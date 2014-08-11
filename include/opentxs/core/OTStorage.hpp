@@ -1099,7 +1099,7 @@ public:
 
     DECLARE_GET_ADD_REMOVE(MarketData);
 
-    DEFINE_OT_DYNAMIC_CAST(MarketList)
+    DEFINE_OT_DYNAMIC_CAST(MarketList);
 };
 
 class OfferDataMarket : public Displayable
