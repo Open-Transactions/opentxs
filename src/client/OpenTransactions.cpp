@@ -217,6 +217,61 @@ namespace opentxs
 namespace
 {
 
+// There may be multiple matching receipts... this just returns the first one.
+// It's used to verify that any are even there. The pointer is returned only for
+// convenience.
+//
+// pass in the opening number for the cron item that this is a receipt for.
+// CALLER RESPONSIBLE TO DELETE.
+OTTransaction* GetPaymentReceipt(mapOfTransactions& transactionsMap,
+                                 int64_t lReferenceNum,
+                                 OTPayment** ppPaymentOut)
+{
+    // loop through the transactions that make up this ledger.
+    for (auto& it : transactionsMap) {
+        OTTransaction* pTransaction = it.second;
+        OT_ASSERT(nullptr != pTransaction);
+
+        if (OTTransaction::paymentReceipt !=
+            pTransaction->GetType()) // <=======
+            continue;
+
+        if (pTransaction->GetReferenceToNum() == lReferenceNum) {
+            if (nullptr !=
+                ppPaymentOut) // The caller might want a copy of this.
+            {
+                OTString strPayment;
+                pTransaction->GetReferenceString(strPayment);
+
+                if (!strPayment.Exists()) {
+                    OTPayment* pPayment = new OTPayment(strPayment);
+                    OT_ASSERT(nullptr != pPayment);
+
+                    if (pPayment->IsValid() && pPayment->SetTempValues())
+                        *ppPaymentOut =
+                            pPayment; // CALLER RESPONSIBLE TO DELETE.
+                    else {
+                        otErr << __FUNCTION__ << ": Error: Failed loading up "
+                                                 "payment instrument from "
+                                                 "paymentReceipt.\n";
+                        delete pPayment;
+                        pPayment = nullptr;
+                        *ppPaymentOut = nullptr;
+                    }
+                }
+                else
+                    otErr << __FUNCTION__ << ": Error: Unexpected: payment "
+                                             "instrument was empty string, on "
+                                             "a paymentReceipt.\n";
+            }
+
+            return pTransaction;
+        }
+    }
+
+    return nullptr;
+}
+
 bool VerifyBalanceReceipt(OTPseudonym& SERVER_NYM, OTPseudonym& THE_NYM,
                           const OTIdentifier& SERVER_ID,
                           const OTIdentifier& ACCT_ID)
@@ -7942,9 +7997,11 @@ bool OT_API::RecordPayment(
                                                 // see if there are any receipts
                                                 // for lPaymentTransNum inside.
                                                 //
-                                                if (theSenderInbox
-                                                        .GetPaymentReceipt(
-                                                             lPaymentTransNum) ||
+                                                if (GetPaymentReceipt(
+                                                        theSenderInbox
+                                                            .GetTransactionMap(),
+                                                        lPaymentTransNum,
+                                                        nullptr) ||
                                                     theSenderInbox
                                                         .GetFinalReceipt(
                                                              lPaymentTransNum)) {
@@ -8001,8 +8058,9 @@ bool OT_API::RecordPayment(
                             // No cheque receipt? Ok let's see if there's a
                             // paymentReceipt or finalReceipt (for a payment
                             // plan...)
-                            else if (theSenderInbox.GetPaymentReceipt(
-                                         lPaymentTransNum) ||
+                            else if (GetPaymentReceipt(
+                                         theSenderInbox.GetTransactionMap(),
+                                         lPaymentTransNum, nullptr) ||
                                      theSenderInbox.GetFinalReceipt(
                                          lPaymentTransNum)) // payment plan.
                             {

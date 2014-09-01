@@ -1523,60 +1523,6 @@ OTTransaction* OTLedger::GetFinalReceipt(int64_t lReferenceNum)
     return nullptr;
 }
 
-// There may be multiple matching receipts... this just returns the first one.
-// It's used to verify that any are even there. The pointer is returned only for
-// convenience.
-//
-OTTransaction* OTLedger::GetPaymentReceipt(
-    int64_t lReferenceNum, // pass in the opening number for the cron item that
-                           // this is a receipt for.
-    OTPayment** ppPaymentOut) // CALLER RESPONSIBLE TO DELETE.
-{
-    // loop through the transactions that make up this ledger.
-    for (auto& it : m_mapTransactions) {
-        OTTransaction* pTransaction = it.second;
-        OT_ASSERT(nullptr != pTransaction);
-
-        if (OTTransaction::paymentReceipt !=
-            pTransaction->GetType()) // <=======
-            continue;
-
-        if (pTransaction->GetReferenceToNum() == lReferenceNum) {
-            if (nullptr !=
-                ppPaymentOut) // The caller might want a copy of this.
-            {
-                OTString strPayment;
-                pTransaction->GetReferenceString(strPayment);
-
-                if (!strPayment.Exists()) {
-                    OTPayment* pPayment = new OTPayment(strPayment);
-                    OT_ASSERT(nullptr != pPayment);
-
-                    if (pPayment->IsValid() && pPayment->SetTempValues())
-                        *ppPaymentOut =
-                            pPayment; // CALLER RESPONSIBLE TO DELETE.
-                    else {
-                        otErr << __FUNCTION__ << ": Error: Failed loading up "
-                                                 "payment instrument from "
-                                                 "paymentReceipt.\n";
-                        delete pPayment;
-                        pPayment = nullptr;
-                        *ppPaymentOut = nullptr;
-                    }
-                }
-                else
-                    otErr << __FUNCTION__ << ": Error: Unexpected: payment "
-                                             "instrument was empty string, on "
-                                             "a paymentReceipt.\n";
-            }
-
-            return pTransaction;
-        }
-    }
-
-    return nullptr;
-}
-
 /// Only if it is an inbox, a ledger will loop through the transactions
 /// and produce the XML output for the report that's necessary during
 /// a balance agreement. (Any balance agreement for an account must
