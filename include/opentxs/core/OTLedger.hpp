@@ -252,11 +252,6 @@ public:
     EXPORT OTTransaction* GetTransaction(int64_t lTransactionNum);
     EXPORT OTTransaction* GetTransactionByIndex(int32_t nIndex);
     EXPORT OTTransaction* GetFinalReceipt(int64_t lReferenceNum);
-    EXPORT OTTransaction* GetPaymentReceipt(int64_t lReferenceNum,
-                                            OTPayment** ppPaymentOut =
-                                                nullptr); // CALLER RESPONSIBLE
-                                                          // TO
-                                                          // DELETE.
     EXPORT OTTransaction* GetTransferReceipt(int64_t lNumberOfOrigin);
     EXPORT OTTransaction* GetChequeReceipt(const int64_t lChequeNum,
                                            OTCheque** ppChequeOut =
