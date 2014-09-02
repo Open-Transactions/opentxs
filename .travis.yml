@@ -19,6 +19,7 @@ branches:
   only:
   - master
   - develop
+  - smartPointers
 before_deploy: ./scripts/travis/build_tar.sh "${TRAVIS_OS_NAME}"
 deploy:
   provider: s3
