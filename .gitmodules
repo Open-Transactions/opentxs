@@ -19,9 +19,6 @@
 [submodule "deps/cppzmq"]
 	path = deps/cppzmq
 	url = https://github.com/zeromq/cppzmq
-[submodule "deps/bitcoin-crypto"]
-	path = deps/bitcoin-crypto
-	url = https://github.com/Open-Transactions/bitcoin-crypto.git
 [submodule "deps/secp256k1"]
 	path = deps/secp256k1
 	url = https://github.com/Open-Transactions/secp256k1.git
