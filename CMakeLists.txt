@@ -34,6 +34,8 @@ option(RPM                 "Build a RPM" OFF)
 option(DEB                 "Build a DEB" OFF)
 option(AUTOCOMPLETION      "CL autocompletion to opentxs CL client" OFF)
 
+option(FORCE_BUNDLED_ZMQ_LIB "Use our ZMQ library included with our sources instead preferring system provided version" OFF)
+
 option(SIGNAL_HANLDER      "Enable Signal Handler" OFF)
 
 option(KEYRING_WINDOWS     "Build with Windows Keyring" OFF)
@@ -145,18 +147,29 @@ message(STATUS "C++ link flags:  ${CMAKE_CXX_LINK_FLAGS}")
 
 find_package(OpenSSL REQUIRED)
 find_package(Protobuf REQUIRED)
-find_package(ZLIB REQUIRED)
-find_library(ZMQ_LIB NAMES zmq)
-if (ZMQ_LIB STREQUAL "ZMQ_LIB-NOTFOUND")
+
+if (FORCE_BUNDLED_ZMQ_LIB)
   set(ZMQ_LIB_FOUND 0)
-  set(ZMQ_LIBRARY libzmq)
-  set(ZMQ_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/deps/libzmq_4/include)
-  message(STATUS "System's ZeroMQ not found. Using local ZeroMQ.")
+	set(ZMQ_LIB_SKIP 1)
+  message(STATUS "Will force bundled ZMQ.")
 else()
-  set(ZMQ_LIB_FOUND 1)
-  set(ZMQ_LIBRARY "${ZMQ_LIB}")
-  find_path(ZMQ_INCLUDE_DIR zmq.h)
-  message(STATUS "Found ZeroMQ: ${ZMQ_LIB}")
+	find_package(ZLIB REQUIRED)
+	find_library(ZMQ_LIB NAMES zmq)
+endif()
+
+if (ZMQ_LIB STREQUAL "ZMQ_LIB-NOTFOUND")
+	set(ZMQ_LIB_FOUND 0)
+elseif (NOT ZMQ_LIB_SKIP)
+	set(ZMQ_LIB_FOUND 1)
+	set(ZMQ_LIBRARY "${ZMQ_LIB}")
+	find_path(ZMQ_INCLUDE_DIR zmq.h)
+	message(STATUS "Found ZeroMQ: ${ZMQ_LIB}")
+endif()
+
+if (NOT ZMQ_LIB_FOUND)
+	set(ZMQ_LIBRARY libzmq)
+	set(ZMQ_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/deps/libzmq_4/include)
+	message(STATUS "System's ZeroMQ not found. Using local ZeroMQ.")
 endif()
 
 #-----------------------------------------------------------------------------

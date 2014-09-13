@@ -1,0 +1,191 @@
+
+This are instructions for build for linux builds, by rfree, including:
+- using local compiler (if your system wide is not good enough)
+- using clang
+- using ccache possibly
+
+State: This functionality is now (2014-09) under development currently.
+
+See also: https://github.com/rfree2/opentxs for unofficial version by rfree (me).
+
+-----------------------------------
+
+1. Dependencies build and installation
+2. Open Transaction build
+3. Subprojects build
+(reserved)
+8. Run the software
+9. Run other software: MoneyChanger
+
+-----------------------------------
+1.
+a)
+Install dependencies:
+	# apt-get install wget git libtool make cmake pkg-config automake libboost-all-dev libzmq-dev libmsgpack-dev libssl-dev protobuf-compiler libprotobuf-dev
+Warning: some of libraries from system might be too old, and for some of them the solution could 
+be to not install them globally to force usage of the one included in source.
+
+b) clang and ccache installation
+Install ccache:
+	# apt-get install ccache
+
+As user we recommend to build from sources clang compiler in some new version
+e.g. at least clang 3.3 (as of 2013-10). We would advice to build it per-user, using PREFIX=$HOME/.local/ when configuring
+
+On debian 7 good setup is to system-wide install clang from repository (3.2)
+and user-local build clang 3.3:
+	# apt-get install clang
+
+	$ mkdir ~/llvm && cd ~/llvm
+
+Download sources:
+$execute:
+	wget http://www.llvm.org/releases/3.4.1/cfe-3.4.1.src.tar.gz
+	wget http://www.llvm.org/releases/3.4.1/cfe-3.4.1.src.tar.gz.sig
+	wget http://www.llvm.org/releases/3.4.1/llvm-3.4.1.src.tar.gz
+	wget http://www.llvm.org/releases/3.4.1/llvm-3.4.1.src.tar.gz.sig
+
+Verify downloads:
+$execute:
+	sha512sum *gz
+
+should give:
+	3886d2e362aab52f29520150a81271ee24433118e0519dd5d1c58cfacc3b1c7da4cbab49c7e82d6b4a90c278b5028f5aa1f5d79478b13d0b11a15c491a6c00d5  cfe-3.4.1.src.tar.gz
+	a8d19f8560604cd1a62b9868aca8848c0675895c5354dfcbc81ef940d4a38f56f8239a49aec853dd7d432134fa0b5feb9b070579226400874b761dcf124f7a7b  llvm-3.4.1.src.tar.gz
+
+
+Packages should be signed with key with fingerprint: C135 49BB 82A1 7681 BF71  43C2 B446 8DF4 E95C 63DC
+$execute:
+	gpg --keyserver pgp.mit.edu --recv-keys E95C63DC
+	gpg --verify cfe-3.4.1.src.tar.gz.sig
+	gpg --verify llvm-3.4.1.src.tar.gz.sig
+
+Verification output should look like:
+$execute:
+	gpg: Signature made Tue 06 May 2014 17:53:48 CEST using RSA key ID 02119294
+	gpg: Good signature from "Tom Stellard <tom@stellard.net>"
+	gpg: WARNING: This key is not certified with a trusted signature!
+	gpg:          There is no indication that the signature belongs to the owner.
+	Primary key fingerprint: 11E5 21D6 4698 2372 EB57  7A1F 8F08 71F2 0211 9294
+
+Unpack and prepare to build:
+$execute:
+	tar -xzf llvm-3.4.1.src.tar.gz
+	tar -xzf cfe-3.4.1.src.tar.gz
+	mv cfe-3.4.1.src llvm-3.4.1.src/tools/clang
+	mkdir build
+	cd build
+
+Build:
+If compiling with clang - must pass full path to compiler
+	CC=/usr/bin/clang CXX=/usr/bin/clang++ ../llvm-3.4.1.src/configure --prefix=$HOME/.local
+	ionice -c3 make -j2
+	make install
+
+--------------------------------------------------------------------------
+Selecting compiler for Open-Transactions (and other env options)
+
+On Linux/Unix, edit ~/.bashrc to use given compiler, by appending following lines, using e.g. this commands:
+	echo '# settings for Open-Transactions / and newcli' >> ~/.bashrc
+	echo 'export CC="ccache $HOME/.local/bin/clang" ; export CXX="ccache $HOME/.local/bin/clang++" ; export CPP="$HOME/.local/bin/clang -E"' >> ~/.bashrc
+	echo 'export PKG_CONFIG_PATH=$HOME/.local/lib/pkgconfig:$PKG_CONFIG_PATH' >> ~/.bashrc
+	source ~/.bashrc # re-read the settings to use them right now
+
+OR instead - you can use CUSTOM CONFIGURATION (advanced topic) as explained below:
+
+First, this setting configures the used computer:
+	export CC="ccache $HOME/.local/bin/clang" ; export CXX="ccache $HOME/.local/bin/clang++" ; export CPP="$HOME/.local/bin/clang -E"
+
+if you want to use other compiler then change this lines, e.g. system-wide clang (with ccache) then use something like:
+	export CC="ccache clang" ; export CXX="ccache clang++" ; export CPP="clang -E"
+
+and system-wide without ccache should be something like:
+	export CC="clang" ; export CXX="clang++" ; export CPP="clang -E"
+
+Next, ALSO append this line AS WELL (in either case, this is other setting):
+	export PKG_CONFIG_PATH=$HOME/.local/lib/pkgconfig:$PKG_CONFIG_PATH
+
+
+Keep in mind that certain parts of Open-Transactiona, like otcli (othint) sub-project might require new enough compiler version;
+It might be possible to set compiler for sub-project separatelly see subproject doc (e.g. in otcli/ a.k.a. othint/).
+
+
+After applying this changes (if you build previously with other compiler choice) you must clear cmake cache using:
+	rm -rf CMakeCache.txt CMakeFiles/
+in the directory where you will be running cmake, and then run cmake (e.g. "cmake .") and then make.
+
+For above change to take effect you need to log out and again log in to user account
+OR instead just do this command:
+	source ~/.bashrc
+
+-----------------------------------
+2. Build and install Open Transactions:
+	git@github.com:open-transactions/opentxs.git
+
+	cd opentxs
+	mkdir -p build && cd build && cmake -D CMAKE_INSTALL_PREFIX=$HOME/.local/ -D FORCE_BUNDLED_ZMQ_LIB=ON .. 
+
+  # option: ccmake .. # edit the PREFIX option if you want to also INSTALL the resulting software locally instead of system wide
+	# WARNING: if you do not have enough RAM (few GB)? then use -j 1. If you have lots of RAM and multicore CPU you can do -j 8 and more
+	make -j 2
+
+-----------------------------------
+3. Subprojects build
+
+Not used now, as otcli (otshell) is now moved to separated repository.
+https://github.com/rfree2/opentxs-cli
+
+
+-----------------------------------
+4. to 7. are reserved chapters
+
+
+-----------------------------------
+8. Run the software
+
+Follow instructions in other doc about how to start the software.
+One option would be to copy the sample-data, then start ot server, then start in-development otcli/othint, or use existing
+and working "ot" client.
+
+echo "this will delete server data!!!" ; read _  
+mkdir -p ~/.ot && cp -R sample-data/ot-sample-data/* ~/.ot
+and go to e.g. ~/.local/bin and run ./otserver 
+
+Then follow instructions for otcli e.g. in src/othint/ (this directory name can change in future to otcli)
+
+
+
+9. Run other software: MoneyChanger
+
+
+*** could be deprecated? ***
+
+
+Running MoneyChanger on Debian 7, for OT lib that was build as above (was build with llvm 3.3);
+Tester on MC version d1c9eb7bac944c9a941c6778d358aa2e97693e5b (Thu Apr 24 18:22:57 2014 +1200)
+
+
+git clone https://github.com/Open-Transactions/Moneychanger.git
+cd Moneychanger/project/
+qmake 
+make 
+
+it will stop with error, you need to export path:
+export PKG_CONFIG_PATH=$HOME/.local/lib/pkgconfig:$PKG_CONFIG_PATH
+then run again:
+make
+
+it will grash gcc (at least gcc (Debian 4.7.2-5) 4.7.2), with error:
+  compiling ../../src/bitcoin-api/btchelper.cpp
+  g++: internal compiler error: Segmentation fault (program cc1plus)
+
+we need to use llvm compiler:
+in file Moneychanger/project/bitcoin-api/Makefile.Release
+	change lines
+CC            = @echo compiling $< && gcc
+CXX           = @echo compiling $< && g++
+	to
+CC            = @echo compiling $< && clang
+CXX           = @echo compiling $< && clang++
+
+
