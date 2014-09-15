@@ -1,0 +1,4 @@
+@PACKAGE_INIT@ 
+
+set_and_check(OPENTXS_INCLUDE_DIRS "@PACKAGE_OPENTXS_INCLUDE_DIRS@")
+include("${CMAKE_CURRENT_LIST_DIR}/opentxsTargets.cmake")

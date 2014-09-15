@@ -56,5 +56,6 @@ if(NOT WIN32)
   include(GNUInstallDirs)
   install(TARGETS opentxs-ext
           DESTINATION ${CMAKE_INSTALL_LIBDIR}
+          EXPORT opentxsTargets
           COMPONENT main)
 endif()

@@ -75,5 +75,6 @@ if (NOT WIN32)
   include(GNUInstallDirs)
   install(TARGETS bigint lucre
           DESTINATION ${CMAKE_INSTALL_LIBDIR}
+          EXPORT opentxsTargets
           COMPONENT main)
 endif()
