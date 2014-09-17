@@ -143,19 +143,37 @@
 namespace opentxs
 {
 
+
+OTString & OTSignedFile::GetFilePayload()                       { return m_strSignedFilePayload;   }
+void       OTSignedFile::SetFilePayload(const OTString &strArg) { m_strSignedFilePayload = strArg; }
+// ----------------------------------
+OTString & OTSignedFile::GetSignerNymID()                       { return m_strSignerNymID;   }
+void       OTSignedFile::SetSignerNymID(const OTString &strArg) { m_strSignerNymID = strArg; }
+
 void OTSignedFile::UpdateContents()
 {
-    // I release this because I'm about to repopulate it.
+
+    
+OTString strSignerNym("");
+    if (m_strSignerNymID.Exists())
+    {
+        strSignerNym.Format("\n signer=\"%s\"", m_strSignerNymID.Get());
+    }
+
+// I release this because I'm about to repopulate it.
     m_xmlUnsigned.Release();
 
     m_xmlUnsigned.Concatenate("<?xml version=\"%s\"?>\n\n", "1.0");
 
     m_xmlUnsigned.Concatenate("<signedFile\n version=\"%s\"\n"
                               " localDir=\"%s\"\n"
-                              " filename=\"%s\""
+                              " filename=\"%s\"%s"
                               " >\n\n",
-                              m_strVersion.Get(), m_strLocalDir.Get(),
-                              m_strSignedFilename.Get());
+                              m_strVersion.Get(), 
+                              m_strLocalDir.Get(),
+                              m_strSignedFilename.Get(),
+			      strSignerNym.Get());
+
 
     if (m_strSignedFilePayload.Exists()) {
         OTASCIIArmor ascPayload(m_strSignedFilePayload);
@@ -186,6 +204,7 @@ int32_t OTSignedFile::ProcessXMLNode(irr::io::IrrXMLReader*& xml)
 
         m_strPurportedLocalDir = xml->getAttributeValue("localDir");
         m_strPurportedFilename = xml->getAttributeValue("filename");
+	m_strSignerNymID       = xml->getAttributeValue("signer");
 
         nReturnVal = 1;
     }
@@ -342,6 +361,7 @@ void OTSignedFile::Release_SignedFile()
 
     m_strPurportedLocalDir.Release();
     m_strPurportedFilename.Release();
+
 }
 
 void OTSignedFile::Release()
