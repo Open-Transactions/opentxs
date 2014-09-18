@@ -22,3 +22,6 @@ Moneychanger.cc
 
 # KDE Dolphin (file manager) noise
 .directory
+
+# CLion IDE noise
+.idea

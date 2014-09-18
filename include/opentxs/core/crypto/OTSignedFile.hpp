@@ -160,9 +160,8 @@ protected:
     OTString m_strPurportedFilename; // This is the filename according to the
                                      // file.
 
-    OTString        m_strSignerNymID; // Optional. Here in case you ever 
-                                      // want to use it.
-
+    OTString m_strSignerNymID; // Optional. Here in case you ever
+                               // want to use it.
 
     // THOUGHT: What if someone switched the file for an older version of
     // itself? Seems to me that he could
@@ -196,11 +195,11 @@ public:
     // this.)
     void SetFilename(const OTString& LOCAL_SUBDIR, const OTString& FILE_NAME);
     
-    EXPORT OTString & GetFilePayload();
-    EXPORT void       SetFilePayload(const OTString &strArg);
+    EXPORT OTString& GetFilePayload();
+    EXPORT void SetFilePayload(const OTString &strArg);
 
-    EXPORT OTString & GetSignerNymID();
-    EXPORT void       SetSignerNymID(const OTString &strArg);
+    EXPORT OTString& GetSignerNymID();
+    EXPORT void SetSignerNymID(const OTString &strArg);
     
     EXPORT virtual ~OTSignedFile();
     virtual void Release();
