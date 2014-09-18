@@ -194,13 +194,10 @@ public:
     // (You should still verify the signature on it as well, if you are doing
     // this.)
     void SetFilename(const OTString& LOCAL_SUBDIR, const OTString& FILE_NAME);
-    
     EXPORT OTString& GetFilePayload();
-    EXPORT void SetFilePayload(const OTString &strArg);
-
+    EXPORT void SetFilePayload(const OTString& strArg);
     EXPORT OTString& GetSignerNymID();
-    EXPORT void SetSignerNymID(const OTString &strArg);
-    
+    EXPORT void SetSignerNymID(const OTString& strArg);
     EXPORT virtual ~OTSignedFile();
     virtual void Release();
     void Release_SignedFile();

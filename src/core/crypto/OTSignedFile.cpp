@@ -143,14 +143,20 @@
 namespace opentxs
 {
 
-OTString& OTSignedFile::GetFilePayload() { return m_strSignedFilePayload; }
+OTString& OTSignedFile::GetFilePayload()
+{
+    return m_strSignedFilePayload;
+}
 
 void OTSignedFile::SetFilePayload(const OTString& strArg)
 {
     m_strSignedFilePayload = strArg;
 }
 
-OTString& OTSignedFile::GetSignerNymID() { return m_strSignerNymID; }
+OTString& OTSignedFile::GetSignerNymID()
+{
+    return m_strSignerNymID;
+}
 
 void OTSignedFile::SetSignerNymID(const OTString& strArg)
 {
@@ -336,13 +342,15 @@ void OTSignedFile::SetFilename(const OTString& LOCAL_SUBDIR,
     // Finished Product:    "transaction/nyms/5bf9a88c.nym"
 }
 
-OTSignedFile::OTSignedFile()
-    : ot_super()
+OTSignedFile::OTSignedFile() : ot_super()
 {
     m_strContractType.Set("FILE");
 }
 
-OTSignedFile::~OTSignedFile() { Release_SignedFile(); }
+OTSignedFile::~OTSignedFile()
+{
+    Release_SignedFile();
+}
 
 void OTSignedFile::Release_SignedFile()
 {
@@ -372,6 +380,9 @@ void OTSignedFile::Release()
     m_strContractType.Set("FILE");
 }
 
-bool OTSignedFile::SaveContractWallet(std::ofstream&) const { return true; }
+bool OTSignedFile::SaveContractWallet(std::ofstream&) const
+{
+    return true;
+}
 
 } // namespace opentxs
