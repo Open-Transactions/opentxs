@@ -143,24 +143,29 @@
 namespace opentxs
 {
 
+OTString& OTSignedFile::GetFilePayload() { return m_strSignedFilePayload; }
 
-OTString & OTSignedFile::GetFilePayload()                       { return m_strSignedFilePayload;   }
-void       OTSignedFile::SetFilePayload(const OTString &strArg) { m_strSignedFilePayload = strArg; }
-// ----------------------------------
-OTString & OTSignedFile::GetSignerNymID()                       { return m_strSignerNymID;   }
-void       OTSignedFile::SetSignerNymID(const OTString &strArg) { m_strSignerNymID = strArg; }
+void OTSignedFile::SetFilePayload(const OTString& strArg)
+{
+    m_strSignedFilePayload = strArg;
+}
+
+OTString& OTSignedFile::GetSignerNymID() { return m_strSignerNymID; }
+
+void OTSignedFile::SetSignerNymID(const OTString& strArg)
+{
+    m_strSignerNymID = strArg;
+}
 
 void OTSignedFile::UpdateContents()
 {
 
-    
-OTString strSignerNym("");
-    if (m_strSignerNymID.Exists())
-    {
+    OTString strSignerNym("");
+    if (m_strSignerNymID.Exists()) {
         strSignerNym.Format("\n signer=\"%s\"", m_strSignerNymID.Get());
     }
 
-// I release this because I'm about to repopulate it.
+    // I release this because I'm about to repopulate it.
     m_xmlUnsigned.Release();
 
     m_xmlUnsigned.Concatenate("<?xml version=\"%s\"?>\n\n", "1.0");
@@ -169,11 +174,8 @@ OTString strSignerNym("");
                               " localDir=\"%s\"\n"
                               " filename=\"%s\"%s"
                               " >\n\n",
-                              m_strVersion.Get(), 
-                              m_strLocalDir.Get(),
-                              m_strSignedFilename.Get(),
-			      strSignerNym.Get());
-
+                              m_strVersion.Get(), m_strLocalDir.Get(),
+                              m_strSignedFilename.Get(), strSignerNym.Get());
 
     if (m_strSignedFilePayload.Exists()) {
         OTASCIIArmor ascPayload(m_strSignedFilePayload);
@@ -204,7 +206,7 @@ int32_t OTSignedFile::ProcessXMLNode(irr::io::IrrXMLReader*& xml)
 
         m_strPurportedLocalDir = xml->getAttributeValue("localDir");
         m_strPurportedFilename = xml->getAttributeValue("filename");
-	m_strSignerNymID       = xml->getAttributeValue("signer");
+        m_strSignerNymID = xml->getAttributeValue("signer");
 
         nReturnVal = 1;
     }
@@ -334,15 +336,13 @@ void OTSignedFile::SetFilename(const OTString& LOCAL_SUBDIR,
     // Finished Product:    "transaction/nyms/5bf9a88c.nym"
 }
 
-OTSignedFile::OTSignedFile() : ot_super()
+OTSignedFile::OTSignedFile()
+    : ot_super()
 {
     m_strContractType.Set("FILE");
 }
 
-OTSignedFile::~OTSignedFile()
-{
-    Release_SignedFile();
-}
+OTSignedFile::~OTSignedFile() { Release_SignedFile(); }
 
 void OTSignedFile::Release_SignedFile()
 {
@@ -361,7 +361,6 @@ void OTSignedFile::Release_SignedFile()
 
     m_strPurportedLocalDir.Release();
     m_strPurportedFilename.Release();
-
 }
 
 void OTSignedFile::Release()
@@ -373,9 +372,6 @@ void OTSignedFile::Release()
     m_strContractType.Set("FILE");
 }
 
-bool OTSignedFile::SaveContractWallet(std::ofstream&) const
-{
-    return true;
-}
+bool OTSignedFile::SaveContractWallet(std::ofstream&) const { return true; }
 
 } // namespace opentxs
