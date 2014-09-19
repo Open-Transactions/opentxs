@@ -1,0 +1,200 @@
+#########################################################################
+#									                                                      #
+#         	##	INSTALL - Debian older tools (local install)	##	      # 
+#									                                                      #
+#########################################################################
+
+This are instructions for build, from scratch, on some linux-like platforms,
+where you need tools newer then provided. This includes Debian 7.
+This is testes and confirmed as of 2014.09.16 on current debian and opentxs.
+
+- use local compiler (if your system wide is not good enough)
+- no root: install all locally as given user (in ~/.local/)
+- use clang
+- btw use ccache (includes now fix for that older ccache, for clang support)
+
+This is instruction e.g. for anyone joining development now on current Debian Stable 7,
+or wanting to use newer compiler then default one.
+
+See also: INSTALL-Debian_Ubuntu.txt
+
+-----------------------------------
+
+1. Dependencies build and installation
+2. Open Transaction build
+3. Subprojects build (opentxs-srv, opentxs-cli aka otshell)
+(reserved)
+8. Run the software
+9. Run other software: MoneyChanger
+
+-----------------------------------
+1.
+a)
+Install dependencies:
+	# apt-get install wget git libtool make cmake pkg-config automake libboost-all-dev libzmq-dev libmsgpack-dev libssl-dev protobuf-compiler libprotobuf-dev
+Library libzmq-dev actually is not important since we will probably use the bundled one (see below).
+
+b) clang and ccache installation
+Install ccache:
+	# apt-get install ccache
+
+As user we recommend to build from sources clang compiler in some new version
+e.g. at least clang 3.3 (as of 2014-09). We would advice to build it per-user, using PREFIX=$HOME/.local/ when configuring
+
+On debian 7 good setup is to system-wide install clang from repository (3.2)
+and user-local build clang 3.3:
+	# apt-get install clang
+
+	$ mkdir ~/llvm && cd ~/llvm
+
+Download sources:
+$execute:
+	wget http://www.llvm.org/releases/3.4.1/cfe-3.4.1.src.tar.gz
+	wget http://www.llvm.org/releases/3.4.1/cfe-3.4.1.src.tar.gz.sig
+	wget http://www.llvm.org/releases/3.4.1/llvm-3.4.1.src.tar.gz
+	wget http://www.llvm.org/releases/3.4.1/llvm-3.4.1.src.tar.gz.sig
+
+Verify downloads:
+$execute:
+	sha512sum *gz
+
+should give:
+	3886d2e362aab52f29520150a81271ee24433118e0519dd5d1c58cfacc3b1c7da4cbab49c7e82d6b4a90c278b5028f5aa1f5d79478b13d0b11a15c491a6c00d5  cfe-3.4.1.src.tar.gz
+	a8d19f8560604cd1a62b9868aca8848c0675895c5354dfcbc81ef940d4a38f56f8239a49aec853dd7d432134fa0b5feb9b070579226400874b761dcf124f7a7b  llvm-3.4.1.src.tar.gz
+
+
+Packages should be signed with key with fingerprint: C135 49BB 82A1 7681 BF71  43C2 B446 8DF4 E95C 63DC
+$execute:
+	gpg --keyserver pgp.mit.edu --recv-keys E95C63DC
+	gpg --verify cfe-3.4.1.src.tar.gz.sig
+	gpg --verify llvm-3.4.1.src.tar.gz.sig
+
+Verification output should look like:
+$execute:
+	gpg: Signature made Tue 06 May 2014 17:53:48 CEST using RSA key ID 02119294
+	gpg: Good signature from "Tom Stellard <tom@stellard.net>"
+	gpg: WARNING: This key is not certified with a trusted signature!
+	gpg:          There is no indication that the signature belongs to the owner.
+	Primary key fingerprint: 11E5 21D6 4698 2372 EB57  7A1F 8F08 71F2 0211 9294
+
+Unpack and prepare to build:
+$execute:
+	tar -xzf llvm-3.4.1.src.tar.gz
+	tar -xzf cfe-3.4.1.src.tar.gz
+	mv cfe-3.4.1.src llvm-3.4.1.src/tools/clang
+	mkdir build
+	cd build
+
+Build:
+If compiling with clang - must pass full path to compiler
+	CC=/usr/bin/clang CXX=/usr/bin/clang++ ../llvm-3.4.1.src/configure --prefix=$HOME/.local
+	ionice -c3 make -j2
+	make install
+
+--------------------------------------------------------------------------
+Selecting compiler for Open-Transactions (and other env options)
+
+This settings work for all parts: opentxs, opentxs-srv, opentxs-cli
+
+On Linux/Unix, edit ~/.bashrc to use given compiler, by appending following lines:
+
+CCACHE_FIX=""
+CCACHE_FIX="-Qunused-arguments -Wno-deprecated-register" ; echo "WARNING: Version for old ccache, working around"; # on debian7
+export CC="ccache $HOME/.local/bin/clang $CCACHE_FIX" ; export CXX="ccache $HOME/.local/bin/clang++ $CCACHE_FIX" ; export CPP="$HOME/.local/bin/clang -E" 
+export PKG_CONFIG_PATH="$HOME/.local/lib/pkgconfig:$PKG_CONFIG_PATH" # local
+export LD_LIBRARY_PATH="$HOME/.local/lib:$HOME/.local/lib64" # local
+export CMAKE_PREFIX_PATH="$HOME/.local/" # local
+export MAKEFLAGS='-j 4' # depending on system!
+
+Skip the line CCACHE_FIX="-Q..." if you have modern ccache that understands clang flags fully.
+The lines marked "local" are for using local build (libs and software will be taken from/placed to ~/.local/)
+The -j option to makefile depends on computer, if you have enough RAM then try *1 or *2 number of CPU cores.
+
+DO NOT FORGET to also run this command:
+  source ~/.bashrc # re-read the settings to use them right now
+
+If you do not want to use ccache or local compiler you might consider instead replacing proper lines with either:
+export CC="ccache $HOME/.local/bin/clang" ; export CXX="ccache $HOME/.local/bin/clang++" ; export CPP="$HOME/.local/bin/clang -E"
+export CC="ccache clang" ; export CXX="ccache clang++" ; export CPP="clang -E"
+export CC="clang" ; export CXX="clang++" ; export CPP="clang -E"
+
+Keep in mind that certain parts of Open-Transactiona, like otcli (othint) sub-project might require new enough compiler version;
+It might be possible to set compiler for sub-project separatelly see subproject doc (e.g. in otcli/ a.k.a. othint/).
+
+After applying this changes (if you build previously with other compiler choice) you must clear cmake cache using:
+	rm -rf build/
+before trying again, and do not forget to reload ~/.bashrc as above.
+
+-----------------------------------
+2. Build and install Open Transactions:
+
+	git@github.com:open-transactions/opentxs.git
+	cd opentxs
+	git submodule init && git submodule update # this step is needed to be run manually for some systems
+	mkdir -p build && cd build && cmake -D CMAKE_INSTALL_PREFIX=$HOME/.local/ -D FORCE_BUNDLED_ZMQ_LIB=ON .. && make install
+
+-----------------------------------
+3. Subprojects build
+
+opentxs-server build will be described in the documentation of that project. The process will be probably similar.
+
+opentxs-cli build will be described in the documentation of that project. That project, a.k.a otshell, the command line interface
+is now moved to https://github.com/rfree2/opentxs-cli (lead developer's version)
+and to repo at https://github.com/Open-Transactions/opentxs-cli (OT developer's version).
+
+-----------------------------------
+4. to 7. are reserved chapters
+
+
+-----------------------------------
+8. Run the software
+
+Follow instructions in other doc about how to start the software.
+One option would be to copy the sample-data, then start ot server, then start in-development otcli/othint, or use existing
+and working "ot" client.
+
+echo "this will delete server data!!!" ; read _  
+mkdir -p ~/.ot && cp -R sample-data/ot-sample-data/* ~/.ot
+and go to e.g. ~/.local/bin and run ./otserver 
+
+Then follow instructions for otcli e.g. in src/othint/ (this directory name can change in future to otcli)
+
+
+9. Run other software: MoneyChanger
+
+
+*** This might be deprecated now; See also other sources. This is the way that worked as of 2014-04 ***
+
+
+Running MoneyChanger on Debian 7, for OT lib that was build as above (was build with llvm 3.3);
+Tester on MC version d1c9eb7bac944c9a941c6778d358aa2e97693e5b (Thu Apr 24 18:22:57 2014 +1200)
+
+
+git clone https://github.com/Open-Transactions/Moneychanger.git
+cd Moneychanger/project/
+qmake 
+make 
+
+it will stop with error, you need to export path:
+export PKG_CONFIG_PATH=$HOME/.local/lib/pkgconfig:$PKG_CONFIG_PATH
+then run again:
+make
+
+it will crash gcc (at least gcc (Debian 4.7.2-5) 4.7.2), with error:
+  compiling ../../src/bitcoin-api/btchelper.cpp
+  g++: internal compiler error: Segmentation fault (program cc1plus)
+
+we need to use llvm compiler:
+in file Moneychanger/project/bitcoin-api/Makefile.Release
+	change lines
+CC            = @echo compiling $< && gcc
+CXX           = @echo compiling $< && g++
+	to
+CC            = @echo compiling $< && clang
+CXX           = @echo compiling $< && clang++
+
+
+-----------------------------------
+See also: INSTALL-Debian_Ubuntu.txt
+
+

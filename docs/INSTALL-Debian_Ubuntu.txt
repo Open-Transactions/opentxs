@@ -6,10 +6,12 @@
 #									#
 #########################################################################
 
-## Supports Debian 7 or later
+## Supports Debian (but see also INSTALL-Debian_and_older.txt, especially for Debian 7)
 ## Supports Ubuntu 12.10 or later
 
 ## To build opentxs you need a C++ 11 compiler (minimum GCC 4.7, 4.8 recommended)
+
+## In case of problems if you lack new enough tools, see INSTALL-Debian_and_older.txt
 
 ################# Dependencies #################
 # install general developer dependencies
