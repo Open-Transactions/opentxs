@@ -320,6 +320,34 @@ add_subdirectory(wrappers)
 
 
 #-----------------------------------------------------------------------------
+# Produce a cmake-package
+
+include(CMakePackageConfigHelpers)
+set(CMAKE_CONFIG_DEST "share/cmake/Modules")
+set(OPENTXS_INCLUDE_DIRS "${CMAKE_CURRENT_BINARY_DIR}/include")
+
+export(TARGETS opentxs-core opentxs-client opentxs-ext opentxs-cash opentxs-basket bigint lucre FILE "${CMAKE_BINARY_DIR}/opentxsTargets.cmake")
+
+configure_package_config_file(
+       "cmake/opentxsConfig.cmake.in"
+       "${CMAKE_BINARY_DIR}/opentxsConfig.cmake"
+       INSTALL_DESTINATION ${CMAKE_CONFIG_DEST}
+       PATH_VARS OPENTXS_INCLUDE_DIRS)
+
+write_basic_package_version_file(
+  "${CMAKE_CURRENT_BINARY_DIR}/opentxsConfigVersion.cmake"
+  VERSION ${VERSION_STRING}
+  COMPATIBILITY AnyNewerVersion)
+
+install(EXPORT opentxsTargets
+        DESTINATION ${CMAKE_CONFIG_DEST} FILE "opentxsTargets.cmake")
+
+install(FILES "${CMAKE_CURRENT_BINARY_DIR}/opentxsConfigVersion.cmake"
+        DESTINATION ${CMAKE_CONFIG_DEST}
+        COMPONENT dev)
+
+
+#-----------------------------------------------------------------------------
 # Produce a pkg-config file
 
 
