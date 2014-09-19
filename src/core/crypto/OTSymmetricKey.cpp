@@ -863,17 +863,17 @@ bool OTSymmetricKey::Decrypt(const OTSymmetricKey& theKey,
         pPassUserInput.reset(OTSymmetricKey::GetPassphraseFromUser(
             &strDisplay)); // bAskTwice=false by default.
     }
-    else
-        pPassUserInput.reset(const_cast<OTPassword*>(pAlreadyHavePW));
 
     bool bSuccess = false;
 
-    if (nullptr != pPassUserInput) // Success retrieving the passphrase from the
-                                   // user. (Now let's decrypt...)
+    if (pPassUserInput || // Success retrieving the passphrase from the
+        pAlreadyHavePW)   // user, or passphrase was provided out of scope.
     {
         OTEnvelope theEnvelope(ascArmor);
 
-        if (theEnvelope.Decrypt(strOutput, theKey, *pPassUserInput)) {
+        if (theEnvelope.Decrypt(strOutput, theKey, pPassUserInput
+                                                       ? *pPassUserInput
+                                                       : *pAlreadyHavePW)) {
             bSuccess = true;
         }
         else {
@@ -884,11 +884,6 @@ bool OTSymmetricKey::Decrypt(const OTSymmetricKey& theKey,
         otWarn
             << __FUNCTION__
             << ": Sorry, unable to retrieve passphrase from user. (Failure.)\n";
-
-    // If the user provided this password, release it back to them
-    // Or else unique_ptr will attempt to free it once it leaves scope
-    // At the end of this function, which can lead to malloc errors.
-    if (pAlreadyHavePW) pPassUserInput.release();
 
     return bSuccess;
 }
