@@ -134,9 +134,13 @@
 #define OPENTXS_CORE_OTDATA_HPP
 
 #include <cinttypes>
+#include <vector>
 
 namespace opentxs
 {
+
+// for variable lengths
+typedef std::vector<uint8_t> ot_data_t;
 
 class OTASCIIArmor;
 
@@ -162,6 +166,12 @@ public:
     inline const void* GetPointer() const
     {
         return data_;
+    }
+
+    inline std::vector<uint8_t> GetDataCopy() const
+    {
+        return std::vector<uint8_t>(static_cast<uint8_t*>(data_),
+                                    static_cast<uint8_t*>(data_) + size_);
     }
 
     EXPORT OTData& operator=(OTData rhs);

@@ -240,6 +240,65 @@ protected:
     virtual void Cleanup_Override() const;
 
 public:
+    //! base class for all exceptions thrown copied from Crypto++
+    class Exception : public std::exception
+    {
+    public:
+        //! error types
+        enum ErrorType {
+            //! a method is not implemented
+            NOT_IMPLEMENTED,
+            //! invalid function argument
+            INVALID_ARGUMENT,
+            //! BufferedTransformation received a Flush(true) signal but can't
+            // flush buffers
+            CANNOT_FLUSH,
+            //! data integerity check (such as CRC or MAC) failed
+            DATA_INTEGRITY_CHECK_FAILED,
+            //! received input data that doesn't conform to expected format
+            INVALID_DATA_FORMAT,
+            //! was unable to get true result
+            VERIFICATION_FAILURE,
+            //! error reading from input device or writing to output device
+            IO_ERROR,
+            //! some error not belong to any of the above categories
+            OTHER_ERROR
+        };
+
+        explicit Exception(ErrorType errorType, const std::string& s)
+            : m_errorType(errorType)
+            , m_what(s)
+        {
+        }
+        virtual ~Exception() throw()
+        {
+        }
+        const char* what() const throw()
+        {
+            return (m_what.c_str());
+        }
+        const std::string& GetWhat() const
+        {
+            return m_what;
+        }
+        void SetWhat(const std::string& s)
+        {
+            m_what = s;
+        }
+        ErrorType GetErrorType() const
+        {
+            return m_errorType;
+        }
+        void SetErrorType(ErrorType errorType)
+        {
+            m_errorType = errorType;
+        }
+
+    private:
+        ErrorType m_errorType;
+        std::string m_what;
+    };
+
     virtual ~OTCrypto();
     // InstantiateBinarySecret
     // (To instantiate a text secret, just do this: OTPassword thePass;)
