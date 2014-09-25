@@ -143,6 +143,8 @@ int64_t ServerSettings::__min_market_scale = 1;
 int32_t ServerSettings::__heartbeat_no_requests = 10;
 // number of ms between each heartbeat.
 int32_t ServerSettings::__heartbeat_ms_between_beats = 100;
+// Performance logging level
+int32_t ServerSettings::__perf_log_level = 0;
 // The Nym who's allowed to do certain
 // commands even if they are turned off.
 std::string ServerSettings::__override_nym_id;

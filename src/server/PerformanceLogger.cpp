@@ -1,6 +1,6 @@
 /************************************************************
  *
- *  ServerSettings.hpp
+ *  PerformanceLogger.cpp
  *
  */
 
@@ -130,131 +130,134 @@
  -----END PGP SIGNATURE-----
 **************************************************************/
 
-#ifndef __OPENTXS_SERVERSETTINGS_HPP__
-#define __OPENTXS_SERVERSETTINGS_HPP__
+#include "PerformanceLogger.hpp"
+#include "ServerSettings.hpp"
 
-#include <string>
-#include <cstdint>
+// This pragma is necessary to suppress unused parameter warnings
+// (which the compiler treats as errors) in the event nobody
+// is using the probe functions
+#pragma GCC diagnostic push
+#pragma GCC diagnostic warning "-Wunused-parameter"
 
-namespace opentxs
+namespace perfLogger
 {
+using namespace opentxs;
 
-struct ServerSettings
+// Log entry: "opentxs-server
+// <version>,PID,eventTimeinMicroseconds,PerfProbeType::ErrorStats,MsgErrorType"
+void ProbeError(const MsgErrorType errorType)
 {
-    static int64_t GetMinMarketScale()
-    {
-        return __min_market_scale;
+#ifdef COLLECT_METRICS
+    PerfLogLevel perfLogLevel =
+        static_cast<PerfLogLevel>(ServerSettings::GetPerfLogLevel());
+    if (PerfLogLevel::DisablePerfLogging != perfLogLevel) {
+        if (PerfLogLevel::LogError == perfLogLevel ||
+            PerfLogLevel::LogEverything == perfLogLevel) {
+            // log error messages
+            syslog(LOG_INFO, ",%d,%d", PerfProbeType::ErrorStats, errorType);
+        }
     }
+#endif
+}
 
-    static void SetMinMarketScale(int64_t value)
-    {
-        __min_market_scale = value;
+// Log entry: "opentxs-server
+// <version>,PID,eventTimeinMicroseconds,PerfProbeType::MsgProcessingTime,MsgRoundEvents::msgRoundEventId"
+void ProbeMsgRoundTiming(MsgRoundEvents msgRoundEventId)
+{
+#ifdef COLLECT_METRICS
+    PerfLogLevel perfLogLevel =
+        static_cast<PerfLogLevel>(ServerSettings::GetPerfLogLevel());
+    if (PerfLogLevel::DisablePerfLogging != perfLogLevel) {
+        if (PerfLogLevel::LogMsgProcessingTime == perfLogLevel ||
+            PerfLogLevel::LogEverything == perfLogLevel) {
+            // log message round timing
+            syslog(LOG_INFO, ",%d,%d", PerfProbeType::MsgProcessingTime,
+                   msgRoundEventId);
+        }
     }
+#endif
+}
 
-    static int32_t GetHeartbeatNoRequests()
-    {
-        return __heartbeat_no_requests;
+// Log entry: "opentxs-server <version>,PID,eventTimeinMicroseconds,
+//             PerfProbeType::MsgRoundTimeRemaining,ValueEvents::MsgRoundTimeRemaining,msRemaining"
+void ProbeMsgRoundTimeRemaining(const int32_t msRemaining)
+{
+#ifdef COLLECT_METRICS
+    PerfLogLevel perfLogLevel =
+        static_cast<PerfLogLevel>(ServerSettings::GetPerfLogLevel());
+    if (PerfLogLevel::DisablePerfLogging != perfLogLevel) {
+        if (PerfLogLevel::LogMsgProcessingTime == perfLogLevel ||
+            PerfLogLevel::LogEverything == perfLogLevel) {
+            // log message round time remaining
+            syslog(LOG_INFO, ",%d,%d,%d", PerfProbeType::MsgRoundTimeRemaining,
+                   ValueEvents::MsgRoundTimeRemaining, msRemaining);
+        }
     }
+#endif
+}
 
-    static void SetHeartbeatNoRequests(int32_t value)
-    {
-        __heartbeat_no_requests = value;
+// Log entry: "opentxs-server <version>,PID,eventTimeinMicroseconds,
+//             PerfProbeType::MsgProcessingTime,TimingEvents::eventID"
+void ProbeMsgTiming(const TimingEvents eventID)
+{
+#ifdef COLLECT_METRICS
+    PerfLogLevel perfLogLevel =
+        static_cast<PerfLogLevel>(ServerSettings::GetPerfLogLevel());
+    if (PerfLogLevel::DisablePerfLogging != perfLogLevel) {
+        if (PerfLogLevel::LogMsgProcessingTime == perfLogLevel ||
+            PerfLogLevel::LogEverything == perfLogLevel) {
+            // log message or event timing
+            syslog(LOG_INFO, ",%d,%d", PerfProbeType::MsgProcessingTime,
+                   eventID);
+        }
     }
+#endif
+}
 
-    static int32_t GetHeartbeatMsBetweenBeats()
-    {
-        return __heartbeat_ms_between_beats;
+// Log entry: "opentxs-server <version>,PID,eventTimeinMicroseconds,
+//             PerfProbeType::TxProcessingTime,TxTimingEvents::txEventID"
+void ProbeTxTiming(const TxTimingEvents txEventID)
+{
+#ifdef COLLECT_METRICS
+    PerfLogLevel perfLogLevel =
+        static_cast<PerfLogLevel>(ServerSettings::GetPerfLogLevel());
+    if (PerfLogLevel::DisablePerfLogging != perfLogLevel) {
+        if (PerfLogLevel::LogTxProcessingTime == perfLogLevel ||
+            PerfLogLevel::LogEverything == perfLogLevel) {
+            // log transaction timing
+            syslog(LOG_INFO, ",%d,%d", PerfProbeType::TxProcessingTime,
+                   txEventID);
+        }
     }
+#endif
+}
 
-    static void SetHeartbeatMsBetweenBeats(int32_t value)
-    {
-        __heartbeat_ms_between_beats = value;
+// Log entry: "opentxs-server <version>,PID,eventTimeinMicroseconds,
+//             PerfProbeType::MsgSize,MsgSizeEvents::msgSizeEventID,msgSize"
+void ProbeMsgSize(const MsgSizeEvents msgSizeEventID, const uint32_t msgSize)
+{
+#ifdef COLLECT_METRICS
+    PerfLogLevel perfLogLevel =
+        static_cast<PerfLogLevel>(ServerSettings::GetPerfLogLevel());
+    if (PerfLogLevel::DisablePerfLogging != perfLogLevel) {
+        if (PerfLogLevel::LogMsgSize == perfLogLevel ||
+            PerfLogLevel::LogEverything == perfLogLevel) {
+            // log sent or received message sizes
+            syslog(LOG_INFO, ",%d,%d,%d", PerfProbeType::MsgSize,
+                   msgSizeEventID, msgSize);
+        }
     }
+#endif
+}
 
-    static int32_t GetPerfLogLevel()
-    {
-        return __perf_log_level;
-    }
-
-    static void SetPerfLogLevel(int32_t value)
-    {
-        __perf_log_level = value;
-    }
-
-    static const std::string& GetOverrideNymID()
-    {
-        return __override_nym_id;
-    }
-
-    static void SetOverrideNymID(const std::string& id)
-    {
-        __override_nym_id = id;
-    }
-
-    static int64_t __min_market_scale;
-
-    static int32_t __heartbeat_no_requests;
-    static int32_t __heartbeat_ms_between_beats;
-
-    // Performance logging level
-    static int32_t __perf_log_level;
-
-    // The Nym who's allowed to do certain commands even if they are turned off.
-    static std::string __override_nym_id;
-    // Are usage credits REQUIRED in order to use this server?
-    static bool __admin_usage_credits;
-    // Is server currently locked to non-override Nyms?
-    static bool __admin_server_locked;
-
-    static bool __cmd_usage_credits;
-    static bool __cmd_issue_asset;
-    static bool __cmd_get_contract;
-    static bool __cmd_check_server_id;
-
-    static bool __cmd_create_user_acct;
-    static bool __cmd_del_user_acct;
-    static bool __cmd_check_user;
-    static bool __cmd_get_request;
-    static bool __cmd_get_trans_num;
-    static bool __cmd_send_message;
-    static bool __cmd_get_nymbox;
-    static bool __cmd_process_nymbox;
-
-    static bool __cmd_create_asset_acct;
-    static bool __cmd_del_asset_acct;
-    static bool __cmd_get_acct;
-    static bool __cmd_get_inbox;
-    static bool __cmd_get_outbox;
-    static bool __cmd_process_inbox;
-
-    static bool __cmd_issue_basket;
-    static bool __transact_exchange_basket;
-
-    static bool __cmd_notarize_transaction;
-    static bool __transact_process_inbox;
-    static bool __transact_transfer;
-    static bool __transact_withdrawal;
-    static bool __transact_deposit;
-    static bool __transact_withdraw_voucher;
-    static bool __transact_deposit_cheque;
-    static bool __transact_pay_dividend;
-
-    static bool __cmd_get_mint;
-    static bool __transact_withdraw_cash;
-    static bool __transact_deposit_cash;
-
-    static bool __cmd_get_market_list;
-    static bool __cmd_get_market_offers;
-    static bool __cmd_get_market_recent_trades;
-    static bool __cmd_get_nym_market_offers;
-
-    static bool __transact_market_offer;
-    static bool __transact_payment_plan;
-    static bool __transact_cancel_cron_item;
-    static bool __transact_smart_contract;
-    static bool __cmd_trigger_clause;
-};
-
-} // namespace opentxs
-
-#endif // __OPENTXS_SERVERSETTINGS_HPP__
+void testProbes()
+{
+    ProbeError(MsgErrorType::ReceiveError);
+    ProbeMsgRoundTiming(MsgRoundEvents::MsgRoundStart);
+    ProbeMsgRoundTimeRemaining(10);
+    ProbeMsgTiming(TimingEvents::MsgStart);
+    ProbeTxTiming(TxTimingEvents::TxTransferStart);
+    ProbeMsgSize(MsgSizeEvents::SizeRecvd, 1024);
+}
+#pragma GCC diagnostic pop
+} // namespace perfLogger

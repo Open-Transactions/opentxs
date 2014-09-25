@@ -1,0 +1,32 @@
+Performance Metrics Configuration ReadMe
+
+1) rsyslogd configuration file. This script controls the rsyslogd output file format, path, and log filename.
+
+sudo cp opentxs-notary-perf.conf /etc/rsyslog.d/
+
+2) logrotate configuration file. This script controls how often your performance logs are rotated, and the size and number
+of performance log files to be kept. Currently the performance log is rotated when it reaches 10M in size, and up to 
+seven previous performance logs are kept.
+
+sudo cp opentxs-notary.conf /etc/logrotate.d/opentxs-notary
+
+Compile opentxs with the cmake -DPERFORMANCE_METRICS=ON option to enable performance metrics collection.
+
+Edit the $HOME/.ot/server.cfg:
+Change the latency_receive_ms to 100 mS. This will cause the receive loop to time out at 100, 200, and 400 mS, so each receive
+try takes 700 mS if no messages are incoming, which means each processing round takes 7 seconds. The current default of 5000 mS
+is way too long, because it results in a receive cycle of 5000, 10000, and 20000 mS = 35 seconds per receive x 10 = 350 seconds
+= 5.83 minutes per processing round!
+
+Change the perflog_level option in the server.cfg file to set the desired performance metrics collection level. See the server.cfg perflog_level comments for details.
+(level 5 logs everything)
+
+To see if the logger is working:
+
+start opentxs-notary
+cd /var/log
+tail -f opentxs-notary_perf.log to monitor the opentxs-notary performance log
+
+Note that you can load the opentxs-notary_perf.log file into a spreadsheet if you want to manually analyze the 
+performance log data. This analysis will be automated in subsequent developments.
+

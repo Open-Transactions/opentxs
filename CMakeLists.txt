@@ -27,6 +27,7 @@ endif()
 option(BUILD_VERBOSE       "Verbose build output." ON)
 option(BUILD_DOCUMENTATION "Build the Doxygen documentation." ON)
 option(BUILD_TESTS         "Build the unit tests." ON)
+option(PERFORMANCE_METRICS "Enable Performance Metrics Reporting" OFF)
 
 option(BUILD_SHARED_LIBS   "Build shared libraries." ON)
 
@@ -67,6 +68,7 @@ message(STATUS "Processor:              ${CMAKE_SYSTEM_PROCESSOR}")
 message(STATUS "Verbose:                ${BUILD_VERBOSE}")
 message(STATUS "Testing:                ${BUILD_TESTS}")
 message(STATUS "Documentation:          ${BUILD_DOCUMENTATION}")
+message(STATUS "Performance Metrics:    ${PERFORMANCE_METRICS}")
 
 message(STATUS "Packaging -----------------------------------")
 message(STATUS "Build RPM:              ${RPM}")
@@ -275,6 +277,10 @@ if(SIGNAL_HANLDER)
 endif()
 
 add_definitions(-DCHAISCRIPT_NO_THREADS)
+
+if(PERFORMANCE_METRICS)
+   add_definitions(-DCOLLECT_METRICS)
+endif()
 
 #Keyrings
 if(KEYRING_WINDOWS AND WIN32)

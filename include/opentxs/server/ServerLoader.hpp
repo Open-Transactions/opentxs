@@ -6,6 +6,7 @@
 #include <opentxs/core/crypto/OTCrypto.hpp>
 #include <opentxs/core/OTDataFolder.hpp>
 #include <opentxs/core/OTLog.hpp>
+#include <syslog.h>
 
 #define SERVER_CONFIG_KEY "server"
 
@@ -48,6 +49,15 @@ public:
             if (!OTDataFolder::IsInitialized()) {
                 OT_FAIL;
             }
+            // Performance log initialization
+            static char szIdent[80] = "";
+            sprintf(szIdent, "opentxs-notary %s,", OTLog::Version());
+
+            // Configure log entries so they all start with:
+            // "opentxs-notary <version>,PID,eventTimeinMicroseconds,"
+            // Each type of probe will then append its own comma separated data
+            // fields
+            openlog(szIdent, LOG_PID, LOG_USER);
         }
         OTCrypto::It()->Init();
 
@@ -76,6 +86,7 @@ public:
             delete server_;
             server_ = nullptr;
         }
+        closelog(); // close the performance log
         OTCachedKey::Cleanup();
         OTCrypto::It()->Cleanup();
     }

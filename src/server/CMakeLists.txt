@@ -11,6 +11,7 @@ set(cxx-sources
   Notary.cpp
   Transactor.cpp
   OTServer.cpp
+  PerformanceLogger.cpp
 )
 
 file(GLOB cxx-headers "${CMAKE_CURRENT_SOURCE_DIR}/../../include/opentxs/server/*.hpp")
