@@ -269,10 +269,10 @@ bool MainFile::SaveMainFile()
     const bool bSaved = OTDB::StorePlainString(
         strFinal.Get(), ".", server_->m_strWalletFilename.Get());
 
-    if (!bSaved) // Check if successfull.
+    if (!bSaved) {
         OTLog::vError("%s: Error saving main file: %s\n", __FUNCTION__,
                       server_->m_strWalletFilename.Get());
-
+    }
     return bSaved;
 }
 
@@ -379,7 +379,6 @@ bool MainFile::CreateMainFile(const std::string& strContract,
 
 bool MainFile::LoadMainFile(bool bReadOnly)
 {
-    //
     if (!OTDB::Exists(".", server_->m_strWalletFilename.Get())) {
         OTLog::vError("%s: Error finding file: %s\n", __FUNCTION__,
                       server_->m_strWalletFilename.Get());
@@ -394,7 +393,7 @@ bool MainFile::LoadMainFile(bool bReadOnly)
                       server_->m_strWalletFilename.Get());
         return false;
     }
-    //
+
     // If, for example, the server user Nym is in old format (no master key)
     // then we will set this to true while loading. Then at the BOTTOM of this
     // function, we'll convert the Nym to the new format and re-save the notary
@@ -463,7 +462,7 @@ bool MainFile::LoadMainFile(bool bReadOnly)
                         server_->transactor_.transactionNumber(),
                         server_->m_strServerID.Get(),
                         server_->m_strServerUserID.Get());
-                    //
+
                     if (m_strVersion.Compare("1.0")) // This means this
                                                      // Nym has
                                                      // not been converted yet
@@ -626,127 +625,6 @@ bool MainFile::LoadMainFile(bool bReadOnly)
                             __FUNCTION__);
                     }
                 }
-
-                // This is where the server finds out his own contract, which he
-                // hashes in order to verify his
-                // serverID (which is either hardcoded or stored in the server
-                // xml file.)
-                //
-                // There should be only one of these per transaction server.
-                //
-                // Commented out because I don't need it right now. TODO. COMING
-                // SOON! So the server can load his
-                // port information out of the contract BEFORE it starts
-                // listening on the port (right now port is
-                // still hardcoded.)
-                // Todo: Server should also then immediately connect to itself
-                // BASED ON THE INFO IN THE CONTRACT
-                // in order to verify that whatever is running at that port IS,
-                // IN FACT, ITSELF!
-                /*
-                  else if (strNodeName.Compare("notaryProvider"))
-                  {
-                  ServerName        = xml->getAttributeValue("name");
-                  ServerID        = xml->getAttributeValue("serverID");    //
-                  hash of contract itself
-
-                  OTLog::vOutput(0, "\n\n****Notary Server (contract)****
-                  (server listing) Name: %s\nContract ID:\n%s\n",
-                  ServerName.Get(), ServerID.Get());
-
-                  OTString strContractPath;
-                  strContractPath.Format("%s%s%s%s%s", OTLog::Path(),
-                  OTLog::PathSeparator(),
-                  OTFolders::Contract().Get(),
-                  OTLog::PathSeparator(), ServerID.Get());
-                  MainFileContract * pContract = new
-                  MainFileContract(ServerName, strContractPath, ServerID);
-
-                  OT_ASSERT_MSG(nullptr != pContract, "Error allocating memory
-                  for
-                  Server Contract in MainFile::LoadMainFile\n");
-
-                  if (pContract->LoadContract())
-                  {
-                  if (pContract->VerifyContract())
-                  {
-                  OTLog::Output(0, "** Server Contract Verified **\n");
-
-                  contractsMap_[ServerID.Get()] = pContract;
-                  }
-                  else
-                  {
-                  delete pContract; pContract = nullptr;
-                  OTLog::Output(0, "Server Contract FAILED to verify.\n");
-                  }
-                  }
-                  else
-                  {
-                  delete pContract; pContract = nullptr;
-                  OTLog::Output(0, "Failed reading file for Server Contract in
-                  MainFile::LoadMainFile\n");
-                  }
-                  }
-                */
-
-                /*
-                // commented out because, since I already have the serverID,
-                then the server
-                // already knows which certfile to open in order to get at its
-                private key.
-                // So I already have the private key loaded, so I don't need
-                pseudonyms in
-                // the config file right now.
-                //
-                // In the future, I will load the server XML file (here) FIRST,
-                and get the serverID and
-                // contract file from that. THEN I will hash the contract file
-                and verify that it matches
-                // the serverID. THEN I will use that serverID to open the
-                Certfile and get my private key.
-                //
-                // In the meantime I don't need this yet, serverID is setup in
-                the config file (that I'm reading now.)
-                else if (strNodeName.Compare("pseudonym")) // The server has to
-                sign things, too.
-                {
-                NymName = xml->getAttributeValue("name");// user-assigned name
-                for GUI usage
-                NymID = xml->getAttributeValue("nymID"); // message digest from
-                hash of x.509 cert, used to look up certfile.
-
-                OTLog::vOutput(0, "\n\n** Pseudonym ** (server): %s\nID:
-                %s\nfile: %s\n",
-                NymName.Get(), NymID.Get(), NymFile.Get());
-
-                OTPseudonym * pNym = new OTPseudonym(NymName, NymFile, NymID);
-
-                if (pNym && pNym->LoadNymfile((char*)(NymFile.Get())))
-                {
-                if (pNym->Loadx509CertAndPrivateKey())
-                {
-                if (pNym->VerifyPseudonym())
-                {
-                m_mapNyms[NymID.Get()] = pNym;
-                g_pTemporaryNym = pNym; // TODO remove this temporary line used
-                for testing only.
-                }
-                else {
-                OTLog::Error("Error verifying public key from x509 against Nym
-                ID in OTWallet::LoadWallet\n");
-                }
-                }
-                else {
-                OTLog::Error("Error loading x509 file for Pseudonym in
-                OTWallet::LoadWallet\n");
-                }
-                }
-                else {
-                OTLog::Error("Error creating or loading Nym in
-                OTWallet::LoadWallet\n");
-                }
-                }
-                */
                 else {
                     // unknown element type
                     OTLog::vError("%s: Unknown element type: %s\n",
@@ -755,8 +633,8 @@ bool MainFile::LoadMainFile(bool bReadOnly)
             } break;
             default:
                 break;
-            } // switch
-        }     // while xml->read
+            }
+        }
     }
     if (!bReadOnly) {
         {
@@ -784,7 +662,7 @@ bool MainFile::LoadServerUserAndContract()
     OT_ASSERT(m_strVersion.Exists());
     OT_ASSERT(server_->m_strServerID.Exists());
     OT_ASSERT(server_->m_strServerUserID.Exists());
-    //
+
     server_->m_nymServer.SetIdentifier(server_->m_strServerUserID);
 
     if (!server_->m_nymServer.Loadx509CertAndPrivateKey(false)) {
