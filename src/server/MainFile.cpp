@@ -287,7 +287,7 @@ bool MainFile::CreateMainFile(const std::string& strContract,
         return false;
     }
 
-    if ((strCert.size()) > 0 &&
+    if (!strCert.empty() &&
         !OTDB::StorePlainString(strCert, "certs", strNymID)) {
         OTLog::Error(
             "Failed trying to store the server Nym's public/private cert.\n");
