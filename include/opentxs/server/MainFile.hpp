@@ -134,6 +134,7 @@
 #define OPENTXS_SERVER_MAINFILE_HPP
 
 #include <opentxs/core/OTString.hpp>
+#include <string>
 
 namespace opentxs
 {
@@ -145,7 +146,10 @@ class MainFile
 public:
     explicit MainFile(OTServer* server);
 
-    bool CreateMainFile();
+    bool CreateMainFile(const std::string& strContract,
+                        const std::string& strServerID,
+                        const std::string& strCert, const std::string& strNymID,
+                        const std::string& strCachedKey);
     bool LoadMainFile(bool readOnly = false);
     bool LoadServerUserAndContract();
     bool SaveMainFile();

@@ -35,6 +35,7 @@
 #include "../../include/opentxs/client/OT_ME.hpp"
 #include "../../include/opentxs/client/OTRecord.hpp"
 #include "../../include/opentxs/client/OTRecordList.hpp"
+#include "../../include/opentxs/server/MainFile.hpp"
     
 %}
 
@@ -96,6 +97,7 @@ namespace std {
 %include "../../include/opentxs/client/OT_ME.hpp"
 %include "../../include/opentxs/client/OTRecord.hpp"
 %include "../../include/opentxs/client/OTRecordList.hpp"
+%include "../../include/opentxs/server/MainFile.hpp"
 
 
 bool opentxs::OT_API_Set_PasswordCallback(OTCaller & theCaller);

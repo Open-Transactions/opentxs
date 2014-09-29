@@ -187,6 +187,104 @@
 namespace opentxs
 {
 
+namespace
+{
+
+void askInteractively(std::string& strContract, std::string& strServerID,
+                      std::string& strCert, std::string& strNymID,
+                      std::string& strCachedKey)
+{
+    const char* szInstructions =
+        "\n\n ==> WARNING: Main file not found. To create it, continue this "
+        "process now...\n\n"
+        "REQUIREMENTS: You must already have a wallet, where you have created "
+        "one Nym.\n"
+        "This will be a temporary wallet only, for the purpose of generating "
+        "the server\n"
+        "nym and the master key for that server nym. You can erase the "
+        "contents of the\n"
+        "~/.ot/client_data folder once we are done with this process, and the "
+        "OT client\n"
+        "will just create a fresh wallet to replace it. In other words, don't "
+        "continue\n"
+        "to use the temporary wallet as a REAL wallet, since it contains the "
+        "master\n"
+        "key and private key for your new server nym. We're using a temporary "
+        "client-side\n"
+        "wallet for the convenience of generating the server nym--we'll copy "
+        "it over to \n"
+        "the server side, and then we'll wipe the temp wallet and start with a "
+        "fresh one\n"
+        "once this process is done.\n"
+        "(FYI, you can decode an armored wallet by using the 'opentxs decode' "
+        "command.)\n"
+        "-- You must also have the new Server Nym's \"NymID\", which should be "
+        "found in the\nwallet.\n"
+        "-- When you have created your server Nym (using your temp wallet) you "
+        "will want to\n"
+        "copy the credentials from the temp wallet to your new server:\n"
+        "    cp -R ~/.ot/client_data/credentials ~/.ot/server_data/ \n"
+        "-- You must already have a signed server contract. (*** To get one, "
+        "copy the\n"
+        "UNSIGNED version of the sample server contract, which is named "
+        "'localhost.xml',\n"
+        "and then change the tags as you see fit. Then use the same Nym, the "
+        "server Nym,\n"
+        "to sign the server contract, via the 'opentxs newserver' "
+        "command.***)\n"
+        "You must also have the server ID for the above contract, which the "
+        "newserver\n"
+        "command will output at the same time it outputs the newly-signed "
+        "server contract.\n"
+        "=> Note that the Nym who signs the server contract MUST be the same "
+        "Nym that you\n"
+        "provide HERE, for this process now...)\n"
+        "-- Finally, you must provide the cached key from the same wallet "
+        "where you brought\n"
+        "the Nym from (In this case, be careful to only copy the "
+        "base64-encoded portion\n"
+        "of the cached key from the wallet, and not the XML tags around it!) "
+        "We\n"
+        "recommend you create a blank wallet entirely for this purpose (of "
+        "generating\n"
+        "that cached key and server Nym, to be used for your new OT server.) "
+        "Then erase it\nonce this process is done.\n"
+        " ==> WARNING: Main file not found. To create it, continue this "
+        "process now...\n";
+
+    OTLog::Output(0, szInstructions);
+    OTLog::Output(0, "Enter the ServerID for your server contract: ");
+    strServerID = OT_CLI_ReadLine();
+    OTLog::Output(0, "Enter the Server User ID (the NymID of the Nym who "
+                     "signed the server contract): ");
+    strNymID = OT_CLI_ReadLine();
+    OTLog::Output(0, "Paste the cached key (ONLY the base64-encoded portion) "
+                     "below, from wallet.xml for that Nym.\n"
+                     "Terminate with '~' on a line by itself.\n\n");
+
+    strCachedKey = OT_CLI_ReadUntilEOF();
+    OTLog::Output(0, "Paste the contents of the server Nym's certfile, "
+                     "including public/PRIVATE, below.\n"
+                     "NOTE: LEAVE THIS BLANK unless you REALLY want to use the "
+                     "OLD system. If you leave this\n"
+                     "blank (preferred), it will instead use the new "
+                     "credentials system. (Just make sure\n"
+                     "you copied over the \"credentials\" folder, as described "
+                     "above, since we're about to\n"
+                     "use it, if you leave this blank.)\n"
+                     "Terminate with '~' on a line by itself.\n\n");
+
+    strCert = OT_CLI_ReadUntilEOF();
+    // signed server contract
+    OTLog::Output(0, "Paste the complete, signed, server contract below. (You "
+                     "must already have it.)\n"
+                     "Terminate with '~' on a line by itself.\n\n");
+
+    strContract = OT_CLI_ReadUntilEOF();
+}
+
+} // namespace
+
 #ifdef _WIN32
 int32_t OTCron::__trans_refill_amount =
     500; // The number of transaction numbers Cron will grab for itself, when it
@@ -399,7 +497,15 @@ void OTServer::Init(bool readOnly)
             OT_FAIL;
         }
         else {
-            mainFileExists = mainFile_.CreateMainFile();
+            std::string strContract;
+            std::string strServerID;
+            std::string strCert;
+            std::string strNymID;
+            std::string strCachedKey;
+            askInteractively(strContract, strServerID, strCert, strNymID,
+                             strCachedKey);
+            mainFileExists = mainFile_.CreateMainFile(
+                strContract, strServerID, strCert, strNymID, strCachedKey);
         }
     }
 

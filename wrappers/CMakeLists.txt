@@ -18,7 +18,7 @@ set(SWIG_INCLUDE_DIRS
 
 
 # The opentxs libraries will we link to
-set(OTX_LINK_LIBS opentxs-client)
+set(OTX_LINK_LIBS opentxs-client opentxs-server)
 
 
 # Build wrappers for each lang enabled

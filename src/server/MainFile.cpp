@@ -269,112 +269,31 @@ bool MainFile::SaveMainFile()
     const bool bSaved = OTDB::StorePlainString(
         strFinal.Get(), ".", server_->m_strWalletFilename.Get());
 
-    if (!bSaved) // Check if successfull.
+    if (!bSaved) {
         OTLog::vError("%s: Error saving main file: %s\n", __FUNCTION__,
                       server_->m_strWalletFilename.Get());
-
+    }
     return bSaved;
 }
 
-bool MainFile::CreateMainFile()
+bool MainFile::CreateMainFile(const std::string& strContract,
+                              const std::string& strServerID,
+                              const std::string& strCert,
+                              const std::string& strNymID,
+                              const std::string& strCachedKey)
 {
-    const char* szInstructions =
-        "\n\n ==> WARNING: Main file not found. To create it, continue this "
-        "process now...\n\n"
-        "REQUIREMENTS: You must already have a wallet, where you have created "
-        "one Nym.\n"
-        "This will be a temporary wallet only, for the purpose of generating "
-        "the server\n"
-        "nym and the master key for that server nym. You can erase the "
-        "contents of the\n"
-        "~/.ot/client_data folder once we are done with this process, and the "
-        "OT client\n"
-        "will just create a fresh wallet to replace it. In other words, don't "
-        "continue\n"
-        "to use the temporary wallet as a REAL wallet, since it contains the "
-        "master\n"
-        "key and private key for your new server nym. We're using a temporary "
-        "client-side\n"
-        "wallet for the convenience of generating the server nym--we'll copy "
-        "it over to \n"
-        "the server side, and then we'll wipe the temp wallet and start with a "
-        "fresh one\n"
-        "once this process is done.\n"
-        "(FYI, you can decode an armored wallet by using the 'opentxs decode' "
-        "command.)\n"
-        "-- You must also have the new Server Nym's \"NymID\", which should be "
-        "found in the\nwallet.\n"
-        "-- When you have created your server Nym (using your temp wallet) you "
-        "will want to\n"
-        "copy the credentials from the temp wallet to your new server:\n"
-        "    cp -R ~/.ot/client_data/credentials ~/.ot/server_data/ \n"
-        "-- You must already have a signed server contract. (*** To get one, "
-        "copy the\n"
-        "UNSIGNED version of the sample server contract, which is named "
-        "'localhost.xml',\n"
-        "and then change the tags as you see fit. Then use the same Nym, the "
-        "server Nym,\n"
-        "to sign the server contract, via the 'opentxs newserver' "
-        "command.***)\n"
-        "You must also have the server ID for the above contract, which the "
-        "newserver\n"
-        "command will output at the same time it outputs the newly-signed "
-        "server contract.\n"
-        "=> Note that the Nym who signs the server contract MUST be the same "
-        "Nym that you\n"
-        "provide HERE, for this process now...)\n"
-        "-- Finally, you must provide the cached key from the same wallet "
-        "where you brought\n"
-        "the Nym from (In this case, be careful to only copy the "
-        "base64-encoded portion\n"
-        "of the cached key from the wallet, and not the XML tags around it!) "
-        "We\n"
-        "recommend you create a blank wallet entirely for this purpose (of "
-        "generating\n"
-        "that cached key and server Nym, to be used for your new OT server.) "
-        "Then erase it\nonce this process is done.\n"
-        " ==> WARNING: Main file not found. To create it, continue this "
-        "process now...\n";
-
-    OTLog::Output(0, szInstructions);
-    OTLog::Output(0, "Enter the ServerID for your server contract: ");
-    std::string strServerID = OT_CLI_ReadLine();
-    OTLog::Output(0, "Enter the Server User ID (the NymID of the Nym who "
-                     "signed the server contract): ");
-    std::string strNymID = OT_CLI_ReadLine();
-    OTLog::Output(0, "Paste the cached key (ONLY the base64-encoded portion) "
-                     "below, from wallet.xml for that Nym.\n"
-                     "Terminate with '~' on a line by itself.\n\n");
-
-    std::string strCachedKey = OT_CLI_ReadUntilEOF();
-    OTLog::Output(0, "Paste the contents of the server Nym's certfile, "
-                     "including public/PRIVATE, below.\n"
-                     "NOTE: LEAVE THIS BLANK unless you REALLY want to use the "
-                     "OLD system. If you leave this\n"
-                     "blank (preferred), it will instead use the new "
-                     "credentials system. (Just make sure\n"
-                     "you copied over the \"credentials\" folder, as described "
-                     "above, since we're about to\n"
-                     "use it, if you leave this blank.)\n"
-                     "Terminate with '~' on a line by itself.\n\n");
-
-    std::string strCert = OT_CLI_ReadUntilEOF();
-    // signed server contract
-    OTLog::Output(0, "Paste the complete, signed, server contract below. (You "
-                     "must already have it.)\n"
-                     "Terminate with '~' on a line by itself.\n\n");
-
-    std::string strContract = OT_CLI_ReadUntilEOF();
     if (!OTDB::StorePlainString(strContract, "contracts", strServerID)) {
         OTLog::Error("Failed trying to store the server contract.\n");
         return false;
     }
-    if ((strCert.size()) > 0 &&
+
+    if (!strCert.empty() &&
         !OTDB::StorePlainString(strCert, "certs", strNymID)) {
         OTLog::Error(
             "Failed trying to store the server Nym's public/private cert.\n");
         return false;
     }
+
     const char* szBlankFile = // todo hardcoding.
         "<?xml version=\"1.0\"?>\n"
         "<notaryServer version=\"2.0\"\n"
@@ -391,7 +310,7 @@ bool MainFile::CreateMainFile()
         "\n"
         "</notaryServer>\n\n";
 
-    const int64_t lTransNum = 5; // a starting point, for the new server.
+    int64_t lTransNum = 5; // a starting point, for the new server.
 
     OTString strNotaryFile;
     strNotaryFile.Format(szBlankFile, strServerID.c_str(), strNymID.c_str(),
@@ -460,7 +379,6 @@ bool MainFile::CreateMainFile()
 
 bool MainFile::LoadMainFile(bool bReadOnly)
 {
-    //
     if (!OTDB::Exists(".", server_->m_strWalletFilename.Get())) {
         OTLog::vError("%s: Error finding file: %s\n", __FUNCTION__,
                       server_->m_strWalletFilename.Get());
@@ -475,7 +393,7 @@ bool MainFile::LoadMainFile(bool bReadOnly)
                       server_->m_strWalletFilename.Get());
         return false;
     }
-    //
+
     // If, for example, the server user Nym is in old format (no master key)
     // then we will set this to true while loading. Then at the BOTTOM of this
     // function, we'll convert the Nym to the new format and re-save the notary
@@ -544,7 +462,7 @@ bool MainFile::LoadMainFile(bool bReadOnly)
                         server_->transactor_.transactionNumber(),
                         server_->m_strServerID.Get(),
                         server_->m_strServerUserID.Get());
-                    //
+
                     if (m_strVersion.Compare("1.0")) // This means this
                                                      // Nym has
                                                      // not been converted yet
@@ -707,127 +625,6 @@ bool MainFile::LoadMainFile(bool bReadOnly)
                             __FUNCTION__);
                     }
                 }
-
-                // This is where the server finds out his own contract, which he
-                // hashes in order to verify his
-                // serverID (which is either hardcoded or stored in the server
-                // xml file.)
-                //
-                // There should be only one of these per transaction server.
-                //
-                // Commented out because I don't need it right now. TODO. COMING
-                // SOON! So the server can load his
-                // port information out of the contract BEFORE it starts
-                // listening on the port (right now port is
-                // still hardcoded.)
-                // Todo: Server should also then immediately connect to itself
-                // BASED ON THE INFO IN THE CONTRACT
-                // in order to verify that whatever is running at that port IS,
-                // IN FACT, ITSELF!
-                /*
-                  else if (strNodeName.Compare("notaryProvider"))
-                  {
-                  ServerName        = xml->getAttributeValue("name");
-                  ServerID        = xml->getAttributeValue("serverID");    //
-                  hash of contract itself
-
-                  OTLog::vOutput(0, "\n\n****Notary Server (contract)****
-                  (server listing) Name: %s\nContract ID:\n%s\n",
-                  ServerName.Get(), ServerID.Get());
-
-                  OTString strContractPath;
-                  strContractPath.Format("%s%s%s%s%s", OTLog::Path(),
-                  OTLog::PathSeparator(),
-                  OTFolders::Contract().Get(),
-                  OTLog::PathSeparator(), ServerID.Get());
-                  MainFileContract * pContract = new
-                  MainFileContract(ServerName, strContractPath, ServerID);
-
-                  OT_ASSERT_MSG(nullptr != pContract, "Error allocating memory
-                  for
-                  Server Contract in MainFile::LoadMainFile\n");
-
-                  if (pContract->LoadContract())
-                  {
-                  if (pContract->VerifyContract())
-                  {
-                  OTLog::Output(0, "** Server Contract Verified **\n");
-
-                  contractsMap_[ServerID.Get()] = pContract;
-                  }
-                  else
-                  {
-                  delete pContract; pContract = nullptr;
-                  OTLog::Output(0, "Server Contract FAILED to verify.\n");
-                  }
-                  }
-                  else
-                  {
-                  delete pContract; pContract = nullptr;
-                  OTLog::Output(0, "Failed reading file for Server Contract in
-                  MainFile::LoadMainFile\n");
-                  }
-                  }
-                */
-
-                /*
-                // commented out because, since I already have the serverID,
-                then the server
-                // already knows which certfile to open in order to get at its
-                private key.
-                // So I already have the private key loaded, so I don't need
-                pseudonyms in
-                // the config file right now.
-                //
-                // In the future, I will load the server XML file (here) FIRST,
-                and get the serverID and
-                // contract file from that. THEN I will hash the contract file
-                and verify that it matches
-                // the serverID. THEN I will use that serverID to open the
-                Certfile and get my private key.
-                //
-                // In the meantime I don't need this yet, serverID is setup in
-                the config file (that I'm reading now.)
-                else if (strNodeName.Compare("pseudonym")) // The server has to
-                sign things, too.
-                {
-                NymName = xml->getAttributeValue("name");// user-assigned name
-                for GUI usage
-                NymID = xml->getAttributeValue("nymID"); // message digest from
-                hash of x.509 cert, used to look up certfile.
-
-                OTLog::vOutput(0, "\n\n** Pseudonym ** (server): %s\nID:
-                %s\nfile: %s\n",
-                NymName.Get(), NymID.Get(), NymFile.Get());
-
-                OTPseudonym * pNym = new OTPseudonym(NymName, NymFile, NymID);
-
-                if (pNym && pNym->LoadNymfile((char*)(NymFile.Get())))
-                {
-                if (pNym->Loadx509CertAndPrivateKey())
-                {
-                if (pNym->VerifyPseudonym())
-                {
-                m_mapNyms[NymID.Get()] = pNym;
-                g_pTemporaryNym = pNym; // TODO remove this temporary line used
-                for testing only.
-                }
-                else {
-                OTLog::Error("Error verifying public key from x509 against Nym
-                ID in OTWallet::LoadWallet\n");
-                }
-                }
-                else {
-                OTLog::Error("Error loading x509 file for Pseudonym in
-                OTWallet::LoadWallet\n");
-                }
-                }
-                else {
-                OTLog::Error("Error creating or loading Nym in
-                OTWallet::LoadWallet\n");
-                }
-                }
-                */
                 else {
                     // unknown element type
                     OTLog::vError("%s: Unknown element type: %s\n",
@@ -836,8 +633,8 @@ bool MainFile::LoadMainFile(bool bReadOnly)
             } break;
             default:
                 break;
-            } // switch
-        }     // while xml->read
+            }
+        }
     }
     if (!bReadOnly) {
         {
@@ -865,7 +662,7 @@ bool MainFile::LoadServerUserAndContract()
     OT_ASSERT(m_strVersion.Exists());
     OT_ASSERT(server_->m_strServerID.Exists());
     OT_ASSERT(server_->m_strServerUserID.Exists());
-    //
+
     server_->m_nymServer.SetIdentifier(server_->m_strServerUserID);
 
     if (!server_->m_nymServer.Loadx509CertAndPrivateKey(false)) {
