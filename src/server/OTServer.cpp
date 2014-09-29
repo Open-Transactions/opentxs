@@ -137,6 +137,7 @@
 #include "ServerSettings.hpp"
 #include "AcctFunctor_PayDividend.hpp"
 #include "Helpers.hpp"
+#include "PerformanceLogger.hpp"
 
 #include <opentxs/ext/OTPayment.hpp>
 #include <opentxs/cash/Purse.hpp>

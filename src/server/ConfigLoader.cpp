@@ -384,6 +384,30 @@ bool ConfigLoader::load(OTString& walletFilename)
 #endif
     }
 
+    // PERFORMANCE LOGGING
+
+    {
+        const char* szComment = ";; PERFORMANCE LOGGING\n";
+
+        bool bSectionExist;
+        p_Config->CheckSetSection("perflog", szComment, bSectionExist);
+    }
+
+    {
+        const char* szComment = "; level 0 = disable performance logging\n"
+                                "; level 1 = log errors\n"
+                                "; level 2 = log msg processing times\n"
+                                "; level 3 = log tx processing times\n"
+                                "; level 4 = log msg sizes\n"
+                                "; level 5 = log everything\n";
+
+        bool bIsNewKey;
+        int64_t lValue;
+        p_Config->CheckSet_long("perflog", "perflog_level", 0, lValue,
+                                bIsNewKey, szComment);
+        ServerSettings::SetPerfLogLevel(static_cast<int32_t>(lValue));
+    }
+
     // (#defined right above this function.)
     //
 

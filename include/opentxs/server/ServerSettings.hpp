@@ -171,6 +171,16 @@ struct ServerSettings
         __heartbeat_ms_between_beats = value;
     }
 
+    static int32_t GetPerfLogLevel()
+    {
+        return __perf_log_level;
+    }
+
+    static void SetPerfLogLevel(int32_t value)
+    {
+        __perf_log_level = value;
+    }
+
     static const std::string& GetOverrideNymID()
     {
         return __override_nym_id;
@@ -185,6 +195,9 @@ struct ServerSettings
 
     static int32_t __heartbeat_no_requests;
     static int32_t __heartbeat_ms_between_beats;
+
+    // Performance logging level
+    static int32_t __perf_log_level;
 
     // The Nym who's allowed to do certain commands even if they are turned off.
     static std::string __override_nym_id;

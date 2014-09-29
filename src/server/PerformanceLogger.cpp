@@ -1,6 +1,6 @@
 /************************************************************
  *
- *  ServerSettings.cpp
+ *  PerformanceLogger.cpp
  *
  */
 
@@ -130,77 +130,134 @@
  -----END PGP SIGNATURE-----
 **************************************************************/
 
+#include "PerformanceLogger.hpp"
 #include "ServerSettings.hpp"
 
-namespace opentxs
+// This pragma is necessary to suppress unused parameter warnings
+// (which the compiler treats as errors) in the event nobody
+// is using the probe functions
+#pragma GCC diagnostic push
+#pragma GCC diagnostic warning "-Wunused-parameter"
+
+namespace perfLogger
 {
+using namespace opentxs;
 
-// These are default values. There are configurable in ~/.ot/server.cfg
-// (static)
+// Log entry: "opentxs-server
+// <version>,PID,eventTimeinMicroseconds,PerfProbeType::ErrorStats,MsgErrorType"
+void ProbeError(const MsgErrorType errorType)
+{
+#ifdef COLLECT_METRICS
+    PerfLogLevel perfLogLevel =
+        static_cast<PerfLogLevel>(ServerSettings::GetPerfLogLevel());
+    if (PerfLogLevel::DisablePerfLogging != perfLogLevel) {
+        if (PerfLogLevel::LogError == perfLogLevel ||
+            PerfLogLevel::LogEverything == perfLogLevel) {
+            // log error messages
+            syslog(LOG_INFO, ",%d,%d", PerfProbeType::ErrorStats, errorType);
+        }
+    }
+#endif
+}
 
-int64_t ServerSettings::__min_market_scale = 1;
-// The number of client requests that will be processed per heartbeat.
-int32_t ServerSettings::__heartbeat_no_requests = 10;
-// number of ms between each heartbeat.
-int32_t ServerSettings::__heartbeat_ms_between_beats = 100;
-// Performance logging level
-int32_t ServerSettings::__perf_log_level = 0;
-// The Nym who's allowed to do certain
-// commands even if they are turned off.
-std::string ServerSettings::__override_nym_id;
+// Log entry: "opentxs-server
+// <version>,PID,eventTimeinMicroseconds,PerfProbeType::MsgProcessingTime,MsgRoundEvents::msgRoundEventId"
+void ProbeMsgRoundTiming(MsgRoundEvents msgRoundEventId)
+{
+#ifdef COLLECT_METRICS
+    PerfLogLevel perfLogLevel =
+        static_cast<PerfLogLevel>(ServerSettings::GetPerfLogLevel());
+    if (PerfLogLevel::DisablePerfLogging != perfLogLevel) {
+        if (PerfLogLevel::LogMsgProcessingTime == perfLogLevel ||
+            PerfLogLevel::LogEverything == perfLogLevel) {
+            // log message round timing
+            syslog(LOG_INFO, ",%d,%d", PerfProbeType::MsgProcessingTime,
+                   msgRoundEventId);
+        }
+    }
+#endif
+}
 
-// NOTE: These are all static variables, and these are all just default values.
-//       (The ACTUAL values are configured in ~/.ot/server.cfg)
-//
-bool ServerSettings::__admin_usage_credits =
-    false; // Are usage credits REQUIRED in order to use this server?
-bool ServerSettings::__admin_server_locked =
-    false; // Is server currently locked to non-override Nyms?
-bool ServerSettings::__cmd_usage_credits =
-    false; // Command for setting / viewing usage credits.
-bool ServerSettings::__cmd_issue_asset = true;
-bool ServerSettings::__cmd_get_contract = true;
-bool ServerSettings::__cmd_check_server_id = true;
-bool ServerSettings::__cmd_create_user_acct = true;
-bool ServerSettings::__cmd_del_user_acct = true;
-bool ServerSettings::__cmd_check_user = true;
-bool ServerSettings::__cmd_get_request = true;
-bool ServerSettings::__cmd_get_trans_num = true;
-bool ServerSettings::__cmd_send_message = true;
-bool ServerSettings::__cmd_get_nymbox = true;
-bool ServerSettings::__cmd_process_nymbox = true;
-bool ServerSettings::__cmd_create_asset_acct = true;
-bool ServerSettings::__cmd_del_asset_acct = true;
-bool ServerSettings::__cmd_get_acct = true;
-bool ServerSettings::__cmd_get_inbox = true;
-bool ServerSettings::__cmd_get_outbox = true;
-bool ServerSettings::__cmd_process_inbox = true;
-bool ServerSettings::__cmd_issue_basket = false;
-bool ServerSettings::__transact_exchange_basket = true;
-bool ServerSettings::__cmd_notarize_transaction = true;
-bool ServerSettings::__transact_process_inbox = true;
-bool ServerSettings::__transact_transfer = true;
-bool ServerSettings::__transact_withdrawal = true;
-bool ServerSettings::__transact_deposit = true;
-bool ServerSettings::__transact_withdraw_voucher = true;
-bool ServerSettings::__transact_deposit_cheque = true;
-bool ServerSettings::__transact_pay_dividend = true;
-bool ServerSettings::__cmd_get_mint = true;
-bool ServerSettings::__transact_withdraw_cash = true;
-bool ServerSettings::__transact_deposit_cash = true;
-bool ServerSettings::__cmd_get_market_list = true;
-bool ServerSettings::__cmd_get_market_offers = true;
-bool ServerSettings::__cmd_get_market_recent_trades = true;
-bool ServerSettings::__cmd_get_nym_market_offers = true;
-bool ServerSettings::__transact_market_offer = true;
-bool ServerSettings::__transact_payment_plan = true;
-bool ServerSettings::__transact_cancel_cron_item = true;
-bool ServerSettings::__transact_smart_contract = true;
-bool ServerSettings::__cmd_trigger_clause = true;
+// Log entry: "opentxs-server <version>,PID,eventTimeinMicroseconds,
+//             PerfProbeType::MsgRoundTimeRemaining,ValueEvents::MsgRoundTimeRemaining,msRemaining"
+void ProbeMsgRoundTimeRemaining(const int32_t msRemaining)
+{
+#ifdef COLLECT_METRICS
+    PerfLogLevel perfLogLevel =
+        static_cast<PerfLogLevel>(ServerSettings::GetPerfLogLevel());
+    if (PerfLogLevel::DisablePerfLogging != perfLogLevel) {
+        if (PerfLogLevel::LogMsgProcessingTime == perfLogLevel ||
+            PerfLogLevel::LogEverything == perfLogLevel) {
+            // log message round time remaining
+            syslog(LOG_INFO, ",%d,%d,%d", PerfProbeType::MsgRoundTimeRemaining,
+                   ValueEvents::MsgRoundTimeRemaining, msRemaining);
+        }
+    }
+#endif
+}
 
-// Todo: Might set ALL of these to false (so you're FORCED to set them true
-// in the server.cfg file.) This way you're also assured that the right data
-// folder was found, before you start unlocking the server messages!
-//
+// Log entry: "opentxs-server <version>,PID,eventTimeinMicroseconds,
+//             PerfProbeType::MsgProcessingTime,TimingEvents::eventID"
+void ProbeMsgTiming(const TimingEvents eventID)
+{
+#ifdef COLLECT_METRICS
+    PerfLogLevel perfLogLevel =
+        static_cast<PerfLogLevel>(ServerSettings::GetPerfLogLevel());
+    if (PerfLogLevel::DisablePerfLogging != perfLogLevel) {
+        if (PerfLogLevel::LogMsgProcessingTime == perfLogLevel ||
+            PerfLogLevel::LogEverything == perfLogLevel) {
+            // log message or event timing
+            syslog(LOG_INFO, ",%d,%d", PerfProbeType::MsgProcessingTime,
+                   eventID);
+        }
+    }
+#endif
+}
 
-} // namespace opentxs
+// Log entry: "opentxs-server <version>,PID,eventTimeinMicroseconds,
+//             PerfProbeType::TxProcessingTime,TxTimingEvents::txEventID"
+void ProbeTxTiming(const TxTimingEvents txEventID)
+{
+#ifdef COLLECT_METRICS
+    PerfLogLevel perfLogLevel =
+        static_cast<PerfLogLevel>(ServerSettings::GetPerfLogLevel());
+    if (PerfLogLevel::DisablePerfLogging != perfLogLevel) {
+        if (PerfLogLevel::LogTxProcessingTime == perfLogLevel ||
+            PerfLogLevel::LogEverything == perfLogLevel) {
+            // log transaction timing
+            syslog(LOG_INFO, ",%d,%d", PerfProbeType::TxProcessingTime,
+                   txEventID);
+        }
+    }
+#endif
+}
+
+// Log entry: "opentxs-server <version>,PID,eventTimeinMicroseconds,
+//             PerfProbeType::MsgSize,MsgSizeEvents::msgSizeEventID,msgSize"
+void ProbeMsgSize(const MsgSizeEvents msgSizeEventID, const uint32_t msgSize)
+{
+#ifdef COLLECT_METRICS
+    PerfLogLevel perfLogLevel =
+        static_cast<PerfLogLevel>(ServerSettings::GetPerfLogLevel());
+    if (PerfLogLevel::DisablePerfLogging != perfLogLevel) {
+        if (PerfLogLevel::LogMsgSize == perfLogLevel ||
+            PerfLogLevel::LogEverything == perfLogLevel) {
+            // log sent or received message sizes
+            syslog(LOG_INFO, ",%d,%d,%d", PerfProbeType::MsgSize,
+                   msgSizeEventID, msgSize);
+        }
+    }
+#endif
+}
+
+void testProbes()
+{
+    ProbeError(MsgErrorType::ReceiveError);
+    ProbeMsgRoundTiming(MsgRoundEvents::MsgRoundStart);
+    ProbeMsgRoundTimeRemaining(10);
+    ProbeMsgTiming(TimingEvents::MsgStart);
+    ProbeTxTiming(TxTimingEvents::TxTransferStart);
+    ProbeMsgSize(MsgSizeEvents::SizeRecvd, 1024);
+}
+#pragma GCC diagnostic pop
+} // namespace perfLogger

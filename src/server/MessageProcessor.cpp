@@ -134,6 +134,7 @@
 #include "ServerLoader.hpp"
 #include "MessageProcessor.hpp"
 #include "OTServer.hpp"
+#include "PerformanceLogger.hpp"
 #include "ClientConnection.hpp"
 #include <opentxs/core/OTLog.hpp>
 #include <opentxs/core/OTMessage.hpp>
@@ -243,6 +244,8 @@ void MessageProcessor::run()
         Timer t;
         t.start();
         double startTick = t.getElapsedTimeInMilliSec();
+        perfLogger::ProbeMsgRoundTiming(
+            perfLogger::MsgRoundEvents::MsgRoundStart);
 
         // PROCESS X NUMBER OF REQUESTS (THIS PULSE.)
         //
@@ -260,17 +263,28 @@ void MessageProcessor::run()
             // roll over every 15 heartbeats.
             // Therefore I will be using a real Timer for Cron, instead of the
             // damn intervals.
+            perfLogger::ProbeMsgTiming(perfLogger::TimingEvents::MsgRcvStart);
             bool received = socket_.Receive(messageString);
+            perfLogger::ProbeMsgTiming(perfLogger::TimingEvents::MsgRcvEnd);
 
             if (received) {
                 if (messageString.GetLength() <= 0) {
                     OTLog::Error("server main: Received a message, but of 0 "
                                  "length or less. Weird. (Skipping it.)\n");
+                    perfLogger::ProbeError(
+                        perfLogger::MsgErrorType::ReceiveError);
                 }
                 else {
+                    perfLogger::ProbeMsgSize(
+                        perfLogger::MsgSizeEvents::SizeRecvd,
+                        messageString.GetLength());
                     std::string strMsg(messageString.Get());
                     std::string reply;
+                    perfLogger::ProbeMsgTiming(
+                        perfLogger::TimingEvents::MsgStart);
                     bool shouldDisconnect = processMessage(strMsg, reply);
+                    perfLogger::ProbeMsgTiming(
+                        perfLogger::TimingEvents::MsgEnd);
 
                     if (reply.length() <= 0 || shouldDisconnect) {
                         OTLog::vOutput(
@@ -279,11 +293,19 @@ void MessageProcessor::run()
                                "legible or worthy of a server response. :-)  "
                                "Msg:\n\n%s\n\n",
                             strMsg.c_str());
-
+                        perfLogger::ProbeError(
+                            perfLogger::MsgErrorType::MalformedMsgError);
                         socket_.Listen();
                     }
                     else {
+                        perfLogger::ProbeMsgSize(
+                            perfLogger::MsgSizeEvents::SizeReply,
+                            reply.length());
+                        perfLogger::ProbeMsgTiming(
+                            perfLogger::TimingEvents::MsgSendStart);
                         bool successSending = socket_.Send(reply.c_str());
+                        perfLogger::ProbeMsgTiming(
+                            perfLogger::TimingEvents::MsgSendEnd);
 
                         if (!successSending) {
                             OTLog::vError("server main: Socket ERROR: failed "
@@ -291,12 +313,15 @@ void MessageProcessor::run()
                                           "back to client! \n\n "
                                           "MESSAGE:\n%s\n\nREPLY:\n%s\n\n",
                                           strMsg.c_str(), reply.c_str());
+                            perfLogger::ProbeError(
+                                perfLogger::MsgErrorType::SendError);
                         }
                     }
                 }
             }
         }
-
+        perfLogger::ProbeMsgRoundTiming(
+            perfLogger::MsgRoundEvents::MsgRoundEnd);
         // IF the time we had available wasn't all used up -- if some of it is
         // still available, then SLEEP until we reach the NEXT PULSE. (In
         // practice, we will probably use TOO MUCH time, not too little--but
@@ -305,9 +330,12 @@ void MessageProcessor::run()
         double endTick = t.getElapsedTimeInMilliSec();
         int64_t elapsed = static_cast<int64_t>(endTick - startTick);
 
+        int64_t msRemaining =
+            ServerSettings::GetHeartbeatMsBetweenBeats() - elapsed;
+        perfLogger::ProbeMsgRoundTimeRemaining(msRemaining);
+
         if (elapsed < ServerSettings::GetHeartbeatMsBetweenBeats()) {
-            int64_t ms = ServerSettings::GetHeartbeatMsBetweenBeats() - elapsed;
-            OTLog::SleepMilliseconds(ms);
+            OTLog::SleepMilliseconds(msRemaining);
         }
 
         if (server_->IsFlaggedForShutdown()) {
@@ -327,33 +355,46 @@ bool MessageProcessor::processMessage(const std::string& messageString,
     ascMessage.MemSet(messageString.data(), messageString.size());
 
     OTEnvelope envelope;
+    perfLogger::ProbeMsgTiming(perfLogger::TimingEvents::MsgDearmorStart);
     if (!envelope.SetAsciiArmoredData(ascMessage)) {
+        perfLogger::ProbeMsgTiming(perfLogger::TimingEvents::MsgDearmorEnd);
         OTLog::vError("Error retrieving envelope.\n");
         return true;
     }
 
+    perfLogger::ProbeMsgTiming(perfLogger::TimingEvents::MsgDearmorEnd);
     // Now the base64 is decoded and the envelope is in binary form again.
     OTLog::vOutput(2, "Successfully retrieved envelope from message.\n");
 
     // Decrypt the Envelope.
     OTString envelopeContents;
+    perfLogger::ProbeMsgTiming(perfLogger::TimingEvents::MsgEnvDecryptionStart);
     if (!envelope.Open(server_->GetServerNym(), envelopeContents)) {
+        perfLogger::ProbeMsgTiming(
+            perfLogger::TimingEvents::MsgEnvDecryptionEnd);
         OTLog::vError("Unable to open envelope.\n");
         return true;
     }
 
+    perfLogger::ProbeMsgTiming(perfLogger::TimingEvents::MsgEnvDecryptionEnd);
     // All decrypted--now let's load the results into an OTMessage.
     // No need to call message.ParseRawFile() after, since
     // LoadContractFromString handles it.
     OTMessage message;
+    perfLogger::ProbeMsgTiming(
+        perfLogger::TimingEvents::ContractInstantiationStart);
     if (!envelopeContents.Exists() ||
         !message.LoadContractFromString(envelopeContents)) {
+        perfLogger::ProbeMsgTiming(
+            perfLogger::TimingEvents::ContractInstantiationEnd);
         OTLog::vError("Error loading message from envelope "
                       "contents:\n\n%s\n\n",
                       envelopeContents.Get());
         return true;
     }
 
+    perfLogger::ProbeMsgTiming(
+        perfLogger::TimingEvents::ContractInstantiationEnd);
     OTMessage replyMessage;
     replyMessage.m_strCommand.Format("@%s", message.m_strCommand.Get());
     // UserID
@@ -369,8 +410,10 @@ bool MessageProcessor::processMessage(const std::string& messageString,
 
     OTPseudonym nym(message.m_strNymID);
 
+    perfLogger::ProbeMsgTiming(perfLogger::TimingEvents::UserCmdStart);
     bool processedUserCmd = server_->userCommandProcessor_.ProcessUserCommand(
         message, replyMessage, &client, &nym);
+    perfLogger::ProbeMsgTiming(perfLogger::TimingEvents::UserCmdEnd);
 
     // By optionally passing in &client, the client Nym's public
     // key will be set on it whenever verification is complete. (So
@@ -403,8 +446,16 @@ bool MessageProcessor::processMessage(const std::string& messageString,
         replyMessage.m_bSuccess = false;
         // making sure this here is definitely set to
         // false (even though it probably was already.)
+        perfLogger::ProbeMsgTiming(
+            perfLogger::TimingEvents::ContractSigningStart);
         replyMessage.SignContract(server_->GetServerNym());
+        perfLogger::ProbeMsgTiming(
+            perfLogger::TimingEvents::ContractSigningEnd);
+
+        perfLogger::ProbeMsgTiming(
+            perfLogger::TimingEvents::ContractSavingStart);
         replyMessage.SaveContract();
+        perfLogger::ProbeMsgTiming(perfLogger::TimingEvents::ContractSavingEnd);
 
         OTString s2(replyMessage);
 
@@ -431,8 +482,12 @@ bool MessageProcessor::processMessage(const std::string& messageString,
         // and send back to the user...
         OTEnvelope recipientEnvelope;
 
+        perfLogger::ProbeMsgTiming(
+            perfLogger::TimingEvents::MsgEnvEncryptionStart);
         bool sealed =
             client.SealMessageForRecipient(replyMessage, recipientEnvelope);
+        perfLogger::ProbeMsgTiming(
+            perfLogger::TimingEvents::MsgEnvEncryptionEnd);
 
         if (!sealed) {
             OTLog::vOutput(0, "Unable to seal envelope. (No reply will be "
@@ -441,7 +496,11 @@ bool MessageProcessor::processMessage(const std::string& messageString,
         }
 
         OTASCIIArmor ascReply;
+        perfLogger::ProbeMsgTiming(
+            perfLogger::TimingEvents::MsgReplyArmoringStart);
         if (!recipientEnvelope.GetAsciiArmoredData(ascReply)) {
+            perfLogger::ProbeMsgTiming(
+                perfLogger::TimingEvents::MsgReplyArmoringEnd);
             OTLog::vOutput(
                 0,
                 "Unable to GetAsciiArmoredData from sealed "
@@ -450,6 +509,8 @@ bool MessageProcessor::processMessage(const std::string& messageString,
             return true;
         }
 
+        perfLogger::ProbeMsgTiming(
+            perfLogger::TimingEvents::MsgReplyArmoringEnd);
         OTString output;
         bool val = ascReply.Exists() &&
                    ascReply.WriteArmoredString(output, "ENVELOPE");
