@@ -140,12 +140,6 @@
 namespace opentxs
 {
 
-#ifdef OT_CASH_USING_MAGIC_MONEY
-
-// Todo:  Someday...
-
-#endif
-
 // Open-Transactions
 // NOTE: review this in security audit...
 // This is da2ce7's fix for the problems that appeared from removing
@@ -177,8 +171,6 @@ void SetDumper(const char* filepathexact)
 
 #endif
 #endif
-
-#ifdef OT_CASH_USING_LUCRE
 
 // We don't need this for release builds
 LucreDumper::LucreDumper()
@@ -222,9 +214,5 @@ LucreDumper::~LucreDumper()
 #endif
 #endif
 }
-
-#else // No digital cash lib is selected? Perhaps error message here?
-
-#endif // Which digital cash library we're using.
 
 } // namespace opentxs

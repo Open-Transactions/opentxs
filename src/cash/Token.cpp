@@ -134,11 +134,7 @@
 #include <opentxs/cash/Token.hpp>
 #include <opentxs/cash/Mint.hpp>
 #include <opentxs/cash/Purse.hpp>
-
-#if defined(OT_CASH_USING_LUCRE)
 #include <opentxs/cash/TokenLucre.hpp>
-#endif
-
 #include <opentxs/core/crypto/OTEnvelope.hpp>
 #include <opentxs/core/crypto/OTNymOrSymmetricKey.hpp>
 #include <opentxs/core/util/OTFolders.hpp>
@@ -342,7 +338,6 @@ Token* Token::LowLevelInstantiate(const OTString& strFirstLine,
 {
     Token* pToken = nullptr;
 
-#if defined(OT_CASH_USING_LUCRE)
     if (strFirstLine.Contains("-----BEGIN SIGNED CASH-----")) // this string is
                                                               // 27 chars long.
     {
@@ -363,10 +358,6 @@ Token* Token::LowLevelInstantiate(const OTString& strFirstLine,
         pToken = new Token_Lucre(SERVER_ID, ASSET_ID);
         OT_ASSERT(nullptr != pToken);
     }
-#else
-    otErr << __FUNCTION__ << ": Open-Transactions is not built for any digital "
-                             "cash algorithms. (Failure.)";
-#endif // defined (OT_CASH_USING_LUCRE)
 
     return pToken;
 }
@@ -376,7 +367,6 @@ Token* Token::LowLevelInstantiate(const OTString& strFirstLine,
 {
     Token* pToken = nullptr;
 
-#if defined(OT_CASH_USING_LUCRE)
     if (strFirstLine.Contains("-----BEGIN SIGNED CASH-----")) // this string is
                                                               // 27 chars long.
     {
@@ -397,10 +387,8 @@ Token* Token::LowLevelInstantiate(const OTString& strFirstLine,
         pToken = new Token_Lucre(thePurse);
         OT_ASSERT(nullptr != pToken);
     }
-#else
     otErr << __FUNCTION__ << ": Open-Transactions is not built for any digital "
                              "cash algorithms. (Failure.)";
-#endif // defined (OT_CASH_USING_LUCRE)
 
     return pToken;
 }
@@ -409,14 +397,8 @@ Token* Token::LowLevelInstantiate(const Purse& thePurse)
 {
     Token* pToken = nullptr;
 
-#if defined(OT_CASH_USING_LUCRE)
     pToken = new Token_Lucre(thePurse);
     OT_ASSERT(nullptr != pToken);
-#else
-    otErr << __FUNCTION__ << ": Open-Transactions is not built for any digital "
-                             "cash algorithms. (Failure.)";
-#endif // defined (OT_CASH_USING_LUCRE)
-
     return pToken;
 }
 
@@ -424,7 +406,6 @@ Token* Token::LowLevelInstantiate(const OTString& strFirstLine)
 {
     Token* pToken = nullptr;
 
-#if defined(OT_CASH_USING_LUCRE)
     if (strFirstLine.Contains("-----BEGIN SIGNED CASH-----")) // this string is
                                                               // 27 chars long.
     {
@@ -445,10 +426,8 @@ Token* Token::LowLevelInstantiate(const OTString& strFirstLine)
         pToken = new Token_Lucre;
         OT_ASSERT(nullptr != pToken);
     }
-#else
     otErr << __FUNCTION__ << ": Open-Transactions is not built for any digital "
                              "cash algorithms. (Failure.)";
-#endif // defined (OT_CASH_USING_LUCRE)
 
     return pToken;
 }
@@ -1214,11 +1193,5 @@ bool Token::VerifyToken(OTPseudonym& theNotary, Mint& theMint)
         return false;
     }
 }
-
-// SUBCLASSES OF OTTOKEN FOR EACH DIGITAL CASH ALGORITHM.
-
-#if defined(OT_CASH_USING_MAGIC_MONEY)
-// Todo:  Someday...
-#endif // Magic Money
 
 } // namespace opentxs

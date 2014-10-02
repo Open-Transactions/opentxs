@@ -138,23 +138,11 @@
 #include <opentxs/cash/Token.hpp>
 
 #include <opentxs/core/crypto/OTEnvelope.hpp>
-
-#if defined(OT_CASH_USING_LUCRE)
 #include <opentxs/core/crypto/OpenSSL_BIO.hpp>
-#endif
-
 #include <opentxs/core/OTLog.hpp>
-
-// SUBCLASSES OF OTTOKEN FOR EACH DIGITAL CASH ALGORITHM.
-
-#if defined(OT_CASH_USING_MAGIC_MONEY)
-// Todo:  Someday...
-#endif // Magic Money
 
 namespace opentxs
 {
-
-#if defined(OT_CASH_USING_LUCRE)
 
 Token_Lucre::Token_Lucre()
     : ot_super()
@@ -458,7 +446,5 @@ bool Token_Lucre::ProcessToken(const OTPseudonym& theNym, Mint& theMint,
 
     return bReturnValue;
 }
-
-#endif // defined(OT_CASH_USING_LUCRE)
 
 } // namespace opentxs

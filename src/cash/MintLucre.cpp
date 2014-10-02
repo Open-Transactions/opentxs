@@ -138,18 +138,12 @@
 
 #include <opentxs/core/crypto/OTAsymmetricKey.hpp>
 #include <opentxs/core/crypto/OTEnvelope.hpp>
-
-#if defined(OT_CASH_USING_LUCRE)
 #include <opentxs/core/crypto/OpenSSL_BIO.hpp>
-#endif
-
 #include <opentxs/core/OTLog.hpp>
 #include <opentxs/core/OTPseudonym.hpp>
 
 namespace opentxs
 {
-
-#if defined(OT_CASH_USING_LUCRE)
 
 MintLucre::MintLucre()
     : ot_super()
