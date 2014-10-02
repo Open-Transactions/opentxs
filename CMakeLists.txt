@@ -286,8 +286,6 @@ endif()
 
 add_definitions(-DCHAISCRIPT_NO_THREADS)
 
-add_definitions(-DOT_CRYPTO_USING_OPENSSL)
-
 add_definitions(-DOT_CASH_USING_LUCRE)
 
 #Keyrings

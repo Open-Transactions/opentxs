@@ -162,12 +162,6 @@ class OTSignature;
 // the OpenSSL library. Theoretically, a new implementation could someday be
 // "swapped in" -- for example, using GPG or NaCl or Crypto++, etc.
 
-#if defined(OT_CRYPTO_USING_GPG)
-
-// Someday    }:-)        OTCrypto_GPG
-
-#elif defined(OT_CRYPTO_USING_OPENSSL)
-
 class OTCrypto_OpenSSL : public OTCrypto
 {
     friend class OTCrypto;
@@ -276,13 +270,6 @@ public:
 
     virtual ~OTCrypto_OpenSSL();
 };
-
-#else // Apparently NO crypto engine is defined!
-
-// Perhaps error out here...
-
-#endif // if defined (OT_CRYPTO_USING_OPENSSL), elif defined
-       // (OT_CRYPTO_USING_GPG), else, endif.
 
 } // namespace opentxs
 

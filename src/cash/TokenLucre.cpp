@@ -154,7 +154,7 @@
 namespace opentxs
 {
 
-#if defined(OT_CASH_USING_LUCRE) && defined(OT_CRYPTO_USING_OPENSSL)
+#if defined(OT_CASH_USING_LUCRE)
 
 Token_Lucre::Token_Lucre()
     : ot_super()
@@ -459,6 +459,6 @@ bool Token_Lucre::ProcessToken(const OTPseudonym& theNym, Mint& theMint,
     return bReturnValue;
 }
 
-#endif // defined(OT_CASH_USING_LUCRE) && defined(OT_CRYPTO_USING_OPENSSL)
+#endif // defined(OT_CASH_USING_LUCRE)
 
 } // namespace opentxs

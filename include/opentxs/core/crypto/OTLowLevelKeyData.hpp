@@ -191,15 +191,8 @@ public:
     OTLowLevelKeyData();
     ~OTLowLevelKeyData();
 
-#if defined(OT_CRYPTO_USING_OPENSSL)
     class OTLowLevelKeyDataOpenSSLdp;
     OTLowLevelKeyDataOpenSSLdp* dp;
-
-#elif defined(OT_CRYPTO_USING_GPG)
-
-#else
-
-#endif // Crypto engine.
 };
 
 } // namespace opentxs

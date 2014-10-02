@@ -131,8 +131,8 @@
  **************************************************************/
 
 #include <opentxs/core/stdafx.hpp>
-
 #include <opentxs/core/crypto/OTAsymmetricKey.hpp>
+#include <opentxs/core/crypto/OTAsymmetricKeyOpenSSL.hpp>
 #include <opentxs/core/crypto/OTASCIIArmor.hpp>
 #include <opentxs/core/crypto/OTCachedKey.hpp>
 #include <opentxs/core/crypto/OTCaller.hpp>
@@ -143,10 +143,6 @@
 #include <opentxs/core/crypto/OTSignatureMetadata.hpp>
 #include <opentxs/core/OTStorage.hpp>
 
-#if defined(OT_CRYPTO_USING_OPENSSL)
-#include <opentxs/core/crypto/OTAsymmetricKeyOpenSSL.hpp>
-#endif
-
 namespace opentxs
 {
 
@@ -155,17 +151,7 @@ OTAsymmetricKey* OTAsymmetricKey::KeyFactory() // Caller IS responsible to
                                                // delete!
 {
     OTAsymmetricKey* pKey = nullptr;
-#if defined(OT_CRYPTO_USING_OPENSSL)
     pKey = new OTAsymmetricKey_OpenSSL;
-#elif defined(OT_CRYPTO_USING_GPG)
-    //  pKey = new OTAsymmetricKey_GPG;
-    otErr << __FUNCTION__ << ": Open-Transactions doesn't support GPG (yet), "
-                             "so it's impossible to instantiate a key.\n";
-#else
-    otErr << __FUNCTION__
-          << ": Open-Transactions isn't built with any crypto engine, "
-             "so it's impossible to instantiate a key.\n";
-#endif
     return pKey;
 }
 
