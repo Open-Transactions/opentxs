@@ -251,6 +251,12 @@ public:
                                        bool bRepeat = false) const;
     EXPORT bool GetPasswordFromConsoleLowLevel(OTPassword& theOutput,
                                                const char* szPrompt) const;
+
+    // ZLIB
+    std::string OTCrypto::compress_string(const std::string& str) const;
+    std::string OTCrypto::decompress_string(const std::string& str) const;
+
+
     // RANDOM NUMBERS
     //
     virtual bool RandomizeMemory(uint8_t* szDestination,

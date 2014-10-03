@@ -140,8 +140,6 @@
 
 #include <fstream>
 
-#include <zlib.h>
-
 namespace opentxs
 {
 
@@ -296,92 +294,6 @@ OTASCIIArmor& OTASCIIArmor::operator=(const OTASCIIArmor& strValue)
     return *this;
 }
 
-// Source for these two functions: http://panthema.net/2007/0328-ZLibString.html
-
-/** Compress a STL string using zlib with given compression level and return
- * the binary data. */
-std::string compress_string(const std::string& str,
-                            int32_t compressionlevel = Z_BEST_COMPRESSION)
-{
-    z_stream zs; // z_stream is zlib's control structure
-    memset(&zs, 0, sizeof(zs));
-
-    if (deflateInit(&zs, compressionlevel) != Z_OK)
-        throw(std::runtime_error("deflateInit failed while compressing."));
-
-    zs.next_in = (Bytef*)str.data();
-    zs.avail_in = static_cast<uInt>(str.size()); // set the z_stream's input
-
-    int32_t ret;
-    char outbuffer[32768];
-    std::string outstring;
-
-    // retrieve the compressed bytes blockwise
-    do {
-        zs.next_out = reinterpret_cast<Bytef*>(outbuffer);
-        zs.avail_out = sizeof(outbuffer);
-
-        ret = deflate(&zs, Z_FINISH);
-
-        if (outstring.size() < zs.total_out) {
-            // append the block to the output string
-            outstring.append(outbuffer, zs.total_out - outstring.size());
-        }
-    } while (ret == Z_OK);
-
-    deflateEnd(&zs);
-
-    if (ret != Z_STREAM_END) { // an error occurred that was not EOF
-        std::ostringstream oss;
-        oss << "Exception during zlib compression: (" << ret << ") " << zs.msg;
-        throw(std::runtime_error(oss.str()));
-    }
-
-    return outstring;
-}
-
-/** Decompress an STL string using zlib and return the original data. */
-std::string decompress_string(const std::string& str)
-{
-    z_stream zs; // z_stream is zlib's control structure
-    memset(&zs, 0, sizeof(zs));
-
-    if (inflateInit(&zs) != Z_OK)
-        throw(std::runtime_error("inflateInit failed while decompressing."));
-
-    zs.next_in = (Bytef*)str.data();
-    zs.avail_in = static_cast<uInt>(str.size());
-
-    int32_t ret;
-    char outbuffer[32768];
-    std::string outstring;
-
-    // get the decompressed bytes blockwise using repeated calls to inflate
-    do {
-        zs.next_out = reinterpret_cast<Bytef*>(outbuffer);
-        zs.avail_out = sizeof(outbuffer);
-
-        ret = inflate(&zs, 0);
-
-        if (outstring.size() < zs.total_out) {
-            outstring.append(outbuffer, zs.total_out - outstring.size());
-        }
-
-    } while (ret == Z_OK);
-
-    inflateEnd(&zs);
-
-    if (ret != Z_STREAM_END) { // an error occurred that was not EOF
-        std::ostringstream oss;
-        oss << "Exception during zlib decompression: (" << ret << ")";
-        if (zs.msg != nullptr) {
-            oss << " " << zs.msg;
-        }
-        throw(std::runtime_error(oss.str()));
-    }
-
-    return outstring;
-}
 
 /// if we pack, compress, encode on the way in, that means, therefore, we
 /// need to decode, uncompress, then unpack on our way out. Right?
@@ -419,7 +331,7 @@ bool OTASCIIArmor::GetAndUnpackString(
 
         std::string str_uncompressed = "";
         try {
-            str_uncompressed = decompress_string(str_decoded);
+            str_uncompressed = OTCrypto::It()->decompress_string(str_decoded);
         }
         catch (const std::runtime_error&) {
             otErr << "Failed decompressing string in "
@@ -812,7 +724,7 @@ bool OTASCIIArmor::SetAndPackString(const OTString& strData,
     std::string str_packed(reinterpret_cast<const char*>(pBuffer->GetData()),
                            pBuffer->GetSize());
 
-    std::string str_compressed = compress_string(str_packed);
+    std::string str_compressed = OTCrypto::It()->compress_string(str_packed);
 
     // Success
     if (str_compressed.size()) {

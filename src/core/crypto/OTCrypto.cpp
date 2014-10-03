@@ -195,6 +195,8 @@ extern "C" {
 
 #endif
 
+#include <zlib.h>
+
 #ifdef __APPLE__
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 #endif
@@ -625,6 +627,97 @@ bool OTCrypto::GetPasswordFromConsole(OTPassword& theOutput, bool bRepeat) const
 
     return false;
 }
+
+
+
+// Source for these two functions: http://panthema.net/2007/0328-ZLibString.html
+
+/** Compress a STL string using zlib with given compression level and return
+* the binary data. */
+std::string OTCrypto::compress_string(const std::string& str) const
+{
+    z_stream zs; // z_stream is zlib's control structure
+    memset(&zs, 0, sizeof(zs));
+
+    if (deflateInit(&zs, Z_BEST_COMPRESSION) != Z_OK)
+        throw(std::runtime_error("deflateInit failed while compressing."));
+
+    zs.next_in = (Bytef*)str.data();
+    zs.avail_in = static_cast<uInt>(str.size()); // set the z_stream's input
+
+    int32_t ret;
+    char outbuffer[32768];
+    std::string outstring;
+
+    // retrieve the compressed bytes blockwise
+    do {
+        zs.next_out = reinterpret_cast<Bytef*>(outbuffer);
+        zs.avail_out = sizeof(outbuffer);
+
+        ret = deflate(&zs, Z_FINISH);
+
+        if (outstring.size() < zs.total_out) {
+            // append the block to the output string
+            outstring.append(outbuffer, zs.total_out - outstring.size());
+        }
+    } while (ret == Z_OK);
+
+    deflateEnd(&zs);
+
+    if (ret != Z_STREAM_END) { // an error occurred that was not EOF
+        std::ostringstream oss;
+        oss << "Exception during zlib compression: (" << ret << ") " << zs.msg;
+        throw(std::runtime_error(oss.str()));
+    }
+
+    return outstring;
+}
+
+/** Decompress an STL string using zlib and return the original data. */
+std::string OTCrypto::decompress_string(const std::string& str) const
+{
+    z_stream zs; // z_stream is zlib's control structure
+    memset(&zs, 0, sizeof(zs));
+
+    if (inflateInit(&zs) != Z_OK)
+        throw(std::runtime_error("inflateInit failed while decompressing."));
+
+    zs.next_in = (Bytef*)str.data();
+    zs.avail_in = static_cast<uInt>(str.size());
+
+    int32_t ret;
+    char outbuffer[32768];
+    std::string outstring;
+
+    // get the decompressed bytes blockwise using repeated calls to inflate
+    do {
+        zs.next_out = reinterpret_cast<Bytef*>(outbuffer);
+        zs.avail_out = sizeof(outbuffer);
+
+        ret = inflate(&zs, 0);
+
+        if (outstring.size() < zs.total_out) {
+            outstring.append(outbuffer, zs.total_out - outstring.size());
+        }
+
+    } while (ret == Z_OK);
+
+    inflateEnd(&zs);
+
+    if (ret != Z_STREAM_END) { // an error occurred that was not EOF
+        std::ostringstream oss;
+        oss << "Exception during zlib decompression: (" << ret << ")";
+        if (zs.msg != nullptr) {
+            oss << " " << zs.msg;
+        }
+        throw(std::runtime_error(oss.str()));
+    }
+
+    return outstring;
+}
+
+
+
 
 // static
 OTCrypto* OTCrypto::It()
@@ -1325,6 +1418,7 @@ uint8_t* ot_openssl_base64_decode(const char* input, size_t* out_len,
     return buf;
 }
 } // extern "C"
+
 
 // Caller responsible to delete.
 char* OTCrypto_OpenSSL::Base64Encode(const uint8_t* input, int32_t in_len,
