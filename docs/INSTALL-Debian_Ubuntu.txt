@@ -126,3 +126,23 @@ $ ./script/install_sample_data.sh
 
 # for python client api support export env variable
 $ export PYTHONPATH=/usr/local/lib:$PYTHONPATH
+
+##########  Backporting SWIG3.0 in ubuntu trusty #############
+# download latest source package from utopic http://packages.ubuntu.com/utopic/swig3.0
+wget http://archive.ubuntu.com/ubuntu/pool/universe/s/swig/swig_3.0.2.orig.tar.gz
+wget http://archive.ubuntu.com/ubuntu/pool/universe/s/swig/swig_3.0.2-1ubuntu1.debian.tar.xz
+
+# unpack source package
+tar xzf swig_3.0.2.orig.tar.gz
+xzcat  swig_3.0.2-1ubuntu1.debian.tar.xz | tar x -C swig-3.0.2/
+
+cd swig-3.0.2/
+# install build dependencies, expect that deps for swig2.0 and swig3.0 are similar
+apt-get build-dep swig
+
+# build package
+dpkg-buildpackage
+
+# install package
+cd ..
+dpkg -i swig3.0*.deb
