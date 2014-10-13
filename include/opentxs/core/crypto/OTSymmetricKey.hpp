@@ -148,23 +148,21 @@ class OTSymmetricKey
 private:
     bool m_bIsGenerated; // GetKey asserts if this is false; GenerateKey asserts
                          // if it's true.
-    bool m_bHasHashCheck; // If a hash-check fo the Derived Key has been made
-                          // yet.
     uint32_t m_nKeySize; // The size, in bits. For example, 128 bit key, 256 bit
                          // key, etc.
     uint32_t m_uIterationCount; // Stores the iteration count, which should
                                 // probably be at least 2000. (Number of
                                 // iterations used while generating key from
                                 // passphrase.)
-    OTData m_dataSalt; // Stores the SALT (which is used with the password
-                       // for generating / retrieving the key from
-                       // m_dataEncryptedKey)
-    OTData m_dataIV;   // Stores the IV used internally for encrypting /
-                       // decrypting the actual key (using the derived key)
-                       // from m_dataEncryptedKey.
-    OTData m_dataEncryptedKey; // Stores only encrypted version of symmetric
-                               // key.
-    OTData m_dataHashCheck;
+    ot_data_t m_dataSalt; // Stores the SALT (which is used with the password
+                          // for generating / retrieving the key from
+                          // m_dataEncryptedKey)
+    ot_data_t m_dataIV;   // Stores the IV used internally for encrypting /
+                          // decrypting the actual key (using the derived key)
+                          // from m_dataEncryptedKey.
+    ot_data_t m_dataEncryptedKey; // Stores only encrypted version of symmetric
+                                  // key.
+    ot_data_t m_dataHashCheck;
 
 public:
     // The highest-level possible interface (used by the API)
@@ -208,8 +206,8 @@ public:
                                const OTString* pstrDisplay = nullptr,
                                const OTPassword* pAlreadyHavePW = nullptr);
 
-    EXPORT bool SerializeTo(OTData& theOutput) const;
-    EXPORT bool SerializeFrom(OTData& theInput);
+    EXPORT bool SerializeTo(ot_data_t& theOutput) const;
+    EXPORT bool SerializeFrom(ot_data_t& theInput);
 
     EXPORT bool SerializeTo(OTASCIIArmor& ascOutput) const;
     EXPORT bool SerializeFrom(const OTASCIIArmor& ascInput);
@@ -222,7 +220,7 @@ public:
     }
     inline bool HasHashCheck() const
     {
-        return m_bHasHashCheck;
+        return !m_dataHashCheck.empty();
     }
     EXPORT void GetIdentifier(OTIdentifier& theIdentifier) const;
     EXPORT void GetIdentifier(OTString& strIdentifier) const;
