@@ -134,6 +134,7 @@
 #define OPENTXS_CORE_CRYPTO_OTASCIIARMOR_HPP
 
 #include <opentxs/core/OTString.hpp>
+#include <opentxs/core/OTData.hpp>
 
 #include <memory>
 
@@ -141,9 +142,7 @@ namespace opentxs
 {
 
 class OTASCIIArmor;
-class OTData;
 class OTEnvelope;
-class OTData;
 
 namespace OTDB
 {
@@ -174,7 +173,7 @@ public:
 
     EXPORT OTASCIIArmor();
     EXPORT OTASCIIArmor(const char* szValue);
-    EXPORT OTASCIIArmor(const OTData& theValue);
+    EXPORT OTASCIIArmor(const ot_data_t& theValue);
     EXPORT OTASCIIArmor(const OTString& strValue);
     EXPORT OTASCIIArmor(const OTASCIIArmor& strValue);
     EXPORT OTASCIIArmor(const OTEnvelope& theEnvelope);
@@ -183,7 +182,7 @@ public:
     using OTString::swap;
 
     EXPORT OTASCIIArmor& operator=(const char* szValue);
-    EXPORT OTASCIIArmor& operator=(const OTData& theValue);
+    EXPORT OTASCIIArmor& operator=(const ot_data_t& theValue);
     EXPORT OTASCIIArmor& operator=(const OTString& strValue);
     EXPORT OTASCIIArmor& operator=(const OTASCIIArmor& strValue);
 
@@ -243,15 +242,17 @@ public:
     // and return them as BINARY in theData
     // Should be called "Get From Internal String Into Data"
     //
-    EXPORT bool GetData(OTData& theData, bool bLineBreaks = true) const;
-    EXPORT bool GetAndUnpackData(OTData& theData,
+    EXPORT bool GetData(ot_data_t& theData, bool bLineBreaks = true) const;
+    EXPORT ot_data_t GetData_Copy() const;
+    EXPORT bool GetAndUnpackData(ot_data_t& theData,
                                  bool bLineBreaks = true) const;
 
     // This function will base64 ENCODE theData,
     // and then Set() that as the string contents.
     // Should be called "Encode Data And Set As Internal String"
-    EXPORT bool SetData(const OTData& theData, bool bLineBreaks = true);
-    EXPORT bool SetAndPackData(const OTData& theData, bool bLineBreaks = true);
+    EXPORT bool SetData(const ot_data_t& theData, bool bLineBreaks = true);
+    EXPORT bool SetAndPackData(const ot_data_t& theData,
+                               bool bLineBreaks = true);
 
     // This function will base64 DECODE the string contents
     // and return them as a STRING in theData
