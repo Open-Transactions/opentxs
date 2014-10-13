@@ -130,11 +130,11 @@
  -----END PGP SIGNATURE-----
  **************************************************************/
 
-#include "stdafx.hpp"
+#include <opentxs/core/stdafx.hpp>
 
 #ifdef _WIN32
 
-#include "util/OTWindowsRegistryTools.hpp"
+#include <opentxs/core/util/OTWindowsRegistryTools.hpp>
 
 LONG WindowsRegistryTools::GetDWORDRegKey(HKEY hKey,
                                           const std::wstring& strValueName,

@@ -260,7 +260,7 @@ void Mint::Release_Mint()
 {
     ReleaseDenominations();
 
-    m_CashAccountID.Release();
+    m_CashAccountID.clear();
 
     if (m_pReserveAcct) {
         delete m_pReserveAcct;

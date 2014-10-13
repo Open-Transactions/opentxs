@@ -305,7 +305,7 @@ bool OTPayment::SetTempValuesFromCheque(const OTCheque& theInput)
         }
         else {
             m_bHasRecipient = false;
-            m_RecipientUserID.Release();
+            m_RecipientUserID.clear();
         }
 
         if (theInput.HasRemitter()) {
@@ -315,8 +315,8 @@ bool OTPayment::SetTempValuesFromCheque(const OTCheque& theInput)
         }
         else {
             m_bHasRemitter = false;
-            m_RemitterUserID.Release();
-            m_RemitterAcctID.Release();
+            m_RemitterUserID.clear();
+            m_RemitterAcctID.clear();
         }
 
         // NOTE: the "Recipient Acct" is NOT KNOWN when cheque is written, but
@@ -325,7 +325,7 @@ bool OTPayment::SetTempValuesFromCheque(const OTCheque& theInput)
         // Recipient
         // Acct ID is not set, and attempts to read it will result in failure.
         //
-        m_RecipientAcctID.Release();
+        m_RecipientAcctID.clear();
 
         m_VALID_FROM = theInput.GetValidFrom();
         m_VALID_TO = theInput.GetValidTo();
@@ -370,8 +370,8 @@ bool OTPayment::SetTempValuesFromPaymentPlan(const OTPaymentPlan& theInput)
         m_RecipientUserID = theInput.GetRecipientUserID();
         m_RecipientAcctID = theInput.GetRecipientAcctID();
 
-        m_RemitterUserID.Release();
-        m_RemitterAcctID.Release();
+        m_RemitterUserID.clear();
+        m_RemitterAcctID.clear();
 
         m_VALID_FROM = theInput.GetValidFrom();
         m_VALID_TO = theInput.GetValidTo();
@@ -402,16 +402,16 @@ bool OTPayment::SetTempValuesFromSmartContract(const OTSmartContract& theInput)
         m_strMemo.Release(); // not used here.
 
         m_ServerID = theInput.GetServerID();
-        m_AssetTypeID.Release(); // not used here.
+        m_AssetTypeID.clear(); // not used here.
 
         m_SenderUserID = theInput.GetSenderUserID();
-        m_SenderAcctID.Release();
+        m_SenderAcctID.clear();
 
-        m_RecipientUserID.Release(); // not used here.
-        m_RecipientAcctID.Release(); // not used here.
+        m_RecipientUserID.clear(); // not used here.
+        m_RecipientAcctID.clear(); // not used here.
 
-        m_RemitterUserID.Release();
-        m_RemitterAcctID.Release();
+        m_RemitterUserID.clear();
+        m_RemitterAcctID.clear();
 
         m_VALID_FROM = theInput.GetValidFrom();
         m_VALID_TO = theInput.GetValidTo();
@@ -440,18 +440,18 @@ bool OTPayment::SetTempValuesFromPurse(const Purse& theInput)
         m_AssetTypeID = theInput.GetAssetID();
         m_ServerID = theInput.GetServerID();
 
-        m_SenderUserID.Release();
-        m_SenderAcctID.Release();
+        m_SenderUserID.clear();
+        m_SenderAcctID.clear();
 
         if (!m_bHasRecipient || !theInput.GetNymID(m_RecipientUserID)) {
             m_bHasRecipient = false;
-            m_RecipientUserID.Release();
+            m_RecipientUserID.clear();
         }
 
-        m_RecipientAcctID.Release();
+        m_RecipientAcctID.clear();
 
-        m_RemitterUserID.Release();
-        m_RemitterAcctID.Release();
+        m_RemitterUserID.clear();
+        m_RemitterAcctID.clear();
 
         m_VALID_FROM = theInput.GetLatestValidFrom();
         m_VALID_TO = theInput.GetEarliestValidTo();
@@ -962,7 +962,7 @@ bool OTPayment::VerifyCurrentDate(bool& bVerified)
 
 bool OTPayment::GetAssetTypeID(OTIdentifier& theOutput) const
 {
-    theOutput.Release();
+    theOutput.clear();
 
     if (!m_bAreTempValuesSet) return false;
 
@@ -992,7 +992,7 @@ bool OTPayment::GetAssetTypeID(OTIdentifier& theOutput) const
 
 bool OTPayment::GetServerID(OTIdentifier& theOutput) const
 {
-    theOutput.Release();
+    theOutput.clear();
 
     if (!m_bAreTempValuesSet) return false;
 
@@ -1022,7 +1022,7 @@ bool OTPayment::GetServerID(OTIdentifier& theOutput) const
 //
 bool OTPayment::GetRemitterUserID(OTIdentifier& theOutput) const
 {
-    theOutput.Release();
+    theOutput.clear();
 
     if (!m_bAreTempValuesSet) return false;
 
@@ -1049,7 +1049,7 @@ bool OTPayment::GetRemitterUserID(OTIdentifier& theOutput) const
 //
 bool OTPayment::GetRemitterAcctID(OTIdentifier& theOutput) const
 {
-    theOutput.Release();
+    theOutput.clear();
 
     if (!m_bAreTempValuesSet) return false;
 
@@ -1086,7 +1086,7 @@ bool OTPayment::GetSenderAcctIDForDisplay(OTIdentifier& theOutput) const
 
 bool OTPayment::GetSenderUserID(OTIdentifier& theOutput) const
 {
-    theOutput.Release();
+    theOutput.clear();
 
     if (!m_bAreTempValuesSet) return false;
 
@@ -1116,7 +1116,7 @@ bool OTPayment::GetSenderUserID(OTIdentifier& theOutput) const
 
 bool OTPayment::GetSenderAcctID(OTIdentifier& theOutput) const
 {
-    theOutput.Release();
+    theOutput.clear();
 
     if (!m_bAreTempValuesSet) return false;
 
@@ -1146,7 +1146,7 @@ bool OTPayment::GetSenderAcctID(OTIdentifier& theOutput) const
 
 bool OTPayment::GetRecipientUserID(OTIdentifier& theOutput) const
 {
-    theOutput.Release();
+    theOutput.clear();
 
     if (!m_bAreTempValuesSet) return false;
 
@@ -1188,7 +1188,7 @@ bool OTPayment::GetRecipientAcctID(OTIdentifier& theOutput) const
     // known at the time
     // that the cheque is written...
 
-    theOutput.Release();
+    theOutput.clear();
 
     if (!m_bAreTempValuesSet) return false;
 
@@ -1535,16 +1535,16 @@ void OTPayment::Release_Payment()
 
     m_strMemo.Release();
 
-    m_AssetTypeID.Release();
-    m_ServerID.Release();
+    m_AssetTypeID.clear();
+    m_ServerID.clear();
 
-    m_SenderUserID.Release();
-    m_SenderAcctID.Release();
-    m_RecipientUserID.Release();
-    m_RecipientAcctID.Release();
+    m_SenderUserID.clear();
+    m_SenderAcctID.clear();
+    m_RecipientUserID.clear();
+    m_RecipientAcctID.clear();
 
-    m_RemitterUserID.Release();
-    m_RemitterAcctID.Release();
+    m_RemitterUserID.clear();
+    m_RemitterAcctID.clear();
 }
 
 void OTPayment::Release()

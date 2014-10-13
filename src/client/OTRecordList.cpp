@@ -1591,7 +1591,7 @@ bool OTRecordList::Populate()
                             str_name = strNameTemp.Get();
                         }
 
-                        theSenderID.Release();
+                        theSenderID.clear();
 
                         if (pBoxTrans->GetSenderAcctIDForDisplay(theSenderID)) {
                             const OTString strSenderID(theSenderID);

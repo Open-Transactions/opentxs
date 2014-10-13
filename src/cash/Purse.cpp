@@ -154,17 +154,17 @@ typedef std::map<std::string, Token*> mapOfTokenPointers;
 bool Purse::GetNymID(OTIdentifier& theOutput) const
 {
     bool bSuccess = false;
-    theOutput.Release();
+    theOutput.clear();
 
     if (IsPasswordProtected()) {
         bSuccess = false; // optimizer will remove automatically anyway, I
                           // assume. Might as well have it here for clarity.
     }
-    else if (IsNymIDIncluded() && !m_UserID.IsEmpty()) {
+    else if (IsNymIDIncluded() && !m_UserID.empty()) {
         bSuccess = true;
         theOutput = m_UserID;
     }
-    else if (!m_UserID.IsEmpty()) {
+    else if (!m_UserID.empty()) {
         bSuccess = true;
         theOutput = m_UserID;
     }
@@ -327,7 +327,7 @@ bool Purse::GenerateInternalKey()
         return false;
     }
 
-    m_UserID.Release();
+    m_UserID.clear();
     m_bIsNymIDIncluded = false;
 
     otWarn << __FUNCTION__
@@ -984,16 +984,16 @@ void Purse::UpdateContents() // Before transmission or serialization, this is
         // optional--user's choice) we attach that NymID here...
         //
         (m_bIsNymIDIncluded &&
-         !m_UserID.IsEmpty()) // (Provided that the ID even exists, of course.)
-            ?                 // =====>
+         !m_UserID.empty()) // (Provided that the ID even exists, of course.)
+            ?               // =====>
             USER_ID.Get()
             : "", // Then print the ID (otherwise print an empty string.)
-        (!m_AssetID.IsEmpty()) ? ASSET_TYPE_ID.Get()
-                               : "", // (Should never actually be empty.) todo:
-                                     // Change this to just the Get()
-        (!m_ServerID.IsEmpty()) ? SERVER_ID.Get()
-                                : "" // (Should never actually be empty.) todo:
-                                     // Change this to just the Get()
+        (!m_AssetID.empty()) ? ASSET_TYPE_ID.Get()
+                             : "", // (Should never actually be empty.) todo:
+                                   // Change this to just the Get()
+        (!m_ServerID.empty()) ? SERVER_ID.Get()
+                              : "" // (Should never actually be empty.) todo:
+                                   // Change this to just the Get()
         );
 
     // Save the Internal Symmetric Key here (if there IS one.)
@@ -1105,7 +1105,7 @@ int32_t Purse::ProcessXMLNode(irr::io::IrrXMLReader*& xml)
         if (strServerID.Exists())
             m_ServerID.SetString(strServerID);
         else {
-            m_ServerID.Release();
+            m_ServerID.clear();
             otErr << szFunc
                   << ": Failed loading serverID, when one was expected.\n";
             return (-1);
@@ -1118,7 +1118,7 @@ int32_t Purse::ProcessXMLNode(irr::io::IrrXMLReader*& xml)
         if (strAssetTypeID.Exists())
             m_AssetID.SetString(strAssetTypeID);
         else {
-            m_AssetID.Release();
+            m_AssetID.clear();
             otErr << szFunc
                   << ": Failed loading assetTypeID, when one was expected.\n";
             return (-1);
@@ -1135,7 +1135,7 @@ int32_t Purse::ProcessXMLNode(irr::io::IrrXMLReader*& xml)
                 otErr << szFunc
                       << ": Failed loading userID, when one was expected. "
                          "(isNymIDIncluded was true.)\n";
-                m_UserID.Release();
+                m_UserID.clear();
                 return (-1);
             }
         }
@@ -1143,8 +1143,8 @@ int32_t Purse::ProcessXMLNode(irr::io::IrrXMLReader*& xml)
                // later,
             // we might consider trying to read it, in order to validate this.
             //
-            m_UserID.Release(); // For now, just assume it's not there to be
-                                // read, and Release my own value to match it.
+            m_UserID.clear(); // For now, just assume it's not there to be
+                              // read, and Release my own value to match it.
 
         otLog4 << szFunc << ": Loaded purse... ("
                << (m_bPasswordProtected ? "Password-protected"
@@ -1177,8 +1177,8 @@ int32_t Purse::ProcessXMLNode(irr::io::IrrXMLReader*& xml)
             return (-1); // error condition
         }
 
-        if (!m_UserID.IsEmpty()) // If the UserID isn't empty, then why am I in
-                                 // the middle of loading an internal Key?
+        if (!m_UserID.empty()) // If the UserID isn't empty, then why am I in
+                               // the middle of loading an internal Key?
         {
             otErr << szFunc << ": Error: Unexpected 'internalKey' data, since "
                                "m_UserID is not blank! "
@@ -1260,8 +1260,8 @@ int32_t Purse::ProcessXMLNode(irr::io::IrrXMLReader*& xml)
             return (-1); // error condition
         }
 
-        if (!m_UserID.IsEmpty()) // If the UserID isn't empty, then why am I in
-                                 // the middle of loading an internal Key?
+        if (!m_UserID.empty()) // If the UserID isn't empty, then why am I in
+                               // the middle of loading an internal Key?
         {
             otErr << szFunc << ": Error: Unexpected 'cachedKey' data, since "
                                "m_UserID is not blank!\n";

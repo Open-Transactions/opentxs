@@ -135,7 +135,7 @@
 #include <opentxs/core/util/OTPaths.hpp>
 #include <opentxs/core/OTLog.hpp>
 #ifdef _WIN32
-#include <opentxs/core/OTWindowsRegistryTools.hpp>
+#include <opentxs/core/util/OTWindowsRegistryTools.hpp>
 #endif
 #include <opentxs/core/util/StringUtils.hpp>
 

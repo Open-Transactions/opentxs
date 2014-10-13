@@ -960,7 +960,7 @@ OTPseudonym* OTWallet::GetOrLoadPrivateNym(const OTIdentifier& NYM_ID,
                                            const OTPasswordData* pPWData,
                                            const OTPassword* pImportPassword)
 {
-    if (NYM_ID.IsEmpty()) {
+    if (NYM_ID.empty()) {
         otErr << __FUNCTION__ << ":" << szFuncName
               << ": Error: NYM_ID passed in empty, returning null";
         return nullptr;
@@ -1438,7 +1438,7 @@ bool OTWallet::ChangePassphrasesOnExtraKeys(const OTPassword& oldPassphrase,
         const std::string str_id = it.first;
         std::shared_ptr<OTSymmetricKey> pOldKey = it.second;
 
-        OTData thePayload;
+        ot_data_t thePayload;
 
         if (pOldKey && pOldKey->SerializeTo(thePayload)) {
             std::shared_ptr<OTSymmetricKey> pNewKey(new OTSymmetricKey);
