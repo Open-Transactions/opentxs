@@ -131,261 +131,176 @@
  **************************************************************/
 
 #include <opentxs/core/OTData.hpp>
+#include <opentxs/core/OTLog.hpp>
 #include <opentxs/core/crypto/OTASCIIArmor.hpp>
 #include <opentxs/core/crypto/OTPassword.hpp>
 #include <opentxs/core/util/Assert.hpp>
+
+#include <cstdint>
 #include <utility>
 #include <cstring>
-#include <cstdint>
+
+#include <thread>
+#include <mutex>
+
+#ifdef _WIN32
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
+#include <Winsock2.h> // For htonl()
+#endif
+
+extern "C" {
+#ifdef _WIN32
+#else
+#include <arpa/inet.h> // For htonl()
+#endif
+}
+
+#ifndef _WIN32
+#include <sys/mman.h> // for mlock and unlock
+#endif
 
 namespace opentxs
 {
 
-OTData::OTData()
-    : data_(nullptr)
-    , position_(0)
-    , size_(0)
-{
+static std::mutex secure_allocator_mutex;
+
+void* _SecureAllocateVoid(const size_t _Count, const size_t _Size)
+{ // allocate storage for _Count elements of type _Ty
+
+    std::lock_guard<std::mutex> lock(secure_allocator_mutex);
+
+    void* _Ptr = 0;
+
+#ifdef _WIN32
+    if (_Count == 0)
+        ;
+    else if ((static_cast<size_t>(-1) / _Size < _Count) ||
+             (_Ptr = ::VirtualAlloc(NULL, _Count * _Size, MEM_COMMIT,
+                                    PAGE_READWRITE)) == 0)
+        std::bad_alloc(); // report no memory;
+#else
+    if (_Count == 0)
+        ;
+    else if ((static_cast<size_t>(-1) / _Size < _Count) ||
+             (_Ptr = ::operator new(_Count * _Size)) == 0)
+        std::bad_alloc(); // report no memory
+#endif
+
+    if (NULL != _Ptr)
+#ifdef _WIN32
+        ::VirtualLock(_Ptr, _Count * _Size); // WINDOWS
+#elif PREDEF_PLATFORM_UNIX
+        // TODO:  Note: may need to add directives here so that mlock and
+        // munlock are not
+        // used except where the user is running as a privileged process.
+        // (Because that
+        // may be the only way we CAN use those functions...)
+        if (mlock(_Ptr, _Count * _Size))
+            otErr << __FUNCTION__
+                  << " WARNING: %s: unable to lock memory, secret keys may "
+                     "be swapped to disk!"; // UNIX
+#else
+        otErr << __FUNCTION__ << "ERROR: %s: no mlock support!";
+    OT_FAIL; // OTHER (FAIL)
+#endif
+
+    return (_Ptr);
 }
 
-OTData::OTData(const OTData& source)
-    : data_(nullptr)
-    , position_(0)
-    , size_(0)
+void _SecureDeallocateVoid(const size_t _Count, const size_t _Size, void* _Ptr)
 {
-    Assign(source);
-}
 
-OTData::OTData(const OTASCIIArmor& source)
-    : data_(nullptr)
-    , position_(0)
-    , size_(0)
-{
-    if (source.Exists()) {
-        source.GetData(*this);
-    }
-}
+    std::lock_guard<std::mutex> lock(secure_allocator_mutex); // must lock.
 
-OTData::OTData(const void* data, uint32_t size)
-    : data_(nullptr)
-    , position_(0)
-    , size_(0)
-{
-    Assign(data, size);
-}
+    if (NULL != _Ptr && 0 < _Count) {
 
-OTData::~OTData()
-{
-    Release();
-}
-
-bool OTData::operator==(const OTData& rhs) const
-{
-    if (size_ != rhs.size_) {
-        return false;
-    }
-
-    if (size_ == 0 && rhs.size_ == 0) {
-        return true;
-    }
-    // TODO security: replace memcmp with a more secure
-    // version. Still, though, I am managing it internal to
-    // the class.
-    if (std::memcmp(data_, rhs.data_, size_) == 0) {
-        return true;
-    }
-
-    return false;
-}
-
-bool OTData::operator!=(const OTData& rhs) const
-{
-    return !operator==(rhs);
-}
-
-// First use reset() to set the internal position to 0.
-// Then you pass in the buffer where the results go.
-// You pass in the length of that buffer.
-// It returns how much was actually read.
-// If you start at position 0, and read 100 bytes, then
-// you are now on position 100, and the next OTfread will
-// proceed from that position. (Unless you reset().)
-uint32_t OTData::OTfread(uint8_t* data, uint32_t size)
-{
-    OT_ASSERT(data != nullptr && size > 0);
-
-    uint32_t sizeToRead = 0;
-
-    if (data_ != nullptr && position_ < GetSize()) {
-        // If the size is 20, and position is 5 (I've already read the first 5
-        // bytes) then the size remaining to read is 15. That is, GetSize()
-        // minus position_.
-        sizeToRead = GetSize() - position_;
-
-        if (size < sizeToRead) {
-            sizeToRead = size;
+#ifdef _WIN32
+        ::SecureZeroMemory(_Ptr, _Count * _Size);
+#else
+        // This section securely overwrites the contents of a memory buffer
+        // (which can otherwise be optimized out by an overzealous compiler...)
+        volatile uint8_t* _vPtr = static_cast<volatile uint8_t*>(_Ptr);
+        {
+            size_t count = _Count * (_Size / sizeof(uint8_t));
+            while (count--) *_vPtr++ = 0;
         }
-        OTPassword::safe_memcpy(
-            data, size, static_cast<uint8_t*>(data_) + position_, sizeToRead);
-        position_ += sizeToRead;
-    }
+#endif
 
-    return sizeToRead;
-}
-
-void OTData::zeroMemory() const
-{
-    if (data_ != nullptr) {
-        OTPassword::zeroMemory(data_, size_);
-    }
-}
-
-void OTData::Release()
-{
-    if (data_ != nullptr) {
-        // For security reasons, we clear the memory to 0 when deleting the
-        // object. (Seems smart.)
-        OTPassword::zeroMemory(data_, size_);
-        delete[] static_cast<uint8_t*>(data_);
-        // If data_ was already nullptr, no need to re-Initialize().
-        Initialize();
+#ifdef _WIN32
+        ::VirtualUnlock(_Ptr, _Count * _Size);
+#elif PREDEF_PLATFORM_UNIX
+        if (munlock(_Ptr, _Count * _Size))
+            otErr << __FUNCTION__
+                  << " WARNING: %s: unable to unlock memory, secret keys "
+                     "may be swapped to disk!"; // UNIX
+#else
+        otErr << __FUNCTION__ << " ERROR: %s: no mlock support!";
+        OT_FAIL; // OTHER (FAIL)
+#endif
     }
 }
 
-OTData& OTData::operator=(OTData rhs)
+namespace OTData
 {
-    swap(rhs);
-    return *this;
+
+void appendShort(uint16_t in, ot_data_t& data)
+{
+    auto in_n = htons(in);
+    auto in_n_p = reinterpret_cast<uint8_t*>(&in_n);
+    data.insert(data.end(), in_n_p, in_n_p + sizeof(in_n));
 }
 
-void OTData::swap(OTData& rhs)
+void appendLong(uint32_t in, ot_data_t& data)
 {
-    std::swap(data_, rhs.data_);
-    std::swap(position_, rhs.position_);
-    std::swap(size_, rhs.size_);
+    auto in_n = htonl(in);
+    auto in_n_p = reinterpret_cast<uint8_t*>(&in_n);
+    data.insert(data.end(), in_n_p, in_n_p + sizeof(in_n));
 }
 
-void OTData::Assign(const OTData& source)
+uint16_t readShort(ot_data_t::const_iterator* it,
+                   const ot_data_t::const_iterator& end)
 {
-    // can't assign to self.
-    if (&source == this) {
-        return;
-    }
+    OT_ASSERT(nullptr != it);
 
-    if (!source.IsEmpty()) {
-        Assign(source.data_, source.size_);
+    uint16_t out = 0;
+    ot_data_t v(sizeof(out));
+
+    for (auto& a : v) {
+        if (*it == end) throw std::out_of_range("reached end of data");
+        a = *(*it)++;
     }
-    else {
-        // Otherwise if it's empty, then empty this also.
-        Release();
-    }
+    out = ntohs(*reinterpret_cast<uint16_t*>(v.data()));
+    return out;
 }
 
-bool OTData::IsEmpty() const
+uint32_t readLong(ot_data_t::const_iterator* it,
+                  const ot_data_t::const_iterator& end)
 {
-    return size_ < 1;
+    OT_ASSERT(nullptr != it);
+
+    uint32_t out = 0;
+    ot_data_t v(sizeof(out));
+
+    for (auto& a : v) {
+        if (*it == end) throw std::out_of_range("reached end of data");
+        a = *(*it)++;
+    }
+    out = ntohl(*reinterpret_cast<uint32_t*>(v.data()));
+    return out;
 }
 
-void OTData::Assign(const void* data, uint32_t size)
+void readDataVector(ot_data_t::const_iterator* it,
+                    const ot_data_t::const_iterator& end, ot_data_t& out)
 {
-    // This releases all memory and zeros out all members.
-    Release();
+    OT_ASSERT(nullptr != it);
 
-    if (data != nullptr && size > 0) {
-        data_ = static_cast<void*>(new uint8_t[size]);
-        OT_ASSERT(data_ != nullptr);
-        OTPassword::safe_memcpy(data_, size, data, size);
-        size_ = size;
+    for (auto& a : out) {
+        if (*it == end) throw std::out_of_range("reached end of data");
+        a = *(*it)++;
     }
-    // TODO: else error condition.  Could just ASSERT() this.
 }
-
-bool OTData::Randomize(uint32_t size)
-{
-    Release(); // This releases all memory and zeros out all members.
-    if (size > 0) {
-        data_ = static_cast<void*>(new uint8_t[size]);
-        OT_ASSERT(data_ != nullptr);
-
-        if (!OTPassword::randomizeMemory_uint8(static_cast<uint8_t*>(data_),
-                                               size)) {
-            // randomizeMemory already logs, so I'm not logging again twice
-            // here.
-            delete[] static_cast<uint8_t*>(data_);
-            data_ = nullptr;
-            return false;
-        }
-
-        size_ = size;
-        return true;
-    }
-    // else error condition.  Could just ASSERT() this.
-    return false;
-}
-
-void OTData::Concatenate(const void* data, uint32_t size)
-{
-    OT_ASSERT(data != nullptr);
-    OT_ASSERT(size > 0);
-
-    if (size == 0) {
-        return;
-    }
-
-    if (size_ == 0) {
-        Assign(data, size);
-        return;
-    }
-
-    void* newData = nullptr;
-    uint32_t newSize = GetSize() + size;
-
-    if (newSize > 0) {
-        newData = static_cast<void*>(new uint8_t[newSize]);
-        OT_ASSERT(newData != nullptr);
-        OTPassword::zeroMemory(newData, newSize);
-    }
-    // If there's a new memory buffer (for the combined..)
-    if (newData != nullptr) {
-        // if THIS object has data inside of it...
-        if (!IsEmpty()) {
-            // Copy THIS object into the new
-            // buffer, starting at the
-            // beginning.
-            OTPassword::safe_memcpy(newData, newSize, data_, GetSize());
-        }
-
-        // Next we copy the data being appended...
-        OTPassword::safe_memcpy(static_cast<uint8_t*>(newData) + GetSize(),
-                                newSize - GetSize(), data, size);
-    }
-
-    if (data_ != nullptr) {
-        delete[] static_cast<uint8_t*>(data_);
-    }
-
-    data_ = newData;
-    size_ = newSize;
-}
-
-OTData& OTData::operator+=(const OTData& rhs)
-{
-    if (rhs.GetSize() > 0) {
-        Concatenate(rhs.data_, rhs.GetSize());
-    }
-    return *this;
-}
-
-void OTData::SetSize(uint32_t size)
-{
-    Release();
-
-    if (size > 0) {
-        data_ = static_cast<void*>(new uint8_t[size]);
-        OT_ASSERT(data_ != nullptr);
-        OTPassword::zeroMemory(data_, size);
-        size_ = size;
-    }
 }
 
 } // namespace opentxs
