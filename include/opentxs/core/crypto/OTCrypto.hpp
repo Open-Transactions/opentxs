@@ -145,11 +145,9 @@ namespace opentxs
 {
 
 class OTAsymmetricKey;
-class OTData;
 class OTIdentifier;
 class OTPassword;
 class OTPasswordData;
-class OTData;
 class OTPseudonym;
 class OTSettings;
 class OTSignature;
@@ -200,7 +198,7 @@ class OTCrypto_Decrypt_Output
 {
 private:
     OTPassword* m_pPassword;
-    OTData* m_pPayload;
+    ot_data_t* m_pPayload;
 
     OTCrypto_Decrypt_Output();
 
@@ -210,7 +208,7 @@ public:
     EXPORT OTCrypto_Decrypt_Output(const OTCrypto_Decrypt_Output& rhs);
 
     EXPORT OTCrypto_Decrypt_Output(OTPassword& thePassword);
-    EXPORT OTCrypto_Decrypt_Output(OTData& thePayload);
+    EXPORT OTCrypto_Decrypt_Output(ot_data_t& thePayload);
 
     EXPORT void swap(OTCrypto_Decrypt_Output& other);
 
@@ -261,7 +259,7 @@ public:
     virtual bool CalculateDigest(const OTString& strInput,
                                  const OTString& strHashAlgorithm,
                                  OTIdentifier& theOutput) const = 0;
-    virtual bool CalculateDigest(const OTData& dataInput,
+    virtual bool CalculateDigest(const ot_data_t& dataInput,
                                  const OTString& strHashAlgorithm,
                                  OTIdentifier& theOutput) const = 0;
     // BASE 62 ENCODING  (for IDs)
@@ -273,18 +271,12 @@ public:
     virtual void SetBase62StringFromID(const OTIdentifier& theInput,
                                        OTString& strOutput) const = 0;
     // BASE 64 ENCODING
-    // Caller is responsible to delete. Todo: return a unqiue pointer.
-    virtual char* Base64Encode(const uint8_t* input, int32_t in_len,
-                               bool bLineBreaks) const = 0; // NOTE: the
-                                                            // 'int32_t' here is
-                                                            // very worrying to
-                                                            // me. The
-    // reason it's here is because that's what OpenSSL uses. So
-    // we may need to find another way of doing it, so we can use
-    // a safer parameter here than what it currently is. Todo
-    // security.
-    virtual uint8_t* Base64Decode(const char* input, size_t* out_len,
-                                  bool bLineBreaks) const = 0;
+    //
+    virtual bool Base64Encode(const ot_data_t& theInput, std::string& strOutput,
+                              bool bLineBreaks = true) const = 0;
+    virtual bool Base64Decode(const std::string& strInput, ot_data_t& theOutput,
+                              bool bLineBreaks = true) const = 0;
+
     // KEY DERIVATION
     //
     // DeriveNewKey derives a 128-bit symmetric key from a passphrase.
@@ -309,9 +301,9 @@ public:
     // Todo: return a smart pointer here.
     //
     virtual OTPassword* DeriveNewKey(const OTPassword& userPassword,
-                                     const OTData& dataSalt,
+                                     const ot_data_t& dataSalt,
                                      uint32_t uIterations,
-                                     OTData& dataCheckHash) const = 0;
+                                     ot_data_t& dataCheckHash) const = 0;
 
     // ENCRYPT / DECRYPT
     //
@@ -322,18 +314,18 @@ public:
                                               // form.
         const char* szInput,                  // This is the Plaintext.
         uint32_t lInputLength,
-        const OTData& theIV, // (We assume this IV is already generated and
-                             // passed in.)
-        OTData& theEncryptedOutput) const = 0; // OUTPUT. (Ciphertext.)
+        const ot_data_t& theIV, // (We assume this IV is already generated and
+        // passed in.)
+        ot_data_t& theEncryptedOutput) const = 0; // OUTPUT. (Ciphertext.)
 
     virtual bool Decrypt(const OTPassword& theRawSymmetricKey, // The symmetric
                                                                // key, in clear
                                                                // form.
                          const char* szInput, // This is the Ciphertext.
                          uint32_t lInputLength,
-                         const OTData& theIV, // (We assume this IV is
-                                              // already generated and passed
-                                              // in.)
+                         const ot_data_t& theIV, // (We assume this IV is
+                                                 // already generated and passed
+                                                 // in.)
                          OTCrypto_Decrypt_Output theDecryptedOutput)
         const = 0; // OUTPUT. (Recovered plaintext.) You can pass OTPassword& OR
                    // OTData& here (either will work.)
@@ -342,9 +334,10 @@ public:
     // Asymmetric (public key) encryption / decryption
     //
     virtual bool Seal(mapOfAsymmetricKeys& RecipPubKeys,
-                      const OTString& theInput, OTData& dataOutput) const = 0;
+                      const OTString& theInput,
+                      ot_data_t& dataOutput) const = 0;
 
-    virtual bool Open(OTData& dataInput, const OTPseudonym& theRecipient,
+    virtual bool Open(ot_data_t& dataInput, const OTPseudonym& theRecipient,
                       OTString& theOutput,
                       const OTPasswordData* pPWData = nullptr) const = 0;
     // SIGN / VERIFY

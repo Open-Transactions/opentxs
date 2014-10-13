@@ -532,7 +532,7 @@ OTCrypto_Decrypt_Output::OTCrypto_Decrypt_Output(OTPassword& thePassword)
 {
 }
 
-OTCrypto_Decrypt_Output::OTCrypto_Decrypt_Output(OTData& thePayload)
+OTCrypto_Decrypt_Output::OTCrypto_Decrypt_Output(ot_data_t& thePayload)
     : m_pPassword(nullptr)
     , m_pPayload(&thePayload)
 {
@@ -577,7 +577,7 @@ void OTCrypto_Decrypt_Output::Release_Envelope_Decrypt_Output() const
 {
     if (nullptr != m_pPassword) m_pPassword->zeroMemory();
 
-    if (nullptr != m_pPayload) m_pPayload->Release();
+    if (nullptr != m_pPayload) m_pPayload->clear();
 }
 
 bool OTCrypto_Decrypt_Output::Concatenate(const void* pAppendData,
@@ -593,8 +593,10 @@ bool OTCrypto_Decrypt_Output::Concatenate(const void* pAppendData,
             return false;
     }
 
+    auto aData = static_cast<const uint8_t*>(pAppendData);
+
     if (nullptr != m_pPayload) {
-        m_pPayload->Concatenate(pAppendData, lAppendSize);
+        m_pPayload->insert(m_pPayload->end(), aData, aData + lAppendSize);
         return true;
     }
     return false;

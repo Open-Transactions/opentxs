@@ -146,11 +146,9 @@ namespace opentxs
 {
 
 class OTAsymmetricKey;
-class OTData;
 class OTIdentifier;
 class OTPassword;
 class OTPasswordData;
-class OTData;
 class OTPseudonym;
 class OTSettings;
 class OTSignature;
@@ -195,7 +193,7 @@ public:
     virtual bool CalculateDigest(const OTString& strInput,
                                  const OTString& strHashAlgorithm,
                                  OTIdentifier& theOutput) const;
-    virtual bool CalculateDigest(const OTData& dataInput,
+    virtual bool CalculateDigest(const ot_data_t& dataInput,
                                  const OTString& strHashAlgorithm,
                                  OTIdentifier& theOutput) const;
     // BASE 62 ENCODING  (for IDs)
@@ -204,18 +202,23 @@ public:
     virtual void SetBase62StringFromID(const OTIdentifier& theInput,
                                        OTString& strOutput) const;
     // BASE 64 ENCODING
-    // Lower-level version:
-    // Caller is responsible to delete. Todo: return a unqiue pointer.
-    virtual char* Base64Encode(const uint8_t* input, int32_t in_len,
-                               bool bLineBreaks) const; // todo security
-                                                        // ('int32_t')
-    virtual uint8_t* Base64Decode(const char* input, size_t* out_len,
-                                  bool bLineBreaks) const;
+    virtual bool Base64Encode(const ot_data_t& theInput, std::string& strOutput,
+                              bool bLineBreaks = true) const;
+    virtual bool Base64Decode(const std::string& strInput, ot_data_t& theOutput,
+                              bool bLineBreaks = true) const;
+
+    // KEY DERIVATION
+    // userPassword argument contains the user's password which is used to
+    // derive the key. Presumably you already obtained this passphrase...
+    // Then the derived key is returned, or nullptr if failure. CALLER
+    // IS RESPONSIBLE TO DELETE!
+    // Todo: return a smart pointer here.
+    //
 
     virtual OTPassword* DeriveNewKey(const OTPassword& userPassword,
-                                     const OTData& dataSalt,
+                                     const ot_data_t& dataSalt,
                                      uint32_t uIterations,
-                                     OTData& dataCheckHash) const;
+                                     ot_data_t& dataCheckHash) const;
     // ENCRYPT / DECRYPT
     // Symmetric (secret key) encryption / decryption
     virtual bool Encrypt(
@@ -223,27 +226,27 @@ public:
                                               // form.
         const char* szInput,                  // This is the Plaintext.
         uint32_t lInputLength,
-        const OTData& theIV, // (We assume this IV is already generated and
-                             // passed in.)
-        OTData& theEncryptedOutput) const; // OUTPUT. (Ciphertext.)
+        const ot_data_t& theIV, // (We assume this IV is already generated and
+        // passed in.)
+        ot_data_t& theEncryptedOutput) const; // OUTPUT. (Ciphertext.)
 
     virtual bool Decrypt(const OTPassword& theRawSymmetricKey, // The symmetric
                                                                // key, in clear
                                                                // form.
                          const char* szInput, // This is the Ciphertext.
                          uint32_t lInputLength,
-                         const OTData& theIV, // (We assume this IV is
-                                              // already generated and passed
-                                              // in.)
+                         const ot_data_t& theIV, // (We assume this IV is
+                                                 // already generated and passed
+                                                 // in.)
                          OTCrypto_Decrypt_Output theDecryptedOutput)
         const; // OUTPUT. (Recovered plaintext.) You can pass OTPassword& OR
                // OTData& here (either will work.)
     // SEAL / OPEN
     // Asymmetric (public key) encryption / decryption
     virtual bool Seal(mapOfAsymmetricKeys& RecipPubKeys,
-                      const OTString& theInput, OTData& dataOutput) const;
+                      const OTString& theInput, ot_data_t& dataOutput) const;
 
-    virtual bool Open(OTData& dataInput, const OTPseudonym& theRecipient,
+    virtual bool Open(ot_data_t& dataInput, const OTPseudonym& theRecipient,
                       OTString& theOutput,
                       const OTPasswordData* pPWData = nullptr) const;
     // SIGN / VERIFY
