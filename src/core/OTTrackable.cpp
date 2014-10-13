@@ -189,8 +189,8 @@ void OTTrackable::GetAllTransactionNumbers(OTNumList& numlistOutput) const
 
 void OTTrackable::Release_Trackable()
 {
-    m_SENDER_ACCT_ID.Release();
-    m_SENDER_USER_ID.Release();
+    m_SENDER_ACCT_ID.clear();
+    m_SENDER_USER_ID.clear();
 }
 
 void OTTrackable::Release()

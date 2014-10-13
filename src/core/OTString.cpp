@@ -694,7 +694,7 @@ OTString::OTString(const OTIdentifier& theValue)
 {
     //    Initialize();
 
-    if (theValue.GetSize() > 0) theValue.GetString(*this);
+    if (theValue.size() > 0) theValue.GetString(*this);
 }
 
 OTString::OTString(const OTContract& theValue)

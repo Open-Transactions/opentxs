@@ -133,6 +133,7 @@
 #include <opentxs/core/stdafx.hpp>
 
 #include <opentxs/core/OTAccount.hpp>
+#include <opentxs/core/crypto/OTCrypto.hpp>
 #include <opentxs/core/util/OTDataFolder.hpp>
 #include <opentxs/core/util/OTFolders.hpp>
 #include <opentxs/core/OTLedger.hpp>
@@ -318,14 +319,14 @@ void OTAccount::SetInboxHash(const OTIdentifier& input)
 
 bool OTAccount::GetInboxHash(OTIdentifier& output)
 {
-    output.Release();
+    output.clear();
 
-    if (!inboxHash_.IsEmpty()) {
+    if (!inboxHash_.empty()) {
         output = inboxHash_;
         return true;
     }
-    else if (!GetUserID().IsEmpty() && !GetRealAccountID().IsEmpty() &&
-               !GetRealServerID().IsEmpty()) {
+    else if (!GetUserID().empty() && !GetRealAccountID().empty() &&
+               !GetRealServerID().empty()) {
         OTLedger inbox(GetUserID(), GetRealAccountID(), GetRealServerID());
 
         if (inbox.LoadInbox() && inbox.CalculateInboxHash(output)) {
@@ -344,14 +345,14 @@ void OTAccount::SetOutboxHash(const OTIdentifier& input)
 
 bool OTAccount::GetOutboxHash(OTIdentifier& output)
 {
-    output.Release();
+    output.clear();
 
-    if (!outboxHash_.IsEmpty()) {
+    if (!outboxHash_.empty()) {
         output = outboxHash_;
         return true;
     }
-    else if (!GetUserID().IsEmpty() && !GetRealAccountID().IsEmpty() &&
-               !GetRealServerID().IsEmpty()) {
+    else if (!GetUserID().empty() && !GetRealAccountID().empty() &&
+               !GetRealServerID().empty()) {
         OTLedger outbox(GetUserID(), GetRealAccountID(), GetRealServerID());
 
         if (outbox.LoadOutbox() && outbox.CalculateOutboxHash(output)) {
@@ -565,9 +566,11 @@ bool OTAccount::GenerateNewAccount(const OTPseudonym& server,
                                    int64_t stashTransNum)
 {
     // First we generate a secure random number into a binary object...
-    OTData payload;
+    ot_data_t payload;
+    payload.resize(100);
+
     // TODO: hardcoding. Plus: is 100 bytes of random a little much here?
-    if (!payload.Randomize(100)) {
+    if (!OTCrypto::It()->RandomizeMemory(payload.data(), payload.size())) {
         otErr << __FUNCTION__ << ": Failed trying to acquire random numbers.\n";
         return false;
     }
@@ -762,12 +765,12 @@ void OTAccount::UpdateContents()
         m_xmlUnsigned.Concatenate("<stashinfo cronItemNum=\"%lld\"/>\n\n",
                                   stashTransNum_);
     }
-    if (!inboxHash_.IsEmpty()) {
+    if (!inboxHash_.empty()) {
         OTString strHash(inboxHash_);
         m_xmlUnsigned.Concatenate("<inboxHash value=\"%s\"/>\n\n",
                                   strHash.Get());
     }
-    if (!outboxHash_.IsEmpty()) {
+    if (!outboxHash_.empty()) {
         OTString strHash(outboxHash_);
         m_xmlUnsigned.Concatenate("<outboxHash value=\"%s\"/>\n\n",
                                   strHash.Get());
@@ -1005,8 +1008,8 @@ void OTAccount::Release_Account()
 {
     balanceDate_.Release();
     balanceAmount_.Release();
-    inboxHash_.Release();
-    outboxHash_.Release();
+    inboxHash_.clear();
+    outboxHash_.clear();
 }
 
 void OTAccount::Release()
