@@ -149,7 +149,7 @@ class OTPseudonym;
 class OTString;
 class OTSymmetricKey;
 
-class OTIdentifier : public OTData
+class OTIdentifier : public ot_data_t
 {
 public:
     EXPORT friend std::ostream& operator<<(std::ostream& os,
@@ -159,7 +159,7 @@ public:
     // They are internal, like SAMY hash.
     EXPORT bool CalculateDigestInternal(const OTString& strInput,
                                         const OTString& strHashAlgorithm);
-    EXPORT bool CalculateDigestInternal(const OTData& dataInput,
+    EXPORT bool CalculateDigestInternal(const ot_data_t& dataInput,
                                         const OTString& strHashAlgorithm);
     EXPORT static const OTString DefaultHashAlgorithm;
     EXPORT static const OTString HashAlgorithm1;
@@ -176,8 +176,6 @@ public:
     EXPORT OTIdentifier(const OTCachedKey& theKey);
 
     EXPORT virtual ~OTIdentifier();
-    using OTData::swap;
-    using OTData::operator=;
     EXPORT bool operator==(const OTIdentifier& s2) const;
     EXPORT bool operator!=(const OTIdentifier& s2) const;
 
@@ -185,12 +183,12 @@ public:
     EXPORT bool operator<(const OTIdentifier& s2) const;
     EXPORT bool operator<=(const OTIdentifier& s2) const;
     EXPORT bool operator>=(const OTIdentifier& s2) const;
-    EXPORT bool CalculateDigest(const OTData& dataInput);
+    EXPORT bool CalculateDigest(const ot_data_t& dataInput);
     EXPORT bool CalculateDigest(const OTString& strInput);
 
     EXPORT bool CalculateDigest(const OTString& strInput,
                                 const OTString& strHashAlgorithm);
-    EXPORT bool CalculateDigest(const OTData& dataInput,
+    EXPORT bool CalculateDigest(const ot_data_t& dataInput,
                                 const OTString& strHashAlgorithm);
     EXPORT bool XOR(const OTIdentifier& theInput) const;
     // If someone passes in the pretty string of hex digits,

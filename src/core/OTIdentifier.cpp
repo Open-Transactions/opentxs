@@ -144,57 +144,57 @@ namespace opentxs
 {
 
 OTIdentifier::OTIdentifier()
-    : OTData()
+    : ot_data_t()
 {
 }
 
 OTIdentifier::OTIdentifier(const OTIdentifier& theID)
-    : OTData(theID)
+    : ot_data_t(theID)
 {
 }
 
 OTIdentifier::OTIdentifier(const char* szStr)
-    : OTData()
+    : ot_data_t()
 {
     OT_ASSERT(nullptr != szStr);
     SetString(szStr);
 }
 
 OTIdentifier::OTIdentifier(const std::string& theStr)
-    : OTData()
+    : ot_data_t()
 {
     OT_ASSERT(!theStr.empty());
     SetString(theStr.c_str());
 }
 
 OTIdentifier::OTIdentifier(const OTString& theStr)
-    : OTData()
+    : ot_data_t()
 {
     SetString(theStr);
 }
 
 OTIdentifier::OTIdentifier(const OTContract& theContract)
-    : OTData() // Get the contract's ID into this identifier.
+    : ot_data_t() // Get the contract's ID into this identifier.
 {
     (const_cast<OTContract&>(theContract)).GetIdentifier(*this);
 }
 
 OTIdentifier::OTIdentifier(const OTPseudonym& theNym)
-    : OTData() // Get the Nym's ID into this identifier.
+    : ot_data_t() // Get the Nym's ID into this identifier.
 {
     (const_cast<OTPseudonym&>(theNym)).GetIdentifier(*this);
 }
 
 OTIdentifier::OTIdentifier(const OTSymmetricKey& theKey)
-    : OTData() // Get the Symmetric Key's ID into *this. (It's a hash of the
-               // encrypted form of the symmetric key.)
+    : ot_data_t() // Get the Symmetric Key's ID into *this. (It's a hash of the
+                  // encrypted form of the symmetric key.)
 {
     (const_cast<OTSymmetricKey&>(theKey)).GetIdentifier(*this);
 }
 
 OTIdentifier::OTIdentifier(const OTCachedKey& theKey)
-    : OTData() // Cached Key stores a symmetric key inside, so this actually
-               // captures the ID for that symmetrickey.
+    : ot_data_t() // Cached Key stores a symmetric key inside, so this actually
+                  // captures the ID for that symmetrickey.
 {
     const bool bSuccess =
         (const_cast<OTCachedKey&>(theKey)).GetIdentifier(*this);
@@ -288,7 +288,7 @@ bool OTIdentifier::CalculateDigest(const OTString& strInput)
 }
 
 // This method implements the SAMY hash
-bool OTIdentifier::CalculateDigest(const OTData& dataInput)
+bool OTIdentifier::CalculateDigest(const ot_data_t& dataInput)
 {
     OTIdentifier idSecondHash;
 
@@ -334,7 +334,7 @@ bool OTIdentifier::CalculateDigestInternal(const OTString& strInput,
 // OpenSSL
 // instead.
 
-bool OTIdentifier::CalculateDigestInternal(const OTData& dataInput,
+bool OTIdentifier::CalculateDigestInternal(const ot_data_t& dataInput,
                                            const OTString& strHashAlgorithm)
 {
     // See if they wanted to use the SAMY hash
@@ -355,7 +355,7 @@ bool OTIdentifier::CalculateDigest(const OTString& strInput,
     return OTCrypto::It()->CalculateDigest(strInput, strHashAlgorithm, *this);
 }
 
-bool OTIdentifier::CalculateDigest(const OTData& dataInput,
+bool OTIdentifier::CalculateDigest(const ot_data_t& dataInput,
                                    const OTString& strHashAlgorithm)
 {
     return OTCrypto::It()->CalculateDigest(dataInput, strHashAlgorithm, *this);
@@ -420,15 +420,22 @@ bool OTIdentifier::CalculateDigest(const OTData& dataInput,
 //
 bool OTIdentifier::XOR(const OTIdentifier& theInput) const
 {
-    // Go with the smallest of the two
-    const int64_t lSize =
-        (GetSize() > theInput.GetSize() ? theInput.GetSize() : GetSize());
+    if (this->empty()) return false;
+    if (theInput.empty()) {
+        const_cast<OTIdentifier*>(this)->clear();
+        return false;
+    }
 
-    for (int32_t i = 0; i < lSize; i++) {
-        // When converting to BigInteger internally, this will be a bit more
-        // efficient.
-        (static_cast<char*>(const_cast<void*>(GetPointer())))[i] ^=
-            (static_cast<char*>(const_cast<void*>(theInput.GetPointer())))[i];
+    if (theInput.size() < this->size()) {
+        // we take the smaller size
+        const_cast<OTIdentifier*>(this)->resize(theInput.size());
+    }
+
+    auto it = theInput.begin();
+
+    for (uint8_t& a : *const_cast<OTIdentifier*>(this)) // todo cast!
+    {
+        a ^= *it++;
     }
 
     return true;

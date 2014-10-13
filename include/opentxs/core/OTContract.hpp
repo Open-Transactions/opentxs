@@ -162,7 +162,6 @@ typedef std::map<std::string, OTPseudonym*> mapOfNyms;
 
 class OTContract
 {
-    friend class OTData;
 
 protected:
     OTString m_strName;       // Contract name as shown in the wallet.
