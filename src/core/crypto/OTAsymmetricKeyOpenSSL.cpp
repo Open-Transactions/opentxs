@@ -149,7 +149,9 @@
 
 // BIO_get_mem_ptr() and BIO_get_mem_data() macros from OpenSSL
 // use old style cast
+#ifndef _WIN32
 #pragma GCC diagnostic ignored "-Wold-style-cast"
+#endif
 
 namespace
 {
@@ -691,8 +693,8 @@ bool OTAsymmetricKey_OpenSSL::ReEncryptPrivateKey(
     const EVP_CIPHER* pCipher =
         EVP_des_ede3_cbc(); // todo should this algorithm be hardcoded?
 
-    OTData theData; // after base64-decoding the ascii-armored string, the
-                    // (encrypted) binary will be stored here.
+    ot_data_t theData; // after base64-decoding the ascii-armored string, the
+                       // (encrypted) binary will be stored here.
 
     // This line base64 decodes the ascii-armored string into binary object
     // theData...
@@ -701,15 +703,13 @@ bool OTAsymmetricKey_OpenSSL::ReEncryptPrivateKey(
                                   // encrypted private key itself, no longer in
                                   // text-armoring.
 
-    if (theData.GetSize() > 0) {
+    if (theData.size() > 0) {
         EVP_PKEY* pClearKey = nullptr;
 
         // Copy the encrypted binary private key data into an OpenSSL memory
         // BIO...
         //
-        OpenSSL_BIO keyBio = BIO_new_mem_buf(
-            static_cast<char*>(const_cast<void*>(theData.GetPointer())),
-            theData.GetSize()); // theData will zeroMemory upon destruction.
+        OpenSSL_BIO keyBio = BIO_new_mem_buf(theData.data(), theData.size());
         OT_ASSERT_MSG(nullptr != keyBio,
                       "OTAsymmetricKey_OpenSSL::"
                       "ReEncryptPrivateKey: Assert: nullptr != "
@@ -806,7 +806,7 @@ bool OTAsymmetricKey_OpenSSL::ReEncryptPrivateKey(
                 otLog5 << __FUNCTION__
                        << ": Success writing EVP_PKEY to memory buffer.\n";
 
-                OTData theNewData;
+                ot_data_t theNewData;
                 char* pChar = nullptr;
 
                 // After the below call, pChar will point to the memory buffer
@@ -818,15 +818,14 @@ bool OTAsymmetricKey_OpenSSL::ReEncryptPrivateKey(
 
                 if (nSize > 0) {
                     // Set the buffer size in our own memory.
-                    theNewData.SetSize(nSize);
+                    theNewData.resize(nSize);
 
                     //                  void * pv =
                     OTPassword::safe_memcpy(
-                        (static_cast<char*>(const_cast<void*>(
-                            theNewData.GetPointer()))), // destination
-                        theNewData.GetSize(), // size of destination buffer.
-                        pChar,                // source
-                        nSize);               // length of source.
+                        theNewData.data(), // destination
+                        theNewData.size(), // size of destination buffer.
+                        pChar,             // source
+                        nSize);            // length of source.
                     // bool bZeroSource=false); // if true, sets the source
                     // buffer to zero after copying is done.
 
