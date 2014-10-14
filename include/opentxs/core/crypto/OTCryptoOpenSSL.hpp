@@ -262,25 +262,14 @@ public:
                               const OTAsymmetricKey& theKey,
                               OTSignature& theSignature, // output
                               const OTString& strHashType,
-                              const OTPasswordData* pPWData = nullptr);
+                              const OTPasswordData* pPWData = nullptr) const;
 
     virtual bool VerifySignature(const OTString& strContractToVerify,
                                  const OTAsymmetricKey& theKey,
                                  const OTSignature& theSignature,
                                  const OTString& strHashType,
                                  const OTPasswordData* pPWData = nullptr) const;
-    // Sign or verify using the contents of a Certfile.
-    virtual bool SignContract(const OTString& strContractUnsigned,
-                              const OTString& strSigHashType,
-                              const std::string& strCertFileContents,
-                              OTSignature& theSignature, // output
-                              const OTPasswordData* pPWData = nullptr);
 
-    virtual bool VerifySignature(const OTString& strContractToVerify,
-                                 const OTString& strSigHashType,
-                                 const std::string& strCertFileContents,
-                                 const OTSignature& theSignature,
-                                 const OTPasswordData* pPWData = nullptr) const;
     void thread_setup() const;
     void thread_cleanup() const;
 

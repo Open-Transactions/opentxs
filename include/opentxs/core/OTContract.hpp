@@ -470,12 +470,6 @@ public:
                              const OTString& strHashType,
                              const OTPasswordData* pPWData = nullptr);
 
-    EXPORT bool SignContract(
-        const char* szFoldername,
-        const char* szFilename,                   // for Cert.
-        OTSignature& theSignature,                // output
-        const OTPasswordData* pPWData = nullptr); // optional in/out
-
     // Calculates a hash of m_strRawFile (the xml portion of the contract plus
     // the signatures)
     // and compares to m_ID (supposedly the same. The ID is calculated by
@@ -526,12 +520,6 @@ public:
                                 const OTSignature& theSignature,
                                 const OTString& strHashType,
                                 const OTPasswordData* pPWData = nullptr) const;
-
-    EXPORT bool VerifySignature(
-        const char* szFoldername,
-        const char* szFilename, // for Cert.
-        const OTSignature& theSignature,
-        const OTPasswordData* pPWData = nullptr) const; // optional in/out
 
     //      bool VerifySignatures();   // This function verifies the signatures
     // on the contract.

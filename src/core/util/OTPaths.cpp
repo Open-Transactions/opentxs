@@ -135,7 +135,7 @@
 #include "util/OTPaths.hpp"
 #include "OTLog.hpp"
 #ifdef _WIN32
-#include "OTWindowsRegistryTools.hpp"
+#include "util/OTWindowsRegistryTools.hpp"
 #endif
 #include "util/StringUtils.hpp"
 

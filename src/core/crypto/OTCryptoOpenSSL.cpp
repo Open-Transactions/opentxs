@@ -3976,7 +3976,7 @@ bool OTCrypto_OpenSSL::SignContract(const OTString& strContractUnsigned,
                                     const OTAsymmetricKey& theKey,
                                     OTSignature& theSignature, // output
                                     const OTString& strHashType,
-                                    const OTPasswordData* pPWData)
+                                    const OTPasswordData* pPWData) const
 {
 
     OTAsymmetricKey& theTempKey = const_cast<OTAsymmetricKey&>(theKey);
@@ -4123,125 +4123,6 @@ bool OTCrypto_OpenSSL::OTCrypto_OpenSSLdp::VerifySignature(
         return false;
 }
 
-// Sign the Contract using a private key from a file.
-// theSignature will contain the output.
-bool OTCrypto_OpenSSL::SignContract(const OTString& strContractUnsigned,
-                                    const OTString& strSigHashType,
-                                    const std::string& strCertFileContents,
-                                    OTSignature& theSignature,
-                                    const OTPasswordData* pPWData)
-{
-    OT_ASSERT_MSG(strContractUnsigned.Exists(), "OTCrypto_OpenSSL::"
-                                                "SignContract: ASSERT FAILURE: "
-                                                "strContractUnsigned.Exists()");
-    OT_ASSERT_MSG(
-        strCertFileContents.size() > 2,
-        "Empty strCertFileContents passed to OTCrypto_OpenSSL::SignContract");
-
-    // Create a new memory buffer on the OpenSSL side
-    //
-    OpenSSL_BIO bio = BIO_new_mem_buf(
-        reinterpret_cast<void*>(const_cast<char*>(strCertFileContents.c_str())),
-        -1);
-    OT_ASSERT(nullptr != bio);
-
-    // TODO security:
-    /* The old PrivateKey write routines are retained for compatibility.
-     New applications should write private keys using the
-     PEM_write_bio_PKCS8PrivateKey() or PEM_write_PKCS8PrivateKey()
-     routines because they are more secure (they use an iteration count of 2048
-     whereas the traditional routines use a
-     count of 1) unless compatibility with older versions of OpenSSL is
-     important.
-     NOTE: The PrivateKey read routines can be used in all applications because
-     they handle all formats transparently.
-     */
-    OTPasswordData thePWData("(OTCrypto_OpenSSL::SignContract is trying to "
-                             "read the private key...)");
-
-    if (nullptr == pPWData) pPWData = &thePWData;
-
-    bool bSigned = false;
-    EVP_PKEY* pkey = PEM_read_bio_PrivateKey(
-        bio, nullptr, OTAsymmetricKey::GetPasswordCallback(),
-        const_cast<OTPasswordData*>(pPWData));
-
-    if (nullptr == pkey) {
-        otErr << "OTCrypto_OpenSSL::SignContract: "
-              << "Error reading private key from BIO.\n";
-    }
-    else {
-        bSigned = dp->SignContract(strContractUnsigned, pkey, theSignature,
-                                   strSigHashType, pPWData);
-
-        EVP_PKEY_free(pkey);
-        pkey = nullptr;
-    }
-
-    return bSigned;
-}
-
-// Presumably the Signature passed in here was just loaded as part of this
-// contract and is
-// somewhere in m_listSignatures. Now it is being verified.
-//
-bool OTCrypto_OpenSSL::VerifySignature(const OTString& strContractToVerify,
-                                       const OTString& strSigHashType,
-                                       const std::string& strCertFileContents,
-                                       const OTSignature& theSignature,
-                                       const OTPasswordData* pPWData) const
-{
-    OT_ASSERT_MSG(strContractToVerify.Exists(),
-                  "OTCrypto_OpenSSL::VerifySignature: ASSERT FAILURE: "
-                  "strContractToVerify.Exists()");
-    OT_ASSERT_MSG(strCertFileContents.size() > 2,
-                  "Empty strCertFileContents passed to "
-                  "OTCrypto_OpenSSL::VerifySignature");
-
-    const char* szFunc = "OTCrypto_OpenSSL::VerifySignature";
-
-    // Create a new memory buffer on the OpenSSL side
-    //
-    OpenSSL_BIO bio = BIO_new_mem_buf(
-        static_cast<void*>(const_cast<char*>(strCertFileContents.c_str())), -1);
-    OT_ASSERT(nullptr != bio);
-
-    OTPasswordData thePWData("(OTCrypto_OpenSSL::VerifySignature is trying to "
-                             "read the public key...)");
-
-    if (nullptr == pPWData) pPWData = &thePWData;
-
-    X509* x509 =
-        PEM_read_bio_X509(bio, nullptr, OTAsymmetricKey::GetPasswordCallback(),
-                          const_cast<OTPasswordData*>(pPWData));
-
-    if (nullptr == x509) {
-        otErr << szFunc << ": Failed reading x509 out of cert file...\n";
-        return false;
-    }
-
-    bool bVerifySig = false;
-    EVP_PKEY* pkey = X509_get_pubkey(x509);
-
-    if (nullptr == pkey) {
-        otErr << szFunc
-              << ": Failed reading public key from x509 from certfile...\n";
-    }
-    else {
-        bVerifySig = dp->VerifySignature(strContractToVerify, pkey,
-                                         theSignature, strSigHashType, pPWData);
-
-        EVP_PKEY_free(pkey);
-        pkey = nullptr;
-    }
-
-    // At some point have to call this.
-    //
-    X509_free(x509);
-    x509 = nullptr;
-
-    return bVerifySig;
-}
 
 // OpenSSL_BIO
 

@@ -4,6 +4,10 @@
 add_subdirectory(gtest)
 add_subdirectory(irrxml)
 
+if(BUILD_CRYPTOPP)
+add_subdirectory(cryptopp/c5)
+endif()
+
 ### Build lucre as library
 set(lucre-sources
   ${CMAKE_CURRENT_SOURCE_DIR}/lucre/src/bankimp.cpp

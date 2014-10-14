@@ -722,6 +722,30 @@ bool OTAsymmetricKey_OpenSSL::SaveCertToString(
 }
 
 // virtual
+bool OTAsymmetricKey_OpenSSL::SavePubkeyToString(
+    OTString& strOutput, const OTString* pstrReason,
+    const OTPassword* pImportPassword) const
+{
+    strOutput.Release();
+    auto key = const_cast<EVP_PKEY*>(dp->GetKey());
+    if (nullptr == key) {
+        otErr << __FUNCTION__
+              << ": Error: Unexpected nullptr key. (Returning false.)\n";
+        return false;
+    }
+    OpenSSL_BIO bio_out_key = BIO_new(BIO_s_mem()); // we now have auto-cleanup
+    PEM_write_bio_PUBKEY(bio_out_key, key);
+    ot_data_t buffer_key(8192);
+    std::string str_key;
+    if (0 < BIO_read(bio_out_key, buffer_key.data(), buffer_key.size())) {
+        str_key.assign(buffer_key.begin(), buffer_key.end());
+        strOutput = str_key.c_str();
+        return true;
+    }
+    return false;
+}
+
+// virtual
 bool OTAsymmetricKey_OpenSSL::SavePrivateKeyToString(
     OTString& strOutput, const OTString* pstrReason,
     const OTPassword* pImportPassword) const
@@ -780,6 +804,46 @@ bool OTAsymmetricKey_OpenSSL::SavePrivateKeyToString(
     else
         otErr << __FUNCTION__ << ": Error : key length is not 1 or more!";
 
+    return bSuccess;
+}
+
+// virtual
+bool OTAsymmetricKey_OpenSSL::SaveDecryptedPrivateKeyToString(
+    ot_string_secure_t& strOutput, const OTPasswordData* pPWData) const
+{
+    auto pw_data = const_cast<OTPasswordData*>(pPWData);
+    OTPasswordData thePWData("OTAsymmetricKey_OpenSSL::"
+                             "InstantiatePrivateKey is calling "
+                             "PEM_read_bio_PrivateKey...");
+    if (nullptr == pw_data) pw_data = &thePWData;
+    if (!IsPrivate()) {
+        otErr << __FUNCTION__ << ": Error: !IsPrivate() (This function should "
+                                 "only be called on a private key.)\n";
+        return false;
+    }
+    auto pPrivateKey =
+        const_cast<EVP_PKEY*>(dp->GetKey(pPWData)); // get password into memory.
+    OT_ASSERT(nullptr != pPrivateKey);
+    OpenSSL_BIO bio_out_pri = BIO_new(BIO_s_mem());
+    bio_out_pri.setFreeOnly(); // only BIO_free(), not BIO_free_all();
+    if (nullptr == pw_data) pw_data = &thePWData;
+    PEM_write_bio_PrivateKey(bio_out_pri, pPrivateKey, nullptr, nullptr, 0,
+                             OTAsymmetricKey::GetPasswordCallback(), pw_data);
+    bool bSuccess = false;
+    int32_t len = 0;
+    ot_data_secure_t buffer_pri(4096);
+    // todo hardcoded 4080 (see array above.)
+    if (0 < (len = BIO_read(bio_out_pri, buffer_pri.data(), 4080))) // returns
+                                                                    // number
+                                                                    // of bytes
+    // successfully
+    // read.
+    {
+        strOutput.assign(buffer_pri.begin(), buffer_pri.end());
+        bSuccess = true;
+    }
+    else
+        otErr << __FUNCTION__ << ": Error : key length is not 1 or more!";
     return bSuccess;
 }
 

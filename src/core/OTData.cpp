@@ -138,9 +138,89 @@
 #include "util/Assert.hpp"
 #include <utility>
 #include <cstring>
+#include <thread>
+#include <mutex>
 
 namespace opentxs
 {
+
+static std::mutex secure_allocator_mutex;
+
+void* _SecureAllocateVoid(const size_t _Count, const size_t _Size)
+{ // allocate storage for _Count elements of type _Ty
+
+    std::lock_guard<std::mutex> lock(secure_allocator_mutex);
+
+    void* _Ptr = 0;
+
+#ifdef _WIN32
+    if (_Count == 0)
+        ;
+    else if (((size_t)(-1) / _Size < _Count) ||
+             (_Ptr = ::VirtualAlloc(NULL, _Count * _Size, MEM_COMMIT,
+                                    PAGE_READWRITE)) == 0)
+        std::bad_alloc(); // report no memory;
+#else
+    if (_Count == 0)
+        ;
+    else if (((size_t)(-1) / _Size < _Count) ||
+             (_Ptr = ::operator new(_Count * _Size)) == 0)
+        std::bad_alloc(); // report no memory
+#endif
+
+    if (NULL != _Ptr)
+#ifdef _WIN32
+        ::VirtualLock(_Ptr, _Count * _Size); // WINDOWS
+#elif PREDEF_PLATFORM_UNIX
+        // TODO:  Note: may need to add directives here so that mlock and
+        // munlock are not
+        // used except where the user is running as a privileged process.
+        // (Because that
+        // may be the only way we CAN use those functions...)
+        if (mlock(_Ptr, _Count * _Size))
+            OTLog::vError("WARNING: %s: unable to lock memory, secret keys may "
+                          "be swapped to disk!",
+                          __FUNCTION__); // UNIX
+#else
+        OTLog::vError("ERROR: %s: no mlock support!", __FUNCTION__);
+    OT_FAIL; // OTHER (FAIL)
+#endif
+
+    return (_Ptr);
+}
+
+void _SecureDeallocateVoid(const size_t _Count, const size_t _Size, void* _Ptr)
+{
+
+    std::lock_guard<std::mutex> lock(secure_allocator_mutex); // must lock.
+
+    if (NULL != _Ptr && 0 < _Count) {
+
+#ifdef _WIN32
+        ::SecureZeroMemory(_Ptr, _Count * _Size);
+#else
+        // This section securely overwrites the contents of a memory buffer
+        // (which can otherwise be optimized out by an overzealous compiler...)
+        volatile uint8_t* _vPtr = static_cast<volatile uint8_t*>(_Ptr);
+        {
+            size_t count = _Count * (_Size / sizeof(uint8_t));
+            while (count--) *_vPtr++ = 0;
+        }
+#endif
+
+#ifdef _WIN32
+        ::VirtualUnlock(_Ptr, _Count * _Size);
+#elif PREDEF_PLATFORM_UNIX
+        if (munlock(_Ptr, _Count * _Size))
+            OTLog::vError("WARNING: %s: unable to unlock memory, secret keys "
+                          "may be swapped to disk!",
+                          __FUNCTION__); // UNIX
+#else
+        OTLog::vError("ERROR: %s: no mlock support!", __FUNCTION__);
+        OT_FAIL; // OTHER (FAIL)
+#endif
+    }
+};
 
 OTData::OTData()
     : data_(nullptr)

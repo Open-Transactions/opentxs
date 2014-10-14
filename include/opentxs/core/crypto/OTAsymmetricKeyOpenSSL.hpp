@@ -134,6 +134,7 @@
 #define OPENTXS_CORE_CRYPTO_OTASYMMETRICKEYOPENSSL_HPP
 
 #include "crypto/OTAsymmetricKey.hpp"
+#include "OTData.hpp"
 
 namespace opentxs
 {
@@ -142,6 +143,7 @@ class OTASCIIArmor;
 class OTCaller;
 class OTPassword;
 class OTString;
+class OTPasswordData;
 
 // Todo:
 // 1. Add this value to the config file so it becomes merely a default value
@@ -208,9 +210,15 @@ public:
     virtual bool SaveCertToString(
         OTString& strOutput, const OTString* pstrReason = nullptr,
         const OTPassword* pImportPassword = nullptr) const;
+    virtual bool SavePubkeyToString(
+        OTString& strOutput, const OTString* pstrReason = nullptr,
+        const OTPassword* pImportPassword = nullptr) const;
     virtual bool SavePrivateKeyToString(
         OTString& strOutput, const OTString* pstrReason = nullptr,
         const OTPassword* pImportPassword = nullptr) const;
+    virtual bool SaveDecryptedPrivateKeyToString(
+        ot_string_secure_t& strOutput,
+        const OTPasswordData* pPWData = nullptr) const;
 
     virtual bool LoadPublicKeyFromPGPKey(
         const OTASCIIArmor& strKey); // does NOT handle bookends.
