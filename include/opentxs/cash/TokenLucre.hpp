@@ -186,13 +186,6 @@ the client unblinds it. Only the
 key for that denomination will work.
  */
 
-// SUBCLASSES OF OTTOKEN FOR EACH DIGITAL CASH ALGORITHM.
-#if defined(OT_CASH_USING_MAGIC_MONEY)
-// Todo:  Someday...
-#endif // Magic Money
-
-#if defined(OT_CASH_USING_LUCRE)
-
 class Token_Lucre : public Token
 {
 private: // Private prevents erroneous use by other classes.
@@ -215,8 +208,6 @@ public:
 
     EXPORT virtual ~Token_Lucre();
 };
-
-#endif // Lucre
 
 } // namespace opentxs
 

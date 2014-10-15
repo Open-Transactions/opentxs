@@ -138,18 +138,12 @@
 
 #include <opentxs/core/crypto/OTAsymmetricKey.hpp>
 #include <opentxs/core/crypto/OTEnvelope.hpp>
-
-#if defined(OT_CASH_USING_LUCRE)
 #include <opentxs/core/crypto/OpenSSL_BIO.hpp>
-#endif
-
 #include <opentxs/core/OTLog.hpp>
 #include <opentxs/core/OTPseudonym.hpp>
 
 namespace opentxs
 {
-
-#if defined(OT_CASH_USING_LUCRE)
 
 MintLucre::MintLucre()
     : ot_super()
@@ -280,8 +274,6 @@ bool MintLucre::AddDenomination(OTPseudonym& theNotary, int64_t lDenomination,
 
     return bReturnValue;
 }
-
-#if defined(OT_CRYPTO_USING_OPENSSL)
 
 // Lucre step 3: the mint signs the token
 //
@@ -450,8 +442,5 @@ bool MintLucre::VerifyToken(OTPseudonym& theNotary, OTString& theCleartextToken,
 
     return bReturnValue;
 }
-
-#endif // defined(OT_CRYPTO_USING_OPENSSL)
-#endif // defined(OT_CASH_USING_LUCRE)
 
 } // namespace opentxs

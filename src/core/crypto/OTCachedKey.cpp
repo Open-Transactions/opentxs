@@ -145,11 +145,9 @@
 
 #include <memory>
 
-#if defined(OT_CRYPTO_USING_OPENSSL)
 extern "C" {
 #include <openssl/opensslconf.h>
 }
-#endif
 
 #define OT_DEFAULT_PASSWORD "test"
 
@@ -1094,8 +1092,6 @@ bool OTCachedKey::GetMasterPassword(std::shared_ptr<OTCachedKey>& mySharedPtr,
 //      otLog4 << "%s: starting up new thread, so we can expire the master key
 // from RAM.\n", szFunc);
 
-#if defined(OT_CRYPTO_USING_OPENSSL)
-
 #if defined(OPENSSL_THREADS)
         // thread support enabled
 
@@ -1115,24 +1111,6 @@ bool OTCachedKey::GetMasterPassword(std::shared_ptr<OTCachedKey>& mySharedPtr,
                  "(Master Key will not expire.)\n";
 
 #endif
-
-#elif defined(OT_CRYPTO_USING_GPG)
-
-        otErr << szFunc << ": WARNING: OT was compiled for GPG, which is not "
-                           "yet supported. "
-                           "(Master Key will not expire.)\n";
-
-#else // OT_CRYPTO_USING_ ... nothing?
-
-        otErr << szFunc
-              << ": WARNING: OT wasn't compiled for any crypto library "
-                 "(such as OpenSSL or GPG). Which is very strange, and I doubt "
-                 "things will even work, with it in this condition. (Plus, "
-                 "Master "
-                 "Key will not expire.)\n";
-
-#endif  // if defined(OT_CRYPTO_USING_OPENSSL),  elif
-        // defined(OT_CRYPTO_USING_GPG),  else,  endif.
 
     }
     else if (m_nTimeoutSeconds != (-1)) {

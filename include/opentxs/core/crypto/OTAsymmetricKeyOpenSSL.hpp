@@ -175,8 +175,6 @@ class OTString;
 // FYI: 1800 seconds is 30 minutes, 300 seconds is 5 mins.
 #endif // OT_KEY_TIMER
 
-#if defined(OT_CRYPTO_USING_OPENSSL)
-
 class OTAsymmetricKey_OpenSSL : public OTAsymmetricKey
 {
 private: // Private prevents erroneous use by other classes.
@@ -232,12 +230,6 @@ public: // DERSTRUCTION
 protected:
     virtual void ReleaseKeyLowLevel_Hook() const;
 };
-
-#elif defined(OT_CRYPTO_USING_GPG)
-
-#else // NO CRYPTO ENGINE DEFINED?
-
-#endif
 
 } // namespace opentxs
 

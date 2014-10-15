@@ -131,19 +131,13 @@
  **************************************************************/
 
 #include <opentxs/core/stdafx.hpp>
-
 #include <opentxs/core/crypto/OTAsymmetricKey_OpenSSLPrivdp.hpp>
-
 #include <opentxs/core/crypto/OTASCIIArmor.hpp>
 #include <opentxs/core/OTLog.hpp>
 #include <opentxs/core/crypto/OTPassword.hpp>
 #include <opentxs/core/crypto/OTPasswordData.hpp>
 #include <opentxs/core/OTData.hpp>
-
-#if defined(OT_CRYPTO_USING_OPENSSL)
 #include <opentxs/core/crypto/OpenSSL_BIO.hpp>
-#endif
-
 #include <opentxs/core/util/stacktrace.h>
 
 // BIO_get_mem_data() macro from OpenSSL uses old style cast
@@ -151,8 +145,6 @@
 
 namespace opentxs
 {
-
-#if defined(OT_CRYPTO_USING_OPENSSL)
 
 void OTAsymmetricKey_OpenSSL::OTAsymmetricKey_OpenSSLPrivdp::SetX509(X509* x509)
 {
@@ -822,7 +814,5 @@ bool OTAsymmetricKey_OpenSSL::OTAsymmetricKey_OpenSSLPrivdp::ArmorPrivateKey(
 
     return bReturnVal;
 }
-
-#endif
 
 } // namespace opentxs

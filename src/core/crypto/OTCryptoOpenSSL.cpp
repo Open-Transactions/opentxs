@@ -187,13 +187,6 @@ extern "C" {
 namespace opentxs
 {
 
-// OpenSSL / Crypto-lib d-pointer
-#if defined(OT_CRYPTO_USING_GPG)
-
-// Someday    }:-)        OTCrypto_GPG
-
-#elif defined(OT_CRYPTO_USING_OPENSSL)
-
 class OTCrypto_OpenSSL::OTCrypto_OpenSSLdp
 {
 public:
@@ -223,15 +216,6 @@ public:
 
     static const EVP_MD* GetOpenSSLDigestByName(const OTString& theName);
 };
-
-#else // Apparently NO crypto engine is defined!
-
-// Perhaps error out here...
-
-#endif // if defined (OT_CRYPTO_USING_OPENSSL), elif defined
-       // (OT_CRYPTO_USING_GPG), else, endif.
-
-#if defined(OT_CRYPTO_USING_OPENSSL)
 
 extern "C" {
 
@@ -1043,7 +1027,7 @@ bool OTCrypto_OpenSSL::GetPasswordFromConsoleLowLevel(
         std::cout << std::endl; // new line.
         return true;
     }
-#elif defined(OT_CRYPTO_USING_OPENSSL)
+#else
     // todo security: might want to allow to set OTPassword's size and copy
     // directly into it,
     // so that we aren't using this temp buf in between, which, although we're
@@ -4251,16 +4235,5 @@ void OpenSSL_BIO::setFreeOnly()
 {
     bFreeOnly = true;
 }
-
-#elif defined(OT_CRYPTO_USING_GPG)
-
-// Someday    }:-)
-
-#else // Apparently NO crypto engine is defined!
-
-// Perhaps error out here...
-
-#endif // if defined (OT_CRYPTO_USING_OPENSSL), elif defined
-       // (OT_CRYPTO_USING_GPG), else, endif.
 
 } // namespace opentxs

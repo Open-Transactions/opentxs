@@ -142,12 +142,6 @@ class Token;
 
 // SUBCLASSES OF OTMINT FOR EACH DIGITAL CASH ALGORITHM.
 
-#if defined(OT_CASH_USING_MAGIC_MONEY)
-// Todo:  Someday...
-#endif // Magic Money
-
-#if defined(OT_CASH_USING_LUCRE)
-
 class MintLucre : public Mint
 {
 private: // Private prevents erroneous use by other classes.
@@ -173,8 +167,6 @@ public:
 
     EXPORT virtual ~MintLucre();
 };
-
-#endif // Lucre
 
 } // namespace opentxs
 

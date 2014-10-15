@@ -131,14 +131,9 @@
  **************************************************************/
 
 #include <opentxs/core/stdafx.hpp>
-
 #include <opentxs/core/crypto/OTLowLevelKeyData.hpp>
-
 #include <opentxs/core/crypto/OTKeypair.hpp>
 #include <opentxs/core/OTLog.hpp>
-
-#if defined(OT_CRYPTO_USING_OPENSSL)
-
 #include <opentxs/core/crypto/OTAsymmetricKey_OpenSSLPrivdp.hpp>
 
 namespace opentxs
@@ -153,20 +148,11 @@ public:
                       // absolutely necessary.)
 };
 
-} // namespace opentxs
-
-#endif
-
-namespace opentxs
-{
-
 OTLowLevelKeyData::~OTLowLevelKeyData()
 {
     if (m_bCleanup) Cleanup();
     if (nullptr != dp) delete (dp);
 }
-
-#if defined(OT_CRYPTO_USING_OPENSSL)
 
 OTLowLevelKeyData::OTLowLevelKeyData()
     : m_bCleanup(true)
@@ -320,11 +306,5 @@ bool OTLowLevelKeyData::SetOntoKeypair(OTKeypair& theKeypair)
     //
     return true;
 }
-
-#elif defined(OT_CRYPTO_USING_GPG)
-
-#else
-
-#endif
 
 } // namespace opentxs

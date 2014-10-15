@@ -140,10 +140,8 @@
 #include <opentxs/core/crypto/OTPasswordData.hpp>
 #include <opentxs/core/OTData.hpp>
 
-#if defined(OT_CRYPTO_USING_OPENSSL)
 #include <opentxs/core/crypto/OTAsymmetricKey_OpenSSLPrivdp.hpp>
 #include <opentxs/core/crypto/OpenSSL_BIO.hpp>
-#endif
 
 // BIO_get_mem_ptr() and BIO_get_mem_data() macros from OpenSSL
 // use old style cast
@@ -338,8 +336,6 @@ PgpKeys ExportRsaKey(uint8_t* pbData, int32_t dataLength)
 
 namespace opentxs
 {
-
-#if defined(OT_CRYPTO_USING_OPENSSL)
 
 OTAsymmetricKey_OpenSSL::OTAsymmetricKey_OpenSSL()
     : OTAsymmetricKey()
@@ -1152,9 +1148,4 @@ bool OTAsymmetricKey_OpenSSL::LoadPublicKeyFromPGPKey(
     return bReturnValue;
 }
 
-#elif defined(OT_CRYPTO_USING_GPG)
-
-#else
-
-#endif
 } // namespace opentxs

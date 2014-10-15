@@ -135,19 +135,12 @@
  **************************************************************/
 
 #include <opentxs/core/stdafx.hpp>
-
 #include <opentxs/core/crypto/OTCrypto.hpp>
-
-#ifdef OT_CRYPTO_USING_OPENSSL
 #include <opentxs/core/crypto/OTCryptoOpenSSL.hpp>
-#else // Apparently NO crypto engine is defined!
-// Perhaps error out here...
-#endif
-
-#include <opentxs/core/OTLog.hpp>
 #include <opentxs/core/crypto/OTPassword.hpp>
 #include <opentxs/core/crypto/OTPasswordData.hpp>
 #include <opentxs/core/util/OTPaths.hpp>
+#include <opentxs/core/OTLog.hpp>
 
 extern "C" {
 #ifdef _WIN32
@@ -163,12 +156,7 @@ extern "C" {
 namespace opentxs
 {
 
-// Choose your OTCrypto implementation here.
-#ifdef OT_CRYPTO_USING_OPENSSL
 typedef OTCrypto_OpenSSL OTCryptoImpl;
-#else // Apparently NO crypto engine is defined!
-// Perhaps error out here...
-#endif
 
 // class OTCrypto
 //
@@ -417,12 +405,7 @@ bool OTCrypto::GetPasswordFromConsole(OTPassword& theOutput, bool bRepeat) const
 // static
 OTCrypto* OTCrypto::It()
 {
-    // Todo: someday, swapping the crypto lib should be as easy as changing this
-    // compile flag to OT_CRYPTO_USING_GPG. We'll get there.
-    //
-    static OTCryptoImpl s_theSingleton; // For now we're only allowing a single
-                                        // instance.
-
+    static OTCryptoImpl s_theSingleton;
     return &s_theSingleton;
 }
 

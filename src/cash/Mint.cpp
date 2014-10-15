@@ -143,9 +143,6 @@
 
 #include <irrxml/irrXML.hpp>
 
-#if defined(OT_CASH_USING_LUCRE)
-#endif
-
 namespace opentxs
 {
 
@@ -154,19 +151,7 @@ Mint* Mint::MintFactory()
 {
     Mint* pMint = nullptr;
 
-#if defined(OT_CASH_USING_LUCRE)
     pMint = new MintLucre;
-#elif defined(OT_CASH_USING_MAGIC_MONEY)
-    //  pMint = new Mint_MagicMoney;
-    otErr << __FUCNTION__ << ": Open-Transactions doesn't support Magic Money "
-                             "by Pr0duct Cypher (yet), "
-          << "so it's impossible to instantiate a mint.\n";
-#else
-    otErr
-        << __FUNCTION__
-        << ": Open-Transactions isn't built with any digital cash algorithms, "
-        << "so it's impossible to instantiate a mint.\n";
-#endif
     return pMint;
 }
 
@@ -176,19 +161,7 @@ Mint* Mint::MintFactory(const OTString& strServerID,
 {
     Mint* pMint = nullptr;
 
-#if defined(OT_CASH_USING_LUCRE)
     pMint = new MintLucre(strServerID, strAssetTypeID);
-#elif defined(OT_CASH_USING_MAGIC_MONEY)
-    //  pMint = new OTMint_MagicMoney;
-    otErr << __FUNCTION__ << ": Open-Transactions doesn't support Magic Money "
-                             "by Pr0duct Cypher (yet), "
-          << "so it's impossible to instantiate a mint.\n";
-#else
-    otErr
-        << __FUNCTION__
-        << ": Open-Transactions isn't built with any digital cash algorithms, "
-        << "so it's impossible to instantiate a mint.\n";
-#endif
     return pMint;
 }
 
@@ -199,27 +172,9 @@ Mint* Mint::MintFactory(const OTString& strServerID,
 {
     Mint* pMint = nullptr;
 
-#if defined(OT_CASH_USING_LUCRE)
     pMint = new MintLucre(strServerID, strServerNymID, strAssetTypeID);
-#elif defined(OT_CASH_USING_MAGIC_MONEY)
-    //  pMint = new OTMint_MagicMoney;
-    otErr << __FUNCTION__ << ": Open-Transactions doesn't support Magic Money "
-                             "by Pr0duct Cypher (yet), "
-          << "so it's impossible to instantiate a mint.\n";
-#else
-    otErr
-        << __FUNCTION__
-        << ": Open-Transactions isn't built with any digital cash algorithms, "
-        << "so it's impossible to instantiate a mint.\n";
-#endif
     return pMint;
 }
-
-// SUBCLASSES OF OTMINT FOR EACH DIGITAL CASH ALGORITHM.
-
-#if defined(OT_CASH_USING_MAGIC_MONEY)
-// Todo:  Someday...
-#endif // Magic Money
 
 // Verify the current date against the VALID FROM / EXPIRATION dates.
 // (As opposed to tokens, which are verified against the valid from/to dates.)

@@ -133,13 +133,7 @@
 #ifndef OPENTXS_CASH_DIGITALCASH_HPP
 #define OPENTXS_CASH_DIGITALCASH_HPP
 
-#ifdef OT_CASH_USING_LUCRE
 #include <lucre/bank.h>
-#endif
-
-#ifdef OT_CASH_USING_MAGIC_MONEY
-#include... // someday
-#endif
 
 // WHICH DIGITAL CASH LIBRARY?
 //
@@ -157,8 +151,6 @@
 namespace opentxs
 {
 
-#ifdef OT_CASH_USING_LUCRE
-
 class LucreDumper
 {
     std::string m_str_dumpfile;
@@ -167,14 +159,6 @@ public:
     LucreDumper();
     ~LucreDumper();
 };
-
-#endif
-
-#ifdef OT_CASH_USING_MAGIC_MONEY
-
-// Todo:  Someday...
-
-#endif
 
 } // namespace opentxs
 
