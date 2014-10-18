@@ -2,22 +2,9 @@
 * operations.
 */
 
-#include <opentxs/core/crypto/mkcert.hpp>
-#include <opentxs/core/OTString.hpp>
-
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-#include <stdio.h>
-#include <stdlib.h>
-
-#include <openssl/crypto.h>
-#include <openssl/ssl.h>
-
-#include <openssl/pem.h>
-#include <openssl/conf.h>
-#include <openssl/x509v3.h>
 
 #ifdef ANDROID
 #include <openssl/bn.h>
@@ -27,9 +14,46 @@ extern "C" {
 #include <openssl/engine.h>
 #endif
 
+#include <stdio.h>
+#include <string.h>
+
 #ifdef __cplusplus
 }
 #endif
+
+#include <opentxs/core/crypto/mkcert.hpp>
+#include <cassert>
+
+bool safe_strcpy(char* dest, const char* src, size_t dest_size,
+                 bool bZeroSource = false) // if true, initializes
+                                           // the source buffer to
+                                           // zero after the
+                                           // copying is done.
+{
+    // Make sure they don't overlap.
+    //
+    assert(false == ((src > dest) && (src < (dest + dest_size))));
+
+    const size_t src_length = strlen(src);
+
+    assert(dest_size > src_length);
+
+#ifdef _WIN32
+    bool bSuccess = (0 == strcpy_s(dest, dest_size, src));
+#else
+    size_t src_cpy_length = strlcpy(dest, src, dest_size);
+    bool bSuccess = (src_length == src_cpy_length);
+#endif
+
+    // Notice: we don't zero out the source unless we were successful (AND
+    // unless we were asked to.)
+    //
+    if (bSuccess && bZeroSource) {
+        memset(const_cast<char*>(src), 0, src_length);
+    }
+
+    return bSuccess;
+}
 
 #ifdef __cplusplus
 extern "C" {
@@ -129,12 +153,11 @@ int32_t mkcert(X509** x509p, EVP_PKEY** pkeyp, int32_t bits, int32_t serial,
     char* szSubjectKeyID = new char[100]();
     char* szCertType = new char[100]();
     char* szComment = new char[100]();
-    opentxs::OTString::safe_strcpy(szConstraints, "critical,CA:TRUE", 99);
-    opentxs::OTString::safe_strcpy(szKeyUsage, "critical,keyCertSign,cRLSign",
-                                   99);
-    opentxs::OTString::safe_strcpy(szSubjectKeyID, "hash", 99);
-    opentxs::OTString::safe_strcpy(szCertType, "sslCA", 99);
-    opentxs::OTString::safe_strcpy(szComment, "example comment extension", 99);
+    safe_strcpy(szConstraints, "critical,CA:TRUE", 99);
+    safe_strcpy(szKeyUsage, "critical,keyCertSign,cRLSign", 99);
+    safe_strcpy(szSubjectKeyID, "hash", 99);
+    safe_strcpy(szCertType, "sslCA", 99);
+    safe_strcpy(szComment, "example comment extension", 99);
     add_ext(x, NID_basic_constraints, szConstraints);
     add_ext(x, NID_key_usage, szKeyUsage);
     add_ext(x, NID_subject_key_identifier, szSubjectKeyID);

@@ -203,12 +203,6 @@ public:
 #endif
 
 public:
-    EXPORT static bool safe_strcpy(
-        char* dest, const char* src,
-        // max size of destination must be passed here.
-        size_t destSize,
-        // if true, sets the source buffer to zero after copying is done.
-        bool zeroSource = false);
     static size_t safe_strlen(const char* s, size_t max);
 
     EXPORT static int64_t StringToLong(const std::string& number);

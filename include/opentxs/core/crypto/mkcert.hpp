@@ -133,9 +133,9 @@
 #ifndef OPENTXS_CORE_CRYPTO_MKCERT
 #define OPENTXS_CORE_CRYPTO_MKCERT
 
+#include <cstdint>
+
 extern "C" {
-#include <openssl/pem.h>
-#include <openssl/evp.h>
 #include <openssl/x509v3.h>
 
 int32_t mkcert(X509** x509p, EVP_PKEY** pkeyp, int32_t bits, int32_t serial,

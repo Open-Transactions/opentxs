@@ -287,47 +287,9 @@ properly terminate the string. The following strlcpy and strlcat functions are
 simple
 implementations that manage the problems of their original ANSI ancestors.
 
+
+*/
 // #include <string.h>
-
-size_t strlcpy(char* d, const char* s, size_t bufsize)
-{
-    size_t len;
-    size_t ret;
-
-    if (!d || !s) return 0;
-    len = strlen(s);
-    ret = len;
-    if (bufsize <= 0) return 0;
-    if (len >= bufsize) len = bufsize-1;
-    memcpy(d, s, len);
-    d[len] = 0;
-
-    return ret;
-}
-
-size_t strlcat(char* d, const char* s, size_t bufsize)
-{
-    size_t len1;
-    size_t len2;
-    size_t ret;
-
-    if (!d || !s || bufsize <= 0) return 0;
-
-    len1 = strlen(d);
-    len2 = strlen(s);
-    ret = len1 + len2;
-    if (len1+len2 >= bufsize)
-    {
-        len2 = bufsize - (len1+1);
-    }
-    if (len2 > 0)
-    {
-        memcpy(d+len1, s, len2);
-        d[len1+len2] = 0;
-    }
-    return ret;
-}
- */
 
 // TODO: Security: should change OTString to use size_t and MAX_SIZE instead of
 // whatever it uses now. Safer.
@@ -342,45 +304,7 @@ errno_t strcpy_s(char* strDestination,
  size_t strlcpy(char * restrict dst,
                 const char* restrict src,
                 size_t size); // MAX SIZE of destination.
-
- extern "C" size_t strnlen(const char* s, size_t max); // Moved the definition
-of this function to OTPassword.cpp
- */
-
-// static
-bool OTString::safe_strcpy(char* dest, const char* src, size_t dest_size,
-                           bool bZeroSource) // if true, initializes
-                                             // the source buffer to
-                                             // zero after the
-                                             // copying is done.
-{
-    // Make sure they don't overlap.
-    //
-    OT_ASSERT_MSG(false == ((src > dest) && (src < (dest + dest_size))),
-                  "ASSERT: safe_strcpy: Unexpected memory overlap.\n");
-
-    const size_t src_length = OTString::safe_strlen(src, MAX_STRING_LENGTH);
-
-    OT_ASSERT_MSG(dest_size > src_length, "OTString::safe_strcpy: ASSERT: "
-                                          "src_length must be less than "
-                                          "dest_size.\n");
-
-#ifdef _WIN32
-    bool bSuccess = (0 == strcpy_s(dest, dest_size, src));
-#else
-    size_t src_cpy_length = strlcpy(dest, src, dest_size);
-    bool bSuccess = (src_length == src_cpy_length);
-#endif
-
-    // Notice: we don't zero out the source unless we were successful (AND
-    // unless we were asked to.)
-    //
-    if (bSuccess && bZeroSource)
-        OTPassword::zeroMemory(const_cast<char*>(src),
-                               static_cast<uint32_t>(src_length));
-
-    return bSuccess;
-}
+*/
 
 // static
 size_t OTString::safe_strlen(const char* s, size_t max)
