@@ -13,9 +13,6 @@
 [submodule "deps/ChaiScript"]
 	path = deps/ChaiScript
 	url = https://github.com/ChaiScript/ChaiScript.git
-[submodule "deps/libzmq_4"]
-	path = deps/libzmq_4
-	url = https://github.com/zeromq/libzmq.git
 [submodule "deps/cppzmq"]
 	path = deps/cppzmq
 	url = https://github.com/zeromq/cppzmq
