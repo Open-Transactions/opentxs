@@ -8779,7 +8779,7 @@ int32_t OT_API::issueBasket(const OTIdentifier& SERVER_ID,
     // (0) Set up the REQUEST NUMBER and then INCREMENT IT
     pNym->GetCurrentRequestNum(strServerID, lRequestNumber);
     theMessage.m_strRequestNum.Format(
-        "%ld", lRequestNumber);                    // Always have to send this.
+        "%lld", lRequestNumber);                   // Always have to send this.
     pNym->IncrementRequestNum(*pNym, strServerID); // since I used it for a
                                                    // server request, I have to
                                                    // increment it
@@ -9287,7 +9287,7 @@ int32_t OT_API::exchangeBasket(
                     int64_t lRequestNumber = 0;
                     pNym->GetCurrentRequestNum(strServerID, lRequestNumber);
                     theMessage.m_strRequestNum.Format(
-                        "%ld", lRequestNumber); // Always have to send this.
+                        "%lld", lRequestNumber); // Always have to send this.
                     pNym->IncrementRequestNum(
                         *pNym, strServerID); // since I used it for a server
                                              // request, I have to increment it
@@ -9586,7 +9586,7 @@ int32_t OT_API::notarizeWithdrawal(const OTIdentifier& SERVER_ID,
         // (0) Set up the REQUEST NUMBER and then INCREMENT IT
         pNym->GetCurrentRequestNum(strServerID, lRequestNumber);
         theMessage.m_strRequestNum.Format(
-            "%ld", lRequestNumber); // Always have to send this.
+            "%lld", lRequestNumber); // Always have to send this.
         pNym->IncrementRequestNum(*pNym, strServerID); // since I used it for a
                                                        // server request, I have
                                                        // to increment it
@@ -9850,7 +9850,7 @@ int32_t OT_API::notarizeDeposit(const OTIdentifier& SERVER_ID,
         // (0) Set up the REQUEST NUMBER and then INCREMENT IT
         pNym->GetCurrentRequestNum(strServerID, lRequestNumber);
         theMessage.m_strRequestNum.Format(
-            "%ld", lRequestNumber); // Always have to send this.
+            "%lld", lRequestNumber); // Always have to send this.
         pNym->IncrementRequestNum(*pNym, strServerID); // since I used it for a
                                                        // server request, I have
                                                        // to increment it
@@ -10190,7 +10190,7 @@ int32_t OT_API::payDividend(
             // (0) Set up the REQUEST NUMBER and then INCREMENT IT
             pNym->GetCurrentRequestNum(strServerID, lRequestNumber);
             theMessage.m_strRequestNum.Format(
-                "%ld", lRequestNumber); // Always have to send this.
+                "%lld", lRequestNumber); // Always have to send this.
             pNym->IncrementRequestNum(*pNym, strServerID); // since I used it
                                                            // for a server
                                                            // request, I have to
@@ -10403,7 +10403,7 @@ int32_t OT_API::withdrawVoucher(const OTIdentifier& SERVER_ID,
         // (0) Set up the REQUEST NUMBER and then INCREMENT IT
         pNym->GetCurrentRequestNum(strServerID, lRequestNumber);
         theMessage.m_strRequestNum.Format(
-            "%ld", lRequestNumber); // Always have to send this.
+            "%lld", lRequestNumber); // Always have to send this.
         pNym->IncrementRequestNum(*pNym, strServerID); // since I used it for a
                                                        // server request, I have
                                                        // to increment it
@@ -10820,7 +10820,7 @@ int32_t OT_API::depositCheque(const OTIdentifier& SERVER_ID,
             // (0) Set up the REQUEST NUMBER and then INCREMENT IT
             pNym->GetCurrentRequestNum(strServerID, lRequestNumber);
             theMessage.m_strRequestNum.Format(
-                "%ld", lRequestNumber); // Always have to send this.
+                "%lld", lRequestNumber); // Always have to send this.
             pNym->IncrementRequestNum(*pNym, strServerID); // since I used it
                                                            // for a server
                                                            // request, I have to
@@ -11012,7 +11012,7 @@ int32_t OT_API::depositPaymentPlan(const OTIdentifier& SERVER_ID,
         // (0) Set up the REQUEST NUMBER and then INCREMENT IT
         pNym->GetCurrentRequestNum(strServerID, lRequestNumber);
         theMessage.m_strRequestNum.Format(
-            "%ld", lRequestNumber); // Always have to send this.
+            "%lld", lRequestNumber); // Always have to send this.
         pNym->IncrementRequestNum(*pNym, strServerID); // since I used it for a
                                                        // server request, I have
                                                        // to increment it
@@ -11088,7 +11088,7 @@ int32_t OT_API::triggerClause(const OTIdentifier& SERVER_ID,
     // (0) Set up the REQUEST NUMBER and then INCREMENT IT
     pNym->GetCurrentRequestNum(strServerID, lRequestNumber);
     theMessage.m_strRequestNum.Format(
-        "%ld", lRequestNumber);                    // Always have to send this.
+        "%lld", lRequestNumber);                   // Always have to send this.
     pNym->IncrementRequestNum(*pNym, strServerID); // since I used it for a
                                                    // server request, I have to
                                                    // increment it
@@ -11469,7 +11469,7 @@ int32_t OT_API::activateSmartContract(const OTIdentifier& SERVER_ID,
         // (0) Set up the REQUEST NUMBER and then INCREMENT IT
         pNym->GetCurrentRequestNum(strServerID, lRequestNumber);
         theMessage.m_strRequestNum.Format(
-            "%ld", lRequestNumber); // Always have to send this.
+            "%lld", lRequestNumber); // Always have to send this.
         pNym->IncrementRequestNum(*pNym, strServerID); // since I used it for a
                                                        // server request, I have
                                                        // to increment it
@@ -11668,7 +11668,7 @@ int32_t OT_API::cancelCronItem(const OTIdentifier& SERVER_ID,
         // (0) Set up the REQUEST NUMBER and then INCREMENT IT
         pNym->GetCurrentRequestNum(strServerID, lRequestNumber);
         theMessage.m_strRequestNum.Format(
-            "%ld", lRequestNumber); // Always have to send this.
+            "%lld", lRequestNumber); // Always have to send this.
         pNym->IncrementRequestNum(*pNym, strServerID); // since I used it for a
                                                        // server request, I have
                                                        // to increment it
@@ -11835,16 +11835,16 @@ int32_t OT_API::issueMarketOffer(
 
         if (0 != cStopSign) {
             if (lPriceLimit > 0)
-                strOfferType.Format("stop limit order, at threshhold: %c%ld",
+                strOfferType.Format("stop limit order, at threshhold: %c%lld",
                                     cStopSign, lActivationPrice);
             else
-                strOfferType.Format("stop order, at threshhold: %c%ld",
+                strOfferType.Format("stop order, at threshhold: %c%lld",
                                     cStopSign, lActivationPrice);
         }
 
         OTString strPrice("");
 
-        if (lPriceLimit > 0) strPrice.Format("Price: %ld\n", lPriceLimit);
+        if (lPriceLimit > 0) strPrice.Format("Price: %lld\n", lPriceLimit);
 
         otOut << "Placing market offer " << lStoredTransactionNumber
               << ", type: " << (bBuyingOrSelling ? "selling" : "buying") << ", "
@@ -11987,7 +11987,7 @@ int32_t OT_API::issueMarketOffer(
             // (0) Set up the REQUEST NUMBER and then INCREMENT IT
             pNym->GetCurrentRequestNum(strServerID, lRequestNumber);
             theMessage.m_strRequestNum.Format(
-                "%ld", lRequestNumber); // Always have to send this.
+                "%lld", lRequestNumber); // Always have to send this.
             pNym->IncrementRequestNum(*pNym, strServerID); // since I used it
                                                            // for a server
                                                            // request, I have to
@@ -12082,7 +12082,7 @@ int32_t OT_API::getMarketList(const OTIdentifier& SERVER_ID,
     int64_t lRequestNumber = 0;
     pNym->GetCurrentRequestNum(strServerID, lRequestNumber);
     theMessage.m_strRequestNum.Format(
-        "%ld", lRequestNumber);                    // Always have to send this.
+        "%lld", lRequestNumber);                   // Always have to send this.
     pNym->IncrementRequestNum(*pNym, strServerID); // since I used it for a
                                                    // server request, I have to
                                                    // increment it
@@ -12140,7 +12140,7 @@ int32_t OT_API::getMarketOffers(const OTIdentifier& SERVER_ID,
     int64_t lRequestNumber = 0;
     pNym->GetCurrentRequestNum(strServerID, lRequestNumber);
     theMessage.m_strRequestNum.Format(
-        "%ld", lRequestNumber);                    // Always have to send this.
+        "%lld", lRequestNumber);                   // Always have to send this.
     pNym->IncrementRequestNum(*pNym, strServerID); // since I used it for a
                                                    // server request, I have to
                                                    // increment it
@@ -12204,7 +12204,7 @@ int32_t OT_API::getMarketRecentTrades(const OTIdentifier& SERVER_ID,
     int64_t lRequestNumber = 0;
     pNym->GetCurrentRequestNum(strServerID, lRequestNumber);
     theMessage.m_strRequestNum.Format(
-        "%ld", lRequestNumber);                    // Always have to send this.
+        "%lld", lRequestNumber);                   // Always have to send this.
     pNym->IncrementRequestNum(*pNym, strServerID); // since I used it for a
                                                    // server request, I have to
                                                    // increment it
@@ -12262,7 +12262,7 @@ int32_t OT_API::getNym_MarketOffers(const OTIdentifier& SERVER_ID,
     int64_t lRequestNumber = 0;
     pNym->GetCurrentRequestNum(strServerID, lRequestNumber);
     theMessage.m_strRequestNum.Format(
-        "%ld", lRequestNumber);                    // Always have to send this.
+        "%lld", lRequestNumber);                   // Always have to send this.
     pNym->IncrementRequestNum(*pNym, strServerID); // since I used it for a
                                                    // server request, I have to
                                                    // increment it
@@ -12443,7 +12443,7 @@ int32_t OT_API::notarizeTransfer(const OTIdentifier& SERVER_ID,
             // (0) Set up the REQUEST NUMBER and then INCREMENT IT
             pNym->GetCurrentRequestNum(strServerID, lRequestNumber);
             theMessage.m_strRequestNum.Format(
-                "%ld", lRequestNumber); // Always have to send this.
+                "%lld", lRequestNumber); // Always have to send this.
             pNym->IncrementRequestNum(*pNym, strServerID); // since I used it
                                                            // for a server
                                                            // request, I have to
@@ -12517,7 +12517,7 @@ int32_t OT_API::getNymbox(const OTIdentifier& SERVER_ID,
     // (0) Set up the REQUEST NUMBER and then INCREMENT IT
     pNym->GetCurrentRequestNum(strServerID, lRequestNumber);
     theMessage.m_strRequestNum.Format(
-        "%ld", lRequestNumber);                    // Always have to send this.
+        "%lld", lRequestNumber);                   // Always have to send this.
     pNym->IncrementRequestNum(*pNym, strServerID); // since I used it for a
                                                    // server request, I have to
                                                    // increment it
@@ -12569,7 +12569,7 @@ int32_t OT_API::getInbox(const OTIdentifier& SERVER_ID,
     // (0) Set up the REQUEST NUMBER and then INCREMENT IT
     pNym->GetCurrentRequestNum(strServerID, lRequestNumber);
     theMessage.m_strRequestNum.Format(
-        "%ld", lRequestNumber);                    // Always have to send this.
+        "%lld", lRequestNumber);                   // Always have to send this.
     pNym->IncrementRequestNum(*pNym, strServerID); // since I used it for a
                                                    // server request, I have to
                                                    // increment it
@@ -12623,7 +12623,7 @@ int32_t OT_API::getOutbox(const OTIdentifier& SERVER_ID,
     // (0) Set up the REQUEST NUMBER and then INCREMENT IT
     pNym->GetCurrentRequestNum(strServerID, lRequestNumber);
     theMessage.m_strRequestNum.Format(
-        "%ld", lRequestNumber);                    // Always have to send this.
+        "%lld", lRequestNumber);                   // Always have to send this.
     pNym->IncrementRequestNum(*pNym, strServerID); // since I used it for a
                                                    // server request, I have to
                                                    // increment it
@@ -12787,7 +12787,7 @@ int32_t OT_API::processInbox(const OTIdentifier& SERVER_ID,
     // (0) Set up the REQUEST NUMBER and then INCREMENT IT
     pNym->GetCurrentRequestNum(strServerID, lRequestNumber);
     theMessage.m_strRequestNum.Format(
-        "%ld", lRequestNumber);                    // Always have to send this.
+        "%lld", lRequestNumber);                   // Always have to send this.
     pNym->IncrementRequestNum(*pNym, strServerID); // since I used it for a
                                                    // server request, I have to
                                                    // increment it
@@ -12878,7 +12878,7 @@ int32_t OT_API::issueAssetType(const OTIdentifier& SERVER_ID,
         // (0) Set up the REQUEST NUMBER and then INCREMENT IT
         pNym->GetCurrentRequestNum(strServerID, lRequestNumber);
         theMessage.m_strRequestNum.Format(
-            "%ld", lRequestNumber); // Always have to send this.
+            "%lld", lRequestNumber); // Always have to send this.
         pNym->IncrementRequestNum(*pNym, strServerID); // since I used it for a
                                                        // server request, I have
                                                        // to increment it
@@ -12977,7 +12977,7 @@ int32_t OT_API::getContract(const OTIdentifier& SERVER_ID,
     // (0) Set up the REQUEST NUMBER and then INCREMENT IT
     pNym->GetCurrentRequestNum(strServerID, lRequestNumber);
     theMessage.m_strRequestNum.Format(
-        "%ld", lRequestNumber);                    // Always have to send this.
+        "%lld", lRequestNumber);                   // Always have to send this.
     pNym->IncrementRequestNum(*pNym, strServerID); // since I used it for a
                                                    // server request, I have to
                                                    // increment it
@@ -13031,7 +13031,7 @@ int32_t OT_API::getMint(const OTIdentifier& SERVER_ID,
     // (0) Set up the REQUEST NUMBER and then INCREMENT IT
     pNym->GetCurrentRequestNum(strServerID, lRequestNumber);
     theMessage.m_strRequestNum.Format(
-        "%ld", lRequestNumber);                    // Always have to send this.
+        "%lld", lRequestNumber);                   // Always have to send this.
     pNym->IncrementRequestNum(*pNym, strServerID); // since I used it for a
                                                    // server request, I have to
                                                    // increment it
@@ -13167,7 +13167,7 @@ int32_t OT_API::queryAssetTypes(const OTIdentifier& SERVER_ID,
     // (0) Set up the REQUEST NUMBER and then INCREMENT IT
     pNym->GetCurrentRequestNum(strServerID, lRequestNumber);
     theMessage.m_strRequestNum.Format(
-        "%ld", lRequestNumber);                    // Always have to send this.
+        "%lld", lRequestNumber);                   // Always have to send this.
     pNym->IncrementRequestNum(*pNym, strServerID); // since I used it for a
                                                    // server request, I have to
                                                    // increment it
@@ -13221,7 +13221,7 @@ int32_t OT_API::createAssetAccount(const OTIdentifier& SERVER_ID,
     // (0) Set up the REQUEST NUMBER and then INCREMENT IT
     pNym->GetCurrentRequestNum(strServerID, lRequestNumber);
     theMessage.m_strRequestNum.Format(
-        "%ld", lRequestNumber);                    // Always have to send this.
+        "%lld", lRequestNumber);                   // Always have to send this.
     pNym->IncrementRequestNum(*pNym, strServerID); // since I used it for a
                                                    // server request, I have to
                                                    // increment it
@@ -13275,7 +13275,7 @@ int32_t OT_API::deleteAssetAccount(const OTIdentifier& SERVER_ID,
     // (0) Set up the REQUEST NUMBER and then INCREMENT IT
     pNym->GetCurrentRequestNum(strServerID, lRequestNumber);
     theMessage.m_strRequestNum.Format(
-        "%ld", lRequestNumber);                    // Always have to send this.
+        "%lld", lRequestNumber);                   // Always have to send this.
     pNym->IncrementRequestNum(*pNym, strServerID); // since I used it for a
                                                    // server request, I have to
                                                    // increment it
@@ -13360,7 +13360,7 @@ int32_t OT_API::getBoxReceipt(
     // (0) Set up the REQUEST NUMBER and then INCREMENT IT
     pNym->GetCurrentRequestNum(strServerID, lRequestNumber);
     theMessage.m_strRequestNum.Format(
-        "%ld", lRequestNumber);                    // Always have to send this.
+        "%lld", lRequestNumber);                   // Always have to send this.
     pNym->IncrementRequestNum(*pNym, strServerID); // since I used it for a
                                                    // server request, I have to
                                                    // increment it
@@ -13418,7 +13418,7 @@ int32_t OT_API::getAccount(const OTIdentifier& SERVER_ID,
     // (0) Set up the REQUEST NUMBER and then INCREMENT IT
     pNym->GetCurrentRequestNum(strServerID, lRequestNumber);
     theMessage.m_strRequestNum.Format(
-        "%ld", lRequestNumber);                    // Always have to send this.
+        "%lld", lRequestNumber);                   // Always have to send this.
     pNym->IncrementRequestNum(*pNym, strServerID); // since I used it for a
                                                    // server request, I have to
                                                    // increment it
@@ -13473,7 +13473,7 @@ int32_t OT_API::getAccountFiles(const OTIdentifier& SERVER_ID,
     // (0) Set up the REQUEST NUMBER and then INCREMENT IT
     pNym->GetCurrentRequestNum(strServerID, lRequestNumber);
     theMessage.m_strRequestNum.Format(
-        "%ld", lRequestNumber);                    // Always have to send this.
+        "%lld", lRequestNumber);                   // Always have to send this.
     pNym->IncrementRequestNum(*pNym, strServerID); // since I used it for a
                                                    // server request, I have to
                                                    // increment it
@@ -13555,7 +13555,7 @@ int32_t OT_API::usageCredits(const OTIdentifier& SERVER_ID,
     // (0) Set up the REQUEST NUMBER and then INCREMENT IT
     pNym->GetCurrentRequestNum(strServerID, lRequestNumber);
     theMessage.m_strRequestNum.Format(
-        "%ld", lRequestNumber);                    // Always have to send this.
+        "%lld", lRequestNumber);                   // Always have to send this.
     pNym->IncrementRequestNum(*pNym, strServerID); // since I used it for a
                                                    // server request, I have to
                                                    // increment it
@@ -13615,7 +13615,7 @@ int32_t OT_API::checkUser(const OTIdentifier& SERVER_ID,
     // (0) Set up the REQUEST NUMBER and then INCREMENT IT
     pNym->GetCurrentRequestNum(strServerID, lRequestNumber);
     theMessage.m_strRequestNum.Format(
-        "%ld", lRequestNumber);                    // Always have to send this.
+        "%lld", lRequestNumber);                   // Always have to send this.
     pNym->IncrementRequestNum(*pNym, strServerID); // since I used it for a
                                                    // server request, I have to
                                                    // increment it
@@ -13672,7 +13672,7 @@ int32_t OT_API::sendUserMessage(const OTIdentifier& SERVER_ID,
     // (0) Set up the REQUEST NUMBER and then INCREMENT IT
     pNym->GetCurrentRequestNum(strServerID, lRequestNumber);
     theMessage.m_strRequestNum.Format(
-        "%ld", lRequestNumber);                    // Always have to send this.
+        "%lld", lRequestNumber);                   // Always have to send this.
     pNym->IncrementRequestNum(*pNym, strServerID); // since I used it for a
                                                    // server request, I have to
                                                    // increment it
@@ -13721,7 +13721,7 @@ int32_t OT_API::sendUserMessage(const OTIdentifier& SERVER_ID,
         pMessage->m_strNymID = strNymID;
         pMessage->m_strNymID2 = strNymID2;
         pMessage->m_strServerID = strServerID;
-        pMessage->m_strRequestNum.Format("%ld", lRequestNumber);
+        pMessage->m_strRequestNum.Format("%lld", lRequestNumber);
 
         pMessage->m_ascPayload.SetString(THE_MESSAGE);
 
@@ -13855,7 +13855,7 @@ int32_t OT_API::sendUserInstrument(
         // (0) Set up the REQUEST NUMBER and then INCREMENT IT
         pNym->GetCurrentRequestNum(strServerID, lRequestNumber);
         theMessage.m_strRequestNum.Format(
-            "%ld", lRequestNumber); // Always have to send this.
+            "%lld", lRequestNumber); // Always have to send this.
         pNym->IncrementRequestNum(*pNym, strServerID); // since I used it for a
                                                        // server request, I have
                                                        // to increment it
@@ -13895,7 +13895,7 @@ int32_t OT_API::sendUserInstrument(
             // about the reply for the sendInstrument itself. Anyway, better
             // safe than sorry...)
             //
-            pMessage->m_strRequestNum.Format("%ld", lRequestNumber);
+            pMessage->m_strRequestNum.Format("%lld", lRequestNumber);
 
             pMessage->SignContract(*pNym);
             pMessage->SaveContract();
@@ -13935,7 +13935,7 @@ int32_t OT_API::sendUserInstrument(
         // gets set to 0.
         //
         pMessage->m_strRequestNum.Format(
-            "%ld", lRequestNumber); // Will be 0 in this case.
+            "%lld", lRequestNumber); // Will be 0 in this case.
 
         pMessage->SignContract(*pNym);
         pMessage->SaveContract();

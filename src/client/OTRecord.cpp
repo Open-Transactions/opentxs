@@ -280,7 +280,7 @@ bool OTRecord::FormatDescription(std::string& str_output) const
     OTString strTransNumForDisplay;
 
     if (!IsCash())
-        strTransNumForDisplay.Format(" #%ld", GetTransNumForDisplay());
+        strTransNumForDisplay.Format(" #%lld", GetTransNumForDisplay());
     if (IsRecord()) {
         if (IsTransfer())
             strDescription.Format("%s%s%s %s", strKind.Get(), "transfer",

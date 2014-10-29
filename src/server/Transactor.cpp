@@ -304,7 +304,7 @@ bool Transactor::verifyTransactionNumber(
                 : "(In fact, that number isn't even issued to that Nym, though "
                   "perhaps it was at some time in the past?)\n");
 
-        OTLog::vError("%s: %ld not available for Nym %s to use. \n%s",
+        OTLog::vError("%s: %lld not available for Nym %s to use. \n%s",
                       __FUNCTION__,
                       //                    " Oh, and FYI, tangentially, the
                       // current Trns# counter is: %ld\n",

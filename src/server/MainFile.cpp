@@ -166,7 +166,7 @@ bool MainFile::SaveMainFileToString(OTString& strMainFile)
         "<notaryServer version=\"%s\"\n"
         " serverID=\"%s\"\n"
         " serverUserID=\"%s\"\n"
-        " transactionNum=\"%ld\" >\n\n",
+        " transactionNum=\"%lld\" >\n\n",
         OTCachedKey::It()->IsGenerated() ? "2.0" : version_.c_str(),
         server_->m_strServerID.Get(), server_->m_strServerUserID.Get(),
         server_->transactor_.transactionNumber());
@@ -456,7 +456,8 @@ bool MainFile::LoadMainFile(bool bReadOnly)
                     OTLog::vOutput(
                         0,
                         "\nLoading Open Transactions server. File version: %s\n"
-                        " Last Issued Transaction Number: %ld\n Server ID:     "
+                        " Last Issued Transaction Number: %lld\n Server ID:    "
+                        " "
                         " %s\n Server User ID: %s\n",
                         version_.c_str(),
                         server_->transactor_.transactionNumber(),

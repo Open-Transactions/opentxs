@@ -304,12 +304,13 @@ bool PayDividendVisitor::Trigger(
         else {
             const OTString strPayoutAssetID(thePayoutAssetID),
                 strRecipientUserID(RECIPIENT_ID);
-            OTLog::vError("PayDividendVisitor::Trigger: ERROR failed "
-                          "issuing voucher (to send to dividend payout "
-                          "recipient.) "
-                          "WAS TRYING TO PAY %ld of asset type %s to Nym %s.\n",
-                          lPayoutAmount, strPayoutAssetID.Get(),
-                          strRecipientUserID.Get());
+            OTLog::vError(
+                "PayDividendVisitor::Trigger: ERROR failed "
+                "issuing voucher (to send to dividend payout "
+                "recipient.) "
+                "WAS TRYING TO PAY %lld of asset type %s to Nym %s.\n",
+                lPayoutAmount, strPayoutAssetID.Get(),
+                strRecipientUserID.Get());
         }
         // If we didn't send it, then we need to return the funds to where they
         // came from.
@@ -363,14 +364,15 @@ bool PayDividendVisitor::Trigger(
             else {
                 const OTString strPayoutAssetID(thePayoutAssetID),
                     strSenderUserID(theSenderUserID);
-                OTLog::vError("PayDividendVisitor::Trigger: ERROR "
-                              "failed issuing voucher (to return back to "
-                              "the dividend payout initiator, after a failed "
-                              "payment attempt to the originally intended "
-                              "recipient.) WAS TRYING TO PAY %ld of asset type "
-                              "%s to Nym %s.\n",
-                              lPayoutAmount, strPayoutAssetID.Get(),
-                              strSenderUserID.Get());
+                OTLog::vError(
+                    "PayDividendVisitor::Trigger: ERROR "
+                    "failed issuing voucher (to return back to "
+                    "the dividend payout initiator, after a failed "
+                    "payment attempt to the originally intended "
+                    "recipient.) WAS TRYING TO PAY %lld of asset type "
+                    "%s to Nym %s.\n",
+                    lPayoutAmount, strPayoutAssetID.Get(),
+                    strSenderUserID.Get());
             }
         }  // if !bSent
     }
@@ -382,7 +384,7 @@ bool PayDividendVisitor::Trigger(
             "PayDividendVisitor::Trigger: ERROR!! Failed issuing next "
             "transaction "
             "number while trying to send a voucher (while paying dividends.) "
-            "WAS TRYING TO PAY %ld of asset type %s to Nym %s.\n",
+            "WAS TRYING TO PAY %lld of asset type %s to Nym %s.\n",
             lPayoutAmount, strPayoutAssetID.Get(), strRecipientUserID.Get());
     }
 
