@@ -38,7 +38,7 @@ else()
 endif()
 
 target_link_libraries(opentxs-basket opentxs-core)
-set_target_properties(opentxs-basket PROPERTIES VERSION ${VERSION_STRING} SOVERSION ${VERSION_MAJOR})
+set_target_properties(opentxs-basket PROPERTIES VERSION "${VERSION_STRING}" SOVERSION "${VERSION_MAJOR}")
 
 if(WIN32)
   add_custom_command(TARGET opentxs-basket POST_BUILD
