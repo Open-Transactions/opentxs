@@ -46,7 +46,7 @@ else()
 endif()
 
 target_link_libraries(opentxs-cash opentxs-core lucre ${OPENSSL_LIBRARIES})
-set_target_properties(opentxs-cash PROPERTIES VERSION ${VERSION_STRING} SOVERSION ${VERSION_MAJOR})
+set_target_properties(opentxs-cash PROPERTIES VERSION "${VERSION_STRING}" SOVERSION "${VERSION_MAJOR}")
 
 if(WIN32)
   add_custom_command(TARGET opentxs-cash POST_BUILD
