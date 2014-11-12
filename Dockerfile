@@ -1,25 +1,23 @@
 FROM ubuntu:14.04
-#FROM docker hub repo ubuntu:14.04
+
 MAINTAINER Darragh Grealish "darragh@monetas.net"
 
 WORKDIR /home/otbuilder/
-# we need to autoselect a best mirror, this takes 5~10mins
+
 #install the following dependencies;
 RUN set +x; \
 		apt-get update \
 		&& apt-get install -y build-essential cmake pkg-config libssl-dev protobuf-compiler libprotobuf-dev g++ gdc libzmq3-dev libzmq3 --no-install-recommends \
 		&& apt-get install -y git wget curl libpcre3-dev python3 python3-pip python3-dev openjdk-6-jdk openjdk-6-source --no-install-recommends ruby-dev \
 		&& apt-get autoremove
-
+ENV DEBIAN_FRONTEND noninteractive
 RUN set +x; \
-		dpkg-reconfigure locales 
-		#&& locale-gen C.UTF-8
-		#&& update-locale LANG=C.UTF-8
-ENV LC_ALL C.UTF-8
+		dpkg-reconfigure locales \
+		&& locale-gen C.UTF-8 \
+		&& update-locale LANG=C.UTF-8 || true 
+#ENV LC_ALL C.UTF-8
 
 RUN useradd -ms /bin/bash otuser
-#RUN cd && cp -R .bash_profile .bashrc .gitconfig .profile scripts /home/otuser
-
 # install SWIG
 RUN set +x; \
 		cd /tmp/ \
@@ -36,8 +34,7 @@ RUN set +x; \
 	        && install -v -m755 -d /usr/share/doc/swig-3.0.2 \
 	        && cp -v -R Doc/* /usr/share/doc/swig-3.0.2
 
-# create build folder but check that i'ts ok
-# notary building  cmake -DCMAKE_PREFIX_PATH=/root/otrepos/opentxs .. -Dopentxs_DIR=/root/otrepos/opentxs/build/CMakeFiles/Export/share/cmake/Modules
+# become otuser and create build folder but check if it already exists 
 USER otuser
 ENV HOME /home/otuser
 WORKDIR /home/otuser
@@ -69,6 +66,6 @@ RUN set +x; \
 		&& make install \
 		&& ldconfig
 USER otuser
-# maybe we install sample data here.
+# we can install sample data here. or pipe it through when running the image e.g docker run <image> << bash script
 CMD opentxs
 
