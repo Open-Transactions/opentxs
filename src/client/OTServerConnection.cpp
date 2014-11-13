@@ -152,40 +152,6 @@ extern "C" {
 
 namespace opentxs
 {
-
-// Everytime you send a message, it is a new connection -- and could be to
-// a different server! So it's important to switch focus each time so we
-// have the right server contract, etc.
-//
-bool OTServerConnection::SetFocus(OTPseudonym& theNym,
-                                  OTServerContract& theServerContract,
-                                  TransportCallback* pCallback)
-{
-    if (nullptr == pCallback) {
-        otErr << __FUNCTION__ << ": pCallback is nullptr";
-        OT_FAIL;
-    };
-
-    // In RPC mode, you must call SetFocus before each time you prepare or
-    // process any server-related messages. Why? Since the Client normally
-    // expects the connection to already be made, and therefore expects
-    // to have access to the Nym and Server Contract (and server ID, etc)
-    // available since those pointers are normally set during Connect().
-    // Since we no longer connect in RPC mode, we must still make sure those
-    // pointers are ready by calling SetFocus before they might end up being
-    // used.
-    // Each time you send a new message, it might be to a different server or
-    // from a different nym. That's fine -- just call SetFocus() before you do
-    // it.
-    m_pNym = &theNym;
-    m_pServerContract = &theServerContract;
-    m_pCallback = pCallback; // This is what we get instead of a socket, when
-                             // we're in RPC mode.
-    m_bFocused = true;
-
-    return true;
-}
-
 // When the server sends a reply back with our new request number, we
 // need to update our records accordingly.
 //
@@ -228,54 +194,42 @@ bool OTServerConnection::GetServerID(OTIdentifier& theID) const
 // they are associated with, so they can access those accounts.
 OTServerConnection::OTServerConnection(OTWallet& theWallet, OTClient& theClient)
 {
-    m_pCallback = nullptr;
-    m_bFocused = false;
     m_pNym = nullptr;
     m_pServerContract = nullptr;
     m_pWallet = &theWallet;
     m_pClient = &theClient;
 }
 
-void OTServerConnection::ProcessMessageOut(const Message& theMessage) const
+void OTServerConnection::ProcessMessageOut(OTServerContract* pServerContract,
+                                           OTPseudonym* pNym,
+                                           TransportCallback* pCallback,
+                                           const Message& theMessage)
 {
-    // todo SetMessagePayload?
-
-    // Here is where we set up the Payload (so we have the size ready before the
-    // header goes out)
-    // This is also where we have turned on the encrypted envelopes  }:-)
-    OTEnvelope theEnvelope; // All comms should be encrypted in one of these
-                            // envelopes.
-
-    // Testing encrypted envelopes...
+    OT_ASSERT(nullptr != pServerContract);
+    OT_ASSERT(nullptr != pNym)
+    OT_ASSERT(nullptr != pCallback);
     const OTPseudonym* pServerNym = m_pServerContract->GetContractPublicNym();
+    OT_ASSERT(nullptr != pServerNym);
 
-    // Make sure we can send encrypted envelopes.
-    OT_ASSERT(m_pServerContract && (nullptr != pServerNym));
-
+    OTEnvelope theEnvelope;
     String strEnvelopeContents;
-    // Save the ready-to-go message into a string.
     theMessage.SaveContractRaw(strEnvelopeContents);
-
-    // Seal the string up into an encrypted Envelope
     theEnvelope.Seal(*pServerNym, strEnvelopeContents);
-
-    OT_ASSERT(IsFocused())
-    OT_ASSERT(nullptr != m_pCallback);
-    OT_ASSERT(nullptr != m_pServerContract);
 
     // Call the callback here.
     otOut << "\n=====>BEGIN Sending " << theMessage.m_strCommand
           << " message via ZMQ... Request number: "
           << theMessage.m_strRequestNum << "\n";
 
-    (*m_pCallback)(*m_pServerContract, theEnvelope);
+    // set state needed by the callback, it will go away
+    m_pServerContract = pServerContract;
+    m_pNym = pNym;
+    (*pCallback)(*pServerContract, theEnvelope);
 
     otWarn << "<=====END Finished sending " << theMessage.m_strCommand
            << " message (and hopefully receiving "
               "a reply.)\nRequest number: " << theMessage.m_strRequestNum
            << "\n\n";
-
-    // At this point, we have sent the envelope to the server.
 }
 
 } // namespace opentxs

@@ -1121,38 +1121,6 @@ int32_t main(int32_t argc, char* argv[])
         // AND theClient object is able to process that request into
         // theMessage, then we send it down the pipe.
 
-        // In lieu of maintaining a constant connection to the server, in ZMQ
-        // mode,
-        // the
-        // client updates its internal "connection" object to make sure the
-        // right
-        // pointers
-        // are in place (since in ZMQ mode, each message could be from a
-        // different
-        // nym
-        // and to a different server.)
-        //
-        if ((nullptr != pServerContract) && (nullptr != pMyNym))
-            OTAPI_Wrap::OTAPI()->GetClient()->SetFocusToServerAndNym(
-                *pServerContract, *pMyNym,
-                OTAPI_Wrap::OTAPI()->GetTransportCallback());
-        // NOTE -- This MAY be unnecessary for ProcessUserCommand (since these
-        // args
-        // are passed
-        // in there already) but it's definitely necessary soon after for
-        // ProcessServerReply()
-        // (which comes next.)
-
-        //        (OTClient::OT_CLIENT_CMD_TYPE requestedCommand,
-        //         OTMessage & theMessage,
-        //         OTPseudonym & theNym,
-        //         OTServerContract & theServer,
-        //         OTAccount * pAccount,
-        //         lAmount
-        //         OTAssetContract * pMyAssetType,
-        //         OTAccount * pHisAcct,
-        //         OTPseudonym * pHisNym)
-
         // COMMANDS
 
         if ((opt->getValue("script") != nullptr) || (opt->getArgc() > 0)) {
@@ -1973,31 +1941,6 @@ int32_t main(int32_t argc, char* argv[])
                                    // message to the server.
 
         Message theMessage;
-
-        // If we can match the user's request to a client command,
-        // AND theClient object is able to process that request into
-        // theMessage, then we send it down the pipe.
-
-        // In lieu of maintaining a constant connection to the server, in RPC
-        // mode,
-        // the
-        // client updates its internal "connection" object to make sure the
-        // right
-        // pointers
-        // are in place (since in RPC mode, each message could be from a
-        // different
-        // nym
-        // and to a different server.)
-        //
-        OTAPI_Wrap::OTAPI()->GetClient()->SetFocusToServerAndNym(
-            *pServerContract, *pMyNym,
-            OTAPI_Wrap::OTAPI()->GetTransportCallback());
-        // NOTE -- This MAY be unnecessary for ProcessUserCommand (since these
-        // args
-        // are passed
-        // in there already) but it's definitely necessary soon after for
-        // ProcessServerReply()
-        // (which comes next.)
 
         // 'check server ID' command
         if (buf[0] == 'c') {

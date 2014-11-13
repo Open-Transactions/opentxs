@@ -180,26 +180,11 @@ public:
         return m_pWallet;
     }
 
-    inline bool IsFocused() const
-    {
-        return m_bFocused;
-    }
-
-    // SetFocus() is for RPC / HTTP mode.
-    bool SetFocus(OTPseudonym& theNym, OTServerContract& theServerContract,
-                  TransportCallback* pCallback);
-
-    // Connect() is for TCP / SSL mode.
-    EXPORT inline bool Connect(const OTPseudonym&, const OTServerContract&,
-                               const String&, const String&,
-                               const String&) const
-    {
-        return false;
-    }
-
     void OnServerResponseToGetRequestNumber(int64_t lNewRequestNumber) const;
 
-    void ProcessMessageOut(const Message& theMessage) const;
+    void ProcessMessageOut(OTServerContract* pServerContract, OTPseudonym* pNym,
+                           TransportCallback* pCallback,
+                           const Message& theMessage);
 };
 
 } // namespace opentxs
