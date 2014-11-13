@@ -325,18 +325,10 @@ public:
         return m_MessageOutbuffer;
     }
 
-    //  inline bool IsConnected() { return m_pConnection->IsConnected(); }
-
-    // For RPC mode
-    EXPORT bool SetFocusToServerAndNym(OTServerContract& theServerContract,
-                                       OTPseudonym& theNym,
-                                       TransportCallback* pCallback) const;
-
     // Eventually, the wallet will have a LIST of these server connections,
     // and any use of the connection will first require to look up the right one
     // on that list, based on ID. This will return a pointer, and then you do
-    // the
-    // same call you normally did from there.
+    // the same call you normally did from there.
 
     OTClient();
     ~OTClient();
@@ -344,7 +336,9 @@ public:
     bool InitClient(OTWallet& theWallet); // Need to call this before using.
     bool m_bInitialized; // this will be false until InitClient() is called.
     // These functions manipulate the internal m_pConnection member:
-    void ProcessMessageOut(const Message& theMessage);
+    void ProcessMessageOut(OTServerContract* pServerContract, OTPseudonym* pNym,
+                           TransportCallback* pCallback,
+                           const Message& theMessage);
     bool ProcessInBuffer(const Message& theServerReply) const;
     // These functions are for command processing:
 

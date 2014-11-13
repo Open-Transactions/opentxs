@@ -14012,15 +14012,12 @@ void OT_API::AddAssetContract(const AssetContract& theContract) const
     m_pWallet->AddAssetContract(theContract);
 }
 
-// Sets the "focus" of the client member variable and calls the
-// ProcessMessageOut method.
+// Calls ProcessMessageOut method.
 void OT_API::SendMessage(OTServerContract* pServerContract, OTPseudonym* pNym,
                          Message& message) const
 {
-    m_pClient->SetFocusToServerAndNym(*pServerContract, *pNym,
-                                      m_pTransportCallback);
-
-    m_pClient->ProcessMessageOut(message);
+    m_pClient->ProcessMessageOut(pServerContract, pNym, m_pTransportCallback,
+                                 message);
 }
 
 // Calls SendMessage() and does some request number magic

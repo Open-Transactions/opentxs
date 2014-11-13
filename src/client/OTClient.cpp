@@ -171,15 +171,16 @@
 namespace opentxs
 {
 
-void OTClient::ProcessMessageOut(const Message& theMessage)
+void OTClient::ProcessMessageOut(OTServerContract* pServerContract,
+                                 OTPseudonym* pNym,
+                                 TransportCallback* pCallback,
+                                 const Message& theMessage)
 {
     const String strMessage(theMessage);
-    //    otErr << "OTClient::ProcessMessageOut: \n\n" << strMessage << "\n\n";
-    //
 
     // WHAT DOES THIS MEAN?
 
-    // I means that later, if a message with a certain request number
+    // It means that later, if a message with a certain request number
     // fails to reply, or show its face in the replies box, then I will
     // have the option to look it up in the Outbuffer, based on that
     // same request number, and send a re-try, or claw back any transaction
@@ -191,10 +192,8 @@ void OTClient::ProcessMessageOut(const Message& theMessage)
     // OT_API_Message_HarvestAllNumbers
 
     // So I can save the request number when sending a message, check for it
-    // later
-    // in the Nymbox, and then worst case, look it up in the Outbuffer and get
-    // my
-    // fucking transaction numbers back again!
+    // later in the Nymbox, and then worst case, look it up in the Outbuffer and
+    // get my fucking transaction numbers back again!
 
     Message* pMsg = new Message; // a copy.
     OT_ASSERT(nullptr != pMsg);
@@ -210,7 +209,8 @@ void OTClient::ProcessMessageOut(const Message& theMessage)
         nullptr != m_pConnection,
         "OTClient::ProcessMessageOut: ASSERT: nullptr != m_pConnection\n");
 
-    m_pConnection->ProcessMessageOut(theMessage);
+    m_pConnection->ProcessMessageOut(pServerContract, pNym, pCallback,
+                                     theMessage);
 }
 
 /// This is standard behavior for the Nymbox (NOT the inbox.)
@@ -9129,21 +9129,6 @@ int32_t OTClient::ProcessUserCommand(
     } // Get out og the big switch statement!
 
     return static_cast<int32_t>(lReturnValue);
-}
-
-/// Used in RPC mode (instead of Connect.)
-/// Whenever a message needs to be processed, this function is called first, in
-/// lieu
-/// of Connect(), so that the right pointers and IDs are in place for OTClient
-/// to do its thing.
-bool OTClient::SetFocusToServerAndNym(OTServerContract& theServerContract,
-                                      OTPseudonym& theNym,
-                                      TransportCallback* pCallback) const
-{
-    OT_ASSERT(nullptr != pCallback);
-    OT_ASSERT(nullptr != m_pConnection);
-
-    return m_pConnection->SetFocus(theNym, theServerContract, pCallback);
 }
 
 /// Need to call this before using.
