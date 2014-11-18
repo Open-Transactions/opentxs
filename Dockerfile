@@ -17,6 +17,9 @@ RUN set +x; \
 		&& update-locale LANG=C.UTF-8 || true 
 #ENV LC_ALL C.UTF-8
 
+RUN set +x; \
+		apt-get install -y cppcheck ccache clang-format-3.5 
+
 RUN useradd -ms /bin/bash otuser
 # install SWIG
 RUN set +x; \
@@ -65,7 +68,6 @@ RUN set +x; \
 		cd /home/otuser/opentxs-source/build \
 		&& make install \
 		&& ldconfig
-USER otuser
 # we can install sample data here. or pipe it through when running the image e.g docker run <image> << bash script
 CMD opentxs
 
