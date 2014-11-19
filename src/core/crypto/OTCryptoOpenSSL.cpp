@@ -188,6 +188,14 @@ extern "C" {
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 #endif
 
+// for BIO_flush and htons
+#ifndef _WIN32
+#pragma GCC diagnostic ignored "-Wold-style-cast"
+#ifndef __clang__
+#pragma GCC diagnostic warning "-Wuseless-cast"
+#endif
+#endif
+
 namespace opentxs
 {
 

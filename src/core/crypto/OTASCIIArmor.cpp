@@ -143,6 +143,11 @@
 #include <cstring>
 #include <zlib.h>
 
+// for zlib
+#ifndef _WIN32
+#pragma GCC diagnostic ignored "-Wold-style-cast"
+#endif
+
 namespace opentxs
 {
 

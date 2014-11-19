@@ -153,6 +153,14 @@ extern "C" {
 #endif
 }
 
+// for htons
+#ifndef _WIN32
+#pragma GCC diagnostic ignored "-Wold-style-cast"
+#ifndef __clang__
+#pragma GCC diagnostic warning "-Wuseless-cast"
+#endif
+#endif
+
 namespace opentxs
 {
 
