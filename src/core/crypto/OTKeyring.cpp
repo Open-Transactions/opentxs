@@ -141,6 +141,7 @@
 #include <opentxs/core/crypto/OTASCIIArmor.hpp>
 #include <opentxs/core/crypto/OTCachedKey.hpp>
 #include <opentxs/core/OTLog.hpp>
+#include <opentxs/core/OTData.hpp>
 #include <opentxs/core/crypto/OTPassword.hpp>
 #include <opentxs/core/util/OTPaths.hpp>
 #include <opentxs/core/OTData.hpp>
@@ -330,10 +331,10 @@ bool OTKeyring::Windows_RetrieveSecret(const OTString& strUser,
     // Below this point, we know for sure the ciphertext of the master
     // key loaded, and exists.
     //
-    const OTData theCipherblob(ascFileContents);
+    const ot_data_t theCipherblob(ascFileContents);
     //
     if (theCipherblob.IsEmpty()) {
-        otErr << __FUNCTION__ << ": Error: OTData is empty after decoding "
+        otErr << __FUNCTION__ << ": Error: ot_data_t is empty after decoding "
                                  "OTASCIIArmor (that wasn't empty.)\n";
     }
     else {
@@ -880,11 +881,11 @@ bool OTKeyring::Gnome_RetrieveSecret(const OTString& strUser,
                                          "from Gnome Keyring contents:\n\n"
                       << strData.Get() << "\n\n";
             else {
-                OTData thePayload(ascData);
+                ot_data_t thePayload(ascData);
                 ascData.zeroMemory();
                 if (thePayload.IsEmpty())
                     otErr << __FUNCTION__ << ": Failed trying to decode secret "
-                                             "OTData from OTASCIIArmor "
+                                             "ot_data_t from OTASCIIArmor "
                           << "from Gnome Keyring contents:\n\n" << strData.Get()
                           << "\n\n";
                 else {
@@ -1117,11 +1118,11 @@ bool OTKeyring::KWallet_RetrieveSecret(const OTString& strUser,
                 otErr << __FUNCTION__ << ": Failed trying to decode secret "
                                          "from KWallet contents.\n";
             else {
-                OTData thePayload(ascData);
+                ot_data_t thePayload(ascData);
                 ascData.zeroMemory();
                 if (thePayload.IsEmpty())
                     otErr << __FUNCTION__ << ": Failed trying to decode secret "
-                                             "OTData from OTASCIIArmor from "
+                                             "ot_data_t from OTASCIIArmor from "
                                              "KWallet contents.\n";
                 else {
                     thePassword.setMemory(thePayload.GetPayloadPointer(),
@@ -1252,11 +1253,11 @@ bool OTKeyring::FlatFile_RetrieveSecret(const OTString& strUser,
                   << "Failed trying to decode secret from flat file contents."
                   << "\n";
         else {
-            OTData thePayload(ascData);
+            ot_data_t thePayload(ascData);
             ascData.zeroMemory();
             if (thePayload.IsEmpty())
                 otErr << __FUNCTION__ << ": Failed trying to decode secret "
-                                         "OTData from OTASCIIArmor from "
+                                         "ot_data_t from OTASCIIArmor from "
                                          "flat file contents.\n";
             else {
                 thePassword.setMemory(thePayload.GetPayloadPointer(),

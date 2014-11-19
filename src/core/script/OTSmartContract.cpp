@@ -978,7 +978,7 @@ OTPartyAccount    * GetPartyAccountByID(const OTIdentifier& theAcctID);
 //
 bool OTSmartContract::SetServerIDIfEmpty(const Identifier& theID)
 {
-    if (GetServerID().IsEmpty()) {
+    if (GetServerID().empty()) {
         SetServerID(theID);
         return true;
     }
@@ -5632,7 +5632,7 @@ int32_t OTSmartContract::ProcessXMLNode(irr::io::IrrXMLReader*& xml)
         }
         else {
             m_bCanceled = false;
-            m_pCancelerNymID->Release();
+            m_pCancelerNymID->clear();
         }
 
         const String strTransNum = xml->getAttributeValue("transactionNum");

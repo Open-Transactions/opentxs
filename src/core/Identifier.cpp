@@ -1,6 +1,6 @@
 /************************************************************
  *
- *  OTIdentifier.cpp
+ *  Identifier.cpp
  *
  */
 
@@ -146,57 +146,57 @@ namespace opentxs
 {
 
 Identifier::Identifier()
-    : OTData()
+    : ot_data_t()
 {
 }
 
 Identifier::Identifier(const Identifier& theID)
-    : OTData(theID)
+    : ot_data_t(theID)
 {
 }
 
 Identifier::Identifier(const char* szStr)
-    : OTData()
+    : ot_data_t()
 {
     OT_ASSERT(nullptr != szStr);
     SetString(szStr);
 }
 
 Identifier::Identifier(const std::string& theStr)
-    : OTData()
+    : ot_data_t()
 {
     OT_ASSERT(!theStr.empty());
     SetString(theStr.c_str());
 }
 
 Identifier::Identifier(const String& theStr)
-    : OTData()
+    : ot_data_t()
 {
     SetString(theStr);
 }
 
 Identifier::Identifier(const Contract& theContract)
-    : OTData() // Get the contract's ID into this identifier.
+    : ot_data_t() // Get the contract's ID into this identifier.
 {
     (const_cast<Contract&>(theContract)).GetIdentifier(*this);
 }
 
 Identifier::Identifier(const OTPseudonym& theNym)
-    : OTData() // Get the Nym's ID into this identifier.
+    : ot_data_t() // Get the Nym's ID into this identifier.
 {
     (const_cast<OTPseudonym&>(theNym)).GetIdentifier(*this);
 }
 
 Identifier::Identifier(const OTSymmetricKey& theKey)
-    : OTData() // Get the Symmetric Key's ID into *this. (It's a hash of the
-               // encrypted form of the symmetric key.)
+    : ot_data_t() // Get the Symmetric Key's ID into *this. (It's a hash of the
+                  // encrypted form of the symmetric key.)
 {
     (const_cast<OTSymmetricKey&>(theKey)).GetIdentifier(*this);
 }
 
 Identifier::Identifier(const OTCachedKey& theKey)
-    : OTData() // Cached Key stores a symmetric key inside, so this actually
-               // captures the ID for that symmetrickey.
+    : ot_data_t() // Cached Key stores a symmetric key inside, so this actually
+                  // captures the ID for that symmetrickey.
 {
     const bool bSuccess =
         (const_cast<OTCachedKey&>(theKey)).GetIdentifier(*this);
@@ -267,13 +267,13 @@ const String Identifier::DefaultHashAlgorithm("HASH256");
 
 // This method implements the (ripemd160 . sha256) hash,
 // so the result is 20 bytes long.
-bool Identifier::CalculateDigest(const unsigned char* data, size_t len)
+bool Identifier::CalculateDigest(const uint8_t* data, size_t len)
 {
     // The Hash160 function comes from the Bitcoin reference client, where
     // it is implemented as RIPEMD160 ( SHA256 ( x ) ) => 20 byte hash
     auto hash160 = Hash160(data, data + len);
-    SetSize(20);
-    memcpy(const_cast<void*>(GetPointer()), hash160, 20);
+    resize(20);
+    assign(hash160, hash160 + 20);
     return true;
 }
 
@@ -284,10 +284,9 @@ bool Identifier::CalculateDigest(const String& strInput)
         static_cast<size_t>(strInput.GetLength()));
 }
 
-bool Identifier::CalculateDigest(const OTData& dataInput)
+bool Identifier::CalculateDigest(const ot_data_t& dataInput)
 {
-    auto dataPtr = static_cast<const unsigned char*>(dataInput.GetPointer());
-    return CalculateDigest(dataPtr, dataInput.GetSize());
+    return CalculateDigest(dataInput.data(), dataInput.size());
 }
 
 // SET (binary id) FROM ENCODED STRING

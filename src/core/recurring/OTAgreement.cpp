@@ -1495,8 +1495,8 @@ void OTAgreement::Release_Agreement()
 {
     // If there were any dynamically allocated objects, clean them up here.
     //
-    m_RECIPIENT_ACCT_ID.Release();
-    m_RECIPIENT_USER_ID.Release();
+    m_RECIPIENT_ACCT_ID.clear();
+    m_RECIPIENT_USER_ID.clear();
 
     m_strConsideration.Release();
     m_strMerchantSignedCopy.Release();
@@ -1574,7 +1574,7 @@ int32_t OTAgreement::ProcessXMLNode(irr::io::IrrXMLReader*& xml)
         }
         else {
             m_bCanceled = false;
-            m_pCancelerNymID->Release();
+            m_pCancelerNymID->clear();
         }
 
         const Identifier SERVER_ID(strServerID), ASSET_ID(strAssetTypeID),

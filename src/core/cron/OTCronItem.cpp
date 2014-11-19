@@ -1725,7 +1725,7 @@ OTCronItem::OTCronItem(const Identifier& SERVER_ID, const Identifier& ASSET_ID,
 bool OTCronItem::GetCancelerID(Identifier& theOutput) const
 {
     if (!IsCanceled()) {
-        theOutput.Release();
+        theOutput.clear();
         return false;
     }
 
@@ -1782,7 +1782,7 @@ void OTCronItem::Release_CronItem()
 
     m_bRemovalFlag = false;
     m_bCanceled = false;
-    m_pCancelerNymID->Release();
+    m_pCancelerNymID->clear();
 }
 
 void OTCronItem::Release()

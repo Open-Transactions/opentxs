@@ -456,7 +456,8 @@ OTOffer* OTTrade::GetOffer(Identifier* offerMarketId, OTMarket** market)
         if (offerMarketId != nullptr) {
             // Sometimes the caller function would like a copy of this ID. So I
             // give the option to pass in a pointer so I can give it here.
-            offerMarketId->Assign(OFFER_MARKET_ID);
+            offerMarketId->assign(OFFER_MARKET_ID.begin(),
+                                  OFFER_MARKET_ID.end());
         }
 
         return offer_;
@@ -495,7 +496,7 @@ OTOffer* OTTrade::GetOffer(Identifier* offerMarketId, OTMarket** market)
     if (offerMarketId != nullptr) {
         // Sometimes the caller function would like a copy of this ID. So I
         // give the option to pass in a pointer so I can give it here.
-        offerMarketId->Assign(OFFER_MARKET_ID);
+        offerMarketId->assign(OFFER_MARKET_ID.begin(), OFFER_MARKET_ID.end());
     }
 
     // Previously if a user tried to use a market that didn't exist, I'd just
@@ -1367,8 +1368,8 @@ OTTrade::~OTTrade()
 void OTTrade::Release_Trade()
 {
     // If there were any dynamically allocated objects, clean them up here.
-    currencyTypeID_.Release();
-    currencyAcctID_.Release();
+    currencyTypeID_.clear();
+    currencyAcctID_.clear();
 
     marketOffer_.Release();
 }

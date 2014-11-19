@@ -292,7 +292,7 @@ OTPseudonym* OTPseudonym::LoadPrivateNym(const Identifier& NYM_ID,
     const char* szFunc =
         (nullptr != szFuncName) ? szFuncName : "OTPseudonym::LoadPrivateNym";
 
-    if (NYM_ID.IsEmpty()) return nullptr;
+    if (NYM_ID.empty()) return nullptr;
 
     const String strNymID(NYM_ID);
 
@@ -1637,7 +1637,7 @@ void OTPseudonym::RemoveAllNumbers(const String* pstrServerID,
 bool OTPseudonym::GetNymboxHashServerSide(const Identifier& theServerID,
                                           Identifier& theOutput) // server-side
 {
-    if (m_NymboxHash.IsEmpty()) {
+    if (m_NymboxHash.empty()) {
         OTLedger theNymbox(m_nymID, m_nymID, theServerID);
 
         if (theNymbox.LoadNymbox() && theNymbox.CalculateNymboxHash(theOutput))
@@ -1707,7 +1707,7 @@ bool OTPseudonym::GetHash(const mapOfIdentifiers& the_map,
 {
     bool bRetVal =
         false; // default is false: "No, I didn't find a hash for that id."
-    theOutput.Release();
+    theOutput.clear();
 
     // The Pseudonym has a map of its recent hashes, one for each server
     // (nymbox) or account (inbox/outbox).
@@ -4596,7 +4596,7 @@ bool OTPseudonym::SavePseudonym(String& strNym)
         std::string strServerID = it.first;
         Identifier& theID = it.second;
 
-        if ((strServerID.size() > 0) && !theID.IsEmpty()) {
+        if ((strServerID.size() > 0) && !theID.empty()) {
             const String strNymboxHash(theID);
             strNym.Concatenate("<nymboxHashItem\n"
                                " serverID=\"%s\"\n"
@@ -4611,7 +4611,7 @@ bool OTPseudonym::SavePseudonym(String& strNym)
         std::string strServerID = it.first;
         Identifier& theID = it.second;
 
-        if ((strServerID.size() > 0) && !theID.IsEmpty()) {
+        if ((strServerID.size() > 0) && !theID.empty()) {
             const String strRecentHash(theID);
             strNym.Concatenate("<recentHashItem\n"
                                " serverID=\"%s\"\n"
@@ -4622,7 +4622,7 @@ bool OTPseudonym::SavePseudonym(String& strNym)
     } // for
 
     // server-side
-    if (!m_NymboxHash.IsEmpty()) {
+    if (!m_NymboxHash.empty()) {
         const String strNymboxHash(m_NymboxHash);
         strNym.Concatenate("<nymboxHash\n"
                            " value=\"%s\""
@@ -4635,7 +4635,7 @@ bool OTPseudonym::SavePseudonym(String& strNym)
         std::string strAcctID = it.first;
         Identifier& theID = it.second;
 
-        if ((strAcctID.size() > 0) && !theID.IsEmpty()) {
+        if ((strAcctID.size() > 0) && !theID.empty()) {
             const String strHash(theID);
             strNym.Concatenate("<inboxHashItem\n"
                                " accountID=\"%s\"\n"
@@ -4650,7 +4650,7 @@ bool OTPseudonym::SavePseudonym(String& strNym)
         std::string strAcctID = it.first;
         Identifier& theID = it.second;
 
-        if ((strAcctID.size() > 0) && !theID.IsEmpty()) {
+        if ((strAcctID.size() > 0) && !theID.empty()) {
             const String strHash(theID);
             strNym.Concatenate("<outboxHashItem\n"
                                " accountID=\"%s\"\n"

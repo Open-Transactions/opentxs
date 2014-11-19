@@ -768,7 +768,7 @@ bool OTAsymmetricKey::CalculateID(Identifier& theOutput) const // Only works
 {
     const char* szFunc = "OTAsymmetricKey::CalculateID";
 
-    theOutput.Release();
+    theOutput.clear();
 
     if (!IsPublic()) {
         otErr << szFunc << ": Error: !IsPublic() (This function should only be "
@@ -787,7 +787,7 @@ bool OTAsymmetricKey::CalculateID(Identifier& theOutput) const // Only works
     bool bSuccessCalculateDigest = theOutput.CalculateDigest(strPublicKey);
 
     if (!bSuccessCalculateDigest) {
-        theOutput.Release();
+        theOutput.clear();
         otErr << szFunc << ": Error calculating digest of public key.\n";
         return false;
     }

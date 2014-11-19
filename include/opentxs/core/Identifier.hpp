@@ -149,10 +149,10 @@ class OTPseudonym;
 class String;
 class OTSymmetricKey;
 
-class Identifier : public OTData
+class Identifier : public ot_data_t
 {
 private:
-    bool CalculateDigest(const unsigned char* data, size_t len);
+    bool CalculateDigest(const uint8_t* data, size_t len);
 
 public:
     EXPORT friend std::ostream& operator<<(std::ostream& os, const String& obj);
@@ -170,8 +170,6 @@ public:
     EXPORT Identifier(const OTCachedKey& theKey);
 
     EXPORT virtual ~Identifier();
-    using OTData::swap;
-    using OTData::operator=;
     EXPORT bool operator==(const Identifier& s2) const;
     EXPORT bool operator!=(const Identifier& s2) const;
 
@@ -179,7 +177,7 @@ public:
     EXPORT bool operator<(const Identifier& s2) const;
     EXPORT bool operator<=(const Identifier& s2) const;
     EXPORT bool operator>=(const Identifier& s2) const;
-    EXPORT bool CalculateDigest(const OTData& dataInput);
+    EXPORT bool CalculateDigest(const ot_data_t& dataInput);
     EXPORT bool CalculateDigest(const String& strInput);
 
     // If someone passes in the pretty string of hex digits,

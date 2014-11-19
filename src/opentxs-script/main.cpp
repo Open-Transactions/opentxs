@@ -1055,7 +1055,7 @@ int32_t main(int32_t argc, char* argv[])
         // use the asset type for the account instead.
         else if (nullptr != pMyAccount)
             thePurseAssetTypeID = pMyAccount->GetAssetTypeID();
-        if (!thePurseAssetTypeID.IsEmpty()) {
+        if (!thePurseAssetTypeID.empty()) {
             String strTempAssetType(thePurseAssetTypeID);
             str_MyPurse = strTempAssetType.Get();
         }
@@ -1091,7 +1091,7 @@ int32_t main(int32_t argc, char* argv[])
         // asset type of HisAcct as HisPurse.
         else if (nullptr != pHisAccount)
             hisPurseAssetTypeID = pHisAccount->GetAssetTypeID();
-        if (!hisPurseAssetTypeID.IsEmpty()) {
+        if (!hisPurseAssetTypeID.empty()) {
             String strTempAssetType(hisPurseAssetTypeID);
             str_HisPurse = strTempAssetType.Get();
         }

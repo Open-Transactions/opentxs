@@ -451,11 +451,11 @@ bool OTMarket::GetRecentTradeList(OTASCIIArmor& ascOutput, int32_t& nTradeCount)
 
         // Now we need to translate pBuffer into strOutput.
 
-        const uint8_t* pUint = pBuffer->GetData();
-        const size_t theSize = pBuffer->GetSize();
+        auto pUint = pBuffer->GetData();
+        auto theSize = pBuffer->GetSize();
 
         if ((nullptr != pUint) || (theSize < 2)) {
-            OTData theData(pUint, static_cast<uint32_t>(theSize));
+            ot_data_t theData(pUint, pUint + theSize);
 
             // This function will base64 ENCODE theData,
             // and then Set() that as the string contents.
@@ -587,11 +587,11 @@ bool OTMarket::GetOfferList(OTASCIIArmor& ascOutput, int64_t lDepth,
 
         // Now we need to translate pBuffer into strOutput.
 
-        const uint8_t* pUint = pBuffer->GetData();
-        const size_t theSize = pBuffer->GetSize();
+        auto pUint = pBuffer->GetData();
+        auto theSize = pBuffer->GetSize();
 
         if (nullptr != pUint) {
-            OTData theData(pUint, static_cast<uint32_t>(theSize));
+            ot_data_t theData(pUint, pUint + theSize);
 
             // This function will base64 ENCODE theData,
             // and then Set() that as the string contents.
@@ -2792,10 +2792,10 @@ void OTMarket::InitMarket()
 
 void OTMarket::Release_Market()
 {
-    m_ASSET_TYPE_ID.Release();
-    m_CURRENCY_TYPE_ID.Release();
+    m_ASSET_TYPE_ID.clear();
+    m_CURRENCY_TYPE_ID.clear();
 
-    m_SERVER_ID.Release();
+    m_SERVER_ID.clear();
 
     // Elements of this list are cleaned up automatically.
     if (nullptr != m_pTradeList) {

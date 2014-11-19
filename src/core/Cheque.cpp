@@ -249,7 +249,7 @@ int32_t Cheque::ProcessXMLNode(IrrXMLReader*& xml)
         if (m_bHasRecipient)
             m_RECIPIENT_USER_ID.SetString(strRecipientUserID);
         else
-            m_RECIPIENT_USER_ID.Release();
+            m_RECIPIENT_USER_ID.clear();
 
         // Remitter ID (for vouchers)
         if (m_bHasRemitter) {
@@ -257,8 +257,8 @@ int32_t Cheque::ProcessXMLNode(IrrXMLReader*& xml)
             m_REMITTER_ACCT_ID.SetString(strRemitterAcctID);
         }
         else {
-            m_REMITTER_USER_ID.Release();
-            m_REMITTER_ACCT_ID.Release();
+            m_REMITTER_USER_ID.clear();
+            m_REMITTER_ACCT_ID.clear();
         }
 
         otInfo << "\n\nCheque Amount: " << m_lAmount
@@ -349,7 +349,7 @@ bool Cheque::IssueCheque(
 
     if (nullptr == pRECIPIENT_USER_ID) {
         m_bHasRecipient = false;
-        m_RECIPIENT_USER_ID.Release();
+        m_RECIPIENT_USER_ID.clear();
     }
     else {
         m_bHasRecipient = true;
@@ -401,7 +401,7 @@ void Cheque::Release_Cheque()
 
     //    m_SENDER_ACCT_ID.Release();     // in parent class now.
     //    m_SENDER_USER_ID.Release();     // in parent class now.
-    m_RECIPIENT_USER_ID.Release();
+    m_RECIPIENT_USER_ID.clear();
 
     ot_super::Release(); // since I've overridden the base class, I call it
                          // now...

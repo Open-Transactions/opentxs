@@ -2409,8 +2409,8 @@ std::string Storage::EncodeObject(Storable& theContents)
     //        virtual const    uint8_t *    GetData()=0;
     //        virtual            size_t            GetSize()=0;
     //
-    const uint32_t nNewSize = static_cast<const uint32_t>(pBuffer->GetSize());
-    const void* pNewData = static_cast<const void*>(pBuffer->GetData());
+    auto nNewSize = pBuffer->GetSize();
+    auto pNewData = pBuffer->GetData();
 
     if ((nNewSize < 1) || (nullptr == pNewData)) {
         delete pBuffer;
@@ -2420,7 +2420,7 @@ std::string Storage::EncodeObject(Storable& theContents)
         return strReturnValue;
     }
 
-    const OTData theData(pNewData, nNewSize);
+    const ot_data_t theData(pNewData, pNewData + nNewSize);
     const OTASCIIArmor theArmor(theData);
 
     strReturnValue.assign(theArmor.Get(), theArmor.GetLength());
@@ -2459,12 +2459,11 @@ Storable* Storage::DecodeObject(StoredObjectType theObjectType,
 
     OTASCIIArmor theArmor;
     theArmor.Set(strInput.c_str(), static_cast<uint32_t>(strInput.size()));
-    const OTData thePayload(theArmor);
+    const ot_data_t thePayload(theArmor.GetData_Copy());
 
     // Put thePayload's contents into pBuffer here.
     //
-    pBuffer->SetData(static_cast<const uint8_t*>(thePayload.GetPointer()),
-                     thePayload.GetSize());
+    pBuffer->SetData(thePayload.data(), thePayload.size());
 
     // Now let's unpack it and return the Storable object.
 

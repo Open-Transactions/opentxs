@@ -694,7 +694,7 @@ String::String(const Identifier& theValue)
 {
     //    Initialize();
 
-    if (theValue.GetSize() > 0) theValue.GetString(*this);
+    if (theValue.size() > 0) theValue.GetString(*this);
 }
 
 String::String(const Contract& theValue)

@@ -1133,7 +1133,7 @@ OTWallet* OT_API::GetWallet(const char* szFuncName) const
 
 OTPseudonym* OT_API::GetNym(const Identifier& NYM_ID, const char* szFunc) const
 {
-    if (NYM_ID.IsEmpty()) {
+    if (NYM_ID.empty()) {
         otErr << __FUNCTION__ << ": NYM_ID is empty!";
         OT_FAIL;
     }
@@ -1363,7 +1363,7 @@ bool OT_API::SetServer_Name(const Identifier& SERVER_ID,
 bool OT_API::IsNym_RegisteredAtServer(const Identifier& NYM_ID,
                                       const Identifier& SERVER_ID) const
 {
-    if (NYM_ID.IsEmpty()) {
+    if (NYM_ID.empty()) {
         otErr << __FUNCTION__ << ": NYM_ID is empty!";
         OT_FAIL;
     }
@@ -1884,7 +1884,7 @@ bool OT_API::Wallet_CanRemoveServer(const Identifier& SERVER_ID) const
               << ": Not initialized; call OT_API::Init first.\n";
         OT_FAIL;
     }
-    if (SERVER_ID.IsEmpty()) {
+    if (SERVER_ID.empty()) {
         otErr << __FUNCTION__ << ": Null: SERVER_ID passed in!\n";
         OT_FAIL;
     }
@@ -1950,7 +1950,7 @@ bool OT_API::Wallet_CanRemoveAssetType(const Identifier& ASSET_ID) const
         OT_FAIL;
     }
 
-    if (ASSET_ID.IsEmpty()) {
+    if (ASSET_ID.empty()) {
         otErr << __FUNCTION__ << ": Null: ASSET_ID passed in!\n";
         OT_FAIL;
     }
@@ -1997,7 +1997,7 @@ bool OT_API::Wallet_CanRemoveNym(const Identifier& NYM_ID) const
         OT_FAIL;
     }
 
-    if (NYM_ID.IsEmpty()) {
+    if (NYM_ID.empty()) {
         otErr << __FUNCTION__ << ": Null: NYM_ID passed in!\n";
         OT_FAIL;
     }
@@ -2019,7 +2019,7 @@ bool OT_API::Wallet_CanRemoveNym(const Identifier& NYM_ID) const
             OTAPI_Wrap::OTAPI()->GetAccount(accountID, __FUNCTION__);
         Identifier theNYM_ID(pAccount->GetUserID());
 
-        if (theNYM_ID.IsEmpty()) {
+        if (theNYM_ID.empty()) {
             otErr << __FUNCTION__ << ": Bug in OT_API_Wallet_CanRemoveNym / "
                                      "OT_API_GetAccountWallet_NymID\n";
             return false;
@@ -2045,7 +2045,7 @@ bool OT_API::Wallet_CanRemoveNym(const Identifier& NYM_ID) const
         bool bGetServer = OTAPI_Wrap::OTAPI()->GetServer(i, theID, strName);
 
         if (bGetServer)
-            if (!theID.IsEmpty()) {
+            if (!theID.empty()) {
                 const String strServerID(theID);
 
                 if (pNym->IsRegisteredAtServer(strServerID)) {
@@ -2082,7 +2082,7 @@ bool OT_API::Wallet_CanRemoveAccount(const Identifier& ACCOUNT_ID) const
         OT_FAIL;
     }
 
-    if (ACCOUNT_ID.IsEmpty()) {
+    if (ACCOUNT_ID.empty()) {
         otErr << __FUNCTION__ << ": Null: ACCOUNT_ID passed in!\n";
         OT_FAIL;
     }
@@ -2149,7 +2149,7 @@ bool OT_API::Wallet_RemoveServer(const Identifier& SERVER_ID) const
         OT_FAIL;
     }
 
-    if (SERVER_ID.IsEmpty()) {
+    if (SERVER_ID.empty()) {
         otErr << __FUNCTION__ << ": Null: ASSET_ID passed in!\n";
         OT_FAIL;
     }
@@ -2200,7 +2200,7 @@ bool OT_API::Wallet_RemoveAssetType(const Identifier& ASSET_ID) const
         OT_FAIL;
     }
 
-    if (ASSET_ID.IsEmpty()) {
+    if (ASSET_ID.empty()) {
         otErr << __FUNCTION__ << ": Null: ASSET_ID passed in!\n";
         OT_FAIL;
     }
@@ -2237,7 +2237,7 @@ bool OT_API::Wallet_RemoveNym(const Identifier& NYM_ID) const
         OT_FAIL;
     }
 
-    if (NYM_ID.IsEmpty()) {
+    if (NYM_ID.empty()) {
         otErr << __FUNCTION__ << ": Null: ACCOUNT_ID passed in!\n";
         OT_FAIL;
     }
@@ -2286,7 +2286,7 @@ bool OT_API::Wallet_RemoveNym(const Identifier& NYM_ID) const
 //
 bool OT_API::Wallet_ExportNym(const Identifier& NYM_ID, String& strOutput) const
 {
-    if (NYM_ID.IsEmpty()) {
+    if (NYM_ID.empty()) {
         otErr << __FUNCTION__ << ": NYM_ID is empty!";
         OT_FAIL;
     }
@@ -2523,7 +2523,7 @@ bool OT_API::Wallet_ImportNym(const String& FILE_CONTENTS,
     const String strNymName(theMap["name"].c_str());
 
     if (nullptr != pNymID) pNymID->SetString(theMap["id"].c_str());
-    if (theNymID.IsEmpty()) {
+    if (theNymID.empty()) {
         otErr << __FUNCTION__
               << ": Error: NYM_ID passed in is empty; returning false";
         return false;
@@ -2835,7 +2835,7 @@ bool OT_API::Wallet_ImportCert(const String& DISPLAY_NAME,
 bool OT_API::Wallet_ExportCert(const Identifier& NYM_ID,
                                String& strOutput) const
 {
-    if (NYM_ID.IsEmpty()) {
+    if (NYM_ID.empty()) {
         otErr << __FUNCTION__ << ": NYM_ID is empty!";
         OT_FAIL;
     }
@@ -4252,7 +4252,7 @@ bool OT_API::SetAccount_Name(const Identifier& ACCT_ID,
 OTPseudonym* OT_API::LoadPublicNym(const Identifier& NYM_ID,
                                    const char* szFuncName) const
 {
-    if (NYM_ID.IsEmpty()) {
+    if (NYM_ID.empty()) {
         otErr << __FUNCTION__ << ": NYM_ID is empty!";
         OT_FAIL;
     }
@@ -4277,7 +4277,7 @@ OTPseudonym* OT_API::LoadPrivateNym(const Identifier& NYM_ID, bool bChecking,
                                     const OTPasswordData* pPWData,
                                     const OTPassword* pImportPassword) const
 {
-    if (NYM_ID.IsEmpty()) {
+    if (NYM_ID.empty()) {
         otErr << __FUNCTION__ << ": NYM_ID is empty!";
         OT_FAIL;
     }
@@ -4496,7 +4496,7 @@ bool OT_API::HarvestAllNumbers(const Identifier&, const Identifier& NYM_ID,
 OTPseudonym* OT_API::GetOrLoadPublicNym(const Identifier& NYM_ID,
                                         const char* szFuncName) const
 {
-    if (NYM_ID.IsEmpty()) {
+    if (NYM_ID.empty()) {
         otErr << __FUNCTION__ << ": NYM_ID is empty!";
         OT_FAIL;
     }
@@ -4521,14 +4521,14 @@ OTPseudonym* OT_API::GetOrLoadPrivateNym(
     const Identifier& NYM_ID, bool bChecking, const char* szFuncName,
     const OTPasswordData* pPWData, const OTPassword* pImportPassword) const
 {
-    if (NYM_ID.IsEmpty()) {
+    if (NYM_ID.empty()) {
         otErr << __FUNCTION__ << ": NYM_ID is empty!";
         OT_FAIL;
     }
 
     OTWallet* pWallet = GetWallet(szFuncName); // This logs and ASSERTs already.
     if (nullptr == pWallet) return nullptr;
-    if (NYM_ID.IsEmpty()) return nullptr;
+    if (NYM_ID.empty()) return nullptr;
     // By this point, pWallet is a good pointer.  (No need to cleanup.)
     //
     // This already logs copiously, including szFuncName...
@@ -4551,7 +4551,7 @@ OTPseudonym* OT_API::GetOrLoadNym(const Identifier& NYM_ID, bool bChecking,
                                   const char* szFuncName,
                                   const OTPasswordData* pPWData) const
 {
-    if (NYM_ID.IsEmpty()) {
+    if (NYM_ID.empty()) {
         otErr << __FUNCTION__ << ": NYM_ID is empty!";
         OT_FAIL;
     }

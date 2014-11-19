@@ -134,67 +134,46 @@
 #define OPENTXS_CORE_OTDATA_HPP
 
 #include <cstdint>
+#include <vector>
+#include <stdexcept>
+
+#include <opentxs/core/util/Assert.hpp>
 
 namespace opentxs
 {
 
-class OTASCIIArmor;
+// for variable lengths
+typedef std::vector<uint8_t> ot_data_t;
 
-class OTData
+namespace OTData
 {
-public:
-    EXPORT OTData();
-    EXPORT OTData(const void* data, uint32_t size);
-    EXPORT OTData(const OTData& source);
-    EXPORT OTData(const OTASCIIArmor& source);
-    EXPORT virtual ~OTData();
 
-    EXPORT void Release();
+template <typename DataType>
+void appendData(DataType in, ot_data_t& data)
+{
+    auto in_n_p = reinterpret_cast<uint8_t*>(&in);
+    data.insert(data.end(), in_n_p, in_n_p + sizeof(in));
+}
 
-    void SetSize(uint32_t size);
+template <typename DataType>
+DataType readData(ot_data_t::const_iterator* it,
+                  const ot_data_t::const_iterator& end)
+{
+    OT_ASSERT(nullptr != it);
 
-    inline const void* GetPointer() const
-    {
-        return data_;
+    ot_data_t v(sizeof(DataType));
+
+    for (auto& a : v) {
+        if (*it == end) throw std::out_of_range("reached end of data");
+        a = *(*it)++;
     }
+    return *reinterpret_cast<DataType*>(v.data());
+}
 
-    EXPORT OTData& operator=(OTData rhs);
-    EXPORT void swap(OTData& rhs);
-    EXPORT bool operator==(const OTData& rhs) const;
-    EXPORT bool operator!=(const OTData& rhs) const;
-    EXPORT OTData& operator+=(const OTData& rhs);
-    EXPORT bool IsEmpty() const;
+void readDataVector(ot_data_t::const_iterator* it,
+                    const ot_data_t::const_iterator& end, ot_data_t& out);
 
-    inline uint32_t GetSize() const
-    {
-        return size_;
-    }
-
-    EXPORT void Assign(const OTData& source);
-    EXPORT void Assign(const void* data, uint32_t size);
-    EXPORT void Concatenate(const void* data, uint32_t size);
-    EXPORT bool Randomize(uint32_t size);
-    EXPORT void zeroMemory() const;
-    EXPORT uint32_t OTfread(uint8_t* data, uint32_t size);
-
-    inline void reset()
-    {
-        position_ = 0;
-    }
-
-protected:
-    inline void Initialize()
-    {
-        data_ = nullptr;
-        size_ = 0;
-        position_ = 0;
-    }
-
-private:
-    void* data_;
-    uint32_t position_;
-    uint32_t size_; // TODO: MAX_SIZE ?? security.
-};
+} // namesapce OTData
 
 } // namespace opentxs
 

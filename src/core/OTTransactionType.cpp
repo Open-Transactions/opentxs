@@ -327,14 +327,14 @@ void OTTransactionType::Release_TransactionType()
     // If there were any dynamically allocated objects, clean them up here.
 
     //  m_ID.Release();
-    m_AcctID.Release(); // Compare m_AcctID to m_ID after loading it from string
-                        // or file. They should match, and signature should
-                        // verify.
+    m_AcctID.clear(); // Compare m_AcctID to m_ID after loading it from string
+                      // or file. They should match, and signature should
+                      // verify.
 
     //    m_ServerID.Release();       // Server ID as used to instantiate the
     // transaction, based on expected ServerID.
-    m_AcctServerID.Release(); // Actual ServerID within the signed portion.
-                              // (Compare to m_ServerID upon loading.)
+    m_AcctServerID.clear(); // Actual ServerID within the signed portion.
+                            // (Compare to m_ServerID upon loading.)
 
     //    m_AcctUserID.Release();
 

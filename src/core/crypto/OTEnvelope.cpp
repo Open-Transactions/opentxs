@@ -150,6 +150,14 @@ extern "C" {
 #endif
 }
 
+// for htons
+#ifndef _WIN32
+#pragma GCC diagnostic ignored "-Wold-style-cast"
+#ifndef __clang__
+#pragma GCC diagnostic warning "-Wuseless-cast"
+#endif
+#endif
+
 namespace opentxs
 {
 
@@ -252,9 +260,10 @@ bool OTEnvelope::Encrypt(const String& theInput, OTSymmetricKey& theKey,
 
     // Generate a random initialization vector.
     //
-    OTData theIV;
+    ot_data_t theIV;
+    theIV.resize(OTCryptoConfig::SymmetricIvSize());
 
-    if (!theIV.Randomize(OTCryptoConfig::SymmetricIvSize())) {
+    if (!OTCrypto::It()->RandomizeMemory(theIV.data(), theIV.size())) {
         otErr << __FUNCTION__ << ": Failed trying to randomly generate IV.\n";
         return false;
     }
@@ -290,7 +299,7 @@ bool OTEnvelope::Encrypt(const String& theInput, OTSymmetricKey& theKey,
         return false;
     }
 
-    OTData theCipherText;
+    ot_data_t theCipherText;
 
     const bool bEncrypted = OTCrypto::It()->Encrypt(
         theRawSymmetricKey,       // The symmetric key, in clear form.
@@ -312,7 +321,7 @@ bool OTEnvelope::Encrypt(const String& theInput, OTSymmetricKey& theKey,
     // including the envelope type, the size of the IV, the IV
     // itself, and the ciphertext.
     //
-    m_dataContents.Release();
+    m_dataContents.clear();
 
     // Write the ENVELOPE TYPE (network order version.)
     //
@@ -320,35 +329,16 @@ bool OTEnvelope::Encrypt(const String& theInput, OTSymmetricKey& theKey,
     // 1 == Asymmetric Key  (other functions -- Seal / Open.)
     // 2 == Symmetric Key   (this function -- Encrypt / Decrypt.)
     // Anything else: error.
-
-    // Calculate "network-order" version of envelope type 2.
-    uint16_t env_type_n = htons(static_cast<uint16_t>(2));
-
-    m_dataContents.Concatenate(reinterpret_cast<void*>(&env_type_n),
-                               // (uint32_t here is the 2nd parameter to
-                               // Concatenate, and has nothing to do with
-                               // env_type_n being uint16_t)
-                               static_cast<uint32_t>(sizeof(env_type_n)));
+    OTData::appendData<uint16_t>(htons(2), m_dataContents);
 
     // Write IV size (in network-order)
-    //
-    uint32_t ivlen =
-        OTCryptoConfig::SymmetricIvSize(); // Length of IV for this cipher...
-    OT_ASSERT(ivlen >= theIV.GetSize());
-    uint32_t ivlen_n = htonl(
-        theIV.GetSize()); // Calculate "network-order" version of iv length.
-
-    m_dataContents.Concatenate(reinterpret_cast<void*>(&ivlen_n),
-                               static_cast<uint32_t>(sizeof(ivlen_n)));
-
-    // Write the IV itself.
-    //
-    m_dataContents.Concatenate(theIV.GetPointer(), theIV.GetSize());
+    OTData::appendData<uint32_t>(htonl(theIV.size()), m_dataContents);
+    m_dataContents.insert(m_dataContents.end(), theIV.begin(), theIV.end());
 
     // Write the Ciphertext.
     //
-    m_dataContents.Concatenate(theCipherText.GetPointer(),
-                               theCipherText.GetSize());
+    m_dataContents.insert(m_dataContents.end(), theCipherText.begin(),
+                          theCipherText.end());
 
     // We don't write the size of the ciphertext before the ciphertext itself,
     // since the decryption is able to deduce the size based on the total
@@ -379,11 +369,6 @@ bool OTEnvelope::Decrypt(String& theOutput, const OTSymmetricKey& theKey,
         return false;
     }
 
-    uint32_t nRead = 0;
-    uint32_t nRunningTotal = 0;
-
-    m_dataContents.reset(); // Reset the fread position on this object to 0.
-
     //
     // Read the ENVELOPE TYPE (as network order version -- and convert to host
     // version.)
@@ -393,23 +378,10 @@ bool OTEnvelope::Decrypt(String& theOutput, const OTSymmetricKey& theKey,
     // 2 == Symmetric Key   (other functions -- Encrypt / Decrypt use this.)
     // Anything else: error.
     //
-    uint16_t env_type_n = 0;
+    auto data_it = m_dataContents.cbegin();
 
-    if (0 == (nRead = m_dataContents.OTfread(
-                  reinterpret_cast<uint8_t*>(&env_type_n),
-                  static_cast<uint32_t>(sizeof(env_type_n))))) {
-        otErr << szFunc << ": Error reading Envelope Type. Expected "
-                           "asymmetric(1) or symmetric (2).\n";
-        return false;
-    }
-    nRunningTotal += nRead;
-    OT_ASSERT(nRead == static_cast<uint32_t>(sizeof(env_type_n)));
-
-    // convert that envelope type from network to HOST endian.
-    //
-    const uint16_t env_type = ntohs(env_type_n);
-    //  nRunningTotal += env_type;    // NOPE! Just because envelope type is 1
-    // or 2, doesn't mean we add 1 or 2 extra bytes to the length here. Nope!
+    uint16_t env_type =
+        ntohs(OTData::readData<uint16_t>(&data_it, m_dataContents.end()));
 
     if (2 != env_type) {
         const uint32_t l_env_type = static_cast<uint32_t>(env_type);
@@ -427,24 +399,11 @@ bool OTEnvelope::Decrypt(String& theOutput, const OTSymmetricKey& theKey,
 
     // Read the IV SIZE (network order version -- convert to host version.)
     //
-    uint32_t iv_size_n = 0;
+    uint32_t iv_size =
+        ntohl(OTData::readData<uint32_t>(&data_it, m_dataContents.end()));
 
-    if (0 == (nRead = m_dataContents.OTfread(
-                  reinterpret_cast<uint8_t*>(&iv_size_n),
-                  static_cast<uint32_t>(sizeof(iv_size_n))))) {
-        otErr << szFunc << ": Error reading IV Size.\n";
-        return false;
-    }
-    nRunningTotal += nRead;
-    OT_ASSERT(nRead == static_cast<uint32_t>(sizeof(iv_size_n)));
-
-    // convert that iv size from network to HOST endian.
-    //
-    const uint32_t iv_size_host_order = ntohl(iv_size_n);
-
-    if (iv_size_host_order > max_iv_length) {
-        otErr << szFunc << ": Error: iv_size ("
-              << static_cast<int64_t>(iv_size_host_order)
+    if (iv_size > max_iv_length) {
+        otErr << szFunc << ": Error: iv_size (" << static_cast<int64_t>(iv_size)
               << ") is larger than max_iv_length ("
               << static_cast<int64_t>(max_iv_length) << ").\n";
         return false;
@@ -453,19 +412,12 @@ bool OTEnvelope::Decrypt(String& theOutput, const OTSymmetricKey& theKey,
 
     // Then read the IV (initialization vector) itself.
     //
-    OTData theIV;
-    theIV.SetSize(iv_size_host_order);
+    ot_data_t theIV;
+    theIV.resize(iv_size);
 
-    if (0 == (nRead = m_dataContents.OTfread(
-                  static_cast<uint8_t*>(const_cast<void*>(theIV.GetPointer())),
-                  static_cast<uint32_t>(iv_size_host_order)))) {
-        otErr << szFunc << ": Error reading initialization vector.\n";
-        return false;
-    }
-    nRunningTotal += nRead;
-    OT_ASSERT(nRead == static_cast<uint32_t>(iv_size_host_order));
+    OTData::readDataVector(&data_it, m_dataContents.end(), theIV);
 
-    OT_ASSERT(nRead <= max_iv_length);
+    OT_ASSERT(theIV.size() <= max_iv_length);
 
     // We create an OTData object to store the ciphertext itself, which
     // begins AFTER the end of the IV.
@@ -474,21 +426,17 @@ bool OTEnvelope::Decrypt(String& theOutput, const OTSymmetricKey& theKey,
     // the size of the ciphertext, meanwhile, is the size of the entire thing,
     // MINUS nRunningTotal.
     //
-    OTData theCipherText(
-        static_cast<const void*>(
-            static_cast<const uint8_t*>(m_dataContents.GetPointer()) +
-            nRunningTotal),
-        m_dataContents.GetSize() - nRunningTotal);
+    ot_data_t theCipherText(data_it, m_dataContents.cend());
 
     // Now we've got all the pieces together, let's try to decrypt it...
     //
-    OTData thePlaintext; // for output.
+    ot_data_t thePlaintext; // for output.
 
     const bool bDecrypted = OTCrypto::It()->Decrypt(
         theRawSymmetricKey, // The symmetric key, in clear form.
-        static_cast<const char*>(
-            theCipherText.GetPointer()), // This is the Ciphertext.
-        theCipherText.GetSize(),
+        reinterpret_cast<const char*>(
+            theCipherText.data()), // This is the Ciphertext.
+        theCipherText.size(),
         theIV, thePlaintext); // OUTPUT. (Recovered plaintext.) You can pass
                               // OTPassword& OR OTData& here (either will
                               // work.)
@@ -501,13 +449,11 @@ bool OTEnvelope::Decrypt(String& theOutput, const OTSymmetricKey& theKey,
 
         // Make sure it's null-terminated...
         //
-        uint32_t nIndex = thePlaintext.GetSize() - 1;
-        (static_cast<uint8_t*>(
-            const_cast<void*>(thePlaintext.GetPointer())))[nIndex] = '\0';
+        thePlaintext.at(thePlaintext.size()) = 0;
 
         // Set it into theOutput (to return the plaintext to the caller)
         //
-        theOutput.Set(static_cast<const char*>(thePlaintext.GetPointer()));
+        theOutput.Set(reinterpret_cast<const char*>(thePlaintext.data()));
     }
 
     return bDecrypted;

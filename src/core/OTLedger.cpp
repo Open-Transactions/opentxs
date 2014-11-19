@@ -754,11 +754,11 @@ bool OTLedger::SaveGeneric(OTLedger::ledgerType theType)
 //
 bool OTLedger::CalculateHash(Identifier& theOutput)
 {
-    theOutput.Release();
+    theOutput.clear();
 
     bool bCalcDigest = theOutput.CalculateDigest(m_xmlUnsigned);
     if (!bCalcDigest) {
-        theOutput.Release();
+        theOutput.clear();
         otErr << "OTLedger::CalculateHash: Failed trying to calculate hash "
                  "(for a " << GetTypeString() << ")\n";
     }
@@ -817,7 +817,7 @@ bool OTLedger::SaveNymbox(Identifier* pNymboxHash) // If you pass
     // I will put the new hash, as output for the caller of this function.
     //
     if (bSaved && (nullptr != pNymboxHash)) {
-        pNymboxHash->Release();
+        pNymboxHash->clear();
 
         if (!CalculateNymboxHash(*pNymboxHash))
             otErr << "OTLedger::SaveNymbox: Failed trying to calculate nymbox "
@@ -865,7 +865,7 @@ bool OTLedger::SaveInbox(Identifier* pInboxHash) // If you pass the
     // I will put the new hash, as output for the caller of this function.
     //
     if (bSaved && (nullptr != pInboxHash)) {
-        pInboxHash->Release();
+        pInboxHash->clear();
 
         if (!CalculateInboxHash(*pInboxHash))
             //      if (!pInboxHash->CalculateDigest(m_xmlUnsigned))
@@ -897,7 +897,7 @@ bool OTLedger::SaveOutbox(Identifier* pOutboxHash) // If you pass
     // I will put the new hash, as output for the caller of this function.
     //
     if (bSaved && (nullptr != pOutboxHash)) {
-        pOutboxHash->Release();
+        pOutboxHash->clear();
 
         if (!CalculateOutboxHash(*pOutboxHash))
             //      if (!pOutboxHash->CalculateDigest(m_xmlUnsigned))

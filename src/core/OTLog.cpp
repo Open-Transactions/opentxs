@@ -221,6 +221,14 @@ struct sigcontext
 #define GLOBAL_LOGNAME "init"
 #define GLOBAL_LOGFILE "init.log"
 
+// for OT_HANDLE_SIGNAL
+#ifndef _WIN32
+#pragma GCC diagnostic ignored "-Wold-style-cast"
+#ifndef __clang__
+#pragma GCC diagnostic warning "-Wuseless-cast"
+#endif
+#endif
+
 //  OTLog Static Variables and Constants.
 
 namespace opentxs
