@@ -353,7 +353,7 @@ bool MessageProcessor::processMessage(const std::string& messageString,
     }
 
     Message replyMessage;
-    replyMessage.m_strCommand.Format("@%s", message.m_strCommand.Get());
+    replyMessage.m_strCommand.Format("%sReply", message.m_strCommand.Get());
     // UserID
     replyMessage.m_strNymID = message.m_strNymID;
     // ServerID, a hash of the server contract
