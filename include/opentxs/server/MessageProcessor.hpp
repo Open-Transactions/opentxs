@@ -136,6 +136,12 @@
 #include <string>
 #include <memory>
 
+namespace zmq
+{
+class context_t;
+class socket_t;
+}
+
 namespace opentxs
 {
 
@@ -155,7 +161,8 @@ private:
 
 private:
     OTServer* server_;
-    std::shared_ptr<OTSocket> socket_;
+    zmq::context_t* zmqContext_;
+    zmq::socket_t* zmqSocket_;
 };
 
 } // namespace opentxs
