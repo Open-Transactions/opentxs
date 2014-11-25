@@ -144,141 +144,65 @@
 #include <opentxs/core/crypto/OTEnvelope.hpp>
 #include <opentxs/core/util/Timer.hpp>
 
+#include <cppzmq/zmq.hpp>
+
+#define IO_THREADS 1
+
 namespace opentxs
 {
 
 MessageProcessor::MessageProcessor(ServerLoader& loader)
     : server_(loader.getServer())
-    , socket_()
+    , zmqContext_(new zmq::context_t(IO_THREADS))
+    , zmqSocket_(new zmq::socket_t(*zmqContext_, ZMQ_REP))
 {
     init(loader.getPort());
 }
 
 void MessageProcessor::init(int port)
 {
-    String configFolderPath = "";
-    if (!OTDataFolder::GetConfigFilePath(configFolderPath)) {
-        OT_FAIL;
-    }
-    OTSettings settings(configFolderPath);
-
-    settings.Reset();
-    if (!settings.Load()) {
-        OT_FAIL;
-    }
-
-    socket_.reset(new OTSocket(false));
-
-    if (!settings.Save()) {
-        OT_FAIL;
-    }
-    settings.Reset();
-
     if (port == 0) {
         OT_FAIL;
     }
-    String bindPath;
-    bindPath.Format("%s%d", "tcp://*:", port);
 
-    if (!socket_->Listen(bindPath.Get())) {
-        OT_FAIL;
-    }
+    std::ostringstream stringStream;
+    stringStream << "tcp://*:" << port;
+    std::string endpoint = stringStream.str();
+    zmqSocket_->bind(endpoint.c_str());
 }
 
 void MessageProcessor::run()
 {
     for (;;) {
-        // =-=-=- HEARTBEAT -=-=-=
-        //
-        // The Server now processes certain things on a regular basis.
-        // ProcessCron is what gives it the opportunity to do that.
-        // All of the Cron Items (including market trades, payment plans, smart
-        // contracts...)
-        // they all have their hooks here...
-        //
-        // Internally this is smart enough to know how often to actually
-        // activate itself.
-        server_->ProcessCron();
-        // Most often it just returns doing nothing (waiting for its timer.)
-        // Wait for client http requests (and process replies out to them.)
-        // Number of requests to process per heartbeat:
-        // ServerSettings::GetHeartbeatNoRequests()
-        //
-        // Loop: process up to 10 client requests, then sleep for 1/10th second.
-        // That's a total of 100 requests per second. Can the computers handle
-        // it?
-        // Is it too much or too little? Todo: load testing.
-        //
-        // Then: check for shutdown flag.
-        //
-        // Then: go back to the top ("do") and repeat the loop.... process cron,
-        // process 10 client requests, sleep, check for shutdown, etc.
+        // std::string conversions taken from zhelpers.hpp
 
-        Timer t;
-        t.start();
-        double startTick = t.getElapsedTimeInMilliSec();
+        zmq::message_t requestMessage;
 
-        // PROCESS X NUMBER OF REQUESTS (THIS PULSE.)
-        //
-        // Theoretically the "number of requests" that we process EACH PULSE.
-        // (The timing code here is still pretty new, need to do some load
-        // testing.)
-        for (int i = 0; i < ServerSettings::GetHeartbeatNoRequests(); i++) {
-            std::string messageString;
-
-            // With 100ms heartbeat, receive will try 100 ms, then 200 ms, then
-            // 400 ms, total of 700.
-            // That's about 15 Receive() calls every 10 seconds. Therefore if I
-            // want the ProcessCron()
-            // to trigger every 10 seconds, I need to set the cron interval to
-            // roll over every 15 heartbeats.
-            // Therefore I will be using a real Timer for Cron, instead of the
-            // damn intervals.
-
-            bool received = socket_->Receive(messageString);
-
-            if (received) {
-                if (messageString.size() == 0) {
-                    OTLog::Error("skipping zero-length message\n");
-                }
-                else {
-                    std::string reply;
-
-                    bool error = processMessage(messageString, reply);
-
-                    if (error) {
-                        reply = "";
-                    }
-
-                    bool successSending = socket_->Send(reply.c_str());
-
-                    if (!successSending) {
-                        OTLog::vError("server main: Socket ERROR: failed "
-                                      "while trying to send reply "
-                                      "back to client! \n\n "
-                                      "MESSAGE:\n%s\n\nREPLY:\n%s\n\n",
-                                      messageString.c_str(), reply.c_str());
-                    }
-                }
-            }
+        if (!zmqSocket_->recv(&requestMessage)) {
+            OTLog::Error("zeromq recv() failed\n");
+            continue;
         }
 
-        // IF the time we had available wasn't all used up -- if some of it is
-        // still available, then SLEEP until we reach the NEXT PULSE. (In
-        // practice, we will probably use TOO MUCH time, not too little--but
-        // then again OT isn't ALWAYS processing a message. There could be
-        // plenty of dead time in between...)
-        double endTick = t.getElapsedTimeInMilliSec();
-        int64_t elapsed = static_cast<int64_t>(endTick - startTick);
+        std::string requestString(static_cast<char*>(requestMessage.data()),
+                                  requestMessage.size());
 
-        if (elapsed < ServerSettings::GetHeartbeatMsBetweenBeats()) {
-            int64_t ms = ServerSettings::GetHeartbeatMsBetweenBeats() - elapsed;
-            OTLog::SleepMilliseconds(ms);
+        std::string responseString;
+
+        bool error = processMessage(requestString, responseString);
+
+        if (error) {
+            responseString = "";
         }
 
-        if (server_->IsFlaggedForShutdown()) {
-            OTLog::Output(0, "opentxs server is shutting down gracefully.\n");
-            break;
+        zmq::message_t responseMsg(responseString.size());
+        memcpy(responseMsg.data(), responseString.data(),
+               responseString.size());
+
+        if (!zmqSocket_->send(responseMsg)) {
+            OTLog::vError("MessageProcessor: failed to send response\n"
+                          "request:\n%s\n\n"
+                          "response:\n%s\n\n",
+                          requestString.c_str(), responseString.c_str());
         }
     }
 }
@@ -329,10 +253,7 @@ bool MessageProcessor::processMessage(const std::string& messageString,
     // The default reply. In fact this is probably superfluous
     replyMessage.m_bSuccess = false;
 
-    // By constructing this without a socket, I put it in ZMQ mode,
-    // instead of tcp/ssl.
     ClientConnection client;
-
     Nym nym(message.m_strNymID);
 
     bool processedUserCmd = server_->userCommandProcessor_.ProcessUserCommand(
