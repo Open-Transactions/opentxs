@@ -163,7 +163,12 @@ OTAPI_Exec* OTAPI_Wrap::Exec()
     }
 
     OT_API* pOTAPI = exec->OTAPI();
+#ifndef ANDROID
     if (nullptr == pOTAPI || !pOTAPI->IsInitialized()) {
+#else
+    if (nullptr == pOTAPI) {
+#endif
+
         otErr << __FUNCTION__ << ": Error: OT_API not Initialized!!\n";
         OT_FAIL;
     }
