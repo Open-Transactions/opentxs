@@ -152,22 +152,33 @@ namespace opentxs
 // but either way the connections need a pointer to the wallet
 // they are associated with, so they can access those accounts.
 OTServerConnection::OTServerConnection(OTClient* theClient,
-                                       const std::string& endpoint)
+                                       OTServerContract* contract, Nym* nym)
     : context_zmq(1, 31)
     , socket_zmq(context_zmq, ZMQ_REQ)
-    , m_pNym(nullptr)
-    , m_pServerContract(nullptr)
+    , m_pNym(nym)
+    , m_pServerContract(contract)
     , m_pClient(theClient)
 {
     int linger = 1000;
     socket_zmq.setsockopt(ZMQ_LINGER, &linger, sizeof(linger));
 
+    String endpoint;
+
     try {
-        socket_zmq.connect(endpoint.c_str());
+        int32_t port = 0;
+        String hostname;
+
+        if (!m_pServerContract->GetConnectInfo(hostname, port)) {
+            otErr << ": Failed retrieving connection info from server "
+                     "contract.\n";
+            OT_FAIL;
+        }
+        endpoint.Format("tcp://%s:%d", hostname.Get(), port);
+
+        socket_zmq.connect(endpoint.Get());
     }
     catch (const std::exception& e) {
-        Log::vError("Failed to connect to %s: %s \n", endpoint.c_str(),
-                    e.what());
+        Log::vError("Failed to connect to %s: %s \n", endpoint.Get(), e.what());
         OT_FAIL;
     }
 }
@@ -204,137 +215,90 @@ bool OTServerConnection::GetNotaryID(Identifier& theID) const
     return false;
 }
 
-void OTServerConnection::send(OTServerContract* pServerContract, Nym* pNym,
-                              const Message& theMessage)
+bool OTServerConnection::send(const Message& theMessage)
 {
-    OT_ASSERT(nullptr != pServerContract);
-    OT_ASSERT(nullptr != pNym)
-    const Nym* pServerNym = pServerContract->GetContractPublicNym();
+    const Nym* pServerNym = m_pServerContract->GetContractPublicNym();
     OT_ASSERT(nullptr != pServerNym);
 
+    // wrap in envelope and seal it
     OTEnvelope theEnvelope;
     String strEnvelopeContents;
     theMessage.SaveContractRaw(strEnvelopeContents);
     theEnvelope.Seal(*pServerNym, strEnvelopeContents);
+    // armor envelope
+    OTASCIIArmor ascEnvelope(theEnvelope);
 
     otOut << "\n=====>BEGIN Sending " << theMessage.m_strCommand
           << " message via ZMQ... Request number: "
           << theMessage.m_strRequestNum << "\n";
 
-    m_pServerContract = pServerContract;
-    m_pNym = pNym;
-    send(theEnvelope);
+    bool success = send(ascEnvelope.Get(), ascEnvelope.GetLength());
 
     otWarn << "<=====END Finished sending " << theMessage.m_strCommand
            << " message (and hopefully receiving "
               "a reply.)\nRequest number: " << theMessage.m_strRequestNum
            << "\n\n";
+
+    return success;
 }
 
-bool OTServerConnection::send(const OTEnvelope& theEnvelope)
+bool OTServerConnection::send(const char* data, size_t length)
 {
-    OTASCIIArmor ascEnvelope(theEnvelope);
+    return socket_zmq.send(data, length);
+}
 
-    if (!ascEnvelope.Exists()) {
-        return false;
-    }
-
-    bool success = socket_zmq.send(ascEnvelope.Get(), ascEnvelope.GetLength());
-
-    if (!success) {
-        otErr << __FUNCTION__
-              << ": Failed, even with error correction and retries, "
-                 "while trying to send message to server.";
-        return false;
-    }
-
+bool OTServerConnection::receive()
+{
+    // receive message from zmw socket
     std::string rawServerReply;
     bool bSuccessReceiving = receive(rawServerReply);
-
     if (!bSuccessReceiving) {
-        otErr << __FUNCTION__ << ": Failed trying to receive expected reply "
-                                 "from server.\n";
+        otErr << "Failed trying to receive expected reply from server.\n";
         return false;
     }
-
+    // dearmor
     String strRawServerReply(rawServerReply);
     OTASCIIArmor ascServerReply;
-    const bool bLoaded = strRawServerReply.Exists() &&
-                         ascServerReply.LoadFromString(strRawServerReply);
+    bool bLoaded = ascServerReply.LoadFromString(strRawServerReply);
+    if (!bLoaded) {
+        otErr << "Failed trying to load OTASCIIArmor object from string:\n\n";
+        otErr << strRawServerReply << "\n\n";
+        return false;
+    }
+    // open envelope
     String strServerReply;
     bool bRetrievedReply = false;
-    if (!bLoaded)
-        otErr << __FUNCTION__ << ": Failed trying to load OTASCIIArmor "
-                                 "object from string:\n\n" << strRawServerReply
-              << "\n\n";
-
-    else if (strRawServerReply.Contains("ENVELOPE")) // Server sent this
-                                                     // encrypted to my
-    // public key, in an armored envelope.
-    {
+    if (strRawServerReply.Contains("ENVELOPE")) {
         OTEnvelope theServerEnvelope;
-        if (theServerEnvelope.SetAsciiArmoredData(ascServerReply)) {
-
-            bRetrievedReply = theServerEnvelope.Open(*m_pNym, strServerReply);
-        }
-        else {
-            otErr << __FUNCTION__ << ": Failed: while setting "
-                                     "OTASCIIArmor'd string into an "
-                                     "OTEnvelope.\n";
+        if (!theServerEnvelope.SetAsciiArmoredData(ascServerReply)) {
+            otErr << "Failed: while setting armored string into envelope.\n";
             return false;
         }
+        bRetrievedReply = theServerEnvelope.Open(*m_pNym, strServerReply);
     }
-    // NOW ABLE TO HANDLE MESSAGES HERE IN ADDITION TO ENVELOPES!!!!
-    // (Sometimes the server HAS to reply with an unencrypted reply,
-    // and this is what makes it possible for the client to RECEIVE
-    // that reply.)
-    //
-    // The Server doesn't have to accept both types, but the client
-    // does,
-    // since technically all clients cannot talk to it without
-    // knowing its key first.
-    //
-    // ===> A CLIENT could POTENTIALLY have sent a message to server
-    // when unregistered,
-    // leaving server NO WAY to reply! Therefore server HAS to have
-    // the OPTION to send
-    // an unencrypted message, in that case, and the client HAS to
-    // be able to receive it
-    // properly!!
-    //
-    else if (strRawServerReply.Contains("MESSAGE")) // Server sent
-                                                    // this NOT
-                                                    // encrypted, in
-                                                    // an armored
-                                                    // message.
-    {
+    // plain message
+    else if (strRawServerReply.Contains("MESSAGE")) {
         bRetrievedReply = ascServerReply.GetString(strServerReply);
     }
     else {
-        otErr << __FUNCTION__ << ": Error: Unknown reply type received from "
-                                 "server. (Expected envelope or message.)\n"
-                                 "\n\n PERHAPS YOU ARE RUNNING AN OLD VERSION "
-                                 "OF THE SERVER ????? \n\n";
+        otErr << "Error: Unknown reply type received from "
+                 "server. (Expected envelope or message.)\n"
+                 "\n\n PERHAPS YOU ARE RUNNING AN OLD VERSION "
+                 "OF THE SERVER ????? \n\n";
         return false;
     }
-    // todo: use a unique_ptr  soon as feasible.
-    std::shared_ptr<Message> pServerReply(new Message());
-    OT_ASSERT(nullptr != pServerReply);
 
+    // load received data into message and process
+    std::shared_ptr<Message> pServerReply(new Message());
     if (bRetrievedReply && strServerReply.Exists() &&
         pServerReply->LoadContractFromString(strServerReply)) {
-        // Now the fully-loaded message object (from the server,
-        // this time) can be processed by the OT library...
-        // Client takes ownership and will
         m_pClient->processServerReply(pServerReply);
-    }
-    else {
-        otErr << __FUNCTION__ << ": Error loading server reply from string:\n\n"
-              << strRawServerReply << "\n\n";
-        return false;
+        return true;
     }
 
-    return true;
+    otErr << "Error loading server reply from string:\n\n" << strRawServerReply
+          << "\n\n";
+    return false;
 }
 
 bool OTServerConnection::receive(std::string& serverReply)

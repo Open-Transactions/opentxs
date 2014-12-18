@@ -144,13 +144,13 @@ class OTClient;
 class Identifier;
 class Nym;
 class OTServerContract;
-class OTEnvelope;
 class Message;
 
 class OTServerConnection
 {
 public:
-    OTServerConnection(OTClient* theClient, const std::string& endpoint);
+    OTServerConnection(OTClient* theClient, OTServerContract* contract,
+                       Nym* nym);
 
     bool GetNotaryID(Identifier& theID) const;
 
@@ -166,11 +166,11 @@ public:
 
     void OnServerResponseToGetRequestNumber(int64_t lNewRequestNumber) const;
 
-    void send(OTServerContract* pServerContract, Nym* pNym,
-              const Message& theMessage);
+    bool send(const Message& theMessage);
+    bool receive();
 
 private:
-    bool send(const OTEnvelope& envelope);
+    bool send(const char* data, size_t length);
     bool receive(std::string& reply);
 
 private:

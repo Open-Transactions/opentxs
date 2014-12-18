@@ -176,9 +176,9 @@ OTClient::OTClient(OTWallet* theWallet)
 {
 }
 
-bool OTClient::connect(const std::string& endpoint)
+bool OTClient::connect(OTServerContract* contract, Nym* nym)
 {
-    m_pConnection.reset(new OTServerConnection(this, endpoint));
+    m_pConnection.reset(new OTServerConnection(this, contract, nym));
     return true;
 }
 
@@ -209,21 +209,20 @@ void OTClient::ProcessMessageOut(OTServerContract* pServerContract, Nym* pNym,
         m_MessageOutbuffer.AddSentMessage(*(pMsg.release()));
 
     if (!m_pConnection) {
-        int32_t port = 0;
-        String hostname;
-
-        if (!pServerContract->GetConnectInfo(hostname, port)) {
-            otErr << ": Failed retrieving connection info from server "
-                     "contract.\n";
-            OT_FAIL;
-        }
-        String endpoint;
-        endpoint.Format("tcp://%s:%d", hostname.Get(), port);
-
-        connect(endpoint.Get());
+        connect(pServerContract, pNym);
     }
 
-    m_pConnection->send(pServerContract, pNym, theMessage);
+    bool sent = m_pConnection->send(theMessage);
+    if (!sent) {
+        otErr << "Error sending message!\n";
+        OT_FAIL;
+    }
+
+    bool received = m_pConnection->receive();
+    if (!received) {
+        otErr << "Error receiving message!\n";
+        OT_FAIL;
+    }
 }
 
 /// This is standard behavior for the Nymbox (NOT the inbox.)
