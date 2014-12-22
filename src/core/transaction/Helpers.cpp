@@ -246,9 +246,7 @@ int32_t LoadAbbreviatedRecord(irr::io::IrrXMLReader*& xml,
 
     if (strOrigin.Exists()) lNumberOfOrigin = strOrigin.ToLong();
 
-    // DATE SIGNED
-    the_DATE_SIGNED = OTTimeGetTimeFromSeconds(
-        strDateSigned.Get()); // (We already verified it Exists() just above.)
+    the_DATE_SIGNED = toTime_t(std::string(strDateSigned.Get()));
 
     // Transaction TYPE for the abbreviated record...
     theType = OTTransaction::error_state; // default

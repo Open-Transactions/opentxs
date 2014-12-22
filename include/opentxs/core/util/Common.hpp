@@ -149,6 +149,8 @@
 #include <string>
 #include <cstdlib>
 
+#include <boost/date_time/posix_time/posix_time.hpp>
+
 // forward decleration.  (need to match what is in the irr source code). Cam.
 namespace irr
 {
@@ -245,6 +247,20 @@ inline time64_t OTTimeAddTimeInterval(time64_t lhs, int64_t rhs)
 {
     return lhs + rhs;
 }
+
+inline std::string getTimestamp()
+{
+    return boost::posix_time::to_iso_extended_string(
+        boost::posix_time::second_clock::universal_time());
+}
+
+inline time64_t toTime_t(std::string extendedTimeString)
+{
+    boost::posix_time::ptime epoch(boost::gregorian::date(1970, 1, 1));
+    return (boost::posix_time::from_iso_string(extendedTimeString) - epoch)
+        .total_seconds();
+}
+
 #endif
 
 #endif // OPENTXS_CORE_COMMON_HPP

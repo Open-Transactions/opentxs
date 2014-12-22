@@ -301,12 +301,10 @@ void Message::UpdateContents()
     // I release this because I'm about to repopulate it.
     m_xmlUnsigned.Release();
 
-    m_lTime = OTTimeGetSecondsFromTime(OTTimeGetCurrentTime());
-
     m_xmlUnsigned.Concatenate("<?xml version=\"%s\"?>\n\n", "1.0");
     m_xmlUnsigned.Concatenate(
-        "<notaryMessage\n version=\"%s\"\n dateSigned=\"%" PRId64 "\">\n\n",
-        m_strVersion.Get(), m_lTime);
+        "<notaryMessage\n version=\"%s\"\n dateSigned=\"%s\">\n\n",
+        m_strVersion.Get(), getTimestamp().c_str());
 
     if (!updateContentsByType()) {
         m_xmlUnsigned.Concatenate("<%s\n" // Command

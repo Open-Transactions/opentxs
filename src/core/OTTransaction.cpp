@@ -4388,26 +4388,22 @@ void OTTransaction::UpdateContents()
         strAcctID(GetPurportedAccountID()), strNotaryID(GetPurportedNotaryID()),
         strNymID(GetNymID());
 
-    m_DATE_SIGNED = OTTimeGetCurrentTime(); // We store the timestamp of when
-                                            // this transaction was signed.
-    const int64_t lDateSigned = OTTimeGetSecondsFromTime(m_DATE_SIGNED);
-
     // I release this because I'm about to repopulate it.
     m_xmlUnsigned.Release();
 
-    m_xmlUnsigned.Concatenate("<transaction type=\"%s\"\n%s"
-                              " dateSigned=\"%" PRId64 "\"\n"
-                              " accountID=\"%s\"\n"
-                              " nymID=\"%s\"\n"
-                              " notaryID=\"%s\"\n%s"
-                              " numberOfOrigin=\"%" PRId64 "\"\n"
-                              " transactionNum=\"%" PRId64 "\"\n%s"
-                              " inReferenceTo=\"%" PRId64 "\" >\n\n",
-                              strType.Get(), strCancelled.Get(), lDateSigned,
-                              strAcctID.Get(), strNymID.Get(),
-                              strNotaryID.Get(), strRequestNum.Get(),
-                              GetRawNumberOfOrigin(), GetTransactionNum(),
-                              strListOfBlanks.Get(), GetReferenceToNum());
+    m_xmlUnsigned.Concatenate(
+        "<transaction type=\"%s\"\n%s"
+        " dateSigned==\"%s\"\n"
+        " accountID=\"%s\"\n"
+        " nymID=\"%s\"\n"
+        " notaryID=\"%s\"\n%s"
+        " numberOfOrigin=\"%" PRId64 "\"\n"
+        " transactionNum=\"%" PRId64 "\"\n%s"
+        " inReferenceTo=\"%" PRId64 "\" >\n\n",
+        strType.Get(), strCancelled.Get(), getTimestamp().c_str(),
+        strAcctID.Get(), strNymID.Get(), strNotaryID.Get(), strRequestNum.Get(),
+        GetRawNumberOfOrigin(), GetTransactionNum(), strListOfBlanks.Get(),
+        GetReferenceToNum());
 
     if (IsAbbreviated()) {
         if (nullptr != m_pParent) {
