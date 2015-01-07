@@ -22,7 +22,16 @@ $ sudo aptitude install libssl-dev protobuf-compiler libprotobuf-dev libzmq3-dev
 
 # install dependencies for git hooks
 
-$ sudo aptitude install cppcheck
+# Download and install cppcheck 1.67
+
+$ wget http://skylink.dl.sourceforge.net/project/cppcheck/cppcheck/1.67/cppcheck-1.67.tar.bz2 \
+$ tar -xf cppcheck-1.67.tar.bz2
+$ cd cppcheck-1.67
+$ make -j 4 -l 2
+$ sudo make install
+# Check the cpp version installed 
+$ /usr/bin/cppcheck --version
+
 $ wget -O - http://llvm.org/apt/llvm-snapshot.gpg.key | sudo apt-key add -
 $ sudo add-apt-repository -y "deb http://llvm.org/apt/trusty/ llvm-toolchain-trusty-3.5 main"
 $ sudo apt-get update

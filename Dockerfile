@@ -10,7 +10,7 @@ RUN set +x; \
 		&& apt-get install -y --no-install-recommends software-properties-common \
 		&& add-apt-repository ppa:hamrle/ppa \
 		&& apt-get update \
-		&& apt-get install -y --no-install-recommends g++ make cmake libssl-dev protobuf-compiler libprotobuf-dev libzmq3-dev git python3-dev swig3.0 cppcheck clang-format-3.5 \
+		&& apt-get install -y --no-install-recommends g++ make cmake libssl-dev protobuf-compiler libprotobuf-dev libzmq3-dev git python3-dev swig3.0 clang-format-3.5 wget \
 		&& ln -s /usr/bin/swig3.0 /usr/bin/swig \
 		&& apt-get autoremove
 ENV DEBIAN_FRONTEND noninteractive
@@ -19,6 +19,15 @@ RUN set +x; \
 		&& locale-gen C.UTF-8 \
 		&& update-locale LANG=C.UTF-8 || true 
 #ENV LC_ALL C.UTF-8
+
+RUN set +x; \
+		cd /tmp \
+		&& wget http://skylink.dl.sourceforge.net/project/cppcheck/cppcheck/1.67/cppcheck-1.67.tar.bz2 \
+		&& tar -xf cppcheck-1.67.tar.bz2 \
+		&& cd cppcheck-1.67 \
+		&& make -j 4 -l 2 \
+		&& make install \
+		&& /usr/bin/cppcheck --version
 
 # setup a non-root user
 RUN useradd -ms /bin/bash otuser
