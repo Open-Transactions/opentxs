@@ -16,7 +16,8 @@
 $ sudo aptitude install git build-essential cmake pkg-config
 
 # install Open-Transactions library dependencies
-$ sudo aptitude install libssl-dev protobuf-compiler libprotobuf-dev libzmq3-dev
+$ sudo add-apt-repository -y ppa:monetas/opentxs
+$ sudo aptitude install libssl-dev protobuf-compiler libprotobuf-dev libzmq3-dev czmq
 
 (NB: may need "libprotoc" if "protobuf-compiler" pkg not available on debian-like sytems)
 
