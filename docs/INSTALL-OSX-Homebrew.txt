@@ -49,7 +49,7 @@ $ source ~/.profile
 ##############
 ##   DEPS   ##
 
-$ brew install --cc=clang libtool cmake protobuf openssl zeromq
+$ brew install --cc=clang libtool cmake protobuf openssl zeromq czmq
 
 
 
