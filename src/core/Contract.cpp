@@ -1111,6 +1111,7 @@ bool Contract::AddBookendsAroundContent(String& strOutput,
                         strContractType.Get(), strHashType.Get());
 
     strTemp.Concatenate("%s", strContents.Get());
+    strTemp.Concatenate("-----END SIGNED %s-----\n", strContractType.Get());
 
     for (const auto& it : listSignatures) {
         OTSignature* pSig = it;
@@ -1377,6 +1378,16 @@ bool Contract::ParseRawFile()
                 //    otErr << "%s\n", pSig->Get());
                 pSig = nullptr;
                 bSignatureMode = false;
+                continue;
+            }
+
+            if (bHaveEnteredContentMode &&
+                line.lenght() > 3 &&
+                line.at(1) == '-' &&
+                line.at(2) == '-' &&
+                line.at(3) == '-' &&
+                line.find("END SIGNED") != std::string::npos) {
+                bContentMode = false;
                 continue;
             }
 
