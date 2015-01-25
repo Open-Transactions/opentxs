@@ -151,7 +151,8 @@ else()
   )
 endif()
 
-target_link_libraries(opentxs-client PUBLIC opentxs-ext opentxs-cash opentxs-basket opentxs-core PRIVATE czmq_local)
+target_link_libraries(opentxs-client LINK_PUBLIC opentxs-ext opentxs-cash opentxs-basket opentxs-core)
+target_link_libraries(opentxs-client LINK_PRIVATE czmq_local)
 set_lib_property(opentxs-client)
 
 if(WIN32)
