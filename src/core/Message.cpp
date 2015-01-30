@@ -305,6 +305,8 @@ void Message::UpdateContents()
         "<notaryMessage\n version=\"%s\"\n dateSigned=\"%s\">\n\n",
         m_strVersion.Get(), getTimestamp().c_str());
 
+    m_lTime = parseTimestamp(getTimestamp());
+
     if (!updateContentsByType()) {
         m_xmlUnsigned.Concatenate("<%s\n" // Command
                                   " requestNum=\"%s\"\n"
@@ -430,7 +432,7 @@ int32_t Message::processXmlNodeNotaryMessage(Message& m,
 
     String strDateSigned = xml->getAttributeValue("dateSigned");
 
-    if (strDateSigned.Exists()) m_lTime = strDateSigned.ToLong();
+    if (strDateSigned.Exists()) m_lTime = parseTimestamp(strDateSigned.Get());
 
     otInfo << "\n===> Loading XML for Message into memory structures...\n";
 
