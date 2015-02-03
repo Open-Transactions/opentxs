@@ -202,6 +202,13 @@ void MessageProcessor::run()
             processSocket();
             continue;
         }
+        if (zpoller_terminated(zmqPoller_)) {
+            otErr << __FUNCTION__
+                  << ": zpoller_terminated - process interrupted or"
+                  << " parent context destroyed\n";
+            break;
+        }
+
         if (!zpoller_expired(zmqPoller_)) {
             otErr << __FUNCTION__ << ": zpoller_wait error\n";
             // we do not want busy loop if something goes wrong
