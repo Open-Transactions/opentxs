@@ -794,7 +794,7 @@ namespace
 #endif
 
 // invoke set_terminate as part of global constant initialization
-static const bool SET_TERMINATE = std::set_terminate(ot_terminate);
+//static const bool SET_TERMINATE = std::set_terminate(ot_terminate);
 
 #ifdef _MSC_VER
 #pragma warning(pop)
