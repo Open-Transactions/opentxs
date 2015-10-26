@@ -211,7 +211,7 @@ bool CmdBase::checkNym(const char* name, string& nym, bool checkExistance) const
     }
 
     OTWallet* wallet = getWallet();
-    Nym* theNym = wallet->GetNymByID(nym);
+    Nym* theNym = wallet->GetOrLoadNym(nym);
     if (theNym == nullptr) {
         theNym = wallet->GetNymByIDPartialMatch(nym);
         if (theNym == nullptr && checkExistance) {
