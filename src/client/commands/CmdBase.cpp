@@ -211,12 +211,15 @@ bool CmdBase::checkNym(const char* name, string& nym, bool checkExistance) const
     }
 
     OTWallet* wallet = getWallet();
+
+    otOut << "Checking nym: " << nym << "\n";
+
     const Identifier nymID(nym);
     Nym* theNym = wallet->GetOrLoadNym(nymID);
     if (theNym == nullptr) {
         theNym = wallet->GetNymByIDPartialMatch(nym);
         if (theNym == nullptr && checkExistance) {
-            otOut << "Error: " << name << ": unknown nymm: " << nym << "\n";
+            otOut << "Error: " << name << ": unknown nym: " << nym << "\n";
             return false;
         }
     }
