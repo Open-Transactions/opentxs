@@ -3376,9 +3376,17 @@ bool Nym::LoadCredentials(bool bLoadPrivate, // Loads public credentials
     String strFilename;
     strFilename.Format("%s.cred", strNymID.Get());
 
+    otErr << "Private credential folder: " << OTFolders::Credential().Get() <<"\n";
+    otErr << "Public credential folder: " << OTFolders::Pubcred().Get() <<"\n";
+    otErr << "NymID: " << strNymID.Get() <<"\n";
+    otErr << "Filename: " << strFilename.Get() <<"\n";
+    
     const char* szFoldername = bLoadPrivate ? OTFolders::Credential().Get()
                                             : OTFolders::Pubcred().Get();
     const char* szFilename = strFilename.Get();
+
+    otErr << "Folder: " << szFoldername <<"\n";
+    otErr << "File: " << szFilename <<"\n";
 
     if (OTDB::Exists(szFoldername, strNymID.Get(), szFilename)) {
         String strFileContents(
