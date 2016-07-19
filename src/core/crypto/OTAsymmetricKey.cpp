@@ -77,10 +77,6 @@ OTAsymmetricKey* OTAsymmetricKey::KeyFactory(
     __attribute__((unused)) const proto::KeyRole role)
 {
     OTAsymmetricKey* pKey = nullptr;
-    String keyTypeName = OTAsymmetricKey::KeyTypeToString(keyType);
-    std::string keyTypeError =
-        "No valid OTAsymmetricKey can be constructed from type: ";
-    keyTypeError += keyTypeName.Get();
     bool validType = false;
 
     if (keyType == OTAsymmetricKey::LEGACY) {
@@ -107,7 +103,7 @@ OTAsymmetricKey* OTAsymmetricKey::KeyFactory(
                  "so it's impossible to instantiate the key.\n";
 #endif
     }
-    OT_ASSERT_MSG(validType, keyTypeError.c_str());
+
     return pKey;
 }
 
@@ -148,7 +144,7 @@ OTAsymmetricKey* OTAsymmetricKey::KeyFactory(
                  "so it's impossible to instantiate the key.\n";
 #endif
     }
-    OT_ASSERT_MSG(validType, keyTypeError.c_str());
+
     return pKey;
 }
 
@@ -170,10 +166,6 @@ OTAsymmetricKey* OTAsymmetricKey::KeyFactory(
         static_cast<OTAsymmetricKey::KeyType>(serializedKey.type());
 
     OTAsymmetricKey* pKey = nullptr;
-    String keyTypeName = OTAsymmetricKey::KeyTypeToString(keyType);
-    std::string keyTypeError =
-        "No valid OTAsymmetricKey can be constructed from type: ";
-    keyTypeError += keyTypeName.Get();
     bool validType = false;
 
     if (keyType == OTAsymmetricKey::LEGACY) {
@@ -200,7 +192,7 @@ OTAsymmetricKey* OTAsymmetricKey::KeyFactory(
                  "so it's impossible to instantiate the key.\n";
 #endif
     }
-    OT_ASSERT_MSG(validType, keyTypeError.c_str());
+
     return pKey;
 }
 
