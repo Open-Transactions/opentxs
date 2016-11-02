@@ -656,7 +656,7 @@ include(CMakePackageConfigHelpers)
 set(CMAKE_CONFIG_DEST "share/cmake/Modules")
 set(OPENTXS_INCLUDE_DIRS "${CMAKE_INSTALL_PREFIX}/include")
 
-export(TARGETS opentxs FILE "${CMAKE_BINARY_DIR}/opentxsTargets.cmake")
+export(TARGETS opentxs opentxs-core FILE "${CMAKE_BINARY_DIR}/opentxsTargets.cmake")
 
 configure_package_config_file(
        "cmake/opentxsConfig.cmake.in"
