@@ -5,7 +5,7 @@
 
 
 # Locate include files for our wrappers
-set(SWIG_INCLUDE_DIRS 
+set(SWIG_INCLUDE_DIRS
   SYSTEM
   ${CMAKE_CURRENT_SOURCE_DIR}/../deps/
   ${CMAKE_CURRENT_SOURCE_DIR}/../include/
@@ -18,7 +18,7 @@ set(SWIG_INCLUDE_DIRS
 
 
 # The opentxs libraries will we link to
-set(OTX_LINK_LIBS opentxs-client)
+set(OTX_LINK_LIBS opentxs)
 
 
 # Build wrappers for each lang enabled
