@@ -14,31 +14,15 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/lucre/include/lucre/ ${OPENSSL_I
 if(WIN32)
   # suppress sscanf/sprintf being unsafe warnings
   add_definitions("/wd4996")
-
-  add_library(lucre
-    STATIC
-    ${lucre-sources}
-  )
-
-  target_link_libraries(lucre ${LIB_EAY_RELEASE})
-else()
-  add_library(lucre
-    ${lucre-sources}
-  )
-
-  target_link_libraries(lucre ${OPENSSL_LIBRARIES})
 endif()
 
+add_library(lucre OBJECT
+  ${lucre-sources}
+)
+
+set_property(TARGET lucre PROPERTY POSITION_INDEPENDENT_CODE 1)
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
-
-if (NOT WIN32)
-  include(GNUInstallDirs)
-  install(TARGETS lucre
-          DESTINATION ${CMAKE_INSTALL_LIBDIR}
-          EXPORT opentxsTargets
-          COMPONENT main)
-endif()
 
 if (OT_INTERNAL_ZMQ)
 

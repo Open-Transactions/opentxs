@@ -38,6 +38,7 @@ endif()
 set(object-deps
   $<TARGET_OBJECTS:base64>
   $<TARGET_OBJECTS:irrxml>
+  $<TARGET_OBJECTS:lucre>
   ${trezor}
   $<TARGET_OBJECTS:otprotob>
   $<TARGET_OBJECTS:opentxs-cash>
@@ -69,7 +70,6 @@ endif()
 
 target_link_libraries(${MODULE_NAME}
   PRIVATE
-  lucre
   ${OPENSSL_LIBRARIES}
   ${OPENTXS_PROTO_LIBRARIES}
   ${PROTOBUF_LITE_LIBRARIES}
