@@ -11,7 +11,7 @@ include(FindPkgConfig)
 
   find_library(
       OPENTXS_PROTO_LIBRARIES
-      NAMES libopentxs-proto.so libopentxs-proto.a libopentxs-proto.dynlib
+      NAMES libopentxs-proto.so libopentxs-proto.dylib libopentxs-proto.a
       HINTS ${PC_OPENTXS_PROTO_LIBRARY_DIRS}
   )
 
