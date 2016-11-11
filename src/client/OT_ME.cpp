@@ -61,6 +61,9 @@
 #endif
 #include "opentxs/core/script/OTVariable.hpp"
 #include "opentxs/core/stdafx.hpp"
+#ifdef ANDROID
+#include "opentxs/core/util/android_string.hpp"
+#endif // ANDROID
 #include "opentxs/core/util/Assert.hpp"
 #include "opentxs/core/util/Common.hpp"
 #include "opentxs/core/util/OTDataFolder.hpp"

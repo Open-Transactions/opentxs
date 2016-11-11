@@ -44,6 +44,9 @@
 #include "opentxs/core/crypto/Ecdsa.hpp"
 #include "opentxs/core/crypto/OTPassword.hpp"
 #include "opentxs/core/crypto/OTPasswordData.hpp"
+#ifdef ANDROID
+#include "opentxs/core/util/android_string.hpp"
+#endif // ANDROID
 #include "opentxs/core/util/Assert.hpp"
 #include "opentxs/core/Identifier.hpp"
 #include "opentxs/core/Log.hpp"

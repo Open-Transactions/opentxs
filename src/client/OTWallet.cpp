@@ -50,6 +50,9 @@
 #include "opentxs/core/crypto/OTPassword.hpp"
 #include "opentxs/core/crypto/OTPasswordData.hpp"
 #include "opentxs/core/crypto/OTSymmetricKey.hpp"
+#ifdef ANDROID
+#include "opentxs/core/util/android_string.hpp"
+#endif // ANDROID
 #include "opentxs/core/util/Assert.hpp"
 #include "opentxs/core/util/OTDataFolder.hpp"
 #include "opentxs/core/util/Tag.hpp"
