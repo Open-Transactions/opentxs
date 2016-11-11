@@ -47,6 +47,9 @@
 #include "opentxs/core/crypto/OTASCIIArmor.hpp"
 #include "opentxs/core/crypto/OTCachedKey.hpp"
 #include "opentxs/core/crypto/OTEnvelope.hpp"
+#ifdef ANDROID
+#include "opentxs/core/util/android_string.hpp"
+#endif // ANDROID
 #include "opentxs/core/util/Assert.hpp"
 #include "opentxs/core/util/OTDataFolder.hpp"
 #include "opentxs/core/util/OTPaths.hpp"
