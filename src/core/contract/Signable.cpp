@@ -45,6 +45,7 @@ namespace opentxs
 Signable::Signable(const ConstNym& nym)
     : nym_(nym)
 {
+    Log::vOutput(0, "Signable::Signable: Signable::Signable(const ConstNym& nym)");
 }
 
 Signable::Signable(const ConstNym& nym, const std::uint32_t version)

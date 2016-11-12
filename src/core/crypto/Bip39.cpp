@@ -234,25 +234,25 @@ std::shared_ptr<OTPassword> Bip39::Seed(const std::string& fingerprint) const
 
     OT_ASSERT(output);
 
-        auto serialized = SerializedSeed(fingerprint);
+    auto serialized = SerializedSeed(fingerprint);
 
-        if (serialized) {
-            std::unique_ptr<OTPassword>
-                seed(App::Me().Crypto().AES().InstantiateBinarySecret());
+    if (serialized) {
+        std::unique_ptr<OTPassword>
+            seed(App::Me().Crypto().AES().InstantiateBinarySecret());
 
-            OT_ASSERT(seed);
+        OT_ASSERT(seed);
 
-            OTPassword words, passphrase;
-            const bool decrypted = DecryptSeed(*serialized, words, passphrase);
+        OTPassword words, passphrase;
+        const bool decrypted = DecryptSeed(*serialized, words, passphrase);
 
-            OT_ASSERT(decrypted);
+        OT_ASSERT(decrypted);
 
-            bool extracted = SeedToData(words, passphrase, *seed);
+        bool extracted = SeedToData(words, passphrase, *seed);
 
-            if (extracted) {
-                output.reset(seed.release());
-            }
+        if (extracted) {
+            output.reset(seed.release());
         }
+    }
 
     return output;
 }

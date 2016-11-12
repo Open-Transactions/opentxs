@@ -49,6 +49,8 @@
 #include "opentxs/storage/StorageSqlite3.hpp"
 #endif
 
+#include "opentxs/core/Log.hpp"
+
 #include <assert.h>
 #include <stdint.h>
 #include <atomic>
@@ -1678,7 +1680,13 @@ ObjectList Storage::ServerList()
 
 bool Storage::Store(const proto::Credential& data)
 {
+    
+    Log::vOutput(0, "Storage::Store: 1\n");
+
     if (!isLoaded_.load()) { Read(); }
+
+    
+    Log::vOutput(0, "Storage::Store: 2\n");
 
     // Avoid overwriting private credentials with public credentials
     bool existingPrivate = false;
@@ -1686,23 +1694,41 @@ bool Storage::Store(const proto::Credential& data)
     const std::string& id = data.id();
 
     if (Load(id, existing, true)) { // suppress "not found" error
+
+        Log::vOutput(0, "Storage::Store: 3\n");
+
+        
         existingPrivate = (proto::KEYMODE_PRIVATE == existing->mode());
     }
 
+    Log::vOutput(0, "Storage::Store: 4\n");
+
     if (existingPrivate && (proto::KEYMODE_PRIVATE != data.mode())) {
+        
+        
+        Log::vOutput(0, "Storage::Store: 5\n");
+
+        
         std::cout << "Skipping update of existing private credential with "
                   << "non-private version." << std::endl;
 
         return true;
     }
 
+    Log::vOutput(0, "Storage::Store: 6\n");
+
     std::string key;
     std::lock_guard<std::mutex> writeLock(write_lock_);
 
+    Log::vOutput(0, "Storage::Store: 7\n");
+
     if (StoreProto(data, key)) {
+        Log::vOutput(0, "Storage::Store: 8\n");
 
         return UpdateCredentials(id, key);
     }
+
+    Log::vOutput(0, "Storage::Store: 9\n");
 
     return false;
 }
