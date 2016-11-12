@@ -271,7 +271,6 @@ std::shared_ptr<OTPassword> Bip39::Seed(std::string& fingerprint) const
             seed(App::Me().Crypto().AES().InstantiateBinarySecret());
 
         OT_ASSERT(seed);
-
         
         Log::vOutput(0, "Bip39::Seed: 3");
 
