@@ -102,6 +102,9 @@ void App::Init_Identity() { identity_.reset(new class Identity); }
 
 void App::Init_Storage()
 {
+    
+    Log::vOutput(0, "App::Init_Storage  1\n");
+    
     Digest hash = std::bind(
         static_cast<bool (CryptoHashEngine::*)(
             const uint32_t, const std::string&, std::string&) const>(
@@ -110,18 +113,31 @@ void App::Init_Storage()
         std::placeholders::_1,
         std::placeholders::_2,
         std::placeholders::_3);
+    
+    
+    Log::vOutput(0, "App::Init_Storage  2\n");
+
 
     Random random =
         std::bind(&CryptoEncodingEngine::RandomFilename, &(Crypto().Encode()));
+
+    
+    Log::vOutput(0, "App::Init_Storage  3\n");
 
     std::shared_ptr<OTDB::StorageFS> storage(OTDB::StorageFS::Instantiate());
     std::string root_path = OTFolders::Common().Get();
     std::string path;
 
+    Log::vOutput(0, "App::Init_Storage  4\n");
+
+    
     if (0 <= storage->ConstructAndCreatePath(
                  path, OTFolders::Common().Get(), ".temp")) {
         path.erase(path.end() - 5, path.end());
     }
+
+    
+    Log::vOutput(0, "App::Init_Storage  path: %s\n", path.c_str());
 
     StorageConfig config;
     config.path_ = path;
@@ -205,6 +221,9 @@ void App::Init_Storage()
         config.sqlite3_db_file_,
         notUsed);
 #endif
+    
+    Log::vOutput(0, "App::Init_Storage  5\n");
+
 
     if (nullptr != dht_) {
         config.dht_callback_ = std::bind(
@@ -214,8 +233,14 @@ void App::Init_Storage()
             std::placeholders::_1,
             std::placeholders::_2);
     }
+    
+    Log::vOutput(0, "App::Init_Storage  6\n");
+
 
     storage_ = &Storage::It(hash, random, config);
+    
+    Log::vOutput(0, "App::Init_Storage  7\n");
+
 }
 
 void App::Init_Dht()

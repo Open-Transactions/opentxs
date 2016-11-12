@@ -643,9 +643,9 @@ if(UNIX)
 endif()
 
 function(set_lib_property lib)
-  if (NOT ANDROID)
+#  if (NOT ANDROID)
     set_target_properties(${lib} PROPERTIES VERSION ${VERSION_STRING} SOVERSION ${VERSION_MAJOR})
-  endif()
+#  endif()
 endfunction(set_lib_property)
 
 add_subdirectory(deps)

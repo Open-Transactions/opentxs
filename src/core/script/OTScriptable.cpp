@@ -74,6 +74,7 @@
 #include <memory>
 #include <stdlib.h>
 #include <string>
+#include <sstream>
 
 // CALLBACKS
 //
