@@ -274,6 +274,9 @@ std::shared_ptr<OTPassword> Bip39::Seed(std::string& fingerprint) const
         
         Log::vOutput(0, "Bip39::Seed: 3");
 
+        
+        Log::vOutput(0, "Bip39::Seed: 3");
+
         OTPassword words, passphrase;
         const bool decrypted = DecryptSeed(*serialized, words, passphrase);
 
@@ -322,9 +325,12 @@ std::shared_ptr<proto::Seed> Bip39::SerializedSeed(
             OT_FAIL;
         }
 
+<<<<<<< e2a12ae0b30b464ea2cac1866db569c2121afdd7
         // Update to correct value
         fingerprint = defaultFingerprint;
 
+=======
+>>>>>>> some other stuff.
         Log::vOutput(0, "Bip39::SerializedSeed: 5");
 
     } else { // want an explicitly identified seed
