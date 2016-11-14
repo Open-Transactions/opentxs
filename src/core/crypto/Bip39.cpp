@@ -274,6 +274,9 @@ std::shared_ptr<OTPassword> Bip39::Seed(std::string& fingerprint) const
         
         Log::vOutput(0, "Bip39::Seed: 3");
 
+        
+        Log::vOutput(0, "Bip39::Seed: 3");
+
         OTPassword words, passphrase;
         const bool decrypted = DecryptSeed(*serialized, words, passphrase);
 
