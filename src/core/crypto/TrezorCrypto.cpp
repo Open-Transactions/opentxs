@@ -65,7 +65,9 @@ extern "C" {
 }
 
 #include <stdint.h>
+#include <algorithm>
 #include <array>
+#include <iterator>
 
 namespace opentxs
 {
@@ -170,6 +172,81 @@ serializedAsymmetricKey TrezorCrypto::GetChild(
         TrezorCrypto::DERIVE_PRIVATE);
 
     return key;
+}
+
+std::unique_ptr<HDNode> TrezorCrypto::GetChild(
+    const HDNode& parent,
+    const uint32_t index)
+{
+    std::unique_ptr<HDNode> output;
+    output.reset(new HDNode(parent));
+
+    if (!output) { return output; }
+
+    std::uint8_t emptyKey[32]{};
+    const bool privateNode = std::equal(
+        std::begin(output->private_key),
+        std::end(output->private_key),
+        std::begin(emptyKey));
+
+    if (privateNode) {
+        hdnode_private_ckd(output.get(), index);
+    } else {
+        hdnode_public_ckd(output.get(), index);
+    }
+
+    return output;
+}
+
+std::unique_ptr<HDNode> TrezorCrypto::DeriveChild(
+    const EcdsaCurve& curve,
+    proto::HDPath& path) const
+{
+    uint32_t depth = path.child_size();
+
+    if (0 == depth) {
+        std::string fingerprint = path.root();
+        auto seed = App::Me().Crypto().BIP39().Seed(fingerprint);
+        // fingerprint may have been updated to correct value
+        path.set_root(fingerprint);
+
+        return InstantiateHDNode(curve, *seed);
+    } else {
+        proto::HDPath newpath = path;
+        newpath.mutable_child()->RemoveLast();
+        auto parentnode = DeriveChild(curve, newpath);
+        std::unique_ptr<HDNode> output;
+
+        if (parentnode) {
+            // root may have been updated to correct value
+            path.set_root(newpath.root());
+
+            output = GetChild(*parentnode, path.child(depth-1));
+        }
+
+        return output;
+    }
+}
+
+serializedAsymmetricKey TrezorCrypto::GetHDKey(
+    const EcdsaCurve& curve,
+    proto::HDPath& path) const
+{
+    serializedAsymmetricKey output;
+    auto node = DeriveChild(curve, path);
+
+    if (!node) { return output; }
+
+    output = HDNodeToSerialized(
+        CryptoAsymmetric::CurveToKeyType(curve),
+        *node,
+        TrezorCrypto::DERIVE_PRIVATE);
+
+    if (output) {
+        *(output->mutable_path()) = path;
+    }
+
+    return output;
 }
 
 serializedAsymmetricKey TrezorCrypto::HDNodeToSerialized(

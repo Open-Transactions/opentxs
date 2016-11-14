@@ -56,7 +56,9 @@ namespace opentxs
 
 std::string Bip32::Seed(const std::string& fingerprint) const
 {
-    auto seed = App::Me().Crypto().BIP39().Seed(fingerprint);
+    //TODO: make fingerprint non-const
+    std::string input (fingerprint);
+    auto seed = App::Me().Crypto().BIP39().Seed(input);
 
     if (!seed) { return ""; }
 
@@ -72,44 +74,6 @@ std::string Bip32::Seed(const std::string& fingerprint) const
     }
 
     return stream.str();
-}
-
-serializedAsymmetricKey Bip32::GetHDKey(
-    const EcdsaCurve& curve,
-    proto::HDPath& path) const
-{
-    uint32_t depth = path.child_size();
-    if (0 == depth) {
-        std::string fingerprint = path.root();
-        auto seed = App::Me().Crypto().BIP39().Seed(fingerprint);
-        serializedAsymmetricKey node;
-
-        if (seed) {
-            node = SeedToPrivateKey(curve, *seed);
-            path.set_root(fingerprint);
-        }
-
-        return node;
-    } else {
-        proto::HDPath newpath = path;
-        newpath.mutable_child()->RemoveLast();
-        auto parentnode = GetHDKey(curve, newpath);
-
-        serializedAsymmetricKey node;
-        if (parentnode) {
-            path.set_root(newpath.root());
-
-            node = GetChild(
-                *parentnode,
-                path.child(depth-1));
-
-            if (node) {
-                *(node->mutable_path()) = path;
-            }
-        }
-
-        return node;
-    }
 }
 
 serializedAsymmetricKey Bip32::GetPaymentCode(const uint32_t nym) const

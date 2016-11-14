@@ -117,7 +117,13 @@ private:
         const EcdsaCurve& curve,
         const OTPassword& seed);
     static std::unique_ptr<HDNode> InstantiateHDNode(const EcdsaCurve& curve);
+    static std::unique_ptr<HDNode> GetChild(
+        const HDNode& parent,
+        const uint32_t index);
 
+    std::unique_ptr<HDNode> DeriveChild(
+        const EcdsaCurve& curve,
+        proto::HDPath& path) const;
     std::unique_ptr<HDNode> SerializedToHDNode(
         const proto::AsymmetricKey& serialized) const;
     serializedAsymmetricKey HDNodeToSerialized(
@@ -148,6 +154,9 @@ public:
     serializedAsymmetricKey GetChild(
         const proto::AsymmetricKey& parent,
         const uint32_t index) const override;
+    serializedAsymmetricKey GetHDKey(
+        const EcdsaCurve& curve,
+        proto::HDPath& path) const override;
     bool RandomKeypair(
         OTPassword& privateKey,
         OTData& publicKey) const override;

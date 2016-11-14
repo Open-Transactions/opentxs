@@ -62,11 +62,11 @@ public:
     virtual serializedAsymmetricKey GetChild(
         const proto::AsymmetricKey& parent,
         const uint32_t index) const = 0;
+    virtual serializedAsymmetricKey GetHDKey(
+        const EcdsaCurve& curve,
+        proto::HDPath& path) const = 0;
 
     std::string Seed(const std::string& fingerprint = "") const;
-    serializedAsymmetricKey GetHDKey(
-        const EcdsaCurve& curve,
-        proto::HDPath& path) const;
     serializedAsymmetricKey GetPaymentCode(const uint32_t nym) const;
 };
 

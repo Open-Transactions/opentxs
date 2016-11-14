@@ -64,8 +64,7 @@ private:
         const OTPassword& words,
         const OTPassword& passphrase,
         OTPassword& output) const;
-    std::shared_ptr<proto::Seed> SerializedSeed(
-        const std::string& fingerprint = "") const;
+    std::shared_ptr<proto::Seed> SerializedSeed(std::string& fingerprint) const;
 
     virtual bool toWords(
         const OTPassword& seed,
@@ -83,7 +82,7 @@ public:
         const OTPassword& passphrase) const;
     std::string NewSeed() const;
     std::string Passphrase(const std::string& fingerprint = "") const;
-    std::shared_ptr<OTPassword> Seed(const std::string& fingerprint = "") const;
+    std::shared_ptr<OTPassword> Seed(std::string& fingerprint) const;
     std::string Words(const std::string& fingerprint = "") const;
 };
 } // namespace opentxs

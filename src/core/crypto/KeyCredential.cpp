@@ -377,7 +377,9 @@ std::shared_ptr<OTKeypair> KeyCredential::DeriveHDKeypair(
 
     if (!fingerprint.empty()) {
         // Check to see if specified seed exists
-        auto seed = App::Me().Crypto().BIP39().Seed(fingerprint);
+        //TODO: make fingerprint non-const
+        std::string input (fingerprint);
+        auto seed = App::Me().Crypto().BIP39().Seed(input);
 
         if (seed) {
             keyPath.set_root(fingerprint.c_str(), fingerprint.size());
