@@ -131,11 +131,17 @@ MasterCredential::MasterCredential(
     const NymParameters& nymParameters)
     : ot_super(theOwner, nymParameters)
 {
+    
+    Log::vOutput(0, "MasterCredential::MasterCredential: owner and nym params\n");
+
     role_ = proto::CREDROLE_MASTERKEY;
 
     std::shared_ptr<NymIDSource> source;
     std::unique_ptr<proto::SourceProof> sourceProof;
     sourceProof.reset(new proto::SourceProof);
+
+    
+    Log::vOutput(0, "MasterCredential::MasterCredential: after new proto\n");
 
     proto::SourceProofType proofType = nymParameters.SourceProofType();
 
@@ -149,9 +155,16 @@ MasterCredential::MasterCredential(
         sourceProof->set_version(1);
         sourceProof->set_type(proto::SOURCEPROOFTYPE_SELF_SIGNATURE);
 
+        Log::vOutput(0, "MasterCredential::MasterCredential: 1\n");
+
     }
+    
+
 #if OT_CRYPTO_SUPPORTED_SOURCE_BIP47
     else if (proto::SOURCETYPE_BIP47 == nymParameters.SourceType()) {
+        Log::vOutput(0, "MasterCredential::MasterCredential: 2\n");
+        
+
         sourceProof->set_version(1);
         sourceProof->set_type(proto::SOURCEPROOFTYPE_SIGNATURE);
 
@@ -159,32 +172,55 @@ MasterCredential::MasterCredential(
         bip47Source.reset(new PaymentCode(nymParameters.Nym()));
 
         source = std::make_shared<NymIDSource>(bip47Source);
+        Log::vOutput(0, "MasterCredential::MasterCredential: 3\n");
     }
 #endif
+
+    Log::vOutput(0, "MasterCredential::MasterCredential: 4\n");
 
     source_proof_.reset(sourceProof.release());
     owner_backlink_->SetSource(source);
     String nymID = owner_backlink_->GetNymID();
 
     nym_id_ = nymID;
+    
+    Log::vOutput(0, "MasterCredential::MasterCredential: (bottom)\n");
+
 }
 
 bool MasterCredential::New(const NymParameters& nymParameters)
 {
+    Log::vOutput(0, "MasterCredential::New: 1\n");
+
     if (!ot_super::New(nymParameters)) {
+        
+        Log::vOutput(0, "MasterCredential::New: Failed in (!ot_super::New(nymParameters))\n");
+        
         return false;
     }
+    Log::vOutput(0, "MasterCredential::New: 2\n");
 
     if (proto::SOURCEPROOFTYPE_SELF_SIGNATURE != source_proof_->type()) {
         SerializedSignature sig = std::make_shared<proto::Signature>();
+        
+        Log::vOutput(0, "MasterCredential::New: 3\n");
+
+        
         bool haveSourceSig = owner_backlink_->Sign(*this, nymParameters, *sig);
+
+        Log::vOutput(0, "MasterCredential::New: 4\n");
 
         if (haveSourceSig) {
             signatures_.push_back(sig);
 
             return true;
         }
+        
+        Log::vOutput(0, "MasterCredential::New: 5\n");
+
     }
+
+    Log::vOutput(0, "MasterCredential::New: 6\n");
 
     return false;
 }

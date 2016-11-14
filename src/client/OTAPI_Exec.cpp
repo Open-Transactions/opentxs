@@ -650,20 +650,34 @@ std::string OTAPI_Exec::CreateNymLegacy(
 
 std::string OTAPI_Exec::CreateNymHD(const std::string& fingerprint) const
 {
+    Log::vOutput(0, "OTAPI_Exec::CreateNymHD: 1\n");
+
 #if OT_CRYPTO_SUPPORTED_KEY_HD
+    Log::vOutput(0, "OTAPI_Exec::CreateNymHD: 2\n");
+
     NymParameters nymParameters(proto::CREDTYPE_HD);
 
     if (0 < fingerprint.size()) {
+        
+        Log::vOutput(0, "OTAPI_Exec::CreateNymHD: 3\n");
+
         nymParameters.SetSeed(fingerprint);
     }
 
+    
+    Log::vOutput(0, "OTAPI_Exec::CreateNymHD: 4\n");
+
     Nym* pNym = OTAPI()->CreateNym(nymParameters);
+
+    Log::vOutput(0, "OTAPI_Exec::CreateNymHD: 5\n");
 
     if (nullptr == pNym) {
         otOut << __FUNCTION__ << ": Failed trying to create Nym." << std::endl;
 
         return "";
     }
+
+    Log::vOutput(0, "OTAPI_Exec::CreateNymHD: 1\n");
 
     String strOutput;
     pNym->GetIdentifier(strOutput);
