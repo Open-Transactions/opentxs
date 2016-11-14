@@ -167,11 +167,20 @@ Credential::Credential(
 
 bool Credential::New(__attribute__((unused)) const NymParameters& nymParameters)
 {
+    Log::vOutput(0, "Credential::New: 1");
+
     CalculateID();
 
+    Log::vOutput(0, "Credential::New: 2");
+
     if (proto::CREDROLE_MASTERKEY != role_) {
+        
+        Log::vOutput(0, "Credential::New: 3");
+
         return AddMasterSignature();
     }
+
+    Log::vOutput(0, "Credential::New: 4");
 
     return true;
 }
