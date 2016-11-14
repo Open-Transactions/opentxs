@@ -3,7 +3,8 @@
 cmake_minimum_required(VERSION 2.8.12)
 project(opentxs)
 
-
+#-----------------------------------------------------------------------------
+if(NOT ANDROID)
 set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM LAST)
 find_package(Git)
 if(GIT_FOUND)
@@ -24,16 +25,22 @@ if(GIT_FOUND)
 else()
   message(FATAL_ERROR "Git not found.")
 endif()
-
-
+endif() # NOT ANDROID
 #-----------------------------------------------------------------------------
 # Options for building
 
 option(BUILD_VERBOSE       "Verbose build output." ON)
-option(BUILD_DOCUMENTATION "Build the Doxygen documentation." ON)
-option(BUILD_TESTS         "Build the unit tests." ON)
-option(USE_CCACHE          "Use ccache." OFF)
+
+if(ANDROID)
+  option(BUILD_DOCUMENTATION "Build the Doxygen documentation." OFF)
+  option(BUILD_TESTS         "Build the unit tests." OFF)
+else()
+  option(BUILD_DOCUMENTATION "Build the Doxygen documentation." ON)
+  option(BUILD_TESTS         "Build the unit tests." ON)
+endif()
+
 option(OT_STRICT           "Use pedantic compiler options." ON)
+option(USE_CCACHE          "Use ccache." OFF)
 
 option(BUILD_SHARED_LIBS   "Build shared libraries." ON)
 
@@ -51,12 +58,18 @@ option(KEYRING_IOS         "Build with iOS Keyring" OFF)
 option(KEYRING_GNOME       "Build with Gnome Keyring" OFF)
 option(KEYRING_KWALLET     "Build with KWallet Keyring" OFF)
 option(KEYRING_FLATFILE    "Build with Flatfile Keyring" OFF)
+
 option(NO_PASSWORD         "Use default password for all prompts" OFF)
 
-option(OT_DHT    "Enable OpenDHT support" OFF)
+if(ANDROID)
+  option(OT_STORAGE_FS       "Use filesystem backend for storage" OFF)
+  option(OT_STORAGE_SQLITE   "Use sqlite backend for storage" ON)
+else()
+  option(OT_STORAGE_FS       "Use filesystem backend for storage" ON)
+  option(OT_STORAGE_SQLITE   "Use sqlite backend for storage" OFF)
+endif()
 
-option(OT_STORAGE_FS       "Use filesystem backend for storage" OFF)
-option(OT_STORAGE_SQLITE   "Use sqlite backend for storage" ON)
+option(OT_DHT    "Enable OpenDHT support" OFF)
 
 option(OT_CRYPTO_SUPPORTED_ALGO_AES     "Enable AES encryption algorithm" ON)
 
@@ -73,13 +86,21 @@ option(OT_CRYPTO_USING_TREZOR  "Use trezor crypto implementation" ON)
 
 option(OT_CRYPTO_SHA2_PREFER_OPENSSL       "Use OpenSSL SHA2 implementation when available" OFF)
 
-option(OT_SCRIPT_USING_CHAI  "Use chaiscript" ON)
+if(ANDROID)
+  option(OT_SCRIPT_USING_CHAI  "Use chaiscript" OFF)
+else()
+  option(OT_SCRIPT_USING_CHAI  "Use chaiscript" ON)
+endif()
 
 option(OT_INTERNAL_ZMQ       "Use bundled version of ZeroMQ and czmq" OFF)
 option(OT_INTERNAL_LIBSECP   "Use bundled version of libsecp256k1" OFF)
 
 # SWIG Bindings
-option(JAVA    "Build with Java binding" OFF)
+if(ANDROID)
+  option(JAVA                "Build with Java binding" ON)
+else()
+  option(JAVA                "Build with Java binding" OFF)
+endif()
 option(PERL    "Build with Perl binding" OFF)
 option(PHP     "Build with PHP binding" OFF)
 option(PYTHON3 "Build with Python3 binding" OFF)
@@ -98,7 +119,7 @@ if(RPM OR DEB)
 endif()
 
 if(ANDROID)
-    #set(OT_INTERNAL_ZMQ ON CACHE BOOL "Use bundled version of ZeroMQ and czmq" FORCE)
+  #set(OT_INTERNAL_ZMQ ON CACHE BOOL "Use bundled version of ZeroMQ and czmq" FORCE)
 endif()
 
 #-----------------------------------------------------------------------------
@@ -186,8 +207,14 @@ if(${CMAKE_CXX_COMPILER_ID} MATCHES GNU)
   INCLUDE(CheckCXXCompilerFlag)
   CHECK_CXX_COMPILER_FLAG(-std=c++11 HAVE_STD11)
   if(HAVE_STD11)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -pthread")
-    set(GCC_WARN_FLAGS "-Wnoexcept -Wstrict-null-sentinel -Wlogical-op")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+    if(ANDROID)
+      set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
+      #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11") # Already done above.
+    else()
+      set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
+    endif()
+    set(GCC_WARN_FLAGS "-Wnoexcept -Wstrict-null-sentinel -Wlogical-op -Wuseless-cast")
   else()
     message(FATAL_ERROR "No advanced standard C++ support (-std=c++11 not defined).")
   endif()
@@ -196,11 +223,15 @@ elseif(${CMAKE_CXX_COMPILER_ID} MATCHES Clang)
   INCLUDE(CheckCXXCompilerFlag)
   CHECK_CXX_COMPILER_FLAG(-std=c++11 HAVE_STD11)
   if(HAVE_STD11)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11") # This option applies to the others below, being outside the if.
     if(APPLE)
-      set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -stdlib=libc++")
+      set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++")
       set(CMAKE_CXX_LINK_FLAGS "${CMAKE_CXX_LINK_FLAGS} -stdlib=libc++")
+    elseif(ANDROID)
+      set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
+      #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11") # Already done above.
     else()
-      set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+      set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
     endif()
   else()
     message(FATAL_ERROR "No C++11 support for Clang version. Please upgrade Clang to a version supporting C++11.")
@@ -215,6 +246,8 @@ if(BUILD_SHARED_LIBS)
 endif()
 
 
+
+
 if(WIN32)
   add_definitions(-D_UNICODE)
 else()
@@ -226,10 +259,14 @@ else()
 endif()
 
 if(ANDROID)
+  set(PEDANTIC_CXX_FLAGS "${PEDANTIC_CXX_FLAGS} -Wno-useless-cast -Wno-missing-field-initializers")
   add_definitions(-D__STDC_LIMIT_MACROS)
 endif()
 
+#set(CMAKE_C_FLAGS "-Wno-psabi --sysroot=/Users/au/my-android-toolchain/sysroot -funwind-tables -finline-limit=64 -fsigned-char -no-canonical-prefixes -march=armv7-a -mfloat-abi=softfp -mfpu=vfpv3-d16 -fdata-sections -ffunction-sections -Wa,--noexecstack  -std=c99 -pthread -fPIC")
+
 message(STATUS "C++ Compiler ID: ${CMAKE_CXX_COMPILER_ID}")
+message(STATUS "C Flags:         ${CMAKE_C_FLAGS}")
 message(STATUS "C++ Flags:       ${CMAKE_CXX_FLAGS}")
 message(STATUS "C++ link flags:  ${CMAKE_CXX_LINK_FLAGS}")
 
@@ -247,8 +284,11 @@ add_definitions(-DPROTOBUF_INLINE_NOT_IN_HEADERS=0)
 find_package(opentxs-proto REQUIRED)
 
 if(APPLE)
-message(STATUS "On Apple, you may have to use: brew install openssl ; brew link --force openssl")
+  message(STATUS "On Apple, you may have to use: brew install openssl ; brew link --force openssl")
   find_package(OpenSSL 1.0.1 REQUIRED)
+#elseif(ANDROID)
+#  find_library(OPENSSL_LIBRARIES NAMES libcrypto.so libssl.so)
+#  find_package(OpenSSL REQUIRED)
 else()
   find_package(OpenSSL 1.0.1 REQUIRED)
 endif()
@@ -282,7 +322,7 @@ endif()
 if(UNIX AND NOT APPLE)
   list(APPEND OPENTXS_SYSTEM_LIBRARIES dl)
   if(ANDROID)
-    #list(APPEND OPENTXS_SYSTEM_LIBRARIES log)
+    list(APPEND OPENTXS_SYSTEM_LIBRARIES log)
   else()
     list(APPEND OPENTXS_SYSTEM_LIBRARIES rt)
   endif()
@@ -385,10 +425,8 @@ if(SIGNAL_HANLDER)
   add_definitions(-DOT_SIGNAL_HANDLING)
 endif()
 
-add_definitions(-DCHAISCRIPT_NO_THREADS)
-
 if(ANDROID)
-  add_definitions(-DOT_ANDROID)
+  add_definitions(-DANDROID)
 endif()
 
 #Network
@@ -579,6 +617,7 @@ endif()
 #Script engines
 if(OT_SCRIPT_USING_CHAI)
   add_definitions(-DOT_USE_SCRIPT_CHAI)
+  add_definitions(-DCHAISCRIPT_NO_THREADS)
 endif()
 
 add_definitions(-DOPENTXS_INTERNAL_BUILD=1)
@@ -612,9 +651,9 @@ if(UNIX)
 endif()
 
 function(set_lib_property lib)
-  if (NOT ANDROID)
+#  if (NOT ANDROID)
     set_target_properties(${lib} PROPERTIES VERSION ${VERSION_STRING} SOVERSION ${VERSION_MAJOR})
-  endif()
+#  endif()
 endfunction(set_lib_property)
 
 add_subdirectory(deps)
@@ -699,13 +738,13 @@ install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/
         PATTERN "Version.hpp" EXCLUDE)
 
 install(FILES
-        ${CMAKE_CURRENT_SOURCE_DIR}/deps/containers/simple_ptr.hpp
-	${CMAKE_CURRENT_SOURCE_DIR}/deps/containers/containers_fixes.hpp
-	${CMAKE_CURRENT_SOURCE_DIR}/deps/containers/exceptions.hpp
-	${CMAKE_CURRENT_SOURCE_DIR}/deps/containers/copy_functors.hpp
-	${CMAKE_CURRENT_SOURCE_DIR}/deps/containers/simple_ptr.tpp
-	DESTINATION include/opentxs/core/containers
-	COMPONENT dev)
+    ${CMAKE_CURRENT_SOURCE_DIR}/deps/containers/simple_ptr.hpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/deps/containers/containers_fixes.hpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/deps/containers/exceptions.hpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/deps/containers/copy_functors.hpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/deps/containers/simple_ptr.tpp
+    DESTINATION include/opentxs/core/containers
+    COMPONENT dev)
 
 install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/deps/irrxml/
         DESTINATION include/irrxml
@@ -726,7 +765,7 @@ if(AUTOCOMPLETION)
 endif()
 
 #-----------------------------------------------------------------------------
-# Uninstal
+# Uninstall
 configure_file(
     "${CMAKE_CURRENT_SOURCE_DIR}/cmake/uninstall.cmake.in"
     "${CMAKE_CURRENT_BINARY_DIR}/uninstall.cmake"
@@ -761,7 +800,7 @@ endif()
 if(DEB)
   set(CPACK_GENERATOR "DEB")
   set(CPACK_DEB_COMPONENT_INSTALL ON)
-  set(CPACK_DEBIAN_PACKAGE_DEPENDS "openssl, libprotobuf8")
+  set(CPACK_DEBIAN_PACKAGE_DEPENDS "openssl, libprotobuf9")
   set(CPACK_DEBIAN_PACKAGE_PRIORITY "extra")
   set(CPACK_DEBIAN_PACKAGE_SECTION "utils")
   set(CPACK_DEBIAN_PACKAGE_HOMEPAGE ${OPEN_TRANSACTIONS_WEBSITE})

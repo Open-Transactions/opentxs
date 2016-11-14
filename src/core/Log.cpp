@@ -222,7 +222,7 @@ bool Log::Init(const String& strThreadContext, const int32_t& nLogLevel)
             config.Reset();
             if (!config.Load()) {
                 return false;
-            };
+            }
 
             bool bIsNew(false);
             if (!config.CheckSet_str("logfile", strThreadContext,
@@ -233,7 +233,7 @@ bool Log::Init(const String& strThreadContext, const int32_t& nLogLevel)
 
             if (!config.Save()) {
                 return false;
-            };
+            }
             config.Reset();
         }
 
@@ -244,7 +244,7 @@ bool Log::Init(const String& strThreadContext, const int32_t& nLogLevel)
                                      OTPaths::AppDataFolder(),
                                      pLogger->m_strLogFileName)) {
                 return false;
-            };
+            }
 
         pLogger->m_bInitialized = true;
 
@@ -1018,7 +1018,7 @@ void crit_err_hdlr(int32_t sig_num, siginfo_t* info, void* ucontext)
 void crit_err_hdlr(ANDROID_UNUSED int32_t sig_num,
                    ANDROID_UNUSED siginfo_t* info, ANDROID_UNUSED void* v)
 {
-#ifndef OT_ANDROID
+#ifndef ANDROID
     static std::mutex the_Mutex;
 
     std::lock_guard<std::mutex> lock(the_Mutex);

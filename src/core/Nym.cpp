@@ -4734,23 +4734,50 @@ Nym::Nym(const NymParameters& nymParameters)
 {
     Initialize();
 
+    
+    Log::vOutput(0, "Nym::Nym: 1\n");
+
     NymParameters revisedParameters = nymParameters;
+    
+    Log::vOutput(0, "Nym::Nym: 2\n");
+
 #if OT_CRYPTO_SUPPORTED_KEY_HD
     revisedParameters.SetCredset(index_++);
+    
+    Log::vOutput(0, "Nym::Nym: 3\n");
 #endif
     CredentialSet* pNewCredentialSet = new CredentialSet(revisedParameters);
 
+    Log::vOutput(0, "Nym::Nym: 4\n");
+
     SetSource(pNewCredentialSet->Source());
+    
+    Log::vOutput(0, "Nym::Nym: 5\n");
+
     m_nymID = source_->NymID();
 
+    Log::vOutput(0, "Nym::Nym: 6\n");
+
     SetDescription(source_->Description());
+
+    Log::vOutput(0, "Nym::Nym: 7\n");
 
     m_mapCredentialSets.insert(
         std::pair<std::string, CredentialSet*>(
             pNewCredentialSet->GetMasterCredID().Get(), pNewCredentialSet));
 
+    
+    //resume
+    
+    Log::vOutput(0, "Nym::Nym: About to save Credential IDs (Justus' code!)\n");
+    
     SaveCredentialIDs();
+
+    Log::vOutput(0, "Nym::Nym: Finished saving Credential IDs\n");
+
     SaveSignedNymfile(*this);
+    
+    Log::vOutput(0, "Nym::Nym: Finished saving signed Nym file.\n");
 }
 
 void Nym::Initialize() { m_strVersion = "1.0"; }

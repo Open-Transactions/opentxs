@@ -139,6 +139,8 @@ Credential::Credential(
     , owner_backlink_(&theOwner)
     , version_(1)
 {
+    Log::vOutput(0, "Credential::Credential: owner and nym params");
+    
 }
 
 Credential::Credential(
@@ -165,11 +167,20 @@ Credential::Credential(
 
 bool Credential::New(__attribute__((unused)) const NymParameters& nymParameters)
 {
+    Log::vOutput(0, "Credential::New: 1");
+
     CalculateID();
 
+    Log::vOutput(0, "Credential::New: 2");
+
     if (proto::CREDROLE_MASTERKEY != role_) {
+        
+        Log::vOutput(0, "Credential::New: 3");
+
         return AddMasterSignature();
     }
+
+    Log::vOutput(0, "Credential::New: 4");
 
     return true;
 }
@@ -469,7 +480,11 @@ bool Credential::Save() const
         return false;
     }
 
+    Log::vOutput(0, "Credential::Save: 1\n");
+
     bool bSaved = App::Me().DB().Store(*serializedProto);
+
+    Log::vOutput(0, "Credential::Save: 2\n");
 
     if (!bSaved) {
         otErr << __FUNCTION__ << ": Error saving credential" << std::endl;

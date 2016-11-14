@@ -31,7 +31,7 @@ include_directories(
 ## Java sources: place all our java code in subdir to keep it clean
 set(JAVA_SOURCE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/otx_java CACHE INTERNAL "")
 set(JAVA_BINARY_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/otx_java CACHE INTERNAL "")
-file(MAKE_DIRECTORY ${JAVA_SOURCE_DIRECTORY})  
+file(MAKE_DIRECTORY ${JAVA_SOURCE_DIRECTORY})
 file(MAKE_DIRECTORY ${JAVA_BINARY_DIRECTORY})
 
 set(CMAKE_SWIG_OUTDIR ${JAVA_BINARY_DIRECTORY})
@@ -44,7 +44,7 @@ set(MOD_NAME ${SWIG_MODULE_${OTX_WRAPPER_NAME}_REAL_NAME})
 
 target_link_libraries(${MOD_NAME} ${OTX_LINK_LIBS})
 set_target_properties(${MOD_NAME}
-                      PROPERTIES OUTPUT_NAME ${OTX_WRAPPER_NAME})
+                      PROPERTIES NO_SONAME ON OUTPUT_NAME ${OTX_WRAPPER_NAME})
 set_lib_property(${MOD_NAME})
 install(TARGETS ${MOD_NAME}
         DESTINATION ${CMAKE_INSTALL_LIBDIR}

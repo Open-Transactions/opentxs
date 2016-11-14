@@ -208,11 +208,18 @@ CredentialSet::CredentialSet(
       : version_(1)
       , mode_(proto::KEYMODE_PRIVATE)
 {
+    
+    Log::vOutput(0, "CredentialSet::CredentialSet: 1\n");
+    
     CreateMasterCredential(nymParameters);
+
+    Log::vOutput(0, "CredentialSet::CredentialSet: 2\n");
 
     OT_ASSERT(m_MasterCredential);
 
     NymParameters revisedParameters = nymParameters;
+
+    Log::vOutput(0, "CredentialSet::CredentialSet: 3\n");
 
 #if OT_CRYPTO_SUPPORTED_KEY_ED25519
     otOut << __FUNCTION__ << ": Creating an ed25519 child key credential."
@@ -266,6 +273,9 @@ bool CredentialSet::AddChildKeyCredential(const NymParameters& nymParameters)
 
 bool CredentialSet::CreateMasterCredential(const NymParameters& nymParameters)
 {
+    
+    Log::vOutput(0, "CredentialSet::CreateMasterCredential: 1\n");
+
 #if OT_CRYPTO_SUPPORTED_KEY_HD
     if (0 != index_) {
         otErr << __FUNCTION__ << ": The master credential must be the first "
@@ -289,8 +299,12 @@ bool CredentialSet::CreateMasterCredential(const NymParameters& nymParameters)
         return false;
     }
 
+    Log::vOutput(0, "CredentialSet::CreateMasterCredential: 2\n");
+
     m_MasterCredential.reset(
         Credential::Create<MasterCredential>(*this, nymParameters));
+
+    Log::vOutput(0, "CredentialSet::CreateMasterCredential: 3\n");
 
     if (m_MasterCredential) {
         index_++;

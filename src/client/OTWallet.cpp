@@ -50,6 +50,9 @@
 #include "opentxs/core/crypto/OTPassword.hpp"
 #include "opentxs/core/crypto/OTPasswordData.hpp"
 #include "opentxs/core/crypto/OTSymmetricKey.hpp"
+#ifdef ANDROID
+#include "opentxs/core/util/android_string.hpp"
+#endif // ANDROID
 #include "opentxs/core/util/Assert.hpp"
 #include "opentxs/core/util/OTDataFolder.hpp"
 #include "opentxs/core/util/Tag.hpp"
@@ -216,21 +219,45 @@ std::string OTWallet::GetWords()
 // (Wallet stores it in RAM and will delete when it destructs.)
 Nym* OTWallet::CreateNym(const NymParameters& nymParameters)
 {
+    Log::vOutput(0, "OTWallet::CreateNym: 1\n");
+
     NymParameters revisedParameters = nymParameters;
 
+    Log::vOutput(0, "OTWallet::CreateNym: 2\n");
+
 #if OT_CRYPTO_SUPPORTED_KEY_HD
+    
+    Log::vOutput(0, "OTWallet::CreateNym: 3\n");
+
     if (proto::CREDTYPE_HD == nymParameters.credentialType()) {
+        
+        Log::vOutput(0, "OTWallet::CreateNym: 4\n");
+
         revisedParameters.SetNym(NextHDSeed());
         next_hd_key_++;
     }
 #endif
 
+    Log::vOutput(0, "OTWallet::CreateNym: 5\n");
+
     Nym* pNym = new Nym(revisedParameters);
+    
+    Log::vOutput(0, "OTWallet::CreateNym: 6\n");
+
     OT_ASSERT(nullptr != pNym);
 
+    Log::vOutput(0, "OTWallet::CreateNym: 7\n");
+
     if (pNym->VerifyPseudonym()) {
+        
+        Log::vOutput(0, "OTWallet::CreateNym: 8\n");
+
+        
         this->AddPrivateNym(
             *pNym);  // Add our new nym to the wallet, who "owns" it hereafter.
+
+        
+        Log::vOutput(0, "OTWallet::CreateNym: 9\n");
 
         // Note: It's already on the master key. To prevent that, we would have
         // had
@@ -248,7 +275,11 @@ Nym* OTWallet::CreateNym(const NymParameters& nymParameters)
             otErr << __FUNCTION__
                   << ": Error: Failed in OTWallet::ConvertNymToCachedKey.\n";
 
+        Log::vOutput(0, "OTWallet::CreateNym: 10\n");
+
         this->SaveWallet();  // Since it just changed.
+
+        Log::vOutput(0, "OTWallet::CreateNym: 11\n");
 
         // By this point, pNym is a good pointer, and is on the wallet.
         //  (No need to cleanup.)

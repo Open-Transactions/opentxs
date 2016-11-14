@@ -24,13 +24,14 @@ set_property(TARGET lucre PROPERTY POSITION_INDEPENDENT_CODE 1)
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
+# -----------------------------------------------
 if (OT_INTERNAL_ZMQ)
 
   SET (EXTERNAL_TOOLCHAIN_FILE ${CMAKE_TOOLCHAIN_FILE})
 
-  if (ANDROID)
-    SET (EXTERNAL_TOOLCHAIN_FILE ${ANDROID_TOOLCHAIN_CMAKE})
-  endif()
+#  if (ANDROID)
+#    SET (EXTERNAL_TOOLCHAIN_FILE ${ANDROID_TOOLCHAIN_CMAKE})
+#  endif()
 
   include(ExternalProject)
   ExternalProject_Add(
@@ -53,6 +54,7 @@ if (OT_INTERNAL_ZMQ)
   install(FILES ${CMAKE_CURRENT_BINARY_DIR}/lib
           DESTINATION ${CMAKE_INSTALL_LIBDIR})
 endif()
+# -----------------------------------------------
 
 if (LIBSECP256K1_EXPORT AND OT_INTERNAL_LIBSECP)
     include(ExternalProject)
