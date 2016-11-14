@@ -312,7 +312,14 @@ KeyCredential::KeyCredential(
     const NymParameters& nymParameters)
         : ot_super(theOwner, nymParameters)
 {
+    Log::vOutput(0, "KeyCredential::KeyCredential: credential set, nym params");
+
+    
     if (proto::CREDTYPE_HD != nymParameters.credentialType()) {
+        
+        Log::vOutput(0, "KeyCredential::KeyCredential: 1");
+
+        
         m_AuthentKey =
             std::make_shared<OTKeypair>(nymParameters, proto::KEYROLE_AUTH);
         m_EncryptKey =
@@ -320,11 +327,22 @@ KeyCredential::KeyCredential(
         m_SigningKey =
             std::make_shared<OTKeypair>(nymParameters, proto::KEYROLE_SIGN);
     } else {
+        
+        Log::vOutput(0, "KeyCredential::KeyCredential: 2");
+
+        
 #if OT_CRYPTO_SUPPORTED_KEY_HD
+        
+        Log::vOutput(0, "KeyCredential::KeyCredential: 3");
+
         const auto keyType = nymParameters.AsymmetricKeyType();
         const auto curve = CryptoAsymmetric::KeyTypeToCurve(keyType);
 
         if (EcdsaCurve::ERROR != curve) {
+            
+            Log::vOutput(0, "KeyCredential::KeyCredential: 4");
+
+            
             m_AuthentKey = DeriveHDKeypair(
                 nymParameters.Seed(),
                 nymParameters.Nym(),
@@ -332,6 +350,10 @@ KeyCredential::KeyCredential(
                 nymParameters.CredIndex(),
                 curve,
                 proto::KEYROLE_AUTH);
+            
+            Log::vOutput(0, "KeyCredential::KeyCredential: 5");
+
+            
             m_EncryptKey = DeriveHDKeypair(
                 nymParameters.Seed(),
                 nymParameters.Nym(),
@@ -339,6 +361,9 @@ KeyCredential::KeyCredential(
                 nymParameters.CredIndex(),
                 curve,
                 proto::KEYROLE_ENCRYPT);
+            
+            Log::vOutput(0, "KeyCredential::KeyCredential: 6");
+
             m_SigningKey = DeriveHDKeypair(
                 nymParameters.Seed(),
                 nymParameters.Nym(),
@@ -346,19 +371,40 @@ KeyCredential::KeyCredential(
                 nymParameters.CredIndex(),
                 curve,
                 proto::KEYROLE_SIGN);
+            
+            
+            Log::vOutput(0, "KeyCredential::KeyCredential: 7");
+
         }
+        
+        Log::vOutput(0, "KeyCredential::KeyCredential: 8");
+
 #endif
+        
+        Log::vOutput(0, "KeyCredential::KeyCredential: 9");
+
     }
+    
+    Log::vOutput(0, "KeyCredential::KeyCredential: 10");
+
 }
 
 bool KeyCredential::New(
     const NymParameters& nymParameters)
 {
+    Log::vOutput(0, "KeyCredential::New: 1");
+
     CalculateID();
 
+    Log::vOutput(0, "KeyCredential::New: 2");
+
     if (SelfSign()) {
+        
+        Log::vOutput(0, "KeyCredential::New: 3");
+
         return ot_super::New(nymParameters);
     }
+    Log::vOutput(0, "KeyCredential::New: 4");
 
     return false;
 }
@@ -372,14 +418,25 @@ std::shared_ptr<OTKeypair> KeyCredential::DeriveHDKeypair(
     const EcdsaCurve& curve,
     const proto::KeyRole role)
 {
+    
+    Log::vOutput(0, "KeyCredential::DeriveHDKeypair: 1");
+
+    
     proto::HDPath keyPath;
     keyPath.set_version(1);
 
     if (!fingerprint.empty()) {
+        
+        Log::vOutput(0, "KeyCredential::DeriveHDKeypair: 2");
+
         // Check to see if specified seed exists
         auto seed = App::Me().Crypto().BIP39().Seed(fingerprint);
 
         if (seed) {
+            
+            Log::vOutput(0, "KeyCredential::DeriveHDKeypair: 3");
+
+            
             keyPath.set_root(fingerprint.c_str(), fingerprint.size());
             otErr << __FUNCTION__ << ": Using seed " << fingerprint <<  " for "
                   << "key derivation." << std::endl;
@@ -387,10 +444,15 @@ std::shared_ptr<OTKeypair> KeyCredential::DeriveHDKeypair(
             otLog5 << __FUNCTION__ << ": Using default seed for key derivation."
                   << std::endl;
         }
+        
+        Log::vOutput(0, "KeyCredential::DeriveHDKeypair: 4");
+
     } else {
         otLog5 << __FUNCTION__ << ": Using default seed for key derivation."
                 << std::endl;
     }
+
+    Log::vOutput(0, "KeyCredential::DeriveHDKeypair: 5");
 
     keyPath.add_child(
         static_cast<std::uint32_t>(Bip43Purpose::NYM) |
@@ -611,42 +673,94 @@ bool KeyCredential::SelfSign(
     const OTPasswordData* pPWData,
     const bool onlyPrivate)
 {
+    
+    Log::vOutput(0, "KeyCredential::SelfSign: 1");
+    
+
+    
     CalculateID();
+    
+    Log::vOutput(0, "KeyCredential::SelfSign: 2");
+    
+
     SerializedSignature publicSignature = std::make_shared<proto::Signature>();
     SerializedSignature privateSignature = std::make_shared<proto::Signature>();
 
+    
+    Log::vOutput(0, "KeyCredential::SelfSign: 3");
+    
+
     bool havePublicSig = false;
     if (!onlyPrivate) {
+        
+        Log::vOutput(0, "KeyCredential::SelfSign: 4");
+        
+
         const serializedCredential publicVersion =
             asSerialized(AS_PUBLIC, WITHOUT_SIGNATURES);
+        
+        Log::vOutput(0, "KeyCredential::SelfSign: 5");
+        
+
         auto& signature = *publicVersion->add_signature();
+        
+        Log::vOutput(0, "KeyCredential::SelfSign: 6");
+        
+
         signature.set_role(proto::SIGROLE_PUBCREDENTIAL);
+        
+        Log::vOutput(0, "KeyCredential::SelfSign: 7");
+        
+
         havePublicSig = SignProto(
             *publicVersion,
             signature,
             proto::KEYROLE_SIGN,
             pPWData);
 
+        
+        Log::vOutput(0, "KeyCredential::SelfSign: 8");
+        
+
         if (havePublicSig) {
+            Log::vOutput(0, "KeyCredential::SelfSign: 9");
+            
+
             publicSignature->CopyFrom(signature);
+            Log::vOutput(0, "KeyCredential::SelfSign: 10");
+            
+
             signatures_.push_back(publicSignature);
         }
     }
+
+    Log::vOutput(0, "KeyCredential::SelfSign: 11");
+    
 
     serializedCredential privateVersion =
         asSerialized(AS_PRIVATE, WITHOUT_SIGNATURES);
     auto& signature = *privateVersion->add_signature();
     signature.set_role(proto::SIGROLE_PRIVCREDENTIAL);
+    
+    Log::vOutput(0, "KeyCredential::SelfSign: 12");
+    
+
     bool havePrivateSig = SignProto(
         *privateVersion,
         signature,
         proto::KEYROLE_SIGN,
         pPWData);
 
+    Log::vOutput(0, "KeyCredential::SelfSign: 13");
+    
+
     if (havePrivateSig) {
         privateSignature->CopyFrom(signature);
         signatures_.push_back(privateSignature);
     }
+
+    Log::vOutput(0, "KeyCredential::SelfSign: 14");
+    
 
     return ((havePublicSig | onlyPrivate) && havePrivateSig);
 }

@@ -200,17 +200,39 @@ std::string Bip39::ImportSeed(
 
 std::string Bip39::NewSeed() const
 {
+    
+    Log::vOutput(0, "Bip39::NewSeed: 1");
+
     auto entropy = App::Me().Crypto().AES().InstantiateBinarySecretSP();
 
     if (entropy) {
+        
+        Log::vOutput(0, "Bip39::NewSeed: 2");
+
         entropy->randomizeMemory(256/8);
         OTPassword words, passphrase;
         passphrase.setPassword(DEFAULT_PASSPHRASE);
 
-        if (!toWords(*entropy, words)) { return ""; }
+        if (!toWords(*entropy, words)) {
+            Log::vOutput(0, "Bip39::NewSeed: 3");
 
-        return SaveSeed(words, passphrase);
+            return "";
+        
+        }
+
+        
+        Log::vOutput(0, "Bip39::NewSeed: 4");
+
+        std::string strSeed = SaveSeed(words, passphrase);
+        
+        Log::vOutput(0, "Bip39::NewSeed: 5 : strSeed: %s", strSeed.c_str());
+        
+        return strSeed;
+    } else {
+        OT_FAIL;
     }
+    
+    Log::vOutput(0, "Bip39::NewSeed: 6");
 
     return "";
 }
@@ -230,6 +252,9 @@ std::string Bip39::Passphrase(const std::string& fingerprint) const
 
 std::shared_ptr<OTPassword> Bip39::Seed(const std::string& fingerprint) const
 {
+    
+    Log::vOutput(0, "Bip39::Seed: 1");
+    
     auto output = App::Me().Crypto().AES().InstantiateBinarySecretSP();
 
     OT_ASSERT(output);
@@ -237,10 +262,16 @@ std::shared_ptr<OTPassword> Bip39::Seed(const std::string& fingerprint) const
     auto serialized = SerializedSeed(fingerprint);
 
     if (serialized) {
+        
+        Log::vOutput(0, "Bip39::Seed: 2");
+
         std::unique_ptr<OTPassword>
             seed(App::Me().Crypto().AES().InstantiateBinarySecret());
 
         OT_ASSERT(seed);
+
+        
+        Log::vOutput(0, "Bip39::Seed: 3");
 
         OTPassword words, passphrase;
         const bool decrypted = DecryptSeed(*serialized, words, passphrase);
@@ -260,27 +291,48 @@ std::shared_ptr<OTPassword> Bip39::Seed(const std::string& fingerprint) const
 std::shared_ptr<proto::Seed> Bip39::SerializedSeed(
     const std::string& fingerprint) const
 {
+    
+    Log::vOutput(0, "Bip39::SerializedSeed: 1");
+
     const bool wantDefaultSeed = fingerprint.empty();
     std::shared_ptr<proto::Seed> serialized;
 
     if (wantDefaultSeed) {
+        
+        Log::vOutput(0, "Bip39::SerializedSeed: 2");
+
         std::string defaultFingerprint = App::Me().DB().DefaultSeed();
         bool haveDefaultSeed = !defaultFingerprint.empty();
 
         if (!haveDefaultSeed) {
+            
+            Log::vOutput(0, "Bip39::SerializedSeed: 3");
+
+            
             defaultFingerprint = NewSeed();
         }
 
         if (!defaultFingerprint.empty()) {
+            
+            Log::vOutput(0, "Bip39::SerializedSeed: 4");
+
             serialized = SerializedSeed(defaultFingerprint);
         } else {
             OT_FAIL;
         }
 
+        Log::vOutput(0, "Bip39::SerializedSeed: 5");
+
     } else { // want an explicitly identified seed
+        
+        Log::vOutput(0, "Bip39::SerializedSeed: 6");
+
         App::Me().DB().Load(fingerprint, serialized);
     }
+    
+    Log::vOutput(0, "Bip39::SerializedSeed: 7");
 
+    
     return serialized;
 }
 

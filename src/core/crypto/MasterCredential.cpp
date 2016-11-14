@@ -193,6 +193,9 @@ bool MasterCredential::New(const NymParameters& nymParameters)
     Log::vOutput(0, "MasterCredential::New: 1\n");
 
     if (!ot_super::New(nymParameters)) {
+        
+        Log::vOutput(0, "MasterCredential::New: Failed in (!ot_super::New(nymParameters))\n");
+        
         return false;
     }
     Log::vOutput(0, "MasterCredential::New: 2\n");

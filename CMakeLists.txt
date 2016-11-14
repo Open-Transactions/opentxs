@@ -39,8 +39,8 @@ else()
   option(BUILD_TESTS         "Build the unit tests." ON)
 endif()
 
-option(USE_CCACHE          "Use ccache." OFF)
 option(OT_STRICT           "Use pedantic compiler options." ON)
+option(USE_CCACHE          "Use ccache." OFF)
 
 option(BUILD_SHARED_LIBS   "Build shared libraries." ON)
 
@@ -59,12 +59,12 @@ option(KEYRING_GNOME       "Build with Gnome Keyring" OFF)
 option(KEYRING_KWALLET     "Build with KWallet Keyring" OFF)
 option(KEYRING_FLATFILE    "Build with Flatfile Keyring" OFF)
 
+option(NO_PASSWORD         "Use default password for all prompts" OFF)
+
 if(ANDROID)
-  option(NO_PASSWORD         "Use default password for all prompts" ON)
   option(OT_STORAGE_FS       "Use filesystem backend for storage" OFF)
   option(OT_STORAGE_SQLITE   "Use sqlite backend for storage" ON)
 else()
-  option(NO_PASSWORD         "Use default password for all prompts" OFF)
   option(OT_STORAGE_FS       "Use filesystem backend for storage" ON)
   option(OT_STORAGE_SQLITE   "Use sqlite backend for storage" OFF)
 endif()
@@ -209,7 +209,8 @@ if(${CMAKE_CXX_COMPILER_ID} MATCHES GNU)
   if(HAVE_STD11)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
     if(ANDROID)
-      #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11") # Already done above.
+      #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wl,--hash-style=sysv")
+      set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
     else()
       set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
     endif()
@@ -227,7 +228,8 @@ elseif(${CMAKE_CXX_COMPILER_ID} MATCHES Clang)
       set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++")
       set(CMAKE_CXX_LINK_FLAGS "${CMAKE_CXX_LINK_FLAGS} -stdlib=libc++")
     elseif(ANDROID)
-      #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11") # Already done above.
+      #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wl,--hash-style=sysv")
+      set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
     else()
       set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
     endif()
@@ -242,6 +244,8 @@ if(BUILD_SHARED_LIBS)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
   endif()
 endif()
+
+
 
 
 if(WIN32)
@@ -259,7 +263,10 @@ if(ANDROID)
   add_definitions(-D__STDC_LIMIT_MACROS)
 endif()
 
+#set(CMAKE_C_FLAGS "-Wno-psabi --sysroot=/Users/au/my-android-toolchain/sysroot -funwind-tables -finline-limit=64 -fsigned-char -no-canonical-prefixes -march=armv7-a -mfloat-abi=softfp -mfpu=vfpv3-d16 -fdata-sections -ffunction-sections -Wa,--noexecstack  -std=c99 -pthread -fPIC")
+
 message(STATUS "C++ Compiler ID: ${CMAKE_CXX_COMPILER_ID}")
+message(STATUS "C Flags:         ${CMAKE_C_FLAGS}")
 message(STATUS "C++ Flags:       ${CMAKE_CXX_FLAGS}")
 message(STATUS "C++ link flags:  ${CMAKE_CXX_LINK_FLAGS}")
 
@@ -280,7 +287,7 @@ if(APPLE)
   message(STATUS "On Apple, you may have to use: brew install openssl ; brew link --force openssl")
   find_package(OpenSSL 1.0.1 REQUIRED)
 #elseif(ANDROID)
-#  find_package(OpenSSL REQUIRED)
+#  find_library(OPENSSL_LIBRARIES NAMES libcrypto.so libssl.so)
 else()
   find_package(OpenSSL 1.0.1 REQUIRED)
 endif()
