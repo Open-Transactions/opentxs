@@ -53,19 +53,11 @@ OTData::OTData(const OTASCIIArmor& source)
     }
 }
 
-OTData::OTData(const std::uint32_t num)
-{
-    Assign(&num, sizeof(std::uint32_t));
-}
-
-OTData::OTData(const std::int64_t num)
-{
-    Assign(&num, sizeof(uint64_t));
-}
-
 OTData::OTData(const void* data, std::size_t size)
+    : data_(
+          static_cast<const std::uint8_t*>(data),
+          static_cast<const std::uint8_t*>(data) + size)
 {
-    Assign(data, size);
 }
 
 OTData::OTData(const std::vector<unsigned char>& sourceVector)
@@ -74,22 +66,16 @@ OTData::OTData(const std::vector<unsigned char>& sourceVector)
 }
 
 OTData::OTData(const OTData& rhs)
+    : position_(rhs.position_)
 {
     Assign(rhs);
 }
 
 OTData::OTData(OTData&& rhs)
-    : data_(nullptr)
-    , position_(0)
-    , size_(0)
 {
-    data_ = rhs.data_;
+    data_.swap(rhs.data_);
     position_ = rhs.position_;
-    size_ = rhs.size_;
-
-    rhs.data_ = nullptr;
     rhs.position_ = 0;
-    rhs.size_ = 0;
 }
 
 OTData& OTData::operator=(const OTData& rhs)
@@ -106,68 +92,44 @@ OTData& OTData::operator=(OTData&& rhs)
     return *this;
 }
 
-bool OTData::operator==(const OTData& rhs) const
-{
-    if (size_ != rhs.size_) {
+bool OTData::operator==(const OTData& rhs) const { return data_ == rhs.data_; }
 
-        return false;
-    }
-
-    if (size_ == 0 && rhs.size_ == 0) {
-
-        return true;
-    }
-    // TODO security: replace memcmp with a more secure
-    // version. Still, though, I am managing it internal to
-    // the class.
-    if (std::memcmp(data_, rhs.data_, size_) == 0) {
-
-        return true;
-    }
-
-    return false;
-}
-
-bool OTData::operator!=(const OTData& rhs) const
-{
-    return !operator==(rhs);
-}
+bool OTData::operator!=(const OTData& rhs) const { return !operator==(rhs); }
 
 OTData& OTData::operator+=(const OTData& rhs)
 {
-    if (rhs.GetSize() > 0) {
-        Concatenate(rhs.data_, rhs.GetSize());
-    }
+    concatenate(rhs.data_);
+
     return *this;
 }
 
-void OTData::Assign(const OTData& source)
+void OTData::Assign(const OTData& rhs)
 {
     // can't assign to self.
-    if (&source == this) {
+    if (&rhs == this) {
         return;
     }
 
-    if (!source.IsEmpty()) {
-        Assign(source.data_, source.size_);
-    } else {
-        // Otherwise if it's empty, then empty this also.
-        Release();
-    }
+    data_ = rhs.data_;
+    position_ = rhs.position_;
 }
 
 void OTData::Assign(const void* data, const std::size_t& size)
 {
-    // This releases all memory and zeros out all members.
     Release();
 
     if (data != nullptr && size > 0) {
-        data_ = static_cast<void*>(new std::uint8_t[size]{});
-        OT_ASSERT(data_ != nullptr);
-        OTPassword::safe_memcpy(data_, size, data, size);
-        size_ = size;
+        auto start = static_cast<const std::uint8_t*>(data);
+        const std::uint8_t* end = start + size;
+        data_.assign(start, end);
     }
-    // TODO: else error condition.  Could just ASSERT() this.
+}
+
+void OTData::concatenate(const Vector& data)
+{
+    for (const auto& byte : data) {
+        data_.emplace_back(byte);
+    }
 }
 
 void OTData::Concatenate(const void* data, const std::size_t& size)
@@ -179,87 +141,39 @@ void OTData::Concatenate(const void* data, const std::size_t& size)
         return;
     }
 
-    if (size_ == 0) {
-        Assign(data, size);
-        return;
-    }
-
-    if (GetSize()>0) {
-        void* newData = nullptr;
-        std::uint32_t newSize = GetSize() + size;
-
-        if (newSize > 0) {
-            newData = static_cast<void*>(new std::uint8_t[newSize]{});
-            OT_ASSERT(newData != nullptr);
-            OTPassword::zeroMemory(newData, newSize);
-        }
-        // If there's a new memory buffer (for the combined..)
-        if (newData != nullptr) {
-            // if THIS object has data inside of it...
-            if (!IsEmpty()) {
-                // Copy THIS object into the new
-                // buffer, starting at the
-                // beginning.
-                OTPassword::safe_memcpy(newData, newSize, data_, GetSize());
-            }
-
-            // Next we copy the data being appended...
-            OTPassword::safe_memcpy(static_cast<std::uint8_t*>(newData) + GetSize(),
-                                    newSize - GetSize(), data, size);
-        }
-
-        if (data_ != nullptr) {
-            delete[] static_cast<std::uint8_t*>(data_);
-        }
-
-        data_ = newData;
-        size_ = newSize;
-    } else {
-        Assign(data, size);
-    }
+    Data temp(data, size);
+    concatenate(temp.data_);
 }
 
-bool OTData::empty() const
-{
-    return size_ < 1;
-}
+bool OTData::empty() const { return data_.empty(); }
 
-const void* OTData::GetPointer() const
-{
-    return data_;
-}
+const void* OTData::GetPointer() const { return data_.data(); }
 
-std::size_t OTData::GetSize() const
-{
-    return size_;
-}
+std::size_t OTData::GetSize() const { return data_.size(); }
 
 void OTData::Initialize()
 {
-    data_ = nullptr;
-    size_ = 0;
-    position_ = 0;
+    data_.empty();
+    reset();
 }
 
-bool OTData::IsEmpty() const // Deprecated.
+bool OTData::IsEmpty() const  // Deprecated.
 {
     return empty();
 }
 
-// First use reset() to set the internal position to 0.
-// Then you pass in the buffer where the results go.
-// You pass in the length of that buffer.
-// It returns how much was actually read.
-// If you start at position 0, and read 100 bytes, then
-// you are now on position 100, and the next OTfread will
-// proceed from that position. (Unless you reset().)
+// First use reset() to set the internal position to 0. Then you pass in the
+// buffer where the results go. You pass in the length of that buffer. It
+// returns how much was actually read. If you start at position 0, and read 100
+// bytes, then you are now on position 100, and the next OTfread will proceed
+// from that position. (Unless you reset().)
 std::size_t OTData::OTfread(std::uint8_t* data, const std::size_t& size)
 {
     OT_ASSERT(data != nullptr && size > 0);
 
     std::size_t sizeToRead = 0;
 
-    if (data_ != nullptr && position_ < GetSize()) {
+    if (position_ < GetSize()) {
         // If the size is 20, and position is 5 (I've already read the first 5
         // bytes) then the size remaining to read is 15. That is, GetSize()
         // minus position_.
@@ -268,8 +182,8 @@ std::size_t OTData::OTfread(std::uint8_t* data, const std::size_t& size)
         if (size < sizeToRead) {
             sizeToRead = size;
         }
-        OTPassword::safe_memcpy(
-            data, size, static_cast<std::uint8_t*>(data_) + position_, sizeToRead);
+
+        OTPassword::safe_memcpy(data, size, &data_[position_], sizeToRead);
         position_ += sizeToRead;
     }
 
@@ -278,53 +192,29 @@ std::size_t OTData::OTfread(std::uint8_t* data, const std::size_t& size)
 
 bool OTData::Randomize(const std::size_t& size)
 {
-    Release(); // This releases all memory and zeros out all members.
-    if (size > 0) {
-        data_ = static_cast<void*>(new std::uint8_t[size]{});
-        OT_ASSERT(data_ != nullptr);
+    SetSize(size);
 
-        if (!OTPassword::randomizeMemory_uint8(static_cast<std::uint8_t*>(data_),
-                                               size)) {
-            // randomizeMemory already logs, so I'm not logging again twice
-            // here.
-            delete[] static_cast<std::uint8_t*>(data_);
-            data_ = nullptr;
-            return false;
-        }
-
-        size_ = size;
-        return true;
+    if (size == 0) {
+        return false;
     }
-    // else error condition.  Could just ASSERT() this.
-    return false;
+
+    return OTPassword::randomizeMemory_uint8(data_.data(), size);
 }
 
 void OTData::Release()
 {
-    if (data_ != nullptr) {
-        // For security reasons, we clear the memory to 0 when deleting the
-        // object. (Seems smart.)
-        OTPassword::zeroMemory(data_, size_);
-        delete[] static_cast<std::uint8_t*>(data_);
-        // If data_ was already nullptr, no need to re-Initialize().
-        Initialize();
-    }
+    zeroMemory();
+    Initialize();
 }
 
-void OTData::reset()
-{
-    position_ = 0;
-}
+void OTData::reset() { position_ = 0; }
 
 void OTData::SetSize(const std::size_t& size)
 {
     Release();
 
     if (size > 0) {
-        data_ = static_cast<void*>(new std::uint8_t[size]{});
-        OT_ASSERT(data_ != nullptr);
-        OTPassword::zeroMemory(data_, size);
-        size_ = size;
+        data_.assign(size, 0);
     }
 }
 
@@ -332,18 +222,14 @@ void OTData::swap(OTData& rhs)
 {
     std::swap(data_, rhs.data_);
     std::swap(position_, rhs.position_);
-    std::swap(size_, rhs.size_);
 }
 
-void OTData::zeroMemory() const
+void OTData::swap(OTData&& rhs) { swap(rhs); }
+
+void OTData::zeroMemory()
 {
-    if (data_ != nullptr) {
-        OTPassword::zeroMemory(data_, size_);
+    if (0 < data_.size()) {
+        data_.assign(data_.size(), 0);
     }
 }
-
-OTData::~OTData()
-{
-    Release();
-}
-} // namespace opentxs
+}  // namespace opentxs

@@ -50,17 +50,19 @@ class OTASCIIArmor;
 class OTData
 {
 private:
-    void* data_{nullptr};
-    std::uint32_t position_{0};
-    std::size_t size_={0};
+    typedef std::vector<std::uint8_t> Vector;
+
+    Vector data_{};
+    std::size_t position_{};
+
+    void concatenate(const Vector& data);
 
 protected:
     void Initialize();
+    void swap(OTData& rhs);
 
 public:
     EXPORT OTData() = default;
-    EXPORT explicit OTData(const std::uint32_t num);
-    EXPORT explicit OTData(const std::int64_t num);
     EXPORT explicit OTData(const void* data, std::size_t size);
     EXPORT explicit OTData(const OTASCIIArmor& source);
     EXPORT explicit OTData(const std::vector<unsigned char>& sourceVector);
@@ -86,11 +88,11 @@ public:
     EXPORT void Release();
     EXPORT void reset();
     EXPORT void SetSize(const std::size_t& size);
-    EXPORT void swap(OTData& rhs);
+    EXPORT void swap(OTData&& rhs);
     EXPORT void zeroMemory();
 
-    EXPORT virtual ~OTData();
+    EXPORT virtual ~OTData() = default;
 };
-} // namespace opentxs
+}  // namespace opentxs
 
-#endif // OPENTXS_CORE_OTDATA_HPP
+#endif  // OPENTXS_CORE_DATA_HPP

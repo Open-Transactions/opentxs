@@ -77,49 +77,49 @@ proto::HashType Identifier::IDToHashType(const ID type)
 }
 
 Identifier::Identifier()
-    : OTData()
+    : ot_super()
 {
 }
 
 Identifier::Identifier(const Identifier& theID)
-    : OTData(theID)
+    : ot_super(theID)
     , type_(theID.Type())
 {
 }
 
 Identifier::Identifier(const std::string& theStr)
-    : OTData()
+    : ot_super()
 {
     SetString(theStr);
 }
 
 Identifier::Identifier(const String& theStr)
-    : OTData()
+    : ot_super()
 {
     SetString(theStr);
 }
 
 Identifier::Identifier(const Contract& theContract)
-    : OTData() // Get the contract's ID into this identifier.
+    : ot_super() // Get the contract's ID into this identifier.
 {
     (const_cast<Contract&>(theContract)).GetIdentifier(*this);
 }
 
 Identifier::Identifier(const Nym& theNym)
-    : OTData() // Get the Nym's ID into this identifier.
+    : ot_super() // Get the Nym's ID into this identifier.
 {
     (const_cast<Nym&>(theNym)).GetIdentifier(*this);
 }
 
 Identifier::Identifier(const OTSymmetricKey& theKey)
-    : OTData() // Get the Symmetric Key's ID into *this. (It's a hash of the
+    : ot_super() // Get the Symmetric Key's ID into *this. (It's a hash of the
                // encrypted form of the symmetric key.)
 {
     (const_cast<OTSymmetricKey&>(theKey)).GetIdentifier(*this);
 }
 
 Identifier::Identifier(const OTCachedKey& theKey)
-    : OTData() // Cached Key stores a symmetric key inside, so this actually
+    : ot_super() // Cached Key stores a symmetric key inside, so this actually
                // captures the ID for that symmetrickey.
 {
     const bool bSuccess =
@@ -134,9 +134,18 @@ Identifier::Identifier(const OTCachedKey& theKey)
                          // would not happen, before constructing like this.)
 }
 
-Identifier& Identifier::operator=(Identifier rhs)
+Identifier& Identifier::operator=(const Identifier& rhs)
+{
+    Assign(rhs);
+    type_ = rhs.type_;
+
+    return *this;
+}
+
+Identifier& Identifier::operator=(Identifier&& rhs)
 {
     swap(rhs);
+
     return *this;
 }
 
@@ -251,5 +260,12 @@ void Identifier::GetString(String& id) const
     output.Concatenate(
         String(OT::App().Crypto().Encode().IdentifierEncode(data).c_str()));
     id.swap(output);
+}
+
+void Identifier::swap(Identifier&& rhs)
+{
+    ot_super::swap(rhs);
+    type_ = rhs.type_;
+    rhs.type_ = ID::ERROR;
 }
 } // namespace opentxs
