@@ -39,7 +39,6 @@
 #ifndef OPENTXS_CORE_OTDATA_HPP
 #define OPENTXS_CORE_OTDATA_HPP
 
-#include <string>
 #include <cstdint>
 #include <vector>
 
@@ -50,65 +49,48 @@ class OTASCIIArmor;
 
 class OTData
 {
+private:
+    void* data_{nullptr};
+    std::uint32_t position_{0};
+    std::size_t size_={0};
+
+protected:
+    void Initialize();
+
 public:
-    EXPORT OTData();
-    EXPORT explicit OTData(const uint32_t num);
-    EXPORT explicit OTData(const int64_t num);
-    EXPORT OTData(const void* data, uint32_t size);
-    EXPORT OTData(const OTData& source);
+    EXPORT OTData() = default;
+    EXPORT explicit OTData(const std::uint32_t num);
+    EXPORT explicit OTData(const std::int64_t num);
+    EXPORT explicit OTData(const void* data, std::size_t size);
     EXPORT explicit OTData(const OTASCIIArmor& source);
     EXPORT explicit OTData(const std::vector<unsigned char>& sourceVector);
-    EXPORT OTData(OTData&& other);
-    EXPORT virtual ~OTData();
+    EXPORT OTData(const OTData& rhs);
+    EXPORT OTData(OTData&& rhs);
+    EXPORT OTData& operator=(const OTData& rhs);
+    EXPORT OTData& operator=(OTData&& rhs);
 
-    EXPORT void Release();
-
-    void SetSize(uint32_t size);
-
-    inline const void* GetPointer() const
-    {
-        return data_;
-    }
-
-    EXPORT OTData& operator=(OTData rhs);
-    EXPORT void swap(OTData& rhs);
     EXPORT bool operator==(const OTData& rhs) const;
     EXPORT bool operator!=(const OTData& rhs) const;
     EXPORT OTData& operator+=(const OTData& rhs);
-    EXPORT bool IsEmpty() const;
-    EXPORT bool empty() const;
 
-    inline uint32_t GetSize() const
-    {
-        return size_;
-    }
+    EXPORT bool empty() const;
+    EXPORT bool IsEmpty() const;
+    EXPORT const void* GetPointer() const;
+    EXPORT std::size_t GetSize() const;
 
     EXPORT void Assign(const OTData& source);
-    EXPORT void Assign(const void* data, uint32_t size);
-    EXPORT void Concatenate(const void* data, uint32_t size);
-    EXPORT bool Randomize(uint32_t size);
-    EXPORT void zeroMemory() const;
-    EXPORT uint32_t OTfread(uint8_t* data, uint32_t size);
+    EXPORT void Assign(const void* data, const std::size_t& size);
+    EXPORT void Concatenate(const void* data, const std::size_t& size);
+    EXPORT std::size_t OTfread(std::uint8_t* data, const std::size_t& size);
+    EXPORT bool Randomize(const std::size_t& size);
+    EXPORT void Release();
+    EXPORT void reset();
+    EXPORT void SetSize(const std::size_t& size);
+    EXPORT void swap(OTData& rhs);
+    EXPORT void zeroMemory();
 
-    inline void reset()
-    {
-        position_ = 0;
-    }
-
-protected:
-    inline void Initialize()
-    {
-        data_ = nullptr;
-        size_ = 0;
-        position_ = 0;
-    }
-
-private:
-    void* data_=nullptr;
-    uint32_t position_=0;
-    uint32_t size_=0; // TODO: MAX_SIZE ?? security.
+    EXPORT virtual ~OTData();
 };
-
 } // namespace opentxs
 
 #endif // OPENTXS_CORE_OTDATA_HPP
