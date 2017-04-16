@@ -764,6 +764,11 @@ bool OTSymmetricKey::Decrypt(const OTSymmetricKey& theKey,
             << __FUNCTION__
             << ": Sorry, unable to retrieve passphrase from user. (Failure.)\n";
 
+    // If the user provided this password, release it back to them
+    // Or else unique_ptr will attempt to free it once it leaves scope
+    // At the end of this function, which can lead to malloc errors.
+    if (pAlreadyHavePW) pPassUserInput.release();
+
     return bSuccess;
 }
 
