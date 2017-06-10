@@ -41,26 +41,26 @@
 
 #include "opentxs/core/crypto/OTAsymmetricKey_OpenSSLPrivdp.hpp"
 
-#include "opentxs/core/Log.hpp"
-#include "opentxs/core/OTData.hpp"
 #include "opentxs/core/crypto/OTASCIIArmor.hpp"
 #include "opentxs/core/crypto/OTAsymmetricKey.hpp"
 #include "opentxs/core/crypto/OTAsymmetricKeyOpenSSL.hpp"
 #include "opentxs/core/crypto/OTPassword.hpp"
 #include "opentxs/core/crypto/OTPasswordData.hpp"
-#include "opentxs/core/util/Assert.hpp"
-#include "opentxs/core/util/Timer.hpp"
-
 #if OT_CRYPTO_USING_OPENSSL
 #include "opentxs/core/crypto/OpenSSL_BIO.hpp"
 #endif
+#include "opentxs/core/util/Assert.hpp"
+#include "opentxs/core/util/Timer.hpp"
+#include <opentxs/core/util/stacktrace.h>
+#include "opentxs/core/Data.hpp"
+#include "opentxs/core/Log.hpp"
 
 #include <openssl/bio.h>
 #include <openssl/evp.h>
 #include <openssl/ossl_typ.h>
 #include <openssl/pem.h>
 #include <openssl/x509.h>
-#include <opentxs/core/util/stacktrace.h>
+
 #include <stdint.h>
 #include <ostream>
 
@@ -229,7 +229,7 @@ EVP_PKEY* OTAsymmetricKey_OpenSSL::OTAsymmetricKey_OpenSSLPrivdp::CopyPublicKey(
         const uint32_t nSize = static_cast<uint32_t>(lSize);
 
         if (nSize > 0) {
-            OTData theData;
+            Data theData;
 
             // Set the buffer size in our own memory.
             theData.SetSize(nSize);
@@ -281,7 +281,7 @@ EVP_PKEY* OTAsymmetricKey_OpenSSL::OTAsymmetricKey_OpenSSLPrivdp::CopyPublicKey(
             }
             else {
                 otErr << __FUNCTION__ << ": Error: Failed copying memory from "
-                                         "BIO into OTData.\n";
+                                         "BIO into Data.\n";
             }
         }
         else {
@@ -307,7 +307,7 @@ EVP_PKEY* OTAsymmetricKey_OpenSSL::OTAsymmetricKey_OpenSSLPrivdp::CopyPublicKey(
 //
 // That's why you see me copying one bio into a payload, before copying it into
 // the next bio. Todo security: copy it into an OTPassword here, instead of an
-// OTData, which is safer, and more appropriate for a private key. Make sure
+// Data, which is safer, and more appropriate for a private key. Make sure
 // OTPassword can accommodate a bit larger size than what it does now.
 //
 EVP_PKEY* OTAsymmetricKey_OpenSSL::OTAsymmetricKey_OpenSSLPrivdp::
@@ -366,7 +366,7 @@ EVP_PKEY* OTAsymmetricKey_OpenSSL::OTAsymmetricKey_OpenSSLPrivdp::
         const uint32_t nSize = static_cast<uint32_t>(lSize);
 
         if (nSize > 0) {
-            OTData theData;
+            Data theData;
 
             // Set the buffer size in our own memory.
             theData.SetSize(nSize);
@@ -415,7 +415,7 @@ EVP_PKEY* OTAsymmetricKey_OpenSSL::OTAsymmetricKey_OpenSSLPrivdp::
             }
             else
                 otErr << __FUNCTION__ << ": Error: Failed copying memory from "
-                                         "BIO into OTData.\n";
+                                         "BIO into Data.\n";
 
         }
         else {
@@ -458,7 +458,7 @@ bool OTAsymmetricKey_OpenSSL::OTAsymmetricKey_OpenSSLPrivdp::ArmorPublicKey(
     else {
         otLog5 << szFunc << ": Success writing EVP_PKEY to memory buffer.\n";
 
-        OTData theData;
+        Data theData;
         char* pChar = nullptr;
 
         // After the below call, pChar will point to the memory buffer where the
@@ -510,7 +510,7 @@ EVP_PKEY* OTAsymmetricKey_OpenSSL::OTAsymmetricKey_OpenSSLPrivdp::
     const char* szFunc = "OTAsymmetricKey_OpenSSL::InstantiatePublicKey";
 
     EVP_PKEY* pReturnKey = nullptr;
-    OTData theData;
+    Data theData;
 
     // This base64 decodes the string m_p_ascKey into the
     // binary payload object "theData"
@@ -570,7 +570,7 @@ EVP_PKEY* OTAsymmetricKey_OpenSSL::OTAsymmetricKey_OpenSSLPrivdp::
     OT_ASSERT(backlink->IsPrivate());
 
     EVP_PKEY* pReturnKey = nullptr;
-    OTData theData; // after base64-decoding the ascii-armored string, the
+    Data theData; // after base64-decoding the ascii-armored string, the
                     // (encrypted) binary will be stored here.
     // --------------------------------------
     // This line base64 decodes the ascii-armored string into binary object
@@ -704,7 +704,7 @@ bool OTAsymmetricKey_OpenSSL::OTAsymmetricKey_OpenSSLPrivdp::ArmorPrivateKey(
         otLog5 << __FUNCTION__
                << ": Success writing EVP_PKEY to memory buffer.\n";
 
-        OTData theData;
+        Data theData;
         char* pChar = nullptr;
 
         // After the below call, pChar will point to the memory buffer where the

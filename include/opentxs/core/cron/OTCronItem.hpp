@@ -42,9 +42,9 @@
 #ifndef OPENTXS_CORE_CRON_OTCRONITEM_HPP
 #define OPENTXS_CORE_CRON_OTCRONITEM_HPP
 
+#include "opentxs/core/OTTransactionType.hpp"
 #include "opentxs/core/OTTrackable.hpp"
 #include "opentxs/core/Types.hpp"
-#include "opentxs/core/OTTransactionType.hpp"
 
 #include <deque>
 

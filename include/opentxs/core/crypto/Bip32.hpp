@@ -39,10 +39,10 @@
 #ifndef OPENTXS_CORE_CRYPTO_BIP32_HPP
 #define OPENTXS_CORE_CRYPTO_BIP32_HPP
 
-#include "opentxs/core/Proto.hpp"
-#include "opentxs/core/Types.hpp"
 #include "opentxs/core/crypto/CryptoSymmetric.hpp"
 #include "opentxs/core/crypto/OTAsymmetricKey.hpp"
+#include "opentxs/core/Proto.hpp"
+#include "opentxs/core/Types.hpp"
 
 #include <string>
 

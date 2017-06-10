@@ -44,10 +44,10 @@
 #include "opentxs/api/Wallet.hpp"
 #include "opentxs/core/contract/Signable.hpp"
 #include "opentxs/core/util/Assert.hpp"
+#include "opentxs/core/Data.hpp"
 #include "opentxs/core/Identifier.hpp"
 #include "opentxs/core/Log.hpp"
 #include "opentxs/core/Nym.hpp"
-#include "opentxs/core/OTData.hpp"
 #include "opentxs/core/Proto.hpp"
 #include "opentxs/core/String.hpp"
 
@@ -306,7 +306,7 @@ zcert_t* ServerContract::PrivateTransportKey() const
     return nym_->TransportKey();
 }
 
-OTData ServerContract::Serialize() const
+Data ServerContract::Serialize() const
 {
     Lock lock(lock_);
 

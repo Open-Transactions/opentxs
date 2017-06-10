@@ -135,7 +135,7 @@ public:
     bool VerifyIssuedNumber(const TransactionNumber& number) const;
 
     std::string Name() const override;
-    OTData Serialize() const override;
+    Data Serialize() const override;
 
     bool AddAcknowledgedNumber(const RequestNumber req);
     virtual bool CloseCronItem(const TransactionNumber) { return false; }

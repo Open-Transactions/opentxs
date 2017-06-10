@@ -51,9 +51,9 @@
 #include "opentxs/core/crypto/PaymentCode.hpp"
 #endif
 #include "opentxs/core/util/Assert.hpp"
+#include "opentxs/core/Data.hpp"
 #include "opentxs/core/Identifier.hpp"
 #include "opentxs/core/Log.hpp"
-#include "opentxs/core/OTData.hpp"
 #include "opentxs/core/Proto.hpp"
 #include "opentxs/core/String.hpp"
 #include "opentxs/core/Types.hpp"
@@ -109,7 +109,7 @@ NymIDSource::NymIDSource(std::unique_ptr<PaymentCode>& source)
 }
 #endif
 
-OTData NymIDSource::asData() const
+Data NymIDSource::asData() const
 {
     serializedNymIDSource serializedSource = Serialize();
 
@@ -144,7 +144,7 @@ std::unique_ptr<proto::AsymmetricKey> NymIDSource::ExtractKey(
 Identifier NymIDSource::NymID() const
 {
     Identifier nymID;
-    OTData dataVersion;
+    Data dataVersion;
 
     switch (type_) {
         case proto::SOURCETYPE_PUBKEY:
@@ -293,7 +293,7 @@ bool NymIDSource::Sign(
 
 String NymIDSource::asString() const
 {
-    OTData dataSource = asData();
+    Data dataSource = asData();
     OTASCIIArmor armoredSource(dataSource);
 
     return armoredSource.Get();
@@ -303,7 +303,7 @@ String NymIDSource::asString() const
 serializedNymIDSource NymIDSource::ExtractArmoredSource(
     const OTASCIIArmor& armoredSource)
 {
-    OTData dataSource(armoredSource);
+    Data dataSource(armoredSource);
 
     OT_ASSERT(dataSource.GetSize() > 0);
 

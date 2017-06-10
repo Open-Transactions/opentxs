@@ -49,9 +49,9 @@
 #include "opentxs/core/crypto/OTPassword.hpp"
 #include "opentxs/core/crypto/OTPasswordData.hpp"
 #include "opentxs/core/util/Assert.hpp"
+#include "opentxs/core/Data.hpp"
 #include "opentxs/core/Identifier.hpp"
 #include "opentxs/core/Log.hpp"
-#include "opentxs/core/OTData.hpp"
 #include "opentxs/core/Proto.hpp"
 #include "opentxs/core/String.hpp"
 
@@ -111,7 +111,7 @@ std::string TrezorCrypto::SeedToFingerprint(
     auto node = InstantiateHDNode(curve, seed);
 
     if (node) {
-        OTData pubkey(
+        Data pubkey(
             static_cast<void*>(node->public_key), sizeof(node->public_key));
         Identifier identifier;
         identifier.CalculateDigest(pubkey);
@@ -380,8 +380,7 @@ std::string TrezorCrypto::CurveName(const EcdsaCurve& curve)
     return "";
 }
 
-bool TrezorCrypto::RandomKeypair(OTPassword& privateKey, OTData& publicKey)
-    const
+bool TrezorCrypto::RandomKeypair(OTPassword& privateKey, Data& publicKey) const
 {
     bool valid = false;
 
@@ -420,7 +419,7 @@ bool TrezorCrypto::ValidPrivateKey(const OTPassword& key) const
 
 #if OT_CRYPTO_SUPPORTED_KEY_SECP256K1
 bool TrezorCrypto::ECDH(
-    const OTData& publicKey,
+    const Data& publicKey,
     const OTPassword& privateKey,
     OTPassword& secret) const
 {
@@ -460,7 +459,7 @@ bool TrezorCrypto::ECDH(
 
 bool TrezorCrypto::ScalarBaseMultiply(
     const OTPassword& privateKey,
-    OTData& publicKey) const
+    Data& publicKey) const
 {
     std::array<std::uint8_t, 33> blank{};
     publicKey.Assign(blank.data(), blank.size());

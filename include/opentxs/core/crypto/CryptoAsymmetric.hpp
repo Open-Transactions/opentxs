@@ -49,7 +49,7 @@ namespace opentxs
 {
 
 class OTAsymmetricKey;
-class OTData;
+class Data;
 class OTPassword;
 class OTPasswordData;
 class OTSignature;
@@ -78,16 +78,16 @@ public:
         const OTPasswordData* pPWData = nullptr) const;
 
     virtual bool Sign(
-        const OTData& plaintext,
+        const Data& plaintext,
         const OTAsymmetricKey& theKey,
         const proto::HashType hashType,
-        OTData& signature, // output
+        Data& signature, // output
         const OTPasswordData* pPWData = nullptr,
         const OTPassword* exportPassword = nullptr) const = 0;
     virtual bool Verify(
-        const OTData& plaintext,
+        const Data& plaintext,
         const OTAsymmetricKey& theKey,
-        const OTData& signature,
+        const Data& signature,
         const proto::HashType hashType,
         const OTPasswordData* pPWData = nullptr) const = 0;
 };

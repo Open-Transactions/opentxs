@@ -67,9 +67,9 @@
 #include "opentxs/core/util/Assert.hpp"
 #include "opentxs/core/util/Tag.hpp"
 #include "opentxs/core/Contract.hpp"
+#include "opentxs/core/Data.hpp"
 #include "opentxs/core/Log.hpp"
 #include "opentxs/core/Nym.hpp"
-#include "opentxs/core/OTData.hpp"
 #include "opentxs/core/OTStringXML.hpp"
 #include "opentxs/core/Proto.hpp"
 #include "opentxs/core/String.hpp"
@@ -93,7 +93,7 @@ bool Letter::AddRSARecipients(
 
     // Encrypt the session key to all RSA recipients and add the
     // encrypted key to the global list of session keys for this letter.
-    OTData encrypted;
+    Data encrypted;
     proto::SymmetricKey serializedSessionKey;
     const bool serialized = sessionKey.Serialize(serializedSessionKey);
 
@@ -104,7 +104,7 @@ bool Letter::AddRSARecipients(
         return false;
     }
 
-    OTData binary = proto::ProtoAsData(serializedSessionKey);
+    Data binary = proto::ProtoAsData(serializedSessionKey);
     const bool haveSessionKey = engine.EncryptSessionKey(
         recipients,
         binary,
@@ -176,7 +176,7 @@ bool Letter::SortRecipients(
 bool Letter::Seal(
     const mapOfAsymmetricKeys& RecipPubKeys,
     const String& theInput,
-    OTData& dataOutput)
+    Data& dataOutput)
 {
     mapOfAsymmetricKeys RSARecipients;
     mapOfECKeys secp256k1Recipients;
@@ -199,7 +199,7 @@ bool Letter::Seal(
 
     proto::Envelope output;
     output.set_version(1);
-    OTData iv;
+    Data iv;
     const bool encrypted = sessionKey->Encrypt(
         theInput, iv, defaultPassword, *output.mutable_ciphertext(), false);
 
@@ -321,7 +321,7 @@ bool Letter::Seal(
 }
 
 bool Letter::Open(
-    const OTData& dataInput,
+    const Data& dataInput,
     const Nym& theRecipient,
     const OTPasswordData& keyPassword,
     String& theOutput)
@@ -418,9 +418,9 @@ bool Letter::Open(
 #if OT_CRYPTO_USING_OPENSSL
         OpenSSL& engine = static_cast<OpenSSL&>(OT::App().Crypto().RSA());
 #endif
-        OTData serializedKey(
+        Data serializedKey(
             serialized.rsakey().data(), serialized.rsakey().size());
-        OTData sessionKey;
+        Data sessionKey;
         haveSessionKey = engine.DecryptSessionKey(
             serializedKey,
             theRecipient,
@@ -430,7 +430,7 @@ bool Letter::Open(
 #endif
 
     if (haveSessionKey) {
-        OTData plaintext;
+        Data plaintext;
         OTPasswordData defaultPassword("");
         DefaultPassword(defaultPassword);
         const bool decrypted = key->Decrypt(

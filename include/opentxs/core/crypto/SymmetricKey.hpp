@@ -51,7 +51,7 @@ namespace opentxs
 
 class CryptoSymmetricNew;
 class OTAsymmetricKeyEC;
-class OTData;
+class Data;
 class OTPassword;
 class OTPasswordData;
 class String;
@@ -77,7 +77,7 @@ private:
 
     bool Allocate(
         const std::size_t size,
-        OTData& container);
+        Data& container);
     bool Allocate(
         const std::size_t size,
         std::string& container);
@@ -189,7 +189,7 @@ public:
     bool Decrypt(
         const proto::Ciphertext& ciphertext,
         const OTPasswordData& keyPassword,
-        OTData& plaintext);
+        Data& plaintext);
     bool Decrypt(
         const proto::Ciphertext& ciphertext,
         const OTPasswordData& keyPassword,
@@ -207,14 +207,14 @@ public:
      */
     bool Encrypt(
         const String& plaintext,
-        const OTData& iv,
+        const Data& iv,
         const OTPasswordData& keyPassword,
         proto::Ciphertext& ciphertext,
         const bool attachKey = true,
         const proto::SymmetricMode mode = proto::SMODE_ERROR);
     bool Encrypt(
         const OTPassword& plaintext,
-        const OTData& iv,
+        const Data& iv,
         const OTPasswordData& keyPassword,
         proto::Ciphertext& ciphertext,
         const bool attachKey = true,

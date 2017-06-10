@@ -39,10 +39,10 @@
 #ifndef OPENTXS_EXT_OTPAYMENT_HPP
 #define OPENTXS_EXT_OTPAYMENT_HPP
 
+#include "opentxs/core/util/Common.hpp"
 #include "opentxs/core/Contract.hpp"
 #include "opentxs/core/Identifier.hpp"
 #include "opentxs/core/String.hpp"
-#include "opentxs/core/util/Common.hpp"
 
 #include <stdint.h>
 

@@ -49,8 +49,8 @@
 #include "opentxs/core/crypto/OpenSSL.hpp"
 #endif
 #include "opentxs/core/crypto/OTPassword.hpp"
+#include "opentxs/core/Data.hpp"
 #include "opentxs/core/Log.hpp"
-#include "opentxs/core/OTData.hpp"
 #include "opentxs/core/String.hpp"
 
 namespace opentxs
@@ -84,7 +84,7 @@ bool CryptoHashEngine::Allocate(
 
 bool CryptoHashEngine::Allocate(
     const proto::HashType hashType,
-    OTData& input)
+    Data& input)
 {
     return input.Randomize(CryptoHash::HashSize(hashType));
 }
@@ -159,8 +159,8 @@ bool CryptoHashEngine::Digest(
 
 bool CryptoHashEngine::Digest(
     const proto::HashType hashType,
-    const OTData& data,
-    OTData& digest) const
+    const Data& data,
+    Data& digest) const
 {
     if (!Allocate(hashType, digest)) { return false; }
 
@@ -174,7 +174,7 @@ bool CryptoHashEngine::Digest(
 bool CryptoHashEngine::Digest(
     const proto::HashType hashType,
     const String& data,
-    OTData& digest) const
+    Data& digest) const
 {
     if (!Allocate(hashType, digest)) { return false; }
 
@@ -191,7 +191,7 @@ bool CryptoHashEngine::Digest(
     std::string& encodedDigest) const
 {
     proto::HashType hashType = static_cast<proto::HashType>(type);
-    OTData result;
+    Data result;
 
     if (!Allocate(hashType, result)) { return false; }
 
@@ -212,7 +212,7 @@ bool CryptoHashEngine::Digest(
 bool CryptoHashEngine::HMAC(
     const proto::HashType hashType,
     const OTPassword& key,
-    const OTData& data,
+    const Data& data,
     OTPassword& digest) const
 {
     if (!key.isMemory()) { return false; }

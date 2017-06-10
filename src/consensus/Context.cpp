@@ -392,7 +392,7 @@ proto::Context Context::serialize(
     return output;
 }
 
-OTData Context::Serialize() const
+Data Context::Serialize() const
 {
     return proto::ProtoAsData(Serialized());
 }

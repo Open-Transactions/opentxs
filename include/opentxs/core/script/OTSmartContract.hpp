@@ -39,16 +39,15 @@
 #ifndef OPENTXS_CORE_SCRIPT_OTSMARTCONTRACT_HPP
 #define OPENTXS_CORE_SCRIPT_OTSMARTCONTRACT_HPP
 
+#include "opentxs/core/cron/OTCronItem.hpp"
+#include "opentxs/core/script/OTScriptable.hpp"
+#include "opentxs/core/util/Common.hpp"
 #include "opentxs/core/AccountList.hpp"
 #include "opentxs/core/Contract.hpp"
 #include "opentxs/core/Identifier.hpp"
+#include "opentxs/core/OTTransactionType.hpp"
 #include "opentxs/core/String.hpp"
 #include "opentxs/core/Types.hpp"
-#include "opentxs/core/OTTransactionType.hpp"
-#include "opentxs/core/cron/OTCronItem.hpp"
-#include "opentxs/core/OTTransactionType.hpp"
-#include "opentxs/core/script/OTScriptable.hpp"
-#include "opentxs/core/util/Common.hpp"
 
 #include <stdint.h>
 #include <map>

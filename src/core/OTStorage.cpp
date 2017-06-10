@@ -43,8 +43,8 @@
 #include "opentxs/core/crypto/OTASCIIArmor.hpp"
 #include "opentxs/core/util/OTDataFolder.hpp"
 #include "opentxs/core/util/OTPaths.hpp"
+#include "opentxs/core/Data.hpp"
 #include "opentxs/core/Log.hpp"
-#include "opentxs/core/OTData.hpp"
 #include "opentxs/core/OTStoragePB.hpp"
 
 #include <fstream>
@@ -2403,7 +2403,7 @@ std::string Storage::EncodeObject(Storable& theContents)
         return strReturnValue;
     }
 
-    const OTData theData(pNewData, nNewSize);
+    const Data theData(pNewData, nNewSize);
     const OTASCIIArmor theArmor(theData);
 
     strReturnValue.assign(theArmor.Get(), theArmor.GetLength());
@@ -2443,7 +2443,7 @@ Storable* Storage::DecodeObject(
 
     OTASCIIArmor theArmor;
     theArmor.Set(strInput.c_str(), static_cast<uint32_t>(strInput.size()));
-    const OTData thePayload(theArmor);
+    const Data thePayload(theArmor);
 
     // Put thePayload's contents into pBuffer here.
     //

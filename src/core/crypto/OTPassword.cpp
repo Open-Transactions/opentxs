@@ -45,8 +45,8 @@
 #include "opentxs/core/crypto/CryptoUtil.hpp"
 #include "opentxs/core/crypto/OTPasswordData.hpp"
 #include "opentxs/core/util/Assert.hpp"
+#include "opentxs/core/Data.hpp"
 #include "opentxs/core/Log.hpp"
-#include "opentxs/core/OTData.hpp"
 #include "opentxs/core/String.hpp"
 
 // For SecureZeroMemory
@@ -875,7 +875,7 @@ int32_t OTPassword::addMemory(const void* vAppend, uint32_t nAppendSize)
     return nAppendSize;
 }
 
-int32_t OTPassword::setMemory(const OTData& data)
+int32_t OTPassword::setMemory(const Data& data)
 {
     const uint32_t dataSize = data.GetSize();
     uint32_t returnedSize = dataSize;

@@ -57,6 +57,7 @@
 #include "opentxs/core/util/Assert.hpp"
 #include "opentxs/core/util/OTFolders.hpp"
 #include "opentxs/core/Account.hpp"
+#include "opentxs/core/Data.hpp"
 #include "opentxs/core/Identifier.hpp"
 #include "opentxs/core/Item.hpp"
 #include "opentxs/core/Ledger.hpp"
@@ -64,7 +65,6 @@
 #include "opentxs/core/Message.hpp"
 #include "opentxs/core/NumList.hpp"
 #include "opentxs/core/Nym.hpp"
-#include "opentxs/core/OTData.hpp"
 #include "opentxs/core/OTStorage.hpp"
 #include "opentxs/core/OTTransaction.hpp"
 #include "opentxs/core/String.hpp"
@@ -208,7 +208,7 @@ bool UserCommandProcessor::ProcessUserCommand(
             strMsgNymID.Get());
         OT_ENFORCE_PERMISSION_MSG(ServerSettings::__cmd_create_user_acct);
         auto serialized = proto::DataToProto<proto::CredentialIndex>(
-            OTData(theMessage.m_ascPayload));
+            Data(theMessage.m_ascPayload));
         auto nym = OT::App().Contract().Nym(serialized);
 
         if (!nym) {
@@ -1798,21 +1798,21 @@ void UserCommandProcessor::UserCmdRegisterContract(
     switch (type) {
         case (ContractType::NYM): {
             const auto nym = proto::DataToProto<proto::CredentialIndex>(
-                OTData(MsgIn.m_ascPayload));
+                Data(MsgIn.m_ascPayload));
             msgOut.m_bSuccess = bool(OT::App().Contract().Nym(nym));
 
             break;
         }
         case (ContractType::SERVER): {
             const auto server = proto::DataToProto<proto::ServerContract>(
-                OTData(MsgIn.m_ascPayload));
+                Data(MsgIn.m_ascPayload));
             msgOut.m_bSuccess = bool(OT::App().Contract().Server(server));
 
             break;
         }
         case (ContractType::UNIT): {
             const auto unit = proto::DataToProto<proto::UnitDefinition>(
-                OTData(MsgIn.m_ascPayload));
+                Data(MsgIn.m_ascPayload));
             msgOut.m_bSuccess = bool(OT::App().Contract().UnitDefinition(unit));
 
             break;
@@ -2083,7 +2083,7 @@ void UserCommandProcessor::UserCmdRegisterInstrumentDefinition(
             szFunc);
     } else {
         auto serialized = proto::DataToProto<proto::UnitDefinition>(
-            OTData(MsgIn.m_ascPayload));
+            Data(MsgIn.m_ascPayload));
         if (proto::UNITTYPE_BASKET == serialized.type()) {
             Log::vOutput(
                 0,
@@ -2305,7 +2305,7 @@ void UserCommandProcessor::UserCmdIssueBasket(
         NOTARY_NYM_ID(server_->m_nymServer);
 
     auto serialized =
-        proto::DataToProto<proto::UnitDefinition>(OTData(MsgIn.m_ascPayload));
+        proto::DataToProto<proto::UnitDefinition>(Data(MsgIn.m_ascPayload));
 
     if (!serialized.has_type()) {
         Log::vError("%s: Invalid unit definition.\n", __FUNCTION__);
@@ -3056,7 +3056,7 @@ void UserCommandProcessor::UserCmdGetInstrumentDefinition(
     const Identifier INSTRUMENT_DEFINITION_ID(
         MsgIn.m_strInstrumentDefinitionID);
 
-    OTData serialized;
+    Data serialized;
     auto unitDefiniton =
         OT::App().Contract().UnitDefinition(INSTRUMENT_DEFINITION_ID);
     // Perhaps the provided ID is actually a server contract, not an

@@ -64,11 +64,6 @@
 
 #include "opentxs/core/crypto/MasterCredential.hpp"
 
-#include "opentxs/core/Identifier.hpp"
-#include "opentxs/core/Log.hpp"
-#include "opentxs/core/NymIDSource.hpp"
-#include "opentxs/core/Proto.hpp"
-#include "opentxs/core/String.hpp"
 #include "opentxs/core/contract/Signable.hpp"
 #include "opentxs/core/crypto/Credential.hpp"
 #include "opentxs/core/crypto/CredentialSet.hpp"
@@ -80,6 +75,11 @@
 #include "opentxs/core/crypto/PaymentCode.hpp"
 #endif
 #include "opentxs/core/util/Assert.hpp"
+#include "opentxs/core/Identifier.hpp"
+#include "opentxs/core/Log.hpp"
+#include "opentxs/core/NymIDSource.hpp"
+#include "opentxs/core/Proto.hpp"
+#include "opentxs/core/String.hpp"
 
 #include <memory>
 #include <ostream>

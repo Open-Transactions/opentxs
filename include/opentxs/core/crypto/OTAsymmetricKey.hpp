@@ -42,8 +42,8 @@
 #include "opentxs/core/crypto/CryptoAsymmetric.hpp"
 #include "opentxs/core/crypto/CryptoEngine.hpp"
 #include "opentxs/core/util/Timer.hpp"
+#include "opentxs/core/Data.hpp"
 #include "opentxs/core/Log.hpp"
-#include "opentxs/core/OTData.hpp"
 #include "opentxs/core/Proto.hpp"
 #include "opentxs/core/String.hpp"
 
@@ -201,7 +201,7 @@ protected:
     EXPORT OTAsymmetricKey();
 
 public:
-    OTData SerializeKeyToData(const proto::AsymmetricKey& rhs) const;
+    Data SerializeKeyToData(const proto::AsymmetricKey& rhs) const;
     bool operator==(const proto::AsymmetricKey&) const;
     EXPORT virtual ~OTAsymmetricKey();
     virtual void Release();
@@ -278,21 +278,21 @@ public:
         const OTPassword& theExportPassword,
         bool bImporting) const = 0;
     virtual serializedAsymmetricKey Serialize() const;
-    virtual bool Verify(const OTData& plaintext, const proto::Signature& sig)
+    virtual bool Verify(const Data& plaintext, const proto::Signature& sig)
         const;
     virtual proto::HashType SigHashType() const
     {
         return CryptoEngine::StandardHash;
     }
     virtual bool Sign(
-        const OTData& plaintext,
+        const Data& plaintext,
         proto::Signature& sig,
         const OTPasswordData* pPWData = nullptr,
         const OTPassword* exportPassword = nullptr,
         const String& credID = String(""),
         const proto::SignatureRole role = proto::SIGROLE_ERROR) const;
     virtual bool TransportKey(
-        OTData& publicKey,
+        Data& publicKey,
         OTPassword& privateKey) const = 0;
 
     template<class C>
@@ -320,7 +320,7 @@ public:
                     signature.set_hashtype(SigHashType());
                 }
 
-                OTData sig;
+                Data sig;
                 bool goodSig = engine().Sign(
                     proto::ProtoAsData<C>(serialized),
                     *this,

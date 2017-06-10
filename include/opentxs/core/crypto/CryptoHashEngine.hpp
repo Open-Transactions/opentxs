@@ -49,7 +49,7 @@ namespace opentxs
 
 class CryptoHash;
 class CryptoEngine;
-class OTData;
+class Data;
 class OTPassword;
 class String;
 
@@ -67,7 +67,7 @@ private:
     CryptoHash& Sodium() const;
 
     static bool Allocate(const proto::HashType hashType, OTPassword& input);
-    static bool Allocate(const proto::HashType hashType, OTData& input);
+    static bool Allocate(const proto::HashType hashType, Data& input);
 
     bool Digest(
         const proto::HashType hashType,
@@ -94,12 +94,12 @@ public:
         OTPassword& digest) const;
     bool Digest(
         const proto::HashType hashType,
-        const OTData& data,
-        OTData& digest) const;
+        const Data& data,
+        Data& digest) const;
     bool Digest(
         const proto::HashType hashType,
         const String& data,
-        OTData& digest) const;
+        Data& digest) const;
     bool Digest(
         const uint32_t type,
         const std::string& data,
@@ -108,7 +108,7 @@ public:
     bool HMAC(
         const proto::HashType hashType,
         const OTPassword& key,
-        const OTData& data,
+        const Data& data,
         OTPassword& digest) const;
 
     ~CryptoHashEngine() = default;

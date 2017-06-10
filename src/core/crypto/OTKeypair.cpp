@@ -72,8 +72,8 @@
 #include "opentxs/core/crypto/OTSignatureMetadata.hpp"
 #include "opentxs/core/util/Assert.hpp"
 #include "opentxs/core/Contract.hpp"
+#include "opentxs/core/Data.hpp"
 #include "opentxs/core/Log.hpp"
-#include "opentxs/core/OTData.hpp"
 #include "opentxs/core/String.hpp"
 
 #include <stdint.h>
@@ -339,7 +339,7 @@ serializedAsymmetricKey OTKeypair::Serialize(bool privateKey) const
 }
 
 bool OTKeypair::Verify(
-    const OTData& plaintext,
+    const Data& plaintext,
     const proto::Signature& sig) const
 {
     if (!m_pkeyPublic) {
@@ -351,7 +351,7 @@ bool OTKeypair::Verify(
     return m_pkeyPublic->Verify(plaintext, sig);
 }
 
-bool OTKeypair::TransportKey(OTData& publicKey, OTPassword& privateKey) const
+bool OTKeypair::TransportKey(Data& publicKey, OTPassword& privateKey) const
 {
     OT_ASSERT(m_pkeyPrivate);
 

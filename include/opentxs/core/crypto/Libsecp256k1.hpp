@@ -39,13 +39,13 @@
 #ifndef OPENTXS_CORE_CRYPTO_LIBSECP256K1_HPP
 #define OPENTXS_CORE_CRYPTO_LIBSECP256K1_HPP
 
-#include "opentxs/core/Proto.hpp"
 #include "opentxs/core/crypto/Crypto.hpp"
 #include "opentxs/core/crypto/CryptoAsymmetric.hpp"
 #include "opentxs/core/crypto/CryptoSymmetric.hpp"
 #include "opentxs/core/crypto/Ecdsa.hpp"
 #include "opentxs/core/crypto/OTEnvelope.hpp"
 #include "opentxs/core/crypto/OTPasswordData.hpp"
+#include "opentxs/core/Proto.hpp"
 
 extern "C" {
 #include "secp256k1.h"
@@ -56,7 +56,7 @@ namespace opentxs
 
 class CryptoEngine;
 class OTAsymmetricKey;
-class OTData;
+class Data;
 class OTPassword;
 class OTPasswordData;
 class Nym;
@@ -74,19 +74,19 @@ private:
     Ecdsa& ecdsa_;
     CryptoUtil& ssl_;
 
-    bool ParsePublicKey(const OTData& input, secp256k1_pubkey& output) const;
+    bool ParsePublicKey(const Data& input, secp256k1_pubkey& output) const;
     void Init_Override() const override;
     void Cleanup_Override() const override {};
     bool ECDH(
-        const OTData& publicKey,
+        const Data& publicKey,
         const OTPassword& privateKey,
         OTPassword& secret) const override;
-    bool OTDataToECSignature(
-        const OTData& inSignature,
+    bool DataToECSignature(
+        const Data& inSignature,
         secp256k1_ecdsa_signature& outSignature) const;
     bool ScalarBaseMultiply(
         const OTPassword& privateKey,
-        OTData& publicKey) const override;
+        Data& publicKey) const override;
 
     Libsecp256k1() = delete;
     explicit Libsecp256k1(CryptoUtil& ssl, Ecdsa& ecdsa);
@@ -94,18 +94,18 @@ private:
 public:
     bool RandomKeypair(
         OTPassword& privateKey,
-        OTData& publicKey) const override;
+        Data& publicKey) const override;
     bool Sign(
-        const OTData& plaintext,
+        const Data& plaintext,
         const OTAsymmetricKey& theKey,
         const proto::HashType hashType,
-        OTData& signature,  // output
+        Data& signature,  // output
         const OTPasswordData* pPWData = nullptr,
         const OTPassword* exportPassword = nullptr) const override;
     bool Verify(
-        const OTData& plaintext,
+        const Data& plaintext,
         const OTAsymmetricKey& theKey,
-        const OTData& signature,
+        const Data& signature,
         const proto::HashType hashType,
         const OTPasswordData* pPWData = nullptr) const override;
 

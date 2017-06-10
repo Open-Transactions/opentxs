@@ -39,8 +39,8 @@
 #ifndef OPENTXS_CORE_CRYPTO_PAYMENTCODE_HPP
 #define OPENTXS_CORE_CRYPTO_PAYMENTCODE_HPP
 
+#include "opentxs/core/Data.hpp"
 #include "opentxs/core/Identifier.hpp"
-#include "opentxs/core/OTData.hpp"
 #include "opentxs/core/Proto.hpp"
 
 #include <cstdint>
@@ -71,8 +71,8 @@ private:
     std::uint8_t bitmessage_version_{0};
     std::uint8_t bitmessage_stream_{0};
 
-    const OTData Pubkey() const;
-    void ConstructKey(const OTData& pubkey);
+    const Data Pubkey() const;
+    void ConstructKey(const Data& pubkey);
     PaymentCode() = delete;
 
 public:

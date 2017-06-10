@@ -199,7 +199,7 @@ std::unique_ptr<SymmetricKey> SymmetricKey::Factory(
 
 bool SymmetricKey::Allocate(
     const std::size_t size,
-    OTData& container)
+    Data& container)
 {
     container.SetSize(size);
 
@@ -272,7 +272,7 @@ bool SymmetricKey::Decrypt(
 bool SymmetricKey::Decrypt(
     const proto::Ciphertext& ciphertext,
     const OTPasswordData& keyPassword,
-    OTData& plaintext)
+    Data& plaintext)
 {
     if (!Allocate(ciphertext.data().size(), plaintext)) {
 
@@ -350,7 +350,7 @@ bool SymmetricKey::Encrypt(
 
 bool SymmetricKey::Encrypt(
     const OTPassword& plaintext,
-    const OTData& iv,
+    const Data& iv,
     const OTPasswordData& keyPassword,
     proto::Ciphertext& ciphertext,
     const bool attachKey,
@@ -386,7 +386,7 @@ bool SymmetricKey::Encrypt(
 
 bool SymmetricKey::Encrypt(
     const String& plaintext,
-    const OTData& iv,
+    const Data& iv,
     const OTPasswordData& keyPassword,
     proto::Ciphertext& ciphertext,
     const bool attachKey,

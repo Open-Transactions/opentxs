@@ -39,10 +39,10 @@
 #ifndef OPENTXS_CORE_CRYPTO_MASTERCREDENTIAL_HPP
 #define OPENTXS_CORE_CRYPTO_MASTERCREDENTIAL_HPP
 
-#include "opentxs/core/Proto.hpp"
 #include "opentxs/core/crypto/Credential.hpp"
 #include "opentxs/core/crypto/KeyCredential.hpp"
 #include "opentxs/core/crypto/NymParameters.hpp"
+#include "opentxs/core/Proto.hpp"
 
 #include <memory>
 

@@ -60,13 +60,13 @@
 #include "opentxs/core/util/Tag.hpp"
 #include "opentxs/storage/Storage.hpp"
 #include "opentxs/core/Contract.hpp"
+#include "opentxs/core/Data.hpp"
 #include "opentxs/core/Identifier.hpp"
 #include "opentxs/core/Item.hpp"
 #include "opentxs/core/Ledger.hpp"
 #include "opentxs/core/Log.hpp"
 #include "opentxs/core/Message.hpp"
 #include "opentxs/core/NymIDSource.hpp"
-#include "opentxs/core/OTData.hpp"
 #include "opentxs/core/OTStorage.hpp"
 #include "opentxs/core/OTStringXML.hpp"
 #include "opentxs/core/OTTransaction.hpp"
@@ -2735,7 +2735,7 @@ bool Nym::SetVerificationSet(const proto::VerificationSet& data)
     return false;
 }
 
-bool Nym::Verify(const OTData& plaintext, const proto::Signature& sig) const
+bool Nym::Verify(const Data& plaintext, const proto::Signature& sig) const
 {
     for (auto& it : m_mapCredentialSets) {
         if (nullptr != it.second) {
@@ -2751,7 +2751,7 @@ bool Nym::Verify(const OTData& plaintext, const proto::Signature& sig) const
 zcert_t* Nym::TransportKey() const
 {
     OTPassword privateKey;
-    OTData publicKey;
+    Data publicKey;
 
     bool generated = false;
     zcert_t* output = nullptr;

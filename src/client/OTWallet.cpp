@@ -60,10 +60,10 @@
 #include "opentxs/core/util/Tag.hpp"
 #include "opentxs/core/Account.hpp"
 #include "opentxs/core/Contract.hpp"
+#include "opentxs/core/Data.hpp"
 #include "opentxs/core/Identifier.hpp"
 #include "opentxs/core/Log.hpp"
 #include "opentxs/core/Nym.hpp"
-#include "opentxs/core/OTData.hpp"
 #include "opentxs/core/OTStorage.hpp"
 #include "opentxs/core/OTStringXML.hpp"
 #include "opentxs/core/Proto.hpp"
@@ -1018,7 +1018,7 @@ bool OTWallet::ChangePassphrasesOnExtraKeys(
         const std::string str_id = it.first;
         std::shared_ptr<OTSymmetricKey> pOldKey = it.second;
 
-        OTData thePayload;
+        Data thePayload;
 
         if (pOldKey && pOldKey->SerializeTo(thePayload)) {
             std::shared_ptr<OTSymmetricKey> pNewKey(new OTSymmetricKey);

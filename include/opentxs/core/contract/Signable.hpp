@@ -39,8 +39,8 @@
 #ifndef OPENTXS_CORE_SIGNABLE_HPP
 #define OPENTXS_CORE_SIGNABLE_HPP
 
+#include "opentxs/core/Data.hpp"
 #include "opentxs/core/Identifier.hpp"
-#include "opentxs/core/OTData.hpp"
 #include "opentxs/core/Proto.hpp"
 
 #include <cstdint>
@@ -108,7 +108,7 @@ public:
     virtual std::string Name() const = 0;
     ConstNym Nym() const;
     virtual const std::string& Terms() const;
-    virtual OTData Serialize() const = 0;
+    virtual Data Serialize() const = 0;
     bool Validate() const;
 
     virtual void SetAlias(const std::string& alias);

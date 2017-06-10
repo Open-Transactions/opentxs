@@ -41,7 +41,7 @@
 #include "opentxs/core/crypto/CryptoAsymmetric.hpp"
 
 #include "opentxs/core/crypto/OTSignature.hpp"
-#include "opentxs/core/OTData.hpp"
+#include "opentxs/core/Data.hpp"
 #include "opentxs/core/String.hpp"
 
 namespace opentxs
@@ -98,8 +98,8 @@ bool CryptoAsymmetric::SignContract(
     const proto::HashType hashType,
     const OTPasswordData* pPWData) const
 {
-    OTData plaintext(strContractUnsigned.Get(), strContractUnsigned.GetLength()+1); //include null terminator
-    OTData signature;
+    Data plaintext(strContractUnsigned.Get(), strContractUnsigned.GetLength()+1); //include null terminator
+    Data signature;
 
     bool success = Sign(
                         plaintext,
@@ -121,8 +121,8 @@ bool CryptoAsymmetric::VerifyContractSignature(
     const proto::HashType hashType,
     const OTPasswordData* pPWData) const
 {
-    OTData plaintext(strContractToVerify.Get(), strContractToVerify.GetLength()+1); //include null terminator
-    OTData signature;
+    Data plaintext(strContractToVerify.Get(), strContractToVerify.GetLength()+1); //include null terminator
+    Data signature;
     theSignature.GetData(signature);
 
     return Verify(

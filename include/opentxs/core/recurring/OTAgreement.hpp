@@ -41,13 +41,13 @@
 #ifndef OPENTXS_CORE_OTAGREEMENT_HPP
 #define OPENTXS_CORE_OTAGREEMENT_HPP
 
+#include "opentxs/core/cron/OTCronItem.hpp"
+#include "opentxs/core/util/Common.hpp"
 #include "opentxs/core/Contract.hpp"
 #include "opentxs/core/Identifier.hpp"
 #include "opentxs/core/String.hpp"
 #include "opentxs/core/Types.hpp"
 #include "opentxs/core/OTTransactionType.hpp"
-#include "opentxs/core/cron/OTCronItem.hpp"
-#include "opentxs/core/util/Common.hpp"
 
 #include <stdint.h>
 #include <deque>

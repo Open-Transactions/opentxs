@@ -39,11 +39,11 @@
 #ifndef OPENTXS_CORE_CRYPTO_KEYCREDENTIAL_HPP
 #define OPENTXS_CORE_CRYPTO_KEYCREDENTIAL_HPP
 
-#include "opentxs/core/Proto.hpp"
-#include "opentxs/core/Types.hpp"
 #include "opentxs/core/crypto/Credential.hpp"
 #include "opentxs/core/crypto/OTKeypair.hpp"
 #include "opentxs/core/crypto/NymParameters.hpp"
+#include "opentxs/core/Proto.hpp"
+#include "opentxs/core/Types.hpp"
 
 #include <memory>
 
@@ -155,10 +155,10 @@ public:
 
     using ot_super::Verify;
     bool Verify(
-        const OTData& plaintext,
+        const Data& plaintext,
         const proto::Signature& sig,
         const proto::KeyRole key = proto::KEYROLE_SIGN) const override;
-    bool TransportKey(OTData& publicKey, OTPassword& privateKey) const override;
+    bool TransportKey(Data& publicKey, OTPassword& privateKey) const override;
 
     virtual ~KeyCredential() = default;
 

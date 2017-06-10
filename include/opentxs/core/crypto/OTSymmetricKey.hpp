@@ -39,7 +39,7 @@
 #ifndef OPENTXS_CORE_CRYPTO_OTSYMMETRICKEY_HPP
 #define OPENTXS_CORE_CRYPTO_OTSYMMETRICKEY_HPP
 
-#include "opentxs/core/OTData.hpp"
+#include "opentxs/core/Data.hpp"
 
 #include <stdint.h>
 
@@ -65,13 +65,13 @@ private:
     uint32_t m_uIterationCount{0};
     // Stores the SALT (which is used with the password for generating /
     // retrieving the key from m_dataEncryptedKey)
-    OTData m_dataSalt;
+    Data m_dataSalt;
     // Stores the IV used internally for encrypting / decrypting the actual key
     // (using the derived key) from m_dataEncryptedKey.
-    OTData m_dataIV;
+    Data m_dataIV;
     // Stores only encrypted version of symmetric key.
-    OTData m_dataEncryptedKey;
-    OTData m_dataHashCheck;
+    Data m_dataEncryptedKey;
+    Data m_dataHashCheck;
 
 public:
     // The highest-level possible interface (used by the API)
@@ -112,8 +112,8 @@ public:
                                const String* pstrDisplay = nullptr,
                                const OTPassword* pAlreadyHavePW = nullptr);
 
-    EXPORT bool SerializeTo(OTData& theOutput) const;
-    EXPORT bool SerializeFrom(OTData& theInput);
+    EXPORT bool SerializeTo(Data& theOutput) const;
+    EXPORT bool SerializeFrom(Data& theInput);
 
     EXPORT bool SerializeTo(OTASCIIArmor& ascOutput) const;
     EXPORT bool SerializeFrom(const OTASCIIArmor& ascInput);

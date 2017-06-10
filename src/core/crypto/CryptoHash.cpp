@@ -43,7 +43,7 @@
 #include "opentxs/api/OT.hpp"
 #include "opentxs/core/crypto/CryptoEngine.hpp"
 #include "opentxs/core/crypto/CryptoUtil.hpp"
-#include "opentxs/core/OTData.hpp"
+#include "opentxs/core/Data.hpp"
 #include "opentxs/core/String.hpp"
 
 #include <stdint.h>

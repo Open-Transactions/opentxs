@@ -56,7 +56,7 @@ namespace opentxs
 {
 
 class DhtConfig;
-class OTData;
+class Data;
 
 //Low interface to OpenDHT. Does not depend on opentxs.
 class OpenDHT

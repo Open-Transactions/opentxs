@@ -54,10 +54,10 @@
 #ifdef ANDROID
 #include "opentxs/core/util/android_string.hpp"
 #endif  // ANDROID
+#include "opentxs/core/Data.hpp"
 #include "opentxs/core/Ledger.hpp"
 #include "opentxs/core/Log.hpp"
 #include "opentxs/core/Nym.hpp"
-#include "opentxs/core/OTData.hpp"
 #include "opentxs/core/String.hpp"
 
 #include <chrono>
@@ -283,7 +283,7 @@ Identifier OTME_too::add_background_thread(BackgroundThread thread)
 
     std::unique_lock<std::mutex> lock(thread_lock_);
 
-    OTData nonce;
+    Data nonce;
     encoding_.Nonce(32, nonce);
     output.CalculateDigest(nonce);
     auto& item = threads_[output];

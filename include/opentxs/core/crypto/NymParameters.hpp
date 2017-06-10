@@ -39,13 +39,13 @@
 #ifndef OPENTXS_CORE_CRYPTO_NYMPARAMETERS_HPP
 #define OPENTXS_CORE_CRYPTO_NYMPARAMETERS_HPP
 
-#include "opentxs/core/Proto.hpp"
-#include "opentxs/core/Types.hpp"
 #include "opentxs/core/crypto/Credential.hpp"
 #include "opentxs/core/crypto/OTAsymmetricKey.hpp"
 #if OT_CRYPTO_SUPPORTED_KEY_HD
 #include "opentxs/core/crypto/OTPassword.hpp"
 #endif
+#include "opentxs/core/Proto.hpp"
+#include "opentxs/core/Types.hpp"
 
 #include <cstdint>
 #include <string>

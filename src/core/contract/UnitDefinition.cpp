@@ -50,10 +50,10 @@
 #include "opentxs/core/util/OTFolders.hpp"
 #include "opentxs/core/Account.hpp"
 #include "opentxs/core/AccountVisitor.hpp"
+#include "opentxs/core/Data.hpp"
 #include "opentxs/core/Identifier.hpp"
 #include "opentxs/core/Log.hpp"
 #include "opentxs/core/Nym.hpp"
-#include "opentxs/core/OTData.hpp"
 #include "opentxs/core/OTStorage.hpp"
 #include "opentxs/core/Proto.hpp"
 #include "opentxs/core/String.hpp"
@@ -829,7 +829,7 @@ proto::UnitDefinition UnitDefinition::Contract() const
     return contract(lock);
 }
 
-OTData UnitDefinition::Serialize() const
+Data UnitDefinition::Serialize() const
 {
     Lock lock(lock_);
 

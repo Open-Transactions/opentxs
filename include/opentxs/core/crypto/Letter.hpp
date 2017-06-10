@@ -53,7 +53,7 @@ namespace opentxs
 class AsymmetricKeyEC;
 class Nym;
 class OTPasswordData;
-class OTData;
+class Data;
 
 typedef std::list<symmetricEnvelope> listOfSessionKeys;
 typedef std::map<proto::AsymmetricKeyType, std::string> listOfEphemeralKeys;
@@ -82,9 +82,9 @@ public:
     static bool Seal(
         const mapOfAsymmetricKeys& RecipPubKeys,
         const String& theInput,
-        OTData& dataOutput);
+        Data& dataOutput);
     static bool Open(
-        const OTData& dataInput,
+        const Data& dataInput,
         const Nym& theRecipient,
         const OTPasswordData& keyPassword,
         String& theOutput);

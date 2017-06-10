@@ -50,9 +50,9 @@
 #include "opentxs/core/util/Tag.hpp"
 #include "opentxs/core/util/Timer.hpp"
 #include "opentxs/core/Contract.hpp"
+#include "opentxs/core/Data.hpp"
 #include "opentxs/core/Identifier.hpp"
 #include "opentxs/core/Log.hpp"
-#include "opentxs/core/OTData.hpp"
 #include "opentxs/core/OTStorage.hpp"
 #include "opentxs/core/OTStringXML.hpp"
 #include "opentxs/core/String.hpp"
@@ -183,7 +183,7 @@ bool OTCron::GetNym_OfferList(OTASCIIArmor& ascOutput, const Identifier& NYM_ID,
         const size_t theSize = pBuffer->GetSize();
 
         if ((nullptr != pUint) || (theSize < 2)) {
-            OTData theData(pUint, static_cast<uint32_t>(theSize));
+            Data theData(pUint, static_cast<uint32_t>(theSize));
 
             // This function will base64 ENCODE theData,
             // and then Set() that as the string contents.
@@ -311,7 +311,7 @@ bool OTCron::GetMarketList(OTASCIIArmor& ascOutput, int32_t& nMarketCount)
         const size_t theSize = pBuffer->GetSize();
 
         if ((theSize > 0) && (nullptr != pUint)) {
-            OTData theData(pUint, static_cast<uint32_t>(theSize));
+            Data theData(pUint, static_cast<uint32_t>(theSize));
 
             // This function will base64 ENCODE theData,
             // and then Set() that as the string contents.

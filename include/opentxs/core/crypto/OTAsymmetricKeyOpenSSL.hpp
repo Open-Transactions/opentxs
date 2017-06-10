@@ -41,10 +41,10 @@
 
 #if OT_CRYPTO_SUPPORTED_KEY_RSA
 
-#include "opentxs/core/Proto.hpp"
-#include "opentxs/core/String.hpp"
 #include "opentxs/core/crypto/OTASCIIArmor.hpp"
 #include "opentxs/core/crypto/OTAsymmetricKey.hpp"
+#include "opentxs/core/Proto.hpp"
+#include "opentxs/core/String.hpp"
 
 namespace opentxs
 {
@@ -130,7 +130,7 @@ public:
     }
 
     serializedAsymmetricKey Serialize() const override;
-    bool TransportKey(OTData& publicKey, OTPassword& privateKey) const override;
+    bool TransportKey(Data& publicKey, OTPassword& privateKey) const override;
 
 protected:
     OTAsymmetricKey_OpenSSL();

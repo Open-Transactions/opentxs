@@ -39,8 +39,8 @@
 #ifndef OPENTXS_CORE_OTLOG_HPP
 #define OPENTXS_CORE_OTLOG_HPP
 
-#include "opentxs/core/String.hpp"
 #include "opentxs/core/util/Assert.hpp"
+#include "opentxs/core/String.hpp"
 
 #include <chrono>
 #include <cstdint>

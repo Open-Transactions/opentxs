@@ -52,7 +52,7 @@ namespace opentxs
 {
 
 class OTAsymmetricKey;
-class OTData;
+class Data;
 class OTPassword;
 class OTPasswordData;
 
@@ -87,7 +87,7 @@ private:
         std::uint8_t* output,
         std::size_t outputSize) const override;
     bool ECDH(
-        const OTData& publicKey,
+        const Data& publicKey,
         const OTPassword& seed,
         OTPassword& secret) const override;
     bool Encrypt(
@@ -99,13 +99,13 @@ private:
     bool ExpandSeed(
         const OTPassword& seed,
         OTPassword& privateKey,
-        OTData& publicKey) const;
+        Data& publicKey) const;
     void Init_Override() const override;
     std::size_t IvSize(const proto::SymmetricMode mode) const override;
     std::size_t KeySize(const proto::SymmetricMode mode) const override;
     bool ScalarBaseMultiply(
         const OTPassword& seed,
-        OTData& publicKey) const override;
+        Data& publicKey) const override;
     std::size_t SaltSize(const proto::SymmetricKeyType type) const override;
     std::size_t TagSize(const proto::SymmetricMode mode) const override;
 
@@ -126,22 +126,22 @@ public:
         std::uint8_t* output) const override;
     bool RandomKeypair(
         OTPassword& privateKey,
-        OTData& publicKey) const override;
+        Data& publicKey) const override;
     bool Sign(
-        const OTData& plaintext,
+        const Data& plaintext,
         const OTAsymmetricKey& theKey,
         const proto::HashType hashType,
-        OTData& signature, // output
+        Data& signature, // output
         const OTPasswordData* pPWData = nullptr,
         const OTPassword* exportPassword = nullptr) const override;
     bool SeedToCurveKey(
         const OTPassword& seed,
         OTPassword& privateKey,
-        OTData& publicKey) const override;
+        Data& publicKey) const override;
     bool Verify(
-        const OTData& plaintext,
+        const Data& plaintext,
         const OTAsymmetricKey& theKey,
-        const OTData& signature,
+        const Data& signature,
         const proto::HashType hashType,
         const OTPasswordData* pPWData = nullptr) const override;
 

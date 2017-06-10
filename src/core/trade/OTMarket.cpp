@@ -52,12 +52,12 @@
 #include "opentxs/core/util/Tag.hpp"
 #include "opentxs/core/Account.hpp"
 #include "opentxs/core/Contract.hpp"
+#include "opentxs/core/Data.hpp"
 #include "opentxs/core/Identifier.hpp"
 #include "opentxs/core/Item.hpp"
 #include "opentxs/core/Ledger.hpp"
 #include "opentxs/core/Log.hpp"
 #include "opentxs/core/Nym.hpp"
-#include "opentxs/core/OTData.hpp"
 #include "opentxs/core/OTStorage.hpp"
 #include "opentxs/core/OTStringXML.hpp"
 #include "opentxs/core/OTTransaction.hpp"
@@ -381,7 +381,7 @@ bool OTMarket::GetRecentTradeList(OTASCIIArmor& ascOutput, int32_t& nTradeCount)
         const size_t theSize = pBuffer->GetSize();
 
         if ((nullptr != pUint) || (theSize < 2)) {
-            OTData theData(pUint, static_cast<uint32_t>(theSize));
+            Data theData(pUint, static_cast<uint32_t>(theSize));
 
             // This function will base64 ENCODE theData,
             // and then Set() that as the string contents.
@@ -517,7 +517,7 @@ bool OTMarket::GetOfferList(OTASCIIArmor& ascOutput, int64_t lDepth,
         const size_t theSize = pBuffer->GetSize();
 
         if (nullptr != pUint) {
-            OTData theData(pUint, static_cast<uint32_t>(theSize));
+            Data theData(pUint, static_cast<uint32_t>(theSize));
 
             // This function will base64 ENCODE theData,
             // and then Set() that as the string contents.

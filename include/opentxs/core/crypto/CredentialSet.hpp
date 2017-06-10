@@ -39,13 +39,13 @@
 #ifndef OPENTXS_CORE_CRYPTO_CREDENTIALSET_HPP
 #define OPENTXS_CORE_CRYPTO_CREDENTIALSET_HPP
 
+#include "opentxs/core/crypto/Credential.hpp"
+#include "opentxs/core/crypto/MasterCredential.hpp"
+#include "opentxs/core/crypto/NymParameters.hpp"
 #include "opentxs/core/NymIDSource.hpp"
 #include "opentxs/core/Proto.hpp"
 #include "opentxs/core/String.hpp"
 #include "opentxs/core/Types.hpp"
-#include "opentxs/core/crypto/Credential.hpp"
-#include "opentxs/core/crypto/MasterCredential.hpp"
-#include "opentxs/core/crypto/NymParameters.hpp"
 
 #include <cstdint>
 #include <memory>
@@ -264,11 +264,11 @@ public:
         const OTPasswordData* pPWData = nullptr) const;
 
     bool Verify(
-        const OTData& plaintext,
+        const Data& plaintext,
         const proto::Signature& sig,
         const proto::KeyRole key = proto::KEYROLE_SIGN) const;
     bool Verify(const proto::Verification& item) const;
-    bool TransportKey(OTData& publicKey, OTPassword& privateKey) const;
+    bool TransportKey(Data& publicKey, OTPassword& privateKey) const;
 
     template<class C>
     bool SignProto(

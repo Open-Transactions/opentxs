@@ -41,9 +41,6 @@
 
 #if OT_CRYPTO_USING_OPENSSL
 
-#include "opentxs/core/OTData.hpp"
-#include "opentxs/core/Proto.hpp"
-#include "opentxs/core/String.hpp"
 #include "opentxs/core/crypto/Crypto.hpp"
 #if OT_CRYPTO_SUPPORTED_KEY_RSA
 #include "opentxs/core/crypto/CryptoAsymmetric.hpp"
@@ -54,6 +51,9 @@
 #endif
 #include "opentxs/core/crypto/CryptoUtil.hpp"
 #include "opentxs/core/util/Assert.hpp"
+#include "opentxs/core/Data.hpp"
+#include "opentxs/core/Proto.hpp"
+#include "opentxs/core/String.hpp"
 
 #include <cstdint>
 #include <memory>
@@ -65,11 +65,11 @@ namespace opentxs
 {
 
 class OTAsymmetricKey;
-class OTData;
+class Data;
 class Identifier;
 class OTPassword;
 class OTPasswordData;
-class OTData;
+class Data;
 class Nym;
 class Settings;
 class OTSignature;
@@ -95,8 +95,8 @@ private:
         const bool encrypt,
         const CryptoSymmetric::Mode cipher,
         const OTPassword& key,
-        const OTData& iv,
-        const OTData& tag,
+        const Data& iv,
+        const Data& tag,
         const char* input,
         const uint32_t inputLength,
         bool& AEAD,
@@ -123,9 +123,9 @@ public:
 
     OTPassword* DeriveNewKey(
         const OTPassword& userPassword,
-        const OTData& dataSalt,
+        const Data& dataSalt,
         uint32_t uIterations,
-        OTData& dataCheckHash) const override;
+        Data& dataCheckHash) const override;
 
     // ENCRYPT / DECRYPT
     // Symmetric (secret key) encryption / decryption
@@ -134,35 +134,35 @@ public:
                                               // form.
         const char* szInput,                  // This is the Plaintext.
         uint32_t lInputLength,
-        const OTData& theIV, // (We assume this IV is already generated and
+        const Data& theIV, // (We assume this IV is already generated and
                              // passed in.)
-        OTData& theEncryptedOutput) const override;
+        Data& theEncryptedOutput) const override;
     bool Encrypt(
         const CryptoSymmetric::Mode cipher,
         const OTPassword& key,
         const char* plaintext,
         uint32_t plaintextLength,
-        OTData& ciphertext) const override;
+        Data& ciphertext) const override;
     bool Encrypt(
         const CryptoSymmetric::Mode cipher,
         const OTPassword& key,
-        const OTData& iv,
+        const Data& iv,
         const char* plaintext,
         uint32_t plaintextLength,
-        OTData& ciphertext) const override;
+        Data& ciphertext) const override;
     bool Encrypt(
         const CryptoSymmetric::Mode cipher,
         const OTPassword& key,
-        const OTData& iv,
+        const Data& iv,
         const char* plaintext,
         uint32_t plaintextLength,
-        OTData& ciphertext,
-        OTData& tag) const override;
+        Data& ciphertext,
+        Data& tag) const override;
     bool Decrypt(
         const OTPassword& theRawSymmetricKey,
         const char* szInput,
         uint32_t lInputLength,
-        const OTData& theIV,
+        const Data& theIV,
         CryptoSymmetricDecryptOutput& theDecryptedOutput) const override;
     bool Decrypt(
         const CryptoSymmetric::Mode cipher,
@@ -173,15 +173,15 @@ public:
     bool Decrypt(
         const CryptoSymmetric::Mode cipher,
         const OTPassword& key,
-        const OTData& iv,
+        const Data& iv,
         const char* ciphertext,
         uint32_t ciphertextLength,
         CryptoSymmetricDecryptOutput& plaintext) const override;
     bool Decrypt(
         const CryptoSymmetric::Mode cipher,
         const OTPassword& key,
-        const OTData& iv,
-        const OTData& tag,
+        const Data& iv,
+        const Data& tag,
         const char* ciphertext,
         const uint32_t ciphertextLength,
         CryptoSymmetricDecryptOutput& plaintext) const override;
@@ -203,16 +203,16 @@ public:
     // SIGN / VERIFY
     // Sign or verify using the Asymmetric Key itself.
     bool Sign(
-        const OTData& plaintext,
+        const Data& plaintext,
         const OTAsymmetricKey& theKey,
         const proto::HashType hashType,
-        OTData& signature, // output
+        Data& signature, // output
         const OTPasswordData* pPWData = nullptr,
         const OTPassword* exportPassword = nullptr) const override;
     bool Verify(
-        const OTData& plaintext,
+        const Data& plaintext,
         const OTAsymmetricKey& theKey,
-        const OTData& signature,
+        const Data& signature,
         const proto::HashType hashType,
         const OTPasswordData* pPWData = nullptr) const override;
 
@@ -220,12 +220,12 @@ public:
     // Asymmetric (public key) encryption / decryption
     bool EncryptSessionKey(
         const mapOfAsymmetricKeys& RecipPubKeys,
-        OTData& plaintext,
-        OTData& dataOutput) const;
+        Data& plaintext,
+        Data& dataOutput) const;
     bool DecryptSessionKey(
-        OTData& dataInput,
+        Data& dataInput,
         const Nym& theRecipient,
-        OTData& plaintext,
+        Data& plaintext,
         const OTPasswordData* pPWData = nullptr) const;
 #endif // OT_CRYPTO_SUPPORTED_KEY_RSA
 

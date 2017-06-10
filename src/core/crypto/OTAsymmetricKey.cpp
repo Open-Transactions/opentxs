@@ -62,8 +62,8 @@
 #include "opentxs/core/crypto/OTSignatureMetadata.hpp"
 #include "opentxs/core/util/Assert.hpp"
 #include "opentxs/core/util/Timer.hpp"
+#include "opentxs/core/Data.hpp"
 #include "opentxs/core/Identifier.hpp"
-#include "opentxs/core/OTData.hpp"
 #include "opentxs/core/String.hpp"
 #include "opentxs/core/Types.hpp"
 
@@ -1039,7 +1039,7 @@ serializedAsymmetricKey OTAsymmetricKey::Serialize() const
     return serializedKey;
 }
 
-OTData OTAsymmetricKey::SerializeKeyToData(
+Data OTAsymmetricKey::SerializeKeyToData(
     const proto::AsymmetricKey& serializedKey) const
 {
     return proto::ProtoAsData<proto::AsymmetricKey>(serializedKey);
@@ -1049,14 +1049,14 @@ bool OTAsymmetricKey::operator==(const proto::AsymmetricKey& rhs) const
 {
     serializedAsymmetricKey tempKey = Serialize();
 
-    OTData LHData = SerializeKeyToData(*tempKey);
-    OTData RHData = SerializeKeyToData(rhs);
+    Data LHData = SerializeKeyToData(*tempKey);
+    Data RHData = SerializeKeyToData(rhs);
 
     return (LHData == RHData);
 }
 
 bool OTAsymmetricKey::Verify(
-    const OTData& plaintext,
+    const Data& plaintext,
     const proto::Signature& sig) const
 {
     if (IsPrivate()) {
@@ -1064,7 +1064,7 @@ bool OTAsymmetricKey::Verify(
         return false;
     }
 
-    OTData signature;
+    Data signature;
     signature.Assign(sig.signature().c_str(), sig.signature().size());
 
     return engine().Verify(
@@ -1076,7 +1076,7 @@ bool OTAsymmetricKey::Verify(
 }
 
 bool OTAsymmetricKey::Sign(
-    const OTData& plaintext,
+    const Data& plaintext,
     proto::Signature& sig,
     const OTPasswordData* pPWData,
     const OTPassword* exportPassword,
@@ -1088,7 +1088,7 @@ bool OTAsymmetricKey::Sign(
         return false;
     }
 
-    OTData signature;
+    Data signature;
     const auto hash = SigHashType();
 
     bool goodSig = engine().Sign(

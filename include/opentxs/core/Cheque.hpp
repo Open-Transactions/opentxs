@@ -39,11 +39,11 @@
 #ifndef OPENTXS_CORE_OTCHEQUE_HPP
 #define OPENTXS_CORE_OTCHEQUE_HPP
 
+#include "opentxs/core/util/Common.hpp"
 #include "opentxs/core/Contract.hpp"
 #include "opentxs/core/Identifier.hpp"
 #include "opentxs/core/OTTrackable.hpp"
 #include "opentxs/core/String.hpp"
-#include "opentxs/core/util/Common.hpp"
 
 #include <stdint.h>
 

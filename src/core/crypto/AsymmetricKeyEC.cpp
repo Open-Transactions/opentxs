@@ -50,9 +50,9 @@
 #include "opentxs/core/util/android_string.hpp"
 #endif // ANDROID
 #include "opentxs/core/util/Assert.hpp"
+#include "opentxs/core/Data.hpp"
 #include "opentxs/core/Identifier.hpp"
 #include "opentxs/core/Log.hpp"
-#include "opentxs/core/OTData.hpp"
 #include "opentxs/core/Proto.hpp"
 #include "opentxs/core/String.hpp"
 #include "opentxs/core/Types.hpp"
@@ -84,9 +84,9 @@ AsymmetricKeyEC::AsymmetricKeyEC(
     }
 
     if (proto::KEYMODE_PUBLIC == serializedKey.mode()) {
-        std::unique_ptr<OTData> theKey;
+        std::unique_ptr<Data> theKey;
         theKey.reset(
-            new OTData(serializedKey.key().c_str(), serializedKey.key().size()));
+            new Data(serializedKey.key().c_str(), serializedKey.key().size()));
 
         OT_ASSERT(theKey);
 
@@ -110,14 +110,14 @@ AsymmetricKeyEC::AsymmetricKeyEC(
 
     auto key = OT::App().Crypto().Encode().DataDecode(publicKey.Get());
 
-    std::unique_ptr<OTData> dataKey(new OTData(key.data(), key.size()));
+    std::unique_ptr<Data> dataKey(new Data(key.data(), key.size()));
 
     OT_ASSERT(dataKey);
 
     SetKey(dataKey);
 }
 
-bool AsymmetricKeyEC::GetKey(OTData& key) const
+bool AsymmetricKeyEC::GetKey(Data& key) const
 {
     if (key_) {
         key.Assign(*key_);
@@ -308,7 +308,7 @@ serializedAsymmetricKey AsymmetricKeyEC::Serialize() const
     return serializedKey;
 }
 
-bool AsymmetricKeyEC::SetKey(std::unique_ptr<OTData>& key)
+bool AsymmetricKeyEC::SetKey(std::unique_ptr<Data>& key)
 {
     ReleaseKeyLowLevel();
     m_bIsPublicKey = true;
@@ -329,7 +329,7 @@ bool AsymmetricKeyEC::SetKey(std::unique_ptr<proto::Ciphertext>& key)
 }
 
 bool AsymmetricKeyEC::TransportKey(
-    OTData& publicKey,
+    Data& publicKey,
     OTPassword& privateKey) const
 {
     if (!IsPrivate()) { return false; }

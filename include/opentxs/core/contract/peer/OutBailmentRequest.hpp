@@ -40,7 +40,6 @@
 #define OPENTXS_CORE_CONTRACT_PEER_OUTBAILMENTREQUEST_HPP
 
 #include "opentxs/core/contract/peer/PeerRequest.hpp"
-
 #include "opentxs/core/Identifier.hpp"
 
 namespace opentxs

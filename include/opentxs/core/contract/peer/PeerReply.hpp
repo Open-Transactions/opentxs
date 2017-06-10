@@ -39,10 +39,10 @@
 #ifndef OPENTXS_CORE_CONTRACT_PEER_PEERREPLY_HPP
 #define OPENTXS_CORE_CONTRACT_PEER_PEERREPLY_HPP
 
-#include "opentxs/core/Identifier.hpp"
-#include "opentxs/core/OTData.hpp"
-#include "opentxs/core/Proto.hpp"
 #include "opentxs/core/contract/Signable.hpp"
+#include "opentxs/core/Data.hpp"
+#include "opentxs/core/Identifier.hpp"
+#include "opentxs/core/Proto.hpp"
 
 #include <string>
 
@@ -121,7 +121,7 @@ public:
     std::string Alias() const override { return Name(); }
     proto::PeerReply Contract() const;
     std::string Name() const override;
-    OTData Serialize() const override;
+    Data Serialize() const override;
     const proto::PeerRequestType& Type() const { return type_; }
     void SetAlias(const std::string&) override {}
 

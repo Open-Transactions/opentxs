@@ -55,8 +55,8 @@
 #include "opentxs/core/crypto/TrezorCrypto.hpp"
 #endif
 #include "opentxs/core/util/Assert.hpp"
+#include "opentxs/core/Data.hpp"
 #include "opentxs/core/Log.hpp"
-#include "opentxs/core/OTData.hpp"
 #include "opentxs/core/String.hpp"
 
 #include <stdint.h>
@@ -77,7 +77,7 @@ Libsecp256k1::Libsecp256k1(CryptoUtil& ssl, Ecdsa& ecdsa)
 
 bool Libsecp256k1::RandomKeypair(
     OTPassword& privateKey,
-    OTData& publicKey) const
+    Data& publicKey) const
 {
     if (nullptr == context_) { return false; }
 
@@ -106,14 +106,14 @@ bool Libsecp256k1::RandomKeypair(
 }
 
 bool Libsecp256k1::Sign(
-    const OTData& plaintext,
+    const Data& plaintext,
     const OTAsymmetricKey& theKey,
     const proto::HashType hashType,
-    OTData& signature, // output
+    Data& signature, // output
     const OTPasswordData* pPWData,
     const OTPassword* exportPassword) const
 {
-    OTData hash;
+    Data hash;
     bool haveDigest = OT::App().Crypto().Hash().Digest(hashType, plaintext, hash);
 
     if (!haveDigest) {
@@ -172,13 +172,13 @@ bool Libsecp256k1::Sign(
 }
 
 bool Libsecp256k1::Verify(
-    const OTData& plaintext,
+    const Data& plaintext,
     const OTAsymmetricKey& theKey,
-    const OTData& signature,
+    const Data& signature,
     const proto::HashType hashType,
     __attribute__((unused)) const OTPasswordData* pPWData) const
 {
-    OTData hash;
+    Data hash;
     bool haveDigest = OT::App().Crypto().Hash().Digest(hashType, plaintext, hash);
 
     if (!haveDigest) { return false; }
@@ -188,7 +188,7 @@ bool Libsecp256k1::Verify(
 
     if (nullptr == key) { return false; }
 
-    OTData ecdsaPubkey;
+    Data ecdsaPubkey;
     const bool havePublicKey = AsymmetricKeyToECPubkey(*key, ecdsaPubkey);
 
     if (!havePublicKey) { return false; }
@@ -199,7 +199,7 @@ bool Libsecp256k1::Verify(
     if (!pubkeyParsed) { return false; }
 
     secp256k1_ecdsa_signature ecdsaSignature;
-    const bool haveSignature = OTDataToECSignature(signature, ecdsaSignature);
+    const bool haveSignature = DataToECSignature(signature, ecdsaSignature);
 
     if (!haveSignature) { return false; }
 
@@ -210,8 +210,8 @@ bool Libsecp256k1::Verify(
         &point);
 }
 
-bool Libsecp256k1::OTDataToECSignature(
-    const OTData& inSignature,
+bool Libsecp256k1::DataToECSignature(
+    const Data& inSignature,
     secp256k1_ecdsa_signature& outSignature) const
 {
     const uint8_t* sigStart = static_cast<const uint8_t*>(inSignature.GetPointer());
@@ -234,7 +234,7 @@ bool Libsecp256k1::OTDataToECSignature(
 }
 
 bool Libsecp256k1::ECDH(
-    const OTData& publicKey,
+    const Data& publicKey,
     const OTPassword& privateKey,
     OTPassword& secret) const
 {
@@ -262,7 +262,7 @@ void Libsecp256k1::Init_Override() const
 }
 
 bool Libsecp256k1::ParsePublicKey(
-    const OTData& input,
+    const Data& input,
     secp256k1_pubkey& output) const
 {
     if (nullptr == context_) { return false; }
@@ -276,7 +276,7 @@ bool Libsecp256k1::ParsePublicKey(
 
 bool Libsecp256k1::ScalarBaseMultiply(
     const OTPassword& privateKey,
-    OTData& publicKey) const
+    Data& publicKey) const
 {
     if (nullptr == context_) { return false; }
 

@@ -51,8 +51,8 @@ namespace opentxs
 {
 
 class OTASCIIArmor;
-class OTData;
-class OTData;
+class Data;
+class Data;
 class OTEnvelope;
 
 namespace OTDB
@@ -83,8 +83,8 @@ extern const char* OT_BEGIN_SIGNED_escaped;
       Load methods
 
    ...if the data is *not* already encoded:
-      Constructors that take String, OTData
-      Assignment operators that take String, OTData
+      Constructors that take String, Data
+      Assignment operators that take String, Data
       Set methods
 
  Methods that take data out of OTASCIIArmor
@@ -105,7 +105,7 @@ public:
 
     EXPORT OTASCIIArmor();
     EXPORT OTASCIIArmor(const char* szValue);
-    EXPORT OTASCIIArmor(const OTData& theValue);
+    EXPORT OTASCIIArmor(const Data& theValue);
     EXPORT OTASCIIArmor(const String& strValue);
     EXPORT OTASCIIArmor(const OTASCIIArmor& strValue);
     EXPORT OTASCIIArmor(const OTEnvelope& theEnvelope);
@@ -114,7 +114,7 @@ public:
     using String::swap;
 
     EXPORT OTASCIIArmor& operator=(const char* szValue);
-    EXPORT OTASCIIArmor& operator=(const OTData& theValue);
+    EXPORT OTASCIIArmor& operator=(const Data& theValue);
     EXPORT OTASCIIArmor& operator=(const String& strValue);
     EXPORT OTASCIIArmor& operator=(const OTASCIIArmor& strValue);
 
@@ -169,8 +169,8 @@ public:
                                      // right string.
         bool bEscaped = false) const;
 
-    EXPORT bool GetData(OTData& theData, bool bLineBreaks = true) const;
-    EXPORT bool SetData(const OTData& theData, bool bLineBreaks = true);
+    EXPORT bool GetData(Data& theData, bool bLineBreaks = true) const;
+    EXPORT bool SetData(const Data& theData, bool bLineBreaks = true);
 
     EXPORT bool GetString(String& theData, bool bLineBreaks = true) const;
     EXPORT bool SetString(const String& theData, bool bLineBreaks = true);

@@ -57,10 +57,10 @@
 #include "opentxs/core/crypto/OTPassword.hpp"
 #include "opentxs/core/util/Assert.hpp"
 #include "opentxs/core/util/stacktrace.h"
+#include "opentxs/core/Data.hpp"
 #include "opentxs/core/Identifier.hpp"
 #include "opentxs/core/Log.hpp"
 #include "opentxs/core/Nym.hpp"
-#include "opentxs/core/OTData.hpp"
 #include "opentxs/core/String.hpp"
 
 extern "C" {
@@ -110,21 +110,21 @@ public:
         const CryptoSymmetric::Mode cipher);
 
 #if OT_CRYPTO_SUPPORTED_KEY_RSA
-    bool SignContractDefaultHash(const OTData& strContractUnsigned,
+    bool SignContractDefaultHash(const Data& strContractUnsigned,
                                  const EVP_PKEY* pkey,
-                                 OTData& theSignature, // output
+                                 Data& theSignature, // output
                                  const OTPasswordData* pPWData = nullptr) const;
     bool VerifyContractDefaultHash(
-        const OTData& strContractToVerify, const EVP_PKEY* pkey,
-        const OTData& theSignature,
+        const Data& strContractToVerify, const EVP_PKEY* pkey,
+        const Data& theSignature,
         const OTPasswordData* pPWData = nullptr) const;
     // Sign or verify using the actual OpenSSL EVP_PKEY
-    bool SignContract(const OTData& strContractUnsigned, const EVP_PKEY* pkey,
-                      OTData& theSignature, // output
+    bool SignContract(const Data& strContractUnsigned, const EVP_PKEY* pkey,
+                      Data& theSignature, // output
                       const proto::HashType hashType,
                       const OTPasswordData* pPWData = nullptr) const;
-    bool VerifySignature(const OTData& strContractToVerify,
-                         const EVP_PKEY* pkey, const OTData& theSignature,
+    bool VerifySignature(const Data& strContractToVerify,
+                         const EVP_PKEY* pkey, const Data& theSignature,
                          const proto::HashType hashType,
                          const OTPasswordData* pPWData = nullptr) const;
 #endif
@@ -395,9 +395,9 @@ bool OpenSSL::RandomizeMemory(uint8_t* szDestination,
 
 OTPassword* OpenSSL::DeriveNewKey(
     const OTPassword& userPassword,
-    const OTData& dataSalt,
+    const Data& dataSalt,
     std::uint32_t uIterations,
-    OTData& dataCheckHash) const
+    Data& dataCheckHash) const
 {
     OT_ASSERT(!dataSalt.IsEmpty());
 
@@ -432,7 +432,7 @@ OTPassword* OpenSSL::DeriveNewKey(
     // For The HashCheck
     const bool bHaveCheckHash = !dataCheckHash.IsEmpty();
 
-    OTData tmpHashCheck;
+    Data tmpHashCheck;
     tmpHashCheck.SetSize(CryptoConfig::SymmetricKeySize());
 
     // We take the DerivedKey, and hash it again, then get a 'hash-check'
@@ -1091,8 +1091,8 @@ bool OpenSSL::ArgumentCheck(
     const bool encrypt,
     const CryptoSymmetric::Mode cipher,
     const OTPassword& key,
-    const OTData& iv,
-    const OTData& tag,
+    const Data& iv,
+    const Data& tag,
     const char* input,
     const uint32_t inputLength,
     bool& AEAD,
@@ -1161,10 +1161,10 @@ bool OpenSSL::ArgumentCheck(
 bool OpenSSL::Encrypt(
     const OTPassword& theRawSymmetricKey, // The symmetric key, in clear form.
     const char* szInput,                  // This is the Plaintext.
-    const uint32_t lInputLength, const OTData& theIV, // (We assume this IV
+    const uint32_t lInputLength, const Data& theIV, // (We assume this IV
                                                       // is already generated
                                                       // and passed in.)
-    OTData& theEncryptedOutput) const                 // OUTPUT. (Ciphertext.)
+    Data& theEncryptedOutput) const                 // OUTPUT. (Ciphertext.)
 {
     return Encrypt(
         CryptoSymmetric::AES_256_CBC, // What OT was using before
@@ -1180,9 +1180,9 @@ bool OpenSSL::Encrypt(
     const OTPassword& key,
     const char* plaintext,
     uint32_t plaintextLength,
-    OTData& ciphertext) const
+    Data& ciphertext) const
 {
-    OTData unusedIV;
+    Data unusedIV;
 
     return Encrypt(
         cipher,
@@ -1196,12 +1196,12 @@ bool OpenSSL::Encrypt(
 bool OpenSSL::Encrypt(
     const CryptoSymmetric::Mode cipher,
     const OTPassword& key,
-    const OTData& iv,
+    const Data& iv,
     const char* plaintext,
     uint32_t plaintextLength,
-    OTData& ciphertext) const
+    Data& ciphertext) const
 {
-    OTData unusedTag;
+    Data unusedTag;
 
     return Encrypt(
         cipher,
@@ -1216,11 +1216,11 @@ bool OpenSSL::Encrypt(
 bool OpenSSL::Encrypt(
     const CryptoSymmetric::Mode cipher,
     const OTPassword& key,
-    const OTData& iv,
+    const Data& iv,
     const char* plaintext,
     uint32_t plaintextLength,
-    OTData& ciphertext,
-    OTData& tag) const
+    Data& ciphertext,
+    Data& tag) const
 {
     const char* szFunc = "OpenSSL::Encrypt";
 
@@ -1396,13 +1396,13 @@ bool OpenSSL::Encrypt(
 bool OpenSSL::Decrypt(
     const OTPassword& theRawSymmetricKey, // The symmetric key, in clear form.
     const char* szInput,                  // This is the Ciphertext.
-    const uint32_t lInputLength, const OTData& theIV, // (We assume this IV
+    const uint32_t lInputLength, const Data& theIV, // (We assume this IV
                                                       // is already generated
                                                       // and passed in.)
     CryptoSymmetricDecryptOutput& theDecryptedOutput) const // OUTPUT. (Recovered
                                                       // plaintext.) You can
                                                       // pass OTPassword& OR
-                                                      // OTData& here (either
+                                                      // Data& here (either
                                                       // will work.)
 {
     return Decrypt(
@@ -1421,7 +1421,7 @@ bool OpenSSL::Decrypt(
     uint32_t ciphertextLength,
     CryptoSymmetricDecryptOutput& plaintext) const
 {
-    OTData unusedIV;
+    Data unusedIV;
 
     return Decrypt(
         cipher,
@@ -1435,12 +1435,12 @@ bool OpenSSL::Decrypt(
 bool OpenSSL::Decrypt(
     const CryptoSymmetric::Mode cipher,
     const OTPassword& key,
-    const OTData& iv,
+    const Data& iv,
     const char* ciphertext,
     const uint32_t ciphertextLength,
     CryptoSymmetricDecryptOutput& plaintext) const
 {
-    OTData unusedTag;
+    Data unusedTag;
 
     return Decrypt(
         cipher,
@@ -1455,8 +1455,8 @@ bool OpenSSL::Decrypt(
 bool OpenSSL::Decrypt(
     const CryptoSymmetric::Mode cipher,
     const OTPassword& key,
-    const OTData& iv,
-    const OTData& tag,
+    const Data& iv,
+    const Data& tag,
     const char* ciphertext,
     const uint32_t ciphertextLength,
     CryptoSymmetricDecryptOutput& plaintext) const
@@ -1814,15 +1814,15 @@ void OpenSSL_BIO::setFreeOnly()
 
  */
 bool OpenSSL::OpenSSLdp::SignContractDefaultHash(
-    const OTData& strContractUnsigned, const EVP_PKEY* pkey,
-    OTData& theSignature, const OTPasswordData*) const
+    const Data& strContractUnsigned, const EVP_PKEY* pkey,
+    Data& theSignature, const OTPasswordData*) const
 {
     const char* szFunc = "OpenSSL::SignContractDefaultHash";
 
     // 32 bytes, double sha256
     // This stores the message digest, pre-encrypted, but with the padding
     // added.
-    OTData hash;
+    Data hash;
     OT::App().Crypto().Hash().Digest(proto::HASHTYPE_SHA256, strContractUnsigned, hash);
 
     // This stores the final signature, when the EM value has been signed by RSA
@@ -1952,7 +1952,7 @@ bool OpenSSL::OpenSSLdp::SignContractDefaultHash(
     }
     // status contains size
 
-    OTData binSignature(&vpSignature.at(0), status); // RSA_private_encrypt
+    Data binSignature(&vpSignature.at(0), status); // RSA_private_encrypt
                                                      // actually returns the
                                                      // right size.
 
@@ -1965,13 +1965,13 @@ bool OpenSSL::OpenSSLdp::SignContractDefaultHash(
 }
 
 bool OpenSSL::OpenSSLdp::VerifyContractDefaultHash(
-    const OTData& strContractToVerify, const EVP_PKEY* pkey,
-    const OTData& theSignature, const OTPasswordData*) const
+    const Data& strContractToVerify, const EVP_PKEY* pkey,
+    const Data& theSignature, const OTPasswordData*) const
 {
     const char* szFunc = "OpenSSL::VerifyContractDefaultHash";
 
     // 32 bytes, double sha256
-    OTData hash;
+    Data hash;
     OT::App().Crypto().Hash().Digest(proto::HASHTYPE_SHA256, strContractToVerify, hash);
 
     std::vector<uint8_t> vDecrypted(
@@ -2494,8 +2494,8 @@ bool OpenSSL::OpenSSLdp::VerifyContractDefaultHash(
 // All the other various versions eventually call this one, where the actual
 // work is done.
 bool OpenSSL::OpenSSLdp::SignContract(
-    const OTData& strContractUnsigned, const EVP_PKEY* pkey,
-    OTData& theSignature, const proto::HashType hashType,
+    const Data& strContractUnsigned, const EVP_PKEY* pkey,
+    Data& theSignature, const proto::HashType hashType,
     const OTPasswordData* pPWData) const
 {
     OT_ASSERT_MSG(nullptr != pkey,
@@ -2584,7 +2584,7 @@ bool OpenSSL::OpenSSLdp::SignContract(
 
         // We put the signature data into the signature object that
         // was passed in for that purpose.
-        OTData tempData;
+        Data tempData;
         tempData.Assign(sig_buf, sig_len);
         theSignature = tempData;
 
@@ -2595,8 +2595,8 @@ bool OpenSSL::OpenSSLdp::SignContract(
 // All the other various versions eventually call this one, where the actual
 // work is done.
 bool OpenSSL::OpenSSLdp::VerifySignature(
-    const OTData& strContractToVerify, const EVP_PKEY* pkey,
-    const OTData& theSignature, const proto::HashType hashType,
+    const Data& strContractToVerify, const EVP_PKEY* pkey,
+    const Data& theSignature, const proto::HashType hashType,
     const OTPasswordData* pPWData) const
 {
     OT_ASSERT_MSG(strContractToVerify.GetSize()>0,
@@ -2658,10 +2658,10 @@ bool OpenSSL::OpenSSLdp::VerifySignature(
 }
 
 bool OpenSSL::Sign(
-    const OTData& plaintext,
+    const Data& plaintext,
     const OTAsymmetricKey& theKey,
     const proto::HashType hashType,
-    OTData& signature, // output
+    Data& signature, // output
     const OTPasswordData* pPWData,
     __attribute__((unused)) const OTPassword* exportPassword) const
 {
@@ -2686,9 +2686,9 @@ bool OpenSSL::Sign(
 }
 
 bool OpenSSL::Verify(
-    const OTData& plaintext,
+    const Data& plaintext,
     const OTAsymmetricKey& theKey,
-    const OTData& signature,
+    const Data& signature,
     const proto::HashType hashType,
     const OTPasswordData* pPWData) const
 {
@@ -2714,8 +2714,8 @@ bool OpenSSL::Verify(
 // Seal up as envelope (Asymmetric, using public key and then AES key.)
 bool OpenSSL::EncryptSessionKey(
     const mapOfAsymmetricKeys& RecipPubKeys,
-    OTData& plaintext,
-    OTData& dataOutput) const
+    Data& plaintext,
+    Data& dataOutput) const
 {
     OT_ASSERT_MSG(!RecipPubKeys.empty(),
                   "OpenSSL::Seal: ASSERT: RecipPubKeys.size() > 0");
@@ -3199,9 +3199,9 @@ bool OpenSSL::EncryptSessionKey(
 
 // RSA / AES
 bool OpenSSL::DecryptSessionKey(
-    OTData& dataInput,
+    Data& dataInput,
     const Nym& theRecipient,
-    OTData& plaintext,
+    Data& plaintext,
     const OTPasswordData* pPWData) const
 {
     const char* szFunc = "OpenSSL::DecryptSessionKey";
@@ -3385,7 +3385,7 @@ bool OpenSSL::DecryptSessionKey(
     // IF we find the one we are looking for, then we set it onto this variable,
     // theRawEncryptedKey, so we have it available below this loop.
     //
-    OTData theRawEncryptedKey;
+    Data theRawEncryptedKey;
     bool bFoundKeyAlready =
         false; // If we find it during the loop below, we'll set this to true.
 
@@ -3643,14 +3643,14 @@ bool OpenSSL::DecryptSessionKey(
     // should probably say
     // "if eklen !=" (right?) Wrong: because I think it's a max length.
     //
-    // We create an OTData object to store the ciphertext itself, which begins
+    // We create an Data object to store the ciphertext itself, which begins
     // AFTER the end of the IV.
     // So we see pointer + nRunningTotal as the starting point for the
     // ciphertext.
     // the size of the ciphertext, meanwhile, is the size of the entire thing,
     // MINUS nRunningTotal.
     //
-    OTData ciphertext(static_cast<const void*>(
+    Data ciphertext(static_cast<const void*>(
                           static_cast<const uint8_t*>(dataInput.GetPointer()) +
                           nRunningTotal),
                       dataInput.GetSize() - nRunningTotal);

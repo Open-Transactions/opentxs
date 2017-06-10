@@ -76,10 +76,10 @@
 #include "opentxs/core/crypto/VerificationCredential.hpp"
 #include "opentxs/core/util/Assert.hpp"
 #include "opentxs/core/util/Tag.hpp"
+#include "opentxs/core/Data.hpp"
 #include "opentxs/core/Log.hpp"
 #include "opentxs/core/Nym.hpp"
 #include "opentxs/core/NymIDSource.hpp"
-#include "opentxs/core/OTData.hpp"
 #include "opentxs/core/Proto.hpp"
 #include "opentxs/core/String.hpp"
 #include "opentxs/storage/Storage.hpp"
@@ -1166,7 +1166,7 @@ bool CredentialSet::Sign(
 }
 
 bool CredentialSet::Verify(
-    const OTData& plaintext,
+    const Data& plaintext,
     const proto::Signature& sig,
     const proto::KeyRole key) const
 {
@@ -1203,7 +1203,7 @@ bool CredentialSet::Verify(const proto::Verification& item) const
 }
 
 bool CredentialSet::TransportKey(
-    OTData& publicKey,
+    Data& publicKey,
     OTPassword& privateKey) const
 {
     bool haveKey = false;

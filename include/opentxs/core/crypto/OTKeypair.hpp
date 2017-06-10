@@ -39,11 +39,11 @@
 #ifndef OPENTXS_CORE_CRYPTO_OTKEYPAIR_HPP
 #define OPENTXS_CORE_CRYPTO_OTKEYPAIR_HPP
 
-#include "opentxs/core/OTData.hpp"
-#include "opentxs/core/Proto.hpp"
-#include "opentxs/core/Types.hpp"
 #include "opentxs/core/crypto/NymParameters.hpp"
 #include "opentxs/core/crypto/OTAsymmetricKey.hpp"
+#include "opentxs/core/Data.hpp"
+#include "opentxs/core/Proto.hpp"
+#include "opentxs/core/Types.hpp"
 
 #include <cstdint>
 #include <list>
@@ -117,8 +117,8 @@ public:
     EXPORT ~OTKeypair();
 
     serializedAsymmetricKey Serialize(bool privateKey = false) const;
-    bool Verify(const OTData& plaintext, const proto::Signature& sig) const;
-    bool TransportKey(OTData& publicKey, OTPassword& privateKey) const;
+    bool Verify(const Data& plaintext, const proto::Signature& sig) const;
+    bool TransportKey(Data& publicKey, OTPassword& privateKey) const;
 
     template<class C>
     bool SignProto(

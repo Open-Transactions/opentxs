@@ -39,10 +39,10 @@
 #ifndef OPENTXS_CORE_OTINSTRUMENT_HPP
 #define OPENTXS_CORE_OTINSTRUMENT_HPP
 
-#include "opentxs/core/Contract.hpp"
-#include "opentxs/core/Identifier.hpp"
 #include "opentxs/core/script/OTScriptable.hpp"
 #include "opentxs/core/util/Common.hpp"
+#include "opentxs/core/Contract.hpp"
+#include "opentxs/core/Identifier.hpp"
 
 #include <stdint.h>
 

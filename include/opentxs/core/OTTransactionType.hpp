@@ -39,11 +39,11 @@
 #ifndef OPENTXS_CORE_OTTRANSACTIONTYPE_HPP
 #define OPENTXS_CORE_OTTRANSACTIONTYPE_HPP
 
+#include "opentxs/core/crypto/OTASCIIArmor.hpp"
 #include "opentxs/core/Contract.hpp"
 #include "opentxs/core/Identifier.hpp"
 #include "opentxs/core/NumList.hpp"
 #include "opentxs/core/Types.hpp"
-#include "opentxs/core/crypto/OTASCIIArmor.hpp"
 
 #include <stdint.h>
 
@@ -767,11 +767,11 @@ public:
     // --------------------------------------------------------
     originType GetOriginType() const; // NOTE: used for GUI display purposes only.
     void SetOriginType(originType theOriginType); // (For paymentReceipts and finalReceipts.)
-    
+
     static originType GetOriginTypeFromString(const String& strOriginType);
-    
+
     const char* GetOriginTypeString() const;
-    // --------------------------------------------------------    
+    // --------------------------------------------------------
     EXPORT int64_t GetReferenceToNum() const;
     EXPORT void SetReferenceToNum(int64_t lTransactionNum);
 

@@ -46,7 +46,7 @@
 #if OT_CRYPTO_USING_TREZOR
 #include "opentxs/core/crypto/TrezorCrypto.hpp"
 #endif
-#include "opentxs/core/OTData.hpp"
+#include "opentxs/core/Data.hpp"
 
 #include "base64/base64.h"
 
@@ -125,7 +125,7 @@ std::string CryptoEncodingEngine::DataEncode(const std::string& input) const
         input.size());
 }
 
-std::string CryptoEncodingEngine::DataEncode(const OTData& input) const
+std::string CryptoEncodingEngine::DataEncode(const Data& input) const
 {
     return Base64Encode(
         static_cast<const uint8_t*>(input.GetPointer()),
@@ -146,7 +146,7 @@ std::string CryptoEncodingEngine::DataDecode(const std::string& input) const
 }
 
 std::string CryptoEncodingEngine::IdentifierEncode(
-    const OTData& input) const
+    const Data& input) const
 {
     return base58_.Base58CheckEncode(
         static_cast<const uint8_t*>(input.GetPointer()),
@@ -188,12 +188,12 @@ bool CryptoEncodingEngine::IsBase62(const std::string& str) const
 
 String CryptoEncodingEngine::Nonce(const uint32_t size) const
 {
-    OTData unusedOutput;
+    Data unusedOutput;
 
     return Nonce(size, unusedOutput);
 }
 
-String CryptoEncodingEngine::Nonce(const uint32_t size, OTData& rawOutput) const
+String CryptoEncodingEngine::Nonce(const uint32_t size, Data& rawOutput) const
 {
     rawOutput.zeroMemory();
     rawOutput.SetSize(size);

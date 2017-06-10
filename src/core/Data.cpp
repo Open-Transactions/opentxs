@@ -38,7 +38,7 @@
 
 #include "opentxs/core/stdafx.hpp"
 
-#include "opentxs/core/OTData.hpp"
+#include "opentxs/core/Data.hpp"
 
 #include "opentxs/core/crypto/OTASCIIArmor.hpp"
 #include "opentxs/core/crypto/OTPassword.hpp"
@@ -46,64 +46,64 @@
 
 namespace opentxs
 {
-OTData::OTData(const OTASCIIArmor& source)
+Data::Data(const OTASCIIArmor& source)
 {
     if (source.Exists()) {
         source.GetData(*this);
     }
 }
 
-OTData::OTData(const void* data, std::size_t size)
+Data::Data(const void* data, std::size_t size)
     : data_(
           static_cast<const std::uint8_t*>(data),
           static_cast<const std::uint8_t*>(data) + size)
 {
 }
 
-OTData::OTData(const std::vector<unsigned char>& sourceVector)
+Data::Data(const std::vector<unsigned char>& sourceVector)
 {
     Assign(sourceVector.data(), sourceVector.size());
 }
 
-OTData::OTData(const OTData& rhs)
+Data::Data(const Data& rhs)
     : position_(rhs.position_)
 {
     Assign(rhs);
 }
 
-OTData::OTData(OTData&& rhs)
+Data::Data(Data&& rhs)
 {
     data_.swap(rhs.data_);
     position_ = rhs.position_;
     rhs.position_ = 0;
 }
 
-OTData& OTData::operator=(const OTData& rhs)
+Data& Data::operator=(const Data& rhs)
 {
     Assign(rhs);
 
     return *this;
 }
 
-OTData& OTData::operator=(OTData&& rhs)
+Data& Data::operator=(Data&& rhs)
 {
     swap(rhs);
 
     return *this;
 }
 
-bool OTData::operator==(const OTData& rhs) const { return data_ == rhs.data_; }
+bool Data::operator==(const Data& rhs) const { return data_ == rhs.data_; }
 
-bool OTData::operator!=(const OTData& rhs) const { return !operator==(rhs); }
+bool Data::operator!=(const Data& rhs) const { return !operator==(rhs); }
 
-OTData& OTData::operator+=(const OTData& rhs)
+Data& Data::operator+=(const Data& rhs)
 {
     concatenate(rhs.data_);
 
     return *this;
 }
 
-void OTData::Assign(const OTData& rhs)
+void Data::Assign(const Data& rhs)
 {
     // can't assign to self.
     if (&rhs == this) {
@@ -114,7 +114,7 @@ void OTData::Assign(const OTData& rhs)
     position_ = rhs.position_;
 }
 
-void OTData::Assign(const void* data, const std::size_t& size)
+void Data::Assign(const void* data, const std::size_t& size)
 {
     Release();
 
@@ -125,14 +125,14 @@ void OTData::Assign(const void* data, const std::size_t& size)
     }
 }
 
-void OTData::concatenate(const Vector& data)
+void Data::concatenate(const Vector& data)
 {
     for (const auto& byte : data) {
         data_.emplace_back(byte);
     }
 }
 
-void OTData::Concatenate(const void* data, const std::size_t& size)
+void Data::Concatenate(const void* data, const std::size_t& size)
 {
     OT_ASSERT(data != nullptr);
     OT_ASSERT(size > 0);
@@ -145,19 +145,19 @@ void OTData::Concatenate(const void* data, const std::size_t& size)
     concatenate(temp.data_);
 }
 
-bool OTData::empty() const { return data_.empty(); }
+bool Data::empty() const { return data_.empty(); }
 
-const void* OTData::GetPointer() const { return data_.data(); }
+const void* Data::GetPointer() const { return data_.data(); }
 
-std::size_t OTData::GetSize() const { return data_.size(); }
+std::size_t Data::GetSize() const { return data_.size(); }
 
-void OTData::Initialize()
+void Data::Initialize()
 {
     data_.empty();
     reset();
 }
 
-bool OTData::IsEmpty() const  // Deprecated.
+bool Data::IsEmpty() const  // Deprecated.
 {
     return empty();
 }
@@ -167,7 +167,7 @@ bool OTData::IsEmpty() const  // Deprecated.
 // returns how much was actually read. If you start at position 0, and read 100
 // bytes, then you are now on position 100, and the next OTfread will proceed
 // from that position. (Unless you reset().)
-std::size_t OTData::OTfread(std::uint8_t* data, const std::size_t& size)
+std::size_t Data::OTfread(std::uint8_t* data, const std::size_t& size)
 {
     OT_ASSERT(data != nullptr && size > 0);
 
@@ -190,7 +190,7 @@ std::size_t OTData::OTfread(std::uint8_t* data, const std::size_t& size)
     return sizeToRead;
 }
 
-bool OTData::Randomize(const std::size_t& size)
+bool Data::Randomize(const std::size_t& size)
 {
     SetSize(size);
 
@@ -201,15 +201,15 @@ bool OTData::Randomize(const std::size_t& size)
     return OTPassword::randomizeMemory_uint8(data_.data(), size);
 }
 
-void OTData::Release()
+void Data::Release()
 {
     zeroMemory();
     Initialize();
 }
 
-void OTData::reset() { position_ = 0; }
+void Data::reset() { position_ = 0; }
 
-void OTData::SetSize(const std::size_t& size)
+void Data::SetSize(const std::size_t& size)
 {
     Release();
 
@@ -218,15 +218,15 @@ void OTData::SetSize(const std::size_t& size)
     }
 }
 
-void OTData::swap(OTData& rhs)
+void Data::swap(Data& rhs)
 {
     std::swap(data_, rhs.data_);
     std::swap(position_, rhs.position_);
 }
 
-void OTData::swap(OTData&& rhs) { swap(rhs); }
+void Data::swap(Data&& rhs) { swap(rhs); }
 
-void OTData::zeroMemory()
+void Data::zeroMemory()
 {
     if (0 < data_.size()) {
         data_.assign(data_.size(), 0);

@@ -79,6 +79,7 @@
 #include "opentxs/core/util/OTPaths.hpp"
 #include "opentxs/core/Account.hpp"
 #include "opentxs/core/Contract.hpp"
+#include "opentxs/core/Data.hpp"
 #include "opentxs/core/Identifier.hpp"
 #include "opentxs/core/Item.hpp"
 #include "opentxs/core/Ledger.hpp"
@@ -87,7 +88,6 @@
 #include "opentxs/core/NumList.hpp"
 #include "opentxs/core/Nym.hpp"
 #include "opentxs/core/NymIDSource.hpp"
-#include "opentxs/core/OTData.hpp"
 #include "opentxs/core/OTTransaction.hpp"
 #include "opentxs/core/String.hpp"
 #include "opentxs/core/Types.hpp"
@@ -1229,7 +1229,7 @@ bool OTAPI_Exec::SetClaim(
 
     // ------------------------------
     const auto item = proto::DataToProto<proto::ContactItem>(
-        OTData(claim.c_str(), claim.length()));
+        Data(claim.c_str(), claim.length()));
     std::set<std::uint32_t> attribute;
 
     for (const auto& it : item.attribute()) {
@@ -1539,7 +1539,7 @@ std::string OTAPI_Exec::GetServer_Contract(const std::string& NOTARY_ID)
         return "";
     }
 
-    OTData serialized = pServer->Serialize();
+    Data serialized = pServer->Serialize();
     OTASCIIArmor armored(serialized);
     String strOutput;
     armored.WriteArmoredString(strOutput, "SERVER CONTRACT");

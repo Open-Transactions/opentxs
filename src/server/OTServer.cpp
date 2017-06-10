@@ -469,7 +469,7 @@ void OTServer::CreateMainFile(
     }
 
     newNym.reset();
-    const OTData signedContract =
+    const Data signedContract =
         proto::ProtoAsData<proto::ServerContract>(pContract->PublicContract());
     OTASCIIArmor ascContract(signedContract);
     opentxs::String strBookended;

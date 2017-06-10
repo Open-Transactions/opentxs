@@ -137,12 +137,12 @@ private:
 
 #if OT_CRYPTO_SUPPORTED_KEY_SECP256K1
     bool ECDH(
-        const OTData& publicKey,
+        const Data& publicKey,
         const OTPassword& privateKey,
         OTPassword& secret) const override;
     bool ScalarBaseMultiply(
         const OTPassword& privateKey,
-        OTData& publicKey) const override;
+        Data& publicKey) const override;
 #endif
 
 #if OT_CRYPTO_WITH_BIP32
@@ -162,7 +162,7 @@ public:
         proto::HDPath& path) const override;
     bool RandomKeypair(
         OTPassword& privateKey,
-        OTData& publicKey) const override;
+        Data& publicKey) const override;
     std::string SeedToFingerprint(
         const EcdsaCurve& curve,
         const OTPassword& seed) const override;

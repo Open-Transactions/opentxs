@@ -75,8 +75,8 @@
 #include "opentxs/core/crypto/OTASCIIArmor.hpp"
 #include "opentxs/core/crypto/VerificationCredential.hpp"
 #include "opentxs/core/util/Assert.hpp"
+#include "opentxs/core/Data.hpp"
 #include "opentxs/core/Identifier.hpp"
-#include "opentxs/core/OTData.hpp"
 #include "opentxs/core/Proto.hpp"
 #include "opentxs/core/String.hpp"
 
@@ -352,7 +352,7 @@ Identifier Credential::GetID(const Lock& lock) const
         idVersion->clear_id();
     }
 
-    OTData serializedData = proto::ProtoAsData<proto::Credential>(*idVersion);
+    Data serializedData = proto::ProtoAsData<proto::Credential>(*idVersion);
     Identifier id;
 
     if (!id.CalculateDigest(serializedData)) {
@@ -510,7 +510,7 @@ bool Credential::Save() const
     return true;
 }
 
-OTData Credential::Serialize() const
+Data Credential::Serialize() const
 {
     serializedCredential serialized = Serialized(
         Private() ? AS_PRIVATE : AS_PUBLIC,
@@ -522,7 +522,7 @@ OTData Credential::Serialize() const
 std::string Credential::asString(const bool asPrivate) const
 {
     serializedCredential credenial;
-    OTData dataCredential;
+    Data dataCredential;
     String stringCredential;
 
     credenial = Serialized(asPrivate, WITH_SIGNATURES);
@@ -549,7 +549,7 @@ serializedCredential Credential::ExtractArmoredCredential(
 serializedCredential Credential::ExtractArmoredCredential(
     const OTASCIIArmor& armoredCredential)
 {
-    OTData dataCredential(armoredCredential);
+    Data dataCredential(armoredCredential);
 
     serializedCredential serializedCred = std::make_shared<proto::Credential>();
 
@@ -624,7 +624,7 @@ bool Credential::GetVerificationSet(
 
 /** Override this method for credentials capable of verifying signatures */
 bool Credential::Verify(
-    const OTData&,
+    const Data&,
     const proto::Signature&,
     const proto::KeyRole) const
 {
@@ -647,7 +647,7 @@ bool Credential::Verify(
 }
 
 /** Override this method for credentials capable of deriving transport keys */
-bool Credential::TransportKey(OTData&, OTPassword&) const
+bool Credential::TransportKey(Data&, OTPassword&) const
 {
     OT_ASSERT_MSG(false, "This method was called on the wrong credential.");
 

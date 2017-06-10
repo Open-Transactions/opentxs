@@ -50,9 +50,9 @@
 #include "opentxs/core/crypto/OTPassword.hpp"
 #include "opentxs/core/crypto/OTPasswordData.hpp"
 #include "opentxs/core/util/Assert.hpp"
+#include "opentxs/core/Data.hpp"
 #include "opentxs/core/Identifier.hpp"
 #include "opentxs/core/Log.hpp"
-#include "opentxs/core/OTData.hpp"
 #include "opentxs/core/String.hpp"
 
 extern "C" {
@@ -106,7 +106,7 @@ bool OTSymmetricKey::ChangePassphrase(const OTPassword& oldPassphrase,
 
     if (!GetRawKeyFromPassphrase(oldPassphrase, theActualKey)) return false;
 
-    OTData dataIV, dataSalt;
+    Data dataIV, dataSalt;
 
     // NOTE: I can't randomize the IV because then anything that was
     // encrypted with this key before, will fail to decrypt. (Ruining
@@ -159,7 +159,7 @@ bool OTSymmetricKey::ChangePassphrase(const OTPassword& oldPassphrase,
     //
     // Encrypt theActualKey using pNewDerivedKey, which is clear/raw already.
     // (Both are OTPasswords.)
-    // Put the result into the OTData m_dataEncryptedKey.
+    // Put the result into the Data m_dataEncryptedKey.
     //
     const bool bEncryptedKey = OT::App().Crypto().AES().Encrypt(
         *pNewDerivedKey, // pNewDerivedKey is a symmetric key, in clear form.
@@ -259,7 +259,7 @@ bool OTSymmetricKey::GenerateKey(const OTPassword& thePassphrase,
     //
     // Encrypt theActualKey using pDerivedKey, which is clear/raw already. (Both
     // are OTPasswords.)
-    // Put the result into the OTData m_dataEncryptedKey.
+    // Put the result into the Data m_dataEncryptedKey.
     //
     const bool bEncryptedKey = OT::App().Crypto().AES().Encrypt(
         *pDerivedKey, // pDerivedKey is a symmetric key, in clear form. Used for
@@ -367,7 +367,7 @@ bool OTSymmetricKey::GenerateHashCheck(const OTPassword& thePassphrase)
 OTPassword* OTSymmetricKey::CalculateDerivedKeyFromPassphrase(
     const OTPassword& thePassphrase, bool bCheckForHashCheck /*= true*/) const
 {
-    OTData tmpDataHashCheck = m_dataHashCheck;
+    Data tmpDataHashCheck = m_dataHashCheck;
 
     if (bCheckForHashCheck) {
         if (!HasHashCheck()) {
@@ -484,7 +484,7 @@ bool OTSymmetricKey::GetRawKeyFromDerivedKey(const OTPassword& theDerivedKey,
         m_dataIV, // Created when *this symmetric key was generated. Both are
                   // already stored.
         plaintext); // OUTPUT. (Recovered plaintext of symmetric key.) You
-                          // can pass OTPassword& OR OTData& here (either
+                          // can pass OTPassword& OR Data& here (either
                           // will work.)
 
     otInfo << szFunc
@@ -795,7 +795,7 @@ bool OTSymmetricKey::SerializeFrom(const String& strInput, bool bEscaped)
 
 bool OTSymmetricKey::SerializeTo(OTASCIIArmor& ascOutput) const
 {
-    OTData theOutput;
+    Data theOutput;
 
     if (SerializeTo(theOutput)) {
         ascOutput.SetData(theOutput);
@@ -807,7 +807,7 @@ bool OTSymmetricKey::SerializeTo(OTASCIIArmor& ascOutput) const
 
 bool OTSymmetricKey::SerializeFrom(const OTASCIIArmor& ascInput)
 {
-    OTData theInput;
+    Data theInput;
 
     if (ascInput.Exists() && ascInput.GetData(theInput)) {
         return SerializeFrom(theInput);
@@ -815,7 +815,7 @@ bool OTSymmetricKey::SerializeFrom(const OTASCIIArmor& ascInput)
     return false;
 }
 
-bool OTSymmetricKey::SerializeTo(OTData& theOutput) const
+bool OTSymmetricKey::SerializeTo(Data& theOutput) const
 {
 
     uint16_t from_bool_is_generated = (m_bIsGenerated ? 1 : 0);
@@ -886,7 +886,7 @@ bool OTSymmetricKey::SerializeTo(OTData& theOutput) const
 // position, and let the CALLER reset first, if that's his
 // intention.
 //
-bool OTSymmetricKey::SerializeFrom(OTData& theInput)
+bool OTSymmetricKey::SerializeFrom(Data& theInput)
 {
     const char* szFunc = "OTSymmetricKey::SerializeFrom";
 

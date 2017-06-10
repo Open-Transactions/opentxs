@@ -39,11 +39,11 @@
 #ifndef OPENTXS_API_EDITOR_HPP
 #define OPENTXS_API_EDITOR_HPP
 
+#include "opentxs/core/Log.hpp"
+
 #include <functional>
 #include <memory>
 #include <mutex>
-
-#include "opentxs/core/Log.hpp"
 
 namespace opentxs
 {

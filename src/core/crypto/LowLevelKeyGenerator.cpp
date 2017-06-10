@@ -66,7 +66,7 @@
 #endif
 #include "opentxs/core/util/Assert.hpp"
 #if OT_CRYPTO_SUPPORTED_KEY_SECP256K1
-#include "opentxs/core/OTData.hpp"
+#include "opentxs/core/Data.hpp"
 #endif
 #include "opentxs/core/Log.hpp"
 #include "opentxs/core/Types.hpp"
@@ -90,7 +90,7 @@ class LowLevelKeyGenerator::LowLevelKeyGeneratorECdp
 {
 public:
     OTPassword privateKey_;
-    std::unique_ptr<OTData> publicKey_;
+    std::unique_ptr<Data> publicKey_;
 
     LowLevelKeyGeneratorECdp();
     virtual void Cleanup();
@@ -177,7 +177,7 @@ void LowLevelKeyGenerator::LowLevelKeyGeneratorOpenSSLdp::Cleanup()
 LowLevelKeyGenerator::LowLevelKeyGeneratorECdp::
     LowLevelKeyGeneratorECdp()
 {
-    publicKey_.reset(new OTData);
+    publicKey_.reset(new Data);
 }
 
 void LowLevelKeyGenerator::LowLevelKeyGeneratorECdp::Cleanup()

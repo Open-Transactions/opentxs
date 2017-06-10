@@ -49,8 +49,8 @@
 #include "opentxs/core/crypto/OTPasswordData.hpp"
 #include "opentxs/core/crypto/SymmetricKey.hpp"
 #include "opentxs/core/util/Assert.hpp"
+#include "opentxs/core/Data.hpp"
 #include "opentxs/core/Log.hpp"
-#include "opentxs/core/OTData.hpp"
 #include "opentxs/storage/Storage.hpp"
 
 #include <memory>
@@ -139,7 +139,7 @@ std::string Bip39::SaveSeed(
     auto& encryptedPassphrase = *serialized.mutable_passphrase();
     serialized.set_fingerprint(fingerprint);
 
-    OTData empty;
+    Data empty;
 
     const bool haveWords = key->Encrypt(
         words,

@@ -39,7 +39,7 @@
 #ifndef OPENTXS_CORE_OTIDENTIFIER_HPP
 #define OPENTXS_CORE_OTIDENTIFIER_HPP
 
-#include "opentxs/core/OTData.hpp"
+#include "opentxs/core/Data.hpp"
 #include "opentxs/core/Proto.hpp"
 #include "opentxs/core/Types.hpp"
 
@@ -57,10 +57,10 @@ class OTCachedKey;
 class OTSymmetricKey;
 class String;
 
-class Identifier : public OTData
+class Identifier : public Data
 {
 private:
-    typedef OTData ot_super;
+    typedef Data ot_super;
 
     static const ID DefaultType{ID::BLAKE2B};
     static const size_t MinimumSize{10};
@@ -95,7 +95,7 @@ public:
     EXPORT void GetString(String& theStr) const;
 
     EXPORT bool CalculateDigest(
-        const OTData& dataInput,
+        const Data& dataInput,
         const ID type = DefaultType);
     EXPORT bool CalculateDigest(
         const String& strInput,

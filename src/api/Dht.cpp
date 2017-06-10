@@ -203,7 +203,7 @@ bool Dht::ProcessPublicNym(
         if (0 == data.size()) { continue; }
 
         auto publicNym = proto::DataToProto<proto::CredentialIndex>(
-            OTData(data.c_str(), data.size()));
+            Data(data.c_str(), data.size()));
 
         if (key != publicNym.nymid()) { continue; }
 
@@ -259,7 +259,7 @@ bool Dht::ProcessServerContract(
         if (0 == data.size()) { continue; }
 
         auto contract = proto::DataToProto<proto::ServerContract>(
-            OTData(data.c_str(), data.size()));
+            Data(data.c_str(), data.size()));
 
         if (key != contract.id()) { continue; }
 
@@ -309,7 +309,7 @@ bool Dht::ProcessUnitDefinition(
         if (0 == data.size()) { continue; }
 
         auto contract = proto::DataToProto<proto::UnitDefinition>(
-            OTData(data.c_str(), data.size()));
+            Data(data.c_str(), data.size()));
 
         if (key != contract.id()) { continue; }
 

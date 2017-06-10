@@ -53,7 +53,7 @@ class OTPassword;
 class OTPasswordData;
 class Nym;
 class String;
-class OTData;
+class Data;
 class OTSymmetricKey;
 class Letter;
 class SymmetricKey;
@@ -65,7 +65,7 @@ class OTEnvelope
 {
 private:
     friend Letter;
-    std::unique_ptr<OTData> ciphertext_;
+    std::unique_ptr<Data> ciphertext_;
 
 public:
     EXPORT OTEnvelope() = default;

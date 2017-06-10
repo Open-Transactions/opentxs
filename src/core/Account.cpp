@@ -48,13 +48,13 @@
 #include "opentxs/core/util/OTPaths.hpp"
 #include "opentxs/core/util/Tag.hpp"
 #include "opentxs/core/Contract.hpp"
+#include "opentxs/core/Data.hpp"
 #include "opentxs/core/Helpers.hpp"
 #include "opentxs/core/Identifier.hpp"
 #include "opentxs/core/Ledger.hpp"
 #include "opentxs/core/Log.hpp"
 #include "opentxs/core/Message.hpp"
 #include "opentxs/core/Nym.hpp"
-#include "opentxs/core/OTData.hpp"
 #include "opentxs/core/OTStorage.hpp"
 #include "opentxs/core/OTStringXML.hpp"
 #include "opentxs/core/OTTransactionType.hpp"
@@ -487,7 +487,7 @@ bool Account::GenerateNewAccount(
     int64_t stashTransNum)
 {
     // First we generate a secure random number into a binary object...
-    OTData payload;
+    Data payload;
     // TODO: hardcoding. Plus: is 100 bytes of random a little much here?
     if (!payload.Randomize(100)) {
         otErr << __FUNCTION__ << ": Failed trying to acquire random numbers.\n";

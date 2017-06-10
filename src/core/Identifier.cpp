@@ -49,8 +49,8 @@
 #include "opentxs/core/crypto/OTSymmetricKey.hpp"
 #include "opentxs/core/util/Assert.hpp"
 #include "opentxs/core/Contract.hpp"
+#include "opentxs/core/Data.hpp"
 #include "opentxs/core/Nym.hpp"
-#include "opentxs/core/OTData.hpp"
 #include "opentxs/core/String.hpp"
 
 namespace opentxs
@@ -195,7 +195,7 @@ bool Identifier::CalculateDigest(const String& strInput, const ID type)
         *this);
 }
 
-bool Identifier::CalculateDigest(const OTData& dataInput, const ID type)
+bool Identifier::CalculateDigest(const Data& dataInput, const ID type)
 {
     type_ = type;
 
@@ -247,7 +247,7 @@ void Identifier::SetString(const std::string& encoded)
 // Just call this function.
 void Identifier::GetString(String& id) const
 {
-    OTData data;
+    Data data;
     data.Assign(&type_, sizeof(type_));
 
     OT_ASSERT(1 == data.GetSize());

@@ -51,7 +51,7 @@ namespace opentxs
 
 class CryptoEncoding;
 class CryptoEngine;
-class OTData;
+class Data;
 class OTPassword;
 
 class CryptoEncodingEngine
@@ -85,13 +85,13 @@ public:
     static std::string SanatizeBase64(const std::string& input);
 
     std::string DataEncode(const std::string& input) const;
-    std::string DataEncode(const OTData& input) const;
+    std::string DataEncode(const Data& input) const;
     std::string DataDecode(const std::string& input) const;
-    std::string IdentifierEncode(const OTData& input) const;
+    std::string IdentifierEncode(const Data& input) const;
     std::string IdentifierDecode(const std::string& input) const;
     bool IsBase62(const std::string& str) const;
     String Nonce(const uint32_t size) const;
-    String Nonce(const uint32_t size, OTData& rawOutput) const;
+    String Nonce(const uint32_t size, Data& rawOutput) const;
     std::string RandomFilename() const;
 
     ~CryptoEncodingEngine() = default;

@@ -87,6 +87,7 @@ set(cxx-sources
   AccountList.cpp
   Cheque.cpp
   Contract.cpp
+  Data.cpp
   Identifier.cpp
   Instrument.cpp
   Item.cpp
@@ -96,7 +97,6 @@ set(cxx-sources
   NumList.cpp
   Nym.cpp
   NymIDSource.cpp
-  OTData.cpp
   OTStorage.cpp
   OTStringXML.cpp
   OTTrackable.cpp

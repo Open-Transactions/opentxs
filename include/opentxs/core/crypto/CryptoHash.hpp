@@ -46,7 +46,7 @@
 namespace opentxs
 {
 
-class OTData;
+class Data;
 class OTPassword;
 class String;
 

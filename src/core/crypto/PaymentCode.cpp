@@ -56,9 +56,9 @@
 #include "opentxs/core/crypto/OTPasswordData.hpp"
 #include "opentxs/core/crypto/SymmetricKey.hpp"
 #include "opentxs/core/util/Assert.hpp"
+#include "opentxs/core/Data.hpp"
 #include "opentxs/core/Identifier.hpp"
 #include "opentxs/core/Log.hpp"
-#include "opentxs/core/OTData.hpp"
 #include "opentxs/core/Proto.hpp"
 #include "opentxs/core/String.hpp"
 #include "opentxs/core/Types.hpp"
@@ -88,7 +88,7 @@ PaymentCode::PaymentCode(const std::string& base58)
             hasBitmessage_ = true;
         }
 
-        OTData key(&rawCode[3], 33);
+        Data key(&rawCode[3], 33);
 
         OT_ASSERT(chain_code_);
 
@@ -119,7 +119,7 @@ PaymentCode::PaymentCode(const proto::PaymentCode& paycode)
     chain_code_->setMemory(
         paycode.chaincode().c_str(), paycode.chaincode().size());
 
-    OTData key(paycode.key().c_str(), paycode.key().size());
+    Data key(paycode.key().c_str(), paycode.key().size());
     ConstructKey(key);
 
     if (paycode.has_bitmessageversion()) {
@@ -166,7 +166,7 @@ PaymentCode::PaymentCode(
 #endif
 
         if (haveKey) {
-            OTData pubkey(key.key().c_str(), key.key().size());
+            Data pubkey(key.key().c_str(), key.key().size());
             ConstructKey(pubkey);
         }
     }
@@ -176,15 +176,15 @@ bool PaymentCode::operator==(const proto::PaymentCode& rhs) const
 {
     SerializedPaymentCode tempPaycode = Serialize();
 
-    OTData LHData = proto::ProtoAsData<proto::PaymentCode>(*tempPaycode);
-    OTData RHData = proto::ProtoAsData<proto::PaymentCode>(rhs);
+    Data LHData = proto::ProtoAsData<proto::PaymentCode>(*tempPaycode);
+    Data RHData = proto::ProtoAsData<proto::PaymentCode>(rhs);
 
     return (LHData == RHData);
 }
 
-const OTData PaymentCode::Pubkey() const
+const Data PaymentCode::Pubkey() const
 {
-    OTData pubkey;
+    Data pubkey;
     pubkey.SetSize(33);
 
     if (pubkey_) {
@@ -203,7 +203,7 @@ const std::string PaymentCode::asBase58() const
 {
     OT_ASSERT(chain_code_);
 
-    OTData pubkey = Pubkey();
+    Data pubkey = Pubkey();
     std::array<std::uint8_t, 81> serialized{};
     serialized[0] = PaymentCode::BIP47_VERSION_BYTE;
     serialized[1] = version_;
@@ -218,7 +218,7 @@ const std::string PaymentCode::asBase58() const
         false);
     serialized[68] = bitmessage_version_;
     serialized[69] = bitmessage_stream_;
-    OTData binaryVersion(serialized.data(), serialized.size());
+    Data binaryVersion(serialized.data(), serialized.size());
 
     return OT::App().Crypto().Encode().IdentifierEncode(binaryVersion);
 }
@@ -229,7 +229,7 @@ SerializedPaymentCode PaymentCode::Serialize() const
     serialized->set_version(version_);
 
     if (pubkey_) {
-        OTData pubkey = Pubkey();
+        Data pubkey = Pubkey();
         serialized->set_key(pubkey.GetPointer(), pubkey.GetSize());
     }
 
@@ -248,7 +248,7 @@ const Identifier PaymentCode::ID() const
 
     std::uint8_t core[65]{};
 
-    OTData pubkey = Pubkey();
+    Data pubkey = Pubkey();
     OTPassword::safe_memcpy(
         &core[0], 33, pubkey.GetPointer(), pubkey.GetSize(), false);
     if (chain_code_) {
@@ -262,7 +262,7 @@ const Identifier PaymentCode::ID() const
         }
     }
 
-    OTData dataVersion(core, sizeof(core));
+    Data dataVersion(core, sizeof(core));
 
     Identifier paymentCodeID;
 
@@ -346,7 +346,7 @@ bool PaymentCode::Sign(
         return false;
     }
 
-    OTData existingKeyData, compareKeyData;
+    Data existingKeyData, compareKeyData;
     proto::AsymmetricKey compareKey;
 #if OT_CRYPTO_USING_LIBSECP256K1
     const bool haveKey =
@@ -386,7 +386,7 @@ bool PaymentCode::Sign(
     return goodSig;
 }
 
-void PaymentCode::ConstructKey(const OTData& pubkey)
+void PaymentCode::ConstructKey(const Data& pubkey)
 {
     proto::AsymmetricKey newKey;
     newKey.set_version(1);

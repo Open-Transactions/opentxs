@@ -425,7 +425,7 @@ public:
     std::unique_ptr<proto::VerificationSet> VerificationSet() const;
     bool SetVerificationSet(const proto::VerificationSet& data);
 
-    bool Verify(const OTData& plaintext, const proto::Signature& sig) const;
+    bool Verify(const Data& plaintext, const proto::Signature& sig) const;
     zcert_t* TransportKey() const;
 
     template<class T>

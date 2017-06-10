@@ -39,8 +39,8 @@
 #ifndef OPENTXS_CORE_BASKET_BASKETCONTRACT_HPP
 #define OPENTXS_CORE_BASKET_BASKETCONTRACT_HPP
 
-#include "opentxs/core/Identifier.hpp"
 #include "opentxs/core/contract/UnitDefinition.hpp"
+#include "opentxs/core/Identifier.hpp"
 
 namespace opentxs
 {

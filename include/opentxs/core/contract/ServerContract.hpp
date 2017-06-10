@@ -53,7 +53,7 @@
 namespace opentxs
 {
 
-class OTData;
+class Data;
 class String;
 
 class ServerContract : public Signable
@@ -72,7 +72,7 @@ private:
 
     std::list<Endpoint> listen_params_;
     std::string name_;
-    OTData transport_key_;
+    Data transport_key_;
 
     proto::ServerContract contract(const Lock& lock) const;
     Identifier GetID(const Lock& lock) const override;
@@ -112,7 +112,7 @@ public:
     zcert_t* PrivateTransportKey() const;
 
     std::string Name() const override { return name_; }
-    OTData Serialize() const override;
+    Data Serialize() const override;
 
     void SetAlias(const std::string& alias) override;
 

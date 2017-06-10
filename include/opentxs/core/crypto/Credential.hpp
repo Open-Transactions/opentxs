@@ -41,8 +41,8 @@
 
 #include "opentxs/core/contract/Signable.hpp"
 #include "opentxs/core/crypto/OTASCIIArmor.hpp"
+#include "opentxs/core/Data.hpp"
 #include "opentxs/core/Log.hpp"
-#include "opentxs/core/OTData.hpp"
 #include "opentxs/core/Proto.hpp"
 #include "opentxs/core/String.hpp"
 #include "opentxs/core/Types.hpp"
@@ -193,7 +193,7 @@ public:
 
     virtual void ReleaseSignatures(const bool onlyPrivate);
     virtual bool Save() const;
-    OTData Serialize() const override;
+    Data Serialize() const override;
 
     virtual bool GetContactData(
         std::unique_ptr<proto::ContactData>& contactData) const;
@@ -202,7 +202,7 @@ public:
 
     bool Validate() const;
     virtual bool Verify(
-        const OTData& plaintext,
+        const Data& plaintext,
         const proto::Signature& sig,
         const proto::KeyRole key = proto::KEYROLE_SIGN) const;
     virtual bool Verify(
@@ -210,7 +210,7 @@ public:
         const proto::CredentialRole& role,
         const Identifier& masterID,
         const proto::Signature& masterSig) const;
-    virtual bool TransportKey(OTData& publicKey, OTPassword& privateKey) const;
+    virtual bool TransportKey(Data& publicKey, OTPassword& privateKey) const;
 
     virtual ~Credential() = default;
 };

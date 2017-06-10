@@ -3,7 +3,7 @@
 set(name unittests-opentxs)
 
 set(cxx-sources
-  Test_OTData.cpp
+  Test_Data.cpp
 )
 
 include_directories(

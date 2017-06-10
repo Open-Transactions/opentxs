@@ -45,8 +45,8 @@
 #include "opentxs/core/crypto/CryptoEngine.hpp"
 #include "opentxs/core/crypto/OTEnvelope.hpp"
 #include "opentxs/core/util/Assert.hpp"
+#include "opentxs/core/Data.hpp"
 #include "opentxs/core/Log.hpp"
-#include "opentxs/core/OTData.hpp"
 #include "opentxs/core/OTStorage.hpp"
 #include "opentxs/core/String.hpp"
 
@@ -132,7 +132,7 @@ OTASCIIArmor::OTASCIIArmor(const String& strValue)
 }
 
 // encodes
-OTASCIIArmor::OTASCIIArmor(const OTData& theValue)
+OTASCIIArmor::OTASCIIArmor(const Data& theValue)
     : String()
 {
     SetData(theValue);
@@ -175,7 +175,7 @@ OTASCIIArmor& OTASCIIArmor::operator=(const String& strValue)
 }
 
 // encodes
-OTASCIIArmor& OTASCIIArmor::operator=(const OTData& theValue)
+OTASCIIArmor& OTASCIIArmor::operator=(const Data& theValue)
 {
     SetData(theValue);
     return *this;
@@ -281,7 +281,7 @@ std::string OTASCIIArmor::decompress_string(const std::string& str) const
 
 // Base64-decode
 bool OTASCIIArmor::GetData(
-    OTData& theData,
+    Data& theData,
     bool bLineBreaks) const  // linebreaks=true
 {
     theData.Release();
@@ -297,7 +297,7 @@ bool OTASCIIArmor::GetData(
 }
 
 // Base64-encode
-bool OTASCIIArmor::SetData(const OTData& theData, bool bLineBreaks)
+bool OTASCIIArmor::SetData(const Data& theData, bool bLineBreaks)
 {
     Release();
 

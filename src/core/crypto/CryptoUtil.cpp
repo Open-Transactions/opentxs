@@ -42,7 +42,7 @@
 
 #include "opentxs/core/crypto/OTPassword.hpp"
 #include "opentxs/core/util/Assert.hpp"
-#include "opentxs/core/OTData.hpp"
+#include "opentxs/core/Data.hpp"
 #include "opentxs/core/String.hpp"
 
 #include <cstdint>

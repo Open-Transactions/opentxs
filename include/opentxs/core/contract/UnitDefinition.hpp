@@ -39,12 +39,12 @@
 #ifndef OPENTXS_CORE_OTASSETCONTRACT_HPP
 #define OPENTXS_CORE_OTASSETCONTRACT_HPP
 
+#include "opentxs/core/contract/Signable.hpp"
 #include "opentxs/core/Contract.hpp"
+#include "opentxs/core/Data.hpp"
 #include "opentxs/core/Nym.hpp"
-#include "opentxs/core/OTData.hpp"
 #include "opentxs/core/Proto.hpp"
 #include "opentxs/core/String.hpp"
-#include "opentxs/core/contract/Signable.hpp"
 
 #include <stdint.h>
 #include <string>
@@ -168,7 +168,7 @@ public:
                                      const std::string& str_input,
                                      const std::string& str_thousand,
                                      const std::string& str_decimal) const;
-    EXPORT OTData Serialize() const override;
+    EXPORT Data Serialize() const override;
     EXPORT std::string Name() const override { return short_name_; }
     EXPORT proto::UnitDefinition PublicContract() const;
     EXPORT virtual int32_t DecimalPower() const { return 0; }

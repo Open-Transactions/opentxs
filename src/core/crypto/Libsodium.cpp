@@ -47,8 +47,8 @@
 #include "opentxs/core/crypto/OTAsymmetricKey.hpp"
 #include "opentxs/core/crypto/OTPassword.hpp"
 #include "opentxs/core/crypto/OTPasswordData.hpp"
+#include "opentxs/core/Data.hpp"
 #include "opentxs/core/Log.hpp"
-#include "opentxs/core/OTData.hpp"
 
 #include <array>
 
@@ -185,11 +185,11 @@ bool Libsodium::Digest(
 }
 
 bool Libsodium::ECDH(
-    const OTData& publicKey,
+    const Data& publicKey,
     const OTPassword& seed,
     OTPassword& secret) const
 {
-    OTData notUsed;
+    Data notUsed;
     OTPassword curvePrivate;
 
     if (!SeedToCurveKey(seed, curvePrivate, notUsed)) {
@@ -200,7 +200,7 @@ bool Libsodium::ECDH(
     }
 
     std::array<unsigned char, crypto_scalarmult_curve25519_BYTES> blank{};
-    OTData curvePublic(blank.data(), blank.size());
+    Data curvePublic(blank.data(), blank.size());
     secret.setMemory(blank.data(), blank.size());
     const bool havePublic = crypto_sign_ed25519_pk_to_curve25519(
         static_cast<unsigned char*>(
@@ -294,7 +294,7 @@ bool Libsodium::Encrypt(
 bool Libsodium::ExpandSeed(
     const OTPassword& seed,
     OTPassword& privateKey,
-    OTData& publicKey) const
+    Data& publicKey) const
 {
     if (!seed.isMemory()) {
         return false;
@@ -397,7 +397,7 @@ std::size_t Libsodium::KeySize(const proto::SymmetricMode mode) const
     return 0;
 }
 
-bool Libsodium::RandomKeypair(OTPassword& privateKey, OTData& publicKey) const
+bool Libsodium::RandomKeypair(OTPassword& privateKey, Data& publicKey) const
 {
     OTPassword notUsed;
     privateKey.randomizeMemory(crypto_sign_SEEDBYTES);
@@ -421,7 +421,7 @@ std::size_t Libsodium::SaltSize(const proto::SymmetricKeyType type) const
     return 0;
 }
 
-bool Libsodium::ScalarBaseMultiply(const OTPassword& seed, OTData& publicKey)
+bool Libsodium::ScalarBaseMultiply(const OTPassword& seed, Data& publicKey)
     const
 {
     OTPassword notUsed;
@@ -432,9 +432,9 @@ bool Libsodium::ScalarBaseMultiply(const OTPassword& seed, OTData& publicKey)
 bool Libsodium::SeedToCurveKey(
     const OTPassword& seed,
     OTPassword& privateKey,
-    OTData& publicKey) const
+    Data& publicKey) const
 {
-    OTData intermediatePublic;
+    Data intermediatePublic;
     OTPassword intermediatePrivate;
 
     if (!ExpandSeed(seed, intermediatePrivate, intermediatePublic)) {
@@ -479,10 +479,10 @@ bool Libsodium::SeedToCurveKey(
 }
 
 bool Libsodium::Sign(
-    const OTData& plaintext,
+    const Data& plaintext,
     const OTAsymmetricKey& theKey,
     const proto::HashType hashType,
-    OTData& signature,
+    Data& signature,
     const OTPasswordData* pPWData,
     const OTPassword* exportPassword) const
 {
@@ -522,7 +522,7 @@ bool Libsodium::Sign(
         return false;
     }
 
-    OTData notUsed;
+    Data notUsed;
     OTPassword privKey;
     const bool keyExpanded = ExpandSeed(seed, privKey, notUsed);
 
@@ -569,9 +569,9 @@ std::size_t Libsodium::TagSize(const proto::SymmetricMode mode) const
 }
 
 bool Libsodium::Verify(
-    const OTData& plaintext,
+    const Data& plaintext,
     const OTAsymmetricKey& theKey,
-    const OTData& signature,
+    const Data& signature,
     const proto::HashType hashType,
     __attribute__((unused)) const OTPasswordData* pPWData) const
 {
@@ -589,7 +589,7 @@ bool Libsodium::Verify(
         return false;
     }
 
-    OTData pubkey;
+    Data pubkey;
     const bool havePublicKey = AsymmetricKeyToECPubkey(*key, pubkey);
 
     if (!havePublicKey) {

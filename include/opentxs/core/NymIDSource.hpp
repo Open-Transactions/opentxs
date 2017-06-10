@@ -43,7 +43,7 @@
 #include "opentxs/core/crypto/PaymentCode.hpp"
 #endif
 #include "opentxs/core/Identifier.hpp"
-#include "opentxs/core/OTData.hpp"
+#include "opentxs/core/Data.hpp"
 #include "opentxs/core/Proto.hpp"
 #include "opentxs/core/String.hpp"
 
@@ -71,7 +71,7 @@ private:
     std::shared_ptr<PaymentCode> payment_code_;
 #endif
 
-    OTData asData() const;
+    Data asData() const;
 
     static std::unique_ptr<proto::AsymmetricKey> ExtractKey(
         const proto::Credential& credential,

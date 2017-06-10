@@ -101,7 +101,7 @@ PeerRequest::PeerRequest(
     auto random = OT::App().Crypto().AES().InstantiateBinarySecretSP();
     random->randomizeMemory(32);
     cookie_.CalculateDigest(
-        OTData(random->getMemory(), random->getMemorySize()));
+        Data(random->getMemory(), random->getMemorySize()));
 }
 
 PeerRequest::PeerRequest(
@@ -119,7 +119,7 @@ PeerRequest::PeerRequest(
     auto random = OT::App().Crypto().AES().InstantiateBinarySecretSP();
     random->randomizeMemory(32);
     cookie_.CalculateDigest(
-        OTData(random->getMemory(), random->getMemorySize()));
+        Data(random->getMemory(), random->getMemorySize()));
 }
 
 proto::PeerRequest PeerRequest::contract(const Lock& lock) const
@@ -438,7 +438,7 @@ std::string PeerRequest::Name() const
     return String(id_).Get();
 }
 
-OTData PeerRequest::Serialize() const
+Data PeerRequest::Serialize() const
 {
     Lock lock(lock_);
 

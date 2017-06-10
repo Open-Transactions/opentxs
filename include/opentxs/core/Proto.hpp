@@ -44,9 +44,9 @@
 #include <opentxs-proto/Check.hpp>
 // IWYU pragma: end_exports
 
-#include "opentxs/core/OTData.hpp"
 #include "opentxs/core/crypto/OTASCIIArmor.hpp"
 #include "opentxs/core/util/Assert.hpp"
+#include "opentxs/core/Data.hpp"
 
 #include <iostream>
 
@@ -55,7 +55,7 @@ namespace opentxs
 namespace proto
 {
 template<class T>
-OTData ProtoAsData(const T& serialized)
+Data ProtoAsData(const T& serialized)
 {
     auto size = serialized.ByteSize();
     char* protoArray = new char [size];
@@ -63,7 +63,7 @@ OTData ProtoAsData(const T& serialized)
     OT_ASSERT_MSG(nullptr != protoArray, "protoArray failed to dynamically allocate.");
 
     serialized.SerializeToArray(protoArray, size);
-    OTData serializedData(protoArray, size);
+    Data serializedData(protoArray, size);
     delete[] protoArray;
     return serializedData;
 }
@@ -109,7 +109,7 @@ T TextToProto(const std::string& input)
 }
 
 template<class T>
-T DataToProto(const OTData& input)
+T DataToProto(const Data& input)
 {
     return RawToProto<T>(
         static_cast<const char*>(input.GetPointer()),
@@ -129,7 +129,7 @@ T StringToProto(const String& input)
         return T();
     } else {
 
-        return DataToProto<T>(OTData(armored));
+        return DataToProto<T>(Data(armored));
     }
 }
 

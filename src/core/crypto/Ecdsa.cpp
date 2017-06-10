@@ -52,8 +52,8 @@
 #include "opentxs/core/crypto/OTPassword.hpp"
 #include "opentxs/core/crypto/OTPasswordData.hpp"
 #include "opentxs/core/crypto/SymmetricKey.hpp"
+#include "opentxs/core/Data.hpp"
 #include "opentxs/core/Log.hpp"
-#include "opentxs/core/OTData.hpp"
 
 namespace opentxs
 {
@@ -84,7 +84,7 @@ bool Ecdsa::AsymmetricKeyToECPrivkey(
 
 bool Ecdsa::AsymmetricKeyToECPubkey(
     const AsymmetricKeyEC& asymmetricKey,
-    OTData& pubkey) const
+    Data& pubkey) const
 {
     return asymmetricKey.GetKey(pubkey);
 }
@@ -130,7 +130,7 @@ bool Ecdsa::DecryptSessionKeyECDH(
     const OTPasswordData& password,
     SymmetricKey& sessionKey) const
 {
-    OTData publicDHKey;
+    Data publicDHKey;
 
     if (!publicKey.GetKey(publicDHKey)) {
         otErr << __FUNCTION__ << ": Failed to get public key."
@@ -175,7 +175,7 @@ bool Ecdsa::ECPrivatekeyToAsymmetricKey(
 }
 
 bool Ecdsa::ECPubkeyToAsymmetricKey(
-    std::unique_ptr<OTData>& pubkey,
+    std::unique_ptr<Data>& pubkey,
     AsymmetricKeyEC& asymmetricKey) const
 {
     if (!pubkey) { return false; }
@@ -192,7 +192,7 @@ bool Ecdsa::EncryptPrivateKey(
 
     if (!key) { return false; }
 
-    OTData blank;
+    Data blank;
 
     return key->Encrypt(
         plaintextKey,
@@ -213,7 +213,7 @@ bool Ecdsa::EncryptPrivateKey(
 
     if (!sessionKey) { return false; }
 
-    OTData blank;
+    Data blank;
 
     const bool keyEncrypted = sessionKey->Encrypt(
         key,
@@ -239,7 +239,7 @@ bool Ecdsa::EncryptSessionKeyECDH(
     SymmetricKey& sessionKey,
     OTPassword& newKeyPassword) const
 {
-    std::unique_ptr<OTData> dhPublicKey(new OTData);
+    std::unique_ptr<Data> dhPublicKey(new Data);
 
     OT_ASSERT(dhPublicKey);
 
@@ -330,7 +330,7 @@ bool Ecdsa::PrivateToPublic(
 
     if (!decrypted) { return false; }
 
-    OTData key;
+    Data key;
     const bool output = ScalarBaseMultiply(*plaintextKey, key);
 
     if (output) {
@@ -345,7 +345,7 @@ bool Ecdsa::PrivateToPublic(
 bool Ecdsa::SeedToCurveKey(
     __attribute__((unused)) const OTPassword& seed,
     __attribute__((unused)) OTPassword& privateKey,
-    __attribute__((unused)) OTData& publicKey) const
+    __attribute__((unused)) Data& publicKey) const
 {
     otErr << __FUNCTION__ << ": this engine does not support curve25519."
           << std::endl;

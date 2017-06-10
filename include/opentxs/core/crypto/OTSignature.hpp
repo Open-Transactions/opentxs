@@ -41,7 +41,6 @@
 
 #include "opentxs/core/crypto/OTASCIIArmor.hpp"
 #include "opentxs/core/crypto/OTSignatureMetadata.hpp"
-#include "opentxs/core/stdafx.hpp"
 
 namespace opentxs
 {

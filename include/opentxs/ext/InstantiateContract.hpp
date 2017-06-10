@@ -49,16 +49,16 @@
 
 #include "opentxs/cash/Mint.hpp"
 #include "opentxs/cash/Token.hpp"
-#include "opentxs/core/recurring/OTPaymentPlan.hpp"
+#include "opentxs/core/contract/UnitDefinition.hpp"
 #include "opentxs/core/crypto/OTSignedFile.hpp"
+#include "opentxs/core/recurring/OTPaymentPlan.hpp"
 #include "opentxs/core/script/OTSmartContract.hpp"
 #include "opentxs/core/trade/OTOffer.hpp"
 #include "opentxs/core/trade/OTTrade.hpp"
 #include "opentxs/core/util/Assert.hpp"
-#include "opentxs/core/Log.hpp"
 #include "opentxs/core/Contract.hpp"
-#include "opentxs/core/contract/UnitDefinition.hpp"
 #include "opentxs/core/Cheque.hpp"
+#include "opentxs/core/Log.hpp"
 #include "opentxs/core/Message.hpp"
 
 #include <memory>

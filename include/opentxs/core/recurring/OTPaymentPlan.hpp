@@ -39,10 +39,10 @@
 #ifndef OPENTXS_CORE_OTPAYMENTPLAN_HPP
 #define OPENTXS_CORE_OTPAYMENTPLAN_HPP
 
-#include "opentxs/core/Contract.hpp"
-#include "opentxs/core/Identifier.hpp"
 #include "opentxs/core/recurring/OTAgreement.hpp"
 #include "opentxs/core/util/Common.hpp"
+#include "opentxs/core/Contract.hpp"
+#include "opentxs/core/Identifier.hpp"
 
 #include <stdint.h>
 

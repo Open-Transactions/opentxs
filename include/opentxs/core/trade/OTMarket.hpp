@@ -44,12 +44,12 @@
 #ifndef OPENTXS_CORE_TRADE_OTMARKET_HPP
 #define OPENTXS_CORE_TRADE_OTMARKET_HPP
 
-#include "opentxs/core/Contract.hpp"
-#include "opentxs/core/Identifier.hpp"
-#include "opentxs/core/OTStorage.hpp"
 #include "opentxs/core/cron/OTCron.hpp"
 #include "opentxs/core/trade/OTOffer.hpp"
 #include "opentxs/core/util/Common.hpp"
+#include "opentxs/core/Contract.hpp"
+#include "opentxs/core/Identifier.hpp"
+#include "opentxs/core/OTStorage.hpp"
 
 #include <cstdint>
 #include <map>

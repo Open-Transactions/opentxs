@@ -36,8 +36,8 @@
  *
  ************************************************************/
 
-#ifndef OPENTXS_CORE_OTDATA_HPP
-#define OPENTXS_CORE_OTDATA_HPP
+#ifndef OPENTXS_CORE_DATA_HPP
+#define OPENTXS_CORE_DATA_HPP
 
 #include <cstdint>
 #include <vector>
@@ -47,7 +47,7 @@ namespace opentxs
 
 class OTASCIIArmor;
 
-class OTData
+class Data
 {
 private:
     typedef std::vector<std::uint8_t> Vector;
@@ -59,28 +59,28 @@ private:
 
 protected:
     void Initialize();
-    void swap(OTData& rhs);
+    void swap(Data& rhs);
 
 public:
-    EXPORT OTData() = default;
-    EXPORT explicit OTData(const void* data, std::size_t size);
-    EXPORT explicit OTData(const OTASCIIArmor& source);
-    EXPORT explicit OTData(const std::vector<unsigned char>& sourceVector);
-    EXPORT OTData(const OTData& rhs);
-    EXPORT OTData(OTData&& rhs);
-    EXPORT OTData& operator=(const OTData& rhs);
-    EXPORT OTData& operator=(OTData&& rhs);
+    EXPORT Data() = default;
+    EXPORT explicit Data(const void* data, std::size_t size);
+    EXPORT explicit Data(const OTASCIIArmor& source);
+    EXPORT explicit Data(const std::vector<unsigned char>& sourceVector);
+    EXPORT Data(const Data& rhs);
+    EXPORT Data(Data&& rhs);
+    EXPORT Data& operator=(const Data& rhs);
+    EXPORT Data& operator=(Data&& rhs);
 
-    EXPORT bool operator==(const OTData& rhs) const;
-    EXPORT bool operator!=(const OTData& rhs) const;
-    EXPORT OTData& operator+=(const OTData& rhs);
+    EXPORT bool operator==(const Data& rhs) const;
+    EXPORT bool operator!=(const Data& rhs) const;
+    EXPORT Data& operator+=(const Data& rhs);
 
     EXPORT bool empty() const;
     EXPORT bool IsEmpty() const;
     EXPORT const void* GetPointer() const;
     EXPORT std::size_t GetSize() const;
 
-    EXPORT void Assign(const OTData& source);
+    EXPORT void Assign(const Data& source);
     EXPORT void Assign(const void* data, const std::size_t& size);
     EXPORT void Concatenate(const void* data, const std::size_t& size);
     EXPORT std::size_t OTfread(std::uint8_t* data, const std::size_t& size);
@@ -88,10 +88,10 @@ public:
     EXPORT void Release();
     EXPORT void reset();
     EXPORT void SetSize(const std::size_t& size);
-    EXPORT void swap(OTData&& rhs);
+    EXPORT void swap(Data&& rhs);
     EXPORT void zeroMemory();
 
-    EXPORT virtual ~OTData() = default;
+    EXPORT virtual ~Data() = default;
 };
 }  // namespace opentxs
 

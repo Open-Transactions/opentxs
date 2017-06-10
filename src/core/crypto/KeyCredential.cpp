@@ -82,8 +82,8 @@
 #include "opentxs/core/crypto/OTSignature.hpp"
 #include "opentxs/core/crypto/OTSignatureMetadata.hpp"
 #include "opentxs/core/util/Assert.hpp"
+#include "opentxs/core/Data.hpp"
 #include "opentxs/core/Log.hpp"
-#include "opentxs/core/OTData.hpp"
 #include "opentxs/core/String.hpp"
 #include "opentxs/core/Types.hpp"
 
@@ -575,7 +575,7 @@ bool KeyCredential::addKeyCredentialtoSerializedCredential(
 }
 
 bool KeyCredential::Verify(
-    const OTData& plaintext,
+    const Data& plaintext,
     const proto::Signature& sig,
     const proto::KeyRole key) const
 {
@@ -672,13 +672,13 @@ bool KeyCredential::VerifySig(
     signature.CopyFrom(sig);
     signature.clear_signature();
 
-    OTData plaintext = proto::ProtoAsData<proto::Credential>(*serialized);
+    Data plaintext = proto::ProtoAsData<proto::Credential>(*serialized);
 
     return Verify(plaintext, sig);
 }
 
 bool KeyCredential::TransportKey(
-    OTData& publicKey,
+    Data& publicKey,
     OTPassword& privateKey) const
 {
     OT_ASSERT(m_AuthentKey);

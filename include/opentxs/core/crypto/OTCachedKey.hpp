@@ -39,6 +39,8 @@
 #ifndef OPENTXS_CORE_CRYPTO_OTCACHEDKEY_HPP
 #define OPENTXS_CORE_CRYPTO_OTCACHEDKEY_HPP
 
+#include "opentxs/core/String.hpp"
+
 #include <atomic>
 #include <chrono>
 #include <cstdint>
@@ -47,8 +49,6 @@
 #include <mutex>
 #include <string>
 #include <thread>
-
-#include "opentxs/core/String.hpp"
 
 namespace opentxs
 {

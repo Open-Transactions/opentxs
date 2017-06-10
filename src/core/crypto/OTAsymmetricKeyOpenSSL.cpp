@@ -53,8 +53,8 @@
 #include "opentxs/core/crypto/OTPasswordData.hpp"
 #include "opentxs/core/crypto/Ecdsa.hpp"
 #include "opentxs/core/util/Assert.hpp"
+#include "opentxs/core/Data.hpp"
 #include "opentxs/core/Log.hpp"
-#include "opentxs/core/OTData.hpp"
 #include "opentxs/core/String.hpp"
 
 #include <openssl/bio.h>
@@ -120,7 +120,7 @@ OTAsymmetricKey_OpenSSL::OTAsymmetricKey_OpenSSL(const proto::AsymmetricKey& ser
 
     m_keyType = proto::AKEYTYPE_LEGACY;
 
-    OTData dataKey(serializedKey.key().c_str(), serializedKey.key().size());
+    Data dataKey(serializedKey.key().c_str(), serializedKey.key().size());
     m_p_ascKey->SetData(dataKey);
 
     if (proto::KEYMODE_PUBLIC == serializedKey.mode()) {
@@ -478,7 +478,7 @@ bool OTAsymmetricKey_OpenSSL::ReEncryptPrivateKey(
     const EVP_CIPHER* pCipher =
         EVP_des_ede3_cbc(); // todo should this algorithm be hardcoded?
 
-    OTData theData; // after base64-decoding the ascii-armored string, the
+    Data theData; // after base64-decoding the ascii-armored string, the
                     // (encrypted) binary will be stored here.
 
     // This line base64 decodes the ascii-armored string into binary object
@@ -593,7 +593,7 @@ bool OTAsymmetricKey_OpenSSL::ReEncryptPrivateKey(
                 otLog5 << __FUNCTION__
                        << ": Success writing EVP_PKEY to memory buffer.\n";
 
-                OTData theNewData;
+                Data theNewData;
                 char* pChar = nullptr;
 
                 // After the below call, pChar will point to the memory buffer
@@ -781,7 +781,7 @@ serializedAsymmetricKey OTAsymmetricKey_OpenSSL::Serialize() const
 {
     serializedAsymmetricKey serializedKey = ot_super::Serialize();
 
-    OTData dataKey;
+    Data dataKey;
     OT_ASSERT(m_p_ascKey);
     m_p_ascKey->GetData(dataKey);
 
@@ -797,14 +797,14 @@ serializedAsymmetricKey OTAsymmetricKey_OpenSSL::Serialize() const
 }
 
 bool OTAsymmetricKey_OpenSSL::TransportKey(
-    OTData& publicKey,
+    Data& publicKey,
     OTPassword& privateKey) const
 {
     OT_ASSERT(nullptr != m_p_ascKey);
 
     if (!IsPrivate()) { return false; }
 
-    OTData key, hash;
+    Data key, hash;
     m_p_ascKey->GetData(key);
 
     OT::App().Crypto().Hash().Digest(

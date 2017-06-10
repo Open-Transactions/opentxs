@@ -40,7 +40,6 @@
 #define OPENTXS_CORE_CONTRACT_PEER_BAILMENTREPLY_HPP
 
 #include "opentxs/core/contract/peer/PeerReply.hpp"
-
 #include "opentxs/core/Identifier.hpp"
 
 #include <string>

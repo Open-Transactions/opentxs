@@ -69,13 +69,13 @@
 #include "opentxs/core/util/OTFolders.hpp"
 #include "opentxs/core/Account.hpp"
 #include "opentxs/core/Cheque.hpp"
+#include "opentxs/core/Data.hpp"
 #include "opentxs/core/Identifier.hpp"
 #include "opentxs/core/Item.hpp"
 #include "opentxs/core/Ledger.hpp"
 #include "opentxs/core/Log.hpp"
 #include "opentxs/core/Message.hpp"
 #include "opentxs/core/Nym.hpp"
-#include "opentxs/core/OTData.hpp"
 #include "opentxs/core/OTStorage.hpp"
 #include "opentxs/core/OTTransaction.hpp"
 #include "opentxs/core/OTTransactionType.hpp"
@@ -2838,8 +2838,8 @@ bool OTClient::processServerReplyCheckNym(
     const Message& theReply,
     ProcessServerReplyArgs& args)
 {
-    auto serialized = proto::DataToProto<proto::CredentialIndex>(
-        OTData(theReply.m_ascPayload));
+    auto serialized =
+        proto::DataToProto<proto::CredentialIndex>(Data(theReply.m_ascPayload));
 
     auto nym = OT::App().Contract().Nym(serialized);
 
@@ -7055,7 +7055,7 @@ bool OTClient::processServerReplyGetInstrumentDefinition(
     ProcessServerReplyArgs& args)
 {
     // base64-Decode the server reply's payload into raw
-    const OTData raw(theReply.m_ascPayload);
+    const Data raw(theReply.m_ascPayload);
     const std::string purportedID = theReply.m_strInstrumentDefinitionID.Get();
 
     proto::UnitDefinition serialized =
@@ -7125,7 +7125,7 @@ bool OTClient::processServerReplyGetMarketList(const Message& theReply)
         return true;
     }
 
-    OTData thePayload;
+    Data thePayload;
 
     if ((theReply.m_ascPayload.GetLength() <= 2) ||
         (false == theReply.m_ascPayload.GetData(thePayload))) {
@@ -7205,7 +7205,7 @@ bool OTClient::processServerReplyGetMarketOffers(const Message& theReply)
         return true;
     }
 
-    OTData thePayload;
+    Data thePayload;
 
     if ((theReply.m_ascPayload.GetLength() <= 2) ||
         (false == theReply.m_ascPayload.GetData(thePayload))) {
@@ -7286,7 +7286,7 @@ bool OTClient::processServerReplyGetMarketRecentTrades(const Message& theReply)
         return true;
     }
 
-    OTData thePayload;
+    Data thePayload;
 
     if ((theReply.m_ascPayload.GetLength() <= 2) ||
         (false == theReply.m_ascPayload.GetData(thePayload))) {
@@ -7362,7 +7362,7 @@ bool OTClient::processServerReplyGetNymMarketOffers(const Message& theReply)
         return true;
     }
 
-    OTData thePayload;
+    Data thePayload;
 
     if ((theReply.m_ascPayload.GetLength() <= 2) ||
         (false == theReply.m_ascPayload.GetData(thePayload))) {

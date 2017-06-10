@@ -51,9 +51,9 @@
 #include "opentxs/core/crypto/OTPasswordData.hpp"
 #include "opentxs/core/crypto/OTSymmetricKey.hpp"
 #include "opentxs/core/util/Assert.hpp"
+#include "opentxs/core/Data.hpp"
 #include "opentxs/core/Log.hpp"
 #include "opentxs/core/Nym.hpp"
-#include "opentxs/core/OTData.hpp"
 #include "opentxs/core/String.hpp"
 
 extern "C" {
@@ -81,7 +81,7 @@ bool OTEnvelope::GetCiphertext(OTASCIIArmor& theArmoredText) const
 
 bool OTEnvelope::SetCiphertext(const OTASCIIArmor& theArmoredText)
 {
-    ciphertext_.reset(new OTData);
+    ciphertext_.reset(new Data);
 
     OT_ASSERT(ciphertext_);
 
@@ -103,7 +103,7 @@ bool OTEnvelope::Encrypt(const String& theInput, OTSymmetricKey& theKey,
 
     // Generate a random initialization vector.
     //
-    OTData theIV;
+    Data theIV;
 
     if (!theIV.Randomize(CryptoConfig::SymmetricIvSize())) {
         otErr << __FUNCTION__ << ": Failed trying to randomly generate IV.\n";
@@ -141,7 +141,7 @@ bool OTEnvelope::Encrypt(const String& theInput, OTSymmetricKey& theKey,
         return false;
     }
 
-    OTData theCipherText;
+    Data theCipherText;
 
     const bool bEncrypted = OT::App().Crypto().AES().Encrypt(
         theRawSymmetricKey,       // The symmetric key, in clear form.
@@ -162,7 +162,7 @@ bool OTEnvelope::Encrypt(const String& theInput, OTSymmetricKey& theKey,
     // This is where the envelope final contents will be placed,
     // including the envelope type, the size of the IV, the IV
     // itself, and the ciphertext.
-    ciphertext_.reset(new OTData);
+    ciphertext_.reset(new Data);
 
     OT_ASSERT(ciphertext_);
 
@@ -307,7 +307,7 @@ bool OTEnvelope::Decrypt(String& theOutput, const OTSymmetricKey& theKey,
 
     // Then read the IV (initialization vector) itself.
     //
-    OTData theIV;
+    Data theIV;
     theIV.SetSize(iv_size_host_order);
 
     if (0 == (nRead = ciphertext_->OTfread(
@@ -321,14 +321,14 @@ bool OTEnvelope::Decrypt(String& theOutput, const OTSymmetricKey& theKey,
 
     OT_ASSERT(nRead <= max_iv_length);
 
-    // We create an OTData object to store the ciphertext itself, which
+    // We create an Data object to store the ciphertext itself, which
     // begins AFTER the end of the IV.
     // So we see pointer + nRunningTotal as the starting point for the
     // ciphertext.
     // the size of the ciphertext, meanwhile, is the size of the entire thing,
     // MINUS nRunningTotal.
     //
-    OTData theCipherText(
+    Data theCipherText(
         static_cast<const void*>(
             static_cast<const uint8_t*>(ciphertext_->GetPointer()) +
             nRunningTotal),
@@ -336,7 +336,7 @@ bool OTEnvelope::Decrypt(String& theOutput, const OTSymmetricKey& theKey,
 
     // Now we've got all the pieces together, let's try to decrypt it...
     //
-    OTData thePlaintext; // for output.
+    Data thePlaintext; // for output.
     CryptoSymmetricDecryptOutput plaintext(thePlaintext);
 
     const bool bDecrypted = OT::App().Crypto().AES().Decrypt(
@@ -345,7 +345,7 @@ bool OTEnvelope::Decrypt(String& theOutput, const OTSymmetricKey& theKey,
             theCipherText.GetPointer()), // This is the Ciphertext.
         theCipherText.GetSize(),
         theIV, plaintext); // OUTPUT. (Recovered plaintext.) You can pass
-                              // OTPassword& OR OTData& here (either will
+                              // OTPassword& OR Data& here (either will
                               // work.)
 
     // theOutput is where we'll put the decrypted data.
@@ -406,7 +406,7 @@ bool OTEnvelope::Seal(const mapOfAsymmetricKeys& recipientKeys,
     OT_ASSERT_MSG(!recipientKeys.empty(),
                   "OTEnvelope::Seal: ASSERT: RecipPubKeys.size() > 0");
 
-    ciphertext_.reset(new OTData);
+    ciphertext_.reset(new Data);
 
     OT_ASSERT(ciphertext_);
 

@@ -45,7 +45,7 @@
 namespace opentxs
 {
 class AsymmetricKeyEC;
-class OTData;
+class Data;
 class OTPassword;
 class OTPasswordData;
 class SymmetricKey;
@@ -57,18 +57,18 @@ protected:
 
     virtual bool AsymmetricKeyToECPubkey(
         const AsymmetricKeyEC& asymmetricKey,
-        OTData& pubkey) const;
+        Data& pubkey) const;
     virtual bool AsymmetricKeyToECPrivkey(
         const proto::Ciphertext& asymmetricKey,
         const OTPasswordData& passwordData,
         OTPassword& privkey) const;
     virtual bool ECDH(
-        const OTData& publicKey,
+        const Data& publicKey,
         const OTPassword& privateKey,
         OTPassword& secret) const = 0;
     virtual bool ScalarBaseMultiply(
         const OTPassword& privateKey,
-        OTData& publicKey) const = 0;
+        Data& publicKey) const = 0;
 
 public:
     static bool DecryptPrivateKey(
@@ -106,7 +106,7 @@ public:
         const OTPasswordData& passwordData,
         AsymmetricKeyEC& asymmetricKey) const;
     virtual bool ECPubkeyToAsymmetricKey(
-        std::unique_ptr<OTData>& pubkey,
+        std::unique_ptr<Data>& pubkey,
         AsymmetricKeyEC& asymmetricKey) const;
     virtual bool EncryptSessionKeyECDH(
         const AsymmetricKeyEC& privateKey,
@@ -127,11 +127,11 @@ public:
         proto::AsymmetricKey& publicKey) const;
     virtual bool RandomKeypair(
         OTPassword& privateKey,
-        OTData& publicKey) const = 0;
+        Data& publicKey) const = 0;
     virtual bool SeedToCurveKey(
         const OTPassword& seed,
         OTPassword& privateKey,
-        OTData& publicKey) const;
+        Data& publicKey) const;
 
     virtual ~Ecdsa() = default;
 };

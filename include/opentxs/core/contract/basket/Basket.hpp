@@ -39,8 +39,8 @@
 #ifndef OPENTXS_BASKET_BASKET_HPP
 #define OPENTXS_BASKET_BASKET_HPP
 
-#include "opentxs/core/Contract.hpp"
 #include "opentxs/core/contract/basket/BasketItem.hpp"
+#include "opentxs/core/Contract.hpp"
 
 /*
 
