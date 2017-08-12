@@ -178,7 +178,6 @@ std::string OTNameLookup::GetNymName(
 
         if (Identifier::validateID(strContactId.Get())) {
             const auto pContact = OT::App().Contact().Contact(contactId);
-
             if (pContact && !(pContact->Label().empty())) {
                 display_label = pContact->Label();
             }
@@ -618,11 +617,10 @@ bool OTRecordList::PerformAutoAccept()
                 // either way.
                 //
                 Ledger* pInbox =
-                    m_bRunFast
-                        ? OTAPI_Wrap::OTAPI()->LoadPaymentInboxNoVerify(
-                              theNotaryID, theNymID)
-                        : OTAPI_Wrap::OTAPI()->LoadPaymentInbox(
-                              theNotaryID, theNymID);
+                    m_bRunFast ? OTAPI_Wrap::OTAPI()->LoadPaymentInboxNoVerify(
+                                     theNotaryID, theNymID)
+                               : OTAPI_Wrap::OTAPI()->LoadPaymentInbox(
+                                     theNotaryID, theNymID);
                 std::unique_ptr<Ledger> theInboxAngel(pInbox);
 
                 // It loaded up, so let's loop through it.
@@ -1795,11 +1793,10 @@ bool OTRecordList::Populate()
             // either way.
             //
             Ledger* pInbox =
-                m_bRunFast
-                    ? OTAPI_Wrap::OTAPI()->LoadPaymentInboxNoVerify(
-                          theNotaryID, theNymID)
-                    : OTAPI_Wrap::OTAPI()->LoadPaymentInbox(
-                          theNotaryID, theNymID);
+                m_bRunFast ? OTAPI_Wrap::OTAPI()->LoadPaymentInboxNoVerify(
+                                 theNotaryID, theNymID)
+                           : OTAPI_Wrap::OTAPI()->LoadPaymentInbox(
+                                 theNotaryID, theNymID);
             std::unique_ptr<Ledger> theInboxAngel(pInbox);
 
             int32_t nIndex = (-1);
@@ -2120,11 +2117,10 @@ bool OTRecordList::Populate()
             // NYM_ID twice, since it's the recordbox for the Nym.
             // OPTIMIZE FYI: m_bRunFast impacts run speed here.
             Ledger* pRecordbox =
-                m_bRunFast
-                    ? OTAPI_Wrap::OTAPI()->LoadRecordBoxNoVerify(
-                          theNotaryID, theNymID, theNymID)  // twice.
-                    : OTAPI_Wrap::OTAPI()->LoadRecordBox(
-                          theNotaryID, theNymID, theNymID);
+                m_bRunFast ? OTAPI_Wrap::OTAPI()->LoadRecordBoxNoVerify(
+                                 theNotaryID, theNymID, theNymID)  // twice.
+                           : OTAPI_Wrap::OTAPI()->LoadRecordBox(
+                                 theNotaryID, theNymID, theNymID);
             std::unique_ptr<Ledger> theRecordBoxAngel(pRecordbox);
 
             // It loaded up, so let's loop through it.
@@ -2217,12 +2213,11 @@ bool OTRecordList::Populate()
                             // Whereas if Nym were the recipient, then we'd want
                             // the SENDER. (For display.)
                             //
-                            if (0 ==
-                                str_nym_id.compare(
-                                    str_sender_id))  // str_nym_id IS
-                                                     // str_sender_id.
-                                                     // (Therefore we want
-                                                     // recipient.)
+                            if (0 == str_nym_id.compare(
+                                         str_sender_id))  // str_nym_id IS
+                                                          // str_sender_id.
+                                                          // (Therefore we want
+                                                          // recipient.)
                             {
                                 if (OTTransaction::notice ==
                                     pBoxTrans->GetType()) {
@@ -2722,9 +2717,10 @@ bool OTRecordList::Populate()
 
                 }  // Loop through Recordbox
             } else
-                otWarn << __FUNCTION__ << ": Failed loading payments record "
-                                          "box. (Probably just doesn't exist "
-                                          "yet.)\n";
+                otWarn << __FUNCTION__
+                       << ": Failed loading payments record "
+                          "box. (Probably just doesn't exist "
+                          "yet.)\n";
 
             // EXPIRED RECORDS:
             nIndex = (-1);
@@ -2732,11 +2728,10 @@ bool OTRecordList::Populate()
             // Also loop through its expired record box.
             // OPTIMIZE FYI: m_bRunFast impacts run speed here.
             Ledger* pExpiredbox =
-                m_bRunFast
-                    ? OTAPI_Wrap::OTAPI()->LoadExpiredBoxNoVerify(
-                          theNotaryID, theNymID)
-                    : OTAPI_Wrap::OTAPI()->LoadExpiredBox(
-                          theNotaryID, theNymID);
+                m_bRunFast ? OTAPI_Wrap::OTAPI()->LoadExpiredBoxNoVerify(
+                                 theNotaryID, theNymID)
+                           : OTAPI_Wrap::OTAPI()->LoadExpiredBox(
+                                 theNotaryID, theNymID);
             std::unique_ptr<Ledger> theExpiredBoxAngel(pExpiredbox);
 
             // It loaded up, so let's loop through it.
@@ -2823,12 +2818,11 @@ bool OTRecordList::Populate()
                             // Whereas if Nym were the recipient, then we'd want
                             // the SENDER. (For display.)
                             //
-                            if (0 ==
-                                str_nym_id.compare(
-                                    str_sender_id))  // str_nym_id IS
-                                                     // str_sender_id.
-                                                     // (Therefore we want
-                                                     // recipient.)
+                            if (0 == str_nym_id.compare(
+                                         str_sender_id))  // str_nym_id IS
+                                                          // str_sender_id.
+                                                          // (Therefore we want
+                                                          // recipient.)
                             {
                                 if (OTTransaction::notice ==
                                     pBoxTrans->GetType())
@@ -3386,11 +3380,10 @@ bool OTRecordList::Populate()
         // return for FASTER PERFORMANCE, then call SetFastMode() before
         // Populating.
         //
-        Ledger* pInbox = m_bRunFast
-                             ? OTAPI_Wrap::OTAPI()->LoadInboxNoVerify(
-                                   theNotaryID, theNymID, theAccountID)
-                             : OTAPI_Wrap::OTAPI()->LoadInbox(
-                                   theNotaryID, theNymID, theAccountID);
+        Ledger* pInbox = m_bRunFast ? OTAPI_Wrap::OTAPI()->LoadInboxNoVerify(
+                                          theNotaryID, theNymID, theAccountID)
+                                    : OTAPI_Wrap::OTAPI()->LoadInbox(
+                                          theNotaryID, theNymID, theAccountID);
         std::unique_ptr<Ledger> theInboxAngel(pInbox);
 
         // It loaded up, so let's loop through it.
@@ -3674,11 +3667,10 @@ bool OTRecordList::Populate()
         // return for FASTER PERFORMANCE, then call SetFastMode() before running
         // Populate.
         //
-        Ledger* pOutbox = m_bRunFast
-                              ? OTAPI_Wrap::OTAPI()->LoadOutboxNoVerify(
-                                    theNotaryID, theNymID, theAccountID)
-                              : OTAPI_Wrap::OTAPI()->LoadOutbox(
-                                    theNotaryID, theNymID, theAccountID);
+        Ledger* pOutbox = m_bRunFast ? OTAPI_Wrap::OTAPI()->LoadOutboxNoVerify(
+                                           theNotaryID, theNymID, theAccountID)
+                                     : OTAPI_Wrap::OTAPI()->LoadOutbox(
+                                           theNotaryID, theNymID, theAccountID);
         std::unique_ptr<Ledger> theOutboxAngel(pOutbox);
 
         // It loaded up, so let's loop through it.
