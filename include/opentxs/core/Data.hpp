@@ -72,6 +72,8 @@ public:
     EXPORT Data& operator=(const Data& rhs);
     EXPORT Data& operator=(Data&& rhs);
 
+    EXPORT static Data fromHex(const std::string&);
+
     EXPORT bool operator==(const Data& rhs) const;
     EXPORT bool operator!=(const Data& rhs) const;
     EXPORT Data& operator+=(const Data& rhs);
