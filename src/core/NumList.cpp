@@ -50,21 +50,21 @@
 #include <ostream>
 #include <set>
 #include <string>
+#include <utility>
 
 // OTNumList (helper class.)
 
 namespace opentxs
 {
 
-NumList::NumList(const std::set<int64_t>& theNumbers)
+NumList::NumList(const std::set<int64_t>& theNumbers) { Add(theNumbers); }
+
+NumList::NumList(std::set<int64_t>&& theNumbers)
+    : m_setData(std::move(theNumbers))
 {
-    Add(theNumbers);
 }
 
-NumList::NumList(int64_t lInput)
-{
-    Add(lInput);
-}
+NumList::NumList(int64_t lInput) { Add(lInput); }
 
 // removed, security reasons.
 // OTNumList::OTNumList(const char* szNumbers)
@@ -72,35 +72,25 @@ NumList::NumList(int64_t lInput)
 //    Add(szNumbers);
 //}
 
-NumList::NumList(const String& strNumbers)
-{
-    Add(strNumbers);
-}
+NumList::NumList(const String& strNumbers) { Add(strNumbers); }
 
-NumList::NumList(const std::string& strNumbers)
-{
-    Add(strNumbers);
-}
+NumList::NumList(const std::string& strNumbers) { Add(strNumbers); }
 
-NumList::NumList()
-{
-}
+NumList::NumList() {}
 
-NumList::~NumList()
-{
-}
+NumList::~NumList() {}
 
-bool NumList::Add(const String& strNumbers) // if false, means the numbers
-                                            // were already there. (At least
-                                            // one of them.)
+bool NumList::Add(const String& strNumbers)  // if false, means the numbers
+                                             // were already there. (At least
+                                             // one of them.)
 {
     return Add(strNumbers.Get());
 }
 
-bool NumList::Add(const std::string& strNumbers) // if false, means the
-                                                 // numbers were already
-                                                 // there. (At least one of
-                                                 // them.)
+bool NumList::Add(const std::string& strNumbers)  // if false, means the
+                                                  // numbers were already
+                                                  // there. (At least one of
+                                                  // them.)
 {
     return Add(strNumbers.c_str());
 }
@@ -109,11 +99,11 @@ bool NumList::Add(const std::string& strNumbers) // if false, means the
 // (For security reasons.) It takes a comma-separated list of numbers, and adds
 // them to *this.
 //
-bool NumList::Add(const char* szNumbers) // if false, means the numbers were
-                                         // already there. (At least one of
-                                         // them.)
+bool NumList::Add(const char* szNumbers)  // if false, means the numbers were
+                                          // already there. (At least one of
+                                          // them.)
 {
-    OT_ASSERT(nullptr != szNumbers); // Should never happen.
+    OT_ASSERT(nullptr != szNumbers);  // Should never happen.
 
     bool bSuccess = true;
     int64_t lNum = 0;
@@ -124,45 +114,46 @@ bool NumList::Add(const char* szNumbers) // if false, means the numbers were
     while (std::isspace(*pChar, loc)) pChar++;
 
     bool bStartedANumber =
-        false; // During the loop, set this to true when processing a digit, and
-               // set to false when anything else. That way when we go to add
-               // the number to the list, and it's "0", we'll know it's a real
-               // number we're supposed to add, and not just a default value.
+        false;  // During the loop, set this to true when processing a digit,
+                // and set to false when anything else. That way when we go to
+                // add the number to the list, and it's "0", we'll know it's a
+                // real number we're supposed to add, and not just a default
+                // value.
 
-    for (;;) // We already know it's not null, due to the assert. (So at least
-             // one iteration will happen.)
+    for (;;)  // We already know it's not null, due to the assert. (So at least
+              // one iteration will happen.)
     {
         if (std::isdigit(*pChar, loc)) {
             bStartedANumber = true;
 
             int32_t nDigit = (*pChar - '0');
 
-            lNum *= 10; // Move it up a decimal place.
+            lNum *= 10;  // Move it up a decimal place.
             lNum += nDigit;
         }
         // if separator, or end of string, either way, add lNum to *this.
-        else if ((',' == *pChar) || ('\0' == *pChar) ||
-                 std::isspace(*pChar, loc)) // first sign of a space, and we are
-                                            // done with current number. (On to
-                                            // the next.)
+        else if (
+            (',' == *pChar) || ('\0' == *pChar) ||
+            std::isspace(*pChar, loc))  // first sign of a space, and we are
+                                        // done with current number. (On to
+                                        // the next.)
         {
             if ((lNum > 0) || (bStartedANumber && (0 == lNum))) {
-                if (!Add(lNum)) // <=========
+                if (!Add(lNum))  // <=========
                 {
-                    bSuccess = false; // We still go ahead and try to add them
-                                      // all, and then return this sort of
-                                      // status when it's all done.
+                    bSuccess = false;  // We still go ahead and try to add them
+                                       // all, and then return this sort of
+                                       // status when it's all done.
                 }
             }
 
-            lNum = 0; // reset for the next transaction number (in the
-                      // comma-separated list.)
-            bStartedANumber = false; // reset
-        }
-        else {
+            lNum = 0;  // reset for the next transaction number (in the
+                       // comma-separated list.)
+            bStartedANumber = false;  // reset
+        } else {
             otErr << "OTNumList::Add: Error: Unexpected character found in "
-                     "erstwhile comma-separated list of longs: " << *pChar
-                  << "\n";
+                     "erstwhile comma-separated list of longs: "
+                  << *pChar << "\n";
             bSuccess = false;
             break;
         }
@@ -175,29 +166,29 @@ bool NumList::Add(const char* szNumbers) // if false, means the numbers were
         // Skip any whitespace.
         while (std::isspace(*pChar, loc)) pChar++;
 
-    } // while
+    }  // while
 
     return bSuccess;
 }
 
-bool NumList::Add(const int64_t& theValue) // if false, means the value was
-                                           // already there.
+bool NumList::Add(const int64_t& theValue)  // if false, means the value was
+                                            // already there.
 {
     auto it = m_setData.find(theValue);
 
-    if (m_setData.end() == it) // it's not already there, so add it.
+    if (m_setData.end() == it)  // it's not already there, so add it.
     {
         m_setData.insert(theValue);
         return true;
     }
-    return false; // it was already there.
+    return false;  // it was already there.
 }
 
 bool NumList::Peek(int64_t& lPeek) const
 {
     auto it = m_setData.begin();
 
-    if (m_setData.end() != it) // it's there.
+    if (m_setData.end() != it)  // it's there.
     {
         lPeek = *it;
         return true;
@@ -209,7 +200,7 @@ bool NumList::Pop()
 {
     auto it = m_setData.begin();
 
-    if (m_setData.end() != it) // it's there.
+    if (m_setData.end() != it)  // it's there.
     {
         m_setData.erase(it);
         return true;
@@ -217,22 +208,22 @@ bool NumList::Pop()
     return false;
 }
 
-bool NumList::Remove(const int64_t& theValue) // if false, means the value was
-                                              // NOT already there.
+bool NumList::Remove(const int64_t& theValue)  // if false, means the value was
+                                               // NOT already there.
 {
     auto it = m_setData.find(theValue);
 
-    if (m_setData.end() != it) // it's there.
+    if (m_setData.end() != it)  // it's there.
     {
         m_setData.erase(it);
         return true;
     }
-    return false; // it wasn't there (so how could you remove it then?)
+    return false;  // it wasn't there (so how could you remove it then?)
 }
 
-bool NumList::Verify(const int64_t& theValue) const // returns true/false
-                                                    // (whether value is
-                                                    // already there.)
+bool NumList::Verify(const int64_t& theValue) const  // returns true/false
+                                                     // (whether value is
+                                                     // already there.)
 {
     auto it = m_setData.find(theValue);
 
@@ -248,7 +239,7 @@ bool NumList::Verify(const std::set<int64_t>& theNumbers) const
     bool bSuccess = true;
 
     for (const auto& it : theNumbers) {
-        if (!Verify(it)) // It must have NOT already been there.
+        if (!Verify(it))  // It must have NOT already been there.
             bSuccess = false;
     }
 
@@ -287,48 +278,48 @@ bool NumList::VerifyAny(const std::set<int64_t>& setData) const
     for (const auto& it : m_setData) {
         auto it_find = setData.find(it);
 
-        if (it_find != setData.end()) // found a match.
+        if (it_find != setData.end())  // found a match.
             return true;
     }
 
     return false;
 }
 
-bool NumList::Add(const NumList& theNumList) // if false, means the numbers
-                                             // were already there. (At
-                                             // least one of them.)
+bool NumList::Add(const NumList& theNumList)  // if false, means the numbers
+                                              // were already there. (At
+                                              // least one of them.)
 {
     std::set<int64_t> theOutput;
-    theNumList.Output(theOutput); // returns false if the numlist was empty.
+    theNumList.Output(theOutput);  // returns false if the numlist was empty.
 
     return Add(theOutput);
 }
 
-bool NumList::Add(const std::set<int64_t>& theNumbers) // if false, means the
-                                                       // numbers were already
-                                                       // there. (At least one
-                                                       // of them.)
+bool NumList::Add(const std::set<int64_t>& theNumbers)  // if false, means the
+                                                        // numbers were already
+                                                        // there. (At least one
+                                                        // of them.)
 {
     bool bSuccess = true;
 
     for (const auto& it : theNumbers) {
-        if (!Add(it)) // It must have already been there.
+        if (!Add(it))  // It must have already been there.
             bSuccess = false;
     }
 
     return bSuccess;
 }
 
-bool NumList::Remove(const std::set<int64_t>& theNumbers) // if false, means
-                                                          // the numbers were
-                                                          // NOT already
-                                                          // there. (At least
-                                                          // one of them.)
+bool NumList::Remove(const std::set<int64_t>& theNumbers)  // if false, means
+                                                           // the numbers were
+                                                           // NOT already
+                                                           // there. (At least
+                                                           // one of them.)
 {
     bool bSuccess = true;
 
     for (const auto& it : theNumbers) {
-        if (!Remove(it)) // It must have NOT already been there.
+        if (!Remove(it))  // It must have NOT already been there.
             bSuccess = false;
     }
 
@@ -338,9 +329,9 @@ bool NumList::Remove(const std::set<int64_t>& theNumbers) // if false, means
 // Outputs the numlist as a set of numbers.
 // (To iterate OTNumList, call this, then iterate the output.)
 //
-bool NumList::Output(std::set<int64_t>& theOutput) const // returns false if
-                                                         // the numlist was
-                                                         // empty.
+bool NumList::Output(std::set<int64_t>& theOutput) const  // returns false if
+                                                          // the numlist was
+                                                          // empty.
 {
     theOutput = m_setData;
 
@@ -349,8 +340,8 @@ bool NumList::Output(std::set<int64_t>& theOutput) const // returns false if
 
 // Outputs the numlist as a comma-separated string (for serialization, usually.)
 //
-bool NumList::Output(String& strOutput) const // returns false if the
-                                              // numlist was empty.
+bool NumList::Output(String& strOutput) const  // returns false if the
+                                               // numlist was empty.
 {
     int32_t nIterationCount = 0;
 
@@ -362,7 +353,8 @@ bool NumList::Output(String& strOutput) const // returns false if the
             // If first iteration, prepend a blank string (instead of a comma.)
             // Like this:  "%" PRId64 ""
             // But for all subsequent iterations, concatenate: ",%" PRId64 ""
-            (1 == nIterationCount) ? "" : ",", it);
+            (1 == nIterationCount) ? "" : ",",
+            it);
     }
 
     return !m_setData.empty();
@@ -373,9 +365,6 @@ int32_t NumList::Count() const
     return static_cast<int32_t>(m_setData.size());
 }
 
-void NumList::Release()
-{
-    m_setData.clear();
-}
+void NumList::Release() { m_setData.clear(); }
 
-} // namespace opentxs
+}  // namespace opentxs

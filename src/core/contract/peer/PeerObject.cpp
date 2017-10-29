@@ -48,6 +48,10 @@
 #include "opentxs/core/Log.hpp"
 #include "opentxs/core/String.hpp"
 
+#define PEER_VERSION 4
+#define MESSAGE_VERSION 2
+#define PAYMENT_VERSION 5
+
 #define OT_METHOD "opentxs::PeerObject::"
 
 namespace opentxs
@@ -83,6 +87,9 @@ PeerObject::PeerObject(
 
             reply_ = PeerReply::Factory(nym_, serialized.otreply());
         } break;
+        case (proto::PEEROBJECT_PAYMENT): {
+            payment_.reset(new std::string(serialized.otpayment()));
+        } break;
         default: {
             otErr << OT_METHOD << __FUNCTION__ << ": Incorrect type."
                   << std::endl;
@@ -92,17 +99,25 @@ PeerObject::PeerObject(
 
 PeerObject::PeerObject(const ConstNym& senderNym, const std::string& message)
     : nym_(senderNym)
+    , message_(new std::string{message})
     , type_(proto::PEEROBJECT_MESSAGE)
-    , version_(2)
+    , version_(MESSAGE_VERSION)
 {
-    message_.reset(new std::string(message));
+}
+
+PeerObject::PeerObject(const std::string& payment, const ConstNym& senderNym)
+    : nym_(senderNym)
+    , payment_(new std::string{payment})
+    , type_(proto::PEEROBJECT_PAYMENT)
+    , version_(PAYMENT_VERSION)
+{
 }
 
 PeerObject::PeerObject(
     std::unique_ptr<PeerRequest>& request,
     std::unique_ptr<PeerReply>& reply)
     : type_(proto::PEEROBJECT_RESPONSE)
-    , version_(2)
+    , version_(PEER_VERSION)
 {
     request_.swap(request);
     reply_.swap(reply);
@@ -110,7 +125,7 @@ PeerObject::PeerObject(
 
 PeerObject::PeerObject(std::unique_ptr<PeerRequest>& request)
     : type_(proto::PEEROBJECT_REQUEST)
-    , version_(2)
+    , version_(PEER_VERSION)
 {
     request_.swap(request);
 }
@@ -120,6 +135,25 @@ std::unique_ptr<PeerObject> PeerObject::Create(
     const std::string& message)
 {
     std::unique_ptr<PeerObject> output(new PeerObject(senderNym, message));
+
+    if (!output->Validate()) {
+        output.reset();
+    }
+
+    return output;
+}
+
+std::unique_ptr<PeerObject> PeerObject::Create(
+    const ConstNym& senderNym,
+    const std::string& payment,
+    const bool isPayment)
+{
+    if (!isPayment) {
+
+        return Create(senderNym, payment);
+    }
+
+    std::unique_ptr<PeerObject> output(new PeerObject(payment, senderNym));
 
     if (!output->Validate()) {
         output.reset();
@@ -198,16 +232,16 @@ proto::PeerObject PeerObject::Serialize() const
 {
     proto::PeerObject output;
 
-    if (2 > version_) {
-        output.set_version(2);
-    } else {
-        output.set_version(version_);
-    }
-
     output.set_type(type_);
 
     switch (type_) {
         case (proto::PEEROBJECT_MESSAGE): {
+            if (MESSAGE_VERSION > version_) {
+                output.set_version(MESSAGE_VERSION);
+            } else {
+                output.set_version(version_);
+            }
+
             if (message_) {
                 if (nym_) {
                     *output.mutable_nym() = nym_->asPublicNym();
@@ -216,7 +250,28 @@ proto::PeerObject PeerObject::Serialize() const
             }
             break;
         }
+        case (proto::PEEROBJECT_PAYMENT): {
+            if (PAYMENT_VERSION > version_) {
+                output.set_version(PAYMENT_VERSION);
+            } else {
+                output.set_version(version_);
+            }
+
+            if (payment_) {
+                if (nym_) {
+                    *output.mutable_nym() = nym_->asPublicNym();
+                }
+                output.set_otpayment(String(*payment_).Get());
+            }
+            break;
+        }
         case (proto::PEEROBJECT_REQUEST): {
+            if (PEER_VERSION > version_) {
+                output.set_version(PEER_VERSION);
+            } else {
+                output.set_version(version_);
+            }
+
             if (request_) {
                 *(output.mutable_otrequest()) = request_->Contract();
                 auto nym = OT::App().Contract().Nym(request_->Initiator());
@@ -228,6 +283,12 @@ proto::PeerObject PeerObject::Serialize() const
             break;
         }
         case (proto::PEEROBJECT_RESPONSE): {
+            if (PEER_VERSION > version_) {
+                output.set_version(PEER_VERSION);
+            } else {
+                output.set_version(version_);
+            }
+
             if (reply_) {
                 *(output.mutable_otreply()) = reply_->Contract();
             }
@@ -267,7 +328,12 @@ bool PeerObject::Validate() const
             validChildren = reply_->Validate() && request_->Validate();
             break;
         }
+        case (proto::PEEROBJECT_PAYMENT): {
+            validChildren = bool(payment_);
+            break;
+        }
         default: {
+            otErr << OT_METHOD << __FUNCTION__ << ": Unknown type" << std::endl;
         }
     }
 

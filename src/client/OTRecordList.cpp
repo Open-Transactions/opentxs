@@ -631,17 +631,17 @@ bool OTRecordList::PerformAutoAccept()
                         OTTransaction* pBoxTrans = it.second;
                         OT_ASSERT(nullptr != pBoxTrans);
                         ++nIndex;  // 0 on first iteration.
-                        otInfo << __FUNCTION__
-                               << ": Incoming payment: " << nIndex << "\n";
+                        //                      otInfo << __FUNCTION__
+                        //                             << ": Incoming payment: "
+                        //                             << nIndex << "\n";
                         const std::string* p_str_asset_type =
                             &OTRecordList::s_blank;  // <========== ASSET TYPE
                         const std::string* p_str_asset_name =
                             &OTRecordList::s_blank;  // instrument definition
                                                      // display name.
                         std::string str_type;        // Instrument type.
-                        OTPayment* pPayment =
-                            GetInstrument(*pNym, nIndex, *pInbox);
-                        // ===> Returns financial instrument by index.
+                        OTPayment* pPayment = GetInstrumentByReceiptID(
+                            *pNym, lPaymentBoxTransNum, *pInbox);
                         std::unique_ptr<OTPayment> thePaymentAngel(pPayment);
                         if (nullptr == pPayment)  // then we treat it like it's
                                                   // abbreviated.
@@ -671,8 +671,7 @@ bool OTRecordList::PerformAutoAccept()
                                 if (it_asset != m_assets.end())  // Found it on
                                                                  // the map of
                                 // instrument definitions
-                                // we care
-                                // about.
+                                // we care about.
                                 {
                                     p_str_asset_type =
                                         &(it_asset->first);  // Set the asset
@@ -1073,10 +1072,7 @@ bool OTRecordList::PerformAutoAccept()
                         }
                         strResponseLedger =
                             OT::App().API().Exec().Ledger_CreateResponse(
-                                str_notary_id,
-                                str_nym_id,
-                                str_account_id,
-                                str_inbox);
+                                str_notary_id, str_nym_id, str_account_id);
 
                         if (strResponseLedger.empty()) {
                             otOut << "\n\nFailure: "
@@ -1109,7 +1105,7 @@ bool OTRecordList::PerformAutoAccept()
                     }
                     strResponseLedger = strNEW_ResponseLEDGER;
                 }
-            }
+            }  // For
             // Okay now we have the response ledger all ready to go, let's
             // process it!
             //
@@ -1803,6 +1799,7 @@ bool OTRecordList::Populate()
             // It loaded up, so let's loop through it.
             if (nullptr != pInbox) {
                 for (auto& it : pInbox->GetTransactionMap()) {
+                    const int64_t lReceiptId = it.first;
                     OTTransaction* pBoxTrans = it.second;
                     OT_ASSERT(nullptr != pBoxTrans);
                     ++nIndex;  // 0 on first iteration.
@@ -1881,9 +1878,8 @@ bool OTRecordList::Populate()
                     } else  // NOT abbreviated. (Full box receipt is already
                             // loaded.)
                     {
-                        OTPayment* pPayment =
-                            GetInstrument(*pNym, nIndex, *pInbox);
-                        // ===> Returns financial instrument by index.
+                        OTPayment* pPayment = GetInstrumentByReceiptID(
+                            *pNym, lReceiptId, *pInbox);
                         std::unique_ptr<OTPayment> thePaymentAngel(pPayment);
                         if (nullptr == pPayment)  // then we treat it like it's
                                                   // abbreviated.
@@ -2126,6 +2122,7 @@ bool OTRecordList::Populate()
             // It loaded up, so let's loop through it.
             if (nullptr != pRecordbox) {
                 for (auto& it : pRecordbox->GetTransactionMap()) {
+                    const int64_t lReceiptId = it.first;
                     OTTransaction* pBoxTrans = it.second;
                     OT_ASSERT(nullptr != pBoxTrans);
                     bool bOutgoing = false;
@@ -2409,11 +2406,8 @@ bool OTRecordList::Populate()
                     } else  // NOT abbreviated. (Full box receipt is already
                             // loaded.)
                     {
-                        OTPayment* pPayment = GetInstrument(
-                            *pNym, nIndex, *pRecordbox);  // ===> Returns
-                                                          // financial
-                                                          // instrument by
-                                                          // index.
+                        OTPayment* pPayment = GetInstrumentByReceiptID(
+                            *pNym, lReceiptId, *pRecordbox);
                         std::unique_ptr<OTPayment> thePaymentAngel(pPayment);
 
                         if (nullptr == pPayment)  // then we treat it like it's
@@ -2737,6 +2731,7 @@ bool OTRecordList::Populate()
             // It loaded up, so let's loop through it.
             if (nullptr != pExpiredbox) {
                 for (auto& it : pExpiredbox->GetTransactionMap()) {
+                    const int64_t lReceiptId = it.first;
                     OTTransaction* pBoxTrans = it.second;
                     OT_ASSERT(nullptr != pBoxTrans);
                     bool bOutgoing = false;
@@ -3002,11 +2997,8 @@ bool OTRecordList::Populate()
                     } else  // NOT abbreviated. (Full box receipt is already
                             // loaded.)
                     {
-                        OTPayment* pPayment = GetInstrument(
-                            *pNym, nIndex, *pExpiredbox);  //===> Returns
-                                                           // financial
-                                                           // instrument by
-                                                           // index.
+                        OTPayment* pPayment = GetInstrumentByReceiptID(
+                            *pNym, lReceiptId, *pExpiredbox);
                         std::unique_ptr<OTPayment> thePaymentAngel(pPayment);
 
                         if (nullptr == pPayment)  // then we treat it like it's

@@ -72,6 +72,7 @@
 #include "opentxs/core/OTStringXML.hpp"
 #include "opentxs/core/OTTransaction.hpp"
 #include "opentxs/core/String.hpp"
+#include "opentxs/ext/OTPayment.hpp"
 #include "opentxs/server/OTServer.hpp"      // TODO remove this
 #include "opentxs/server/ServerLoader.hpp"  // TODO remove this
 
@@ -604,10 +605,57 @@ Message* Nym::GetOutpaymentsByIndex(std::int32_t nIndex) const
 
     // Out of bounds.
     if (m_dequeOutpayments.empty() || (nIndex < 0) ||
-        (uIndex >= m_dequeOutpayments.size()))
+        (uIndex >= m_dequeOutpayments.size())) {
+
         return nullptr;
+    }
 
     return m_dequeOutpayments.at(nIndex);
+}
+
+Message* Nym::GetOutpaymentsByTransNum(
+    const std::int64_t lTransNum,
+    std::unique_ptr<OTPayment>* pReturnPayment /*=nullptr*/,
+    std::int32_t* pnReturnIndex /*=nullptr*/) const
+{
+    if (nullptr != pnReturnIndex) {
+        *pnReturnIndex = -1;
+    }
+
+    const std::int32_t nCount = GetOutpaymentsCount();
+
+    for (std::int32_t nIndex = 0; nIndex < nCount; ++nIndex) {
+        Message* pMsg = m_dequeOutpayments.at(nIndex);
+        OT_ASSERT(nullptr != pMsg);
+        String strPayment;
+        std::unique_ptr<OTPayment> payment;
+        std::unique_ptr<OTPayment>& pPayment(
+            nullptr == pReturnPayment ? payment : *pReturnPayment);
+
+        // There isn't any encrypted envelope this time, since it's my
+        // outPayments box.
+        //
+        if (pMsg->m_ascPayload.Exists() &&
+            pMsg->m_ascPayload.GetString(strPayment) && strPayment.Exists()) {
+            pPayment.reset(new OTPayment(strPayment));
+
+            // Let's see if it's the cheque we're looking for...
+            //
+            if (pPayment && pPayment->IsValid()) {
+                if (pPayment->SetTempValues()) {
+                    if (pPayment->HasTransactionNum(lTransNum)) {
+
+                        if (nullptr != pnReturnIndex) {
+                            *pnReturnIndex = nIndex;
+                        }
+
+                        return pMsg;
+                    }
+                }
+            }
+        }
+    }
+    return nullptr;
 }
 
 /// return the number of payments items available for this Nym.
@@ -1386,8 +1434,9 @@ bool Nym::LoadNymFromString(
 
                     if (!tempNotaryID.Exists() ||
                         !Contract::LoadEncodedTextField(xml, strTemp)) {
-                        otErr << __FUNCTION__ << ": Error: transactionNums "
-                                                 "field without value.\n";
+                        otErr << __FUNCTION__
+                              << ": Error: transactionNums "
+                                 "field without value.\n";
                         return false;  // error condition
                     }
 
@@ -2057,9 +2106,8 @@ bool Nym::ReEncryptPrivateCredentials(
         CredentialSet* pCredential = it.second;
         OT_ASSERT(nullptr != pCredential);
 
-        if (false ==
-            pCredential->ReEncryptPrivateCredentials(
-                *pExportPassphrase, bImporting))
+        if (false == pCredential->ReEncryptPrivateCredentials(
+                         *pExportPassphrase, bImporting))
             return false;
     }
 
@@ -2096,7 +2144,7 @@ void Nym::RemoveAllNumbers(const String* pstrNotaryID)
 }
 
 // if this function returns false, outpayments index was bad.
-bool Nym::RemoveOutpaymentsByIndex(std::int32_t nIndex, bool bDeleteIt)
+bool Nym::RemoveOutpaymentsByIndex(const std::int32_t nIndex, bool bDeleteIt)
 {
     const std::uint32_t uIndex = nIndex;
 
@@ -2105,7 +2153,7 @@ bool Nym::RemoveOutpaymentsByIndex(std::int32_t nIndex, bool bDeleteIt)
         (uIndex >= m_dequeOutpayments.size())) {
         otErr << __FUNCTION__
               << ": Error: Index out of bounds: signed: " << nIndex
-              << " unsigned: " << uIndex << " (size is "
+              << " unsigned: " << uIndex << " (deque size is "
               << m_dequeOutpayments.size() << ").\n";
         return false;
     }
@@ -2118,6 +2166,25 @@ bool Nym::RemoveOutpaymentsByIndex(std::int32_t nIndex, bool bDeleteIt)
     if (bDeleteIt) delete pMessage;
 
     return true;
+}
+
+bool Nym::RemoveOutpaymentsByTransNum(
+    const std::int64_t lTransNum,
+    bool bDeleteIt /*=true*/)
+{
+    std::int32_t nReturnIndex = -1;
+
+    Message* pMsg =
+        this->GetOutpaymentsByTransNum(lTransNum, nullptr, &nReturnIndex);
+    const std::uint32_t uIndex = nReturnIndex;
+
+    if ((nullptr != pMsg) && (nReturnIndex > (-1)) &&
+        (uIndex < m_dequeOutpayments.size())) {
+        m_dequeOutpayments.erase(m_dequeOutpayments.begin() + uIndex);
+        if (bDeleteIt) delete pMsg;
+        return true;
+    }
+    return false;
 }
 
 // ** ResyncWithServer **

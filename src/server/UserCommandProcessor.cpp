@@ -2368,6 +2368,24 @@ bool UserCommandProcessor::cmd_send_nym_message(ReplyMessage& reply) const
     return true;
 }
 
+// msg, the request msg from payer, which is attached WHOLE to the Nymbox
+// receipt. contains payment already.
+// or pass pPayment instead: we will create our own msg here (with payment
+// inside) to be attached to the receipt.
+bool UserCommandProcessor::send_message_to_nym(
+    const Identifier& NOTARY_ID,
+    const Identifier& SENDER_NYM_ID,
+    const Identifier& RECIPIENT_NYM_ID,
+    const Message& pMsg) const
+{
+    return server_->DropMessageToNymbox(
+        NOTARY_ID,
+        SENDER_NYM_ID,
+        RECIPIENT_NYM_ID,
+        OTTransaction::message,
+        pMsg);
+}
+
 bool UserCommandProcessor::cmd_trigger_clause(ReplyMessage& reply) const
 {
     const auto& msgIn = reply.Original();
@@ -3225,24 +3243,6 @@ bool UserCommandProcessor::save_outbox(
     }
 
     return true;
-}
-
-// msg, the request msg from payer, which is attached WHOLE to the Nymbox
-// receipt. contains payment already.
-// or pass pPayment instead: we will create our own msg here (with payment
-// inside) to be attached to the receipt.
-bool UserCommandProcessor::send_message_to_nym(
-    const Identifier& NOTARY_ID,
-    const Identifier& SENDER_NYM_ID,
-    const Identifier& RECIPIENT_NYM_ID,
-    const Message& pMsg) const
-{
-    return server_->DropMessageToNymbox(
-        NOTARY_ID,
-        SENDER_NYM_ID,
-        RECIPIENT_NYM_ID,
-        OTTransaction::message,
-        pMsg);
 }
 
 bool UserCommandProcessor::verify_box(

@@ -1996,11 +1996,9 @@ int32_t OTAPI_Wrap::Ledger_GetCount(
 std::string OTAPI_Wrap::Ledger_CreateResponse(
     const std::string& NOTARY_ID,
     const std::string& NYM_ID,
-    const std::string& ACCOUNT_ID,
-    const std::string& ORIGINAL_LEDGER)
+    const std::string& ACCOUNT_ID)
 {
-    return Exec()->Ledger_CreateResponse(
-        NOTARY_ID, NYM_ID, ACCOUNT_ID, ORIGINAL_LEDGER);
+    return Exec()->Ledger_CreateResponse(NOTARY_ID, NYM_ID, ACCOUNT_ID);
 }
 
 std::string OTAPI_Wrap::Ledger_GetTransactionByIndex(
@@ -2036,6 +2034,17 @@ std::string OTAPI_Wrap::Ledger_GetInstrument(
         NOTARY_ID, NYM_ID, ACCOUNT_ID, THE_LEDGER, nIndex);
 }
 
+std::string OTAPI_Wrap::Ledger_GetInstrumentByReceiptID(
+    const std::string& NOTARY_ID,
+    const std::string& NYM_ID,
+    const std::string& ACCOUNT_ID,
+    const std::string& THE_LEDGER,
+    const int64_t& lReceiptId)
+{
+    return Exec()->Ledger_GetInstrumentByReceiptID(
+        NOTARY_ID, NYM_ID, ACCOUNT_ID, THE_LEDGER, lReceiptId);
+}
+
 int64_t OTAPI_Wrap::Ledger_GetTransactionIDByIndex(
     const std::string& NOTARY_ID,
     const std::string& NYM_ID,
@@ -2045,6 +2054,16 @@ int64_t OTAPI_Wrap::Ledger_GetTransactionIDByIndex(
 {
     return Exec()->Ledger_GetTransactionIDByIndex(
         NOTARY_ID, NYM_ID, ACCOUNT_ID, THE_LEDGER, nIndex);
+}
+
+std::string OTAPI_Wrap::Ledger_GetTransactionNums(
+    const std::string& NOTARY_ID,
+    const std::string& NYM_ID,
+    const std::string& ACCOUNT_ID,
+    const std::string& THE_LEDGER)
+{
+    return Exec()->Ledger_GetTransactionNums(
+        NOTARY_ID, NYM_ID, ACCOUNT_ID, THE_LEDGER);
 }
 
 std::string OTAPI_Wrap::Ledger_AddTransaction(
