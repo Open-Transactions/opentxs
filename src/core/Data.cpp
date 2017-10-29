@@ -47,6 +47,7 @@
 #include <cstdio>
 #include <iomanip>
 #include <sstream>
+#include <boost/algorithm/hex.hpp>
 
 namespace opentxs
 {
@@ -105,6 +106,20 @@ Data& Data::operator+=(const Data& rhs)
     concatenate(rhs.data_);
 
     return *this;
+}
+
+Data Data::fromHex(const std::string& in)
+{
+    std::vector<std::uint8_t> v;
+
+    for (unsigned int i = 0; i < in.length(); i += 2) {
+        std::string byteString = in.substr(i, 2);
+        std::uint8_t byte =
+            static_cast<std::uint8_t>(strtol(byteString.c_str(), NULL, 16));
+        v.push_back(byte);
+    }
+
+    return Data(v);
 }
 
 std::string Data::asHex() const
