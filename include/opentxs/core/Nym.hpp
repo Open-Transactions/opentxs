@@ -69,6 +69,7 @@ class OTAsymmetricKey;
 class OTKeypair;
 class OTPassword;
 class OTPasswordData;
+class OTPayment;
 class OTTransaction;
 class ServerContract;
 class Tag;
@@ -136,7 +137,11 @@ public:
     EXPORT bool GetOutboxHash(
         const std::string& acct_id,
         Identifier& theOutput) const;  // client-side
-    EXPORT Message* GetOutpaymentsByIndex(std::int32_t nIndex) const;
+    EXPORT Message* GetOutpaymentsByIndex(const std::int32_t nIndex) const;
+    EXPORT Message* GetOutpaymentsByTransNum(
+        const std::int64_t lTransNum,
+        std::unique_ptr<OTPayment>* pReturnPayment = nullptr,
+        std::int32_t* pnReturnIndex = nullptr) const;
     EXPORT std::int32_t GetOutpaymentsCount() const;
     EXPORT const OTAsymmetricKey& GetPrivateAuthKey() const;
     EXPORT const OTAsymmetricKey& GetPrivateEncrKey() const;
@@ -224,8 +229,18 @@ public:
         bool bImporting,
         const OTPasswordData* pPWData = nullptr,
         const OTPassword* pImportPassword = nullptr);
+
+    // IMPORTANT NOTE: Not all outpayments have a transaction num!
+    // Imagine if you sent a cash purse to someone, for example.
+    // The cash withdrawal had a transNum, and the eventual cash
+    // deposit will have a transNum, but the purse itself does NOT.
+    // That's okay in your outpayments box since it's like an outmail
+    // box. It's not a ledger, so the items inside don't need a txn#.
     EXPORT bool RemoveOutpaymentsByIndex(
-        std::int32_t nIndex,
+        const std::int32_t nIndex,
+        bool bDeleteIt = true);
+    EXPORT bool RemoveOutpaymentsByTransNum(
+        const std::int64_t lTransNum,
         bool bDeleteIt = true);
     // ** ResyncWithServer **
     //

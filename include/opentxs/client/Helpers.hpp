@@ -141,14 +141,38 @@ namespace opentxs
 class Ledger;
 class Nym;
 class OTPayment;
+class OTTransaction;
 
+// returns financial instrument (Cheque, Purse, etc.) by
+// receipt ID in ledger. So if ledger contains 5 receipts,
+// the transaction ID of one of those receipts might contain
+// a purse or something, that the caller wants to retrieve.
+//
 // Caller is responsible to delete.
-// returns financial instrument by index. (Cheque, Purse, etc.)
-EXPORT OTPayment* GetInstrument(const Nym& theNym, const int32_t& nIndex,
-                                Ledger& ledger);
+EXPORT OTPayment* GetInstrumentByReceiptID(
+    const Nym& theNym,
+    const int64_t& lReceiptId,
+    Ledger& ledger);
+
+EXPORT OTPayment* GetInstrumentByIndex(
+    const Nym& theNym,
+    const int32_t& nIndex,
+    Ledger& ledger);
+
+// returns financial instrument inside pTransaction.
+// (Cheque, Purse, etc.)
+// Caller is responsible to delete.
+EXPORT OTPayment* GetInstrument(
+    const Nym& theNym,
+    Ledger& ledger,
+    OTTransaction*& pTransaction);
+
+EXPORT OTPayment* extract_payment_instrument_from_notice(
+    const Nym& theNym,
+    OTTransaction*& pTransaction);
 
 EXPORT int32_t GetOutpaymentsIndexByTransNum(const Nym& nym, int64_t lTransNum);
 
-} // namespace opentxs
+}  // namespace opentxs
 
-#endif // OPENTXS_CLIENT_HELPERS_HPP
+#endif  // OPENTXS_CLIENT_HELPERS_HPP

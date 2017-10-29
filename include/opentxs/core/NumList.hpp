@@ -66,6 +66,7 @@ class NumList
 
 public:
     explicit EXPORT NumList(const std::set<int64_t>& theNumbers);
+    explicit EXPORT NumList(std::set<int64_t>&& theNumbers);
     explicit EXPORT NumList(const String& strNumbers);
     explicit EXPORT NumList(const std::string& strNumbers);
     explicit EXPORT NumList(int64_t lInput);

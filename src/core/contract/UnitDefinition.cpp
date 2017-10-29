@@ -419,8 +419,9 @@ bool UnitDefinition::AddAccountRecord(const Account& theAccount) const  // adds
     const char* szFunc = "OTUnitDefinition::AddAccountRecord";
 
     if (theAccount.GetInstrumentDefinitionID() != id_) {
-        otErr << szFunc << ": Error: theAccount doesn't have the same asset "
-                           "type ID as *this does.\n";
+        otErr << szFunc
+              << ": Error: theAccount doesn't have the same asset "
+                 "type ID as *this does.\n";
         return false;
     }
 
@@ -485,11 +486,13 @@ bool UnitDefinition::AddAccountRecord(const Account& theAccount) const  // adds
                                                                        // never
         // happen.
         {
-            otErr << szFunc << ": Error: wrong instrument definition found in "
-                               "account records "
-                               "file...\n For instrument definition: "
-                  << strInstrumentDefinitionID << "\n "
-                                                  "For account: "
+            otErr << szFunc
+                  << ": Error: wrong instrument definition found in "
+                     "account records "
+                     "file...\n For instrument definition: "
+                  << strInstrumentDefinitionID
+                  << "\n "
+                     "For account: "
                   << strAcctID
                   << "\n Found wrong instrument definition: " << str2 << "\n";
             return false;

@@ -178,7 +178,6 @@ std::string OTNameLookup::GetNymName(
 
         if (Identifier::validateID(strContactId.Get())) {
             const auto pContact = OT::App().Contact().Contact(contactId);
-
             if (pContact && !(pContact->Label().empty())) {
                 display_label = pContact->Label();
             }
@@ -618,11 +617,10 @@ bool OTRecordList::PerformAutoAccept()
                 // either way.
                 //
                 Ledger* pInbox =
-                    m_bRunFast
-                        ? OTAPI_Wrap::OTAPI()->LoadPaymentInboxNoVerify(
-                              theNotaryID, theNymID)
-                        : OTAPI_Wrap::OTAPI()->LoadPaymentInbox(
-                              theNotaryID, theNymID);
+                    m_bRunFast ? OTAPI_Wrap::OTAPI()->LoadPaymentInboxNoVerify(
+                                     theNotaryID, theNymID)
+                               : OTAPI_Wrap::OTAPI()->LoadPaymentInbox(
+                                     theNotaryID, theNymID);
                 std::unique_ptr<Ledger> theInboxAngel(pInbox);
 
                 // It loaded up, so let's loop through it.
@@ -633,17 +631,17 @@ bool OTRecordList::PerformAutoAccept()
                         OTTransaction* pBoxTrans = it.second;
                         OT_ASSERT(nullptr != pBoxTrans);
                         ++nIndex;  // 0 on first iteration.
-                        otInfo << __FUNCTION__
-                               << ": Incoming payment: " << nIndex << "\n";
+                        //                      otInfo << __FUNCTION__
+                        //                             << ": Incoming payment: "
+                        //                             << nIndex << "\n";
                         const std::string* p_str_asset_type =
                             &OTRecordList::s_blank;  // <========== ASSET TYPE
                         const std::string* p_str_asset_name =
                             &OTRecordList::s_blank;  // instrument definition
                                                      // display name.
                         std::string str_type;        // Instrument type.
-                        OTPayment* pPayment =
-                            GetInstrument(*pNym, nIndex, *pInbox);
-                        // ===> Returns financial instrument by index.
+                        OTPayment* pPayment = GetInstrumentByReceiptID(
+                            *pNym, lPaymentBoxTransNum, *pInbox);
                         std::unique_ptr<OTPayment> thePaymentAngel(pPayment);
                         if (nullptr == pPayment)  // then we treat it like it's
                                                   // abbreviated.
@@ -673,8 +671,7 @@ bool OTRecordList::PerformAutoAccept()
                                 if (it_asset != m_assets.end())  // Found it on
                                                                  // the map of
                                 // instrument definitions
-                                // we care
-                                // about.
+                                // we care about.
                                 {
                                     p_str_asset_type =
                                         &(it_asset->first);  // Set the asset
@@ -1075,10 +1072,7 @@ bool OTRecordList::PerformAutoAccept()
                         }
                         strResponseLedger =
                             OT::App().API().Exec().Ledger_CreateResponse(
-                                str_notary_id,
-                                str_nym_id,
-                                str_account_id,
-                                str_inbox);
+                                str_notary_id, str_nym_id, str_account_id);
 
                         if (strResponseLedger.empty()) {
                             otOut << "\n\nFailure: "
@@ -1111,7 +1105,7 @@ bool OTRecordList::PerformAutoAccept()
                     }
                     strResponseLedger = strNEW_ResponseLEDGER;
                 }
-            }
+            }  // For
             // Okay now we have the response ledger all ready to go, let's
             // process it!
             //
@@ -1795,17 +1789,17 @@ bool OTRecordList::Populate()
             // either way.
             //
             Ledger* pInbox =
-                m_bRunFast
-                    ? OTAPI_Wrap::OTAPI()->LoadPaymentInboxNoVerify(
-                          theNotaryID, theNymID)
-                    : OTAPI_Wrap::OTAPI()->LoadPaymentInbox(
-                          theNotaryID, theNymID);
+                m_bRunFast ? OTAPI_Wrap::OTAPI()->LoadPaymentInboxNoVerify(
+                                 theNotaryID, theNymID)
+                           : OTAPI_Wrap::OTAPI()->LoadPaymentInbox(
+                                 theNotaryID, theNymID);
             std::unique_ptr<Ledger> theInboxAngel(pInbox);
 
             int32_t nIndex = (-1);
             // It loaded up, so let's loop through it.
             if (nullptr != pInbox) {
                 for (auto& it : pInbox->GetTransactionMap()) {
+                    const int64_t lReceiptId = it.first;
                     OTTransaction* pBoxTrans = it.second;
                     OT_ASSERT(nullptr != pBoxTrans);
                     ++nIndex;  // 0 on first iteration.
@@ -1884,9 +1878,8 @@ bool OTRecordList::Populate()
                     } else  // NOT abbreviated. (Full box receipt is already
                             // loaded.)
                     {
-                        OTPayment* pPayment =
-                            GetInstrument(*pNym, nIndex, *pInbox);
-                        // ===> Returns financial instrument by index.
+                        OTPayment* pPayment = GetInstrumentByReceiptID(
+                            *pNym, lReceiptId, *pInbox);
                         std::unique_ptr<OTPayment> thePaymentAngel(pPayment);
                         if (nullptr == pPayment)  // then we treat it like it's
                                                   // abbreviated.
@@ -2120,16 +2113,16 @@ bool OTRecordList::Populate()
             // NYM_ID twice, since it's the recordbox for the Nym.
             // OPTIMIZE FYI: m_bRunFast impacts run speed here.
             Ledger* pRecordbox =
-                m_bRunFast
-                    ? OTAPI_Wrap::OTAPI()->LoadRecordBoxNoVerify(
-                          theNotaryID, theNymID, theNymID)  // twice.
-                    : OTAPI_Wrap::OTAPI()->LoadRecordBox(
-                          theNotaryID, theNymID, theNymID);
+                m_bRunFast ? OTAPI_Wrap::OTAPI()->LoadRecordBoxNoVerify(
+                                 theNotaryID, theNymID, theNymID)  // twice.
+                           : OTAPI_Wrap::OTAPI()->LoadRecordBox(
+                                 theNotaryID, theNymID, theNymID);
             std::unique_ptr<Ledger> theRecordBoxAngel(pRecordbox);
 
             // It loaded up, so let's loop through it.
             if (nullptr != pRecordbox) {
                 for (auto& it : pRecordbox->GetTransactionMap()) {
+                    const int64_t lReceiptId = it.first;
                     OTTransaction* pBoxTrans = it.second;
                     OT_ASSERT(nullptr != pBoxTrans);
                     bool bOutgoing = false;
@@ -2217,12 +2210,11 @@ bool OTRecordList::Populate()
                             // Whereas if Nym were the recipient, then we'd want
                             // the SENDER. (For display.)
                             //
-                            if (0 ==
-                                str_nym_id.compare(
-                                    str_sender_id))  // str_nym_id IS
-                                                     // str_sender_id.
-                                                     // (Therefore we want
-                                                     // recipient.)
+                            if (0 == str_nym_id.compare(
+                                         str_sender_id))  // str_nym_id IS
+                                                          // str_sender_id.
+                                                          // (Therefore we want
+                                                          // recipient.)
                             {
                                 if (OTTransaction::notice ==
                                     pBoxTrans->GetType()) {
@@ -2414,11 +2406,8 @@ bool OTRecordList::Populate()
                     } else  // NOT abbreviated. (Full box receipt is already
                             // loaded.)
                     {
-                        OTPayment* pPayment = GetInstrument(
-                            *pNym, nIndex, *pRecordbox);  // ===> Returns
-                                                          // financial
-                                                          // instrument by
-                                                          // index.
+                        OTPayment* pPayment = GetInstrumentByReceiptID(
+                            *pNym, lReceiptId, *pRecordbox);
                         std::unique_ptr<OTPayment> thePaymentAngel(pPayment);
 
                         if (nullptr == pPayment)  // then we treat it like it's
@@ -2722,9 +2711,10 @@ bool OTRecordList::Populate()
 
                 }  // Loop through Recordbox
             } else
-                otWarn << __FUNCTION__ << ": Failed loading payments record "
-                                          "box. (Probably just doesn't exist "
-                                          "yet.)\n";
+                otWarn << __FUNCTION__
+                       << ": Failed loading payments record "
+                          "box. (Probably just doesn't exist "
+                          "yet.)\n";
 
             // EXPIRED RECORDS:
             nIndex = (-1);
@@ -2732,16 +2722,16 @@ bool OTRecordList::Populate()
             // Also loop through its expired record box.
             // OPTIMIZE FYI: m_bRunFast impacts run speed here.
             Ledger* pExpiredbox =
-                m_bRunFast
-                    ? OTAPI_Wrap::OTAPI()->LoadExpiredBoxNoVerify(
-                          theNotaryID, theNymID)
-                    : OTAPI_Wrap::OTAPI()->LoadExpiredBox(
-                          theNotaryID, theNymID);
+                m_bRunFast ? OTAPI_Wrap::OTAPI()->LoadExpiredBoxNoVerify(
+                                 theNotaryID, theNymID)
+                           : OTAPI_Wrap::OTAPI()->LoadExpiredBox(
+                                 theNotaryID, theNymID);
             std::unique_ptr<Ledger> theExpiredBoxAngel(pExpiredbox);
 
             // It loaded up, so let's loop through it.
             if (nullptr != pExpiredbox) {
                 for (auto& it : pExpiredbox->GetTransactionMap()) {
+                    const int64_t lReceiptId = it.first;
                     OTTransaction* pBoxTrans = it.second;
                     OT_ASSERT(nullptr != pBoxTrans);
                     bool bOutgoing = false;
@@ -2823,12 +2813,11 @@ bool OTRecordList::Populate()
                             // Whereas if Nym were the recipient, then we'd want
                             // the SENDER. (For display.)
                             //
-                            if (0 ==
-                                str_nym_id.compare(
-                                    str_sender_id))  // str_nym_id IS
-                                                     // str_sender_id.
-                                                     // (Therefore we want
-                                                     // recipient.)
+                            if (0 == str_nym_id.compare(
+                                         str_sender_id))  // str_nym_id IS
+                                                          // str_sender_id.
+                                                          // (Therefore we want
+                                                          // recipient.)
                             {
                                 if (OTTransaction::notice ==
                                     pBoxTrans->GetType())
@@ -3008,11 +2997,8 @@ bool OTRecordList::Populate()
                     } else  // NOT abbreviated. (Full box receipt is already
                             // loaded.)
                     {
-                        OTPayment* pPayment = GetInstrument(
-                            *pNym, nIndex, *pExpiredbox);  //===> Returns
-                                                           // financial
-                                                           // instrument by
-                                                           // index.
+                        OTPayment* pPayment = GetInstrumentByReceiptID(
+                            *pNym, lReceiptId, *pExpiredbox);
                         std::unique_ptr<OTPayment> thePaymentAngel(pPayment);
 
                         if (nullptr == pPayment)  // then we treat it like it's
@@ -3386,11 +3372,10 @@ bool OTRecordList::Populate()
         // return for FASTER PERFORMANCE, then call SetFastMode() before
         // Populating.
         //
-        Ledger* pInbox = m_bRunFast
-                             ? OTAPI_Wrap::OTAPI()->LoadInboxNoVerify(
-                                   theNotaryID, theNymID, theAccountID)
-                             : OTAPI_Wrap::OTAPI()->LoadInbox(
-                                   theNotaryID, theNymID, theAccountID);
+        Ledger* pInbox = m_bRunFast ? OTAPI_Wrap::OTAPI()->LoadInboxNoVerify(
+                                          theNotaryID, theNymID, theAccountID)
+                                    : OTAPI_Wrap::OTAPI()->LoadInbox(
+                                          theNotaryID, theNymID, theAccountID);
         std::unique_ptr<Ledger> theInboxAngel(pInbox);
 
         // It loaded up, so let's loop through it.
@@ -3674,11 +3659,10 @@ bool OTRecordList::Populate()
         // return for FASTER PERFORMANCE, then call SetFastMode() before running
         // Populate.
         //
-        Ledger* pOutbox = m_bRunFast
-                              ? OTAPI_Wrap::OTAPI()->LoadOutboxNoVerify(
-                                    theNotaryID, theNymID, theAccountID)
-                              : OTAPI_Wrap::OTAPI()->LoadOutbox(
-                                    theNotaryID, theNymID, theAccountID);
+        Ledger* pOutbox = m_bRunFast ? OTAPI_Wrap::OTAPI()->LoadOutboxNoVerify(
+                                           theNotaryID, theNymID, theAccountID)
+                                     : OTAPI_Wrap::OTAPI()->LoadOutbox(
+                                           theNotaryID, theNymID, theAccountID);
         std::unique_ptr<Ledger> theOutboxAngel(pOutbox);
 
         // It loaded up, so let's loop through it.

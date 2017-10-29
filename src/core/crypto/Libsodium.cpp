@@ -610,8 +610,13 @@ bool Libsodium::Verify(
         return true;
     }
 
-    otErr << OT_METHOD << __FUNCTION__ << ": Failed to verify signature."
-          << std::endl;
+    // I made this "info" since it's not necessarily an
+    // error. Perhaps someone tried to verify 3 signatures
+    // so he could find the right one. Metadata can be used
+    // to avoid these extra, unnecessary sig verifications.
+    //
+    otInfo << OT_METHOD << __FUNCTION__ << ": Failed to verify signature."
+           << std::endl;
 
     return false;
 }

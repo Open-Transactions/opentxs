@@ -773,31 +773,24 @@ bool OTServer::DropMessageToNymbox(
     OTTransaction::transactionType theType,
     const Message* pMsg,
     const String* pstrMessage,
-    const char* szCommand)  // If you pass
-                            // something here, it
-                            // will
-// replace pMsg->m_strCommand below
-{
+    const char* szCommand)  // If you pass something here, it will
+{                           // replace pMsg->m_strCommand below.
     OT_ASSERT_MSG(
         !((nullptr == pMsg) && (nullptr == pstrMessage)),
-        "pMsg and pstrMessage -- these can't BOTH be nullptr.\n");  // must
-                                                                    // provide
-    // one or the
-    // other.
+        "pMsg and pstrMessage -- these can't BOTH be nullptr.\n");
+    // ^^^ Must provde one or the other.
     OT_ASSERT_MSG(
         !((nullptr != pMsg) && (nullptr != pstrMessage)),
-        "pMsg and pstrMessage -- these can't BOTH be not-nullptr.\n");  // can't
-    // provide
-    // both.
-    const char* szFunc = "OTServer::DropMessageToNymbox";
-    int64_t lTransNum = 0;
+        "pMsg and pstrMessage -- these can't BOTH be not-nullptr.\n");
+    // ^^^ Can't provide both.
+    int64_t lTransNum{0};
     const bool bGotNextTransNum =
         transactor_.issueNextTransactionNumber(lTransNum);
 
     if (!bGotNextTransNum) {
         Log::vError(
             "%s: Error: failed trying to get next transaction number.\n",
-            szFunc);
+            __FUNCTION__);
         return false;
     }
     switch (theType) {
@@ -809,7 +802,7 @@ bool OTServer::DropMessageToNymbox(
             Log::vError(
                 "%s: Unexpected transactionType passed here (expected message "
                 "or instrumentNotice.)\n",
-                szFunc);
+                __FUNCTION__);
             return false;
     }
     // If pMsg was not already passed in here, then
@@ -856,11 +849,12 @@ bool OTServer::DropMessageToNymbox(
         if (!bLoadedNym) {
             Log::vError(
                 "%s: Failed trying to load public key for recipient.\n",
-                szFunc);
+                __FUNCTION__);
             return false;
         } else if (!nymRecipient.VerifyPseudonym()) {
             Log::vError(
-                "%s: Failed trying to verify Nym for recipient.\n", szFunc);
+                "%s: Failed trying to verify Nym for recipient.\n",
+                __FUNCTION__);
             return false;
         }
         const OTAsymmetricKey& thePubkey = nymRecipient.GetPublicEncrKey();
@@ -887,7 +881,7 @@ bool OTServer::DropMessageToNymbox(
             Log::vError(
                 "%s: Failed trying to seal envelope containing theMsgAngel "
                 "(or while grabbing the base64-encoded result.)\n",
-                szFunc);
+                __FUNCTION__);
             return false;
         }
 
@@ -978,14 +972,14 @@ bool OTServer::DropMessageToNymbox(
             Log::vError(
                 "%s: Failed while trying to generate transaction in order to "
                 "add a message to Nymbox: %s\n",
-                szFunc,
+                __FUNCTION__,
                 strRecipientNymID.Get());
         }
     } else {
         const String strRecipientNymID(RECIPIENT_NYM_ID);
         Log::vError(
             "%s: Failed while trying to load or verify Nymbox: %s\n",
-            szFunc,
+            __FUNCTION__,
             strRecipientNymID.Get());
     }
 

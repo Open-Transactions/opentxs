@@ -41,12 +41,14 @@
 #include "opentxs/client/commands/CmdBaseAccept.hpp"
 
 #include "opentxs/client/OTAPI_Wrap.hpp"
+#include "opentxs/client/OT_API.hpp"
 #include "opentxs/client/OT_ME.hpp"
 #include "opentxs/client/commands/CmdConfirm.hpp"
 #include "opentxs/client/commands/CmdPayInvoice.hpp"
 #include "opentxs/client/MadeEasy.hpp"
 #include "opentxs/api/OT.hpp"
 #include "opentxs/api/Api.hpp"
+#include "opentxs/core/Ledger.hpp"
 #include "opentxs/core/Log.hpp"
 
 #include <stdint.h>
@@ -117,7 +119,7 @@ cash instructions.
 int32_t CmdBaseAccept::acceptFromInbox(
     const string& myacct,
     const string& indices,
-    const int32_t itemType) const
+    const int32_t itemTypeFilter) const
 {
     string server = OTAPI_Wrap::GetAccountWallet_NotaryID(myacct);
     if ("" == server) {
@@ -130,12 +132,24 @@ int32_t CmdBaseAccept::acceptFromInbox(
         otOut << "Error: cannot determine mynym from myacct.\n";
         return -1;
     }
-
-    if (!OT::App().API().ME().retrieve_account(server, mynym, myacct, true)) {
-        otOut << "Error retrieving intermediary files for account.\n";
-        return -1;
-    }
-
+    // -----------------------------------------------------------
+    // NOTE: I just removed this during my most recent changes. It just seems,
+    // now with Justus' regular automated refreshes, I shouldn't have to grab
+    // these right BEFORE, when I then anyway have to grab them right AFTER
+    // (at the end of this function) once it succeeds. Should speed things
+    // up?
+    // Also, I considered the fact that we're using indices in this function
+    // So if the user has actually selected certain indices already, then seems
+    // unwise to download the inbox before processing THOSE indices. Rather
+    // have it fail and re-try, and at least be trying the actual intended
+    // indices, and cut our account retrievals in half while we're at it!
+    //
+    //    if (!OT::App().API().ME().retrieve_account(server, mynym, myacct,
+    //    true)) {
+    //        otOut << "Error retrieving intermediary files for account.\n";
+    //        return -1;
+    //    }
+    // -----------------------------------------------------------
     // NOTE: Normally we don't have to do this, because the high-level API is
     // smart enough, when sending server transaction requests, to grab new
     // transaction numbers if it is running low. But in this case, we need the
@@ -143,100 +157,265 @@ int32_t CmdBaseAccept::acceptFromInbox(
     // call to OTAPI_Wrap::Ledger_CreateResponse is where the number is first
     // needed, and that call is made before the server transaction request is
     // actually sent.
+    //
     if (!OT_ME::It().make_sure_enough_trans_nums(10, server, mynym)) {
         otOut << "Error: cannot reserve transaction numbers.\n";
         return -1;
     }
+    // -----------------------------------------------------------
+    const Identifier theNotaryID{server}, theNymID{mynym}, theAcctID{myacct};
 
-    string inbox = OTAPI_Wrap::LoadInbox(server, mynym, myacct);
-    if ("" == inbox) {
+    std::unique_ptr<Ledger> pInbox(
+        OT::App().API().OTAPI().LoadInbox(theNotaryID, theNymID, theAcctID));
+    if (false == bool(pInbox)) {
         otOut << "Error: cannot load inbox.\n";
         return -1;
     }
+    // -----------------------------------------------------------
+    int32_t item_count = pInbox->GetTransactionCount();
 
-    int32_t items = OTAPI_Wrap::Ledger_GetCount(server, mynym, myacct, inbox);
-    if (0 > items) {
-        otOut << "Error: cannot load inbox item count.\n";
+    // -----------------------------------------------------------
+    //    string inbox = OTAPI_Wrap::LoadInbox(server, mynym, myacct);
+    //    if ("" == inbox) {
+    //        otOut << "Error: cannot load inbox.\n";
+    //        return -1;
+    //    }
+
+    //    int32_t item_count = OTAPI_Wrap::Ledger_GetCount(server, mynym,
+    //    myacct, inbox);
+
+    if (0 > item_count) {
+        otErr << "Error: cannot load inbox item count.\n";
         return -1;
-    }
-
-    if (0 == items) {
+    } else if (0 == item_count) {
         otWarn << "The inbox is empty.\n";
         return 0;
     }
 
-    if (!checkIndicesRange("indices", indices, items)) {
+    if (!checkIndicesRange("indices", indices, item_count)) {
         return -1;
     }
 
     bool all = "" == indices || "all" == indices;
+    // -----------------------------------------------------------
+    std::set<int32_t>* pOnlyForIndices{nullptr};
+    std::set<int32_t> setForIndices;
+    if (!all) {
+        NumList numlistForIndices{indices};
+        std::set<int64_t> setForIndices64;
+        if (numlistForIndices.Output(setForIndices64)) {
+            pOnlyForIndices = &setForIndices;
+            for (const int64_t& lIndex : setForIndices64) {
+                setForIndices.insert(static_cast<int32_t>(lIndex));
+            }
+        }
+    }
+    std::set<int64_t> receiptIds{pInbox->GetTransactionNums(pOnlyForIndices)};
 
-    string ledger = "";
-    for (int32_t i = 0; i < items; i++) {
-        string tx = OTAPI_Wrap::Ledger_GetTransactionByIndex(
-            server, mynym, myacct, inbox, i);
+    if (receiptIds.size() < 1) {
+        otWarn << "There are no inbox receipts to process.\n";
+        return 0;
+    }
+    // -----------------------------------------------------------
+    // NOTE: Indices are only optional. Otherwise it's "accept all receipts".
+    // But even if you DID pass in a comma-separated list of indices, it doesn't
+    // matter below this point.
+    // That's because we have now translated the user-selected GUI indices into
+    // an actual set of receipt IDs, each being the trans num on a transaction
+    // inside the inbox.
 
-        // itemType == 0 for all, 1 for transfers only, 2 for receipts only.
-        if (0 != itemType) {
-            string type =
-                OTAPI_Wrap::Transaction_GetType(server, mynym, myacct, tx);
-            bool transfer = "pending" == type;
-            if (1 == itemType && !transfer) {
-                // not a transfer.
+    // -------------------------------------------------------
+    OT_API::ProcessInbox response{OT::App().API().OTAPI().Ledger_CreateResponse(
+        theNotaryID, theNymID, theAcctID)};
+    // -------------------------------------------------------
+    auto& processInbox = std::get<0>(response);
+    auto& inbox = std::get<1>(response);
+
+    if (!bool(processInbox) || !bool(inbox)) {
+        otWarn << __FUNCTION__ << "Ledger_CreateResponse somehow failed.\n";
+        return -1;
+    }
+    // -------------------------------------------------------
+    for (const int64_t& lReceiptId : receiptIds) {
+        OTTransaction* pReceipt =
+            OT::App().API().OTAPI().Ledger_GetTransactionByID(
+                *inbox, lReceiptId);
+
+        if (nullptr == pReceipt) {
+            otErr << __FUNCTION__
+                  << "Unexpectedly got a nullptr for ReceiptId: " << lReceiptId;
+            return -1;
+        }  // Below this point, pReceipt is a good pointer. It's
+        //   owned by inbox, so no need to delete.
+        // ------------------------
+        // itemTypeFilter == 0 for all, 1 for transfers only, 2 for receipts
+        // only.
+        //
+        if (0 != itemTypeFilter) {
+            const OTTransaction::transactionType receipt_type{
+                pReceipt->GetType()};
+
+            //            string type =
+            //                OTAPI_Wrap::Transaction_GetType(server, mynym,
+            //                myacct, tx);
+
+            const bool transfer = (OTTransaction::pending == receipt_type);
+
+            if ((1 == itemTypeFilter) && !transfer) {
+                // not a pending transfer.
                 continue;
             }
-            if (2 == itemType && transfer) {
+            if ((2 == itemTypeFilter) && transfer) {
                 // not a receipt.
                 continue;
             }
         }
+        // ------------------------
 
-        // do we want this index?
-        if (!all && !OTAPI_Wrap::NumList_VerifyQuery(indices, to_string(i))) {
-            continue;
-        }
+        // This is already handled now, above, in the call to
+        // GetTransactionNums. Can delete this now.
+        //
+        //        // do we want this index?
+        //        if (!all && !OTAPI_Wrap::NumList_VerifyQuery(indices,
+        //        to_string(i))) {
+        //            continue;
+        //        }
 
-        // need to create response ledger?
-        if ("" == ledger) {
-            ledger =
-                OTAPI_Wrap::Ledger_CreateResponse(server, mynym, myacct, inbox);
-            if ("" == ledger) {
-                otOut << "Error: cannot create response ledger.\n";
-                return -1;
-            }
-        }
+        // This is now done above as well.
+        //        // need to create response ledger?
+        //        if ("" == ledger) {
+        //            ledger =
+        //            OTAPI_Wrap::Ledger_CreateResponse(server, mynym, myacct,
+        //            inbox); if ("" == ledger) {
+        //                otOut << "Error: cannot create response ledger.\n";
+        //                return -1;
+        //            }
+        //        }
+        // What the above old code calls "ledger" is the object now
+        // pointed to by "processInbox".
+        // ------------------------
 
-        ledger = OTAPI_Wrap::Transaction_CreateResponse(
-            server, mynym, myacct, ledger, tx, true);
-        if ("" == ledger) {
-            otOut << "Error: cannot create transaction response.\n";
+        //        ledger = OTAPI_Wrap::Transaction_CreateResponse(
+        //            server, mynym, myacct, ledger, tx, true);
+        //        if ("" == ledger) {
+        //            otOut << "Error: cannot create transaction response.\n";
+        //            return -1;
+        //        }
+        // Now handled here:
+
+        const bool bReceiptResponseCreated =
+            OT::App().API().OTAPI().Transaction_CreateResponse(
+                theNotaryID,
+                theNymID,
+                theAcctID,
+                *processInbox,
+                *pReceipt,
+                true);
+
+        if (!bReceiptResponseCreated) {
+            otErr << __FUNCTION__
+                  << "Error: cannot create transaction response.\n";
             return -1;
         }
-    }
+    }  // for
+    // -------------------------------------------------------
 
-    if ("" == ledger) {
+    // OT::App().API().OTAPI().
+
+    //    string ledger = "";
+    //    for (int32_t i = 0; i < item_count; i++) {
+    //        string tx = OTAPI_Wrap::Ledger_GetTransactionByIndex(
+    //            server, mynym, myacct, inbox, i);
+    //
+    //        // itemType == 0 for all, 1 for transfers only, 2 for receipts
+    //        only. if (0 != itemType) {
+    //            string type =
+    //                OTAPI_Wrap::Transaction_GetType(server, mynym, myacct,
+    //                tx);
+    //            bool transfer = "pending" == type;
+    //            if (1 == itemType && !transfer) {
+    //                // not a transfer.
+    //                continue;
+    //            }
+    //            if (2 == itemType && transfer) {
+    //                // not a receipt.
+    //                continue;
+    //            }
+    //        }
+    //
+    //        // do we want this index?
+    //        if (!all && !OTAPI_Wrap::NumList_VerifyQuery(indices,
+    //        to_string(i))) {
+    //            continue;
+    //        }
+    //
+    //        // need to create response ledger?
+    //        if ("" == ledger) {
+    //            ledger =
+    //                OTAPI_Wrap::Ledger_CreateResponse(server, mynym, myacct,
+    //                inbox);
+    //            if ("" == ledger) {
+    //                otOut << "Error: cannot create response ledger.\n";
+    //                return -1;
+    //            }
+    //        }
+    //
+    //        ledger = OTAPI_Wrap::Transaction_CreateResponse(
+    //            server, mynym, myacct, ledger, tx, true);
+    //        if ("" == ledger) {
+    //            otOut << "Error: cannot create transaction response.\n";
+    //            return -1;
+    //        }
+    //    }
+
+    if (processInbox->GetTransactionCount() <= 0) {
         // did not process anything
+        otErr << __FUNCTION__
+              << "Should never happen. Might want to follow up if you see this "
+                 "log.\n";
         return 0;
     }
+    // ----------------------------------------------
 
-    string response =
-        OTAPI_Wrap::Ledger_FinalizeResponse(server, mynym, myacct, ledger);
-    if ("" == response) {
-        otOut << "Error: cannot finalize response.\n";
+    //    string response =
+    //        OTAPI_Wrap::Ledger_FinalizeResponse(server, mynym, myacct,
+    //        ledger);
+    //    if ("" == response) {
+    //        otOut << "Error: cannot finalize response.\n";
+    //        return -1;
+    //    }
+
+    const bool bFinalized = OT::App().API().OTAPI().Ledger_FinalizeResponse(
+        theNotaryID, theNymID, theAcctID, *processInbox);
+
+    if (!bFinalized) {
+        otErr << __FUNCTION__ << "Error: cannot finalize response.\n";
         return -1;
     }
-
-    response =
-        OT::App().API().ME().process_inbox(server, mynym, myacct, response);
+    // ----------------------------------------------
+    const opentxs::String strFinalized{*processInbox};
+    const std::string str_finalized{strFinalized.Get()};
+    // ----------------------------------------------
+    const std::string notary_response = OT::App().API().ME().process_inbox(
+        server, mynym, myacct, str_finalized);
     int32_t reply =
-        responseReply(response, server, mynym, myacct, "process_inbox");
+        responseReply(notary_response, server, mynym, myacct, "process_inbox");
+
     if (1 != reply) {
         return reply;
     }
 
+    // We KNOW they all just changed, since we just processed
+    // the inbox. Might as well refresh our copy with the new changes.
+    //
     if (!OT::App().API().ME().retrieve_account(server, mynym, myacct, true)) {
-        otOut << "Error retrieving intermediary files for account.\n";
-        return -1;
+        otOut << __FUNCTION__
+              << "Success processing inbox, but then failed "
+                 "retrieving intermediary files for account.\n";
+        //      return -1; // By this point we DID successfully process the
+        //      inbox.
+        // (We just then subsequently failed to download the updated acct
+        // files.)
     }
 
     return 1;

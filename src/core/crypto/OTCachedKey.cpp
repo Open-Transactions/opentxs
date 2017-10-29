@@ -101,8 +101,9 @@ bool OTCachedKey::ChangeUserPassphrase()
     Lock lock(general_lock_);
 
     if (false == bool(key_)) {
-        otErr << __FUNCTION__ << ": The Master Key does not appear yet to "
-                                 "exist. Try creating a Nym first.\n";
+        otErr << __FUNCTION__
+              << ": The Master Key does not appear yet to "
+                 "exist. Try creating a Nym first.\n";
         return false;
     }
 
@@ -114,8 +115,9 @@ bool OTCachedKey::ChangeUserPassphrase()
                                                               // = false
 
     if (!pOldUserPassphrase) {
-        otErr << __FUNCTION__ << ": Error: Failed while trying to get old "
-                                 "passphrase from user.\n";
+        otErr << __FUNCTION__
+              << ": Error: Failed while trying to get old "
+                 "passphrase from user.\n";
         return false;
     }
 
@@ -127,8 +129,9 @@ bool OTCachedKey::ChangeUserPassphrase()
             &strReason2, true));  // bool bAskTwice = false by default.
 
     if (!pNewUserPassphrase) {
-        otErr << __FUNCTION__ << ": Error: Failed while trying to get new "
-                                 "passphrase from user.\n";
+        otErr << __FUNCTION__
+              << ": Error: Failed while trying to get new "
+                 "passphrase from user.\n";
         return false;
     }
 
@@ -471,9 +474,10 @@ bool OTCachedKey::GetMasterPassword(
             if (nullptr != pDerivedKey)
                 theDerivedAngel.reset(pDerivedKey);
             else
-                otErr << __FUNCTION__ << ": FYI: Derived key is still nullptr "
-                                         "after calling "
-                                         "OTSymmetricKey::GenerateKey.\n";
+                otErr << __FUNCTION__
+                      << ": FYI: Derived key is still nullptr "
+                         "after calling "
+                         "OTSymmetricKey::GenerateKey.\n";
 
         } else  // key_->IsGenerated() == true. (Symmetric Key is
                 // already generated.)
@@ -869,4 +873,5 @@ OTCachedKey::~OTCachedKey()
         thread_->join();
     }
 }
+
 }  // namespace opentxs

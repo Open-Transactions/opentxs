@@ -52,8 +52,11 @@ namespace opentxs
 class Account;
 class UnitDefinition;
 class Ledger;
+class Item;
 class ServerContract;
+class OTCronItem;
 class OTWallet;
+class PeerObject;
 
 class OTClient
 {
@@ -64,6 +67,11 @@ private:
     OTMessageBuffer m_MessageBuffer;
     OTMessageOutbuffer m_MessageOutbuffer;
 
+    void ProcessIncomingTransaction(
+        ProcessServerReplyArgs& args,
+        const Message& theReply,
+        OTTransaction* pTransaction,
+        String& strReceiptID) const;
     void ProcessIncomingTransactions(
         ProcessServerReplyArgs& args,
         const Message& theReply) const;
@@ -75,6 +83,11 @@ private:
         OTTransaction& theTransaction,
         ProcessServerReplyArgs& args,
         const Message& theReply) const;
+    void ProcessDepositChequeResponse(
+        Item* pReplyItem,
+        const Identifier& NOTARY_ID,
+        const Identifier& NYM_ID,
+        Nym* pNym) const;
     void ProcessPayDividendResponse(
         OTTransaction& theTransaction,
         ProcessServerReplyArgs& args,
@@ -84,7 +97,7 @@ private:
         const String& str_trans,
         const String& str_box_type,
         const int64_t& lTransNum,
-        Nym& the_nym,
+        const Nym& the_nym,
         Ledger& ledger) const;
     void setRecentHash(
         const Message& theReply,
@@ -111,10 +124,22 @@ private:
         const Message& theReply,
         Ledger* pNymbox,
         ProcessServerReplyArgs& args);
-    bool processServerReplyProcessInbox(
+    bool processServerReplyProcessBox(
         const Message& theReply,
         Ledger* pNymbox,
         ProcessServerReplyArgs& args);
+    bool processServerReplyProcessInbox(
+        const Message& theReply,
+        Ledger* pNymbox,
+        ProcessServerReplyArgs& args,
+        OTTransaction* pTransaction,
+        OTTransaction* pReplyTransaction);
+    bool processServerReplyProcessNymbox(
+        const Message& theReply,
+        Ledger* pNymbox,
+        ProcessServerReplyArgs& args,
+        OTTransaction* pTransaction,
+        OTTransaction* pReplyTransaction);
     bool processServerReplyGetAccountData(
         const Message& theReply,
         Ledger* pNymbox,
@@ -139,6 +164,21 @@ private:
     bool processServerReplyRegisterAccount(
         const Message& theReply,
         ProcessServerReplyArgs& args);
+
+    bool createInstrumentNoticeFromPeerObject(
+        const std::unique_ptr<PeerObject>& peerObject,
+        OTTransaction* pTxnPeerObject,
+        const Identifier& theNotaryID,
+        const Identifier& theNymID,
+        const Nym& theNym);
+
+    void ProcessIncomingCronItemReply(
+        Item* pReplyItem,
+        std::unique_ptr<OTCronItem>& pCronItem,
+        ProcessServerReplyArgs& args,
+        const int64_t& lNymOpeningNumber,
+        OTTransaction* pTransaction,
+        const String& strCronItem) const;
 
 public:
     explicit OTClient(OTWallet* theWallet);

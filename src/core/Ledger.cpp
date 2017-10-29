@@ -127,9 +127,8 @@ bool Ledger::VerifyAccount(const Nym& theNym)
         case Ledger::expiredBox: {
             std::set<int64_t> setUnloaded;
             // if psetUnloaded passed in, then use it to return the #s that
-            // weren't
-            // there as box receipts.
-            //            bool bLoadedBoxReceipts =
+            // weren't there as box receipts.
+            //          bool bLoadedBoxReceipts =
             LoadBoxReceipts(&setUnloaded);  // Note: Also useful for suppressing
                                             // errors here.
         } break;
@@ -345,11 +344,10 @@ bool Ledger::LoadBoxReceipt(const int64_t& lTransactionNum)
 
     // success
     if (nullptr != pBoxReceipt) {
-        //  Remove the existing, abbreviated receipt, and replace it with the
-        // actual receipt.
-        //  (If this inbox/outbox/whatever is saved, it will later save in
-        // abbreviated form
-        //    again.)
+        // Remove the existing, abbreviated receipt, and replace it with
+        // the actual receipt.
+        // (If this inbox/outbox/whatever is saved, it will later save in
+        // abbreviated form again.)
         //
         RemoveTransaction(lTransactionNum);  // this deletes pTransaction
         pTransaction = nullptr;
@@ -361,15 +359,40 @@ bool Ledger::LoadBoxReceipt(const int64_t& lTransactionNum)
     return false;
 }
 
-// the below four functions (load/save in/outbox) assume that the ID is already
-// set
-// properly.
-// Then it uses the ID to form the path for the file that is opened. Easy,
-// right?
+std::set<int64_t> Ledger::GetTransactionNums(
+    const std::set<int32_t>* pOnlyForIndices /*=nullptr*/) const
+{
+    std::set<int64_t> the_set{};
+
+    int32_t current_index{-1};
+
+    for (const auto& it : m_mapTransactions) {
+        ++current_index;  // 0 on first iteration.
+        const OTTransaction* pTransaction = it.second;
+        OT_ASSERT(nullptr != pTransaction);
+        const int64_t lTransNum = pTransaction->GetTransactionNum();
+        if (nullptr == pOnlyForIndices) {
+            the_set.insert(lTransNum);
+            continue;
+        }
+        // -------------------------------
+        std::set<int32_t>::const_iterator it_indices =
+            pOnlyForIndices->find(current_index);
+        if (pOnlyForIndices->end() != it_indices) {
+            the_set.insert(lTransNum);
+        }
+    }
+    return the_set;
+}
+
+// the below four functions (load/save in/outbox) assume that the ID
+// is already set properly.
+// Then it uses the ID to form the path for the file that is opened.
+// Easy, right?
 
 bool Ledger::LoadInbox()
 {
-    //    print_stacktrace();
+    //  print_stacktrace();
 
     bool bRetVal = LoadGeneric(Ledger::inbox);
 
@@ -499,11 +522,10 @@ bool Ledger::LoadGeneric(Ledger::ledgerType theType, const String* pString)
 
         // Try to load the ledger from local storage.
         //
-        std::string strFileContents(
-            OTDB::QueryPlainString(
-                szFolder1name,
-                szFolder2name,
-                szFilename));  // <=== LOADING FROM DATA STORE.
+        std::string strFileContents(OTDB::QueryPlainString(
+            szFolder1name,
+            szFolder2name,
+            szFilename));  // <=== LOADING FROM DATA STORE.
 
         if (strFileContents.length() < 2) {
             otErr << "OTLedger::LoadGeneric: Error reading file: "
@@ -911,10 +933,9 @@ bool Ledger::GenerateLedger(
             m_Type = theType;
             return true;
         default:
-            OT_FAIL_MSG(
-                "OTLedger::GenerateLedger: GenerateLedger is only for "
-                "message, nymbox, inbox, outbox, and paymentInbox "
-                "ledgers.\n");
+            OT_FAIL_MSG("OTLedger::GenerateLedger: GenerateLedger is only for "
+                        "message, nymbox, inbox, outbox, and paymentInbox "
+                        "ledgers.\n");
     }
 
     m_Type = theType;  // Todo make this Get/Set methods
@@ -1115,6 +1136,7 @@ bool Ledger::AddTransaction(OTTransaction& theTransaction)
     return false;
 }
 
+// Do NOT delete the return value, it's owned by the ledger.
 OTTransaction* Ledger::GetTransaction(OTTransaction::transactionType theType)
 {
     // loop through the items that make up this transaction
@@ -1152,17 +1174,19 @@ int32_t Ledger::GetTransactionIndex(int64_t lTransactionNum)
 
 // Look up a transaction by transaction number and see if it is in the ledger.
 // If it is, return a pointer to it, otherwise return nullptr.
+//
+// Do NOT delete the return value, it's owned by the ledger.
+//
 OTTransaction* Ledger::GetTransaction(int64_t lTransactionNum) const
 {
-    // loop through the transactions inside this ledger
-
-    for (auto& it : m_mapTransactions) {
-        OTTransaction* pTransaction = it.second;
+    auto it = m_mapTransactions.find(lTransactionNum);
+    if (it != m_mapTransactions.end()) {  // found it
+        OTTransaction* pTransaction = it->second;
         OT_ASSERT(nullptr != pTransaction);
-
         if (pTransaction->GetTransactionNum() == lTransactionNum) {
             return pTransaction;
         }
+        // TODO: Else log error here.
     }
     return nullptr;
 }
@@ -1174,7 +1198,7 @@ OTTransaction* Ledger::GetTransaction(int64_t lTransactionNum) const
 //
 int32_t Ledger::GetTransactionCountInRefTo(int64_t lReferenceNum) const
 {
-    int32_t nCount = 0;
+    int32_t nCount{0};
 
     for (auto& it : m_mapTransactions) {
         OTTransaction* pTransaction = it.second;
@@ -1188,6 +1212,9 @@ int32_t Ledger::GetTransactionCountInRefTo(int64_t lReferenceNum) const
 
 // Look up a transaction by transaction number and see if it is in the ledger.
 // If it is, return a pointer to it, otherwise return nullptr.
+//
+// Do NOT delete the pointer returned, since it's owned by the ledger.
+//
 OTTransaction* Ledger::GetTransactionByIndex(int32_t nIndex) const
 {
     // Out of bounds.
@@ -1205,8 +1232,7 @@ OTTransaction* Ledger::GetTransactionByIndex(int32_t nIndex) const
     }
 
     return nullptr;  // Should never reach this point, since bounds are checked
-                     // at
-                     // the top.
+                     // at the top.
 }
 
 // Nymbox-only.
@@ -1239,11 +1265,10 @@ OTTransaction* Ledger::GetTransferReceipt(int64_t lNumberOfOrigin)
             String strReference;
             pTransaction->GetReferenceString(strReference);
 
-            std::unique_ptr<Item> pOriginalItem(
-                Item::CreateItemFromString(
-                    strReference,
-                    pTransaction->GetPurportedNotaryID(),
-                    pTransaction->GetReferenceToNum()));
+            std::unique_ptr<Item> pOriginalItem(Item::CreateItemFromString(
+                strReference,
+                pTransaction->GetPurportedNotaryID(),
+                pTransaction->GetReferenceToNum()));
             OT_ASSERT(nullptr != pOriginalItem);
 
             if (pOriginalItem->GetType() != Item::acceptPending) {
@@ -1320,11 +1345,10 @@ OTTransaction* Ledger::GetChequeReceipt(
         String strDepositChequeMsg;
         pCurrentReceipt->GetReferenceString(strDepositChequeMsg);
 
-        std::unique_ptr<Item> pOriginalItem(
-            Item::CreateItemFromString(
-                strDepositChequeMsg,
-                GetPurportedNotaryID(),
-                pCurrentReceipt->GetReferenceToNum()));
+        std::unique_ptr<Item> pOriginalItem(Item::CreateItemFromString(
+            strDepositChequeMsg,
+            GetPurportedNotaryID(),
+            pCurrentReceipt->GetReferenceToNum()));
 
         if (nullptr == pOriginalItem) {
             otErr << __FUNCTION__
@@ -1511,37 +1535,37 @@ Item* Ledger::GenerateBalanceStatement(
         // from the list, in the case of these. Therefore I remove it here in
         // order to generate a proper balance agreement, acceptable to the
         // server.
-        case OTTransaction::processInbox : {
+        case OTTransaction::processInbox: {
             itemType = "processInbox";
             otWarn << __FUNCTION__ << ": Removing number " << number << " for "
                    << itemType << std::endl;
             removing.insert(number);
         } break;
-        case OTTransaction::withdrawal : {
+        case OTTransaction::withdrawal: {
             itemType = "withdrawal";
             otWarn << __FUNCTION__ << ": Removing number " << number << " for "
                    << itemType << std::endl;
             removing.insert(number);
         } break;
-        case OTTransaction::deposit : {
+        case OTTransaction::deposit: {
             itemType = "deposit";
             otWarn << __FUNCTION__ << ": Removing number " << number << " for "
                    << itemType << std::endl;
             removing.insert(number);
         } break;
-        case OTTransaction::cancelCronItem : {
+        case OTTransaction::cancelCronItem: {
             itemType = "cancelCronItem";
             otWarn << __FUNCTION__ << ": Removing number " << number << " for "
                    << itemType << std::endl;
             removing.insert(number);
         } break;
-        case OTTransaction::exchangeBasket : {
+        case OTTransaction::exchangeBasket: {
             itemType = "exchangeBasket";
             otWarn << __FUNCTION__ << ": Removing number " << number << " for "
                    << itemType << std::endl;
             removing.insert(number);
         } break;
-        case OTTransaction::payDividend : {
+        case OTTransaction::payDividend: {
             itemType = "payDividend";
             otWarn << __FUNCTION__ << ": Removing number " << number << " for "
                    << itemType << std::endl;
@@ -1570,7 +1594,9 @@ Item* Ledger::GenerateBalanceStatement(
     std::set<TransactionNumber> adding;
     auto statement = context.Statement(adding, removing);
 
-    if (!statement) { return nullptr; }
+    if (!statement) {
+        return nullptr;
+    }
 
     pBalanceItem->SetAttachment(String(*statement));
     int64_t lCurrentBalance = theAccount.GetBalance();
@@ -1802,9 +1828,8 @@ void Ledger::UpdateContents()  // Before transmission or serialization, this is
                              "(2nd block). (This should never happen. "
                              "Skipping.)\n";
 
-                    OT_FAIL_MSG(
-                        "ASSERT: OTLedger::UpdateContents: Unexpected "
-                        "ledger type.");
+                    OT_FAIL_MSG("ASSERT: OTLedger::UpdateContents: Unexpected "
+                                "ledger type.");
 
                     continue;
             }
@@ -1874,8 +1899,9 @@ int32_t Ledger::ProcessXMLNode(irr::io::IrrXMLReader*& xml)
         if (!strLedgerAcctID.Exists() || !strLedgerAcctNotaryID.Exists() ||
             !strNymID.Exists()) {
             otOut << szFunc << ": Failure: missing strLedgerAcctID ("
-                  << strLedgerAcctID << ") or "
-                                        "strLedgerAcctNotaryID ("
+                  << strLedgerAcctID
+                  << ") or "
+                     "strLedgerAcctNotaryID ("
                   << strLedgerAcctNotaryID << ") or strNymID (" << strNymID
                   << ") while loading transaction "
                      "from "
@@ -1946,8 +1972,9 @@ int32_t Ledger::ProcessXMLNode(irr::io::IrrXMLReader*& xml)
                 break;
             default:
                 otErr << "OTLedger::ProcessXMLNode: Unexpected ledger type ("
-                      << strType << "). (Failed loading "
-                                    "ledger for account: "
+                      << strType
+                      << "). (Failed loading "
+                         "ledger for account: "
                       << strLedgerAcctID << ")\n";
                 return (-1);
         }  // switch (to set strExpected to the abbreviated record type.)
@@ -1963,8 +1990,9 @@ int32_t Ledger::ProcessXMLNode(irr::io::IrrXMLReader*& xml)
             while (nPartialRecordCount-- > 0) {
                 //                xml->read(); // <==================
                 if (!SkipToElement(xml)) {
-                    otOut << szFunc << ": Failure: Unable to find element when "
-                                       "one was expected ("
+                    otOut << szFunc
+                          << ": Failure: Unable to find element when "
+                             "one was expected ("
                           << strExpected
                           << ") "
                              "for abbreviated record of receipt in "
@@ -1988,7 +2016,8 @@ int32_t Ledger::ProcessXMLNode(irr::io::IrrXMLReader*& xml)
                     (xml->getNodeType() == irr::io::EXN_ELEMENT) &&
                     (strExpected.Compare(strLoopNodeName))) {
                     int64_t lNumberOfOrigin = 0;
-                    int theOriginType = static_cast<int>(originType::not_applicable);  // default
+                    int theOriginType = static_cast<int>(
+                        originType::not_applicable);  // default
                     int64_t lTransactionNum = 0;
                     int64_t lInRefTo = 0;
                     int64_t lInRefDisplay = 0;
@@ -2125,8 +2154,9 @@ int32_t Ledger::ProcessXMLNode(irr::io::IrrXMLReader*& xml)
                         // transaction and adding to m_mapTransactions in
                         // OTLedger\n");
                     } else {
-                        otErr << szFunc << ": ERROR: verifying contract ID on "
-                                           "abbreviated transaction "
+                        otErr << szFunc
+                              << ": ERROR: verifying contract ID on "
+                                 "abbreviated transaction "
                               << pTransaction->GetTransactionNum() << "\n";
                         delete pTransaction;
                         pTransaction = nullptr;

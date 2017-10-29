@@ -72,65 +72,62 @@ typedef std::map<int64_t, OTTransaction*> mapOfTransactions;
 // the "inbox" and "outbox" functionality is implemented in this class
 class Ledger : public OTTransactionType
 {
-private: // Private prevents erroneous use by other classes.
+private:  // Private prevents erroneous use by other classes.
     typedef OTTransactionType ot_super;
 
     friend OTTransactionType* OTTransactionType::TransactionFactory(
         String strInput);
 
 private:
-    mapOfTransactions m_mapTransactions; // a ledger contains a map of
-                                         // transactions.
+    mapOfTransactions m_mapTransactions;  // a ledger contains a map of
+                                          // transactions.
 
 protected:
     // return -1 if error, 0 if nothing, and 1 if the node was processed.
     int32_t ProcessXMLNode(irr::io::IrrXMLReader*& xml) override;
-    void UpdateContents() override; // Before transmission or serialization, this
-                                   // is where the ledger saves its contents
+    void UpdateContents() override;  // Before transmission or serialization,
+                                     // this is where the ledger saves its
+                                     // contents
 
-    Ledger(); // Hopefully stays here.
+    Ledger();  // Hopefully stays here.
 
 public:
     enum ledgerType {
-        nymbox, // the nymbox is per user account (versus per asset account) and
-                // is used to receive new transaction numbers (and messages.)
-        inbox,  // each asset account has an inbox, with pending transfers as
-                // well as receipts inside.
-        outbox, // if you SEND a pending transfer, it sits in your outbox until
-                // it's accepted, rejected, or canceled.
-        message, // used in OTMessages, to send various lists of transactions
-                 // back and forth.
-        paymentInbox, // Used for client-side-only storage of incoming cheques,
-                      // invoices, payment plan requests, etc. (Coming in from
-                      // the Nymbox.)
+        nymbox,  // the nymbox is per user account (versus per asset account)
+                 // and is used to receive new transaction numbers (and
+                 // messages.)
+        inbox,   // each asset account has an inbox, with pending transfers as
+                 // well as receipts inside.
+        outbox,  // if you SEND a pending transfer, it sits in your outbox until
+                 // it's accepted, rejected, or canceled.
+        message,  // used in OTMessages, to send various lists of transactions
+                  // back and forth.
+        paymentInbox,  // Used for client-side-only storage of incoming cheques,
+                       // invoices, payment plan requests, etc. (Coming in from
+                       // the Nymbox.)
         recordBox,  // Used for client-side-only storage of completed items from
                     // the inbox, and the paymentInbox.
-        expiredBox, // Used for client-side-only storage of expired items from
-                    // the paymentInbox.
+        expiredBox,  // Used for client-side-only storage of expired items from
+                     // the paymentInbox.
         error_state
-    }; // If you add any types to this list, update the list of strings at the
-       // top of the .CPP file.
+    };  // If you add any types to this list, update the list of strings at the
+        // top of the .CPP file.
     ledgerType m_Type{error_state};
 
-    bool m_bLoadedLegacyData{false}; // So the server can tell if it just loaded a
-                              // legacy box or a hashed box. (Legacy boxes
-                              // stored ALL of the receipts IN the box. No
-                              // more.)
+    bool m_bLoadedLegacyData{
+        false};  // So the server can tell if it just loaded a
+                 // legacy box or a hashed box. (Legacy boxes
+                 // stored ALL of the receipts IN the box. No
+                 // more.)
 
 protected:
     bool LoadGeneric(ledgerType theType, const String* pString = nullptr);
     bool SaveGeneric(ledgerType theType);
 
 public:
-    inline ledgerType GetType() const
-    {
-        return m_Type;
-    }
+    inline ledgerType GetType() const { return m_Type; }
 
-    EXPORT bool LoadedLegacyData() const
-    {
-        return m_bLoadedLegacyData;
-    }
+    EXPORT bool LoadedLegacyData() const { return m_bLoadedLegacyData; }
 
     // This function assumes that this is an INBOX.
     // If you don't use an INBOX to call this method, then it will return
@@ -158,10 +155,14 @@ public:
     EXPORT void ProduceOutboxReport(Item& theBalanceItem);
 
     EXPORT bool AddTransaction(OTTransaction& theTransaction);
-    EXPORT bool RemoveTransaction(int64_t lTransactionNum,
-                                  bool bDeleteIt = true); // if false,
-                                                          // transaction wasn't
-                                                          // found.
+    EXPORT bool RemoveTransaction(
+        int64_t lTransactionNum,
+        bool bDeleteIt = true);  // if false,
+                                 // transaction wasn't
+                                 // found.
+
+    EXPORT std::set<int64_t> GetTransactionNums(
+        const std::set<int32_t>* pOnlyForIndices = nullptr) const;
 
     EXPORT OTTransaction* GetTransaction(
         OTTransaction::transactionType theType);
@@ -171,12 +172,11 @@ public:
     EXPORT OTTransaction* GetTransferReceipt(int64_t lNumberOfOrigin);
     EXPORT OTTransaction* GetChequeReceipt(
         int64_t lChequeNum,
-        Cheque** ppChequeOut = nullptr); // CALLER RESPONSIBLE
-                                         // TO
-                                         // DELETE.
-    EXPORT int32_t GetTransactionIndex(int64_t lTransactionNum); // if not
-                                                                 // found,
-                                                                 // returns -1
+        Cheque** ppChequeOut = nullptr);  // CALLER RESPONSIBLE
+                                          // TO DELETE.
+    EXPORT int32_t GetTransactionIndex(int64_t lTransactionNum);  // if not
+                                                                  // found,
+                                                                  // returns -1
     EXPORT OTTransaction* GetReplyNotice(const int64_t& lRequestNum);
 
     // This calls OTTransactionType::VerifyAccount(), which calls
@@ -191,12 +191,13 @@ public:
     //
     EXPORT bool VerifyAccount(const Nym& theNym) override;
     // For ALL abbreviated transactions, load the actual box receipt for each.
-    EXPORT bool LoadBoxReceipts(std::set<int64_t>* psetUnloaded =
-                                    nullptr); // if psetUnloaded passed in, then
-                                              // use it to return the #s that
-                                              // weren't there.
-    EXPORT bool SaveBoxReceipts(); // For all "full version" transactions, save
-                                   // the actual box receipt for each.
+    EXPORT bool LoadBoxReceipts(
+        std::set<int64_t>* psetUnloaded = nullptr);  // if psetUnloaded passed
+                                                     // in, then use it to
+                                                     // return the #s that
+                                                     // weren't there.
+    EXPORT bool SaveBoxReceipts();  // For all "full version" transactions, save
+                                    // the actual box receipt for each.
     // Verifies the abbreviated form exists first, and then loads the
     // full version and compares the two. Returns success / fail.
     //
@@ -206,20 +207,20 @@ public:
     // "Deletes" it by adding MARKED_FOR_DELETION to the bottom of the file.
     EXPORT bool DeleteBoxReceipt(const int64_t& lTransactionNum);
     EXPORT bool LoadInbox();
-    EXPORT bool SaveInbox(Identifier* pInboxHash = nullptr); // If you pass
-                                                             // the
-                                                             // identifier in,
-                                                             // the hash is
-                                                             // recorded there
+    EXPORT bool SaveInbox(Identifier* pInboxHash = nullptr);  // If you pass
+                                                              // the
+                                                              // identifier in,
+                                                              // the hash is
+                                                              // recorded there
     EXPORT bool LoadNymbox();
-    EXPORT bool SaveNymbox(Identifier* pNymboxHash = nullptr); // If you pass
-                                                               // the
+    EXPORT bool SaveNymbox(Identifier* pNymboxHash = nullptr);  // If you pass
+                                                                // the
     // identifier in,
     // the hash is
     // recorded there.
     EXPORT bool LoadOutbox();
-    EXPORT bool SaveOutbox(Identifier* pOutboxHash = nullptr); // If you pass
-                                                               // the
+    EXPORT bool SaveOutbox(Identifier* pOutboxHash = nullptr);  // If you pass
+                                                                // the
     // identifier in,
     // the hash is
     // recorded there
@@ -236,8 +237,8 @@ public:
 
     EXPORT bool SaveExpiredBox();
     EXPORT bool LoadExpiredBox();
-    EXPORT bool LoadLedgerFromString(const String& theStr); // Auto-detects
-                                                            // ledger type.
+    EXPORT bool LoadLedgerFromString(const String& theStr);  // Auto-detects
+                                                             // ledger type.
     // (message/nymbox/inbox/outbox)
     EXPORT bool LoadInboxFromString(const String& strBox);
     EXPORT bool LoadOutboxFromString(const String& strBox);
@@ -251,12 +252,14 @@ public:
         return static_cast<int32_t>(m_mapTransactions.size());
     }
     EXPORT int32_t GetTransactionCountInRefTo(int64_t lReferenceNum) const;
-    EXPORT int64_t GetTotalPendingValue(); // for inbox only, allows you to
-                                           // lookup the total value of pending
-                                           // transfers within.
+    EXPORT int64_t GetTotalPendingValue();  // for inbox only, allows you to
+                                            // lookup the total value of pending
+                                            // transfers within.
     EXPORT const mapOfTransactions& GetTransactionMap() const;
-    EXPORT Ledger(const Identifier& theNymID, const Identifier& theAccountID,
-                  const Identifier& theNotaryID);
+    EXPORT Ledger(
+        const Identifier& theNymID,
+        const Identifier& theAccountID,
+        const Identifier& theNotaryID);
     EXPORT virtual ~Ledger();
 
     EXPORT void Release() override;
@@ -271,26 +274,27 @@ public:
     // function to get it
     // loaded up, and the NymID will hopefully be loaded up with the rest of
     // it.
-    EXPORT Ledger(const Identifier& theAccountID,
-                  const Identifier& theNotaryID);
+    EXPORT Ledger(
+        const Identifier& theAccountID,
+        const Identifier& theNotaryID);
     EXPORT void InitLedger();
-    EXPORT static Ledger* GenerateLedger(const Identifier& theNymID,
-                                         const Identifier& theAcctID,
-                                         const Identifier& theNotaryID,
-                                         ledgerType theType,
-                                         bool bCreateFile = false);
+    EXPORT static Ledger* GenerateLedger(
+        const Identifier& theNymID,
+        const Identifier& theAcctID,
+        const Identifier& theNotaryID,
+        ledgerType theType,
+        bool bCreateFile = false);
 
-    EXPORT bool GenerateLedger(const Identifier& theAcctID,
-                               const Identifier& theNotaryID,
-                               ledgerType theType, bool bCreateFile = false);
+    EXPORT bool GenerateLedger(
+        const Identifier& theAcctID,
+        const Identifier& theNotaryID,
+        ledgerType theType,
+        bool bCreateFile = false);
 
     EXPORT static char const* _GetTypeString(ledgerType theType);
-    EXPORT char const* GetTypeString() const
-    {
-        return _GetTypeString(m_Type);
-    }
+    EXPORT char const* GetTypeString() const { return _GetTypeString(m_Type); }
 };
 
-} // namespace opentxs
+}  // namespace opentxs
 
-#endif // OPENTXS_CORE_OTLEDGER_HPP
+#endif  // OPENTXS_CORE_OTLEDGER_HPP

@@ -449,7 +449,7 @@ public:
         const std::string& SIGNER_ID);
 
     /** The below functions are for retrieving log data programatically.
-    */
+     */
     EXPORT static int32_t GetMemlogSize();
 
     EXPORT static std::string GetMemlogAtIndex(const int32_t& nIndex);
@@ -2240,8 +2240,7 @@ public:
     EXPORT static std::string Ledger_CreateResponse(
         const std::string& NOTARY_ID,
         const std::string& NYM_ID,
-        const std::string& ACCOUNT_ID,
-        const std::string& ORIGINAL_LEDGER);
+        const std::string& ACCOUNT_ID);
 
     //! Lookup a transaction or its ID (from within a ledger) based on index or
     //! transaction number.
@@ -2266,6 +2265,12 @@ public:
         const std::string& ACCOUNT_ID,
         const std::string& THE_LEDGER,
         const int32_t& nIndex);  // returns transaction number by index.
+
+    EXPORT static std::string Ledger_GetTransactionNums(
+        const std::string& NOTARY_ID,
+        const std::string& NYM_ID,
+        const std::string& ACCOUNT_ID,
+        const std::string& THE_LEDGER);
 
     //! Add a transaction to a ledger.
     //
@@ -2361,6 +2366,13 @@ public:
         const std::string& THE_LEDGER,
         const int32_t& nIndex);  // returns financial instrument by index of the
                                  // transaction it's in.
+
+    EXPORT static std::string Ledger_GetInstrumentByReceiptID(
+        const std::string& NOTARY_ID,
+        const std::string& NYM_ID,
+        const std::string& ACCOUNT_ID,
+        const std::string& THE_LEDGER,
+        const int64_t& lReceiptId);
 
     // NOTE: If an instrument is already expired when this function is called,
     // it will be moved

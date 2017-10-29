@@ -60,6 +60,10 @@ public:
         const ConstNym& senderNym,
         const std::string& message);
     static std::unique_ptr<PeerObject> Create(
+        const ConstNym& senderNym,
+        const std::string& payment,
+        const bool isPayment);
+    static std::unique_ptr<PeerObject> Create(
         std::unique_ptr<PeerRequest>& request,
         std::unique_ptr<PeerReply>& reply);
     static std::unique_ptr<PeerObject> Create(
@@ -79,19 +83,22 @@ public:
     bool Validate() const;
 
     std::unique_ptr<std::string>& Message() { return message_; }
+    std::unique_ptr<std::string>& Payment() { return payment_; }
 
     ~PeerObject() = default;
 
 private:
     ConstNym nym_{nullptr};
     std::unique_ptr<std::string> message_{nullptr};
+    std::unique_ptr<std::string> payment_{nullptr};
     std::unique_ptr<PeerReply> reply_{nullptr};
     std::unique_ptr<PeerRequest> request_{nullptr};
     proto::PeerObjectType type_{proto::PEEROBJECT_ERROR};
     std::uint32_t version_{0};
 
     PeerObject(const ConstNym& signerNym, const proto::PeerObject serialized);
-    PeerObject(const ConstNym& nym, const std::string& message);
+    PeerObject(const ConstNym& senderNym, const std::string& message);
+    PeerObject(const std::string& payment, const ConstNym& senderNym);
     PeerObject(
         std::unique_ptr<PeerRequest>& request,
         std::unique_ptr<PeerReply>& reply);

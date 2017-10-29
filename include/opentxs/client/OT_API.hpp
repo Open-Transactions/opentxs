@@ -90,7 +90,9 @@ class ZMQ;
 class OT_API
 {
 public:
-    typedef std::pair<std::unique_ptr<Ledger>, Ledger*> ProcessInbox;
+    //  typedef std::pair<std::unique_ptr<Ledger>, Ledger*> ProcessInbox;
+    typedef std::pair<std::unique_ptr<Ledger>, std::unique_ptr<Ledger>>
+        ProcessInbox;
 
     EXPORT bool GetWalletFilename(String& strPath) const;
     EXPORT bool SetWalletFilename(const String& strPath);
@@ -650,6 +652,64 @@ public:
         bool bClearAll = false  // if true, nIndex is
                                 // ignored.
         ) const;
+
+    EXPORT int32_t Ledger_GetCount(const Ledger& theLedger) const;
+    EXPORT std::set<int64_t> Ledger_GetTransactionNums(
+        const Ledger& theLedger) const;
+
+    EXPORT ProcessInbox Ledger_CreateResponse(
+        const Identifier& theNotaryID,
+        const Identifier& theNymID,
+        const Identifier& theAccountID) const;
+
+    EXPORT bool Transaction_CreateResponse(
+        const Identifier& theNotaryID,
+        const Identifier& theNymID,
+        const Identifier& theAcctID,
+        Ledger& responseLedger,
+        OTTransaction& originalTransaction,  // Responding to
+        const bool& BOOL_DO_I_ACCEPT) const;
+
+    EXPORT bool Ledger_FinalizeResponse(
+        const Identifier& theNotaryID,
+        const Identifier& theNymID,
+        const Identifier& theAcctID,
+        Ledger& responseLedger) const;
+
+    EXPORT OTTransaction* Ledger_GetTransactionByIndex(
+        Ledger& theLedger,
+        const int32_t& nIndex) const;
+
+    EXPORT OTTransaction* Ledger_GetTransactionByID(
+        Ledger& theLedger,
+        const int64_t& TRANSACTION_NUMBER) const;
+
+    EXPORT std::unique_ptr<OTPayment> Ledger_GetInstrument(
+        const Identifier& theNymID,
+        const Ledger& theLedger,
+        const int32_t& nIndex) const;
+    // The functions immediately above and blow this comment
+    // have good reason for having their parameters in a different order.
+    EXPORT std::unique_ptr<OTPayment> Ledger_GetInstrumentByReceiptID(
+        const Ledger& theLedger,
+        const Identifier& theNymID,
+        const int64_t& lReceiptId) const;
+
+    EXPORT std::unique_ptr<OTPayment> Ledger_GetInstrumentByReceiptID(
+        const Identifier& theNymID,
+        const Ledger& theLedger,
+        const int64_t& lReceiptId) const;
+
+    EXPORT int64_t Ledger_GetTransactionIDByIndex(
+        const Ledger& theLedger,
+        const int32_t& nIndex) const;
+
+    EXPORT bool Ledger_AddTransaction(
+        const Identifier& theNymID,
+        Ledger& theLedger,  // theLedger takes ownership of pTransaction.
+        std::unique_ptr<OTTransaction>& pTransaction) const;
+
+    // These 3 functions are lower level:
 
     EXPORT ProcessInbox CreateProcessInbox(
         const Identifier& accountID,
