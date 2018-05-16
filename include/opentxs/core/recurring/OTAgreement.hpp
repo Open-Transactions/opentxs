@@ -156,14 +156,14 @@ public:
     /*
         FIRST: (Construction)
 
-     OTAgreement(const OTIdentifier& NOTARY_ID,
-                 const OTIdentifier& INSTRUMENT_DEFINITION_ID);
+     OTAgreement(const Identifier& NOTARY_ID,
+                 const Identifier& INSTRUMENT_DEFINITION_ID);
        OR:
-     OTAgreement(const OTIdentifier& NOTARY_ID, const OTIdentifier&
+     OTAgreement(const Identifier& NOTARY_ID, const Identifier&
     INSTRUMENT_DEFINITION_ID,
-                 const OTIdentifier& SENDER_ACCT_ID, const OTIdentifier&
+                 const Identifier& SENDER_ACCT_ID, const Identifier&
     SENDER_NYM_ID,
-                 const OTIdentifier& RECIPIENT_ACCT_ID, const OTIdentifier&
+                 const Identifier& RECIPIENT_ACCT_ID, const Identifier&
     RECIPIENT_NYM_ID);
        OR:
      OTPaymentPlan * pPlan = new OTPaymentPlan(pAccount->GetRealNotaryID(),
@@ -339,13 +339,13 @@ public:
      m_lTransactionNum
      = lTransactionNum; }
 
-     inline const OTIdentifier&    GetSenderAcctID()        { return
+     inline const Identifier&    GetSenderAcctID()        { return
      m_SENDER_ACCT_ID; }
-     inline const OTIdentifier&    GetSenderNymID()        { return
+     inline const Identifier&    GetSenderNymID()        { return
      m_SENDER_NYM_ID; }
-     inline void            SetSenderAcctID(const OTIdentifier& ACCT_ID)
+     inline void            SetSenderAcctID(const Identifier& ACCT_ID)
      { m_SENDER_ACCT_ID = ACCT_ID; }
-     inline void            SetSenderNymID(const OTIdentifier& NYM_ID)
+     inline void            SetSenderNymID(const Identifier& NYM_ID)
      { m_SENDER_NYM_ID = NYM_ID; }
      */
 
@@ -355,19 +355,19 @@ public:
     // From OTInstrument (parent class of OTTrackable, parent class of
     // OTCronItem, parent class of this)
     /*
-     OTInstrument(const OTIdentifier& NOTARY_ID, const OTIdentifier&
+     OTInstrument(const Identifier& NOTARY_ID, const Identifier&
      INSTRUMENT_DEFINITION_ID)
      : Contract()
 
-     inline const OTIdentifier& GetInstrumentDefinitionID() const { return
+     inline const Identifier& GetInstrumentDefinitionID() const { return
      m_InstrumentDefinitionID; }
-     inline const OTIdentifier& GetNotaryID() const { return m_NotaryID; }
+     inline const Identifier& GetNotaryID() const { return m_NotaryID; }
 
-     inline void SetInstrumentDefinitionID(const OTIdentifier&
+     inline void SetInstrumentDefinitionID(const Identifier&
      INSTRUMENT_DEFINITION_ID)  {
      m_InstrumentDefinitionID    =
      INSTRUMENT_DEFINITION_ID; }
-     inline void SetNotaryID(const OTIdentifier& NOTARY_ID) { m_NotaryID    =
+     inline void SetNotaryID(const Identifier& NOTARY_ID) { m_NotaryID    =
      NOTARY_ID; }
 
      inline time64_t GetValidFrom()    const { return m_VALID_FROM; }

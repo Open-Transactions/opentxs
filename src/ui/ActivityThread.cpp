@@ -95,7 +95,7 @@ ActivityThread::ActivityThread(
     const api::client::Sync& sync,
     const api::Activity& activity,
     const api::ContactManager& contact,
-    const OTIdentifier nymID,
+    const Identifier& nymID,
     const Identifier& threadID)
     : ActivityThreadType(
           zmq,

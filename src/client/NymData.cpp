@@ -134,7 +134,6 @@ bool NymData::AddPreferredOTServer(const std::string& id, const bool primary)
     }
 
     return nym().AddPreferredOTServer(Identifier::Factory(id), primary);
-
 }
 
 bool NymData::AddSocialMediaProfile(

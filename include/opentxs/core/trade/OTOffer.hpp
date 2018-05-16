@@ -90,15 +90,15 @@ TIME_FROM; }
 }
 
 
-     inline const OTIdentifier& GetInstrumentDefinitionID() const { return
+     inline const Identifier& GetInstrumentDefinitionID() const { return
 m_InstrumentDefinitionID; }
-     inline const OTIdentifier& GetNotaryID() const { return m_NotaryID; }
+     inline const Identifier& GetNotaryID() const { return m_NotaryID; }
 
-     inline void SetInstrumentDefinitionID(const OTIdentifier&
+     inline void SetInstrumentDefinitionID(const Identifier&
 INSTRUMENT_DEFINITION_ID)  {
 m_InstrumentDefinitionID    =
 INSTRUMENT_DEFINITION_ID; }
-     inline void SetNotaryID(const OTIdentifier& NOTARY_ID) { m_NotaryID    =
+     inline void SetNotaryID(const Identifier& NOTARY_ID) { m_NotaryID    =
 NOTARY_ID; }
 
      bool VerifyCurrentDate(); // Verify the current date against the VALID FROM

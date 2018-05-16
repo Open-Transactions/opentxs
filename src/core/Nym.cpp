@@ -95,7 +95,7 @@ namespace opentxs
 Nym::Nym(
     const String& name,
     const String& filename,
-    const OTIdentifier nymID,
+    const Identifier& nymID,
     const proto::CredentialIndexMode mode)
     : version_(NYM_CREATE_VERSION)
     , index_(0)
@@ -131,7 +131,7 @@ Nym::Nym(const String& name, const String& filename, const String& nymID)
 {
 }
 
-Nym::Nym(const OTIdentifier nymID)
+Nym::Nym(const Identifier& nymID)
     : Nym(String(), String(), nymID)
 {
 }

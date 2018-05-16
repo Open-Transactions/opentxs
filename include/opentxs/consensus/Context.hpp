@@ -106,7 +106,7 @@ public:
 
 protected:
     std::mutex& nymfile_lock_;
-    const OTIdentifier server_id_;
+    const Identifier& server_id_;
     std::shared_ptr<const class Nym> remote_nym_{};
     std::set<TransactionNumber> available_transaction_numbers_{};
     std::set<TransactionNumber> issued_transaction_numbers_{};

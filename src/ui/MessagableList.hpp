@@ -73,7 +73,7 @@ private:
     friend Factory;
 
     const api::client::Sync& sync_;
-    const OTIdentifier owner_contact_id_;
+    const Identifier& owner_contact_id_;
     OTZMQListenCallback contact_subscriber_callback_;
     OTZMQSubscribeSocket contact_subscriber_;
     OTZMQListenCallback nym_subscriber_callback_;

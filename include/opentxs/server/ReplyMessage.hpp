@@ -117,7 +117,7 @@ private:
     const opentxs::api::client::Wallet& wallet_;
     const Nym& signer_;
     const Message& original_;
-    const OTIdentifier notary_id_;
+    const Identifier& notary_id_;
     Message& message_;
     Server& server_;
     Nym nymfile_;

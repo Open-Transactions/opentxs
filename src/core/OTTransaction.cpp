@@ -3179,13 +3179,13 @@ OTTransaction::OTTransaction(
     if (nullptr != pNumList) m_Numlist = *pNumList;
 }
 
-// bool GenerateTransaction(const OTIdentifier& theAccountID, const
+// bool GenerateTransaction(const Identifier& theAccountID, const
 // OTIdentifier& theNotaryID, std::int64_t lTransactionNum);
 //
 // static
-// OTTransaction * GenerateTransaction(const OTIdentifier& theNymID, const
+// OTTransaction * GenerateTransaction(const Identifier& theNymID, const
 // OTIdentifier& theAccountID,
-//                                    const OTIdentifier& theNotaryID,
+//                                    const Identifier& theNotaryID,
 // transactionType theType,
 //                                    std::int64_t lTransactionNum=0);
 // static

@@ -1644,13 +1644,13 @@ void Notary::NotarizePayDividend(
             //
             // already validated, just above.
             const std::int64_t lAmountPerShare = theVoucherRequest.GetAmount();
-            const OTIdentifier SHARES_ISSUER_ACCT_ID =
+            const Identifier& SHARES_ISSUER_ACCT_ID =
                 theVoucherRequest.GetSenderAcctID();
             const String strSharesIssuerAcct(SHARES_ISSUER_ACCT_ID);
             // Get the asset contract for the shares type, stored in the voucher
             // request, inside pItem. (Make sure it's NOT the same instrument
             // definition as theSourceAccount.)
-            const OTIdentifier SHARES_INSTRUMENT_DEFINITION_ID =
+            const Identifier& SHARES_INSTRUMENT_DEFINITION_ID =
                 theVoucherRequest.GetInstrumentDefinitionID();
             auto pSharesContract = wallet_.UnitDefinition(
                 theVoucherRequest.GetInstrumentDefinitionID());

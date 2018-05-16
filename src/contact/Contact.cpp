@@ -658,7 +658,7 @@ void Contact::init_nyms()
 
         OT_ASSERT(item);
 
-        const OTIdentifier nymID = Identifier::Factory(item->Value());
+        const Identifier& nymID = Identifier::Factory(item->Value());
         auto& nym = nyms_[nymID];
         nym = wallet_.Nym(nymID);
 

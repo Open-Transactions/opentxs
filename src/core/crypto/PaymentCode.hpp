@@ -51,7 +51,7 @@ class PaymentCode : virtual public opentxs::PaymentCode
 public:
     bool operator==(const proto::PaymentCode& rhs) const override;
 
-    const OTIdentifier ID() const override;
+    const Identifier& ID() const override;
     const std::string asBase58() const override;
     SerializedPaymentCode Serialize() const override;
     bool VerifyInternally() const override;
