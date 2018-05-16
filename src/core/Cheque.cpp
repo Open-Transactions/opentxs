@@ -303,15 +303,15 @@ bool Cheque::IssueCheque(
     const time64_t& VALID_FROM,
     const time64_t& VALID_TO,  // The expiration date (valid from/to dates) of
                                // the cheque
-    const OTIdentifier SENDER_ACCT_ID,  // The asset account the cheque is drawn
-                                        // on.
-    const OTIdentifier SENDER_NYM_ID,   // This ID must match the user ID on the
-                                        // asset account,
+    const Identifier& SENDER_ACCT_ID,  // The asset account the cheque is drawn
+                                       // on.
+    const Identifier& SENDER_NYM_ID,   // This ID must match the user ID on the
+                                       // asset account,
     // AND must verify the cheque signature with that user's key.
-    const String& strMemo,                 // Optional memo field.
-    const OTIdentifier pRECIPIENT_NYM_ID)  // Recipient optional.
-                                           // (Might be a blank
-                                           // cheque.)
+    const String& strMemo,                // Optional memo field.
+    const Identifier& pRECIPIENT_NYM_ID)  // Recipient optional.
+                                          // (Might be a blank
+                                          // cheque.)
 {
     m_lAmount = lAmount;
     m_strMemo = strMemo;

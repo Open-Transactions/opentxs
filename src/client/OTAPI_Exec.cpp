@@ -6945,7 +6945,7 @@ bool OTAPI_Exec::Msg_HarvestTransactionNumbers(
                 return false;
             }
             // Now let's get the server ID...
-            const OTIdentifier serverID = pAccount->GetPurportedNotaryID();
+            const Identifier& serverID = pAccount->GetPurportedNotaryID();
             auto pServer = wallet_.Server(serverID);
 
             if (!pServer) {
@@ -6999,7 +6999,7 @@ bool OTAPI_Exec::Msg_HarvestTransactionNumbers(
 //    OT_ASSERT_MSG("" != THE_CRON_ITEM, "OTAPI_Exec::HarvestClosingNumbers:
 // Null THE_CRON_ITEM passed in.");
 //
-//    const OTIdentifier    theNymID(NYM_ID), theNotaryID(NOTARY_ID);
+//    const Identifier&    theNymID(NYM_ID), theNotaryID(NOTARY_ID);
 //    const OTString        strContract(THE_CRON_ITEM);
 //
 //    const bool& bHarvested = ot_api_.HarvestClosingNumbers(theNotaryID,
@@ -7038,7 +7038,7 @@ bool OTAPI_Exec::Msg_HarvestTransactionNumbers(
 //    OT_ASSERT_MSG("" != THE_CRON_ITEM, "OTAPI_Exec::HarvestAllNumbers: Null
 // THE_CRON_ITEM passed in.");
 //
-//    const OTIdentifier    theNymID(NYM_ID), theNotaryID(NOTARY_ID);
+//    const Identifier&    theNymID(NYM_ID), theNotaryID(NOTARY_ID);
 //    const OTString        strContract(THE_CRON_ITEM);
 //
 //    const bool& bHarvested = ot_api_.HarvestAllNumbers(theNotaryID,

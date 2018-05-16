@@ -71,7 +71,7 @@ public:
 private:
     friend Factory;
 
-    const OTIdentifier owner_contact_id_;
+    const Identifier& owner_contact_id_;
     std::unique_ptr<opentxs::ui::ContactListItem> owner_p_;
     opentxs::ui::ContactListItem& owner_;
     OTZMQListenCallback contact_subscriber_callback_;

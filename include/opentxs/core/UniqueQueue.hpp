@@ -78,7 +78,7 @@ public:
         OT_ASSERT(set_.size() == queue_.size())
     }
 
-    void CancelByKey(const OTIdentifier& in) const
+    void CancelByKey(const Identifier& in) const
     {
         Lock lock(lock_);
 
@@ -116,7 +116,7 @@ public:
         return output;
     }
 
-    bool Push(const OTIdentifier& key, const T& in) const
+    bool Push(const Identifier& key, const T& in) const
     {
         OT_ASSERT(false == key->empty())
 

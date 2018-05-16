@@ -903,15 +903,15 @@ OTParty * FindPartyBasedOnNymAsAuthAgent(OTPseudonym& theNym, OTAgent **
 ppAgent=nullptr);
 OTParty * FindPartyBasedOnAccount(OTAccount& theAccount, OTPartyAccount **
 ppPartyAccount=nullptr);
-OTParty * FindPartyBasedOnNymIDAsAgent(const OTIdentifier& theNymID, OTAgent **
+OTParty * FindPartyBasedOnNymIDAsAgent(const Identifier& theNymID, OTAgent **
 ppAgent=nullptr);
-OTParty * FindPartyBasedOnNymIDAsAuthAgent(const OTIdentifier& theNymID,
+OTParty * FindPartyBasedOnNymIDAsAuthAgent(const Identifier& theNymID,
 OTAgent ** ppAgent=nullptr);
-OTParty * FindPartyBasedOnAccountID(const OTIdentifier& theAcctID,
+OTParty * FindPartyBasedOnAccountID(const Identifier& theAcctID,
 OTPartyAccount ** ppPartyAccount=nullptr);
 OTAgent            * GetAgent(std::string str_agent_name);
 OTPartyAccount    * GetPartyAccount(std::string str_acct_name);
-OTPartyAccount    * GetPartyAccountByID(const OTIdentifier& theAcctID);
+OTPartyAccount    * GetPartyAccountByID(const Identifier& theAcctID);
 */
 
 // Returns true if it was empty (and thus successfully set.)

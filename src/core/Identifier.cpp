@@ -61,17 +61,17 @@ template class std::map<opentxs::OTIdentifier, std::set<opentxs::OTIdentifier>>;
 
 namespace opentxs
 {
-bool operator==(const OTIdentifier& lhs, const Identifier& rhs)
+bool operator==(const Identifier& lhs, const Identifier& rhs)
 {
     return lhs.get() == rhs;
 }
 
-bool operator!=(const OTIdentifier& lhs, const Identifier& rhs)
+bool operator!=(const Identifier& lhs, const Identifier& rhs)
 {
     return lhs.get() != rhs;
 }
 
-bool operator<(const OTIdentifier& lhs, const OTIdentifier& rhs)
+bool operator<(const Identifier& lhs, const Identifier& rhs)
 {
     return lhs.get() < rhs.get();
 }

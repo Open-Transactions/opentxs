@@ -114,7 +114,7 @@ private:
     const std::time_t start_{0};
     const std::time_t end_{0};
     const std::set<proto::ContactItemAttribute> attributes_{};
-    const OTIdentifier id_;
+    const Identifier& id_;
 
     static std::uint32_t check_version(
         const std::uint32_t in,

@@ -429,7 +429,7 @@ public:
 
     TransactionNumber GetTransactionNumber() const override;
     SendResult LastSendResult() const override;
-    const OTIdentifier MessageID() const override;
+    const Identifier MessageID() const override;
     const std::shared_ptr<PeerRequest>& SentPeerRequest() const override;
     const std::shared_ptr<PeerReply>& SentPeerReply() const override;
     const std::shared_ptr<Message>& Reply() const override;

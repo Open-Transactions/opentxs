@@ -779,8 +779,8 @@ std::int32_t Mint::ProcessXMLNode(irr::io::IrrXMLReader*& xml)
 
  // static method (call it without an instance, using notation:
  OTAccount::GenerateNewAccount)
- OTAccount * OTAccount::GenerateNewAccount(    const OTIdentifier & theNymID,
- const OTIdentifier & theNotaryID,
+ OTAccount * OTAccount::GenerateNewAccount(    const Identifier& theNymID,
+ const Identifier& theNotaryID,
                                             const OTPseudonym & theServerNym,
  const OTMessage & theMessage,
                                             const OTAccount::AccountType

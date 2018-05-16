@@ -133,7 +133,7 @@ private:
     std::uint32_t version_{0};
     std::string label_{""};
     mutable std::mutex lock_{};
-    const OTIdentifier id_;
+    const Identifier& id_;
     OTIdentifier parent_;
     OTIdentifier primary_nym_;
     std::map<OTIdentifier, std::shared_ptr<const Nym>> nyms_;

@@ -134,7 +134,7 @@ private:
 
     const api::Activity& activity_;
     const api::client::Sync& sync_;
-    const OTIdentifier threadID_;
+    const Identifier& threadID_;
     std::set<OTIdentifier> participants_;
     OTZMQListenCallback activity_subscriber_callback_;
     OTZMQSubscribeSocket activity_subscriber_;
@@ -168,7 +168,7 @@ private:
         const api::client::Sync& sync,
         const api::Activity& activity,
         const api::ContactManager& contact,
-        const OTIdentifier nymID,
+        const Identifier& nymID,
         const Identifier& threadID);
 
     ActivityThread() = delete;

@@ -88,7 +88,7 @@ private:
     const std::string nym_{};
     const proto::ContactSectionName section_{proto::CONTACTSECTION_ERROR};
     const proto::ContactItemType type_{proto::CITEMTYPE_ERROR};
-    const OTIdentifier primary_;
+    const Identifier& primary_;
     const ItemMap items_{};
 
     static ItemMap create_item(const std::shared_ptr<ContactItem>& item);

@@ -336,7 +336,7 @@ bool OTAgreement::DropServerNoticeToNymbox(
 
         // Update the NymboxHash (in the nymfile.)
         //
-        const OTIdentifier ACTUAL_NYM_ID = NYM_ID;
+        const Identifier& ACTUAL_NYM_ID = NYM_ID;
         Nym theActualNym;  // unused unless it's really not already
                            // loaded. (use pActualNym.)
 

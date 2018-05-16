@@ -65,7 +65,7 @@ private:
 
     const api::Activity& activity_;
     const Flag& running_;
-    const OTIdentifier nym_id_;
+    const Identifier& nym_id_;
     std::shared_ptr<proto::StorageThread> thread_{nullptr};
     std::string display_name_{""};
     std::string text_{""};

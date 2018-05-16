@@ -59,7 +59,7 @@ class ServerAction
 public:
     EXPORT virtual TransactionNumber GetTransactionNumber() const = 0;
     EXPORT virtual SendResult LastSendResult() const = 0;
-    EXPORT virtual const OTIdentifier MessageID() const = 0;
+    EXPORT virtual const Identifier& MessageID() const = 0;
     EXPORT virtual const std::shared_ptr<PeerRequest>& SentPeerRequest()
         const = 0;
     EXPORT virtual const std::shared_ptr<PeerReply>& SentPeerReply() const = 0;

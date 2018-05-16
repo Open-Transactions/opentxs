@@ -110,7 +110,7 @@ public:
 
 protected:
     const api::ContactManager& contact_manager_;
-    const OTIdentifier nym_id_;
+    const Identifier& nym_id_;
     mutable OuterType items_;
     mutable OuterIteratorType outer_;
     mutable typename InnerType::const_iterator inner_;
@@ -122,7 +122,7 @@ protected:
     std::unique_ptr<std::thread> startup_{nullptr};
     const std::unique_ptr<RowType> blank_p_{nullptr};
     const RowType& blank_;
-    const OTIdentifier widget_id_;
+    const Identifier& widget_id_;
 
     virtual IDType blank_id() const = 0;
     virtual void construct_item(
@@ -437,7 +437,7 @@ protected:
         const network::zeromq::Context& zmq,
         const api::ContactManager& contact,
         const IDType lastID,
-        const OTIdentifier nymID,
+        const Identifier& nymID,
         RowType* blank)
         : Widget(zmq)
         , contact_manager_(contact)

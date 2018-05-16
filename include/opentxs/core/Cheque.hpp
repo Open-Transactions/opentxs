@@ -94,16 +94,16 @@ public:
         const std::int64_t& lTransactionNum,
         const time64_t& VALID_FROM,
         const time64_t& VALID_TO,  // The expiration date (valid from/to dates.)
-        const OTIdentifier SENDER_ACCT_ID,  // The asset account the cheque is
-                                            // drawn on.
-        const OTIdentifier SENDER_NYM_ID,   // This ID must match the user ID on
-                                            // the asset account,
+        const Identifier& SENDER_ACCT_ID,  // The asset account the cheque is
+                                           // drawn on.
+        const Identifier& SENDER_NYM_ID,   // This ID must match the user ID on
+                                           // the asset account,
         // AND must verify the cheque signature with that user's key.
-        const String& strMemo,                  // Optional memo field.
-        const OTIdentifier pRECIPIENT_NYM_ID);  // Recipient
-                                                // optional. (Might
-                                                // be a blank
-                                                // cheque.)
+        const String& strMemo,                 // Optional memo field.
+        const Identifier& pRECIPIENT_NYM_ID);  // Recipient
+                                               // optional. (Might
+                                               // be a blank
+                                               // cheque.)
 
     EXPORT void CancelCheque();  // You still need to re-sign the cheque after
                                  // doing this.
@@ -114,21 +114,21 @@ public:
      // number handy to write it with. (Necessary to prevent double-spending.)
      inline       std::int64_t              GetTransactionNum() const  { return
      m_lTransactionNum; }
-     inline const OTIdentifier&    GetSenderAcctID()           { return
+     inline const Identifier&    GetSenderAcctID()           { return
      m_SENDER_ACCT_ID; }
-     inline const OTIdentifier&    GetSenderNymID()           { return
+     inline const Identifier&    GetSenderNymID()           { return
      m_SENDER_NYM_ID; }
      */
 
     // From OTInstrument (parent class of OTTrackable, parent class of this)
     /*
-     OTInstrument(const OTIdentifier& NOTARY_ID, const OTIdentifier&
+     OTInstrument(const Identifier& NOTARY_ID, const Identifier&
      INSTRUMENT_DEFINITION_ID)
      : Contract()
 
-     inline const OTIdentifier& GetInstrumentDefinitionID()  const { return
+     inline const Identifier& GetInstrumentDefinitionID()  const { return
      m_InstrumentDefinitionID; }
-     inline const OTIdentifier& GetNotaryID() const { return m_NotaryID;    }
+     inline const Identifier& GetNotaryID() const { return m_NotaryID;    }
 
      inline time64_t GetValidFrom()    const { return m_VALID_FROM; }
      inline time64_t GetValidTo()        const { return m_VALID_TO;   }

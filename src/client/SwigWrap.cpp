@@ -4297,7 +4297,6 @@ const ui::Profile& SwigWrap::Profile(const std::string& contactID)
 {
 
     return OT::App().UI().Profile(Identifier::Factory(contactID));
-
 }
 
 const network::zeromq::Context& SwigWrap::ZMQ()

@@ -2769,7 +2769,7 @@ bool OTClient::processServerReplyGetBoxReceipt(
                         // make sure the associated box receipt doesn't get
                         // MARKED FOR DELETION when being removed at that time.
                         //
-                        // void load_str_trans_add_to_ledger(const OTIdentifier&
+                        // void load_str_trans_add_to_ledger(const Identifier&
                         //  the_nym_id, const OTString& str_trans,
                         //                                   const OTString
                         //                                   str_box_type, const
