@@ -52,7 +52,7 @@ public:
                   opentxs::proto::CITEMTYPE_INDIVIDUAL,
                   "testNym",
                   "",
-                  0))))
+                  -1))))
     {
     }
 

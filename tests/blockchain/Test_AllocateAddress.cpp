@@ -72,7 +72,7 @@ public:
 
 TEST_F(Test_AllocateAddress, testBip32_SeedA)
 {
-    std::string Alice = opentxs::OT::App().API().Exec().CreateNymHD(
+    const auto Alice = opentxs::OT::App().API().Exec().CreateNymHD(
         proto::CITEMTYPE_INDIVIDUAL, "Alice", SeedA_, 0);
 
     // Check m / 0'
@@ -234,7 +234,7 @@ TEST_F(Test_AllocateAddress, testBip32_SeedA)
 TEST_F(Test_AllocateAddress, testBip32_SeedB)
 {
     // create account
-    std::string Bob = opentxs::OT::App().API().Exec().CreateNymHD(
+    const auto Bob = opentxs::OT::App().API().Exec().CreateNymHD(
         proto::CITEMTYPE_INDIVIDUAL, "Bob", SeedB_, 0);
 
     // Check m / 0'
@@ -395,7 +395,7 @@ TEST_F(Test_AllocateAddress, testBip32_SeedB)
 
 TEST_F(Test_AllocateAddress, testBip44_SeedC)
 {
-    std::string Charly = OT::App().API().Exec().CreateNymHD(
+    const auto Charly = OT::App().API().Exec().CreateNymHD(
         opentxs::proto::CITEMTYPE_INDIVIDUAL, "Charly", SeedC_, 0);
     Identifier BTCAccountID = OT::App().Blockchain().NewAccount(
         Identifier(Charly),

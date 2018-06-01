@@ -285,6 +285,45 @@ bool Blockchain::AssignAddress(
     address.set_contact(sContactID);
     account->set_revision(account->revision() + 1);
 
+    // check: does the activity thread exist between nym and contact?
+    bool threadExists = false;
+    const auto threadList = storage_.ThreadList(sNymID, false);
+    for (const auto it : threadList) {
+        const auto& id = it.first;
+
+        if (id == sContactID) {
+            threadExists = true;
+        }
+    }
+
+    if (threadExists) {
+        // check: does every incoming transaction exist as an activity
+        std::shared_ptr<proto::StorageThread> thread =
+            activity_.Thread(nymID, contactID);
+        for (const std::string& txID : address.incoming()) {
+            bool exists = false;
+            for (const auto activity : thread->item())
+                if (txID.compare(activity.id()) == 0) exists = true;
+
+            // add: transaction to the thread
+            if (!exists)
+                activity_.AddBlockchainTransaction(
+                    nymID,
+                    contactID,
+                    StorageBox::INCOMINGBLOCKCHAIN,
+                    *Transaction(txID));
+        }
+    } else {
+        // create the thread and add the transactions
+        for (const auto txID : address.incoming()) {
+            activity_.AddBlockchainTransaction(
+                nymID,
+                contactID,
+                StorageBox::INCOMINGBLOCKCHAIN,
+                *Transaction(txID));
+        }
+    }
+
     return storage_.Store(sNymID, type, *account);
 }
 
@@ -429,11 +468,15 @@ proto::Bip44Address& Blockchain::find_address(
 
     if (chain) {
         for (auto& address : *account.mutable_internaladdress()) {
-            if (address.index() == index) { return address; }
+            if (address.index() == index) {
+                return address;
+            }
         }
     } else {
         for (auto& address : *account.mutable_externaladdress()) {
-            if (address.index() == index) { return address; }
+            if (address.index() == index) {
+                return address;
+            }
         }
     }
 
@@ -604,7 +647,9 @@ OTIdentifier Blockchain::NewAccount(
 
     const bool saved = storage_.Store(sNymID, type, account);
 
-    if (saved) { return accountID; }
+    if (saved) {
+        return accountID;
+    }
 
     otErr << OT_METHOD << __FUNCTION__ << ": Failed to save account."
           << std::endl;
@@ -652,7 +697,9 @@ bool Blockchain::StoreIncoming(
         }
     }
 
-    if (false == exists) { address.add_incoming(transaction.txid()); }
+    if (false == exists) {
+        address.add_incoming(transaction.txid());
+    }
 
     auto saved = storage_.Store(sNymID, account->type(), *account);
 
@@ -672,7 +719,9 @@ bool Blockchain::StoreIncoming(
         return false;
     }
 
-    if (address.contact().empty()) { return true; }
+    if (address.contact().empty()) {
+        return true;
+    }
 
     const auto contactID = Identifier::Factory(address.contact());
 
@@ -719,7 +768,9 @@ bool Blockchain::StoreOutgoing(
         return false;
     }
 
-    if (recipientContactID.empty()) { return true; }
+    if (recipientContactID.empty()) {
+        return true;
+    }
 
     return activity_.AddBlockchainTransaction(
         senderNymID,

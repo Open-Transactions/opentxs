@@ -67,11 +67,13 @@ serializedAsymmetricKey Bip32::AccountChildKey(
     auto path = rootPath;
     auto fingerprint = rootPath.root();
     serializedAsymmetricKey output;
-    std::uint32_t notUsed = 0;
+    std::int32_t notUsed;
     auto seed = OT::App().Crypto().BIP39().Seed(fingerprint, notUsed);
     path.set_root(fingerprint);
 
-    if (false == bool(seed)) { return output; }
+    if (false == bool(seed)) {
+        return output;
+    }
 
     const std::uint32_t change = internal ? 1 : 0;
     path.add_child(change);
@@ -84,10 +86,12 @@ std::string Bip32::Seed(const std::string& fingerprint) const
 {
     // TODO: make fingerprint non-const
     std::string input(fingerprint);
-    std::uint32_t notUsed = 0;
+    std::int32_t notUsed = 0;
     auto seed = OT::App().Crypto().BIP39().Seed(input, notUsed);
 
-    if (!seed) { return ""; }
+    if (!seed) {
+        return "";
+    }
 
     auto start = static_cast<const unsigned char*>(seed->getMemory());
     const auto end = start + seed->getMemorySize();
@@ -96,7 +100,9 @@ std::string Bip32::Seed(const std::string& fingerprint) const
     std::ostringstream stream;
     stream << std::hex << std::setfill('0');
 
-    for (int byte : bytes) { stream << std::setw(2) << byte; }
+    for (int byte : bytes) {
+        stream << std::setw(2) << byte;
+    }
 
     return stream.str();
 }
@@ -106,10 +112,12 @@ serializedAsymmetricKey Bip32::GetPaymentCode(
     const std::uint32_t nym) const
 {
     serializedAsymmetricKey output;
-    std::uint32_t notUsed = 0;
+    std::int32_t notUsed = 0;
     auto seed = OT::App().Crypto().BIP39().Seed(fingerprint, notUsed);
 
-    if (!seed) { return output; }
+    if (!seed) {
+        return output;
+    }
 
     proto::HDPath path;
     path.set_root(fingerprint);
@@ -128,7 +136,7 @@ serializedAsymmetricKey Bip32::GetPaymentCode(
 
 serializedAsymmetricKey Bip32::GetStorageKey(std::string& fingerprint) const
 {
-    std::uint32_t notUsed = 0;
+    std::int32_t notUsed = 0;
     auto seed = OT::App().Crypto().BIP39().Seed(fingerprint, notUsed);
 
     if (false == bool(seed)) {

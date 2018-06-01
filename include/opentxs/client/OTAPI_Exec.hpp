@@ -504,7 +504,7 @@ public:
      *                              blank or not found, the default wallet seed
      *                              will be used.
      *  \param[in] index (optional) Derivation path of the nym to be created. A
-     *                              value of zero will use the next index for
+     *                              negative value will use the next index for
      *                              the specified seed.
      *  \returns nym id for the new nym on success, or an empty string
      */
@@ -512,7 +512,7 @@ public:
         const proto::ContactItemType type,
         const std::string& name,
         const std::string& fingerprint = "",
-        const std::uint32_t index = 0) const;
+        const std::int32_t index = -1) const;
 
     EXPORT std::string GetNym_ActiveCronItemIDs(
         const std::string& NYM_ID,

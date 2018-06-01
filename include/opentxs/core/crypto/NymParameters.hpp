@@ -81,7 +81,7 @@ private:
     proto::CredentialType credentialType_{proto::CREDTYPE_HD};
     std::unique_ptr<OTPassword> entropy_;
     std::string seed_;
-    std::uint32_t nym_{0};
+    std::int32_t nym_{0};
     std::uint32_t credset_{0};
     std::uint32_t cred_index_{0};
     bool default_{true};
@@ -149,8 +149,8 @@ public:
     inline std::string Seed() const { return seed_; }
     inline void SetSeed(const std::string& seed) { seed_ = seed; }
 
-    inline std::uint32_t Nym() const { return nym_; }
-    inline void SetNym(const std::uint32_t path) { nym_ = path; }
+    inline std::int32_t Nym() const { return nym_; }
+    inline void SetNym(const std::int32_t path) { nym_ = path; }
 
     inline std::uint32_t Credset() const { return credset_; }
     inline void SetCredset(const std::uint32_t path) { credset_ = path; }
