@@ -6,6 +6,8 @@ endif()
 
 set(cxx-sources
   Accounts.cpp
+  Bip47Context.cpp
+  Bip47Contexts.cpp
   BlockchainTransactions.cpp
   Contacts.cpp
   Contexts.cpp
@@ -29,6 +31,8 @@ set(cxx-sources
 
 set(cxx-headers
   Accounts.hpp
+  Bip47Context.hpp
+  Bip47Contexts.hpp
   BlockchainTransactions.hpp
   Contacts.hpp
   Contexts.hpp

@@ -95,6 +95,8 @@ class Proxy;
 namespace storage
 {
 class Accounts;
+class Bip47Context;
+class Bip47Contexts;
 class BlockchainTransactions;
 class Contacts;
 class Contexts;

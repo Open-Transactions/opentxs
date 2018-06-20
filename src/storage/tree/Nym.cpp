@@ -41,6 +41,8 @@
 #include "Nym.hpp"
 
 #include "storage/Plugin.hpp"
+#include "Bip47Context.hpp"
+#include "Bip47Contexts.hpp"
 #include "Contexts.hpp"
 #include "Issuers.hpp"
 #include "Mailbox.hpp"
@@ -54,11 +56,12 @@
 
 #define CURRENT_VERSION 6
 #define BLOCKCHAIN_INDEX_VERSION 1
-
+#define BIP47_CHANNEL_INDEX_VERSION 1
 #define OT_METHOD "opentxs::storage::Nym::"
 
 namespace opentxs::storage
 {
+
 Nym::Nym(
     const opentxs::api::storage::Driver& storage,
     const std::string& id,
@@ -116,6 +119,11 @@ Nym::Nym(
     , workflows_root_(Node::BLANK_HASH)
     , workflows_lock_()
     , workflows_(nullptr)
+    , bip47_lock_()
+    , bip47_channels_()
+    , bip47_contexts_lock_()
+    , bip47_contexts_()
+    , bip47_contexts_root_(Node::BLANK_HASH)
 {
     if (check_hash(hash)) {
         init(hash);
@@ -126,6 +134,59 @@ Nym::Nym(
 }
 
 std::string Nym::Alias() const { return alias_; }
+
+std::set<proto::ContactItemType> Nym::Bip47ChainList() const
+{
+    std::set<proto::ContactItemType> output{};
+    sLock lock(bip47_lock_);
+
+    for (const auto& it : bip47_channels_) {
+        if (!it.second.empty()) { output.emplace(it.first); }
+    }
+
+    return output;
+}
+
+std::set<Bip47ChannelID> Nym::Bip47ChannelList(
+    const std::string& contactID,
+    const proto::ContactItemType chain) const
+{
+    sLock lock(bip47_lock_);
+    const auto outer = bip47_channels_.find(chain);
+
+    // check: given chain exists
+    if (outer == bip47_channels_.end()) { return {}; }
+
+    const auto& innerMap = outer->second;
+
+    // check: contact has channels
+    const auto inner = innerMap.find(contactID);
+
+    if (inner == innerMap.end()) { return {}; }
+
+    return inner->second;
+}
+
+std::set<std::string> Nym::Bip47ContactList(
+    const proto::ContactItemType chain) const
+{
+    std::set<std::string> contacts{};
+    sLock lock(bip47_lock_);
+    const auto it = bip47_channels_.find(chain);
+
+    // check: given chain exists
+    if (it == bip47_channels_.end()) { return contacts; }
+
+    const auto& innerMap = it->second;
+
+    for (const auto& channelID : innerMap) {
+        // check: contact has at least one channel
+        if (!channelID.second.empty()) { contacts.emplace(channelID.first); }
+    }
+
+    lock.unlock();
+    return contacts;
+}
 
 class Contexts* Nym::contexts() const
 {
@@ -335,6 +396,22 @@ void Nym::init(const std::string& hash)
 
     // Fields added in version 6
     workflows_root_ = normalize_hash(serialized->paymentworkflow());
+
+    // Fields added in version 7
+    for (const auto& it_channel : serialized->bip47channelindex()) {
+        auto& chain = bip47_channels_[it_channel.chain()];
+        auto& channels = chain[it_channel.contact()];
+
+        for (const auto& pcode : it_channel.paymentcode()) {
+            channels.emplace(Bip47ChannelID{it_channel.contact(), pcode});
+        }
+    }
+
+    if (serialized->has_bip47contexts()) {
+        threads_root_ = normalize_hash(serialized->bip47contexts().hash());
+    } else {
+        threads_root_ = Node::BLANK_HASH;
+    }
 }
 
 class Issuers* Nym::issuers() const
@@ -605,9 +682,24 @@ Editor<class PaymentWorkflows> Nym::mutable_PaymentWorkflows()
     return Editor<class PaymentWorkflows>(write_lock_, workflows(), callback);
 }
 
+Editor<class Bip47Contexts> Nym::mutable_Bip47Contexts()
+{
+    std::function<void(class Bip47Contexts*, Lock&)> callback =
+        [&](class Bip47Contexts* in, Lock& lock) -> void {
+        this->save(in, lock);
+    };
+
+    return Editor<class Bip47Contexts>(write_lock_, bip47contexts(), callback);
+}
+
 const class PaymentWorkflows& Nym::PaymentWorkflows() const
 {
     return *workflows();
+}
+
+const class Bip47Contexts& Nym::Bip47Contexts() const
+{
+    return *bip47contexts();
 }
 
 PeerReplies* Nym::processed_reply_box() const
@@ -820,6 +912,26 @@ void Nym::save(class PaymentWorkflows* input, const Lock& lock)
     }
 }
 
+void Nym::save(class Bip47Contexts* input, const Lock& lock)
+{
+    if (!verify_write_lock(lock)) {
+        otErr << __FUNCTION__ << ": Lock failure." << std::endl;
+        OT_FAIL;
+    }
+
+    if (nullptr == input) {
+        otErr << __FUNCTION__ << ": Null target" << std::endl;
+        OT_FAIL;
+    }
+
+    bip47_contexts_root_ = input->Root();
+
+    if (!save(lock)) {
+        otErr << __FUNCTION__ << ": Save error" << std::endl;
+        OT_FAIL;
+    }
+}
+
 class Threads* Nym::threads() const
 {
     Lock lock(threads_lock_);
@@ -1002,6 +1114,26 @@ proto::StorageNym Nym::serialize() const
         *serialized.add_blockchainaccount() = account;
     }
 
+    for (const auto& it_chain : bip47_channels_) {
+        auto& chain = it_chain.first;
+
+        for (const auto& it_contact : it_chain.second) {
+            auto& channel = *serialized.add_bip47channelindex();
+            channel.set_version(BIP47_CHANNEL_INDEX_VERSION);
+            channel.set_chain(chain);
+            channel.set_contact(it_contact.first);
+
+            for (const auto& chanid : it_contact.second) {
+                *channel.add_paymentcode() = chanid.second;
+            }
+        }
+    }
+
+    set_hash(
+        version_,
+        nymid_,
+        bip47_contexts_root_,
+        *serialized.mutable_bip47contexts());
     serialized.set_issuers(issuers_root_);
     serialized.set_paymentworkflow(workflows_root_);
 
@@ -1030,12 +1162,6 @@ bool Nym::Store(
         return false;
     }
 
-    if (false == proto::Validate(data, VERBOSE)) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Invalid account." << std::endl;
-
-        return false;
-    }
-
     Lock writeLock(write_lock_, std::defer_lock);
     Lock blockchainLock(blockchain_lock_, std::defer_lock);
     std::lock(writeLock, blockchainLock);
@@ -1057,6 +1183,40 @@ bool Nym::Store(
 
     blockchain_account_types_[type].insert(accountID);
     blockchainLock.unlock();
+
+    return save(writeLock);
+}
+
+bool Nym::Store(const proto::Bip47Context& context)
+{
+    const auto& paymentCode = context.paymentcode();
+
+    if (paymentCode.empty()) {
+        otErr << OT_METHOD << __FUNCTION__ << ": Invalid payment code."
+              << std::endl;
+
+        return false;
+    }
+
+    if (false == proto::Validate(context, VERBOSE)) {
+        otErr << OT_METHOD << __FUNCTION__ << ": Invalid BIP47Context."
+              << std::endl;
+
+        return false;
+    }
+
+    Lock writeLock(write_lock_, std::defer_lock);
+    sLock bip47Lock(bip47_lock_, std::defer_lock);
+    std::lock(writeLock, bip47Lock);
+
+    for (const auto& chain : context.chain()) {
+        auto& chans = bip47_channels_[chain.type()];
+        for (const auto& channel : chain.channel()) {
+            auto& channels = chans[channel.contact()];
+            channels.emplace(
+                Bip47ChannelID{channel.contact(), channel.paymentcode()});
+        }
+    }
 
     return save(writeLock);
 }
@@ -1129,6 +1289,26 @@ class PaymentWorkflows* Nym::workflows() const
     lock.unlock();
 
     return workflows_.get();
+}
+
+class Bip47Contexts* Nym::bip47contexts() const
+{
+    Lock lock(bip47_contexts_lock_);
+
+    if (false == bool(bip47_contexts_)) {
+        bip47_contexts_.reset(
+            new class Bip47Contexts(driver_, bip47_contexts_root_));
+
+        if (false == bool(bip47_contexts_)) {
+            otErr << __FUNCTION__ << ": Unable to instantiate." << std::endl;
+
+            OT_FAIL
+        }
+    }
+
+    lock.unlock();
+
+    return bip47_contexts_.get();
 }
 
 Nym::~Nym() {}

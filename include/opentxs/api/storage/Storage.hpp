@@ -57,6 +57,7 @@ namespace opentxs
 typedef std::function<void(const proto::CredentialIndex&)> NymLambda;
 typedef std::function<void(const proto::ServerContract&)> ServerLambda;
 typedef std::function<void(const proto::UnitDefinition&)> UnitLambda;
+using Bip47ChannelID = std::pair<std::string, std::string>;
 
 namespace api
 {
@@ -83,6 +84,15 @@ public:
         const Identifier& server) const = 0;
     virtual std::set<OTIdentifier> AccountsByUnit(
         const proto::ContactItemType unit) const = 0;
+    virtual std::set<proto::ContactItemType> Bip47ChainList(
+        const std::string& nymID) const = 0;
+    virtual std::set<Bip47ChannelID> Bip47ChannelList(
+        const std::string& nymID,
+        const std::string& contactID,
+        const proto::ContactItemType chain) const = 0;
+    virtual std::set<std::string> Bip47ContactList(
+        const std::string& nymID,
+        const proto::ContactItemType chain) const = 0;
     virtual std::set<std::string> BlockchainAccountList(
         const std::string& nymID,
         const proto::ContactItemType type) const = 0;
@@ -117,6 +127,11 @@ public:
         const std::string& nymID,
         const std::string& accountID,
         std::shared_ptr<proto::Bip44Account>& output,
+        const bool checking = false) const = 0;
+    virtual bool Load(
+        const std::string& nymID,
+        const std::string& paymentCode,
+        std::shared_ptr<proto::Bip47Context>& output,
         const bool checking = false) const = 0;
     virtual bool Load(
         const std::string& id,
@@ -297,6 +312,9 @@ public:
         const std::string& nymID,
         const proto::ContactItemType type,
         const proto::Bip44Account& data) const = 0;
+    virtual bool Store(
+        const std::string& nymID,
+        const proto::Bip47Context& data) const = 0;
     virtual bool Store(const proto::BlockchainTransaction& data) const = 0;
     virtual bool Store(const proto::Contact& data) const = 0;
     virtual bool Store(const proto::Context& data) const = 0;
