@@ -5,6 +5,8 @@
 
 include_directories(SYSTEM ${CMAKE_CURRENT_SOURCE_DIR}/../deps/)
 
+
+add_subdirectory(api)
 if(OT_CRYPTO_SUPPORTED_KEY_HD)
   add_subdirectory(blockchain)
 endif()

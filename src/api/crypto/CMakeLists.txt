@@ -4,6 +4,7 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 set(cxx-sources
+  Bip47.cpp
   Crypto.cpp
   Encode.cpp
   Hash.cpp
@@ -16,6 +17,7 @@ file(GLOB cxx-install-headers
 
 set(cxx-headers
   ${cxx-install-headers}
+  ${CMAKE_CURRENT_SOURCE_DIR}/Bip47.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Crypto.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Encode.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Hash.hpp

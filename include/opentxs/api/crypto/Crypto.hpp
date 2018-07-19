@@ -69,6 +69,9 @@ public:
 #if OT_CRYPTO_WITH_BIP39
     EXPORT virtual const opentxs::crypto::Bip39& BIP39() const = 0;
 #endif  // OT_CRYPTO_WITH_BIP39
+#if OT_CRYPTO_SUPPORTED_SOURCE_BIP47
+    EXPORT virtual const crypto::Bip47& BIP47() const = 0;
+#endif  // OT_CRYPTO_SUPPORTED_SOURCE_BIP47
 
     EXPORT virtual OTSymmetricKey GetStorageKey(std::string& seed) const = 0;
 

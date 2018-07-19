@@ -262,7 +262,7 @@ class OpenSSL;
 class StorageConfig;
 class StorageMultiplex;
 #if OT_CRYPTO_USING_TREZOR
-class TrezorCrypto;
+class Trezor;
 #endif
 }  // namespace opentxs
 

@@ -39,6 +39,10 @@ public:
         const std::uint32_t index,
         const Identifier& contactID,
         const BIP44Chain chain = EXTERNAL_CHAIN) const = 0;
+    virtual std::string CalculateAddress(
+        const proto::AsymmetricKey serialized,
+        const proto::ContactItemType type) const = 0;
+    virtual Bip44Type GetBip44Type(const proto::ContactItemType type) const = 0;
     virtual std::unique_ptr<proto::Bip44Address> LoadAddress(
         const Identifier& nymID,
         const Identifier& accountID,

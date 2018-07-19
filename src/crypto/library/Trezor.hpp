@@ -6,6 +6,13 @@
 #ifndef OPENTXS_CORE_CRYPTO_TREZOR_CRYPTO_HPP
 #define OPENTXS_CORE_CRYPTO_TREZOR_CRYPTO_HPP
 
+extern "C" {
+void ecdsa_compress_public_key33(
+    const ecdsa_curve* curve,
+    const curve_point* P,
+    uint8_t* pub_key);
+}
+
 namespace opentxs::crypto::implementation
 {
 class Trezor final : virtual public crypto::Trezor,
@@ -86,6 +93,10 @@ private:
         OTPassword& secret) const override;
     bool ScalarBaseMultiply(const OTPassword& privateKey, Data& publicKey)
         const override;
+#if OT_CRYPTO_SUPPORTED_SOURCE_BIP47
+    bool AddSecp256k1(const Data& P, Data& Q) const override;
+    bool IsSecp256k1(OTPassword& P) const override;
+#endif    
 #endif
 
 #if OT_CRYPTO_WITH_BIP39

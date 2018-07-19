@@ -48,6 +48,10 @@ extern "C" {
 #endif
 }
 
+#include "Encode.hpp"
+#include "Hash.hpp"
+#include "Symmetric.hpp"
+
 #define OT_METHOD "opentxs::Crypto::"
 
 namespace opentxs
@@ -111,6 +115,15 @@ const opentxs::crypto::Bip32& Crypto::BIP32() const
 
 #if OT_CRYPTO_WITH_BIP39
 const opentxs::crypto::Bip39& Crypto::BIP39() const
+{
+    OT_ASSERT(nullptr != bitcoincrypto_);
+
+    return *bitcoincrypto_;
+}
+#endif
+
+#if OT_CRYPTO_SUPPORTED_SOURCE_BIP47
+const opentxs::api::crypto::Bip47& Crypto::BIP47() const
 {
     OT_ASSERT(nullptr != bitcoincrypto_);
 

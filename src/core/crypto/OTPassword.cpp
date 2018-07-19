@@ -949,4 +949,17 @@ std::uint32_t OTPassword::OTfread(std::uint8_t* data, uint32_t size)
     return sizeToRead;
 }
 
+std::string OTPassword::asHex() const
+{
+    const std::size_t size = 2 * size_;
+    std::vector<char> output{};
+    output.resize(size, 0x0);
+
+    for (std::size_t i = 0; i < size_; i++) {
+        std::sprintf(&output[2 * i], "%02X", data_[i]);
+    }
+
+    return std::string(output.data(), output.size());
+}
+
 }  // namespace opentxs

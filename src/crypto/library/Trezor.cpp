@@ -13,6 +13,7 @@
 #include "opentxs/api/Native.hpp"
 #include "opentxs/core/crypto/OTPassword.hpp"
 #include "opentxs/core/crypto/OTPasswordData.hpp"
+#include "opentxs/core/crypto/PaymentCode.hpp"
 #include "opentxs/core/util/Assert.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/Identifier.hpp"
@@ -37,7 +38,6 @@
 #include "AsymmetricProvider.hpp"
 #include "EcdsaProvider.hpp"
 
-extern "C" {
 #if OT_CRYPTO_WITH_BIP39
 #include <trezor-crypto/bip39.h>
 #if OT_CRYPTO_WITH_BIP32
@@ -49,7 +49,6 @@ extern "C" {
 #include <trezor-crypto/base58.h>
 #include <trezor-crypto/ecdsa.h>
 #include <trezor-crypto/ripemd160.h>
-}
 
 #include <array>
 #include <cstdint>
@@ -57,6 +56,18 @@ extern "C" {
 #include <string>
 
 #include "Trezor.hpp"
+
+extern "C" {
+void ecdsa_compress_public_key33(
+    const ecdsa_curve* curve,
+    const curve_point* P,
+    uint8_t* pub_key)
+{
+    pub_key[0] = 0x02 | (P->y.val[0] & 0x01);
+    bn_write_be(&P->x, pub_key + 1);
+    memset(&P, 0, sizeof(P));
+}
+}  // extern "C"
 
 #define OT_METHOD "opentxs::crypto::implementation::Trezor::"
 
@@ -173,13 +184,13 @@ std::shared_ptr<proto::AsymmetricKey> Trezor::GetChild(
 
     if (proto::KEYMODE_PRIVATE == parent.mode()) {
         hdnode_private_ckd(node.get(), index);
+        return HDNodeToSerialized(
+            parent.type(), *node, Trezor::DERIVE_PRIVATE);
     } else {
         hdnode_public_ckd(node.get(), index);
+        return HDNodeToSerialized(
+            parent.type(), *node, Trezor::DERIVE_PUBLIC);
     }
-    std::shared_ptr<proto::AsymmetricKey> key =
-        HDNodeToSerialized(parent.type(), *node, Trezor::DERIVE_PRIVATE);
-
-    return key;
 }
 
 std::unique_ptr<HDNode> Trezor::GetChild(
@@ -477,14 +488,11 @@ bool Trezor::ScalarBaseMultiply(const OTPassword& privateKey, Data& publicKey)
 {
     std::array<std::uint8_t, 33> blank{};
     publicKey.Assign(blank.data(), blank.size());
-
     OT_ASSERT(secp256k1_);
-
     ecdsa_get_public_key33(
         secp256k1_->params,
         privateKey.getMemory_uint8(),
         static_cast<std::uint8_t*>(const_cast<void*>(publicKey.GetPointer())));
-
     curve_point notUsed;
 
     return (
@@ -493,6 +501,59 @@ bool Trezor::ScalarBaseMultiply(const OTPassword& privateKey, Data& publicKey)
                  static_cast<const std::uint8_t*>(publicKey.GetPointer()),
                  &notUsed));
 }
+
+// Q = Q + P for compressed points (33 bytes)
+bool Trezor::AddSecp256k1(const Data& P, Data& Q) const
+{
+    OT_ASSERT(secp256k1_);
+    curve_point p, q;
+
+    const bool valid_P = ecdsa_read_pubkey(
+        secp256k1_->params,
+        static_cast<const std::uint8_t*>(P.GetPointer()),
+        &p);
+
+    const bool valid_Q = ecdsa_read_pubkey(
+        secp256k1_->params,
+        static_cast<const std::uint8_t*>(Q.GetPointer()),
+        &q);
+
+    if (!valid_P || !valid_Q) {
+        otWarn << OT_METHOD << __FUNCTION__ << ": Invalid public key."
+               << std::endl;
+
+        return false;
+    }
+
+    point_add(secp256k1_->params, &p, &q);
+
+    std::array<std::uint8_t, 33> blank{};
+    Q.Assign(blank.data(), blank.size());
+    OT_ASSERT(secp256k1_);
+
+    ecdsa_compress_public_key33(
+        secp256k1_->params,
+        &q,
+        static_cast<std::uint8_t*>(const_cast<void*>(Q.GetPointer())));
+
+    curve_point pubkey_point;
+
+    const bool havePublic = ecdsa_read_pubkey(
+        secp256k1_->params,
+        static_cast<const std::uint8_t*>(Q.GetPointer()),
+        &pubkey_point);
+
+    return havePublic;
+}
+
+bool Trezor::IsSecp256k1(OTPassword& P) const
+{
+    OT_ASSERT(secp256k1_);
+    bignum256 p;
+    bn_read_be(P.getMemory_uint8(), &p);
+    return !bn_is_zero(&p) && bn_is_less(&p, &secp256k1_->params->order);
+}
+
 #endif  // OT_CRYPTO_SUPPORTED_KEY_SECP256K1
 
 std::string Trezor::Base58CheckEncode(
@@ -669,4 +730,5 @@ bool Trezor::Verify(
     return output;
 }
 }  // namespace opentxs::crypto::implementation
+
 #endif  // OT_CRYPTO_USING_TREZOR

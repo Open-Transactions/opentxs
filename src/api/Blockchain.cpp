@@ -212,7 +212,12 @@ std::unique_ptr<proto::Bip44Address> Blockchain::AllocateAddress(
     auto& newAddress = add_address(index, *account, chain);
     newAddress.set_version(BLOCKCHAIN_VERSION);
     newAddress.set_index(index);
-    newAddress.set_address(calculate_address(*account, chain, index));
+
+    const auto& path = account->path();
+    auto fingerprint = path.root();
+    auto serialized = crypto_.BIP32().AccountChildKey(path, chain, index);
+    
+    newAddress.set_address(CalculateAddress(*serialized, account->type()));
 
     OT_ASSERT(false == newAddress.address().empty());
 
@@ -317,7 +322,7 @@ bool Blockchain::AssignAddress(
     return storage_.Store(sNymID, type, *account);
 }
 
-Bip44Type Blockchain::bip44_type(const proto::ContactItemType type) const
+Bip44Type Blockchain::GetBip44Type(const proto::ContactItemType type) const
 {
     switch (type) {
         case proto::CITEMTYPE_BTC: {
@@ -364,23 +369,11 @@ Bip44Type Blockchain::bip44_type(const proto::ContactItemType type) const
     return {};
 }
 
-std::string Blockchain::calculate_address(
-    const proto::Bip44Account& account,
-    const BIP44Chain chain,
-    const std::uint32_t index) const
+std::string Blockchain::CalculateAddress(
+    const proto::AsymmetricKey serialized, const proto::ContactItemType type) const
 {
-    const auto& path = account.path();
-    auto fingerprint = path.root();
-    auto serialized = crypto_.BIP32().AccountChildKey(path, chain, index);
-
-    if (false == bool(serialized)) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Unable to derive key."
-              << std::endl;
-
-        return {};
-    }
-
-    const auto key{opentxs::crypto::key::Asymmetric::Factory(*serialized)};
+    const std::uint8_t prefix = address_prefix(type);
+    const auto key{opentxs::crypto::key::Asymmetric::Factory(serialized)};
     const opentxs::crypto::key::Secp256k1* ecKey{
         dynamic_cast<const opentxs::crypto::key::Secp256k1*>(&key.get())};
 
@@ -431,8 +424,7 @@ std::string Blockchain::calculate_address(
 
         return {};
     }
-
-    const auto prefix = address_prefix(account.type());
+    
     auto preimage = Data::Factory(&prefix, sizeof(prefix));
 
     OT_ASSERT(1 == preimage->GetSize());
@@ -487,7 +479,7 @@ void Blockchain::init_path(
                 static_cast<std::uint32_t>(Bip43Purpose::HDWALLET) |
                 static_cast<std::uint32_t>(Bip32Child::HARDENED));
             path.add_child(
-                static_cast<std::uint32_t>(bip44_type(chain)) |
+                static_cast<std::uint32_t>(GetBip44Type(chain)) |
                 static_cast<std::uint32_t>(Bip32Child::HARDENED));
             path.add_child(account);
         } break;

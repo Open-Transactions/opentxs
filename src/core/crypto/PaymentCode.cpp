@@ -8,31 +8,31 @@
 #include "PaymentCode.hpp"
 
 #if OT_CRYPTO_SUPPORTED_SOURCE_BIP47
+#include "opentxs/api/Native.hpp"
 #include "opentxs/api/crypto/Crypto.hpp"
 #include "opentxs/api/crypto/Encode.hpp"
 #include "opentxs/api/crypto/Symmetric.hpp"
-#include "opentxs/api/Native.hpp"
+#include "opentxs/core/Data.hpp"
+#include "opentxs/core/Identifier.hpp"
+#include "opentxs/core/Log.hpp"
+#include "opentxs/core/String.hpp"
 #include "opentxs/core/contract/Signable.hpp"
 #include "opentxs/core/crypto/Credential.hpp"
 #include "opentxs/core/crypto/MasterCredential.hpp"
 #include "opentxs/core/crypto/OTPassword.hpp"
 #include "opentxs/core/crypto/OTPasswordData.hpp"
 #include "opentxs/core/util/Assert.hpp"
-#include "opentxs/core/Data.hpp"
-#include "opentxs/core/Identifier.hpp"
-#include "opentxs/core/Log.hpp"
-#include "opentxs/core/String.hpp"
 #include "opentxs/crypto/key/Asymmetric.hpp"
 #include "opentxs/crypto/key/EllipticCurve.hpp"
 #if OT_CRYPTO_SUPPORTED_KEY_SECP256K1
 #include "opentxs/crypto/key/Secp256k1.hpp"
 #endif
-#include "opentxs/crypto/key/Symmetric.hpp"
-#include "opentxs/crypto/library/EcdsaProvider.hpp"
-#include "opentxs/crypto/Bip32.hpp"
 #include "opentxs/OT.hpp"
 #include "opentxs/Proto.hpp"
 #include "opentxs/Types.hpp"
+#include "opentxs/crypto/Bip32.hpp"
+#include "opentxs/crypto/key/Symmetric.hpp"
+#include "opentxs/crypto/library/EcdsaProvider.hpp"
 
 #include <array>
 #include <cstdint>
@@ -188,9 +188,15 @@ PaymentCode::PaymentCode(
 {
     auto [success, chainCode, publicKey] = make_key(seed_, index_);
 
+    OT_ASSERT(success);
+
     if (success) {
         chain_code_.swap(chainCode);
         ConstructKey(publicKey);
+        OT_ASSERT(pubkey_);
+    } else {
+        otErr << OT_METHOD << __FUNCTION__
+              << ": Failed to generate extended private key" << std::endl;
     }
 }
 

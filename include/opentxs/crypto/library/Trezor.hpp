@@ -18,6 +18,9 @@
 #if OT_CRYPTO_WITH_BIP39
 #include "opentxs/crypto/Bip39.hpp"
 #endif
+#if OT_CRYPTO_SUPPORTED_SOURCE_BIP47
+#include "api/crypto/Bip47.hpp"
+#endif
 
 namespace opentxs::crypto
 {
@@ -29,6 +32,10 @@ class Trezor : virtual public EncodingProvider
 #if OT_CRYPTO_WITH_BIP32
     ,
                virtual public Bip32
+#endif
+#if OT_CRYPTO_SUPPORTED_SOURCE_BIP47
+    ,
+               public opentxs::api::crypto::implementation::Bip47
 #endif
 #if OT_CRYPTO_SUPPORTED_KEY_SECP256K1
     ,

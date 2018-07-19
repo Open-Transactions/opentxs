@@ -30,6 +30,7 @@ class Workflow;
 
 namespace crypto
 {
+class Bip47;
 class Encode;
 class Hash;
 class Symmetric;
@@ -190,6 +191,7 @@ class Identifier;
 class Item;
 class Ledger;
 class Letter;
+class Libsecp256k1;
 class ListenCallbackSwig;
 class Log;
 class MasterCredential;

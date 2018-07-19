@@ -29,6 +29,10 @@ public:
         const std::uint32_t index,
         const Identifier& contactID,
         const BIP44Chain chain = EXTERNAL_CHAIN) const override;
+    std::string CalculateAddress(
+        const proto::AsymmetricKey serialized,
+        const proto::ContactItemType type) const override;
+    Bip44Type GetBip44Type(const proto::ContactItemType type) const override;
     std::unique_ptr<proto::Bip44Address> LoadAddress(
         const Identifier& nymID,
         const Identifier& accountID,
@@ -71,12 +75,6 @@ private:
         proto::Bip44Account& account,
         const BIP44Chain chain) const;
     std::uint8_t address_prefix(const proto::ContactItemType type) const;
-
-    Bip44Type bip44_type(const proto::ContactItemType type) const;
-    std::string calculate_address(
-        const proto::Bip44Account& account,
-        const BIP44Chain chain,
-        const std::uint32_t index) const;
     proto::Bip44Address& find_address(
         const std::uint32_t index,
         const BIP44Chain chain,
