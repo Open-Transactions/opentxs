@@ -46,10 +46,12 @@ we run [cppcheck](https://github.com/danmar/cppcheck/) and
 if either of them finds problems.
 
 #### Running the tests
-  
-The OT directory in `~/.ot` is deleted on every `make test` in the `build` directory.
-  
-BE ADVISED: Run `make test` in *development only*.
+
+Run `make test`, after `make`. Optionally to see test logging: `make test args -V`. To output the information of failed tests: `env CTEST_OUTPUT_ON_FAILURE=1 make test`
+
+Tests may run in parallel passing `-j` to make.
+
+BE ADVISED: The OT directory in `~/.ot` is deleted on every `make test` in the `build` directory. Run `make test` in *development only*.
   
 #### CppCheck and clang-format Git hooks
 
