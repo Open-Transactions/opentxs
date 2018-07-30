@@ -6,6 +6,8 @@
 #ifndef OPENTXS_CORE_CRYPTO_TREZOR_CRYPTO_HPP
 #define OPENTXS_CORE_CRYPTO_TREZOR_CRYPTO_HPP
 
+#include "opentxs/crypto/library/OTCrypto.hpp"
+
 namespace opentxs::crypto::implementation
 {
 class Trezor final : virtual public crypto::Trezor,
