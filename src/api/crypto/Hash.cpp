@@ -35,7 +35,7 @@ api::crypto::Hash* Factory::Hash(
     crypto::HashingProvider& sodium
 #if OT_CRYPTO_USING_TREZOR
     ,
-    crypto::Trezor& bitcoin
+    crypto::Trezor<std::shared_ptr<proto::AsymmetricKey>>& bitcoin
 #endif
 )
 {
@@ -59,7 +59,7 @@ Hash::Hash(
     opentxs::crypto::HashingProvider& sodium
 #if OT_CRYPTO_USING_TREZOR
     ,
-    opentxs::crypto::Trezor& bitcoin
+    opentxs::crypto::Trezor<std::shared_ptr<proto::AsymmetricKey>>& bitcoin
 #endif
     )
     : encode_(encode)

@@ -103,7 +103,7 @@ const opentxs::crypto::LegacySymmetricProvider& Crypto::AES() const
 #endif
 
 #if OT_CRYPTO_WITH_BIP32
-const opentxs::crypto::Bip32& Crypto::BIP32() const
+const opentxs::crypto::Bip32<std::shared_ptr<proto::AsymmetricKey>>& Crypto::BIP32() const
 {
     OT_ASSERT(nullptr != bitcoincrypto_);
 

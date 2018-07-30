@@ -21,6 +21,8 @@
 
 namespace opentxs::crypto
 {
+    
+template<typename X>
 class Trezor : virtual public EncodingProvider
 #if OT_CRYPTO_WITH_BIP39
     ,
@@ -28,7 +30,7 @@ class Trezor : virtual public EncodingProvider
 #endif
 #if OT_CRYPTO_WITH_BIP32
     ,
-               virtual public Bip32
+               virtual public Bip32<X>
 #endif
 #if OT_CRYPTO_SUPPORTED_KEY_SECP256K1
     ,

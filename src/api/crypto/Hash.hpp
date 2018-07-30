@@ -42,7 +42,7 @@ private:
     opentxs::crypto::HashingProvider& ssl_;
     opentxs::crypto::HashingProvider& sodium_;
 #if OT_CRYPTO_USING_TREZOR
-    opentxs::crypto::Trezor& bitcoin_;
+    opentxs::crypto::Trezor<std::shared_ptr<proto::AsymmetricKey>>& bitcoin_;
 #endif
 
     static bool Allocate(const proto::HashType hashType, OTPassword& input);
@@ -59,7 +59,7 @@ private:
         opentxs::crypto::HashingProvider& sodium
 #if OT_CRYPTO_USING_TREZOR
         ,
-        opentxs::crypto::Trezor& bitcoin
+        opentxs::crypto::Trezor<std::shared_ptr<proto::AsymmetricKey>>& bitcoin
 #endif
     );
     bool HMAC(

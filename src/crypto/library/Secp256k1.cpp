@@ -47,7 +47,7 @@ namespace opentxs
 {
 crypto::Secp256k1* Factory::Secp256k1(
     const api::crypto::Util& util,
-    const crypto::Trezor& ecdsa)
+    const crypto::Trezor<std::shared_ptr<proto::AsymmetricKey>>& ecdsa)
 {
     return new crypto::implementation::Secp256k1(util, ecdsa);
 }
@@ -57,7 +57,7 @@ namespace opentxs::crypto::implementation
 {
 bool Secp256k1::Initialized_ = false;
 
-Secp256k1::Secp256k1(const api::crypto::Util& ssl, const crypto::Trezor& ecdsa)
+Secp256k1::Secp256k1(const api::crypto::Util& ssl, const crypto::Trezor<std::shared_ptr<proto::AsymmetricKey>>& ecdsa)
     : context_(secp256k1_context_create(
           SECP256K1_CONTEXT_SIGN | SECP256K1_CONTEXT_VERIFY))
     , ecdsa_(ecdsa)
@@ -231,7 +231,7 @@ bool Secp256k1::ECDH(
     OTPassword& secret) const
 {
 #if OT_CRYPTO_USING_TREZOR
-    return static_cast<const Trezor&>(ecdsa_).ECDH(
+    return static_cast<const Trezor<std::shared_ptr<proto::AsymmetricKey>>&>(ecdsa_).ECDH(
         publicKey, privateKey, secret);
 #else
     return false;

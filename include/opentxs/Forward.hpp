@@ -80,7 +80,7 @@ class Symmetric;
 }  // namespace key
 
 class AsymmetricProvider;
-class Bip32;
+template<typename X> class Bip32;
 class Bip39;
 class EcdsaProvider;
 class EncodingProvider;
@@ -90,7 +90,7 @@ class OpenSSL;
 class Secp256k1;
 class Sodium;
 class SymmetricProvider;
-class Trezor;
+template<typename X> class Trezor;
 }  // namespace crypto
 
 namespace network

@@ -60,7 +60,7 @@ public:
     EXPORT const opentxs::crypto::LegacySymmetricProvider& AES() const override;
 #endif  // OT_CRYPTO_SUPPORTED_ALGO_AES
 #if OT_CRYPTO_WITH_BIP32
-    EXPORT const opentxs::crypto::Bip32& BIP32() const override;
+    EXPORT const opentxs::crypto::Bip32<std::shared_ptr<proto::AsymmetricKey>>& BIP32() const override;
 #endif  // OT_CRYPTO_WITH_BIP32
 #if OT_CRYPTO_WITH_BIP39
     EXPORT const opentxs::crypto::Bip39& BIP39() const override;
@@ -78,7 +78,7 @@ private:
     mutable std::unique_ptr<OTCachedKey> primary_key_;
     mutable std::map<OTIdentifier, std::unique_ptr<OTCachedKey>> cached_keys_;
 #if OT_CRYPTO_USING_TREZOR
-    std::unique_ptr<opentxs::crypto::Trezor> bitcoincrypto_;
+    std::unique_ptr<opentxs::crypto::Trezor<std::shared_ptr<proto::AsymmetricKey>>> bitcoincrypto_;
 #endif  // OT_CRYPTO_USING_TREZOR
     std::unique_ptr<opentxs::crypto::Sodium> ed25519_;
 #if OT_CRYPTO_USING_OPENSSL

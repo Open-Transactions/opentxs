@@ -10,7 +10,10 @@
 
 namespace opentxs::crypto::implementation
 {
-class Trezor final : virtual public crypto::Trezor,
+
+typedef std::shared_ptr<proto::AsymmetricKey> TrezorKey;
+
+class Trezor final : virtual public crypto::Trezor<TrezorKey>,
                      virtual public EncodingProvider
 #if OT_CRYPTO_WITH_BIP39
     ,

@@ -12,18 +12,21 @@
 
 namespace opentxs::crypto::implementation
 {
-class Bip32 : virtual public opentxs::crypto::Bip32
+    
+typedef std::shared_ptr<proto::AsymmetricKey> TrezorKey;
+
+class Bip32 : virtual public opentxs::crypto::Bip32<TrezorKey>
 {
 public:
-    std::shared_ptr<proto::AsymmetricKey> AccountChildKey(
+    TrezorKey AccountChildKey(
         const proto::HDPath& path,
         const BIP44Chain internal,
         const std::uint32_t index) const;
     std::string Seed(const std::string& fingerprint = "") const;
-    std::shared_ptr<proto::AsymmetricKey> GetPaymentCode(
+    TrezorKey GetPaymentCode(
         std::string& fingerprint,
         const std::uint32_t nym) const;
-    std::shared_ptr<proto::AsymmetricKey> GetStorageKey(
+    TrezorKey GetStorageKey(
         std::string& seed) const;
 };
 }  // namespace opentxs::crypto::implementation

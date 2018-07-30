@@ -64,7 +64,7 @@ public:
         const = 0;
 #endif  // OT_CRYPTO_SUPPORTED_ALGO_AES
 #if OT_CRYPTO_WITH_BIP32
-    EXPORT virtual const opentxs::crypto::Bip32& BIP32() const = 0;
+    EXPORT virtual const opentxs::crypto::Bip32<std::shared_ptr<proto::AsymmetricKey>>& BIP32() const = 0;
 #endif  // OT_CRYPTO_WITH_BIP32
 #if OT_CRYPTO_WITH_BIP39
     EXPORT virtual const opentxs::crypto::Bip39& BIP39() const = 0;

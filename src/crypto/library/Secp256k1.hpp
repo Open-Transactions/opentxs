@@ -41,7 +41,7 @@ private:
     static bool Initialized_;
 
     secp256k1_context* context_{nullptr};
-    const crypto::Trezor& ecdsa_;
+    const crypto::Trezor<std::shared_ptr<proto::AsymmetricKey>>& ecdsa_;
     const api::crypto::Util& ssl_;
 
     bool ParsePublicKey(const Data& input, secp256k1_pubkey& output) const;
@@ -55,7 +55,7 @@ private:
     bool ScalarBaseMultiply(const OTPassword& privateKey, Data& publicKey)
         const override;
 
-    Secp256k1(const api::crypto::Util& ssl, const crypto::Trezor& ecdsa);
+    Secp256k1(const api::crypto::Util& ssl, const crypto::Trezor<std::shared_ptr<proto::AsymmetricKey>>& ecdsa);
     Secp256k1() = delete;
 };
 }  // namespace opentxs::crypto::implementation

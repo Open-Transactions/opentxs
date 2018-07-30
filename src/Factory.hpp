@@ -150,7 +150,7 @@ public:
         crypto::HashingProvider& sodium
 #if OT_CRYPTO_USING_TREZOR
         ,
-        crypto::Trezor& bitcoin
+        crypto::Trezor<std::shared_ptr<proto::AsymmetricKey>>& bitcoin
 #endif
     );
     static api::Identity* Identity(const api::client::Wallet& wallet);
@@ -283,7 +283,7 @@ public:
     static crypto::key::RSA* RSAKey(const proto::KeyRole role);
     static crypto::Secp256k1* Secp256k1(
         const api::crypto::Util& util,
-        const crypto::Trezor& ecdsa);
+        const crypto::Trezor<std::shared_ptr<proto::AsymmetricKey>>& ecdsa);
     static crypto::key::Secp256k1* Secp256k1Key(
         const proto::AsymmetricKey& serializedKey);
     static crypto::key::Secp256k1* Secp256k1Key(const String& publicKey);
@@ -319,7 +319,7 @@ public:
         const api::storage::Storage& storage,
         const network::zeromq::Context& zmq,
         const ContextLockCallback& lockCallback);
-    static crypto::Trezor* Trezor(const api::Native& native);
+    static opentxs::crypto::Trezor<std::shared_ptr<proto::AsymmetricKey>>* Trezor(const opentxs::api::Native& native);
     static api::UI* UI(
         const api::client::Sync& sync,
         const api::client::Wallet& wallet,

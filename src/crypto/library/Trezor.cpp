@@ -62,7 +62,7 @@ extern "C" {
 
 namespace opentxs
 {
-crypto::Trezor* Factory::Trezor(const api::Native& native)
+crypto::Trezor<crypto::implementation::TrezorKey>* Factory::Trezor(const api::Native& native)
 {
     return new crypto::implementation::Trezor(native);
 }
@@ -97,7 +97,7 @@ void Trezor::WordsToSeed(
 }
 #endif  // OT_CRYPTO_WITH_BIP39
 
-Trezor::Trezor(const api::Native& native) : crypto::Trezor()
+Trezor::Trezor(const api::Native& native) : crypto::Trezor<TrezorKey>()
 #if OT_CRYPTO_WITH_BIP39
     , Bip39(native)
 #endif
