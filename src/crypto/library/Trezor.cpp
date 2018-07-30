@@ -493,78 +493,6 @@ bool Trezor::ScalarBaseMultiply(const OTPassword& privateKey, Data& publicKey)
                  static_cast<const std::uint8_t*>(publicKey.data()),
                  &notUsed));
 }
-#endif  // OT_CRYPTO_SUPPORTED_KEY_SECP256K1
-
-std::string Trezor::Base58CheckEncode(
-    const std::uint8_t* inputStart,
-    const std::size_t& inputSize) const
-{
-    std::string output;
-
-    if (0 == inputSize) { return output; }
-
-    if (128 < inputSize) {
-        otWarn << OT_METHOD << __FUNCTION__ << ": Input too long." << std::endl;
-
-        return output;
-    }
-
-    const std::size_t bufferSize = inputSize + 32 + 4;
-    output.resize(bufferSize, 0x0);
-    const std::size_t outputSize = ::base58_encode_check(
-        inputStart,
-        inputSize,
-        HASHER_SHA2D,
-        const_cast<char*>(output.c_str()),
-        output.size());
-
-    OT_ASSERT(outputSize <= bufferSize);
-
-    output.resize(outputSize);
-
-    return output;
-}
-
-bool Trezor::Base58CheckDecode(const std::string&& input, RawData& output) const
-{
-    const std::size_t inputSize = input.size();
-
-    if (0 == inputSize) { return false; }
-
-    if (128 < inputSize) {
-        otWarn << OT_METHOD << __FUNCTION__ << ": Input too long." << std::endl;
-
-        return false;
-    }
-
-    std::size_t outputSize = inputSize;
-    output.resize(outputSize, 0x0);
-    outputSize = ::base58_decode_check(
-        input.data(), HASHER_SHA2D, output.data(), output.size());
-
-    if (0 == outputSize) {
-        otWarn << OT_METHOD << __FUNCTION__ << ": Decoding failed."
-               << std::endl;
-
-        return false;
-    }
-
-    OT_ASSERT(outputSize <= output.size());
-
-    output.resize(outputSize);
-
-    return true;
-}
-
-bool Trezor::RIPEMD160(
-    const std::uint8_t* input,
-    const size_t inputSize,
-    std::uint8_t* output) const
-{
-    ripemd160(input, inputSize, output);
-
-    return true;
-}
 
 bool Trezor::Sign(
     const Data& plaintext,
@@ -668,5 +596,79 @@ bool Trezor::Verify(
 
     return output;
 }
+
+#endif  // OT_CRYPTO_SUPPORTED_KEY_SECP256K1
+
+std::string Trezor::Base58CheckEncode(
+    const std::uint8_t* inputStart,
+    const std::size_t& inputSize) const
+{
+    std::string output;
+
+    if (0 == inputSize) { return output; }
+
+    if (128 < inputSize) {
+        otWarn << OT_METHOD << __FUNCTION__ << ": Input too long." << std::endl;
+
+        return output;
+    }
+
+    const std::size_t bufferSize = inputSize + 32 + 4;
+    output.resize(bufferSize, 0x0);
+    const std::size_t outputSize = ::base58_encode_check(
+        inputStart,
+        inputSize,
+        HASHER_SHA2D,
+        const_cast<char*>(output.c_str()),
+        output.size());
+
+    OT_ASSERT(outputSize <= bufferSize);
+
+    output.resize(outputSize);
+
+    return output;
+}
+
+bool Trezor::Base58CheckDecode(const std::string&& input, RawData& output) const
+{
+    const std::size_t inputSize = input.size();
+
+    if (0 == inputSize) { return false; }
+
+    if (128 < inputSize) {
+        otWarn << OT_METHOD << __FUNCTION__ << ": Input too long." << std::endl;
+
+        return false;
+    }
+
+    std::size_t outputSize = inputSize;
+    output.resize(outputSize, 0x0);
+    outputSize = ::base58_decode_check(
+        input.data(), HASHER_SHA2D, output.data(), output.size());
+
+    if (0 == outputSize) {
+        otWarn << OT_METHOD << __FUNCTION__ << ": Decoding failed."
+               << std::endl;
+
+        return false;
+    }
+
+    OT_ASSERT(outputSize <= output.size());
+
+    output.resize(outputSize);
+
+    return true;
+}
+
+bool Trezor::RIPEMD160(
+    const std::uint8_t* input,
+    const size_t inputSize,
+    std::uint8_t* output) const
+{
+    ripemd160(input, inputSize, output);
+
+    return true;
+}
+
 }  // namespace opentxs::crypto::implementation
 #endif  // OT_CRYPTO_USING_TREZOR

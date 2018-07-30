@@ -53,6 +53,7 @@ public:
         const size_t inputSize,
         std::uint8_t* output) const override;
 
+#if OT_CRYPTO_SUPPORTED_KEY_SECP256K1
     bool Sign(
         const Data& plaintext,
         const key::Asymmetric& theKey,
@@ -66,6 +67,7 @@ public:
         const Data& signature,
         const proto::HashType hashType,
         const OTPasswordData* pPWData = nullptr) const override;
+#endif
 
     ~Trezor() = default;
 
@@ -81,7 +83,7 @@ private:
         0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
         0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFE, 0xFF, 0xFF, 0xFC, 0x2F};
 
-#if OT_CRYPTO_SUPPORTED_KEY_SECP256K1
+#if OT_CRYPTO_SUPPORTED_KEY_SECP256K1        
     bool ECDH(
         const Data& publicKey,
         const OTPassword& privateKey,
