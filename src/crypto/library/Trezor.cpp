@@ -396,40 +396,6 @@ std::string Trezor::CurveName(const EcdsaCurve& curve)
 
     return "";
 }
-
-bool Trezor::RandomKeypair(OTPassword& privateKey, Data& publicKey) const
-{
-    bool valid = false;
-
-    do {
-        privateKey.randomizeMemory(256 / 8);
-
-        if (ValidPrivateKey(privateKey)) { valid = true; }
-    } while (false == valid);
-
-    return ScalarBaseMultiply(privateKey, publicKey);
-}
-
-bool Trezor::ValidPrivateKey(const OTPassword& key) const
-{
-    std::unique_ptr<bignum256> input(new bignum256);
-    std::unique_ptr<bignum256> max(new bignum256);
-
-    OT_ASSERT(input);
-    OT_ASSERT(max);
-
-    bn_read_be(key.getMemory_uint8(), input.get());
-    bn_normalize(input.get());
-
-    bn_read_be(KeyMax, max.get());
-    bn_normalize(max.get());
-
-    const bool zero = bn_is_zero(input.get());
-
-    const bool size = bn_is_less(input.get(), max.get());
-
-    return (!zero && size);
-}
 #endif  // OT_CRYPTO_WITH_BIP32
 
 #if OT_CRYPTO_SUPPORTED_KEY_SECP256K1
@@ -492,6 +458,40 @@ bool Trezor::ScalarBaseMultiply(const OTPassword& privateKey, Data& publicKey)
                  secp256k1_->params,
                  static_cast<const std::uint8_t*>(publicKey.data()),
                  &notUsed));
+}
+
+bool Trezor::ValidPrivateKey(const OTPassword& key) const
+{
+    std::unique_ptr<bignum256> input(new bignum256);
+    std::unique_ptr<bignum256> max(new bignum256);
+
+    OT_ASSERT(input);
+    OT_ASSERT(max);
+
+    bn_read_be(key.getMemory_uint8(), input.get());
+    bn_normalize(input.get());
+
+    bn_read_be(KeyMax, max.get());
+    bn_normalize(max.get());
+
+    const bool zero = bn_is_zero(input.get());
+
+    const bool size = bn_is_less(input.get(), max.get());
+
+    return (!zero && size);
+}
+
+bool Trezor::RandomKeypair(OTPassword& privateKey, Data& publicKey) const
+{
+    bool valid = false;
+
+    do {
+        privateKey.randomizeMemory(256 / 8);
+
+        if (ValidPrivateKey(privateKey)) { valid = true; }
+    } while (false == valid);
+
+    return ScalarBaseMultiply(privateKey, publicKey);
 }
 
 bool Trezor::Sign(

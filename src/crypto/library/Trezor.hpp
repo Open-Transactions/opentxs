@@ -6,7 +6,7 @@
 #ifndef OPENTXS_CORE_CRYPTO_TREZOR_CRYPTO_HPP
 #define OPENTXS_CORE_CRYPTO_TREZOR_CRYPTO_HPP
 
-#include "opentxs/crypto/library/OTCrypto.hpp"
+#include "opentxs/crypto/library/Trezor.hpp"
 
 namespace opentxs::crypto::implementation
 {
@@ -35,7 +35,6 @@ public:
         const EcdsaCurve& curve,
         const OTPassword& seed,
         proto::HDPath& path) const override;
-    bool RandomKeypair(OTPassword& privateKey, Data& publicKey) const override;
     std::string SeedToFingerprint(
         const EcdsaCurve& curve,
         const OTPassword& seed) const override;
@@ -90,6 +89,8 @@ private:
         OTPassword& secret) const override;
     bool ScalarBaseMultiply(const OTPassword& privateKey, Data& publicKey)
         const override;
+    bool RandomKeypair(OTPassword& privateKey, Data& publicKey) const override;
+    bool ValidPrivateKey(const OTPassword& key) const;
 #endif
 
 #if OT_CRYPTO_WITH_BIP39
@@ -124,7 +125,6 @@ private:
         const proto::AsymmetricKeyType& type,
         const HDNode& node,
         const DerivationMode privateVersion) const;
-    bool ValidPrivateKey(const OTPassword& key) const;
 #endif
 
     Trezor(const api::Native& native);
