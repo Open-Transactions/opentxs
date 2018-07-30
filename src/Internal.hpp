@@ -289,9 +289,6 @@ class OpenSSL;
 #endif
 class StorageConfig;
 class StorageMultiplex;
-#if OT_CRYPTO_USING_TREZOR
-class TrezorCrypto;
-#endif
 }  // namespace opentxs
 
 #include "Factory.hpp"
