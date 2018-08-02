@@ -70,6 +70,7 @@ crypto::Trezor* Factory::Trezor(const api::Native& native)
 
 namespace opentxs::crypto::implementation
 {
+
 #if OT_CRYPTO_WITH_BIP39
 bool Trezor::toWords(const OTPassword& seed, OTPassword& words) const
 {
@@ -96,20 +97,15 @@ void Trezor::WordsToSeed(
 }
 #endif  // OT_CRYPTO_WITH_BIP39
 
-Trezor::Trezor(const api::Native& native)
+Trezor::Trezor(const api::Native& native) : crypto::Trezor()
 #if OT_CRYPTO_WITH_BIP39
-    : Bip39(native)
+    , Bip39(native)
+#endif
 #if OT_CRYPTO_WITH_BIP32
     , Bip32()
 #endif
-#endif
 #if OT_CRYPTO_SUPPORTED_KEY_SECP256K1
-#if OT_CRYPTO_WITH_BIP39
-    ,
-#else
-    :
-#endif
-    EcdsaProvider()
+    , EcdsaProvider()
 #endif
 {
 #if OT_CRYPTO_WITH_BIP32
