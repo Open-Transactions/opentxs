@@ -38,11 +38,12 @@ class Trezor : virtual public EncodingProvider
 {
 public:
 #if OT_CRYPTO_SUPPORTED_KEY_SECP256K1
-    EXPORT virtual bool ECDH(
+    virtual bool ECDH(
         const Data& publicKey,
         const OTPassword& privateKey,
         OTPassword& secret) const = 0;
 #endif
+        
     EXPORT virtual bool RIPEMD160(
         const std::uint8_t* input,
         const size_t inputSize,

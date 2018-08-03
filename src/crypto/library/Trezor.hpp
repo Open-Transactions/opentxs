@@ -66,6 +66,10 @@ public:
         const Data& signature,
         const proto::HashType hashType,
         const OTPasswordData* pPWData = nullptr) const override;
+    bool ECDH(
+        const Data& publicKey,
+        const OTPassword& privateKey,
+        OTPassword& secret) const override;
 #endif
 
     ~Trezor() = default;
@@ -83,10 +87,6 @@ private:
         0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFE, 0xFF, 0xFF, 0xFC, 0x2F};
 
 #if OT_CRYPTO_SUPPORTED_KEY_SECP256K1        
-    bool ECDH(
-        const Data& publicKey,
-        const OTPassword& privateKey,
-        OTPassword& secret) const override;
     bool ScalarBaseMultiply(const OTPassword& privateKey, Data& publicKey)
         const override;
     bool RandomKeypair(OTPassword& privateKey, Data& publicKey) const override;

@@ -80,6 +80,10 @@ public:
         const OTPassword& seed,
         OTPassword& privateKey,
         Data& publicKey) const = 0;
+    /*virtual bool ECDH(
+        const Data& publicKey,
+        const OTPassword& privateKey,
+        OTPassword& secret) const = 0;*/
 
     EXPORT virtual ~EcdsaProvider() = default;
 
