@@ -31,6 +31,11 @@ class Trezor final : virtual public crypto::Trezor<TrezorKey>,
 {
 public:
 #if OT_CRYPTO_WITH_BIP32
+
+    typedef bool DerivationMode;
+    static const DerivationMode DERIVE_PRIVATE = true;
+    static const DerivationMode DERIVE_PUBLIC = false;
+    
     std::shared_ptr<proto::AsymmetricKey> GetChild(
         const proto::AsymmetricKey& parent,
         const std::uint32_t index) const override;
@@ -80,10 +85,6 @@ public:
 private:
     friend Factory;
 
-    typedef bool DerivationMode;
-    const DerivationMode DERIVE_PRIVATE = true;
-    const DerivationMode DERIVE_PUBLIC = false;
-
     const std::uint8_t KeyMax[32]{
         0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
         0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
@@ -106,28 +107,6 @@ private:
 
 #if OT_CRYPTO_WITH_BIP32
     const curve_info* secp256k1_{nullptr};
-
-    static std::string CurveName(const EcdsaCurve& curve);
-
-    static std::unique_ptr<HDNode> InstantiateHDNode(
-        const EcdsaCurve& curve,
-        const OTPassword& seed);
-    static std::unique_ptr<HDNode> InstantiateHDNode(const EcdsaCurve& curve);
-    static std::unique_ptr<HDNode> GetChild(
-        const HDNode& parent,
-        const std::uint32_t index,
-        const DerivationMode privateVersion);
-
-    std::unique_ptr<HDNode> DeriveChild(
-        const EcdsaCurve& curve,
-        const OTPassword& seed,
-        proto::HDPath& path) const;
-    std::unique_ptr<HDNode> SerializedToHDNode(
-        const proto::AsymmetricKey& serialized) const;
-    std::shared_ptr<proto::AsymmetricKey> HDNodeToSerialized(
-        const proto::AsymmetricKeyType& type,
-        const HDNode& node,
-        const DerivationMode privateVersion) const;
 #endif
 
     Trezor(const api::Native& native);

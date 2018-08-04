@@ -71,6 +71,225 @@ crypto::Trezor<crypto::implementation::TrezorKey>* Factory::Trezor(const api::Na
 namespace opentxs::crypto::implementation
 {
 
+#if OT_CRYPTO_WITH_BIP32
+
+std::string CurveName(const EcdsaCurve& curve);
+
+std::unique_ptr<HDNode> InstantiateHDNode(
+    const EcdsaCurve& curve,
+    const OTPassword& seed);
+
+std::unique_ptr<HDNode> InstantiateHDNode(
+    const EcdsaCurve& curve);
+
+std::unique_ptr<HDNode> GetChild(
+    const HDNode& parent, 
+    const std::uint32_t index, 
+    const Trezor::DerivationMode privateVersion);
+
+std::unique_ptr<HDNode> DeriveChild(
+    const EcdsaCurve& curve, 
+    const OTPassword& seed, 
+    proto::HDPath& path);
+
+std::unique_ptr<HDNode> SerializedToHDNode(
+    const proto::AsymmetricKey& serialized);
+
+std::shared_ptr<proto::AsymmetricKey> HDNodeToSerialized(
+    const proto::AsymmetricKeyType& type,
+    const HDNode& node,
+    const Trezor::DerivationMode privateVersion);
+
+std::string CurveName(const EcdsaCurve& curve)
+{
+    switch (curve) {
+        case (EcdsaCurve::SECP256K1): {
+            return ::SECP256K1_NAME;
+        }
+        case (EcdsaCurve::ED25519): {
+            return ::ED25519_NAME;
+        }
+        default: {
+        }
+    }
+
+    return "";
+}
+
+std::unique_ptr<HDNode> InstantiateHDNode(
+    const EcdsaCurve& curve,
+    const OTPassword& seed)
+{
+    std::unique_ptr<HDNode> output;
+    output.reset(new HDNode);
+
+    OT_ASSERT_MSG(output, "Instantiation of HD node failed.");
+
+    auto curveName = CurveName(curve);
+
+    if (1 > curveName.size()) { return output; }
+
+    int result = ::hdnode_from_seed(
+        static_cast<const std::uint8_t*>(seed.getMemory()),
+        seed.getMemorySize(),
+         CurveName(curve).c_str(),
+        output.get());
+
+    OT_ASSERT_MSG((1 == result), "Setup of HD node failed.");
+
+    ::hdnode_fill_public_key(output.get());
+
+    return output;
+}
+
+std::unique_ptr<HDNode> InstantiateHDNode(const EcdsaCurve& curve)
+{
+    auto entropy = OT::App().Crypto().AES().InstantiateBinarySecretSP();
+
+    OT_ASSERT_MSG(entropy, "Failed to obtain entropy.");
+
+    entropy->randomizeMemory(256 / 8);
+
+    auto output = InstantiateHDNode(curve, *entropy);
+
+    OT_ASSERT(output);
+
+    output->depth = 0;
+    output->child_num = 0;
+    OTPassword::zeroMemory(output->chain_code, sizeof(output->chain_code));
+    OTPassword::zeroMemory(output->private_key, sizeof(output->private_key));
+    OTPassword::zeroMemory(output->public_key, sizeof(output->public_key));
+
+    return output;
+}
+
+std::unique_ptr<HDNode> GetChild(
+    const HDNode& parent,
+    const std::uint32_t index,
+    const Trezor::DerivationMode privateVersion)
+{
+    std::unique_ptr<HDNode> output;
+    output.reset(new HDNode(parent));
+
+    if (!output) { OT_FAIL; }
+
+    if (privateVersion) {
+        hdnode_private_ckd(output.get(), index);
+    } else {
+        hdnode_public_ckd(output.get(), index);
+    }
+
+    return output;
+}
+
+std::unique_ptr<HDNode> DeriveChild(
+    const EcdsaCurve& curve,
+    const OTPassword& seed,
+    proto::HDPath& path)
+{
+    std::uint32_t depth = path.child_size();
+
+    if (0 == depth) {
+
+        return InstantiateHDNode(curve, seed);
+    } else {
+        proto::HDPath newpath = path;
+        newpath.mutable_child()->RemoveLast();
+        auto parentnode = DeriveChild(curve, seed, newpath);
+        std::unique_ptr<HDNode> output{nullptr};
+
+        if (parentnode) {
+            const auto child = path.child(depth - 1);
+            output = implementation::GetChild(*parentnode, child, Trezor::DERIVE_PRIVATE);
+        } else {
+            OT_FAIL;
+        }
+
+        return output;
+    }
+}
+
+std::shared_ptr<proto::AsymmetricKey> HDNodeToSerialized(
+    const proto::AsymmetricKeyType& type,
+    const HDNode& node,
+    const Trezor::DerivationMode privateVersion)
+{
+    std::shared_ptr<proto::AsymmetricKey> key =
+        std::make_shared<proto::AsymmetricKey>();
+
+    key->set_version(1);
+    key->set_type(type);
+
+    if (privateVersion) {
+        key->set_mode(proto::KEYMODE_PRIVATE);
+        auto& encryptedKey = *key->mutable_encryptedkey();
+        auto& chaincode = *key->mutable_chaincode();
+
+        OTPasswordData password(__FUNCTION__);
+        OTPassword privateKey, publicKey;
+        privateKey.setMemory(node.private_key, sizeof(node.private_key));
+        publicKey.setMemory(node.chain_code, sizeof(node.chain_code));
+
+        EcdsaProvider::EncryptPrivateKey(
+            privateKey, publicKey, password, encryptedKey, chaincode);
+    } else {
+        key->set_mode(proto::KEYMODE_PUBLIC);
+        key->set_key(node.public_key, sizeof(node.public_key));
+    }
+
+    return key;
+}
+
+std::unique_ptr<HDNode> SerializedToHDNode(
+    const proto::AsymmetricKey& serialized)
+{
+    auto node = InstantiateHDNode(
+        AsymmetricProvider::KeyTypeToCurve(serialized.type()));
+
+    if (proto::KEYMODE_PRIVATE == serialized.mode()) {
+        OTPassword key, chaincode;
+        OTPasswordData password(__FUNCTION__);
+
+        OT_ASSERT(!serialized.encryptedkey().text());
+        OT_ASSERT(!serialized.chaincode().text());
+
+        EcdsaProvider::DecryptPrivateKey(
+            serialized.encryptedkey(),
+            serialized.chaincode(),
+            password,
+            key,
+            chaincode);
+
+        OT_ASSERT(key.isMemory());
+        OT_ASSERT(chaincode.isMemory());
+
+        OTPassword::safe_memcpy(
+            &(node->private_key[0]),
+            sizeof(node->private_key),
+            key.getMemory(),
+            key.getMemorySize(),
+            false);
+
+        OTPassword::safe_memcpy(
+            &(node->chain_code[0]),
+            sizeof(node->chain_code),
+            chaincode.getMemory(),
+            chaincode.getMemorySize(),
+            false);
+    } else {
+        OTPassword::safe_memcpy(
+            &(node->public_key[0]),
+            sizeof(node->public_key),
+            serialized.key().c_str(),
+            serialized.key().size(),
+            false);
+    }
+
+    return node;
+}
+
+#endif
+
 #if OT_CRYPTO_WITH_BIP39
 bool Trezor::toWords(const OTPassword& seed, OTPassword& words) const
 {
@@ -178,52 +397,6 @@ std::shared_ptr<proto::AsymmetricKey> Trezor::GetChild(
     return key;
 }
 
-std::unique_ptr<HDNode> Trezor::GetChild(
-    const HDNode& parent,
-    const std::uint32_t index,
-    const DerivationMode privateVersion)
-{
-    std::unique_ptr<HDNode> output;
-    output.reset(new HDNode(parent));
-
-    if (!output) { OT_FAIL; }
-
-    if (privateVersion) {
-        hdnode_private_ckd(output.get(), index);
-    } else {
-        hdnode_public_ckd(output.get(), index);
-    }
-
-    return output;
-}
-
-std::unique_ptr<HDNode> Trezor::DeriveChild(
-    const EcdsaCurve& curve,
-    const OTPassword& seed,
-    proto::HDPath& path) const
-{
-    std::uint32_t depth = path.child_size();
-
-    if (0 == depth) {
-
-        return InstantiateHDNode(curve, seed);
-    } else {
-        proto::HDPath newpath = path;
-        newpath.mutable_child()->RemoveLast();
-        auto parentnode = DeriveChild(curve, seed, newpath);
-        std::unique_ptr<HDNode> output{nullptr};
-
-        if (parentnode) {
-            const auto child = path.child(depth - 1);
-            output = GetChild(*parentnode, child, DERIVE_PRIVATE);
-        } else {
-            OT_FAIL;
-        }
-
-        return output;
-    }
-}
-
 std::shared_ptr<proto::AsymmetricKey> Trezor::GetHDKey(
     const EcdsaCurve& curve,
     const OTPassword& seed,
@@ -249,148 +422,6 @@ std::shared_ptr<proto::AsymmetricKey> Trezor::GetHDKey(
     if (output) { *(output->mutable_path()) = path; }
 
     return output;
-}
-
-std::shared_ptr<proto::AsymmetricKey> Trezor::HDNodeToSerialized(
-    const proto::AsymmetricKeyType& type,
-    const HDNode& node,
-    const DerivationMode privateVersion) const
-{
-    std::shared_ptr<proto::AsymmetricKey> key =
-        std::make_shared<proto::AsymmetricKey>();
-
-    key->set_version(1);
-    key->set_type(type);
-
-    if (privateVersion) {
-        key->set_mode(proto::KEYMODE_PRIVATE);
-        auto& encryptedKey = *key->mutable_encryptedkey();
-        auto& chaincode = *key->mutable_chaincode();
-
-        OTPasswordData password(__FUNCTION__);
-        OTPassword privateKey, publicKey;
-        privateKey.setMemory(node.private_key, sizeof(node.private_key));
-        publicKey.setMemory(node.chain_code, sizeof(node.chain_code));
-
-        EcdsaProvider::EncryptPrivateKey(
-            privateKey, publicKey, password, encryptedKey, chaincode);
-    } else {
-        key->set_mode(proto::KEYMODE_PUBLIC);
-        key->set_key(node.public_key, sizeof(node.public_key));
-    }
-
-    return key;
-}
-
-std::unique_ptr<HDNode> Trezor::InstantiateHDNode(const EcdsaCurve& curve)
-{
-    auto entropy = OT::App().Crypto().AES().InstantiateBinarySecretSP();
-
-    OT_ASSERT_MSG(entropy, "Failed to obtain entropy.");
-
-    entropy->randomizeMemory(256 / 8);
-
-    auto output = InstantiateHDNode(curve, *entropy);
-
-    OT_ASSERT(output);
-
-    output->depth = 0;
-    output->child_num = 0;
-    OTPassword::zeroMemory(output->chain_code, sizeof(output->chain_code));
-    OTPassword::zeroMemory(output->private_key, sizeof(output->private_key));
-    OTPassword::zeroMemory(output->public_key, sizeof(output->public_key));
-
-    return output;
-}
-
-std::unique_ptr<HDNode> Trezor::InstantiateHDNode(
-    const EcdsaCurve& curve,
-    const OTPassword& seed)
-{
-    std::unique_ptr<HDNode> output;
-    output.reset(new HDNode);
-
-    OT_ASSERT_MSG(output, "Instantiation of HD node failed.");
-
-    auto curveName = CurveName(curve);
-
-    if (1 > curveName.size()) { return output; }
-
-    int result = ::hdnode_from_seed(
-        static_cast<const std::uint8_t*>(seed.getMemory()),
-        seed.getMemorySize(),
-        CurveName(curve).c_str(),
-        output.get());
-
-    OT_ASSERT_MSG((1 == result), "Setup of HD node failed.");
-
-    ::hdnode_fill_public_key(output.get());
-
-    return output;
-}
-
-std::unique_ptr<HDNode> Trezor::SerializedToHDNode(
-    const proto::AsymmetricKey& serialized) const
-{
-    auto node = InstantiateHDNode(
-        AsymmetricProvider::KeyTypeToCurve(serialized.type()));
-
-    if (proto::KEYMODE_PRIVATE == serialized.mode()) {
-        OTPassword key, chaincode;
-        OTPasswordData password(__FUNCTION__);
-
-        OT_ASSERT(!serialized.encryptedkey().text());
-        OT_ASSERT(!serialized.chaincode().text());
-
-        EcdsaProvider::DecryptPrivateKey(
-            serialized.encryptedkey(),
-            serialized.chaincode(),
-            password,
-            key,
-            chaincode);
-
-        OT_ASSERT(key.isMemory());
-        OT_ASSERT(chaincode.isMemory());
-
-        OTPassword::safe_memcpy(
-            &(node->private_key[0]),
-            sizeof(node->private_key),
-            key.getMemory(),
-            key.getMemorySize(),
-            false);
-
-        OTPassword::safe_memcpy(
-            &(node->chain_code[0]),
-            sizeof(node->chain_code),
-            chaincode.getMemory(),
-            chaincode.getMemorySize(),
-            false);
-    } else {
-        OTPassword::safe_memcpy(
-            &(node->public_key[0]),
-            sizeof(node->public_key),
-            serialized.key().c_str(),
-            serialized.key().size(),
-            false);
-    }
-
-    return node;
-}
-
-std::string Trezor::CurveName(const EcdsaCurve& curve)
-{
-    switch (curve) {
-        case (EcdsaCurve::SECP256K1): {
-            return ::SECP256K1_NAME;
-        }
-        case (EcdsaCurve::ED25519): {
-            return ::ED25519_NAME;
-        }
-        default: {
-        }
-    }
-
-    return "";
 }
 #endif  // OT_CRYPTO_WITH_BIP32
 
