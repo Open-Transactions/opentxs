@@ -18,7 +18,7 @@
 
 namespace opentxs
 {
-typedef std::map<std::int64_t, Armored*> mapOfArmor;
+typedef std::map<std::int64_t, OTArmored> mapOfArmor;
 
 extern const char* OT_BEGIN_ARMORED;
 extern const char* OT_END_ARMORED;
@@ -126,7 +126,8 @@ private:
         std::int32_t compressionlevel) const;
     std::string decompress_string(const std::string& str) const;
 
-public:
+protected:
+//public:
     Armored(const char* szValue);
     explicit Armored(const Data& theValue);
     explicit Armored(const String& strValue);

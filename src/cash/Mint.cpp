@@ -133,18 +133,8 @@ bool Mint::Expired() const
 
 void Mint::ReleaseDenominations()
 {
-    while (!m_mapPublic.empty()) {
-        Armored* pArmor = m_mapPublic.begin()->second;
-        m_mapPublic.erase(m_mapPublic.begin());
-        delete pArmor;
-        pArmor = nullptr;
-    }
-    while (!m_mapPrivate.empty()) {
-        Armored* pArmor = m_mapPrivate.begin()->second;
-        m_mapPrivate.erase(m_mapPrivate.begin());
-        delete pArmor;
-        pArmor = nullptr;
-    }
+    m_mapPublic.clear();
+    m_mapPrivate.clear();
 }
 
 // If you want to load a certain Mint from string, then
@@ -409,12 +399,12 @@ bool Mint::VerifyContractID() const
 bool Mint::GetPrivate(Armored& theArmor, std::int64_t lDenomination)
 {
     for (auto& it : m_mapPrivate) {
-        Armored* pArmor = it.second;
+        const auto& pArmor = it.second;
         OT_ASSERT_MSG(
-            nullptr != pArmor, "nullptr mint pointer in Mint::GetPrivate.\n");
+            pArmor->Exists(), "nullptr mint pointer in Mint::GetPrivate.\n");
         // if this denomination (say, 50) matches the one passed in
         if (it.first == lDenomination) {
-            theArmor.Set(*pArmor);
+            theArmor.Set(pArmor);
             return true;
         }
     }
@@ -426,12 +416,12 @@ bool Mint::GetPrivate(Armored& theArmor, std::int64_t lDenomination)
 bool Mint::GetPublic(Armored& theArmor, std::int64_t lDenomination)
 {
     for (auto& it : m_mapPublic) {
-        Armored* pArmor = it.second;
+        const auto& pArmor = it.second;
         OT_ASSERT_MSG(
-            nullptr != pArmor, "nullptr mint pointer in Mint::GetPublic.\n");
+            pArmor->Exists(), "nullptr mint pointer in Mint::GetPublic.\n");
         // if this denomination (say, 50) matches the one passed in
         if (it.first == lDenomination) {
-            theArmor.Set(*pArmor);
+            theArmor.Set(pArmor);
             return true;
         }
     }
@@ -469,9 +459,9 @@ std::int64_t Mint::GetDenomination(std::int32_t nIndex)
 
     for (auto it = m_mapPublic.begin(); it != m_mapPublic.end();
          ++it, nIterateIndex++) {
-        Armored* pArmor = it->second;
+        const auto& pArmor = it->second;
         OT_ASSERT_MSG(
-            nullptr != pArmor,
+            pArmor->Exists(),
             "nullptr mint pointer in Mint::GetDenomination.\n");
 
         if (nIndex == nIterateIndex) return it->first;
@@ -513,9 +503,9 @@ void Mint::UpdateContents()
                                          // SetSavePrivateKeys() to set it true.
 
             for (auto& it : m_mapPrivate) {
-                Armored* pArmor = it.second;
+                const auto& pArmor = it.second;
                 OT_ASSERT_MSG(
-                    nullptr != pArmor,
+                    pArmor->Exists(),
                     "nullptr private mint pointer "
                     "in "
                     "Mint::UpdateContents.\n");
@@ -528,9 +518,9 @@ void Mint::UpdateContents()
             }
         }
         for (auto& it : m_mapPublic) {
-            Armored* pArmor = it.second;
+            const auto& pArmor = it.second;
             OT_ASSERT_MSG(
-                nullptr != pArmor,
+                pArmor->Exists(),
                 "nullptr public mint pointer in Mint::UpdateContents.\n");
 
             TagPtr tagPublicInfo(new Tag("mintPublicInfo", pArmor->Get()));
@@ -612,21 +602,17 @@ std::int32_t Mint::ProcessXMLNode(irr::io::IrrXMLReader*& xml)
         std::int64_t lDenomination =
             String::StringToLong(xml->getAttributeValue("denomination"));
 
-        Armored* pArmor = new Armored;
+        auto pArmor = Armored::Factory();
 
-        OT_ASSERT(nullptr != pArmor);
-
-        if (!Contract::LoadEncodedTextField(xml, *pArmor) ||
-            !pArmor->Exists()) {
+        if (!Contract::LoadEncodedTextField(xml, pArmor) || !pArmor->Exists()) {
             otErr << "Error in Mint::ProcessXMLNode: mintPrivateInfo field "
                      "without value.\n";
 
-            delete pArmor;
-            pArmor = nullptr;
+            pArmor = Armored::Factory();
 
             return (-1);  // error condition
         } else {
-            m_mapPrivate[lDenomination] = pArmor;
+            m_mapPrivate.emplace(lDenomination, Armored::Factory(pArmor));
         }
 
         return 1;
@@ -634,21 +620,17 @@ std::int32_t Mint::ProcessXMLNode(irr::io::IrrXMLReader*& xml)
         std::int64_t lDenomination =
             String::StringToLong(xml->getAttributeValue("denomination"));
 
-        Armored* pArmor = new Armored;
+        auto pArmor = Armored::Factory();
 
-        OT_ASSERT(nullptr != pArmor);
-
-        if (!Contract::LoadEncodedTextField(xml, *pArmor) ||
-            !pArmor->Exists()) {
+        if (!Contract::LoadEncodedTextField(xml, pArmor) || !pArmor->Exists()) {
             otErr << "Error in Mint::ProcessXMLNode: mintPublicInfo field "
                      "without value.\n";
 
-            delete pArmor;
-            pArmor = nullptr;
+            pArmor = Armored::Factory();
 
             return (-1);  // error condition
         } else {
-            m_mapPublic[lDenomination] = pArmor;
+            m_mapPublic.emplace(lDenomination, Armored::Factory(pArmor));
             m_nDenominationCount++;  // Whether client or server, both sides
                                      // have
                                      // public. Each public denomination should

@@ -17,7 +17,7 @@
 
 namespace opentxs
 {
-typedef std::map<std::int64_t, Armored*> mapOfArmor;
+typedef std::map<std::int64_t, OTArmored> mapOfArmor;
 
 class Mint : public Contract
 {

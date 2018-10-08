@@ -291,7 +291,7 @@ std::pair<RequestNumber, std::unique_ptr<Message>> ServerContext::
     auto output = initialize_server_command(
         lock, type, provided, withAcknowledgments, withNymboxHash);
     auto& [requestNumber, message] = output;
-    const auto& notUsed [[maybe_unused]] = requestNumber;
+    const auto& notUsed[[maybe_unused]] = requestNumber;
 
     message->m_ascPayload = payload;
     message->m_strAcctID = String::Factory(accountID);

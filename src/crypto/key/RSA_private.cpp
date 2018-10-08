@@ -91,9 +91,8 @@ void RSA::d::SetKeyAsCopyOf(
     backlink->m_bIsPublicKey = !bIsPrivateKey;
     backlink->m_bIsPrivateKey = bIsPrivateKey;
 
-    if (nullptr == backlink->m_p_ascKey) {
-        backlink->m_p_ascKey = new Armored;
-        OT_ASSERT(nullptr != backlink->m_p_ascKey);
+    if (backlink->m_p_ascKey->Exists()) {
+        backlink->m_p_ascKey = Armored::Factory();
     } else {
         backlink->m_p_ascKey->Release();
     }
@@ -102,7 +101,7 @@ void RSA::d::SetKeyAsCopyOf(
     if (backlink->m_bIsPrivateKey) {
         RSA::d::ArmorPrivateKey(
             *m_pKey,
-            *backlink->m_p_ascKey,
+            backlink->m_p_ascKey,
             backlink->m_timer,
             nullptr == pPWData ? &thePWData : pPWData,
             pImportPassword);
@@ -111,7 +110,7 @@ void RSA::d::SetKeyAsCopyOf(
     //      m_timer.start(); // Note: this isn't the ultimate timer solution.
     // See notes in ReleaseKeyLowLevel.
     else if (backlink->m_bIsPublicKey) {
-        RSA::d::ArmorPublicKey(*m_pKey, *backlink->m_p_ascKey);
+        RSA::d::ArmorPublicKey(*m_pKey, backlink->m_p_ascKey);
     } else {
         otErr << __FUNCTION__
               << ": Error: This key is NEITHER public NOR private!\n";
@@ -123,10 +122,9 @@ EVP_PKEY* RSA::d::GetKeyLowLevel() const { return m_pKey; }
 const EVP_PKEY* RSA::d::GetKey(const OTPasswordData* pPWData)
 {
     OT_ASSERT_MSG(
-        nullptr != backlink->m_p_ascKey,
-        "RSA::GetKey: nullptr != m_p_ascKey\n");
+        backlink->m_p_ascKey->Exists(), "RSA::GetKey: nullptr != m_p_ascKey\n");
 
-    if (nullptr == backlink->m_p_ascKey) {
+    if (!backlink->m_p_ascKey->Exists()) {
         otErr << __FUNCTION__
               << ": Unexpected nullptr m_p_ascKey. Printing stack "
                  "trace (and returning nullptr):\n";
@@ -494,7 +492,7 @@ bool RSA::d::ArmorPublicKey(EVP_PKEY& theKey, Armored& ascKey)
 EVP_PKEY* RSA::d::InstantiatePublicKey(const OTPasswordData* pPWData)
 {
     OT_ASSERT(m_pKey == nullptr);
-    OT_ASSERT(backlink->m_p_ascKey != nullptr);
+    OT_ASSERT(backlink->m_p_ascKey->Exists());
     OT_ASSERT(backlink->IsPublic());
 
     const char* szFunc = "RSA::InstantiatePublicKey";
@@ -561,7 +559,7 @@ EVP_PKEY* RSA::d::InstantiatePublicKey(const OTPasswordData* pPWData)
 EVP_PKEY* RSA::d::InstantiatePrivateKey(const OTPasswordData* pPWData)
 {
     OT_ASSERT(m_pKey == nullptr);
-    OT_ASSERT(backlink->m_p_ascKey != nullptr);
+    OT_ASSERT(backlink->m_p_ascKey->Exists());
     OT_ASSERT(backlink->IsPrivate());
 
     EVP_PKEY* pReturnKey = nullptr;

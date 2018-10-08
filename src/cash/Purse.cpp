@@ -1080,15 +1080,13 @@ std::int32_t Purse::ProcessXMLNode(irr::io::IrrXMLReader*& xml)
 
         return 1;
     } else if (strNodeName->Compare("token")) {
-        Armored* pArmor = new Armored;
-        OT_ASSERT(nullptr != pArmor);
+        auto pArmor = Armored::Factory();
+        OT_ASSERT(pArmor->Exists());
 
-        if (!Contract::LoadEncodedTextField(xml, *pArmor) ||
-            !pArmor->Exists()) {
+        if (!Contract::LoadEncodedTextField(xml, pArmor) || !pArmor->Exists()) {
             otErr << szFunc << ": Error: token field without value.\n";
 
-            delete pArmor;
-            pArmor = nullptr;
+            pArmor = Armored::Factory();
 
             return (-1);  // error condition
         } else {
@@ -1150,10 +1148,10 @@ Token* Purse::Peek(OTNym_or_SymmetricKey theOwner) const
 
     // Grab a pointer to the first armored token on the deque.
     //
-    const Armored* pArmor = m_dequeTokens.front();
+    const auto& pArmor = m_dequeTokens.front();
     // ---------------
     // Copy the token contents into an Envelope.
-    OTEnvelope theEnvelope(*pArmor);
+    OTEnvelope theEnvelope(pArmor);
 
     // Open the envelope into a string.
     //
@@ -1213,10 +1211,9 @@ Token* Purse::Pop(OTNym_or_SymmetricKey theOwner)
     // Grab a pointer to the ascii-armored token, and remove it from the deque.
     // (And delete it.)
     //
-    Armored* pArmor = m_dequeTokens.front();
+    const auto& pArmor = m_dequeTokens.front();
     m_dequeTokens.pop_front();
-    delete pArmor;
-    pArmor = nullptr;
+    Armored::Factory(pArmor);
 
     // We keep track of the purse's total value.
     m_lTotalValue -= pToken->GetDenomination();
@@ -1250,10 +1247,10 @@ void Purse::RecalculateExpirationDates(OTNym_or_SymmetricKey& theOwner)
     m_tEarliestValidTo = OT_TIME_ZERO;
 
     for (auto& it : m_dequeTokens) {
-        Armored* pArmor = it;
-        OT_ASSERT(nullptr != pArmor);
+        const auto& pArmor = it;
+        OT_ASSERT(pArmor->Exists());
 
-        OTEnvelope theEnvelope(*pArmor);
+        OTEnvelope theEnvelope(pArmor);
 
         // Open the envelope into a string.
         //
@@ -1316,9 +1313,9 @@ bool Purse::Push(OTNym_or_SymmetricKey theOwner, const Token& theToken)
             theOwner.Seal_or_Encrypt(theEnvelope, strToken, strDisplay);
 
         if (bSuccess) {
-            Armored* pArmor = new Armored(theEnvelope);
+            const auto& pArmor = theEnvelope;
 
-            m_dequeTokens.push_front(pArmor);
+            m_dequeTokens.push_front(Armored::Factory(pArmor));
 
             // We keep track of the purse's total value.
             m_lTotalValue += theToken.GetDenomination();
@@ -1382,9 +1379,9 @@ bool Purse::IsEmpty() const { return m_dequeTokens.empty(); }
 void Purse::ReleaseTokens()
 {
     while (!m_dequeTokens.empty()) {
-        Armored* pArmor = m_dequeTokens.front();
+        const auto& pArmor = m_dequeTokens.front();
         m_dequeTokens.pop_front();
-        delete pArmor;
+        Armored::Factory(pArmor);
     }
 
     m_lTotalValue = 0;
