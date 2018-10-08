@@ -182,23 +182,17 @@ void Token::Release()
 void Token::ReleasePrototokens()
 {
     for (auto& it : m_mapPublic) {
-        Armored* pPrototoken = it.second;
+        auto& pPrototoken = it.second;
         OT_ASSERT_MSG(
-            nullptr != pPrototoken,
+            !pPrototoken->Exists(),
             "nullptr Armored pointer in Token::ReleasePrototokens.");
-
-        delete pPrototoken;
-        pPrototoken = nullptr;
     }
 
     for (auto& it : m_mapPrivate) {
-        Armored* pPrototoken = it.second;
+        auto& pPrototoken = it.second;
         OT_ASSERT_MSG(
-            nullptr != pPrototoken,
+            !pPrototoken->Exists(),
             "nullptr Armored pointer in Token::ReleasePrototokens.");
-
-        delete pPrototoken;
-        pPrototoken = nullptr;
     }
 
     m_mapPublic.clear();
@@ -515,8 +509,8 @@ void Token::UpdateContents()
         tagProtoPurse->add_attribute("chosenIndex", formatInt(m_nChosenIndex));
 
         for (auto& it : m_mapPublic) {
-            Armored* pPrototoken = it.second;
-            OT_ASSERT(nullptr != pPrototoken);
+            auto& pPrototoken = it.second;
+            OT_ASSERT(!pPrototoken->Exists());
             tagProtoPurse->add_tag("prototoken", pPrototoken->Get());
         }
 
@@ -529,8 +523,8 @@ void Token::UpdateContents()
         TagPtr tagPrivateProtoPurse(new Tag("privateProtopurse"));
 
         for (auto& it : m_mapPrivate) {
-            Armored* pPrototoken = it.second;
-            OT_ASSERT(nullptr != pPrototoken);
+            auto& pPrototoken = it.second;
+            OT_ASSERT(!pPrototoken->Exists());
             tagPrivateProtoPurse->add_tag(
                 "privatePrototoken", pPrototoken->Get());
         }
@@ -638,20 +632,16 @@ std::int32_t Token::ProcessXMLNode(irr::io::IrrXMLReader*& xml)
 
         return 1;
     } else if (strNodeName->Compare("prototoken")) {
-        Armored* pArmoredPrototoken = new Armored;
-        OT_ASSERT(nullptr != pArmoredPrototoken);
+        auto pArmoredPrototoken = Armored::Factory();
 
-        if (!Contract::LoadEncodedTextField(xml, *pArmoredPrototoken) ||
+        if (!Contract::LoadEncodedTextField(xml, pArmoredPrototoken) ||
             !pArmoredPrototoken->Exists()) {
             otErr << "Error in Token::ProcessXMLNode: prototoken field "
                      "without value.\n";
 
-            delete pArmoredPrototoken;
-            pArmoredPrototoken = nullptr;
-
             return (-1);  // error condition
         } else {
-            m_mapPublic[nPublicTokenCount] = pArmoredPrototoken;
+            m_mapPublic.emplace(nPublicTokenCount, pArmoredPrototoken);
             nPublicTokenCount++;
         }
 
@@ -661,20 +651,16 @@ std::int32_t Token::ProcessXMLNode(irr::io::IrrXMLReader*& xml)
 
         return 1;
     } else if (strNodeName->Compare("privatePrototoken")) {
-        Armored* pArmoredPrototoken = new Armored;
-        OT_ASSERT(nullptr != pArmoredPrototoken);
+        auto pArmoredPrototoken = Armored::Factory();
 
-        if (!Contract::LoadEncodedTextField(xml, *pArmoredPrototoken) ||
+        if (!Contract::LoadEncodedTextField(xml, pArmoredPrototoken) ||
             !pArmoredPrototoken->Exists()) {
             otErr << "Error in Token::ProcessXMLNode: privatePrototoken "
                      "field without value.\n";
 
-            delete pArmoredPrototoken;
-            pArmoredPrototoken = nullptr;
-
             return (-1);  // error condition
         } else {
-            m_mapPrivate[nPrivateTokenCount] = pArmoredPrototoken;
+            m_mapPrivate.emplace(nPrivateTokenCount, pArmoredPrototoken);
             nPrivateTokenCount++;
             LogTrace(OT_METHOD)(__FUNCTION__)(
                 ": Loaded prototoken and adding to m_mapPrivate at index: ")(
@@ -695,13 +681,13 @@ bool Token::GetPrototoken(Armored& ascPrototoken, std::int32_t nTokenIndex)
     if (nTokenIndex >= m_nTokenCount) { return false; }
 
     for (auto& it : m_mapPublic) {
-        Armored* pPrototoken = it.second;
-        OT_ASSERT(nullptr != pPrototoken);
+        auto& pPrototoken = it.second;
+        OT_ASSERT(!pPrototoken->Exists());
 
         const bool bSuccess = (nTokenIndex == it.first);
 
         if (bSuccess) {
-            ascPrototoken.Set(*pPrototoken);
+            ascPrototoken.Set(pPrototoken);
 
             return true;
         }
@@ -718,13 +704,13 @@ bool Token::GetPrivatePrototoken(
     if (nTokenIndex >= m_nTokenCount) { return false; }
 
     for (auto& it : m_mapPrivate) {
-        Armored* pPrototoken = it.second;
-        OT_ASSERT(nullptr != pPrototoken);
+        auto& pPrototoken = it.second;
+        OT_ASSERT(!pPrototoken->Exists());
 
         bool bSuccess = (nTokenIndex == it.first);
 
         if (bSuccess) {
-            ascPrototoken.Set(*pPrototoken);
+            ascPrototoken.Set(pPrototoken);
             return true;
         }
     }

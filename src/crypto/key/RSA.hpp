@@ -85,7 +85,7 @@ private:
     /** base64-encoded, string form of key. (Encrypted too, for private keys.
      * Should store it in this form most of the time.) m_p_ascKey is the most
      * basic value. m_pKey is derived from it, for example. */
-    Armored* m_p_ascKey = nullptr;
+    OTArmored m_p_ascKey = Armored::Factory();
 
     RSA* clone() const override;
 

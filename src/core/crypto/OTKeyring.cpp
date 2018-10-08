@@ -1301,8 +1301,7 @@ bool OTKeyring::FlatFile_DeleteSecret(
                   << str_ExactPath.c_str() << '\n';
         } else {
             bSuccess = true;
-            LogVerbose(OT_METHOD)(__FUNCTION__)(
-                ": ** Success ")(
+            LogVerbose(OT_METHOD)(__FUNCTION__)(": ** Success ")(
                 "deleting file: ")(str_ExactPath.c_str())
                 .Flush();
         }
