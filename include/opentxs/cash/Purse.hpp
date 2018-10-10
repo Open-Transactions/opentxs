@@ -46,7 +46,7 @@ class Factory;
 // The interface of this class is that of a simple stack. Imagine a stack of
 // poker chips.
 
-typedef std::deque<Armored*> dequeOfTokens;
+typedef std::deque<OTArmored> dequeOfTokens;
 
 class Purse : public Contract
 {

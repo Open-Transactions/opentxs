@@ -183,11 +183,11 @@ bool Token_Lucre::GenerateTokenRequest(
             auto strPrivateCoin = String::Factory();
             strPrivateCoin->Set(privateCoinBuffer, privatecoinLen);
 
-            Armored* pArmoredPublic = new Armored(strPublicCoin);
-            Armored* pArmoredPrivate = new Armored;
+            auto pArmoredPublic = Armored::Factory(strPublicCoin);
+            auto pArmoredPrivate = Armored::Factory();
 
             OT_ASSERT_MSG(
-                ((nullptr != pArmoredPublic) && (nullptr != pArmoredPrivate)),
+                ((pArmoredPublic->Exists()) && (pArmoredPrivate->Exists())),
                 "ERROR: Unable to allocate memory in "
                 "Token_Lucre::GenerateTokenRequest\n");
 
@@ -201,10 +201,10 @@ bool Token_Lucre::GenerateTokenRequest(
             theEnvelope.Seal(theNym, strPrivateCoin);  // Todo check the return
                                                        // values on these two
                                                        // functions
-            theEnvelope.GetCiphertext(*pArmoredPrivate);
+            theEnvelope.GetCiphertext(pArmoredPrivate);
 
-            m_mapPublic[i] = pArmoredPublic;
-            m_mapPrivate[i] = pArmoredPrivate;
+            m_mapPublic.emplace(i, Armored::Factory(pArmoredPublic));
+            m_mapPrivate.emplace(i, Armored::Factory(pArmoredPrivate));
 
             m_nTokenCount = nFinalTokenCount;
             SetDenomination(lDenomination);

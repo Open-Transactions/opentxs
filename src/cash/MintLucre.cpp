@@ -133,11 +133,8 @@ bool MintLucre::AddDenomination(
         auto strPrivateBank = String::Factory();
         strPrivateBank->Set(privateBankBuffer, privatebankLen);
 
-        Armored* pPublic = new Armored;
-        Armored* pPrivate = new Armored;
-
-        OT_ASSERT(nullptr != pPublic);
-        OT_ASSERT(nullptr != pPrivate);
+        auto pPublic = Armored::Factory();
+        auto pPrivate = Armored::Factory();
 
         // Set the public bank info onto pPublic
         pPublic->SetString(strPublicBank, true);  // linebreaks = true
@@ -148,11 +145,11 @@ bool MintLucre::AddDenomination(
         theEnvelope.Seal(theNotary, strPrivateBank);  // Todo check the return
                                                       // values on these two
                                                       // functions
-        theEnvelope.GetCiphertext(*pPrivate);
+        theEnvelope.GetCiphertext(pPrivate);
 
         // Add the new key pair to the maps, using denomination as the key
-        m_mapPublic[lDenomination] = pPublic;
-        m_mapPrivate[lDenomination] = pPrivate;
+        m_mapPublic.emplace(lDenomination, Armored::Factory(pPublic));
+        m_mapPrivate.emplace(lDenomination, Armored::Factory(pPrivate));
 
         // Grab the Server Nym ID and save it with this Mint
         theNotary.GetIdentifier(m_ServerNymID);
