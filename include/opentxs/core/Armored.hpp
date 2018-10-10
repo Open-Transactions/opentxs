@@ -126,6 +126,7 @@ private:
         std::int32_t compressionlevel) const;
     std::string decompress_string(const std::string& str) const;
 
+//protected:
 public:
     Armored(const char* szValue);
     explicit Armored(const Data& theValue);

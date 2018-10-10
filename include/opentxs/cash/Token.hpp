@@ -30,7 +30,7 @@ class Factory;
 }  // namespace implementation
 }  // namespace api
 
-typedef std::map<std::int32_t, Armored*> mapOfPrototokens;
+typedef std::map<std::int32_t, OTArmored> mapOfPrototokens;
 
 /*
 Here's a rough sketch of the protocol:
