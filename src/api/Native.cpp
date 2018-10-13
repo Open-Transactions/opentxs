@@ -97,9 +97,9 @@ extern "C" std::int32_t default_pass_cb(
         str_userdata = "";
     }
 
-    opentxs::otWarn << __FUNCTION__
-                    << ": Using DEFAULT TEST PASSWORD: 'test' (for \""
-                    << str_userdata << "\")\n";
+    opentxs::LogDetail(OT_METHOD)(__FUNCTION__)(
+        ": Using DEFAULT TEST PASSWORD: 'test' (for  ")(str_userdata)(" ) ")
+        .Flush();
 
     const char* tmp_passwd = "test";
     len = static_cast<std::int32_t>(strlen(tmp_passwd));

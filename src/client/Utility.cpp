@@ -29,7 +29,7 @@ namespace opentxs
 bool VerifyMessage(const std::string& message)
 {
     if (MIN_MESSAGE_LENGTH > message.length()) {
-        otWarn << __FUNCTION__ << ": too short:" << message << std::endl;
+        LogDetail(OT_METHOD)(__FUNCTION__)(": too short:")(message).Flush();
 
         return false;
     }
@@ -52,12 +52,14 @@ NetworkOperationStatus VerifyMessageSuccess(
                   << message << std::endl;
         } break;
         case MESSAGE_SUCCESS_FALSE: {
-            otWarn << __FUNCTION__
-                   << ": Reply received: success == FALSE for message:\n"
-                   << message << "\n";
+            LogDetail(OT_METHOD)(__FUNCTION__)(
+                ": Reply received: success == FALSE for message: ")(message)
+                .Flush();
         } break;
         case MESSAGE_SUCCESS_TRUE: {
-            otWarn << __FUNCTION__ << ": Reply received: success == TRUE.\n";
+            LogDetail(OT_METHOD)(__FUNCTION__)(
+                ": Reply received: success == TRUE. ")
+                .Flush();
         } break;
         default: {
             otOut << __FUNCTION__ << ": Unknown message status: " << status
@@ -89,15 +91,14 @@ std::int32_t VerifyMsgBalanceAgrmntSuccess(
                   << strMessage << "\n";
             break;
         case 0:
-            otWarn << __FUNCTION__
-                   << ": Reply received: success == "
-                      "FALSE. Reply message:\n\n"
-                   << strMessage << "\n";
+            LogDetail(OT_METHOD)(__FUNCTION__)(": Reply received: success == ")(
+                "FALSE. Reply message: ")(strMessage)
+                .Flush();
             break;
         case 1:
-            otWarn << __FUNCTION__
-                   << ": Reply received: success == "
-                      "TRUE.\n";
+            LogDetail(OT_METHOD)(__FUNCTION__)(": Reply received: success == ")(
+                "TRUE. ")
+                .Flush();
             break;
         default:
             otOut << __FUNCTION__
@@ -130,13 +131,15 @@ std::int32_t VerifyMsgTrnxSuccess(
                   << strMessage << "\n";
             break;
         case 0:
-            otWarn << __FUNCTION__
-                   << ": Reply received: success == FALSE. "
-                      "Reply message:\n\n"
-                   << strMessage << "\n";
+            LogDetail(OT_METHOD)(__FUNCTION__)(
+                ": Reply received: success == FALSE. ")("Reply message: ")(
+                strMessage)
+                .Flush();
             break;
         case 1:
-            otWarn << __FUNCTION__ << ": Reply received: success == TRUE.\n";
+            LogDetail(OT_METHOD)(__FUNCTION__)(
+                ": Reply received: success == TRUE. ")
+                .Flush();
             break;
         default:
             otOut << __FUNCTION__
@@ -303,10 +306,10 @@ std::int32_t Utility::getNymbox(
     std::string strLocalHash = api_.Exec().GetNym_NymboxHash(notaryID, nymID);
     bool bLocalHash = VerifyStringVal(strLocalHash);
     if (!bLocalHash) {
-        otWarn << strLocation
-               << ": Warning: Unable to retrieve client-side "
-                  "NymboxHash for:\n notaryID: "
-               << notaryID << "\n nymID: " << nymID << "\n";
+        LogDetail(OT_METHOD)(__FUNCTION__)(strLocation)(
+            ": Warning: Unable to retrieve client-side ")("NymboxHash for: ")(
+            " notaryID: ")(notaryID)(" nymID: ")(nymID)
+            .Flush();
     }
 
     if (!bForceDownload) {
@@ -314,9 +317,9 @@ std::int32_t Utility::getNymbox(
             (strRecentHash == strLocalHash))  // the hashes match -- no need to
                                               // download anything.
         {
-            otWarn
-                << strLocation
-                << ": The hashes already match (skipping Nymbox download.)\n";
+            LogDetail(OT_METHOD)(__FUNCTION__)(strLocation)(
+                ": The hashes already match (skipping Nymbox download.) ")
+                .Flush();
             return 1;
         }
     }
@@ -329,9 +332,10 @@ std::int32_t Utility::getNymbox(
     if (ConnectionState::ACTIVE != api_.ZMQ().Status(notaryID)) return -1;
 
     if (bWasMsgSent) {
-        otWarn << strLocation
-               << ": FYI: we just sent a getNymboxLowLevel msg. RequestNum: "
-               << nGetNymbox << "\n";
+        LogDetail(OT_METHOD)(__FUNCTION__)(strLocation)(
+            ": FYI: we just sent a getNymboxLowLevel msg. RequestNum: ")(
+            nGetNymbox)
+            .Flush();
     }
 
     if (!(bWasMsgSent) || ((nGetNymbox <= 0) && (-1 != nGetNymbox))) {
@@ -1615,9 +1619,9 @@ bool Utility::insureHaveAllBoxReceipts(
             bool bHaveBoxReceipt = api_.OTAPI().DoesBoxReceiptExist(
                 theNotaryID, theNymID, theAccountID, nBoxType, lTransactionNum);
             if (!bHaveBoxReceipt) {
-                otWarn << strLocation
-                       << ": Downloading box receipt to add to my collection..."
-                          "\n";
+                LogDetail(OT_METHOD)(__FUNCTION__)(strLocation)(
+                    ": Downloading box receipt to add to my collection...")
+                    .Flush();
                 const bool bDownloaded = getBoxReceiptWithErrorCorrection(
                     notaryID, nymID, accountID, nBoxType, lTransactionNum);
                 if (!bDownloaded) {

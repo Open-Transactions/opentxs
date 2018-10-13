@@ -143,13 +143,10 @@ std::int32_t OTMarket::ProcessXMLNode(irr::io::IrrXMLReader*& xml)
 
         otOut << "\n\nMarket. Scale: " << m_lScale << "\n";
 
-        otWarn << " instrumentDefinitionID: " << strInstrumentDefinitionID
-               << "\n"
-                  " currencyTypeID: "
-               << strCurrencyTypeID
-               << "\n"
-                  " NotaryID: "
-               << strNotaryID << "\n";
+        LogDetail(OT_METHOD)(__FUNCTION__)(" instrumentDefinitionID: ")(
+            strInstrumentDefinitionID)(" currencyTypeID: ")(strCurrencyTypeID)(
+            " NotaryID: ")(strNotaryID)
+            .Flush();
 
         nReturnVal = 1;
     } else if (!strcmp("offer", xml->getNodeName())) {
@@ -180,7 +177,9 @@ std::int32_t OTMarket::ProcessXMLNode(irr::io::IrrXMLReader*& xml)
                 AddOffer(nullptr, *offer, false, tDateAdded))
             // bSaveMarket = false (Don't SAVE -- we're loading right now!)
             {
-                otWarn << "Successfully loaded offer and added to market.\n";
+                LogDetail(OT_METHOD)(__FUNCTION__)(
+                    "Successfully loaded offer and added to market. ")
+                    .Flush();
             } else {
                 otErr << "Error adding offer to market while loading market.\n";
                 delete offer;
@@ -2148,8 +2147,9 @@ void OTMarket::ProcessTrade(
             // only go to the rejectees. But if success, then notices go
             // to all four inboxes.
             else {
-                otWarn << "Unable to perform trade in OTMarket::"
-                       << __FUNCTION__ << "\n";
+                LogDetail(OT_METHOD)(__FUNCTION__)(
+                    "Unable to perform trade in OTMarket::")
+                    .Flush();
 
                 // Let's figure out which one it was and remove his
                 // trade and offer.

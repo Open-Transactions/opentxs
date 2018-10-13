@@ -264,8 +264,9 @@ const crypto::Hash& Crypto::Hash() const
 
 void Crypto::Init()
 {
-    otWarn << OT_METHOD << __FUNCTION__
-           << ": Setting up rlimits, and crypto libraries...\n";
+    LogDetail(OT_METHOD)(__FUNCTION__)(
+        ": Setting up rlimits, and crypto libraries...")
+        .Flush();
 
 // Here is a security measure intended to make it more difficult to
 // capture a core dump. (Not used in debug mode, obviously.)

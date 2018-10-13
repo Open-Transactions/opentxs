@@ -10,6 +10,7 @@
 #include "opentxs/api/Native.hpp"
 #include "opentxs/core/Identifier.hpp"
 #include "opentxs/core/String.hpp"
+#include "opentxs/core/StringXML.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/network/zeromq/Message.hpp"
 #include "opentxs/network/zeromq/PushSocket.hpp"
@@ -52,7 +53,27 @@ const LogSource& LogSource::operator()(const OTString& in) const
     return operator()(in.get());
 }
 
+const LogSource& LogSource::operator()(const OTStringXML& in) const
+{
+    return operator()(in.get());
+}
+
+const LogSource& LogSource::operator()(const OTArmored& in) const
+{
+    return operator()(in.get());
+}
+
 const LogSource& LogSource::operator()(const String& in) const
+{
+    return operator()(in.Get());
+}
+
+const LogSource& LogSource::operator()(const StringXML& in) const
+{
+    return operator()(in.Get());
+}
+
+const LogSource& LogSource::operator()(const Armored& in) const
 {
     return operator()(in.Get());
 }

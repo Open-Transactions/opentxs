@@ -248,8 +248,7 @@ Workflow::Workflow(
 {
     // WARNING: do not access api_.Wallet() during construction
     const auto endpoint = api_.Endpoints().WorkflowAccountUpdate();
-    otWarn << OT_METHOD << __FUNCTION__ << ": Binding to " << endpoint
-           << std::endl;
+    LogDetail(OT_METHOD)(__FUNCTION__)(": Binding to ")(endpoint).Flush();
     auto bound = account_publisher_->Start(endpoint);
 
     OT_ASSERT(bound)

@@ -33,6 +33,8 @@
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 #endif
 
+#define OT_METHOD "opentxs::MintLucre"
+
 namespace opentxs
 {
 
@@ -155,7 +157,9 @@ bool MintLucre::AddDenomination(
         theNotary.GetIdentifier(m_ServerNymID);
         m_nDenominationCount++;
         bReturnValue = true;
-        otWarn << "Successfully added denomination: " << lDenomination << "\n";
+        LogDetail(OT_METHOD)(__FUNCTION__)("Successfully added denomination: ")(
+            lDenomination)
+            .Flush();
     }
 
     return bReturnValue;

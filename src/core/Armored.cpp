@@ -132,8 +132,9 @@ Armored::Armored(const OTEnvelope& theEnvelope)
 
 // copies (already encoded)
 Armored::Armored(const char* szValue)
-    : String(szValue)
+    : Armored()
 {
+    Set(szValue);
 }
 
 // Copies (already encoded)
@@ -142,6 +143,7 @@ Armored::Armored(const Armored& strValue)
     , opentxs::Armored()
     , String(dynamic_cast<const String&>(strValue))
 {
+    Set(strValue.Get());
 }
 
 // copies, assumes already encoded.

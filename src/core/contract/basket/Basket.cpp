@@ -222,7 +222,8 @@ std::int32_t Basket::ProcessXMLNode(irr::io::IrrXMLReader*& xml)
         m_nSubCount = atoi(strSubCount->Get());
         m_lMinimumTransfer = strMinTrans->ToLong();
 
-        otWarn << "Loading currency basket...\n";
+        LogDetail(OT_METHOD)(__FUNCTION__)("Loading currency basket... ")
+            .Flush();
 
         return 1;
     } else if (strNodeName->Compare("requestExchange")) {

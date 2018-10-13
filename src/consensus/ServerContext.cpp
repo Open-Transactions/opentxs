@@ -744,13 +744,14 @@ void ServerContext::validate_number_set(
 {
     for (const auto& it : input) {
         if (it <= limit) {
-            otWarn << OT_METHOD << __FUNCTION__ << ": New transaction number is"
-                   << " less-than-or-equal-to last known 'highest trans number'"
-                   << " record. (Must be seeing the same server reply for a "
-                   << "second time, due to a receipt in my Nymbox.) FYI, last "
-                   << "known 'highest' number received: " << limit
-                   << " (Current 'violator': " << it << ") Skipping..."
-                   << std::endl;
+            LogDetail(OT_METHOD)(__FUNCTION__)(": New transaction number is")(
+                " less-than-or-equal-to last known 'highest trans number'")(
+                " record. (Must be seeing the same server reply for a ")(
+                "second time, due to a receipt in my Nymbox.) FYI, last ")(
+                "known 'highest' number received: ")(limit)(
+                " (Current 'violator': ")(it)(") Skipping...")
+                .Flush();
+            ;
             bad.insert(it);
         } else {
             good.insert(it);
