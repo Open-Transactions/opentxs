@@ -558,21 +558,17 @@ std::int32_t Mint::ProcessXMLNode(irr::io::IrrXMLReader*& xml)
         std::int64_t nValidTo = OTTimeGetSecondsFromTime(m_VALID_TO);
         std::int64_t nExpiration = OTTimeGetSecondsFromTime(m_EXPIRATION);
 
-        otWarn <<
+        LogDetail(OT_METHOD)(__FUNCTION__)
             //    "\n===> Loading XML for mint into memory structures..."
-            "\n\nMint version: " << m_strVersion
-               << "\n Notary ID: " << strNotaryID
-               << "\n Instrument Definition ID: " << strInstrumentDefinitionID
-               << "\n Cash Acct ID: " << strCashAcctID
-               << "\n"
-                  ""
-               << ((false == m_CashAccountID->empty()) ? "SUCCESS" : "FAILURE")
-               << " loading Cash Account into memory for pointer: "
-                  "Mint::m_pReserveAcct\n"
-                  " Series: "
-               << m_nSeries << "\n Expiration: " << nExpiration
-               << "\n Valid From: " << nValidFrom << "\n Valid To: " << nValidTo
-               << "\n";
+            (": Mint version: ")(m_strVersion)(" Notary ID: ")(strNotaryID)(
+                " Instrument Definition ID: ")(strInstrumentDefinitionID)(
+                " Cash Acct ID: ")(strCashAcctID)(
+                (false == m_CashAccountID->empty()) ? "SUCCESS" : "FAILURE")(
+                " loading Cash Account into memory for pointer: ")(
+                "Mint::m_pReserveAcct ")(" Series: ")(m_nSeries)(
+                " Expiration: ")(nExpiration)(" Valid From: ")(nValidFrom)(
+                " Valid To: ")(nValidTo)
+                .Flush();
 
         nReturnVal = 1;
     } else if (strNodeName->Compare("mintPrivateInfo")) {

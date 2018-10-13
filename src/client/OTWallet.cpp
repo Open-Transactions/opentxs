@@ -441,8 +441,10 @@ bool OTWallet::LoadWallet(const char* szFilename)
                         m_strVersion =
                             String::Factory(xml->getAttributeValue("version"));
 
-                        otWarn << "\nLoading wallet: " << m_strName
-                               << ", version: " << m_strVersion << "\n";
+                        LogDetail(OT_METHOD)(__FUNCTION__)(
+                            ": Loading wallet: ")(m_strName)(", version: ")(
+                            m_strVersion)
+                            .Flush();
                     } else if (strNodeName->Compare("cachedKey")) {
                         auto ascCachedKey = Armored::Factory();
 
@@ -464,8 +466,9 @@ bool OTWallet::LoadWallet(const char* szFilename)
                             }
                         }
 
-                        otWarn << "Loading cachedKey:\n"
-                               << ascCachedKey << "\n";
+                        LogDetail(OT_METHOD)(__FUNCTION__)(
+                            "Loading cachedKey: ")(ascCachedKey)
+                            .Flush();
                     } else if (strNodeName->Compare("account")) {
                         auto ascAcctName =
                             Armored::Factory(xml->getAttributeValue("name"));

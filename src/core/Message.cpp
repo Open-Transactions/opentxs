@@ -622,7 +622,9 @@ bool Message::SignContract(const Nym& theNym, const OTPasswordData* pPWData)
         // message:\n\n%s******************************************************\n\n",
         // m_xmlUnsigned->Get());
     } else
-        otWarn << "Failure signing message:\n" << m_xmlUnsigned << "";
+        LogDetail(OT_METHOD)(__FUNCTION__)("Failure signing message: ")(
+            m_xmlUnsigned)
+            .Flush();
 
     return m_bIsSigned;
 }
@@ -784,19 +786,17 @@ public:
         }
 
         if (m.m_bSuccess)
-            otWarn << "\nCommand: " << m.m_strCommand << "   "
-                   << (m.m_bSuccess ? "SUCCESS" : "FAILED")
-                   << "\nNymID:    " << m.m_strNymID
-                   << "\n NotaryID: " << m.m_strNotaryID
-                   << "\n MarketID: " << m.m_strNymID2
-                   << "\n\n";  // m_ascPayload.Get()
+            LogDetail(OT_METHOD)(__FUNCTION__)(" Command: ")(m.m_strCommand)(
+                "   ")(m.m_bSuccess ? "SUCCESS" : "FAILED")(" NymID:    ")(
+                m.m_strNymID)(" NotaryID: ")(m.m_strNotaryID)(" MarketID: ")(
+                m.m_strNymID2)
+                .Flush();  // m_ascPayload.Get()
         else
-            otWarn << "\nCommand: " << m.m_strCommand << "   "
-                   << (m.m_bSuccess ? "SUCCESS" : "FAILED")
-                   << "\nNymID:    " << m.m_strNymID
-                   << "\n NotaryID: " << m.m_strNotaryID
-                   << "\n MarketID: " << m.m_strNymID2
-                   << "\n\n";  // m_ascInReferenceTo.Get()
+            LogDetail(OT_METHOD)(__FUNCTION__)(" Command: ")(m.m_strCommand)(
+                "   ")(m.m_bSuccess ? "SUCCESS" : "FAILED")(" NymID:    ")(
+                m.m_strNymID)(" NotaryID: ")(m.m_strNotaryID)(" MarketID: ")(
+                m.m_strNymID2)
+                .Flush();  // m_ascInReferenceTo.Get()
 
         return 1;
     }
@@ -830,11 +830,10 @@ public:
             String::Factory(xml->getAttributeValue("requestNum"));
         m.m_strNymID2 = String::Factory(xml->getAttributeValue("marketID"));
 
-        otWarn << "\nCommand: " << m.m_strCommand
-               << "\nNymID:    " << m.m_strNymID
-               << "\nNotaryID: " << m.m_strNotaryID
-               << "\n Market ID: " << m.m_strNymID2
-               << "\n Request #: " << m.m_strRequestNum << "\n";
+        LogDetail(OT_METHOD)(__FUNCTION__)(" Command: ")(m.m_strCommand)(
+            " NymID:    ")(m.m_strNymID)(" NotaryID: ")(m.m_strNotaryID)(
+            " Market ID: ")(m.m_strNymID2)(" Request #: ")(m.m_strRequestNum)
+            .Flush();
 
         return 1;
     }
@@ -908,19 +907,17 @@ public:
         }
 
         if (m.m_bSuccess)
-            otWarn << "\nCommand: " << m.m_strCommand << "   "
-                   << (m.m_bSuccess ? "SUCCESS" : "FAILED")
-                   << "\nNymID:    " << m.m_strNymID
-                   << "\n NotaryID: " << m.m_strNotaryID
-                   << "\n MarketID: " << m.m_strNymID2
-                   << "\n\n";  // m_ascPayload.Get()
+            LogDetail(OT_METHOD)(__FUNCTION__)(" Command: ")(m.m_strCommand)(
+                "   ")(m.m_bSuccess ? "SUCCESS" : "FAILED")(" NymID:    ")(
+                m.m_strNymID)(" NotaryID: ")(m.m_strNotaryID)(" MarketID: ")(
+                m.m_strNymID2)
+                .Flush();  // m_ascPayload.Get()
         else
-            otWarn << "\nCommand: " << m.m_strCommand << "   "
-                   << (m.m_bSuccess ? "SUCCESS" : "FAILED")
-                   << "\nNymID:    " << m.m_strNymID
-                   << "\n NotaryID: " << m.m_strNotaryID
-                   << "\n MarketID: " << m.m_strNymID2
-                   << "\n\n";  // m_ascInReferenceTo.Get()
+            LogDetail(OT_METHOD)(__FUNCTION__)(" Command: ")(m.m_strCommand)(
+                "   ")(m.m_bSuccess ? "SUCCESS" : "FAILED")(" NymID:    ")(
+                m.m_strNymID)(" NotaryID: ")(m.m_strNotaryID)(" MarketID: ")(
+                m.m_strNymID2)
+                .Flush();  // m_ascInReferenceTo.Get()
 
         return 1;
     }
@@ -952,10 +949,10 @@ public:
         m.m_strRequestNum =
             String::Factory(xml->getAttributeValue("requestNum"));
 
-        otWarn << "\nCommand: " << m.m_strCommand
-               << "\nNymID:    " << m.m_strNymID
-               << "\nNotaryID: " << m.m_strNotaryID
-               << "\nRequest #: " << m.m_strRequestNum << "\n";
+        LogDetail(OT_METHOD)(__FUNCTION__)(" Command: ")(m.m_strCommand)(
+            " NymID:    ")(m.m_strNymID)(" NotaryID: ")(m.m_strNotaryID)(
+            " Request #: ")(m.m_strRequestNum)
+            .Flush();
 
         return 1;
     }
@@ -1027,17 +1024,15 @@ public:
         }
 
         if (m.m_bSuccess)
-            otWarn << "\nCommand: " << m.m_strCommand << "   "
-                   << (m.m_bSuccess ? "SUCCESS" : "FAILED")
-                   << "\nNymID:    " << m.m_strNymID
-                   << "\n NotaryID: " << m.m_strNotaryID
-                   << "\n\n";  // m_ascPayload.Get()
+            LogDetail(OT_METHOD)(__FUNCTION__)(" Command: ")(m.m_strCommand)(
+                "   ")(m.m_bSuccess ? "SUCCESS" : "FAILED")(" NymID:    ")(
+                m.m_strNymID)(" NotaryID: ")(m.m_strNotaryID)
+                .Flush();  // m_ascPayload.Get()
         else
-            otWarn << "\nCommand: " << m.m_strCommand << "   "
-                   << (m.m_bSuccess ? "SUCCESS" : "FAILED")
-                   << "\nNymID:    " << m.m_strNymID
-                   << "\n NotaryID: " << m.m_strNotaryID
-                   << "\n\n";  // m_ascInReferenceTo.Get()
+            LogDetail(OT_METHOD)(__FUNCTION__)(" Command: ")(m.m_strCommand)(
+                "   ")(m.m_bSuccess ? "SUCCESS" : "FAILED")(" NymID:    ")(
+                m.m_strNymID)("\n NotaryID: ")(m.m_strNotaryID)
+                .Flush();  // m_ascInReferenceTo.Get()
 
         return 1;
     }
@@ -1166,12 +1161,11 @@ public:
         // -----------------------------------------------
         m.m_strNymID2->Set(ascTextExpected);
         // -------------------------------------------------
-        otWarn << "\nCommand: " << m.m_strCommand
-               << "\nNymID:    " << m.m_strNymID
-               << "\nNotaryID: " << m.m_strNotaryID
-               << "\n\n Public signing key:\n"
-               << m.m_strNymPublicKey << "\nPublic encryption key:\n"
-               << m.m_strNymID2 << "\n";
+        LogDetail(OT_METHOD)(__FUNCTION__)(" Command: ")(m.m_strCommand)(
+            " NymID:    ")(m.m_strNymID)(" NotaryID: ")(m.m_strNotaryID)(
+            " Public signing key: ")(m.m_strNymPublicKey)(
+            " Public encryption key: ")(m.m_strNymID2)
+            .Flush();
 
         return 1;
     }
@@ -1206,12 +1200,10 @@ public:
         m.m_strNymID = String::Factory(xml->getAttributeValue("nymID"));
         m.m_strNotaryID = String::Factory(xml->getAttributeValue("notaryID"));
 
-        otWarn << "\nCommand: " << m.m_strCommand
-               << "\nSuccess: " << (m.m_bSuccess ? "true" : "false")
-               << "\nNymID:    " << m.m_strNymID
-               << "\n"
-                  "NotaryID: "
-               << m.m_strNotaryID << "\n\n";
+        LogDetail(OT_METHOD)(__FUNCTION__)(" Command: ")(m.m_strCommand)(
+            " Success: ")(m.m_bSuccess ? "true" : "false")("\nNymID:    ")(
+            m.m_strNymID)("NotaryID: ")(m.m_strNotaryID)
+            .Flush();
 
         return 1;
     }

@@ -195,7 +195,7 @@ bool Letter::Seal(
     }
 
     [[maybe_unused]] auto dhRawKey = crypto::key::Asymmetric::Factory();
-    [[maybe_unused]] const crypto::key::EllipticCurve* dhPrivateKey{nullptr};
+    [[maybe_unused]] const crypto::key::EllipticCurve* dhPrivateKey { nullptr };
 
     if (haveRecipientsECDSA) {
 #if OT_CRYPTO_SUPPORTED_KEY_SECP256K1

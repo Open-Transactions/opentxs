@@ -16,6 +16,8 @@
 
 #include "Cash.hpp"
 
+#define OT_METHOD "opentxs::Cash"
+
 //#define OT_METHOD "opentxs::api::client::implementation::Cash::"
 
 namespace opentxs
@@ -759,9 +761,9 @@ std::string Cash::load_or_retrieve_mint(
 
     // expired or missing.
     if (!api_.Exec().Mint_IsStillGood(notaryID, unitTypeID)) {
-        otWarn << "load_or_retrieve_mint: Mint file is "
-                  "missing or expired. Downloading from "
-                  "server...\n";
+        LogDetail(OT_METHOD)(__FUNCTION__)(": Mint file is ")(
+            "missing or expired. Downloading from ")("server...")
+            .Flush();
 
         response = server_action_
                        .DownloadMint(

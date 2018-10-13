@@ -30,7 +30,11 @@ public:
     const LogSource& operator()(const char* in) const;
     const LogSource& operator()(const std::string& in) const;
     const LogSource& operator()(const OTString& in) const;
+    const LogSource& operator()(const OTStringXML& in) const;
+    const LogSource& operator()(const OTArmored& in) const;
     const LogSource& operator()(const String& in) const;
+    const LogSource& operator()(const StringXML& in) const;
+    const LogSource& operator()(const Armored& in) const;
     const LogSource& operator()(const OTIdentifier& in) const;
     const LogSource& operator()(const Identifier& in) const;
     template <typename T>

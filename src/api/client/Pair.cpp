@@ -544,8 +544,9 @@ void Pair::process_store_secret(
             pair_event_->Publish(proto::ProtoAsString(event));
 
         if (published) {
-            otWarn << OT_METHOD << __FUNCTION__
-                   << ": Published store secret notification." << std::endl;
+            LogDetail(OT_METHOD)(__FUNCTION__)(
+                ": Published store secret notification.")
+                .Flush();
         } else {
             otErr << OT_METHOD << __FUNCTION__
                   << ": Error Publishing store secret notification."
@@ -630,9 +631,9 @@ void Pair::state_machine(
     const Identifier& localNymID,
     const Identifier& issuerNymID) const
 {
-    otWarn << OT_METHOD << __FUNCTION__
-           << ": Local nym: " << String::Factory(localNymID)
-           << "\nIssuer Nym: " << String::Factory(issuerNymID) << std::endl;
+    LogDetail(OT_METHOD)(__FUNCTION__)(": Local nym: ")(localNymID)(
+        "Issuer Nym: ")(issuerNymID)
+        .Flush();
     Lock lock(status_lock_);
     auto& [status, trusted] = pair_status_[{localNymID, issuerNymID}];
     lock.unlock();
@@ -671,8 +672,9 @@ void Pair::state_machine(
         otErr << OT_METHOD << __FUNCTION__
               << ": Issuer does not advertise any contracts." << std::endl;
     } else {
-        otWarn << OT_METHOD << __FUNCTION__ << ": Issuer advertise "
-               << contractSection->Size() << " contracts." << std::endl;
+        LogDetail(OT_METHOD)(__FUNCTION__)(": Issuer advertise ")(
+            contractSection->Size())(" contracts.")
+            .Flush();
     }
 
     auto editor = client_.Wallet().mutable_Issuer(localNymID, issuerNymID);
@@ -684,8 +686,9 @@ void Pair::state_machine(
 
     switch (status) {
         case Status::Error: {
-            otWarn << OT_METHOD << __FUNCTION__
-                   << ": First pass through state machine." << std::endl;
+            LogDetail(OT_METHOD)(__FUNCTION__)(
+                ": First pass through state machine.")
+                .Flush();
             status = Status::Started;
             [[fallthrough]];
         }
@@ -720,9 +723,9 @@ void Pair::state_machine(
         case Status::Registered: {
             SHUTDOWN()
 
-            otWarn << OT_METHOD << __FUNCTION__
-                   << ": Local nym is registered on issuer's notary."
-                   << std::endl;
+            LogDetail(OT_METHOD)(__FUNCTION__)(
+                ": Local nym is registered on issuer's notary.")
+                .Flush();
 
             if (trusted) {
                 needStoreSecret = (false == issuer.StoreSecretComplete()) &&
@@ -744,9 +747,9 @@ void Pair::state_machine(
                         pair_event_->Publish(proto::ProtoAsString(event));
 
                     if (published) {
-                        otWarn << OT_METHOD << __FUNCTION__
-                               << ": Published should rename notification."
-                               << std::endl;
+                        LogDetail(OT_METHOD)(__FUNCTION__)(
+                            ": Published should rename notification.")
+                            .Flush();
                     } else {
                         otErr
                             << OT_METHOD << __FUNCTION__
@@ -829,11 +832,10 @@ void Pair::state_machine(
                                 continue;
                             }
                         } else {
-                            otWarn << OT_METHOD << __FUNCTION__ << ": "
-                                   << unitID->str() << " account for "
-                                   << localNymID.str() << " on "
-                                   << serverID->str() << " already exists."
-                                   << std::endl;
+                            LogDetail(OT_METHOD)(__FUNCTION__)(": ")(unitID)(
+                                " account for ")(localNymID)(" on ")(serverID)(
+                                " already exists.")
+                                .Flush();
                         }
 
                         const auto instructions =

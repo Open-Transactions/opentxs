@@ -1490,38 +1490,44 @@ std::unique_ptr<Item> Ledger::GenerateBalanceStatement(
         // server.
         case transactionType::processInbox: {
             itemType = "processInbox";
-            otWarn << __FUNCTION__ << ": Removing number " << number << " for "
-                   << itemType << std::endl;
+            LogDetail(OT_METHOD)(__FUNCTION__)(": Removing number ")(number)(
+                " for ")(itemType)
+                .Flush();
             removing.insert(number);
         } break;
         case transactionType::withdrawal: {
             itemType = "withdrawal";
-            otWarn << __FUNCTION__ << ": Removing number " << number << " for "
-                   << itemType << std::endl;
+            LogDetail(OT_METHOD)(__FUNCTION__)(": Removing number ")(number)(
+                " for ")(itemType)
+                .Flush();
             removing.insert(number);
         } break;
         case transactionType::deposit: {
             itemType = "deposit";
-            otWarn << __FUNCTION__ << ": Removing number " << number << " for "
-                   << itemType << std::endl;
+            LogDetail(OT_METHOD)(__FUNCTION__)(": Removing number ")(number)(
+                " for ")(itemType)
+                .Flush();
             removing.insert(number);
         } break;
         case transactionType::cancelCronItem: {
             itemType = "cancelCronItem";
-            otWarn << __FUNCTION__ << ": Removing number " << number << " for "
-                   << itemType << std::endl;
+            LogDetail(OT_METHOD)(__FUNCTION__)(": Removing number ")(number)(
+                " for ")(itemType)
+                .Flush();
             removing.insert(number);
         } break;
         case transactionType::exchangeBasket: {
             itemType = "exchangeBasket";
-            otWarn << __FUNCTION__ << ": Removing number " << number << " for "
-                   << itemType << std::endl;
+            LogDetail(OT_METHOD)(__FUNCTION__)(": Removing number ")(number)(
+                " for ")(itemType)
+                .Flush();
             removing.insert(number);
         } break;
         case transactionType::payDividend: {
             itemType = "payDividend";
-            otWarn << __FUNCTION__ << ": Removing number " << number << " for "
-                   << itemType << std::endl;
+            LogDetail(OT_METHOD)(__FUNCTION__)(": Removing number ")(number)(
+                " for ")(itemType)
+                .Flush();
             removing.insert(number);
         } break;
         case transactionType::transfer:

@@ -52,9 +52,9 @@ StringXML::StringXML()
 }
 
 StringXML::StringXML(const opentxs::String& value)
-    : String(value.Get())
-    , pvt_(new StringXMLPvt(this))
+    : StringXML()
 {
+    Set(value.Get());
 }
 
 StringXML::StringXML(const StringXML& value)
@@ -63,6 +63,7 @@ StringXML::StringXML(const StringXML& value)
     , String(value)
     , pvt_(new StringXMLPvt(this))
 {
+    Set(value.Get());
 }
 
 opentxs::StringXML& StringXML::operator=(const opentxs::String& rhs)

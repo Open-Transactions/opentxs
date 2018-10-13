@@ -23,6 +23,8 @@
 
 #include "Settings.hpp"
 
+#define OT_METHOD "opentxs::Settings"
+
 namespace opentxs
 {
 api::Settings* Factory::Settings()
@@ -184,8 +186,9 @@ bool Settings::LogChange_str(
     if (!Log::StringFill(strCategory, strSection.Get(), 12)) return false;
     if (!Log::StringFill(strOption, strKey.Get(), 30, " to:")) return false;
 
-    otWarn << "Setting " << strCategory << " " << strOption << " " << szValue
-           << " \n";
+    LogDetail(OT_METHOD)(__FUNCTION__)(": Setting ")(strCategory)(" ")(
+        strOption)(" ")(szValue)
+        .Flush();
     return true;
 }
 

@@ -350,14 +350,13 @@ bool OTClient::AcceptEntireNymbox(
             // Iterate through those numbers...
             for (const auto& lValue : theNumbers) {
                 if (!context.VerifyTentativeNumber(lValue)) {
-                    otWarn
-                        << __FUNCTION__
-                        << ": transactionType::successNotice: This wasn't on "
-                           "my tentative list ("
-                        << lValue
-                        << "), I must have already processed it. (Or there "
-                           "was dropped message when I did, or the server "
-                           "is trying to slip me an old number.\n)";
+                    LogDetail(OT_METHOD)(__FUNCTION__)(
+                        ": transactionType::successNotice: This wasn't on ")(
+                        "my tentative list (")(lValue)(
+                        "), I must have already processed it. (Or there ")(
+                        "was dropped message when I did, or the server ")(
+                        "is trying to slip me an old number.) ")
+                        .Flush();
                 } else {
                     // I only take the numbers that I had been expecting, as
                     // tentative numbers,
@@ -604,15 +603,17 @@ bool OTClient::AcceptEntireNymbox(
                 context.ConsumeIssued(pTransaction->GetReferenceToNum());
 
             if (removed) {
-                otWarn << __FUNCTION__
-                       << ": **** Due to finding a finalReceipt, REMOVING "
-                          "OPENING NUMBER FROM NYM:  "
-                       << pTransaction->GetReferenceToNum() << " \n";
+                LogDetail(OT_METHOD)(__FUNCTION__)(
+                    ": **** Due to finding a finalReceipt, REMOVING ")(
+                    "OPENING NUMBER FROM NYM:  ")(
+                    pTransaction->GetReferenceToNum())
+                    .Flush();
             } else {
-                otWarn << __FUNCTION__
-                       << ": **** Noticed a finalReceipt, but Opening Number "
-                       << pTransaction->GetReferenceToNum()
-                       << " had ALREADY been removed from nym. \n";
+                LogDetail(OT_METHOD)(__FUNCTION__)(
+                    ": **** Noticed a finalReceipt, but Opening Number ")(
+                    pTransaction->GetReferenceToNum())(
+                    " had ALREADY been removed from nym. ")
+                    .Flush();
             }
 
             // pNym won't actually save unless it actually removes that #. If
@@ -1529,14 +1530,17 @@ bool OTClient::process_account_data(
 
                     if (context.ConsumeIssued(
                             pTempTrans->GetReferenceToNum())) {
-                        otWarn << "**** Due to finding a finalReceipt, "
-                               << "REMOVING OPENING NUMBER FROM NYM:  "
-                               << pTempTrans->GetReferenceToNum() << " \n";
+                        LogDetail(OT_METHOD)(__FUNCTION__)(
+                            "**** Due to finding a finalReceipt, ")(
+                            "REMOVING OPENING NUMBER FROM NYM:  ")(
+                            pTempTrans->GetReferenceToNum())
+                            .Flush();
                     } else {
-                        otWarn << "**** Noticed a finalReceipt, but Opening "
-                                  "Number "
-                               << pTempTrans->GetReferenceToNum()
-                               << " had ALREADY been removed from nym. \n";
+                        LogDetail(OT_METHOD)(__FUNCTION__)(
+                            "**** Noticed a finalReceipt, but Opening ")(
+                            "Number ")(pTempTrans->GetReferenceToNum())(
+                            " had ALREADY been removed from nym. ")
+                            .Flush();
                     }
 
                     // The client side keeps a list of active (recurring)
@@ -1750,11 +1754,9 @@ void OTClient::ProcessDepositChequeResponse(
     if (false == bool(pLedger) || !pLedger->LoadPaymentInbox() ||
         !pLedger->VerifyAccount(nym)) {
         // Not necessarily a problem.
-        otWarn << __FUNCTION__
-               << ": Unable to load or verify "
-                  "payments inbox: User "
-               << String::Factory(nymID) << " / Acct " << String::Factory(nymID)
-               << "\n";
+        LogDetail(OT_METHOD)(__FUNCTION__)(": Unable to load or verify ")(
+            "payments inbox: User ")(nymID)(" / Acct ")(nymID)
+            .Flush();
         return;
     }
     // ----------------------------------------------------------
@@ -4236,15 +4238,16 @@ bool OTClient::processServerReplyProcessBox(
             } else {
                 const auto strTheLedger = String::Factory(*theLedger),
                            strTheReplyLedger = String::Factory(*theReplyLedger);
-                otWarn << "Strange... found ledger in " << theReply.m_strCommand
-                       << ", but didn't find the right transaction type "
-                          "within.\n(pTransaction == "
-                       << (((pTransaction)) ? "NOT nullptr" : "nullptr")
-                       << ") && (pReplyTransaction == "
-                       << (((pReplyTransaction)) ? "NOT nullptr" : "nullptr")
-                       << ")\ntheLedger: \n\n"
-                       << strTheLedger << "\n\ntheReplyLedger:\n\n"
-                       << strTheReplyLedger << "\n\n";
+                LogDetail(OT_METHOD)(__FUNCTION__)(
+                    "Strange... found ledger in ")(theReply.m_strCommand)(
+                    ", but didn't find the right transaction type ")(
+                    "within.\n(pTransaction == ")(
+                    ((pTransaction)) ? "NOT nullptr" : "nullptr")(
+                    ") && (pReplyTransaction == ")(
+                    ((pReplyTransaction)) ? "NOT nullptr"
+                                          : "nullptr")(") theLedger: ")(
+                    strTheLedger)(" theReplyLedger: ")(strTheReplyLedger)
+                    .Flush();
             }
         }
     } else {
@@ -4418,8 +4421,9 @@ bool OTClient::processServerReplyProcessInbox(
             continue;
         }
         // else
-        otWarn << "processInboxResponse reply item " << strTempTypeString
-               << ": status == SUCCESS\n";
+        LogDetail(OT_METHOD)(__FUNCTION__)("processInboxResponse reply item ")(
+            strTempTypeString)(": status == SUCCESS ")
+            .Flush();
 
         // WTF IS THIS? There could be 3 acceptPendings, 5
         // acceptCronReceipts, 3 acceptFinalReceipts, etc in a single
@@ -4510,9 +4514,12 @@ bool OTClient::processServerReplyProcessInbox(
         //
         std::shared_ptr<OTTransaction> pServerTransaction;
 
-        otWarn << "Checking client-side inbox for expected "
-                  "pending or receipt transaction: "
-               << pItem->GetReferenceToNum() << "... \n";  // temp remove
+        LogDetail(OT_METHOD)(__FUNCTION__)(
+            "Checking client-side inbox for expected ")(
+            "pending or receipt transaction: ")(pItem->GetReferenceToNum())(
+            "... ")
+            .Flush();
+        // temp remove
 
         switch (pReplyItem->GetType()) {
             case itemType::atAcceptPending:      // Server reply to my
@@ -4979,28 +4986,30 @@ bool OTClient::processServerReplyProcessInbox(
             break;
 
             case itemType::atAcceptFinalReceipt: {
-                otWarn << "OTClient::"
-                          "processServerReplyProcessInbox: "
-                          "Successfully removed finalReceipt "
-                          "with closing num: "
-                       << pServerTransaction->GetClosingNum() << "\n";
+                LogDetail(OT_METHOD)(__FUNCTION__)("OTClient::")(
+                    "processServerReplyProcessInbox: ")(
+                    "Successfully removed finalReceipt ")("with closing num: ")(
+                    pServerTransaction->GetClosingNum())
+                    .Flush();
                 context.ConsumeIssued(pServerTransaction->GetClosingNum());
 
                 // This should have already been done by this point, but I'm
                 // putting it here just in case, while debugging:
                 if (context.ConsumeIssued(
                         pServerTransaction->GetReferenceToNum())) {
-                    otWarn << "**** Due to finding a "
-                           << "finalReceipt, REMOVING OPENING "
-                           << "NUMBER FROM NYM:  "
-                           << pServerTransaction->GetReferenceToNum() << " \n";
+                    LogDetail(OT_METHOD)(__FUNCTION__)(
+                        "**** Due to finding a ")(
+                        "finalReceipt, REMOVING OPENING ")(
+                        "NUMBER FROM NYM:  ")(
+                        pServerTransaction->GetReferenceToNum())
+                        .Flush();
                 } else {
-                    otWarn << "**** Noticed a finalReceipt, "
-                              "but"
-                           << " Opening Number "
-                           << pServerTransaction->GetReferenceToNum()
-                           << " had ALREADY been removed from "
-                           << "nym. \n";
+                    LogDetail(OT_METHOD)(__FUNCTION__)(
+                        "**** Noticed a finalReceipt, ")("but")(
+                        " Opening Number ")(
+                        pServerTransaction->GetReferenceToNum())(
+                        " had ALREADY been removed from ")("nym. ")
+                        .Flush();
                 }
 
                 // The client side keeps a list of active (recurring)
@@ -5298,13 +5307,16 @@ bool OTClient::processServerReplyProcessNymbox(
         pReplyItem->GetTypeString(strTempTypeString);
 
         if (Item::acknowledgement != pReplyItem->GetStatus()) {
-            otWarn << "processNymboxResponse reply item " << strTempTypeString
-                   << ": status == FAILED\n";
+            LogDetail(OT_METHOD)(__FUNCTION__)(
+                "processNymboxResponse reply item ")(strTempTypeString)(
+                ": status == FAILED ")
+                .Flush();
             continue;
         }
         // else
-        otWarn << "processNymboxResponse reply item " << strTempTypeString
-               << ": status == SUCCESS\n";
+        LogDetail(OT_METHOD)(__FUNCTION__)("processNymboxResponse reply item ")(
+            strTempTypeString)(": status == SUCCESS ")
+            .Flush();
 
         // pReplyItem->GetReferenceToNum() contains the process transaction#
         // of pItem (0, in a transaction statement, since it usually has no
@@ -5384,9 +5396,10 @@ bool OTClient::processServerReplyProcessNymbox(
         //
         std::shared_ptr<OTTransaction> pServerTransaction;
 
-        otWarn << __FUNCTION__
-               << ": Checking client-side Nymbox for expected Nymbox item: "
-               << pItem->GetReferenceToNum() << "... \n";  // temp remove
+        LogDetail(OT_METHOD)(__FUNCTION__)(
+            ": Checking client-side Nymbox for expected Nymbox item: ")(
+            pItem->GetReferenceToNum())("... ")
+            .Flush();  // temp remove
 
         switch (pReplyItem->GetType()) {
             case itemType::atAcceptNotice:
@@ -5409,16 +5422,15 @@ bool OTClient::processServerReplyProcessNymbox(
         }
         // ----------------------------------
         if (false == bool(pServerTransaction)) {
-            otWarn << __FUNCTION__
-                   << ": The original processNymbox item referred to trans "
-                      "number "
-                   << pItem->GetReferenceToNum()
-                   << ", but that receipt wasn't in my Nymbox. "
-                      "(We probably processed this server reply ALREADY, and "
-                      "now we're just seeing it again, since an extra copy "
-                      "was "
-                      "dropped into the Nymbox originally. It happens. "
-                      "Skipping.)";
+            LogDetail(OT_METHOD)(__FUNCTION__)(
+                ": The original processNymbox item referred to trans ")(
+                "number ")(pItem->GetReferenceToNum())(
+                ", but that receipt wasn't in my Nymbox. ")(
+                "(We probably processed this server reply ALREADY, and ")(
+                "now we're just seeing it again, since an extra copy ")("was ")(
+                "dropped into the Nymbox originally. It happens. ")(
+                "Skipping.)")
+                .Flush();
             break;  // We must have processed this reply already, and it
                     // just came through again cause a copy was in a nymbox
                     // notice.
@@ -7283,14 +7295,17 @@ bool OTClient::processServerReplyProcessNymbox(
                 const bool removed = context.ConsumeIssued(
                     pServerTransaction->GetReferenceToNum());
                 if (removed) {
-                    otWarn << "**** Due to finding a finalReceipt, "
-                           << "REMOVING OPENING NUMBER FROM NYM:  "
-                           << pServerTransaction->GetReferenceToNum() << " \n";
+                    LogDetail(OT_METHOD)(__FUNCTION__)(
+                        "**** Due to finding a finalReceipt, ")(
+                        "REMOVING OPENING NUMBER FROM NYM:  ")(
+                        pServerTransaction->GetReferenceToNum())
+                        .Flush();
                 } else {
-                    otWarn << "**** Noticed a finalReceipt, but Opening "
-                              "Number "
-                           << pServerTransaction->GetReferenceToNum()
-                           << " had ALREADY been removed from nym. \n";
+                    LogDetail(OT_METHOD)(__FUNCTION__)(
+                        "**** Noticed a finalReceipt, but Opening ")("Number ")(
+                        pServerTransaction->GetReferenceToNum())(
+                        " had ALREADY been removed from nym. ")
+                        .Flush();
                 }
 
                 // BUG: RemoveIssuedNum shouldn't be here. In Nymbox,
@@ -7793,9 +7808,11 @@ void OTClient::ProcessWithdrawalResponse(
                                      "but couldn't find original token:"
                                   << strPurse << "\n";
                         } else if (Token::signedToken == pToken->GetState()) {
-                            otWarn << "Retrieved signed token from purse, and "
-                                      "have corresponding withdrawal request "
-                                      "in wallet. Unblinding...\n\n";
+                            LogDetail(OT_METHOD)(__FUNCTION__)(
+                                "Retrieved signed token from purse, and ")(
+                                "have corresponding withdrawal request ")(
+                                "in wallet. Unblinding... ")
+                                .Flush();
 
                             if (pToken->ProcessToken(
                                     *context.Nym(), *pMint, *pOriginalToken)) {
