@@ -1114,7 +1114,7 @@ TEST_F(Test_Rpc, Get_Account_Balance)
 
     ASSERT_TRUE(0 != response.balance_size());
 
-    auto& accountdata = *response.balance().cbegin();
+    const auto& accountdata = *response.balance().begin();
     ASSERT_EQ(1, accountdata.version());
     ASSERT_EQ(nym3_account2_id_, accountdata.id());
 
