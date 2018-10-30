@@ -182,11 +182,12 @@ bool OTPartyAccount::IsAccount(const Account& theAccount)
               theInstrumentDefinitionID)) {
             auto strRHS =
                 String::Factory(theAccount.GetInstrumentDefinitionID());
-            otOut << "OTPartyAccount::" << __FUNCTION__
-                  << ": Instrument Definition IDs don't "
-                     "match ( "
-                  << m_strInstrumentDefinitionID << " / " << strRHS
-                  << " ) for Acct ID: " << m_strAcctID << " \n";
+        {
+	    LogNormal(OT_METHOD)(__FUNCTION__)
+              (": Instrument Definition IDs don't "
+	      "match ( ")(m_strInstrumentDefinitionID)( " / ")(strRHS)
+	      (" ) for Acct ID: ")(m_strAcctID).Flush();
+          }
             return false;
         }
     }
@@ -216,10 +217,12 @@ bool OTPartyAccount::VerifyOwnership() const
     }  // todo maybe turn the above into OT_ASSERT()s.
 
     if (!m_pForParty->VerifyOwnershipOfAccount(account.get())) {
-        otOut << "OTPartyAccount::" << __FUNCTION__
-              << ": Party %s doesn't verify as "
-                 "the ACTUAL owner of account: "
-              << m_strName << " \n";
+        {
+	    LogNormal(OT_METHOD)(__FUNCTION__)(
+	      ": Party %s doesn't verify as "
+              "the ACTUAL owner of account: ")
+	      (m_strName).Flush();
+          }
         return false;
     }
 
@@ -243,17 +246,22 @@ bool OTPartyAccount::VerifyAgency()
     OTAgent* pAgent = GetAuthorizedAgent();
 
     if (nullptr == pAgent) {
-        otOut << "OTPartyAccount::" << __FUNCTION__
-              << ": Unable to find authorized agent (" << GetAgentName()
-              << ") for this account: " << GetName() << " \n";
+        {
+	    LogNormal(OT_METHOD)(__FUNCTION__)(
+	      ": Unable to find authorized agent (")(GetAgentName())
+              (") for this account: ")(GetName()).Flush();
+          }
         return false;
     }
 
     if (!pAgent->VerifyAgencyOfAccount(account.get())) {
-        otOut << "OTPartyAccount::" << __FUNCTION__ << ": Agent "
-              << GetAgentName()
-              << " doesn't verify as ACTUALLY having rights over account "
-              << GetName() << " with ID: " << GetAcctID() << " \n";
+        {
+	    LogNormal(OT_METHOD)(__FUNCTION__)(
+	       ": Agent ")
+	       (GetAgentName())
+	       (" doesn't verify as ACTUALLY having rights over account ")
+	       (GetName())(" with ID: ")(GetAcctID()).Flush();
+          }
         return false;
     }
 
@@ -314,10 +322,11 @@ bool OTPartyAccount::DropFinalReceiptToInbox(
 SharedAccount OTPartyAccount::LoadAccount()
 {
     if (!m_strAcctID->Exists()) {
-        otOut << "OTPartyAccount::" << __FUNCTION__
-              << ": Bad: Acct ID is blank for "
-                 "account: "
-              << m_strName << " \n";
+        {
+	    LogNormal(OT_METHOD)(__FUNCTION__)(
+	       ": Bad: Acct ID is blank for account: ")
+	       (m_strName).Flush();
+          }
 
         return {};
     }
@@ -325,9 +334,11 @@ SharedAccount OTPartyAccount::LoadAccount()
     auto account = wallet_.Account(Identifier::Factory(m_strAcctID));
 
     if (false == bool(account)) {
-        otOut << "OTPartyAccount::" << __FUNCTION__
-              << ": Failed trying to load account: " << m_strName
-              << ", with AcctID: " << m_strAcctID << " \n";
+        {
+	    LogNormal(OT_METHOD)(__FUNCTION__)(
+	       ": Failed trying to load account: ")(m_strName)
+	       (", with AcctID: ")(m_strAcctID).Flush();
+          }
 
         return {};
     }
@@ -374,50 +385,59 @@ void OTPartyAccount::RegisterForExecution(OTScript& theScript)
 bool OTPartyAccount::Compare(const OTPartyAccount& rhs) const
 {
     if (!(GetName().Compare(rhs.GetName()))) {
-        otOut << "OTPartyAccount::" << __FUNCTION__
-              << ": Names don't match: " << GetName() << " / " << rhs.GetName()
-              << " \n";
+        {
+	    LogNormal(OT_METHOD)(__FUNCTION__)(
+	      ": Names don't match: ")(GetName())( " / " )
+	      (rhs.GetName()).Flush();
+          }
         return false;
     }
 
     if ((GetClosingTransNo() > 0) && (rhs.GetClosingTransNo() > 0) &&
         (GetClosingTransNo() != rhs.GetClosingTransNo())) {
-        otOut << "OTPartyAccount::" << __FUNCTION__
-              << ": Closing transaction numbers don't "
-                 "match: "
-              << GetName() << " \n";
+        {
+	    LogNormal(OT_METHOD)(__FUNCTION__)(
+	      ": Closing transaction numbers don't match: ")
+              (GetName()).Flush();
+          }
         return false;
     }
 
     if ((GetAcctID().Exists()) && (rhs.GetAcctID().Exists()) &&
         (!GetAcctID().Compare(rhs.GetAcctID()))) {
-        otOut << "OTPartyAccount::" << __FUNCTION__
-              << ": Asset account numbers don't match "
-                 "for party account "
-              << GetName() << ".\n( " << GetAcctID() << "  /  "
-              << rhs.GetAcctID() << " ) \n";
+        {
+	    LogNormal(OT_METHOD)(__FUNCTION__)(
+	      ":  Asset account numbers don't match "
+              "for party account ")
+              (GetName())(".\n( ")(GetAcctID())("  /  ")
+              (rhs.GetAcctID())(" )").Flush();
+          }
         return false;
     }
 
     if ((GetAgentName().Exists()) && (rhs.GetAgentName().Exists()) &&
         (!GetAgentName().Compare(rhs.GetAgentName()))) {
-        otOut << "OTPartyAccount::" << __FUNCTION__
-              << ": Agent names don't match for party "
-                 "account "
-              << GetName() << ".\n( " << GetAgentName() << "  /  "
-              << rhs.GetAgentName() << " ) \n";
+        {
+	    LogNormal(OT_METHOD)(__FUNCTION__)(
+	      ":  Agent Names don't match for party "
+	      "account ")
+              (GetName())(".\n( ")(GetAgentName())("  /  ")
+              (rhs.GetAgentName())(" )").Flush();
+          }
         return false;
     }
 
     if ((GetInstrumentDefinitionID().Exists() &&
          rhs.GetInstrumentDefinitionID().Exists()) &&
         !GetInstrumentDefinitionID().Compare(rhs.GetInstrumentDefinitionID())) {
-        otOut << "OTPartyAccount::" << __FUNCTION__
-              << ": Instrument Definition IDs don't "
-                 "exist, or don't match ( "
-              << GetInstrumentDefinitionID() << " / "
-              << rhs.GetInstrumentDefinitionID()
-              << " ) for party's account: " << GetName() << " \n";
+        {
+	    LogNormal(OT_METHOD)(__FUNCTION__)(
+	      ": Instrument Definition IDs don't "
+	      "exist, or don't match ( ")
+              (GetInstrumentDefinitionID())(" / ")
+              (rhs.GetInstrumentDefinitionID())
+              (" ) for party's account: ")(GetName()).Flush();
+          }
         return false;
     }
 

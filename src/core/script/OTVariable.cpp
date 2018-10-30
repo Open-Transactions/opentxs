@@ -19,6 +19,8 @@
 #include <ostream>
 #include <string>
 
+#define OT_METHOD "opentxs::OTVariable"
+
 namespace opentxs
 {
 
@@ -298,18 +300,27 @@ void OTVariable::RegisterForExecution(OTScript& theScript)
 bool OTVariable::Compare(OTVariable& rhs)
 {
     if (!(GetName().Compare(rhs.GetName()))) {
-        otOut << "OTVariable::Compare: Names don't match: " << GetName()
-              << " / " << rhs.GetName() << " \n";
+        {
+	    LogNormal(OT_METHOD)(__FUNCTION__)(
+	      ": Names don't match: ")
+	      (GetName())(" / ")(rhs.GetName()).Flush();
+          }
         return false;
     }
     if (!(GetType() == rhs.GetType())) {
-        otOut << "OTVariable::Compare: Type doesn't match: " << GetName()
-              << " \n";
+        {
+	    LogNormal(OT_METHOD)(__FUNCTION__)(
+	      ": Type doesn't match: ")
+	      (GetName()).Flush();
+          }
         return false;
     }
     if (!(GetAccess() == rhs.GetAccess())) {
-        otOut << "OTVariable::Compare: Access types don't match: " << GetName()
-              << " \n";
+        {
+	    LogNormal(OT_METHOD)(__FUNCTION__)(
+	      ": Access tyes don't match: ")
+	      (GetName()).Flush();
+          }
         return false;
     }
 
