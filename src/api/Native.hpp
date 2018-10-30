@@ -78,6 +78,7 @@ private:
 
     static int client_instance(const int count);
     static int server_instance(const int count);
+    static std::string get_arg(const ArgList& args, const std::string& argName);
 
     void init_pid(const Lock& lock) const;
     const ArgList merge_arglist(const ArgList& args) const;

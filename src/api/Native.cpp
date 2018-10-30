@@ -345,7 +345,9 @@ Native::Native(
     , config_()
     , zmq_context_(opentxs::network::zeromq::Context::Factory())
     , signal_handler_(nullptr)
-    , log_(opentxs::Factory::Log(zmq_context_))
+    , log_(opentxs::Factory::Log(
+          zmq_context_,
+          get_arg(args, OPENTXS_ARG_LOGENDPOINT)))
     , crypto_(nullptr)
     , legacy_(opentxs::Factory::Legacy())
     , client_()
@@ -369,18 +371,12 @@ Native::Native(
 
     assert(nullptr != external_password_callback_);
 
-    for (const auto& [key, arg] : args) {
-        if (key == OPENTXS_ARG_WORDS) {
-            assert(2 > arg.size());
-            assert(0 < arg.size());
-            const auto& word = *arg.cbegin();
-            word_list_.setPassword(word.c_str(), word.size());
-        } else if (key == OPENTXS_ARG_PASSPHRASE) {
-            assert(2 > arg.size());
-            assert(0 < arg.size());
-            const auto& passphrase = *arg.cbegin();
-            passphrase_.setPassword(passphrase.c_str(), passphrase.size());
-        }
+    const auto& word = get_arg(args, OPENTXS_ARG_WORDS);
+    if (!word.empty()) { word_list_.setPassword(word.c_str(), word.size()); }
+
+    const auto& passphrase = get_arg(args, OPENTXS_ARG_PASSPHRASE);
+    if (!passphrase.empty()) {
+        passphrase_.setPassword(passphrase.c_str(), passphrase.size());
     }
 
     assert(rpc_);
@@ -425,6 +421,21 @@ const api::Crypto& Native::Crypto() const
     return *crypto_;
 }
 
+std::string Native::get_arg(const ArgList& args, const std::string& argName)
+{
+    auto argIt = args.find(argName);
+
+    if (args.end() != argIt) {
+        const auto& argItems = argIt->second;
+
+        OT_ASSERT(2 > argItems.size());
+        OT_ASSERT(0 < argItems.size());
+
+        return *argItems.cbegin();
+    }
+
+    return {};
+}
 INTERNAL_PASSWORD_CALLBACK* Native::GetInternalPasswordCallback() const
 {
 #if defined OT_TEST_PASSWORD

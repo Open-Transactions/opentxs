@@ -12,6 +12,7 @@
 #include "opentxs/network/zeromq/ListenCallback.hpp"
 #include "opentxs/network/zeromq/Message.hpp"
 #include "opentxs/network/zeromq/PullSocket.hpp"
+#include "opentxs/network/zeromq/PublishSocket.hpp"
 
 #include "internal/api/Internal.hpp"
 
@@ -27,23 +28,32 @@ namespace zmq = opentxs::network::zeromq;
 
 namespace opentxs
 {
-api::internal::Log* Factory::Log(const zmq::Context& zmq)
+api::internal::Log* Factory::Log(
+    const zmq::Context& zmq,
+    const std::string& endpoint)
 {
-    return new api::implementation::Log(zmq);
+    return new api::implementation::Log(zmq, endpoint);
 }
 }  // namespace opentxs
 
 namespace opentxs::api::implementation
 {
-Log::Log(const zmq::Context& zmq)
+Log::Log(const zmq::Context& zmq, const std::string& endpoint)
     : zmq_(zmq)
     , callback_(zmq::ListenCallback::Factory(
           std::bind(&Log::callback, this, std::placeholders::_1)))
     , socket_(zmq.PullSocket(callback_, zmq::Socket::Direction::Bind))
+    , publish_socket_(zmq.PublishSocket())
+    , publish_{!endpoint.empty()}
 {
     const auto started = socket_->Start(LOG_SINK);
 
     if (false == started) { abort(); }
+
+    if (publish_) {
+        const auto publishStarted = publish_socket_->Start(endpoint);
+        if (false == publishStarted) { abort(); }
+    }
 }
 
 void Log::callback(zmq::Message& message)
@@ -61,6 +71,7 @@ void Log::callback(zmq::Message& message)
 #else
     print(level, messageFrame, id);
 #endif
+    if (publish_) { publish_socket_->Publish(message); }
 }
 
 void Log::print(

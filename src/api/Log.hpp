@@ -12,7 +12,9 @@ namespace opentxs::api::implementation
 class Log : virtual public api::internal::Log
 {
 public:
-    explicit Log(const opentxs::network::zeromq::Context& zmq);
+    explicit Log(
+        const opentxs::network::zeromq::Context& zmq,
+        const std::string& endpoint);
 
     ~Log() = default;
 
@@ -22,6 +24,8 @@ private:
     const opentxs::network::zeromq::Context& zmq_;
     OTZMQListenCallback callback_;
     OTZMQPullSocket socket_;
+    OTZMQPublishSocket publish_socket_;
+    const bool publish_;
 
     void callback(opentxs::network::zeromq::Message& message);
     void print(

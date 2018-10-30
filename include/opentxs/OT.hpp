@@ -35,6 +35,7 @@
 #define OPENTXS_ARG_TERMS "terms"
 #define OPENTXS_ARG_VERSION "version"
 #define OPENTXS_ARG_WORDS "words"
+#define OPENTXS_ARG_LOGENDPOINT "logendpoint"
 
 namespace opentxs
 {
