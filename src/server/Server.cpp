@@ -110,8 +110,9 @@ Server::Server(const opentxs::api::server::Manager& manager)
 
 void Server::ActivateCron()
 {
-    otOut << "Server::ActivateCron: "
-          << (m_Cron->ActivateCron() ? "(STARTED)" : "FAILED") << " \n";
+	    LogNormal(OT_METHOD)(__FUNCTION__)(
+	    ": Activate Cron.")
+	    (m_Cron->ActivateCron() ? "(STARTED)" : "FAILED").Flush();
 }
 
 const api::Core& Server::API() const { return manager_; }
@@ -409,12 +410,15 @@ void Server::CreateMainFile(bool& mainFileExists)
         proto::AddressType type{};
 
         if (!pContract->ConnectInfo(strHostname, nPort, type, type)) {
-            otOut << __FUNCTION__
-                  << ": Unable to retrieve connection info from "
-                     "this contract. Please fix that first; see "
-                     "the sample data. (Failure.)\n";
+            LogNormal(OT_METHOD)(__FUNCTION__)(
+	     __FUNCTION__)
+	     (": Unable to retrieve connection info from "
+             "this contract. Please fix that first; see "
+	     "the sample data. (Failure.)").Flush();
+	    
             OT_FAIL;
-        }
+          }
+
         strNotaryID = String::Factory(pContract->ID())->Get();
     } else {
         OT_FAIL;
@@ -463,8 +467,10 @@ void Server::CreateMainFile(bool& mainFileExists)
         "",
         "");
 
-    otOut << "Your server contract has been saved as " << SERVER_CONTRACT_FILE
-          << " in the server data directory." << std::endl;
+        LogNormal(OT_METHOD)(__FUNCTION__)(
+           " Your server contract has been saved as ")(SERVER_CONTRACT_FILE)
+           (" in the server data directory.").Flush();
+	    
 #if OT_CRYPTO_SUPPORTED_KEY_HD
     const std::string defaultFingerprint = manager_.Storage().DefaultSeed();
     const std::string words = manager_.Seeds().Words(defaultFingerprint);

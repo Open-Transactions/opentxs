@@ -28,6 +28,8 @@
 #include <string>
 #include <utility>
 
+#define OT_METHOD "opentxs::Transactor::"
+
 namespace opentxs::server
 {
 
@@ -110,7 +112,10 @@ bool Transactor::addBasketAccountID(
     auto theBasketAcctID = Identifier::Factory();
 
     if (lookupBasketAccountID(BASKET_ID, theBasketAcctID)) {
-        otOut << "User attempted to add Basket that already exists.\n";
+       {
+	  LogNormal(OT_METHOD)(__FUNCTION__)(
+	        ": User attempted to add Basket that already exists.").Flush();
+        }
 
         return false;
     }
@@ -230,13 +235,13 @@ ExclusiveAccount Transactor::getVoucherAccount(
         auto strAcctID = String::Factory();
         pAccount.get().GetIdentifier(strAcctID);
         const auto strInstrumentDefinitionID =
-            String::Factory(INSTRUMENT_DEFINITION_ID);
-        otOut << "Server::GetVoucherAccount: Successfully created "
-              << "voucher account ID: " << strAcctID
-              << " Instrument Definition ID: " << strInstrumentDefinitionID
-              << "\n";
-
-        if (!server_.GetMainFile().SaveMainFile()) {
+            String::Factory(INSTRUMENT_DEFINITION_ID);{
+	    LogNormal(OT_METHOD)(__FUNCTION__)(
+	     ": Successfully created "
+             "voucher account ID: ")(strAcctID)
+	     (" Instrument Definition ID: ")(strInstrumentDefinitionID)
+             (".").Flush();
+	    }if (!server_.GetMainFile().SaveMainFile()) {
             otErr << "Server::GetVoucherAccount: Error saving main "
                      "server file containing new account ID!!\n";
         }

@@ -68,9 +68,12 @@ bool PayDividendVisitor::Trigger(
         (theSharesAccount.GetBalance() * GetPayoutPerShare());
 
     if (lPayoutAmount <= 0) {
-        otOut << "PayDividendVisitor::Trigger: nothing to pay, "
-                 "since this account owns no shares. (Returning "
-                 "true.)";
+          {
+	    LogNormal(OT_METHOD)(__FUNCTION__)(
+	    ": Nothing to pay, "
+            "since this account owns no shares. (Returning "
+            "true.").Flush();
+          }
         return true;  // nothing to pay, since this account owns no shares.
                       // Success!
     }
