@@ -20,24 +20,12 @@ namespace opentxs
 template <class C>
 class Editor
 {
-private:
+public:
     using OptionalCallback = std::function<void(const C&)>;
     using Lock = std::unique_lock<std::mutex>;
     using LockedSave = std::function<void(C*, Lock&)>;
     using UnlockedSave = std::function<void(C*)>;
 
-    C* object_{nullptr};
-    bool locked_{true};
-    std::unique_ptr<Lock> object_lock_{nullptr};
-    std::unique_ptr<LockedSave> locked_save_callback_{nullptr};
-    std::unique_ptr<UnlockedSave> unlocked_save_callback_{nullptr};
-    const OptionalCallback optional_callback_{nullptr};
-
-    Editor() = delete;
-    Editor(const Editor&) = delete;
-    Editor& operator=(const Editor&) = delete;
-
-public:
     Editor(
         std::mutex& objectMutex,
         C* object,
@@ -100,6 +88,17 @@ public:
         if (optional_callback_) { optional_callback_(*object_); }
     }
 
+private:
+    C* object_{nullptr};
+    bool locked_{true};
+    std::unique_ptr<Lock> object_lock_{nullptr};
+    std::unique_ptr<LockedSave> locked_save_callback_{nullptr};
+    std::unique_ptr<UnlockedSave> unlocked_save_callback_{nullptr};
+    const OptionalCallback optional_callback_{nullptr};
+
+    Editor() = delete;
+    Editor(const Editor&) = delete;
+    Editor& operator=(const Editor&) = delete;
 };  // class Editor
 }  // namespace opentxs
 
