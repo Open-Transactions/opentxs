@@ -885,7 +885,7 @@ std::shared_ptr<const api::client::Issuer> Wallet::Issuer(
     const Identifier& issuerID) const
 {
     auto& [lock, pIssuer] = issuer(nymID, issuerID, false);
-    const auto& notUsed[[maybe_unused]] = lock;
+    const auto& notUsed [[maybe_unused]] = lock;
 
     return pIssuer;
 }
@@ -914,7 +914,7 @@ Wallet::IssuerLock& Wallet::issuer(
     Lock lock(issuer_map_lock_);
     auto& output = issuer_map_[{nymID, issuerID}];
     auto& [issuerMutex, pIssuer] = output;
-    const auto& notUsed[[maybe_unused]] = issuerMutex;
+    const auto& notUsed [[maybe_unused]] = issuerMutex;
 
     if (pIssuer) { return output; }
 
@@ -1176,11 +1176,15 @@ Editor<opentxs::NymFile> Wallet::mutable_nymfile(
 
     if (false == nymfile->LoadSignedNymFile()) { nymfile->SaveSignedNymFile(); }
 
-    std::function<void(opentxs::NymFile*, Lock&)> callback =
+    using EditorType = Editor<opentxs::NymFile>;
+    EditorType::LockedSave callback =
         [&](opentxs::NymFile* in, Lock& lock) -> void { this->save(in, lock); };
+    EditorType::OptionalCallback deleter = [](const opentxs::NymFile& in) {
+        auto* p = &const_cast<opentxs::NymFile&>(in);
+        delete p;
+    };
 
-    return Editor<opentxs::NymFile>(
-        nymfile_lock(id), nymfile.release(), callback);
+    return EditorType(nymfile_lock(id), nymfile.release(), callback, deleter);
 }
 
 std::mutex& Wallet::nymfile_lock(const Identifier& nymID) const
