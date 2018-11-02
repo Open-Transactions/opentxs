@@ -5,19 +5,25 @@
 
 #include "stdafx.hpp"
 
-#include "PullSocket.hpp"
-
 #include "opentxs/core/Log.hpp"
 #include "opentxs/network/zeromq/ListenCallback.hpp"
 #include "opentxs/network/zeromq/Frame.hpp"
+#include "opentxs/network/zeromq/PullSocket.hpp"
+
+#include "network/zeromq/curve/Server.hpp"
+#include "Receiver.hpp"
+#include "Socket.hpp"
 
 #include <chrono>
 
 #include <zmq.h>
 
+#include "Pull.hpp"
+
 template class opentxs::Pimpl<opentxs::network::zeromq::PullSocket>;
 
-//#define OT_METHOD "opentxs::network::zeromq::implementation::PullSocket::"
+//#define OT_METHOD
+//"opentxs::network::zeromq::socket::implementation::PullSocket::"
 
 namespace opentxs::network::zeromq
 {
@@ -27,29 +33,30 @@ OTZMQPullSocket PullSocket::Factory(
     const ListenCallback& callback)
 {
     return OTZMQPullSocket(
-        new implementation::PullSocket(context, direction, callback));
+        new socket::implementation::PullSocket(context, direction, callback));
 }
 
 OTZMQPullSocket PullSocket::Factory(
     const class Context& context,
     const Socket::Direction direction)
 {
-    return OTZMQPullSocket(new implementation::PullSocket(context, direction));
+    return OTZMQPullSocket(
+        new socket::implementation::PullSocket(context, direction));
 }
 }  // namespace opentxs::network::zeromq
 
-namespace opentxs::network::zeromq::implementation
+namespace opentxs::network::zeromq::socket::implementation
 {
 PullSocket::PullSocket(
     const zeromq::Context& context,
     const Socket::Direction direction,
     const zeromq::ListenCallback& callback,
     const bool startThread)
-    : ot_super(context, SocketType::Pull, direction)
-    , CurveServer(lock_, socket_)
-    , Receiver(lock_, running_, socket_, startThread)
+    : Receiver(context, SocketType::Pull, direction, startThread)
+    , Server(this->get())
     , callback_(callback)
 {
+    init();
 }
 
 PullSocket::PullSocket(
@@ -81,18 +88,5 @@ void PullSocket::process_incoming(const Lock& lock, Message& message)
     callback_.Process(message);
 }
 
-bool PullSocket::Start(const std::string& endpoint) const
-{
-    Lock lock(lock_);
-
-    if (Socket::Direction::Connect == direction_) {
-
-        return start_client(lock, endpoint);
-    } else {
-
-        return bind(lock, endpoint);
-    }
-}
-
-PullSocket::~PullSocket() { shutdown(); }
-}  // namespace opentxs::network::zeromq::implementation
+PullSocket::~PullSocket() SHUTDOWN
+}  // namespace opentxs::network::zeromq::socket::implementation

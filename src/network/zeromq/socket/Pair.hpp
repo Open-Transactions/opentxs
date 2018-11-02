@@ -5,46 +5,44 @@
 
 #pragma once
 
-#include "opentxs/Forward.hpp"
+#include "Internal.hpp"
 
 #include "opentxs/network/zeromq/PairSocket.hpp"
 
 #include "Bidirectional.hpp"
 #include "Socket.hpp"
 
-namespace opentxs::network::zeromq::implementation
+namespace opentxs::network::zeromq::socket::implementation
 {
-class PairSocket final : virtual public zeromq::PairSocket,
-                         public Socket,
-                         Bidirectional
+class PairSocket final : virtual public zeromq::PairSocket, public Bidirectional
 {
 public:
     const std::string& Endpoint() const override;
     bool Send(const std::string& data) const override;
     bool Send(const opentxs::Data& data) const override;
     bool Send(network::zeromq::Message& data) const override;
-    bool Start(const std::string& endpoint) const override;
+    bool Start(const std::string& endpoint) const override { return false; }
 
     ~PairSocket();
 
 private:
     friend opentxs::network::zeromq::PairSocket;
-    friend Proxy;
-    typedef Socket ot_super;
+    friend zeromq::implementation::Proxy;
 
     const ListenCallback& callback_;
     const std::string endpoint_;
-    const bool bind_{false};
 
     PairSocket* clone() const override;
     bool have_callback() const override;
     void process_incoming(const Lock& lock, Message& message) override;
 
+    void init() override;
+
     PairSocket(
         const zeromq::Context& context,
         const zeromq::ListenCallback& callback,
         const std::string& endpoint,
-        const bool bind,
+        const Socket::Direction direction,
         const bool startThread);
     PairSocket(
         const zeromq::Context& context,
@@ -64,4 +62,4 @@ private:
     PairSocket& operator=(const PairSocket&) = delete;
     PairSocket& operator=(PairSocket&&) = delete;
 };
-}  // namespace opentxs::network::zeromq::implementation
+}  // namespace opentxs::network::zeromq::socket::implementation

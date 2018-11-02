@@ -10,12 +10,20 @@
 #include "opentxs/network/zeromq/Frame.hpp"
 #include "opentxs/network/zeromq/Message.hpp"
 #include "opentxs/network/zeromq/FrameIterator.hpp"
+#include "opentxs/network/zeromq/ReplySocket.hpp"
 
-#include "ReplySocket.hpp"
+#include "network/zeromq/curve/Server.hpp"
+#include "Receiver.tpp"
+#include "Socket.hpp"
+
+#include "Reply.hpp"
 
 template class opentxs::Pimpl<opentxs::network::zeromq::ReplySocket>;
+template class opentxs::network::zeromq::socket::implementation::Receiver<
+    opentxs::network::zeromq::Message>;
 
-//#define OT_METHOD "opentxs::network::zeromq::implementation::ReplySocket::"
+//#define OT_METHOD
+//"opentxs::network::zeromq::socket::implementation::ReplySocket::"
 
 namespace opentxs::network::zeromq
 {
@@ -25,21 +33,21 @@ OTZMQReplySocket ReplySocket::Factory(
     const ReplyCallback& callback)
 {
     return OTZMQReplySocket(
-        new implementation::ReplySocket(context, direction, callback));
+        new socket::implementation::ReplySocket(context, direction, callback));
 }
 }  // namespace opentxs::network::zeromq
 
-namespace opentxs::network::zeromq::implementation
+namespace opentxs::network::zeromq::socket::implementation
 {
 ReplySocket::ReplySocket(
     const zeromq::Context& context,
     const Socket::Direction direction,
     const ReplyCallback& callback)
-    : ot_super(context, SocketType::Reply, direction)
-    , CurveServer(lock_, socket_)
-    , Receiver(lock_, running_, socket_, true)
+    : Receiver(context, SocketType::Reply, direction, true)
+    , Server(this->get())
     , callback_(callback)
 {
+    init();
 }
 
 ReplySocket* ReplySocket::clone() const
@@ -56,18 +64,5 @@ void ReplySocket::process_incoming(const Lock& lock, Message& message)
     send_message(lock, reply);
 }
 
-bool ReplySocket::Start(const std::string& endpoint) const
-{
-    Lock lock(lock_);
-
-    if (Socket::Direction::Connect == direction_) {
-
-        return start_client(lock, endpoint);
-    } else {
-
-        return bind(lock, endpoint);
-    }
-}
-
-ReplySocket::~ReplySocket() { shutdown(); }
-}  // namespace opentxs::network::zeromq::implementation
+ReplySocket::~ReplySocket() SHUTDOWN
+}  // namespace opentxs::network::zeromq::socket::implementation

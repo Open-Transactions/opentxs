@@ -7,14 +7,15 @@
 
 #include "Internal.hpp"
 
-#include "SubscribeSocket.hpp"
+#include "network/zeromq/socket/Subscribe.hpp"
 
 namespace opentxs::network::zeromq::implementation
 {
-class PairEventListener final : public SubscribeSocket
+class PairEventListener final
+    : public zeromq::socket::implementation::SubscribeSocket
 {
 public:
-    ~PairEventListener();
+    ~PairEventListener() = default;
 
 private:
     friend zeromq::implementation::Context;

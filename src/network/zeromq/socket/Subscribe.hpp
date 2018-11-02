@@ -5,24 +5,22 @@
 
 #pragma once
 
-#include "opentxs/Forward.hpp"
+#include "Internal.hpp"
 
 #include "opentxs/network/zeromq/SubscribeSocket.hpp"
 
-#include "CurveClient.hpp"
+#include "network/zeromq/curve/Client.hpp"
 #include "Receiver.hpp"
 #include "Socket.hpp"
 
-namespace opentxs::network::zeromq::implementation
+namespace opentxs::network::zeromq::socket::implementation
 {
 class SubscribeSocket : virtual public zeromq::SubscribeSocket,
-                        public Socket,
-                        CurveClient,
-                        Receiver<zeromq::Message>
+                        public Receiver<zeromq::Message>,
+                        zeromq::curve::implementation::Client
 {
 public:
     bool SetSocksProxy(const std::string& proxy) const override;
-    bool Start(const std::string& endpoint) const override;
 
     virtual ~SubscribeSocket();
 
@@ -35,11 +33,11 @@ protected:
 
 private:
     friend opentxs::network::zeromq::SubscribeSocket;
-    typedef Socket ot_super;
 
     SubscribeSocket* clone() const override;
     bool have_callback() const override;
 
+    void init() override;
     void process_incoming(const Lock& lock, Message& message) override;
 
     SubscribeSocket() = delete;
@@ -48,4 +46,4 @@ private:
     SubscribeSocket& operator=(const SubscribeSocket&) = delete;
     SubscribeSocket& operator=(SubscribeSocket&&) = delete;
 };
-}  // namespace opentxs::network::zeromq::implementation
+}  // namespace opentxs::network::zeromq::socket::implementation

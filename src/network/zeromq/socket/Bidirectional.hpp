@@ -16,7 +16,7 @@
 #include <mutex>
 #include <thread>
 
-namespace opentxs::network::zeromq::implementation
+namespace opentxs::network::zeromq::socket::implementation
 {
 class Bidirectional : public Receiver<zeromq::Message>
 {
@@ -25,16 +25,18 @@ protected:
 
     Bidirectional(
         const zeromq::Context& context,
-        std::mutex& lock,
-        const Flag& running,
-        void* socket,
+        const SocketType type,
+        const zeromq::Socket::Direction direction,
         const bool startThread);
 
+    void init() override;
     bool queue_message(zeromq::Message& message) const;
+    void shutdown(const Lock& lock) override;
 
-    virtual ~Bidirectional();
+    virtual ~Bidirectional() = default;
 
 private:
+    const bool bidirectional_start_thread_{true};
     const std::string endpoint_;
     void* pull_socket_{nullptr};
     mutable int linger_{0};
@@ -51,8 +53,9 @@ private:
         void* socket,
         std::mutex& socket_mutex,
         const std::string& endpoint) const;
-    bool process_pull_socket();
-    bool process_receiver_socket();
+
+    bool process_pull_socket(const Lock& lock);
+    bool process_receiver_socket(const Lock& lock);
     bool send(const Lock& lock, zeromq::Message& message);
     void thread() override;
 
@@ -62,4 +65,4 @@ private:
     Bidirectional& operator=(const Bidirectional&) = delete;
     Bidirectional& operator=(Bidirectional&&) = delete;
 };
-}  // namespace opentxs::network::zeromq::implementation
+}  // namespace opentxs::network::zeromq::socket::implementation

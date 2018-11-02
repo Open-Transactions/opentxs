@@ -5,32 +5,34 @@
 
 #pragma once
 
-#include "opentxs/Forward.hpp"
+#include "Internal.hpp"
 
-#include "opentxs/network/zeromq/PublishSocket.hpp"
-
-#include "CurveServer.hpp"
-#include "Socket.hpp"
-
-namespace opentxs::network::zeromq::implementation
+namespace opentxs::network::zeromq::socket::implementation
 {
 class PublishSocket final : virtual public zeromq::PublishSocket,
-                            public Socket,
-                            CurveServer
+                            public Sender,
+                            public zeromq::curve::implementation::Server
 {
 public:
-    bool Publish(const std::string& data) const override;
-    bool Publish(const opentxs::Data& data) const override;
-    bool Publish(zeromq::Message& data) const override;
-    bool Start(const std::string& endpoint) const override;
+    bool Publish(const std::string& data) const override
+    {
+        return Publish(Message::Factory(data));
+    }
+    bool Publish(const opentxs::Data& data) const override
+    {
+        return Publish(Message::Factory(data));
+    }
+    bool Publish(zeromq::Message& data) const override { return deliver(data); }
 
     ~PublishSocket();
 
 private:
     friend opentxs::network::zeromq::PublishSocket;
-    typedef Socket ot_super;
 
-    PublishSocket* clone() const override;
+    PublishSocket* clone() const override
+    {
+        return new PublishSocket(context_);
+    }
 
     PublishSocket(const zeromq::Context& context);
     PublishSocket() = delete;
@@ -39,4 +41,4 @@ private:
     PublishSocket& operator=(const PublishSocket&) = delete;
     PublishSocket& operator=(PublishSocket&&) = delete;
 };
-}  // namespace opentxs::network::zeromq::implementation
+}  // namespace opentxs::network::zeromq::socket::implementation

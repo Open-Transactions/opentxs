@@ -13,11 +13,18 @@
 
 #include <map>
 #include <mutex>
+#include <set>
 
 #define CURVE_KEY_BYTES 32
 #define CURVE_KEY_Z85_BYTES 40
+#define SHUTDOWN                                                               \
+    {                                                                          \
+        running_->Off();                                                       \
+        Lock lock(lock_);                                                      \
+        shutdown(lock);                                                        \
+    }
 
-namespace opentxs::network::zeromq::implementation
+namespace opentxs::network::zeromq::socket::implementation
 {
 class Socket : virtual public zeromq::Socket, public Lockable
 {
@@ -35,6 +42,7 @@ public:
     SocketType Type() const override;
 
     operator void*() const override;
+    operator std::mutex&() { return lock_; }
 
     bool Close() const override;
     const zeromq::Context& Context() const override { return context_; }
@@ -42,8 +50,11 @@ public:
         const std::chrono::milliseconds& linger,
         const std::chrono::milliseconds& send,
         const std::chrono::milliseconds& receive) const override;
+    bool Start(const std::string& endpoint) const override;
 
-    virtual ~Socket();
+    Socket& get() { return *this; }
+
+    virtual ~Socket() = default;
 
 protected:
     const zeromq::Context& context_;
@@ -52,18 +63,20 @@ protected:
     mutable int linger_{0};
     mutable int send_timeout_{-1};
     mutable int receive_timeout_{-1};
-    mutable std::vector<std::string> endpoints_;
+    mutable std::set<std::string> endpoints_;
     OTFlag running_;
 
     bool apply_timeouts(const Lock& lock) const;
     bool bind(const Lock& lock, const std::string& endpoint) const;
     bool connect(const Lock& lock, const std::string& endpoint) const;
-    bool receive_message(const Lock& lock, Message& message) const;
-    bool send_message(const Lock& lock, Message& message) const;
+    bool receive_message(const Lock& lock, zeromq::Message& message) const;
+    bool send_message(const Lock& lock, zeromq::Message& message) const;
     bool set_socks_proxy(const std::string& proxy) const;
+    bool start(const Lock& lock, const std::string& endpoint) const;
     bool start_client(const Lock& lock, const std::string& endpoint) const;
 
-    void shutdown();
+    virtual void init() {}
+    virtual void shutdown(const Lock& lock);
 
     explicit Socket(
         const zeromq::Context& context,
@@ -81,4 +94,4 @@ private:
     Socket& operator=(const Socket&) = delete;
     Socket& operator=(Socket&&) = delete;
 };
-}  // namespace opentxs::network::zeromq::implementation
+}  // namespace opentxs::network::zeromq::socket::implementation

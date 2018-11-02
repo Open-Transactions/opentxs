@@ -5,29 +5,19 @@
 
 #pragma once
 
-#include "opentxs/Forward.hpp"
+#include "Internal.hpp"
 
-#include "opentxs/network/zeromq/PullSocket.hpp"
-
-#include "CurveServer.hpp"
-#include "Receiver.hpp"
-#include "Socket.hpp"
-
-namespace opentxs::network::zeromq::implementation
+namespace opentxs::network::zeromq::socket::implementation
 {
 class PullSocket final : virtual public zeromq::PullSocket,
-                         public Socket,
-                         CurveServer,
-                         Receiver<zeromq::Message>
+                         public Receiver<zeromq::Message>,
+                         zeromq::curve::implementation::Server
 {
 public:
-    bool Start(const std::string& endpoint) const override;
-
     ~PullSocket();
 
 private:
     friend opentxs::network::zeromq::PullSocket;
-    typedef Socket ot_super;
 
     const ListenCallback& callback_;
 
@@ -54,4 +44,4 @@ private:
     PullSocket& operator=(const PullSocket&) = delete;
     PullSocket& operator=(PullSocket&&) = delete;
 };
-}  // namespace opentxs::network::zeromq::implementation
+}  // namespace opentxs::network::zeromq::socket::implementation

@@ -5,27 +5,18 @@
 
 #pragma once
 
-#include "opentxs/Forward.hpp"
+#include "Internal.hpp"
 
-#include "opentxs/network/zeromq/DealerSocket.hpp"
-
-#include "CurveClient.hpp"
-#include "Bidirectional.hpp"
-#include "Socket.hpp"
-
-namespace opentxs::network::zeromq::implementation
+namespace opentxs::network::zeromq::socket::implementation
 {
-class DealerSocket final : virtual public zeromq::DealerSocket,
-                           public Socket,
-                           CurveClient,
-                           Bidirectional
+class DealerSocket final : public _Bidirectional<zeromq::DealerSocket>,
+                           zeromq::curve::implementation::Client
 {
 public:
-    bool Send(opentxs::Data& message) const override;
-    bool Send(const std::string& message) const override;
-    bool Send(zeromq::Message& message) const override;
-    bool SetSocksProxy(const std::string& proxy) const override;
-    bool Start(const std::string& endpoint) const override;
+    bool SetSocksProxy(const std::string& proxy) const override
+    {
+        return set_socks_proxy(proxy);
+    }
 
     virtual ~DealerSocket();
 
@@ -39,10 +30,9 @@ protected:
 
 private:
     friend opentxs::network::zeromq::DealerSocket;
-    typedef Socket ot_super;
 
     DealerSocket* clone() const override;
-    bool have_callback() const override;
+    bool have_callback() const override { return true; }
 
     void process_incoming(const Lock& lock, Message& message) override;
 
@@ -52,4 +42,4 @@ private:
     DealerSocket& operator=(const DealerSocket&) = delete;
     DealerSocket& operator=(DealerSocket&&) = delete;
 };
-}  // namespace opentxs::network::zeromq::implementation
+}  // namespace opentxs::network::zeromq::socket::implementation

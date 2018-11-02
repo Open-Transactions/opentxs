@@ -5,32 +5,34 @@
 
 #pragma once
 
-#include "opentxs/Forward.hpp"
+#include "Internal.hpp"
 
-#include "opentxs/network/zeromq/PushSocket.hpp"
-
-#include "CurveClient.hpp"
-#include "Socket.hpp"
-
-namespace opentxs::network::zeromq::implementation
+namespace opentxs::network::zeromq::socket::implementation
 {
 class PushSocket final : virtual public zeromq::PushSocket,
-                         public Socket,
-                         CurveClient
+                         public Sender,
+                         zeromq::curve::implementation::Client
 {
 public:
-    bool Push(const std::string& data) const override;
-    bool Push(const opentxs::Data& data) const override;
-    bool Push(zeromq::Message& data) const override;
-    bool Start(const std::string& endpoint) const override;
+    bool Push(const std::string& data) const override
+    {
+        return Push(Message::Factory(data));
+    }
+    bool Push(const opentxs::Data& data) const override
+    {
+        return Push(Message::Factory(data));
+    }
+    bool Push(zeromq::Message& data) const override { return deliver(data); }
 
     ~PushSocket();
 
 private:
     friend opentxs::network::zeromq::PushSocket;
-    typedef Socket ot_super;
 
-    PushSocket* clone() const override;
+    PushSocket* clone() const override
+    {
+        return new PushSocket(context_, direction_);
+    }
 
     PushSocket(
         const zeromq::Context& context,
@@ -41,4 +43,4 @@ private:
     PushSocket& operator=(const PushSocket&) = delete;
     PushSocket& operator=(PushSocket&&) = delete;
 };
-}  // namespace opentxs::network::zeromq::implementation
+}  // namespace opentxs::network::zeromq::socket::implementation

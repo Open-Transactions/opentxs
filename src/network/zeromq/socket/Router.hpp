@@ -5,29 +5,19 @@
 
 #pragma once
 
-#include "opentxs/Forward.hpp"
+#include "Internal.hpp"
 
-#include "opentxs/network/zeromq/RouterSocket.hpp"
-
-#include "CurveClient.hpp"
-#include "CurveServer.hpp"
-#include "Bidirectional.hpp"
-#include "Socket.hpp"
-
-namespace opentxs::network::zeromq::implementation
+namespace opentxs::network::zeromq::socket::implementation
 {
-class RouterSocket final : virtual public zeromq::RouterSocket,
-                           public Socket,
-                           CurveClient,
-                           CurveServer,
-                           Bidirectional
+class RouterSocket final : public _Bidirectional<zeromq::RouterSocket>,
+                           zeromq::curve::implementation::Client,
+                           zeromq::curve::implementation::Server
 {
 public:
-    bool Send(opentxs::Data& message) const override;
-    bool Send(const std::string& message) const override;
-    bool Send(zeromq::Message& message) const override;
-    bool SetSocksProxy(const std::string& proxy) const override;
-    bool Start(const std::string& endpoint) const override;
+    bool SetSocksProxy(const std::string& proxy) const override
+    {
+        return set_socks_proxy(proxy);
+    }
 
     virtual ~RouterSocket();
 
@@ -41,10 +31,9 @@ protected:
 
 private:
     friend opentxs::network::zeromq::RouterSocket;
-    typedef Socket ot_super;
 
     RouterSocket* clone() const override;
-    bool have_callback() const override;
+    bool have_callback() const override { return true; }
 
     void process_incoming(const Lock& lock, Message& message) override;
 
@@ -54,4 +43,4 @@ private:
     RouterSocket& operator=(const RouterSocket&) = delete;
     RouterSocket& operator=(RouterSocket&&) = delete;
 };
-}  // namespace opentxs::network::zeromq::implementation
+}  // namespace opentxs::network::zeromq::socket::implementation

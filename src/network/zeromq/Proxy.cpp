@@ -5,15 +5,16 @@
 
 #include "stdafx.hpp"
 
-#include "PairSocket.hpp"
-#include "Proxy.hpp"
-
 #include "opentxs/core/Log.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/network/zeromq/ListenCallback.hpp"
 #include "opentxs/network/zeromq/Socket.hpp"
 
+#include "network/zeromq/socket/Pair.hpp"
+
 #include <zmq.h>
+
+#include "Proxy.hpp"
 
 template class opentxs::Pimpl<opentxs::network::zeromq::Proxy>;
 
@@ -41,8 +42,14 @@ Proxy::Proxy(
     , backend_(backend)
     , null_callback_(opentxs::network::zeromq::ListenCallback::Factory(
           [](const zeromq::Message&) -> void {}))
-    , control_listener_(new PairSocket(context, null_callback_, false))
-    , control_sender_(new PairSocket(null_callback_, control_listener_, false))
+    , control_listener_(new socket::implementation::PairSocket(
+          context,
+          null_callback_,
+          false))
+    , control_sender_(new socket::implementation::PairSocket(
+          null_callback_,
+          control_listener_,
+          false))
     , thread_(nullptr)
 {
     thread_.reset(new std::thread(&Proxy::proxy, this));

@@ -5,42 +5,33 @@
 
 #pragma once
 
-#include "opentxs/Forward.hpp"
+#include "Internal.hpp"
 
-#include "opentxs/network/zeromq/RequestSocket.hpp"
-
-#include "CurveClient.hpp"
-#include "Socket.hpp"
-
-namespace opentxs::network::zeromq::implementation
+namespace opentxs::network::zeromq::socket::implementation
 {
 class RequestSocket final : virtual public zeromq::RequestSocket,
-                            public Socket,
-                            CurveClient
+                            public Sender,
+                            zeromq::curve::implementation::Client
 {
 public:
     SendResult SendRequest(opentxs::Data& message) const override;
     SendResult SendRequest(const std::string& message) const override;
     SendResult SendRequest(zeromq::Message& message) const override;
     bool SetSocksProxy(const std::string& proxy) const override;
-    bool Start(const std::string& endpoint) const override;
 
     ~RequestSocket();
 
 private:
     friend opentxs::network::zeromq::RequestSocket;
-    typedef Socket ot_super;
-
-    const Flag& running_;
 
     RequestSocket* clone() const override;
     bool wait(const Lock& lock) const;
 
-    RequestSocket(const zeromq::Context& context, const Flag& running);
+    RequestSocket(const zeromq::Context& context);
     RequestSocket() = delete;
     RequestSocket(const RequestSocket&) = delete;
     RequestSocket(RequestSocket&&) = delete;
     RequestSocket& operator=(const RequestSocket&) = delete;
     RequestSocket& operator=(RequestSocket&&) = delete;
 };
-}  // namespace opentxs::network::zeromq::implementation
+}  // namespace opentxs::network::zeromq::socket::implementation

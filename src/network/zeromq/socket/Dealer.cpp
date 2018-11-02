@@ -5,19 +5,26 @@
 
 #include "stdafx.hpp"
 
-#include "DealerSocket.hpp"
-
 #include "opentxs/core/Log.hpp"
+#include "opentxs/network/zeromq/DealerSocket.hpp"
 #include "opentxs/network/zeromq/FrameIterator.hpp"
 #include "opentxs/network/zeromq/Frame.hpp"
 #include "opentxs/network/zeromq/ListenCallback.hpp"
 #include "opentxs/network/zeromq/Message.hpp"
 
+#include "network/zeromq/curve/Client.hpp"
+#include "Bidirectional.hpp"
+#include "Send.hpp"
+#include "Socket.hpp"
+
 #include <zmq.h>
+
+#include "Dealer.hpp"
 
 template class opentxs::Pimpl<opentxs::network::zeromq::DealerSocket>;
 
-#define OT_METHOD "opentxs::network::zeromq::implementation::DealerSocket::"
+#define OT_METHOD                                                              \
+    "opentxs::network::zeromq::socket::implementation::DealerSocket::"
 
 namespace opentxs::network::zeromq
 {
@@ -27,29 +34,27 @@ OTZMQDealerSocket DealerSocket::Factory(
     const ListenCallback& callback)
 {
     return OTZMQDealerSocket(
-        new implementation::DealerSocket(context, direction, callback));
+        new socket::implementation::DealerSocket(context, direction, callback));
 }
 }  // namespace opentxs::network::zeromq
 
-namespace opentxs::network::zeromq::implementation
+namespace opentxs::network::zeromq::socket::implementation
 {
 DealerSocket::DealerSocket(
     const zeromq::Context& context,
     const Socket::Direction direction,
     const zeromq::ListenCallback& callback)
-    : ot_super(context, SocketType::Dealer, direction)
-    , CurveClient(lock_, socket_)
-    , Bidirectional(context, lock_, running_, socket_, true)
+    : _Bidirectional(context, SocketType::Dealer, direction, true)
+    , Client(this->get())
     , callback_(callback)
 {
+    init();
 }
 
 DealerSocket* DealerSocket::clone() const
 {
     return new DealerSocket(context_, direction_, callback_);
 }
-
-bool DealerSocket::have_callback() const { return true; }
 
 void DealerSocket::process_incoming(
     const Lock& lock,
@@ -64,40 +69,5 @@ void DealerSocket::process_incoming(
     LogDetail(OT_METHOD)(__FUNCTION__)(": Done.").Flush();
 }
 
-bool DealerSocket::Send(opentxs::Data& input) const
-{
-    return Send(Message::Factory(input));
-}
-
-bool DealerSocket::Send(const std::string& input) const
-{
-    auto copy = input;
-
-    return Send(Message::Factory(copy));
-}
-
-bool DealerSocket::Send(zeromq::Message& message) const
-{
-    return queue_message(message);
-}
-
-bool DealerSocket::SetSocksProxy(const std::string& proxy) const
-{
-    return set_socks_proxy(proxy);
-}
-
-bool DealerSocket::Start(const std::string& endpoint) const
-{
-    Lock lock(lock_);
-
-    if (Socket::Direction::Connect == direction_) {
-
-        return start_client(lock, endpoint);
-    } else {
-
-        return Socket::bind(lock, endpoint);
-    }
-}
-
-DealerSocket::~DealerSocket() { shutdown(); }
-}  // namespace opentxs::network::zeromq::implementation
+DealerSocket::~DealerSocket() SHUTDOWN
+}  // namespace opentxs::network::zeromq::socket::implementation

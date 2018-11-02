@@ -13,13 +13,15 @@
 #include "opentxs/network/zeromq/zap/Reply.hpp"
 #include "opentxs/network/zeromq/zap/Request.hpp"
 
-#include "network/zeromq/CurveServer.hpp"
-#include "network/zeromq/Receiver.hpp"
-#include "network/zeromq/Socket.hpp"
+#include "network/zeromq/curve/Server.hpp"
+#include "network/zeromq/socket/Receiver.tpp"
+#include "network/zeromq/socket/Socket.hpp"
 
 #include "Handler.hpp"
 
 template class opentxs::Pimpl<opentxs::network::zeromq::zap::Handler>;
+template class opentxs::network::zeromq::socket::implementation::Receiver<
+    opentxs::network::zeromq::zap::Request>;
 
 #define ZAP_ENDPOINT "inproc://zeromq.zap.01"
 
@@ -38,13 +40,17 @@ OTZMQZAPHandler Handler::Factory(
 namespace opentxs::network::zeromq::zap::implementation
 {
 Handler::Handler(const zeromq::Context& context, const zap::Callback& callback)
-    : ot_super(context, SocketType::Router, Socket::Direction::Bind)
-    , CurveServer(lock_, socket_)
-    , Receiver(lock_, running_, socket_, true)
+    : Receiver(context, SocketType::Router, Socket::Direction::Bind, true)
+    , Server(this->get())
     , callback_(callback)
 {
-    Lock lock(lock_);
-    const auto running = bind(lock, ZAP_ENDPOINT);
+    init();
+}
+
+void Handler::init()
+{
+    Receiver::init();
+    const auto running = Receiver::Start(ZAP_ENDPOINT);
 
     OT_ASSERT(running);
 
@@ -58,5 +64,5 @@ void Handler::process_incoming(const Lock& lock, zap::Request& message)
     send_message(lock, reply);
 }
 
-Handler::~Handler() { shutdown(); }
+Handler::~Handler() SHUTDOWN
 }  // namespace opentxs::network::zeromq::zap::implementation

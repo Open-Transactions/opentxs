@@ -13,43 +13,29 @@
 
 #include <zmq.h>
 
-#include "Message.hpp"
+#include "network/zeromq/Message.hpp"
 #include "Socket.hpp"
 
 #include "Bidirectional.hpp"
 
 #define CALLBACK_WAIT_MILLISECONDS 50
-#define POLL_MILLISECONDS 1000
+#define POLL_MILLISECONDS 100
 
 #define OT_METHOD "opentxs::network::zeromq::implementation::Bidirectional::"
 
-namespace opentxs::network::zeromq::implementation
+namespace opentxs::network::zeromq::socket::implementation
 {
 Bidirectional::Bidirectional(
     const zeromq::Context& context,
-    std::mutex& lock,
-    const Flag& running,
-    void* socket,
+    const SocketType type,
+    const zeromq::Socket::Direction direction,
     const bool startThread)
-    : Receiver(lock, running, socket, false)
+    : Receiver(context, type, direction, false)
     , push_socket_{zmq_socket(context, ZMQ_PUSH)}
+    , bidirectional_start_thread_(startThread)
     , endpoint_{Socket::random_inproc_endpoint()}
     , pull_socket_{zmq_socket(context, ZMQ_PULL)}
 {
-    OT_ASSERT(nullptr != pull_socket_);
-    OT_ASSERT(nullptr != push_socket_);
-
-    auto bound = bind(pull_socket_, receiver_lock_, endpoint_);
-
-    OT_ASSERT(false != bound);
-
-    auto connected = connect(push_socket_, receiver_lock_, endpoint_);
-
-    OT_ASSERT(false != connected);
-
-    if (startThread) {
-        receiver_thread_ = std::thread(&Bidirectional::thread, this);
-    }
 }
 
 bool Bidirectional::apply_timeouts(void* socket, std::mutex& socket_mutex) const
@@ -109,12 +95,28 @@ bool Bidirectional::connect(
     return (0 == zmq_connect(socket, endpoint.c_str()));
 }
 
-bool Bidirectional::process_pull_socket()
+void Bidirectional::init()
 {
-    Lock lock(receiver_lock_, std::try_to_lock);
+    OT_ASSERT(nullptr != pull_socket_);
+    OT_ASSERT(nullptr != push_socket_);
 
-    if (!lock.owns_lock()) { return false; }
+    auto bound = bind(pull_socket_, lock_, endpoint_);
 
+    OT_ASSERT(false != bound);
+
+    auto connected = connect(push_socket_, lock_, endpoint_);
+
+    OT_ASSERT(false != connected);
+
+    Socket::init();
+
+    if (bidirectional_start_thread_) {
+        receiver_thread_ = std::thread(&Bidirectional::thread, this);
+    }
+}
+
+bool Bidirectional::process_pull_socket(const Lock& lock)
+{
     auto msg = Message::Factory();
     const auto received = Socket::receive_message(lock, pull_socket_, msg);
 
@@ -125,45 +127,50 @@ bool Bidirectional::process_pull_socket()
     return sent;
 }
 
-bool Bidirectional::process_receiver_socket()
+bool Bidirectional::process_receiver_socket(const Lock& lock)
 {
-    Lock lock(receiver_lock_, std::try_to_lock);
-
-    if (!lock.owns_lock()) { return false; }
-
     auto reply = Message::Factory();
-    const auto received =
-        Socket::receive_message(lock, receiver_socket_, reply);
+    const auto received = Socket::receive_message(lock, socket_, reply);
 
     if (false == received) { return false; }
 
     process_incoming(lock, reply);
-    lock.unlock();
 
     return true;
 }
 
 bool Bidirectional::queue_message(zeromq::Message& message) const
 {
-    OT_ASSERT(nullptr != push_socket_);
-
     Lock lock(send_lock_);
 
-    if (false == receiver_run_) { return false; }
+    if (false == running_.get()) { return false; }
+
+    OT_ASSERT(nullptr != push_socket_);
 
     return Socket::send_message(lock, push_socket_, message);
 }
 
 bool Bidirectional::send(const Lock& lock, zeromq::Message& message)
 {
-    return Socket::send_message(lock, receiver_socket_, message);
+    return Socket::send_message(lock, socket_, message);
+}
+
+void Bidirectional::shutdown(const Lock& lock)
+{
+    Lock send(send_lock_);
+    Socket::shutdown(lock);
+
+    if (running_.get()) {
+        zmq_disconnect(push_socket_, endpoint_.c_str());
+        zmq_unbind(pull_socket_, endpoint_.c_str());
+    }
 }
 
 void Bidirectional::thread()
 {
     LogVerbose(OT_METHOD)(__FUNCTION__)(": Starting listener").Flush();
 
-    while (receiver_run_) {
+    while (running_.get()) {
         if (have_callback()) { break; }
 
         Log::Sleep(std::chrono::milliseconds(CALLBACK_WAIT_MILLISECONDS));
@@ -171,12 +178,20 @@ void Bidirectional::thread()
 
     LogVerbose(OT_METHOD)(__FUNCTION__)(": Callback ready").Flush();
     zmq_pollitem_t poll[2];
+    poll[0].socket = socket_;
+    poll[0].events = ZMQ_POLLIN;
+    poll[1].socket = pull_socket_;
+    poll[1].events = ZMQ_POLLIN;
 
-    while (receiver_run_) {
-        poll[0].socket = receiver_socket_;
-        poll[0].events = ZMQ_POLLIN;
-        poll[1].socket = pull_socket_;
-        poll[1].events = ZMQ_POLLIN;
+    while (running_.get()) {
+        Lock lock(lock_, std::try_to_lock);
+
+        if (false == lock.owns_lock()) { continue; }
+
+        std::string endpoint{};
+
+        while (start_.Pop(endpoint)) { Socket::start(lock, endpoint); }
+
         const auto events = zmq_poll(poll, 2, POLL_MILLISECONDS);
 
         if (0 == events) {
@@ -194,23 +209,16 @@ void Bidirectional::thread()
         }
 
         bool processed = true;
+
         if (ZMQ_POLLIN == poll[0].revents) {
-            processed = process_receiver_socket();
+            processed = process_receiver_socket(lock);
         }
 
-        if (false != processed && ZMQ_POLLIN == poll[1].revents) {
-            processed = process_pull_socket();
+        if (processed && ZMQ_POLLIN == poll[1].revents) {
+            processed = process_pull_socket(lock);
         }
-
-        if (false == processed) { return; }
     }
 
     LogVerbose(OT_METHOD)(__FUNCTION__)(": Shutting down").Flush();
 }
-
-Bidirectional::~Bidirectional()
-{
-    zmq_disconnect(push_socket_, endpoint_.c_str());
-    zmq_unbind(pull_socket_, endpoint_.c_str());
-}
-}  // namespace opentxs::network::zeromq::implementation
+}  // namespace opentxs::network::zeromq::socket::implementation

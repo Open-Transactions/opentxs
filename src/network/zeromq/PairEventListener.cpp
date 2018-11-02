@@ -30,15 +30,13 @@ PairEventListener::PairEventListener(
     : ot_super(context, callback)
     , instance_(instance)
 {
-    Lock lock(lock_);
     const auto endpoint = context_.BuildEndpoint(
         PAIR_EVENT_ENDPOINT_PATH, instance, PAIR_EVENT_ENDPOINT_VERSION);
-    const bool started = start_client(lock, endpoint);
+    const bool started = Start(endpoint);
 
     OT_ASSERT(started)
 
-    LogVerbose(OT_METHOD)(__FUNCTION__)(": Subscriber listening on ")(endpoint)
-        .Flush();
+    LogVerbose(OT_METHOD)(__FUNCTION__)(": listening on ")(endpoint).Flush();
 }
 
 PairEventListener* PairEventListener::clone() const
@@ -48,6 +46,4 @@ PairEventListener* PairEventListener::clone() const
         dynamic_cast<const zeromq::PairEventCallback&>(callback_),
         instance_);
 }
-
-PairEventListener::~PairEventListener() { shutdown(); }
 }  // namespace opentxs::network::zeromq::implementation

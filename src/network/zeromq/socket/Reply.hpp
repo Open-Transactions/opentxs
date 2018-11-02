@@ -5,29 +5,19 @@
 
 #pragma once
 
-#include "opentxs/Forward.hpp"
+#include "Internal.hpp"
 
-#include "opentxs/network/zeromq/ReplySocket.hpp"
-
-#include "CurveServer.hpp"
-#include "Receiver.hpp"
-#include "Socket.hpp"
-
-namespace opentxs::network::zeromq::implementation
+namespace opentxs::network::zeromq::socket::implementation
 {
-class ReplySocket : virtual public zeromq::ReplySocket,
-                    public Socket,
-                    CurveServer,
-                    Receiver<zeromq::Message>
+class ReplySocket final : virtual public zeromq::ReplySocket,
+                          public Receiver<zeromq::Message>,
+                          zeromq::curve::implementation::Server
 {
 public:
-    bool Start(const std::string& endpoint) const override;
-
     virtual ~ReplySocket();
 
 private:
     friend opentxs::network::zeromq::ReplySocket;
-    typedef Socket ot_super;
 
     const ReplyCallback& callback_;
 
@@ -46,4 +36,4 @@ private:
     ReplySocket& operator=(const ReplySocket&) = delete;
     ReplySocket& operator=(ReplySocket&&) = delete;
 };
-}  // namespace opentxs::network::zeromq::implementation
+}  // namespace opentxs::network::zeromq::socket::implementation

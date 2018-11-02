@@ -5,45 +5,49 @@
 
 #include "stdafx.hpp"
 
-#include "RequestSocket.hpp"
 #include "opentxs/core/Log.hpp"
 #include "opentxs/network/zeromq/FrameIterator.hpp"
 #include "opentxs/network/zeromq/Frame.hpp"
 #include "opentxs/network/zeromq/Message.hpp"
+#include "opentxs/network/zeromq/RequestSocket.hpp"
 #include "opentxs/OT.hpp"
 
+#include "network/zeromq/curve/Client.hpp"
+#include "network/zeromq/Message.hpp"
+#include "Sender.hpp"
+
 #include <zmq.h>
-#include "Message.hpp"
+
+#include "Request.hpp"
 
 template class opentxs::Pimpl<opentxs::network::zeromq::RequestSocket>;
 
 #define POLL_MILLISECONDS 1000
 
-#define OT_METHOD "opentxs::network::zeromq::implementation::RequestSocket::"
+#define OT_METHOD                                                              \
+    "opentxs::network::zeromq::socket::implementation::RequestSocket::"
 
 namespace opentxs::network::zeromq
 {
 OTZMQRequestSocket RequestSocket::Factory(const class Context& context)
 {
     return OTZMQRequestSocket(
-        new implementation::RequestSocket(context, OT::Running()));
+        new socket::implementation::RequestSocket(context));
 }
 }  // namespace opentxs::network::zeromq
 
-namespace opentxs::network::zeromq::implementation
+namespace opentxs::network::zeromq::socket::implementation
 {
-RequestSocket::RequestSocket(
-    const zeromq::Context& context,
-    const Flag& running)
-    : ot_super(context, SocketType::Request, Socket::Direction::Connect)
-    , CurveClient(lock_, socket_)
-    , running_(running)
+RequestSocket::RequestSocket(const zeromq::Context& context)
+    : Sender(context, SocketType::Request, Socket::Direction::Connect)
+    , Client(this->get())
 {
+    init();
 }
 
 RequestSocket* RequestSocket::clone() const
 {
-    return new RequestSocket(context_, running_);
+    return new RequestSocket(context_);
 }
 
 Socket::SendResult RequestSocket::SendRequest(opentxs::Data& input) const
@@ -63,12 +67,9 @@ Socket::SendResult RequestSocket::SendRequest(zeromq::Message& request) const
     OT_ASSERT(nullptr != socket_);
 
     Lock lock(lock_);
-
     SendResult output{opentxs::SendResult::ERROR, Message::Factory()};
     auto& status = output.first;
     auto& reply = output.second;
-
-    if (false == running_) { return output; }
 
     if (false == send_message(lock, request)) { return output; }
 
@@ -93,23 +94,16 @@ bool RequestSocket::SetSocksProxy(const std::string& proxy) const
     return set_socks_proxy(proxy);
 }
 
-bool RequestSocket::Start(const std::string& endpoint) const
-{
-    Lock lock(lock_);
-
-    return start_client(lock, endpoint);
-}
-
 bool RequestSocket::wait(const Lock& lock) const
 {
     OT_ASSERT(verify_lock(lock))
 
     const auto start = std::chrono::system_clock::now();
     zmq_pollitem_t poll[1];
+    poll[0].socket = socket_;
+    poll[0].events = ZMQ_POLLIN;
 
-    while (running_) {
-        poll[0].socket = socket_;
-        poll[0].events = ZMQ_POLLIN;
+    while (running_.get()) {
         const auto events = zmq_poll(poll, 1, POLL_MILLISECONDS);
 
         if (0 == events) {
@@ -139,5 +133,5 @@ bool RequestSocket::wait(const Lock& lock) const
     return false;
 }
 
-RequestSocket::~RequestSocket() { shutdown(); }
-}  // namespace opentxs::network::zeromq::implementation
+RequestSocket::~RequestSocket() SHUTDOWN
+}  // namespace opentxs::network::zeromq::socket::implementation

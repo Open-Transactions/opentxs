@@ -5,8 +5,6 @@
 
 #include "stdafx.hpp"
 
-#include "SubscribeSocket.hpp"
-
 #include "opentxs/core/Log.hpp"
 #include "opentxs/network/zeromq/ListenCallback.hpp"
 #include "opentxs/network/zeromq/Frame.hpp"
@@ -16,9 +14,12 @@
 
 #include <zmq.h>
 
+#include "Subscribe.hpp"
+
 template class opentxs::Pimpl<opentxs::network::zeromq::SubscribeSocket>;
 
-#define OT_METHOD "opentxs::network::zeromq::implementation::SubscribeSocket::"
+#define OT_METHOD                                                              \
+    "opentxs::network::zeromq::socket::implementation::SubscribeSocket::"
 
 namespace opentxs::network::zeromq
 {
@@ -27,24 +28,20 @@ OTZMQSubscribeSocket SubscribeSocket::Factory(
     const ListenCallback& callback)
 {
     return OTZMQSubscribeSocket(
-        new implementation::SubscribeSocket(context, callback));
+        new socket::implementation::SubscribeSocket(context, callback));
 }
 }  // namespace opentxs::network::zeromq
 
-namespace opentxs::network::zeromq::implementation
+namespace opentxs::network::zeromq::socket::implementation
 {
 SubscribeSocket::SubscribeSocket(
     const zeromq::Context& context,
     const zeromq::ListenCallback& callback)
-    : ot_super(context, SocketType::Subscribe, Socket::Direction::Connect)
-    , CurveClient(lock_, socket_)
-    , Receiver(lock_, running_, socket_, true)
+    : Receiver(context, SocketType::Subscribe, Socket::Direction::Connect, true)
+    , Client(this->get())
     , callback_(callback)
 {
-    // subscribe to all messages until filtering is implemented
-    const auto set = zmq_setsockopt(socket_, ZMQ_SUBSCRIBE, "", 0);
-
-    OT_ASSERT(0 == set);
+    init();
 }
 
 SubscribeSocket* SubscribeSocket::clone() const
@@ -53,6 +50,15 @@ SubscribeSocket* SubscribeSocket::clone() const
 }
 
 bool SubscribeSocket::have_callback() const { return true; }
+
+void SubscribeSocket::init()
+{
+    // subscribe to all messages until filtering is implemented
+    const auto set = zmq_setsockopt(socket_, ZMQ_SUBSCRIBE, "", 0);
+    Receiver::init();
+
+    OT_ASSERT(0 == set);
+}
 
 void SubscribeSocket::process_incoming(const Lock& lock, Message& message)
 {
@@ -70,12 +76,5 @@ bool SubscribeSocket::SetSocksProxy(const std::string& proxy) const
     return set_socks_proxy(proxy);
 }
 
-bool SubscribeSocket::Start(const std::string& endpoint) const
-{
-    Lock lock(lock_);
-
-    return start_client(lock, endpoint);
-}
-
-SubscribeSocket::~SubscribeSocket() { shutdown(); }
-}  // namespace opentxs::network::zeromq::implementation
+SubscribeSocket::~SubscribeSocket() SHUTDOWN
+}  // namespace opentxs::network::zeromq::socket::implementation

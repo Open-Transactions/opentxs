@@ -5,8 +5,6 @@
 
 #include "stdafx.hpp"
 
-#include "Socket.hpp"
-
 #include "opentxs/core/Log.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/network/zeromq/Frame.hpp"
@@ -17,11 +15,13 @@
 
 #include <random>
 
+#include "Socket.hpp"
+
 #define INPROC_PREFIX "inproc://opentxs/"
 
-#define OT_METHOD "opentxs::network::zeromq::implementation::Socket::"
+#define OT_METHOD "opentxs::network::Socket::"
 
-namespace opentxs::network::zeromq::implementation
+namespace opentxs::network::zeromq::socket::implementation
 {
 const std::map<SocketType, int> Socket::types_{
     {SocketType::Request, ZMQ_REQ},
@@ -96,10 +96,14 @@ bool Socket::bind(const Lock& lock, const std::string& endpoint) const
     if (false == running_.get()) { return false; }
 
     apply_timeouts(lock);
-
     const auto output = (0 == zmq_bind(socket_, endpoint.c_str()));
 
-    if (output) { endpoints_.emplace_back(endpoint); }
+    if (output) {
+        endpoints_.emplace(endpoint);
+    } else {
+        std::cerr << OT_METHOD << __FUNCTION__ << ": "
+                  << zmq_strerror(zmq_errno()) << std::endl;
+    }
 
     return output;
 }
@@ -109,21 +113,27 @@ bool Socket::connect(const Lock& lock, const std::string& endpoint) const
     if (false == running_.get()) { return false; }
 
     apply_timeouts(lock);
-
     const auto output = (0 == zmq_connect(socket_, endpoint.c_str()));
 
-    if (output) { endpoints_.emplace_back(endpoint); }
+    if (output) {
+        endpoints_.emplace(endpoint);
+    } else {
+        std::cerr << OT_METHOD << __FUNCTION__ << ": "
+                  << zmq_strerror(zmq_errno()) << std::endl;
+    }
 
     return output;
 }
 
 bool Socket::Close() const
 {
-    OT_ASSERT(nullptr != socket_);
-
     Lock lock(lock_);
 
-    return (0 == zmq_close(socket_));
+    if (nullptr == socket_) { return false; }
+
+    const_cast<Socket*>(this)->shutdown(lock);
+
+    return true;
 }
 
 bool Socket::receive_message(
@@ -238,11 +248,8 @@ bool Socket::SetTimeouts(
     return apply_timeouts(lock);
 }
 
-void Socket::shutdown()
+void Socket::shutdown(const Lock& lock)
 {
-    Lock lock(lock_);
-    running_->Off();
-
     for (const auto& endpoint : endpoints_) {
         if (Socket::Direction::Connect == direction_) {
             zmq_disconnect(socket_, endpoint.c_str());
@@ -252,6 +259,26 @@ void Socket::shutdown()
     }
 
     endpoints_.clear();
+
+    if (nullptr != socket_) { zmq_close(socket_); }
+}
+
+bool Socket::Start(const std::string& endpoint) const
+{
+    Lock lock(lock_);
+
+    return start(lock, endpoint);
+}
+
+bool Socket::start(const Lock& lock, const std::string& endpoint) const
+{
+    if (Socket::Direction::Connect == direction_) {
+
+        return start_client(lock, endpoint);
+    } else {
+
+        return bind(lock, endpoint);
+    }
 }
 
 bool Socket::start_client(const Lock& lock, const std::string& endpoint) const
@@ -269,11 +296,4 @@ bool Socket::start_client(const Lock& lock, const std::string& endpoint) const
 }
 
 SocketType Socket::Type() const { return type_; }
-
-Socket::~Socket()
-{
-    Lock lock(lock_);
-
-    if (nullptr != socket_) { zmq_close(socket_); }
-}
-}  // namespace opentxs::network::zeromq::implementation
+}  // namespace opentxs::network::zeromq::socket::implementation

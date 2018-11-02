@@ -9,11 +9,13 @@
 
 #include "opentxs/network/zeromq/CurveServer.hpp"
 
+#include "network/zeromq/socket/Socket.hpp"
+
 #include <mutex>
 
-namespace opentxs::network::zeromq::implementation
+namespace opentxs::network::zeromq::curve::implementation
 {
-class CurveServer : virtual public zeromq::CurveServer
+class Server : virtual public zeromq::CurveServer
 {
 public:
     bool SetDomain(const std::string& domain) const override;
@@ -23,18 +25,17 @@ public:
 protected:
     bool set_private_key(const void* key, const std::size_t keySize) const;
 
-    CurveServer(std::mutex& lock, void* socket);
-    ~CurveServer();
+    Server(zeromq::socket::implementation::Socket& socket);
+
+    virtual ~Server() = default;
 
 private:
-    std::mutex& server_curve_lock_;
-    // Not owned by this class
-    void* server_curve_socket_{nullptr};
+    zeromq::socket::implementation::Socket& parent_;
 
-    CurveServer() = delete;
-    CurveServer(const CurveServer&) = delete;
-    CurveServer(CurveServer&&) = delete;
-    CurveServer& operator=(const CurveServer&) = delete;
-    CurveServer& operator=(CurveServer&&) = delete;
+    Server() = delete;
+    Server(const Server&) = delete;
+    Server(Server&&) = delete;
+    Server& operator=(const Server&) = delete;
+    Server& operator=(Server&&) = delete;
 };
-}  // namespace opentxs::network::zeromq::implementation
+}  // namespace opentxs::network::zeromq::curve::implementation

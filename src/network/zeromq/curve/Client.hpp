@@ -7,15 +7,16 @@
 
 #include "Internal.hpp"
 
+#include "opentxs/network/zeromq/CurveClient.hpp"
 #include "opentxs/Types.hpp"
 
-#include "opentxs/network/zeromq/CurveClient.hpp"
+#include "network/zeromq/socket/Socket.hpp"
 
 #include <mutex>
 
-namespace opentxs::network::zeromq::implementation
+namespace opentxs::network::zeromq::curve::implementation
 {
-class CurveClient : virtual public zeromq::CurveClient
+class Client : virtual public zeromq::CurveClient
 {
 public:
     bool SetKeysZ85(
@@ -29,13 +30,12 @@ protected:
     bool set_public_key(const ServerContract& contract) const;
     bool set_public_key(const Data& key) const;
 
-    CurveClient(std::mutex& lock, void* socket);
-    ~CurveClient();
+    Client(zeromq::socket::implementation::Socket& socket);
+
+    virtual ~Client() = default;
 
 private:
-    std::mutex& client_curve_lock_;
-    // Not owned by this class
-    void* client_curve_socket_{nullptr};
+    zeromq::socket::implementation::Socket& parent_;
 
     bool set_local_keys() const;
     bool set_local_keys(
@@ -48,10 +48,10 @@ private:
         const std::size_t publicKeySize) const;
     bool set_remote_key(const void* key, const std::size_t size) const;
 
-    CurveClient() = delete;
-    CurveClient(const CurveClient&) = delete;
-    CurveClient(CurveClient&&) = delete;
-    CurveClient& operator=(const CurveClient&) = delete;
-    CurveClient& operator=(CurveClient&&) = delete;
+    Client() = delete;
+    Client(const Client&) = delete;
+    Client(Client&&) = delete;
+    Client& operator=(const Client&) = delete;
+    Client& operator=(Client&&) = delete;
 };
-}  // namespace opentxs::network::zeromq::implementation
+}  // namespace opentxs::network::zeromq::curve::implementation

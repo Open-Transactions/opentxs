@@ -8,9 +8,8 @@
 namespace opentxs::network::zeromq::zap::implementation
 {
 class Handler final : virtual zap::Handler,
-                      zeromq::implementation::Socket,
-                      zeromq::implementation::CurveServer,
-                      zeromq::implementation::Receiver<zap::Request>
+                      zeromq::socket::implementation::Receiver<zap::Request>,
+                      zeromq::curve::implementation::Server
 {
 public:
     bool Start(const std::string& endpoint) const override { return false; }
@@ -19,13 +18,13 @@ public:
 
 private:
     friend zap::Handler;
-    typedef Socket ot_super;
 
     const zap::Callback& callback_;
 
     Handler* clone() const override { return new Handler(context_, callback_); }
     bool have_callback() const override { return true; }
 
+    void init() override;
     void process_incoming(const Lock& lock, zap::Request& message) override;
 
     Handler(const zeromq::Context& context, const zap::Callback& callback);

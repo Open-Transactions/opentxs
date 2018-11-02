@@ -8,11 +8,21 @@ set(MODULE_NAME opentxs-network-zeromq)
 add_subdirectory(zap)
 
 set(cxx-sources
-  Bidirectional.cpp
+  curve/Client.cpp
+  curve/Server.cpp
+  socket/Bidirectional.cpp
+  socket/Dealer.cpp
+  socket/Pair.cpp
+  socket/Publish.cpp
+  socket/Pull.cpp
+  socket/Push.cpp
+  socket/Reply.cpp
+  socket/Request.cpp
+  socket/Router.cpp
+  socket/Sender.cpp
+  socket/Socket.cpp
+  socket/Subscribe.cpp
   Context.cpp
-  CurveClient.cpp
-  CurveServer.cpp
-  DealerSocket.cpp
   Frame.cpp
   FrameIterator.cpp
   FrameSection.cpp
@@ -22,17 +32,8 @@ set(cxx-sources
   PairEventCallback.cpp
   PairEventCallbackSwig.cpp
   PairEventListener.cpp
-  PairSocket.cpp
-  PublishSocket.cpp
-  PullSocket.cpp
-  PushSocket.cpp
   Proxy.cpp
   ReplyCallback.cpp
-  ReplySocket.cpp
-  RequestSocket.cpp
-  RouterSocket.cpp
-  Socket.cpp
-  SubscribeSocket.cpp
 )
 
 file(GLOB cxx-install-headers
@@ -41,29 +42,32 @@ file(GLOB cxx-install-headers
 
 set(cxx-headers
   ${cxx-install-headers}
-  ${CMAKE_CURRENT_SOURCE_DIR}/Bidirectional.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/Context.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/CurveClient.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/CurveServer.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/DealerSocket.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/Frame.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/ListenCallback.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/ListenCallbackSwig.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/PairEventCallback.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/PairEventCallbackSwig.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/PairEventListener.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/PairSocket.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/Proxy.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/PublishSocket.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/PullSocket.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/PushSocket.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/Receiver.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/ReplyCallback.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/ReplySocket.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/RequestSocket.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/RouterSocket.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/Socket.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/SubscribeSocket.hpp
+  curve/Client.hpp
+  curve/Server.hpp
+  socket/Bidirectional.hpp
+  socket/Dealer.hpp
+  socket/Pair.hpp
+  socket/Publish.hpp
+  socket/Pull.hpp
+  socket/Push.hpp
+  socket/Receiver.hpp
+  socket/Receiver.tpp
+  socket/Reply.hpp
+  socket/Request.hpp
+  socket/Router.hpp
+  socket/Send.hpp
+  socket/Sender.hpp
+  socket/Socket.hpp
+  socket/Subscribe.hpp
+  Context.hpp
+  Frame.hpp
+  ListenCallback.hpp
+  ListenCallbackSwig.hpp
+  PairEventCallback.hpp
+  PairEventCallbackSwig.hpp
+  PairEventListener.hpp
+  Proxy.hpp
+  ReplyCallback.hpp
 )
 
 if(WIN32)
