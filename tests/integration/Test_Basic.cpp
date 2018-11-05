@@ -185,7 +185,11 @@ public:
 
         switch (counter) {
             case 0: {
-                EXPECT_FALSE(list.First()->Valid());
+            } break;  // skip
+            case 1: {
+                ASSERT_TRUE(list.First()->Valid());
+
+                // TODO check section
             } break;
             default: {
                 ASSERT_TRUE(false);
@@ -238,6 +242,8 @@ public:
             case 1: {
             } break;  // skip
             case 2: {
+            } break;  // skip
+            case 3: {
                 auto alice_paymentcode_ =
                     alice_->Factory().PaymentCode(SeedA_, 0, 1);
                 EXPECT_STREQ(
@@ -248,7 +254,9 @@ public:
 
                 const auto& alice_first_section_ = profile.First();
 
-                ASSERT_FALSE(alice_first_section_->Valid());
+                ASSERT_TRUE(alice_first_section_->Valid());
+
+                // TODO check section
             } break;
             default: {
                 ASSERT_TRUE(false);
@@ -344,9 +352,13 @@ public:
 
         switch (counter) {
             case 0: {
+            } break;  // skip
+            case 1: {
                 const auto& first = list.First();
 
-                EXPECT_FALSE(first->Valid());
+                ASSERT_TRUE(first->Valid());
+
+                // TODO check section
             } break;
             default: {
                 ASSERT_TRUE(false);
@@ -400,6 +412,8 @@ public:
             case 1: {
             } break;  // skip
             case 2: {
+            } break;  // skip
+            case 3: {
                 auto bob_paymentcode_ =
                     bob_->Factory().PaymentCode(SeedB_, 0, 1);
                 EXPECT_STREQ(
@@ -410,7 +424,9 @@ public:
 
                 const auto& bob_first_section_ = profile.First();
 
-                ASSERT_FALSE(bob_first_section_->Valid());
+                ASSERT_TRUE(bob_first_section_->Valid());
+
+                // TODO check section
             } break;
             default: {
                 ASSERT_TRUE(false);

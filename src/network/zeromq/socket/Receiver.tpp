@@ -18,9 +18,34 @@ Receiver<T>::Receiver(
     const bool startThread)
     : Socket(context, type, direction)
     , receiver_thread_()
-    , start_()
     , start_thread_(startThread)
+    , next_task_(0)
+    , task_lock_()
+    , socket_tasks_()
 {
+}
+
+template <typename T>
+int Receiver<T>::add_task(SocketCallback&& cb) const
+{
+    Lock lock(task_lock_);
+    auto [it, success] = socket_tasks_.emplace(++next_task_, std::move(cb));
+
+    OT_ASSERT(success);
+
+    return it->first;
+}
+
+template <typename T>
+bool Receiver<T>::apply_socket(SocketCallback&& cb) const
+{
+    const auto id = add_task(std::move(cb));
+
+    while (task_running(id)) {
+        Log::Sleep(std::chrono::milliseconds(RECEIVER_POLL_MILLISECONDS));
+    }
+
+    return task_result(id);
 }
 
 template <typename T>
@@ -31,6 +56,48 @@ void Receiver<T>::init()
     if (start_thread_) {
         receiver_thread_ = std::thread(&Receiver::thread, this);
     }
+}
+
+template <typename T>
+void Receiver<T>::run_tasks(const Lock& lock) const
+{
+    Lock task_lock(task_lock_);
+
+    for (auto i = socket_tasks_.begin(); i != socket_tasks_.end(); ++i) {
+        const auto& [id, cb] = *i;
+        task_result_.emplace(id, cb(lock));
+        socket_tasks_.erase(i);
+    }
+}
+
+template <typename T>
+void Receiver<T>::shutdown(const Lock& lock)
+{
+    if (receiver_thread_.joinable()) { receiver_thread_.join(); }
+
+    Socket::shutdown(lock);
+}
+
+template <typename T>
+bool Receiver<T>::task_result(const int id) const
+{
+    Lock lock(task_lock_);
+    const auto it = task_result_.find(id);
+
+    OT_ASSERT(task_result_.end() != it);
+
+    auto output = it->second;
+    task_result_.erase(it);
+
+    return output;
+}
+
+template <typename T>
+bool Receiver<T>::task_running(const int id) const
+{
+    Lock lock(task_lock_);
+
+    return (1 == socket_tasks_.count(id));
 }
 
 template <typename T>
@@ -47,14 +114,12 @@ void Receiver<T>::thread()
     poll[0].events = ZMQ_POLLIN;
 
     while (running_.get()) {
+        std::this_thread::yield();
         Lock lock(lock_, std::try_to_lock);
 
         if (false == lock.owns_lock()) { continue; }
 
-        std::string endpoint{};
-
-        while (start_.Pop(endpoint)) { Socket::start(lock, endpoint); }
-
+        run_tasks(lock);
         const auto events = zmq_poll(poll, 1, RECEIVER_POLL_MILLISECONDS);
 
         if (0 == events) { continue; }
@@ -76,28 +141,6 @@ void Receiver<T>::thread()
 
         process_incoming(lock, reply);
     }
-}
-
-template <typename T>
-void Receiver<T>::shutdown(const Lock& lock)
-{
-    if (receiver_thread_.joinable()) { receiver_thread_.join(); }
-
-    Socket::shutdown(lock);
-}
-
-template <typename T>
-bool Receiver<T>::Start(const std::string& endpoint) const
-{
-    start_.Push(endpoint);
-
-    while (running_.get() && start_.Queued(endpoint)) {
-        if (1 == endpoints_.count(endpoint)) { return true; }
-
-        Log::Sleep(std::chrono::milliseconds(RECEIVER_POLL_MILLISECONDS));
-    }
-
-    return 1 == endpoints_.count(endpoint);
 }
 
 template <typename T>

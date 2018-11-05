@@ -11,6 +11,7 @@
 #include "opentxs/core/Lockable.hpp"
 #include "opentxs/network/zeromq/Socket.hpp"
 
+#include <functional>
 #include <map>
 #include <mutex>
 #include <set>
@@ -29,6 +30,8 @@ namespace opentxs::network::zeromq::socket::implementation
 class Socket : virtual public zeromq::Socket, public Lockable
 {
 public:
+    using SocketCallback = std::function<bool(const Lock& lock)>;
+
     static bool send_message(
         const Lock& lock,
         void* socket,
@@ -42,8 +45,8 @@ public:
     SocketType Type() const override;
 
     operator void*() const override;
-    operator std::mutex&() { return lock_; }
 
+    virtual bool apply_socket(SocketCallback&& cb) const;
     bool Close() const override;
     const zeromq::Context& Context() const override { return context_; }
     bool SetTimeouts(
@@ -60,12 +63,14 @@ protected:
     const zeromq::Context& context_;
     const Socket::Direction direction_;
     void* socket_{nullptr};
-    mutable int linger_{0};
-    mutable int send_timeout_{-1};
-    mutable int receive_timeout_{-1};
+    mutable std::atomic<int> linger_{0};
+    mutable std::atomic<int> send_timeout_{-1};
+    mutable std::atomic<int> receive_timeout_{-1};
+    mutable std::mutex endpoint_lock_;
     mutable std::set<std::string> endpoints_;
     OTFlag running_;
 
+    void add_endpoint(const std::string& endpoint) const;
     bool apply_timeouts(const Lock& lock) const;
     bool bind(const Lock& lock, const std::string& endpoint) const;
     bool connect(const Lock& lock, const std::string& endpoint) const;
@@ -73,7 +78,6 @@ protected:
     bool send_message(const Lock& lock, zeromq::Message& message) const;
     bool set_socks_proxy(const std::string& proxy) const;
     bool start(const Lock& lock, const std::string& endpoint) const;
-    bool start_client(const Lock& lock, const std::string& endpoint) const;
 
     virtual void init() {}
     virtual void shutdown(const Lock& lock);

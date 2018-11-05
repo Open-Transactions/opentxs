@@ -45,6 +45,7 @@ Socket::Socket(
     , linger_(0)
     , send_timeout_(-1)
     , receive_timeout_(-1)
+    , endpoint_lock_()
     , endpoints_()
     , running_(Flag::Factory(true))
     , type_(type)
@@ -53,6 +54,19 @@ Socket::Socket(
 }
 
 Socket::operator void*() const { return socket_; }
+
+void Socket::add_endpoint(const std::string& endpoint) const
+{
+    Lock lock(endpoint_lock_);
+    endpoints_.emplace(endpoint);
+}
+
+bool Socket::apply_socket(SocketCallback&& cb) const
+{
+    Lock lock(lock_);
+
+    return cb(lock);
+}
 
 bool Socket::apply_timeouts(const Lock& lock) const
 {
@@ -93,13 +107,11 @@ bool Socket::apply_timeouts(const Lock& lock) const
 
 bool Socket::bind(const Lock& lock, const std::string& endpoint) const
 {
-    if (false == running_.get()) { return false; }
-
     apply_timeouts(lock);
     const auto output = (0 == zmq_bind(socket_, endpoint.c_str()));
 
     if (output) {
-        endpoints_.emplace(endpoint);
+        add_endpoint(endpoint);
     } else {
         std::cerr << OT_METHOD << __FUNCTION__ << ": "
                   << zmq_strerror(zmq_errno()) << std::endl;
@@ -110,13 +122,11 @@ bool Socket::bind(const Lock& lock, const std::string& endpoint) const
 
 bool Socket::connect(const Lock& lock, const std::string& endpoint) const
 {
-    if (false == running_.get()) { return false; }
-
     apply_timeouts(lock);
     const auto output = (0 == zmq_connect(socket_, endpoint.c_str()));
 
     if (output) {
-        endpoints_.emplace(endpoint);
+        add_endpoint(endpoint);
     } else {
         std::cerr << OT_METHOD << __FUNCTION__ << ": "
                   << zmq_strerror(zmq_errno()) << std::endl;
@@ -228,11 +238,14 @@ bool Socket::set_socks_proxy(const std::string& proxy) const
 {
     OT_ASSERT(nullptr != socket_);
 
-    Lock lock(lock_);
-    const auto set =
-        zmq_setsockopt(socket_, ZMQ_SOCKS_PROXY, proxy.data(), proxy.size());
+    SocketCallback cb{[&](const Lock&) -> bool {
+        const auto set = zmq_setsockopt(
+            socket_, ZMQ_SOCKS_PROXY, proxy.data(), proxy.size());
 
-    return (0 == set);
+        return (0 == set);
+    }};
+
+    return apply_socket(std::move(cb));
 }
 
 bool Socket::SetTimeouts(
@@ -240,12 +253,13 @@ bool Socket::SetTimeouts(
     const std::chrono::milliseconds& send,
     const std::chrono::milliseconds& receive) const
 {
-    Lock lock(lock_);
-    linger_ = linger.count();
-    send_timeout_ = send.count();
-    receive_timeout_ = receive.count();
+    linger_.store(linger.count());
+    send_timeout_.store(send.count());
+    receive_timeout_.store(receive.count());
+    SocketCallback cb{
+        [&](const Lock& lock) -> bool { return apply_timeouts(lock); }};
 
-    return apply_timeouts(lock);
+    return apply_socket(std::move(cb));
 }
 
 void Socket::shutdown(const Lock& lock)
@@ -265,34 +279,21 @@ void Socket::shutdown(const Lock& lock)
 
 bool Socket::Start(const std::string& endpoint) const
 {
-    Lock lock(lock_);
+    SocketCallback cb{
+        [&](const Lock& lock) -> bool { return start(lock, endpoint); }};
 
-    return start(lock, endpoint);
+    return apply_socket(std::move(cb));
 }
 
 bool Socket::start(const Lock& lock, const std::string& endpoint) const
 {
     if (Socket::Direction::Connect == direction_) {
 
-        return start_client(lock, endpoint);
+        return connect(lock, endpoint);
     } else {
 
         return bind(lock, endpoint);
     }
-}
-
-bool Socket::start_client(const Lock& lock, const std::string& endpoint) const
-{
-    OT_ASSERT(nullptr != socket_);
-
-    if (false == connect(lock, endpoint)) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Failed to connect to "
-              << endpoint << std::endl;
-
-        return false;
-    }
-
-    return true;
 }
 
 SocketType Socket::Type() const { return type_; }

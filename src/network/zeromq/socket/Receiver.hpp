@@ -33,52 +33,13 @@ template <typename T>
 class Receiver : public Socket
 {
 public:
-    bool Start(const std::string& endpoint) const override;
+    bool apply_socket(SocketCallback&& cb) const override;
 
 protected:
-    class Queue
-    {
-    public:
-        bool Queued(const std::string& value) const
-        {
-            Lock lock(lock_);
-
-            for (const auto& endpoint : queue_) {
-                if (endpoint == value) { return true; }
-            }
-
-            return false;
-        }
-
-        void Push(const std::string& in) const
-        {
-            Lock lock(lock_);
-            queue_.emplace_back(in);
-        }
-        bool Pop(std::string& out) const
-        {
-            if (0 == queue_.size()) { return false; }
-
-            Lock lock(lock_);
-            auto it = queue_.begin();
-            out = *it;
-            queue_.erase(it);
-
-            return true;
-        }
-
-        Queue() = default;
-        ~Queue() = default;
-
-    private:
-        mutable std::mutex lock_;
-        mutable std::vector<std::string> queue_;
-    };
-
     std::thread receiver_thread_{};
-    Queue start_;
 
     virtual bool have_callback() const { return false; }
+    void run_tasks(const Lock& lock) const;
 
     void init() override;
     virtual void process_incoming(const Lock& lock, T& message) = 0;
@@ -95,6 +56,14 @@ protected:
 
 private:
     const bool start_thread_{true};
+    mutable int next_task_;
+    mutable std::mutex task_lock_;
+    mutable std::map<int, SocketCallback> socket_tasks_;
+    mutable std::map<int, bool> task_result_;
+
+    int add_task(SocketCallback&& cb) const;
+    bool task_result(const int id) const;
+    bool task_running(const int id) const;
 
     Receiver() = delete;
     Receiver(const Receiver&) = delete;

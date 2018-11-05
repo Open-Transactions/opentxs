@@ -22,7 +22,7 @@
 
 template class opentxs::Pimpl<opentxs::network::zeromq::RequestSocket>;
 
-#define POLL_MILLISECONDS 1000
+#define POLL_MILLISECONDS 10
 
 #define OT_METHOD                                                              \
     "opentxs::network::zeromq::socket::implementation::RequestSocket::"
@@ -104,6 +104,7 @@ bool RequestSocket::wait(const Lock& lock) const
     poll[0].events = ZMQ_POLLIN;
 
     while (running_.get()) {
+        std::this_thread::yield();
         const auto events = zmq_poll(poll, 1, POLL_MILLISECONDS);
 
         if (0 == events) {

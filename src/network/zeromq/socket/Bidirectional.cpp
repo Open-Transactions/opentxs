@@ -184,14 +184,12 @@ void Bidirectional::thread()
     poll[1].events = ZMQ_POLLIN;
 
     while (running_.get()) {
+        std::this_thread::yield();
         Lock lock(lock_, std::try_to_lock);
 
         if (false == lock.owns_lock()) { continue; }
 
-        std::string endpoint{};
-
-        while (start_.Pop(endpoint)) { Socket::start(lock, endpoint); }
-
+        run_tasks(lock);
         const auto events = zmq_poll(poll, 2, POLL_MILLISECONDS);
 
         if (0 == events) {

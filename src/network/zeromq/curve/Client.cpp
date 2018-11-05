@@ -86,8 +86,6 @@ bool Client::SetServerPubkey(const Data& key) const
 
 bool Client::set_public_key(const ServerContract& contract) const
 {
-    Lock lock(parent_);
-
     const auto& key = contract.TransportKey();
 
     if (CURVE_KEY_BYTES != key.GetSize()) {
@@ -162,42 +160,53 @@ bool Client::set_local_keys(
     const void* publicKey,
     const std::size_t publicKeySize) const
 {
-    auto set = zmq_setsockopt(
-        parent_, ZMQ_CURVE_SECRETKEY, privateKey, privateKeySize);
+    OT_ASSERT(nullptr != parent_);
 
-    if (0 != set) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Failed to set private key."
-              << std::endl;
+    socket::implementation::Socket::SocketCallback cb{[&](const Lock&) -> bool {
+        auto set = zmq_setsockopt(
+            parent_, ZMQ_CURVE_SECRETKEY, privateKey, privateKeySize);
 
-        return false;
-    }
+        if (0 != set) {
+            LogOutput(OT_METHOD)(__FUNCTION__)(": Failed to set private key.")
+                .Flush();
 
-    set =
-        zmq_setsockopt(parent_, ZMQ_CURVE_PUBLICKEY, publicKey, publicKeySize);
+            return false;
+        }
 
-    if (0 != set) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Failed to set public key."
-              << std::endl;
+        set = zmq_setsockopt(
+            parent_, ZMQ_CURVE_PUBLICKEY, publicKey, publicKeySize);
 
-        return false;
-    }
+        if (0 != set) {
+            LogOutput(OT_METHOD)(__FUNCTION__)(": Failed to set public key.")
+                .Flush();
 
-    return true;
+            return false;
+        }
+
+        return true;
+    }};
+
+    return parent_.apply_socket(std::move(cb));
 }
 
 bool Client::set_remote_key(const void* key, const std::size_t size) const
 {
     OT_ASSERT(nullptr != parent_);
 
-    const auto set = zmq_setsockopt(parent_, ZMQ_CURVE_SERVERKEY, key, size);
+    socket::implementation::Socket::SocketCallback cb{[&](const Lock&) -> bool {
+        const auto set =
+            zmq_setsockopt(parent_, ZMQ_CURVE_SERVERKEY, key, size);
 
-    if (0 != set) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Failed to set server key."
-              << std::endl;
+        if (0 != set) {
+            LogOutput(OT_METHOD)(__FUNCTION__)(": Failed to set server key.")
+                .Flush();
 
-        return false;
-    }
+            return false;
+        }
 
-    return true;
+        return true;
+    }};
+
+    return parent_.apply_socket(std::move(cb));
 }
 }  // namespace opentxs::network::zeromq::curve::implementation

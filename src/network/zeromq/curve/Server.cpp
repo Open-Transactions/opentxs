@@ -69,27 +69,31 @@ bool Server::set_private_key(const void* key, const std::size_t keySize) const
 {
     OT_ASSERT(nullptr != parent_);
 
-    Lock lock(parent_);
-    const int server{1};
-    auto set =
-        zmq_setsockopt(parent_, ZMQ_CURVE_SERVER, &server, sizeof(server));
+    socket::implementation::Socket::SocketCallback cb{[&](const Lock&) -> bool {
+        const int server{1};
+        auto set =
+            zmq_setsockopt(parent_, ZMQ_CURVE_SERVER, &server, sizeof(server));
 
-    if (0 != set) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Failed to set ZMQ_CURVE_SERVER"
-              << std::endl;
+        if (0 != set) {
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Failed to set ZMQ_CURVE_SERVER")
+                .Flush();
 
-        return false;
-    }
+            return false;
+        }
 
-    set = zmq_setsockopt(parent_, ZMQ_CURVE_SECRETKEY, key, keySize);
+        set = zmq_setsockopt(parent_, ZMQ_CURVE_SECRETKEY, key, keySize);
 
-    if (0 != set) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Failed to set private key."
-              << std::endl;
+        if (0 != set) {
+            LogOutput(OT_METHOD)(__FUNCTION__)(": Failed to set private key.")
+                .Flush();
 
-        return false;
-    }
+            return false;
+        }
 
-    return true;
+        return true;
+    }};
+
+    return parent_.apply_socket(std::move(cb));
 }
 }  // namespace opentxs::network::zeromq::curve::implementation
