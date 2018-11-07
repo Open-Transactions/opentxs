@@ -760,22 +760,24 @@ void Notary::NotarizeTransfer(
 
         // Only accept transfers with positive amounts.
         if (0 > pItem->GetAmount()) {
-            otOut << "Notary::NotarizeTransfer: Failure: Attempt to "
-                     "transfer negative balance.\n";
+	  LogNormal(OT_METHOD)(__FUNCTION__)(
+	        ": Failure: Attempt to transfer negative balance.").Flush();
         }
 
         // I'm using the operator== because it exists.
         // If the ID on the "from" account that was passed in,
         // does not match the "Acct From" ID on this transaction item
         else if (!(IDFromAccount == pItem->GetPurportedAccountID())) {
-            otOut << "Notary::NotarizeTransfer: Error: 'From' "
-                     "account ID on the transaction does not match "
-                     "'from' account ID on the transaction item.\n";
+            LogNormal(OT_METHOD)(__FUNCTION__)(
+                ": Error: 'From' "
+                "account ID on the transaction does not match "
+                "'from' account ID on the transaction item.").Flush();
         }
         // ok so the IDs match. Does the destination account exist?
         else if (false == bool(destinationAccount)) {
-            otOut << "Notary::NotarizeTransfer: ERROR verifying "
-                     "existence of the 'to' account.\n";
+            LogNormal(OT_METHOD)(__FUNCTION__)(
+                ": ERROR verifying "
+                "existence of the 'to' account.").Flush();
         }
         // Is the destination a legitimate other user's acct, or is it just an
         // internal server account?
@@ -784,9 +786,10 @@ void Notary::NotarizeTransfer(
         // and may not be recipients to user transfers...)
         //
         else if (destinationAccount.get().IsInternalServerAcct()) {
-            otOut << "Notary::NotarizeTransfer: Failure: Destination "
-                     "account is used internally by the server, and is "
-                     "not a valid recipient for this transaction.\n";
+            LogNormal(OT_METHOD)(__FUNCTION__)(
+                ": Failure: Destination "
+                "account is used internally by the server, and is "
+                "not a valid recipient for this transaction.").Flush();
         }
         // Are both of the accounts of the same Asset Type?
         else if (!(theFromAccount.get().GetInstrumentDefinitionID() ==
@@ -924,7 +927,7 @@ void Notary::NotarizeTransfer(
                     originType::not_applicable,
                     lNewTransactionNumber)};
 
-                OT_ASSERT(false != bool(pTEMPOutboxTransaction));
+                    OT_ASSERT(false != bool(pTEMPOutboxTransaction));
 
                 auto pOutboxTransaction{manager_.Factory().Transaction(
                     *theFromOutbox,
@@ -1343,12 +1346,15 @@ void Notary::NotarizeWithdrawal(
               pItem->GetPurportedAccountID())) {  // TODO see if this is already
                                                   // verified by the caller
                                                   // function and if so, remove.
-            otOut << "Error: Account ID does not match account ID on "
-                     "the withdrawal item.\n";
+	  LogNormal(OT_METHOD)(__FUNCTION__)(
+	        ": Error: Account ID does not match account ID on "
+                "the withdrawal item.").Flush();
         } else if (nullptr == pInbox) {
-            otErr << "Error loading or verifying inbox.\n";
+            LogNormal(OT_METHOD)(__FUNCTION__)(
+            ": Error loading or verifying inbox.").Flush();
         } else if (nullptr == pOutbox) {
-            otErr << "Error loading or verifying outbox.\n";
+            LogNormal(OT_METHOD)(__FUNCTION__)(
+            ": Error loading or verifying outbox.").Flush();
         }
         // The server will already have a special account for issuing vouchers.
         // Actually, a list of them --
@@ -1591,15 +1597,17 @@ void Notary::NotarizeWithdrawal(
         ExclusiveAccount pMintCashReserveAcct{};
 
         if (0 > pItem->GetAmount()) {
-            otOut << "Attempt to withdraw a negative amount.\n";
+            LogNormal(OT_METHOD)(__FUNCTION__)(
+            ": Attempt to withdraw a negative amount.").Flush();
         }
         // If the ID on the "from" account that was passed in,
         // does not match the "Acct From" ID on this transaction item
         //
         else if (ACCOUNT_ID != pItem->GetPurportedAccountID()) {
-            otOut << "Error: 'From' account ID on the transaction does "
-                     "not match 'from' account ID on the withdrawal "
-                     "item.\n";
+            LogNormal(OT_METHOD)(__FUNCTION__)(
+                ": Error: 'From' account ID on the transaction does "
+                "not match 'from' account ID on the withdrawal "
+                "item.").Flush();
         } else if (nullptr == pInbox) {
             otErr << "Error loading or verifying inbox.\n";
         } else if (nullptr == pOutbox) {
@@ -3232,9 +3240,10 @@ void Notary::NotarizePaymentPlan(
                     else if (
                         bCancelling &&
                         !pPlan->VerifySignature(*rContext.It().Nym())) {
-                        otOut << "ERROR verifying Recipient's "
-                                 "signature on Payment Plan.\n";
-                    } else {
+                        LogNormal(OT_METHOD)(__FUNCTION__)(
+                            ": ERROR verifying Recipient's "
+                            "signature on Payment Plan.").Flush();
+                        } else {
                         // Verify that BOTH of the Recipient's transaction
                         // numbers (opening and
                         // closing) are available for use.
@@ -4513,9 +4522,10 @@ void Notary::NotarizeCancelCronItem(
             // If the ID on the "from" account that was passed in,
             // does not match the "Acct From" ID on this transaction item
             if (!(ASSET_ACCT_ID == pItem->GetPurportedAccountID())) {
-                otOut << "Error: Asset account ID on the transaction "
-                         "does not match asset account "
-                         "ID on the transaction item.\n";
+                LogNormal(OT_METHOD)(__FUNCTION__)(
+                    ": Error: Asset account ID on the transaction "
+                    "does not match asset account "
+                    "ID on the transaction item.").Flush();
             } else  // LET'S SEE IF WE CAN REMOVE IT THEN...
             {
                 auto pCronItem =
@@ -4562,9 +4572,9 @@ void Notary::NotarizeCancelCronItem(
                     // Any transaction numbers that need to be cleared,
                     // happens inside RemoveCronItem().
                 } else {
-                    otOut << "Unable to remove Cron Item from Cron "
-                             "object "
-                             "Notary::NotarizeCancelCronItem\n";
+                    LogNormal(OT_METHOD)(__FUNCTION__)(
+                        ": Unable to remove Cron Item from Cron object ")
+                        .Flush();
                 }
             }
         }  // transaction statement verified.
@@ -4652,13 +4662,15 @@ void Notary::NotarizeExchangeBasket(
             "this transaction (All basket exchanges are "
             "disallowed in server.cfg)\n",
             strNymID->Get());
-    } else if (nullptr == pItem) {
-        otOut << "Notary::NotarizeExchangeBasket: No exchangeBasket "
-                 "item found on this transaction.\n";
-    } else if (nullptr == pBalanceItem) {
-        otOut << "Notary::NotarizeExchangeBasket: No Balance "
-                 "Agreement item found on this transaction.\n";
-    } else if ((nullptr == pInbox)) {
+            } else if (nullptr == pItem) {
+                LogNormal(OT_METHOD)(__FUNCTION__)(
+                    ": No exchangeBasket item found on "
+                    "this transaction.").Flush();
+            } else if (nullptr == pBalanceItem) {
+                LogNormal(OT_METHOD)(__FUNCTION__)(
+                    ": No Balance "
+                    "Agreement item found on this transaction.").Flush();
+            } else if ((nullptr == pInbox)) {
         otErr << "Error loading or verifying inbox.\n";
     } else if ((nullptr == pOutbox)) {
         otErr << "Error loading or verifying outbox.\n";
@@ -5008,12 +5020,9 @@ void Notary::NotarizeExchangeBasket(
                                                     break;
                                                 }
                                             } else {
-                                                otOut
-                                                    << "Notary::"
-                                                       "NotarizeExchangeBasket"
-                                                       ":"
-                                                       " Unable to Debit user "
-                                                       "account.\n";
+                                                LogNormal(OT_METHOD)(__FUNCTION__)(
+                                                    ": Unable to Debit user "
+                                                    "account.").Flush();
                                                 bSuccess = false;
                                                 break;
                                             }
@@ -5056,12 +5065,9 @@ void Notary::NotarizeExchangeBasket(
                                                     break;
                                                 }
                                             } else {
-                                                otOut
-                                                    << " Notary::"
-                                                       "NotarizeExchangeBasket"
-                                                       ":"
-                                                       " Unable to Debit "
-                                                       "server account.\n";
+                                                LogNormal(OT_METHOD)(__FUNCTION__)(
+                                                    ": Unable to Debit server "
+                                                    "account.").Flush();
                                                 bSuccess = false;
                                                 break;
                                             }
@@ -5238,11 +5244,10 @@ void Notary::NotarizeExchangeBasket(
                                         }
                                     } else {
                                         bSuccess = false;
-                                        otOut
-                                            << "Unable to Debit basket issuer "
-                                               "account, in "
-                                               "Notary::"
-                                               "NotarizeExchangeBasket\n";
+                                        LogNormal(OT_METHOD)(__FUNCTION__)(
+                                            ": Unable to Debit basket issuer "
+                                            "account, in Notary::"
+                                            "NotarizeExchangeBasket").Flush();
                                     }
                                 } else  // user is peforming exchange OUT
                                 {
@@ -5273,10 +5278,11 @@ void Notary::NotarizeExchangeBasket(
                                         }
                                     } else {
                                         bSuccess = false;
-                                        otOut << "Unable to Debit user "
-                                                 "basket account in "
-                                                 "Notary::"
-                                                 "NotarizeExchangeBasket\n";
+                                        LogNormal(OT_METHOD)(__FUNCTION__)(
+                                            ": Unable to Debit user "
+                                            "basket account in "
+                                            "Notary::"
+                                            "NotarizeExchangeBasket").Flush();
                                     }
                                 }
 
@@ -5662,22 +5668,26 @@ void Notary::NotarizeMarketOffer(
             // If the ID on the "from" account that was passed in,
             // does not match the "Acct From" ID on this transaction item
             else if (!(ASSET_ACCT_ID == pItem->GetPurportedAccountID())) {
-                otOut << "Error: Asset account ID on the transaction "
-                         "does not match asset account ID on the "
-                         "transaction item.\n";
+                LogNormal(OT_METHOD)(__FUNCTION__)(
+                    ": Error: Asset account ID on the transaction "
+                    "does not match asset account ID on the "
+                    "transaction item.").Flush();
             }
             // ok so the IDs match. Does the currency account exist?
             else if (false == bool(currencyAccount)) {
-                otOut << "ERROR verifying existence of the currency "
-                         "account in Notary::NotarizeMarketOffer\n";
+                LogNormal(OT_METHOD)(__FUNCTION__)(
+                    ": ERROR verifying existence of the currency "
+                    "account in Notary::NotarizeMarketOffer").Flush();
             } else if (!currencyAccount.get().VerifyContractID()) {
-                otOut << "ERROR verifying Contract ID on the currency "
-                         "account in Notary::NotarizeMarketOffer\n";
+                LogNormal(OT_METHOD)(__FUNCTION__)(
+                    ": ERROR verifying Contract ID on the currency "
+                    "account in Notary::NotarizeMarketOffer").Flush();
             } else if (!currencyAccount.get().VerifyOwner(
-                           context.RemoteNym())) {
-                otOut << "ERROR verifying ownership of the currency "
-                         "account in Notary::NotarizeMarketOffer\n";
-            }
+                context.RemoteNym())) {
+                LogNormal(OT_METHOD)(__FUNCTION__)(
+                    ": ERROR verifying ownership of the currency "
+                    "account in Notary::NotarizeMarketOffer").Flush();
+                }
             // Are both of the accounts of the same Asset Type?
             else if (
                 theAssetAccount.get().GetInstrumentDefinitionID() ==
@@ -5698,17 +5708,20 @@ void Notary::NotarizeMarketOffer(
             // I call VerifySignature here since VerifyContractID was
             // already called in LoadExistingAccount().
             else if (!currencyAccount.get().VerifySignature(
-                         server_.GetServerNym())) {
-                otOut << "ERROR verifying signature on the Currency "
-                         "account in Notary::NotarizeMarketOffer\n";
-            } else if (!pTrade->VerifySignature(context.RemoteNym())) {
-                otOut << "ERROR verifying signature on the Trade in "
-                         "Notary::NotarizeMarketOffer\n";
-            } else if (
-                pTrade->GetTransactionNum() != pItem->GetTransactionNum()) {
-                otOut << "ERROR bad transaction number on trade in "
-                         "Notary::NotarizeMarketOffer\n";
-            }
+                server_.GetServerNym())) {
+                LogNormal(OT_METHOD)(__FUNCTION__)(
+                    ": ERROR verifying signature on the Currency "
+                    "account in Notary::NotarizeMarketOffer").Flush();
+                } else if (!pTrade->VerifySignature(context.RemoteNym())) {
+                    LogNormal(OT_METHOD)(__FUNCTION__)(
+                        ": ERROR verifying signature on the Trade in "
+                        "Notary::NotarizeMarketOffer").Flush();
+                } else if (
+                    pTrade->GetTransactionNum() != pItem->GetTransactionNum()) {
+                    LogNormal(OT_METHOD)(__FUNCTION__)(
+                        ": ERROR bad transaction number on trade in "
+                        "Notary::NotarizeMarketOffer").Flush();
+                    }
             // The transaction number opens the market offer, but there must
             // also be a closing number for closing it.
             else if (
@@ -5717,9 +5730,10 @@ void Notary::NotarizeMarketOffer(
                 !context.VerifyIssuedNumber(pTrade->GetAssetAcctClosingNum()) ||
                 !context.VerifyIssuedNumber(
                     pTrade->GetCurrencyAcctClosingNum())) {
-                otOut << "ERROR needed 2 valid closing transaction "
-                         "numbers in Notary::NotarizeMarketOffer\n";
-            } else if (pTrade->GetNotaryID() != NOTARY_ID) {
+                LogNormal(OT_METHOD)(__FUNCTION__)(
+                    ": ERROR needed 2 valid closing transaction "
+                    "numbers in Notary::NotarizeMarketOffer").Flush();
+                    } else if (pTrade->GetNotaryID() != NOTARY_ID) {
                 const auto strID1 = String::Factory(pTrade->GetNotaryID()),
                            strID2 = String::Factory(NOTARY_ID);
                 Log::vOutput(
@@ -5808,8 +5822,9 @@ void Notary::NotarizeMarketOffer(
                 otErr << "ERROR verifying offer signature in "
                          "Notary::NotarizeMarketOffer.\n";
             } else if (!pTrade->VerifyOffer(*theOffer)) {
-                otOut << "FAILED verifying offer for Trade in "
-                         "Notary::NotarizeMarketOffer\n";
+                LogNormal(OT_METHOD)(__FUNCTION__)(
+                    ": FAILED verifying offer for Trade in "
+                    "Notary::NotarizeMarketOffer").Flush();
             } else if (
                 theOffer->GetScale() < ServerSettings::GetMinMarketScale()) {
                 Log::vOutput(
@@ -5829,11 +5844,11 @@ void Notary::NotarizeMarketOffer(
                 // for other cron items such as payment plans and smart
                 // contracts. But it's a good enough approximation for now.
                 //
-                otOut << "Notary::NotarizeMarketOffer: FAILED adding "
-                         "offer to market: "
-                         "NYM HAS TOO MANY ACTIVE OFFERS ALREADY. See "
-                         "'max_items_per_nym' setting in the config "
-                         "file.\n";
+                LogNormal(OT_METHOD)(__FUNCTION__)(
+                    ": FAILED adding offer to market: "
+                    "NYM HAS TOO MANY ACTIVE OFFERS ALREADY. See "
+                    "'max_items_per_nym' setting in the config "
+                    "file.").Flush();
             }
             // At this point I feel pretty confident that the Trade is a
             // valid request from the user. The top half of this function is
@@ -5904,8 +5919,8 @@ void Notary::NotarizeMarketOffer(
                     // RemoveIssuedNum will be called for the Closing number
                     // when the finalReceipt is accepted.
                 } else {
-                    otOut << "Unable to add trade to Cron object "
-                             "Notary::NotarizeMarketOffer\n";
+                    LogNormal(OT_METHOD)(__FUNCTION__)(
+                        ": Unable to add trade to Cron object. ").Flush();
                 }
             }
         }  // transaction statement verified.
@@ -6037,7 +6052,8 @@ void Notary::NotarizeTransaction(
                 // DEF. A copy will also remain in her outbox until canceled
                 // or accepted.
                 case transactionType::transfer:
-                    otOut << "NotarizeTransaction type: Transfer\n";
+                    LogNormal(OT_METHOD)(__FUNCTION__)(
+                        ": Transfer").Flush();
                     NotarizeTransfer(
                         context, theFromAccount, tranIn, tranOut, bOutSuccess);
                     theReplyItemType = itemType::atTransfer;
@@ -6049,7 +6065,8 @@ void Notary::NotarizeTransaction(
                 // reject some of his inbox items and/or accept some into
                 // his account DEF.
                 case transactionType::processInbox:
-                    otOut << "NotarizeTransaction type: Process Inbox\n";
+                    LogNormal(OT_METHOD)(__FUNCTION__)(
+                        ": Process Inbox").Flush();
                     NotarizeProcessInbox(
                         context, theFromAccount, tranIn, tranOut, bOutSuccess);
                     //                    theReplyItemType =
@@ -6074,12 +6091,14 @@ void Notary::NotarizeTransaction(
 
                     if (false != bool(pItemCash)) {
                         theReplyItemType = itemType::atWithdrawal;
-                        otOut << "NotarizeTransaction type: Withdrawal "
-                                 "(cash)\n";
+                        LogNormal(OT_METHOD)(__FUNCTION__)(
+                            ": Withdrawal "
+                            "(cash)").Flush();
                     } else if (false != bool(pItemVoucher)) {
                         theReplyItemType = itemType::atWithdrawVoucher;
-                        otOut << "NotarizeTransaction type: Withdrawal "
-                                 "(voucher)\n";
+                        LogNormal(OT_METHOD)(__FUNCTION__)(
+                            ": Withdrawal "
+                            "(voucher)").Flush();
                     }
                     NotarizeWithdrawal(
                         context, theFromAccount, tranIn, tranOut, bOutSuccess);
@@ -6091,7 +6110,8 @@ void Notary::NotarizeTransaction(
                 // request a signed cheque made out to Bob's user ID (or
                 // blank), --OR-- a purse full of tokens.
                 case transactionType::deposit:
-                    otOut << "NotarizeTransaction type: Deposit\n";
+                    LogNormal(OT_METHOD)(__FUNCTION__)(
+                        ": Deposit").Flush();
                     NotarizeDeposit(
                         context, theFromAccount, tranIn, tranOut, bOutSuccess);
                     theReplyItemType = itemType::atDeposit;
@@ -6103,7 +6123,8 @@ void Notary::NotarizeTransaction(
                 // rate of $X per share, where X and $ are both
                 // configurable.
                 case transactionType::payDividend:
-                    otOut << "NotarizeTransaction type: Pay Dividend\n";
+                    LogNormal(OT_METHOD)(__FUNCTION__)(
+                        ": Pay Dividend").Flush();
                     NotarizePayDividend(
                         context, theFromAccount, tranIn, tranOut, bOutSuccess);
                     theReplyItemType = itemType::atPayDividend;
@@ -6115,7 +6136,8 @@ void Notary::NotarizeTransaction(
                 // signed trade listing the relevant information, instrument
                 // definitions and account IDs.
                 case transactionType::marketOffer:
-                    otOut << "NotarizeTransaction type: Market Offer\n";
+                    LogNormal(OT_METHOD)(__FUNCTION__)(
+                        ": Market Offer").Flush();
                     NotarizeMarketOffer(
                         context, theFromAccount, tranIn, tranOut, bOutSuccess);
                     theReplyItemType = itemType::atMarketOffer;
@@ -6126,7 +6148,8 @@ void Notary::NotarizeTransaction(
                 // make regular payments to Alice. (BOTH Alice AND Bob must
                 // have signed the same contract.)
                 case transactionType::paymentPlan:
-                    otOut << "NotarizeTransaction type: Payment Plan\n";
+                    LogNormal(OT_METHOD)(__FUNCTION__)(
+                        ": Payment Plan").Flush();
                     NotarizePaymentPlan(
                         context, theFromAccount, tranIn, tranOut, bOutSuccess);
                     theReplyItemType = itemType::atPaymentPlan;
@@ -6140,7 +6163,8 @@ void Notary::NotarizeTransaction(
                 // of whom have signed it, and have provided transaction #s
                 // for it.
                 case transactionType::smartContract: {
-                    otOut << "NotarizeTransaction type: Smart Contract\n";
+                    LogNormal(OT_METHOD)(__FUNCTION__)(
+                        ": Smart Contract").Flush();
 
                     // For all transaction numbers used on cron items, we
                     // keep track of them in the GetSetOpenCronItems. This
@@ -6158,7 +6182,8 @@ void Notary::NotarizeTransaction(
                 // REGULARLY PROCESSING CONTRACT that he had previously
                 // created.
                 case transactionType::cancelCronItem: {
-                    otOut << "NotarizeTransaction type: cancelCronItem\n";
+                    LogNormal(OT_METHOD)(__FUNCTION__)(
+                        ": cancelCronItem").Flush();
                     NotarizeCancelCronItem(
                         context, theFromAccount, tranIn, tranOut, bOutSuccess);
                     theReplyItemType = itemType::atCancelCronItem;
@@ -6172,7 +6197,8 @@ void Notary::NotarizeTransaction(
                 // basket account and his various sub-accounts for each
                 // member currency in the basket.)
                 case transactionType::exchangeBasket:
-                    otOut << "NotarizeTransaction type: Exchange Basket\n";
+                    LogNormal(OT_METHOD)(__FUNCTION__)(
+                        ": Exchange Basket").Flush();
                     NotarizeExchangeBasket(
                         context, theFromAccount, tranIn, tranOut, bOutSuccess);
                     theReplyItemType = itemType::atExchangeBasket;
