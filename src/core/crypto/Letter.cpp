@@ -53,6 +53,8 @@
 #include <ostream>
 #include <string>
 
+#define OT_METHOD "opentxs::Letter::"
+
 namespace opentxs
 {
 bool Letter::AddRSARecipients(
@@ -73,8 +75,9 @@ bool Letter::AddRSARecipients(
     const bool serialized = sessionKey.Serialize(serializedSessionKey);
 
     if (!serialized) {
-        otErr << __FUNCTION__ << ": Session key serialization failed."
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Session key serialization failed.")
+            .Flush();
 
         return false;
     }
@@ -86,16 +89,18 @@ bool Letter::AddRSARecipients(
     if (haveSessionKey) {
         envelope.set_rsakey(encrypted->data(), encrypted->size());
     } else {
-        otErr << __FUNCTION__ << ": Session key encryption failed."
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Session key encryption failed.")
+            .Flush();
 
         return false;
     }
 
     return true;
 #else
-    otErr << __FUNCTION__ << ": Attempting to Seal to RSA recipients without "
-          << "RSA support." << std::endl;
+    LogOutput(OT_METHOD)(__FUNCTION__)(
+        ": Attempting to Seal to RSA recipients without "
+        "RSA support.")
+        .Flush();
 
     return false;
 #endif
@@ -141,8 +146,8 @@ bool Letter::SortRecipients(
             } break;
 #endif  // OT_CRYPTO_SUPPORTED_KEY_RSA
             default: {
-                otErr << __FUNCTION__ << ": Unknown recipient type."
-                      << std::endl;
+                LogOutput(OT_METHOD)(__FUNCTION__)(": Unknown recipient type.")
+                    .Flush();
                 return false;
             }
         }
@@ -183,7 +188,7 @@ bool Letter::Seal(
         theInput, iv, defaultPassword, *output.mutable_ciphertext(), false);
 
     if (!encrypted) {
-        otErr << __FUNCTION__ << ": Encryption failed." << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Encryption failed.").Flush();
 
         return false;
     }
@@ -230,16 +235,18 @@ bool Letter::Seal(
                 auto& serializedSessionKey = *output.add_sessionkey();
                 sessionKey->Serialize(serializedSessionKey);
             } else {
-                otErr << __FUNCTION__ << ": Session key encryption failed."
-                      << std::endl;
+                LogOutput(OT_METHOD)(__FUNCTION__)(
+                    ": Session key encryption failed.")
+                    .Flush();
 
                 return false;
             }
         }
 #else
-        otErr << __FUNCTION__ << ": Attempting to Seal to "
-              << "secp256k1 recipients without crypto::Secp256k1 support."
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Attempting to Seal to "
+            "secp256k1 recipients without crypto::Secp256k1 support.")
+            .Flush();
 
         return false;
 #endif
@@ -279,8 +286,9 @@ bool Letter::Seal(
                 auto& serializedSessionKey = *output.add_sessionkey();
                 sessionKey->Serialize(serializedSessionKey);
             } else {
-                otErr << __FUNCTION__ << ": Session key encryption failed."
-                      << std::endl;
+                LogOutput(OT_METHOD)(__FUNCTION__)(
+                    ": Session key encryption failed.")
+                    .Flush();
 
                 return false;
             }
@@ -305,7 +313,7 @@ bool Letter::Open(
     const bool haveInput = proto::Validate(serialized, VERBOSE);
 
     if (!haveInput) {
-        otErr << __FUNCTION__ << " Could not decode input." << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Could not decode input.").Flush();
 
         return false;
     }
@@ -337,7 +345,8 @@ bool Letter::Open(
         }
 
         if (nullptr == ecKey) {
-            otErr << __FUNCTION__ << ": Unsupported key type." << std::endl;
+            LogOutput(OT_METHOD)(__FUNCTION__)(": Unsupported key type.")
+                .Flush();
 
             return false;
         }
@@ -355,8 +364,10 @@ bool Letter::Open(
         }
 
         if (!found) {
-            otErr << __FUNCTION__ << ": Need an ephemeral public key for ECDH, "
-                  << "but the letter does not contain one." << std::endl;
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Need an ephemeral public key for ECDH, "
+                "but the letter does not contain one.")
+                .Flush();
 
             return false;
         }
@@ -417,13 +428,15 @@ bool Letter::Open(
 
             return true;
         } else {
-            otErr << __FUNCTION__ << " Decryption failed." << std::endl;
+            LogOutput(OT_METHOD)(__FUNCTION__)(": Decryption failed.").Flush();
 
             return false;
         }
     } else {
-        otErr << __FUNCTION__ << " Could not decrypt any sessions key. "
-              << "Was this message intended for us?" << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Could not decrypt any sessions key. "
+            "Was this message intended for us?")
+            .Flush();
 
         return false;
     }

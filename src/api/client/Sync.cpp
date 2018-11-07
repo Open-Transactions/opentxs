@@ -241,7 +241,7 @@ Sync::Sync(
 }
 
 std::pair<bool, std::size_t> Sync::accept_incoming(
-    const rLock& lock [[maybe_unused]],
+    const rLock& lock[[maybe_unused]],
     const std::size_t max,
     const Identifier& accountID,
     ServerContext& context) const
@@ -1845,7 +1845,7 @@ void Sync::refresh_contacts() const
                     SHUTDOWN()
                     OT_ASSERT(item)
 
-                    const auto& notUsed [[maybe_unused]] = claimID;
+                    const auto& notUsed[[maybe_unused]] = claimID;
                     const OTIdentifier serverID =
                         Identifier::Factory(item->Value());
 
@@ -2599,7 +2599,7 @@ void Sync::state_machine(const ContextID id, OperationQueue& queue) const
                     .Flush();
             }
 
-            const auto& notUsed [[maybe_unused]] = taskID;
+            const auto& notUsed[[maybe_unused]] = taskID;
             find_server(nymID, serverID, targetID);
         }
 
@@ -2643,7 +2643,7 @@ void Sync::state_machine(const ContextID id, OperationQueue& queue) const
                     .Flush();
             }
 
-            const auto& notUsed [[maybe_unused]] = taskID;
+            const auto& notUsed[[maybe_unused]] = taskID;
             find_nym(nymID, serverID, targetID);
         }
 
@@ -3271,7 +3271,7 @@ bool Sync::write_and_send_cheque(
 Sync::~Sync()
 {
     for (auto& [id, thread] : state_machines_) {
-        const auto& notUsed [[maybe_unused]] = id;
+        const auto& notUsed[[maybe_unused]] = id;
 
         OT_ASSERT(thread)
 

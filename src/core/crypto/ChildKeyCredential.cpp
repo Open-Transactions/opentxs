@@ -44,6 +44,8 @@
 #include <memory>
 #include <ostream>
 
+#define OT_METHOD "opentxs::ChildKeyCredential::"
+
 namespace opentxs
 {
 ChildKeyCredential::ChildKeyCredential(
@@ -81,8 +83,9 @@ serializedCredential ChildKeyCredential::serialize(
         if (masterSignature) {
             *serializedCredential->add_signature() = *masterSignature;
         } else {
-            otErr << __FUNCTION__ << ": Failed to get master signature."
-                  << std::endl;
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Failed to get master signature.")
+                .Flush();
         }
     }
 

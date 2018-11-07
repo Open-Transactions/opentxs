@@ -157,8 +157,10 @@ bool MasterCredential::verify_against_source(const Lock& lock) const
     auto sourceSig = SourceSignature();
 
     if (!sourceSig) {
-        otErr << __FUNCTION__ << ": Master credential not signed by its"
-              << " source." << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Master credential not signed by its"
+            " source.")
+            .Flush();
 
         return false;
     }
@@ -216,7 +218,8 @@ bool MasterCredential::Verify(
 {
     if (!proto::Validate<proto::Credential>(
             credential, VERBOSE, proto::KEYMODE_PUBLIC, role, false)) {
-        otErr << __FUNCTION__ << ": Invalid credential syntax." << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Invalid credential syntax.")
+            .Flush();
 
         return false;
     }
@@ -224,8 +227,10 @@ bool MasterCredential::Verify(
     bool sameMaster = (id_ == masterID);
 
     if (!sameMaster) {
-        otErr << __FUNCTION__ << ": Credential does not designate this"
-              << " credential as its master." << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Credential does not designate this"
+            " credential as its master.")
+            .Flush();
 
         return false;
     }
@@ -255,7 +260,7 @@ bool MasterCredential::hasCapability(const NymCapability& capability) const
 bool MasterCredential::Path(proto::HDPath& output) const
 {
     if (false == signing_key_->HasPrivateKey()) {
-        otErr << OT_METHOD << __FUNCTION__ << ": No private key." << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": No private key.").Flush();
 
         return false;
     }

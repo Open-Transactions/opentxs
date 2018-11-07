@@ -20,6 +20,8 @@
 #include <ostream>
 #include <string>
 
+#define OT_METHOD "opentxs::ContactCredential::"
+
 namespace opentxs
 {
 // static
@@ -144,7 +146,9 @@ serializedCredential ContactCredential::serialize(
                 serializedCredential->add_signature();
             *serializedMasterSignature = *masterSignature;
         } else {
-            otErr << __FUNCTION__ << ": Failed to get master signature.\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Failed to get master signature.")
+                .Flush();
         }
     }
 

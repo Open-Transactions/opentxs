@@ -49,6 +49,8 @@
 #include <cstdint>
 #include <ostream>
 
+#define OT_METHOD "opentxs::LowLevelKeyGenerator::"
+
 namespace opentxs
 {
 
@@ -204,8 +206,9 @@ bool LowLevelKeyGenerator::MakeNewKeypair()
             // todo.
 
             if (nullptr == x509) {
-                otErr << __FUNCTION__
-                      << ": Failed attempting to generate new x509 cert.\n";
+                LogOutput(OT_METHOD)(__FUNCTION__)(
+                    ": Failed attempting to generate new x509 cert.")
+                    .Flush();
 
                 if (nullptr != pNewKey) EVP_PKEY_free(pNewKey);
                 pNewKey = nullptr;
@@ -214,8 +217,9 @@ bool LowLevelKeyGenerator::MakeNewKeypair()
             }
 
             if (nullptr == pNewKey) {
-                otErr << __FUNCTION__
-                      << ": Failed attempting to generate new private key.\n";
+                LogOutput(OT_METHOD)(__FUNCTION__)(
+                    ": Failed attempting to generate new private key.")
+                    .Flush();
 
                 if (nullptr != x509) X509_free(x509);
                 x509 = nullptr;
@@ -273,15 +277,19 @@ bool LowLevelKeyGenerator::SetOntoKeypair(
                 &keypair.m_pkeyPrivate.get());
 
             if (nullptr == pPublicKey) {
-                otErr << __FUNCTION__ << ": dynamic_cast of public key to "
-                      << "crypto::key::Ed25519 failed." << std::endl;
+                LogOutput(OT_METHOD)(__FUNCTION__)(
+                    ": dynamic_cast of public key to "
+                    "crypto::key::Ed25519 failed.")
+                    .Flush();
 
                 return false;
             }
 
             if (nullptr == pPrivateKey) {
-                otErr << __FUNCTION__ << ": dynamic_cast of private key to "
-                      << "crypto::key::Ed25519 failed." << std::endl;
+                LogOutput(OT_METHOD)(__FUNCTION__)(
+                    ": dynamic_cast of private key to "
+                    "crypto::key::Ed25519 failed.")
+                    .Flush();
 
                 return false;
             }
@@ -312,17 +320,19 @@ bool LowLevelKeyGenerator::SetOntoKeypair(
                 &keypair.m_pkeyPrivate.get());
 
             if (nullptr == pPublicKey) {
-                otErr << __FUNCTION__ << ": dynamic_cast of public key to "
-                      << "crypto::key::AsymmetricSecp256k1 failed."
-                      << std::endl;
+                LogOutput(OT_METHOD)(__FUNCTION__)(
+                    ": dynamic_cast of public key to "
+                    "crypto::key::AsymmetricSecp256k1 failed.")
+                    .Flush();
 
                 return false;
             }
 
             if (nullptr == pPrivateKey) {
-                otErr << __FUNCTION__ << ": dynamic_cast of private key to "
-                      << "crypto::key::AsymmetricSecp256k1 failed."
-                      << std::endl;
+                LogOutput(OT_METHOD)(__FUNCTION__)(
+                    ": dynamic_cast of private key to "
+                    "crypto::key::AsymmetricSecp256k1 failed.")
+                    .Flush();
 
                 return false;
             }
@@ -352,14 +362,18 @@ bool LowLevelKeyGenerator::SetOntoKeypair(
                 &keypair.m_pkeyPrivate.get());
 
             if (nullptr == pPublicKey) {
-                otErr << __FUNCTION__ << ": dynamic_cast of public key to "
-                      << "crypto::key::RSA failed." << std::endl;
+                LogOutput(OT_METHOD)(__FUNCTION__)(
+                    ": dynamic_cast of public key to "
+                    "crypto::key::RSA failed.")
+                    .Flush();
 
                 return false;
             }
             if (nullptr == pPrivateKey) {
-                otErr << __FUNCTION__ << ": dynamic_cast of private key to "
-                      << "crypto::key::RSA failed." << std::endl;
+                LogOutput(OT_METHOD)(__FUNCTION__)(
+                    ": dynamic_cast of private key to "
+                    "crypto::key::RSA failed.")
+                    .Flush();
 
                 return false;
             }

@@ -39,6 +39,8 @@ extern "C" {
 #include <cstdint>
 #include <ostream>
 
+#define OT_METHOD "opentxs::OTEnvelope::"
+
 namespace opentxs
 {
 OTEnvelope::OTEnvelope()
@@ -86,7 +88,9 @@ bool OTEnvelope::Encrypt(
     auto theIV = Data::Factory();
 
     if (!theIV->Randomize(OT::App().Crypto().Config().SymmetricIvSize())) {
-        otErr << __FUNCTION__ << ": Failed trying to randomly generate IV.\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Failed trying to randomly generate IV.")
+            .Flush();
         return false;
     }
 
@@ -97,15 +101,17 @@ bool OTEnvelope::Encrypt(
     //
     if ((false == theKey.IsGenerated()) &&
         (false == theKey.GenerateKey(thePassword))) {
-        otErr << __FUNCTION__
-              << ": Failed trying to generate symmetric key using password.\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Failed trying to generate symmetric key using password.")
+            .Flush();
         return false;
     }
 
     if (!theKey.HasHashCheck()) {
         if (!theKey.GenerateHashCheck(thePassword)) {
-            otErr << __FUNCTION__
-                  << ": Failed trying to generate hash check using password.\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Failed trying to generate hash check using password.")
+                .Flush();
             return false;
         }
     }
@@ -116,9 +122,10 @@ bool OTEnvelope::Encrypt(
 
     if (false ==
         theKey.GetRawKeyFromPassphrase(thePassword, theRawSymmetricKey)) {
-        otErr << __FUNCTION__
-              << ": Failed trying to retrieve raw symmetric "
-                 "key using password.\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Failed trying to retrieve raw symmetric "
+            "key using password.")
+            .Flush();
         return false;
     }
 
@@ -134,9 +141,10 @@ bool OTEnvelope::Encrypt(
     // Success?
     //
     if (!bEncrypted) {
-        otErr << __FUNCTION__
-              << ": (static) call failed to encrypt. Wrong "
-                 "key? (Returning false.)\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": (static) call failed to encrypt. Wrong "
+            "key? (Returning false).")
+            .Flush();
         return false;
     }
 
@@ -197,8 +205,6 @@ bool OTEnvelope::Decrypt(
     const crypto::key::LegacySymmetric& theKey,
     const OTPassword& thePassword)
 {
-    const char* szFunc = "OTEnvelope::Decrypt";
-
     OT_ASSERT(
         (thePassword.isPassword() && (thePassword.getPasswordSize() > 0)) ||
         (thePassword.isMemory() && (thePassword.getMemorySize() > 0)));
@@ -208,9 +214,10 @@ bool OTEnvelope::Decrypt(
 
     if (false ==
         theKey.GetRawKeyFromPassphrase(thePassword, theRawSymmetricKey)) {
-        otErr << szFunc
-              << ": Failed trying to retrieve raw symmetric key "
-                 "using password. (Wrong password?)\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Failed trying to retrieve raw symmetric key "
+            "using password. (Wrong password?).")
+            .Flush();
         return false;
     }
 
@@ -235,9 +242,10 @@ bool OTEnvelope::Decrypt(
     if (0 == (nRead = ciphertext_->OTfread(
                   reinterpret_cast<std::uint8_t*>(&env_type_n),
                   static_cast<std::uint32_t>(sizeof(env_type_n))))) {
-        otErr << szFunc
-              << ": Error reading Envelope Type. Expected "
-                 "asymmetric(1) or symmetric (2).\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Error reading Envelope Type. Expected "
+            "asymmetric(1) or symmetric(2).")
+            .Flush();
         return false;
     }
     nRunningTotal += nRead;
@@ -251,10 +259,10 @@ bool OTEnvelope::Decrypt(
 
     if (2 != env_type) {
         const std::uint32_t l_env_type = static_cast<uint32_t>(env_type);
-        otErr << szFunc
-              << ": Error: Expected Envelope for Symmetric key (type "
-                 "2) but instead found type: "
-              << l_env_type << ".\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Error: Expected Envelope for Symmetric key (type "
+            "2) but instead found type: ")(l_env_type)(".")
+            .Flush();
         return false;
     }
 
@@ -273,7 +281,7 @@ bool OTEnvelope::Decrypt(
     if (0 == (nRead = ciphertext_->OTfread(
                   reinterpret_cast<std::uint8_t*>(&iv_size_n),
                   static_cast<std::uint32_t>(sizeof(iv_size_n))))) {
-        otErr << szFunc << ": Error reading IV Size.\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Error reading IV Size.").Flush();
         return false;
     }
     nRunningTotal += nRead;
@@ -284,10 +292,11 @@ bool OTEnvelope::Decrypt(
     const std::uint32_t iv_size_host_order = ntohl(iv_size_n);
 
     if (iv_size_host_order > max_iv_length) {
-        otErr << szFunc << ": Error: iv_size ("
-              << static_cast<std::int64_t>(iv_size_host_order)
-              << ") is larger than max_iv_length ("
-              << static_cast<std::int64_t>(max_iv_length) << ").\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Error: iv_size (")(
+            static_cast<std::int64_t>(iv_size_host_order))(
+            ") is larger than max_iv_length (")(
+            static_cast<std::int64_t>(max_iv_length))(").")
+            .Flush();
         return false;
     }
     //  nRunningTotal += iv_size_host_order; // Nope!
@@ -300,7 +309,9 @@ bool OTEnvelope::Decrypt(
     if (0 == (nRead = ciphertext_->OTfread(
                   static_cast<std::uint8_t*>(const_cast<void*>(theIV->data())),
                   static_cast<std::uint32_t>(iv_size_host_order)))) {
-        otErr << szFunc << ": Error reading initialization vector.\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Error reading initialization vector.")
+            .Flush();
         return false;
     }
     nRunningTotal += nRead;

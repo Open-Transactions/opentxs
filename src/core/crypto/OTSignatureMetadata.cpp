@@ -16,6 +16,8 @@
 #include <ostream>
 #include <string>
 
+#define OT_METHOD "opentxs::OTSignatureMetadata::"
+
 namespace opentxs
 {
 
@@ -36,9 +38,10 @@ bool OTSignatureMetadata::SetMetadata(
         case 'S':
             break;
         default:
-            otErr << __FUNCTION__
-                  << ": Expected key type of A, E, or S, but instead found: "
-                  << metaKeyType << " (bad data or error)\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Expected key type of A, E, or S, but instead found: ")(
+                metaKeyType)(" (bad data or error).")
+                .Flush();
             return false;
     }
 
@@ -50,9 +53,10 @@ bool OTSignatureMetadata::SetMetadata(
     str_verify_base62 += metaChildCredID;
 
     if (!OT::App().Crypto().Encode().IsBase62(str_verify_base62)) {
-        otErr << __FUNCTION__
-              << ": Metadata for signature failed base62 validation: "
-              << str_verify_base62 << "\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Metadata for signature failed base62 validation: ")(
+            str_verify_base62)(".")
+            .Flush();
         return false;
     }
 

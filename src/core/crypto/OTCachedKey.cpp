@@ -75,9 +75,10 @@ bool OTCachedKey::ChangeUserPassphrase()
     Lock lock(general_lock_);
 
     if (false == bool(key_.get())) {
-        otErr << __FUNCTION__
-              << ": The Master Key does not appear yet to "
-                 "exist. Try creating a Nym first.\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": The Master Key does not appear yet to "
+            "exist. Try creating a Nym first.")
+            .Flush();
         return false;
     }
 
@@ -91,9 +92,10 @@ bool OTCachedKey::ChangeUserPassphrase()
                            // = false
 
     if (!pOldUserPassphrase) {
-        otErr << __FUNCTION__
-              << ": Error: Failed while trying to get old "
-                 "passphrase from user.\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Error: Failed while trying to get old "
+            "passphrase from user.")
+            .Flush();
         return false;
     }
 
@@ -106,9 +108,10 @@ bool OTCachedKey::ChangeUserPassphrase()
             strReason2, true));  // bool bAskTwice = false by default.
 
     if (!pNewUserPassphrase) {
-        otErr << __FUNCTION__
-              << ": Error: Failed while trying to get new "
-                 "passphrase from user.\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Error: Failed while trying to get new "
+            "passphrase from user.")
+            .Flush();
         return false;
     }
 
@@ -428,7 +431,9 @@ bool OTCachedKey::GetMasterPassword(
                 static_cast<void*>(&thePWData));
 
             if (false == got) {
-                otErr << __FUNCTION__ << ": Failed to get password from user!";
+                LogOutput(OT_METHOD)(__FUNCTION__)(
+                    ": Failed to get password from user!")
+                    .Flush();
 
                 return false;
             }
@@ -462,10 +467,11 @@ bool OTCachedKey::GetMasterPassword(
             if (nullptr != pDerivedKey)
                 theDerivedAngel.reset(pDerivedKey);
             else
-                otErr << __FUNCTION__
-                      << ": FYI: Derived key is still nullptr "
-                         "after calling "
-                         "crypto::key::LegacySymmetric::GenerateKey.\n";
+                LogOutput(OT_METHOD)(__FUNCTION__)(
+                    ": FYI: Derived key is still nullptr "
+                    "after calling "
+                    "crypto::key::LegacySymmetric::GenerateKey.")
+                    .Flush();
         } else  // key_->IsGenerated() == true. (Symmetric Key is
                 // already generated.)
         {
@@ -504,9 +510,9 @@ bool OTCachedKey::GetMasterPassword(
                                 0,
                                 0,  // false
                                 static_cast<void*>(&thePWData))) {
-                            otErr << "\n\n"
-                                  << __FUNCTION__
-                                  << ": Failed to get password from user!\n\n";
+                            LogOutput(OT_METHOD)(__FUNCTION__)(
+                                ": Failed to get password from user!")
+                                .Flush();
                             return false;
                         }
 
@@ -530,8 +536,9 @@ bool OTCachedKey::GetMasterPassword(
                         0,
                         1,  // true
                         static_cast<void*>(&thePWData))) {
-                    otErr << __FUNCTION__
-                          << ": Failed to get password from user!";
+                    LogOutput(OT_METHOD)(__FUNCTION__)(
+                        ": Failed to get password from user!")
+                        .Flush();
                     return false;
                 }
 
@@ -621,9 +628,10 @@ bool OTCachedKey::GetMasterPassword(
                     .Flush();
         }  // bGenerated
         else
-            otErr << OT_METHOD << __FUNCTION__
-                  << ": bGenerated is still false, even after trying "
-                     "to generate it, yadda yadda yadda.\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": bGenerated is still false, even after trying "
+                "to generate it, yadda yadda yadda.")
+                .Flush();
 
     }  // nullptr == pDerivedKey
 

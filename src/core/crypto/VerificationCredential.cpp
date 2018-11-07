@@ -22,6 +22,8 @@
 #include <ostream>
 #include <string>
 
+#define OT_METHOD "opentxs::VerificationCredential::"
+
 namespace opentxs
 {
 
@@ -102,7 +104,9 @@ serializedCredential VerificationCredential::serialize(
                 serializedCredential->add_signature();
             *serializedMasterSignature = *masterSignature;
         } else {
-            otErr << __FUNCTION__ << ": Failed to get master signature.\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Failed to get master signature.")
+                .Flush();
         }
     }
 
@@ -122,8 +126,9 @@ bool VerificationCredential::verify_internally(const Lock& lock) const
                 bool valid = owner_backlink_->Verify(claim);
 
                 if (!valid) {
-                    otErr << __FUNCTION__ << ": invalid claim verification."
-                          << std::endl;
+                    LogOutput(OT_METHOD)(__FUNCTION__)(
+                        ": Invalid claim verification.")
+                        .Flush();
 
                     return false;
                 }

@@ -25,6 +25,8 @@
 #include <ostream>
 #include <string>
 
+#define OT_METHOD "opentxs::OTSignedFile::"
+
 namespace opentxs
 {
 OTSignedFile::OTSignedFile(const api::Core& core)
@@ -163,8 +165,10 @@ std::int32_t OTSignedFile::ProcessXMLNode(irr::io::IrrXMLReader*& xml)
     } else if (!strcmp("filePayload", xml->getNodeName())) {
         if (false ==
             Contract::LoadEncodedTextField(xml, m_strSignedFilePayload)) {
-            otErr << "Error in OTSignedFile::ProcessXMLNode: filePayload field "
-                     "without value.\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Error in OTSignedFile::ProcessXMLNode: filePayload field "
+                "without value.")
+                .Flush();
             return (-1);  // error condition
         }
 
@@ -189,14 +193,11 @@ bool OTSignedFile::VerifyFile()
         m_strSignedFilename->Compare(m_strPurportedFilename))
         return true;
 
-    otErr << __FUNCTION__
-          << ": Failed verifying signed file:\n"
-             "Expected directory: "
-          << m_strLocalDir << "  Found: " << m_strPurportedLocalDir
-          << "\n"
-             "Expected filename:  "
-          << m_strSignedFilename << "  Found: " << m_strPurportedFilename
-          << "\n";
+    LogOutput(OT_METHOD)(__FUNCTION__)(": Failed verifying signed file: "
+                                       "Expected directory: ")(m_strLocalDir)(
+        ". Found: ")(m_strPurportedLocalDir)(". Expected filename: ")(
+        m_strSignedFilename)(". Found: ")(m_strPurportedFilename)(".")
+        .Flush();
     return false;
 }
 

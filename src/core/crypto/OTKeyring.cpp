@@ -31,6 +31,8 @@
 #include <memory>
 #include <string>
 
+#define OT_METHOD "opentxs::OTKeyring::"
+
 #ifndef _WIN32
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 #endif
@@ -156,7 +158,9 @@ bool OTKeyring::Windows_StoreSecret(
         0,
         &output);
     if (!result) {
-        otErr << __FUNCTION__ << ": Failed calling Win32: CryptProtectData \n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Failed calling Win32: CryptProtectData.")
+            .Flush();
         return false;
     }
 
@@ -181,8 +185,9 @@ bool OTKeyring::Windows_StoreSecret(
     // Write it to local storage.
     //
     if (theOutput.IsEmpty()) {
-        otErr << __FUNCTION__
-              << ": Error: Output of Win32 CryptProtectData was empty.\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Error: Output of Win32 CryptProtectData was empty.")
+            .Flush();
     } else {
         auto ascData = Armored::Factory(theOutput);
         const OTString strFoldername("win32_data");  // todo hardcoding.
@@ -226,9 +231,10 @@ bool OTKeyring::Windows_RetrieveSecret(
     const Data theCipherblob(ascFileContents);
     //
     if (theCipherblob.IsEmpty()) {
-        otErr << __FUNCTION__
-              << ": Error: Data is empty after decoding "
-                 "Armored (that wasn't empty.)\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Error: Data is empty after decoding "
+            "Armored (that wasn't empty).")
+            .Flush();
     } else {
         DATA_BLOB input;
         input.pbData = const_cast<BYTE*>(
@@ -253,8 +259,9 @@ bool OTKeyring::Windows_RetrieveSecret(
             0,
             &output);
         if (!result) {
-            otErr << __FUNCTION__
-                  << ": Error: Output of Win32 CryptUnprotectData was empty.\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Error: Output of Win32 CryptUnprotectData was empty.")
+                .Flush();
         } else {
             thePassword.setMemory(
                 reinterpret_cast<void*>(output.pbData),
@@ -282,10 +289,10 @@ bool OTKeyring::Windows_DeleteSecret(
         OTDB::EraseValueByKey(strFoldername.Get(), strUser.Get());
 
     if (!bErased)
-        otErr << __FUNCTION__
-              << ": Failed attempt to erase file: " << OTPaths::AppDataFolder()
-              << OTLog::PathSeparator() << strFoldername
-              << OTLog::PathSeparator() << strUser << " \n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Failed attempt to erase file: ")(
+            OTPaths::AppDataFolder())(OTLog::PathSeparator())(strFoldername)(
+            OTLog::PathSeparator())(strUser)(".")
+            .Flush();
 
     return bErased;
 }
@@ -435,8 +442,8 @@ bool OTKeyring::Mac_StoreSecret(
         vData,  // thePassword.getMemory()
         nullptr);
     if (theError != noErr) {
-        otErr
-            << "OTKeyring::Mac_StoreSecret: Error in theKeychain.AddSecret.\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Error in theKeychain.AddSecret.")
+            .Flush();
         return false;
     }
 
@@ -473,8 +480,9 @@ bool OTKeyring::Mac_RetrieveSecret(
         theKeychain.ItemFreeContent(nullptr, password_data);
         return true;
     } else
-        otErr << "OTKeyring::Mac_RetrieveSecret: Error in "
-                 "theKeychain.FindSecret.\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Error in "
+                                           "theKeychain.FindSecret.")
+            .Flush();
 
     return false;
 }
@@ -527,8 +535,9 @@ bool OTKeyring::Mac_DeleteSecret(
             theStatus = theKeychain.ItemDelete(theItem);
 
             if (theStatus != 0)
-                otErr << "OTKeyring::Mac_DeleteSecret: Error deleting item "
-                         "from keychain.\n";
+                LogOutput(OT_METHOD)(__FUNCTION__)(": Error deleting item "
+                                                   "from keychain.")
+                    .Flush();
             else
                 bReturnVal = true;
         }
@@ -582,7 +591,7 @@ bool OTKeyring::IOS_StoreSecret(
     CFRelease(account_name);
 
     if (theError != noErr) {
-        otErr << "OTKeyring::IOS_StoreSecret: Error in SecItemAdd.\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Error in SecItemAdd.").Flush();
         return false;
     }
 
@@ -615,8 +624,8 @@ bool OTKeyring::IOS_RetrieveSecret(
     CFRelease(account_name);
 
     if (theError != noErr) {
-        otErr
-            << "OTKeyring::IOS_RetrieveSecret: Error in SecItemCopyMatching.\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Error in SecItemCopyMatching.")
+            .Flush();
         return false;
     }
 
@@ -649,7 +658,7 @@ bool OTKeyring::IOS_DeleteSecret(
     CFRelease(account_name);
 
     if (theError != noErr) {
-        otErr << "OTKeyring::IOS_RetrieveSecret: Error in SecItemDelete.\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Error in SecItemDelete.").Flush();
         return false;
     }
 
@@ -722,9 +731,10 @@ bool OTKeyring::Gnome_StoreSecret(
         if (theResult == GNOME_KEYRING_RESULT_OK)
             bResult = true;
         else
-            otErr << "OTKeyring::Gnome_StoreSecret: "
-                  << "Failure in gnome_keyring_store_password_sync: "
-                  << gnome_keyring_result_to_message(theResult) << '\n';
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Failure in gnome_keyring_store_password_sync: ")(
+                gnome_keyring_result_to_message(theResult))(".")
+                .Flush();
 
         return bResult;
     }
@@ -812,10 +822,13 @@ bool OTKeyring::Gnome_RetrieveSecret(
         //                break;
         //        }
 
-        otErr << __FUNCTION__ << ": gnome_keyring_find_password_sync returned "
-              << strGnomeError.Get() << '\n';
-        otErr << "Remedy: Sleeping for " << lSleep
-              << " seconds and then retrying (attempt " << (nCount + 2) << '\n';
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": gnome_keyring_find_password_sync returned ")(
+            strGnomeError.Get())(".")
+            .Flush();
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Remedy: Sleeping for ")(lSleep)(
+            " seconds and then retrying (attempt ")(nCount + 2)(".")
+            .Flush();
         // on first iteration, nCount is 0, and this will say "attempt 2" aka
         // "second attempt," which is correct.
 
@@ -840,19 +853,19 @@ bool OTKeyring::Gnome_RetrieveSecret(
             strData.zeroMemory();
 
             if (!bLoaded)
-                otErr << __FUNCTION__
-                      << ": Failed trying to decode secret "
-                         "from Gnome Keyring contents:\n\n"
-                      << strData.Get() << "\n\n";
+                LogOutput(OT_METHOD)(__FUNCTION__)(
+                    ": Failed trying to decode secret "
+                    "from Gnome Keyring contents: ")(strData.Get())(".")
+                    .Flush();
             else {
                 Data thePayload(ascData);
                 ascData.zeroMemory();
                 if (thePayload.IsEmpty())
-                    otErr << __FUNCTION__
-                          << ": Failed trying to decode secret "
-                             "Data from Armored "
-                          << "from Gnome Keyring contents:\n\n"
-                          << strData.Get() << "\n\n";
+                    LogOutput(OT_METHOD)(__FUNCTION__)(
+                        ": Failed trying to decode secret "
+                        "Data from Armored "
+                        "from Gnome Keyring contents: ")(strData.Get())(".")
+                        .Flush();
                 else {
                     thePassword.setMemory(
                         thePayload.GetPayloadPointer(), thePayload.GetSize());
@@ -892,9 +905,10 @@ bool OTKeyring::Gnome_DeleteSecret(
     if (theResult == GNOME_KEYRING_RESULT_OK) {
         return true;
     } else {
-        otErr << "OTKeyring::Gnome_DeleteSecret: "
-              << "Failure in gnome_keyring_delete_password_sync: "
-              << gnome_keyring_result_to_message(theResult) << '\n';
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Failure in gnome_keyring_delete_password_sync: ")(
+            gnome_keyring_result_to_message(theResult))(".")
+            .Flush();
     }
 
     return false;
@@ -927,7 +941,9 @@ bool OTKeyring::InitKApp()
             if (!qApp)
                 OTKeyring::s_pApp = new KApplication(true);  // todo  cleanup ?
             else
-                otErr << "OTKeyring::InitKApp: Error: qApp already existed.\n";
+                LogOutput(OT_METHOD)(__FUNCTION__)(
+                    ": Error: qApp already existed.")
+                    .Flush();
         }
 
         bInitialized = true;
@@ -947,9 +963,10 @@ KWallet::Wallet* OTKeyring::OpenKWallet()
                 KWallet::Wallet::NetworkWallet(), nullptr);
 
             if (nullptr == OTKeyring::s_pWallet) {
-                otErr << "OTKeyring::OpenKWallet: Failed "
-                      << "calling: KWallet::Wallet::openWallet"
-                      << "(KWallet::Wallet::NetworkWallet(), nullptr)\n";
+                LogOutput(OT_METHOD)(__FUNCTION__)(
+                    ": Failed calling: KWallet::Wallet::openWallet, "
+                    "(KWallet::Wallet::NetworkWallet(), nullptr).")
+                    .Flush();
                 return nullptr;
             }
         }
@@ -965,9 +982,11 @@ KWallet::Wallet* OTKeyring::OpenKWallet()
                 KWallet::Wallet::NetworkWallet(), nullptr);
 
             if (nullptr == OTKeyring::s_pWallet) {
-                otErr << "OTKeyring::OpenKWallet (while re-opening): Failed "
-                      << "calling: KWallet::Wallet::openWallet"
-                      << "(KWallet::Wallet::NetworkWallet(), nullptr)\n";
+                LogOutput(OT_METHOD)(__FUNCTION__)(
+                    "(While re-opening): Failed "
+                    "calling: KWallet::Wallet::openWallet, "
+                    "(KWallet::Wallet::NetworkWallet(), nullptr).")
+                    .Flush();
                 return nullptr;
             }
         }
@@ -981,10 +1000,12 @@ KWallet::Wallet* OTKeyring::OpenKWallet()
 
             if (!OTKeyring::s_pWallet->setFolder(
                     QString::fromAscii("opentxs"))) {
-                otErr << "OTKeyring::OpenKWallet: Failed calling: "
-                         "KWallet::Wallet::setFolder"
-                      << "(QString::fromAscii(\"opentxs\")) -- Tried creating "
-                         "it, too!\n";
+                LogOutput(OT_METHOD)(__FUNCTION__)(
+                    ": Failed calling: "
+                    "KWallet::Wallet::setFolder, "
+                    "(QString::fromAscii(opentxs)) -- Tried creating "
+                    "it too!")
+                    .Flush();
                 return nullptr;
             }
         }
@@ -1044,15 +1065,16 @@ bool OTKeyring::KWallet_StoreSecret(
                 qstrKey, QString::fromUtf8(strOutput.Get())) == 0)
             bReturnVal = true;
         else
-            otErr << "OTKeyring::KWallet_StoreSecret: Failed trying to store "
-                     "secret into KWallet.\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(": Failed trying to store "
+                                               "secret into KWallet.")
+                .Flush();
 
         strOutput.zeroMemory();
 
         return bReturnVal;
     }
 
-    otErr << "OTKeyring::KWallet_StoreSecret: Unable to open kwallet.\n";
+    LogOutput(OT_METHOD)(__FUNCTION__)(": Unable to open kwallet.").Flush();
 
     return false;
 }
@@ -1086,17 +1108,19 @@ bool OTKeyring::KWallet_RetrieveSecret(
             strData.zeroMemory();
 
             if (!bLoaded)
-                otErr << __FUNCTION__
-                      << ": Failed trying to decode secret "
-                         "from KWallet contents.\n";
+                LogOutput(OT_METHOD)(__FUNCTION__)(
+                    ": Failed trying to decode secret "
+                    "from KWallet contents.")
+                    .Flush();
             else {
                 Data thePayload(ascData);
                 ascData.zeroMemory();
                 if (thePayload.IsEmpty())
-                    otErr << __FUNCTION__
-                          << ": Failed trying to decode secret "
-                             "Data from Armored from "
-                             "KWallet contents.\n";
+                    LogOutput(OT_METHOD)(__FUNCTION__)(
+                        ": Failed trying to decode secret "
+                        "Data from Armored from "
+                        "KWallet contents.")
+                        .Flush();
                 else {
                     thePassword.setMemory(
                         thePayload.GetPayloadPointer(), thePayload.GetSize());
@@ -1105,8 +1129,9 @@ bool OTKeyring::KWallet_RetrieveSecret(
                 }
             }
         } else
-            otErr << __FUNCITON__
-                  << ": Failed trying to retrieve secret from KWallet.\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Failed trying to retrieve secret from KWallet.")
+                .Flush();
     }
 
     // Not an error: what if it just hasn't been set there yet?
@@ -1133,13 +1158,14 @@ bool OTKeyring::KWallet_DeleteSecret(
         if (pWallet->removeEntry(qstrKey) == 0)  // delete the entry
             bResult = true;
         else
-            otErr << "OTKeyring::KWallet_DeleteSecret: Failed trying to erase "
-                     "secret from KWallet.\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(": Failed trying to erase "
+                                               "secret from KWallet.")
+                .Flush();
 
         return bResult;
     }
 
-    otErr << "OTKeyring::KWallet_DeleteSecret: Unable to open kwallet.\n";
+    LogOutput(OT_METHOD)(__FUNCTION__)(": Unable to open kwallet.").Flush();
 
     return false;
 }
@@ -1196,14 +1222,17 @@ bool OTKeyring::FlatFile_StoreSecret(
         ascData.zeroMemory();
 
         if (!bSaved)
-            otErr << "OTKeyring::FlatFile_StoreSecret: Failed trying to store "
-                     "secret.\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(": Failed trying to store "
+                                               "secret.")
+                .Flush();
 
         return bSaved;
     }
 
-    otErr << "OTKeyring::FlatFile_StoreSecret: Unable to cache derived key, "
-             "since password_folder not provided in config file.\n";
+    LogOutput(OT_METHOD)(__FUNCTION__)(
+        ": Unable to cache derived key, "
+        "since password_folder not provided in config file.")
+        .Flush();
 
     return false;
 }
@@ -1230,17 +1259,18 @@ bool OTKeyring::FlatFile_RetrieveSecret(
         auto ascData = Armored::Factory();
 
         if (!ascData.LoadFromExactPath(str_ExactPath))
-            otErr << "OTKeyring::FlatFile_RetrieveSecret: "
-                  << "Failed trying to decode secret from flat file contents."
-                  << "\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Failed trying to decode secret from flat file contents.")
+                .Flush();
         else {
             Data thePayload(ascData);
             ascData.zeroMemory();
             if (thePayload.IsEmpty())
-                otErr << __FUNCTION__
-                      << ": Failed trying to decode secret "
-                         "Data from Armored from "
-                         "flat file contents.\n";
+                LogOutput(OT_METHOD)(__FUNCTION__)(
+                    ": Failed trying to decode secret "
+                    "Data from Armored from "
+                    "flat file contents.")
+                    .Flush();
             else {
                 thePassword.setMemory(
                     thePayload.GetPointer(), thePayload.GetSize());
@@ -1281,8 +1311,10 @@ bool OTKeyring::FlatFile_DeleteSecret(
             str_ExactPath.c_str(), std::ios::out | std::ios::binary);
 
         if (ofs.fail()) {
-            otErr << __FUNCTION__ << ": Error opening file (to delete it): "
-                  << str_ExactPath.c_str() << '\n';
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Error opening file (to delete it): ")(str_ExactPath.c_str())(
+                ".")
+                .Flush();
             return false;
         }
         ofs.clear();
@@ -1300,9 +1332,10 @@ bool OTKeyring::FlatFile_DeleteSecret(
         //
         if (remove(str_ExactPath.c_str()) != 0) {
             bSuccess = false;
-            otErr << "** (OTKeyring::FlatFile_DeleteSecret) Failed trying to "
-                  << "delete file (containing secret):  "
-                  << str_ExactPath.c_str() << '\n';
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": ** (OTKeyring::FlatFile_DeleteSecret) Failed trying to "
+                "delete file (containing secret): ")(str_ExactPath.c_str())(".")
+                .Flush();
         } else {
             bSuccess = true;
             LogVerbose(OT_METHOD)(__FUNCTION__)(": ** Success ")(
@@ -1313,8 +1346,10 @@ bool OTKeyring::FlatFile_DeleteSecret(
         return bSuccess;
     }
 
-    otErr << "OTKeyring::FlatFile_DeleteSecret: Unable to delete any derived "
-             "key, since password_folder not provided in config file.\n";
+    LogOutput(OT_METHOD)(__FUNCTION__)(
+        ": Unable to delete any derived "
+        "key, since password_folder not provided in config file.")
+        .Flush();
 
     return false;
 }
@@ -1346,9 +1381,11 @@ bool OTKeyring::StoreSecret(
         return OTKeyring::FlatFile_StoreSecret(
             strUser, thePassword, str_display);
 #else
-        otErr << "OTKeyring::StoreSecret: WARNING: The OT config file says to "
-                 "use the system keyring, "
-                 "but OT wasn't compiled to support any keyrings.\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": WARNING: The OT config file says to "
+            "use the system keyring, "
+            "but OT wasn't compiled to support any keyrings.")
+            .Flush();
 #endif
     }
     return false;
@@ -1380,9 +1417,11 @@ bool OTKeyring::RetrieveSecret(
         return OTKeyring::FlatFile_RetrieveSecret(
             strUser, thePassword, str_display);
 #else
-        otErr << "OTKeyring::RetrieveSecret: WARNING: The OT config file says "
-                 "to use the system keyring, "
-                 "but OT wasn't compiled to support any keyrings.\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": WARNING: The OT config file says "
+            "to use the system keyring, "
+            "but OT wasn't compiled to support any keyrings.")
+            .Flush();
 #endif
     }
     return false;
@@ -1409,9 +1448,11 @@ bool OTKeyring::DeleteSecret(
 #elif defined(OT_KEYRING_FLATFILE)
         return OTKeyring::FlatFile_DeleteSecret(strUser, str_display);
 #else
-        otErr << "OTKeyring::DeleteSecret: WARNING: The OT config file says to "
-                 "use the system keyring, "
-                 "but OT wasn't compiled to support any keyrings.\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": WARNING: The OT config file says to "
+            "use the system keyring, "
+            "but OT wasn't compiled to support any keyrings.")
+            .Flush();
 #endif
     }
     return false;

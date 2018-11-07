@@ -185,8 +185,8 @@ bool CredentialSet::Path(proto::HDPath& output) const
         return found;
     }
 
-    otErr << OT_METHOD << __FUNCTION__
-          << ": Master credential not instantiated." << std::endl;
+    LogOutput(OT_METHOD)(__FUNCTION__)(": Master credential not instantiated.")
+        .Flush();
 
     return false;
 }
@@ -289,8 +289,9 @@ std::string CredentialSet::AddChildKeyCredential(
         Credential::Create<ChildKeyCredential>(api_, *this, revisedParameters);
 
     if (!childCred) {
-        otErr << __FUNCTION__ << ": Failed to instantiate child key credential."
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Failed to instantiate child key credential.")
+            .Flush();
 
         return output;
     }
@@ -306,23 +307,27 @@ bool CredentialSet::CreateMasterCredential(const NymParameters& nymParameters)
 {
 #if OT_CRYPTO_SUPPORTED_KEY_HD
     if (0 != index_) {
-        otErr << __FUNCTION__ << ": The master credential must be the first "
-              << "credential created." << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": The master credential must be the first "
+            "credential created.")
+            .Flush();
 
         return false;
     }
 
     if (0 != nymParameters.CredIndex()) {
-        otErr << __FUNCTION__ << ": Invalid CredIndex in nymParameters."
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Invalid CredIndex in nymParameters.")
+            .Flush();
 
         return false;
     }
 #endif
 
     if (m_MasterCredential) {
-        otErr << __FUNCTION__ << ": The master credential already exists."
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": The master credential already exists.")
+            .Flush();
 
         return false;
     }
@@ -336,8 +341,9 @@ bool CredentialSet::CreateMasterCredential(const NymParameters& nymParameters)
         return true;
     }
 
-    otErr << __FUNCTION__ << ": Failed to instantiate master credential."
-          << std::endl;
+    LogOutput(OT_METHOD)(__FUNCTION__)(
+        ": Failed to instantiate master credential.")
+        .Flush();
 
     return false;
 }
@@ -392,9 +398,10 @@ bool CredentialSet::ReEncryptPrivateCredentials(
                 m_MasterCredential->SelfSign(passwordToUse, &thePWData, true);
         }
         if (!bReEncryptMaster) {
-            otErr << "In " << __FILE__ << ", line " << __LINE__
-                  << ": Failed trying to re-encrypt the private master "
-                     "credential.\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)("In ")(__FILE__)(", line ")(
+                __LINE__)(": Failed trying to re-encrypt the private master "
+                          "credential.")
+                .Flush();
             return false;
         }
 
@@ -421,19 +428,23 @@ bool CredentialSet::ReEncryptPrivateCredentials(
                         pKey->SelfSign(passwordToUse, &thePWData, true);
                 }
                 if (!bReEncryptChildKeyCredential) {
-                    otErr << "In " << __FILE__ << ", line " << __LINE__
-                          << ": Failed trying to re-encrypt the private "
-                             "child key credential.\n";
+                    LogOutput(OT_METHOD)(__FUNCTION__)("In ")(__FILE__)(
+                        ", line ")(__LINE__)(
+                        ": Failed trying to re-encrypt the private "
+                        "child key credential.")
+                        .Flush();
                     return false;
                 }
                 if (bImporting) {
                     if (bSignedChildCredential) {
                         pKey->Save();
                     } else {
-                        otErr << "In " << __FILE__ << ", line " << __LINE__
-                              << ": Failed trying to re-sign the private "
-                                 "child "
-                                 "key credential.\n";
+                        LogOutput(OT_METHOD)(__FUNCTION__)("In ")(__FILE__)(
+                            ", line ")(__LINE__)(
+                            ": Failed trying to re-sign the private "
+                            "child "
+                            "key credential.")
+                            .Flush();
                         return false;
                     }
                 }
@@ -441,13 +452,15 @@ bool CredentialSet::ReEncryptPrivateCredentials(
 
             return true;  // <=== Success.
         } else
-            otErr << "In " << __FILE__ << ", line " << __LINE__
-                  << ": Failed trying to re-sign the master private "
-                     "credential.\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)("In ")(__FILE__)(", line ")(
+                __LINE__)(": Failed trying to re-sign the master private "
+                          "credential.")
+                .Flush();
     } else
-        otErr << "In " << __FILE__ << ", line " << __LINE__
-              << ": Failed: There is no private info on this master "
-                 "credential.\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)("In ")(__FILE__)(", line ")(
+            __LINE__)(": Failed: There is no private info on this master "
+                      "credential.")
+            .Flush();
 
     return false;
 }
@@ -465,8 +478,9 @@ bool CredentialSet::Load_MasterFromString(
         Credential::ExtractArmoredCredential(strInput);
 
     if (!serializedCred) {
-        otErr << __FUNCTION__
-              << ": Could not parse retrieved credential as a protobuf.\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Could not parse retrieved credential as a protobuf.")
+            .Flush();
         return false;
     }
 
@@ -479,8 +493,9 @@ bool CredentialSet::Load_MasterFromString(
     }
 
     if (!m_MasterCredential) {
-        otErr << __FUNCTION__
-              << ": Failed to construct credential from protobuf." << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Failed to construct credential from protobuf.")
+            .Flush();
 
         return false;
     }
@@ -500,9 +515,9 @@ bool CredentialSet::Load_Master(
         api_.Wallet().LoadCredential(strMasterCredID.Get(), serialized);
 
     if (!loaded) {
-        otErr << __FUNCTION__ << ": Failure: Master Credential "
-              << strMasterCredID << " doesn't exist for Nym " << strNymID
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Failure: Master Credential ")(
+            strMasterCredID)(" doesn't exist for Nym ")(strNymID)(".")
+            .Flush();
 
         return false;
     }
@@ -550,8 +565,9 @@ bool CredentialSet::LoadChildKeyCredential(const String& strSubID)
     bool loaded = api_.Wallet().LoadCredential(strSubID.Get(), child);
 
     if (!loaded) {
-        otErr << __FUNCTION__ << ": Failure: Key Credential " << strSubID
-              << " doesn't exist for Nym " << GetNymID() << "\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Failure: Key Credential ")(
+            strSubID)(" doesn't exist for Nym ")(GetNymID())(".")
+            .Flush();
         return false;
     }
 
@@ -566,12 +582,15 @@ bool CredentialSet::LoadChildKeyCredential(
         serializedCred, VERBOSE, mode_, proto::CREDROLE_ERROR, true);
 
     if (!validProto) {
-        otErr << __FUNCTION__ << ": Invalid serialized child key credential.\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Invalid serialized child key credential.")
+            .Flush();
         return false;
     }
 
     if (proto::CREDROLE_MASTERKEY == serializedCred.role()) {
-        otErr << __FUNCTION__ << ": unexpected master credential.\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Unexpected master credential.")
+            .Flush();
         return false;
     }
 
@@ -623,7 +642,9 @@ const Credential* CredentialSet::GetChildCredentialByIndex(
 {
     if ((nIndex < 0) ||
         (nIndex >= static_cast<std::int64_t>(m_mapCredentials.size()))) {
-        otErr << __FUNCTION__ << ": Index out of bounds: " << nIndex << "\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Index out of bounds: ")(nIndex)(
+            ".")
+            .Flush();
     } else {
         std::int32_t nLoopIndex = -1;
 
@@ -645,7 +666,9 @@ const std::string CredentialSet::GetChildCredentialIDByIndex(
     size_t nIndex) const
 {
     if (nIndex >= m_mapCredentials.size()) {
-        otErr << __FUNCTION__ << ": Index out of bounds: " << nIndex << "\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Index out of bounds: ")(nIndex)(
+            ".")
+            .Flush();
     } else {
         std::int32_t nLoopIndex = -1;
 
@@ -929,16 +952,18 @@ void CredentialSet::SerializeIDs(
 bool CredentialSet::WriteCredentials() const
 {
     if (!m_MasterCredential->Save()) {
-        otErr << __FUNCTION__ << ": Failed to save master credential."
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Failed to save master credential.")
+            .Flush();
 
         return false;
     };
 
     for (auto& it : m_mapCredentials) {
         if (!it.second->Save()) {
-            otErr << __FUNCTION__ << ": Failed to save child credential."
-                  << std::endl;
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Failed to save child credential.")
+                .Flush();
 
             return false;
         }
@@ -1123,8 +1148,10 @@ bool CredentialSet::Verify(
     std::string signerID(sig.credentialid());
 
     if (signerID == GetMasterCredID()) {
-        otErr << __FUNCTION__ << ": Master credentials are only allowed to "
-              << "sign other credentials." << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Master credentials are only allowed to "
+            "sign other credentials.")
+            .Flush();
 
         return false;
     }
@@ -1177,8 +1204,9 @@ bool CredentialSet::TransportKey(Data& publicKey, OTPassword& privateKey) const
         }
     }
 
-    otErr << __FUNCTION__ << ": No child credentials are capable of "
-          << "generating transport keys." << std::endl;
+    LogOutput(OT_METHOD)(__FUNCTION__)(": No child credentials are capable of "
+                                       "generating transport keys.")
+        .Flush();
 
     return haveKey;
 }

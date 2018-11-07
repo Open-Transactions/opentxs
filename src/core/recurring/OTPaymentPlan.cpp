@@ -365,9 +365,10 @@ bool OTPaymentPlan::VerifyMerchantSignature(const Nym& RECIPIENT_NYM) const
     OTPaymentPlan theMerchantCopy{api_};
     if (!m_strMerchantSignedCopy->Exists() ||
         !theMerchantCopy.LoadContractFromString(m_strMerchantSignedCopy)) {
-        otErr << "OTPaymentPlan::" << __FUNCTION__
-              << ": Expected Merchant's signed copy to be inside the "
-                 "payment plan, but unable to load.\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Expected Merchant's signed copy to be inside the "
+            "payment plan, but unable to load.")
+            .Flush();
         return false;
     }
 
@@ -413,8 +414,9 @@ bool OTPaymentPlan::VerifyAgreement(
     const ClientContext& sender) const
 {
     if (!VerifyMerchantSignature(recipient.RemoteNym())) {
-        otErr << "OTPaymentPlan::" << __FUNCTION__
-              << ": Merchant's signature failed to verify.\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Merchant's signature failed to verify.")
+            .Flush();
 
         return false;
     }
@@ -430,29 +432,30 @@ bool OTPaymentPlan::VerifyAgreement(
     // Verify Transaction Num and Closing Nums against SENDER's issued list
     if ((GetCountClosingNumbers() < 1) ||
         !sender.VerifyIssuedNumber(GetTransactionNum())) {
-        otErr << "OTPaymentPlan::" << __FUNCTION__ << ": Transaction number "
-              << GetTransactionNum() << " isn't on sender's issued list, "
-              << "OR there weren't enough closing numbers.\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Transaction number ")(
+            GetTransactionNum())(" isn't on sender's issued list, "
+                                 "OR there weren't enough closing numbers.")
+            .Flush();
 
         return false;
     }
 
     for (std::int32_t i = 0; i < GetCountClosingNumbers(); i++)
         if (!sender.VerifyIssuedNumber(GetClosingTransactionNoAt(i))) {
-            otErr << "OTPaymentPlan::" << __FUNCTION__
-                  << ": Closing transaction number "
-                  << GetClosingTransactionNoAt(i)
-                  << " isn't on sender's issued list.\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(": Closing transaction number ")(
+                GetClosingTransactionNoAt(i))(" isn't on sender's issued list.")
+                .Flush();
 
             return false;
         }
 
     // Verify Recipient closing numbers against RECIPIENT's issued list.
     if (GetRecipientCountClosingNumbers() < 2) {
-        otErr << "OTPaymentPlan::" << __FUNCTION__
-              << ": Failed verifying: "
-                 "Expected opening and closing transaction numbers for "
-                 "recipient. (2 total.)\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Failed verifying: "
+            "Expected opening and closing transaction numbers for "
+            "recipient. (2 total).")
+            .Flush();
 
         return false;
     }
@@ -460,10 +463,11 @@ bool OTPaymentPlan::VerifyAgreement(
     for (std::int32_t i = 0; i < GetRecipientCountClosingNumbers(); i++)
         if (!recipient.VerifyIssuedNumber(
                 GetRecipientClosingTransactionNoAt(i))) {
-            otErr << "OTPaymentPlan::" << __FUNCTION__
-                  << ": Recipient's Closing transaction number "
-                  << GetRecipientClosingTransactionNoAt(i)
-                  << " isn't on recipient's issued list.\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Recipient's Closing transaction number ")(
+                GetRecipientClosingTransactionNoAt(i))(
+                " isn't on recipient's issued list.")
+                .Flush();
 
             return false;
         }
@@ -483,8 +487,8 @@ bool OTPaymentPlan::SetPaymentPlan(
 {
 
     if (lPaymentAmount <= 0) {
-        otErr << "Payment Amount less than zero in "
-                 "OTPaymentPlan::SetPaymentPlan\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Payment Amount less than zero.")
+            .Flush();
         return false;
     }
 
@@ -523,7 +527,9 @@ bool OTPaymentPlan::SetPaymentPlan(
     // Is this even a problem? todo: verify that time64_t is unisigned.
     if (OT_TIME_ZERO > tPlanLength)  // if it's a negative number...
     {
-        otErr << "Attempt to use negative number for plan length.\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Attempt to use negative number for plan length.")
+            .Flush();
         return false;
     }
 
@@ -532,7 +538,9 @@ bool OTPaymentPlan::SetPaymentPlan(
 
     if (0 > nMaxPayments)  // if it's a negative number...
     {
-        otErr << "Attempt to use negative number for plan max payments.\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Attempt to use negative number for plan max payments.")
+            .Flush();
         return false;
     }
 
@@ -668,8 +676,9 @@ bool OTPaymentPlan::ProcessPayment(
     {
         pSenderNym = api_.Wallet().Nym(SENDER_NYM_ID);
         if (nullptr == pSenderNym) {
-            otErr << "Failure loading Sender Nym in " << __FUNCTION__ << ": "
-                  << SENDER_NYM_ID.str() << std::endl;
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Failure loading Sender Nym in: ")(SENDER_NYM_ID)(".")
+                .Flush();
             FlagForRemoval();  // Remove it from future Cron processing, please.
             return false;
         }
@@ -687,8 +696,9 @@ bool OTPaymentPlan::ProcessPayment(
     {
         pRecipientNym = api_.Wallet().Nym(RECIPIENT_NYM_ID);
         if (nullptr == pRecipientNym) {
-            otErr << "Failure loading Recipient Nym in " << __FUNCTION__ << ": "
-                  << RECIPIENT_NYM_ID.str() << std::endl;
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Failure loading Recipient Nym in: ")(RECIPIENT_NYM_ID)(".")
+                .Flush();
             FlagForRemoval();  // Remove it from future Cron processing, please.
             return false;
         }
@@ -703,9 +713,11 @@ bool OTPaymentPlan::ProcessPayment(
 
     if ((nullptr == pPlan) || !pPlan->VerifyMerchantSignature(*pRecipientNym) ||
         !pPlan->VerifyCustomerSignature(*pSenderNym)) {
-        otErr << "Failed verifying original signatures on Payment plan (while "
-                 "attempting to process...) "
-                 "Flagging for removal.\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Failed verifying original signatures on Payment plan (while "
+            "attempting to process...) "
+            "Flagging for removal.")
+            .Flush();
         FlagForRemoval();  // Remove it from Cron.
         return false;
     }
@@ -841,8 +853,9 @@ bool OTPaymentPlan::ProcessPayment(
 
         if ((false == bSuccessLoadingSenderInbox) ||
             (false == bSuccessLoadingRecipientInbox)) {
-            otErr << __FUNCTION__
-                  << ": ERROR loading or generating inbox ledger.\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": ERROR loading or generating inbox ledger.")
+                .Flush();
         } else {
             // Generate new transaction numbers for these new transactions
             std::int64_t lNewTransactionNumber =
@@ -959,10 +972,10 @@ bool OTPaymentPlan::ProcessPayment(
 
                 // If ANY of these failed, then roll them all back and break.
                 if (!bMoveSender || !bMoveRecipient) {
-                    otErr
-                        << __FUNCTION__
-                        << ": Very strange! Funds were available but debit or "
-                           "credit failed while performing payment.\n";
+                    LogOutput(OT_METHOD)(__FUNCTION__)(
+                        ": Very strange! Funds were available but debit or "
+                        "credit failed while performing payment.")
+                        .Flush();
                     // We won't save the files anyway, if this failed.
                     bSuccess = false;
                 }
