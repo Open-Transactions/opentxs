@@ -43,8 +43,9 @@ ContactSection::ContactSection(
           create_group(nym, section, item))
 {
     if (0 == version) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Warning: malformed version. "
-              << "Setting to " << parentVersion << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Warning: malformed version. "
+                                           "Setting to ")(parentVersion)(".")
+            .Flush();
     }
 }
 

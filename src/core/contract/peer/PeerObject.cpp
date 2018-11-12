@@ -68,8 +68,7 @@ PeerObject::PeerObject(
             payment_.reset(new std::string(serialized.otpayment()));
         } break;
         default: {
-            otErr << OT_METHOD << __FUNCTION__ << ": Incorrect type."
-                  << std::endl;
+            LogOutput(OT_METHOD)(__FUNCTION__)(": Incorrect type.").Flush();
         }
     }
 }
@@ -190,8 +189,7 @@ std::unique_ptr<PeerObject> PeerObject::Factory(
     if (valid) {
         output.reset(new PeerObject(contacts, wallet, signerNym, serialized));
     } else {
-        otErr << OT_METHOD << __FUNCTION__ << ": invalid peer object."
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Invalid peer object.").Flush();
     }
 
     return output;
@@ -273,7 +271,7 @@ proto::PeerObject PeerObject::Serialize() const
             break;
         }
         default: {
-            otErr << OT_METHOD << __FUNCTION__ << ": Unknown type" << std::endl;
+            LogOutput(OT_METHOD)(__FUNCTION__)(": Unknown type.").Flush();
         }
     }
 
@@ -304,7 +302,7 @@ bool PeerObject::Validate() const
             break;
         }
         default: {
-            otErr << OT_METHOD << __FUNCTION__ << ": Unknown type" << std::endl;
+            LogOutput(OT_METHOD)(__FUNCTION__)(": Unknown type.").Flush();
         }
     }
 

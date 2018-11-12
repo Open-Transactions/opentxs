@@ -11,6 +11,8 @@
 #include "opentxs/core/Identifier.hpp"
 #include "opentxs/core/Log.hpp"
 
+#define OT_METHOD "opentxs::Signable::"
+
 namespace opentxs
 {
 Signable::Signable(const ConstNym& nym)
@@ -100,7 +102,7 @@ bool Signable::update_signature(const Lock& lock)
     OT_ASSERT(verify_write_lock(lock));
 
     if (!nym_) {
-        otErr << __FUNCTION__ << ": Missing nym." << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Missing nym.").Flush();
 
         return false;
     }
@@ -118,13 +120,13 @@ bool Signable::Validate() const
 bool Signable::verify_write_lock(const Lock& lock) const
 {
     if (lock.mutex() != &lock_) {
-        otErr << __FUNCTION__ << ": Incorrect mutex." << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Incorrect mutex.").Flush();
 
         return false;
     }
 
     if (false == lock.owns_lock()) {
-        otErr << __FUNCTION__ << ": Lock not owned." << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Lock not owned.").Flush();
 
         return false;
     }
@@ -137,7 +139,7 @@ bool Signable::verify_signature(const Lock& lock, const proto::Signature&) const
     OT_ASSERT(verify_write_lock(lock));
 
     if (!nym_) {
-        otErr << __FUNCTION__ << ": Missing nym." << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Missing nym.").Flush();
 
         return false;
     }

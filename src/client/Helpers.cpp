@@ -46,10 +46,10 @@ std::shared_ptr<OTPayment> GetInstrumentByReceiptID(
 
     auto pTransaction = ledger.GetTransaction(lReceiptId);
     if (false == bool(pTransaction)) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": supposedly good receipt ID, but uncovered nullptr "
-                 "transaction: "
-              << lReceiptId << "\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Supposedly good receipt ID, but uncovered nullptr "
+            "transaction: ")(lReceiptId)(".")
+            .Flush();
         return nullptr;  // Weird.
     }
     return GetInstrument(theNym, ledger, pTransaction);
@@ -64,9 +64,10 @@ std::shared_ptr<OTPayment> GetInstrumentByIndex(
 
     auto pTransaction = ledger.GetTransactionByIndex(nIndex);
     if (false == bool(pTransaction)) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": supposedly good index, but uncovered nullptr transaction: "
-              << nIndex << "\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Supposedly good index, but uncovered nullptr transaction: ")(
+            nIndex)(".")
+            .Flush();
         return nullptr;  // Weird.
     }
     return GetInstrument(theNym, ledger, pTransaction);
@@ -104,11 +105,11 @@ std::shared_ptr<OTPayment> GetInstrument(
             ledger.GetTransaction(static_cast<std::int64_t>(lTransactionNum));
 
         if (false == bool(pTransaction)) {
-            otErr << OT_METHOD << __FUNCTION__
-                  << ": good index but uncovered nullptr "
-                     "after trying to load full version of abbreviated receipt "
-                     "with transaction number: "
-                  << lTransactionNum << "\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Good index but uncovered nullptr "
+                "after trying to load full version of abbreviated receipt "
+                "with transaction number: ")(lTransactionNum)(".")
+                .Flush();
             return nullptr;  // Weird. Clearly I need the full box receipt, if
                              // I'm to get the instrument out of it.
         }
@@ -180,9 +181,10 @@ std::shared_ptr<OTPayment> extract_payment_instrument_from_notice(
         // --------------------
         auto pMsg{pTransaction->API().Factory().Message()};
         if (false == bool(pMsg)) {
-            otErr << OT_METHOD << __FUNCTION__
-                  << ": Null:  Assert while allocating memory "
-                     "for an OTMessage!\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Null: Assert while allocating memory "
+                "for an OTMessage!")
+                .Flush();
             OT_FAIL;
         }
         if (!pMsg->LoadContractFromString(strMsg)) {

@@ -28,8 +28,9 @@ ContactData::ContactData(
     , sections_(sections)
 {
     if (0 == version) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Warning: malformed version. "
-              << "Setting to " << targetVersion << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Warning: malformed version. "
+                                           "Setting to ")(targetVersion)(".")
+            .Flush();
     }
 }
 
@@ -865,8 +866,7 @@ ContactData ContactData::SetScope(
 
         return ContactData(nym_, version, version, mapCopy);
     } else {
-        otErr << OT_METHOD << __FUNCTION__ << ": Scope already set."
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Scope already set.").Flush();
         return *this;
     }
 }

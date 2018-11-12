@@ -114,8 +114,7 @@ bool OTClient::AcceptEntireNymbox(
     } else if (!theNymbox.VerifyAccount(nym)) {
         // If there aren't any notices in the nymbox, no point wasting a # to
         // process an empty box.
-        otErr << OT_METHOD << __FUNCTION__ << ":  VerifyAccount() failed."
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": VerifyAccount() failed.").Flush();
 
         return false;
     }
@@ -218,11 +217,12 @@ bool OTClient::AcceptEntireNymbox(
         // if it's abbreviated but NOT a replyNotice.
         if (pTransaction->IsAbbreviated() &&
             (pTransaction->GetType() != transactionType::replyNotice)) {
-            otErr << OT_METHOD << __FUNCTION__
-                  << ": Error: Unexpected abbreviated receipt "
-                     "in Nymbox, even after supposedly loading "
-                     "all box receipts. (And it's not a "
-                     "replyNotice, either!)\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Error: Unexpected abbreviated receipt "
+                "in Nymbox, even after supposedly loading "
+                "all box receipts. (And it's not a "
+                "replyNotice, either)!")
+                .Flush();
         }
 
         auto strRespTo = String::Factory();
@@ -459,11 +459,12 @@ bool OTClient::AcceptEntireNymbox(
                     pItem->GetAttachment(strOriginalReply);
 
                     if (!strOriginalReply->Exists()) {
-                        otErr << OT_METHOD << __FUNCTION__
-                              << ": Error loading original "
-                                 "server reply message from "
-                                 "replyNotice. (It appears to "
-                                 "be zero length.)\n";
+                        LogOutput(OT_METHOD)(__FUNCTION__)(
+                            ": Error loading original "
+                            "server reply message from "
+                            "replyNotice. (It appears to "
+                            "be zero length).")
+                            .Flush();
                     } else {
                         auto pMessage = api_.Factory().Message();
                         OT_ASSERT_MSG(
@@ -473,10 +474,11 @@ bool OTClient::AcceptEntireNymbox(
 
                         if (!pMessage->LoadContractFromString(
                                 strOriginalReply)) {
-                            otErr << OT_METHOD << __FUNCTION__
-                                  << ": Failed loading original server reply "
-                                     "message from replyNotice:\n\n"
-                                  << strOriginalReply << "\n\n";
+                            LogOutput(OT_METHOD)(__FUNCTION__)(
+                                ": Failed loading original server reply "
+                                "message from replyNotice: ")(strOriginalReply)(
+                                ".")
+                                .Flush();
                         } else {
                             // pMessage needs to be allocated on the heap since
                             // ProcessServerReply takes ownership of it.
@@ -755,11 +757,12 @@ bool OTClient::AcceptEntireNymbox(
 
             return ready;
         } else {
-            otErr << OT_METHOD << __FUNCTION__
-                  << ": Error processing processNymbox command.\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Error processing processNymbox command.")
+                .Flush();
         }
     } else {
-        otErr << OT_METHOD << __FUNCTION__ << ": Nothing to accept.\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Nothing to accept.").Flush();
     }
 
     return false;
@@ -778,8 +781,8 @@ bool OTClient::add_item_to_workflow(
         message->LoadContractFromString(String::Factory(item.c_str()));
 
     if (false == loaded) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Failed to instantiate message"
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Failed to instantiate message.")
+            .Flush();
 
         return false;
     }
@@ -789,8 +792,8 @@ bool OTClient::add_item_to_workflow(
     const auto decrypted = envelope.Open(nym, plaintext);
 
     if (false == decrypted) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Failed to decrypt message"
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Failed to decrypt message.")
+            .Flush();
 
         return false;
     }
@@ -815,13 +818,13 @@ bool OTClient::add_item_to_workflow(
         workflow_.ReceiveCheque(nym.ID(), *cheque, transportItem);
 
     if (workflow->empty()) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Failed to create workflow."
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Failed to create workflow.")
+            .Flush();
 
         return false;
     } else {
-        otErr << OT_METHOD << __FUNCTION__ << ": Started workflow "
-              << workflow->str() << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Started workflow ")(workflow)(".")
+            .Flush();
     }
 
     return true;
@@ -945,8 +948,7 @@ bool OTClient::createInstrumentNoticeFromPeerObject(
     OT_ASSERT(proto::PEEROBJECT_PAYMENT == peerObject.Type());
 
     if (false == peerObject.Validate()) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Invalid peer object"
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Invalid peer object.").Flush();
 
         return false;
     }
@@ -958,10 +960,10 @@ bool OTClient::createInstrumentNoticeFromPeerObject(
     const auto& payment = *peerObject.Payment();
 
     if (payment.empty()) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Payment as received was apparently empty. Maybe the sender "
-                 "sent it that way?"
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Payment as received was apparently empty. Maybe the sender "
+            "sent it that way?")
+            .Flush();
 
         return false;
     }
@@ -1054,8 +1056,9 @@ bool OTClient::harvest_unused(ServerContext& context)
         const auto workflow = workflow_.LoadWorkflow(nymID, workflowID);
 
         if (false == bool(workflow)) {
-            otErr << OT_METHOD << __FUNCTION__ << ": Failed to load workflow "
-                  << workflowID->str() << std::endl;
+            LogOutput(OT_METHOD)(__FUNCTION__)(": Failed to load workflow ")(
+                workflowID)(".")
+                .Flush();
 
             continue;
         }
@@ -1074,8 +1077,9 @@ bool OTClient::harvest_unused(ServerContext& context)
 
             case proto::PAYMENTWORKFLOWTYPE_ERROR:
             default: {
-                otErr << OT_METHOD << __FUNCTION__
-                      << ": Warning: unhandled workflow typw" << std::endl;
+                LogOutput(OT_METHOD)(__FUNCTION__)(
+                    ": Warning: Unhandled workflow type.")
+                    .Flush();
                 output &= false;
                 continue;
             }
@@ -1095,8 +1099,9 @@ bool OTClient::harvest_unused(ServerContext& context)
 
             case proto::PAYMENTWORKFLOWSTATE_ERROR:
             default: {
-                otErr << OT_METHOD << __FUNCTION__
-                      << ": Warning: unhandled workflow state" << std::endl;
+                LogOutput(OT_METHOD)(__FUNCTION__)(
+                    ": Warning: unhandled workflow state.")
+                    .Flush();
                 output &= false;
                 continue;
             }
@@ -1112,8 +1117,9 @@ bool OTClient::harvest_unused(ServerContext& context)
                     api::client::Workflow::InstantiateCheque(api_, *workflow);
 
                 if (false == bool(cheque)) {
-                    otErr << OT_METHOD << __FUNCTION__
-                          << ": Failed to load cheque" << std::endl;
+                    LogOutput(OT_METHOD)(__FUNCTION__)(
+                        ": Failed to load cheque.")
+                        .Flush();
 
                     continue;
                 }
@@ -1128,8 +1134,9 @@ bool OTClient::harvest_unused(ServerContext& context)
             case proto::PAYMENTWORKFLOWTYPE_INCOMINGCHEQUE:
             case proto::PAYMENTWORKFLOWTYPE_INCOMINGINVOICE:
             default: {
-                otErr << OT_METHOD << __FUNCTION__
-                      << ": Warning: unhandled workflow type" << std::endl;
+                LogOutput(OT_METHOD)(__FUNCTION__)(
+                    ": Warning: unhandled workflow type.")
+                    .Flush();
                 output &= false;
                 continue;
             }
@@ -1140,8 +1147,9 @@ bool OTClient::harvest_unused(ServerContext& context)
     // be returned to the available list.
     for (const auto& number : available) {
         if (false == context.VerifyAvailableNumber(number)) {
-            otErr << OT_METHOD << __FUNCTION__ << ": Restoring number "
-                  << number << std::endl;
+            LogOutput(OT_METHOD)(__FUNCTION__)(": Restoring number ")(number)(
+                ".")
+                .Flush();
             context.RecoverAvailableNumber(number);
         }
     }
@@ -1158,9 +1166,9 @@ bool OTClient::init_new_account(
     OT_ASSERT(account);
 
     if (false == account.get().InitBoxes(*context.Nym())) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Error initializing boxes for account " << accountID.str()
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Error initializing boxes for account ")(accountID)(".")
+            .Flush();
 
         return false;
     }
@@ -1170,8 +1178,8 @@ bool OTClient::init_new_account(
     auto haveHash = account.get().GetInboxHash(inboxHash);
 
     if (false == haveHash) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Failed to get inbox hash"
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Failed to get inbox hash.")
+            .Flush();
 
         return false;
     }
@@ -1179,8 +1187,8 @@ bool OTClient::init_new_account(
     haveHash = account.get().GetOutboxHash(outboxHash);
 
     if (false == haveHash) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Failed to get outbox hash"
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Failed to get outbox hash.")
+            .Flush();
 
         return false;
     }
@@ -1190,8 +1198,9 @@ bool OTClient::init_new_account(
     auto hashSet = nymfile.It().SetInboxHash(accountID.str(), inboxHash);
 
     if (false == hashSet) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Failed to set inbox hash on nymfile" << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Failed to set inbox hash on nymfile.")
+            .Flush();
 
         return false;
     }
@@ -1199,8 +1208,9 @@ bool OTClient::init_new_account(
     hashSet = nymfile.It().SetOutboxHash(accountID.str(), outboxHash);
 
     if (false == hashSet) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Failed to set outbox hash on nymfile" << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Failed to set outbox hash on nymfile.")
+            .Flush();
 
         return false;
     }
@@ -1228,10 +1238,10 @@ void OTClient::load_str_trans_add_to_ledger(
     auto pTransType = api_.Factory().Transaction(str_trans_to_add);
 
     if (false == bool(pTransType)) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Error instantiating transaction type "
-                 "based on str_trans_to_add:\n"
-              << str_trans_to_add << "\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Error instantiating transaction type "
+            "based on str_trans_to_add: ")(str_trans_to_add)(".")
+            .Flush();
 
         return;
     }
@@ -1278,9 +1288,10 @@ void OTClient::load_str_trans_add_to_ledger(
         ledger.SaveExpiredBox();
 
     if (!pCopy->SaveBoxReceipt(ledger))
-        otErr << OT_METHOD << __FUNCTION__ << ": " << str_box_type
-              << " Failed trying to SaveBoxReceipt. Contents:\n\n"
-              << str_trans_to_add << "\n\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": ")(str_box_type)(
+            ". Failed trying to SaveBoxReceipt. Contents: ")(str_trans_to_add)(
+            ".")
+            .Flush();
 }
 
 void OTClient::process_incoming_instrument(
@@ -1448,11 +1459,11 @@ bool OTClient::process_account_data(
             api_.Wallet().UpdateAccount(accountID, context, account);
 
         if (updated) {
-            otErr << OT_METHOD << __FUNCTION__
-                  << ": Saved updated account file." << std::endl;
+            LogOutput(OT_METHOD)(__FUNCTION__)(": Saved updated account file.")
+                .Flush();
         } else {
-            otErr << OT_METHOD << __FUNCTION__ << ": Failed to save account."
-                  << std::endl;
+            LogOutput(OT_METHOD)(__FUNCTION__)(": Failed to save account.")
+                .Flush();
 
             OT_FAIL
         }
@@ -1495,9 +1506,10 @@ bool OTClient::process_account_data(
                     nymfile.It().SetInboxHash(str_acct_id, THE_HASH);
 
                 if (false == bHash) {
-                    otErr << OT_METHOD << __FUNCTION__
-                          << ": Failed setting inbox hash for account: "
-                          << str_acct_id << " to (" << THE_HASH->str() << ")\n";
+                    LogOutput(OT_METHOD)(__FUNCTION__)(
+                        ": Failed setting inbox hash for account: ")(
+                        str_acct_id)(" to (")(THE_HASH)(").")
+                        .Flush();
                 }
             }
 
@@ -1574,10 +1586,10 @@ bool OTClient::process_account_data(
             theInbox->SaveContract();
             theInbox->SaveInbox(Identifier::Factory());
         } else {
-            otErr << OT_METHOD << __FUNCTION__
-                  << ": Error loading (from string) or verifying "
-                     "inbox:\n\n"
-                  << inbox << "\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Error loading (from string) or verifying "
+                "inbox: ")(inbox)(".")
+                .Flush();
         }
     }
     if (outbox.Exists()) {
@@ -1609,9 +1621,10 @@ bool OTClient::process_account_data(
                     nymfile.It().SetOutboxHash(str_acct_id, THE_HASH);
 
                 if (false == bHash) {
-                    otErr << OT_METHOD << __FUNCTION__
-                          << ": Failed setting outbox hash for account: "
-                          << str_acct_id << " to (" << THE_HASH->str() << ")\n";
+                    LogOutput(OT_METHOD)(__FUNCTION__)(
+                        ": Failed setting outbox hash for account: ")(
+                        str_acct_id)(" to (")(THE_HASH)(").")
+                        .Flush();
                 }
             }
 
@@ -1625,10 +1638,10 @@ bool OTClient::process_account_data(
             theOutbox->SaveContract();
             theOutbox->SaveOutbox(Identifier::Factory());
         } else {
-            otErr << OT_METHOD << __FUNCTION__
-                  << ": Error loading (from string) or verifying "
-                     "outbox:\n\n"
-                  << outbox << "\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Error loading (from string) or verifying "
+                "outbox: ")(outbox)(".")
+                .Flush();
         }
     }
 
@@ -1788,9 +1801,9 @@ void OTClient::ProcessDepositChequeResponse(
     auto strCheque = String::Factory();
     pOriginalItem->GetAttachment(strCheque);
     if (!theCheque->LoadContractFromString(strCheque)) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": ERROR loading cheque from string:\n"
-              << strCheque << "\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": ERROR loading cheque from string: ")(strCheque)(".")
+            .Flush();
         return;
     }  // else: Okay, we've got the cheque!
     // ----------------------------------------------------------
@@ -1826,10 +1839,11 @@ void OTClient::ProcessDepositChequeResponse(
             lRemoveTransaction = pTransaction->GetTransactionNum();
 
             if (false == pLedger->DeleteBoxReceipt(lRemoveTransaction)) {
-                otErr << OT_METHOD << __FUNCTION__
-                      << ": Failed trying to delete the box receipt for a "
-                         "cheque being removed from a payments inbox: "
-                      << lRemoveTransaction << "\n";
+                LogOutput(OT_METHOD)(__FUNCTION__)(
+                    ": Failed trying to delete the box receipt for a "
+                    "cheque being removed from a payments inbox: ")(
+                    lRemoveTransaction)(".")
+                    .Flush();
             }
             if (pLedger->RemoveTransaction(lRemoveTransaction)) {
                 pLedger->ReleaseSignatures();
@@ -1837,9 +1851,10 @@ void OTClient::ProcessDepositChequeResponse(
                 pLedger->SaveContract();
 
                 if (!pLedger->SavePaymentInbox()) {
-                    otErr << OT_METHOD << __FUNCTION__
-                          << ": Failure while trying to save payment "
-                             "inbox.\n";
+                    LogOutput(OT_METHOD)(__FUNCTION__)(
+                        ": Failure while trying to save payment "
+                        "inbox.")
+                        .Flush();
                 } else {
                     LogNormal(OT_METHOD)(__FUNCTION__)(
                         ": Removed cheque from payments inbox. "
@@ -1981,9 +1996,10 @@ void OTClient::ProcessIncomingCronItemReply(
         // it open if success. Perfect.
         //
         if (!context.ConsumeIssued(lNymOpeningNumber)) {
-            otErr << OT_METHOD << __FUNCTION__
-                  << ": Error removing issued number from user nym "
-                     "(for a cron item.)\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Error removing issued number from user nym "
+                "(for a cron item).")
+                .Flush();
         }
         // If the activation was a failure, we can add all the extra
         // transaction numbers BACK to the Nym, that were being used as
@@ -2029,16 +2045,16 @@ void OTClient::ProcessIncomingCronItemReply(
         const bool bRemovedOutpayment =
             nymfile.It().RemoveOutpaymentsByTransNum(lNymOpeningNumber);
         if (!bRemovedOutpayment) {
-            otErr << __FUNCTION__
-                  << ": Failed trying to remove outpayment with "
-                     "transaction num: "
-                  << lNymOpeningNumber << "\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Failed trying to remove outpayment with "
+                "transaction num: ")(lNymOpeningNumber)(".")
+                .Flush();
         }
         if (!pMsg->m_ascPayload->GetString(strInstrument)) {
-            otErr << OT_METHOD << __FUNCTION__
-                  << ": Unable to find payment instrument in outpayment "
-                     "message with transaction num: "
-                  << lNymOpeningNumber << "\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Unable to find payment instrument in outpayment "
+                "message with transaction num: ")(lNymOpeningNumber)(".")
+                .Flush();
         } else {
             // At this point, we've removed the outpayment already, and
             // it will be deleted when it goes out of scope already. And
@@ -2258,10 +2274,11 @@ void OTClient::ProcessIncomingCronItemReply(
                     // be deleted.
 
                     if (false == thePmntInbox->DeleteBoxReceipt(receipt_id)) {
-                        otErr << OT_METHOD << __FUNCTION__
-                              << ": Failed trying to delete the box receipt "
-                                 "for a transaction being removed from the "
-                                 "payment inbox.\n";
+                        LogOutput(OT_METHOD)(__FUNCTION__)(
+                            ": Failed trying to delete the box receipt "
+                            "for a transaction being removed from the "
+                            "payment inbox.")
+                            .Flush();
                     }
                     if (thePmntInbox->RemoveTransaction(receipt_id)) {
                         thePmntInbox->ReleaseSignatures();
@@ -2269,11 +2286,10 @@ void OTClient::ProcessIncomingCronItemReply(
                         thePmntInbox->SaveContract();
 
                         if (!thePmntInbox->SavePaymentInbox()) {
-                            otErr << __FUNCTION__
-                                  << ": "
-                                     "Failure while trying to save payment "
-                                     "inbox."
-                                     "\n";
+                            LogOutput(OT_METHOD)(__FUNCTION__)(
+                                ": Failure while trying to save payment "
+                                "inbox.")
+                                .Flush();
                         } else {
                             LogNormal(OT_METHOD)(__FUNCTION__)(
                                 ": Removed instrument from payment inbox."
@@ -2281,10 +2297,10 @@ void OTClient::ProcessIncomingCronItemReply(
                                 .Flush();
                         }
                     } else {
-                        otErr << OT_METHOD << __FUNCTION__
-                              << ": Failed trying to remove transaction "
-                                 "from payment inbox. (Should never happen.) "
-                                 "\n";
+                        LogOutput(OT_METHOD)(__FUNCTION__)(
+                            ": Failed trying to remove transaction "
+                            "from payment inbox. (Should never happen).")
+                            .Flush();
                     }
                     // Note: I could break right here, if this is the only
                     // transaction in the payment inbox which contains the
@@ -2385,13 +2401,13 @@ void OTClient::ProcessIncomingCronItemReply(
                         theRecordBox->AddTransaction(newTransaction);
 
                     if (!bAdded) {
-                        otErr << OT_METHOD << __FUNCTION__
-                              << ": Unable to add transaction "
-                              << newTransaction->GetTransactionNum()
-                              << " to record box (after tentatively removing "
-                                 "from payment outbox, an action that is now "
-                                 "canceled.)"
-                                 "\n";
+                        LogOutput(OT_METHOD)(__FUNCTION__)(
+                            ": Unable to add transaction ")(
+                            newTransaction->GetTransactionNum())(
+                            " to record box (after tentatively removing "
+                            "from payment outbox, an action that is now "
+                            "cancelled).")
+                            .Flush();
                     } else {
                         theRecordBox->ReleaseSignatures();
                         theRecordBox->SignContract(*context.Nym());
@@ -2411,24 +2427,24 @@ void OTClient::ProcessIncomingCronItemReply(
                         if (!newTransaction->SaveBoxReceipt(*theRecordBox)) {
                             auto strNewTransaction =
                                 String::Factory(*newTransaction);
-                            otErr << OT_METHOD << __FUNCTION__
-                                  << ": for Record Box... "
-                                     "Failed trying to SaveBoxReceipt. "
-                                     "Contents:\n\n"
-                                  << strNewTransaction << "\n\n";
+                            LogOutput(OT_METHOD)(__FUNCTION__)(
+                                ": For Record Box... "
+                                "Failed trying to SaveBoxReceipt. "
+                                "Contents: ")(strNewTransaction)(".")
+                                .Flush();
                         }
                     }
                 }     // if (nullptr != pNewTransaction)
                 else  // should never happen
                 {
-                    otErr << __FUNCTION__
-                          << ": Failed while trying to generate "
-                             "transaction in "
-                             "order to add a new transaction to record box "
-                             "(for a payment instrument we just removed "
-                             "from the "
-                             "outpayments box): "
-                          << context.Nym()->ID().str() << "\n";
+                    LogOutput(OT_METHOD)(__FUNCTION__)(
+                        ": Failed while trying to generate "
+                        "transaction in "
+                        "order to add a new transaction to record box "
+                        "(for a payment instrument we just removed "
+                        "from the "
+                        "outpayments box): ")(context.Nym()->ID())(".")
+                        .Flush();
                 }
             }  // if (strInstrument.Exists())
                // (then add a copy to record box.)
@@ -2546,17 +2562,16 @@ void OTClient::ProcessIncomingTransaction(
                         theRequestBasket->HarvestClosingNumbers(
                             context, context.Server(), true);
                     } else {
-                        otErr << "(atExchangeBasket) Error loading "
-                                 "original"
-                              << " basket request in "
-                              << "OTClient::ProcessIncomingTransactions"
-                              << std::endl;
+                        LogOutput(OT_METHOD)(__FUNCTION__)(
+                            ": (atExchangeBasket) Error loading "
+                            "original basket request.")
+                            .Flush();
                     }
                 } else {
-                    otErr << "(atExchangeBasket) Error loading original "
-                          << "item from string in "
-                          << "OTClient::ProcessIncomingTransactions"
-                          << std::endl;
+                    LogOutput(OT_METHOD)(__FUNCTION__)(
+                        ": (atExchangeBasket) Error loading original "
+                        "item from string.")
+                        .Flush();
                 }
             }  // if exchangeBasket was a failure
         } break;
@@ -2593,10 +2608,10 @@ void OTClient::ProcessIncomingTransaction(
                 if ((pOriginalItem)) {
                     if (!context.ConsumeIssued(
                             pOriginalItem->GetReferenceToNum())) {
-                        otErr << "(atCancelCronItem) Error removing "
-                              << "issued number from user nym in "
-                              << "OTClient::ProcessIncomingTransactions"
-                              << std::endl;
+                        LogOutput(OT_METHOD)(__FUNCTION__)(
+                            ": (atCancelCronItem) Error removing "
+                            "issued number from user nym.")
+                            .Flush();
                     }
                     // I don't have to call RemoveTransactionNum for the
                     // closing number (though the server does.) Why not?
@@ -2605,10 +2620,10 @@ void OTClient::ProcessIncomingTransaction(
                     // my list of usable transaction numbers here on the
                     // client side.
                 } else {
-                    otErr << OT_METHOD << __FUNCTION__
-                          << ": (atCancelCronItem) "
-                          << "Error loading original item from string."
-                          << std::endl;
+                    LogOutput(OT_METHOD)(__FUNCTION__)(
+                        ": (atCancelCronItem) "
+                        "Error loading original item from string.")
+                        .Flush();
                 }
             }
         } break;
@@ -2713,25 +2728,27 @@ void OTClient::ProcessIncomingTransaction(
                             lNymOpeningNumber,
                             pTransaction,
                             strCronItem);
-                        otErr << OT_METHOD << __FUNCTION__
-                              << ": Error loading cronitem from "
-                                 "original item, from string:\n"
-                              << strOriginalItem << "\n";
+                        LogOutput(OT_METHOD)(__FUNCTION__)(
+                            ": Error loading cronitem from "
+                            "original item, from string: ")(strOriginalItem)(
+                            ".")
+                            .Flush();
                     }
                 }  // if (nullptr != pOriginalItem)
                 else {
-                    otErr << OT_METHOD << __FUNCTION__
-                          << ": Error loading original item from "
-                             "string:\n"
-                          << strOriginalItem << "\n\n";
+                    LogOutput(OT_METHOD)(__FUNCTION__)(
+                        ": Error loading original item from "
+                        "string: ")(strOriginalItem)(".")
+                        .Flush();
                 }
             }     // if (nullptr != pReplyItem)
         } break;  // Case market offer, payment plan, or smart contract.
 
         default:
             // Error
-            otErr << OT_METHOD << __FUNCTION__ << ": wrong transaction type: "
-                  << pTransaction->GetTypeString() << "\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(": wrong transaction type: ")(
+                pTransaction->GetTypeString())(".")
+                .Flush();
             break;
     }  // switch
     // -----------------------------------------------------------------
@@ -2779,11 +2796,11 @@ void OTClient::ProcessIncomingTransaction(
 
     // todo hardcoding.
     if (false == ascTemp->WriteArmoredString(strFinal, "TRANSACTION")) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Error saving transaction receipt "
-                 "(failed writing armored string):\n"
-              << OTFolders::Receipt() << Log::PathSeparator() << strNotaryID
-              << Log::PathSeparator() << strReceiptFilename << "\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Error saving transaction receipt "
+                                           "(failed writing armored string): ")(
+            OTFolders::Receipt())(Log::PathSeparator())(strNotaryID)(
+            Log::PathSeparator())(strReceiptFilename)(".")
+            .Flush();
         return;
     }
     if ((pItem)) {
@@ -2805,10 +2822,10 @@ void OTClient::ProcessIncomingTransaction(
     {
         strReceiptFilename->Format("%s.error", strReceiptID.Get());
 
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Error saving transaction receipt, "
-                 "since pItem was nullptr: "
-              << strReceiptFilename << "\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Error saving transaction receipt, "
+            "since pItem was nullptr: ")(strReceiptFilename)(".")
+            .Flush();
 
         OTDB::StorePlainString(
             strFinal->Get(),
@@ -2888,8 +2905,9 @@ void OTClient::ProcessIncomingTransactions(
 
     if (bSuccess) bSuccess = theLedger->VerifyAccount(serverNym);
     if (!bSuccess) {
-        otErr << "ERROR loading ledger from message payload in "
-                 "OTClient::ProcessIncomingTransactions.\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": ERROR loading ledger from message payload.")
+            .Flush();
         return;
     }
 
@@ -3017,7 +3035,7 @@ bool OTClient::processServerReply(
     const std::string& label)
 {
     if (!reply) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Invalid reply" << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Invalid reply.").Flush();
 
         return false;
     }
@@ -3031,9 +3049,9 @@ bool OTClient::processServerReply(
     // so does the client need to verify the signatures against each message
     // and verify the various contract IDs and signatures.
     if (!theReply.VerifySignature(serverNym)) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Error: Server reply signature failed to verify."
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Error: Server reply signature failed to verify.")
+            .Flush();
 
         return false;
     }
@@ -3220,9 +3238,10 @@ bool OTClient::processServerReplyCheckNym(
 
         return true;
     } else {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": checkNymResponse: Retrieved nym (" << serialized.nymid()
-              << ") is invalid." << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": checkNymResponse: Retrieved nym (")(serialized.nymid())(
+            ") is invalid.")
+            .Flush();
     }
 
     return false;
@@ -3299,9 +3318,10 @@ bool OTClient::processServerReplyGetBoxReceipt(
         case 2:  // bSuccessLoading = pLedger->LoadOutbox();    break;
             break;
         default:
-            otErr << OT_METHOD << __FUNCTION__
-                  << ": getBoxReceiptResponse: Unknown box type: "
-                  << theReply.m_lDepth << "\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": getBoxReceiptResponse: Unknown box type: ")(
+                theReply.m_lDepth)(".")
+                .Flush();
             bErrorCondition = true;
             break;
     }
@@ -3321,49 +3341,52 @@ bool OTClient::processServerReplyGetBoxReceipt(
             pTransType = api_.Factory().Transaction(strTransTypeObject);
 
         if (false == bool(pTransType))
-            otErr << OT_METHOD << __FUNCTION__
-                  << ": getBoxReceiptResponse: Error instantiating "
-                     "transaction "
-                     "type based on decoded theReply.m_ascPayload:\n\n"
-                  << strTransTypeObject << "\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": getBoxReceiptResponse: Error instantiating "
+                "transaction "
+                "type based on decoded theReply.m_ascPayload: ")(
+                strTransTypeObject)(".")
+                .Flush();
         else {
             OTTransaction* pBoxReceipt =
                 dynamic_cast<OTTransaction*>(pTransType.get());
 
             if (nullptr == pBoxReceipt)
-                otErr << OT_METHOD << __FUNCTION__
-                      << ": getBoxReceiptResponse: Error dynamic_cast from "
-                         "transaction type to transaction, based on "
-                         "decoded theReply.m_ascPayload:\n\n"
-                      << strTransTypeObject << "\n\n";
+                LogOutput(OT_METHOD)(__FUNCTION__)(
+                    ": getBoxReceiptResponse: Error dynamic_cast from "
+                    "transaction type to transaction, based on "
+                    "decoded theReply.m_ascPayload: ")(strTransTypeObject)(".")
+                    .Flush();
             else if (!pBoxReceipt->VerifyAccount(serverNym))
-                otErr << OT_METHOD << __FUNCTION__
-                      << ": getBoxReceiptResponse: Error: Box Receipt "
-                      << pBoxReceipt->GetTransactionNum() << " in "
-                      << ((theReply.m_lDepth == 0)
-                              ? "nymbox"
-                              : ((theReply.m_lDepth == 1) ? "inbox" : "outbox"))
-                      << " fails VerifyAccount().\n";  // outbox is 2.);
+                LogOutput(OT_METHOD)(__FUNCTION__)(
+                    ": getBoxReceiptResponse: Error: Box Receipt ")(
+                    pBoxReceipt->GetTransactionNum())(" in ")(
+                    (theReply.m_lDepth == 0)
+                        ? "nymbox"
+                        : ((theReply.m_lDepth == 1) ? "inbox" : "outbox"))(
+                    " fails VerifyAccount().")
+                    .Flush();  // outbox is 2.);
             else if (
                 pBoxReceipt->GetTransactionNum() != theReply.m_lTransactionNum)
-                otErr << OT_METHOD << __FUNCTION__
-                      << ": getBoxReceiptResponse: Error: Transaction Number "
-                         "doesn't match on the box receipt itself ("
-                      << pBoxReceipt->GetTransactionNum()
-                      << "), versus the one listed in the reply message ("
-                      << theReply.m_lTransactionNum << ").\n";
+                LogOutput(OT_METHOD)(__FUNCTION__)(
+                    ": getBoxReceiptResponse: Error: Transaction Number "
+                    "doesn't match on the box receipt itself (")(
+                    pBoxReceipt->GetTransactionNum())(
+                    "), versus the one listed in the reply message (")(
+                    theReply.m_lTransactionNum)(").")
+                    .Flush();
             // Note: Account ID and Notary ID were already verified, in
             // VerifyAccount().
             else if (pBoxReceipt->GetNymID() != nymID) {
                 const auto strPurportedNymID =
                     String::Factory(pBoxReceipt->GetNymID());
-                otErr << __FUNCTION__
-                      << ": getBoxReceiptResponse: Error: NymID doesn't "
-                         "match on "
-                         "the box receipt itself ("
-                      << strPurportedNymID
-                      << "), versus the one listed in the reply message ("
-                      << theReply.m_strNymID << ").\n";
+                LogOutput(OT_METHOD)(__FUNCTION__)(
+                    ": getBoxReceiptResponse: Error: NymID doesn't "
+                    "match on "
+                    "the box receipt itself (")(strPurportedNymID)(
+                    "), versus the one listed in the reply message (")(
+                    theReply.m_strNymID)(").")
+                    .Flush();
             } else {
                 return processServerReplyGetBoxReceipt(
                     accountID,
@@ -3375,12 +3398,12 @@ bool OTClient::processServerReplyGetBoxReceipt(
         }  // Success loading the boxReceipt from the server reply
     }      // No error condition.
     else {
-        otErr << __FUNCTION__
-              << ": SHOULD NEVER HAPPEN: getBoxReceiptResponse: failure "
-                 "loading "
-                 "box, or verifying it. NymID: "
-              << theReply.m_strNymID << "  AcctID: " << theReply.m_strAcctID
-              << " \n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": SHOULD NEVER HAPPEN: getBoxReceiptResponse: Failure "
+            "loading "
+            "box, or verifying it. NymID: ")(theReply.m_strNymID)("  AcctID: ")(
+            theReply.m_strAcctID)(".")
+            .Flush();
     }
 
     return true;
@@ -3503,8 +3526,10 @@ bool OTClient::processServerReplyGetMarketList(const Message& theReply)
             strMarketDatafile->Get(),
             "");  // "markets/<notaryID>/market_data.bin"
         if (!bSuccessErase)
-            otErr << "Error erasing market list from market folder: "
-                  << strMarketDatafile << " \n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Error erasing market list from market folder: ")(
+                strMarketDatafile)(".")
+                .Flush();
 
         return true;
     }
@@ -3513,8 +3538,10 @@ bool OTClient::processServerReplyGetMarketList(const Message& theReply)
 
     if ((theReply.m_ascPayload->GetLength() <= 2) ||
         (false == theReply.m_ascPayload->GetData(thePayload))) {
-        otErr << "ProcessServerReply: unable to decode ascii-armored "
-                 "payload in getMarketListResponse reply.\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": ProcessServerReply: Unable to decode ascii-armored "
+            "payload in getMarketListResponse reply.")
+            .Flush();
         return true;
     }
 
@@ -3539,8 +3566,10 @@ bool OTClient::processServerReplyGetMarketList(const Message& theReply)
     bool bUnpacked = pPacker->Unpack(*pBuffer, *pMarketList);
 
     if (!bUnpacked) {
-        otErr << "Process Server Reply: Failed unpacking data for "
-                 "getMarketListResponse.\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Process Server Reply: Failed unpacking data for "
+            "getMarketListResponse.")
+            .Flush();
         return true;
     }
 
@@ -3552,8 +3581,10 @@ bool OTClient::processServerReplyGetMarketList(const Message& theReply)
         strMarketDatafile->Get(),
         "");  // "markets/<notaryID>/market_data.bin"
     if (!bSuccessStore)
-        otErr << "Error storing market list to market folder: "
-              << strMarketDatafile << " \n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Error storing market list to market folder: ")(
+            strMarketDatafile)(".")
+            .Flush();
 
     return true;
 }
@@ -3586,8 +3617,10 @@ bool OTClient::processServerReplyGetMarketOffers(const Message& theReply)
             strOfferDatafile
                 ->Get());  // "markets/<notaryID>/offers/<marketID>.bin"
         if (!bSuccessErase)
-            otErr << "Error erasing offers list from market folder: "
-                  << strOfferDatafile << " \n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Error erasing offers list from market folder: ")(
+                strOfferDatafile)(".")
+                .Flush();
 
         return true;
     }
@@ -3596,8 +3629,10 @@ bool OTClient::processServerReplyGetMarketOffers(const Message& theReply)
 
     if ((theReply.m_ascPayload->GetLength() <= 2) ||
         (false == theReply.m_ascPayload->GetData(thePayload))) {
-        otErr << "ProcessServerReply: unable to decode ascii-armored "
-                 "payload in getMarketOffersResponse reply.\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": ProcessServerReply: Unable to decode asci-armored "
+            "payload in getMarketOffersResponse reply.")
+            .Flush();
         return true;
     }
 
@@ -3622,8 +3657,10 @@ bool OTClient::processServerReplyGetMarketOffers(const Message& theReply)
     bool bUnpacked = pPacker->Unpack(*pBuffer, *pOfferList);
 
     if (!bUnpacked) {
-        otErr << "Failed unpacking data for process server reply, "
-                 "getMarketOffersResponse.\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Failed unpacking data for process server reply, "
+            "getMarketOffersResponse.")
+            .Flush();
         return true;
     }
 
@@ -3636,7 +3673,9 @@ bool OTClient::processServerReplyGetMarketOffers(const Message& theReply)
                                         // todo stop hardcoding.
         strOfferDatafile->Get());  // "markets/<notaryID>/offers/<marketID>.bin"
     if (!bSuccessStore)
-        otErr << "Error storing " << strOfferDatafile << " to market folder.\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Error storing ")(
+            strOfferDatafile)(" to market folder.")
+            .Flush();
 
     return true;
 }
@@ -3670,8 +3709,10 @@ bool OTClient::processServerReplyGetMarketRecentTrades(const Message& theReply)
             strTradeDatafile->Get(),
             "");  // "markets/<notaryID>/recent/<marketID>.bin"
         if (!bSuccessErase)
-            otErr << "Error erasing recent trades list from market folder: "
-                  << strTradeDatafile << " \n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Error erasing recent trades list from market folder: ")(
+                strTradeDatafile)(".")
+                .Flush();
 
         return true;
     }
@@ -3680,8 +3721,10 @@ bool OTClient::processServerReplyGetMarketRecentTrades(const Message& theReply)
 
     if ((theReply.m_ascPayload->GetLength() <= 2) ||
         (false == theReply.m_ascPayload->GetData(thePayload))) {
-        otErr << "ProcessServerReply: unable to decode ascii-armored "
-                 "payload in getMarketRecentTradesResponse reply.\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": ProcessServerReply: Unable to decode asci-armored "
+            "payload in getMarketRecentTradesResponse reply.")
+            .Flush();
         return true;
     }
 
@@ -3706,8 +3749,10 @@ bool OTClient::processServerReplyGetMarketRecentTrades(const Message& theReply)
     bool bUnpacked = pPacker->Unpack(*pBuffer, *pTradeList);
 
     if (!bUnpacked) {
-        otErr << "Failed unpacking data for process server reply, "
-                 "getMarketRecentTradesResponse.\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Failed unpacking data for process server reply, "
+            "getMarketRecentTradesResponse.")
+            .Flush();
         return true;
     }
 
@@ -3720,7 +3765,9 @@ bool OTClient::processServerReplyGetMarketRecentTrades(const Message& theReply)
                                         // todo stop hardcoding.
         strTradeDatafile->Get());  // "markets/<notaryID>/recent/<marketID>.bin"
     if (!bSuccessStore)
-        otErr << "Error storing " << strTradeDatafile << " to market folder.\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Error storing ")(
+            strTradeDatafile)(" to market folder.")
+            .Flush();
 
     return true;
 }
@@ -3833,9 +3880,10 @@ bool OTClient::processServerReplyGetNymBox(
         // trust is risked since
         // the downloaded file is always verified against the receipt!
     } else {
-        otErr << "OTClient::ProcessServerReply: Error loading or verifying "
-                 "nymbox during getNymboxResponse:\n\n"
-              << strNymbox << "\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Error loading or verifying "
+            "nymbox during getNymboxResponse: ")(strNymbox)(".")
+            .Flush();
     }
 
     return true;
@@ -3864,8 +3912,10 @@ bool OTClient::processServerReplyGetNymMarketOffers(const Message& theReply)
                                             // todo stop hardcoding.
             strOfferDatafile->Get());  // "nyms/<notaryID>/offers/<NymID>.bin"
         if (!bSuccessErase)
-            otErr << "Error erasing offers list from nyms folder: "
-                  << strOfferDatafile << " \n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Error erasing offers list from nyms folder: ")(
+                strOfferDatafile)(".")
+                .Flush();
 
         return true;
     }
@@ -3874,8 +3924,10 @@ bool OTClient::processServerReplyGetNymMarketOffers(const Message& theReply)
 
     if ((theReply.m_ascPayload->GetLength() <= 2) ||
         (false == theReply.m_ascPayload->GetData(thePayload))) {
-        otErr << "ProcessServerReply: unable to decode ascii-armored "
-                 "payload in getNymMarketOffersResponse reply.\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Unable to decode ascii-armored "
+            "payload in getNymMarketOffersResponse reply.")
+            .Flush();
         return true;
     }
 
@@ -3900,8 +3952,10 @@ bool OTClient::processServerReplyGetNymMarketOffers(const Message& theReply)
     bool bUnpacked = pPacker->Unpack(*pBuffer, *pOfferList);
 
     if (!bUnpacked) {
-        otErr << "Failed unpacking data for process server reply, "
-                 "getNymMarketOffersResponse.\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Failed unpacking data for process server reply, "
+            "getNymMarketOffersResponse.")
+            .Flush();
         return true;
     }
 
@@ -3913,7 +3967,9 @@ bool OTClient::processServerReplyGetNymMarketOffers(const Message& theReply)
         "offers",                       // "nyms/<notaryID>/offers",
         strOfferDatafile->Get());       // "nyms/<notaryID>/offers/<NymID>.bin"
     if (!bSuccessStore)
-        otErr << "Error storing " << strOfferDatafile << " to nyms folder.\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Error storing ")(
+            strOfferDatafile)(" to nyms folder.")
+            .Flush();
 
     return true;
 }
@@ -4014,11 +4070,12 @@ bool OTClient::processServerReplyProcessBox(
 
         if (!strLedger->Exists()) {
             auto strLogData = String::Factory(*theOriginalMessage);
-            otErr << "Strange: Received server acknowledgment ("
-                  << theReply.m_strCommand
-                  << "), but found no request ledger within your original "
-                     "message:\n\n"
-                  << strLogData << "\n\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Strange: Received server acknowledgment (")(
+                theReply.m_strCommand)(
+                "), but found no request ledger within your original "
+                "message ")(strLogData)(".")
+                .Flush();
         } else if (!strReplyLedger->Exists()) {
             auto strReply = String::Factory(theReply);
             LogNormal(OT_METHOD)(__FUNCTION__)(
@@ -4027,28 +4084,33 @@ bool OTClient::processServerReplyProcessBox(
                 " ), but found no reply ledger within: ")(strReply)(".")
                 .Flush();
         } else if (!theLedger->LoadLedgerFromString(strLedger)) {
-            otErr << "Strange: Received server acknowledgment ("
-                  << theReply.m_strCommand
-                  << "), but unable to load original request ledger from "
-                     "string:\n\n"
-                  << strLedger << "\n\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Strange: Received server acknowledgment (")(
+                theReply.m_strCommand)(
+                "), but unable to load original request ledger from "
+                "string: ")(strLedger)(".")
+                .Flush();
         } else if (!theLedger->VerifySignature(*context.Nym())) {
-            otErr << "Strange: Received server acknowledgment ("
-                  << theReply.m_strCommand
-                  << "), but unable to verify your signature on the "
-                     "original request ledger:\n\n"
-                  << strLedger << "\n\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Strange: Received server acknowledgment (")(
+                theReply.m_strCommand)(
+                "), but unable to verify your signature on the "
+                "original request ledger: ")(strLedger)(".")
+                .Flush();
         } else if (!theReplyLedger->LoadLedgerFromString(strReplyLedger)) {
-            otErr << "Strange: Received server acknowledgment ("
-                  << theReply.m_strCommand
-                  << "), but unable to load the reply ledger from string:\n\n"
-                  << strReplyLedger << "\n\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Strange: Received server acknowledgment (")(
+                theReply.m_strCommand)(
+                "), but unable to load the reply ledger from string: ")(
+                strReplyLedger)(".")
+                .Flush();
         } else if (!theReplyLedger->VerifySignature(serverNym)) {
-            otErr << "Strange: Received server acknowledgment ("
-                  << theReply.m_strCommand
-                  << "), but unable to verify server's signature on the "
-                     "reply ledger within:\n\n"
-                  << strReplyLedger << "\n\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Strange: Received server acknowledgment (")(
+                theReply.m_strCommand)(
+                "), but unable to verify server's signature on the "
+                "reply ledger within: ")(strReplyLedger)(".")
+                .Flush();
         } else {
             // atAcceptItemReceipt: Whether success or fail, remove the
             // number used from list of responsibility.
@@ -4219,13 +4281,14 @@ bool OTClient::processServerReplyProcessBox(
                                  strFinal, "TRANSACTION"))  // todo
                                                             // hardcoding.
                 {
-                    otErr << "OTClient::ProcessServerReply: Error saving "
-                             "transaction receipt "
-                             "(failed writing armored string):\n"
-                          << OTFolders::Receipt() << Log::PathSeparator()
-                          << strNotaryID << Log::PathSeparator()
-                          << strReceiptFilename << "\n Contents:\n"
-                          << strTransaction << "\n";
+                    LogOutput(OT_METHOD)(__FUNCTION__)(
+                        ": Error saving "
+                        "transaction receipt "
+                        "(Failed writing armored string): ")(
+                        OTFolders::Receipt())(Log::PathSeparator())(
+                        strNotaryID)(Log::PathSeparator())(strReceiptFilename)(
+                        ". Contents: ")(strTransaction)(".")
+                        .Flush();
                 } else  // success writing armored string
                 {
                     if (nullptr != pReplyItem) {
@@ -4241,10 +4304,11 @@ bool OTClient::processServerReplyProcessBox(
                         strReceiptFilename->Format(
                             "%s.error", strReceiptID->Get());
 
-                        otErr << "OTClient::ProcessServerReply: Error "
-                                 "saving transaction receipt:  "
-                              << strNotaryID << Log::PathSeparator()
-                              << strReceiptFilename << "\n";
+                        LogOutput(OT_METHOD)(__FUNCTION__)(
+                            ": Error "
+                            "saving transaction receipt: ")(strNotaryID)(
+                            Log::PathSeparator())(strReceiptFilename)(".")
+                            .Flush();
 
                         OTDB::StorePlainString(
                             strFinal->Get(),
@@ -4298,8 +4362,9 @@ bool OTClient::processServerReplyProcessInbox(
         context.VerifyIssuedNumber(pTransaction->GetTransactionNum());
 
     if (false == bIsSignedOut) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": This reply has already been processed." << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": This reply has already been processed.")
+            .Flush();
 
         return true;
     }
@@ -4424,10 +4489,11 @@ bool OTClient::processServerReplyProcessInbox(
                 auto strTheType = String::Factory();
                 pReplyItem->GetTypeString(strTheType);
 
-                otErr << "*** Unexpected reply item type (" << nReplyItemType
-                      << ") in processInboxResponse, while "
-                         "processing server reply: "
-                      << strTheType << " \n";
+                LogOutput(OT_METHOD)(__FUNCTION__)(
+                    ": *** Unexpected reply item type (")(nReplyItemType)(
+                    ") in processInboxResponse, while "
+                    "processing server reply: ")(strTheType)(".")
+                    .Flush();
                 continue;
             }
         }  // SWITCH
@@ -4438,8 +4504,10 @@ bool OTClient::processServerReplyProcessInbox(
         pReplyItem->GetTypeString(strTempTypeString);
 
         if (Item::acknowledgement != pReplyItem->GetStatus()) {
-            otErr << "processInboxResponse reply item " << strTempTypeString
-                  << ": status == FAILED\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": processInboxResponse reply item ")(strTempTypeString)(
+                ": status == FAILED.")
+                .Flush();
             continue;
         }
         // else
@@ -4503,9 +4571,11 @@ bool OTClient::processServerReplyProcessInbox(
                          : nullptr;
 
         if (nullptr == pItem) {
-            otErr << "Unable to find original item in original "
-                     "processInbox transaction request, based on reply "
-                     "item.\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Unable to find original item in original "
+                "processInbox transaction request, based on reply "
+                "item.")
+                .Flush();
             continue;
         }
 
@@ -4523,9 +4593,11 @@ bool OTClient::processServerReplyProcessInbox(
                                                 // acceptCronReceipt,
                                                 // acceptFinalReceipt,
                                                 // acceptBasketReceipt.)
-            otErr << "Wrong original item TYPE, on reply item's copy of "
-                     "original item, than what was expected based on reply "
-                     "item's type.\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Wrong original item TYPE, on reply item's copy of "
+                "original item, than what was expected based on reply "
+                "item's type.")
+                .Flush();
             continue;
         }
 
@@ -4569,20 +4641,23 @@ bool OTClient::processServerReplyProcessInbox(
                 auto strTheType = String::Factory();
                 pReplyItem->GetTypeString(strTheType);
 
-                otErr << "*** Unexpected reply item type ("
-                      << static_cast<std::int32_t>(nReplyItemType)
-                      << ") in processInboxResponse, while "
-                         "processing server reply: "
-                      << strTheType << "\n";
+                LogOutput(OT_METHOD)(__FUNCTION__)(
+                    ": *** Unexpected reply item type (")(
+                    static_cast<std::int32_t>(nReplyItemType))(
+                    ") in processInboxResponse, while "
+                    "processing server reply: ")(strTheType)(".")
+                    .Flush();
                 break;  // will return just below, where it
                         // checks pServerTransaction for nullptr.
             }
         }
 
         if (false == bool(pServerTransaction)) {
-            otErr << "Unable to find the server's receipt, in my inbox, "
-                     "that my original processInbox's item was "
-                     "referring to.\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Unable to find the server's receipt, in my inbox, "
+                "that my original processInbox's item was "
+                "referring to.")
+                .Flush();
             break;  // We must've processed this already,
                     // and it came through again cause a
                     // copy was in a nymbox notice.
@@ -4660,10 +4735,10 @@ bool OTClient::processServerReplyProcessInbox(
                         if (false ==
                             ((strCheque->GetLength() > 2) &&
                              theCheque->LoadContractFromString(strCheque))) {
-                            otErr << "ERROR loading cheque from string in "
-                                     "OTClient::"
-                                     "processServerReplyProcessInbox:\n"
-                                  << strCheque << "\n";
+                            LogOutput(OT_METHOD)(__FUNCTION__)(
+                                ": ERROR loading cheque from string: ")(
+                                strCheque)(".")
+                                .Flush();
                         } else {
                             // Since I wrote the cheque, and I am now
                             // accepting the cheque receipt, I can now
@@ -4708,18 +4783,17 @@ bool OTClient::processServerReplyProcessInbox(
                     } else {
                         auto strOriginalItemType = String::Factory();
                         pOriginalItem->GetTypeString(strOriginalItemType);
-                        otErr << "OTClient::"
-                                 "processServerReplyProcess"
-                                 "Inbox: Original item has wrong type, "
-                                 "while accepting item receipt:\n"
-                              << strOriginalItemType << "\n";
+                        LogOutput(OT_METHOD)(__FUNCTION__)(
+                            "Inbox: Original item has wrong type, "
+                            "while accepting item receipt: ")(
+                            strOriginalItemType)(".")
+                            .Flush();
                     }
                 } else {
-                    otErr << "OTClient::"
-                             "processServerReplyProcessInbox: Unable to "
-                             "load original item from string while "
-                             "accepting item receipt:\n"
-                          << strOriginalItem << "\n";
+                    LogOutput(OT_METHOD)(__FUNCTION__)(
+                        ": Unable to load original item from string while "
+                        "accepting item receipt: ")(strOriginalItem)(".")
+                        .Flush();
                 }
             }  // Item::atAcceptItemReceipt.
             break;
@@ -4998,11 +5072,11 @@ bool OTClient::processServerReplyProcessInbox(
                                          "trades",  // todo stop hardcoding.
                                          strNotaryID->Get(),
                                          strNymID->Get()))
-                            otErr << "OTClient::" << __FUNCTION__
-                                  << ": Failed storing list of trades for "
-                                     "Nym. Notary ID: "
-                                  << strNotaryID << " Nym ID: " << strNymID
-                                  << " \n";
+                            LogOutput(OT_METHOD)(__FUNCTION__)(
+                                ": Failed storing list of trades for "
+                                "Nym. Notary ID: ")(strNotaryID)(". Nym ID: ")(
+                                strNymID)(".")
+                                .Flush();
                     }
                 }
             }  // Item::atAcceptCronReceipt
@@ -5065,10 +5139,10 @@ bool OTClient::processServerReplyProcessInbox(
             {
                 bAddToRecordBox = false;
                 pReplyItem->GetTypeString(strTempTypeString);
-                otErr << "OTClient::"
-                         "processServerReplyProcessInbox: "
-                         "wrong reply item transaction type: "
-                      << strTempTypeString << "\n";
+                LogOutput(OT_METHOD)(__FUNCTION__)(
+                    ": Wrong reply item transaction type: ")(strTempTypeString)(
+                    ".")
+                    .Flush();
             } break;
         }  // switch replyItem type
         // -----------------------------------------------------------------
@@ -5118,11 +5192,12 @@ bool OTClient::processServerReplyProcessInbox(
                         theRecordBox->AddTransaction(pNewTransaction);
 
                     if (!bAdded) {
-                        otErr << OT_METHOD << __FUNCTION__
-                              << ": Unable to add transaction "
-                              << pNewTransaction->GetTransactionNum()
-                              << " to record box (still removing it from "
-                                 "asset account inbox, however.)\n";
+                        LogOutput(OT_METHOD)(__FUNCTION__)(
+                            ": Unable to add transaction ")(
+                            pNewTransaction->GetTransactionNum())(
+                            " to record box (still removing it from "
+                            "asset account inbox, however).")
+                            .Flush();
                     } else  // Success adding it to the record box.
                     {       // (let's save it.)
                         // If successfully added to the record box, then no
@@ -5146,10 +5221,11 @@ bool OTClient::processServerReplyProcessInbox(
                         //
                         if (!pNewTransaction->SaveBoxReceipt(
                                 *theRecordBox))  // <===================
-                            otErr << OT_METHOD << __FUNCTION__
-                                  << ": for Record Box... Failed trying to "
-                                     "SaveBoxReceipt. Contents:\n\n"
-                                  << strServerTransaction << "\n\n";
+                            LogOutput(OT_METHOD)(__FUNCTION__)(
+                                ": For Record Box... Failed trying to "
+                                "SaveBoxReceipt. Contents: ")(
+                                strServerTransaction)(".")
+                                .Flush();
                     }
                 }  // if (nullptr != pNewTransaction)
             }      // if (bLoadedRecordBox)
@@ -5319,10 +5395,10 @@ bool OTClient::processServerReplyProcessNymbox(
             default: {
                 auto strTempTypeString = String::Factory();
                 pReplyItem->GetTypeString(strTempTypeString);
-                otErr << OT_METHOD << __FUNCTION__
-                      << ": Unexpected replyItem:type while processing "
-                         "Nymbox: "
-                      << strTempTypeString << " \n";
+                LogOutput(OT_METHOD)(__FUNCTION__)(
+                    ": Unexpected replyItem:type while processing "
+                    "Nymbox: ")(strTempTypeString)(".")
+                    .Flush();
                 continue;
             }
         }  // SWITCH
@@ -5388,10 +5464,11 @@ bool OTClient::processServerReplyProcessNymbox(
                          : nullptr;
 
         if (false == bool(pItem)) {
-            otErr << OT_METHOD << __FUNCTION__
-                  << ": Unable to find original item in original "
-                     "processNymbox "
-                     "transaction request, based on reply item.\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Unable to find original item in original "
+                "processNymbox "
+                "transaction request, based on reply item.")
+                .Flush();
             continue;
         }
         // If this happens, it means the item we found in our original
@@ -5408,10 +5485,11 @@ bool OTClient::processServerReplyProcessNymbox(
             // acceptTransactions,
             // acceptFinalReceipt
 
-            otErr << OT_METHOD << __FUNCTION__
-                  << ": Wrong original item TYPE, on reply item's copy of "
-                     "original item, than what was expected based on reply "
-                     "item's type.\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Wrong original item TYPE, on reply item's copy of "
+                "original item, than what was expected based on reply "
+                "item's type.")
+                .Flush();
             continue;
         }
 
@@ -5441,10 +5519,10 @@ bool OTClient::processServerReplyProcessNymbox(
             default: {
                 auto strTempTypeString = String::Factory();
                 pReplyItem->GetTypeString(strTempTypeString);
-                otErr << OT_METHOD << __FUNCTION__
-                      << ": Unexpected replyItem::type while processing "
-                         "Nymbox:"
-                      << strTempTypeString << " \n";
+                LogOutput(OT_METHOD)(__FUNCTION__)(
+                    ": Unexpected replyItem::type while processing "
+                    "Nymbox: ")(strTempTypeString)(".")
+                    .Flush();
                 break;
             }
         }
@@ -5761,11 +5839,12 @@ bool OTClient::processServerReplyProcessNymbox(
                                     //
                                     if (!context.ConsumeIssued(
                                             lNymOpeningNumber)) {
-                                        otErr << __FUNCTION__
-                                              << ": Error removing issued "
-                                                 "number "
-                                                 "from user nym (for a cron "
-                                                 "item.)\n";
+                                        LogOutput(OT_METHOD)(__FUNCTION__)(
+                                            ": Error removing issued "
+                                            "number "
+                                            "from user nym (for a cron "
+                                            "item).")
+                                            .Flush();
                                     }
                                     // If the
                                     // activation
@@ -5938,18 +6017,20 @@ bool OTClient::processServerReplyProcessNymbox(
                                     // function.
                                     //
                                     if (!bRemovedOutpayment) {
-                                        otErr << OT_METHOD << __FUNCTION__
-                                              << ": Failed trying to remove "
-                                                 "outpayment with trans num: "
-                                              << lNymOpeningNumber << "\n";
+                                        LogOutput(OT_METHOD)(__FUNCTION__)(
+                                            ": Failed trying to remove "
+                                            "outpayment with trans num: ")(
+                                            lNymOpeningNumber)(".")
+                                            .Flush();
                                     }
                                     if (!pMsg->m_ascPayload->GetString(
                                             strSentInstrument)) {
-                                        otErr << OT_METHOD << __FUNCTION__
-                                              << ": Unable to find payment "
-                                                 "instrument in outpayment "
-                                                 "message with trans num: "
-                                              << lNymOpeningNumber << "\n";
+                                        LogOutput(OT_METHOD)(__FUNCTION__)(
+                                            ": Unable to find payment "
+                                            "instrument in outpayment "
+                                            "message with trans num: ")(
+                                            lNymOpeningNumber)(".")
+                                            .Flush();
                                     } else {
                                         // At
                                         // this
@@ -6707,19 +6788,20 @@ bool OTClient::processServerReplyProcessNymbox(
                                                     thePmntInbox
                                                         ->DeleteBoxReceipt(
                                                             receipt_id)) {
-                                                    otErr << __FUNCTION__
-                                                          << ": "
-                                                             "Failed trying "
-                                                             "to "
-                                                             "delete the box "
-                                                             "receipt for a "
-                                                             "trans"
-                                                             "action being "
-                                                             "remove"
-                                                             "d from the "
-                                                             "payment "
-                                                             "inbox."
-                                                             "\n";
+                                                    LogOutput(OT_METHOD)(
+                                                        __FUNCTION__)(
+                                                        ": "
+                                                        "Failed trying "
+                                                        "to "
+                                                        "delete the box "
+                                                        "receipt for a "
+                                                        "transaction "
+                                                        "being removed"
+                                                        " from the "
+                                                        "payment "
+                                                        "inbox."
+                                                        ".")
+                                                        .Flush();
                                                 }
                                                 if (thePmntInbox
                                                         ->RemoveTransaction(
@@ -6733,13 +6815,15 @@ bool OTClient::processServerReplyProcessNymbox(
 
                                                     if (!thePmntInbox
                                                              ->SavePaymentInbox()) {
-                                                        otErr << __FUNCTION__
-                                                              << ": Failure "
-                                                                 "while "
-                                                                 "trying to "
-                                                                 "save "
-                                                                 "payment "
-                                                                 "inbox.\n";
+                                                        LogOutput(OT_METHOD)(
+                                                            __FUNCTION__)(
+                                                            ": Failure "
+                                                            "while "
+                                                            "trying to "
+                                                            "save "
+                                                            "payment "
+                                                            "inbox.")
+                                                            .Flush();
                                                     } else {
                                                         LogNormal(OT_METHOD)(
                                                             __FUNCTION__)(
@@ -6754,17 +6838,17 @@ bool OTClient::processServerReplyProcessNymbox(
                                                             .Flush();
                                                     }
                                                 } else {
-                                                    otErr << __FUNCTION__
-                                                          << ": "
-                                                             "Failed trying "
-                                                             "to "
-                                                             "remove "
-                                                             "transaction "
-                                                             "from payment "
-                                                             "inbox."
-                                                             " (Should never "
-                                                             "happen.)"
-                                                             "\n";
+                                                    LogOutput(OT_METHOD)(
+                                                        __FUNCTION__)(
+                                                        ": Failed trying "
+                                                        "to "
+                                                        "remove "
+                                                        "transaction "
+                                                        "from payment "
+                                                        "inbox."
+                                                        " (Should never "
+                                                        "happen).")
+                                                        .Flush();
                                                 }
                                                 // Todo: save a copy to the
                                                 // record box. Note: I could
@@ -7179,23 +7263,23 @@ bool OTClient::processServerReplyProcessNymbox(
                                                             newTransaction);
 
                                                 if (!bAdded) {
-                                                    otErr
-                                                        << __FUNCTION__
-                                                        << ": "
-                                                           "Unable to add "
-                                                           "txn "
-                                                        << newTransaction
-                                                               ->GetTransactionNum()
-                                                        << " to record box "
-                                                           "(after "
-                                                           "tentatively "
-                                                           "removing from "
-                                                           "payment "
-                                                           "outbox, "
-                                                           "an action that "
-                                                           "is "
-                                                           "now canceled.)"
-                                                           "\n";
+                                                    LogOutput(OT_METHOD)(
+                                                        __FUNCTION__)(
+                                                        ": "
+                                                        "Unable to add "
+                                                        "txn ")(
+                                                        newTransaction
+                                                            ->GetTransactionNum())(
+                                                        " to record box "
+                                                        "(after "
+                                                        "tentatively "
+                                                        "removing from "
+                                                        "payment "
+                                                        "outbox, "
+                                                        "an action that "
+                                                        "is "
+                                                        "now canceled).")
+                                                        .Flush();
                                                     // todo, question: why
                                                     // are we returning
                                                     // here, instead of
@@ -7231,39 +7315,38 @@ bool OTClient::processServerReplyProcessNymbox(
                                                     auto strNewTransaction =
                                                         String::Factory(
                                                             *newTransaction);
-                                                    otErr << __FUNCTION__
-                                                          << ": "
-                                                             "for Record Box "
-                                                             "... "
-                                                             "Failed trying "
-                                                             "to "
-                                                             "SaveBoxReceipt."
-                                                             " "
-                                                             "Contents:\n\n"
-                                                          << strNewTransaction
-                                                          << "\n\n";
+                                                    LogOutput(OT_METHOD)(
+                                                        __FUNCTION__)(
+                                                        ": "
+                                                        "For Record Box "
+                                                        "... "
+                                                        "Failed trying "
+                                                        "to "
+                                                        "SaveBoxReceipt."
+                                                        " Contents: ")(
+                                                        strNewTransaction)(".")
+                                                        .Flush();
                                                 }
                                             } else  // should never happen
                                             {
-                                                otErr
-                                                    << __FUNCTION__
-                                                    << ": "
-                                                       "Failed while "
-                                                       "trying to "
-                                                       "generate "
-                                                       "transaction "
-                                                       "in order to add a "
-                                                       "new "
-                                                       "transaction to "
-                                                       "record "
-                                                       "box (for a payment"
-                                                       " instrument we "
-                                                       "just "
-                                                       "removed from the "
-                                                       "outpayments box): "
-                                                    << String::Factory(
-                                                           context.Nym()->ID())
-                                                    << "\n";
+                                                LogOutput(OT_METHOD)(
+                                                    __FUNCTION__)(
+                                                    ": "
+                                                    "Failed while "
+                                                    "trying to "
+                                                    "generate "
+                                                    "transaction "
+                                                    "in order to add a "
+                                                    "new "
+                                                    "transaction to "
+                                                    "record "
+                                                    "box (for a payment"
+                                                    " instrument we "
+                                                    "just "
+                                                    "removed from the "
+                                                    "outpayments box): ")(
+                                                    context.Nym()->ID())(".")
+                                                    .Flush();
                                             }
                                         }  // if (strSentInstrument())
                                         // (then
@@ -7289,17 +7372,17 @@ bool OTClient::processServerReplyProcessNymbox(
                         }              // if (pCronItem &&
                                        // pOriginalCronItem)
                         else {
-                            otErr << OT_METHOD << __FUNCTION__
-                                  << ": Error "
-                                     "loading "
-                                     "original "
-                                     "CronItem "
-                                     "from "
-                                     "Nymbox "
-                                     "receipt, "
-                                     "from "
-                                     "string:\n"
-                                  << strOriginalCronItem << "\n";
+                            LogOutput(OT_METHOD)(__FUNCTION__)(
+                                ": Error "
+                                "loading "
+                                "original "
+                                "CronItem "
+                                "from "
+                                "Nymbox "
+                                "receipt, "
+                                "from "
+                                "string: ")(strOriginalCronItem)(".")
+                                .Flush();
                         }
                     }  // pReplyItem is a rejection.
                 }      // pServerTransaction (the Nymbox receipt we
@@ -7367,8 +7450,10 @@ bool OTClient::processServerReplyProcessNymbox(
             default: {
                 auto strTempTypeString = String::Factory();
                 pReplyItem->GetTypeString(strTempTypeString);
-                otErr << "Unexpected replyItem:type while processing Nymbox: "
-                      << strTempTypeString << " \n";
+                LogOutput(OT_METHOD)(__FUNCTION__)(
+                    ": Unexpected replyItem:type while processing Nymbox: ")(
+                    strTempTypeString)(".")
+                    .Flush();
                 continue;
             }
         }  // switch replyItem type
@@ -7412,13 +7497,13 @@ bool OTClient::processServerReplyRegisterAccount(
             accountID, context, strAcctContents, label);
 
         if (updated) {
-            otErr << OT_METHOD << __FUNCTION__
-                  << ": Saved updated account file." << std::endl;
+            LogOutput(OT_METHOD)(__FUNCTION__)(": Saved updated account file.")
+                .Flush();
 
             return init_new_account(accountID, context);
         } else {
-            otErr << OT_METHOD << __FUNCTION__ << ": Failed to save account."
-                  << std::endl;
+            LogOutput(OT_METHOD)(__FUNCTION__)(": Failed to save account.")
+                .Flush();
         }
     }
 
@@ -7441,13 +7526,13 @@ bool OTClient::processServerReplyRegisterInstrumentDefinition(
             accountID, context, strAcctContents, label);
 
         if (updated) {
-            otErr << OT_METHOD << __FUNCTION__ << ": Saved new issuer account."
-                  << std::endl;
+            LogOutput(OT_METHOD)(__FUNCTION__)(": Saved new issuer account.")
+                .Flush();
 
             return init_new_account(accountID, context);
         } else {
-            otErr << OT_METHOD << __FUNCTION__ << ": Failed to save account."
-                  << std::endl;
+            LogOutput(OT_METHOD)(__FUNCTION__)(": Failed to save account.")
+                .Flush();
 
             return false;
         }
@@ -7465,7 +7550,7 @@ bool OTClient::processServerReplyResyncContext(
     auto verified = proto::Validate(serialized, SILENT);
 
     if (false == verified) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Invalid context." << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Invalid context.").Flush();
 
         return false;
     }
@@ -7522,9 +7607,11 @@ bool OTClient::processServerReplyUnregisterAccount(
             " from Server: ")(strNotaryID)(".")
             .Flush();
     } else {
-        otErr << "The server just for some reason tried to trick me into "
-                 "erasing my account "
-              << theReply.m_strAcctID << " on Server " << strNotaryID << ".\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": The server just for some reason tried to trick me into "
+            "erasing my account ")(theReply.m_strAcctID)(" on Server ")(
+            strNotaryID)(".")
+            .Flush();
     }
 
     return true;
@@ -7556,9 +7643,11 @@ bool OTClient::processServerReplyUnregisterNym(
             theReply.m_strNymID)(" for Server ")(strNotaryID)(".")
             .Flush();
     } else {
-        otErr << "The server just for some reason tried to trick me into "
-                 "erasing my issued and transaction numbers for Nym "
-              << theReply.m_strNymID << ", Server " << strNotaryID << ".\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": The server just for some reason tried to trick me into "
+            "erasing my issued and transaction numbers for Nym ")(
+            theReply.m_strNymID)(", Server ")(strNotaryID)(".")
+            .Flush();
     }
 
     return true;
@@ -7594,9 +7683,10 @@ std::int32_t OTClient::ProcessUserCommand(
 
     if (nullptr != pAccount) {
         if (pAccount->GetPurportedNotaryID() != context.Server()) {
-            otErr << "OTClient::ProcessUserCommand: "
-                     "pAccount->GetPurportedNotaryID() doesn't match "
-                     "NOTARY_ID.\n(Try adding:  --server NOTARY_ID)\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": pAccount->GetPurportedNotaryID() doesn't match "
+                "NOTARY_ID. (Try adding: --server NOTARY_ID).")
+                .Flush();
 
             return -1;
         }
@@ -7668,8 +7758,10 @@ std::int32_t OTClient::ProcessUserCommand(
             NYMBOX_HASH->GetString(theMessage.m_strNymboxHash);
 
             if (!String::Factory(NYMBOX_HASH)->Exists()) {
-                otErr << "Failed getting NymboxHash from Nym for server: "
-                      << String::Factory(context.Server()) << std::endl;
+                LogOutput(OT_METHOD)(__FUNCTION__)(
+                    ": Failed getting NymboxHash from Nym for server: ")(
+                    context.Server())(".")
+                    .Flush();
             }
 
             // (2) Sign the Message
@@ -7700,8 +7792,10 @@ std::int32_t OTClient::ProcessUserCommand(
             NYMBOX_HASH->GetString(theMessage.m_strNymboxHash);
 
             if (NYMBOX_HASH->IsEmpty()) {
-                otErr << "Failed getting NymboxHash from Nym for server: "
-                      << String::Factory(context.Server()) << std::endl;
+                LogOutput(OT_METHOD)(__FUNCTION__)(
+                    ": Failed getting NymboxHash from Nym for server: ")(
+                    context.Server())(".")
+                    .Flush();
             }
 
             // (2) Sign the Message
@@ -7835,9 +7929,11 @@ void OTClient::ProcessWithdrawalResponse(
                             pRequestPurse->Pop(*context.Nym())};
 
                         if (false == bool(pOriginalToken)) {
-                            otErr << "ERROR, processing withdrawal response, "
-                                     "but couldn't find original token:"
-                                  << strPurse << "\n";
+                            LogOutput(OT_METHOD)(__FUNCTION__)(
+                                ": ERROR, processing withdrawal response, "
+                                "but couldn't find original token: ")(strPurse)(
+                                ".")
+                                .Flush();
                         } else if (Token::signedToken == pToken->GetState()) {
                             LogDetail(OT_METHOD)(__FUNCTION__)(
                                 ": Retrieved signed token from purse, and "

@@ -271,15 +271,15 @@ std::int32_t Utility::getNymboxLowLevel(bool& bWasSent)
             return nRequestNum;
         } break;
         case SendResult::TIMEOUT: {
-            otErr << OT_METHOD << __FUNCTION__
-                  << ": Failed to send getNymbox message due to error."
-                  << std::endl;
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Failed to send getNymbox message due to error.")
+                .Flush();
             setLastReplyReceived("");
 
             return -1;
         } break;
         default: {
-            otErr << OT_METHOD << __FUNCTION__ << ": Error" << std::endl;
+            LogOutput(OT_METHOD)(__FUNCTION__)(": Error!").Flush();
             setLastReplyReceived("");
 
             return -1;
@@ -1477,9 +1477,9 @@ bool Utility::getBoxReceiptLowLevel(
             return true;
         } break;
         case SendResult::TIMEOUT: {
-            otErr << OT_METHOD << __FUNCTION__
-                  << ": Failed to send getNymbox message due to error."
-                  << std::endl;
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Failed to send getNymbox message due to error.")
+                .Flush();
             setLastReplyReceived("");
 
             return false;
@@ -1488,7 +1488,7 @@ bool Utility::getBoxReceiptLowLevel(
         }
     }
 
-    otErr << OT_METHOD << __FUNCTION__ << ": Error" << std::endl;
+    LogOutput(OT_METHOD)(__FUNCTION__)(": Error!").Flush();
     setLastReplyReceived("");
 
     return false;
@@ -2347,15 +2347,15 @@ std::int32_t Utility::getInboxAccount(
             setLastReplyReceived(String::Factory(*reply)->Get());
         } break;
         case SendResult::TIMEOUT: {
-            otErr << OT_METHOD << __FUNCTION__
-                  << ": Failed to send getNymbox message due to error."
-                  << std::endl;
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Failed to send getNymbox message due to error.")
+                .Flush();
             setLastReplyReceived("");
 
             return -1;
         } break;
         default: {
-            otErr << OT_METHOD << __FUNCTION__ << ": Error" << std::endl;
+            LogOutput(OT_METHOD)(__FUNCTION__)(": Error!").Flush();
             setLastReplyReceived("");
 
             return -1;

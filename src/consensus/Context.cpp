@@ -257,9 +257,9 @@ bool Context::InitializeNymbox()
         api_.Factory().Ledger(ownerNymID, server_nym_id(lock), server_id_)};
 
     if (false == bool(nymbox)) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Unable to instantiate nymbox for " << ownerNymID.str()
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Unable to instantiate nymbox for ")(ownerNymID)(".")
+            .Flush();
 
         return false;
     }
@@ -268,8 +268,9 @@ bool Context::InitializeNymbox()
         ownerNymID, server_id_, ledgerType::nymbox, true);
 
     if (false == generated) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Unable to generate nymbox for "
-              << ownerNymID.str() << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Unable to generate nymbox for ")(
+            ownerNymID)(".")
+            .Flush();
 
         return false;
     }
@@ -279,23 +280,25 @@ bool Context::InitializeNymbox()
     OT_ASSERT(nym_)
 
     if (false == nymbox->SignContract(*nym_)) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Unable to sign nymbox for "
-              << ownerNymID.str() << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Unable to sign nymbox for ")(
+            ownerNymID)(".")
+            .Flush();
 
         return false;
     }
 
     if (false == nymbox->SaveContract()) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Unable to serialize nymbox for " << ownerNymID.str()
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Unable to serialize nymbox for ")(
+            ownerNymID)(".")
+            .Flush();
 
         return false;
     }
 
     if (false == nymbox->SaveNymbox(local_nymbox_hash_)) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Unable to save nymbox for "
-              << ownerNymID.str() << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Unable to save nymbox for ")(
+            ownerNymID)
+            .Flush();
 
         return false;
     }
@@ -328,8 +331,9 @@ bool Context::issue_number(const Lock& lock, const TransactionNumber& number)
     const bool output = issued && available;
 
     if (!output) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Failed to issue number "
-              << number << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Failed to issue number ")(number)(
+            ".")
+            .Flush();
         issued_transaction_numbers_.erase(number);
         available_transaction_numbers_.erase(number);
     }
@@ -541,8 +545,8 @@ bool Context::update_signature(const Lock& lock)
     if (success) {
         signatures_.emplace_front(new proto::Signature(signature));
     } else {
-        otErr << OT_METHOD << __FUNCTION__ << ": failed to create signature."
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Failed to create signature.")
+            .Flush();
     }
 
     return success;
@@ -553,8 +557,9 @@ bool Context::validate(const Lock& lock) const
     OT_ASSERT(verify_write_lock(lock));
 
     if (1 != signatures_.size()) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Error: this context is not signed." << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Error: This context is not signed.")
+            .Flush();
 
         return false;
     }
@@ -590,8 +595,8 @@ bool Context::verify_signature(
     OT_ASSERT(verify_write_lock(lock));
 
     if (!ot_super::verify_signature(lock, signature)) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Error: invalid signature."
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Error: invalid signature.")
+            .Flush();
 
         return false;
     }
