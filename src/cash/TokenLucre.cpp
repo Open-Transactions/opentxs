@@ -27,6 +27,8 @@
 #include <sys/types.h>
 #include <ostream>
 
+#define OT_METHOD "opentxs::TokenLucre::"
+
 #ifdef __APPLE__
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 #endif
@@ -73,7 +75,7 @@ bool Token_Lucre::GenerateTokenRequest(
     // <coin request public output file>\n", argv[0]);
     //
     if (Token::blankToken != m_State) {
-        otErr << "Token_Lucre::GenerateTokenRequest: Blank token expected.\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Blank token expected.").Flush();
         return false;
     }
 
@@ -226,7 +228,9 @@ bool Token_Lucre::ProcessToken(
     // the client must unblind the token and set it as spendable. Thus,
     // this function is only performed on tokens in the signedToken state.
     if (Token::signedToken != m_State) {
-        otErr << "Signed token expected in Token_Lucre::ProcessToken\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Signed token expected.")
+            .Flush();
         return false;
     }
 

@@ -267,10 +267,11 @@ bool Token::RecordTokenAsSpent(String& theCleartextToken)
 
     // If so, we're trying to record a token that was already recorded...
     if (bTokenIsPresent) {
-        otErr << "Token::RecordTokenAsSpent: Trying to record token as spent,"
-                 " but it was already recorded: "
-              << OTFolders::Spent() << Log::PathSeparator() << strAssetFolder
-              << Log::PathSeparator() << strTokenHash << "\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Trying to record token as spent,"
+                                           " but it was already recorded: ")(
+            OTFolders::Spent())(Log::PathSeparator())(strAssetFolder)(
+            Log::PathSeparator())(strTokenHash)(".")
+            .Flush();
         return false;
     }
 
@@ -285,10 +286,12 @@ bool Token::RecordTokenAsSpent(String& theCleartextToken)
 
     if (false ==
         ascTemp->WriteArmoredString(strFinal, m_strContractType->Get())) {
-        otErr << "Token::RecordTokenAsSpent: Error recording token as "
-                 "spent (failed writing armored string):\n"
-              << OTFolders::Spent() << Log::PathSeparator() << strAssetFolder
-              << Log::PathSeparator() << strTokenHash << "\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Error recording token as "
+            "spent (Failed writing armored string): ")(OTFolders::Spent())(
+            Log::PathSeparator())(strAssetFolder)(Log::PathSeparator())(
+            strTokenHash)(".")
+            .Flush();
         return false;
     }
 
@@ -300,9 +303,10 @@ bool Token::RecordTokenAsSpent(String& theCleartextToken)
         strTokenHash->Get(),
         "");
     if (!bSaved) {
-        otErr << "Token::RecordTokenAsSpent: Error saving file: "
-              << OTFolders::Spent() << Log::PathSeparator() << strAssetFolder
-              << Log::PathSeparator() << strTokenHash << "\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Error saving file: ")(
+            OTFolders::Spent())(Log::PathSeparator())(strAssetFolder)(
+            Log::PathSeparator())(strTokenHash)(".")
+            .Flush();
     }
 
     return bSaved;
@@ -423,7 +427,9 @@ bool Token::GetSpendableString(
         if (theOwner.Open_or_Decrypt(theEnvelope, theString, strDisplay))
             return true;
     } else
-        otErr << szFunc << ": m_ascSpendable is empty... (failure.)\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": m_ascSpendable is empty...(Failure).")
+            .Flush();
 
     return false;
 }
@@ -588,16 +594,17 @@ std::int32_t Token::ProcessXMLNode(irr::io::IrrXMLReader*& xml)
         nReturnVal = 1;
     } else if (strNodeName->Compare("tokenID")) {
         if (!Contract::LoadEncodedTextField(xml, m_ascSpendable)) {
-            otErr << "Error in Token::ProcessXMLNode: token ID without "
-                     "value.\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(": token ID without value.")
+                .Flush();
             return (-1);  // error condition
         }
 
         return 1;
     } else if (strNodeName->Compare("tokenSignature")) {
         if (!Contract::LoadEncodedTextField(xml, m_Signature)) {
-            otErr << "Error in Token::ProcessXMLNode: token Signature "
-                     "without value.\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": token Signature without value.")
+                .Flush();
             return (-1);  // error condition
         }
 
@@ -618,8 +625,10 @@ std::int32_t Token::ProcessXMLNode(irr::io::IrrXMLReader*& xml)
 
         if (!Contract::LoadEncodedTextField(xml, pArmoredPrototoken) ||
             !pArmoredPrototoken->Exists()) {
-            otErr << "Error in Token::ProcessXMLNode: prototoken field "
-                     "without value.\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Error in Token::ProcessXMLNode: prototoken field "
+                "without value.")
+                .Flush();
 
             return (-1);  // error condition
         } else {
@@ -638,8 +647,10 @@ std::int32_t Token::ProcessXMLNode(irr::io::IrrXMLReader*& xml)
 
         if (!Contract::LoadEncodedTextField(xml, pArmoredPrototoken) ||
             !pArmoredPrototoken->Exists()) {
-            otErr << "Error in Token::ProcessXMLNode: privatePrototoken "
-                     "field without value.\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Error in Token::ProcessXMLNode: privatePrototoken "
+                "field without value.")
+                .Flush();
 
             return (-1);  // error condition
         } else {
@@ -752,7 +763,9 @@ bool Token::VerifyToken(Nym& theNotary, Mint& theMint)
     // otErr << "%s <bank info> <coin>\n",argv[0]);
 
     if (Token::spendableToken != m_State) {
-        otErr << "Expected spendable token in Token::VerifyToken\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Expected spendable token in Token::VerifyToken.")
+            .Flush();
 
         return false;
     }

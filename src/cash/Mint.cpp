@@ -247,9 +247,10 @@ bool Mint::LoadMint(const char* szAppend)  // todo: server should
                // DATA STORE.
 
     if (strFileContents.length() < 2) {
-        otErr << "Mint::LoadMint: Error reading file: " << szFolder1name
-              << Log::PathSeparator() << szFolder2name << Log::PathSeparator()
-              << szFilename << "\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Error reading file: ")(
+            szFolder1name)(Log::PathSeparator())(szFolder2name)(
+            Log::PathSeparator())(szFilename)(".")
+            .Flush();
         return false;
     }
 
@@ -302,9 +303,11 @@ bool Mint::SaveMint(const char* szAppend)
     auto strRawFile = String::Factory();
 
     if (!SaveContractRaw(strRawFile)) {
-        otErr << "Mint::SaveMint: Error saving Mintfile (to string):\n"
-              << szFolder1name << Log::PathSeparator() << szFolder2name
-              << Log::PathSeparator() << szFilename << "\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Error saving Mintfile (to string): ")(szFolder1name)(
+            Log::PathSeparator())(szFolder2name)(Log::PathSeparator())(
+            szFilename)(".")
+            .Flush();
         return false;
     }
 
@@ -313,10 +316,11 @@ bool Mint::SaveMint(const char* szAppend)
 
     if (false ==
         ascTemp->WriteArmoredString(strFinal, m_strContractType->Get())) {
-        otErr << "Mint::SaveMint: Error saving mint (failed writing armored "
-                 "string):\n"
-              << szFolder1name << Log::PathSeparator() << szFolder2name
-              << Log::PathSeparator() << szFilename << "\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Error saving mint (Failed writing armored "
+            "string): ")(szFolder1name)(Log::PathSeparator())(szFolder2name)(
+            Log::PathSeparator())(szFilename)(".")
+            .Flush();
         return false;
     }
 
@@ -329,13 +333,15 @@ bool Mint::SaveMint(const char* szAppend)
         "");  // <=== SAVING TO LOCAL DATA STORE.
     if (!bSaved) {
         if (nullptr != szAppend)
-            otErr << "Mint::SaveMint: Error writing to file: " << szFolder1name
-                  << Log::PathSeparator() << szFolder2name
-                  << Log::PathSeparator() << szFilename << szAppend << "\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(": Error writing to file: ")(
+                szFolder1name)(Log::PathSeparator())(szFolder2name)(
+                Log::PathSeparator())(szFilename)(szAppend)(".")
+                .Flush();
         else
-            otErr << "Mint::SaveMint: Error writing to file: " << szFolder1name
-                  << Log::PathSeparator() << szFolder2name
-                  << Log::PathSeparator() << szFilename << "\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(": Error writing to file: ")(
+                szFolder1name)(Log::PathSeparator())(szFolder2name)(
+                Log::PathSeparator())(szFilename)(".")
+                .Flush();
 
         return false;
     }
@@ -350,11 +356,14 @@ bool Mint::VerifyMint(const Nym& theOperator)
     // Make sure that the supposed Contract ID that was set is actually
     // a hash of the contract file, signatures and all.
     if (!VerifyContractID()) {
-        otErr << "Error comparing Mint ID to Asset Contract ID in "
-                 "Mint::VerifyMint\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Error comparing Mint ID to Asset Contract ID.")
+            .Flush();
         return false;
     } else if (!VerifySignature(theOperator)) {
-        otErr << "Error verifying signature on mint in Mint::VerifyMint.\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Error verifying signature on mint.")
+            .Flush();
         return false;
     }
 
@@ -380,10 +389,9 @@ bool Mint::VerifyContractID() const
         auto str1 = String::Factory(m_ID),
              str2 = String::Factory(m_InstrumentDefinitionID);
 
-        otErr << "\nMint ID does NOT match Instrument Definition ID in "
-                 "Mint::VerifyContractID.\n"
-              << str1 << "\n"
-              << str2 << "\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Mint ID does NOT match Instrument Definition. ")
+        (str1)(" | ")(str2)(".").Flush();
         //                "\nRAW FILE:\n--->" << m_strRawFile << "<---"
         return false;
     } else {
@@ -578,8 +586,9 @@ std::int32_t Mint::ProcessXMLNode(irr::io::IrrXMLReader*& xml)
         auto pArmor = Armored::Factory();
 
         if (!Contract::LoadEncodedTextField(xml, pArmor) || !pArmor->Exists()) {
-            otErr << "Error in Mint::ProcessXMLNode: mintPrivateInfo field "
-                     "without value.\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(": Error: mintPrivateInfo field "
+                                               "without value.")
+                .Flush();
 
             return (-1);  // error condition
         } else {
@@ -594,8 +603,9 @@ std::int32_t Mint::ProcessXMLNode(irr::io::IrrXMLReader*& xml)
         auto pArmor = Armored::Factory();
 
         if (!Contract::LoadEncodedTextField(xml, pArmor) || !pArmor->Exists()) {
-            otErr << "Error in Mint::ProcessXMLNode: mintPublicInfo field "
-                     "without value.\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(": Error: mintPublicInfo field "
+                                               "without value.")
+                .Flush();
 
             return (-1);  // error condition
         } else {

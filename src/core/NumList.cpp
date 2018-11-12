@@ -19,6 +19,8 @@
 #include <string>
 #include <utility>
 
+#define OT_METHOD "opentxs::NumList::"
+
 // OTNumList (helper class.)
 
 namespace opentxs
@@ -118,9 +120,10 @@ bool NumList::Add(const char* szNumbers)  // if false, means the numbers were
                        // comma-separated list.)
             bStartedANumber = false;  // reset
         } else {
-            otErr << "OTNumList::Add: Error: Unexpected character found in "
-                     "erstwhile comma-separated list of longs: "
-                  << *pChar << "\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Error: Unexpected character found in "
+                "erstwhile comma-separated list of longs: ") (*pChar)(".")
+                .Flush();
             bSuccess = false;
             break;
         }

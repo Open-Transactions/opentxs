@@ -187,13 +187,12 @@ std::int32_t LoadAbbreviatedRecord(
         theType = OTTransaction::GetTypeFromString(strAbbrevType);
 
         if (transactionType::error_state == theType) {
-            otErr << "LoadAbbreviatedRecord: Failure: "
-                     "error_state was the found type (based on "
-                     "string "
-                  << strAbbrevType
-                  << "), when loading abbreviated receipt for trans num: "
-                  << lTransactionNum << " (In Reference To: " << lInRefTo
-                  << ") \n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Failure: Error_state was the found type (based on "
+                "string ")(strAbbrevType)(
+                "), when loading abbreviated receipt for trans num: ")(
+                lTransactionNum)(" (In Reference To: ")(lInRefTo)(").")
+                .Flush();
             return (-1);
         }
     } else {
@@ -414,21 +413,23 @@ std::unique_ptr<OTTransaction> LoadBoxReceipt(
         strFolder3name->Get(),
         strFilename->Get()));
     if (strFileContents.length() < 2) {
-        otErr << __FUNCTION__ << ": Error reading file: " << strFolder1name
-              << Log::PathSeparator() << strFolder2name << Log::PathSeparator()
-              << strFolder3name << Log::PathSeparator() << strFilename << "\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Error reading file: ")(
+            strFolder1name)(Log::PathSeparator())(strFolder2name)(
+            Log::PathSeparator())(strFolder3name)(Log::PathSeparator())(
+            strFilename)(".")
+            .Flush();
         return nullptr;
     }
 
     auto strRawFile = String::Factory(strFileContents.c_str());
 
     if (!strRawFile->Exists()) {
-        otErr << __FUNCTION__
-              << ": Error reading file (resulting output "
-                 "string is empty): "
-              << strFolder1name << Log::PathSeparator() << strFolder2name
-              << Log::PathSeparator() << strFolder3name << Log::PathSeparator()
-              << strFilename << "\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Error reading file (resulting output "
+            "string is empty): ")(strFolder1name)(Log::PathSeparator())(
+            strFolder2name)(Log::PathSeparator())(strFolder3name)(
+            Log::PathSeparator())(strFilename)(".")
+            .Flush();
         return nullptr;
     }
 
@@ -438,12 +439,12 @@ std::unique_ptr<OTTransaction> LoadBoxReceipt(
     auto pTransType = theAbbrev.API().Factory().Transaction(strRawFile);
 
     if (false == bool(pTransType)) {
-        otErr << __FUNCTION__
-              << ": Error instantiating transaction "
-                 "type based on strRawFile: "
-              << strFolder1name << Log::PathSeparator() << strFolder2name
-              << Log::PathSeparator() << strFolder3name << Log::PathSeparator()
-              << strFilename << "\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Error instantiating transaction "
+            "type based on strRawFile: ")(strFolder1name)(Log::PathSeparator())(
+            strFolder2name)(Log::PathSeparator())(strFolder3name)(
+            Log::PathSeparator())(strFilename)(".")
+            .Flush();
         return nullptr;
     }
 
@@ -451,12 +452,12 @@ std::unique_ptr<OTTransaction> LoadBoxReceipt(
         dynamic_cast<OTTransaction*>(pTransType.release())};
 
     if (false == bool(pBoxReceipt)) {
-        otErr << __FUNCTION__
-              << ": Error dynamic_cast from transaction "
-                 "type to transaction, based on strRawFile: "
-              << strFolder1name << Log::PathSeparator() << strFolder2name
-              << Log::PathSeparator() << strFolder3name << Log::PathSeparator()
-              << strFilename << "\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Error dynamic_cast from transaction "
+            "type to transaction, based on strRawFile: ")(strFolder1name)(
+            Log::PathSeparator())(strFolder2name)(Log::PathSeparator())(
+            strFolder3name)(Log::PathSeparator())(strFilename)(".")
+            .Flush();
         return nullptr;
     }
 
@@ -469,10 +470,11 @@ std::unique_ptr<OTTransaction> LoadBoxReceipt(
     bool bSuccess = theAbbrev.VerifyBoxReceipt(*pBoxReceipt);
 
     if (!bSuccess) {
-        otErr << __FUNCTION__ << ": Failed verifying Box Receipt:\n"
-              << strFolder1name << Log::PathSeparator() << strFolder2name
-              << Log::PathSeparator() << strFolder3name << Log::PathSeparator()
-              << strFilename << "\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Failed verifying Box Receipt: ")(
+            strFolder1name)(Log::PathSeparator())(strFolder2name)(
+            Log::PathSeparator())(strFolder3name)(Log::PathSeparator())(
+            strFilename)(".")
+            .Flush();
 
         return nullptr;
     } else
@@ -535,9 +537,9 @@ bool SetupBoxReceiptFilename(
             pszFolder = OTFolders::ExpiredBox().Get();
             break;
         default:
-            otErr << "OTTransaction::" << __FUNCTION__ << " " << szCaller
-                  << ": Error: unknown box type: " << lLedgerType
-                  << ". (This should never happen.)\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(": Error: Unknown box type: ")(
+                lLedgerType)(". (This should never happen).")
+                .Flush();
             return false;
     }
 
@@ -612,9 +614,9 @@ bool SetupBoxReceiptFilename(
             lLedgerType = 6;
             break;
         default:
-            otErr << "OTTransaction::" << __FUNCTION__ << " " << szCaller
-                  << ": Error: unknown box type. "
-                     "(This should never happen.)\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(": Error: unknown box type. "
+                                               "(This should never happen).")
+                .Flush();
             return false;
     }
 

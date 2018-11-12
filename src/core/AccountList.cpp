@@ -89,16 +89,18 @@ std::int32_t AccountList::ReadFromXMLNode(
     const String& acctCount)
 {
     if (!acctType.Exists()) {
-        otErr << "AccountList::ReadFromXMLNode: Failed: Empty accountList "
-                 "'type' attribute.\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Failed: Empty accountList "
+                                           "'type' attribute.")
+            .Flush();
         return -1;
     }
 
     acctType_ = TranslateAccountTypeStringToEnum(acctType);
 
     if (Account::err_acct == acctType_) {
-        otErr << "AccountList::ReadFromXMLNode: Failed: accountList 'type' "
-                 "attribute contains unknown value.\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Failed: accountList 'type' "
+                                           "attribute contains unknown value.")
+            .Flush();
         return -1;
     }
 
@@ -123,17 +125,20 @@ std::int32_t AccountList::ReadFromXMLNode(
                     "accountID"));  // Account ID for this account.
 
                 if (!instrumentDefinitionID->Exists() || !accountID->Exists()) {
-                    otErr << "Error loading accountEntry: Either the "
-                             "instrumentDefinitionID ("
-                          << instrumentDefinitionID << "), or the accountID ("
-                          << accountID << ") was EMPTY.\n";
+                    LogOutput(OT_METHOD)(__FUNCTION__)(
+                        ": Error loading accountEntry: Either the "
+                        "instrumentDefinitionID (")(instrumentDefinitionID)(
+                        "), or the accountID (")(accountID)(") was EMPTY.")
+                        .Flush();
                     return -1;
                 }
 
                 mapAcctIDs_.insert(std::make_pair(
                     instrumentDefinitionID->Get(), accountID->Get()));
             } else {
-                otErr << "Expected accountEntry element in accountList.\n";
+                LogOutput(OT_METHOD)(__FUNCTION__)(
+                    ": Expected accountEntry element in accountList.")
+                    .Flush();
                 return -1;
             }
         }
@@ -168,9 +173,10 @@ ExclusiveAccount AccountList::GetOrRegisterAccount(
 
     if (Account::stash == acctType_) {
         if (1 > stashTransNum) {
-            otErr << OT_METHOD << __FUNCTION__
-                  << ": Failed attempt to "
-                     "create stash account without cron item #.";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Failed attempt to "
+                "create stash account without cron item #.")
+                .Flush();
 
             return {};
         }
@@ -209,9 +215,10 @@ ExclusiveAccount AccountList::GetOrRegisterAccount(
         stashTransNum);
 
     if (false == bool(account)) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Failed trying to generate"
-              << acctTypeString << " account with instrument definition ID: "
-              << instrumentDefinitionID.str() << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Failed trying to generate ")(
+            acctTypeString)(" account with instrument definition ID: ")(
+            instrumentDefinitionID)(".")
+            .Flush();
     } else {
         auto acctIDString = String::Factory();
         account.get().GetIdentifier(acctIDString);
