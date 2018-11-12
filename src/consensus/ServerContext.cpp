@@ -166,15 +166,16 @@ bool ServerContext::finalize_server_command(Message& command) const
     OT_ASSERT(nym_);
 
     if (false == command.SignContract(*nym_)) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Failed to sign server message."
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Failed to sign server message.")
+            .Flush();
 
         return false;
     }
 
     if (false == command.SaveContract()) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Failed to serialize server message." << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Failed to serialize server message.")
+            .Flush();
 
         return false;
     }
@@ -375,8 +376,9 @@ NetworkReplyMessage ServerContext::PingNotary()
     auto request = initialize_server_command(MessageType::pingNotary);
 
     if (false == bool(request)) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Failed to initialize server message." << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Failed to initialize server message.")
+            .Flush();
 
         return {};
     }
@@ -395,8 +397,9 @@ NetworkReplyMessage ServerContext::PingNotary()
     request->keytypeEncrypt_ = encrKey.keyType();
 
     if (false == finalize_server_command(*request)) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Failed to finalize server message." << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Failed to finalize server message.")
+            .Flush();
 
         return {};
     }
@@ -445,8 +448,9 @@ bool ServerContext::Resync(const proto::Context& serialized)
         auto exists = (1 == issued_transaction_numbers_.count(number));
 
         if (false == exists) {
-            otErr << OT_METHOD << __FUNCTION__ << ": Server believes number "
-                  << number << " is still issued. Restoring." << std::endl;
+            LogOutput(OT_METHOD)(__FUNCTION__)(": Server believes number ")(
+                number)(" is still issued. Restoring.")
+                .Flush();
             issued_transaction_numbers_.insert(number);
             available_transaction_numbers_.insert(number);
         }
@@ -456,8 +460,9 @@ bool ServerContext::Resync(const proto::Context& serialized)
         auto exists = (1 == serverNumbers.count(number));
 
         if (false == exists) {
-            otErr << OT_METHOD << __FUNCTION__ << ": Server believes number "
-                  << number << " is no longer issued. Removing." << std::endl;
+            LogOutput(OT_METHOD)(__FUNCTION__)(": Server believes number ")(
+                number)(" is no longer issued. Removing.")
+                .Flush();
             issued_transaction_numbers_.erase(number);
             available_transaction_numbers_.erase(number);
         }
@@ -580,8 +585,8 @@ std::unique_ptr<Item> ServerContext::Statement(
     OT_ASSERT(nym_);
 
     if ((transaction.GetNymID() != nym_->ID())) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Transaction has wrong owner."
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Transaction has wrong owner.")
+            .Flush();
 
         return output;
     }
@@ -644,8 +649,8 @@ bool ServerContext::ShouldRename(const std::string& defaultName) const
     const auto& name = defaultName.empty() ? default_node_name_ : defaultName;
 
     if (false == admin_success_.get()) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Do not have admin permission."
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Do not have admin permission.")
+            .Flush();
 
         return false;
     }
@@ -653,8 +658,8 @@ bool ServerContext::ShouldRename(const std::string& defaultName) const
     auto contract = api_.Wallet().Server(server_id_);
 
     if (false == bool(contract)) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Missing server contract."
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Missing server contract.")
+            .Flush();
 
         return false;
     }
@@ -776,8 +781,9 @@ RequestNumber ServerContext::UpdateRequestNumber(bool& sendStatus)
     auto request = initialize_server_command(MessageType::getRequestNumber);
 
     if (false == bool(request)) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Failed to initialize server message." << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Failed to initialize server message.")
+            .Flush();
 
         return {};
     }
@@ -786,8 +792,9 @@ RequestNumber ServerContext::UpdateRequestNumber(bool& sendStatus)
         String::Factory(std::to_string(FIRST_REQUEST_NUMBER).c_str());
 
     if (false == finalize_server_command(*request)) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Failed to finalize server message." << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Failed to finalize server message.")
+            .Flush();
 
         return {};
     }
@@ -798,15 +805,13 @@ RequestNumber ServerContext::UpdateRequestNumber(bool& sendStatus)
 
     switch (status) {
         case SendResult::TIMEOUT: {
-            otErr << OT_METHOD << __FUNCTION__ << ": Reply timeout."
-                  << std::endl;
+            LogOutput(OT_METHOD)(__FUNCTION__)(": Reply timeout.").Flush();
 
             return {};
         } break;
         case SendResult::INVALID_REPLY: {
             sendStatus = true;
-            otErr << OT_METHOD << __FUNCTION__ << ": Invalid reply."
-                  << std::endl;
+            LogOutput(OT_METHOD)(__FUNCTION__)(": Invalid reply.").Flush();
 
             return {};
         } break;
@@ -814,8 +819,7 @@ RequestNumber ServerContext::UpdateRequestNumber(bool& sendStatus)
             sendStatus = true;
         } break;
         default: {
-            otErr << OT_METHOD << __FUNCTION__ << ": Unknown error."
-                  << std::endl;
+            LogOutput(OT_METHOD)(__FUNCTION__)(": Unknown error.").Flush();
 
             return {};
         }

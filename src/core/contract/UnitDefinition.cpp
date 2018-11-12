@@ -343,28 +343,29 @@ bool UnitDefinition::VisitAccountRecords(
 
             if (!strInstrumentDefinitionID->Compare(
                     str_instrument_definition_id.c_str())) {
-                otErr << "OTUnitDefinition::VisitAccountRecords: Error: wrong "
-                         "instrument definition ID ("
-                      << str_instrument_definition_id
-                      << ") when expecting: " << strInstrumentDefinitionID
-                      << "\n";
+                LogOutput(OT_METHOD)(__FUNCTION__)(
+                    ": Error: wrong "
+                    "instrument definition ID (")(str_instrument_definition_id)(
+                    ") when expecting: ")(strInstrumentDefinitionID)(".")
+                    .Flush();
             } else {
                 const auto& wallet = wallet_;
                 const auto accountID = Identifier::Factory(str_acct_id);
                 auto account = wallet.Account(accountID);
 
                 if (false == bool(account)) {
-                    otErr << OT_METHOD << __FUNCTION__
-                          << ": Unable to load account " << str_acct_id
-                          << std::endl;
+                    LogOutput(OT_METHOD)(__FUNCTION__)(
+                        ": Unable to load account ")(str_acct_id)(".")
+                        .Flush();
 
                     continue;
                 }
 
                 if (false == visitor.Trigger(account.get())) {
-                    otErr << OT_METHOD << __FUNCTION__
-                          << ": Error: Trigger failed for account "
-                          << str_acct_id << std::endl;
+                    LogOutput(OT_METHOD)(__FUNCTION__)(
+                        ": Error: Trigger failed for account ")(str_acct_id)(
+                        ".")
+                        .Flush();
                 }
             }
         }
@@ -391,12 +392,12 @@ bool UnitDefinition::AddAccountRecord(
     // instrument definition.)
 
     Lock lock(lock_);
-    const char* szFunc = "OTUnitDefinition::AddAccountRecord";
 
     if (theAccount.GetInstrumentDefinitionID() != id_) {
-        otErr << szFunc
-              << ": Error: theAccount doesn't have the same asset "
-                 "type ID as *this does.\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Error: theAccount doesn't have the same asset "
+            "type ID as *this does.")
+            .Flush();
         return false;
     }
 
@@ -437,10 +438,10 @@ bool UnitDefinition::AddAccountRecord(
     // It exists.
     //
     if (nullptr == pMap) {
-        otErr << szFunc
-              << ": Error: failed trying to load or create the account records "
-                 "file for instrument definition: "
-              << strInstrumentDefinitionID << "\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Error: Failed trying to load or create the account records "
+            "file for instrument definition: ")(strInstrumentDefinitionID)(".")
+            .Flush();
         return false;
     }
 
@@ -468,15 +469,13 @@ bool UnitDefinition::AddAccountRecord(
                                                                // never
         // happen.
         {
-            otErr << szFunc
-                  << ": Error: wrong instrument definition found in "
-                     "account records "
-                     "file...\n For instrument definition: "
-                  << strInstrumentDefinitionID
-                  << "\n "
-                     "For account: "
-                  << strAcctID
-                  << "\n Found wrong instrument definition: " << str2 << "\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Error: wrong instrument definition found in "
+                "account records "
+                "file. For instrument definition: ")(strInstrumentDefinitionID)(
+                ". For account: ")(strAcctID)(
+                ". Found wrong instrument definition: ")(str2)(".")
+                .Flush();
             return false;
         }
 
@@ -500,11 +499,12 @@ bool UnitDefinition::AddAccountRecord(
             strAcctRecordFile->Get(),
             "",
             "")) {
-        otErr << szFunc
-              << ": Failed trying to StoreObject, while saving updated "
-                 "account records file for instrument definition: "
-              << strInstrumentDefinitionID
-              << "\n to contain account ID: " << strAcctID << "\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Failed trying to StoreObject, while saving updated "
+            "account records file for instrument definition: ")(
+            strInstrumentDefinitionID)(" to contain account ID: ")(strAcctID)(
+            ".")
+            .Flush();
         return false;
     }
 
@@ -524,7 +524,6 @@ bool UnitDefinition::EraseAccountRecord(
     // instrument definition.)
 
     Lock lock(lock_);
-    const char* szFunc = "OTUnitDefinition::EraseAccountRecord";
 
     const auto strAcctID = String::Factory(theAcctID);
 
@@ -562,10 +561,10 @@ bool UnitDefinition::EraseAccountRecord(
     // It exists.
     //
     if (nullptr == pMap) {
-        otErr << szFunc
-              << ": Error: failed trying to load or create the account records "
-                 "file for instrument definition: "
-              << strInstrumentDefinitionID << "\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Error: Failed trying to load or create the account records "
+            "file for instrument definition: ")(strInstrumentDefinitionID)(".")
+            .Flush();
         return false;
     }
 
@@ -594,11 +593,11 @@ bool UnitDefinition::EraseAccountRecord(
             strAcctRecordFile->Get(),
             "",
             "")) {
-        otErr << szFunc
-              << ": Failed trying to StoreObject, while saving updated "
-                 "account records file for instrument definition: "
-              << strInstrumentDefinitionID
-              << "\n to erase account ID: " << strAcctID << "\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Failed trying to StoreObject, while saving updated "
+            "account records file for instrument definition: ")(
+            strInstrumentDefinitionID)(" to erase account ID: ")(strAcctID)(".")
+            .Flush();
         return false;
     }
 
@@ -825,7 +824,8 @@ bool UnitDefinition::update_signature(const Lock& lock)
     if (success) {
         signatures_.emplace_front(new proto::Signature(signature));
     } else {
-        otErr << __FUNCTION__ << ": failed to create signature." << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Failed to create signature.")
+            .Flush();
     }
 
     return success;
@@ -840,7 +840,7 @@ bool UnitDefinition::validate(const Lock& lock) const
     const bool validSyntax = proto::Validate(contract(lock), VERBOSE, true);
 
     if (1 > signatures_.size()) {
-        otErr << __FUNCTION__ << ": Missing signature." << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Missing signature.").Flush();
 
         return false;
     }

@@ -109,8 +109,8 @@ std::unique_ptr<PeerReply> PeerReply::Create(
                 terms));
         } break;
         default: {
-            otErr << OT_METHOD << __FUNCTION__ << ": invalid request type."
-                  << std::endl;
+            LogOutput(OT_METHOD)(__FUNCTION__)(": Invalid request type.")
+                .Flush();
 
             return nullptr;
         }
@@ -146,8 +146,8 @@ std::unique_ptr<PeerReply> PeerReply::Create(
                 ack));
         } break;
         default: {
-            otErr << OT_METHOD << __FUNCTION__ << ": invalid request type."
-                  << std::endl;
+            LogOutput(OT_METHOD)(__FUNCTION__)(": Invalid request type.")
+                .Flush();
 
             return nullptr;
         }
@@ -189,8 +189,8 @@ std::unique_ptr<PeerReply> PeerReply::Create(
                 key));
         } break;
         default: {
-            otErr << OT_METHOD << __FUNCTION__ << ": invalid request type."
-                  << std::endl;
+            LogOutput(OT_METHOD)(__FUNCTION__)(": Invalid request type.")
+                .Flush();
 
             return nullptr;
         }
@@ -205,8 +205,8 @@ std::unique_ptr<PeerReply> PeerReply::Factory(
     const proto::PeerReply& serialized)
 {
     if (!proto::Validate(serialized, VERBOSE)) {
-        otErr << OT_METHOD << __FUNCTION__ << ": invalid serialized reply."
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Invalid serialized reply.")
+            .Flush();
 
         return nullptr;
     }
@@ -228,16 +228,15 @@ std::unique_ptr<PeerReply> PeerReply::Factory(
             contract.reset(new ConnectionReply(wallet, nym, serialized));
         } break;
         default: {
-            otErr << OT_METHOD << __FUNCTION__ << ": invalid reply type."
-                  << std::endl;
+            LogOutput(OT_METHOD)(__FUNCTION__)(": Invalid reply type.").Flush();
 
             return nullptr;
         }
     }
 
     if (!contract) {
-        otErr << OT_METHOD << __FUNCTION__ << ": failed to instantiate reply."
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Failed to instantiate reply.")
+            .Flush();
 
         return nullptr;
     }
@@ -245,7 +244,7 @@ std::unique_ptr<PeerReply> PeerReply::Factory(
     Lock lock(contract->lock_);
 
     if (!contract->validate(lock)) {
-        otErr << OT_METHOD << __FUNCTION__ << ": invalid reply." << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Invalid reply.").Flush();
 
         return nullptr;
     }
@@ -253,8 +252,7 @@ std::unique_ptr<PeerReply> PeerReply::Factory(
     const auto purportedID = Identifier::Factory(serialized.id());
 
     if (!contract->CalculateID(lock)) {
-        otErr << OT_METHOD << __FUNCTION__ << ": failed to calculate ID."
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Failed to calculate ID.").Flush();
 
         return nullptr;
     }
@@ -262,7 +260,7 @@ std::unique_ptr<PeerReply> PeerReply::Factory(
     const auto& actualID = contract->id_;
 
     if (purportedID != actualID) {
-        otErr << OT_METHOD << __FUNCTION__ << ": invalid ID." << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Invalid ID.").Flush();
 
         return nullptr;
     }
@@ -287,8 +285,8 @@ std::unique_ptr<PeerReply> PeerReply::Finish(
     std::unique_ptr<PeerReply> output(contract.release());
 
     if (!output) {
-        otErr << OT_METHOD << __FUNCTION__ << ": failed to instantiate reply."
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Failed to instantiate reply.")
+            .Flush();
 
         return nullptr;
     }
@@ -297,8 +295,8 @@ std::unique_ptr<PeerReply> PeerReply::Finish(
 
         return output;
     } else {
-        otErr << OT_METHOD << __FUNCTION__ << ": failed to finalize contract."
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Failed to finalize contract.")
+            .Flush();
 
         return nullptr;
     }
@@ -355,11 +353,12 @@ std::shared_ptr<proto::PeerRequest> PeerReply::LoadRequest(
             nym->ID(), requestID, StorageBox::PROCESSEDPEERREQUEST, notUsed);
 
         if (output) {
-            otErr << OT_METHOD << __FUNCTION__
-                  << ": request has already been processed." << std::endl;
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Request has already been processed.")
+                .Flush();
         } else {
-            otErr << OT_METHOD << __FUNCTION__ << ": request does not exist."
-                  << std::endl;
+            LogOutput(OT_METHOD)(__FUNCTION__)(": Request does not exist.")
+                .Flush();
         }
     }
 
@@ -397,8 +396,8 @@ bool PeerReply::update_signature(const Lock& lock)
     if (success) {
         signatures_.emplace_front(new proto::Signature(signature));
     } else {
-        otErr << OT_METHOD << __FUNCTION__ << ": failed to create signature."
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Failed to create signature.")
+            .Flush();
     }
 
     return success;
@@ -411,13 +410,13 @@ bool PeerReply::validate(const Lock& lock) const
     if (nym_) {
         validNym = nym_->VerifyPseudonym();
     } else {
-        otErr << OT_METHOD << __FUNCTION__ << ": missing nym." << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Missing nym.").Flush();
 
         return false;
     }
 
     if (false == validNym) {
-        otErr << OT_METHOD << __FUNCTION__ << ": invalid nym." << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Invalid nym.").Flush();
 
         return false;
     }
@@ -425,14 +424,13 @@ bool PeerReply::validate(const Lock& lock) const
     const bool validSyntax = proto::Validate(contract(lock), VERBOSE);
 
     if (!validSyntax) {
-        otErr << OT_METHOD << __FUNCTION__ << ": invalid syntax." << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Invalid syntax.").Flush();
 
         return false;
     }
 
     if (1 > signatures_.size()) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Missing signature."
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Missing signature.").Flush();
 
         return false;
     }
@@ -443,8 +441,7 @@ bool PeerReply::validate(const Lock& lock) const
     if (signature) { validSig = verify_signature(lock, *signature); }
 
     if (!validSig) {
-        otErr << OT_METHOD << __FUNCTION__ << ": invalid signature."
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Invalid signature.").Flush();
     }
 
     return (validNym && validSyntax && validSig);

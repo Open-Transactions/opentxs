@@ -24,6 +24,8 @@
 #include "opentxs/crypto/library/LegacySymmetricProvider.hpp"
 #include "opentxs/OT.hpp"
 
+#define OT_METHOD "opentxs::PeerRequest::"
+
 namespace opentxs
 {
 PeerRequest::PeerRequest(
@@ -133,8 +135,8 @@ std::unique_ptr<PeerRequest> PeerRequest::Create(
     auto unit = wallet.UnitDefinition(unitID);
 
     if (!unit) {
-        otErr << __FUNCTION__ << ": failed to load unit definition."
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Failed to load unit definition.")
+            .Flush();
 
         return nullptr;
     }
@@ -155,7 +157,8 @@ std::unique_ptr<PeerRequest> PeerRequest::Create(
             break;
         }
         default: {
-            otErr << __FUNCTION__ << ": invalid request type." << std::endl;
+            LogOutput(OT_METHOD)(__FUNCTION__)(": Invalid request type.")
+                .Flush();
 
             return nullptr;
         }
@@ -174,8 +177,8 @@ std::unique_ptr<PeerRequest> PeerRequest::Create(
     auto unit = wallet.UnitDefinition(unitID);
 
     if (!unit) {
-        otErr << __FUNCTION__ << ": failed to load unit definition."
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Failed to load unit definition.")
+            .Flush();
 
         return nullptr;
     }
@@ -189,7 +192,8 @@ std::unique_ptr<PeerRequest> PeerRequest::Create(
             break;
         }
         default: {
-            otErr << __FUNCTION__ << ": invalid request type." << std::endl;
+            LogOutput(OT_METHOD)(__FUNCTION__)(": Invalid request type.")
+                .Flush();
 
             return nullptr;
         }
@@ -210,8 +214,8 @@ std::unique_ptr<PeerRequest> PeerRequest::Create(
     auto unit = wallet.UnitDefinition(unitID);
 
     if (!unit) {
-        otErr << __FUNCTION__ << ": failed to load unit definition."
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Failed to load unit definition.")
+            .Flush();
 
         return nullptr;
     }
@@ -230,7 +234,8 @@ std::unique_ptr<PeerRequest> PeerRequest::Create(
                 terms));
         } break;
         default: {
-            otErr << __FUNCTION__ << ": invalid request type." << std::endl;
+            LogOutput(OT_METHOD)(__FUNCTION__)(": Invalid request type.")
+                .Flush();
 
             return nullptr;
         }
@@ -255,7 +260,8 @@ std::unique_ptr<PeerRequest> PeerRequest::Create(
                 wallet, sender, recipient, connectionType, serverID));
         } break;
         default: {
-            otErr << __FUNCTION__ << ": invalid request type." << std::endl;
+            LogOutput(OT_METHOD)(__FUNCTION__)(": Invalid request type.")
+                .Flush();
 
             return nullptr;
         }
@@ -288,7 +294,8 @@ std::unique_ptr<PeerRequest> PeerRequest::Create(
                 serverID));
         } break;
         default: {
-            otErr << __FUNCTION__ << ": invalid request type." << std::endl;
+            LogOutput(OT_METHOD)(__FUNCTION__)(": Invalid request type.")
+                .Flush();
 
             return nullptr;
         }
@@ -303,7 +310,7 @@ std::unique_ptr<PeerRequest> PeerRequest::Factory(
     const proto::PeerRequest& serialized)
 {
     if (!proto::Validate(serialized, VERBOSE)) {
-        otErr << __FUNCTION__ << ": invalid protobuf." << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Invalid protobuf.").Flush();
 
         return nullptr;
     }
@@ -327,15 +334,16 @@ std::unique_ptr<PeerRequest> PeerRequest::Factory(
             contract.reset(new StoreSecret(wallet, nym, serialized));
         } break;
         default: {
-            otErr << __FUNCTION__ << ": invalid request type." << std::endl;
+            LogOutput(OT_METHOD)(__FUNCTION__)(": Invalid request type.")
+                .Flush();
 
             return nullptr;
         }
     }
 
     if (!contract) {
-        otErr << __FUNCTION__ << ": failed to instantiate request."
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Failed to instantiate request.")
+            .Flush();
 
         return nullptr;
     }
@@ -343,7 +351,7 @@ std::unique_ptr<PeerRequest> PeerRequest::Factory(
     Lock lock(contract->lock_);
 
     if (!contract->validate(lock)) {
-        otErr << __FUNCTION__ << ": invalid request." << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Invalid request.").Flush();
 
         return nullptr;
     }
@@ -351,7 +359,7 @@ std::unique_ptr<PeerRequest> PeerRequest::Factory(
     const auto purportedID = Identifier::Factory(serialized.id());
 
     if (!contract->CalculateID(lock)) {
-        otErr << __FUNCTION__ << ": failed to calculate ID." << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Failed to calculate ID.").Flush();
 
         return nullptr;
     }
@@ -359,7 +367,7 @@ std::unique_ptr<PeerRequest> PeerRequest::Factory(
     const auto& actualID = contract->id_;
 
     if (purportedID != actualID) {
-        otErr << __FUNCTION__ << ": invalid ID." << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Invalid ID.").Flush();
 
         return nullptr;
     }
@@ -372,7 +380,7 @@ bool PeerRequest::FinalizeContract(PeerRequest& contract)
     Lock lock(contract.lock_);
 
     if (!contract.CalculateID(lock)) {
-        otErr << __FUNCTION__ << ": failed to calculate ID." << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Failed to calculate ID.").Flush();
 
         return false;
     }
@@ -388,8 +396,8 @@ std::unique_ptr<PeerRequest> PeerRequest::Finish(
     std::unique_ptr<PeerRequest> output(contract.release());
 
     if (!output) {
-        otErr << __FUNCTION__ << ": failed to instantiate request."
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Failed to instantiate request.")
+            .Flush();
 
         return nullptr;
     }
@@ -398,7 +406,8 @@ std::unique_ptr<PeerRequest> PeerRequest::Finish(
 
         return output;
     } else {
-        otErr << __FUNCTION__ << ": failed to finalize contract." << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Failed to finalize contract.")
+            .Flush();
 
         return nullptr;
     }
@@ -470,7 +479,8 @@ bool PeerRequest::update_signature(const Lock& lock)
     if (success) {
         signatures_.emplace_front(new proto::Signature(signature));
     } else {
-        otErr << __FUNCTION__ << ": failed to create signature." << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Failed to create signature.")
+            .Flush();
     }
 
     return success;
@@ -483,17 +493,17 @@ bool PeerRequest::validate(const Lock& lock) const
     if (nym_) {
         validNym = nym_->VerifyPseudonym();
     } else {
-        otErr << __FUNCTION__ << ": invalid nym." << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Invalid nym.").Flush();
     }
 
     const bool validSyntax = proto::Validate(contract(lock), VERBOSE);
 
     if (!validSyntax) {
-        otErr << __FUNCTION__ << ": invalid syntax." << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Invalid syntax.").Flush();
     }
 
     if (1 > signatures_.size()) {
-        otErr << __FUNCTION__ << ": Missing signature." << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Missing signature.").Flush();
 
         return false;
     }
@@ -504,7 +514,7 @@ bool PeerRequest::validate(const Lock& lock) const
     if (signature) { validSig = verify_signature(lock, *signature); }
 
     if (!validSig) {
-        otErr << __FUNCTION__ << ": invalid signature." << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Invalid signature.").Flush();
     }
 
     return (validNym && validSyntax && validSig);

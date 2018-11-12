@@ -31,6 +31,8 @@
 #include <string>
 #include <utility>
 
+#define OT_METHOD "opentxs::OTMessageOutBuffer::"
+
 namespace opentxs
 {
 OTMessageOutbuffer::OTMessageOutbuffer(const api::Core& core)
@@ -187,8 +189,10 @@ void OTMessageOutbuffer::AddSentMessage(std::shared_ptr<Message> theMessage)
             "",
             ""))  // todo hardcoding.
     {
-        otErr << "OTMessageOutbuffer::AddSentMessage: Error: failed writing "
-                 "list of request numbers to storage.\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Error: Failed writing "
+            "list of request numbers to storage.")
+            .Flush();
     }
 }
 
@@ -494,8 +498,10 @@ void OTMessageOutbuffer::Clear(
             "");
 
         if (!saved) {
-            otErr << "OTMessageOutbuffer::Clear: Error: failed writing list of "
-                  << "request numbers to storage." << std::endl;
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Error: failed writing list of "
+                "request numbers to storage.")
+                .Flush();
         }
 
         // Make sure any messages being erased here, are also erased from local
@@ -634,8 +640,10 @@ bool OTMessageOutbuffer::RemoveSentMessage(
             str_data_filename,
             "",
             "")) {
-        otErr << "OTMessageOutbuffer::RemoveSentMessage: Error: failed writing "
-                 "list of request numbers to storage.\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Error: failed writing "
+            "list of request numbers to storage.")
+            .Flush();
     }
 
     // Now that we've updated the numlist in local storage, let's

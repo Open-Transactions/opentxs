@@ -234,8 +234,9 @@ bool ContactGroup::SerializeTo(
 {
     if (section.name() != section_) {
 
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Trying to serialize to incorrect section." << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Trying to serialize to incorrect section.")
+            .Flush();
 
         return false;
     }

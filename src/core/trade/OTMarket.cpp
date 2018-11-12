@@ -161,8 +161,9 @@ std::int32_t OTMarket::ProcessXMLNode(irr::io::IrrXMLReader*& xml)
 
         if (!Contract::LoadEncodedTextField(xml, strData) ||
             !strData->Exists()) {
-            otErr << "Error in OTMarket::" << __FUNCTION__
-                  << ": offer field without value.\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Error: Offer field without value.")
+                .Flush();
             return (-1);  // error condition
         } else {
             auto pOffer{api_.Factory().Offer(
@@ -182,7 +183,9 @@ std::int32_t OTMarket::ProcessXMLNode(irr::io::IrrXMLReader*& xml)
                     ": Successfully loaded offer and added to market.")
                     .Flush();
             } else {
-                otErr << "Error adding offer to market while loading market.\n";
+                LogOutput(OT_METHOD)(__FUNCTION__)(
+                    ": Error adding offer to market while loading market.")
+                    .Flush();
                 delete offer;
                 offer = nullptr;
                 return (-1);
@@ -299,8 +302,9 @@ bool OTMarket::GetNym_OfferList(
         std::unique_ptr<OTDB::OfferDataNym> pOfferData(
             dynamic_cast<OTDB::OfferDataNym*>(
                 OTDB::CreateObject(OTDB::STORED_OBJ_OFFER_DATA_NYM)));
-
-        const std::int64_t& lTransactionNum = pOffer->GetTransactionNum();
+        in "
+           "OTTransaction
+            const std::int64_t& lTransactionNum = pOffer->GetTransactionNum();
         const std::int64_t& lPriceLimit = pOffer->GetPriceLimit();
         const std::int64_t& lTotalAssets = pOffer->GetTotalAssetsOnOffer();
         const std::int64_t& lFinishedSoFar = pOffer->GetFinishedSoFar();
@@ -410,8 +414,8 @@ bool OTMarket::GetRecentTradeList(Armored& ascOutput, std::int32_t& nTradeCount)
             *m_pTradeList));  // Now we PACK our market's recent trades list.
 
         if (nullptr == pBuffer) {
-            otErr << "Failed packing pTradeList in OTCron::GetRecentTradeList. "
-                     "\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(": Failed packing pTradeList.")
+                .Flush();
             return false;
         }
 
@@ -430,12 +434,13 @@ bool OTMarket::GetRecentTradeList(Armored& ascOutput, std::int32_t& nTradeCount)
 
             return true;
         } else
-            otErr << "Error while getting buffer data in "
-                     "OTMarket::GetRecentTradeList.\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Error while getting buffer data.")
+                .Flush();
     } else
-        otErr << "Error: nTradeCount with negative value in "
-                 "OTMarket::GetRecentTradeList: "
-              << nTradeCount << ".\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            "Error: nTradeCount with negative value: ")(nTradeCount)(".")
+            .Flush();
 
     return false;
 }
@@ -553,7 +558,8 @@ bool OTMarket::GetOfferList(
             *pOfferList));  // Now we PACK our market's offer list.
 
         if (nullptr == pBuffer) {
-            otErr << "Failed packing pOfferList in OTCron::GetOfferList. \n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(": Failed packing pOfferList.")
+                .Flush();
             return false;
         }
 
@@ -571,10 +577,12 @@ bool OTMarket::GetOfferList(
 
             return true;
         } else
-            otErr << "Error while getting buffer data in "
-                     "OTMarket::GetOfferList.\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Error while getting buffer data.")
+                .Flush();
     } else
-        otErr << "invalid: nOfferCount is < 0 in OTMarket::GetOfferList.\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Invalid: nOfferCount is < 0.")
+            .Flush();
 
     return false;
 }
@@ -609,9 +617,11 @@ OTOffer* OTMarket::GetOffer(const std::int64_t& lTransactionNum)
         if (pOffer->GetTransactionNum() == lTransactionNum)
             return pOffer;
         else
-            otErr << "Expected Offer with transaction number "
-                  << lTransactionNum << ", but found "
-                  << pOffer->GetTransactionNum() << " inside. Bad data?\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Expected Offer with transaction number ")(lTransactionNum)(
+                ", but found ")(pOffer->GetTransactionNum())(
+                " inside. Bad data?")
+                .Flush();
     }
 
     return nullptr;
@@ -628,9 +638,10 @@ bool OTMarket::RemoveOffer(const std::int64_t& lTransactionNum)  // if false,
 
     // If it's not already on the list, then there's nothing to remove.
     if (it == m_mapOffers.end()) {
-        otErr << "Attempt to remove non-existent Offer from Market. "
-                 "Transaction #: "
-              << lTransactionNum << "\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Attempt to remove non-existent Offer from Market. "
+            "Transaction #: ")(lTransactionNum)(".")
+            .Flush();
         return false;
     }
     // Otherwise, if it WAS already there, remove it properly.
@@ -676,8 +687,10 @@ bool OTMarket::RemoveOffer(const std::int64_t& lTransactionNum)  // if false,
         }
 
         if (nullptr == pSameOffer) {
-            otErr << "Removed Offer from offers list, but not found on bid/ask "
-                     "list.\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Removed offer from offers list, but not found on bid/ask "
+                "list.")
+                .Flush();
         } else  // This means it was found and removed from the second list as
                 // well.
         {
@@ -721,7 +734,9 @@ bool OTMarket::AddOffer(
 
     // Make sure the offer is even appropriate for this market...
     if (!ValidateOfferForMarket(theOffer)) {
-        otErr << "Failed attempt to add invalid offer to market.\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Failed attempt to add invalid offer to market.")
+            .Flush();
 
         if (nullptr != pTrade) pTrade->FlagForRemoval();
     } else {
@@ -743,9 +758,10 @@ bool OTMarket::AddOffer(
         }
         // Otherwise, if it was already there, log an error.
         else {
-            otErr << "Attempt to add Offer to Market with pre-existing "
-                     "transaction number: "
-                  << lTransactionNum << "\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Attempt to add Offer to Market with pre-existing "
+                "transaction number: ")(lTransactionNum)(".")
+                .Flush();
             return false;
         }
 
@@ -864,8 +880,9 @@ bool OTMarket::SaveMarket()
     // file.
     if (!SignContract(*(GetCron()->GetServerNym())) || !SaveContract() ||
         !SaveContract(szFoldername, szFilename)) {
-        otErr << "Error saving Market:\n"
-              << szFoldername << Log::PathSeparator() << szFilename << "\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Error saving Market: ")(
+            szFoldername)(Log::PathSeparator())(szFilename)(".")
+            .Flush();
         return false;
     }
 
@@ -886,9 +903,11 @@ bool OTMarket::SaveMarket()
                 szSubFolder,   // markets/recent
                 str_TRADES_FILE->Get(),
                 ""))  // markets/recent/<Market_ID>.bin
-            otErr << "Error saving recent trades for Market:\n"
-                  << szFoldername << Log::PathSeparator() << szSubFolder
-                  << Log::PathSeparator() << szFilename << "\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Error saving recent trades for Market: ")(szFoldername)(
+                Log::PathSeparator())(szSubFolder)(Log::PathSeparator())(
+                szFilename)(".")
+                .Flush();
     }
 
     return true;
@@ -1144,10 +1163,10 @@ void OTMarket::ProcessTrade(
         pFirstNym = api_.Wallet().Nym(FIRST_NYM_ID);
         if (nullptr == pFirstNym) {
             auto strNymID = String::Factory(FIRST_NYM_ID);
-            otErr << "OTMarket::" << __FUNCTION__
-                  << ": Failure verifying trade, offer, or nym, or loading "
-                     "signed Nymfile: "
-                  << strNymID << "\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Failure verifying trade, offer, nym, or loading "
+                "signed Nymfile: ")(strNymID)(".")
+                .Flush();
             theTrade.FlagForRemoval();
             return;
         }
@@ -1167,9 +1186,10 @@ void OTMarket::ProcessTrade(
         pOtherNym = api_.Wallet().Nym(OTHER_NYM_ID);
         if (nullptr == pOtherNym) {
             auto strNymID = String::Factory(OTHER_NYM_ID);
-            otErr << "Failure loading or verifying Other Nym public key in "
-                     "OTMarket::"
-                  << __FUNCTION__ << ": " << strNymID << "\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Failure loading or verifying Other Nym public key in "
+                "OTMarket:: ")(strNymID)(".")
+                .Flush();
             pOtherTrade->FlagForRemoval();
             return;
         }
@@ -1242,9 +1262,10 @@ void OTMarket::ProcessTrade(
          GetCurrencyID())  // the trader's currency accts have same asset
                            // type as the market.
     ) {
-        otErr << "ERROR - First Trader has accounts of wrong "
-                 "instrument definitions in OTMarket::"
-              << __FUNCTION__ << "\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": ERROR - First Trader has accounts of wrong "
+            "instrument definitions in OTMarket::.")
+            .Flush();
         theTrade.FlagForRemoval();  // Removes from Cron.
         return;
     } else if (
@@ -1256,9 +1277,10 @@ void OTMarket::ProcessTrade(
          GetCurrencyID()))  // the trader's currency accts have same asset
                             // type as market.
     {
-        otErr << "ERROR - Other Trader has accounts of wrong "
-                 "instrument definitions in OTMarket::"
-              << __FUNCTION__ << "\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": ERROR - Other Trader has accounts of wrong "
+            "instrument definitions in OTMarket::.")
+            .Flush();
         pOtherTrade->FlagForRemoval();  // Removes from Cron.
         return;
     }
@@ -1273,9 +1295,10 @@ void OTMarket::ProcessTrade(
          !pFirstAssetAcct.get().VerifySignature(*pServerNym)) ||
         (!pFirstCurrencyAcct.get().VerifyOwner(*pFirstNym) ||
          !pFirstCurrencyAcct.get().VerifySignature(*pServerNym))) {
-        otErr << "ERROR verifying ownership or signature on one of first "
-                 "trader's accounts in OTMarket::"
-              << __FUNCTION__ << "\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": ERROR verifying ownership or signature on one of first "
+            "trader's accounts.")
+            .Flush();
         theTrade.FlagForRemoval();  // Removes from Cron.
         return;
     } else if (
@@ -1283,9 +1306,10 @@ void OTMarket::ProcessTrade(
          !pOtherAssetAcct.get().VerifySignature(*pServerNym)) ||
         (!pOtherCurrencyAcct.get().VerifyOwner(*pOtherNym) ||
          !pOtherCurrencyAcct.get().VerifySignature(*pServerNym))) {
-        otErr << "ERROR verifying ownership or signature on one of other "
-                 "trader's accounts in OTMarket::"
-              << __FUNCTION__ << "\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": ERROR verifying ownership or signature on one of other "
+            "trader's accounts.")
+            .Flush();
         pOtherTrade->FlagForRemoval();  // Removes from Cron.
         return;
     }
@@ -1371,17 +1395,17 @@ void OTMarket::ProcessTrade(
 
         if ((false == bSuccessLoadingFirstAsset) ||
             (false == bSuccessLoadingFirstCurrency)) {
-            otErr << "ERROR loading or generating an inbox for first trader in "
-                     "OTMarket::"
-                  << __FUNCTION__ << ".\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": ERROR loading or generating an inbox for first trader.")
+                .Flush();
             theTrade.FlagForRemoval();  // Removes from Cron.
             return;
         } else if (
             (false == bSuccessLoadingOtherAsset) ||
             (false == bSuccessLoadingOtherCurrency)) {
-            otErr << "ERROR loading or generating an inbox for other trader in "
-                     "OTMarket::"
-                  << __FUNCTION__ << ".\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": ERROR loading or generating an inbox for other trader.")
+                .Flush();
             pOtherTrade->FlagForRemoval();  // Removes from Cron.
             return;
         } else {
@@ -1753,10 +1777,12 @@ void OTMarket::ProcessTrade(
                 // If ANY of these failed, then roll them all back and
                 // break.
                 if (!bMove1 || !bMove2 || !bMove3 || !bMove4) {
-                    otErr << "Very strange! Funds were available, yet "
-                             "debit or "
-                             "credit failed while performing trade. "
-                             "Attempting rollback!\n";
+                    LogOutput(OT_METHOD)(__FUNCTION__)(
+                        ": Very strange! Funds were available, yet "
+                        "debit or "
+                        "credit failed while performing trade. "
+                        "Attempting rollback!")
+                        .Flush();
                     // We won't save the files anyway, if this failed.
                     // So the rollback is actually superfluous but
                     // somehow worthwhile.

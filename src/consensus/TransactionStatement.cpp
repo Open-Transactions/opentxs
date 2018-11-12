@@ -61,9 +61,9 @@ TransactionStatement::TransactionStatement(const String& serialized)
                         Contract::LoadEncodedTextField(raw, list);
 
                     if (notary_.empty() || !loaded) {
-                        otErr << __FUNCTION__
-                              << ": Error: transactionNums field without value."
-                              << std::endl;
+                        LogOutput(OT_METHOD)(__FUNCTION__)(
+                            ": Error: transactionNums field without value.")
+                            .Flush();
                         break;
                     }
 
@@ -89,9 +89,9 @@ TransactionStatement::TransactionStatement(const String& serialized)
                         Contract::LoadEncodedTextField(raw, list);
 
                     if (notary_.empty() || !loaded) {
-                        otErr << __FUNCTION__
-                              << ": Error: issuedNums field without value."
-                              << std::endl;
+                        LogOutput(OT_METHOD)(__FUNCTION__)(
+                            ": Error: issuedNums field without value.")
+                            .Flush();
                         break;
                     }
 
@@ -111,8 +111,9 @@ TransactionStatement::TransactionStatement(const String& serialized)
                         issued_.insert(number);
                     }
                 } else {
-                    otErr << "Unknown element type in " << __FUNCTION__ << ": "
-                          << nodeName << std::endl;
+                    LogOutput(OT_METHOD)(__FUNCTION__)(
+                        ": Unknown element type in: ")(nodeName)(".")
+                        .Flush();
                 }
             } break;
             default: {

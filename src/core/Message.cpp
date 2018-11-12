@@ -332,9 +332,9 @@ bool Message::HarvestTransactionNumbers(
                      // ledger from *this.
 
     if (!strLedger->Exists() || !theLedger->LoadLedgerFromString(strLedger)) {
-        otErr << __FUNCTION__
-              << ": ERROR: Failed trying to load message ledger:\n\n"
-              << strLedger << "\n\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": ERROR: Failed trying to load message ledger: ")(strLedger)(".")
+            .Flush();
         return false;
     }
 
@@ -530,8 +530,9 @@ std::int32_t Message::processXmlNodeAckReplies(
 {
     auto strDepth = String::Factory();
     if (!Contract::LoadEncodedTextField(xml, strDepth)) {
-        otErr << "Error in OTMessage::ProcessXMLNode: ackReplies field "
-                 "without value.\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Error: ackReplies field "
+                                           "without value.")
+            .Flush();
         return (-1);  // error condition
     }
 
@@ -546,8 +547,9 @@ std::int32_t Message::processXmlNodeAcknowledgedReplies(
     __attribute__((unused)) Message& m,
     irr::io::IrrXMLReader*& xml)
 {
-    otErr << "OTMessage::ProcessXMLNode: SKIPPING DEPRECATED FIELD: "
-             "acknowledgedReplies\n";
+    LogOutput(OT_METHOD)(__FUNCTION__)(": SKIPPING DEPRECATED FIELD: "
+                                       "acknowledgedReplies.")
+        .Flush();
 
     while (xml->getNodeType() != irr::io::EXN_ELEMENT_END) { xml->read(); }
 
@@ -771,10 +773,10 @@ public:
 
             if (!Contract::LoadEncodedTextFieldByName(
                     xml, ascTextExpected, pElementExpected)) {
-                otErr << "Error in StrategyGetMarketOffersResponse: "
-                         "Expected "
-                      << pElementExpected << " element with text field, for "
-                      << m.m_strCommand << ".\n";
+                LogOutput(OT_METHOD)(__FUNCTION__)(": Error: Expected ")(
+                    pElementExpected)(" element with text field, for ")(
+                    m.m_strCommand)(".")
+                    .Flush();
                 return (-1);  // error condition
             }
 
@@ -892,10 +894,10 @@ public:
 
             if (!Contract::LoadEncodedTextFieldByName(
                     xml, ascTextExpected, pElementExpected)) {
-                otErr << "Error in OTMessage::ProcessXMLNode: "
-                         "Expected "
-                      << pElementExpected << " element with text field, for "
-                      << m.m_strCommand << ".\n";
+                LogOutput(OT_METHOD)(__FUNCTION__)(": Error: Expected ")(
+                    pElementExpected)(" element with text field, for ")(
+                    m.m_strCommand)(".")
+                    .Flush();
                 return (-1);  // error condition
             }
 
@@ -1009,10 +1011,10 @@ public:
 
             if (!Contract::LoadEncodedTextFieldByName(
                     xml, ascTextExpected, pElementExpected)) {
-                otErr << "Error in OTMessage::ProcessXMLNode: "
-                         "Expected "
-                      << pElementExpected << " element with text field, for "
-                      << m.m_strCommand << ".\n";
+                LogOutput(OT_METHOD)(__FUNCTION__)(": Error: Expected ")(
+                    pElementExpected)(" element with text field, for ")(
+                    m.m_strCommand)(".")
+                    .Flush();
                 return (-1);  // error condition
             }
 
@@ -1095,10 +1097,10 @@ public:
                 ascTextExpected,
                 pElementExpected,
                 &temp_MapAttributesAuthent)) {
-            otErr << "Error in OTMessage::ProcessXMLNode: "
-                     "Expected "
-                  << pElementExpected << " element with text field, for "
-                  << m.m_strCommand << ".\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(": Error: Expected ")(
+                pElementExpected)(" element with text field, for ")(
+                m.m_strCommand)(".")
+                .Flush();
             return (-1);  // error condition
         }
         {
@@ -1134,10 +1136,10 @@ public:
                 ascTextExpected,
                 pElementExpected,
                 &temp_MapAttributesEncrypt)) {
-            otErr << "Error in OTMessage::ProcessXMLNode: "
-                     "Expected "
-                  << pElementExpected << " element with text field, for "
-                  << m.m_strCommand << ".\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(": Error: Expected ")(
+                pElementExpected)(" element with text field, for ")(
+                m.m_strCommand)(".")
+                .Flush();
             return (-1);  // error condition
         }
         {
@@ -1291,10 +1293,10 @@ public:
 
         if (!Contract::LoadEncodedTextFieldByName(
                 xml, ascTextExpected, pElementExpected)) {
-            otErr << "Error in StrategyRegisterContractResponse: "
-                     "Expected "
-                  << pElementExpected << " element with text field, for "
-                  << m.m_strCommand << ".\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(": Error: Expected ")(
+                pElementExpected)(" element with text field, for ")(
+                m.m_strCommand)(".")
+                .Flush();
             return (-1);  // error condition
         }
 
@@ -1386,10 +1388,10 @@ public:
 
             if (!Contract::LoadEncodedTextFieldByName(
                     xml, ascTextExpected, pElementExpected)) {
-                otErr << "Error in OTMessage::ProcessXMLNode: "
-                         "Expected "
-                      << pElementExpected << " element with text field, for "
-                      << m.m_strCommand << ".\n";
+                LogOutput(OT_METHOD)(__FUNCTION__)(": Error: Expected ")(
+                    pElementExpected)(" element with text field, for ")(
+                    m.m_strCommand)(".")
+                    .Flush();
                 return (-1);  // error condition
             }
         }
@@ -1399,10 +1401,10 @@ public:
 
         if (!Contract::LoadEncodedTextFieldByName(
                 xml, ascTextExpected, pElementExpected)) {
-            otErr << "Error in OTMessage::ProcessXMLNode: "
-                     "Expected "
-                  << pElementExpected << " element with text field, for "
-                  << m.m_strCommand << ".\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(": Error: Expected ")(
+                pElementExpected)(" element with text field, for ")(
+                m.m_strCommand)(".")
+                .Flush();
             return (-1);  // error condition
         }
 
@@ -1487,10 +1489,10 @@ public:
 
         if (!Contract::LoadEncodedTextFieldByName(
                 xml, ascTextExpected, pElementExpected)) {
-            otErr << "Error in OTMessage::ProcessXMLNode: "
-                     "Expected "
-                  << pElementExpected << " element with text field, for "
-                  << m.m_strCommand << ".\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(": Error: Expected ")(
+                pElementExpected)(" element with text field, for ")(
+                m.m_strCommand)(".")
+                .Flush();
             return (-1);  // error condition
         }
 
@@ -1588,10 +1590,10 @@ public:
             m.m_ascInReferenceTo = ascTextExpected;
             if (!Contract::LoadEncodedTextFieldByName(
                     xml, ascTextExpected, pElementExpected)) {
-                otErr << "Error in OTMessage::ProcessXMLNode: "
-                         "Expected "
-                      << pElementExpected << " element with text field, for "
-                      << m.m_strCommand << ".\n";
+                LogOutput(OT_METHOD)(__FUNCTION__)(": Error: Expected ")(
+                    pElementExpected)(" element with text field, for ")(
+                    m.m_strCommand)(".")
+                    .Flush();
                 return (-1);  // error condition
             }
         } else {  // Success.
@@ -1600,10 +1602,10 @@ public:
 
             if (!Contract::LoadEncodedTextFieldByName(
                     xml, ascTextExpected, pElementExpected)) {
-                otErr << "Error in OTMessage::ProcessXMLNode: "
-                         "Expected "
-                      << pElementExpected << " element with text field, for "
-                      << m.m_strCommand << ".\n";
+                LogOutput(OT_METHOD)(__FUNCTION__)(": Error: Expected ")(
+                    pElementExpected)(" element with text field, for ")(
+                    m.m_strCommand)(".")
+                    .Flush();
                 return (-1);  // error condition
             }
             m.m_ascPayload = ascTextExpected;
@@ -1762,10 +1764,10 @@ public:
 
         if (!Contract::LoadEncodedTextFieldByName(
                 xml, ascTextExpected, pElementExpected)) {
-            otErr << "Error in OTMessage::ProcessXMLNode: "
-                     "Expected "
-                  << pElementExpected << " element with text field, for "
-                  << m.m_strCommand << ".\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(": Error: Expected ")(
+                pElementExpected)(" element with text field, for ")(
+                m.m_strCommand)(".")
+                .Flush();
             return (-1);  // error condition
         }
 
@@ -1819,10 +1821,10 @@ public:
 
         if (!Contract::LoadEncodedTextFieldByName(
                 xml, ascTextExpected, pElementExpected)) {
-            otErr << "Error in OTMessage::ProcessXMLNode: "
-                     "Expected "
-                  << pElementExpected << " element with text field, for "
-                  << m.m_strCommand << ".\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(": Error: Expected ")(
+                pElementExpected)(" element with text field, for ")(
+                m.m_strCommand)(".")
+                .Flush();
             return (-1);  // error condition
         }
 
@@ -1930,10 +1932,10 @@ public:
 
         if (!Contract::LoadEncodedTextFieldByName(
                 xml, ascTextExpected, pElementExpected)) {
-            otErr << "Error in OTMessage::ProcessXMLNode: "
-                     "Expected "
-                  << pElementExpected << " element with text field, for "
-                  << m.m_strCommand << ".\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(": Error: Expected ")(
+                pElementExpected)(" element with text field, for ")(
+                m.m_strCommand)(".")
+                .Flush();
             return (-1);  // error condition
         }
 
@@ -2076,10 +2078,10 @@ public:
 
         if (!Contract::LoadEncodedTextFieldByName(
                 xml, ascTextExpected, pElementExpected)) {
-            otErr << "Error in OTMessage::ProcessXMLNode: "
-                     "Expected "
-                  << pElementExpected << " element with text field, for "
-                  << m.m_strCommand << ".\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(": Error: Expected ")(
+                pElementExpected)(" element with text field, for ")(
+                m.m_strCommand)(".")
+                .Flush();
             return (-1);  // error condition
         }
 
@@ -2151,11 +2153,10 @@ public:
 
             if (!Contract::LoadEncodedTextFieldByName(
                     xml, ascTextExpected, pElementExpected)) {
-                otErr
-                    << "Error in StrategyRegisterInstrumentDefinitionResponse: "
-                       "Expected "
-                    << pElementExpected << " element with text field, for "
-                    << m.m_strCommand << ".\n";
+                LogOutput(OT_METHOD)(__FUNCTION__)(": Error: Expected ")(
+                    pElementExpected)(" element with text field, for ")(
+                    m.m_strCommand)(".")
+                    .Flush();
                 return (-1);  // error condition
             }
         }
@@ -2166,11 +2167,10 @@ public:
 
             if (!Contract::LoadEncodedTextFieldByName(
                     xml, ascTextExpected, pElementExpected)) {
-                otErr
-                    << "Error in StrategyRegisterInstrumentDefinitionResponse: "
-                       "Expected "
-                    << pElementExpected << " element with text field, for "
-                    << m.m_strCommand << ".\n";
+                LogOutput(OT_METHOD)(__FUNCTION__)(": Error: Expected ")(
+                    pElementExpected)(" element with text field, for ")(
+                    m.m_strCommand)(".")
+                    .Flush();
                 return (-1);  // error condition
             }
         }
@@ -2180,10 +2180,12 @@ public:
         // OR if it was successful but the Payload isn't there, then failure.
         if (!m.m_ascInReferenceTo->GetLength() ||
             (m.m_bSuccess && !m.m_ascPayload->GetLength())) {
-            otErr << "Error in StrategyRegisterInstrumentDefinitionResponse:\n"
-                     "Expected issuerAccount and/or inReferenceTo elements "
-                     "with text fields in "
-                     "registerInstrumentDefinitionResponse reply\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Error: "
+                "Expected issuerAccount and/or inReferenceTo elements "
+                "with text fields in "
+                "registerInstrumentDefinitionResponse reply.")
+                .Flush();
             return (-1);  // error condition
         }
 
@@ -2237,10 +2239,10 @@ public:
 
         if (!Contract::LoadEncodedTextFieldByName(
                 xml, ascTextExpected, pElementExpected)) {
-            otErr << "Error in OTMessage::ProcessXMLNode: "
-                     "Expected "
-                  << pElementExpected << " element with text field, for "
-                  << m.m_strCommand << ".\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(": Error: Expected ")(
+                pElementExpected)(" element with text field, for ")(
+                m.m_strCommand)(".")
+                .Flush();
             return (-1);  // error condition
         }
 
@@ -2301,10 +2303,10 @@ public:
 
             if (!Contract::LoadEncodedTextFieldByName(
                     xml, ascTextExpected, pElementExpected)) {
-                otErr << "Error in StrategyQueryInstrumentDefinitionsResponse: "
-                         "Expected "
-                      << pElementExpected << " element with text field, for "
-                      << m.m_strCommand << ".\n";
+                LogOutput(OT_METHOD)(__FUNCTION__)(": Error: Expected ")(
+                    pElementExpected)(" element with text field, for ")(
+                    m.m_strCommand)(".")
+                    .Flush();
                 return (-1);  // error condition
             }
         }
@@ -2315,10 +2317,10 @@ public:
 
             if (!Contract::LoadEncodedTextFieldByName(
                     xml, ascTextExpected, pElementExpected)) {
-                otErr << "Error in StrategyQueryInstrumentDefinitionsResponse: "
-                         "Expected "
-                      << pElementExpected << " element with text field, for "
-                      << m.m_strCommand << ".\n";
+                LogOutput(OT_METHOD)(__FUNCTION__)(": Error: Expected ")(
+                    pElementExpected)(" element with text field, for ")(
+                    m.m_strCommand)(".")
+                    .Flush();
                 return (-1);  // error condition
             }
         }
@@ -2328,10 +2330,11 @@ public:
         // OR if it was successful but the Payload isn't there, then failure.
         if (!m.m_ascInReferenceTo->GetLength() ||
             (m.m_bSuccess && !m.m_ascPayload->GetLength())) {
-            otErr << "Error in StrategyQueryInstrumentDefinitionsResponse:\n"
-                     "Expected stringMap and/or inReferenceTo elements with "
-                     "text fields in "
-                     "queryInstrumentDefinitionsResponse reply\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Error: Expected stringMap and/or inReferenceTo elements "
+                "with text fields in "
+                "queryInstrumentDefinitionsResponse reply.")
+                .Flush();
             return (-1);  // error condition
         }
 
@@ -2380,10 +2383,10 @@ public:
 
             if (!Contract::LoadEncodedTextFieldByName(
                     xml, ascTextExpected, pElementExpected)) {
-                otErr << "Error in OTMessage::ProcessXMLNode: "
-                         "Expected "
-                      << pElementExpected << " element with text field, for "
-                      << m.m_strCommand << ".\n";
+                LogOutput(OT_METHOD)(__FUNCTION__)(": Error: Expected ")(
+                    pElementExpected)(" element with text field, for ")(
+                    m.m_strCommand)(".")
+                    .Flush();
                 return (-1);  // error condition
             }
         }
@@ -2391,9 +2394,10 @@ public:
         // Did we find everything we were looking for?
         // If the Payload isn't there, then failure.
         if (!m.m_ascPayload->GetLength()) {
-            otErr << "Error in OTMessage::ProcessXMLNode:\n"
-                     "Expected currencyBasket element with text fields in "
-                     "issueBasket message\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Error: Expected currencyBasket element with text fields in "
+                "issueBasket message.")
+                .Flush();
             return (-1);  // error condition
         }
 
@@ -2451,10 +2455,10 @@ public:
 
             if (!Contract::LoadEncodedTextFieldByName(
                     xml, ascTextExpected, pElementExpected)) {
-                otErr << "Error in OTMessage::ProcessXMLNode: "
-                         "Expected "
-                      << pElementExpected << " element with text field, for "
-                      << m.m_strCommand << ".\n";
+                LogOutput(OT_METHOD)(__FUNCTION__)(": Error: Expected ")(
+                    pElementExpected)(" element with text field, for ")(
+                    m.m_strCommand)(".")
+                    .Flush();
                 return (-1);  // error condition
             }
         }
@@ -2463,9 +2467,10 @@ public:
         // If the "command responding to" isn't there,
         // OR if it was successful but the Payload isn't there, then failure.
         if (!m.m_ascInReferenceTo->GetLength()) {
-            otErr << "Error in OTMessage::ProcessXMLNode:\n"
-                     "Expected inReferenceTo element with text fields in "
-                     "issueBasketResponse reply\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Error: Expected inReferenceTo element with text fields in "
+                "issueBasketResponse reply.")
+                .Flush();
             return (-1);  // error condition
         }
 
@@ -2573,10 +2578,10 @@ public:
 
             if (!Contract::LoadEncodedTextFieldByName(
                     xml, ascTextExpected, pElementExpected)) {
-                otErr << "Error in OTMessage::ProcessXMLNode: "
-                         "Expected "
-                      << pElementExpected << " element with text field, for "
-                      << m.m_strCommand << ".\n";
+                LogOutput(OT_METHOD)(__FUNCTION__)(": Error: Expected ")(
+                    pElementExpected)(" element with text field, for ")(
+                    m.m_strCommand)(".")
+                    .Flush();
                 //                return (-1); // error condition
             }
         }
@@ -2587,10 +2592,10 @@ public:
 
             if (!Contract::LoadEncodedTextFieldByName(
                     xml, ascTextExpected, pElementExpected)) {
-                otErr << "Error in OTMessage::ProcessXMLNode: "
-                         "Expected "
-                      << pElementExpected << " element with text field, for "
-                      << m.m_strCommand << ".\n";
+                LogOutput(OT_METHOD)(__FUNCTION__)(": Error: Expected ")(
+                    pElementExpected)(" element with text field, for ")(
+                    m.m_strCommand)(".")
+                    .Flush();
                 return (-1);  // error condition
             }
         }
@@ -2600,9 +2605,10 @@ public:
         // OR if it was successful but the Payload isn't there, then failure.
         //
         if (m.m_bSuccess && !m.m_ascPayload->GetLength()) {
-            otErr << "Error in OTMessage::ProcessXMLNode:\n"
-                     "Expected newAccount element with text field, in "
-                     "registerAccountResponse reply\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Error: Expected newAccount element with text field, in "
+                "registerAccountResponse reply.")
+                .Flush();
             return (-1);  // error condition
         }
 
@@ -2670,9 +2676,10 @@ public:
             m.m_lDepth = 2;
         else {
             m.m_lDepth = 0;
-            otErr << "Error in OTMessage::ProcessXMLNode:\n"
-                     "Expected boxType to be inbox, outbox, or nymbox, in "
-                     "getBoxReceipt\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Error: Expected boxType to be inbox, outbox, or nymbox, in "
+                "getBoxReceipt.")
+                .Flush();
             return (-1);
         }
 
@@ -2751,9 +2758,10 @@ public:
             m.m_lDepth = 2;
         else {
             m.m_lDepth = 0;
-            otErr << "Error in OTMessage::ProcessXMLNode:\n"
-                     "Expected boxType to be inbox, outbox, or nymbox, in "
-                     "getBoxReceiptResponse reply\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Error: Expected boxType to be inbox, outbox, or nymbox, in "
+                "getBoxReceiptResponse reply.")
+                .Flush();
             return (-1);
         }
 
@@ -2766,10 +2774,10 @@ public:
 
             if (!Contract::LoadEncodedTextFieldByName(
                     xml, ascTextExpected, pElementExpected)) {
-                otErr << "Error in OTMessage::ProcessXMLNode: "
-                         "Expected "
-                      << pElementExpected << " element with text field, for "
-                      << m.m_strCommand << ".\n";
+                LogOutput(OT_METHOD)(__FUNCTION__)(": Error: Expected ")(
+                    pElementExpected)(" element with text field, for ")(
+                    m.m_strCommand)(".")
+                    .Flush();
                 return (-1);  // error condition
             }
         }
@@ -2780,10 +2788,10 @@ public:
 
             if (!Contract::LoadEncodedTextFieldByName(
                     xml, ascTextExpected, pElementExpected)) {
-                otErr << "Error in OTMessage::ProcessXMLNode: "
-                         "Expected "
-                      << pElementExpected << " element with text field, for "
-                      << m.m_strCommand << ".\n";
+                LogOutput(OT_METHOD)(__FUNCTION__)(": Error: Expected ")(
+                    pElementExpected)(" element with text field, for ")(
+                    m.m_strCommand)(".")
+                    .Flush();
                 return (-1);  // error condition
             }
         }
@@ -2793,10 +2801,10 @@ public:
         // OR if it was successful but the Payload isn't there, then failure.
         if (!m.m_ascInReferenceTo->GetLength() ||
             (m.m_bSuccess && !m.m_ascPayload->GetLength())) {
-            otErr << "Error in OTMessage::ProcessXMLNode:\n"
-                     "Expected boxReceipt and/or inReferenceTo elements with "
-                     "text fields in "
-                     "getBoxReceiptResponse reply\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Error: Expected boxReceipt and/or inReferenceTo elements "
+                "with text fields in getBoxReceiptResponse reply.")
+                .Flush();
             return (-1);  // error condition
         }
 
@@ -2892,10 +2900,10 @@ public:
 
             if (!Contract::LoadEncodedTextFieldByName(
                     xml, ascTextExpected, pElementExpected)) {
-                otErr << "Error in StrategyUnregisterAccount: "
-                         "Expected "
-                      << pElementExpected << " element with text field, for "
-                      << m.m_strCommand << ".\n";
+                LogOutput(OT_METHOD)(__FUNCTION__)(": Error: Expected ")(
+                    pElementExpected)(" element with text field, for ")(
+                    m.m_strCommand)(".")
+                    .Flush();
                 return (-1);  // error condition
             }
         }
@@ -2903,9 +2911,10 @@ public:
         // Did we find everything we were looking for?
         // If the "command responding to" isn't there, then failure.
         if (!m.m_ascInReferenceTo->GetLength()) {
-            otErr << "Error in StrategyUnregisterAccount:\n"
-                     "Expected inReferenceTo element with text fields in "
-                     "unregisterAccountResponse reply\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Error: Expected inReferenceTo element with text fields in "
+                "unregisterAccountResponse reply.")
+                .Flush();
             return (-1);  // error condition
         }
 
@@ -2963,10 +2972,10 @@ public:
 
             if (!Contract::LoadEncodedTextFieldByName(
                     xml, ascTextExpected, pElementExpected)) {
-                otErr << "Error in OTMessage::ProcessXMLNode: "
-                         "Expected "
-                      << pElementExpected << " element with text field, for "
-                      << m.m_strCommand << ".\n";
+                LogOutput(OT_METHOD)(__FUNCTION__)(": Error: Expected ")(
+                    pElementExpected)(" element with text field, for ")(
+                    m.m_strCommand)(".")
+                    .Flush();
                 return (-1);  // error condition
             }
         }
@@ -3030,10 +3039,10 @@ public:
 
             if (!Contract::LoadEncodedTextFieldByName(
                     xml, ascTextExpected, pElementExpected)) {
-                otErr << "Error in StrategyNotarizeTransactionResponse: "
-                         "Expected "
-                      << pElementExpected << " element with text field, for "
-                      << m.m_strCommand << ".\n";
+                LogOutput(OT_METHOD)(__FUNCTION__)(": Error: Expected ")(
+                    pElementExpected)(" element with text field, for ")(
+                    m.m_strCommand)(".")
+                    .Flush();
                 return (-1);  // error condition
             }
         }
@@ -3044,10 +3053,10 @@ public:
 
             if (!Contract::LoadEncodedTextFieldByName(
                     xml, ascTextExpected, pElementExpected)) {
-                otErr << "Error in StrategyNotarizeTransactionResponse: "
-                         "Expected "
-                      << pElementExpected << " element with text field, for "
-                      << m.m_strCommand << ".\n";
+                LogOutput(OT_METHOD)(__FUNCTION__)(": Error: Expected ")(
+                    pElementExpected)(" element with text field, for ")(
+                    m.m_strCommand)(".")
+                    .Flush();
                 return (-1);  // error condition
             }
         }
@@ -3057,10 +3066,12 @@ public:
         // there, then failure.
         if (!m.m_ascInReferenceTo->GetLength() ||
             (!m.m_ascPayload->GetLength() && m.m_bSuccess)) {
-            otErr << "Error in OTMessage::ProcessXMLNode:\n"
-                     "Expected responseLedger and/or inReferenceTo elements "
-                     "with text fields in "
-                     "notarizeTransactionResponse reply\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Error: Expected responseLedger and/or inReferenceTo "
+                "elements "
+                "with text fields in "
+                "notarizeTransactionResponse reply.")
+                .Flush();
             return (-1);  // error condition
         }
 
@@ -3240,10 +3251,10 @@ public:
 
         if (!Contract::LoadEncodedTextFieldByName(
                 xml, ascTextExpected, pElementExpected)) {
-            otErr << "Error in OTMessage::ProcessXMLNode: "
-                     "Expected "
-                  << pElementExpected << " element with text field, for "
-                  << m.m_strCommand << ".\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(": Error: Expected ")(
+                pElementExpected)(" element with text field, for ")(
+                m.m_strCommand)(".")
+                .Flush();
             return (-1);  // error condition
         }
 
@@ -3353,33 +3364,38 @@ public:
         if (m.m_bSuccess) {
             if (!Contract::LoadEncodedTextFieldByName(
                     xml, m.m_ascPayload, "account")) {
-                otErr << "Error in OTMessage::ProcessXMLNode: Expected account "
-                         "element with text field, for "
-                      << m.m_strCommand << ".\n";
+                LogOutput(OT_METHOD)(__FUNCTION__)(
+                    ": Error: Expected account "
+                    "element with text field, for ")(m.m_strCommand)(".")
+                    .Flush();
                 return (-1);  // error condition
             }
 
             if (!Contract::LoadEncodedTextFieldByName(
                     xml, m.m_ascPayload2, "inbox")) {
-                otErr << "Error in OTMessage::ProcessXMLNode: Expected inbox"
-                      << " element with text field, for " << m.m_strCommand
-                      << ".\n";
+                LogOutput(OT_METHOD)(__FUNCTION__)(
+                    ": Error: Expected inbox"
+                    " element with text field, for ")(m.m_strCommand)(".")
+                    .Flush();
                 return (-1);  // error condition
             }
 
             if (!Contract::LoadEncodedTextFieldByName(
                     xml, m.m_ascPayload3, "outbox")) {
-                otErr << "Error in OTMessage::ProcessXMLNode: Expected outbox"
-                      << " element with text field, for " << m.m_strCommand
-                      << ".\n";
+                LogOutput(OT_METHOD)(__FUNCTION__)(
+                    ": Error: Expected outbox"
+                    " element with text field, for ")(m.m_strCommand)(".")
+                    .Flush();
                 return (-1);  // error condition
             }
         } else {  // Message success=false
             if (!Contract::LoadEncodedTextFieldByName(
                     xml, m.m_ascInReferenceTo, "inReferenceTo")) {
-                otErr << "Error in OTMessage::ProcessXMLNode: Expected "
-                         "inReferenceTo element with text field, for "
-                      << m.m_strCommand << ".\n";
+                LogOutput(OT_METHOD)(__FUNCTION__)(
+                    ": Error: Expected "
+                    "inReferenceTo element with text field, for ")(
+                    m.m_strCommand)(".")
+                    .Flush();
                 return (-1);  // error condition
             }
         }
@@ -3485,10 +3501,10 @@ public:
 
         if (!Contract::LoadEncodedTextFieldByName(
                 xml, ascTextExpected, pElementExpected)) {
-            otErr << "Error in OTMessage::ProcessXMLNode: "
-                     "Expected "
-                  << pElementExpected << " element with text field, for "
-                  << m.m_strCommand << ".\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(": Error: Expected ")(
+                pElementExpected)(" element with text field, for ")(
+                m.m_strCommand)(".")
+                .Flush();
             return (-1);  // error condition
         }
 
@@ -3596,10 +3612,10 @@ public:
 
         if (!Contract::LoadEncodedTextFieldByName(
                 xml, ascTextExpected, pElementExpected)) {
-            otErr << "Error in StrategyGetMintResponse: "
-                     "Expected "
-                  << pElementExpected << " element with text field, for "
-                  << m.m_strCommand << ".\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(": Error: Expected ")(
+                pElementExpected)(" element with text field, for ")(
+                m.m_strCommand)(".")
+                .Flush();
             return (-1);  // error condition
         }
 
@@ -3659,10 +3675,10 @@ public:
 
             if (!Contract::LoadEncodedTextFieldByName(
                     xml, ascTextExpected, pElementExpected)) {
-                otErr << "Error in OTMessage::ProcessXMLNode: "
-                         "Expected "
-                      << pElementExpected << " element with text field, for "
-                      << m.m_strCommand << ".\n";
+                LogOutput(OT_METHOD)(__FUNCTION__)(": Error: Expected ")(
+                    pElementExpected)(" element with text field, for ")(
+                    m.m_strCommand)(".")
+                    .Flush();
                 return (-1);  // error condition
             }
         }
@@ -3726,10 +3742,10 @@ public:
 
             if (!Contract::LoadEncodedTextFieldByName(
                     xml, ascTextExpected, pElementExpected)) {
-                otErr << "Error in StrategyProcessInboxResponse: "
-                         "Expected "
-                      << pElementExpected << " element with text field, for "
-                      << m.m_strCommand << ".\n";
+                LogOutput(OT_METHOD)(__FUNCTION__)(": Error: Expected ")(
+                    pElementExpected)(" element with text field, for ")(
+                    m.m_strCommand)(".")
+                    .Flush();
                 return (-1);  // error condition
             }
         }
@@ -3740,10 +3756,10 @@ public:
 
             if (!Contract::LoadEncodedTextFieldByName(
                     xml, ascTextExpected, pElementExpected)) {
-                otErr << "Error in StrategyProcessInboxResponse: "
-                         "Expected "
-                      << pElementExpected << " element with text field, for "
-                      << m.m_strCommand << ".\n";
+                LogOutput(OT_METHOD)(__FUNCTION__)(": Error: Expected ")(
+                    pElementExpected)(" element with text field, for ")(
+                    m.m_strCommand)(".")
+                    .Flush();
                 return (-1);  // error condition
             }
         }
@@ -3753,10 +3769,12 @@ public:
         // there, then failure.
         if (!m.m_ascInReferenceTo->GetLength() ||
             (!m.m_ascPayload->GetLength() && m.m_bSuccess)) {
-            otErr << "Error in StrategyProcessInboxResponse:\n"
-                     "Expected responseLedger and/or inReferenceTo elements "
-                     "with text fields in "
-                     "processInboxResponse reply\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Error: Expected responseLedger and/or inReferenceTo "
+                "elements "
+                "with text fields in "
+                "processInboxResponse reply.")
+                .Flush();
             return (-1);  // error condition
         }
 
@@ -3810,10 +3828,10 @@ public:
 
             if (!Contract::LoadEncodedTextFieldByName(
                     xml, ascTextExpected, pElementExpected)) {
-                otErr << "Error in OTMessage::ProcessXMLNode: "
-                         "Expected "
-                      << pElementExpected << " element with text field, for "
-                      << m.m_strCommand << ".\n";
+                LogOutput(OT_METHOD)(__FUNCTION__)(": Error: Expected ")(
+                    pElementExpected)(" element with text field, for ")(
+                    m.m_strCommand)(".")
+                    .Flush();
                 return (-1);  // error condition
             }
         }
@@ -3875,10 +3893,10 @@ public:
 
             if (!Contract::LoadEncodedTextFieldByName(
                     xml, ascTextExpected, pElementExpected)) {
-                otErr << "Error in StrategyProcessNymboxResponse: "
-                         "Expected "
-                      << pElementExpected << " element with text field, for "
-                      << m.m_strCommand << ".\n";
+                LogOutput(OT_METHOD)(__FUNCTION__)(": Error: Expected ")(
+                    pElementExpected)(" element with text field, for ")(
+                    m.m_strCommand)(".")
+                    .Flush();
                 return (-1);  // error condition
             }
         }
@@ -3889,10 +3907,10 @@ public:
 
             if (!Contract::LoadEncodedTextFieldByName(
                     xml, ascTextExpected, pElementExpected)) {
-                otErr << "Error in StrategyProcessNymboxResponse: "
-                         "Expected "
-                      << pElementExpected << " element with text field, for "
-                      << m.m_strCommand << ".\n";
+                LogOutput(OT_METHOD)(__FUNCTION__)(": Error: Expected ")(
+                    pElementExpected)(" element with text field, for ")(
+                    m.m_strCommand)(".")
+                    .Flush();
                 return (-1);  // error condition
             }
         }
@@ -3902,10 +3920,12 @@ public:
         // there, then failure.
         if (!m.m_ascInReferenceTo->GetLength() ||
             (!m.m_ascPayload->GetLength() && m.m_bSuccess)) {
-            otErr << "Error in StrategyProcessNymboxResponse:\n"
-                     "Expected responseLedger and/or inReferenceTo elements "
-                     "with text fields in "
-                     "processNymboxResponse reply\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Error: Expected responseLedger and/or inReferenceTo "
+                "elements "
+                "with text fields in "
+                "processNymboxResponse reply.")
+                .Flush();
             return (-1);  // error condition
         }
 
@@ -3969,10 +3989,10 @@ public:
 
             if (!Contract::LoadEncodedTextFieldByName(
                     xml, ascTextExpected, pElementExpected)) {
-                otErr << "Error in OTMessage::ProcessXMLNode: "
-                         "Expected "
-                      << pElementExpected << " element with text field, for "
-                      << m.m_strCommand << ".\n";
+                LogOutput(OT_METHOD)(__FUNCTION__)(": Error: Expected ")(
+                    pElementExpected)(" element with text field, for ")(
+                    m.m_strCommand)(".")
+                    .Flush();
                 return (-1);  // error condition
             } else
                 m.m_ascPayload = ascTextExpected;
@@ -4027,10 +4047,10 @@ public:
 
         if (!Contract::LoadEncodedTextFieldByName(
                 xml, ascTextExpected, pElementExpected)) {
-            otErr << "Error in StrategyTriggerClauseResponse: "
-                     "Expected "
-                  << pElementExpected << " element with text field, for "
-                  << m.m_strCommand << ".\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(": Error: Expected ")(
+                pElementExpected)(" element with text field, for ")(
+                m.m_strCommand)(".")
+                .Flush();
             return (-1);  // error condition
         }
 
@@ -4112,10 +4132,10 @@ public:
 
             if (!Contract::LoadEncodedTextFieldByName(
                     xml, ascTextExpected, pElementExpected)) {
-                otErr << "Error in OTMessage::ProcessXMLNode: "
-                         "Expected "
-                      << pElementExpected << " element with text field, for "
-                      << m.m_strCommand << ".\n";
+                LogOutput(OT_METHOD)(__FUNCTION__)(": Error: Expected ")(
+                    pElementExpected)(" element with text field, for ")(
+                    m.m_strCommand)(".")
+                    .Flush();
                 return (-1);  // error condition
             }
 
@@ -4236,10 +4256,10 @@ public:
 
         if (!Contract::LoadEncodedTextFieldByName(
                 xml, ascTextExpected, pElementExpected)) {
-            otErr << "Error in StrategyRequestAdminResponse: "
-                     "Expected "
-                  << pElementExpected << " element with text field, for "
-                  << m.m_strCommand << ".\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(": Error: Expected ")(
+                pElementExpected)(" element with text field, for ")(
+                m.m_strCommand)(".")
+                .Flush();
             return (-1);  // error condition
         }
 
@@ -4332,10 +4352,10 @@ public:
 
         if (!Contract::LoadEncodedTextFieldByName(
                 xml, ascTextExpected, pElementExpected)) {
-            otErr << "Error in StrategyAddClaimResponse: "
-                     "Expected "
-                  << pElementExpected << " element with text field, for "
-                  << m.m_strCommand << ".\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(": Error: Expected ")(
+                pElementExpected)(" element with text field, for ")(
+                m.m_strCommand)(".")
+                .Flush();
             return (-1);  // error condition
         }
 

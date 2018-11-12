@@ -424,19 +424,22 @@ bool OTTransaction::VerifyAccount(const Nym& theNym)
     // Make sure that the supposed AcctID matches the one read from the file.
     //
     if (!VerifyContractID()) {
-        otErr << __FUNCTION__ << ": Error verifying account ID.\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Error verifying account ID.")
+            .Flush();
         return false;
     }
     // todo security audit:
     else if (
         IsAbbreviated() && (pParent != nullptr) &&
         !pParent->VerifySignature(theNym)) {
-        otErr << __FUNCTION__
-              << ": Error verifying signature on parent ledger "
-                 "for abbreviated transaction receipt.\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Error verifying signature on parent ledger "
+            "for abbreviated transaction receipt.")
+            .Flush();
         return false;
     } else if (!IsAbbreviated() && (false == VerifySignature(theNym))) {
-        otErr << __FUNCTION__ << ": Error verifying signature.\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Error verifying signature.")
+            .Flush();
         return false;
     }
 
@@ -939,17 +942,18 @@ bool OTTransaction::HarvestOpeningNumber(
                                         strPaymentPlan))
                                     return thePlan->GetRecipientOpeningNum();
                                 else
-                                    otErr << "OTTransaction::"
-                                             "HarvestOpeningNumber: "
-                                             "Error: Unable to load "
-                                             "paymentPlan object from "
-                                             "paymentPlan "
-                                             "transaction item.\n";
+                                    LogOutput(OT_METHOD)(__FUNCTION__)(
+                                        ": Error: Unable to load "
+                                        "paymentPlan object from "
+                                        "paymentPlan "
+                                        "transaction item.")
+                                        .Flush();
                             } else
-                                otErr << "OTTransaction::HarvestOpeningNumber: "
-                                         "Error: Unable to find "
-                                         "paymentPlan item in paymentPlan "
-                                         "transaction.\n";
+                                LogOutput(OT_METHOD)(__FUNCTION__)(
+                                    ": Error: Unable to find "
+                                    "paymentPlan item in paymentPlan "
+                                    "transaction.")
+                                    .Flush();
                             return 0;
                         }
 
@@ -1059,10 +1063,11 @@ bool OTTransaction::HarvestOpeningNumber(
                 const auto pItem = GetItem(itemType::smartContract);
 
                 if (false == bool(pItem)) {
-                    otErr
-                        << "OTTransaction::HarvestOpeningNumber: Error: Unable "
-                           "to find "
-                           "smartContract item in smartContract transaction.\n";
+                    LogOutput(OT_METHOD)(__FUNCTION__)(
+                        ": Error: Unable "
+                        "to find "
+                        "smartContract item in smartContract transaction.")
+                        .Flush();
                 } else  // Load up the smart contract...
                 {
                     auto strSmartContract = String::Factory();
@@ -1074,10 +1079,12 @@ bool OTTransaction::HarvestOpeningNumber(
                     if (!strSmartContract->Exists() ||
                         (false == theSmartContract->LoadContractFromString(
                                       strSmartContract))) {
-                        otErr << "OTTransaction::HarvestOpeningNumber: Error: "
-                                 "Unable to load "
-                                 "smartContract object from smartContract "
-                                 "transaction item.\n";
+                        LogOutput(OT_METHOD)(__FUNCTION__)(
+                            ": Error: "
+                            "Unable to load "
+                            "smartContract object from smartContract "
+                            "transaction item.")
+                            .Flush();
                     } else  // theSmartContract is ready to go....
                     {
 
@@ -1172,10 +1179,12 @@ bool OTTransaction::HarvestClosingNumbers(
                 const auto pItem = GetItem(itemType::marketOffer);
 
                 if (false == bool(pItem)) {
-                    otErr << "OTTransaction::HarvestClosingNumbers: Error: "
-                             "Unable "
-                             "to find "
-                             "marketOffer item in marketOffer transaction.\n";
+                    LogOutput(OT_METHOD)(__FUNCTION__)(
+                        ": Error: "
+                        "Unable "
+                        "to find "
+                        "marketOffer item in marketOffer transaction.")
+                        .Flush();
                 } else  // pItem is good. Let's load up the OTCronIteam
                         // object...
                 {
@@ -1193,9 +1202,10 @@ bool OTTransaction::HarvestClosingNumbers(
 
                     // If failed to load the trade...
                     if (!bLoadContractFromString) {
-                        otErr << "OTTransaction::HarvestClosingNumbers: ERROR: "
-                                 "Failed loading trade from string:\n\n"
-                              << strTrade << "\n\n";
+                        LogOutput(OT_METHOD)(__FUNCTION__)(
+                            ": ERROR: "
+                            "Failed loading trade from string: ")(strTrade)(".")
+                            .Flush();
                     } else  // theTrade is ready to go....
                     {
 
@@ -1283,10 +1293,12 @@ bool OTTransaction::HarvestClosingNumbers(
                 const auto pItem = GetItem(itemType::paymentPlan);
 
                 if (false == bool(pItem)) {
-                    otErr << "OTTransaction::HarvestClosingNumbers: Error: "
-                             "Unable "
-                             "to find "
-                             "paymentPlan item in paymentPlan transaction.\n";
+                    LogOutput(OT_METHOD)(__FUNCTION__)(
+                        ": Error: "
+                        "Unable "
+                        "to find "
+                        "paymentPlan item in paymentPlan transaction.")
+                        .Flush();
                 } else  // pItem is good. Let's load up the OTPaymentPlan
                         // object...
                 {
@@ -1304,10 +1316,11 @@ bool OTTransaction::HarvestClosingNumbers(
 
                     // If failed to load the payment plan from string...
                     if (!bLoadContractFromString) {
-                        otErr
-                            << "OTTransaction::HarvestClosingNumbers: ERROR : "
-                               "Failed loading payment plan from string :\n\n "
-                            << strPaymentPlan << "\n\n";
+                        LogOutput(OT_METHOD)(__FUNCTION__)(
+                            ": ERROR : "
+                            "Failed loading payment plan from string: ")(
+                            strPaymentPlan)(".")
+                            .Flush();
                     } else  // thePlan is ready to go....
                     {
                         // If the server reply message was unambiguously a FAIL,
@@ -1392,11 +1405,12 @@ bool OTTransaction::HarvestClosingNumbers(
                 const auto pItem = GetItem(itemType::smartContract);
 
                 if (false == bool(pItem)) {
-                    otErr
-                        << "OTTransaction::HarvestClosingNumbers: Error: "
-                           "Unable "
-                           "to find "
-                           "smartContract item in smartContract transaction.\n";
+                    LogOutput(OT_METHOD)(__FUNCTION__)(
+                        ": Error: "
+                        "Unable "
+                        "to find "
+                        "smartContract item in smartContract transaction.")
+                        .Flush();
                 } else  // Load up the smart contract...
                 {
                     auto strSmartContract = String::Factory();
@@ -1411,10 +1425,12 @@ bool OTTransaction::HarvestClosingNumbers(
                     if (!strSmartContract->Exists() ||
                         (false == theSmartContract->LoadContractFromString(
                                       strSmartContract))) {
-                        otErr << "OTTransaction::HarvestClosingNumbers: Error: "
-                                 "Unable to load "
-                                 "smartContract object from smartContract "
-                                 "transaction item.\n";
+                        LogOutput(OT_METHOD)(__FUNCTION__)(
+                            ": Error: "
+                            "Unable to load "
+                            "smartContract object from smartContract "
+                            "transaction item.")
+                            .Flush();
                     } else  // theSmartContract is ready to go....
                     {
 
@@ -1667,8 +1683,10 @@ bool OTTransaction::VerifyBalanceReceipt(const ServerContext& context)
      */
 
     if (IsAbbreviated()) {
-        otErr << "OTTransaction::VerifyBalanceReceipt: Error: This is an "
-                 "abbreviated receipt. (Load the box receipt first.)\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Error: This is an "
+            "abbreviated receipt. (Load the box receipt first).")
+            .Flush();
 
         return false;
     }
@@ -1700,10 +1718,11 @@ bool OTTransaction::VerifyBalanceReceipt(const ServerContext& context)
         api_.DataFolder(), szFolder1name, szFolder2name, szFilename, ""));
 
     if (strFileContents.length() < 2) {
-        otErr << "OTTransaction::VerifyBalanceReceipt: Error reading "
-                 "transaction statement:\n "
-              << szFolder1name << Log::PathSeparator() << szFolder2name
-              << Log::PathSeparator() << szFilename << "\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Error reading "
+            "transaction statement: ")(szFolder1name)(Log::PathSeparator())(
+            szFolder2name)(Log::PathSeparator())(szFilename)(".")
+            .Flush();
 
         return false;
     }
@@ -1712,17 +1731,20 @@ bool OTTransaction::VerifyBalanceReceipt(const ServerContext& context)
     const auto pContents{api_.Factory().Transaction(strTransaction)};
 
     if (false == bool(pContents)) {
-        otErr << "OTTransaction::VerifyBalanceReceipt: Unable to load "
-                 "transaction statement:\n "
-              << szFolder1name << Log::PathSeparator() << szFolder2name
-              << Log::PathSeparator() << szFilename << "\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Unable to load "
+            "transaction statement: ")(szFolder1name)(Log::PathSeparator())(
+            szFolder2name)(Log::PathSeparator())(szFilename)(".")
+            .Flush();
 
         return false;
     } else if (!pContents->VerifySignature(SERVER_NYM)) {
-        otErr << "OTTransaction::VerifyBalanceReceipt: Unable to verify "
-                 "signature on transaction statement:\n "
-              << szFolder1name << Log::PathSeparator() << szFolder2name
-              << Log::PathSeparator() << szFilename << "\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Unable to verify "
+            "signature on transaction statement: ")(szFolder1name)(
+            Log::PathSeparator())(szFolder2name)(Log::PathSeparator())(
+            szFilename)(".")
+            .Flush();
 
         return false;
     }
@@ -1732,11 +1754,12 @@ bool OTTransaction::VerifyBalanceReceipt(const ServerContext& context)
     OTTransaction* pTrans = dynamic_cast<OTTransaction*>(pContents.get());
 
     if (nullptr == pTrans) {
-        otErr << "OTTransaction::VerifyBalanceReceipt: Was expecting an "
-                 "OTTransaction to be stored in the transaction statement "
-                 "at:\n "
-              << szFolder1name << Log::PathSeparator() << szFolder2name
-              << Log::PathSeparator() << szFilename << "\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Was expecting an "
+            "OTTransaction to be stored in the transaction statement "
+            "at: ")(szFolder1name)(Log::PathSeparator())(szFolder2name)(
+            Log::PathSeparator())(szFilename)(".")
+            .Flush();
 
         return false;
     }
@@ -2777,10 +2800,11 @@ bool OTTransaction::VerifyBalanceReceipt(const ServerContext& context)
         const bool missing = (1 != statement.Issued().count(lIssuedNum));
 
         if (missing) {
-            otErr << "OTTransaction::" << __FUNCTION__
-                  << ": Error verifying if transaction num in inbox ("
-                  << pTransaction->GetTransactionNum()
-                  << ") was actually signed out (" << lIssuedNum << ")\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Error verifying if transaction num in inbox (")(
+                pTransaction->GetTransactionNum())(
+                ") was actually signed out (")(lIssuedNum)(").")
+                .Flush();
 
             return false;
         }
@@ -2871,15 +2895,13 @@ bool OTTransaction::VerifyBalanceReceipt(const ServerContext& context)
     // supposed difference from adding up just the new receipts, (Which is
     // probably impossible anyway) then return false.
     if (lActualDifference != lInboxSupposedDifference) {
-        otErr << "OTTransaction::" << __FUNCTION__ << ": lActualDifference ("
-              << lActualDifference
-              << ") is not equal to lInboxSupposedDifference ("
-              << lInboxSupposedDifference
-              << ")\n"
-                 "FYI, Inbox balance on old receipt: "
-              << lReceiptBalanceChange
-              << "  Inbox balance on current inbox: " << lInboxBalanceChange
-              << "\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": lActualDifference (")(
+            lActualDifference)(") is not equal to lInboxSupposedDifference (")(
+            lInboxSupposedDifference)(
+            "). "
+            "FYI, Inbox balance on old receipt: ")(lReceiptBalanceChange)(
+            ". Inbox balance on current inbox: ")(lInboxBalanceChange)(".")
+            .Flush();
 
         return false;
     }
@@ -2901,11 +2923,12 @@ bool OTTransaction::VerifyBalanceReceipt(const ServerContext& context)
          (account.get().GetBalance() + (lActualDifference * (-1))));
 
     if (wrongBalance) {
-        otErr << "OTTransaction::" << __FUNCTION__
-              << ": lActualDifference in receipts (" << lActualDifference
-              << ") plus current acct balance (" << account.get().GetBalance()
-              << ") is NOT equal to last signed balance ("
-              << pBalanceItem->GetAmount() << ")" << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": lActualDifference in receipts (")(
+            lActualDifference)(") plus current acct balance (")(
+            account.get().GetBalance())(
+            ") is NOT equal to last signed balance (")(
+            pBalanceItem->GetAmount())(").")
+            .Flush();
 
         return false;
     }
@@ -2957,12 +2980,12 @@ bool OTTransaction::DeleteBoxReceipt(Ledger& theLedger)
 
         if (false ==
             ascTemp->WriteArmoredString(strFinal, m_strContractType->Get())) {
-            otErr << __FUNCTION__
-                  << ": Error deleting (writing over) box receipt (failed "
-                     "writing armored string):\n"
-                  << strFolder1name << Log::PathSeparator() << strFolder2name
-                  << Log::PathSeparator() << strFolder3name
-                  << Log::PathSeparator() << strFilename << "\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Error deleting (writing over) box receipt (failed "
+                "writing armored string): ")(strFolder1name)(
+                Log::PathSeparator())(strFolder2name)(Log::PathSeparator())(
+                strFolder3name)(Log::PathSeparator())(strFilename)(".")
+                .Flush();
             return false;
         }
     }
@@ -2994,12 +3017,12 @@ bool OTTransaction::DeleteBoxReceipt(Ledger& theLedger)
         strFolder3name->Get(),
         strFilename->Get());
     if (!bDeleted)
-        otErr << __FUNCTION__
-              << ": Error deleting (writing over) file: " << strFolder1name
-              << Log::PathSeparator() << strFolder2name << Log::PathSeparator()
-              << strFolder3name << Log::PathSeparator() << strFilename
-              << "\nContents:\n\n"
-              << m_strRawFile << "\n\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Error deleting (writing over) file: ")(strFolder1name)(
+            Log::PathSeparator())(strFolder2name)(Log::PathSeparator())(
+            strFolder3name)(Log::PathSeparator())(strFilename)(". Contents: ")(
+            m_strRawFile)(".")
+            .Flush();
 
     return bDeleted;
 }
@@ -3055,11 +3078,12 @@ bool OTTransaction::SaveBoxReceipt(std::int64_t lLedgerType)
 
     if (false ==
         ascTemp->WriteArmoredString(strFinal, m_strContractType->Get())) {
-        otErr << __FUNCTION__
-              << ": Error saving box receipt (failed writing armored string):\n"
-              << strFolder1name << Log::PathSeparator() << strFolder2name
-              << Log::PathSeparator() << strFolder3name << Log::PathSeparator()
-              << strFilename << "\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Error saving box receipt (failed writing armored string): ")(
+            strFolder1name)(Log::PathSeparator())(strFolder2name)(
+            Log::PathSeparator())(strFolder3name)(Log::PathSeparator())(
+            strFilename)(".")
+            .Flush();
         return false;
     }
 
@@ -3072,11 +3096,11 @@ bool OTTransaction::SaveBoxReceipt(std::int64_t lLedgerType)
         strFilename->Get());
 
     if (!bSaved)
-        otErr << __FUNCTION__ << ": Error writing file: " << strFolder1name
-              << Log::PathSeparator() << strFolder2name << Log::PathSeparator()
-              << strFolder3name << Log::PathSeparator() << strFilename
-              << "\nContents:\n\n"
-              << m_strRawFile << "\n\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Error writing file: ")(
+            strFolder1name)(Log::PathSeparator())(strFolder2name)(
+            Log::PathSeparator())(strFolder3name)(Log::PathSeparator())(
+            strFilename)(". Contents: ")(m_strRawFile)(".")
+            .Flush();
 
     return bSaved;
 }
@@ -3109,8 +3133,9 @@ bool OTTransaction::SaveBoxReceipt(Ledger& theLedger)
             lLedgerType = 6;
             break;
         default:
-            otErr << "OTTransaction::SaveBoxReceipt: Error: unknown box type. "
-                     "(This should never happen.)\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(": Error: unknown box type. "
+                                               "(This should never happen).")
+                .Flush();
             return false;
     }
     return SaveBoxReceipt(lLedgerType);
@@ -3119,15 +3144,15 @@ bool OTTransaction::SaveBoxReceipt(Ledger& theLedger)
 bool OTTransaction::VerifyBoxReceipt(OTTransaction& theFullVersion)
 {
     if (!m_bIsAbbreviated || theFullVersion.IsAbbreviated()) {
-        otErr << "OTTransaction::" << __FUNCTION__
-              << ": Failure: This transaction "
-                 "isn't abbreviated (val: "
-              << (m_bIsAbbreviated ? "IS" : "IS NOT")
-              << "), or the purported full version erroneously is (val: "
-              << (theFullVersion.IsAbbreviated() ? "IS" : "IS NOT")
-              << "). "
-                 "Either way, you can't use it in this way, for trans num: "
-              << GetTransactionNum() << "\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Failure: This transaction "
+            "isn't abbreviated (val: ")(m_bIsAbbreviated ? "IS" : "IS NOT")(
+            "), or the purported full version erroneously is (val: ")(
+            theFullVersion.IsAbbreviated() ? "IS" : "IS NOT")(
+            "). "
+            "Either way, you can't use it in this way, for trans num: ")(
+            GetTransactionNum())(".")
+            .Flush();
         return false;
     }
 
@@ -3142,11 +3167,11 @@ bool OTTransaction::VerifyBoxReceipt(OTTransaction& theFullVersion)
     // compare it to the stored one.
     //
     if (m_Hash != idFullVersion) {
-        otErr << "OTTransaction::" << __FUNCTION__
-              << ": Failure: The purported 'full version' of the transaction, "
-                 "passed in for verification fails to match the stored hash "
-                 "value for trans num: "
-              << GetTransactionNum() << "\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Failure: The purported 'full version' of the transaction, "
+            "passed in for verification fails to match the stored hash "
+            "value for trans num: ")(GetTransactionNum())(".")
+            .Flush();
         return false;
     }
 
@@ -3154,23 +3179,24 @@ bool OTTransaction::VerifyBoxReceipt(OTTransaction& theFullVersion)
     // But we check a few more things, just to be safe.
     // Such as the TRANSACTION NUMBER...
     if (GetTransactionNum() != theFullVersion.GetTransactionNum()) {
-        otErr << "OTTransaction::" << __FUNCTION__
-              << ": Failure: The purported 'full version' of the transaction "
-                 "passed in (number "
-              << theFullVersion.GetTransactionNum()
-              << ") fails to match the actual transaction number: "
-              << GetTransactionNum() << "\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Failure: The purported 'full version' of the transaction "
+            "passed in (number ")(theFullVersion.GetTransactionNum())(
+            ") fails to match the actual transaction number: ")(
+            GetTransactionNum())(".")
+            .Flush();
         return false;
     }
 
     // THE "IN REFERENCE TO" NUMBER (DISPLAY VERSION)
     if (GetAbbrevInRefDisplay() != theFullVersion.GetReferenceNumForDisplay()) {
-        otErr << "OTTransaction::" << __FUNCTION__
-              << ": Failure: The purported 'full version' of the transaction "
-                 "passed, GetReferenceNumForDisplay() ("
-              << theFullVersion.GetReferenceNumForDisplay()
-              << ") fails to match the GetAbbrevInRefDisplay ("
-              << GetAbbrevInRefDisplay() << ") on this.\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Failure: The purported 'full version' of the transaction "
+            "passed, GetReferenceNumForDisplay() (")(
+            theFullVersion.GetReferenceNumForDisplay())(
+            ") fails to match the GetAbbrevInRefDisplay (")(
+            GetAbbrevInRefDisplay())(") on this.")
+            .Flush();
         return false;
     }
 
@@ -3188,7 +3214,7 @@ bool OTTransaction::VerifyItems(const Nym& theNym)
     const auto NYM_ID = Identifier::Factory(theNym);
 
     if (NYM_ID != GetNymID()) {
-        otErr << "Wrong owner passed to OTTransaction::VerifyItems\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Wrong owner passed.").Flush();
         return false;
     }
 
@@ -3562,9 +3588,10 @@ bool OTTransaction::GetSuccess(
                     continue;
 
                 default:
-                    otErr << "Wrong transaction type passed to "
-                             "OTTransaction::GetSuccess() "
-                             "for processNymbox or processInbox transaction.\n";
+                    LogOutput(OT_METHOD)(__FUNCTION__)(
+                        ": Wrong transaction type passed "
+                        "for processNymbox or processInbox transaction.")
+                        .Flush();
                     return false;
             }  // switch
         }
@@ -3802,8 +3829,9 @@ bool OTTransaction::GetSuccess(
                 return false;
             // -----------------------------------------------
             default:
-                otErr << "Wrong transaction type passed to "
-                         "OTTransaction::GetSuccess()\n";
+                LogOutput(OT_METHOD)(__FUNCTION__)(
+                    ": Wrong transaction type passed.")
+                    .Flush();
                 return false;
         }
     }
@@ -3907,8 +3935,9 @@ std::int32_t OTTransaction::ProcessXMLNode(irr::io::IrrXMLReader*& xml)
         if (strHash->Exists())
             m_Hash->SetString(strHash);
         else
-            otErr << "OTTransaction::ProcessXMLNode: Missing receiptHash on "
-                     "abbreviated record.\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(": Missing receiptHash on "
+                                               "abbreviated record.")
+                .Flush();
 
         return 1;
     }
@@ -4074,9 +4103,10 @@ std::int32_t OTTransaction::ProcessXMLNode(irr::io::IrrXMLReader*& xml)
              (transactionType::basketReceipt == m_Type))) {
             m_lClosingTransactionNo = strClosingNumber->ToLong();
         } else {
-            otErr << "Error in OTTransaction::ProcessXMLNode: "
-                     "closingTransactionNumber field without value, or in "
-                     "wrong transaction type.\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Error: closingTransactionNumber field without value, or in "
+                "wrong transaction type.")
+                .Flush();
             return (-1);  // error condition
         }
 
@@ -4084,16 +4114,18 @@ std::int32_t OTTransaction::ProcessXMLNode(irr::io::IrrXMLReader*& xml)
     } else if (!strcmp("cancelRequest", xml->getNodeName())) {
         if (false ==
             Contract::LoadEncodedTextField(xml, m_ascCancellationRequest)) {
-            otErr << "Error in OTTransaction::ProcessXMLNode: cancelRequest "
-                     "field without value.\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(": Error: cancelRequest "
+                                               "field without value.")
+                .Flush();
             return (-1);  // error condition
         }
 
         return 1;
     } else if (!strcmp("inReferenceTo", xml->getNodeName())) {
         if (false == Contract::LoadEncodedTextField(xml, m_ascInReferenceTo)) {
-            otErr << "Error in OTTransaction::ProcessXMLNode: inReferenceTo "
-                     "field without value.\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(": Error: inReferenceTo "
+                                               "field without value.")
+                .Flush();
             return (-1);  // error condition
         }
 
@@ -4103,8 +4135,9 @@ std::int32_t OTTransaction::ProcessXMLNode(irr::io::IrrXMLReader*& xml)
 
         if (!Contract::LoadEncodedTextField(xml, strData) ||
             !strData->Exists()) {
-            otErr << "Error in OTTransaction::ProcessXMLNode: transaction item "
-                     "field without value.\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(": Error: transaction item "
+                                               "field without value.")
+                .Flush();
             return (-1);  // error condition
         } else {
             auto pItem{api_.Factory().Item(GetNymID(), *this)};
@@ -4116,14 +4149,16 @@ std::int32_t OTTransaction::ProcessXMLNode(irr::io::IrrXMLReader*& xml)
             // it up as
             // a transaction, then add it to the ledger's list of transactions
             if (!pItem->LoadContractFromString(strData)) {
-                otErr << "ERROR: OTTransaction failed loading item from "
-                         "string: \n\n"
-                      << (strData->Exists() ? strData->Get() : "") << "\n\n";
+                LogOutput(OT_METHOD)(__FUNCTION__)(
+                    "ERROR: OTTransaction failed loading item from "
+                    "string: ")(strData->Exists() ? strData->Get() : " ")(".")
+                    .Flush();
                 return (-1);
             } else if (!pItem->VerifyContractID()) {
-                otErr << "ERROR: Failed verifying transaction Item in "
-                         "OTTransaction::ProcessXMLNode: \n\n"
-                      << strData << "\n\n";
+                LogOutput(OT_METHOD)(__FUNCTION__)(
+                    ": ERROR: Failed verifying transaction Item: ")(strData)(
+                    ".")
+                    .Flush();
                 return (-1);
             } else {
                 m_listItems.push_back(std::shared_ptr<Item>(pItem.release()));
@@ -4231,23 +4266,25 @@ void OTTransaction::UpdateContents()
                     break;
                 /* --- BREAK --- */
                 case ledgerType::message: {
-                    otErr
-                        << OT_METHOD << __FUNCTION__
-                        << ": Unexpected message ledger type in 'abbreviated' "
-                           "block. (Error.) \n";
+                    LogOutput(OT_METHOD)(__FUNCTION__)(
+                        ": Unexpected message ledger type in 'abbreviated' "
+                        "block. (Error).")
+                        .Flush();
 
                     OT_FAIL
                 } break;
                 default:
-                    otErr << OT_METHOD << __FUNCTION__
-                          << ": Unexpected ledger type in 'abbreviated' block. "
-                             "(Error.) \n";
+                    LogOutput(OT_METHOD)(__FUNCTION__)(
+                        ": Unexpected ledger type in 'abbreviated' block. "
+                        "(Error).")
+                        .Flush();
                     break;
             } /*switch*/
         } else {
-            otErr << OT_METHOD << __FUNCTION__
-                  << ": Error: Unable to save abbreviated receipt here, since "
-                     "m_pParent is nullptr.\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Error: Unable to save abbreviated receipt here, since "
+                "m_pParent is nullptr.")
+                .Flush();
         }
     } else {
         if ((transactionType::finalReceipt == m_Type) ||
@@ -4377,11 +4414,11 @@ void OTTransaction::SaveAbbrevPaymentInboxRecord(Tag& parent)
                 lDisplayValue = GetAbbrevDisplayAmount();
             break;
         default:  // All other types are irrelevant for payment inbox reports
-            otErr << "OTTransaction::" << __FUNCTION__ << ": Unexpected "
-                  << GetTypeString()
-                  << " transaction "
-                     "in payment inbox while making abbreviated "
-                     "payment inbox record.\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(": Unexpected ")(
+                GetTypeString())(" transaction "
+                                 "in payment inbox while making abbreviated "
+                                 "payment inbox record.")
+                .Flush();
 
             OT_FAIL_MSG("ASSERT: OTTransaction::SaveAbbrevPaymentInboxRecord: "
                         "Unexpected transaction type.");
@@ -4466,11 +4503,12 @@ void OTTransaction::SaveAbbrevExpiredBoxRecord(Tag& parent)
             break;
         default:  // All other types are irrelevant for inbox reports
         {
-            otErr << "OTTransaction::" << __FUNCTION__ << ": Unexpected "
-                  << GetTypeString()
-                  << " transaction "
-                     "in expired box while making abbreviated expired-box "
-                     "record.\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(": Unexpected ")(
+                GetTypeString())(
+                " transaction "
+                "in expired box while making abbreviated expired-box "
+                "record.")
+                .Flush();
 
             OT_FAIL_MSG("ASSERT: OTTransaction::SaveAbbrevExpiredBoxRecord: "
                         "Unexpected transaction type.");
@@ -4677,11 +4715,12 @@ void OTTransaction::SaveAbbrevRecordBoxRecord(Tag& parent)
             break;
         default:  // All other types are irrelevant for inbox reports
         {
-            otErr << "OTTransaction::SaveAbbrevRecordBoxRecord: Unexpected "
-                  << GetTypeString()
-                  << " transaction "
-                     "in record box while making abbreviated record-box "
-                     "record.\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(": Unexpected ")(
+                GetTypeString())(
+                " transaction "
+                "in record box while making abbreviated record-box "
+                "record.")
+                .Flush();
         }
             return;
     }  // why not transfer receipt? Because the amount was already removed from
@@ -4811,9 +4850,11 @@ void OTTransaction::SaveAbbreviatedNymboxRecord(Tag& parent)
             break;
 
         default:  // All other types are irrelevant for nymbox reports.
-            otErr << __FUNCTION__ << ": Unexpected " << GetTypeString()
-                  << " transaction in nymbox while making abbreviated nymbox "
-                     "record.\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(": Unexpected ")(
+                GetTypeString())(
+                " transaction in nymbox while making abbreviated nymbox "
+                "record.")
+                .Flush();
             OT_FAIL_MSG("ASSERT: OTTransaction::SaveAbbreviatedNymboxRecord: "
                         "Unexpected transaction in this Nymbox.");
 
@@ -4912,10 +4953,11 @@ void OTTransaction::SaveAbbreviatedOutboxRecord(Tag& parent)
                     // (-500) Display amount (since I'm sending, not receiving
                     // it.)
         default:    // All other types are irrelevant for outbox reports.
-            otErr << "OTTransaction::SaveAbbreviatedOutboxRecord: Unexpected "
-                  << GetTypeString()
-                  << " transaction "
-                     "in outbox while making abbreviated outbox record.\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(": Unexpected ")(
+                GetTypeString())(
+                " transaction "
+                "in outbox while making abbreviated outbox record.")
+                .Flush();
 
             OT_FAIL_MSG("ASSERT: OTTransaction::SaveAbbreviatedOutboxRecord: "
                         "unexpected transaction type.");
@@ -5066,10 +5108,11 @@ void OTTransaction::SaveAbbreviatedInboxRecord(Tag& parent)
             break;
         default:  // All other types are irrelevant for inbox reports
         {
-            otErr << "OTTransaction::" << __FUNCTION__ << ": Unexpected "
-                  << GetTypeString()
-                  << " transaction "
-                     "in inbox while making abbreviated inbox record.\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(": Unexpected ")(
+                GetTypeString())(
+                " transaction "
+                "in inbox while making abbreviated inbox record.")
+                .Flush();
 
             OT_FAIL_MSG("ASSERT: OTTransaction::SaveAbbreviatedInboxRecord: "
                         "unexpected transaction type.");
@@ -5291,8 +5334,9 @@ void OTTransaction::ProduceOutboxReportItem(Item& theBalanceItem)
             theItemType = itemType::transfer;
             break;
         default:  // All other types are irrelevant for outbox reports.
-            otErr << "ProduceOutboxReportItem: Error, wrong item type. "
-                     "Returning.\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(": Error, wrong item type. "
+                                               "Returning.")
+                .Flush();
             return;
     }
 
@@ -5404,8 +5448,9 @@ std::int64_t OTTransaction::GetReceiptAmount()
     }
 
     if (false == bool(pOriginalItem)) {
-        otErr << "OTTransaction::" << __FUNCTION__
-              << ": Unable to find original item. Should never happen.\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Unable to find original item. Should never happen.")
+            .Flush();
         return 0;  // Should never happen, since we always expect one based on
                    // the transaction type.
     }
@@ -5419,11 +5464,12 @@ std::int64_t OTTransaction::GetReceiptAmount()
                                                // item, attached.)
         {
             if (pOriginalItem->GetType() != itemType::depositCheque) {
-                otErr << __FUNCTION__ << ": Wrong item type attached to "
-                      << ((transactionType::chequeReceipt == GetType())
-                              ? "chequeReceipt"
-                              : "voucherReceipt")
-                      << ". (expected depositCheque)\n";
+                LogOutput(OT_METHOD)(__FUNCTION__)(
+                    ": Wrong item type attached to ")(
+                    (transactionType::chequeReceipt == GetType())
+                        ? "chequeReceipt"
+                        : "voucherReceipt")(". (Expected depositCheque).")
+                    .Flush();
                 return 0;
             }
 
@@ -5439,9 +5485,9 @@ std::int64_t OTTransaction::GetReceiptAmount()
             if (!bLoadContractFromString) {
                 auto strCheque = String::Factory(*theCheque);
 
-                otErr << "ERROR loading cheque from string in OTTransaction::"
-                      << __FUNCTION__ << ":\n"
-                      << strCheque << "\n";
+                LogOutput(OT_METHOD)(__FUNCTION__)(
+                    ": ERROR loading cheque from string: ")(strCheque)(".")
+                    .Flush();
             } else {
                 lAdjustment =
                     (theCheque->GetAmount() * (-1));  // a cheque reduces my
@@ -5466,7 +5512,9 @@ std::int64_t OTTransaction::GetReceiptAmount()
                                                 // wrong amount on them.)
 
             if (pOriginalItem->GetType() != itemType::acceptPending) {
-                otErr << "Wrong item type attached to transferReceipt\n";
+                LogOutput(OT_METHOD)(__FUNCTION__)(
+                    ": Wrong item type attached to transferReceipt.")
+                    .Flush();
             } else {  // If I transfer 100 clams to someone, then my account is
                       // smaller by 100 clams. -100 has hit my account.
                 // So the pending will show as -100 in my outbox, not 100,
@@ -5497,7 +5545,9 @@ std::int64_t OTTransaction::GetReceiptAmount()
         case transactionType::pending:  // amount is stored on transfer item
 
             if (pOriginalItem->GetType() != itemType::transfer) {
-                otErr << "Wrong item type attached to pending transfer\n";
+                LogOutput(OT_METHOD)(__FUNCTION__)(
+                    ": Wrong item type attached to pending transfer.")
+                    .Flush();
             } else {
                 // Pending transfer adds to my account if this is inbox, and
                 // removes if outbox. I'll let the caller multiply by (-1) or
@@ -5510,7 +5560,9 @@ std::int64_t OTTransaction::GetReceiptAmount()
                                               // marketReceipt item
 
             if (pOriginalItem->GetType() != itemType::marketReceipt) {
-                otErr << "Wrong item type attached to marketReceipt\n";
+                LogOutput(OT_METHOD)(__FUNCTION__)(
+                    ": Wrong item type attached to marketReceipt.")
+                    .Flush();
             } else {
                 lAdjustment =
                     pOriginalItem->GetAmount();  // THIS WILL ALSO USE THE
@@ -5522,7 +5574,9 @@ std::int64_t OTTransaction::GetReceiptAmount()
                                                // paymentReceipt item
 
             if (pOriginalItem->GetType() != itemType::paymentReceipt) {
-                otErr << "Wrong item type attached to paymentReceipt\n";
+                LogOutput(OT_METHOD)(__FUNCTION__)(
+                    ": Wrong item type attached to paymentReceipt.")
+                    .Flush();
             } else {
                 lAdjustment =
                     pOriginalItem->GetAmount();  // THIS WILL ALSO USE THE
@@ -5534,7 +5588,9 @@ std::int64_t OTTransaction::GetReceiptAmount()
                                               // basketReceipt item
 
             if (pOriginalItem->GetType() != itemType::basketReceipt) {
-                otErr << "Wrong item type attached to basketReceipt\n";
+                LogOutput(OT_METHOD)(__FUNCTION__)(
+                    ": Wrong item type attached to basketReceipt.")
+                    .Flush();
             } else {
                 lAdjustment =
                     pOriginalItem->GetAmount();  // THIS WILL ALSO USE THE
@@ -5574,10 +5630,11 @@ std::int64_t OTTransaction::GetNumberOfOrigin()
                                                         // one of these in YOUR
                                                         // paymentInbox.
 
-                otErr << __FUNCTION__
-                      << ": In this case, you can't calculate the "
-                         "origin number, you must set it "
-                         "explicitly.\n";
+                LogOutput(OT_METHOD)(__FUNCTION__)(
+                    ": In this case, you can't calculate the "
+                    "origin number, you must set it "
+                    "explicitly.")
+                    .Flush();
                 SetNumberOfOrigin(0);  // Not applicable.
                 // Comment this out later so people can't use it to crash the
                 // server:
@@ -5653,9 +5710,10 @@ void OTTransaction::CalculateNumberOfOrigin()
                                                     // invoice, you get one of
                                                     // these in YOUR
                                                     // paymentInbox.
-            otErr << __FUNCTION__
-                  << ": In this case, you can't calculate the "
-                     "origin number, you must set it explicitly.\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": In this case, you can't calculate the "
+                "origin number, you must set it explicitly.")
+                .Flush();
             SetNumberOfOrigin(0);  // Not applicable.
             // Comment this out later so people can't use it to crash the
             // server:
@@ -5690,12 +5748,13 @@ void OTTransaction::CalculateNumberOfOrigin()
             OT_ASSERT(nullptr != pOriginalItem);
 
             if (itemType::depositCheque != pOriginalItem->GetType()) {
-                otErr << __FUNCTION__ << ": ERROR: Wrong item type attached to "
-                      << ((transactionType::chequeReceipt == GetType())
-                              ? "chequeReceipt"
-                              : "voucherReceipt")
-                      << " "
-                         "(expected Item::depositCheque)\n";
+                LogOutput(OT_METHOD)(__FUNCTION__)(
+                    ": ERROR: Wrong item type attached to ")(
+                    (transactionType::chequeReceipt == GetType())
+                        ? "chequeReceipt"
+                        : "voucherReceipt")(" ")(
+                    "(expected Item::depositCheque).")
+                    .Flush();
                 SetNumberOfOrigin(0);
                 return;
             }
@@ -5947,11 +6006,12 @@ bool OTTransaction::GetSenderNymIDForDisplay(Identifier& theReturnID)
                                                     // cron item, instead of the
                                                     // updated version.
             else {
-                otErr << "OTTransaction::" << __FUNCTION__
-                      << ": Failed trying to get notice item from notice "
-                         "transaction. "
-                         "Or couldn't find cron item within that we were "
-                         "seeking.\n";
+                LogOutput(OT_METHOD)(__FUNCTION__)(
+                    ": Failed trying to get notice item from notice "
+                    "transaction. "
+                    "Or couldn't find cron item within that we were "
+                    "seeking.")
+                    .Flush();
                 return false;
             }
 
@@ -5982,11 +6042,11 @@ bool OTTransaction::GetSenderNymIDForDisplay(Identifier& theReturnID)
                 theReturnID.SetString(pCronItem->GetSenderNymID().str());
                 return !theReturnID.empty();
             } else {
-                otErr << "OTTransaction::" << __FUNCTION__
-                      << ": Unable to load Cron Item. Should never happen. "
-                         "Receipt: "
-                      << GetTransactionNum()
-                      << "  Origin: " << GetNumberOfOrigin() << "\n";
+                LogOutput(OT_METHOD)(__FUNCTION__)(
+                    ": Unable to load Cron Item. Should never happen. "
+                    "Receipt: ")(GetTransactionNum())(". Origin: ")(
+                    GetNumberOfOrigin())(".")
+                    .Flush();
                 return false;
             }
             break;
@@ -6003,9 +6063,10 @@ bool OTTransaction::GetSenderNymIDForDisplay(Identifier& theReturnID)
             if (false != bool(pItem))
                 pItem->GetAttachment(strUpdatedCronItem);
             else {
-                otErr << "OTTransaction::" << __FUNCTION__
-                      << ": Failed trying to get paymentReceipt item from "
-                         "paymentReceipt transaction.\n";
+                LogOutput(OT_METHOD)(__FUNCTION__)(
+                    ": Failed trying to get paymentReceipt item from "
+                    "paymentReceipt transaction.")
+                    .Flush();
                 return false;
             }
 
@@ -6027,11 +6088,11 @@ bool OTTransaction::GetSenderNymIDForDisplay(Identifier& theReturnID)
                 theReturnID.SetString(pCronItem->GetSenderNymID().str());
                 return !theReturnID.empty();
             } else {
-                otErr << "OTTransaction::" << __FUNCTION__
-                      << ": Unable to load Cron Item. Should never happen. "
-                         "Receipt: "
-                      << GetTransactionNum()
-                      << "  Origin: " << GetNumberOfOrigin() << "\n";
+                LogOutput(OT_METHOD)(__FUNCTION__)(
+                    ": Unable to load Cron Item. Should never happen. "
+                    "Receipt: ")(GetTransactionNum())(". Origin: ")(
+                    GetNumberOfOrigin())(".")
+                    .Flush();
                 return false;
             }
             break;
@@ -6106,8 +6167,9 @@ bool OTTransaction::GetSenderNymIDForDisplay(Identifier& theReturnID)
     }
 
     if (false == bool(pOriginalItem)) {
-        otErr << "OTTransaction::GetSenderNymIDForDisplay: original item not "
-                 "found. Should never happen.\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Original item not "
+                                           "found. Should never happen.")
+            .Flush();
         return false;  // Should never happen, since we always expect one based
                        // on the transaction type.
     }
@@ -6121,11 +6183,12 @@ bool OTTransaction::GetSenderNymIDForDisplay(Identifier& theReturnID)
                                                // item, attached.)
         {
             if (pOriginalItem->GetType() != itemType::depositCheque) {
-                otErr << __FUNCTION__ << ": Wrong item type attached to "
-                      << ((transactionType::chequeReceipt == GetType())
-                              ? "chequeReceipt"
-                              : "voucherReceipt")
-                      << " (expected depositCheque)\n";
+                LogOutput(OT_METHOD)(__FUNCTION__)(
+                    ": Wrong item type attached to ")(
+                    (transactionType::chequeReceipt == GetType())
+                        ? "chequeReceipt"
+                        : "voucherReceipt")(". (Expected depositCheque).")
+                    .Flush();
                 return false;
             }
 
@@ -6141,10 +6204,10 @@ bool OTTransaction::GetSenderNymIDForDisplay(Identifier& theReturnID)
             if (!bLoadContractFromString) {
                 auto strCheque = String::Factory(*theCheque);
 
-                otErr << "ERROR loading cheque or voucher from string in "
-                         "OTTransaction::"
-                      << __FUNCTION__ << ":\n"
-                      << strCheque << "\n";
+                LogOutput(OT_METHOD)(__FUNCTION__)(
+                    ": ERROR loading cheque or voucher from string: ")(
+                    strCheque)(".")
+                    .Flush();
             } else {
                 if (transactionType::chequeReceipt == GetType())
                     theReturnID.SetString(theCheque->GetSenderNymID().str());
@@ -6158,7 +6221,9 @@ bool OTTransaction::GetSenderNymIDForDisplay(Identifier& theReturnID)
         case transactionType::pending:  // amount is stored on transfer item
 
             if (pOriginalItem->GetType() != itemType::transfer) {
-                otErr << "Wrong item type attached to pending transfer\n";
+                LogOutput(OT_METHOD)(__FUNCTION__)(
+                    ": Wrong item type attached to pending transfer.")
+                    .Flush();
             } else {
                 theReturnID.SetString(pOriginalItem->GetNymID().str());
                 bSuccess = true;
@@ -6197,10 +6262,11 @@ bool OTTransaction::GetRecipientNymIDForDisplay(Identifier& theReturnID)
             // version of the payment plan, instead of
             // the updated verison. (Or smart contract.)
             else {
-                otErr << "OTTransaction::" << __FUNCTION__
-                      << ": Failed trying to get notice item from notice "
-                         "transaction, and couldn't find the instrument this "
-                         "notice is about.\n";
+                LogOutput(OT_METHOD)(__FUNCTION__)(
+                    ": Failed trying to get notice item from notice "
+                    "transaction, and couldn't find the instrument this "
+                    "notice is about.")
+                    .Flush();
                 return false;
             }
 
@@ -6234,11 +6300,11 @@ bool OTTransaction::GetRecipientNymIDForDisplay(Identifier& theReturnID)
                 theReturnID.SetString(pPlan->GetRecipientNymID().str());
                 return !theReturnID.empty();
             } else {
-                otErr << "OTTransaction::" << __FUNCTION__
-                      << ": Unable to load Cron Item. Should never happen. "
-                         "Receipt: "
-                      << GetTransactionNum()
-                      << "  Origin: " << GetNumberOfOrigin() << "\n";
+                LogOutput(OT_METHOD)(__FUNCTION__)(
+                    ": Unable to load Cron Item. Should never happen. "
+                    "Receipt: ")(GetTransactionNum())(". Origin: ")(
+                    GetNumberOfOrigin())(".")
+                    .Flush();
                 return false;
             }
         } break;  // this break never actually happens. Above always returns,
@@ -6254,9 +6320,10 @@ bool OTTransaction::GetRecipientNymIDForDisplay(Identifier& theReturnID)
             if (false != bool(pItem))
                 pItem->GetAttachment(strUpdatedCronItem);
             else {
-                otErr << "OTTransaction::" << __FUNCTION__
-                      << ": Failed trying to get paymentReceipt item from "
-                         "paymentReceipt transaction.\n";
+                LogOutput(OT_METHOD)(__FUNCTION__)(
+                    ": Failed trying to get paymentReceipt item from "
+                    "paymentReceipt transaction.")
+                    .Flush();
                 return false;
             }
 
@@ -6278,11 +6345,11 @@ bool OTTransaction::GetRecipientNymIDForDisplay(Identifier& theReturnID)
                 theReturnID.SetString(pPlan->GetRecipientNymID().str());
                 return !theReturnID.empty();
             } else {
-                otErr << "OTTransaction::" << __FUNCTION__
-                      << ": Unable to load Cron Item. Should never happen. "
-                         "Receipt: "
-                      << GetTransactionNum()
-                      << "  Origin: " << GetNumberOfOrigin() << "\n";
+                LogOutput(OT_METHOD)(__FUNCTION__)(
+                    ": Unable to load Cron Item. Should never happen. "
+                    "Receipt: ")(GetTransactionNum())("  Origin: ")(
+                    GetNumberOfOrigin())(".")
+                    .Flush();
                 return false;
             }
         } break;  // this break never actually happens. Above always returns,
@@ -6361,7 +6428,9 @@ bool OTTransaction::GetRecipientNymIDForDisplay(Identifier& theReturnID)
     switch (GetType()) {
         case transactionType::transferReceipt: {
             if (pOriginalItem->GetType() != itemType::acceptPending) {
-                otErr << "Wrong item type attached to transferReceipt\n";
+                LogOutput(OT_METHOD)(__FUNCTION__)(
+                    ": Wrong item type attached to transferReceipt.")
+                    .Flush();
                 return false;
             } else {
                 theReturnID.SetString(
@@ -6383,11 +6452,12 @@ bool OTTransaction::GetRecipientNymIDForDisplay(Identifier& theReturnID)
                                                // item, attached.)
         {
             if (pOriginalItem->GetType() != itemType::depositCheque) {
-                otErr << __FUNCTION__ << ": Wrong item type attached to "
-                      << ((transactionType::chequeReceipt == GetType())
-                              ? "chequeReceipt"
-                              : "voucherReceipt")
-                      << " (expected depositCheque)\n";
+                LogOutput(OT_METHOD)(__FUNCTION__)(
+                    ": Wrong item type attached to ")(
+                    (transactionType::chequeReceipt == GetType())
+                        ? "chequeReceipt"
+                        : "voucherReceipt")(". (Expected depositCheque).")
+                    .Flush();
                 return false;
             }
 
@@ -6403,10 +6473,10 @@ bool OTTransaction::GetRecipientNymIDForDisplay(Identifier& theReturnID)
             if (!bLoadContractFromString) {
                 auto strCheque = String::Factory(*theCheque);
 
-                otErr << "ERROR loading cheque or voucher from string in "
-                         "OTTransaction::"
-                      << __FUNCTION__ << ":\n"
-                      << strCheque << "\n";
+                LogOutput(OT_METHOD)(__FUNCTION__)(
+                    ": ERROR loading cheque or voucher from string: ")(
+                    strCheque)(".")
+                    .Flush();
             } else if (theCheque->HasRecipient()) {
                 theReturnID.Assign(theCheque->GetRecipientNymID());
                 bSuccess = true;
@@ -6448,9 +6518,10 @@ bool OTTransaction::GetSenderAcctIDForDisplay(Identifier& theReturnID)
             if (false != bool(pItem))
                 pItem->GetAttachment(strUpdatedCronItem);
             else
-                otErr << "OTTransaction::" << __FUNCTION__
-                      << ": Failed trying to get paymentReceipt item from "
-                         "paymentReceipt transaction.\n";
+                LogOutput(OT_METHOD)(__FUNCTION__)(
+                    ": Failed trying to get paymentReceipt item from "
+                    "paymentReceipt transaction.")
+                    .Flush();
 
             const auto pCronItem{api_.Factory().CronItem(strUpdatedCronItem)};
 
@@ -6469,11 +6540,11 @@ bool OTTransaction::GetSenderAcctIDForDisplay(Identifier& theReturnID)
                 theReturnID.SetString(pCronItem->GetSenderAcctID().str());
                 return true;
             } else {
-                otErr << "OTTransaction::" << __FUNCTION__
-                      << ": Unable to load Cron Item. Should never happen. "
-                         "Receipt: "
-                      << GetTransactionNum()
-                      << "  Origin: " << GetNumberOfOrigin() << "\n";
+                LogOutput(OT_METHOD)(__FUNCTION__)(
+                    ": Unable to load Cron Item. Should never happen. "
+                    "Receipt: ")(GetTransactionNum())(". Origin: ")(
+                    GetNumberOfOrigin())(".")
+                    .Flush();
                 return false;
             }
         } break;
@@ -6500,8 +6571,9 @@ bool OTTransaction::GetSenderAcctIDForDisplay(Identifier& theReturnID)
     }
 
     if (false == bool(pOriginalItem)) {
-        otErr << "OTTransaction::" << __FUNCTION__
-              << ": couldn't load original item, should never happen. \n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Couldn't load original item, should never happen.")
+            .Flush();
         return false;  // Should never happen, since we always expect one based
                        // on the transaction type.
     }
@@ -6515,11 +6587,12 @@ bool OTTransaction::GetSenderAcctIDForDisplay(Identifier& theReturnID)
                                                // item, attached.)
         {
             if (pOriginalItem->GetType() != itemType::depositCheque) {
-                otErr << __FUNCTION__ << ": Wrong item type attached to "
-                      << ((transactionType::chequeReceipt == GetType())
-                              ? "chequeReceipt"
-                              : "voucherReceipt")
-                      << " (expected depositCheque)\n";
+                LogOutput(OT_METHOD)(__FUNCTION__)(
+                    ": Wrong item type attached to ")(
+                    (transactionType::chequeReceipt == GetType())
+                        ? "chequeReceipt"
+                        : "voucherReceipt")(". (Expected depositCheque).")
+                    .Flush();
                 return false;
             }
 
@@ -6535,9 +6608,10 @@ bool OTTransaction::GetSenderAcctIDForDisplay(Identifier& theReturnID)
             if (!bLoadContractFromString) {
                 auto strCheque = String::Factory(*theCheque);
 
-                otErr << "ERROR loading cheque from string in transactionType::"
-                      << __FUNCTION__ << ":\n"
-                      << strCheque << "\n";
+                LogOutput(OT_METHOD)(__FUNCTION__)(
+                    ": ERROR loading cheque from string in transactionType: "
+                    ". ")(strCheque)(".")
+                    .Flush();
             } else {
                 if (transactionType::chequeReceipt == GetType())
                     theReturnID.Assign(theCheque->GetSenderAcctID());
@@ -6551,7 +6625,9 @@ bool OTTransaction::GetSenderAcctIDForDisplay(Identifier& theReturnID)
         case transactionType::pending:  // amount is stored on transfer item
 
             if (pOriginalItem->GetType() != itemType::transfer) {
-                otErr << "Wrong item type attached to pending transfer\n";
+                LogOutput(OT_METHOD)(__FUNCTION__)(
+                    ": Wrong item type attached to pending transfer.")
+                    .Flush();
             } else {
                 theReturnID.Assign(pOriginalItem->GetPurportedAccountID());
                 bSuccess = true;
@@ -6584,9 +6660,10 @@ bool OTTransaction::GetRecipientAcctIDForDisplay(Identifier& theReturnID)
             if (false != bool(pItem))
                 pItem->GetAttachment(strUpdatedCronItem);
             else
-                otErr << "OTTransaction::" << __FUNCTION__
-                      << ": Failed trying to get paymentReceipt item from "
-                         "paymentReceipt transaction.\n";
+                LogOutput(OT_METHOD)(__FUNCTION__)(
+                    ": Failed trying to get paymentReceipt item from "
+                    "paymentReceipt transaction.")
+                    .Flush();
 
             const auto pCronItem{api_.Factory().CronItem(strUpdatedCronItem)};
 
@@ -6607,11 +6684,11 @@ bool OTTransaction::GetRecipientAcctIDForDisplay(Identifier& theReturnID)
                 return true;
             } else  // else if it is any other kind of cron item...
             {
-                otErr << "OTTransaction::" << __FUNCTION__
-                      << ": Unable to load Cron Item. Should never happen. "
-                         "Receipt: "
-                      << GetTransactionNum()
-                      << "  Origin: " << GetNumberOfOrigin() << "\n";
+                LogOutput(OT_METHOD)(__FUNCTION__)(
+                    ": Unable to load Cron Item. Should never happen. "
+                    "Receipt: ")(GetTransactionNum())(". Origin: ")(
+                    GetNumberOfOrigin())(".")
+                    .Flush();
                 return false;
             }
         } break;  // this break never actually happens. Above always returns, if
@@ -6641,7 +6718,9 @@ bool OTTransaction::GetRecipientAcctIDForDisplay(Identifier& theReturnID)
     switch (GetType()) {
         case transactionType::transferReceipt: {
             if (pOriginalItem->GetType() != itemType::acceptPending) {
-                otErr << "Wrong item type attached to transferReceipt\n";
+                LogOutput(OT_METHOD)(__FUNCTION__)(
+                    ": Wrong item type attached to transferReceipt.")
+                    .Flush();
                 return false;
             } else {
                 theReturnID.Assign(pOriginalItem->GetPurportedAccountID());
@@ -6652,11 +6731,12 @@ bool OTTransaction::GetRecipientAcctIDForDisplay(Identifier& theReturnID)
         case transactionType::chequeReceipt:
         case transactionType::voucherReceipt: {
             if (pOriginalItem->GetType() != itemType::depositCheque) {
-                otErr << __FUNCTION__ << ": Wrong item type attached to "
-                      << ((transactionType::chequeReceipt == GetType())
-                              ? "chequeReceipt"
-                              : "voucherReceipt")
-                      << " (expected depositCheque)\n";
+                LogOutput(OT_METHOD)(__FUNCTION__)(
+                    ": Wrong item type attached to ")(
+                    (transactionType::chequeReceipt == GetType())
+                        ? "chequeReceipt"
+                        : "voucherReceipt")(". (Expected depositCheque).")
+                    .Flush();
                 return false;
             } else {
                 theReturnID.SetString(
@@ -6677,7 +6757,9 @@ bool OTTransaction::GetRecipientAcctIDForDisplay(Identifier& theReturnID)
         case transactionType::pending:  // amount is stored on transfer item
 
             if (pOriginalItem->GetType() != itemType::transfer) {
-                otErr << "Wrong item type attached to pending transfer\n";
+                LogOutput(OT_METHOD)(__FUNCTION__)(
+                    ": Wrong item type attached to pending transfer.")
+                    .Flush();
             } else {
                 theReturnID.Assign(pOriginalItem->GetDestinationAcctID());
                 bSuccess = true;
@@ -6710,9 +6792,10 @@ bool OTTransaction::GetMemo(String& strMemo)
             if (false != bool(pItem))
                 pItem->GetAttachment(strUpdatedCronItem);
             else
-                otErr << "OTTransaction::" << __FUNCTION__
-                      << ": Failed trying to get paymentReceipt item from "
-                         "paymentReceipt transaction.\n";
+                LogOutput(OT_METHOD)(__FUNCTION__)(
+                    ": Failed trying to get paymentReceipt item from "
+                    "paymentReceipt transaction.")
+                    .Flush();
 
             const auto pCronItem{api_.Factory().CronItem(strUpdatedCronItem)};
 
@@ -6734,11 +6817,11 @@ bool OTTransaction::GetMemo(String& strMemo)
                 return true;
             } else  // else if it's any other kind of cron item.
             {
-                otErr << "OTTransaction::" << __FUNCTION__
-                      << ": Unable to load Cron Item. Should never happen. "
-                         "Receipt: "
-                      << GetTransactionNum()
-                      << "  Origin: " << GetNumberOfOrigin() << "\n";
+                LogOutput(OT_METHOD)(__FUNCTION__)(
+                    ": Unable to load Cron Item. Should never happen. "
+                    "Receipt: ")(GetTransactionNum())(". Origin: ")(
+                    GetNumberOfOrigin())(".")
+                    .Flush();
                 return false;
             }
         } break;  // this break never actually happens. Above always returns, if
@@ -6768,8 +6851,9 @@ bool OTTransaction::GetMemo(String& strMemo)
     switch (GetType()) {
         case transactionType::transferReceipt: {
             if (pOriginalItem->GetType() != itemType::acceptPending) {
-                otErr << __FUNCTION__
-                      << ": Wrong item type attached to transferReceipt\n";
+                LogOutput(OT_METHOD)(__FUNCTION__)(
+                    ": Wrong item type attached to transferReceipt.")
+                    .Flush();
                 return false;
             } else {
                 pOriginalItem->GetNote(strMemo);
@@ -6780,11 +6864,12 @@ bool OTTransaction::GetMemo(String& strMemo)
         case transactionType::chequeReceipt:
         case transactionType::voucherReceipt: {
             if (pOriginalItem->GetType() != itemType::depositCheque) {
-                otErr << __FUNCTION__ << ": Wrong item type attached to "
-                      << ((transactionType::chequeReceipt == GetType())
-                              ? "chequeReceipt"
-                              : "voucherReceipt")
-                      << " (expected depositCheque)\n";
+                LogOutput(OT_METHOD)(__FUNCTION__)(
+                    ": Wrong item type attached to ")(
+                    (transactionType::chequeReceipt == GetType())
+                        ? "chequeReceipt"
+                        : "voucherReceipt")(". (Expected depositCheque).")
+                    .Flush();
                 return false;
             } else {
                 auto theCheque{api_.Factory().Cheque()};
@@ -6796,9 +6881,10 @@ bool OTTransaction::GetMemo(String& strMemo)
 
                 if (!((strCheque->GetLength() > 2) &&
                       theCheque->LoadContractFromString(strCheque))) {
-                    otErr << __FUNCTION__
-                          << ": Error loading cheque or voucher from string:\n"
-                          << strCheque << "\n";
+                    LogOutput(OT_METHOD)(__FUNCTION__)(
+                        ": Error loading cheque or voucher from string: ")(
+                        strCheque)(".")
+                        .Flush();
                     return false;
                 }
 
@@ -6811,8 +6897,9 @@ bool OTTransaction::GetMemo(String& strMemo)
         case transactionType::pending:
 
             if (pOriginalItem->GetType() != itemType::transfer) {
-                otErr << __FUNCTION__
-                      << ": Wrong item type attached to pending transfer\n";
+                LogOutput(OT_METHOD)(__FUNCTION__)(
+                    ": Wrong item type attached to pending transfer.")
+                    .Flush();
             } else {
                 pOriginalItem->GetNote(strMemo);
                 bSuccess = strMemo.Exists();

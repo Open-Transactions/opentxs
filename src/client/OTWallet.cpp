@@ -229,8 +229,10 @@ bool OTWallet::save_contract(const Lock& lock, String& strContract)
         if (cachedKey.SerializeTo(ascMasterContents)) {
             tag.add_tag("cachedKey", ascMasterContents->Get());
         } else
-            otErr << "OTWallet::SaveContract: Failed trying to write master "
-                     "key to wallet.\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Failed trying to write master "
+                "key to wallet.")
+                .Flush();
     }
 
     std::string str_result;
@@ -268,7 +270,7 @@ bool OTWallet::save_wallet(const Lock& lock, const char* szFilename)
     if (nullptr != szFilename) m_strFilename->Set(szFilename);
 
     if (!m_strFilename->Exists()) {
-        otErr << __FUNCTION__ << ": Filename Dosn't Exist!\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Filename Doesn't Exist!").Flush();
         OT_FAIL;
     }
 
@@ -285,10 +287,10 @@ bool OTWallet::save_wallet(const Lock& lock, const char* szFilename)
         if (false == ascTemp->WriteArmoredString(
                          strFinal, "WALLET"))  // todo hardcoding.
         {
-            otErr << "OTWallet::SaveWallet: Error saving wallet (failed "
-                     "writing armored string):\n"
-                  << m_strDataFolder << Log::PathSeparator() << m_strFilename
-                  << "\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(": Error saving wallet (failed "
+                                               "writing armored string): ")(
+                m_strDataFolder)(Log::PathSeparator())(m_strFilename)(".")
+                .Flush();
             return false;
         }
 
@@ -354,8 +356,9 @@ bool OTWallet::LoadWallet(const char* szFilename)
                                             // there, in this case.)
 
     if (!OTDB::Exists(api_.DataFolder(), ".", szFilename, "", "")) {
-        otErr << __FUNCTION__ << ": Wallet file does not exist: " << szFilename
-              << ". Creating...\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Wallet file does not exist: ")(
+            szFilename)(". Creating...")
+            .Flush();
 
         const char* szContents = "<wallet name=\"\" version=\"1.0\">\n"
                                  "\n"
@@ -363,8 +366,9 @@ bool OTWallet::LoadWallet(const char* szFilename)
 
         if (!OTDB::StorePlainString(
                 szContents, api_.DataFolder(), ".", szFilename, "", "")) {
-            otErr << __FUNCTION__
-                  << ": Error: Unable to create blank wallet file.\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Error: Unable to create blank wallet file.")
+                .Flush();
             OT_FAIL;
         }
     }
@@ -377,8 +381,9 @@ bool OTWallet::LoadWallet(const char* szFilename)
                                                        // STORE.
 
     if (!strFileContents->Exists()) {
-        otErr << __FUNCTION__ << ": Error reading wallet file: " << szFilename
-              << "\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Error reading wallet file: ")(
+            szFilename)(".")
+            .Flush();
         return false;
     }
 
@@ -388,13 +393,11 @@ bool OTWallet::LoadWallet(const char* szFilename)
         auto xmlFileContents = StringXML::Factory(strFileContents);
 
         if (!xmlFileContents->DecodeIfArmored()) {
-            otErr << __FUNCTION__
-                  << ": Input string apparently was encoded and then failed "
-                     "decoding. Filename: "
-                  << szFilename
-                  << " \n"
-                     "Contents: \n"
-                  << strFileContents << "\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Input string apparently was encoded and then failed "
+                "decoding. Filename: ")(szFilename)(". Contents: ")(
+                strFileContents)(".")
+                .Flush();
             return false;
         }
 
@@ -508,9 +511,9 @@ bool OTWallet::LoadWallet(const char* szFilename)
                             pAccount->SetName(AcctName);
                             api_.Wallet().ImportAccount(pAccount);
                         } else {
-                            otErr
-                                << __FUNCTION__
-                                << ": Error loading existing Asset Account.\n";
+                            LogOutput(OT_METHOD)(__FUNCTION__)(
+                                ": Error loading existing Asset Account.")
+                                .Flush();
                         }
                     }
                     // This tag is no longer saved in the wallet, but it is
@@ -528,8 +531,9 @@ bool OTWallet::LoadWallet(const char* szFilename)
 #endif
                     } else {
                         // unknown element type
-                        otErr << __FUNCTION__ << ": unknown element type: "
-                              << xml->getNodeName() << "\n";
+                        LogOutput(OT_METHOD)(__FUNCTION__)(
+                            ": unknown element type: ")(xml->getNodeName())(".")
+                            .Flush();
                     }
                 } break;
                 default:
