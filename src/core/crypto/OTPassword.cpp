@@ -32,6 +32,7 @@
 #include <string>
 
 #define PAGESIZE sysconf(_SC_PAGESIZE)
+#define OT_METHOD "opentxs::OTPassword::"
 #endif
 
 // FT: Credit to the Bitcoin team for the mlock / munlock defines.
@@ -100,8 +101,10 @@ bool OTPassword::ot_lockPage(void* addr, size_t len)
     static bool bWarned = false;
     if (mlock(addr, len) && !bWarned) {
         bWarned = true;
-        otErr << "ot_lockPage: WARNING: unable to lock memory. \n"
-                 "   (Passwords / secret keys may be swapped to disk!)\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": WARNING: Unable to lock memory. "
+            " (Passwords / secret keys may be swapped to disk)!")
+            .Flush();
     }
     return true;
 #else
@@ -123,8 +126,10 @@ bool OTPassword::ot_unlockPage(void* addr, size_t len)
     static bool bWarned = false;
     if (munlock(addr, len) && !bWarned) {
         bWarned = true;
-        otErr << "ot_unlockPage: WARNING: unable to unlock memory used for "
-                 "storing secrets.\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": WARNING: Unable to unlock memory used for "
+            "storing secrets.")
+            .Flush();
     }
     return true;
 #else
@@ -154,8 +159,10 @@ void OTPassword::zeroMemory()
         if (ot_unlockPage(static_cast<void*>(&(data_[0])), getBlockSize())) {
             isPageLocked_ = false;
         } else
-            otErr << "OTPassword::zeroMemory: Error: Memory page was locked, "
-                     "but then failed to unlock it.\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Error: Memory page was locked, "
+                "but then failed to unlock it.")
+                .Flush();
     }
 #endif
 }
@@ -518,7 +525,6 @@ std::int32_t OTPassword::setPassword_uint8(
     OT_ASSERT(nullptr != szInput);
 
     // cppcheck-suppress variableScope
-    const char* szFunc = "OTPassword::setPassword";
 
     // Wipe whatever was in there before.
     //
@@ -544,9 +550,9 @@ std::int32_t OTPassword::setPassword_uint8(
             reinterpret_cast<const char*>(szInput),
             static_cast<size_t>(nInputSize)) <
         static_cast<size_t>(nInputSize)) {
-        otErr
-            << szFunc
-            << ": ERROR: string length of szInput did not match nInputSize.\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": ERROR: String length of szInput did not match nInputSize.")
+            .Flush();
         return (-1);
     }
 
@@ -562,8 +568,9 @@ std::int32_t OTPassword::setPassword_uint8(
         if (ot_lockPage(static_cast<void*>(&(data_[0])), getBlockSize())) {
             isPageLocked_ = true;
         } else {
-            otErr << szFunc
-                  << ": Error: Failed attempting to lock memory page.\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Error: Failed attempting to lock memory page.")
+                .Flush();
         }
     }
 #endif
@@ -622,9 +629,10 @@ bool OTPassword::SetSize(std::uint32_t uSize)
         // data_[3] (which is the 4th byte.)
         return true;
     }
-    otErr << __FUNCTION__
-          << ": Error: isBinary_ and isText_ are both "
-             "false. (Should never happen.)\n";
+    LogOutput(OT_METHOD)(__FUNCTION__)(
+        ": Error: isBinary_ and isText_ are both "
+        "false. (Should never happen).")
+        .Flush();
     return false;
 }
 
@@ -696,8 +704,9 @@ std::int32_t OTPassword::randomizePassword(std::uint32_t nNewSize)
         if (ot_lockPage(static_cast<void*>(&(data_[0])), getBlockSize())) {
             isPageLocked_ = true;
         } else {
-            otErr << __FUNCTION__
-                  << ": Error: Failed attempting to lock memory page.\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Error: Failed attempting to lock memory page.")
+                .Flush();
         }
     }
 #endif
@@ -764,8 +773,9 @@ std::int32_t OTPassword::randomizeMemory(std::uint32_t nNewSize)
         if (ot_lockPage(static_cast<void*>(&(data_[0])), getBlockSize())) {
             isPageLocked_ = true;
         } else {
-            otErr << __FUNCTION__
-                  << ": Error: Failed attempting to lock memory page.\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Error: Failed attempting to lock memory page.")
+                .Flush();
         }
     }
 #endif
@@ -891,8 +901,9 @@ std::int32_t OTPassword::setMemory(const void* vInput, std::uint32_t nInputSize)
         if (ot_lockPage(static_cast<void*>(&(data_[0])), getBlockSize())) {
             isPageLocked_ = true;
         } else {
-            otErr << __FUNCTION__
-                  << ": Error: Failed attempting to lock memory page.\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Error: Failed attempting to lock memory page.")
+                .Flush();
         }
     }
 #endif

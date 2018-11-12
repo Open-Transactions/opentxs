@@ -95,8 +95,9 @@ bool KeyCredential::VerifySignedBySelf(const Lock& lock) const
     auto publicSig = SelfSignature(PUBLIC_VERSION);
 
     if (!publicSig) {
-        otErr << __FUNCTION__ << ": Could not find public self signature."
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Could not find public self signature.")
+            .Flush();
 
         return false;
     }
@@ -104,8 +105,9 @@ bool KeyCredential::VerifySignedBySelf(const Lock& lock) const
     bool goodPublic = VerifySig(lock, *publicSig, PUBLIC_VERSION);
 
     if (!goodPublic) {
-        otErr << __FUNCTION__ << ": Could not verify public self signature."
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Could not verify public self signature.")
+            .Flush();
 
         return false;
     }
@@ -114,8 +116,9 @@ bool KeyCredential::VerifySignedBySelf(const Lock& lock) const
         auto privateSig = SelfSignature(PRIVATE_VERSION);
 
         if (!privateSig) {
-            otErr << __FUNCTION__ << ": Could not find private self signature."
-                  << std::endl;
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Could not find private self signature.")
+                .Flush();
 
             return false;
         }
@@ -123,8 +126,9 @@ bool KeyCredential::VerifySignedBySelf(const Lock& lock) const
         bool goodPrivate = VerifySig(lock, *privateSig, PRIVATE_VERSION);
 
         if (!goodPrivate) {
-            otErr << __FUNCTION__
-                  << ": Could not verify private self signature." << std::endl;
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Could not verify private self signature.")
+                .Flush();
 
             return false;
         }
@@ -198,11 +202,10 @@ std::int32_t KeyCredential::GetPublicKeysBySignature(
                         listOutput, theSignature);
                     break;  // bInclusive=false by default
                 default:
-                    otErr
-                        << __FUNCTION__
-                        << ": Unexpected keytype value in signature metadata: "
-                        << theSignature.getMetaData().GetKeyType()
-                        << " (failure)\n";
+                    LogOutput(OT_METHOD)(__FUNCTION__)(
+                        ": Unexpected keytype value in signature metadata: ")(
+                        theSignature.getMetaData().GetKeyType())(" (Failure)!")
+                        .Flush();
                     return 0;
             }
             break;
@@ -223,10 +226,10 @@ std::int32_t KeyCredential::GetPublicKeysBySignature(
                 listOutput, theSignature, true);
             break;  // bInclusive=true
         default:
-            otErr
-                << __FUNCTION__
-                << ": Unexpected value for cKeyType (should be 0, A, E, or S): "
-                << cKeyType << "\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Unexpected value for cKeyType (should be 0, A, E, or S): ")(
+                cKeyType)(".")
+                .Flush();
             return 0;
     }
     return nCount;
@@ -475,8 +478,9 @@ bool KeyCredential::addKeyCredentialtoSerializedCredential(
         new proto::KeyCredential);
 
     if (!keyCredential) {
-        otErr << __FUNCTION__ << ": failed to allocate keyCredential protobuf."
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Failed to allocate keyCredential protobuf.")
+            .Flush();
 
         return false;
     }
@@ -524,8 +528,10 @@ bool KeyCredential::Verify(
             keyToUse = &signing_key_.get();
             break;
         default:
-            otErr << __FUNCTION__ << ": Can not verify signatures with the "
-                  << "specified key.\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Can not verify signatures with the "
+                "specified key.")
+                .Flush();
             return false;
     }
 
@@ -586,8 +592,10 @@ bool KeyCredential::VerifySig(
     serializedCredential serialized;
 
     if ((proto::KEYMODE_PRIVATE != mode_) && asPrivate) {
-        otErr << __FUNCTION__ << ": Can not serialize a public credential "
-              << "as a private credential.\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Can not serialize a public credential "
+            "as a private credential.")
+            .Flush();
         return false;
     }
 

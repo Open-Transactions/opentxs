@@ -553,7 +553,7 @@ bool SwigWrap::Wallet_CheckPassword()
     auto key = client_->Crypto().mutable_DefaultKey();
 
     if (false == key.It().IsGenerated()) {
-        otErr << OT_METHOD << __FUNCTION__ << ": No master key." << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": No master key.").Flush();
 
         return false;
     }
@@ -2997,8 +2997,8 @@ std::string SwigWrap::Blockchain_Allocate_Address(
         internal);
 
     if (false == bool(output)) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Failed to allocate address"
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Failed to allocate address.")
+            .Flush();
 
         return {};
     }
@@ -3048,8 +3048,7 @@ std::string SwigWrap::Blockchain_Load_Address(
         internal);
 
     if (false == bool(output)) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Failed to load address"
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Failed to load address.").Flush();
 
         return {};
     }
@@ -3107,8 +3106,7 @@ bool SwigWrap::Blockchain_Store_Incoming(
     const auto valid = proto::Validate(input, VERBOSE);
 
     if (false == valid) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Invalid transaction."
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Invalid transaction.").Flush();
 
         return false;
     }
@@ -3144,8 +3142,7 @@ bool SwigWrap::Blockchain_Store_Outgoing(
     const auto valid = proto::Validate(input, VERBOSE);
 
     if (false == valid) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Invalid transaction."
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Invalid transaction.").Flush();
 
         return false;
     }
@@ -3236,8 +3233,8 @@ std::string SwigWrap::Blockchain_Address_To_Contact(
         client_->Contacts().NewContactFromAddress(address, label, type);
 
     if (false == bool(contact)) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Failed to create new contact."
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Failed to create new contact.")
+            .Flush();
 
         return {};
     }
@@ -3254,8 +3251,7 @@ bool SwigWrap::Contact_Add_Blockchain_Address(
         client_->Contacts().mutable_Contact(Identifier::Factory(contactID));
 
     if (false == bool(contact)) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Contact does not exist."
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Contact does not exist.").Flush();
 
         return false;
     }
@@ -3351,7 +3347,7 @@ std::string SwigWrap::Bailment_Instructions(const std::string& account)
     const auto accountID = Identifier::Factory(account);
 
     if (accountID->empty()) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Invalid account" << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Invalid account.").Flush();
 
         return {};
     }
@@ -3359,7 +3355,7 @@ std::string SwigWrap::Bailment_Instructions(const std::string& account)
     const auto nymID = db.AccountOwner(accountID);
 
     if (nymID->empty()) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Invalid nym" << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Invalid nym.").Flush();
 
         return {};
     }
@@ -3367,13 +3363,13 @@ std::string SwigWrap::Bailment_Instructions(const std::string& account)
     const auto issuerID = db.AccountIssuer(accountID);
 
     if (issuerID->empty()) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Invalid issuer" << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Invalid issuer.").Flush();
 
         return {};
     }
 
     if (0 == wallet.IssuerList(nymID).count(issuerID)) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Missing issuer" << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Missing issuer.").Flush();
 
         return {};
     }
@@ -3385,8 +3381,8 @@ std::string SwigWrap::Bailment_Instructions(const std::string& account)
     const auto instructions = issuer.BailmentInstructions(unit, true);
 
     if (0 == instructions.size()) {
-        otErr << OT_METHOD << __FUNCTION__ << ": No bailment instructions yet"
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": No bailment instructions yet.")
+            .Flush();
 
         return {};
     }
@@ -3394,8 +3390,8 @@ std::string SwigWrap::Bailment_Instructions(const std::string& account)
     const auto& [requestID, reply] = *instructions.begin();
     const auto& output = reply.instructions();
     issuer.SetUsed(proto::PEERREQUEST_BAILMENT, requestID);
-    otErr << OT_METHOD << __FUNCTION__ << ": Deposit address: " << output
-          << std::endl;
+    LogOutput(OT_METHOD)(__FUNCTION__)(": Deposit address: ")(output)(".")
+        .Flush();
 
     return output;
 }
@@ -3490,8 +3486,7 @@ bool SwigWrap::Pair_ShouldRename(
         Identifier::Factory(localNym), Identifier::Factory(serverID));
 
     if (false == bool(context)) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Server does not exist."
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Server does not exist.").Flush();
 
         return false;
     }

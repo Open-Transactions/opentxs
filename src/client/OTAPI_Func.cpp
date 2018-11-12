@@ -265,7 +265,7 @@ OTAPI_Func::OTAPI_Func(
         "Warning: Empty std::string passed to OTAPI_Func.OTAPI_Func() as: ";
 
     if (!VerifyStringVal(password)) {
-        otErr << strError << "password" << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": password.").Flush();
     }
 
     switch (theType) {
@@ -598,11 +598,11 @@ OTAPI_Func::OTAPI_Func(
         "Warning: Empty std::string passed to OTAPI_Func.OTAPI_Func() as: ";
 
     if (!VerifyStringVal(clause)) {
-        otErr << strError << "clause" << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": clause.").Flush();
     }
 
     if (!VerifyStringVal(parameter)) {
-        otErr << strError << "parameter" << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": parameter.").Flush();
     }
 
     nTransNumsNeeded_ = 1;
@@ -659,7 +659,7 @@ OTAPI_Func::OTAPI_Func(
         "Warning: Empty std::string passed to OTAPI_Func.OTAPI_Func() as: ";
 
     if (!VerifyStringVal(message)) {
-        otErr << strError << "message" << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": message.").Flush();
     }
 
     switch (theType) {
@@ -726,7 +726,7 @@ OTAPI_Func::OTAPI_Func(
         "Warning: Empty std::string passed to OTAPI_Func.OTAPI_Func() as: ";
 
     if (!VerifyStringVal(agentName)) {
-        otErr << strError << "agentName" << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": agentName.").Flush();
     }
 
     nTransNumsNeeded_ = 1;
@@ -827,7 +827,7 @@ OTAPI_Func::OTAPI_Func(
                                    "OTAPI_Func.OTAPI_Func() as: ";
 
             if (!VerifyStringVal(message)) {
-                otErr << strError << "message" << std::endl;
+                LogOutput(OT_METHOD)(__FUNCTION__)(": message.").Flush();
             }
             nTransNumsNeeded_ = 1;
             accountID_ = nymID2;
@@ -884,11 +884,11 @@ OTAPI_Func::OTAPI_Func(
         "Warning: Empty std::string passed to OTAPI_Func.OTAPI_Func() as: ";
 
     if (!VerifyStringVal(primary)) {
-        otErr << strError << "primary" << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": primary.").Flush();
     }
 
     if (!VerifyStringVal(secondary)) {
-        otErr << strError << "secondary" << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": secondary.").Flush();
     }
 
     switch (theType) {
@@ -968,7 +968,7 @@ OTAPI_Func::OTAPI_Func(
 
     if (theType == NOTIFY_BAILMENT) {
         if (!VerifyStringVal(txid)) {
-            otErr << strError << "txid" << std::endl;
+            LogOutput(OT_METHOD)(__FUNCTION__)(": txid.").Flush();
         }
         nTransNumsNeeded_ = 0;
         accountID_ = recipientID;
@@ -1012,7 +1012,9 @@ OTAPI_Func::OTAPI_Func(
     const std::string strError =
         "Warning: Empty std::string passed to OTAPI_Func.OTAPI_Func() as: ";
 
-    if (!VerifyStringVal(value)) { otErr << strError << "value" << std::endl; }
+    if (!VerifyStringVal(value)) {
+        LogOutput(OT_METHOD)(__FUNCTION__)(": value.").Flush();
+    }
 
     switch (theType) {
         case SERVER_ADD_CLAIM: {
@@ -1081,17 +1083,21 @@ OTAPI_Func::OTAPI_Func(
         "Warning: Empty std::string passed to OTAPI_Func.OTAPI_Func() as: ";
 
     if (ack_) {
-        if (!VerifyStringVal(url)) { otErr << strError << "url" << std::endl; }
+        if (!VerifyStringVal(url)) {
+            LogOutput(OT_METHOD)(__FUNCTION__)(": url.").Flush();
+        }
 
         if (!VerifyStringVal(login)) {
-            otErr << strError << "login" << std::endl;
+            LogOutput(OT_METHOD)(__FUNCTION__)(": login.").Flush();
         }
 
         if (!VerifyStringVal(password)) {
-            otErr << strError << "password" << std::endl;
+            LogOutput(OT_METHOD)(__FUNCTION__)(": password.").Flush();
         }
 
-        if (!VerifyStringVal(key)) { otErr << strError << "key" << std::endl; }
+        if (!VerifyStringVal(key)) {
+            LogOutput(OT_METHOD)(__FUNCTION__)(": key.").Flush();
+        }
     }
 
     switch (theType) {
@@ -1291,8 +1297,9 @@ void OTAPI_Func::run()
                     cheque->LoadContractFromString(payment->Payment());
 
                 if (false == loaded) {
-                    otErr << OT_METHOD << __FUNCTION__
-                          << ": Failed to load cheque" << std::endl;
+                    LogOutput(OT_METHOD)(__FUNCTION__)(
+                        ": Failed to load cheque.")
+                        .Flush();
                     break;
                 }
 
@@ -1309,11 +1316,13 @@ void OTAPI_Func::run()
                 }
 
                 if (workflowUpdated) {
-                    otErr << OT_METHOD << __FUNCTION__
-                          << ": Successfully updated workflow" << std::endl;
+                    LogOutput(OT_METHOD)(__FUNCTION__)(
+                        ": Successfully updated workflow.")
+                        .Flush();
                 } else {
-                    otErr << OT_METHOD << __FUNCTION__
-                          << ": Failed to update workflow" << std::endl;
+                    LogOutput(OT_METHOD)(__FUNCTION__)(
+                        ": Failed to update workflow.")
+                        .Flush();
                 }
             }
         } break;
@@ -1367,8 +1376,8 @@ void OTAPI_Func::run()
         } break;
         case EXCHANGE_CASH: {
 #if OT_CASH
-            otErr << OT_METHOD << __FUNCTION__ << ": TODO (NOT CODED YET)"
-                  << std::endl;
+            LogOutput(OT_METHOD)(__FUNCTION__)(": TODO (NOT CODED YET).")
+                .Flush();
 #endif  // OT_CASH
         } break;
         case KILL_MARKET_OFFER: {
@@ -1476,10 +1485,11 @@ void OTAPI_Func::run()
             if (!STOP_SIGN.empty() &&
                 ((ACTIVATION_PRICE == 0) ||
                  ((cStopSign != '<') && (cStopSign != '>')))) {
-                otErr << OT_METHOD << __FUNCTION__
-                      << ": If STOP_SIGN is provided, it must be \"<\" "
-                         "or \">\", and in that case ACTIVATION_PRICE "
-                         "must be non-zero.\n";
+                LogOutput(OT_METHOD)(__FUNCTION__)(
+                    ": If STOP_SIGN is provided, it must be < "
+                    "or >, and in that case ACTIVATION_PRICE "
+                    "must be non-zero.")
+                    .Flush();
 
                 return;
             }
@@ -1496,9 +1506,10 @@ void OTAPI_Func::run()
 
             if (str_asset_notary_id.empty() || str_currency_notary_id.empty() ||
                 str_asset_nym_id.empty() || str_currency_nym_id.empty()) {
-                otErr << OT_METHOD << __FUNCTION__
-                      << ": Failed determining server or nym ID for "
-                         "either asset or currency account.\n";
+                LogOutput(OT_METHOD)(__FUNCTION__)(
+                    ": Failed determining server or nym ID for "
+                    "either asset or currency account.")
+                    .Flush();
 
                 return;
             }
@@ -1581,8 +1592,9 @@ void OTAPI_Func::run()
             last_attempt_ = api_.OTAPI().getTransactionNumbers(context_);
         } break;
         default: {
-            otErr << OT_METHOD << __FUNCTION__ << ": Error: unhandled function "
-                  << " type: " << type_ << std::endl;
+            LogOutput(OT_METHOD)(__FUNCTION__)(": Error: unhandled function "
+                                               "type: ")(type_)(".")
+                .Flush();
 
             OT_FAIL;
         }

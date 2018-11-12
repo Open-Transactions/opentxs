@@ -271,14 +271,13 @@ bool PaymentCode::AddPrivateKeys(
     const std::uint32_t index)
 {
     if (false == seed_.empty()) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Seed already set" << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Seed already set.").Flush();
 
         return false;
     }
 
     if (0 <= index_) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Index already set"
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Index already set.").Flush();
 
         return false;
     }
@@ -294,7 +293,7 @@ bool PaymentCode::AddPrivateKeys(
         bitmessage_stream_);
 
     if (this->ID() != candidate.ID()) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Wrong parameters" << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Wrong parameters.").Flush();
 
         return false;
     }
@@ -423,8 +422,8 @@ std::tuple<bool, std::unique_ptr<OTPassword>, OTData> PaymentCode::make_key(
             publicKey = Data::Factory(key.key().c_str(), key.key().size());
         }
     } else {
-        otErr << OT_METHOD << __FUNCTION__ << ": Failed to generate private key"
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Failed to generate private key.")
+            .Flush();
     }
 
     success = (CHAIN_CODE_BYTES == chainCode->getMemorySize()) &&
@@ -504,22 +503,24 @@ bool PaymentCode::Sign(
 OTAsymmetricKey PaymentCode::signing_key() const
 {
     if (nullptr == pubkey_) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Payment code not instantiated."
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Payment code not instantiated.")
+            .Flush();
 
         return crypto::key::Asymmetric::Factory();
     }
 
     if (0 > index_) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Private key is unavailable (unknown index)." << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Private key is unavailable (unknown index).")
+            .Flush();
 
         return crypto::key::Asymmetric::Factory();
     }
 
     if (seed_.empty()) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Private key is unavailable (unknown seed)." << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Private key is unavailable (unknown seed).")
+            .Flush();
 
         return crypto::key::Asymmetric::Factory();
     }
@@ -529,16 +530,17 @@ OTAsymmetricKey PaymentCode::signing_key() const
         seeds_.GetPaymentCode(fingerprint, index_);
 
     if (fingerprint != seed_) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Specified seed could not be loaded." << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Specified seed could not be loaded.")
+            .Flush();
 
         return crypto::key::Asymmetric::Factory();
     }
 
     if (!privatekey) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Failed to derive private key for payment code."
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Failed to derive private key for payment code.")
+            .Flush();
 
         return crypto::key::Asymmetric::Factory();
     }
@@ -557,9 +559,9 @@ OTAsymmetricKey PaymentCode::signing_key() const
     compareKeyData->Assign(compareKey.key().c_str(), compareKey.key().size());
 
     if (!(existingKeyData == compareKeyData)) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Private key is not valid for this payment code."
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Private key is not valid for this payment code.")
+            .Flush();
 
         return crypto::key::Asymmetric::Factory();
     }
@@ -579,8 +581,9 @@ bool PaymentCode::Verify(
             proto::KEYMODE_PUBLIC,
             proto::CREDROLE_MASTERKEY,
             false)) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Invalid master credential syntax." << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Invalid master credential syntax.")
+            .Flush();
 
         return false;
     }
@@ -588,16 +591,17 @@ bool PaymentCode::Verify(
     bool sameSource = (*this == master.masterdata().source().paymentcode());
 
     if (!sameSource) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Master credential was not derived from this source."
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Master credential was not derived from this source.")
+            .Flush();
 
         return false;
     }
 
     if (nullptr == pubkey_) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Payment code is missing public key." << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Payment code is missing public key.")
+            .Flush();
 
         return false;
     }

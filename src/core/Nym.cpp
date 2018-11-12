@@ -95,8 +95,9 @@ Nym::Nym(const api::Core& api, const NymParameters& nymParameters)
     const bool defaultIndex = nymParameters.UseAutoIndex();
 
     if (!defaultIndex) {
-        otErr << __FUNCTION__ << ": Re-creating nym at specified path. "
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Re-creating nym at specified path.")
+            .Flush();
 
         nymIndex = nymParameters.Nym();
     }
@@ -176,7 +177,7 @@ std::string Nym::AddChildKeyCredential(
     const bool noMaster = (it == m_mapCredentialSets.end());
 
     if (noMaster) {
-        otErr << __FUNCTION__ << ": master ID not found." << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Master ID not found.").Flush();
 
         return output;
     }
@@ -903,8 +904,9 @@ bool Nym::load_credential_index(
     const serializedCredentialIndex& index)
 {
     if (!proto::Validate<proto::CredentialIndex>(index, VERBOSE)) {
-        otErr << __FUNCTION__ << ": Unable to load invalid serialized"
-              << " credential index." << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Unable to load invalid serialized"
+                                           " credential index.")
+            .Flush();
 
         return false;
     }
@@ -976,9 +978,9 @@ bool Nym::load_credentials(
     if (api_.Storage().Load(strNymID->Get(), index)) {
         return load_credential_index(lock, *index);
     } else {
-        otErr << __FUNCTION__
-              << ": Failed trying to load credential list for nym: " << strNymID
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Failed trying to load credential list for nym: ")(strNymID)(".")
+            .Flush();
     }
 
     return false;
@@ -1055,8 +1057,8 @@ bool Nym::Path(proto::HDPath& output) const
         }
     }
 
-    otErr << OT_METHOD << __FUNCTION__ << ": No credential set contains a path."
-          << std::endl;
+    LogOutput(OT_METHOD)(__FUNCTION__)(": No credential set contains a path.")
+        .Flush();
 
     return false;
 }
@@ -1124,7 +1126,9 @@ bool Nym::ReEncryptPrivateCredentials(
         thePasswordAngel.reset(pExportPassphrase);
 
         if (nullptr == pExportPassphrase) {
-            otErr << __FUNCTION__ << ": Failed in GetPassphraseFromUser.\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Failed in GetPassphraseFromUser.")
+                .Flush();
             return false;
         }
     } else {
@@ -1328,22 +1332,21 @@ bool Nym::set_contact_data(const eLock& lock, const proto::ContactData& data)
     auto version = proto::NymRequiredVersion(data.version(), version_);
 
     if (!version || version > NYM_UPGRADE_VERSION) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Contact data version not supported by this nym."
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Contact data version not supported by this nym.")
+            .Flush();
         return false;
     }
 
     if (false == has_capability(lock, NymCapability::SIGN_CHILDCRED)) {
-        otErr << OT_METHOD << __FUNCTION__ << ": This nym can not be modified."
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": This nym can not be modified.")
+            .Flush();
 
         return false;
     }
 
     if (false == proto::Validate(data, VERBOSE, false)) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Invalid contact data."
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Invalid contact data.").Flush();
 
         return false;
     }
@@ -1416,8 +1419,8 @@ bool Nym::SetVerificationSet(const proto::VerificationSet& data)
     eLock lock(shared_lock_);
 
     if (false == has_capability(lock, NymCapability::SIGN_CHILDCRED)) {
-        otErr << OT_METHOD << __FUNCTION__ << ": This nym can not be modified."
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": This nym can not be modified.")
+            .Flush();
 
         return false;
     }
@@ -1555,7 +1558,7 @@ bool Nym::verify_pseudonym(const eLock& lock) const
         }
         return true;
     }
-    otErr << "No credentials.\n";
+    LogOutput(OT_METHOD)(__FUNCTION__)(": No credentials.").Flush();
     return false;
 }
 
@@ -1565,8 +1568,8 @@ bool Nym::WriteCredentials() const
 
     for (auto& it : m_mapCredentialSets) {
         if (!it.second->WriteCredentials()) {
-            otErr << __FUNCTION__ << ": Failed to save credentials."
-                  << std::endl;
+            LogOutput(OT_METHOD)(__FUNCTION__)(": Failed to save credentials.")
+                .Flush();
 
             return false;
         }

@@ -75,8 +75,9 @@ bool NymData::AddContract(
     auto id = Identifier::Factory(instrumentDefinitionID);
 
     if (id->empty()) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Invalid instrument definition id." << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Invalid instrument definition id.")
+            .Flush();
 
         return false;
     }
@@ -102,8 +103,7 @@ bool NymData::AddPaymentCode(
     auto paymentCode = factory_.PaymentCode(code);
 
     if (false == paymentCode->VerifyInternally()) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Invalid payment code."
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Invalid payment code.").Flush();
 
         return false;
     }
@@ -125,8 +125,7 @@ bool NymData::AddPhoneNumber(
 bool NymData::AddPreferredOTServer(const std::string& id, const bool primary)
 {
     if (id.empty()) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Invalid server id."
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Invalid server id.").Flush();
 
         return false;
     }

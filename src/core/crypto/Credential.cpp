@@ -75,8 +75,8 @@ std::unique_ptr<Credential> Credential::Factory(
     // This check allows all constructors to assume inputs are well-formed
     if (!proto::Validate<proto::Credential>(
             serialized, VERBOSE, mode, purportedRole)) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Invalid serialized credential."
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Invalid serialized credential.")
+            .Flush();
 
         return result;
     }
@@ -187,29 +187,37 @@ bool Credential::verify_internally(const Lock& lock) const
     OT_ASSERT(nullptr != owner_backlink_);
 
     if (nullptr == owner_backlink_) {
-        otErr << OT_METHOD << __FUNCTION__ << ": This credential is not "
-              << "attached to a CredentialSet. Can not verify.\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": This credential is not "
+            "attached to a CredentialSet. Can not verify.")
+            .Flush();
 
         return false;
     }
 
     if (!VerifyNymID()) {
-        otErr << OT_METHOD << __FUNCTION__ << ": NymID for this credential "
-              << "does not match NymID of parent CredentialSet.\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": NymID for this credential "
+            "does not match NymID of parent CredentialSet.")
+            .Flush();
 
         return false;
     }
 
     if (!VerifyMasterID()) {
-        otErr << OT_METHOD << __FUNCTION__ << ": MasterID for this credential "
-              << "does not match MasterID of parent CredentialSet.\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": MasterID for this credential "
+            "does not match MasterID of parent CredentialSet.")
+            .Flush();
 
         return false;
     }
 
     if (!CheckID(lock)) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Purported ID for this "
-              << "credential does not match its actual contents.\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Purported ID for this "
+            "credential does not match its actual contents.")
+            .Flush();
 
         return false;
     }
@@ -223,8 +231,10 @@ bool Credential::verify_internally(const Lock& lock) const
     }
 
     if (!GoodMasterSignature) {
-        otErr << OT_METHOD << __FUNCTION__ << ": This credential hasn't "
-              << "been signed by its  master credential." << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": This credential hasn't "
+            "been signed by its  master credential.")
+            .Flush();
 
         return false;
     }
@@ -241,8 +251,8 @@ bool Credential::verify_master_signature(const Lock& lock) const
     auto masterSig = MasterSignature();
 
     if (!masterSig) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Missing master signature."
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Missing master signature.")
+            .Flush();
 
         return false;
     }
@@ -324,8 +334,9 @@ OTIdentifier Credential::GetID(const Lock& lock) const
     auto id = Identifier::Factory();
 
     if (!id->CalculateDigest(serializedData)) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Error calculating credential digest.\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Error calculating credential digest.")
+            .Flush();
     }
 
     return id;
@@ -376,8 +387,10 @@ serializedCredential Credential::serialize(
         if (proto::KEYMODE_PRIVATE == mode_) {
             serializedCredential->set_mode(mode_);
         } else {
-            otErr << OT_METHOD << __FUNCTION__ << ": Can't serialized a public "
-                  << "credential as a private credential." << std::endl;
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Can't serialized a public "
+                "credential as a private credential.")
+                .Flush();
         }
     } else {
         serializedCredential->set_mode(proto::KEYMODE_PUBLIC);
@@ -455,9 +468,10 @@ bool Credential::Save() const
     serializedCredential serializedProto;
 
     if (!isValid(lock, serializedProto)) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Unable to save serialized "
-              << "credential. Type (" << role_ << "), version " << version_
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Unable to save serialized "
+            "credential. Type (")(role_)("), version ")(version_)(".")
+            .Flush();
 
         return false;
     }
@@ -465,8 +479,8 @@ bool Credential::Save() const
     const bool bSaved = api_.Wallet().SaveCredential(*serializedProto);
 
     if (!bSaved) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Error saving credential"
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Error saving credential.")
+            .Flush();
 
         return false;
     }
@@ -533,8 +547,8 @@ void Credential::ReleaseSignatures(const bool onlyPrivate)
 bool Credential::AddMasterSignature(const Lock& lock)
 {
     if (nullptr == owner_backlink_) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Missing master credential."
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Missing master credential.")
+            .Flush();
 
         return false;
     }
@@ -548,9 +562,9 @@ bool Credential::AddMasterSignature(const Lock& lock)
     bool havePublicSig = owner_backlink_->SignProto(*serialized, signature);
 
     if (!havePublicSig) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Failed to obtain signature from master credential."
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Failed to obtain signature from master credential.")
+            .Flush();
 
         return false;
     }
