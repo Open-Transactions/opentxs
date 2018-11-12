@@ -109,7 +109,7 @@ bool Contract::DearmorAndTrim(
 {
 
     if (!strInput.Exists()) {
-        otErr << __FUNCTION__ << ": Input string is empty.\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Input string is empty.").Flush();
         return false;
     }
 
@@ -270,7 +270,9 @@ void Contract::CalculateContractID(Identifier& newID) const
     auto strTemp = String::Factory(str_Trim2.c_str());
 
     if (!newID.CalculateDigest(strTemp))
-        otErr << __FUNCTION__ << ": Error calculating Contract digest.\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Error calculating Contract digest.")
+            .Flush();
 }
 
 void Contract::CalculateAndSetContractID(Identifier& newID)
@@ -354,9 +356,10 @@ bool Contract::SignContract(const Nym& theNym, const OTPasswordData* pPWData)
     if (bSigned) {
         m_listSignatures.emplace_back(std::move(sig));
     } else {
-        otErr << __FUNCTION__
-              << ": Failure while calling "
-                 "SignContract(theNym, sig, pPWData)\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Failure while calling "
+            "SignContract(theNym, sig, pPWData).")
+            .Flush();
     }
 
     return bSigned;
@@ -374,10 +377,10 @@ bool Contract::SignContractAuthent(
     if (bSigned) {
         m_listSignatures.emplace_back(std::move(sig));
     } else {
-        otErr << __FUNCTION__
-              << ": Failure while calling "
-                 "SignContractAuthent(theNym, sig, "
-                 "pPWData)\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Failure while calling "
+                                           "SignContractAuthent(theNym, sig, "
+                                           "pPWData).")
+            .Flush();
     }
 
     return bSigned;
@@ -431,8 +434,9 @@ bool Contract::SignWithKey(
     if (bSigned) {
         m_listSignatures.emplace_back(std::move(sig));
     } else {
-        otErr << __FUNCTION__
-              << ": Failure while calling SignContract(theNym, sig).\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Failure while calling SignContract(theNym, sig).")
+            .Flush();
     }
 
     return bSigned;
@@ -524,8 +528,9 @@ bool Contract::SignContract(
     if (false ==
         engine.SignContract(
             trim(m_xmlUnsigned), theKey, theSignature, hashType, pPWData)) {
-        otErr << "Contract::SignContract: "
-                 "engine.SignContract returned false.\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": engine.SignContract returned false.")
+            .Flush();
         return false;
     }
 
@@ -827,7 +832,6 @@ bool Contract::SignFlatText(
     const Nym& theSigner,
     String& strOutput)
 {
-    const char* szFunc = "Contract::SignFlatText";
 
     // Trim the input to remove any extraneous whitespace
     //
@@ -840,10 +844,11 @@ bool Contract::SignFlatText(
     const std::uint32_t lLength = strFlatText.GetLength();
 
     if ((3 > lLength) || !strFlatText.At(lLength - 1, cNewline)) {
-        otErr << szFunc
-              << ": Invalid input: text is less than 3 bytes "
-                 "std::int64_t, or unable to read a byte from the end where "
-                 "a newline is meant to be.\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Invalid input: text is less than 3 bytes "
+            "std::int64_t, or unable to read a byte from the end where "
+            "a newline is meant to be.")
+            .Flush();
         return false;
     }
 
@@ -874,8 +879,9 @@ bool Contract::SignFlatText(
                      theSignature,  // the output
                      key.SigHashType(),
                      &thePWData)) {
-        otErr << szFunc << ": SignContract failed. Contents:\n\n"
-              << strInput << "\n\n\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": SignContract failed. Contents: ")(
+            strInput)(".")
+            .Flush();
         return false;
     }
 
@@ -990,9 +996,10 @@ bool Contract::WriteContract(
     OT_ASSERT(filename.size() > 2);
 
     if (!m_strRawFile->Exists()) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Error saving file (contract contents are empty): " << folder
-              << Log::PathSeparator() << filename << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Error saving file (contract contents are empty): ")(folder)(
+            Log::PathSeparator())(filename)(".")
+            .Flush();
 
         return false;
     }
@@ -1002,9 +1009,10 @@ bool Contract::WriteContract(
 
     if (false ==
         ascTemp->WriteArmoredString(strFinal, m_strContractType->Get())) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Error saving file (failed writing armored string): "
-              << folder << Log::PathSeparator() << filename << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Error saving file (failed writing armored string): ")(folder)(
+            Log::PathSeparator())(filename)(".")
+            .Flush();
 
         return false;
     }
@@ -1013,8 +1021,9 @@ bool Contract::WriteContract(
         strFinal->Get(), api_.DataFolder(), folder, filename, "", "");
 
     if (!bSaved) {
-        otErr << OT_METHOD << __FUNCTION__ << "Error saving file: " << folder
-              << Log::PathSeparator() << filename << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Error saving file: ")(folder)(
+            Log::PathSeparator())(filename)(".")
+            .Flush();
 
         return false;
     }
@@ -1048,8 +1057,9 @@ bool Contract::LoadContractRawFile()
     if (!m_strFoldername->Exists() || !m_strFilename->Exists()) return false;
 
     if (!OTDB::Exists(api_.DataFolder(), szFoldername, szFilename, "", "")) {
-        otErr << __FUNCTION__ << ": File does not exist: " << szFoldername
-              << Log::PathSeparator() << szFilename << "\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": File does not exist: ")(
+            szFoldername)(Log::PathSeparator())(szFilename)(".")
+            .Flush();
         return false;
     }
 
@@ -1060,18 +1070,19 @@ bool Contract::LoadContractRawFile()
                                                                 // STORE.
 
     if (!strFileContents->Exists()) {
-        otErr << __FUNCTION__ << ": Error reading file: " << szFoldername
-              << Log::PathSeparator() << szFilename << "\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Error reading file: ")(
+            szFoldername)(Log::PathSeparator())(szFilename)(".")
+            .Flush();
         return false;
     }
 
     if (false == strFileContents->DecodeIfArmored())  // bEscapedIsAllowed=true
                                                       // by default.
     {
-        otErr << __FUNCTION__
-              << ": Input string apparently was encoded and "
-                 "then failed decoding. Contents: \n"
-              << strFileContents << "\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Input string apparently was encoded and "
+            "then failed decoding. Contents: ")(strFileContents)(".")
+            .Flush();
         return false;
     }
 
@@ -1096,8 +1107,10 @@ bool Contract::LoadContract(const char* szFoldername, const char* szFilename)
         return ParseRawFile();  // Parses m_strRawFile into the various member
                                 // variables.
     else {
-        otErr << "Failed loading raw contract file: " << m_strFoldername
-              << Log::PathSeparator() << m_strFilename << "\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Failed loading raw contract file: ")(m_strFoldername)(
+            Log::PathSeparator())(m_strFilename)(".")
+            .Flush();
     }
     return false;
 }
@@ -1109,7 +1122,8 @@ bool Contract::LoadContractFromString(const String& theStr)
     Release();
 
     if (!theStr.Exists()) {
-        otErr << __FUNCTION__ << ": ERROR: Empty string passed in...\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": ERROR: Empty string passed in...")
+            .Flush();
         return false;
     }
 
@@ -1118,11 +1132,11 @@ bool Contract::LoadContractFromString(const String& theStr)
     if (false == strContract->DecodeIfArmored())  // bEscapedIsAllowed=true by
                                                   // default.
     {
-        otErr << __FUNCTION__
-              << ": ERROR: Input string apparently was encoded "
-                 "and then failed decoding. "
-                 "Contents: \n"
-              << theStr << "\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": ERROR: Input string apparently was encoded "
+            "and then failed decoding. "
+            "Contents: ")(theStr)(".")
+            .Flush();
         return false;
     }
 
@@ -1163,9 +1177,10 @@ bool Contract::ParseRawFile()
     bool bHaveEnteredContentMode = false;  // "have yet to enter content mode"
 
     if (!m_strRawFile->GetLength()) {
-        otErr << "Empty m_strRawFile in Contract::ParseRawFile. Filename: "
-              << m_strFoldername << Log::PathSeparator() << m_strFilename
-              << ".\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Empty m_strRawFile in Contract::ParseRawFile. Filename: ")(
+            m_strFoldername)(Log::PathSeparator())(m_strFilename)(".")
+            .Flush();
         return false;
     }
 
@@ -1388,23 +1403,32 @@ bool Contract::ParseRawFile()
     } while (!bIsEOF);
 
     if (!bHaveEnteredContentMode) {
-        otErr << "Error in Contract::ParseRawFile: Found no BEGIN for signed "
-                 "content.\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Error in Contract::ParseRawFile: Found no BEGIN for signed "
+            "content.")
+            .Flush();
         return false;
     } else if (bContentMode) {
-        otErr << "Error in Contract::ParseRawFile: EOF while reading xml "
-                 "content.\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Error in Contract::ParseRawFile: EOF while reading xml "
+            "content.")
+            .Flush();
         return false;
     } else if (bSignatureMode) {
-        otErr << "Error in Contract::ParseRawFile: EOF while reading "
-                 "signature.\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Error in Contract::ParseRawFile: EOF while reading "
+            "signature.")
+            .Flush();
         return false;
     } else if (!LoadContractXML()) {
-        otErr << "Error in Contract::ParseRawFile: unable to load XML "
-                 "portion of contract into memory.\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Error in Contract::ParseRawFile: Unable to load XML "
+            "portion of contract into memory.")
+            .Flush();
         return false;
     } else if (proto::HASHTYPE_ERROR == m_strSigHashType) {
-        otErr << __FUNCTION__ << ": Failed to set hash type," << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Failed to set hash type.")
+            .Flush();
 
         return false;
     } else {
@@ -1471,19 +1495,23 @@ bool Contract::LoadContractXML()
 
                 // an error was returned. file format or whatever.
                 if ((-1) == retProcess) {
-                    otErr << "Contract::LoadContractXML: (Cancelling this "
-                             "contract load; an error occurred.)\n";
+                    LogOutput(OT_METHOD)(__FUNCTION__)(
+                        ": (Cancelling this "
+                        "contract load; an error occurred).")
+                        .Flush();
                     return false;
                 }
                 // No error, but also the node wasn't found...
                 else if (0 == retProcess) {
                     // unknown element type
-                    otErr
-                        << "UNKNOWN element type in Contract::LoadContractXML: "
-                        << xml->getNodeName()
-                        << ", value: " << xml->getNodeData() << "\n";
+                    LogOutput(OT_METHOD)(__FUNCTION__)(
+                        ": UNKNOWN element type in "
+                        "Contract::LoadContractXML: ")(xml->getNodeName())(
+                        ", value: ")(xml->getNodeData())(".")
+                        .Flush();
 
-                    otErr << m_xmlUnsigned << "\n";
+                    LogOutput(OT_METHOD)(__FUNCTION__)(": ")(m_xmlUnsigned)(".")
+                        .Flush();
                 }
                 // else if 1 was returned, that means the node was processed.
             } break;
@@ -1505,8 +1533,6 @@ bool Contract::SkipToElement(IrrXMLReader*& xml)
 {
     OT_ASSERT_MSG(
         nullptr != xml, "Contract::SkipToElement -- assert: nullptr != xml");
-
-    const char* szFunc = "Contract::SkipToElement";
 
     while (xml->read() && (xml->getNodeType() != EXN_ELEMENT)) {
         //      otOut << szFunc << ": Looping to skip non-elements: currently
@@ -1536,7 +1562,7 @@ bool Contract::SkipToElement(IrrXMLReader*& xml)
                 .Flush();
             return false;
         } else if (xml->getNodeType() == EXN_TEXT) {
-            otErr << "*** " << szFunc << ": EXN_TEXT\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(": EXN_TEXT.").Flush();
             return false;
         } else if (xml->getNodeType() == EXN_ELEMENT) {
             LogDetail(OT_METHOD)(__FUNCTION__)(": EXN_ELEMENT.").Flush();
@@ -1544,8 +1570,9 @@ bool Contract::SkipToElement(IrrXMLReader*& xml)
         }  // (Should never happen due to while() second condition.) Still
            // returns true.
         else {
-            otErr << "*** " << szFunc
-                  << ": SHOULD NEVER HAPPEN  (Unknown element type!)\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": SHOULD NEVER HAPPEN (Unknown element type)!")
+                .Flush();
             return false;
         }  // Failure / Error
     }
@@ -1558,8 +1585,6 @@ bool Contract::SkipToTextField(IrrXMLReader*& xml)
 {
     OT_ASSERT_MSG(
         nullptr != xml, "Contract::SkipToTextField -- assert: nullptr != xml");
-
-    const char* szFunc = "Contract::SkipToTextField";
 
     while (xml->read() && (xml->getNodeType() != EXN_TEXT)) {
         if (xml->getNodeType() == EXN_NONE) {
@@ -1589,13 +1614,14 @@ bool Contract::SkipToTextField(IrrXMLReader*& xml)
             LogDetail(OT_METHOD)(__FUNCTION__)(": EXN_ELEMENT.").Flush();
             return false;
         } else if (xml->getNodeType() == EXN_TEXT) {
-            otErr << "*** " << szFunc << ": EXN_TEXT\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(": EXN_TEXT.").Flush();
             break;
         }  // (Should never happen due to while() second condition.) Still
            // returns true.
         else {
-            otErr << "*** " << szFunc
-                  << ": SHOULD NEVER HAPPEN  (Unknown element type!)\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": SHOULD NEVER HAPPEN (Unknown element type)!")
+                .Flush();
             return false;
         }  // Failure / Error
     }
@@ -1618,9 +1644,7 @@ bool Contract::SkipAfterLoadingField(IrrXMLReader*& xml)
     if (EXN_ELEMENT_END != xml->getNodeType())  // If we're not ALREADY on the
     // ending element, then go there.
     {
-        const char* szFunc = "Contract::SkipAfterLoadingField";
-        // move to the next node which SHOULD be the expected element_end.
-        //
+
         while (xml->read()) {
             if (xml->getNodeType() == EXN_NONE) {
                 LogDetail(OT_METHOD)(__FUNCTION__)(": EXN_NONE  (Skipping).")
@@ -1651,12 +1675,14 @@ bool Contract::SkipAfterLoadingField(IrrXMLReader*& xml)
                 return false;
             }  // Failure / Error
             else if (xml->getNodeType() == EXN_TEXT) {
-                otErr << "*** " << szFunc << ": EXN_TEXT  (Unexpected!)\n";
+                LogOutput(OT_METHOD)(__FUNCTION__)(": EXN_TEXT (Unexpected)!")
+                    .Flush();
                 return false;
             }  // Failure / Error
             else {
-                otErr << "*** " << szFunc
-                      << ": SHOULD NEVER HAPPEN  (Unknown element type!)\n";
+                LogOutput(OT_METHOD)(__FUNCTION__)(
+                    ": SHOULD NEVER HAPPEN (Unknown element type)!")
+                    .Flush();
                 return false;
             }  // Failure / Error
         }
@@ -1804,13 +1830,16 @@ bool Contract::LoadEncodedTextFieldByName(
 
     if (EXN_ELEMENT != xml->getNodeType())  // SHOULD always be ELEMENT...
     {
-        otErr << __FUNCTION__ << ": Error: Expected " << szName
-              << " element with text field.\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Error: Expected ")(szName)(
+            " element with text field.")
+            .Flush();
         return false;  // error condition
     }
 
     if (strcmp(szName, xml->getNodeName()) != 0) {
-        otErr << __FUNCTION__ << ": Error: missing " << szName << " element.\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Error: missing ")(szName)(
+            " element.")
+            .Flush();
         return false;  // error condition
     }
 
@@ -1831,7 +1860,9 @@ bool Contract::LoadEncodedTextFieldByName(
     // values set on mapExtraVars (for caller.)
 
     if (false == Contract::LoadEncodedTextField(xml, ascOutput)) {
-        otErr << __FUNCTION__ << ": Error loading " << szName << " field.\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Error loading ")(szName)(
+            " field.")
+            .Flush();
         return false;
     }
 
@@ -1865,10 +1896,11 @@ bool Contract::CreateContract(const String& strContract, const Nym& theSigner)
     const std::uint32_t lLength = strContract.GetLength();
 
     if ((3 > lLength) || !strContract.At(lLength - 1, cNewline)) {
-        otErr << __FUNCTION__
-              << ": Invalid input: contract is less than 3 bytes "
-                 "std::int64_t, or unable to read a byte from the end where a "
-                 "newline is meant to be.\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Invalid input: Contract is less than 3 bytes "
+            "std::int64_t, or unable to read a byte from the end where a "
+            "newline is meant to be.")
+            .Flush();
         return false;
     }
 
@@ -1900,15 +1932,18 @@ bool Contract::CreateContract(const String& strContract, const Nym& theSigner)
                 (theSigner.HasCapability(NymCapability::SIGN_MESSAGE));
 
             if (!bHasCredentials) {
-                otErr << __FUNCTION__ << ": Signing nym has no credentials.\n";
+                LogOutput(OT_METHOD)(__FUNCTION__)(
+                    ": Signing nym has no credentials.")
+                    .Flush();
                 return false;
             } else  // theSigner has Credentials, so we'll add him to the
                     // contract.
             {
                 auto pNym = api_.Wallet().Nym(theSigner.ID());
                 if (nullptr == pNym) {
-                    otErr << __FUNCTION__ << ": failed to load signing nym."
-                          << std::endl;
+                    LogOutput(OT_METHOD)(__FUNCTION__)(
+                        ": Failed to load signing nym.")
+                        .Flush();
                     return false;
                 }
                 // Add pNym to the contract's internal list of nyms.
@@ -1927,7 +1962,8 @@ bool Contract::CreateContract(const String& strContract, const Nym& theSigner)
                                  "key to sign the contract...");
 
         if (!SignContract(theSigner, &thePWData)) {
-            otErr << __FUNCTION__ << ": SignContract failed.\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(": SignContract failed.")
+                .Flush();
             return false;
         }
 
@@ -1946,9 +1982,10 @@ bool Contract::CreateContract(const String& strContract, const Nym& theSigner)
             return true;
         }
     } else
-        otErr << __FUNCTION__
-              << ": LoadContractXML failed. strContract contents:\n\n"
-              << strContract << "\n\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": LoadContractXML failed. strContract contents: ")(strContract)(
+            ".")
+            .Flush();
 
     return false;
 }
@@ -2061,9 +2098,10 @@ std::int32_t Contract::ProcessXMLNode(IrrXMLReader*& xml)
         if (EXN_TEXT == xml->getNodeType()) {
             strConditionValue = String::Factory(xml->getNodeData());
         } else {
-            otErr << "Error in Contract::ProcessXMLNode: Condition without "
-                     "value: "
-                  << strConditionName << "\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Error in Contract::ProcessXMLNode: Condition without "
+                "value: ")(strConditionName)(".")
+                .Flush();
             return (-1);  // error condition
         }
 
@@ -2085,9 +2123,9 @@ std::int32_t Contract::ProcessXMLNode(IrrXMLReader*& xml)
             String::Factory(xml->getAttributeValue("nymID"));
 
         if (!strSignerNymID->Exists()) {
-            otErr << "Error in " << __FUNCTION__
-                  << ": "
-                     "Expected nymID attribute on signer element.\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Error: Expected nymID attribute on signer element.")
+                .Flush();
             return (-1);  // error condition
         }
 
@@ -2095,8 +2133,8 @@ std::int32_t Contract::ProcessXMLNode(IrrXMLReader*& xml)
         auto pNym = api_.Wallet().Nym(nymId);
 
         if (nullptr == pNym) {
-            otErr << __FUNCTION__ << ": Failure loading signing nym "
-                  << std::endl;
+            LogOutput(OT_METHOD)(__FUNCTION__)(": Failure loading signing nym.")
+                .Flush();
 
             return (-1);
         }

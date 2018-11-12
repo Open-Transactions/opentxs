@@ -235,20 +235,20 @@ bool OTTransactionType::VerifyAccount(const Nym& theNym)
     // Make sure that the supposed AcctID matches the one read from the file.
     //
     if (!VerifyContractID()) {
-        otErr << "Error verifying account ID in "
-                 "OTTransactionType::VerifyAccount\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Error verifying account ID.")
+            .Flush();
 
         return false;
     } else if (!VerifySignature(theNym)) {
-        otErr << "Error verifying signature in "
-                 "OTTransactionType::VerifyAccount.\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Error verifying signature.")
+            .Flush();
 
         return false;
     }
 
     LogTrace(OT_METHOD)(__FUNCTION__)(
-        ": We now know that...\n1) The expected Account ID matches the ID that "
-        "was found on the object.\n2) The SIGNATURE VERIFIED on the object.")
+        ": We now know that...1) The expected Account ID matches the ID that "
+        "was found on the object. 2) The SIGNATURE VERIFIED on the object.")
         .Flush();
 
     return true;

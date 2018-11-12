@@ -292,7 +292,8 @@ bool Armored::GetString(opentxs::String& strData, bool bLineBreaks) const
     std::string str_decoded = OT::App().Crypto().Encode().DataDecode(Get());
 
     if (str_decoded.empty()) {
-        otErr << __FUNCTION__ << "Base58CheckDecode failed." << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Base58CheckDecode failed.")
+            .Flush();
 
         return false;
     }
@@ -301,7 +302,7 @@ bool Armored::GetString(opentxs::String& strData, bool bLineBreaks) const
     try {
         str_uncompressed = decompress_string(str_decoded);
     } catch (const std::runtime_error&) {
-        otErr << __FUNCTION__ << ": decompress failed" << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": decompress failed.").Flush();
 
         return false;
     }
@@ -447,15 +448,17 @@ bool Armored::LoadFromString(
     theStr.reset();
 
     if (!bHaveEnteredContentMode) {
-        otErr << "Error in Armored::LoadFromString: EOF before "
-                 "ascii-armored "
-                 "content found, in:\n\n"
-              << theStr << "\n\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Error in Armored::LoadFromString: EOF before "
+            "ascii-armored "
+            "content found, in: ")(theStr)(".")
+            .Flush();
         return false;
     } else if (bContentMode) {
-        otErr << "Error in Armored::LoadFromString: EOF while still reading "
-                 "content, in:\n\n"
-              << theStr << "\n\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Error in Armored::LoadFromString: EOF while still reading "
+            "content, in: ")(theStr)(".")
+            .Flush();
         return false;
     } else
         return true;
@@ -471,7 +474,7 @@ bool Armored::SetData(const Data& theData, bool bLineBreaks)
     auto string = OT::App().Crypto().Encode().DataEncode(theData);
 
     if (string.empty()) {
-        otErr << __FUNCTION__ << "Base64Encode failed" << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Base64Encode failed.").Flush();
 
         return false;
     }
@@ -492,8 +495,9 @@ bool Armored::SaveTo_ofstream(std::ofstream& fout)
         fout << strOutput;
 
         if (fout.fail()) {
-            otErr << __FUNCTION__ << ": Failed saving to file.\n Contents:\n\n"
-                  << strOutput << "\n\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Failed saving to file. Contents: ")(strOutput)(".")
+                .Flush();
             return false;
         }
 
@@ -529,8 +533,7 @@ bool Armored::SetString(
 
     // "Success"
     if (str_compressed.size() == 0) {
-        otErr << "Armored::" << __FUNCTION__ << ": compression failed."
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": compression failed.").Flush();
 
         return false;
     }
@@ -538,8 +541,7 @@ bool Armored::SetString(
     auto pString = OT::App().Crypto().Encode().DataEncode(str_compressed);
 
     if (pString.empty()) {
-        otErr << "Armored::" << __FUNCTION__ << ": Base64Encode failed."
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Base64Encode failed.").Flush();
 
         return false;
     }

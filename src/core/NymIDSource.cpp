@@ -29,6 +29,8 @@
 #include <memory>
 #include <ostream>
 
+#define OT_METHOD "opentxs::NymIDSource::"
+
 namespace opentxs
 {
 
@@ -217,8 +219,9 @@ bool NymIDSource::Verify(
             signingKey = ExtractKey(*serializedMaster, proto::KEYROLE_SIGN);
 
             if (!signingKey) {
-                otErr << __FUNCTION__ << ": Failed to extract signing key"
-                      << std::endl;
+                LogOutput(OT_METHOD)(__FUNCTION__)(
+                    ": Failed to extract signing key.")
+                    .Flush();
 
                 return false;
             }
@@ -227,8 +230,9 @@ bool NymIDSource::Verify(
             sameSource = (sourceKey->key() == signingKey->key());
 
             if (!sameSource) {
-                otErr << __FUNCTION__ << ": Master credential was not"
-                      << " derived from this source." << std::endl;
+                LogOutput(OT_METHOD)(__FUNCTION__)(": Master credential was not"
+                                                   " derived from this source.")
+                    .Flush();
 
                 return false;
             }
@@ -237,8 +241,9 @@ bool NymIDSource::Verify(
 #if OT_CRYPTO_SUPPORTED_SOURCE_BIP47
         case proto::SOURCETYPE_BIP47:
             if (!payment_code_->Verify(master, sourceSignature)) {
-                otErr << __FUNCTION__ << ": Invalid source signature."
-                      << std::endl;
+                LogOutput(OT_METHOD)(__FUNCTION__)(
+                    ": Invalid source signature.")
+                    .Flush();
 
                 return false;
             }

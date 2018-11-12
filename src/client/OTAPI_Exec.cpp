@@ -152,8 +152,9 @@ bool OTAPI_Exec::CheckSetConfigSection(
         b_isNewSection);
     if (bSuccess && b_isNewSection) {
         if (!api_.Config().Save()) {
-            otErr << __FUNCTION__
-                  << ": Error: Unable to save updated config file.\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Error: Unable to save updated config file.")
+                .Flush();
             OT_FAIL;
         }
     }
@@ -175,8 +176,9 @@ bool OTAPI_Exec::SetConfig_str(
 
     if (bSuccess && b_isNew) {
         if (!api_.Config().Save()) {
-            otErr << __FUNCTION__
-                  << ": Error: Unable to save updated config file.\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Error: Unable to save updated config file.")
+                .Flush();
             OT_FAIL;
         }
     }
@@ -198,8 +200,9 @@ bool OTAPI_Exec::SetConfig_long(
 
     if (bSuccess && b_isNew) {
         if (!api_.Config().Save()) {
-            otErr << __FUNCTION__
-                  << ": Error: Unable to save updated config file.\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Error: Unable to save updated config file.")
+                .Flush();
             OT_FAIL;
         }
     }
@@ -221,8 +224,9 @@ bool OTAPI_Exec::SetConfig_bool(
 
     if (bSuccess && b_isNew) {
         if (!api_.Config().Save()) {
-            otErr << __FUNCTION__
-                  << ": Error: Unable to save updated config file.\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Error: Unable to save updated config file.")
+                .Flush();
             OT_FAIL;
         }
     }
@@ -291,8 +295,8 @@ bool OTAPI_Exec::SetWallet(const std::string& strWalletFilename) const
         return ot_api_.SetWalletFilename(sWalletFilename);
     }
 
-    otErr << OT_METHOD << __FUNCTION__
-          << ": Error:: Wallet Filename is Null!\n";
+    LogOutput(OT_METHOD)(__FUNCTION__)(": Error: Wallet Filename is Null!")
+        .Flush();
 
     return false;
 }
@@ -319,7 +323,8 @@ std::string OTAPI_Exec::NumList_Add(
     const std::string& strNumbers) const
 {
     if (strNumbers.empty()) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Null: strNumbers passed in!\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Null: strNumbers passed in!")
+            .Flush();
         return {};
     }
 
@@ -347,11 +352,13 @@ std::string OTAPI_Exec::NumList_Remove(
     const std::string& strNumbers) const
 {
     if (strNumList.empty()) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Null: strNumList passed in!\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Null: strNumList passed in!")
+            .Flush();
         return {};
     }
     if (strNumbers.empty()) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Null: strNumbers passed in!\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Null: strNumbers passed in!")
+            .Flush();
         return {};
     }
 
@@ -373,11 +380,13 @@ bool OTAPI_Exec::NumList_VerifyQuery(
     const std::string& strNumbers) const
 {
     if (strNumList.empty()) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Null: strNumList passed in!\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Null: strNumList passed in!")
+            .Flush();
         return false;
     }
     if (strNumbers.empty()) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Null: strNumbers passed in!\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Null: strNumbers passed in!")
+            .Flush();
         return false;
     }
 
@@ -393,11 +402,13 @@ bool OTAPI_Exec::NumList_VerifyAll(
     const std::string& strNumbers) const
 {
     if (strNumList.empty()) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Null: strNumList passed in!\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Null: strNumList passed in!")
+            .Flush();
         return false;
     }
     if (strNumbers.empty()) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Null: strNumbers passed in!\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Null: strNumbers passed in!")
+            .Flush();
         return false;
     }
     NumList theList(strNumList), theNewNumbers(strNumbers);
@@ -408,7 +419,8 @@ bool OTAPI_Exec::NumList_VerifyAll(
 std::int32_t OTAPI_Exec::NumList_Count(const std::string& strNumList) const
 {
     if (strNumList.empty()) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Null: strNumList passed in!\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Null: strNumList passed in!")
+            .Flush();
         return OT_ERROR;
     }
 
@@ -446,8 +458,9 @@ std::string OTAPI_Exec::CreateNymLegacy(
     const std::string& NYM_ID_SOURCE) const  // Can be empty.
 {
     if (0 >= nKeySize) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Keysize is 0 or less, will fail! Try 1024.\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Keysize is 0 or less, will fail! Try 1024.")
+            .Flush();
         return {};
     }
     // ---------------------------------------
@@ -458,10 +471,10 @@ std::string OTAPI_Exec::CreateNymLegacy(
         case 8192:
             break;
         default:
-            otErr << OT_METHOD << __FUNCTION__
-                  << ": Failure: nKeySize must be one of: "
-                     "1024, 2048, 4096, 8192. ("
-                  << nKeySize << " was passed...)\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Failure: nKeySize must be one of: "
+                "1024, 2048, 4096, 8192. (")(nKeySize)(" was passed...).")
+                .Flush();
             return {};
     }
 
@@ -558,12 +571,13 @@ std::string OTAPI_Exec::GetNym_ActiveCronItemIDs(
     rLock lock(lock_callback_({NYM_ID, NOTARY_ID}));
 
     if (NYM_ID.empty()) {
-        otErr << OT_METHOD << __FUNCTION__ << ": nullptr NYM_ID passed in!\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": nullptr NYM_ID passed in!")
+            .Flush();
         return {};
     }
     if (NOTARY_ID.empty()) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": nullptr NOTARY_ID passed in!\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": nullptr NOTARY_ID passed in!")
+            .Flush();
         return {};
     }
     const auto nymId = Identifier::Factory(NYM_ID),
@@ -588,13 +602,13 @@ std::string OTAPI_Exec::GetActiveCronItem(
     Lock lock(lock_);
 
     if (NOTARY_ID.empty()) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": nullptr NOTARY_ID passed in!\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": nullptr NOTARY_ID passed in!")
+            .Flush();
         return {};
     }
     if (0 > lTransNum) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Negative: lTransNum passed in!\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Negative: lTransNum passed in!")
+            .Flush();
         return {};
     }
     const auto notaryID = Identifier::Factory(NOTARY_ID);
@@ -614,7 +628,8 @@ std::string OTAPI_Exec::GetActiveCronItem(
 std::string OTAPI_Exec::GetNym_SourceForID(const std::string& NYM_ID) const
 {
     if (NYM_ID.empty()) {
-        otErr << OT_METHOD << __FUNCTION__ << ": nullptr NYM_ID passed in!\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": nullptr NYM_ID passed in!")
+            .Flush();
         return {};
     }
     OTPasswordData thePWData(OT_PW_DISPLAY);
@@ -628,7 +643,8 @@ std::string OTAPI_Exec::GetNym_SourceForID(const std::string& NYM_ID) const
 std::string OTAPI_Exec::GetNym_Description(const std::string& NYM_ID) const
 {
     if (NYM_ID.empty()) {
-        otErr << OT_METHOD << __FUNCTION__ << ": nullptr NYM_ID passed in!\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": nullptr NYM_ID passed in!")
+            .Flush();
         return {};
     }
     OTPasswordData thePWData(OT_PW_DISPLAY);
@@ -644,7 +660,8 @@ std::string OTAPI_Exec::GetNym_MasterCredentialContents(
     const std::string& CREDENTIAL_ID) const
 {
     if (NYM_ID.empty()) {
-        otErr << OT_METHOD << __FUNCTION__ << ": nullptr NYM_ID passed in!\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": nullptr NYM_ID passed in!")
+            .Flush();
         return {};
     }
     OTPasswordData thePWData(OT_PW_DISPLAY);
@@ -664,7 +681,8 @@ std::string OTAPI_Exec::GetNym_RevokedCredContents(
     const std::string& CREDENTIAL_ID) const
 {
     if (NYM_ID.empty()) {
-        otErr << OT_METHOD << __FUNCTION__ << ": nullptr NYM_ID passed in!\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": nullptr NYM_ID passed in!")
+            .Flush();
         return {};
     }
     OTPasswordData thePWData(OT_PW_DISPLAY);
@@ -685,17 +703,19 @@ std::string OTAPI_Exec::GetNym_ChildCredentialContents(
     const std::string& SUB_CRED_ID) const
 {
     if (NYM_ID.empty()) {
-        otErr << OT_METHOD << __FUNCTION__ << ": nullptr NYM_ID passed in!\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": nullptr NYM_ID passed in!")
+            .Flush();
         return {};
     }
     if (MASTER_CRED_ID.empty()) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": nullptr MASTER_CRED_ID passed in!\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": nullptr MASTER_CRED_ID passed in!")
+            .Flush();
         return {};
     }
     if (SUB_CRED_ID.empty()) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": nullptr SUB_CRED_ID passed in!\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": nullptr SUB_CRED_ID passed in!")
+            .Flush();
         return {};
     }
     OTPasswordData thePWData(OT_PW_DISPLAY);
@@ -717,17 +737,19 @@ bool OTAPI_Exec::RevokeChildCredential(
     const std::string& SUB_CRED_ID) const
 {
     if (NYM_ID.empty()) {
-        otErr << OT_METHOD << __FUNCTION__ << ": nullptr NYM_ID passed in!\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": nullptr NYM_ID passed in!")
+            .Flush();
         return false;
     }
     if (MASTER_CRED_ID.empty()) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": nullptr MASTER_CRED_ID passed in!\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": nullptr MASTER_CRED_ID passed in!")
+            .Flush();
         return false;
     }
     if (SUB_CRED_ID.empty()) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": nullptr SUB_CRED_ID passed in!\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": nullptr SUB_CRED_ID passed in!")
+            .Flush();
         return false;
     }
     OTPasswordData thePWData(OT_PW_DISPLAY);
@@ -738,9 +760,10 @@ bool OTAPI_Exec::RevokeChildCredential(
 
     const auto strCredID = String::Factory(MASTER_CRED_ID);
 
-    otErr << "\n\n\nSwigWrap::" << __FUNCTION__
-          << ": TODO: REVOKING IS NOT YET CODED. ADD FUNCTION CALL "
-          << "HERE TO REVOKE SUB-CREDENTIAL!\n\n\n";
+    LogOutput(OT_METHOD)(__FUNCTION__)(
+        ": TODO: REVOKING IS NOT YET CODED. ADD FUNCTION CALL "
+        "HERE TO REVOKE SUB-CREDENTIAL!")
+        .Flush();
 
     /* Revokation is not implemented yet
     CredentialSet* pCredential = pNym->GetMasterCredential(strCredID);
@@ -812,11 +835,12 @@ bool OTAPI_Exec::SetContactData_Base64(
     const std::string& THE_DATA) const
 {
     if (THE_DATA.empty()) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Unexpectedly got a blank data parameter. "
-                 "Should assert here. (The UI developer has a "
-                 "bug in his UI code, if you are seeing this "
-                 "log.)";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Unexpectedly got a blank data parameter. "
+            "Should assert here. (The UI developer has a "
+            "bug in his UI code, if you are seeing this "
+            "log).")
+            .Flush();
         return false;
     }
 
@@ -832,11 +856,13 @@ bool OTAPI_Exec::SetContactData(
     const std::string& THE_DATA) const
 {
     if (NYM_ID.empty()) {
-        otErr << OT_METHOD << __FUNCTION__ << ": nullptr NYM_ID passed in!\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": nullptr NYM_ID passed in!")
+            .Flush();
         return false;
     }
     if (THE_DATA.empty()) {
-        otErr << OT_METHOD << __FUNCTION__ << ": nullptr THE_DATA passed in!\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": nullptr THE_DATA passed in!")
+            .Flush();
         return false;
     }
     opentxs::OTIdentifier nymID = Identifier::Factory(NYM_ID);
@@ -861,11 +887,12 @@ bool OTAPI_Exec::SetClaim_Base64(
     const std::string& claim) const
 {
     if (claim.empty()) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Unexpectedly got a blank claim parameter. "
-                 "Should assert here. (The UI developer has a "
-                 "bug in his UI code, if you are seeing this "
-                 "log.)";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Unexpectedly got a blank claim parameter. "
+            "Should assert here. (The UI developer has a "
+            "bug in his UI code, if you are seeing this "
+            "log).")
+            .Flush();
         return false;
     }
 
@@ -880,7 +907,8 @@ bool OTAPI_Exec::SetClaim(
     const std::string& claim) const
 {
     if (nymID.empty()) {
-        otErr << OT_METHOD << __FUNCTION__ << ": nullptr nymID passed in!\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": nullptr nymID passed in!")
+            .Flush();
         return false;
     }
     NymData pNym = api_.Wallet().mutable_Nym(Identifier::Factory(nymID));
@@ -909,7 +937,8 @@ bool OTAPI_Exec::DeleteClaim(
     const std::string& claimID) const
 {
     if (nymID.empty()) {
-        otErr << OT_METHOD << __FUNCTION__ << ": nullptr nymID passed in!\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": nullptr nymID passed in!")
+            .Flush();
         return false;
     }
     NymData pNym = api_.Wallet().mutable_Nym(Identifier::Factory(nymID));
@@ -970,7 +999,7 @@ std::string OTAPI_Exec::SetVerification(
     const std::int64_t end) const
 {
     if (onNym.empty()) {
-        otErr << OT_METHOD << __FUNCTION__ << ": empty onNym passed in!\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Empty onNym passed in!").Flush();
         return {};
     }
     NymData pNym = api_.Wallet().mutable_Nym(Identifier::Factory(onNym));
@@ -987,8 +1016,8 @@ std::string OTAPI_Exec::SetVerification(
 std::string OTAPI_Exec::GetSignerNymID(const std::string& str_Contract) const
 {
     if (str_Contract.empty()) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Null: str_Contract passed in!\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Null: str_Contract passed in!")
+            .Flush();
         return {};
     }
     std::string str_Trim(str_Contract);
@@ -1004,8 +1033,9 @@ std::string OTAPI_Exec::GetSignerNymID(const std::string& str_Contract) const
     auto pContract{api_.Factory().Contract(strContract)};
 
     if (false != bool(pContract)) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Failed trying to instantiate contract.\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Failed trying to instantiate contract.")
+            .Flush();
 
         return {};
     }
@@ -1013,8 +1043,9 @@ std::string OTAPI_Exec::GetSignerNymID(const std::string& str_Contract) const
     ConstNym pNym = pContract->GetContractPublicNym();
 
     if (false == bool(pNym)) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Failed trying to retrieve signer nym from contract.\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Failed trying to retrieve signer nym from contract.")
+            .Flush();
 
         return {};
     }
@@ -1026,8 +1057,8 @@ std::string OTAPI_Exec::CalculateContractID(
     const std::string& str_Contract) const
 {
     if (str_Contract.empty()) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Null: str_Contract passed in!\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Null: str_Contract passed in!")
+            .Flush();
         return {};
     }
     std::string str_Trim(str_Contract);
@@ -1085,19 +1116,19 @@ std::string OTAPI_Exec::CreateCurrencyContract(
     std::string output = "";
 
     if (NYM_ID.empty()) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Null: NYM_ID passed in!\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Null: NYM_ID passed in!").Flush();
         return output;
     }
     if (terms.empty()) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Null: terms passed in!\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Null: terms passed in!").Flush();
         return output;
     }
     if (name.empty()) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Null: name passed in!\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Null: name passed in!").Flush();
         return output;
     }
     if (symbol.empty()) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Null: symbol passed in!\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Null: symbol passed in!").Flush();
         return output;
     }
 
@@ -1107,8 +1138,9 @@ std::string OTAPI_Exec::CreateCurrencyContract(
     if (pContract) {
         output = pContract->ID()->str();
     } else {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Failed to create currency contract." << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Failed to create currency contract.")
+            .Flush();
     }
 
     return output;
@@ -1124,19 +1156,19 @@ std::string OTAPI_Exec::CreateSecurityContract(
     std::string output = "";
 
     if (NYM_ID.empty()) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Null: NYM_ID passed in!\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Null: NYM_ID passed in!").Flush();
         return output;
     }
     if (terms.empty()) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Null: terms passed in!\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Null: terms passed in!").Flush();
         return output;
     }
     if (name.empty()) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Null: name passed in!\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Null: name passed in!").Flush();
         return output;
     }
     if (symbol.empty()) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Null: symbol passed in!\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Null: symbol passed in!").Flush();
         return output;
     }
 
@@ -1146,8 +1178,9 @@ std::string OTAPI_Exec::CreateSecurityContract(
     if (pContract) {
         output = pContract->ID()->str();
     } else {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Failed to create currency contract." << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Failed to create currency contract.")
+            .Flush();
     }
 
     return output;
@@ -1334,8 +1367,8 @@ std::string OTAPI_Exec::GetAssetType_Contract(
 std::string OTAPI_Exec::AddServerContract(const std::string& strContract) const
 {
     if (strContract.empty()) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Null: strContract passed in!\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Null: strContract passed in!")
+            .Flush();
     } else {
         auto serialized = proto::StringToProto<proto::ServerContract>(
             String::Factory(strContract));
@@ -1353,8 +1386,8 @@ std::string OTAPI_Exec::AddServerContract(const std::string& strContract) const
 std::string OTAPI_Exec::AddUnitDefinition(const std::string& strContract) const
 {
     if (strContract.empty()) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Null: strContract passed in!\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Null: strContract passed in!")
+            .Flush();
     } else {
         auto serialized = proto::StringToProto<proto::UnitDefinition>(
             String::Factory(strContract));
@@ -1528,7 +1561,7 @@ bool OTAPI_Exec::Wallet_RemoveNym(const std::string& NYM_ID) const
     OTWallet* pWallet = ot_api_.GetWallet(__FUNCTION__);
 
     if (nullptr == pWallet) {
-        otErr << OT_METHOD << __FUNCTION__ << ": No wallet found...!\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": No wallet found...!").Flush();
         return false;
     }
 
@@ -1633,13 +1666,15 @@ bool OTAPI_Exec::DoesBoxReceiptExist(
     OT_VERIFY_ID_STR(ACCOUNT_ID);
 
     if (!((0 == nBoxType) || (1 == nBoxType) || (2 == nBoxType))) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": nBoxType is of wrong type: value: " << nBoxType << "\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": nBoxType is of wrong type: value: ")(nBoxType)(".")
+            .Flush();
         return false;
     }
     if (0 > TRANSACTION_NUMBER) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Negative: TRANSACTION_NUMBER passed in!\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Negative: TRANSACTION_NUMBER passed in!")
+            .Flush();
         return false;
     }
     const auto theNotaryID = Identifier::Factory(NOTARY_ID),
@@ -1652,10 +1687,10 @@ bool OTAPI_Exec::DoesBoxReceiptExist(
         case 2:  // outbox
             break;
         default:
-            otErr << OT_METHOD << __FUNCTION__
-                  << ": Error: bad nBoxType: " << nBoxType
-                  << " for NymID: " << NYM_ID << " AcctID: " << ACCOUNT_ID
-                  << " (expected one of: 0/nymbox, 1/inbox, 2/outbox)\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(": Error: bad nBoxType: ")(
+                nBoxType)(" for NymID: ")(NYM_ID)(" AcctID: ")(ACCOUNT_ID)(
+                " (expected one of: 0/nymbox, 1/inbox, 2/outbox).")
+                .Flush();
             return false;
     }
     return ot_api_.DoesBoxReceiptExist(
@@ -1713,8 +1748,8 @@ std::string OTAPI_Exec::Wallet_ExportNym(const std::string& NYM_ID) const
 std::string OTAPI_Exec::Wallet_ImportNym(const std::string& FILE_CONTENTS) const
 {
     if (FILE_CONTENTS.empty()) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Null: FILE_CONTENTS passed in!\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Null: FILE_CONTENTS passed in!")
+            .Flush();
         return {};
     }
 
@@ -1774,7 +1809,8 @@ std::string OTAPI_Exec::Wallet_GetNymIDFromPartial(
     const std::string& PARTIAL_ID) const
 {
     if (PARTIAL_ID.empty()) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Empty PARTIAL_ID passed in!\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Empty PARTIAL_ID passed in!")
+            .Flush();
         return {};
     }
 
@@ -1816,7 +1852,8 @@ std::string OTAPI_Exec::Wallet_GetNotaryIDFromPartial(
     const std::string& PARTIAL_ID) const
 {
     if (PARTIAL_ID.empty()) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Null: PARTIAL_ID passed in!\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Null: PARTIAL_ID passed in!")
+            .Flush();
         return {};
     }
 
@@ -1851,7 +1888,8 @@ std::string OTAPI_Exec::Wallet_GetInstrumentDefinitionIDFromPartial(
     const std::string& PARTIAL_ID) const
 {
     if (PARTIAL_ID.empty()) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Null: PARTIAL_ID passed in!\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Null: PARTIAL_ID passed in!")
+            .Flush();
         return {};
     }
 
@@ -1916,8 +1954,9 @@ std::string OTAPI_Exec::Wallet_GetAccountIDFromPartial(
 std::string OTAPI_Exec::GetNym_ID(const std::int32_t& nIndex) const
 {
     if (0 > nIndex) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": nIndex is out of bounds (it's in the negative!)\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": nIndex is out of bounds (it's in the negative!).")
+            .Flush();
         return {};
     }
 
@@ -2315,8 +2354,9 @@ std::string OTAPI_Exec::GetNym_OutpaymentsContentsByIndex(
         "passed in.");
 
     if (0 > nIndex) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": nIndex is out of bounds (it's in the negative!)\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": nIndex is out of bounds (it's in the negative)!")
+            .Flush();
         return {};
     }
     auto theNymID = Identifier::Factory(NYM_ID);
@@ -2361,8 +2401,9 @@ std::string OTAPI_Exec::GetNym_OutpaymentsRecipientIDByIndex(
         "passed in.");
 
     if (0 > nIndex) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": nIndex is out of bounds (it's in the negative!)\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": nIndex is out of bounds (it's in the negative)!")
+            .Flush();
         return {};
     }
     auto theNymID = Identifier::Factory(NYM_ID);
@@ -2395,8 +2436,9 @@ std::string OTAPI_Exec::GetNym_OutpaymentsNotaryIDByIndex(
         "passed in.");
 
     if (0 > nIndex) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": nIndex is out of bounds (it's in the negative!)\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": nIndex is out of bounds (it's in the negative)!")
+            .Flush();
         return {};
     }
     auto theNymID = Identifier::Factory(NYM_ID);
@@ -2413,8 +2455,9 @@ std::string OTAPI_Exec::GetNym_OutpaymentsNotaryIDByIndex(
 
         std::int32_t bNotaryIDLength = pMessage->m_strNotaryID->GetLength();
         if (1 >= bNotaryIDLength) {
-            otErr << OT_METHOD << __FUNCTION__
-                  << ": m_strNotaryID Length is 1 or less!\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": m_strNotaryID Length is 1 or less!")
+                .Flush();
             return {};
         }
 
@@ -2433,8 +2476,9 @@ bool OTAPI_Exec::Nym_RemoveOutpaymentsByIndex(
         "OTAPI_Exec::Nym_RemoveOutpaymentsByIndex: Null NYM_ID passed in.");
 
     if (0 > nIndex) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": nIndex is out of bounds (it's in the negative!)\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": nIndex is out of bounds (it's in the negative)!")
+            .Flush();
         return false;
     }
 
@@ -2477,8 +2521,9 @@ bool OTAPI_Exec::Nym_VerifyOutpaymentsByIndex(
         "OTAPI_Exec::Nym_VerifyOutpaymentsByIndex: Null NYM_ID passed in.");
 
     if (0 > nIndex) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": nIndex is out of bounds (it's in the negative!)\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": nIndex is out of bounds (it's in the negative)!")
+            .Flush();
         return false;
     }
     auto theNymID = Identifier::Factory(NYM_ID);
@@ -2521,8 +2566,8 @@ std::int64_t OTAPI_Exec::Instrmnt_GetAmount(
     const std::string& THE_INSTRUMENT) const
 {
     if (THE_INSTRUMENT.empty()) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Null: THE_INSTRUMENT passed in!\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Null: THE_INSTRUMENT passed in!")
+            .Flush();
         return -1;
     }
     const auto strInstrument = String::Factory(THE_INSTRUMENT);
@@ -2554,8 +2599,8 @@ std::int64_t OTAPI_Exec::Instrmnt_GetTransNum(
     const std::string& THE_INSTRUMENT) const
 {
     if (THE_INSTRUMENT.empty()) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Null: THE_INSTRUMENT passed in!\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Null: THE_INSTRUMENT passed in!")
+            .Flush();
         return -1;
     }
     const auto strInstrument = String::Factory(THE_INSTRUMENT);
@@ -2589,8 +2634,8 @@ time64_t OTAPI_Exec::Instrmnt_GetValidFrom(
     const std::string& THE_INSTRUMENT) const
 {
     if (THE_INSTRUMENT.empty()) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Null: THE_INSTRUMENT passed in!\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Null: THE_INSTRUMENT passed in!")
+            .Flush();
         return OTTimeGetTimeFromSeconds(-1);
     }
     const auto strInstrument = String::Factory(THE_INSTRUMENT);
@@ -2626,8 +2671,8 @@ time64_t OTAPI_Exec::Instrmnt_GetValidTo(
     const std::string& THE_INSTRUMENT) const
 {
     if (THE_INSTRUMENT.empty()) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Null: THE_INSTRUMENT passed in!\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Null: THE_INSTRUMENT passed in!")
+            .Flush();
         return OTTimeGetTimeFromSeconds(-1);
     }
     const auto strInstrument = String::Factory(THE_INSTRUMENT);
@@ -2663,8 +2708,8 @@ std::string OTAPI_Exec::Instrmnt_GetType(
     const std::string& THE_INSTRUMENT) const
 {
     if (THE_INSTRUMENT.empty()) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Null: THE_INSTRUMENT passed in!\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Null: THE_INSTRUMENT passed in!")
+            .Flush();
         return {};
     }
     const auto strInstrument = String::Factory(THE_INSTRUMENT);
@@ -2703,8 +2748,8 @@ std::string OTAPI_Exec::Instrmnt_GetMemo(
     const std::string& THE_INSTRUMENT) const
 {
     if (THE_INSTRUMENT.empty()) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Null: THE_INSTRUMENT passed in!\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Null: THE_INSTRUMENT passed in!")
+            .Flush();
         return {};
     }
     const auto strInstrument = String::Factory(THE_INSTRUMENT);
@@ -2744,8 +2789,8 @@ std::string OTAPI_Exec::Instrmnt_GetNotaryID(
     const std::string& THE_INSTRUMENT) const
 {
     if (THE_INSTRUMENT.empty()) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Null: THE_INSTRUMENT passed in!\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Null: THE_INSTRUMENT passed in!")
+            .Flush();
         return {};
     }
     const auto strInstrument = String::Factory(THE_INSTRUMENT);
@@ -2786,8 +2831,8 @@ std::string OTAPI_Exec::Instrmnt_GetInstrumentDefinitionID(
     const std::string& THE_INSTRUMENT) const
 {
     if (THE_INSTRUMENT.empty()) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Null: THE_INSTRUMENT passed in!\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Null: THE_INSTRUMENT passed in!")
+            .Flush();
         return {};
     }
     const auto strInstrument = String::Factory(THE_INSTRUMENT);
@@ -2829,8 +2874,8 @@ std::string OTAPI_Exec::Instrmnt_GetRemitterNymID(
     const std::string& THE_INSTRUMENT) const
 {
     if (THE_INSTRUMENT.empty()) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Null: THE_INSTRUMENT passed in!\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Null: THE_INSTRUMENT passed in!")
+            .Flush();
         return {};
     }
     const auto strInstrument = String::Factory(THE_INSTRUMENT);
@@ -2871,8 +2916,8 @@ std::string OTAPI_Exec::Instrmnt_GetRemitterAcctID(
     const std::string& THE_INSTRUMENT) const
 {
     if (THE_INSTRUMENT.empty()) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Null: THE_INSTRUMENT passed in!\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Null: THE_INSTRUMENT passed in!")
+            .Flush();
         return {};
     }
     const auto strInstrument = String::Factory(THE_INSTRUMENT);
@@ -2914,8 +2959,8 @@ std::string OTAPI_Exec::Instrmnt_GetSenderNymID(
     const std::string& THE_INSTRUMENT) const
 {
     if (THE_INSTRUMENT.empty()) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Null: THE_INSTRUMENT passed in!\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Null: THE_INSTRUMENT passed in!")
+            .Flush();
         return {};
     }
     const auto strInstrument = String::Factory(THE_INSTRUMENT);
@@ -2956,8 +3001,8 @@ std::string OTAPI_Exec::Instrmnt_GetSenderAcctID(
     const std::string& THE_INSTRUMENT) const
 {
     if (THE_INSTRUMENT.empty()) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Null: THE_INSTRUMENT passed in!\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Null: THE_INSTRUMENT passed in!")
+            .Flush();
         return {};
     }
     const auto strInstrument = String::Factory(THE_INSTRUMENT);
@@ -2998,8 +3043,8 @@ std::string OTAPI_Exec::Instrmnt_GetRecipientNymID(
     const std::string& THE_INSTRUMENT) const
 {
     if (THE_INSTRUMENT.empty()) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Null: THE_INSTRUMENT passed in!\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Null: THE_INSTRUMENT passed in!")
+            .Flush();
         return {};
     }
     const auto strInstrument = String::Factory(THE_INSTRUMENT);
@@ -3041,8 +3086,8 @@ std::string OTAPI_Exec::Instrmnt_GetRecipientAcctID(
     const std::string& THE_INSTRUMENT) const
 {
     if (THE_INSTRUMENT.empty()) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Null: THE_INSTRUMENT passed in!\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Null: THE_INSTRUMENT passed in!")
+            .Flush();
         return {};
     }
     const auto strInstrument = String::Factory(THE_INSTRUMENT);
@@ -3103,17 +3148,17 @@ bool OTAPI_Exec::SetNym_Alias(
     const std::string& name) const
 {
     if (targetNymID.empty()) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Null: targetNymID passed in!\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Null: targetNymID passed in!")
+            .Flush();
         return false;
     }
     if (walletNymID.empty()) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Null: walletNymID passed in!\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Null: walletNymID passed in!")
+            .Flush();
         return false;
     }
     if (name.empty()) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Null: name passed in!\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Null: name passed in!").Flush();
         return false;
     }
 
@@ -3132,14 +3177,14 @@ bool OTAPI_Exec::Rename_Nym(
     const bool primary) const
 {
     if (nymID.empty()) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Null: targetNymID passed in!\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Null: targetNymID passed in!")
+            .Flush();
         return false;
     }
 
     if (name.empty()) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Null: walletNymID passed in!\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Null: walletNymID passed in!")
+            .Flush();
         return false;
     }
 
@@ -3155,8 +3200,8 @@ bool OTAPI_Exec::SetServer_Name(
         !NOTARY_ID.empty(),
         "OTAPI_Exec::SetServer_Name: Null NOTARY_ID passed in.");
     if (STR_NEW_NAME.empty()) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Null STR_NEW_NAME passed in!\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Null STR_NEW_NAME passed in!")
+            .Flush();
         return false;
     }
 
@@ -3178,8 +3223,8 @@ bool OTAPI_Exec::SetAssetType_Name(
         "INSTRUMENT_DEFINITION_ID "
         "passed in.");
     if (STR_NEW_NAME.empty()) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Null: STR_NEW_NAME passed in!\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Null: STR_NEW_NAME passed in!")
+            .Flush();
         return false;
     }
 
@@ -3224,8 +3269,9 @@ std::int32_t OTAPI_Exec::GetNym_TransactionNumCount(
 std::string OTAPI_Exec::GetServer_ID(const std::int32_t& nIndex) const
 {
     if (0 > nIndex) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": nIndex is out of bounds (it's in the negative!)\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": nIndex is out of bounds (it's in the negative)!")
+            .Flush();
         return {};
     }
 
@@ -3255,8 +3301,9 @@ std::string OTAPI_Exec::GetServer_Name(const std::string& THE_ID) const
 std::string OTAPI_Exec::GetAssetType_ID(const std::int32_t& nIndex) const
 {
     if (0 > nIndex) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": nIndex is out of bounds (it's in the negative!)\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": nIndex is out of bounds (it's in the negative)!")
+            .Flush();
         return {};
     }
 
@@ -3340,8 +3387,8 @@ std::string OTAPI_Exec::Encode(
                                     // usually be set to true.
 {
     if (strPlaintext.empty()) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Null: strPlaintext passed in!\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Null: strPlaintext passed in!")
+            .Flush();
         return {};
     }
 
@@ -3940,8 +3987,8 @@ std::string OTAPI_Exec::WriteCheque(
     // (Why would you pay zero other than to spam somebody?)
     //
     if (0 == CHEQUE_AMOUNT) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Null: CHEQUE_AMOUNT passed in!\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Null: CHEQUE_AMOUNT passed in!")
+            .Flush();
         return {};
     }
     OT_VERIFY_MIN_BOUND(VALID_FROM, OT_TIME_ZERO);
@@ -3981,7 +4028,8 @@ std::string OTAPI_Exec::WriteCheque(
         idForRecipient));
 
     if (!pCheque) {
-        otErr << OT_METHOD << __FUNCTION__ << ": OT_API::WriteCheque failed.\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": OT_API::WriteCheque failed.")
+            .Flush();
         return {};
     }
     // At this point, I know pCheque is good (and will be cleaned up
@@ -4117,8 +4165,9 @@ std::string OTAPI_Exec::ProposePaymentPlan(
         static_cast<std::int32_t>(PAYMENT_PLAN_MAX_PAYMENTS)));
 
     if (!pPlan) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": failed in OTAPI_Exec::ProposePaymentPlan.\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Failed in OTAPI_Exec::ProposePaymentPlan.")
+            .Flush();
         return {};
     }
 
@@ -4346,13 +4395,13 @@ std::string OTAPI_Exec::Create_SmartContract(
     OT_VERIFY_ID_STR(SIGNER_NYM_ID);
 
     if (OT_TIME_ZERO > VALID_FROM) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Negative: VALID_FROM passed in!\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Negative: VALID_FROM passed in!")
+            .Flush();
         return {};
     }
     if (OT_TIME_ZERO > VALID_TO) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Negative: VALID_TO passed in!\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Negative: VALID_TO passed in!")
+            .Flush();
         return {};
     }
     const auto theSignerNymID = Identifier::Factory(SIGNER_NYM_ID);
@@ -4412,13 +4461,13 @@ std::string OTAPI_Exec::SmartContract_SetDates(
     OT_VERIFY_ID_STR(SIGNER_NYM_ID);
 
     if (OT_TIME_ZERO > VALID_FROM) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Negative: VALID_FROM passed in!\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Negative: VALID_FROM passed in!")
+            .Flush();
         return {};
     }
     if (OT_TIME_ZERO > VALID_TO) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Negative: VALID_TO passed in!\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Negative: VALID_TO passed in!")
+            .Flush();
         return {};
     }
     const auto strContract = String::Factory(THE_CONTRACT);
@@ -5315,19 +5364,19 @@ bool OTAPI_Exec::Smart_IsPartyConfirmed(
 
     if (nullptr == pPartySignedCopy) {
         const std::string current_party_name(pParty->GetPartyName());
-        otErr << OT_METHOD << __FUNCTION__ << ": Error loading party's ("
-              << current_party_name
-              << ") signed copy of agreement. Has it been "
-                 "executed?\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Error loading party's (")(
+            current_party_name)(") signed copy of agreement. Has it been "
+                                "executed?")
+            .Flush();
         return false;
     }
 
     if (!pScriptable->Compare(*pPartySignedCopy)) {
         const std::string current_party_name(pParty->GetPartyName());
-        otErr << OT_METHOD << __FUNCTION__ << ": Suspicious: Party's ("
-              << current_party_name
-              << ") signed copy of agreement doesn't match the "
-                 "contract.\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Suspicious: Party's (")(
+            current_party_name)(") signed copy of agreement doesn't match the "
+                                "contract.")
+            .Flush();
         return false;
     }
 
@@ -5855,8 +5904,9 @@ std::string OTAPI_Exec::Variable_GetContents(
         case OTVariable::Var_Bool:
             return pVar->GetValueBool() ? "true" : "false";
         default:
-            otErr << OT_METHOD << __FUNCTION__
-                  << ": Error: Unknown variable type.\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Error: Unknown variable type.")
+                .Flush();
             return {};
     }
 }
@@ -7011,12 +7061,13 @@ std::string OTAPI_Exec::Nymbox_GetReplyNotice(
                                                       // lets use
                                                       // that one.
         } else {  // nullptr == pFullTransaction
-            otErr << OT_METHOD << __FUNCTION__
-                  << ": good index but uncovered \"\" pointer "
-                     "after trying to load full version of "
-                     "receipt (from abbreviated.) Thus, saving "
-                     "abbreviated version instead, so I can "
-                     "still return SOMETHING.\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Good index but uncovered pointer "
+                "after trying to load full version of "
+                "receipt (from abbreviated). Thus, saving "
+                "abbreviated version instead, so I can "
+                "still return SOMETHING.")
+                .Flush();
             ConstNym pNym = api_.Wallet().Nym(theNymID);
             if (false == bool(pNym)) { return {}; }
             pTransaction->ReleaseSignatures();
@@ -7535,10 +7586,9 @@ std::int32_t OTAPI_Exec::Ledger_GetCount(
 
     if (!theLedger->LoadLedgerFromString(strLedger)) {
         auto strAcctID = String::Factory(theAccountID);
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Error loading ledger from string."
-                 " Acct ID: "
-              << strAcctID << "\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Error loading ledger from string."
+                                           " Acct ID: ")(strAcctID)(".")
+            .Flush();
         return OT_ERROR;
     }
 
@@ -7567,10 +7617,9 @@ std::string OTAPI_Exec::Ledger_GetTransactionNums(
 
     if (!theLedger->LoadLedgerFromString(strLedger)) {
         auto strAcctID = String::Factory(theAccountID);
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Error loading ledger from string."
-                 " Acct ID: "
-              << strAcctID << "\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Error loading ledger from string."
+                                           " Acct ID: ")(strAcctID)(".")
+            .Flush();
         return {};
     }
 
@@ -7621,8 +7670,9 @@ std::string OTAPI_Exec::Ledger_CreateResponse(
 
         return String::Factory(*processInbox)->Get();
     } else {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Failed in the call to ot_api_.Ledger_CreateResponse.\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Failed in the call to ot_api_.Ledger_CreateResponse.")
+            .Flush();
     }
     // -------------------------------------------------------
     return {};
@@ -7669,11 +7719,10 @@ std::string OTAPI_Exec::Ledger_GetTransactionByIndex(
         // for better optimization.
     ) {
         auto strAcctID = String::Factory(theAccountID);
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Error loading ledger from string, or loading box "
-                 "receipts "
-                 "subsequently. Acct ID: "
-              << strAcctID << "\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Error loading ledger from string, or loading box "
+            "receipts subsequently. Acct ID: ")(strAcctID)(".")
+            .Flush();
         return {};
     }
     // At this point, I know theLedger loaded successfully.
@@ -7682,18 +7731,19 @@ std::string OTAPI_Exec::Ledger_GetTransactionByIndex(
         ot_api_.Ledger_GetTransactionByIndex(*theLedger, nIndex);
 
     if (nullptr == pTransaction) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Failure: Uncovered nullptr transaction at index: " << nIndex
-              << "\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Failure: Uncovered nullptr transaction at index: ")(nIndex)(".")
+            .Flush();
         return {};  // Weird.
     }
     // ----------------------------------------------
     if (pTransaction->IsAbbreviated()) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Returning empty string, since box receipt wasn't "
-                 "downloaded yet. The caller of this function should have "
-                 "first called DoesBoxReceiptExist() if he didn't want to "
-                 "see this log.\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Returning empty string, since box receipt wasn't "
+            "downloaded yet. The caller of this function should have "
+            "first called DoesBoxReceiptExist() if he didn't want to "
+            "see this log.")
+            .Flush();
 
         return {};
     }
@@ -7734,10 +7784,10 @@ std::string OTAPI_Exec::Ledger_GetTransactionByID(
 
     if (!theLedger->LoadLedgerFromString(strLedger)) {
         auto strAcctID = String::Factory(theAccountID);
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Error loading ledger from string. "
-                 "Acct ID: "
-              << strAcctID << "\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Error loading ledger from string. "
+            "Acct ID: ")(strAcctID)(".")
+            .Flush();
 
         return {};
     }
@@ -7775,11 +7825,12 @@ std::string OTAPI_Exec::Ledger_GetTransactionByID(
     // used above...)
     // ----------------------------------------------
     if (pTransaction->IsAbbreviated()) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Returning empty string, since box receipt wasn't "
-                 "downloaded yet. The caller of this function should have "
-                 "first called DoesBoxReceiptExist() if he didn't want to "
-                 "see this log.\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Returning empty string, since box receipt wasn't "
+            "downloaded yet. The caller of this function should have "
+            "first called DoesBoxReceiptExist() if he didn't want to "
+            "see this log.")
+            .Flush();
 
         return {};
     }
@@ -7905,9 +7956,10 @@ std::string OTAPI_Exec::Ledger_GetInstrument_lowlevel(
     {
         auto strNymID = String::Factory(theNymID);
         auto strAcctID = String::Factory(theAccountID);
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Error loading ledger from string. NymID / Acct ID: "
-              << strNymID << " / " << strAcctID << "\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Error loading ledger from string. NymID / Acct ID: ")(strNymID)(
+            " / ")(strAcctID)(".")
+            .Flush();
         return {};
     }
     // At this point, I know theLedger loaded successfully.
@@ -7996,9 +8048,9 @@ std::int64_t OTAPI_Exec::Ledger_GetTransactionIDByIndex(
     auto strLedger = String::Factory(THE_LEDGER);
     if (!theLedger->LoadLedgerFromString(strLedger)) {
         auto strAcctID = String::Factory(theAccountID);
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Error loading ledger from string. Acct ID: " << strAcctID
-              << "\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Error loading ledger from string. Acct ID: ")(strAcctID)(".")
+            .Flush();
         return -1;
     }
     // At this point, I know theLedger loaded successfully.
@@ -8037,10 +8089,10 @@ std::string OTAPI_Exec::Ledger_AddTransaction(
 
     if (!theLedger->LoadLedgerFromString(strLedger)) {
         auto strAcctID = String::Factory(theAccountID);
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Error loading ledger from string. "
-                 "Acct ID: "
-              << strAcctID << "\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Error loading ledger from string. "
+            "Acct ID: ")(strAcctID)(".")
+            .Flush();
         return {};
     }
     // We don't do theLedger.VerifyAccount since our call to
@@ -8052,17 +8104,18 @@ std::string OTAPI_Exec::Ledger_AddTransaction(
         api_.Factory().Transaction(theNymID, theAccountID, theNotaryID)};
 
     if (false == bool(pTransaction)) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Error allocating memory: "
-              << "pTransaction"
-              << " !\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Error allocating memory: "
+                                           "pTransaction!")
+            .Flush();
         return {};
     }
     // ----------------------------------------------
     if (!pTransaction->LoadContractFromString(strTransaction)) {
         auto strAcctID = String::Factory(theAccountID);
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Error loading transaction from string. Acct ID: "
-              << strAcctID << "\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Error loading transaction from string. Acct ID: ")(strAcctID)(
+            ".")
+            .Flush();
         return {};
     }
     // We don't do pTransaction->VerifyAccount since our call to
@@ -8121,10 +8174,10 @@ std::string OTAPI_Exec::Transaction_CreateResponse(
 
     if (!responseLedger->LoadLedgerFromString(strLedger)) {
         auto strAcctID = String::Factory(theAcctID);
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Error loading response ledger from string. "
-                 "Acct ID: "
-              << strAcctID << "\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Error loading response ledger from string. "
+            "Acct ID: ")(strAcctID)(".")
+            .Flush();
         return {};
     }
     // ----------------------------------------------
@@ -8139,9 +8192,10 @@ std::string OTAPI_Exec::Transaction_CreateResponse(
 
     if (!originalTransaction->LoadContractFromString(strTransaction)) {
         auto strAcctID = String::Factory(theAcctID);
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Error loading transaction from string. Acct ID: "
-              << strAcctID << "\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Error loading transaction from string. Acct ID: ")(strAcctID)(
+            ".")
+            .Flush();
         return {};
     }
     // ----------------------------------------------
@@ -8157,10 +8211,10 @@ std::string OTAPI_Exec::Transaction_CreateResponse(
 
     if (!bCreatedResponse) {
         auto strAcctID = String::Factory(theAcctID);
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Failed creating response to inbox transaction."
-                 " Acct ID: "
-              << strAcctID << "\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Failed creating response to inbox transaction."
+            " Acct ID: ")(strAcctID)(".")
+            .Flush();
 
         return {};
     }
@@ -8236,9 +8290,9 @@ std::string OTAPI_Exec::Ledger_FinalizeResponse(
 
     if (!responseLedger->LoadLedgerFromString(strLedger)) {
         auto strAcctID = String::Factory(theAcctID);
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Error loading ledger from string. Acct ID: " << strAcctID
-              << "\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Error loading ledger from string. Acct ID: ")(strAcctID)(".")
+            .Flush();
 
         return {};
     }
@@ -8248,10 +8302,10 @@ std::string OTAPI_Exec::Ledger_FinalizeResponse(
 
     if (false == finalized) {
         auto strAcctID = String::Factory(theAcctID);
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Failed finalizing message ledger for processInbox."
-                 " Acct ID: "
-              << strAcctID << "\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Failed finalizing message ledger for processInbox."
+            " Acct ID: ")(strAcctID)(".")
+            .Flush();
 
         return {};
     }
@@ -8312,9 +8366,10 @@ std::string OTAPI_Exec::Transaction_GetVoucher(
 
     if (!theTransaction->LoadContractFromString(strTransaction)) {
         auto strAcctID = String::Factory(theAccountID);
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Error loading transaction from string. Acct ID: "
-              << strAcctID << "\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Error loading transaction from string. Acct ID: ")(strAcctID)(
+            ".")
+            .Flush();
         return {};
     }
     // No need to check if transaction is abbreviated, since it's coming
@@ -8322,9 +8377,10 @@ std::string OTAPI_Exec::Transaction_GetVoucher(
     // transactions, automatically.)
 
     if (transactionType::atWithdrawal != theTransaction->GetType()) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Error: tried to retrieve voucher from "
-                 "wrong transaction (not atWithdrawal).\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Error: tried to retrieve voucher from "
+            "wrong transaction (not atWithdrawal).")
+            .Flush();
         return {};
     }
 
@@ -8336,9 +8392,9 @@ std::string OTAPI_Exec::Transaction_GetVoucher(
     for (auto& it : theTransaction->GetItemList()) {
         auto pItem = it;
         if (false == bool(pItem)) {
-            otErr << OT_METHOD << __FUNCTION__ << ": Pointer: "
-                  << "pItem"
-                  << " should not have been .\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(": Pointer: "
+                                               "pItem should not have been.")
+                .Flush();
             return {};
         }
 
@@ -8393,9 +8449,10 @@ std::string OTAPI_Exec::Transaction_GetSenderNymID(
 
     if (!theTransaction->LoadContractFromString(strTransaction)) {
         auto strAcctID = String::Factory(theAccountID);
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Error loading transaction from string. Acct ID: "
-              << strAcctID << "\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Error loading transaction from string. Acct ID: ")(strAcctID)(
+            ".")
+            .Flush();
         return {};
     }
     std::unique_ptr<OTTransaction> pTransaction = nullptr;
@@ -8416,17 +8473,19 @@ std::string OTAPI_Exec::Transaction_GetSenderNymID(
         else if (theTransaction->Contains("expiredBoxRecord"))
             lBoxType = static_cast<std::int64_t>(ledgerType::expiredBox);
         else {
-            otErr << OT_METHOD << __FUNCTION__
-                  << ": Error loading from abbreviated "
-                     "transaction: unknown ledger type.\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Error loading from abbreviated "
+                "transaction: Unknown ledger type.")
+                .Flush();
             return {};
         }
         pTransaction = LoadBoxReceipt(*theTransaction, lBoxType);
         if (false == bool(pTransaction)) {
-            otErr << OT_METHOD << __FUNCTION__
-                  << ": Error loading from abbreviated "
-                     "transaction: failed loading box "
-                     "receipt.\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Error loading from abbreviated "
+                "transaction: Failed loading box "
+                "receipt.")
+                .Flush();
             return {};
         }
     } else
@@ -8474,9 +8533,10 @@ std::string OTAPI_Exec::Transaction_GetRecipientNymID(
 
     if (!theTransaction->LoadContractFromString(strTransaction)) {
         auto strAcctID = String::Factory(theAccountID);
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Error loading transaction from string. Acct ID: "
-              << strAcctID << "\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Error loading transaction from string. Acct ID: ")(strAcctID)(
+            ".")
+            .Flush();
         return {};
     }
     std::unique_ptr<OTTransaction> pTransaction = nullptr;
@@ -8497,16 +8557,18 @@ std::string OTAPI_Exec::Transaction_GetRecipientNymID(
         else if (theTransaction->Contains("expiredBoxRecord"))
             lBoxType = static_cast<std::int64_t>(ledgerType::expiredBox);
         else {
-            otErr << OT_METHOD << __FUNCTION__
-                  << ": Error loading from abbreviated "
-                     "transaction: unknown ledger type. \n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Error loading from abbreviated "
+                "transaction: Unknown ledger type.")
+                .Flush();
             return {};
         }
         pTransaction = LoadBoxReceipt(*theTransaction, lBoxType);
         if (false == bool(pTransaction)) {
-            otErr << OT_METHOD << __FUNCTION__
-                  << ": Error loading from abbreviated "
-                     "transaction: failed loading box receipt.";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Error loading from abbreviated "
+                "transaction: Failed loading box receipt.")
+                .Flush();
             return {};
         }
     } else
@@ -8568,9 +8630,10 @@ std::string OTAPI_Exec::Transaction_GetSenderAcctID(
 
     if (!theTransaction->LoadContractFromString(strTransaction)) {
         auto strAcctID = String::Factory(theAccountID);
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Error loading transaction from string. Acct ID: "
-              << strAcctID << "\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Error loading transaction from string. Acct ID: ")(strAcctID)(
+            ".")
+            .Flush();
         return {};
     }
     std::unique_ptr<OTTransaction> pTransaction = nullptr;
@@ -8591,17 +8654,18 @@ std::string OTAPI_Exec::Transaction_GetSenderAcctID(
         else if (theTransaction->Contains("expiredBoxRecord"))
             lBoxType = static_cast<std::int64_t>(ledgerType::expiredBox);
         else {
-            otErr << OT_METHOD << __FUNCTION__
-                  << ": Error loading from abbreviated "
-                     "transaction: unknown ledger type.\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Error loading from abbreviated "
+                "transaction: Unknown ledger type.")
+                .Flush();
             return {};
         }
         pTransaction = LoadBoxReceipt(*theTransaction, lBoxType);
         if (false == bool(pTransaction)) {
-            otErr << OT_METHOD << __FUNCTION__
-                  << ": Error loading from abbreviated "
-                     "transaction: failed loading box receipt. "
-                     "\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Error loading from abbreviated "
+                "transaction: Failed loading box receipt.")
+                .Flush();
             return {};
         }
     } else
@@ -8650,11 +8714,11 @@ std::string OTAPI_Exec::Transaction_GetRecipientAcctID(
 
     if (!theTransaction->LoadContractFromString(strTransaction)) {
         auto strAcctID = String::Factory(theAccountID);
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Error loading transaction from string in "
-                 "OTAPI_Exec::Transaction_GetRecipientAcctID. "
-                 "Acct ID: "
-              << strAcctID << "\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Error loading transaction from string in "
+            "OTAPI_Exec::Transaction_GetRecipientAcctID. "
+            "Acct ID: ")(strAcctID)(".")
+            .Flush();
         return {};
     }
 
@@ -8676,17 +8740,19 @@ std::string OTAPI_Exec::Transaction_GetRecipientAcctID(
         else if (theTransaction->Contains("expiredBoxRecord"))
             lBoxType = static_cast<std::int64_t>(ledgerType::expiredBox);
         else {
-            otErr << OT_METHOD << __FUNCTION__
-                  << ": Error loading from abbreviated "
-                     "transaction: unknown ledger type. \n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Error loading from abbreviated "
+                "transaction: Unknown ledger type.")
+                .Flush();
             return {};
         }
         pTransaction = LoadBoxReceipt(*theTransaction, lBoxType);
         if (false == bool(pTransaction)) {
-            otErr << OT_METHOD << __FUNCTION__
-                  << ": Error loading from abbreviated "
-                     "transaction: failed loading box "
-                     "receipt.\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Error loading from abbreviated "
+                "transaction: Failed loading box "
+                "receipt.")
+                .Flush();
             return {};
         }
     } else
@@ -8738,10 +8804,10 @@ std::string OTAPI_Exec::Pending_GetNote(
 
     if (!theTransaction->LoadContractFromString(strTransaction)) {
         auto strAcctID = String::Factory(theAccountID);
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Error loading transaction from string. "
-                 "Acct ID: "
-              << strAcctID << "\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Error loading transaction from string. "
+            "Acct ID: ")(strAcctID)(".")
+            .Flush();
         return {};
     }
     std::unique_ptr<OTTransaction> pTransaction = nullptr;
@@ -8762,50 +8828,54 @@ std::string OTAPI_Exec::Pending_GetNote(
         else if (theTransaction->Contains("expiredBoxRecord"))
             lBoxType = static_cast<std::int64_t>(ledgerType::expiredBox);
         else {
-            otErr << OT_METHOD << __FUNCTION__
-                  << " Error loading from abbreviated "
-                     "transaction: unknown ledger type. \n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                " Error loading from abbreviated "
+                "transaction: Unknown ledger type.")
+                .Flush();
             return {};
         }
         pTransaction = LoadBoxReceipt(*theTransaction, lBoxType);
         if (false == bool(pTransaction)) {
-            otErr << OT_METHOD << __FUNCTION__
-                  << ": Error loading from abbreviated "
-                     "transaction: failed loading box receipt. "
-                     "\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Error loading from abbreviated "
+                "transaction: Failed loading box receipt.")
+                .Flush();
             return {};
         }
     } else
         pTransaction.reset(theTransaction.release());
     if (transactionType::pending != pTransaction->GetType()) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": wrong transaction type: " << pTransaction->GetTypeString()
-              << ". (Expected \"pending\".)\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Wrong transaction type: ")(
+            pTransaction->GetTypeString())(". (Expected pending).")
+            .Flush();
         return {};
     }
     auto strReference = String::Factory();
     pTransaction->GetReferenceString(strReference);
 
     if (!strReference->Exists()) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": No reference string found on transaction.\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": No reference string found on transaction.")
+            .Flush();
         return {};
     }
     auto pItem{api_.Factory().Item(
         strReference, theNotaryID, pTransaction->GetReferenceToNum())};
 
     if (false == bool(pItem)) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Failed loading transaction item from string.\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Failed loading transaction item from string.")
+            .Flush();
         return {};
     }
 
     // pItem will be automatically cleaned up when it goes out of scope.
     if ((itemType::transfer != pItem->GetType()) ||
         (Item::request != pItem->GetStatus())) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Wrong item type or status attached as "
-                 "reference on transaction.\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Wrong item type or status attached as "
+            "reference on transaction.")
+            .Flush();
         return {};
     }
     auto strOutput = String::Factory();
@@ -8845,9 +8915,10 @@ std::int64_t OTAPI_Exec::Transaction_GetAmount(
 
     if (!theTransaction->LoadContractFromString(strTransaction)) {
         auto strAcctID = String::Factory(theAccountID);
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Error loading transaction from string. Acct ID: "
-              << strAcctID << "\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Error loading transaction from string. Acct ID: ")(strAcctID)(
+            ".")
+            .Flush();
         return -1;
     }
 
@@ -8869,17 +8940,18 @@ std::int64_t OTAPI_Exec::Transaction_GetAmount(
         else if (theTransaction->Contains("expiredBoxRecord"))
             lBoxType = static_cast<std::int64_t>(ledgerType::expiredBox);
         else {
-            otErr << OT_METHOD << __FUNCTION__
-                  << ": Error loading from abbreviated "
-                     "transaction: unknown ledger type. \n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Error loading from abbreviated "
+                "transaction: unknown ledger type.")
+                .Flush();
             return -1;
         }
         pTransaction = LoadBoxReceipt(*theTransaction, lBoxType);
         if (false == bool(pTransaction)) {
-            otErr << OT_METHOD << __FUNCTION__
-                  << ": Error loading from abbreviated "
-                     "transaction: failed loading box receipt. "
-                     "\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Error loading from abbreviated "
+                "transaction: Failed loading box receipt.")
+                .Flush();
             return -1;
         }
     } else
@@ -8922,9 +8994,10 @@ std::int64_t OTAPI_Exec::Transaction_GetDisplayReferenceToNum(
 
     if (!theTransaction->LoadContractFromString(strTransaction)) {
         auto strAcctID = String::Factory(theAccountID);
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Error loading transaction from string. Acct ID: "
-              << strAcctID << "\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Error loading transaction from string. Acct ID: ")(strAcctID)(
+            ".")
+            .Flush();
         return -1;
     }
 
@@ -8962,9 +9035,10 @@ std::string OTAPI_Exec::Transaction_GetType(
 
     if (!theTransaction->LoadContractFromString(strTransaction)) {
         auto strAcctID = String::Factory(theAccountID);
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Error loading transaction from string. Acct ID: "
-              << strAcctID << "\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Error loading transaction from string. Acct ID: ")(strAcctID)(
+            ".")
+            .Flush();
         return {};
     }
     // NO need to load abbreviated version, since it already stores this
@@ -9009,17 +9083,18 @@ std::int64_t OTAPI_Exec::ReplyNotice_GetRequestNum(
 
     if (!theTransaction->LoadContractFromString(strTransaction)) {
         auto strNymID = String::Factory(theNymID);
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Error loading transaction from string. Nym ID: " << strNymID
-              << "\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Error loading transaction from string. Nym ID: ")(strNymID)(".")
+            .Flush();
         return -1;
     }
 
     if (transactionType::replyNotice != theTransaction->GetType()) {
         auto strNymID = String::Factory(theNymID);
-        otErr << OT_METHOD << __FUNCTION__ << ": Unexpected transaction type: "
-              << theTransaction->GetTypeString()
-              << ". (Expected: replyNotice) User: " << strNymID << "\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Unexpected transaction type: ")(
+            theTransaction->GetTypeString())(
+            ". (Expected: replyNotice) User: ")(strNymID)(".")
+            .Flush();
         return -1;
     }
     // NO need to load abbreviated version, since it already stores this
@@ -9060,9 +9135,10 @@ time64_t OTAPI_Exec::Transaction_GetDateSigned(
 
     if (!theTransaction->LoadContractFromString(strTransaction)) {
         auto strAcctID = String::Factory(theAccountID);
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Error loading transaction from string. Acct ID: "
-              << strAcctID << "\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Error loading transaction from string. Acct ID: ")(strAcctID)(
+            ".")
+            .Flush();
         return OTTimeGetTimeFromSeconds(-1);
     }
     // NO need to load abbreviated version here, since it already stores the
@@ -9106,9 +9182,10 @@ std::int32_t OTAPI_Exec::Transaction_GetSuccess(
 
     if (!theTransaction->LoadContractFromString(strTransaction)) {
         auto strAcctID = String::Factory(theAccountID);
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Error loading transaction from string. Acct ID: "
-              << strAcctID << "\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Error loading transaction from string. Acct ID: ")(strAcctID)(
+            ".")
+            .Flush();
         return OT_ERROR;
     }
     std::unique_ptr<OTTransaction> pTransaction = nullptr;
@@ -9130,17 +9207,18 @@ std::int32_t OTAPI_Exec::Transaction_GetSuccess(
         else if (theTransaction->Contains("expiredBoxRecord"))
             lBoxType = static_cast<std::int64_t>(ledgerType::expiredBox);
         else {
-            otErr << OT_METHOD << __FUNCTION__
-                  << ": Error loading from abbreviated "
-                     "transaction: unknown ledger type. \n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Error loading from abbreviated "
+                "transaction: Unknown ledger type.")
+                .Flush();
             return OT_ERROR;
         }
         pTransaction = LoadBoxReceipt(*theTransaction, lBoxType);
         if (false == bool(pTransaction)) {
-            otErr << OT_METHOD << __FUNCTION__
-                  << ": Error loading from abbreviated "
-                     "transaction: failed loading box receipt. "
-                     "\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Error loading from abbreviated "
+                "transaction: Failed loading box receipt.")
+                .Flush();
             return OT_ERROR;
         }
     } else  // NOT abbreviated.
@@ -9151,10 +9229,10 @@ std::int32_t OTAPI_Exec::Transaction_GetSuccess(
     } else {
         const std::int64_t lTransactionNum = pTransaction->GetTransactionNum();
 
-        otErr << OT_METHOD << __FUNCTION__
-              << ": ** FYI, this transaction has a 'failure' status from the "
-                 "server. TransNum: "
-              << lTransactionNum << "\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": ** FYI, this transaction has a 'failure' status from the "
+            "server. TransNum: ")(lTransactionNum)(".")
+            .Flush();
     }
 
     return OT_FALSE;
@@ -9185,9 +9263,10 @@ std::int32_t OTAPI_Exec::Transaction_IsCanceled(
 
     if (!theTransaction->LoadContractFromString(strTransaction)) {
         auto strAcctID = String::Factory(theAccountID);
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Error loading transaction from string. Acct ID: "
-              << strAcctID << "\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Error loading transaction from string. Acct ID: ")(strAcctID)(
+            ".")
+            .Flush();
         return OT_ERROR;
     }
     std::unique_ptr<OTTransaction> pTransaction = nullptr;
@@ -9221,17 +9300,18 @@ std::int32_t OTAPI_Exec::Transaction_IsCanceled(
         else if (theTransaction->Contains("expiredBoxRecord"))
             lBoxType = static_cast<std::int64_t>(ledgerType::expiredBox);
         else {
-            otErr << OT_METHOD << __FUNCTION__
-                  << ": Error loading from abbreviated "
-                     "transaction: unknown ledger type. \n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Error loading from abbreviated "
+                "transaction: Unknown ledger type.")
+                .Flush();
             return OT_ERROR;
         }
         pTransaction = LoadBoxReceipt(*theTransaction, lBoxType);
         if (nullptr == pTransaction) {
-            otErr << OT_METHOD << __FUNCTION__
-                  << ": Error loading from abbreviated "
-                     "transaction: failed loading box receipt. "
-                     "\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Error loading from abbreviated "
+                "transaction: Failed loading box receipt.")
+                .Flush();
             return OT_ERROR;
         }
     } else  // NOT abbreviated.
@@ -9274,9 +9354,10 @@ std::int32_t OTAPI_Exec::Transaction_GetBalanceAgreementSuccess(
 
     if (!theTransaction->LoadContractFromString(strTransaction)) {
         auto strAcctID = String::Factory(theAccountID);
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Error loading transaction from string. Acct ID: "
-              << strAcctID << "\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Error loading transaction from string. Acct ID: ")(strAcctID)(
+            ".")
+            .Flush();
         return OT_ERROR;
     }
     std::unique_ptr<OTTransaction> pTransaction = nullptr;
@@ -9301,17 +9382,19 @@ std::int32_t OTAPI_Exec::Transaction_GetBalanceAgreementSuccess(
         else if (theTransaction->Contains("expiredBoxRecord"))
             lBoxType = static_cast<std::int64_t>(ledgerType::expiredBox);
         else {
-            otErr << OT_METHOD << __FUNCTION__
-                  << ": Error loading from abbreviated "
-                     "transaction: unknown ledger type. \n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Error loading from abbreviated "
+                "transaction: Unknown ledger type.")
+                .Flush();
             return OT_ERROR;
         }
         pTransaction = LoadBoxReceipt(*theTransaction, lBoxType);
         if (nullptr == pTransaction) {
-            otErr << OT_METHOD << __FUNCTION__
-                  << ": Error loading from abbreviated "
-                     "transaction: failed loading box "
-                     "receipt.\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Error loading from abbreviated "
+                "transaction: Failed loading box "
+                "receipt.")
+                .Flush();
             return OT_ERROR;
         }
     } else
@@ -9324,10 +9407,11 @@ std::int32_t OTAPI_Exec::Transaction_GetBalanceAgreementSuccess(
         pReplyItem = pTransaction->GetItem(itemType::atTransactionStatement);
 
     if (nullptr == pReplyItem) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": good transaction (could have been "
-                 "abbreviated though) but uncovered \"\" item "
-                 "pointer.\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Good transaction (could have been "
+            "abbreviated though), but uncovered item "
+            "pointer.")
+            .Flush();
         return OT_ERROR;  // Weird.
     }
 
@@ -9390,17 +9474,18 @@ std::int32_t OTAPI_Exec::Message_GetBalanceAgreementSuccess(
 
     if (!theLedger->LoadLedgerFromString(strLedger)) {
         auto strAcctID = String::Factory(theAccountID);
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Error loading ledger from string. Acct ID: " << strAcctID
-              << "\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Error loading ledger from string. Acct ID: ")(strAcctID)(".")
+            .Flush();
         return OT_ERROR;
     }
 
     // At this point, I know theLedger loaded successfully.
 
     if (theLedger->GetTransactionCount() <= 0) {
-        otErr << OT_METHOD << __FUNCTION__ << " bad count in message ledger: "
-              << theLedger->GetTransactionCount() << "\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Bad count in message ledger: ")(
+            theLedger->GetTransactionCount())(".")
+            .Flush();
         return OT_ERROR;  // out of bounds. I'm saving from an
                           // OT_ASSERT_MSG() happening here. (Maybe I
                           // shouldn't.)
@@ -9412,8 +9497,9 @@ std::int32_t OTAPI_Exec::Message_GetBalanceAgreementSuccess(
              // one as well I thought. And has multiple items attached.)
 
     if (false == bool(pReplyTransaction)) {
-        otErr << OT_METHOD << __FUNCTION__
-              << " good index but uncovered \"\" pointer there: " << 0 << "\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Good index but uncovered pointer there: ")(0)(".")
+            .Flush();
         return OT_ERROR;  // Weird.
     }
 
@@ -9426,8 +9512,9 @@ std::int32_t OTAPI_Exec::Message_GetBalanceAgreementSuccess(
             pReplyTransaction->GetItem(itemType::atTransactionStatement);
 
     if (false == bool(pReplyItem)) {
-        otErr << OT_METHOD << __FUNCTION__
-              << " good index but uncovered \"\" item pointer: " << 0 << "\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Good index but uncovered item pointer: ")(0)(".")
+            .Flush();
         return OT_ERROR;  // Weird.
     }
 
@@ -9559,10 +9646,10 @@ std::int64_t OTAPI_Exec::Purse_GetTotalValue(
     if (!thePurse->LoadContractFromString(strPurse)) {
         auto strInstrumentDefinitionID =
             String::Factory(theInstrumentDefinitionID);
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Error loading purse from string. Instrument Definition "
-                 "ID: "
-              << strInstrumentDefinitionID << "\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Error loading purse from string. Instrument Definition "
+            "ID: ")(strInstrumentDefinitionID)(".")
+            .Flush();
         return OT_ERROR_AMOUNT;
     }
 
@@ -10406,9 +10493,10 @@ std::int64_t OTAPI_Exec::Basket_GetMinimumTransferAmount(
         ot_api_.GetBasketMinimumTransferAmount(theInstrumentDefinitionID);
 
     if (0 >= lMinTransAmount) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": returned 0 (or negitive). Strange... what basket is "
-                 "this?\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Returned 0 (or negative). Strange! What basket is "
+            "this?")
+            .Flush();
         return OT_ERROR_AMOUNT;
     }
 
@@ -10443,9 +10531,10 @@ std::int64_t OTAPI_Exec::Basket_GetMemberMinimumTransferAmount(
         theInstrumentDefinitionID, nIndex);
 
     if (0 >= lMinTransAmount) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": returned 0 (or negitive). Strange... what basket is "
-                 "this?\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Returned 0 (or negative). Strange! What basket is "
+            "this?")
+            .Flush();
         return OT_ERROR_AMOUNT;
     }
 
@@ -10479,8 +10568,8 @@ std::int64_t OTAPI_Exec::Message_GetUsageCredits(
     const std::string& THE_MESSAGE) const
 {
     if (THE_MESSAGE.empty()) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Null: THE_MESSAGE passed in!\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Null: THE_MESSAGE passed in!")
+            .Flush();
         return -2;
     }
 
@@ -10488,30 +10577,34 @@ std::int64_t OTAPI_Exec::Message_GetUsageCredits(
     auto theMessage{api_.Factory().Message()};
 
     if (!strMessage->Exists()) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Error: THE_MESSAGE doesn't exist.\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Error: THE_MESSAGE doesn't exist.")
+            .Flush();
         return -2;
     }
 
     if (!theMessage->LoadContractFromString(strMessage)) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Failed loading message from string.\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Failed loading message from string.")
+            .Flush();
         return -2;
     }
 
     if (!theMessage->m_bSuccess) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Message success == false, thus unable to "
-                 "report Usage Credits balance. (Returning "
-                 "-2.)\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Message success == false, thus unable to "
+            "report Usage Credits balance. (Returning "
+            "-2).")
+            .Flush();
         return -2;
     }
 
     if (!theMessage->m_strCommand->Compare("usageCreditsResponse")) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": THE_MESSAGE is supposed to be of command "
-                 "type \"usageCreditsResponse\", but instead it's a: "
-              << theMessage->m_strCommand << "\n (Failure. Returning -2.)";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": THE_MESSAGE is supposed to be of command "
+            "type usageCreditsResponse, but instead it's a: ")(
+            theMessage->m_strCommand)(". (Failure! Returning -2).")
+            .Flush();
         return -2;
     }
 
@@ -11021,9 +11114,9 @@ void OTAPI_Exec::FlushSentMessages(
         ot_api_.FlushSentMessages(
             bHarvestingForRetry, theNotaryID, theNymID, *theLedger);
     else
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Failure: Unable to load Nymbox from string:\n\n"
-              << strLedger << "\n\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Failure: Unable to load Nymbox from string: ")(strLedger)(".")
+            .Flush();
 }
 
 // Make sure you download your Nymbox (getNymbox) before calling this,
@@ -11443,15 +11536,16 @@ std::int32_t OTAPI_Exec::Message_GetSuccess(
     auto strMessage = String::Factory(THE_MESSAGE);
 
     if (!strMessage->Exists()) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Error: THE_MESSAGE doesn't exist.\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Error: THE_MESSAGE doesn't exist.")
+            .Flush();
         return OT_ERROR;
     }
 
     if (!theMessage->LoadContractFromString(strMessage)) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Error: Failed loading message from string:\n\n"
-              << THE_MESSAGE << "\n\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Error: Failed loading message from string: ")(THE_MESSAGE)(".")
+            .Flush();
         return OT_ERROR;
     }
     if (true == theMessage->m_bSuccess) {
@@ -11459,7 +11553,7 @@ std::int32_t OTAPI_Exec::Message_GetSuccess(
             theMessage->m_strRequestNum)(
             "(Message_GetSuccess was successful, but any transaction ")(
             "inside could have failed OR succeeded. Use "
-            "Message_GetTransactionSuccess for that.)")
+            "Message_GetTransactionSuccess for that).")
             .Flush();  // Contents:
                        // \n\n" <<
                        // THE_MESSAGE
@@ -11567,17 +11661,18 @@ std::int32_t OTAPI_Exec::Message_IsTransactionCanceled(
 
     if (!theLedger->LoadContractFromString(strLedger)) {
         auto strAcctID = String::Factory(theAccountID);
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Error loading ledger from string. Acct ID: " << strAcctID
-              << "\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Error loading ledger from string. Acct ID: ")(strAcctID)(".")
+            .Flush();
         return OT_ERROR;
     }
 
     // At this point, I know theLedger loaded successfully.
 
     if (theLedger->GetTransactionCount() <= 0) {
-        otErr << OT_METHOD << __FUNCTION__ << ": bad count in message ledger: "
-              << theLedger->GetTransactionCount() << "\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Bad count in message ledger: ")(
+            theLedger->GetTransactionCount())(".")
+            .Flush();
         return OT_ERROR;  // out of bounds. I'm saving from an
                           // OT_ASSERT_MSG() happening here. (Maybe I
                           // shouldn't.)
@@ -11588,8 +11683,9 @@ std::int32_t OTAPI_Exec::Message_IsTransactionCanceled(
              // per message ledger, excepting process inbox.)
 
     if (false == bool(pTransaction)) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": good index but uncovered \"\" pointer: " << 0 << "\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Good index but uncovered pointer: ")(0)(".")
+            .Flush();
         return OT_ERROR;  // Weird.
     }
 
@@ -11658,17 +11754,18 @@ std::int32_t OTAPI_Exec::Message_GetTransactionSuccess(
 
     if (!theLedger->LoadContractFromString(strLedger)) {
         auto strAcctID = String::Factory(theAccountID);
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Error loading ledger from string. Acct ID: " << strAcctID
-              << "\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Error loading ledger from string. Acct ID: ")(strAcctID)(".")
+            .Flush();
         return OT_ERROR;
     }
 
     // At this point, I know theLedger loaded successfully.
 
     if (theLedger->GetTransactionCount() <= 0) {
-        otErr << OT_METHOD << __FUNCTION__ << ": bad count in message ledger: "
-              << theLedger->GetTransactionCount() << "\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Bad count in message ledger: ")(
+            theLedger->GetTransactionCount())(".")
+            .Flush();
         return OT_ERROR;  // out of bounds. I'm saving from an
                           // OT_ASSERT_MSG() happening here. (Maybe I
                           // shouldn't.)
@@ -11679,8 +11776,9 @@ std::int32_t OTAPI_Exec::Message_GetTransactionSuccess(
              // per message ledger, excepting process inbox.)
 
     if (false == bool(pTransaction)) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": good index but uncovered \"\" pointer: " << 0 << "\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Good index but uncovered pointer: ")(0)(".")
+            .Flush();
         return OT_ERROR;  // Weird.
     }
 
@@ -11852,8 +11950,9 @@ std::string OTAPI_Exec::AddChildRSACredential(
 #if OT_CRYPTO_SUPPORTED_KEY_RSA
 
     if (0 >= keysize) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Keysize is 0 or less, will fail! Try 1024." << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Keysize is 0 or less, will fail! Try 1024.")
+            .Flush();
 
         return output;
     }
@@ -11865,10 +11964,10 @@ std::string OTAPI_Exec::AddChildRSACredential(
         case 8192:
             break;
         default:
-            otErr << OT_METHOD << __FUNCTION__
-                  << ": Failure: keysize must be one of: "
-                  << "1024, 2048, 4096, 8192. (" << keysize
-                  << " was passed...)\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Failure: keysize must be one of: "
+                "1024, 2048, 4096, 8192. (")(keysize)(" was passed...).")
+                .Flush();
 
             return output;
     }

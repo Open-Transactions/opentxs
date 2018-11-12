@@ -85,8 +85,11 @@ bool MintLucre::AddDenomination(
     }
 
     if ((nPrimeLength / 8) < (MIN_COIN_LENGTH + DIGEST_LENGTH)) {
-        otErr << "Prime must be at least "
-              << (MIN_COIN_LENGTH + DIGEST_LENGTH) * 8 << " bits\n";
+
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Prime must be at least ")(
+            (MIN_COIN_LENGTH + DIGEST_LENGTH) * 8)(" bits.")
+            .Flush();
+
         return false;
     }
 
