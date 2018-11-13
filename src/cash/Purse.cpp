@@ -346,7 +346,6 @@ bool Purse::Merge(
     OTNym_or_SymmetricKey theNewNym,  // must be private, if a nym.
     Purse& theNewPurse)
 {
-    const char* szFunc = "Purse::Merge";
 
     mapOfTokenPointers theMap;
 
@@ -464,9 +463,10 @@ bool Purse::Merge(
                          theNewNym,   // must be private, if a Nym.
                          theOldNym))  // can be public, if a Nym.
         {
-            otErr << szFunc
-                  << ": Error: Failed while attempting to re-assign "
-                     "ownership of token during purse merge.\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Error: Failed while attempting to re-assign "
+                "ownership of token during purse merge.")
+                .Flush();
         } else {
             LogDetail(OT_METHOD)(__FUNCTION__)(
                 ": FYI: Success re-assigning ownership of "
@@ -501,7 +501,9 @@ bool Purse::Merge(
                         // the token, into string form.
 
         if (!bPush) {
-            otErr << szFunc << ": Error: Failure pushing token into purse.\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Error: Failure pushing token into purse.")
+                .Flush();
             bSuccess = false;
         }
         // Notice we don't break here if 1 token fails -- we loop through them
@@ -616,9 +618,11 @@ bool Purse::LoadPurse(
         szFilename));  // <=== LOADING FROM DATA STORE.
 
     if (strFileContents.length() < 2) {
-        otErr << "Purse::LoadPurse: Error reading file: " << szFolder1name
-              << Log::PathSeparator() << szFolder2name << Log::PathSeparator()
-              << szFolder3name << Log::PathSeparator() << szFilename << "\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(":Error reading file: ")(
+            szFolder1name)(Log::PathSeparator())(szFolder2name)(
+            Log::PathSeparator())(szFolder3name)(Log::PathSeparator())(
+            szFilename)(".")
+            .Flush();
         return false;
     }
 
@@ -670,10 +674,11 @@ bool Purse::SavePurse(
     auto strRawFile = String::Factory();
 
     if (!SaveContractRaw(strRawFile)) {
-        otErr << "Purse::SavePurse: Error saving Pursefile (to string):\n"
-              << szFolder1name << Log::PathSeparator() << szFolder2name
-              << Log::PathSeparator() << szFolder3name << Log::PathSeparator()
-              << szFilename << "\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Error saving Pursefile (to string): ")(szFolder1name)(
+            Log::PathSeparator())(szFolder2name)(Log::PathSeparator())(
+            szFolder3name)(Log::PathSeparator())(szFilename)(".")
+            .Flush();
         return false;
     }
 
@@ -682,11 +687,12 @@ bool Purse::SavePurse(
 
     if (false ==
         ascTemp->WriteArmoredString(strFinal, m_strContractType->Get())) {
-        otErr << "Purse::SavePurse: Error saving Pursefile (failed writing "
-                 "armored string):\n"
-              << szFolder1name << Log::PathSeparator() << szFolder2name
-              << Log::PathSeparator() << szFolder3name << Log::PathSeparator()
-              << szFilename << "\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Error saving Pursefile (failed writing "
+            "armored string): ")(szFolder1name)(Log::PathSeparator())(
+            szFolder2name)(Log::PathSeparator())(szFolder3name)(
+            Log::PathSeparator())(szFilename)(".")
+            .Flush();
         return false;
     }
 
@@ -698,9 +704,11 @@ bool Purse::SavePurse(
         szFolder3name,
         szFilename);  // <=== SAVING TO DATA STORE.
     if (!bSaved) {
-        otErr << "Purse::SavePurse: Error writing to file: " << szFolder1name
-              << Log::PathSeparator() << szFolder2name << Log::PathSeparator()
-              << szFolder3name << Log::PathSeparator() << szFilename << "\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Error writing to file: ")(
+            szFolder1name)(Log::PathSeparator())(szFolder2name)(
+            Log::PathSeparator())(szFolder3name)(Log::PathSeparator())(
+            szFilename)(".")
+            .Flush();
         return false;
     }
 
@@ -742,28 +750,31 @@ void Purse::UpdateContents()  // Before transmission or serialization, this is
     //
     if (m_bPasswordProtected) {
         if (!m_pCachedKey)
-            otErr
-                << __FUNCTION__
-                << ": Error: m_pCachedKey is unexpectedly nullptr, even though "
-                   "m_bPasswordProtected is true!\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Error: m_pCachedKey is unexpectedly nullptr, even though "
+                "m_bPasswordProtected is true!")
+                .Flush();
         else if (!m_pSymmetricKey.get())
-            otErr << __FUNCTION__
-                  << ": Error: m_pSymmetricKey is unexpectedly "
-                     "nullptr, even though "
-                     "m_bPasswordProtected is true!\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Error: m_pSymmetricKey is unexpectedly "
+                "nullptr, even though "
+                "m_bPasswordProtected is true!")
+                .Flush();
         else  // m_pCachedKey and m_pSymmetricKey are good pointers. (Or at
               // least, not-null.)
         {
             if (!m_pCachedKey->IsGenerated())
-                otErr << __FUNCTION__
-                      << ": Error: m_pCachedKey wasn't a "
-                         "generated key! Even though "
-                         "m_bPasswordProtected is true.\n";
+                LogOutput(OT_METHOD)(__FUNCTION__)(
+                    ": Error: m_pCachedKey wasn't a "
+                    "generated key! Even though "
+                    "m_bPasswordProtected is true.")
+                    .Flush();
             else if (!m_pSymmetricKey->IsGenerated())
-                otErr << __FUNCTION__
-                      << ": Error: m_pSymmetricKey wasn't a "
-                         "generated key! Even though "
-                         "m_bPasswordProtected is true.\n";
+                LogOutput(OT_METHOD)(__FUNCTION__)(
+                    ": Error: m_pSymmetricKey wasn't a "
+                    "generated key! Even though "
+                    "m_bPasswordProtected is true.")
+                    .Flush();
             else {
                 auto ascCachedKey = Armored::Factory(),
                      ascSymmetricKey = Armored::Factory();
@@ -772,9 +783,10 @@ void Purse::UpdateContents()  // Before transmission or serialization, this is
                     !ascCachedKey->Exists() ||
                     !m_pSymmetricKey->SerializeTo(ascSymmetricKey) ||
                     !ascSymmetricKey->Exists())
-                    otErr << __FUNCTION__
-                          << ": Error: m_pCachedKey or m_pSymmetricKey failed "
-                             "trying to serialize to Armored.\n";
+                    LogOutput(OT_METHOD)(__FUNCTION__)(
+                        ": Error: m_pCachedKey or m_pSymmetricKey failed "
+                        "trying to serialize to Armored.")
+                        .Flush();
                 else {
                     // ascInternalKey is good by this point.
                     // Therefore, let's serialize it...
@@ -804,7 +816,6 @@ void Purse::UpdateContents()  // Before transmission or serialization, this is
 
 std::int32_t Purse::ProcessXMLNode(irr::io::IrrXMLReader*& xml)
 {
-    const char* szFunc = "Purse::ProcessXMLNode";
 
     const auto strNodeName = String::Factory(xml->getNodeName());
 
@@ -852,8 +863,9 @@ std::int32_t Purse::ProcessXMLNode(irr::io::IrrXMLReader*& xml)
             m_NotaryID->SetString(strNotaryID);
         else {
             m_NotaryID->Release();
-            otErr << szFunc
-                  << ": Failed loading notaryID, when one was expected.\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Failed loading notaryID, when one was expected.")
+                .Flush();
             return (-1);
         }
 
@@ -867,9 +879,10 @@ std::int32_t Purse::ProcessXMLNode(irr::io::IrrXMLReader*& xml)
             m_InstrumentDefinitionID->SetString(strInstrumentDefinitionID);
         else {
             m_InstrumentDefinitionID->Release();
-            otErr << szFunc
-                  << ": Failed loading instrumentDefinitionID, when "
-                     "one was expected.\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Failed loading instrumentDefinitionID, when "
+                "one was expected.")
+                .Flush();
             return (-1);
         }
 
@@ -882,9 +895,10 @@ std::int32_t Purse::ProcessXMLNode(irr::io::IrrXMLReader*& xml)
             if (strNymID->Exists())
                 m_NymID->SetString(strNymID);
             else {
-                otErr << szFunc
-                      << ": Failed loading nymID, when one was expected. "
-                         "(isNymIDIncluded was true.)\n";
+                LogOutput(OT_METHOD)(__FUNCTION__)(
+                    ": Failed loading nymID, when one was expected. "
+                    "(isNymIDIncluded was true).")
+                    .Flush();
                 m_NymID->Release();
                 return (-1);
             }
@@ -923,20 +937,22 @@ std::int32_t Purse::ProcessXMLNode(irr::io::IrrXMLReader*& xml)
                                     // why am I in the middle of loading one
                                     // here?
         {
-            otErr << szFunc
-                  << ": Error: Unexpected 'internalKey' data, "
-                     "since m_bPasswordProtected is set to false!\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Error: Unexpected 'internalKey' data, "
+                "since m_bPasswordProtected is set to false!")
+                .Flush();
             return (-1);  // error condition
         }
 
         if (!m_NymID->empty())  // If the NymID isn't empty, then why am I in
                                 // the middle of loading an internal Key?
         {
-            otErr << szFunc
-                  << ": Error: Unexpected 'internalKey' data, since "
-                     "m_NymID is not blank! "
-                     "(The NymID should have loaded before THIS "
-                     "node ever popped up...)\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Error: Unexpected 'internalKey' data, since "
+                "m_NymID is not blank! "
+                "(The NymID should have loaded before THIS "
+                "node ever popped up...).")
+                .Flush();
             return (-1);  // error condition
         }
 
@@ -944,9 +960,10 @@ std::int32_t Purse::ProcessXMLNode(irr::io::IrrXMLReader*& xml)
 
         if (!Contract::LoadEncodedTextField(xml, ascValue) ||
             !ascValue->Exists()) {
-            otErr << szFunc << ": Error: Expected "
-                  << "internalKey"
-                  << " element to have text field.\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Error: Expected "
+                "internalKey element to have text field.")
+                .Flush();
             return (-1);  // error condition
         }
 
@@ -954,11 +971,12 @@ std::int32_t Purse::ProcessXMLNode(irr::io::IrrXMLReader*& xml)
         // be...)
         //
         if (m_pSymmetricKey.get()) {
-            otErr << szFunc
-                  << ": WARNING: While loading internal Key for a purse, "
-                     "noticed the pointer was ALREADY set! (I'm deleting old "
-                     "one to make room, "
-                     "and then allowing this one to load instead...)\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": WARNING: While loading internal Key for a purse, "
+                "noticed the pointer was ALREADY set! (I'm deleting old "
+                "one to make room, "
+                "and then allowing this one to load instead...).")
+                .Flush();
             m_pSymmetricKey = crypto::key::LegacySymmetric::Blank();
             ;
         }
@@ -979,10 +997,10 @@ std::int32_t Purse::ProcessXMLNode(irr::io::IrrXMLReader*& xml)
             "crypto::key::LegacySymmetric \n");
 
         if (!pSymmetricKey->SerializeFrom(ascValue)) {
-            otErr
-                << szFunc
-                << ": Error: While loading internal Key for a purse, failed "
-                   "serializing from stored string! (Failed loading purse.)\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Error: While loading internal Key for a purse, failed "
+                "serializing from stored string! (Failed loading purse).")
+                .Flush();
             return (-1);
         }
 
@@ -1005,18 +1023,20 @@ std::int32_t Purse::ProcessXMLNode(irr::io::IrrXMLReader*& xml)
                                     // keys, then why am I in the middle of
                                     // loading one here?
         {
-            otErr << szFunc
-                  << ": Error: Unexpected 'cachedKey' data, "
-                     "since m_bPasswordProtected is set to false!\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Error: Unexpected 'cachedKey' data, "
+                "since m_bPasswordProtected is set to false!")
+                .Flush();
             return (-1);  // error condition
         }
 
         if (!m_NymID->empty())  // If the NymID isn't empty, then why am I in
                                 // the middle of loading an internal Key?
         {
-            otErr << szFunc
-                  << ": Error: Unexpected 'cachedKey' data, since "
-                     "m_NymID is not blank!\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Error: Unexpected 'cachedKey' data, since "
+                "m_NymID is not blank!")
+                .Flush();
             return (-1);  // error condition
         }
 
@@ -1024,9 +1044,9 @@ std::int32_t Purse::ProcessXMLNode(irr::io::IrrXMLReader*& xml)
 
         if (!Contract::LoadEncodedTextField(xml, ascValue) ||
             !ascValue->Exists()) {
-            otErr << szFunc << ": Error: Expected "
-                  << "cachedKey"
-                  << " element to have text field.\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(": Error: Expected cachedKey"
+                                               " element to have text field.")
+                .Flush();
             return (-1);  // error condition
         }
 
@@ -1034,11 +1054,12 @@ std::int32_t Purse::ProcessXMLNode(irr::io::IrrXMLReader*& xml)
         // be...)
         //
         if (m_pCachedKey) {
-            otErr << szFunc
-                  << ": WARNING: While loading master Key for a purse, "
-                     "noticed the pointer was ALREADY set! (I'm deleting old "
-                     "one to make room, "
-                     "and then allowing this one to load instead...)\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": WARNING: While loading master Key for a purse, "
+                "noticed the pointer was ALREADY set! (I'm deleting old "
+                "one to make room, "
+                "and then allowing this one to load instead...).")
+                .Flush();
             //          return (-1); // error condition
 
             m_pCachedKey.reset();
@@ -1061,10 +1082,10 @@ std::int32_t Purse::ProcessXMLNode(irr::io::IrrXMLReader*& xml)
         // (Or it will leak.)
         //
         if (!pCachedKey->SerializeFrom(ascValue)) {
-            otErr
-                << szFunc
-                << ": Error: While loading master Key for a purse, failed "
-                   "serializing from stored string! (Failed loading purse.)\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Error: While loading master Key for a purse, failed "
+                "serializing from stored string! (Failed loading purse).")
+                .Flush();
             //            delete pCachedKey; pCachedKey = nullptr;
             return (-1);
         }
@@ -1097,7 +1118,9 @@ std::int32_t Purse::ProcessXMLNode(irr::io::IrrXMLReader*& xml)
         auto pArmor = Armored::Factory();
 
         if (!Contract::LoadEncodedTextField(xml, pArmor) || !pArmor->Exists()) {
-            otErr << szFunc << ": Error: token field without value.\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Error: Token field without value.")
+                .Flush();
 
             return (-1);  // error condition
         } else {
@@ -1184,15 +1207,18 @@ Token* Purse::Peek(OTNym_or_SymmetricKey theOwner) const
         if (pToken->GetInstrumentDefinitionID() != m_InstrumentDefinitionID ||
             pToken->GetNotaryID() != m_NotaryID) {
 
-            otErr << __FUNCTION__
-                  << ": ERROR: Cash token with wrong server or "
-                     "instrument definition.\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": ERROR: Cash token with wrong server or "
+                "instrument definition.")
+                .Flush();
         } else {
             // CALLER is responsible to delete this token.
             return pToken.release();
         }
     } else
-        otErr << __FUNCTION__ << ": Failure: theOwner.Open_or_Decrypt.\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Failure: theOwner.Open_or_Decrypt.")
+            .Flush();
 
     return nullptr;
 }
@@ -1213,9 +1239,10 @@ Token* Purse::Pop(OTNym_or_SymmetricKey theOwner)
     Token* pToken = Peek(theOwner);
 
     if (nullptr == pToken) {
-        otErr << __FUNCTION__
-              << ": Failure: Peek(theOwner) "
-                 "(And m_dequeTokens isn't empty, either.)\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Failure: Peek(theOwner) "
+            "(And m_dequeTokens isn't empty, either).")
+            .Flush();
         return nullptr;
     }
 
@@ -1287,15 +1314,17 @@ void Purse::RecalculateExpirationDates(OTNym_or_SymmetricKey& theOwner)
             }
 
             if (m_tLatestValidFrom > m_tEarliestValidTo)
-                otErr << __FUNCTION__
-                      << ": WARNING: This purse has a 'valid from' date LATER "
-                         "than the 'valid to' date. "
-                         "(due to different tokens with different date "
-                         "ranges...)\n";
+                LogOutput(OT_METHOD)(__FUNCTION__)(
+                    ": WARNING: This purse has a 'valid from' date LATER "
+                    "than the 'valid to' date. "
+                    "(Due to different tokens with different date "
+                    "ranges...).")
+                    .Flush();
 
         } else
-            otErr << __FUNCTION__
-                  << ": Failure while trying to decrypt a token.\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Failure while trying to decrypt a token.")
+                .Flush();
     }
 }
 
@@ -1338,37 +1367,36 @@ bool Purse::Push(OTNym_or_SymmetricKey theOwner, const Token& theToken)
             }
 
             if (m_tLatestValidFrom > m_tEarliestValidTo)
-                otErr << __FUNCTION__
-                      << ": WARNING: This purse has a 'valid from' date LATER "
-                         "than the 'valid to' date. "
-                         "(due to different tokens with different date "
-                         "ranges...)\n";
+                LogOutput(OT_METHOD)(__FUNCTION__)(
+                    ": WARNING: This purse has a 'valid from' date LATER "
+                    "than the 'valid to' date. "
+                    "(Due to different tokens with different date "
+                    "ranges...).")
+                    .Flush();
 
             return true;
         } else {
             auto strPurseAssetType = String::Factory(m_InstrumentDefinitionID),
                  strTokenAssetType =
                      String::Factory(theToken.GetInstrumentDefinitionID());
-            otErr << __FUNCTION__
-                  << ": Failed while calling: "
-                     "theOwner.Seal_or_Encrypt(theEnvelope, "
-                     "strToken)\nPurse Asset Type:\n"
-                  << strPurseAssetType
-                  << "\n"
-                     "Token Asset Type:\n"
-                  << strTokenAssetType << "\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Failed while calling: "
+                "theOwner.Seal_or_Encrypt(theEnvelope, "
+                "strToken) "
+                "Purse Asset Type: ")(strPurseAssetType)("Token Asset Type: ")(
+                strTokenAssetType)(".")
+                .Flush();
         }
     } else {
         auto strPurseAssetType = String::Factory(m_InstrumentDefinitionID),
              strTokenAssetType =
                  String::Factory(theToken.GetInstrumentDefinitionID());
-        otErr << __FUNCTION__
-              << ": ERROR: Tried to push token with wrong "
-                 "instrument definition.\nPurse Asset Type:\n"
-              << strPurseAssetType
-              << "\n"
-                 "Token Asset Type:\n"
-              << strTokenAssetType << "\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": ERROR: Tried to push token with wrong "
+            "instrument definition. "
+            "Purse Asset Type: ")(strPurseAssetType)(" Token Asset Type: ")(
+            strTokenAssetType)(".")
+            .Flush();
     }
 
     return false;

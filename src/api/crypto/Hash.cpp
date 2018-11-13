@@ -127,8 +127,7 @@ bool Hash::Digest(
         }
     }
 
-    otErr << OT_METHOD << __FUNCTION__ << ": Unsupported hash type."
-          << std::endl;
+    LogOutput(OT_METHOD)(__FUNCTION__)(": Unsupported hash type.").Flush();
 
     return false;
 }
@@ -157,8 +156,7 @@ bool Hash::HMAC(
         }
     }
 
-    otErr << OT_METHOD << __FUNCTION__ << ": Unsupported hash type."
-          << std::endl;
+    LogOutput(OT_METHOD)(__FUNCTION__)(": Unsupported hash type.").Flush();
 
     return false;
 }
@@ -169,15 +167,14 @@ bool Hash::Digest(
     OTPassword& digest) const
 {
     if (false == Allocate(hashType, digest)) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Unable to allocate output space." << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Unable to allocate output space.")
+            .Flush();
 
         return false;
     }
 
     if (false == data.isMemory()) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Wrong OTPassword mode."
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Wrong OTPassword mode.").Flush();
 
         return false;
     }
@@ -195,8 +192,8 @@ bool Hash::Digest(
     Data& digest) const
 {
     if (false == Allocate(hashType, digest)) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Unable to allocate output space." << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Unable to allocate output space.")
+            .Flush();
 
         return false;
     }
@@ -214,8 +211,8 @@ bool Hash::Digest(
     Data& digest) const
 {
     if (false == Allocate(hashType, digest)) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Unable to allocate output space." << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Unable to allocate output space.")
+            .Flush();
 
         return false;
     }
@@ -236,8 +233,8 @@ bool Hash::Digest(
     auto result = Data::Factory();
 
     if (false == Allocate(hashType, result)) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Unable to allocate output space." << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Unable to allocate output space.")
+            .Flush();
 
         return false;
     }
@@ -260,15 +257,14 @@ bool Hash::HMAC(
     OTPassword& digest) const
 {
     if (false == Allocate(hashType, digest)) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Unable to allocate output space." << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Unable to allocate output space.")
+            .Flush();
 
         return false;
     }
 
     if (false == key.isMemory()) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Wrong OTPassword mode."
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Wrong OTPassword mode.").Flush();
 
         return false;
     }

@@ -28,7 +28,7 @@
 #include "Identity.hpp"
 
 // error from being unused.
-//#define OT_METHOD "opentxs::Identity::"
+#define OT_METHOD "opentxs::Identity::"
 
 namespace opentxs
 {
@@ -184,8 +184,9 @@ std::unique_ptr<proto::VerificationSet> Identity::InitializeVerificationSet(
     if (output) {
         output->set_version(version);
     } else {
-        otErr << __FUNCTION__ << ": Failed to instantiate verification set."
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Failed to instantiate verification set.")
+            .Flush();
     }
 
     return output;
@@ -324,15 +325,17 @@ std::unique_ptr<proto::VerificationSet> Identity::Verify(
 
                 return revised;
             } else {
-                otErr << __FUNCTION__ << ": Failed to update verification set."
-                      << std::endl;
+                LogOutput(OT_METHOD)(__FUNCTION__)(
+                    ": Failed to update verification set.")
+                    .Flush();
             }
         } else {
             return revised;
         }
     } else {
-        otErr << __FUNCTION__ << ": Failed to add internal verification."
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Failed to add internal verification.")
+            .Flush();
     }
 
     return nullptr;

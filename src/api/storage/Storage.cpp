@@ -404,8 +404,8 @@ OTIdentifier Storage::Bip47AddressToChannel(
     const bool exists = Root().Tree().NymNode().Exists(nymID.str());
 
     if (false == exists) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Nym " << nymID.str()
-              << " doesn't exist." << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Nym ")(nymID)(" doesn't exist.")
+            .Flush();
 
         return Identifier::Factory();
     }
@@ -425,8 +425,8 @@ proto::ContactItemType Storage::Bip47Chain(
     const bool exists = Root().Tree().NymNode().Exists(nymID.str());
 
     if (false == exists) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Nym " << nymID.str()
-              << " doesn't exist." << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Nym ")(nymID)(" doesn't exist.")
+            .Flush();
 
         return proto::CITEMTYPE_ERROR;
     }
@@ -446,8 +446,8 @@ Storage::Bip47ChannelList Storage::Bip47ChannelsByContact(
     const bool exists = Root().Tree().NymNode().Exists(nymID.str());
 
     if (false == exists) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Nym " << nymID.str()
-              << " doesn't exist." << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Nym ")(nymID)(" doesn't exist.")
+            .Flush();
 
         return {};
     }
@@ -467,8 +467,8 @@ Storage::Bip47ChannelList Storage::Bip47ChannelsByChain(
     const bool exists = Root().Tree().NymNode().Exists(nymID.str());
 
     if (false == exists) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Nym " << nymID.str()
-              << " doesn't exist." << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Nym ")(nymID)(" doesn't exist.")
+            .Flush();
 
         return {};
     }
@@ -488,8 +488,8 @@ Storage::Bip47ChannelList Storage::Bip47ChannelsByLocalPaymentCode(
     const bool exists = Root().Tree().NymNode().Exists(nymID.str());
 
     if (false == exists) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Nym " << nymID.str()
-              << " doesn't exist." << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Nym ")(nymID)(" doesn't exist.")
+            .Flush();
 
         return {};
     }
@@ -509,8 +509,8 @@ Storage::Bip47ChannelList Storage::Bip47ChannelsByRemotePaymentCode(
     const bool exists = Root().Tree().NymNode().Exists(nymID.str());
 
     if (false == exists) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Nym " << nymID.str()
-              << " doesn't exist." << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Nym ")(nymID)(" doesn't exist.")
+            .Flush();
 
         return {};
     }
@@ -528,8 +528,8 @@ ObjectList Storage::Bip47ChannelsList(const Identifier& nymID) const
     const bool exists = Root().Tree().NymNode().Exists(nymID.str());
 
     if (false == exists) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Nym " << nymID.str()
-              << " doesn't exist." << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Nym ")(nymID)(" doesn't exist.")
+            .Flush();
 
         return {};
     }
@@ -544,8 +544,8 @@ OTIdentifier Storage::Bip47Contact(
     const bool exists = Root().Tree().NymNode().Exists(nymID.str());
 
     if (false == exists) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Nym " << nymID.str()
-              << " doesn't exist." << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Nym ")(nymID)(" doesn't exist.")
+            .Flush();
 
         return Identifier::Factory();
     }
@@ -565,8 +565,8 @@ std::string Storage::Bip47LocalPaymentCode(
     const bool exists = Root().Tree().NymNode().Exists(nymID.str());
 
     if (false == exists) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Nym " << nymID.str()
-              << " doesn't exist." << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Nym ")(nymID)(" doesn't exist.")
+            .Flush();
 
         return {};
     }
@@ -586,8 +586,8 @@ std::string Storage::Bip47RemotePaymentCode(
     const bool exists = Root().Tree().NymNode().Exists(nymID.str());
 
     if (false == exists) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Nym " << nymID.str()
-              << " doesn't exist." << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Nym ")(nymID)(" doesn't exist.")
+            .Flush();
 
         return {};
     }
@@ -717,8 +717,8 @@ bool Storage::DeletePaymentWorkflow(
     const bool exists = Root().Tree().NymNode().Exists(nymID);
 
     if (false == exists) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Nym " << nymID
-              << " doesn't exist." << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Nym ")(nymID)(" doesn't exist.")
+            .Flush();
 
         return false;
     }
@@ -768,8 +768,8 @@ ObjectList Storage::IssuerList(const std::string& nymID) const
     const bool exists = Root().Tree().NymNode().Exists(nymID);
 
     if (false == exists) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Nym " << nymID
-              << " doesn't exist." << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Nym ")(nymID)(" doesn't exist.")
+            .Flush();
 
         return {};
     }
@@ -804,8 +804,8 @@ bool Storage::Load(
     const bool exists = Root().Tree().NymNode().Exists(nymID.str());
 
     if (false == exists) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Nym " << nymID.str()
-              << " doesn't exist." << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Nym ")(nymID)(" doesn't exist.")
+            .Flush();
 
         return false;
     }
@@ -891,8 +891,8 @@ bool Storage::Load(
     const bool checking) const
 {
     if (false == Root().Tree().NymNode().Exists(nymID)) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Nym " << nymID
-              << " doesn't exist." << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Nym ")(nymID)(" doesn't exist.")
+            .Flush();
 
         return false;
     }
@@ -910,8 +910,8 @@ bool Storage::Load(
     const bool checking) const
 {
     if (false == Root().Tree().NymNode().Exists(nymID)) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Nym " << nymID
-              << " doesn't exist." << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Nym ")(nymID)(" doesn't exist.")
+            .Flush();
 
         return false;
     }
@@ -1154,8 +1154,8 @@ bool Storage::MoveThreadItem(
         Root().Tree().NymNode().Nym(nymId).Threads().Exists(fromThreadID);
 
     if (false == fromExists) {
-        otErr << OT_METHOD << __FUNCTION__ << ": From thread does not exist."
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": From thread does not exist.")
+            .Flush();
 
         return false;
     }
@@ -1164,8 +1164,8 @@ bool Storage::MoveThreadItem(
         Root().Tree().NymNode().Nym(nymId).Threads().Exists(toThreadID);
 
     if (false == toExists) {
-        otErr << OT_METHOD << __FUNCTION__ << ": To thread does not exist."
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": To thread does not exist.")
+            .Flush();
 
         return false;
     }
@@ -1198,15 +1198,13 @@ bool Storage::MoveThreadItem(
     }
 
     if (false == found) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Item does not exist."
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Item does not exist.").Flush();
 
         return false;
     }
 
     if (false == fromThread.Remove(itemID)) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Failed to remove item."
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Failed to remove item.").Flush();
 
         return false;
     }
@@ -1225,8 +1223,7 @@ bool Storage::MoveThreadItem(
                          .It();
 
     if (false == toThread.Add(itemID, time, box, {}, {})) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Failed to insert item."
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Failed to insert item.").Flush();
 
         return false;
     }
@@ -1309,8 +1306,8 @@ ObjectList Storage::NymList() const { return Root().Tree().NymNode().List(); }
 ObjectList Storage::PaymentWorkflowList(const std::string& nymID) const
 {
     if (false == Root().Tree().NymNode().Exists(nymID)) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Nym " << nymID
-              << " doesn't exist." << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Nym ")(nymID)(" doesn't exist.")
+            .Flush();
 
         return {};
     }
@@ -1323,8 +1320,8 @@ std::string Storage::PaymentWorkflowLookup(
     const std::string& sourceID) const
 {
     if (false == Root().Tree().NymNode().Exists(nymID)) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Nym " << nymID
-              << " doesn't exist." << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Nym ")(nymID)(" doesn't exist.")
+            .Flush();
 
         return {};
     }
@@ -1338,8 +1335,8 @@ std::set<std::string> Storage::PaymentWorkflowsByAccount(
     const std::string& accountID) const
 {
     if (false == Root().Tree().NymNode().Exists(nymID)) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Nym " << nymID
-              << " doesn't exist." << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Nym ")(nymID)(" doesn't exist.")
+            .Flush();
 
         return {};
     }
@@ -1354,8 +1351,8 @@ std::set<std::string> Storage::PaymentWorkflowsByState(
     const proto::PaymentWorkflowState state) const
 {
     if (false == Root().Tree().NymNode().Exists(nymID)) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Nym " << nymID
-              << " doesn't exist." << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Nym ")(nymID)(" doesn't exist.")
+            .Flush();
 
         return {};
     }
@@ -1369,8 +1366,8 @@ std::set<std::string> Storage::PaymentWorkflowsByUnit(
     const std::string& unitID) const
 {
     if (false == Root().Tree().NymNode().Exists(nymID)) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Nym " << nymID
-              << " doesn't exist." << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Nym ")(nymID)(" doesn't exist.")
+            .Flush();
 
         return {};
     }
@@ -1385,8 +1382,8 @@ std::pair<proto::PaymentWorkflowType, proto::PaymentWorkflowState> Storage::
         const std::string& workflowID) const
 {
     if (false == Root().Tree().NymNode().Exists(nymID)) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Nym " << nymID
-              << " doesn't exist." << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Nym ")(nymID)(" doesn't exist.")
+            .Flush();
 
         return {};
     }
@@ -1762,8 +1759,8 @@ bool Storage::SetReadState(
     auto& nyms = mutable_Root().It().mutable_Tree().It().mutable_Nyms().It();
 
     if (false == nyms.Exists(nymId)) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Nym " << nymId
-              << " does not exist." << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Nym ")(nymId)(" does not exist.")
+            .Flush();
 
         return false;
     }
@@ -1771,8 +1768,9 @@ bool Storage::SetReadState(
     auto& threads = nyms.mutable_Nym(nymId).It().mutable_Threads().It();
 
     if (false == threads.Exists(threadId)) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Thread " << threadId
-              << " does not exist." << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Thread ")(threadId)(
+            " does not exist.")
+            .Flush();
 
         return false;
     }
@@ -1902,8 +1900,8 @@ bool Storage::Store(
     const bool exists = Root().Tree().NymNode().Exists(nymID.str());
 
     if (false == exists) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Nym " << nymID.str()
-              << " doesn't exist." << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Nym ")(nymID)(" doesn't exist.")
+            .Flush();
 
         return false;
     }
@@ -2004,8 +2002,8 @@ bool Storage::Store(const std::string& nymID, const proto::Issuer& data) const
     const bool exists = Root().Tree().NymNode().Exists(nymID);
 
     if (false == exists) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Nym " << nymID
-              << " doesn't exist." << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Nym ")(nymID)(" doesn't exist.")
+            .Flush();
 
         return false;
     }
@@ -2030,8 +2028,8 @@ bool Storage::Store(
     const bool exists = Root().Tree().NymNode().Exists(nymID);
 
     if (false == exists) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Nym " << nymID
-              << " doesn't exist." << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Nym ")(nymID)(" doesn't exist.")
+            .Flush();
 
         return false;
     }
@@ -2292,8 +2290,8 @@ std::size_t Storage::UnreadCount(
     auto& nyms = Root().Tree().NymNode();
 
     if (false == nyms.Exists(nymId)) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Nym " << nymId
-              << " does not exist." << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Nym ")(nymId)(" does not exist.")
+            .Flush();
 
         return 0;
     }
@@ -2301,8 +2299,9 @@ std::size_t Storage::UnreadCount(
     auto& threads = nyms.Nym(nymId).Threads();
 
     if (false == threads.Exists(threadId)) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Thread " << threadId
-              << " does not exist." << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Thread ")(threadId)(
+            " does not exist.")
+            .Flush();
 
         return 0;
     }
@@ -2315,8 +2314,9 @@ void Storage::UpgradeNyms()
     const auto level = Root().Tree().NymNode().UpgradeLevel();
 
     if (3 > level) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Beginning upgrade for version "
-              << level << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Beginning upgrade for version ")(
+            level)(".")
+            .Flush();
         mutable_Root()
             .It()
             .mutable_Tree()
@@ -2334,13 +2334,13 @@ void Storage::UpgradeNyms()
 bool Storage::verify_write_lock(const Lock& lock) const
 {
     if (lock.mutex() != &write_lock_) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Incorrect mutex." << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Incorrect mutex.").Flush();
 
         return false;
     }
 
     if (false == lock.owns_lock()) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Lock not owned." << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Lock not owned.").Flush();
 
         return false;
     }

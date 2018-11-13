@@ -72,17 +72,17 @@ void StorageParent::init([[maybe_unused]] const api::HDSeed& seeds)
     auto seed = seeds.DefaultSeed();
 
     if (seed.empty()) {
-        otErr << OT_METHOD << __FUNCTION__ << ": No default seed." << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": No default seed.").Flush();
     } else {
-        otErr << OT_METHOD << __FUNCTION__ << ": Default seed is: " << seed
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Default seed is: ")(seed)(".")
+            .Flush();
     }
 
     auto rawKey = seeds.GetStorageKey(seed);
 
     if (false == bool(rawKey)) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Failed to load encryption key."
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Failed to load encryption key.")
+            .Flush();
     }
 
     storage_encryption_key_ = crypto_.GetStorageKey(*rawKey);
@@ -92,8 +92,9 @@ void StorageParent::init([[maybe_unused]] const api::HDSeed& seeds)
             storage_encryption_key_->ID())
             .Flush();
     } else {
-        otErr << OT_METHOD << __FUNCTION__ << ": Failed to load storage key "
-              << seed << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Failed to load storage key ")(
+            seed)(".")
+            .Flush();
     }
 #endif
 
@@ -149,8 +150,9 @@ OTString StorageParent::get_primary_storage_plugin(
         if (haveConfigured && (false == same)) {
             migrate = true;
             previous.Set(configured);
-            otErr << OT_METHOD << __FUNCTION__ << ": Migrating from "
-                  << previous << "." << std::endl;
+            LogOutput(OT_METHOD)(__FUNCTION__)(": Migrating from ")(previous)(
+                ".")
+                .Flush();
         }
 
         return commandLine;
