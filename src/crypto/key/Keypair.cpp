@@ -219,9 +219,9 @@ bool Keypair::make_new_keypair(const NymParameters& nymParameters)
     LowLevelKeyGenerator lowLevelKeys(nymParameters);
 
     if (!lowLevelKeys.MakeNewKeypair()) {
-        otErr
-            << OT_METHOD << __FUNCTION__
-            << " : Failed in a call to LowLevelKeyGenerator::MakeNewKeypair.\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Failed in a call to LowLevelKeyGenerator::MakeNewKeypair.")
+            .Flush();
         return false;
     }
 
@@ -292,11 +292,12 @@ bool Keypair::ReEncrypt(const OTPassword& theExportPassword, bool bImporting)
         theExportPassword, bImporting);  // <==== IMPORT or EXPORT occurs here.
 
     if (!(bReEncrypted)) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Failure, either when re-encrypting, or "
-                 "when subsequently retrieving "
-                 "the public/private keys. bImporting == "
-              << (bImporting ? "true" : "false") << "\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Failure, either when re-encrypting, or "
+            "when subsequently retrieving "
+            "the public/private keys. bImporting == ")(
+            bImporting ? "true" : "false")(".")
+            .Flush();
     }
 
     return (bReEncrypted);
@@ -325,8 +326,9 @@ bool Keypair::TransportKey(Data& publicKey, OTPassword& privateKey) const
 bool Keypair::Verify(const Data& plaintext, const proto::Signature& sig) const
 {
     if (!m_pkeyPublic.get()) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Missing public key. Can not verify.\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Missing public key. Can not verify.")
+            .Flush();
 
         return false;
     }

@@ -161,8 +161,9 @@ bool LegacySymmetric::Decrypt(
         ascArmor, strCiphertext);  // str_bookend="-----BEGIN" by default
 
     if (!bLoadedArmor || !ascArmor->Exists()) {
-        otErr << __FUNCTION__ << ": Failure loading ciphertext envelope:\n\n"
-              << strCiphertext << "\n\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Failure loading ciphertext envelope: ")(strCiphertext)(".")
+            .Flush();
         return false;
     }
 
@@ -467,18 +468,20 @@ bool LegacySymmetric::ChangePassphrase(
     // OTEnvelope.
     //
     if (!dataIV->Randomize(crypto_.Config().SymmetricIvSize())) {
-        otErr << __FUNCTION__
-              << ": Failed generating iv for changing "
-                 "passphrase on a symmetric key. (Returning "
-                 "false.)\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Failed generating iv for changing "
+            "passphrase on a symmetric key. (Returning "
+            "false).")
+            .Flush();
         return false;
     }
 
     if (!dataSalt->Randomize(crypto_.Config().SymmetricSaltSize())) {
-        otErr << __FUNCTION__
-              << ": Failed generating random salt for changing "
-                 "passphrase on a symmetric key. (Returning "
-                 "false.)\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Failed generating random salt for changing "
+            "passphrase on a symmetric key. (Returning "
+            "false).")
+            .Flush();
         return false;
     }
 
@@ -554,15 +557,17 @@ bool LegacySymmetric::GenerateKey(
         .Flush();
 
     if (!iv_->Randomize(crypto_.Config().SymmetricIvSize())) {
-        otErr << __FUNCTION__
-              << ": Failed generating iv for encrypting a "
-                 "symmetric key. (Returning false.)\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Failed generating iv for encrypting a "
+            "symmetric key. (Returning false).")
+            .Flush();
         return false;
     }
 
     if (!salt_->Randomize(crypto_.Config().SymmetricSaltSize())) {
-        otErr << __FUNCTION__
-              << ": Failed generating random salt. (Returning false.)\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Failed generating random salt. (Returning false).")
+            .Flush();
         return false;
     }
 
@@ -579,8 +584,9 @@ bool LegacySymmetric::GenerateKey(
             static_cast<std::uint32_t>(nRes);  // we need an uint32_t value.
 
         if (crypto_.Config().SymmetricKeySize() != uRes) {
-            otErr << __FUNCTION__
-                  << ": Failed generating symmetric key. (Returning false.)\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Failed generating symmetric key. (Returning false).")
+                .Flush();
             return false;
         }
     }
@@ -642,15 +648,17 @@ bool LegacySymmetric::GenerateHashCheck(const OTPassword& thePassphrase)
     Lock lock(lock_);
 
     if (!m_bIsGenerated) {
-        otErr << __FUNCTION__
-              << ": No Key Generated, run GenerateKey(), and "
-                 "this function will not be needed!";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": No Key Generated, run GenerateKey(), and "
+            "this function will not be needed!")
+            .Flush();
         OT_FAIL;
     }
 
     if (HasHashCheck()) {
-        otErr << __FUNCTION__
-              << ": Already have a HashCheck, no need to create one!";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Already have a HashCheck, no need to create one!")
+            .Flush();
         return false;
     }
 
@@ -663,15 +671,16 @@ bool LegacySymmetric::GenerateHashCheck(const OTPassword& thePassphrase)
     if (nullptr == pDerivedKey)  // A pointerpointer was passed in... (caller
                                  // will be responsible then, to delete.)
     {
-        otErr << __FUNCTION__ << ": failed to calculate derived key";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Failed to calculate derived key.")
+            .Flush();
         return false;
     }
 
     if (!HasHashCheck()) {
-        otErr
-            << __FUNCTION__
-            << ": Still don't have a hash check (even after generating one)\n!"
-               "this is bad. Will assert.";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Still don't have a hash check (even after generating one)!"
+            " This is bad! Will assert.")
+            .Flush();
         OT_FAIL;
     }
 
@@ -729,9 +738,10 @@ OTPassword* LegacySymmetric::calculate_derived_key_from_passphrase(
 
     if (bCheckForHashCheck) {
         if (!HasHashCheck()) {
-            otErr << __FUNCTION__
-                  << ": Unable to calculate derived key, as "
-                     "hash check is missing!";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Unable to calculate derived key because "
+                "hash check is missing!")
+                .Flush();
             OT_FAIL;
         }
         OT_ASSERT(false == hash_check_->empty());
@@ -773,8 +783,9 @@ OTPassword* LegacySymmetric::calculate_new_derived_key_from_passphrase(
         pDerivedKey.reset(crypto_.AES().DeriveNewKey(
             thePassphrase, salt_, m_uIterationCount, hash_check_));
     } else {
-        otErr << __FUNCTION__
-              << ": Calling Wrong function!! Hash check already exists!";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Calling Wrong function!! Hash check already exists!")
+            .Flush();
     }
 
     OT_ASSERT(pDerivedKey);
@@ -904,8 +915,8 @@ bool LegacySymmetric::serialize_from(const Lock& lock, Data& theInput)
     if (0 == (nRead = theInput.OTfread(
                   reinterpret_cast<std::uint8_t*>(&n_is_generated),
                   static_cast<std::uint32_t>(sizeof(n_is_generated))))) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Error reading n_is_generated.\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Error reading n_is_generated.")
+            .Flush();
         return false;
     }
 
@@ -918,10 +929,11 @@ bool LegacySymmetric::serialize_from(const Lock& lock, Data& theInput)
     else if (0 == host_is_generated)
         m_bIsGenerated = false;
     else {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Error: host_is_generated, Bad value: "
-              << static_cast<std::int32_t>(host_is_generated)
-              << ". (Expected 0 or 1.)\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Error: host_is_generated, Bad value: ")(
+            static_cast<std::int32_t>(host_is_generated))(
+            ". (Expected 0 or 1).")
+            .Flush();
         return false;
     }
 
@@ -934,8 +946,8 @@ bool LegacySymmetric::serialize_from(const Lock& lock, Data& theInput)
     if (0 == (nRead = theInput.OTfread(
                   reinterpret_cast<std::uint8_t*>(&n_key_size_bits),
                   static_cast<std::uint32_t>(sizeof(n_key_size_bits))))) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Error reading n_key_size_bits.\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Error reading n_key_size_bits.")
+            .Flush();
         return false;
     }
 
@@ -950,8 +962,8 @@ bool LegacySymmetric::serialize_from(const Lock& lock, Data& theInput)
     if (0 == (nRead = theInput.OTfread(
                   reinterpret_cast<std::uint8_t*>(&n_iteration_count),
                   static_cast<std::uint32_t>(sizeof(n_iteration_count))))) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Error reading n_iteration_count.\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Error reading n_iteration_count.")
+            .Flush();
         return false;
     }
     OT_ASSERT(nRead == static_cast<std::uint32_t>(sizeof(n_iteration_count)));
@@ -968,7 +980,8 @@ bool LegacySymmetric::serialize_from(const Lock& lock, Data& theInput)
     if (0 == (nRead = theInput.OTfread(
                   reinterpret_cast<std::uint8_t*>(&n_salt_size),
                   static_cast<std::uint32_t>(sizeof(n_salt_size))))) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Error reading n_salt_size.\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Error reading n_salt_size.")
+            .Flush();
         return false;
     }
     OT_ASSERT(nRead == static_cast<std::uint32_t>(sizeof(n_salt_size)));
@@ -985,8 +998,9 @@ bool LegacySymmetric::serialize_from(const Lock& lock, Data& theInput)
     if (0 == (nRead = theInput.OTfread(
                   static_cast<std::uint8_t*>(const_cast<void*>(salt_->data())),
                   static_cast<std::uint32_t>(lSaltSize)))) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Error reading salt for symmetric key.\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Error reading salt for symmetric key.")
+            .Flush();
         return false;
     }
 
@@ -1002,7 +1016,8 @@ bool LegacySymmetric::serialize_from(const Lock& lock, Data& theInput)
     if (0 == (nRead = theInput.OTfread(
                   reinterpret_cast<std::uint8_t*>(&n_iv_size),
                   static_cast<std::uint32_t>(sizeof(n_iv_size))))) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Error reading n_iv_size.\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Error reading n_iv_size.")
+            .Flush();
         return false;
     }
 
@@ -1019,8 +1034,9 @@ bool LegacySymmetric::serialize_from(const Lock& lock, Data& theInput)
     if (0 == (nRead = theInput.OTfread(
                   static_cast<std::uint8_t*>(const_cast<void*>(iv_->data())),
                   static_cast<std::uint32_t>(lIVSize)))) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Error reading IV for symmetric key.\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Error reading IV for symmetric key.")
+            .Flush();
         return false;
     }
 
@@ -1036,8 +1052,8 @@ bool LegacySymmetric::serialize_from(const Lock& lock, Data& theInput)
     if (0 == (nRead = theInput.OTfread(
                   reinterpret_cast<std::uint8_t*>(&n_enc_key_size),
                   static_cast<std::uint32_t>(sizeof(n_enc_key_size))))) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Error reading n_enc_key_size.\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Error reading n_enc_key_size.")
+            .Flush();
         return false;
     }
     OT_ASSERT(nRead == static_cast<std::uint32_t>(sizeof(n_enc_key_size)));
@@ -1056,8 +1072,9 @@ bool LegacySymmetric::serialize_from(const Lock& lock, Data& theInput)
                   static_cast<std::uint8_t*>(
                       const_cast<void*>(encrypted_key_->data())),
                   static_cast<std::uint32_t>(lEncKeySize)))) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Error reading encrypted symmetric key.\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Error reading encrypted symmetric key.")
+            .Flush();
         return false;
     }
 
@@ -1074,11 +1091,11 @@ bool LegacySymmetric::serialize_from(const Lock& lock, Data& theInput)
     if (0 == (nRead = theInput.OTfread(
                   reinterpret_cast<std::uint8_t*>(&n_hash_check_size),
                   static_cast<std::uint32_t>(sizeof(n_hash_check_size))))) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Error reading n_hash_check_size.\n";
-        otErr
-            << OT_METHOD << __FUNCTION__
-            << ": Looks like we don't have a hash check yet! (will make one)\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Error reading n_hash_check_size.")
+            .Flush();
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Looks like we don't have a hash check yet (will make one)!")
+            .Flush();
         has_hash_check_->Off();
 
         return false;
@@ -1102,8 +1119,8 @@ bool LegacySymmetric::serialize_from(const Lock& lock, Data& theInput)
         (nRead = theInput.OTfread(
              static_cast<std::uint8_t*>(const_cast<void*>(hash_check_->data())),
              static_cast<std::uint32_t>(lHashCheckSize)))) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Error reading hash check data.\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Error reading hash check data.")
+            .Flush();
         return false;
     }
 

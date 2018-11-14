@@ -19,7 +19,7 @@
 #include <ostream>
 #include <string>
 
-#define OT_METHOD "opentxs::OTVariable"
+#define OT_METHOD "opentxs::OTVariable::"
 
 namespace opentxs
 {
@@ -45,7 +45,8 @@ void OTVariable::Serialize(Tag& parent, bool bCalculatingID) const
             str_access = "important";
             break;
         default:
-            otErr << "OTVariable::Serialize: ERROR: Bad variable access.\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(": ERROR: Bad variable access.")
+                .Flush();
             break;
     }
 
@@ -80,7 +81,8 @@ void OTVariable::Serialize(Tag& parent, bool bCalculatingID) const
                 "value", bCalculatingID ? "false" : formatBool(m_bValue));
             break;
         default:
-            otErr << "OTVariable::Serialize: ERROR: Bad variable type.\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(": ERROR: Bad variable type.")
+                .Flush();
             break;
     }
 
@@ -171,8 +173,9 @@ OTVariable::~OTVariable()
 bool OTVariable::SetValue(const std::int32_t& nValue)
 {
     if (!IsInteger()) {
-        otErr << "OTVariable::SetValue(std::int64_t): Error: This variable ("
-              << m_strName << ") is not an integer.\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Error: This variable (")(
+            m_strName)(") is not an integer.")
+            .Flush();
         return false;
     }
 
@@ -184,8 +187,9 @@ bool OTVariable::SetValue(const std::int32_t& nValue)
 bool OTVariable::SetValue(bool bValue)
 {
     if (!IsBool()) {
-        otErr << "OTVariable::SetValue(bool): Error: This variable ("
-              << m_strName << ") is not a bool.\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Error: This variable (")(
+            m_strName)(") is not a bool.")
+            .Flush();
         return false;
     }
 
@@ -197,8 +201,9 @@ bool OTVariable::SetValue(bool bValue)
 bool OTVariable::SetValue(const std::string& str_Value)
 {
     if (!IsString()) {
-        otErr << "OTVariable::SetValue(std::string): Error: This variable ("
-              << m_strName << ") is not a string.\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Error: This variable (")(
+            m_strName)(") is not a string.")
+            .Flush();
         return false;
     }
 
@@ -236,8 +241,9 @@ bool OTVariable::IsDirty() const
                 bReturnVal = true;
             break;
         default:
-            otErr << "OTVariable::IsDirty: Error: unknown type for variable: "
-                  << m_strName << "\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Error: Unknown type for variable: ")(m_strName)(".")
+                .Flush();
             break;
     }
 
@@ -265,9 +271,9 @@ void OTVariable::SetAsClean()
                                         // different.
             break;
         default:
-            otErr
-                << "OTVariable::SetAsClean: Error: unknown type for variable: "
-                << m_strName << "\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Error: Unknown type for variable: ")(m_strName)(".")
+                .Flush();
             m_str_ValueBackup = m_str_Value;
             m_nValueBackup = m_nValue;
             m_bValueBackup = m_bValue;
@@ -337,8 +343,9 @@ bool OTVariable::Compare(OTVariable& rhs)
             bMatch = (GetValueString().compare(rhs.GetValueString()) == 0);
             break;
         default:
-            otErr << "OTVariable::Compare: Unknown type in variable "
-                  << m_strName << ".\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(": Unknown type in variable ")(
+                m_strName)(".")
+                .Flush();
             break;
     }
 

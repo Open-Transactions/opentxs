@@ -158,8 +158,9 @@ bool RSA::GetPublicKey(String& strKey) const
             m_p_ascKey->Get());
         return true;
     } else {
-        otErr << "RSA::GetPublicKey: Error: no "
-                 "public key.\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Error: No "
+                                           "public key.")
+            .Flush();
     }
 
     return false;
@@ -180,9 +181,10 @@ bool RSA::SetPublicKey(const String& strKey)
         m_p_ascKey->Set(theArmor);
         return true;
     } else
-        otErr << "RSA::SetPublicKey: Error: failed loading "
-                 "ascii-armored contents from bookended string:\n\n"
-              << strKey << "\n\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Error: Failed loading "
+            "ascii-armored contents from bookended string: ")(strKey)(".")
+            .Flush();
 
     return false;
 }
@@ -225,7 +227,9 @@ bool RSA::SetPrivateKey(
     m_bIsPrivateKey = true;
 
     if (!strCert.Exists()) {
-        otErr << __FUNCTION__ << ": Error: Cert input is nonexistent!\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Error: Cert input is nonexistent!")
+            .Flush();
         return false;
     }
 
@@ -295,11 +299,12 @@ bool RSA::SetPrivateKey(
         }
 
         if (nullptr == pkey) {
-            otErr << __FUNCTION__ << ": (pImportPassword size: "
-                  << (nullptr == pImportPassword
-                          ? 0
-                          : pImportPassword->getPasswordSize())
-                  << ") Error reading private key from string.\n\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(": (pImportPassword size: ")(
+                nullptr == pImportPassword
+                    ? 0
+                    : pImportPassword->getPasswordSize())(
+                "). Error reading private key from string.")
+                .Flush();
             return false;
         } else {
             // Note: no need to start m_timer here since SetKeyAsCopyOf already
@@ -393,7 +398,9 @@ bool RSA::SetPublicKeyFromPrivateKey(
         EVP_PKEY* pkey = X509_get_pubkey(x509);
 
         if (pkey == nullptr) {
-            otErr << __FUNCTION__ << ": Error reading public key from x509.\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Error reading public key from x509.")
+                .Flush();
         } else {
             dp->SetKeyAsCopyOf(
                 *pkey,
@@ -412,7 +419,9 @@ bool RSA::SetPublicKeyFromPrivateKey(
             bReturnValue = true;
         }
     } else {
-        otErr << __FUNCTION__ << ": Error reading x509 out of certificate.\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Error reading x509 out of certificate.")
+            .Flush();
     }
 
     // For now we save the x509, and free it in the destructor, since we may
@@ -559,8 +568,9 @@ bool RSA::ReEncryptPrivateKey(
             EVP_PKEY_free(pClearKey);
 
             if (0 == nWriteBio)
-                otErr << __FUNCTION__
-                      << ": Failed writing EVP_PKEY to memory buffer.\n";
+                LogOutput(OT_METHOD)(__FUNCTION__)(
+                    ": Failed writing EVP_PKEY to memory buffer.")
+                    .Flush();
             else {
                 LogInsane(OT_METHOD)(__FUNCTION__)(
                     ": Success writing EVP_PKEY to memory buffer.")
@@ -595,18 +605,20 @@ bool RSA::ReEncryptPrivateKey(
                     m_p_ascKey->SetData(theNewData);  // <======== Success!
                     bReturnVal = true;
                 } else
-                    otErr << __FUNCTION__
-                          << ": Failed copying private key into memory.\n";
+                    LogOutput(OT_METHOD)(__FUNCTION__)(
+                        ": Failed copying private key into memory.")
+                        .Flush();
             }  // (nWriteBio != 0)
 
         } else
-            otErr << __FUNCTION__
-                  << ": Failed loading actual private key from "
-                     "BIO containing ASCII-armored data:\n\n"
-                  << m_p_ascKey->Get() << "\n\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Failed loading actual private key from "
+                "BIO containing ASCII-armored data: ")(m_p_ascKey->Get())(".")
+                .Flush();
     } else
-        otErr << __FUNCTION__
-              << ": Failed reading private key from ASCII-armored data.\n\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Failed reading private key from ASCII-armored data. ")
+            .Flush();
     //      otErr << "%s: Failed reading private key from ASCII-armored
     // data:\n\n%s\n\n",
     //                    __FUNCTION__, m_p_ascKey->Get());
@@ -623,8 +635,9 @@ bool RSA::SaveCertToString(
     X509* x509 = dp->GetX509();
 
     if (nullptr == x509) {
-        otErr << __FUNCTION__
-              << ": Error: Unexpected nullptr x509. (Returning false.)\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Error: Unexpected nullptr x509. (Returning false).")
+            .Flush();
         return false;
     }
 
@@ -680,17 +693,18 @@ bool RSA::GetPrivateKey(
         EVP_des_ede3_cbc();  // todo security (revisit this mode...)
 
     if (!IsPrivate()) {
-        otErr << __FUNCTION__
-              << ": Error: !IsPrivate() (This function should "
-                 "only be called on a private key.)\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Error: !IsPrivate() (This function should "
+            "only be called on a private key).")
+            .Flush();
         return false;
     }
 
     EVP_PKEY* pPrivateKey = dp->GetKeyLowLevel();
     if (nullptr == pPrivateKey) {
-        otErr
-            << __FUNCTION__
-            << ": Error: Unexpected nullptr pPrivateKey. (Returning false.)\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Error: Unexpected nullptr pPrivateKey. (Returning false).")
+            .Flush();
         return false;
     }
 
@@ -742,7 +756,9 @@ bool RSA::GetPrivateKey(
         privateKey->Set(reinterpret_cast<const char*>(buffer_pri));
         privateSuccess = true;
     } else {
-        otErr << __FUNCTION__ << ": Error : key length is not 1 or more!";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Error: Key length is not 1 or more!")
+            .Flush();
     }
 
     publicSuccess = dynamic_cast<const RSA*>(pPubkey)->SaveCertToString(

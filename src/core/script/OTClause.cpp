@@ -77,7 +77,9 @@ void OTClause::Serialize(Tag& parent) const
     if (m_strCode->GetLength() > 2)
         ascCode->SetString(m_strCode);
     else
-        otErr << "Empty script code in OTClause::Serialize()\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Empty script code in OTClause::Serialize().")
+            .Flush();
 
     TagPtr pTag(new Tag("clause", ascCode->Get()));
 

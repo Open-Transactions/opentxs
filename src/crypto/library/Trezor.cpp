@@ -247,8 +247,7 @@ std::shared_ptr<proto::AsymmetricKey> Trezor::GetHDKey(
     auto node = DeriveChild(curve, seed, path);
 
     if (!node) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Failed to derive child."
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Failed to derive child.").Flush();
 
         return output;
     }
@@ -584,8 +583,9 @@ bool Trezor::Sign(
     bool haveDigest = crypto_.Hash().Digest(hashType, plaintext, hash);
 
     if (!haveDigest) {
-        otErr << __FUNCTION__ << ": Failed to obtain the contract hash."
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Failed to obtain the contract hash.")
+            .Flush();
 
         return false;
     }
@@ -627,15 +627,17 @@ bool Trezor::Sign(
 
             return true;
         } else {
-            otErr << __FUNCTION__ << ": "
-                  << "Call to ecdsa_sign_digest() failed.\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Call to ecdsa_sign_digest() failed.")
+                .Flush();
 
             return false;
         }
     } else {
-        otErr << __FUNCTION__ << ": "
-              << "Can not extract ecdsa private key from "
-                 "Asymmetric.\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Can not extract ecdsa private key from "
+            "Asymmetric.")
+            .Flush();
 
         return false;
     }

@@ -24,6 +24,8 @@
 #include <string>
 #include <utility>
 
+#define OT_METHOD "opentxs::OTScript::"
+
 namespace opentxs
 {
 
@@ -103,15 +105,18 @@ std::shared_ptr<OTScript> OTScriptFactory(const std::string& script_type)
 #else
     // default no script interpreter
     if (script_type == "") {
-        otErr << "\n\n WARNING 1: script_type == noscript. \n\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": WARNING 1: script_type == noscript.")
+            .Flush();
 
         std::shared_ptr<OTScript> pNoScript(new OTScript);
         return pNoScript;
     }
 #endif
 
-    otErr << __FUNCTION__ << ": Script language (" << script_type
-          << ") not found.\n";
+    LogOutput(OT_METHOD)(__FUNCTION__)(": Script language (")(script_type)(
+        ") not found.")
+        .Flush();
 
     std::shared_ptr<OTScript> retVal;
     return retVal;
@@ -141,15 +146,18 @@ std::shared_ptr<OTScript> OTScriptFactory(
 #else
     // default no script interpreter
     if (script_type == "") {
-        otErr << "\n\n WARNING 2: script_type == noscript. \n\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": WARNING 2: script_type == noscript.")
+            .Flush();
 
         std::shared_ptr<OTScript> pNoScript(new OTScript);
         return pNoScript;
     }
 #endif
 
-    otErr << __FUNCTION__ << ": Script language (" << script_type
-          << ") not found.\n";
+    LogOutput(OT_METHOD)(__FUNCTION__)(": Script language (")(script_type)(
+        ") not found.")
+        .Flush();
 
     std::shared_ptr<OTScript> retVal;
     return retVal;
@@ -296,7 +304,8 @@ void OTScript::RemoveVariable(OTVariable& theVar)
 
 bool OTScript::ExecuteScript(OTVariable*)
 {
-    otErr << "OTScript::ExecuteScript: Scripting has been disabled.\n";
+    LogOutput(OT_METHOD)(__FUNCTION__)(": Scripting has been disabled.")
+        .Flush();
     return true;
 }
 

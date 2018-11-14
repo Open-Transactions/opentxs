@@ -799,9 +799,10 @@ void OpenSSL::Init()
 #else
     // no thread support
 
-    otErr << __FUNCTION__
-          << ": WARNING: OpenSSL was NOT compiled with thread support. "
-          << "(Also: Master Key will not expire.)\n";
+    LogOutput(OT_METHOD)(__FUNCTION__)(
+        ": WARNING: OpenSSL was NOT compiled with thread support. "
+        "(Also: Master Key will not expire).")
+        .Flush();
 
 #endif
 }
@@ -943,40 +944,44 @@ bool OpenSSL::ArgumentCheck(
     // Validate input parameters
     if (!encrypt) {
         if (AEAD && (LegacySymmetricProvider::TagSize(cipher) != tag.size())) {
-            otErr << "OpenSSL::" << __FUNCTION__ << ": Incorrect tag size.\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(": Incorrect tag size.").Flush();
             return false;
         }
     }
 
     if ((encrypt && ECB) &&
         (inputLength != LegacySymmetricProvider::KeySize(cipher))) {
-        otErr << "OpenSSL::" << __FUNCTION__
-              << ": Input size must be exactly one block for ECB mode.\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Input size must be exactly one block for ECB mode.")
+            .Flush();
         return false;
     }
 
     if (!ECB && (iv.size() != LegacySymmetricProvider::IVSize(cipher))) {
-        otErr << "OpenSSL::" << __FUNCTION__ << ": Incorrect IV size.\n";
-        otErr << "Actual IV bytes: " << iv.size() << "\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Incorrect IV size.").Flush();
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Actual IV bytes: ")(iv.size())
+        (".").Flush();
         return false;
     }
 
     if (key.getMemorySize() != LegacySymmetricProvider::KeySize(cipher)) {
-        otErr << "OpenSSL::" << __FUNCTION__
-              << ": Incorrect key size. Expected: "
-              << LegacySymmetricProvider::KeySize(cipher) << "\n";
-        otErr << "Actual key bytes: " << key.getMemorySize() << "\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Incorrect key size. Expected: ")(
+            LegacySymmetricProvider::KeySize(cipher))(".")
+            .Flush();
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Actual key bytes: ")(
+            key.getMemorySize())(".")
+            .Flush();
         return false;
     }
 
     if (nullptr == input) {
-        otErr << "OpenSSL::" << __FUNCTION__
-              << ": Input pointer does not exist.\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Input pointer does not exist.")
+            .Flush();
         return false;
     }
 
     if (0 == inputLength) {
-        otErr << "OpenSSL::" << __FUNCTION__ << ": Input is empty.\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Input is empty.").Flush();
         return false;
     }
 
@@ -1037,8 +1042,6 @@ bool OpenSSL::Encrypt(
     Data& ciphertext,
     Data& tag) const
 {
-    const char* szFunc = "OpenSSL::Encrypt";
-
     bool AEAD = false;
     bool ECB = false;
     bool goodInputs = ArgumentCheck(
@@ -1093,9 +1096,10 @@ bool OpenSSL::Encrypt(
             // EVP_CIPHER_CTX_cleanup returns 1 for success and 0 for failure.
             //
             if (0 == EVP_CIPHER_CTX_cleanup(&m_ctx))
-                otErr << m_szFunc
-                      << ": Failure in EVP_CIPHER_CTX_cleanup. (It "
-                         "returned 0.)\n";
+                LogOutput(OT_METHOD)(__FUNCTION__)(
+                    ": Failure in EVP_CIPHER_CTX_cleanup. (It "
+                    "returned 0).")
+                    .Flush();
 
             m_szFunc = nullptr;  // keep the static analyzer happy
         }
@@ -1133,7 +1137,8 @@ bool OpenSSL::Encrypt(
     if (!EVP_EncryptInit_ex(pCONTEXT, cipher_type, nullptr, nullptr, nullptr)) {
         //  if (!EVP_EncryptInit_ex(context, cipher_type, nullptr, nullptr,
         //  nullptr))
-        otErr << szFunc << ": Could not set cipher type.\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Could not set cipher type.")
+            .Flush();
         return false;
     }
 
@@ -1141,7 +1146,8 @@ bool OpenSSL::Encrypt(
         // set GCM IV length
         if (!EVP_CIPHER_CTX_ctrl(
                 pCONTEXT, EVP_CTRL_GCM_SET_IVLEN, iv.size(), nullptr)) {
-            otErr << szFunc << ": Could not set IV length.\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(": Could not set IV length.")
+                .Flush();
             return false;
         }
     }
@@ -1154,7 +1160,7 @@ bool OpenSSL::Encrypt(
                 nullptr,
                 nullptr,
                 static_cast<std::uint8_t*>(const_cast<void*>(iv.data())))) {
-            otErr << szFunc << ": Could not set IV.\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(": Could not set IV.").Flush();
             return false;
         }
     }
@@ -1166,7 +1172,7 @@ bool OpenSSL::Encrypt(
             nullptr,
             const_cast<std::uint8_t*>(key.getMemory_uint8()),
             nullptr)) {
-        otErr << szFunc << ": Could not set key.\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Could not set key.").Flush();
         return false;
     }
 
@@ -1198,7 +1204,8 @@ bool OpenSSL::Encrypt(
                 const_cast<std::uint8_t*>(reinterpret_cast<const uint8_t*>(
                     &(plaintext[lCurrentIndex]))),
                 len)) {
-            otErr << szFunc << ": EVP_EncryptUpdate: failed.\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(": EVP_EncryptUpdate: failed.")
+                .Flush();
             return false;
         }
         lRemainingLength -= len;
@@ -1211,7 +1218,8 @@ bool OpenSSL::Encrypt(
     }
 
     if (!EVP_EncryptFinal_ex(pCONTEXT, &vBuffer_out.at(0), &len_out)) {
-        otErr << szFunc << ": EVP_EncryptFinal: failed.\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": EVP_EncryptFinal: failed.")
+            .Flush();
         return false;
     }
 
@@ -1225,7 +1233,8 @@ bool OpenSSL::Encrypt(
                 EVP_CTRL_GCM_GET_TAG,
                 LegacySymmetricProvider::TagSize(cipher),
                 const_cast<void*>(tag.data()))) {
-            otErr << szFunc << ": Could not extract tag.\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(": Could not extract tag.")
+                .Flush();
             return false;
         }
     }
@@ -1300,8 +1309,6 @@ bool OpenSSL::Decrypt(
     const std::uint32_t ciphertextLength,
     CryptoSymmetricDecryptOutput& plaintext) const
 {
-    const char* szFunc = "OpenSSL::Decrypt";
-
     bool AEAD = false;
     bool ECB = false;
     bool goodInputs = ArgumentCheck(
@@ -1352,9 +1359,10 @@ bool OpenSSL::Decrypt(
             // EVP_CIPHER_CTX_cleanup returns 1 for success and 0 for failure.
             //
             if (0 == EVP_CIPHER_CTX_cleanup(&m_ctx))
-                otErr << m_szFunc
-                      << ": Failure in EVP_CIPHER_CTX_cleanup. (It "
-                         "returned 0.)\n";
+                LogOutput(OT_METHOD)(__FUNCTION__)(
+                    ": Failure in EVP_CIPHER_CTX_cleanup. (It "
+                    "returned 0).")
+                    .Flush();
             m_szFunc = nullptr;  // to keep the static analyzer happy.
         }
     };
@@ -1373,7 +1381,8 @@ bool OpenSSL::Decrypt(
 #else
     if (!EVP_DecryptInit_ex(context, cipher_type, nullptr, nullptr, nullptr)) {
 #endif
-        otErr << szFunc << ": Could not set cipher type.\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Could not set cipher type.")
+            .Flush();
         return false;
     }
 
@@ -1385,7 +1394,8 @@ bool OpenSSL::Decrypt(
 #else
                 context, EVP_CTRL_GCM_SET_IVLEN, iv.size(), nullptr)) {
 #endif
-            otErr << szFunc << ": Could not set IV length.\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(": Could not set IV length.")
+                .Flush();
             return false;
         }
     }  // namespace opentxs
@@ -1402,7 +1412,7 @@ bool OpenSSL::Decrypt(
                 nullptr,
                 nullptr,
                 static_cast<std::uint8_t*>(const_cast<void*>(iv.data())))) {
-            otErr << szFunc << ": Could not set IV.\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(": Could not set IV.").Flush();
             return false;
         }
     }
@@ -1418,7 +1428,7 @@ bool OpenSSL::Decrypt(
             nullptr,
             const_cast<std::uint8_t*>(key.getMemory_uint8()),
             nullptr)) {
-        otErr << szFunc << ": Could not set key.\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Could not set key.").Flush();
         return false;
     }
     // TODO: set AAD
@@ -1453,7 +1463,8 @@ bool OpenSSL::Decrypt(
                 const_cast<std::uint8_t*>(reinterpret_cast<const uint8_t*>(
                     &(ciphertext[lCurrentIndex]))),
                 len)) {
-            otErr << szFunc << ": EVP_DecryptUpdate: failed.\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(": EVP_DecryptUpdate: Failed.")
+                .Flush();
             return false;
         }
         lCurrentIndex += len;
@@ -1462,9 +1473,10 @@ bool OpenSSL::Decrypt(
             if (false == plaintext.Concatenate(
                              reinterpret_cast<void*>(&vBuffer_out.at(0)),
                              static_cast<std::uint32_t>(len_out))) {
-                otErr << szFunc
-                      << ": Failure: theDecryptedOutput isn't large "
-                         "enough for the decrypted output (1).\n";
+                LogOutput(OT_METHOD)(__FUNCTION__)(
+                    ": Failure: theDecryptedOutput isn't large "
+                    "enough for the decrypted output (1).")
+                    .Flush();
                 return false;
             }
     }
@@ -1480,7 +1492,7 @@ bool OpenSSL::Decrypt(
                 EVP_CTRL_GCM_SET_TAG,
                 LegacySymmetricProvider::TagSize(cipher),
                 const_cast<void*>(tag.data()))) {
-            otErr << szFunc << ": Could not set tag.\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(": Could not set tag.").Flush();
             return false;
         }
     }
@@ -1490,7 +1502,8 @@ bool OpenSSL::Decrypt(
 #else
     if (!EVP_DecryptFinal_ex(context, &vBuffer_out.at(0), &len_out)) {
 #endif
-        otErr << szFunc << ": EVP_DecryptFinal: failed.\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": EVP_DecryptFinal: Failed.")
+            .Flush();
         return false;
     }
 
@@ -1500,9 +1513,10 @@ bool OpenSSL::Decrypt(
         if (false == plaintext.Concatenate(
                          reinterpret_cast<void*>(&vBuffer_out.at(0)),
                          static_cast<std::uint32_t>(len_out))) {
-            otErr << szFunc
-                  << ": Failure: theDecryptedOutput isn't large "
-                     "enough for the decrypted output (2).\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Failure: theDecryptedOutput isn't large "
+                "enough for the decrypted output (2).")
+                .Flush();
             return false;
         }
 
@@ -1576,8 +1590,9 @@ bool OpenSSL::Digest(
         (proto::HASHTYPE_BLAKE2B160 == hashType) ||
         (proto::HASHTYPE_BLAKE2B256 == hashType) ||
         (proto::HASHTYPE_BLAKE2B512 == hashType)) {
-        otErr << __FUNCTION__ << ": Error: invalid hash type: "
-              << HashingProvider::HashTypeToString(hashType) << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Error: invalid hash type: ")(
+            HashingProvider::HashTypeToString(hashType))(".")
+            .Flush();
 
         return false;
     }
@@ -1598,7 +1613,8 @@ bool OpenSSL::Digest(
 
         return true;
     } else {
-        otErr << __FUNCTION__ << ": Error: invalid hash type.\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Error: invalid hash type.")
+            .Flush();
 
         return false;
     }
@@ -1625,12 +1641,14 @@ bool OpenSSL::HMAC(
 
             return true;
         } else {
-            otErr << __FUNCTION__ << ": Failed to produce a valid HMAC.\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Failed to produce a valid HMAC.")
+                .Flush();
 
             return false;
         }
     } else {
-        otErr << __FUNCTION__ << ": Invalid hash type\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Invalid hash type.").Flush();
 
         return false;
     }
@@ -1647,7 +1665,6 @@ bool OpenSSL::OpenSSLdp::SignContractDefaultHash(
     Data& theSignature,
     const OTPasswordData*) const
 {
-    const char* szFunc = "OpenSSL::SignContractDefaultHash";
 
     // 32 bytes, double sha256
     // This stores the message digest, pre-encrypted, but with the padding
@@ -1670,8 +1687,10 @@ bool OpenSSL::OpenSSLdp::SignContractDefaultHash(
     auto* pRsaKey = EVP_PKEY_get1_RSA(const_cast<EVP_PKEY*>(pkey));
 
     if (!pRsaKey) {
-        otErr << szFunc << ": EVP_PKEY_get1_RSA failed with error "
-              << ERR_error_string(ERR_get_error(), nullptr) << "\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": EVP_PKEY_get1_RSA failed with error ")(
+            ERR_error_string(ERR_get_error(), nullptr))(".")
+            .Flush();
         return false;
     }
 
@@ -1740,8 +1759,10 @@ bool OpenSSL::OpenSSLdp::SignContractDefaultHash(
 
     if (!status)  // 1 or 0.
     {
-        otErr << __FILE__ << ": RSA_padding_add_PKCS1_PSS failure: "
-              << ERR_error_string(ERR_get_error(), nullptr) << "\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": RSA_padding_add_PKCS1_PSS failure: ")(
+            ERR_error_string(ERR_get_error(), nullptr))(".")
+            .Flush();
         RSA_free(pRsaKey);
         pRsaKey = nullptr;
         return false;
@@ -1780,8 +1801,9 @@ bool OpenSSL::OpenSSLdp::SignContractDefaultHash(
                           // PSS mode with two hashes.)
 
     if (status == -1) {
-        otErr << szFunc << ": RSA_private_encrypt failure: "
-              << ERR_error_string(ERR_get_error(), nullptr) << "\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": RSA_private_encrypt failure: ")(
+            ERR_error_string(ERR_get_error(), nullptr))(".")
+            .Flush();
         RSA_free(pRsaKey);
         pRsaKey = nullptr;
         return false;
@@ -1805,7 +1827,6 @@ bool OpenSSL::OpenSSLdp::VerifyContractDefaultHash(
     const Data& theSignature,
     const OTPasswordData*) const
 {
-    const char* szFunc = "OpenSSL::VerifyContractDefaultHash";
 
     // 32 bytes, double sha256
     auto hash = Data::Factory();
@@ -1824,8 +1845,10 @@ bool OpenSSL::OpenSSLdp::VerifyContractDefaultHash(
     auto* pRsaKey = EVP_PKEY_get1_RSA(const_cast<EVP_PKEY*>(pkey));
 
     if (!pRsaKey) {
-        otErr << szFunc << ": EVP_PKEY_get1_RSA failed with error "
-              << ERR_error_string(ERR_get_error(), nullptr) << "\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": EVP_PKEY_get1_RSA failed with error ")(
+            ERR_error_string(ERR_get_error(), nullptr))(".")
+            .Flush();
         return false;
     }
 
@@ -1836,12 +1859,12 @@ bool OpenSSL::OpenSSLdp::VerifyContractDefaultHash(
     if ((theSignature.size() < static_cast<std::uint32_t>(RSA_size(pRsaKey))) ||
         (nSignatureSize < RSA_size(pRsaKey)))  // this one probably unnecessary.
     {
-        otErr << szFunc
-              << ": Decoded base64-encoded data for signature, but "
-                 "resulting size was < RSA_size(pRsaKey): "
-                 "Signed: "
-              << nSignatureSize << ". Unsigned: " << theSignature.size()
-              << ".\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Decoded base64-encoded data for signature, but "
+            "resulting size was < RSA_size(pRsaKey): "
+            "Signed: ")(nSignatureSize)(". Unsigned: ")(theSignature.size())(
+            ".")
+            .Flush();
         RSA_free(pRsaKey);
         pRsaKey = nullptr;
         return false;
@@ -1892,8 +1915,10 @@ bool OpenSSL::OpenSSLdp::VerifyContractDefaultHash(
 
     if (status == -1)  // Error
     {
-        otErr << szFunc << ": RSA_public_decrypt failed with error "
-              << ERR_error_string(ERR_get_error(), nullptr) << "\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": RSA_public_decrypt failed with error ")(
+            ERR_error_string(ERR_get_error(), nullptr))(".")
+            .Flush();
         RSA_free(pRsaKey);
         pRsaKey = nullptr;
         return false;
@@ -2355,8 +2380,6 @@ bool OpenSSL::OpenSSLdp::SignContract(
     OT_ASSERT_MSG(
         nullptr != pkey, "Null private key sent to OpenSSL::SignContract.\n");
 
-    const char* szFunc = "OpenSSL::SignContract";
-
 #if OPENSSL_VERSION_NUMBER < 0x10100000L
     class _OTCont_SignCont1
     {
@@ -2376,7 +2399,9 @@ bool OpenSSL::OpenSSLdp::SignContract(
         ~_OTCont_SignCont1()
         {
             if (0 == EVP_MD_CTX_cleanup(&m_ctx))
-                otErr << m_szFunc << ": Failure in cleanup. (It returned 0.)\n";
+                LogOutput(OT_METHOD)(__FUNCTION__)(
+                    ": Failure in cleanup. (It returned 0).")
+                    .Flush();
         }
     };
 #endif
@@ -2400,8 +2425,9 @@ bool OpenSSL::OpenSSLdp::SignContract(
     // pointer for signing.
 
     if (nullptr == md) {
-        otErr << szFunc
-              << ": Unable to decipher Hash algorithm: " << strHashType << "\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Unable to decipher Hash algorithm: ")(strHashType)(".")
+            .Flush();
         return false;
     }
 
@@ -2448,7 +2474,8 @@ bool OpenSSL::OpenSSLdp::SignContract(
         const_cast<EVP_PKEY*>(pkey));
 
     if (err != 1) {
-        otErr << szFunc << ": Error signing xml contents.\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Error signing xml contents.")
+            .Flush();
         return false;
     } else {
         LogDebug(OT_METHOD)(__FUNCTION__)(": Successfully signed xml contents.")
@@ -2567,8 +2594,8 @@ bool OpenSSL::Sign(
     Lock lock(lock_);
     if (false ==
         dp_->SignContract(plaintext, pkey, signature, hashType, pPWData)) {
-        otErr << "OpenSSL::SignContract: "
-              << "SignContract returned false.\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": SignContract returned false.")
+            .Flush();
         return false;
     }
 
@@ -2610,8 +2637,6 @@ bool OpenSSL::EncryptSessionKey(
     OT_ASSERT_MSG(
         !RecipPubKeys.empty(),
         "OpenSSL::Seal: ASSERT: RecipPubKeys.size() > 0");
-
-    const char* szFunc = "OpenSSL::Seal";
 
 #if OPENSSL_VERSION_NUMBER < 0x10100000L
     EVP_CIPHER_CTX ctx;
@@ -2889,9 +2914,10 @@ bool OpenSSL::EncryptSessionKey(
                 // would have done this for us.)
 
                 if (0 == EVP_CIPHER_CTX_cleanup(&m_ctx))
-                    otErr << m_szFunc
-                          << ": Failure in EVP_CIPHER_CTX_cleanup. "
-                             "(It returned 0.)\n";
+                    LogOutput(OT_METHOD)(__FUNCTION__)(
+                        ": Failure in EVP_CIPHER_CTX_cleanup. "
+                        "(It returned 0).")
+                        .Flush();
             }
 #endif
         }
@@ -2957,7 +2983,7 @@ bool OpenSSL::EncryptSessionKey(
     // we are addressing
     // this envelope to.
     {
-        otErr << szFunc << ": EVP_SealInit: failed.\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": EVP_SealInit: Failed.").Flush();
         return false;
     }
 
@@ -3102,7 +3128,8 @@ bool OpenSSL::EncryptSessionKey(
                 buffer,
                 static_cast<std::int32_t>(len))) {
 #endif
-            otErr << szFunc << ": EVP_SealUpdate failed.\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(": EVP_SealUpdate failed.")
+                .Flush();
             return false;
         } else if (len_out > 0)
             dataOutput.Concatenate(
@@ -3117,7 +3144,7 @@ bool OpenSSL::EncryptSessionKey(
 #else
     if (!EVP_SealFinal(context, buffer_out, &len_out)) {
 #endif
-        otErr << szFunc << ": EVP_SealFinal failed.\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": EVP_SealFinal failed.").Flush();
         return false;
     }
     // This is the "final" piece that is added from SealFinal just above.
@@ -3142,7 +3169,6 @@ bool OpenSSL::DecryptSessionKey(
     Data& plaintext,
     const OTPasswordData* pPWData) const
 {
-    const char* szFunc = "OpenSSL::DecryptSessionKey";
 
     std::uint8_t buffer[4096];
     std::uint8_t buffer_out[4096 + EVP_MAX_IV_LENGTH];
@@ -3180,8 +3206,9 @@ bool OpenSSL::DecryptSessionKey(
     }
 
     if (nullptr == private_key) {
-        otErr << szFunc
-              << ": Null private key on recipient. (Returning false.)\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Null private key on recipient. (Returning false).")
+            .Flush();
         return false;
     } else {
         LogInsane(OT_METHOD)(__FUNCTION__)(
@@ -3245,9 +3272,10 @@ bool OpenSSL::DecryptSessionKey(
             //
             if (!m_bFinalized) {
                 if (0 == EVP_CIPHER_CTX_cleanup(&m_ctx))
-                    otErr << m_szFunc
-                          << ": Failure in EVP_CIPHER_CTX_cleanup. "
-                             "(It returned 0.)\n";
+                    LogOutput(OT_METHOD)(__FUNCTION__)(
+                        ": Failure in EVP_CIPHER_CTX_cleanup. "
+                        "(It returned 0).")
+                        .Flush();
             }
 
             m_szFunc = nullptr;
@@ -3302,9 +3330,10 @@ bool OpenSSL::DecryptSessionKey(
     if (0 == (nReadEnvType = dataInput.OTfread(
                   reinterpret_cast<std::uint8_t*>(&env_type_n),
                   static_cast<std::uint32_t>(sizeof(env_type_n))))) {
-        otErr << szFunc
-              << ": Error reading Envelope Type. Expected "
-                 "asymmetric(1) or symmetric (2).\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Error reading Envelope Type. Expected "
+            "asymmetric(1) or symmetric (2).")
+            .Flush();
         return false;
     }
     nRunningTotal += nReadEnvType;
@@ -3325,8 +3354,9 @@ bool OpenSSL::DecryptSessionKey(
     if (0 == (nReadArraySize = dataInput.OTfread(
                   reinterpret_cast<std::uint8_t*>(&array_size_n),
                   static_cast<std::uint32_t>(sizeof(array_size_n))))) {
-        otErr << szFunc
-              << ": Error reading Array Size for encrypted symmetric keys.\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Error reading Array Size for encrypted symmetric keys.")
+            .Flush();
         return false;
     }
 
@@ -3368,9 +3398,10 @@ bool OpenSSL::DecryptSessionKey(
         if (0 == (nReadNymIDSize = dataInput.OTfread(
                       reinterpret_cast<std::uint8_t*>(&nymid_len_n),
                       static_cast<std::uint32_t>(sizeof(nymid_len_n))))) {
-            otErr << szFunc
-                  << ": Error reading NymID length for an encrypted "
-                     "symmetric key.\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Error reading NymID length for an encrypted "
+                "symmetric key.")
+                .Flush();
             return false;
         }
 
@@ -3399,8 +3430,9 @@ bool OpenSSL::DecryptSessionKey(
         // terminator (it was
         // written that way.)
         {
-            otErr << szFunc
-                  << ": Error reading NymID for an encrypted symmetric key.\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Error reading NymID for an encrypted symmetric key.")
+                .Flush();
             free(nymid);
             nymid = nullptr;
             return false;
@@ -3444,7 +3476,9 @@ bool OpenSSL::DecryptSessionKey(
         if (0 == (nReadLength = dataInput.OTfread(
                       reinterpret_cast<std::uint8_t*>(&eklen_n),
                       static_cast<std::uint32_t>(sizeof(eklen_n))))) {
-            otErr << szFunc << ": Error reading encrypted key size.\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Error reading encrypted key size.")
+                .Flush();
             return false;
         }
 
@@ -3466,7 +3500,8 @@ bool OpenSSL::DecryptSessionKey(
 
         // Next we read the encrypted key itself...
         if (0 == (nReadKey = dataInput.OTfread(ek, eklen))) {
-            otErr << szFunc << ": Error reading encrypted key.\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(": Error reading encrypted key.")
+                .Flush();
             free(ek);
             ek = nullptr;
             return false;
@@ -3556,8 +3591,9 @@ bool OpenSSL::DecryptSessionKey(
     if (0 == (nReadIVSize = dataInput.OTfread(
                   reinterpret_cast<std::uint8_t*>(&iv_size_n),
                   static_cast<std::uint32_t>(sizeof(iv_size_n))))) {
-        otErr << szFunc
-              << ": Error reading IV Size for encrypted symmetric keys.\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Error reading IV Size for encrypted symmetric keys.")
+            .Flush();
         return false;
     }
     nRunningTotal += nReadIVSize;
@@ -3569,8 +3605,9 @@ bool OpenSSL::DecryptSessionKey(
 
     if (iv_size_host_order > max_iv_length) {
         const std::int64_t l1 = iv_size_host_order, l2 = max_iv_length;
-        otErr << __FUNCTION__ << ": Error: iv_size (" << l1
-              << ") is larger than max_iv_length (" << l2 << ").\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Error: iv_size (")(l1)(
+            ") is larger than max_iv_length (")(l2)(").")
+            .Flush();
         return false;
     } else
         LogInsane(OT_METHOD)(__FUNCTION__)(": IV size: ")(iv_size_host_order)
@@ -3581,7 +3618,9 @@ bool OpenSSL::DecryptSessionKey(
     if (0 == (nReadIV = dataInput.OTfread(
                   reinterpret_cast<std::uint8_t*>(iv),
                   static_cast<std::uint32_t>(iv_size_host_order)))) {
-        otErr << szFunc << ": Error reading initialization vector.\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Error reading initialization vector.")
+            .Flush();
         return false;
     }
 
@@ -3641,7 +3680,7 @@ bool OpenSSL::DecryptSessionKey(
         // the private key priv. The IV is supplied
         //    in the iv parameter.
 
-        otErr << szFunc << ": EVP_OpenInit: failed.\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": EVP_OpenInit: Failed.").Flush();
         return false;
     }
 
@@ -3666,7 +3705,8 @@ bool OpenSSL::DecryptSessionKey(
                 buffer,
                 static_cast<std::int32_t>(len))) {
 #endif
-            otErr << szFunc << ": EVP_OpenUpdate: failed.\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(": EVP_OpenUpdate: Failed.")
+                .Flush();
             return false;
         } else if (len_out > 0)
             plaintext.Concatenate(
@@ -3681,7 +3721,7 @@ bool OpenSSL::DecryptSessionKey(
 #else
     if (!EVP_OpenFinal(context, buffer_out, &len_out)) {
 #endif
-        otErr << szFunc << ": EVP_OpenFinal: failed.\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": EVP_OpenFinal: Failed.").Flush();
         return false;
     } else if (len_out > 0) {
         bFinalized = true;

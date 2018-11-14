@@ -64,15 +64,13 @@ bool Sodium::Decrypt(
     const auto& mode = ciphertext.mode();
 
     if (KeySize(mode) != keySize) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Incorrect key size."
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Incorrect key size.").Flush();
 
         return false;
     }
 
     if (IvSize(mode) != nonce.size()) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Incorrect nonce size."
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Incorrect nonce size.").Flush();
 
         return false;
     }
@@ -92,9 +90,9 @@ bool Sodium::Decrypt(
                          key));
         }
         default: {
-            otErr << OT_METHOD << __FUNCTION__
-                  << ": Unsupported encryption mode (" << mode << ")"
-                  << std::endl;
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Unsupported encryption mode (")(mode)(").")
+                .Flush();
         }
     }
 
@@ -115,9 +113,9 @@ bool Sodium::Derive(
     const auto requiredSize = SaltSize(type);
 
     if (requiredSize != saltSize) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Incorrect salt size ("
-              << saltSize << "). Required: (" << requiredSize << ")."
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Incorrect salt size (")(saltSize)(
+            "). Required: (")(requiredSize)(").")
+            .Flush();
 
         return false;
     }
@@ -163,8 +161,7 @@ bool Sodium::Digest(
         }
     }
 
-    otErr << OT_METHOD << __FUNCTION__ << ": Unsupported hash function."
-          << std::endl;
+    LogOutput(OT_METHOD)(__FUNCTION__)(": Unsupported hash function.").Flush();
 
     return false;
 }
@@ -179,8 +176,8 @@ bool Sodium::ECDH(
     OTPassword curvePrivate;
 
     if (!SeedToCurveKey(seed, curvePrivate, notUsed)) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Failed to expand private key."
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Failed to expand private key.")
+            .Flush();
 
         return false;
     }
@@ -193,9 +190,9 @@ bool Sodium::ECDH(
         static_cast<const unsigned char*>(publicKey.data()));
 
     if (0 != havePublic) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Failed to convert public key from ed25519 to curve25519."
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Failed to convert public key from ed25519 to curve25519.")
+            .Flush();
 
         return false;
     }
@@ -227,21 +224,19 @@ bool Sodium::Encrypt(
     bool result = false;
 
     if (mode == proto::SMODE_ERROR) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Incorrect mode." << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Incorrect mode.").Flush();
 
         return result;
     }
 
     if (KeySize(mode) != keySize) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Incorrect key size."
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Incorrect key size.").Flush();
 
         return result;
     }
 
     if (IvSize(mode) != nonce.size()) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Incorrect nonce size."
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Incorrect nonce size.").Flush();
 
         return result;
     }
@@ -268,9 +263,9 @@ bool Sodium::Encrypt(
             break;
         }
         default: {
-            otErr << OT_METHOD << __FUNCTION__
-                  << ": Unsupported encryption mode (" << mode << ")"
-                  << std::endl;
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Unsupported encryption mode (")(mode)(").")
+                .Flush();
         }
     }
 
@@ -323,8 +318,8 @@ bool Sodium::HMAC(
         }
         case (proto::HASHTYPE_SHA256): {
             if (crypto_auth_hmacsha256_KEYBYTES != keySize) {
-                otErr << OT_METHOD << __FUNCTION__ << ": Incorrect key size."
-                      << std::endl;
+                LogOutput(OT_METHOD)(__FUNCTION__)(": Incorrect key size.")
+                    .Flush();
 
                 return false;
             }
@@ -333,8 +328,8 @@ bool Sodium::HMAC(
         }
         case (proto::HASHTYPE_SHA512): {
             if (crypto_auth_hmacsha512_KEYBYTES != keySize) {
-                otErr << OT_METHOD << __FUNCTION__ << ": Incorrect key size."
-                      << std::endl;
+                LogOutput(OT_METHOD)(__FUNCTION__)(": Incorrect key size.")
+                    .Flush();
 
                 return false;
             }
@@ -345,8 +340,7 @@ bool Sodium::HMAC(
         }
     }
 
-    otErr << OT_METHOD << __FUNCTION__ << ": Unsupported hash function."
-          << std::endl;
+    LogOutput(OT_METHOD)(__FUNCTION__)(": Unsupported hash function.").Flush();
 
     return false;
 }
@@ -358,9 +352,9 @@ std::size_t Sodium::IvSize(const proto::SymmetricMode mode) const
             return crypto_aead_chacha20poly1305_IETF_NPUBBYTES;
         }
         default: {
-            otErr << OT_METHOD << __FUNCTION__
-                  << ": Unsupported encryption mode (" << mode << ")"
-                  << std::endl;
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Unsupported encryption mode (")(mode)(").")
+                .Flush();
         }
     }
     return 0;
@@ -373,9 +367,9 @@ std::size_t Sodium::KeySize(const proto::SymmetricMode mode) const
             return crypto_aead_chacha20poly1305_IETF_KEYBYTES;
         }
         default: {
-            otErr << OT_METHOD << __FUNCTION__
-                  << ": Unsupported encryption mode (" << mode << ")"
-                  << std::endl;
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Unsupported encryption mode (")(mode)(").")
+                .Flush();
         }
     }
     return 0;
@@ -406,8 +400,9 @@ std::size_t Sodium::SaltSize(const proto::SymmetricKeyType type) const
             return crypto_pwhash_SALTBYTES;
         }
         default: {
-            otErr << OT_METHOD << __FUNCTION__ << ": Unsupported key type ("
-                  << type << ")" << std::endl;
+            LogOutput(OT_METHOD)(__FUNCTION__)(": Unsupported key type (")(
+                type)(").")
+                .Flush();
         }
     }
 
@@ -432,8 +427,7 @@ bool Sodium::SeedToCurveKey(
     OTPassword intermediatePrivate;
 
     if (!ExpandSeed(seed, intermediatePrivate, intermediatePublic)) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Failed to expand seed."
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Failed to expand seed.").Flush();
 
         return false;
     }
@@ -445,9 +439,9 @@ bool Sodium::SeedToCurveKey(
         static_cast<const unsigned char*>(intermediatePrivate.getMemory()));
 
     if (0 != havePrivate) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Failed to convert private key from ed25519 to curve25519."
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Failed to convert private key from ed25519 to curve25519.")
+            .Flush();
 
         return false;
     }
@@ -457,9 +451,9 @@ bool Sodium::SeedToCurveKey(
         static_cast<const unsigned char*>(intermediatePublic->data()));
 
     if (0 != havePublic) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Failed to convert public key from ed25519 to curve25519."
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Failed to convert public key from ed25519 to curve25519.")
+            .Flush();
 
         return false;
     }
@@ -481,8 +475,9 @@ bool Sodium::Sign(
     const OTPassword* exportPassword) const
 {
     if (proto::HASHTYPE_BLAKE2B256 != hashType) {
-        otErr << __FUNCTION__ << ": Invalid hash function: "
-              << HashingProvider::HashTypeToString(hashType) << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Invalid hash function: ")(
+            hashType)(".")
+            .Flush();
 
         return false;
     }
@@ -507,9 +502,10 @@ bool Sodium::Sign(
     }
 
     if (!havePrivateKey) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Can not extract ed25519 private key seed "
-              << "from Asymmetric." << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Can not extract ed25519 private key seed "
+            "from Asymmetric.")
+            .Flush();
 
         return false;
     }
@@ -519,8 +515,9 @@ bool Sodium::Sign(
     const bool keyExpanded = ExpandSeed(seed, privKey, notUsed);
 
     if (!keyExpanded) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Can not expand ed25519 private key from seed." << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Can not expand ed25519 private key from seed.")
+            .Flush();
 
         return false;
     }
@@ -539,8 +536,7 @@ bool Sodium::Sign(
         return true;
     }
 
-    otErr << OT_METHOD << __FUNCTION__ << ": Failed to sign plaintext."
-          << std::endl;
+    LogOutput(OT_METHOD)(__FUNCTION__)(": Failed to sign plaintext.").Flush();
 
     return false;
 }
@@ -553,9 +549,9 @@ std::size_t Sodium::TagSize(const proto::SymmetricMode mode) const
             return crypto_aead_chacha20poly1305_IETF_ABYTES;
         }
         default: {
-            otErr << OT_METHOD << __FUNCTION__
-                  << ": Unsupported encryption mode (" << mode << ")"
-                  << std::endl;
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Unsupported encryption mode (")(mode)(").")
+                .Flush();
         }
     }
     return 0;
@@ -570,8 +566,9 @@ bool Sodium::Verify(
     __attribute__((unused)) const OTPasswordData* pPWData) const
 {
     if (proto::HASHTYPE_BLAKE2B256 != hashType) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Invalid hash function: "
-              << HashingProvider::HashTypeToString(hashType) << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Invalid hash function: ")(
+            hashType)(".")
+            .Flush();
 
         return false;
     }
@@ -586,10 +583,10 @@ bool Sodium::Verify(
     const bool havePublicKey = AsymmetricKeyToECPubkey(*key, pubkey);
 
     if (!havePublicKey) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Can not extract ed25519 public key from "
-                 "Asymmetric."
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Can not extract ed25519 public key from "
+            "Asymmetric.")
+            .Flush();
 
         return false;
     }

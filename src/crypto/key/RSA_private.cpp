@@ -107,8 +107,9 @@ void RSA::d::SetKeyAsCopyOf(
     else if (backlink->m_bIsPublicKey) {
         RSA::d::ArmorPublicKey(*m_pKey, backlink->m_p_ascKey);
     } else {
-        otErr << __FUNCTION__
-              << ": Error: This key is NEITHER public NOR private!\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Error: This key is NEITHER public NOR private!")
+            .Flush();
     }
 }
 
@@ -143,8 +144,9 @@ EVP_PKEY* RSA::d::InstantiateKey(const OTPasswordData* pPWData)
                                                 // method is called.
 
     else
-        otErr << "RSA::InstantiateKey: Error: Key is "
-                 "neither public nor private!\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Error: Key is neither public nor private!")
+            .Flush();
 
     return nullptr;
 }
@@ -166,8 +168,9 @@ EVP_PKEY* RSA::d::CopyPublicKey(
     std::int32_t nWriteBio = PEM_write_bio_PUBKEY(bmem, &theKey);
 
     if (0 == nWriteBio) {
-        otErr << __FUNCTION__
-              << ": Error: Failed writing EVP_PKEY to memory buffer.\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Error: Failed writing EVP_PKEY to memory buffer.")
+            .Flush();
     } else {
         LogInsane(OT_METHOD)(__FUNCTION__)(
             ": Success writing EVP_PKEY to memory buffer.")
@@ -238,13 +241,15 @@ EVP_PKEY* RSA::d::CopyPublicKey(
                 // scope).
                 //
             } else {
-                otErr << __FUNCTION__
-                      << ": Error: Failed copying memory from "
-                         "BIO into Data.\n";
+                LogOutput(OT_METHOD)(__FUNCTION__)(
+                    ": Error: Failed copying memory from "
+                    "BIO into Data.")
+                    .Flush();
             }
         } else {
-            otErr << __FUNCTION__
-                  << ": Failed copying private key into memory.\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Failed copying private key into memory.")
+                .Flush();
         }
     }
 
@@ -319,8 +324,9 @@ EVP_PKEY* RSA::d::CopyPrivateKey(
     }
 
     if (0 == nWriteBio) {
-        otErr << __FUNCTION__
-              << ": Failed writing EVP_PKEY to memory buffer.\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Failed writing EVP_PKEY to memory buffer.")
+            .Flush();
     } else {
         LogInsane(OT_METHOD)(__FUNCTION__)(
             ": Success writing EVP_PKEY to memory buffer.")
@@ -389,13 +395,15 @@ EVP_PKEY* RSA::d::CopyPrivateKey(
                             pImportPassword->getPassword())));
                 }
             } else {
-                otErr << __FUNCTION__
-                      << ": Error: Failed copying memory from "
-                         "BIO into Data.\n";
+                LogOutput(OT_METHOD)(__FUNCTION__)(
+                    ": Error: Failed copying memory from "
+                    "BIO into Data.")
+                    .Flush();
             }
         } else {
-            otErr << __FUNCTION__
-                  << ": Failed copying private key into memory.\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Failed copying private key into memory.")
+                .Flush();
         }
     }
 
@@ -411,8 +419,6 @@ bool RSA::d::ArmorPublicKey(EVP_PKEY& theKey, Armored& ascKey)
 {
     bool bReturnVal = false;
 
-    const char* szFunc = "RSA::ArmorPublicKey";
-
     ascKey.Release();
 
     // Create a new memory buffer on the OpenSSL side
@@ -425,8 +431,9 @@ bool RSA::d::ArmorPublicKey(EVP_PKEY& theKey, Armored& ascKey)
     std::int32_t nWriteBio = PEM_write_bio_PUBKEY(bmem, &theKey);
 
     if (0 == nWriteBio) {
-        otErr << szFunc
-              << ": Error: Failed writing EVP_PKEY to memory buffer.\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Error: Failed writing EVP_PKEY to memory buffer.")
+            .Flush();
     } else {
         LogInsane(OT_METHOD)(__FUNCTION__)(
             ": Success writing EVP_PKEY to memory buffer.")
@@ -464,7 +471,9 @@ bool RSA::d::ArmorPublicKey(EVP_PKEY& theKey, Armored& ascKey)
                 .Flush();
             bReturnVal = true;
         } else {
-            otErr << szFunc << ": Failed copying public key into memory.\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Failed copying public key into memory.")
+                .Flush();
         }
     }
 
@@ -477,8 +486,6 @@ EVP_PKEY* RSA::d::InstantiatePublicKey(const OTPasswordData* pPWData)
 {
     OT_ASSERT(m_pKey == nullptr);
     OT_ASSERT(backlink->IsPublic());
-
-    const char* szFunc = "RSA::InstantiatePublicKey";
 
     EVP_PKEY* pReturnKey = nullptr;
     auto theData = Data::Factory();
@@ -533,9 +540,10 @@ EVP_PKEY* RSA::d::InstantiatePublicKey(const OTPasswordData* pPWData)
         }
     }
 
-    otErr << szFunc
-          << ": Failed reading public key from ASCII-armored data:\n\n"
-          << backlink->m_p_ascKey->Get() << "\n\n";
+    LogOutput(OT_METHOD)(__FUNCTION__)(
+        ": Failed reading public key from ASCII-armored data: ")(
+        backlink->m_p_ascKey->Get())(".")
+        .Flush();
     return nullptr;
 }
 
@@ -621,8 +629,9 @@ EVP_PKEY* RSA::d::InstantiatePrivateKey(const OTPasswordData* pPWData)
             return m_pKey;
         }
     }
-    otErr << __FUNCTION__
-          << ": Failed reading private key from ASCII-armored data.\n\n";
+    LogOutput(OT_METHOD)(__FUNCTION__)(
+        ": Failed reading private key from ASCII-armored data.")
+        .Flush();
     OT_ASSERT(false);
     //  otErr << __FUNCTION__ << ": Failed reading private key from
     // ASCII-armored data:\n\n" << m_p_ascKey->Get() << "\n\n";
@@ -676,8 +685,9 @@ bool RSA::d::ArmorPrivateKey(
     }
 
     if (0 == nWriteBio) {
-        otErr << __FUNCTION__
-              << ": Failed writing EVP_PKEY to memory buffer.\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Failed writing EVP_PKEY to memory buffer.")
+            .Flush();
     } else {
         // TODO (remove theTimer entirely. OTCachedKey replaces already.)
         // I set this timer because the above required a password. But now that
@@ -730,8 +740,9 @@ bool RSA::d::ArmorPrivateKey(
                 .Flush();
             bReturnVal = true;
         } else {
-            otErr << __FUNCTION__
-                  << ": Failed copying private key into memory.\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Failed copying private key into memory.")
+                .Flush();
         }
     }
 

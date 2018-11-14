@@ -115,7 +115,8 @@ OTAgent::OTAgent(
         // SEPARATE CONSTRUCTOR.
         // (Once I get around to adding Entities.)
         //
-        otErr << "OTAgent::OTAgent: THIS HASN'T BEEN WRITTEN YET!!\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": THIS HASN'T BEEN WRITTEN YET!!")
+            .Flush();
     }
 }
 
@@ -127,9 +128,9 @@ bool OTAgent::VerifySignature(const Contract& theContract) const
     // verify an election result (or whatever.)
     //
     if (!IsAnIndividual() || !DoesRepresentHimself()) {
-        otErr << "OTAgent::VerifySignature: Entities and roles are not yet "
-                 "supported. Agent: "
-              << m_strName << ".\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Entities and roles are not yet "
+                                           "supported. Agent: ")(m_strName)(".")
+            .Flush();
         return false;
     }  // todo: when adding entities, this will change.
 
@@ -165,10 +166,11 @@ bool OTAgent::VerifySignature(const Contract& theContract) const
     //    else
     if (nullptr == m_pNym) {
         auto strTemp = String::Factory(theContract);
-        otErr << "OTAgent::VerifySignature: Attempted to verify signature on "
-                 "contract, "
-                 "but no Nym had ever been loaded for this agent:\n\n"
-              << strTemp << "\n\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Attempted to verify signature on "
+            "contract, "
+            "but no Nym had ever been loaded for this agent: ")(strTemp)(".")
+            .Flush();
         return false;
     }
 
@@ -195,8 +197,10 @@ ConstNym OTAgent::LoadNym()
 
         return m_pNym;
     } else
-        otErr << "OTAgent::LoadNym: Failure. Are you sure this agent IS a Nym "
-                 "at all? \n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Failure. Are you sure this agent IS a Nym "
+            "at all?")
+            .Flush();
 
     return nullptr;
 }
@@ -498,8 +502,9 @@ bool OTAgent::IsAuthorizingAgentForParty()
 std::int32_t OTAgent::GetCountAuthorizedAccts()
 {
     if (nullptr == m_pForParty) {
-        otErr << "OTAgent::CountAuthorizedAccts: Error: m_pForParty was "
-                 "nullptr.\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Error: m_pForParty was "
+                                           "nullptr.")
+            .Flush();
         return 0;  // Maybe should log here...
     }
 
@@ -534,8 +539,9 @@ bool OTAgent::VerifyAgencyOfAccount(const Account& theAccount) const
     auto theSignerID = Identifier::Factory();
 
     if (!GetSignerID(theSignerID)) {
-        otErr << "OTAgent::VerifyAgencyOfAccount: ERROR: Entities and roles "
-                 "haven't been coded yet.\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": ERROR: Entities and roles "
+                                           "haven't been coded yet.")
+            .Flush();
         return false;
     }
 
@@ -559,7 +565,6 @@ bool OTAgent::DropFinalReceiptToInbox(
 {
     // TODO: When entites and ROLES are added, this function may change a bit to
     // accommodate them.
-    const char* szFunc = "OTAgent::DropFinalReceiptToInbox";
 
     auto theAgentNymID = Identifier::Factory();
     bool bNymID = GetNymID(theAgentNymID);
@@ -590,13 +595,16 @@ bool OTAgent::DropFinalReceiptToInbox(
                                   // load
                                   // the acct up and update its inbox hash.)
         } else {
-            otErr << szFunc
-                  << ": Error: lClosingNumber <=0, "
-                     "or context->VerifyIssuedNum("
-                     "lClosingNumber)) failed to verify.\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Error: lClosingNumber <=0, "
+                "or context->VerifyIssuedNum("
+                "lClosingNumber)) failed to verify.")
+                .Flush();
         }
     } else {
-        otErr << szFunc << ": No NymID available for this agent...\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": No NymID available for this agent...")
+            .Flush();
     }
 
     return false;
@@ -675,16 +683,17 @@ bool OTAgent::DropServerNoticeToNymbox(
 bool OTAgent::SignContract(Contract& theInput) const
 {
     if (!IsAnIndividual() || !DoesRepresentHimself()) {
-        otErr << "OTAgent::SignContract: Entities and roles are not yet "
-                 "supported. Agent: "
-              << m_strName << ".\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Entities and roles are not yet "
+                                           "supported. Agent: ")(m_strName)(".")
+            .Flush();
         return false;
     }  // todo: when adding entities, this will change.
 
     if (nullptr == m_pNym) {
-        otErr << "OTAgent::SignContract: Nym was nullptr while trying to sign "
-                 "contract. Agent: "
-              << m_strName << ".\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Nym was nullptr while trying to sign "
+            "contract. Agent: ")(m_strName)(".")
+            .Flush();
         return false;
     }  // todo: when adding entities, this will change.
 
@@ -697,9 +706,10 @@ bool OTAgent::VerifyIssuedNumber(
 {
     // Todo: this function may change when entities / roles are added.
     if (!IsAnIndividual() || !DoesRepresentHimself()) {
-        otErr << "OTAgent::VerifyIssuedNumber:  Error: Entities and Roles are "
-                 "not yet supported. Agent: "
-              << m_strName << "\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Error: Entities and Roles are "
+            "not yet supported. Agent: ")(m_strName)(".")
+            .Flush();
         return false;
     }
 
@@ -711,9 +721,9 @@ bool OTAgent::VerifyIssuedNumber(
 
         return context->VerifyIssuedNumber(lNumber);
     } else {
-        otErr << "OTAgent::VerifyIssuedNumber: Error: m_pNym was nullptr. For "
-                 "agent: "
-              << m_strName << "\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Error: m_pNym was nullptr. For "
+                                           "agent: ")(m_strName)(".")
+            .Flush();
     }
 
     return false;
@@ -725,9 +735,10 @@ bool OTAgent::VerifyTransactionNumber(
 {
     // Todo: this function may change when entities / roles are added.
     if (!IsAnIndividual() || !DoesRepresentHimself()) {
-        otErr << "OTAgent::VerifyTransactionNumber:  Error: Entities and Roles "
-                 "are not yet supported. Agent: "
-              << m_strName << "\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Error: Entities and Roles "
+            "are not yet supported. Agent: ")(m_strName)(".")
+            .Flush();
         return false;
     }
 
@@ -739,9 +750,9 @@ bool OTAgent::VerifyTransactionNumber(
 
         return context->VerifyAvailableNumber(lNumber);
     } else {
-        otErr << "OTAgent::VerifyTransactionNumber: Error: m_pNym was nullptr. "
-                 "For agent: "
-              << m_strName << "\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Error: m_pNym was nullptr. "
+                                           "For agent: ")(m_strName)(".")
+            .Flush();
     }
 
     return false;
@@ -753,9 +764,10 @@ bool OTAgent::RecoverTransactionNumber(
 {
     // Todo: this function may change when entities / roles are added.
     if (!IsAnIndividual() || !DoesRepresentHimself()) {
-        otErr << __FUNCTION__
-              << ":  Error: Entities and Roles are not yet supported. Agent: "
-              << m_strName << "\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Error: Entities and Roles are not yet supported. Agent: ")(
+            m_strName)(".")
+            .Flush();
         return false;
     }
 
@@ -776,14 +788,15 @@ bool OTAgent::RecoverTransactionNumber(
 
             return true;
         } else {
-            otErr << __FUNCTION__ << ": Number (" << lNumber
-                  << ") failed to verify for agent: " << m_strName
-                  << " (Thus didn't bother 'adding it back'.)\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(": Number (")(lNumber)(
+                ") failed to verify for agent: ")(m_strName)(
+                " (Thus didn't bother 'adding it back').")
+                .Flush();
         }
     } else {
-        otErr << __FUNCTION__
-              << ": Error: m_pNym was nullptr. For agent: " << m_strName
-              << "\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Error: m_pNym was nullptr. For agent: ")(m_strName)(".")
+            .Flush();
     }
 
     return false;
@@ -799,9 +812,9 @@ bool OTAgent::RecoverTransactionNumber(
 
         return RecoverTransactionNumber(lNumber, context.It());
     } else {
-        otErr << __FUNCTION__
-              << ": Error: m_pNym was nullptr. For agent: " << m_strName
-              << "\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Error: m_pNym was nullptr. For agent: ")(m_strName)(".")
+            .Flush();
     }
 
     return false;
@@ -816,16 +829,17 @@ bool OTAgent::RemoveTransactionNumber(
 {
     // Todo: this function may change when entities / roles are added.
     if (!IsAnIndividual() || !DoesRepresentHimself()) {
-        otErr << "OTAgent::" << __FUNCTION__
-              << ":  Error: Entities and Roles are not yet supported. Agent: "
-              << m_strName << "\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Error: Entities and Roles are not yet supported. Agent: ")(
+            m_strName)(".")
+            .Flush();
         return false;
     }
 
     if (nullptr == m_pNym) {
-        otErr << "OTAgent::" << __FUNCTION__
-              << ": Error: m_pNym was nullptr. For agent: " << m_strName
-              << "\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Error: m_pNym was nullptr. For agent: ")(m_strName)(".")
+            .Flush();
 
         return false;
     }
@@ -836,10 +850,11 @@ bool OTAgent::RemoveTransactionNumber(
     if (context.It().ConsumeAvailable(lNumber)) {
         context.It().OpenCronItem(lNumber);
     } else {
-        otErr << "OTAgent::" << __FUNCTION__
-              << ": Error, should never happen. (I'd assume you aren't "
-                 "removing numbers without verifying first if they're "
-                 "there.)\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Error, should never happen. (I'd assume you aren't "
+            "removing numbers without verifying first if they're "
+            "there).")
+            .Flush();
     }
 
     return false;
@@ -855,17 +870,18 @@ bool OTAgent::RemoveIssuedNumber(
 {
     // Todo: this function may change when entities / roles are added.
     if (!IsAnIndividual() || !DoesRepresentHimself()) {
-        otErr << "OTAgent::" << __FUNCTION__
-              << ":  Error: Entities and Roles are not yet supported. Agent: "
-              << m_strName << "\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Error: Entities and Roles are not yet supported. Agent: ")(
+            m_strName)(".")
+            .Flush();
 
         return false;
     }
 
     if (nullptr == m_pNym) {
-        otErr << "OTAgent::" << __FUNCTION__
-              << ": Error: m_pNym was nullptr. For agent: " << m_strName
-              << "\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Error: m_pNym was nullptr. For agent: ")(m_strName)(".")
+            .Flush();
 
         return false;
     }
@@ -876,10 +892,11 @@ bool OTAgent::RemoveIssuedNumber(
     if (context.It().ConsumeIssued(lNumber)) {
         context.It().CloseCronItem(lNumber);
     } else {
-        otErr << "OTAgent::" << __FUNCTION__
-              << ": Error, should never happen. (I'd assume you aren't "
-                 "removing issued numbers without verifying first if "
-                 "they're there.)\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Error, should never happen. (I'd assume you aren't "
+            "removing issued numbers without verifying first if "
+            "they're there).")
+            .Flush();
     }
 
     return true;
@@ -907,8 +924,10 @@ bool OTAgent::ReserveClosingTransNum(
             context.NextTransactionNumber(MessageType::notarizeTransaction);
 
         if (0 == number->Value()) {
-            otErr << "OTAgent::ReserveClosingTransNum: Error: Strangely, "
-                     "unable to get a transaction number.\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Error: Strangely, "
+                "unable to get a transaction number.")
+                .Flush();
 
             return false;
         }
@@ -916,9 +935,9 @@ bool OTAgent::ReserveClosingTransNum(
         // Above this line, the transaction number will be recovered
         // automatically
         number->SetSuccess(true);
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Allocated closing transaction number " << number->Value()
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Allocated closing transaction number ")(number->Value())(".")
+            .Flush();
 
         // BELOW THIS POINT, TRANSACTION # HAS BEEN RESERVED, AND MUST BE
         // SAVED...
@@ -932,11 +951,12 @@ bool OTAgent::ReserveClosingTransNum(
     } else  // todo: when entities and roles are added... this function will
             // change.
     {
-        otErr << "OTAgent::ReserveClosingTransNum: Either the Nym pointer "
-                 "isn't set properly, "
-                 "or you tried to use Entities when they haven't been coded "
-                 "yet. Agent: "
-              << m_strName << " \n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Either the Nym pointer "
+            "isn't set properly, "
+            "or you tried to use Entities when they haven't been coded "
+            "yet. Agent: ")(m_strName)(".")
+            .Flush();
     }
 
     return false;
@@ -947,8 +967,10 @@ bool OTAgent::ReserveOpeningTransNum(ServerContext& context)
 {
     if (IsAnIndividual() && DoesRepresentHimself() && (nullptr != m_pNym)) {
         if (nullptr == m_pForParty) {
-            otErr << "OTAgent::ReserveOpeningTransNum: Error: Party pointer "
-                     "was nullptr.  SHOULD NEVER HAPPEN!!\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Error: Party pointer "
+                "was nullptr. SHOULD NEVER HAPPEN!!")
+                .Flush();
             return false;
         }
 
@@ -967,8 +989,10 @@ bool OTAgent::ReserveOpeningTransNum(ServerContext& context)
             context.NextTransactionNumber(MessageType::notarizeTransaction);
 
         if (0 == number->Value()) {
-            otErr << "OTAgent::ReserveOpeningTransNum: Error: Strangely, "
-                     "unable to get a transaction number.\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Error: Strangely, "
+                "unable to get a transaction number.")
+                .Flush();
 
             return false;
         }
@@ -976,9 +1000,9 @@ bool OTAgent::ReserveOpeningTransNum(ServerContext& context)
         // Above this line, the transaction number will be recovered
         // automatically
         number->SetSuccess(true);
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Allocated opening transaction number " << number->Value()
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Allocated opening transaction number ")(number->Value())(".")
+            .Flush();
 
         // BELOW THIS POINT, TRANSACTION # HAS BEEN RESERVED, AND MUST BE
         // SAVED...
@@ -992,11 +1016,12 @@ bool OTAgent::ReserveOpeningTransNum(ServerContext& context)
     } else  // todo: when entities and roles are added... this function will
             // change.
     {
-        otErr << "OTAgent::ReserveOpeningTransNum: Either the Nym pointer "
-                 "isn't set properly, "
-                 "or you tried to use Entities when they haven't been coded "
-                 "yet. Agent: "
-              << m_strName << " \n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Either the Nym pointer "
+            "isn't set properly, "
+            "or you tried to use Entities when they haven't been coded "
+            "yet. Agent: ")(m_strName)(".")
+            .Flush();
     }
 
     return false;

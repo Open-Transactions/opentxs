@@ -102,8 +102,9 @@ bool OTCron::SaveCron()
     // file.
     if (!SignContract(*m_pServerNym) || !SaveContract() ||
         !SaveContract(szFoldername, szFilename)) {
-        otErr << "Error saving main Cronfile:\n"
-              << szFoldername << Log::PathSeparator() << szFilename << "\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Error saving main Cronfile: ")(
+            szFoldername)(Log::PathSeparator())(szFilename)(".")
+            .Flush();
         return false;
     } else
         return true;
@@ -161,8 +162,9 @@ bool OTCron::GetNym_OfferList(
             pPacker->Pack(*pOfferList));  // Now we PACK our nym's offer list.
 
         if (nullptr == pBuffer) {
-            otErr
-                << "Failed packing pOfferList in OTCron::GetNym_OfferList. \n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Failed packing pOfferList in OTCron::GetNym_OfferList.")
+                .Flush();
             return false;
         }
 
@@ -181,12 +183,15 @@ bool OTCron::GetNym_OfferList(
 
             return true;
         } else
-            otErr << "Null returned, or bad size, while getting buffer data in "
-                     "OTCron::GetNym_OfferList.\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Null returned, or bad size, while getting buffer data in "
+                "OTCron::GetNym_OfferList.")
+                .Flush();
     } else
-        otErr
-            << "Error: Less-than-zero nOfferCount in OTCron::GetNym_OfferList: "
-            << nOfferCount << ".\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Error: Less-than-zero nOfferCount in "
+            "OTCron::GetNym_OfferList: ")(nOfferCount)(".")
+            .Flush();
 
     return false;
 }
@@ -285,7 +290,9 @@ bool OTCron::GetMarketList(Armored& ascOutput, std::int32_t& nMarketCount)
             pPacker->Pack(*pMarketList));  // Now we PACK our market list.
 
         if (nullptr == pBuffer) {
-            otErr << "Failed packing pMarketList in OTCron::GetMarketList. \n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Failed packing pMarketList in OTCron::GetMarketList.")
+                .Flush();
             return false;
         }
 
@@ -308,11 +315,14 @@ bool OTCron::GetMarketList(Armored& ascOutput, std::int32_t& nMarketCount)
 
             return true;
         } else
-            otErr << "OTCron::GetMarketList: 0 size, or null return value, "
-                     "while getting raw data from packed buffer.\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": 0 size, or null return value, "
+                "while getting raw data from packed buffer.")
+                .Flush();
     } else
-        otErr << "OTCron::GetMarketList: nMarketCount is less than zero: "
-              << nMarketCount << ".\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": nMarketCount is less than zero: ")(nMarketCount)(".")
+            .Flush();
 
     return false;
 }
@@ -398,15 +408,18 @@ std::int32_t OTCron::ProcessXMLNode(irr::io::IrrXMLReader*& xml)
 
         if (!Contract::LoadEncodedTextField(xml, strData) ||
             !strData->Exists()) {
-            otErr << "Error in OTCron::ProcessXMLNode: cronItem field without "
-                     "value.\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Error in OTCron::ProcessXMLNode: cronItem field without "
+                "value.")
+                .Flush();
             return (-1);  // error condition
         } else {
             auto pItem{api_.Factory().CronItem(strData)};
 
             if (false == bool(pItem)) {
-                otErr
-                    << "Unable to create cron item from data in cron file.\n ";
+                LogOutput(OT_METHOD)(__FUNCTION__)(
+                    ": Unable to create cron item from data in cron file.")
+                    .Flush();
                 return (-1);
             }
 
@@ -417,10 +430,12 @@ std::int32_t OTCron::ProcessXMLNode(irr::io::IrrXMLReader*& xml)
             //
             std::shared_ptr<OTCronItem> item{pItem.release()};
             if (!item->VerifySignature(*m_pServerNym)) {
-                otErr << "OTCron::ProcessXMLNode: ERROR SECURITY: Server "
-                         "signature failed to "
-                         "verify on a cron item while loading: "
-                      << item->GetTransactionNum() << "\n";
+                LogOutput(OT_METHOD)(__FUNCTION__)(
+                    ": ERROR SECURITY: Server "
+                    "signature failed to "
+                    "verify on a cron item while loading: ")(
+                    item->GetTransactionNum())(".")
+                    .Flush();
                 return (-1);
             } else if (AddCronItem(
                            item,
@@ -443,10 +458,12 @@ std::int32_t OTCron::ProcessXMLNode(irr::io::IrrXMLReader*& xml)
                     ": Successfully loaded cron item and added to list. ")
                     .Flush();
             } else {
-                otErr << "OTCron::ProcessXMLNode: Though loaded / verified "
-                         "successfully, "
-                         "unable to add cron item (from cron file) to cron "
-                         " list.\n ";
+                LogOutput(OT_METHOD)(__FUNCTION__)(
+                    ": Though loaded / verified "
+                    "successfully, "
+                    "unable to add cron item (from cron file) to cron "
+                    " list.")
+                    .Flush();
                 return (-1);
             }
         }
@@ -488,8 +505,10 @@ std::int32_t OTCron::ProcessXMLNode(irr::io::IrrXMLReader*& xml)
             !AddMarket(market, false))  // bSaveFile=false: don't save this
                                         // file WHILE loading it!!!
         {
-            otErr << "Somehow error while loading, verifying, or adding market "
-                     "while loading Cron file.\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Somehow error while loading, verifying, or adding market "
+                "while loading Cron file.")
+                .Flush();
             return (-1);
         } else {
             LogDetail(OT_METHOD)(__FUNCTION__)(
@@ -578,7 +597,8 @@ std::int64_t OTCron::computeTimeout()
 void OTCron::ProcessCronItems()
 {
     if (!m_bIsActivated) {
-        otErr << "OTCron::ProcessCronItems: Not activated yet. (Skipping.)\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Not activated yet. (Skipping).")
+            .Flush();
         return;
     }
 
@@ -588,17 +608,16 @@ void OTCron::ProcessCronItems()
 
     const std::int32_t nTwentyPercent = OTCron::GetCronRefillAmount() / 5;
     if (GetTransactionCount() <= nTwentyPercent) {
-        otErr << "WARNING: Cron has fewer than 20 percent of its normal "
-                 "transaction number count available since the previous round! "
-                 "\n"
-                 "That is, "
-              << GetTransactionCount()
-              << " are currently available, with a max of "
-              << OTCron::GetCronRefillAmount() << ", meaning "
-              << OTCron::GetCronRefillAmount() - GetTransactionCount()
-              << " were used in the last round alone!!! \n"
-                 "SKIPPING THE CRON ITEMS THAT WERE SCHEDULED FOR THIS "
-                 "ROUND!!!\n\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": WARNING: Cron has fewer than 20 percent of its normal "
+            "transaction number count available since the previous round! "
+            "That is, ")(GetTransactionCount())(
+            " are currently available, with a max of ")(GetCronRefillAmount())(
+            ", meaning ")(GetCronRefillAmount() - GetTransactionCount())(
+            " were used in the last round alone!!! "
+            "SKIPPING THE CRON ITEMS THAT WERE SCHEDULED FOR THIS "
+            "ROUND!!!")
+            .Flush();
         return;
     }
     bool bNeedToSave = false;
@@ -609,18 +628,19 @@ void OTCron::ProcessCronItems()
     for (auto it = m_multimapCronItems.begin();
          it != m_multimapCronItems.end();) {
         if (GetTransactionCount() <= nTwentyPercent) {
-            otErr << "WARNING: Cron has fewer than 20 percent of its normal "
-                     "transaction "
-                     "number count available since the previous cron item "
-                     "alone! \n"
-                     "That is, "
-                  << GetTransactionCount()
-                  << " are currently available, with a max of "
-                  << OTCron::GetCronRefillAmount() << ", meaning "
-                  << OTCron::GetCronRefillAmount() - GetTransactionCount()
-                  << " were used in the current round alone!!! \n"
-                     "SKIPPING THE REMAINDER OF THE CRON ITEMS THAT WERE "
-                     "SCHEDULED FOR THIS ROUND!!!\n\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": WARNING: Cron has fewer than 20 percent of its normal "
+                "transaction "
+                "number count available since the previous cron item "
+                "alone! "
+                "That is, ")(GetTransactionCount())(
+                " are currently available, with a max of ")(
+                GetCronRefillAmount())(", meaning ")(
+                GetCronRefillAmount() - GetTransactionCount())(
+                " were used in the current round alone!!! "
+                "SKIPPING THE REMAINDER OF THE CRON ITEMS THAT WERE "
+                "SCHEDULED FOR THIS ROUND!!!")
+                .Flush();
             break;
         }
         auto pItem = it->second;
@@ -684,9 +704,10 @@ bool OTCron::AddCronItem(
              // with. (BOTH signatures are there
              // now--user's and server's.)
              !theItem->SaveContract() || !theItem->SaveCronReceipt())) {
-            otErr << __FUNCTION__
-                  << ": Error saving receipt while adding new "
-                     "CronItem to Cron.\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Error saving receipt while adding new "
+                "CronItem to Cron.")
+                .Flush();
             return false;
         }
 
@@ -747,19 +768,20 @@ bool OTCron::AddCronItem(
                     theItem->GetTransactionNum())(".")
                     .Flush();
             else
-                otErr << __FUNCTION__
-                      << ": Error saving while adding new CronItem to Cron: "
-                      << theItem->GetTransactionNum() << "\n";
+                LogOutput(OT_METHOD)(__FUNCTION__)(
+                    ": Error saving while adding new CronItem to Cron: ")(
+                    theItem->GetTransactionNum())(".")
+                    .Flush();
         }
 
         return bSuccess;
     }
     // Otherwise, if it was already there, log an error.
     else {
-        otErr << __FUNCTION__
-              << ": Failed attempt to add CronItem with pre-existing "
-                 "transaction number: "
-              << theItem->GetTransactionNum() << "\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Failed attempt to add CronItem with pre-existing "
+            "transaction number: ")(theItem->GetTransactionNum())(".")
+            .Flush();
     }
 
     return false;
@@ -775,10 +797,10 @@ bool OTCron::RemoveCronItem(
 
     // If it's not already on the list, then there's nothing to remove.
     if (m_mapCronItems.end() == it_map) {
-        otErr << __FUNCTION__
-              << ": Attempt to remove non-existent CronItem from OTCron. "
-                 "Transaction #: "
-              << lTransactionNum << "\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Attempt to remove non-existent CronItem from OTCron. "
+            "Transaction #: ")(lTransactionNum)(".")
+            .Flush();
     }
 
     // Otherwise, if it WAS already there, remove it properly.
@@ -962,9 +984,10 @@ bool OTCron::AddMarket(
         //  (to its own file), then return false.  This will happen if
         // filesystem problems.
         if (bSaveMarketFile && !theMarket->SaveMarket()) {
-            otErr
-                << "Error saving market file while adding new Market to Cron:\n"
-                << std_MARKET_ID << "\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Error saving market file while adding new Market to Cron: ")(
+                std_MARKET_ID)(".")
+                .Flush();
             return false;
         }
 
@@ -992,15 +1015,19 @@ bool OTCron::AddMarket(
                     ": New Market has been added to Cron.")
                     .Flush();
             else
-                otErr << "Error saving while adding new Market to Cron.\n";
+                LogOutput(OT_METHOD)(__FUNCTION__)(
+                    ": Error saving while adding new Market to Cron.")
+                    .Flush();
         }
 
         return bSuccess;
     }
     // Otherwise, if it was already there, log an error.
     else {
-        otErr << "Attempt to add Market that was already there: "
-              << std_MARKET_ID << "\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Attempt to add Market that was already there: ")(std_MARKET_ID)(
+            ".")
+            .Flush();
     }
 
     return false;
@@ -1036,7 +1063,9 @@ std::shared_ptr<OTMarket> OTCron::GetOrCreateMarket(
             "New market created and added to Cron.")
             .Flush();
     } else {
-        otErr << "Error trying to add new market to Cron.\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Error trying to add new market to Cron.")
+            .Flush();
     }
 
     return market;
@@ -1068,9 +1097,9 @@ std::shared_ptr<OTMarket> OTCron::GetMarket(const Identifier& MARKET_ID)
         if (MARKET_ID == LOOP_MARKET_ID)
             return pMarket;
         else
-            otErr << "Expected Market with ID:\n"
-                  << std_MARKET_ID << "\n but found " << str_LOOP_MARKET_ID
-                  << "\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(": Expected Market with ID: ")(
+                std_MARKET_ID)(" but found ")(str_LOOP_MARKET_ID)(".")
+                .Flush();
     }
 
     return nullptr;

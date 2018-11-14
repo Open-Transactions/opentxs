@@ -181,9 +181,10 @@ bool OTAgreement::DropServerNoticeToNymbox(
     }
 
     if (!bSuccessLoading) {
-        otErr << __FUNCTION__
-              << ": Failed loading or generating a nymbox. "
-                 "(FAILED WRITING RECEIPT!!) \n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Failed loading or generating a nymbox. "
+            "(FAILED WRITING RECEIPT!!).")
+            .Flush();
 
         return false;
     }
@@ -287,7 +288,8 @@ bool OTAgreement::DropServerNoticeToNymbox(
 
         return true;
     } else {
-        otErr << __FUNCTION__ << ": Failed trying to create Nymbox.\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Failed trying to create Nymbox.")
+            .Flush();
     }
 
     return false;  // unreachable.
@@ -368,8 +370,6 @@ void OTAgreement::onFinalReceipt(
 
     OT_ASSERT(nullptr != pServerNym);
 
-    const char* szFunc = "OTAgreement::onFinalReceipt";
-
     // The finalReceipt Item's ATTACHMENT contains the UPDATED Cron Item.
     // (With the SERVER's signature on it!)
     auto strUpdatedCronItem = String::Factory(*this);
@@ -420,11 +420,14 @@ void OTAgreement::onFinalReceipt(
                 GetOriginType(),
                 String::Factory(),
                 pstrAttachment)) {
-            otErr << szFunc
-                  << ": Failure dropping sender final receipt into nymbox.\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Failure dropping sender final receipt into nymbox.")
+                .Flush();
         }
     } else {
-        otErr << szFunc << ": Failure verifying sender's opening number.\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Failure verifying sender's opening number.")
+            .Flush();
     }
 
     if ((lSenderClosingNumber > 0) &&
@@ -444,8 +447,9 @@ void OTAgreement::onFinalReceipt(
                                   // call will load it up and update its
                                   // inbox hash.)
         {
-            otErr << szFunc
-                  << ": Failure dropping receipt into sender's inbox.\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Failure dropping receipt into sender's inbox.")
+                .Flush();
         }
         // This part below doesn't happen until theOriginator ACCEPTS the final
         // receipt (when processing his inbox.)
@@ -453,11 +457,12 @@ void OTAgreement::onFinalReceipt(
         //      theOriginator.RemoveIssuedNum(strNotaryID, lSenderClosingNumber,
         // true); //bSave=false
     } else {
-        otErr << szFunc
-              << ": Failed verifying "
-                 "lSenderClosingNumber=theOrigCronItem."
-                 "GetClosingTransactionNoAt(0)>0 &&  "
-                 "theOriginator.VerifyTransactionNum(lSenderClosingNumber)\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Failed verifying "
+            "lSenderClosingNumber=theOrigCronItem. "
+            "GetClosingTransactionNoAt(0)>0 && "
+            "theOriginator.VerifyTransactionNum(lSenderClosingNumber).")
+            .Flush();
     }
 
     auto rContext = api_.Wallet().mutable_ClientContext(
@@ -488,17 +493,18 @@ void OTAgreement::onFinalReceipt(
             pstrAttachment);
 
         if (!dropped) {
-            otErr
-                << szFunc
-                << ": Failure dropping recipient final receipt into nymbox.\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Failure dropping recipient final receipt into nymbox.")
+                .Flush();
         }
     } else {
-        otErr << szFunc
-              << ": Failed verifying "
-                 "lRecipientClosingNumber="
-                 "GetRecipientClosingTransactionNoAt(1)>0 &&  "
-                 "pRecipient->VerifyTransactionNum(lRecipientClosingNumber) && "
-                 "VerifyIssuedNum(lRecipientOpeningNumber)\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Failed verifying "
+            "lRecipientClosingNumber="
+            "GetRecipientClosingTransactionNoAt(1)>0 && "
+            "pRecipient->VerifyTransactionNum(lRecipientClosingNumber) && "
+            "VerifyIssuedNum(lRecipientOpeningNumber).")
+            .Flush();
     }
 
     if ((lRecipientClosingNumber > 0) &&
@@ -513,16 +519,18 @@ void OTAgreement::onFinalReceipt(
                 GetOriginType(),
                 String::Factory(),
                 pstrAttachment)) {
-            otErr << szFunc
-                  << ": Failure dropping receipt into recipient's inbox.\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Failure dropping receipt into recipient's inbox.")
+                .Flush();
         }
     } else {
-        otErr << szFunc
-              << ": Failed verifying "
-                 "lRecipientClosingNumber="
-                 "GetRecipientClosingTransactionNoAt(1)>0 &&  "
-                 "pRecipient->VerifyTransactionNum(lRecipientClosingNumber) && "
-                 "VerifyIssuedNum(lRecipientOpeningNumber)\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Failed verifying "
+            "lRecipientClosingNumber="
+            "GetRecipientClosingTransactionNoAt(1)>0 && "
+            "pRecipient->VerifyTransactionNum(lRecipientClosingNumber) && "
+            "VerifyIssuedNum(lRecipientOpeningNumber).")
+            .Flush();
     }
 
     // QUESTION: Won't there be Cron Items that have no asset account at all?
@@ -881,8 +889,9 @@ bool OTAgreement::SetProposal(
     } else  // VALID_TO is a NEGATIVE number... Error.
     {
         std::int64_t lValidTo = OTTimeGetSecondsFromTime(VALID_TO);
-        otErr << __FUNCTION__ << ": Negative value for valid_to: " << lValidTo
-              << "\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Negative value for valid_to: ")(
+            lValidTo)(".")
+            .Flush();
 
         return false;
     }
@@ -896,16 +905,17 @@ bool OTAgreement::SetProposal(
         context.NextTransactionNumber(MessageType::notarizeTransaction);
 
     if (0 == openingNumber->Value()) {
-        otErr << __FUNCTION__
-              << ": Error: Unable to get a transaction number.\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Error: Unable to get a transaction number.")
+            .Flush();
 
         return false;
     }
 
     if (0 == closingNumber->Value()) {
-        otErr << __FUNCTION__
-              << ": Error: Unable to get a closing "
-                 "transaction number.\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Error: Unable to get a closing "
+                                           "transaction number.")
+            .Flush();
         // (Since the first one was successful, we just put it back before
         // returning.)
 
@@ -915,13 +925,13 @@ bool OTAgreement::SetProposal(
     // Above this line, the transaction numbers will be recovered automatically
     openingNumber->SetSuccess(true);
     closingNumber->SetSuccess(true);
-    otErr << OT_METHOD << __FUNCTION__
-          << ": Allocated opening transaction number " << openingNumber->Value()
-          << std::endl;
+    LogOutput(OT_METHOD)(__FUNCTION__)(
+        ": Allocated opening transaction number ")(openingNumber->Value())(".")
+        .Flush();
 
-    otErr << OT_METHOD << __FUNCTION__
-          << ": Allocated closing transaction number " << closingNumber->Value()
-          << std::endl;
+    LogOutput(OT_METHOD)(__FUNCTION__)(
+        ": Allocated closing transaction number ")(closingNumber->Value())(".")
+        .Flush();
 
     // At this point we now have 2 transaction numbers...
     // We can't return without either USING THEM, or PUTTING THEM BACK.
@@ -1063,16 +1073,18 @@ bool OTAgreement::Confirm(
         context.NextTransactionNumber(MessageType::notarizeTransaction);
 
     if (0 == openingNumber->Value()) {
-        otErr << __FUNCTION__
-              << ": Error: Strangely unable to get a transaction number.\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Error: Strangely unable to get a transaction number.")
+            .Flush();
 
         return false;
     }
 
     if (false == closingNumber->Value()) {
-        otErr << __FUNCTION__
-              << ": Error: Strangely unable to get a closing "
-                 "transaction number.\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Error: Strangely unable to get a closing "
+            "transaction number.")
+            .Flush();
 
         return false;
     }
@@ -1230,8 +1242,10 @@ std::int32_t OTAgreement::ProcessXMLNode(irr::io::IrrXMLReader*& xml)
         nReturnVal = 1;
     } else if (!strcmp("consideration", xml->getNodeName())) {
         if (false == Contract::LoadEncodedTextField(xml, m_strConsideration)) {
-            otErr << "Error in OTPaymentPlan::ProcessXMLNode: consideration "
-                     "field without value.\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Error in OTPaymentPlan::ProcessXMLNode: Consideration "
+                "field without value.")
+                .Flush();
             return (-1);  // error condition
         }
 
@@ -1239,8 +1253,10 @@ std::int32_t OTAgreement::ProcessXMLNode(irr::io::IrrXMLReader*& xml)
     } else if (!strcmp("merchantSignedCopy", xml->getNodeName())) {
         if (false ==
             Contract::LoadEncodedTextField(xml, m_strMerchantSignedCopy)) {
-            otErr << "Error in OTPaymentPlan::ProcessXMLNode: "
-                     "merchant_signed_copy field without value.\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Error in OTPaymentPlan::ProcessXMLNode: "
+                "merchant_signed_copy field without value.")
+                .Flush();
             return (-1);  // error condition
         }
 
@@ -1259,8 +1275,9 @@ std::int32_t OTAgreement::ProcessXMLNode(irr::io::IrrXMLReader*& xml)
 
             AddRecipientClosingTransactionNo(lClosingNumber);
         } else {
-            otErr << "Error in OTAgreement::ProcessXMLNode: "
-                     "closingRecipientNumber field without value.\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": closingRecipientNumber field without value.")
+                .Flush();
             return (-1);  // error condition
         }
 

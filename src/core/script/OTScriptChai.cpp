@@ -26,6 +26,8 @@
 #include <exception>
 #include <string>
 
+#define OT_METHOD "opentxs::OTScriptChai::"
+
 namespace opentxs
 {
 
@@ -200,9 +202,10 @@ bool OTScriptChai::ExecuteScript(OTVariable* pReturnVar)
                 } break;
 
                 default:
-                    otErr << "OTScriptChai::ExecuteScript: Failure: Unknown "
-                             "variable type for variable: "
-                          << var_name << "\n";
+                    LogOutput(OT_METHOD)(__FUNCTION__)(
+                        ": Failure: Unknown "
+                        "variable type for variable: ")(var_name)(".")
+                        .Flush();
                     return false;
             }
         }
@@ -250,28 +253,28 @@ bool OTScriptChai::ExecuteScript(OTVariable* pReturnVar)
                     } break;
 
                     default:
-                        otErr << "OTScriptChai::ExecuteScript: Unknown return "
-                                 "type "
-                                 "passed in, "
-                                 "unable to service it.\n";
+                        LogOutput(OT_METHOD)(__FUNCTION__)(
+                            ": Unknown return "
+                            "type passed in, "
+                            "unable to service it.")
+                            .Flush();
                         return false;
                 }  // switch
             }      // else return variable.
         }          // try
         catch (const chaiscript::exception::eval_error& ee) {
             // Error in script parsing / execution
-            otErr << "OTScriptChai::ExecuteScript: \n Caught "
-                     "chaiscript::exception::eval_error: \n "
-                  << ee.reason << ". \n   File: " << ee.filename
-                  << "\n"
-                     "   Start position, line: "
-                  << ee.start_position.line << " column: "
-                  << ee.start_position.column
-                  //                  << "\n"
-                  //                     "   End position,   line: " <<
-                  //                     ee.end_position.line
-                  //                  << " column: " << ee.end_position.column
-                  << "\n\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Caught "
+                "chaiscript::exception::eval_error: ")(ee.reason)(". File: ")(
+                ee.filename)(". Start position, line: ")(
+                ee.start_position.line)(". Column: ")(ee.start_position.column)(
+                ".")
+                .Flush();
+            //                  << "\n"
+            //                     "   End position,   line: " <<
+            //                     ee.end_position.line
+            //                  << " column: " << ee.end_position.column
 
             std::cout << ee.what();
             if (ee.call_stack.size() > 0) {
@@ -311,25 +314,26 @@ bool OTScriptChai::ExecuteScript(OTVariable* pReturnVar)
             return false;
         } catch (const chaiscript::exception::bad_boxed_cast& e) {
             // Error unboxing return value
-            otErr << "OTScriptChai::ExecuteScript: Caught "
-                     "chaiscript::exception::bad_boxed_cast : "
-                  << ((e.what() != nullptr) ? e.what()
-                                            : "e.what() returned null, sorry")
-                  << ".\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Caught "
+                "chaiscript::exception::bad_boxed_cast : ")(
+                (e.what() != nullptr) ? e.what()
+                                      : "e.what() returned null, sorry.")
+                .Flush();
             return false;
         } catch (const std::exception& e) {
             // Error explicitly thrown from script
-            otErr << "OTScriptChai::ExecuteScript: Caught std::exception "
-                     "exception: "
-                  << ((e.what() != nullptr) ? e.what()
-                                            : "e.what() returned null, sorry")
-                  << "\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(": Caught std::exception "
+                                               "exception: ")(
+                (e.what() != nullptr) ? e.what()
+                                      : "e.what() returned null, sorry.")
+                .Flush();
             return false;
         }
         //      catch (chaiscript::Boxed_Value bv)
         catch (...) {
             //          std::int32_t i = chaiscript::boxed_cast<int32_t>(bv);
-            otErr << "OTScriptChai::ExecuteScript: Caught exception.\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(": Caught exception.").Flush();
             return false;
         }
     }

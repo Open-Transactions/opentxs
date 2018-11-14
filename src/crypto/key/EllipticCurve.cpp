@@ -189,8 +189,7 @@ bool EllipticCurve::Path(proto::HDPath& output) const
         return true;
     }
 
-    otErr << OT_METHOD << __FUNCTION__ << ": HDPath not instantiated."
-          << std::endl;
+    LogOutput(OT_METHOD)(__FUNCTION__)(": HDPath not instantiated.").Flush();
 
     return false;
 }
@@ -260,18 +259,20 @@ bool EllipticCurve::ReEncryptPrivateKey(
             }
 
             if (!reencrypted) {
-                otErr << __FUNCTION__ << ": Could not encrypt private key."
-                      << std::endl;
+                LogOutput(OT_METHOD)(__FUNCTION__)(
+                    ": Could not encrypt private key.")
+                    .Flush();
             }
 
             bReturnVal = reencrypted;
 
         } else {
-            otErr << __FUNCTION__ << ": Could not decrypt private key."
-                  << std::endl;
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Could not decrypt private key.")
+                .Flush();
         }
     } else {
-        otErr << __FUNCTION__ << ": Key is empty." << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Key is empty.").Flush();
     }
 
     return bReturnVal;

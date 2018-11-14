@@ -202,9 +202,10 @@ bool NymFile::deserialize_nymfile(
                     convert = (String::Factory("1.0")->Compare(m_strVersion));
 
                     if (convert) {
-                        otErr << __FUNCTION__
-                              << ": Converting nymfile with version "
-                              << m_strVersion << std::endl;
+                        LogOutput(OT_METHOD)(__FUNCTION__)(
+                            ": Converting nymfile with version ")(m_strVersion)(
+                            ".")
+                            .Flush();
                     } else {
                         LogDetail(OT_METHOD)(__FUNCTION__)(
                             ": Not converting nymfile because version is ")(
@@ -321,8 +322,9 @@ bool NymFile::deserialize_nymfile(
                 }          // outpayments message
                 else {
                     // unknown element type
-                    otErr << "Unknown element type in " << __FUNCTION__ << ": "
-                          << xml->getNodeName() << "\n";
+                    LogOutput(OT_METHOD)(__FUNCTION__)(
+                        ": Unknown element type in: ")(xml->getNodeName())(".")
+                        .Flush();
                     bSuccess = false;
                 }
                 break;
@@ -509,8 +511,9 @@ bool NymFile::load_signed_nymfile(const T& lock)
     // 3. That the signature matches for the signer nym who was passed in.
     //
     if (!theNymFile->VerifyFile()) {
-        otErr << __FUNCTION__ << ": Failed verifying nymfile: " << nymID
-              << "\n\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Failed verifying nymfile: ")(
+            nymID)(".")
+            .Flush();
 
         return false;
     }
@@ -518,9 +521,10 @@ bool NymFile::load_signed_nymfile(const T& lock)
     const auto& publicSignKey = signer_nym_->GetPublicSignKey();
 
     if (!theNymFile->VerifyWithKey(publicSignKey)) {
-        otErr << __FUNCTION__
-              << ": Failed verifying signature on nymfile: " << nymID
-              << "\n Signer Nym ID: " << signer_nym_->ID().str() << "\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Failed verifying signature on nymfile: ")(nymID)(
+            ". Signer Nym ID: ")(signer_nym_->ID())(".")
+            .Flush();
 
         return false;
     }
@@ -532,8 +536,9 @@ bool NymFile::load_signed_nymfile(const T& lock)
     if (1 > theNymFile->GetFilePayload().GetLength()) {
         const auto lLength = theNymFile->GetFilePayload().GetLength();
 
-        otErr << __FUNCTION__ << ": Bad length (" << lLength
-              << ") while loading nymfile: " << nymID << "\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Bad length (")(lLength)(
+            ") while loading nymfile: ")(nymID)(".")
+            .Flush();
     }
 
     bool converted = false;
@@ -594,10 +599,10 @@ bool NymFile::RemoveOutpaymentsByIndex(const std::int32_t nIndex)
     // Out of bounds.
     if (m_dequeOutpayments.empty() || (nIndex < 0) ||
         (uIndex >= m_dequeOutpayments.size())) {
-        otErr << __FUNCTION__
-              << ": Error: Index out of bounds: signed: " << nIndex
-              << " unsigned: " << uIndex << " (deque size is "
-              << m_dequeOutpayments.size() << ").\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Error: Index out of bounds: signed: ")(nIndex)(". Unsigned: ")(
+            uIndex)(" (deque size is ")(m_dequeOutpayments.size())(").")
+            .Flush();
         return false;
     }
 
@@ -740,8 +745,9 @@ bool NymFile::SerializeNymFile(const char* szFoldername, const char* szFilename)
     bool bSaved = OTDB::StorePlainString(
         strNym->Get(), api_.DataFolder(), szFoldername, szFilename, "", "");
     if (!bSaved)
-        otErr << __FUNCTION__ << ": Error saving file: " << szFoldername
-              << Log::PathSeparator() << szFilename << "\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Error saving file: ")(
+            szFoldername)(Log::PathSeparator())(szFilename)(".")
+            .Flush();
 
     return bSaved;
 }
@@ -784,17 +790,18 @@ bool NymFile::save_signed_nymfile(const T& lock)
         const bool bSaved = theNymFile->SaveFile();
 
         if (!bSaved) {
-            otErr << __FUNCTION__
-                  << ": Failed while calling theNymFile->SaveFile() for Nym "
-                  << strNymID << " using Signer Nym " << signer_nym_->ID().str()
-                  << "\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Failed while calling theNymFile->SaveFile() for Nym ")(
+                strNymID)(" using Signer Nym ")(signer_nym_->ID())(".")
+                .Flush();
         }
 
         return bSaved;
     } else {
-        otErr << __FUNCTION__
-              << ": Failed trying to sign and save NymFile for Nym " << strNymID
-              << " using Signer Nym " << signer_nym_->ID().str() << "\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Failed trying to sign and save NymFile for Nym ")(strNymID)(
+            " using Signer Nym ")(signer_nym_->ID())(".")
+            .Flush();
     }
 
     return false;

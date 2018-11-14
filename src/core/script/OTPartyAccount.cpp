@@ -110,9 +110,9 @@ OTAgent* OTPartyAccount::GetAuthorizedAgent()
     OT_ASSERT(nullptr != m_pForParty);
 
     if (!m_strAgentName->Exists()) {
-        otErr << "OTPartyAccount::" << __FUNCTION__
-              << ": Error: Authorized agent "
-                 "name (for this account) is blank!\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Error: Authorized agent "
+                                           "name (for this account) is blank!")
+            .Flush();
         return nullptr;
     }
 
@@ -153,16 +153,17 @@ bool OTPartyAccount::IsAccountByID(const Identifier& theAcctID) const
 bool OTPartyAccount::IsAccount(const Account& theAccount)
 {
     if (!m_strAcctID->Exists()) {
-        otErr << "OTPartyAccount::" << __FUNCTION__
-              << ": Error: Empty m_strAcctID.\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Error: Empty m_strAcctID.")
+            .Flush();
         return false;
     }
 
     bool bCheckAssetId = true;
     if (!m_strInstrumentDefinitionID->Exists()) {
-        otErr << "OTPartyAccount::" << __FUNCTION__
-              << ": FYI, Asset ID is blank in this smart contract, for this "
-                 "account.\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": FYI, Asset ID is blank in this smart contract, for this "
+            "account.")
+            .Flush();
         bCheckAssetId = false;
     }
 
@@ -201,19 +202,20 @@ bool OTPartyAccount::IsAccount(const Account& theAccount)
 bool OTPartyAccount::VerifyOwnership() const
 {
     if (nullptr == m_pForParty) {
-        otErr << "OTPartyAccount::" << __FUNCTION__
-              << ": Error: nullptr pointer to "
-                 "owner party. \n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Error: nullptr pointer to "
+                                           "owner party.")
+            .Flush();
         return false;
     }
 
     auto account = get_account();
 
     if (false == bool(account)) {
-        otErr << "OTPartyAccount::" << __FUNCTION__
-              << ": Error: nullptr pointer to "
-                 "account. (This function expects account to already be "
-                 "loaded.) \n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Error: nullptr pointer to "
+            "account. (This function expects account to already be "
+            "loaded).")
+            .Flush();
         return false;
     }  // todo maybe turn the above into OT_ASSERT()s.
 
@@ -237,10 +239,11 @@ bool OTPartyAccount::VerifyAgency()
     auto account = get_account();
 
     if (false == bool(account)) {
-        otErr << "OTPartyAccount::" << __FUNCTION__
-              << ": Error: nullptr pointer to "
-                 "account. (This function expects account to already be "
-                 "loaded.) \n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Error: nullptr pointer to "
+            "account. (This function expects account to already be "
+            "loaded).")
+            .Flush();
         return false;
     }  // todo maybe turn the above into OT_ASSERT()s.
 
@@ -277,16 +280,15 @@ bool OTPartyAccount::DropFinalReceiptToInbox(
     OTString pstrNote,
     OTString pstrAttachment)
 {
-    const char* szFunc = "OTPartyAccount::DropFinalReceiptToInbox";
-
     if (nullptr == m_pForParty) {
-        otErr << szFunc << ": nullptr m_pForParty.\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": nullptr m_pForParty.").Flush();
         return false;
     } else if (!m_strAcctID->Exists()) {
-        otErr << szFunc << ": Empty Acct ID.\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Empty Acct ID.").Flush();
         return false;
     } else if (!m_strAgentName->Exists()) {
-        otErr << szFunc << ": No agent named for this account.\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": No agent named for this account.")
+            .Flush();
         return false;
     }
 
@@ -298,7 +300,9 @@ bool OTPartyAccount::DropFinalReceiptToInbox(
     OTAgent* pAgent = m_pForParty->GetAgent(str_agent_name);
 
     if (nullptr == pAgent)
-        otErr << szFunc << ": named agent wasn't found on party.\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Named agent wasn't found on party.")
+            .Flush();
     else {
         const auto theAccountID = Identifier::Factory(m_strAcctID);
 

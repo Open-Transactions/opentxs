@@ -45,6 +45,8 @@ extern "C" {
 
 #include "Secp256k1.hpp"
 
+#define OT_METHOD "opentxs::Secp256k1::"
+
 namespace opentxs
 {
 crypto::Secp256k1* Factory::Secp256k1(
@@ -112,8 +114,9 @@ bool Secp256k1::Sign(
     bool haveDigest = crypto_.Hash().Digest(hashType, plaintext, hash);
 
     if (!haveDigest) {
-        otErr << __FUNCTION__ << ": Failed to obtain the contract hash."
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Failed to obtain the contract hash.")
+            .Flush();
 
         return false;
     }
@@ -153,15 +156,17 @@ bool Secp256k1::Sign(
                 ecdsaSignature.data, sizeof(secp256k1_ecdsa_signature));
             return true;
         } else {
-            otErr << __FUNCTION__ << ": "
-                  << "Call to secp256k1_ecdsa_sign() failed.\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Call to secp256k1_ecdsa_sign() failed.")
+                .Flush();
 
             return false;
         }
     } else {
-        otErr << __FUNCTION__ << ": "
-              << "Can not extract ecdsa private key from "
-                 "Asymmetric.\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Can not extract ecdsa private key from "
+            "Asymmetric.")
+            .Flush();
 
         return false;
     }

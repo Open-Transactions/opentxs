@@ -76,8 +76,10 @@ OTAsymmetricKey Asymmetric::Factory(
         }
 #endif  // OT_CRYPTO_SUPPORTED_KEY_RSA
         default: {
-            otErr << __FUNCTION__ << ": Open-Transactions isn't built with "
-                  << "support for this key type." << std::endl;
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Open-Transactions isn't built with "
+                "support for this key type.")
+                .Flush();
         }
     }
 
@@ -117,8 +119,10 @@ OTAsymmetricKey Asymmetric::Factory(
         }
 #endif  // OT_CRYPTO_SUPPORTED_KEY_RSA
         default: {
-            otErr << __FUNCTION__ << ": Open-Transactions isn't built with "
-                  << "support for this key type." << std::endl;
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Open-Transactions isn't built with "
+                "support for this key type.")
+                .Flush();
         }
     }
 
@@ -209,14 +213,13 @@ bool Asymmetric::CalculateID(Identifier& theOutput) const  // Only works
                                                            // for public
                                                            // keys.
 {
-    const char* szFunc = "Asymmetric::CalculateID";
-
     theOutput.Release();
 
     if (!IsPublic()) {
-        otErr << szFunc
-              << ": Error: !IsPublic() (This function should only be "
-                 "called on a public key.)\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Error: !IsPublic() (This function should only be "
+            "called on a public key).")
+            .Flush();
         return false;
     }
 
@@ -224,7 +227,8 @@ bool Asymmetric::CalculateID(Identifier& theOutput) const  // Only works
     bool bGotPublicKey = GetPublicKey(strPublicKey);
 
     if (!bGotPublicKey) {
-        otErr << szFunc << ": Error getting public key.\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Error getting public key.")
+            .Flush();
         return false;
     }
 
@@ -232,7 +236,9 @@ bool Asymmetric::CalculateID(Identifier& theOutput) const  // Only works
 
     if (!bSuccessCalculateDigest) {
         theOutput.Release();
-        otErr << szFunc << ": Error calculating digest of public key.\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Error calculating digest of public key.")
+            .Flush();
         return false;
     }
 
@@ -303,8 +309,10 @@ key::Asymmetric* Asymmetric::KeyFactory(
         }
 #endif  // OT_CRYPTO_SUPPORTED_KEY_RSA
         default: {
-            otErr << __FUNCTION__ << ": Open-Transactions isn't built with "
-                  << "support for this key type." << std::endl;
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Open-Transactions isn't built with "
+                "support for this key type.")
+                .Flush();
         }
     }
 
@@ -315,14 +323,14 @@ proto::AsymmetricKeyType Asymmetric::keyType() const { return m_keyType; }
 
 const std::string Asymmetric::Path() const
 {
-    otErr << OT_METHOD << __FUNCTION__ << ": Incorrect key type." << std::endl;
+    LogOutput(OT_METHOD)(__FUNCTION__)(": Incorrect key type.").Flush();
 
     return "";
 }
 
 bool Asymmetric::Path(proto::HDPath&) const
 {
-    otErr << OT_METHOD << __FUNCTION__ << ": Incorrect key type." << std::endl;
+    LogOutput(OT_METHOD)(__FUNCTION__)(": Incorrect key type.").Flush();
 
     return false;
 }
@@ -362,7 +370,9 @@ bool Asymmetric::Sign(
     const proto::SignatureRole role) const
 {
     if (IsPublic()) {
-        otErr << "You must use private keys to create signatures.\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": You must use private keys to create signatures.")
+            .Flush();
         return false;
     }
 
@@ -387,7 +397,9 @@ bool Asymmetric::Verify(const Data& plaintext, const proto::Signature& sig)
     const
 {
     if (IsPrivate()) {
-        otErr << "You must use public keys to verify signatures.\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": You must use public keys to verify signatures.")
+            .Flush();
         return false;
     }
 

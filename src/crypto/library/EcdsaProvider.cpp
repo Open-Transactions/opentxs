@@ -21,6 +21,8 @@
 
 #include "EcdsaProvider.hpp"
 
+#define OT_METHOD "opentxs::EcdsaProvider::"
+
 namespace opentxs::crypto::implementation
 {
 EcdsaProvider::EcdsaProvider(const api::Crypto& crypto)
@@ -95,7 +97,8 @@ bool EcdsaProvider::DecryptSessionKeyECDH(
     auto publicDHKey = Data::Factory();
 
     if (!publicKey.GetKey(publicDHKey)) {
-        otErr << __FUNCTION__ << ": Failed to get public key." << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Failed to get public key.")
+            .Flush();
 
         return false;
     }
@@ -103,7 +106,8 @@ bool EcdsaProvider::DecryptSessionKeyECDH(
     OTPassword privateDHKey;
 
     if (!AsymmetricKeyToECPrivatekey(privateKey, password, privateDHKey)) {
-        otErr << __FUNCTION__ << ": Failed to get private key." << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Failed to get private key.")
+            .Flush();
 
         return false;
     }
@@ -113,8 +117,9 @@ bool EcdsaProvider::DecryptSessionKeyECDH(
     bool haveECDH = ECDH(publicDHKey, privateDHKey, *ECDHSecret);
 
     if (!haveECDH) {
-        otErr << __FUNCTION__ << ": ECDH shared secret negotiation failed."
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": ECDH shared secret negotiation failed.")
+            .Flush();
 
         return false;
     }
@@ -187,7 +192,8 @@ bool EcdsaProvider::EncryptSessionKeyECDH(
     const auto havePubkey = publicKey.GetKey(dhPublicKey);
 
     if (!havePubkey) {
-        otErr << __FUNCTION__ << ": Failed to get public key." << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Failed to get public key.")
+            .Flush();
 
         return false;
     }
@@ -201,7 +207,8 @@ bool EcdsaProvider::EncryptSessionKeyECDH(
         AsymmetricKeyToECPrivatekey(privateKey, privatePassword, *dhPrivateKey);
 
     if (!havePrivateKey) {
-        otErr << __FUNCTION__ << ": Failed to get private key." << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Failed to get private key.")
+            .Flush();
 
         return false;
     }
@@ -210,8 +217,9 @@ bool EcdsaProvider::EncryptSessionKeyECDH(
     const bool haveECDH = ECDH(dhPublicKey, *dhPrivateKey, newKeyPassword);
 
     if (!haveECDH) {
-        otErr << __FUNCTION__ << ": ECDH shared secret negotiation failed."
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": ECDH shared secret negotiation failed.")
+            .Flush();
 
         return false;
     }
@@ -220,8 +228,8 @@ bool EcdsaProvider::EncryptSessionKeyECDH(
         sessionKey.ChangePassword(passwordData, newKeyPassword);
 
     if (!encrypted) {
-        otErr << __FUNCTION__ << ": Session key encryption failed."
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Session key encryption failed.")
+            .Flush();
 
         return false;
     }
@@ -288,8 +296,9 @@ bool EcdsaProvider::SeedToCurveKey(
     [[maybe_unused]] OTPassword& privateKey,
     [[maybe_unused]] Data& publicKey) const
 {
-    otErr << __FUNCTION__ << ": this provider does not support curve25519."
-          << std::endl;
+    LogOutput(OT_METHOD)(__FUNCTION__)(
+        ": This provider does not support curve25519.")
+        .Flush();
 
     return false;
 }

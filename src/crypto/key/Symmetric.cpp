@@ -277,8 +277,8 @@ bool Symmetric::ChangePassword(
         return EncryptKey(*plaintext_key_, password);
     }
 
-    otErr << OT_METHOD << __FUNCTION__ << ": Unable to unlock master key."
-          << std::endl;
+    LogOutput(OT_METHOD)(__FUNCTION__)(": Unable to unlock master key.")
+        .Flush();
 
     return false;
 }
@@ -292,8 +292,8 @@ bool Symmetric::Decrypt(
 {
     if (false == bool(plaintext_key_)) {
         if (false == Unlock(keyPassword)) {
-            otErr << OT_METHOD << __FUNCTION__
-                  << ": Unable to unlock master key." << std::endl;
+            LogOutput(OT_METHOD)(__FUNCTION__)(": Unable to unlock master key.")
+                .Flush();
 
             return false;
         }
@@ -314,8 +314,9 @@ bool Symmetric::Decrypt(
     std::string& plaintext)
 {
     if (false == Allocate(ciphertext.data().size(), plaintext, true)) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Unable to allocate space for decryption." << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Unable to allocate space for decryption.")
+            .Flush();
 
         return false;
     }
@@ -332,8 +333,9 @@ bool Symmetric::Decrypt(
     Data& plaintext)
 {
     if (false == Allocate(ciphertext.data().size(), plaintext)) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Unable to allocate space for decryption." << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Unable to allocate space for decryption.")
+            .Flush();
 
         return false;
     }
@@ -350,8 +352,9 @@ bool Symmetric::Decrypt(
     OTPassword& plaintext)
 {
     if (!Allocate(ciphertext.data().size(), plaintext, ciphertext.text())) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Unable to allocate space for decryption." << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Unable to allocate space for decryption.")
+            .Flush();
 
         return false;
     }
@@ -378,15 +381,15 @@ bool Symmetric::Encrypt(
     const bool text)
 {
     if (nullptr == input) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Null input" << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Null input.").Flush();
 
         return false;
     }
 
     if (false == bool(plaintext_key_)) {
         if (false == Unlock(keyPassword)) {
-            otErr << OT_METHOD << __FUNCTION__
-                  << ": Unable to unlock master key." << std::endl;
+            LogOutput(OT_METHOD)(__FUNCTION__)(": Unable to unlock master key.")
+                .Flush();
 
             return false;
         }
@@ -581,8 +584,8 @@ OTIdentifier Symmetric::ID()
 
     if (false == bool(plaintext_key_)) {
         if (false == Unlock(keyPassword)) {
-            otErr << OT_METHOD << __FUNCTION__
-                  << ": Unable to unlock master key." << std::endl;
+            LogOutput(OT_METHOD)(__FUNCTION__)(": Unable to unlock master key.")
+                .Flush();
 
             return Identifier::Factory();
         }
@@ -615,8 +618,7 @@ bool Symmetric::Serialize(proto::SymmetricKey& output) const
 bool Symmetric::Unlock(const OTPasswordData& keyPassword)
 {
     if (false == bool(encrypted_key_)) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Master key not loaded."
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Master key not loaded.").Flush();
 
         return false;
     }
@@ -628,9 +630,9 @@ bool Symmetric::Unlock(const OTPasswordData& keyPassword)
 
         // Allocate space for plaintext (same size as ciphertext)
         if (!Allocate(encrypted_key_->data().size(), *plaintext_key_)) {
-            otErr << OT_METHOD << __FUNCTION__
-                  << ": Unable to allocate space for plaintext master key."
-                  << std::endl;
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Unable to allocate space for plaintext master key.")
+                .Flush();
 
             return false;
         }
@@ -639,8 +641,9 @@ bool Symmetric::Unlock(const OTPasswordData& keyPassword)
     OTPassword key;
 
     if (false == GetPassword(keyPassword, key)) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Unable to obtain master password." << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Unable to obtain master password.")
+            .Flush();
 
         return false;
     }

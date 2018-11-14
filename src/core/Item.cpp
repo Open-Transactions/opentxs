@@ -247,8 +247,9 @@ bool Item::VerifyTransactionStatement(
                 break;
             }
             default: {
-                otErr << "Item::VerifyTransactionStatement: Unexpected "
-                      << "transaction type." << std::endl;
+                LogOutput(OT_METHOD)(__FUNCTION__)(": Unexpected "
+                                                   "transaction type.")
+                    .Flush();
             } break;
         }
         // Client side will NOT remove from issued list in this case (market
@@ -400,8 +401,9 @@ bool Item::VerifyBalanceStatement(
                 lReceiptAmountMultiplier = 1;
             } break;
             default: {
-                otErr << "Item::" << __FUNCTION__ << ": Bad Subitem type "
-                      << "(SHOULD NEVER HAPPEN)...." << std::endl;
+                LogOutput(OT_METHOD)(__FUNCTION__)(": Bad Subitem type "
+                                                   "(SHOULD NEVER HAPPEN)....")
+                    .Flush();
             }
                 continue;  // This will never happen, due to the first continue
                            // above in the first switch.
@@ -686,9 +688,10 @@ bool Item::VerifyBalanceStatement(
                 .Flush();
         } break;
         default: {
-            otErr << "Item::" << __FUNCTION__
-                  << ": wrong target transaction type: "
-                  << TARGET_TRANSACTION.GetTypeString() << std::endl;
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Wrong target transaction type: ")(
+                TARGET_TRANSACTION.GetTypeString())(".")
+                .Flush();
         } break;
     }
 
@@ -848,10 +851,11 @@ std::int64_t Item::GetNumberOfOrigin()
                                                   // rejection of a basket
                                                   // receipt in his inbox.
 
-                otErr << __FUNCTION__
-                      << ": In this case, you can't calculate the "
-                         "origin number, you must set it "
-                         "explicitly.\n";
+                LogOutput(OT_METHOD)(__FUNCTION__)(
+                    ": In this case, you can't calculate the "
+                    "origin number, you must set it "
+                    "explicitly.")
+                    .Flush();
                 // Comment this out later so people can't use it to crash the
                 // server:
                 OT_FAIL_MSG(
@@ -934,9 +938,10 @@ void Item::CalculateNumberOfOrigin()
                                               // rejection of a basket receipt
                                               // in his inbox.
 
-            otErr << __FUNCTION__
-                  << ": In this case, you can't calculate the "
-                     "origin number, you must set it explicitly.\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": In this case, you can't calculate the "
+                "origin number, you must set it explicitly.")
+                .Flush();
             SetNumberOfOrigin(0);  // Not applicable.
             // Comment this out later so people can't use it to crash the
             // server:
@@ -971,8 +976,9 @@ void Item::CalculateNumberOfOrigin()
             GetAttachment(strAttachment);
 
             if (!theCheque->LoadContractFromString(strAttachment))
-                otErr << __FUNCTION__ << ": ERROR loading cheque from string:\n"
-                      << strAttachment << "\n";
+                LogOutput(OT_METHOD)(__FUNCTION__)(
+                    ": ERROR loading cheque from string: ")(strAttachment)(".")
+                    .Flush();
             else
                 SetNumberOfOrigin(theCheque->GetTransactionNum());
         } break;
@@ -1033,10 +1039,10 @@ void Item::CalculateNumberOfOrigin()
                   pOriginalItem->GetType()))) {
                 auto strType = String::Factory();
                 pOriginalItem->GetTypeString(strType);
-                otErr << __FUNCTION__
-                      << ": ERROR: Wrong item type as 'in "
-                         "reference to' string on "
-                      << strType << " item.\n";
+                LogOutput(OT_METHOD)(__FUNCTION__)(
+                    ": ERROR: Wrong item type as 'in "
+                    "reference to' string on ")(strType)(" item.")
+                    .Flush();
                 SetNumberOfOrigin(0);
                 return;
             }
@@ -1454,24 +1460,30 @@ std::int32_t Item::ProcessXMLNode(irr::io::IrrXMLReader*& xml)
         return 1;
     } else if (!strcmp("note", xml->getNodeName())) {
         if (!Contract::LoadEncodedTextField(xml, m_ascNote)) {
-            otErr << "Error in Item::ProcessXMLNode: note field without "
-                     "value.\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Error in Item::ProcessXMLNode: note field without "
+                "value.")
+                .Flush();
             return (-1);  // error condition
         }
 
         return 1;
     } else if (!strcmp("inReferenceTo", xml->getNodeName())) {
         if (false == Contract::LoadEncodedTextField(xml, m_ascInReferenceTo)) {
-            otErr << "Error in Item::ProcessXMLNode: inReferenceTo field "
-                     "without value.\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Error in Item::ProcessXMLNode: inReferenceTo field "
+                "without value.")
+                .Flush();
             return (-1);  // error condition
         }
 
         return 1;
     } else if (!strcmp("attachment", xml->getNodeName())) {
         if (!Contract::LoadEncodedTextField(xml, m_ascAttachment)) {
-            otErr << "Error in Item::ProcessXMLNode: attachment field "
-                     "without value.\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Error in Item::ProcessXMLNode: attachment field "
+                "without value.")
+                .Flush();
             return (-1);  // error condition
         }
 
@@ -1570,8 +1582,10 @@ std::int32_t Item::ProcessXMLNode(irr::io::IrrXMLReader*& xml)
             //                         strAcctFromID.Get(), strNymID.Get(),
             // strAcctToID.Get(), strNotaryID.Get()
         } else {
-            otErr << "Outbox hash in item wrong type (expected "
-                     "balanceStatement or atBalanceStatement.\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Outbox hash in item wrong type (expected "
+                "balanceStatement or atBalanceStatement.")
+                .Flush();
         }
 
         return 1;
