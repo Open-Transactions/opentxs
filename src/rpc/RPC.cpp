@@ -1877,8 +1877,8 @@ proto::RPCResponse RPC::Process(const proto::RPCCommand& command) const
         } break;
         case proto::RPCCOMMAND_ERROR:
         default: {
-            otErr << OT_METHOD << __FUNCTION__ << ": Unsupported command"
-                  << std::endl;
+            LogOutput(OT_METHOD)(__FUNCTION__)(": Unsupported command.")
+                .Flush();
         }
     }
 

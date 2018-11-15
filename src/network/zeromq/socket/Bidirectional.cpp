@@ -46,8 +46,8 @@ bool Bidirectional::apply_timeouts(void* socket, std::mutex& socket_mutex) const
     auto set = zmq_setsockopt(socket, ZMQ_LINGER, &linger_, sizeof(linger_));
 
     if (0 != set) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Failed to set ZMQ_LINGER"
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Failed to set ZMQ_LINGER.")
+            .Flush();
 
         return false;
     }
@@ -56,8 +56,8 @@ bool Bidirectional::apply_timeouts(void* socket, std::mutex& socket_mutex) const
         socket, ZMQ_SNDTIMEO, &send_timeout_, sizeof(send_timeout_));
 
     if (0 != set) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Failed to set ZMQ_SNDTIMEO"
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Failed to set ZMQ_SNDTIMEO.")
+            .Flush();
 
         return false;
     }
@@ -66,8 +66,8 @@ bool Bidirectional::apply_timeouts(void* socket, std::mutex& socket_mutex) const
         socket, ZMQ_RCVTIMEO, &receive_timeout_, sizeof(receive_timeout_));
 
     if (0 != set) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Failed to set ZMQ_RCVTIMEO"
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Failed to set ZMQ_RCVTIMEO.")
+            .Flush();
 
         return false;
     }
@@ -200,8 +200,9 @@ void Bidirectional::thread()
 
         if (-1 == events) {
             const auto error = zmq_errno();
-            otErr << OT_METHOD << __FUNCTION__
-                  << ": Poll error: " << zmq_strerror(error) << std::endl;
+            LogOutput(OT_METHOD)(__FUNCTION__)(": Poll error: ")(
+                zmq_strerror(error))(".")
+                .Flush();
 
             continue;
         }

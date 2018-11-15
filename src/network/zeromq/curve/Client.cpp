@@ -34,8 +34,8 @@ std::pair<std::string, std::string> CurveClient::RandomKeypair()
         privKey.assign(secretKey.data(), secretKey.size());
         pubKey.assign(publicKey.data(), publicKey.size());
     } else {
-        otErr << OT_METHOD << __FUNCTION__ << ": Failed to generate keypair."
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Failed to generate keypair.")
+            .Flush();
     }
 
     return output;
@@ -55,8 +55,9 @@ bool Client::SetKeysZ85(
     const std::string& clientPublic) const
 {
     if (CURVE_KEY_Z85_BYTES > serverPublic.size()) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Invalid server key size ("
-              << serverPublic.size() << ")" << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Invalid server key size (")(
+            serverPublic.size())(").")
+            .Flush();
 
         return false;
     }
@@ -65,8 +66,8 @@ bool Client::SetKeysZ85(
     ::zmq_z85_decode(key.data(), serverPublic.data());
 
     if (false == set_remote_key(key.data(), key.size())) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Failed to set server key."
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Failed to set server key.")
+            .Flush();
 
         return false;
     }
@@ -89,8 +90,7 @@ bool Client::set_public_key(const ServerContract& contract) const
     const auto& key = contract.TransportKey();
 
     if (CURVE_KEY_BYTES != key.GetSize()) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Invalid server key."
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Invalid server key.").Flush();
 
         return false;
     }
@@ -112,8 +112,8 @@ bool Client::set_local_keys() const
     const auto [secretKey, publicKey] = RandomKeypair();
 
     if (secretKey.empty() || publicKey.empty()) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Failed to generate keypair."
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Failed to generate keypair.")
+            .Flush();
 
         return false;
     }
@@ -128,8 +128,9 @@ bool Client::set_local_keys(
     OT_ASSERT(nullptr != parent_);
 
     if (CURVE_KEY_Z85_BYTES > privateKey.size()) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Invalid private key size ("
-              << privateKey.size() << ")" << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Invalid private key size (")(
+            privateKey.size())(").")
+            .Flush();
 
         return false;
     }
@@ -138,8 +139,9 @@ bool Client::set_local_keys(
     ::zmq_z85_decode(privateDecoded.data(), privateKey.data());
 
     if (CURVE_KEY_Z85_BYTES > publicKey.size()) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Invalid public key size ("
-              << publicKey.size() << ")" << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Invalid public key size (")(
+            publicKey.size())(").")
+            .Flush();
 
         return false;
     }

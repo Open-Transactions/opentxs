@@ -31,6 +31,7 @@ template class opentxs::Pimpl<opentxs::network::zeromq::Context>;
 
 #define INPROC_PREFIX "inproc://opentxs/"
 #define PATH_SEPERATOR "/"
+#define OT_METHOD "opentxs::Context::"
 
 namespace opentxs::network::zeromq
 {
@@ -52,7 +53,7 @@ std::string Context::EncodePrivateZ85(const opentxs::crypto::key::Ed25519& key)
 std::string Context::RawToZ85(const void* input, const std::size_t size)
 {
     if (0 != size % 4) {
-        otErr << __FUNCTION__ << ": Invalid input size" << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Invalid input size.").Flush();
 
         return {};
     }
@@ -71,7 +72,7 @@ std::string Context::RawToZ85(const void* input, const std::size_t size)
 OTData Context::Z85ToRaw(const void* input, const std::size_t size)
 {
     if (0 != size % 5) {
-        otErr << __FUNCTION__ << ": Invalid input size" << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Invalid input size.").Flush();
 
         return Data::Factory();
     }

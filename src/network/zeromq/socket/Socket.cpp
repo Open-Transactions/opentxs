@@ -76,8 +76,8 @@ bool Socket::apply_timeouts(const Lock& lock) const
     auto set = zmq_setsockopt(socket_, ZMQ_LINGER, &linger_, sizeof(linger_));
 
     if (0 != set) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Failed to set ZMQ_LINGER"
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Failed to set ZMQ_LINGER.")
+            .Flush();
 
         return false;
     }
@@ -86,8 +86,8 @@ bool Socket::apply_timeouts(const Lock& lock) const
         socket_, ZMQ_SNDTIMEO, &send_timeout_, sizeof(send_timeout_));
 
     if (0 != set) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Failed to set ZMQ_SNDTIMEO"
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Failed to set ZMQ_SNDTIMEO.")
+            .Flush();
 
         return false;
     }
@@ -96,8 +96,8 @@ bool Socket::apply_timeouts(const Lock& lock) const
         socket_, ZMQ_RCVTIMEO, &receive_timeout_, sizeof(receive_timeout_));
 
     if (0 != set) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Failed to set ZMQ_RCVTIMEO"
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Failed to set ZMQ_RCVTIMEO.")
+            .Flush();
 
         return false;
     }
@@ -210,8 +210,9 @@ bool Socket::send_message(const Lock& lock, void* socket, Message& message)
     }
 
     if (false == sent) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Send error:\n"
-              << zmq_strerror(zmq_errno()) << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Send error: ")(
+            zmq_strerror(zmq_errno()))(".")
+            .Flush();
     }
 
     return sent;

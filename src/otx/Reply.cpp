@@ -114,8 +114,7 @@ std::shared_ptr<const opentxs::Nym> Reply::extract_nym(
     const auto server = api.Wallet().Server(serverID);
 
     if (false == bool(server)) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Invalid server id"
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Invalid server id.").Flush();
 
         return nullptr;
     }
@@ -221,8 +220,8 @@ bool Reply::update_signature(const Lock& lock)
     if (success) {
         signatures_.emplace_front(new proto::Signature(signature));
     } else {
-        otErr << OT_METHOD << __FUNCTION__ << ": failed to create signature."
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Failed to create signature.")
+            .Flush();
     }
 
     return success;
@@ -235,7 +234,7 @@ bool Reply::validate(const Lock& lock) const
     if (nym_) { validNym = nym_->VerifyPseudonym(); }
 
     if (false == validNym) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Invalid nym." << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Invalid nym.").Flush();
 
         return false;
     }
@@ -243,14 +242,14 @@ bool Reply::validate(const Lock& lock) const
     const bool validSyntax = proto::Validate(full_version(lock), VERBOSE);
 
     if (false == validSyntax) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Invalid syntax." << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Invalid syntax.").Flush();
 
         return false;
     }
 
     if (1 != signatures_.size()) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Wrong number signatures."
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Wrong number signatures.")
+            .Flush();
 
         return false;
     }
@@ -261,8 +260,7 @@ bool Reply::validate(const Lock& lock) const
     if (signature) { validSig = verify_signature(lock, *signature); }
 
     if (false == validSig) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Invalid signature."
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Invalid signature.").Flush();
 
         return false;
     }

@@ -128,8 +128,9 @@ bool RequestSocket::wait(const Lock& lock) const
 
         if (0 > events) {
             const auto error = zmq_errno();
-            otErr << OT_METHOD << __FUNCTION__
-                  << ": Poll error: " << zmq_strerror(error) << std::endl;
+            LogOutput(OT_METHOD)(__FUNCTION__)(": Poll error: ")(
+                zmq_strerror(error))(".")
+                .Flush();
 
             return false;
         }

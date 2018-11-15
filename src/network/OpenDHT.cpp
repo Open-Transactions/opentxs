@@ -21,6 +21,8 @@
 #include <stdexcept>
 #include <vector>
 
+#define OT_METHOD "opentxs::OpenDHT::"
+
 namespace opentxs::network::implementation
 {
 #if OT_DHT
@@ -93,8 +95,9 @@ void OpenDHT::Insert(
     if (!pValue) { return; }
 
     if (value.size() > dht::MAX_VALUE_SIZE) {
-        otErr << __FUNCTION__ << ": Error: data size exceeds DHT limits."
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Error: data size exceeds DHT limits.")
+            .Flush();
         return;
     }
 

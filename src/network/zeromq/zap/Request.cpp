@@ -139,19 +139,22 @@ std::string Request::Debug() const
         switch (Mechanism()) {
             case Mechanism::Plain: {
                 if (0 < credentials.size()) {
-                    otErr << " * Username: " << std::string(credentials.at(0))
-                          << "\n";
+                    LogOutput(OT_METHOD)(__FUNCTION__)(": * Username: ")(
+                        std::string(credentials.at(0)))(".")
+                        .Flush();
                 }
 
                 if (1 < credentials.size()) {
-                    otErr << " * Password: " << std::string(credentials.at(1))
-                          << "\n";
+                    LogOutput(OT_METHOD)(__FUNCTION__)(": * Password: ")(
+                        std::string(credentials.at(1)))(".")
+                        .Flush();
                 }
             } break;
             case Mechanism::Curve: {
                 for (const auto& credential : credentials) {
-                    otErr << " * Pubkey: 0x"
-                          << Data::Factory(credential)->asHex() << "\n";
+                    LogOutput(OT_METHOD)(__FUNCTION__)(": * Pubkey: 0x ")(
+                        Data::Factory(credential)->asHex())(".")
+                        .Flush();
                 }
             } break;
             case Mechanism::Null:
@@ -202,21 +205,21 @@ std::pair<bool, std::string> Request::Validate() const
 
     if (VERSION_POSITION + body >= messages_.size()) {
         error = "Missing version";
-        otErr << OT_METHOD << __FUNCTION__ << ": " << error << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": ")(error)(".").Flush();
 
         return output;
     }
 
     if (0 == accept_versions_.count(Version())) {
         error = std::string("Invalid version (") + Version() + ")";
-        otErr << OT_METHOD << __FUNCTION__ << ": " << error << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": ")(error)(".").Flush();
 
         return output;
     }
 
     if (REQUEST_ID_POSITION + body >= messages_.size()) {
         error = "Missing request ID";
-        otErr << OT_METHOD << __FUNCTION__ << ": " << error << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": ")(error)(".").Flush();
 
         return output;
     }
@@ -226,14 +229,14 @@ std::pair<bool, std::string> Request::Validate() const
     if (MAX_STRING_FIELD_SIZE < requestSize) {
         error = std::string("Request ID too long (") +
                 std::to_string(requestSize) + ")";
-        otErr << OT_METHOD << __FUNCTION__ << ": " << error << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": ")(error)(".").Flush();
 
         return output;
     }
 
     if (DOMAIN_POSITION + body >= messages_.size()) {
         error = "Missing domain";
-        otErr << OT_METHOD << __FUNCTION__ << ": " << error << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": ")(error)(".").Flush();
 
         return output;
     }
@@ -243,14 +246,14 @@ std::pair<bool, std::string> Request::Validate() const
     if (MAX_STRING_FIELD_SIZE < domainSize) {
         error =
             std::string("Domain too long (") + std::to_string(domainSize) + ")";
-        otErr << OT_METHOD << __FUNCTION__ << ": " << error << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": ")(error)(".").Flush();
 
         return output;
     }
 
     if (ADDRESS_POSITION + body >= messages_.size()) {
         error = "Missing address";
-        otErr << OT_METHOD << __FUNCTION__ << ": " << error << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": ")(error)(".").Flush();
 
         return output;
     }
@@ -260,14 +263,14 @@ std::pair<bool, std::string> Request::Validate() const
     if (MAX_STRING_FIELD_SIZE < addressSize) {
         error = std::string("Address too long (") +
                 std::to_string(addressSize) + ")";
-        otErr << OT_METHOD << __FUNCTION__ << ": " << error << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": ")(error)(".").Flush();
 
         return output;
     }
 
     if (IDENTITY_POSITION + body >= messages_.size()) {
         error = "Missing identity";
-        otErr << OT_METHOD << __FUNCTION__ << ": " << error << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": ")(error)(".").Flush();
 
         return output;
     }
@@ -277,14 +280,14 @@ std::pair<bool, std::string> Request::Validate() const
     if (MAX_STRING_FIELD_SIZE < identitySize) {
         error = std::string("Identity too long (") +
                 std::to_string(identitySize) + ")";
-        otErr << OT_METHOD << __FUNCTION__ << ": " << error << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": ")(error)(".").Flush();
 
         return output;
     }
 
     if (MECHANISM_POSITION + body >= messages_.size()) {
         error = "Missing mechanism";
-        otErr << OT_METHOD << __FUNCTION__ << ": " << error << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": ")(error)(".").Flush();
 
         return output;
     }
@@ -294,7 +297,7 @@ std::pair<bool, std::string> Request::Validate() const
 
     if (false == validMechanism) {
         error = std::string("Unknown mechanism (") + mechanism + ")";
-        otErr << OT_METHOD << __FUNCTION__ << ": " << error << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": ")(error)(".").Flush();
 
         return output;
     }
@@ -307,8 +310,7 @@ std::pair<bool, std::string> Request::Validate() const
             if (0 != count) {
                 error = std::string("Too many credentials (") +
                         std::to_string(count) + ")";
-                otErr << OT_METHOD << __FUNCTION__ << ": " << error
-                      << std::endl;
+                LogOutput(OT_METHOD)(__FUNCTION__)(": ")(error)(".").Flush();
 
                 return output;
             }
@@ -316,8 +318,7 @@ std::pair<bool, std::string> Request::Validate() const
         case Mechanism::Plain: {
             if (1 > count) {
                 error = "Missing username";
-                otErr << OT_METHOD << __FUNCTION__ << ": " << error
-                      << std::endl;
+                LogOutput(OT_METHOD)(__FUNCTION__)(": ")(error)(".").Flush();
 
                 return output;
             }
@@ -327,16 +328,14 @@ std::pair<bool, std::string> Request::Validate() const
             if (MAX_STRING_FIELD_SIZE < username) {
                 error = std::string("Username too long (") +
                         std::to_string(username) + ")";
-                otErr << OT_METHOD << __FUNCTION__ << ": " << error
-                      << std::endl;
+                LogOutput(OT_METHOD)(__FUNCTION__)(": ")(error)(".").Flush();
 
                 return output;
             }
 
             if (2 > count) {
                 error = "Missing password";
-                otErr << OT_METHOD << __FUNCTION__ << ": " << error
-                      << std::endl;
+                LogOutput(OT_METHOD)(__FUNCTION__)(": ")(error)(".").Flush();
 
                 return output;
             }
@@ -346,8 +345,7 @@ std::pair<bool, std::string> Request::Validate() const
             if (MAX_STRING_FIELD_SIZE < password) {
                 error = std::string("Password too long (") +
                         std::to_string(password) + ")";
-                otErr << OT_METHOD << __FUNCTION__ << ": " << error
-                      << std::endl;
+                LogOutput(OT_METHOD)(__FUNCTION__)(": ")(error)(".").Flush();
 
                 return output;
             }
@@ -356,8 +354,7 @@ std::pair<bool, std::string> Request::Validate() const
             if (1 != count) {
                 error = std::string("Wrong number of credentials (") +
                         std::to_string(count) + ")";
-                otErr << OT_METHOD << __FUNCTION__ << ": " << error
-                      << std::endl;
+                LogOutput(OT_METHOD)(__FUNCTION__)(": ")(error)(".").Flush();
 
                 return output;
             }
@@ -367,16 +364,14 @@ std::pair<bool, std::string> Request::Validate() const
             if (PUBKEY_SIZE != pubkey) {
                 error = std::string("Wrong pubkey size (") +
                         std::to_string(pubkey) + ")";
-                otErr << OT_METHOD << __FUNCTION__ << ": " << error
-                      << std::endl;
+                LogOutput(OT_METHOD)(__FUNCTION__)(": ")(error)(".").Flush();
 
                 return output;
             }
         } break;
         case Mechanism::Unknown:
         default: {
-            otErr << OT_METHOD << __FUNCTION__ << ": Invalid mechanism"
-                  << std::endl;
+            LogOutput(OT_METHOD)(__FUNCTION__)(": Invalid mechanism.").Flush();
 
             return output;
         }

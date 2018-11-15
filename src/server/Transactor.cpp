@@ -60,7 +60,8 @@ bool Transactor::issueNextTransactionNumber(
 
     // Next, we save it to file.
     if (!server_.GetMainFile().SaveMainFile()) {
-        otErr << "Error saving main server file.\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Error saving main server file.")
+            .Flush();
         transactionNumber_--;
         return false;
     }
@@ -86,7 +87,9 @@ bool Transactor::issueNextTransactionNumberToNym(
     // is also recorded in his Nym file.)  That way the server always knows
     // which numbers are valid for each Nym.
     if (!context.IssueNumber(transactionNumber_)) {
-        otErr << "Error adding transaction number to Nym file.\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Error adding transaction number to Nym file.")
+            .Flush();
         transactionNumber_--;
         // Save it back how it was, since we're not issuing this number after
         // all.
@@ -245,8 +248,10 @@ ExclusiveAccount Transactor::getVoucherAccount(
                 .Flush();
         }
         if (!server_.GetMainFile().SaveMainFile()) {
-            otErr << "Server::GetVoucherAccount: Error saving main "
-                     "server file containing new account ID!!\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Error saving main "
+                "server file containing new account ID!!")
+                .Flush();
         }
     }
 

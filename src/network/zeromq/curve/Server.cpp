@@ -29,8 +29,7 @@ bool Server::SetDomain(const std::string& domain) const
         zmq_setsockopt(parent_, ZMQ_ZAP_DOMAIN, domain.data(), domain.size());
 
     if (0 != set) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Failed to set domain."
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Failed to set domain.").Flush();
 
         return false;
     }
@@ -41,8 +40,7 @@ bool Server::SetDomain(const std::string& domain) const
 bool Server::SetPrivateKey(const OTPassword& key) const
 {
     if (CURVE_KEY_BYTES != key.getMemorySize()) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Invalid private key."
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Invalid private key.").Flush();
 
         return false;
     }
@@ -53,8 +51,9 @@ bool Server::SetPrivateKey(const OTPassword& key) const
 bool Server::SetPrivateKey(const std::string& z85) const
 {
     if (CURVE_KEY_Z85_BYTES > z85.size()) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Invalid private key size ("
-              << z85.size() << ")" << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Invalid private key size (")(
+            z85.size())(").")
+            .Flush();
 
         return false;
     }

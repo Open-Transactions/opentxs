@@ -112,9 +112,9 @@ void MessageProcessor::associate_connection(
     const auto result = active_connections_.emplace(nymID, connection);
 
     if (std::get<1>(result)) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Nym " << nymID.str()
-              << " is available via connection " << connection.asHex()
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Nym ")(nymID)(
+            " is available via connection ")(connection.asHex())(".")
+            .Flush();
     }
 }
 
@@ -188,9 +188,9 @@ void MessageProcessor::init(
         throw std::invalid_argument("Cannot connect to endpoint.");
     }
 
-    otErr << std::endl
-          << OT_METHOD << __FUNCTION__ << ": Bound to endpoint "
-          << endpoint.str() << std::endl;
+    LogOutput(OT_METHOD)(__FUNCTION__)(": Bound to endpoint ")(endpoint.str())(
+        ".")
+        .Flush();
 }
 
 void MessageProcessor::run()
@@ -238,8 +238,8 @@ bool MessageProcessor::process_command(
     const auto nym = server_.API().Wallet().Nym(allegedNymID);
 
     if (false == bool(nym)) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Nym is not yet registered"
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Nym is not yet registered.")
+            .Flush();
 
         return true;
     }
@@ -249,7 +249,7 @@ bool MessageProcessor::process_command(
     if (request->Validate()) {
         nymID.Assign(request->Initiator());
     } else {
-        otErr << OT_METHOD << __FUNCTION__ << ": Invalid request" << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Invalid request.").Flush();
 
         return false;
     }
@@ -329,15 +329,15 @@ bool MessageProcessor::process_message(
     auto request{server_.API().Factory().Message()};
 
     if (false == serialized->Exists()) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Empty serialized request."
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Empty serialized request.")
+            .Flush();
 
         return true;
     }
 
     if (false == request->LoadContractFromString(serialized)) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Failed to deserialized request." << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Failed to deserialized request.")
+            .Flush();
 
         return true;
     }
@@ -363,8 +363,8 @@ bool MessageProcessor::process_message(
     auto serializedReply = String::Factory(*replymsg);
 
     if (false == serializedReply->Exists()) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Failed to serialize reply."
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Failed to serialize reply.")
+            .Flush();
 
         return true;
     }
@@ -372,8 +372,7 @@ bool MessageProcessor::process_message(
     auto armoredReply = Armored::Factory(serializedReply);
 
     if (false == armoredReply->Exists()) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Failed to armor reply."
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Failed to armor reply.").Flush();
 
         return true;
     }
@@ -396,7 +395,7 @@ void MessageProcessor::process_notification(const zmq::Message& incoming)
 
     if (connection->empty()) {
         LogOutput(OT_METHOD)(__FUNCTION__)(
-            ": No notification channel available for ")(nymID)
+            ": No notification channel available for ")(nymID)(".")
             .Flush();
 
         return;
@@ -427,8 +426,8 @@ void MessageProcessor::process_notification(const zmq::Message& incoming)
             .Flush();
     } else {
         LogOutput(OT_METHOD)(__FUNCTION__)(
-            ": Failed to deliver push notifcation for  ")(nymID)(" via ")(
-            connection->asHex())
+            ": Failed to deliver push notifcation for ")(nymID)(" via ")(
+            connection->asHex())(".")
             .Flush();
     }
 }
@@ -442,7 +441,7 @@ void MessageProcessor::process_proto(
     const auto command = extract_proto(incoming.Body().at(0));
 
     if (false == proto::Validate(command, VERBOSE)) {
-        LogOutput(OT_METHOD)(__FUNCTION__)(": Invalid otx request").Flush();
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Invalid otx request.").Flush();
 
         return;
     }

@@ -96,8 +96,9 @@ void UserCommandProcessor::FinalizeResponse::SetResponse(
     response_.reset(response);
 
     if (false == bool(response_)) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Unable to construct response transaction." << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Unable to construct response transaction.")
+            .Flush();
 
         OT_FAIL;
     }
@@ -115,24 +116,26 @@ UserCommandProcessor::FinalizeResponse::~FinalizeResponse()
                             .release());
 
         if (false == response_->SignContract(nym_)) {
-            otErr << OT_METHOD << __FUNCTION__
-                  << ": Failed to sign response transaction." << std::endl;
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Failed to sign response transaction.")
+                .Flush();
 
             OT_FAIL;
         }
 
         if (false == response_->SaveContract()) {
-            otErr << OT_METHOD << __FUNCTION__
-                  << ": Failed to serialize response transaction." << std::endl;
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Failed to serialize response transaction.")
+                .Flush();
 
             OT_FAIL;
         }
 
         std::shared_ptr<OTTransaction> presponse{response_.release()};
         if (false == ledger_.AddTransaction(presponse)) {
-            otErr << OT_METHOD << __FUNCTION__
-                  << ": Unable to add response transaction to response ledger."
-                  << std::endl;
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Unable to add response transaction to response ledger.")
+                .Flush();
 
             OT_FAIL;
         }
@@ -141,15 +144,16 @@ UserCommandProcessor::FinalizeResponse::~FinalizeResponse()
     ledger_.ReleaseSignatures();
 
     if (false == ledger_.SignContract(nym_)) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Failed to sign response ledger." << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Failed to sign response ledger.")
+            .Flush();
 
         OT_FAIL;
     }
 
     if (false == ledger_.SaveContract()) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Failed to serialize response ledger." << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Failed to serialize response ledger.")
+            .Flush();
 
         OT_FAIL;
     }
@@ -179,8 +183,7 @@ bool UserCommandProcessor::add_numbers_to_nymbox(
     Identifier& nymboxHash) const
 {
     if (false == nymbox.LoadNymbox()) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Error loading nymbox."
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Error loading nymbox.").Flush();
 
         return false;
     }
@@ -191,8 +194,7 @@ bool UserCommandProcessor::add_numbers_to_nymbox(
     if (success) { success &= nymbox.VerifySignature(server_.GetServerNym()); }
 
     if (false == success) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Error veryfying nymbox."
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Error veryfying nymbox.").Flush();
 
         return false;
     }
@@ -304,10 +306,11 @@ void UserCommandProcessor::check_acknowledgements(ReplyMessage& reply) const
                     // automatically by the above Remove call.)
 
                     if (!bDeleted || !bRemoved)
-                        otErr << "UserCommandProcessor::ProcessUserCommand: "
-                                 "Failed trying "
-                                 "to delete a box receipt, or "
-                                 "while removing its stub from the Nymbox.\n";
+                        LogOutput(OT_METHOD)(__FUNCTION__)(
+                            ": Failed trying "
+                            "to delete a box receipt, or "
+                            "while removing its stub from the Nymbox.")
+                            .Flush();
 
                     if (bRemoved) { bIsDirtyNymbox = true; }
                 }
@@ -336,8 +339,9 @@ bool UserCommandProcessor::check_client_isnt_server(
     const bool bNymIsServerNym = serverNymID == nymID;
 
     if (bNymIsServerNym) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Server nym is not allowed to act as a client." << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Server nym is not allowed to act as a client.")
+            .Flush();
 
         return false;
     }
@@ -351,8 +355,9 @@ bool UserCommandProcessor::check_client_nym(ReplyMessage& reply) const
     const auto& nym = reply.Context().RemoteNym();
 
     if (false == msgIn.VerifySignature(nym)) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Unable to verify message signature." << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Unable to verify message signature.")
+            .Flush();
 
         return false;
     }
@@ -371,9 +376,9 @@ bool UserCommandProcessor::check_message_notary(
     // Validate the server ID, to keep users from intercepting a valid requst
     // and sending it to the wrong server.
     if (false == (realNotaryID == notaryID)) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Invalid server ID ("
-              << String::Factory(notaryID) << ") sent in command request."
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Invalid server ID (")(notaryID)(
+            ") sent in command request.")
+            .Flush();
 
         return false;
     }
@@ -400,8 +405,8 @@ bool UserCommandProcessor::check_ping_notary(const Message& msgIn) const
     // Not all contracts are signed with the authentication key, but messages
     // are.
     if (!msgIn.VerifyWithKey(nymAuthentKey)) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Signature verification failed!"
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Signature verification failed!")
+            .Flush();
 
         return false;
     }
@@ -421,10 +426,10 @@ bool UserCommandProcessor::check_request_number(
     const RequestNumber messageNumber = msgIn.m_strRequestNum->ToLong();
 
     if (correctNumber != messageNumber) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Request number sent in this message (" << messageNumber
-              << ") does not match the one in the context (" << correctNumber
-              << ")" << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Request number sent in this message (")(messageNumber)(
+            ") does not match the one in the context (")(correctNumber)(").")
+            .Flush();
 
         return false;
     }
@@ -442,9 +447,10 @@ bool UserCommandProcessor::check_server_lock(const Identifier& nymID)
 
     if (isAdmin(nymID)) { return true; }
 
-    otErr << OT_METHOD << __FUNCTION__ << ": Nym " << String::Factory(nymID)
-          << " failed attempt to message the server, while server is in "
-          << "**LOCK DOWN MODE**" << std::endl;
+    LogOutput(OT_METHOD)(__FUNCTION__)(": Nym ")(nymID)(
+        " failed attempt to message the server, while server is in "
+        "**LOCK DOWN MODE**.")
+        .Flush();
 
     return false;
 }
@@ -465,9 +471,9 @@ bool UserCommandProcessor::check_usage_credits(ReplyMessage& reply) const
         const auto& credits = nymFile.It().GetUsageCredits();
 
         if (0 == credits) {
-            otErr << OT_METHOD << __FUNCTION__ << ": Nym "
-                  << nymFile.It().ID().str() << " Out of usage credits."
-                  << std::endl;
+            LogOutput(OT_METHOD)(__FUNCTION__)(": Nym ")(nymFile.It().ID())(
+                " is out of usage credits.")
+                .Flush();
 
             return false;
         }
@@ -512,9 +518,13 @@ bool UserCommandProcessor::cmd_add_claim(ReplyMessage& reply) const
     if (isAdmin) {
         auto nym =
             server_.API().Wallet().mutable_Nym(server_.GetServerNym().ID());
-        otErr << "Before:\n" << std::string(nym.Claims()) << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Before: ")(
+            std::string(nym.Claims()))(".")
+            .Flush();
         nym.AddClaim(claim);
-        otErr << "After:\n" << std::string(nym.Claims()) << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": After: ")(
+            std::string(nym.Claims()))(".")
+            .Flush();
     }
 
     return true;
@@ -554,8 +564,9 @@ bool UserCommandProcessor::cmd_delete_asset_account(ReplyMessage& reply) const
     auto account = server_.API().Wallet().mutable_Account(accountID);
 
     if (false == bool(account)) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Error loading account "
-              << String::Factory(accountID) << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Error loading account ")(
+            accountID)(".")
+            .Flush();
 
         return false;
     }
@@ -563,9 +574,9 @@ bool UserCommandProcessor::cmd_delete_asset_account(ReplyMessage& reply) const
     const auto balance = account.get().GetBalance();
 
     if (balance != 0) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Unable to delate account "
-              << String::Factory(accountID) << " with non-zero balance "
-              << balance << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Unable to delete account ")(
+            accountID)(" with non-zero balance ")(balance)(".")
+            .Flush();
 
         return false;
     }
@@ -574,17 +585,17 @@ bool UserCommandProcessor::cmd_delete_asset_account(ReplyMessage& reply) const
     std::unique_ptr<Ledger> outbox(account.get().LoadOutbox(serverNym));
 
     if (false == bool(inbox)) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Error loading inbox for account "
-              << String::Factory(accountID) << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Error loading inbox for account ")(accountID)(".")
+            .Flush();
 
         return false;
     }
 
     if (false == bool(outbox)) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Error loading outbox for account "
-              << String::Factory(accountID) << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Error loading outbox for account ")(accountID)(".")
+            .Flush();
 
         return false;
     }
@@ -593,17 +604,18 @@ bool UserCommandProcessor::cmd_delete_asset_account(ReplyMessage& reply) const
     const auto outboxTransactions = outbox->GetTransactionCount();
 
     if (inboxTransactions > 0) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Unable to delete account "
-              << String::Factory(accountID) << " with " << inboxTransactions
-              << " open inbox transactions." << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Unable to delete account ")(
+            accountID)(" with ")(inboxTransactions)(" open inbox transactions.")
+            .Flush();
 
         return false;
     }
 
     if (outboxTransactions > 0) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Unable to delete account "
-              << String::Factory(accountID) << " with " << inboxTransactions
-              << " open outbox transactions." << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Unable to delete account ")(
+            accountID)(" with ")(inboxTransactions)(
+            " open outbox transactions.")
+            .Flush();
 
         return false;
     }
@@ -612,8 +624,9 @@ bool UserCommandProcessor::cmd_delete_asset_account(ReplyMessage& reply) const
     auto contract = server_.API().Wallet().UnitDefinition(contractID);
 
     if (false == bool(contract)) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Unable to load unit definition"
-              << String::Factory(contractID) << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Unable to load unit definition ")(
+            contractID)(".")
+            .Flush();
 
         return false;
     }
@@ -621,9 +634,9 @@ bool UserCommandProcessor::cmd_delete_asset_account(ReplyMessage& reply) const
     if (contract->Type() == proto::UNITTYPE_SECURITY) {
         if (false == contract->EraseAccountRecord(
                          server_.API().DataFolder(), accountID)) {
-            otErr << OT_METHOD << __FUNCTION__
-                  << ": Unable to delete account record "
-                  << String::Factory(contractID) << std::endl;
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Unable to delete account record ")(contractID)(".")
+                .Flush();
 
             return false;
         }
@@ -661,36 +674,37 @@ bool UserCommandProcessor::cmd_delete_user(ReplyMessage& reply) const
     auto nymbox = load_nymbox(nymID, server, serverNym, true);
 
     if (false == bool(nymbox)) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Failed to load or verify nymbox." << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Failed to load or verify nymbox.")
+            .Flush();
 
         return false;
     }
 
     if (nymbox->GetTransactionCount() > 0) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Failed due to nymbox not empty." << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Failed due to nymbox not empty.")
+            .Flush();
 
         return false;
     }
 
     if (0 < context.OpenCronItems()) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Failed due to open cron items."
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Failed due to open cron items.")
+            .Flush();
 
         return false;
     }
 
     if (nymfile.It().GetSetAssetAccounts().size() > 0) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Failed due to open asset accounts." << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Failed due to open asset accounts.")
+            .Flush();
 
         return false;
     }
 
     if (context.hasOpenTransactions()) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Failed due to open transactions." << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Failed due to open transactions.")
+            .Flush();
 
         return false;
     }
@@ -732,8 +746,9 @@ bool UserCommandProcessor::cmd_get_account_data(ReplyMessage& reply) const
     auto account = server_.API().Wallet().mutable_Account(accountID);
 
     if (false == bool(account)) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Unable to load account "
-              << String::Factory(accountID) << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Unable to load account ")(
+            accountID)(".")
+            .Flush();
 
         return false;
     }
@@ -743,9 +758,9 @@ bool UserCommandProcessor::cmd_get_account_data(ReplyMessage& reply) const
     const auto inbox = load_inbox(nymID, accountID, serverID, serverNym, false);
 
     if (false == bool(inbox)) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Unable to load or verify inbox for account "
-              << String::Factory(accountID) << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Unable to load or verify inbox for account ")(accountID)(".")
+            .Flush();
 
         return false;
     }
@@ -754,9 +769,9 @@ bool UserCommandProcessor::cmd_get_account_data(ReplyMessage& reply) const
         load_outbox(nymID, accountID, serverID, serverNym, false);
 
     if (false == bool(outbox)) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Unable to load or verify outbox for account "
-              << String::Factory(accountID) << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Unable to load or verify outbox for account ")(accountID)(".")
+            .Flush();
 
         return false;
     }
@@ -804,8 +819,7 @@ bool UserCommandProcessor::cmd_get_box_receipt(ReplyMessage& reply) const
             OT_ENFORCE_PERMISSION_MSG(ServerSettings::__cmd_get_outbox)
         } break;
         default: {
-            otErr << OT_METHOD << __FUNCTION__ << ": Invalid box type."
-                  << std::endl;
+            LogOutput(OT_METHOD)(__FUNCTION__)(": Invalid box type.").Flush();
 
             return false;
         }
@@ -829,16 +843,15 @@ bool UserCommandProcessor::cmd_get_box_receipt(ReplyMessage& reply) const
             box = load_outbox(nymID, accountID, serverID, serverNym, false);
         } break;
         default: {
-            otErr << OT_METHOD << __FUNCTION__ << ": Invalid box type."
-                  << std::endl;
+            LogOutput(OT_METHOD)(__FUNCTION__)(": Invalid box type.").Flush();
 
             return false;
         }
     }
 
     if (false == bool(box)) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Unable to load or verify box."
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Unable to load or verify box.")
+            .Flush();
 
         return false;
     }
@@ -846,8 +859,9 @@ bool UserCommandProcessor::cmd_get_box_receipt(ReplyMessage& reply) const
     auto transaction = box->GetTransaction(number);
 
     if (nullptr == transaction) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Transaction not found: " << number << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Transaction not found: ")(number)(
+            ".")
+            .Flush();
 
         return false;
     }
@@ -863,8 +877,7 @@ bool UserCommandProcessor::cmd_get_box_receipt(ReplyMessage& reply) const
     transaction = box->GetTransaction(number);
 
     if (false == verify_transaction(transaction.get(), serverNym)) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Invalid box item."
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Invalid box item.").Flush();
 
         return false;
     }
@@ -1052,8 +1065,7 @@ bool UserCommandProcessor::cmd_get_nymbox(ReplyMessage& reply) const
     auto nymbox = load_nymbox(nymID, serverID, serverNym, false);
 
     if (false == bool(nymbox)) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Failed to load nymbox."
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Failed to load nymbox.").Flush();
         reply.SetNymboxHash(originalNymboxHash);
 
         return false;
@@ -1137,16 +1149,17 @@ bool UserCommandProcessor::cmd_get_transaction_numbers(
     }
 
     if (!hashMatch) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Rejecting message since "
-              << "nymbox hash doesn't match." << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Rejecting message since "
+                                           "nymbox hash doesn't match.")
+            .Flush();
 
         return false;
     }
 
     if (nCount > MAX_UNUSED_NUMBERS) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Nym " << String::Factory(nymID)
-              << " already has more than 50 unused transaction numbers."
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Nym ")(nymID)(
+            " already has more than 50 unused transaction numbers.")
+            .Flush();
 
         return false;
     }
@@ -1166,8 +1179,9 @@ bool UserCommandProcessor::cmd_get_transaction_numbers(
 
         if (!server_.GetTransactor().issueNextTransactionNumber(number)) {
             number = 0;
-            otErr << OT_METHOD << __FUNCTION__
-                  << ": Error issuing next transaction number." << std::endl;
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Error issuing next transaction number.")
+                .Flush();
             bSuccess = false;
             break;
         }
@@ -1182,8 +1196,9 @@ bool UserCommandProcessor::cmd_get_transaction_numbers(
             transactionNumber);
 
         if (false == issued) {
-            otErr << OT_METHOD << __FUNCTION__
-                  << ": Error issuing transaction number." << std::endl;
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Error issuing transaction number.")
+                .Flush();
             bSuccess = false;
         }
     }
@@ -1221,15 +1236,13 @@ bool UserCommandProcessor::cmd_issue_basket(ReplyMessage& reply) const
         Data::Factory(msgIn.m_ascPayload));
 
     if (false == proto::Validate(serialized, VERBOSE)) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Invalid contract."
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Invalid contract.").Flush();
 
         return false;
     }
 
     if (proto::UNITTYPE_BASKET != serialized.type()) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Invalid contract type."
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Invalid contract type.").Flush();
 
         return false;
     }
@@ -1247,8 +1260,7 @@ bool UserCommandProcessor::cmd_issue_basket(ReplyMessage& reply) const
         BASKET_ID, basketAccountID);
 
     if (exists) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Basket already exists."
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Basket already exists.").Flush();
 
         return false;
     }
@@ -1268,8 +1280,9 @@ bool UserCommandProcessor::cmd_issue_basket(ReplyMessage& reply) const
             Identifier::Factory(subcontractID));
 
         if (!contract) {
-            otErr << OT_METHOD << __FUNCTION__ << ": Missing subcurrency "
-                  << subcontractID << std::endl;
+            LogOutput(OT_METHOD)(__FUNCTION__)(": Missing subcurrency ")(
+                subcontractID)(".")
+                .Flush();
 
             return false;
         }
@@ -1298,8 +1311,8 @@ bool UserCommandProcessor::cmd_issue_basket(ReplyMessage& reply) const
             newAccount.get().GetIdentifier(newAccountID);
             it.set_account(newAccountID->Get());
         } else {
-            otErr << OT_METHOD << __FUNCTION__
-                  << ": Unable to create subaccount." << std::endl;
+            LogOutput(OT_METHOD)(__FUNCTION__)(": Unable to create subaccount.")
+                .Flush();
 
             return false;
         }
@@ -1307,15 +1320,16 @@ bool UserCommandProcessor::cmd_issue_basket(ReplyMessage& reply) const
 
     if (false == BasketContract::FinalizeTemplate(
                      server_.API().Wallet(), serverNym, serialized)) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Unable to finalize basket contract." << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Unable to finalize basket contract.")
+            .Flush();
 
         return false;
     }
 
     if (proto::UNITTYPE_BASKET != serialized.type()) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Invalid basket contract."
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Invalid basket contract.")
+            .Flush();
 
         return false;
     }
@@ -1323,8 +1337,9 @@ bool UserCommandProcessor::cmd_issue_basket(ReplyMessage& reply) const
     const auto contract = server_.API().Wallet().UnitDefinition(serialized);
 
     if (false == bool(contract)) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Failed to construct basket contract object." << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Failed to construct basket contract object.")
+            .Flush();
 
         return false;
     }
@@ -1355,8 +1370,9 @@ bool UserCommandProcessor::cmd_issue_basket(ReplyMessage& reply) const
         serverNymID, serverID, contractID, *serverNym, Account::basket, 0);
 
     if (false == bool(basketAccount)) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Failed to instantiate basket account." << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Failed to instantiate basket account.")
+            .Flush();
 
         return false;
     }
@@ -1402,16 +1418,15 @@ bool UserCommandProcessor::cmd_notarize_transaction(ReplyMessage& reply) const
     OT_ASSERT(false != bool(responseLedger));
 
     if (false == hash_check(context, nymboxHash)) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Nymbox hash mismatch."
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Nymbox hash mismatch.").Flush();
 
         return false;
     }
 
     if (false ==
         input->LoadLedgerFromString(String::Factory(msgIn.m_ascPayload))) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Unable to load input ledger."
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Unable to load input ledger.")
+            .Flush();
 
         return false;
     }
@@ -1429,8 +1444,8 @@ bool UserCommandProcessor::cmd_notarize_transaction(ReplyMessage& reply) const
         const auto transaction = it.second;
 
         if (nullptr == transaction) {
-            otErr << OT_METHOD << __FUNCTION__ << ": Invalid input ledger."
-                  << std::endl;
+            LogOutput(OT_METHOD)(__FUNCTION__)(": Invalid input ledger.")
+                .Flush();
         }
 
         const auto inputNumber = transaction->GetTransactionNum();
@@ -1447,18 +1462,21 @@ bool UserCommandProcessor::cmd_notarize_transaction(ReplyMessage& reply) const
             context, *transaction, *response.Response(), success);
 
         if (response.Response()->IsCancelled()) {
-            otErr << OT_METHOD << __FUNCTION__
-                  << ": Success canceling transaction " << inputNumber
-                  << " for nym " << String::Factory(nymID) << std::endl;
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Success canceling transaction ")(inputNumber)(" for nym ")(
+                nymID)(".")
+                .Flush();
         } else {
             if (success) {
-                otErr << OT_METHOD << __FUNCTION__
-                      << ": Success processing transaction " << inputNumber
-                      << " for nym " << String::Factory(nymID) << std::endl;
+                LogOutput(OT_METHOD)(__FUNCTION__)(
+                    ": Success processing transaction ")(inputNumber)(
+                    " for nym ")(nymID)(".")
+                    .Flush();
             } else {
-                otErr << OT_METHOD << __FUNCTION__
-                      << ": Failure processing transaction " << inputNumber
-                      << " for nym " << String::Factory(nymID) << std::endl;
+                LogOutput(OT_METHOD)(__FUNCTION__)(
+                    ": Failure processing transaction ")(inputNumber)(
+                    " for nym ")(nymID)(".")
+                    .Flush();
             }
         }
 
@@ -1469,9 +1487,9 @@ bool UserCommandProcessor::cmd_notarize_transaction(ReplyMessage& reply) const
 
         std::shared_ptr<OTTransaction> ptransaction{response.Release()};
         if (false == responseLedger->AddTransaction(ptransaction)) {
-            otErr << OT_METHOD << __FUNCTION__
-                  << ": Unable to add response transaction to response ledger."
-                  << std::endl;
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Unable to add response transaction to response ledger.")
+                .Flush();
 
             OT_FAIL;
         }
@@ -1511,16 +1529,15 @@ bool UserCommandProcessor::cmd_process_inbox(ReplyMessage& reply) const
     OT_ASSERT(false != bool(responseLedger));
 
     if (false == hash_check(context, nymboxHash)) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Nymbox hash mismatch."
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Nymbox hash mismatch.").Flush();
 
         return false;
     }
 
     if (false ==
         input->LoadLedgerFromString(String::Factory(msgIn.m_ascPayload))) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Unable to load input ledger."
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Unable to load input ledger.")
+            .Flush();
 
         return false;
     }
@@ -1532,9 +1549,9 @@ bool UserCommandProcessor::cmd_process_inbox(ReplyMessage& reply) const
     auto processInbox = input->GetTransaction(transactionType::processInbox);
 
     if (nullptr == processInbox) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": processInbox transaction not found in input ledger."
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": processInbox transaction not found in input ledger.")
+            .Flush();
 
         return false;
     }
@@ -1542,9 +1559,9 @@ bool UserCommandProcessor::cmd_process_inbox(ReplyMessage& reply) const
     const auto inputNumber = processInbox->GetTransactionNum();
 
     if (false == context.VerifyIssuedNumber(inputNumber)) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Transaction number "
-              << inputNumber << " is not issued to " << String::Factory(nymID)
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Transaction number ")(
+            inputNumber)(" is not issued to ")(nymID)(".")
+            .Flush();
 
         return false;
     }
@@ -1555,8 +1572,9 @@ bool UserCommandProcessor::cmd_process_inbox(ReplyMessage& reply) const
     // those things don't have to be checked for security over and over again in
     // the subsequent calls.
     if (false == processInbox->VerifyItems(nym)) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Failed to verify transaction items. " << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Failed to verify transaction items.")
+            .Flush();
 
         return false;
     }
@@ -1567,9 +1585,9 @@ bool UserCommandProcessor::cmd_process_inbox(ReplyMessage& reply) const
     // the user no longer has the number on his AVAILABLE list. Removal from
     // issued list happens separately.)
     if (false == context.ConsumeAvailable(inputNumber)) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Error removing available number " << inputNumber
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Error removing available number ")(inputNumber)(".")
+            .Flush();
 
         return false;
     }
@@ -1597,32 +1615,35 @@ bool UserCommandProcessor::cmd_process_inbox(ReplyMessage& reply) const
     const auto consumed = context.ConsumeIssued(inputNumber);
 
     if (false == consumed) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Error removing issued number "
-              << inputNumber << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Error removing issued number ")(
+            inputNumber)(".")
+            .Flush();
 
         OT_FAIL;
     }
 
     if (transactionSuccess) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Success processing process inbox " << inputNumber
-              << " for nym " << String::Factory(nymID) << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Success processing process inbox ")(inputNumber)(" for nym ")(
+            nymID)(".")
+            .Flush();
     } else {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Failure processing process inbox " << inputNumber
-              << " for nym " << String::Factory(nymID) << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Failure processing process inbox ")(inputNumber)(" for nym ")(
+            nymID)(".")
+            .Flush();
     }
 
     OT_ASSERT_MSG(
         inputNumber == response.Response()->GetTransactionNum(),
         "Transaction number and response number should "
-        "always be the same. (But this time, they weren't.)");
+        "always be the same. (But this time they weren't).");
 
     std::shared_ptr<OTTransaction> ptransaction{response.Release()};
     if (false == responseLedger->AddTransaction(ptransaction)) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Unable to add response transaction to response ledger."
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Unable to add response transaction to response ledger.")
+            .Flush();
 
         OT_FAIL;
     }
@@ -1650,16 +1671,15 @@ bool UserCommandProcessor::cmd_process_nymbox(ReplyMessage& reply) const
     OT_ASSERT(false != bool(responseLedger));
 
     if (false == hash_check(context, nymboxHash)) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Nymbox hash mismatch."
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Nymbox hash mismatch.").Flush();
 
         return false;
     }
 
     if (false ==
         input->LoadLedgerFromString(String::Factory(msgIn.m_ascPayload))) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Unable to load input ledger."
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Unable to load input ledger.")
+            .Flush();
 
         return false;
     }
@@ -1677,8 +1697,8 @@ bool UserCommandProcessor::cmd_process_nymbox(ReplyMessage& reply) const
         const auto transaction = it.second;
 
         if (nullptr == transaction) {
-            otErr << OT_METHOD << __FUNCTION__ << ": Invalid input ledger."
-                  << std::endl;
+            LogOutput(OT_METHOD)(__FUNCTION__)(": Invalid input ledger.")
+                .Flush();
 
             OT_FAIL;
         }
@@ -1697,13 +1717,15 @@ bool UserCommandProcessor::cmd_process_nymbox(ReplyMessage& reply) const
             context, *transaction, *response.Response(), success);
 
         if (success) {
-            otErr << OT_METHOD << __FUNCTION__
-                  << ": Success processing process nymbox " << inputNumber
-                  << " for nym " << String::Factory(nymID) << std::endl;
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Success processing process nymbox ")(inputNumber)(
+                " for nym ")(nymID)(".")
+                .Flush();
         } else {
-            otErr << OT_METHOD << __FUNCTION__
-                  << ": Failure processing process nymbox " << inputNumber
-                  << " for nym " << String::Factory(nymID) << std::endl;
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Failure processing process nymbox ")(inputNumber)(
+                " for nym ")(nymID)(".")
+                .Flush();
         }
 
         OT_ASSERT_MSG(
@@ -1713,9 +1735,9 @@ bool UserCommandProcessor::cmd_process_nymbox(ReplyMessage& reply) const
 
         std::shared_ptr<OTTransaction> ptransaction{response.Release()};
         if (false == responseLedger->AddTransaction(ptransaction)) {
-            otErr << OT_METHOD << __FUNCTION__
-                  << ": Unable to add response transaction to response ledger."
-                  << std::endl;
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Unable to add response transaction to response ledger.")
+                .Flush();
 
             OT_FAIL;
         }
@@ -1793,8 +1815,8 @@ bool UserCommandProcessor::cmd_register_account(ReplyMessage& reply) const
     // If we successfully create the account, then bundle it in the message XML
     // payload
     if (false == bool(account)) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Unable to create new account."
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Unable to create new account.")
+            .Flush();
 
         return false;
     }
@@ -1803,8 +1825,9 @@ bool UserCommandProcessor::cmd_register_account(ReplyMessage& reply) const
         account.get().GetInstrumentDefinitionID());
 
     if (false == bool(contract)) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Unable to load unit definition"
-              << String::Factory(contractID) << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Unable to load unit definition ")(
+            contractID)(".")
+            .Flush();
 
         return false;
     }
@@ -1814,9 +1837,9 @@ bool UserCommandProcessor::cmd_register_account(ReplyMessage& reply) const
         // (For shares, not for currencies.)
         if (false == contract->AddAccountRecord(
                          server_.API().DataFolder(), account.get())) {
-            otErr << OT_METHOD << __FUNCTION__
-                  << ": Unable to add account record "
-                  << String::Factory(contractID) << std::endl;
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Unable to add account record ")(contractID)(".")
+                .Flush();
 
             return false;
         }
@@ -1868,17 +1891,17 @@ bool UserCommandProcessor::cmd_register_account(ReplyMessage& reply) const
     }
 
     if (false == inboxLoaded) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Error generating inbox for account "
-              << String::Factory(accountID) << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Error generating inbox for account ")(accountID)(".")
+            .Flush();
 
         return false;
     }
 
     if (false == outboxLoaded) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Error generating outbox for account "
-              << String::Factory(accountID) << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Error generating outbox for account ")(accountID)(".")
+            .Flush();
 
         return false;
     }
@@ -1927,8 +1950,9 @@ bool UserCommandProcessor::cmd_register_contract(ReplyMessage& reply) const
             break;
         }
         default: {
-            otErr << OT_METHOD << __FUNCTION__
-                  << ": Invalid contract type: " << msgIn.enum_ << std::endl;
+            LogOutput(OT_METHOD)(__FUNCTION__)(": Invalid contract type: ")(
+                msgIn.enum_)(".")
+                .Flush();
         }
     }
 
@@ -1950,8 +1974,9 @@ bool UserCommandProcessor::cmd_register_instrument_definition(
 
     // Make sure the contract isn't already available on this server.
     if (contract) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Instrument definition "
-              << String::Factory(contractID) << " already exists." << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Instrument definition ")(
+            contractID)(" already exists.")
+            .Flush();
 
         return false;
     }
@@ -1960,8 +1985,7 @@ bool UserCommandProcessor::cmd_register_instrument_definition(
         Data::Factory(msgIn.m_ascPayload));
 
     if (proto::UNITTYPE_BASKET == serialized.type()) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Incorrect unit type."
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Incorrect unit type.").Flush();
 
         return false;
     }
@@ -1969,13 +1993,13 @@ bool UserCommandProcessor::cmd_register_instrument_definition(
     contract = server_.API().Wallet().UnitDefinition(serialized);
 
     if (false == bool(contract)) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Invalid contract" << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Invalid contract.").Flush();
 
         return false;
     }
 
     if (contract->ID() != contractID) {
-        otErr << OT_METHOD << __FUNCTION__ << ": ID mismatch" << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": ID mismatch.").Flush();
 
         return false;
     }
@@ -1990,8 +2014,9 @@ bool UserCommandProcessor::cmd_register_instrument_definition(
         nymID, serverID, contractID, serverNym, Account::issuer, 0);
 
     if (false == bool(account)) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Unable to generate issued account." << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Unable to generate issued account.")
+            .Flush();
 
         return false;
     }
@@ -2004,9 +2029,9 @@ bool UserCommandProcessor::cmd_register_instrument_definition(
 
     if (false == account.get().InitBoxes(serverNym)) {
 
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Error initializing boxes for account " << accountID->str()
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Error initializing boxes for account ")(accountID)(".")
+            .Flush();
 
         return false;
     }
@@ -2036,8 +2061,9 @@ bool UserCommandProcessor::cmd_register_nym(ReplyMessage& reply) const
     auto sender_nym = server_.API().Wallet().Nym(serialized);
 
     if (false == bool(sender_nym)) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Invalid nym: " << msgIn.m_strNymID << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Invalid nym: ")(msgIn.m_strNymID)(
+            ".")
+            .Flush();
 
         return false;
     }
@@ -2045,8 +2071,9 @@ bool UserCommandProcessor::cmd_register_nym(ReplyMessage& reply) const
     LogDebug(OT_METHOD)(__FUNCTION__)(": Nym verified!").Flush();
 
     if (false == msgIn.VerifySignature(*sender_nym)) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Invalid signature."
-              << sender_nym->ID().str() << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Invalid signature ")(
+            sender_nym->ID())(".")
+            .Flush();
 
         return false;
     }
@@ -2069,22 +2096,22 @@ bool UserCommandProcessor::cmd_register_nym(ReplyMessage& reply) const
         OTFolders::UserAcct().Get(), msgIn.m_strNymID->Get()));
 
     if (false == reply.Success()) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Error saving new user account verification file."
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Error saving new user account verification file.")
+            .Flush();
 
         return true;
     }
 
-    otErr << OT_METHOD << __FUNCTION__
-          << ": Success saving new user account verification file."
-          << std::endl;
+    LogOutput(OT_METHOD)(__FUNCTION__)(
+        ": Success saving new user account verification file.")
+        .Flush();
 
     context.InitializeNymbox();
     context.SetRemoteNymboxHash(context.LocalNymboxHash());
 
-    otErr << OT_METHOD << __FUNCTION__
-          << ": Success registering Nym credentials." << std::endl;
+    LogOutput(OT_METHOD)(__FUNCTION__)(": Success registering Nym credentials.")
+        .Flush();
     auto strNymContents = String::Factory();
     // This will save the nymfile.
     auto nymfile =
@@ -2128,8 +2155,7 @@ bool UserCommandProcessor::cmd_request_admin(ReplyMessage& reply) const
     const bool duplicateRequest = (!noAdminYet && returningAdmin);
 
     if (false == correctPassword) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Incorrect password"
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Incorrect password.").Flush();
 
         return false;
     }
@@ -2142,15 +2168,17 @@ bool UserCommandProcessor::cmd_request_admin(ReplyMessage& reply) const
             notUsed));
 
         if (reply.Success()) {
-            otErr << __FUNCTION__ << ": override nym set." << std::endl;
+            LogOutput(OT_METHOD)(__FUNCTION__)(": override nym set.").Flush();
             server_.API().Config().Save();
         }
     } else {
         if (duplicateRequest) {
             reply.SetSuccess(true);
         } else {
-            otErr << __FUNCTION__ << ": Admin password empty or admin nym "
-                  << "already set." << std::endl;
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Admin password empty or admin nym "
+                "already set.")
+                .Flush();
         }
     }
 
@@ -2172,8 +2200,8 @@ bool UserCommandProcessor::cmd_send_nym_message(ReplyMessage& reply) const
     reply.SetSuccess(send_message_to_nym(server, sender, recipient, msgIn));
 
     if (false == reply.Success()) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Failed to send message to nym."
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Failed to send message to nym.")
+            .Flush();
     }
 
     return true;
@@ -2213,9 +2241,9 @@ bool UserCommandProcessor::cmd_trigger_clause(ReplyMessage& reply) const
     }
 
     if (false == context.NymboxHashMatch()) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Rejecting message due to nymbox hash mismatch."
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Rejecting message due to nymbox hash mismatch.")
+            .Flush();
 
         return false;
     }
@@ -2224,9 +2252,10 @@ bool UserCommandProcessor::cmd_trigger_clause(ReplyMessage& reply) const
     auto cronItem = server_.Cron().GetItemByValidOpeningNum(number);
 
     if (false == bool(cronItem)) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Can not find smart contract based on transaction number "
-              << number << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Can not find smart contract based on transaction number ")(
+            number)(".")
+            .Flush();
 
         return false;
     }
@@ -2234,8 +2263,9 @@ bool UserCommandProcessor::cmd_trigger_clause(ReplyMessage& reply) const
     smartContract = dynamic_cast<OTSmartContract*>(cronItem.get());
 
     if (nullptr == smartContract) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Cron item  " << number
-              << " is not a smart contract." << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Cron item ")(number)(
+            " is not a smart contract.")
+            .Flush();
 
         return false;
     }
@@ -2245,9 +2275,9 @@ bool UserCommandProcessor::cmd_trigger_clause(ReplyMessage& reply) const
     OTParty* party = smartContract->FindPartyBasedOnNymAsAgent(nym, &agent);
 
     if (nullptr == party) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Unable to find party to this contract based on nym."
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Unable to find party to this contract based on nym.")
+            .Flush();
 
         return false;
     }
@@ -2260,8 +2290,9 @@ bool UserCommandProcessor::cmd_trigger_clause(ReplyMessage& reply) const
         auto clause = smartContract->GetClause(clauseID);
 
         if (nullptr == clause) {
-            otErr << OT_METHOD << __FUNCTION__ << ": Clause " << clauseID
-                  << " does not exist." << std::endl;
+            LogOutput(OT_METHOD)(__FUNCTION__)(": Clause ")(clauseID)(
+                " does not exist.")
+                .Flush();
 
             return false;
         }
@@ -2270,14 +2301,14 @@ bool UserCommandProcessor::cmd_trigger_clause(ReplyMessage& reply) const
         smartContract->ExecuteClauses(theMatchingClauses);
 
         if (smartContract->IsFlaggedForRemoval()) {
-            otErr << OT_METHOD << __FUNCTION__ << ": Removing smart contract "
-                  << smartContract->GetTransactionNum() << " from cron ."
-                  << std::endl;
+            LogOutput(OT_METHOD)(__FUNCTION__)(": Removing smart contract ")(
+                smartContract->GetTransactionNum())(" from cron.")
+                .Flush();
         }
     } else {
-        otErr << OT_METHOD << __FUNCTION__ << ": Party "
-              << party->GetPartyName() << " lacks permission to execute clause "
-              << clauseID << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Party ")(party->GetPartyName())(
+            " lacks permission to execute clause ")(clauseID)(".")
+            .Flush();
 
         return false;
     }
@@ -2290,8 +2321,9 @@ bool UserCommandProcessor::cmd_trigger_clause(ReplyMessage& reply) const
     // require my processing out all related marketReceipts) then the closing
     // number will be removed from my list of responsibility.
 
-    otErr << OT_METHOD << __FUNCTION__ << ": Party " << party->GetPartyName()
-          << "successfully triggered clause: " << clauseID << std::endl;
+    LogOutput(OT_METHOD)(__FUNCTION__)(": Party ")(party->GetPartyName())(
+        " successfully triggered clause: ")(clauseID)(".")
+        .Flush();
 
     return true;
 }
@@ -2321,9 +2353,9 @@ bool UserCommandProcessor::cmd_usage_credits(ReplyMessage& reply) const
         nymID = adminNymID;
     } else {
         if (false == admin) {
-            otErr << OT_METHOD << __FUNCTION__
-                  << ": This command is only available to admin nym."
-                  << std::endl;
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": This command is only available to admin nym.")
+                .Flush();
 
             return false;
         }
@@ -2340,8 +2372,9 @@ bool UserCommandProcessor::cmd_usage_credits(ReplyMessage& reply) const
     }
 
     if (false == bool(nymbox)) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Unable to load nymbox for "
-              << targetNymID->str() << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Unable to load nymbox for ")(
+            targetNymID)(".")
+            .Flush();
 
         return false;
     }
@@ -2371,17 +2404,18 @@ std::unique_ptr<Ledger> UserCommandProcessor::create_nymbox(
     auto nymbox{manager_.Factory().Ledger(nymID, nymID, server)};
 
     if (false == bool(nymbox)) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Unable to instantiate nymbox for " << String::Factory(nymID)
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Unable to instantiate nymbox for ")(nymID)(".")
+            .Flush();
 
         return {};
     }
 
     if (false ==
         nymbox->GenerateLedger(nymID, server, ledgerType::nymbox, true)) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Unable to generate nymbox for "
-              << String::Factory(nymID) << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Unable to generate nymbox for ")(
+            nymID)(".")
+            .Flush();
 
         return {};
     }
@@ -2389,8 +2423,9 @@ std::unique_ptr<Ledger> UserCommandProcessor::create_nymbox(
     auto notUsed = Identifier::Factory();
 
     if (false == save_nymbox(serverNym, notUsed, *nymbox)) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Unable to save nymbox for "
-              << String::Factory(nymID) << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Unable to save nymbox for ")(
+            nymID)(".")
+            .Flush();
 
         return {};
     }
@@ -2426,9 +2461,9 @@ void UserCommandProcessor::drop_reply_notice_to_nymbox(
     }
 
     if (!bSuccessLoadingNymbox) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Failed loading or verifying Nymbox for user: "
-              << String::Factory(nymID)->Get() << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Failed loading or verifying Nymbox for user: ")(nymID)(".")
+            .Flush();
 
         return;
     }
@@ -2439,9 +2474,10 @@ void UserCommandProcessor::drop_reply_notice_to_nymbox(
 
     if (!bGotNextTransNum) {
         lReplyNoticeTransNum = 0;
-        otErr << OT_METHOD << __FUNCTION__
-              << "Error getting next transaction number for an "
-              << "transactionType::replyNotice." << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Error getting next transaction number for a "
+            "transactionType::replyNotice.")
+            .Flush();
 
         return;
     }
@@ -2501,15 +2537,17 @@ bool UserCommandProcessor::hash_check(
     if (context.HaveLocalNymboxHash()) {
         nymboxHash.SetString(context.LocalNymboxHash()->str());
     } else {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Continuing without server side nymbox hash." << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Continuing without server side nymbox hash.")
+            .Flush();
 
         return true;
     }
 
     if (false == context.HaveRemoteNymboxHash()) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Continuing without client side nymbox hash." << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Continuing without client side nymbox hash.")
+            .Flush();
 
         return true;
     }
@@ -2523,8 +2561,8 @@ RequestNumber UserCommandProcessor::initialize_request_number(
     auto requestNumber = context.Request();
 
     if (0 == requestNumber) {
-        otErr << OT_METHOD << __FUNCTION__ << ": request number doesn't exist"
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Request number doesn't exist.")
+            .Flush();
 
         requestNumber = context.IncrementRequest();
 
@@ -2551,8 +2589,9 @@ std::unique_ptr<Ledger> UserCommandProcessor::load_inbox(
     const bool verifyAccount) const
 {
     if (accountID == nymID) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Invalid account ID "
-              << String::Factory(accountID) << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Invalid account ID ")(accountID)(
+            ".")
+            .Flush();
 
         return {};
     }
@@ -2560,23 +2599,25 @@ std::unique_ptr<Ledger> UserCommandProcessor::load_inbox(
     auto inbox{manager_.Factory().Ledger(nymID, accountID, serverID)};
 
     if (false == bool(inbox)) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Unable to instantiate inbox for " << String::Factory(nymID)
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Unable to instantiate inbox for ")(nymID)(".")
+            .Flush();
 
         return {};
     }
 
     if (false == inbox->LoadInbox()) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Unable to load inbox for "
-              << String::Factory(nymID) << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Unable to load inbox for ")(
+            nymID)(".")
+            .Flush();
 
         return {};
     }
 
     if (false == verify_box(nymID, *inbox, serverNym, verifyAccount)) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Unable to verify inbox for "
-              << String::Factory(nymID) << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Unable to verify inbox for ")(
+            nymID)(".")
+            .Flush();
 
         return {};
     }
@@ -2597,23 +2638,25 @@ std::unique_ptr<Ledger> UserCommandProcessor::load_nymbox(
     auto nymbox{manager_.Factory().Ledger(nymID, nymID, serverID)};
 
     if (false == bool(nymbox)) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Unable to instantiate nymbox for " << String::Factory(nymID)
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Unable to instantiate nymbox for ")(nymID)(".")
+            .Flush();
 
         return {};
     }
 
     if (false == nymbox->LoadNymbox()) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Unable to load nymbox for "
-              << String::Factory(nymID) << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Unable to load nymbox for ")(
+            nymID)(".")
+            .Flush();
 
         return {};
     }
 
     if (false == verify_box(nymID, *nymbox, serverNym, verifyAccount)) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Unable to verify nymbox for "
-              << String::Factory(nymID) << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Unable to verify nymbox for ")(
+            nymID)(".")
+            .Flush();
 
         return {};
     }
@@ -2635,8 +2678,9 @@ std::unique_ptr<Ledger> UserCommandProcessor::load_outbox(
     const bool verifyAccount) const
 {
     if (accountID == nymID) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Invalid account ID "
-              << String::Factory(accountID) << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Invalid account ID ")(accountID)(
+            ".")
+            .Flush();
 
         return {};
     }
@@ -2644,23 +2688,25 @@ std::unique_ptr<Ledger> UserCommandProcessor::load_outbox(
     auto outbox{manager_.Factory().Ledger(nymID, accountID, serverID)};
 
     if (false == bool(outbox)) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Unable to instantiate outbox for " << String::Factory(nymID)
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Unable to instantiate outbox for ")(nymID)(".")
+            .Flush();
 
         return {};
     }
 
     if (false == outbox->LoadOutbox()) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Unable to load outbox for "
-              << String::Factory(nymID) << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Unable to load outbox for ")(
+            nymID)(".")
+            .Flush();
 
         return {};
     }
 
     if (false == verify_box(nymID, *outbox, serverNym, verifyAccount)) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Unable to verify outbox for "
-              << String::Factory(nymID) << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Unable to verify outbox for ")(
+            nymID)(".")
+            .Flush();
 
         return {};
     }
@@ -2692,8 +2738,9 @@ bool UserCommandProcessor::ProcessUserCommand(
 
     if (false == reply.Init()) { return false; }
 
-    otErr << "==> Received a " << command
-          << " message. Nym: " << msgIn.m_strNymID << " ..." << std::endl;
+    LogOutput(OT_METHOD)(__FUNCTION__)(": ==> Received a ")(command)(
+        " message. Nym: ")(msgIn.m_strNymID)(".")
+        .Flush();
 
     switch (type) {
         case MessageType::pingNotary: {
@@ -2838,8 +2885,9 @@ bool UserCommandProcessor::ProcessUserCommand(
             return cmd_add_claim(reply);
         }
         default: {
-            otErr << OT_METHOD << __FUNCTION__
-                  << ": Unknown command type: " << command << std::endl;
+            LogOutput(OT_METHOD)(__FUNCTION__)(": Unknown command type: ")(
+                command)(".")
+                .Flush();
 
             reply.SetAccount(msgIn.m_strAcctID);
             auto response = String::Factory(command);
@@ -2871,9 +2919,11 @@ bool UserCommandProcessor::reregister_nym(ReplyMessage& reply) const
     }
 
     if (false == bool(nymbox)) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Error during nym "
-              << "re-registration. Failed verifying or generating nymbox for "
-              << "nym: " << msgIn.m_strNymID << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Error during nym "
+            "re-registration. Failed verifying or generating nymbox for "
+            "Nym: ")(msgIn.m_strNymID)(".")
+            .Flush();
 
         return false;
     }
@@ -2936,24 +2986,26 @@ bool UserCommandProcessor::verify_box(
     const bool full) const
 {
     if (false == box.VerifyContractID()) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Unable to verify box ID for "
-              << String::Factory(ownerID) << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Unable to verify box ID for ")(
+            ownerID)(".")
+            .Flush();
 
         return false;
     }
 
     if (full) {
         if (false == box.VerifyAccount(nym)) {
-            otErr << OT_METHOD << __FUNCTION__ << ": Unable to verify box for "
-                  << String::Factory(ownerID) << std::endl;
+            LogOutput(OT_METHOD)(__FUNCTION__)(": Unable to verify box for ")(
+                ownerID)(".")
+                .Flush();
 
             return false;
         }
     } else {
         if (false == box.VerifySignature(nym)) {
-            otErr << OT_METHOD << __FUNCTION__
-                  << ": Unable to verify signature for "
-                  << String::Factory(ownerID) << std::endl;
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Unable to verify signature for ")(ownerID)(".")
+                .Flush();
 
             return false;
         }
