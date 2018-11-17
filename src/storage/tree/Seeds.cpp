@@ -11,7 +11,7 @@
 
 #define CURRENT_VERSION 2
 
-#define OT_METHOD "opentxs::storage::Seeds::"
+//#define OT_METHOD "opentxs::storage::Seeds::"
 
 namespace opentxs
 {

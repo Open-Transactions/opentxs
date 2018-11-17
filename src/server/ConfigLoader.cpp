@@ -37,7 +37,6 @@ bool ConfigLoader::load(
     const api::Settings& config,
     String& walletFilename)
 {
-    const char* szFunc = "ConfigLoader::load()";
 
     // Setup Config File
     auto strConfigFolder = String::Factory(),
@@ -481,7 +480,9 @@ bool ConfigLoader::load(
 
     // Done Loading... Lets save any changes...
     if (!config.Save()) {
-        otErr << szFunc << ": Error! Unable to save updated Config!!!\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Error! Unable to save updated Config!!!")
+            .Flush();
         OT_FAIL;
     }
 

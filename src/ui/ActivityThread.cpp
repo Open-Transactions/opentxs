@@ -96,14 +96,14 @@ bool ActivityThread::check_draft(const ActivityThreadRowID& id) const
     switch (status) {
         case ThreadStatus::RUNNING:
         case ThreadStatus::FINISHED_SUCCESS: {
-            otErr << OT_METHOD << __FUNCTION__ << ": Message sent successfully "
-                  << std::endl;
+            LogOutput(OT_METHOD)(__FUNCTION__)(": Message sent successfully.")
+                .Flush();
 
             return true;
         } break;
         case ThreadStatus::FINISHED_FAILED: {
-            otErr << OT_METHOD << __FUNCTION__ << ": Failed to send message "
-                  << std::endl;
+            LogOutput(OT_METHOD)(__FUNCTION__)(": Failed to send message.")
+                .Flush();
         } break;
         case ThreadStatus::ERROR:
         case ThreadStatus::SHUTDOWN:
@@ -117,20 +117,22 @@ bool ActivityThread::check_draft(const ActivityThreadRowID& id) const
 void ActivityThread::check_drafts() const
 {
     eLock lock(draft_lock_);
-    otErr << OT_METHOD << __FUNCTION__ << ": Checking " << draft_tasks_.size()
-          << " pending sends." << std::endl;
+    LogOutput(OT_METHOD)(__FUNCTION__)(": Checking ")(draft_tasks_.size())(
+        " pending sends.")
+        .Flush();
     std::set<ActivityThreadRowID> deleted{};
 
     for (const auto& draftID : draft_tasks_) {
         if (check_draft(draftID)) {
-            otErr << OT_METHOD << __FUNCTION__
-                  << ": Removing successfully sent draft." << std::endl;
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Removing successfully sent draft.")
+                .Flush();
             Lock lock(lock_);
             delete_item(lock, draftID);
             deleted.emplace(draftID);
         } else {
-            otErr << OT_METHOD << __FUNCTION__ << ": Keeping pending send"
-                  << std::endl;
+            LogOutput(OT_METHOD)(__FUNCTION__)(": Keeping pending send.")
+                .Flush();
         }
     }
 
@@ -236,8 +238,9 @@ std::string ActivityThread::GetDraft() const
 void ActivityThread::init_contact()
 {
     if (1 != participants_.size()) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Wrong number of participants ("
-              << participants_.size() << ")" << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Wrong number of participants (")(
+            participants_.size())(").")
+            .Flush();
 
         return;
     }
@@ -351,22 +354,22 @@ bool ActivityThread::SendDraft() const
     eLock draftLock(draft_lock_);
 
     if (draft_.empty()) {
-        otErr << OT_METHOD << __FUNCTION__ << ": No draft message to send."
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": No draft message to send.")
+            .Flush();
 
         return false;
     }
 
     if (participants_.empty()) {
-        otErr << OT_METHOD << __FUNCTION__ << ": No recipients." << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": No recipients.").Flush();
 
         return false;
     }
 
     if (1 < participants_.size()) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Sending to multiple recipient not yet supported."
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Sending to multiple recipient not yet supported.")
+            .Flush();
 
         return false;
     }
@@ -376,8 +379,9 @@ bool ActivityThread::SendDraft() const
 
     // if (taskID.empty())
     if (taskID->empty()) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Failed to queue message for sending" << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Failed to queue message for sending.")
+            .Flush();
 
         return false;
     }

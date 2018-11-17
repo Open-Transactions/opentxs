@@ -109,8 +109,9 @@ std::string ActivitySummaryItem::find_text(const ItemLocator& locator) const
 
                 return *text;
             } else {
-                otErr << OT_METHOD << __FUNCTION__
-                      << ": Mail item does not exist." << std::endl;
+                LogOutput(OT_METHOD)(__FUNCTION__)(
+                    ": Mail item does not exist.")
+                    .Flush();
             }
         } break;
         case StorageBox::INCOMINGCHEQUE:
@@ -121,8 +122,9 @@ std::string ActivitySummaryItem::find_text(const ItemLocator& locator) const
 
                 return *text;
             } else {
-                otErr << OT_METHOD << __FUNCTION__
-                      << ": Cheque item does not exist." << std::endl;
+                LogOutput(OT_METHOD)(__FUNCTION__)(
+                    ": Cheque item does not exist.")
+                    .Flush();
             }
         } break;
         default: {

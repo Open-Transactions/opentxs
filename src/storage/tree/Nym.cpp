@@ -23,7 +23,7 @@
 #define CURRENT_VERSION 7
 #define BLOCKCHAIN_INDEX_VERSION 1
 
-#define OT_METHOD "opentxs::storage::Nym::"
+//#define OT_METHOD "opentxs::storage::Nym::"
 
 namespace opentxs::storage
 {
@@ -130,7 +130,8 @@ T* Nym::construct(
         pointer.reset(new T(driver_, root, params...));
 
         if (!pointer) {
-            otErr << __FUNCTION__ << ": Unable to instantiate." << std::endl;
+            LogOutput(OT_METHOD)(__FUNCTION__)(": Unable to instantiate.")
+                .Flush();
             OT_FAIL;
         }
     }
@@ -215,8 +216,8 @@ void Nym::init(const std::string& hash)
     driver_.LoadProto(hash, serialized);
 
     if (!serialized) {
-        otErr << __FUNCTION__ << ": Failed to load nym index file."
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Failed to load nym index file.")
+            .Flush();
         OT_FAIL;
     }
 
@@ -312,8 +313,8 @@ bool Nym::Load(
 
     if (blockchain_accounts_.end() == it) {
         if (false == checking) {
-            otErr << OT_METHOD << __FUNCTION__ << ": Account does not exist."
-                  << std::endl;
+            LogOutput(OT_METHOD)(__FUNCTION__)(": Account does not exist.")
+                .Flush();
         }
 
         return false;
@@ -333,8 +334,9 @@ bool Nym::Load(
 
     if (!check_hash(credentials_)) {
         if (!checking) {
-            otErr << __FUNCTION__ << ": Error: nym with id " << nymid_
-                  << " has no credentials." << std::endl;
+            LogOutput(OT_METHOD)(__FUNCTION__)(": Error: nym with id ")(nymid_)(
+                " has no credentials.")
+                .Flush();
         }
 
         return false;
@@ -525,7 +527,7 @@ const PeerReplies& Nym::ProcessedReplyBox() const
 bool Nym::save(const Lock& lock) const
 {
     if (!verify_write_lock(lock)) {
-        otErr << __FUNCTION__ << ": Lock failure." << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Lock failure.").Flush();
         OT_FAIL;
     }
 
@@ -544,12 +546,12 @@ void Nym::_save(
     std::string& root)
 {
     if (!verify_write_lock(lock)) {
-        otErr << __FUNCTION__ << ": Lock failure." << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Lock failure.").Flush();
         OT_FAIL;
     }
 
     if (nullptr == input) {
-        otErr << __FUNCTION__ << ": Null target" << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Null target.").Flush();
         OT_FAIL;
     }
 
@@ -558,7 +560,7 @@ void Nym::_save(
     rootLock.unlock();
 
     if (false == save(lock)) {
-        otErr << __FUNCTION__ << ": Save error" << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Save error.").Flush();
         OT_FAIL;
     }
 }
@@ -681,14 +683,13 @@ bool Nym::Store(
     const auto& accountID = data.id();
 
     if (accountID.empty()) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Invalid account ID."
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Invalid account ID.").Flush();
 
         return false;
     }
 
     if (false == proto::Validate(data, VERBOSE)) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Invalid account." << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Invalid account.").Flush();
 
         return false;
     }
@@ -705,8 +706,9 @@ bool Nym::Store(
         auto& existing = accountItem->second;
 
         if (existing->revision() > data.revision()) {
-            otErr << OT_METHOD << __FUNCTION__
-                  << ": Not saving object with older revision." << std::endl;
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Not saving object with older revision.")
+                .Flush();
         } else {
             existing = std::make_shared<proto::Bip44Account>(data);
         }

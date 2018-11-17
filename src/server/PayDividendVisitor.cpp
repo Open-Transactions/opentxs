@@ -193,11 +193,12 @@ bool PayDividendVisitor::Trigger(
             const auto strPayoutUnitTypeId = String::Factory(
                            Identifier::Factory(payoutUnitTypeId_)),
                        strRecipientNymID = String::Factory(RECIPIENT_ID);
-            otErr << "PayDividendVisitor::Trigger: ERROR failed issuing "
-                  << "voucher (to send to dividend payout recipient.) WAS "
-                  << "TRYING TO PAY " << lPayoutAmount
-                  << " of instrument definition " << strPayoutUnitTypeId
-                  << " to Nym " << strRecipientNymID << ".\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": ERROR failed issuing "
+                "voucher (to send to dividend payout recipient). WAS "
+                "TRYING TO PAY ")(lPayoutAmount)(" of instrument definition ")(
+                strPayoutUnitTypeId)(" to Nym ")(strRecipientNymID)(".")
+                .Flush();
         }
         // If we didn't send it, then we need to return the funds to where they
         // came from.
@@ -261,26 +262,27 @@ bool PayDividendVisitor::Trigger(
                 const auto strPayoutUnitTypeId =
                                String::Factory(payoutUnitTypeId_),
                            strSenderNymID = String::Factory(theSenderNymID);
-                otErr << "PayDividendVisitor::Trigger: ERROR "
-                         "failed issuing voucher (to return back to "
-                         "the dividend payout initiator, after a failed "
-                         "payment attempt to the originally intended "
-                         "recipient.) WAS TRYING TO PAY "
-                      << lPayoutAmount << " of instrument definition "
-                      << strPayoutUnitTypeId << " to Nym " << strSenderNymID
-                      << ".\n";
+                LogOutput(OT_METHOD)(__FUNCTION__)(
+                    ": ERROR! Failed issuing voucher (to return back to "
+                    "the dividend payout initiator, after a failed "
+                    "payment attempt to the originally intended "
+                    "recipient). WAS TRYING TO PAY ")(lPayoutAmount)(
+                    " of instrument definition ")(strPayoutUnitTypeId)(
+                    " to Nym ")(strSenderNymID)(".")
+                    .Flush();
             }
         }   // if !bSent
     } else  // !bGotNextTransNum
     {
         const auto strPayoutUnitTypeId = String::Factory(payoutUnitTypeId_),
                    strRecipientNymID = String::Factory(RECIPIENT_ID);
-        otErr << OT_METHOD << __FUNCTION__
-              << ": ERROR!! Failed issuing next transaction number while "
-              << "trying to send a voucher (while paying dividends.) "
-              << "WAS TRYING TO PAY " << lPayoutAmount
-              << " of instrument definition " << strPayoutUnitTypeId->Get()
-              << " to Nym " << strRecipientNymID->Get() << ".\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": ERROR! Failed issuing next transaction number while "
+            "trying to send a voucher (while paying dividends). "
+            "WAS TRYING TO PAY ")(lPayoutAmount)(" of instrument definition ")(
+            strPayoutUnitTypeId->Get())(" to Nym ")(strRecipientNymID->Get())(
+            ".")
+            .Flush();
     }
 
     return bReturnValue;

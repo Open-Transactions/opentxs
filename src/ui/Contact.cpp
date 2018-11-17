@@ -168,8 +168,8 @@ int Contact::sort_key(const proto::ContactSectionName type)
 
 void Contact::startup()
 {
-    otErr << OT_METHOD << __FUNCTION__ << ": Loading contact " << nym_id_->str()
-          << std::endl;
+    LogOutput(OT_METHOD)(__FUNCTION__)(": Loading contact ")(nym_id_)(".")
+        .Flush();
     const auto contact = api_.Contacts().Contact(nym_id_);
 
     OT_ASSERT(contact)

@@ -77,7 +77,7 @@
 #define ACCOUNT_VERSION 1
 #define INDEX_VERSION 1
 
-#define OT_METHOD "opentxs::storage::Accounts::"
+//#define OT_METHOD "opentxs::storage::Accounts::"
 
 namespace opentxs::storage
 {
@@ -165,10 +165,10 @@ bool Accounts::add_set_index(
         mapID.SetString(argID.str());
     } else {
         if (mapID != argID) {
-            otErr << OT_METHOD << __FUNCTION__ << ": Provided index id ("
-                  << argID.str() << ") for account " << accountID.str()
-                  << " does not match existing index id " << mapID.str()
-                  << std::endl;
+            LogOutput(OT_METHOD)(__FUNCTION__)(": Provided index id (")(argID)(
+                ") for account ")(accountID)(
+                " does not match existing index id ")(mapID)(".")
+                .Flush();
 
             return false;
         }
@@ -195,42 +195,37 @@ bool Accounts::check_update_account(
     const proto::ContactItemType unit)
 {
     if (accountID->empty()) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Invalid account ID."
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Invalid account ID.").Flush();
 
         return false;
     }
 
     if (ownerNym.empty()) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Invalid owner nym ID."
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Invalid owner nym ID.").Flush();
 
         return false;
     }
 
     if (signerNym.empty()) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Invalid signer nym ID."
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Invalid signer nym ID.").Flush();
 
         return false;
     }
 
     if (issuerNym.empty()) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Invalid issuer nym ID."
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Invalid issuer nym ID.").Flush();
 
         return false;
     }
 
     if (server.empty()) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Invalid server ID."
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Invalid server ID.").Flush();
 
         return false;
     }
 
     if (contract.empty()) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Invalid unit ID." << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Invalid unit ID.").Flush();
 
         return false;
     }
@@ -326,8 +321,9 @@ void Accounts::init(const std::string& hash)
     driver_.LoadProto(hash, serialized);
 
     if (false == bool(serialized)) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Failed to load account index file." << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Failed to load account index file.")
+            .Flush();
         OT_FAIL;
     }
 
@@ -372,7 +368,7 @@ bool Accounts::Load(
 bool Accounts::save(const Lock& lock) const
 {
     if (!verify_write_lock(lock)) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Lock failure." << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Lock failure.").Flush();
         OT_FAIL;
     }
 

@@ -18,7 +18,7 @@
 
 #define CURRENT_VERSION 3
 
-#define OT_METHOD "opentxs::storage::Nyms::"
+//#define OT_METHOD "opentxs::storage::Nyms::"
 
 namespace opentxs
 {
@@ -52,8 +52,9 @@ void Nyms::init(const std::string& hash)
     driver_.LoadProto(hash, serialized);
 
     if (!serialized) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Failed to load nym list index file." << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Failed to load nym list index file.")
+            .Flush();
         abort();
     }
 
@@ -61,8 +62,9 @@ void Nyms::init(const std::string& hash)
 
     // Upgrade version
     if (CURRENT_VERSION > original_version_) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Upgrading to version "
-              << CURRENT_VERSION << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Upgrading to version ")(
+            CURRENT_VERSION)(".")
+            .Flush();
         version_ = CURRENT_VERSION;
     } else {
         version_ = original_version_;
@@ -142,8 +144,8 @@ class Nym* Nyms::nym(const Lock& lock, const std::string& id) const
         node.reset(new class Nym(driver_, id, hash, alias));
 
         if (!node) {
-            otErr << OT_METHOD << __FUNCTION__ << ": Failed to instantiate nym."
-                  << std::endl;
+            LogOutput(OT_METHOD)(__FUNCTION__)(": Failed to instantiate nym.")
+                .Flush();
             abort();
         }
     }
@@ -190,7 +192,7 @@ bool Nyms::RelabelThread(const std::string& threadID, const std::string label)
 bool Nyms::save(const Lock& lock) const
 {
     if (!verify_write_lock(lock)) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Lock failure." << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Lock failure.").Flush();
         abort();
     }
 
@@ -206,12 +208,12 @@ bool Nyms::save(const Lock& lock) const
 void Nyms::save(class Nym* nym, const Lock& lock, const std::string& id)
 {
     if (!verify_write_lock(lock)) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Lock failure." << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Lock failure.").Flush();
         abort();
     }
 
     if (nullptr == nym) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Null target" << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Null target.").Flush();
         abort();
     }
 
@@ -224,7 +226,7 @@ void Nyms::save(class Nym* nym, const Lock& lock, const std::string& id)
     if (nym->private_.get()) { local_nyms_.emplace(nym->nymid_); }
 
     if (!save(lock)) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Save error" << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Save error.").Flush();
         abort();
     }
 }
@@ -265,12 +267,13 @@ void Nyms::UpgradeLocalnym()
         OT_ASSERT(node.checked_.get())
 
         if (node.private_.get()) {
-            otErr << OT_METHOD << __FUNCTION__ << ": Adding nym " << id
-                  << " to local nym list." << std::endl;
+            LogOutput(OT_METHOD)(__FUNCTION__)(": Adding nym ")(id)(
+                " to local nym list.")
+                .Flush();
             local_nyms_.emplace(id);
         } else {
-            otErr << OT_METHOD << __FUNCTION__ << ": Nym " << id
-                  << " is not local." << std::endl;
+            LogOutput(OT_METHOD)(__FUNCTION__)(": Nym ")(id)(" is not local.")
+                .Flush();
         }
     }
 

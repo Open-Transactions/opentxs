@@ -69,8 +69,9 @@ bool MainFile::SaveMainFileToString(String& strMainFile)
         if (cachedKey.SerializeTo(ascMasterContents)) {
             tag.add_tag("cachedKey", ascMasterContents->Get());
         } else
-            otErr << __FUNCTION__
-                  << " Failed trying to write master key to notary file.\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Failed trying to write master key to notary file.")
+                .Flush();
     }
 
     // Save the basket account information
@@ -87,9 +88,10 @@ bool MainFile::SaveMainFileToString(String& strMainFile)
                 BASKET_ACCOUNT_ID, BASKET_CONTRACT_ID);
 
         if (!bContractID) {
-            otErr << __FUNCTION__
-                  << ": Error: Missing Contract ID for basket ID "
-                  << strBasketID->Get() << "\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Error: Missing Contract ID for basket ID ")(
+                strBasketID->Get())(".")
+                .Flush();
             break;
         }
 
@@ -125,8 +127,9 @@ bool MainFile::SaveMainFile()
     auto strMainFile = String::Factory();
 
     if (!SaveMainFileToString(strMainFile)) {
-        otErr << __FUNCTION__
-              << ": Error saving to string. (Giving up on save attempt.)\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Error saving to string. (Giving up on save attempt).")
+            .Flush();
         return false;
     }
     // Try to save the notary server's main datafile to local storage...
@@ -138,8 +141,9 @@ bool MainFile::SaveMainFile()
         ascTemp->WriteArmoredString(strFinal, "NOTARY"))  // todo
                                                           // hardcoding.
     {
-        otErr << __FUNCTION__
-              << ": Error saving notary (failed writing armored string)\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Error saving notary (Failed writing armored string).")
+            .Flush();
         return false;
     }
     // Save the Main File to the Harddrive... (or DB, if other storage module is
@@ -154,9 +158,9 @@ bool MainFile::SaveMainFile()
         "");
 
     if (!bSaved) {
-        otErr << __FUNCTION__
-              << ": Error saving main file: " << server_.WalletFilename().Get()
-              << "\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Error saving main file: ")(
+            server_.WalletFilename().Get())(".")
+            .Flush();
     }
     return bSaved;
 }
@@ -175,7 +179,9 @@ bool MainFile::CreateMainFile(
             strNotaryID,
             "",
             "")) {
-        otErr << "Failed trying to store the server contract.\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Failed trying to store the server contract.")
+            .Flush();
         return false;
     }
 
@@ -186,8 +192,9 @@ bool MainFile::CreateMainFile(
                                 strNymID,
                                 "",
                                 "")) {
-        otErr
-            << "Failed trying to store the server Nym's public/private cert.\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Failed trying to store the server Nym's public/private cert.")
+            .Flush();
         return false;
     }
 
@@ -226,7 +233,9 @@ bool MainFile::CreateMainFile(
             "",
             ""))  // todo hardcoding.
     {
-        otErr << "Failed trying to store the new notaryServer.xml file.\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Failed trying to store the new notaryServer.xml file.")
+            .Flush();
         return false;
     }
     auto ascCachedKey = Armored::Factory();
@@ -272,9 +281,9 @@ bool MainFile::LoadMainFile(bool bReadOnly)
             server_.WalletFilename().Get(),
             "",
             "")) {
-        otErr << __FUNCTION__
-              << ": Error finding file: " << server_.WalletFilename().Get()
-              << "\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Error finding file: ")(
+            server_.WalletFilename().Get())(".")
+            .Flush();
         return false;
     }
     auto strFileContents = String::Factory(OTDB::QueryPlainString(
@@ -286,8 +295,9 @@ bool MainFile::LoadMainFile(bool bReadOnly)
                // DATA STORE.
 
     if (!strFileContents->Exists()) {
-        otErr << __FUNCTION__ << ": Unable to read main file: "
-              << server_.WalletFilename().Get() << "\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Unable to read main file: ")(
+            server_.WalletFilename().Get())(".")
+            .Flush();
         return false;
     }
 
@@ -299,11 +309,12 @@ bool MainFile::LoadMainFile(bool bReadOnly)
         auto xmlFileContents = StringXML::Factory(strFileContents);
 
         if (false == xmlFileContents->DecodeIfArmored()) {
-            otErr << __FUNCTION__
-                  << ": Notary server file apparently was encoded and "
-                     "then failed decoding. Filename: "
-                  << server_.WalletFilename().Get() << "\nContents: \n"
-                  << strFileContents->Get() << "\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Notary server file apparently was encoded and "
+                "then failed decoding. Filename: ")(
+                server_.WalletFilename().Get())(". Contents: ")(
+                strFileContents->Get())(".")
+                .Flush();
             return false;
         }
 
@@ -385,8 +396,9 @@ bool MainFile::LoadMainFile(bool bReadOnly)
                         if ((-1) == server_.GetTransactor()
                                         .voucherAccounts_.ReadFromXMLNode(
                                             xml, strAcctType, strAcctCount))
-                            otErr << __FUNCTION__
-                                  << ": Error loading voucher accountList.\n";
+                            LogOutput(OT_METHOD)(__FUNCTION__)(
+                                ": Error loading voucher accountList.")
+                                .Flush();
                     } else if (strNodeName->Compare("basketInfo")) {
                         auto strBasketID =
                             String::Factory(xml->getAttributeValue("basketID"));
@@ -412,15 +424,18 @@ bool MainFile::LoadMainFile(bool bReadOnly)
                                 ".")
                                 .Flush();
                         } else {
-                            otErr << "Error adding basket currency info...\n "
-                                     "Basket ID: "
-                                  << strBasketID->Get() << "\n Basket Acct ID: "
-                                  << strBasketAcctID->Get() << "\n";
+                            LogOutput(OT_METHOD)(__FUNCTION__)(
+                                ": Error adding basket currency info."
+                                " Basket ID: ")(strBasketID->Get())(
+                                ". Basket Acct ID: ")(strBasketAcctID->Get())(
+                                ".")
+                                .Flush();
                         }
                     } else {
                         // unknown element type
-                        otErr << __FUNCTION__ << ": Unknown element type: "
-                              << xml->getNodeName() << "\n";
+                        LogOutput(OT_METHOD)(__FUNCTION__)(
+                            ": Unknown element type: ")(xml->getNodeName())(".")
+                            .Flush();
                     }
                 } break;
                 default: {
@@ -430,8 +445,9 @@ bool MainFile::LoadMainFile(bool bReadOnly)
     }
 
     if (server_.ServerNymID().empty()) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Failed to determine server nym id." << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Failed to determine server nym id.")
+            .Flush();
         bFailure = true;
     }
 
@@ -440,8 +456,8 @@ bool MainFile::LoadMainFile(bool bReadOnly)
             server_.LoadServerNym(Identifier::Factory(server_.ServerNymID()));
 
         if (false == loaded) {
-            otErr << OT_METHOD << __FUNCTION__ << ": Failed to load server nym."
-                  << std::endl;
+            LogOutput(OT_METHOD)(__FUNCTION__)(": Failed to load server nym.")
+                .Flush();
             bFailure = true;
         }
     }
@@ -450,8 +466,7 @@ bool MainFile::LoadMainFile(bool bReadOnly)
         const auto loaded = LoadServerUserAndContract();
 
         if (false == loaded) {
-            otErr << OT_METHOD << __FUNCTION__ << ": Failed to load nym."
-                  << std::endl;
+            LogOutput(OT_METHOD)(__FUNCTION__)(": Failed to load nym.").Flush();
             bFailure = true;
         }
     }
@@ -476,11 +491,10 @@ bool MainFile::LoadServerUserAndContract()
         server_.API().Wallet().Nym(Identifier::Factory(server_.ServerNymID()));
 
     if (serverNym->HasCapability(NymCapability::SIGN_MESSAGE)) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Server nym is viable."
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Server nym is viable.").Flush();
     } else {
-        otErr << OT_METHOD << __FUNCTION__ << ": Server nym lacks private keys."
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Server nym lacks private keys.")
+            .Flush();
 
         return false;
     }
@@ -498,9 +512,10 @@ bool MainFile::LoadServerUserAndContract()
     server_.Cron().SetServerNym(serverNym);
 
     if (!server_.Cron().LoadCron()) {
-        otErr << __FUNCTION__
-              << ": Failed loading Cron file. (Did you just create this "
-                 "server?)\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Failed loading Cron file. (Did you just create this "
+            "server?).")
+            .Flush();
     }
     LogNormal(OT_METHOD)(__FUNCTION__)(": Loading the server contract...")
         .Flush();

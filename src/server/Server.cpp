@@ -185,8 +185,8 @@ void Server::CreateMainFile(bool& mainFileExists)
     std::string seed{};
 
     if (false == backup.empty()) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Seed backup found. Restoring."
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Seed backup found. Restoring.")
+            .Flush();
         auto parsed = parse_seed_backup(backup);
         OTPassword phrase;
         OTPassword words;
@@ -195,11 +195,11 @@ void Server::CreateMainFile(bool& mainFileExists)
         seed = manager_.Seeds().ImportSeed(words, phrase);
 
         if (seed.empty()) {
-            otErr << OT_METHOD << __FUNCTION__ << ": Seed restoration failed."
-                  << std::endl;
+            LogOutput(OT_METHOD)(__FUNCTION__)(": Seed restoration failed.")
+                .Flush();
         } else {
-            otErr << OT_METHOD << __FUNCTION__ << ": Seed " << seed
-                  << " restored." << std::endl;
+            LogOutput(OT_METHOD)(__FUNCTION__)(": Seed ")(seed)(" restored.")
+                .Flush();
         }
     }
 #endif
@@ -215,7 +215,9 @@ void Server::CreateMainFile(bool& mainFileExists)
     m_nymServer = manager_.Wallet().Nym(nymParameters);
 
     if (false == bool(m_nymServer)) {
-        otErr << "Error: Failed to create server nym\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Error: Failed to create server nym.")
+            .Flush();
         OT_FAIL;
     }
 
@@ -339,9 +341,10 @@ void Server::CreateMainFile(bool& mainFileExists)
     const bool useInproc = !inproc.empty();
 
     if (useInproc) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Creating inproc contract for instance "
-              << manager_.GetInproc() << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Creating inproc contract for instance ")(manager_.GetInproc())(
+            ".")
+            .Flush();
         ServerContract::Endpoint inproc{proto::ADDRESSTYPE_INPROC,
                                         proto::PROTOCOLVERSION_LEGACY,
                                         manager_.GetInproc(),
@@ -349,8 +352,8 @@ void Server::CreateMainFile(bool& mainFileExists)
                                         2};
         endpoints.push_back(inproc);
     } else {
-        otErr << OT_METHOD << __FUNCTION__ << ": Creating standard contract"
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Creating standard contract.")
+            .Flush();
         ServerContract::Endpoint ipv4{proto::ADDRESSTYPE_IPV4,
                                       proto::PROTOCOLVERSION_LEGACY,
                                       hostname,
@@ -395,8 +398,9 @@ void Server::CreateMainFile(bool& mainFileExists)
             endpoints,
             (useInproc) ? 2 : SERVER_CONTRACT_CREATE_VERSION);
     } else {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Existing contract found. Restoring." << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Existing contract found. Restoring.")
+            .Flush();
         const auto serialized =
             proto::StringToProto<proto::ServerContract>(existing);
         pContract = wallet.Server(serialized);
@@ -504,7 +508,8 @@ void Server::Init(bool readOnly)
 
     if (!ConfigLoader::load(
             manager_.Crypto(), manager_.Config(), WalletFilename())) {
-        otErr << "Unable to Load Config File!";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Unable to Load Config File!")
+            .Flush();
         OT_FAIL;
     }
 
@@ -519,9 +524,10 @@ void Server::Init(bool readOnly)
 
     if (false == mainFileExists) {
         if (readOnly) {
-            otErr << "Error: Main file non-existent (" << WalletFilename().Get()
-                  << "). "
-                     "Plus, unable to create, since read-only flag is set.\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Error: Main file non-existent (")(WalletFilename().Get())(
+                "). Plus, unable to create, since read-only flag is set.")
+                .Flush();
             OT_FAIL;
         } else {
             CreateMainFile(mainFileExists);
@@ -530,7 +536,9 @@ void Server::Init(bool readOnly)
 
     if (mainFileExists) {
         if (false == mainFile_.LoadMainFile(readOnly)) {
-            otErr << "Error in Loading Main File, re-creating.\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Error in Loading Main File, re-creating.")
+                .Flush();
             OTDB::EraseValueByKey(
                 manager_.DataFolder(), ".", WalletFilename().Get(), "", "");
             CreateMainFile(mainFileExists);
@@ -562,8 +570,8 @@ bool Server::LoadServerNym(const Identifier& nymID)
     auto nym = manager_.Wallet().Nym(nymID);
 
     if (false == bool(nym)) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Server nym does not exist."
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Server nym does not exist.")
+            .Flush();
 
         return false;
     }
@@ -596,7 +604,8 @@ bool Server::SendInstrumentToNym(
     const bool bGotPaymentContents = pPayment.GetPaymentContents(strPayment);
 
     if (!bGotPaymentContents) {
-        otErr << __FUNCTION__ << ": Error GetPaymentContents Failed";
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Error GetPaymentContents Failed!")
+            .Flush();
     }
 
     const bool bDropped = DropMessageToNymbox(
@@ -719,8 +728,9 @@ bool Server::DropMessageToNymbox(
         transactor_.issueNextTransactionNumber(lTransNum);
 
     if (!bGotNextTransNum) {
-        otErr << __FUNCTION__
-              << ": Error: failed trying to get next transaction number.\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Error: Failed trying to get next transaction number.")
+            .Flush();
         return false;
     }
     switch (theType) {
@@ -729,10 +739,10 @@ bool Server::DropMessageToNymbox(
         case transactionType::instrumentNotice:
             break;
         default:
-            otErr
-                << __FUNCTION__
-                << ": Unexpected transactionType passed here (expected message "
-                   "or instrumentNotice.)\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Unexpected transactionType passed here (Expected message "
+                "or instrumentNotice).")
+                .Flush();
             return false;
     }
     // If pMsg was not already passed in here, then
@@ -794,9 +804,10 @@ bool Server::DropMessageToNymbox(
             theMsgAngel->SignContract(*m_nymServer);
             theMsgAngel->SaveContract();
         } else {
-            otErr << __FUNCTION__
-                  << ": Failed trying to seal envelope containing theMsgAngel "
-                     "(or while grabbing the base64-encoded result.)\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Failed trying to seal envelope containing theMsgAngel "
+                "(or while grabbing the base64-encoded result).")
+                .Flush();
             return false;
         }
 
@@ -888,17 +899,17 @@ bool Server::DropMessageToNymbox(
         } else  // should never happen
         {
             const auto strRecipientNymID = String::Factory(RECIPIENT_NYM_ID);
-            otErr
-                << __FUNCTION__
-                << ": Failed while trying to generate transaction in order to "
-                   "add a message to Nymbox: "
-                << strRecipientNymID->Get() << "\n";
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Failed while trying to generate transaction in order to "
+                "add a message to Nymbox: ")(strRecipientNymID->Get())(".")
+                .Flush();
         }
     } else {
         const auto strRecipientNymID = String::Factory(RECIPIENT_NYM_ID);
-        otErr << __FUNCTION__
-              << ": Failed while trying to load or verify Nymbox: "
-              << strRecipientNymID->Get() << "\n";
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Failed while trying to load or verify Nymbox: ")(
+            strRecipientNymID->Get())(".")
+            .Flush();
     }
 
     return false;

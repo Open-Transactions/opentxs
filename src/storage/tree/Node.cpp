@@ -11,7 +11,7 @@
 
 #include "storage/Plugin.hpp"
 
-#define OT_METHOD "opentxs::storage::Node::"
+//#define OT_METHOD "opentxs::storage::Node::"
 
 namespace opentxs::storage
 {
@@ -101,8 +101,9 @@ bool Node::load_raw(
 
     if (!exists) {
         if (!checking) {
-            otErr << OT_METHOD << __FUNCTION__ << ": Error: item with id " << id
-                  << " does not exist." << std::endl;
+            LogOutput(OT_METHOD)(__FUNCTION__)(": Error: item with id ")(id)(
+                " does not exist.")
+                .Flush();
         }
 
         return false;
@@ -126,9 +127,9 @@ bool Node::Migrate(const opentxs::api::storage::Driver& to) const
 {
     if (std::string(BLANK_HASH) == root_) {
         if (0 < item_map_.size()) {
-            otErr << OT_METHOD << __FUNCTION__
-                  << ": Items present in object with blank root hash."
-                  << std::endl;
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Items present in object with blank root hash.")
+                .Flush();
 
             OT_FAIL;
         }
@@ -152,17 +153,17 @@ std::string Node::normalize_hash(const std::string& hash)
     if (hash.empty()) { return BLANK_HASH; }
 
     if (proto::MIN_PLAUSIBLE_IDENTIFIER > hash.size()) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Blanked out short hash "
-              << hash << "\n"
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Blanked out short hash ")(hash)(
+            ".")
+            .Flush();
 
         return BLANK_HASH;
     }
 
     if (proto::MAX_PLAUSIBLE_IDENTIFIER < hash.size()) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Blanked out long hash " << hash
-              << "\n"
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Blanked out long hash ")(hash)(
+            ".")
+            .Flush();
 
         return BLANK_HASH;
     }
@@ -262,13 +263,13 @@ std::uint32_t Node::UpgradeLevel() const { return original_version_; }
 bool Node::verify_write_lock(const Lock& lock) const
 {
     if (lock.mutex() != &write_lock_) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Incorrect mutex." << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Incorrect mutex.").Flush();
 
         return false;
     }
 
     if (false == lock.owns_lock()) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Lock not owned." << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Lock not owned.").Flush();
 
         return false;
     }

@@ -58,7 +58,7 @@
 
 #define STORAGE_CONFIG_KEY "storage"
 
-#define OT_METHOD "opentxs::api::storage::implementation::Storage::"
+//#define OT_METHOD "opentxs::api::storage::implementation::Storage::"
 
 namespace opentxs
 {

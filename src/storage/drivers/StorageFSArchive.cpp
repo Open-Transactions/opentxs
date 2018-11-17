@@ -107,14 +107,16 @@ std::string StorageFSArchive::calculate_path(
 
     if (8 < key.size()) {
         if (false == sync(level2)) {
-            otErr << OT_METHOD << __FUNCTION__ << ": Unable to sync directory"
-                  << level2 << std::endl;
+            LogOutput(OT_METHOD)(__FUNCTION__)(": Unable to sync directory ")(
+                level2)(".")
+                .Flush();
         }
     }
 
     if (false == sync(level1)) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Unable to sync directory"
-              << level1 << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Unable to sync directory ")(
+            level1)(".")
+            .Flush();
     }
 
     return {directory + path_seperator_ + key};
@@ -154,8 +156,8 @@ std::string StorageFSArchive::prepare_read(const std::string& input) const
     OTPasswordData reason("");
 
     if (false == encryption_key_.Decrypt(ciphertext, reason, output)) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Failed to decrypt value."
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Failed to decrypt value.")
+            .Flush();
     }
 
     return output;
@@ -174,8 +176,8 @@ std::string StorageFSArchive::prepare_write(const std::string& plaintext) const
         encryption_key_.Encrypt(plaintext, iv, reason, ciphertext, false);
 
     if (false == encrypted) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Failed to encrypt value."
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Failed to encrypt value.")
+            .Flush();
     }
 
     return proto::ProtoAsString(ciphertext);

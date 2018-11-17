@@ -84,8 +84,8 @@ void ContactList::add_item(
     const ContactListSortKey& index,
     const CustomData& custom)
 {
-    otErr << OT_METHOD << __FUNCTION__ << ": Widget ID: " << WidgetID()->str()
-          << std::endl;
+    LogOutput(OT_METHOD)(__FUNCTION__)(": Widget ID: ")(WidgetID())(".")
+        .Flush();
 
     if (owner_contact_id_ == id) {
         owner_->reindex(index, custom);
@@ -137,8 +137,9 @@ void ContactList::process_contact(const network::zeromq::Message& message)
 void ContactList::startup()
 {
     const auto contacts = api_.Contacts().ContactList();
-    otErr << OT_METHOD << __FUNCTION__ << ": Loading " << contacts.size()
-          << " contacts." << std::endl;
+    LogOutput(OT_METHOD)(__FUNCTION__)(": Loading ")(contacts.size())(
+        " contacts.")
+        .Flush();
 
     for (const auto& [id, alias] : contacts) {
         add_item(Identifier::Factory(id), alias, {});

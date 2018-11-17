@@ -25,7 +25,7 @@
 
 #define CURRENT_VERSION 2
 
-#define OT_METHOD "opentxs::storage::Root::"
+//#define OT_METHOD "opentxs::storage::Root::"
 
 namespace opentxs
 {
@@ -69,8 +69,8 @@ void Root::cleanup() const
 void Root::collect_garbage(const opentxs::api::storage::Driver* to) const
 {
     Lock lock(write_lock_);
-    otErr << OT_METHOD << __FUNCTION__ << ": Beginning garbage collection."
-          << std::endl;
+    LogOutput(OT_METHOD)(__FUNCTION__)(": Beginning garbage collection.")
+        .Flush();
     const auto resume = gc_resume_->Set(false);
     bool oldLocation = false;
 
@@ -94,8 +94,9 @@ void Root::collect_garbage(const opentxs::api::storage::Driver* to) const
     if (success) {
         driver_.EmptyBucket(oldLocation);
     } else {
-        otErr << OT_METHOD << __FUNCTION__ << ": Garbage collection failed. "
-              << "Will retry next cycle." << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Garbage collection failed. "
+                                           "Will retry next cycle.")
+            .Flush();
     }
 
     Lock gcLock(gc_lock_, std::defer_lock);
@@ -107,8 +108,8 @@ void Root::collect_garbage(const opentxs::api::storage::Driver* to) const
     driver_.StoreRoot(true, root_);
     lock.unlock();
     gcLock.unlock();
-    otErr << OT_METHOD << __FUNCTION__ << ": Finished garbage collection."
-          << std::endl;
+    LogOutput(OT_METHOD)(__FUNCTION__)(": Finished garbage collection.")
+        .Flush();
 }
 
 void Root::init(const std::string& hash)
@@ -116,8 +117,8 @@ void Root::init(const std::string& hash)
     std::shared_ptr<proto::StorageRoot> serialized;
 
     if (!driver_.LoadProto(hash, serialized)) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Failed to load root object file." << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Failed to load root object file.")
+            .Flush();
         OT_FAIL;
     }
 
@@ -138,8 +139,8 @@ void Root::init(const std::string& hash)
 bool Root::Migrate(const opentxs::api::storage::Driver& to) const
 {
     if (0 == gc_interval_) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Garbage collection disabled"
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Garbage collection disabled.")
+            .Flush();
 
         return false;
     }

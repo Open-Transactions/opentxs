@@ -15,7 +15,7 @@
 #define TYPE_VERSION 2
 #define INDEX_VERSION 1
 
-#define OT_METHOD "opentxs::storage::PaymentWorkflows::"
+//#define OT_METHOD "opentxs::storage::PaymentWorkflows::"
 
 namespace opentxs::storage
 {
@@ -104,8 +104,9 @@ void PaymentWorkflows::init(const std::string& hash)
     driver_.LoadProto(hash, serialized);
 
     if (!serialized) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Failed to load workflow index file." << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Failed to load workflow index file.")
+            .Flush();
         OT_FAIL
     }
 
@@ -224,7 +225,7 @@ void PaymentWorkflows::reindex(
 bool PaymentWorkflows::save(const Lock& lock) const
 {
     if (!verify_write_lock(lock)) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Lock failure." << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Lock failure.").Flush();
         OT_FAIL
     }
 

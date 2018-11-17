@@ -20,7 +20,7 @@
 
 #define TREE_VERSION 4
 
-#define OT_METHOD "opentxs::storage::Tree::"
+//#define OT_METHOD "opentxs::storage::Tree::"
 
 namespace opentxs::storage
 {
@@ -110,8 +110,8 @@ Accounts* Tree::accounts() const
         account_.reset(new Accounts(driver_, account_root_));
 
         if (false == bool(account_)) {
-            otErr << OT_METHOD << __FUNCTION__ << ": Unable to instantiate."
-                  << std::endl;
+            LogOutput(OT_METHOD)(__FUNCTION__)(": Unable to instantiate.")
+                .Flush();
 
             OT_FAIL;
         }
@@ -131,8 +131,8 @@ BlockchainTransactions* Tree::blockchain() const
             new BlockchainTransactions(driver_, blockchain_root_));
 
         if (false == bool(blockchain_)) {
-            otErr << OT_METHOD << __FUNCTION__ << ": Unable to instantiate."
-                  << std::endl;
+            LogOutput(OT_METHOD)(__FUNCTION__)(": Unable to instantiate.")
+                .Flush();
 
             OT_FAIL
         }
@@ -160,8 +160,8 @@ Contacts* Tree::contacts() const
         contacts_.reset(new Contacts(driver_, contact_root_));
 
         if (!contacts_) {
-            otErr << OT_METHOD << __FUNCTION__ << ": Unable to instantiate."
-                  << std::endl;
+            LogOutput(OT_METHOD)(__FUNCTION__)(": Unable to instantiate.")
+                .Flush();
 
             OT_FAIL
         }
@@ -182,8 +182,8 @@ Credentials* Tree::credentials() const
         credentials_.reset(new Credentials(driver_, credential_root_));
 
         if (!credentials_) {
-            otErr << OT_METHOD << __FUNCTION__ << ": Unable to instantiate."
-                  << std::endl;
+            LogOutput(OT_METHOD)(__FUNCTION__)(": Unable to instantiate.")
+                .Flush();
 
             OT_FAIL
         }
@@ -200,8 +200,8 @@ void Tree::init(const std::string& hash)
     driver_.LoadProto(hash, serialized);
 
     if (false == bool(serialized)) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Failed to load root index file." << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Failed to load root index file.")
+            .Flush();
 
         OT_FAIL
     }
@@ -313,8 +313,8 @@ Nyms* Tree::nyms() const
         nyms_.reset(new Nyms(driver_, nym_root_));
 
         if (!nyms_) {
-            otErr << OT_METHOD << __FUNCTION__ << ": Unable to instantiate."
-                  << std::endl;
+            LogOutput(OT_METHOD)(__FUNCTION__)(": Unable to instantiate.")
+                .Flush();
             OT_FAIL
         }
     }
@@ -327,7 +327,7 @@ Nyms* Tree::nyms() const
 bool Tree::save(const Lock& lock) const
 {
     if (!verify_write_lock(lock)) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Lock failure." << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Lock failure.").Flush();
         OT_FAIL
     }
 
@@ -341,12 +341,12 @@ bool Tree::save(const Lock& lock) const
 void Tree::save(Accounts* accounts, const Lock& lock)
 {
     if (!verify_write_lock(lock)) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Lock failure." << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Lock failure.").Flush();
         OT_FAIL
     }
 
     if (nullptr == account_) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Null target" << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Null target.").Flush();
         OT_FAIL
     }
 
@@ -355,7 +355,7 @@ void Tree::save(Accounts* accounts, const Lock& lock)
     mapLock.unlock();
 
     if (!save(lock)) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Save error" << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Save error.").Flush();
         OT_FAIL
     }
 }
@@ -363,12 +363,12 @@ void Tree::save(Accounts* accounts, const Lock& lock)
 void Tree::save(BlockchainTransactions* blockchain, const Lock& lock)
 {
     if (!verify_write_lock(lock)) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Lock failure." << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Lock failure.").Flush();
         OT_FAIL
     }
 
     if (nullptr == blockchain) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Null target" << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Null target.").Flush();
         OT_FAIL
     }
 
@@ -377,7 +377,7 @@ void Tree::save(BlockchainTransactions* blockchain, const Lock& lock)
     mapLock.unlock();
 
     if (!save(lock)) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Save error" << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Save error.").Flush();
         OT_FAIL
     }
 }
@@ -385,12 +385,12 @@ void Tree::save(BlockchainTransactions* blockchain, const Lock& lock)
 void Tree::save(Contacts* contacts, const Lock& lock)
 {
     if (!verify_write_lock(lock)) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Lock failure." << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Lock failure.").Flush();
         OT_FAIL
     }
 
     if (nullptr == contacts) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Null target" << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Null target.").Flush();
         OT_FAIL
     }
 
@@ -399,7 +399,7 @@ void Tree::save(Contacts* contacts, const Lock& lock)
     mapLock.unlock();
 
     if (!save(lock)) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Save error" << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Save error.").Flush();
         OT_FAIL
     }
 }
@@ -407,12 +407,12 @@ void Tree::save(Contacts* contacts, const Lock& lock)
 void Tree::save(Credentials* credentials, const Lock& lock)
 {
     if (!verify_write_lock(lock)) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Lock failure." << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Lock failure.").Flush();
         OT_FAIL
     }
 
     if (nullptr == credentials) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Null target" << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Null target.").Flush();
         OT_FAIL
     }
 
@@ -421,7 +421,7 @@ void Tree::save(Credentials* credentials, const Lock& lock)
     mapLock.unlock();
 
     if (!save(lock)) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Save error" << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Save error.").Flush();
         OT_FAIL
     }
 }
@@ -429,12 +429,12 @@ void Tree::save(Credentials* credentials, const Lock& lock)
 void Tree::save(Nyms* nyms, const Lock& lock)
 {
     if (!verify_write_lock(lock)) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Lock failure." << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Lock failure.").Flush();
         OT_FAIL
     }
 
     if (nullptr == nyms) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Null target" << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Null target.").Flush();
         OT_FAIL
     }
 
@@ -443,7 +443,7 @@ void Tree::save(Nyms* nyms, const Lock& lock)
     mapLock.unlock();
 
     if (!save(lock)) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Save error" << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Save error.").Flush();
         OT_FAIL
     }
 }
@@ -451,12 +451,12 @@ void Tree::save(Nyms* nyms, const Lock& lock)
 void Tree::save(Seeds* seeds, const Lock& lock)
 {
     if (!verify_write_lock(lock)) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Lock failure." << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Lock failure.").Flush();
         OT_FAIL
     }
 
     if (nullptr == seeds) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Null target" << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Null target.").Flush();
         OT_FAIL
     }
 
@@ -465,7 +465,7 @@ void Tree::save(Seeds* seeds, const Lock& lock)
     mapLock.unlock();
 
     if (!save(lock)) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Save error" << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Save error.").Flush();
         OT_FAIL
     }
 }
@@ -473,12 +473,12 @@ void Tree::save(Seeds* seeds, const Lock& lock)
 void Tree::save(Servers* servers, const Lock& lock)
 {
     if (!verify_write_lock(lock)) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Lock failure." << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Lock failure.").Flush();
         OT_FAIL
     }
 
     if (nullptr == servers) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Null target" << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Null target.").Flush();
         OT_FAIL
     }
 
@@ -487,7 +487,7 @@ void Tree::save(Servers* servers, const Lock& lock)
     mapLock.unlock();
 
     if (!save(lock)) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Save error" << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Save error.").Flush();
         OT_FAIL
     }
 }
@@ -495,12 +495,12 @@ void Tree::save(Servers* servers, const Lock& lock)
 void Tree::save(Units* units, const Lock& lock)
 {
     if (!verify_write_lock(lock)) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Lock failure." << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Lock failure.").Flush();
         OT_FAIL
     }
 
     if (nullptr == units) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Null target" << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Null target.").Flush();
         OT_FAIL
     }
 
@@ -509,7 +509,7 @@ void Tree::save(Units* units, const Lock& lock)
     mapLock.unlock();
 
     if (!save(lock)) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Save error" << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Save error.").Flush();
         OT_FAIL
     }
 }
@@ -524,8 +524,8 @@ Seeds* Tree::seeds() const
         seeds_.reset(new Seeds(driver_, seed_root_));
 
         if (!seeds_) {
-            otErr << OT_METHOD << __FUNCTION__ << ": Unable to instantiate."
-                  << std::endl;
+            LogOutput(OT_METHOD)(__FUNCTION__)(": Unable to instantiate.")
+                .Flush();
             OT_FAIL
         }
     }
@@ -585,8 +585,8 @@ Servers* Tree::servers() const
         servers_.reset(new Servers(driver_, server_root_));
 
         if (!servers_) {
-            otErr << OT_METHOD << __FUNCTION__ << ": Unable to instantiate."
-                  << std::endl;
+            LogOutput(OT_METHOD)(__FUNCTION__)(": Unable to instantiate.")
+                .Flush();
             OT_FAIL
         }
     }
@@ -606,8 +606,8 @@ Units* Tree::units() const
         units_.reset(new Units(driver_, unit_root_));
 
         if (!units_) {
-            otErr << OT_METHOD << __FUNCTION__ << ": Unable to instantiate."
-                  << std::endl;
+            LogOutput(OT_METHOD)(__FUNCTION__)(": Unable to instantiate.")
+                .Flush();
             OT_FAIL
         }
     }

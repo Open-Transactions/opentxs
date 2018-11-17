@@ -16,7 +16,7 @@
 #include <functional>
 #include <map>
 
-#define OT_METHOD "opentxs::storage::Threads::"
+//#define OT_METHOD "opentxs::storage::Threads::"
 
 namespace opentxs
 {
@@ -66,8 +66,7 @@ std::string Threads::create(
         node.swap(newThread);
         save(lock);
     } else {
-        otErr << OT_METHOD << __FUNCTION__ << ": Thread already exists."
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Thread already exists.").Flush();
     }
 
     return id;
@@ -225,8 +224,9 @@ bool Threads::Rename(const std::string& existingID, const std::string& newID)
     auto it = item_map_.find(existingID);
 
     if (item_map_.end() == it) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Thread " << existingID
-              << " does not exist." << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Thread ")(existingID)(
+            " does not exist.")
+            .Flush();
 
         return false;
     }
@@ -246,8 +246,9 @@ bool Threads::Rename(const std::string& existingID, const std::string& newID)
     std::unique_ptr<class Thread> newThread{nullptr};
 
     if (false == oldThread->Rename(newID)) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Failed to rename thread "
-              << existingID << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Failed to rename thread ")(
+            existingID)(".")
+            .Flush();
 
         return false;
     }

@@ -11,7 +11,7 @@
 
 #define CURRENT_VERSION 1
 
-#define OT_METHOD "opentxs::storage::BlockchainTransactions::"
+//#define OT_METHOD "opentxs::storage::BlockchainTransactions::"
 
 namespace opentxs
 {
@@ -41,9 +41,9 @@ void BlockchainTransactions::init(const std::string& hash)
     driver_.LoadProto(hash, serialized);
 
     if (false == bool(serialized)) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Failed to load blockchain transaction index file."
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Failed to load blockchain transaction index file.")
+            .Flush();
 
         abort();
     }
@@ -73,7 +73,7 @@ bool BlockchainTransactions::Load(
 bool BlockchainTransactions::save(const Lock& lock) const
 {
     if (false == verify_write_lock(lock)) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Lock failure." << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Lock failure.").Flush();
 
         abort();
     }

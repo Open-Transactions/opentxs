@@ -18,6 +18,8 @@
 #include <string>
 #include <tuple>
 
+#define OT_METHOD "opentxs::Node::"
+
 namespace opentxs
 {
 namespace storage
@@ -146,8 +148,8 @@ protected:
             std::shared_ptr<T> existing{nullptr};
 
             if (false == driver_.LoadProto(hash, existing, false)) {
-                otErr << method << __FUNCTION__ << ": Unable to load object."
-                      << std::endl;
+                LogOutput(OT_METHOD)(__FUNCTION__)(": Unable to load object.")
+                      .Flush();
 
                 abort();
             }

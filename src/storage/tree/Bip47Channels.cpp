@@ -50,7 +50,7 @@
 #define ADDRESS_INDEX_VERSION 1
 #define CHANNEL_INDEX_VERSION 1
 
-#define OT_METHOD "opentxs::storage::Bip47Channels::"
+//#define OT_METHOD "opentxs::storage::Bip47Channels::"
 
 namespace opentxs::storage
 {
@@ -225,8 +225,9 @@ void Bip47Channels::init(const std::string& hash)
     driver_.LoadProto(hash, serialized);
 
     if (!serialized) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Failed to load bip47 channel index file." << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Failed to load bip47 channel index file.")
+            .Flush();
         OT_FAIL
     }
 
@@ -301,7 +302,7 @@ void Bip47Channels::reverse_index_addresses(const eLock& /* TODO Lockable*/)
 bool Bip47Channels::save(const std::unique_lock<std::mutex>& lock) const
 {
     if (!verify_write_lock(lock)) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Lock failure." << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Lock failure.").Flush();
         OT_FAIL
     }
 

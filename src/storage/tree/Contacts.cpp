@@ -15,7 +15,7 @@
 #define NYM_INDEX_VERSION 1
 #define MERGE_VERSION 1
 
-#define OT_METHOD "opentxs::storage::Contacts::"
+//#define OT_METHOD "opentxs::storage::Contacts::"
 
 namespace opentxs::storage
 {
@@ -60,7 +60,7 @@ void Contacts::extract_addresses(const Lock& lock, const proto::Contact& data)
     const auto& version = data.version();
 
     if (false == verify_write_lock(lock)) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Lock failure." << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Lock failure.").Flush();
 
         abort();
     }
@@ -86,7 +86,7 @@ void Contacts::extract_addresses(const Lock& lock, const proto::Contact& data)
 void Contacts::extract_nyms(const Lock& lock, const proto::Contact& data) const
 {
     if (false == verify_write_lock(lock)) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Lock failure." << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Lock failure.").Flush();
 
         abort();
     }
@@ -111,8 +111,9 @@ void Contacts::init(const std::string& hash)
     driver_.LoadProto(hash, serialized);
 
     if (false == bool(serialized)) {
-        otErr << OT_METHOD << __FUNCTION__
-              << ": Failed to load contact index file." << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(
+            ": Failed to load contact index file.")
+            .Flush();
 
         abort();
     }
@@ -122,8 +123,9 @@ void Contacts::init(const std::string& hash)
     // Upgrade version
     if (CURRENT_VERSION > original_version_) {
         version_ = CURRENT_VERSION;
-        otErr << OT_METHOD << __FUNCTION__ << ": Upgrading from version "
-              << original_version_ << " to " << version_ << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Upgrading from version ")(
+            original_version_)(" to ")(version_)(".")
+            .Flush();
     } else {
         version_ = original_version_;
     }
@@ -217,7 +219,7 @@ std::string Contacts::NymOwner(std::string nym) const
 void Contacts::reconcile_maps(const Lock& lock, const proto::Contact& data)
 {
     if (false == verify_write_lock(lock)) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Lock failure." << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Lock failure.").Flush();
 
         abort();
     }
@@ -259,7 +261,7 @@ void Contacts::reverse_merged()
 bool Contacts::save(const Lock& lock) const
 {
     if (false == verify_write_lock(lock)) {
-        otErr << OT_METHOD << __FUNCTION__ << ": Lock failure." << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Lock failure.").Flush();
 
         abort();
     }

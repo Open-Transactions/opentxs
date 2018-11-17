@@ -144,8 +144,8 @@ void StorageSqlite3::Init_StorageSqlite3()
         Create(config_.sqlite3_secondary_bucket_);
         Create(config_.sqlite3_control_table_);
     } else {
-        otErr << OT_METHOD << __FUNCTION__ << "Failed to initialize database."
-              << std::endl;
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Failed to initialize database.")
+            .Flush();
 
         OT_FAIL
     }
@@ -213,13 +213,14 @@ bool StorageSqlite3::Select(
                 }
             } break;
             case SQLITE_BUSY: {
-                otErr << OT_METHOD << __FUNCTION__ << ": Busy" << std::endl;
+                LogOutput(OT_METHOD)(__FUNCTION__)(": Busy.").Flush();
                 result = sqlite3_step(statement);
                 --retry;
             } break;
             default: {
-                otErr << OT_METHOD << __FUNCTION__ << ": Unknown error ("
-                      << result << ")" << std::endl;
+                LogOutput(OT_METHOD)(__FUNCTION__)(": Unknown error (")(result)(
+                    ").")
+                    .Flush();
                 result = sqlite3_step(statement);
                 --retry;
             }
