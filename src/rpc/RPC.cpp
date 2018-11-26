@@ -1841,7 +1841,10 @@ proto::RPCResponse RPC::Process(const proto::RPCCommand& command) const
         case proto::RPCCOMMAND_VERIFYCLAIM:
         case proto::RPCCOMMAND_ACCEPTVERIFICATION:
         case proto::RPCCOMMAND_SENDCONTACTMESSAGE:
-        case proto::RPCCOMMAND_GETCONTACTACTIVITY:
+        case proto::RPCCOMMAND_GETCONTACTACTIVITY: {
+            otErr << OT_METHOD << __FUNCTION__ << ": Command not implemented"
+                  << std::endl;
+        } break;
         case proto::RPCCOMMAND_ACCEPTPENDINGPAYMENTS: {
             return accept_pending_payments(command);
         } break;

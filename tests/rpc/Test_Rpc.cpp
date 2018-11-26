@@ -46,7 +46,11 @@ protected:
     static std::string unit_definition_id_;
     static std::string issuer_account_id_;
     static proto::ServerContract server_contract_;
+    static proto::ServerContract server2_contract_;
+    static proto::ServerContract server3_contract_;
     static std::string server_id_;
+    static std::string server2_id_;
+    static std::string server3_id_;
     static std::string nym1_id_;
     static std::string nym2_account_id_;
     static std::string nym2_id_;
@@ -54,6 +58,7 @@ protected:
     static std::string nym3_id_;
     static std::string nym3_account2_id_;
     static std::string seed_id_;
+    static std::string seed2_id_;
     static std::map<std::string, int> widget_update_counters_;
     static std::mutex widget_update_lock_;
 
@@ -97,6 +102,39 @@ protected:
         EXPECT_TRUE(proto::Validate(response, VERBOSE));
 
         EXPECT_EQ(1, response.status_size());
+
+        if (proto::RPCCOMMAND_ADDSERVERSESSION == commandtype) {
+            if (server2_id_.empty()) {
+                auto& manager = Test_Rpc::get_session(response.session());
+
+                auto& servermanager =
+                    dynamic_cast<const api::server::Manager&>(manager);
+                server2_id_ = servermanager.ID().str();
+                auto servercontract =
+                    servermanager.Wallet().Server(servermanager.ID());
+
+                auto& client = get_session(0);
+                auto& clientmanager =
+                    dynamic_cast<const api::client::Manager&>(client);
+                auto clientservercontract = clientmanager.Wallet().Server(
+                    servercontract->PublicContract());
+            } else if (server3_id_.empty()) {
+                auto& manager = Test_Rpc::get_session(response.session());
+
+                auto& servermanager =
+                    dynamic_cast<const api::server::Manager&>(manager);
+                server3_id_ = servermanager.ID().str();
+                auto servercontract =
+                    servermanager.Wallet().Server(servermanager.ID());
+
+                auto& client = get_session(0);
+                auto& clientmanager =
+                    dynamic_cast<const api::client::Manager&>(client);
+                auto clientservercontract = clientmanager.Wallet().Server(
+                    servercontract->PublicContract());
+            }
+        }
+
         return proto::RPCRESPONSE_SUCCESS == response.status(0).code();
     }
 
@@ -121,7 +159,11 @@ protected:
 std::string Test_Rpc::unit_definition_id_{};
 std::string Test_Rpc::issuer_account_id_{};
 proto::ServerContract Test_Rpc::server_contract_;
+proto::ServerContract Test_Rpc::server2_contract_;
+proto::ServerContract Test_Rpc::server3_contract_;
 std::string Test_Rpc::server_id_{};
+std::string Test_Rpc::server2_id_{};
+std::string Test_Rpc::server3_id_{};
 std::string Test_Rpc::nym1_id_{};
 std::string Test_Rpc::nym2_account_id_{};
 std::string Test_Rpc::nym2_id_{};
@@ -129,6 +171,7 @@ std::string Test_Rpc::nym3_account1_id_{};
 std::string Test_Rpc::nym3_id_{};
 std::string Test_Rpc::nym3_account2_id_{};
 std::string Test_Rpc::seed_id_{};
+std::string Test_Rpc::seed2_id_{};
 std::map<std::string, int> Test_Rpc::widget_update_counters_{};
 std::mutex Test_Rpc::widget_update_lock_{};
 
@@ -425,6 +468,30 @@ TEST_F(Test_Rpc, Get_Notary_Contract)
     server_contract_ = response.notary(0);
 }
 
+TEST_F(Test_Rpc, Get_Notary_Contracts)
+{
+    auto command = init(proto::RPCCOMMAND_GETSERVERCONTRACT);
+    command.set_session(0);
+    command.add_identifier(server2_id_);
+    command.add_identifier(server3_id_);
+
+    auto response = ot_.RPC(command);
+
+    ASSERT_TRUE(proto::Validate(response, VERBOSE));
+
+    ASSERT_EQ(2, response.status_size());
+    ASSERT_EQ(proto::RPCRESPONSE_SUCCESS, response.status(0).code());
+    ASSERT_EQ(proto::RPCRESPONSE_SUCCESS, response.status(1).code());
+    ASSERT_EQ(RESPONSE_VERSION, response.version());
+    ASSERT_STREQ(command.cookie().c_str(), response.cookie().c_str());
+    ASSERT_EQ(command.type(), response.type());
+
+    ASSERT_EQ(2, response.notary_size());
+
+    server2_contract_ = response.notary(0);
+    server3_contract_ = response.notary(1);
+}
+
 TEST_F(Test_Rpc, Import_Server_Contract)
 {
     auto command = init(proto::RPCCOMMAND_IMPORTSERVERCONTRACT);
@@ -438,6 +505,27 @@ TEST_F(Test_Rpc, Import_Server_Contract)
 
     ASSERT_EQ(1, response.status_size());
     ASSERT_EQ(proto::RPCRESPONSE_SUCCESS, response.status(0).code());
+    ASSERT_EQ(RESPONSE_VERSION, response.version());
+    ASSERT_STREQ(command.cookie().c_str(), response.cookie().c_str());
+    ASSERT_EQ(command.type(), response.type());
+}
+
+TEST_F(Test_Rpc, Import_Server_Contracts)
+{
+    auto command = init(proto::RPCCOMMAND_IMPORTSERVERCONTRACT);
+    command.set_session(2);
+    auto& server = *command.add_server();
+    server = server2_contract_;
+    auto& server2 = *command.add_server();
+    server2 = server3_contract_;
+
+    auto response = ot_.RPC(command);
+
+    ASSERT_TRUE(proto::Validate(response, VERBOSE));
+
+    ASSERT_EQ(2, response.status_size());
+    ASSERT_EQ(proto::RPCRESPONSE_SUCCESS, response.status(0).code());
+    ASSERT_EQ(proto::RPCRESPONSE_SUCCESS, response.status(1).code());
     ASSERT_EQ(RESPONSE_VERSION, response.version());
     ASSERT_STREQ(command.cookie().c_str(), response.cookie().c_str());
     ASSERT_EQ(command.type(), response.type());
@@ -1213,6 +1301,26 @@ TEST_F(Test_Rpc, Get_Account_Activity)
     EXPECT_EQ(25, accountevent.amount());
 }
 
+TEST_F(Test_Rpc, Get_Account_Activities)
+{
+    auto command = init(proto::RPCCOMMAND_GETACCOUNTACTIVITY);
+    command.set_session(0);
+    command.add_identifier(nym3_account1_id_);
+    command.add_identifier(nym3_account2_id_);
+    auto response = ot_.RPC(command);
+
+    ASSERT_TRUE(proto::Validate(response, VERBOSE));
+    EXPECT_EQ(RESPONSE_VERSION, response.version());
+
+    ASSERT_EQ(2, response.status_size());
+    EXPECT_EQ(proto::RPCRESPONSE_NONE, response.status(0).code());
+    EXPECT_EQ(proto::RPCRESPONSE_SUCCESS, response.status(1).code());
+    EXPECT_EQ(RESPONSE_VERSION, response.version());
+    EXPECT_STREQ(command.cookie().c_str(), response.cookie().c_str());
+    EXPECT_EQ(command.type(), response.type());
+    EXPECT_EQ(2, response.accountevent_size());
+}
+
 TEST_F(Test_Rpc, Get_Account_Balance)
 {
     auto command = init(proto::RPCCOMMAND_GETACCOUNTBALANCE);
@@ -1261,6 +1369,30 @@ TEST_F(Test_Rpc, Get_Account_Balance)
     EXPECT_EQ(proto::ACCOUNTTYPE_NORMAL, accountdata.type());
 }
 
+TEST_F(Test_Rpc, Get_Account_Balances)
+{
+    auto command = init(proto::RPCCOMMAND_GETACCOUNTBALANCE);
+    command.set_session(0);
+
+    auto& manager = ot_.Client(0);
+
+    command.add_identifier(nym3_account1_id_);
+    command.add_identifier(nym3_account2_id_);
+
+    auto response = ot_.RPC(command);
+
+    ASSERT_TRUE(proto::Validate(response, VERBOSE));
+
+    ASSERT_EQ(2, response.status_size());
+    ASSERT_EQ(proto::RPCRESPONSE_SUCCESS, response.status(0).code());
+    ASSERT_EQ(proto::RPCRESPONSE_SUCCESS, response.status(1).code());
+    ASSERT_EQ(RESPONSE_VERSION, response.version());
+    ASSERT_STREQ(command.cookie().c_str(), response.cookie().c_str());
+    ASSERT_EQ(command.type(), response.type());
+
+    ASSERT_EQ(2, response.balance_size());
+}
+
 TEST_F(Test_Rpc, List_Nyms)
 {
     auto command = init(proto::RPCCOMMAND_LISTNYMS);
@@ -1300,6 +1432,40 @@ TEST_F(Test_Rpc, Get_Nym)
     const auto& credentialindex = response.nym(0);
     ASSERT_EQ(NYM_VERSION, credentialindex.version());
     ASSERT_STREQ(nym1_id_.c_str(), credentialindex.nymid().c_str());
+    ASSERT_EQ(proto::CREDINDEX_PUBLIC, credentialindex.mode());
+    ASSERT_EQ(4, credentialindex.revision());
+    ASSERT_EQ(1, credentialindex.activecredentials_size());
+    ASSERT_EQ(0, credentialindex.revokedcredentials_size());
+}
+
+TEST_F(Test_Rpc, Get_Nyms)
+{
+    auto command = init(proto::RPCCOMMAND_GETNYM);
+    command.set_session(0);
+    command.add_identifier(nym1_id_);
+    command.add_identifier(nym2_id_);
+    command.add_identifier(nym3_id_);
+
+    auto response = ot_.RPC(command);
+
+    ASSERT_TRUE(proto::Validate(response, VERBOSE));
+
+    ASSERT_EQ(3, response.status_size());
+    ASSERT_EQ(proto::RPCRESPONSE_SUCCESS, response.status(0).code());
+    ASSERT_EQ(proto::RPCRESPONSE_SUCCESS, response.status(1).code());
+    ASSERT_EQ(proto::RPCRESPONSE_SUCCESS, response.status(2).code());
+    ASSERT_EQ(RESPONSE_VERSION, response.version());
+    ASSERT_STREQ(command.cookie().c_str(), response.cookie().c_str());
+    ASSERT_EQ(command.type(), response.type());
+
+    ASSERT_EQ(3, response.nym_size());
+
+    auto& credentialindex = response.nym(0);
+    ASSERT_EQ(NYM_VERSION, credentialindex.version());
+    ASSERT_TRUE(
+        nym1_id_ == credentialindex.nymid() ||
+        nym2_id_ == credentialindex.nymid() ||
+        nym3_id_ == credentialindex.nymid());
     ASSERT_EQ(proto::CREDINDEX_PUBLIC, credentialindex.mode());
     ASSERT_EQ(4, credentialindex.revision());
     ASSERT_EQ(1, credentialindex.activecredentials_size());
@@ -1369,9 +1535,13 @@ TEST_F(Test_Rpc, List_Seeds)
 
     ASSERT_EQ(2, response.identifier_size());
 
-    ASSERT_TRUE(
-        seed_id_ == response.identifier(0) ||
-        seed_id_ == response.identifier(1));
+    if (seed_id_ == response.identifier(0)) {
+        seed2_id_ = response.identifier(1);
+    } else if (seed_id_ == response.identifier(1)) {
+        seed2_id_ = response.identifier(0);
+    } else {
+        FAIL();
+    }
 }
 
 TEST_F(Test_Rpc, Get_Seed)
@@ -1393,6 +1563,34 @@ TEST_F(Test_Rpc, Get_Seed)
     ASSERT_EQ(1, response.seed_size());
 
     auto seed = response.seed(0);
+    ASSERT_STREQ(seed_id_.c_str(), seed.id().c_str());
+    ASSERT_STREQ(TEST_SEED, seed.words().c_str());
+    ASSERT_STREQ(TEST_SEED_PASSPHRASE, seed.passphrase().c_str());
+}
+
+TEST_F(Test_Rpc, Get_Seeds)
+{
+    auto command = init(proto::RPCCOMMAND_GETHDSEED);
+    command.set_session(0);
+    command.add_identifier(seed_id_);
+    command.add_identifier(seed2_id_);
+
+    auto response = ot_.RPC(command);
+
+    ASSERT_TRUE(proto::Validate(response, VERBOSE));
+
+    ASSERT_EQ(2, response.status_size());
+    ASSERT_EQ(proto::RPCRESPONSE_SUCCESS, response.status(0).code());
+    ASSERT_EQ(proto::RPCRESPONSE_SUCCESS, response.status(1).code());
+    ASSERT_EQ(RESPONSE_VERSION, response.version());
+    ASSERT_STREQ(command.cookie().c_str(), response.cookie().c_str());
+    ASSERT_EQ(command.type(), response.type());
+
+    ASSERT_EQ(2, response.seed_size());
+
+    auto seed = response.seed(0);
+    if (seed.id() != seed_id_) { seed = response.seed(1); }
+
     ASSERT_STREQ(seed_id_.c_str(), seed.id().c_str());
     ASSERT_STREQ(TEST_SEED, seed.words().c_str());
     ASSERT_STREQ(TEST_SEED_PASSPHRASE, seed.passphrase().c_str());

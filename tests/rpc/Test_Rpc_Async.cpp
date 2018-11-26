@@ -660,6 +660,208 @@ TEST_F(Test_Rpc_Async, Get_Account_Activity)
     EXPECT_EQ(100, accountevent2.amount());
 }
 
+TEST_F(Test_Rpc_Async, Accept_2_Pending_Payments)
+{
+    // Send 1 payment
+    send_payment_cheque_complete_ = false;
+
+    auto& client_a = ot_.Client(get_index(client_a_));
+    auto command = init(proto::RPCCOMMAND_SENDPAYMENT);
+    command.set_session(client_a_);
+    auto& client_b = ot_.Client(get_index(client_b_));
+    auto nym5 = client_b.Wallet().Nym(Identifier::Factory(receiver_nym_id_));
+
+    ASSERT_TRUE(bool(nym5));
+
+    auto& contacts = client_a.Contacts();
+    const auto contact = contacts.NewContact(
+        std::string(TEST_NYM_5),
+        nym5->ID(),
+        client_a.Factory().PaymentCode(nym5->PaymentCode()));
+
+    ASSERT_TRUE(contact);
+
+    const auto issueraccounts = client_a.Storage().AccountsByIssuer(
+        Identifier::Factory(sender_nym_id_));
+
+    ASSERT_TRUE(false == issueraccounts.empty());
+
+    auto issueraccountid = *issueraccounts.cbegin();
+    Lock lock(task_lock_);
+
+    auto sendpayment = command.mutable_sendpayment();
+
+    ASSERT_NE(nullptr, sendpayment);
+
+    sendpayment->set_version(1);
+    sendpayment->set_type(proto::RPCPAYMENTTYPE_CHEQUE);
+    sendpayment->set_contact(contact->ID().str());
+    sendpayment->set_sourceaccount(issueraccountid->str());
+    sendpayment->set_memo("Send_Payment_Cheque test");
+    sendpayment->set_amount(100);
+
+    proto::RPCResponse response;
+
+    do {
+        response = ot_.RPC(command);
+
+        ASSERT_EQ(1, response.status_size());
+        auto responseCode = response.status(0).code();
+        auto responseIsValid = responseCode == proto::RPCRESPONSE_RETRY ||
+                               responseCode == proto::RPCRESPONSE_QUEUED;
+        ASSERT_TRUE(responseIsValid);
+        EXPECT_EQ(RESPONSE_VERSION, response.version());
+        ASSERT_STREQ(command.cookie().c_str(), response.cookie().c_str());
+        ASSERT_EQ(command.type(), response.type());
+
+        command.set_cookie(opentxs::Identifier::Random()->str());
+    } while (proto::RPCRESPONSE_RETRY == response.status(0).code());
+
+    ASSERT_EQ(1, response.status_size());
+    ASSERT_EQ(proto::RPCRESPONSE_QUEUED, response.status(0).code());
+
+    ASSERT_EQ(1, response.task_size());
+    send_payment_cheque_task_id_ = response.task(0).id();
+    lock.unlock();
+
+    auto end = std::time(nullptr) + 60;
+
+    while (std::time(nullptr) < end) {
+        if (send_payment_cheque_complete_) { break; }
+
+        Log::Sleep(std::chrono::milliseconds(100));
+    }
+
+    ASSERT_TRUE(send_payment_cheque_complete_);
+
+    // Send a second payment.
+    send_payment_cheque_complete_ = false;
+
+    command = init(proto::RPCCOMMAND_SENDPAYMENT);
+    command.set_session(client_a_);
+    lock.lock();
+
+    sendpayment = command.mutable_sendpayment();
+
+    ASSERT_NE(nullptr, sendpayment);
+
+    sendpayment->set_version(1);
+    sendpayment->set_type(proto::RPCPAYMENTTYPE_CHEQUE);
+    sendpayment->set_contact(contact->ID().str());
+    sendpayment->set_sourceaccount(issueraccountid->str());
+    sendpayment->set_memo("Send_Payment_Cheque test");
+    sendpayment->set_amount(100);
+
+    do {
+        response = ot_.RPC(command);
+
+        ASSERT_EQ(1, response.status_size());
+        auto responseCode = response.status(0).code();
+        auto responseIsValid = responseCode == proto::RPCRESPONSE_RETRY ||
+                               responseCode == proto::RPCRESPONSE_QUEUED;
+        ASSERT_TRUE(responseIsValid);
+        EXPECT_EQ(RESPONSE_VERSION, response.version());
+        ASSERT_STREQ(command.cookie().c_str(), response.cookie().c_str());
+        ASSERT_EQ(command.type(), response.type());
+
+        command.set_cookie(opentxs::Identifier::Random()->str());
+    } while (proto::RPCRESPONSE_RETRY == response.status(0).code());
+
+    ASSERT_EQ(1, response.status_size());
+    ASSERT_EQ(proto::RPCRESPONSE_QUEUED, response.status(0).code());
+
+    ASSERT_EQ(1, response.task_size());
+    send_payment_cheque_task_id_ = response.task(0).id();
+    lock.unlock();
+
+    end = std::time(nullptr) + 60;
+
+    while (std::time(nullptr) < end) {
+        if (send_payment_cheque_complete_) { break; }
+
+        Log::Sleep(std::chrono::milliseconds(100));
+    }
+
+    ASSERT_TRUE(send_payment_cheque_complete_);
+
+    // Execute RPCCOMMAND_GETPENDINGPAYMENTS.
+
+    // Make sure the workflows on the client are up-to-date.
+    client_b.Sync().Refresh();
+
+    const auto& workflow = client_b.Workflow();
+    std::set<OTIdentifier> workflows;
+    end = std::time(nullptr) + 60;
+    do {
+        workflows = workflow.List(
+            nym5->ID(),
+            proto::PAYMENTWORKFLOWTYPE_INCOMINGCHEQUE,
+            proto::PAYMENTWORKFLOWSTATE_CONVEYED);
+    } while (workflows.empty() && std::time(nullptr) < end);
+
+    ASSERT_TRUE(!workflows.empty());
+
+    command = init(proto::RPCCOMMAND_GETPENDINGPAYMENTS);
+
+    command.set_session(client_b_);
+    command.set_owner(receiver_nym_id_);
+
+    response = ot_.RPC(command);
+
+    ASSERT_TRUE(proto::Validate(response, VERBOSE));
+    EXPECT_EQ(RESPONSE_VERSION, response.version());
+
+    ASSERT_EQ(1, response.status_size());
+    EXPECT_EQ(proto::RPCRESPONSE_SUCCESS, response.status(0).code());
+    EXPECT_EQ(RESPONSE_VERSION, response.version());
+    EXPECT_STREQ(command.cookie().c_str(), response.cookie().c_str());
+    EXPECT_EQ(command.type(), response.type());
+
+    EXPECT_EQ(2, response.accountevent_size());
+
+    const auto& accountevent1 = response.accountevent(0);
+    const auto workflow_id_1 = accountevent1.workflow();
+
+    ASSERT_TRUE(!workflow_id_1.empty());
+
+    const auto& accountevent2 = response.accountevent(1);
+    const auto workflow_id_2 = accountevent2.workflow();
+
+    ASSERT_TRUE(!workflow_id_2.empty());
+
+    // Execute RPCCOMMAND_ACCEPTPENDINGPAYMENTS
+    command = init(proto::RPCCOMMAND_ACCEPTPENDINGPAYMENTS);
+
+    command.set_session(client_b_);
+    auto& acceptpendingpayment = *command.add_acceptpendingpayment();
+    acceptpendingpayment.set_version(1);
+    acceptpendingpayment.set_destinationaccount(destination_account_id_);
+    acceptpendingpayment.set_workflow(workflow_id_1);
+    auto& acceptpendingpayment2 = *command.add_acceptpendingpayment();
+    acceptpendingpayment2.set_version(1);
+    acceptpendingpayment2.set_destinationaccount(destination_account_id_);
+    acceptpendingpayment2.set_workflow(workflow_id_2);
+
+    response = ot_.RPC(command);
+
+    ASSERT_TRUE(proto::Validate(response, VERBOSE));
+    EXPECT_EQ(RESPONSE_VERSION, response.version());
+
+    ASSERT_EQ(2, response.status_size());
+    EXPECT_EQ(proto::RPCRESPONSE_QUEUED, response.status(0).code());
+    EXPECT_EQ(proto::RPCRESPONSE_QUEUED, response.status(1).code());
+    EXPECT_EQ(RESPONSE_VERSION, response.version());
+    EXPECT_STREQ(command.cookie().c_str(), response.cookie().c_str());
+    EXPECT_EQ(command.type(), response.type());
+    EXPECT_EQ(2, response.task_size());
+
+    auto pending_payment_task_id1 = response.task(0).id();
+    auto pending_payment_task_id2 = response.task(1).id();
+
+    ASSERT_TRUE(!pending_payment_task_id1.empty());
+    ASSERT_TRUE(!pending_payment_task_id2.empty());
+}
+
 TEST_F(Test_Rpc_Async, Create_Account)
 {
     auto command = init(proto::RPCCOMMAND_CREATEACCOUNT);
