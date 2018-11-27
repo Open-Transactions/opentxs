@@ -959,8 +959,9 @@ bool OpenSSL::ArgumentCheck(
 
     if (!ECB && (iv.size() != LegacySymmetricProvider::IVSize(cipher))) {
         LogOutput(OT_METHOD)(__FUNCTION__)(": Incorrect IV size.").Flush();
-        LogOutput(OT_METHOD)(__FUNCTION__)(": Actual IV bytes: ")(iv.size())
-        (".").Flush();
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Actual IV bytes: ")(iv.size())(
+            ".")
+            .Flush();
         return false;
     }
 
@@ -1079,13 +1080,11 @@ bool OpenSSL::Encrypt(
     class _OTEnv_Enc_stat
     {
     private:
-        const char* m_szFunc;
         EVP_CIPHER_CTX& m_ctx;
 
     public:
-        _OTEnv_Enc_stat(const char* param_szFunc, EVP_CIPHER_CTX& param_ctx)
-            : m_szFunc(param_szFunc)
-            , m_ctx(param_ctx)
+        _OTEnv_Enc_stat(EVP_CIPHER_CTX& param_ctx)
+            : m_ctx(param_ctx)
         {
             OT_ASSERT(nullptr != param_szFunc);
 
@@ -1096,15 +1095,14 @@ bool OpenSSL::Encrypt(
             // EVP_CIPHER_CTX_cleanup returns 1 for success and 0 for failure.
             //
             if (0 == EVP_CIPHER_CTX_cleanup(&m_ctx))
-                LogOutput(OT_METHOD)(__FUNCTION__)(
+                LogOutput("_OTEnv_Enc_stat::")(__FUNCTION__)(
                     ": Failure in EVP_CIPHER_CTX_cleanup. (It "
                     "returned 0).")
                     .Flush();
-
-            m_szFunc = nullptr;  // keep the static analyzer happy
         }
     };
-    _OTEnv_Enc_stat theInstance(szFunc, ctx);
+
+    _OTEnv_Enc_stat theInstance(ctx);
 #endif
 
     Lock lock(lock_);
@@ -1342,13 +1340,11 @@ bool OpenSSL::Decrypt(
     class _OTEnv_Dec_stat
     {
     private:
-        const char* m_szFunc;
         EVP_CIPHER_CTX& m_ctx;
 
     public:
-        _OTEnv_Dec_stat(const char* param_szFunc, EVP_CIPHER_CTX& param_ctx)
-            : m_szFunc(param_szFunc)
-            , m_ctx(param_ctx)
+        _OTEnv_Dec_stat(EVP_CIPHER_CTX& param_ctx)
+            : m_ctx(param_ctx)
         {
             OT_ASSERT(nullptr != param_szFunc);
 
@@ -1359,14 +1355,14 @@ bool OpenSSL::Decrypt(
             // EVP_CIPHER_CTX_cleanup returns 1 for success and 0 for failure.
             //
             if (0 == EVP_CIPHER_CTX_cleanup(&m_ctx))
-                LogOutput(OT_METHOD)(__FUNCTION__)(
+                LogOutput("_OTEnv_Dec_stat::")(__FUNCTION__)(
                     ": Failure in EVP_CIPHER_CTX_cleanup. (It "
                     "returned 0).")
                     .Flush();
-            m_szFunc = nullptr;  // to keep the static analyzer happy.
         }
     };
-    _OTEnv_Dec_stat theInstance(szFunc, ctx);
+
+    _OTEnv_Dec_stat theInstance(ctx);
 #endif
 
     Lock lock(lock_);
