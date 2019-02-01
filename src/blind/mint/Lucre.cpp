@@ -13,6 +13,7 @@
 #include "opentxs/core/crypto/OTEnvelope.hpp"
 #include "opentxs/core/util/Assert.hpp"
 #include "opentxs/core/Armored.hpp"
+#include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/core/Identifier.hpp"
 #include "opentxs/core/Log.hpp"
 #include "opentxs/core/Nym.hpp"

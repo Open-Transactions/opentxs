@@ -11,6 +11,7 @@
 #include "opentxs/api/Factory.hpp"
 #include "opentxs/consensus/Context.hpp"
 #include "opentxs/consensus/ServerContext.hpp"
+#include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/core/util/Assert.hpp"
 #include "opentxs/core/util/Common.hpp"
 #include "opentxs/core/util/Tag.hpp"
@@ -317,8 +318,8 @@ bool Message::HarvestTransactionNumbers(
     bool bTransactionWasFailure) const  // false until positively asserted.
 {
 
-    const auto MSG_NYM_ID = Identifier::Factory(m_strNymID),
-               NOTARY_ID = Identifier::Factory(m_strNotaryID),
+    const auto MSG_NYM_ID = identifier::Nym::Factory(m_strNymID);
+    const auto NOTARY_ID = Identifier::Factory(m_strNotaryID),
                ACCOUNT_ID = Identifier::Factory(
                    m_strAcctID->Exists() ? m_strAcctID
                                          : m_strNymID);  // This may be

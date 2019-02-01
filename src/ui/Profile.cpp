@@ -12,6 +12,7 @@
 #include "opentxs/contact/Contact.hpp"
 #include "opentxs/contact/ContactData.hpp"
 #include "opentxs/contact/ContactSection.hpp"
+#include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/core/Flag.hpp"
 #include "opentxs/core/Identifier.hpp"
 #include "opentxs/core/Lockable.hpp"
@@ -49,7 +50,7 @@ namespace opentxs
 ui::Profile* Factory::ProfileWidget(
     const api::client::Manager& api,
     const network::zeromq::PublishSocket& publisher,
-    const Identifier& nymID)
+    const identifier::Nym& nymID)
 {
     return new ui::implementation::Profile(api, publisher, nymID);
 }
@@ -68,7 +69,7 @@ const std::map<proto::ContactSectionName, int> Profile::sort_keys_{
 Profile::Profile(
     const api::client::Manager& api,
     const network::zeromq::PublishSocket& publisher,
-    const Identifier& nymID)
+    const identifier::Nym& nymID)
     : ProfileList(api, publisher, nymID)
     , listeners_({
           {api_.Endpoints().NymDownload(),
@@ -198,7 +199,7 @@ bool Profile::Delete(
     return section.Delete(type, claimID);
 }
 
-const Identifier& Profile::NymID() const { return nym_id_; }
+const identifier::Nym& Profile::NymID() const { return nym_id_; }
 
 std::string Profile::DisplayName() const
 {
@@ -209,7 +210,7 @@ std::string Profile::DisplayName() const
 
 std::string Profile::nym_name(
     const api::Wallet& wallet,
-    const Identifier& nymID)
+    const identifier::Nym& nymID)
 {
     for (const auto& [id, name] : wallet.NymList()) {
         if (nymID.str() == id) { return name; }
@@ -254,7 +255,7 @@ void Profile::process_nym(const network::zeromq::Message& message)
     OT_ASSERT(1 == message.Body().size());
 
     const std::string id(*message.Body().begin());
-    const auto nymID = Identifier::Factory(id);
+    const auto nymID = identifier::Nym::Factory(id);
 
     OT_ASSERT(false == nymID->empty())
 

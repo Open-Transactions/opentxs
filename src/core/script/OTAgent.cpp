@@ -15,6 +15,7 @@
 #include "opentxs/consensus/Context.hpp"
 #include "opentxs/consensus/ManagedNumber.hpp"
 #include "opentxs/consensus/ServerContext.hpp"
+#include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/core/recurring/OTAgreement.hpp"
 #include "opentxs/core/script/OTParty.hpp"
 #include "opentxs/core/script/OTPartyAccount.hpp"
@@ -103,7 +104,7 @@ OTAgent::OTAgent(
     , m_strGroupName(String::Factory())
 {
     // Grab m_strNymID
-    auto theNymID = Identifier::Factory();
+    auto theNymID = identifier::Nym::Factory();
     theNym.GetIdentifier(theNymID);
     theNymID->GetString(m_strNymID);
 
@@ -188,7 +189,7 @@ bool OTAgent::VerifySignature(const Contract& theContract) const
 //
 ConstNym OTAgent::LoadNym()
 {
-    auto theAgentNymID = Identifier::Factory();
+    auto theAgentNymID = identifier::Nym::Factory();
     bool bNymID = GetNymID(theAgentNymID);
 
     if (bNymID) {
@@ -405,14 +406,14 @@ bool OTAgent::GetSignerID(Identifier& theOutput) const
     return false;
 }
 
-bool OTAgent::IsValidSignerID(const Identifier& theNymID)
+bool OTAgent::IsValidSignerID(const identifier::Nym& theNymID)
 {
-    auto theAgentNymID = Identifier::Factory();
+    auto theAgentNymID = identifier::Nym::Factory();
     bool bNymID = GetNymID(theAgentNymID);
 
     // If there's a NymID on this agent, and it matches theNymID...
     //
-    if (bNymID && (theNymID == theAgentNymID)) return true;
+    if (bNymID && (theNymID.operator==(theAgentNymID))) return true;
 
     // TODO Entities...
     //
@@ -423,7 +424,7 @@ bool OTAgent::IsValidSignerID(const Identifier& theNymID)
 //
 bool OTAgent::IsValidSigner(const Nym& theNym)
 {
-    auto theAgentNymID = Identifier::Factory();
+    auto theAgentNymID = identifier::Nym::Factory();
     bool bNymID = GetNymID(theAgentNymID);
 
     // If there's a NymID on this agent, and it matches theNym's ID...
@@ -536,7 +537,7 @@ bool OTAgent::GetPartyID(Identifier& theOutput) const
 
 bool OTAgent::VerifyAgencyOfAccount(const Account& theAccount) const
 {
-    auto theSignerID = Identifier::Factory();
+    auto theSignerID = identifier::Nym::Factory();
 
     if (!GetSignerID(theSignerID)) {
         LogOutput(OT_METHOD)(__FUNCTION__)(": ERROR: Entities and roles "
@@ -566,7 +567,7 @@ bool OTAgent::DropFinalReceiptToInbox(
     // TODO: When entites and ROLES are added, this function may change a bit to
     // accommodate them.
 
-    auto theAgentNymID = Identifier::Factory();
+    auto theAgentNymID = identifier::Nym::Factory();
     bool bNymID = GetNymID(theAgentNymID);
 
     // Not all agents have Nyms. (Might be a voting group.) But in the case of
@@ -577,7 +578,7 @@ bool OTAgent::DropFinalReceiptToInbox(
         // IsAnIndividual() is definitely true.
 
         auto context = wallet_.ClientContext(
-            Identifier::Factory(strNotaryID), theAgentNymID);
+            identifier::Nym::Factory(strNotaryID), theAgentNymID);
 
         OT_ASSERT(context);
 
@@ -617,7 +618,7 @@ bool OTAgent::DropFinalReceiptToNymbox(
     OTString pstrNote,
     OTString pstrAttachment)
 {
-    auto theAgentNymID = Identifier::Factory();
+    auto theAgentNymID = identifier::Nym::Factory();
     bool bNymID = GetNymID(theAgentNymID);
 
     // Not all agents have Nyms. (Might be a voting group.)
@@ -652,7 +653,7 @@ bool OTAgent::DropServerNoticeToNymbox(
     OTString pstrAttachment,
     Nym* pActualNym)
 {
-    auto theAgentNymID = Identifier::Factory();
+    auto theAgentNymID = identifier::Nym::Factory();
     bool bNymID = GetNymID(theAgentNymID);
 
     // Not all agents have Nyms. (Might be a voting group.)

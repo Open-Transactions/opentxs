@@ -71,7 +71,7 @@ Request::Request(
 
 Request::Request(const api::Core& api, const proto::ServerRequest serialized)
     : Signable(extract_nym(api, serialized), serialized.version(), "")
-    , initiator_((nym_) ? nym_->ID() : Identifier::Factory().get())
+    , initiator_((nym_) ? nym_->ID() : identifier::Nym::Factory().get())
     , server_(Identifier::Factory(serialized.server()))
     , type_(serialized.type())
     , number_(serialized.request())
@@ -110,7 +110,7 @@ std::shared_ptr<const opentxs::Nym> Request::extract_nym(
         return api.Wallet().Nym(serialized.credentials());
     } else if (false == serialized.nym().empty()) {
 
-        return api.Wallet().Nym(Identifier::Factory(serialized.nym()));
+        return api.Wallet().Nym(identifier::Nym::Factory(serialized.nym()));
     }
 
     return nullptr;

@@ -96,7 +96,7 @@ std::int32_t OTClient::ProcessUserCommand(
     const MessageType requestedCommand,
     ServerContext& context,
     Message& theMessage,
-    const Identifier& pHisNymID,
+    const identifier::Nym& pHisNymID,
     const Identifier& pHisAcctID,
     const Amount lTransactionAmount,
     const Account* pAccount,

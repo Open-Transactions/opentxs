@@ -135,7 +135,7 @@ public:
     bool GetMarketList(Armored& ascOutput, std::int32_t& nMarketCount);
     bool GetNym_OfferList(
         Armored& ascOutput,
-        const Identifier& NYM_ID,
+        const identifier::Nym& NYM_ID,
         std::int32_t& nOfferCount);
     // TRANSACTION NUMBERS
     /**The server starts out putting a bunch of numbers in here so Cron can use

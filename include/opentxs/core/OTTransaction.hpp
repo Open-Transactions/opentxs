@@ -395,8 +395,8 @@ public:
     /// you actually have to load up
     /// the original cheque.)
 
-    EXPORT bool GetSenderNymIDForDisplay(Identifier& theReturnID);
-    EXPORT bool GetRecipientNymIDForDisplay(Identifier& theReturnID);
+    EXPORT bool GetSenderNymIDForDisplay(identifier::Nym& theReturnID);
+    EXPORT bool GetRecipientNymIDForDisplay(identifier::Nym& theReturnID);
 
     EXPORT bool GetSenderAcctIDForDisplay(Identifier& theReturnID);
     EXPORT bool GetRecipientAcctIDForDisplay(Identifier& theReturnID);
@@ -695,14 +695,14 @@ private:
 
     OTTransaction(
         const api::Core& core,
-        const Identifier& theNymID,
+        const identifier::Nym& theNymID,
         const Identifier& theAccountID,
         const Identifier& theNotaryID,
         originType theOriginType = originType::not_applicable);
 
     OTTransaction(
         const api::Core& core,
-        const Identifier& theNymID,
+        const identifier::Nym& theNymID,
         const Identifier& theAccountID,
         const Identifier& theNotaryID,
         std::int64_t lTransactionNum,
@@ -714,7 +714,7 @@ private:
     // and verified against them.
     OTTransaction(
         const api::Core& core,
-        const Identifier& theNymID,
+        const identifier::Nym& theNymID,
         const Identifier& theAccountID,
         const Identifier& theNotaryID,
         const std::int64_t& lNumberOfOrigin,

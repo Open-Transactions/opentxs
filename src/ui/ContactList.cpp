@@ -8,6 +8,7 @@
 #include "opentxs/api/client/Contacts.hpp"
 #include "opentxs/api/client/Manager.hpp"
 #include "opentxs/api/Endpoints.hpp"
+#include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/core/Flag.hpp"
 #include "opentxs/core/Identifier.hpp"
 #include "opentxs/core/Lockable.hpp"
@@ -43,7 +44,7 @@ namespace opentxs
 ui::implementation::ContactListExternalInterface* Factory::ContactList(
     const api::client::Manager& api,
     const network::zeromq::PublishSocket& publisher,
-    const Identifier& nymID)
+    const identifier::Nym& nymID)
 {
     return new ui::implementation::ContactList(api, publisher, nymID);
 }
@@ -54,7 +55,7 @@ namespace opentxs::ui::implementation
 ContactList::ContactList(
     const api::client::Manager& api,
     const network::zeromq::PublishSocket& publisher,
-    const Identifier& nymID)
+    const identifier::Nym& nymID)
     : ContactListList(api, publisher, nymID)
     , listeners_({
           {api_.Endpoints().ContactUpdate(),

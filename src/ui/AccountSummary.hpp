@@ -22,7 +22,7 @@ class AccountSummary final : public AccountSummaryList
 {
 public:
     proto::ContactItemType Currency() const override { return currency_; }
-    const Identifier& NymID() const override { return nym_id_.get(); }
+    const identifier::Nym& NymID() const override { return nym_id_; }
 
     ~AccountSummary();
 
@@ -41,7 +41,7 @@ private:
         const CustomData& custom) const override;
 
     AccountSummarySortKey extract_key(
-        const Identifier& nymID,
+        const identifier::Nym& nymID,
         const Identifier& issuerID);
     void process_connection(const network::zeromq::Message& message);
     void process_issuer(const Identifier& issuerID);
@@ -54,7 +54,7 @@ private:
     AccountSummary(
         const api::client::Manager& api,
         const network::zeromq::PublishSocket& publisher,
-        const Identifier& nymID,
+        const identifier::Nym& nymID,
         const proto::ContactItemType currency);
     AccountSummary() = delete;
     AccountSummary(const AccountSummary&) = delete;

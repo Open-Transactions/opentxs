@@ -8,6 +8,7 @@
 #include "opentxs/api/client/Contacts.hpp"
 #include "opentxs/contact/ContactGroup.hpp"
 #include "opentxs/contact/ContactItem.hpp"
+#include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/core/Flag.hpp"
 #include "opentxs/core/Identifier.hpp"
 #include "opentxs/core/Lockable.hpp"
@@ -64,7 +65,7 @@ ContactSubsection::ContactSubsection(
     : ContactSubsectionList(
           api,
           publisher,
-          Identifier::Factory(parent.ContactID()),
+          identifier::Nym::Factory(parent.ContactID()),
           parent.WidgetID())
     , ContactSubsectionRow(parent, rowID, true)
 {

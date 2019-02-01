@@ -474,6 +474,7 @@ various sequence numbers. Hm.
 #include "opentxs/consensus/ServerContext.hpp"
 #include "opentxs/core/cron/OTCron.hpp"
 #include "opentxs/core/cron/OTCronItem.hpp"
+#include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/core/trade/OTMarket.hpp"
 #include "opentxs/core/trade/OTOffer.hpp"
 #include "opentxs/core/util/Assert.hpp"
@@ -967,7 +968,8 @@ void OTSmartContract::GetAllTransactionNumbers(NumList& numlistOutput) const
     }
 }
 
-std::int64_t OTSmartContract::GetOpeningNumber(const Identifier& theNymID) const
+std::int64_t OTSmartContract::GetOpeningNumber(
+    const identifier::Nym& theNymID) const
 {
     OTAgent* pAgent = nullptr;
     OTParty* pParty = FindPartyBasedOnNymIDAsAgent(theNymID, &pAgent);
@@ -1926,7 +1928,7 @@ bool OTSmartContract::StashAcctFunds(
     // then we can error out here if he's not.  We can then pass in his Nym ID.
     //
 
-    auto theFromAgentID = Identifier::Factory();
+    auto theFromAgentID = identifier::Nym::Factory();
     const bool bFromAgentID = pFromAgent->GetSignerID(theFromAgentID);
 
     if (!bFromAgentID) {
@@ -2166,7 +2168,7 @@ bool OTSmartContract::UnstashAcctFunds(
     // then we can error out here if he's not.  We can then pass in his Nym ID.
     //
 
-    auto theToAgentID = Identifier::Factory();
+    auto theToAgentID = identifier::Nym::Factory();
     const bool bToAgentID = pToAgent->GetSignerID(theToAgentID);
 
     if (!bToAgentID) {
@@ -2227,7 +2229,7 @@ bool OTSmartContract::StashFunds(
     const std::int64_t& lAmount,  // negative amount here means UNstash.
                                   // Positive means STASH.
     const Identifier& PARTY_ACCT_ID,
-    const Identifier& PARTY_NYM_ID,
+    const identifier::Nym& PARTY_NYM_ID,
     OTStash& theStash)
 {
     OTCron* pCron = GetCron();
@@ -2243,7 +2245,7 @@ bool OTSmartContract::StashFunds(
     }
 
     const auto NOTARY_ID = Identifier::Factory(pCron->GetNotaryID());
-    const auto NOTARY_NYM_ID = Identifier::Factory(*pServerNym);
+    const auto NOTARY_NYM_ID = identifier::Nym::Factory(*pServerNym);
 
     // Load up the party's account and get the instrument definition, so we know
     // which stash to get off the stash.
@@ -2471,7 +2473,7 @@ bool OTSmartContract::StashFunds(
 
     // Find out if party Nym is actually also the server nym.
     const bool bPartyNymIsServerNym =
-        ((PARTY_NYM_ID == NOTARY_NYM_ID) ? true : false);
+        ((PARTY_NYM_ID.operator==(NOTARY_NYM_ID)) ? true : false);
     ConstNym pPartyNym = nullptr;
     const std::string str_party_id = strPartyNymID->Get();
 
@@ -3213,8 +3215,8 @@ bool OTSmartContract::MoveAcctFundsStr(
     // then we can error out here if he's not.  We can then pass in his Nym ID
     //
 
-    auto theFromAgentID = Identifier::Factory(),
-         theToAgentID = Identifier::Factory();
+    auto theFromAgentID = identifier::Nym::Factory(),
+         theToAgentID = identifier::Nym::Factory();
     const bool bFromAgentID = pFromAgent->GetSignerID(theFromAgentID);
     const bool bToAgentID = pToAgent->GetSignerID(theToAgentID);
 
@@ -3401,8 +3403,8 @@ void OTSmartContract::onFinalReceipt(
 
         OT_ASSERT(nullptr != pPartyNym);
 
-        auto context =
-            api_.Wallet().mutable_ClientContext(GetNotaryID(), pPartyNym->ID());
+        auto context = api_.Wallet().mutable_ClientContext(
+            identifier::Nym::Factory(GetNotaryID().str()), pPartyNym->ID());
         const auto opening = pParty->GetOpeningTransNo();
         const bool haveOpening = pParty->GetOpeningTransNo() > 0;
         const bool issuedOpening = context.It().VerifyIssuedNumber(opening);
@@ -5273,7 +5275,7 @@ void OTSmartContract::ReleaseLastSenderRecipientIDs()
 void OTSmartContract::PrepareToActivate(
     const std::int64_t& lOpeningTransNo,
     const std::int64_t& lClosingTransNo,
-    const Identifier& theNymID,
+    const identifier::Nym& theNymID,
     const Identifier& theAcctID)
 {
     SetTransactionNum(lOpeningTransNo);
@@ -5339,7 +5341,7 @@ std::int32_t OTSmartContract::ProcessXMLNode(irr::io::IrrXMLReader*& xml)
         }
         if (strActivatorNymID->Exists()) {
             const auto ACTIVATOR_NYM_ID =
-                Identifier::Factory(strActivatorNymID);
+                identifier::Nym::Factory(strActivatorNymID);
             SetSenderNymID(ACTIVATOR_NYM_ID);
         }
         if (strActivatorAcctID->Exists()) {
@@ -5461,10 +5463,10 @@ std::int32_t OTSmartContract::ProcessXMLNode(irr::io::IrrXMLReader*& xml)
 // true == success, false == failure.
 bool OTSmartContract::MoveFunds(
     const std::int64_t& lAmount,
-    const Identifier& SOURCE_ACCT_ID,     // GetSenderAcctID();
-    const Identifier& SENDER_NYM_ID,      // GetSenderNymID();
-    const Identifier& RECIPIENT_ACCT_ID,  // GetRecipientAcctID();
-    const Identifier& RECIPIENT_NYM_ID)   // GetRecipientNymID();
+    const Identifier& SOURCE_ACCT_ID,         // GetSenderAcctID();
+    const identifier::Nym& SENDER_NYM_ID,     // GetSenderNymID();
+    const Identifier& RECIPIENT_ACCT_ID,      // GetRecipientAcctID();
+    const identifier::Nym& RECIPIENT_NYM_ID)  // GetRecipientNymID();
 {
     OTCron* pCron = GetCron();
     OT_ASSERT(nullptr != pCron);
@@ -5563,7 +5565,7 @@ bool OTSmartContract::MoveFunds(
     // entity.
     // (We'll want to know that later.)
     bool bUsersAreSameNym =
-        ((SENDER_NYM_ID == RECIPIENT_NYM_ID) ? true : false);
+        ((SENDER_NYM_ID.operator==(RECIPIENT_NYM_ID)) ? true : false);
 
     ConstNym pSenderNym = nullptr;
     ConstNym pRecipientNym = nullptr;

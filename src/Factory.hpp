@@ -14,12 +14,12 @@ public:
     AccountActivity(
         const api::client::Manager& api,
         const network::zeromq::PublishSocket& publisher,
-        const Identifier& nymID,
+        const identifier::Nym& nymID,
         const Identifier& accountID);
     static ui::implementation::AccountSummaryExternalInterface* AccountSummary(
         const api::client::Manager& api,
         const network::zeromq::PublishSocket& publisher,
-        const Identifier& nymID,
+        const identifier::Nym& nymID,
         const proto::ContactItemType currency);
     static ui::implementation::IssuerItemRowInternal* AccountSummaryItem(
         const ui::implementation::IssuerItemInternalInterface& parent,
@@ -36,12 +36,12 @@ public:
         const api::client::Manager& api,
         const network::zeromq::PublishSocket& publisher,
         const Flag& running,
-        const Identifier& nymID);
+        const identifier::Nym& nymID);
     static ui::implementation::ActivitySummaryRowInternal* ActivitySummaryItem(
         const ui::implementation::ActivitySummaryInternalInterface& parent,
         const api::client::Manager& api,
         const network::zeromq::PublishSocket& publisher,
-        const Identifier& nymID,
+        const identifier::Nym& nymID,
         const ui::implementation::ActivitySummaryRowID& rowID,
         const ui::implementation::ActivitySummarySortKey& sortKey,
         const ui::implementation::CustomData& custom,
@@ -49,7 +49,7 @@ public:
     static ui::ActivityThread* ActivityThread(
         const api::client::Manager& api,
         const network::zeromq::PublishSocket& publisher,
-        const Identifier& nymID,
+        const identifier::Nym& nymID,
         const Identifier& threadID);
     static ui::implementation::AccountActivityRowInternal* BalanceItem(
         const ui::implementation::AccountActivityInternalInterface& parent,
@@ -58,7 +58,7 @@ public:
         const ui::implementation::AccountActivityRowID& rowID,
         const ui::implementation::AccountActivitySortKey& sortKey,
         const ui::implementation::CustomData& custom,
-        const Identifier& nymID,
+        const identifier::Nym& nymID,
         const Identifier& accountID);
     static crypto::Bitcoin* Bitcoin(const api::Crypto& crypto);
 #if OT_CRYPTO_SUPPORTED_KEY_HD
@@ -89,7 +89,7 @@ public:
     static ui::implementation::ContactListExternalInterface* ContactList(
         const api::client::Manager& api,
         const network::zeromq::PublishSocket& publisher,
-        const Identifier& nymID);
+        const identifier::Nym& nymID);
     static ui::implementation::ContactListRowInternal* ContactListItem(
         const ui::implementation::ContactListInternalInterface& parent,
         const api::client::Manager& api,
@@ -164,11 +164,11 @@ public:
     static api::Identity* Identity(const api::Core& api);
     static api::client::Issuer* Issuer(
         const api::Wallet& wallet,
-        const Identifier& nymID,
+        const identifier::Nym& nymID,
         const proto::Issuer& serialized);
     static api::client::Issuer* Issuer(
         const api::Wallet& wallet,
-        const Identifier& nymID,
+        const identifier::Nym& nymID,
         const Identifier& issuerID);
     static ui::implementation::AccountSummaryRowInternal* IssuerItem(
         const ui::implementation::AccountSummaryInternalInterface& parent,
@@ -186,7 +186,7 @@ public:
         const ui::implementation::ActivityThreadInternalInterface& parent,
         const api::client::Manager& api,
         const network::zeromq::PublishSocket& publisher,
-        const Identifier& nymID,
+        const identifier::Nym& nymID,
         const ui::implementation::ActivityThreadRowID& rowID,
         const ui::implementation::ActivityThreadSortKey& sortKey,
         const ui::implementation::CustomData& custom,
@@ -196,7 +196,7 @@ public:
         const ui::implementation::ActivityThreadInternalInterface& parent,
         const api::client::Manager& api,
         const network::zeromq::PublishSocket& publisher,
-        const Identifier& nymID,
+        const identifier::Nym& nymID,
         const ui::implementation::ActivityThreadRowID& rowID,
         const ui::implementation::ActivityThreadSortKey& sortKey,
         const ui::implementation::CustomData& custom);
@@ -206,7 +206,7 @@ public:
     static ui::implementation::MessagableExternalInterface* MessagableList(
         const api::client::Manager& api,
         const network::zeromq::PublishSocket& publisher,
-        const Identifier& nymID);
+        const identifier::Nym& nymID);
 #if OT_CASH
     static blind::Mint* MintLucre(const api::Core& core);
     static blind::Mint* MintLucre(
@@ -219,6 +219,7 @@ public:
         const String& strServerNymID,
         const String& strInstrumentDefinitionID);
 #endif
+
     static api::internal::Native* Native(
         Flag& running,
         const ArgList& args,
@@ -245,7 +246,7 @@ public:
     static ui::implementation::PayableExternalInterface* PayableList(
         const api::client::Manager& api,
         const network::zeromq::PublishSocket& publisher,
-        const Identifier& nymID,
+        const identifier::Nym& nymID,
         const proto::ContactItemType& currency);
     static ui::implementation::PayableListRowInternal* PayableListItem(
         const ui::implementation::PayableInternalInterface& parent,
@@ -259,7 +260,7 @@ public:
         const ui::implementation::ActivityThreadInternalInterface& parent,
         const api::client::Manager& api,
         const network::zeromq::PublishSocket& publisher,
-        const Identifier& nymID,
+        const identifier::Nym& nymID,
         const ui::implementation::ActivityThreadRowID& rowID,
         const ui::implementation::ActivityThreadSortKey& sortKey,
         const ui::implementation::CustomData& custom);
@@ -301,7 +302,7 @@ public:
     static ui::implementation::ProfileExternalInterface* ProfileWidget(
         const api::client::Manager& api,
         const network::zeromq::PublishSocket& publisher,
-        const Identifier& nymID);
+        const identifier::Nym& nymID);
     static ui::implementation::ProfileSubsectionRowInternal* ProfileItemWidget(
         const ui::implementation::ProfileSubsectionInternalInterface& parent,
         const api::client::Manager& api,

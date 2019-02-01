@@ -8,6 +8,7 @@
 
 #include "opentxs/Forward.hpp"
 
+#include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/core/Armored.hpp"
 #include "opentxs/core/Contract.hpp"
 #include "opentxs/core/Identifier.hpp"
@@ -51,8 +52,8 @@ public:
     // Someday I'll add EntityID and RoleID here (in lieu of NymID,
     // in cases when the account is owned by an Entity and not a Nym.)
     //
-    inline const Identifier& GetNymID() const { return m_AcctNymID; }
-    inline void SetNymID(const Identifier& theID) { m_AcctNymID = theID; }
+    inline const identifier::Nym& GetNymID() const { return m_AcctNymID; }
+    inline void SetNymID(const identifier::Nym& theID) { m_AcctNymID = theID; }
 
     // Used for: Load an account based on this ID
     inline const Identifier& GetRealAccountID() const { return m_ID; }
@@ -634,7 +635,7 @@ protected:
     // might be the only reference someone has. They'll want my NymID.)
     // I put this in protected because there are now Get/Set methods...so use
     // them!
-    OTIdentifier m_AcctNymID;
+    OTNymID m_AcctNymID;
     // The server issues this and it must be sent with transaction request.
     TransactionNumber m_lTransactionNum{0};
     TransactionNumber m_lInReferenceToTransaction{0};
@@ -699,13 +700,13 @@ protected:
     // both the Account ID and the NotaryID.
     explicit OTTransactionType(
         const api::Core& core,
-        const Identifier& theNymID,
+        const identifier::Nym& theNymID,
         const Identifier& theAccountID,
         const Identifier& theNotaryID,
         originType theOriginType = originType::not_applicable);
     explicit OTTransactionType(
         const api::Core& core,
-        const Identifier& theNymID,
+        const identifier::Nym& theNymID,
         const Identifier& theAccountID,
         const Identifier& theNotaryID,
         std::int64_t lTransactionNum,

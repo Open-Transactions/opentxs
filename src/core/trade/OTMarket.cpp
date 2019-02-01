@@ -10,6 +10,7 @@
 #include "opentxs/api/Wallet.hpp"
 #include "opentxs/core/cron/OTCron.hpp"
 #include "opentxs/core/cron/OTCronItem.hpp"
+#include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/core/trade/OTOffer.hpp"
 #include "opentxs/core/trade/OTTrade.hpp"
 #include "opentxs/core/util/Assert.hpp"
@@ -274,7 +275,7 @@ std::int64_t OTMarket::GetTotalAvailableAssets()
 // Get list of offers for a particular Nym, to send that Nym
 //
 bool OTMarket::GetNym_OfferList(
-    const Identifier& NYM_ID,
+    const identifier::Nym& NYM_ID,
     OTDB::OfferListNym& theOutputList,
     std::int32_t& nNymOfferCount)
 {
@@ -293,7 +294,8 @@ bool OTMarket::GetNym_OfferList(
         // We only return offers for a specific Nym ID, since this is private
         // info only for that Nym.
         //
-        if ((nullptr == pTrade) || (pTrade->GetSenderNymID() != NYM_ID))
+        if ((nullptr == pTrade) ||
+            (pTrade->GetSenderNymID().operator!=(NYM_ID)))
             continue;
 
         // Below this point, I KNOW pTrade and pOffer are both good pointers.
@@ -1122,17 +1124,17 @@ void OTMarket::ProcessTrade(
     // the pointers accordingly, and then operate
     // using the pointers from there.
 
-    const auto FIRST_NYM_ID = Identifier::Factory(
-                   theTrade.GetSenderNymID()),  // The newest trade's
-                                                // Nym.
-        OTHER_NYM_ID = Identifier::Factory(
-            pOtherTrade->GetSenderNymID()),  // The Nym of the trade
-                                             // that was already on the
-                                             // market. (Could be same
-                                             // Nym.)
-        NOTARY_NYM_ID =
-            Identifier::Factory(*pServerNym);  // The Server Nym (could be one
-                                               // or both of the above.)
+    const auto FIRST_NYM_ID = identifier::Nym::Factory(
+                   theTrade.GetSenderNymID().str()),  // The newest trade's
+                                                      // Nym.
+        OTHER_NYM_ID = identifier::Nym::Factory(
+            pOtherTrade->GetSenderNymID().str()),  // The Nym of the trade
+                                                   // that was already on the
+                                                   // market. (Could be same
+                                                   // Nym.)
+        NOTARY_NYM_ID = identifier::Nym::Factory(
+            *pServerNym);  // The Server Nym (could be one
+                           // or both of the above.)
 
     // We MIGHT use ONE, OR BOTH, of these, or none.
 

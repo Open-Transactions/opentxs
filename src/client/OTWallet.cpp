@@ -19,6 +19,7 @@
 #include "opentxs/core/crypto/OTCachedKey.hpp"
 #include "opentxs/core/crypto/OTPassword.hpp"
 #include "opentxs/core/crypto/OTPasswordData.hpp"
+#include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/core/util/Assert.hpp"
 #include "opentxs/core/util/Tag.hpp"
 #include "opentxs/core/Account.hpp"
@@ -137,7 +138,7 @@ void OTWallet::DisplayStatistics(String& strOutput) const
     strOutput.Concatenate("\nNYM(s):\n\n");
 
     for (auto& it : api_.Storage().LocalNyms()) {
-        const auto& nymId = Identifier::Factory(it);
+        const auto& nymId = identifier::Nym::Factory(it);
         const auto& pNym = api_.Wallet().Nym(nymId);
 
         OT_ASSERT(pNym);

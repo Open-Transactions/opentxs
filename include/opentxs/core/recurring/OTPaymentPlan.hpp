@@ -235,9 +235,9 @@ private:
         const Identifier& NOTARY_ID,
         const Identifier& INSTRUMENT_DEFINITION_ID,
         const Identifier& SENDER_ACCT_ID,
-        const Identifier& SENDER_NYM_ID,
+        const identifier::Nym& SENDER_NYM_ID,
         const Identifier& RECIPIENT_ACCT_ID,
-        const Identifier& RECIPIENT_NYM_ID);
+        const identifier::Nym& RECIPIENT_NYM_ID);
 
 protected:
     // "INITIAL PAYMENT" protected SET METHODS

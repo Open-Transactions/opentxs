@@ -8,6 +8,7 @@
 #include "opentxs/api/client/Contacts.hpp"
 #include "opentxs/contact/ContactGroup.hpp"
 #include "opentxs/contact/ContactSection.hpp"
+#include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/core/Flag.hpp"
 #include "opentxs/core/Identifier.hpp"
 #include "opentxs/core/Lockable.hpp"

@@ -8,6 +8,7 @@
 #include "opentxs/api/Core.hpp"
 #include "opentxs/consensus/ClientContext.hpp"
 #include "opentxs/consensus/TransactionStatement.hpp"
+#include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/core/Identifier.hpp"
 #include "opentxs/core/Log.hpp"
 #include "opentxs/core/Nym.hpp"
@@ -101,7 +102,7 @@ bool ClientContext::AcceptIssuedNumbers(std::set<TransactionNumber>& newNumbers)
     return (added == offered);
 }
 
-const Identifier& ClientContext::client_nym_id(const Lock& lock) const
+const identifier::Nym& ClientContext::client_nym_id(const Lock& lock) const
 {
     OT_ASSERT(remote_nym_);
 
@@ -186,7 +187,7 @@ proto::Context ClientContext::serialize(const Lock& lock) const
     return output;
 }
 
-const Identifier& ClientContext::server_nym_id(const Lock& lock) const
+const identifier::Nym& ClientContext::server_nym_id(const Lock& lock) const
 {
     OT_ASSERT(nym_);
 

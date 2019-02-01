@@ -102,7 +102,7 @@ MessageProcessor::MessageProcessor(
 }
 
 void MessageProcessor::associate_connection(
-    const Identifier& nymID,
+    const identifier::Nym& nymID,
     const Data& connection)
 {
     if (nymID.empty()) { return; }
@@ -230,9 +230,9 @@ OTZMQMessage MessageProcessor::process_backend(const zmq::Message& incoming)
 
 bool MessageProcessor::process_command(
     const proto::ServerRequest& serialized,
-    Identifier& nymID)
+    identifier::Nym& nymID)
 {
-    const auto allegedNymID = Identifier::Factory(serialized.nym());
+    const auto allegedNymID = identifier::Nym::Factory(serialized.nym());
     const auto nym = server_.API().Wallet().Nym(allegedNymID);
 
     if (false == bool(nym)) {
@@ -388,7 +388,7 @@ void MessageProcessor::process_notification(const zmq::Message& incoming)
         return;
     }
 
-    const auto nymID = Identifier::Factory(incoming.Body().at(0));
+    const auto nymID = identifier::Nym::Factory(incoming.Body().at(0));
     const auto connection = query_connection(nymID);
 
     if (connection->empty()) {
@@ -444,7 +444,7 @@ void MessageProcessor::process_proto(
         return;
     }
 
-    auto nymID = Identifier::Factory();
+    auto nymID = identifier::Nym::Factory();
     const auto valid = process_command(command, nymID);
 
     if (valid) {
@@ -456,7 +456,7 @@ void MessageProcessor::process_proto(
     }
 }
 
-OTData MessageProcessor::query_connection(const Identifier& nymID)
+OTData MessageProcessor::query_connection(const identifier::Nym& nymID)
 {
     sLock lock(connection_map_lock_);
     auto it = active_connections_.find(nymID);

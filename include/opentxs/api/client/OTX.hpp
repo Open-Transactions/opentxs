@@ -74,14 +74,14 @@ public:
         const SetID setID = {}) const = 0;
     EXPORT virtual bool AutoProcessInboxEnabled() const = 0;
     EXPORT virtual Depositability CanDeposit(
-        const Identifier& recipientNymID,
+        const identifier::Nym& recipientNymID,
         const OTPayment& payment) const = 0;
     EXPORT virtual Depositability CanDeposit(
-        const Identifier& recipientNymID,
+        const identifier::Nym& recipientNymID,
         const Identifier& accountID,
         const OTPayment& payment) const = 0;
     EXPORT virtual Messagability CanMessage(
-        const Identifier& senderNymID,
+        const identifier::Nym& senderNymID,
         const Identifier& recipientContactID,
         const bool startIntroductionServer = true) const = 0;
     EXPORT virtual bool CheckTransactionNumbers(
@@ -96,7 +96,7 @@ public:
      *  \returns the number of cheques queued for deposit
      */
     EXPORT virtual std::size_t DepositCheques(
-        const Identifier& nymID) const = 0;
+        const identifier::Nym& nymID) const = 0;
     /** Deposit the specified list of cheques for specified nym
      *
      *  If the list of chequeIDs is empty, then all cheques will be deposited
@@ -104,19 +104,19 @@ public:
      *  \returns the number of cheques queued for deposit
      */
     EXPORT virtual std::size_t DepositCheques(
-        const Identifier& nymID,
+        const identifier::Nym& nymID,
         const std::set<OTIdentifier>& chequeIDs) const = 0;
     EXPORT virtual BackgroundTask DepositPayment(
-        const Identifier& recipientNymID,
+        const identifier::Nym& recipientNymID,
         const std::shared_ptr<const OTPayment>& payment) const = 0;
     EXPORT virtual BackgroundTask DepositPayment(
-        const Identifier& recipientNymID,
+        const identifier::Nym& recipientNymID,
         const Identifier& accountID,
         const std::shared_ptr<const OTPayment>& payment) const = 0;
     /** Used by unit tests */
     EXPORT virtual void DisableAutoaccept() const = 0;
     EXPORT virtual BackgroundTask DownloadContract(
-        const Identifier& localNymID,
+        const identifier::Nym& localNymID,
         const Identifier& serverID,
         const Identifier& contractID) const = 0;
 #if OT_CASH
@@ -126,15 +126,16 @@ public:
         const identifier::UnitDefinition& unit) const = 0;
 #endif
     EXPORT virtual BackgroundTask DownloadNym(
-        const Identifier& localNymID,
+        const identifier::Nym& localNymID,
         const Identifier& serverID,
-        const Identifier& targetNymID) const = 0;
+        const identifier::Nym& targetNymID) const = 0;
     EXPORT virtual BackgroundTask DownloadNymbox(
-        const Identifier& localNymID,
+        const identifier::Nym& localNymID,
         const Identifier& serverID) const = 0;
-    EXPORT virtual BackgroundTask FindNym(const Identifier& nymID) const = 0;
     EXPORT virtual BackgroundTask FindNym(
-        const Identifier& nymID,
+        const identifier::Nym& nymID) const = 0;
+    EXPORT virtual BackgroundTask FindNym(
+        const identifier::Nym& nymID,
         const Identifier& serverIDHint) const = 0;
     EXPORT virtual BackgroundTask FindServer(
         const Identifier& serverID) const = 0;
@@ -168,12 +169,12 @@ public:
         const SetID setID = {}) const = 0;
     EXPORT virtual const Identifier& IntroductionServer() const = 0;
     EXPORT virtual BackgroundTask IssueUnitDefinition(
-        const Identifier& localNymID,
+        const identifier::Nym& localNymID,
         const Identifier& serverID,
         const Identifier& unitIDD,
         const std::string& label = "") const = 0;
     EXPORT virtual BackgroundTask MessageContact(
-        const Identifier& senderNymID,
+        const identifier::Nym& senderNymID,
         const Identifier& contactID,
         const std::string& message,
         const SetID setID = {}) const = 0;
@@ -189,36 +190,36 @@ public:
         const Amount amount,
         const SetID setID = {}) const = 0;
     EXPORT virtual BackgroundTask PayContact(
-        const Identifier& senderNymID,
+        const identifier::Nym& senderNymID,
         const Identifier& contactID,
         std::shared_ptr<const OTPayment> payment) const = 0;
 #if OT_CASH
     EXPORT virtual BackgroundTask PayContactCash(
-        const Identifier& senderNymID,
+        const identifier::Nym& senderNymID,
         const Identifier& contactID,
         const Identifier& workflowID) const = 0;
 #endif  // OT_CASH
     EXPORT virtual BackgroundTask ProcessInbox(
-        const Identifier& localNymID,
+        const identifier::Nym& localNymID,
         const Identifier& serverID,
         const Identifier& accountID) const = 0;
     EXPORT virtual BackgroundTask PublishServerContract(
-        const Identifier& localNymID,
+        const identifier::Nym& localNymID,
         const Identifier& serverID,
         const Identifier& contractID) const = 0;
     EXPORT virtual void Refresh() const = 0;
     EXPORT virtual std::uint64_t RefreshCount() const = 0;
     EXPORT virtual BackgroundTask RegisterAccount(
-        const Identifier& localNymID,
+        const identifier::Nym& localNymID,
         const Identifier& serverID,
         const Identifier& unitID,
         const std::string& label = "") const = 0;
     EXPORT virtual BackgroundTask RegisterNym(
-        const Identifier& localNymID,
+        const identifier::Nym& localNymID,
         const Identifier& serverID,
         const bool resync = false) const = 0;
     EXPORT virtual BackgroundTask RegisterNymPublic(
-        const Identifier& nymID,
+        const identifier::Nym& nymID,
         const Identifier& server,
         const bool setContactData,
         const bool forcePrimary = false,
@@ -226,7 +227,7 @@ public:
     EXPORT virtual OTIdentifier SetIntroductionServer(
         const ServerContract& contract) const = 0;
     EXPORT virtual BackgroundTask SendCheque(
-        const Identifier& localNymID,
+        const identifier::Nym& localNymID,
         const Identifier& sourceAccountID,
         const Identifier& recipientContactID,
         const Amount value,
@@ -235,21 +236,21 @@ public:
         const Time validTo =
             (Clock::now() + std::chrono::hours(OT_CHEQUE_HOURS))) const = 0;
     EXPORT virtual BackgroundTask SendExternalTransfer(
-        const Identifier& localNymID,
+        const identifier::Nym& localNymID,
         const Identifier& serverID,
         const Identifier& sourceAccountID,
         const Identifier& targetAccountID,
         const Amount value,
         const std::string& memo) const = 0;
     EXPORT virtual BackgroundTask SendTransfer(
-        const Identifier& localNymID,
+        const identifier::Nym& localNymID,
         const Identifier& serverID,
         const Identifier& sourceAccountID,
         const Identifier& targetAccountID,
         const Amount value,
         const std::string& memo) const = 0;
     EXPORT virtual void StartIntroductionServer(
-        const Identifier& localNymID) const = 0;
+        const identifier::Nym& localNymID) const = 0;
     EXPORT virtual ThreadStatus Status(const TaskID taskID) const = 0;
 #if OT_CASH
     EXPORT virtual BackgroundTask WithdrawCash(

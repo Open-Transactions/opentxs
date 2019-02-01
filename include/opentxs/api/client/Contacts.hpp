@@ -29,7 +29,8 @@ public:
     EXPORT virtual std::shared_ptr<const class Contact> Contact(
         const Identifier& id) const = 0;
     /** Returns the contact ID for a nym, if it exists */
-    EXPORT virtual OTIdentifier ContactID(const Identifier& nymID) const = 0;
+    EXPORT virtual OTIdentifier ContactID(
+        const identifier::Nym& nymID) const = 0;
     EXPORT virtual ObjectList ContactList() const = 0;
     EXPORT virtual std::string ContactName(
         const Identifier& contactID) const = 0;
@@ -42,7 +43,7 @@ public:
         const std::string& label) const = 0;
     EXPORT virtual std::shared_ptr<const class Contact> NewContact(
         const std::string& label,
-        const Identifier& nymID
+        const identifier::Nym& nymID
 #if OT_CRYPTO_SUPPORTED_SOURCE_BIP47
         ,
         const PaymentCode& paymentCode
@@ -53,7 +54,8 @@ public:
         const std::string& label,
         const proto::ContactItemType currency = proto::CITEMTYPE_BTC) const = 0;
     /** Returns an existing contact ID if it exists, or creates a new one */
-    EXPORT virtual OTIdentifier NymToContact(const Identifier& nymID) const = 0;
+    EXPORT virtual OTIdentifier NymToContact(
+        const identifier::Nym& nymID) const = 0;
     EXPORT virtual std::shared_ptr<const class Contact> Update(
         const proto::CredentialIndex& nym) const = 0;
 

@@ -30,7 +30,7 @@ public:
         const MessageType requestedCommand,
         ServerContext& context,
         Message& theMessage,
-        const Identifier& pHisNymID,
+        const identifier::Nym& pHisNymID,
         const Identifier& pHisAcctID,
         const Amount lTransactionAmount = 0,
         const Account* pAccount = nullptr,

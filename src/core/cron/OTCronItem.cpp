@@ -18,6 +18,7 @@
 #include "opentxs/core/util/Assert.hpp"
 #include "opentxs/core/util/Common.hpp"
 #include "opentxs/core/util/OTFolders.hpp"
+#include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/core/Account.hpp"
 #include "opentxs/core/Armored.hpp"
 #include "opentxs/core/Contract.hpp"
@@ -61,7 +62,7 @@ namespace opentxs
 OTCronItem::OTCronItem(const api::Core& core)
     : ot_super(core)
     , m_dequeClosingNumbers{}
-    , m_pCancelerNymID(Identifier::Factory())
+    , m_pCancelerNymID(identifier::Nym::Factory())
     , m_bCanceled(false)
     , m_bRemovalFlag(false)
     , m_pCron(nullptr)
@@ -80,7 +81,7 @@ OTCronItem::OTCronItem(
     const Identifier& INSTRUMENT_DEFINITION_ID)
     : ot_super(core, NOTARY_ID, INSTRUMENT_DEFINITION_ID)
     , m_dequeClosingNumbers{}
-    , m_pCancelerNymID(Identifier::Factory())
+    , m_pCancelerNymID(identifier::Nym::Factory())
     , m_bCanceled(false)
     , m_bRemovalFlag(false)
     , m_pCron(nullptr)
@@ -98,10 +99,10 @@ OTCronItem::OTCronItem(
     const Identifier& NOTARY_ID,
     const Identifier& INSTRUMENT_DEFINITION_ID,
     const Identifier& ACCT_ID,
-    const Identifier& NYM_ID)
+    const identifier::Nym& NYM_ID)
     : ot_super(core, NOTARY_ID, INSTRUMENT_DEFINITION_ID, ACCT_ID, NYM_ID)
     , m_dequeClosingNumbers{}
-    , m_pCancelerNymID(Identifier::Factory())
+    , m_pCancelerNymID(identifier::Nym::Factory())
     , m_bCanceled(false)
     , m_bRemovalFlag(false)
     , m_pCron(nullptr)
@@ -208,7 +209,7 @@ std::unique_ptr<OTCronItem> OTCronItem::LoadActiveCronReceipt(
 bool OTCronItem::GetActiveCronTransNums(
     NumList& output,
     const std::string& dataFolder,
-    const Identifier& nymID,
+    const identifier::Nym& nymID,
     const Identifier& notaryID)
 {
     const char* szFoldername = OTFolders::Cron().Get();
@@ -260,7 +261,7 @@ bool OTCronItem::GetActiveCronTransNums(
 bool OTCronItem::EraseActiveCronReceipt(
     const std::string& dataFolder,
     const TransactionNumber& lTransactionNum,
-    const Identifier& nymID,
+    const identifier::Nym& nymID,
     const Identifier& notaryID)
 {
     auto strFilename = String::Factory(),
@@ -387,8 +388,8 @@ bool OTCronItem::EraseActiveCronReceipt(
 }
 
 bool OTCronItem::SaveActiveCronReceipt(
-    const Identifier& theNymID)  // Client-side
-                                 // only.
+    const identifier::Nym& theNymID)  // Client-side
+                                      // only.
 {
     const std::int64_t lOpeningNum = GetOpeningNumber(theNymID);
 
@@ -895,8 +896,7 @@ void OTCronItem::HookRemovalFromCron(
             // but for whatever reason, I'm checking the nymID on the original
             // version. Sue me.
             //
-            const OTIdentifier NYM_ID =
-                Identifier::Factory(pOrigCronItem->GetSenderNymID());
+            const identifier::Nym& NYM_ID = (pOrigCronItem->GetSenderNymID());
 
             pOriginator = api_.Wallet().Nym(NYM_ID);
         }
@@ -1008,7 +1008,7 @@ void OTCronItem::onFinalReceipt(
         context.It().VerifyIssuedNumber(lClosingNumber)) {
         // SENDER only. (CronItem has no recipient. That's in the subclass.)
         if (!DropFinalReceiptToInbox(
-                GetSenderNymID(),
+                identifier::Nym::Factory(),
                 GetSenderAcctID(),
                 lNewTransactionNumber,
                 lClosingNumber,  // The closing transaction number to
@@ -1054,7 +1054,7 @@ void OTCronItem::onFinalReceipt(
 // transaction number.
 //
 bool OTCronItem::DropFinalReceiptToInbox(
-    const Identifier& NYM_ID,
+    const identifier::Nym& NYM_ID,
     const Identifier& ACCOUNT_ID,
     const std::int64_t& lNewTransactionNumber,
     const std::int64_t& lClosingNumber,
@@ -1234,7 +1234,7 @@ bool OTCronItem::DropFinalReceiptToInbox(
 // from your issued list (so your balance agreements will work :P)
 //
 bool OTCronItem::DropFinalReceiptToNymbox(
-    const Identifier& NYM_ID,
+    const identifier::Nym& NYM_ID,
     const TransactionNumber& lNewTransactionNumber,
     const String& strOrigCronItem,
     const originType theOriginType,
@@ -1417,7 +1417,7 @@ bool OTCronItem::IsValidOpeningNumber(const std::int64_t& lOpeningNum) const
     return false;
 }
 
-std::int64_t OTCronItem::GetOpeningNumber(const Identifier& theNymID) const
+std::int64_t OTCronItem::GetOpeningNumber(const identifier::Nym& theNymID) const
 {
     const Identifier& theSenderNymID = GetSenderNymID();
 

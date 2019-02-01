@@ -64,13 +64,13 @@ public:
     {
     }
     bool last(const ProfileSectionRowID&) const override { return false; }
-    const Identifier& NymID() const override { return nym_id_; }
+    const identifier::Nym& NymID() const override { return nym_id_; }
 
     ProfileSectionBlank() = default;
     ~ProfileSectionBlank() = default;
 
 private:
-    const OTIdentifier nym_id_{Identifier::Factory()};
+    const OTNymID nym_id_{identifier::Nym::Factory()};
 
     ProfileSectionBlank(const ProfileSectionBlank&) = delete;
     ProfileSectionBlank(ProfileSectionBlank&&) = delete;

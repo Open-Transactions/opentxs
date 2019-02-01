@@ -88,7 +88,7 @@ protected:
     mapOfArmor m_mapPrivate;
     mapOfArmor m_mapPublic;
     OTIdentifier m_NotaryID;
-    OTIdentifier m_ServerNymID;
+    OTNymID m_ServerNymID;
     OTIdentifier m_InstrumentDefinitionID;
     std::int32_t m_nDenominationCount{0};
     bool m_bSavePrivateKeys{false};

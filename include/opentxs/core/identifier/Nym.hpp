@@ -31,6 +31,7 @@
 
 namespace opentxs
 {
+
 #ifndef SWIG
 bool operator==(
     const opentxs::Pimpl<opentxs::identifier::Nym>& lhs,

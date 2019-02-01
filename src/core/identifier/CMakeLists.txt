@@ -9,9 +9,16 @@
 set(MODULE_NAME opentxs-core-identifier)
 
 set(cxx-install-headers
+<<<<<<< HEAD
      "${CMAKE_CURRENT_SOURCE_DIR}/../../../include/opentxs/core/identifier/Nym.hpp"
      "${CMAKE_CURRENT_SOURCE_DIR}/../../../include/opentxs/core/identifier/Server.hpp"
      "${CMAKE_CURRENT_SOURCE_DIR}/../../../include/opentxs/core/identifier/UnitDefinition.hpp"
+=======
+  "${CMAKE_CURRENT_SOURCE_DIR}/../../../include/opentxs/core/identifier/Nym.hpp"
+  "${CMAKE_CURRENT_SOURCE_DIR}/../../../include/opentxs/core/identifier/Server.hpp"
+  "${CMAKE_CURRENT_SOURCE_DIR}/../../../include/opentxs/core/identifier/UnitDefinition.hpp"
+
+>>>>>>> e8812e4f0... Use opentxs::identifier::Nym class for nym identifiers
 )
 
 install(FILES ${cxx-install-headers}

@@ -300,7 +300,7 @@ void OTMessageOutbuffer::Clear(
     const String& pstrNymID,
     const bool pbHarvestingForRetry,
     ServerContext& context,
-    const Identifier& nymID)
+    const identifier::Nym& nymID)
 {
     OT_ASSERT(pstrNymID.Exists());
     OT_ASSERT(pstrNotaryID.Exists());

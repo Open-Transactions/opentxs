@@ -29,7 +29,7 @@ public:
     SharedAccount Account(const Identifier& accountID) const override;
     OTIdentifier AccountPartialMatch(const std::string& hint) const override;
     ExclusiveAccount CreateAccount(
-        const Identifier& ownerNymID,
+        const identifier::Nym& ownerNymID,
         const Identifier& notaryID,
         const Identifier& instrumentDefinitionID,
         const opentxs::Nym& signer,
@@ -52,29 +52,30 @@ public:
     bool ImportAccount(
         std::unique_ptr<opentxs::Account>& imported) const override;
     std::shared_ptr<const opentxs::ClientContext> ClientContext(
-        const Identifier& localNymID,
-        const Identifier& remoteNymID) const override;
+        const identifier::Nym& localNymID,
+        const identifier::Nym& remoteNymID) const override;
     std::shared_ptr<const opentxs::ServerContext> ServerContext(
-        const Identifier& localNymID,
+        const identifier::Nym& localNymID,
         const Identifier& remoteID) const override;
     Editor<opentxs::ClientContext> mutable_ClientContext(
-        const Identifier& localNymID,
-        const Identifier& remoteNymID) const override;
+        const identifier::Nym& localNymID,
+        const identifier::Nym& remoteNymID) const override;
     Editor<opentxs::ServerContext> mutable_ServerContext(
-        const Identifier& localNymID,
+        const identifier::Nym& localNymID,
         const Identifier& remoteID) const override;
-    std::set<OTIdentifier> IssuerList(const Identifier& nymID) const override;
+    std::set<OTIdentifier> IssuerList(
+        const identifier::Nym& nymID) const override;
     std::shared_ptr<const api::client::Issuer> Issuer(
-        const Identifier& nymID,
+        const identifier::Nym& nymID,
         const Identifier& issuerID) const override;
     Editor<api::client::Issuer> mutable_Issuer(
-        const Identifier& nymID,
+        const identifier::Nym& nymID,
         const Identifier& issuerID) const override;
     bool IsLocalNym(const std::string& id) const override;
     std::size_t LocalNymCount() const override;
-    std::set<OTIdentifier> LocalNyms() const override;
+    std::set<OTNymID> LocalNyms() const override;
     ConstNym Nym(
-        const Identifier& id,
+        const identifier::Nym& id,
         const std::chrono::milliseconds& timeout =
             std::chrono::milliseconds(0)) const override;
     ConstNym Nym(const proto::CredentialIndex& nym) const override;
@@ -82,62 +83,64 @@ public:
         const NymParameters& nymParameters,
         const proto::ContactItemType type = proto::CITEMTYPE_ERROR,
         const std::string name = "") const override;
-    NymData mutable_Nym(const Identifier& id) const override;
+    NymData mutable_Nym(const identifier::Nym& id) const override;
     std::unique_ptr<const opentxs::NymFile> Nymfile(
-        const Identifier& id,
+        const identifier::Nym& id,
         const OTPasswordData& reason) const override;
     Editor<opentxs::NymFile> mutable_Nymfile(
-        const Identifier& id,
+        const identifier::Nym& id,
         const OTPasswordData& reason) const override;
     ConstNym NymByIDPartialMatch(const std::string& partialId) const override;
     ObjectList NymList() const override;
     bool NymNameByIndex(const std::size_t index, String& name) const override;
     std::shared_ptr<proto::PeerReply> PeerReply(
-        const Identifier& nym,
+        const identifier::Nym& nym,
         const Identifier& reply,
         const StorageBox& box) const override;
     bool PeerReplyComplete(
-        const Identifier& nym,
+        const identifier::Nym& nym,
         const Identifier& replyOrRequest) const override;
     bool PeerReplyCreate(
-        const Identifier& nym,
+        const identifier::Nym& nym,
         const proto::PeerRequest& request,
         const proto::PeerReply& reply) const override;
     bool PeerReplyCreateRollback(
-        const Identifier& nym,
+        const identifier::Nym& nym,
         const Identifier& request,
         const Identifier& reply) const override;
-    ObjectList PeerReplySent(const Identifier& nym) const override;
-    ObjectList PeerReplyIncoming(const Identifier& nym) const override;
-    ObjectList PeerReplyFinished(const Identifier& nym) const override;
-    ObjectList PeerReplyProcessed(const Identifier& nym) const override;
-    bool PeerReplyReceive(const Identifier& nym, const PeerObject& reply)
+    ObjectList PeerReplySent(const identifier::Nym& nym) const override;
+    ObjectList PeerReplyIncoming(const identifier::Nym& nym) const override;
+    ObjectList PeerReplyFinished(const identifier::Nym& nym) const override;
+    ObjectList PeerReplyProcessed(const identifier::Nym& nym) const override;
+    bool PeerReplyReceive(const identifier::Nym& nym, const PeerObject& reply)
         const override;
     std::shared_ptr<proto::PeerRequest> PeerRequest(
-        const Identifier& nym,
+        const identifier::Nym& nym,
         const Identifier& request,
         const StorageBox& box,
         std::time_t& time) const override;
-    bool PeerRequestComplete(const Identifier& nym, const Identifier& reply)
-        const override;
+    bool PeerRequestComplete(
+        const identifier::Nym& nym,
+        const Identifier& reply) const override;
     bool PeerRequestCreate(
-        const Identifier& nym,
+        const identifier::Nym& nym,
         const proto::PeerRequest& request) const override;
     bool PeerRequestCreateRollback(
-        const Identifier& nym,
+        const identifier::Nym& nym,
         const Identifier& request) const override;
     bool PeerRequestDelete(
-        const Identifier& nym,
+        const identifier::Nym& nym,
         const Identifier& request,
         const StorageBox& box) const override;
-    ObjectList PeerRequestSent(const Identifier& nym) const override;
-    ObjectList PeerRequestIncoming(const Identifier& nym) const override;
-    ObjectList PeerRequestFinished(const Identifier& nym) const override;
-    ObjectList PeerRequestProcessed(const Identifier& nym) const override;
-    bool PeerRequestReceive(const Identifier& nym, const PeerObject& request)
-        const override;
+    ObjectList PeerRequestSent(const identifier::Nym& nym) const override;
+    ObjectList PeerRequestIncoming(const identifier::Nym& nym) const override;
+    ObjectList PeerRequestFinished(const identifier::Nym& nym) const override;
+    ObjectList PeerRequestProcessed(const identifier::Nym& nym) const override;
+    bool PeerRequestReceive(
+        const identifier::Nym& nym,
+        const PeerObject& request) const override;
     bool PeerRequestUpdate(
-        const Identifier& nym,
+        const identifier::Nym& nym,
         const Identifier& request,
         const StorageBox& box) const override;
 #if OT_CASH
@@ -217,14 +220,14 @@ protected:
     mutable std::mutex context_map_lock_;
 
     std::shared_ptr<opentxs::Context> context(
-        const Identifier& localNymID,
-        const Identifier& remoteNymID) const;
+        const identifier::Nym& localNymID,
+        const identifier::Nym& remoteNymID) const;
     proto::ContactItemType extract_unit(const Identifier& contractID) const;
     proto::ContactItemType extract_unit(
         const opentxs::UnitDefinition& contract) const;
-    void save(opentxs::internal::Context* context) const;
-    OTIdentifier server_to_nym(OTIdentifier& serverID) const;
 
+    void save(opentxs::internal::Context* context) const;
+    OTNymID server_to_nym(OTIdentifier& serverID) const;
     Wallet(const api::Core& core);
 
 private:
@@ -310,9 +313,9 @@ private:
     Editor<opentxs::NymFile> mutable_nymfile(
         const std::shared_ptr<const opentxs::Nym>& targetNym,
         const std::shared_ptr<const opentxs::Nym>& signerNym,
-        const Identifier& id,
+        const identifier::Nym& id,
         const OTPasswordData& reason) const;
-    std::mutex& nymfile_lock(const Identifier& nymID) const;
+    std::mutex& nymfile_lock(const identifier::Nym& nymID) const;
     std::mutex& peer_lock(const std::string& nymID) const;
     void publish_server(const Identifier& id) const;
 #if OT_CASH
@@ -335,7 +338,7 @@ private:
     void save(opentxs::NymFile* nym, const Lock& lock) const;
     bool SaveCredentialIDs(const opentxs::Nym& nym) const;
     virtual std::shared_ptr<const opentxs::Nym> signer_nym(
-        const Identifier& id) const = 0;
+        const identifier::Nym& id) const = 0;
 
     /* Throws std::out_of_range for missing accounts */
     AccountLock& account(
@@ -343,7 +346,7 @@ private:
         const Identifier& accountID,
         const bool create) const;
     IssuerLock& issuer(
-        const Identifier& nymID,
+        const identifier::Nym& nymID,
         const Identifier& issuerID,
         const bool create) const;
 

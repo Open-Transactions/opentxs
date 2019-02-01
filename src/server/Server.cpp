@@ -26,6 +26,7 @@
 #include "opentxs/core/crypto/OTCachedKey.hpp"
 #include "opentxs/core/crypto/OTEnvelope.hpp"
 #include "opentxs/core/crypto/OTPassword.hpp"
+#include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/core/util/Assert.hpp"
 #include "opentxs/core/util/OTPaths.hpp"
 #include "opentxs/core/Armored.hpp"
@@ -226,7 +227,7 @@ void Server::CreateMainFile(bool& mainFileExists)
 
     if (!m_nymServer->VerifyPseudonym()) { OT_FAIL; }
 
-    const OTIdentifier nymID = m_nymServer->ID();
+    const auto& nymID = m_nymServer->ID();
 
     const std::string defaultTerms = "This is an example server contract.";
     const std::string& userTerms = manager_.GetUserTerms();
@@ -393,7 +394,7 @@ void Server::CreateMainFile(bool& mainFileExists)
 
     if (existing->empty()) {
         pContract = wallet.Server(
-            nymID->str(),
+            nymID.str(),
             name,
             terms,
             endpoints,
@@ -497,7 +498,7 @@ void Server::CreateMainFile(bool& mainFileExists)
         json, manager_.DataFolder(), SEED_BACKUP_FILE, "", "", "");
 
     mainFileExists = mainFile_.CreateMainFile(
-        strBookended->Get(), strNotaryID, "", nymID->str(), strCachedKey);
+        strBookended->Get(), strNotaryID, "", nymID.str(), strCachedKey);
 
     manager_.Config().Save();
 }
@@ -565,7 +566,7 @@ void Server::Init(bool readOnly)
     // ready for operation!
 }
 
-bool Server::LoadServerNym(const Identifier& nymID)
+bool Server::LoadServerNym(const identifier::Nym& nymID)
 {
     auto nym = manager_.Wallet().Nym(nymID);
 
@@ -590,8 +591,8 @@ bool Server::LoadServerNym(const Identifier& nymID)
 // sendNymInstrument, the default.)
 bool Server::SendInstrumentToNym(
     const Identifier& NOTARY_ID,
-    const Identifier& SENDER_NYM_ID,
-    const Identifier& RECIPIENT_NYM_ID,
+    const identifier::Nym& SENDER_NYM_ID,
+    const identifier::Nym& RECIPIENT_NYM_ID,
     const OTPayment& pPayment,
     const char* szCommand)
 {
@@ -622,8 +623,8 @@ bool Server::SendInstrumentToNym(
 
 bool Server::SendInstrumentToNym(
     const Identifier& NOTARY_ID,
-    const Identifier& SENDER_NYM_ID,
-    const Identifier& RECIPIENT_NYM_ID,
+    const identifier::Nym& SENDER_NYM_ID,
+    const identifier::Nym& RECIPIENT_NYM_ID,
     const Message& pMsg)
 {
     return DropMessageToNymbox(
@@ -636,8 +637,8 @@ bool Server::SendInstrumentToNym(
 
 bool Server::DropMessageToNymbox(
     const Identifier& notaryID,
-    const Identifier& senderNymID,
-    const Identifier& recipientNymID,
+    const identifier::Nym& senderNymID,
+    const identifier::Nym& recipientNymID,
     transactionType transactionType,
     const Message& msg)
 {
@@ -708,8 +709,8 @@ bool Server::DropMessageToNymbox(
 //
 bool Server::DropMessageToNymbox(
     const Identifier& NOTARY_ID,
-    const Identifier& SENDER_NYM_ID,
-    const Identifier& RECIPIENT_NYM_ID,
+    const identifier::Nym& SENDER_NYM_ID,
+    const identifier::Nym& RECIPIENT_NYM_ID,
     transactionType theType,
     const Message* pMsg,
     const String& pstrMessage,
@@ -960,7 +961,7 @@ bool Server::GetConnectInfo(
 }
 
 OTZMQMessage Server::nymbox_push(
-    const Identifier& nymID,
+    const identifier::Nym& nymID,
     const OTTransaction& item) const
 {
     auto output = zmq::Message::Factory();

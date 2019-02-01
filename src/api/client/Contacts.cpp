@@ -14,6 +14,7 @@
 #include "opentxs/api/Wallet.hpp"
 #include "opentxs/contact/Contact.hpp"
 #include "opentxs/contact/ContactData.hpp"
+#include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/core/Identifier.hpp"
 #include "opentxs/core/Log.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
@@ -106,13 +107,13 @@ Contacts::ContactNameMap Contacts::build_name_map(
 }
 
 void Contacts::check_identifiers(
-    const Identifier& inputNymID,
+    const identifier::Nym& inputNymID,
 #if OT_CRYPTO_SUPPORTED_SOURCE_BIP47
     const PaymentCode& paymentCode,
 #endif
     bool& haveNymID,
     bool& havePaymentCode,
-    OTIdentifier& outputNymID) const
+    OTNymID& outputNymID) const
 {
 #if OT_CRYPTO_SUPPORTED_SOURCE_BIP47
     if (paymentCode.VerifyInternally()) { havePaymentCode = true; }
@@ -122,12 +123,12 @@ void Contacts::check_identifiers(
 
     if (false == inputNymID.empty()) {
         haveNymID = true;
-        outputNymID = Identifier::Factory(inputNymID);
+        outputNymID = inputNymID;
     }
 #if OT_CRYPTO_SUPPORTED_SOURCE_BIP47
     else if (havePaymentCode) {
         haveNymID = true;
-        outputNymID = Identifier::Factory(paymentCode.ID());
+        outputNymID = identifier::Nym::Factory(paymentCode.ID()->str());
     }
 #endif
 }
@@ -191,7 +192,7 @@ std::shared_ptr<const class Contact> Contacts::Contact(
     return contact(lock, id);
 }
 
-OTIdentifier Contacts::ContactID(const Identifier& nymID) const
+OTIdentifier Contacts::ContactID(const identifier::Nym& nymID) const
 {
     return Identifier::Factory(api_.Storage().ContactOwnerNym(nymID.str()));
 }
@@ -216,7 +217,7 @@ void Contacts::import_contacts(const rLock& lock)
     auto nyms = api_.Wallet().NymList();
 
     for (const auto& it : nyms) {
-        const auto nymID = Identifier::Factory(it.first);
+        const auto nymID = identifier::Nym::Factory(it.first);
         const auto contactID = api_.Storage().ContactOwnerNym(nymID->str());
 
         if (contactID.empty()) {
@@ -433,7 +434,7 @@ std::unique_ptr<Editor<class Contact>> Contacts::mutable_Contact(
 std::shared_ptr<const class Contact> Contacts::new_contact(
     const rLock& lock,
     const std::string& label,
-    const Identifier& nymID
+    const identifier::Nym& nymID
 #if OT_CRYPTO_SUPPORTED_SOURCE_BIP47
     ,
     const PaymentCode& code
@@ -446,7 +447,7 @@ std::shared_ptr<const class Contact> Contacts::new_contact(
 
     bool haveNymID{false};
     bool havePaymentCode{false};
-    auto inputNymID = Identifier::Factory();
+    auto inputNymID = identifier::Nym::Factory();
     check_identifiers(
         nymID,
 #if OT_CRYPTO_SUPPORTED_SOURCE_BIP47
@@ -514,7 +515,7 @@ std::shared_ptr<const class Contact> Contacts::NewContact(
 
 std::shared_ptr<const class Contact> Contacts::NewContact(
     const std::string& label,
-    const Identifier& nymID
+    const identifier::Nym& nymID
 #if OT_CRYPTO_SUPPORTED_SOURCE_BIP47
     ,
     const PaymentCode& paymentCode
@@ -570,7 +571,7 @@ std::shared_ptr<const class Contact> Contacts::NewContactFromAddress(
     return newContact;
 }
 
-OTIdentifier Contacts::NymToContact(const Identifier& nymID) const
+OTIdentifier Contacts::NymToContact(const identifier::Nym& nymID) const
 {
     const auto contactID = ContactID(nymID);
 
@@ -785,7 +786,7 @@ std::shared_ptr<const class Contact> Contacts::update_existing_contact(
 
 void Contacts::update_nym_map(
     const rLock& lock,
-    const OTIdentifier nymID,
+    const OTNymID nymID,
     class Contact& contact,
     const bool replace) const
 {

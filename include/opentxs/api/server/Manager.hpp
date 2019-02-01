@@ -50,7 +50,7 @@ public:
     EXPORT virtual std::string GetUserName() const = 0;
     EXPORT virtual std::string GetUserTerms() const = 0;
     EXPORT virtual const Identifier& ID() const = 0;
-    EXPORT virtual const Identifier& NymID() const = 0;
+    EXPORT virtual const identifier::Nym& NymID() const = 0;
 #if OT_CASH
     EXPORT virtual void ScanMints() const = 0;
 #endif  // OT_CASH

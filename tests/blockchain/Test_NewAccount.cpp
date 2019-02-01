@@ -25,16 +25,17 @@ public:
 TEST_F(Test_NewAccount, TestNymDoesNotExist)
 {
     const std::string nym = "Inexistent Nym";
-    const std::string Result = String::Factory(client_.Blockchain().NewAccount(
-                                                   Identifier::Factory(nym),
-                                                   BlockchainAccountType::BIP32,
-                                                   proto::CITEMTYPE_BTC))
-                                   ->Get();
+    const std::string Result =
+        String::Factory(client_.Blockchain().NewAccount(
+                            identifier::Nym::Factory(nym),
+                            BlockchainAccountType::BIP32,
+                            proto::CITEMTYPE_BTC))
+            ->Get();
     EXPECT_STREQ(Result.c_str(), "");
 
     const std::string Result2 =
         String::Factory(client_.Blockchain().NewAccount(
-                            Identifier::Factory(nym),
+                            identifier::Nym::Factory(nym),
                             BlockchainAccountType::BIP32,
                             proto::CITEMTYPE_BTC))
             ->Get();
@@ -63,14 +64,14 @@ TEST_F(Test_NewAccount, TestSeedRoot)
     EXPECT_STRNE(Nym0.c_str(), Nym1.c_str());
 
     OTIdentifier Acc0ID = client_.Blockchain().NewAccount(
-        Identifier::Factory(Nym0),
+        identifier::Nym::Factory(Nym0),
         BlockchainAccountType::BIP32,
         proto::CITEMTYPE_BTC);
 
     std::cout << "Created Nym 0's Account: " << String::Factory(Acc0ID)->Get()
               << " !!\n";
     OTIdentifier Acc1ID = client_.Blockchain().NewAccount(
-        Identifier::Factory(Nym1),
+        identifier::Nym::Factory(Nym1),
         BlockchainAccountType::BIP32,
         proto::CITEMTYPE_BTC);
 
@@ -81,10 +82,10 @@ TEST_F(Test_NewAccount, TestSeedRoot)
     EXPECT_STRNE(
         String::Factory(Acc0ID)->Get(), String::Factory(Acc1ID)->Get());
     std::shared_ptr<proto::Bip44Account> Acc0 =
-        client_.Blockchain().Account(Identifier::Factory(Nym0), Acc0ID);
+        client_.Blockchain().Account(identifier::Nym::Factory(Nym0), Acc0ID);
     ASSERT_TRUE(bool(Acc0));
     std::shared_ptr<proto::Bip44Account> Acc1 =
-        client_.Blockchain().Account(Identifier::Factory(Nym1), Acc1ID);
+        client_.Blockchain().Account(identifier::Nym::Factory(Nym1), Acc1ID);
     ASSERT_TRUE(bool(Acc1));
 
     proto::Bip44Account& Acc_0 = *Acc0.get();
@@ -112,21 +113,21 @@ TEST_F(Test_NewAccount, TestNymsDiff)
     std::cout << "Created Bob: " << BobNymID << " \n";
 
     OTIdentifier AliceAccountID = client_.Blockchain().NewAccount(
-        Identifier::Factory(AliceNymID),
+        identifier::Nym::Factory(AliceNymID),
         BlockchainAccountType::BIP44,
         proto::CITEMTYPE_BTC);
 
     OTIdentifier BobAccountID = client_.Blockchain().NewAccount(
-        Identifier::Factory(BobNymID),
+        identifier::Nym::Factory(BobNymID),
         BlockchainAccountType::BIP44,
         proto::CITEMTYPE_BTC);
 
     std::shared_ptr<proto::Bip44Account> AliceAccount =
         client_.Blockchain().Account(
-            Identifier::Factory(AliceNymID), AliceAccountID);
+            identifier::Nym::Factory(AliceNymID), AliceAccountID);
     std::shared_ptr<proto::Bip44Account> BobAccount =
         client_.Blockchain().Account(
-            Identifier::Factory(BobNymID), BobAccountID);
+            identifier::Nym::Factory(BobNymID), BobAccountID);
 
     ASSERT_TRUE(bool(AliceAccount));
     ASSERT_TRUE(bool(BobAccount));
@@ -155,14 +156,14 @@ TEST_F(Test_NewAccount, TestNym_AccountIdempotence)
 
     const std::string CharlyBIP32AccountID =
         String::Factory(client_.Blockchain().NewAccount(
-                            Identifier::Factory(Charly),
+                            identifier::Nym::Factory(Charly),
                             BlockchainAccountType::BIP32,
                             proto::CITEMTYPE_BTC))
             ->Get();
 
     const std::string CharlyBIP44AccountID =
         String::Factory(client_.Blockchain().NewAccount(
-                            Identifier::Factory(Charly),
+                            identifier::Nym::Factory(Charly),
                             BlockchainAccountType::BIP44,
                             proto::CITEMTYPE_BTC))
             ->Get();
@@ -171,7 +172,7 @@ TEST_F(Test_NewAccount, TestNym_AccountIdempotence)
 
     const std::string CharlyBIP44DupAccountID =
         String::Factory(client_.Blockchain().NewAccount(
-                            Identifier::Factory(Charly),
+                            identifier::Nym::Factory(Charly),
                             BlockchainAccountType::BIP44,
                             proto::CITEMTYPE_BTC))
             ->Get();
@@ -190,14 +191,14 @@ TEST_F(Test_NewAccount, TestChainDiff)
 
     const std::string AliceBTCAccountID =
         String::Factory(client_.Blockchain().NewAccount(
-                            Identifier::Factory(Alice),
+                            identifier::Nym::Factory(Alice),
                             BlockchainAccountType::BIP32,
                             proto::CITEMTYPE_BTC))
             ->Get();
 
     const std::string AliceLTCAccountID =
         String::Factory(client_.Blockchain().NewAccount(
-                            Identifier::Factory(Alice),
+                            identifier::Nym::Factory(Alice),
                             BlockchainAccountType::BIP44,
                             proto::CITEMTYPE_LTC))
             ->Get();
@@ -222,11 +223,11 @@ TEST_F(Test_NewAccount, TestSeedPassphrase)
     EXPECT_STRNE(alias.c_str(), Nym0.c_str());
 
     OTIdentifier AccountID = client_.Blockchain().NewAccount(
-        Identifier::Factory(Nym0),
+        identifier::Nym::Factory(Nym0),
         BlockchainAccountType::BIP32,
         proto::CITEMTYPE_BTC);
     std::shared_ptr<proto::Bip44Account> Acc =
-        client_.Blockchain().Account(Identifier::Factory(Nym0), AccountID);
+        client_.Blockchain().Account(identifier::Nym::Factory(Nym0), AccountID);
     // std::string rootKey =
     // "xprv9s21ZrQH143K25QhxbucbDDuQ4naNntJRi4KUfWT7xo4EKsHt2QJDu7KXp1A3u7Bi1j8ph3EGsZ9Xvz9dGuVrtHHs7pXeTzjuxBrCmmhgC6";
 

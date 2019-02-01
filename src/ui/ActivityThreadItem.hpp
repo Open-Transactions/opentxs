@@ -33,7 +33,7 @@ public:
     virtual ~ActivityThreadItem() = default;
 
 protected:
-    const Identifier& nym_id_;
+    const identifier::Nym& nym_id_;
     const std::chrono::system_clock::time_point time_;
     const Identifier& item_id_;
     const StorageBox& box_;
@@ -46,7 +46,7 @@ protected:
         const ActivityThreadInternalInterface& parent,
         const api::client::Manager& api,
         const network::zeromq::PublishSocket& publisher,
-        const Identifier& nymID,
+        const identifier::Nym& nymID,
         const ActivityThreadRowID& rowID,
         const ActivityThreadSortKey& sortKey,
         const CustomData& custom,

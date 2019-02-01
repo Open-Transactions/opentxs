@@ -33,7 +33,7 @@ public:
     const opentxs::api::client::Manager& client_;
 
     const std::string fingerprint_;
-    const OTIdentifier nym_id_;
+    const OTNymID nym_id_;
     std::string contact_widget_id_;
     WidgetUpdateCounter counter_;
     std::mutex counter_lock_;
@@ -43,9 +43,9 @@ public:
     std::thread loop_;
     std::atomic<bool> shutdown_;
     const OTPaymentCode bob_payment_code_;
-    OTIdentifier bob_contact_id_;
+    OTNymID bob_contact_id_;
     const OTPaymentCode chris_payment_code_;
-    OTIdentifier chris_contact_id_;
+    OTNymID chris_contact_id_;
 
     Test_ContactList()
         : client_(opentxs::OT::App().StartClient({}, 0))
@@ -53,11 +53,13 @@ public:
               "response seminar brave tip suit recall often sound stick owner "
               "lottery motion",
               ""))
-        , nym_id_(Identifier::Factory(client_.Exec().CreateNymHD(
-              proto::CITEMTYPE_INDIVIDUAL,
-              ALICE_NYM_NAME,
-              fingerprint_,
-              0)))
+        , nym_id_(identifier::Nym::Factory(client_.Exec()
+                                               .CreateNymHD(
+                                                   proto::CITEMTYPE_INDIVIDUAL,
+                                                   ALICE_NYM_NAME,
+                                                   fingerprint_,
+                                                   0)
+                                               .c_str()))
         , contact_widget_id_("")
         , counter_()
         , counter_lock_()
@@ -71,9 +73,9 @@ public:
         , loop_(&Test_ContactList::loop, this)
         , shutdown_(false)
         , bob_payment_code_(client_.Factory().PaymentCode(BOB_PAYMENT_CODE))
-        , bob_contact_id_(Identifier::Factory())
+        , bob_contact_id_(identifier::Nym::Factory())
         , chris_payment_code_(client_.Factory().PaymentCode(CHRIS_PAYMENT_CODE))
-        , chris_contact_id_(Identifier::Factory())
+        , chris_contact_id_(identifier::Nym::Factory())
     {
     }
 
@@ -225,27 +227,31 @@ public:
 TEST_F(Test_ContactList, Contact_List)
 {
     ASSERT_EQ(false, nym_id_->empty());
-    ASSERT_EQ(nym_id_->str(), ALICE_NYM_ID);
+    ASSERT_EQ(nym_id_, identifier::Nym::Factory(ALICE_NYM_ID));
     ASSERT_EQ(true, bob_payment_code_->VerifyInternally());
 
     while (GetCounter(contact_widget_id_) < 2) { ; }
 
     const auto bob = client_.Contacts().NewContact(
-        BOB_NYM_NAME, bob_payment_code_->ID(), bob_payment_code_);
+        BOB_NYM_NAME,
+        identifier::Nym::Factory(bob_payment_code_->ID()->str()),
+        bob_payment_code_);
 
     ASSERT_EQ(true, bool(bob));
 
-    bob_contact_id_ = Identifier::Factory(bob->ID());
+    bob_contact_id_ = identifier::Nym::Factory(bob->ID().str());
 
     ASSERT_EQ(false, bob_contact_id_->empty());
 
     while (GetCounter(contact_widget_id_) < 4) { ; }
 
     const auto chris = client_.Contacts().NewContact(
-        CHRIS_NYM_NAME, chris_payment_code_->ID(), chris_payment_code_);
+        CHRIS_NYM_NAME,
+        identifier::Nym::Factory(chris_payment_code_->ID()->str()),
+        chris_payment_code_);
 
     ASSERT_EQ(true, bool(chris));
 
-    chris_contact_id_ = Identifier::Factory(chris->ID());
+    chris_contact_id_ = identifier::Nym::Factory(chris->ID().str());
 }
 }  // namespace

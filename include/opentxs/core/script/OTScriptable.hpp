@@ -70,10 +70,10 @@ public:
         const Account& theAccount,
         OTPartyAccount** ppPartyAccount = nullptr) const;
     OTParty* FindPartyBasedOnNymIDAsAgent(
-        const Identifier& theNymID,
+        const identifier::Nym& theNymID,
         OTAgent** ppAgent = nullptr) const;
     OTParty* FindPartyBasedOnNymIDAsAuthAgent(
-        const Identifier& theNymID,
+        const identifier::Nym& theNymID,
         OTAgent** ppAgent = nullptr) const;
     OTParty* FindPartyBasedOnAccountID(
         const Identifier& theAcctID,

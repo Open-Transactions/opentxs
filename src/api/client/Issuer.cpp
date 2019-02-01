@@ -11,6 +11,7 @@
 #include "opentxs/contact/ContactGroup.hpp"
 #include "opentxs/contact/ContactItem.hpp"
 #include "opentxs/contact/ContactSection.hpp"
+#include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/core/Identifier.hpp"
 #include "opentxs/core/Flag.hpp"
 #include "opentxs/core/Lockable.hpp"
@@ -29,7 +30,7 @@ namespace opentxs
 {
 api::client::Issuer* Factory::Issuer(
     const api::Wallet& wallet,
-    const Identifier& nymID,
+    const identifier::Nym& nymID,
     const proto::Issuer& serialized)
 {
     return new api::client::implementation::Issuer(wallet, nymID, serialized);
@@ -37,7 +38,7 @@ api::client::Issuer* Factory::Issuer(
 
 api::client::Issuer* Factory::Issuer(
     const api::Wallet& wallet,
-    const Identifier& nymID,
+    const identifier::Nym& nymID,
     const Identifier& issuerID)
 {
     return new api::client::implementation::Issuer(wallet, nymID, issuerID);
@@ -48,14 +49,14 @@ namespace opentxs::api::client::implementation
 {
 Issuer::Issuer(
     const api::Wallet& wallet,
-    const Identifier& nymID,
+    const identifier::Nym& nymID,
     const Identifier& issuerID)
     : wallet_(wallet)
     , version_(CURRENT_VERSION)
     , pairing_code_("")
     , paired_(Flag::Factory(false))
-    , nym_id_(Identifier::Factory(nymID))
-    , issuer_id_(Identifier::Factory(issuerID))
+    , nym_id_(nymID)
+    , issuer_id_(issuerID)
     , account_map_()
     , peer_requests_()
 {
@@ -63,14 +64,14 @@ Issuer::Issuer(
 
 Issuer::Issuer(
     const api::Wallet& wallet,
-    const Identifier& nymID,
+    const identifier::Nym& nymID,
     const proto::Issuer& serialized)
     : wallet_(wallet)
     , version_(serialized.version())
     , pairing_code_(serialized.pairingcode())
     , paired_(Flag::Factory(serialized.paired()))
-    , nym_id_(Identifier::Factory(nymID))
-    , issuer_id_(Identifier::Factory(serialized.id()))
+    , nym_id_(nymID)
+    , issuer_id_(identifier::Nym::Factory(serialized.id()))
     , account_map_()
     , peer_requests_()
 {
@@ -108,7 +109,7 @@ Issuer::operator std::string() const
         output << "* Pairing code: " << pairing_code_ << "\n";
     }
 
-    const auto nym = wallet_.Nym(issuer_id_);
+    const auto nym = wallet_.Nym(identifier::Nym::Factory(issuer_id_->str()));
 
     if (false == bool(nym)) {
         output << "* The credentials for the issuer nym are not yet downloaded."
@@ -552,7 +553,7 @@ std::set<std::tuple<OTIdentifier, OTIdentifier, bool>> Issuer::get_requests(
 
 const Identifier& Issuer::IssuerID() const { return issuer_id_; }
 
-const Identifier& Issuer::LocalNymID() const { return nym_id_; }
+const identifier::Nym& Issuer::LocalNymID() const { return nym_id_; }
 
 bool Issuer::Paired() const { return paired_.get(); }
 
@@ -562,7 +563,7 @@ OTIdentifier Issuer::PrimaryServer() const
 {
     Lock lock(lock_);
 
-    auto nym = wallet_.Nym(issuer_id_);
+    auto nym = wallet_.Nym(identifier::Nym::Factory(issuer_id_->str()));
 
     if (false == bool(nym)) { return Identifier::Factory(); }
 

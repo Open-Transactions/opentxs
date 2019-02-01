@@ -54,14 +54,14 @@ public:
 
     void reindex(const ProfileSortKey&, const CustomData&) override {}
     bool last(const ProfileSubsectionRowID&) const override { return false; }
-    const Identifier& NymID() const override { return nym_id_; }
+    const identifier::Nym& NymID() const override { return nym_id_; }
     proto::ContactSectionName Section() const override { return {}; }
 
     ProfileSubsectionBlank() = default;
     ~ProfileSubsectionBlank() = default;
 
 private:
-    const OTIdentifier nym_id_{Identifier::Factory()};
+    const OTNymID nym_id_{identifier::Nym::Factory()};
 
     ProfileSubsectionBlank(const ProfileSubsectionBlank&) = delete;
     ProfileSubsectionBlank(ProfileSubsectionBlank&&) = delete;

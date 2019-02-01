@@ -295,10 +295,11 @@ std::int32_t LoadAbbreviatedRecord(
 bool VerifyBoxReceiptExists(
     const std::string& dataFolder,
     const Identifier& NOTARY_ID,
-    const Identifier& NYM_ID,      // Unused here for now, but still convention.
-    const Identifier& ACCOUNT_ID,  // If for Nymbox (vs inbox/outbox) then pass
-                                   // NYM_ID in this field also.
-    const std::int32_t nBoxType,   // 0/nymbox, 1/inbox, 2/outbox
+    const identifier::Nym& NYM_ID,  // Unused here for now, but still
+                                    // convention.
+    const Identifier& ACCOUNT_ID,   // If for Nymbox (vs inbox/outbox) then pass
+                                    // NYM_ID in this field also.
+    const std::int32_t nBoxType,    // 0/nymbox, 1/inbox, 2/outbox
     const std::int64_t& lTransactionNum)
 {
     const std::int64_t lLedgerType = static_cast<int64_t>(nBoxType);

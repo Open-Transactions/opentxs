@@ -499,7 +499,10 @@ void Manager::mint() const
 }
 #endif  // OT_CASH
 
-const Identifier& Manager::NymID() const { return server_.GetServerNym().ID(); }
+const identifier::Nym& Manager::NymID() const
+{
+    return server_.GetServerNym().ID();
+}
 
 #if OT_CASH
 void Manager::ScanMints() const

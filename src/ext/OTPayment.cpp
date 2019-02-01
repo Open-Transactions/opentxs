@@ -9,6 +9,7 @@
 
 #include "opentxs/api/Core.hpp"
 #include "opentxs/api/Factory.hpp"
+#include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/core/recurring/OTPaymentPlan.hpp"
 #include "opentxs/core/script/OTSmartContract.hpp"
 #include "opentxs/core/util/Assert.hpp"
@@ -83,11 +84,11 @@ OTPayment::OTPayment(const api::Core& core)
     , m_strMemo(String::Factory())
     , m_InstrumentDefinitionID(Identifier::Factory())
     , m_NotaryID(Identifier::Factory())
-    , m_SenderNymID(Identifier::Factory())
+    , m_SenderNymID(identifier::Nym::Factory())
     , m_SenderAcctID(Identifier::Factory())
-    , m_RecipientNymID(Identifier::Factory())
+    , m_RecipientNymID(identifier::Nym::Factory())
     , m_RecipientAcctID(Identifier::Factory())
-    , m_RemitterNymID(Identifier::Factory())
+    , m_RemitterNymID(identifier::Nym::Factory())
     , m_RemitterAcctID(Identifier::Factory())
     , m_VALID_FROM(OT_TIME_ZERO)
     , m_VALID_TO(OT_TIME_ZERO)
@@ -108,11 +109,11 @@ OTPayment::OTPayment(const api::Core& core, const String& strPayment)
     , m_strMemo(String::Factory())
     , m_InstrumentDefinitionID(Identifier::Factory())
     , m_NotaryID(Identifier::Factory())
-    , m_SenderNymID(Identifier::Factory())
+    , m_SenderNymID(identifier::Nym::Factory())
     , m_SenderAcctID(Identifier::Factory())
-    , m_RecipientNymID(Identifier::Factory())
+    , m_RecipientNymID(identifier::Nym::Factory())
     , m_RecipientAcctID(Identifier::Factory())
-    , m_RemitterNymID(Identifier::Factory())
+    , m_RemitterNymID(identifier::Nym::Factory())
     , m_RemitterAcctID(Identifier::Factory())
     , m_VALID_FROM(OT_TIME_ZERO)
     , m_VALID_TO(OT_TIME_ZERO)
@@ -140,9 +141,9 @@ OTPayment::paymentType OTPayment::GetTypeFromString(const String& strType)
     return OTPayment::ERROR_STATE;
 }
 
-bool OTPayment::SetTempRecipientNymID(const Identifier& id)
+bool OTPayment::SetTempRecipientNymID(const identifier::Nym& id)
 {
-    m_RecipientNymID = Identifier::Factory(id);
+    m_RecipientNymID = id;
 
     return true;
 }
@@ -969,8 +970,9 @@ bool OTPayment::GetClosingNum(
     return bSuccess;
 }
 
-bool OTPayment::GetOpeningNum(std::int64_t& lOutput, const Identifier& theNymID)
-    const
+bool OTPayment::GetOpeningNum(
+    std::int64_t& lOutput,
+    const identifier::Nym& theNymID) const
 {
     lOutput = 0;
 
@@ -1071,7 +1073,7 @@ bool OTPayment::GetOpeningNum(std::int64_t& lOutput, const Identifier& theNymID)
 
         case OTPayment::CHEQUE:
         case OTPayment::INVOICE:
-            if (theNymID == m_SenderNymID) {
+            if (theNymID.operator==(m_SenderNymID)) {
                 lOutput =
                     m_lTransactionNum;  // The "opening" number for a cheque is
                                         // the ONLY number it has.
@@ -1083,7 +1085,7 @@ bool OTPayment::GetOpeningNum(std::int64_t& lOutput, const Identifier& theNymID)
             break;
 
         case OTPayment::VOUCHER:
-            if (theNymID == m_RemitterNymID) {
+            if (theNymID.operator==(m_RemitterNymID)) {
                 lOutput =
                     m_lTransactionNum;  // The "opening" number for a cheque is
                                         // the ONLY number it has.
@@ -1357,7 +1359,7 @@ bool OTPayment::GetNotaryID(Identifier& theOutput) const
 // With a voucher (cashier's cheque) the "bank" is the "sender",
 // whereas the actual Nym who purchased it is the "remitter."
 //
-bool OTPayment::GetRemitterNymID(Identifier& theOutput) const
+bool OTPayment::GetRemitterNymID(identifier::Nym& theOutput) const
 {
     theOutput.Release();
 
@@ -1409,7 +1411,7 @@ bool OTPayment::GetRemitterAcctID(Identifier& theOutput) const
     return bSuccess;
 }
 
-bool OTPayment::GetSenderNymIDForDisplay(Identifier& theOutput) const
+bool OTPayment::GetSenderNymIDForDisplay(identifier::Nym& theOutput) const
 {
     if (IsVoucher()) return GetRemitterNymID(theOutput);
 
@@ -1423,7 +1425,7 @@ bool OTPayment::GetSenderAcctIDForDisplay(Identifier& theOutput) const
     return GetSenderAcctID(theOutput);
 }
 
-bool OTPayment::GetSenderNymID(Identifier& theOutput) const
+bool OTPayment::GetSenderNymID(identifier::Nym& theOutput) const
 {
     theOutput.Release();
 
@@ -1480,7 +1482,7 @@ bool OTPayment::GetSenderAcctID(Identifier& theOutput) const
     return bSuccess;
 }
 
-bool OTPayment::GetRecipientNymID(Identifier& theOutput) const
+bool OTPayment::GetRecipientNymID(identifier::Nym& theOutput) const
 {
     theOutput.Release();
 
@@ -1740,8 +1742,8 @@ bool OTPayment::IsCancelledCheque()
 
     if (false == IsCheque()) { return false; }
 
-    auto sender = Identifier::Factory();
-    auto recipient = Identifier::Factory();
+    auto sender = identifier::Nym::Factory();
+    auto recipient = identifier::Nym::Factory();
     Amount amount{0};
 
     if (false == GetSenderNymID(sender)) {

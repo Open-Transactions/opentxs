@@ -11,6 +11,7 @@
 #include "opentxs/api/client/OTX.hpp"
 #include "opentxs/contact/Contact.hpp"
 #include "opentxs/contact/ContactData.hpp"
+#include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/core/Flag.hpp"
 #include "opentxs/core/Identifier.hpp"
 #include "opentxs/core/Lockable.hpp"
@@ -49,7 +50,7 @@ namespace opentxs
 ui::ActivityThread* Factory::ActivityThread(
     const api::client::Manager& api,
     const network::zeromq::PublishSocket& publisher,
-    const Identifier& nymID,
+    const identifier::Nym& nymID,
     const Identifier& threadID)
 {
     return new ui::implementation::ActivityThread(
@@ -62,7 +63,7 @@ namespace opentxs::ui::implementation
 ActivityThread::ActivityThread(
     const api::client::Manager& api,
     const network::zeromq::PublishSocket& publisher,
-    const Identifier& nymID,
+    const identifier::Nym& nymID,
     const Identifier& threadID)
     : ActivityThreadList(api, publisher, nymID)
     , listeners_{{api_.Activity().ThreadPublisher(nymID),

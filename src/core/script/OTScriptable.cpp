@@ -11,6 +11,7 @@
 #include "opentxs/api/Factory.hpp"
 #include "opentxs/api/Native.hpp"
 #include "opentxs/core/cron/OTCronItem.hpp"
+#include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/core/script/OTAgent.hpp"
 #include "opentxs/core/script/OTBylaw.hpp"
 #include "opentxs/core/script/OTClause.hpp"
@@ -827,7 +828,7 @@ OTPartyAccount* OTScriptable::GetPartyAccountByID(
 }
 
 OTParty* OTScriptable::FindPartyBasedOnNymIDAsAgent(
-    const Identifier& theNymID,
+    const identifier::Nym& theNymID,
     OTAgent** ppAgent) const
 {
     for (const auto& it : m_mapParties) {
@@ -840,7 +841,7 @@ OTParty* OTScriptable::FindPartyBasedOnNymIDAsAgent(
 }
 
 OTParty* OTScriptable::FindPartyBasedOnNymIDAsAuthAgent(
-    const Identifier& theNymID,
+    const identifier::Nym& theNymID,
     OTAgent** ppAgent) const
 {
     for (auto& it : m_mapParties) {

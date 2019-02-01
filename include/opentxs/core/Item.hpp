@@ -223,17 +223,17 @@ private:  // Private prevents erroneous use by other classes.
     Item(const api::Core& core);
     Item(
         const api::Core& core,
-        const Identifier& theNymID,
+        const identifier::Nym& theNymID,
         const Item& theOwner);  // From owner we can get acct ID, server ID,
                                 // and transaction Num
     Item(
         const api::Core& core,
-        const Identifier& theNymID,
+        const identifier::Nym& theNymID,
         const OTTransaction& theOwner);  // From owner we can get acct ID,
                                          // server ID, and transaction Num
     Item(
         const api::Core& core,
-        const Identifier& theNymID,
+        const identifier::Nym& theNymID,
         const OTTransaction& theOwner,
         itemType theType,
         const Identifier& pDestinationAcctID);

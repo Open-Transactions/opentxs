@@ -20,6 +20,7 @@
 #include "opentxs/contact/ContactItem.hpp"
 #include "opentxs/contact/ContactSection.hpp"
 #include "opentxs/core/contract/peer/PeerReply.hpp"
+#include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/core/contract/peer/PeerRequest.hpp"
 #include "opentxs/core/contract/UnitDefinition.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
@@ -98,8 +99,8 @@ Pair::Pair(const Flag& running, const api::client::Manager& client)
 }
 
 bool Pair::AddIssuer(
-    const Identifier& localNymID,
-    const Identifier& issuerNymID,
+    const identifier::Nym& localNymID,
+    const identifier::Nym& issuerNymID,
     const std::string& pairingCode) const
 {
     if (localNymID.empty()) {
@@ -135,7 +136,7 @@ bool Pair::AddIssuer(
 }
 
 bool Pair::CheckIssuer(
-    const Identifier& localNymID,
+    const identifier::Nym& localNymID,
     const Identifier& unitDefinitionID) const
 {
     const auto contract = client_.Wallet().UnitDefinition(unitDefinitionID);
@@ -161,7 +162,8 @@ void Pair::check_pairing() const
         for (const auto& issuerID : issuerSet) {
             SHUTDOWN()
 
-            state_machine(nymID, issuerID);
+            state_machine(nymID, identifier::Nym::Factory(issuerID->str()));
+            // TODO NymID Type
         }
     }
 }
@@ -183,21 +185,23 @@ void Pair::check_refresh() const
     }
 }
 
-std::map<OTIdentifier, std::set<OTIdentifier>> Pair::create_issuer_map() const
+std::map<OTNymID, std::set<OTIdentifier>> Pair::create_issuer_map() const
 {
-    std::map<OTIdentifier, std::set<OTIdentifier>> output;
+    std::map<OTNymID, std::set<OTIdentifier>> output;
     const auto nymList = client_.OTAPI().LocalNymList();
 
     for (const auto& nymID : nymList) {
-        output[nymID] = client_.Wallet().IssuerList(nymID);
+
+        output[nymID] =
+            client_.Wallet().IssuerList(identifier::Nym::Factory(nymID->str()));
     }
 
     return output;
 }
 
 std::pair<bool, OTIdentifier> Pair::get_connection(
-    const Identifier& localNymID,
-    const Identifier& issuerNymID,
+    const identifier::Nym& localNymID,
+    const identifier::Nym& issuerNymID,
     const Identifier& serverID,
     const proto::ConnectionInfoType type) const
 {
@@ -221,7 +225,7 @@ std::pair<bool, OTIdentifier> Pair::get_connection(
 }
 
 std::pair<bool, OTIdentifier> Pair::initiate_bailment(
-    const Identifier& nymID,
+    const identifier::Nym& nymID,
     const Identifier& serverID,
     const Identifier& issuerID,
     const Identifier& unitID) const
@@ -253,8 +257,8 @@ std::pair<bool, OTIdentifier> Pair::initiate_bailment(
 }
 
 std::string Pair::IssuerDetails(
-    const Identifier& localNymID,
-    const Identifier& issuerNymID) const
+    const identifier::Nym& localNymID,
+    const identifier::Nym& issuerNymID) const
 {
     auto issuer = client_.Wallet().Issuer(localNymID, issuerNymID);
 
@@ -264,7 +268,7 @@ std::string Pair::IssuerDetails(
 }
 
 std::set<OTIdentifier> Pair::IssuerList(
-    const Identifier& localNymID,
+    const identifier::Nym& localNymID,
     const bool onlyTrusted) const
 {
     Lock lock(status_lock_);
@@ -288,7 +292,7 @@ std::set<OTIdentifier> Pair::IssuerList(
 }
 
 bool Pair::need_registration(
-    const Identifier& localNymID,
+    const identifier::Nym& localNymID,
     const Identifier& serverID) const
 {
     auto context = client_.Wallet().ServerContext(localNymID, serverID);
@@ -300,7 +304,7 @@ bool Pair::need_registration(
 
 void Pair::process_connection_info(
     const Lock& lock,
-    const Identifier& nymID,
+    const identifier::Nym& nymID,
     const proto::PeerReply& reply) const
 {
     OT_ASSERT(verify_lock(lock, peer_lock_))
@@ -323,7 +327,8 @@ void Pair::process_connection_info(
     }
 }
 
-void Pair::process_peer_replies(const Lock& lock, const Identifier& nymID) const
+void Pair::process_peer_replies(const Lock& lock, const identifier::Nym& nymID)
+    const
 {
     OT_ASSERT(verify_lock(lock, peer_lock_));
 
@@ -379,7 +384,7 @@ void Pair::process_peer_replies(const Lock& lock, const Identifier& nymID) const
     }
 }
 
-void Pair::process_peer_requests(const Lock& lock, const Identifier& nymID)
+void Pair::process_peer_requests(const Lock& lock, const identifier::Nym& nymID)
     const
 {
     OT_ASSERT(verify_lock(lock, peer_lock_));
@@ -426,7 +431,7 @@ void Pair::process_peer_requests(const Lock& lock, const Identifier& nymID)
 
 void Pair::process_pending_bailment(
     const Lock& lock,
-    const Identifier& nymID,
+    const identifier::Nym& nymID,
     const proto::PeerRequest& request) const
 {
     OT_ASSERT(verify_lock(lock, peer_lock_))
@@ -485,7 +490,7 @@ void Pair::process_pending_bailment(
 
 void Pair::process_request_bailment(
     const Lock& lock,
-    const Identifier& nymID,
+    const identifier::Nym& nymID,
     const proto::PeerReply& reply) const
 {
     OT_ASSERT(verify_lock(lock, peer_lock_))
@@ -510,7 +515,7 @@ void Pair::process_request_bailment(
 
 void Pair::process_request_outbailment(
     const Lock& lock,
-    const Identifier& nymID,
+    const identifier::Nym& nymID,
     const proto::PeerReply& reply) const
 {
     OT_ASSERT(verify_lock(lock, peer_lock_))
@@ -535,7 +540,7 @@ void Pair::process_request_outbailment(
 
 void Pair::process_store_secret(
     const Lock& lock,
-    const Identifier& nymID,
+    const identifier::Nym& nymID,
     const proto::PeerReply& reply) const
 {
     OT_ASSERT(verify_lock(lock, peer_lock_))
@@ -575,15 +580,15 @@ void Pair::process_store_secret(
 }
 
 void Pair::queue_nym_download(
-    const Identifier& localNymID,
-    const Identifier& targetNymID) const
+    const identifier::Nym& localNymID,
+    const identifier::Nym& targetNymID) const
 {
     client_.OTX().StartIntroductionServer(localNymID);
     client_.OTX().FindNym(targetNymID);
 }
 
 void Pair::queue_nym_registration(
-    const Identifier& nymID,
+    const identifier::Nym& nymID,
     const Identifier& serverID,
     const bool setData) const
 {
@@ -591,7 +596,7 @@ void Pair::queue_nym_registration(
 }
 
 void Pair::queue_server_contract(
-    const Identifier& nymID,
+    const identifier::Nym& nymID,
     const Identifier& serverID) const
 {
     client_.OTX().StartIntroductionServer(nymID);
@@ -599,7 +604,7 @@ void Pair::queue_server_contract(
 }
 
 void Pair::queue_unit_definition(
-    const Identifier& nymID,
+    const identifier::Nym& nymID,
     const Identifier& serverID,
     const Identifier& unitID) const
 {
@@ -613,7 +618,7 @@ void Pair::refresh() const
 }
 
 std::pair<bool, OTIdentifier> Pair::register_account(
-    const Identifier& nymID,
+    const identifier::Nym& nymID,
     const Identifier& serverID,
     const Identifier& unitID) const
 {
@@ -646,8 +651,8 @@ std::pair<bool, OTIdentifier> Pair::register_account(
 }
 
 void Pair::state_machine(
-    const Identifier& localNymID,
-    const Identifier& issuerNymID) const
+    const identifier::Nym& localNymID,
+    const identifier::Nym& issuerNymID) const
 {
     LogDetail(OT_METHOD)(__FUNCTION__)(": Local nym: ")(localNymID)(
         " Issuer Nym: ")(issuerNymID)
@@ -698,7 +703,8 @@ void Pair::state_machine(
             .Flush();
     }
 
-    auto editor = client_.Wallet().mutable_Issuer(localNymID, issuerNymID);
+    auto editor = client_.Wallet().mutable_Issuer(
+        identifier::Nym::Factory(localNymID.str()), issuerNymID);
     auto& issuer = editor.It();
     trusted = issuer.Paired();
     bool needStoreSecret{false};
@@ -889,8 +895,8 @@ void Pair::state_machine(
 }
 
 std::pair<bool, OTIdentifier> Pair::store_secret(
-    const Identifier& localNymID,
-    const Identifier& issuerNymID,
+    const identifier::Nym& localNymID,
+    const identifier::Nym& issuerNymID,
     const Identifier& serverID) const
 {
     std::pair<bool, OTIdentifier> output{false, Identifier::Factory()};
@@ -936,8 +942,8 @@ void Pair::update_peer() const
 
     for (const auto& [nymID, issuerSet] : create_issuer_map()) {
         const auto& notUsed [[maybe_unused]] = issuerSet;
-        process_peer_replies(lock, nymID);
-        process_peer_requests(lock, nymID);
+        process_peer_replies(lock, identifier::Nym::Factory(nymID->str()));
+        process_peer_requests(lock, identifier::Nym::Factory(nymID->str()));
     }
 }
 

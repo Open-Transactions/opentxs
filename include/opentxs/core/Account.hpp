@@ -78,7 +78,7 @@ public:
     // Compares the NymID loaded from the account file with whatever Nym the
     // programmer wants to verify.
     EXPORT bool VerifyOwner(const Nym& candidate) const;
-    EXPORT bool VerifyOwnerByID(const Identifier& nymId) const;
+    EXPORT bool VerifyOwnerByID(const identifier::Nym& nymId) const;
 
     // Debit a certain amount from the account (presumably the same amount is
     // being added somewhere)
@@ -131,10 +131,10 @@ private:
 
     static Account* GenerateNewAccount(
         const api::Core& core,
-        const Identifier& nymID,
+        const identifier::Nym& nymID,
         const Identifier& notaryID,
         const Nym& serverNym,
-        const Identifier& userNymID,
+        const identifier::Nym& userNymID,
         const Identifier& instrumentDefinitionID,
         AccountType acctType = user,
         TransactionNumber stashTransNum = 0);
@@ -153,7 +153,7 @@ private:
         const ledgerType type);
     bool GenerateNewAccount(
         const Nym& server,
-        const Identifier& userNymID,
+        const identifier::Nym& userNymID,
         const Identifier& notaryID,
         const Identifier& instrumentDefinitionID,
         AccountType acctType = user,
@@ -180,18 +180,18 @@ private:
 
     Account(
         const api::Core& core,
-        const Identifier& nymID,
+        const identifier::Nym& nymID,
         const Identifier& accountId,
         const Identifier& notaryID,
         const String& name);
     Account(
         const api::Core& core,
-        const Identifier& nymID,
+        const identifier::Nym& nymID,
         const Identifier& accountId,
         const Identifier& notaryID);
     Account(
         const api::Core& core,
-        const Identifier& nymID,
+        const identifier::Nym& nymID,
         const Identifier& notaryID);
     Account(const api::Core& core);
     Account() = delete;

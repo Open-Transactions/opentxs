@@ -18,6 +18,7 @@
 #include "opentxs/core/contract/UnitDefinition.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/Identifier.hpp"
+#include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/core/Log.hpp"
 #include "opentxs/core/Nym.hpp"
 #include "opentxs/core/String.hpp"

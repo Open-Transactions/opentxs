@@ -213,13 +213,13 @@ Object::Object(
         } break;
         case (proto::PEEROBJECT_RESPONSE): {
             auto senderNym = api_.Wallet().Nym(
-                Identifier::Factory(serialized.otrequest().initiator()));
+                identifier::Nym::Factory(serialized.otrequest().initiator()));
             request_ = PeerRequest::Factory(
                 api_.Wallet(), senderNym, serialized.otrequest());
 
             if (false == bool(nym_)) {
-                nym_ = api_.Wallet().Nym(
-                    Identifier::Factory(serialized.otrequest().recipient()));
+                nym_ = api_.Wallet().Nym(identifier::Nym::Factory(
+                    serialized.otrequest().recipient()));
             }
 
             reply_ =
@@ -371,7 +371,8 @@ proto::PeerObject Object::Serialize() const
 
             if (request_) {
                 *(output.mutable_otrequest()) = request_->Contract();
-                auto nym = api_.Wallet().Nym(request_->Initiator());
+                auto nym = api_.Wallet().Nym(
+                    identifier::Nym::Factory(request_->Initiator().str()));
 
                 if (nym) { *output.mutable_nym() = nym->asPublicNym(); }
             }

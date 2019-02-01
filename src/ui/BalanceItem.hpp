@@ -34,7 +34,7 @@ public:
     virtual ~BalanceItem() override;
 
 protected:
-    const OTIdentifier nym_id_;
+    const OTNymID nym_id_;
     const std::string workflow_{""};
     const StorageBox type_{StorageBox::UNKNOWN};
     std::string text_{""};
@@ -44,7 +44,7 @@ protected:
 
     static StorageBox extract_type(const proto::PaymentWorkflow& workflow);
 
-    std::string get_contact_name(const Identifier& nymID) const;
+    std::string get_contact_name(const identifier::Nym& nymID) const;
 
     BalanceItem(
         const AccountActivityInternalInterface& parent,
@@ -53,7 +53,7 @@ protected:
         const AccountActivityRowID& rowID,
         const AccountActivitySortKey& sortKey,
         const CustomData& custom,
-        const Identifier& nymID,
+        const identifier::Nym& nymID,
         const Identifier& accountID);
 
 private:

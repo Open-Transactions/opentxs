@@ -67,7 +67,7 @@ public:
     EXPORT virtual std::pair<RequestNumber, std::unique_ptr<Message>>
     InitializeServerCommand(
         const MessageType type,
-        const Identifier& recipientNymID,
+        const identifier::Nym& recipientNymID,
         const RequestNumber provided,
         const bool withAcknowledgments = true,
         const bool withNymboxHash = false) = 0;

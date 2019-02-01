@@ -21,17 +21,17 @@ class Pair
 {
 public:
     virtual bool AddIssuer(
-        const Identifier& localNymID,
-        const Identifier& issuerNymID,
+        const identifier::Nym& localNymID,
+        const identifier::Nym& issuerNymID,
         const std::string& pairingCode) const = 0;
     virtual bool CheckIssuer(
-        const Identifier& localNymID,
+        const identifier::Nym& localNymID,
         const Identifier& unitDefinitionID) const = 0;
     virtual std::string IssuerDetails(
-        const Identifier& localNymID,
-        const Identifier& issuerNymID) const = 0;
+        const identifier::Nym& localNymID,
+        const identifier::Nym& issuerNymID) const = 0;
     virtual std::set<OTIdentifier> IssuerList(
-        const Identifier& localNymID,
+        const identifier::Nym& localNymID,
         const bool onlyTrusted) const = 0;
     virtual void Update() const = 0;
 

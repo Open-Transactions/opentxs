@@ -59,7 +59,7 @@ public:
         const bool withNymboxHash = true) override;
     std::pair<RequestNumber, std::unique_ptr<Message>> InitializeServerCommand(
         const MessageType type,
-        const Identifier& recipientNymID,
+        const identifier::Nym& recipientNymID,
         const RequestNumber provided,
         const bool withAcknowledgments = true,
         const bool withNymboxHash = false) override;
@@ -200,7 +200,6 @@ private:
         const TransactionNumber number,
         std::shared_ptr<OTTransaction> transaction,
         Ledger& ledger) const;
-    const Identifier& client_nym_id(const Lock& lock) const override;
     bool create_instrument_notice_from_peer_object(
         const Lock& lock,
         const api::client::Manager& client,
@@ -519,7 +518,8 @@ private:
     bool resync(const Lock& lock, const proto::Context& serialized);
     using implementation::Context::serialize;
     proto::Context serialize(const Lock& lock) const override;
-    const Identifier& server_nym_id(const Lock& lock) const override;
+    const identifier::Nym& client_nym_id(const Lock& lock) const override;
+    const identifier::Nym& server_nym_id(const Lock& lock) const override;
     QueueResult start(
         const api::client::Manager& client,
         std::shared_ptr<Message> message,

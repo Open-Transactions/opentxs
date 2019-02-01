@@ -31,6 +31,7 @@
 #include "opentxs/core/contract/peer/PeerRequest.hpp"
 #include "opentxs/core/contract/UnitDefinition.hpp"
 #include "opentxs/core/crypto/OTPasswordData.hpp"
+#include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/core/Account.hpp"
 #include "opentxs/core/Log.hpp"
 #include "opentxs/core/Message.hpp"
@@ -253,7 +254,7 @@ opentxs::Account* Wallet::account_factory(
         return nullptr;
     }
 
-    const auto signerNym = Nym(signerID);
+    const auto signerNym = Nym(identifier::Nym::Factory(signerID->str()));
 
     if (false == bool(signerNym)) {
         LogOutput(OT_METHOD)(__FUNCTION__)(": Unable to load signer nym.")
@@ -293,7 +294,7 @@ OTIdentifier Wallet::AccountPartialMatch(const std::string& hint) const
 }
 
 ExclusiveAccount Wallet::CreateAccount(
-    const Identifier& ownerNymID,
+    const identifier::Nym& ownerNymID,
     const Identifier& notaryID,
     const Identifier& instrumentDefinitionID,
     const opentxs::Nym& signer,
@@ -518,7 +519,7 @@ bool Wallet::UpdateAccount(
         return false;
     }
 
-    if (newAccount->GetNymID() != localNym.ID()) {
+    if (newAccount->GetNymID().operator!=(localNym.ID())) {
         LogOutput(OT_METHOD)(__FUNCTION__)(": Wrong nym on account.").Flush();
 
         return false;
@@ -646,8 +647,8 @@ std::mutex& Wallet::get_purse_lock(
 #endif
 
 std::shared_ptr<opentxs::Context> Wallet::context(
-    const Identifier& localNymID,
-    const Identifier& remoteNymID) const
+    const identifier::Nym& localNymID,
+    const identifier::Nym& remoteNymID) const
 {
     const std::string local = localNymID.str();
     const std::string remote = remoteNymID.str();
@@ -682,6 +683,7 @@ std::shared_ptr<opentxs::Context> Wallet::context(
 
     // Obtain nyms.
     const auto localNym = Nym(localNymID);
+    // const OTNymID localNym = identifier::Nym::Factory()
     const auto remoteNym = Nym(remoteNymID);
 
     if (!localNym) {
@@ -729,15 +731,15 @@ std::shared_ptr<opentxs::Context> Wallet::context(
 }
 
 std::shared_ptr<const opentxs::ClientContext> Wallet::ClientContext(
-    const Identifier&,  // Not used for now.
-    const Identifier& remoteNymID) const
+    const identifier::Nym&,  // Not used for now.
+    const identifier::Nym& remoteNymID) const
 {
     // Overridden in appropriate child class.
     OT_FAIL;
 }
 
 std::shared_ptr<const opentxs::ServerContext> Wallet::ServerContext(
-    const Identifier& localNymID,
+    const identifier::Nym& localNymID,
     const Identifier& remoteID) const
 {
     // Overridden in appropriate child class.
@@ -745,15 +747,15 @@ std::shared_ptr<const opentxs::ServerContext> Wallet::ServerContext(
 }
 
 Editor<opentxs::ClientContext> Wallet::mutable_ClientContext(
-    const Identifier&,  // Not used for now.
-    const Identifier& remoteNymID) const
+    const identifier::Nym&,  // Not used for now.
+    const identifier::Nym& remoteNymID) const
 {
     // Overridden in appropriate child class.
     OT_FAIL;
 }
 
 Editor<opentxs::ServerContext> Wallet::mutable_ServerContext(
-    const Identifier& localNymID,
+    const identifier::Nym& localNymID,
     const Identifier& remoteID) const
 {
     // Overridden in appropriate child class.
@@ -835,7 +837,7 @@ bool Wallet::ImportAccount(std::unique_ptr<opentxs::Account>& imported) const
     return false;
 }
 
-std::set<OTIdentifier> Wallet::IssuerList(const Identifier& nymID) const
+std::set<OTIdentifier> Wallet::IssuerList(const identifier::Nym& nymID) const
 {
     std::set<OTIdentifier> output{};
     auto list = api_.Storage().IssuerList(nymID.str());
@@ -848,20 +850,22 @@ std::set<OTIdentifier> Wallet::IssuerList(const Identifier& nymID) const
 }
 
 std::shared_ptr<const api::client::Issuer> Wallet::Issuer(
-    const Identifier& nymID,
+    const identifier::Nym& nymID,
     const Identifier& issuerID) const
 {
-    auto& [lock, pIssuer] = issuer(nymID, issuerID, false);
+    auto& [lock, pIssuer] =
+        issuer(nymID, identifier::Nym::Factory(issuerID.str()), false);
     const auto& notUsed [[maybe_unused]] = lock;
 
     return pIssuer;
 }
 
 Editor<api::client::Issuer> Wallet::mutable_Issuer(
-    const Identifier& nymID,
+    const identifier::Nym& nymID,
     const Identifier& issuerID) const
 {
-    auto& [lock, pIssuer] = issuer(nymID, issuerID, true);
+    auto& [lock, pIssuer] =
+        issuer(nymID, identifier::Nym::Factory(issuerID.str()), true);
 
     OT_ASSERT(pIssuer);
 
@@ -874,7 +878,7 @@ Editor<api::client::Issuer> Wallet::mutable_Issuer(
 }
 
 Wallet::IssuerLock& Wallet::issuer(
-    const Identifier& nymID,
+    const identifier::Nym& nymID,
     const Identifier& issuerID,
     const bool create) const
 {
@@ -920,24 +924,24 @@ std::size_t Wallet::LocalNymCount() const
     return api_.Storage().LocalNyms().size();
 }
 
-std::set<OTIdentifier> Wallet::LocalNyms() const
+std::set<OTNymID> Wallet::LocalNyms() const
 {
     const std::set<std::string> ids = api_.Storage().LocalNyms();
 
-    std::set<OTIdentifier> nymIds;
+    std::set<OTNymID> nymIds;
     std::transform(
         ids.begin(),
         ids.end(),
         std::inserter(nymIds, nymIds.end()),
-        [](std::string nym) -> OTIdentifier {
-            return Identifier::Factory(nym);
+        [](std::string nym) -> OTNymID {
+            return identifier::Nym::Factory(nym);
         });
 
     return nymIds;
 }
 
 ConstNym Wallet::Nym(
-    const Identifier& id,
+    const identifier::Nym& id,
     const std::chrono::milliseconds& timeout) const
 {
     const std::string nym = id.str();
@@ -995,7 +999,7 @@ ConstNym Wallet::Nym(
 ConstNym Wallet::Nym(const proto::CredentialIndex& serialized) const
 {
     const auto& id = serialized.nymid();
-    const auto nymID = Identifier::Factory(id);
+    const auto nymID = identifier::Nym::Factory(id);
 
     if (nymID->empty()) {
         LogOutput(OT_METHOD)(__FUNCTION__)(": Invalid nym ID.").Flush();
@@ -1069,7 +1073,7 @@ ConstNym Wallet::Nym(
     }
 }
 
-NymData Wallet::mutable_Nym(const Identifier& id) const
+NymData Wallet::mutable_Nym(const identifier::Nym& id) const
 {
     const std::string nym = id.str();
     auto exists = Nym(id);
@@ -1094,7 +1098,7 @@ NymData Wallet::mutable_Nym(const Identifier& id) const
 }
 
 std::unique_ptr<const opentxs::NymFile> Wallet::Nymfile(
-    const Identifier& id,
+    const identifier::Nym& id,
     const OTPasswordData& reason) const
 {
     Lock lock(nymfile_lock(id));
@@ -1121,7 +1125,7 @@ std::unique_ptr<const opentxs::NymFile> Wallet::Nymfile(
 }
 
 Editor<opentxs::NymFile> Wallet::mutable_Nymfile(
-    const Identifier& id,
+    const identifier::Nym& id,
     const OTPasswordData& reason) const
 {
     const auto targetNym = Nym(id);
@@ -1133,7 +1137,7 @@ Editor<opentxs::NymFile> Wallet::mutable_Nymfile(
 Editor<opentxs::NymFile> Wallet::mutable_nymfile(
     const std::shared_ptr<const opentxs::Nym>& targetNym,
     const std::shared_ptr<const opentxs::Nym>& signerNym,
-    const Identifier& id,
+    const identifier::Nym& id,
     const OTPasswordData& reason) const
 {
     auto nymfile = std::unique_ptr<opentxs::internal::NymFile>(
@@ -1154,10 +1158,10 @@ Editor<opentxs::NymFile> Wallet::mutable_nymfile(
     return EditorType(nymfile_lock(id), nymfile.release(), callback, deleter);
 }
 
-std::mutex& Wallet::nymfile_lock(const Identifier& nymID) const
+std::mutex& Wallet::nymfile_lock(const identifier::Nym& nymID) const
 {
     Lock map_lock(nymfile_map_lock_);
-    auto& output = nymfile_lock_[Identifier::Factory(nymID)];
+    auto& output = nymfile_lock_[nymID];
     map_lock.unlock();
 
     return output;
@@ -1223,7 +1227,7 @@ std::mutex& Wallet::peer_lock(const std::string& nymID) const
 }
 
 std::shared_ptr<proto::PeerReply> Wallet::PeerReply(
-    const Identifier& nym,
+    const identifier::Nym& nym,
     const Identifier& reply,
     const StorageBox& box) const
 {
@@ -1236,8 +1240,9 @@ std::shared_ptr<proto::PeerReply> Wallet::PeerReply(
     return output;
 }
 
-bool Wallet::PeerReplyComplete(const Identifier& nym, const Identifier& replyID)
-    const
+bool Wallet::PeerReplyComplete(
+    const identifier::Nym& nym,
+    const Identifier& replyID) const
 {
     const std::string nymID = nym.str();
     Lock lock(peer_lock(nymID));
@@ -1277,7 +1282,7 @@ bool Wallet::PeerReplyComplete(const Identifier& nym, const Identifier& replyID)
 }
 
 bool Wallet::PeerReplyCreate(
-    const Identifier& nym,
+    const identifier::Nym& nym,
     const proto::PeerRequest& request,
     const proto::PeerReply& reply) const
 {
@@ -1334,7 +1339,7 @@ bool Wallet::PeerReplyCreate(
 }
 
 bool Wallet::PeerReplyCreateRollback(
-    const Identifier& nym,
+    const identifier::Nym& nym,
     const Identifier& request,
     const Identifier& reply) const
 {
@@ -1391,7 +1396,7 @@ bool Wallet::PeerReplyCreateRollback(
     return output;
 }
 
-ObjectList Wallet::PeerReplySent(const Identifier& nym) const
+ObjectList Wallet::PeerReplySent(const identifier::Nym& nym) const
 {
     const std::string nymID = nym.str();
     Lock lock(peer_lock(nymID));
@@ -1399,7 +1404,7 @@ ObjectList Wallet::PeerReplySent(const Identifier& nym) const
     return api_.Storage().NymBoxList(nymID, StorageBox::SENTPEERREPLY);
 }
 
-ObjectList Wallet::PeerReplyIncoming(const Identifier& nym) const
+ObjectList Wallet::PeerReplyIncoming(const identifier::Nym& nym) const
 {
     const std::string nymID = nym.str();
     Lock lock(peer_lock(nymID));
@@ -1407,7 +1412,7 @@ ObjectList Wallet::PeerReplyIncoming(const Identifier& nym) const
     return api_.Storage().NymBoxList(nymID, StorageBox::INCOMINGPEERREPLY);
 }
 
-ObjectList Wallet::PeerReplyFinished(const Identifier& nym) const
+ObjectList Wallet::PeerReplyFinished(const identifier::Nym& nym) const
 {
     const std::string nymID = nym.str();
     Lock lock(peer_lock(nymID));
@@ -1415,7 +1420,7 @@ ObjectList Wallet::PeerReplyFinished(const Identifier& nym) const
     return api_.Storage().NymBoxList(nymID, StorageBox::FINISHEDPEERREPLY);
 }
 
-ObjectList Wallet::PeerReplyProcessed(const Identifier& nym) const
+ObjectList Wallet::PeerReplyProcessed(const identifier::Nym& nym) const
 {
     const std::string nymID = nym.str();
     Lock lock(peer_lock(nymID));
@@ -1423,8 +1428,9 @@ ObjectList Wallet::PeerReplyProcessed(const Identifier& nym) const
     return api_.Storage().NymBoxList(nymID, StorageBox::PROCESSEDPEERREPLY);
 }
 
-bool Wallet::PeerReplyReceive(const Identifier& nym, const PeerObject& reply)
-    const
+bool Wallet::PeerReplyReceive(
+    const identifier::Nym& nym,
+    const PeerObject& reply) const
 {
     if (proto::PEEROBJECT_RESPONSE != reply.Type()) {
         LogOutput(OT_METHOD)(__FUNCTION__)(": This is not a peer reply.")
@@ -1501,7 +1507,7 @@ bool Wallet::PeerReplyReceive(const Identifier& nym, const PeerObject& reply)
 }
 
 std::shared_ptr<proto::PeerRequest> Wallet::PeerRequest(
-    const Identifier& nym,
+    const identifier::Nym& nym,
     const Identifier& request,
     const StorageBox& box,
     std::time_t& time) const
@@ -1516,7 +1522,7 @@ std::shared_ptr<proto::PeerRequest> Wallet::PeerRequest(
 }
 
 bool Wallet::PeerRequestComplete(
-    const Identifier& nym,
+    const identifier::Nym& nym,
     const Identifier& replyID) const
 {
     const std::string nymID = nym.str();
@@ -1560,7 +1566,7 @@ bool Wallet::PeerRequestComplete(
 }
 
 bool Wallet::PeerRequestCreate(
-    const Identifier& nym,
+    const identifier::Nym& nym,
     const proto::PeerRequest& request) const
 {
     const std::string nymID = nym.str();
@@ -1571,7 +1577,7 @@ bool Wallet::PeerRequestCreate(
 }
 
 bool Wallet::PeerRequestCreateRollback(
-    const Identifier& nym,
+    const identifier::Nym& nym,
     const Identifier& request) const
 {
     const std::string nymID = nym.str();
@@ -1582,7 +1588,7 @@ bool Wallet::PeerRequestCreateRollback(
 }
 
 bool Wallet::PeerRequestDelete(
-    const Identifier& nym,
+    const identifier::Nym& nym,
     const Identifier& request,
     const StorageBox& box) const
 {
@@ -1600,7 +1606,7 @@ bool Wallet::PeerRequestDelete(
     }
 }
 
-ObjectList Wallet::PeerRequestSent(const Identifier& nym) const
+ObjectList Wallet::PeerRequestSent(const identifier::Nym& nym) const
 {
     const std::string nymID = nym.str();
     Lock lock(peer_lock(nymID));
@@ -1608,7 +1614,7 @@ ObjectList Wallet::PeerRequestSent(const Identifier& nym) const
     return api_.Storage().NymBoxList(nym.str(), StorageBox::SENTPEERREQUEST);
 }
 
-ObjectList Wallet::PeerRequestIncoming(const Identifier& nym) const
+ObjectList Wallet::PeerRequestIncoming(const identifier::Nym& nym) const
 {
     const std::string nymID = nym.str();
     Lock lock(peer_lock(nymID));
@@ -1617,7 +1623,7 @@ ObjectList Wallet::PeerRequestIncoming(const Identifier& nym) const
         nym.str(), StorageBox::INCOMINGPEERREQUEST);
 }
 
-ObjectList Wallet::PeerRequestFinished(const Identifier& nym) const
+ObjectList Wallet::PeerRequestFinished(const identifier::Nym& nym) const
 {
     const std::string nymID = nym.str();
     Lock lock(peer_lock(nymID));
@@ -1626,7 +1632,7 @@ ObjectList Wallet::PeerRequestFinished(const Identifier& nym) const
         nym.str(), StorageBox::FINISHEDPEERREQUEST);
 }
 
-ObjectList Wallet::PeerRequestProcessed(const Identifier& nym) const
+ObjectList Wallet::PeerRequestProcessed(const identifier::Nym& nym) const
 {
     const std::string nymID = nym.str();
     Lock lock(peer_lock(nymID));
@@ -1636,7 +1642,7 @@ ObjectList Wallet::PeerRequestProcessed(const Identifier& nym) const
 }
 
 bool Wallet::PeerRequestReceive(
-    const Identifier& nym,
+    const identifier::Nym& nym,
     const PeerObject& request) const
 {
     if (proto::PEEROBJECT_REQUEST != request.Type()) {
@@ -1664,7 +1670,7 @@ bool Wallet::PeerRequestReceive(
 }
 
 bool Wallet::PeerRequestUpdate(
-    const Identifier& nym,
+    const identifier::Nym& nym,
     const Identifier& request,
     const StorageBox& box) const
 {
@@ -1818,7 +1824,7 @@ void Wallet::save(
 
     OT_ASSERT(false == signerID->empty())
 
-    const auto signerNym = Nym(signerID);
+    const auto signerNym = Nym(identifier::Nym::Factory(signerID->str()));
 
     OT_ASSERT(signerNym)
 
@@ -1944,6 +1950,7 @@ bool Wallet::SaveCredentialIDs(const opentxs::Nym& nym) const
 }
 
 bool Wallet::SetNymAlias(const Identifier& id, const std::string& alias) const
+
 {
     Lock mapLock(nym_map_lock_);
     auto& nym = nym_map_[id.str()].second;
@@ -1969,7 +1976,7 @@ ConstServerContract Wallet::Server(
         bool loaded = api_.Storage().Load(server, serialized, alias, true);
 
         if (loaded) {
-            auto nym = Nym(Identifier::Factory(serialized->nymid()));
+            auto nym = Nym(identifier::Nym::Factory(serialized->nymid()));
 
             if (!nym && serialized->has_publicnym()) {
                 nym = Nym(serialized->publicnym());
@@ -2066,7 +2073,7 @@ ConstServerContract Wallet::Server(const proto::ServerContract& contract) const
         return {};
     }
 
-    const auto nymID = Identifier::Factory(contract.nymid());
+    const auto nymID = identifier::Nym::Factory(contract.nymid());
 
     if (nymID->empty()) {
         LogOutput(OT_METHOD)(__FUNCTION__)(": Invalid nym ID.").Flush();
@@ -2119,7 +2126,7 @@ ConstServerContract Wallet::Server(
 {
     std::string server;
 
-    auto nym = Nym(Identifier::Factory(nymid));
+    auto nym = Nym(identifier::Nym::Factory(nymid));
 
     if (nym) {
         std::unique_ptr<ServerContract> contract;
@@ -2144,10 +2151,11 @@ ConstServerContract Wallet::Server(
 
 ObjectList Wallet::ServerList() const { return api_.Storage().ServerList(); }
 
-OTIdentifier Wallet::server_to_nym(OTIdentifier& input) const
+OTNymID Wallet::server_to_nym(OTIdentifier& input) const
 {
+
     auto output = Identifier::Factory();
-    auto nym = Nym(input);
+    auto nym = Nym(identifier::Nym::Factory(input->str()));
     const bool inputIsNymID = bool(nym);
 
     if (inputIsNymID) {
@@ -2157,14 +2165,14 @@ OTIdentifier Wallet::server_to_nym(OTIdentifier& input) const
 
         for (const auto& item : list) {
             const auto& serverID = item.first;
-            auto server = Server(Identifier::Factory(serverID));
+            auto server = Server(identifier::Nym::Factory(serverID));
 
             OT_ASSERT(server);
 
-            if (server->Nym()->ID() == input) {
+            if (server->Nym()->ID().operator==(input)) {
                 matches++;
                 // set input to the notary ID
-                input = Identifier::Factory(server->ID());
+                input->str() = server->ID()->str();
             }
         }
 
@@ -2173,15 +2181,15 @@ OTIdentifier Wallet::server_to_nym(OTIdentifier& input) const
         auto contract = Server(input);
 
         if (contract) {
-            output = Identifier::Factory(contract->Contract().nymid());
+            output = identifier::Nym::Factory(contract->Contract().nymid());
         } else {
             LogDetail(OT_METHOD)(__FUNCTION__)(": Non-existent server: ")(input)
                 .Flush();
         }
     }
 
-    return output;
-}
+    return identifier::Nym::Factory(output->str());
+}  // namespace opentxs::api::implementation
 
 bool Wallet::SetServerAlias(const Identifier& id, const std::string& alias)
     const
@@ -2238,7 +2246,7 @@ const ConstUnitDefinition Wallet::UnitDefinition(
         bool loaded = api_.Storage().Load(unit, serialized, alias, true);
 
         if (loaded) {
-            auto nym = Nym(Identifier::Factory(serialized->nymid()));
+            auto nym = Nym(identifier::Nym::Factory(serialized->nymid()));
 
             if (!nym && serialized->has_publicnym()) {
                 nym = Nym(serialized->publicnym());
@@ -2307,7 +2315,7 @@ ConstUnitDefinition Wallet::UnitDefinition(
     const proto::UnitDefinition& contract) const
 {
     std::string unit = contract.id();
-    auto nym = Nym(Identifier::Factory(contract.nymid()));
+    auto nym = Nym(identifier::Nym::Factory(contract.nymid()));
 
     if (!nym && contract.has_publicnym()) { nym = Nym(contract.publicnym()); }
 
@@ -2342,7 +2350,7 @@ ConstUnitDefinition Wallet::UnitDefinition(
 {
     std::string unit;
 
-    auto nym = Nym(Identifier::Factory(nymid));
+    auto nym = Nym(identifier::Nym::Factory(nymid));
 
     if (nym) {
         std::unique_ptr<opentxs::UnitDefinition> contract;
@@ -2373,7 +2381,7 @@ ConstUnitDefinition Wallet::UnitDefinition(
 {
     std::string unit;
 
-    auto nym = Nym(Identifier::Factory(nymid));
+    auto nym = Nym(identifier::Nym::Factory(nymid));
 
     if (nym) {
         std::unique_ptr<opentxs::UnitDefinition> contract;

@@ -102,14 +102,14 @@ public:
         return auto_process_inbox_.get();
     };
     Depositability CanDeposit(
-        const Identifier& recipientNymID,
+        const identifier::Nym& recipientNymID,
         const OTPayment& payment) const override;
     Depositability CanDeposit(
-        const Identifier& recipientNymID,
+        const identifier::Nym& recipientNymID,
         const Identifier& accountID,
         const OTPayment& payment) const override;
     Messagability CanMessage(
-        const Identifier& senderNymID,
+        const identifier::Nym& senderNymID,
         const Identifier& recipientContactID,
         const bool startIntroductionServer) const override;
     bool CheckTransactionNumbers(
@@ -119,20 +119,20 @@ public:
     Finished ContextIdle(
         const identifier::Nym& nym,
         const identifier::Server& server) const override;
-    std::size_t DepositCheques(const Identifier& nymID) const override;
+    std::size_t DepositCheques(const identifier::Nym& nymID) const override;
     std::size_t DepositCheques(
-        const Identifier& nymID,
+        const identifier::Nym& nymID,
         const std::set<OTIdentifier>& chequeIDs) const override;
     BackgroundTask DepositPayment(
-        const Identifier& recipientNymID,
+        const identifier::Nym& recipientNymID,
         const std::shared_ptr<const OTPayment>& payment) const override;
     BackgroundTask DepositPayment(
-        const Identifier& recipientNymID,
+        const identifier::Nym& recipientNymID,
         const Identifier& accountID,
         const std::shared_ptr<const OTPayment>& payment) const override;
     void DisableAutoaccept() const override;
     BackgroundTask DownloadContract(
-        const Identifier& localNymID,
+        const identifier::Nym& localNymID,
         const Identifier& serverID,
         const Identifier& contractID) const override;
 #if OT_CASH
@@ -142,15 +142,15 @@ public:
         const identifier::UnitDefinition& unit) const override;
 #endif
     BackgroundTask DownloadNym(
-        const Identifier& localNymID,
+        const identifier::Nym& localNymID,
         const Identifier& serverID,
-        const Identifier& targetNymID) const override;
+        const identifier::Nym& targetNymID) const override;
     BackgroundTask DownloadNymbox(
-        const Identifier& localNymID,
+        const identifier::Nym& localNymID,
         const Identifier& serverID) const override;
-    BackgroundTask FindNym(const Identifier& nymID) const override;
+    BackgroundTask FindNym(const identifier::Nym& nymID) const override;
     BackgroundTask FindNym(
-        const Identifier& nymID,
+        const identifier::Nym& nymID,
         const Identifier& serverIDHint) const override;
     BackgroundTask FindServer(const Identifier& serverID) const override;
     BackgroundTask InitiateBailment(
@@ -183,12 +183,12 @@ public:
         const SetID setID) const override;
     const Identifier& IntroductionServer() const override;
     BackgroundTask IssueUnitDefinition(
-        const Identifier& localNymID,
+        const identifier::Nym& localNymID,
         const Identifier& serverID,
         const Identifier& unitID,
         const std::string& label) const override;
     BackgroundTask MessageContact(
-        const Identifier& senderNymID,
+        const identifier::Nym& senderNymID,
         const Identifier& contactID,
         const std::string& message,
         const SetID setID) const override;
@@ -204,36 +204,36 @@ public:
         const Amount amount,
         const SetID setID) const override;
     BackgroundTask PayContact(
-        const Identifier& senderNymID,
+        const identifier::Nym& senderNymID,
         const Identifier& contactID,
         std::shared_ptr<const OTPayment> payment) const override;
 #if OT_CASH
     BackgroundTask PayContactCash(
-        const Identifier& senderNymID,
+        const identifier::Nym& senderNymID,
         const Identifier& contactID,
         const Identifier& workflowID) const override;
 #endif  // OT_CASH
     BackgroundTask ProcessInbox(
-        const Identifier& localNymID,
+        const identifier::Nym& localNymID,
         const Identifier& serverID,
         const Identifier& accountID) const override;
     BackgroundTask PublishServerContract(
-        const Identifier& localNymID,
+        const identifier::Nym& localNymID,
         const Identifier& serverID,
         const Identifier& contractID) const override;
     void Refresh() const override;
     std::uint64_t RefreshCount() const override;
     BackgroundTask RegisterAccount(
-        const Identifier& localNymID,
+        const identifier::Nym& localNymID,
         const Identifier& serverID,
         const Identifier& unitID,
         const std::string& label) const override;
     BackgroundTask RegisterNym(
-        const Identifier& localNymID,
+        const identifier::Nym& localNymID,
         const Identifier& serverID,
         const bool resync) const override;
     BackgroundTask RegisterNymPublic(
-        const Identifier& nymID,
+        const identifier::Nym& nymID,
         const Identifier& server,
         const bool setContactData,
         const bool forcePrimary,
@@ -241,7 +241,7 @@ public:
     OTIdentifier SetIntroductionServer(
         const ServerContract& contract) const override;
     BackgroundTask SendCheque(
-        const Identifier& localNymID,
+        const identifier::Nym& localNymID,
         const Identifier& sourceAccountID,
         const Identifier& recipientContactID,
         const Amount value,
@@ -249,20 +249,21 @@ public:
         const Time validFrom,
         const Time validTo) const override;
     BackgroundTask SendExternalTransfer(
-        const Identifier& localNymID,
+        const identifier::Nym& localNymID,
         const Identifier& serverID,
         const Identifier& sourceAccountID,
         const Identifier& targetAccountID,
         const Amount value,
         const std::string& memo) const override;
     BackgroundTask SendTransfer(
-        const Identifier& localNymID,
+        const identifier::Nym& localNymID,
         const Identifier& serverID,
         const Identifier& sourceAccountID,
         const Identifier& targetAccountID,
         const Amount value,
         const std::string& memo) const override;
-    void StartIntroductionServer(const Identifier& localNymID) const override;
+    void StartIntroductionServer(
+        const identifier::Nym& localNymID) const override;
     ThreadStatus Status(const TaskID taskID) const override;
 #if OT_CASH
     BackgroundTask WithdrawCash(
@@ -283,7 +284,7 @@ private:
         std::map<TaskID, std::pair<ThreadStatus, std::promise<Result>>>;
 
     /** ContextID: localNymID, serverID */
-    using ContextID = std::pair<OTIdentifier, OTIdentifier>;
+    using ContextID = std::pair<OTNymID, OTIdentifier>;
     /** MessageTask: recipientID, message */
     using MessageTask = std::tuple<OTNymID, std::string, SetID>;
     /** PaymentTask: recipientID, payment */
@@ -300,7 +301,7 @@ private:
     /** SendTransferTask: localNymID, serverID, sourceAccountID, targetAccountID
      */
     using SendTransferTask =
-        std::tuple<OTIdentifier, OTIdentifier, uint64_t, std::string>;
+        std::tuple<OTNymID, OTIdentifier, uint64_t, std::string>;
     /** SendChequeTask: sourceAccountID, targetNymID, value, memo, validFrom,
      * validTo
      */
@@ -413,19 +414,19 @@ private:
         const;
     Depositability can_deposit(
         const OTPayment& payment,
-        const Identifier& recipient,
+        const identifier::Nym& recipient,
         const Identifier& accountIDHint,
         OTIdentifier& depositServer,
         OTIdentifier& depositAccount) const;
     Messagability can_message(
-        const Identifier& senderID,
+        const identifier::Nym& senderID,
         const Identifier& recipientID,
         OTNymID& recipientNymID,
         OTIdentifier& serverID) const;
     void check_nym_revision(const ServerContext& context, OperationQueue& queue)
         const;
     bool check_registration(
-        const Identifier& nymID,
+        const identifier::Nym& nymID,
         const Identifier& serverID,
         api::client::internal::Operation& op,
         std::shared_ptr<const ServerContext>& context) const;
@@ -457,7 +458,7 @@ private:
         api::client::internal::Operation& op) const;
     bool extract_payment_data(
         const OTPayment& payment,
-        OTIdentifier& nymID,
+        OTNymID& nymID,
         OTIdentifier& serverID,
         OTIdentifier& unitID) const;
     bool find_nym(
@@ -465,7 +466,7 @@ private:
         const identifier::Nym& targetNymID) const;
     bool find_server(
         api::client::internal::Operation& op,
-        const Identifier& targetNymID) const;
+        const identifier::Nym& targetNymID) const;
     bool finish_task(const TaskID taskID, const bool success, Result&& result)
         const;
     bool get_admin(
@@ -524,11 +525,12 @@ private:
         api::client::internal::Operation& op,
         const identifier::Server& serverID) const;
     bool publish_server_registration(
-        const Identifier& nymID,
+        const identifier::Nym& nymID,
         const Identifier& serverID,
         const bool forcePrimary) const;
-    bool queue_cheque_deposit(const Identifier& nymID, const Cheque& cheque)
-        const;
+    bool queue_cheque_deposit(
+        const identifier::Nym& nymID,
+        const Cheque& cheque) const;
     void refresh_accounts() const;
     void refresh_contacts() const;
     bool register_account(
@@ -541,10 +543,10 @@ private:
         api::client::internal::Operation& op,
         const bool resync) const;
     BackgroundTask schedule_download_nymbox(
-        const Identifier& localNymID,
+        const identifier::Nym& localNymID,
         const Identifier& serverID) const;
     BackgroundTask schedule_register_account(
-        const Identifier& localNymID,
+        const identifier::Nym& localNymID,
         const Identifier& serverID,
         const Identifier& unitID,
         const std::string& label) const;
@@ -555,7 +557,8 @@ private:
         const Identifier& targetAccountID,
         const Amount value,
         const std::string& memo) const;
-    void set_contact(const Identifier& nymID, const Identifier& serverID) const;
+    void set_contact(const identifier::Nym& nymID, const Identifier& serverID)
+        const;
     OTIdentifier set_introduction_server(
         const Lock& lock,
         const ServerContract& contract) const;
@@ -566,7 +569,7 @@ private:
         const TaskID taskID,
         const ThreadStatus status,
         Result&& result) const;
-    void start_introduction_server(const Identifier& nymID) const;
+    void start_introduction_server(const identifier::Nym& nymID) const;
     Depositability valid_account(
         const OTPayment& payment,
         const Identifier& recipient,
@@ -574,11 +577,11 @@ private:
         const Identifier& unitID,
         const Identifier& accountIDHint,
         OTIdentifier& depositAccount) const;
-    bool valid_context(const Identifier& nymID, const Identifier& serverID)
+    bool valid_context(const identifier::Nym& nymID, const Identifier& serverID)
         const;
     Depositability valid_recipient(
         const OTPayment& payment,
-        const Identifier& specifiedNymID,
+        const identifier::Nym& specifiedNymID,
         const Identifier& recipient) const;
 #if OT_CASH
     bool withdraw_cash(

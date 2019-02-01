@@ -120,9 +120,9 @@ private:
 
     const std::uint32_t target_version_{0};
 
-    virtual const Identifier& client_nym_id(const Lock& lock) const = 0;
+    virtual const identifier::Nym& client_nym_id(const Lock& lock) const = 0;
     proto::Context IDVersion(const Lock& lock) const;
-    virtual const Identifier& server_nym_id(const Lock& lock) const = 0;
+    virtual const identifier::Nym& server_nym_id(const Lock& lock) const = 0;
     proto::Context SigVersion(const Lock& lock) const;
     bool verify_signature(const Lock& lock, const proto::Signature& signature)
         const override;

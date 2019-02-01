@@ -36,7 +36,7 @@ struct AccountSummary {
     virtual OTIdentifier WidgetID() const = 0;
     // custom
     virtual proto::ContactItemType Currency() const = 0;
-    virtual const Identifier& NymID() const = 0;
+    virtual const identifier::Nym& NymID() const = 0;
 
     virtual ~AccountSummary() = default;
 };
@@ -158,7 +158,7 @@ struct Profile : virtual public ui::Profile {
     virtual bool last(const implementation::ProfileRowID& id) const = 0;
     virtual OTIdentifier WidgetID() const = 0;
     // custom
-    virtual const Identifier& NymID() const = 0;
+    virtual const identifier::Nym& NymID() const = 0;
 
     virtual ~Profile() = default;
 };
@@ -171,7 +171,7 @@ struct ProfileSection : virtual public ui::ProfileSection {
     virtual bool last(const implementation::ProfileSectionRowID& id) const = 0;
     virtual OTIdentifier WidgetID() const = 0;
     // custom
-    virtual const Identifier& NymID() const = 0;
+    virtual const identifier::Nym& NymID() const = 0;
 
     virtual ~ProfileSection() = default;
 };
@@ -185,7 +185,7 @@ struct ProfileSubsection : virtual public ui::ProfileSubsection {
         const implementation::ProfileSubsectionRowID& id) const = 0;
     virtual OTIdentifier WidgetID() const = 0;
     // custom
-    virtual const Identifier& NymID() const = 0;
+    virtual const identifier::Nym& NymID() const = 0;
     virtual proto::ContactSectionName Section() const = 0;
 
     virtual ~ProfileSubsection() = default;

@@ -13,6 +13,7 @@
 #include "opentxs/consensus/ClientContext.hpp"
 #include "opentxs/core/cron/OTCron.hpp"
 #include "opentxs/core/cron/OTCronItem.hpp"
+#include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/core/recurring/OTAgreement.hpp"
 #include "opentxs/core/util/Assert.hpp"
 #include "opentxs/core/util/Common.hpp"
@@ -67,9 +68,9 @@ OTPaymentPlan::OTPaymentPlan(
     const Identifier& NOTARY_ID,
     const Identifier& INSTRUMENT_DEFINITION_ID,
     const Identifier& SENDER_ACCT_ID,
-    const Identifier& SENDER_NYM_ID,
+    const identifier::Nym& SENDER_NYM_ID,
     const Identifier& RECIPIENT_ACCT_ID,
-    const Identifier& RECIPIENT_NYM_ID)
+    const identifier::Nym& RECIPIENT_NYM_ID)
     : ot_super(
           core,
           NOTARY_ID,
@@ -588,13 +589,13 @@ bool OTPaymentPlan::ProcessPayment(
     bool bSuccess = false;  // The return value.
 
     const auto NOTARY_ID = Identifier::Factory(pCron->GetNotaryID());
-    const auto NOTARY_NYM_ID = Identifier::Factory(*pServerNym);
+    const auto NOTARY_NYM_ID = identifier::Nym::Factory(*pServerNym);
 
     const Identifier& SOURCE_ACCT_ID = GetSenderAcctID();
-    const Identifier& SENDER_NYM_ID = GetSenderNymID();
+    const identifier::Nym& SENDER_NYM_ID = GetSenderNymID();
 
     const Identifier& RECIPIENT_ACCT_ID = GetRecipientAcctID();
-    const Identifier& RECIPIENT_NYM_ID = GetRecipientNymID();
+    const identifier::Nym& RECIPIENT_NYM_ID = GetRecipientNymID();
 
     auto strSenderNymID = String::Factory(SENDER_NYM_ID),
          strRecipientNymID = String::Factory(RECIPIENT_NYM_ID),
@@ -655,15 +656,15 @@ bool OTPaymentPlan::ProcessPayment(
 
     // Find out if either Nym is actually also the server.
     bool bSenderNymIsServerNym =
-        ((SENDER_NYM_ID == NOTARY_NYM_ID) ? true : false);
+        ((SENDER_NYM_ID.operator==(NOTARY_NYM_ID)) ? true : false);
     bool bRecipientNymIsServerNym =
-        ((RECIPIENT_NYM_ID == NOTARY_NYM_ID) ? true : false);
+        ((RECIPIENT_NYM_ID.operator==(NOTARY_NYM_ID)) ? true : false);
 
     // We also see, after all that is done, whether both pointers go to the same
     // entity.
     // (We'll want to know that later.)
     bool bUsersAreSameNym =
-        ((SENDER_NYM_ID == RECIPIENT_NYM_ID) ? true : false);
+        ((SENDER_NYM_ID.operator==(RECIPIENT_NYM_ID)) ? true : false);
 
     ConstNym pSenderNym = nullptr;
     ConstNym pRecipientNym = nullptr;

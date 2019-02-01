@@ -143,8 +143,8 @@ bool VerifyBalanceReceipt(
 {
     const auto& THE_NYM = *context.Nym();
     const auto& SERVER_NYM = context.RemoteNym();
-    auto NYM_ID = Identifier::Factory(THE_NYM),
-         NOTARY_NYM_ID = Identifier::Factory(SERVER_NYM);
+    auto NYM_ID = identifier::Nym::Factory(THE_NYM),
+         NOTARY_NYM_ID = identifier::Nym::Factory(SERVER_NYM);
     auto strNotaryID = String::Factory(NOTARY_ID),
          strReceiptID = String::Factory(accountID);
 
@@ -616,13 +616,15 @@ std::int32_t OT_API::GetNymCount() const
     return api_.Wallet().LocalNymCount();
 }
 
-std::set<OTIdentifier> OT_API::LocalNymList() const
+std::set<OTNymID> OT_API::LocalNymList() const
 {
     return api_.Wallet().LocalNyms();
 }
 
-bool OT_API::GetNym(std::int32_t iIndex, Identifier& NYM_ID, String& NYM_NAME)
-    const
+bool OT_API::GetNym(
+    std::int32_t iIndex,
+    identifier::Nym& NYM_ID,
+    String& NYM_NAME) const
 {
     if (api_.Wallet().NymNameByIndex(iIndex, NYM_NAME)) {
         NYM_ID.SetString(NYM_NAME);
@@ -667,7 +669,7 @@ const BasketContract* OT_API::GetBasketContract(
 }
 
 bool OT_API::IsNym_RegisteredAtServer(
-    const Identifier& NYM_ID,
+    const identifier::Nym& NYM_ID,
     const Identifier& NOTARY_ID) const
 {
     if (NYM_ID.empty()) {
@@ -856,7 +858,7 @@ bool OT_API::Wallet_CanRemoveServer(const Identifier& NOTARY_ID) const
 
     // Loop through all the Nyms. (One might be registered on that server.)
     //
-    std::set<OTIdentifier> nymIDs = api_.Wallet().LocalNyms();
+    std::set<OTNymID> nymIDs = api_.Wallet().LocalNyms();
     for (auto& nymID : nymIDs) {
         if (IsNym_RegisteredAtServer(nymID, NOTARY_ID)) {
             LogOutput(OT_METHOD)(__FUNCTION__)(
@@ -915,7 +917,7 @@ bool OT_API::Wallet_CanRemoveAssetType(
 //
 // returns OT_BOOL
 //
-bool OT_API::Wallet_CanRemoveNym(const Identifier& NYM_ID) const
+bool OT_API::Wallet_CanRemoveNym(const identifier::Nym& NYM_ID) const
 {
     Lock lock(lock_);
 
@@ -1008,7 +1010,7 @@ bool OT_API::Wallet_CanRemoveAccount(const Identifier& ACCOUNT_ID) const
     bool BOOL_RETURN_VALUE = false;
 
     const Identifier& theNotaryID = account.get().GetPurportedNotaryID();
-    const Identifier& theNymID = account.get().GetNymID();
+    const identifier::Nym& theNymID = account.get().GetNymID();
 
     // There is an OT_ASSERT in here for memory failure,
     // but it still might return nullptr if various verification fails.
@@ -1044,7 +1046,8 @@ bool OT_API::Wallet_CanRemoveAccount(const Identifier& ACCOUNT_ID) const
 // object (in base64-encoded form) and then import it again.
 //
 // Returns bool on success, and strOutput will contain the exported data.
-bool OT_API::Wallet_ExportNym(const Identifier& NYM_ID, String& strOutput) const
+bool OT_API::Wallet_ExportNym(const identifier::Nym& NYM_ID, String& strOutput)
+    const
 {
     /*Lock lock(lock_);
 
@@ -1191,14 +1194,14 @@ bool OT_API::Wallet_ExportNym(const Identifier& NYM_ID, String& strOutput) const
 // nymfileID is passed, then it will be set to the ID that was already there.
 bool OT_API::Wallet_ImportNym(const String& FILE_CONTENTS) const
 {
-    auto id = Identifier::Factory();
+    auto id = identifier::Nym::Factory();
 
     return Wallet_ImportNym(FILE_CONTENTS, id);
 }
 
 bool OT_API::Wallet_ImportNym(
     const String& FILE_CONTENTS,
-    Identifier& nymfileID) const
+    identifier::Nym& nymfileID) const
 {
     /*Lock lock(lock_);
 
@@ -1646,7 +1649,7 @@ bool OT_API::Decode(
  }
  */
 bool OT_API::Encrypt(
-    const Identifier& theRecipientNymID,
+    const identifier::Nym& theRecipientNymID,
     const String& strPlaintext,
     String& strOutput) const
 {
@@ -1691,7 +1694,7 @@ bool OT_API::Encrypt(
  }
  */
 bool OT_API::Decrypt(
-    const Identifier& theRecipientNymID,
+    const identifier::Nym& theRecipientNymID,
     const String& strCiphertext,
     String& strOutput) const
 {
@@ -1723,7 +1726,7 @@ bool OT_API::Decrypt(
  LEDGER for strContractType, resulting in -----BEGIN OT SIGNED LEDGER-----
  */
 bool OT_API::FlatSign(
-    const Identifier& theSignerNymID,
+    const identifier::Nym& theSignerNymID,
     const String& strInput,
     const String& strContractType,
     String& strOutput) const
@@ -1768,7 +1771,7 @@ bool OT_API::FlatSign(
  advanced uses, for OT-Scripts, server operators, etc.
  */
 bool OT_API::SignContract(
-    const Identifier& theSignerNymID,
+    const identifier::Nym& theSignerNymID,
     const String& strContract,
     String& strOutput) const
 {
@@ -1829,7 +1832,7 @@ bool OT_API::SignContract(
  advanced uses, for OT-Scripts, server operators, etc.
  */
 bool OT_API::AddSignature(
-    const Identifier& theSignerNymID,
+    const identifier::Nym& theSignerNymID,
     const String& strContract,
     String& strOutput) const
 {
@@ -1880,7 +1883,7 @@ bool OT_API::AddSignature(
  */
 bool OT_API::VerifySignature(
     const String& strContract,
-    const Identifier& theSignerNymID,
+    const identifier::Nym& theSignerNymID,
     std::unique_ptr<Contract>* pcontract) const
 {
     OTPasswordData thePWData(OT_PW_DISPLAY);
@@ -1956,7 +1959,7 @@ bool OT_API::VerifySignature(
 //
 bool OT_API::VerifyAndRetrieveXMLContents(
     const String& strContract,
-    const Identifier& theSignerNymID,
+    const identifier::Nym& theSignerNymID,
     String& strOutput) const
 {
     std::unique_ptr<Contract> contract = nullptr;
@@ -1982,7 +1985,7 @@ bool OT_API::VerifyAndRetrieveXMLContents(
 ///
 bool OT_API::VerifyAccountReceipt(
     const Identifier& NOTARY_ID,
-    const Identifier& NYM_ID,
+    const identifier::Nym& NYM_ID,
     const Identifier& ACCOUNT_ID) const
 {
     auto context = api_.Wallet().ServerContext(NYM_ID, NOTARY_ID);
@@ -1999,10 +2002,10 @@ bool OT_API::VerifyAccountReceipt(
 }
 
 bool OT_API::Create_SmartContract(
-    const Identifier& SIGNER_NYM_ID,  // Use any Nym you wish here. (The
-                                      // signing at this point is only to cause
-                                      // a save.)
-    time64_t VALID_FROM,              // Default (0 or nullptr) == NOW
+    const identifier::Nym& SIGNER_NYM_ID,  // Use any Nym you wish here. (The
+                                           // signing at this point is only to
+                                           // cause a save.)
+    time64_t VALID_FROM,                   // Default (0 or nullptr) == NOW
     time64_t VALID_TO,  // Default (0 or nullptr) == no expiry / cancel anytime
     bool SPECIFY_ASSETS,   // This means asset type IDs must be provided for
                            // every named account.
@@ -2041,12 +2044,12 @@ bool OT_API::Create_SmartContract(
 }
 
 bool OT_API::SmartContract_SetDates(
-    const String& THE_CONTRACT,       // The contract, about to have the dates
-                                      // changed on it.
-    const Identifier& SIGNER_NYM_ID,  // Use any Nym you wish here. (The
-                                      // signing at this point is only to cause
-                                      // a save.)
-    time64_t VALID_FROM,              // Default (0 or nullptr) == NOW
+    const String& THE_CONTRACT,  // The contract, about to have the dates
+                                 // changed on it.
+    const identifier::Nym& SIGNER_NYM_ID,  // Use any Nym you wish here. (The
+                                           // signing at this point is only to
+                                           // cause a save.)
+    time64_t VALID_FROM,                   // Default (0 or nullptr) == NOW
     time64_t VALID_TO,  // Default (0 or nullptr) == no expiry / cancel anytime.
     String& strOutput) const
 {
@@ -2082,9 +2085,9 @@ bool OT_API::SmartContract_SetDates(
 bool OT_API::SmartContract_AddParty(
     const String& THE_CONTRACT,  // The contract, about to have the party added
                                  // to it.
-    const Identifier& SIGNER_NYM_ID,  // Use any Nym you wish here. (The
-                                      // signing at this point is only to cause
-                                      // a save.)
+    const identifier::Nym& SIGNER_NYM_ID,  // Use any Nym you wish here. (The
+                                           // signing at this point is only to
+                                           // cause a save.)
     const String& PARTY_NYM_ID,  // Optional. Some smart contracts require the
                                  // party's Nym to be specified in advance.
     const String& PARTY_NAME,    // The Party's NAME as referenced in the smart
@@ -2176,12 +2179,12 @@ bool OT_API::SmartContract_AddParty(
 }
 
 bool OT_API::SmartContract_RemoveParty(
-    const String& THE_CONTRACT,       // The contract, about to have the party
-                                      // removed
-                                      // from it.
-    const Identifier& SIGNER_NYM_ID,  // Use any Nym you wish here. (The
-                                      // signing at this point is only to cause
-                                      // a save.)
+    const String& THE_CONTRACT,  // The contract, about to have the party
+                                 // removed
+                                 // from it.
+    const identifier::Nym& SIGNER_NYM_ID,  // Use any Nym you wish here. (The
+                                           // signing at this point is only to
+                                           // cause a save.)
     const String& PARTY_NAME,  // The Party's NAME as referenced in the smart
                                // contract. (And the scripts...)
     String& strOutput) const
@@ -2216,11 +2219,11 @@ bool OT_API::SmartContract_RemoveParty(
 }
 
 bool OT_API::SmartContract_AddAccount(
-    const String& THE_CONTRACT,       // The contract, about to have the account
-                                      // added to it.
-    const Identifier& SIGNER_NYM_ID,  // Use any Nym you wish here. (The
-                                      // signing at this point is only to cause
-                                      // a save.)
+    const String& THE_CONTRACT,  // The contract, about to have the account
+                                 // added to it.
+    const identifier::Nym& SIGNER_NYM_ID,  // Use any Nym you wish here. (The
+                                           // signing at this point is only to
+                                           // cause a save.)
     const String& PARTY_NAME,  // The Party's NAME as referenced in the smart
                                // contract. (And the scripts...)
     const String& ACCT_NAME,   // The Account's name as referenced in the smart
@@ -2326,11 +2329,11 @@ bool OT_API::SmartContract_AddAccount(
 }
 
 bool OT_API::SmartContract_RemoveAccount(
-    const String& THE_CONTRACT,       // The contract, about to have the account
-                                      // removed from it.
-    const Identifier& SIGNER_NYM_ID,  // Use any Nym you wish here. (The
-                                      // signing at this point is only to cause
-                                      // a save.)
+    const String& THE_CONTRACT,  // The contract, about to have the account
+                                 // removed from it.
+    const identifier::Nym& SIGNER_NYM_ID,  // Use any Nym you wish here. (The
+                                           // signing at this point is only to
+                                           // cause a save.)
     const String& PARTY_NAME,  // The Party's NAME as referenced in the smart
                                // contract. (And the scripts...)
     const String& ACCT_NAME,   // The Account's name as referenced in the smart
@@ -2408,7 +2411,7 @@ std::int32_t OT_API::SmartContract_CountNumsNeeded(
 
 bool OT_API::SmartContract_ConfirmAccount(
     const String& THE_CONTRACT,
-    const Identifier& SIGNER_NYM_ID,
+    const identifier::Nym& SIGNER_NYM_ID,
     const String& PARTY_NAME,
     const String& ACCT_NAME,
     const String& AGENT_NAME,
@@ -2620,7 +2623,7 @@ bool OT_API::SmartContract_ConfirmParty(
                                  // this function.
     const String& PARTY_NAME,    // Should already be on the contract. This way
                                  // we can find it.
-    const Identifier& NYM_ID,    // Nym ID for the party, the actual owner,
+    const identifier::Nym& NYM_ID,  // Nym ID for the party, the actual owner,
     const Identifier& NOTARY_ID,
     String& strOutput) const  // ===> AS WELL AS for the default AGENT of that
                               // party.
@@ -2659,7 +2662,7 @@ bool OT_API::SmartContract_ConfirmParty(
 
         if (bSuccessID && !partyNymID.empty()) {
             auto strPartyNymID = String::Factory(partyNymID);
-            auto idParty = Identifier::Factory(strPartyNymID);
+            auto idParty = identifier::Nym::Factory(strPartyNymID);
 
             if (idParty != NYM_ID) {
                 LogOutput(OT_METHOD)(__FUNCTION__)(": Failure: Party (")(
@@ -2726,7 +2729,8 @@ bool OT_API::SmartContract_ConfirmParty(
     //  pMessage->m_strNotaryID        = strNotaryID;
     pMessage->m_ascPayload->SetString(strInstrument);
 
-    auto pNym = api_.Wallet().Nym(nymfile.It().ID());
+    auto pNym =
+        api_.Wallet().Nym(identifier::Nym::Factory(nymfile.It().ID().str()));
     OT_ASSERT(nullptr != pNym)
 
     pMessage->SignContract(*pNym);
@@ -2741,9 +2745,9 @@ bool OT_API::SmartContract_ConfirmParty(
 bool OT_API::SmartContract_AddBylaw(
     const String& THE_CONTRACT,  // The contract, about to have the bylaw added
                                  // to it.
-    const Identifier& SIGNER_NYM_ID,  // Use any Nym you wish here. (The
-                                      // signing at this point is only to cause
-                                      // a save.)
+    const identifier::Nym& SIGNER_NYM_ID,  // Use any Nym you wish here. (The
+                                           // signing at this point is only to
+                                           // cause a save.)
     const String& BYLAW_NAME,  // The Bylaw's NAME as referenced in the smart
                                // contract. (And the scripts...)
     String& strOutput) const
@@ -2795,12 +2799,12 @@ bool OT_API::SmartContract_AddBylaw(
 }
 
 bool OT_API::SmartContract_RemoveBylaw(
-    const String& THE_CONTRACT,       // The contract, about to have the bylaw
-                                      // removed
-                                      // from it.
-    const Identifier& SIGNER_NYM_ID,  // Use any Nym you wish here. (The
-                                      // signing at this point is only to cause
-                                      // a save.)
+    const String& THE_CONTRACT,  // The contract, about to have the bylaw
+                                 // removed
+                                 // from it.
+    const identifier::Nym& SIGNER_NYM_ID,  // Use any Nym you wish here. (The
+                                           // signing at this point is only to
+                                           // cause a save.)
     const String& BYLAW_NAME,  // The Bylaw's NAME as referenced in the smart
                                // contract. (And the scripts...)
     String& strOutput) const
@@ -2836,11 +2840,11 @@ bool OT_API::SmartContract_RemoveBylaw(
 }
 
 bool OT_API::SmartContract_AddHook(
-    const String& THE_CONTRACT,       // The contract, about to have the hook
-                                      // added to it.
-    const Identifier& SIGNER_NYM_ID,  // Use any Nym you wish here. (The
-                                      // signing at this point is only to cause
-                                      // a save.)
+    const String& THE_CONTRACT,  // The contract, about to have the hook
+                                 // added to it.
+    const identifier::Nym& SIGNER_NYM_ID,  // Use any Nym you wish here. (The
+                                           // signing at this point is only to
+                                           // cause a save.)
     const String& BYLAW_NAME,   // Should already be on the contract. (This way
                                 // we can find it.)
     const String& HOOK_NAME,    // The Hook's name as referenced in the smart
@@ -2896,11 +2900,11 @@ bool OT_API::SmartContract_AddHook(
 }
 
 bool OT_API::SmartContract_RemoveHook(
-    const String& THE_CONTRACT,       // The contract, about to have the hook
-                                      // removed from it.
-    const Identifier& SIGNER_NYM_ID,  // Use any Nym you wish here. (The
-                                      // signing at this point is only to cause
-                                      // a save.)
+    const String& THE_CONTRACT,  // The contract, about to have the hook
+                                 // removed from it.
+    const identifier::Nym& SIGNER_NYM_ID,  // Use any Nym you wish here. (The
+                                           // signing at this point is only to
+                                           // cause a save.)
     const String& BYLAW_NAME,   // Should already be on the contract. (This way
                                 // we can find it.)
     const String& HOOK_NAME,    // The Hook's name as referenced in the smart
@@ -2956,9 +2960,9 @@ bool OT_API::SmartContract_RemoveHook(
 bool OT_API::SmartContract_AddCallback(
     const String& THE_CONTRACT,  // The contract, about to have the callback
                                  // added to it.
-    const Identifier& SIGNER_NYM_ID,  // Use any Nym you wish here. (The
-                                      // signing at this point is only to cause
-                                      // a save.)
+    const identifier::Nym& SIGNER_NYM_ID,  // Use any Nym you wish here. (The
+                                           // signing at this point is only to
+                                           // cause a save.)
     const String& BYLAW_NAME,  // Should already be on the contract. (This way
                                // we can find it.)
     const String& CALLBACK_NAME,  // The Callback's name as referenced in the
@@ -3023,9 +3027,9 @@ bool OT_API::SmartContract_AddCallback(
 bool OT_API::SmartContract_RemoveCallback(
     const String& THE_CONTRACT,  // The contract, about to have the callback
                                  // removed from it.
-    const Identifier& SIGNER_NYM_ID,  // Use any Nym you wish here. (The
-                                      // signing at this point is only to cause
-                                      // a save.)
+    const identifier::Nym& SIGNER_NYM_ID,  // Use any Nym you wish here. (The
+                                           // signing at this point is only to
+                                           // cause a save.)
     const String& BYLAW_NAME,  // Should already be on the contract. (This way
                                // we can find it.)
     const String& CALLBACK_NAME,  // The Callback's name as referenced in the
@@ -3075,11 +3079,11 @@ bool OT_API::SmartContract_RemoveCallback(
 }
 
 bool OT_API::SmartContract_AddClause(
-    const String& THE_CONTRACT,       // The contract, about to have the clause
-                                      // added to it.
-    const Identifier& SIGNER_NYM_ID,  // Use any Nym you wish here. (The
-                                      // signing at this point is only to cause
-                                      // a save.)
+    const String& THE_CONTRACT,  // The contract, about to have the clause
+                                 // added to it.
+    const identifier::Nym& SIGNER_NYM_ID,  // Use any Nym you wish here. (The
+                                           // signing at this point is only to
+                                           // cause a save.)
     const String& BYLAW_NAME,   // Should already be on the contract. (This way
                                 // we can find it.)
     const String& CLAUSE_NAME,  // The Clause's name as referenced in the smart
@@ -3142,11 +3146,11 @@ bool OT_API::SmartContract_AddClause(
 }
 
 bool OT_API::SmartContract_UpdateClause(
-    const String& THE_CONTRACT,       // The contract, about to have the clause
-                                      // updated on it.
-    const Identifier& SIGNER_NYM_ID,  // Use any Nym you wish here. (The
-                                      // signing at this point is only to cause
-                                      // a save.)
+    const String& THE_CONTRACT,  // The contract, about to have the clause
+                                 // updated on it.
+    const identifier::Nym& SIGNER_NYM_ID,  // Use any Nym you wish here. (The
+                                           // signing at this point is only to
+                                           // cause a save.)
     const String& BYLAW_NAME,   // Should already be on the contract. (This way
                                 // we can find it.)
     const String& CLAUSE_NAME,  // The Clause's name as referenced in the smart
@@ -3197,11 +3201,11 @@ bool OT_API::SmartContract_UpdateClause(
 }
 
 bool OT_API::SmartContract_RemoveClause(
-    const String& THE_CONTRACT,       // The contract, about to have the clause
-                                      // removed from it.
-    const Identifier& SIGNER_NYM_ID,  // Use any Nym you wish here. (The
-                                      // signing at this point is only to cause
-                                      // a save.)
+    const String& THE_CONTRACT,  // The contract, about to have the clause
+                                 // removed from it.
+    const identifier::Nym& SIGNER_NYM_ID,  // Use any Nym you wish here. (The
+                                           // signing at this point is only to
+                                           // cause a save.)
     const String& BYLAW_NAME,   // Should already be on the contract. (This way
                                 // we can find it.)
     const String& CLAUSE_NAME,  // The Clause's name as referenced in the smart
@@ -3253,9 +3257,9 @@ bool OT_API::SmartContract_RemoveClause(
 bool OT_API::SmartContract_AddVariable(
     const String& THE_CONTRACT,  // The contract, about to have the variable
                                  // added to it.
-    const Identifier& SIGNER_NYM_ID,  // Use any Nym you wish here. (The
-                                      // signing at this point is only to cause
-                                      // a save.)
+    const identifier::Nym& SIGNER_NYM_ID,  // Use any Nym you wish here. (The
+                                           // signing at this point is only to
+                                           // cause a save.)
     const String& BYLAW_NAME,  // Should already be on the contract. (This way
                                // we can find it.)
     const String& VAR_NAME,    // The Variable's name as referenced in the smart
@@ -3371,9 +3375,9 @@ bool OT_API::SmartContract_AddVariable(
 bool OT_API::SmartContract_RemoveVariable(
     const String& THE_CONTRACT,  // The contract, about to have the variable
                                  // added to it.
-    const Identifier& SIGNER_NYM_ID,  // Use any Nym you wish here. (The
-                                      // signing at this point is only to cause
-                                      // a save.)
+    const identifier::Nym& SIGNER_NYM_ID,  // Use any Nym you wish here. (The
+                                           // signing at this point is only to
+                                           // cause a save.)
     const String& BYLAW_NAME,  // Should already be on the contract. (This way
                                // we can find it.)
     const String& VAR_NAME,    // The Variable's name as referenced in the smart
@@ -3427,15 +3431,15 @@ bool OT_API::SmartContract_RemoveVariable(
 //
 // Returns success, true or false.
 bool OT_API::SetNym_Alias(
-    const Identifier& targetNymID,
-    const Identifier&,
+    const identifier::Nym& targetNymID,
+    const identifier::Nym&,
     const String& name) const
 {
     return api_.Wallet().SetNymAlias(targetNymID, name.Get());
 }
 
 bool OT_API::Rename_Nym(
-    const Identifier& nymID,
+    const identifier::Nym& nymID,
     const std::string& name,
     const proto::ContactItemType type,
     const bool primary) const
@@ -3475,7 +3479,7 @@ bool OT_API::Rename_Nym(
 // Returns success, true or false.
 bool OT_API::SetAccount_Name(
     const Identifier& accountID,
-    const Identifier& SIGNER_NYM_ID,
+    const identifier::Nym& SIGNER_NYM_ID,
     const String& ACCT_NEW_NAME) const
 {
     Lock lock(lock_);
@@ -3562,7 +3566,7 @@ bool OT_API::SetAccount_Name(
 //
 bool OT_API::Msg_HarvestTransactionNumbers(
     const Message& theMsg,
-    const Identifier& NYM_ID,
+    const identifier::Nym& NYM_ID,
     bool bHarvestingForRetry,           // false until positively asserted.
     bool bReplyWasSuccess,              // false until positively asserted.
     bool bReplyWasFailure,              // false until positively asserted.
@@ -3621,7 +3625,7 @@ bool OT_API::Msg_HarvestTransactionNumbers(
 
 bool OT_API::HarvestClosingNumbers(
     const Identifier& NOTARY_ID,
-    const Identifier& NYM_ID,
+    const identifier::Nym& NYM_ID,
     const String& THE_CRON_ITEM) const
 {
     rLock lock(lock_callback_({NYM_ID.str(), NOTARY_ID.str()}));
@@ -3666,7 +3670,7 @@ bool OT_API::HarvestClosingNumbers(
 // use the below function to get it back.
 bool OT_API::HarvestAllNumbers(
     const Identifier& NOTARY_ID,
-    const Identifier& NYM_ID,
+    const identifier::Nym& NYM_ID,
     const String& THE_CRON_ITEM) const
 {
     rLock lock(lock_callback_({NYM_ID.str(), NOTARY_ID.str()}));
@@ -3744,9 +3748,9 @@ Cheque* OT_API::WriteCheque(
     const time64_t& VALID_FROM,
     const time64_t& VALID_TO,
     const Identifier& SENDER_accountID,
-    const Identifier& SENDER_NYM_ID,
+    const identifier::Nym& SENDER_NYM_ID,
     const String& CHEQUE_MEMO,
-    const Identifier& pRECIPIENT_NYM_ID) const
+    const identifier::Nym& pRECIPIENT_NYM_ID) const
 {
     rLock lock(lock_callback_({SENDER_NYM_ID.str(), NOTARY_ID.str()}));
     auto context =
@@ -3868,10 +3872,10 @@ OTPaymentPlan* OT_API::ProposePaymentPlan(
                                  // Otherwise this is a LENGTH and is ADDED to
                                  // VALID_FROM
     const Identifier& pSENDER_accountID,
-    const Identifier& SENDER_NYM_ID,
+    const identifier::Nym& SENDER_NYM_ID,
     const String& PLAN_CONSIDERATION,  // Like a memo.
     const Identifier& RECIPIENT_accountID,
-    const Identifier& RECIPIENT_NYM_ID,
+    const identifier::Nym& RECIPIENT_NYM_ID,
     // ----------------------------------------  // If it's above zero, the
     // initial
     const std::int64_t& INITIAL_PAYMENT_AMOUNT,  // amount will be processed
@@ -4074,9 +4078,9 @@ OTPaymentPlan* OT_API::ProposePaymentPlan(
 //    submit it) so now, both have verified trns#s in this way.
 bool OT_API::ConfirmPaymentPlan(
     const Identifier& NOTARY_ID,
-    const Identifier& SENDER_NYM_ID,
+    const identifier::Nym& SENDER_NYM_ID,
     const Identifier& SENDER_accountID,
-    const Identifier& RECIPIENT_NYM_ID,
+    const identifier::Nym& RECIPIENT_NYM_ID,
     OTPaymentPlan& thePlan) const
 {
     rLock lock(lock_callback_({SENDER_NYM_ID.str(), NOTARY_ID.str()}));
@@ -4168,7 +4172,7 @@ bool OT_API::ConfirmPaymentPlan(
 // Caller IS responsible to delete
 std::unique_ptr<Ledger> OT_API::LoadNymbox(
     const Identifier& NOTARY_ID,
-    const Identifier& NYM_ID) const
+    const identifier::Nym& NYM_ID) const
 {
     rLock lock(lock_callback_({NYM_ID.str(), NOTARY_ID.str()}));
     auto context = api_.Wallet().ServerContext(NYM_ID, NOTARY_ID);
@@ -4206,7 +4210,7 @@ std::unique_ptr<Ledger> OT_API::LoadNymbox(
 // Caller IS responsible to delete
 std::unique_ptr<Ledger> OT_API::LoadNymboxNoVerify(
     const Identifier& NOTARY_ID,
-    const Identifier& NYM_ID) const
+    const identifier::Nym& NYM_ID) const
 {
     rLock lock(lock_callback_({NYM_ID.str(), NOTARY_ID.str()}));
 
@@ -4234,7 +4238,7 @@ std::unique_ptr<Ledger> OT_API::LoadNymboxNoVerify(
 //
 std::unique_ptr<Ledger> OT_API::LoadInbox(
     const Identifier& NOTARY_ID,
-    const Identifier& NYM_ID,
+    const identifier::Nym& NYM_ID,
     const Identifier& ACCOUNT_ID) const
 {
     rLock lock(lock_callback_({NYM_ID.str(), NOTARY_ID.str()}));
@@ -4281,7 +4285,7 @@ std::unique_ptr<Ledger> OT_API::LoadInbox(
 //
 std::unique_ptr<Ledger> OT_API::LoadInboxNoVerify(
     const Identifier& NOTARY_ID,
-    const Identifier& NYM_ID,
+    const identifier::Nym& NYM_ID,
     const Identifier& ACCOUNT_ID) const
 {
     rLock lock(lock_callback_({NYM_ID.str(), NOTARY_ID.str()}));
@@ -4312,7 +4316,7 @@ std::unique_ptr<Ledger> OT_API::LoadInboxNoVerify(
 // Caller IS responsible to delete
 std::unique_ptr<Ledger> OT_API::LoadOutbox(
     const Identifier& NOTARY_ID,
-    const Identifier& NYM_ID,
+    const identifier::Nym& NYM_ID,
     const Identifier& ACCOUNT_ID) const
 {
     rLock lock(lock_callback_({NYM_ID.str(), NOTARY_ID.str()}));
@@ -4361,7 +4365,7 @@ std::unique_ptr<Ledger> OT_API::LoadOutbox(
 // Caller IS responsible to delete
 std::unique_ptr<Ledger> OT_API::LoadOutboxNoVerify(
     const Identifier& NOTARY_ID,
-    const Identifier& NYM_ID,
+    const identifier::Nym& NYM_ID,
     const Identifier& ACCOUNT_ID) const
 {
     rLock lock(lock_callback_({NYM_ID.str(), NOTARY_ID.str()}));
@@ -4391,7 +4395,7 @@ std::unique_ptr<Ledger> OT_API::LoadOutboxNoVerify(
 // Caller is responsible to delete!
 std::unique_ptr<Ledger> OT_API::LoadPaymentInbox(
     const Identifier& NOTARY_ID,
-    const Identifier& NYM_ID) const
+    const identifier::Nym& NYM_ID) const
 {
     rLock lock(lock_callback_({NYM_ID.str(), NOTARY_ID.str()}));
     auto context = api_.Wallet().ServerContext(NYM_ID, NOTARY_ID);
@@ -4428,7 +4432,7 @@ std::unique_ptr<Ledger> OT_API::LoadPaymentInbox(
 // Caller is responsible to delete!
 std::unique_ptr<Ledger> OT_API::LoadPaymentInboxNoVerify(
     const Identifier& NOTARY_ID,
-    const Identifier& NYM_ID) const
+    const identifier::Nym& NYM_ID) const
 {
     rLock lock(lock_callback_({NYM_ID.str(), NOTARY_ID.str()}));
 
@@ -4457,7 +4461,7 @@ std::unique_ptr<Ledger> OT_API::LoadPaymentInboxNoVerify(
 // Caller IS responsible to delete
 std::unique_ptr<Ledger> OT_API::LoadRecordBox(
     const Identifier& NOTARY_ID,
-    const Identifier& NYM_ID,
+    const identifier::Nym& NYM_ID,
     const Identifier& ACCOUNT_ID) const
 {
     rLock lock(lock_callback_({NYM_ID.str(), NOTARY_ID.str()}));
@@ -4501,7 +4505,7 @@ std::unique_ptr<Ledger> OT_API::LoadRecordBox(
 // Caller is responsible to delete!
 std::unique_ptr<Ledger> OT_API::LoadRecordBoxNoVerify(
     const Identifier& NOTARY_ID,
-    const Identifier& NYM_ID,
+    const identifier::Nym& NYM_ID,
     const Identifier& ACCOUNT_ID) const
 {
     rLock lock(lock_callback_({NYM_ID.str(), NOTARY_ID.str()}));
@@ -4531,7 +4535,7 @@ std::unique_ptr<Ledger> OT_API::LoadRecordBoxNoVerify(
 // Caller IS responsible to delete.
 std::unique_ptr<Ledger> OT_API::LoadExpiredBox(
     const Identifier& NOTARY_ID,
-    const Identifier& NYM_ID) const
+    const identifier::Nym& NYM_ID) const
 {
     rLock lock(lock_callback_({NYM_ID.str(), NOTARY_ID.str()}));
     auto context = api_.Wallet().ServerContext(NYM_ID, NOTARY_ID);
@@ -4572,7 +4576,7 @@ std::unique_ptr<Ledger> OT_API::LoadExpiredBox(
 
 std::unique_ptr<Ledger> OT_API::LoadExpiredBoxNoVerify(
     const Identifier& NOTARY_ID,
-    const Identifier& NYM_ID) const
+    const identifier::Nym& NYM_ID) const
 {
     rLock lock(lock_callback_({NYM_ID.str(), NOTARY_ID.str()}));
 
@@ -4600,7 +4604,7 @@ std::unique_ptr<Ledger> OT_API::LoadExpiredBoxNoVerify(
 
 bool OT_API::ClearExpired(
     const Identifier& NOTARY_ID,
-    const Identifier& NYM_ID,
+    const identifier::Nym& NYM_ID,
     const std::int32_t nIndex,
     bool bClearAll) const  // if true, nIndex is
                            // ignored.
@@ -4875,7 +4879,7 @@ bool OT_API::RecordPayment(
     const Identifier& TRANSPORT_NOTARY_ID,  // Transport Notary for inPayments
                                             // box. (May differ from notary ID
                                             // on the payment itself)
-    const Identifier& NYM_ID,
+    const identifier::Nym& NYM_ID,
     bool bIsInbox,        // true == payments inbox. false == outpayments box.
     std::int32_t nIndex,  // removes payment instrument (from payments inbox or
                           // outpayments box) and moves to record box.
@@ -5226,8 +5230,8 @@ bool OT_API::RecordPayment(
 
                 bool bShouldHarvestPayment = false;
                 bool bNeedToLoadAssetAcctInbox = false;
-                auto theSenderNymID = Identifier::Factory(),
-                     theSenderAcctID = Identifier::Factory();
+                auto theSenderNymID = identifier::Nym::Factory();
+                auto theSenderAcctID = Identifier::Factory();
 
                 bool bPaymentSenderIsNym = false;
                 bool bFromAcctIsAvailable = false;
@@ -5704,9 +5708,9 @@ bool OT_API::RecordPayment(
                             // case, he's the "recipient." (So we need to figure
                             // out which, and set the account accordingly.)
                             //
-                            if (NYM_ID == pPlan->GetRecipientNymID())
+                            if (NYM_ID.operator==(pPlan->GetRecipientNymID()))
                                 theSenderAcctID = pPlan->GetRecipientAcctID();
-                            else if (NYM_ID == pPlan->GetSenderNymID())
+                            else if (NYM_ID.operator==(pPlan->GetSenderNymID()))
                                 theSenderAcctID = pPlan->GetSenderAcctID();
                             else
                                 LogOutput(OT_METHOD)(__FUNCTION__)(
@@ -6057,7 +6061,7 @@ bool OT_API::RecordPayment(
 //
 bool OT_API::ClearRecord(
     const Identifier& NOTARY_ID,
-    const Identifier& NYM_ID,
+    const identifier::Nym& NYM_ID,
     const Identifier& ACCOUNT_ID,  // NYM_ID can be passed here as well.
     std::int32_t nIndex,
     bool bClearAll) const  // if true, nIndex is ignored.
@@ -6160,7 +6164,7 @@ bool OT_API::ClearRecord(
 Message* OT_API::GetSentMessage(
     const std::int64_t& lRequestNumber,
     const Identifier& NOTARY_ID,
-    const Identifier& NYM_ID) const
+    const identifier::Nym& NYM_ID) const
 {
     rLock lock(lock_callback_({NYM_ID.str(), NOTARY_ID.str()}));
 
@@ -6181,7 +6185,7 @@ Message* OT_API::GetSentMessage(
 bool OT_API::RemoveSentMessage(
     const std::int64_t& lRequestNumber,
     const Identifier& NOTARY_ID,
-    const Identifier& NYM_ID) const
+    const identifier::Nym& NYM_ID) const
 {
     rLock lock(lock_callback_({NYM_ID.str(), NOTARY_ID.str()}));
 
@@ -6257,7 +6261,7 @@ bool OT_API::RemoveSentMessage(
 void OT_API::FlushSentMessages(
     bool bHarvestingForRetry,
     const Identifier& NOTARY_ID,
-    const Identifier& NYM_ID,
+    const identifier::Nym& NYM_ID,
     const Ledger& THE_NYMBOX) const
 {
     rLock lock(lock_callback_({NYM_ID.str(), NOTARY_ID.str()}));
@@ -6269,7 +6273,7 @@ void OT_API::FlushSentMessages(
     const auto strNotaryID = String::Factory(NOTARY_ID),
                strNymID = String::Factory(NYM_ID);
 
-    if ((THE_NYMBOX.GetNymID() != NYM_ID) ||
+    if ((THE_NYMBOX.GetNymID().operator!=(NYM_ID)) ||
         (THE_NYMBOX.GetPurportedNotaryID() != NOTARY_ID)) {
         const auto strLedger = String::Factory(THE_NYMBOX);
         LogOutput(OT_METHOD)(__FUNCTION__)(
@@ -6337,7 +6341,7 @@ void OT_API::FlushSentMessages(
 
 bool OT_API::HaveAlreadySeenReply(
     const Identifier& NOTARY_ID,
-    const Identifier& NYM_ID,
+    const identifier::Nym& NYM_ID,
     const RequestNumber& lRequestNumber) const
 {
     auto context = api_.Wallet().ServerContext(NYM_ID, NOTARY_ID);
@@ -6550,7 +6554,7 @@ CommandResult OT_API::issueBasket(
 // (Caller is responsible to delete.)
 Basket* OT_API::GenerateBasketExchange(
     const Identifier& NOTARY_ID,
-    const Identifier& NYM_ID,
+    const identifier::Nym& NYM_ID,
     const Identifier& BASKET_INSTRUMENT_DEFINITION_ID,
     const Identifier& accountID,
     std::int32_t TRANSFER_MULTIPLE) const
@@ -6637,7 +6641,7 @@ Basket* OT_API::GenerateBasketExchange(
 // ADD BASKET EXCHANGE ITEM
 bool OT_API::AddBasketExchangeItem(
     const Identifier& NOTARY_ID,
-    const Identifier& NYM_ID,
+    const identifier::Nym& NYM_ID,
     Basket& theBasket,
     const Identifier& INSTRUMENT_DEFINITION_ID,
     const Identifier& ASSET_ACCOUNT_ID) const
@@ -7005,7 +7009,7 @@ std::unique_ptr<Message> OT_API::getTransactionNumbers(
         MessageType::getTransactionNumbers,
         context,
         *output,
-        Identifier::Factory(),
+        identifier::Nym::Factory(),
         Identifier::Factory());
 
     if (1 > requestNum) {
@@ -7182,7 +7186,7 @@ CommandResult OT_API::payDividend(
         SHARES_ISSUER_accountID,
         nymID,
         DIVIDEND_MEMO,
-        Identifier::Factory(nymID));
+        nymID);
 
     if (!bIssueCheque) { return output; }
 
@@ -7316,7 +7320,7 @@ CommandResult OT_API::payDividend(
 CommandResult OT_API::withdrawVoucher(
     ServerContext& context,
     const Identifier& accountID,
-    const Identifier& RECIPIENT_NYM_ID,
+    const identifier::Nym& RECIPIENT_NYM_ID,
     const String& CHEQUE_MEMO,
     const Amount amount) const
 {
@@ -7390,8 +7394,9 @@ CommandResult OT_API::withdrawVoucher(
         accountID,
         nymID,
         strChequeMemo,
-        (strRecipientNymID->GetLength() > 2) ? RECIPIENT_NYM_ID
-                                             : Identifier::Factory().get());
+        (strRecipientNymID->GetLength() > 2)
+            ? RECIPIENT_NYM_ID
+            : identifier::Nym::Factory().get());
     std::unique_ptr<Ledger> inbox(account.get().LoadInbox(nym));
     std::unique_ptr<Ledger> outbox(account.get().LoadOutbox(nym));
 
@@ -7520,7 +7525,7 @@ CommandResult OT_API::withdrawVoucher(
 // vouchers.)
 bool OT_API::DiscardCheque(
     const Identifier& NOTARY_ID,
-    const Identifier& NYM_ID,
+    const identifier::Nym& NYM_ID,
     const Identifier& accountID,
     const String& THE_CHEQUE) const
 {
@@ -7564,7 +7569,7 @@ bool OT_API::DiscardCheque(
     } else if (
         (theCheque->GetNotaryID() == NOTARY_ID) &&
         (theCheque->GetInstrumentDefinitionID() == contractID) &&
-        (theCheque->GetSenderNymID() == NYM_ID) &&
+        (theCheque->GetSenderNymID().operator==(NYM_ID)) &&
         (theCheque->GetSenderAcctID() == accountID)) {
         // we only "add it back" if it was really there in the first place.
         if (context.It().VerifyIssuedNumber(theCheque->GetTransactionNum())) {
@@ -7635,7 +7640,7 @@ CommandResult OT_API::depositPaymentPlan(
         return output;
     }
 
-    const bool bCancelling = (plan->GetRecipientNymID() == nymID);
+    const bool bCancelling = (plan->GetRecipientNymID().operator==(nymID));
 
     if (bCancelling) {
         if (plan->IsCanceled()) {
@@ -8807,12 +8812,12 @@ CommandResult OT_API::deleteAssetAccount(
 
 bool OT_API::DoesBoxReceiptExist(
     const Identifier& NOTARY_ID,
-    const Identifier& NYM_ID,      // Unused here for now, but still
-                                   // convention.
-    const Identifier& ACCOUNT_ID,  // If for Nymbox (vs
-                                   // inbox/outbox) then pass NYM_ID
-                                   // in this field also.
-    std::int32_t nBoxType,         // 0/nymbox, 1/inbox, 2/outbox
+    const identifier::Nym& NYM_ID,  // Unused here for now, but still
+                                    // convention.
+    const Identifier& ACCOUNT_ID,   // If for Nymbox (vs
+                                    // inbox/outbox) then pass NYM_ID
+                                    // in this field also.
+    std::int32_t nBoxType,          // 0/nymbox, 1/inbox, 2/outbox
     const TransactionNumber& lTransactionNum) const
 {
     rLock lock(lock_callback_({NYM_ID.str(), NOTARY_ID.str()}));
@@ -8830,7 +8835,7 @@ bool OT_API::DoesBoxReceiptExist(
 
 CommandResult OT_API::usageCredits(
     ServerContext& context,
-    const Identifier& NYM_ID_CHECK,
+    const identifier::Nym& NYM_ID_CHECK,
     std::int64_t lAdjustment) const
 {
     rLock lock(
@@ -8861,7 +8866,7 @@ CommandResult OT_API::usageCredits(
 CommandResult OT_API::sendNymObject(
     ServerContext& context,
     std::unique_ptr<Message>& message,
-    const Identifier& recipientNymID,
+    const identifier::Nym& recipientNymID,
     const PeerObject& object,
     const RequestNumber provided) const
 {
@@ -8945,7 +8950,7 @@ std::set<std::int64_t> OT_API::Ledger_GetTransactionNums(
 //
 OT_API::ProcessInbox OT_API::Ledger_CreateResponse(
     const Identifier& theNotaryID,
-    const Identifier& theNymID,
+    const identifier::Nym& theNymID,
     const Identifier& theAccountID) const
 {
     OT_VERIFY_OT_ID(theNotaryID);
@@ -9184,7 +9189,7 @@ on that message and returns the decrypted cleartext.
 // DONE: Finish writing OTClient::ProcessDepositResponse
 
 std::shared_ptr<OTPayment> OT_API::Ledger_GetInstrument(
-    const Identifier& theNymID,
+    const identifier::Nym& theNymID,
     const Ledger& ledger,
     const std::int32_t& nIndex) const  // returns financial instrument by index.
 {
@@ -9218,7 +9223,7 @@ std::shared_ptr<OTPayment> OT_API::Ledger_GetInstrument(
 // receipt (that contains the instrument) in the ledger.
 //
 std::shared_ptr<OTPayment> OT_API::Ledger_GetInstrumentByReceiptID(
-    const Identifier& theNymID,
+    const identifier::Nym& theNymID,
     const Ledger& ledger,
     const std::int64_t& lReceiptId) const
 {
@@ -9288,7 +9293,7 @@ std::int64_t OT_API::Ledger_GetTransactionIDByIndex(
 // (Returns bool for succes or failure.)
 //
 bool OT_API::Ledger_AddTransaction(
-    const Identifier& theNymID,
+    const identifier::Nym& theNymID,
     Ledger& ledger,  // ledger takes ownership of transaction.
     std::unique_ptr<OTTransaction>& transaction) const
 {
@@ -9359,7 +9364,7 @@ bool OT_API::Ledger_AddTransaction(
 //
 bool OT_API::Transaction_CreateResponse(
     const Identifier& theNotaryID,
-    const Identifier& theNymID,
+    const identifier::Nym& theNymID,
     const Identifier& accountID,
     Ledger& responseLedger,
     OTTransaction& originalTransaction,  // Responding to
@@ -9438,7 +9443,7 @@ bool OT_API::Transaction_CreateResponse(
 //
 bool OT_API::Ledger_FinalizeResponse(
     const Identifier& theNotaryID,
-    const Identifier& theNymID,
+    const identifier::Nym& theNymID,
     const Identifier& accountID,
     Ledger& responseLedger) const
 {
@@ -9508,7 +9513,7 @@ CommandResult OT_API::unregisterNym(ServerContext& context) const
         MessageType::unregisterNym,
         context,
         *message,
-        Identifier::Factory(),
+        identifier::Nym::Factory(),
         Identifier::Factory());
 
     if (0 < requestNum) {
@@ -9571,7 +9576,12 @@ CommandResult OT_API::initiatePeerRequest(
     }
 
     std::unique_ptr<Message> request{nullptr};
-    output = sendNymObject(context, request, recipient, *object, requestNum);
+    output = sendNymObject(
+        context,
+        request,
+        identifier::Nym::Factory(recipient.str()),
+        *object,
+        requestNum);
 
     if (SendResult::VALID_REPLY != status) {
         api_.Wallet().PeerRequestCreateRollback(nymID, itemID);
@@ -9612,7 +9622,8 @@ CommandResult OT_API::initiatePeerReply(
         return output;
     }
 
-    auto recipientNym = api_.Wallet().Nym(recipient);
+    auto recipientNym =
+        api_.Wallet().Nym(identifier::Nym::Factory(recipient.str()));
     std::unique_ptr<PeerRequest> instantiatedRequest(
         PeerRequest::Factory(api_.Wallet(), recipientNym, *serializedRequest));
 
@@ -9649,8 +9660,12 @@ CommandResult OT_API::initiatePeerReply(
     }
 
     std::unique_ptr<Message> requestMessage{nullptr};
-    output =
-        sendNymObject(context, requestMessage, recipient, *object, requestNum);
+    output = sendNymObject(
+        context,
+        requestMessage,
+        identifier::Nym::Factory(recipient.str()),
+        *object,
+        requestNum);
 
     if (SendResult::VALID_REPLY != status) {
         api_.Wallet().PeerReplyCreateRollback(nymID, request, itemID);
@@ -9665,7 +9680,7 @@ ConnectionState OT_API::CheckConnection(const std::string& server) const
 }
 
 std::string OT_API::AddChildKeyCredential(
-    const Identifier& nymID,
+    const identifier::Nym& nymID,
     const Identifier& masterID,
     const NymParameters& nymParameters) const
 {
@@ -9678,7 +9693,7 @@ std::string OT_API::AddChildKeyCredential(
 }
 
 std::unique_ptr<proto::ContactData> OT_API::GetContactData(
-    const Identifier& nymID) const
+    const identifier::Nym& nymID) const
 {
     std::unique_ptr<proto::ContactData> output;
     const auto nym = api_.Wallet().Nym(nymID);
@@ -9691,7 +9706,7 @@ std::unique_ptr<proto::ContactData> OT_API::GetContactData(
 }
 
 std::list<std::string> OT_API::BoxItemCount(
-    const Identifier& NYM_ID,
+    const identifier::Nym& NYM_ID,
     const StorageBox box) const
 {
     const auto list = activity_.Mail(NYM_ID, box);
@@ -9703,7 +9718,7 @@ std::list<std::string> OT_API::BoxItemCount(
 }
 
 std::string OT_API::BoxContents(
-    const Identifier& nymID,
+    const identifier::Nym& nymID,
     const Identifier& id,
     const StorageBox box) const
 {
@@ -10471,7 +10486,7 @@ TransactionNumber OT_API::get_origin(
 }
 
 std::set<std::unique_ptr<Cheque>> OT_API::extract_cheques(
-    const Identifier& nymID,
+    const identifier::Nym& nymID,
     const Identifier& accountID,
     const Identifier& serverID,
     const String& serializedProcessInbox,

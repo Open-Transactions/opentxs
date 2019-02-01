@@ -381,13 +381,15 @@ std::set<OTIdentifier> Storage::AccountsByContract(
 std::set<OTIdentifier> Storage::AccountsByIssuer(
     const Identifier& issuerNym) const
 {
-    return Root().Tree().Accounts().AccountsByIssuer(issuerNym);
+    return Root().Tree().Accounts().AccountsByIssuer(
+        identifier::Nym::Factory(issuerNym.str()));
 }
 
 std::set<OTIdentifier> Storage::AccountsByOwner(
     const Identifier& ownerNym) const
 {
-    return Root().Tree().Accounts().AccountsByOwner(ownerNym);
+    return Root().Tree().Accounts().AccountsByOwner(
+        identifier::Nym::Factory(ownerNym.str()));
 }
 
 std::set<OTIdentifier> Storage::AccountsByServer(const Identifier& server) const
@@ -402,7 +404,7 @@ std::set<OTIdentifier> Storage::AccountsByUnit(
 }
 
 OTIdentifier Storage::Bip47AddressToChannel(
-    const Identifier& nymID,
+    const identifier::Nym& nymID,
     const std::string& address) const
 {
     const bool exists = Root().Tree().Nyms().Exists(nymID.str());
@@ -423,7 +425,7 @@ OTIdentifier Storage::Bip47AddressToChannel(
 }
 
 proto::ContactItemType Storage::Bip47Chain(
-    const Identifier& nymID,
+    const identifier::Nym& nymID,
     const Identifier& channelID) const
 {
     const bool exists = Root().Tree().Nyms().Exists(nymID.str());
@@ -444,7 +446,7 @@ proto::ContactItemType Storage::Bip47Chain(
 }
 
 Storage::Bip47ChannelList Storage::Bip47ChannelsByContact(
-    const Identifier& nymID,
+    const identifier::Nym& nymID,
     const Identifier& contactID) const
 {
     const bool exists = Root().Tree().Nyms().Exists(nymID.str());
@@ -465,7 +467,7 @@ Storage::Bip47ChannelList Storage::Bip47ChannelsByContact(
 }
 
 Storage::Bip47ChannelList Storage::Bip47ChannelsByChain(
-    const Identifier& nymID,
+    const identifier::Nym& nymID,
     const proto::ContactItemType chain) const
 {
     const bool exists = Root().Tree().Nyms().Exists(nymID.str());
@@ -486,7 +488,7 @@ Storage::Bip47ChannelList Storage::Bip47ChannelsByChain(
 }
 
 Storage::Bip47ChannelList Storage::Bip47ChannelsByLocalPaymentCode(
-    const Identifier& nymID,
+    const identifier::Nym& nymID,
     const std::string& code) const
 {
     const bool exists = Root().Tree().Nyms().Exists(nymID.str());
@@ -507,7 +509,7 @@ Storage::Bip47ChannelList Storage::Bip47ChannelsByLocalPaymentCode(
 }
 
 Storage::Bip47ChannelList Storage::Bip47ChannelsByRemotePaymentCode(
-    const Identifier& nymID,
+    const identifier::Nym& nymID,
     const std::string& code) const
 {
     const bool exists = Root().Tree().Nyms().Exists(nymID.str());
@@ -527,7 +529,7 @@ Storage::Bip47ChannelList Storage::Bip47ChannelsByRemotePaymentCode(
         .ChannelsByRemotePaymentCode(code);
 }
 
-ObjectList Storage::Bip47ChannelsList(const Identifier& nymID) const
+ObjectList Storage::Bip47ChannelsList(const identifier::Nym& nymID) const
 {
     const bool exists = Root().Tree().Nyms().Exists(nymID.str());
 
@@ -542,7 +544,7 @@ ObjectList Storage::Bip47ChannelsList(const Identifier& nymID) const
 }
 
 OTIdentifier Storage::Bip47Contact(
-    const Identifier& nymID,
+    const identifier::Nym& nymID,
     const Identifier& channelID) const
 {
     const bool exists = Root().Tree().Nyms().Exists(nymID.str());
@@ -563,7 +565,7 @@ OTIdentifier Storage::Bip47Contact(
 }
 
 std::string Storage::Bip47LocalPaymentCode(
-    const Identifier& nymID,
+    const identifier::Nym& nymID,
     const Identifier& channelID) const
 {
     const bool exists = Root().Tree().Nyms().Exists(nymID.str());
@@ -584,7 +586,7 @@ std::string Storage::Bip47LocalPaymentCode(
 }
 
 std::string Storage::Bip47RemotePaymentCode(
-    const Identifier& nymID,
+    const identifier::Nym& nymID,
     const Identifier& channelID) const
 {
     const bool exists = Root().Tree().Nyms().Exists(nymID.str());
@@ -811,7 +813,7 @@ bool Storage::Load(
 }
 
 bool Storage::Load(
-    const Identifier& nymID,
+    const identifier::Nym& nymID,
     const Identifier& channelID,
     std::shared_ptr<proto::Bip47Channel>& output,
     const bool checking) const
@@ -1908,9 +1910,9 @@ bool Storage::Store(
             accountID,
             data,
             alias,
-            ownerNym,
-            signerNym,
-            issuerNym,
+            identifier::Nym::Factory(ownerNym.str()),
+            identifier::Nym::Factory(signerNym.str()),
+            identifier::Nym::Factory(issuerNym.str()),
             server,
             contract,
             unit);
@@ -1933,7 +1935,7 @@ bool Storage::Store(
 }
 
 bool Storage::Store(
-    const Identifier& nymID,
+    const identifier::Nym& nymID,
     const proto::Bip47Channel& data,
     Identifier& channelID) const
 {

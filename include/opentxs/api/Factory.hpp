@@ -48,17 +48,17 @@ public:
     EXPORT virtual std::unique_ptr<opentxs::Item> Item(
         const std::string& serialized) const = 0;
     EXPORT virtual std::unique_ptr<opentxs::Item> Item(
-        const Identifier& theNymID,
+        const identifier::Nym& theNymID,
         const opentxs::Item& theOwner) const = 0;  // From owner we can get acct
                                                    // ID, server ID, and
                                                    // transaction Num
     EXPORT virtual std::unique_ptr<opentxs::Item> Item(
-        const Identifier& theNymID,
+        const identifier::Nym& theNymID,
         const OTTransaction& theOwner) const = 0;  // From owner we can get acct
                                                    // ID, server ID, and
                                                    // transaction Num
     EXPORT virtual std::unique_ptr<opentxs::Item> Item(
-        const Identifier& theNymID,
+        const identifier::Nym& theNymID,
         const OTTransaction& theOwner,
         itemType theType,
         const Identifier& pDestinationAcctID) const = 0;
@@ -75,11 +75,11 @@ public:
         const Identifier& theAccountID,
         const Identifier& theNotaryID) const = 0;
     EXPORT virtual std::unique_ptr<opentxs::Ledger> Ledger(
-        const Identifier& theNymID,
+        const identifier::Nym& theNymID,
         const Identifier& theAccountID,
         const Identifier& theNotaryID) const = 0;
     EXPORT virtual std::unique_ptr<opentxs::Ledger> Ledger(
-        const Identifier& theNymID,
+        const identifier::Nym& theNymID,
         const Identifier& theAcctID,
         const Identifier& theNotaryID,
         ledgerType theType,
@@ -145,9 +145,9 @@ public:
         const Identifier& NOTARY_ID,
         const Identifier& INSTRUMENT_DEFINITION_ID,
         const Identifier& SENDER_ACCT_ID,
-        const Identifier& SENDER_NYM_ID,
+        const identifier::Nym& SENDER_NYM_ID,
         const Identifier& RECIPIENT_ACCT_ID,
-        const Identifier& RECIPIENT_NYM_ID) const = 0;
+        const identifier::Nym& RECIPIENT_NYM_ID) const = 0;
 
     EXPORT virtual std::unique_ptr<opentxs::PeerObject> PeerObject(
         const ConstNym& senderNym,
@@ -214,7 +214,7 @@ public:
         const Identifier& notaryID,
         const Identifier& instrumentDefinitionID,
         const Identifier& assetAcctId,
-        const Identifier& nymID,
+        const identifier::Nym& nymID,
         const Identifier& currencyId,
         const Identifier& currencyAcctId) const = 0;
 
@@ -224,12 +224,12 @@ public:
     EXPORT virtual std::unique_ptr<OTTransaction> Transaction(
         const opentxs::Ledger& theOwner) const = 0;
     EXPORT virtual std::unique_ptr<OTTransaction> Transaction(
-        const Identifier& theNymID,
+        const identifier::Nym& theNymID,
         const Identifier& theAccountID,
         const Identifier& theNotaryID,
         originType theOriginType = originType::not_applicable) const = 0;
     EXPORT virtual std::unique_ptr<OTTransaction> Transaction(
-        const Identifier& theNymID,
+        const identifier::Nym& theNymID,
         const Identifier& theAccountID,
         const Identifier& theNotaryID,
         std::int64_t lTransactionNum,
@@ -239,7 +239,7 @@ public:
     // The full receipt is loaded only after the abbreviated ones are loaded,
     // and verified against them.
     EXPORT virtual std::unique_ptr<OTTransaction> Transaction(
-        const Identifier& theNymID,
+        const identifier::Nym& theNymID,
         const Identifier& theAccountID,
         const Identifier& theNotaryID,
         const std::int64_t& lNumberOfOrigin,
@@ -257,7 +257,7 @@ public:
         bool bReplyTransSuccess,
         NumList* pNumList = nullptr) const = 0;
     EXPORT virtual std::unique_ptr<OTTransaction> Transaction(
-        const Identifier& theNymID,
+        const identifier::Nym& theNymID,
         const Identifier& theAccountID,
         const Identifier& theNotaryID,
         transactionType theType,

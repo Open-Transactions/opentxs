@@ -13,6 +13,7 @@
 #include "opentxs/api/Core.hpp"
 #include "opentxs/api/Wallet.hpp"
 #include "opentxs/core/contract/UnitDefinition.hpp"
+#include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/core/Cheque.hpp"
 #include "opentxs/core/Flag.hpp"
 #include "opentxs/core/Identifier.hpp"
@@ -45,7 +46,7 @@ TransferBalanceItem::TransferBalanceItem(
     const AccountActivityRowID& rowID,
     const AccountActivitySortKey& sortKey,
     const CustomData& custom,
-    const Identifier& nymID,
+    const identifier::Nym& nymID,
     const Identifier& accountID)
     : BalanceItem(
           parent,
@@ -185,7 +186,7 @@ void TransferBalanceItem::startup(const CustomData& custom)
 
                     if (0 < workflow.party_size()) {
                         text += get_contact_name(
-                            Identifier::Factory(workflow.party(0)));
+                            identifier::Nym::Factory(workflow.party(0)));
                     } else {
                         text += "account " +
                                 transfer_->GetDestinationAcctID().str();
@@ -208,7 +209,7 @@ void TransferBalanceItem::startup(const CustomData& custom)
 
                     if (0 < workflow.party_size()) {
                         text += get_contact_name(
-                            Identifier::Factory(workflow.party(0)));
+                            identifier::Nym::Factory(workflow.party(0)));
                     } else {
                         text += "account " +
                                 transfer_->GetPurportedAccountID().str();

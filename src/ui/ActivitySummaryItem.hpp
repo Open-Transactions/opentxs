@@ -35,7 +35,7 @@ private:
     using ItemLocator = std::tuple<std::string, StorageBox, std::string>;
 
     const Flag& running_;
-    const OTIdentifier nym_id_;
+    const OTNymID nym_id_;
     ActivitySummarySortKey key_;
     std::shared_ptr<proto::StorageThread> thread_{nullptr};
     std::string& display_name_;
@@ -55,7 +55,7 @@ private:
         const ActivitySummaryInternalInterface& parent,
         const api::client::Manager& api,
         const network::zeromq::PublishSocket& publisher,
-        const Identifier& nymID,
+        const identifier::Nym& nymID,
         const ActivitySummaryRowID& rowID,
         const ActivitySummarySortKey& sortKey,
         const CustomData& custom,

@@ -248,7 +248,7 @@ void UserCommandProcessor::check_acknowledgements(ReplyMessage& reply) const
     // client message... If we add any acknowledged replies to the server-side
     // list, we will want to save (at the end.)
     auto numlist_ack_reply = reply.Acknowledged();
-    const auto nymID = Identifier::Factory(context.RemoteNym().ID());
+    const auto nymID = identifier::Nym::Factory(context.RemoteNym().ID().str());
     auto nymbox{manager_.Factory().Ledger(nymID, nymID, context.Server())};
 
     OT_ASSERT(false != bool(nymbox));
@@ -311,11 +311,11 @@ void UserCommandProcessor::check_acknowledgements(ReplyMessage& reply) const
 }
 
 bool UserCommandProcessor::check_client_isnt_server(
-    const Identifier& nymID,
+    const identifier::Nym& nymID,
     const Nym& serverNym)
 {
     const auto& serverNymID = serverNym.ID();
-    const bool bNymIsServerNym = serverNymID == nymID;
+    const bool bNymIsServerNym = serverNymID.operator==(nymID);
 
     if (bNymIsServerNym) {
         LogOutput(OT_METHOD)(__FUNCTION__)(
@@ -420,7 +420,7 @@ bool UserCommandProcessor::check_request_number(
     return true;
 }
 
-bool UserCommandProcessor::check_server_lock(const Identifier& nymID)
+bool UserCommandProcessor::check_server_lock(const identifier::Nym& nymID)
 {
     if (false == ServerSettings::__admin_server_locked) { return true; }
 
@@ -443,7 +443,8 @@ bool UserCommandProcessor::check_usage_credits(ReplyMessage& reply) const
     const bool creditsRequired = ServerSettings::__admin_usage_credits;
     const bool needsCredits = nymfile->GetUsageCredits() >= 0;
     const bool checkCredits =
-        creditsRequired && needsCredits && (false == isAdmin(nymfile->ID()));
+        creditsRequired && needsCredits &&
+        (false == isAdmin(identifier::Nym::Factory(nymfile->ID().str())));
 
     if (checkCredits) {
         auto nymFile = reply.Context().mutable_Nymfile("");
@@ -513,7 +514,7 @@ bool UserCommandProcessor::cmd_check_nym(ReplyMessage& reply) const
     OT_ENFORCE_PERMISSION_MSG(ServerSettings::__cmd_check_nym);
 
     reply.SetSuccess(true);
-    auto nym = server_.API().Wallet().Nym(Identifier::Factory(targetNym));
+    auto nym = server_.API().Wallet().Nym(identifier::Nym::Factory(targetNym));
 
     if (nym) {
         reply.SetPayload(proto::ProtoAsData(nym->asPublicNym()));
@@ -733,7 +734,7 @@ bool UserCommandProcessor::cmd_get_account_data(ReplyMessage& reply) const
         return false;
     }
 
-    if (account.get().GetNymID() != nymID) {
+    if (account.get().GetNymID().operator!=(nymID)) {
         LogOutput(OT_METHOD)(__FUNCTION__)(": Nym ")(nymID)(
             " does not own account ")(accountID)
             .Flush();
@@ -906,7 +907,8 @@ bool UserCommandProcessor::cmd_get_instrument_definition(
             reply.SetBool(true);
         }
     } else if (ContractType::NYM == static_cast<ContractType>(msgIn.enum_)) {
-        auto contract = server_.API().Wallet().Nym(contractID);
+        auto contract = server_.API().Wallet().Nym(
+            identifier::Nym::Factory(contractID->str()));
 
         if (contract) {
             serialized = proto::ProtoAsData(contract->asPublicNym());
@@ -2201,7 +2203,7 @@ bool UserCommandProcessor::cmd_send_nym_message(ReplyMessage& reply) const
     const auto& server = context.Server();
     const auto& msgIn = reply.Original();
     const auto& targetNym = msgIn.m_strNymID2;
-    const auto recipient = Identifier::Factory(targetNym);
+    const auto recipient = identifier::Nym::Factory(targetNym);
     reply.SetTargetNym(targetNym);
 
     OT_ENFORCE_PERMISSION_MSG(ServerSettings::__cmd_send_message);
@@ -2222,8 +2224,8 @@ bool UserCommandProcessor::cmd_send_nym_message(ReplyMessage& reply) const
 // inside) to be attached to the receipt.
 bool UserCommandProcessor::send_message_to_nym(
     const Identifier& NOTARY_ID,
-    const Identifier& SENDER_NYM_ID,
-    const Identifier& RECIPIENT_NYM_ID,
+    const identifier::Nym& SENDER_NYM_ID,
+    const identifier::Nym& RECIPIENT_NYM_ID,
     const Message& pMsg) const
 {
     return server_.DropMessageToNymbox(
@@ -2355,8 +2357,8 @@ bool UserCommandProcessor::cmd_usage_credits(ReplyMessage& reply) const
 
     if (false == admin) { adjustment = 0; }
 
-    const auto targetNymID = Identifier::Factory(msgIn.m_strNymID2);
-    OTIdentifier nymID = Identifier::Factory();
+    const auto targetNymID = identifier::Nym::Factory(msgIn.m_strNymID2);
+    OTNymID nymID = identifier::Nym::Factory();
 
     if (targetNymID == adminNymID) {
         nymID = adminNymID;
@@ -2406,7 +2408,7 @@ bool UserCommandProcessor::cmd_usage_credits(ReplyMessage& reply) const
 }
 
 std::unique_ptr<Ledger> UserCommandProcessor::create_nymbox(
-    const Identifier& nymID,
+    const identifier::Nym& nymID,
     const Identifier& server,
     const Nym& serverNym) const
 {
@@ -2581,7 +2583,7 @@ RequestNumber UserCommandProcessor::initialize_request_number(
     return requestNumber;
 }
 
-bool UserCommandProcessor::isAdmin(const Identifier& nymID)
+bool UserCommandProcessor::isAdmin(const identifier::Nym& nymID)
 {
     const auto adminNym = ServerSettings::GetOverrideNymID();
 
@@ -2591,7 +2593,7 @@ bool UserCommandProcessor::isAdmin(const Identifier& nymID)
 }
 
 std::unique_ptr<Ledger> UserCommandProcessor::load_inbox(
-    const Identifier& nymID,
+    const identifier::Nym& nymID,
     const Identifier& accountID,
     const Identifier& serverID,
     const Nym& serverNym,
@@ -2639,7 +2641,7 @@ std::unique_ptr<Ledger> UserCommandProcessor::load_inbox(
 }
 
 std::unique_ptr<Ledger> UserCommandProcessor::load_nymbox(
-    const Identifier& nymID,
+    const identifier::Nym& nymID,
     const Identifier& serverID,
     const Nym& serverNym,
     const bool verifyAccount) const
@@ -2680,7 +2682,7 @@ std::unique_ptr<Ledger> UserCommandProcessor::load_nymbox(
 }
 
 std::unique_ptr<Ledger> UserCommandProcessor::load_outbox(
-    const Identifier& nymID,
+    const identifier::Nym& nymID,
     const Identifier& accountID,
     const Identifier& serverID,
     const Nym& serverNym,

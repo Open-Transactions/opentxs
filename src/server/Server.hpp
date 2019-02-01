@@ -45,20 +45,20 @@ public:
     OTCron& Cron() { return *m_Cron; }
     bool DropMessageToNymbox(
         const Identifier& notaryID,
-        const Identifier& senderNymID,
-        const Identifier& recipientNymID,
+        const identifier::Nym& senderNymID,
+        const identifier::Nym& recipientNymID,
         transactionType transactionType,
         const Message& msg);
     MainFile& GetMainFile() { return mainFile_; }
     Notary& GetNotary() { return notary_; }
     Transactor& GetTransactor() { return transactor_; }
     void Init(bool readOnly = false);
-    bool LoadServerNym(const Identifier& nymID);
+    bool LoadServerNym(const identifier::Nym& nymID);
     void ProcessCron();
     bool SendInstrumentToNym(
         const Identifier& notaryID,
-        const Identifier& senderNymID,
-        const Identifier& recipientNymID,
+        const identifier::Nym& senderNymID,
+        const identifier::Nym& recipientNymID,
         const OTPayment& payment,
         const char* command);
     String& WalletFilename() { return m_strWalletFilename; }
@@ -99,16 +99,17 @@ private:
                                      // tasks go.
     OTZMQPushSocket notification_socket_;
 
-    OTZMQMessage nymbox_push(const Identifier& nymID, const OTTransaction& item)
-        const;
+    OTZMQMessage nymbox_push(
+        const identifier::Nym& nymID,
+        const OTTransaction& item) const;
 
     void CreateMainFile(bool& mainFileExists);
     // Note: SendInstrumentToNym and SendMessageToNym CALL THIS.
     // They are higher-level, this is lower-level.
     bool DropMessageToNymbox(
         const Identifier& notaryID,
-        const Identifier& senderNymID,
-        const Identifier& recipientNymID,
+        const identifier::Nym& senderNymID,
+        const identifier::Nym& recipientNymID,
         transactionType transactionType,
         const Message* msg = nullptr,
         const String& messageString = String::Factory(),
@@ -121,8 +122,8 @@ private:
 
     bool SendInstrumentToNym(
         const Identifier& notaryID,
-        const Identifier& senderNymID,
-        const Identifier& recipientNymID,
+        const identifier::Nym& senderNymID,
+        const identifier::Nym& recipientNymID,
         const Message& msg);
 
     Server(const opentxs::api::server::Manager& manager);

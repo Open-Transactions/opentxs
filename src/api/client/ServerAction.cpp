@@ -11,6 +11,7 @@
 #include "opentxs/api/Factory.hpp"
 #include "opentxs/client/OT_API.hpp"
 #include "opentxs/client/Utility.hpp"
+#include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/core/recurring/OTPaymentPlan.hpp"
 #include "opentxs/core/script/OTSmartContract.hpp"
 #include "opentxs/core/Cheque.hpp"
@@ -47,7 +48,7 @@ ServerAction::ServerAction(
 }
 
 ServerAction::Action ServerAction::ActivateSmartContract(
-    const Identifier& localNymID,
+    const identifier::Nym& localNymID,
     const Identifier& serverID,
     const Identifier& accountID,
     const std::string& agentName,
@@ -65,9 +66,9 @@ ServerAction::Action ServerAction::ActivateSmartContract(
 }
 
 ServerAction::Action ServerAction::AdjustUsageCredits(
-    const Identifier& localNymID,
+    const identifier::Nym& localNymID,
     const Identifier& serverID,
-    const Identifier& targetNymID,
+    const identifier::Nym& targetNymID,
     const Amount adjustment) const
 {
     return Action(new OTAPI_Func(
@@ -81,7 +82,7 @@ ServerAction::Action ServerAction::AdjustUsageCredits(
 }
 
 ServerAction::Action ServerAction::CancelPaymentPlan(
-    const Identifier& localNymID,
+    const identifier::Nym& localNymID,
     const Identifier& serverID,
     std::unique_ptr<OTPaymentPlan>& plan) const
 {
@@ -117,7 +118,7 @@ ServerAction::Action ServerAction::CreateMarketOffer(
     const Amount activationPrice) const
 {
     auto notaryID = Identifier::Factory();
-    auto nymID = Identifier::Factory();
+    auto nymID = identifier::Nym::Factory();
     const auto assetAccount = api_.Wallet().Account(assetAccountID);
 
     if (assetAccount) {
@@ -144,7 +145,7 @@ ServerAction::Action ServerAction::CreateMarketOffer(
 }
 
 ServerAction::Action ServerAction::DepositPaymentPlan(
-    const Identifier& localNymID,
+    const identifier::Nym& localNymID,
     const Identifier& serverID,
     std::unique_ptr<OTPaymentPlan>& plan) const
 {
@@ -159,7 +160,7 @@ ServerAction::Action ServerAction::DepositPaymentPlan(
 }
 
 ServerAction::Action ServerAction::DownloadMarketList(
-    const Identifier& localNymID,
+    const identifier::Nym& localNymID,
     const Identifier& serverID) const
 {
     return Action(new OTAPI_Func(
@@ -171,7 +172,7 @@ ServerAction::Action ServerAction::DownloadMarketList(
 }
 
 ServerAction::Action ServerAction::DownloadMarketOffers(
-    const Identifier& localNymID,
+    const identifier::Nym& localNymID,
     const Identifier& serverID,
     const Identifier& marketID,
     const Amount depth) const
@@ -182,12 +183,12 @@ ServerAction::Action ServerAction::DownloadMarketOffers(
         api_,
         localNymID,
         serverID,
-        marketID,
+        identifier::Nym::Factory(marketID.str()),
         depth));
 }
 
 ServerAction::Action ServerAction::DownloadMarketRecentTrades(
-    const Identifier& localNymID,
+    const identifier::Nym& localNymID,
     const Identifier& serverID,
     const Identifier& marketID) const
 {
@@ -197,11 +198,11 @@ ServerAction::Action ServerAction::DownloadMarketRecentTrades(
         api_,
         localNymID,
         serverID,
-        marketID));
+        identifier::Nym::Factory(marketID.str())));
 }
 
 ServerAction::Action ServerAction::DownloadNymMarketOffers(
-    const Identifier& localNymID,
+    const identifier::Nym& localNymID,
     const Identifier& serverID) const
 {
     return Action(new OTAPI_Func(
@@ -213,7 +214,7 @@ ServerAction::Action ServerAction::DownloadNymMarketOffers(
 }
 
 ServerAction::Action ServerAction::ExchangeBasketCurrency(
-    const Identifier& localNymID,
+    const identifier::Nym& localNymID,
     const Identifier& serverID,
     const Identifier& instrumentDefinitionID,
     const Identifier& accountID,
@@ -234,7 +235,7 @@ ServerAction::Action ServerAction::ExchangeBasketCurrency(
 }
 
 ServerAction::Action ServerAction::IssueBasketCurrency(
-    const Identifier& localNymID,
+    const identifier::Nym& localNymID,
     const Identifier& serverID,
     const proto::UnitDefinition& basket,
     const std::string& label) const
@@ -250,7 +251,7 @@ ServerAction::Action ServerAction::IssueBasketCurrency(
 }
 
 ServerAction::Action ServerAction::KillMarketOffer(
-    const Identifier& localNymID,
+    const identifier::Nym& localNymID,
     const Identifier& serverID,
     const Identifier& accountID,
     const TransactionNumber number) const
@@ -261,12 +262,12 @@ ServerAction::Action ServerAction::KillMarketOffer(
         api_,
         localNymID,
         serverID,
-        accountID,
+        identifier::Nym::Factory(accountID.str()),
         number));
 }
 
 ServerAction::Action ServerAction::KillPaymentPlan(
-    const Identifier& localNymID,
+    const identifier::Nym& localNymID,
     const Identifier& serverID,
     const Identifier& accountID,
     const TransactionNumber number) const
@@ -277,12 +278,12 @@ ServerAction::Action ServerAction::KillPaymentPlan(
         api_,
         localNymID,
         serverID,
-        accountID,
+        identifier::Nym::Factory(accountID.str()),
         number));
 }
 
 ServerAction::Action ServerAction::PayDividend(
-    const Identifier& localNymID,
+    const identifier::Nym& localNymID,
     const Identifier& serverID,
     const Identifier& instrumentDefinitionID,
     const Identifier& accountID,
@@ -295,14 +296,14 @@ ServerAction::Action ServerAction::PayDividend(
         api_,
         localNymID,
         serverID,
-        accountID,
+        identifier::Nym::Factory(accountID.str()),
         instrumentDefinitionID,
         amountPerShare,
         memo));
 }
 
 ServerAction::Action ServerAction::TriggerClause(
-    const Identifier& localNymID,
+    const identifier::Nym& localNymID,
     const Identifier& serverID,
     const TransactionNumber transactionNumber,
     const std::string& clause,
@@ -320,7 +321,7 @@ ServerAction::Action ServerAction::TriggerClause(
 }
 
 ServerAction::Action ServerAction::UnregisterAccount(
-    const Identifier& localNymID,
+    const identifier::Nym& localNymID,
     const Identifier& serverID,
     const Identifier& accountID) const
 {
@@ -330,11 +331,11 @@ ServerAction::Action ServerAction::UnregisterAccount(
         api_,
         localNymID,
         serverID,
-        accountID));
+        identifier::Nym::Factory(accountID.str())));
 }
 
 ServerAction::Action ServerAction::UnregisterNym(
-    const Identifier& localNymID,
+    const identifier::Nym& localNymID,
     const Identifier& serverID) const
 {
     return Action(new OTAPI_Func(
@@ -346,10 +347,10 @@ ServerAction::Action ServerAction::UnregisterNym(
 }
 
 ServerAction::Action ServerAction::WithdrawVoucher(
-    const Identifier& localNymID,
+    const identifier::Nym& localNymID,
     const Identifier& serverID,
     const Identifier& accountID,
-    const Identifier& recipientNymID,
+    const identifier::Nym& recipientNymID,
     const Amount amount,
     const std::string& memo) const
 {
@@ -359,7 +360,7 @@ ServerAction::Action ServerAction::WithdrawVoucher(
         api_,
         localNymID,
         serverID,
-        accountID,
+        identifier::Nym::Factory(accountID.str()),
         recipientNymID,
         amount,
         memo));

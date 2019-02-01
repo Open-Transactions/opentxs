@@ -27,7 +27,7 @@ private:
         const ActivityThreadInternalInterface& parent,
         const api::client::Manager& api,
         const network::zeromq::PublishSocket& publisher,
-        const Identifier& nymID,
+        const identifier::Nym& nymID,
         const ActivityThreadRowID& rowID,
         const ActivityThreadSortKey& sortKey,
         const CustomData& custom,
@@ -37,7 +37,7 @@ private:
         const ActivityThreadInternalInterface& parent,
         const api::client::Manager& api,
         const network::zeromq::PublishSocket& publisher,
-        const Identifier& nymID,
+        const identifier::Nym& nymID,
         const ActivityThreadRowID& rowID,
         const ActivityThreadSortKey& sortKey,
         const CustomData& custom);

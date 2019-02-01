@@ -33,12 +33,12 @@ TEST_F(Test_Blockchain, testAssignIncomingAddress)
     std::cout << "Created Bob's Nym: " << Bob << " !!\n";
 
     OTIdentifier AliceAccountID = client_.Blockchain().NewAccount(
-        Identifier::Factory(Alice),
+        identifier::Nym::Factory(Alice),
         BlockchainAccountType::BIP44,
         proto::CITEMTYPE_BTC);
     std::shared_ptr<proto::Bip44Account> AliceAccount =
         client_.Blockchain().Account(
-            Identifier::Factory(Alice), AliceAccountID);
+            identifier::Nym::Factory(Alice), AliceAccountID);
 
     // std::cout << "Created Account " << String(AliceAccount).Get() << " !!\n";
     // std::cout << "\nCreated Address " << Address.address() << " (length " <<
@@ -52,7 +52,7 @@ TEST_F(Test_Blockchain, testAssignIncomingAddress)
     const std::string label = "Address label";
     std::unique_ptr<proto::Bip44Address> AccountAddress =
         client_.Blockchain().AllocateAddress(
-            Identifier::Factory(Alice),
+            identifier::Nym::Factory(Alice),
             Identifier::Factory(AliceAccountID),
             label,
             proto::CITEMTYPE_BTC);
@@ -66,7 +66,7 @@ TEST_F(Test_Blockchain, testAssignIncomingAddress)
     //
 
     bool assigned = client_.Blockchain().AssignAddress(
-        Identifier::Factory(Alice),
+        identifier::Nym::Factory(Alice),
         Identifier::Factory(AliceAccountID),
         0,
         Identifier::Factory(Bob),
@@ -78,7 +78,7 @@ TEST_F(Test_Blockchain, testAssignIncomingAddress)
     // Check assignment
     std::unique_ptr<proto::Bip44Address> AddrPtr =
         client_.Blockchain().LoadAddress(
-            Identifier::Factory(Alice),
+            identifier::Nym::Factory(Alice),
             Identifier::Factory(AliceAccountID),
             0,
             proto::CITEMTYPE_BTC);

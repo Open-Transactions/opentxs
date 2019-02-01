@@ -11,6 +11,7 @@
 #include "opentxs/contact/Contact.hpp"
 #include "opentxs/contact/ContactData.hpp"
 #include "opentxs/contact/ContactSection.hpp"
+#include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/core/Flag.hpp"
 #include "opentxs/core/Identifier.hpp"
 #include "opentxs/core/Lockable.hpp"
@@ -47,7 +48,8 @@ ui::implementation::ContactExternalInterface* Factory::ContactWidget(
     const network::zeromq::PublishSocket& publisher,
     const Identifier& contactID)
 {
-    return new ui::implementation::Contact(api, publisher, contactID);
+    return new ui::implementation::Contact(
+        api, publisher, identifier::Nym::Factory(contactID.str()));
 }
 }  // namespace opentxs
 
@@ -64,7 +66,7 @@ const std::map<proto::ContactSectionName, int> Contact::sort_keys_{
 Contact::Contact(
     const api::client::Manager& api,
     const network::zeromq::PublishSocket& publisher,
-    const Identifier& contactID)
+    const identifier::Nym& contactID)
     : ContactType(api, publisher, contactID)
     , listeners_({
           {api_.Endpoints().ContactUpdate(),

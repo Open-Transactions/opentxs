@@ -209,7 +209,7 @@ private:
         const Identifier& notaryID,
         const Identifier& instrumentDefinitionID,
         const Identifier& assetAcctId,
-        const Identifier& nymID,
+        const identifier::Nym& nymID,
         const Identifier& currencyId,
         const Identifier& currencyAcctId);
 

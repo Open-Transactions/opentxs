@@ -12,6 +12,7 @@
 #include "opentxs/api/Native.hpp"
 #include "opentxs/consensus/Context.hpp"
 #include "opentxs/core/crypto/OTPasswordData.hpp"
+#include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/core/util/Assert.hpp"
 #include "opentxs/core/util/Common.hpp"
 #include "opentxs/core/util/OTFolders.hpp"
@@ -64,7 +65,7 @@ char const* const __TypeStringsAccount[] = {
 // Used for generating accounts, thus no accountID needed.
 Account::Account(
     const api::Core& core,
-    const Identifier& nymID,
+    const identifier::Nym& nymID,
     const Identifier& notaryID)
     : OTTransactionType(core)
     , acctType_(err_acct)
@@ -100,7 +101,7 @@ Account::Account(const api::Core& core)
 
 Account::Account(
     const api::Core& core,
-    const Identifier& nymID,
+    const identifier::Nym& nymID,
     const Identifier& accountId,
     const Identifier& notaryID,
     const String& name)
@@ -121,7 +122,7 @@ Account::Account(
 
 Account::Account(
     const api::Core& core,
-    const Identifier& nymID,
+    const identifier::Nym& nymID,
     const Identifier& accountId,
     const Identifier& notaryID)
     : OTTransactionType(core, nymID, accountId, notaryID)
@@ -572,16 +573,16 @@ void Account::InitAccount()
 // before calling this.
 bool Account::VerifyOwner(const Nym& candidate) const
 {
-    auto ID_CANDIDATE = Identifier::Factory();
+    auto ID_CANDIDATE = identifier::Nym::Factory();
     // ID_CANDIDATE now contains the ID of the Nym we're testing.
     candidate.GetIdentifier(ID_CANDIDATE);
     return m_AcctNymID == ID_CANDIDATE;
 }
 
 // TODO: when entities and roles are added, probably more will go here.
-bool Account::VerifyOwnerByID(const Identifier& nymId) const
+bool Account::VerifyOwnerByID(const identifier::Nym& nymId) const
 {
-    return nymId == m_AcctNymID;
+    return nymId.operator==(m_AcctNymID);
 }
 
 Account* Account::LoadExistingAccount(
@@ -643,10 +644,10 @@ Account* Account::LoadExistingAccount(
 
 Account* Account::GenerateNewAccount(
     const api::Core& core,
-    const Identifier& nymID,
+    const identifier::Nym& nymID,
     const Identifier& notaryID,
     const Nym& serverNym,
-    const Identifier& userNymID,
+    const identifier::Nym& userNymID,
     const Identifier& instrumentDefinitionID,
     Account::AccountType acctType,
     std::int64_t stashTransNum)
@@ -676,7 +677,7 @@ message.m_strNotaryID;
  */
 bool Account::GenerateNewAccount(
     const Nym& server,
-    const Identifier& userNymID,
+    const identifier::Nym& userNymID,
     const Identifier& notaryID,
     const Identifier& instrumentDefinitionID,
     Account::AccountType acctType,
@@ -982,7 +983,7 @@ std::int32_t Account::ProcessXMLNode(IrrXMLReader*& xml)
         if (strAcctAssetType->Exists()) {
             acctInstrumentDefinitionID_->SetString(strAcctAssetType);
         } else {
-            LogOutput(OT_METHOD)(__FUNCTION__)(": Failed: missing "
+            LogOutput(OT_METHOD)(__FUNCTION__)(": Failed: Missing "
                                                "instrumentDefinitionID.")
                 .Flush();
             return -1;
@@ -994,7 +995,7 @@ std::int32_t Account::ProcessXMLNode(IrrXMLReader*& xml)
 
         auto ACCOUNT_ID = Identifier::Factory(strAccountID);
         auto NOTARY_ID = Identifier::Factory(strNotaryID);
-        auto NYM_ID = Identifier::Factory(strAcctNymID);
+        auto NYM_ID = identifier::Nym::Factory(strAcctNymID);
 
         SetPurportedAccountID(ACCOUNT_ID);
         SetPurportedNotaryID(NOTARY_ID);

@@ -31,7 +31,7 @@ class Cheque : public OTTrackable
 {
 public:
     inline void SetAsVoucher(
-        const Identifier& remitterNymID,
+        const identifier::Nym& remitterNymID,
         const Identifier& remitterAcctID)
     {
         m_REMITTER_NYM_ID = remitterNymID;
@@ -41,12 +41,12 @@ public:
     }
     inline const String& GetMemo() const { return m_strMemo; }
     inline const std::int64_t& GetAmount() const { return m_lAmount; }
-    inline const Identifier& GetRecipientNymID() const
+    inline const identifier::Nym& GetRecipientNymID() const
     {
         return m_RECIPIENT_NYM_ID;
     }
     inline bool HasRecipient() const { return m_bHasRecipient; }
-    inline const Identifier& GetRemitterNymID() const
+    inline const identifier::Nym& GetRemitterNymID() const
     {
         return m_REMITTER_NYM_ID;
     }
@@ -74,14 +74,14 @@ public:
         const time64_t& VALID_TO,  // The expiration date (valid from/to dates.)
         const Identifier& SENDER_ACCT_ID,  // The asset account the cheque is
                                            // drawn on.
-        const Identifier& SENDER_NYM_ID,   // This ID must match the user ID on
-                                           // the asset account,
+        const identifier::Nym& SENDER_NYM_ID,  // This ID must match the user ID
+                                               // on the asset account,
         // AND must verify the cheque signature with that user's key.
-        const String& strMemo,                 // Optional memo field.
-        const Identifier& pRECIPIENT_NYM_ID);  // Recipient
-                                               // optional. (Might
-                                               // be a blank
-                                               // cheque.)
+        const String& strMemo,                      // Optional memo field.
+        const identifier::Nym& pRECIPIENT_NYM_ID);  // Recipient
+                                                    // optional. (Might
+                                                    // be a blank
+                                                    // cheque.)
 
     EXPORT void CancelCheque();  // You still need to re-sign the cheque after
                                  // doing this.
@@ -99,10 +99,10 @@ protected:
     Amount m_lAmount{0};
     OTString m_strMemo;
     // Optional. If present, must match depositor's user ID.
-    OTIdentifier m_RECIPIENT_NYM_ID;
+    OTNymID m_RECIPIENT_NYM_ID;
     bool m_bHasRecipient{false};
     // In the case of vouchers (cashier's cheques) we store the Remitter's ID.
-    OTIdentifier m_REMITTER_NYM_ID;
+    OTNymID m_REMITTER_NYM_ID;
     OTIdentifier m_REMITTER_ACCT_ID;
     bool m_bHasRemitter{false};
 

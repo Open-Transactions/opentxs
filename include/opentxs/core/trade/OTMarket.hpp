@@ -71,7 +71,7 @@ public:
 
     // Returns more detailed information about offers for a specific Nym.
     bool GetNym_OfferList(
-        const Identifier& NYM_ID,
+        const identifier::Nym& NYM_ID,
         OTDB::OfferListNym& theOutputList,
         std::int32_t& nNymOfferCount);
 

@@ -76,7 +76,7 @@ private:
     AccountActivity(
         const api::client::Manager& api,
         const network::zeromq::PublishSocket& publisher,
-        const Identifier& nymID,
+        const identifier::Nym& nymID,
         const Identifier& accountID);
     AccountActivity() = delete;
     AccountActivity(const AccountActivity&) = delete;

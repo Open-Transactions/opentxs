@@ -11,6 +11,7 @@
 #include "opentxs/api/Endpoints.hpp"
 #include "opentxs/contact/Contact.hpp"
 #include "opentxs/contact/ContactData.hpp"
+#include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/core/Flag.hpp"
 #include "opentxs/core/Identifier.hpp"
 #include "opentxs/core/Lockable.hpp"
@@ -45,7 +46,7 @@ namespace opentxs
 ui::PayableList* Factory::PayableList(
     const api::client::Manager& api,
     const network::zeromq::PublishSocket& publisher,
-    const Identifier& nymID,
+    const identifier::Nym& nymID,
     const proto::ContactItemType& currency)
 {
     return new ui::implementation::PayableList(api, publisher, nymID, currency);
@@ -57,7 +58,7 @@ namespace opentxs::ui::implementation
 PayableList::PayableList(
     const api::client::Manager& api,
     const network::zeromq::PublishSocket& publisher,
-    const Identifier& nymID,
+    const identifier::Nym& nymID,
     const proto::ContactItemType& currency)
     : PayableListList(api, publisher, nymID)
     , listeners_({
@@ -152,7 +153,7 @@ void PayableList::process_nym(const network::zeromq::Message& message)
     OT_ASSERT(1 == message.Body().size());
 
     const std::string id(*message.Body().begin());
-    const auto nymID = Identifier::Factory(id);
+    const auto nymID = identifier::Nym::Factory(id);
 
     OT_ASSERT(false == nymID->empty())
 

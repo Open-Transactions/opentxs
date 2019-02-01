@@ -34,14 +34,14 @@ namespace opentxs
 PayDividendVisitor::PayDividendVisitor(
     server::Server& server,
     const Identifier& theNotaryID,
-    const Identifier& theNymID,
+    const identifier::Nym& theNymID,
     const Identifier& thePayoutUnitTypeId,
     const Identifier& theVoucherAcctID,
     const String& strMemo,
     std::int64_t lPayoutPerShare)
     : AccountVisitor(server.API().Wallet(), Identifier::Factory(theNotaryID))
     , server_(server)
-    , nymId_(Identifier::Factory(theNymID))
+    , nymId_(theNymID)
     , payoutUnitTypeId_(Identifier::Factory(thePayoutUnitTypeId))
     , voucherAcctId_(Identifier::Factory(theVoucherAcctID))
     , m_pstrMemo(String::Factory(strMemo.Get()))
@@ -85,10 +85,10 @@ bool PayDividendVisitor::Trigger(
     OT_ASSERT(!GetVoucherAcctID()->empty());
     const Identifier& theVoucherAcctID = (GetVoucherAcctID());
     Nym& theServerNym = const_cast<Nym&>(server_.GetServerNym());
-    const auto theServerNymID = Identifier::Factory(theServerNym);
-    const Identifier& RECIPIENT_ID = theSharesAccount.GetNymID();
+    const auto& theServerNymID = theServerNym.ID();
+    const auto& RECIPIENT_ID = theSharesAccount.GetNymID();
     OT_ASSERT(!GetNymID()->empty());
-    const Identifier& theSenderNymID = (GetNymID());
+    const identifier::Nym& theSenderNymID = (GetNymID());
     OT_ASSERT(!GetMemo()->empty());
     const String& strMemo = (GetMemo());
     // Note: theSenderNymID is the originator of the Dividend Payout.
@@ -144,7 +144,7 @@ bool PayDividendVisitor::Trigger(
                                // nym.)
             strMemo,  // Optional memo field. Includes item note and request
                       // memo.
-            Identifier::Factory(RECIPIENT_ID));
+            RECIPIENT_ID);
 
         // All account crediting / debiting happens in the caller, in
         // server::Server.
@@ -222,9 +222,9 @@ bool PayDividendVisitor::Trigger(
                                    // server nym.)
                 strMemo,  // Optional memo field. Includes item note and request
                           // memo.
-                Identifier::Factory(theSenderNymID));  // We're returning the
-                                                       // money to its original
-                                                       // sender.
+                theSenderNymID);  // We're returning the
+                                  // money to its original
+                                  // sender.
             if (bIssueReturnVoucher) {
                 // All this does is set the voucher's internal contract string
                 // to

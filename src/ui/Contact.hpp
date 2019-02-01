@@ -58,7 +58,7 @@ private:
     Contact(
         const api::client::Manager& api,
         const network::zeromq::PublishSocket& publisher,
-        const Identifier& nymID);
+        const identifier::Nym& nymID);
     Contact() = delete;
     Contact(const Contact&) = delete;
     Contact(Contact&&) = delete;

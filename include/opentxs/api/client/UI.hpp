@@ -14,7 +14,7 @@
 // clang-format off
 %extend opentxs::api::client::UI {
     const ui::AccountSummary& AccountSummary(
-        const Identifier& nymID,
+        const identifier::Nym& nymID,
         const int currency) const
     {
         return $self->AccountSummary(
@@ -22,7 +22,7 @@
             static_cast<opentxs::proto::ContactItemType>(currency));
     }
     const opentxs::ui::PayableList& PayableList(
-        const Identifier& nymID,
+        const identifier::Nym& nymID,
         const int currency) const
     {
         return $self->PayableList(
@@ -45,27 +45,27 @@ class UI
 {
 public:
     EXPORT virtual const ui::AccountActivity& AccountActivity(
-        const Identifier& nymID,
+        const identifier::Nym& nymID,
         const Identifier& accountID) const = 0;
     EXPORT virtual const ui::AccountSummary& AccountSummary(
-        const Identifier& nymID,
+        const identifier::Nym& nymID,
         const proto::ContactItemType currency) const = 0;
     EXPORT virtual const ui::ActivitySummary& ActivitySummary(
-        const Identifier& nymID) const = 0;
+        const identifier::Nym& nymID) const = 0;
     EXPORT virtual const ui::ActivityThread& ActivityThread(
-        const Identifier& nymID,
+        const identifier::Nym& nymID,
         const Identifier& threadID) const = 0;
     EXPORT virtual const ui::Contact& Contact(
         const Identifier& contactID) const = 0;
     EXPORT virtual const ui::ContactList& ContactList(
-        const Identifier& nymID) const = 0;
+        const identifier::Nym& nymID) const = 0;
     EXPORT virtual const ui::MessagableList& MessagableList(
-        const Identifier& nymID) const = 0;
+        const identifier::Nym& nymID) const = 0;
     EXPORT virtual const ui::PayableList& PayableList(
-        const Identifier& nymID,
+        const identifier::Nym& nymID,
         proto::ContactItemType currency) const = 0;
     EXPORT virtual const ui::Profile& Profile(
-        const Identifier& contactID) const = 0;
+        const identifier::Nym& contactID) const = 0;
 
     virtual ~UI() = default;
 

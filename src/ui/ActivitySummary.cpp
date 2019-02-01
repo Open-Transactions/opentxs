@@ -8,6 +8,7 @@
 #include "opentxs/api/client/Activity.hpp"
 #include "opentxs/api/client/Contacts.hpp"
 #include "opentxs/api/client/Manager.hpp"
+#include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/core/Flag.hpp"
 #include "opentxs/core/Identifier.hpp"
 #include "opentxs/core/Lockable.hpp"
@@ -45,7 +46,7 @@ ui::implementation::ActivitySummaryExternalInterface* Factory::ActivitySummary(
     const api::client::Manager& api,
     const network::zeromq::PublishSocket& publisher,
     const Flag& running,
-    const Identifier& nymID)
+    const identifier::Nym& nymID)
 {
     return new ui::implementation::ActivitySummary(
         api, publisher, running, nymID);
@@ -59,7 +60,7 @@ ActivitySummary::ActivitySummary(
     const api::client::Manager& api,
     const network::zeromq::PublishSocket& publisher,
     const Flag& running,
-    const Identifier& nymID)
+    const identifier::Nym& nymID)
     : ActivitySummaryList(api, publisher, nymID)
     , listeners_{{api_.Activity().ThreadPublisher(nymID),
         new MessageProcessor<ActivitySummary>(

@@ -12,15 +12,15 @@ class Wallet final : public api::implementation::Wallet
 public:
     std::shared_ptr<const opentxs::Context> Context(
         const Identifier& notaryID,
-        const Identifier& clientNymID) const override;
+        const identifier::Nym& clientNymID) const override;
     Editor<opentxs::Context> mutable_Context(
         const Identifier& notaryID,
-        const Identifier& clientNymID) const override;
+        const identifier::Nym& clientNymID) const override;
     Editor<opentxs::ServerContext> mutable_ServerContext(
-        const Identifier& localNymID,
+        const identifier::Nym& localNymID,
         const Identifier& remoteID) const override;
     std::shared_ptr<const opentxs::ServerContext> ServerContext(
-        const Identifier& localNymID,
+        const identifier::Nym& localNymID,
         const Identifier& remoteID) const override;
 
     ~Wallet() = default;
@@ -40,7 +40,7 @@ private:
         const std::shared_ptr<const opentxs::Nym>& remoteNym,
         std::shared_ptr<opentxs::internal::Context>& output) const override;
     std::shared_ptr<const opentxs::Nym> signer_nym(
-        const Identifier& id) const override;
+        const identifier::Nym& id) const override;
 
     Wallet(const api::client::Manager& client);
     Wallet() = delete;

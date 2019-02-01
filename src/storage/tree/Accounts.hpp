@@ -26,8 +26,10 @@ public:
     OTIdentifier AccountSigner(const Identifier& accountID) const;
     proto::ContactItemType AccountUnit(const Identifier& accountID) const;
     std::set<OTIdentifier> AccountsByContract(const Identifier& unit) const;
-    std::set<OTIdentifier> AccountsByIssuer(const Identifier& issuerNym) const;
-    std::set<OTIdentifier> AccountsByOwner(const Identifier& ownerNym) const;
+    std::set<OTIdentifier> AccountsByIssuer(
+        const identifier::Nym& issuerNym) const;
+    std::set<OTIdentifier> AccountsByOwner(
+        const identifier::Nym& ownerNym) const;
     std::set<OTIdentifier> AccountsByServer(const Identifier& server) const;
     std::set<OTIdentifier> AccountsByUnit(
         const proto::ContactItemType unit) const;
@@ -44,9 +46,9 @@ public:
         const std::string& id,
         const std::string& data,
         const std::string& alias,
-        const Identifier& ownerNym,
-        const Identifier& signerNym,
-        const Identifier& issuerNym,
+        const identifier::Nym& ownerNym,
+        const identifier::Nym& signerNym,
+        const identifier::Nym& issuerNym,
         const Identifier& server,
         const Identifier& contract,
         const proto::ContactItemType unit);
@@ -102,9 +104,9 @@ private:
     bool check_update_account(
         const Lock& lock,
         const OTIdentifier& accountID,
-        const Identifier& ownerNym,
-        const Identifier& signerNym,
-        const Identifier& issuerNym,
+        const identifier::Nym& ownerNym,
+        const identifier::Nym& signerNym,
+        const identifier::Nym& issuerNym,
         const Identifier& server,
         const Identifier& contract,
         const proto::ContactItemType unit);

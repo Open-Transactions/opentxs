@@ -53,32 +53,32 @@ public:
     std::set<OTIdentifier> AccountsByUnit(
         const proto::ContactItemType unit) const override;
     OTIdentifier Bip47AddressToChannel(
-        const Identifier& nymID,
+        const identifier::Nym& nymID,
         const std::string& address) const override;
     proto::ContactItemType Bip47Chain(
-        const Identifier& nymID,
+        const identifier::Nym& nymID,
         const Identifier& channelID) const override;
     Bip47ChannelList Bip47ChannelsByContact(
-        const Identifier& nymID,
+        const identifier::Nym& nymID,
         const Identifier& contactID) const override;
     Bip47ChannelList Bip47ChannelsByChain(
-        const Identifier& nymID,
+        const identifier::Nym& nymID,
         const proto::ContactItemType chain) const override;
     Bip47ChannelList Bip47ChannelsByLocalPaymentCode(
-        const Identifier& nymID,
+        const identifier::Nym& nymID,
         const std::string& code) const override;
     Bip47ChannelList Bip47ChannelsByRemotePaymentCode(
-        const Identifier& nymID,
+        const identifier::Nym& nymID,
         const std::string& code) const override;
-    ObjectList Bip47ChannelsList(const Identifier& nymID) const override;
+    ObjectList Bip47ChannelsList(const identifier::Nym& nymID) const override;
     OTIdentifier Bip47Contact(
-        const Identifier& nymID,
+        const identifier::Nym& nymID,
         const Identifier& channelID) const override;
     std::string Bip47LocalPaymentCode(
-        const Identifier& nymID,
+        const identifier::Nym& nymID,
         const Identifier& channelID) const override;
     std::string Bip47RemotePaymentCode(
-        const Identifier& nymID,
+        const identifier::Nym& nymID,
         const Identifier& channelID) const override;
     std::set<std::string> BlockchainAccountList(
         const std::string& nymID,
@@ -123,7 +123,7 @@ public:
         std::shared_ptr<proto::Bip44Account>& output,
         const bool checking = false) const override;
     bool Load(
-        const Identifier& nymID,
+        const identifier::Nym& nymID,
         const Identifier& channelID,
         std::shared_ptr<proto::Bip47Channel>& output,
         const bool checking = false) const override;
@@ -319,7 +319,7 @@ public:
         const proto::ContactItemType type,
         const proto::Bip44Account& data) const override;
     bool Store(
-        const Identifier& nymID,
+        const identifier::Nym& nymID,
         const proto::Bip47Channel& data,
         Identifier& channelID) const override;
     bool Store(const proto::BlockchainTransaction& data) const override;

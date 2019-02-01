@@ -82,7 +82,7 @@ const std::map<OTAPI_Func_Type, bool> OTAPI_Func::type_type_{
 OTAPI_Func::OTAPI_Func(
     std::recursive_mutex& apiLock,
     const api::client::Manager& api,
-    const Identifier& nymID,
+    const identifier::Nym& nymID,
     const Identifier& serverID,
     const OTAPI_Func_Type type)
     : type_(type)
@@ -145,7 +145,7 @@ OTAPI_Func::OTAPI_Func(
     OTAPI_Func_Type theType,
     std::recursive_mutex& apilock,
     const api::client::Manager& api,
-    const Identifier& nymID,
+    const identifier::Nym& nymID,
     const Identifier& serverID)
     : OTAPI_Func(apilock, api, nymID, serverID, theType)
 {
@@ -162,7 +162,7 @@ OTAPI_Func::OTAPI_Func(
     OTAPI_Func_Type theType,
     std::recursive_mutex& apilock,
     const api::client::Manager& api,
-    const Identifier& nymID,
+    const identifier::Nym& nymID,
     const Identifier& serverID,
     const proto::UnitDefinition& unitDefinition,
     const std::string& label)
@@ -186,9 +186,9 @@ OTAPI_Func::OTAPI_Func(
     OTAPI_Func_Type theType,
     std::recursive_mutex& apilock,
     const api::client::Manager& api,
-    const Identifier& nymID,
+    const identifier::Nym& nymID,
     const Identifier& serverID,
-    const Identifier& nymID2)
+    const identifier::Nym& nymID2)
     : OTAPI_Func(apilock, api, nymID, serverID, theType)
 {
     switch (theType) {
@@ -211,7 +211,7 @@ OTAPI_Func::OTAPI_Func(
     OTAPI_Func_Type theType,
     std::recursive_mutex& apilock,
     const api::client::Manager& api,
-    const Identifier& nymID,
+    const identifier::Nym& nymID,
     const Identifier& serverID,
     const Identifier& recipientID,
     std::unique_ptr<OTPaymentPlan>& paymentPlan)
@@ -239,9 +239,9 @@ OTAPI_Func::OTAPI_Func(
     OTAPI_Func_Type theType,
     std::recursive_mutex& apilock,
     const api::client::Manager& api,
-    const Identifier& nymID,
+    const identifier::Nym& nymID,
     const Identifier& serverID,
-    const Identifier& nymID2,
+    const identifier::Nym& nymID2,
     const std::int64_t& int64val)
     : OTAPI_Func(apilock, api, nymID, serverID, theType)
 {
@@ -273,7 +273,7 @@ OTAPI_Func::OTAPI_Func(
     OTAPI_Func_Type theType,
     std::recursive_mutex& apilock,
     const api::client::Manager& api,
-    const Identifier& nymID,
+    const identifier::Nym& nymID,
     const Identifier& serverID,
     const TransactionNumber& transactionNumber,
     const std::string& clause,
@@ -310,7 +310,7 @@ OTAPI_Func::OTAPI_Func(
     OTAPI_Func_Type theType,
     std::recursive_mutex& apilock,
     const api::client::Manager& api,
-    const Identifier& nymID,
+    const identifier::Nym& nymID,
     const Identifier& serverID,
     const Identifier& accountID,
     const std::string& agentName,
@@ -351,9 +351,9 @@ OTAPI_Func::OTAPI_Func(
     OTAPI_Func_Type theType,
     std::recursive_mutex& apilock,
     const api::client::Manager& api,
-    const Identifier& nymID,
+    const identifier::Nym& nymID,
     const Identifier& serverID,
-    const Identifier& nymID2,
+    const identifier::Nym& nymID2,
     const Identifier& targetID,
     const Amount& amount,
     const std::string& message)
@@ -386,7 +386,7 @@ OTAPI_Func::OTAPI_Func(
     OTAPI_Func_Type theType,
     std::recursive_mutex& apilock,
     const api::client::Manager& api,
-    const Identifier& nymID,
+    const identifier::Nym& nymID,
     const Identifier& serverID,
     const Identifier& instrumentDefinitionID,
     const Identifier& basketID,
@@ -411,7 +411,7 @@ OTAPI_Func::OTAPI_Func(
     OTAPI_Func_Type theType,
     std::recursive_mutex& apilock,
     const api::client::Manager& api,
-    const Identifier& nymID,
+    const identifier::Nym& nymID,
     const Identifier& serverID,
     const Identifier& assetAccountID,
     const Identifier& currencyAccountID,
@@ -521,7 +521,7 @@ void OTAPI_Func::run()
             last_attempt_ = api_.OTAPI().withdrawVoucher(
                 context_,
                 accountID_,
-                recipientID_,
+                identifier::Nym::Factory(recipientID_->str()),
                 String::Factory(message_.c_str()),
                 amount_);
         } break;
@@ -610,8 +610,10 @@ void OTAPI_Func::run()
                 ACTIVATION_PRICE);
         } break;
         case ADJUST_USAGE_CREDITS: {
-            last_attempt_ =
-                api_.OTAPI().usageCredits(context_, targetID_, adjustment_);
+            last_attempt_ = api_.OTAPI().usageCredits(
+                context_,
+                identifier::Nym::Factory(targetID_->str()),
+                adjustment_);
         } break;
         default: {
             LogOutput(OT_METHOD)(__FUNCTION__)(": Error: unhandled function "

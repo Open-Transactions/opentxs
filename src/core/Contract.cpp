@@ -12,6 +12,7 @@
 #include "opentxs/core/crypto/OTPasswordData.hpp"
 #include "opentxs/core/crypto/Signature.hpp"
 #include "opentxs/core/crypto/OTSignatureMetadata.hpp"
+#include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/core/util/Assert.hpp"
 #include "opentxs/core/util/OTFolders.hpp"
 #include "opentxs/core/util/Tag.hpp"
@@ -2147,7 +2148,7 @@ std::int32_t Contract::ProcessXMLNode(IrrXMLReader*& xml)
             return (-1);  // error condition
         }
 
-        auto nymId = Identifier::Factory(strSignerNymID);
+        auto nymId = identifier::Nym::Factory(strSignerNymID);
         auto pNym = api_.Wallet().Nym(nymId);
 
         if (nullptr == pNym) {

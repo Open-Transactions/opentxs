@@ -23,7 +23,7 @@ public:
     static const opentxs::ArgList args_;
     static const std::string SeedA_;
     static const std::string Alice_;
-    static const OTIdentifier alice_nym_id_;
+    static const OTNymID alice_nym_id_;
     static const std::shared_ptr<const ServerContract> server_contract_;
 
     const opentxs::api::client::Manager& client_;
@@ -58,7 +58,7 @@ public:
             "");
         const_cast<std::string&>(Alice_) = client_.Exec().CreateNymHD(
             proto::CITEMTYPE_INDIVIDUAL, "Alice", SeedA_, 0);
-        const_cast<OTIdentifier&>(alice_nym_id_) = Identifier::Factory(Alice_);
+        const_cast<OTNymID&>(alice_nym_id_) = identifier::Nym::Factory(Alice_);
         const_cast<std::shared_ptr<const ServerContract>&>(server_contract_) =
             server_.Wallet().Server(server_id_);
 
@@ -75,7 +75,7 @@ const opentxs::ArgList Test_Messages::args_{
     {{OPENTXS_ARG_STORAGE_PLUGIN, {"mem"}}}};
 const std::string Test_Messages::SeedA_{""};
 const std::string Test_Messages::Alice_{""};
-const OTIdentifier Test_Messages::alice_nym_id_{Identifier::Factory()};
+const OTNymID Test_Messages::alice_nym_id_{identifier::Nym::Factory()};
 const std::shared_ptr<const ServerContract> Test_Messages::server_contract_{
     nullptr};
 

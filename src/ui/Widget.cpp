@@ -6,6 +6,7 @@
 #include "stdafx.hpp"
 
 #include "opentxs/api/client/Manager.hpp"
+#include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/core/Identifier.hpp"
 #include "opentxs/core/Log.hpp"
 #include "opentxs/network/zeromq/Context.hpp"

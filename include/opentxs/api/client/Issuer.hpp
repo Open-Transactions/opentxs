@@ -54,7 +54,7 @@ public:
         const proto::PeerRequestType type,
         const RequestStatus state = RequestStatus::All) const = 0;
     virtual const Identifier& IssuerID() const = 0;
-    virtual const Identifier& LocalNymID() const = 0;
+    virtual const identifier::Nym& LocalNymID() const = 0;
     virtual bool Paired() const = 0;
     virtual const std::string& PairingCode() const = 0;
     virtual OTIdentifier PrimaryServer() const = 0;

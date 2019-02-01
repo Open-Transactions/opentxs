@@ -40,7 +40,7 @@ private:
         const AccountActivityRowID& rowID,
         const AccountActivitySortKey& sortKey,
         const CustomData& custom,
-        const Identifier& nymID,
+        const identifier::Nym& nymID,
         const Identifier& accountID);
 
     TransferBalanceItem() = delete;

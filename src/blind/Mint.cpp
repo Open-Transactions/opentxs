@@ -44,7 +44,7 @@ Mint::Mint(
     , m_mapPrivate()
     , m_mapPublic()
     , m_NotaryID(Identifier::Factory(strNotaryID))
-    , m_ServerNymID(Identifier::Factory(strServerNymID))
+    , m_ServerNymID(identifier::Nym::Factory(strServerNymID))
     , m_InstrumentDefinitionID(Identifier::Factory(strInstrumentDefinitionID))
     , m_nDenominationCount(0)
     , m_bSavePrivateKeys(false)
@@ -72,7 +72,7 @@ Mint::Mint(
     , m_mapPrivate()
     , m_mapPublic()
     , m_NotaryID(Identifier::Factory(strNotaryID))
-    , m_ServerNymID(Identifier::Factory())
+    , m_ServerNymID(identifier::Nym::Factory())
     , m_InstrumentDefinitionID(Identifier::Factory(strInstrumentDefinitionID))
     , m_nDenominationCount(0)
     , m_bSavePrivateKeys(false)
@@ -97,7 +97,7 @@ Mint::Mint(const api::Core& core)
     , m_mapPrivate()
     , m_mapPublic()
     , m_NotaryID(Identifier::Factory())
-    , m_ServerNymID(Identifier::Factory())
+    , m_ServerNymID(identifier::Nym::Factory())
     , m_InstrumentDefinitionID(Identifier::Factory())
     , m_nDenominationCount(0)
     , m_bSavePrivateKeys(false)
@@ -682,7 +682,7 @@ void Mint::GenerateNewMint(
     Release();
     m_InstrumentDefinitionID = theInstrumentDefinitionID;
     m_NotaryID = theNotaryID;
-    auto NOTARY_NYM_ID = Identifier::Factory(theNotary);
+    auto NOTARY_NYM_ID = identifier::Nym::Factory(theNotary);
     m_ServerNymID = NOTARY_NYM_ID;
     m_nSeries = nSeries;
     m_VALID_FROM = VALID_FROM;

@@ -12,6 +12,7 @@
 #include "opentxs/api/Wallet.hpp"
 #include "opentxs/consensus/ServerContext.hpp"
 #include "opentxs/consensus/TransactionStatement.hpp"
+#include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/core/transaction/Helpers.hpp"
 #include "opentxs/core/util/Assert.hpp"
 #include "opentxs/core/util/Common.hpp"
@@ -72,7 +73,7 @@ char const* const __TypeStringsLedger[] = {
 // specific file, then I've decided to restrict ledgers to a single account.
 Ledger::Ledger(
     const api::Core& core,
-    const Identifier& theNymID,
+    const identifier::Nym& theNymID,
     const Identifier& theAccountID,
     const Identifier& theNotaryID)
     : OTTransactionType(core, theNymID, theAccountID, theNotaryID)
@@ -149,7 +150,7 @@ bool Ledger::VerifyAccount(const Nym& theNym)
         default: {
             const std::int32_t nLedgerType =
                 static_cast<std::int32_t>(GetType());
-            const auto theNymID = Identifier::Factory(theNym);
+            const auto theNymID = identifier::Nym::Factory(theNym);
             const auto strNymID = String::Factory(theNymID);
             auto strAccountID = String::Factory();
             GetIdentifier(strAccountID);
@@ -862,7 +863,7 @@ bool Ledger::SaveExpiredBox()
 }
 
 bool Ledger::generate_ledger(
-    const Identifier& theNymID,
+    const identifier::Nym& theNymID,
     const Identifier& theAcctID,
     const Identifier& theNotaryID,
     ledgerType theType,
@@ -1004,7 +1005,7 @@ bool Ledger::GenerateLedger(
     ledgerType theType,
     bool bCreateFile)
 {
-    auto nymID = Identifier::Factory();
+    auto nymID = identifier::Nym::Factory();
 
     if ((ledgerType::inbox == theType) || (ledgerType::outbox == theType)) {
         // Have to look up the NymID here. No way around it. We need that ID.
@@ -1012,7 +1013,7 @@ bool Ledger::GenerateLedger(
         auto account = api_.Wallet().Account(theAcctID);
 
         if (account) {
-            nymID = Identifier::Factory(account.get().GetNymID());
+            nymID = (account.get().GetNymID());
         } else {
             LogOutput(OT_METHOD)(__FUNCTION__)(
                 ": Failed in "
@@ -1025,11 +1026,11 @@ bool Ledger::GenerateLedger(
         auto account = api_.Wallet().Account(theAcctID);
 
         if (account) {
-            nymID = Identifier::Factory(account.get().GetNymID());
+            nymID = (account.get().GetNymID());
         } else {
             // Must be based on NymID, not AcctID (like Nymbox. But RecordBox
             // can go either way.)
-            nymID = Identifier::Factory(theAcctID);
+            nymID = identifier::Nym::Factory(theAcctID.str());
             // In the case of nymbox, and sometimes with recordBox, the acct ID
             // IS the user ID.
         }
@@ -1037,14 +1038,14 @@ bool Ledger::GenerateLedger(
         // In the case of paymentInbox, expired box, and nymbox, the acct ID IS
         // the user ID. (Should change it to "owner ID" to make it sound right
         // either way.)
-        nymID = Identifier::Factory(theAcctID);
+        nymID = identifier::Nym::Factory(theAcctID.str());
     }
 
     return generate_ledger(nymID, theAcctID, theNotaryID, theType, bCreateFile);
 }
 
 bool Ledger::CreateLedger(
-    const Identifier& theNymID,
+    const identifier::Nym& theNymID,
     const Identifier& theAcctID,
     const Identifier& theNotaryID,
     ledgerType theType,
@@ -1467,7 +1468,7 @@ std::unique_ptr<Item> Ledger::GenerateBalanceStatement(
 
     if ((theAccount.GetPurportedAccountID() != GetPurportedAccountID()) ||
         (theAccount.GetPurportedNotaryID() != GetPurportedNotaryID()) ||
-        (theAccount.GetNymID() != GetNymID())) {
+        (theAccount.GetNymID().operator!=(GetNymID()))) {
         LogOutput(OT_METHOD)(__FUNCTION__)(": Wrong Account passed in.")
             .Flush();
 
@@ -1476,13 +1477,13 @@ std::unique_ptr<Item> Ledger::GenerateBalanceStatement(
 
     if ((theOutbox.GetPurportedAccountID() != GetPurportedAccountID()) ||
         (theOutbox.GetPurportedNotaryID() != GetPurportedNotaryID()) ||
-        (theOutbox.GetNymID() != GetNymID())) {
+        (theOutbox.GetNymID().operator!=(GetNymID()))) {
         LogOutput(OT_METHOD)(__FUNCTION__)(": Wrong Outbox passed in.").Flush();
 
         return nullptr;
     }
 
-    if ((context.Nym()->ID() != GetNymID())) {
+    if ((context.Nym()->ID().operator!=(GetNymID()))) {
         LogOutput(OT_METHOD)(__FUNCTION__)(": Wrong Nym passed in.").Flush();
 
         return nullptr;
@@ -1898,8 +1899,8 @@ std::int32_t Ledger::ProcessXMLNode(irr::io::IrrXMLReader*& xml)
         }
 
         auto ACCOUNT_ID = Identifier::Factory(strLedgerAcctID),
-             NOTARY_ID = Identifier::Factory(strLedgerAcctNotaryID),
-             NYM_ID = Identifier::Factory(strNymID);
+             NOTARY_ID = Identifier::Factory(strLedgerAcctNotaryID);
+        auto NYM_ID = identifier::Nym::Factory(strNymID);
 
         SetPurportedAccountID(ACCOUNT_ID);
         SetPurportedNotaryID(NOTARY_ID);

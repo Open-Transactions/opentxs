@@ -25,6 +25,7 @@
 #include "opentxs/client/OTAPI_Exec.hpp"
 #include "opentxs/client/OTWallet.hpp"
 #include "opentxs/client/SwigWrap.hpp"
+#include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/core/crypto/OTCachedKey.hpp"
 #include "opentxs/core/Flag.hpp"
 #include "opentxs/core/Identifier.hpp"
@@ -216,7 +217,7 @@ void Manager::Init()
 }
 
 std::recursive_mutex& Manager::Lock(
-    const Identifier& nymID,
+    const identifier::Nym& nymID,
     const Identifier& serverID) const
 {
     return get_lock({nymID.str(), serverID.str()});

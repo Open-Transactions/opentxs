@@ -106,7 +106,7 @@ public:
         proto::AsymmetricKeyType keytype = proto::AKEYTYPE_NULL) const;
     EXPORT const std::vector<OTIdentifier> GetRevokedCredentialIDs() const;
     EXPORT bool HasCapability(const NymCapability& capability) const;
-    EXPORT const Identifier& ID() const { return m_nymID; }
+    EXPORT const identifier::Nym& ID() const { return m_nymID; }
 
     /* Encrypt a symmetric key's password
      *
@@ -282,7 +282,7 @@ private:
     proto::CredentialIndexMode mode_{proto::CREDINDEX_ERROR};
     OTString m_strVersion;
     OTString m_strDescription;
-    const OTIdentifier m_nymID;
+    const OTNymID m_nymID;
     std::shared_ptr<NymIDSource> source_{nullptr};
     mutable std::unique_ptr<class ContactData> contact_data_;
 
@@ -343,7 +343,7 @@ private:
 
     Nym(const api::Core& api, const NymParameters& nymParameters);
     Nym(const api::Core& api,
-        const Identifier& nymID,
+        const identifier::Nym& nymID,
         const proto::CredentialIndexMode mode = proto::CREDINDEX_ERROR);
     Nym() = delete;
     Nym(const Nym&) = delete;

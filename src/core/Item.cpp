@@ -12,6 +12,7 @@
 #include "opentxs/api/Wallet.hpp"
 #include "opentxs/consensus/ClientContext.hpp"
 #include "opentxs/consensus/TransactionStatement.hpp"
+#include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/core/transaction/Helpers.hpp"
 #include "opentxs/core/util/Assert.hpp"
 #include "opentxs/core/util/Common.hpp"
@@ -66,7 +67,7 @@ Item::Item(const api::Core& core)
 // From owner we can get acct ID, server ID, and transaction Num
 Item::Item(
     const api::Core& core,
-    const Identifier& theNymID,
+    const identifier::Nym& theNymID,
     const OTTransaction& theOwner)
     : OTTransactionType(
           core,
@@ -91,7 +92,7 @@ Item::Item(
 // From owner we can get acct ID, server ID, and transaction Num
 Item::Item(
     const api::Core& core,
-    const Identifier& theNymID,
+    const identifier::Nym& theNymID,
     const Item& theOwner)
     : OTTransactionType(
           core,
@@ -115,7 +116,7 @@ Item::Item(
 
 Item::Item(
     const api::Core& core,
-    const Identifier& theNymID,
+    const identifier::Nym& theNymID,
     const OTTransaction& theOwner,
     itemType theType,
     const Identifier& pDestinationAcctID)
@@ -1426,8 +1427,8 @@ std::int32_t Item::ProcessXMLNode(irr::io::IrrXMLReader*& xml)
 
         auto ACCOUNT_ID = Identifier::Factory(strAcctFromID),
              NOTARY_ID = Identifier::Factory(strNotaryID),
-             DESTINATION_ACCOUNT = Identifier::Factory(strAcctToID),
-             NYM_ID = Identifier::Factory(strNymID);
+             DESTINATION_ACCOUNT = Identifier::Factory(strAcctToID);
+        auto NYM_ID = identifier::Nym::Factory(strNymID);
 
         SetPurportedAccountID(ACCOUNT_ID);  // OTTransactionType::m_AcctID  the
                                             // PURPORTED Account ID
@@ -1548,8 +1549,8 @@ std::int32_t Item::ProcessXMLNode(irr::io::IrrXMLReader*& xml)
             strNymID = String::Factory(xml->getAttributeValue("nymID"));
 
             auto ACCOUNT_ID = Identifier::Factory(strAccountID),
-                 NOTARY_ID = Identifier::Factory(strNotaryID),
-                 NYM_ID = Identifier::Factory(strNymID);
+                 NOTARY_ID = Identifier::Factory(strNotaryID);
+            auto NYM_ID = identifier::Nym::Factory(strNymID);
 
             pItem->SetPurportedAccountID(
                 ACCOUNT_ID);  // OTTransactionType::m_AcctID

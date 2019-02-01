@@ -11,6 +11,7 @@
 #include "opentxs/api/storage/Storage.hpp"
 #include "opentxs/api/Core.hpp"
 #include "opentxs/consensus/ClientContext.hpp"
+#include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/core/contract/UnitDefinition.hpp"
 
 #include "api/Wallet.hpp"
@@ -36,8 +37,8 @@ Wallet::Wallet(const api::server::Manager& server)
 }
 
 std::shared_ptr<const opentxs::ClientContext> Wallet::ClientContext(
-    const Identifier&,  // Not used for now.
-    const Identifier& remoteNymID) const
+    const identifier::Nym&,  // Not used for now.
+    const identifier::Nym& remoteNymID) const
 {
     const auto& serverNymID = server_.NymID();
     auto base = context(serverNymID, remoteNymID);
@@ -48,7 +49,7 @@ std::shared_ptr<const opentxs::ClientContext> Wallet::ClientContext(
 
 std::shared_ptr<const opentxs::Context> Wallet::Context(
     [[maybe_unused]] const Identifier& notaryID,
-    const Identifier& clientNymID) const
+    const identifier::Nym& clientNymID) const
 {
     return context(server_.NymID(), clientNymID);
 }
@@ -136,8 +137,8 @@ bool Wallet::load_legacy_account(
 }
 
 Editor<opentxs::ClientContext> Wallet::mutable_ClientContext(
-    const Identifier&,  // Not used for now.
-    const Identifier& remoteNymID) const
+    const identifier::Nym&,  // Not used for now.
+    const identifier::Nym& remoteNymID) const
 {
     const auto& serverID = server_.ID();
     const auto& serverNymID = server_.NymID();
@@ -179,7 +180,7 @@ Editor<opentxs::ClientContext> Wallet::mutable_ClientContext(
 
 Editor<opentxs::Context> Wallet::mutable_Context(
     const Identifier& notaryID,
-    const Identifier& clientNymID) const
+    const identifier::Nym& clientNymID) const
 {
     auto base = context(server_.NymID(), clientNymID);
     std::function<void(opentxs::Context*)> callback =
@@ -193,7 +194,7 @@ Editor<opentxs::Context> Wallet::mutable_Context(
 }
 
 std::shared_ptr<const opentxs::Nym> Wallet::signer_nym(
-    const Identifier& id) const
+    const identifier::Nym& id) const
 {
     return Nym(server_.NymID());
 }

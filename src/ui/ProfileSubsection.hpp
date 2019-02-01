@@ -32,7 +32,7 @@ public:
         const bool active) const override;
     bool Delete(const std::string& claimID) const override;
     std::string Name(const std::string& lang) const override;
-    const Identifier& NymID() const override { return nym_id_; }
+    const identifier::Nym& NymID() const override { return nym_id_; }
     proto::ContactSectionName Section() const override { return row_id_.first; }
     bool SetActive(const std::string& claimID, const bool active)
         const override;

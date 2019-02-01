@@ -13,16 +13,16 @@ class Workflow final : opentxs::api::client::Workflow, Lockable
 {
 public:
     bool AbortTransfer(
-        const Identifier& nymID,
+        const identifier::Nym& nymID,
         const Item& transfer,
         const Message& reply) const override;
     bool AcceptTransfer(
-        const Identifier& nymID,
+        const identifier::Nym& nymID,
         const Identifier& notaryID,
         const OTTransaction& pending,
         const Message& reply) const override;
     bool AcknowledgeTransfer(
-        const Identifier& nymID,
+        const identifier::Nym& nymID,
         const Item& transfer,
         const Message& reply) const override;
 #if OT_CASH
@@ -35,55 +35,57 @@ public:
         const Message& request,
         const Message* reply) const override;
     bool ClearCheque(
-        const Identifier& recipientNymID,
+        const identifier::Nym& recipientNymID,
         const OTTransaction& receipt) const override;
     bool ClearTransfer(
-        const Identifier& nymID,
+        const identifier::Nym& nymID,
         const Identifier& notaryID,
         const OTTransaction& receipt) const override;
     bool CompleteTransfer(
-        const Identifier& nymID,
+        const identifier::Nym& nymID,
         const Identifier& notaryID,
         const OTTransaction& receipt,
         const Message& reply) const override;
     OTIdentifier ConveyTransfer(
-        const Identifier& nymID,
+        const identifier::Nym& nymID,
         const Identifier& notaryID,
         const OTTransaction& pending) const override;
     OTIdentifier CreateTransfer(const Item& transfer, const Message& request)
         const override;
     bool DepositCheque(
-        const Identifier& nymID,
+        const identifier::Nym& nymID,
         const Identifier& accountID,
         const opentxs::Cheque& cheque,
         const Message& request,
         const Message* reply) const override;
-    bool ExpireCheque(const Identifier& nymID, const opentxs::Cheque& cheque)
-        const override;
+    bool ExpireCheque(
+        const identifier::Nym& nymID,
+        const opentxs::Cheque& cheque) const override;
     bool ExportCheque(const opentxs::Cheque& cheque) const override;
     bool FinishCheque(
         const opentxs::Cheque& cheque,
         const Message& request,
         const Message* reply) const override;
     OTIdentifier ImportCheque(
-        const Identifier& nymID,
+        const identifier::Nym& nymID,
         const opentxs::Cheque& cheque) const override;
     std::set<OTIdentifier> List(
-        const Identifier& nymID,
+        const identifier::Nym& nymID,
         const proto::PaymentWorkflowType type,
         const proto::PaymentWorkflowState state) const override;
-    Cheque LoadCheque(const Identifier& nymID, const Identifier& chequeID)
+    Cheque LoadCheque(const identifier::Nym& nymID, const Identifier& chequeID)
         const override;
     Cheque LoadChequeByWorkflow(
-        const Identifier& nymID,
+        const identifier::Nym& nymID,
         const Identifier& workflowID) const override;
-    Transfer LoadTransfer(const Identifier& nymID, const Identifier& transferID)
-        const override;
+    Transfer LoadTransfer(
+        const identifier::Nym& nymID,
+        const Identifier& transferID) const override;
     Transfer LoadTransferByWorkflow(
-        const Identifier& nymID,
+        const identifier::Nym& nymID,
         const Identifier& workflowID) const override;
     std::shared_ptr<proto::PaymentWorkflow> LoadWorkflow(
-        const Identifier& nymID,
+        const identifier::Nym& nymID,
         const Identifier& workflowID) const override;
 #if OT_CASH
     OTIdentifier ReceiveCash(
@@ -92,7 +94,7 @@ public:
         const Message& message) const override;
 #endif
     OTIdentifier ReceiveCheque(
-        const Identifier& nymID,
+        const identifier::Nym& nymID,
         const opentxs::Cheque& cheque,
         const Message& message) const override;
 #if OT_CASH
@@ -108,7 +110,7 @@ public:
         const Message& request,
         const Message* reply) const override;
     std::vector<OTIdentifier> WorkflowsByAccount(
-        const Identifier& nymID,
+        const identifier::Nym& nymID,
         const Identifier& accountID) const override;
     OTIdentifier WriteCheque(const opentxs::Cheque& cheque) const override;
 
@@ -149,7 +151,7 @@ private:
     static bool isTransfer(const Item& item);
     static std::int64_t now() { return std::time(nullptr); }
     static bool validate_recipient(
-        const Identifier& nymID,
+        const identifier::Nym& nymID,
         const opentxs::Cheque& cheque);
 
     bool add_cheque_event(
@@ -171,7 +173,7 @@ private:
         const proto::PaymentWorkflowState newState,
         const proto::PaymentEventType newEventType,
         const std::uint32_t version,
-        const Identifier& recipientNymID,
+        const identifier::Nym& recipientNymID,
         const OTTransaction& receipt,
         const std::chrono::time_point<std::chrono::system_clock> time =
             std::chrono::system_clock::from_time_t(now())) const;
@@ -199,14 +201,14 @@ private:
         const std::string& account,
         const bool success) const;
     OTIdentifier convey_incoming_transfer(
-        const Identifier& nymID,
+        const identifier::Nym& nymID,
         const Identifier& notaryID,
         const OTTransaction& pending,
         const std::string& senderNymID,
         const std::string& recipientNymID,
         const Item& transfer) const;
     OTIdentifier convey_internal_transfer(
-        const Identifier& nymID,
+        const identifier::Nym& nymID,
         const Identifier& notaryID,
         const OTTransaction& pending,
         const std::string& senderNymID,
@@ -240,7 +242,7 @@ private:
         const OTTransaction& receipt) const;
     std::unique_ptr<Item> extract_transfer_from_receipt(
         const OTTransaction& receipt,
-        Identifier& depositorNymID) const;
+        identifier::Nym& depositorNymID) const;
     template <typename T>
     std::shared_ptr<proto::PaymentWorkflow> get_workflow(
         const Lock& global,
@@ -281,8 +283,8 @@ private:
         const std::string& accountID,
         const proto::PaymentWorkflow& workflow) const;
     bool update_activity(
-        const Identifier& localNymID,
-        const Identifier& remoteNymID,
+        const identifier::Nym& localNymID,
+        const identifier::Nym& remoteNymID,
         const Identifier& sourceID,
         const Identifier& workflowID,
         const StorageBox type,

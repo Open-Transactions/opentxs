@@ -208,7 +208,7 @@ public:
         ledgerType theType,
         bool bCreateFile = false);
     EXPORT bool CreateLedger(
-        const Identifier& theNymID,
+        const identifier::Nym& theNymID,
         const Identifier& theAcctID,
         const Identifier& theNotaryID,
         ledgerType theType,
@@ -245,12 +245,12 @@ private:  // Private prevents erroneous use by other classes.
         const Identifier& theNotaryID);
     EXPORT Ledger(
         const api::Core& core,
-        const Identifier& theNymID,
+        const identifier::Nym& theNymID,
         const Identifier& theAccountID,
         const Identifier& theNotaryID);
 
     bool generate_ledger(
-        const Identifier& theNymID,
+        const identifier::Nym& theNymID,
         const Identifier& theAcctID,
         const Identifier& theNotaryID,
         ledgerType theType,

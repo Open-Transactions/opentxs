@@ -38,7 +38,7 @@ public:
               "",
               92))
         , AccountID(client_.Blockchain().NewAccount(
-              Identifier::Factory(Alice),
+              identifier::Nym::Factory(Alice),
               BlockchainAccountType::BIP44,
               proto::CITEMTYPE_BTC))
     {
@@ -69,7 +69,7 @@ TEST_F(Test_StoreIncoming, testIncomingDeposit1)
     // 1. allocate deposit address
     std::unique_ptr<proto::Bip44Address> Address =
         client_.Blockchain().AllocateAddress(
-            Identifier::Factory(Alice),
+            identifier::Nym::Factory(Alice),
             Identifier::Factory(AccountID),
             "Deposit 1",
             EXTERNAL_CHAIN);
@@ -77,7 +77,7 @@ TEST_F(Test_StoreIncoming, testIncomingDeposit1)
     // test: address allocated
     std::unique_ptr<proto::Bip44Address> AddrPtr =
         client_.Blockchain().LoadAddress(
-            Identifier::Factory(Alice),
+            identifier::Nym::Factory(Alice),
             Identifier::Factory(AccountID),
             0,
             EXTERNAL_CHAIN);
@@ -86,7 +86,7 @@ TEST_F(Test_StoreIncoming, testIncomingDeposit1)
 
     // 2. assign to Bob
     bool assigned = client_.Blockchain().AssignAddress(
-        Identifier::Factory(Alice),
+        identifier::Nym::Factory(Alice),
         Identifier::Factory(AccountID),
         0,
         Identifier::Factory(Bob),
@@ -97,7 +97,7 @@ TEST_F(Test_StoreIncoming, testIncomingDeposit1)
     auto Tx = MakeTransaction(
         "5ddfedaf76b3abd902e1860115e163957aa16f72fc56b1f61bf314fc37781618");
     bool Stored = client_.Blockchain().StoreIncoming(
-        Identifier::Factory(Alice),
+        identifier::Nym::Factory(Alice),
         Identifier::Factory(AccountID),
         AddrPtr->index(),
         EXTERNAL_CHAIN,
@@ -122,7 +122,7 @@ TEST_F(Test_StoreIncoming, testIncomingDeposit1)
     // test: tx is associated in deposit address
     std::unique_ptr<proto::Bip44Address> NewAddrPtr =
         client_.Blockchain().LoadAddress(
-            Identifier::Factory(Alice),
+            identifier::Nym::Factory(Alice),
             Identifier::Factory(AccountID),
             0,
             EXTERNAL_CHAIN);
@@ -133,7 +133,7 @@ TEST_F(Test_StoreIncoming, testIncomingDeposit1)
 
     // test: Activity::Thread has deposit
     std::shared_ptr<proto::StorageThread> Thread_AB = client_.Activity().Thread(
-        Identifier::Factory(Alice), Identifier::Factory(Bob));
+        identifier::Nym::Factory(Alice), Identifier::Factory(Bob));
     ASSERT_EQ(1, Thread_AB->item_size());
     EXPECT_EQ(1, Thread_AB->participant_size());
     EXPECT_STREQ(Bob.c_str(), Thread_AB->participant(0).c_str());
@@ -153,13 +153,13 @@ TEST_F(Test_StoreIncoming, testIncomingDeposit1)
     // testL a second deposit from Bob
     std::unique_ptr<proto::Bip44Address> Address2 =
         client_.Blockchain().AllocateAddress(
-            Identifier::Factory(Alice),
+            identifier::Nym::Factory(Alice),
             Identifier::Factory(AccountID),
             "Deposit 2",
             EXTERNAL_CHAIN);
 
     bool assigned2 = client_.Blockchain().AssignAddress(
-        Identifier::Factory(Alice),
+        identifier::Nym::Factory(Alice),
         Identifier::Factory(AccountID),
         Address2->index(),
         Identifier::Factory(Bob),
@@ -169,7 +169,7 @@ TEST_F(Test_StoreIncoming, testIncomingDeposit1)
     auto Tx2 = MakeTransaction(
         "6ddfedaf76b3abd902e1860115e163957aa16f72fc56b1f61bf314fc37781616");
     bool Stored2 = client_.Blockchain().StoreIncoming(
-        Identifier::Factory(Alice),
+        identifier::Nym::Factory(Alice),
         Identifier::Factory(AccountID),
         Address2->index(),
         EXTERNAL_CHAIN,
@@ -181,7 +181,7 @@ TEST_F(Test_StoreIncoming, testIncomingDeposit1)
     // test: tx is associated in deposit address
     std::unique_ptr<proto::Bip44Address> AddrPtr2 =
         client_.Blockchain().LoadAddress(
-            Identifier::Factory(Alice),
+            identifier::Nym::Factory(Alice),
             Identifier::Factory(AccountID),
             Address2->index(),
             EXTERNAL_CHAIN);
@@ -193,7 +193,7 @@ TEST_F(Test_StoreIncoming, testIncomingDeposit1)
     // test: Alice<->Bob events are 2
     std::shared_ptr<proto::StorageThread> Thread_AB_ =
         client_.Activity().Thread(
-            Identifier::Factory(Alice), Identifier::Factory(Bob));
+            identifier::Nym::Factory(Alice), Identifier::Factory(Bob));
     ASSERT_EQ(2, Thread_AB_->item_size());
 }
 
@@ -208,17 +208,17 @@ TEST_F(Test_StoreIncoming, testIncomingDeposit_UnknownContact)
 
     // test: Alice has activity record with Bob
     ObjectList AThreads =
-        client_.Activity().Threads(Identifier::Factory(Alice), false);
+        client_.Activity().Threads(identifier::Nym::Factory(Alice), false);
     ASSERT_EQ(1, AThreads.size());
 
-    std::shared_ptr<proto::Bip44Account> Account =
-        client_.Blockchain().Account(Identifier::Factory(Alice), AccountID);
+    std::shared_ptr<proto::Bip44Account> Account = client_.Blockchain().Account(
+        identifier::Nym::Factory(Alice), AccountID);
     const std::int8_t NextDepositIndex = 2;
 
     // 1. allocate deposit address
     std::unique_ptr<proto::Bip44Address> Address =
         client_.Blockchain().AllocateAddress(
-            Identifier::Factory(Alice),
+            identifier::Nym::Factory(Alice),
             Identifier::Factory(AccountID),
             "Deposit 2",
             EXTERNAL_CHAIN);
@@ -228,7 +228,7 @@ TEST_F(Test_StoreIncoming, testIncomingDeposit_UnknownContact)
     // test: address allocated
     std::unique_ptr<proto::Bip44Address> AddrPtr =
         client_.Blockchain().LoadAddress(
-            Identifier::Factory(Alice),
+            identifier::Nym::Factory(Alice),
             Identifier::Factory(AccountID),
             Address->index(),
             EXTERNAL_CHAIN);
@@ -240,7 +240,7 @@ TEST_F(Test_StoreIncoming, testIncomingDeposit_UnknownContact)
     auto Tx = MakeTransaction(
         "5688c51b241770ff488eb1c425d608e9de0c25d4df31f0b49fa2b5a90dade126");
     bool Stored = client_.Blockchain().StoreIncoming(
-        Identifier::Factory(Alice),
+        identifier::Nym::Factory(Alice),
         Identifier::Factory(AccountID),
         AddrPtr->index(),
         EXTERNAL_CHAIN,
@@ -265,7 +265,7 @@ TEST_F(Test_StoreIncoming, testIncomingDeposit_UnknownContact)
     // test: tx is associated in deposit address #2
     std::unique_ptr<proto::Bip44Address> NewAddrPtr =
         client_.Blockchain().LoadAddress(
-            Identifier::Factory(Alice),
+            identifier::Nym::Factory(Alice),
             Identifier::Factory(AccountID),
             AddrPtr->index(),
             EXTERNAL_CHAIN);
@@ -276,7 +276,7 @@ TEST_F(Test_StoreIncoming, testIncomingDeposit_UnknownContact)
 
     // 3. Assign deposit address to contact
     bool assigned = client_.Blockchain().AssignAddress(
-        Identifier::Factory(Alice),
+        identifier::Nym::Factory(Alice),
         Identifier::Factory(AccountID),
         AddrPtr->index(),
         Identifier::Factory(Charly),
@@ -287,7 +287,7 @@ TEST_F(Test_StoreIncoming, testIncomingDeposit_UnknownContact)
 
     // test: deposit is included in Activity::Thread
     std::shared_ptr<proto::StorageThread> Thread_AC = client_.Activity().Thread(
-        Identifier::Factory(Alice), Identifier::Factory(Charly));
+        identifier::Nym::Factory(Alice), Identifier::Factory(Charly));
     ASSERT_EQ(1, Thread_AC->item_size());
     EXPECT_EQ(1, Thread_AC->participant_size());
     EXPECT_STREQ(Charly.c_str(), Thread_AC->participant(0).c_str());

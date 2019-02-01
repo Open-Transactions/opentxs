@@ -7,6 +7,7 @@
 
 #include "Accounts.hpp"
 
+#include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/core/Log.hpp"
 
 #include "storage/Plugin.hpp"
@@ -131,13 +132,13 @@ std::set<OTIdentifier> Accounts::AccountsByContract(
 }
 
 std::set<OTIdentifier> Accounts::AccountsByIssuer(
-    const Identifier& issuerNym) const
+    const identifier::Nym& issuerNym) const
 {
     EXTRACT_SET_BY_ID(issuer_index_, issuerNym);
 }
 
 std::set<OTIdentifier> Accounts::AccountsByOwner(
-    const Identifier& ownerNym) const
+    const identifier::Nym& ownerNym) const
 {
     EXTRACT_SET_BY_ID(owner_index_, ownerNym);
 }
@@ -187,9 +188,9 @@ std::string Accounts::Alias(const std::string& id) const
 bool Accounts::check_update_account(
     const Lock& lock,
     const OTIdentifier& accountID,
-    const Identifier& ownerNym,
-    const Identifier& signerNym,
-    const Identifier& issuerNym,
+    const identifier::Nym& ownerNym,
+    const identifier::Nym& signerNym,
+    const identifier::Nym& issuerNym,
     const Identifier& server,
     const Identifier& contract,
     const proto::ContactItemType unit)
@@ -433,9 +434,9 @@ bool Accounts::Store(
     const std::string& id,
     const std::string& data,
     const std::string& alias,
-    const Identifier& owner,
-    const Identifier& signer,
-    const Identifier& issuer,
+    const identifier::Nym& owner,
+    const identifier::Nym& signer,
+    const identifier::Nym& issuer,
     const Identifier& server,
     const Identifier& contract,
     const proto::ContactItemType unit)

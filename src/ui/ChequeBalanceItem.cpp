@@ -13,6 +13,7 @@
 #include "opentxs/api/Core.hpp"
 #include "opentxs/api/Wallet.hpp"
 #include "opentxs/core/contract/UnitDefinition.hpp"
+#include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/core/Cheque.hpp"
 #include "opentxs/core/Flag.hpp"
 #include "opentxs/core/Identifier.hpp"
@@ -45,7 +46,7 @@ ChequeBalanceItem::ChequeBalanceItem(
     const AccountActivityRowID& rowID,
     const AccountActivitySortKey& sortKey,
     const CustomData& custom,
-    const Identifier& nymID,
+    const identifier::Nym& nymID,
     const Identifier& accountID)
     : BalanceItem(
           parent,
@@ -148,11 +149,12 @@ void ChequeBalanceItem::startup(const CustomData& custom)
     std::string name{""};
     std::string text{""};
     auto number = std::to_string(cheque_->GetTransactionNum());
-    auto otherNymID = Identifier::Factory();
+    auto otherNymID = identifier::Nym::Factory();
 
     switch (type_) {
         case StorageBox::INCOMINGCHEQUE: {
-            otherNymID = Identifier::Factory(cheque_->GetSenderNymID());
+            otherNymID =
+                identifier::Nym::Factory(cheque_->GetSenderNymID().str());
 
             if (otherNymID->empty()) { otherNymID = nym_id_; }
 
@@ -174,7 +176,8 @@ void ChequeBalanceItem::startup(const CustomData& custom)
             }
         } break;
         case StorageBox::OUTGOINGCHEQUE: {
-            otherNymID = Identifier::Factory(cheque_->GetRecipientNymID());
+            otherNymID =
+                identifier::Nym::Factory(cheque_->GetRecipientNymID().str());
 
             switch (event.type()) {
                 case proto::PAYMENTEVENTTYPE_CREATE: {

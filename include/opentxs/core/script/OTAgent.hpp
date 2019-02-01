@@ -140,7 +140,7 @@ public:
                                             // added to the party.
 
     EXPORT bool IsValidSigner(const Nym& theNym);
-    EXPORT bool IsValidSignerID(const Identifier& theNymID);
+    EXPORT bool IsValidSignerID(const identifier::Nym& theNymID);
 
     bool IsAuthorizingAgentForParty();  // true/false whether THIS agent is the
                                         // authorizing agent for his party.

@@ -11,6 +11,7 @@
 #include "opentxs/api/crypto/Encode.hpp"
 #include "opentxs/api/Native.hpp"
 #include "opentxs/core/crypto/OTEnvelope.hpp"
+#include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/core/util/Assert.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/Log.hpp"

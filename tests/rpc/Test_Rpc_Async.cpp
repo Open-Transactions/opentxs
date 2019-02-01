@@ -380,7 +380,7 @@ TEST_F(Test_Rpc_Async, Send_Payment_Cheque_No_Account_Owner)
 
     const auto contact = client_a.Contacts().NewContact(
         "label_only_contact",
-        Identifier::Factory(),
+        identifier::Nym::Factory(),
         client_a.Factory().PaymentCode(""));
 
     auto sendpayment = command.mutable_sendpayment();
@@ -420,7 +420,7 @@ TEST_F(Test_Rpc_Async, Send_Payment_Cheque_No_Path)
 
     const auto contact = client_a.Contacts().NewContact(
         "label_only_contact",
-        Identifier::Factory(),
+        identifier::Nym::Factory(),
         client_a.Factory().PaymentCode(""));
 
     auto sendpayment = command.mutable_sendpayment();
@@ -843,7 +843,6 @@ TEST_F(Test_Rpc_Async, Accept_2_Pending_Payments)
     ASSERT_FALSE(receiver_nym_id_->empty());
 
     auto nym5 = client_b.Wallet().Nym(receiver_nym_id_);
-
     ASSERT_TRUE(bool(nym5));
 
     auto& contacts = client_a.Contacts();

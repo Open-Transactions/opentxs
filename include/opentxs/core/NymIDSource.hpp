@@ -30,7 +30,7 @@ public:
     OTString asString() const;
     OTString Description() const;
     proto::SourceType Type() const;
-    OTIdentifier NymID() const;
+    OTNymID NymID() const;
     serializedNymIDSource Serialize() const;
     bool Verify(
         const proto::Credential& master,

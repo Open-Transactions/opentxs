@@ -47,7 +47,7 @@ private:
         const api::client::Manager& api,
         const network::zeromq::PublishSocket& publisher,
         const Flag& running,
-        const Identifier& nymID);
+        const identifier::Nym& nymID);
     ActivitySummary() = delete;
     ActivitySummary(const ActivitySummary&) = delete;
     ActivitySummary(ActivitySummary&&) = delete;

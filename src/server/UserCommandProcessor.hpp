@@ -20,13 +20,13 @@ class UserCommandProcessor
 {
 public:
     static bool check_client_isnt_server(
-        const Identifier& nymID,
+        const identifier::Nym& nymID,
         const Nym& serverNym);
     static bool check_message_notary(
         const Identifier& notaryID,
         const Identifier& realNotaryID);
-    static bool check_server_lock(const Identifier& nymID);
-    static bool isAdmin(const Identifier& nymID);
+    static bool check_server_lock(const identifier::Nym& nymID);
+    static bool isAdmin(const identifier::Nym& nymID);
 
     void drop_reply_notice_to_nymbox(
         const api::Wallet& wallet,
@@ -120,24 +120,24 @@ private:
     bool cmd_trigger_clause(ReplyMessage& reply) const;
     bool cmd_usage_credits(ReplyMessage& reply) const;
     std::unique_ptr<Ledger> create_nymbox(
-        const Identifier& nymID,
+        const identifier::Nym& nymID,
         const Identifier& serverID,
         const Nym& serverNym) const;
     bool hash_check(const ClientContext& context, Identifier& nymboxHash) const;
     RequestNumber initialize_request_number(ClientContext& context) const;
     std::unique_ptr<Ledger> load_inbox(
-        const Identifier& nymID,
+        const identifier::Nym& nymID,
         const Identifier& accountID,
         const Identifier& serverID,
         const Nym& serverNym,
         const bool verifyAccount) const;
     std::unique_ptr<Ledger> load_nymbox(
-        const Identifier& nymID,
+        const identifier::Nym& nymID,
         const Identifier& serverID,
         const Nym& serverNym,
         const bool verifyAccount) const;
     std::unique_ptr<Ledger> load_outbox(
-        const Identifier& nymID,
+        const identifier::Nym& nymID,
         const Identifier& accountID,
         const Identifier& serverID,
         const Nym& serverNym,
@@ -149,8 +149,8 @@ private:
     bool save_outbox(const Nym& nym, Identifier& hash, Ledger& outbox) const;
     bool send_message_to_nym(
         const Identifier& notaryID,
-        const Identifier& senderNymID,
-        const Identifier& recipientNymID,
+        const identifier::Nym& senderNymID,
+        const identifier::Nym& recipientNymID,
         const Message& msg) const;
     bool verify_box(
         const Identifier& ownerID,

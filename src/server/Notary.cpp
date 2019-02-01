@@ -136,7 +136,7 @@ void Notary::cancel_cheque(
     const auto strSenderNymID = String::Factory(cheque.GetSenderNymID());
     const auto strRecipientNymID = String::Factory(cheque.GetRecipientNymID());
 
-    if (cheque.GetSenderNymID() != nymID) {
+    if (cheque.GetSenderNymID().operator!=(nymID)) {
         LogOutput(OT_METHOD)(__FUNCTION__)(": Incorrect nym id (")(
             cheque.GetSenderNymID())(").")
             .Flush();
@@ -246,12 +246,12 @@ void Notary::deposit_cheque(
 {
     const auto& nymID = depositorContext.RemoteNym().ID();
     const Identifier& sourceAccountID(cheque.GetSenderAcctID());
-    const Identifier& senderNymID(cheque.GetSenderNymID());
+    const identifier::Nym& senderNymID(cheque.GetSenderNymID());
     const Identifier& remitterAccountID(cheque.GetRemitterAcctID());
-    const Identifier& remitterNymID(cheque.GetRemitterNymID());
+    const identifier::Nym& remitterNymID(cheque.GetRemitterNymID());
     const bool isVoucher = cheque.HasRemitter();
     const bool cancelVoucher =
-        (isVoucher && (nymID == cheque.GetRemitterNymID()));
+        (isVoucher && (nymID.operator==(cheque.GetRemitterNymID())));
     std::shared_ptr<Ledger> senderInbox{nullptr};
     std::shared_ptr<Ledger> senderOutbox{nullptr};
     std::shared_ptr<OTTransaction> inboxItem{nullptr};
@@ -433,7 +433,7 @@ void Notary::deposit_cheque(
     const Cheque& cheque,
     const bool isVoucher,
     const bool cancelling,
-    const Identifier& senderNymID,
+    const identifier::Nym& senderNymID,
     ClientContext& senderContext,
     Account& senderAccount,
     Ledger& senderInbox,
@@ -463,7 +463,7 @@ void Notary::deposit_cheque(
     const auto& nymID = depositorContext.RemoteNym().ID();
     const auto& serverNymID = senderContext.Nym()->ID();
 
-    if (isVoucher && (senderNymID != serverNymID)) {
+    if (isVoucher && (senderNymID.operator!=(serverNymID))) {
         LogOutput(OT_METHOD)(__FUNCTION__)(": Invalid sender nym on voucher: ")(
             senderNymID)(".")
             .Flush();
@@ -495,7 +495,7 @@ void Notary::deposit_cheque(
         validReceipient = true;
     } else {
         if (cheque.HasRecipient()) {
-            validReceipient = (nymID == cheque.GetRecipientNymID());
+            validReceipient = (nymID.operator==(cheque.GetRecipientNymID()));
         } else {
             validReceipient = true;
         }
@@ -555,7 +555,7 @@ void Notary::deposit_cheque(
     }
 
     // This happens if the voucher is the result of a dividend payment
-    if (isVoucher && (senderNymID == senderContext.Nym()->ID())) {
+    if (isVoucher && (senderNymID.operator==(senderContext.Nym()->ID()))) {
         // Server nyms never process the inbox of internal server accounts,
         // so this ensures the number is fully closed out.
         senderContext.ConsumeIssued(chequeNumber);
@@ -1514,8 +1514,8 @@ void Notary::NotarizeWithdrawal(
                     strChequeMemo,  // Optional memo field. Includes item
                                     // note and request memo.
                     theVoucherRequest->HasRecipient()
-                        ? Identifier::Factory(RECIPIENT_ID)
-                        : Identifier::Factory());
+                        ? identifier::Nym::Factory(RECIPIENT_ID.str())
+                        : identifier::Nym::Factory());
 
                 // IF we successfully created the voucher, AND the voucher
                 // amount is greater than 0,
@@ -2339,7 +2339,7 @@ void Notary::NotarizePayDividend(
                                     // cheques.)
                                     if (bGotNextTransNum) {
                                         const auto NOTARY_NYM_ID =
-                                            Identifier::Factory(
+                                            identifier::Nym::Factory(
                                                 server_.GetServerNym());
                                         const bool bIssueVoucher =
                                             theVoucher->IssueCheque(
@@ -2824,7 +2824,7 @@ void Notary::NotarizePaymentPlan(
                 const TransactionNumber lExpectedNum =
                     bCancelling ? 0 : pItem->GetTransactionNum();
                 const TransactionNumber lFoundNum = pPlan->GetTransactionNum();
-                const Identifier& FOUND_NYM_ID =
+                const identifier::Nym& FOUND_NYM_ID =
                     bCancelling ? pPlan->GetRecipientNymID()
                                 : pPlan->GetSenderNymID();
                 const Identifier& FOUND_ACCT_ID =
@@ -2857,7 +2857,7 @@ void Notary::NotarizePaymentPlan(
                         bCancelling ? "cancelling" : "activating",
                         lFoundOpeningNum,
                         pItem->GetTransactionNum());
-                } else if (FOUND_NYM_ID != DEPOSITOR_NYM_ID) {
+                } else if (FOUND_NYM_ID.operator!=(DEPOSITOR_NYM_ID)) {
                     const auto strIDExpected = String::Factory(FOUND_NYM_ID),
                                strIDDepositor =
                                    String::Factory(DEPOSITOR_NYM_ID);
@@ -3496,7 +3496,7 @@ void Notary::NotarizeSmartContract(
             } else {
                 // CANCELING, or ACTIVATING?
                 //
-                auto theCancelerNymID = Identifier::Factory();
+                auto theCancelerNymID = identifier::Nym::Factory();
                 const bool bCancelling =
                     (pContract->IsCanceled() &&
                      pContract->GetCancelerID(theCancelerNymID));
@@ -3505,7 +3505,7 @@ void Notary::NotarizeSmartContract(
                 std::int64_t lFoundOpeningNum = 0;
                 std::int64_t lFoundClosingNum = 0;
 
-                auto FOUND_NYM_ID = Identifier::Factory();
+                auto FOUND_NYM_ID = identifier::Nym::Factory();
                 auto FOUND_ACCT_ID = Identifier::Factory();
 
                 if (!bCancelling)  // ACTIVATING
@@ -3612,7 +3612,7 @@ void Notary::NotarizeSmartContract(
                 // to enforce this, then I need to do it for ALL
                 // parties, not just the activator!
                 else if (
-                    (pContract->GetSenderNymID() == NOTARY_NYM_ID) ||
+                    (pContract->GetSenderNymID().operator==(NOTARY_NYM_ID)) ||
                     (nullptr != pContract->FindPartyBasedOnNymAsAgent(
                                     server_.GetServerNym()))) {
                     Log::vOutput(
@@ -5542,7 +5542,7 @@ void Notary::NotarizeMarketOffer(
                     "Notary ID (%s) on trade. Expected: %s\n",
                     strID1->Get(),
                     strID2->Get());
-            } else if (pTrade->GetSenderNymID() != NYM_ID) {
+            } else if (pTrade->GetSenderNymID().operator!=(NYM_ID)) {
                 const auto strID1 = String::Factory(pTrade->GetSenderNymID()),
                            strID2 = String::Factory(NYM_ID);
                 Log::vOutput(

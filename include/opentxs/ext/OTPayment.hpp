@@ -130,20 +130,20 @@ public:
     // a given asset account.)
     EXPORT bool GetOpeningNum(
         TransactionNumber& lOutput,
-        const Identifier& theNymID) const;
+        const identifier::Nym& theNymID) const;
     EXPORT bool GetPaymentContents(String& strOutput) const
     {
         strOutput.Set(m_strPayment->Get());
         return true;
     }
     EXPORT bool GetRecipientAcctID(Identifier& theOutput) const;
-    EXPORT bool GetRecipientNymID(Identifier& theOutput) const;
+    EXPORT bool GetRecipientNymID(identifier::Nym& theOutput) const;
     EXPORT bool GetRemitterAcctID(Identifier& theOutput) const;
-    EXPORT bool GetRemitterNymID(Identifier& theOutput) const;
+    EXPORT bool GetRemitterNymID(identifier::Nym& theOutput) const;
     EXPORT bool GetSenderAcctID(Identifier& theOutput) const;
     EXPORT bool GetSenderAcctIDForDisplay(Identifier& theOutput) const;
-    EXPORT bool GetSenderNymID(Identifier& theOutput) const;
-    EXPORT bool GetSenderNymIDForDisplay(Identifier& theOutput) const;
+    EXPORT bool GetSenderNymID(identifier::Nym& theOutput) const;
+    EXPORT bool GetSenderNymIDForDisplay(identifier::Nym& theOutput) const;
     EXPORT bool GetTransactionNum(TransactionNumber& lOutput) const;
     EXPORT bool GetTransNumDisplay(TransactionNumber& lOutput) const;
     EXPORT paymentType GetType() const { return m_Type; }
@@ -172,7 +172,7 @@ public:
     EXPORT void Release() override;
     EXPORT void Release_Payment();
     EXPORT bool SetPayment(const String& strPayment);
-    EXPORT bool SetTempRecipientNymID(const Identifier& id);
+    EXPORT bool SetTempRecipientNymID(const identifier::Nym& id);
     // Since the temp values are not available until at least ONE instantiating
     // has occured, this function forces that very scenario (cleanly) so you
     // don't have to instantiate-and-then-delete a payment instrument. Instead,
@@ -219,13 +219,13 @@ protected:
     // type. Different payment instruments support different temp values.
     OTIdentifier m_InstrumentDefinitionID;
     OTIdentifier m_NotaryID;
-    OTIdentifier m_SenderNymID;
+    OTNymID m_SenderNymID;
     OTIdentifier m_SenderAcctID;
-    OTIdentifier m_RecipientNymID;
+    OTNymID m_RecipientNymID;
     OTIdentifier m_RecipientAcctID;
     // A voucher (cashier's cheque) has the "bank" as the sender. Whereas the
     // Nym who actually purchased the voucher is the remitter.
-    OTIdentifier m_RemitterNymID;
+    OTNymID m_RemitterNymID;
     // A voucher (cashier's cheque) has the "bank"s account as the sender acct.
     // Whereas the account that was originally used to purchase the voucher is
     // the remitter account.

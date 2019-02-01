@@ -9,6 +9,7 @@
 #include "opentxs/api/client/Manager.hpp"
 #include "opentxs/api/client/OTX.hpp"
 #include "opentxs/api/Endpoints.hpp"
+#include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/core/Flag.hpp"
 #include "opentxs/core/Identifier.hpp"
 #include "opentxs/core/Lockable.hpp"
@@ -43,7 +44,7 @@ namespace opentxs
 ui::implementation::MessagableExternalInterface* Factory::MessagableList(
     const api::client::Manager& api,
     const network::zeromq::PublishSocket& publisher,
-    const Identifier& nymID)
+    const identifier::Nym& nymID)
 {
     return new ui::implementation::MessagableList(api, publisher, nymID);
 }
@@ -54,7 +55,7 @@ namespace opentxs::ui::implementation
 MessagableList::MessagableList(
     const api::client::Manager& api,
     const network::zeromq::PublishSocket& publisher,
-    const Identifier& nymID)
+    const identifier::Nym& nymID)
     : MessagableListList(api, publisher, nymID)
     , listeners_({
           {api_.Endpoints().ContactUpdate(),
@@ -131,7 +132,7 @@ void MessagableList::process_nym(const network::zeromq::Message& message)
     OT_ASSERT(1 == message.Body().size());
 
     const std::string id(*message.Body().begin());
-    const auto nymID = Identifier::Factory(id);
+    const auto nymID = identifier::Nym::Factory(id);
 
     OT_ASSERT(false == nymID->empty())
 

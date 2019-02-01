@@ -15,6 +15,7 @@
 #include "opentxs/consensus/ServerContext.hpp"
 #include "opentxs/core/cron/OTCron.hpp"
 #include "opentxs/core/cron/OTCronItem.hpp"
+#include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/core/util/Assert.hpp"
 #include "opentxs/core/util/Common.hpp"
 #include "opentxs/core/Account.hpp"
@@ -45,7 +46,7 @@ namespace opentxs
 OTAgreement::OTAgreement(const api::Core& core)
     : ot_super(core)
     , m_RECIPIENT_ACCT_ID(Identifier::Factory())
-    , m_RECIPIENT_NYM_ID(Identifier::Factory())
+    , m_RECIPIENT_NYM_ID(identifier::Nym::Factory())
     , m_strConsideration(String::Factory())
     , m_strMerchantSignedCopy(String::Factory())
     , m_dequeRecipientClosingNumbers()
@@ -59,7 +60,7 @@ OTAgreement::OTAgreement(
     const Identifier& INSTRUMENT_DEFINITION_ID)
     : ot_super(core, NOTARY_ID, INSTRUMENT_DEFINITION_ID)
     , m_RECIPIENT_ACCT_ID(Identifier::Factory())
-    , m_RECIPIENT_NYM_ID(Identifier::Factory())
+    , m_RECIPIENT_NYM_ID(identifier::Nym::Factory())
     , m_strConsideration(String::Factory())
     , m_strMerchantSignedCopy(String::Factory())
     , m_dequeRecipientClosingNumbers()
@@ -72,9 +73,9 @@ OTAgreement::OTAgreement(
     const Identifier& NOTARY_ID,
     const Identifier& INSTRUMENT_DEFINITION_ID,
     const Identifier& SENDER_ACCT_ID,
-    const Identifier& SENDER_NYM_ID,
+    const identifier::Nym& SENDER_NYM_ID,
     const Identifier& RECIPIENT_ACCT_ID,
-    const Identifier& RECIPIENT_NYM_ID)
+    const identifier::Nym& RECIPIENT_NYM_ID)
     : ot_super(
           core,
           NOTARY_ID,
@@ -82,7 +83,7 @@ OTAgreement::OTAgreement(
           SENDER_ACCT_ID,
           SENDER_NYM_ID)
     , m_RECIPIENT_ACCT_ID(Identifier::Factory())
-    , m_RECIPIENT_NYM_ID(Identifier::Factory())
+    , m_RECIPIENT_NYM_ID(identifier::Nym::Factory())
     , m_strConsideration(String::Factory())
     , m_strMerchantSignedCopy(String::Factory())
     , m_dequeRecipientClosingNumbers()
@@ -92,7 +93,7 @@ OTAgreement::OTAgreement(
     SetRecipientNymID(RECIPIENT_NYM_ID);
 }
 
-void OTAgreement::setCustomerNymId(const Identifier& NYM_ID)
+void OTAgreement::setCustomerNymId(const identifier::Nym& NYM_ID)
 {
     ot_super::SetSenderNymID(NYM_ID);
 }
@@ -157,14 +158,14 @@ bool OTAgreement::DropServerNoticeToNymbox(
     bool bSuccessMsg,
     const Nym& theServerNym,
     const Identifier& NOTARY_ID,
-    const Identifier& NYM_ID,
+    const identifier::Nym& NYM_ID,
     const TransactionNumber& lNewTransactionNumber,
     const TransactionNumber& lInReferenceTo,
     const String& strReference,
     originType theOriginType,
     OTString pstrNote,
     OTString pstrAttachment,
-    const Identifier& actualNymID)
+    const identifier::Nym& actualNymID)
 {
     auto theLedger{core.Factory().Ledger(NYM_ID, NYM_ID, NOTARY_ID)};
 
@@ -619,11 +620,12 @@ void OTAgreement::HarvestClosingNumbers(ServerContext& context)
     }
 }
 
-std::int64_t OTAgreement::GetOpeningNumber(const Identifier& theNymID) const
+std::int64_t OTAgreement::GetOpeningNumber(
+    const identifier::Nym& theNymID) const
 {
-    const Identifier& theRecipientNymID = GetRecipientNymID();
+    const identifier::Nym& theRecipientNymID = GetRecipientNymID();
 
-    if (theNymID == theRecipientNymID) return GetRecipientOpeningNum();
+    if (theNymID.operator==(theRecipientNymID)) return GetRecipientOpeningNum();
     // else...
     return ot_super::GetOpeningNumber(theNymID);
 }
@@ -724,8 +726,8 @@ bool OTAgreement::CanRemoveItemFromCron(const ClientContext& context)
     // (see below.)
     if (!context.RemoteNym().CompareID(GetRecipientNymID())) {
         LogNormal(OT_METHOD)(__FUNCTION__)(": Context Remote Nym ID: ")(
-            (context.RemoteNym().ID()))(". Sender Nym ID: ")(
-            (GetSenderNymID()))(". Recipient Nym ID: ")((GetRecipientNymID()))(
+            context.RemoteNym().ID())(". Sender Nym ID: ")(GetSenderNymID())(
+            ". Recipient Nym ID: ")(GetRecipientNymID())(
             ". Weird: Nym tried to remove agreement (payment plan), even "
             "though he apparently wasn't the sender OR recipient.")
             .Flush();
@@ -782,7 +784,7 @@ bool OTAgreement::CompareAgreement(const OTAgreement& rhs) const
 
     if ((m_strConsideration->Compare(rhs.m_strConsideration)) &&
         (GetRecipientAcctID() == rhs.GetRecipientAcctID()) &&
-        (GetRecipientNymID() == rhs.GetRecipientNymID()) &&
+        (GetRecipientNymID().operator==(rhs.GetRecipientNymID())) &&
         //        (   m_dequeClosingNumbers == rhs.m_dequeClosingNumbers ) && //
         // The merchant wouldn't know the customer's trans#s.
         // (Thus wouldn't expect them to be set in BOTH versions...)
@@ -840,7 +842,7 @@ bool OTAgreement::SetProposal(
                                            "owned by Merchant Nym.")
             .Flush();
         return false;
-    } else if (GetRecipientNymID() == GetSenderNymID()) {
+    } else if (GetRecipientNymID().operator==(GetSenderNymID())) {
         LogNormal(OT_METHOD)(__FUNCTION__)(
             ": Failure: Sender and recipient have the same "
             "Nym ID (not allowed).")
@@ -958,7 +960,7 @@ bool OTAgreement::SetProposal(
 bool OTAgreement::Confirm(
     ServerContext& context,
     const Account& PAYER_ACCT,
-    const Identifier& p_id_MERCHANT_NYM,
+    const identifier::Nym& p_id_MERCHANT_NYM,
     const Nym* pMERCHANT_NYM)
 {
     auto nym = context.Nym();
@@ -968,7 +970,7 @@ bool OTAgreement::Confirm(
          id_PAYER_ACCT =
              Identifier::Factory(PAYER_ACCT.GetPurportedAccountID());
 
-    if (GetRecipientNymID() == GetSenderNymID()) {
+    if (GetRecipientNymID().operator==(GetSenderNymID())) {
         LogNormal(OT_METHOD)(__FUNCTION__)(
             ": Error: Sender and recipient have the same "
             "Nym ID (not allowed).")
@@ -976,7 +978,7 @@ bool OTAgreement::Confirm(
         return false;
     } else if (
         (!p_id_MERCHANT_NYM.empty()) &&
-        (GetRecipientNymID() != p_id_MERCHANT_NYM)) {
+        (GetRecipientNymID().operator!=(p_id_MERCHANT_NYM))) {
         LogNormal(OT_METHOD)(__FUNCTION__)(
             ": Merchant has wrong NymID (should be same "
             "as RecipientNymID).")
@@ -984,7 +986,7 @@ bool OTAgreement::Confirm(
         return false;
     } else if (
         (nullptr != pMERCHANT_NYM) &&
-        (GetRecipientNymID() != pMERCHANT_NYM->ID())) {
+        (GetRecipientNymID().operator!=(pMERCHANT_NYM->ID()))) {
         LogNormal(OT_METHOD)(__FUNCTION__)(
             ": Merchant has wrong NymID (should be same "
             "as RecipientNymID).")
@@ -1214,17 +1216,17 @@ std::int32_t OTAgreement::ProcessXMLNode(irr::io::IrrXMLReader*& xml)
         const auto NOTARY_ID = Identifier::Factory(strNotaryID),
                    INSTRUMENT_DEFINITION_ID =
                        Identifier::Factory(strInstrumentDefinitionID),
-                   SENDER_ACCT_ID = Identifier::Factory(strSenderAcctID),
-                   SENDER_NYM_ID = Identifier::Factory(strSenderNymID),
-                   RECIPIENT_ACCT_ID = Identifier::Factory(strRecipientAcctID),
-                   RECIPIENT_NYM_ID = Identifier::Factory(strRecipientNymID);
+                   SENDER_ACCT_ID = Identifier::Factory(strSenderAcctID);
+        const auto SENDER_NYM_ID(strSenderNymID);
+        const auto RECIPIENT_ACCT_ID = Identifier::Factory(strRecipientAcctID);
+        const auto RECIPIENT_NYM_ID(strRecipientNymID);
 
         SetNotaryID(NOTARY_ID);
         SetInstrumentDefinitionID(INSTRUMENT_DEFINITION_ID);
         SetSenderAcctID(SENDER_ACCT_ID);
-        SetSenderNymID(SENDER_NYM_ID);
+        SetSenderNymID(identifier::Nym::Factory(SENDER_NYM_ID));
         SetRecipientAcctID(RECIPIENT_ACCT_ID);
-        SetRecipientNymID(RECIPIENT_NYM_ID);
+        SetRecipientNymID(identifier::Nym::Factory(RECIPIENT_NYM_ID));
 
         LogDetail(OT_METHOD)(__FUNCTION__)(": ")(
             m_bCanceled ? "Canceled a" : "A")("greement. Transaction Number: ")(

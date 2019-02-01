@@ -9,6 +9,7 @@
 
 #include "opentxs/api/Core.hpp"
 #include "opentxs/api/Wallet.hpp"
+#include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/core/util/Assert.hpp"
 #include "opentxs/core/util/Common.hpp"
 #include "opentxs/core/util/Tag.hpp"
@@ -207,7 +208,7 @@ ExclusiveAccount AccountList::GetOrRegisterAccount(
     // Not found. There's no account ID yet for that instrument definition ID.
     // That means we can create it.
     account = api_.Wallet().CreateAccount(
-        accountOwnerId,
+        identifier::Nym::Factory(accountOwnerId.str()),
         notaryID,
         instrumentDefinitionID,
         serverNym,

@@ -13,6 +13,7 @@
 #include "opentxs/core/cron/OTCron.hpp"
 #include "opentxs/core/crypto/OTCachedKey.hpp"
 #include "opentxs/core/crypto/OTPassword.hpp"
+#include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/core/util/Assert.hpp"
 #include "opentxs/core/util/Common.hpp"
 #include "opentxs/core/util/OTFolders.hpp"
@@ -257,7 +258,7 @@ bool MainFile::CreateMainFile(
     // notaryServer.xml file
     // is saved. All we have left is the Nymfile, which we'll create.
 
-    auto loaded = server_.LoadServerNym(Identifier::Factory(strNymID));
+    auto loaded = server_.LoadServerNym(identifier::Nym::Factory(strNymID));
     if (false == loaded) {
         LogNormal(OT_METHOD)(__FUNCTION__)(": Error loading server nym.")
             .Flush();
@@ -450,8 +451,8 @@ bool MainFile::LoadMainFile(bool bReadOnly)
     }
 
     if (false == bFailure) {
-        const auto loaded =
-            server_.LoadServerNym(Identifier::Factory(server_.ServerNymID()));
+        const auto loaded = server_.LoadServerNym(
+            identifier::Nym::Factory(server_.ServerNymID()));
 
         if (false == loaded) {
             LogOutput(OT_METHOD)(__FUNCTION__)(": Failed to load server nym.")
@@ -485,8 +486,8 @@ bool MainFile::LoadServerUserAndContract()
     OT_ASSERT(!server_.GetServerID().str().empty());
     OT_ASSERT(!server_.ServerNymID().empty());
 
-    serverNym =
-        server_.API().Wallet().Nym(Identifier::Factory(server_.ServerNymID()));
+    serverNym = server_.API().Wallet().Nym(
+        identifier::Nym::Factory(server_.ServerNymID()));
 
     if (serverNym->HasCapability(NymCapability::SIGN_MESSAGE)) {
         LogTrace(OT_METHOD)(__FUNCTION__)(": Server nym is viable.").Flush();

@@ -47,7 +47,7 @@ std::int32_t LoadAbbreviatedRecord(
 EXPORT bool VerifyBoxReceiptExists(
     const std::string& dataFolder,
     const Identifier& NOTARY_ID,
-    const Identifier& NYM_ID,
+    const identifier::Nym& NYM_ID,
     const Identifier& ACCOUNT_ID,  // If for Nymbox (vs inbox/outbox) then
     // pass NYM_ID in this field also.
     std::int32_t nBoxType,  // 0/nymbox, 1/inbox, 2/outbox

@@ -36,7 +36,7 @@ public:
 
         return m_lUsageCredits;
     }
-    const Identifier& ID() const override { return target_nym_->ID(); }
+    const identifier::Nym& ID() const override { return target_nym_->ID(); }
     std::string PaymentCode() const override
     {
         return target_nym_->PaymentCode();

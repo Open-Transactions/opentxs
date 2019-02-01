@@ -12,39 +12,39 @@ class Blockchain : virtual public api::client::Blockchain
 {
 public:
     std::shared_ptr<proto::Bip44Account> Account(
-        const Identifier& nymID,
+        const identifier::Nym& nymID,
         const Identifier& accountID) const override;
     std::set<OTIdentifier> AccountList(
-        const Identifier& nymID,
+        const identifier::Nym& nymID,
         const proto::ContactItemType type) const override;
     std::unique_ptr<proto::Bip44Address> AllocateAddress(
-        const Identifier& nymID,
+        const identifier::Nym& nymID,
         const Identifier& accountID,
         const std::string& label = "",
         const BIP44Chain chain = EXTERNAL_CHAIN) const override;
     bool AssignAddress(
-        const Identifier& nymID,
+        const identifier::Nym& nymID,
         const Identifier& accountID,
         const std::uint32_t index,
         const Identifier& contactID,
         const BIP44Chain chain = EXTERNAL_CHAIN) const override;
     std::unique_ptr<proto::Bip44Address> LoadAddress(
-        const Identifier& nymID,
+        const identifier::Nym& nymID,
         const Identifier& accountID,
         const std::uint32_t index,
         const BIP44Chain chain) const override;
     OTIdentifier NewAccount(
-        const Identifier& nymID,
+        const identifier::Nym& nymID,
         const BlockchainAccountType standard,
         const proto::ContactItemType type) const override;
     bool StoreIncoming(
-        const Identifier& nymID,
+        const identifier::Nym& nymID,
         const Identifier& accountID,
         const std::uint32_t index,
         const BIP44Chain chain,
         const proto::BlockchainTransaction& transaction) const override;
     bool StoreOutgoing(
-        const Identifier& senderNymID,
+        const identifier::Nym& senderNymID,
         const Identifier& accountID,
         const Identifier& recipientContactID,
         const proto::BlockchainTransaction& transaction) const override;
@@ -89,7 +89,7 @@ private:
         const std::string& nymID,
         const std::string& accountID) const;
     bool move_transactions(
-        const Identifier& nymID,
+        const identifier::Nym& nymID,
         const proto::Bip44Address& address,
         const std::string& fromContact,
         const std::string& toContact) const;

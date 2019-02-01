@@ -109,7 +109,7 @@ public:
 protected:
     using ReverseType = std::map<RowID, SortKey>;
 
-    const OTIdentifier nym_id_;
+    const OTNymID nym_id_;
     mutable Outer items_;
     mutable OuterIterator outer_;
     mutable typename Inner::const_iterator inner_;
@@ -413,10 +413,10 @@ protected:
     List(
         const api::client::Manager& api,
         const network::zeromq::PublishSocket& publisher,
-        const Identifier& nymID,
+        const identifier::Nym& nymID,
         const Identifier& widgetID)
         : Widget(api, publisher, widgetID)
-        , nym_id_(Identifier::Factory(nymID))
+        , nym_id_(identifier::Nym::Factory(nymID.str()))
         , items_()
         , outer_(items_.begin())
         , inner_(items_.begin()->second.begin())
@@ -434,7 +434,7 @@ protected:
     List(
         const api::client::Manager& api,
         const network::zeromq::PublishSocket& publisher,
-        const Identifier& nymID)
+        const identifier::Nym& nymID)
         : List(api, publisher, nymID, Identifier::Random())
     {
     }

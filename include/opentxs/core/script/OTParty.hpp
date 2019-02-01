@@ -178,12 +178,12 @@ public:
     // set agent's pointer to Nym
     // and return true.
     bool HasAgentByNymID(
-        const Identifier& theNymID,
+        const identifier::Nym& theNymID,
         OTAgent** ppAgent = nullptr) const;
     bool HasAuthorizingAgent(const Nym& theNym, OTAgent** ppAgent = nullptr)
         const;
     bool HasAuthorizingAgentByNymID(
-        const Identifier& theNymID,
+        const identifier::Nym& theNymID,
         OTAgent** ppAgent = nullptr) const;  // ppAgent lets you get the agent
                                              // ptr if it was there.
     // Load the authorizing agent from storage. Set agent's pointer to Nym.

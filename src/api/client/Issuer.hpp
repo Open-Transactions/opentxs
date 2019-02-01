@@ -29,7 +29,7 @@ public:
         const proto::PeerRequestType type,
         const RequestStatus state = RequestStatus::All) const override;
     const Identifier& IssuerID() const override;
-    const Identifier& LocalNymID() const override;
+    const identifier::Nym& LocalNymID() const override;
     bool Paired() const override;
     const std::string& PairingCode() const override;
     OTIdentifier PrimaryServer() const override;
@@ -72,7 +72,7 @@ private:
     std::uint32_t version_{0};
     std::string pairing_code_{""};
     mutable OTFlag paired_;
-    const OTIdentifier nym_id_;
+    const OTNymID nym_id_;
     const OTIdentifier issuer_id_;
     std::map<proto::ContactItemType, std::set<UnitAccountPair>> account_map_;
     WorkflowMap peer_requests_;
@@ -94,11 +94,11 @@ private:
 
     Issuer(
         const api::Wallet& wallet,
-        const Identifier& nymID,
+        const identifier::Nym& nymID,
         const proto::Issuer& serialized);
     Issuer(
         const api::Wallet& wallet,
-        const Identifier& nymID,
+        const identifier::Nym& nymID,
         const Identifier& issuerID);
     Issuer() = delete;
     Issuer(const Issuer&) = delete;

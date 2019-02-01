@@ -18,6 +18,7 @@
 #if OT_CRYPTO_SUPPORTED_SOURCE_BIP47
 #include "opentxs/core/crypto/PaymentCode.hpp"
 #endif
+#include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/Identifier.hpp"
 #include "opentxs/core/Log.hpp"
@@ -38,9 +39,9 @@ Contact::Contact(const api::Wallet& wallet, const proto::Contact& serialized)
     , version_(check_version(serialized.version(), OT_CONTACT_VERSION))
     , label_(serialized.label())
     , lock_()
-    , id_(Identifier::Factory(Identifier::Factory(serialized.id())))
+    , id_(Identifier::Factory(serialized.id()))
     , parent_(Identifier::Factory(serialized.mergedto()))
-    , primary_nym_(Identifier::Factory())
+    , primary_nym_(identifier::Nym::Factory())
     , nyms_()
     , merged_children_()
     , contact_data_(new ContactData(
@@ -74,7 +75,7 @@ Contact::Contact(const api::Wallet& wallet, const std::string& label)
     , lock_()
     , id_(Identifier::Factory(generate_id()))
     , parent_(Identifier::Factory())
-    , primary_nym_(Identifier::Factory())
+    , primary_nym_(identifier::Nym::Factory())
     , nyms_()
     , merged_children_()
     , contact_data_(nullptr)
@@ -226,7 +227,7 @@ bool Contact::add_nym(
 
 void Contact::add_nym_claim(
     const Lock& lock,
-    const Identifier& nymID,
+    const identifier::Nym& nymID,
     const bool primary)
 {
     OT_ASSERT(verify_write_lock(lock));
@@ -314,7 +315,7 @@ bool Contact::AddNym(const std::shared_ptr<const Nym>& nym, const bool primary)
     return add_nym(lock, nym, primary);
 }
 
-bool Contact::AddNym(const Identifier& nymID, const bool primary)
+bool Contact::AddNym(const identifier::Nym& nymID, const bool primary)
 {
     Lock lock(lock_);
 
@@ -562,7 +563,7 @@ void Contact::init_nyms()
 
         OT_ASSERT(item);
 
-        const auto nymID = Identifier::Factory(item->Value());
+        const auto nymID = identifier::Nym::Factory(item->Value());
         auto& nym = nyms_[nymID];
         nym = wallet_.Nym(nymID);
 
@@ -626,7 +627,8 @@ std::shared_ptr<ContactData> Contact::merged_data(const Lock& lock) const
 
     if (false == primary_nym_->empty()) {
         try {
-            auto& primary = nyms_.at(primary_nym_);
+            auto& primary =
+                nyms_.at(identifier::Nym::Factory(primary_nym_->str()));
 
             if (primary) {
                 output.reset(new ContactData(*output + primary->Claims()));
@@ -641,7 +643,7 @@ std::shared_ptr<ContactData> Contact::merged_data(const Lock& lock) const
 
         if (false == bool(nym)) { continue; }
 
-        if (nymID == primary_nym_) { continue; }
+        if (nymID->operator==(primary_nym_)) { continue; }
 
         output.reset(new ContactData(*output + nym->Claims()));
     }
@@ -649,7 +651,7 @@ std::shared_ptr<ContactData> Contact::merged_data(const Lock& lock) const
     return output;
 }
 
-std::vector<opentxs::OTIdentifier> opentxs::Contact::Nyms(
+std::vector<opentxs::OTNymID> opentxs::Contact::Nyms(
     const bool includeInactive) const
 {
     Lock lock(lock_);
@@ -663,7 +665,7 @@ std::vector<opentxs::OTIdentifier> opentxs::Contact::Nyms(
 
     if (false == bool(group)) { return {}; }
 
-    std::vector<OTIdentifier> output{};
+    std::vector<OTNymID> output{};
     const auto& primaryID = group->Primary();
 
     for (const auto& it : *group) {
@@ -676,9 +678,11 @@ std::vector<opentxs::OTIdentifier> opentxs::Contact::Nyms(
         if (false == (includeInactive || item->isActive())) { continue; }
 
         if (primaryID == itemID) {
-            output.emplace(output.begin(), Identifier::Factory(item->Value()));
+            output.emplace(
+                output.begin(), identifier::Nym::Factory(item->Value()));
         } else {
-            output.emplace(output.end(), Identifier::Factory(item->Value()));
+            output.emplace(
+                output.end(), identifier::Nym::Factory(item->Value()));
         }
     }
 
@@ -781,7 +785,7 @@ std::string Contact::Print() const
             const auto& id = it.first;
             out << " * " << String::Factory(id)->Get();
 
-            if (id == primary_nym_) { out << " (primary)"; }
+            if (id->operator==(primary_nym_)) { out << " (primary)"; }
 
             out << "\n";
         }
@@ -796,13 +800,13 @@ std::string Contact::Print() const
     return out.str();
 }
 
-bool Contact::RemoveNym(const Identifier& nymID)
+bool Contact::RemoveNym(const identifier::Nym& nymID)
 {
     Lock lock(lock_);
 
     auto result = nyms_.erase(nymID);
 
-    if (primary_nym_ == nymID) { primary_nym_ = Identifier::Factory(); }
+    if (primary_nym_ == nymID) { primary_nym_ = identifier::Nym::Factory(); }
 
     return (0 < result);
 }

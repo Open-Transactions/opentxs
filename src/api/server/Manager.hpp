@@ -34,7 +34,7 @@ public:
     std::string GetUserName() const override;
     std::string GetUserTerms() const override;
     const Identifier& ID() const override;
-    const Identifier& NymID() const override;
+    const identifier::Nym& NymID() const override;
 #if OT_CASH
     void ScanMints() const override;
 #endif  // OT_CASH

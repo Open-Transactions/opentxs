@@ -253,7 +253,7 @@ bool ServerContext::accept_entire_nymbox(
         return false;
     }
 
-    if (nymbox.GetNymID() != nymID) {
+    if (nymbox.GetNymID().operator!=(nymID)) {
         LogOutput(OT_METHOD)(__FUNCTION__)(": Wrong nymbox").Flush();
 
         return false;
@@ -859,7 +859,7 @@ NetworkReplyMessage ServerContext::attempt_delivery(
     return output;
 }
 
-const Identifier& ServerContext::client_nym_id(const Lock& lock) const
+const identifier::Nym& ServerContext::client_nym_id(const Lock& lock) const
 {
     OT_ASSERT(nym_);
 
@@ -1043,7 +1043,7 @@ std::shared_ptr<OTTransaction> ServerContext::extract_box_receipt(
         return {};
     }
 
-    if (receipt->GetNymID() != owner) {
+    if (receipt->GetNymID().operator!=(owner)) {
         LogOutput(OT_METHOD)(__FUNCTION__)(": Invalid nym").Flush();
 
         return {};
@@ -1787,7 +1787,7 @@ std::pair<RequestNumber, std::unique_ptr<Message>> ServerContext::
 std::pair<RequestNumber, std::unique_ptr<Message>> ServerContext::
     InitializeServerCommand(
         const MessageType type,
-        const Identifier& recipientNymID,
+        const identifier::Nym& recipientNymID,
         const RequestNumber provided,
         const bool withAcknowledgments,
         const bool withNymboxHash)
@@ -3163,7 +3163,7 @@ bool ServerContext::process_box_item(
         return false;
     }
 
-    if (receipt->GetNymID() != nymID) {
+    if (receipt->GetNymID().operator!=(nymID)) {
         LogOutput(OT_METHOD)(__FUNCTION__)(": Wrong nym id on box receipt")
             .Flush();
 
@@ -3393,7 +3393,7 @@ bool ServerContext::process_get_box_receipt_response(
                         .Flush();
                     client.Workflow().ConveyTransfer(
                         nymID, server_id_, *receipt);
-                } else if (transfer.GetNymID() != nymID) {
+                } else if (transfer.GetNymID().operator!=(nymID)) {
                     LogDetail(OT_METHOD)(__FUNCTION__)(
                         ": Conveying incoming transfer")
                         .Flush();
@@ -6837,7 +6837,7 @@ proto::Context ServerContext::serialize(const Lock& lock) const
     return output;
 }
 
-const Identifier& ServerContext::server_nym_id(const Lock& lock) const
+const identifier::Nym& ServerContext::server_nym_id(const Lock& lock) const
 {
     OT_ASSERT(remote_nym_);
 
@@ -6909,7 +6909,7 @@ std::unique_ptr<Item> ServerContext::statement(
 
     OT_ASSERT(nym_);
 
-    if ((transaction.GetNymID() != nym_->ID())) {
+    if ((transaction.GetNymID().operator!=(nym_->ID()))) {
         LogOutput(OT_METHOD)(__FUNCTION__)(": Transaction has wrong owner.")
             .Flush();
 

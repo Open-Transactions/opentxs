@@ -54,32 +54,33 @@ public:
     virtual std::set<OTIdentifier> AccountsByUnit(
         const proto::ContactItemType unit) const = 0;
     virtual OTIdentifier Bip47AddressToChannel(
-        const Identifier& nymID,
+        const identifier::Nym& nymID,
         const std::string& address) const = 0;
     virtual proto::ContactItemType Bip47Chain(
-        const Identifier& nymID,
+        const identifier::Nym& nymID,
         const Identifier& channelID) const = 0;
     virtual Bip47ChannelList Bip47ChannelsByContact(
-        const Identifier& nymID,
+        const identifier::Nym& nymID,
         const Identifier& contactID) const = 0;
     virtual Bip47ChannelList Bip47ChannelsByChain(
-        const Identifier& nymID,
+        const identifier::Nym& nymID,
         const proto::ContactItemType chain) const = 0;
     virtual Bip47ChannelList Bip47ChannelsByLocalPaymentCode(
-        const Identifier& nymID,
+        const identifier::Nym& nymID,
         const std::string& code) const = 0;
     virtual Bip47ChannelList Bip47ChannelsByRemotePaymentCode(
-        const Identifier& nymID,
+        const identifier::Nym& nymID,
         const std::string& code) const = 0;
-    virtual ObjectList Bip47ChannelsList(const Identifier& nymID) const = 0;
+    virtual ObjectList Bip47ChannelsList(
+        const identifier::Nym& nymID) const = 0;
     virtual OTIdentifier Bip47Contact(
-        const Identifier& nymID,
+        const identifier::Nym& nymID,
         const Identifier& channelID) const = 0;
     virtual std::string Bip47LocalPaymentCode(
-        const Identifier& nymID,
+        const identifier::Nym& nymID,
         const Identifier& channelID) const = 0;
     virtual std::string Bip47RemotePaymentCode(
-        const Identifier& nymID,
+        const identifier::Nym& nymID,
         const Identifier& channelID) const = 0;
     virtual std::set<std::string> BlockchainAccountList(
         const std::string& nymID,
@@ -124,7 +125,7 @@ public:
         std::shared_ptr<proto::Bip44Account>& output,
         const bool checking = false) const = 0;
     virtual bool Load(
-        const Identifier& nymID,
+        const identifier::Nym& nymID,
         const Identifier& channelID,
         std::shared_ptr<proto::Bip47Channel>& output,
         const bool checking = false) const = 0;
@@ -325,7 +326,7 @@ public:
         const proto::ContactItemType type,
         const proto::Bip44Account& data) const = 0;
     virtual bool Store(
-        const Identifier& nymID,
+        const identifier::Nym& nymID,
         const proto::Bip47Channel& data,
         Identifier& channelID) const = 0;
     virtual bool Store(const proto::BlockchainTransaction& data) const = 0;

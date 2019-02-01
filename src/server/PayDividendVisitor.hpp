@@ -27,7 +27,7 @@ class Server;
 class PayDividendVisitor : public AccountVisitor
 {
     server::Server& server_;
-    const OTIdentifier nymId_;
+    const OTNymID nymId_;
     const OTIdentifier payoutUnitTypeId_;
     const OTIdentifier voucherAcctId_;
     OTString m_pstrMemo;  // contains the original payDividend item from
@@ -46,13 +46,13 @@ public:
     PayDividendVisitor(
         server::Server& theServer,
         const Identifier& theNotaryID,
-        const Identifier& theNymID,
+        const identifier::Nym& theNymID,
         const Identifier& thePayoutUnitTypeId,
         const Identifier& theVoucherAcctID,
         const String& strMemo,
         std::int64_t lPayoutPerShare);
 
-    const OTIdentifier GetNymID() { return nymId_; }
+    const OTNymID GetNymID() { return nymId_; }
     const OTIdentifier GetPayoutUnitTypeId() { return payoutUnitTypeId_; }
     const OTIdentifier GetVoucherAcctID() { return voucherAcctId_; }
     OTString GetMemo() { return m_pstrMemo; }

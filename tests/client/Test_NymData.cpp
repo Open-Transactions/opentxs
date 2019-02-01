@@ -18,12 +18,15 @@ public:
 
     Test_NymData()
         : client_(opentxs::OT::App().StartClient({}, 0))
-        , nymData_(client_.Wallet().mutable_Nym(
-              opentxs::Identifier::Factory(client_.Exec().CreateNymHD(
-                  opentxs::proto::CITEMTYPE_INDIVIDUAL,
-                  "testNym",
-                  "",
-                  -1))))
+        , nymData_(
+              client_.Wallet().mutable_Nym((opentxs::identifier::Nym::Factory(
+                  client_.Exec()
+                      .CreateNymHD(
+                          opentxs::proto::CITEMTYPE_INDIVIDUAL,
+                          "testNym",
+                          "",
+                          -1)
+                      .c_str()))))
     {
     }
 };

@@ -8,6 +8,7 @@
 #include "opentxs/api/client/Activity.hpp"
 #include "opentxs/api/client/Contacts.hpp"
 #include "opentxs/api/client/Manager.hpp"
+#include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/core/Flag.hpp"
 #include "opentxs/core/Identifier.hpp"
 #include "opentxs/core/Lockable.hpp"
@@ -26,7 +27,7 @@ ActivityThreadItem::ActivityThreadItem(
     const ActivityThreadInternalInterface& parent,
     const api::client::Manager& api,
     const network::zeromq::PublishSocket& publisher,
-    const Identifier& nymID,
+    const identifier::Nym& nymID,
     const ActivityThreadRowID& rowID,
     const ActivityThreadSortKey& sortKey,
     const CustomData& custom,

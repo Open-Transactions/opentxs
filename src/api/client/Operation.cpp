@@ -689,11 +689,11 @@ std::shared_ptr<Message> Operation::construct_deposit_cheque()
     if (cheque.HasRemitter()) {
         cancellingCheque =
             ((cheque.GetRemitterAcctID() == account_id_) &&
-             (cheque.GetRemitterNymID() == nymID));
+             (cheque.GetRemitterNymID().operator==(nymID)));
     } else {
         cancellingCheque =
             ((cheque.GetSenderAcctID() == account_id_) &&
-             (cheque.GetSenderNymID() == nymID));
+             (cheque.GetSenderNymID().operator==(nymID)));
         if (cancellingCheque) cancellingCheque = cheque.VerifySignature(nym);
     }
 

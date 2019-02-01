@@ -13,24 +13,25 @@ class UI : virtual public opentxs::api::client::UI, Lockable
 {
 public:
     const ui::AccountActivity& AccountActivity(
-        const Identifier& nymID,
+        const identifier::Nym& nymID,
         const Identifier& accountID) const override;
     const ui::AccountSummary& AccountSummary(
-        const Identifier& nymID,
+        const identifier::Nym& nymID,
         const proto::ContactItemType currency) const override;
     const ui::ActivitySummary& ActivitySummary(
-        const Identifier& nymID) const override;
+        const identifier::Nym& nymID) const override;
     const ui::ActivityThread& ActivityThread(
-        const Identifier& nymID,
+        const identifier::Nym& nymID,
         const Identifier& threadID) const override;
     const ui::Contact& Contact(const Identifier& contactID) const override;
-    const ui::ContactList& ContactList(const Identifier& nymID) const override;
+    const ui::ContactList& ContactList(
+        const identifier::Nym& nymID) const override;
     const ui::MessagableList& MessagableList(
-        const Identifier& nymID) const override;
+        const identifier::Nym& nymID) const override;
     const ui::PayableList& PayableList(
-        const Identifier& nymID,
+        const identifier::Nym& nymID,
         proto::ContactItemType currency) const override;
-    const ui::Profile& Profile(const Identifier& contactID) const override;
+    const ui::Profile& Profile(const identifier::Nym& contactID) const override;
 
     ~UI();
 
@@ -38,11 +39,11 @@ private:
     friend opentxs::Factory;
 
     /** NymID, AccountID */
-    using AccountKey = std::pair<OTIdentifier, OTIdentifier>;
+    using AccountKey = std::pair<OTNymID, OTIdentifier>;
     using AccountActivityMap =
         std::map<AccountKey, std::unique_ptr<ui::AccountActivity>>;
     /** NymID, currency*/
-    using AccountSummaryKey = std::pair<OTIdentifier, proto::ContactItemType>;
+    using AccountSummaryKey = std::pair<OTNymID, proto::ContactItemType>;
     using AccountSummaryMap =
         std::map<AccountSummaryKey, std::unique_ptr<ui::AccountSummary>>;
     using ActivitySummaryMap =

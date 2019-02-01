@@ -140,18 +140,18 @@ public:
 
     /** Record a failed transfer attempt */
     EXPORT virtual bool AbortTransfer(
-        const Identifier& nymID,
+        const identifier::Nym& nymID,
         const Item& transfer,
         const Message& reply) const = 0;
     /** Record a transfer accept, or accept attempt */
     EXPORT virtual bool AcceptTransfer(
-        const Identifier& nymID,
+        const identifier::Nym& nymID,
         const Identifier& notaryID,
         const OTTransaction& pending,
         const Message& reply) const = 0;
     /** Record a successful transfer attempt */
     EXPORT virtual bool AcknowledgeTransfer(
-        const Identifier& nymID,
+        const identifier::Nym& nymID,
         const Item& transfer,
         const Message& reply) const = 0;
 #if OT_CASH
@@ -166,23 +166,23 @@ public:
         const Message* reply) const = 0;
     /** Record a cheque deposit receipt */
     EXPORT virtual bool ClearCheque(
-        const Identifier& recipientNymID,
+        const identifier::Nym& recipientNymID,
         const OTTransaction& receipt) const = 0;
     /** Record receipt of a transfer receipt */
     EXPORT virtual bool ClearTransfer(
-        const Identifier& nymID,
+        const identifier::Nym& nymID,
         const Identifier& notaryID,
         const OTTransaction& receipt) const = 0;
     /** Record a process inbox for sender that accepts a transfer receipt */
     EXPORT virtual bool CompleteTransfer(
-        const Identifier& nymID,
+        const identifier::Nym& nymID,
         const Identifier& notaryID,
         const OTTransaction& receipt,
         const Message& reply) const = 0;
     /** Create a new incoming transfer workflow, or update an existing internal
      *  transfer workflow. */
     EXPORT virtual OTIdentifier ConveyTransfer(
-        const Identifier& nymID,
+        const identifier::Nym& nymID,
         const Identifier& notaryID,
         const OTTransaction& pending) const = 0;
     /** Record a new outgoing or internal "sent transfer" (or attempt) workflow
@@ -192,14 +192,14 @@ public:
         const Message& request) const = 0;
     /** Record a cheque deposit or deposit attempt */
     EXPORT virtual bool DepositCheque(
-        const Identifier& nymID,
+        const identifier::Nym& nymID,
         const Identifier& accountID,
         const opentxs::Cheque& cheque,
         const Message& request,
         const Message* reply) const = 0;
     /** Mark a cheque workflow as expired */
     EXPORT virtual bool ExpireCheque(
-        const Identifier& nymID,
+        const identifier::Nym& nymID,
         const opentxs::Cheque& cheque) const = 0;
     /** Record an out of band cheque conveyance */
     EXPORT virtual bool ExportCheque(const opentxs::Cheque& cheque) const = 0;
@@ -210,27 +210,27 @@ public:
         const Message* reply) const = 0;
     /** Create a new incoming cheque workflow from an out of band cheque */
     EXPORT virtual OTIdentifier ImportCheque(
-        const Identifier& nymID,
+        const identifier::Nym& nymID,
         const opentxs::Cheque& cheque) const = 0;
     EXPORT virtual std::set<OTIdentifier> List(
-        const Identifier& nymID,
+        const identifier::Nym& nymID,
         const proto::PaymentWorkflowType type,
         const proto::PaymentWorkflowState state) const = 0;
     EXPORT virtual Cheque LoadCheque(
-        const Identifier& nymID,
+        const identifier::Nym& nymID,
         const Identifier& chequeID) const = 0;
     EXPORT virtual Cheque LoadChequeByWorkflow(
-        const Identifier& nymID,
+        const identifier::Nym& nymID,
         const Identifier& workflowID) const = 0;
     EXPORT virtual Transfer LoadTransfer(
-        const Identifier& nymID,
+        const identifier::Nym& nymID,
         const Identifier& transferID) const = 0;
     EXPORT virtual Transfer LoadTransferByWorkflow(
-        const Identifier& nymID,
+        const identifier::Nym& nymID,
         const Identifier& workflowID) const = 0;
     /** Load a serialized workflow, if it exists*/
     EXPORT virtual std::shared_ptr<proto::PaymentWorkflow> LoadWorkflow(
-        const Identifier& nymID,
+        const identifier::Nym& nymID,
         const Identifier& workflowID) const = 0;
 #if OT_CASH
     EXPORT virtual OTIdentifier ReceiveCash(
@@ -240,7 +240,7 @@ public:
 #endif
     /** Create a new incoming cheque workflow from an OT message */
     EXPORT virtual OTIdentifier ReceiveCheque(
-        const Identifier& nymID,
+        const identifier::Nym& nymID,
         const opentxs::Cheque& cheque,
         const Message& message) const = 0;
 #if OT_CASH
@@ -258,7 +258,7 @@ public:
         const Message* reply) const = 0;
     /** Get a list of workflow IDs relevant to a specified account */
     EXPORT virtual std::vector<OTIdentifier> WorkflowsByAccount(
-        const Identifier& nymID,
+        const identifier::Nym& nymID,
         const Identifier& accountID) const = 0;
     /** Create a new outgoing cheque workflow */
     EXPORT virtual OTIdentifier WriteCheque(

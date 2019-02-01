@@ -3062,15 +3062,15 @@ public:
     EXPORT bool CheckConnection(const std::string& server) const;
 
     EXPORT std::string AddChildEd25519Credential(
-        const Identifier& nymID,
+        const identifier::Nym& nymID,
         const Identifier& masterID) const;
 
     EXPORT std::string AddChildSecp256k1Credential(
-        const Identifier& nymID,
+        const identifier::Nym& nymID,
         const Identifier& masterID) const;
 
     EXPORT std::string AddChildRSACredential(
-        const Identifier& nymID,
+        const identifier::Nym& nymID,
         const Identifier& masterID,
         const std::uint32_t keysize) const;
 

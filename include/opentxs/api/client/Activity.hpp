@@ -33,19 +33,19 @@ public:
         std::shared_ptr<const UnitDefinition>>;
 
     EXPORT virtual bool AddBlockchainTransaction(
-        const Identifier& nymID,
+        const identifier::Nym& nymID,
         const Identifier& threadID,
         const StorageBox box,
         const proto::BlockchainTransaction& transaction) const = 0;
     EXPORT virtual bool AddPaymentEvent(
-        const Identifier& nymID,
+        const identifier::Nym& nymID,
         const Identifier& threadID,
         const StorageBox type,
         const Identifier& itemID,
         const Identifier& workflowID,
         std::chrono::time_point<std::chrono::system_clock> time) const = 0;
     EXPORT virtual bool MoveIncomingBlockchainTransaction(
-        const Identifier& nymID,
+        const identifier::Nym& nymID,
         const Identifier& fromThreadID,
         const Identifier& toThreadID,
         const std::string& txid) const = 0;
@@ -58,7 +58,7 @@ public:
      *             instantiated if the object does not exist or is invalid.
      */
     EXPORT virtual std::unique_ptr<Message> Mail(
-        const Identifier& nym,
+        const identifier::Nym& nym,
         const Identifier& id,
         const StorageBox& box) const = 0;
     /**   Store a mail object
@@ -70,7 +70,7 @@ public:
      *             the mail object can not be stored.
      */
     EXPORT virtual std::string Mail(
-        const Identifier& nym,
+        const identifier::Nym& nym,
         const Message& mail,
         const StorageBox box) const = 0;
     /**   Obtain a list of mail objects in a specified box
@@ -78,8 +78,9 @@ public:
      *    \param[in] nym the identifier of the nym who owns the mail box
      *    \param[in] box the box to be listed
      */
-    EXPORT virtual ObjectList Mail(const Identifier& nym, const StorageBox box)
-        const = 0;
+    EXPORT virtual ObjectList Mail(
+        const identifier::Nym& nym,
+        const StorageBox box) const = 0;
     /**   Delete a mail object
      *
      *    \param[in] nym the identifier of the nym who owns the mail box
@@ -89,7 +90,7 @@ public:
      *             the mail object can not be stored.
      */
     EXPORT virtual bool MailRemove(
-        const Identifier& nym,
+        const identifier::Nym& nym,
         const Identifier& id,
         const StorageBox box) const = 0;
     /**   Retrieve the text from a message
@@ -101,7 +102,7 @@ public:
      *             instantiated if the object does not exist or is invalid.
      */
     EXPORT virtual std::shared_ptr<const std::string> MailText(
-        const Identifier& nym,
+        const identifier::Nym& nym,
         const Identifier& id,
         const StorageBox& box) const = 0;
     /**   Mark a thread item as read
@@ -112,7 +113,7 @@ public:
      *    \returns False if the nym, thread, or item does not exist
      */
     EXPORT virtual bool MarkRead(
-        const Identifier& nymId,
+        const identifier::Nym& nymId,
         const Identifier& threadId,
         const Identifier& itemId) const = 0;
     /**   Mark a thread item as unread
@@ -123,17 +124,17 @@ public:
      *    \returns False if the nym, thread, or item does not exist
      */
     EXPORT virtual bool MarkUnread(
-        const Identifier& nymId,
+        const identifier::Nym& nymId,
         const Identifier& threadId,
         const Identifier& itemId) const = 0;
 
     EXPORT virtual ChequeData Cheque(
-        const Identifier& nym,
+        const identifier::Nym& nym,
         const std::string& id,
         const std::string& workflow) const = 0;
 
     EXPORT virtual TransferData Transfer(
-        const Identifier& nym,
+        const identifier::Nym& nym,
         const std::string& id,
         const std::string& workflow) const = 0;
 
@@ -146,7 +147,7 @@ public:
      *             instantiated if the object does not exist or is invalid.
      */
     EXPORT virtual std::shared_ptr<const std::string> PaymentText(
-        const Identifier& nym,
+        const identifier::Nym& nym,
         const std::string& id,
         const std::string& workflow) const = 0;
 
@@ -156,7 +157,7 @@ public:
      *    \param[in] count the number of items to preload in each thread
      */
     EXPORT virtual void PreloadActivity(
-        const Identifier& nymID,
+        const identifier::Nym& nymID,
         const std::size_t count) const = 0;
     /**   Asynchronously cache the items in an activity thread
      *
@@ -166,12 +167,12 @@ public:
      *    \param[in] count the number of items to cache
      */
     EXPORT virtual void PreloadThread(
-        const Identifier& nymID,
+        const identifier::Nym& nymID,
         const Identifier& threadID,
         const std::size_t start,
         const std::size_t count) const = 0;
     EXPORT virtual std::shared_ptr<proto::StorageThread> Thread(
-        const Identifier& nymID,
+        const identifier::Nym& nymID,
         const Identifier& threadID) const = 0;
     /**   Obtain a list of thread ids for the specified nym
      *
@@ -179,15 +180,17 @@ public:
      *    \param[in] unreadOnly if true, only return threads with unread items
      */
     EXPORT virtual ObjectList Threads(
-        const Identifier& nym,
+        const identifier::Nym& nym,
         const bool unreadOnly = false) const = 0;
     /**   Return the total number of unread thread items for a nym
      *
      *    \param[in] nymId
      */
-    EXPORT virtual std::size_t UnreadCount(const Identifier& nym) const = 0;
+    EXPORT virtual std::size_t UnreadCount(
+        const identifier::Nym& nym) const = 0;
 
-    EXPORT virtual std::string ThreadPublisher(const Identifier& nym) const = 0;
+    EXPORT virtual std::string ThreadPublisher(
+        const identifier::Nym& nym) const = 0;
 
     virtual ~Activity() = default;
 

@@ -34,7 +34,7 @@ public:
     bool Delete(const int section, const int type, const std::string& claimID)
         const override;
     std::string DisplayName() const override;
-    const Identifier& NymID() const override;
+    const identifier::Nym& NymID() const override;
     std::string ID() const override { return nym_id_->str(); }
     std::string PaymentCode() const override;
     bool SetActive(
@@ -69,7 +69,7 @@ private:
     static bool check_type(const proto::ContactSectionName type);
     static std::string nym_name(
         const api::Wallet& wallet,
-        const Identifier& nymID);
+        const identifier::Nym& nymID);
 
     void construct_row(
         const ProfileRowID& id,
@@ -88,7 +88,7 @@ private:
     Profile(
         const api::client::Manager& api,
         const network::zeromq::PublishSocket& publisher,
-        const Identifier& nymID);
+        const identifier::Nym& nymID);
     Profile() = delete;
     Profile(const Profile&) = delete;
     Profile(Profile&&) = delete;

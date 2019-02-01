@@ -10,6 +10,7 @@
 #include "opentxs/api/Core.hpp"
 #include "opentxs/api/Factory.hpp"
 #include "opentxs/core/cron/OTCronItem.hpp"
+#include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/core/trade/OTMarket.hpp"
 #include "opentxs/core/util/Assert.hpp"
 #include "opentxs/core/util/Common.hpp"
@@ -116,7 +117,7 @@ bool OTCron::SaveCron()
 //
 bool OTCron::GetNym_OfferList(
     Armored& ascOutput,
-    const Identifier& NYM_ID,
+    const identifier::Nym& NYM_ID,
     std::int32_t& nOfferCount)
 {
     nOfferCount = 0;  // Outputs the number of offers on this nym.

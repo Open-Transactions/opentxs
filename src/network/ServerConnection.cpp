@@ -11,6 +11,7 @@
 #include "opentxs/api/Factory.hpp"
 #include "opentxs/consensus/ServerContext.hpp"
 #include "opentxs/core/contract/ServerContract.hpp"
+#include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/core/Armored.hpp"
 #include "opentxs/core/Flag.hpp"
 #include "opentxs/core/Identifier.hpp"

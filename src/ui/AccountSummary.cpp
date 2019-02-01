@@ -51,7 +51,7 @@ namespace opentxs
 ui::implementation::AccountSummaryExternalInterface* Factory::AccountSummary(
     const api::client::Manager& api,
     const network::zeromq::PublishSocket& publisher,
-    const Identifier& nymID,
+    const identifier::Nym& nymID,
     const proto::ContactItemType currency)
 {
     return new ui::implementation::AccountSummary(
@@ -64,7 +64,7 @@ namespace opentxs::ui::implementation
 AccountSummary::AccountSummary(
     const api::client::Manager& api,
     const network::zeromq::PublishSocket& publisher,
-    const Identifier& nymID,
+    const identifier::Nym& nymID,
     const proto::ContactItemType currency)
     : AccountSummaryList(api, publisher, nymID)
     , listeners_({
@@ -105,7 +105,7 @@ void AccountSummary::construct_row(
 }
 
 AccountSummarySortKey AccountSummary::extract_key(
-    const Identifier& nymID,
+    const identifier::Nym& nymID,
     const Identifier& issuerID)
 {
     AccountSummarySortKey output{false, DEFAULT_ISSUER_NAME};
@@ -168,13 +168,13 @@ void AccountSummary::process_issuer(const network::zeromq::Message& message)
 
     OT_ASSERT(2 == message.Body().size());
 
-    const auto nymID = Identifier::Factory(message.Body().at(0));
+    const auto nymID = identifier::Nym::Factory(message.Body().at(0));
     const auto issuerID = Identifier::Factory(message.Body().at(1));
 
     OT_ASSERT(false == nymID->empty())
     OT_ASSERT(false == issuerID->empty())
 
-    if (nymID.get() != nym_id_) { return; }
+    if (nymID.get().operator!=(nym_id_)) { return; }
 
     auto existing = names_.count(issuerID);
 

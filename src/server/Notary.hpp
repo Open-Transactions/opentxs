@@ -106,7 +106,7 @@ private:
         const Cheque& cheque,
         const bool isVoucher,
         const bool cancelling,
-        const Identifier& senderNymID,
+        const identifier::Nym& senderNymID,
         ClientContext& senderContext,
         Account& senderAccount,
         Ledger& senderInbox,

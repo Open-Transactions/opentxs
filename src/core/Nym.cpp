@@ -31,6 +31,7 @@
 #include "opentxs/core/util/Common.hpp"
 #include "opentxs/core/util/OTFolders.hpp"
 #include "opentxs/core/util/Tag.hpp"
+#include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/core/Armored.hpp"
 #include "opentxs/core/Contract.hpp"
 #include "opentxs/core/Data.hpp"
@@ -71,7 +72,7 @@ bool session_key_from_iv(
 
 Nym::Nym(
     const api::Core& api,
-    const Identifier& nymID,
+    const identifier::Nym& nymID,
     const proto::CredentialIndexMode mode)
     : api_(api)
     , version_(NYM_CREATE_VERSION)
@@ -81,7 +82,7 @@ Nym::Nym(
     , mode_(mode)
     , m_strVersion(String::Factory(NYMFILE_VERSION))
     , m_strDescription(String::Factory())
-    , m_nymID(Identifier::Factory(nymID))
+    , m_nymID(nymID)
     , source_(nullptr)
     , contact_data_(nullptr)
     , m_mapCredentialSets()
@@ -91,7 +92,7 @@ Nym::Nym(
 }
 
 Nym::Nym(const api::Core& api, const NymParameters& nymParameters)
-    : Nym(api, Identifier::Factory(), proto::CREDINDEX_PRIVATE)
+    : Nym(api, identifier::Nym::Factory(), proto::CREDINDEX_PRIVATE)
 {
     NymParameters revisedParameters = nymParameters;
 #if OT_CRYPTO_SUPPORTED_KEY_HD
@@ -125,7 +126,7 @@ Nym::Nym(const api::Core& api, const NymParameters& nymParameters)
     OT_ASSERT(nullptr != pNewCredentialSet);
 
     source_ = std::make_shared<NymIDSource>(pNewCredentialSet->Source());
-    const_cast<OTIdentifier&>(m_nymID) = source_->NymID();
+    const_cast<OTNymID&>(m_nymID) = source_->NymID();
 
     SetDescription(source_->Description());
 
@@ -923,7 +924,7 @@ bool Nym::load_credential_index(
 
     OT_ASSERT(verify_lock(lock));
 
-    const auto nymID = Identifier::Factory(index.nymid());
+    const auto nymID = identifier::Nym::Factory(index.nymid());
 
     if (m_nymID != nymID) { return false; }
 
@@ -1869,8 +1870,8 @@ bool Nym::verify_pseudonym(const eLock& lock) const
             const CredentialSet* pCredential = it.second;
             OT_ASSERT(nullptr != pCredential);
 
-            const OTIdentifier theCredentialNymID =
-                Identifier::Factory(pCredential->GetNymID());
+            const OTNymID theCredentialNymID =
+                identifier::Nym::Factory(pCredential->GetNymID());
             if (m_nymID != theCredentialNymID) {
                 LogNormal(OT_METHOD)(__FUNCTION__)(": Credential NymID (")(
                     pCredential->GetNymID())(") doesn't match actual NymID: ")(

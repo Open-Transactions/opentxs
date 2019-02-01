@@ -18,6 +18,7 @@
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/core/identifier/Server.hpp"
 #include "opentxs/core/identifier/UnitDefinition.hpp"
+#include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/core/Cheque.hpp"
 #include "opentxs/core/Identifier.hpp"
 #include "opentxs/core/Lockable.hpp"
@@ -448,7 +449,7 @@ Workflow::Workflow(
 }
 
 bool Workflow::AbortTransfer(
-    const Identifier& nymID,
+    const identifier::Nym& nymID,
     const Item& transfer,
     const Message& reply) const
 {
@@ -492,7 +493,7 @@ bool Workflow::AbortTransfer(
 
 // Works for Incoming and Internal transfer workflows.
 bool Workflow::AcceptTransfer(
-    const Identifier& nymID,
+    const identifier::Nym& nymID,
     const Identifier& notaryID,
     const OTTransaction& pending,
     const Message& reply) const
@@ -509,7 +510,7 @@ bool Workflow::AcceptTransfer(
     const auto recipientNymID = pending.GetNymID().str();
     const auto& accountID = pending.GetPurportedAccountID();
 
-    if (pending.GetNymID() != nymID) {
+    if (pending.GetNymID().operator==(nymID)) {
         LogOutput(OT_METHOD)(__FUNCTION__)(": Invalid recipient").Flush();
 
         return false;
@@ -551,7 +552,7 @@ bool Workflow::AcceptTransfer(
 }
 
 bool Workflow::AcknowledgeTransfer(
-    const Identifier& nymID,
+    const identifier::Nym& nymID,
     const Item& transfer,
     const Message& reply) const
 {
@@ -709,7 +710,7 @@ bool Workflow::add_cheque_event(
     const proto::PaymentWorkflowState newState,
     const proto::PaymentEventType newEventType,
     const std::uint32_t version,
-    const Identifier& recipientNymID,
+    const identifier::Nym& recipientNymID,
     const OTTransaction& receipt,
     const std::chrono::time_point<std::chrono::system_clock> time) const
 {
@@ -1146,7 +1147,7 @@ bool Workflow::cheque_deposit_success(const Message* message)
 }
 
 bool Workflow::ClearCheque(
-    const Identifier& recipientNymID,
+    const identifier::Nym& recipientNymID,
     const OTTransaction& receipt) const
 {
     if (recipientNymID.empty()) {
@@ -1226,11 +1227,11 @@ bool Workflow::ClearCheque(
 }
 
 bool Workflow::ClearTransfer(
-    const Identifier& nymID,
+    const identifier::Nym& nymID,
     const Identifier& notaryID,
     const OTTransaction& receipt) const
 {
-    auto depositorNymID = Identifier::Factory();
+    auto depositorNymID = identifier::Nym::Factory();
     const auto transfer =
         extract_transfer_from_receipt(receipt, depositorNymID);
 
@@ -1328,12 +1329,12 @@ bool Workflow::ClearTransfer(
 
 // Works for outgoing and internal transfer workflows.
 bool Workflow::CompleteTransfer(
-    const Identifier& nymID,
+    const identifier::Nym& nymID,
     const Identifier& notaryID,
     const OTTransaction& receipt,
     const Message& reply) const
 {
-    auto depositorNymID = Identifier::Factory();
+    auto depositorNymID = identifier::Nym::Factory();
     const auto transfer =
         extract_transfer_from_receipt(receipt, depositorNymID);
 
@@ -1406,7 +1407,7 @@ bool Workflow::CompleteTransfer(
 // have been created, and thus we'd need to GET the existing workflow, and
 // then add the new event to it).
 OTIdentifier Workflow::convey_incoming_transfer(
-    const Identifier& nymID,
+    const identifier::Nym& nymID,
     const Identifier& notaryID,
     const OTTransaction& pending,
     const std::string& senderNymID,
@@ -1475,7 +1476,7 @@ OTIdentifier Workflow::convey_incoming_transfer(
 // Whereas if this is an INCOMING transfer, then we need to CREATE its
 // corresponding transfer workflow since it does not already exist.
 OTIdentifier Workflow::convey_internal_transfer(
-    const Identifier& nymID,
+    const identifier::Nym& nymID,
     const Identifier& notaryID,
     const OTTransaction& pending,
     const std::string& senderNymID,
@@ -1525,7 +1526,7 @@ OTIdentifier Workflow::convey_internal_transfer(
 }
 
 OTIdentifier Workflow::ConveyTransfer(
-    const Identifier& nymID,
+    const identifier::Nym& nymID,
     const Identifier& notaryID,
     const OTTransaction& pending) const
 {
@@ -1541,7 +1542,7 @@ OTIdentifier Workflow::ConveyTransfer(
     contact_.NymToContact(transfer->GetNymID());
     const auto recipientNymID = pending.GetNymID().str();
 
-    if (pending.GetNymID() != nymID) {
+    if (pending.GetNymID().operator==(nymID)) {
         LogOutput(OT_METHOD)(__FUNCTION__)(": Invalid recipient").Flush();
 
         return Identifier::Factory();
@@ -1798,7 +1799,7 @@ OTIdentifier Workflow::CreateTransfer(
 }
 
 bool Workflow::DepositCheque(
-    const Identifier& receiver,
+    const identifier::Nym& receiver,
     const Identifier& accountID,
     const opentxs::Cheque& cheque,
     const Message& request,
@@ -1852,7 +1853,7 @@ bool Workflow::DepositCheque(
 }
 
 bool Workflow::ExpireCheque(
-    const Identifier& nym,
+    const identifier::Nym& nym,
     const opentxs::Cheque& cheque) const
 {
     if (false == isCheque(cheque)) { return false; }
@@ -1972,7 +1973,7 @@ std::unique_ptr<Item> Workflow::extract_transfer_from_pending(
 
 std::unique_ptr<Item> Workflow::extract_transfer_from_receipt(
     const OTTransaction& receipt,
-    Identifier& depositorNymID) const
+    identifier::Nym& depositorNymID) const
 {
     if (transactionType::transferReceipt != receipt.GetType()) {
         if (transactionType::pending == receipt.GetType()) {
@@ -2200,13 +2201,13 @@ eLock Workflow::get_workflow_lock(Lock& global, const std::string& id) const
 }
 
 OTIdentifier Workflow::ImportCheque(
-    const Identifier& nymID,
+    const identifier::Nym& nymID,
     const opentxs::Cheque& cheque) const
 {
     if (false == isCheque(cheque)) { return Identifier::Factory(); }
 
     if (false == validate_recipient(nymID, cheque)) {
-        LogOutput(OT_METHOD)(__FUNCTION__)(": Nym ")(nymID)(
+        LogOutput(OT_METHOD)(__FUNCTION__)(": Nym ")(nymID.str())(
             " can not deposit this cheque.")
             .Flush();
 
@@ -2314,7 +2315,7 @@ bool Workflow::isTransfer(const Item& item)
 }
 
 std::set<OTIdentifier> Workflow::List(
-    const Identifier& nymID,
+    const identifier::Nym& nymID,
     const proto::PaymentWorkflowType type,
     const proto::PaymentWorkflowState state) const
 {
@@ -2333,7 +2334,7 @@ std::set<OTIdentifier> Workflow::List(
 }
 
 Workflow::Cheque Workflow::LoadCheque(
-    const Identifier& nymID,
+    const identifier::Nym& nymID,
     const Identifier& chequeID) const
 {
     auto workflow = get_workflow_by_source(
@@ -2354,7 +2355,7 @@ Workflow::Cheque Workflow::LoadCheque(
 }
 
 Workflow::Cheque Workflow::LoadChequeByWorkflow(
-    const Identifier& nymID,
+    const identifier::Nym& nymID,
     const Identifier& workflowID) const
 {
     auto workflow = get_workflow_by_id(
@@ -2375,7 +2376,7 @@ Workflow::Cheque Workflow::LoadChequeByWorkflow(
 }
 
 Workflow::Transfer Workflow::LoadTransfer(
-    const Identifier& nymID,
+    const identifier::Nym& nymID,
     const Identifier& transferID) const
 {
     auto workflow = get_workflow_by_source(
@@ -2397,7 +2398,7 @@ Workflow::Transfer Workflow::LoadTransfer(
 }
 
 Workflow::Transfer Workflow::LoadTransferByWorkflow(
-    const Identifier& nymID,
+    const identifier::Nym& nymID,
     const Identifier& workflowID) const
 {
     auto workflow = get_workflow_by_id(
@@ -2419,7 +2420,7 @@ Workflow::Transfer Workflow::LoadTransferByWorkflow(
 }
 
 std::shared_ptr<proto::PaymentWorkflow> Workflow::LoadWorkflow(
-    const Identifier& nymID,
+    const identifier::Nym& nymID,
     const Identifier& workflowID) const
 {
     return get_workflow_by_id(nymID.str(), workflowID.str());
@@ -2470,7 +2471,7 @@ OTIdentifier Workflow::ReceiveCash(
 #endif
 
 OTIdentifier Workflow::ReceiveCheque(
-    const Identifier& nymID,
+    const identifier::Nym& nymID,
     const opentxs::Cheque& cheque,
     const Message& message) const
 {
@@ -2672,8 +2673,8 @@ bool Workflow::SendCheque(
 }
 
 bool Workflow::update_activity(
-    const Identifier& localNymID,
-    const Identifier& remoteNymID,
+    const identifier::Nym& localNymID,
+    const identifier::Nym& remoteNymID,
     const Identifier& sourceID,
     const Identifier& workflowID,
     const StorageBox type,
@@ -2729,7 +2730,8 @@ void Workflow::update_rpc(
 
     if (false == remoteNymID.empty()) {
         event.set_contact(
-            contact_.NymToContact(Identifier::Factory(remoteNymID))->str());
+            contact_.NymToContact(identifier::Nym::Factory(remoteNymID))
+                ->str());
     }
 
     event.set_workflow(workflowID);
@@ -2750,16 +2752,16 @@ void Workflow::update_rpc(
 }
 
 bool Workflow::validate_recipient(
-    const Identifier& nymID,
+    const identifier::Nym& nymID,
     const opentxs::Cheque& cheque)
 {
     if (nymID.empty()) { return true; }
 
-    return (nymID == cheque.GetRecipientNymID());
+    return (nymID.str() == cheque.GetRecipientNymID().str());
 }
 
 std::vector<OTIdentifier> Workflow::WorkflowsByAccount(
-    const Identifier& nymID,
+    const identifier::Nym& nymID,
     const Identifier& accountID) const
 {
     std::vector<OTIdentifier> output{};

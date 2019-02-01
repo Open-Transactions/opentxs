@@ -7,6 +7,7 @@
 
 #include "opentxs/core/OTTransactionType.hpp"
 
+#include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/core/transaction/Helpers.hpp"
 #include "opentxs/core/util/Assert.hpp"
 #include "opentxs/core/Account.hpp"
@@ -35,7 +36,7 @@ OTTransactionType::OTTransactionType(const api::Core& core)
     , m_AcctID(Identifier::Factory())
     , m_NotaryID(Identifier::Factory())
     , m_AcctNotaryID(Identifier::Factory())
-    , m_AcctNymID(Identifier::Factory())
+    , m_AcctNymID(identifier::Nym::Factory())
     , m_lTransactionNum(0)
     , m_lInReferenceToTransaction(0)
     , m_lNumberOfOrigin(0)
@@ -52,7 +53,7 @@ OTTransactionType::OTTransactionType(const api::Core& core)
 
 OTTransactionType::OTTransactionType(
     const api::Core& core,
-    const Identifier& theNymID,
+    const identifier::Nym& theNymID,
     const Identifier& theAccountID,
     const Identifier& theNotaryID,
     originType theOriginType)
@@ -60,7 +61,7 @@ OTTransactionType::OTTransactionType(
     , m_AcctID(Identifier::Factory())
     , m_NotaryID(Identifier::Factory(theNotaryID))
     , m_AcctNotaryID(Identifier::Factory())
-    , m_AcctNymID(Identifier::Factory(theNymID))
+    , m_AcctNymID(theNymID)
     , m_lTransactionNum(0)
     , m_lInReferenceToTransaction(0)
     , m_lNumberOfOrigin(0)
@@ -75,7 +76,7 @@ OTTransactionType::OTTransactionType(
 
 OTTransactionType::OTTransactionType(
     const api::Core& core,
-    const Identifier& theNymID,
+    const identifier::Nym& theNymID,
     const Identifier& theAccountID,
     const Identifier& theNotaryID,
     std::int64_t lTransactionNum,
@@ -84,7 +85,7 @@ OTTransactionType::OTTransactionType(
     , m_AcctID(Identifier::Factory())
     , m_NotaryID(Identifier::Factory(theNotaryID))
     , m_AcctNotaryID(Identifier::Factory())
-    , m_AcctNymID(Identifier::Factory(theNymID))
+    , m_AcctNymID(theNymID)
     , m_lTransactionNum(lTransactionNum)
     , m_lInReferenceToTransaction(0)
     , m_lNumberOfOrigin(0)
@@ -207,7 +208,7 @@ void OTTransactionType::Release()
 //
 bool OTTransactionType::IsSameAccount(const OTTransactionType& rhs) const
 {
-    if ((GetNymID() != rhs.GetNymID()) ||
+    if ((GetNymID().operator!=(rhs.GetNymID())) ||
         (GetRealAccountID() != rhs.GetRealAccountID()) ||
         (GetRealNotaryID() != rhs.GetRealNotaryID()))
         return false;

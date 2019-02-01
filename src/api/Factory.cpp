@@ -19,6 +19,7 @@
 #include "opentxs/core/contract/peer/PeerObject.hpp"
 #include "opentxs/core/crypto/OTSignedFile.hpp"
 #include "opentxs/core/crypto/PaymentCode.hpp"
+#include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/core/recurring/OTAgreement.hpp"
 #include "opentxs/core/recurring/OTPaymentPlan.hpp"
 #include "opentxs/core/script/OTSmartContract.hpp"
@@ -294,7 +295,7 @@ std::unique_ptr<opentxs::Item> Factory::Item(const String& serialized) const
 }
 
 std::unique_ptr<opentxs::Item> Factory::Item(
-    const Identifier& theNymID,
+    const identifier::Nym& theNymID,
     const opentxs::Item& theOwner) const
 {
     std::unique_ptr<opentxs::Item> item;
@@ -304,7 +305,7 @@ std::unique_ptr<opentxs::Item> Factory::Item(
 }
 
 std::unique_ptr<opentxs::Item> Factory::Item(
-    const Identifier& theNymID,
+    const identifier::Nym& theNymID,
     const OTTransaction& theOwner) const
 {
     std::unique_ptr<opentxs::Item> item;
@@ -314,7 +315,7 @@ std::unique_ptr<opentxs::Item> Factory::Item(
 }
 
 std::unique_ptr<opentxs::Item> Factory::Item(
-    const Identifier& theNymID,
+    const identifier::Nym& theNymID,
     const OTTransaction& theOwner,
     itemType theType,
     const Identifier& pDestinationAcctID) const
@@ -412,7 +413,7 @@ std::unique_ptr<opentxs::Ledger> Factory::Ledger(
 }
 
 std::unique_ptr<opentxs::Ledger> Factory::Ledger(
-    const Identifier& theNymID,
+    const identifier::Nym& theNymID,
     const Identifier& theAccountID,
     const Identifier& theNotaryID) const
 {
@@ -424,7 +425,7 @@ std::unique_ptr<opentxs::Ledger> Factory::Ledger(
 }
 
 std::unique_ptr<opentxs::Ledger> Factory::Ledger(
-    const Identifier& theNymID,
+    const identifier::Nym& theNymID,
     const Identifier& theAcctID,
     const Identifier& theNotaryID,
     ledgerType theType,
@@ -641,9 +642,9 @@ std::unique_ptr<OTPaymentPlan> Factory::PaymentPlan(
     const Identifier& NOTARY_ID,
     const Identifier& INSTRUMENT_DEFINITION_ID,
     const Identifier& SENDER_ACCT_ID,
-    const Identifier& SENDER_NYM_ID,
+    const identifier::Nym& SENDER_NYM_ID,
     const Identifier& RECIPIENT_ACCT_ID,
-    const Identifier& RECIPIENT_NYM_ID) const
+    const identifier::Nym& RECIPIENT_NYM_ID) const
 {
     std::unique_ptr<OTPaymentPlan> paymentplan;
     paymentplan.reset(new OTPaymentPlan(
@@ -698,6 +699,7 @@ std::unique_ptr<opentxs::PeerObject> Factory::PeerObject(
     [[maybe_unused]] const std::shared_ptr<const PeerRequest> request,
     [[maybe_unused]] const std::shared_ptr<const PeerReply> reply,
     [[maybe_unused]] const std::uint32_t& version) const
+
 {
     LogOutput(OT_METHOD)(__FUNCTION__)(
         ": Peer objects are only supported in client sessions")
@@ -899,7 +901,7 @@ std::unique_ptr<OTTrade> Factory::Trade(
     const Identifier& notaryID,
     const Identifier& instrumentDefinitionID,
     const Identifier& assetAcctId,
-    const Identifier& nymID,
+    const identifier::Nym& nymID,
     const Identifier& currencyId,
     const Identifier& currencyAcctId) const
 {
@@ -1009,7 +1011,7 @@ std::unique_ptr<OTTransaction> Factory::Transaction(
 }
 
 std::unique_ptr<OTTransaction> Factory::Transaction(
-    const Identifier& theNymID,
+    const identifier::Nym& theNymID,
     const Identifier& theAccountID,
     const Identifier& theNotaryID,
     originType theOriginType) const
@@ -1022,7 +1024,7 @@ std::unique_ptr<OTTransaction> Factory::Transaction(
 }
 
 std::unique_ptr<OTTransaction> Factory::Transaction(
-    const Identifier& theNymID,
+    const identifier::Nym& theNymID,
     const Identifier& theAccountID,
     const Identifier& theNotaryID,
     std::int64_t lTransactionNum,
@@ -1044,7 +1046,7 @@ std::unique_ptr<OTTransaction> Factory::Transaction(
 // The full receipt is loaded only after the abbreviated ones are loaded,
 // and verified against them.
 std::unique_ptr<OTTransaction> Factory::Transaction(
-    const Identifier& theNymID,
+    const identifier::Nym& theNymID,
     const Identifier& theAccountID,
     const Identifier& theNotaryID,
     const std::int64_t& lNumberOfOrigin,
@@ -1105,7 +1107,7 @@ std::unique_ptr<OTTransaction> Factory::Transaction(
 }
 
 std::unique_ptr<OTTransaction> Factory::Transaction(
-    const Identifier& theNymID,
+    const identifier::Nym& theNymID,
     const Identifier& theAccountID,
     const Identifier& theNotaryID,
     transactionType theType,

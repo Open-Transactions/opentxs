@@ -17,6 +17,7 @@
 #include "opentxs/api/Core.hpp"
 #include "opentxs/api/HDSeed.hpp"
 #include "opentxs/api/Wallet.hpp"
+#include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/Identifier.hpp"
 #include "opentxs/core/Log.hpp"
@@ -83,7 +84,7 @@ Blockchain::Blockchain(
 }
 
 std::shared_ptr<proto::Bip44Account> Blockchain::Account(
-    const Identifier& nymID,
+    const identifier::Nym& nymID,
     const Identifier& accountID) const
 {
     LOCK_ACCOUNT()
@@ -100,7 +101,7 @@ std::shared_ptr<proto::Bip44Account> Blockchain::Account(
 }
 
 std::set<OTIdentifier> Blockchain::AccountList(
-    const Identifier& nymID,
+    const identifier::Nym& nymID,
     const proto::ContactItemType type) const
 {
     std::set<OTIdentifier> output;
@@ -175,7 +176,7 @@ std::uint8_t Blockchain::address_prefix(const proto::ContactItemType type) const
 }
 
 std::unique_ptr<proto::Bip44Address> Blockchain::AllocateAddress(
-    const Identifier& nymID,
+    const identifier::Nym& nymID,
     const Identifier& accountID,
     const std::string& label,
     const BIP44Chain chain) const
@@ -228,7 +229,7 @@ std::unique_ptr<proto::Bip44Address> Blockchain::AllocateAddress(
 }
 
 bool Blockchain::AssignAddress(
-    const Identifier& nymID,
+    const identifier::Nym& nymID,
     const Identifier& accountID,
     const std::uint32_t index,
     const Identifier& contactID,
@@ -502,7 +503,7 @@ std::shared_ptr<proto::Bip44Account> Blockchain::load_account(
 }
 
 std::unique_ptr<proto::Bip44Address> Blockchain::LoadAddress(
-    const Identifier& nymID,
+    const identifier::Nym& nymID,
     const Identifier& accountID,
     const std::uint32_t index,
     const BIP44Chain chain) const
@@ -537,7 +538,7 @@ std::unique_ptr<proto::Bip44Address> Blockchain::LoadAddress(
 }
 
 bool Blockchain::move_transactions(
-    const Identifier& nymID,
+    const identifier::Nym& nymID,
     const proto::Bip44Address& address,
     const std::string& fromContact,
     const std::string& toContact) const
@@ -556,7 +557,7 @@ bool Blockchain::move_transactions(
 }
 
 OTIdentifier Blockchain::NewAccount(
-    const Identifier& nymID,
+    const identifier::Nym& nymID,
     const BlockchainAccountType standard,
     const proto::ContactItemType type) const
 {
@@ -629,7 +630,7 @@ OTIdentifier Blockchain::NewAccount(
 }
 
 bool Blockchain::StoreIncoming(
-    const Identifier& nymID,
+    const identifier::Nym& nymID,
     const Identifier& accountID,
     const std::uint32_t index,
     const BIP44Chain chain,
@@ -695,7 +696,7 @@ bool Blockchain::StoreIncoming(
 }
 
 bool Blockchain::StoreOutgoing(
-    const Identifier& senderNymID,
+    const identifier::Nym& senderNymID,
     const Identifier& accountID,
     const Identifier& recipientContactID,
     const proto::BlockchainTransaction& transaction) const

@@ -54,7 +54,7 @@ private:
     mutable int drop_incoming_{0};
     mutable int drop_outgoing_{0};
     // nym id, connection identifier
-    std::map<OTIdentifier, OTData> active_connections_;
+    std::map<OTNymID, OTData> active_connections_;
     mutable std::shared_mutex connection_map_lock_;
 
     static OTData get_connection(const network::zeromq::Message& incoming);
@@ -62,11 +62,13 @@ private:
     proto::ServerRequest extract_proto(
         const network::zeromq::Frame& incoming) const;
 
-    void associate_connection(const Identifier& nymID, const Data& connection);
+    void associate_connection(
+        const identifier::Nym& nymID,
+        const Data& connection);
     OTZMQMessage process_backend(const network::zeromq::Message& incoming);
     bool process_command(
         const proto::ServerRequest& request,
-        Identifier& nymID);
+        identifier::Nym& nymID);
     void process_frontend(const network::zeromq::Message& incoming);
     void process_internal(const network::zeromq::Message& incoming);
     void process_legacy(
@@ -77,7 +79,7 @@ private:
     void process_proto(
         const Data& id,
         const network::zeromq::Message& incoming);
-    OTData query_connection(const Identifier& nymID);
+    OTData query_connection(const identifier::Nym& nymID);
     void run();
 
     MessageProcessor() = delete;

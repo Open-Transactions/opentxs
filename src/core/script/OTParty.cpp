@@ -8,6 +8,7 @@
 #include "opentxs/core/script/OTParty.hpp"
 
 #include "opentxs/consensus/ServerContext.hpp"
+#include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/core/script/OTAgent.hpp"
 #include "opentxs/core/script/OTPartyAccount.hpp"
 #include "opentxs/core/script/OTScriptable.hpp"
@@ -726,8 +727,9 @@ bool OTParty::HasAgent(const Nym& theNym, OTAgent** ppAgent) const
     return false;
 }
 
-bool OTParty::HasAgentByNymID(const Identifier& theNymID, OTAgent** ppAgent)
-    const
+bool OTParty::HasAgentByNymID(
+    const identifier::Nym& theNymID,
+    OTAgent** ppAgent) const
 {
     for (const auto& it : m_mapAgents) {
         OTAgent* pAgent = it.second;
@@ -776,7 +778,7 @@ bool OTParty::HasAuthorizingAgent(
 }
 
 bool OTParty::HasAuthorizingAgentByNymID(
-    const Identifier& theNymID,
+    const identifier::Nym& theNymID,
     OTAgent** ppAgent) const  // ppAgent
                               // lets you
                               // get the
@@ -875,7 +877,7 @@ bool OTParty::VerifyOwnershipOfAccount(const Account& theAccount) const
             return false;
         }
 
-        const auto thePartyNymID = Identifier::Factory(str_nym_id);
+        const auto thePartyNymID = identifier::Nym::Factory(str_nym_id);
 
         return theAccount.VerifyOwnerByID(thePartyNymID);
     } else if (IsEntity())

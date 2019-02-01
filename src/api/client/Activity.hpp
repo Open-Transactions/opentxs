@@ -13,13 +13,13 @@ class Activity : virtual public api::client::internal::Activity, Lockable
 {
 public:
     bool AddBlockchainTransaction(
-        const Identifier& nymID,
+        const identifier::Nym& nymID,
         const Identifier& threadID,
         const StorageBox box,
         const proto::BlockchainTransaction& transaction) const override;
 
     bool AddPaymentEvent(
-        const Identifier& nymID,
+        const identifier::Nym& nymID,
         const Identifier& threadID,
         const StorageBox type,
         const Identifier& itemID,
@@ -27,7 +27,7 @@ public:
         std::chrono::time_point<std::chrono::system_clock> time) const override;
 
     bool MoveIncomingBlockchainTransaction(
-        const Identifier& nymID,
+        const identifier::Nym& nymID,
         const Identifier& fromThreadID,
         const Identifier& toThreadID,
         const std::string& txid) const override;
@@ -41,7 +41,7 @@ public:
      *             instantiated if the object does not exist or is invalid.
      */
     std::unique_ptr<Message> Mail(
-        const Identifier& nym,
+        const identifier::Nym& nym,
         const Identifier& id,
         const StorageBox& box) const override;
 
@@ -54,7 +54,7 @@ public:
      *             the mail object can not be stored.
      */
     std::string Mail(
-        const Identifier& nym,
+        const identifier::Nym& nym,
         const Message& mail,
         const StorageBox box) const override;
 
@@ -63,7 +63,8 @@ public:
      *    \param[in] nym the identifier of the nym who owns the mail box
      *    \param[in] box the box to be listed
      */
-    ObjectList Mail(const Identifier& nym, const StorageBox box) const override;
+    ObjectList Mail(const identifier::Nym& nym, const StorageBox box)
+        const override;
 
     /**   Delete a mail object
      *
@@ -74,7 +75,7 @@ public:
      *             the mail object can not be stored.
      */
     bool MailRemove(
-        const Identifier& nym,
+        const identifier::Nym& nym,
         const Identifier& id,
         const StorageBox box) const override;
 
@@ -87,7 +88,7 @@ public:
      *             instantiated if the object does not exist or is invalid.
      */
     std::shared_ptr<const std::string> MailText(
-        const Identifier& nym,
+        const identifier::Nym& nym,
         const Identifier& id,
         const StorageBox& box) const override;
 
@@ -99,7 +100,7 @@ public:
      *    \returns False if the nym, thread, or item does not exist
      */
     bool MarkRead(
-        const Identifier& nymId,
+        const identifier::Nym& nymId,
         const Identifier& threadId,
         const Identifier& itemId) const override;
 
@@ -111,17 +112,17 @@ public:
      *    \returns False if the nym, thread, or item does not exist
      */
     bool MarkUnread(
-        const Identifier& nymId,
+        const identifier::Nym& nymId,
         const Identifier& threadId,
         const Identifier& itemId) const override;
 
     ChequeData Cheque(
-        const Identifier& nym,
+        const identifier::Nym& nym,
         const std::string& id,
         const std::string& workflow) const override;
 
     TransferData Transfer(
-        const Identifier& nym,
+        const identifier::Nym& nym,
         const std::string& id,
         const std::string& workflow) const override;
 
@@ -134,7 +135,7 @@ public:
      *             instantiated if the object does not exist or is invalid.
      */
     std::shared_ptr<const std::string> PaymentText(
-        const Identifier& nym,
+        const identifier::Nym& nym,
         const std::string& id,
         const std::string& workflow) const override;
 
@@ -143,7 +144,7 @@ public:
      *    \param[in] nymID the identifier of the nym who owns the thread
      *    \param[in] count the number of items to preload in each thread
      */
-    void PreloadActivity(const Identifier& nymID, const std::size_t count)
+    void PreloadActivity(const identifier::Nym& nymID, const std::size_t count)
         const override;
 
     /**   Asynchronously cache the items in an activity thread
@@ -154,13 +155,13 @@ public:
      *    \param[in] count the number of items to cache
      */
     void PreloadThread(
-        const Identifier& nymID,
+        const identifier::Nym& nymID,
         const Identifier& threadID,
         const std::size_t start,
         const std::size_t count) const override;
 
     std::shared_ptr<proto::StorageThread> Thread(
-        const Identifier& nymID,
+        const identifier::Nym& nymID,
         const Identifier& threadID) const override;
 
     /**   Obtain a list of thread ids for the specified nym
@@ -168,16 +169,17 @@ public:
      *    \param[in] nym the identifier of the nym
      *    \param[in] unreadOnly if true, only return threads with unread items
      */
-    ObjectList Threads(const Identifier& nym, const bool unreadOnly = false)
-        const override;
+    ObjectList Threads(
+        const identifier::Nym& nym,
+        const bool unreadOnly = false) const override;
 
     /**   Return the total number of unread thread items for a nym
      *
      *    \param[in] nymId
      */
-    std::size_t UnreadCount(const Identifier& nym) const override;
+    std::size_t UnreadCount(const identifier::Nym& nym) const override;
 
-    std::string ThreadPublisher(const Identifier& nym) const override;
+    std::string ThreadPublisher(const identifier::Nym& nym) const override;
 
     ~Activity() = default;
 
@@ -199,13 +201,10 @@ private:
      *    This method should only be called by the Contacts on startup
      */
     void MigrateLegacyThreads() const override;
-    void activity_preload_thread(
-        const OTIdentifier nymID,
-        const std::size_t count) const;
-    void preload(
-        const OTIdentifier nym,
-        const OTIdentifier id,
-        const StorageBox box) const;
+    void activity_preload_thread(const OTNymID nymID, const std::size_t count)
+        const;
+    void preload(const OTNymID nym, const OTIdentifier id, const StorageBox box)
+        const;
     void thread_preload_thread(
         const std::string nymID,
         const std::string threadID,
@@ -215,11 +214,12 @@ private:
     std::shared_ptr<const Contact> nym_to_contact(
         const std::string& nymID) const;
     const opentxs::network::zeromq::PublishSocket& get_publisher(
-        const Identifier& nymID) const;
+        const identifier::Nym& nymID) const;
     const opentxs::network::zeromq::PublishSocket& get_publisher(
-        const Identifier& nymID,
+        const identifier::Nym& nymID,
         std::string& endpoint) const;
-    void publish(const Identifier& nymID, const std::string& threadID) const;
+    void publish(const identifier::Nym& nymID, const std::string& threadID)
+        const;
 
     Activity(const api::Core& api, const client::Contacts& contact);
     Activity() = delete;

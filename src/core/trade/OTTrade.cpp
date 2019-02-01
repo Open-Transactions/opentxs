@@ -11,6 +11,7 @@
 #include "opentxs/consensus/ClientContext.hpp"
 #include "opentxs/core/cron/OTCron.hpp"
 #include "opentxs/core/cron/OTCronItem.hpp"
+#include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/core/trade/OTMarket.hpp"
 #include "opentxs/core/trade/OTOffer.hpp"
 #include "opentxs/core/util/Assert.hpp"
@@ -60,7 +61,7 @@ OTTrade::OTTrade(
     const Identifier& notaryID,
     const Identifier& instrumentDefinitionID,
     const Identifier& assetAcctId,
-    const Identifier& nymID,
+    const identifier::Nym& nymID,
     const Identifier& currencyId,
     const Identifier& currencyAcctId)
     : ot_super(core, notaryID, instrumentDefinitionID, assetAcctId, nymID)
@@ -159,9 +160,9 @@ std::int32_t OTTrade::ProcessXMLNode(irr::io::IrrXMLReader*& xml)
                    currencyAcctID = String::Factory(
                        xml->getAttributeValue("currencyAcctID"));
 
-        const auto NOTARY_ID = Identifier::Factory(notaryID),
-                   NYM_ID = Identifier::Factory(nymID),
-                   INSTRUMENT_DEFINITION_ID =
+        const auto NOTARY_ID = Identifier::Factory(notaryID);
+        const auto NYM_ID = identifier::Nym::Factory(nymID);
+        const auto INSTRUMENT_DEFINITION_ID =
                        Identifier::Factory(instrumentDefinitionID),
                    ASSET_ACCT_ID = Identifier::Factory(assetAcctID),
                    CURRENCY_TYPE_ID = Identifier::Factory(currencyTypeID),

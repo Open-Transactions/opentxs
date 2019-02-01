@@ -9,6 +9,7 @@
 
 #include "opentxs/core/crypto/OTPassword.hpp"
 #include "opentxs/core/crypto/Signature.hpp"
+#include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/core/util/Assert.hpp"
 #include "opentxs/core/util/StringUtils.hpp"
 #include "opentxs/core/Armored.hpp"

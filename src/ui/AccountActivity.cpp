@@ -50,7 +50,7 @@ namespace opentxs
 ui::implementation::AccountActivityExternalInterface* Factory::AccountActivity(
     const api::client::Manager& api,
     const network::zeromq::PublishSocket& publisher,
-    const Identifier& nymID,
+    const identifier::Nym& nymID,
     const Identifier& accountID)
 {
     return new ui::implementation::AccountActivity(
@@ -63,7 +63,7 @@ namespace opentxs::ui::implementation
 AccountActivity::AccountActivity(
     const api::client::Manager& api,
     const network::zeromq::PublishSocket& publisher,
-    const Identifier& nymID,
+    const identifier::Nym& nymID,
     const Identifier& accountID)
     : AccountActivityList(api, publisher, nymID)
     , listeners_({

@@ -48,7 +48,7 @@ public:
     const Identifier& ID() const;
     const std::string& Label() const;
     std::time_t LastUpdated() const;
-    std::vector<OTIdentifier> Nyms(const bool includeInactive = false) const;
+    std::vector<OTNymID> Nyms(const bool includeInactive = false) const;
     std::string PaymentCode(
         const proto::ContactItemType currency = proto::CITEMTYPE_BTC) const;
     std::vector<std::string> PaymentCodes(
@@ -69,7 +69,7 @@ public:
         const bool primary,
         const bool active);
     bool AddNym(const std::shared_ptr<const Nym>& nym, const bool primary);
-    bool AddNym(const Identifier& nymID, const bool primary);
+    bool AddNym(const identifier::Nym& nymID, const bool primary);
 #if OT_CRYPTO_SUPPORTED_SOURCE_BIP47
     bool AddPaymentCode(
         const class PaymentCode& code,
@@ -89,7 +89,7 @@ public:
     bool RemoveBlockchainAddress(
         const std::string& address,
         const proto::ContactItemType currency = proto::CITEMTYPE_BTC);
-    bool RemoveNym(const Identifier& nymID);
+    bool RemoveNym(const identifier::Nym& nymID);
     void SetLabel(const std::string& label);
     void Update(const proto::CredentialIndex& nym);
 
@@ -103,7 +103,7 @@ private:
     const OTIdentifier id_;
     OTIdentifier parent_;
     OTIdentifier primary_nym_;
-    std::map<OTIdentifier, std::shared_ptr<const Nym>> nyms_;
+    std::map<OTNymID, std::shared_ptr<const Nym>> nyms_;
     std::set<OTIdentifier> merged_children_;
     std::unique_ptr<ContactData> contact_data_{};
     mutable std::shared_ptr<ContactData> cached_contact_data_{};
@@ -129,7 +129,7 @@ private:
     bool add_claim(const Lock& lock, const std::shared_ptr<ContactItem>& item);
     void add_nym_claim(
         const Lock& lock,
-        const Identifier& nymID,
+        const identifier::Nym& nymID,
         const bool primary);
     void add_verified_claim(
         const Lock& lock,

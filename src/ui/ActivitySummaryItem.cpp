@@ -8,6 +8,7 @@
 #include "opentxs/api/client/Activity.hpp"
 #include "opentxs/api/client/Contacts.hpp"
 #include "opentxs/api/client/Manager.hpp"
+#include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/core/Flag.hpp"
 #include "opentxs/core/Identifier.hpp"
 #include "opentxs/core/Lockable.hpp"
@@ -46,7 +47,7 @@ ui::implementation::ActivitySummaryRowInternal* Factory::ActivitySummaryItem(
     const ui::implementation::ActivitySummaryInternalInterface& parent,
     const api::client::Manager& api,
     const network::zeromq::PublishSocket& publisher,
-    const Identifier& nymID,
+    const identifier::Nym& nymID,
     const ui::implementation::ActivitySummaryRowID& rowID,
     const ui::implementation::ActivitySummarySortKey& sortKey,
     const ui::implementation::CustomData& custom,
@@ -63,14 +64,14 @@ ActivitySummaryItem::ActivitySummaryItem(
     const ActivitySummaryInternalInterface& parent,
     const api::client::Manager& api,
     const network::zeromq::PublishSocket& publisher,
-    const Identifier& nymID,
+    const identifier::Nym& nymID,
     const ActivitySummaryRowID& rowID,
     const ActivitySummarySortKey& sortKey,
     const CustomData& custom,
     const Flag& running)
     : ActivitySummaryItemRow(parent, api, publisher, rowID, true)
     , running_(running)
-    , nym_id_(Identifier::Factory(nymID))
+    , nym_id_(nymID)
     , key_{sortKey}
     , thread_()
     , display_name_{std::get<1>(key_)}
