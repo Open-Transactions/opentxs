@@ -2730,7 +2730,9 @@ void OTX::state_machine(const ContextID id, OperationQueue& queue) const
     UniqueQueue<DepositPaymentTask> depositPaymentRetry;
     SendTransferTask transfer{
         Identifier::Factory(), Identifier::Factory(), {}, {}};
+#if OT_CASH
     WithdrawCashTask withdrawCash{accountID, 0};
+#endif
     PeerReplyTask peerReply{identifier::Nym::Factory(), {}, {}};
     PeerRequestTask peerRequest{identifier::Nym::Factory(), {}};
 

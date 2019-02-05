@@ -356,7 +356,9 @@ Operation::Operation(
     , payment_()
     , inbox_()
     , outbox_()
+#if OT_CASH
     , purse_()
+#endif
     , affected_accounts_()
     , redownload_accounts_()
     , numbers_()
@@ -2283,7 +2285,9 @@ void Operation::reset()
     payment_.reset();
     inbox_.reset();
     outbox_.reset();
+#if OT_CASH
     purse_.reset();
+#endif
     affected_accounts_.clear();
     redownload_accounts_.clear();
     numbers_.clear();
@@ -2293,6 +2297,7 @@ void Operation::reset()
     set_id_ = {};
 }
 
+#if OT_CASH
 bool Operation::SendCash(
     const identifier::Nym& recipientID,
     const Identifier& workflowID)
@@ -2361,11 +2366,12 @@ bool Operation::SendCash(
 
     target_nym_id_ = recipientID;
     generic_id_ = workflowID;
+#if OT_CASH
     purse_ = std::move(pPurse);
-
+#endif
     return start(Type::SendCash, {});
 }
-
+#endif
 bool Operation::SendMessage(
     const identifier::Nym& recipient,
     const String& message,

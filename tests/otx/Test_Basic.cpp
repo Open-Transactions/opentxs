@@ -95,8 +95,9 @@ public:
         alice_state_machine_;
     static std::unique_ptr<opentxs::api::client::internal::Operation>
         bob_state_machine_;
+#if OT_CASH
     static std::shared_ptr<blind::Purse> untrusted_purse_;
-
+#endif
     const opentxs::api::client::Manager& client_1_;
     const opentxs::api::client::Manager& client_2_;
     const opentxs::api::server::Manager& server_1_;
@@ -787,7 +788,9 @@ std::unique_ptr<opentxs::api::client::internal::Operation>
     Test_Basic::alice_state_machine_{nullptr};
 std::unique_ptr<opentxs::api::client::internal::Operation>
     Test_Basic::bob_state_machine_{nullptr};
+#if OT_CASH
 std::shared_ptr<blind::Purse> Test_Basic::untrusted_purse_{};
+#endif
 
 TEST_F(Test_Basic, getRequestNumber_not_registered)
 {

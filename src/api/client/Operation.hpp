@@ -144,7 +144,9 @@ private:
     std::shared_ptr<const OTPayment> payment_;
     std::shared_ptr<Ledger> inbox_;
     std::shared_ptr<Ledger> outbox_;
+#if OT_CASH
     std::shared_ptr<blind::Purse> purse_;
+#endif
     std::set<OTIdentifier> affected_accounts_;
     std::set<OTIdentifier> redownload_accounts_;
     std::set<OTManagedNumber> numbers_;
