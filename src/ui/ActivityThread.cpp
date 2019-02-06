@@ -237,6 +237,8 @@ std::string ActivityThread::GetDraft() const
 
 void ActivityThread::init_contact()
 {
+    wait_for_startup();
+
     if (1 != participants_.size()) {
         LogOutput(OT_METHOD)(__FUNCTION__)(": Wrong number of participants (")(
             participants_.size())(").")
