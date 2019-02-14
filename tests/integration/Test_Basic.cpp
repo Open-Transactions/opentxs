@@ -281,7 +281,7 @@ int Test_Basic::msg_count = 0;
 
 static int view_contact_list(
     const opentxs::api::client::Manager& client,
-    const OTNymID& nym_id) )
+    const OTNymID& nym_id)
 {
     auto& contacts = client.UI().ContactList(nym_id);
 
@@ -314,6 +314,27 @@ static std::string search_contact_list(
     }
     return {};
 }
+
+static std::vector<std::string> search_message_list(const ui::ActivityThread &list,
+                        const std::string message_id_text) {
+    int count = 0;
+    std::vector<std::string> results;
+    auto entry = list.First();
+    while (entry->Valid()) {
+        // TODO fix this
+        if ( true ) //entry->Type() == message_id_text )
+        {
+            ++count;
+            results.push_back( entry->Text() );
+        }
+        if (entry->Last() == false)
+            entry = list.Next();
+        else
+            break;
+    }
+    return results;
+}
+
 
 TEST_F(Test_Basic, instantiate_ui_objects)
 {
@@ -718,11 +739,32 @@ TEST_F(Test_Basic, send_message_from_Alice_to_Bob_1)
     conversation_thread.SendDraft();
 }
 
-TEST_F(Test_Basic, verify_message_from_Alice_to_Bob_1)
+TEST_F(Test_Basic, verify_read_message_from_Alice_to_Bob_1)
 {
-    // TODO
+    std::string from = "Alice";
+    const opentxs::api::client::Manager& from_client = alice_client_;
+    const OTNymID from_nym_id_ = alice_nym_id_;
+
+    std::string to = "Bob";
+    const opentxs::api::client::Manager& to_client = bob_client_;
+    const OTNymID to_nym_id_ = bob_nym_id_;
+
+    std::string target_contact_id = search_contact_list(to_client, to_nym_id_, from);
+
+    const ui::ActivityThread& thread = to_client.UI().ActivityThread(
+            from_nym_id_, Identifier::Factory(target_contact_id));
+
+    auto results = search_message_list(thread, target_contact_id);
+    ASSERT_EQ(results.size(), 1) << std::string("Message from ")
+                        .append(to)
+                        .append(" to ")
+                        .append(from)
+                        .append(" didn't appear to arrive. Got ")
+                        .append(std::to_string(results.size()))
+                        .append(" instead.");
 }
 
+// TODO determine how/configure to make this a REply instead of a new message
 TEST_F(Test_Basic, reply_message_from_Bob_to_Alice_1)
 {
     std::string from = "Bob";
@@ -747,18 +789,82 @@ TEST_F(Test_Basic, reply_message_from_Bob_to_Alice_1)
     conversation_thread.SetDraft(message);
     conversation_thread.SendDraft();
 }
-TEST_F(Test_Basic, verify_message_from_Bob_to_Alice_1)
+
+TEST_F(Test_Basic, verify_read_message_from_Bob_to_Alice_1)
 {
-    // TODO
+    std::string from = "Bob";
+    const opentxs::api::client::Manager& from_client = bob_client_;
+    const OTNymID from_nym_id_ = bob_nym_id_;
+
+    std::string to = "Alice";
+    const opentxs::api::client::Manager& to_client = alice_client_;
+    const OTNymID to_nym_id_ = alice_nym_id_;
+
+    std::string target_contact_id = search_contact_list(to_client, to_nym_id_, from);
+
+    const ui::ActivityThread& thread = to_client.UI().ActivityThread(
+            from_nym_id_, Identifier::Factory(target_contact_id));
+
+    auto results = search_message_list(thread, target_contact_id);
+    ASSERT_EQ(results.size(), 2) << std::string("Message from ")
+                                  .append(to)
+                                  .append(" to ")
+                                  .append(from)
+                                  .append(" didn't appear to arrive. Got ")
+                                  .append(std::to_string(results.size()))
+                                  .append(" instead.");
 }
 
-TEST_F(Test_Basic, read_reply_message_Bob_from_Alice_2)
+// TODO determine how/configure to make this a REply instead of a new message
+TEST_F(Test_Basic, read_reply_message_from_Alice_to_Bob_2)
 {
-    // TODO
+    // TODO read message and confirm
+    std::string from = "Bob";
+    const opentxs::api::client::Manager& from_client = bob_client_;
+    const OTNymID from_nym_id_ = bob_nym_id_;
+
+    std::string to = "Alice";
+    const opentxs::api::client::Manager& to_client = alice_client_;
+
+    std::string message = from.append(" messaged ")
+            .append(to)
+            .append(" with message #")
+            .append(std::to_string(++Test_Basic::msg_count))
+            .append(", ");
+    std::string target_contact_id =
+            search_contact_list(from_client, from_nym_id_, to);
+
+    const auto& conversation_thread = from_client.UI().ActivityThread(
+            alice_nym_id_, Identifier::Factory(target_contact_id));
+    message.append(typeid(conversation_thread).name());
+
+    conversation_thread.SetDraft(message);
+    conversation_thread.SendDraft();
 }
-TEST_F(Test_Basic, verify_message_from_Alice_to_Bob_2)
+
+TEST_F(Test_Basic, verify_read_message_from_Alice_to_Bob_3)
 {
-    // TODO
+    std::string from = "Alice";
+    const opentxs::api::client::Manager& from_client = alice_client_;
+    const OTNymID from_nym_id_ = alice_nym_id_;
+
+    std::string to = "Bob";
+    const opentxs::api::client::Manager& to_client = bob_client_;
+    const OTNymID to_nym_id_ = bob_nym_id_;
+
+    std::string target_contact_id = search_contact_list(to_client, to_nym_id_, from);
+
+    const ui::ActivityThread& thread = to_client.UI().ActivityThread(
+            from_nym_id_, Identifier::Factory(target_contact_id));
+
+    auto results = search_message_list(thread, target_contact_id);
+    ASSERT_EQ(results.size(), 3) << std::string("Message from ")
+                        .append(to)
+                        .append(" to ")
+                        .append(from)
+                        .append(" didn't appear to arrive. Got ")
+                        .append( std::to_string(results.size()))
+                        .append(" instead.");
 }
 
 }  // namespace
