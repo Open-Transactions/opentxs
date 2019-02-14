@@ -73,6 +73,8 @@ public:
     static std::string alice_payment_code_;
     static std::string bob_payment_code_;
 
+    static int msg_count;
+
     Test_Basic()
         : alice_client_(OT::App().StartClient(args_, 0))
         , bob_client_(OT::App().StartClient(args_, 1))
@@ -275,6 +277,43 @@ const opentxs::api::client::Manager* Test_Basic::bob_{nullptr};
 std::mutex Test_Basic::callback_lock_{};
 std::string Test_Basic::alice_payment_code_;
 std::string Test_Basic::bob_payment_code_;
+int Test_Basic::msg_count = 0;
+
+static int view_contact_list(
+    const opentxs::api::client::Manager& client,
+    const OTNymID& nym_id) )
+{
+    auto& contacts = client.UI().ContactList(nym_id);
+
+    int count = 1;
+    auto entry = contacts.First();
+    while (entry->Valid()) {
+        count++;
+        if (entry->Last() == false)
+            entry = contacts.Next();
+        else
+            break;
+    }
+    return --count;
+}
+
+static std::string search_contact_list(
+    const opentxs::api::client::Manager& client,
+    const OTNymID& nym_id,
+    const std::string target_name)
+{
+    auto& contacts = client.UI().ContactList(nym_id);
+
+    auto entry = contacts.First();
+    while (entry->Valid()) {
+        if (entry->DisplayName() == target_name) { return entry->ContactID(); }
+        if (entry->Last() == false)
+            entry = contacts.Next();
+        else
+            break;
+    }
+    return {};
+}
 
 TEST_F(Test_Basic, instantiate_ui_objects)
 {
@@ -611,4 +650,115 @@ TEST_F(Test_Basic, introduction_server)
     alice_client_.OTX().ContextIdle(alice_nym_id_, server_1_id_).get();
     bob_client_.OTX().ContextIdle(bob_nym_id_, server_1_id_).get();
 }
+
+TEST_F(Test_Basic, precheck_contact_list_Alice_for_contact_Bob)
+{
+    const int count = view_contact_list(alice_client_, alice_nym_id_);
+    ASSERT_GE(count, 1) << "Failed pre check of contact list for Alice";
+}
+
+TEST_F(Test_Basic, precheck_contact_list_Bob_for_contact_Alice)
+{
+    const int count = view_contact_list(bob_client_, bob_nym_id_);
+    ASSERT_GE(count, 1) << "Failed pre check of contact list for Bob";
+}
+
+TEST_F(Test_Basic, add_contact_Bob_To_Alice)
+{
+    auto nym = bob_client_.Wallet().Nym(bob_nym_id_);
+    auto contact = alice_client_.Contacts().NewContact(
+        nym->Alias(),
+        bob_nym_id_,
+        alice_client_.Factory().PaymentCode(nym->PaymentCode()));
+}
+
+TEST_F(Test_Basic, add_contact_Alice_to_Bob)
+{
+    auto nym = alice_client_.Wallet().Nym(alice_nym_id_);
+    auto contact = bob_client_.Contacts().NewContact(
+        nym->Alias(),
+        alice_nym_id_,
+        bob_client_.Factory().PaymentCode(nym->PaymentCode()));
+}
+
+TEST_F(Test_Basic, check_contact_list_Alice_for_contact_Bob)
+{
+    const int count = view_contact_list(alice_client_, alice_nym_id_);
+    ASSERT_GT(count, 1) << "Failed post check of contact list for Alice";
+}
+
+TEST_F(Test_Basic, check_contact_list_Bob_for_contact_Alice)
+{
+    const int count = view_contact_list(bob_client_, bob_nym_id_);
+    ASSERT_GT(count, 1) << "Failed post check of contact list for Bob";
+}
+
+TEST_F(Test_Basic, send_message_from_Alice_to_Bob_1)
+{
+    std::string from = "Alice";
+    const opentxs::api::client::Manager& from_client = alice_client_;
+    const OTNymID from_nym_id_ = alice_nym_id_;
+
+    std::string to = "Bob";
+    const opentxs::api::client::Manager& to_client = bob_client_;
+
+    std::string message = from.append(" messaged ")
+                              .append(to)
+                              .append(" with message #")
+                              .append(std::to_string(++Test_Basic::msg_count))
+                              .append(", ");
+    std::string target_contact_id =
+        search_contact_list(from_client, from_nym_id_, to);
+
+    const auto& conversation_thread = from_client.UI().ActivityThread(
+        alice_nym_id_, Identifier::Factory(target_contact_id));
+    message.append(typeid(conversation_thread).name());
+
+    conversation_thread.SetDraft(message);
+    conversation_thread.SendDraft();
+}
+
+TEST_F(Test_Basic, verify_message_from_Alice_to_Bob_1)
+{
+    // TODO
+}
+
+TEST_F(Test_Basic, reply_message_from_Bob_to_Alice_1)
+{
+    std::string from = "Bob";
+    const opentxs::api::client::Manager& from_client = bob_client_;
+    const OTNymID from_nym_id_ = bob_nym_id_;
+
+    std::string to = "Alice";
+    const opentxs::api::client::Manager& to_client = alice_client_;
+
+    std::string message = from.append(" messaged ")
+                              .append(to)
+                              .append(" with message #")
+                              .append(std::to_string(++Test_Basic::msg_count))
+                              .append(", ");
+    std::string target_contact_id =
+        search_contact_list(from_client, from_nym_id_, to);
+
+    const auto& conversation_thread = from_client.UI().ActivityThread(
+        alice_nym_id_, Identifier::Factory(target_contact_id));
+    message.append(typeid(conversation_thread).name());
+
+    conversation_thread.SetDraft(message);
+    conversation_thread.SendDraft();
+}
+TEST_F(Test_Basic, verify_message_from_Bob_to_Alice_1)
+{
+    // TODO
+}
+
+TEST_F(Test_Basic, read_reply_message_Bob_from_Alice_2)
+{
+    // TODO
+}
+TEST_F(Test_Basic, verify_message_from_Alice_to_Bob_2)
+{
+    // TODO
+}
+
 }  // namespace
