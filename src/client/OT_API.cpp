@@ -9765,7 +9765,7 @@ OT_API::ProcessInboxOnly OT_API::CreateProcessInbox(
     auto transaction =
         get_or_create_process_inbox(accountID, context, *processInbox);
 
-    if (nullptr == processInbox) {
+    if (nullptr == transaction) {
         LogOutput(OT_METHOD)(__FUNCTION__)(
             ": Unable to create processInbox transaction.")
             .Flush();

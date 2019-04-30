@@ -30,6 +30,8 @@ public:
     EXPORT virtual bool AdminAttempted() const = 0;
     EXPORT virtual bool FinalizeServerCommand(Message& command) const = 0;
     EXPORT virtual bool HaveAdminPassword() const = 0;
+    EXPORT virtual bool HaveSufficientNumbers(
+        const MessageType reason) const = 0;
     EXPORT virtual TransactionNumber Highest() const = 0;
     EXPORT virtual bool isAdmin() const = 0;
 #if OT_CASH

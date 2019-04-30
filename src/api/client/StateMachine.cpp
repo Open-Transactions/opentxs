@@ -1108,9 +1108,10 @@ StateMachine::TaskDone StateMachine::write_and_send_cheque(
 
     OT_ASSERT(context);
 
-    const auto available = context->AvailableNumbers();
-
-    if (0 == available) { return TaskDone::retry; }
+    if (false ==
+        context->HaveSufficientNumbers(MessageType::notarizeTransaction)) {
+        return TaskDone::retry;
+    }
 
     std::unique_ptr<Cheque> cheque(client_.OTAPI().WriteCheque(
         op_.ServerID(),

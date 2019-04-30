@@ -1530,6 +1530,15 @@ bool ServerContext::HaveAdminPassword() const
     return false == admin_password_.empty();
 }
 
+bool ServerContext::HaveSufficientNumbers(const MessageType reason) const
+{
+	if (MessageType::processInbox == reason) {
+		return 0 < available_transaction_numbers_.size();
+	}
+	
+	return 1 < available_transaction_numbers_.size();
+}
+
 TransactionNumber ServerContext::Highest() const
 {
     return highest_transaction_number_.load();

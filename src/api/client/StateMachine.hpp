@@ -37,8 +37,14 @@ struct less<PAYMENTTASK> {
 
         if (rID->str() < lID->str()) { return false; }
 
-        if (lPayment.get() < rPayment.get()) { return true; }
+        auto lPaymentID = opentxs::Identifier::Factory();
+        auto rPaymentID = opentxs::Identifier::Factory();
+        
+        lPayment->GetIdentifier(lPaymentID);
+        rPayment->GetIdentifier(rPaymentID);
 
+        if (lPaymentID->str() < rPaymentID->str()) { return true; }
+        
         return false;
     }
 };

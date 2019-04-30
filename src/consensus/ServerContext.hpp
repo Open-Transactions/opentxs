@@ -23,6 +23,7 @@ public:
         return contract(lock);
     }
     bool HaveAdminPassword() const override;
+    bool HaveSufficientNumbers(const MessageType reason) const override;
     TransactionNumber Highest() const override;
     bool isAdmin() const override;
 #if OT_CASH
