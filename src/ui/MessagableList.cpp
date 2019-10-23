@@ -100,31 +100,32 @@ void MessagableList::construct_row(
 #if OT_QT
 QVariant MessagableList::data(
     const QModelIndex& index,
-    [[maybe_unused]] int role) const noexcept
+    int role /*= Qt::DisplayRole*/) const noexcept
 {
-    const auto [valid, pRow] = check_index(index);
+    if (Qt::DisplayRole == role) {
+        const auto [valid, pRow] = check_index(index);
+        if (false == valid) { return {}; }
+        const auto& row = *pRow;
 
-    if (false == valid) { return {}; }
-
-    const auto& row = *pRow;
-
-    switch (index.column()) {
-        case 0: {
-            return row.ContactID().c_str();
+        switch (index.column()) {
+            case 0: {
+                return row.ContactID().c_str();
+            }
+            case 1: {
+                return row.DisplayName().c_str();
+            }
+            case 2: {
+                return row.ImageURI().c_str();
+            }
+            case 3: {
+                return row.Section().c_str();
+            }
+            default: {
+                return {};
+            }
         }
-        case 1: {
-            return row.DisplayName().c_str();
-        }
-        case 2: {
-            return row.ImageURI().c_str();
-        }
-        case 3: {
-            return row.Section().c_str();
-        }
-        default: {
-            return {};
-        }
-    }
+    } else
+        return qt_super::data(index, role);
 }
 #endif
 

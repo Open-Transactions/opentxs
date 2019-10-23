@@ -29,6 +29,10 @@ class PayableList;
 class PayableList : virtual public List
 {
 public:
+#if OT_QT
+    // Data method needs this. And it needs to match the parent type for the Qt
+    using qt_super = QAbstractItemModel;  // class that appears below this one.
+#endif
     EXPORT virtual opentxs::SharedPimpl<opentxs::ui::PayableListItem> First()
         const noexcept = 0;
     EXPORT virtual opentxs::SharedPimpl<opentxs::ui::PayableListItem> Next()

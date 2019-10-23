@@ -128,60 +128,63 @@ void AccountActivity::construct_row(
 #if OT_QT
 QVariant AccountActivity::data(
     const QModelIndex& index,
-    [[maybe_unused]] int role) const noexcept
+    int role /*= Qt::DisplayRole*/) const noexcept
 {
-    const auto [valid, pRow] = check_index(index);
+    if (Qt::DisplayRole == role) {
+        const auto [valid, pRow] = check_index(index);
 
-    if (false == valid) { return {}; }
+        if (false == valid) { return {}; }
 
-    const auto& row = *pRow;
+        const auto& row = *pRow;
 
-    switch (index.column()) {
-        case 0: {
-            return row.UUID().c_str();
-        }
-        case 1: {
-            return polarity(row.Amount());
-        }
-        case 2: {
-            std::string contacts;
-            auto contact = row.Contacts().cbegin();
-
-            if (contact != row.Contacts().cend()) {
-                contacts = *contact;
-                while (++contact != row.Contacts().cend()) {
-                    contacts += ", " + *contact;
-                }
+        switch (index.column()) {
+            case 0: {
+                return row.UUID().c_str();
             }
+            case 1: {
+                return polarity(row.Amount());
+            }
+            case 2: {
+                std::string contacts;
+                auto contact = row.Contacts().cbegin();
 
-            return contacts.c_str();
-        }
-        case 3: {
-            return row.DisplayAmount().c_str();
-        }
-        case 4: {
-            return row.Memo().c_str();
-        }
-        case 5: {
-            return row.Workflow().c_str();
-        }
-        case 6: {
-            return row.Text().c_str();
-        }
-        case 7: {
-            QDateTime qdatetime;
-            qdatetime.setSecsSinceEpoch(
-                std::chrono::system_clock::to_time_t(row.Timestamp()));
+                if (contact != row.Contacts().cend()) {
+                    contacts = *contact;
+                    while (++contact != row.Contacts().cend()) {
+                        contacts += ", " + *contact;
+                    }
+                }
 
-            return qdatetime;
+                return contacts.c_str();
+            }
+            case 3: {
+                return row.DisplayAmount().c_str();
+            }
+            case 4: {
+                return row.Memo().c_str();
+            }
+            case 5: {
+                return row.Workflow().c_str();
+            }
+            case 6: {
+                return row.Text().c_str();
+            }
+            case 7: {
+                QDateTime qdatetime;
+                qdatetime.setSecsSinceEpoch(
+                    std::chrono::system_clock::to_time_t(row.Timestamp()));
+
+                return qdatetime;
+            }
+            case 8: {
+                return static_cast<int>(row.Type());
+            }
+            default: {
+                return {};
+            }
         }
-        case 8: {
-            return static_cast<int>(row.Type());
-        }
-        default: {
-            return {};
-        }
-    }
+    } else
+        return qt_super::data(index, role);
 }
 #endif
 

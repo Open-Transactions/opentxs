@@ -35,6 +35,12 @@ using AccountActivityList = List<
 class AccountActivity final : public AccountActivityList
 {
 public:
+#if OT_QT
+    // Data method needs this. And it needs to match the parent type for the Qt
+    using qt_super =
+        AccountActivityList::qt_super;  // class that appears below this one.
+#endif
+
     const Identifier& AccountID() const noexcept final
     {
         return account_id_.get();

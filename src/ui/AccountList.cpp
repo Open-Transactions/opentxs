@@ -103,47 +103,48 @@ void AccountList::construct_row(
 #if OT_QT
 QVariant AccountList::data(const QModelIndex& index, int role) const noexcept
 {
-    const auto [valid, pRow] = check_index(index);
+    if (Qt::DisplayRole == role) {
+        const auto [valid, pRow] = check_index(index);
+        if (false == valid) { return {}; }
+        const auto& row = *pRow;
 
-    if (false == valid) { return {}; }
-
-    const auto& row = *pRow;
-
-    switch (index.column()) {
-        case 0: {
-            return row.AccountID().c_str();
+        switch (index.column()) {
+            case 0: {
+                return row.AccountID().c_str();
+            }
+            case 1: {
+                return polarity(row.Balance());
+            }
+            case 2: {
+                return row.ContractID().c_str();
+            }
+            case 3: {
+                return row.DisplayBalance().c_str();
+            }
+            case 4: {
+                return row.DisplayUnit().c_str();
+            }
+            case 5: {
+                return row.Name().c_str();
+            }
+            case 6: {
+                return row.NotaryID().c_str();
+            }
+            case 7: {
+                return row.NotaryName().c_str();
+            }
+            case 8: {
+                return static_cast<int>(row.Type());
+            }
+            case 9: {
+                return static_cast<int>(row.Unit());
+            }
+            default: {
+                return {};
+            }
         }
-        case 1: {
-            return polarity(row.Balance());
-        }
-        case 2: {
-            return row.ContractID().c_str();
-        }
-        case 3: {
-            return row.DisplayBalance().c_str();
-        }
-        case 4: {
-            return row.DisplayUnit().c_str();
-        }
-        case 5: {
-            return row.Name().c_str();
-        }
-        case 6: {
-            return row.NotaryID().c_str();
-        }
-        case 7: {
-            return row.NotaryName().c_str();
-        }
-        case 8: {
-            return static_cast<int>(row.Type());
-        }
-        case 9: {
-            return static_cast<int>(row.Unit());
-        }
-        default: {
-            return {};
-        }
-    }
+    } else
+        return qt_super::data(index, role);
 }
 #endif
 

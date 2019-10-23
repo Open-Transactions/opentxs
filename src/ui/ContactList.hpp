@@ -32,6 +32,11 @@ public:
         const std::string& paymentCode,
         const std::string& nymID) const noexcept final;
 #if OT_QT
+    // Data method needs this. And it needs to match the parent type for the Qt
+    using qt_super = QAbstractItemModel;  // class that appears below this one.
+#endif
+
+#if OT_QT
     QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const
         noexcept final;
 #endif

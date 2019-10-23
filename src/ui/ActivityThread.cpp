@@ -232,46 +232,49 @@ void ActivityThread::construct_row(
 #if OT_QT
 QVariant ActivityThread::data(
     const QModelIndex& index,
-    [[maybe_unused]] int role) const noexcept
+    int role /*= Qt::DisplayRole*/) const noexcept
 {
-    const auto [valid, pRow] = check_index(index);
+    if (Qt::DisplayRole == role) {
+        const auto [valid, pRow] = check_index(index);
 
-    if (false == valid) { return {}; }
+        if (false == valid) { return {}; }
 
-    const auto& row = *pRow;
+        const auto& row = *pRow;
 
-    switch (index.column()) {
-        case 0: {
-            return polarity(row.Amount());
+        switch (index.column()) {
+            case 0: {
+                return polarity(row.Amount());
+            }
+            case 1: {
+                return row.DisplayAmount().c_str();
+            }
+            case 2: {
+                return row.Memo().c_str();
+            }
+            case 3: {
+                return row.Text().c_str();
+            }
+            case 4: {
+                QDateTime qdatetime;
+                qdatetime.setSecsSinceEpoch(
+                    std::chrono::system_clock::to_time_t(row.Timestamp()));
+                return qdatetime;
+            }
+            case 5: {
+                return static_cast<int>(row.Type());
+            }
+            case 6: {
+                return row.Loading();
+            }
+            case 7: {
+                return row.Pending();
+            }
+            default: {
+                return {};
+            }
         }
-        case 1: {
-            return row.DisplayAmount().c_str();
-        }
-        case 2: {
-            return row.Memo().c_str();
-        }
-        case 3: {
-            return row.Text().c_str();
-        }
-        case 4: {
-            QDateTime qdatetime;
-            qdatetime.setSecsSinceEpoch(
-                std::chrono::system_clock::to_time_t(row.Timestamp()));
-            return qdatetime;
-        }
-        case 5: {
-            return static_cast<int>(row.Type());
-        }
-        case 6: {
-            return row.Loading();
-        }
-        case 7: {
-            return row.Pending();
-        }
-        default: {
-            return {};
-        }
-    }
+    } else
+        return qt_super::data(index, role);
 }
 #endif
 

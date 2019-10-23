@@ -70,6 +70,9 @@ class List : virtual public ExternalInterface,
 {
 #if OT_QT
 public:
+    // Data method needs this. And it needs to match the parent type for the Qt
+    using qt_super = QAbstractItemModel;  // class that appears below this one.
+
     int columnCount(const QModelIndex& parent = QModelIndex()) const
         noexcept override
     {

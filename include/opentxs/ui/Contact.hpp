@@ -33,6 +33,11 @@ class Contact;
 class Contact : virtual public List
 {
 public:
+#if OT_QT
+    // Data method needs this. And it needs to match the parent type for the Qt
+    using qt_super = QAbstractItemModel;  // class that appears below this one.
+#endif
+
     EXPORT virtual std::string ContactID() const noexcept = 0;
     EXPORT virtual std::string DisplayName() const noexcept = 0;
     EXPORT virtual opentxs::SharedPimpl<opentxs::ui::ContactSection> First()
