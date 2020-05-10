@@ -143,9 +143,14 @@ protected:
     OTData header_;
     bool outgoing_handshake_;
     bool incoming_handshake_;
+    bool verify_complete_;
+    bool started_subscribe_;
     Subscriptions subscribe_;
 
+    bool verifying() noexcept;
     void check_handshake() noexcept;
+    void check_subscribe() noexcept;
+    void check_verify() noexcept;
     void disconnect() noexcept;
     auto local_endpoint() noexcept -> tcp::socket::endpoint_type;
     // NOTE call init in every final child class constructor
@@ -176,6 +181,8 @@ private:
 
     enum class State : std::uint8_t {
         Handshake,
+        Verify,
+        Subscribe,
         Run,
         Shutdown,
     };
@@ -216,7 +223,9 @@ private:
     std::promise<bool> connection_promise_;
     std::shared_future<bool> connected_;
     std::promise<void> handshake_promise_;
+    std::promise<void> verify_promise_;
     Handshake handshake_;
+    Verify verify_;
     SendPromises send_promises_;
     Activity activity_;
     mutable std::atomic<State> state_;
@@ -248,9 +257,12 @@ private:
     void run() noexcept;
     void shutdown(std::promise<void>& promise) noexcept;
     virtual void start_handshake() noexcept = 0;
+    virtual void start_verify() noexcept = 0;
+    void subscribe() noexcept;
     void subscribe_work() noexcept;
     void transmit(zmq::Message& message) noexcept;
     void update_address_activity() noexcept;
+    void verify() noexcept;
 
     Peer() = delete;
     Peer(const Peer&) = delete;

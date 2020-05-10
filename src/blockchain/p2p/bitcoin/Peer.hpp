@@ -141,6 +141,7 @@ private:
     void request_headers() noexcept final;
     void request_headers(const block::Hash& hash) noexcept;
     void start_handshake() noexcept final;
+    void start_verify() noexcept final;
 
     void process_addr(
         std::unique_ptr<HeaderType> header,

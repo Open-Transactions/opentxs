@@ -7,6 +7,7 @@
 
 #include <deque>
 #include <map>
+#include <tuple>
 #include <memory>
 #include <mutex>
 #include <set>
@@ -51,12 +52,19 @@ namespace opentxs::blockchain::client::implementation
 class HeaderOracle final : virtual public internal::HeaderOracle
 {
 public:
+    using CheckpointsTypeData =
+        std::tuple<block::Height, std::string, std::string>;
+    using CheckpointsType = std::map<blockchain::Type, CheckpointsTypeData>;
+    using CheckpointData =
+        std::tuple<block::Height, block::pHash, block::pHash>;
+
     auto BestChain() const noexcept -> block::Position final;
     auto BestHash(const block::Height height) const noexcept
         -> block::pHash final;
     auto CommonParent(const block::Position& position) const noexcept
         -> std::pair<block::Position, block::Position> final;
     auto GetCheckpoint() const noexcept -> block::Position final;
+    auto GetDefaultCheckpoint() const noexcept -> CheckpointData final;
     auto IsInBestChain(const block::Hash& hash) const noexcept -> bool final;
     auto LoadHeader(const block::Hash& hash) const noexcept
         -> std::unique_ptr<block::Header> final;
@@ -91,10 +99,7 @@ private:
     };
 
     using Candidates = std::vector<Candidate>;
-
-    static const std::
-        map<blockchain::Type, std::pair<block::Height, std::string>>
-            checkpoints_;
+    static const CheckpointsType checkpoints_;
 
     const api::internal::Core& api_;
     const internal::HeaderDatabase& database_;
@@ -106,7 +111,6 @@ private:
         const block::Header& candidate) noexcept -> bool;
 
     auto best_chain(const Lock& lock) const noexcept -> block::Position;
-    auto get_default_checkpoint() const noexcept -> block::Position;
     auto is_in_best_chain(const Lock& lock, const block::Hash& hash) const
         noexcept -> bool;
 

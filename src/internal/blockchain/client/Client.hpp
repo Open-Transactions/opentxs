@@ -263,7 +263,13 @@ struct FilterOracle {
 
 struct HeaderOracle : virtual public opentxs::blockchain::client::HeaderOracle {
     virtual auto Init() noexcept -> void = 0;
+    using CheckpointsTypeData =
+        std::tuple<block::Height, std::string, std::string>;
+    using CheckpointsType = std::map<blockchain::Type, CheckpointsTypeData>;
+    using CheckpointData =
+        std::tuple<block::Height, block::pHash, block::pHash>;
 
+    virtual auto GetDefaultCheckpoint() const noexcept -> CheckpointData = 0;
     virtual ~HeaderOracle() = default;
 };
 

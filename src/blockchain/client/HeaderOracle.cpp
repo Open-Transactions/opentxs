@@ -82,21 +82,24 @@ auto HeaderOracle::GenesisBlockHash(const blockchain::Type type)
 
 namespace opentxs::blockchain::client::implementation
 {
-const std::map<blockchain::Type, std::pair<block::Height, std::string>>
-    HeaderOracle::checkpoints_{
-        {blockchain::Type::Bitcoin,
-         {630000,
-          "6de9d737a62ea1c197000edb02c252089969dfd8ea4b02000000000000000000"}},
-        {blockchain::Type::Bitcoin_testnet3,
-         {1740000,
-          "f758e6307382affd044c64e2bead2efdd2d9222bce9d232ae3fc000000000000"}},
-        {blockchain::Type::BitcoinCash,
-         {635259,
-          "f73075b2c598f49b3a19558c070b52d5a5d6c21fefdf33000000000000000000"}},
-        {blockchain::Type::BitcoinCash_testnet3,
-         {1378461,
-          "d715e9fab7bbdf301081eeadbe6e931db282cf6b92b1365f9b50f59900000000"}},
-    };
+const HeaderOracle::CheckpointsType HeaderOracle::checkpoints_{
+    {blockchain::Type::Bitcoin,
+     {630000,
+      "6de9d737a62ea1c197000edb02c252089969dfd8ea4b02000000000000000000",
+      "1e2b96b120a73bacb0667279bd231bdb95b08be16b650d000000000000000000"}},
+    {blockchain::Type::Bitcoin_testnet3,
+     {1740000,
+      "f758e6307382affd044c64e2bead2efdd2d9222bce9d232ae3fc000000000000",
+      "b7b063b8908b78d83c837c53bfa1222dc141fab18537d525f5f6000000000000"}},
+    {blockchain::Type::BitcoinCash,
+     {635259,
+      "f73075b2c598f49b3a19558c070b52d5a5d6c21fefdf33000000000000000000",
+      "1a78f5c89b05a56167066be9b0a36ac8f1781ed0472c30030000000000000000"}},
+    {blockchain::Type::BitcoinCash_testnet3,
+     {1378461,
+      "d715e9fab7bbdf301081eeadbe6e931db282cf6b92b1365f9b50f59900000000",
+      "24b33d026d36cbff3a693ea754a3be177dc5fb80966294cb643cf37000000000"}},
+};
 
 HeaderOracle::HeaderOracle(
     const api::internal::Core& api,
@@ -491,12 +494,17 @@ auto HeaderOracle::evaluate_candidate(
     return candidate.Work() > current.Work();
 }
 
-auto HeaderOracle::get_default_checkpoint() const noexcept -> block::Position
+auto HeaderOracle::GetDefaultCheckpoint() const noexcept -> CheckpointData
 {
-    const auto& data = checkpoints_.at(chain_);
+    const auto& dataStrings = checkpoints_.at(chain_);
+    const auto& [first, second, third] = dataStrings;
+    auto secondData = api_.Factory().Data();
+    secondData->DecodeHex(second);
+    auto thirdData = api_.Factory().Data();
+    thirdData->DecodeHex(third);
+    const auto data = CheckpointData{first, secondData, thirdData};
 
-    return block::Position{data.first,
-                           api_.Factory().Data(data.second, StringStyle::Hex)};
+    return data;
 }
 
 auto HeaderOracle::GetCheckpoint() const noexcept -> block::Position
@@ -509,22 +517,25 @@ auto HeaderOracle::GetCheckpoint() const noexcept -> block::Position
 auto HeaderOracle::Init() noexcept -> void
 {
     static const auto null = make_blank<block::Position>::value(api_);
-    const auto existing = GetCheckpoint();
-    const auto expected = get_default_checkpoint();
+    const auto existingCheckpoint = GetCheckpoint();
+    const auto& [existingHeight, existingBlockHash] = existingCheckpoint;
+    const auto defaultCheckpoint = GetDefaultCheckpoint();
+    const auto& [defaultHeight, defaultBlockhash, defaultParenthash] =
+        defaultCheckpoint;
 
     // A checkpoint has been set that is newer than the default
-    if (existing.first > expected.first) { return; }
+    if (existingHeight > defaultHeight) { return; }
 
     // The existing checkpoint matches the default checkpoint
-    if ((existing.first == expected.first) &&
-        (existing.second == expected.second)) {
+    if ((existingHeight == defaultHeight) &&
+        (existingBlockHash == defaultBlockhash)) {
         return;
     }
 
     // Remove existing checkpoint if it is set
-    if (existing.first != null.first) {
+    if (existingHeight != null.first) {
         LogNormal(blockchain::internal::DisplayString(chain_))(
-            ": Removing obsolete checkpoint at height ")(existing.first)
+            ": Removing obsolete checkpoint at height ")(existingHeight)
             .Flush();
         const auto deleted = DeleteCheckpoint();
 
@@ -532,10 +543,11 @@ auto HeaderOracle::Init() noexcept -> void
     }
 
     LogNormal(blockchain::internal::DisplayString(chain_))(
-        ": Updating checkpoint to hash ")(expected.second->asHex())(
-        " at height ")(expected.first)
+        ": Updating checkpoint to hash ")(defaultBlockhash->asHex())(
+        " at height ")(defaultHeight)
         .Flush();
-    const auto added = AddCheckpoint(expected.first, expected.second);
+
+    const auto added = AddCheckpoint(defaultHeight, defaultBlockhash);
 
     OT_ASSERT(added);
 }

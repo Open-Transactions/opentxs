@@ -64,6 +64,8 @@ Peer::Peer(
     , header_(make_buffer(headerSize))
     , outgoing_handshake_(false)
     , incoming_handshake_(false)
+    , verify_complete_(false)
+    , started_subscribe_(false)
     , subscribe_()
     , header_bytes_(headerSize)
     , id_(id)
@@ -76,7 +78,9 @@ Peer::Peer(
     , connection_promise_()
     , connected_(connection_promise_.get_future())
     , handshake_promise_()
+    , verify_promise_()
     , handshake_(handshake_promise_.get_future())
+    , verify_(verify_promise_.get_future())
     , send_promises_()
     , activity_()
     , state_(State::Handshake)
@@ -125,6 +129,8 @@ Peer::SendPromises::SendPromises() noexcept
     , map_()
 {
 }
+
+bool Peer::verifying() noexcept { return (State::Verify == state_.load()); }
 
 auto Peer::Activity::Bump() noexcept -> void
 {
@@ -264,6 +270,7 @@ auto Peer::break_promises() noexcept -> void
 {
     handshake_promise_ = {};
     connection_promise_ = {};
+    verify_promise_ = {};
     send_promise_ = {};
     send_promises_.Break();
 }
@@ -297,7 +304,7 @@ auto Peer::check_handshake() noexcept -> void
 {
     if (outgoing_handshake_ && incoming_handshake_) {
         try {
-            state_.store(State::Run);
+            state_.store(State::Verify);
             handshake_promise_.set_value();
             update_address_activity();
             LogNormal("Connected to ")(blockchain::internal::DisplayString(
@@ -309,6 +316,27 @@ auto Peer::check_handshake() noexcept -> void
                 LogNormal(" * ")(p2p::DisplayService(service)).Flush();
             }
 
+        } catch (...) {
+        }
+    }
+}
+
+auto Peer::check_verify() noexcept -> void
+{
+    if (verify_complete_) {
+        try {
+            state_.store(State::Subscribe);
+            verify_promise_.set_value();
+        } catch (...) {
+        }
+    }
+}
+
+auto Peer::check_subscribe() noexcept -> void
+{
+    if (started_subscribe_) {
+        try {
+            state_.store(State::Run);
         } catch (...) {
         }
 
@@ -342,6 +370,58 @@ auto Peer::handshake() noexcept -> void
     start_handshake();
     auto disconnect{true};
     auto done{handshake_};
+    const auto start = Clock::now();
+
+    try {
+        while (running_.get() && (limit > (Clock::now() - start))) {
+            if (std::future_status::ready == done.wait_for(wait)) {
+                disconnect = false;
+                break;
+            }
+        }
+    } catch (...) {
+    }
+
+    if (disconnect) { this->disconnect(); }
+}
+
+auto Peer::subscribe() noexcept -> void
+{
+    try {
+        auto subscribe = Subscriptions::value_type{};
+
+        const auto services_network_ =
+            (1 == address_.Services().count(p2p::Service::Network));
+        const auto services_limited_ =
+            (1 == address_.Services().count(p2p::Service::Limited));
+        const auto services_cfilters_ =
+            (1 == address_.Services().count(p2p::Service::CompactFilters));
+
+        if (services_network_ || services_limited_) {
+            subscribe.emplace_back(Task::Getheaders);
+            subscribe.emplace_back(Task::Getblock);
+        }
+
+        if (services_cfilters_) {
+            subscribe.emplace_back(Task::Getcfheaders);
+            subscribe.emplace_back(Task::Getcfilters);
+        }
+
+        subscribe_.Push(subscribe);
+        started_subscribe_ = true;
+        Trigger();
+    } catch (...) {
+        disconnect();
+    }
+}
+
+auto Peer::verify() noexcept -> void
+{
+    static const auto limit = std::chrono::seconds(15);
+    static const auto wait = std::chrono::milliseconds(10);
+    start_verify();
+    auto disconnect{true};
+    auto done{verify_};
     const auto start = Clock::now();
 
     try {
@@ -547,6 +627,12 @@ auto Peer::pipeline_d(zmq::Message& message) noexcept -> void
 auto Peer::process_state_machine() noexcept -> void
 {
     switch (state_.load()) {
+        case State::Verify: {
+            check_verify();
+        } break;
+        case State::Subscribe: {
+            check_subscribe();
+        } break;
         case State::Run: {
             check_activity();
             check_download_peers();
@@ -641,6 +727,12 @@ auto Peer::state_machine() noexcept -> bool
     switch (state_.load()) {
         case State::Handshake: {
             handshake();
+        } break;
+        case State::Verify: {
+            verify();
+        } break;
+        case State::Subscribe: {
+            subscribe();
         } break;
         case State::Run: {
             subscribe_work();

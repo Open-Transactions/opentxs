@@ -21,6 +21,8 @@ class Peer
 public:
     using ConnectionStatus = std::shared_future<bool>;
     using Handshake = std::shared_future<void>;
+    using Verify = std::shared_future<void>;
+    using Subscribe = std::shared_future<void>;
 
     OPENTXS_EXPORT virtual ConnectionStatus Connected() const noexcept = 0;
     OPENTXS_EXPORT virtual Handshake HandshakeComplete() const noexcept = 0;

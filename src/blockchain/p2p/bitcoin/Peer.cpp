@@ -673,15 +673,12 @@ auto Peer::process_getheaders(
 
         return;
     }
-
-    // TODO
 }
 
 auto Peer::process_headers(
     std::unique_ptr<HeaderType> header,
     const zmq::Frame& payload) -> void
 {
-    get_headers_.Finish();
     const auto pMessage =
         std::unique_ptr<message::internal::Headers>{Factory::BitcoinP2PHeaders(
             api_,
@@ -697,25 +694,62 @@ auto Peer::process_headers(
         return;
     }
 
-    using Promise = std::promise<void>;
-    auto* promise = new Promise{};
+    if (verifying()) {
+        LogVerbose(OT_METHOD)(__FUNCTION__)(": about to verify...").Flush();
 
-    OT_ASSERT(nullptr != promise);
+        if (1 != pMessage->size()) {
+            LogOutput(OT_METHOD)(__FUNCTION__)(": unexpected header count: ")(
+                pMessage->size())
+                .Flush();
+            disconnect();
 
-    auto future = promise->get_future();
-    auto pointer = reinterpret_cast<std::uintptr_t>(promise);
-    const auto& message = *pMessage;
-    using Task = client::internal::Network::Task;
-    auto work = network_.Work(Task::SubmitBlockHeader);
-    work->AddFrame(pointer);
+            return;
+        }
 
-    for (const auto& header : message) { work->AddFrame(header.Serialize()); }
+        const auto checkpointData =
+            network_.HeaderOracle().GetDefaultCheckpoint();
+        const auto& [height, checkpointHash, parentHash] = checkpointData;
 
-    network_.Submit(work);
+        for (const auto& header : *pMessage) {
+            if (checkpointHash != header.Hash()) {
+                LogOutput(OT_METHOD)(__FUNCTION__)(
+                    ": unexpected header hash: ")(header.Hash().asHex())(
+                    ". Expected: ")(checkpointHash->asHex())
+                    .Flush();
+                disconnect();
 
-    if (std::future_status::ready ==
-        future.wait_for(std::chrono::seconds(10))) {
-        if (false == network_.IsSynchronized()) { request_headers(); }
+                return;
+            }
+        }
+        verify_complete_ = true;
+        LogVerbose(OT_METHOD)(__FUNCTION__)(": Verify SUCCESS").Flush();
+
+        Trigger();
+    } else {
+        get_headers_.Finish();
+
+        using Promise = std::promise<void>;
+        auto* promise = new Promise{};
+
+        OT_ASSERT(nullptr != promise);
+
+        auto future = promise->get_future();
+        auto pointer = reinterpret_cast<std::uintptr_t>(promise);
+        const auto& message = *pMessage;
+        using Task = client::internal::Network::Task;
+        auto work = network_.Work(Task::SubmitBlockHeader);
+        work->AddFrame(pointer);
+
+        for (const auto& header : message) {
+            work->AddFrame(header.Serialize());
+        }
+
+        network_.Submit(work);
+
+        if (std::future_status::ready ==
+            future.wait_for(std::chrono::seconds(10))) {
+            if (false == network_.IsSynchronized()) { request_headers(); }
+        }
     }
 }
 
@@ -1080,20 +1114,7 @@ auto Peer::process_version(
     send(verack.Encode());
     outgoing_handshake_ = true;
     check_handshake();
-    auto subscribe = Subscriptions::value_type{};
 
-    if ((1 == services.count(p2p::Service::Network)) ||
-        (1 == services.count(p2p::Service::Limited))) {
-        subscribe.emplace_back(Task::Getheaders);
-        subscribe.emplace_back(Task::Getblock);
-    }
-
-    if (1 == services.count(p2p::Service::CompactFilters)) {
-        subscribe.emplace_back(Task::Getcfheaders);
-        subscribe.emplace_back(Task::Getcfilters);
-    }
-
-    subscribe_.Push(subscribe);
     Trigger();
 }
 
@@ -1263,7 +1284,7 @@ auto Peer::start_handshake() noexcept -> void
         std::unique_ptr<Message> pVersion{Factory::BitcoinP2PVersion(
             api_,
             chain_,
-            protocol_,
+            protocol_.load(),
             local_services_,
             local.address().to_v6().to_string(),
             local.port(),
@@ -1279,6 +1300,53 @@ auto Peer::start_handshake() noexcept -> void
 
         const auto& version = *pVersion;
         send(version.Encode());
+    } catch (...) {
+        disconnect();
+    }
+}
+
+auto Peer::start_verify() noexcept -> void
+{
+    try {
+        const auto status = Connected().wait_for(std::chrono::seconds(5));
+
+        if (std::future_status::ready != status) {
+            disconnect();
+
+            return;
+        }
+    } catch (...) {
+        disconnect();
+
+        return;
+    }
+
+    try {
+        auto checkpointData = network_.HeaderOracle().GetDefaultCheckpoint();
+        auto [height, checkpointBlockHash, parentBlockHash] = checkpointData;
+
+        auto pbh = api_.Factory().Data();
+        pbh->DecodeHex(parentBlockHash->asHex());
+        std::vector<block::pHash> parentHashes{pbh};
+
+        auto pMessage = std::unique_ptr<Message>{Factory::BitcoinP2PGetheaders(
+            api_,
+            chain_,
+            protocol_.load(),
+            std::move(parentHashes),
+            std::move(checkpointBlockHash))};
+
+        if (false == bool(pMessage)) {
+            LogOutput(OT_METHOD)(__FUNCTION__)(
+                ": Failed to construct getheaders")
+                .Flush();
+
+            return;
+        }
+
+        const auto& message = *pMessage;
+        send(message.Encode());
+
     } catch (...) {
         disconnect();
     }
