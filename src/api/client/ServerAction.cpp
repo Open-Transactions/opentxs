@@ -49,6 +49,7 @@ auto ServerAction::ActivateSmartContract(
     const std::string& agentName,
     std::unique_ptr<OTSmartContract>& contract) const -> ServerAction::Action
 {
+#if OT_WITH_SMART_CONTRACTS
     return Action(new OTAPI_Func(reason,
         ACTIVATE_SMART_CONTRACT,
         lock_callback_({localNymID.str(), serverID.str()}),
@@ -58,7 +59,11 @@ auto ServerAction::ActivateSmartContract(
         accountID,
         agentName,
         contract*/));
+#else
+    OT_FAIL
+#endif
 }
+
 
 auto ServerAction::AdjustUsageCredits(
     const PasswordPrompt& reason,
@@ -83,6 +88,7 @@ auto ServerAction::CancelPaymentPlan(
     const identifier::Server& serverID,
     std::unique_ptr<OTPaymentPlan>& plan) const -> ServerAction::Action
 {
+#if OT_WITH_PAYMENT_PLANS
     // NOTE: Normally the SENDER (PAYER) is the one who deposits a payment plan.
     // But in this case, the RECIPIENT (PAYEE) deposits it -- which means
     // "Please cancel this plan." It SHOULD fail, since it's only been signed
@@ -100,6 +106,9 @@ auto ServerAction::CancelPaymentPlan(
         serverID/*,
         plan->GetRecipientAcctID(),
         plan*/));
+#else
+    OT_FAIL
+#endif
 }
 
 auto ServerAction::CreateMarketOffer(
@@ -115,6 +124,7 @@ auto ServerAction::CreateMarketOffer(
     const std::string& stopSign,
     const Amount activationPrice) const -> ServerAction::Action
 {
+#if OT_WITH_MARKETS
     auto notaryID = identifier::Server::Factory();
     auto nymID = identifier::Nym::Factory();
     const auto assetAccount = api_.Wallet().Account(assetAccountID);
@@ -140,6 +150,9 @@ auto ServerAction::CreateMarketOffer(
         lifetime.count(),
         activationPrice,
         stopSign*/));
+#else
+    OT_FAIL
+#endif
 }
 
 auto ServerAction::DepositPaymentPlan(
@@ -148,6 +161,7 @@ auto ServerAction::DepositPaymentPlan(
     const identifier::Server& serverID,
     std::unique_ptr<OTPaymentPlan>& plan) const -> ServerAction::Action
 {
+#if OT_WITH_PAYMENT_PLANS
     return Action(new OTAPI_Func(reason,
         DEPOSIT_PAYMENT_PLAN,
         lock_callback_({localNymID.str(), serverID.str()}),
@@ -156,6 +170,9 @@ auto ServerAction::DepositPaymentPlan(
         serverID/*,
         plan->GetSenderAcctID(),
         plan*/));
+#else
+    OT_FAIL
+#endif
 }
 
 auto ServerAction::DownloadMarketList(
@@ -163,6 +180,7 @@ auto ServerAction::DownloadMarketList(
     const identifier::Nym& localNymID,
     const identifier::Server& serverID) const -> ServerAction::Action
 {
+#if OT_WITH_MARKETS
     return Action(new OTAPI_Func(
         reason,
         GET_MARKET_LIST,
@@ -170,6 +188,9 @@ auto ServerAction::DownloadMarketList(
         api_,
         localNymID,
         serverID));
+#else
+    OT_FAIL
+#endif
 }
 
 auto ServerAction::DownloadMarketOffers(
@@ -179,6 +200,7 @@ auto ServerAction::DownloadMarketOffers(
     const Identifier& marketID,
     const Amount depth) const -> ServerAction::Action
 {
+#if OT_WITH_MARKETS
     return Action(new OTAPI_Func(reason,
         GET_MARKET_OFFERS,
         lock_callback_({localNymID.str(), serverID.str()}),
@@ -187,6 +209,9 @@ auto ServerAction::DownloadMarketOffers(
         serverID/*,
         marketID,
         depth*/));
+#else
+    OT_FAIL
+#endif
 }
 
 auto ServerAction::DownloadMarketRecentTrades(
@@ -195,6 +220,7 @@ auto ServerAction::DownloadMarketRecentTrades(
     const identifier::Server& serverID,
     const Identifier& marketID) const -> ServerAction::Action
 {
+#if OT_WITH_MARKETS
     return Action(new OTAPI_Func(reason,
         GET_MARKET_RECENT_TRADES,
         lock_callback_({localNymID.str(), serverID.str()}),
@@ -202,6 +228,9 @@ auto ServerAction::DownloadMarketRecentTrades(
         localNymID,
         serverID/*,
         marketID*/));
+#else
+    OT_FAIL
+#endif
 }
 
 auto ServerAction::DownloadNymMarketOffers(
@@ -209,6 +238,7 @@ auto ServerAction::DownloadNymMarketOffers(
     const identifier::Nym& localNymID,
     const identifier::Server& serverID) const -> ServerAction::Action
 {
+#if OT_WITH_MARKETS
     return Action(new OTAPI_Func(
         reason,
         GET_NYM_MARKET_OFFERS,
@@ -216,6 +246,9 @@ auto ServerAction::DownloadNymMarketOffers(
         api_,
         localNymID,
         serverID));
+#else
+    OT_FAIL
+#endif
 }
 
 auto ServerAction::ExchangeBasketCurrency(
@@ -227,6 +260,7 @@ auto ServerAction::ExchangeBasketCurrency(
     const Identifier& basketID,
     const bool direction) const -> ServerAction::Action
 {
+#if OT_WITH_BASKETS
     return Action(new OTAPI_Func(reason,
         EXCHANGE_BASKET,
         lock_callback_({localNymID.str(), serverID.str()}),
@@ -238,6 +272,9 @@ auto ServerAction::ExchangeBasketCurrency(
         accountID,
         direction,
         api_.OTAPI().GetBasketMemberCount(basketID)*/));
+#else
+    OT_FAIL
+#endif
 }
 
 auto ServerAction::IssueBasketCurrency(
@@ -247,6 +284,7 @@ auto ServerAction::IssueBasketCurrency(
     const proto::UnitDefinition& basket,
     const std::string& label) const -> ServerAction::Action
 {
+#if OT_WITH_BASKETS
     return Action(new OTAPI_Func(reason,
         ISSUE_BASKET,
         lock_callback_({localNymID.str(), serverID.str()}),
@@ -255,6 +293,9 @@ auto ServerAction::IssueBasketCurrency(
         serverID/*,
         basket,
         label*/));
+#else
+    OT_FAIL
+#endif
 }
 
 auto ServerAction::KillMarketOffer(
@@ -264,6 +305,7 @@ auto ServerAction::KillMarketOffer(
     const Identifier& accountID,
     const TransactionNumber number) const -> ServerAction::Action
 {
+#if OT_WITH_MARKETS
     return Action(new OTAPI_Func(reason,
         KILL_MARKET_OFFER,
         lock_callback_({localNymID.str(), serverID.str()}),
@@ -272,6 +314,9 @@ auto ServerAction::KillMarketOffer(
         serverID/*,
         accountID,
         number*/));
+#else
+    OT_FAIL
+#endif
 }
 
 auto ServerAction::KillPaymentPlan(
@@ -281,6 +326,7 @@ auto ServerAction::KillPaymentPlan(
     const Identifier& accountID,
     const TransactionNumber number) const -> ServerAction::Action
 {
+#if OT_WITH_PAYMENT_PLANS
     return Action(new OTAPI_Func(reason,
         KILL_PAYMENT_PLAN,
         lock_callback_({localNymID.str(), serverID.str()}),
@@ -289,6 +335,9 @@ auto ServerAction::KillPaymentPlan(
         serverID/*,
         accountID,
         number*/));
+#else
+    OT_FAIL
+#endif
 }
 
 auto ServerAction::PayDividend(
@@ -300,6 +349,7 @@ auto ServerAction::PayDividend(
     const std::string& memo,
     const Amount amountPerShare) const -> ServerAction::Action
 {
+#if OT_WITH_DIVIDENDS
     return Action(new OTAPI_Func(reason,
         PAY_DIVIDEND,
         lock_callback_({localNymID.str(), serverID.str()}),
@@ -310,6 +360,9 @@ auto ServerAction::PayDividend(
         instrumentDefinitionID,
         amountPerShare,
         memo*/));
+#else
+    OT_FAIL
+#endif
 }
 
 auto ServerAction::TriggerClause(
@@ -320,6 +373,7 @@ auto ServerAction::TriggerClause(
     const std::string& clause,
     const std::string& parameter) const -> ServerAction::Action
 {
+#if OT_WITH_SMART_CONTRACTS
     return Action(new OTAPI_Func(reason,
         TRIGGER_CLAUSE,
         lock_callback_({localNymID.str(), serverID.str()}),
@@ -329,6 +383,9 @@ auto ServerAction::TriggerClause(
         transactionNumber,
         clause,
         parameter*/));
+#else
+    OT_FAIL
+#endif
 }
 
 auto ServerAction::UnregisterAccount(

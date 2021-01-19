@@ -1739,6 +1739,7 @@ void Notary::NotarizePayDividend(
     Ledger& outbox,
     bool& bOutSuccess)
 {
+#if OT_WITH_DIVIDENDS
     // The outgoing transaction is an "atPayDividend", that is, "a reply to the
     // 'pay dividend' request"
     tranOut.SetType(transactionType::atPayDividend);
@@ -2525,7 +2526,9 @@ void Notary::NotarizePayDividend(
 
     pResponseBalanceItem->SignContract(server_.GetServerNym(), reason_);
     pResponseBalanceItem->SaveContract();
+#endif
 }
+
 
 /// for depositing a cheque or cash.
 void Notary::NotarizeDeposit(
@@ -2672,6 +2675,7 @@ void Notary::NotarizePaymentPlan(
     OTTransaction& tranOut,
     bool& bOutSuccess)
 {
+#if OT_WITH_PAYMENT_PLANS
     // The outgoing transaction is an "atPaymentPlan", that is, "a reply to the
     // paymentPlan request"
     tranOut.SetType(transactionType::atPaymentPlan);
@@ -3306,6 +3310,7 @@ void Notary::NotarizePaymentPlan(
 
     pResponseBalanceItem->SignContract(server_.GetServerNym(), reason_);
     pResponseBalanceItem->SaveContract();
+#endif
 }
 
 void Notary::NotarizeSmartContract(
@@ -3315,6 +3320,7 @@ void Notary::NotarizeSmartContract(
     OTTransaction& tranOut,
     bool& bOutSuccess)
 {
+#if OT_WITH_SMART_CONTRACTS
     // The outgoing transaction is an "atSmartContract", that is, "a reply to
     // the smartContract request"
     tranOut.SetType(transactionType::atSmartContract);
@@ -4057,6 +4063,7 @@ void Notary::NotarizeSmartContract(
 
     pResponseBalanceItem->SignContract(server_.GetServerNym(), reason_);
     pResponseBalanceItem->SaveContract();
+#endif
 }
 
 // DONE: The code inside here is just a copy of payment plan.
@@ -4293,6 +4300,7 @@ void Notary::NotarizeExchangeBasket(
     Ledger& outbox,
     bool& bOutSuccess)
 {
+#if OT_WITH_BASKETS
     // The outgoing transaction is an "atExchangeBasket", that is, "a reply
     // to the exchange basket request"
     tranOut.SetType(transactionType::atExchangeBasket);
@@ -5216,11 +5224,12 @@ void Notary::NotarizeExchangeBasket(
 
     pResponseBalanceItem->SignContract(server_.GetServerNym(), reason_);
     pResponseBalanceItem->SaveContract();
+#endif
 }
+
 
 // DONE:  Make sure a CLOSING TRANSACTION number is provided, and recorded
 // for use later in cron!
-
 void Notary::NotarizeMarketOffer(
     otx::context::Client& context,
     ExclusiveAccount& theAssetAccount,
@@ -5228,6 +5237,7 @@ void Notary::NotarizeMarketOffer(
     OTTransaction& tranOut,
     bool& bOutSuccess)
 {
+#if OT_WITH_MARKETS
     // The outgoing transaction is an "atMarketOffer", that is, "a reply to
     // the marketOffer request"
     tranOut.SetType(transactionType::atMarketOffer);
@@ -5638,6 +5648,7 @@ void Notary::NotarizeMarketOffer(
 
     pResponseBalanceItem->SignContract(server_.GetServerNym(), reason_);
     pResponseBalanceItem->SaveContract();
+#endif
 }
 
 /// If the server receives a notarizeTransaction command, it will be

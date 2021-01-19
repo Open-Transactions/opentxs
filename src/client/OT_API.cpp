@@ -428,6 +428,7 @@ auto OT_API::VerifyAccountReceipt(
     return VerifyBalanceReceipt(api_, *context, NOTARY_ID, ACCOUNT_ID, reason);
 }
 
+#if OT_WITH_SMART_CONTRACTS
 auto OT_API::Create_SmartContract(
     const identifier::Nym& SIGNER_NYM_ID,  // Use any Nym you wish here. (The
                                            // signing at this point is only to
@@ -1878,6 +1879,7 @@ auto OT_API::SmartContract_RemoveVariable(
 
     return false;
 }
+#endif // OT_WITH_SMART_CONTRACT
 
 // WRITE CHEQUE
 //
@@ -1977,6 +1979,8 @@ auto OT_API::WriteCheque(
     return pCheque.release();
 }
 
+
+#if OT_WITH_PAYMENT_PLANS
 // PROPOSE PAYMENT PLAN  (MERCHANT calls this function)
 //
 // Returns an OTPaymentPlan pointer, or nullptr.
@@ -2315,6 +2319,8 @@ auto OT_API::ConfirmPaymentPlan(
     return true;
 }
 
+#endif // OT_WITH_PAYMENT_PLANS
+
 // LOAD NYMBOX
 //
 // Caller IS responsible to delete
@@ -2348,6 +2354,7 @@ auto OT_API::LoadNymbox(
     return nullptr;
 }
 
+#if OT_WITH_BASKETS
 // IS BASKET CURRENCY ?
 //
 // Tells you whether or not a given instrument definition is actually a
@@ -3020,6 +3027,7 @@ auto OT_API::exchangeBasket(
 
     return output;
 }
+#endif // OT_WITH_BASKETS
 
 auto OT_API::getTransactionNumbers(otx::context::Server& context) const
     -> std::unique_ptr<Message>
@@ -3051,6 +3059,7 @@ auto OT_API::getTransactionNumbers(otx::context::Server& context) const
 // SHARES_INSTRUMENT_DEFINITION_ID needs
 // to be the Pepsi instrument definition ID. (NOT the dollar instrument
 // definition ID...)
+#if OT_WITH_DIVIDENDS
 auto OT_API::payDividend(
     otx::context::Server& context,
     const Identifier& DIVIDEND_FROM_accountID,  // if dollars paid for pepsi
@@ -3344,6 +3353,7 @@ auto OT_API::payDividend(
 
     return output;
 }
+#endif // OT_WITH_DIVIDENDS
 
 // Request the server to withdraw from an asset account and issue a voucher
 // (cashier's cheque)
@@ -3510,6 +3520,7 @@ auto OT_API::withdrawVoucher(
     return output;
 }
 
+#if OT_WITH_PAYMENT_PLANS
 // DEPOSIT PAYMENT PLAN
 //
 // The Recipient Creates the Payment Plan using ProposePaymentPlan.
@@ -3656,7 +3667,10 @@ auto OT_API::depositPaymentPlan(
 
     return output;
 }
+#endif // OT_WITH_PAYMENT_PLANS
 
+
+#if OT_WITH_SMART_CONTRACTS
 // If a smart contract is already running on a specific server, and the Nym
 // in question (NYM_ID) is an authorized agent for that smart contract, then
 // he can trigger clauses. All he needs is the transaction ID for the smart
@@ -4030,6 +4044,8 @@ auto OT_API::activateSmartContract(
 
     return output;
 }
+#endif // OT_WITH_SMART_CONTRACTS
+
 
 // Done: make a new transaction (and item) type for smart contract. (for a
 // cron item.)
@@ -4183,6 +4199,7 @@ auto OT_API::cancelCronItem(
     return output;
 }
 
+#if OT_WITH_MARKETS
 // Create an Offer object and add it to one of the server's Market objects.
 // This will also create a Trade object and add it to the server's Cron
 // object. (The Trade provides the payment authorization for the Offer, as
@@ -4716,6 +4733,8 @@ auto OT_API::getNymMarketOffers(otx::context::Server& context) const
 
     return output;
 }
+#endif // OT_WITH_MARKETS
+
 
 // Sends a list of instrument definition ids to the server, which
 // replies with a list of the actual receipts with the issuer's

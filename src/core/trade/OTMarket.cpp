@@ -124,6 +124,7 @@ auto OTMarket::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
     // if (nReturnVal = Contract::ProcessXMLNode(xml))
     //    return nReturnVal;
 
+#if OT_WITH_MARKETS
     if (!strcmp("market", xml->getNodeName())) {
         m_strVersion = String::Factory(xml->getAttributeValue("version"));
         SetScale(String::StringToLong(xml->getAttributeValue("marketScale")));
@@ -200,6 +201,7 @@ auto OTMarket::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
 
         nReturnVal = 1;
     }
+#endif
 
     return nReturnVal;
 }

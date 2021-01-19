@@ -190,9 +190,12 @@ auto OTPayment::SetTempValues(const PasswordPrompt& reason)
         std::unique_ptr<OTTrackable> theTrackableAngel(pTrackable);
 
         Cheque* pCheque = nullptr;
+#if OT_WITH_PAYMENT_PLANS
         OTPaymentPlan* pPaymentPlan = nullptr;
+#endif
+#if OT_WITH_SMART_CONTRACTS
         OTSmartContract* pSmartContract = nullptr;
-
+#endif
         switch (m_Type) {
             case CHEQUE:
             case VOUCHER:
@@ -211,6 +214,7 @@ auto OTPayment::SetTempValues(const PasswordPrompt& reason)
                 break;
 
             case PAYMENT_PLAN:
+#if OT_WITH_PAYMENT_PLANS
                 pPaymentPlan = dynamic_cast<OTPaymentPlan*>(pTrackable);
                 if (nullptr == pPaymentPlan)
                     LogOutput(OT_METHOD)(__FUNCTION__)(
@@ -223,8 +227,9 @@ auto OTPayment::SetTempValues(const PasswordPrompt& reason)
                 else  // success
                     return SetTempValuesFromPaymentPlan(*pPaymentPlan);
                 break;
-
+#endif
             case SMART_CONTRACT:
+#if OT_WITH_SMART_CONTRACTS
                 pSmartContract = dynamic_cast<OTSmartContract*>(pTrackable);
                 if (nullptr == pSmartContract)
                     LogOutput(OT_METHOD)(__FUNCTION__)(
@@ -237,7 +242,7 @@ auto OTPayment::SetTempValues(const PasswordPrompt& reason)
                 else  // success
                     return SetTempValuesFromSmartContract(*pSmartContract);
                 break;
-
+#endif
             default:
                 LogOutput(OT_METHOD)(__FUNCTION__)(
                     ": Failure: Wrong m_Type. "
@@ -438,6 +443,7 @@ void OTPayment::lowLevelSetTempValuesFromPaymentPlan(
 auto OTPayment::SetTempValuesFromPaymentPlan(const OTPaymentPlan& theInput)
     -> bool
 {
+#if OT_WITH_PAYMENT_PLANS
     if (OTPayment::PAYMENT_PLAN == m_Type) {
         lowLevelSetTempValuesFromPaymentPlan(theInput);
         return true;
@@ -445,13 +451,14 @@ auto OTPayment::SetTempValuesFromPaymentPlan(const OTPaymentPlan& theInput)
         LogOutput(OT_METHOD)(__FUNCTION__)(
             ": Error: Wrong type. (Returning false).")
             .Flush();
-
+#endif
     return false;
 }
 
 void OTPayment::lowLevelSetTempValuesFromSmartContract(
     const OTSmartContract& theInput)
 {
+#if OT_WITH_SMART_CONTRACTS
     m_bAreTempValuesSet = true;
     m_bHasRecipient = false;
     m_bHasRemitter = false;
@@ -526,11 +533,13 @@ void OTPayment::lowLevelSetTempValuesFromSmartContract(
 
     m_VALID_FROM = theInput.GetValidFrom();
     m_VALID_TO = theInput.GetValidTo();
+#endif
 }
 
 auto OTPayment::SetTempValuesFromSmartContract(const OTSmartContract& theInput)
     -> bool
 {
+#if OT_WITH_SMART_CONTRACTS
     if (OTPayment::SMART_CONTRACT == m_Type) {
         lowLevelSetTempValuesFromSmartContract(theInput);
         return true;
@@ -538,7 +547,7 @@ auto OTPayment::SetTempValuesFromSmartContract(const OTSmartContract& theInput)
         LogOutput(OT_METHOD)(__FUNCTION__)(
             ": Error: Wrong type. (Returning false).")
             .Flush();
-
+#endif
     return false;
 }
 
@@ -638,17 +647,22 @@ auto OTPayment::GetAllTransactionNumbers(
         }  // Below THIS POINT, MUST DELETE pTrackable!
         std::unique_ptr<OTTrackable> theTrackableAngel(pTrackable);
 
+    #if OT_WITH_PAYMENT_PLANS
         auto* pPlan = dynamic_cast<OTPaymentPlan*>(pTrackable);
-        auto* pSmartContract = dynamic_cast<OTSmartContract*>(pTrackable);
-
         if (nullptr != pPlan) {
             pPlan->GetAllTransactionNumbers(numlistOutput);
             return true;
-        } else if (nullptr != pSmartContract) {
+        }
+    #endif
+        
+    #if OT_WITH_SMART_CONTRACTS
+        auto* pSmartContract = dynamic_cast<OTSmartContract*>(pTrackable);
+        if (nullptr != pSmartContract) {
             pSmartContract->GetAllTransactionNumbers(numlistOutput);
             return true;
         }
-
+    #endif
+        
         return false;
     }
     // ------------------------------------------------------
@@ -767,17 +781,18 @@ auto OTPayment::HasTransactionNum(
         }  // BELOW THIS POINT, MUST DELETE pTrackable!
         std::unique_ptr<OTTrackable> theTrackableAngel(pTrackable);
 
-        OTPaymentPlan* pPlan = nullptr;
-        OTSmartContract* pSmartContract = nullptr;
-
-        pPlan = dynamic_cast<OTPaymentPlan*>(pTrackable);
-        pSmartContract = dynamic_cast<OTSmartContract*>(pTrackable);
-
+#if OT_WITH_PAYMENT_PLANS
+        OTPaymentPlan* pPlan = dynamic_cast<OTPaymentPlan*>(pTrackable);
         if (nullptr != pPlan)
             return pPlan->HasTransactionNum(lInput);
-        else if (nullptr != pSmartContract)
+#endif
+        
+#if OT_WITH_SMART_CONTRACTS
+        OTSmartContract* pSmartContract =
+            dynamic_cast<OTSmartContract*>(pTrackable);
+        if (nullptr != pSmartContract)
             return pSmartContract->HasTransactionNum(lInput);
-
+#endif
         return false;
     }
     // ------------------------------------------------------
@@ -880,22 +895,23 @@ auto OTPayment::GetClosingNum(
         }  // BELOW THIS POINT, MUST DELETE pTrackable!
         std::unique_ptr<OTTrackable> theTrackableAngel(pTrackable);
 
-        OTSmartContract* pSmartContract = nullptr;
-        pSmartContract = dynamic_cast<OTSmartContract*>(pTrackable);
-
-        OTPaymentPlan* pPlan = nullptr;
-        pPlan = dynamic_cast<OTPaymentPlan*>(pTrackable);
-
+#if OT_WITH_SMART_CONTRACTS
+        OTSmartContract* pSmartContract =
+            dynamic_cast<OTSmartContract*>(pTrackable);
         if (nullptr != pSmartContract) {
             lOutput = pSmartContract->GetClosingNumber(theAcctID);
             if (lOutput > 0) return true;
             return false;
-        } else if (nullptr != pPlan) {
+        }
+#endif
+#if OT_WITH_PAYMENT_PLANS
+        OTPaymentPlan* pPlan = dynamic_cast<OTPaymentPlan*>(pTrackable);
+        if (nullptr != pPlan) {
             lOutput = pPlan->GetClosingNumber(theAcctID);
             if (lOutput > 0) return true;
             return false;
         }
-
+#endif
         // There's no "return false" here because of the "if
         // !m_bAreTempValuesSet"
         // In other words, it still very well could be a cheque or invoice, or
@@ -1000,22 +1016,24 @@ auto OTPayment::GetOpeningNum(
         }  // BELOW THIS POINT, MUST DELETE pTrackable!
         std::unique_ptr<OTTrackable> theTrackableAngel(pTrackable);
 
-        OTSmartContract* pSmartContract = nullptr;
-        pSmartContract = dynamic_cast<OTSmartContract*>(pTrackable);
-
-        OTPaymentPlan* pPlan = nullptr;
-        pPlan = dynamic_cast<OTPaymentPlan*>(pTrackable);
-
+#if OT_WITH_SMART_CONTRACTS
+        OTSmartContract* pSmartContract =
+           dynamic_cast<OTSmartContract*>(pTrackable);
         if (nullptr != pSmartContract) {
             lOutput = pSmartContract->GetOpeningNumber(theNymID);
             if (lOutput > 0) return true;
             return false;
-        } else if (nullptr != pPlan) {
+        }
+#endif
+        
+#if OT_WITH_PAYMENT_PLANS
+        OTPaymentPlan* pPlan = dynamic_cast<OTPaymentPlan*>(pTrackable);
+        if (nullptr != pPlan) {
             lOutput = pPlan->GetOpeningNumber(theNymID);
             if (lOutput > 0) return true;
             return false;
         }
-
+#endif
         // There's no "return false" here because of the "if
         // !m_bAreTempValuesSet"
         // In other words, it still very well could be a cheque or invoice, or
@@ -1589,9 +1607,12 @@ auto OTPayment::Instantiate() const -> OTTrackable*
     std::unique_ptr<Contract> pContract;
     OTTrackable* pTrackable = nullptr;
     Cheque* pCheque = nullptr;
+#if OT_WITH_PAYMENT_PLANS
     OTPaymentPlan* pPaymentPlan = nullptr;
+#endif
+#if OT_WITH_SMART_CONTRACTS
     OTSmartContract* pSmartContract = nullptr;
-
+#endif
     switch (m_Type) {
         case CHEQUE:
         case VOUCHER:
@@ -1616,6 +1637,7 @@ auto OTPayment::Instantiate() const -> OTTrackable*
             break;
 
         case PAYMENT_PLAN:
+#if OT_WITH_PAYMENT_PLANS
             pContract = api_.Factory().Contract(m_strPayment);
 
             if (false != bool(pContract)) {
@@ -1631,6 +1653,7 @@ auto OTPayment::Instantiate() const -> OTTrackable*
                 } else
                     pTrackable = pPaymentPlan;
             } else
+#endif
                 LogOutput(OT_METHOD)(__FUNCTION__)(
                     ": Tried to instantiate payment "
                     "plan, but factory returned nullptr: ")(m_strPayment)(".")
@@ -1638,6 +1661,7 @@ auto OTPayment::Instantiate() const -> OTTrackable*
             break;
 
         case SMART_CONTRACT:
+#if OT_WITH_SMART_CONTRACTS
             pContract = api_.Factory().Contract(m_strPayment);
 
             if (false != bool(pContract)) {
@@ -1652,6 +1676,7 @@ auto OTPayment::Instantiate() const -> OTTrackable*
                 } else
                     pTrackable = pSmartContract;
             } else
+#endif
                 LogOutput(OT_METHOD)(__FUNCTION__)(
                     ": Tried to instantiate smart "
                     "contract, but factory returned nullptr: ")(m_strPayment)(
@@ -1890,12 +1915,14 @@ auto OTPayment::SetPayment(const String& strPayment) -> bool
         m_Type = OTPayment::VOUCHER;
     else if (strContract->Contains("-----BEGIN SIGNED INVOICE-----"))
         m_Type = OTPayment::INVOICE;
-
+#if OT_WITH_PAYMENT_PLANS
     else if (strContract->Contains("-----BEGIN SIGNED PAYMENT PLAN-----"))
         m_Type = OTPayment::PAYMENT_PLAN;
+#endif
+#if OT_WITH_SMART_CONTRACTS
     else if (strContract->Contains("-----BEGIN SIGNED SMARTCONTRACT-----"))
         m_Type = OTPayment::SMART_CONTRACT;
-
+#endif
     else if (strContract->Contains("-----BEGIN SIGNED TRANSACTION-----"))
         m_Type = OTPayment::NOTICE;
     else {

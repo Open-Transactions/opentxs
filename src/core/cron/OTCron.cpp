@@ -464,6 +464,7 @@ auto OTCron::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
 
         nReturnVal = 1;
     } else if (!strcmp("market", xml->getNodeName())) {
+#if OT_WITH_MARKETS
         const auto strMarketID =
             String::Factory(xml->getAttributeValue("marketID"));
         const auto strInstrumentDefinitionID =
@@ -511,6 +512,7 @@ auto OTCron::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
                 .Flush();
         }
         nReturnVal = 1;
+#endif
     }
 
     return nReturnVal;
@@ -967,6 +969,7 @@ auto OTCron::AddMarket(
     std::shared_ptr<OTMarket> theMarket,
     bool bSaveMarketFile) -> bool
 {
+#if OT_WITH_MARKETS
     OT_ASSERT(nullptr != GetServerNym());
     auto reason = api_.Factory().PasswordPrompt(__FUNCTION__);
 
@@ -1032,7 +1035,7 @@ auto OTCron::AddMarket(
             ".")
             .Flush();
     }
-
+#endif
     return false;
 }
 
@@ -1042,6 +1045,7 @@ auto OTCron::GetOrCreateMarket(
     const identifier::UnitDefinition& CURRENCY_ID,
     const std::int64_t& lScale) -> std::shared_ptr<OTMarket>
 {
+#if OT_WITH_MARKETS
     auto pMarket{api_.Factory().Market(
         GetNotaryID(), INSTRUMENT_DEFINITION_ID, CURRENCY_ID, lScale)};
 
@@ -1072,12 +1076,16 @@ auto OTCron::GetOrCreateMarket(
     }
 
     return market;
+#else
+    return {};
+#endif
 }
 
 // Look up a transaction by transaction number and see if it is in the ledger.
 // If it is, return a pointer to it, otherwise return nullptr.
 auto OTCron::GetMarket(const Identifier& MARKET_ID) -> std::shared_ptr<OTMarket>
 {
+#if OT_WITH_MARKETS
     auto str_MARKET_ID = String::Factory(MARKET_ID);
     std::string std_MARKET_ID = str_MARKET_ID->Get();
 
@@ -1104,6 +1112,7 @@ auto OTCron::GetMarket(const Identifier& MARKET_ID) -> std::shared_ptr<OTMarket>
                 std_MARKET_ID)(" but found ")(str_LOOP_MARKET_ID)(".")
                 .Flush();
     }
+#endif
 
     return nullptr;
 }

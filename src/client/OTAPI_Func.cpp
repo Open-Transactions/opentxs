@@ -335,20 +335,21 @@ OTAPI_Func::OTAPI_Func(
     }
 
     nTransNumsNeeded_ = 1;
-
     if (theType == ACTIVATE_SMART_CONTRACT) {
-
         accountID_ = accountID;  // the "official" asset account of the party
                                  // activating the contract.;
         agentName_ = agentName;  // the agent's name for that party, as listed
                                  // on the contract.;
         contract_.reset(contract.release());  // the smart contract itself.;
 
-        std::int32_t nNumsNeeded = api_.Exec().SmartContract_CountNumsNeeded(
+        std::int32_t nNumsNeeded{};
+#if OT_WITH_SMART_CONTRACTS
+        nNumsNeeded = api_.Exec().SmartContract_CountNumsNeeded(
             String::Factory(*contract_)->Get(), agentName_);
-
+#endif
         if (nNumsNeeded > 0) { nTransNumsNeeded_ = nNumsNeeded; }
-    } else {
+    } else
+    {
         LogNormal(OT_METHOD)(__FUNCTION__)(
             ": ERROR! WRONG TYPE passed to OTAPI_Func.OTAPI_Func(). "
             "ERROR!!!!!!")

@@ -2831,6 +2831,7 @@ void Server::process_accept_cron_receipt_reply(
     const Identifier& accountID,
     OTTransaction& inboxTransaction)
 {
+#if OT_WITH_MARKETS
     auto pServerItem = inboxTransaction.GetItem(itemType::marketReceipt);
 
     if (false == bool(pServerItem)) {
@@ -3029,6 +3030,7 @@ void Server::process_accept_cron_receipt_reply(
                 "Nym. Notary ID: ")(server_id_)(". Nym ID: ")(strNymID)(".")
                 .Flush();
     }
+#endif
 }
 
 void Server::process_accept_final_receipt_reply(
@@ -5039,14 +5041,18 @@ void Server::process_response_transaction(
             process_response_transaction_deposit(
                 lock, client, reply, type, response, reason);
         } break;
+#if OT_WITH_DIVIDENDS
         case transactionType::atPayDividend: {
             process_response_transaction_pay_dividend(
                 lock, reply, type, response);
         } break;
+#endif
+#if OT_WITH_BASKETS
         case transactionType::atExchangeBasket: {
             process_response_transaction_exchange_basket(
                 lock, reply, type, response);
         } break;
+#endif
         case transactionType::atCancelCronItem: {
             process_response_transaction_cancel(lock, reply, type, response);
         } break;
@@ -5060,12 +5066,18 @@ void Server::process_response_transaction(
             process_response_transaction_transfer(
                 lock, client, reply, type, response);
         } break;
+#if OT_WITH_MARKETS
         case transactionType::atMarketOffer:
+#endif
+#if OT_WITH_PAYMENT_PLANS
         case transactionType::atPaymentPlan:
+#endif
+#if OT_WITH_SMART_CONTRACTS
         case transactionType::atSmartContract: {
             process_response_transaction_cron(
                 lock, reply, type, response, reason);
         } break;
+#endif
         default:
             LogOutput(OT_METHOD)(__FUNCTION__)(": wrong transaction type: ")(
                 response.GetTypeString())(".")
@@ -5951,6 +5963,7 @@ void Server::process_response_transaction_exchange_basket(
     const itemType type,
     OTTransaction& response)
 {
+#if OT_WITH_BASKETS
     consume_issued(lock, response.GetTransactionNum());
     auto item = response.GetItem(type);
 
@@ -6001,6 +6014,7 @@ void Server::process_response_transaction_exchange_basket(
             recover_available_number(lock, closingNumber);
         }
     }
+#endif
 }
 
 void Server::process_response_transaction_pay_dividend(

@@ -30,7 +30,9 @@
 #include "server/Server.hpp"
 #include "server/Transactor.hpp"
 
+#if OT_WITH_DIVIDENDS
 #define OT_METHOD "opentxs::PayDividendVisitor::"
+#endif
 
 namespace opentxs
 {
@@ -68,6 +70,7 @@ auto PayDividendVisitor::Trigger(
 // account.  Here, we'll send a dollars voucher
 // to its owner.
 {
+#if OT_WITH_DIVIDENDS
     const std::int64_t lPayoutAmount =
         (theSharesAccount.GetBalance() * GetPayoutPerShare());
 
@@ -284,6 +287,9 @@ auto PayDividendVisitor::Trigger(
     }
 
     return bReturnValue;
+#else
+    return false;
+#endif
 }
 
 PayDividendVisitor::~PayDividendVisitor()

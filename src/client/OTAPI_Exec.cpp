@@ -46,14 +46,17 @@
 #include "opentxs/protobuf/ContactEnums.pb.h"
 #include "opentxs/protobuf/UnitDefinition.pb.h"
 
+#if OT_WITH_BASKETS
 #define OT_ERROR_AMOUNT INT64_MIN
-
 #define OT_METHOD "opentxs::OTAPI_Exec::"
+#endif
 
 namespace opentxs
 {
+#if OT_WITH_SMART_CONTRACTS
 #ifndef OT_ERROR
 const std::int32_t OT_ERROR = (-1);
+#endif
 #endif
 
 OTAPI_Exec::OTAPI_Exec(
@@ -73,6 +76,8 @@ OTAPI_Exec::OTAPI_Exec(
     // WARNING: do not access api_.Wallet() during construction
 }
 
+
+#if OT_WITH_PAYMENT_PLANS
 // PROPOSE PAYMENT PLAN
 //
 // (Return as STRING)
@@ -390,7 +395,10 @@ auto OTAPI_Exec::ConfirmPaymentPlan(
 
     return strOutput->Get();
 }
+#endif //OT_WITH_PAYMENT_PLANS
 
+
+#if OT_WITH_SMART_CONTRACTS
 // RETURNS:  the Smart Contract itself. (Or "".)
 //
 auto OTAPI_Exec::Create_SmartContract(
@@ -2502,7 +2510,9 @@ auto OTAPI_Exec::Party_GetAgentID(
     }
     return {};
 }
+#endif // OT_WITH_SMART_CONTRACTS
 
+#if OT_WITH_BASKETS
 // IS BASKET CURRENCY ?
 //
 // Tells you whether or not a given instrument definition is actually a
@@ -2810,6 +2820,8 @@ auto OTAPI_Exec::AddBasketExchangeItem(
     std::string pBuf = strOutput->Get();
     return pBuf;
 }
+#endif // OT_WITH_BASKETS
+
 
 auto OTAPI_Exec::Wallet_ImportSeed(
     const std::string& words,

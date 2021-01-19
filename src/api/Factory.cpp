@@ -299,6 +299,7 @@ auto Factory::BailmentRequest(
     }
 }
 
+#if OT_WITH_BASKETS
 auto Factory::Basket() const -> std::unique_ptr<opentxs::Basket>
 {
     std::unique_ptr<opentxs::Basket> basket;
@@ -357,6 +358,8 @@ auto Factory::BasketContract(
         throw std::runtime_error("Failed to instantiate bailment request");
     }
 }
+#endif
+
 
 #if OT_BLOCKCHAIN
 auto Factory::BitcoinScriptNullData(
@@ -666,36 +669,45 @@ auto Factory::Contract(const opentxs::String& strInput) const
 
         std::unique_ptr<opentxs::Contract> pContract;
 
-        if (strFirstLine->Contains(
-                "-----BEGIN SIGNED SMARTCONTRACT-----"))  // this string is 36
-                                                          // chars long.
-        {
+        if (strFirstLine->Contains("-----BEGIN SIGNED CHEQUE-----")) {
+            pContract.reset(new opentxs::Cheque(api_));
+            OT_ASSERT(false != bool(pContract));
+        }
+#if OT_WITH_SMART_CONTRACTS
+        else if (strFirstLine->Contains(
+                "-----BEGIN SIGNED SMARTCONTRACT-----")) { // this string is 36
+                                                           // chars long.
             pContract.reset(new OTSmartContract(api_));
             OT_ASSERT(false != bool(pContract));
         }
-
-        if (strFirstLine->Contains(
-                "-----BEGIN SIGNED PAYMENT PLAN-----"))  // this string is 35
+#endif
+        
+#if OT_WITH_PAYMENT_PLANS
+        else if (strFirstLine->Contains(
+                "-----BEGIN SIGNED PAYMENT PLAN-----")) { // this string is 35
                                                          // chars long.
         {
             pContract.reset(new OTPaymentPlan(api_));
             OT_ASSERT(false != bool(pContract));
-        } else if (strFirstLine->Contains(
-                       "-----BEGIN SIGNED TRADE-----"))  // this string is 28
-                                                         // chars long.
+        }
+#endif
+            
+#if OT_WITH_MARKETS
+        else if (strFirstLine->Contains(
+                "-----BEGIN SIGNED TRADE-----"))  { // this string is 28
+                                                    // chars long.
         {
             pContract.reset(new OTTrade(api_));
             OT_ASSERT(false != bool(pContract));
         } else if (strFirstLine->Contains("-----BEGIN SIGNED OFFER-----")) {
             pContract.reset(new OTOffer(api_));
             OT_ASSERT(false != bool(pContract));
-        } else if (strFirstLine->Contains("-----BEGIN SIGNED INVOICE-----")) {
+        }
+#endif
+        else if (strFirstLine->Contains("-----BEGIN SIGNED INVOICE-----")) {
             pContract.reset(new opentxs::Cheque(api_));
             OT_ASSERT(false != bool(pContract));
         } else if (strFirstLine->Contains("-----BEGIN SIGNED VOUCHER-----")) {
-            pContract.reset(new opentxs::Cheque(api_));
-            OT_ASSERT(false != bool(pContract));
-        } else if (strFirstLine->Contains("-----BEGIN SIGNED CHEQUE-----")) {
             pContract.reset(new opentxs::Cheque(api_));
             OT_ASSERT(false != bool(pContract));
         } else if (strFirstLine->Contains("-----BEGIN SIGNED MESSAGE-----")) {
@@ -775,18 +787,29 @@ auto Factory::CronItem(const String& strCronItem) const
     // BUT it might still be ARMORED!
 
     std::unique_ptr<OTCronItem> pItem;
+    bool success{false};
+#if OT_WITH_PAYMENT_PLANS
     // this string is 35 chars long.
     if (strFirstLine->Contains("-----BEGIN SIGNED PAYMENT PLAN-----")) {
         pItem.reset(new OTPaymentPlan(api_));
+        success = true;
     }
+#endif
+#if OT_WITH_MARKETS
     // this string is 28 chars long.
-    else if (strFirstLine->Contains("-----BEGIN SIGNED TRADE-----")) {
+    if (strFirstLine->Contains("-----BEGIN SIGNED TRADE-----")) {
         pItem.reset(new OTTrade(api_));
+        success = true;
     }
+#endif
+#if OT_WITH_SMART_CONTRACTS
     // this string is 36 chars long.
-    else if (strFirstLine->Contains("-----BEGIN SIGNED SMARTCONTRACT-----")) {
+    if (strFirstLine->Contains("-----BEGIN SIGNED SMARTCONTRACT-----")) {
         pItem.reset(new OTSmartContract(api_));
-    } else {
+        success = true;
+    }
+#endif
+    if (!success) {
         return nullptr;
     }
 
@@ -1328,6 +1351,7 @@ auto Factory::Ledger(
     return ledger;
 }
 
+#if OT_WITH_MARKETS
 auto Factory::Market() const -> std::unique_ptr<OTMarket>
 {
     std::unique_ptr<opentxs::OTMarket> market;
@@ -1356,7 +1380,8 @@ auto Factory::Market(
 
     return market;
 }
-
+#endif
+        
 auto Factory::Message() const -> std::unique_ptr<opentxs::Message>
 {
     std::unique_ptr<opentxs::Message> message;
@@ -1457,6 +1482,7 @@ auto Factory::NymIDFromPaymentCode(const std::string& input) const -> OTNymID
     return output;
 }
 
+#if OT_WITH_MARKETS
 auto Factory::Offer() const -> std::unique_ptr<OTOffer>
 {
     std::unique_ptr<OTOffer> offer;
@@ -1477,7 +1503,8 @@ auto Factory::Offer(
 
     return offer;
 }
-
+#endif
+        
 auto Factory::OutbailmentReply(
     const Nym_p& nym,
     const identifier::Nym& initiator,
@@ -1679,6 +1706,7 @@ auto Factory::PaymentCode(
 }
 #endif  // OT_CRYPTO_SUPPORTED_KEY_SECP256K1 && OT_CRYPTO_WITH_BIP32
 
+#if OT_WITH_PAYMENT_PLANS
 auto Factory::PaymentPlan() const -> std::unique_ptr<OTPaymentPlan>
 {
     std::unique_ptr<OTPaymentPlan> paymentplan;
@@ -1720,7 +1748,8 @@ auto Factory::PaymentPlan(
 
     return paymentplan;
 }
-
+#endif
+        
 auto Factory::PeerObject(
     [[maybe_unused]] const Nym_p& senderNym,
     [[maybe_unused]] const std::string& message) const
@@ -2003,6 +2032,7 @@ auto Factory::Scriptable(const String& strInput) const
     // There are actually two factories that load smart contracts. See
     // OTCronItem.
     //
+#if OT_WITH_SMART_CONTRACTS
     else if (strFirstLine->Contains(
                  "-----BEGIN SIGNED SMARTCONTRACT-----"))  // this string is 36
                                                            // chars long.
@@ -2010,7 +2040,8 @@ auto Factory::Scriptable(const String& strInput) const
         pItem.reset(new OTSmartContract(api_));
         OT_ASSERT(false != bool(pItem));
     }
-
+#endif
+    
     // The string didn't match any of the options in the factory.
     if (false == bool(pItem)) return nullptr;
 
@@ -2117,6 +2148,7 @@ auto Factory::SignedFile(const char* LOCAL_SUBDIR, const char* FILE_NAME) const
     return signedfile;
 }
 
+#if OT_WITH_SMART_CONTRACTS
 auto Factory::SmartContract() const -> std::unique_ptr<OTSmartContract>
 {
     std::unique_ptr<OTSmartContract> smartcontract;
@@ -2133,7 +2165,8 @@ auto Factory::SmartContract(const identifier::Server& NOTARY_ID) const
 
     return smartcontract;
 }
-
+#endif
+        
 auto Factory::StoreSecret(
     const Nym_p& nym,
     const identifier::Nym& recipient,
@@ -2210,6 +2243,7 @@ auto Factory::SymmetricKey(
         opentxs::Factory::SymmetricKey(api_, engine, raw, reason)};
 }
 
+#if OT_WITH_MARKETS
 auto Factory::Trade() const -> std::unique_ptr<OTTrade>
 {
     std::unique_ptr<OTTrade> trade;
@@ -2238,7 +2272,8 @@ auto Factory::Trade(
 
     return trade;
 }
-
+#endif
+        
 auto Factory::Transaction(const String& strInput) const
     -> std::unique_ptr<OTTransactionType>
 {

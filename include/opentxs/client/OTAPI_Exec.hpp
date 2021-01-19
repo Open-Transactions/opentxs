@@ -116,6 +116,7 @@ public:
     time64_t tPlanLength=0, std::int32_t nMaxPayments=0);
     ----------------------------------------------------------------------------------------
     */
+#if OT_WITH_PAYMENT_PLANS
     OPENTXS_EXPORT std::string ProposePaymentPlan(
         const std::string& NOTARY_ID,
         const Time& VALID_FROM,  // Default (0 or nullptr) == current time
@@ -204,7 +205,9 @@ public:
         const std::string& SENDER_ACCT_ID,
         const std::string& RECIPIENT_NYM_ID,
         const std::string& PAYMENT_PLAN) const;
-
+#endif
+    
+#if OT_WITH_SMART_CONTRACTS
     // SMART CONTRACTS
 
     // RETURNS: the Smart Contract itself. (Or nullptr.)
@@ -662,7 +665,9 @@ public:
         const std::string& AGENT_NAME) const;  // returns ID of the agent. (If
                                                // there is
                                                // one...)
-
+#endif // OT_WITH_SMART_CONTRACT
+    
+#if OT_WITH_BASKETS
     /** --------------------------------------------------------------
     // IS BASKET CURRENCY ?
     //
@@ -793,7 +798,8 @@ public:
         const std::string& THE_BASKET,
         const std::string& INSTRUMENT_DEFINITION_ID,
         const std::string& ASSET_ACCT_ID) const;
-
+#endif // OT_WITH_BASKETS
+    
     /** Import a BIP39 seed into the wallet.
      *
      *  The imported seed will be set to the default seed if a default does not

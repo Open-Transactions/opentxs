@@ -157,6 +157,7 @@ public:
     OPENTXS_EXPORT virtual OTBailmentRequest BailmentRequest(
         const Nym_p& nym,
         const proto::PeerRequest& serialized) const noexcept(false) = 0;
+#if OT_WITH_BASKETS
     OPENTXS_EXPORT virtual std::unique_ptr<opentxs::Basket> Basket() const = 0;
     OPENTXS_EXPORT virtual std::unique_ptr<opentxs::Basket> Basket(
         std::int32_t nCount,
@@ -173,6 +174,7 @@ public:
     OPENTXS_EXPORT virtual OTBasketContract BasketContract(
         const Nym_p& nym,
         const proto::UnitDefinition serialized) const noexcept(false) = 0;
+#endif
 #if OT_BLOCKCHAIN
     OPENTXS_EXPORT virtual auto BitcoinBlock(
         const opentxs::blockchain::Type chain,
@@ -398,6 +400,8 @@ public:
         const identifier::Server& theNotaryID,
         ledgerType theType,
         bool bCreateFile = false) const = 0;
+    
+#if OT_WITH_MARKETS
     OPENTXS_EXPORT virtual std::unique_ptr<OTMarket> Market() const = 0;
     OPENTXS_EXPORT virtual std::unique_ptr<OTMarket> Market(
         const char* szFilename) const = 0;
@@ -406,6 +410,7 @@ public:
         const identifier::UnitDefinition& INSTRUMENT_DEFINITION_ID,
         const identifier::UnitDefinition& CURRENCY_TYPE_ID,
         const std::int64_t& lScale) const = 0;
+#endif
     OPENTXS_EXPORT virtual std::unique_ptr<opentxs::Message> Message()
         const = 0;
 #if OT_CASH
@@ -425,6 +430,7 @@ public:
         const opentxs::String& serialized) const = 0;
     OPENTXS_EXPORT virtual OTNymID NymIDFromPaymentCode(
         const std::string& serialized) const = 0;
+#if OT_WITH_MARKETS
     OPENTXS_EXPORT virtual std::unique_ptr<OTOffer> Offer()
         const = 0;  // The constructor contains
                     // the 3 variables needed to
@@ -434,6 +440,7 @@ public:
         const identifier::UnitDefinition& INSTRUMENT_DEFINITION_ID,
         const identifier::UnitDefinition& CURRENCY_ID,
         const std::int64_t& MARKET_SCALE) const = 0;
+#endif
     OPENTXS_EXPORT virtual OTOutbailmentReply OutbailmentReply(
         const Nym_p& nym,
         const identifier::Nym& initiator,
@@ -479,6 +486,7 @@ public:
         const std::uint8_t bitmessageVersion = 0,
         const std::uint8_t bitmessageStream = 0) const noexcept = 0;
 #endif  // OT_CRYPTO_SUPPORTED_KEY_SECP256K1 && OT_CRYPTO_WITH_BIP32
+#if OT_WITH_PAYMENT_PLANS
     OPENTXS_EXPORT virtual std::unique_ptr<OTPaymentPlan> PaymentPlan()
         const = 0;
     OPENTXS_EXPORT virtual std::unique_ptr<OTPaymentPlan> PaymentPlan(
@@ -491,6 +499,7 @@ public:
         const identifier::Nym& SENDER_NYM_ID,
         const opentxs::Identifier& RECIPIENT_ACCT_ID,
         const identifier::Nym& RECIPIENT_NYM_ID) const = 0;
+#endif
     OPENTXS_EXPORT virtual std::unique_ptr<opentxs::PeerObject> PeerObject(
         const Nym_p& senderNym,
         const std::string& message) const = 0;
@@ -587,10 +596,12 @@ public:
     OPENTXS_EXPORT virtual std::unique_ptr<OTSignedFile> SignedFile(
         const char* LOCAL_SUBDIR,
         const char* FILE_NAME) const = 0;
+#if OT_WITH_SMART_CONTRACTS
     OPENTXS_EXPORT virtual std::unique_ptr<OTSmartContract> SmartContract()
         const = 0;
     OPENTXS_EXPORT virtual std::unique_ptr<OTSmartContract> SmartContract(
         const identifier::Server& NOTARY_ID) const = 0;
+#endif
     OPENTXS_EXPORT virtual OTStoreSecret StoreSecret(
         const Nym_p& nym,
         const identifier::Nym& recipientID,
@@ -653,6 +664,7 @@ public:
         const opentxs::crypto::SymmetricProvider& engine,
         const opentxs::Secret& raw,
         const opentxs::PasswordPrompt& reason) const = 0;
+#if OT_WITH_MARKETS
     OPENTXS_EXPORT virtual std::unique_ptr<OTTrade> Trade() const = 0;
     OPENTXS_EXPORT virtual std::unique_ptr<OTTrade> Trade(
         const identifier::Server& notaryID,
@@ -661,6 +673,7 @@ public:
         const identifier::Nym& nymID,
         const identifier::UnitDefinition& currencyId,
         const opentxs::Identifier& currencyAcctId) const = 0;
+#endif
     OPENTXS_EXPORT virtual std::unique_ptr<OTTransactionType> Transaction(
         const String& strCronItem) const = 0;
     OPENTXS_EXPORT virtual std::unique_ptr<OTTransaction> Transaction(

@@ -380,6 +380,7 @@ auto OTTrade::GetOffer(
     const PasswordPrompt& reason,
     OTMarket** market) -> OTOffer*
 {
+#if OT_WITH_MARKETS
     OT_ASSERT(GetCron() != nullptr);
 
     // See if the offer has already been instantiated onto a market...
@@ -647,7 +648,7 @@ auto OTTrade::GetOffer(
             }
         }
     }
-
+#endif
     return nullptr;
 }
 
@@ -662,6 +663,7 @@ auto OTTrade::GetOffer(
 //
 void OTTrade::onRemovalFromCron(const PasswordPrompt& reason)
 {
+#if OT_WITH_MARKETS
     OTCron* cron = GetCron();
     OT_ASSERT(cron != nullptr);
 
@@ -732,6 +734,7 @@ void OTTrade::onRemovalFromCron(const PasswordPrompt& reason)
     }
 
     market->RemoveOffer(transactionNum, reason);
+#endif
 }
 
 //    GetSenderAcctID()    -- asset account.

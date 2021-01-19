@@ -597,6 +597,7 @@ auto OTTransaction::HarvestOpeningNumber(
                                                // whether transaction is
                                                // success-or-fail.
         case transactionType::payDividend:  // Uses 1 transaction #, the opening
+#if OT_WITH_DIVIDENDS
             // number, and burns it whether transaction
             // is success-or-fail.
 
@@ -635,6 +636,7 @@ auto OTTransaction::HarvestOpeningNumber(
                 //                                                          GetTransactionNum());
                 // //bSave=false, pSignerNym=nullptr
             }
+#endif
             break;
 
         case transactionType::transfer:  // Uses 1 transaction #, the opening
@@ -678,9 +680,10 @@ auto OTTransaction::HarvestOpeningNumber(
             }
             break;
 
-        case transactionType::marketOffer:  // Uses 3 transaction #s, the
-                                            // opening number and 2 closers. If
-                                            // failure, opener is burned.
+        case transactionType::marketOffer:
+#if OT_WITH_MARKETS
+            // Uses 3 transaction #s, the opening number and 2 closers.
+            // If failure, opener is burned.
             // But if success, merely marks it as "used." Closers are also
             // marked "used" if success, but if message succeeds while
             // transaction fails, then closers can be harvested. If the server
@@ -717,14 +720,14 @@ auto OTTransaction::HarvestOpeningNumber(
                     // //bSave=false, pSignerNym=nullptr
                 }
             }
-
+#endif
             break;
 
-        case transactionType::exchangeBasket:  // Uses X transaction #s: the
-                                               // opener, which is burned
-                                               // success-or-fail, and Y closers
-                                               // (one for
-            // each account.) Closers are marked "used" if success transaction,
+        case transactionType::exchangeBasket:
+#if OT_WITH_BASKETS
+            // Uses X transaction #s: the opener, which is burned
+            // success-or-fail, and Y closers (one for each account).
+            // Closers are marked "used" if success transaction,
             // but if message succeeds while transaction fails, then closers can
             // be harvested. If the server reply message was unambiguously a
             // FAIL, that means the opening number is STILL GOOD. (Because the
@@ -747,13 +750,14 @@ auto OTTransaction::HarvestOpeningNumber(
                 //                                                          GetTransactionNum());
                 // //bSave=false, pSignerNym=nullptr
             }
+#endif
             break;
 
         // These aren't AS simple.
-        case transactionType::paymentPlan:  // Uses 4 transaction #s: the opener
-                                            // (sender's #), which burned on
-                                            // failure but kept alive on
-                                            // success,
+        case transactionType::paymentPlan:
+#if OT_WITH_PAYMENT_PLANS
+            // Uses 4 transaction #s: the opener (sender's #), which burned on
+            // failure but kept alive on success,
             // the sender's closer, which is only marked as "used" upon success,
             // and the recipient's opening and closing numbers, which are both
             // only marked as "used" upon success.
@@ -1048,6 +1052,7 @@ auto OTTransaction::HarvestOpeningNumber(
                     }
                 }
             }
+#endif
             break;
 
             // TODO: Make sure that when a user receives a success notice that a
@@ -1066,9 +1071,10 @@ auto OTTransaction::HarvestOpeningNumber(
             // well.)
             //
 
-        case transactionType::smartContract:  // Uses X transaction #s, with an
-                                              // opener for each party and a
-                                              // closer for each asset account.
+        case transactionType::smartContract:
+#if OT_WITH_SMART_CONTRACTS
+            // Uses X transaction #s, with an
+            // opener for each party and a closer for each asset account.
             // If the message is rejected by the server, then ALL openers can be
             // harvested. But if the
             // message was successful (REGARDLESS of whether the transaction was
@@ -1151,6 +1157,7 @@ auto OTTransaction::HarvestOpeningNumber(
                     }  // else (smart contract loaded successfully)
                 }      // pItem was found.
             }
+#endif
             break;
 
         default:
@@ -1188,8 +1195,9 @@ auto OTTransaction::HarvestClosingNumbers(
 
             break;
 
-        case transactionType::marketOffer:  // Uses 3 transaction #s, the
-                                            // opening number and 2 closers.
+        case transactionType::marketOffer:
+#if OT_WITH_MARKETS
+            // Uses 3 transaction #s, the opening number and 2 closers.
             // If message fails, all closing numbers are harvestable.
             // If message succeeds but transaction fails, closers can also be
             // harvested.
@@ -1298,11 +1306,13 @@ auto OTTransaction::HarvestClosingNumbers(
                     }  // else (the trade loaded successfully)
                 }      // pItem was found.
             }
+#endif
             break;
 
         // These aren't AS simple.
-        case transactionType::paymentPlan:  // Uses 4 transaction #s: the opener
-                                            // (sender's #), which is burned on
+        case transactionType::paymentPlan:
+#if OT_WITH_PAYMENT_PLANS
+            // Uses 4 transaction #s: the opener (sender's #), which is burned on
             // transaction failure, but kept alive on success,
             // ===> the sender's closing #, which is only marked as "used" upon
             // success (harvestable up until that point.)
@@ -1406,11 +1416,13 @@ auto OTTransaction::HarvestClosingNumbers(
                     }  // else (the payment plan loaded successfully)
                 }      // pItem was found.
             }
+#endif
             break;
 
-        case transactionType::smartContract:  // Uses X transaction #s, with an
-                                              // opener for each party and a
-                                              // closer for each asset account.
+        case transactionType::smartContract:
+#if OT_WITH_SMART_CONTRACTS
+            // Uses X transaction #s, with an opener for each party and a
+            // closer for each asset account.
             // If the message is rejected by the server, then ALL openers can be
             // harvested. But if the
             // message was successful (REGARDLESS of whether the transaction was
@@ -1517,6 +1529,7 @@ auto OTTransaction::HarvestClosingNumbers(
                     }  // else (smart contract loaded successfully)
                 }      // pItem was found.
             }
+#endif
             break;
 
         default:

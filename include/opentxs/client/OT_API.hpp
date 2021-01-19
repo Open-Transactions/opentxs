@@ -142,7 +142,8 @@ public:
         const identifier::Nym& SENDER_NYM_ID,
         const String& CHEQUE_MEMO,
         const identifier::Nym& pRECIPIENT_NYM_ID) const;
-
+    
+#if OT_WITH_PAYMENT_PLANS
     // PROPOSE PAYMENT PLAN (called by Merchant)
     //
     // Returns an OTPaymentPlan pointer, or nullptr.
@@ -181,6 +182,9 @@ public:
         const Identifier& SENDER_ACCT_ID,
         const identifier::Nym& RECIPIENT_NYM_ID,
         OTPaymentPlan& thePlan) const;
+#endif
+
+#if OT_WITH_BASKETS
     OPENTXS_EXPORT bool IsBasketCurrency(
         const identifier::UnitDefinition& BASKET_INSTRUMENT_DEFINITION_ID)
         const;
@@ -201,6 +205,8 @@ public:
     OPENTXS_EXPORT std::int64_t GetBasketMemberMinimumTransferAmount(
         const identifier::UnitDefinition& BASKET_INSTRUMENT_DEFINITION_ID,
         std::int32_t nIndex) const;
+#endif
+
     OPENTXS_EXPORT std::unique_ptr<Ledger> LoadNymbox(
         const identifier::Server& NOTARY_ID,
         const identifier::Nym& NYM_ID) const;
@@ -243,6 +249,7 @@ public:
         otx::context::Server& context,
         const Identifier& ACCOUNT_ID) const;
 
+#if OT_WITH_BASKETS
     OPENTXS_EXPORT bool AddBasketCreationItem(
         proto::UnitDefinition& basketTemplate,
         const String& currencyID,
@@ -273,7 +280,8 @@ public:
         const identifier::UnitDefinition& BASKET_INSTRUMENT_DEFINITION_ID,
         const String& BASKET_INFO,
         bool bExchangeInOrOut) const;
-
+#endif
+    
     OPENTXS_EXPORT std::unique_ptr<Message> getTransactionNumbers(
         otx::context::Server& context) const;
 
@@ -284,6 +292,7 @@ public:
         const String& CHEQUE_MEMO,
         const Amount amount) const;
 
+#if OT_WITH_DIVIDENDS
     OPENTXS_EXPORT CommandResult payDividend(
         otx::context::Server& context,
         const Identifier& DIVIDEND_FROM_ACCT_ID,  // if dollars paid for pepsi
@@ -302,7 +311,9 @@ public:
                                                 // out
     // PER SHARE (multiplied by total
     // number of shares issued.)
-
+#endif
+    
+#if OT_WITH_SMART_CONTRACTS
     OPENTXS_EXPORT CommandResult triggerClause(
         otx::context::Server& context,
         const TransactionNumber& lTransactionNum,
@@ -570,10 +581,15 @@ public:
     OPENTXS_EXPORT CommandResult activateSmartContract(
         otx::context::Server& context,
         const String& THE_SMART_CONTRACT) const;
-
+#endif
+    
+#if OT_WITH_PAYMENT_PLANS
     OPENTXS_EXPORT CommandResult depositPaymentPlan(
         otx::context::Server& context,
         const String& THE_PAYMENT_PLAN) const;
+#endif
+    
+#if OT_WITH_MARKETS
     OPENTXS_EXPORT CommandResult issueMarketOffer(
         otx::context::Server& context,
         const Identifier& ASSET_ACCT_ID,
@@ -606,7 +622,8 @@ public:
 
     OPENTXS_EXPORT CommandResult
     getNymMarketOffers(otx::context::Server& context) const;
-
+#endif
+    
     // For cancelling market offers and payment plans.
     OPENTXS_EXPORT CommandResult cancelCronItem(
         otx::context::Server& context,

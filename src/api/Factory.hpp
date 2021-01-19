@@ -221,6 +221,7 @@ public:
         -> OTBailmentRequest final;
     auto BailmentRequest(const Nym_p& nym, const proto::PeerRequest& serialized)
         const noexcept(false) -> OTBailmentRequest final;
+#if OT_WITH_BASKETS
     auto Basket() const -> std::unique_ptr<opentxs::Basket> final;
     auto Basket(std::int32_t nCount, std::int64_t lMinimumTransferAmount) const
         -> std::unique_ptr<opentxs::Basket> final;
@@ -238,6 +239,7 @@ public:
         const Nym_p& nym,
         const proto::UnitDefinition serialized) const noexcept(false)
         -> OTBasketContract final;
+#endif
 #if OT_BLOCKCHAIN
     auto BitcoinBlock(
         const opentxs::blockchain::Type chain,
@@ -483,6 +485,7 @@ public:
         ledgerType theType,
         bool bCreateFile = false) const
         -> std::unique_ptr<opentxs::Ledger> final;
+#if OT_WITH_MARKETS
     auto Market() const -> std::unique_ptr<OTMarket> final;
     auto Market(const char* szFilename) const
         -> std::unique_ptr<OTMarket> final;
@@ -491,6 +494,7 @@ public:
         const identifier::UnitDefinition& INSTRUMENT_DEFINITION_ID,
         const identifier::UnitDefinition& CURRENCY_TYPE_ID,
         const std::int64_t& lScale) const -> std::unique_ptr<OTMarket> final;
+#endif
     auto Message() const -> std::unique_ptr<opentxs::Message> final;
 #if OT_CASH
     auto Mint() const -> std::unique_ptr<blind::Mint> final;
@@ -509,6 +513,7 @@ public:
     auto NymID(const opentxs::String& serialized) const -> OTNymID final;
     auto NymIDFromPaymentCode(const std::string& serialized) const
         -> OTNymID final;
+#if OT_WITH_MARKETS
     auto Offer() const -> std::unique_ptr<OTOffer> final;
     auto Offer(
         const identifier::Server& NOTARY_ID,
@@ -516,6 +521,7 @@ public:
         const identifier::UnitDefinition& CURRENCY_ID,
         const std::int64_t& MARKET_SCALE) const
         -> std::unique_ptr<OTOffer> final;
+#endif
     auto OutbailmentReply(
         const Nym_p& nym,
         const identifier::Nym& initiator,
@@ -568,6 +574,7 @@ public:
         const std::uint8_t bitmessageStream) const noexcept
         -> OTPaymentCode final;
 #endif  // OT_CRYPTO_SUPPORTED_KEY_SECP256K1 && OT_CRYPTO_WITH_BIP32
+#if OT_WITH_PAYMENT_PLANS
     auto PaymentPlan() const -> std::unique_ptr<OTPaymentPlan> final;
     auto PaymentPlan(
         const identifier::Server& NOTARY_ID,
@@ -581,6 +588,7 @@ public:
         const opentxs::Identifier& RECIPIENT_ACCT_ID,
         const identifier::Nym& RECIPIENT_NYM_ID) const
         -> std::unique_ptr<OTPaymentPlan> final;
+#endif
     auto PeerObject(const Nym_p& senderNym, const std::string& message) const
         -> std::unique_ptr<opentxs::PeerObject> override;
     auto PeerObject(
@@ -688,9 +696,11 @@ public:
         -> std::unique_ptr<OTSignedFile> final;
     auto SignedFile(const char* LOCAL_SUBDIR, const char* FILE_NAME) const
         -> std::unique_ptr<OTSignedFile> final;
+#if OT_WITH_SMART_CONTRACTS
     auto SmartContract() const -> std::unique_ptr<OTSmartContract> final;
     auto SmartContract(const identifier::Server& NOTARY_ID) const
         -> std::unique_ptr<OTSmartContract> final;
+#endif
     auto StoreSecret(
         const Nym_p& nym,
         const identifier::Nym& recipientID,
@@ -725,6 +735,7 @@ public:
         const opentxs::crypto::SymmetricProvider& engine,
         const opentxs::Secret& raw,
         const opentxs::PasswordPrompt& reason) const -> OTSymmetricKey final;
+#if OT_WITH_MARKETS
     auto Trade() const -> std::unique_ptr<OTTrade> final;
     auto Trade(
         const identifier::Server& notaryID,
@@ -734,6 +745,7 @@ public:
         const identifier::UnitDefinition& currencyId,
         const opentxs::Identifier& currencyAcctId) const
         -> std::unique_ptr<OTTrade> final;
+#endif
     auto Transaction(const String& strCronItem) const
         -> std::unique_ptr<OTTransactionType> final;
     auto Transaction(const opentxs::Ledger& theOwner) const
