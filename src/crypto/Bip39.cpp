@@ -15,6 +15,7 @@
 #include <cstring>
 #include <iterator>
 #include <memory>
+#include <memory_resource>
 #include <stdexcept>
 #include <string_view>
 #include <utility>
@@ -278,9 +279,9 @@ auto Bip39::SeedToWords(const Secret& seed, Secret& words, const Language lang)
 }
 
 auto Bip39::tokenize(const Language lang, const ReadView words) noexcept(false)
-    -> std::vector<std::size_t>
+    -> std::pmr::vector<std::size_t>
 {
-    auto s = std::vector<std::string>{};
+    auto s = std::pmr::vector<std::string>{};
     boost::split(
         s, words, [](char c) { return c == ' '; }, boost::token_compress_on);
     const auto& d = [&] {
@@ -292,7 +293,7 @@ auto Bip39::tokenize(const Language lang, const ReadView words) noexcept(false)
             throw std::runtime_error{"Unsupported language"};
         }
     }();
-    auto output = std::vector<std::size_t>{};
+    auto output = std::pmr::vector<std::size_t>{};
     output.reserve(s.size());
     const auto first = d.begin();
 

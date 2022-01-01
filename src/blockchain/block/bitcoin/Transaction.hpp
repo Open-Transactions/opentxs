@@ -78,11 +78,12 @@ class Transaction final : public internal::Transaction
 public:
     static const VersionNumber default_version_;
 
-    auto AssociatedLocalNyms() const noexcept -> std::vector<OTNymID> final;
+    auto AssociatedLocalNyms() const noexcept
+        -> std::pmr::vector<OTNymID> final;
     auto AssociatedRemoteContacts(
         const api::session::Contacts& contacts,
         const identifier::Nym& nym) const noexcept
-        -> std::vector<OTIdentifier> final;
+        -> std::pmr::vector<OTIdentifier> final;
     auto BlockPosition() const noexcept -> std::optional<std::size_t> final
     {
         return position_;
@@ -91,7 +92,7 @@ public:
     {
         return calculate_size(false);
     }
-    auto Chains() const noexcept -> std::vector<blockchain::Type> final
+    auto Chains() const noexcept -> std::pmr::vector<blockchain::Type> final
     {
         return cache_.chains();
     }
@@ -104,12 +105,12 @@ public:
         return cache_.height();
     }
     auto ExtractElements(const filter::Type style) const noexcept
-        -> std::vector<Space> final;
+        -> std::pmr::vector<Space> final;
     auto FindMatches(
         const filter::Type type,
         const Patterns& txos,
         const ParsedPatterns& elements) const noexcept -> Matches final;
-    auto GetPatterns() const noexcept -> std::vector<PatternID> final;
+    auto GetPatterns() const noexcept -> std::pmr::vector<PatternID> final;
     auto GetPreimageBTC(
         const std::size_t index,
         const blockchain::bitcoin::SigHash& hashType) const noexcept
@@ -125,7 +126,7 @@ public:
         return *this;
     }
     auto IsGeneration() const noexcept -> bool final { return is_generation_; }
-    auto Keys() const noexcept -> std::vector<crypto::Key> final;
+    auto Keys() const noexcept -> std::pmr::vector<crypto::Key> final;
     auto Locktime() const noexcept -> std::uint32_t final { return lock_time_; }
     auto Memo() const noexcept -> std::string final;
     auto MinedPosition() const noexcept -> const block::Position& final
@@ -190,7 +191,7 @@ public:
         const std::string& memo,
         std::unique_ptr<internal::Inputs> inputs,
         std::unique_ptr<internal::Outputs> outputs,
-        std::vector<blockchain::Type>&& chains,
+        std::pmr::vector<blockchain::Type>&& chains,
         block::Position&& minedPosition,
         std::optional<std::size_t>&& position = std::nullopt) noexcept(false);
     Transaction(const Transaction&) noexcept;
@@ -201,7 +202,7 @@ private:
     class Cache
     {
     public:
-        auto chains() const noexcept -> std::vector<blockchain::Type>;
+        auto chains() const noexcept -> std::pmr::vector<blockchain::Type>;
         auto height() const noexcept -> block::Height;
         auto memo() const noexcept -> std::string;
         auto position() const noexcept -> const block::Position&;
@@ -236,7 +237,7 @@ private:
 
         Cache(
             const std::string& memo,
-            std::vector<blockchain::Type>&& chains,
+            std::pmr::vector<blockchain::Type>&& chains,
             block::Position&& minedPosition) noexcept(false);
         Cache(const Cache& rhs) noexcept;
 
@@ -246,7 +247,7 @@ private:
         std::optional<std::size_t> size_;
         std::optional<std::size_t> normalized_size_;
         std::string memo_;
-        std::vector<blockchain::Type> chains_;
+        std::pmr::vector<blockchain::Type> chains_;
         block::Position mined_position_;
 
         Cache() = delete;
@@ -269,7 +270,7 @@ private:
 
     static auto calculate_witness_size(const Space& witness) noexcept
         -> std::size_t;
-    static auto calculate_witness_size(const std::vector<Space>&) noexcept
+    static auto calculate_witness_size(const std::pmr::vector<Space>&) noexcept
         -> std::size_t;
 
     auto calculate_size(const bool normalize) const noexcept -> std::size_t;

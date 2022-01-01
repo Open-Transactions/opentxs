@@ -79,7 +79,8 @@ public:
     ~AccountList();
 
 private:
-    using MapOfWeakAccounts = std::map<std::string, std::weak_ptr<Account>>;
+    using MapOfWeakAccounts =
+        std::pmr::map<std::string, std::weak_ptr<Account>>;
 
     const api::Session& api_;
     Account::AccountType acctType_;

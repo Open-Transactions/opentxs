@@ -652,7 +652,7 @@ private:
         OTTransaction& serverTransaction,
         Ledger& inbox,
         Amount& amount,
-        std::set<TransactionNumber>& closing) const -> bool;
+        std::pmr::set<TransactionNumber>& closing) const -> bool;
     auto find_standard(
         const otx::context::Server& context,
         const Item& item,
@@ -660,7 +660,7 @@ private:
         OTTransaction& serverTransaction,
         Ledger& inbox,
         Amount& amount,
-        std::set<TransactionNumber>& closing) const -> bool;
+        std::pmr::set<TransactionNumber>& closing) const -> bool;
     auto get_or_create_process_inbox(
         const Identifier& accountID,
         otx::context::Server& context,

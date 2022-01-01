@@ -12,7 +12,8 @@
 namespace opentxs
 {
 template <typename T>
-auto contains(const std::vector<T>& vector, const T& value) noexcept -> bool
+auto contains(const std::pmr::vector<T>& vector, const T& value) noexcept
+    -> bool
 {
     for (const auto& item : vector) {
         if (item == value) { return true; }
@@ -22,15 +23,16 @@ auto contains(const std::vector<T>& vector, const T& value) noexcept -> bool
 }
 
 template <typename T>
-auto dedup(std::vector<T>& vector) noexcept -> void
+auto dedup(std::pmr::vector<T>& vector) noexcept -> void
 {
     std::sort(vector.begin(), vector.end());
     vector.erase(std::unique(vector.begin(), vector.end()), vector.end());
 }
 
 template <typename Store, typename Interface>
-auto insert_sorted(std::vector<Store>& vector, const Interface& key) noexcept
-    -> void
+auto insert_sorted(
+    std::pmr::vector<Store>& vector,
+    const Interface& key) noexcept -> void
 {
     static const auto less = std::less<Interface>{};
 
@@ -54,7 +56,7 @@ auto insert_sorted(std::vector<Store>& vector, const Interface& key) noexcept
 }
 
 template <typename Store, typename Interface>
-auto remove(std::vector<Store>& vector, const Interface& key) noexcept
+auto remove(std::pmr::vector<Store>& vector, const Interface& key) noexcept
     -> std::size_t
 {
     const auto before{vector.size()};
@@ -66,8 +68,8 @@ auto remove(std::vector<Store>& vector, const Interface& key) noexcept
 template <
     typename Key,
     typename Value,
-    typename Out = std::map<Value, Key>,
-    typename In = std::map<Key, Value>>
+    typename Out = std::pmr::map<Value, Key>,
+    typename In = std::pmr::map<Key, Value>>
 auto reverse_arbitrary_map(const In& map) noexcept -> Out
 {
     auto output = Out{};
@@ -78,8 +80,8 @@ auto reverse_arbitrary_map(const In& map) noexcept -> Out
 }
 
 template <typename Key, typename Value>
-auto reverse_map(const std::map<Key, Value>& map) noexcept
-    -> std::map<Value, Key>
+auto reverse_map(const std::pmr::map<Key, Value>& map) noexcept
+    -> std::pmr::map<Value, Key>
 {
     return reverse_arbitrary_map<Key, Value>(map);
 }

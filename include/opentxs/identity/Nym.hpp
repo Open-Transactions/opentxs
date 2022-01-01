@@ -80,9 +80,9 @@ namespace identity
 class OPENTXS_EXPORT Nym
 {
 public:
-    using KeyTypes = std::vector<crypto::key::asymmetric::Algorithm>;
+    using KeyTypes = std::pmr::vector<crypto::key::asymmetric::Algorithm>;
     using AuthorityKeys = std::pair<OTIdentifier, KeyTypes>;
-    using NymKeys = std::pair<OTNymID, std::vector<AuthorityKeys>>;
+    using NymKeys = std::pair<OTNymID, std::pmr::vector<AuthorityKeys>>;
     using Serialized = proto::Nym;
     using key_type = Identifier;
     using value_type = Authority;
@@ -110,7 +110,7 @@ public:
     virtual auto ContactCredentialVersion() const -> VersionNumber = 0;
     virtual auto ContactDataVersion() const -> VersionNumber = 0;
     virtual auto Contracts(const core::UnitType currency, const bool onlyActive)
-        const -> std::set<OTIdentifier> = 0;
+        const -> std::pmr::set<OTIdentifier> = 0;
     virtual auto EmailAddresses(bool active = true) const -> std::string = 0;
     virtual auto EncryptionTargets() const noexcept -> NymKeys = 0;
     virtual auto end() const noexcept -> const_iterator = 0;
@@ -183,7 +183,7 @@ public:
         const contact::ClaimType type,
         bool active = true) const -> std::string = 0;
     virtual auto SocialMediaProfileTypes() const
-        -> const std::set<contact::ClaimType> = 0;
+        -> const std::pmr::set<contact::ClaimType> = 0;
     virtual auto Source() const -> const identity::Source& = 0;
     virtual auto TransportKey(Data& pubkey, const PasswordPrompt& reason) const
         -> OTSecret = 0;

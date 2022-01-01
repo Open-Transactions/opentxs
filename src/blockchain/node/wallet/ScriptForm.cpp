@@ -7,6 +7,7 @@
 #include "1_Internal.hpp"                         // IWYU pragma: associated
 #include "blockchain/node/wallet/ScriptForm.hpp"  // IWYU pragma: associated
 
+#include <memory_resource>
 #include <optional>
 #include <utility>
 

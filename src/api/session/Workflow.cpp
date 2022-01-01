@@ -481,7 +481,7 @@ auto Workflow::AbortTransfer(
 
     const bool isInternal = isInternalTransfer(
         transfer.GetRealAccountID(), transfer.GetDestinationAcctID());
-    const std::set<PaymentWorkflowType> type{
+    const std::pmr::set<PaymentWorkflowType> type{
         isInternal ? PaymentWorkflowType::InternalTransfer
                    : PaymentWorkflowType::OutgoingTransfer};
     Lock global(lock_);
@@ -544,7 +544,7 @@ auto Workflow::AcceptTransfer(
     // Ignore this event for internal transfers.
     if (isInternal) { return true; }
 
-    const std::set<PaymentWorkflowType> type{
+    const std::pmr::set<PaymentWorkflowType> type{
         PaymentWorkflowType::IncomingTransfer};
     Lock global(lock_);
     const auto workflow = get_workflow(global, type, nymID.str(), *transfer);
@@ -583,7 +583,7 @@ auto Workflow::AcknowledgeTransfer(
 
     const bool isInternal = isInternalTransfer(
         transfer.GetRealAccountID(), transfer.GetDestinationAcctID());
-    const std::set<PaymentWorkflowType> type{
+    const std::pmr::set<PaymentWorkflowType> type{
         isInternal ? PaymentWorkflowType::InternalTransfer
                    : PaymentWorkflowType::OutgoingTransfer};
     Lock global(lock_);
@@ -1227,7 +1227,7 @@ auto Workflow::ClearCheque(
     const auto output = add_cheque_event(
         lock,
         nymID,
-        api_.Factory().Identifier(workflow->account(0)),
+        api_.Factory().IdentifierFromBase58(workflow->account(0)),
         *workflow,
         PaymentWorkflowState::Accepted,
         proto::PAYMENTEVENTTYPE_ACCEPT,
@@ -1304,7 +1304,7 @@ auto Workflow::ClearTransfer(
     }
 
     const bool isInternal = isInternalTransfer(accountID, destinationAccountID);
-    const std::set<PaymentWorkflowType> type{
+    const std::pmr::set<PaymentWorkflowType> type{
         isInternal ? PaymentWorkflowType::InternalTransfer
                    : PaymentWorkflowType::OutgoingTransfer};
     Lock global(lock_);
@@ -1402,7 +1402,7 @@ auto Workflow::CompleteTransfer(
     }
 
     const bool isInternal = isInternalTransfer(accountID, destinationAccountID);
-    const std::set<PaymentWorkflowType> type{
+    const std::pmr::set<PaymentWorkflowType> type{
         isInternal ? PaymentWorkflowType::InternalTransfer
                    : PaymentWorkflowType::OutgoingTransfer};
     Lock global(lock_);
@@ -2153,7 +2153,7 @@ auto Workflow::FinishCheque(
 template <typename T>
 auto Workflow::get_workflow(
     const Lock& global,
-    const std::set<PaymentWorkflowType>& types,
+    const std::pmr::set<PaymentWorkflowType>& types,
     const std::string& nymID,
     const T& source) const -> std::shared_ptr<proto::PaymentWorkflow>
 {
@@ -2186,7 +2186,7 @@ auto Workflow::get_workflow_by_id(
 }
 
 auto Workflow::get_workflow_by_id(
-    const std::set<PaymentWorkflowType>& types,
+    const std::pmr::set<PaymentWorkflowType>& types,
     const std::string& nymID,
     const std::string& workflowID) const
     -> std::shared_ptr<proto::PaymentWorkflow>
@@ -2205,7 +2205,7 @@ auto Workflow::get_workflow_by_id(
 }
 
 auto Workflow::get_workflow_by_source(
-    const std::set<PaymentWorkflowType>& types,
+    const std::pmr::set<PaymentWorkflowType>& types,
     const std::string& nymID,
     const std::string& sourceID) const
     -> std::shared_ptr<proto::PaymentWorkflow>
@@ -2400,11 +2400,11 @@ auto Workflow::isTransfer(const Item& item) -> bool
 auto Workflow::List(
     const identifier::Nym& nymID,
     const PaymentWorkflowType type,
-    const PaymentWorkflowState state) const -> std::set<OTIdentifier>
+    const PaymentWorkflowState state) const -> std::pmr::set<OTIdentifier>
 {
     const auto input =
         api_.Storage().PaymentWorkflowsByState(nymID.str(), type, state);
-    std::set<OTIdentifier> output{};
+    std::pmr::set<OTIdentifier> output{};
     std::transform(
         input.begin(),
         input.end(),
@@ -2918,9 +2918,9 @@ auto Workflow::validate_recipient(
 
 auto Workflow::WorkflowsByAccount(
     const identifier::Nym& nymID,
-    const Identifier& accountID) const -> std::vector<OTIdentifier>
+    const Identifier& accountID) const -> std::pmr::vector<OTIdentifier>
 {
-    std::vector<OTIdentifier> output{};
+    std::pmr::vector<OTIdentifier> output{};
     const auto workflows =
         api_.Storage().PaymentWorkflowsByAccount(nymID.str(), accountID.str());
     std::transform(

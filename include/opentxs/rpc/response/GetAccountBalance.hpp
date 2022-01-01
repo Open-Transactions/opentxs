@@ -26,6 +26,8 @@ namespace request
 {
 class GetAccountBalance;
 }  // namespace request
+
+class AccountData;
 }  // namespace rpc
 }  // namespace opentxs
 
@@ -38,7 +40,7 @@ namespace response
 class OPENTXS_EXPORT GetAccountBalance final : public Base
 {
 public:
-    using Data = std::vector<AccountData>;
+    using Data = std::pmr::vector<AccountData>;
 
     auto Balances() const noexcept -> const Data&;
 

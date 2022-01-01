@@ -48,7 +48,7 @@ class OPENTXS_EXPORT ContactSection
 {
 public:
     using GroupMap =
-        std::map<contact::ClaimType, std::shared_ptr<ContactGroup>>;
+        std::pmr::map<contact::ClaimType, std::shared_ptr<ContactGroup>>;
 
     ContactSection(
         const api::Session& api,

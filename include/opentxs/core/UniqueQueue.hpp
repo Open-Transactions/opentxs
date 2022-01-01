@@ -68,9 +68,9 @@ public:
         assert(set_.size() == queue_.size());
     }
 
-    auto Copy() const -> std::map<T, Key>
+    auto Copy() const -> std::pmr::map<T, Key>
     {
-        std::map<T, Key> output{};
+        std::pmr::map<T, Key> output{};
         Lock lock(lock_);
 
         /* TODO: this line will cause a segfault in the clang-5 ast parser.
@@ -147,8 +147,8 @@ public:
 
 private:
     mutable std::mutex lock_;
-    mutable std::deque<std::pair<Key, T>> queue_;
-    mutable std::set<T> set_;
+    mutable std::pmr::deque<std::pair<Key, T>> queue_;
+    mutable std::pmr::set<T> set_;
 
     UniqueQueue(const UniqueQueue&) = delete;
     UniqueQueue(UniqueQueue&&) = delete;

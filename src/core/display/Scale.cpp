@@ -21,7 +21,7 @@ namespace opentxs::display
 Scale::Scale(
     const std::string& prefix,
     const std::string& suffix,
-    const std::vector<Ratio>& ratios,
+    const std::pmr::vector<Ratio>& ratios,
     const OptionalInt defaultMinDecimals,
     const OptionalInt defaultMaxDecimals) noexcept
     : imp_(std::make_unique<Imp>(
@@ -83,7 +83,7 @@ auto Scale::Import(const std::string& formatted) const noexcept(false) -> Amount
 
 auto Scale::Prefix() const noexcept -> std::string { return imp_->prefix_; }
 
-auto Scale::Ratios() const noexcept -> const std::vector<Ratio>&
+auto Scale::Ratios() const noexcept -> const std::pmr::vector<Ratio>&
 {
     return imp_->ratios_;
 }

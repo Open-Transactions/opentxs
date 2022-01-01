@@ -41,7 +41,7 @@ class Mempool : public Job
 {
 public:
     using Transaction = std::shared_ptr<const block::bitcoin::Transaction>;
-    using Transactions = std::vector<Transaction>;
+    using Transactions = std::pmr::vector<Transaction>;
 
     auto Queue(Transaction tx) noexcept -> bool;
     auto Queue(Transactions&& transactions) noexcept -> bool;

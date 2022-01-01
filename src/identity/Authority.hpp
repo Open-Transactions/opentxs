@@ -191,9 +191,9 @@ public:
         const proto::ContactData& contactData,
         const PasswordPrompt& reason) -> bool final;
     void RevokeContactCredentials(
-        std::list<std::string>& contactCredentialIDs) final;
+        std::pmr::list<std::string>& contactCredentialIDs) final;
     void RevokeVerificationCredentials(
-        std::list<std::string>& verificationCredentialIDs) final;
+        std::pmr::list<std::string>& verificationCredentialIDs) final;
     auto WriteCredentials() const -> bool final;
 
     ~Authority() final = default;
@@ -202,16 +202,16 @@ private:
     friend opentxs::Factory;
     friend internal::Authority;
 
-    using ContactCredentialMap =
-        std::map<OTIdentifier, std::unique_ptr<credential::internal::Contact>>;
-    using KeyCredentialMap = std::
+    using ContactCredentialMap = std::pmr::
+        map<OTIdentifier, std::unique_ptr<credential::internal::Contact>>;
+    using KeyCredentialMap = std::pmr::
         map<OTIdentifier, std::unique_ptr<credential::internal::Secondary>>;
     using KeyCredentialItem = std::
         pair<OTIdentifier, std::unique_ptr<credential::internal::Secondary>>;
-    using VerificationCredentialMap = std::
+    using VerificationCredentialMap = std::pmr::
         map<OTIdentifier, std::unique_ptr<credential::internal::Verification>>;
     using mapOfCredentials =
-        std::map<std::string, std::unique_ptr<credential::internal::Base>>;
+        std::pmr::map<std::string, std::unique_ptr<credential::internal::Base>>;
 
     static const VersionConversionMap authority_to_contact_;
     static const VersionConversionMap authority_to_primary_;
@@ -280,7 +280,8 @@ private:
         const credential::Base::SerializedType& serialized,
         const proto::KeyMode mode,
         const proto::CredentialRole role,
-        std::map<OTIdentifier, std::unique_ptr<Type>>& map) noexcept(false);
+        std::pmr::map<OTIdentifier, std::unique_ptr<Type>>&
+            map) noexcept(false);
     static auto load_master(
         const api::Session& api,
         identity::internal::Authority& owner,
@@ -297,7 +298,7 @@ private:
         const Serialized& serialized,
         const proto::KeyMode mode,
         const proto::CredentialRole role) noexcept(false)
-        -> std::map<OTIdentifier, std::unique_ptr<Type>>;
+        -> std::pmr::map<OTIdentifier, std::unique_ptr<Type>>;
 
     auto get_keypair(
         const crypto::key::asymmetric::Algorithm type,

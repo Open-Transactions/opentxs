@@ -75,12 +75,12 @@ public:
         const PasswordPrompt& reason) const noexcept -> bool;
     auto DecodeNotificationElements(
         const std::uint8_t version,
-        const std::vector<Space>& elements,
+        const std::pmr::vector<Space>& elements,
         const PasswordPrompt& reason) const noexcept -> opentxs::PaymentCode;
     auto GenerateNotificationElements(
         const PaymentCode& recipient,
         const crypto::key::EllipticCurve& privateKey,
-        const PasswordPrompt& reason) const noexcept -> std::vector<Space>;
+        const PasswordPrompt& reason) const noexcept -> std::pmr::vector<Space>;
     auto ID() const noexcept -> const identifier::Nym&;
     OPENTXS_NO_EXPORT auto Internal() const noexcept
         -> const internal::PaymentCode&;

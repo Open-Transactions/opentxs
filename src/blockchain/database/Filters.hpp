@@ -93,15 +93,15 @@ public:
         const noexcept -> bool;
     auto StoreFilters(
         const filter::Type type,
-        const std::vector<Header>& headers,
-        const std::vector<Filter>& filters,
+        const std::pmr::vector<Header>& headers,
+        const std::pmr::vector<Filter>& filters,
         const block::Position& tip) const noexcept -> bool;
-    auto StoreFilters(const filter::Type type, std::vector<Filter> filters)
+    auto StoreFilters(const filter::Type type, std::pmr::vector<Filter> filters)
         const noexcept -> bool;
     auto StoreHeaders(
         const filter::Type type,
         const ReadView previous,
-        const std::vector<Header> headers) const noexcept -> bool;
+        const std::pmr::vector<Header> headers) const noexcept -> bool;
 
     Filters(
         const api::Session& api,

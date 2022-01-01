@@ -8,6 +8,7 @@
 #include "opentxs/Version.hpp"  // IWYU pragma: associated
 
 #include <cstdint>
+#include <memory_resource>
 #include <optional>  // IWYU pragma: keep
 #include <set>
 #include <tuple>
@@ -40,7 +41,7 @@ OPENTXS_EXPORT auto BlockHash(
     const Type chain,
     const ReadView input,
     const AllocateOutput output) noexcept -> bool;
-OPENTXS_EXPORT auto DefinedChains() noexcept -> const std::set<Type>&;
+OPENTXS_EXPORT auto DefinedChains() noexcept -> const std::pmr::set<Type>&;
 OPENTXS_EXPORT auto DisplayString(const Type type) noexcept -> std::string;
 OPENTXS_EXPORT auto FilterHash(
     const api::Session& api,
@@ -84,7 +85,7 @@ OPENTXS_EXPORT auto ScriptHashSegwit(
     const Type chain,
     const ReadView input,
     const AllocateOutput output) noexcept -> bool;
-OPENTXS_EXPORT auto SupportedChains() noexcept -> const std::set<Type>&;
+OPENTXS_EXPORT auto SupportedChains() noexcept -> const std::pmr::set<Type>&;
 OPENTXS_EXPORT auto TickerSymbol(const Type type) noexcept -> std::string;
 OPENTXS_EXPORT auto TransactionHash(
     const api::Session& api,
@@ -302,7 +303,7 @@ struct ScriptElement {
     std::optional<ScriptPushBytes> bytes_{};
     std::optional<ScriptData> data_{};
 };
-using ScriptElements = std::vector<ScriptElement>;
+using ScriptElements = std::pmr::vector<ScriptElement>;
 }  // namespace bitcoin
 
 using Height = std::int64_t;

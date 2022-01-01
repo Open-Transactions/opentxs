@@ -16,8 +16,8 @@ class BlockIndex
 public:
     auto Query(const block::Hash& block) const noexcept -> bool;
 
-    auto Add(const std::vector<block::Position>& blocks) noexcept -> void;
-    auto Forget(const std::vector<block::pHash>& blocks) noexcept -> void;
+    auto Add(const std::pmr::vector<block::Position>& blocks) noexcept -> void;
+    auto Forget(const std::pmr::vector<block::pHash>& blocks) noexcept -> void;
 
     BlockIndex() noexcept;
 

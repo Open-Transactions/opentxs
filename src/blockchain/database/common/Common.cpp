@@ -37,10 +37,10 @@ auto ChainToSyncTable(const Chain chain) noexcept(false) -> int
     return map.at(chain).first;
 }
 
-auto SyncTables() noexcept -> const std::vector<SyncTableData>&
+auto SyncTables() noexcept -> const std::pmr::vector<SyncTableData>&
 {
     static const auto map = [] {
-        auto output = std::vector<SyncTableData>{};
+        auto output = std::pmr::vector<SyncTableData>{};
 
         for (const auto& [key, value] : sync_map_()) {
             output.emplace_back(value);

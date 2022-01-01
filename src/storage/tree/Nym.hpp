@@ -66,7 +66,7 @@ class Nym final : public Node
 {
 public:
     auto BlockchainAccountList(const core::UnitType type) const
-        -> std::set<std::string>;
+        -> std::pmr::set<std::string>;
     auto BlockchainAccountType(const std::string& accountID) const
         -> core::UnitType;
 
@@ -185,9 +185,10 @@ private:
     mutable std::unique_ptr<storage::Contexts> contexts_;
     std::string contexts_root_;
     mutable std::mutex blockchain_lock_;
-    std::map<core::UnitType, std::set<std::string>> blockchain_account_types_{};
-    std::map<std::string, core::UnitType> blockchain_account_index_;
-    std::map<std::string, std::shared_ptr<proto::HDAccount>>
+    std::pmr::map<core::UnitType, std::pmr::set<std::string>>
+        blockchain_account_types_{};
+    std::pmr::map<std::string, core::UnitType> blockchain_account_index_;
+    std::pmr::map<std::string, std::shared_ptr<proto::HDAccount>>
         blockchain_accounts_{};
     std::string issuers_root_;
     mutable std::mutex issuers_lock_;
@@ -195,7 +196,7 @@ private:
     std::string workflows_root_;
     mutable std::mutex workflows_lock_;
     mutable std::unique_ptr<storage::PaymentWorkflows> workflows_;
-    std::map<PurseID, std::string> purse_id_;
+    std::pmr::map<PurseID, std::string> purse_id_;
 
     template <typename T, typename... Args>
     auto construct(

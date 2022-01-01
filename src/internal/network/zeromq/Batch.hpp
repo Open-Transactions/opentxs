@@ -42,16 +42,16 @@ class Batch
 {
 public:
     const BatchID id_;
-    std::vector<OTZMQListenCallback> listen_callbacks_;
-    std::vector<OTZMQReplyCallback> reply_callbacks_;
-    std::vector<socket::Raw> sockets_;
+    std::pmr::vector<OTZMQListenCallback> listen_callbacks_;
+    std::pmr::vector<OTZMQReplyCallback> reply_callbacks_;
+    std::pmr::vector<socket::Raw> sockets_;
 
     auto ClearCallbacks() noexcept -> void;
 
     Batch(
         const BatchID id,
         const zeromq::Context& context,
-        std::vector<socket::Type>&& types) noexcept;
+        std::pmr::vector<socket::Type>&& types) noexcept;
 
     ~Batch();
 

@@ -11,7 +11,6 @@
 #include <iterator>
 
 #include "internal/network/zeromq/socket/Factory.hpp"
-#include "internal/network/zeromq/socket/Raw.hpp"
 #include "opentxs/network/zeromq/ListenCallback.hpp"
 #include "opentxs/network/zeromq/ReplyCallback.hpp"
 
@@ -20,7 +19,7 @@ namespace opentxs::network::zeromq::internal
 Batch::Batch(
     const BatchID id,
     const zeromq::Context& context,
-    std::vector<socket::Type>&& types) noexcept
+    std::pmr::vector<socket::Type>&& types) noexcept
     : id_(id)
     , listen_callbacks_()
     , reply_callbacks_()

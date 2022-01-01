@@ -82,7 +82,7 @@ public:
     // account label, resync nym
     using ExtraArgs = std::pair<std::string, bool>;
 
-    virtual auto Accounts() const -> std::vector<OTIdentifier> = 0;
+    virtual auto Accounts() const -> std::pmr::vector<OTIdentifier> = 0;
     virtual auto AdminPassword() const -> const std::string& = 0;
     virtual auto AdminAttempted() const -> bool = 0;
     virtual auto FinalizeServerCommand(
@@ -167,7 +167,7 @@ public:
         std::shared_ptr<Message> message,
         std::shared_ptr<Ledger> inbox,
         std::shared_ptr<Ledger> outbox,
-        std::set<OTManagedNumber>* numbers,
+        std::pmr::set<OTManagedNumber>* numbers,
         const PasswordPrompt& reason,
         const ExtraArgs& args = ExtraArgs{}) -> QueueResult = 0;
     virtual auto RefreshNymbox(
@@ -179,7 +179,7 @@ public:
     virtual auto Resync(const proto::Context& serialized) -> bool = 0;
     [[deprecated]] virtual auto SendMessage(
         const api::session::Client& client,
-        const std::set<OTManagedNumber>& pending,
+        const std::pmr::set<OTManagedNumber>& pending,
         Server& context,
         const Message& message,
         const PasswordPrompt& reason,

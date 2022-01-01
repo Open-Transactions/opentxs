@@ -234,7 +234,7 @@ auto ContactList::startup() noexcept -> void
 
     for (const auto& [id, alias] : contacts) {
         auto custom = CustomData{};
-        const auto contactID = Widget::api_.Factory().Identifier(id);
+        const auto contactID = Widget::api_.Factory().IdentifierFromBase58(id);
         process_contact(contactID);
     }
 

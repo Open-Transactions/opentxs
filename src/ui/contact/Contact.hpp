@@ -89,8 +89,8 @@ private:
         Callbacks cb_{};
     };
 
-    static const std::set<contact::SectionType> allowed_types_;
-    static const std::map<contact::SectionType, int> sort_keys_;
+    static const std::pmr::set<contact::SectionType> allowed_types_;
+    static const std::pmr::map<contact::SectionType, int> sort_keys_;
 
     const ListenerDefinitions listeners_;
     mutable CallbackHolder callbacks_;

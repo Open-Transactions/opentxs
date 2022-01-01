@@ -163,7 +163,7 @@ auto Nym::Bip47Channels() const -> const storage::Bip47Channels&
 }
 
 auto Nym::BlockchainAccountList(const core::UnitType type) const
-    -> std::set<std::string>
+    -> std::pmr::set<std::string>
 {
     Lock lock(blockchain_lock_);
 

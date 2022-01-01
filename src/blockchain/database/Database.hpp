@@ -125,7 +125,7 @@ public:
         const Subchain subchain,
         const block::Position& block,
         const std::size_t blockIndex,
-        const std::vector<std::uint32_t> outputIndices,
+        const std::pmr::vector<std::uint32_t> outputIndices,
         const block::bitcoin::Transaction& transaction) const noexcept
         -> bool final
     {
@@ -140,7 +140,7 @@ public:
     auto AddMempoolTransaction(
         const NodeID& balanceNode,
         const Subchain subchain,
-        const std::vector<std::uint32_t> outputIndices,
+        const std::pmr::vector<std::uint32_t> outputIndices,
         const block::bitcoin::Transaction& transaction) const noexcept
         -> bool final
     {
@@ -203,7 +203,8 @@ public:
     {
         return blocks_.Tip();
     }
-    auto CompletedProposals() const noexcept -> std::set<OTIdentifier> final
+    auto CompletedProposals() const noexcept
+        -> std::pmr::set<OTIdentifier> final
     {
         return wallet_.CompletedProposals();
     }
@@ -235,7 +236,7 @@ public:
     {
         return wallet_.FinalizeReorg(tx, pos);
     }
-    auto ForgetProposals(const std::set<OTIdentifier>& ids) const noexcept
+    auto ForgetProposals(const std::pmr::set<OTIdentifier>& ids) const noexcept
         -> bool final
     {
         return wallet_.ForgetProposals(ids);
@@ -246,8 +247,9 @@ public:
     }
     auto Get(
         const Protocol protocol,
-        const std::set<Type> onNetworks,
-        const std::set<Service> withServices) const noexcept -> Address final
+        const std::pmr::set<Type> onNetworks,
+        const std::pmr::set<Service> withServices) const noexcept
+        -> Address final
     {
         return common_.Find(chain_, protocol, onNetworks, withServices);
     }
@@ -270,29 +272,29 @@ public:
         return wallet_.GetBalance(key);
     }
     auto GetOutputs(node::TxoState type) const noexcept
-        -> std::vector<UTXO> final
+        -> std::pmr::vector<UTXO> final
     {
         return wallet_.GetOutputs(type);
     }
     auto GetOutputs(const identifier::Nym& owner, node::TxoState type)
-        const noexcept -> std::vector<UTXO> final
+        const noexcept -> std::pmr::vector<UTXO> final
     {
         return wallet_.GetOutputs(owner, type);
     }
     auto GetOutputs(
         const identifier::Nym& owner,
         const Identifier& node,
-        node::TxoState type) const noexcept -> std::vector<UTXO> final
+        node::TxoState type) const noexcept -> std::pmr::vector<UTXO> final
     {
         return wallet_.GetOutputs(owner, node, type);
     }
     auto GetOutputs(const crypto::Key& key, node::TxoState type) const noexcept
-        -> std::vector<UTXO> final
+        -> std::pmr::vector<UTXO> final
     {
         return wallet_.GetOutputs(key, type);
     }
     auto GetOutputTags(const block::Outpoint& output) const noexcept
-        -> std::set<node::TxoTag> final
+        -> std::pmr::set<node::TxoTag> final
     {
         return wallet_.GetOutputTags(output);
     }
@@ -306,26 +308,27 @@ public:
     {
         return wallet_.GetSubchainID(balanceNode, subchain);
     }
-    auto GetTransactions() const noexcept -> std::vector<block::pTxid> final
+    auto GetTransactions() const noexcept
+        -> std::pmr::vector<block::pTxid> final
     {
         return wallet_.GetTransactions();
     }
     auto GetTransactions(const identifier::Nym& account) const noexcept
-        -> std::vector<block::pTxid> final
+        -> std::pmr::vector<block::pTxid> final
     {
         return wallet_.GetTransactions(account);
     }
     auto GetUnconfirmedTransactions() const noexcept
-        -> std::set<block::pTxid> final
+        -> std::pmr::set<block::pTxid> final
     {
         return wallet_.GetUnconfirmedTransactions();
     }
-    auto GetUnspentOutputs() const noexcept -> std::vector<UTXO> final
+    auto GetUnspentOutputs() const noexcept -> std::pmr::vector<UTXO> final
     {
         return wallet_.GetUnspentOutputs();
     }
     auto GetUnspentOutputs(const NodeID& balanceNode, const Subchain subchain)
-        const noexcept -> std::vector<UTXO> final
+        const noexcept -> std::pmr::vector<UTXO> final
     {
         return wallet_.GetUnspentOutputs(balanceNode, subchain);
     }
@@ -361,7 +364,7 @@ public:
     {
         return headers_.HeaderExists(hash);
     }
-    auto Import(std::vector<Address> peers) const noexcept -> bool final
+    auto Import(std::pmr::vector<Address> peers) const noexcept -> bool final
     {
         return common_.Import(std::move(peers));
     }
@@ -396,7 +399,7 @@ public:
         return wallet_.LoadProposal(id);
     }
     auto LoadProposals() const noexcept
-        -> std::vector<proto::BlockchainTransactionProposal> final
+        -> std::pmr::vector<proto::BlockchainTransactionProposal> final
     {
         return wallet_.LoadProposals();
     }
@@ -406,11 +409,11 @@ public:
         return sync_.Load(height, output);
     }
     auto LookupContact(const Data& pubkeyHash) const noexcept
-        -> std::set<OTIdentifier> final
+        -> std::pmr::set<OTIdentifier> final
     {
         return wallet_.LookupContact(pubkeyHash);
     }
-    auto RecentHashes() const noexcept -> std::vector<block::pHash> final
+    auto RecentHashes() const noexcept -> std::pmr::vector<block::pHash> final
     {
         return headers_.RecentHashes();
     }
@@ -425,7 +428,8 @@ public:
         const NodeID& balanceNode,
         const Subchain subchain,
         const SubchainIndex& index,
-        const std::vector<block::Position>& reorg) const noexcept -> bool final
+        const std::pmr::vector<block::Position>& reorg) const noexcept
+        -> bool final
     {
         return wallet_.ReorgTo(
             headerOracleLock, tx, headers, balanceNode, subchain, index, reorg);
@@ -467,15 +471,15 @@ public:
     {
         return lmdb_.TransactionRW();
     }
-    auto StoreFilters(const filter::Type type, std::vector<Filter> filters)
+    auto StoreFilters(const filter::Type type, std::pmr::vector<Filter> filters)
         const noexcept -> bool final
     {
         return filters_.StoreFilters(type, std::move(filters));
     }
     auto StoreFilters(
         const filter::Type type,
-        const std::vector<Header>& headers,
-        const std::vector<Filter>& filters,
+        const std::pmr::vector<Header>& headers,
+        const std::pmr::vector<Filter>& filters,
         const block::Position& tip) const noexcept -> bool final
     {
         return filters_.StoreFilters(type, headers, filters, tip);
@@ -483,7 +487,7 @@ public:
     auto StoreFilterHeaders(
         const filter::Type type,
         const ReadView previous,
-        const std::vector<Header> headers) const noexcept -> bool final
+        const std::pmr::vector<Header> headers) const noexcept -> bool final
     {
         return filters_.StoreHeaders(type, previous, std::move(headers));
     }
@@ -510,7 +514,7 @@ public:
     }
     auto SubchainMatchBlock(
         const SubchainIndex& index,
-        const std::vector<std::pair<ReadView, MatchingIndices>>& results)
+        const std::pmr::vector<std::pair<ReadView, MatchingIndices>>& results)
         const noexcept -> bool final
     {
         return wallet_.SubchainMatchBlock(index, results);

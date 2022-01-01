@@ -114,38 +114,41 @@ struct NullWallet final : public node::internal::Wallet {
     {
         return {};
     }
-    auto GetOutputs() const noexcept -> std::vector<UTXO> final { return {}; }
-    auto GetOutputs(TxoState) const noexcept -> std::vector<UTXO> final
+    auto GetOutputs() const noexcept -> std::pmr::vector<UTXO> final
+    {
+        return {};
+    }
+    auto GetOutputs(TxoState) const noexcept -> std::pmr::vector<UTXO> final
     {
         return {};
     }
     auto GetOutputs(const identifier::Nym&) const noexcept
-        -> std::vector<UTXO> final
+        -> std::pmr::vector<UTXO> final
     {
         return {};
     }
     auto GetOutputs(const identifier::Nym&, TxoState) const noexcept
-        -> std::vector<UTXO> final
+        -> std::pmr::vector<UTXO> final
     {
         return {};
     }
     auto GetOutputs(const identifier::Nym&, const Identifier&) const noexcept
-        -> std::vector<UTXO> final
+        -> std::pmr::vector<UTXO> final
     {
         return {};
     }
     auto GetOutputs(const identifier::Nym&, const Identifier&, TxoState)
-        const noexcept -> std::vector<UTXO> final
+        const noexcept -> std::pmr::vector<UTXO> final
     {
         return {};
     }
     auto GetOutputs(const crypto::Key&, TxoState) const noexcept
-        -> std::vector<UTXO> final
+        -> std::pmr::vector<UTXO> final
     {
         return {};
     }
     auto GetTags(const block::Outpoint& output) const noexcept
-        -> std::set<TxoTag> final
+        -> std::pmr::set<TxoTag> final
     {
         return {};
     }
@@ -513,13 +516,13 @@ auto Base::GetPeerCount() const noexcept -> std::size_t
     return peer_.GetPeerCount();
 }
 
-auto Base::GetTransactions() const noexcept -> std::vector<block::pTxid>
+auto Base::GetTransactions() const noexcept -> std::pmr::vector<block::pTxid>
 {
     return database_.GetTransactions();
 }
 
 auto Base::GetTransactions(const identifier::Nym& account) const noexcept
-    -> std::vector<block::pTxid>
+    -> std::pmr::vector<block::pTxid>
 {
     return database_.GetTransactions(account);
 }
@@ -723,7 +726,7 @@ auto Base::process_header(network::zeromq::Message&& in) noexcept -> void
     waiting_for_headers_->Off();
     headers_received_ = Clock::now();
     auto promise = int{};
-    auto input = std::vector<ReadView>{};
+    auto input = std::pmr::vector<ReadView>{};
 
     {
         const auto body = in.Body();
@@ -745,7 +748,7 @@ auto Base::process_header(network::zeromq::Message&& in) noexcept -> void
         promise = promiseFrame.as<int>();
     }
 
-    auto headers = std::vector<std::unique_ptr<block::Header>>{};
+    auto headers = std::pmr::vector<std::unique_ptr<block::Header>>{};
 
     for (const auto& header : input) {
         headers.emplace_back(instantiate_header(header));
@@ -999,7 +1002,7 @@ auto Base::process_sync_data(network::zeromq::Message&& in) noexcept -> void
     }
 
     auto prior = block::BlankHash();
-    auto hashes = std::vector<block::pHash>{};
+    auto hashes = std::pmr::vector<block::pHash>{};
     const auto accepted =
         header_.Internal().ProcessSyncData(prior, hashes, data);
 
@@ -1036,8 +1039,8 @@ auto Base::RequestBlock(const block::Hash& block) const noexcept -> bool
     return peer_.RequestBlock(block);
 }
 
-auto Base::RequestBlocks(const std::vector<ReadView>& hashes) const noexcept
-    -> bool
+auto Base::RequestBlocks(
+    const std::pmr::vector<ReadView>& hashes) const noexcept -> bool
 {
     if (false == running_.load()) { return false; }
 

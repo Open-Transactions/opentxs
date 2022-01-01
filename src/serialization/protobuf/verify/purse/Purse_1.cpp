@@ -44,7 +44,7 @@ auto CheckProto_1(const Purse& input, const bool silent, std::string& value)
         }
     }
 
-    auto allowedStates = std::set<TokenState>{};
+    auto allowedStates = std::pmr::set<TokenState>{};
     auto validFrom = std::int64_t{Clock::to_time_t(Time::min())};
     auto validTo = std::int64_t{Clock::to_time_t(Time::max())};
 

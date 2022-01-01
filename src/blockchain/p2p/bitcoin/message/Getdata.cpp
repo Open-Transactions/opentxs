@@ -65,7 +65,7 @@ auto BitcoinP2PGetdata(
         return nullptr;
     }
 
-    std::vector<blockchain::bitcoin::Inventory> items{};
+    std::pmr::vector<blockchain::bitcoin::Inventory> items{};
 
     if (count > 0) {
         for (std::size_t i{0}; i < count; ++i) {
@@ -90,7 +90,7 @@ auto BitcoinP2PGetdata(
 auto BitcoinP2PGetdata(
     const api::Session& api,
     const blockchain::Type network,
-    std::vector<blockchain::bitcoin::Inventory>&& payload)
+    std::pmr::vector<blockchain::bitcoin::Inventory>&& payload)
     -> blockchain::p2p::bitcoin::message::internal::Getdata*
 {
     namespace bitcoin = blockchain::p2p::bitcoin;
@@ -105,7 +105,7 @@ namespace opentxs::blockchain::p2p::bitcoin::message::implementation
 Getdata::Getdata(
     const api::Session& api,
     const blockchain::Type network,
-    std::vector<blockchain::bitcoin::Inventory>&& payload) noexcept
+    std::pmr::vector<blockchain::bitcoin::Inventory>&& payload) noexcept
     : Message(api, network, bitcoin::Command::getdata)
     , payload_(std::move(payload))
 {
@@ -115,7 +115,7 @@ Getdata::Getdata(
 Getdata::Getdata(
     const api::Session& api,
     std::unique_ptr<Header> header,
-    std::vector<blockchain::bitcoin::Inventory>&& payload) noexcept
+    std::pmr::vector<blockchain::bitcoin::Inventory>&& payload) noexcept
     : Message(api, std::move(header))
     , payload_(std::move(payload))
 {

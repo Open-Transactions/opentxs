@@ -101,7 +101,7 @@ private:
     using SubaccountMap = std::
         map<BlockchainAccountStatusRowID, std::pair<std::string, CustomData>>;
     using ChildMap =
-        std::map<blockchain::crypto::SubaccountType, SubaccountMap>;
+        std::pmr::map<blockchain::crypto::SubaccountType, SubaccountMap>;
 
     const blockchain::Type chain_;
 

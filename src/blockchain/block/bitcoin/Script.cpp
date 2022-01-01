@@ -13,6 +13,7 @@
 #include <cstdint>
 #include <cstring>
 #include <iterator>
+#include <memory_resource>
 #include <numeric>
 #include <sstream>
 #include <stdexcept>
@@ -624,7 +625,7 @@ auto Script::evaluate_segwit(const ScriptElements& script) noexcept -> Pattern
 }
 
 auto Script::ExtractElements(const filter::Type style) const noexcept
-    -> std::vector<Space>
+    -> std::pmr::vector<Space>
 {
     if (0 == elements_.size()) {
         LogTrace()(OT_PRETTY_CLASS())("skipping empty script").Flush();
@@ -632,7 +633,7 @@ auto Script::ExtractElements(const filter::Type style) const noexcept
         return {};
     }
 
-    auto output = std::vector<Space>{};
+    auto output = std::pmr::vector<Space>{};
 
     switch (style) {
         case filter::Type::ES: {
@@ -698,9 +699,9 @@ auto Script::ExtractElements(const filter::Type style) const noexcept
 }
 
 auto Script::ExtractPatterns(const api::Session& api) const noexcept
-    -> std::vector<PatternID>
+    -> std::pmr::vector<PatternID>
 {
-    auto output = std::vector<PatternID>{};
+    auto output = std::pmr::vector<PatternID>{};
     const auto hashes = LikelyPubkeyHashes(api);
     std::transform(
         std::begin(hashes),
@@ -856,9 +857,9 @@ auto Script::last_opcode(const ScriptElements& script) noexcept -> OP
 }
 
 auto Script::LikelyPubkeyHashes(const api::Session& api) const noexcept
-    -> std::vector<OTData>
+    -> std::pmr::vector<OTData>
 {
-    auto output = std::vector<OTData>{};
+    auto output = std::pmr::vector<OTData>{};
 
     switch (type_) {
         case Pattern::PayToPubkeyHash: {

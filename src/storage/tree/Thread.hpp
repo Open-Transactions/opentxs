@@ -23,6 +23,11 @@
 
 namespace opentxs
 {
+namespace proto
+{
+class StorageThreadItem;
+}  // namespace proto
+
 namespace storage
 {
 class Driver;
@@ -38,17 +43,17 @@ class Thread final : public Node
 private:
     friend Threads;
     using SortKey = std::tuple<std::size_t, std::int64_t, std::string>;
-    using SortedItems = std::map<SortKey, const proto::StorageThreadItem*>;
+    using SortedItems = std::pmr::map<SortKey, const proto::StorageThreadItem*>;
 
     std::string id_;
     std::string alias_;
     std::size_t index_;
     Mailbox& mail_inbox_;
     Mailbox& mail_outbox_;
-    std::map<std::string, proto::StorageThreadItem> items_;
+    std::pmr::map<std::string, proto::StorageThreadItem> items_;
     // It's important to use a sorted container for this so the thread ID can be
     // calculated deterministically
-    std::set<std::string> participants_;
+    std::pmr::set<std::string> participants_;
 
     void init(const std::string& hash) final;
     auto save(const Lock& lock) const -> bool final;
@@ -66,7 +71,7 @@ private:
     Thread(
         const Driver& storage,
         const std::string& id,
-        const std::set<std::string>& participants,
+        const std::pmr::set<std::string>& participants,
         Mailbox& mailInbox,
         Mailbox& mailOutbox);
     Thread() = delete;

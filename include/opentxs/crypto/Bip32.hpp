@@ -55,7 +55,7 @@ class OPENTXS_EXPORT Bip32
 public:
     struct Imp;
 
-    using Path = std::vector<Bip32Index>;
+    using Path = std::pmr::vector<Bip32Index>;
     using Key = std::tuple<OTSecret, OTSecret, OTData, Path, Bip32Fingerprint>;
 
     auto DeriveKey(

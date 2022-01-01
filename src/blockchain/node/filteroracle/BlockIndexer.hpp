@@ -120,7 +120,7 @@ private:
     auto batch_ready() const noexcept -> void { trigger(); }
     auto batch_size(const std::size_t in) const noexcept -> std::size_t;
     auto calculate_cfheaders(
-        std::vector<BlockIndexerData>& cache) const noexcept -> bool;
+        std::pmr::vector<BlockIndexerData>& cache) const noexcept -> bool;
     auto check_task(TaskType&) const noexcept -> void {}
     auto trigger_state_machine() const noexcept -> void { trigger(); }
     auto update_tip(const Position& position, const filter::pHeader&)

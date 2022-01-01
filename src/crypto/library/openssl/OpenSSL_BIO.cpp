@@ -60,7 +60,7 @@ void OpenSSL_BIO::read_bio(
     const std::size_t amount,
     std::size_t& read,
     std::size_t& total,
-    std::vector<std::byte>& output)
+    std::pmr::vector<std::byte>& output)
 {
     OT_ASSERT(std::numeric_limits<int>::max() >= amount);
 
@@ -69,11 +69,11 @@ void OpenSSL_BIO::read_bio(
     total += read;
 }
 
-auto OpenSSL_BIO::ToBytes() -> std::vector<std::byte>
+auto OpenSSL_BIO::ToBytes() -> std::pmr::vector<std::byte>
 {
     std::size_t read{0};
     std::size_t total{0};
-    std::vector<std::byte> output{};
+    std::pmr::vector<std::byte> output{};
     read_bio(READ_AMOUNT, read, total, output);
 
     if (0 == read) {

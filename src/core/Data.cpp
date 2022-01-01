@@ -18,6 +18,7 @@ extern "C" {
 #include <iomanip>
 #include <iterator>
 #include <limits>
+#include <memory_resource>
 #include <sstream>
 #include <utility>
 
@@ -122,12 +123,12 @@ auto Data::Factory(const Armored& source) -> OTData
     return OTData(new implementation::Data(source));
 }
 
-auto Data::Factory(const std::vector<unsigned char>& source) -> OTData
+auto Data::Factory(const std::pmr::vector<unsigned char>& source) -> OTData
 {
     return OTData(new implementation::Data(source));
 }
 
-auto Data::Factory(const std::vector<std::byte>& source) -> OTData
+auto Data::Factory(const std::pmr::vector<std::byte>& source) -> OTData
 {
     return OTData(new implementation::Data(source));
 }
@@ -206,7 +207,7 @@ Data::Data(Vector&& v) noexcept
 {
 }
 
-Data::Data(const std::vector<std::byte>& v) noexcept
+Data::Data(const std::pmr::vector<std::byte>& v) noexcept
     : data_(
           reinterpret_cast<const std::uint8_t*>(v.data()),
           reinterpret_cast<const std::uint8_t*>(v.data()) + v.size())

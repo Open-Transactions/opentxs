@@ -43,7 +43,7 @@ public:
     auto List(
         const identifier::Nym& nymID,
         const opentxs::blockchain::Type chain) const noexcept
-        -> std::set<OTIdentifier>;
+        -> std::pmr::set<OTIdentifier>;
     auto New(
         const opentxs::blockchain::crypto::SubaccountType type,
         const opentxs::blockchain::Type chain,
@@ -59,13 +59,13 @@ public:
     AccountCache(const api::Session& api) noexcept;
 
 private:
-    using Accounts = std::set<OTIdentifier>;
-    using NymAccountMap = std::map<OTNymID, Accounts>;
+    using Accounts = std::pmr::set<OTIdentifier>;
+    using NymAccountMap = std::pmr::map<OTNymID, Accounts>;
     using ChainAccountMap =
-        std::map<opentxs::blockchain::Type, std::optional<NymAccountMap>>;
-    using AccountNymIndex = std::map<OTIdentifier, OTNymID>;
-    using AccountTypeIndex =
-        std::map<OTIdentifier, opentxs::blockchain::crypto::SubaccountType>;
+        std::pmr::map<opentxs::blockchain::Type, std::optional<NymAccountMap>>;
+    using AccountNymIndex = std::pmr::map<OTIdentifier, OTNymID>;
+    using AccountTypeIndex = std::pmr::
+        map<OTIdentifier, opentxs::blockchain::crypto::SubaccountType>;
 
     const api::Session& api_;
     mutable std::mutex lock_;

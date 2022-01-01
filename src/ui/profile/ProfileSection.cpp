@@ -50,41 +50,42 @@ auto ProfileSectionWidget(
 
 namespace opentxs::ui
 {
-static const std::map<contact::SectionType, std::set<proto::ContactItemType>>
-    allowed_types_{
-        {contact::SectionType::Communication,
-         {
-             proto::CITEMTYPE_PHONE,
-             proto::CITEMTYPE_EMAIL,
-             proto::CITEMTYPE_SKYPE,
-             proto::CITEMTYPE_WIRE,
-             proto::CITEMTYPE_QQ,
-             proto::CITEMTYPE_BITMESSAGE,
-             proto::CITEMTYPE_WHATSAPP,
-             proto::CITEMTYPE_TELEGRAM,
-             proto::CITEMTYPE_KIK,
-             proto::CITEMTYPE_BBM,
-             proto::CITEMTYPE_WECHAT,
-             proto::CITEMTYPE_KAKAOTALK,
-         }},
-        {contact::SectionType::Profile,
-         {
-             proto::CITEMTYPE_FACEBOOK,  proto::CITEMTYPE_GOOGLE,
-             proto::CITEMTYPE_LINKEDIN,  proto::CITEMTYPE_VK,
-             proto::CITEMTYPE_ABOUTME,   proto::CITEMTYPE_ONENAME,
-             proto::CITEMTYPE_TWITTER,   proto::CITEMTYPE_MEDIUM,
-             proto::CITEMTYPE_TUMBLR,    proto::CITEMTYPE_YAHOO,
-             proto::CITEMTYPE_MYSPACE,   proto::CITEMTYPE_MEETUP,
-             proto::CITEMTYPE_REDDIT,    proto::CITEMTYPE_HACKERNEWS,
-             proto::CITEMTYPE_WIKIPEDIA, proto::CITEMTYPE_ANGELLIST,
-             proto::CITEMTYPE_GITHUB,    proto::CITEMTYPE_BITBUCKET,
-             proto::CITEMTYPE_YOUTUBE,   proto::CITEMTYPE_VIMEO,
-             proto::CITEMTYPE_TWITCH,    proto::CITEMTYPE_SNAPCHAT,
-         }},
-    };
+static const std::pmr::
+    map<contact::SectionType, std::pmr::set<proto::ContactItemType>>
+        allowed_types_{
+            {contact::SectionType::Communication,
+             {
+                 proto::CITEMTYPE_PHONE,
+                 proto::CITEMTYPE_EMAIL,
+                 proto::CITEMTYPE_SKYPE,
+                 proto::CITEMTYPE_WIRE,
+                 proto::CITEMTYPE_QQ,
+                 proto::CITEMTYPE_BITMESSAGE,
+                 proto::CITEMTYPE_WHATSAPP,
+                 proto::CITEMTYPE_TELEGRAM,
+                 proto::CITEMTYPE_KIK,
+                 proto::CITEMTYPE_BBM,
+                 proto::CITEMTYPE_WECHAT,
+                 proto::CITEMTYPE_KAKAOTALK,
+             }},
+            {contact::SectionType::Profile,
+             {
+                 proto::CITEMTYPE_FACEBOOK,  proto::CITEMTYPE_GOOGLE,
+                 proto::CITEMTYPE_LINKEDIN,  proto::CITEMTYPE_VK,
+                 proto::CITEMTYPE_ABOUTME,   proto::CITEMTYPE_ONENAME,
+                 proto::CITEMTYPE_TWITTER,   proto::CITEMTYPE_MEDIUM,
+                 proto::CITEMTYPE_TUMBLR,    proto::CITEMTYPE_YAHOO,
+                 proto::CITEMTYPE_MYSPACE,   proto::CITEMTYPE_MEETUP,
+                 proto::CITEMTYPE_REDDIT,    proto::CITEMTYPE_HACKERNEWS,
+                 proto::CITEMTYPE_WIKIPEDIA, proto::CITEMTYPE_ANGELLIST,
+                 proto::CITEMTYPE_GITHUB,    proto::CITEMTYPE_BITBUCKET,
+                 proto::CITEMTYPE_YOUTUBE,   proto::CITEMTYPE_VIMEO,
+                 proto::CITEMTYPE_TWITCH,    proto::CITEMTYPE_SNAPCHAT,
+             }},
+        };
 
 static const std::
-    map<contact::SectionType, std::map<proto::ContactItemType, int>>
+    map<contact::SectionType, std::pmr::map<proto::ContactItemType, int>>
         sort_keys_{
             {contact::SectionType::Communication,
              {
@@ -217,11 +218,11 @@ auto ProfileSection::Name(const std::string& lang) const noexcept -> std::string
 
 auto ProfileSection::process_section(
     const contact::ContactSection& section) noexcept
-    -> std::set<ProfileSectionRowID>
+    -> std::pmr::set<ProfileSectionRowID>
 {
     OT_ASSERT(row_id_ == section.Type())
 
-    std::set<ProfileSectionRowID> active{};
+    std::pmr::set<ProfileSectionRowID> active{};
 
     for (const auto& [type, group] : section) {
         OT_ASSERT(group)

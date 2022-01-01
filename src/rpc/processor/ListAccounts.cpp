@@ -56,7 +56,7 @@ auto RPC::list_accounts(const request::Base& base) const noexcept
         const auto serverAndUnit = (!haveNym) && haveServer && haveUnit;
         const auto all = haveNym && haveServer && haveUnit;
         const auto byNymOTX = [&] {
-            auto out = std::set<std::string>{};
+            auto out = std::pmr::set<std::string>{};
             const auto ids = session.Storage().AccountsByOwner(nym);
             std::transform(
                 ids.begin(),
@@ -67,7 +67,7 @@ auto RPC::list_accounts(const request::Base& base) const noexcept
             return out;
         };
         const auto byNymBlockchain = [&] {
-            auto out = std::set<std::string>{};
+            auto out = std::pmr::set<std::string>{};
             const auto ids = session.Crypto().Blockchain().AccountList(nym);
             std::transform(
                 ids.begin(),
@@ -85,7 +85,7 @@ auto RPC::list_accounts(const request::Base& base) const noexcept
             return out;
         };
         const auto byServerOTX = [&] {
-            auto out = std::set<std::string>{};
+            auto out = std::pmr::set<std::string>{};
             const auto ids = session.Storage().AccountsByServer(notary);
             std::transform(
                 ids.begin(),
@@ -96,7 +96,7 @@ auto RPC::list_accounts(const request::Base& base) const noexcept
             return out;
         };
         const auto byServerBlockchain = [&] {
-            auto out = std::set<std::string>{};
+            auto out = std::pmr::set<std::string>{};
             const auto chain = blockchain::Chain(session, notary);
             const auto ids = session.Crypto().Blockchain().AccountList(chain);
             std::transform(
@@ -115,7 +115,7 @@ auto RPC::list_accounts(const request::Base& base) const noexcept
             return out;
         };
         const auto byUnitOTX = [&] {
-            auto out = std::set<std::string>{};
+            auto out = std::pmr::set<std::string>{};
             const auto ids = session.Storage().AccountsByContract(unitID);
             std::transform(
                 ids.begin(),
@@ -126,7 +126,7 @@ auto RPC::list_accounts(const request::Base& base) const noexcept
             return out;
         };
         const auto byUnitBlockchain = [&] {
-            auto out = std::set<std::string>{};
+            auto out = std::pmr::set<std::string>{};
             const auto chain = blockchain::Chain(session, unitID);
             const auto ids = session.Crypto().Blockchain().AccountList(chain);
             std::transform(
@@ -149,7 +149,7 @@ auto RPC::list_accounts(const request::Base& base) const noexcept
             const auto nym = byNym();
             const auto server = byServer();
             const auto unit = byUnit();
-            auto temp = std::set<std::string>{};
+            auto temp = std::pmr::set<std::string>{};
             std::set_intersection(
                 nym.begin(),
                 nym.end(),

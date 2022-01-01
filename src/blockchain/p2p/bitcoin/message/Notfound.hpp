@@ -61,16 +61,16 @@ public:
     Notfound(
         const api::Session& api,
         const blockchain::Type network,
-        std::vector<value_type>&& payload) noexcept;
+        std::pmr::vector<value_type>&& payload) noexcept;
     Notfound(
         const api::Session& api,
         std::unique_ptr<Header> header,
-        std::vector<value_type>&& payload) noexcept;
+        std::pmr::vector<value_type>&& payload) noexcept;
 
     ~Notfound() final = default;
 
 private:
-    const std::vector<value_type> payload_;
+    const std::pmr::vector<value_type> payload_;
 
     using implementation::Message::payload;
     auto payload(AllocateOutput out) const noexcept -> bool final;

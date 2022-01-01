@@ -101,7 +101,8 @@ public:
     }
     auto DepositAddress(const blockchain::Type) const noexcept
         -> std::string final;
-    auto DepositChains() const noexcept -> std::vector<blockchain::Type> final
+    auto DepositChains() const noexcept
+        -> std::pmr::vector<blockchain::Type> final
     {
         return {chain_};
     }

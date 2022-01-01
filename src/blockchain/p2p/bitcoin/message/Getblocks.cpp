@@ -66,7 +66,7 @@ auto BitcoinP2PGetblocks(
         return nullptr;
     }
 
-    std::vector<OTData> header_hashes;
+    std::pmr::vector<OTData> header_hashes;
 
     std::size_t hashCount{0};
     const bool decodedSize = network::blockchain::bitcoin::DecodeSize(
@@ -129,7 +129,7 @@ auto BitcoinP2PGetblocks(
     const api::Session& api,
     const blockchain::Type network,
     const std::uint32_t version,
-    const std::vector<OTData>& header_hashes,
+    const std::pmr::vector<OTData>& header_hashes,
     const Data& stop_hash) -> blockchain::p2p::bitcoin::message::Getblocks*
 {
     namespace bitcoin = blockchain::p2p::bitcoin;
@@ -146,7 +146,7 @@ Getblocks::Getblocks(
     const api::Session& api,
     const blockchain::Type network,
     const bitcoin::ProtocolVersionUnsigned version,
-    const std::vector<OTData>& header_hashes,
+    const std::pmr::vector<OTData>& header_hashes,
     const Data& stop_hash) noexcept
     : Message(api, network, bitcoin::Command::getblocks)
     , version_(version)
@@ -162,7 +162,7 @@ Getblocks::Getblocks(
     const api::Session& api,
     std::unique_ptr<Header> header,
     const bitcoin::ProtocolVersionUnsigned version,
-    const std::vector<OTData>& header_hashes,
+    const std::pmr::vector<OTData>& header_hashes,
     const Data& stop_hash) noexcept(false)
     : Message(api, std::move(header))
     , version_(version)

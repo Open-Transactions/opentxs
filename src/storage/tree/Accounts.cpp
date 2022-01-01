@@ -135,32 +135,32 @@ auto Accounts::AccountUnit(const Identifier& id) const -> core::UnitType
     EXTRACT_FIELD(5);
 }
 
-auto Accounts::AccountsByContract(
-    const identifier::UnitDefinition& contract) const -> std::set<OTIdentifier>
+auto Accounts::AccountsByContract(const identifier::UnitDefinition& contract)
+    const -> std::pmr::set<OTIdentifier>
 {
     EXTRACT_SET_BY_ID(contract_index_, contract);
 }
 
 auto Accounts::AccountsByIssuer(const identifier::Nym& issuerNym) const
-    -> std::set<OTIdentifier>
+    -> std::pmr::set<OTIdentifier>
 {
     EXTRACT_SET_BY_ID(issuer_index_, issuerNym);
 }
 
 auto Accounts::AccountsByOwner(const identifier::Nym& ownerNym) const
-    -> std::set<OTIdentifier>
+    -> std::pmr::set<OTIdentifier>
 {
     EXTRACT_SET_BY_ID(owner_index_, ownerNym);
 }
 
 auto Accounts::AccountsByServer(const identifier::Server& server) const
-    -> std::set<OTIdentifier>
+    -> std::pmr::set<OTIdentifier>
 {
     EXTRACT_SET_BY_ID(server_index_, server);
 }
 
 auto Accounts::AccountsByUnit(const core::UnitType unit) const
-    -> std::set<OTIdentifier>
+    -> std::pmr::set<OTIdentifier>
 {
     EXTRACT_SET_BY_VALUE(unit_index_, unit);
 }

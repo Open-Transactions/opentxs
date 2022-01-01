@@ -193,7 +193,7 @@ void OTScript::SetScript(const std::string& new_string)
 //
 void OTScript::AddParty(std::string str_party_name, OTParty& theParty)
 {
-    //  typedef std::map<std::string, OTParty *> mapOfParties;
+    //  typedef std::pmr::map<std::string, OTParty *> mapOfParties;
 
     m_mapParties.insert(
         std::pair<std::string, OTParty*>(str_party_name, &theParty));

@@ -123,7 +123,7 @@ struct BlockchainImp final : public Blockchain::Imp {
     auto Disable(const Imp::Chain type) const noexcept -> bool final;
     auto Enable(const Imp::Chain type, const std::string& seednode)
         const noexcept -> bool final;
-    auto EnabledChains() const noexcept -> std::set<Imp::Chain> final;
+    auto EnabledChains() const noexcept -> std::pmr::set<Imp::Chain> final;
     auto FilterUpdate() const noexcept -> const zmq::socket::Publish& final
     {
         return new_filters_;
@@ -181,7 +181,7 @@ struct BlockchainImp final : public Blockchain::Imp {
 private:
     using Config = opentxs::blockchain::node::internal::Config;
     using pNode = std::unique_ptr<opentxs::blockchain::node::internal::Network>;
-    using Chains = std::vector<Chain>;
+    using Chains = std::pmr::vector<Chain>;
 
     const api::Session& api_;
     const api::crypto::Blockchain* crypto_;
@@ -197,8 +197,8 @@ private:
     OTZMQPublishSocket mempool_;
     const std::unique_ptr<Config> base_config_;
     mutable std::mutex lock_;
-    mutable std::map<Chain, Config> config_;
-    mutable std::map<Chain, pNode> networks_;
+    mutable std::pmr::map<Chain, Config> config_;
+    mutable std::pmr::map<Chain, pNode> networks_;
     std::unique_ptr<blockchain::SyncClient> sync_client_;
     mutable opentxs::network::p2p::Server sync_server_;
     std::promise<void> init_promise_;

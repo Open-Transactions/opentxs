@@ -56,13 +56,13 @@ class OPENTXS_EXPORT Base
 {
 public:
     using SessionIndex = int;
-    using Identifiers = std::vector<std::string>;
+    using Identifiers = std::pmr::vector<std::string>;
     using RequestIndex = std::uint32_t;
     using Status = std::pair<RequestIndex, ResponseCode>;
-    using Responses = std::vector<Status>;
+    using Responses = std::pmr::vector<Status>;
     using TaskID = std::string;
     using Queued = std::pair<RequestIndex, TaskID>;
-    using Tasks = std::vector<Queued>;
+    using Tasks = std::pmr::vector<Queued>;
 
     struct Imp;
 

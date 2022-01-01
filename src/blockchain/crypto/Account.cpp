@@ -54,9 +54,9 @@ auto BlockchainAccountKeys(
     const blockchain::crypto::Wallet& parent,
     const blockchain::crypto::AccountIndex& index,
     const identifier::Nym& id,
-    const std::set<OTIdentifier>& hd,
-    const std::set<OTIdentifier>& imported,
-    const std::set<OTIdentifier>& pc) noexcept
+    const std::pmr::set<OTIdentifier>& hd,
+    const std::pmr::set<OTIdentifier>& imported,
+    const std::pmr::set<OTIdentifier>& pc) noexcept
     -> std::unique_ptr<blockchain::crypto::Account>
 {
     using ReturnType = blockchain::crypto::implementation::Account;
@@ -138,18 +138,19 @@ auto Account::NodeIndex::Find(const std::string& id) const noexcept
 }
 
 auto Account::AssociateTransaction(
-    const std::vector<Activity>& unspent,
-    const std::vector<Activity>& spent,
-    std::set<OTIdentifier>& contacts,
+    const std::pmr::vector<Activity>& unspent,
+    const std::pmr::vector<Activity>& spent,
+    std::pmr::set<OTIdentifier>& contacts,
     const PasswordPrompt& reason) const noexcept -> bool
 {
-    using ActivityVector = std::vector<Activity>;
+    using ActivityVector = std::pmr::vector<Activity>;
     using ActivityPair = std::pair<ActivityVector, ActivityVector>;
-    using ActivityMap = std::map<std::string, ActivityPair>;
+    using ActivityMap = std::pmr::map<std::string, ActivityPair>;
 
     Lock lock(lock_);
     auto sorted = ActivityMap{};
-    auto outputs = std::map<std::string, std::map<std::size_t, int>>{};
+    auto outputs =
+        std::pmr::map<std::string, std::pmr::map<std::size_t, int>>{};
 
     for (const auto& [coin, key, amount] : unspent) {
         const auto& [transaction, output] = coin;

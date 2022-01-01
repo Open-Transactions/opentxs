@@ -20,7 +20,7 @@ namespace ot = opentxs;
 namespace ottest
 {
 // clang-format off
-const std::map<std::uint64_t, std::string> vector_1_{
+const std::pmr::map<std::uint64_t, std::string> vector_1_{
     {0u,                    "0x00"},
     {252u,                  "0xfc"},
     {253u,                  "0xfdfd00"},
@@ -30,17 +30,17 @@ const std::map<std::uint64_t, std::string> vector_1_{
     {4294967296u,           "0xff0000000001000000"},
     {18446744073709551615u, "0xffffffffffffffffff"},
 };
-const std::map<std::string, std::uint64_t> vector_2_{
+const std::pmr::map<std::string, std::uint64_t> vector_2_{
     {"0x00",                 0u},
     {"0xfc",                 252u},
 };
-const std::map<std::string, std::uint64_t> vector_3_{
+const std::pmr::map<std::string, std::uint64_t> vector_3_{
     {"0xfd0000",             0u},
     {"0xfdfc00",             252u},
     {"0xfdfd00",             253u},
     {"0xfdffff",             65535u},
 };
-const std::map<std::string, std::uint64_t> vector_4_{
+const std::pmr::map<std::string, std::uint64_t> vector_4_{
     {"0xfe00000000",         0u},
     {"0xfefc000000",         252u},
     {"0xfefd000000",         253u},
@@ -48,7 +48,7 @@ const std::map<std::string, std::uint64_t> vector_4_{
     {"0xfe00000100",         65536u},
     {"0xfeffffffff",         4294967295u},
 };
-const std::map<std::string, std::uint64_t> vector_5_{
+const std::pmr::map<std::string, std::uint64_t> vector_5_{
     {"0xff0000000000000000", 0u},
     {"0xfffc00000000000000", 252u},
     {"0xfffd00000000000000", 253u},

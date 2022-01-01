@@ -139,7 +139,7 @@ PaymentCode::PaymentCode(
     , version_(DefaultVersion)
     , outgoing_notifications_()
     , incoming_notifications_([&] {
-        auto out = std::set<opentxs::blockchain::block::pTxid>{};
+        auto out = std::pmr::set<opentxs::blockchain::block::pTxid>{};
 
         if (false == txid.empty()) { out.emplace(txid); }
 
@@ -223,7 +223,7 @@ PaymentCode::PaymentCode(
           id)
     , version_(serialized.version())
     , outgoing_notifications_([&] {
-        auto out = std::set<opentxs::blockchain::block::pTxid>{};
+        auto out = std::pmr::set<opentxs::blockchain::block::pTxid>{};
 
         for (const auto& notif : serialized.outgoing().notification()) {
             out.emplace(api_.Factory().Data(notif, StringStyle::Raw));
@@ -232,7 +232,7 @@ PaymentCode::PaymentCode(
         return out;
     }())
     , incoming_notifications_([&] {
-        auto out = std::set<opentxs::blockchain::block::pTxid>{};
+        auto out = std::pmr::set<opentxs::blockchain::block::pTxid>{};
 
         for (const auto& notif : serialized.incoming().notification()) {
             out.emplace(api_.Factory().Data(notif, StringStyle::Raw));

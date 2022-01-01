@@ -23,7 +23,7 @@ namespace opentxs::implementation
 class Data : virtual public opentxs::Data
 {
 public:
-    using Vector = std::vector<std::uint8_t>;
+    using Vector = std::pmr::vector<std::uint8_t>;
 
     auto operator==(const opentxs::Data& rhs) const noexcept -> bool final;
     auto operator!=(const opentxs::Data& rhs) const noexcept -> bool final;
@@ -128,7 +128,7 @@ protected:
     Data(const Armored& source) noexcept;
     Data(const Vector& sourceVector) noexcept;
     Data(Vector&& data) noexcept;
-    Data(const std::vector<std::byte>& sourceVector) noexcept;
+    Data(const std::pmr::vector<std::byte>& sourceVector) noexcept;
 
 private:
     friend opentxs::Data;

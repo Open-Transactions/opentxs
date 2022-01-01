@@ -19,7 +19,7 @@
 #include "opentxs/core/Data.hpp"
 #include "opentxs/util/Pimpl.hpp"
 
-std::vector<std::unique_ptr<bb::Header>> headers_{};
+std::pmr::vector<std::unique_ptr<bb::Header>> headers_{};
 
 namespace ottest
 {

@@ -74,7 +74,7 @@ private:
 
     mutable std::mutex lock_;
     Key counter_;
-    std::list<Data> queue_;
+    std::pmr::list<Data> queue_;
     std::atomic_bool running_;
     std::promise<void> promise_;
     std::shared_future<void> future_;

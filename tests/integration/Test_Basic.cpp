@@ -128,7 +128,7 @@ public:
     static const bool have_hd_;
     static Issuer issuer_data_;
     static int msg_count_;
-    static std::map<int, std::string> message_;
+    static std::pmr::map<int, std::string> message_;
     static ot::OTUnitID unit_id_;
 
     const ot::api::session::Client& api_alex_;
@@ -163,7 +163,7 @@ const bool Integration::have_hd_{
 
 };
 int Integration::msg_count_ = 0;
-std::map<int, std::string> Integration::message_{};
+std::pmr::map<int, std::string> Integration::message_{};
 ot::OTUnitID Integration::unit_id_{ot::identifier::UnitDefinition::Factory()};
 Issuer Integration::issuer_data_{};
 

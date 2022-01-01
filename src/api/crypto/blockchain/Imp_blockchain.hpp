@@ -176,7 +176,7 @@ struct BlockchainImp final : public Blockchain::Imp {
         const opentxs::blockchain::Type chain,
         const opentxs::blockchain::Balance balance) const noexcept
         -> void final;
-    auto UpdateElement(std::vector<ReadView>& pubkeyHashes) const noexcept
+    auto UpdateElement(std::pmr::vector<ReadView>& pubkeyHashes) const noexcept
         -> void final;
 
     BlockchainImp(
@@ -201,10 +201,10 @@ private:
 
     auto broadcast_update_signal(const Txid& txid) const noexcept -> void
     {
-        broadcast_update_signal(std::vector<pTxid>{txid});
+        broadcast_update_signal(std::pmr::vector<pTxid>{txid});
     }
     auto broadcast_update_signal(
-        const std::vector<pTxid>& transactions) const noexcept -> void;
+        const std::pmr::vector<pTxid>& transactions) const noexcept -> void;
     auto broadcast_update_signal(
         const opentxs::blockchain::block::bitcoin::Transaction& tx)
         const noexcept -> void;

@@ -39,7 +39,7 @@ public:
     bool segwit_;
     Type primary_;
     Type secondary_;
-    std::vector<ReadView> element_;
+    std::pmr::vector<ReadView> element_;
     Script script_;
 
     ScriptForm(

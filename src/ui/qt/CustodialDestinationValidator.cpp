@@ -24,7 +24,8 @@ struct CustodialDestionationValidator final : public DestinationValidator::Imp {
     auto getDetails() const -> QString final { return {}; }
     auto validate(QString& input, int& pos) const -> QValidator::State final
     {
-        const auto id = api_.Factory().Identifier(input.toStdString());
+        const auto id =
+            api_.Factory().IdentifierFromBase58(input.toStdString());
 
         if (id->empty()) {
 

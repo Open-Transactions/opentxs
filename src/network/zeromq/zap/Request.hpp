@@ -25,8 +25,8 @@ namespace opentxs::network::zeromq::zap
 class Request::Imp final : public zeromq::Message::Imp
 {
 public:
-    using MechanismMap = std::map<zap::Mechanism, std::string>;
-    using MechanismReverseMap = std::map<std::string, zap::Mechanism>;
+    using MechanismMap = std::pmr::map<zap::Mechanism, std::string>;
+    using MechanismReverseMap = std::pmr::map<std::string, zap::Mechanism>;
 
     static constexpr auto default_version_{"1.0"};
     static constexpr auto version_position_ = std::size_t{0};
@@ -39,7 +39,7 @@ public:
     static constexpr auto max_string_field_size_ = std::size_t{255};
     static constexpr auto pubkey_size_ = std::size_t{32};
 
-    static const std::set<std::string> accept_versions_;
+    static const std::pmr::set<std::string> accept_versions_;
     static const MechanismMap mechanism_map_;
     static const MechanismReverseMap mechanism_reverse_map_;
 

@@ -251,10 +251,11 @@ auto Issuer::toString() const -> std::string
 
 auto Issuer::AccountList(
     const core::UnitType type,
-    const identifier::UnitDefinition& unitID) const -> std::set<OTIdentifier>
+    const identifier::UnitDefinition& unitID) const
+    -> std::pmr::set<OTIdentifier>
 {
     Lock lock(lock_);
-    std::set<OTIdentifier> output;
+    std::pmr::set<OTIdentifier> output;
     auto accountSet = account_map_.find(type);
     const bool allUnits = unitID.empty();
 
@@ -390,10 +391,10 @@ auto Issuer::BailmentInitiated(const identifier::UnitDefinition& unitID) const
 auto Issuer::BailmentInstructions(
     const api::Session& client,
     const identifier::UnitDefinition& unitID,
-    const bool onlyUnused) const -> std::vector<Issuer::BailmentDetails>
+    const bool onlyUnused) const -> std::pmr::vector<Issuer::BailmentDetails>
 {
     Lock lock(lock_);
-    std::vector<BailmentDetails> output{};
+    std::pmr::vector<BailmentDetails> output{};
     const auto replies = get_requests(
         lock,
         contract::peer::PeerRequestType::Bailment,
@@ -454,14 +455,14 @@ auto Issuer::BailmentInstructions(
 auto Issuer::ConnectionInfo(
     const api::Session& client,
     const contract::peer::ConnectionInfoType type) const
-    -> std::vector<Issuer::ConnectionDetails>
+    -> std::pmr::vector<Issuer::ConnectionDetails>
 {
     LogVerbose()(OT_PRETTY_CLASS())("Searching for type ")(
         static_cast<std::uint32_t>(type))(
         " connection info requests (which have replies).")
         .Flush();
     Lock lock(lock_);
-    std::vector<ConnectionDetails> output{};
+    std::pmr::vector<ConnectionDetails> output{};
     const auto replies = get_requests(
         lock,
         contract::peer::PeerRequestType::ConnectionInfo,
@@ -597,7 +598,7 @@ auto Issuer::find_request(
 auto Issuer::GetRequests(
     const contract::peer::PeerRequestType type,
     const Issuer::RequestStatus state) const
-    -> std::set<std::tuple<OTIdentifier, OTIdentifier, bool>>
+    -> std::pmr::set<std::tuple<OTIdentifier, OTIdentifier, bool>>
 {
     Lock lock(lock_);
 
@@ -608,11 +609,11 @@ auto Issuer::get_requests(
     const Lock& lock,
     const contract::peer::PeerRequestType type,
     const Issuer::RequestStatus state) const
-    -> std::set<std::tuple<OTIdentifier, OTIdentifier, bool>>
+    -> std::pmr::set<std::tuple<OTIdentifier, OTIdentifier, bool>>
 {
     OT_ASSERT(verify_lock(lock));
 
-    std::set<std::tuple<OTIdentifier, OTIdentifier, bool>> output;
+    std::pmr::set<std::tuple<OTIdentifier, OTIdentifier, bool>> output;
 
     if (Issuer::RequestStatus::None == state) { return output; }
 
@@ -688,10 +689,11 @@ auto Issuer::RemoveAccount(
     return true;
 }
 
-auto Issuer::RequestTypes() const -> std::set<contract::peer::PeerRequestType>
+auto Issuer::RequestTypes() const
+    -> std::pmr::set<contract::peer::PeerRequestType>
 {
     Lock lock(lock_);
-    std::set<contract::peer::PeerRequestType> output{};
+    std::pmr::set<contract::peer::PeerRequestType> output{};
 
     for (const auto& [type, map] : peer_requests_) {
         const auto& notUsed [[maybe_unused]] = map;

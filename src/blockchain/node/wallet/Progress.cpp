@@ -82,7 +82,7 @@ struct Progress::Imp {
     }
     auto UpdateScan(
         const std::optional<block::Position>& highestClean,
-        const std::vector<block::Position>& in) noexcept -> void
+        const std::pmr::vector<block::Position>& in) noexcept -> void
     {
         auto lock = Lock{lock_};
         std::copy(
@@ -115,13 +115,13 @@ struct Progress::Imp {
     ~Imp() = default;
 
 private:
-    using Map = std::map<block::Position, long long int>;
+    using Map = std::pmr::map<block::Position, long long int>;
 
     const SubchainStateData& parent_;
     mutable std::mutex lock_;
     std::optional<block::Position> last_reported_;
     std::optional<block::Position> highest_clean_;
-    std::set<block::Position> dirty_blocks_;
+    std::pmr::set<block::Position> dirty_blocks_;
 
     auto lowest_dirty(const Lock&) const noexcept
         -> std::optional<block::Position>
@@ -219,7 +219,7 @@ auto Progress::UpdateProcess(const ProgressBatch& processed) noexcept -> void
 
 auto Progress::UpdateScan(
     const std::optional<block::Position>& highestClean,
-    const std::vector<block::Position>& dirtyBlocks) noexcept -> void
+    const std::pmr::vector<block::Position>& dirtyBlocks) noexcept -> void
 {
     imp_->UpdateScan(highestClean, dirtyBlocks);
 }

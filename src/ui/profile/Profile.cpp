@@ -57,11 +57,11 @@ auto ProfileModel(
 
 namespace opentxs::ui::implementation
 {
-const std::set<contact::SectionType> Profile::allowed_types_{
+const std::pmr::set<contact::SectionType> Profile::allowed_types_{
     contact::SectionType::Communication,
     contact::SectionType::Profile};
 
-const std::map<contact::SectionType, int> Profile::sort_keys_{
+const std::pmr::map<contact::SectionType, int> Profile::sort_keys_{
     {contact::SectionType::Communication, 0},
     {contact::SectionType::Profile, 1}};
 
@@ -267,7 +267,7 @@ void Profile::process_nym(const identity::Nym& nym) noexcept
         if (nameChanged || codeChanged) { UpdateNotify(); }
     }
 
-    auto active = std::set<ProfileRowID>{};
+    auto active = std::pmr::set<ProfileRowID>{};
 
     for (const auto& section : nym.Claims()) {
         auto& type = section.first;

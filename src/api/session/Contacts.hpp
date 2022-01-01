@@ -114,8 +114,8 @@ private:
     using ContactLock =
         std::pair<std::mutex, std::shared_ptr<contact::Contact>>;
     using Address = std::pair<contact::ClaimType, std::string>;
-    using ContactMap = std::map<OTIdentifier, ContactLock>;
-    using ContactNameMap = std::map<OTIdentifier, std::string>;
+    using ContactMap = std::pmr::map<OTIdentifier, ContactLock>;
+    using ContactNameMap = std::pmr::map<OTIdentifier, std::string>;
 
     const api::session::Client& api_;
     mutable std::recursive_mutex lock_{};

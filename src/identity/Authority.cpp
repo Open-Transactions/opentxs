@@ -541,7 +541,7 @@ auto Authority::create_master(
 auto Authority::EncryptionTargets() const noexcept -> AuthorityKeys
 {
     auto output = AuthorityKeys{GetMasterCredID(), {}};
-    auto set = std::set<crypto::key::asymmetric::Algorithm>{};
+    auto set = std::pmr::set<crypto::key::asymmetric::Algorithm>{};
     auto& list = output.second;
 
     for (const auto& [id, pCredential] : key_credentials_) {
@@ -570,7 +570,7 @@ void Authority::extract_child(
     const credential::Base::SerializedType& serialized,
     const proto::KeyMode mode,
     const proto::CredentialRole role,
-    std::map<OTIdentifier, std::unique_ptr<Type>>& map) noexcept(false)
+    std::pmr::map<OTIdentifier, std::unique_ptr<Type>>& map) noexcept(false)
 {
     if (role != serialized.role()) { return; }
 
@@ -620,7 +620,8 @@ auto Authority::get_secondary_credential(
 {
     if (is_revoked(strSubID, plistRevokedIDs)) { return nullptr; }
 
-    const auto it = key_credentials_.find(api_.Factory().Identifier(strSubID));
+    const auto it =
+        key_credentials_.find(api_.Factory().IdentifierFromBase58(strSubID));
 
     if (key_credentials_.end() == it) { return nullptr; }
 
@@ -796,9 +797,9 @@ auto Authority::load_child(
     const Serialized& serialized,
     const proto::KeyMode mode,
     const proto::CredentialRole role) noexcept(false)
-    -> std::map<OTIdentifier, std::unique_ptr<Type>>
+    -> std::pmr::map<OTIdentifier, std::unique_ptr<Type>>
 {
-    auto output = std::map<OTIdentifier, std::unique_ptr<Type>>{};
+    auto output = std::pmr::map<OTIdentifier, std::unique_ptr<Type>>{};
 
     if (proto::AUTHORITYMODE_INDEX == serialized.mode()) {
         for (auto& it : serialized.activechildids()) {
@@ -988,7 +989,7 @@ auto Authority::Path(proto::HDPath& output) const -> bool
     return false;
 }
 
-void Authority::RevokeContactCredentials(std::list<std::string>& output)
+void Authority::RevokeContactCredentials(std::pmr::list<std::string>& output)
 {
     const auto revoke = [&](const auto& item) -> void {
         output.push_back(item.first->str());
@@ -998,7 +999,8 @@ void Authority::RevokeContactCredentials(std::list<std::string>& output)
     contact_credentials_.clear();
 }
 
-void Authority::RevokeVerificationCredentials(std::list<std::string>& output)
+void Authority::RevokeVerificationCredentials(
+    std::pmr::list<std::string>& output)
 {
     const auto revoke = [&](const auto& item) -> void {
         output.push_back(item.first->str());

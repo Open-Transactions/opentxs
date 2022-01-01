@@ -52,7 +52,7 @@ auto HeaderOracle::GenesisBlockHash(const blockchain::Type type)
     -> const block::Hash&
 {
     static std::mutex lock_{};
-    static auto cache = std::map<blockchain::Type, block::pHash>{};
+    static auto cache = std::pmr::map<blockchain::Type, block::pHash>{};
 
     try {
         auto lock = Lock{lock_};
@@ -120,7 +120,7 @@ auto HeaderOracle::Ancestors(
         return output;
     }
 
-    auto cache = std::deque<block::Position>{};
+    auto cache = std::pmr::deque<block::Position>{};
     auto current = database_.LoadHeader(target.second);
     auto sibling = database_.LoadHeader(start.second);
 
@@ -201,14 +201,14 @@ auto HeaderOracle::AddCheckpoint(
 auto HeaderOracle::AddHeader(std::unique_ptr<block::Header> header) noexcept
     -> bool
 {
-    auto headers = std::vector<std::unique_ptr<block::Header>>{};
+    auto headers = std::pmr::vector<std::unique_ptr<block::Header>>{};
     headers.emplace_back(std::move(header));
 
     return AddHeaders(headers);
 }
 
 auto HeaderOracle::AddHeaders(
-    std::vector<std::unique_ptr<block::Header>>& headers) noexcept -> bool
+    std::pmr::vector<std::unique_ptr<block::Header>>& headers) noexcept -> bool
 {
     if (0 == headers.size()) { return false; }
 
@@ -951,7 +951,7 @@ auto HeaderOracle::LoadHeader(const block::Hash& hash) const noexcept
 
 auto HeaderOracle::ProcessSyncData(
     block::Hash& prior,
-    std::vector<block::pHash>& hashes,
+    std::pmr::vector<block::pHash>& hashes,
     const network::p2p::Data& data) noexcept -> std::size_t
 {
     auto output = std::size_t{0};
@@ -1049,7 +1049,7 @@ auto HeaderOracle::stage_candidate(
     }
 }
 
-auto HeaderOracle::Siblings() const noexcept -> std::set<block::pHash>
+auto HeaderOracle::Siblings() const noexcept -> std::pmr::set<block::pHash>
 {
     auto lock = Lock{lock_};
 

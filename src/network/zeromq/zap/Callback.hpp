@@ -47,7 +47,7 @@ private:
     friend zap::Callback;
 
     const Lambda default_callback_;
-    mutable std::map<std::string, Lambda> domains_;
+    mutable std::pmr::map<std::string, Lambda> domains_;
     mutable std::mutex domain_lock_;
     mutable std::atomic<Policy> policy_;
 

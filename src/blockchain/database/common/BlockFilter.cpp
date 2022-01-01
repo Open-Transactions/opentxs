@@ -221,22 +221,22 @@ auto BlockFilter::store(
 
 auto BlockFilter::StoreFilterHeaders(
     const filter::Type type,
-    const std::vector<FilterHeader>& headers) const noexcept -> bool
+    const std::pmr::vector<FilterHeader>& headers) const noexcept -> bool
 {
     return StoreFilters(type, headers, {});
 }
 
 auto BlockFilter::StoreFilters(
     const filter::Type type,
-    std::vector<FilterData>& filters) const noexcept -> bool
+    std::pmr::vector<FilterData>& filters) const noexcept -> bool
 {
     return StoreFilters(type, {}, filters);
 }
 
 auto BlockFilter::StoreFilters(
     const filter::Type type,
-    const std::vector<FilterHeader>& headers,
-    const std::vector<FilterData>& filters) const noexcept -> bool
+    const std::pmr::vector<FilterHeader>& headers,
+    const std::pmr::vector<FilterData>& filters) const noexcept -> bool
 {
     auto tx = lmdb_.TransactionRW();
     auto lock = Lock{bulk_.Mutex()};

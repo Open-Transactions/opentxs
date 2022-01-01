@@ -26,9 +26,9 @@
 namespace opentxs::contact
 {
 static auto extract_attributes(const proto::ContactItem& serialized)
-    -> std::set<contact::Attribute>
+    -> std::pmr::set<contact::Attribute>
 {
-    std::set<contact::Attribute> output{};
+    std::pmr::set<contact::Attribute> output{};
 
     for (const auto& attribute : serialized.attribute()) {
         output.emplace(static_cast<contact::Attribute>(attribute));
@@ -38,9 +38,9 @@ static auto extract_attributes(const proto::ContactItem& serialized)
 }
 
 static auto extract_attributes(const Claim& claim)
-    -> std::set<contact::Attribute>
+    -> std::pmr::set<contact::Attribute>
 {
-    std::set<contact::Attribute> output{};
+    std::pmr::set<contact::Attribute> output{};
 
     for (const auto& attribute : std::get<6>(claim)) {
         output.emplace(static_cast<contact::Attribute>(attribute));
@@ -58,7 +58,7 @@ struct ContactItem::Imp {
     const std::string value_;
     const std::time_t start_;
     const std::time_t end_;
-    const std::set<contact::Attribute> attributes_;
+    const std::pmr::set<contact::Attribute> attributes_;
     const OTIdentifier id_;
     const std::string subtype_;
 
@@ -79,7 +79,7 @@ struct ContactItem::Imp {
         const contact::SectionType section,
         const contact::ClaimType& type,
         const std::string& value,
-        const std::set<contact::Attribute>& attributes,
+        const std::pmr::set<contact::Attribute>& attributes,
         const std::time_t start,
         const std::time_t end,
         const std::string subtype)
@@ -129,7 +129,7 @@ struct ContactItem::Imp {
         , start_(rhs.start_)
         , end_(rhs.end_)
         , attributes_(std::move(
-              const_cast<std::set<contact::Attribute>&>(rhs.attributes_)))
+              const_cast<std::pmr::set<contact::Attribute>&>(rhs.attributes_)))
         , id_(std::move(const_cast<OTIdentifier&>(rhs.id_)))
         , subtype_(std::move(const_cast<std::string&>(rhs.subtype_)))
     {
@@ -173,7 +173,7 @@ ContactItem::ContactItem(
     const contact::SectionType section,
     const contact::ClaimType& type,
     const std::string& value,
-    const std::set<contact::Attribute>& attributes,
+    const std::pmr::set<contact::Attribute>& attributes,
     const std::time_t start,
     const std::time_t end,
     const std::string subtype)

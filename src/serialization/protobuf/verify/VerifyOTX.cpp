@@ -5,6 +5,8 @@
 
 #include "internal/protobuf/verify/VerifyOTX.hpp"  // IWYU pragma: associated
 
+#include <memory_resource>
+
 namespace opentxs::proto
 {
 auto ServerReplyAllowedOTXPush() noexcept -> const VersionMap&

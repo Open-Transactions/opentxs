@@ -47,7 +47,7 @@ namespace key
 class OPENTXS_EXPORT Keypair
 {
 public:
-    using Keys = std::list<const Asymmetric*>;
+    using Keys = std::pmr::list<const Asymmetric*>;
 
     virtual operator bool() const noexcept = 0;
 

@@ -224,7 +224,7 @@ auto claim_ownership(QObject* object) noexcept -> void;
 
 namespace opentxs::ui::implementation
 {
-using CustomData = std::vector<void*>;
+using CustomData = std::pmr::vector<void*>;
 
 template <typename RowID, typename SortKey>
 struct ChildObjectData {
@@ -1010,7 +1010,7 @@ struct ActivityThreadItem final : public Row,
 struct BalanceItem final : public Row, public internal::BalanceItem {
     auto Amount() const noexcept -> opentxs::Amount final { return {}; }
     auto Confirmations() const noexcept -> int override { return -1; }
-    auto Contacts() const noexcept -> std::vector<std::string> final
+    auto Contacts() const noexcept -> std::pmr::vector<std::string> final
     {
         return {};
     }
@@ -1361,7 +1361,7 @@ struct Index {
 
 struct Model {
     using Row = ui::internal::Row;
-    using RoleData = std::vector<std::pair<int, std::string>>;
+    using RoleData = std::pmr::vector<std::pair<int, std::string>>;
 
     static auto GetID(const ui::internal::Row* ptr) noexcept -> std::ptrdiff_t;
 

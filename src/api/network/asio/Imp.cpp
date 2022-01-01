@@ -26,6 +26,7 @@
 #include <exception>
 #include <functional>
 #include <future>
+#include <memory_resource>
 #include <stdexcept>
 #include <string>
 #include <string_view>
@@ -75,7 +76,7 @@ using Type = opentxs::network::asio::Endpoint::Type;
 
 namespace opentxs::api::network
 {
-const std::vector<Asio::Imp::Site> Asio::Imp::sites{
+const std::pmr::vector<Asio::Imp::Site> Asio::Imp::sites{
     {
         "ip4only.me",
         "http",
@@ -124,7 +125,7 @@ Asio::Imp::Imp(const zmq::Context& zmq) noexcept
     , lock_()
     , io_context_()
     , thread_pools_([] {
-        auto out = std::map<ThreadPool, asio::Context>{};
+        auto out = std::pmr::map<ThreadPool, asio::Context>{};
         out[ThreadPool::General];
         out[ThreadPool::Storage];
         out[ThreadPool::Blockchain];
@@ -571,7 +572,7 @@ auto Asio::Imp::retrieve_address_async(
     std::string address_string{};
     switch (site.response_type) {
         case ResponseType::IPvonly: {
-            auto parts = std::vector<std::string>{};
+            auto parts = std::pmr::vector<std::string>{};
             algo::split(parts, response_string, algo::is_any_of(","));
 
             if (parts.size() > 1) { address_string = parts[1]; }
@@ -795,7 +796,7 @@ auto Asio::Imp::retrieve_address_async_ssl(
     std::string address_string{};
     switch (site.response_type) {
         case ResponseType::IPvonly: {
-            auto parts = std::vector<std::string>{};
+            auto parts = std::pmr::vector<std::string>{};
             algo::split(parts, response_string, algo::is_any_of(","));
 
             if (parts.size() > 1) { address_string = parts[1]; }
@@ -890,11 +891,11 @@ auto Asio::Imp::state_machine() noexcept -> bool
         ipv6_future_ = ipv6_promise_.get_future();
     }
 
-    auto promises4 = std::vector<std::promise<OTData>>{};
-    auto futures4 = std::vector<std::future<OTData>>{};
+    auto promises4 = std::pmr::vector<std::promise<OTData>>{};
+    auto futures4 = std::pmr::vector<std::future<OTData>>{};
 
-    auto promises6 = std::vector<std::promise<OTData>>{};
-    auto futures6 = std::vector<std::future<OTData>>{};
+    auto promises6 = std::pmr::vector<std::promise<OTData>>{};
+    auto futures6 = std::pmr::vector<std::future<OTData>>{};
 
     for (const auto& site : sites) {
         if (IPversion::IPV4 == site.protocol) {

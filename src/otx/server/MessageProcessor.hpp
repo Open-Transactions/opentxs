@@ -115,7 +115,7 @@ private:
     mutable std::mutex counter_lock_;
     mutable int drop_incoming_;
     mutable int drop_outgoing_;
-    std::map<OTNymID, ConnectionData> active_connections_;
+    std::pmr::map<OTNymID, ConnectionData> active_connections_;
     mutable std::shared_mutex connection_map_lock_;
 
     static auto get_connection(

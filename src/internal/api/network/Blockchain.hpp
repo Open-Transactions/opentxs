@@ -59,7 +59,7 @@ public:
         -> const opentxs::blockchain::database::common::Database& = 0;
     virtual auto FilterUpdate() const noexcept
         -> const opentxs::network::zeromq::socket::Publish& = 0;
-    using SyncData = std::vector<opentxs::network::p2p::State>;
+    using SyncData = std::pmr::vector<opentxs::network::p2p::State>;
     virtual auto Hello() const noexcept -> SyncData = 0;
     virtual auto IsEnabled(const opentxs::blockchain::Type chain) const noexcept
         -> bool = 0;

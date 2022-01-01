@@ -135,7 +135,7 @@ using Chain = opentxs::blockchain::Type;
 
 namespace opentxs::blockchain::crypto::internal
 {
-using ActivityMap = std::map<Coin, std::pair<Key, Amount>>;
+using ActivityMap = std::pmr::map<Coin, std::pair<Key, Amount>>;
 
 struct Wallet : virtual public crypto::Wallet {
     virtual auto AddHDNode(
@@ -150,9 +150,9 @@ struct Wallet : virtual public crypto::Wallet {
 
 struct Account : virtual public crypto::Account {
     virtual auto AssociateTransaction(
-        const std::vector<Activity>& unspent,
-        const std::vector<Activity>& spent,
-        std::set<OTIdentifier>& contacts,
+        const std::pmr::vector<Activity>& unspent,
+        const std::pmr::vector<Activity>& spent,
+        std::pmr::set<OTIdentifier>& contacts,
         const PasswordPrompt& reason) const noexcept -> bool = 0;
     virtual auto ClaimAccountID(const std::string& id, crypto::Subaccount* node)
         const noexcept -> void = 0;
@@ -195,10 +195,10 @@ struct Element : virtual public crypto::Element {
         Used,
     };
 
-    virtual auto Elements() const noexcept -> std::set<OTData> = 0;
+    virtual auto Elements() const noexcept -> std::pmr::set<OTData> = 0;
     virtual auto ID() const noexcept -> const Identifier& = 0;
     virtual auto IncomingTransactions() const noexcept
-        -> std::set<std::string> = 0;
+        -> std::pmr::set<std::string> = 0;
     virtual auto IsAvailable(const Identifier& contact, const std::string& memo)
         const noexcept -> Availability = 0;
     virtual auto NymID() const noexcept -> const identifier::Nym& = 0;
@@ -218,12 +218,12 @@ struct Element : virtual public crypto::Element {
 
 struct Subaccount : virtual public crypto::Subaccount {
     virtual auto AssociateTransaction(
-        const std::vector<Activity>& unspent,
-        const std::vector<Activity>& spent,
-        std::set<OTIdentifier>& contacts,
+        const std::pmr::vector<Activity>& unspent,
+        const std::pmr::vector<Activity>& spent,
+        std::pmr::set<OTIdentifier>& contacts,
         const PasswordPrompt& reason) const noexcept -> bool = 0;
     virtual auto IncomingTransactions(const Key& key) const noexcept
-        -> std::set<std::string> = 0;
+        -> std::pmr::set<std::string> = 0;
     virtual auto PrivateKey(
         const Subchain type,
         const Bip32Index index,
@@ -245,7 +245,7 @@ struct Subaccount : virtual public crypto::Subaccount {
         const block::Position& progress,
         Subchain type) noexcept -> void = 0;
     virtual auto UpdateElement(
-        std::vector<ReadView>& pubkeyHashes) const noexcept -> void = 0;
+        std::pmr::vector<ReadView>& pubkeyHashes) const noexcept -> void = 0;
     virtual auto Unconfirm(
         const Subchain type,
         const Bip32Index index,

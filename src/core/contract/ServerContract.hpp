@@ -76,7 +76,7 @@ public:
         const VersionNumber version,
         const std::string& terms,
         const std::string& name,
-        std::list<contract::Server::Endpoint>&& endpoints,
+        std::pmr::list<contract::Server::Endpoint>&& endpoints,
         OTData&& key,
         OTServerID&& id,
         Signatures&& signatures = {});
@@ -90,13 +90,13 @@ public:
 private:
     friend opentxs::Factory;
 
-    const std::list<contract::Server::Endpoint> listen_params_;
+    const std::pmr::list<contract::Server::Endpoint> listen_params_;
     const std::string name_;
     const OTData transport_key_;
 
     static auto extract_endpoints(
         const proto::ServerContract& serialized) noexcept
-        -> std::list<contract::Server::Endpoint>;
+        -> std::pmr::list<contract::Server::Endpoint>;
 
     auto clone() const noexcept -> Server* final { return new Server(*this); }
     auto contract(const Lock& lock) const -> proto::ServerContract;

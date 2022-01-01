@@ -23,8 +23,8 @@ enum class MessageType : TypeEnum;
 class Block;
 class State;
 
-using StateData = std::vector<p2p::State>;
-using SyncData = std::vector<p2p::Block>;
+using StateData = std::pmr::vector<p2p::State>;
+using SyncData = std::pmr::vector<p2p::Block>;
 }  // namespace opentxs::network::p2p
 
 namespace opentxs

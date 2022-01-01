@@ -7,6 +7,7 @@
 
 #include <cstdint>
 #include <memory>
+#include <memory_resource>
 #include <set>
 #include <string>
 
@@ -37,7 +38,7 @@ public:
     static const VersionNumber DefaultVersion;
 
     static auto instantiate_services(const SerializedType& serialized) noexcept
-        -> std::set<Service>;
+        -> std::pmr::set<Service>;
 
     auto Bytes() const noexcept -> OTData final { return bytes_; }
     auto Chain() const noexcept -> blockchain::Type final { return chain_; }
@@ -53,12 +54,12 @@ public:
     {
         return previous_last_connected_;
     }
-    auto PreviousServices() const noexcept -> std::set<Service> final
+    auto PreviousServices() const noexcept -> std::pmr::set<Service> final
     {
         return previous_services_;
     }
     auto Serialize(SerializedType& out) const noexcept -> bool final;
-    auto Services() const noexcept -> std::set<Service> final
+    auto Services() const noexcept -> std::pmr::set<Service> final
     {
         return services_;
     }
@@ -77,7 +78,7 @@ public:
     {
         last_connected_ = time;
     }
-    void SetServices(const std::set<Service>& services) noexcept final
+    void SetServices(const std::pmr::set<Service>& services) noexcept final
     {
         services_ = services;
     }
@@ -91,7 +92,7 @@ public:
         const std::uint16_t port,
         const blockchain::Type chain,
         const Time lastConnected,
-        const std::set<Service>& services,
+        const std::pmr::set<Service>& services,
         const bool incoming) noexcept(false);
     Address(const Address& rhs) noexcept;
 
@@ -107,10 +108,10 @@ private:
     const std::uint16_t port_;
     const blockchain::Type chain_;
     const Time previous_last_connected_;
-    const std::set<Service> previous_services_;
+    const std::pmr::set<Service> previous_services_;
     const bool incoming_;
     Time last_connected_;
-    std::set<Service> services_;
+    std::pmr::set<Service> services_;
 
     static auto calculate_id(
         const api::Session& api,
@@ -128,7 +129,7 @@ private:
         const std::uint16_t port,
         const blockchain::Type chain,
         const Time lastConnected,
-        const std::set<Service>& services) noexcept -> SerializedType;
+        const std::pmr::set<Service>& services) noexcept -> SerializedType;
 
     auto clone() const noexcept -> Address* final { return new Address(*this); }
     auto clone_internal() const noexcept

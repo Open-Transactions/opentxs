@@ -185,7 +185,7 @@ TEST_F(Test_RequestRouter, Request_2_Router_1)
 {
     callbackCount_ = 2;
 
-    std::map<std::string, network::zeromq::Message> replyMessages{
+    std::pmr::map<std::string, network::zeromq::Message> replyMessages{
         std::pair<std::string, network::zeromq::Message>(testMessage2_, {}),
         std::pair<std::string, network::zeromq::Message>(testMessage3_, {})};
 

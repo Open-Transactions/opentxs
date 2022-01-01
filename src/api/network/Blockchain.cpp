@@ -57,7 +57,7 @@ auto Blockchain::Enable(const Chain type, const std::string& seednode)
     return imp_->Enable(type, seednode);
 }
 
-auto Blockchain::EnabledChains() const noexcept -> std::set<Chain>
+auto Blockchain::EnabledChains() const noexcept -> std::pmr::set<Chain>
 {
     return imp_->EnabledChains();
 }

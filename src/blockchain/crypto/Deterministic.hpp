@@ -65,7 +65,7 @@ namespace opentxs::blockchain::crypto::implementation
 class Deterministic : virtual public internal::Deterministic, public Subaccount
 {
 public:
-    auto AllowedSubchains() const noexcept -> std::set<Subchain> final;
+    auto AllowedSubchains() const noexcept -> std::pmr::set<Subchain> final;
     auto Floor(const Subchain type) const noexcept
         -> std::optional<Bip32Index> final;
     auto BalanceElement(const Subchain type, const Bip32Index index) const
@@ -110,7 +110,7 @@ public:
     ~Deterministic() override = default;
 
 protected:
-    using IndexMap = std::map<Subchain, Bip32Index>;
+    using IndexMap = std::pmr::map<Subchain, Bip32Index>;
     using SerializedType = proto::BlockchainDeterministicAccountData;
 
     struct ChainData {
@@ -199,7 +199,7 @@ protected:
 
 private:
     using Status = internal::Element::Availability;
-    using Fallback = std::map<Status, std::set<Bip32Index>>;
+    using Fallback = std::pmr::map<Status, std::pmr::set<Bip32Index>>;
     using CachedKey = std::pair<std::mutex, blockchain::crypto::HDKey>;
 
     static constexpr auto BlockchainDeterministicAccountDataVersion =
@@ -210,7 +210,7 @@ private:
     static auto extract_contacts(
         const Bip32Index index,
         const AddressMap& map,
-        std::set<OTIdentifier>& contacts) noexcept -> void;
+        std::pmr::set<OTIdentifier>& contacts) noexcept -> void;
 
     auto accept(
         const rLock& lock,
@@ -235,8 +235,8 @@ private:
         Batch& generated) const noexcept(false) -> std::optional<Bip32Index>;
     auto check_activity(
         const rLock& lock,
-        const std::vector<Activity>& unspent,
-        std::set<OTIdentifier>& contacts,
+        const std::pmr::vector<Activity>& unspent,
+        std::pmr::set<OTIdentifier>& contacts,
         const PasswordPrompt& reason) const noexcept -> bool final;
     auto check_lookahead(
         const rLock& lock,
@@ -262,7 +262,7 @@ private:
         const Subchain type,
         const Bip32Index index) noexcept(false) -> Element& final;
     virtual auto set_deterministic_contact(
-        std::set<OTIdentifier>&) const noexcept -> void
+        std::pmr::set<OTIdentifier>&) const noexcept -> void
     {
     }
     auto set_metadata(

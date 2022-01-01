@@ -19,7 +19,8 @@
 #include "internal/util/LogMacros.hpp"
 #include "network/p2p/Base.hpp"
 #include "opentxs/network/p2p/Acknowledgement.hpp"  // IWYU pragma: keep
-#include "opentxs/network/p2p/Data.hpp"             // IWYU pragma: keep
+#include "opentxs/network/p2p/Block.hpp"
+#include "opentxs/network/p2p/Data.hpp"  // IWYU pragma: keep
 #include "opentxs/network/p2p/MessageType.hpp"
 #include "opentxs/network/p2p/PublishContract.hpp"       // IWYU pragma: keep
 #include "opentxs/network/p2p/PublishContractReply.hpp"  // IWYU pragma: keep
@@ -27,6 +28,7 @@
 #include "opentxs/network/p2p/QueryContract.hpp"         // IWYU pragma: keep
 #include "opentxs/network/p2p/QueryContractReply.hpp"    // IWYU pragma: keep
 #include "opentxs/network/p2p/Request.hpp"               // IWYU pragma: keep
+#include "opentxs/network/p2p/State.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/util/Log.hpp"
@@ -79,9 +81,9 @@ namespace opentxs::network::p2p
 Base::Imp::Imp(
     VersionNumber version,
     MessageType type,
-    std::vector<State> state,
+    std::pmr::vector<State> state,
     std::string endpoint,
-    std::vector<Block> blocks) noexcept
+    std::pmr::vector<Block> blocks) noexcept
     : version_(version)
     , type_(type)
     , state_(std::move(state))

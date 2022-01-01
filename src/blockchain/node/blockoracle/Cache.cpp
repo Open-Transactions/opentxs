@@ -22,6 +22,7 @@
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/blockchain/block/bitcoin/Block.hpp"
 #include "opentxs/blockchain/node/BlockOracle.hpp"
+#include "opentxs/core/Data.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/network/zeromq/message/Message.tpp"
@@ -145,8 +146,9 @@ auto BlockOracle::Cache::Request(const BlockHashes& hashes) const noexcept
 {
     auto output = BitcoinBlockFutures{};
     output.reserve(hashes.size());
-    auto ready = std::vector<const block::Hash*>{};
-    auto download = std::map<block::pHash, BitcoinBlockFutures::iterator>{};
+    auto ready = std::pmr::vector<const block::Hash*>{};
+    auto download =
+        std::pmr::map<block::pHash, BitcoinBlockFutures::iterator>{};
     auto lock = Lock{lock_};
 
     if (false == running_) {
@@ -237,7 +239,7 @@ auto BlockOracle::Cache::Request(const BlockHashes& hashes) const noexcept
     OT_ASSERT(output.size() == hashes.size());
 
     if (0 < download.size()) {
-        auto blockList = std::vector<ReadView>{};
+        auto blockList = std::pmr::vector<ReadView>{};
         std::transform(
             std::begin(download),
             std::end(download),
@@ -295,7 +297,7 @@ auto BlockOracle::Cache::StateMachine() const noexcept -> bool
     LogVerbose()(OT_PRETTY_CLASS())(DisplayString(chain_))(
         " download queue contains ")(pending_.size())(" blocks.")
         .Flush();
-    auto blockList = std::vector<ReadView>{};
+    auto blockList = std::pmr::vector<ReadView>{};
     blockList.reserve(pending_.size());
 
     for (auto& [hash, item] : pending_) {

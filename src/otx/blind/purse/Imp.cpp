@@ -14,7 +14,6 @@
 #include <set>
 #include <stdexcept>
 #include <string>
-#include <type_traits>
 #include <utility>
 #include <vector>
 
@@ -218,9 +217,9 @@ Purse::Purse(
     const Amount& totalValue,
     const Time validFrom,
     const Time validTo,
-    const std::vector<blind::Token>& tokens,
+    const std::pmr::vector<blind::Token>& tokens,
     const std::shared_ptr<OTSymmetricKey> primary,
-    const std::vector<proto::Envelope>& primaryPasswords,
+    const std::pmr::vector<proto::Envelope>& primaryPasswords,
     const std::shared_ptr<const OTSymmetricKey> secondaryKey,
     const std::shared_ptr<const OTEnvelope> secondaryEncrypted,
     std::optional<OTSecret> secondaryKeyPassword) noexcept
@@ -572,9 +571,9 @@ auto Purse::GeneratePrototokens(
 }
 
 auto Purse::get_passwords(const proto::Purse& in)
-    -> std::vector<proto::Envelope>
+    -> std::pmr::vector<proto::Envelope>
 {
-    auto output = std::vector<proto::Envelope>{};
+    auto output = std::pmr::vector<proto::Envelope>{};
 
     for (const auto& password : in.primarypassword()) {
         output.emplace_back(password);
@@ -870,7 +869,7 @@ auto Purse::Verify(const api::session::Notary& server) const -> bool
     Amount total{0};
     auto validFrom{Time::min()};
     auto validTo{Time::max()};
-    std::set<blind::TokenState> allowedStates{};
+    std::pmr::set<blind::TokenState> allowedStates{};
 
     switch (state_) {
         case blind::PurseType::Request: {

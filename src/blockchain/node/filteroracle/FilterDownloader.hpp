@@ -197,7 +197,7 @@ private:
     {
         if (0 == data.size()) { return; }
 
-        auto filters = std::vector<internal::FilterDatabase::Filter>{};
+        auto filters = std::pmr::vector<internal::FilterDatabase::Filter>{};
 
         for (const auto& task : data) {
             const auto& prior = task->previous_.get();

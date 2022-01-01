@@ -51,14 +51,15 @@ public:
     virtual auto Port() const noexcept -> std::uint16_t = 0;
     OPENTXS_NO_EXPORT virtual auto Serialize(SerializedType& out) const noexcept
         -> bool = 0;
-    virtual auto Services() const noexcept -> std::set<Service> = 0;
+    virtual auto Services() const noexcept -> std::pmr::set<Service> = 0;
     virtual auto Style() const noexcept -> Protocol = 0;
     virtual auto Type() const noexcept -> Network = 0;
 
     virtual void AddService(const Service service) noexcept = 0;
     virtual void RemoveService(const Service service) noexcept = 0;
     virtual void SetLastConnected(const Time& time) noexcept = 0;
-    virtual void SetServices(const std::set<Service>& services) noexcept = 0;
+    virtual void SetServices(
+        const std::pmr::set<Service>& services) noexcept = 0;
 
     virtual ~Address() = default;
 

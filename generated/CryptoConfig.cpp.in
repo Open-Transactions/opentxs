@@ -8,6 +8,7 @@
 #include "api/crypto/Config.hpp"  // IWYU pragma: associated
 
 #include <map>
+#include <memory_resource>
 
 #include "opentxs/crypto/key/asymmetric/Algorithm.hpp"
 #include "opentxs/crypto/ParameterType.hpp"
@@ -19,7 +20,7 @@ auto HaveHDKeys() noexcept -> bool { return @OPENTXS_HAVE_HD_KEYS@; }
 auto HaveSupport(opentxs::crypto::ParameterType val) noexcept -> bool
 {
     using Type = opentxs::crypto::ParameterType;
-    static const auto map = std::map<Type, bool>{
+    static const auto map = std::pmr::map<Type, bool>{
         {Type::invalid, false},
         {Type::rsa, @OPENTXS_CRYPTO_HAVE_RSA@},
         {Type::secp256k1, @OPENTXS_CRYPTO_HAVE_SECP256K1@},
@@ -39,7 +40,7 @@ auto HaveSupport(opentxs::crypto::key::asymmetric::Algorithm val) noexcept
     -> bool
 {
     using Type = opentxs::crypto::key::asymmetric::Algorithm;
-    static const auto map = std::map<Type, bool>{
+    static const auto map = std::pmr::map<Type, bool>{
         {Type::Error, false},
         {Type::Null, true},
         {Type::Legacy, @OPENTXS_CRYPTO_HAVE_RSA@},

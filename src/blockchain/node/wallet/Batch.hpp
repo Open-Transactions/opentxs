@@ -76,7 +76,7 @@ private:
 
     mutable std::atomic_bool reported_;
     std::atomic<std::size_t> running_;
-    std::vector<std::unique_ptr<Work>> jobs_;
+    std::pmr::vector<std::unique_ptr<Work>> jobs_;
 
     static auto NextID() noexcept -> ID;
 };

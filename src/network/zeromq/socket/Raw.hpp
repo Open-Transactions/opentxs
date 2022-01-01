@@ -101,7 +101,7 @@ public:
 
 private:
     using Socket = std::unique_ptr<void, decltype(&::zmq_close)>;
-    using Endpoints = std::set<std::string>;
+    using Endpoints = std::pmr::set<std::string>;
 
     const socket::Type type_;
     Socket socket_;

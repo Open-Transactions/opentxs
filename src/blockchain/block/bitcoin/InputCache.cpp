@@ -49,10 +49,10 @@ auto Input::Cache::associate(const internal::Output& in) noexcept -> bool
     return bool(previous_output_);
 }
 
-auto Input::Cache::keys() const noexcept -> std::vector<crypto::Key>
+auto Input::Cache::keys() const noexcept -> std::pmr::vector<crypto::Key>
 {
     auto lock = rLock{lock_};
-    auto output = std::vector<crypto::Key>{};
+    auto output = std::pmr::vector<crypto::Key>{};
     std::transform(
         std::begin(keys_), std::end(keys_), std::back_inserter(output), [
         ](const auto& key) -> auto { return key; });

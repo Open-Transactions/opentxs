@@ -38,7 +38,7 @@ PaymentTasks::PaymentTasks(client::internal::StateMachine& parent)
 
 auto PaymentTasks::cleanup() -> bool
 {
-    std::vector<TaskMap::iterator> finished;
+    std::pmr::vector<TaskMap::iterator> finished;
 
     Lock lock(decision_lock_);
 

@@ -35,15 +35,16 @@ public:
         throw std::runtime_error{""};
     }
     auto AccountList(const identifier::Nym&) const noexcept
-        -> std::set<OTIdentifier> final
+        -> std::pmr::set<OTIdentifier> final
     {
         return {};
     }
-    auto AccountList(const Chain) const noexcept -> std::set<OTIdentifier> final
+    auto AccountList(const Chain) const noexcept
+        -> std::pmr::set<OTIdentifier> final
     {
         return {};
     }
-    auto AccountList() const noexcept -> std::set<OTIdentifier> final
+    auto AccountList() const noexcept -> std::pmr::set<OTIdentifier> final
     {
         return {};
     }
@@ -260,7 +261,7 @@ public:
         return {id_.get()};
     }
     auto SubaccountList(const identifier::Nym&, const Chain) const noexcept
-        -> std::set<OTIdentifier> final
+        -> std::pmr::set<OTIdentifier> final
     {
         return {};
     }
@@ -282,7 +283,9 @@ public:
         const opentxs::blockchain::Balance) const noexcept -> void final
     {
     }
-    auto UpdateElement(std::vector<ReadView>&) const noexcept -> void final {}
+    auto UpdateElement(std::pmr::vector<ReadView>&) const noexcept -> void final
+    {
+    }
     auto Wallet(const Chain) const noexcept(false)
         -> const opentxs::blockchain::crypto::Wallet& final
     {

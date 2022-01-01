@@ -63,7 +63,7 @@ class String;
 
 namespace opentxs
 {
-using listOfItems = std::list<std::shared_ptr<Item>>;
+using listOfItems = std::pmr::list<std::shared_ptr<Item>>;
 
 // Item as in "Transaction Item"
 // An OTLedger contains a list of transactions (pending transactions, inbox or
@@ -166,7 +166,7 @@ public:
         const Ledger& THE_OUTBOX,
         const Account& THE_ACCOUNT,
         const OTTransaction& TARGET_TRANSACTION,
-        const std::set<TransactionNumber>& excluded,
+        const std::pmr::set<TransactionNumber>& excluded,
         const PasswordPrompt& reason,
         TransactionNumber outboxNum = 0) const
         -> bool;  // Used in special case of
@@ -178,7 +178,7 @@ public:
     auto VerifyTransactionStatement(
         const otx::context::Client& THE_NYM,
         const OTTransaction& TARGET_TRANSACTION,
-        const std::set<TransactionNumber> newNumbers,
+        const std::pmr::set<TransactionNumber> newNumbers,
         const bool bIsRealTransaction = true) const -> bool;
     auto VerifyTransactionStatement(
         const otx::context::Client& THE_NYM,

@@ -12,6 +12,7 @@ extern "C" {
 #include <cstddef>
 #include <cstdlib>
 #include <limits>
+#include <memory_resource>
 #include <new>
 #include <optional>
 #include <vector>

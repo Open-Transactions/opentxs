@@ -76,16 +76,16 @@ namespace opentxs::blockchain::crypto::implementation
 class Account final : public internal::Account
 {
 public:
-    using Accounts = std::set<OTIdentifier>;
+    using Accounts = std::pmr::set<OTIdentifier>;
 
     auto AccountID() const noexcept -> const Identifier& final
     {
         return account_id_;
     }
     auto AssociateTransaction(
-        const std::vector<Activity>& unspent,
-        const std::vector<Activity>& spent,
-        std::set<OTIdentifier>& contacts,
+        const std::pmr::vector<Activity>& unspent,
+        const std::pmr::vector<Activity>& spent,
+        std::pmr::set<OTIdentifier>& contacts,
         const PasswordPrompt& reason) const noexcept -> bool final;
     auto Chain() const noexcept -> opentxs::blockchain::Type final
     {
@@ -183,9 +183,9 @@ private:
         using const_iterator = typename InterfaceType::const_iterator;
         using value_type = typename InterfaceType::value_type;
 
-        auto all() const noexcept -> std::set<OTIdentifier> final
+        auto all() const noexcept -> std::pmr::set<OTIdentifier> final
         {
-            auto out = std::set<OTIdentifier>{};
+            auto out = std::pmr::set<OTIdentifier>{};
             auto lock = Lock{lock_};
 
             for (const auto& [id, count] : index_) { out.emplace(id); }
@@ -264,8 +264,8 @@ private:
         const SubaccountType type_;
         Account& parent_;
         mutable std::mutex lock_;
-        std::vector<std::unique_ptr<PayloadType>> nodes_;
-        std::map<OTIdentifier, std::size_t> index_;
+        std::pmr::vector<std::unique_ptr<PayloadType>> nodes_;
+        std::pmr::map<OTIdentifier, std::size_t> index_;
 
         auto add(
             const Lock& lock,
@@ -315,7 +315,7 @@ private:
 
     private:
         mutable std::mutex lock_;
-        std::map<std::string, crypto::Subaccount*> index_;
+        std::pmr::map<std::string, crypto::Subaccount*> index_;
     };
 
     using HDNodes = NodeGroup<HDAccounts, crypto::HD>;

@@ -40,8 +40,8 @@ namespace context
 class OPENTXS_EXPORT Base : virtual public opentxs::contract::Signable
 {
 public:
-    using TransactionNumbers = std::set<TransactionNumber>;
-    using RequestNumbers = std::set<RequestNumber>;
+    using TransactionNumbers = std::pmr::set<TransactionNumber>;
+    using RequestNumbers = std::pmr::set<RequestNumber>;
 
     virtual auto AcknowledgedNumbers() const -> RequestNumbers = 0;
     virtual auto AvailableNumbers() const -> std::size_t = 0;

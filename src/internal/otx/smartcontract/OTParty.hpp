@@ -75,9 +75,9 @@ namespace opentxs
 class OTParty
 {
 public:
-    using mapOfAccounts = std::map<std::string, SharedAccount>;
-    using mapOfAgents = std::map<std::string, OTAgent*>;
-    using mapOfPartyAccounts = std::map<std::string, OTPartyAccount*>;
+    using mapOfAccounts = std::pmr::map<std::string, SharedAccount>;
+    using mapOfAgents = std::pmr::map<std::string, OTAgent*>;
+    using mapOfPartyAccounts = std::pmr::map<std::string, OTPartyAccount*>;
 
     void CleanupAgents();
     void CleanupAccounts();

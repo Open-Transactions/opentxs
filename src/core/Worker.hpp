@@ -46,7 +46,7 @@ template <typename Child, typename API = api::session::Client>
 class Worker
 {
 protected:
-    using Endpoints = std::vector<std::string>;
+    using Endpoints = std::pmr::vector<std::string>;
 
     const API& api_;
     const std::chrono::milliseconds rate_limit_;

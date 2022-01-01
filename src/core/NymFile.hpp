@@ -43,8 +43,8 @@ class PasswordPrompt;
 
 namespace opentxs::implementation
 {
-using dequeOfMail = std::deque<std::shared_ptr<Message>>;
-using mapOfIdentifiers = std::map<std::string, OTIdentifier>;
+using dequeOfMail = std::pmr::deque<std::shared_ptr<Message>>;
+using mapOfIdentifiers = std::pmr::map<std::string, OTIdentifier>;
 
 class NymFile final : public opentxs::internal::NymFile, Lockable
 {
@@ -83,7 +83,7 @@ public:
     auto SerializeNymFile(String& output) const -> bool final;
 
     void AddOutpayments(std::shared_ptr<Message> theMessage) final;
-    auto GetSetAssetAccounts() -> std::set<std::string>& final
+    auto GetSetAssetAccounts() -> std::pmr::set<std::string>& final
     {
         sLock lock(shared_lock_);
 
@@ -135,7 +135,7 @@ private:
     // (SERVER side)
     // A list of asset account IDs. Server side only (client side uses wallet;
     // has multiple servers.)
-    std::set<std::string> m_setAccounts;
+    std::pmr::set<std::string> m_setAccounts;
 
     auto GetHash(
         const mapOfIdentifiers& the_map,

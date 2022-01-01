@@ -86,7 +86,7 @@ private:
     internal::Asio& parent_;
     boost::asio::io_context& context_;
     mutable std::mutex lock_;
-    std::map<std::string, Acceptor> map_;
+    std::pmr::map<std::string, Acceptor> map_;
 
     Imp() = delete;
     Imp(const Imp&) = delete;

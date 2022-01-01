@@ -31,7 +31,7 @@ namespace ottest
 class SyncServerDB : public ::testing::Test
 {
 protected:
-    using Endpoints = std::vector<std::string>;
+    using Endpoints = std::pmr::vector<std::string>;
 
     static constexpr auto first_server_{"tcp://example.com:1"};
     static constexpr auto second_server_{"tcp://example.com:2"};

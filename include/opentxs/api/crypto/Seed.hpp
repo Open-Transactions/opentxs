@@ -60,13 +60,13 @@ public:
         const PasswordPrompt& reason) const
         -> std::unique_ptr<opentxs::crypto::key::HD> = 0;
     virtual auto AllowedSeedTypes() const noexcept
-        -> const std::map<opentxs::crypto::SeedStyle, std::string>& = 0;
+        -> const std::pmr::map<opentxs::crypto::SeedStyle, std::string>& = 0;
     virtual auto AllowedLanguages(
         const opentxs::crypto::SeedStyle type) const noexcept
-        -> const std::map<opentxs::crypto::Language, std::string>& = 0;
+        -> const std::pmr::map<opentxs::crypto::Language, std::string>& = 0;
     virtual auto AllowedSeedStrength(
         const opentxs::crypto::SeedStyle type) const noexcept
-        -> const std::map<opentxs::crypto::SeedStrength, std::string>& = 0;
+        -> const std::pmr::map<opentxs::crypto::SeedStrength, std::string>& = 0;
     virtual auto Bip32Root(
         const std::string& seedID,
         const PasswordPrompt& reason) const -> std::string = 0;
@@ -74,27 +74,27 @@ public:
     virtual auto GetHDKey(
         const std::string& seedID,
         const EcdsaCurve& curve,
-        const std::vector<Bip32Index>& path,
+        const std::pmr::vector<Bip32Index>& path,
         const PasswordPrompt& reason) const
         -> std::unique_ptr<opentxs::crypto::key::HD> = 0;
     virtual auto GetHDKey(
         const std::string& seedID,
         const EcdsaCurve& curve,
-        const std::vector<Bip32Index>& path,
+        const std::pmr::vector<Bip32Index>& path,
         const opentxs::crypto::key::asymmetric::Role,
         const PasswordPrompt& reason) const
         -> std::unique_ptr<opentxs::crypto::key::HD> = 0;
     virtual auto GetHDKey(
         const std::string& seedID,
         const EcdsaCurve& curve,
-        const std::vector<Bip32Index>& path,
+        const std::pmr::vector<Bip32Index>& path,
         const VersionNumber version,
         const PasswordPrompt& reason) const
         -> std::unique_ptr<opentxs::crypto::key::HD> = 0;
     virtual auto GetHDKey(
         const std::string& seedID,
         const EcdsaCurve& curve,
-        const std::vector<Bip32Index>& path,
+        const std::pmr::vector<Bip32Index>& path,
         const opentxs::crypto::key::asymmetric::Role,
         const VersionNumber version,
         const PasswordPrompt& reason) const
@@ -150,7 +150,7 @@ public:
         const opentxs::crypto::SeedStyle type,
         const opentxs::crypto::Language lang,
         const std::string_view word) const noexcept
-        -> std::vector<std::string> = 0;
+        -> std::pmr::vector<std::string> = 0;
     virtual auto WordCount(
         const opentxs::crypto::SeedStyle type,
         const opentxs::crypto::SeedStrength strength) const noexcept

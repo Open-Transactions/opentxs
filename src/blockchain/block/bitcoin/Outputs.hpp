@@ -39,12 +39,12 @@ namespace opentxs::blockchain::block::bitcoin::implementation
 class Outputs final : public internal::Outputs
 {
 public:
-    using OutputList = std::vector<std::unique_ptr<internal::Output>>;
+    using OutputList = std::pmr::vector<std::unique_ptr<internal::Output>>;
 
-    auto AssociatedLocalNyms(std::vector<OTNymID>& output) const noexcept
+    auto AssociatedLocalNyms(std::pmr::vector<OTNymID>& output) const noexcept
         -> void final;
     auto AssociatedRemoteContacts(
-        std::vector<OTIdentifier>& output) const noexcept -> void final;
+        std::pmr::vector<OTIdentifier>& output) const noexcept -> void final;
     auto at(const std::size_t position) const noexcept(false)
         -> const value_type& final
     {
@@ -66,13 +66,13 @@ public:
     }
     auto end() const noexcept -> const_iterator final { return cend(); }
     auto ExtractElements(const filter::Type style) const noexcept
-        -> std::vector<Space> final;
+        -> std::pmr::vector<Space> final;
     auto FindMatches(
         const ReadView txid,
         const filter::Type type,
         const ParsedPatterns& elements) const noexcept -> Matches final;
-    auto GetPatterns() const noexcept -> std::vector<PatternID> final;
-    auto Keys() const noexcept -> std::vector<crypto::Key> final;
+    auto GetPatterns() const noexcept -> std::pmr::vector<PatternID> final;
+    auto Keys() const noexcept -> std::pmr::vector<crypto::Key> final;
     auto Internal() const noexcept -> const internal::Outputs& final
     {
         return *this;

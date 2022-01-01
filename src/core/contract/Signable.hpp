@@ -46,7 +46,7 @@ public:
     ~Signable() override = default;
 
 protected:
-    using Signatures = std::list<Signature>;
+    using Signatures = std::pmr::list<Signature>;
 
     const api::Session& api_;
     mutable std::mutex lock_;

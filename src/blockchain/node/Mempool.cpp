@@ -34,9 +34,9 @@ namespace opentxs::blockchain::node
 {
 struct Mempool::Imp {
     using Transactions =
-        std::vector<std::unique_ptr<const block::bitcoin::Transaction>>;
+        std::pmr::vector<std::unique_ptr<const block::bitcoin::Transaction>>;
 
-    auto Dump() const noexcept -> std::set<std::string>
+    auto Dump() const noexcept -> std::pmr::set<std::string>
     {
         auto lock = sLock{lock_};
 
@@ -57,15 +57,15 @@ struct Mempool::Imp {
     }
     auto Submit(ReadView txid) const noexcept -> bool
     {
-        const auto input = std::vector<ReadView>{txid};
+        const auto input = std::pmr::vector<ReadView>{txid};
         const auto output = Submit(input);
 
         return output.front();
     }
-    auto Submit(const std::vector<ReadView>& txids) const noexcept
-        -> std::vector<bool>
+    auto Submit(const std::pmr::vector<ReadView>& txids) const noexcept
+        -> std::pmr::vector<bool>
     {
-        auto output = std::vector<bool>{};
+        auto output = std::pmr::vector<bool>{};
         output.reserve(txids.size());
         auto lock = eLock{lock_};
 
@@ -185,7 +185,7 @@ private:
     const Type chain_;
     mutable std::shared_mutex lock_;
     mutable TransactionMap transactions_;
-    mutable std::set<Hash> active_;
+    mutable std::pmr::set<Hash> active_;
     mutable Cache unexpired_txid_;
     mutable Cache unexpired_tx_;
     const network::zeromq::socket::Publish& socket_;
@@ -233,7 +233,7 @@ Mempool::Mempool(
 {
 }
 
-auto Mempool::Dump() const noexcept -> std::set<std::string>
+auto Mempool::Dump() const noexcept -> std::pmr::set<std::string>
 {
     return imp_->Dump();
 }
@@ -251,8 +251,8 @@ auto Mempool::Submit(ReadView txid) const noexcept -> bool
     return imp_->Submit(txid);
 }
 
-auto Mempool::Submit(const std::vector<ReadView>& txids) const noexcept
-    -> std::vector<bool>
+auto Mempool::Submit(const std::pmr::vector<ReadView>& txids) const noexcept
+    -> std::pmr::vector<bool>
 {
     return imp_->Submit(txids);
 }

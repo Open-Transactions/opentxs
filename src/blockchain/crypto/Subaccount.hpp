@@ -85,9 +85,9 @@ class Subaccount : virtual public internal::Subaccount
 {
 public:
     auto AssociateTransaction(
-        const std::vector<Activity>& unspent,
-        const std::vector<Activity>& outgoing,
-        std::set<OTIdentifier>& contacts,
+        const std::pmr::vector<Activity>& unspent,
+        const std::pmr::vector<Activity>& outgoing,
+        std::pmr::set<OTIdentifier>& contacts,
         const PasswordPrompt& reason) const noexcept -> bool final;
     auto ID() const noexcept -> const Identifier& final { return id_; }
     auto Internal() const noexcept -> internal::Subaccount& final
@@ -95,7 +95,7 @@ public:
         return const_cast<Subaccount&>(*this);
     }
     auto IncomingTransactions(const Key& key) const noexcept
-        -> std::set<std::string> final;
+        -> std::pmr::set<std::string> final;
     auto Parent() const noexcept -> const crypto::Account& final
     {
         return parent_;
@@ -134,7 +134,7 @@ public:
         const Time time) noexcept -> bool final;
     auto Unreserve(const Subchain type, const Bip32Index index) noexcept
         -> bool final;
-    auto UpdateElement(std::vector<ReadView>& pubkeyHashes) const noexcept
+    auto UpdateElement(std::pmr::vector<ReadView>& pubkeyHashes) const noexcept
         -> void final;
 
     ~Subaccount() override = default;
@@ -174,8 +174,8 @@ protected:
     static auto convert(const proto::BlockchainActivity& in) noexcept
         -> Activity;
     static auto convert(const SerializedActivity& in) noexcept
-        -> std::vector<Activity>;
-    static auto convert(const std::vector<Activity>& in) noexcept
+        -> std::pmr::vector<Activity>;
+    static auto convert(const std::pmr::vector<Activity>& in) noexcept
         -> internal::ActivityMap;
 
     virtual auto account_already_exists(const rLock& lock) const noexcept
@@ -220,8 +220,8 @@ private:
 
     virtual auto check_activity(
         const rLock& lock,
-        const std::vector<Activity>& unspent,
-        std::set<OTIdentifier>& contacts,
+        const std::pmr::vector<Activity>& unspent,
+        std::pmr::set<OTIdentifier>& contacts,
         const PasswordPrompt& reason) const noexcept -> bool = 0;
 
     virtual auto confirm(
@@ -243,8 +243,8 @@ private:
         const SubaccountType type,
         OTIdentifier&& id,
         const Revision revision,
-        const std::vector<Activity>& unspent,
-        const std::vector<Activity>& spent,
+        const std::pmr::vector<Activity>& unspent,
+        const std::pmr::vector<Activity>& spent,
         Identifier& out) noexcept;
     Subaccount() = delete;
     Subaccount(const Subaccount&) = delete;

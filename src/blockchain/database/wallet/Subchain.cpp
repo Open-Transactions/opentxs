@@ -86,7 +86,7 @@ struct SubchainData::Imp {
             const auto patterns = [&] {
                 const auto all = cache_.GetPatternIndex(lock, subchain);
                 const auto matches = cache_.GetMatchIndex(lock, blockID);
-                auto out = std::vector<pPatternID>{};
+                auto out = std::pmr::vector<pPatternID>{};
                 out.reserve(std::min(all.size(), matches.size()));
                 std::set_difference(
                     std::begin(all),
@@ -160,7 +160,7 @@ struct SubchainData::Imp {
 
         try {
             auto output{false};
-            auto newIndices = std::vector<pPatternID>{};
+            auto newIndices = std::pmr::vector<pPatternID>{};
             auto highest = Bip32Index{};
             auto tx = lmdb_.TransactionRW();
 
@@ -226,7 +226,7 @@ struct SubchainData::Imp {
     }
     auto SubchainMatchBlock(
         const SubchainIndex& subchain,
-        const std::vector<std::pair<ReadView, MatchingIndices>>& results)
+        const std::pmr::vector<std::pair<ReadView, MatchingIndices>>& results)
         const noexcept -> bool
     {
         auto lock = eLock{lock_};
@@ -451,7 +451,7 @@ auto SubchainData::SubchainLastScanned(
 
 auto SubchainData::SubchainMatchBlock(
     const SubchainIndex& index,
-    const std::vector<std::pair<ReadView, MatchingIndices>>& results)
+    const std::pmr::vector<std::pair<ReadView, MatchingIndices>>& results)
     const noexcept -> bool
 {
     return imp_->SubchainMatchBlock(index, results);

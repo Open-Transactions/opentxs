@@ -68,7 +68,7 @@ public:
         Message& output,
         const PasswordPrompt& reason);
 
-    auto Acknowledged() const -> std::set<RequestNumber>;
+    auto Acknowledged() const -> std::pmr::set<RequestNumber>;
     auto HaveContext() const -> bool;
     auto Init() const -> const bool&;
     auto Original() const -> const Message&;

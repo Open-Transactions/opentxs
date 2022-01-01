@@ -158,7 +158,9 @@ void Wallet::init() noexcept
                 list.begin(),
                 list.end(),
                 std::inserter(out, out.end()),
-                [&](const auto& in) { return api_.Factory().Identifier(in); });
+                [&](const auto& in) {
+                    return api_.Factory().IdentifierFromBase58(in);
+                });
 
             return out;
         }();

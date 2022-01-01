@@ -302,7 +302,8 @@ public:
         [[maybe_unused]] const opentxs::blockchain::block::Header& previous,
         [[maybe_unused]] const Transaction_p generationTransaction,
         [[maybe_unused]] const std::uint32_t nBits,
-        [[maybe_unused]] const std::vector<Transaction_p>& extraTransactions,
+        [[maybe_unused]] const std::pmr::vector<Transaction_p>&
+            extraTransactions,
         [[maybe_unused]] const std::int32_t version,
         [[maybe_unused]] const AbortFunction abort) const noexcept
         -> std::shared_ptr<
@@ -313,7 +314,7 @@ public:
     auto BitcoinGenerationTransaction(
         [[maybe_unused]] const opentxs::blockchain::Type chain,
         [[maybe_unused]] const opentxs::blockchain::block::Height height,
-        [[maybe_unused]] std::vector<OutputBuilder>&& outputs,
+        [[maybe_unused]] std::pmr::vector<OutputBuilder>&& outputs,
         [[maybe_unused]] const std::string& coinbase,
         [[maybe_unused]] const std::int32_t version) const noexcept
         -> Transaction_p override
@@ -322,14 +323,14 @@ public:
     }
     auto BitcoinScriptNullData(
         const opentxs::blockchain::Type chain,
-        const std::vector<ReadView>& data) const noexcept
+        const std::pmr::vector<ReadView>& data) const noexcept
         -> std::unique_ptr<
             const opentxs::blockchain::block::bitcoin::Script> final;
     auto BitcoinScriptP2MS(
         const opentxs::blockchain::Type chain,
         const std::uint8_t M,
         const std::uint8_t N,
-        const std::vector<const opentxs::crypto::key::EllipticCurve*>&
+        const std::pmr::vector<const opentxs::crypto::key::EllipticCurve*>&
             publicKeys) const noexcept
         -> std::unique_ptr<
             const opentxs::blockchain::block::bitcoin::Script> final;
@@ -375,7 +376,7 @@ public:
         const std::uint16_t port,
         const opentxs::blockchain::Type chain,
         const Time lastConnected,
-        const std::set<opentxs::blockchain::p2p::Service>& services,
+        const std::pmr::set<opentxs::blockchain::p2p::Service>& services,
         const bool incoming) const -> OTBlockchainAddress final;
     auto BlockchainAddress(
         const opentxs::blockchain::p2p::Address::SerializedType& serialized)
@@ -471,8 +472,9 @@ public:
     auto Data(const std::uint32_t input) const -> OTData final;
     auto Data(const std::string& input, const StringStyle mode) const
         -> OTData final;
-    auto Data(const std::vector<unsigned char>& input) const -> OTData final;
-    auto Data(const std::vector<std::byte>& input) const -> OTData final;
+    auto Data(const std::pmr::vector<unsigned char>& input) const
+        -> OTData final;
+    auto Data(const std::pmr::vector<std::byte>& input) const -> OTData final;
     auto Data(ReadView input) const -> OTData final;
     auto Envelope() const noexcept -> OTEnvelope final;
     auto Envelope(const opentxs::Armored& ciphertext) const noexcept(false)
@@ -482,18 +484,19 @@ public:
     auto Envelope(const opentxs::ReadView& serialized) const noexcept(false)
         -> OTEnvelope final;
     auto Identifier() const -> OTIdentifier final;
-    auto Identifier(const std::string& serialized) const -> OTIdentifier final;
-    auto Identifier(const opentxs::String& serialized) const
-        -> OTIdentifier final;
     auto Identifier(const opentxs::Contract& contract) const
         -> OTIdentifier final;
     auto Identifier(const opentxs::Item& item) const -> OTIdentifier final;
-    auto Identifier(const ReadView bytes) const -> OTIdentifier final;
     auto Identifier(const ProtobufType& proto) const -> OTIdentifier final;
     auto Identifier(const opentxs::network::zeromq::Frame& bytes) const
         -> OTIdentifier final;
     auto Identifier(const proto::Identifier& in) const noexcept
         -> OTIdentifier final;
+    auto IdentifierFromBase58(const std::string& serialized) const
+        -> OTIdentifier final;
+    auto IdentifierFromBase58(const opentxs::String& serialized) const
+        -> OTIdentifier final;
+    auto IdentifierFromBytes(const ReadView bytes) const -> OTIdentifier final;
     auto Item(const String& serialized) const
         -> std::unique_ptr<opentxs::Item> final;
     auto Item(const std::string& serialized) const

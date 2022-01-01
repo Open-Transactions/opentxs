@@ -61,7 +61,7 @@ auto RPC::get_account_activity(const request::Base& base) const
                 continue;
             }
 
-            const auto accountID = api.Factory().Identifier(id);
+            const auto accountID = api.Factory().IdentifierFromBase58(id);
             const auto owner = [&]() -> OTNymID {
                 const auto [chain, owner] =
                     api.Crypto().Blockchain().LookupAccount(accountID);
@@ -91,7 +91,8 @@ auto RPC::get_account_activity(const request::Base& base) const
                 }();
                 const auto state = [&] {
                     auto out{proto::PAYMENTWORKFLOWSTATE_ERROR};
-                    const auto id = api.Factory().Identifier(row.Workflow());
+                    const auto id =
+                        api.Factory().IdentifierFromBase58(row.Workflow());
 
                     if (id->empty()) { return out; }
 

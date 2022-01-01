@@ -208,7 +208,7 @@ public:
         const identity::Nym& theCancelerNym,
         const PasswordPrompt& reason) -> bool;
 
-    // These are for     std::deque<std::int64_t> m_dequeClosingNumbers;
+    // These are for     std::pmr::deque<std::int64_t> m_dequeClosingNumbers;
     // They are numbers used for CLOSING a transaction. (finalReceipt.)
     auto GetClosingTransactionNoAt(std::uint32_t nIndex) const -> std::int64_t;
     auto GetCountClosingNumbers() const -> std::int32_t;
@@ -228,10 +228,10 @@ public:
     auto ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t override;
 
 protected:
-    std::deque<std::int64_t> m_dequeClosingNumbers;  // Numbers used for
-                                                     // CLOSING a
-                                                     // transaction.
-                                                     // (finalReceipt.)
+    std::pmr::deque<std::int64_t> m_dequeClosingNumbers;  // Numbers used for
+                                                          // CLOSING a
+                                                          // transaction.
+                                                          // (finalReceipt.)
     OTNymID m_pCancelerNymID;
 
     bool m_bCanceled{false};  // This defaults to false. But if someone

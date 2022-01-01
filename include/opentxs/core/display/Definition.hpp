@@ -29,8 +29,8 @@ public:
     using Index = unsigned int;
     using Name = std::string;
     using NamedScale = std::pair<Name, Scale>;
-    using Map = std::map<Index, Name>;
-    using Scales = std::vector<NamedScale>;
+    using Map = std::pmr::map<Index, Name>;
+    using Scales = std::pmr::vector<NamedScale>;
     using OptionalInt = Scale::OptionalInt;
 
     auto DisplayScales() const noexcept -> const Scales&;

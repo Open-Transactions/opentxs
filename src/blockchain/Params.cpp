@@ -46,7 +46,8 @@ auto BlockchainToUnit(const blockchain::Type type) noexcept -> core::UnitType
 
 auto UnitToBlockchain(const core::UnitType type) noexcept -> blockchain::Type
 {
-    using Map = std::map<opentxs::core::UnitType, opentxs::blockchain::Type>;
+    using Map =
+        std::pmr::map<opentxs::core::UnitType, opentxs::blockchain::Type>;
 
     static const auto build = []() -> auto
     {
@@ -146,10 +147,10 @@ auto BlockHash(
     }
 }
 
-auto DefinedChains() noexcept -> const std::set<Type>&
+auto DefinedChains() noexcept -> const std::pmr::set<Type>&
 {
     static const auto output = [] {
-        auto output = std::set<Type>{};
+        auto output = std::pmr::set<Type>{};
 
         for (const auto& [chain, data] : params::Data::Chains()) {
             output.emplace(chain);
@@ -374,10 +375,10 @@ auto ScriptHashSegwit(
     }
 }
 
-auto SupportedChains() noexcept -> const std::set<Type>&
+auto SupportedChains() noexcept -> const std::pmr::set<Type>&
 {
     static const auto output = [] {
-        auto output = std::set<Type>{};
+        auto output = std::pmr::set<Type>{};
 
         for (const auto& [chain, data] : params::Data::Chains()) {
             if (data.supported_) { output.emplace(chain); }

@@ -61,9 +61,9 @@ ReplyMessage::ReplyMessage(
     init_ = init();
 }
 
-auto ReplyMessage::Acknowledged() const -> std::set<RequestNumber>
+auto ReplyMessage::Acknowledged() const -> std::pmr::set<RequestNumber>
 {
-    std::set<RequestNumber> output{};
+    std::pmr::set<RequestNumber> output{};
     original_.m_AcknowledgedReplies.Output(output);
 
     return output;

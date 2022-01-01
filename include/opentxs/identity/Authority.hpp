@@ -146,9 +146,9 @@ public:
         const proto::ContactData& contactData,
         const PasswordPrompt& reason) -> bool = 0;
     virtual void RevokeContactCredentials(
-        std::list<std::string>& contactCredentialIDs) = 0;
+        std::pmr::list<std::string>& contactCredentialIDs) = 0;
     virtual void RevokeVerificationCredentials(
-        std::list<std::string>& verificationCredentialIDs) = 0;
+        std::pmr::list<std::string>& verificationCredentialIDs) = 0;
 
     virtual ~Authority() = default;
 

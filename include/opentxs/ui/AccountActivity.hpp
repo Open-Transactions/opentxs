@@ -42,7 +42,7 @@ public:
     virtual auto DepositAddress(const blockchain::Type chain) const noexcept
         -> std::string = 0;
     virtual auto DepositChains() const noexcept
-        -> std::vector<blockchain::Type> = 0;
+        -> std::pmr::vector<blockchain::Type> = 0;
     virtual auto DisplayBalance() const noexcept -> std::string = 0;
     virtual auto DisplayUnit() const noexcept -> std::string = 0;
     virtual auto First() const noexcept

@@ -106,7 +106,7 @@ auto ValidContactSectionName(
     const std::uint32_t version,
     const ContactSectionName name) -> bool
 {
-    std::set<ContactSectionName> allowedNames =
+    std::pmr::set<ContactSectionName> allowedNames =
         AllowedSectionNames().at(version);
 
     try {
@@ -122,7 +122,8 @@ auto ValidContactItemType(
     const ContactSectionVersion version,
     const ContactItemType itemType) -> bool
 {
-    std::set<ContactItemType> allowedTypes = AllowedItemTypes().at(version);
+    std::pmr::set<ContactItemType> allowedTypes =
+        AllowedItemTypes().at(version);
 
     try {
         return (

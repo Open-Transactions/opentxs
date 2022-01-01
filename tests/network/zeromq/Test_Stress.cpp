@@ -28,8 +28,8 @@ namespace ottest
 TEST(Test_Stress, Pub_10000)
 {
     const auto& ot = ot::Context();
-    auto endpoints = std::vector<std::string>{};
-    auto pub = std::vector<ot::OTZMQPublishSocket>{};
+    auto endpoints = std::pmr::vector<std::string>{};
+    auto pub = std::pmr::vector<ot::OTZMQPublishSocket>{};
 
     for (auto i{0}; i < 10000; ++i) {
         auto& socket = pub.emplace_back(ot.ZMQ().PublishSocket()).get();
@@ -43,8 +43,8 @@ TEST(Test_Stress, Pub_10000)
 TEST(Test_Stress, PubSub_100)
 {
     const auto& ot = ot::Context();
-    auto endpoints = std::vector<std::string>{};
-    auto pub = std::vector<ot::OTZMQPublishSocket>{};
+    auto endpoints = std::pmr::vector<std::string>{};
+    auto pub = std::pmr::vector<ot::OTZMQPublishSocket>{};
 
     for (auto i{0}; i < 100; ++i) {
         auto& socket = pub.emplace_back(ot.ZMQ().PublishSocket()).get();

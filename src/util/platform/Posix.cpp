@@ -108,8 +108,8 @@ auto Signals::handle() -> void
 
 namespace opentxs::implementation
 {
-auto String::tokenize_basic(std::map<std::string, std::string>& mapOutput) const
-    -> bool
+auto String::tokenize_basic(
+    std::pmr::map<std::string, std::string>& mapOutput) const -> bool
 {
     // simple parser that allows for one level of quotes nesting but no escaped
     // quotes
@@ -170,7 +170,7 @@ auto String::tokenize_basic(std::map<std::string, std::string>& mapOutput) const
 }
 
 auto String::tokenize_enhanced(
-    std::map<std::string, std::string>& mapOutput) const -> bool
+    std::pmr::map<std::string, std::string>& mapOutput) const -> bool
 {
 #if __has_include(<wordexp.h>)
     // fabcy-pansy parser that allows for multiple level of quotes nesting and

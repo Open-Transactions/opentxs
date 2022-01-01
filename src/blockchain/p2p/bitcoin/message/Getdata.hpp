@@ -63,16 +63,16 @@ public:
     Getdata(
         const api::Session& api,
         const blockchain::Type network,
-        std::vector<value_type>&& payload) noexcept;
+        std::pmr::vector<value_type>&& payload) noexcept;
     Getdata(
         const api::Session& api,
         std::unique_ptr<Header> header,
-        std::vector<value_type>&& payload) noexcept;
+        std::pmr::vector<value_type>&& payload) noexcept;
 
     ~Getdata() final = default;
 
 private:
-    const std::vector<value_type> payload_;
+    const std::pmr::vector<value_type> payload_;
 
     Getdata(const Getdata&) = delete;
     Getdata(Getdata&&) = delete;

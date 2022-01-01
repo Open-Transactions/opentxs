@@ -60,7 +60,7 @@ using Metadata = std::tuple<std::string, std::string, std::uint64_t, bool>;
  *  * string: id of the stored object
  *  * Metadata: metadata for the stored object
  */
-using Index = std::map<std::string, Metadata>;
+using Index = std::pmr::map<std::string, Metadata>;
 
 class Node
 {

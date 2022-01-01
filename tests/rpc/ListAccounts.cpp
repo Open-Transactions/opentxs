@@ -16,7 +16,6 @@
 #include "opentxs/api/session/Notary.hpp"
 #include "opentxs/api/session/Storage.hpp"
 #include "opentxs/core/UnitType.hpp"
-#include "opentxs/core/display/Scale.hpp"
 #include "opentxs/core/identifier/Server.hpp"
 #include "opentxs/rpc/CommandType.hpp"
 #include "opentxs/rpc/ResponseCode.hpp"
@@ -230,7 +229,7 @@ TEST_F(RPC_fixture, issuer_accounts)
     const auto& response = base->asListAccounts();
     const auto& codes = response.ResponseCodes();
     const auto expected = [&] {
-        auto out = std::set<std::string>{};
+        auto out = std::pmr::set<std::string>{};
         const auto& api = ot_.ClientSession(0);
         const auto& issuer = *local_nym_map_.at(0).begin();
         const auto nym = api.Factory().NymID(issuer);
@@ -288,7 +287,7 @@ TEST_F(RPC_fixture, user_accounts)
     const auto& response = base->asListAccounts();
     const auto& codes = response.ResponseCodes();
     const auto expected = [&] {
-        auto out = std::set<std::string>{};
+        auto out = std::pmr::set<std::string>{};
         const auto& api = ot_.ClientSession(1);
         const auto ids = api.Storage().AccountList();
         std::transform(
@@ -387,7 +386,7 @@ TEST_F(RPC_fixture, filter_nym_match)
     const auto& response = base->asListAccounts();
     const auto& codes = response.ResponseCodes();
     const auto expected = [&] {
-        auto out = std::set<std::string>{};
+        auto out = std::pmr::set<std::string>{};
         const auto& api = ot_.ClientSession(1);
         const auto nym = api.Factory().NymID(filterNym);
         const auto ids = api.Storage().AccountsByOwner(nym);
@@ -491,7 +490,7 @@ TEST_F(RPC_fixture, filter_server_match)
     const auto& response = base->asListAccounts();
     const auto& codes = response.ResponseCodes();
     const auto owner = *local_nym_map_.at(2).rbegin();
-    const auto expected = [&]() -> std::set<std::string> {
+    const auto expected = [&]() -> std::pmr::set<std::string> {
         return {registered_accounts_.at(owner).at(1)};
     }();
     const auto& ids = response.AccountIDs();
@@ -588,7 +587,7 @@ TEST_F(RPC_fixture, filter_unit_match)
     const auto& response = base->asListAccounts();
     const auto& codes = response.ResponseCodes();
     // TODO const auto owner = *local_nym_map_.at(0).begin();
-    // TODO const auto expected = [&]() -> std::set<std::string> {
+    // TODO const auto expected = [&]() -> std::pmr::set<std::string> {
     // TODO     return {registered_accounts_.at(owner).at(0)};
     // TODO }();
     // TODO const auto& ids = response.AccountIDs();

@@ -43,7 +43,7 @@ public:
     using State = std::pair<
         otx::client::PaymentWorkflowType,
         otx::client::PaymentWorkflowState>;
-    using Workflows = std::set<std::string>;
+    using Workflows = std::pmr::set<std::string>;
 
     auto GetState(const std::string& workflowID) const -> State;
     auto ListByAccount(const std::string& accountID) const -> Workflows;
@@ -67,12 +67,13 @@ private:
     friend Nym;
 
     Workflows archived_;
-    std::map<std::string, std::string> item_workflow_map_;
-    std::map<std::string, Workflows> account_workflow_map_;
-    std::map<std::string, Workflows> unit_workflow_map_;
-    std::map<std::string, State> workflow_state_map_;
-    std::map<otx::client::PaymentWorkflowType, Workflows> type_workflow_map_;
-    std::map<State, Workflows> state_workflow_map_;
+    std::pmr::map<std::string, std::string> item_workflow_map_;
+    std::pmr::map<std::string, Workflows> account_workflow_map_;
+    std::pmr::map<std::string, Workflows> unit_workflow_map_;
+    std::pmr::map<std::string, State> workflow_state_map_;
+    std::pmr::map<otx::client::PaymentWorkflowType, Workflows>
+        type_workflow_map_;
+    std::pmr::map<State, Workflows> state_workflow_map_;
 
     auto save(const Lock& lock) const -> bool final;
     auto serialize() const -> proto::StoragePaymentWorkflows;

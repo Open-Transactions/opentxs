@@ -147,11 +147,11 @@ public:
     auto ProcessBlock(BlockIndexerData& data) const noexcept -> void;
     auto ProcessSyncData(
         const block::Hash& prior,
-        const std::vector<block::pHash>& hashes,
+        const std::pmr::vector<block::pHash>& hashes,
         const network::p2p::Data& data) const noexcept -> void final;
     auto ProcessSyncData(SyncClientFilterData& data) const noexcept -> void;
     auto ProcessSyncData(
-        std::vector<SyncClientFilterData>& cache) const noexcept -> bool;
+        std::pmr::vector<SyncClientFilterData>& cache) const noexcept -> bool;
     auto Tip(const filter::Type type) const noexcept -> block::Position final
     {
         return database_.FilterTip(type);
@@ -178,10 +178,10 @@ private:
     friend internal::FilterOracle;
 
     using FilterHeaderHex = std::string;
-    using FilterHeaderMap = std::map<filter::Type, FilterHeaderHex>;
-    using ChainMap = std::map<block::Height, FilterHeaderMap>;
-    using CheckpointMap = std::map<blockchain::Type, ChainMap>;
-    using OutstandingMap = std::map<int, std::atomic_int>;
+    using FilterHeaderMap = std::pmr::map<filter::Type, FilterHeaderHex>;
+    using ChainMap = std::pmr::map<block::Height, FilterHeaderMap>;
+    using CheckpointMap = std::pmr::map<blockchain::Type, ChainMap>;
+    using OutstandingMap = std::pmr::map<int, std::atomic_int>;
 
     static const CheckpointMap filter_checkpoints_;
 
@@ -199,7 +199,7 @@ private:
     mutable std::unique_ptr<HeaderDownloader> header_downloader_;
     mutable std::unique_ptr<BlockIndexer> block_indexer_;
     mutable Time last_sync_progress_;
-    mutable std::map<filter::Type, block::Position> last_broadcast_;
+    mutable std::pmr::map<filter::Type, block::Position> last_broadcast_;
     mutable JobCounter outstanding_jobs_;
     std::atomic_bool running_;
 

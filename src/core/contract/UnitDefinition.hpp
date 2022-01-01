@@ -52,7 +52,7 @@ class Unit : virtual public contract::Unit,
              public opentxs::contract::implementation::Signable
 {
 public:
-    static const std::map<VersionNumber, VersionNumber>
+    static const std::pmr::map<VersionNumber, VersionNumber>
         unit_of_account_version_map_;
 
     static auto GetID(const api::Session& api, const SerializedType& contract)

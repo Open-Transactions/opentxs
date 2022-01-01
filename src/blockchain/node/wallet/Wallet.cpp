@@ -120,31 +120,31 @@ auto Wallet::GetBalance(const crypto::Key& key) const noexcept -> Balance
     return db_.GetBalance(key);
 }
 
-auto Wallet::GetOutputs() const noexcept -> std::vector<UTXO>
+auto Wallet::GetOutputs() const noexcept -> std::pmr::vector<UTXO>
 {
     return GetOutputs(TxoState::All);
 }
 
-auto Wallet::GetOutputs(TxoState type) const noexcept -> std::vector<UTXO>
+auto Wallet::GetOutputs(TxoState type) const noexcept -> std::pmr::vector<UTXO>
 {
     return db_.GetOutputs(type);
 }
 
 auto Wallet::GetOutputs(const identifier::Nym& owner) const noexcept
-    -> std::vector<UTXO>
+    -> std::pmr::vector<UTXO>
 {
     return GetOutputs(owner, TxoState::All);
 }
 
 auto Wallet::GetOutputs(const identifier::Nym& owner, TxoState type)
-    const noexcept -> std::vector<UTXO>
+    const noexcept -> std::pmr::vector<UTXO>
 {
     return db_.GetOutputs(owner, type);
 }
 
 auto Wallet::GetOutputs(
     const identifier::Nym& owner,
-    const Identifier& subaccount) const noexcept -> std::vector<UTXO>
+    const Identifier& subaccount) const noexcept -> std::pmr::vector<UTXO>
 {
     return GetOutputs(owner, subaccount, TxoState::All);
 }
@@ -152,19 +152,19 @@ auto Wallet::GetOutputs(
 auto Wallet::GetOutputs(
     const identifier::Nym& owner,
     const Identifier& node,
-    TxoState type) const noexcept -> std::vector<UTXO>
+    TxoState type) const noexcept -> std::pmr::vector<UTXO>
 {
     return db_.GetOutputs(owner, node, type);
 }
 
 auto Wallet::GetOutputs(const crypto::Key& key, TxoState type) const noexcept
-    -> std::vector<UTXO>
+    -> std::pmr::vector<UTXO>
 {
     return db_.GetOutputs(key, type);
 }
 
 auto Wallet::GetTags(const block::Outpoint& output) const noexcept
-    -> std::set<TxoTag>
+    -> std::pmr::set<TxoTag>
 {
     return db_.GetOutputTags(output);
 }

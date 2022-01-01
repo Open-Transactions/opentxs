@@ -181,7 +181,7 @@ auto BlockListener::GetFuture(const Height height) noexcept
 BlockListener::~BlockListener() = default;
 
 struct MinedBlocks::Imp {
-    using Vector = std::vector<Future>;
+    using Vector = std::pmr::vector<Future>;
 
     mutable std::mutex lock_{};
     Vector hashes_{};
@@ -349,9 +349,9 @@ Regtest_fixture_base::Regtest_fixture_base(
             test_chain_,
             height,
             [&] {
-                auto output = std::vector<OutputBuilder>{};
+                auto output = std::pmr::vector<OutputBuilder>{};
                 const auto text = std::string{"null"};
-                const auto keys = std::set<ot::blockchain::crypto::Key>{};
+                const auto keys = std::pmr::set<ot::blockchain::crypto::Key>{};
                 output.emplace_back(
                     5000000000,
                     miner_.Factory().BitcoinScriptNullData(test_chain_, {text}),
@@ -427,10 +427,11 @@ auto Regtest_fixture_base::compare_outpoints(
 auto Regtest_fixture_base::compare_outpoints(
     const ot::blockchain::node::TxoState type,
     const TXOState::Data& expected,
-    const std::vector<UTXO>& got) const noexcept -> bool
+    const std::pmr::vector<UTXO>& got) const noexcept -> bool
 {
     auto output{true};
-    static const auto emptySet = std::set<ot::blockchain::block::Outpoint>{};
+    static const auto emptySet =
+        std::pmr::set<ot::blockchain::block::Outpoint>{};
     const auto& set = [&]() -> auto&
     {
         try {
@@ -648,11 +649,11 @@ auto Regtest_fixture_base::Mine(
     const Height ancestor,
     const std::size_t count,
     const Generator& gen,
-    const std::vector<Transaction>& extra) noexcept -> bool
+    const std::pmr::vector<Transaction>& extra) noexcept -> bool
 {
     const auto targetHeight = ancestor + static_cast<Height>(count);
-    auto blocks = std::vector<BlockListener::Future>{};
-    auto wallets = std::vector<WalletListener::Future>{};
+    auto blocks = std::pmr::vector<BlockListener::Future>{};
+    auto wallets = std::pmr::vector<WalletListener::Future>{};
     blocks.reserve(client_count_);
     wallets.reserve(client_count_);
 
@@ -789,7 +790,7 @@ auto Regtest_fixture_base::Start() noexcept -> bool
 
 auto Regtest_fixture_base::TestUTXOs(
     const Expected& expected,
-    const std::vector<UTXO>& utxos) const noexcept -> bool
+    const std::pmr::vector<UTXO>& utxos) const noexcept -> bool
 {
     auto out = true;
 
@@ -932,17 +933,17 @@ Regtest_fixture_hd::Regtest_fixture_hd()
         using Index = ot::Bip32Index;
         static constexpr auto count = 100u;
         static const auto baseAmount = ot::blockchain::Amount{100000000};
-        auto meta = std::vector<OutpointMetadata>{};
+        auto meta = std::pmr::vector<OutpointMetadata>{};
         meta.reserve(count);
         const auto& account = SendHD();
         auto output = miner_.Factory().BitcoinGenerationTransaction(
             test_chain_,
             height,
             [&] {
-                auto output = std::vector<OutputBuilder>{};
+                auto output = std::pmr::vector<OutputBuilder>{};
                 const auto reason =
                     client_1_.Factory().PasswordPrompt(__func__);
-                const auto keys = std::set<ot::blockchain::crypto::Key>{};
+                const auto keys = std::pmr::set<ot::blockchain::crypto::Key>{};
 
                 for (auto i = Index{0}; i < Index{count}; ++i) {
                     const auto index = account.Reserve(
@@ -1162,16 +1163,16 @@ Regtest_payment_code::Regtest_payment_code()
     , mine_to_alice_([&](Height height) -> Transaction {
         using OutputBuilder = ot::api::session::Factory::OutputBuilder;
         static const auto baseAmmount = ot::blockchain::Amount{10000000000};
-        auto meta = std::vector<OutpointMetadata>{};
+        auto meta = std::pmr::vector<OutpointMetadata>{};
         const auto& account = SendHD();
         auto output = miner_.Factory().BitcoinGenerationTransaction(
             test_chain_,
             height,
             [&] {
-                auto output = std::vector<OutputBuilder>{};
+                auto output = std::pmr::vector<OutputBuilder>{};
                 const auto reason =
                     client_1_.Factory().PasswordPrompt(__func__);
-                const auto keys = std::set<bca::Key>{};
+                const auto keys = std::pmr::set<bca::Key>{};
                 const auto index = account.Reserve(Subchain::External, reason);
 
                 EXPECT_TRUE(index.has_value());
@@ -1382,10 +1383,10 @@ struct ScanListener::Imp {
         auto operator=(Data&&) -> Data& = delete;
     };
 
-    using SubchainMap = std::map<Subchain, Data>;
-    using AccountMap = std::map<ot::OTIdentifier, SubchainMap>;
-    using ChainMap = std::map<Chain, AccountMap>;
-    using Map = std::map<ot::OTNymID, ChainMap>;
+    using SubchainMap = std::pmr::map<Subchain, Data>;
+    using AccountMap = std::pmr::map<ot::OTIdentifier, SubchainMap>;
+    using ChainMap = std::pmr::map<Chain, AccountMap>;
+    using Map = std::pmr::map<ot::OTNymID, ChainMap>;
 
     const ot::api::Session& api_;
     const ot::OTZMQListenCallback cb_;
@@ -1506,7 +1507,7 @@ auto ScanListener::wait(const Future& future) const noexcept -> bool
 ScanListener::~ScanListener() = default;
 
 struct SyncRequestor::Imp {
-    using Buffer = std::deque<ot::network::zeromq::Message>;
+    using Buffer = std::pmr::deque<ot::network::zeromq::Message>;
 
     SyncRequestor& parent_;
     const ot::api::session::Client& api_;
@@ -2041,11 +2042,11 @@ private:
         auto operator=(TXO&&) -> TXO& = delete;
     };
 
-    using TXOSet = std::set<TXO>;
-    using Map = std::map<ot::OTIdentifier, TXOSet>;
-    using Immature = std::map<
+    using TXOSet = std::pmr::set<TXO>;
+    using Map = std::pmr::map<ot::OTIdentifier, TXOSet>;
+    using Immature = std::pmr::map<
         ot::blockchain::block::Height,
-        std::set<std::pair<ot::OTIdentifier, TXO>>>;
+        std::pmr::set<std::pair<ot::OTIdentifier, TXO>>>;
 
     const User& user_;
     Map unconfirmed_incoming_;
@@ -2093,7 +2094,8 @@ private:
         Map& from,
         Map& to) noexcept -> std::size_t
     {
-        auto toMove = std::vector<std::pair<Map::iterator, TXOSet::iterator>>{};
+        auto toMove =
+            std::pmr::vector<std::pair<Map::iterator, TXOSet::iterator>>{};
 
         for (auto s{from.begin()}; s != from.end(); ++s) {
             auto& set = s->second;
@@ -2284,7 +2286,7 @@ Regtest_fixture_base::Expected Regtest_fixture_base::expected_{};
 Regtest_fixture_base::Transactions Regtest_fixture_base::transactions_{};
 ot::blockchain::block::Height Regtest_fixture_base::height_{0};
 using TxoState = ot::blockchain::node::TxoState;
-const std::set<TxoState> Regtest_fixture_base::states_{
+const std::pmr::set<TxoState> Regtest_fixture_base::states_{
     TxoState::UnconfirmedNew,
     TxoState::UnconfirmedSpend,
     TxoState::ConfirmedNew,

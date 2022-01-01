@@ -43,7 +43,7 @@ auto VerifyStringVal(const std::string& nValue) -> bool
 
 namespace opentxs
 {
-const std::map<OTAPI_Func_Type, std::string> OTAPI_Func::type_name_{
+const std::pmr::map<OTAPI_Func_Type, std::string> OTAPI_Func::type_name_{
     {NO_FUNC, "NO_FUNC"},
     {DELETE_NYM, "DELETE_NYM"},
     {ISSUE_BASKET, "ISSUE_BASKET"},
@@ -64,7 +64,7 @@ const std::map<OTAPI_Func_Type, std::string> OTAPI_Func::type_name_{
     {ADJUST_USAGE_CREDITS, "ADJUST_USAGE_CREDITS"},
 };
 
-const std::map<OTAPI_Func_Type, bool> OTAPI_Func::type_type_{
+const std::pmr::map<OTAPI_Func_Type, bool> OTAPI_Func::type_type_{
     {DELETE_NYM, false},
     {ISSUE_BASKET, false},
     {DELETE_ASSET_ACCT, false},

@@ -26,7 +26,7 @@ namespace ottest
 //  basic_sequence
 //
 //  1   2   3   4   5   6   7   8   9   10
-const std::vector<Test_HeaderOracle_base::Block>
+const std::pmr::vector<Test_HeaderOracle_base::Block>
     Test_HeaderOracle_base::create_1_{
         {"", BLOCK_1},
         {BLOCK_1, BLOCK_2},
@@ -38,7 +38,7 @@ const std::vector<Test_HeaderOracle_base::Block>
         {BLOCK_7, BLOCK_8},
         {BLOCK_8, BLOCK_9},
         {BLOCK_9, BLOCK_10}};
-const std::vector<Test_HeaderOracle_base::Test>
+const std::pmr::vector<Test_HeaderOracle_base::Test>
     Test_HeaderOracle_base::sequence_1_{
         {BLOCK_1, {1, BLOCK_1}, {"", BLOCK_1}},
         {BLOCK_2, {2, BLOCK_2}, {"", BLOCK_1, BLOCK_2}},
@@ -125,7 +125,7 @@ const Test_HeaderOracle_base::ExpectedSiblings
 //  1   2   3   7   8
 //          4
 //          5   6
-const std::vector<Test_HeaderOracle_base::Block>
+const std::pmr::vector<Test_HeaderOracle_base::Block>
     Test_HeaderOracle_base::create_2_{
         {"", BLOCK_1},
         {BLOCK_1, BLOCK_2},
@@ -136,7 +136,7 @@ const std::vector<Test_HeaderOracle_base::Block>
         {BLOCK_3, BLOCK_7},
         {BLOCK_7, BLOCK_8},
     };
-const std::vector<Test_HeaderOracle_base::Test>
+const std::pmr::vector<Test_HeaderOracle_base::Test>
     Test_HeaderOracle_base::sequence_2_{
         {BLOCK_1, {1, BLOCK_1}, {"", BLOCK_1}},
         {BLOCK_2, {2, BLOCK_2}, {"", BLOCK_1, BLOCK_2}},
@@ -177,7 +177,7 @@ const Test_HeaderOracle_base::ExpectedSiblings
 //  1   2   3   4   5   6
 //              7
 //             (8)  9   10
-const std::vector<Test_HeaderOracle_base::Block>
+const std::pmr::vector<Test_HeaderOracle_base::Block>
     Test_HeaderOracle_base::create_3_{
         {"", BLOCK_1},
         {BLOCK_1, BLOCK_2},
@@ -190,7 +190,7 @@ const std::vector<Test_HeaderOracle_base::Block>
         {BLOCK_8, BLOCK_9},
         {BLOCK_9, BLOCK_10},
     };
-const std::vector<Test_HeaderOracle_base::Test>
+const std::pmr::vector<Test_HeaderOracle_base::Test>
     Test_HeaderOracle_base::sequence_3_{
         {BLOCK_1, {1, BLOCK_1}, {"", BLOCK_1}},
         {BLOCK_2, {2, BLOCK_2}, {"", BLOCK_1, BLOCK_2}},
@@ -238,7 +238,7 @@ const Test_HeaderOracle_base::ExpectedSiblings
 //  1   2   3  (4)  10
 //              5
 //              6   7   8   9
-const std::vector<Test_HeaderOracle_base::Block>
+const std::pmr::vector<Test_HeaderOracle_base::Block>
     Test_HeaderOracle_base::create_4_{
         {"", BLOCK_1},
         {BLOCK_1, BLOCK_2},
@@ -251,7 +251,7 @@ const std::vector<Test_HeaderOracle_base::Block>
         {BLOCK_8, BLOCK_9},
         {BLOCK_4, BLOCK_10},
     };
-const std::vector<Test_HeaderOracle_base::Test>
+const std::pmr::vector<Test_HeaderOracle_base::Test>
     Test_HeaderOracle_base::sequence_4_{
         {BLOCK_1, {1, BLOCK_1}, {"", BLOCK_1}},
         {BLOCK_2, {2, BLOCK_2}, {"", BLOCK_1, BLOCK_2}},
@@ -296,7 +296,7 @@ const Test_HeaderOracle_base::ExpectedSiblings
 //                      7   8   9
 //  1   2   3   12  4   5   6   13  14
 //              10  11
-const std::vector<Test_HeaderOracle_base::Block>
+const std::pmr::vector<Test_HeaderOracle_base::Block>
     Test_HeaderOracle_base::create_5_{
         {"", BLOCK_1},
         {BLOCK_1, BLOCK_2},
@@ -313,7 +313,7 @@ const std::vector<Test_HeaderOracle_base::Block>
         {BLOCK_7, BLOCK_8},
         {BLOCK_8, BLOCK_9},
     };
-const std::vector<Test_HeaderOracle_base::Test>
+const std::pmr::vector<Test_HeaderOracle_base::Test>
     Test_HeaderOracle_base::sequence_5_{
         {BLOCK_1, {1, BLOCK_1}, {"", BLOCK_1}},
         {BLOCK_2, {2, BLOCK_2}, {"", BLOCK_1, BLOCK_2}},
@@ -399,9 +399,9 @@ const Test_HeaderOracle_base::ExpectedSiblings
 //  add_checkpoint_already_in_best_chain
 //
 //  1   2   3   4   5  (6)  7   8   9   10
-const std::vector<Test_HeaderOracle_base::Block>
+const std::pmr::vector<Test_HeaderOracle_base::Block>
     Test_HeaderOracle_base::create_6_{Test_HeaderOracle_base::create_1_};
-const std::vector<Test_HeaderOracle_base::Test>
+const std::pmr::vector<Test_HeaderOracle_base::Test>
     Test_HeaderOracle_base::sequence_6_{Test_HeaderOracle_base::sequence_1_};
 const Test_HeaderOracle_base::PostStateVector
     Test_HeaderOracle_base::post_state_6_{
@@ -427,9 +427,9 @@ const Test_HeaderOracle_base::ExpectedSiblings
 //  1   2   3   7   8
 //         (4)
 //          5   6
-const std::vector<Test_HeaderOracle_base::Block>
+const std::pmr::vector<Test_HeaderOracle_base::Block>
     Test_HeaderOracle_base::create_7_{Test_HeaderOracle_base::create_2_};
-const std::vector<Test_HeaderOracle_base::Test>
+const std::pmr::vector<Test_HeaderOracle_base::Test>
     Test_HeaderOracle_base::sequence_7_{Test_HeaderOracle_base::sequence_2_};
 const Test_HeaderOracle_base::PostStateVector
     Test_HeaderOracle_base::post_state_7_{
@@ -456,7 +456,7 @@ const Test_HeaderOracle_base::ExpectedSiblings
 //          8   9
 //     (6)  7
 //  1   2   3   4   5
-const std::vector<Test_HeaderOracle_base::Block>
+const std::pmr::vector<Test_HeaderOracle_base::Block>
     Test_HeaderOracle_base::create_8_{
         {"", BLOCK_1},
         {BLOCK_1, BLOCK_2},
@@ -468,7 +468,7 @@ const std::vector<Test_HeaderOracle_base::Block>
         {BLOCK_6, BLOCK_8},
         {BLOCK_8, BLOCK_9},
     };
-const std::vector<Test_HeaderOracle_base::Test>
+const std::pmr::vector<Test_HeaderOracle_base::Test>
     Test_HeaderOracle_base::sequence_8_{
         {BLOCK_1, {1, BLOCK_1}, {"", BLOCK_1}},
         {BLOCK_2, {2, BLOCK_2}, {"", BLOCK_1, BLOCK_2}},
@@ -543,9 +543,9 @@ const Test_HeaderOracle_base::ExpectedSiblings
 //          5   6
 //
 //     (9)
-const std::vector<Test_HeaderOracle_base::Block>
+const std::pmr::vector<Test_HeaderOracle_base::Block>
     Test_HeaderOracle_base::create_9_{Test_HeaderOracle_base::create_2_};
-const std::vector<Test_HeaderOracle_base::Test>
+const std::pmr::vector<Test_HeaderOracle_base::Test>
     Test_HeaderOracle_base::sequence_9_{Test_HeaderOracle_base::sequence_2_};
 const Test_HeaderOracle_base::PostStateVector
     Test_HeaderOracle_base::post_state_9_{
@@ -570,7 +570,7 @@ const Test_HeaderOracle_base::ExpectedSiblings
 //          8   9
 //     (6)  7
 //  1   2   3   4   5
-const std::vector<Test_HeaderOracle_base::Block>
+const std::pmr::vector<Test_HeaderOracle_base::Block>
     Test_HeaderOracle_base::create_10_{
         {"", BLOCK_1},
         {BLOCK_1, BLOCK_2},
@@ -582,7 +582,7 @@ const std::vector<Test_HeaderOracle_base::Block>
         {BLOCK_6, BLOCK_8},
         {BLOCK_8, BLOCK_9},
     };
-const std::vector<Test_HeaderOracle_base::Test>
+const std::pmr::vector<Test_HeaderOracle_base::Test>
     Test_HeaderOracle_base::sequence_10_{
         {BLOCK_1, {1, BLOCK_1}, {"", BLOCK_1}},
         {BLOCK_2, {1, BLOCK_1}, {"", BLOCK_1}},
@@ -595,7 +595,7 @@ const std::vector<Test_HeaderOracle_base::Test>
         {BLOCK_9, {4, BLOCK_9}, {"", BLOCK_1, BLOCK_6, BLOCK_8, BLOCK_9}},
     };
 // clang-format off
-const std::vector<std::string> Test_HeaderOracle_base::bitcoin_{
+const std::pmr::vector<std::string> Test_HeaderOracle_base::bitcoin_{
     {"010000006fe28c0ab6f1b372c1a6a246ae63f74f931e8365e15a089c68d6190000000000982051fd1e4ba744bbbe680e1fee14677ba1a3c3540bf7b1cdb606e857233e0e61bc6649ffff001d01e36299"},
     {"010000004860eb18bf1b1620e37e9490fc8a427514416fd75159ab86688e9a8300000000d5fdcc541e25de1c7a5addedf24858b8bb665c9f36ef744ee42c316022c90f9bb0bc6649ffff001d08d2bd61"},
     {"01000000bddd99ccfda39da1b108ce1a5d70038d0a967bacb68b6b63065f626a0000000044f672226090d85db9a9f2fbfe5f0f9609b387af7be5b7fbb7a1767c831c9e995dbe6649ffff001d05e0ed6d"},
@@ -2619,7 +2619,7 @@ Test_HeaderOracle::Test_HeaderOracle()
 {
 }
 
-auto Test_HeaderOracle_base::apply_blocks(const std::vector<Test>& vector)
+auto Test_HeaderOracle_base::apply_blocks(const std::pmr::vector<Test>& vector)
     -> bool
 {
     for (const auto& [block, position, best] : vector) {
@@ -2637,10 +2637,10 @@ auto Test_HeaderOracle_base::apply_blocks(const std::vector<Test>& vector)
     return true;
 }
 
-auto Test_HeaderOracle_base::apply_blocks_batch(const std::vector<Test>& vector)
-    -> bool
+auto Test_HeaderOracle_base::apply_blocks_batch(
+    const std::pmr::vector<Test>& vector) -> bool
 {
-    auto headers = std::vector<std::unique_ptr<bb::Header>>{};
+    auto headers = std::pmr::vector<std::unique_ptr<bb::Header>>{};
 
     for (const auto& [block, position, best] : vector) {
         headers.emplace_back(get_test_block(block));
@@ -2649,8 +2649,8 @@ auto Test_HeaderOracle_base::apply_blocks_batch(const std::vector<Test>& vector)
     return header_oracle_.AddHeaders(headers);
 }
 
-auto Test_HeaderOracle_base::create_blocks(const std::vector<Block>& vector)
-    -> bool
+auto Test_HeaderOracle_base::create_blocks(
+    const std::pmr::vector<Block>& vector) -> bool
 {
     for (const auto& [parent, child] : vector) {
         const bb::pHash previous{
@@ -2750,7 +2750,7 @@ auto Test_HeaderOracle_base::verify_best_chain(const BestChainVector& vector)
 auto Test_HeaderOracle_base::verify_hash_sequence(
     const bb::Height start,
     const std::size_t stop,
-    const std::vector<std::string>& expected) -> bool
+    const std::pmr::vector<std::string>& expected) -> bool
 {
     const auto hashes = header_oracle_.BestHashes(start, stop);
 

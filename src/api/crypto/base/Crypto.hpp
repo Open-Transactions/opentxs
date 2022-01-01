@@ -109,10 +109,10 @@ private:
     using AType = opentxs::crypto::key::asymmetric::Algorithm;
     using SaType = opentxs::crypto::key::symmetric::Algorithm;
     using SsType = opentxs::crypto::key::symmetric::Source;
-    using AMap = std::map<AType, opentxs::crypto::AsymmetricProvider*>;
-    using EMap = std::map<AType, opentxs::crypto::EcdsaProvider*>;
-    using SaMap = std::map<SaType, opentxs::crypto::SymmetricProvider*>;
-    using SsMap = std::map<SsType, opentxs::crypto::SymmetricProvider*>;
+    using AMap = std::pmr::map<AType, opentxs::crypto::AsymmetricProvider*>;
+    using EMap = std::pmr::map<AType, opentxs::crypto::EcdsaProvider*>;
+    using SaMap = std::pmr::map<SaType, opentxs::crypto::SymmetricProvider*>;
+    using SsMap = std::pmr::map<SsType, opentxs::crypto::SymmetricProvider*>;
 
     static auto pbkdf2_choose(
         std::unique_ptr<opentxs::crypto::Sodium>& sodium,

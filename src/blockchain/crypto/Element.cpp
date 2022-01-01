@@ -163,7 +163,7 @@ Element::Element(
           chain,
           subchain,
           address,
-          api.Factory().Identifier(address.contact()))
+          api.Factory().IdentifierFromBase58(address.contact()))
 {
 }
 
@@ -205,16 +205,16 @@ auto Element::Contact() const noexcept -> OTIdentifier
     return contact_;
 }
 
-auto Element::Elements() const noexcept -> std::set<OTData>
+auto Element::Elements() const noexcept -> std::pmr::set<OTData>
 {
     auto lock = rLock{lock_};
 
     return elements(lock);
 }
 
-auto Element::elements(const rLock&) const noexcept -> std::set<OTData>
+auto Element::elements(const rLock&) const noexcept -> std::pmr::set<OTData>
 {
-    auto output = std::set<OTData>{};
+    auto output = std::pmr::set<OTData>{};
     auto pubkey = api_.Factory().Data(pkey_->PublicKey());
 
     try {
@@ -226,7 +226,8 @@ auto Element::elements(const rLock&) const noexcept -> std::set<OTData>
     return output;
 }
 
-auto Element::IncomingTransactions() const noexcept -> std::set<std::string>
+auto Element::IncomingTransactions() const noexcept
+    -> std::pmr::set<std::string>
 {
     return parent_.Internal().IncomingTransactions(KeyID());
 }
@@ -476,7 +477,7 @@ auto Element::Unreserve() noexcept -> bool
 auto Element::update_element(rLock& lock) const noexcept -> void
 {
     const auto elements = this->elements(lock);
-    auto hashes = std::vector<ReadView>{};
+    auto hashes = std::pmr::vector<ReadView>{};
     std::transform(
         std::begin(elements), std::end(elements), std::back_inserter(hashes), [
         ](const auto& in) -> auto { return in->Bytes(); });

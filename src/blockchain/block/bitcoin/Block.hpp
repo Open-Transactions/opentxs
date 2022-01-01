@@ -63,8 +63,8 @@ class Block : public bitcoin::Block, public block::implementation::Block
 public:
     using CalculatedSize =
         std::pair<std::size_t, network::blockchain::bitcoin::CompactSize>;
-    using TxidIndex = std::vector<Space>;
-    using TransactionMap = std::map<ReadView, value_type>;
+    using TxidIndex = std::pmr::vector<Space>;
+    using TransactionMap = std::pmr::map<ReadView, value_type>;
 
     static const std::size_t header_bytes_;
 
@@ -103,7 +103,7 @@ public:
     }
     auto end() const noexcept -> const_iterator final { return cend(); }
     auto ExtractElements(const filter::Type style) const noexcept
-        -> std::vector<Space> final;
+        -> std::pmr::vector<Space> final;
     auto FindMatches(
         const filter::Type type,
         const Patterns& outpoints,

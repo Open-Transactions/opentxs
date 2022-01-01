@@ -206,7 +206,7 @@ auto NumericHash::operator<=(const blockchain::NumericHash& rhs) const noexcept
 auto NumericHash::asHex(const std::size_t minimumBytes) const noexcept
     -> std::string
 {
-    std::vector<unsigned char> bytes;
+    std::pmr::vector<unsigned char> bytes;
 
     try {
         // Export as big endian

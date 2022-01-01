@@ -153,7 +153,7 @@ auto OTAPI_Exec::ProposePaymentPlan(
     OTIdentifier angelSenderAcctId = api_.Factory().Identifier();
 
     if (!SENDER_ACCT_ID.empty())
-        angelSenderAcctId = api_.Factory().Identifier(SENDER_ACCT_ID);
+        angelSenderAcctId = api_.Factory().IdentifierFromBase58(SENDER_ACCT_ID);
 
     std::unique_ptr<OTPaymentPlan> pPlan(ot_api_.ProposePaymentPlan(
         api_.Factory().ServerID(NOTARY_ID),
@@ -170,7 +170,7 @@ auto OTAPI_Exec::ProposePaymentPlan(
                               "here.)")
             // Like a memo.
             : String::Factory(PLAN_CONSIDERATION),
-        api_.Factory().Identifier(RECIPIENT_ACCT_ID),
+        api_.Factory().IdentifierFromBase58(RECIPIENT_ACCT_ID),
         api_.Factory().NymID(RECIPIENT_NYM_ID),
         static_cast<std::int64_t>(INITIAL_PAYMENT_AMOUNT),
         INITIAL_PAYMENT_DELAY,
@@ -357,7 +357,8 @@ auto OTAPI_Exec::ConfirmPaymentPlan(
 
     const auto theNotaryID = api_.Factory().ServerID(NOTARY_ID);
     const auto theSenderNymID = api_.Factory().NymID(SENDER_NYM_ID);
-    const auto theSenderAcctID = api_.Factory().Identifier(SENDER_ACCT_ID);
+    const auto theSenderAcctID =
+        api_.Factory().IdentifierFromBase58(SENDER_ACCT_ID);
     const auto theRecipientNymID = api_.Factory().NymID(RECIPIENT_NYM_ID);
 
     auto thePlan{api_.Factory().PaymentPlan()};
@@ -1224,7 +1225,7 @@ auto OTAPI_Exec::SmartContract_ConfirmAccount(
                strAcctName = String::Factory(ACCT_NAME),
                strAgentName = String::Factory(AGENT_NAME);
     const auto theSignerNymID = api_.Factory().NymID(SIGNER_NYM_ID);
-    const auto theAcctID = api_.Factory().Identifier(strAccountID);
+    const auto theAcctID = api_.Factory().IdentifierFromBase58(strAccountID);
     auto strOutput = String::Factory();
 
     const bool bConfirmed = ot_api_.SmartContract_ConfirmAccount(
@@ -2727,7 +2728,7 @@ auto OTAPI_Exec::GenerateBasketExchange(
     const auto theBasketInstrumentDefinitionID =
         api_.Factory().UnitID(BASKET_INSTRUMENT_DEFINITION_ID);
     const auto theBasketAssetAcctID =
-        api_.Factory().Identifier(BASKET_ASSET_ACCT_ID);
+        api_.Factory().IdentifierFromBase58(BASKET_ASSET_ACCT_ID);
     std::int32_t nTransferMultiple = 1;  // Just a default value.
 
     if (TRANSFER_MULTIPLE > 0) nTransferMultiple = TRANSFER_MULTIPLE;
@@ -2777,7 +2778,8 @@ auto OTAPI_Exec::AddBasketExchangeItem(
     const auto theNymID = api_.Factory().NymID(NYM_ID);
     const auto theInstrumentDefinitionID =
         api_.Factory().UnitID(INSTRUMENT_DEFINITION_ID);
-    const auto theAssetAcctID = api_.Factory().Identifier(ASSET_ACCT_ID);
+    const auto theAssetAcctID =
+        api_.Factory().IdentifierFromBase58(ASSET_ACCT_ID);
     auto theBasket{api_.Factory().Basket()};
 
     OT_ASSERT(false != bool(theBasket));

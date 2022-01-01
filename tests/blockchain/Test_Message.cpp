@@ -71,7 +71,7 @@ TEST_F(Test_Message, init_opentxs) {}
 
 TEST_F(Test_Message, service_bits)
 {
-    std::vector<bp::Service> services{
+    std::pmr::vector<bp::Service> services{
         bp::Service::Bit1,  bp::Service::Bit2,  bp::Service::Bit3,
         bp::Service::Bit4,  bp::Service::Bit5,  bp::Service::Bit6,
         bp::Service::Bit7,  bp::Service::Bit8,  bp::Service::Bit9,
@@ -104,7 +104,7 @@ TEST_F(Test_Message, getblocks)
     namespace bitcoin = ot::blockchain::p2p::bitcoin;
 
     bitcoin::ProtocolVersionUnsigned version{2};
-    std::vector<ot::OTData> header_hashes;
+    std::pmr::vector<ot::OTData> header_hashes;
     for (int ii = 0; ii < 10; ii++) {
         ot::OTData header_hash = ot::Data::Factory();
         header_hash->Randomize(32);

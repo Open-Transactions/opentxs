@@ -90,7 +90,8 @@ public:
     }
 
 private:
-    std::unordered_map<std::string, std::unique_ptr<OTMessageStrategy>> mapping;
+    std::pmr::unordered_map<std::string, std::unique_ptr<OTMessageStrategy>>
+        mapping;
 };
 
 class OPENTXS_EXPORT Message final : public Contract
@@ -105,12 +106,12 @@ protected:
 private:
     friend api::session::imp::Factory;
 
-    using TypeMap = std::map<MessageType, std::string>;
-    using ReverseTypeMap = std::map<std::string, MessageType>;
+    using TypeMap = std::pmr::map<MessageType, std::string>;
+    using ReverseTypeMap = std::pmr::map<std::string, MessageType>;
 
     static const TypeMap message_names_;
     static const ReverseTypeMap message_types_;
-    static const std::map<MessageType, MessageType> reply_message_;
+    static const std::pmr::map<MessageType, MessageType> reply_message_;
 
     static auto make_reverse_map() -> ReverseTypeMap;
     static auto reply_command(const MessageType& type) -> MessageType;
@@ -153,7 +154,7 @@ public:
     // that should be listed as acknowledged that the server reply has already
     // been seen for those request numbers.
     void SetAcknowledgments(const otx::context::Base& context);
-    void SetAcknowledgments(const std::set<RequestNumber>& numbers);
+    void SetAcknowledgments(const std::pmr::set<RequestNumber>& numbers);
 
     static void registerStrategy(std::string name, OTMessageStrategy* strategy);
 

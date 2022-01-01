@@ -269,8 +269,8 @@ private:
     mutable std::mutex lock_;
     JobCounter jobs_;
     std::size_t cached_bytes_;
-    std::map<OTIdentifier, Task> tasks_;
-    std::map<OTIdentifier, std::shared_future<std::string>> results_;
+    std::pmr::map<OTIdentifier, Task> tasks_;
+    std::pmr::map<OTIdentifier, std::shared_future<std::string>> results_;
     std::queue<OTIdentifier> fifo_;
 
     auto key(

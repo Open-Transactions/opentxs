@@ -13,6 +13,7 @@
 #include <iterator>
 #include <limits>
 #include <map>
+#include <memory_resource>
 #include <numeric>
 #include <sstream>
 #include <stdexcept>
@@ -133,7 +134,7 @@ auto BitcoinTransaction(
             std::string{},
             std::move(inputs),
             std::move(outputs),
-            std::vector<blockchain::Type>{chain},
+            std::pmr::vector<blockchain::Type>{chain},
             make_blank<blockchain::block::Position>::value(api));
     } catch (const std::exception& e) {
         LogError()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
@@ -152,7 +153,7 @@ auto BitcoinTransaction(
 {
     try {
         auto inputBytes = std::size_t{};
-        auto instantiatedInputs = std::vector<
+        auto instantiatedInputs = std::pmr::vector<
             std::unique_ptr<blockchain::block::bitcoin::internal::Input>>{};
         {
             auto counter = int{0};
@@ -163,7 +164,7 @@ auto BitcoinTransaction(
                 const auto& input = inputs.at(i);
                 const auto& op = input.outpoint_;
                 const auto& seq = input.sequence_;
-                auto witness = std::vector<Space>{};
+                auto witness = std::pmr::vector<Space>{};
 
                 if (0 < parsed.witnesses_.size()) {
                     const auto& encodedWitness = parsed.witnesses_.at(i);
@@ -195,7 +196,7 @@ auto BitcoinTransaction(
         }
 
         auto outputBytes = std::size_t{};
-        auto instantiatedOutputs = std::vector<
+        auto instantiatedOutputs = std::pmr::vector<
             std::unique_ptr<blockchain::block::bitcoin::internal::Output>>{};
         {
             instantiatedOutputs.reserve(parsed.outputs_.size());
@@ -237,7 +238,7 @@ auto BitcoinTransaction(
                 std::move(instantiatedInputs), inputBytes),
             factory::BitcoinTransactionOutputs(
                 std::move(instantiatedOutputs), outputBytes),
-            std::vector<blockchain::Type>{chain},
+            std::pmr::vector<blockchain::Type>{chain},
             make_blank<blockchain::block::Position>::value(api),
             [&]() -> std::optional<std::size_t> {
                 if (std::numeric_limits<std::size_t>::max() == position) {
@@ -260,7 +261,7 @@ auto BitcoinTransaction(
     const proto::BlockchainTransaction& in) noexcept
     -> std::unique_ptr<blockchain::block::bitcoin::internal::Transaction>
 {
-    auto chains = std::vector<blockchain::Type>{};
+    auto chains = std::pmr::vector<blockchain::Type>{};
     std::transform(
         std::begin(in.chain()),
         std::end(in.chain()),
@@ -279,11 +280,11 @@ auto BitcoinTransaction(
     const auto& chain = chains.at(0);
 
     try {
-        auto inputs = std::vector<
+        auto inputs = std::pmr::vector<
             std::unique_ptr<blockchain::block::bitcoin::internal::Input>>{};
 
         {
-            auto map = std::map<
+            auto map = std::pmr::map<
                 std::uint32_t,
                 std::unique_ptr<blockchain::block::bitcoin::internal::Input>>{};
 
@@ -303,11 +304,11 @@ auto BitcoinTransaction(
                 ](auto& in) -> auto { return std::move(in.second); });
         }
 
-        auto outputs = std::vector<
+        auto outputs = std::pmr::vector<
             std::unique_ptr<blockchain::block::bitcoin::internal::Output>>{};
 
         {
-            auto map = std::map<
+            auto map = std::pmr::map<
                 std::uint32_t,
                 std::unique_ptr<
                     blockchain::block::bitcoin::internal::Output>>{};
@@ -380,7 +381,7 @@ Transaction::Transaction(
     const std::string& memo,
     std::unique_ptr<internal::Inputs> inputs,
     std::unique_ptr<internal::Outputs> outputs,
-    std::vector<blockchain::Type>&& chains,
+    std::pmr::vector<blockchain::Type>&& chains,
     block::Position&& minedPosition,
     std::optional<std::size_t>&& position) noexcept(false)
     : api_(api)
@@ -421,9 +422,10 @@ Transaction::Transaction(const Transaction& rhs) noexcept
 {
 }
 
-auto Transaction::AssociatedLocalNyms() const noexcept -> std::vector<OTNymID>
+auto Transaction::AssociatedLocalNyms() const noexcept
+    -> std::pmr::vector<OTNymID>
 {
-    auto output = std::vector<OTNymID>{};
+    auto output = std::pmr::vector<OTNymID>{};
     inputs_->AssociatedLocalNyms(output);
     outputs_->AssociatedLocalNyms(output);
     dedup(output);
@@ -433,9 +435,9 @@ auto Transaction::AssociatedLocalNyms() const noexcept -> std::vector<OTNymID>
 
 auto Transaction::AssociatedRemoteContacts(
     const api::session::Contacts& contacts,
-    const identifier::Nym& nym) const noexcept -> std::vector<OTIdentifier>
+    const identifier::Nym& nym) const noexcept -> std::pmr::vector<OTIdentifier>
 {
-    auto output = std::vector<OTIdentifier>{};
+    auto output = std::pmr::vector<OTIdentifier>{};
     inputs_->AssociatedRemoteContacts(output);
     outputs_->AssociatedRemoteContacts(output);
     dedup(output);
@@ -465,8 +467,8 @@ auto Transaction::calculate_witness_size(const Space& in) noexcept
     return blockchain::bitcoin::CompactSize{in.size()}.Total();
 }
 
-auto Transaction::calculate_witness_size(const std::vector<Space>& in) noexcept
-    -> std::size_t
+auto Transaction::calculate_witness_size(
+    const std::pmr::vector<Space>& in) noexcept -> std::size_t
 {
     const auto cs = blockchain::bitcoin::CompactSize{in.size()};
 
@@ -507,7 +509,7 @@ auto Transaction::IDNormalized() const noexcept -> const Identifier&
 }
 
 auto Transaction::ExtractElements(const filter::Type style) const noexcept
-    -> std::vector<Space>
+    -> std::pmr::vector<Space>
 {
     auto output = inputs_->ExtractElements(style);
     LogTrace()(OT_PRETTY_CLASS())("extracted ")(output.size())(
@@ -562,7 +564,7 @@ auto Transaction::FindMatches(
     return output;
 }
 
-auto Transaction::GetPatterns() const noexcept -> std::vector<PatternID>
+auto Transaction::GetPatterns() const noexcept -> std::pmr::vector<PatternID>
 {
     auto output = inputs_->GetPatterns();
     const auto oPatterns = outputs_->GetPatterns();
@@ -607,7 +609,7 @@ auto Transaction::GetPreimageBTC(
     return output;
 }
 
-auto Transaction::Keys() const noexcept -> std::vector<crypto::Key>
+auto Transaction::Keys() const noexcept -> std::pmr::vector<crypto::Key>
 {
     auto out = inputs_->Keys();
     auto keys = outputs_->Keys();

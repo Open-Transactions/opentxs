@@ -168,9 +168,9 @@ auto CustodialAccountActivity::extract_event(
 }
 
 auto CustodialAccountActivity::extract_rows(
-    const proto::PaymentWorkflow& workflow) noexcept -> std::vector<RowKey>
+    const proto::PaymentWorkflow& workflow) noexcept -> std::pmr::vector<RowKey>
 {
-    auto output = std::vector<RowKey>{};
+    auto output = std::pmr::vector<RowKey>{};
 
     switch (translate(workflow.type())) {
         case otx::client::PaymentWorkflowType::OutgoingCheque: {
@@ -505,7 +505,7 @@ auto CustodialAccountActivity::process_notary(const Message& message) noexcept
 
 auto CustodialAccountActivity::process_workflow(
     const Identifier& workflowID,
-    std::set<AccountActivityRowID>& active) noexcept -> void
+    std::pmr::set<AccountActivityRowID>& active) noexcept -> void
 {
     const auto workflow = [&] {
         auto out = proto::PaymentWorkflow{};
@@ -575,7 +575,7 @@ auto CustodialAccountActivity::startup() noexcept -> void
 
     const auto workflows =
         Widget::api_.Workflow().WorkflowsByAccount(primary_id_, account_id_);
-    auto active = std::set<AccountActivityRowID>{};
+    auto active = std::pmr::set<AccountActivityRowID>{};
 
     for (const auto& id : workflows) { process_workflow(id, active); }
 

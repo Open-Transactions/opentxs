@@ -895,9 +895,10 @@ auto Wallet::ImportAccount(std::unique_ptr<opentxs::Account>& imported) const
     return false;
 }
 
-auto Wallet::IssuerList(const identifier::Nym& nymID) const -> std::set<OTNymID>
+auto Wallet::IssuerList(const identifier::Nym& nymID) const
+    -> std::pmr::set<OTNymID>
 {
-    std::set<OTNymID> output{};
+    std::pmr::set<OTNymID> output{};
     auto list = api_.Storage().IssuerList(nymID.str());
 
     for (const auto& it : list) {
@@ -997,11 +998,11 @@ auto Wallet::LocalNymCount() const -> std::size_t
     return api_.Storage().LocalNyms().size();
 }
 
-auto Wallet::LocalNyms() const -> std::set<OTNymID>
+auto Wallet::LocalNyms() const -> std::pmr::set<OTNymID>
 {
-    const std::set<std::string> ids = api_.Storage().LocalNyms();
+    const std::pmr::set<std::string> ids = api_.Storage().LocalNyms();
 
-    std::set<OTNymID> nymIds;
+    std::pmr::set<OTNymID> nymIds;
     std::transform(
         ids.begin(),
         ids.end(),
@@ -1344,7 +1345,7 @@ auto Wallet::NymList() const -> ObjectList { return api_.Storage().NymList(); }
 
 auto Wallet::NymNameByIndex(const std::size_t index, String& name) const -> bool
 {
-    std::set<std::string> nymNames = api_.Storage().LocalNyms();
+    std::pmr::set<std::string> nymNames = api_.Storage().LocalNyms();
 
     if (index < nymNames.size()) {
         std::size_t idx{0};
@@ -2396,14 +2397,14 @@ auto Wallet::Server(
     const std::string& nymid,
     const std::string& name,
     const std::string& terms,
-    const std::list<contract::Server::Endpoint>& endpoints,
+    const std::pmr::list<contract::Server::Endpoint>& endpoints,
     const opentxs::PasswordPrompt& reason,
     const VersionNumber version) const -> OTServerContract
 {
     auto nym = Nym(identifier::Nym::Factory(nymid));
 
     if (nym) {
-        auto list = std::list<Endpoint>{};
+        auto list = std::pmr::list<Endpoint>{};
         std::transform(
             std::begin(endpoints),
             std::end(endpoints),

@@ -113,22 +113,23 @@ public:
     auto GetBalance(const identifier::Nym& owner, const Identifier& subaccount)
         const noexcept -> Balance final;
     auto GetBalance(const crypto::Key& key) const noexcept -> Balance final;
-    auto GetOutputs() const noexcept -> std::vector<UTXO> final;
-    auto GetOutputs(TxoState type) const noexcept -> std::vector<UTXO> final;
+    auto GetOutputs() const noexcept -> std::pmr::vector<UTXO> final;
+    auto GetOutputs(TxoState type) const noexcept
+        -> std::pmr::vector<UTXO> final;
     auto GetOutputs(const identifier::Nym& owner) const noexcept
-        -> std::vector<UTXO> final;
+        -> std::pmr::vector<UTXO> final;
     auto GetOutputs(const identifier::Nym& owner, TxoState type) const noexcept
-        -> std::vector<UTXO> final;
+        -> std::pmr::vector<UTXO> final;
     auto GetOutputs(const identifier::Nym& owner, const Identifier& subaccount)
-        const noexcept -> std::vector<UTXO> final;
+        const noexcept -> std::pmr::vector<UTXO> final;
     auto GetOutputs(
         const identifier::Nym& owner,
         const Identifier& subaccount,
-        TxoState type) const noexcept -> std::vector<UTXO> final;
+        TxoState type) const noexcept -> std::pmr::vector<UTXO> final;
     auto GetOutputs(const crypto::Key& key, TxoState type) const noexcept
-        -> std::vector<UTXO> final;
+        -> std::pmr::vector<UTXO> final;
     auto GetTags(const block::Outpoint& output) const noexcept
-        -> std::set<TxoTag> final;
+        -> std::pmr::set<TxoTag> final;
     auto Height() const noexcept -> block::Height final;
 
     auto Init() noexcept -> void final;

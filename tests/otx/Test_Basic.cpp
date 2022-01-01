@@ -13,6 +13,7 @@
 #include <list>
 #include <map>
 #include <memory>
+#include <memory_resource>
 #include <set>
 #include <stdexcept>
 #include <string>
@@ -2731,7 +2732,7 @@ TEST_F(Test_Basic, send_internal_transfer)
         serverAccount.get().GetBalance());
 
     std::size_t count{0}, tries{100};
-    std::set<std::string> workflows{};
+    std::pmr::set<std::string> workflows{};
     while (0 == count) {
         // The state change from ACKNOWLEDGED to CONVEYED occurs
         // asynchronously due to server push notifications so the order in

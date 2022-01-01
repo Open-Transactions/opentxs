@@ -453,7 +453,7 @@ TEST_F(Test_BlockchainActivity, setup_ui)
     activity_thread_3_.expected_ += 2;
     api_.UI().AccountActivity(
         nym_1_id(),
-        api_.Factory().Identifier(std::string{btc_account_id_}),
+        api_.Factory().IdentifierFromBase58(btc_account_id_),
         make_cb(account_activity_, u8"account_activity_"));
     api_.UI().AccountSummary(
         nym_1_id(),
@@ -556,7 +556,7 @@ TEST_F(Test_BlockchainActivity, initial_state_account_activity)
     ASSERT_TRUE(wait_for_counter(account_activity_));
 
     const auto& widget = api_.UI().AccountActivity(
-        nym_1_id(), api_.Factory().Identifier(std::string{btc_account_id_}));
+        nym_1_id(), api_.Factory().IdentifierFromBase58(btc_account_id_));
 
     EXPECT_EQ(widget.AccountID(), btc_account_id_);
     EXPECT_EQ(widget.Balance(), 0);
@@ -715,7 +715,7 @@ TEST_F(Test_BlockchainActivity, receive_assigned_account_activity)
     ASSERT_TRUE(wait_for_counter(account_activity_));
 
     const auto& widget = api_.UI().AccountActivity(
-        nym_1_id(), api_.Factory().Identifier(std::string{btc_account_id_}));
+        nym_1_id(), api_.Factory().IdentifierFromBase58(btc_account_id_));
 
     EXPECT_EQ(widget.AccountID(), btc_account_id_);
     EXPECT_EQ(widget.Balance(), 0);          // FIXME
@@ -1033,7 +1033,7 @@ TEST_F(Test_BlockchainActivity, send_account_activity)
     ASSERT_TRUE(wait_for_counter(account_activity_));
 
     const auto& widget = api_.UI().AccountActivity(
-        nym_1_id(), api_.Factory().Identifier(std::string{btc_account_id_}));
+        nym_1_id(), api_.Factory().IdentifierFromBase58(btc_account_id_));
 
     EXPECT_EQ(widget.AccountID(), btc_account_id_);
     EXPECT_EQ(widget.Balance(), 0);          // FIXME
@@ -1361,7 +1361,7 @@ TEST_F(Test_BlockchainActivity, receive_unassigned_account_activity)
     ASSERT_TRUE(wait_for_counter(account_activity_));
 
     const auto& widget = api_.UI().AccountActivity(
-        nym_1_id(), api_.Factory().Identifier(std::string{btc_account_id_}));
+        nym_1_id(), api_.Factory().IdentifierFromBase58(btc_account_id_));
 
     EXPECT_EQ(widget.AccountID(), btc_account_id_);
     EXPECT_EQ(widget.Balance(), 0);          // FIXME

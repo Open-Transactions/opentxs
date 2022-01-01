@@ -98,11 +98,11 @@ public:
     ~ContactSection() final = default;
 
 private:
-    static const std::
-        map<contact::SectionType, std::set<proto::ContactItemType>>
+    static const std::pmr::
+        map<contact::SectionType, std::pmr::set<proto::ContactItemType>>
             allowed_types_;
-    static const std::
-        map<contact::SectionType, std::map<proto::ContactItemType, int>>
+    static const std::pmr::
+        map<contact::SectionType, std::pmr::map<proto::ContactItemType, int>>
             sort_keys_;
 
     static auto sort_key(const ContactSectionRowID type) noexcept -> int;
@@ -118,7 +118,7 @@ private:
         return ContactSectionList::last(id);
     }
     auto process_section(const contact::ContactSection& section) noexcept
-        -> std::set<ContactSectionRowID>;
+        -> std::pmr::set<ContactSectionRowID>;
     auto reindex(
         const implementation::ContactSortKey& key,
         implementation::CustomData& custom) noexcept -> bool final;

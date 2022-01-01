@@ -383,7 +383,7 @@ struct BitcoinTransactionBuilder::Imp {
     auto FinalizeTransaction() noexcept -> Transaction
     {
         auto inputs = factory::BitcoinTransactionInputs([&] {
-            auto output = std::vector<Input>{};
+            auto output = std::pmr::vector<Input>{};
             output.reserve(inputs_.size());
 
             for (auto& [input, value] : inputs_) {
@@ -484,7 +484,7 @@ struct BitcoinTransactionBuilder::Imp {
         , output_value_()
         , change_keys_()
         , outgoing_keys_([&] {
-            auto out = std::set<KeyID>{};
+            auto out = std::pmr::set<KeyID>{};
 
             for (const auto& output : proposal.output()) {
                 if (false == output.has_paymentcodechannel()) { continue; }
@@ -519,9 +519,9 @@ private:
     const be::little_int32_buf_t version_;
     const be::little_uint32_buf_t lock_time_;
     mutable bool segwit_;
-    std::vector<Output> outputs_;
-    std::vector<Output> change_;
-    std::vector<std::pair<Input, Amount>> inputs_;
+    std::pmr::vector<Output> outputs_;
+    std::pmr::vector<Output> change_;
+    std::pmr::vector<std::pair<Input, Amount>> inputs_;
     const std::size_t fixed_overhead_;
     bitcoin::CompactSize input_count_;
     bitcoin::CompactSize output_count_;
@@ -529,8 +529,8 @@ private:
     std::size_t output_total_;
     Amount input_value_;
     Amount output_value_;
-    std::set<KeyID> change_keys_;
-    std::set<KeyID> outgoing_keys_;
+    std::pmr::set<KeyID> change_keys_;
+    std::pmr::set<KeyID> outgoing_keys_;
 
     static auto is_segwit(const block::bitcoin::internal::Input& input) noexcept
         -> bool
@@ -597,8 +597,8 @@ private:
             return false;
         }
 
-        auto keys = std::vector<OTData>{};
-        auto signatures = std::vector<Space>{};
+        auto keys = std::pmr::vector<OTData>{};
+        auto signatures = std::pmr::vector<Space>{};
         auto views = block::bitcoin::internal::Input::Signatures{};
         const auto& api = api_.Crypto().Blockchain();
 
@@ -675,8 +675,8 @@ private:
         const block::bitcoin::internal::Output& spends,
         block::bitcoin::internal::Input& input) const noexcept -> bool
     {
-        auto keys = std::vector<OTData>{};
-        auto signatures = std::vector<Space>{};
+        auto keys = std::pmr::vector<OTData>{};
+        auto signatures = std::pmr::vector<Space>{};
         auto views = block::bitcoin::internal::Input::Signatures{};
         const auto& api = api_.Crypto().Blockchain();
 
@@ -752,8 +752,8 @@ private:
         const block::bitcoin::internal::Output& spends,
         block::bitcoin::internal::Input& input) const noexcept -> bool
     {
-        auto keys = std::vector<OTData>{};
-        auto signatures = std::vector<Space>{};
+        auto keys = std::pmr::vector<OTData>{};
+        auto signatures = std::pmr::vector<Space>{};
         auto views = block::bitcoin::internal::Input::Signatures{};
         const auto& api = api_.Crypto().Blockchain();
 
@@ -977,7 +977,7 @@ private:
     {
         if (txcopy) { return true; }
 
-        auto inputCopy = std::vector<Input>{};
+        auto inputCopy = std::pmr::vector<Input>{};
         std::transform(
             std::begin(inputs_),
             std::end(inputs_),
@@ -993,7 +993,7 @@ private:
             return {};
         }
 
-        auto outputCopy = std::vector<Output>{};
+        auto outputCopy = std::pmr::vector<Output>{};
         std::transform(
             std::begin(outputs_),
             std::end(outputs_),

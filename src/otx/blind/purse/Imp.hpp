@@ -59,6 +59,7 @@ class Mint;
 
 namespace proto
 {
+class Envelope;
 class Purse;
 }  // namespace proto
 
@@ -150,9 +151,9 @@ public:
         const Amount& totalValue,
         const Time validFrom,
         const Time validTo,
-        const std::vector<blind::Token>& tokens,
+        const std::pmr::vector<blind::Token>& tokens,
         const std::shared_ptr<OTSymmetricKey> primary,
-        const std::vector<proto::Envelope>& primaryPasswords,
+        const std::pmr::vector<proto::Envelope>& primaryPasswords,
         const std::shared_ptr<const OTSymmetricKey> secondaryKey,
         const std::shared_ptr<const OTEnvelope> secondaryEncrypted,
         std::optional<OTSecret> secondaryKeyPassword) noexcept;
@@ -174,11 +175,11 @@ private:
     Amount total_value_;
     Time latest_valid_from_;
     Time earliest_valid_to_;
-    std::vector<blind::Token> tokens_;
+    std::pmr::vector<blind::Token> tokens_;
     mutable bool unlocked_;
     mutable OTSecret primary_key_password_;
     std::shared_ptr<OTSymmetricKey> primary_;
-    std::vector<proto::Envelope> primary_passwords_;
+    std::pmr::vector<proto::Envelope> primary_passwords_;
     OTSecret secondary_key_password_;
     const std::shared_ptr<const OTSymmetricKey> secondary_;
     const std::shared_ptr<const OTEnvelope> secondary_password_;
@@ -192,7 +193,7 @@ private:
         const proto::Purse& serialized) noexcept(false)
         -> std::unique_ptr<const OTEnvelope>;
     static auto get_passwords(const proto::Purse& in)
-        -> std::vector<proto::Envelope>;
+        -> std::pmr::vector<proto::Envelope>;
 
     auto generate_key(Secret& password) const -> OTSymmetricKey;
 

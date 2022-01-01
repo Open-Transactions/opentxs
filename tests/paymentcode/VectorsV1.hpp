@@ -13,7 +13,7 @@ namespace ottest
 struct VectorV1 {
     std::string words_{};
     std::string payment_code_{};
-    std::vector<std::string> receiving_address_{};
+    std::pmr::vector<std::string> receiving_address_{};
     std::string private_key_{};
     std::string outpoint_{};
     std::string blinded_{};

@@ -60,31 +60,31 @@ public:
     auto AccountList(
         const core::UnitType type,
         const identifier::UnitDefinition& unitID) const
-        -> std::set<OTIdentifier> final;
+        -> std::pmr::set<OTIdentifier> final;
     auto BailmentInitiated(const identifier::UnitDefinition& unitID) const
         -> bool final;
     auto BailmentInstructions(
         const api::Session& client,
         const identifier::UnitDefinition& unitID,
         const bool onlyUnused = true) const
-        -> std::vector<BailmentDetails> final;
+        -> std::pmr::vector<BailmentDetails> final;
     auto ConnectionInfo(
         const api::Session& client,
         const contract::peer::ConnectionInfoType type) const
-        -> std::vector<ConnectionDetails> final;
+        -> std::pmr::vector<ConnectionDetails> final;
     auto ConnectionInfoInitiated(
         const contract::peer::ConnectionInfoType type) const -> bool final;
     auto GetRequests(
         const contract::peer::PeerRequestType type,
         const RequestStatus state = RequestStatus::All) const
-        -> std::set<std::tuple<OTIdentifier, OTIdentifier, bool>> final;
+        -> std::pmr::set<std::tuple<OTIdentifier, OTIdentifier, bool>> final;
     auto IssuerID() const -> const identifier::Nym& final { return issuer_id_; }
     auto LocalNymID() const -> const identifier::Nym& final { return nym_id_; }
     auto Paired() const -> bool final;
     auto PairingCode() const -> const std::string& final;
     auto PrimaryServer() const -> OTServerID final;
     auto RequestTypes() const
-        -> std::set<contract::peer::PeerRequestType> final;
+        -> std::pmr::set<contract::peer::PeerRequestType> final;
     auto Serialize(proto::Issuer&) const -> bool final;
     auto StoreSecretComplete() const -> bool final;
     auto StoreSecretInitiated() const -> bool final;
@@ -123,8 +123,9 @@ public:
     ~Issuer() final;
 
 private:
-    using Workflow = std::map<OTIdentifier, std::pair<OTIdentifier, bool>>;
-    using WorkflowMap = std::map<contract::peer::PeerRequestType, Workflow>;
+    using Workflow = std::pmr::map<OTIdentifier, std::pair<OTIdentifier, bool>>;
+    using WorkflowMap =
+        std::pmr::map<contract::peer::PeerRequestType, Workflow>;
     using UnitAccountPair = std::pair<OTUnitID, OTIdentifier>;
 
     const api::session::Wallet& wallet_;
@@ -133,7 +134,7 @@ private:
     mutable OTFlag paired_;
     const OTNymID nym_id_;
     const OTNymID issuer_id_;
-    std::map<core::UnitType, std::set<UnitAccountPair>> account_map_;
+    std::pmr::map<core::UnitType, std::pmr::set<UnitAccountPair>> account_map_;
     WorkflowMap peer_requests_;
 
     auto find_request(
@@ -144,7 +145,7 @@ private:
         const Lock& lock,
         const contract::peer::PeerRequestType type,
         const RequestStatus state = RequestStatus::All) const
-        -> std::set<std::tuple<OTIdentifier, OTIdentifier, bool>>;
+        -> std::pmr::set<std::tuple<OTIdentifier, OTIdentifier, bool>>;
 
     auto add_request(
         const Lock& lock,

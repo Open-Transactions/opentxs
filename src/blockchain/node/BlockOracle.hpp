@@ -125,7 +125,7 @@ private:
 
     using Promise = std::promise<BitcoinBlock_p>;
     using PendingData = std::tuple<Time, Promise, BitcoinBlockFuture, bool>;
-    using Pending = std::map<block::pHash, PendingData>;
+    using Pending = std::pmr::map<block::pHash, PendingData>;
 
     struct Cache {
         auto DownloadQueue() const noexcept -> std::size_t;
@@ -163,7 +163,7 @@ private:
 
         private:
             using CachedBlock = std::pair<block::pHash, BitcoinBlockFuture>;
-            using Completed = std::deque<CachedBlock>;
+            using Completed = std::pmr::deque<CachedBlock>;
             using Index =
                 boost::container::flat_map<ReadView, const CachedBlock*>;
 

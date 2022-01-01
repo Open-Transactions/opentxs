@@ -34,7 +34,7 @@ class String;
 
 namespace opentxs
 {
-using listOfSignatures = std::list<OTSignature>;
+using listOfSignatures = std::pmr::list<OTSignature>;
 
 auto AddBookendsAroundContent(
     String& strOutput,

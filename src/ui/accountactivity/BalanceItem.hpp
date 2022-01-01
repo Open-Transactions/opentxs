@@ -74,7 +74,7 @@ public:
         -> const proto::PaymentWorkflow&;
 
     auto Confirmations() const noexcept -> int override { return 1; }
-    auto Contacts() const noexcept -> std::vector<std::string> override
+    auto Contacts() const noexcept -> std::pmr::vector<std::string> override
     {
         return contacts_;
     }
@@ -114,12 +114,12 @@ protected:
 
 private:
     const OTIdentifier account_id_;
-    const std::vector<std::string> contacts_;
+    const std::pmr::vector<std::string> contacts_;
 
     static auto extract_contacts(
         const api::session::Client& api,
         const proto::PaymentWorkflow& workflow) noexcept
-        -> std::vector<std::string>;
+        -> std::pmr::vector<std::string>;
 
     virtual auto effective_amount() const noexcept -> opentxs::Amount = 0;
     auto qt_data(const int column, const int role, QVariant& out) const noexcept

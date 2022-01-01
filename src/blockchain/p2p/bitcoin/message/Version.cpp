@@ -181,10 +181,10 @@ auto BitcoinP2PVersion(
     const blockchain::Type network,
     const blockchain::p2p::Network style,
     const std::int32_t version,
-    const std::set<blockchain::p2p::Service>& localServices,
+    const std::pmr::set<blockchain::p2p::Service>& localServices,
     const std::string& localAddress,
     const std::uint16_t localPort,
-    const std::set<blockchain::p2p::Service>& remoteServices,
+    const std::pmr::set<blockchain::p2p::Service>& remoteServices,
     const std::string& remoteAddress,
     const std::uint16_t remotePort,
     const std::uint64_t nonce,
@@ -249,9 +249,9 @@ Version::Version(
     const bitcoin::ProtocolVersion version,
     const tcp::endpoint localAddress,
     const tcp::endpoint remoteAddress,
-    const std::set<blockchain::p2p::Service>& services,
-    const std::set<blockchain::p2p::Service>& localServices,
-    const std::set<blockchain::p2p::Service>& remoteServices,
+    const std::pmr::set<blockchain::p2p::Service>& services,
+    const std::pmr::set<blockchain::p2p::Service>& localServices,
+    const std::pmr::set<blockchain::p2p::Service>& remoteServices,
     const bitcoin::Nonce nonce,
     const std::string& userAgent,
     const block::Height height,
@@ -279,9 +279,9 @@ Version::Version(
     const bitcoin::ProtocolVersion version,
     const tcp::endpoint localAddress,
     const tcp::endpoint remoteAddress,
-    const std::set<blockchain::p2p::Service>& services,
-    const std::set<blockchain::p2p::Service>& localServices,
-    const std::set<blockchain::p2p::Service>& remoteServices,
+    const std::pmr::set<blockchain::p2p::Service>& services,
+    const std::pmr::set<blockchain::p2p::Service>& localServices,
+    const std::pmr::set<blockchain::p2p::Service>& remoteServices,
     const bitcoin::Nonce nonce,
     const std::string& userAgent,
     const block::Height height,
@@ -313,8 +313,8 @@ Version::BitcoinFormat_1::BitcoinFormat_1() noexcept
 
 Version::BitcoinFormat_1::BitcoinFormat_1(
     const bitcoin::ProtocolVersion version,
-    const std::set<bitcoin::Service>& localServices,
-    const std::set<bitcoin::Service>& remoteServices,
+    const std::pmr::set<bitcoin::Service>& localServices,
+    const std::pmr::set<bitcoin::Service>& remoteServices,
     const tcp::endpoint& remoteAddress,
     const Time time) noexcept
     : version_(version)
@@ -333,7 +333,7 @@ Version::BitcoinFormat_106::BitcoinFormat_106() noexcept
 }
 
 Version::BitcoinFormat_106::BitcoinFormat_106(
-    const std::set<bitcoin::Service>& services,
+    const std::pmr::set<bitcoin::Service>& services,
     const tcp::endpoint address,
     const bitcoin::Nonce nonce) noexcept
     : local_(services, address)

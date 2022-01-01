@@ -58,7 +58,7 @@ auto HaveSupport(opentxs::crypto::key::symmetric::Algorithm val) noexcept
     -> bool
 {
     using Type = opentxs::crypto::key::symmetric::Algorithm;
-    static const auto map = std::map<Type, bool>{
+    static const auto map = std::pmr::map<Type, bool>{
         {Type::Error, false},
         {Type::ChaCha20Poly1305, true},
     };

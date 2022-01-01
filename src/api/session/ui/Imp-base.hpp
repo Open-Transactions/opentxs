@@ -354,25 +354,25 @@ protected:
     using UnitListPointer = std::unique_ptr<opentxs::ui::internal::UnitList>;
 
     using AccountActivityMap =
-        std::map<AccountActivityKey, AccountActivityPointer>;
-    using AccountListMap = std::map<AccountListKey, AccountListPointer>;
+        std::pmr::map<AccountActivityKey, AccountActivityPointer>;
+    using AccountListMap = std::pmr::map<AccountListKey, AccountListPointer>;
     using AccountSummaryMap =
-        std::map<AccountSummaryKey, AccountSummaryPointer>;
+        std::pmr::map<AccountSummaryKey, AccountSummaryPointer>;
     using ActivitySummaryMap =
-        std::map<ActivitySummaryKey, ActivitySummaryPointer>;
+        std::pmr::map<ActivitySummaryKey, ActivitySummaryPointer>;
     using ActivityThreadMap =
-        std::map<ActivityThreadKey, ActivityThreadPointer>;
-    using BlockchainAccountStatusMap =
-        std::map<BlockchainAccountStatusKey, BlockchainAccountStatusPointer>;
+        std::pmr::map<ActivityThreadKey, ActivityThreadPointer>;
+    using BlockchainAccountStatusMap = std::pmr::
+        map<BlockchainAccountStatusKey, BlockchainAccountStatusPointer>;
     using BlockchainSelectionMap =
-        std::map<opentxs::ui::Blockchains, BlockchainSelectionPointer>;
-    using ContactListMap = std::map<ContactListKey, ContactListPointer>;
-    using ContactMap = std::map<ContactKey, ContactPointer>;
+        std::pmr::map<opentxs::ui::Blockchains, BlockchainSelectionPointer>;
+    using ContactListMap = std::pmr::map<ContactListKey, ContactListPointer>;
+    using ContactMap = std::pmr::map<ContactKey, ContactPointer>;
     using MessagableListMap =
-        std::map<MessagableListKey, MessagableListPointer>;
-    using PayableListMap = std::map<PayableListKey, PayableListPointer>;
-    using ProfileMap = std::map<ProfileKey, ProfilePointer>;
-    using UnitListMap = std::map<UnitListKey, UnitListPointer>;
+        std::pmr::map<MessagableListKey, MessagableListPointer>;
+    using PayableListMap = std::pmr::map<PayableListKey, PayableListPointer>;
+    using ProfileMap = std::pmr::map<ProfileKey, ProfilePointer>;
+    using UnitListMap = std::pmr::map<UnitListKey, UnitListPointer>;
 
     const api::session::Client& api_;
     const api::crypto::Blockchain& blockchain_;

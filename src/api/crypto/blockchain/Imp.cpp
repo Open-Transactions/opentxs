@@ -75,14 +75,15 @@ enum class Prefix : std::uint8_t {
 };
 
 using Style = crypto::Blockchain::Style;
-using AddressMap = std::map<Prefix, std::string>;
-using AddressReverseMap = std::map<std::string, Prefix>;
+using AddressMap = std::pmr::map<Prefix, std::string>;
+using AddressReverseMap = std::pmr::map<std::string, Prefix>;
 using StylePair = std::pair<Style, opentxs::blockchain::Type>;
 // Style, preferred prefix, additional prefixes
-using StyleMap = std::map<StylePair, std::pair<Prefix, std::set<Prefix>>>;
-using StyleReverseMap = std::map<Prefix, std::set<StylePair>>;
-using HrpMap = std::map<opentxs::blockchain::Type, std::string>;
-using HrpReverseMap = std::map<std::string, opentxs::blockchain::Type>;
+using StyleMap =
+    std::pmr::map<StylePair, std::pair<Prefix, std::pmr::set<Prefix>>>;
+using StyleReverseMap = std::pmr::map<Prefix, std::pmr::set<StylePair>>;
+using HrpMap = std::pmr::map<opentxs::blockchain::Type, std::string>;
+using HrpReverseMap = std::pmr::map<std::string, opentxs::blockchain::Type>;
 
 auto reverse(const StyleMap& in) noexcept -> StyleReverseMap;
 auto reverse(const StyleMap& in) noexcept -> StyleReverseMap
@@ -191,18 +192,19 @@ auto Blockchain::Imp::Account(
 }
 
 auto Blockchain::Imp::AccountList(const identifier::Nym& nym) const noexcept
-    -> std::set<OTIdentifier>
+    -> std::pmr::set<OTIdentifier>
 {
     return wallets_.AccountList(nym);
 }
 
 auto Blockchain::Imp::AccountList(const opentxs::blockchain::Type chain)
-    const noexcept -> std::set<OTIdentifier>
+    const noexcept -> std::pmr::set<OTIdentifier>
 {
     return wallets_.AccountList(chain);
 }
 
-auto Blockchain::Imp::AccountList() const noexcept -> std::set<OTIdentifier>
+auto Blockchain::Imp::AccountList() const noexcept
+    -> std::pmr::set<OTIdentifier>
 {
     return wallets_.AccountList();
 }
@@ -398,7 +400,7 @@ auto Blockchain::Imp::Confirm(
 {
     try {
         const auto [id, subchain, index] = key;
-        const auto accountID = api_.Factory().Identifier(id);
+        const auto accountID = api_.Factory().IdentifierFromBase58(id);
 
         return get_node(accountID).Internal().Confirm(subchain, index, tx);
     } catch (...) {
@@ -604,7 +606,7 @@ auto Blockchain::Imp::GetKey(const Key& id) const noexcept(false)
     -> const opentxs::blockchain::crypto::Element&
 {
     const auto [str, subchain, index] = id;
-    const auto account = api_.Factory().Identifier(str);
+    const auto account = api_.Factory().IdentifierFromBase58(str);
     using Type = opentxs::blockchain::crypto::SubaccountType;
 
     switch (accounts_.Type(account)) {
@@ -980,7 +982,7 @@ auto Blockchain::Imp::Owner(const Key& key) const noexcept
 
     if (Subchain::Outgoing == subchain) { return blank; }
 
-    return Owner(api_.Factory().Identifier(account));
+    return Owner(api_.Factory().IdentifierFromBase58(account));
 }
 
 auto Blockchain::Imp::p2pkh(
@@ -1161,7 +1163,7 @@ auto Blockchain::Imp::RecipientContact(const Key& key) const noexcept
 
     if (Subchain::Notification == subchain) { return blank; }
 
-    const auto accountID = api_.Factory().Identifier(account);
+    const auto accountID = api_.Factory().IdentifierFromBase58(account);
     const auto& owner = Owner(accountID);
 
     try {
@@ -1198,7 +1200,7 @@ auto Blockchain::Imp::Release(const Key key) const noexcept -> bool
 {
     try {
         const auto [id, subchain, index] = key;
-        const auto accountID = api_.Factory().Identifier(id);
+        const auto accountID = api_.Factory().IdentifierFromBase58(id);
 
         return get_node(accountID).Internal().Unreserve(subchain, index);
     } catch (...) {
@@ -1226,7 +1228,7 @@ auto Blockchain::Imp::SenderContact(const Key& key) const noexcept
 
     if (Subchain::Notification == subchain) { return blank; }
 
-    const auto accountID = api_.Factory().Identifier(account);
+    const auto accountID = api_.Factory().IdentifierFromBase58(account);
     const auto& owner = Owner(accountID);
 
     try {
@@ -1266,7 +1268,7 @@ auto Blockchain::Imp::Unconfirm(
 {
     try {
         const auto [id, subchain, index] = key;
-        const auto accountID = api_.Factory().Identifier(id);
+        const auto accountID = api_.Factory().IdentifierFromBase58(id);
 
         return get_node(accountID).Internal().Unconfirm(
             subchain, index, tx, time);
@@ -1289,7 +1291,7 @@ auto Blockchain::Imp::UpdateBalance(
 {
 }
 
-auto Blockchain::Imp::UpdateElement(std::vector<ReadView>&) const noexcept
+auto Blockchain::Imp::UpdateElement(std::pmr::vector<ReadView>&) const noexcept
     -> void
 {
 }

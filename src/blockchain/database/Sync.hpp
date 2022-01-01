@@ -77,7 +77,7 @@ namespace opentxs::blockchain::database
 class Sync
 {
 public:
-    using Items = std::vector<network::p2p::Block>;
+    using Items = std::pmr::vector<network::p2p::Block>;
     using Message = network::p2p::Data;
 
     auto Load(const block::Height height, Message& output) const noexcept

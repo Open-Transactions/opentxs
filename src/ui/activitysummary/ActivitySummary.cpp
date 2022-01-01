@@ -82,11 +82,11 @@ auto ActivitySummary::construct_row(
 auto ActivitySummary::display_name(
     const proto::StorageThread& thread) const noexcept -> std::string
 {
-    auto names = std::set<std::string>{};
+    auto names = std::pmr::set<std::string>{};
 
     for (const auto& id : thread.participant()) {
-        names.emplace(
-            api_.Contacts().ContactName(api_.Factory().Identifier(id)));
+        names.emplace(api_.Contacts().ContactName(
+            api_.Factory().IdentifierFromBase58(id)));
     }
 
     if (names.empty()) { return thread.id(); }

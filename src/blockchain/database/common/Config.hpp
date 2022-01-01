@@ -61,7 +61,7 @@ namespace opentxs::blockchain::database::common
 class Configuration
 {
 public:
-    using Endpoints = std::vector<std::string>;
+    using Endpoints = std::pmr::vector<std::string>;
 
     auto AddSyncServer(const std::string& endpoint) const noexcept -> bool;
     auto DeleteSyncServer(const std::string& endpoint) const noexcept -> bool;

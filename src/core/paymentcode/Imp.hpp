@@ -97,14 +97,14 @@ public:
     }
     auto DecodeNotificationElements(
         const std::uint8_t version,
-        const std::vector<Space>& elements,
+        const std::pmr::vector<Space>& elements,
         const PasswordPrompt& reason) const noexcept
         -> opentxs::PaymentCode final;
     auto GenerateNotificationElements(
         const opentxs::PaymentCode& recipient,
         const crypto::key::EllipticCurve& privateKey,
         const PasswordPrompt& reason) const noexcept
-        -> std::vector<Space> final;
+        -> std::pmr::vector<Space> final;
     auto ID() const noexcept -> const identifier::Nym& final { return id_; }
     auto Incoming(
         const opentxs::PaymentCode& sender,
@@ -222,11 +222,11 @@ private:
     auto generate_elements_v1(
         const opentxs::PaymentCode& recipient,
         const Space& blind,
-        std::vector<Space>& output) const noexcept(false) -> void;
+        std::pmr::vector<Space>& output) const noexcept(false) -> void;
     auto generate_elements_v3(
         const opentxs::PaymentCode& recipient,
         const Space& blind,
-        std::vector<Space>& output) const noexcept(false) -> void;
+        std::pmr::vector<Space>& output) const noexcept(false) -> void;
     auto match_locator(const std::uint8_t version, const Space& element) const
         noexcept(false) -> bool;
     auto postprocess(const Secret& in) const noexcept(false) -> OTSecret;

@@ -285,7 +285,7 @@ protected:
     auto reset_cfilter_job() noexcept -> void;
     auto send(std::pair<zmq::Frame, zmq::Frame>&& data) noexcept -> SendStatus;
     auto update_address_services(
-        const std::set<p2p::Service>& services) noexcept -> void;
+        const std::pmr::set<p2p::Service>& services) noexcept -> void;
     auto verifying() noexcept -> bool
     {
         return (State::Verify == state_.value_.load());
@@ -318,7 +318,7 @@ private:
     private:
         std::mutex lock_;
         int counter_;
-        std::map<int, std::promise<bool>> map_;
+        std::pmr::map<int, std::promise<bool>> map_;
     };
 
     static constexpr auto peer_download_interval_ = std::chrono::minutes{10};

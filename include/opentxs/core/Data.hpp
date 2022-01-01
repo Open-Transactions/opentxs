@@ -68,8 +68,9 @@ public:
     static auto Factory(const void* data, std::size_t size)
         -> Pimpl<opentxs::Data>;
     static auto Factory(const Armored& source) -> OTData;
-    static auto Factory(const std::vector<unsigned char>& source) -> OTData;
-    static auto Factory(const std::vector<std::byte>& source) -> OTData;
+    static auto Factory(const std::pmr::vector<unsigned char>& source)
+        -> OTData;
+    static auto Factory(const std::pmr::vector<std::byte>& source) -> OTData;
     static auto Factory(const network::zeromq::Frame& message) -> OTData;
     static auto Factory(const std::uint8_t in) -> OTData;
     /// Bytes will be stored in big endian order

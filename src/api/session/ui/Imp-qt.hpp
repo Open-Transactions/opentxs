@@ -64,7 +64,13 @@ namespace identifier
 class Nym;
 }  // namespace identifier
 
+namespace ui
+{
+struct BlankModel;
+}  // namespace ui
+
 class Flag;
+class Identifier;
 }  // namespace opentxs
 
 namespace opentxs::api::session::ui
@@ -160,28 +166,31 @@ private:
     using UnitListQtPointer = std::unique_ptr<opentxs::ui::UnitListQt>;
 
     using AccountActivityQtMap =
-        std::map<AccountActivityKey, AccountActivityQtPointer>;
-    using AccountListQtMap = std::map<AccountListKey, AccountListQtPointer>;
+        std::pmr::map<AccountActivityKey, AccountActivityQtPointer>;
+    using AccountListQtMap =
+        std::pmr::map<AccountListKey, AccountListQtPointer>;
     using AccountSummaryQtMap =
-        std::map<AccountSummaryKey, AccountSummaryQtPointer>;
+        std::pmr::map<AccountSummaryKey, AccountSummaryQtPointer>;
     using ActivitySummaryQtMap =
-        std::map<ActivitySummaryKey, ActivitySummaryQtPointer>;
+        std::pmr::map<ActivitySummaryKey, ActivitySummaryQtPointer>;
     using ActivityThreadQtMap =
-        std::map<ActivityThreadKey, ActivityThreadQtPointer>;
-    using BlockchainAccountStatusQtMap =
-        std::map<BlockchainAccountStatusKey, BlockchainAccountStatusQtPointer>;
+        std::pmr::map<ActivityThreadKey, ActivityThreadQtPointer>;
+    using BlockchainAccountStatusQtMap = std::pmr::
+        map<BlockchainAccountStatusKey, BlockchainAccountStatusQtPointer>;
     using BlockchainSelectionQtMap =
-        std::map<opentxs::ui::Blockchains, BlockchainSelectionQtPointer>;
-    using ContactListQtMap = std::map<ContactListKey, ContactListQtPointer>;
-    using ContactQtMap = std::map<ContactKey, ContactQtPointer>;
+        std::pmr::map<opentxs::ui::Blockchains, BlockchainSelectionQtPointer>;
+    using ContactListQtMap =
+        std::pmr::map<ContactListKey, ContactListQtPointer>;
+    using ContactQtMap = std::pmr::map<ContactKey, ContactQtPointer>;
     using MessagableListQtMap =
-        std::map<MessagableListKey, MessagableListQtPointer>;
-    using PayableListQtMap = std::map<PayableListKey, PayableListQtPointer>;
-    using ProfileQtMap = std::map<ProfileKey, ProfileQtPointer>;
-    using SeedValidatorMap = std::map<
+        std::pmr::map<MessagableListKey, MessagableListQtPointer>;
+    using PayableListQtMap =
+        std::pmr::map<PayableListKey, PayableListQtPointer>;
+    using ProfileQtMap = std::pmr::map<ProfileKey, ProfileQtPointer>;
+    using SeedValidatorMap = std::pmr::map<
         opentxs::crypto::SeedStyle,
-        std::map<opentxs::crypto::Language, opentxs::ui::SeedValidator>>;
-    using UnitListQtMap = std::map<UnitListKey, UnitListQtPointer>;
+        std::pmr::map<opentxs::crypto::Language, opentxs::ui::SeedValidator>>;
+    using UnitListQtMap = std::pmr::map<UnitListKey, UnitListQtPointer>;
 
     struct Blank {
         auto get(const std::size_t columns) noexcept
@@ -189,7 +198,7 @@ private:
 
     private:
         std::mutex lock_{};
-        std::map<std::size_t, opentxs::ui::BlankModel> map_{};
+        std::pmr::map<std::size_t, opentxs::ui::BlankModel> map_{};
     };
 
     mutable Blank blank_;

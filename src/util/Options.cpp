@@ -263,7 +263,7 @@ auto Options::Imp::convert(const std::string& value) const noexcept(false)
 {
     static const auto& chains = blockchain::DefinedChains();
     static const auto names = [] {
-        auto out = std::map<std::string, blockchain::Type>{};
+        auto out = std::pmr::map<std::string, blockchain::Type>{};
 
         for (const auto& chain : chains) {
             const auto& data = blockchain::params::Data::Chains().at(chain);
@@ -793,13 +793,13 @@ auto Options::AddNotaryPublicOnion(const char* value) noexcept -> Options&
 }
 
 auto Options::BlockchainBindIpv4() const noexcept
-    -> const std::set<std::string>&
+    -> const std::pmr::set<std::string>&
 {
     return imp_->blockchain_ipv4_bind_;
 }
 
 auto Options::BlockchainBindIpv6() const noexcept
-    -> const std::set<std::string>&
+    -> const std::pmr::set<std::string>&
 {
     return imp_->blockchain_ipv6_bind_;
 }
@@ -828,7 +828,8 @@ auto Options::DisableBlockchain(blockchain::Type chain) noexcept -> Options&
     return *this;
 }
 
-auto Options::DisabledBlockchains() const noexcept -> std::set<blockchain::Type>
+auto Options::DisabledBlockchains() const noexcept
+    -> std::pmr::set<blockchain::Type>
 {
     return imp_->blockchain_disabled_chains_;
 }
@@ -886,22 +887,26 @@ auto Options::NotaryName() const noexcept -> const char*
     return Imp::get(imp_->notary_name_);
 }
 
-auto Options::NotaryPublicEEP() const noexcept -> const std::set<std::string>&
+auto Options::NotaryPublicEEP() const noexcept
+    -> const std::pmr::set<std::string>&
 {
     return imp_->notary_public_eep_;
 }
 
-auto Options::NotaryPublicIPv4() const noexcept -> const std::set<std::string>&
+auto Options::NotaryPublicIPv4() const noexcept
+    -> const std::pmr::set<std::string>&
 {
     return imp_->notary_public_ipv4_;
 }
 
-auto Options::NotaryPublicIPv6() const noexcept -> const std::set<std::string>&
+auto Options::NotaryPublicIPv6() const noexcept
+    -> const std::pmr::set<std::string>&
 {
     return imp_->notary_public_ipv6_;
 }
 
-auto Options::NotaryPublicOnion() const noexcept -> const std::set<std::string>&
+auto Options::NotaryPublicOnion() const noexcept
+    -> const std::pmr::set<std::string>&
 {
     return imp_->notary_public_onion_;
 }
@@ -938,7 +943,7 @@ auto Options::QtRootObject() const noexcept -> QObject*
 }
 
 auto Options::RemoteBlockchainSyncServers() const noexcept
-    -> const std::set<std::string>&
+    -> const std::pmr::set<std::string>&
 {
     return imp_->blockchain_sync_servers_;
 }

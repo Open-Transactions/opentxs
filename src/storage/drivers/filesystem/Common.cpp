@@ -110,7 +110,7 @@ auto Common::read_file(const std::string& filename) const -> std::string
 
         auto size(pos);
         file.seekg(0, std::ios::beg);
-        std::vector<char> bytes(size);
+        std::pmr::vector<char> bytes(size);
         file.read(&bytes[0], size);
 
         return prepare_read(std::string(&bytes[0], size));

@@ -107,7 +107,7 @@ private:
         return ContactSubsectionList::last(id);
     }
     auto process_group(const contact::ContactGroup& group) noexcept
-        -> std::set<ContactSubsectionRowID>;
+        -> std::pmr::set<ContactSubsectionRowID>;
     auto reindex(const ContactSectionSortKey& key, CustomData& custom) noexcept
         -> bool final;
     auto startup(const contact::ContactGroup group) noexcept -> void;

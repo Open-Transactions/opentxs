@@ -117,7 +117,7 @@ private:
 
     const api::Context& ot_;
     mutable std::mutex task_lock_;
-    mutable std::map<TaskID, TaskData> queued_tasks_;
+    mutable std::pmr::map<TaskID, TaskData> queued_tasks_;
     const OTZMQListenCallback task_callback_;
     const OTZMQListenCallback push_callback_;
     const OTZMQPullSocket push_receiver_;
@@ -210,13 +210,13 @@ private:
         const request::Base& base,
         const std::size_t index,
         const Identifier& accountID,
-        std::vector<AccountData>& balances,
+        std::pmr::vector<AccountData>& balances,
         response::Base::Responses& codes) const noexcept -> void;
     auto get_account_balance_custodial(
         const api::Session& api,
         const std::size_t index,
         const Identifier& accountID,
-        std::vector<AccountData>& balances,
+        std::pmr::vector<AccountData>& balances,
         response::Base::Responses& codes) const noexcept -> void;
     auto get_compatible_accounts(const proto::RPCCommand& command) const
         -> proto::RPCResponse;

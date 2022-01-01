@@ -28,9 +28,10 @@ namespace ot = opentxs;
 
 using Style = ot::blockchain::crypto::AddressStyle;
 using Chain = ot::blockchain::Type;
-using TestData = std::map<std::string, std::pair<Style, std::set<Chain>>>;
-using SegwitGood = std::map<std::string, std::pair<Chain, std::string>>;
-using SegwitBad = std::vector<std::string>;
+using TestData =
+    std::pmr::map<std::string, std::pair<Style, std::pmr::set<Chain>>>;
+using SegwitGood = std::pmr::map<std::string, std::pair<Chain, std::string>>;
+using SegwitBad = std::pmr::vector<std::string>;
 
 // https://en.bitcoin.it/wiki/Technical_background_of_version_1_Bitcoin_addresses
 // https://bitcoin.stackexchange.com/questions/62781/litecoin-constants-and-prefixes

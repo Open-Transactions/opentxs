@@ -52,7 +52,7 @@ class Block final : public bitcoin::implementation::Block
 {
 public:
     using Proof = std::pair<std::byte, Space>;
-    using Proofs = std::vector<Proof>;
+    using Proofs = std::pmr::vector<Proof>;
 
     auto GetProofs() const noexcept -> const Proofs& { return proofs_; }
 

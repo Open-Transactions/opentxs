@@ -19,16 +19,16 @@ class OTScript;
 class OTScriptable;
 class Tag;
 
-using mapOfCallbacks = std::map<std::string, std::string>;
-using mapOfClauses = std::map<std::string, OTClause*>;
-using mapOfVariables = std::map<std::string, OTVariable*>;
+using mapOfCallbacks = std::pmr::map<std::string, std::string>;
+using mapOfClauses = std::pmr::map<std::string, OTClause*>;
+using mapOfVariables = std::pmr::map<std::string, OTVariable*>;
 
 // First is the name of some standard OT hook, like OnActivate, and Second is
 // name of clause.
 // It's a multimap because you might have 6 or 7 clauses that all trigger on the
 // same hook.
 //
-using mapOfHooks = std::multimap<std::string, std::string>;
+using mapOfHooks = std::pmr::multimap<std::string, std::string>;
 
 // A section of law, including its own clauses (scripts). A bylaw is kind of
 // like an OT script "program", so it makes sense to be able to collect them,

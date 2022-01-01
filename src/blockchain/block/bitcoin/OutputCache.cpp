@@ -11,6 +11,7 @@
 #include <algorithm>
 #include <cstddef>
 #include <iterator>
+#include <memory_resource>
 #include <string>
 #include <utility>
 
@@ -29,7 +30,7 @@ Output::Cache::Cache(
     boost::container::flat_set<crypto::Key>&& keys,
     block::Position&& minedPosition,
     node::TxoState state,
-    std::set<node::TxoTag>&& tags) noexcept
+    std::pmr::set<node::TxoTag>&& tags) noexcept
     : lock_()
     , size_(std::move(size))
     , payee_(api.Factory().Identifier())
@@ -86,10 +87,10 @@ auto Output::Cache::add(node::TxoTag tag) noexcept -> void
     tags_.emplace(tag);
 }
 
-auto Output::Cache::keys() const noexcept -> std::vector<crypto::Key>
+auto Output::Cache::keys() const noexcept -> std::pmr::vector<crypto::Key>
 {
     auto lock = Lock{lock_};
-    auto output = std::vector<crypto::Key>{};
+    auto output = std::pmr::vector<crypto::Key>{};
     std::transform(
         std::begin(keys_), std::end(keys_), std::back_inserter(output), [
         ](const auto& key) -> auto { return key; });
@@ -217,7 +218,7 @@ auto Output::Cache::state() const noexcept -> node::TxoState
     return state_;
 }
 
-auto Output::Cache::tags() const noexcept -> std::set<node::TxoTag>
+auto Output::Cache::tags() const noexcept -> std::pmr::set<node::TxoTag>
 {
     auto lock = Lock{lock_};
 

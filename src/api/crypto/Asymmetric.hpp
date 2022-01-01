@@ -228,7 +228,7 @@ public:
 
 private:
     using TypeMap =
-        std::map<EcdsaCurve, opentxs::crypto::key::asymmetric::Algorithm>;
+        std::pmr::map<EcdsaCurve, opentxs::crypto::key::asymmetric::Algorithm>;
 
     static const VersionNumber serialized_path_version_;
     static const TypeMap curve_to_key_type_;

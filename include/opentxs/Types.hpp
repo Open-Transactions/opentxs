@@ -69,7 +69,7 @@ enum class StringStyle : bool { Hex = true, Raw = false };
 using GetPreimage = std::function<std::string()>;
 using SimpleCallback = std::function<void()>;
 
-using DhtResults = std::vector<std::shared_ptr<std::string>>;
+using DhtResults = std::pmr::vector<std::shared_ptr<std::string>>;
 
 using DhtDoneCallback = std::function<void(bool)>;
 using DhtResultsCallback = std::function<bool(const DhtResults&)>;
@@ -80,27 +80,27 @@ using PeriodicTask = std::function<void()>;
  *  protobuf version, since it contains the claim ID.
  */
 using Claim = std::tuple<
-    std::string,               // claim identifier
-    std::uint32_t,             // section
-    std::uint32_t,             // type
-    std::string,               // value
-    std::int64_t,              // start time
-    std::int64_t,              // end time
-    std::set<std::uint32_t>>;  // attributes
+    std::string,                    // claim identifier
+    std::uint32_t,                  // section
+    std::uint32_t,                  // type
+    std::string,                    // value
+    std::int64_t,                   // start time
+    std::int64_t,                   // end time
+    std::pmr::set<std::uint32_t>>;  // attributes
 using ClaimTuple = Claim;
 
 /** C++11 representation of all contact data associated with a nym, aggregating
  *  each the nym's contact credentials in the event it has more than one.
  */
-using ClaimSet = std::set<Claim>;
+using ClaimSet = std::pmr::set<Claim>;
 
 /** A list of object IDs and their associated aliases
  *  * string: id of the stored object
  *  * string: alias of the stored object
  */
-using ObjectList = std::list<std::pair<std::string, std::string>>;
+using ObjectList = std::pmr::list<std::pair<std::string, std::string>>;
 
-using RawData = std::vector<unsigned char>;
+using RawData = std::pmr::vector<unsigned char>;
 
 using Nym_p = std::shared_ptr<const identity::Nym>;
 

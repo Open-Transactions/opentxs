@@ -144,7 +144,7 @@ public:
 
 protected:
     using ListenerDefinition = std::pair<std::string, MessageFunctor*>;
-    using ListenerDefinitions = std::vector<ListenerDefinition>;
+    using ListenerDefinitions = std::pmr::vector<ListenerDefinition>;
 
     const OTIdentifier widget_id_;
 
@@ -159,8 +159,8 @@ protected:
 
 private:
     const api::session::UI& ui_;
-    std::vector<OTZMQListenCallback> callbacks_;
-    std::vector<OTZMQSubscribeSocket> listeners_;
+    std::pmr::vector<OTZMQListenCallback> callbacks_;
+    std::pmr::vector<OTZMQSubscribeSocket> listeners_;
 
     Widget() = delete;
     Widget(const Widget&) = delete;

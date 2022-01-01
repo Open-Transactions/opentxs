@@ -42,7 +42,7 @@ namespace opentxs
 struct Log::Imp final : public internal::Log {
     struct Logger {
         using Source = std::pair<OTZMQPushSocket, std::stringstream>;
-        using SourceMap = std::map<int, Source>;
+        using SourceMap = std::pmr::map<int, Source>;
 
         std::atomic_int verbosity_{-1};
         std::atomic_int index_{-1};

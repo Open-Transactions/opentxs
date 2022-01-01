@@ -992,7 +992,7 @@ auto Account::ProcessXMLNode(IrrXMLReader*& xml) -> std::int32_t
         auto strNotaryID = String::Factory(xml->getAttributeValue("notaryID"));
         auto strAcctNymID = String::Factory(xml->getAttributeValue("nymID"));
 
-        auto ACCOUNT_ID = api_.Factory().Identifier(strAccountID);
+        auto ACCOUNT_ID = api_.Factory().IdentifierFromBase58(strAccountID);
         auto NOTARY_ID = api_.Factory().ServerID(strNotaryID);
         auto NYM_ID = api_.Factory().NymID(strAcctNymID);
 

@@ -375,7 +375,7 @@ auto User::SetAccount(const std::string& type, const std::string& id)
 {
     OT_ASSERT(nullptr != api_);
 
-    return SetAccount(type, api_->Factory().Identifier(id));
+    return SetAccount(type, api_->Factory().IdentifierFromBase58(id));
 }
 
 auto User::SetAccount(const std::string& type, const ot::Identifier& id)
@@ -394,7 +394,7 @@ auto User::SetContact(const std::string& contact, const std::string& id)
 {
     OT_ASSERT(nullptr != api_);
 
-    return SetContact(contact, api_->Factory().Identifier(id));
+    return SetContact(contact, api_->Factory().IdentifierFromBase58(id));
 }
 
 auto User::SetContact(const std::string& contact, const ot::Identifier& id)

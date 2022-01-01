@@ -42,7 +42,7 @@ auto Chain(const api::Session& api, const identifier::Nym& id) noexcept
     -> blockchain::Type
 {
     static const auto data = [&] {
-        auto out = std::map<OTNymID, blockchain::Type>{};
+        auto out = std::pmr::map<OTNymID, blockchain::Type>{};
 
         for (const auto& chain : blockchain::DefinedChains()) {
             out.emplace(IssuerID(api, chain), chain);
@@ -64,7 +64,7 @@ auto Chain(const api::Session& api, const identifier::Server& id) noexcept
     -> blockchain::Type
 {
     static const auto data = [&] {
-        auto out = std::map<OTServerID, blockchain::Type>{};
+        auto out = std::pmr::map<OTServerID, blockchain::Type>{};
 
         for (const auto& chain : blockchain::DefinedChains()) {
             out.emplace(NotaryID(api, chain), chain);
@@ -87,7 +87,7 @@ auto Chain(
     const identifier::UnitDefinition& id) noexcept -> blockchain::Type
 {
     static const auto data = [&] {
-        auto out = std::map<OTUnitID, blockchain::Type>{};
+        auto out = std::pmr::map<OTUnitID, blockchain::Type>{};
 
         for (const auto& chain : blockchain::DefinedChains()) {
             out.emplace(UnitID(api, chain), chain);
@@ -109,7 +109,7 @@ auto IssuerID(const api::Session& api, const blockchain::Type chain) noexcept
     -> const identifier::Nym&
 {
     static auto mutex = std::mutex{};
-    static auto map = std::map<blockchain::Type, OTNymID>{};
+    static auto map = std::pmr::map<blockchain::Type, OTNymID>{};
 
     auto lock = Lock{mutex};
 
@@ -137,7 +137,7 @@ auto NotaryID(const api::Session& api, const blockchain::Type chain) noexcept
     -> const identifier::Server&
 {
     static auto mutex = std::mutex{};
-    static auto map = std::map<blockchain::Type, OTServerID>{};
+    static auto map = std::pmr::map<blockchain::Type, OTServerID>{};
 
     auto lock = Lock{mutex};
 
@@ -160,7 +160,7 @@ auto UnitID(const api::Session& api, const blockchain::Type chain) noexcept
     -> const identifier::UnitDefinition&
 {
     static auto mutex = std::mutex{};
-    static auto map = std::map<blockchain::Type, OTUnitID>{};
+    static auto map = std::pmr::map<blockchain::Type, OTUnitID>{};
 
     auto lock = Lock{mutex};
 

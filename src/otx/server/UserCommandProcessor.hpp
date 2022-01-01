@@ -111,7 +111,7 @@ private:
         const identity::Nym& nym_;
         ReplyMessage& reply_;
         Ledger& ledger_;
-        std::vector<std::shared_ptr<OTTransaction>> response_;
+        std::pmr::vector<std::shared_ptr<OTTransaction>> response_;
     };
 
     Server& server_;

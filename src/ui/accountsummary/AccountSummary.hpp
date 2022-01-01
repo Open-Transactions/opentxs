@@ -83,9 +83,9 @@ public:
 private:
     const ListenerDefinitions listeners_;
     const core::UnitType currency_;
-    std::set<OTNymID> issuers_;
-    std::map<OTServerID, OTNymID> server_issuer_map_;
-    std::map<OTNymID, OTServerID> nym_server_map_;
+    std::pmr::set<OTNymID> issuers_;
+    std::pmr::map<OTServerID, OTNymID> server_issuer_map_;
+    std::pmr::map<OTNymID, OTServerID> nym_server_map_;
 
     auto construct_row(
         const AccountSummaryRowID& id,

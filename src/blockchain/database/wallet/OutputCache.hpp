@@ -80,10 +80,10 @@ using Dir = storage::lmdb::LMDB::Dir;
 using Mode = storage::lmdb::LMDB::Mode;
 using SubchainID = Identifier;
 using pSubchainID = OTIdentifier;
-using States = std::vector<node::TxoState>;
-using Matches = std::vector<block::Outpoint>;
+using States = std::pmr::vector<node::TxoState>;
+using Matches = std::pmr::vector<block::Outpoint>;
 using Outpoints = robin_hood::unordered_node_set<block::Outpoint>;
-using NymBalances = std::map<OTNymID, Balance>;
+using NymBalances = std::pmr::map<OTNymID, Balance>;
 using Nyms = robin_hood::unordered_node_set<OTNymID>;
 
 auto all_states() noexcept -> const States&;

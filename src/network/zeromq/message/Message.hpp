@@ -67,7 +67,7 @@ public:
     ~Imp() override = default;
 
 protected:
-    std::vector<Frame> frames_;
+    std::pmr::vector<Frame> frames_;
 
     auto set_field(
         const std::size_t position,

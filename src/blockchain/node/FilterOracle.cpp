@@ -412,8 +412,8 @@ auto FilterOracle::ProcessBlock(
 {
     const auto& id = block.ID();
     const auto& header = block.Header();
-    auto filters = std::vector<internal::FilterDatabase::Filter>{};
-    auto headers = std::vector<internal::FilterDatabase::Header>{};
+    auto filters = std::pmr::vector<internal::FilterDatabase::Filter>{};
+    auto headers = std::pmr::vector<internal::FilterDatabase::Header>{};
     const auto& pGCS =
         filters.emplace_back(id.Bytes(), process_block(default_type_, block))
             .second;
@@ -512,12 +512,12 @@ auto FilterOracle::ProcessBlock(BlockIndexerData& data) const noexcept -> void
 
 auto FilterOracle::ProcessSyncData(
     const block::Hash& prior,
-    const std::vector<block::pHash>& hashes,
+    const std::pmr::vector<block::pHash>& hashes,
     const network::p2p::Data& data) const noexcept -> void
 {
-    auto filters = std::vector<internal::FilterDatabase::Filter>{};
-    auto headers = std::vector<internal::FilterDatabase::Header>{};
-    auto cache = std::vector<SyncClientFilterData>{};
+    auto filters = std::pmr::vector<internal::FilterDatabase::Filter>{};
+    auto headers = std::pmr::vector<internal::FilterDatabase::Header>{};
+    auto cache = std::pmr::vector<SyncClientFilterData>{};
     const auto& blocks = data.Blocks();
     const auto incoming = blocks.front().Height();
     const auto filterType = blocks.front().FilterType();
@@ -682,7 +682,7 @@ auto FilterOracle::ProcessSyncData(SyncClientFilterData& data) const noexcept
 }
 
 auto FilterOracle::ProcessSyncData(
-    std::vector<SyncClientFilterData>& cache) const noexcept -> bool
+    std::pmr::vector<SyncClientFilterData>& cache) const noexcept -> bool
 {
     auto failures{0};
 
@@ -738,7 +738,7 @@ auto FilterOracle::process_block(
     const auto params = blockchain::internal::GetFilterParams(filterType);
     const auto elements = [&] {
         const auto input = block.Internal().ExtractElements(filterType);
-        auto output = std::vector<OTData>{};
+        auto output = std::pmr::vector<OTData>{};
         std::transform(
             input.begin(),
             input.end(),

@@ -245,8 +245,8 @@ public:
     ~OTAPI_Func() final;
 
 private:
-    static const std::map<OTAPI_Func_Type, std::string> type_name_;
-    static const std::map<OTAPI_Func_Type, bool> type_type_;
+    static const std::pmr::map<OTAPI_Func_Type, std::string> type_name_;
+    static const std::pmr::map<OTAPI_Func_Type, bool> type_type_;
 
     OTAPI_Func_Type type_{NO_FUNC};
     rLock api_lock_;

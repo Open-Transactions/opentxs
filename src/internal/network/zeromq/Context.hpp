@@ -36,8 +36,8 @@ public:
     {
         return *this;
     }
-    virtual auto MakeBatch(std::vector<socket::Type>&& types) const noexcept
-        -> internal::Batch& = 0;
+    virtual auto MakeBatch(std::pmr::vector<socket::Type>&& types)
+        const noexcept -> internal::Batch& = 0;
     virtual auto Modify(SocketID id, ModifyCallback cb) const noexcept
         -> std::pair<bool, std::future<bool>> = 0;
     virtual auto Start(BatchID id, StartArgs&& sockets) const noexcept

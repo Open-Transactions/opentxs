@@ -63,7 +63,7 @@ public:
     };
 
     using pAddress = std::unique_ptr<blockchain::p2p::internal::Address>;
-    using AddressVector = std::vector<pAddress>;
+    using AddressVector = std::pmr::vector<pAddress>;
 
     static auto ExtractAddress(AddressByteField in) noexcept
         -> std::pair<p2p::Network, OTData>;

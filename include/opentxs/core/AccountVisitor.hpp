@@ -28,7 +28,7 @@ class PasswordPrompt;
 class AccountVisitor
 {
 public:
-    using mapOfAccounts = std::map<std::string, const Account*>;
+    using mapOfAccounts = std::pmr::map<std::string, const Account*>;
 
     auto GetNotaryID() const -> const identifier::Server& { return notaryID_; }
 

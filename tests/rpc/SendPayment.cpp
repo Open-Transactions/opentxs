@@ -21,7 +21,6 @@
 #include "opentxs/api/session/OTX.hpp"
 #include "opentxs/api/session/Wallet.hpp"
 #include "opentxs/core/Account.hpp"
-#include "opentxs/core/display/Scale.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/rpc/CommandType.hpp"
@@ -314,12 +313,15 @@ TEST_F(RPC_fixture, cheque)
 TEST_F(RPC_fixture, postconditions)
 {
     const auto& api = ot_.ClientSession(0);
-    auto account1 = api.Wallet().Internal().Account(
-        api.Factory().Identifier(registered_accounts_.at(issuer_).front()));
-    auto account2 = api.Wallet().Internal().Account(
-        api.Factory().Identifier(registered_accounts_.at(brian_).front()));
-    auto account3 = api.Wallet().Internal().Account(
-        api.Factory().Identifier(registered_accounts_.at(chris_).front()));
+    auto account1 =
+        api.Wallet().Internal().Account(api.Factory().IdentifierFromBase58(
+            registered_accounts_.at(issuer_).front()));
+    auto account2 =
+        api.Wallet().Internal().Account(api.Factory().IdentifierFromBase58(
+            registered_accounts_.at(brian_).front()));
+    auto account3 =
+        api.Wallet().Internal().Account(api.Factory().IdentifierFromBase58(
+            registered_accounts_.at(chris_).front()));
 
     EXPECT_EQ(account1.get().GetBalance(), -100);
     EXPECT_EQ(account2.get().GetBalance(), 25);

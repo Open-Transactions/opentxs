@@ -60,8 +60,8 @@ public:
     ~Imp() final = default;
 
 private:
-    using CodeMap = std::map<zap::Status, std::string>;
-    using CodeReverseMap = std::map<std::string, zap::Status>;
+    using CodeMap = std::pmr::map<zap::Status, std::string>;
+    using CodeReverseMap = std::pmr::map<std::string, zap::Status>;
 
     static const CodeMap code_map_;
     static const CodeReverseMap code_reverse_map_;

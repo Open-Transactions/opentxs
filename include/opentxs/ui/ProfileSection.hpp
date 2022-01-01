@@ -34,7 +34,7 @@ class OPENTXS_EXPORT ProfileSection : virtual public List,
 {
 public:
     using ItemType = std::pair<contact::ClaimType, std::string>;
-    using ItemTypeList = std::vector<ItemType>;
+    using ItemTypeList = std::pmr::vector<ItemType>;
 
     static auto AllowedItems(
         const contact::SectionType section,

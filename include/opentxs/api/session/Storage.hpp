@@ -76,7 +76,7 @@ namespace opentxs::api::session
 class Storage
 {
 public:
-    using Bip47ChannelList = std::set<OTIdentifier>;
+    using Bip47ChannelList = std::pmr::set<OTIdentifier>;
 
     virtual auto AccountAlias(const Identifier& accountID) const
         -> std::string = 0;
@@ -93,15 +93,15 @@ public:
     virtual auto AccountUnit(const Identifier& accountID) const
         -> core::UnitType = 0;
     virtual auto AccountsByContract(const identifier::UnitDefinition& contract)
-        const -> std::set<OTIdentifier> = 0;
+        const -> std::pmr::set<OTIdentifier> = 0;
     virtual auto AccountsByIssuer(const identifier::Nym& issuerNym) const
-        -> std::set<OTIdentifier> = 0;
+        -> std::pmr::set<OTIdentifier> = 0;
     virtual auto AccountsByOwner(const identifier::Nym& ownerNym) const
-        -> std::set<OTIdentifier> = 0;
+        -> std::pmr::set<OTIdentifier> = 0;
     virtual auto AccountsByServer(const identifier::Server& server) const
-        -> std::set<OTIdentifier> = 0;
+        -> std::pmr::set<OTIdentifier> = 0;
     virtual auto AccountsByUnit(const core::UnitType unit) const
-        -> std::set<OTIdentifier> = 0;
+        -> std::pmr::set<OTIdentifier> = 0;
     virtual auto Bip47Chain(
         const identifier::Nym& nymID,
         const Identifier& channelID) const -> core::UnitType = 0;
@@ -110,15 +110,15 @@ public:
         const core::UnitType chain) const -> Bip47ChannelList = 0;
     virtual auto BlockchainAccountList(
         const std::string& nymID,
-        const core::UnitType type) const -> std::set<std::string> = 0;
+        const core::UnitType type) const -> std::pmr::set<std::string> = 0;
     virtual auto BlockchainAccountType(
         const std::string& nymID,
         const std::string& accountID) const -> core::UnitType = 0;
     virtual auto BlockchainThreadMap(
         const identifier::Nym& nym,
-        const Data& txid) const noexcept -> std::vector<OTIdentifier> = 0;
-    virtual auto BlockchainTransactionList(
-        const identifier::Nym& nym) const noexcept -> std::vector<OTData> = 0;
+        const Data& txid) const noexcept -> std::pmr::vector<OTIdentifier> = 0;
+    virtual auto BlockchainTransactionList(const identifier::Nym& nym)
+        const noexcept -> std::pmr::vector<OTData> = 0;
     virtual auto CheckTokenSpent(
         const identifier::Server& notary,
         const identifier::UnitDefinition& unit,
@@ -134,7 +134,7 @@ public:
     virtual auto CreateThread(
         const std::string& nymID,
         const std::string& threadID,
-        const std::set<std::string>& participants) const -> bool = 0;
+        const std::pmr::set<std::string>& participants) const -> bool = 0;
     virtual auto DeleteAccount(const std::string& id) const -> bool = 0;
     virtual auto DefaultSeed() const -> std::string = 0;
     virtual auto DeleteContact(const std::string& id) const -> bool = 0;
@@ -260,7 +260,7 @@ public:
         proto::UnitDefinition& contract,
         std::string& alias,
         const bool checking = false) const -> bool = 0;
-    virtual auto LocalNyms() const -> const std::set<std::string> = 0;
+    virtual auto LocalNyms() const -> const std::pmr::set<std::string> = 0;
     virtual void MapPublicNyms(NymLambda& lambda) const = 0;
     virtual void MapServers(ServerLambda& lambda) const = 0;
     virtual void MapUnitDefinitions(UnitLambda& lambda) const = 0;
@@ -284,15 +284,15 @@ public:
         const std::string& sourceID) const -> std::string = 0;
     virtual auto PaymentWorkflowsByAccount(
         const std::string& nymID,
-        const std::string& accountID) const -> std::set<std::string> = 0;
+        const std::string& accountID) const -> std::pmr::set<std::string> = 0;
     virtual auto PaymentWorkflowsByState(
         const std::string& nymID,
         const otx::client::PaymentWorkflowType type,
         const otx::client::PaymentWorkflowState state) const
-        -> std::set<std::string> = 0;
+        -> std::pmr::set<std::string> = 0;
     virtual auto PaymentWorkflowsByUnit(
         const std::string& nymID,
-        const std::string& unitID) const -> std::set<std::string> = 0;
+        const std::string& unitID) const -> std::pmr::set<std::string> = 0;
     virtual auto PaymentWorkflowState(
         const std::string& nymID,
         const std::string& workflowID) const

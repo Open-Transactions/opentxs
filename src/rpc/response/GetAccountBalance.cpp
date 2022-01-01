@@ -14,6 +14,7 @@
 #include <utility>
 
 #include "Proto.hpp"
+#include "opentxs/rpc/AccountData.hpp"
 #include "opentxs/rpc/request/GetAccountBalance.hpp"
 #include "serialization/protobuf/RPCResponse.pb.h"
 

@@ -128,7 +128,7 @@ private:
     std::unique_ptr<otx::client::Pair> pair_;
     std::unique_ptr<session::UI> ui_;
     mutable std::mutex map_lock_;
-    mutable std::map<ContextID, std::recursive_mutex> context_locks_;
+    mutable std::pmr::map<ContextID, std::recursive_mutex> context_locks_;
 
     auto get_lock(const ContextID context) const -> std::recursive_mutex&;
 

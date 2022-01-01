@@ -30,7 +30,7 @@ namespace crypto
 class OPENTXS_EXPORT Bip39
 {
 public:
-    using Suggestions = std::vector<std::string>;
+    using Suggestions = std::pmr::vector<std::string>;
 
     virtual auto GetSuggestions(
         const Language lang,

@@ -58,7 +58,7 @@ public:
     using Promise = std::promise<void>;
     using Future = std::shared_future<void>;
     using Callback = std::function<void(Promise&)>;
-    using Endpoints = std::vector<std::string>;
+    using Endpoints = std::pmr::vector<std::string>;
 
     Promise promise_;
     Future future_;

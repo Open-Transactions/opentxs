@@ -96,7 +96,7 @@ struct EncodedWitnessItem {
 
 struct EncodedInputWitness {
     CompactSize cs_{};
-    std::vector<EncodedWitnessItem> items_{};
+    std::pmr::vector<EncodedWitnessItem> items_{};
 
     auto size() const noexcept -> std::size_t;
 };
@@ -105,10 +105,10 @@ struct EncodedTransaction {
     be::little_int32_buf_t version_{};
     std::optional<std::byte> segwit_flag_{};
     CompactSize input_count_{};
-    std::vector<EncodedInput> inputs_{};
+    std::pmr::vector<EncodedInput> inputs_{};
     CompactSize output_count_{};
-    std::vector<EncodedOutput> outputs_{};
-    std::vector<EncodedInputWitness> witnesses_{};
+    std::pmr::vector<EncodedOutput> outputs_{};
+    std::pmr::vector<EncodedInputWitness> witnesses_{};
     be::little_uint32_buf_t lock_time_{};
     Space wtxid_{};
     Space txid_{};

@@ -20,7 +20,6 @@
 #include <set>
 #include <string>
 #include <thread>
-#include <type_traits>
 
 #include "internal/network/zeromq/Pool.hpp"
 #include "internal/network/zeromq/socket/Factory.hpp"
@@ -185,7 +184,7 @@ auto Thread::receive_message(void* socket, Message& message) noexcept -> bool
     return true;
 }
 
-auto Thread::Remove(BatchID id, std::vector<socket::Raw*>&& data) noexcept
+auto Thread::Remove(BatchID id, std::pmr::vector<socket::Raw*>&& data) noexcept
     -> std::future<bool>
 {
     auto p = std::make_shared<std::promise<bool>>();
@@ -193,7 +192,7 @@ auto Thread::Remove(BatchID id, std::vector<socket::Raw*>&& data) noexcept
     auto cb =
         [this, id, sockets = std::move(data), promise = std::move(p)](auto&) {
             const auto set = [&] {
-                auto out = std::set<void*>{};
+                auto out = std::pmr::set<void*>{};
                 std::transform(
                     sockets.begin(),
                     sockets.end(),

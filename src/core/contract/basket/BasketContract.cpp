@@ -214,7 +214,7 @@ auto Basket::IDVersion(const Lock& lock) const -> SerializedType
     basket->set_version(1);
     basket->set_weight(weight_);
 
-    // determinism here depends on the defined ordering of std::map
+    // determinism here depends on the defined ordering of std::pmr::map
     for (auto& item : subcontracts_) {
         auto serialized = basket->add_item();
         serialized->set_version(1);

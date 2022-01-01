@@ -51,7 +51,7 @@ auto Pool::get(BatchID id) noexcept -> Thread&
     return threads_.at(id % count_);
 }
 
-auto Pool::MakeBatch(std::vector<socket::Type>&& types) noexcept
+auto Pool::MakeBatch(std::pmr::vector<socket::Type>&& types) noexcept
     -> internal::Batch&
 {
     auto id = GetBatchID();
@@ -116,7 +116,7 @@ auto Pool::Stop(BatchID id) noexcept -> std::future<bool>
 {
     try {
         auto sockets = [&] {
-            auto out = std::vector<socket::Raw*>{};
+            auto out = std::pmr::vector<socket::Raw*>{};
             auto lock = Lock{index_lock_};
 
             for (const auto& sID : batch_index_.at(id)) {

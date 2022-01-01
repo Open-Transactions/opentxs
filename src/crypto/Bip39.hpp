@@ -35,8 +35,8 @@ namespace opentxs::crypto::implementation
 class Bip39 final : public opentxs::crypto::Bip39
 {
 public:
-    using WordList = std::vector<const char*>;
-    using Words = std::map<Language, WordList>;
+    using WordList = std::pmr::vector<const char*>;
+    using Words = std::pmr::map<Language, WordList>;
 
     static const Words words_;
 
@@ -57,8 +57,8 @@ public:
     ~Bip39() final = default;
 
 private:
-    using LongestWords = std::map<Language, std::size_t>;
-    using MnemonicWords = std::vector<std::string>;
+    using LongestWords = std::pmr::map<Language, std::size_t>;
+    using MnemonicWords = std::pmr::vector<std::string>;
 
     static const LongestWords longest_words_;
     static const std::size_t BitsPerWord;
@@ -75,7 +75,7 @@ private:
     static auto bitShift(std::size_t theBit) noexcept -> std::byte;
     static auto find_longest_words(const Words& words) noexcept -> LongestWords;
     static auto tokenize(const Language lang, const ReadView words) noexcept(
-        false) -> std::vector<std::size_t>;
+        false) -> std::pmr::vector<std::size_t>;
 
     auto entropy_to_words(
         const Secret& entropy,

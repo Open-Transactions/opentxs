@@ -105,13 +105,13 @@ public:
 private:
     friend opentxs::Factory;
 
-    using Vector = std::vector<std::unique_ptr<internal::Nym>>;
+    using Vector = std::pmr::vector<std::unique_ptr<internal::Nym>>;
 
     internal::Set& parent_;
     const VersionNumber version_;
     const bool external_;
     Vector nyms_;
-    std::map<OTIdentifier, OTNymID> map_;
+    std::pmr::map<OTIdentifier, OTNymID> map_;
 
     static auto instantiate(
         internal::Group& parent,

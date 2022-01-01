@@ -47,8 +47,10 @@ public:
     auto Serialize(AllocateOutput out) const noexcept -> bool final;
     auto Test(const Data& target) const noexcept -> bool final;
     auto Test(const ReadView target) const noexcept -> bool final;
-    auto Test(const std::vector<OTData>& targets) const noexcept -> bool final;
-    auto Test(const std::vector<Space>& targets) const noexcept -> bool final;
+    auto Test(const std::pmr::vector<OTData>& targets) const noexcept
+        -> bool final;
+    auto Test(const std::pmr::vector<Space>& targets) const noexcept
+        -> bool final;
 
     GCS(const api::Session& api,
         const std::uint8_t bits,
@@ -61,13 +63,13 @@ public:
         const std::uint8_t bits,
         const std::uint32_t fpRate,
         const ReadView key,
-        const std::vector<ReadView>& elements)
+        const std::pmr::vector<ReadView>& elements)
     noexcept(false);
 
     ~GCS() final = default;
 
 private:
-    using Elements = std::vector<std::uint64_t>;
+    using Elements = std::pmr::vector<std::uint64_t>;
 
     const VersionNumber version_;
     const api::Session& api_;
@@ -78,20 +80,20 @@ private:
     const OTData compressed_;
     const OTData key_;
 
-    static auto transform(const std::vector<OTData>& in) noexcept
-        -> std::vector<ReadView>;
-    static auto transform(const std::vector<Space>& in) noexcept
-        -> std::vector<ReadView>;
+    static auto transform(const std::pmr::vector<OTData>& in) noexcept
+        -> std::pmr::vector<ReadView>;
+    static auto transform(const std::pmr::vector<Space>& in) noexcept
+        -> std::pmr::vector<ReadView>;
 
     auto decompress() const noexcept -> const Elements&;
-    auto hashed_set_construct(const std::vector<OTData>& elements)
-        const noexcept -> std::vector<std::uint64_t>;
-    auto hashed_set_construct(const std::vector<Space>& elements) const noexcept
-        -> std::vector<std::uint64_t>;
-    auto hashed_set_construct(const std::vector<ReadView>& elements)
-        const noexcept -> std::vector<std::uint64_t>;
-    auto test(const std::vector<std::uint64_t>& targetHashes) const noexcept
-        -> bool;
+    auto hashed_set_construct(const std::pmr::vector<OTData>& elements)
+        const noexcept -> std::pmr::vector<std::uint64_t>;
+    auto hashed_set_construct(const std::pmr::vector<Space>& elements)
+        const noexcept -> std::pmr::vector<std::uint64_t>;
+    auto hashed_set_construct(const std::pmr::vector<ReadView>& elements)
+        const noexcept -> std::pmr::vector<std::uint64_t>;
+    auto test(const std::pmr::vector<std::uint64_t>& targetHashes)
+        const noexcept -> bool;
     auto hash_to_range(const ReadView in) const noexcept -> std::uint64_t;
 
     GCS() = delete;

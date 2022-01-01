@@ -118,8 +118,9 @@ auto Filters::import_genesis(const blockchain::Type chain) const noexcept
 
         if (needHeader) {
             auto header = api_.Factory().Data(genesis.first, StringStyle::Hex);
-            auto headers = std::vector<node::internal::FilterDatabase::Header>{
-                {blockHash, std::move(header), filterHash->Bytes()}};
+            auto headers =
+                std::pmr::vector<node::internal::FilterDatabase::Header>{
+                    {blockHash, std::move(header), filterHash->Bytes()}};
             success = common_.StoreFilterHeaders(style, headers);
 
             OT_ASSERT(success);
@@ -131,7 +132,7 @@ auto Filters::import_genesis(const blockchain::Type chain) const noexcept
 
         if (needFilter) {
             auto filters =
-                std::vector<node::internal::FilterDatabase::Filter>{};
+                std::pmr::vector<node::internal::FilterDatabase::Filter>{};
             filters.emplace_back(blockHash.Bytes(), std::move(gcs));
 
             success = common_.StoreFilters(style, filters);
@@ -202,8 +203,8 @@ auto Filters::SetTip(const filter::Type type, const block::Position& position)
 
 auto Filters::StoreFilters(
     const filter::Type type,
-    const std::vector<Header>& headers,
-    const std::vector<Filter>& filters,
+    const std::pmr::vector<Header>& headers,
+    const std::pmr::vector<Filter>& filters,
     const block::Position& tip) const noexcept -> bool
 {
     auto output = common_.StoreFilters(type, headers, filters);
@@ -248,8 +249,9 @@ auto Filters::StoreFilters(
     return parentTxn.Finalize(true);
 }
 
-auto Filters::StoreFilters(const filter::Type type, std::vector<Filter> filters)
-    const noexcept -> bool
+auto Filters::StoreFilters(
+    const filter::Type type,
+    std::pmr::vector<Filter> filters) const noexcept -> bool
 {
     return common_.StoreFilters(type, filters);
 }
@@ -257,7 +259,7 @@ auto Filters::StoreFilters(const filter::Type type, std::vector<Filter> filters)
 auto Filters::StoreHeaders(
     const filter::Type type,
     const ReadView previous,
-    const std::vector<Header> headers) const noexcept -> bool
+    const std::pmr::vector<Header> headers) const noexcept -> bool
 {
     return common_.StoreFilterHeaders(type, headers);
 }

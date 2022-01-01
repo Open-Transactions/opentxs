@@ -111,7 +111,7 @@ public:
     ~Wallet() final = default;
 
 private:
-    using Accounts = std::set<OTIdentifier>;
+    using Accounts = std::pmr::set<OTIdentifier>;
 
     const api::crypto::Blockchain& parent_;
     const AccountIndex& account_index_;
@@ -119,8 +119,8 @@ private:
     const api::session::Contacts& contacts_;
     const opentxs::blockchain::Type chain_;
     mutable std::mutex lock_;
-    std::vector<std::unique_ptr<crypto::Account>> trees_;
-    std::map<OTNymID, std::size_t> index_;
+    std::pmr::vector<std::unique_ptr<crypto::Account>> trees_;
+    std::pmr::map<OTNymID, std::size_t> index_;
 
     using crypto::Wallet::at;
     auto at(const Lock& lock, const std::size_t index) const noexcept(false)

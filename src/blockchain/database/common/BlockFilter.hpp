@@ -68,13 +68,14 @@ public:
         const AllocateOutput header) const noexcept -> bool;
     auto StoreFilterHeaders(
         const filter::Type type,
-        const std::vector<FilterHeader>& headers) const noexcept -> bool;
-    auto StoreFilters(const filter::Type type, std::vector<FilterData>& filters)
-        const noexcept -> bool;
+        const std::pmr::vector<FilterHeader>& headers) const noexcept -> bool;
     auto StoreFilters(
         const filter::Type type,
-        const std::vector<FilterHeader>& headers,
-        const std::vector<FilterData>& filters) const noexcept -> bool;
+        std::pmr::vector<FilterData>& filters) const noexcept -> bool;
+    auto StoreFilters(
+        const filter::Type type,
+        const std::pmr::vector<FilterHeader>& headers,
+        const std::pmr::vector<FilterData>& filters) const noexcept -> bool;
 
     BlockFilter(
         const api::Session& api,

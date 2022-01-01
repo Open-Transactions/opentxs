@@ -55,11 +55,11 @@ public:
         return Data::Factory(block_header_);
     }
     auto getTxnCount() const noexcept -> TxnCount { return txn_count_; }
-    auto getHashes() const noexcept -> const std::vector<OTData>&
+    auto getHashes() const noexcept -> const std::pmr::vector<OTData>&
     {
         return hashes_;
     }
-    auto getFlags() const noexcept -> const std::vector<std::byte>&
+    auto getFlags() const noexcept -> const std::pmr::vector<std::byte>&
     {
         return flags_;
     }
@@ -69,23 +69,23 @@ public:
         const blockchain::Type network,
         const Data& block_header,
         const TxnCount txn_count,
-        const std::vector<OTData>& hashes,
-        const std::vector<std::byte>& flags) noexcept;
+        const std::pmr::vector<OTData>& hashes,
+        const std::pmr::vector<std::byte>& flags) noexcept;
     Merkleblock(
         const api::Session& api,
         std::unique_ptr<Header> header,
         const Data& block_header,
         const TxnCount txn_count,
-        const std::vector<OTData>& hashes,
-        const std::vector<std::byte>& flags) noexcept(false);
+        const std::pmr::vector<OTData>& hashes,
+        const std::pmr::vector<std::byte>& flags) noexcept(false);
 
     ~Merkleblock() final = default;
 
 private:
     const OTData block_header_;
     const TxnCount txn_count_{};
-    const std::vector<OTData> hashes_;
-    const std::vector<std::byte> flags_;
+    const std::pmr::vector<OTData> hashes_;
+    const std::pmr::vector<std::byte> flags_;
 
     using implementation::Message::payload;
     auto payload(AllocateOutput out) const noexcept -> bool final;

@@ -9,6 +9,7 @@
 
 #include <cstdlib>
 #include <list>
+#include <memory_resource>
 #include <set>
 #include <tuple>
 
@@ -254,7 +255,7 @@ auto Contacts::serialize() const -> proto::StorageContacts
         }
     }
 
-    std::map<std::string, std::set<std::string>> nyms;
+    std::pmr::map<std::string, std::pmr::set<std::string>> nyms;
 
     for (const auto& it : nym_contact_index_) {
         const auto& nym = it.first;

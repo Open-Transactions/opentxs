@@ -167,7 +167,7 @@ auto ServerContext(
 namespace opentxs::otx::context::implementation
 {
 const std::string Server::default_node_name_{DEFAULT_NODE_NAME};
-const std::set<MessageType> Server::do_not_need_request_number_{
+const std::pmr::set<MessageType> Server::do_not_need_request_number_{
     MessageType::pingNotary,
     MessageType::registerNym,
     MessageType::getRequestNumber,
@@ -627,9 +627,9 @@ auto Server::AcceptIssuedNumbers(
     return accept_issued_number(lock, statement);
 }
 
-auto Server::Accounts() const -> std::vector<OTIdentifier>
+auto Server::Accounts() const -> std::pmr::vector<OTIdentifier>
 {
-    std::vector<OTIdentifier> output{};
+    std::pmr::vector<OTIdentifier> output{};
     const auto serverSet = api_.Storage().AccountsByServer(server_id_);
     const auto nymSet = api_.Storage().AccountsByOwner(nym_->ID());
     std::set_intersection(
@@ -907,8 +907,8 @@ auto Server::attempt_delivery(
 
                 return out;
             }());
-            static std::set<OTManagedNumber> empty{};
-            std::set<OTManagedNumber>* numbers = numbers_;
+            static std::pmr::set<OTManagedNumber> empty{};
+            std::pmr::set<OTManagedNumber>* numbers = numbers_;
 
             if (nullptr == numbers) { numbers = &empty; }
 
@@ -1721,12 +1721,12 @@ auto Server::harvest_unused(
     const auto& nymID = nym_->ID();
     auto available = issued_transaction_numbers_;
     const auto workflows = client.Storage().PaymentWorkflowList(nymID.str());
-    std::set<otx::client::PaymentWorkflowState> keepStates{};
+    std::pmr::set<otx::client::PaymentWorkflowState> keepStates{};
 
     // Loop through workflows to determine which issued numbers should not be
     // harvested
     for (const auto& [id, alias] : workflows) {
-        const auto workflowID = api_.Factory().Identifier(id);
+        const auto workflowID = api_.Factory().IdentifierFromBase58(id);
         auto proto = proto::PaymentWorkflow{};
 
         if (false == client.Workflow().LoadWorkflow(nymID, workflowID, proto)) {
@@ -3404,9 +3404,12 @@ auto Server::process_account_push(
     const proto::OTXPush& push,
     const PasswordPrompt& reason) -> bool
 {
-    const auto accountID = api_.Factory().Identifier(push.accountid());
-    const auto inboxHash = api_.Factory().Identifier(push.inboxhash());
-    const auto outboxHash = api_.Factory().Identifier(push.outboxhash());
+    const auto accountID =
+        api_.Factory().IdentifierFromBase58(push.accountid());
+    const auto inboxHash =
+        api_.Factory().IdentifierFromBase58(push.inboxhash());
+    const auto outboxHash =
+        api_.Factory().IdentifierFromBase58(push.outboxhash());
     const auto account = String::Factory(push.account());
     const auto inbox = String::Factory(push.inbox());
     const auto outbox = String::Factory(push.outbox());
@@ -3578,7 +3581,8 @@ auto Server::process_get_account_data(
     const Message& reply,
     const PasswordPrompt& reason) -> bool
 {
-    const auto accountID = api_.Factory().Identifier(reply.m_strAcctID);
+    const auto accountID =
+        api_.Factory().IdentifierFromBase58(reply.m_strAcctID);
     auto serializedAccount = String::Factory();
     auto serializedInbox = String::Factory();
     auto serializedOutbox = String::Factory();
@@ -3611,9 +3615,9 @@ auto Server::process_get_account_data(
         lock,
         accountID,
         serializedAccount,
-        api_.Factory().Identifier(reply.m_strInboxHash),
+        api_.Factory().IdentifierFromBase58(reply.m_strInboxHash),
         serializedInbox,
-        api_.Factory().Identifier(reply.m_strOutboxHash),
+        api_.Factory().IdentifierFromBase58(reply.m_strOutboxHash),
         serializedOutbox,
         reason);
 }
@@ -3644,7 +3648,7 @@ auto Server::process_get_box_receipt_response(
     return process_get_box_receipt_response(
         lock,
         client,
-        api_.Factory().Identifier(reply.m_strAcctID),
+        api_.Factory().IdentifierFromBase58(reply.m_strAcctID),
         boxReceipt,
         serialized,
         type,
@@ -4266,7 +4270,7 @@ auto Server::process_get_unit_definition_response(
 {
     update_nymbox_hash(lock, reply);
     const auto id =
-        api_.Factory().Identifier(reply.m_strInstrumentDefinitionID);
+        api_.Factory().IdentifierFromBase58(reply.m_strInstrumentDefinitionID);
 
     if (reply.m_ascPayload->empty()) {
         LogError()(OT_PRETTY_CLASS())(
@@ -4330,7 +4334,8 @@ auto Server::process_issue_unit_definition_response(
     const PasswordPrompt& reason) -> bool
 {
     update_nymbox_hash(lock, reply);
-    const auto accountID = api_.Factory().Identifier(reply.m_strAcctID);
+    const auto accountID =
+        api_.Factory().IdentifierFromBase58(reply.m_strAcctID);
 
     if (reply.m_ascPayload->empty()) {
         LogError()(OT_PRETTY_CLASS())(
@@ -4365,7 +4370,8 @@ auto Server::process_notarize_transaction_response(
     OT_ASSERT(remote_nym_);
 
     update_nymbox_hash(lock, reply);
-    const auto accountID = api_.Factory().Identifier(reply.m_strAcctID);
+    const auto accountID =
+        api_.Factory().IdentifierFromBase58(reply.m_strAcctID);
     const auto& nym = *nym_;
     const auto& nymID = nym.ID();
     const auto& serverNym = *remote_nym_;
@@ -4589,7 +4595,8 @@ auto Server::process_process_inbox_response(
     OT_ASSERT(nym_);
 
     const auto& nym = *nym_;
-    const auto accountID = api_.Factory().Identifier(reply.m_strAcctID);
+    const auto accountID =
+        api_.Factory().IdentifierFromBase58(reply.m_strAcctID);
     transaction = ledger.GetTransaction(transactionType::processInbox);
     replyTransaction =
         responseLedger.GetTransaction(transactionType::atProcessInbox);
@@ -4838,7 +4845,8 @@ auto Server::process_register_account_response(
     const PasswordPrompt& reason) -> bool
 {
     update_nymbox_hash(lock, reply);
-    const auto accountID = api_.Factory().Identifier(reply.m_strAcctID);
+    const auto accountID =
+        api_.Factory().IdentifierFromBase58(reply.m_strAcctID);
 
     if (reply.m_ascPayload->empty()) {
         LogError()(OT_PRETTY_CLASS())(
@@ -4908,7 +4916,7 @@ auto Server::process_register_nym_response(
 auto Server::process_reply(
     const Lock& lock,
     const api::session::Client& client,
-    const std::set<OTManagedNumber>& managed,
+    const std::pmr::set<OTManagedNumber>& managed,
     const Message& reply,
     const PasswordPrompt& reason) -> bool
 {
@@ -4916,7 +4924,8 @@ auto Server::process_reply(
 
     const auto& nym = *nym_;
     const auto& nymID = nym.ID();
-    const auto accountID = api_.Factory().Identifier(reply.m_strAcctID);
+    const auto accountID =
+        api_.Factory().IdentifierFromBase58(reply.m_strAcctID);
     const auto& serverNym = *remote_nym_;
 
     LogVerbose()(OT_PRETTY_CLASS())("Received ")(reply.m_strCommand)("(")(
@@ -4991,7 +5000,7 @@ auto Server::process_reply(
                 client,
                 reply,
                 BoxType::Inbox,
-                api_.Factory().Identifier(reply.m_strAcctID),
+                api_.Factory().IdentifierFromBase58(reply.m_strAcctID),
                 reason);
         }
         case MessageType::processNymboxResponse: {
@@ -5227,8 +5236,8 @@ void Server::process_response_transaction_cash_deposit(
         return;
     }
 
-    std::set<std::string> spentTokens{};
-    std::vector<blind::Token> keepTokens{};
+    std::pmr::set<std::string> spentTokens{};
+    std::pmr::vector<blind::Token> keepTokens{};
 
     for (const auto& token : purse) { spentTokens.insert(token.ID(reason)); }
 
@@ -5655,7 +5664,7 @@ void Server::process_response_transaction_cron(
                     numlistOutpayment, reason);
             }
 
-            const std::set<std::int64_t> set_receipt_ids{
+            const std::pmr::set<std::int64_t> set_receipt_ids{
                 thePmntInbox->GetTransactionNums()};
             for (const auto& receipt_id : set_receipt_ids) {
                 auto pPayment = get_instrument_by_receipt_id(
@@ -6322,7 +6331,8 @@ auto Server::process_unregister_account_response(
         originalMessage->m_strAcctID->Compare(reply.m_strAcctID) &&
         originalMessage->m_strCommand->Compare("unregisterAccount")) {
 
-        const auto theAccountID = api_.Factory().Identifier(reply.m_strAcctID);
+        const auto theAccountID =
+            api_.Factory().IdentifierFromBase58(reply.m_strAcctID);
         auto account =
             api_.Wallet().Internal().mutable_Account(theAccountID, reason);
 
@@ -6456,7 +6466,7 @@ auto Server::Queue(
     std::shared_ptr<Message> message,
     std::shared_ptr<Ledger> inbox,
     std::shared_ptr<Ledger> outbox,
-    std::set<OTManagedNumber>* numbers,
+    std::pmr::set<OTManagedNumber>* numbers,
     const PasswordPrompt& reason,
     const ExtraArgs& args) -> Server::QueueResult
 {
@@ -6508,7 +6518,7 @@ auto Server::remove_acknowledged_number(const Lock& lock, const Message& reply)
 {
     OT_ASSERT(verify_write_lock(lock));
 
-    std::set<RequestNumber> list{};
+    std::pmr::set<RequestNumber> list{};
 
     if (false == reply.m_AcknowledgedReplies.Output(list)) { return false; }
 
@@ -6831,7 +6841,7 @@ auto Server::remove_nymbox_item(
                             numlistOutpayment, reason);
                     }
 
-                    const std::set<std::int64_t> set_receipt_ids{
+                    const std::pmr::set<std::int64_t> set_receipt_ids{
                         paymentInbox->GetTransactionNums()};
 
                     for (const auto& receipt_id : set_receipt_ids) {
@@ -7185,7 +7195,7 @@ void Server::scan_number_set(
 
 auto Server::SendMessage(
     const api::session::Client& client,
-    const std::set<OTManagedNumber>& pending,
+    const std::pmr::set<OTManagedNumber>& pending,
     otx::context::Server& context,
     const Message& message,
     const PasswordPrompt& reason,
@@ -7424,7 +7434,7 @@ auto Server::start(
     const ActionType type,
     std::shared_ptr<Ledger> inbox,
     std::shared_ptr<Ledger> outbox,
-    std::set<OTManagedNumber>* numbers) -> Server::QueueResult
+    std::pmr::set<OTManagedNumber>* numbers) -> Server::QueueResult
 {
     Lock contextLock(lock_);
     client_.store(&client);
@@ -7585,7 +7595,8 @@ auto Server::update_nymbox_hash(
         return false;
     }
 
-    const auto hash = api_.Factory().Identifier(reply.m_strNymboxHash);
+    const auto hash =
+        api_.Factory().IdentifierFromBase58(reply.m_strNymboxHash);
     set_remote_nymbox_hash(lock, hash);
 
     if (UpdateHash::Both == which) { set_local_nymbox_hash(lock, hash); }

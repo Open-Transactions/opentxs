@@ -35,9 +35,9 @@ using ReadCallback =
     std::function<bool(const ReadView key, const ReadView value)>;
 using Result = std::pair<bool, int>;
 using Table = int;
-using Databases = std::map<Table, MDB_dbi>;
-using TablesToInit = std::vector<std::pair<Table, unsigned int>>;
-using TableNames = std::map<Table, const std::string>;
+using Databases = std::pmr::map<Table, MDB_dbi>;
+using TablesToInit = std::pmr::vector<std::pair<Table, unsigned int>>;
+using TableNames = std::pmr::map<Table, const std::string>;
 using UpdateCallback = std::function<Space(const ReadView data)>;
 
 class LMDB

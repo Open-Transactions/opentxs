@@ -30,120 +30,120 @@ auto CheckProto_1(
     const bool silent,
     const std::uint32_t parentVersion,
     const PaymentWorkflowType parent,
-    std::map<PaymentEventType, std::size_t>& events) -> bool;
+    std::pmr::map<PaymentEventType, std::size_t>& events) -> bool;
 auto CheckProto_2(
     const PaymentEvent& input,
     const bool silent,
     const std::uint32_t parentVersion,
     const PaymentWorkflowType parent,
-    std::map<PaymentEventType, std::size_t>& events) -> bool;
+    std::pmr::map<PaymentEventType, std::size_t>& events) -> bool;
 auto CheckProto_3(
     const PaymentEvent& input,
     const bool silent,
     const std::uint32_t parentVersion,
     const PaymentWorkflowType parent,
-    std::map<PaymentEventType, std::size_t>& events) -> bool;
+    std::pmr::map<PaymentEventType, std::size_t>& events) -> bool;
 auto CheckProto_4(
     const PaymentEvent& input,
     const bool silent,
     const std::uint32_t parentVersion,
     const PaymentWorkflowType parent,
-    std::map<PaymentEventType, std::size_t>& events) -> bool;
+    std::pmr::map<PaymentEventType, std::size_t>& events) -> bool;
 auto CheckProto_5(
     const PaymentEvent& input,
     const bool silent,
     const std::uint32_t parentVersion,
     const PaymentWorkflowType parent,
-    std::map<PaymentEventType, std::size_t>& events) -> bool;
+    std::pmr::map<PaymentEventType, std::size_t>& events) -> bool;
 auto CheckProto_6(
     const PaymentEvent& input,
     const bool silent,
     const std::uint32_t parentVersion,
     const PaymentWorkflowType parent,
-    std::map<PaymentEventType, std::size_t>& events) -> bool;
+    std::pmr::map<PaymentEventType, std::size_t>& events) -> bool;
 auto CheckProto_7(
     const PaymentEvent& input,
     const bool silent,
     const std::uint32_t parentVersion,
     const PaymentWorkflowType parent,
-    std::map<PaymentEventType, std::size_t>& events) -> bool;
+    std::pmr::map<PaymentEventType, std::size_t>& events) -> bool;
 auto CheckProto_8(
     const PaymentEvent& input,
     const bool silent,
     const std::uint32_t parentVersion,
     const PaymentWorkflowType parent,
-    std::map<PaymentEventType, std::size_t>& events) -> bool;
+    std::pmr::map<PaymentEventType, std::size_t>& events) -> bool;
 auto CheckProto_9(
     const PaymentEvent& input,
     const bool silent,
     const std::uint32_t parentVersion,
     const PaymentWorkflowType parent,
-    std::map<PaymentEventType, std::size_t>& events) -> bool;
+    std::pmr::map<PaymentEventType, std::size_t>& events) -> bool;
 auto CheckProto_10(
     const PaymentEvent& input,
     const bool silent,
     const std::uint32_t parentVersion,
     const PaymentWorkflowType parent,
-    std::map<PaymentEventType, std::size_t>& events) -> bool;
+    std::pmr::map<PaymentEventType, std::size_t>& events) -> bool;
 auto CheckProto_11(
     const PaymentEvent& input,
     const bool silent,
     const std::uint32_t parentVersion,
     const PaymentWorkflowType parent,
-    std::map<PaymentEventType, std::size_t>& events) -> bool;
+    std::pmr::map<PaymentEventType, std::size_t>& events) -> bool;
 auto CheckProto_12(
     const PaymentEvent& input,
     const bool silent,
     const std::uint32_t parentVersion,
     const PaymentWorkflowType parent,
-    std::map<PaymentEventType, std::size_t>& events) -> bool;
+    std::pmr::map<PaymentEventType, std::size_t>& events) -> bool;
 auto CheckProto_13(
     const PaymentEvent& input,
     const bool silent,
     const std::uint32_t parentVersion,
     const PaymentWorkflowType parent,
-    std::map<PaymentEventType, std::size_t>& events) -> bool;
+    std::pmr::map<PaymentEventType, std::size_t>& events) -> bool;
 auto CheckProto_14(
     const PaymentEvent& input,
     const bool silent,
     const std::uint32_t parentVersion,
     const PaymentWorkflowType parent,
-    std::map<PaymentEventType, std::size_t>& events) -> bool;
+    std::pmr::map<PaymentEventType, std::size_t>& events) -> bool;
 auto CheckProto_15(
     const PaymentEvent& input,
     const bool silent,
     const std::uint32_t parentVersion,
     const PaymentWorkflowType parent,
-    std::map<PaymentEventType, std::size_t>& events) -> bool;
+    std::pmr::map<PaymentEventType, std::size_t>& events) -> bool;
 auto CheckProto_16(
     const PaymentEvent& input,
     const bool silent,
     const std::uint32_t parentVersion,
     const PaymentWorkflowType parent,
-    std::map<PaymentEventType, std::size_t>& events) -> bool;
+    std::pmr::map<PaymentEventType, std::size_t>& events) -> bool;
 auto CheckProto_17(
     const PaymentEvent& input,
     const bool silent,
     const std::uint32_t parentVersion,
     const PaymentWorkflowType parent,
-    std::map<PaymentEventType, std::size_t>& events) -> bool;
+    std::pmr::map<PaymentEventType, std::size_t>& events) -> bool;
 auto CheckProto_18(
     const PaymentEvent& input,
     const bool silent,
     const std::uint32_t parentVersion,
     const PaymentWorkflowType parent,
-    std::map<PaymentEventType, std::size_t>& events) -> bool;
+    std::pmr::map<PaymentEventType, std::size_t>& events) -> bool;
 auto CheckProto_19(
     const PaymentEvent& input,
     const bool silent,
     const std::uint32_t parentVersion,
     const PaymentWorkflowType parent,
-    std::map<PaymentEventType, std::size_t>& events) -> bool;
+    std::pmr::map<PaymentEventType, std::size_t>& events) -> bool;
 auto CheckProto_20(
     const PaymentEvent& input,
     const bool silent,
     const std::uint32_t parentVersion,
     const PaymentWorkflowType parent,
-    std::map<PaymentEventType, std::size_t>& events) -> bool;
+    std::pmr::map<PaymentEventType, std::size_t>& events) -> bool;
 }  // namespace proto
 }  // namespace opentxs

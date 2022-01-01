@@ -180,8 +180,8 @@ private:
     const OTZMQPublishSocket message_loaded_;
     mutable activity::MailCache mail_;
     mutable std::mutex publisher_lock_;
-    mutable std::map<OTIdentifier, OTZMQPublishSocket> thread_publishers_;
-    mutable std::map<OTNymID, OTZMQPublishSocket> blockchain_publishers_;
+    mutable std::pmr::map<OTIdentifier, OTZMQPublishSocket> thread_publishers_;
+    mutable std::pmr::map<OTNymID, OTZMQPublishSocket> blockchain_publishers_;
 
     auto activity_preload_thread(
         OTPasswordPrompt reason,

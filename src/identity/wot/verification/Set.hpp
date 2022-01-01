@@ -85,7 +85,7 @@ private:
     const OTNymID nym_id_;
     GroupPointer internal_;
     GroupPointer external_;
-    std::map<OTIdentifier, bool> map_;
+    std::pmr::map<OTIdentifier, bool> map_;
 
     static auto instantiate(
         internal::Set& parent,

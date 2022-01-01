@@ -5,6 +5,7 @@
 
 #pragma once
 
+#include <memory_resource>
 #include <string>
 #include <string_view>
 

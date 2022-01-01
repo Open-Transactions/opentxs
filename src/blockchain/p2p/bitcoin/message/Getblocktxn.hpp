@@ -48,7 +48,7 @@ public:
     {
         return Data::Factory(block_hash_);
     }
-    auto getIndices() const noexcept -> const std::vector<std::size_t>&
+    auto getIndices() const noexcept -> const std::pmr::vector<std::size_t>&
     {
         return txn_indices_;
     }
@@ -57,18 +57,18 @@ public:
         const api::Session& api,
         const blockchain::Type network,
         const Data& block_hash,
-        const std::vector<std::size_t>& txn_indices) noexcept;
+        const std::pmr::vector<std::size_t>& txn_indices) noexcept;
     Getblocktxn(
         const api::Session& api,
         std::unique_ptr<Header> header,
         const Data& block_hash,
-        const std::vector<std::size_t>& txn_indices) noexcept(false);
+        const std::pmr::vector<std::size_t>& txn_indices) noexcept(false);
 
     ~Getblocktxn() final = default;
 
 private:
     const OTData block_hash_;
-    const std::vector<std::size_t> txn_indices_;
+    const std::pmr::vector<std::size_t> txn_indices_;
 
     using implementation::Message::payload;
     auto payload(AllocateOutput out) const noexcept -> bool final;

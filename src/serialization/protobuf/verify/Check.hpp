@@ -17,7 +17,7 @@
 
 namespace opentxs::proto
 {
-static const std::map<std::uint32_t, std::set<AsymmetricKeyType>>
+static const std::pmr::map<std::uint32_t, std::pmr::set<AsymmetricKeyType>>
     AsymmetricKeyAllowedTypes{
         {1, {AKEYTYPE_LEGACY, AKEYTYPE_SECP256K1, AKEYTYPE_ED25519}},
         {2, {AKEYTYPE_LEGACY, AKEYTYPE_SECP256K1, AKEYTYPE_ED25519}},

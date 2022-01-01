@@ -184,7 +184,7 @@ const Message::TypeMap Message::message_names_{
     {MessageType::outmail, OUTMAIL},
 };
 
-const std::map<MessageType, MessageType> Message::reply_message_{
+const std::pmr::map<MessageType, MessageType> Message::reply_message_{
     {MessageType::pingNotary, MessageType::pingNotaryResponse},
     {MessageType::registerNym, MessageType::registerNymResponse},
     {MessageType::unregisterNym, MessageType::unregisterNymResponse},
@@ -417,7 +417,7 @@ void Message::SetAcknowledgments(const otx::context::Base& context)
     SetAcknowledgments(context.AcknowledgedNumbers());
 }
 
-void Message::SetAcknowledgments(const std::set<RequestNumber>& numbers)
+void Message::SetAcknowledgments(const std::pmr::set<RequestNumber>& numbers)
 {
     m_AcknowledgedReplies.Release();
 

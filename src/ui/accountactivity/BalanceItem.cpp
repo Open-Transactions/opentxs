@@ -144,9 +144,10 @@ auto BalanceItem::DisplayAmount() const noexcept -> std::string
 
 auto BalanceItem::extract_contacts(
     const api::session::Client& api,
-    const proto::PaymentWorkflow& workflow) noexcept -> std::vector<std::string>
+    const proto::PaymentWorkflow& workflow) noexcept
+    -> std::pmr::vector<std::string>
 {
-    std::vector<std::string> output{};
+    std::pmr::vector<std::string> output{};
 
     for (const auto& party : workflow.party()) {
         const auto contactID =

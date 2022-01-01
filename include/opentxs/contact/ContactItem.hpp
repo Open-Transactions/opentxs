@@ -53,7 +53,7 @@ public:
         const contact::SectionType section,
         const contact::ClaimType& type,
         const std::string& value,
-        const std::set<contact::Attribute>& attributes,
+        const std::pmr::set<contact::Attribute>& attributes,
         const std::time_t start,
         const std::time_t end,
         const std::string subtype);

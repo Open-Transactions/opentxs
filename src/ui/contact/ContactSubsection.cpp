@@ -80,11 +80,11 @@ auto ContactSubsection::Name(const std::string& lang) const noexcept
 
 auto ContactSubsection::process_group(
     const contact::ContactGroup& group) noexcept
-    -> std::set<ContactSubsectionRowID>
+    -> std::pmr::set<ContactSubsectionRowID>
 {
     OT_ASSERT(row_id_.second == group.Type())
 
-    std::set<ContactSubsectionRowID> active{};
+    std::pmr::set<ContactSubsectionRowID> active{};
 
     for (const auto& [id, claim] : group) {
         OT_ASSERT(claim)

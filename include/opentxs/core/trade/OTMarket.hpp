@@ -66,9 +66,9 @@ class PasswordPrompt;
 // Using multi-map since there will be more than one offer for each single
 // price.
 // (Map would only allow a single item on the map for each price.)
-using mapOfOffers = std::multimap<Amount, OTOffer*>;
+using mapOfOffers = std::pmr::multimap<Amount, OTOffer*>;
 // The same offers are also mapped (uniquely) to transaction number.
-using mapOfOffersTrnsNum = std::map<Amount, OTOffer*>;
+using mapOfOffersTrnsNum = std::pmr::map<Amount, OTOffer*>;
 
 // A market has a list of OTOffers for all the bids, and another list of
 // OTOffers for all the asks.

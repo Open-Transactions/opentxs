@@ -54,12 +54,12 @@ public:
     const ot::api::session::Client& client_;
     ot::OTPasswordPrompt reason_;
     const ot::api::Crypto& crypto_;
-    const std::map<std::string, std::string> base_58_{
+    const std::pmr::map<std::string, std::string> base_58_{
         {"", ""},
         {"00010966776006953D5567439E5E39F86A0D273BEE",
          "16UwLL9Risc3QfPqBUvKofHmBQ7wMtjvM"},
     };
-    const std::map<std::string, std::string> ripemd160_{
+    const std::pmr::map<std::string, std::string> ripemd160_{
         {"", "9c1185a5c5e9fc54612808977ee8f548b2258d31"},
         {"a", "0bdc9d2d256b3ee9daae347be6f4dc835a467ffe"},
         {"abc", "8eb208f7e05d987a9b044a8e98c6b087f15a0bfc"},
@@ -73,10 +73,11 @@ public:
         {"123456789012345678901234567890123456789012345678901234567890123456789"
          "01234567890",
          "9b752e45573d4b39f4dbd3323cab82bf63326bfb"}};
-    using Path = std::vector<std::uint32_t>;
+    using Path = std::pmr::vector<std::uint32_t>;
     using Bip32TestCase = std::tuple<Path, std::string, std::string>;
-    using Bip32TestVector = std::pair<std::string, std::vector<Bip32TestCase>>;
-    const std::vector<Bip32TestVector> bip_32_{
+    using Bip32TestVector =
+        std::pair<std::string, std::pmr::vector<Bip32TestCase>>;
+    const std::pmr::vector<Bip32TestVector> bip_32_{
         {"0x000102030405060708090a0b0c0d0e0f",
          {
              {{},
@@ -190,7 +191,7 @@ public:
               "PrS7AANYqdq6vcBcBUdJCVVFceUvJFjaPdGZ2y9WACViL4L"},
          }},
     };
-    const std::map<
+    const std::pmr::map<
         std::string,
         std::tuple<std::string, std::string, std::string>>
         bip_39_{

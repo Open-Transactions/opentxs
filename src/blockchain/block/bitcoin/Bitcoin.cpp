@@ -13,6 +13,7 @@
 #include <cstring>
 #include <iterator>
 #include <limits>
+#include <memory_resource>
 #include <stdexcept>
 
 #include "internal/util/LogMacros.hpp"

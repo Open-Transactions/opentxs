@@ -183,20 +183,20 @@ public:
         const bool invalid_peer_;
         const OTData localhost_peer_;
         const OTData default_peer_;
-        const std::set<p2p::Service> preferred_services_;
+        const std::pmr::set<p2p::Service> preferred_services_;
         std::atomic<int> next_id_;
         std::atomic<std::size_t> minimum_peers_;
-        std::map<int, Peer> peers_;
-        std::map<OTIdentifier, int> active_;
+        std::pmr::map<int, Peer> peers_;
+        std::pmr::map<OTIdentifier, int> active_;
         std::atomic<std::size_t> count_;
         Addresses connected_;
         std::unique_ptr<IncomingConnectionManager> incoming_zmq_;
         std::unique_ptr<IncomingConnectionManager> incoming_tcp_;
-        std::map<OTIdentifier, Time> attempt_;
+        std::pmr::map<OTIdentifier, Time> attempt_;
 
         static auto get_preferred_services(
             const node::internal::Config& config) noexcept
-            -> std::set<p2p::Service>;
+            -> std::pmr::set<p2p::Service>;
         static auto set_default_peer(
             const std::string node,
             const Data& localhost,
@@ -209,7 +209,7 @@ public:
         auto get_peer() const noexcept -> Endpoint;
         auto get_preferred_peer(const p2p::Protocol protocol) const noexcept
             -> Endpoint;
-        auto get_types() const noexcept -> std::set<p2p::Network>;
+        auto get_types() const noexcept -> std::pmr::set<p2p::Network>;
         auto is_not_connected(const p2p::Address& endpoint) const noexcept
             -> bool;
 
@@ -261,7 +261,7 @@ public:
     auto LookupIncomingSocket(const int id) const noexcept(false)
         -> opentxs::network::asio::Socket final;
     auto RequestBlock(const block::Hash& block) const noexcept -> bool final;
-    auto RequestBlocks(const std::vector<ReadView>& hashes) const noexcept
+    auto RequestBlocks(const std::pmr::vector<ReadView>& hashes) const noexcept
         -> bool final;
     auto RequestHeaders() const noexcept -> bool final;
     auto VerifyPeer(const int id, const std::string& address) const noexcept
@@ -304,8 +304,8 @@ private:
         Jobs(const api::Session& api) noexcept;
 
     private:
-        using EndpointMap = std::map<Task, std::string>;
-        using SocketMap = std::map<Task, zmq::socket::Sender*>;
+        using EndpointMap = std::pmr::map<Task, std::string>;
+        using SocketMap = std::pmr::map<Task, zmq::socket::Sender*>;
 
         const zmq::Context& zmq_;
         OTZMQPushSocket getheaders_;
@@ -333,7 +333,7 @@ private:
     mutable Jobs jobs_;
     mutable Peers peers_;
     mutable std::mutex verified_lock_;
-    mutable std::set<int> verified_peers_;
+    mutable std::pmr::set<int> verified_peers_;
     std::promise<void> init_promise_;
     std::shared_future<void> init_;
 

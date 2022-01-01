@@ -740,7 +740,7 @@ auto Peer::update_address_activity() noexcept -> void
 }
 
 auto Peer::update_address_services(
-    const std::set<p2p::Service>& services) noexcept -> void
+    const std::pmr::set<p2p::Service>& services) noexcept -> void
 {
     manager_.Database().AddOrUpdate(address_.UpdateServices(services));
 }

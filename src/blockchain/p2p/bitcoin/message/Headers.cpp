@@ -68,7 +68,8 @@ auto BitcoinP2PHeaders(
         return nullptr;
     }
 
-    std::vector<std::unique_ptr<blockchain::block::bitcoin::Header>> headers{};
+    std::pmr::vector<std::unique_ptr<blockchain::block::bitcoin::Header>>
+        headers{};
 
     if (count > 0) {
         for (std::size_t i{0}; i < count; ++i) {
@@ -107,8 +108,8 @@ auto BitcoinP2PHeaders(
 auto BitcoinP2PHeaders(
     const api::Session& api,
     const blockchain::Type network,
-    std::vector<std::unique_ptr<blockchain::block::bitcoin::Header>>&& headers)
-    -> blockchain::p2p::bitcoin::message::internal::Headers*
+    std::pmr::vector<std::unique_ptr<blockchain::block::bitcoin::Header>>&&
+        headers) -> blockchain::p2p::bitcoin::message::internal::Headers*
 {
     namespace bitcoin = blockchain::p2p::bitcoin;
     using ReturnType = bitcoin::message::implementation::Headers;
@@ -122,7 +123,7 @@ namespace opentxs::blockchain::p2p::bitcoin::message::implementation
 Headers::Headers(
     const api::Session& api,
     const blockchain::Type network,
-    std::vector<std::unique_ptr<value_type>>&& headers) noexcept
+    std::pmr::vector<std::unique_ptr<value_type>>&& headers) noexcept
     : Message(api, network, bitcoin::Command::headers)
     , payload_(std::move(headers))
 {
@@ -132,7 +133,7 @@ Headers::Headers(
 Headers::Headers(
     const api::Session& api,
     std::unique_ptr<Header> header,
-    std::vector<std::unique_ptr<value_type>>&& headers) noexcept
+    std::pmr::vector<std::unique_ptr<value_type>>&& headers) noexcept
     : Message(api, std::move(header))
     , payload_(std::move(headers))
 {

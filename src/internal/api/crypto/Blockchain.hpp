@@ -84,7 +84,7 @@ public:
         const opentxs::blockchain::Type chain,
         const opentxs::blockchain::Balance balance) const noexcept -> void = 0;
     virtual auto UpdateElement(
-        std::vector<ReadView>& pubkeyHashes) const noexcept -> void = 0;
+        std::pmr::vector<ReadView>& pubkeyHashes) const noexcept -> void = 0;
 
     virtual auto Init() noexcept -> void = 0;
     auto Internal() noexcept -> Blockchain& final { return *this; }

@@ -10,6 +10,7 @@
 #include <cinttypes>
 #include <cstdint>
 #include <locale>
+#include <memory_resource>
 #include <set>
 #include <string>
 #include <utility>
@@ -27,13 +28,13 @@ NumList::NumList()
 {
 }
 
-NumList::NumList(const std::set<std::int64_t>& theNumbers)
+NumList::NumList(const std::pmr::set<std::int64_t>& theNumbers)
     : NumList()
 {
     Add(theNumbers);
 }
 
-NumList::NumList(std::set<std::int64_t>&& theNumbers)
+NumList::NumList(std::pmr::set<std::int64_t>&& theNumbers)
     : m_setData(std::move(theNumbers))
 {
 }
@@ -217,7 +218,8 @@ auto NumList::Verify(const std::int64_t& theValue) const
 // (ALL theNumbersmust be present.)
 // So if *this contains "3,4,5,6" and rhs contains "4,5" then match is TRUE.
 //
-auto NumList::Verify(const std::set<std::int64_t>& theNumbers) const -> bool
+auto NumList::Verify(const std::pmr::set<std::int64_t>& theNumbers) const
+    -> bool
 {
     bool bSuccess = true;
 
@@ -262,7 +264,8 @@ auto NumList::VerifyAny(const NumList& rhs) const -> bool
 
 /// Verify whether ANY of the numbers on *this are found in setData.
 ///
-auto NumList::VerifyAny(const std::set<std::int64_t>& setData) const -> bool
+auto NumList::VerifyAny(const std::pmr::set<std::int64_t>& setData) const
+    -> bool
 {
     for (const auto& it : m_setData) {
         auto it_find = setData.find(it);
@@ -279,13 +282,13 @@ auto NumList::Add(const NumList& theNumList)
              // were already there. (At
              // least one of them.)
 {
-    std::set<std::int64_t> theOutput;
+    std::pmr::set<std::int64_t> theOutput;
     theNumList.Output(theOutput);  // returns false if the numlist was empty.
 
     return Add(theOutput);
 }
 
-auto NumList::Add(const std::set<std::int64_t>& theNumbers)
+auto NumList::Add(const std::pmr::set<std::int64_t>& theNumbers)
     -> bool  // if false, means
              // the
 // numbers were already
@@ -302,7 +305,7 @@ auto NumList::Add(const std::set<std::int64_t>& theNumbers)
     return bSuccess;
 }
 
-auto NumList::Remove(const std::set<std::int64_t>& theNumbers)
+auto NumList::Remove(const std::pmr::set<std::int64_t>& theNumbers)
     -> bool  // if false,
              // means
 // the numbers were
@@ -323,7 +326,7 @@ auto NumList::Remove(const std::set<std::int64_t>& theNumbers)
 // Outputs the numlist as a set of numbers.
 // (To iterate OTNumList, call this, then iterate the output.)
 //
-auto NumList::Output(std::set<std::int64_t>& theOutput) const
+auto NumList::Output(std::pmr::set<std::int64_t>& theOutput) const
     -> bool  // returns false
              // if
 // the numlist was

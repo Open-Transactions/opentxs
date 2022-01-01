@@ -106,8 +106,8 @@ public:
     using Chain = opentxs::blockchain::Type;
     using EnabledChain = std::pair<Chain, std::string>;
     using Height = opentxs::blockchain::block::Height;
-    using SyncItems = std::vector<opentxs::network::p2p::Block>;
-    using Endpoints = std::vector<std::string>;
+    using SyncItems = std::pmr::vector<opentxs::network::p2p::Block>;
+    using Endpoints = std::pmr::vector<std::string>;
 
     auto AddOrUpdate(Address_p address) const noexcept -> bool;
     auto AddSyncServer(const std::string& endpoint) const noexcept -> bool;
@@ -115,7 +115,7 @@ public:
         -> std::string;
     auto AssociateTransaction(
         const Txid& txid,
-        const std::vector<PatternID>& patterns) const noexcept -> bool;
+        const std::pmr::vector<PatternID>& patterns) const noexcept -> bool;
     auto BlockHeaderExists(const BlockHash& hash) const noexcept -> bool;
     auto BlockExists(const BlockHash& block) const noexcept -> bool;
     auto BlockLoad(const BlockHash& block) const noexcept -> BlockReader;
@@ -129,18 +129,18 @@ public:
     auto Find(
         const Chain chain,
         const Protocol protocol,
-        const std::set<Type> onNetworks,
-        const std::set<Service> withServices) const noexcept -> Address_p;
+        const std::pmr::set<Type> onNetworks,
+        const std::pmr::set<Service> withServices) const noexcept -> Address_p;
     auto GetSyncServers() const noexcept -> Endpoints;
     auto HashKey() const noexcept -> ReadView;
     auto HaveFilter(const filter::Type type, const ReadView blockHash)
         const noexcept -> bool;
     auto HaveFilterHeader(const filter::Type type, const ReadView blockHash)
         const noexcept -> bool;
-    auto Import(std::vector<Address_p> peers) const noexcept -> bool;
+    auto Import(std::pmr::vector<Address_p> peers) const noexcept -> bool;
     auto LoadBlockHeader(const BlockHash& hash) const noexcept(false)
         -> proto::BlockchainBlockHeader;
-    auto LoadEnabledChains() const noexcept -> std::vector<EnabledChain>;
+    auto LoadEnabledChains() const noexcept -> std::pmr::vector<EnabledChain>;
     auto LoadFilter(const filter::Type type, const ReadView blockHash)
         const noexcept -> std::unique_ptr<const opentxs::blockchain::GCS>;
     auto LoadFilterHash(
@@ -158,9 +158,9 @@ public:
     auto LoadTransaction(const ReadView txid) const noexcept
         -> std::unique_ptr<block::bitcoin::Transaction>;
     auto LookupContact(const Data& pubkeyHash) const noexcept
-        -> std::set<OTIdentifier>;
+        -> std::pmr::set<OTIdentifier>;
     auto LookupTransactions(const PatternID pattern) const noexcept
-        -> std::vector<pTxid>;
+        -> std::pmr::vector<pTxid>;
     auto ReorgSync(const Chain chain, const Height height) const noexcept
         -> bool;
     auto StoreBlockHeader(const opentxs::blockchain::block::Header& header)
@@ -168,23 +168,25 @@ public:
     auto StoreBlockHeaders(const UpdatedHeader& headers) const noexcept -> bool;
     auto StoreFilterHeaders(
         const filter::Type type,
-        const std::vector<FilterHeader>& headers) const noexcept -> bool;
-    auto StoreFilters(const filter::Type type, std::vector<FilterData>& filters)
-        const noexcept -> bool;
+        const std::pmr::vector<FilterHeader>& headers) const noexcept -> bool;
     auto StoreFilters(
         const filter::Type type,
-        const std::vector<FilterHeader>& headers,
-        const std::vector<FilterData>& filters) const noexcept -> bool;
+        std::pmr::vector<FilterData>& filters) const noexcept -> bool;
+    auto StoreFilters(
+        const filter::Type type,
+        const std::pmr::vector<FilterHeader>& headers,
+        const std::pmr::vector<FilterData>& filters) const noexcept -> bool;
     auto StoreSync(const Chain chain, const SyncItems& items) const noexcept
         -> bool;
     auto StoreTransaction(const block::bitcoin::Transaction& tx) const noexcept
         -> bool;
     auto SyncTip(const Chain chain) const noexcept -> Height;
     auto UpdateContact(const contact::Contact& contact) const noexcept
-        -> std::vector<pTxid>;
+        -> std::pmr::vector<pTxid>;
     auto UpdateMergedContact(
         const contact::Contact& parent,
-        const contact::Contact& child) const noexcept -> std::vector<pTxid>;
+        const contact::Contact& child) const noexcept
+        -> std::pmr::vector<pTxid>;
 
     Database(
         const api::Session& api,

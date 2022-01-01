@@ -61,8 +61,8 @@ namespace ot = opentxs;
 namespace
 {
 struct AddressData {
-    std::vector<ot::Time> times_{};
-    std::vector<ot::OTIdentifier> txids_{};
+    std::pmr::vector<ot::Time> times_{};
+    std::pmr::vector<ot::OTIdentifier> txids_{};
 };
 
 bool init_{false};
@@ -108,7 +108,7 @@ const std::string memo_3_{"memo 3"};
 const std::string memo_4_{"memo 4"};
 const std::string empty_string_{};
 constexpr auto zero_time_ = ot::Time{};
-const std::vector<std::string> alex_external_{
+const std::pmr::vector<std::string> alex_external_{
     "1K9teXNg8iKYwUPregT8QTmMepb376oTuX",
     "1GgpoMuPBfaa4ZT6ZeKaTY8NH9Ldx4Q89t",
     "1FXb97adaza32zYQ5U29nxHZS4FmiCfXAJ",
@@ -120,7 +120,7 @@ const std::vector<std::string> alex_external_{
     "19w4gVEse89JjE7TroavXZ9pyfJ78h4arG",
     "1DVYvYAmTNtvML7vBrhBBhyePaEDVCCNaw",
 };
-const std::vector<std::string> alex_internal_{
+const std::pmr::vector<std::string> alex_internal_{
     "179XLYWcaHiPMnPUsSdrPiAwNcybx2vpaa",
     "1FPoX1BUe9a6ugobnQkzFyn1Uycyns4Ejp",
     "17jfyBx8ZHJ3DT9G2WehYEPKwT7Zv3kcLs",
@@ -132,7 +132,7 @@ const std::vector<std::string> alex_internal_{
     "197TU7ptMMnhufMLFrY1o2Sgi5zcw2e3qv",
     "176aRLv3W94vyWPZDPY9csUrLNrqDFrzCs",
 };
-const std::vector<std::string> bob_external_{
+const std::pmr::vector<std::string> bob_external_{
     "1AngXb5xQoQ4nT8Bn6dDdr6AFS4yMZU2y",
     "1FQMy3HkD5C3gGZZHeeH9rjHgyqurxC44q",
     "1APXZ5bCTbj2ZRV3ZHyAa59CmsXRP4HkTh",
@@ -144,7 +144,7 @@ const std::vector<std::string> bob_external_{
     "12hwhKpxTyfiSGDdQw63SWVzefRuRxrFqb",
     "18SRAzD6bZ2GsTK4J4RohhYneEyZAUvyqp",
 };
-const std::vector<std::string> bob_internal_{
+const std::pmr::vector<std::string> bob_internal_{
     "1GXj4LrpYKugu4ps7BvYHkUgJLErjBcZc",
     "18yFFsUUe7ATjku2NfKizdnNfZGx99LmLJ",
     "19hDov3sMJdXkgrinhfD2seaKhcb6FiDKL",
@@ -156,27 +156,27 @@ const std::vector<std::string> bob_internal_{
     "16SdtUXrRey55j49Ae84YwVVNZXwGL2tLU",
     "1N2Y3mM828N4JQGLzDfxNjU2WK9CMMekVg",
 };
-const std::vector<std::string> chris_btc_external_{
+const std::pmr::vector<std::string> chris_btc_external_{
     "1MWZN5PtYjfHA7WC1czB43HK9NjTKig1rA",
     "16Ach28pUQbWDpVhe75AjwoCJws144Nd25",
 };
-const std::vector<std::string> chris_btc_internal_{
+const std::pmr::vector<std::string> chris_btc_internal_{
     "1PsjtCRUQ32t5F18W2K8Zzpn1aVmuRmTdB",
     "15xi7Z3kVPg88ZYA82V8zPyodnQnamSZvN",
 };
-const std::vector<std::string> chris_bch_external_{
+const std::pmr::vector<std::string> chris_bch_external_{
     "14Et9A6QnwpnUH2Ym9kZ4Zz1FN2GixG9qS",
     "17u11yKTfr13Xkm4k7h4bx3o3ssz4HSwGJ",
 };
-const std::vector<std::string> chris_bch_internal_{
+const std::pmr::vector<std::string> chris_bch_internal_{
     "1FkAAgJWW1YWSqa5ByvHFe8dQvfNLT2rQN",
     "1HyweNdaw2QoRU1YfuJQWcZKUAVqMXyJsj",
 };
-const std::vector<std::string> chris_ltc_external_{
+const std::pmr::vector<std::string> chris_ltc_external_{
     "LWDn8duKKwbP9hhCWpmX9o8BxywgCSTg41",
     "LSyrWGpCUm457F9TaXWAhvZs7Vu5g7a4Do",
 };
-const std::vector<std::string> chris_ltc_internal_{
+const std::pmr::vector<std::string> chris_ltc_internal_{
     "LX3FAVopX2moW5h2ZwAKcrCKTChTyWqWze",
     "LMoZuWNnoTEJ1FjxQ4NXTcNbMK3croGpaF",
 };
@@ -187,7 +187,7 @@ public:
     using AddressStyle = ot::blockchain::crypto::AddressStyle;
     using Subchain = ot::blockchain::crypto::Subchain;
     using ThreadData = std::tuple<std::string, std::uint64_t, std::string>;
-    using ThreadVectors = std::map<int, std::vector<ThreadData>>;
+    using ThreadVectors = std::pmr::map<int, std::pmr::vector<ThreadData>>;
 
     const ot::api::session::Client& api_;
     ot::PasswordPrompt& reason_;
@@ -297,8 +297,8 @@ public:
         const ot::blockchain::Type chain,
         const ot::Identifier& accountID,
         const ot::Identifier& contactID,
-        const std::vector<std::string>& external,
-        const std::vector<std::string>& internal,
+        const std::pmr::vector<std::string>& external,
+        const std::pmr::vector<std::string>& internal,
         const Subchain subchain1,
         const Subchain subchain2,
         const std::string label1,
@@ -348,8 +348,8 @@ public:
         const ot::blockchain::Type chain,
         const ot::Identifier& accountID,
         const ot::Identifier& contactID,
-        const std::vector<std::string>& external,
-        const std::vector<std::string>& internal) const noexcept -> bool
+        const std::pmr::vector<std::string>& external,
+        const std::pmr::vector<std::string>& internal) const noexcept -> bool
     {
         return check_deterministic_account(
             nym,
@@ -366,7 +366,7 @@ public:
     auto check_hd_index(
         const ot::Identifier& accountID,
         const ot::Identifier& contactID,
-        const std::vector<std::string>& expected,
+        const std::pmr::vector<std::string>& expected,
         const ot::blockchain::crypto::HD& account,
         const Subchain subchain,
         const ot::Bip32Index i,
@@ -1007,10 +1007,11 @@ TEST_F(Test_BlockchainAPI, set_metadata)
         api_.Crypto().Blockchain().Account(nym, chain).GetHD().at(accountID);
     const auto subchain = Subchain::External;
     const auto setContact =
-        std::vector<ot::Bip32Index>{0, 1, 6, 8, 9, 14, 16, 17, 22};
-    const auto clearContact = std::vector<ot::Bip32Index>{3, 4, 11, 12, 19, 20};
+        std::pmr::vector<ot::Bip32Index>{0, 1, 6, 8, 9, 14, 16, 17, 22};
+    const auto clearContact =
+        std::pmr::vector<ot::Bip32Index>{3, 4, 11, 12, 19, 20};
     const auto unconfirmed =
-        std::vector<std::pair<ot::Bip32Index, ot::Bip32Index>>{
+        std::pmr::vector<std::pair<ot::Bip32Index, ot::Bip32Index>>{
             {4, 0},
             {5, 0},
             {6, 0},
@@ -1021,7 +1022,7 @@ TEST_F(Test_BlockchainAPI, set_metadata)
             {21, 2},
             {22, 2},
         };
-    const auto confirmed = std::vector<ot::Bip32Index>{7, 15, 23};
+    const auto confirmed = std::pmr::vector<ot::Bip32Index>{7, 15, 23};
 
     for (const auto& index : setContact) {
         EXPECT_TRUE(api_.Crypto().Blockchain().AssignContact(

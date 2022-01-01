@@ -67,7 +67,7 @@ public:
         return effective_amount();
     }
     auto Confirmations() const noexcept -> int final { return confirmations_; }
-    auto Contacts() const noexcept -> std::vector<std::string> final;
+    auto Contacts() const noexcept -> std::pmr::vector<std::string> final;
     auto DisplayAmount() const noexcept -> std::string final;
     auto Memo() const noexcept -> std::string final;
     auto Type() const noexcept -> StorageBox final

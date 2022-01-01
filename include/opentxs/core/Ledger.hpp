@@ -72,7 +72,7 @@ namespace opentxs
 // transaction, we use the blank to do so. If there is no blank available, we
 // message the server and request one.
 using mapOfTransactions =
-    std::map<TransactionNumber, std::shared_ptr<OTTransaction>>;
+    std::pmr::map<TransactionNumber, std::shared_ptr<OTTransaction>>;
 
 // the "inbox" and "outbox" functionality is implemented in this class
 class OPENTXS_EXPORT Ledger : public OTTransactionType
@@ -109,7 +109,7 @@ public:
         const otx::context::Server& context,
         const Account& theAccount,
         Ledger& theOutbox,
-        const std::set<TransactionNumber>& without,
+        const std::pmr::set<TransactionNumber>& without,
         const PasswordPrompt& reason) const -> std::unique_ptr<Item>;
 
     void ProduceOutboxReport(
@@ -124,8 +124,8 @@ public:
                   // found.
 
     auto GetTransactionNums(
-        const std::set<std::int32_t>* pOnlyForIndices = nullptr) const
-        -> std::set<std::int64_t>;
+        const std::pmr::set<std::int32_t>* pOnlyForIndices = nullptr) const
+        -> std::pmr::set<std::int64_t>;
 
     auto GetTransaction(transactionType theType)
         -> std::shared_ptr<OTTransaction>;
@@ -159,7 +159,7 @@ public:
     //
     auto VerifyAccount(const identity::Nym& theNym) -> bool override;
     // For ALL abbreviated transactions, load the actual box receipt for each.
-    auto LoadBoxReceipts(std::set<std::int64_t>* psetUnloaded = nullptr)
+    auto LoadBoxReceipts(std::pmr::set<std::int64_t>* psetUnloaded = nullptr)
         -> bool;                     // if psetUnloaded
                                      // passed
                                      // in, then use it to

@@ -80,7 +80,7 @@ auto BitcoinP2PCfcheckpt(
         return nullptr;
     }
 
-    std::vector<blockchain::filter::pHash> headers{};
+    std::pmr::vector<blockchain::filter::pHash> headers{};
 
     if (count > 0) {
         for (std::size_t i{0}; i < count; ++i) {
@@ -113,7 +113,7 @@ auto BitcoinP2PCfcheckpt(
     const blockchain::Type network,
     const blockchain::filter::Type type,
     const blockchain::filter::Hash& stop,
-    const std::vector<blockchain::filter::pHash>& headers)
+    const std::pmr::vector<blockchain::filter::pHash>& headers)
     -> blockchain::p2p::bitcoin::message::internal::Cfcheckpt*
 {
     namespace bitcoin = blockchain::p2p::bitcoin;
@@ -130,7 +130,7 @@ Cfcheckpt::Cfcheckpt(
     const blockchain::Type network,
     const filter::Type type,
     const filter::Hash& stop,
-    const std::vector<filter::pHash>& headers) noexcept
+    const std::pmr::vector<filter::pHash>& headers) noexcept
     : Message(api, network, bitcoin::Command::cfcheckpt)
     , type_(type)
     , stop_(stop)
@@ -144,7 +144,7 @@ Cfcheckpt::Cfcheckpt(
     std::unique_ptr<Header> header,
     const filter::Type type,
     const filter::Hash& stop,
-    const std::vector<filter::pHash>& headers) noexcept
+    const std::pmr::vector<filter::pHash>& headers) noexcept
     : Message(api, std::move(header))
     , type_(type)
     , stop_(stop)

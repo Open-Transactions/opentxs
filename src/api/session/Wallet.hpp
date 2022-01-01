@@ -177,7 +177,7 @@ public:
         const PasswordPrompt& reason) const
         -> Editor<otx::context::Server> override;
     auto IssuerList(const identifier::Nym& nymID) const
-        -> std::set<OTNymID> final;
+        -> std::pmr::set<OTNymID> final;
     auto Issuer(const identifier::Nym& nymID, const identifier::Nym& issuerID)
         const -> std::shared_ptr<const otx::client::Issuer> final;
     auto mutable_Issuer(
@@ -186,7 +186,7 @@ public:
         -> Editor<otx::client::Issuer> final;
     auto IsLocalNym(const std::string& id) const -> bool final;
     auto LocalNymCount() const -> std::size_t final;
-    auto LocalNyms() const -> std::set<OTNymID> final;
+    auto LocalNyms() const -> std::pmr::set<OTNymID> final;
     auto Nym(
         const identifier::Nym& id,
         const std::chrono::milliseconds& timeout =
@@ -314,7 +314,7 @@ public:
         const std::string& nymid,
         const std::string& name,
         const std::string& terms,
-        const std::list<contract::Server::Endpoint>& endpoints,
+        const std::pmr::list<contract::Server::Endpoint>& endpoints,
         const PasswordPrompt& reason,
         const VersionNumber version) const -> OTServerContract final;
     auto ServerList() const -> ObjectList final;
@@ -397,7 +397,7 @@ protected:
         std::pair<std::shared_mutex, std::unique_ptr<opentxs::Account>>;
     using ContextID = std::pair<std::string, std::string>;
     using ContextMap =
-        std::map<ContextID, std::shared_ptr<otx::context::internal::Base>>;
+        std::pmr::map<ContextID, std::shared_ptr<otx::context::internal::Base>>;
 
     const api::Session& api_;
     mutable ContextMap context_map_;
@@ -418,21 +418,22 @@ protected:
     Wallet(const api::Session& api);
 
 private:
-    using AccountMap = std::map<OTIdentifier, AccountLock>;
+    using AccountMap = std::pmr::map<OTIdentifier, AccountLock>;
     using NymLock =
         std::pair<std::mutex, std::shared_ptr<identity::internal::Nym>>;
-    using NymMap = std::map<OTNymID, NymLock>;
-    using ServerMap = std::map<OTServerID, std::shared_ptr<contract::Server>>;
-    using UnitMap = std::map<OTUnitID, std::shared_ptr<contract::Unit>>;
+    using NymMap = std::pmr::map<OTNymID, NymLock>;
+    using ServerMap =
+        std::pmr::map<OTServerID, std::shared_ptr<contract::Server>>;
+    using UnitMap = std::pmr::map<OTUnitID, std::shared_ptr<contract::Unit>>;
     using IssuerID = std::pair<OTIdentifier, OTIdentifier>;
     using IssuerLock =
         std::pair<std::mutex, std::shared_ptr<otx::client::Issuer>>;
-    using IssuerMap = std::map<IssuerID, IssuerLock>;
+    using IssuerMap = std::pmr::map<IssuerID, IssuerLock>;
     using PurseID = std::tuple<OTNymID, OTServerID, OTUnitID>;
     using PurseMap =
-        std::map<PurseID, std::pair<std::shared_mutex, otx::blind::Purse>>;
-    using UnitNameMap = std::map<std::string, proto::ContactItemType>;
-    using UnitNameReverse = std::map<proto::ContactItemType, std::string>;
+        std::pmr::map<PurseID, std::pair<std::shared_mutex, otx::blind::Purse>>;
+    using UnitNameMap = std::pmr::map<std::string, proto::ContactItemType>;
+    using UnitNameReverse = std::pmr::map<proto::ContactItemType, std::string>;
 
     mutable AccountMap account_map_;
     mutable NymMap nym_map_;
@@ -445,9 +446,9 @@ private:
     mutable std::mutex unit_map_lock_;
     mutable std::mutex issuer_map_lock_;
     mutable std::mutex peer_map_lock_;
-    mutable std::map<std::string, std::mutex> peer_lock_;
+    mutable std::pmr::map<std::string, std::mutex> peer_lock_;
     mutable std::mutex nymfile_map_lock_;
-    mutable std::map<OTIdentifier, std::mutex> nymfile_lock_;
+    mutable std::pmr::map<OTIdentifier, std::mutex> nymfile_lock_;
     mutable std::mutex purse_lock_;
     mutable PurseMap purse_map_;
     OTZMQPublishSocket account_publisher_;

@@ -114,8 +114,8 @@ private:
     using CachedMessages = std::queue<network::zeromq::Message>;
     using PeerData =
         std::tuple<ConnectionID, ConnectionID, bool, CachedMessages>;
-    using Peers = std::map<int, PeerData>;
-    using PeerIndex = std::map<ConnectionID, int>;
+    using Peers = std::pmr::map<int, PeerData>;
+    using PeerIndex = std::pmr::map<ConnectionID, int>;
 
     const api::Session& api_;
     mutable std::mutex lock_;

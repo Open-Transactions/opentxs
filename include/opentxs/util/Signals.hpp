@@ -28,7 +28,7 @@ public:
     ~Signals();
 
 private:
-    static const std::map<int, std::function<bool()>> handler_;
+    static const std::pmr::map<int, std::function<bool()>> handler_;
 
     const Flag& running_;
     std::unique_ptr<std::thread> thread_{nullptr};

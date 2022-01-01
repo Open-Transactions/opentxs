@@ -72,10 +72,10 @@ public:
     using AccountData = crypto::Blockchain::AccountData;
 
     auto AccountList(const identifier::Nym& nymID) const noexcept
-        -> std::set<OTIdentifier>;
+        -> std::pmr::set<OTIdentifier>;
     auto AccountList(const opentxs::blockchain::Type chain) const noexcept
-        -> std::set<OTIdentifier>;
-    auto AccountList() const noexcept -> std::set<OTIdentifier>;
+        -> std::pmr::set<OTIdentifier>;
+    auto AccountList() const noexcept -> std::pmr::set<OTIdentifier>;
     auto Get(const opentxs::blockchain::Type chain) noexcept
         -> opentxs::blockchain::crypto::Wallet&;
     auto LookupAccount(const Identifier& id) const noexcept -> AccountData;
@@ -92,7 +92,7 @@ private:
     opentxs::blockchain::crypto::AccountIndex index_;
     mutable std::mutex lock_;
     mutable bool populated_;
-    mutable std::map<
+    mutable std::pmr::map<
         opentxs::blockchain::Type,
         std::unique_ptr<opentxs::blockchain::crypto::Wallet>>
         lists_;

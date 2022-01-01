@@ -40,9 +40,9 @@ bool init_{false};
 class Test_Envelope : public ::testing::Test
 {
 public:
-    using Nyms = std::vector<ot::Nym_p>;
-    using Test = std::pair<bool, std::vector<int>>;
-    using Expected = std::vector<Test>;
+    using Nyms = std::pmr::vector<ot::Nym_p>;
+    using Test = std::pair<bool, std::pmr::vector<int>>;
+    using Expected = std::pmr::vector<Test>;
 
     static const bool have_rsa_;
     static const bool have_secp256k1_;

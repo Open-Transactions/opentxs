@@ -25,10 +25,11 @@ namespace opentxs
 {
 namespace proto
 {
-const std::map<std::uint32_t, std::set<AsymmetricKeyType>> allowed_types_{
-    {1, {AKEYTYPE_LEGACY, AKEYTYPE_SECP256K1, AKEYTYPE_ED25519}},
-    {2, {AKEYTYPE_LEGACY, AKEYTYPE_SECP256K1, AKEYTYPE_ED25519}},
-};
+const std::pmr::map<std::uint32_t, std::pmr::set<AsymmetricKeyType>>
+    allowed_types_{
+        {1, {AKEYTYPE_LEGACY, AKEYTYPE_SECP256K1, AKEYTYPE_ED25519}},
+        {2, {AKEYTYPE_LEGACY, AKEYTYPE_SECP256K1, AKEYTYPE_ED25519}},
+    };
 
 auto CheckProto_1(const Envelope& input, const bool silent) -> bool
 {
@@ -41,7 +42,7 @@ auto CheckProto_1(const Envelope& input, const bool silent) -> bool
     CHECK_SUBOBJECTS(sessionkey, EnvelopeAllowedTaggedKey())
     CHECK_SUBOBJECT_VA(ciphertext, EnvelopeAllowedCiphertext(), false)
 
-    auto dh = std::map<AsymmetricKeyType, int>{};
+    auto dh = std::pmr::map<AsymmetricKeyType, int>{};
 
     for (const auto& key : input.dhkey()) {
         const auto type = key.type();

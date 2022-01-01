@@ -34,7 +34,7 @@ TEST(Test_DownloadManager, allocate_batches)
     EXPECT_EQ(manager_.state_machine_triggers_, 0);
 
     manager_.UpdatePosition(manager_.MakePositions(1, [] {
-        auto output = std::vector<std::string>{};
+        auto output = std::pmr::vector<std::string>{};
 
         for (auto i{1}; i < 12; ++i) { output.emplace_back(std::to_string(i)); }
 
@@ -273,7 +273,7 @@ TEST(Test_DownloadManager, after_simple_reorg)
 TEST(Test_DownloadManager, reorg_outstanding_batches)
 {
     manager_.UpdatePosition(manager_.MakePositions(13, [] {
-        auto output = std::vector<std::string>{};
+        auto output = std::pmr::vector<std::string>{};
 
         for (auto i{13}; i < 22; ++i) {
             output.emplace_back(std::to_string(i));

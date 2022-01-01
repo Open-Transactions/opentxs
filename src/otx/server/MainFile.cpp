@@ -63,7 +63,7 @@ auto MainFile::SaveMainFileToString(String& strMainFile) -> bool
         auto strBasketAcctID = String::Factory(it.second.c_str());
 
         const auto BASKET_ACCOUNT_ID =
-            server_.API().Factory().Identifier(strBasketAcctID);
+            server_.API().Factory().IdentifierFromBase58(strBasketAcctID);
         auto BASKET_CONTRACT_ID = server_.API().Factory().UnitID();
 
         bool bContractID =
@@ -334,9 +334,11 @@ auto MainFile::LoadMainFile(bool bReadOnly) -> bool
                         auto strBasketContractID = String::Factory(
                             xml->getAttributeValue("basketContractID"));
                         const auto BASKET_ID =
-                            server_.API().Factory().Identifier(strBasketID);
+                            server_.API().Factory().IdentifierFromBase58(
+                                strBasketID);
                         const auto BASKET_ACCT_ID =
-                            server_.API().Factory().Identifier(strBasketAcctID);
+                            server_.API().Factory().IdentifierFromBase58(
+                                strBasketAcctID);
                         const auto BASKET_CONTRACT_ID =
                             server_.API().Factory().UnitID(strBasketContractID);
 

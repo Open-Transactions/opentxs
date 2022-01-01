@@ -8,6 +8,7 @@
 #include <cstddef>
 #include <map>
 #include <memory>
+#include <memory_resource>
 #include <string>
 
 namespace opentxs
@@ -22,9 +23,9 @@ class String;
 
 namespace opentxs
 {
-using mapOfParties = std::map<std::string, OTParty*>;
-using mapOfPartyAccounts = std::map<std::string, OTPartyAccount*>;
-using mapOfVariables = std::map<std::string, OTVariable*>;
+using mapOfParties = std::pmr::map<std::string, OTParty*>;
+using mapOfPartyAccounts = std::pmr::map<std::string, OTPartyAccount*>;
+using mapOfVariables = std::pmr::map<std::string, OTVariable*>;
 
 // A script should be "Dumb", meaning that you just stick it with its
 // parties and other resources, and it EXPECTS them to be the correct

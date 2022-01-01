@@ -64,7 +64,7 @@ auto BitcoinP2PInv(
         return nullptr;
     }
 
-    std::vector<blockchain::bitcoin::Inventory> items{};
+    std::pmr::vector<blockchain::bitcoin::Inventory> items{};
 
     if (count > 0) {
         for (std::size_t i{0}; i < count; ++i) {
@@ -89,7 +89,7 @@ auto BitcoinP2PInv(
 auto BitcoinP2PInv(
     const api::Session& api,
     const blockchain::Type network,
-    std::vector<blockchain::bitcoin::Inventory>&& payload)
+    std::pmr::vector<blockchain::bitcoin::Inventory>&& payload)
     -> blockchain::p2p::bitcoin::message::internal::Inv*
 {
     namespace bitcoin = blockchain::p2p::bitcoin;
@@ -104,7 +104,7 @@ namespace opentxs::blockchain::p2p::bitcoin::message::implementation
 Inv::Inv(
     const api::Session& api,
     const blockchain::Type network,
-    std::vector<value_type>&& payload) noexcept
+    std::pmr::vector<value_type>&& payload) noexcept
     : Message(api, network, bitcoin::Command::inv)
     , payload_(std::move(payload))
 {
@@ -114,7 +114,7 @@ Inv::Inv(
 Inv::Inv(
     const api::Session& api,
     std::unique_ptr<Header> header,
-    std::vector<value_type>&& payload) noexcept
+    std::pmr::vector<value_type>&& payload) noexcept
     : Message(api, std::move(header))
     , payload_(std::move(payload))
 {

@@ -95,7 +95,7 @@ public:
     virtual ~Contract();
 
 protected:
-    using listOfSignatures = std::list<OTSignature>;
+    using listOfSignatures = std::pmr::list<OTSignature>;
 
     const api::Session& api_;
 
@@ -135,7 +135,7 @@ protected:
      * requisite key exchange. ==> THE TRADER HAS ASSURANCE THAT, IF HIS
      * OUT-MESSAGE IS ENCRYPTED, HE KNOWS THE MESSAGE CAN ONLY BE DECRYPTED BY
      * THE SAME PERSON WHO SIGNED THAT CONTRACT. */
-    std::map<std::string, Nym_p> m_mapNyms;
+    std::pmr::map<std::string, Nym_p> m_mapNyms;
 
     /** The PGP signatures at the bottom of the XML file. */
     listOfSignatures m_listSignatures;

@@ -138,7 +138,7 @@ public:
         const identifier::Nym& nymID,
         const otx::client::PaymentWorkflowType type,
         const otx::client::PaymentWorkflowState state) const
-        -> std::set<OTIdentifier> final;
+        -> std::pmr::set<OTIdentifier> final;
     auto LoadCheque(const identifier::Nym& nymID, const Identifier& chequeID)
         const -> Cheque final;
     auto LoadChequeByWorkflow(
@@ -190,7 +190,8 @@ public:
         -> otx::client::PaymentWorkflowType final;
     auto WorkflowsByAccount(
         const identifier::Nym& nymID,
-        const Identifier& accountID) const -> std::vector<OTIdentifier> final;
+        const Identifier& accountID) const
+        -> std::pmr::vector<OTIdentifier> final;
     auto WriteCheque(const opentxs::Cheque& cheque) const -> OTIdentifier final;
 
     Workflow(
@@ -208,7 +209,7 @@ private:
     };
 
     using VersionMap =
-        std::map<otx::client::PaymentWorkflowType, ProtobufVersions>;
+        std::pmr::map<otx::client::PaymentWorkflowType, ProtobufVersions>;
 
     static const VersionMap versions_;
 
@@ -217,7 +218,7 @@ private:
     const session::Contacts& contact_;
     const OTZMQPublishSocket account_publisher_;
     const OTZMQPushSocket rpc_publisher_;
-    mutable std::map<std::string, std::shared_mutex> workflow_locks_;
+    mutable std::pmr::map<std::string, std::shared_mutex> workflow_locks_;
 
     static auto can_abort_transfer(const proto::PaymentWorkflow& workflow)
         -> bool;
@@ -347,11 +348,11 @@ private:
     template <typename T>
     auto get_workflow(
         const Lock& global,
-        const std::set<otx::client::PaymentWorkflowType>& types,
+        const std::pmr::set<otx::client::PaymentWorkflowType>& types,
         const std::string& nymID,
         const T& source) const -> std::shared_ptr<proto::PaymentWorkflow>;
     auto get_workflow_by_id(
-        const std::set<otx::client::PaymentWorkflowType>& types,
+        const std::pmr::set<otx::client::PaymentWorkflowType>& types,
         const std::string& nymID,
         const std::string& workflowID) const
         -> std::shared_ptr<proto::PaymentWorkflow>;
@@ -360,7 +361,7 @@ private:
         const std::string& workflowID) const
         -> std::shared_ptr<proto::PaymentWorkflow>;
     auto get_workflow_by_source(
-        const std::set<otx::client::PaymentWorkflowType>& types,
+        const std::pmr::set<otx::client::PaymentWorkflowType>& types,
         const std::string& nymID,
         const std::string& sourceID) const
         -> std::shared_ptr<proto::PaymentWorkflow>;

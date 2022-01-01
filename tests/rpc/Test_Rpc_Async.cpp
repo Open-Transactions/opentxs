@@ -120,7 +120,7 @@ protected:
     static ot::OTServerID intro_server_id_;
     static ot::OTServerID server_id_;
 
-    static bool check_push_results(const std::vector<bool>& results)
+    static bool check_push_results(const std::pmr::vector<bool>& results)
     {
         return std::all_of(results.cbegin(), results.cend(), [](bool result) {
             return result;
@@ -145,7 +145,7 @@ protected:
         return command;
     }
 
-    std::future<std::vector<bool>> set_push_checker(
+    std::future<std::pmr::vector<bool>> set_push_checker(
         PushChecker func,
         std::size_t count = 1)
     {
@@ -158,8 +158,8 @@ protected:
 
 private:
     static PushChecker push_checker_;
-    static std::promise<std::vector<bool>> push_received_;
-    static std::vector<bool> push_results_;
+    static std::promise<std::pmr::vector<bool>> push_received_;
+    static std::pmr::vector<bool> push_results_;
     static std::size_t push_results_count_;
 };
 
@@ -180,8 +180,8 @@ OTIdentifier Test_Rpc_Async::workflow_id_{Identifier::Factory()};
 OTServerID Test_Rpc_Async::intro_server_id_{identifier::Server::Factory()};
 OTServerID Test_Rpc_Async::server_id_{identifier::Server::Factory()};
 Test_Rpc_Async::PushChecker Test_Rpc_Async::push_checker_{};
-std::promise<std::vector<bool>> Test_Rpc_Async::push_received_{};
-std::vector<bool> Test_Rpc_Async::push_results_{};
+std::promise<std::pmr::vector<bool>> Test_Rpc_Async::push_received_{};
+std::pmr::vector<bool> Test_Rpc_Async::push_results_{};
 std::size_t Test_Rpc_Async::push_results_count_{0};
 
 void Test_Rpc_Async::cleanup()
@@ -226,7 +226,7 @@ void Test_Rpc_Async::process_notification(
         }
     } else {
         try {
-            push_received_.set_value(std::vector<bool>{false});
+            push_received_.set_value(std::pmr::vector<bool>{false});
         } catch (...) {
         }
 
@@ -601,7 +601,7 @@ TEST_F(Test_Rpc_Async, Get_Pending_Payments)
     future1.get();
     future2.get();
     const auto& workflow = client_b.Workflow();
-    std::set<OTIdentifier> workflows;
+    std::pmr::set<OTIdentifier> workflows;
     auto end = std::time(nullptr) + 60;
     do {
         workflows = workflow.List(
@@ -771,7 +771,7 @@ TEST_F(Test_Rpc_Async, Get_Account_Activity)
         ot_.ClientSession(static_cast<int>(get_index(sender_session_)));
 
     const auto& workflow = client_a.Workflow();
-    std::set<OTIdentifier> workflows;
+    std::pmr::set<OTIdentifier> workflows;
     auto end = std::time(nullptr) + 60;
     do {
         workflows = workflow.List(
@@ -838,7 +838,7 @@ TEST_F(Test_Rpc_Async, Get_Account_Activity)
     client_b.OTX().ContextIdle(receiver_nym_id_, server_id_).get();
 
     const auto& receiverworkflow = client_b.Workflow();
-    std::set<OTIdentifier> receiverworkflows;
+    std::pmr::set<OTIdentifier> receiverworkflows;
     end = std::time(nullptr) + 60;
     do {
         receiverworkflows = receiverworkflow.List(
@@ -1010,7 +1010,7 @@ TEST_F(Test_Rpc_Async, Accept_2_Pending_Payments)
     future1.get();
     future2.get();
     const auto& workflow = client_b.Workflow();
-    std::set<OTIdentifier> workflows;
+    std::pmr::set<OTIdentifier> workflows;
     auto end = std::time(nullptr) + 60;
 
     do {

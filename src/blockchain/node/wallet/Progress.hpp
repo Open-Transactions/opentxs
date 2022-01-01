@@ -38,7 +38,7 @@ public:
     auto UpdateProcess(const ProgressBatch& processed) noexcept -> void;
     auto UpdateScan(
         const std::optional<block::Position>& highestClean,
-        const std::vector<block::Position>& dirtyBlocks) noexcept -> void;
+        const std::pmr::vector<block::Position>& dirtyBlocks) noexcept -> void;
 
     Progress(const SubchainStateData& parent) noexcept;
 

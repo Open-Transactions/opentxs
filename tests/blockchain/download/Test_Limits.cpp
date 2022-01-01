@@ -33,7 +33,7 @@ TEST(Test_DownloadManager, attempt_excessive_queue)
     EXPECT_EQ(manager_.state_machine_triggers_, 0);
 
     manager_.UpdatePosition(manager_.MakePositions(1, [] {
-        auto output = std::vector<std::string>{};
+        auto output = std::pmr::vector<std::string>{};
 
         for (auto i{1}; i < 21; ++i) { output.emplace_back(std::to_string(i)); }
 

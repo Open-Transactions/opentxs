@@ -91,7 +91,7 @@ private:
     friend opentxs::Factory;
 
     using Child = std::unique_ptr<internal::Item>;
-    using Vector = std::vector<Child>;
+    using Vector = std::pmr::vector<Child>;
 
     enum class Match { Accept, Reject, Replace };
 

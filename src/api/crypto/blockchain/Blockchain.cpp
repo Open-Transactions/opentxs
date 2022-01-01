@@ -87,24 +87,24 @@ auto Blockchain::Account(const identifier::Nym& nymID, const Chain chain) const
 }
 
 auto Blockchain::SubaccountList(const identifier::Nym& nymID, const Chain chain)
-    const noexcept -> std::set<OTIdentifier>
+    const noexcept -> std::pmr::set<OTIdentifier>
 {
     return imp_->SubaccountList(nymID, chain);
 }
 
 auto Blockchain::AccountList(const identifier::Nym& nymID) const noexcept
-    -> std::set<OTIdentifier>
+    -> std::pmr::set<OTIdentifier>
 {
     return imp_->AccountList(nymID);
 }
 
 auto Blockchain::AccountList(const Chain chain) const noexcept
-    -> std::set<OTIdentifier>
+    -> std::pmr::set<OTIdentifier>
 {
     return imp_->AccountList(chain);
 }
 
-auto Blockchain::AccountList() const noexcept -> std::set<OTIdentifier>
+auto Blockchain::AccountList() const noexcept -> std::pmr::set<OTIdentifier>
 {
     return imp_->AccountList();
 }
@@ -395,8 +395,8 @@ auto Blockchain::Unconfirm(
     return imp_->Unconfirm(key, tx, time);
 }
 
-auto Blockchain::UpdateElement(std::vector<ReadView>& hashes) const noexcept
-    -> void
+auto Blockchain::UpdateElement(
+    std::pmr::vector<ReadView>& hashes) const noexcept -> void
 {
     imp_->UpdateElement(hashes);
 }

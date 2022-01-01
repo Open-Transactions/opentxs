@@ -21,8 +21,8 @@
 #include "opentxs/core/Data.hpp"
 #include "opentxs/util/Pimpl.hpp"
 
-std::vector<std::unique_ptr<bb::Header>> headers_btc_{};
-std::vector<std::unique_ptr<bb::Header>> headers_bch_{};
+std::pmr::vector<std::unique_ptr<bb::Header>> headers_btc_{};
+std::pmr::vector<std::unique_ptr<bb::Header>> headers_bch_{};
 
 namespace ottest
 {

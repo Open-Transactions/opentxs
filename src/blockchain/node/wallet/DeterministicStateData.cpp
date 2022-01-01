@@ -7,7 +7,6 @@
 #include "1_Internal.hpp"  // IWYU pragma: associated
 #include "blockchain/node/wallet/DeterministicStateData.hpp"  // IWYU pragma: associated
 
-#include <cstdint>
 #include <map>
 #include <memory>
 #include <optional>
@@ -82,10 +81,10 @@ auto DeterministicStateData::handle_confirmed_matches(
     const block::Matches& confirmed) noexcept -> void
 {
     const auto& [utxo, general] = confirmed;
-    auto transactions = std::map<
+    auto transactions = std::pmr::map<
         block::pTxid,
         std::pair<
-            std::vector<Bip32Index>,
+            std::pmr::vector<Bip32Index>,
             const block::bitcoin::Transaction*>>{};
 
     for (const auto& match : general) {

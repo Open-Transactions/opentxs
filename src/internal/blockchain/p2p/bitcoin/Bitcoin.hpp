@@ -220,7 +220,7 @@ struct AddressVersion {
         -> AddressByteField;
 
     AddressVersion(
-        const std::set<bitcoin::Service>& services,
+        const std::pmr::set<bitcoin::Service>& services,
         const tcp::endpoint& endpoint) noexcept;
     AddressVersion(
         const blockchain::Type chain,
@@ -229,24 +229,27 @@ struct AddressVersion {
     AddressVersion() noexcept;
 };
 
-using CommandMap = std::map<Command, std::string>;
-using CommandReverseMap = std::map<std::string, Command>;
+using CommandMap = std::pmr::map<Command, std::string>;
+using CommandReverseMap = std::pmr::map<std::string, Command>;
 
 auto BitcoinString(const std::string& in) noexcept -> OTData;
 auto CommandName(const Command command) noexcept -> std::string;
 auto GetCommand(const CommandField& bytes) noexcept -> Command;
-auto GetServiceBytes(const std::set<bitcoin::Service>& services) noexcept
+auto GetServiceBytes(const std::pmr::set<bitcoin::Service>& services) noexcept
     -> BitVector8;
-auto GetServices(const BitVector8 data) noexcept -> std::set<bitcoin::Service>;
+auto GetServices(const BitVector8 data) noexcept
+    -> std::pmr::set<bitcoin::Service>;
 auto SerializeCommand(const Command command) noexcept -> CommandField;
 auto TranslateServices(
     const blockchain::Type chain,
     const ProtocolVersion version,
-    const std::set<p2p::Service>& input) noexcept -> std::set<bitcoin::Service>;
+    const std::pmr::set<p2p::Service>& input) noexcept
+    -> std::pmr::set<bitcoin::Service>;
 auto TranslateServices(
     const blockchain::Type chain,
     const ProtocolVersion version,
-    const std::set<bitcoin::Service>& input) noexcept -> std::set<p2p::Service>;
+    const std::pmr::set<bitcoin::Service>& input) noexcept
+    -> std::pmr::set<p2p::Service>;
 
 auto convert_service_bit(BitVector8 value) noexcept -> bitcoin::Service;
 auto convert_service_bit(const bitcoin::Service value) noexcept -> BitVector8;

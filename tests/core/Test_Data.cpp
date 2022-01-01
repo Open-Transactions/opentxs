@@ -19,7 +19,7 @@ namespace
 {
 struct Default_Data : public ::testing::Test {
     OTData data_;
-    const std::vector<std::string> hex_{
+    const std::pmr::vector<std::string> hex_{
         "",
         "61",
         "626262",
@@ -42,7 +42,7 @@ struct Default_Data : public ::testing::Test {
         "afb0b1b2b3b4b5b6b7b8b9babbbcbdbebfc0c1c2c3c4c5c6c7c8c9cacbcccdcecfd0d1"
         "d2d3d4d5d6d7d8d9dadbdcdddedfe0e1e2e3e4e5e6e7e8e9eaebecedeeeff0f1f2f3f4"
         "f5f6f7f8f9fafbfcfdfeff"};
-    const std::vector<std::string> hex_2_{
+    const std::pmr::vector<std::string> hex_2_{
         "0x000000000000000000",
         "0X000111d38e5fc9071ffcd20b4a763cc9ae4f252bb4e48fd66a835e252ada93ff480d"
         "6dd43dc62a641155a5"};
@@ -209,7 +209,7 @@ TEST(Data, map_1)
     EXPECT_TRUE(two > one);
     EXPECT_TRUE(two >= one);
 
-    std::map<OTData, std::string> map{};
+    std::pmr::map<OTData, std::string> map{};
 
     EXPECT_EQ(map.size(), 0);
     EXPECT_EQ(map.count(one), 0);
@@ -251,7 +251,7 @@ TEST(Data, map_2)
     EXPECT_TRUE(two > one);
     EXPECT_TRUE(two >= one);
 
-    std::map<OTData, std::string> map{};
+    std::pmr::map<OTData, std::string> map{};
 
     EXPECT_EQ(map.size(), 0);
     EXPECT_EQ(map.count(one), 0);

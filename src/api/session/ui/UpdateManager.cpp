@@ -96,7 +96,7 @@ struct UpdateManager::Imp {
 private:
     const api::session::Client& api_;
     mutable std::mutex lock_;
-    mutable std::map<OTIdentifier, std::vector<SimpleCallback>> map_;
+    mutable std::pmr::map<OTIdentifier, std::pmr::vector<SimpleCallback>> map_;
     OTZMQPublishSocket publisher_;
     opentxs::network::zeromq::Pipeline pipeline_;
 

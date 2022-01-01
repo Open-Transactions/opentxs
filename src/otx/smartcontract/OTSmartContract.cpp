@@ -1136,7 +1136,7 @@ auto OTSmartContract::GetAcctBalance(std::string from_acct_name) -> std::string
     }
 
     const auto theFromAcctID =
-        api_.Factory().Identifier(pFromAcct->GetAcctID());
+        api_.Factory().IdentifierFromBase58(pFromAcct->GetAcctID());
     //
     // BELOW THIS POINT, theFromAcctID and theFromAgentID available.
     const std::string str_party_id = pFromParty->GetPartyID();
@@ -1144,7 +1144,7 @@ auto OTSmartContract::GetAcctBalance(std::string from_acct_name) -> std::string
     const auto PARTY_NYM_ID = api_.Factory().NymID(strPartyID);
 
     const auto PARTY_ACCT_ID =
-        api_.Factory().Identifier(pFromAcct->GetAcctID());
+        api_.Factory().IdentifierFromBase58(pFromAcct->GetAcctID());
 
     // Load up the party's account so we can get the balance.
     auto account = api_.Wallet().Internal().Account(PARTY_ACCT_ID);
@@ -1350,7 +1350,7 @@ auto OTSmartContract::GetUnitTypeIDofAcct(std::string from_acct_name)
     }
 
     const auto theFromAcctID =
-        api_.Factory().Identifier(pFromAcct->GetAcctID());
+        api_.Factory().IdentifierFromBase58(pFromAcct->GetAcctID());
     //
     // BELOW THIS POINT, theFromAcctID and theFromAgentID available.
     const std::string str_party_id = pFromParty->GetPartyID();
@@ -1358,7 +1358,7 @@ auto OTSmartContract::GetUnitTypeIDofAcct(std::string from_acct_name)
     const auto PARTY_NYM_ID = api_.Factory().NymID(strPartyID);
 
     const auto PARTY_ACCT_ID =
-        api_.Factory().Identifier(pFromAcct->GetAcctID());
+        api_.Factory().IdentifierFromBase58(pFromAcct->GetAcctID());
 
     // Load up the party's account and get the instrument definition.
     auto account = api_.Wallet().Internal().Account(PARTY_ACCT_ID);
@@ -1812,7 +1812,7 @@ auto OTSmartContract::StashAcctFunds(
     }
 
     const auto theFromAcctID =
-        api_.Factory().Identifier(pFromAcct->GetAcctID());
+        api_.Factory().IdentifierFromBase58(pFromAcct->GetAcctID());
     //
     // BELOW THIS POINT, theFromAcctID and theFromAgentID available.
 
@@ -2054,7 +2054,8 @@ auto OTSmartContract::UnstashAcctFunds(
         return false;
     }
 
-    const auto theToAcctID = api_.Factory().Identifier(pToAcct->GetAcctID());
+    const auto theToAcctID =
+        api_.Factory().IdentifierFromBase58(pToAcct->GetAcctID());
     //
     // BELOW THIS POINT, theToAcctID and theToAgentID available.
 
@@ -3113,8 +3114,9 @@ auto OTSmartContract::MoveAcctFundsStr(
     }
 
     const auto theFromAcctID =
-                   api_.Factory().Identifier(pFromAcct->GetAcctID()),
-               theToAcctID = api_.Factory().Identifier(pToAcct->GetAcctID());
+                   api_.Factory().IdentifierFromBase58(pFromAcct->GetAcctID()),
+               theToAcctID =
+                   api_.Factory().IdentifierFromBase58(pToAcct->GetAcctID());
     //
     // BELOW THIS POINT, theFromAcctID, theFromAgentID, theToAcctID, and
     // theToAgentID are all available.
@@ -4137,8 +4139,8 @@ auto OTSmartContract::VerifySmartContract(
                                                       // (and must be deleted.)
 
     bool bAreAnyInvalidParties = false;
-    std::set<OTParty*> theFailedParties;  // A set of pointers to parties who
-                                          // failed verification.
+    std::pmr::set<OTParty*> theFailedParties;  // A set of pointers to parties
+                                               // who failed verification.
 
     // LOOP THROUGH ALL PARTIES AND VERIFY THEM.
     for (auto& it_party : m_mapParties) {
@@ -4646,7 +4648,7 @@ void OTSmartContract::CloseoutOpeningNumbers(const PasswordPrompt& reason)
 void OTSmartContract::HarvestClosingNumbers(
     const identity::Nym& pSignerNym,
     const PasswordPrompt& reason,
-    std::set<OTParty*>* pFailedParties)
+    std::pmr::set<OTParty*>* pFailedParties)
 {
     const auto strNotaryID = String::Factory(GetNotaryID());
 
@@ -5231,7 +5233,7 @@ auto OTSmartContract::ProcessXMLNode(irr::io::IrrXMLReader*& xml)
         }
         if (strActivatorAcctID->Exists()) {
             const auto ACTIVATOR_ACCT_ID =
-                api_.Factory().Identifier(strActivatorAcctID);
+                api_.Factory().IdentifierFromBase58(strActivatorAcctID);
             SetSenderAcctID(ACTIVATOR_ACCT_ID);
         }
 

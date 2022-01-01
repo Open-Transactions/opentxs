@@ -398,7 +398,7 @@ auto PeerManager::RequestBlock(const block::Hash& block) const noexcept -> bool
 }
 
 auto PeerManager::RequestBlocks(
-    const std::vector<ReadView>& hashes) const noexcept -> bool
+    const std::pmr::vector<ReadView>& hashes) const noexcept -> bool
 {
     if (false == running_.load()) { return false; }
 

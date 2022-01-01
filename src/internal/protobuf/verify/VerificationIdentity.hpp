@@ -25,7 +25,7 @@ namespace opentxs
 {
 namespace proto
 {
-using VerificationNymMap = std::map<std::string, std::uint64_t>;
+using VerificationNymMap = std::pmr::map<std::string, std::uint64_t>;
 
 auto CheckProto_1(
     const VerificationIdentity& verificationIdentity,

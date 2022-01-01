@@ -11,6 +11,7 @@
 
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/blockchain/node/BlockOracle.hpp"
+#include "opentxs/core/Data.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Pimpl.hpp"
 

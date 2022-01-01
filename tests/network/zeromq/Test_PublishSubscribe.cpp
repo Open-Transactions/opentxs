@@ -53,8 +53,8 @@ public:
     int callbackCount_{0};
 
     void subscribeSocketThread(
-        const std::set<std::string>& endpoints,
-        const std::set<std::string>& msgs);
+        const std::pmr::set<std::string>& endpoints,
+        const std::pmr::set<std::string>& msgs);
     void publishSocketThread(
         const std::string& endpoint,
         const std::string& msg);
@@ -66,8 +66,8 @@ public:
 };
 
 void Test_PublishSubscribe::subscribeSocketThread(
-    const std::set<std::string>& endpoints,
-    const std::set<std::string>& msgs)
+    const std::pmr::set<std::string>& endpoints,
+    const std::pmr::set<std::string>& msgs)
 {
     auto listenCallback = network::zeromq::ListenCallback::Factory(
         [this, msgs](network::zeromq::Message&& input) -> void {
@@ -221,13 +221,13 @@ TEST_F(Test_PublishSubscribe, Publish_1_Subscribe_2)
     std::thread subscribeSocketThread1(
         &Test_PublishSubscribe::subscribeSocketThread,
         this,
-        std::set<std::string>({endpoint_}),
-        std::set<std::string>({testMessage_}));
+        std::pmr::set<std::string>({endpoint_}),
+        std::pmr::set<std::string>({testMessage_}));
     std::thread subscribeSocketThread2(
         &Test_PublishSubscribe::subscribeSocketThread,
         this,
-        std::set<std::string>({endpoint_}),
-        std::set<std::string>({testMessage_}));
+        std::pmr::set<std::string>({endpoint_}),
+        std::pmr::set<std::string>({testMessage_}));
 
     auto end = std::time(nullptr) + 30;
     while (subscribeThreadStartedCount_ < subscribeThreadCount_ &&
@@ -331,13 +331,13 @@ TEST_F(Test_PublishSubscribe, Publish_2_Subscribe_2)
     std::thread subscribeSocketThread1(
         &Test_PublishSubscribe::subscribeSocketThread,
         this,
-        std::set<std::string>({endpoint_, endpoint2_}),
-        std::set<std::string>({testMessage_, testMessage2_}));
+        std::pmr::set<std::string>({endpoint_, endpoint2_}),
+        std::pmr::set<std::string>({testMessage_, testMessage2_}));
     std::thread subscribeSocketThread2(
         &Test_PublishSubscribe::subscribeSocketThread,
         this,
-        std::set<std::string>({endpoint_, endpoint2_}),
-        std::set<std::string>({testMessage_, testMessage2_}));
+        std::pmr::set<std::string>({endpoint_, endpoint2_}),
+        std::pmr::set<std::string>({testMessage_, testMessage2_}));
 
     end = std::time(nullptr) + 30;
     while (subscribeThreadStartedCount_ < subscribeThreadCount_ &&

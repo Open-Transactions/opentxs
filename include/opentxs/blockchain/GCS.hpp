@@ -31,8 +31,8 @@ namespace blockchain
 class OPENTXS_EXPORT GCS
 {
 public:
-    using Targets = std::vector<ReadView>;
-    using Matches = std::vector<Targets::const_iterator>;
+    using Targets = std::pmr::vector<ReadView>;
+    using Matches = std::pmr::vector<Targets::const_iterator>;
 
     /// Serialized filter only, no element count
     virtual auto Compressed() const noexcept -> Space = 0;
@@ -48,9 +48,9 @@ public:
     virtual auto Serialize(AllocateOutput out) const noexcept -> bool = 0;
     virtual auto Test(const Data& target) const noexcept -> bool = 0;
     virtual auto Test(const ReadView target) const noexcept -> bool = 0;
-    virtual auto Test(const std::vector<OTData>& targets) const noexcept
+    virtual auto Test(const std::pmr::vector<OTData>& targets) const noexcept
         -> bool = 0;
-    virtual auto Test(const std::vector<Space>& targets) const noexcept
+    virtual auto Test(const std::pmr::vector<Space>& targets) const noexcept
         -> bool = 0;
 
     virtual ~GCS() = default;

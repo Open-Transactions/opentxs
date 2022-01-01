@@ -77,79 +77,79 @@ class Test_HeaderOracle_base : public ::testing::Test
 public:
     using Block = std::pair<std::string, std::string>;
     using Position = std::pair<bb::Height, std::string>;
-    using BestChainVector = std::vector<std::string>;
+    using BestChainVector = std::pmr::vector<std::string>;
     using Test = std::tuple<std::string, Position, BestChainVector>;
     using Status = bb::Header::Status;
     using HeaderData =
         std::tuple<std::string, std::string, bb::Height, Status, Status>;
-    using PostStateVector = std::vector<HeaderData>;
-    using ExpectedSiblings = std::set<std::string>;
+    using PostStateVector = std::pmr::vector<HeaderData>;
+    using ExpectedSiblings = std::pmr::set<std::string>;
 
-    static const std::vector<Block> create_1_;
-    static const std::vector<Test> sequence_1_;
+    static const std::pmr::vector<Block> create_1_;
+    static const std::pmr::vector<Test> sequence_1_;
     static const PostStateVector post_state_1_;
     static const BestChainVector best_chain_1_;
     static const ExpectedSiblings siblings_1_;
-    static const std::vector<Block> create_2_;
-    static const std::vector<Test> sequence_2_;
+    static const std::pmr::vector<Block> create_2_;
+    static const std::pmr::vector<Test> sequence_2_;
     static const PostStateVector post_state_2_;
     static const BestChainVector best_chain_2_;
     static const ExpectedSiblings siblings_2_;
-    static const std::vector<Block> create_3_;
-    static const std::vector<Test> sequence_3_;
+    static const std::pmr::vector<Block> create_3_;
+    static const std::pmr::vector<Test> sequence_3_;
     static const PostStateVector post_state_3_;
     static const BestChainVector best_chain_3_;
     static const ExpectedSiblings siblings_3_;
-    static const std::vector<Block> create_4_;
-    static const std::vector<Test> sequence_4_;
+    static const std::pmr::vector<Block> create_4_;
+    static const std::pmr::vector<Test> sequence_4_;
     static const PostStateVector post_state_4_;
     static const BestChainVector best_chain_4_;
     static const ExpectedSiblings siblings_4_;
-    static const std::vector<Block> create_5_;
-    static const std::vector<Test> sequence_5_;
+    static const std::pmr::vector<Block> create_5_;
+    static const std::pmr::vector<Test> sequence_5_;
     static const PostStateVector post_state_5_;
     static const BestChainVector best_chain_5_;
     static const ExpectedSiblings siblings_5_;
-    static const std::vector<Block> create_6_;
-    static const std::vector<Test> sequence_6_;
+    static const std::pmr::vector<Block> create_6_;
+    static const std::pmr::vector<Test> sequence_6_;
     static const PostStateVector post_state_6_;
     static const BestChainVector best_chain_6_;
     static const ExpectedSiblings siblings_6_;
-    static const std::vector<Block> create_7_;
-    static const std::vector<Test> sequence_7_;
+    static const std::pmr::vector<Block> create_7_;
+    static const std::pmr::vector<Test> sequence_7_;
     static const PostStateVector post_state_7_;
     static const BestChainVector best_chain_7_;
     static const ExpectedSiblings siblings_7_;
-    static const std::vector<Block> create_8_;
-    static const std::vector<Test> sequence_8_;
+    static const std::pmr::vector<Block> create_8_;
+    static const std::pmr::vector<Test> sequence_8_;
     static const PostStateVector post_state_8a_;
     static const PostStateVector post_state_8b_;
     static const BestChainVector best_chain_8a_;
     static const BestChainVector best_chain_8b_;
     static const ExpectedSiblings siblings_8a_;
     static const ExpectedSiblings siblings_8b_;
-    static const std::vector<Block> create_9_;
-    static const std::vector<Test> sequence_9_;
+    static const std::pmr::vector<Block> create_9_;
+    static const std::pmr::vector<Test> sequence_9_;
     static const PostStateVector post_state_9_;
     static const BestChainVector best_chain_9_;
     static const ExpectedSiblings siblings_9_;
-    static const std::vector<Block> create_10_;
-    static const std::vector<Test> sequence_10_;
-    static const std::vector<std::string> bitcoin_;
+    static const std::pmr::vector<Block> create_10_;
+    static const std::pmr::vector<Test> sequence_10_;
+    static const std::pmr::vector<std::string> bitcoin_;
 
     const ot::api::session::Client& api_;
     const b::Type type_;
     std::unique_ptr<bc::Manager> network_;
     bc::HeaderOracle& header_oracle_;
-    std::map<std::string, std::unique_ptr<bb::Header>> test_blocks_;
+    std::pmr::map<std::string, std::unique_ptr<bb::Header>> test_blocks_;
 
     static auto init_network(
         const ot::api::session::Client& api,
         const b::Type type) noexcept -> std::unique_ptr<bc::Manager>;
 
-    auto apply_blocks(const std::vector<Test>& vector) -> bool;
-    auto apply_blocks_batch(const std::vector<Test>& vector) -> bool;
-    auto create_blocks(const std::vector<Block>& vector) -> bool;
+    auto apply_blocks(const std::pmr::vector<Test>& vector) -> bool;
+    auto apply_blocks_batch(const std::pmr::vector<Test>& vector) -> bool;
+    auto create_blocks(const std::pmr::vector<Block>& vector) -> bool;
     auto get_block_hash(const std::string& hash) -> bb::pHash;
     auto get_test_block(const std::string& hash) -> std::unique_ptr<bb::Header>;
     auto make_position(const bb::Height height, const std::string_view hash)
@@ -160,7 +160,7 @@ public:
     auto verify_hash_sequence(
         const bb::Height start,
         const std::size_t stop,
-        const std::vector<std::string>& expected) -> bool;
+        const std::pmr::vector<std::string>& expected) -> bool;
     auto verify_post_state(const PostStateVector& vector) -> bool;
     auto verify_siblings(const ExpectedSiblings& vector) -> bool;
 

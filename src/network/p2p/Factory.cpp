@@ -31,7 +31,6 @@
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/contract/ContractType.hpp"
 #include "opentxs/network/p2p/Acknowledgement.hpp"
-#include "opentxs/network/p2p/Block.hpp"
 #include "opentxs/network/p2p/Data.hpp"
 #include "opentxs/network/p2p/MessageType.hpp"
 #include "opentxs/network/p2p/PublishContract.hpp"
@@ -171,7 +170,7 @@ auto BlockchainSyncMessage(
         }
 
         auto chains = [&] {
-            auto out = std::vector<network::p2p::State>{};
+            auto out = std::pmr::vector<network::p2p::State>{};
 
             for (const auto& state : hello.state()) {
                 auto hash = [&] {
@@ -197,7 +196,7 @@ auto BlockchainSyncMessage(
                 }
 
                 const auto& cfheaderFrame = b.at(2);
-                auto data = std::vector<network::p2p::Block>{};
+                auto data = std::pmr::vector<network::p2p::Block>{};
                 using Chain = opentxs::blockchain::Type;
                 auto chain = std::optional<Chain>{std::nullopt};
                 using FilterType = opentxs::blockchain::filter::Type;

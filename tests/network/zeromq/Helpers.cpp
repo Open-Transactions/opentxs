@@ -85,7 +85,7 @@ private:
 
     private:
         mutable std::mutex lock_{};
-        std::map<std::size_t, Task> map_{};
+        std::pmr::map<std::size_t, Task> map_{};
     };
 
     mutable std::mutex lock_;

@@ -74,10 +74,10 @@ class Input final : public internal::Input
 public:
     static const VersionNumber default_version_;
 
-    auto AssociatedLocalNyms(std::vector<OTNymID>& output) const noexcept
+    auto AssociatedLocalNyms(std::pmr::vector<OTNymID>& output) const noexcept
         -> void final;
     auto AssociatedRemoteContacts(
-        std::vector<OTIdentifier>& output) const noexcept -> void final;
+        std::pmr::vector<OTIdentifier>& output) const noexcept -> void final;
     auto CalculateSize(const bool normalized) const noexcept
         -> std::size_t final;
     auto Coinbase() const noexcept -> Space final { return coinbase_; }
@@ -86,18 +86,18 @@ public:
         return std::make_unique<Input>(*this);
     }
     auto ExtractElements(const filter::Type style) const noexcept
-        -> std::vector<Space> final;
+        -> std::pmr::vector<Space> final;
     auto FindMatches(
         const ReadView txid,
         const filter::Type type,
         const Patterns& txos,
         const ParsedPatterns& elements) const noexcept -> Matches final;
-    auto GetPatterns() const noexcept -> std::vector<PatternID> final;
+    auto GetPatterns() const noexcept -> std::pmr::vector<PatternID> final;
     auto Internal() const noexcept -> const internal::Input& final
     {
         return *this;
     }
-    auto Keys() const noexcept -> std::vector<crypto::Key> final
+    auto Keys() const noexcept -> std::pmr::vector<crypto::Key> final
     {
         return cache_.keys();
     }
@@ -135,7 +135,7 @@ public:
     {
         return cache_.spends();
     }
-    auto Witness() const noexcept -> const std::vector<Space>& final
+    auto Witness() const noexcept -> const std::pmr::vector<Space>& final
     {
         return witness_;
     }
@@ -154,7 +154,7 @@ public:
         const blockchain::Type chain,
         const std::uint32_t sequence,
         Outpoint&& previous,
-        std::vector<Space>&& witness,
+        std::pmr::vector<Space>&& witness,
         std::unique_ptr<const internal::Script> script,
         const VersionNumber version,
         std::optional<std::size_t> size) noexcept(false);
@@ -163,7 +163,7 @@ public:
         const blockchain::Type chain,
         const std::uint32_t sequence,
         Outpoint&& previous,
-        std::vector<Space>&& witness,
+        std::pmr::vector<Space>&& witness,
         std::unique_ptr<const internal::Script> script,
         const VersionNumber version,
         std::unique_ptr<const internal::Output> output,
@@ -173,7 +173,7 @@ public:
         const blockchain::Type chain,
         const std::uint32_t sequence,
         Outpoint&& previous,
-        std::vector<Space>&& witness,
+        std::pmr::vector<Space>&& witness,
         const ReadView coinbase,
         const VersionNumber version,
         std::unique_ptr<const internal::Output> output,
@@ -183,7 +183,7 @@ public:
         const blockchain::Type chain,
         const std::uint32_t sequence,
         Outpoint&& previous,
-        std::vector<Space>&& witness,
+        std::pmr::vector<Space>&& witness,
         std::unique_ptr<const internal::Script> script,
         Space&& coinbase,
         const VersionNumber version,
@@ -210,7 +210,7 @@ private:
             auto lock = rLock{lock_};
             std::for_each(std::begin(keys_), std::end(keys_), cb);
         }
-        auto keys() const noexcept -> std::vector<crypto::Key>;
+        auto keys() const noexcept -> std::pmr::vector<crypto::Key>;
         auto net_balance_change(const identifier::Nym& nym) const noexcept
             -> opentxs::Amount;
         auto payer() const noexcept -> OTIdentifier;
@@ -296,7 +296,7 @@ private:
     const blockchain::Type chain_;
     const VersionNumber serialize_version_;
     const Outpoint previous_;
-    const std::vector<Space> witness_;
+    const std::pmr::vector<Space> witness_;
     const std::unique_ptr<const internal::Script> script_;
     const Space coinbase_;
     const std::uint32_t sequence_;

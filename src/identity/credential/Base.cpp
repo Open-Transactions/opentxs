@@ -75,7 +75,7 @@ Base::Base(
           serialized.version(),
           {},
           {},
-          api.Factory().Identifier(serialized.id()),
+          api.Factory().IdentifierFromBase58(serialized.id()),
           extract_signatures(serialized))
     , parent_(parent)
     , source_(source)

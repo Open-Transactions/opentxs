@@ -145,15 +145,15 @@ public:
     auto AccountSigner(const Identifier& accountID) const -> OTNymID final;
     auto AccountUnit(const Identifier& accountID) const -> core::UnitType final;
     auto AccountsByContract(const identifier::UnitDefinition& contract) const
-        -> std::set<OTIdentifier> final;
+        -> std::pmr::set<OTIdentifier> final;
     auto AccountsByIssuer(const identifier::Nym& issuerNym) const
-        -> std::set<OTIdentifier> final;
+        -> std::pmr::set<OTIdentifier> final;
     auto AccountsByOwner(const identifier::Nym& ownerNym) const
-        -> std::set<OTIdentifier> final;
+        -> std::pmr::set<OTIdentifier> final;
     auto AccountsByServer(const identifier::Server& server) const
-        -> std::set<OTIdentifier> final;
+        -> std::pmr::set<OTIdentifier> final;
     auto AccountsByUnit(const core::UnitType unit) const
-        -> std::set<OTIdentifier> final;
+        -> std::pmr::set<OTIdentifier> final;
     auto Bip47Chain(const identifier::Nym& nymID, const Identifier& channelID)
         const -> core::UnitType final;
     auto Bip47ChannelsByChain(
@@ -161,14 +161,14 @@ public:
         const core::UnitType chain) const -> Bip47ChannelList final;
     auto BlockchainAccountList(
         const std::string& nymID,
-        const core::UnitType type) const -> std::set<std::string> final;
+        const core::UnitType type) const -> std::pmr::set<std::string> final;
     auto BlockchainAccountType(
         const std::string& nymID,
         const std::string& accountID) const -> core::UnitType final;
     auto BlockchainThreadMap(const identifier::Nym& nym, const Data& txid)
-        const noexcept -> std::vector<OTIdentifier> final;
+        const noexcept -> std::pmr::vector<OTIdentifier> final;
     auto BlockchainTransactionList(const identifier::Nym& nym) const noexcept
-        -> std::vector<OTData> final;
+        -> std::pmr::vector<OTData> final;
     auto CheckTokenSpent(
         const identifier::Server& notary,
         const identifier::UnitDefinition& unit,
@@ -183,7 +183,7 @@ public:
     auto CreateThread(
         const std::string& nymID,
         const std::string& threadID,
-        const std::set<std::string>& participants) const -> bool final;
+        const std::pmr::set<std::string>& participants) const -> bool final;
     auto DeleteAccount(const std::string& id) const -> bool final;
     auto DefaultSeed() const -> std::string final;
     auto DeleteContact(const std::string& id) const -> bool final;
@@ -307,7 +307,7 @@ public:
         proto::UnitDefinition& contract,
         std::string& alias,
         const bool checking = false) const -> bool final;
-    auto LocalNyms() const -> const std::set<std::string> final;
+    auto LocalNyms() const -> const std::pmr::set<std::string> final;
     void MapPublicNyms(NymLambda& lambda) const final;
     void MapServers(ServerLambda& lambda) const final;
     void MapUnitDefinitions(UnitLambda& lambda) const final;
@@ -331,15 +331,15 @@ public:
         const std::string& sourceID) const -> std::string final;
     auto PaymentWorkflowsByAccount(
         const std::string& nymID,
-        const std::string& accountID) const -> std::set<std::string> final;
+        const std::string& accountID) const -> std::pmr::set<std::string> final;
     auto PaymentWorkflowsByState(
         const std::string& nymID,
         const otx::client::PaymentWorkflowType type,
         const otx::client::PaymentWorkflowState state) const
-        -> std::set<std::string> final;
+        -> std::pmr::set<std::string> final;
     auto PaymentWorkflowsByUnit(
         const std::string& nymID,
-        const std::string& unitID) const -> std::set<std::string> final;
+        const std::string& unitID) const -> std::pmr::set<std::string> final;
     auto PaymentWorkflowState(
         const std::string& nymID,
         const std::string& workflowID) const

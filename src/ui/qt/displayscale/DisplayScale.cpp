@@ -7,6 +7,7 @@
 #include "1_Internal.hpp"                  // IWYU pragma: associated
 #include "opentxs/ui/qt/DisplayScale.hpp"  // IWYU pragma: associated
 
+#include <memory_resource>  // IWYU pragma: keep
 #include <string>
 
 #include "opentxs/core/display/Definition.hpp"

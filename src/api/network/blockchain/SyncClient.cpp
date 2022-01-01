@@ -196,7 +196,7 @@ private:
         bool active_;
         bool waiting_;
         bool new_local_handler_;
-        std::set<Chain> chains_;
+        std::pmr::set<Chain> chains_;
         std::string publisher_;
 
         auto is_stalled() const noexcept -> bool
@@ -246,10 +246,10 @@ private:
 
     using Socket = std::unique_ptr<void, decltype(&::zmq_close)>;
     using OTSocket = opentxs::network::zeromq::socket::implementation::Socket;
-    using ServerMap = std::map<std::string, Server>;
-    using ChainMap = std::map<Chain, std::string>;
-    using ProviderMap = std::map<Chain, std::set<std::string>>;
-    using ActiveMap = std::map<Chain, std::atomic<std::size_t>>;
+    using ServerMap = std::pmr::map<std::string, Server>;
+    using ChainMap = std::pmr::map<Chain, std::string>;
+    using ProviderMap = std::pmr::map<Chain, std::pmr::set<std::string>>;
+    using ActiveMap = std::pmr::map<Chain, std::atomic<std::size_t>>;
     using Message = opentxs::network::zeromq::Message;
 
     static constexpr int linger_{0};
@@ -268,7 +268,7 @@ private:
     ChainMap clients_;
     ProviderMap providers_;
     ActiveMap active_;
-    std::set<std::string> connected_servers_;
+    std::pmr::set<std::string> connected_servers_;
     std::atomic<std::size_t> connected_count_;
     std::atomic_bool running_;
     std::thread thread_;
@@ -288,7 +288,7 @@ private:
         try {
             const auto& providers = providers_.at(chain);
             static auto rand = std::mt19937{std::random_device{}()};
-            auto result = std::vector<std::string>{};
+            auto result = std::pmr::vector<std::string>{};
             std::sample(
                 providers.begin(),
                 providers.end(),

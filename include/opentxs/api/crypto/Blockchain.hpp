@@ -82,8 +82,9 @@ public:
     using Key = opentxs::blockchain::crypto::Key;
     using Style = opentxs::blockchain::crypto::AddressStyle;
     using Subchain = opentxs::blockchain::crypto::Subchain;
-    using DecodedAddress = std::tuple<OTData, Style, std::set<Chain>, bool>;
-    using ContactList = std::set<OTIdentifier>;
+    using DecodedAddress =
+        std::tuple<OTData, Style, std::pmr::set<Chain>, bool>;
+    using ContactList = std::pmr::set<OTIdentifier>;
     using Txid = opentxs::blockchain::block::Txid;
     using TxidHex = std::string;
     using PatternID = opentxs::blockchain::PatternID;
@@ -100,10 +101,11 @@ public:
     virtual auto Account(const identifier::Nym& nymID, const Chain chain) const
         noexcept(false) -> const opentxs::blockchain::crypto::Account& = 0;
     virtual auto AccountList(const identifier::Nym& nymID) const noexcept
-        -> std::set<OTIdentifier> = 0;
+        -> std::pmr::set<OTIdentifier> = 0;
     virtual auto AccountList(const Chain chain) const noexcept
-        -> std::set<OTIdentifier> = 0;
-    virtual auto AccountList() const noexcept -> std::set<OTIdentifier> = 0;
+        -> std::pmr::set<OTIdentifier> = 0;
+    virtual auto AccountList() const noexcept
+        -> std::pmr::set<OTIdentifier> = 0;
     virtual auto ActivityDescription(
         const identifier::Nym& nym,
         const Identifier& thread,
@@ -198,7 +200,7 @@ public:
     virtual auto SenderContact(const Key& key) const noexcept
         -> OTIdentifier = 0;
     virtual auto SubaccountList(const identifier::Nym& nymID, const Chain chain)
-        const noexcept -> std::set<OTIdentifier> = 0;
+        const noexcept -> std::pmr::set<OTIdentifier> = 0;
     virtual auto Unconfirm(
         const Key key,
         const opentxs::blockchain::block::Txid& tx,

@@ -24,7 +24,7 @@ auto CheckProto_1(
     const bool silent,
     const std::uint32_t parentVersion,
     const PaymentWorkflowType parent,
-    std::map<PaymentEventType, std::size_t>& events) -> bool
+    std::pmr::map<PaymentEventType, std::size_t>& events) -> bool
 {
     try {
         const bool valid =

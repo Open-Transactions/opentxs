@@ -130,7 +130,7 @@ public:
         const opentxs::blockchain::block::Header& previous,
         const Transaction_p generationTransaction,
         const std::uint32_t nBits,
-        const std::vector<Transaction_p>& extraTransactions,
+        const std::pmr::vector<Transaction_p>& extraTransactions,
         const std::int32_t version,
         const AbortFunction abort) const noexcept
         -> std::shared_ptr<
@@ -138,7 +138,7 @@ public:
     auto BitcoinGenerationTransaction(
         const opentxs::blockchain::Type chain,
         const opentxs::blockchain::block::Height height,
-        std::vector<OutputBuilder>&& outputs,
+        std::pmr::vector<OutputBuilder>&& outputs,
         const std::string& coinbase,
         const std::int32_t version) const noexcept -> Transaction_p final;
     auto BitcoinTransaction(

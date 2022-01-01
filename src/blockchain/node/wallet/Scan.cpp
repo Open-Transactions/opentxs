@@ -67,9 +67,9 @@ auto Scan::Do(
         std::min(std::min(startHeight + 999, best.first), stop);
     auto atLeastOnce{false};
     auto highestClean = std::optional<block::Position>{std::nullopt};
-    auto batches = std::vector<std::unique_ptr<Batch>>{};
-    auto jobs = std::vector<Work*>{};
-    auto blocks = std::vector<block::Position>{};
+    auto batches = std::pmr::vector<std::unique_ptr<Batch>>{};
+    auto jobs = std::pmr::vector<Work*>{};
+    auto blocks = std::pmr::vector<block::Position>{};
     auto postcondition = ScopeGuard{[&] {
         const auto& log = LogTrace();
         const auto start = Clock::now();

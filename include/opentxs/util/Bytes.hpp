@@ -11,6 +11,7 @@
 #include <cstdint>
 #include <functional>
 #include <memory>
+#include <memory_resource>
 #include <mutex>
 #include <string>
 #include <string_view>
@@ -140,7 +141,7 @@ private:
 };
 
 using AllocateOutput = std::function<WritableView(const std::size_t)>;
-using Space = std::vector<std::byte>;
+using Space = std::pmr::vector<std::byte>;
 
 OPENTXS_EXPORT auto copy(const ReadView in, const AllocateOutput out) noexcept
     -> bool;
@@ -152,6 +153,8 @@ OPENTXS_EXPORT auto preallocated(const std::size_t size, void* out) noexcept
     -> AllocateOutput;
 OPENTXS_EXPORT auto reader(const WritableView& in) noexcept -> ReadView;
 OPENTXS_EXPORT auto reader(const Space& in) noexcept -> ReadView;
+OPENTXS_EXPORT auto reader(const std::pmr::vector<std::uint8_t>& in) noexcept
+    -> ReadView;
 OPENTXS_EXPORT auto reader(const std::vector<std::uint8_t>& in) noexcept
     -> ReadView;
 OPENTXS_EXPORT auto space(const std::size_t size) noexcept -> Space;

@@ -39,10 +39,10 @@ public:
     using Data = std::pair<Chain, OTNymID>;
 
     auto AccountList(const identifier::Nym& nymID) const noexcept
-        -> std::set<OTIdentifier>;
+        -> std::pmr::set<OTIdentifier>;
     auto AccountList(const Chain chain) const noexcept
-        -> std::set<OTIdentifier>;
-    auto AccountList() const noexcept -> std::set<OTIdentifier>;
+        -> std::pmr::set<OTIdentifier>;
+    auto AccountList() const noexcept -> std::pmr::set<OTIdentifier>;
     auto Query(const Identifier& account) const noexcept -> Data;
     auto Register(
         const Identifier& account,

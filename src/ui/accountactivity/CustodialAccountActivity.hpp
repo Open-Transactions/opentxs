@@ -114,7 +114,7 @@ private:
         const proto::PaymentEventType event,
         const proto::PaymentWorkflow& workflow) noexcept -> EventRow;
     static auto extract_rows(const proto::PaymentWorkflow& workflow) noexcept
-        -> std::vector<RowKey>;
+        -> std::pmr::vector<RowKey>;
 
     auto display_balance(opentxs::Amount value) const noexcept
         -> std::string final;
@@ -125,7 +125,7 @@ private:
     auto process_notary(const Message& message) noexcept -> void;
     auto process_workflow(
         const Identifier& workflowID,
-        std::set<AccountActivityRowID>& active) noexcept -> void;
+        std::pmr::set<AccountActivityRowID>& active) noexcept -> void;
     auto process_workflow(const Message& message) noexcept -> void;
     auto process_unit(const Message& message) noexcept -> void;
     auto startup() noexcept -> void final;

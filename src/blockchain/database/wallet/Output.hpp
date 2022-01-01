@@ -99,34 +99,36 @@ public:
     auto GetBalance(const identifier::Nym& owner, const NodeID& node)
         const noexcept -> Balance;
     auto GetBalance(const crypto::Key& key) const noexcept -> Balance;
-    auto GetOutputs(node::TxoState type) const noexcept -> std::vector<UTXO>;
+    auto GetOutputs(node::TxoState type) const noexcept
+        -> std::pmr::vector<UTXO>;
     auto GetOutputs(const identifier::Nym& owner, node::TxoState type)
-        const noexcept -> std::vector<UTXO>;
+        const noexcept -> std::pmr::vector<UTXO>;
     auto GetOutputs(
         const identifier::Nym& owner,
         const Identifier& node,
-        node::TxoState type) const noexcept -> std::vector<UTXO>;
+        node::TxoState type) const noexcept -> std::pmr::vector<UTXO>;
     auto GetOutputs(const crypto::Key& key, node::TxoState type) const noexcept
-        -> std::vector<UTXO>;
-    auto GetTransactions() const noexcept -> std::vector<block::pTxid>;
+        -> std::pmr::vector<UTXO>;
+    auto GetTransactions() const noexcept -> std::pmr::vector<block::pTxid>;
     auto GetTransactions(const identifier::Nym& account) const noexcept
-        -> std::vector<block::pTxid>;
-    auto GetUnconfirmedTransactions() const noexcept -> std::set<block::pTxid>;
-    auto GetUnspentOutputs() const noexcept -> std::vector<UTXO>;
+        -> std::pmr::vector<block::pTxid>;
+    auto GetUnconfirmedTransactions() const noexcept
+        -> std::pmr::set<block::pTxid>;
+    auto GetUnspentOutputs() const noexcept -> std::pmr::vector<UTXO>;
     auto GetUnspentOutputs(const NodeID& balanceNode) const noexcept
-        -> std::vector<UTXO>;
+        -> std::pmr::vector<UTXO>;
 
     auto AddConfirmedTransaction(
         const AccountID& account,
         const SubchainID& subchain,
         const block::Position& block,
         const std::size_t blockIndex,
-        const std::vector<std::uint32_t> outputIndices,
+        const std::pmr::vector<std::uint32_t> outputIndices,
         const block::bitcoin::Transaction& transaction) noexcept -> bool;
     auto AddMempoolTransaction(
         const AccountID& account,
         const SubchainID& subchain,
-        const std::vector<std::uint32_t> outputIndices,
+        const std::pmr::vector<std::uint32_t> outputIndices,
         const block::bitcoin::Transaction& transaction) const noexcept -> bool;
     auto AddOutgoingTransaction(
         const Identifier& proposalID,
@@ -136,7 +138,7 @@ public:
     auto FinalizeReorg(MDB_txn* tx, const block::Position& pos) noexcept
         -> bool;
     auto GetOutputTags(const block::Outpoint& output) const noexcept
-        -> std::set<node::TxoTag>;
+        -> std::pmr::set<node::TxoTag>;
     auto GetWalletHeight() const noexcept -> block::Height;
     auto ReserveUTXO(
         const identifier::Nym& spender,

@@ -20,7 +20,7 @@
 
 namespace opentxs
 {
-using OutstandingMap = std::map<int, std::atomic_int>;
+using OutstandingMap = std::pmr::map<int, std::atomic_int>;
 
 struct Outstanding::Imp {
     auto operator++() noexcept -> Imp&

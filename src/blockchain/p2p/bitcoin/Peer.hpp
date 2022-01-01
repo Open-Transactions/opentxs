@@ -102,7 +102,7 @@ public:
         const int id,
         std::unique_ptr<internal::Address> address,
         const bool relay = true,
-        const std::set<p2p::Service>& localServices = {},
+        const std::pmr::set<p2p::Service>& localServices = {},
         const ProtocolVersion protocol = 0) noexcept;
 
     ~Peer() final;
@@ -145,14 +145,14 @@ private:
         Time start_{};
     };
 
-    static const std::map<Command, CommandFunction> command_map_;
+    static const std::pmr::map<Command, CommandFunction> command_map_;
     static const ProtocolVersion default_protocol_version_{70015};
     static const std::string user_agent_;
 
     const node::HeaderOracle& headers_;
     std::atomic<ProtocolVersion> protocol_;
     const Nonce nonce_;
-    const std::set<p2p::Service> local_services_;
+    const std::pmr::set<p2p::Service> local_services_;
     std::atomic<bool> relay_;
     Request get_headers_;
 
@@ -160,11 +160,13 @@ private:
         const ProtocolVersion version,
         const blockchain::Type network,
         const database::BlockStorage policy,
-        const std::set<p2p::Service>& input) noexcept -> std::set<p2p::Service>;
+        const std::pmr::set<p2p::Service>& input) noexcept
+        -> std::pmr::set<p2p::Service>;
     static auto nonce(const api::Session& api) noexcept -> Nonce;
 
     auto broadcast_inv(
-        std::vector<blockchain::bitcoin::Inventory>&& inv) noexcept -> void;
+        std::pmr::vector<blockchain::bitcoin::Inventory>&& inv) noexcept
+        -> void;
     auto get_body_size(const zmq::Frame& header) const noexcept
         -> std::size_t final;
 
@@ -187,7 +189,7 @@ private:
     auto request_headers(const block::Hash& hash) noexcept -> void;
     auto request_mempool() noexcept -> void final;
     auto request_transactions(
-        std::vector<blockchain::bitcoin::Inventory>&&) noexcept -> void;
+        std::pmr::vector<blockchain::bitcoin::Inventory>&&) noexcept -> void;
     auto start_handshake() noexcept -> void final;
 
     auto process_addr(

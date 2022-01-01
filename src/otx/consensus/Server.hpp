@@ -115,7 +115,7 @@ class Server final : virtual public internal::Server,
                      public opentxs::internal::StateMachine
 {
 public:
-    auto Accounts() const -> std::vector<OTIdentifier> final;
+    auto Accounts() const -> std::pmr::vector<OTIdentifier> final;
     auto AdminPassword() const -> const std::string& final;
     auto AdminAttempted() const -> bool final;
     auto FinalizeServerCommand(Message& command, const PasswordPrompt& reason)
@@ -203,7 +203,7 @@ public:
         std::shared_ptr<Message> message,
         std::shared_ptr<Ledger> inbox,
         std::shared_ptr<Ledger> outbox,
-        std::set<OTManagedNumber>* numbers,
+        std::pmr::set<OTManagedNumber>* numbers,
         const PasswordPrompt& reason,
         const ExtraArgs& args) -> QueueResult final;
     auto RefreshNymbox(
@@ -214,7 +214,7 @@ public:
     auto Resync(const proto::Context& serialized) -> bool final;
     auto SendMessage(
         const api::session::Client& client,
-        const std::set<OTManagedNumber>& pending,
+        const std::pmr::set<OTManagedNumber>& pending,
         otx::context::Server&,
         const Message& message,
         const PasswordPrompt& reason,
@@ -263,7 +263,7 @@ public:
 
 private:
     using ReplyNoticeOutcome = std::pair<RequestNumber, Server::DeliveryResult>;
-    using ReplyNoticeOutcomes = std::vector<ReplyNoticeOutcome>;
+    using ReplyNoticeOutcomes = std::pmr::vector<ReplyNoticeOutcome>;
 
     enum class Exit : bool { Yes = true, Continue = false };
     enum class UpdateHash : bool { Remote = false, Both = true };
@@ -277,7 +277,7 @@ private:
     enum class TransactionAttempt : bool { Accepted = true, Rejected = false };
 
     static const std::string default_node_name_;
-    static const std::set<MessageType> do_not_need_request_number_;
+    static const std::pmr::set<MessageType> do_not_need_request_number_;
 
     const network::zeromq::socket::Publish& request_sent_;
     const network::zeromq::socket::Publish& reply_received_;
@@ -304,7 +304,7 @@ private:
     std::atomic<int> failure_counter_;
     std::shared_ptr<Ledger> inbox_;
     std::shared_ptr<Ledger> outbox_;
-    std::set<OTManagedNumber>* numbers_;
+    std::pmr::set<OTManagedNumber>* numbers_;
     OTZMQPushSocket find_nym_;
     OTZMQPushSocket find_server_;
     OTZMQPushSocket find_unit_definition_;
@@ -629,7 +629,7 @@ private:
     auto process_reply(
         const Lock& lock,
         const api::session::Client& client,
-        const std::set<OTManagedNumber>& managed,
+        const std::pmr::set<OTManagedNumber>& managed,
         const Message& reply,
         const PasswordPrompt& reason) -> bool;
     void process_response_transaction(
@@ -733,7 +733,7 @@ private:
         const ActionType type = ActionType::Normal,
         std::shared_ptr<Ledger> inbox = {},
         std::shared_ptr<Ledger> outbox = {},
-        std::set<OTManagedNumber>* numbers = nullptr) -> QueueResult;
+        std::pmr::set<OTManagedNumber>* numbers = nullptr) -> QueueResult;
     auto state_machine() noexcept -> bool;
     auto statement(
         const Lock& lock,

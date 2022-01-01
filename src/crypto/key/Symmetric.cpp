@@ -325,7 +325,7 @@ auto Symmetric::Allocate(const std::size_t size, String& container) -> bool
 {
     if (std::numeric_limits<std::uint32_t>::max() < size) { return false; }
 
-    auto blank = std::vector<char>{};
+    auto blank = std::pmr::vector<char>{};
     blank.assign(size, 0x7f);
 
     OT_ASSERT(blank.size() == size);
@@ -685,7 +685,7 @@ auto Symmetric::ID(const opentxs::PasswordPrompt& reason) const -> OTIdentifier
 
     OT_ASSERT(plain.has_value());
 
-    return api_.Factory().Identifier(plain.value()->Bytes());
+    return api_.Factory().IdentifierFromBytes(plain.value()->Bytes());
 }
 
 auto Symmetric::RawKey(const opentxs::PasswordPrompt& reason, Secret& output)

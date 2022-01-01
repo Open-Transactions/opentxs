@@ -70,18 +70,18 @@ public:
         std::string,
         std::string>;
 
-    static const std::vector<HMACVector> hmac_sha2_;
-    static const std::vector<MurmurVector> murmur_;
-    static const std::vector<PbkdfVector> pbkdf_sha1_;
-    static const std::vector<PbkdfVector> pbkdf_sha256_;
-    static const std::vector<PbkdfVector> pbkdf_sha512_;
-    static const std::vector<ScryptVector> scrypt_rfc7914_;
-    static const std::vector<ScryptVector> scrypt_litecoin_;
-    static const std::vector<Nist> nist_hashes_;
+    static const std::pmr::vector<HMACVector> hmac_sha2_;
+    static const std::pmr::vector<MurmurVector> murmur_;
+    static const std::pmr::vector<PbkdfVector> pbkdf_sha1_;
+    static const std::pmr::vector<PbkdfVector> pbkdf_sha256_;
+    static const std::pmr::vector<PbkdfVector> pbkdf_sha512_;
+    static const std::pmr::vector<ScryptVector> scrypt_rfc7914_;
+    static const std::pmr::vector<ScryptVector> scrypt_litecoin_;
+    static const std::pmr::vector<Nist> nist_hashes_;
     static const Nist nist_one_million_;
     static const Nist nist_one_gigabyte_;
-    static const std::vector<ArgonVector> argon_2i_;
-    static const std::vector<ArgonVector> argon_2id_;
+    static const std::pmr::vector<ArgonVector> argon_2i_;
+    static const std::pmr::vector<ArgonVector> argon_2id_;
 
     const ot::api::Crypto& crypto_;
 
@@ -92,7 +92,7 @@ public:
 };
 
 // https://tools.ietf.org/html/rfc4231
-const std::vector<Test_Hash::HMACVector> Test_Hash::hmac_sha2_{
+const std::pmr::vector<Test_Hash::HMACVector> Test_Hash::hmac_sha2_{
     {"0x0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b",
      "0x4869205468657265",
      "0xb0344c61d8db38535ca8afceaf0bf12b881dc200c9833da726e9376c2e32cff7",
@@ -127,7 +127,7 @@ const std::vector<Test_Hash::HMACVector> Test_Hash::hmac_sha2_{
 };
 
 // https://stackoverflow.com/a/31929528
-const std::vector<Test_Hash::MurmurVector> Test_Hash::murmur_{
+const std::pmr::vector<Test_Hash::MurmurVector> Test_Hash::murmur_{
     {"", 0, 0},
     {"", 1, 1364076727},
     {"", 4294967295, 2180083513},
@@ -144,7 +144,7 @@ const std::vector<Test_Hash::MurmurVector> Test_Hash::murmur_{
 };
 
 // https://tools.ietf.org/html/rfc6070
-const std::vector<Test_Hash::PbkdfVector> Test_Hash::pbkdf_sha1_{
+const std::pmr::vector<Test_Hash::PbkdfVector> Test_Hash::pbkdf_sha1_{
     {"password", "salt", 1, 20, "0x0c60c80f961f0e71f3a9b524af6012062fe037a6"},
     {"password", "salt", 2, 20, "0xea6c014dc72d6f8ccd1ed92ace1d41f0d8de8957"},
     {"password",
@@ -165,7 +165,7 @@ const std::vector<Test_Hash::PbkdfVector> Test_Hash::pbkdf_sha1_{
 };
 
 // https://github.com/Anti-weakpasswords/PBKDF2-Test-Vectors/releases
-const std::vector<Test_Hash::PbkdfVector> Test_Hash::pbkdf_sha256_{
+const std::pmr::vector<Test_Hash::PbkdfVector> Test_Hash::pbkdf_sha256_{
     {"password",
      "salt",
      1,
@@ -195,7 +195,7 @@ const std::vector<Test_Hash::PbkdfVector> Test_Hash::pbkdf_sha256_{
 };
 
 // https://github.com/Anti-weakpasswords/PBKDF2-Test-Vectors/releases
-const std::vector<Test_Hash::PbkdfVector> Test_Hash::pbkdf_sha512_{
+const std::pmr::vector<Test_Hash::PbkdfVector> Test_Hash::pbkdf_sha512_{
     {"password",
      "salt",
      1,
@@ -223,7 +223,7 @@ const std::vector<Test_Hash::PbkdfVector> Test_Hash::pbkdf_sha512_{
 };
 
 // https://tools.ietf.org/html/rfc7914
-const std::vector<Test_Hash::ScryptVector> Test_Hash::scrypt_rfc7914_{
+const std::pmr::vector<Test_Hash::ScryptVector> Test_Hash::scrypt_rfc7914_{
     {"",
      "",
      16,
@@ -259,7 +259,7 @@ const std::vector<Test_Hash::ScryptVector> Test_Hash::scrypt_rfc7914_{
 };
 
 // https://www.litecoin.info/index.php/Block_hashing_algorithm
-const std::vector<Test_Hash::ScryptVector> Test_Hash::scrypt_litecoin_{
+const std::pmr::vector<Test_Hash::ScryptVector> Test_Hash::scrypt_litecoin_{
     {"01000000ae178934851bfa0e83ccb6a3fc4bfddff3641e104b6c4680c31509074e699be2b"
      "d672d8d2199ef37a59678f92443083e3b85edef8b45c71759371f823bab59a97126614f44"
      "d5001d45920180",
@@ -272,7 +272,7 @@ const std::vector<Test_Hash::ScryptVector> Test_Hash::scrypt_litecoin_{
 };
 
 // https://www.di-mgt.com.au/sha_testvectors.html
-const std::vector<Nist> Test_Hash::nist_hashes_{
+const std::pmr::vector<Nist> Test_Hash::nist_hashes_{
     {"abc",
      "a9993e364706816aba3e25717850c26c9cd0d89d",
      "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad",
@@ -310,7 +310,7 @@ const Nist Test_Hash::nist_one_gigabyte_{
 // https://github.com/P-H-C/phc-winner-argon2/blob/master/src/test.c
 // Modified salt length and iteration count to correspond to libsodium
 // requirements Checked against https://argon2.online/
-const std::vector<Test_Hash::ArgonVector> Test_Hash::argon_2i_{
+const std::pmr::vector<Test_Hash::ArgonVector> Test_Hash::argon_2i_{
     {4,
      (1 << 16) << 10,  // 65536 KiB
      1,
@@ -357,7 +357,7 @@ const std::vector<Test_Hash::ArgonVector> Test_Hash::argon_2i_{
 // https://github.com/P-H-C/phc-winner-argon2/blob/master/src/test.c
 // Modified salt length to correspond to libsodium requirements
 // Checked against https://argon2.online/
-const std::vector<Test_Hash::ArgonVector> Test_Hash::argon_2id_{
+const std::pmr::vector<Test_Hash::ArgonVector> Test_Hash::argon_2id_{
     {2,
      (1 << 16) << 10,  // 65536 KiB
      1,
@@ -553,7 +553,7 @@ TEST_F(Test_Hash, nist_million_characters)
     auto calculatedSha512 = ot::Data::Factory();
     constexpr auto copies = std::size_t{1000000};
     const auto& character = input.at(0);
-    const std::vector<char> preimage(copies, character);
+    const std::pmr::vector<char> preimage(copies, character);
     const auto view = ot::ReadView{preimage.data(), preimage.size()};
 
     ASSERT_EQ(preimage.size(), copies);
@@ -583,7 +583,7 @@ TEST_F(Test_Hash, nist_gigabyte_string)
     auto calculatedSha512 = ot::Data::Factory();
     constexpr auto copies = std::size_t{16777216u};
     constexpr auto size = std::size_t{1073741824u};
-    auto preimage = std::vector<char>{};
+    auto preimage = std::pmr::vector<char>{};
     preimage.reserve(size);
     const auto start = input.data();
     const auto end = input.data() + input.size();

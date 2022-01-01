@@ -33,9 +33,9 @@ class OPENTXS_EXPORT Profile : virtual public List
 {
 public:
     using ItemType = std::pair<contact::ClaimType, std::string>;
-    using ItemTypeList = std::vector<ItemType>;
+    using ItemTypeList = std::pmr::vector<ItemType>;
     using SectionType = std::pair<contact::SectionType, std::string>;
-    using SectionTypeList = std::vector<SectionType>;
+    using SectionTypeList = std::pmr::vector<SectionType>;
 
     virtual auto AddClaim(
         const contact::SectionType section,

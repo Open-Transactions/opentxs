@@ -61,22 +61,22 @@ Wallet::Wallet(
 
 auto Wallet::AssociateTransaction(
     const Txid& txid,
-    const std::vector<PatternID>& in) const noexcept -> bool
+    const std::pmr::vector<PatternID>& in) const noexcept -> bool
 {
     LogTrace()(OT_PRETTY_CLASS())("Transaction ")(txid.asHex())(
         " is associated with patterns:")
         .Flush();
     // TODO transaction data never changes so indexing should only happen
     // once.
-    auto incoming = std::set<PatternID>{};
+    auto incoming = std::pmr::set<PatternID>{};
     std::for_each(std::begin(in), std::end(in), [&](auto& pattern) {
         incoming.emplace(pattern);
         LogTrace()("    * ")(pattern).Flush();
     });
     Lock lock(lock_);
     auto& existing = transaction_to_patterns_[txid];
-    auto newElements = std::vector<PatternID>{};
-    auto removedElements = std::vector<PatternID>{};
+    auto newElements = std::pmr::vector<PatternID>{};
+    auto removedElements = std::pmr::vector<PatternID>{};
     std::set_difference(
         std::begin(incoming),
         std::end(incoming),
@@ -152,7 +152,7 @@ auto Wallet::LoadTransaction(const ReadView txid) const noexcept
 }
 
 auto Wallet::LookupContact(const Data& pubkeyHash) const noexcept
-    -> std::set<OTIdentifier>
+    -> std::pmr::set<OTIdentifier>
 {
     Lock lock(lock_);
 
@@ -160,9 +160,9 @@ auto Wallet::LookupContact(const Data& pubkeyHash) const noexcept
 }
 
 auto Wallet::LookupTransactions(const PatternID pattern) const noexcept
-    -> std::vector<pTxid>
+    -> std::pmr::vector<pTxid>
 {
-    auto output = std::vector<pTxid>{};
+    auto output = std::pmr::vector<pTxid>{};
 
     try {
         const auto& data = pattern_to_transactions_.at(pattern);
@@ -246,13 +246,13 @@ auto Wallet::StoreTransaction(
 
 auto Wallet::update_contact(
     const Lock& lock,
-    const std::set<OTData>& existing,
-    const std::set<OTData>& incoming,
-    const Identifier& contactID) const noexcept -> std::vector<pTxid>
+    const std::pmr::set<OTData>& existing,
+    const std::pmr::set<OTData>& incoming,
+    const Identifier& contactID) const noexcept -> std::pmr::vector<pTxid>
 {
-    auto newAddresses = std::vector<OTData>{};
-    auto removedAddresses = std::vector<OTData>{};
-    auto output = std::vector<pTxid>{};
+    auto newAddresses = std::pmr::vector<OTData>{};
+    auto removedAddresses = std::pmr::vector<OTData>{};
+    auto output = std::pmr::vector<pTxid>{};
     std::set_difference(
         std::begin(incoming),
         std::end(incoming),
@@ -303,9 +303,9 @@ auto Wallet::update_contact(
 }
 
 auto Wallet::UpdateContact(const opentxs::contact::Contact& contact)
-    const noexcept -> std::vector<pTxid>
+    const noexcept -> std::pmr::vector<pTxid>
 {
-    auto incoming = std::set<OTData>{};
+    auto incoming = std::pmr::set<OTData>{};
 
     {
         auto data = contact.BlockchainAddresses();
@@ -326,10 +326,11 @@ auto Wallet::UpdateContact(const opentxs::contact::Contact& contact)
 
 auto Wallet::UpdateMergedContact(
     const opentxs::contact::Contact& parent,
-    const opentxs::contact::Contact& child) const noexcept -> std::vector<pTxid>
+    const opentxs::contact::Contact& child) const noexcept
+    -> std::pmr::vector<pTxid>
 {
-    auto deleted = std::set<OTData>{};
-    auto incoming = std::set<OTData>{};
+    auto deleted = std::pmr::set<OTData>{};
+    auto incoming = std::pmr::set<OTData>{};
 
     {
         auto data = child.BlockchainAddresses();

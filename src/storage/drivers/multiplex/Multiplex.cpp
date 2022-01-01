@@ -350,8 +350,8 @@ auto Multiplex::Store(
 {
     OT_ASSERT(primary_plugin_);
 
-    std::vector<std::promise<bool>> promises{};
-    std::vector<std::future<bool>> futures{};
+    std::pmr::vector<std::promise<bool>> promises{};
+    std::pmr::vector<std::future<bool>> futures{};
     promises.push_back(std::promise<bool>());
     auto& primaryPromise = promises.back();
     futures.push_back(primaryPromise.get_future());

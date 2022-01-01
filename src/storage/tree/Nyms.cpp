@@ -77,7 +77,7 @@ void Nyms::init(const std::string& hash)
     }
 }
 
-auto Nyms::LocalNyms() const -> const std::set<std::string>
+auto Nyms::LocalNyms() const -> const std::pmr::set<std::string>
 {
     return local_nyms_;
 }
@@ -161,7 +161,7 @@ auto Nyms::RelabelThread(const std::string& threadID, const std::string label)
     -> bool
 {
     Lock lock(write_lock_);
-    std::set<std::string> nyms{};
+    std::pmr::set<std::string> nyms{};
 
     for (const auto& it : item_map_) {
         const auto& nymID = it.first;

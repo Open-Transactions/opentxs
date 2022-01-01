@@ -47,20 +47,21 @@ public:
     auto Find(
         const Chain chain,
         const Protocol protocol,
-        const std::set<Type> onNetworks,
-        const std::set<Service> withServices) const noexcept -> Address_p;
+        const std::pmr::set<Type> onNetworks,
+        const std::pmr::set<Service> withServices) const noexcept -> Address_p;
 
-    auto Import(std::vector<Address_p> peers) noexcept -> bool;
+    auto Import(std::pmr::vector<Address_p> peers) noexcept -> bool;
     auto Insert(Address_p address) noexcept -> bool;
 
     Peers(const api::Session& api, storage::lmdb::LMDB& lmdb) noexcept(false);
 
 private:
-    using ChainIndexMap = std::map<Chain, std::set<std::string>>;
-    using ProtocolIndexMap = std::map<Protocol, std::set<std::string>>;
-    using ServiceIndexMap = std::map<Service, std::set<std::string>>;
-    using TypeIndexMap = std::map<Type, std::set<std::string>>;
-    using ConnectedIndexMap = std::map<std::string, Time>;
+    using ChainIndexMap = std::pmr::map<Chain, std::pmr::set<std::string>>;
+    using ProtocolIndexMap =
+        std::pmr::map<Protocol, std::pmr::set<std::string>>;
+    using ServiceIndexMap = std::pmr::map<Service, std::pmr::set<std::string>>;
+    using TypeIndexMap = std::pmr::map<Type, std::pmr::set<std::string>>;
+    using ConnectedIndexMap = std::pmr::map<std::string, Time>;
 
     const api::Session& api_;
     storage::lmdb::LMDB& lmdb_;
@@ -71,7 +72,7 @@ private:
     TypeIndexMap networks_;
     ConnectedIndexMap connected_;
 
-    auto insert(const Lock& lock, std::vector<Address_p> peers) noexcept
+    auto insert(const Lock& lock, std::pmr::vector<Address_p> peers) noexcept
         -> bool;
     auto load_address(const std::string& id) const noexcept(false) -> Address_p;
     template <typename Index, typename Map>

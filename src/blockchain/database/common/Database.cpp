@@ -22,6 +22,7 @@ extern "C" {
 #include <map>
 #include <optional>
 #include <stdexcept>
+#include <type_traits>
 #include <utility>
 
 #include "blockchain/database/common/BlockFilter.hpp"
@@ -317,7 +318,7 @@ struct Database::Imp {
               }(),
               0,
               [&] {
-                  auto deleted = std::vector<Table>{};
+                  auto deleted = std::pmr::vector<Table>{};
                   deleted.emplace_back(Table::BlockHeadersDeleted);
                   deleted.emplace_back(Table::FiltersBasicDeleted);
                   deleted.emplace_back(Table::FiltersBCHDeleted);
@@ -402,7 +403,7 @@ auto Database::AllocateStorageFolder(const std::string& dir) const noexcept
 
 auto Database::AssociateTransaction(
     const Txid& txid,
-    const std::vector<PatternID>& patterns) const noexcept -> bool
+    const std::pmr::vector<PatternID>& patterns) const noexcept -> bool
 {
     return imp_.wallet_.AssociateTransaction(txid, patterns);
 }
@@ -473,8 +474,8 @@ auto Database::Enable(const Chain type, const std::string& seednode)
 auto Database::Find(
     const Chain chain,
     const Protocol protocol,
-    const std::set<Type> onNetworks,
-    const std::set<Service> withServices) const noexcept -> Address_p
+    const std::pmr::set<Type> onNetworks,
+    const std::pmr::set<Service> withServices) const noexcept -> Address_p
 {
     return imp_.peers_.Find(chain, protocol, onNetworks, withServices);
 }
@@ -502,7 +503,7 @@ auto Database::HaveFilterHeader(
     return imp_.filters_.HaveFilterHeader(type, blockHash);
 }
 
-auto Database::Import(std::vector<Address_p> peers) const noexcept -> bool
+auto Database::Import(std::pmr::vector<Address_p> peers) const noexcept -> bool
 {
     return imp_.peers_.Import(std::move(peers));
 }
@@ -542,7 +543,7 @@ auto Database::LoadTransaction(const ReadView txid) const noexcept
 }
 
 auto Database::LookupContact(const Data& pubkeyHash) const noexcept
-    -> std::set<OTIdentifier>
+    -> std::pmr::set<OTIdentifier>
 {
     return imp_.wallet_.LookupContact(pubkeyHash);
 }
@@ -556,14 +557,15 @@ auto Database::LoadSync(
 }
 
 auto Database::LookupTransactions(const PatternID pattern) const noexcept
-    -> std::vector<pTxid>
+    -> std::pmr::vector<pTxid>
 {
     return imp_.wallet_.LookupTransactions(pattern);
 }
 
-auto Database::LoadEnabledChains() const noexcept -> std::vector<EnabledChain>
+auto Database::LoadEnabledChains() const noexcept
+    -> std::pmr::vector<EnabledChain>
 {
-    auto output = std::vector<EnabledChain>{};
+    auto output = std::pmr::vector<EnabledChain>{};
     const auto cb = [&](const auto key, const auto value) -> bool {
         if (0 == value.size()) { return true; }
 
@@ -613,22 +615,22 @@ auto Database::StoreBlockHeaders(const UpdatedHeader& headers) const noexcept
 
 auto Database::StoreFilterHeaders(
     const filter::Type type,
-    const std::vector<FilterHeader>& headers) const noexcept -> bool
+    const std::pmr::vector<FilterHeader>& headers) const noexcept -> bool
 {
     return imp_.filters_.StoreFilterHeaders(type, headers);
 }
 
 auto Database::StoreFilters(
     const filter::Type type,
-    std::vector<FilterData>& filters) const noexcept -> bool
+    std::pmr::vector<FilterData>& filters) const noexcept -> bool
 {
     return imp_.filters_.StoreFilters(type, filters);
 }
 
 auto Database::StoreFilters(
     const filter::Type type,
-    const std::vector<FilterHeader>& headers,
-    const std::vector<FilterData>& filters) const noexcept -> bool
+    const std::pmr::vector<FilterHeader>& headers,
+    const std::pmr::vector<FilterData>& filters) const noexcept -> bool
 {
     return imp_.filters_.StoreFilters(type, headers, filters);
 }
@@ -651,14 +653,14 @@ auto Database::SyncTip(const Chain chain) const noexcept -> Height
 }
 
 auto Database::UpdateContact(const contact::Contact& contact) const noexcept
-    -> std::vector<pTxid>
+    -> std::pmr::vector<pTxid>
 {
     return imp_.wallet_.UpdateContact(contact);
 }
 
 auto Database::UpdateMergedContact(
     const contact::Contact& parent,
-    const contact::Contact& child) const noexcept -> std::vector<pTxid>
+    const contact::Contact& child) const noexcept -> std::pmr::vector<pTxid>
 {
     return imp_.wallet_.UpdateMergedContact(parent, child);
 }

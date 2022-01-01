@@ -34,7 +34,7 @@ class Dht : virtual public network::Dht
 {
 public:
     using NotifyCB = std::function<void(const std::string)>;
-    using CallbackMap = std::map<contract::Type, NotifyCB>;
+    using CallbackMap = std::pmr::map<contract::Type, NotifyCB>;
 
     auto Internal() const noexcept -> const internal::Dht& final
     {

@@ -648,7 +648,7 @@ auto OTMarket::GetOfferList(
 // the
 // order received for that price.
 //
-// typedef std::multimap<std::int64_t, OTOffer *>    mapOfOffers;
+// typedef std::pmr::multimap<std::int64_t, OTOffer *>    mapOfOffers;
 // mapOfOffers    m_mapBids; // The buyers, ordered
 // mapOfOffers    m_mapAsks; // The sellers, ordered
 

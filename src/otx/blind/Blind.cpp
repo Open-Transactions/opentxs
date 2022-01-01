@@ -8,6 +8,7 @@
 #include "internal/otx/blind/Types.hpp"  // IWYU pragma: associated
 
 #include <robin_hood.h>
+#include <memory_resource>  // IWYU pragma: keep
 #include <set>
 #include <string>
 
@@ -95,7 +96,7 @@ auto print(otx::blind::CashType in) noexcept -> std::string
     }
 }
 
-auto supported_otx_token_types() noexcept -> std::set<otx::blind::CashType>
+auto supported_otx_token_types() noexcept -> std::pmr::set<otx::blind::CashType>
 {
     return {otx::blind::CashType::Lucre};
 }

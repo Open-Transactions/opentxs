@@ -93,13 +93,14 @@ public:
     virtual auto clone() const noexcept -> Imp* = 0;
     virtual auto DecodeNotificationElements(
         const std::uint8_t version,
-        const std::vector<Space>& elements,
+        const std::pmr::vector<Space>& elements,
         const PasswordPrompt& reason) const noexcept
         -> opentxs::PaymentCode = 0;
     virtual auto GenerateNotificationElements(
         const opentxs::PaymentCode& recipient,
         const crypto::key::EllipticCurve& privateKey,
-        const PasswordPrompt& reason) const noexcept -> std::vector<Space> = 0;
+        const PasswordPrompt& reason) const noexcept
+        -> std::pmr::vector<Space> = 0;
     virtual auto ID() const noexcept -> const identifier::Nym& = 0;
     virtual auto Incoming(
         const opentxs::PaymentCode& sender,
@@ -192,7 +193,7 @@ public:
     auto clone() const noexcept -> PaymentCode* final { return {}; }
     auto DecodeNotificationElements(
         const std::uint8_t,
-        const std::vector<Space>&,
+        const std::pmr::vector<Space>&,
         const PasswordPrompt&) const noexcept -> opentxs::PaymentCode final
     {
         return std::make_unique<PaymentCode>().release();
@@ -200,7 +201,7 @@ public:
     auto GenerateNotificationElements(
         const opentxs::PaymentCode&,
         const crypto::key::EllipticCurve&,
-        const PasswordPrompt&) const noexcept -> std::vector<Space> final
+        const PasswordPrompt&) const noexcept -> std::pmr::vector<Space> final
     {
         return {};
     }

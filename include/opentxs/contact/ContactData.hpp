@@ -52,7 +52,7 @@ class OPENTXS_EXPORT ContactData
 {
 public:
     using SectionMap =
-        std::map<contact::SectionType, std::shared_ptr<ContactSection>>;
+        std::pmr::map<contact::SectionType, std::shared_ptr<ContactSection>>;
 
     OPENTXS_NO_EXPORT static auto PrintContactData(
         const proto::ContactData& data) -> std::string;
@@ -113,7 +113,7 @@ public:
         -> std::string;
     auto Claim(const Identifier& item) const -> std::shared_ptr<ContactItem>;
     auto Contracts(const core::UnitType currency, const bool onlyActive) const
-        -> std::set<OTIdentifier>;
+        -> std::pmr::set<OTIdentifier>;
     auto Delete(const Identifier& id) const -> ContactData;
     auto EmailAddresses(bool active = true) const -> std::string;
     auto end() const -> SectionMap::const_iterator;
@@ -142,7 +142,8 @@ public:
         -> ContactData;
     auto SocialMediaProfiles(const contact::ClaimType type, bool active = true)
         const -> std::string;
-    auto SocialMediaProfileTypes() const -> const std::set<contact::ClaimType>;
+    auto SocialMediaProfileTypes() const
+        -> const std::pmr::set<contact::ClaimType>;
     auto Type() const -> contact::ClaimType;
     auto Version() const -> VersionNumber;
 

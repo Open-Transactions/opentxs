@@ -82,7 +82,7 @@ private:
     std::string folder_;
     mutable std::mutex transaction_lock_;
     mutable OTFlag transaction_bucket_;
-    mutable std::vector<std::pair<const std::string, const std::string>>
+    mutable std::pmr::vector<std::pair<const std::string, const std::string>>
         pending_;
     sqlite3* db_{nullptr};
 

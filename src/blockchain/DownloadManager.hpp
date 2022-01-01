@@ -33,7 +33,7 @@ class Manager
 {
 public:
     using Position = block::Position;
-    using Positions = std::vector<Position>;
+    using Positions = std::pmr::vector<Position>;
     using BatchType = Batch<DownloadType, FinishedType, ExtraData>;
     using Finished = typename BatchType::TaskType::Finished;
     using PreviousData = std::pair<Position, Finished>;
@@ -282,7 +282,7 @@ private:
     };
 
     using TaskPtr = std::shared_ptr<TaskType>;
-    using Buffer = std::deque<TaskPtr>;
+    using Buffer = std::pmr::deque<TaskPtr>;
     using BatchID = typename BatchType::ID;
 
     const std::string log_;

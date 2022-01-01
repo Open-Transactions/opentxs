@@ -38,7 +38,7 @@ namespace crypto
 class OPENTXS_EXPORT Deterministic : virtual public Subaccount
 {
 public:
-    using Batch = std::vector<Bip32Index>;
+    using Batch = std::pmr::vector<Bip32Index>;
 
     virtual auto Floor(const Subchain type) const noexcept
         -> std::optional<Bip32Index> = 0;

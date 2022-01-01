@@ -43,7 +43,7 @@ public:
     struct Imp;
 
     using Chain = opentxs::blockchain::Type;
-    using Endpoints = std::vector<std::string>;
+    using Endpoints = std::pmr::vector<std::string>;
 
     auto AddSyncServer(const std::string& endpoint) const noexcept -> bool;
     auto ConnectedSyncServers() const noexcept -> Endpoints;
@@ -51,7 +51,7 @@ public:
     auto Disable(const Chain type) const noexcept -> bool;
     auto Enable(const Chain type, const std::string& seednode = "")
         const noexcept -> bool;
-    auto EnabledChains() const noexcept -> std::set<Chain>;
+    auto EnabledChains() const noexcept -> std::pmr::set<Chain>;
     /// throws std::out_of_range if chain has not been started
     auto GetChain(const Chain type) const noexcept(false)
         -> const opentxs::blockchain::node::Manager&;

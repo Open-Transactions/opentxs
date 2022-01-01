@@ -56,7 +56,7 @@ public:
     auto Add(BatchID id, StartArgs&& args) noexcept -> bool;
     auto Modify(SocketID socket, ModifyCallback cb) noexcept
         -> AsyncResult final;
-    auto Remove(BatchID id, std::vector<socket::Raw*>&& sockets) noexcept
+    auto Remove(BatchID id, std::pmr::vector<socket::Raw*>&& sockets) noexcept
         -> std::future<bool>;
     auto Shutdown() noexcept -> void;
 
@@ -71,8 +71,8 @@ private:
         std::thread handle_{};
     };
     struct Items {
-        using ItemVector = std::vector<zmq_pollitem_t>;
-        using DataVector = std::vector<ReceiveCallback>;
+        using ItemVector = std::pmr::vector<zmq_pollitem_t>;
+        using DataVector = std::pmr::vector<ReceiveCallback>;
 
         ItemVector items_{};
         DataVector data_{};

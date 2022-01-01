@@ -866,7 +866,7 @@ auto OT_API::SmartContract_ConfirmAccount(
     // By this point, nymfile is a good pointer, and is on the wallet. (No need
     // to
     // cleanup.)
-    const auto accountID = api_.Factory().Identifier(ACCT_ID);
+    const auto accountID = api_.Factory().IdentifierFromBase58(ACCT_ID);
     auto account = api_.Wallet().Internal().Account(accountID);
 
     if (false == bool(account)) return false;
@@ -2894,7 +2894,7 @@ auto OT_API::exchangeBasket(
         return output;
     }
 
-    std::set<OTManagedNumber> managed{};
+    std::pmr::set<OTManagedNumber> managed{};
     managed.emplace(
         context.NextTransactionNumber(MessageType::notarizeTransaction));
     auto& managedNumber = *managed.rbegin();
@@ -3150,7 +3150,7 @@ auto OT_API::payDividend(
         return output;
     }
 
-    std::set<OTManagedNumber> managed{};
+    std::pmr::set<OTManagedNumber> managed{};
     managed.insert(
         context.NextTransactionNumber(MessageType::notarizeTransaction));
     auto& managedNumber = *managed.rbegin();
@@ -3867,7 +3867,8 @@ auto OT_API::activateSmartContract(
         return output;
     }
 
-    const auto accountID = api_.Factory().Identifier(account->GetAcctID());
+    const auto accountID =
+        api_.Factory().IdentifierFromBase58(account->GetAcctID());
 
     if (accountID->empty()) {
         LogError()(OT_PRETTY_CLASS())("Failed. The Account ID is "
@@ -4079,7 +4080,7 @@ auto OT_API::cancelCronItem(
         return output;
     }
 
-    std::set<OTManagedNumber> managed{};
+    std::pmr::set<OTManagedNumber> managed{};
     managed.insert(
         context.NextTransactionNumber(MessageType::notarizeTransaction));
     auto& managedNumber = *managed.rbegin();
@@ -4243,7 +4244,7 @@ auto OT_API::issueMarketOffer(
         return output;
     }
 
-    std::set<OTManagedNumber> managed{};
+    std::pmr::set<OTManagedNumber> managed{};
     managed.insert(
         context.NextTransactionNumber(MessageType::notarizeTransaction));
     auto& openingNumber = *managed.rbegin();
@@ -5047,8 +5048,8 @@ auto OT_API::FinalizeProcessInbox(
 
     bool allFound{true};
     Amount totalAccepted{0};
-    std::set<TransactionNumber> issuedClosing{};
-    std::set<TransactionNumber> inboxRemoving{};
+    std::pmr::set<TransactionNumber> issuedClosing{};
+    std::pmr::set<TransactionNumber> inboxRemoving{};
 
     for (auto& acceptItem : processInbox->GetItemList()) {
         OT_ASSERT(acceptItem);
@@ -5169,7 +5170,7 @@ auto OT_API::find_cron(
     OTTransaction& serverTransaction,
     Ledger& inbox,
     Amount& amount,
-    std::set<TransactionNumber>& closing) const -> bool
+    std::pmr::set<TransactionNumber>& closing) const -> bool
 {
     const auto type = item.GetType();
 
@@ -5180,7 +5181,7 @@ auto OT_API::find_cron(
             const auto openingNumber = serverTransaction.GetReferenceToNum();
             const auto inboxCount = static_cast<std::size_t>(
                 inbox.GetTransactionCountInRefTo(openingNumber));
-            std::set<TransactionNumber> referenceNumbers;
+            std::pmr::set<TransactionNumber> referenceNumbers;
 
             for (const auto& acceptItem : processInbox.GetItemList()) {
                 OT_ASSERT(nullptr != acceptItem);
@@ -5241,7 +5242,7 @@ auto OT_API::find_standard(
     OTTransaction& serverTransaction,
     Ledger& inbox,
     Amount& amount,
-    std::set<TransactionNumber>& closing) const -> bool
+    std::pmr::set<TransactionNumber>& closing) const -> bool
 {
     auto reason = api_.Factory().PasswordPrompt(__func__);
     const auto& notaryID = context.Notary();

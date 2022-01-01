@@ -14,9 +14,7 @@
 #include <iosfwd>
 #include <iostream>
 #include <iterator>
-#include <map>
 #include <memory>
-#include <set>
 #include <sstream>
 #include <stdexcept>
 #include <type_traits>
@@ -55,8 +53,6 @@
 #include "serialization/protobuf/Identifier.pb.h"
 
 template class opentxs::Pimpl<opentxs::Identifier>;
-template class std::set<opentxs::OTIdentifier>;
-template class std::map<opentxs::OTIdentifier, std::set<opentxs::OTIdentifier>>;
 
 namespace std
 {

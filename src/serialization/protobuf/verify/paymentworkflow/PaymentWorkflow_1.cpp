@@ -80,7 +80,7 @@ auto CheckProto_1(const PaymentWorkflow& input, const bool silent) -> bool
 
     CHECK_SUBOBJECTS(source, PaymentWorkflowAllowedInstrumentRevision())
     CHECK_IDENTIFIERS(party)
-    std::map<PaymentEventType, std::size_t> events{};
+    std::pmr::map<PaymentEventType, std::size_t> events{};
 
     for (const auto& it : input.event()) {
         try {

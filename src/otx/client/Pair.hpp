@@ -107,7 +107,7 @@ public:
         const identifier::Nym& localNymID,
         const identifier::Nym& issuerNymID) const noexcept -> std::string final;
     auto IssuerList(const identifier::Nym& localNymID, const bool onlyTrusted)
-        const noexcept -> std::set<OTNymID> final
+        const noexcept -> std::pmr::set<OTNymID> final
     {
         return state_.IssuerList(localNymID, onlyTrusted);
     }
@@ -151,19 +151,20 @@ private:
             Trusted,
             OfferedCurrencies,
             RegisteredAccounts,
-            std::vector<AccountDetails>,
-            std::vector<api::session::OTX::BackgroundTask>,
+            std::pmr::vector<AccountDetails>,
+            std::pmr::vector<api::session::OTX::BackgroundTask>,
             NeedRename>;
-        using StateMap = std::map<IssuerID, Details>;
+        using StateMap = std::pmr::map<IssuerID, Details>;
 
         static auto count_currencies(
-            const std::vector<AccountDetails>& in) noexcept -> std::size_t;
+            const std::pmr::vector<AccountDetails>& in) noexcept -> std::size_t;
         static auto count_currencies(const contact::ContactSection& in) noexcept
             -> std::size_t;
         static auto get_account(
             const identifier::UnitDefinition& unit,
             const Identifier& account,
-            std::vector<AccountDetails>& details) noexcept -> AccountDetails&;
+            std::pmr::vector<AccountDetails>& details) noexcept
+            -> AccountDetails&;
 
         auto CheckIssuer(const identifier::Nym& id) const noexcept -> bool;
         auto check_state() const noexcept -> bool;
@@ -187,7 +188,7 @@ private:
 
         auto IssuerList(
             const identifier::Nym& localNymID,
-            const bool onlyTrusted) const noexcept -> std::set<OTNymID>;
+            const bool onlyTrusted) const noexcept -> std::pmr::set<OTNymID>;
 
         State(std::mutex& lock, const api::session::Client& client) noexcept;
 
@@ -195,7 +196,7 @@ private:
         std::mutex& lock_;
         const api::session::Client& client_;
         mutable StateMap state_;
-        std::set<OTNymID> issuers_;
+        std::pmr::set<OTNymID> issuers_;
     };
 
     const Flag& running_;
@@ -218,7 +219,7 @@ private:
         const identifier::Server& serverID,
         std::size_t& offered,
         std::size_t& registeredAccounts,
-        std::vector<State::AccountDetails>& accountDetails) const noexcept;
+        std::pmr::vector<State::AccountDetails>& accountDetails) const noexcept;
     void check_connection_info(
         otx::client::Issuer& issuer,
         const identifier::Server& serverID) const noexcept;

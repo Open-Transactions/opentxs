@@ -185,7 +185,7 @@ auto BloomFilter::Serialize(AllocateOutput out) const noexcept -> bool
         static constexpr auto fixed =
             sizeof(blockchain::internal::SerializedBloomFilter);
         const auto filter = [&] {
-            auto out = std::vector<std::uint8_t>{};
+            auto out = std::pmr::vector<std::uint8_t>{};
             boost::to_block_range(filter_, std::back_inserter(out));
 
             return out;

@@ -70,7 +70,7 @@ Contacts::Contacts(const api::session::Client& api)
         auto output = ContactNameMap{};
 
         for (const auto& [id, alias] : api_.Storage().ContactList()) {
-            output.emplace(api_.Factory().Identifier(id), alias);
+            output.emplace(api_.Factory().IdentifierFromBase58(id), alias);
         }
 
         return output;
@@ -183,7 +183,7 @@ auto Contacts::Contact(const Identifier& id) const
 
 auto Contacts::ContactID(const identifier::Nym& nymID) const -> OTIdentifier
 {
-    return api_.Factory().Identifier(
+    return api_.Factory().IdentifierFromBase58(
         api_.Storage().ContactOwnerNym(nymID.str()));
 }
 
@@ -347,7 +347,7 @@ void Contacts::init_nym_map(const rLock& lock)
     LogDetail()(OT_PRETTY_CLASS())("Upgrading indices.").Flush();
 
     for (const auto& it : api_.Storage().ContactList()) {
-        const auto& contactID = api_.Factory().Identifier(it.first);
+        const auto& contactID = api_.Factory().IdentifierFromBase58(it.first);
         auto loaded = load_contact(lock, contactID);
 
         if (contact_map_.end() == loaded) {
@@ -551,7 +551,10 @@ auto Contacts::new_contact(
         if (false == contactID.empty()) {
 
             return update_existing_contact(
-                lock, label, code, api_.Factory().Identifier(contactID));
+                lock,
+                label,
+                code,
+                api_.Factory().IdentifierFromBase58(contactID));
         }
     }
 
@@ -841,7 +844,8 @@ auto Contacts::Update(const identity::Nym& nym) const
     const auto& nymID = nym.ID();
     auto lock = rLock{lock_};
     const auto contactIdentifier = api_.Storage().ContactOwnerNym(nymID.str());
-    const auto contactID = api_.Factory().Identifier(contactIdentifier);
+    const auto contactID =
+        api_.Factory().IdentifierFromBase58(contactIdentifier);
     const auto label = contact::Contact::ExtractLabel(nym);
 
     if (contactIdentifier.empty()) {
@@ -923,7 +927,8 @@ void Contacts::update_nym_map(
     const auto contactIdentifier = api_.Storage().ContactOwnerNym(nymID.str());
     const bool exists = (false == contactIdentifier.empty());
     const auto& incomingID = contact.ID();
-    const auto contactID = api_.Factory().Identifier(contactIdentifier);
+    const auto contactID =
+        api_.Factory().IdentifierFromBase58(contactIdentifier);
     const bool same = (incomingID == contactID);
 
     if (exists && (false == same)) {

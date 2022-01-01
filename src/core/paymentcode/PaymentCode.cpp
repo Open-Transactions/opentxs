@@ -128,7 +128,7 @@ auto PaymentCode::BlindV3(
 
 auto PaymentCode::DecodeNotificationElements(
     const std::uint8_t version,
-    const std::vector<Space>& elements,
+    const std::pmr::vector<Space>& elements,
     const PasswordPrompt& reason) const noexcept -> opentxs::PaymentCode
 {
     return imp_->DecodeNotificationElements(version, elements, reason);
@@ -139,7 +139,7 @@ auto PaymentCode::DefaultVersion() noexcept -> VersionNumber { return 3; }
 auto PaymentCode::GenerateNotificationElements(
     const PaymentCode& recipient,
     const crypto::key::EllipticCurve& privateKey,
-    const PasswordPrompt& reason) const noexcept -> std::vector<Space>
+    const PasswordPrompt& reason) const noexcept -> std::pmr::vector<Space>
 {
     return imp_->GenerateNotificationElements(recipient, privateKey, reason);
 }

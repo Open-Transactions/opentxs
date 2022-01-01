@@ -67,7 +67,7 @@ Contract::Contract(
     , m_strName(name)
     , m_strFoldername(foldername)
     , m_strFilename(filename)
-    , m_ID(api_.Factory().Identifier(strID))
+    , m_ID(api_.Factory().IdentifierFromBase58(strID))
     , m_xmlUnsigned(StringXML::Factory())
     , m_strRawFile(String::Factory())
     , m_strSigHashType(crypto::HashType::Error)

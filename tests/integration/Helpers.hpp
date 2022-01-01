@@ -83,10 +83,10 @@ using WidgetCallback = std::function<bool()>;
 using WidgetCallbackData = std::tuple<int, WidgetCallback, std::promise<bool>>;
 // name, counter
 using WidgetData = std::tuple<Widget, int, WidgetCallbackData>;
-using WidgetMap = std::map<ot::OTIdentifier, WidgetData>;
-using WidgetTypeMap = std::map<Widget, ot::OTIdentifier>;
-using StateMap =
-    std::map<std::string, std::map<Widget, std::map<int, WidgetCallback>>>;
+using WidgetMap = std::pmr::map<ot::OTIdentifier, WidgetData>;
+using WidgetTypeMap = std::pmr::map<Widget, ot::OTIdentifier>;
+using StateMap = std::pmr::
+    map<std::string, std::pmr::map<Widget, std::pmr::map<int, WidgetCallback>>>;
 
 struct Server {
     const ot::api::session::Notary* api_{nullptr};
@@ -164,8 +164,8 @@ struct User {
 
 private:
     mutable std::mutex lock_;
-    mutable std::map<std::string, ot::OTIdentifier> contacts_;
-    mutable std::map<std::string, ot::OTIdentifier> accounts_;
+    mutable std::pmr::map<std::string, ot::OTIdentifier> contacts_;
+    mutable std::pmr::map<std::string, ot::OTIdentifier> accounts_;
 
     auto init_basic(
         const ot::api::session::Client& api,

@@ -99,39 +99,39 @@ public:
         const PasswordPrompt& reason) const
         -> std::unique_ptr<opentxs::crypto::key::HD> final;
     auto AllowedSeedTypes() const noexcept
-        -> const std::map<opentxs::crypto::SeedStyle, std::string>& final;
+        -> const std::pmr::map<opentxs::crypto::SeedStyle, std::string>& final;
     auto AllowedLanguages(const opentxs::crypto::SeedStyle type) const noexcept
-        -> const std::map<opentxs::crypto::Language, std::string>& final;
+        -> const std::pmr::map<opentxs::crypto::Language, std::string>& final;
     auto AllowedSeedStrength(
-        const opentxs::crypto::SeedStyle type) const noexcept
-        -> const std::map<opentxs::crypto::SeedStrength, std::string>& final;
+        const opentxs::crypto::SeedStyle type) const noexcept -> const
+        std::pmr::map<opentxs::crypto::SeedStrength, std::string>& final;
     auto Bip32Root(const std::string& seedID, const PasswordPrompt& reason)
         const -> std::string final;
     auto DefaultSeed() const -> std::string final;
     auto GetHDKey(
         const std::string& seedID,
         const EcdsaCurve& curve,
-        const std::vector<Bip32Index>& path,
+        const std::pmr::vector<Bip32Index>& path,
         const PasswordPrompt& reason) const
         -> std::unique_ptr<opentxs::crypto::key::HD> final;
     auto GetHDKey(
         const std::string& seedID,
         const EcdsaCurve& curve,
-        const std::vector<Bip32Index>& path,
+        const std::pmr::vector<Bip32Index>& path,
         const opentxs::crypto::key::asymmetric::Role role,
         const PasswordPrompt& reason) const
         -> std::unique_ptr<opentxs::crypto::key::HD> final;
     auto GetHDKey(
         const std::string& seedID,
         const EcdsaCurve& curve,
-        const std::vector<Bip32Index>& path,
+        const std::pmr::vector<Bip32Index>& path,
         const VersionNumber version,
         const PasswordPrompt& reason) const
         -> std::unique_ptr<opentxs::crypto::key::HD> final;
     auto GetHDKey(
         const std::string& seedID,
         const EcdsaCurve& curve,
-        const std::vector<Bip32Index>& path,
+        const std::pmr::vector<Bip32Index>& path,
         const opentxs::crypto::key::asymmetric::Role role,
         const VersionNumber version,
         const PasswordPrompt& reason) const
@@ -184,7 +184,7 @@ public:
         const opentxs::crypto::SeedStyle type,
         const opentxs::crypto::Language lang,
         const std::string_view word) const noexcept
-        -> std::vector<std::string> final;
+        -> std::pmr::vector<std::string> final;
     auto WordCount(
         const opentxs::crypto::SeedStyle type,
         const opentxs::crypto::SeedStrength strength) const noexcept
@@ -204,7 +204,7 @@ public:
     ~Seed() final = default;
 
 private:
-    using SeedMap = std::map<std::string, opentxs::crypto::Seed>;
+    using SeedMap = std::pmr::map<std::string, opentxs::crypto::Seed>;
 
     const api::Session& api_;  // WARNING do not access during construction
     const api::session::Factory& factory_;

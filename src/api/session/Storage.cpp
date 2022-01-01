@@ -161,32 +161,32 @@ auto Storage::AccountUnit(const Identifier& accountID) const -> core::UnitType
     return Root().Tree().Accounts().AccountUnit(accountID);
 }
 
-auto Storage::AccountsByContract(
-    const identifier::UnitDefinition& contract) const -> std::set<OTIdentifier>
+auto Storage::AccountsByContract(const identifier::UnitDefinition& contract)
+    const -> std::pmr::set<OTIdentifier>
 {
     return Root().Tree().Accounts().AccountsByContract(contract);
 }
 
 auto Storage::AccountsByIssuer(const identifier::Nym& issuerNym) const
-    -> std::set<OTIdentifier>
+    -> std::pmr::set<OTIdentifier>
 {
     return Root().Tree().Accounts().AccountsByIssuer(issuerNym);
 }
 
 auto Storage::AccountsByOwner(const identifier::Nym& ownerNym) const
-    -> std::set<OTIdentifier>
+    -> std::pmr::set<OTIdentifier>
 {
     return Root().Tree().Accounts().AccountsByOwner(ownerNym);
 }
 
 auto Storage::AccountsByServer(const identifier::Server& server) const
-    -> std::set<OTIdentifier>
+    -> std::pmr::set<OTIdentifier>
 {
     return Root().Tree().Accounts().AccountsByServer(server);
 }
 
 auto Storage::AccountsByUnit(const core::UnitType unit) const
-    -> std::set<OTIdentifier>
+    -> std::pmr::set<OTIdentifier>
 {
     return Root().Tree().Accounts().AccountsByUnit(unit);
 }
@@ -240,7 +240,7 @@ auto Storage::blockchain_thread_item_id(
 
 auto Storage::BlockchainAccountList(
     const std::string& nymID,
-    const core::UnitType type) const -> std::set<std::string>
+    const core::UnitType type) const -> std::pmr::set<std::string>
 {
     return Root().Tree().Nyms().Nym(nymID).BlockchainAccountList(type);
 }
@@ -253,7 +253,7 @@ auto Storage::BlockchainAccountType(
 }
 
 auto Storage::BlockchainThreadMap(const identifier::Nym& nym, const Data& txid)
-    const noexcept -> std::vector<OTIdentifier>
+    const noexcept -> std::pmr::vector<OTIdentifier>
 {
     const auto& nyms = Root().Tree().Nyms();
 
@@ -267,7 +267,7 @@ auto Storage::BlockchainThreadMap(const identifier::Nym& nym, const Data& txid)
 }
 
 auto Storage::BlockchainTransactionList(
-    const identifier::Nym& nym) const noexcept -> std::vector<OTData>
+    const identifier::Nym& nym) const noexcept -> std::pmr::vector<OTData>
 {
     const auto& nyms = Root().Tree().Nyms();
 
@@ -331,7 +331,7 @@ auto Storage::ContextList(const std::string& nymID) const -> ObjectList
 auto Storage::CreateThread(
     const std::string& nymID,
     const std::string& threadID,
-    const std::set<std::string>& participants) const -> bool
+    const std::pmr::set<std::string>& participants) const -> bool
 {
     const auto id = mutable_Root()
                         .get()
@@ -876,7 +876,7 @@ auto Storage::Load(
     return rc;
 }
 
-auto Storage::LocalNyms() const -> const std::set<std::string>
+auto Storage::LocalNyms() const -> const std::pmr::set<std::string>
 {
     return Root().Tree().Nyms().LocalNyms();
 }
@@ -1100,7 +1100,7 @@ auto Storage::PaymentWorkflowLookup(
 
 auto Storage::PaymentWorkflowsByAccount(
     const std::string& nymID,
-    const std::string& accountID) const -> std::set<std::string>
+    const std::string& accountID) const -> std::pmr::set<std::string>
 {
     if (false == Root().Tree().Nyms().Exists(nymID)) {
         LogError()(OT_PRETTY_CLASS())("Nym ")(nymID)(" doesn't exist.").Flush();
@@ -1116,7 +1116,7 @@ auto Storage::PaymentWorkflowsByState(
     const std::string& nymID,
     const otx::client::PaymentWorkflowType type,
     const otx::client::PaymentWorkflowState state) const
-    -> std::set<std::string>
+    -> std::pmr::set<std::string>
 {
     if (false == Root().Tree().Nyms().Exists(nymID)) {
         LogError()(OT_PRETTY_CLASS())("Nym ")(nymID)(" doesn't exist.").Flush();
@@ -1130,7 +1130,7 @@ auto Storage::PaymentWorkflowsByState(
 
 auto Storage::PaymentWorkflowsByUnit(
     const std::string& nymID,
-    const std::string& unitID) const -> std::set<std::string>
+    const std::string& unitID) const -> std::pmr::set<std::string>
 {
     if (false == Root().Tree().Nyms().Exists(nymID)) {
         LogError()(OT_PRETTY_CLASS())("Nym ")(nymID)(" doesn't exist.").Flush();

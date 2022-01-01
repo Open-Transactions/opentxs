@@ -113,7 +113,7 @@ public:
     ~Notary() final;
 
 private:
-    using MintSeries = std::map<std::string, otx::blind::Mint>;
+    using MintSeries = std::pmr::map<std::string, otx::blind::Mint>;
 
     const OTPasswordPrompt reason_;
     std::unique_ptr<opentxs::server::Server> server_p_;
@@ -124,8 +124,8 @@ private:
     mutable std::mutex mint_lock_;
     mutable std::mutex mint_update_lock_;
     mutable std::mutex mint_scan_lock_;
-    mutable std::map<std::string, MintSeries> mints_;
-    mutable std::deque<std::string> mints_to_check_;
+    mutable std::pmr::map<std::string, MintSeries> mints_;
+    mutable std::pmr::deque<std::string> mints_to_check_;
     mutable std::atomic<std::size_t> mint_key_size_;
 
     auto generate_mint(

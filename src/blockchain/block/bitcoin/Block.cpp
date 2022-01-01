@@ -17,6 +17,7 @@
 #include <iosfwd>
 #include <iterator>
 #include <map>
+#include <memory_resource>
 #include <numeric>
 #include <optional>
 #include <sstream>
@@ -53,7 +54,7 @@ auto BitcoinBlock(
     const opentxs::blockchain::block::Header& previous,
     const Transaction_p pGen,
     const std::uint32_t nBits,
-    const std::vector<Transaction_p>& extra,
+    const std::pmr::vector<Transaction_p>& extra,
     const std::int32_t version,
     const AbortFunction abort) noexcept
     -> std::shared_ptr<const opentxs::blockchain::block::bitcoin::Block>
@@ -360,8 +361,8 @@ auto Block::calculate_merkle_value(
 
     if (1 == txids.size()) { return api.Factory().Data(txids.at(0)); }
 
-    auto a = std::vector<Hash>{};
-    auto b = std::vector<Hash>{};
+    auto a = std::pmr::vector<Hash>{};
+    auto b = std::pmr::vector<Hash>{};
     a.reserve(txids.size());
     b.reserve(txids.size());
     auto counter{0};
@@ -396,9 +397,9 @@ auto Block::calculate_size() const noexcept -> CalculatedSize
 }
 
 auto Block::ExtractElements(const filter::Type style) const noexcept
-    -> std::vector<Space>
+    -> std::pmr::vector<Space>
 {
-    auto output = std::vector<Space>{};
+    auto output = std::pmr::vector<Space>{};
     LogTrace()(OT_PRETTY_CLASS())("processing ")(transactions_.size())(
         " transactions")
         .Flush();

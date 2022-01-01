@@ -196,8 +196,8 @@ struct Accounts::Imp {
     ~Imp() { shutdown(); }
 
 private:
-    using AccountMap = std::map<OTNymID, wallet::Account>;
-    using PCMap = std::map<OTIdentifier, NotificationStateData>;
+    using AccountMap = std::pmr::map<OTNymID, wallet::Account>;
+    using PCMap = std::pmr::map<OTIdentifier, NotificationStateData>;
 
     const api::Session& api_;
     const node::internal::Network& node_;
@@ -217,7 +217,7 @@ private:
     {
         if (!action) { return; }
 
-        auto actors = std::vector<Actor*>{};
+        auto actors = std::pmr::vector<Actor*>{};
 
         for (auto& [nym, account] : map_) { actors.emplace_back(&account); }
 

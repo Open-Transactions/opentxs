@@ -153,8 +153,10 @@ private:
         LatestVersion<opentxs::PaymentCode, opentxs::PaymentCode, Compare>;
 
     VersionNumber version_;
-    mutable std::set<opentxs::blockchain::block::pTxid> outgoing_notifications_;
-    mutable std::set<opentxs::blockchain::block::pTxid> incoming_notifications_;
+    mutable std::pmr::set<opentxs::blockchain::block::pTxid>
+        outgoing_notifications_;
+    mutable std::pmr::set<opentxs::blockchain::block::pTxid>
+        incoming_notifications_;
     mutable Latest local_;
     Latest remote_;
     const OTIdentifier contact_id_;
@@ -167,7 +169,7 @@ private:
     auto has_private(const PasswordPrompt& reason) const noexcept -> bool;
     auto save(const rLock& lock) const noexcept -> bool final;
     auto set_deterministic_contact(
-        std::set<OTIdentifier>& contacts) const noexcept -> void final
+        std::pmr::set<OTIdentifier>& contacts) const noexcept -> void final
     {
         contacts.emplace(get_contact());
     }

@@ -43,9 +43,9 @@ public:
     using Subaccount = ot::blockchain::crypto::SubaccountType;
     using Subchain = ot::blockchain::crypto::Subchain;
     using HDAccountMap =
-        std::map<ot::OTNymID, std::map<Protocol, ot::OTIdentifier>>;
-    using PCAccountMap =
-        std::map<std::string, std::map<std::string, ot::OTIdentifier>>;
+        std::pmr::map<ot::OTNymID, std::pmr::map<Protocol, ot::OTIdentifier>>;
+    using PCAccountMap = std::pmr::
+        map<std::string, std::pmr::map<std::string, ot::OTIdentifier>>;
 
     static constexpr auto chain_{ot::blockchain::Type::UnitTest};
     static constexpr auto pkt_words_{

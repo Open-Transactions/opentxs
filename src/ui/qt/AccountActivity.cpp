@@ -197,7 +197,8 @@ auto AccountActivityQt::sendToContact(
 
     try {
         return imp_->parent_.Send(
-            imp_->parent_.API().Factory().Identifier(contactID.toStdString()),
+            imp_->parent_.API().Factory().IdentifierFromBase58(
+                contactID.toStdString()),
             amount.toStdString(),
             memo.toStdString(),
             static_cast<AccountActivity::Scale>(scale),

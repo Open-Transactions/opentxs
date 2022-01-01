@@ -1061,8 +1061,8 @@ auto OTParty::LoadAndVerifyAssetAccounts(
     mapOfAccounts& map_Accts_Already_Loaded,
     mapOfAccounts& map_NewlyLoaded) -> bool
 {
-    std::set<std::string> theAcctIDSet;  // Make sure all the acct IDs are
-                                         // unique.
+    std::pmr::set<std::string> theAcctIDSet;  // Make sure all the acct IDs are
+                                              // unique.
 
     for (auto& it_acct : m_mapPartyAccounts) {
         const std::string str_acct_name = it_acct.first;

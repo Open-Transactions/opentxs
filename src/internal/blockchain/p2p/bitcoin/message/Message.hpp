@@ -365,14 +365,14 @@ struct Version : virtual public bitcoin::Message {
     virtual auto Height() const noexcept -> block::Height = 0;
     virtual auto LocalAddress() const noexcept -> tcp::endpoint = 0;
     virtual auto LocalServices() const noexcept
-        -> std::set<blockchain::p2p::Service> = 0;
+        -> std::pmr::set<blockchain::p2p::Service> = 0;
     virtual auto Nonce() const noexcept -> p2p::bitcoin::Nonce = 0;
     virtual auto ProtocolVersion() const noexcept
         -> bitcoin::ProtocolVersion = 0;
     virtual auto Relay() const noexcept -> bool = 0;
     virtual auto RemoteAddress() const noexcept -> tcp::endpoint = 0;
     virtual auto RemoteServices() const noexcept
-        -> std::set<blockchain::p2p::Service> = 0;
+        -> std::pmr::set<blockchain::p2p::Service> = 0;
     virtual auto UserAgent() const noexcept -> const std::string& = 0;
 
     ~Version() override = default;
@@ -393,7 +393,7 @@ auto BitcoinP2PAddr(
     const api::Session& api,
     const blockchain::Type network,
     const blockchain::p2p::bitcoin::ProtocolVersion version,
-    std::vector<std::unique_ptr<blockchain::p2p::internal::Address>>&&
+    std::pmr::vector<std::unique_ptr<blockchain::p2p::internal::Address>>&&
         addresses) -> blockchain::p2p::bitcoin::message::internal::Addr*;
 auto BitcoinP2PBlock(
     const api::Session& api,
@@ -431,7 +431,7 @@ auto BitcoinP2PCfcheckpt(
     const blockchain::Type network,
     const blockchain::filter::Type type,
     const blockchain::filter::Hash& stop,
-    const std::vector<blockchain::filter::pHash>& headers)
+    const std::pmr::vector<blockchain::filter::pHash>& headers)
     -> blockchain::p2p::bitcoin::message::internal::Cfcheckpt*;
 auto BitcoinP2PCfheaders(
     const api::Session& api,
@@ -446,7 +446,7 @@ auto BitcoinP2PCfheaders(
     const blockchain::filter::Type type,
     const blockchain::block::Hash& stop,
     const ReadView previousHeader,
-    const std::vector<blockchain::filter::pHash>& headers)
+    const std::pmr::vector<blockchain::filter::pHash>& headers)
     -> blockchain::p2p::bitcoin::message::internal::Cfheaders*;
 auto BitcoinP2PCfilter(
     const api::Session& api,
@@ -532,7 +532,7 @@ auto BitcoinP2PGetblocks(
     const api::Session& api,
     const blockchain::Type network,
     const std::uint32_t version,
-    const std::vector<OTData>& header_hashes,
+    const std::pmr::vector<OTData>& header_hashes,
     const Data& stop_hash) -> blockchain::p2p::bitcoin::message::Getblocks*;
 auto BitcoinP2PGetblocktxn(
     const api::Session& api,
@@ -544,7 +544,7 @@ auto BitcoinP2PGetblocktxn(
     const api::Session& api,
     const blockchain::Type network,
     const Data& block_hash,
-    const std::vector<std::size_t>& txn_indices)
+    const std::pmr::vector<std::size_t>& txn_indices)
     -> blockchain::p2p::bitcoin::message::Getblocktxn*;
 auto BitcoinP2PGetcfcheckpt(
     const api::Session& api,
@@ -597,7 +597,7 @@ auto BitcoinP2PGetdata(
 auto BitcoinP2PGetdata(
     const api::Session& api,
     const blockchain::Type network,
-    std::vector<blockchain::bitcoin::Inventory>&& payload)
+    std::pmr::vector<blockchain::bitcoin::Inventory>&& payload)
     -> blockchain::p2p::bitcoin::message::internal::Getdata*;
 auto BitcoinP2PGetheaders(
     const api::Session& api,
@@ -610,7 +610,7 @@ auto BitcoinP2PGetheaders(
     const api::Session& api,
     const blockchain::Type network,
     const blockchain::p2p::bitcoin::ProtocolVersionUnsigned version,
-    std::vector<blockchain::block::pHash>&& history,
+    std::pmr::vector<blockchain::block::pHash>&& history,
     blockchain::block::pHash&& stop)
     -> blockchain::p2p::bitcoin::message::internal::Getheaders*;
 auto BitcoinP2PHeaders(
@@ -623,8 +623,8 @@ auto BitcoinP2PHeaders(
 auto BitcoinP2PHeaders(
     const api::Session& api,
     const blockchain::Type network,
-    std::vector<std::unique_ptr<blockchain::block::bitcoin::Header>>&& headers)
-    -> blockchain::p2p::bitcoin::message::internal::Headers*;
+    std::pmr::vector<std::unique_ptr<blockchain::block::bitcoin::Header>>&&
+        headers) -> blockchain::p2p::bitcoin::message::internal::Headers*;
 auto BitcoinP2PInv(
     const api::Session& api,
     std::unique_ptr<blockchain::p2p::bitcoin::Header> pHeader,
@@ -635,7 +635,7 @@ auto BitcoinP2PInv(
 auto BitcoinP2PInv(
     const api::Session& api,
     const blockchain::Type network,
-    std::vector<blockchain::bitcoin::Inventory>&& payload)
+    std::pmr::vector<blockchain::bitcoin::Inventory>&& payload)
     -> blockchain::p2p::bitcoin::message::internal::Inv*;
 auto BitcoinP2PMempool(
     const api::Session& api,
@@ -654,8 +654,8 @@ auto BitcoinP2PMerkleblock(
     const blockchain::Type network,
     const Data& block_header,
     const std::uint32_t txn_count,
-    const std::vector<OTData>& hashes,
-    const std::vector<std::byte>& flags)
+    const std::pmr::vector<OTData>& hashes,
+    const std::pmr::vector<std::byte>& flags)
     -> blockchain::p2p::bitcoin::message::Merkleblock*;
 auto BitcoinP2PNotfound(
     const api::Session& api,
@@ -667,7 +667,7 @@ auto BitcoinP2PNotfound(
 auto BitcoinP2PNotfound(
     const api::Session& api,
     const blockchain::Type network,
-    std::vector<blockchain::bitcoin::Inventory>&& payload)
+    std::pmr::vector<blockchain::bitcoin::Inventory>&& payload)
     -> blockchain::p2p::bitcoin::message::internal::Notfound*;
 auto BitcoinP2PPing(
     const api::Session& api,
@@ -756,10 +756,10 @@ auto BitcoinP2PVersion(
     const blockchain::Type network,
     const blockchain::p2p::Network style,
     const std::int32_t version,
-    const std::set<blockchain::p2p::Service>& localServices,
+    const std::pmr::set<blockchain::p2p::Service>& localServices,
     const std::string& localAddress,
     const std::uint16_t localPort,
-    const std::set<blockchain::p2p::Service>& remoteServices,
+    const std::pmr::set<blockchain::p2p::Service>& remoteServices,
     const std::string& remoteAddress,
     const std::uint16_t remotePort,
     const std::uint64_t nonce,

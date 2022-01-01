@@ -44,7 +44,7 @@ namespace opentxs::storage
 class Bip47Channels final : public Node
 {
 public:
-    using ChannelList = std::set<OTIdentifier>;
+    using ChannelList = std::pmr::set<OTIdentifier>;
 
     auto Chain(const Identifier& channelID) const -> core::UnitType;
     auto ChannelsByChain(const core::UnitType chain) const -> ChannelList;
@@ -65,8 +65,8 @@ private:
     /** chain */
     using ChannelData = core::UnitType;
     /** channel id, channel data */
-    using ChannelIndex = std::map<OTIdentifier, ChannelData>;
-    using ChainIndex = std::map<core::UnitType, ChannelList>;
+    using ChannelIndex = std::pmr::map<OTIdentifier, ChannelData>;
+    using ChainIndex = std::pmr::map<core::UnitType, ChannelList>;
 
     mutable std::shared_mutex index_lock_;
     ChannelIndex channel_data_;

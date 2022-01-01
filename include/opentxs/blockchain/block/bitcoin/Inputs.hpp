@@ -52,7 +52,7 @@ public:
     virtual auto end() const noexcept -> const_iterator = 0;
     OPENTXS_NO_EXPORT virtual auto Internal() const noexcept
         -> const internal::Inputs& = 0;
-    virtual auto Keys() const noexcept -> std::vector<crypto::Key> = 0;
+    virtual auto Keys() const noexcept -> std::pmr::vector<crypto::Key> = 0;
     virtual auto size() const noexcept -> std::size_t = 0;
 
     OPENTXS_NO_EXPORT virtual auto Internal() noexcept -> internal::Inputs& = 0;

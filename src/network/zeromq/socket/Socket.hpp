@@ -89,9 +89,9 @@ protected:
         std::mutex lock_{};
         std::queue<std::string> queue_{};
 
-        auto pop() noexcept -> std::vector<std::string>
+        auto pop() noexcept -> std::pmr::vector<std::string>
         {
-            auto output = std::vector<std::string>{};
+            auto output = std::pmr::vector<std::string>{};
 
             Lock lock{lock_};
             output.reserve(queue_.size());
@@ -113,7 +113,7 @@ protected:
     mutable std::atomic<int> send_timeout_;
     mutable std::atomic<int> receive_timeout_;
     mutable std::mutex endpoint_lock_;
-    mutable std::set<std::string> endpoints_;
+    mutable std::pmr::set<std::string> endpoints_;
     mutable OTFlag running_;
     mutable Endpoints endpoint_queue_;
 

@@ -70,7 +70,7 @@ auto RPC::get_account_balance(const request::Base& base) const noexcept
                 continue;
             }
 
-            const auto accountID = api.Factory().Identifier(id);
+            const auto accountID = api.Factory().IdentifierFromBase58(id);
 
             if (is_blockchain_account(base, accountID)) {
                 get_account_balance_blockchain(
@@ -91,7 +91,7 @@ auto RPC::get_account_balance_blockchain(
     const request::Base& base,
     const std::size_t index,
     const Identifier& accountID,
-    std::vector<AccountData>& balances,
+    std::pmr::vector<AccountData>& balances,
     response::Base::Responses& codes) const noexcept -> void
 {
     try {
@@ -124,7 +124,7 @@ auto RPC::get_account_balance_custodial(
     const api::Session& api,
     const std::size_t index,
     const Identifier& accountID,
-    std::vector<AccountData>& balances,
+    std::pmr::vector<AccountData>& balances,
     response::Base::Responses& codes) const noexcept -> void
 {
     const auto account = api.Wallet().Internal().Account(accountID);

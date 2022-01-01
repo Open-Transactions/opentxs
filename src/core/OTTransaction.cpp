@@ -4070,7 +4070,7 @@ auto OTTransaction::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
             if (strTotalList->Exists())
                 m_Numlist.Add(strTotalList);  // (Comma-separated list of
                                               // numbers now becomes
-                                              // std::set<std::int64_t>.)
+                                              // std::pmr::set<std::int64_t>.)
         }
 
         auto inboxHash = xml->getAttributeValue("inboxHash"),
@@ -5989,7 +5989,7 @@ auto OTTransaction::GetReferenceNumForDisplay() -> std::int64_t
                     if (nullptr != pPlan) {
                         lReferenceNum = pPlan->GetRecipientOpeningNum();
                     } else if (nullptr != pSmartContract) {
-                        const std::vector<std::int64_t>&
+                        const std::pmr::vector<std::int64_t>&
                             openingNumsInOrderOfSigning =
                                 pSmartContract->openingNumsInOrderOfSigning();
 

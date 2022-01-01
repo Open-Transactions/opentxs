@@ -19,6 +19,7 @@
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/ui/Blockchains.hpp"
+#include "opentxs/ui/qt/BlankModel.hpp"
 #include "opentxs/ui/qt/BlockchainSelection.hpp"
 #include "opentxs/ui/qt/BlockchainStatistics.hpp"
 #include "opentxs/ui/qt/SeedValidator.hpp"

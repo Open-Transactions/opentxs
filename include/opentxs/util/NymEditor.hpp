@@ -95,7 +95,7 @@ public:
     auto PrintContactData() const -> std::string;
     auto SocialMediaProfiles(const contact::ClaimType type, bool active = true)
         const -> std::string;
-    auto SocialMediaProfileTypes() const -> std::set<contact::ClaimType>;
+    auto SocialMediaProfileTypes() const -> std::pmr::set<contact::ClaimType>;
     auto Type() const -> contact::ClaimType;
     auto Valid() const -> bool;
 

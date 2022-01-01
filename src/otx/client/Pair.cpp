@@ -163,8 +163,8 @@ void Pair::State::Add(
             trusted,
             0,
             0,
-            std::vector<AccountDetails>{},
-            std::vector<api::session::OTX::BackgroundTask>{},
+            std::pmr::vector<AccountDetails>{},
+            std::pmr::vector<api::session::OTX::BackgroundTask>{},
             false));
 }
 
@@ -252,9 +252,9 @@ repeat:
 }
 
 auto Pair::State::count_currencies(
-    const std::vector<AccountDetails>& in) noexcept -> std::size_t
+    const std::pmr::vector<AccountDetails>& in) noexcept -> std::size_t
 {
-    auto unique = std::set<OTUnitID>{};
+    auto unique = std::pmr::set<OTUnitID>{};
     std::transform(
         std::begin(in),
         std::end(in),
@@ -267,7 +267,7 @@ auto Pair::State::count_currencies(
 auto Pair::State::count_currencies(const contact::ContactSection& in) noexcept
     -> std::size_t
 {
-    auto unique = std::set<OTUnitID>{};
+    auto unique = std::pmr::set<OTUnitID>{};
 
     for (const auto& [type, pGroup] : in) {
         OT_ASSERT(pGroup);
@@ -288,7 +288,7 @@ auto Pair::State::count_currencies(const contact::ContactSection& in) noexcept
 auto Pair::State::get_account(
     const identifier::UnitDefinition& unit,
     const Identifier& account,
-    std::vector<AccountDetails>& details) noexcept -> AccountDetails&
+    std::pmr::vector<AccountDetails>& details) noexcept -> AccountDetails&
 {
     OT_ASSERT(false == unit.empty());
     OT_ASSERT(false == account.empty());
@@ -315,10 +315,10 @@ auto Pair::State::GetDetails(
 
 auto Pair::State::IssuerList(
     const identifier::Nym& localNymID,
-    const bool onlyTrusted) const noexcept -> std::set<OTNymID>
+    const bool onlyTrusted) const noexcept -> std::pmr::set<OTNymID>
 {
     Lock lock(lock_);
-    std::set<OTNymID> output{};
+    std::pmr::set<OTNymID> output{};
 
     for (auto& [key, value] : state_) {
         auto& pMutex = std::get<0>(value);
@@ -338,7 +338,7 @@ auto Pair::State::IssuerList(
 auto Pair::State::run(const std::function<void(const IssuerID&)> fn) noexcept
     -> bool
 {
-    auto list = std::set<IssuerID>{};
+    auto list = std::pmr::set<IssuerID>{};
 
     {
         Lock lock(lock_);
@@ -510,7 +510,8 @@ void Pair::check_accounts(
     const identifier::Server& serverID,
     std::size_t& offered,
     std::size_t& registeredAccounts,
-    std::vector<Pair::State::AccountDetails>& accountDetails) const noexcept
+    std::pmr::vector<Pair::State::AccountDetails>& accountDetails)
+    const noexcept
 {
     const auto& localNymID = issuer.LocalNymID();
     const auto& issuerNymID = issuer.IssuerID();
@@ -529,7 +530,7 @@ void Pair::check_accounts(
             .Flush();
     }
 
-    auto uniqueRegistered = std::set<OTUnitID>{};
+    auto uniqueRegistered = std::pmr::set<OTUnitID>{};
 
     if (false == haveAccounts) { return; }
 

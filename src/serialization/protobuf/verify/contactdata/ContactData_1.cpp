@@ -31,7 +31,7 @@ auto CheckProto_1(
     const bool silent,
     const ClaimType indexed) -> bool
 {
-    std::map<ContactSectionName, uint32_t> sectionCount;
+    std::pmr::map<ContactSectionName, uint32_t> sectionCount;
 
     for (auto& it : input.section()) {
         try {

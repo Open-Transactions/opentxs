@@ -16,7 +16,7 @@ auto index_{1};
 auto manager_ = DownloadManager{batchSize, 0, 0};
 const auto AddBlocks = [] {
     manager_.UpdatePosition(manager_.MakePositions(index_, [] {
-        auto output = std::vector<std::string>{};
+        auto output = std::pmr::vector<std::string>{};
 
         for (auto i{index_}; i < (index_ + count_); ++i) {
             output.emplace_back(std::to_string(i));

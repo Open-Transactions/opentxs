@@ -73,8 +73,8 @@ private:
     using ot_super = Plugin;
 
     mutable std::string root_;
-    mutable std::map<std::string, std::string> a_;
-    mutable std::map<std::string, std::string> b_;
+    mutable std::pmr::map<std::string, std::string> a_;
+    mutable std::pmr::map<std::string, std::string> b_;
 
     void store(
         const bool isTransaction,

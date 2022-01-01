@@ -49,8 +49,8 @@ Subaccount::Subaccount(
     const SubaccountType type,
     OTIdentifier&& id,
     const Revision revision,
-    const std::vector<Activity>& unspent,
-    const std::vector<Activity>& spent,
+    const std::pmr::vector<Activity>& unspent,
+    const std::pmr::vector<Activity>& spent,
     Identifier& out) noexcept
     : api_(api)
     , parent_(parent)
@@ -85,7 +85,7 @@ Subaccount::Subaccount(
           api,
           parent,
           type,
-          api.Factory().Identifier(serialized.id()),
+          api.Factory().IdentifierFromBase58(serialized.id()),
           serialized.revision(),
           convert(serialized.unspent()),
           convert(serialized.spent()),
@@ -98,9 +98,9 @@ Subaccount::Subaccount(
 }
 
 auto Subaccount::AssociateTransaction(
-    const std::vector<Activity>& unspent,
-    const std::vector<Activity>& spent,
-    std::set<OTIdentifier>& contacts,
+    const std::pmr::vector<Activity>& unspent,
+    const std::pmr::vector<Activity>& spent,
+    std::pmr::set<OTIdentifier>& contacts,
     const PasswordPrompt& reason) const noexcept -> bool
 {
     auto lock = rLock{lock_};
@@ -179,16 +179,16 @@ auto Subaccount::convert(const proto::BlockchainActivity& in) noexcept
 }
 
 auto Subaccount::convert(const SerializedActivity& in) noexcept
-    -> std::vector<Activity>
+    -> std::pmr::vector<Activity>
 {
-    auto output = std::vector<Activity>{};
+    auto output = std::pmr::vector<Activity>{};
 
     for (const auto& activity : in) { output.emplace_back(convert(activity)); }
 
     return output;
 }
 
-auto Subaccount::convert(const std::vector<Activity>& in) noexcept
+auto Subaccount::convert(const std::pmr::vector<Activity>& in) noexcept
     -> internal::ActivityMap
 {
     auto output = internal::ActivityMap{};
@@ -204,10 +204,10 @@ auto Subaccount::convert(const std::vector<Activity>& in) noexcept
 }
 
 auto Subaccount::IncomingTransactions(const Key& element) const noexcept
-    -> std::set<std::string>
+    -> std::pmr::set<std::string>
 {
     auto lock = rLock{lock_};
-    auto output = std::set<std::string>{};
+    auto output = std::pmr::set<std::string>{};
 
     for (const auto& [coin, data] : unspent_) {
         const auto& [key, amount] = data;
@@ -377,7 +377,7 @@ auto Subaccount::Unreserve(const Subchain type, const Bip32Index index) noexcept
 }
 
 auto Subaccount::UpdateElement(
-    std::vector<ReadView>& pubkeyHashes) const noexcept -> void
+    std::pmr::vector<ReadView>& pubkeyHashes) const noexcept -> void
 {
     parent_.Parent().Parent().Internal().UpdateElement(pubkeyHashes);
 }

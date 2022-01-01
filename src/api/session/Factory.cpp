@@ -379,7 +379,7 @@ auto Factory::BasketContract(
 #if OT_BLOCKCHAIN
 auto Factory::BitcoinScriptNullData(
     const opentxs::blockchain::Type chain,
-    const std::vector<ReadView>& data) const noexcept
+    const std::pmr::vector<ReadView>& data) const noexcept
     -> std::unique_ptr<const opentxs::blockchain::block::bitcoin::Script>
 {
     namespace b = opentxs::blockchain;
@@ -401,8 +401,8 @@ auto Factory::BitcoinScriptP2MS(
     const opentxs::blockchain::Type chain,
     const std::uint8_t M,
     const std::uint8_t N,
-    const std::vector<const opentxs::crypto::key::EllipticCurve*>& publicKeys)
-    const noexcept
+    const std::pmr::vector<const opentxs::crypto::key::EllipticCurve*>&
+        publicKeys) const noexcept
     -> std::unique_ptr<const opentxs::blockchain::block::bitcoin::Script>
 {
     namespace b = opentxs::blockchain;
@@ -582,7 +582,7 @@ auto Factory::BlockchainAddress(
     const std::uint16_t port,
     const opentxs::blockchain::Type chain,
     const Time lastConnected,
-    const std::set<opentxs::blockchain::p2p::Service>& services,
+    const std::pmr::set<opentxs::blockchain::p2p::Service>& services,
     const bool incoming) const -> OTBlockchainAddress
 {
     return OTBlockchainAddress{factory::BlockchainAddress(
@@ -961,12 +961,12 @@ auto Factory::Data(const std::string& input, const StringStyle mode) const
     return Data::Factory(input, static_cast<Data::Mode>(mode));
 }
 
-auto Factory::Data(const std::vector<unsigned char>& input) const -> OTData
+auto Factory::Data(const std::pmr::vector<unsigned char>& input) const -> OTData
 {
     return Data::Factory(input);
 }
 
-auto Factory::Data(const std::vector<std::byte>& input) const -> OTData
+auto Factory::Data(const std::pmr::vector<std::byte>& input) const -> OTData
 {
     return Data::Factory(input);
 }
@@ -1016,17 +1016,6 @@ auto Factory::Identifier() const -> OTIdentifier
     return Identifier::Factory();
 }
 
-auto Factory::Identifier(const std::string& serialized) const -> OTIdentifier
-{
-    return Identifier::Factory(serialized);
-}
-
-auto Factory::Identifier(const opentxs::String& serialized) const
-    -> OTIdentifier
-{
-    return Identifier::Factory(serialized);
-}
-
 auto Factory::Identifier(const opentxs::Contract& contract) const
     -> OTIdentifier
 {
@@ -1038,19 +1027,11 @@ auto Factory::Identifier(const opentxs::Item& item) const -> OTIdentifier
     return Identifier::Factory(item);
 }
 
-auto Factory::Identifier(const ReadView bytes) const -> OTIdentifier
-{
-    auto output = this->Identifier();
-    output->CalculateDigest(bytes);
-
-    return output;
-}
-
 auto Factory::Identifier(const ProtobufType& proto) const -> OTIdentifier
 {
     const auto bytes = Data(proto);
 
-    return Identifier(bytes->Bytes());
+    return IdentifierFromBytes(bytes->Bytes());
 }
 
 auto Factory::Identifier(const opentxs::network::zeromq::Frame& bytes) const
@@ -1066,6 +1047,26 @@ auto Factory::Identifier(const proto::Identifier& in) const noexcept
     -> OTIdentifier
 {
     return factory::IdentifierGeneric(in);
+}
+
+auto Factory::IdentifierFromBase58(const std::string& serialized) const
+    -> OTIdentifier
+{
+    return Identifier::Factory(serialized);
+}
+
+auto Factory::IdentifierFromBase58(const opentxs::String& serialized) const
+    -> OTIdentifier
+{
+    return Identifier::Factory(serialized);
+}
+
+auto Factory::IdentifierFromBytes(const ReadView bytes) const -> OTIdentifier
+{
+    auto output = this->Identifier();
+    output->CalculateDigest(bytes);
+
+    return output;
 }
 
 auto Factory::instantiate_secp256k1(
@@ -1360,7 +1361,7 @@ auto Factory::Keypair(
         }
     }
 
-    const auto path = std::vector<Bip32Index>{
+    const auto path = std::pmr::vector<Bip32Index>{
         HDIndex{Bip43Purpose::NYM, Bip32Child::HARDENED},
         HDIndex{nym, Bip32Child::HARDENED},
         HDIndex{credset, Bip32Child::HARDENED},
@@ -2221,7 +2222,7 @@ auto Factory::ServerID(const google::protobuf::MessageLite& proto) const
         return out;
     }();
 
-    return Identifier(id->str());
+    return IdentifierFromBase58(id->str());
 }
 
 auto Factory::SignedFile() const -> std::unique_ptr<OTSignedFile>
@@ -2689,6 +2690,6 @@ auto Factory::UnitID(const google::protobuf::MessageLite& proto) const
         return out;
     }();
 
-    return Identifier(id->str());
+    return IdentifierFromBase58(id->str());
 }
 }  // namespace opentxs::api::session::imp

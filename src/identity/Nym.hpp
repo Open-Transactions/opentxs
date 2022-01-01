@@ -111,7 +111,7 @@ public:
             ContactCredentialVersion());
     }
     auto Contracts(const core::UnitType currency, const bool onlyActive) const
-        -> std::set<OTIdentifier> final;
+        -> std::pmr::set<OTIdentifier> final;
     auto EmailAddresses(bool active) const -> std::string final;
     auto EncryptionTargets() const noexcept -> NymKeys final;
     auto end() const noexcept -> const_iterator final { return cend(); }
@@ -167,7 +167,7 @@ public:
     auto SocialMediaProfiles(const contact::ClaimType type, bool active) const
         -> std::string final;
     auto SocialMediaProfileTypes() const
-        -> const std::set<contact::ClaimType> final;
+        -> const std::pmr::set<contact::ClaimType> final;
     auto Source() const -> const identity::Source& final { return source_; }
     auto TransportKey(Data& pubkey, const PasswordPrompt& reason) const
         -> OTSecret final;
@@ -248,7 +248,7 @@ public:
 private:
     using MasterID = OTIdentifier;
     using CredentialMap =
-        std::map<MasterID, std::unique_ptr<identity::internal::Authority>>;
+        std::pmr::map<MasterID, std::unique_ptr<identity::internal::Authority>>;
 
     friend opentxs::Factory;
 

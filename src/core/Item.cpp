@@ -172,7 +172,7 @@ auto Item::VerifyTransactionStatement(
     const OTTransaction& transaction,
     const bool real) const -> bool
 {
-    const std::set<TransactionNumber> empty;
+    const std::pmr::set<TransactionNumber> empty;
 
     return VerifyTransactionStatement(context, transaction, empty, real);
 }
@@ -180,7 +180,7 @@ auto Item::VerifyTransactionStatement(
 auto Item::VerifyTransactionStatement(
     const otx::context::Client& context,
     const OTTransaction& TARGET_TRANSACTION,
-    const std::set<TransactionNumber> newNumbers,
+    const std::pmr::set<TransactionNumber> newNumbers,
     const bool bIsRealTransaction) const -> bool
 {
     if (GetType() != itemType::transactionStatement) {
@@ -197,7 +197,7 @@ auto Item::VerifyTransactionStatement(
     // THE TRANSACTION IS PROCESSED.)
     const auto NOTARY_ID = String::Factory(GetPurportedNotaryID());
     const TransactionNumber itemNumber = GetTransactionNum();
-    std::set<TransactionNumber> excluded;
+    std::pmr::set<TransactionNumber> excluded;
 
     // Sometimes my "transaction number" is 0 since we're accepting numbers from
     // the Nymbox (which is done by message, not transaction.) In such cases,
@@ -283,7 +283,7 @@ auto Item::VerifyBalanceStatement(
     const Ledger& THE_OUTBOX,
     const Account& THE_ACCOUNT,
     const OTTransaction& TARGET_TRANSACTION,
-    const std::set<TransactionNumber>& excluded,
+    const std::pmr::set<TransactionNumber>& excluded,
     const PasswordPrompt& reason,
     TransactionNumber outboxNum) const
     -> bool  // Only used in the case of transfer,
@@ -294,7 +294,7 @@ auto Item::VerifyBalanceStatement(
              // trans# successfully, only in that
              // special case.
 {
-    std::set<TransactionNumber> removed(excluded);
+    std::pmr::set<TransactionNumber> removed(excluded);
 
     if (GetType() != itemType::balanceStatement) {
         LogConsole()(OT_PRETTY_CLASS())("Wrong item type.").Flush();
@@ -718,7 +718,7 @@ auto Item::VerifyBalanceStatement(
     }
 
     otx::context::TransactionStatement statement(serialized);
-    std::set<TransactionNumber> added;
+    std::pmr::set<TransactionNumber> added;
 
     return context.Verify(statement, removed, added);
 }
@@ -1427,12 +1427,14 @@ auto Item::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
             if (strTotalList->Exists())
                 m_Numlist.Add(strTotalList);  // (Comma-separated list of
                                               // numbers now becomes
-                                              // std::set<std::int64_t>.)
+                                              // std::pmr::set<std::int64_t>.)
         }
 
-        const auto ACCOUNT_ID = api_.Factory().Identifier(strAcctFromID);
+        const auto ACCOUNT_ID =
+            api_.Factory().IdentifierFromBase58(strAcctFromID);
         const auto NOTARY_ID = api_.Factory().ServerID(strNotaryID);
-        const auto DESTINATION_ACCOUNT = api_.Factory().Identifier(strAcctToID);
+        const auto DESTINATION_ACCOUNT =
+            api_.Factory().IdentifierFromBase58(strAcctToID);
         auto NYM_ID = api_.Factory().NymID(strNymID);
 
         SetPurportedAccountID(ACCOUNT_ID);  // OTTransactionType::m_AcctID  the
@@ -1553,7 +1555,8 @@ auto Item::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
             strNotaryID = String::Factory(xml->getAttributeValue("notaryID"));
             strNymID = String::Factory(xml->getAttributeValue("nymID"));
 
-            const auto ACCOUNT_ID = api_.Factory().Identifier(strAccountID);
+            const auto ACCOUNT_ID =
+                api_.Factory().IdentifierFromBase58(strAccountID);
             const auto NOTARY_ID = api_.Factory().ServerID(strNotaryID);
             const auto NYM_ID = api_.Factory().NymID(strNymID);
 

@@ -292,7 +292,7 @@ TEST_F(Test_PaymentCode_v3, blind_alice)
         EXPECT_EQ(v1, v2);
     }
 
-    using Elements = std::vector<ot::Space>;
+    using Elements = std::pmr::vector<ot::Space>;
     {
         const auto alice = bob_pc_secret_.DecodeNotificationElements(
             version_, Elements{A, F, G}, reason_);
@@ -395,7 +395,7 @@ TEST_F(Test_PaymentCode_v3, blind_bob)
         EXPECT_EQ(v1, v2);
     }
 
-    using Elements = std::vector<ot::Space>;
+    using Elements = std::pmr::vector<ot::Space>;
     {
         const auto bob = alice_pc_secret_.DecodeNotificationElements(
             version_, Elements{A, F, G}, reason_);

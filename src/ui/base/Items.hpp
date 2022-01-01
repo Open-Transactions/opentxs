@@ -35,16 +35,16 @@ public:
         RowID id_;
         RowPointer item_;
     };
-    using Data = std::list<Row>;
+    using Data = std::pmr::list<Row>;
     using Iterator = typename Data::iterator;
-    using Index = std::map<RowID, Iterator>;
+    using Index = std::pmr::map<RowID, Iterator>;
     using Insert = std::pair<Iterator, internal::Row*>;
     using Position = std::pair<Iterator, std::size_t>;
     using Move = std::pair<Insert, Insert>;
 
-    auto active() const noexcept -> std::vector<RowID>
+    auto active() const noexcept -> std::pmr::vector<RowID>
     {
-        auto output = std::vector<RowID>{};
+        auto output = std::pmr::vector<RowID>{};
         output.reserve(index_.size());
         std::transform(
             index_.begin(), index_.end(), std::back_inserter(output), [

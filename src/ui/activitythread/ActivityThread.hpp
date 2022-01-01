@@ -197,19 +197,20 @@ private:
 
     const OTIdentifier threadID_;
     const OTIdentifier self_contact_;
-    const std::set<OTIdentifier> contacts_;
+    const std::pmr::set<OTIdentifier> contacts_;
     const std::string participants_;
     std::string me_;
     std::string display_name_;
-    std::map<core::UnitType, std::string> payment_codes_;
+    std::pmr::map<core::UnitType, std::string> payment_codes_;
     std::optional<Messagability> can_message_;
     mutable std::string draft_;
-    mutable std::map<api::session::OTX::TaskID, DraftTask> draft_tasks_;
+    mutable std::pmr::map<api::session::OTX::TaskID, DraftTask> draft_tasks_;
     mutable std::optional<Callbacks> callbacks_;
 
     auto calculate_display_name() const noexcept -> std::string;
     auto calculate_participants() const noexcept -> std::string;
-    auto comma(const std::set<std::string>& list) const noexcept -> std::string;
+    auto comma(const std::pmr::set<std::string>& list) const noexcept
+        -> std::string;
     auto can_message() const noexcept -> bool;
     auto construct_row(
         const ActivityThreadRowID& id,

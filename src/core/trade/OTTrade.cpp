@@ -170,8 +170,10 @@ auto OTTrade::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
         const auto INSTRUMENT_DEFINITION_ID =
                        api_.Factory().UnitID(instrumentDefinitionID),
                    CURRENCY_TYPE_ID = api_.Factory().UnitID(currencyTypeID);
-        const auto ASSET_ACCT_ID = api_.Factory().Identifier(assetAcctID),
-                   CURRENCY_ACCT_ID = api_.Factory().Identifier(currencyAcctID);
+        const auto ASSET_ACCT_ID =
+                       api_.Factory().IdentifierFromBase58(assetAcctID),
+                   CURRENCY_ACCT_ID =
+                       api_.Factory().IdentifierFromBase58(currencyAcctID);
         const auto NYM_ID = api_.Factory().NymID(nymID);
 
         SetNotaryID(NOTARY_ID);

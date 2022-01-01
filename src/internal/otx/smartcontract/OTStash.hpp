@@ -8,6 +8,7 @@
 #include <irrxml/irrXML.hpp>
 #include <cstdint>
 #include <map>
+#include <memory_resource>
 #include <string>
 
 namespace irr
@@ -29,7 +30,7 @@ class OTStashItem;
 class String;
 class Tag;
 
-using mapOfStashItems = std::map<std::string, OTStashItem*>;
+using mapOfStashItems = std::pmr::map<std::string, OTStashItem*>;
 
 class OTStash
 {

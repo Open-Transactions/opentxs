@@ -460,7 +460,7 @@ auto OutputCache::ChangeState(
     try {
         for (const auto state : all_states()) { GetState(lock, state); }
 
-        auto deleted = std::vector<node::TxoState>{};
+        auto deleted = std::pmr::vector<node::TxoState>{};
 
         for (const auto state : all_states()) {
             if (lmdb_.Delete(
@@ -858,7 +858,7 @@ auto OutputCache::load_nyms() noexcept -> Nyms&
     const auto start = Clock::now();
 #endif  // defined OPENTXS_DETAILED_DEBUG
     auto& set = nym_list_.emplace();
-    auto tested = std::set<ReadView>{};
+    auto tested = std::pmr::set<ReadView>{};
     lmdb_.Read(
         wallet::nyms_,
         [&](const auto key, const auto bytes) {
@@ -983,7 +983,7 @@ auto OutputCache::Print(const eLock&) const noexcept -> void
         std::stringstream text_{};
         Amount total_{};
     };
-    auto output = std::map<node::TxoState, Output>{};
+    auto output = std::pmr::map<node::TxoState, Output>{};
 
     const auto& definition = blockchain::GetDefinition(chain_);
 

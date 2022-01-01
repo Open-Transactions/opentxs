@@ -125,7 +125,7 @@ auto Deterministic::accept(
     return index;
 }
 
-auto Deterministic::AllowedSubchains() const noexcept -> std::set<Subchain>
+auto Deterministic::AllowedSubchains() const noexcept -> std::pmr::set<Subchain>
 {
     return {data_.internal_.type_, data_.external_.type_};
 }
@@ -225,8 +225,8 @@ auto Deterministic::check(
 
 auto Deterministic::check_activity(
     const rLock& lock,
-    const std::vector<Activity>& unspent,
-    std::set<OTIdentifier>& contacts,
+    const std::pmr::vector<Activity>& unspent,
+    std::pmr::set<OTIdentifier>& contacts,
     const PasswordPrompt& reason) const noexcept -> bool
 {
     set_deterministic_contact(contacts);
@@ -333,7 +333,7 @@ auto Deterministic::element(
 auto Deterministic::extract_contacts(
     const Bip32Index index,
     const AddressMap& map,
-    std::set<OTIdentifier>& contacts) noexcept -> void
+    std::pmr::set<OTIdentifier>& contacts) noexcept -> void
 {
     try {
         auto contact = map.at(index)->Contact();
@@ -572,7 +572,7 @@ auto Deterministic::RootNode(const PasswordPrompt& reason) const noexcept
     if (key) { return key; }
 
     auto fingerprint(path_.root());
-    auto path = std::vector<Bip32Index>{};
+    auto path = std::pmr::vector<Bip32Index>{};
 
     for (const auto& child : path_.child()) { path.emplace_back(child); }
 

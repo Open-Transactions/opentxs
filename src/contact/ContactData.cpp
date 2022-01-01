@@ -222,7 +222,7 @@ auto ContactData::AddContract(
 
     if (group) { needPrimary = group->Primary().empty(); }
 
-    std::set<contact::Attribute> attrib{};
+    std::pmr::set<contact::Attribute> attrib{};
 
     if (active || primary || needPrimary) {
         attrib.emplace(contact::Attribute::Active);
@@ -263,7 +263,7 @@ auto ContactData::AddEmail(
 
     if (group) { needPrimary = group->Primary().empty(); }
 
-    std::set<contact::Attribute> attrib{};
+    std::pmr::set<contact::Attribute> attrib{};
 
     if (active || primary || needPrimary) {
         attrib.emplace(contact::Attribute::Active);
@@ -349,7 +349,7 @@ auto ContactData::AddPaymentCode(
     if (group) { needPrimary = group->Primary().empty(); }
 
     const auto attrib = [&] {
-        auto out = std::set<contact::Attribute>{};
+        auto out = std::pmr::set<contact::Attribute>{};
 
         if (active || primary || needPrimary) {
             out.emplace(contact::Attribute::Active);
@@ -402,7 +402,7 @@ auto ContactData::AddPhoneNumber(
 
     if (group) { needPrimary = group->Primary().empty(); }
 
-    std::set<contact::Attribute> attrib{};
+    std::pmr::set<contact::Attribute> attrib{};
 
     if (active || primary || needPrimary) {
         attrib.emplace(contact::Attribute::Active);
@@ -441,7 +441,7 @@ auto ContactData::AddPreferredOTServer(const Identifier& id, const bool primary)
 
     if (group) { needPrimary = group->Primary().empty(); }
 
-    std::set<contact::Attribute> attrib{contact::Attribute::Active};
+    std::pmr::set<contact::Attribute> attrib{contact::Attribute::Active};
 
     if (primary || needPrimary) { attrib.emplace(contact::Attribute::Primary); }
 
@@ -483,7 +483,7 @@ auto ContactData::AddSocialMediaProfile(
         if (group) { needPrimary = group->Primary().empty(); }
     }
 
-    std::set<contact::Attribute> attrib{};
+    std::pmr::set<contact::Attribute> attrib{};
 
     if (active || primary || needPrimary) {
         attrib.emplace(contact::Attribute::Active);
@@ -705,9 +705,9 @@ auto ContactData::Claim(const Identifier& item) const
 
 auto ContactData::Contracts(
     const core::UnitType currency,
-    const bool onlyActive) const -> std::set<OTIdentifier>
+    const bool onlyActive) const -> std::pmr::set<OTIdentifier>
 {
-    std::set<OTIdentifier> output{};
+    std::pmr::set<OTIdentifier> output{};
     const contact::SectionType section{contact::SectionType::Contract};
     auto group = Group(section, UnitToClaim(currency));
 
@@ -930,7 +930,7 @@ auto ContactData::SetCommonName(const std::string& name) const -> ContactData
 {
     const contact::SectionType section{contact::SectionType::Identifier};
     const contact::ClaimType type{contact::ClaimType::Commonname};
-    std::set<contact::Attribute> attrib{
+    std::pmr::set<contact::Attribute> attrib{
         contact::Attribute::Active, contact::Attribute::Primary};
 
     auto item = std::make_shared<ContactItem>(
@@ -961,7 +961,7 @@ auto ContactData::SetName(const std::string& name, const bool primary) const
     const contact::SectionType section{contact::SectionType::Scope};
     const contact::ClaimType type = scopeInfo.first;
 
-    std::set<contact::Attribute> attrib{contact::Attribute::Active};
+    std::pmr::set<contact::Attribute> attrib{contact::Attribute::Active};
 
     if (primary) { attrib.emplace(contact::Attribute::Primary); }
 
@@ -994,7 +994,7 @@ auto ContactData::SetScope(
     if (contact::ClaimType::Unknown == imp_->scope().first) {
         auto mapCopy = imp_->sections_;
         mapCopy.erase(section);
-        std::set<contact::Attribute> attrib{
+        std::pmr::set<contact::Attribute> attrib{
             contact::Attribute::Active, contact::Attribute::Primary};
 
         auto version = proto::RequiredVersion(
@@ -1086,14 +1086,14 @@ auto ContactData::SocialMediaProfiles(
 }
 
 auto ContactData::SocialMediaProfileTypes() const
-    -> const std::set<contact::ClaimType>
+    -> const std::pmr::set<contact::ClaimType>
 {
     try {
         auto profiletypes =
             proto::AllowedItemTypes().at(proto::ContactSectionVersion(
                 CONTACT_CONTACT_DATA_VERSION, proto::CONTACTSECTION_PROFILE));
 
-        std::set<contact::ClaimType> output;
+        std::pmr::set<contact::ClaimType> output;
         std::transform(
             profiletypes.begin(),
             profiletypes.end(),

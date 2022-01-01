@@ -148,7 +148,7 @@ auto check_account_list_rpc(
     const auto& ids = response.AccountIDs();
     const auto goodCodes = verify_response_codes(codes, 1);
     const auto required = [&] {
-        auto out = std::vector<std::string>{};
+        auto out = std::pmr::vector<std::string>{};
         out.reserve(expected.rows_.size());
 
         for (const auto& row : expected.rows_) {
@@ -283,7 +283,7 @@ private:
     const ot::OTZMQListenCallback cb_;
     const ot::OTZMQSubscribeSocket socket_;
     mutable std::mutex lock_;
-    std::list<ot::network::zeromq::Message> received_;
+    std::pmr::list<ot::network::zeromq::Message> received_;
 
     auto cb(zmq::Message&& in) noexcept -> void
     {
@@ -464,7 +464,7 @@ auto RPC_fixture::InitAccountActivityCounter(
 {
     api.UI().AccountActivity(
         nym,
-        api.Factory().Identifier(account),
+        api.Factory().IdentifierFromBase58(account),
         make_cb(counter, std::string{u8"account activity "} + account));
 }
 
@@ -562,7 +562,7 @@ auto RPC_fixture::RefreshAccount(
 
 auto RPC_fixture::RefreshAccount(
     const ot::api::session::Client& api,
-    const std::vector<std::string> nyms,
+    const std::pmr::vector<std::string> nyms,
     const ot::identifier::Server& server) const noexcept -> void
 {
     api.OTX().Refresh();
@@ -574,7 +574,7 @@ auto RPC_fixture::RefreshAccount(
 
 auto RPC_fixture::RefreshAccount(
     const ot::api::session::Client& api,
-    const std::vector<const User*> nyms,
+    const std::pmr::vector<const User*> nyms,
     const ot::identifier::Server& server) const noexcept -> void
 {
     api.OTX().Refresh();
@@ -699,8 +699,8 @@ auto RPC_fixture::SendCheque(
     Amount amount) const noexcept -> bool
 {
     const auto& serverID = server.ID();
-    const auto accountID = api.Factory().Identifier(account);
-    const auto contactID = api.Factory().Identifier(contact);
+    const auto accountID = api.Factory().IdentifierFromBase58(account);
+    const auto contactID = api.Factory().IdentifierFromBase58(contact);
     auto [taskID, future] =
         api.OTX().SendCheque(nymID, accountID, contactID, amount, memo);
 
@@ -762,8 +762,8 @@ auto RPC_fixture::SendTransfer(
     Amount amount) const noexcept -> bool
 {
     const auto& serverID = server.ID();
-    const auto from = api.Factory().Identifier(fromAccount);
-    const auto to = api.Factory().Identifier(toAccount);
+    const auto from = api.Factory().IdentifierFromBase58(fromAccount);
+    const auto to = api.Factory().IdentifierFromBase58(toAccount);
     auto [taskID, future] =
         api.OTX().SendTransfer(nymID, serverID, from, to, amount, memo);
 

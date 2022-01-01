@@ -46,11 +46,11 @@ auto ContactModel(
 
 namespace opentxs::ui::implementation
 {
-const std::set<contact::SectionType> Contact::allowed_types_{
+const std::pmr::set<contact::SectionType> Contact::allowed_types_{
     contact::SectionType::Communication,
     contact::SectionType::Profile};
 
-const std::map<contact::SectionType, int> Contact::sort_keys_{
+const std::pmr::map<contact::SectionType, int> Contact::sort_keys_{
     {contact::SectionType::Communication, 0},
     {contact::SectionType::Profile, 1}};
 
@@ -148,7 +148,7 @@ auto Contact::process_contact(const contact::Contact& contact) noexcept -> void
         if (nameChanged || codeChanged) { UpdateNotify(); }
     }
 
-    auto active = std::set<ContactRowID>{};
+    auto active = std::pmr::set<ContactRowID>{};
     const auto data = contact.Data();
 
     if (data) {

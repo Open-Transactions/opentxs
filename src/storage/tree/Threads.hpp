@@ -40,8 +40,8 @@ class Threads final : public Node
 
 public:
     auto BlockchainThreadMap(const Data& txid) const noexcept
-        -> std::vector<OTIdentifier>;
-    auto BlockchainTransactionList() const noexcept -> std::vector<OTData>;
+        -> std::pmr::vector<OTIdentifier>;
+    auto BlockchainTransactionList() const noexcept -> std::pmr::vector<OTData>;
     auto Exists(const std::string& id) const -> bool;
     using ot_super::List;
     auto List(const bool unreadOnly) const -> ObjectList;
@@ -51,7 +51,7 @@ public:
     auto AddIndex(const Data& txid, const Identifier& thread) noexcept -> bool;
     auto Create(
         const std::string& id,
-        const std::set<std::string>& participants) -> std::string;
+        const std::pmr::set<std::string>& participants) -> std::string;
     auto FindAndDeleteItem(const std::string& itemID) -> bool;
     auto mutable_Thread(const std::string& id) -> Editor<storage::Thread>;
     auto RemoveIndex(const Data& txid, const Identifier& thread) noexcept
@@ -69,10 +69,11 @@ private:
         using ThreadID = OTIdentifier;
 
         mutable std::mutex lock_{};
-        std::map<Txid, std::set<ThreadID>> map_{};
+        std::pmr::map<Txid, std::pmr::set<ThreadID>> map_{};
     };
 
-    mutable std::map<std::string, std::unique_ptr<storage::Thread>> threads_;
+    mutable std::pmr::map<std::string, std::unique_ptr<storage::Thread>>
+        threads_;
     Mailbox& mail_inbox_;
     Mailbox& mail_outbox_;
     BlockchainThreadIndex blockchain_;
@@ -86,7 +87,7 @@ private:
     auto create(
         const Lock& lock,
         const std::string& id,
-        const std::set<std::string>& participants) -> std::string;
+        const std::pmr::set<std::string>& participants) -> std::string;
     void init(const std::string& hash) final;
     void save(
         storage::Thread* thread,

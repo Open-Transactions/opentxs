@@ -114,7 +114,7 @@ struct Blockchain::Imp : virtual public internal::Blockchain {
     {
         return {};
     }
-    virtual auto EnabledChains() const noexcept -> std::set<Chain>
+    virtual auto EnabledChains() const noexcept -> std::pmr::set<Chain>
     {
         return {};
     }

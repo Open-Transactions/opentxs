@@ -43,15 +43,15 @@ public:
     auto AccountSigner(const Identifier& accountID) const -> OTNymID;
     auto AccountUnit(const Identifier& accountID) const -> core::UnitType;
     auto AccountsByContract(const identifier::UnitDefinition& unit) const
-        -> std::set<OTIdentifier>;
+        -> std::pmr::set<OTIdentifier>;
     auto AccountsByIssuer(const identifier::Nym& issuerNym) const
-        -> std::set<OTIdentifier>;
+        -> std::pmr::set<OTIdentifier>;
     auto AccountsByOwner(const identifier::Nym& ownerNym) const
-        -> std::set<OTIdentifier>;
+        -> std::pmr::set<OTIdentifier>;
     auto AccountsByServer(const identifier::Server& server) const
-        -> std::set<OTIdentifier>;
+        -> std::pmr::set<OTIdentifier>;
     auto AccountsByUnit(const core::UnitType unit) const
-        -> std::set<OTIdentifier>;
+        -> std::pmr::set<OTIdentifier>;
     auto Alias(const std::string& id) const -> std::string;
     auto Load(
         const std::string& id,
@@ -77,14 +77,15 @@ public:
 private:
     friend Tree;
 
-    using NymIndex = std::map<OTNymID, std::set<OTIdentifier>>;
-    using ServerIndex = std::map<OTServerID, std::set<OTIdentifier>>;
-    using ContractIndex = std::map<OTUnitID, std::set<OTIdentifier>>;
-    using UnitIndex = std::map<core::UnitType, std::set<OTIdentifier>>;
+    using NymIndex = std::pmr::map<OTNymID, std::pmr::set<OTIdentifier>>;
+    using ServerIndex = std::pmr::map<OTServerID, std::pmr::set<OTIdentifier>>;
+    using ContractIndex = std::pmr::map<OTUnitID, std::pmr::set<OTIdentifier>>;
+    using UnitIndex =
+        std::pmr::map<core::UnitType, std::pmr::set<OTIdentifier>>;
     /** owner, signer, issuer, server, contract, unit */
     using AccountData = std::
         tuple<OTNymID, OTNymID, OTNymID, OTServerID, OTUnitID, core::UnitType>;
-    using ReverseIndex = std::map<OTIdentifier, AccountData>;
+    using ReverseIndex = std::pmr::map<OTIdentifier, AccountData>;
 
     NymIndex owner_index_{};
     NymIndex signer_index_{};

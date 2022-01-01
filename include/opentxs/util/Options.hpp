@@ -28,12 +28,15 @@ public:
         on = 1,
     };
 
-    auto BlockchainBindIpv4() const noexcept -> const std::set<std::string>&;
-    auto BlockchainBindIpv6() const noexcept -> const std::set<std::string>&;
+    auto BlockchainBindIpv4() const noexcept
+        -> const std::pmr::set<std::string>&;
+    auto BlockchainBindIpv6() const noexcept
+        -> const std::pmr::set<std::string>&;
     auto BlockchainStorageLevel() const noexcept -> int;
     auto BlockchainWalletEnabled() const noexcept -> bool;
     auto DefaultMintKeyBytes() const noexcept -> std::size_t;
-    auto DisabledBlockchains() const noexcept -> std::set<blockchain::Type>;
+    auto DisabledBlockchains() const noexcept
+        -> std::pmr::set<blockchain::Type>;
     auto HelpText() const noexcept -> const std::string&;
     auto Home() const noexcept -> const char*;
     auto Ipv4ConnectionMode() const noexcept -> ConnectionMode;
@@ -43,16 +46,17 @@ public:
     auto NotaryBindPort() const noexcept -> std::uint16_t;
     auto NotaryInproc() const noexcept -> bool;
     auto NotaryName() const noexcept -> const char*;
-    auto NotaryPublicEEP() const noexcept -> const std::set<std::string>&;
-    auto NotaryPublicIPv4() const noexcept -> const std::set<std::string>&;
-    auto NotaryPublicIPv6() const noexcept -> const std::set<std::string>&;
-    auto NotaryPublicOnion() const noexcept -> const std::set<std::string>&;
+    auto NotaryPublicEEP() const noexcept -> const std::pmr::set<std::string>&;
+    auto NotaryPublicIPv4() const noexcept -> const std::pmr::set<std::string>&;
+    auto NotaryPublicIPv6() const noexcept -> const std::pmr::set<std::string>&;
+    auto NotaryPublicOnion() const noexcept
+        -> const std::pmr::set<std::string>&;
     auto NotaryPublicPort() const noexcept -> std::uint16_t;
     auto NotaryTerms() const noexcept -> const char*;
     auto ProvideBlockchainSyncServer() const noexcept -> bool;
     auto QtRootObject() const noexcept -> QObject*;
     auto RemoteBlockchainSyncServers() const noexcept
-        -> const std::set<std::string>&;
+        -> const std::pmr::set<std::string>&;
     auto RemoteLogEndpoint() const noexcept -> const char*;
     auto StoragePrimaryPlugin() const noexcept -> const char*;
     auto TestMode() const noexcept -> bool;

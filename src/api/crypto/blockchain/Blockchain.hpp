@@ -130,10 +130,10 @@ public:
     auto Account(const identifier::Nym& nymID, const Chain chain) const
         noexcept(false) -> const opentxs::blockchain::crypto::Account& final;
     auto AccountList(const identifier::Nym& nymID) const noexcept
-        -> std::set<OTIdentifier> final;
+        -> std::pmr::set<OTIdentifier> final;
     auto AccountList(const Chain chain) const noexcept
-        -> std::set<OTIdentifier> final;
-    auto AccountList() const noexcept -> std::set<OTIdentifier> final;
+        -> std::pmr::set<OTIdentifier> final;
+    auto AccountList() const noexcept -> std::pmr::set<OTIdentifier> final;
     auto ActivityDescription(
         const identifier::Nym& nym,
         const Identifier& thread,
@@ -251,7 +251,7 @@ public:
         -> void final;
     auto SenderContact(const Key& key) const noexcept -> OTIdentifier final;
     auto SubaccountList(const identifier::Nym& nymID, const Chain chain)
-        const noexcept -> std::set<OTIdentifier> final;
+        const noexcept -> std::pmr::set<OTIdentifier> final;
     auto UpdateBalance(
         const opentxs::blockchain::Type chain,
         const opentxs::blockchain::Balance balance) const noexcept
@@ -261,7 +261,7 @@ public:
         const opentxs::blockchain::Type chain,
         const opentxs::blockchain::Balance balance) const noexcept
         -> void final;
-    auto UpdateElement(std::vector<ReadView>& pubkeyHashes) const noexcept
+    auto UpdateElement(std::pmr::vector<ReadView>& pubkeyHashes) const noexcept
         -> void final;
     auto Unconfirm(
         const Key key,

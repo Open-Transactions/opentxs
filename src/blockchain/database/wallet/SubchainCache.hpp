@@ -71,7 +71,7 @@ class SubchainCache
 {
 public:
     using dbPatterns = robin_hood::unordered_node_set<db::Pattern>;
-    using dbPatternIndex = std::set<pPatternID>;
+    using dbPatternIndex = std::pmr::set<pPatternID>;
 
     auto AddMatch(
         const eLock&,

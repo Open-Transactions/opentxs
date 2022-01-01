@@ -53,7 +53,7 @@ Thread::Thread(
 Thread::Thread(
     const Driver& storage,
     const std::string& id,
-    const std::set<std::string>& participants,
+    const std::pmr::set<std::string>& participants,
     Mailbox& mailInbox,
     Mailbox& mailOutbox)
     : Node(storage, Node::BLANK_HASH)

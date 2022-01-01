@@ -96,7 +96,7 @@ auto Context::DealerSocket(
         factory::DealerSocket(*this, static_cast<bool>(direction), callback)};
 }
 
-auto Context::MakeBatch(std::vector<socket::Type>&& types) const noexcept
+auto Context::MakeBatch(std::pmr::vector<socket::Type>&& types) const noexcept
     -> internal::Batch&
 {
     return pool_.MakeBatch(std::move(types));

@@ -62,24 +62,25 @@ public:
         const Identifier& subaccount) const noexcept -> Balance = 0;
     virtual auto GetBalance(const crypto::Key& key) const noexcept
         -> Balance = 0;
-    virtual auto GetOutputs() const noexcept -> std::vector<UTXO> = 0;
+    virtual auto GetOutputs() const noexcept -> std::pmr::vector<UTXO> = 0;
     virtual auto GetOutputs(TxoState type) const noexcept
-        -> std::vector<UTXO> = 0;
+        -> std::pmr::vector<UTXO> = 0;
     virtual auto GetOutputs(const identifier::Nym& owner) const noexcept
-        -> std::vector<UTXO> = 0;
+        -> std::pmr::vector<UTXO> = 0;
     virtual auto GetOutputs(const identifier::Nym& owner, TxoState type)
-        const noexcept -> std::vector<UTXO> = 0;
+        const noexcept -> std::pmr::vector<UTXO> = 0;
     virtual auto GetOutputs(
         const identifier::Nym& owner,
-        const Identifier& subaccount) const noexcept -> std::vector<UTXO> = 0;
+        const Identifier& subaccount) const noexcept
+        -> std::pmr::vector<UTXO> = 0;
     virtual auto GetOutputs(
         const identifier::Nym& owner,
         const Identifier& subaccount,
-        TxoState type) const noexcept -> std::vector<UTXO> = 0;
+        TxoState type) const noexcept -> std::pmr::vector<UTXO> = 0;
     virtual auto GetOutputs(const crypto::Key& key, TxoState type)
-        const noexcept -> std::vector<UTXO> = 0;
+        const noexcept -> std::pmr::vector<UTXO> = 0;
     virtual auto GetTags(const block::Outpoint& output) const noexcept
-        -> std::set<TxoTag> = 0;
+        -> std::pmr::set<TxoTag> = 0;
     virtual auto Height() const noexcept -> block::Height = 0;
 
     virtual ~Wallet() = default;

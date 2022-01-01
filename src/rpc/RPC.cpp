@@ -207,7 +207,7 @@ auto Factory::RPC(const api::Context& native) -> rpc::internal::RPC*
 
 namespace opentxs::rpc::implementation
 {
-static const std::map<VersionNumber, VersionNumber> StatusVersionMap{
+static const std::pmr::map<VersionNumber, VersionNumber> StatusVersionMap{
     {1, 1},
     {2, 2},
     {3, 2},
@@ -247,10 +247,10 @@ auto RPC::accept_pending_payments(const proto::RPCCommand& command) const
     CHECK_INPUT(acceptpendingpayment, proto::RPCRESPONSE_INVALID);
 
     for (auto acceptpendingpayment : command.acceptpendingpayment()) {
-        const auto destinationaccountID = client.Factory().Identifier(
+        const auto destinationaccountID = client.Factory().IdentifierFromBase58(
             acceptpendingpayment.destinationaccount());
-        const auto workflowID =
-            client.Factory().Identifier(acceptpendingpayment.workflow());
+        const auto workflowID = client.Factory().IdentifierFromBase58(
+            acceptpendingpayment.workflow());
         const auto nymID = client.Storage().AccountOwner(destinationaccountID);
 
         try {
@@ -352,7 +352,7 @@ auto RPC::add_claim(const proto::RPCCommand& command) const
 
     for (const auto& addclaim : command.claim()) {
         const auto& contactitem = addclaim.item();
-        std::set<std::uint32_t> attributes(
+        std::pmr::set<std::uint32_t> attributes(
             contactitem.attribute().begin(), contactitem.attribute().end());
         auto claim = Claim(
             contactitem.id(),
@@ -660,7 +660,7 @@ auto RPC::create_nym(const proto::RPCCommand& command) const
 
         for (const auto& addclaim : createnym.claims()) {
             const auto& contactitem = addclaim.item();
-            std::set<std::uint32_t> attributes(
+            std::pmr::set<std::uint32_t> attributes(
                 contactitem.attribute().begin(), contactitem.attribute().end());
             auto claim = Claim(
                 contactitem.id(),
@@ -825,7 +825,8 @@ auto RPC::evaluate_transaction_reply(
     auto success{true};
     const auto notaryID = api.Factory().ServerID(reply.m_strNotaryID);
     const auto nymID = api.Factory().NymID(reply.m_strNymID);
-    const auto accountID = api.Factory().Identifier(reply.m_strAcctID);
+    const auto accountID =
+        api.Factory().IdentifierFromBase58(reply.m_strAcctID);
     const bool transaction =
         reply.m_strCommand->Compare("notarizeTransactionResponse") ||
         reply.m_strCommand->Compare("processInboxResponse") ||
@@ -951,7 +952,7 @@ auto RPC::get_compatible_accounts(const proto::RPCCommand& command) const
 
     const auto owneraccounts = client.Storage().AccountsByOwner(ownerID);
     const auto unitaccounts = client.Storage().AccountsByContract(unitID);
-    std::vector<OTIdentifier> compatible{};
+    std::pmr::vector<OTIdentifier> compatible{};
     std::set_intersection(
         owneraccounts.begin(),
         owneraccounts.end(),
@@ -1016,7 +1017,7 @@ auto RPC::get_pending_payments(const proto::RPCCommand& command) const
         ownerID,
         otx::client::PaymentWorkflowType::IncomingInvoice,
         otx::client::PaymentWorkflowState::Conveyed);
-    std::set<OTIdentifier> workflows;
+    std::pmr::set<OTIdentifier> workflows;
     std::set_union(
         checkWorkflows.begin(),
         checkWorkflows.end(),

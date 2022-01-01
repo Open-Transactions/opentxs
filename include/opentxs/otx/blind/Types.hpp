@@ -32,5 +32,6 @@ using MintSeries = std::uint64_t;
 namespace opentxs
 {
 auto print(otx::blind::CashType) noexcept -> std::string;
-auto supported_otx_token_types() noexcept -> std::set<otx::blind::CashType>;
+auto supported_otx_token_types() noexcept
+    -> std::pmr::set<otx::blind::CashType>;
 }  // namespace opentxs

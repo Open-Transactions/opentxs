@@ -10,6 +10,7 @@
 #include <algorithm>
 #include <iterator>
 #include <map>
+#include <memory_resource>
 #include <set>
 #include <utility>
 
@@ -68,7 +69,7 @@ auto AccountCache::get_account_map(
 auto AccountCache::List(
     const identifier::Nym& nymID,
     const opentxs::blockchain::Type chain) const noexcept
-    -> std::set<OTIdentifier>
+    -> std::pmr::set<OTIdentifier>
 {
     Lock lock(lock_);
     const auto& map = get_account_map(lock, chain);
@@ -88,7 +89,7 @@ auto AccountCache::load_nym(
         nym.str(), BlockchainToUnit(chain));
     std::for_each(std::begin(hd), std::end(hd), [&](const auto& account) {
         auto& set = output[nym];
-        auto accountID = api_.Factory().Identifier(account);
+        auto accountID = api_.Factory().IdentifierFromBase58(account);
         account_index_.emplace(accountID, nym);
         account_type_.emplace(
             accountID, opentxs::blockchain::crypto::SubaccountType::HD);

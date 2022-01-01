@@ -46,7 +46,7 @@ namespace ottest
 const auto params_ = ot::blockchain::internal::GetFilterParams(
     ot::blockchain::filter::Type::Basic_BIP158);
 using Hash = ot::OTData;
-auto stress_test_ = std::vector<Hash>{};
+auto stress_test_ = std::pmr::vector<Hash>{};
 
 class Test_Filters : public ::testing::Test
 {
@@ -54,13 +54,13 @@ public:
     struct TestData {
         std::string block_hash_;
         std::string block_;
-        std::vector<std::string> previous_;
-        std::vector<std::string> outputs_;
+        std::pmr::vector<std::string> previous_;
+        std::pmr::vector<std::string> outputs_;
         std::string previous_header_;
         std::string filter_;
         std::string header_;
     };
-    using TestMap = std::map<ot::blockchain::block::Height, TestData>;
+    using TestMap = std::pmr::map<ot::blockchain::block::Height, TestData>;
 
     static const TestMap gcs_;
 
@@ -71,7 +71,7 @@ public:
         const auto& vector = gcs_.at(0);
         const auto block =
             api_.Factory().Data(vector.block_hash_, ot::StringStyle::Hex);
-        auto elements = std::vector<ot::OTData>{};
+        auto elements = std::pmr::vector<ot::OTData>{};
 
         for (const auto& element : vector.previous_) {
             elements.emplace_back(
@@ -345,7 +345,7 @@ TEST_F(Test_Filters, bitstreams)
 
 TEST_F(Test_Filters, golomb_coding)
 {
-    const auto elements = std::vector<std::uint64_t>{2, 3, 5, 8, 13};
+    const auto elements = std::pmr::vector<std::uint64_t>{2, 3, 5, 8, 13};
     const auto N = static_cast<std::uint32_t>(elements.size());
     const auto P = std::uint8_t{19};
     const auto encoded = ot::gcs::GolombEncode(P, elements);
@@ -377,8 +377,8 @@ TEST_F(Test_Filters, gcs)
     const auto object6(ot::Data::Factory(s6.data(), s6.length()));
 
     auto includedElements =
-        std::vector<ot::OTData>{object1, object2, object3, object4};
-    auto excludedElements = std::vector<ot::OTData>{object5, object6};
+        std::pmr::vector<ot::OTData>{object1, object2, object3, object4};
+    auto excludedElements = std::pmr::vector<ot::OTData>{object5, object6};
     auto key = std::string{"0123456789abcdef"};
     auto pGcs = ot::factory::GCS(
         api_, params_.first, params_.second, key, includedElements);
@@ -396,7 +396,7 @@ TEST_F(Test_Filters, gcs)
     EXPECT_TRUE(gcs.Test(includedElements));
     EXPECT_FALSE(gcs.Test(excludedElements));
 
-    const auto partial = std::vector<ot::ReadView>{
+    const auto partial = std::pmr::vector<ot::ReadView>{
         object1->Bytes(), object4->Bytes(), object5->Bytes(), object6->Bytes()};
     const auto matches = gcs.Match(partial);
 

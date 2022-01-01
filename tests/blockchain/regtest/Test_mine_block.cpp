@@ -53,9 +53,9 @@ TEST_F(Regtest_fixture_single, generate_block)
         test_chain_,
         previousHeader->Height() + 1,
         [&] {
-            auto output = std::vector<OutputBuilder>{};
+            auto output = std::pmr::vector<OutputBuilder>{};
             const auto text = std::string{"null"};
-            const auto keys = std::set<ot::blockchain::crypto::Key>{};
+            const auto keys = std::pmr::set<ot::blockchain::crypto::Key>{};
             output.emplace_back(
                 5000000000,
                 miner_.Factory().BitcoinScriptNullData(test_chain_, {text}),

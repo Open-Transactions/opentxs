@@ -14,6 +14,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <memory>
+#include <memory_resource>
 #include <sstream>
 #include <string>
 #include <utility>
@@ -2193,7 +2194,7 @@ void OTScriptable::CalculateContractID(Identifier& newID) const
     newID.CalculateDigest(xmlUnsigned->Bytes());
 }
 
-auto vectorToString(const std::vector<std::int64_t>& v) -> std::string
+auto vectorToString(const std::pmr::vector<std::int64_t>& v) -> std::string
 {
     std::stringstream ss;
 
@@ -2204,11 +2205,11 @@ auto vectorToString(const std::vector<std::int64_t>& v) -> std::string
     return ss.str();
 }
 
-auto stringToVector(const std::string& s) -> std::vector<std::int64_t>
+auto stringToVector(const std::string& s) -> std::pmr::vector<std::int64_t>
 {
     std::stringstream stream(s);
 
-    std::vector<std::int64_t> results;
+    std::pmr::vector<std::int64_t> results;
 
     std::int64_t n;
     while (stream >> n) { results.push_back(n); }

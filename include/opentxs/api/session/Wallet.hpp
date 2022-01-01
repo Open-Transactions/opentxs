@@ -148,13 +148,13 @@ public:
 
     /**   Returns a list of all issuers associated with a local nym */
     virtual auto IssuerList(const identifier::Nym& nymID) const
-        -> std::set<OTNymID> = 0;
+        -> std::pmr::set<OTNymID> = 0;
 
     virtual auto IsLocalNym(const std::string& id) const -> bool = 0;
 
     virtual auto LocalNymCount() const -> std::size_t = 0;
 
-    virtual auto LocalNyms() const -> std::set<OTNymID> = 0;
+    virtual auto LocalNyms() const -> std::pmr::set<OTNymID> = 0;
 
     /**   Obtain a smart pointer to an instantiated nym.
      *
@@ -485,7 +485,7 @@ public:
         const std::string& nymid,
         const std::string& name,
         const std::string& terms,
-        const std::list<contract::Server::Endpoint>& endpoints,
+        const std::pmr::list<contract::Server::Endpoint>& endpoints,
         const PasswordPrompt& reason,
         const VersionNumber version) const noexcept(false)
         -> OTServerContract = 0;

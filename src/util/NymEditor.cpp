@@ -317,7 +317,8 @@ auto NymData::SocialMediaProfiles(const contact::ClaimType type, bool active)
     return nym().SocialMediaProfiles(type, active);
 }
 
-auto NymData::SocialMediaProfileTypes() const -> std::set<contact::ClaimType>
+auto NymData::SocialMediaProfileTypes() const
+    -> std::pmr::set<contact::ClaimType>
 {
     return nym().SocialMediaProfileTypes();
 }

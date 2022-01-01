@@ -139,7 +139,7 @@ auto BitcoinP2PAddr(
     const api::Session& api,
     const blockchain::Type network,
     const blockchain::p2p::bitcoin::ProtocolVersion version,
-    std::vector<std::unique_ptr<blockchain::p2p::internal::Address>>&&
+    std::pmr::vector<std::unique_ptr<blockchain::p2p::internal::Address>>&&
         addresses) -> blockchain::p2p::bitcoin::message::internal::Addr*
 {
     namespace bitcoin = blockchain::p2p::bitcoin;

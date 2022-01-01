@@ -24,6 +24,12 @@ namespace opentxs
 {
 namespace network
 {
+namespace p2p
+{
+class Block;
+class State;
+}  // namespace p2p
+
 namespace zeromq
 {
 class Message;
@@ -44,9 +50,9 @@ public:
 
     const VersionNumber version_;
     const MessageType type_;
-    const std::vector<State> state_;
+    const std::pmr::vector<State> state_;
     const std::string endpoint_;
-    const std::vector<Block> blocks_;
+    const std::pmr::vector<Block> blocks_;
 
     static auto translate(const LocalType in) noexcept -> RemoteType;
     static auto translate(const RemoteType in) noexcept -> LocalType;
@@ -66,9 +72,9 @@ public:
 
     Imp(VersionNumber version,
         MessageType type,
-        std::vector<State> state,
+        std::pmr::vector<State> state,
         std::string endpoint,
-        std::vector<Block> blocks) noexcept;
+        std::pmr::vector<Block> blocks) noexcept;
     Imp(const MessageType type) noexcept;
     Imp() noexcept;
 

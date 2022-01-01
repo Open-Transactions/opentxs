@@ -94,7 +94,7 @@ namespace zmq = opentxs::network::zeromq;
 
 namespace opentxs::server
 {
-using listOfAccounts = std::vector<ExclusiveAccount>;
+using listOfAccounts = std::pmr::vector<ExclusiveAccount>;
 
 Notary::Notary(
     Server& server,
@@ -207,7 +207,7 @@ void Notary::cancel_cheque(
         outbox,
         account,
         input,
-        std::set<TransactionNumber>(),
+        std::pmr::set<TransactionNumber>(),
         reason_);
 
     if (false == validBalance) {
@@ -542,7 +542,7 @@ void Notary::deposit_cheque(
         depositorOutbox,
         depositorAccount,
         input,
-        std::set<TransactionNumber>(),
+        std::pmr::set<TransactionNumber>(),
         reason_);
 
     if (false == validBalance) {
@@ -1082,7 +1082,7 @@ void Notary::NotarizeTransfer(
                         outbox,
                         theFromAccount.get(),
                         tranIn,
-                        std::set<TransactionNumber>(),
+                        std::pmr::set<TransactionNumber>(),
                         reason_,
                         lNewTransactionNumber))) {
                     LogConsole()(OT_PRETTY_CLASS())(
@@ -1476,7 +1476,7 @@ void Notary::NotarizeWithdrawal(
                            outbox,
                            theAccount.get(),
                            tranIn,
-                           std::set<TransactionNumber>(),
+                           std::pmr::set<TransactionNumber>(),
                            reason_))) {
                 LogError()(OT_PRETTY_CLASS())(
                     "ERROR verifying balance statement while issuing "
@@ -2104,7 +2104,7 @@ void Notary::NotarizePayDividend(
                                 outbox,
                                 theSourceAccount.get(),
                                 tranIn,
-                                std::set<TransactionNumber>(),
+                                std::pmr::set<TransactionNumber>(),
                                 reason_))) {
                             LogError()(OT_PRETTY_CLASS())(
                                 "ERROR verifying balance statement while "
@@ -4506,7 +4506,7 @@ void Notary::NotarizeExchangeBasket(
                          outbox,
                          theAccount.get(),
                          tranIn,
-                         std::set<TransactionNumber>(),
+                         std::pmr::set<TransactionNumber>(),
                          reason_)) {
             LogError()(OT_PRETTY_CLASS())("ERROR verifying balance statement.")
                 .Flush();
@@ -4518,7 +4518,7 @@ void Notary::NotarizeExchangeBasket(
                                          // successful.
             // Set up some account pointer lists for later...
             listOfAccounts listUserAccounts, listServerAccounts;
-            std::list<Ledger*> listInboxes;
+            std::pmr::list<Ledger*> listInboxes;
 
             // Here's the request from the user.
             auto strBasket = String::Factory();
@@ -4596,7 +4596,7 @@ void Notary::NotarizeExchangeBasket(
                             // Let's make sure that the same asset account
                             // doesn't appear twice on the request.
                             //
-                            std::set<OTIdentifier> setOfAccounts;
+                            std::pmr::set<OTIdentifier> setOfAccounts;
                             setOfAccounts.insert(
                                 theRequestBasket->GetRequestAccountID());
 
@@ -4711,7 +4711,7 @@ void Notary::NotarizeExchangeBasket(
                                                 .mutable_Account(
                                                     server_.API()
                                                         .Factory()
-                                                        .Identifier(
+                                                        .IdentifierFromBase58(
                                                             serverAccountID),
                                                     reason_);
 
@@ -6268,7 +6268,7 @@ auto Notary::NotarizeProcessNymbox(
     // ID here.
     const auto& NYM_ID = context.RemoteNym().ID();
     const auto& NOTARY_ID = context.Notary();
-    std::set<TransactionNumber> newNumbers;
+    std::pmr::set<TransactionNumber> newNumbers;
     auto theNymbox{manager_.Factory().Ledger(NYM_ID, NYM_ID, NOTARY_ID)};
 
     OT_ASSERT(false != bool(theNymbox));
@@ -6377,7 +6377,7 @@ auto Notary::NotarizeProcessNymbox(
                         // of the blank to the Nym, we actually add an
                         // entire list of numbers retrieved from the blank,
                         // including its main number.
-                        std::set<TransactionNumber> theNumbers;
+                        std::pmr::set<TransactionNumber> theNumbers;
                         listNumbersNymbox.Output(theNumbers);
 
                         // Looping through the transaction numbers on the
@@ -6935,7 +6935,7 @@ void Notary::NotarizeProcessInbox(
     const auto ACCOUNT_ID =
         server_.API().Factory().Identifier(theAccount.get());
     const std::string strNymID(String::Factory(NYM_ID)->Get());
-    std::set<TransactionNumber> closedNumbers, closedCron;
+    std::pmr::set<TransactionNumber> closedNumbers, closedCron;
     pResponseBalanceItem.reset(manager_.Factory()
                                    .Item(
                                        processInboxResponse,
@@ -6948,7 +6948,7 @@ void Notary::NotarizeProcessInbox(
 
     bool bSuccessFindingAllTransactions{true};
     Amount lTotalBeingAccepted{0};
-    std::list<TransactionNumber> theListOfInboxReceiptsBeingRemoved{};
+    std::pmr::list<TransactionNumber> theListOfInboxReceiptsBeingRemoved{};
     bool bVerifiedBalanceStatement{false};
     const bool allowed =
         NYM_IS_ALLOWED(strNymID, ServerSettings::__transact_process_inbox);
@@ -7116,7 +7116,7 @@ void Notary::NotarizeProcessInbox(
 
                 // we'll store them here, and disallow duplicates, to make
                 // sure they are all unique IDs (no repeats.)
-                std::set<std::int64_t> setOfRefNumbers;
+                std::pmr::set<std::int64_t> setOfRefNumbers;
 
                 for (auto& it : processInbox.GetItemList()) {
                     auto pItemPointer = it;
@@ -8393,7 +8393,7 @@ void Notary::process_cash_deposit(
                                  outbox,
                                  depositorAccount.get(),
                                  input,
-                                 std::set<TransactionNumber>(),
+                                 std::pmr::set<TransactionNumber>(),
                                  reason_)) {
                     LogError()(OT_PRETTY_CLASS())(
                         "ERROR verifying balance statement while depositing "
@@ -8545,7 +8545,7 @@ void Notary::process_cash_withdrawal(
         outbox,
         account.get(),
         requestTransaction,
-        std::set<TransactionNumber>(),
+        std::pmr::set<TransactionNumber>(),
         reason_);
 
     if (false == verifiedBalance) {

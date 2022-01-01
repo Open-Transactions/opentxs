@@ -150,7 +150,7 @@ public:
         return {};
     }
     auto DepositChains() const noexcept
-        -> std::vector<blockchain::Type> override
+        -> std::pmr::vector<blockchain::Type> override
     {
         return {};
     }

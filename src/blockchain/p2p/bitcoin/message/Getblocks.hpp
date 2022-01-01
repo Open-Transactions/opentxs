@@ -50,11 +50,11 @@ class Getblocks final : public implementation::Message
 public:
     struct Raw {
         ProtocolVersionField version_;
-        std::vector<BlockHeaderHashField> header_hashes_;
+        std::pmr::vector<BlockHeaderHashField> header_hashes_;
         BlockHeaderHashField stop_hash_;
 
         Raw(ProtocolVersionUnsigned version,
-            const std::vector<OTData>& header_hashes,
+            const std::pmr::vector<OTData>& header_hashes,
             const Data& stop_hash) noexcept(false)
             : version_(version)
             , header_hashes_()
@@ -85,7 +85,7 @@ public:
         }
     };
 
-    auto getHashes() const noexcept -> const std::vector<OTData>&
+    auto getHashes() const noexcept -> const std::pmr::vector<OTData>&
     {
         return header_hashes_;
     }
@@ -108,20 +108,20 @@ public:
         const api::Session& api,
         const blockchain::Type network,
         const bitcoin::ProtocolVersionUnsigned version,
-        const std::vector<OTData>& header_hashes,
+        const std::pmr::vector<OTData>& header_hashes,
         const Data& stop_hash) noexcept;
     Getblocks(
         const api::Session& api,
         std::unique_ptr<Header> header,
         const bitcoin::ProtocolVersionUnsigned version,
-        const std::vector<OTData>& header_hashes,
+        const std::pmr::vector<OTData>& header_hashes,
         const Data& stop_hash) noexcept(false);
 
     ~Getblocks() final = default;
 
 private:
     const bitcoin::ProtocolVersionUnsigned version_;
-    const std::vector<OTData> header_hashes_;
+    const std::pmr::vector<OTData> header_hashes_;
     const OTData stop_hash_;
 
     Getblocks(const Getblocks&) = delete;

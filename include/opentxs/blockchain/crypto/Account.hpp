@@ -62,7 +62,7 @@ public:
         using const_iterator = opentxs::iterator::
             Bidirectional<const HDAccounts, const value_type>;
 
-        virtual auto all() const noexcept -> std::set<OTIdentifier> = 0;
+        virtual auto all() const noexcept -> std::pmr::set<OTIdentifier> = 0;
         /// Throws std::out_of_range for invalid position
         virtual auto at(const std::size_t position) const noexcept(false)
             -> const value_type& = 0;
@@ -83,7 +83,7 @@ public:
         using const_iterator = opentxs::iterator::
             Bidirectional<const ImportedAccounts, const value_type>;
 
-        virtual auto all() const noexcept -> std::set<OTIdentifier> = 0;
+        virtual auto all() const noexcept -> std::pmr::set<OTIdentifier> = 0;
         /// Throws std::out_of_range for invalid position
         virtual auto at(const std::size_t position) const noexcept(false)
             -> const value_type& = 0;
@@ -104,7 +104,7 @@ public:
         using const_iterator = opentxs::iterator::
             Bidirectional<const PaymentCodeAccounts, const value_type>;
 
-        virtual auto all() const noexcept -> std::set<OTIdentifier> = 0;
+        virtual auto all() const noexcept -> std::pmr::set<OTIdentifier> = 0;
         /// Throws std::out_of_range for invalid position
         virtual auto at(const std::size_t position) const noexcept(false)
             -> const value_type& = 0;

@@ -28,8 +28,8 @@ private:
     std::string version_;
     std::string nym_id_;
     std::string notary_;
-    std::set<TransactionNumber> available_;
-    std::set<TransactionNumber> issued_;
+    std::pmr::set<TransactionNumber> available_;
+    std::pmr::set<TransactionNumber> issued_;
 
     TransactionStatement() = delete;
     TransactionStatement(const TransactionStatement& rhs) = delete;
@@ -41,14 +41,14 @@ private:
 public:
     TransactionStatement(
         const std::string& notary,
-        const std::set<TransactionNumber>& issued,
-        const std::set<TransactionNumber>& available);
+        const std::pmr::set<TransactionNumber>& issued,
+        const std::pmr::set<TransactionNumber>& available);
     TransactionStatement(const String& serialized);
     TransactionStatement(TransactionStatement&& rhs) = default;
 
     explicit operator OTString() const;
 
-    auto Issued() const -> const std::set<TransactionNumber>&;
+    auto Issued() const -> const std::pmr::set<TransactionNumber>&;
     auto Notary() const -> const std::string&;
 
     void Remove(const TransactionNumber& number);

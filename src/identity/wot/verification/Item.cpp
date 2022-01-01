@@ -126,12 +126,12 @@ Item::Item(
 Item::Item(const internal::Nym& parent, const SerializedType& in) noexcept(
     false)
     : version_(in.version())
-    , claim_(parent.API().Factory().Identifier(in.claim()))
+    , claim_(parent.API().Factory().IdentifierFromBase58(in.claim()))
     , value_(static_cast<Type>(in.valid()))
     , valid_(static_cast<Validity>(in.retracted()))
     , start_(Clock::from_time_t(in.start()))
     , end_(Clock::from_time_t(in.end()))
-    , id_(parent.API().Factory().Identifier(in.id()))
+    , id_(parent.API().Factory().IdentifierFromBase58(in.id()))
     , sig_(in.sig())
 {
     const auto calculated = calculate_id(

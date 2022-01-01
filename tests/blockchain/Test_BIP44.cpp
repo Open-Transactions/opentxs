@@ -48,7 +48,7 @@ namespace ottest
 const ot::Nym_p nym_{};
 const std::string seed_id_{};
 using Pubkey = ot::Space;
-using ExpectedKeys = std::vector<Pubkey>;
+using ExpectedKeys = std::pmr::vector<Pubkey>;
 const ExpectedKeys external_{};
 const ExpectedKeys internal_{};
 
@@ -124,7 +124,7 @@ TEST_F(Test_BIP44, generate_expected_keys)
     internal.reserve(count_);
     external.reserve(count_);
     using EcdsaCurve = ot::EcdsaCurve;
-    using Path = std::vector<ot::Bip32Index>;
+    using Path = std::pmr::vector<ot::Bip32Index>;
     const auto MakePath = [&](auto change, auto index) -> Path {
         constexpr auto hard =
             static_cast<ot::Bip32Index>(ot::Bip32Child::HARDENED);

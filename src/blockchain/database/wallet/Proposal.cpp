@@ -26,7 +26,7 @@ using Direction = storage::lmdb::LMDB::Dir;
 constexpr auto table_{Table::Proposals};
 
 struct Proposal::Imp {
-    auto CompletedProposals() const noexcept -> std::set<OTIdentifier>
+    auto CompletedProposals() const noexcept -> std::pmr::set<OTIdentifier>
     {
         auto lock = Lock{lock_};
 
@@ -42,9 +42,9 @@ struct Proposal::Imp {
         return load_proposal(id);
     }
     auto LoadProposals() const noexcept
-        -> std::vector<proto::BlockchainTransactionProposal>
+        -> std::pmr::vector<proto::BlockchainTransactionProposal>
     {
-        auto output = std::vector<proto::BlockchainTransactionProposal>{};
+        auto output = std::pmr::vector<proto::BlockchainTransactionProposal>{};
         lmdb_.Read(
             table_,
             [&](const auto key, const auto value) -> bool {
@@ -110,7 +110,8 @@ struct Proposal::Imp {
 
         return out;
     }
-    auto ForgetProposals(const std::set<OTIdentifier>& ids) noexcept -> bool
+    auto ForgetProposals(const std::pmr::set<OTIdentifier>& ids) noexcept
+        -> bool
     {
         auto lock = Lock{lock_};
 
@@ -127,7 +128,7 @@ struct Proposal::Imp {
     }
 
 private:
-    using FinishedProposals = std::set<OTIdentifier>;
+    using FinishedProposals = std::pmr::set<OTIdentifier>;
 
     const storage::lmdb::LMDB& lmdb_;
     mutable std::mutex lock_;
@@ -170,7 +171,8 @@ auto Proposal::CancelProposal(MDB_txn* tx, const Identifier& id) noexcept
     return imp_->CancelProposal(tx, id);
 }
 
-auto Proposal::CompletedProposals() const noexcept -> std::set<OTIdentifier>
+auto Proposal::CompletedProposals() const noexcept
+    -> std::pmr::set<OTIdentifier>
 {
     return imp_->CompletedProposals();
 }
@@ -186,7 +188,7 @@ auto Proposal::FinishProposal(MDB_txn* tx, const Identifier& id) noexcept
     return imp_->FinishProposal(tx, id);
 }
 
-auto Proposal::ForgetProposals(const std::set<OTIdentifier>& ids) noexcept
+auto Proposal::ForgetProposals(const std::pmr::set<OTIdentifier>& ids) noexcept
     -> bool
 {
     return imp_->ForgetProposals(ids);
@@ -199,7 +201,7 @@ auto Proposal::LoadProposal(const Identifier& id) const noexcept
 }
 
 auto Proposal::LoadProposals() const noexcept
-    -> std::vector<proto::BlockchainTransactionProposal>
+    -> std::pmr::vector<proto::BlockchainTransactionProposal>
 {
     return imp_->LoadProposals();
 }

@@ -30,7 +30,7 @@ struct Scale::Imp {
     const std::string suffix_;
     const OptionalInt default_min_;
     const OptionalInt default_max_;
-    const std::vector<Ratio> ratios_;
+    const std::pmr::vector<Ratio> ratios_;
 
     auto format(
         const Amount& amount,
@@ -138,7 +138,7 @@ struct Scale::Imp {
     }
     Imp(const std::string& prefix,
         const std::string& suffix,
-        const std::vector<Ratio>& ratios,
+        const std::pmr::vector<Ratio>& ratios,
         const OptionalInt defaultMinDecimals,
         const OptionalInt defaultMaxDecimals) noexcept
         : prefix_(prefix)
@@ -176,7 +176,7 @@ private:
 
     // ratio for converting display string to Amount
     static auto calculate_incoming_ratio(
-        const std::vector<Ratio>& ratios) noexcept -> Backend
+        const std::pmr::vector<Ratio>& ratios) noexcept -> Backend
     {
         auto output = Backend{1};
 
@@ -188,7 +188,7 @@ private:
     }
     // ratio for converting Amount to display string
     static auto calculate_outgoing_ratio(
-        const std::vector<Ratio>& ratios) noexcept -> Backend
+        const std::pmr::vector<Ratio>& ratios) noexcept -> Backend
     {
         auto output = Backend{1};
 

@@ -112,7 +112,7 @@ protected:
     void onRemovalFromCron(const PasswordPrompt& reason) override;
 
     // Numbers used for CLOSING a transaction. (finalReceipt.)
-    std::deque<TransactionNumber> m_dequeRecipientClosingNumbers;
+    std::pmr::deque<TransactionNumber> m_dequeRecipientClosingNumbers;
 
 public:
     auto GetOriginType() const -> originType override
@@ -318,7 +318,7 @@ public:
      inline const Time& GetCreationDate() const { return m_CREATION_DATE; }
 
      // These are for:
-     // std::deque<std::int64_t> m_dequeClosingNumbers;
+     // std::pmr::deque<std::int64_t> m_dequeClosingNumbers;
      //
      // They are numbers used for CLOSING a transaction. (finalReceipt, someday
      more.)

@@ -77,7 +77,7 @@ auto BitcoinP2PGetheaders(
         return nullptr;
     }
 
-    std::vector<blockchain::block::pHash> hashes{};
+    std::pmr::vector<blockchain::block::pHash> hashes{};
 
     if (count > 0) {
         for (std::size_t i{0}; i < count; ++i) {
@@ -123,7 +123,7 @@ auto BitcoinP2PGetheaders(
     const api::Session& api,
     const blockchain::Type network,
     const blockchain::p2p::bitcoin::ProtocolVersionUnsigned version,
-    std::vector<blockchain::block::pHash>&& history,
+    std::pmr::vector<blockchain::block::pHash>&& history,
     blockchain::block::pHash&& stop)
     -> blockchain::p2p::bitcoin::message::internal::Getheaders*
 {
@@ -141,7 +141,7 @@ Getheaders::Getheaders(
     const api::Session& api,
     const blockchain::Type network,
     const bitcoin::ProtocolVersionUnsigned version,
-    std::vector<block::pHash>&& hashes,
+    std::pmr::vector<block::pHash>&& hashes,
     block::pHash&& stop) noexcept
     : Message(api, network, bitcoin::Command::getheaders)
     , version_(version)
@@ -155,7 +155,7 @@ Getheaders::Getheaders(
     const api::Session& api,
     std::unique_ptr<Header> header,
     const bitcoin::ProtocolVersionUnsigned version,
-    std::vector<block::pHash>&& hashes,
+    std::pmr::vector<block::pHash>&& hashes,
     block::pHash&& stop) noexcept
     : Message(api, std::move(header))
     , version_(version)

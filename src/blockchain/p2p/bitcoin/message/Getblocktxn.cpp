@@ -79,7 +79,7 @@ auto BitcoinP2PGetblocktxn(
         return nullptr;
     }
 
-    std::vector<std::size_t> txn_indices;
+    std::pmr::vector<std::size_t> txn_indices;
 
     if (indicesCount > 0) {
         for (std::size_t ii = 0; ii < indicesCount; ii++) {
@@ -122,7 +122,7 @@ auto BitcoinP2PGetblocktxn(
     const api::Session& api,
     const blockchain::Type network,
     const Data& block_hash,
-    const std::vector<std::size_t>& txn_indices)
+    const std::pmr::vector<std::size_t>& txn_indices)
     -> blockchain::p2p::bitcoin::message::Getblocktxn*
 {
     namespace bitcoin = blockchain::p2p::bitcoin;
@@ -141,7 +141,7 @@ auto Getblocktxn::payload(AllocateOutput out) const noexcept -> bool
         if (!out) { throw std::runtime_error{"invalid output allocator"}; }
 
         auto bytes = block_hash_->size();
-        auto data = std::vector<OTData>{};
+        auto data = std::pmr::vector<OTData>{};
         data.reserve(1u + txn_indices_.size());
         const auto& count = data.emplace_back(
             Data::Factory(CompactSize(txn_indices_.size()).Encode()));
@@ -180,7 +180,7 @@ Getblocktxn::Getblocktxn(
     const api::Session& api,
     const blockchain::Type network,
     const Data& block_hash,
-    const std::vector<std::size_t>& txn_indices) noexcept
+    const std::pmr::vector<std::size_t>& txn_indices) noexcept
     : Message(api, network, bitcoin::Command::getblocktxn)
     , block_hash_(Data::Factory(block_hash))
     , txn_indices_(txn_indices)
@@ -194,7 +194,7 @@ Getblocktxn::Getblocktxn(
     const api::Session& api,
     std::unique_ptr<Header> header,
     const Data& block_hash,
-    const std::vector<std::size_t>& txn_indices) noexcept(false)
+    const std::pmr::vector<std::size_t>& txn_indices) noexcept(false)
     : Message(api, std::move(header))
     , block_hash_(Data::Factory(block_hash))
     , txn_indices_(txn_indices)

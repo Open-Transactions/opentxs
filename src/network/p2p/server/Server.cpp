@@ -71,7 +71,7 @@ namespace opentxs::network::p2p
 class Server::Imp
 {
 public:
-    using Map = std::map<
+    using Map = std::pmr::map<
         Chain,
         std::tuple<
             std::string,
@@ -100,7 +100,7 @@ public:
         : api_(api)
         , zmq_(zmq)
         , batch_(zmq_.Internal().MakeBatch([&] {
-            auto out = std::vector<zeromq::socket::Type>{};
+            auto out = std::pmr::vector<zeromq::socket::Type>{};
             out.emplace_back(zeromq::socket::Type::Router);
             out.emplace_back(zeromq::socket::Type::Publish);
             const auto chains = opentxs::blockchain::DefinedChains().size();

@@ -114,7 +114,7 @@ private:
         const unsigned http_version{};
     };
 
-    static const std::vector<Site> sites;
+    static const std::pmr::vector<Site> sites;
 
     const zmq::Context& zmq_;
     const std::string notification_endpoint_;
@@ -123,7 +123,7 @@ private:
     asio::Buffers buffers_;
     mutable std::shared_mutex lock_;
     mutable asio::Context io_context_;
-    mutable std::map<ThreadPool, asio::Context> thread_pools_;
+    mutable std::pmr::map<ThreadPool, asio::Context> thread_pools_;
     mutable asio::Acceptors acceptors_;
     std::promise<OTData> ipv4_promise_;
     std::promise<OTData> ipv6_promise_;

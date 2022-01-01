@@ -53,7 +53,7 @@ class OPENTXS_EXPORT Base
 {
 public:
     using SessionIndex = int;
-    using Identifiers = std::vector<std::string>;
+    using Identifiers = std::pmr::vector<std::string>;
     using AssociateNyms = Identifiers;
 
     struct Imp;

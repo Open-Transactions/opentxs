@@ -89,23 +89,25 @@ public:
     auto BestPhoneNumber() const -> std::string;
     auto BestSocialMediaProfile(const contact::ClaimType type) const
         -> std::string;
-    auto BlockchainAddresses() const -> std::vector<BlockchainAddress>;
+    auto BlockchainAddresses() const -> std::pmr::vector<BlockchainAddress>;
     auto Data() const -> std::shared_ptr<ContactData>;
     auto EmailAddresses(bool active = true) const -> std::string;
     auto ID() const -> const Identifier&;
     auto Label() const -> const std::string&;
     auto LastUpdated() const -> std::time_t;
-    auto Nyms(const bool includeInactive = false) const -> std::vector<OTNymID>;
+    auto Nyms(const bool includeInactive = false) const
+        -> std::pmr::vector<OTNymID>;
     auto PaymentCode(const core::UnitType currency = core::UnitType::BTC) const
         -> std::string;
     auto PaymentCodes(const core::UnitType currency = core::UnitType::BTC) const
-        -> std::vector<std::string>;
+        -> std::pmr::vector<std::string>;
     auto PhoneNumbers(bool active = true) const -> std::string;
     auto Print() const -> std::string;
     OPENTXS_NO_EXPORT auto Serialize(proto::Contact& out) const -> bool;
     auto SocialMediaProfiles(const contact::ClaimType type, bool active = true)
         const -> std::string;
-    auto SocialMediaProfileTypes() const -> const std::set<contact::ClaimType>;
+    auto SocialMediaProfileTypes() const
+        -> const std::pmr::set<contact::ClaimType>;
     auto Type() const -> contact::ClaimType;
 
     auto AddBlockchainAddress(

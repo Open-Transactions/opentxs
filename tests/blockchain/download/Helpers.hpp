@@ -25,7 +25,7 @@ using FinishedType = std::string;
 using ManagerType = d::Manager<DownloadManager, DownloadType, FinishedType>;
 
 struct DownloadManager : public ManagerType {
-    using FinishedMap = std::map<Position, Finished>;
+    using FinishedMap = std::pmr::map<Position, Finished>;
 
     static const bb::Position genesis_;
 
@@ -61,7 +61,7 @@ struct DownloadManager : public ManagerType {
     }
     [[maybe_unused]] auto MakePositions(
         bb::Height start,
-        std::vector<std::string> hashes) noexcept
+        std::pmr::vector<std::string> hashes) noexcept
     {
         auto output = ManagerType::Positions{};
         output.reserve(hashes.size());

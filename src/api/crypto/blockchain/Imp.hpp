@@ -107,6 +107,7 @@ namespace network
 namespace p2p
 {
 class Data;
+class State;
 }  // namespace p2p
 
 namespace zeromq
@@ -132,17 +133,17 @@ namespace zmq = opentxs::network::zeromq;
 namespace opentxs::api::crypto::imp
 {
 struct Blockchain::Imp {
-    using IDLock = std::map<OTIdentifier, std::mutex>;
+    using IDLock = std::pmr::map<OTIdentifier, std::mutex>;
 
     auto Account(
         const identifier::Nym& nymID,
         const opentxs::blockchain::Type chain) const noexcept(false)
         -> const opentxs::blockchain::crypto::Account&;
     auto AccountList(const identifier::Nym& nymID) const noexcept
-        -> std::set<OTIdentifier>;
+        -> std::pmr::set<OTIdentifier>;
     auto AccountList(const opentxs::blockchain::Type chain) const noexcept
-        -> std::set<OTIdentifier>;
-    auto AccountList() const noexcept -> std::set<OTIdentifier>;
+        -> std::pmr::set<OTIdentifier>;
+    auto AccountList() const noexcept -> std::pmr::set<OTIdentifier>;
     virtual auto ActivityDescription(
         const identifier::Nym& nym,
         const Identifier& thread,
@@ -193,7 +194,7 @@ struct Blockchain::Imp {
         -> const opentxs::blockchain::crypto::Element&;
     auto HDSubaccount(const identifier::Nym& nymID, const Identifier& accountID)
         const noexcept(false) -> const opentxs::blockchain::crypto::HD&;
-    using SyncState = std::vector<opentxs::network::p2p::State>;
+    using SyncState = std::pmr::vector<opentxs::network::p2p::State>;
     virtual auto IndexItem(const ReadView bytes) const noexcept -> PatternID;
     virtual auto KeyEndpoint() const noexcept -> const std::string&;
     virtual auto KeyGenerated(
@@ -264,7 +265,7 @@ struct Blockchain::Imp {
     auto SubaccountList(
         const identifier::Nym& nymID,
         const opentxs::blockchain::Type chain) const noexcept
-        -> std::set<OTIdentifier>
+        -> std::pmr::set<OTIdentifier>
     {
         return accounts_.List(nymID, chain);
     }
@@ -280,7 +281,7 @@ struct Blockchain::Imp {
         const opentxs::blockchain::Type chain,
         const opentxs::blockchain::Balance balance) const noexcept -> void;
     virtual auto UpdateElement(
-        std::vector<ReadView>& pubkeyHashes) const noexcept -> void;
+        std::pmr::vector<ReadView>& pubkeyHashes) const noexcept -> void;
     auto Wallet(const opentxs::blockchain::Type chain) const noexcept(false)
         -> const opentxs::blockchain::crypto::Wallet&;
 

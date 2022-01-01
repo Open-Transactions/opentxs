@@ -13,7 +13,7 @@
 #include <utility>
 #include <vector>
 
-#include "blockchain/node/wallet/DeterministicStateData.hpp"
+#include "blockchain/node/wallet/DeterministicStateData.hpp"  // IWYU pragma: keep
 #include "internal/blockchain/node/Node.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/blockchain/FilterType.hpp"
@@ -159,7 +159,7 @@ struct Account::Imp {
     ~Imp() { shutdown(); }
 
 private:
-    using Map = std::map<OTIdentifier, DeterministicStateData>;
+    using Map = std::pmr::map<OTIdentifier, DeterministicStateData>;
 
     const api::Session& api_;
     const BalanceTree& ref_;
@@ -190,7 +190,7 @@ private:
     template <typename Action>
     auto for_each_subchain(Action action) noexcept -> void
     {
-        auto actors = std::vector<Actor*>{};
+        auto actors = std::pmr::vector<Actor*>{};
 
         for (const auto& account : ref_.GetHD()) {
             actors.emplace_back(&get(account, Subchain::Internal, internal_));

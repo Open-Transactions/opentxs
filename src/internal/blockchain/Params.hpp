@@ -21,6 +21,7 @@
 #include <functional>
 #include <iosfwd>
 #include <map>
+#include <memory_resource>
 #include <string>
 #include <tuple>
 #include <utility>
@@ -48,13 +49,15 @@ struct Data {
         blockchain::Type,
         boost::container::
             flat_map<filter::Type, std::pair<std::string, std::string>>>;
-    using FilterTypes = std::map<Type, std::map<filter::Type, std::uint8_t>>;
-    using ServiceBits = std::
-        map<blockchain::Type, std::map<p2p::bitcoin::Service, p2p::Service>>;
+    using FilterTypes =
+        std::pmr::map<Type, std::pmr::map<filter::Type, std::uint8_t>>;
+    using ServiceBits = std::pmr::map<
+        blockchain::Type,
+        std::pmr::map<p2p::bitcoin::Service, p2p::Service>>;
 #endif  // OT_BLOCKCHAIN
     using Style = blockchain::crypto::AddressStyle;
     using ScriptMap = boost::container::flat_map<Style, bool>;
-    using StylePref = std::vector<std::pair<Style, std::string>>;
+    using StylePref = std::pmr::vector<std::pair<Style, std::string>>;
 
     struct Checkpoint {
         block::Height height_{};
@@ -79,7 +82,7 @@ struct Data {
     p2p::Protocol p2p_protocol_{};
     std::uint32_t p2p_magic_bits_{};
     std::uint16_t default_port_{};
-    std::vector<std::string> dns_seeds_{};
+    std::pmr::vector<std::string> dns_seeds_{};
     Amount default_fee_rate_{};  // satoshis per 1000 bytes
     std::size_t block_download_batch_{};
     ScriptMap scripts_{};

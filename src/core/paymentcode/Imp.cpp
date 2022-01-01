@@ -425,7 +425,7 @@ auto PaymentCode::calculate_mask_v3(
 
 auto PaymentCode::DecodeNotificationElements(
     const std::uint8_t version,
-    const std::vector<Space>& in,
+    const std::pmr::vector<Space>& in,
     const PasswordPrompt& reason) const noexcept -> opentxs::PaymentCode
 {
     try {
@@ -564,7 +564,7 @@ auto PaymentCode::effective_version(
 auto PaymentCode::GenerateNotificationElements(
     const opentxs::PaymentCode& recipient,
     const crypto::key::EllipticCurve& privateKey,
-    const PasswordPrompt& reason) const noexcept -> std::vector<Space>
+    const PasswordPrompt& reason) const noexcept -> std::pmr::vector<Space>
 {
     try {
         if (3 > recipient.Version()) {
@@ -582,7 +582,7 @@ auto PaymentCode::GenerateNotificationElements(
             return out;
         }();
 
-        auto output = std::vector<Space>{};
+        auto output = std::pmr::vector<Space>{};
         constexpr auto size = sizeof(paymentcode::BinaryPreimage_3::key_);
         {
             auto& A = output.emplace_back(space(size));
@@ -616,7 +616,7 @@ auto PaymentCode::GenerateNotificationElements(
 auto PaymentCode::generate_elements_v1(
     const opentxs::PaymentCode& recipient,
     const Space& blind,
-    std::vector<Space>& output) const noexcept(false) -> void
+    std::pmr::vector<Space>& output) const noexcept(false) -> void
 {
     constexpr auto size = std::size_t{65};
 
@@ -649,7 +649,7 @@ auto PaymentCode::generate_elements_v1(
 auto PaymentCode::generate_elements_v3(
     const opentxs::PaymentCode& recipient,
     const Space& blind,
-    std::vector<Space>& output) const noexcept(false) -> void
+    std::pmr::vector<Space>& output) const noexcept(false) -> void
 {
     constexpr auto size = sizeof(paymentcode::BinaryPreimage_3::key_);
 

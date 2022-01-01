@@ -40,7 +40,7 @@ public:
         const identifier::Nym& issuerNymID) const noexcept -> std::string = 0;
     virtual auto IssuerList(
         const identifier::Nym& localNymID,
-        const bool onlyTrusted) const noexcept -> std::set<OTNymID> = 0;
+        const bool onlyTrusted) const noexcept -> std::pmr::set<OTNymID> = 0;
     /** For unit tests */
     virtual auto Stop() const noexcept -> std::shared_future<void> = 0;
     /** For unit tests */

@@ -57,7 +57,7 @@ static auto extract_groups(
     const proto::ContactSection& serialized) -> ContactSection::GroupMap
 {
     ContactSection::GroupMap groupMap{};
-    std::map<contact::ClaimType, ContactGroup::ItemMap> itemMaps{};
+    std::pmr::map<contact::ClaimType, ContactGroup::ItemMap> itemMaps{};
     const auto& section = serialized.name();
 
     for (const auto& item : serialized.item()) {

@@ -864,7 +864,7 @@ auto OTX::DepositCheques(const identifier::Nym& nymID) const -> std::size_t
 
 auto OTX::DepositCheques(
     const identifier::Nym& nymID,
-    const std::set<OTIdentifier>& chequeIDs) const -> std::size_t
+    const std::pmr::set<OTIdentifier>& chequeIDs) const -> std::size_t
 {
     std::size_t output{0};
 
@@ -2322,7 +2322,7 @@ auto OTX::valid_account(
     const Identifier& accountIDHint,
     Identifier& depositAccount) const -> Depositability
 {
-    std::set<OTIdentifier> matchingAccounts{};
+    std::pmr::set<OTIdentifier> matchingAccounts{};
 
     for (const auto& it : api_.Storage().AccountList()) {
         const auto accountID = Identifier::Factory(it.first);
@@ -2452,7 +2452,7 @@ OTX::~OTX()
     Lock lock(shutdown_lock_);
     shutdown_.store(true);
     lock.unlock();
-    std::vector<otx::client::implementation::StateMachine::WaitFuture>
+    std::pmr::vector<otx::client::implementation::StateMachine::WaitFuture>
         futures{};
 
     for (const auto& [id, queue] : operations_) {

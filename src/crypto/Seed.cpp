@@ -268,7 +268,7 @@ struct Seed::Imp {
         , entropy_(factory.Secret(0))
         , words_(factory.Secret(0))
         , phrase_(factory.Secret(0))
-        , id_(factory.Identifier(proto.fingerprint()))
+        , id_(factory.IdentifierFromBase58(proto.fingerprint()))
         , storage_(storage)
         , lock_()
         , encrypted_words_(

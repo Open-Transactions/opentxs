@@ -258,7 +258,7 @@ public:
         const identifier::Nym& nymID,
         const otx::client::PaymentWorkflowType type,
         const otx::client::PaymentWorkflowState state) const
-        -> std::set<OTIdentifier> = 0;
+        -> std::pmr::set<OTIdentifier> = 0;
     virtual auto LoadCheque(
         const identifier::Nym& nymID,
         const Identifier& chequeID) const -> Cheque = 0;
@@ -315,7 +315,8 @@ public:
     /** Get a list of workflow IDs relevant to a specified account */
     virtual auto WorkflowsByAccount(
         const identifier::Nym& nymID,
-        const Identifier& accountID) const -> std::vector<OTIdentifier> = 0;
+        const Identifier& accountID) const
+        -> std::pmr::vector<OTIdentifier> = 0;
     /** Create a new outgoing cheque workflow */
     virtual auto WriteCheque(const opentxs::Cheque& cheque) const
         -> OTIdentifier = 0;

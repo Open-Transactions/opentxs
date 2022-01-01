@@ -345,7 +345,7 @@ private:
         if (0 == data.size()) { return; }
 
         const auto& tip = data.back();
-        auto items = std::vector<network::p2p::Block>{};
+        auto items = std::pmr::vector<network::p2p::Block>{};
         auto previousFilterHeader = api_.Factory().Data();
 
         for (const auto& task : data) {
@@ -435,7 +435,7 @@ private:
     auto zmq_thread() noexcept -> void
     {
         auto poll = [&] {
-            auto output = std::vector<::zmq_pollitem_t>{};
+            auto output = std::pmr::vector<::zmq_pollitem_t>{};
 
             {
                 auto& item = output.emplace_back();

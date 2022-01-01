@@ -22,6 +22,7 @@
 #include "integration/Helpers.hpp"
 #include "opentxs/Version.hpp"
 #include "opentxs/core/Amount.hpp"
+#include "opentxs/core/Data.hpp"
 #include "opentxs/core/Types.hpp"
 #include "opentxs/util/Bytes.hpp"
 
@@ -110,12 +111,13 @@ private:
 class RPC_fixture : virtual public ::testing::Test
 {
 protected:
-    using AccountMap = std::map<std::string, std::vector<std::string>>;
+    using AccountMap =
+        std::pmr::map<std::string, std::pmr::vector<std::string>>;
     using Amount = ot::Amount;
-    using IssuedUnits = std::vector<std::string>;
-    using LocalNymMap = std::map<int, std::set<std::string>>;
-    using SeedMap = std::map<int, std::set<std::string>>;
-    using UserIndex = std::map<int, User>;
+    using IssuedUnits = std::pmr::vector<std::string>;
+    using LocalNymMap = std::pmr::map<int, std::pmr::set<std::string>>;
+    using SeedMap = std::pmr::map<int, std::pmr::set<std::string>>;
+    using UserIndex = std::pmr::map<int, User>;
 
     static SeedMap seed_map_;
     static LocalNymMap local_nym_map_;
@@ -192,11 +194,11 @@ protected:
         const ot::identifier::Server& server) const noexcept -> void;
     auto RefreshAccount(
         const ot::api::session::Client& api,
-        const std::vector<std::string> nyms,
+        const std::pmr::vector<std::string> nyms,
         const ot::identifier::Server& server) const noexcept -> void;
     auto RefreshAccount(
         const ot::api::session::Client& api,
-        const std::vector<const User*> nyms,
+        const std::pmr::vector<const User*> nyms,
         const ot::identifier::Server& server) const noexcept -> void;
     auto RegisterAccount(
         const ot::api::session::Client& api,

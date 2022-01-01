@@ -76,6 +76,10 @@ auto reader(const WritableView& in) noexcept -> ReadView
 {
     return {in.as<const char>(), in.size()};
 }
+auto reader(const std::pmr::vector<std::uint8_t>& in) noexcept -> ReadView
+{
+    return {reinterpret_cast<const char*>(in.data()), in.size()};
+}
 auto reader(const std::vector<std::uint8_t>& in) noexcept -> ReadView
 {
     return {reinterpret_cast<const char*>(in.data()), in.size()};

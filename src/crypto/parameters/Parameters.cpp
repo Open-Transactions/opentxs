@@ -61,11 +61,13 @@ struct hash<opentxs::crypto::Parameters> {
 
 namespace opentxs::crypto
 {
-const std::map<crypto::key::asymmetric::Algorithm, ParameterType> key_to_nym_{
-    {crypto::key::asymmetric::Algorithm::Legacy, ParameterType::rsa},
-    {crypto::key::asymmetric::Algorithm::Secp256k1, ParameterType::secp256k1},
-    {crypto::key::asymmetric::Algorithm::ED25519, ParameterType::ed25519},
-};
+const std::pmr::map<crypto::key::asymmetric::Algorithm, ParameterType>
+    key_to_nym_{
+        {crypto::key::asymmetric::Algorithm::Legacy, ParameterType::rsa},
+        {crypto::key::asymmetric::Algorithm::Secp256k1,
+         ParameterType::secp256k1},
+        {crypto::key::asymmetric::Algorithm::ED25519, ParameterType::ed25519},
+    };
 const auto nym_to_key_{reverse_map(key_to_nym_)};
 
 auto swap(Parameters& lhs, Parameters& rhs) noexcept -> void { lhs.swap(rhs); }

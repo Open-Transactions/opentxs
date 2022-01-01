@@ -124,7 +124,7 @@ public:
     ~Mint() override;
 
 protected:
-    using mapOfArmor = std::map<Amount, OTArmored>;
+    using mapOfArmor = std::pmr::map<Amount, OTArmored>;
 
     auto ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t override;
 

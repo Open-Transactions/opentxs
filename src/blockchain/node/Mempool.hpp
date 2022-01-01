@@ -67,12 +67,12 @@ namespace opentxs::blockchain::node
 class Mempool final : public internal::Mempool
 {
 public:
-    auto Dump() const noexcept -> std::set<std::string> final;
+    auto Dump() const noexcept -> std::pmr::set<std::string> final;
     auto Query(ReadView txid) const noexcept
         -> std::shared_ptr<const block::bitcoin::Transaction> final;
     auto Submit(ReadView txid) const noexcept -> bool final;
-    auto Submit(const std::vector<ReadView>& txids) const noexcept
-        -> std::vector<bool> final;
+    auto Submit(const std::pmr::vector<ReadView>& txids) const noexcept
+        -> std::pmr::vector<bool> final;
     auto Submit(std::unique_ptr<const block::bitcoin::Transaction> tx)
         const noexcept -> void final;
 

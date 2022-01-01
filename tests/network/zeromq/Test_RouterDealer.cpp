@@ -467,7 +467,7 @@ TEST_F(Test_RouterDealer, Dealer_3_Router_Dealer_Router)
 
     routerSocket_ = &routerSocket;
 
-    std::vector<network::zeromq::Message> replyMessages;
+    std::pmr::vector<network::zeromq::Message> replyMessages;
 
     auto clientRouterCallback = zmq::ListenCallback::Factory(
         [this, &replyMessages](const network::zeromq::Message&& input) -> void {

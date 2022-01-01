@@ -23,7 +23,7 @@ namespace opentxs
 {
 namespace proto
 {
-using BasketItemMap = std::map<std::string, std::uint64_t>;
+using BasketItemMap = std::pmr::map<std::string, std::uint64_t>;
 
 auto CheckProto_1(const BasketItem& item, const bool silent, BasketItemMap& map)
     -> bool;

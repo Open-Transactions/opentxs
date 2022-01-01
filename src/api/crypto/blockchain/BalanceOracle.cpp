@@ -149,7 +149,7 @@ struct BalanceOracle::Imp {
     }
 
 private:
-    using Subscribers = std::set<OTData>;
+    using Subscribers = std::pmr::set<OTData>;
 
     const api::Session& api_;
     const zmq::Context& zmq_;
@@ -157,8 +157,9 @@ private:
     OTZMQRouterSocket socket_;
     OTZMQPublishSocket publisher_;
     mutable std::mutex lock_;
-    mutable std::map<Chain, Subscribers> subscribers_;
-    mutable std::map<Chain, std::map<OTNymID, Subscribers>> nym_subscribers_;
+    mutable std::pmr::map<Chain, Subscribers> subscribers_;
+    mutable std::pmr::map<Chain, std::pmr::map<OTNymID, Subscribers>>
+        nym_subscribers_;
 
     auto cb(opentxs::network::zeromq::Message&& in) noexcept -> void
     {

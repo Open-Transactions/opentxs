@@ -52,10 +52,10 @@ public:
     auto ID() const noexcept -> OTIdentifier;
     auto Incoming() const noexcept -> bool;
     auto Port() const noexcept -> std::uint16_t;
-    auto Services() const noexcept -> std::set<Service>;
+    auto Services() const noexcept -> std::pmr::set<Service>;
     auto Type() const noexcept -> Network;
 
-    auto UpdateServices(const std::set<p2p::Service>& services) noexcept
+    auto UpdateServices(const std::pmr::set<p2p::Service>& services) noexcept
         -> pointer;
     auto UpdateTime(const Time& time) noexcept -> pointer;
 

@@ -13,7 +13,6 @@
 #include "blockchain/database/common/Database.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/blockchain/Blockchain.hpp"
-#include "opentxs/core/Data.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Pimpl.hpp"
@@ -42,7 +41,7 @@ auto Wallet::AddConfirmedTransaction(
     const Subchain subchain,
     const block::Position& block,
     const std::size_t blockIndex,
-    const std::vector<std::uint32_t> outputIndices,
+    const std::pmr::vector<std::uint32_t> outputIndices,
     const block::bitcoin::Transaction& original) const noexcept -> bool
 {
     const auto id = subchains_.GetSubchainID(balanceNode, subchain, nullptr);
@@ -54,7 +53,7 @@ auto Wallet::AddConfirmedTransaction(
 auto Wallet::AddMempoolTransaction(
     const NodeID& balanceNode,
     const Subchain subchain,
-    const std::vector<std::uint32_t> outputIndices,
+    const std::pmr::vector<std::uint32_t> outputIndices,
     const block::bitcoin::Transaction& original) const noexcept -> bool
 {
     const auto id = subchains_.GetSubchainID(balanceNode, subchain, nullptr);
@@ -88,7 +87,7 @@ auto Wallet::CancelProposal(const Identifier& id) const noexcept -> bool
     return outputs_.CancelProposal(id);
 }
 
-auto Wallet::CompletedProposals() const noexcept -> std::set<OTIdentifier>
+auto Wallet::CompletedProposals() const noexcept -> std::pmr::set<OTIdentifier>
 {
     return proposals_.CompletedProposals();
 }
@@ -100,8 +99,8 @@ auto Wallet::FinalizeReorg(
     return outputs_.FinalizeReorg(tx, pos);
 }
 
-auto Wallet::ForgetProposals(const std::set<OTIdentifier>& ids) const noexcept
-    -> bool
+auto Wallet::ForgetProposals(
+    const std::pmr::set<OTIdentifier>& ids) const noexcept -> bool
 {
     return proposals_.ForgetProposals(ids);
 }
@@ -127,13 +126,14 @@ auto Wallet::GetBalance(const crypto::Key& key) const noexcept -> Balance
     return outputs_.GetBalance(key);
 }
 
-auto Wallet::GetOutputs(node::TxoState type) const noexcept -> std::vector<UTXO>
+auto Wallet::GetOutputs(node::TxoState type) const noexcept
+    -> std::pmr::vector<UTXO>
 {
     return outputs_.GetOutputs(type);
 }
 
 auto Wallet::GetOutputs(const identifier::Nym& owner, node::TxoState type)
-    const noexcept -> std::vector<UTXO>
+    const noexcept -> std::pmr::vector<UTXO>
 {
     return outputs_.GetOutputs(owner, type);
 }
@@ -141,19 +141,19 @@ auto Wallet::GetOutputs(const identifier::Nym& owner, node::TxoState type)
 auto Wallet::GetOutputs(
     const identifier::Nym& owner,
     const Identifier& node,
-    node::TxoState type) const noexcept -> std::vector<UTXO>
+    node::TxoState type) const noexcept -> std::pmr::vector<UTXO>
 {
     return outputs_.GetOutputs(owner, node, type);
 }
 
 auto Wallet::GetOutputs(const crypto::Key& key, node::TxoState type)
-    const noexcept -> std::vector<UTXO>
+    const noexcept -> std::pmr::vector<UTXO>
 {
     return outputs_.GetOutputs(key, type);
 }
 
 auto Wallet::GetOutputTags(const block::Outpoint& output) const noexcept
-    -> std::set<node::TxoTag>
+    -> std::pmr::set<node::TxoTag>
 {
     return outputs_.GetOutputTags(output);
 }
@@ -169,31 +169,31 @@ auto Wallet::GetSubchainID(const NodeID& balanceNode, const Subchain subchain)
     return subchains_.GetSubchainID(balanceNode, subchain, nullptr);
 }
 
-auto Wallet::GetTransactions() const noexcept -> std::vector<block::pTxid>
+auto Wallet::GetTransactions() const noexcept -> std::pmr::vector<block::pTxid>
 {
     return outputs_.GetTransactions();
 }
 
 auto Wallet::GetTransactions(const identifier::Nym& account) const noexcept
-    -> std::vector<block::pTxid>
+    -> std::pmr::vector<block::pTxid>
 {
     return outputs_.GetTransactions(account);
 }
 
 auto Wallet::GetUnconfirmedTransactions() const noexcept
-    -> std::set<block::pTxid>
+    -> std::pmr::set<block::pTxid>
 {
     return outputs_.GetUnconfirmedTransactions();
 }
 
-auto Wallet::GetUnspentOutputs() const noexcept -> std::vector<UTXO>
+auto Wallet::GetUnspentOutputs() const noexcept -> std::pmr::vector<UTXO>
 {
     return outputs_.GetUnspentOutputs();
 }
 
 auto Wallet::GetUnspentOutputs(
     const NodeID& balanceNode,
-    const Subchain subchain) const noexcept -> std::vector<UTXO>
+    const Subchain subchain) const noexcept -> std::pmr::vector<UTXO>
 {
     const auto id = subchains_.GetSubchainID(balanceNode, subchain, nullptr);
 
@@ -219,13 +219,13 @@ auto Wallet::LoadProposal(const Identifier& id) const noexcept
 }
 
 auto Wallet::LoadProposals() const noexcept
-    -> std::vector<proto::BlockchainTransactionProposal>
+    -> std::pmr::vector<proto::BlockchainTransactionProposal>
 {
     return proposals_.LoadProposals();
 }
 
 auto Wallet::LookupContact(const Data& pubkeyHash) const noexcept
-    -> std::set<OTIdentifier>
+    -> std::pmr::set<OTIdentifier>
 {
     return common_.LookupContact(pubkeyHash);
 }
@@ -237,7 +237,7 @@ auto Wallet::ReorgTo(
     const NodeID& balanceNode,
     const Subchain subchain,
     const SubchainIndex& index,
-    const std::vector<block::Position>& reorg) const noexcept -> bool
+    const std::pmr::vector<block::Position>& reorg) const noexcept -> bool
 {
     if (reorg.empty()) { return true; }
 
@@ -302,7 +302,7 @@ auto Wallet::SubchainLastScanned(const SubchainIndex& index) const noexcept
 
 auto Wallet::SubchainMatchBlock(
     const SubchainIndex& index,
-    const std::vector<std::pair<ReadView, MatchingIndices>>& results)
+    const std::pmr::vector<std::pair<ReadView, MatchingIndices>>& results)
     const noexcept -> bool
 {
     return subchains_.SubchainMatchBlock(index, results);

@@ -67,7 +67,7 @@ class Regtest_stress : public Regtest_fixture_normal
 {
 protected:
     using Subchain = ot::blockchain::crypto::Subchain;
-    using Transactions = std::deque<ot::blockchain::block::pTxid>;
+    using Transactions = std::pmr::deque<ot::blockchain::block::pTxid>;
 
     static ot::Nym_p alice_p_;
     static ot::Nym_p bob_p_;
@@ -93,9 +93,9 @@ protected:
     ScanListener& listener_alice_;
     ScanListener& listener_bob_;
 
-    auto GetAddresses() noexcept -> std::vector<std::string>
+    auto GetAddresses() noexcept -> std::pmr::vector<std::string>
     {
-        auto output = std::vector<std::string>{};
+        auto output = std::pmr::vector<std::string>{};
         output.reserve(tx_per_block_);
         const auto reason = client_2_.Factory().PasswordPrompt(__func__);
         const auto& bob = client_2_.Crypto()
@@ -227,10 +227,11 @@ protected:
                 height,
                 [&] {
                     namespace c = std::chrono;
-                    auto output = std::vector<OutputBuilder>{};
+                    auto output = std::pmr::vector<OutputBuilder>{};
                     const auto reason =
                         client_1_.Factory().PasswordPrompt(__func__);
-                    const auto keys = std::set<ot::blockchain::crypto::Key>{};
+                    const auto keys =
+                        std::pmr::set<ot::blockchain::crypto::Key>{};
                     const auto target = [] {
                         if (first_block_) {
                             first_block_ = false;
@@ -425,7 +426,7 @@ TEST_F(Regtest_stress, generate_transactions)
     auto future1 =
         listener_bob_.get_future(bob_account_, Subchain::External, stop);
     auto transactions =
-        std::vector<ot::OTData>{tx_per_block_, client_1_.Factory().Data()};
+        std::pmr::vector<ot::OTData>{tx_per_block_, client_1_.Factory().Data()};
     using Future = ot::blockchain::node::Manager::PendingOutgoing;
     auto futures = std::array<Future, tx_per_block_>{};
 
@@ -478,7 +479,7 @@ TEST_F(Regtest_stress, generate_transactions)
                          c::duration_cast<c::seconds>(sigs - init).count())
                   << " sec to sign and broadcast transactions\n";
         const auto extra = [&] {
-            auto output = std::vector<Transaction>{};
+            auto output = std::pmr::vector<Transaction>{};
 
             for (const auto& txid : transactions) {
                 const auto& pTX = output.emplace_back(

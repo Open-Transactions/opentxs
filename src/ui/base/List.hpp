@@ -48,7 +48,7 @@ class List : virtual public ExternalInterface,
 {
 public:
     using ChildObjectDataType = ChildObjectData<RowID, SortKey>;
-    using ChildDefinitions = std::vector<ChildObjectDataType>;
+    using ChildDefinitions = std::pmr::vector<ChildObjectDataType>;
     using ListPrimaryID = PrimaryID;
 
     auto AddChildrenToList(CustomData&& data) noexcept -> void
@@ -126,16 +126,17 @@ protected:
     mutable OTFlag start_;
     std::unique_ptr<std::thread> startup_;  // TODO remove
 
-    auto delete_inactive(const std::set<RowID>& active) const noexcept -> void
+    auto delete_inactive(const std::pmr::set<RowID>& active) const noexcept
+        -> void
     {
         auto lock = rLock{recursive_lock_};
         delete_inactive(lock, active);
     }
-    auto delete_inactive(const rLock& lock, const std::set<RowID>& active)
+    auto delete_inactive(const rLock& lock, const std::pmr::set<RowID>& active)
         const noexcept -> void
     {
         const auto existing = items_.active();
-        auto deleteIDs = std::vector<RowID>{};
+        auto deleteIDs = std::pmr::vector<RowID>{};
         std::set_difference(
             existing.begin(),
             existing.end(),

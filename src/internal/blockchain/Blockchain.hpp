@@ -71,10 +71,10 @@ namespace opentxs::gcs
 auto GolombDecode(
     const std::uint32_t N,
     const std::uint8_t P,
-    const Space& encoded) noexcept(false) -> std::vector<std::uint64_t>;
+    const Space& encoded) noexcept(false) -> std::pmr::vector<std::uint64_t>;
 auto GolombEncode(
     const std::uint8_t P,
-    const std::vector<std::uint64_t>& hashedSet) noexcept(false) -> Space;
+    const std::pmr::vector<std::uint64_t>& hashedSet) noexcept(false) -> Space;
 auto HashToRange(
     const api::Session& api,
     const ReadView key,
@@ -85,8 +85,8 @@ auto HashedSetConstruct(
     const ReadView key,
     const std::uint32_t N,
     const std::uint32_t M,
-    const std::vector<ReadView> items) noexcept(false)
-    -> std::vector<std::uint64_t>;
+    const std::pmr::vector<ReadView> items) noexcept(false)
+    -> std::pmr::vector<std::uint64_t>;
 }  // namespace opentxs::gcs
 
 namespace opentxs::blockchain
@@ -218,7 +218,7 @@ auto GCS(
     const std::uint8_t bits,
     const std::uint32_t fpRate,
     const ReadView key,
-    const std::vector<OTData>& elements) noexcept
+    const std::pmr::vector<OTData>& elements) noexcept
     -> std::unique_ptr<blockchain::GCS>;
 auto GCS(
     const api::Session& api,

@@ -139,7 +139,7 @@ auto Data::Add(ReadView data) noexcept -> bool
 
     if (false == proto::Validate(proto, VERBOSE)) { return false; }
 
-    auto& blocks = const_cast<std::vector<Block>&>(imp_->blocks_);
+    auto& blocks = const_cast<std::pmr::vector<Block>&>(imp_->blocks_);
 
     if (0 < blocks.size()) {
         const auto expected = blocks.back().Height() + 1;

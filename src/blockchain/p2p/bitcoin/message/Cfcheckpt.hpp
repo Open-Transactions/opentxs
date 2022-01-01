@@ -69,20 +69,20 @@ public:
         const blockchain::Type network,
         const filter::Type type,
         const filter::Hash& stop,
-        const std::vector<filter::pHash>& headers) noexcept;
+        const std::pmr::vector<filter::pHash>& headers) noexcept;
     Cfcheckpt(
         const api::Session& api,
         std::unique_ptr<Header> header,
         const filter::Type type,
         const filter::Hash& stop,
-        const std::vector<filter::pHash>& headers) noexcept;
+        const std::pmr::vector<filter::pHash>& headers) noexcept;
 
     ~Cfcheckpt() final = default;
 
 private:
     const filter::Type type_;
     const filter::pHash stop_;
-    const std::vector<filter::pHash> payload_;
+    const std::pmr::vector<filter::pHash> payload_;
 
     using implementation::Message::payload;
     auto payload(AllocateOutput out) const noexcept -> bool final;

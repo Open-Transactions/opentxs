@@ -29,7 +29,7 @@ auto CheckProto_1(
     const Token& input,
     const bool silent,
     const CashType expectedType,
-    const std::set<TokenState>& expectedState,
+    const std::pmr::set<TokenState>& expectedState,
     std::string& totalValue,
     std::int64_t& validFrom,
     std::int64_t& validTo) -> bool;
@@ -37,7 +37,7 @@ auto CheckProto_2(
     const Token& input,
     const bool silent,
     const CashType expectedType,
-    const std::set<TokenState>& expectedState,
+    const std::pmr::set<TokenState>& expectedState,
     std::string& totalValue,
     std::int64_t& validFrom,
     std::int64_t& validTo) -> bool;
@@ -45,7 +45,7 @@ auto CheckProto_3(
     const Token& input,
     const bool silent,
     const CashType expectedType,
-    const std::set<TokenState>& expectedState,
+    const std::pmr::set<TokenState>& expectedState,
     std::string& totalValue,
     std::int64_t& validFrom,
     std::int64_t& validTo) -> bool;
@@ -53,7 +53,7 @@ auto CheckProto_4(
     const Token& input,
     const bool silent,
     const CashType expectedType,
-    const std::set<TokenState>& expectedState,
+    const std::pmr::set<TokenState>& expectedState,
     std::string& totalValue,
     std::int64_t& validFrom,
     std::int64_t& validTo) -> bool;
@@ -61,7 +61,7 @@ auto CheckProto_5(
     const Token& input,
     const bool silent,
     const CashType expectedType,
-    const std::set<TokenState>& expectedState,
+    const std::pmr::set<TokenState>& expectedState,
     std::string& totalValue,
     std::int64_t& validFrom,
     std::int64_t& validTo) -> bool;
@@ -69,7 +69,7 @@ auto CheckProto_6(
     const Token& input,
     const bool silent,
     const CashType expectedType,
-    const std::set<TokenState>& expectedState,
+    const std::pmr::set<TokenState>& expectedState,
     std::string& totalValue,
     std::int64_t& validFrom,
     std::int64_t& validTo) -> bool;
@@ -77,7 +77,7 @@ auto CheckProto_7(
     const Token& input,
     const bool silent,
     const CashType expectedType,
-    const std::set<TokenState>& expectedState,
+    const std::pmr::set<TokenState>& expectedState,
     std::string& totalValue,
     std::int64_t& validFrom,
     std::int64_t& validTo) -> bool;
@@ -85,7 +85,7 @@ auto CheckProto_8(
     const Token& input,
     const bool silent,
     const CashType expectedType,
-    const std::set<TokenState>& expectedState,
+    const std::pmr::set<TokenState>& expectedState,
     std::string& totalValue,
     std::int64_t& validFrom,
     std::int64_t& validTo) -> bool;
@@ -93,7 +93,7 @@ auto CheckProto_9(
     const Token& input,
     const bool silent,
     const CashType expectedType,
-    const std::set<TokenState>& expectedState,
+    const std::pmr::set<TokenState>& expectedState,
     std::string& totalValue,
     std::int64_t& validFrom,
     std::int64_t& validTo) -> bool;
@@ -101,7 +101,7 @@ auto CheckProto_10(
     const Token& input,
     const bool silent,
     const CashType expectedType,
-    const std::set<TokenState>& expectedState,
+    const std::pmr::set<TokenState>& expectedState,
     std::string& totalValue,
     std::int64_t& validFrom,
     std::int64_t& validTo) -> bool;
@@ -109,7 +109,7 @@ auto CheckProto_11(
     const Token& input,
     const bool silent,
     const CashType expectedType,
-    const std::set<TokenState>& expectedState,
+    const std::pmr::set<TokenState>& expectedState,
     std::string& totalValue,
     std::int64_t& validFrom,
     std::int64_t& validTo) -> bool;
@@ -117,7 +117,7 @@ auto CheckProto_12(
     const Token& input,
     const bool silent,
     const CashType expectedType,
-    const std::set<TokenState>& expectedState,
+    const std::pmr::set<TokenState>& expectedState,
     std::string& totalValue,
     std::int64_t& validFrom,
     std::int64_t& validTo) -> bool;
@@ -125,7 +125,7 @@ auto CheckProto_13(
     const Token& input,
     const bool silent,
     const CashType expectedType,
-    const std::set<TokenState>& expectedState,
+    const std::pmr::set<TokenState>& expectedState,
     std::string& totalValue,
     std::int64_t& validFrom,
     std::int64_t& validTo) -> bool;
@@ -133,7 +133,7 @@ auto CheckProto_14(
     const Token& input,
     const bool silent,
     const CashType expectedType,
-    const std::set<TokenState>& expectedState,
+    const std::pmr::set<TokenState>& expectedState,
     std::string& totalValue,
     std::int64_t& validFrom,
     std::int64_t& validTo) -> bool;
@@ -141,7 +141,7 @@ auto CheckProto_15(
     const Token& input,
     const bool silent,
     const CashType expectedType,
-    const std::set<TokenState>& expectedState,
+    const std::pmr::set<TokenState>& expectedState,
     std::string& totalValue,
     std::int64_t& validFrom,
     std::int64_t& validTo) -> bool;
@@ -149,7 +149,7 @@ auto CheckProto_16(
     const Token& input,
     const bool silent,
     const CashType expectedType,
-    const std::set<TokenState>& expectedState,
+    const std::pmr::set<TokenState>& expectedState,
     std::string& totalValue,
     std::int64_t& validFrom,
     std::int64_t& validTo) -> bool;
@@ -157,7 +157,7 @@ auto CheckProto_17(
     const Token& input,
     const bool silent,
     const CashType expectedType,
-    const std::set<TokenState>& expectedState,
+    const std::pmr::set<TokenState>& expectedState,
     std::string& totalValue,
     std::int64_t& validFrom,
     std::int64_t& validTo) -> bool;
@@ -165,7 +165,7 @@ auto CheckProto_18(
     const Token& input,
     const bool silent,
     const CashType expectedType,
-    const std::set<TokenState>& expectedState,
+    const std::pmr::set<TokenState>& expectedState,
     std::string& totalValue,
     std::int64_t& validFrom,
     std::int64_t& validTo) -> bool;
@@ -173,7 +173,7 @@ auto CheckProto_19(
     const Token& input,
     const bool silent,
     const CashType expectedType,
-    const std::set<TokenState>& expectedState,
+    const std::pmr::set<TokenState>& expectedState,
     std::string& totalValue,
     std::int64_t& validFrom,
     std::int64_t& validTo) -> bool;
@@ -181,7 +181,7 @@ auto CheckProto_20(
     const Token& input,
     const bool silent,
     const CashType expectedType,
-    const std::set<TokenState>& expectedState,
+    const std::pmr::set<TokenState>& expectedState,
     std::string& totalValue,
     std::int64_t& validFrom,
     std::int64_t& validTo) -> bool;

@@ -17,6 +17,7 @@ extern "C" {
 #include <cstdio>
 #include <cstring>
 #include <map>
+#include <memory_resource>
 #include <sstream>
 #include <string>
 #include <utility>
@@ -659,9 +660,9 @@ void String::LowLevelSetStr(const String& strBuf)
 }
 
 auto String::make_string(const char* str, std::uint32_t length)
-    -> std::vector<char>
+    -> std::pmr::vector<char>
 {
-    std::vector<char> output{};
+    std::pmr::vector<char> output{};
 
     if ((nullptr != str) && (0 < length)) {
         auto* it = str;
@@ -840,7 +841,7 @@ auto String::ToInt() const -> std::int32_t
 }
 
 auto String::TokenizeIntoKeyValuePairs(
-    std::map<std::string, std::string>& mapOutput) const -> bool
+    std::pmr::map<std::string, std::string>& mapOutput) const -> bool
 {
 #if __has_include(<wordexp.h>)
     return tokenize_enhanced(mapOutput);
@@ -874,7 +875,7 @@ auto String::WriteInto() noexcept -> AllocateOutput
 {
     return [this](const auto size) {
         Release();
-        auto blank = std::vector<char>{};
+        auto blank = std::pmr::vector<char>{};
         blank.assign(size, 5);
         blank.push_back('\0');
         Set(blank.data());

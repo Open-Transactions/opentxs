@@ -1229,9 +1229,10 @@ auto OTAgreement::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
         const auto NOTARY_ID = api_.Factory().ServerID(strNotaryID);
         const auto INSTRUMENT_DEFINITION_ID =
             api_.Factory().UnitID(strInstrumentDefinitionID);
-        const auto SENDER_ACCT_ID = api_.Factory().Identifier(strSenderAcctID),
+        const auto SENDER_ACCT_ID =
+                       api_.Factory().IdentifierFromBase58(strSenderAcctID),
                    RECIPIENT_ACCT_ID =
-                       api_.Factory().Identifier(strRecipientAcctID);
+                       api_.Factory().IdentifierFromBase58(strRecipientAcctID);
         const auto SENDER_NYM_ID = api_.Factory().NymID(strSenderNymID),
                    RECIPIENT_NYM_ID = api_.Factory().NymID(strRecipientNymID);
 
@@ -1278,8 +1279,8 @@ auto OTAgreement::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
         nReturnVal = 1;
     }
 
-    //  std::deque<std::int64_t>   m_dequeRecipientClosingNumbers; // Numbers
-    //  used
+    //  std::pmr::deque<std::int64_t>   m_dequeRecipientClosingNumbers; //
+    //  Numbers used
     // for CLOSING a transaction. (finalReceipt.)
     else if (!strcmp("closingRecipientNumber", xml->getNodeName())) {
         auto strClosingNumber =

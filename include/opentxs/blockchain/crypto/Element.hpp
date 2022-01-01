@@ -41,7 +41,7 @@ namespace crypto
 class OPENTXS_EXPORT Element
 {
 public:
-    using Txids = std::vector<opentxs::blockchain::block::pTxid>;
+    using Txids = std::pmr::vector<opentxs::blockchain::block::pTxid>;
 
     virtual auto Address(const AddressStyle format) const noexcept
         -> std::string = 0;

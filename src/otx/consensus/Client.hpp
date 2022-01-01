@@ -51,7 +51,7 @@ public:
     }
     auto hasOpenTransactions() const -> bool final;
     using Base::IssuedNumbers;
-    auto IssuedNumbers(const std::set<TransactionNumber>& exclude) const
+    auto IssuedNumbers(const std::pmr::set<TransactionNumber>& exclude) const
         -> std::size_t final;
     auto OpenCronItems() const -> std::size_t final;
     auto Type() const -> otx::ConsensusType final;
@@ -61,18 +61,18 @@ public:
     }
     auto Verify(
         const otx::context::TransactionStatement& statement,
-        const std::set<TransactionNumber>& excluded,
-        const std::set<TransactionNumber>& included) const -> bool final;
+        const std::pmr::set<TransactionNumber>& excluded,
+        const std::pmr::set<TransactionNumber>& included) const -> bool final;
     auto VerifyCronItem(const TransactionNumber number) const -> bool final;
     using Base::VerifyIssuedNumber;
     auto VerifyIssuedNumber(
         const TransactionNumber& number,
-        const std::set<TransactionNumber>& exclude) const -> bool final;
+        const std::pmr::set<TransactionNumber>& exclude) const -> bool final;
 
-    auto AcceptIssuedNumbers(std::set<TransactionNumber>& newNumbers)
+    auto AcceptIssuedNumbers(std::pmr::set<TransactionNumber>& newNumbers)
         -> bool final;
     auto CloseCronItem(const TransactionNumber number) -> bool final;
-    void FinishAcknowledgements(const std::set<RequestNumber>& req) final;
+    void FinishAcknowledgements(const std::pmr::set<RequestNumber>& req) final;
     auto GetLock() -> std::mutex& final { return lock_; }
     auto IssueNumber(const TransactionNumber& number) -> bool final;
     auto OpenCronItem(const TransactionNumber number) -> bool final;
@@ -96,7 +96,7 @@ public:
     ~ClientContext() final = default;
 
 private:
-    std::set<TransactionNumber> open_cron_items_{};
+    std::pmr::set<TransactionNumber> open_cron_items_{};
 
     auto client_nym_id(const Lock& lock) const -> const identifier::Nym& final;
     using Base::serialize;

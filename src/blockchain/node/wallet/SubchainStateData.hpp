@@ -148,10 +148,10 @@ public:
 
 protected:
     using Transactions =
-        std::vector<std::shared_ptr<const block::bitcoin::Transaction>>;
+        std::pmr::vector<std::shared_ptr<const block::bitcoin::Transaction>>;
     using Task = node::internal::Wallet::Task;
     using Patterns = WalletDatabase::Patterns;
-    using UTXOs = std::vector<WalletDatabase::UTXO>;
+    using UTXOs = std::pmr::vector<WalletDatabase::UTXO>;
     using Targets = GCS::Targets;
     using Tested = WalletDatabase::MatchingIndices;
 
@@ -177,9 +177,9 @@ protected:
     virtual auto report_scan(const block::Position& pos) const noexcept -> void;
     auto set_key_data(block::bitcoin::Transaction& tx) const noexcept -> void;
     auto supported_scripts(const crypto::Element& element) const noexcept
-        -> std::vector<ScriptForm>;
+        -> std::pmr::vector<ScriptForm>;
     auto translate(
-        const std::vector<WalletDatabase::UTXO>& utxos,
+        const std::pmr::vector<WalletDatabase::UTXO>& utxos,
         Patterns& outpoints) const noexcept -> void;
     virtual auto type() const noexcept -> std::stringstream = 0;
     auto update_scan(const block::Position& pos, bool reorg) const noexcept
@@ -219,11 +219,11 @@ private:
 
     auto get_targets(
         const Patterns& elements,
-        const std::vector<WalletDatabase::UTXO>& utxos,
+        const std::pmr::vector<WalletDatabase::UTXO>& utxos,
         Targets& targets) const noexcept -> void;
     auto get_targets(
         const Patterns& elements,
-        const std::vector<WalletDatabase::UTXO>& utxos,
+        const std::pmr::vector<WalletDatabase::UTXO>& utxos,
         Targets& targets,
         Patterns& outpoints,
         Tested& tested) const noexcept -> void;

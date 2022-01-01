@@ -1015,7 +1015,7 @@ auto OTPacker::Unpack(PackedBuffer& inBuf, std::string& outObj) -> bool
                                                                                \
     using PointerTo##name = std::shared_ptr<name>;                             \
                                                                                \
-    using listOf##name##s = std::deque<PointerTo##name>;                       \
+    using listOf##name##s = std::pmr::deque<PointerTo##name>;                  \
                                                                                \
     size_t scope Get##name##Count() { return list_##name##s.size(); }          \
                                                                                \

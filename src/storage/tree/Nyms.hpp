@@ -38,8 +38,8 @@ class Nyms final : public Node
 private:
     friend Tree;
 
-    mutable std::map<std::string, std::unique_ptr<storage::Nym>> nyms_;
-    std::set<std::string> local_nyms_{};
+    mutable std::pmr::map<std::string, std::unique_ptr<storage::Nym>> nyms_;
+    std::pmr::set<std::string> local_nyms_{};
 
     auto nym(const std::string& id) const -> storage::Nym*;
     auto nym(const Lock& lock, const std::string& id) const -> storage::Nym*;
@@ -58,7 +58,7 @@ private:
 
 public:
     auto Exists(const std::string& id) const -> bool;
-    auto LocalNyms() const -> const std::set<std::string>;
+    auto LocalNyms() const -> const std::pmr::set<std::string>;
     void Map(NymLambda lambda) const;
     auto Migrate(const Driver& to) const -> bool final;
     auto Nym(const std::string& id) const -> const storage::Nym&;

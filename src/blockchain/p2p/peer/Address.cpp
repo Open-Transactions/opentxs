@@ -64,7 +64,7 @@ auto Address::Port() const noexcept -> std::uint16_t
     return address_->Port();
 }
 
-auto Address::Services() const noexcept -> std::set<Service>
+auto Address::Services() const noexcept -> std::pmr::set<Service>
 {
     Lock lock(lock_);
 
@@ -78,8 +78,8 @@ auto Address::Type() const noexcept -> Network
     return address_->Type();
 }
 
-auto Address::UpdateServices(const std::set<p2p::Service>& services) noexcept
-    -> pointer
+auto Address::UpdateServices(
+    const std::pmr::set<p2p::Service>& services) noexcept -> pointer
 {
     Lock lock(lock_);
     address_->SetServices(services);

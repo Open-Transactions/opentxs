@@ -19,7 +19,7 @@
 namespace opentxs::display
 {
 struct Definition::Imp {
-    using Scales = std::vector<NamedScale>;
+    using Scales = std::pmr::vector<NamedScale>;
 
     const std::string short_name_;
     const Scales scales_;

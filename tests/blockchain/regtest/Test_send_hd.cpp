@@ -699,7 +699,7 @@ TEST_F(Regtest_fixture_hd, confirm)
     account_activity_.expected_ += ((3 * count) + 2);
     const auto& txid = transactions_.at(1).get();
     const auto extra = [&] {
-        auto output = std::vector<Transaction>{};
+        auto output = std::pmr::vector<Transaction>{};
         const auto& pTX = output.emplace_back(
             client_1_.Crypto().Blockchain().LoadTransactionBitcoin(txid));
 

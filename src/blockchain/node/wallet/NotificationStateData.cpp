@@ -188,7 +188,7 @@ auto NotificationStateData::process(
 
         if (script.IsNotification(version, code_)) {
             const auto elements = [&] {
-                auto out = std::vector<Space>{};
+                auto out = std::pmr::vector<Space>{};
 
                 for (auto i{0u}; i < 3u; ++i) {
                     const auto view = script.MultisigPubkey(i);

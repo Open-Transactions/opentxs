@@ -63,10 +63,10 @@ auto activity_thread_send_message(
 
 auto check_blockchain_subaccounts(
     const ot::ui::BlockchainSubaccountSource& widget,
-    const std::vector<BlockchainSubaccountData>& v) noexcept -> bool;
+    const std::pmr::vector<BlockchainSubaccountData>& v) noexcept -> bool;
 auto check_blockchain_subchains(
     const ot::ui::BlockchainSubaccount& widget,
-    const std::vector<BlockchainSubchainData>& v) noexcept -> bool;
+    const std::pmr::vector<BlockchainSubchainData>& v) noexcept -> bool;
 
 auto check_account_activity(
     const User& user,
@@ -452,7 +452,7 @@ auto check_blockchain_selection(
 
 auto check_blockchain_subaccounts(
     const ot::ui::BlockchainSubaccountSource& widget,
-    const std::vector<BlockchainSubaccountData>& v) noexcept -> bool
+    const std::pmr::vector<BlockchainSubaccountData>& v) noexcept -> bool
 {
     auto output{true};
     auto row = widget.First();
@@ -495,7 +495,7 @@ auto check_blockchain_subaccounts(
 
 auto check_blockchain_subchains(
     const ot::ui::BlockchainSubaccount& widget,
-    const std::vector<BlockchainSubchainData>& v) noexcept -> bool
+    const std::pmr::vector<BlockchainSubchainData>& v) noexcept -> bool
 {
     auto output{true};
     auto row = widget.First();

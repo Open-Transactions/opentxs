@@ -23,7 +23,7 @@ TEST_F(Test_HeaderOracle, receive_headers_out_of_order)
     EXPECT_TRUE(verify_siblings(siblings_5_));
 
     {
-        const auto expected = std::vector<std::string>{
+        const auto expected = std::pmr::vector<std::string>{
             BLOCK_3,
             BLOCK_12,
             BLOCK_4,
@@ -40,7 +40,7 @@ TEST_F(Test_HeaderOracle, receive_headers_out_of_order)
     }
 
     {
-        const auto expected = std::vector<std::string>{
+        const auto expected = std::pmr::vector<std::string>{
             BLOCK_12,
             BLOCK_4,
             BLOCK_5,
@@ -50,7 +50,7 @@ TEST_F(Test_HeaderOracle, receive_headers_out_of_order)
     }
 
     {
-        const auto expected = std::vector<std::string>{
+        const auto expected = std::pmr::vector<std::string>{
             BLOCK_12,
             BLOCK_5,
             BLOCK_4,

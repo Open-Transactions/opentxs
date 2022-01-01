@@ -802,7 +802,7 @@ TEST_F(Test_ContactData, AddItem_claim)
         std::string("contactItemValue"),
         NULL_START,
         NULL_END,
-        std::set<std::uint32_t>{
+        std::pmr::set<std::uint32_t>{
             static_cast<uint32_t>(ot::contact::Attribute::Active)});
     const auto& data1 = contactData_.AddItem(claim);
     // Verify the section was added.
@@ -854,7 +854,7 @@ TEST_F(Test_ContactData, AddItem_claim_different_versions)
         std::string("contactItemValue"),
         NULL_START,
         NULL_END,
-        std::set<std::uint32_t>{
+        std::pmr::set<std::uint32_t>{
             static_cast<uint32_t>(ot::contact::Attribute::Active)});
 
     const auto& data2 = data1.AddItem(claim);

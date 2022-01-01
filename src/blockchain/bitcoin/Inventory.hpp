@@ -54,8 +54,8 @@ public:
     ~Inventory() = default;
 
 private:
-    using Map = std::map<Type, std::uint32_t>;
-    using ReverseMap = std::map<std::uint32_t, Type>;
+    using Map = std::pmr::map<Type, std::uint32_t>;
+    using ReverseMap = std::pmr::map<std::uint32_t, Type>;
 
     struct BitcoinFormat {
         p2p::bitcoin::message::InventoryTypeField type_;

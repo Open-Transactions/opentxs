@@ -525,8 +525,8 @@ auto NymFile::load_signed_nymfile(const T& lock, const PasswordPrompt& reason)
 // nym. So I added this method to make such a thing easy to do.
 void NymFile::RemoveAllNumbers(const String& pstrNotaryID)
 {
-    std::list<mapOfIdentifiers::iterator> listOfInboxHash;
-    std::list<mapOfIdentifiers::iterator> listOfOutboxHash;
+    std::pmr::list<mapOfIdentifiers::iterator> listOfInboxHash;
+    std::pmr::list<mapOfIdentifiers::iterator> listOfOutboxHash;
 
     // This is mapped to acct_id, not notary_id.
     // (So we just wipe them all.)

@@ -301,7 +301,7 @@ private:
     using Mutex = boost::upgrade_mutex;
     using SharedLock = boost::upgrade_lock<Mutex>;
     using ExclusiveLock = boost::unique_lock<Mutex>;
-    using Tips = std::map<Chain, Height>;
+    using Tips = std::pmr::map<Chain, Height>;
 
     static const std::array<unsigned char, 16> checksum_key_;
 

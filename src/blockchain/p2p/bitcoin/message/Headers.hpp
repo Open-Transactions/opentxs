@@ -62,16 +62,16 @@ public:
     Headers(
         const api::Session& api,
         const blockchain::Type network,
-        std::vector<std::unique_ptr<value_type>>&& headers) noexcept;
+        std::pmr::vector<std::unique_ptr<value_type>>&& headers) noexcept;
     Headers(
         const api::Session& api,
         std::unique_ptr<Header> header,
-        std::vector<std::unique_ptr<value_type>>&& headers) noexcept;
+        std::pmr::vector<std::unique_ptr<value_type>>&& headers) noexcept;
 
     ~Headers() final = default;
 
 private:
-    const std::vector<std::unique_ptr<value_type>> payload_;
+    const std::pmr::vector<std::unique_ptr<value_type>> payload_;
 
     using implementation::Message::payload;
     auto payload(AllocateOutput out) const noexcept -> bool final;

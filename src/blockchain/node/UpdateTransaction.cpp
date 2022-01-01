@@ -9,6 +9,7 @@
 
 #include <iterator>
 #include <map>
+#include <memory_resource>
 #include <set>
 #include <tuple>
 #include <utility>

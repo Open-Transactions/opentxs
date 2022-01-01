@@ -59,7 +59,7 @@ public:
     // deposit will have a transNum, but the purse itself does NOT.
     // That's okay in your outpayments box since it's like an outmail
     // box. It's not a ledger, so the items inside don't need a txn#.
-    virtual auto GetSetAssetAccounts() -> std::set<std::string>& = 0;
+    virtual auto GetSetAssetAccounts() -> std::pmr::set<std::string>& = 0;
     virtual auto RemoveOutpaymentsByIndex(const std::int32_t nIndex)
         -> bool = 0;
     virtual auto RemoveOutpaymentsByTransNum(

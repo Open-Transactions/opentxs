@@ -6,6 +6,7 @@
 #pragma once
 
 #include <cstdint>
+#include <memory_resource>
 #include <string>
 #include <vector>
 
@@ -19,7 +20,7 @@ struct PathElement {
 };
 
 struct Child {
-    using Path = std::vector<PathElement>;
+    using Path = std::pmr::vector<PathElement>;
     using Base58 = std::string;
 
     Path path_{};
@@ -29,13 +30,13 @@ struct Child {
 
 struct Bip32TestCase {
     using Hex = std::string;
-    using Children = std::vector<Child>;
+    using Children = std::pmr::vector<Child>;
 
     Hex seed_{};
     Children children_{};
 };
 
-using Bip32TestCases = std::vector<Bip32TestCase>;
+using Bip32TestCases = std::pmr::vector<Bip32TestCase>;
 
 // clang-format off
 // https://github.com/bitcoin/bips/blob/master/bip-0032.mediawiki

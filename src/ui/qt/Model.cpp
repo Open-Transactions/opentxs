@@ -251,7 +251,7 @@ private:
         const ui::internal::Row* parent_;
         const std::shared_ptr<ui::internal::Row> pointer_;
         std::optional<int> column_count_;
-        std::deque<const ui::internal::Row*> children_;
+        std::pmr::deque<const ui::internal::Row*> children_;
 
         auto FindChild(const ui::internal::Row* item) const noexcept -> int
         {
@@ -342,7 +342,7 @@ private:
     QObject* qt_parent_;
     std::atomic<qt::Model*> parent_;
     RoleData role_data_;
-    std::map<RowID, RowData> map_;
+    std::pmr::map<RowID, RowData> map_;
 
     auto do_delete_row(const Lock&, const ui::internal::Row* item) noexcept
         -> void
@@ -444,7 +444,8 @@ private:
 
     auto get_helper() noexcept -> ModelHelper&
     {
-        static thread_local auto map = std::map<std::uintptr_t, ModelHelper>{};
+        static thread_local auto map =
+            std::pmr::map<std::uintptr_t, ModelHelper>{};
         auto [it, added] = map.try_emplace(
             reinterpret_cast<std::uintptr_t>(this), parent_.load());
 

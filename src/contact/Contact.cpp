@@ -106,8 +106,8 @@ struct Contact::Imp {
     const OTIdentifier id_;
     OTIdentifier parent_;
     OTNymID primary_nym_;
-    std::map<OTNymID, Nym_p> nyms_;
-    std::set<OTIdentifier> merged_children_;
+    std::pmr::map<OTNymID, Nym_p> nyms_;
+    std::pmr::set<OTIdentifier> merged_children_;
     std::unique_ptr<ContactData> contact_data_{};
     mutable std::shared_ptr<ContactData> cached_contact_data_{};
     std::atomic<std::uint64_t> revision_{0};
@@ -128,7 +128,7 @@ struct Contact::Imp {
         auto random = Data::Factory();
         encode.Nonce(ID_BYTES, random);
 
-        return api.Factory().Identifier(random->Bytes());
+        return api.Factory().IdentifierFromBytes(random->Bytes());
     }
 
     static auto translate(
@@ -157,8 +157,8 @@ struct Contact::Imp {
         , version_(check_version(serialized.version(), OT_CONTACT_VERSION))
         , label_(serialized.label())
         , lock_()
-        , id_(api_.Factory().Identifier(serialized.id()))
-        , parent_(api_.Factory().Identifier(serialized.mergedto()))
+        , id_(api_.Factory().IdentifierFromBase58(serialized.id()))
+        , parent_(api_.Factory().IdentifierFromBase58(serialized.mergedto()))
         , primary_nym_(api_.Factory().NymID())
         , nyms_()
         , merged_children_()
@@ -182,7 +182,8 @@ struct Contact::Imp {
         OT_ASSERT(contact_data_);
 
         for (const auto& child : serialized.merged()) {
-            merged_children_.emplace(api_.Factory().Identifier(child));
+            merged_children_.emplace(
+                api_.Factory().IdentifierFromBase58(child));
         }
 
         init_nyms();
@@ -287,7 +288,7 @@ struct Contact::Imp {
     {
         OT_ASSERT(verify_write_lock(lock));
 
-        std::set<contact::Attribute> attr{
+        std::pmr::set<contact::Attribute> attr{
             contact::Attribute::Local, contact::Attribute::Active};
 
         if (primary) { attr.emplace(contact::Attribute::Primary); }
@@ -605,7 +606,7 @@ auto Contact::AddPaymentCode(
     const core::UnitType currency,
     const bool active) -> bool
 {
-    std::set<contact::Attribute> attr{contact::Attribute::Local};
+    std::pmr::set<contact::Attribute> attr{contact::Attribute::Local};
 
     if (active) { attr.emplace(contact::Attribute::Active); }
 
@@ -731,9 +732,9 @@ auto Contact::BestSocialMediaProfile(const contact::ClaimType type) const
 }
 
 auto Contact::BlockchainAddresses() const
-    -> std::vector<Contact::BlockchainAddress>
+    -> std::pmr::vector<Contact::BlockchainAddress>
 {
-    auto output = std::vector<BlockchainAddress>{};
+    auto output = std::pmr::vector<BlockchainAddress>{};
     auto lock = Lock{imp_->lock_};
     auto data = imp_->merged_data(lock);
     lock.unlock();
@@ -846,7 +847,7 @@ auto Contact::LastUpdated() const -> std::time_t
 }
 
 auto Contact::Nyms(const bool includeInactive) const
-    -> std::vector<opentxs::OTNymID>
+    -> std::pmr::vector<opentxs::OTNymID>
 {
     auto lock = Lock{imp_->lock_};
     const auto data = imp_->merged_data(lock);
@@ -859,7 +860,7 @@ auto Contact::Nyms(const bool includeInactive) const
 
     if (false == bool(group)) { return {}; }
 
-    std::vector<OTNymID> output{};
+    std::pmr::vector<OTNymID> output{};
     const auto& primaryID = group->Primary();
 
     for (const auto& it : *group) {
@@ -911,7 +912,7 @@ auto Contact::PaymentCode(const core::UnitType currency) const -> std::string
 }
 
 auto Contact::PaymentCodes(const core::UnitType currency) const
-    -> std::vector<std::string>
+    -> std::pmr::vector<std::string>
 {
     auto lock = Lock{imp_->lock_};
     const auto group = imp_->payment_codes(lock, currency);
@@ -919,7 +920,7 @@ auto Contact::PaymentCodes(const core::UnitType currency) const
 
     if (false == bool(group)) { return {}; }
 
-    std::vector<std::string> output{};
+    std::pmr::vector<std::string> output{};
 
     for (const auto& it : *group) {
         OT_ASSERT(it.second);
@@ -1043,7 +1044,7 @@ auto Contact::SocialMediaProfiles(const contact::ClaimType type, bool active)
 }
 
 auto Contact::SocialMediaProfileTypes() const
-    -> const std::set<contact::ClaimType>
+    -> const std::pmr::set<contact::ClaimType>
 {
     auto lock = Lock{imp_->lock_};
     const auto data = imp_->merged_data(lock);

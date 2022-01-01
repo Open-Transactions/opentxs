@@ -25,7 +25,7 @@ auto CheckProto_1(const BlockchainP2PHello& input, const bool silent) -> bool
     OPTIONAL_SUBOBJECTS(
         state, BlockchainP2PHelloAllowedBlockchainP2PChainState())
 
-    auto map = std::map<std::uint32_t, std::size_t>{};
+    auto map = std::pmr::map<std::uint32_t, std::size_t>{};
 
     for (const auto& state : input.state()) {
         const auto& count = ++map[state.chain()];

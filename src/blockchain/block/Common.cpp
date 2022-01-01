@@ -9,6 +9,7 @@
 
 #include <algorithm>
 #include <iterator>
+#include <memory_resource>
 #include <string_view>
 
 #include "opentxs/api/session/Factory.hpp"
@@ -38,9 +39,9 @@ auto SetIntersection(
     const api::Session& api,
     const ReadView txid,
     const ParsedPatterns& parsed,
-    const std::vector<Space>& compare) noexcept -> Matches
+    const std::pmr::vector<Space>& compare) noexcept -> Matches
 {
-    auto matches = std::vector<Space>{};
+    auto matches = std::pmr::vector<Space>{};
     auto output = Matches{};
     std::set_intersection(
         std::begin(parsed.data_),

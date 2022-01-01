@@ -59,7 +59,7 @@ auto BitcoinTransactionOutput(
     const std::uint32_t index,
     const blockchain::Amount& value,
     std::unique_ptr<const blockchain::block::bitcoin::internal::Script> script,
-    const std::set<blockchain::crypto::Key>& keys) noexcept
+    const std::pmr::set<blockchain::crypto::Key>& keys) noexcept
     -> std::unique_ptr<blockchain::block::bitcoin::internal::Output>
 {
     try {
@@ -110,7 +110,7 @@ auto BitcoinTransactionOutput(
         using Payer = OTIdentifier;
         using Payee = OTIdentifier;
         using Correction = std::pair<Payer, Payee>;
-        auto corrections = std::vector<Correction>{};
+        auto corrections = std::pmr::vector<Correction>{};
         const auto& blockchain = api.Crypto().Blockchain();
 
         for (const auto& key : in.key()) {
@@ -164,7 +164,7 @@ auto BitcoinTransactionOutput(
             }(),
             static_cast<blockchain::node::TxoState>(in.state()),
             [&] {
-                auto out = std::set<blockchain::node::TxoTag>{};
+                auto out = std::pmr::set<blockchain::node::TxoTag>{};
 
                 for (const auto& tag : in.tag()) {
                     out.emplace(static_cast<blockchain::node::TxoTag>(tag));
@@ -228,7 +228,7 @@ Output::Output(
     bool indexed,
     block::Position minedPosition,
     node::TxoState state,
-    std::set<node::TxoTag> tags) noexcept(false)
+    std::pmr::set<node::TxoTag> tags) noexcept(false)
     : api_(api)
     , chain_(chain)
     , serialize_version_(version)
@@ -317,8 +317,8 @@ Output::Output(const Output& rhs) noexcept
 {
 }
 
-auto Output::AssociatedLocalNyms(std::vector<OTNymID>& output) const noexcept
-    -> void
+auto Output::AssociatedLocalNyms(
+    std::pmr::vector<OTNymID>& output) const noexcept -> void
 {
     cache_.for_each_key([&](const auto& key) {
         const auto& owner = api_.Crypto().Blockchain().Owner(key);
@@ -328,7 +328,7 @@ auto Output::AssociatedLocalNyms(std::vector<OTNymID>& output) const noexcept
 }
 
 auto Output::AssociatedRemoteContacts(
-    std::vector<OTIdentifier>& output) const noexcept -> void
+    std::pmr::vector<OTIdentifier>& output) const noexcept -> void
 {
     const auto hashes = script_->LikelyPubkeyHashes(api_);
     const auto& api = api_.Crypto().Blockchain();
@@ -358,7 +358,7 @@ auto Output::CalculateSize() const noexcept -> std::size_t
 }
 
 auto Output::ExtractElements(const filter::Type style) const noexcept
-    -> std::vector<Space>
+    -> std::pmr::vector<Space>
 {
     return script_->ExtractElements(style);
 }
@@ -400,7 +400,7 @@ auto Output::FindMatches(
     return output;
 }
 
-auto Output::GetPatterns() const noexcept -> std::vector<PatternID>
+auto Output::GetPatterns() const noexcept -> std::pmr::vector<PatternID>
 {
     return {std::begin(pubkey_hashes_), std::end(pubkey_hashes_)};
 }

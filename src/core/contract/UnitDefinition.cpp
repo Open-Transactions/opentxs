@@ -96,8 +96,8 @@ const VersionNumber Unit::MaxVersion{2};
 
 namespace opentxs::contract::implementation
 {
-const std::map<VersionNumber, VersionNumber> Unit::unit_of_account_version_map_{
-    {2, 6}};
+const std::pmr::map<VersionNumber, VersionNumber>
+    Unit::unit_of_account_version_map_{{2, 6}};
 const Unit::Locale Unit::locale_{};
 
 Unit::Unit(
@@ -416,7 +416,7 @@ auto Unit::get_displayscales(const SerializedType& serialized) const
 
         auto scales = display::Definition::Scales{};
         for (auto& scale : params.scales()) {
-            auto ratios = std::vector<display::Scale::Ratio>{};
+            auto ratios = std::pmr::vector<display::Scale::Ratio>{};
             for (auto& ratio : scale.ratios()) {
                 ratios.emplace_back(std::pair{ratio.base(), ratio.power()});
             }

@@ -126,7 +126,7 @@ private:
         return ProfileSectionList::last(id);
     }
     auto process_section(const contact::ContactSection& section) noexcept
-        -> std::set<ProfileSectionRowID>;
+        -> std::pmr::set<ProfileSectionRowID>;
 
     auto reindex(const ProfileSortKey& key, CustomData& custom) noexcept
         -> bool final;

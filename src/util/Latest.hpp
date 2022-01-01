@@ -61,6 +61,6 @@ public:
 private:
     const Compare compare_;
     mutable std::mutex lock_;
-    std::list<Store> versions_;
+    std::pmr::list<Store> versions_;
 };
 }  // namespace opentxs

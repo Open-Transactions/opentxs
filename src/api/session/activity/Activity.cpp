@@ -119,8 +119,8 @@ auto Activity::add_blockchain_transaction(
         .Flush();
     const auto existing =
         api_.Storage().BlockchainThreadMap(nym, transaction.ID());
-    auto added = std::vector<OTIdentifier>{};
-    auto removed = std::vector<OTIdentifier>{};
+    auto added = std::pmr::vector<OTIdentifier>{};
+    auto removed = std::pmr::vector<OTIdentifier>{};
     std::set_difference(
         std::begin(incoming),
         std::end(incoming),
@@ -770,7 +770,10 @@ auto Activity::thread_preload_thread(
                     " in thread ")(threadID)
                     .Flush();
                 mail_.GetText(
-                    nym, api_.Factory().Identifier(item.id()), box, reason);
+                    nym,
+                    api_.Factory().IdentifierFromBase58(item.id()),
+                    box,
+                    reason);
                 ++cached;
             } break;
             default: {

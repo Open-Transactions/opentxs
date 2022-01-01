@@ -148,13 +148,13 @@ private:
         statemachine = OT_ZMQ_STATE_MACHINE_SIGNAL,
     };
 
-    const std::set<blockchain::Type> filter_;
-    mutable std::map<blockchain::Type, bool> chain_state_;
+    const std::pmr::set<blockchain::Type> filter_;
+    mutable std::pmr::map<blockchain::Type, bool> chain_state_;
     mutable std::atomic<std::size_t> enabled_count_;
     mutable Callback enabled_callback_;
 
     static auto filter(const ui::Blockchains type) noexcept
-        -> std::set<blockchain::Type>;
+        -> std::pmr::set<blockchain::Type>;
 
     auto process_state(const blockchain::Type chain, const bool enabled)
         const noexcept -> void;

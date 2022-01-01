@@ -217,7 +217,7 @@ class Batch
 public:
     using ID = std::int64_t;
     using TaskType = Task<DownloadType, FinishedType, ExtraData>;
-    using Vector = std::vector<std::shared_ptr<TaskType>>;
+    using Vector = std::pmr::vector<std::shared_ptr<TaskType>>;
     using Callback = std::function<void(const Batch&)>;
     using Position = typename TaskType::Position;
 
@@ -322,7 +322,7 @@ public:
     ~Batch() { Finish(); }
 
 private:
-    using Index = std::map<Position, std::size_t>;
+    using Index = std::pmr::map<Position, std::size_t>;
 
     Callback cb_;
     const Index index_;

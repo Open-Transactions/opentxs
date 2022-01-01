@@ -158,7 +158,7 @@ auto BlockchainImp::ActivityDescription(
     const auto amount = tx.NetBalanceChange(nym);
     const auto memo = tx.Memo();
     const auto names = [&] {
-        auto out = std::set<std::string>{};
+        auto out = std::pmr::set<std::string>{};
         const auto contacts = tx.AssociatedRemoteContacts(contacts_, nym);
 
         for (const auto& id : contacts) {
@@ -238,7 +238,7 @@ auto BlockchainImp::AssignTransactionMemo(
 }
 
 auto BlockchainImp::broadcast_update_signal(
-    const std::vector<pTxid>& transactions) const noexcept -> void
+    const std::pmr::vector<pTxid>& transactions) const noexcept -> void
 {
     const auto& db = api_.Network().Blockchain().Internal().Database();
     std::for_each(
@@ -515,17 +515,17 @@ auto BlockchainImp::UpdateBalance(
     balances_.UpdateBalance(owner, chain, balance);
 }
 
-auto BlockchainImp::UpdateElement(std::vector<ReadView>& hashes) const noexcept
-    -> void
+auto BlockchainImp::UpdateElement(
+    std::pmr::vector<ReadView>& hashes) const noexcept -> void
 {
-    auto patterns = std::vector<PatternID>{};
+    auto patterns = std::pmr::vector<PatternID>{};
     std::for_each(std::begin(hashes), std::end(hashes), [&](const auto& bytes) {
         patterns.emplace_back(IndexItem(bytes));
     });
     LogTrace()(OT_PRETTY_CLASS())(patterns.size())(
         " pubkey hashes have changed:")
         .Flush();
-    auto transactions = std::vector<pTxid>{};
+    auto transactions = std::pmr::vector<pTxid>{};
     std::for_each(
         std::begin(patterns), std::end(patterns), [&](const auto& pattern) {
             LogTrace()("    * ")(pattern).Flush();

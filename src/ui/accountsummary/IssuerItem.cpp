@@ -152,7 +152,7 @@ void IssuerItem::refresh_accounts() noexcept
 
     for (const auto& id : accounts) { process_account(id); }
 
-    std::set<IssuerItemRowID> active{};
+    std::pmr::set<IssuerItemRowID> active{};
     std::transform(
         accounts.begin(),
         accounts.end(),

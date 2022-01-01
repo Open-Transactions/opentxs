@@ -146,7 +146,7 @@ auto Contact::asClaim(
     const std::uint32_t section,
     const proto::ContactItem& item) -> Claim
 {
-    std::set<std::uint32_t> attributes;
+    std::pmr::set<std::uint32_t> attributes;
 
     for (auto& attrib : item.attribute()) { attributes.insert(attrib); }
 

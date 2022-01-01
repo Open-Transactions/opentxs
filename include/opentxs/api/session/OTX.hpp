@@ -131,7 +131,7 @@ public:
      */
     virtual auto DepositCheques(
         const identifier::Nym& nymID,
-        const std::set<OTIdentifier>& chequeIDs) const -> std::size_t = 0;
+        const std::pmr::set<OTIdentifier>& chequeIDs) const -> std::size_t = 0;
     virtual auto DepositPayment(
         const identifier::Nym& recipientNymID,
         const std::shared_ptr<const OTPayment>& payment) const

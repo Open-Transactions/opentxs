@@ -48,7 +48,8 @@ class OPENTXS_EXPORT Subaccount
 public:
     using Txid = opentxs::blockchain::block::Txid;
 
-    virtual auto AllowedSubchains() const noexcept -> std::set<Subchain> = 0;
+    virtual auto AllowedSubchains() const noexcept
+        -> std::pmr::set<Subchain> = 0;
     /// Throws std::out_of_range for invalid index
     virtual auto BalanceElement(const Subchain type, const Bip32Index index)
         const noexcept(false) -> const crypto::Element& = 0;

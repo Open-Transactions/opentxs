@@ -55,7 +55,7 @@ public:
         const noexcept -> void
     {
         auto lock = Lock{lock_};
-        auto id = api_.Factory().Identifier(tx.id());
+        auto id = api_.Factory().IdentifierFromBase58(tx.id());
 
         if (false == db_.AddProposal(id, tx)) {
             LogError()(OT_PRETTY_CLASS())("Database error").Flush();
@@ -88,7 +88,7 @@ public:
         , confirming_()
     {
         for (const auto& serialized : db_.LoadProposals()) {
-            auto id = api_.Factory().Identifier(serialized.id());
+            auto id = api_.Factory().IdentifierFromBase58(serialized.id());
 
             if (serialized.has_finished()) {
                 confirming_.emplace(std::move(id), Time{});
@@ -188,8 +188,8 @@ private:
     private:
         const api::Session& api_;
         mutable std::mutex lock_;
-        std::deque<Data> data_;
-        std::set<OTIdentifier> ids_;
+        std::pmr::deque<Data> data_;
+        std::pmr::set<OTIdentifier> ids_;
     };
 
     const api::Session& api_;
@@ -198,7 +198,7 @@ private:
     const Type chain_;
     mutable std::mutex lock_;
     mutable Pending pending_;
-    mutable std::map<OTIdentifier, Time> confirming_;
+    mutable std::pmr::map<OTIdentifier, Time> confirming_;
 
     static auto is_expired(const Proposal& tx) noexcept -> bool
     {

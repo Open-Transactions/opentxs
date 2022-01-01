@@ -71,7 +71,7 @@ public:
         const ListenCallback& callback,
         const socket::Socket::Direction direction) const noexcept
         -> OTZMQDealerSocket final;
-    auto MakeBatch(std::vector<socket::Type>&& types) const noexcept
+    auto MakeBatch(std::pmr::vector<socket::Type>&& types) const noexcept
         -> internal::Batch& final;
     auto Modify(SocketID id, ModifyCallback cb) const noexcept
         -> AsyncResult final;

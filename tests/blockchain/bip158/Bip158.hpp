@@ -47,7 +47,7 @@ struct Bip158Vector {
     ot::blockchain::block::Height height_;
     std::string block_hash_;
     std::string block_;
-    std::vector<std::string> previous_outputs_;
+    std::pmr::vector<std::string> previous_outputs_;
     std::string previous_filter_header_;
     std::string filter_;
     std::string filter_header_;
@@ -78,7 +78,7 @@ struct Bip158Vector {
     [[maybe_unused]] auto PreviousOutputs(
         const ot::api::Session& api) const noexcept
     {
-        auto output = std::vector<ot::OTData>{};
+        auto output = std::pmr::vector<ot::OTData>{};
 
         for (const auto& hex : previous_outputs_) {
             output.emplace_back(parse_hex(api, hex));
@@ -88,7 +88,7 @@ struct Bip158Vector {
     }
 };
 
-const auto bip_158_vectors_ = std::vector<Bip158Vector>{
+const auto bip_158_vectors_ = std::pmr::vector<Bip158Vector>{
     {0,
      "000000000933ea01ad0ee984209779baaec3ced90fa3f408719526f8d77f4943",
      "0100000000000000000000000000000000000000000000000000000000000000000000003"
@@ -374,7 +374,9 @@ const auto bip_158_vectors_ = std::vector<Bip158Vector>{
      "00",
      "021e8882ef5a0ed932edeebbecfeda1d7ce528ec7b3daa27641acf1189d7b5dc",
      "Empty data"}};
-const std::map<ot::blockchain::block::Height, std::vector<std::string>>
+const std::pmr::map<
+    ot::blockchain::block::Height,
+    std::pmr::vector<std::string>>
     indexed_elements_{
         {0,
          {

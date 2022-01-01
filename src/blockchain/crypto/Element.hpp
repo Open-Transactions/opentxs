@@ -81,10 +81,11 @@ public:
         -> std::string final;
     auto Confirmed() const noexcept -> Txids final;
     auto Contact() const noexcept -> OTIdentifier final;
-    auto Elements() const noexcept -> std::set<OTData> final;
-    auto elements(const rLock& lock) const noexcept -> std::set<OTData>;
+    auto Elements() const noexcept -> std::pmr::set<OTData> final;
+    auto elements(const rLock& lock) const noexcept -> std::pmr::set<OTData>;
     auto ID() const noexcept -> const Identifier& final { return parent_.ID(); }
-    auto IncomingTransactions() const noexcept -> std::set<std::string> final;
+    auto IncomingTransactions() const noexcept
+        -> std::pmr::set<std::string> final;
     auto Internal() const noexcept -> internal::Element& final
     {
         return const_cast<Element&>(*this);

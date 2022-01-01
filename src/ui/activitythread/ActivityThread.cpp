@@ -110,7 +110,7 @@ ActivityThread::ActivityThread(
 
 auto ActivityThread::calculate_display_name() const noexcept -> std::string
 {
-    auto names = std::set<std::string>{};
+    auto names = std::pmr::set<std::string>{};
 
     for (const auto& contactID : contacts_) {
         names.emplace(Widget::api_.Contacts().ContactName(contactID));
@@ -121,7 +121,7 @@ auto ActivityThread::calculate_display_name() const noexcept -> std::string
 
 auto ActivityThread::calculate_participants() const noexcept -> std::string
 {
-    auto ids = std::set<std::string>{};
+    auto ids = std::pmr::set<std::string>{};
 
     for (const auto& id : contacts_) { ids.emplace(id->str()); }
 
@@ -156,8 +156,8 @@ auto ActivityThread::ClearCallbacks() const noexcept -> void
     callbacks_ = std::nullopt;
 }
 
-auto ActivityThread::comma(const std::set<std::string>& list) const noexcept
-    -> std::string
+auto ActivityThread::comma(
+    const std::pmr::set<std::string>& list) const noexcept -> std::string
 {
     auto stream = std::ostringstream{};
 
@@ -240,10 +240,10 @@ auto ActivityThread::GetDraft() const noexcept -> std::string
 auto ActivityThread::load_contacts(const proto::StorageThread& thread) noexcept
     -> void
 {
-    auto& contacts = const_cast<std::set<OTIdentifier>&>(contacts_);
+    auto& contacts = const_cast<std::pmr::set<OTIdentifier>&>(contacts_);
 
     for (const auto& id : thread.participant()) {
-        contacts.emplace(Widget::api_.Factory().Identifier(id));
+        contacts.emplace(Widget::api_.Factory().IdentifierFromBase58(id));
     }
 }
 
@@ -264,7 +264,7 @@ auto ActivityThread::load_thread(const proto::StorageThread& thread) noexcept
 
 auto ActivityThread::new_thread() noexcept -> void
 {
-    auto& contacts = const_cast<std::set<OTIdentifier>&>(contacts_);
+    auto& contacts = const_cast<std::pmr::set<OTIdentifier>&>(contacts_);
     contacts.emplace(threadID_);
 }
 
@@ -460,9 +460,9 @@ auto ActivityThread::process_item(
     const proto::StorageThreadItem& item) noexcept(false) -> ActivityThreadRowID
 {
     const auto id = ActivityThreadRowID{
-        Widget::api_.Factory().Identifier(item.id()),
+        Widget::api_.Factory().IdentifierFromBase58(item.id()),
         static_cast<StorageBox>(item.box()),
-        Widget::api_.Factory().Identifier(item.account())};
+        Widget::api_.Factory().IdentifierFromBase58(item.account())};
     const auto& [itemID, box, account] = id;
     const auto key =
         ActivityThreadSortKey{std::chrono::seconds(item.time()), item.index()};
@@ -653,7 +653,7 @@ auto ActivityThread::refresh_thread() noexcept -> void
 
     OT_ASSERT(loaded)
 
-    auto active = std::set<ActivityThreadRowID>{};
+    auto active = std::pmr::set<ActivityThreadRowID>{};
 
     for (const auto& item : thread.item()) {
         try {
@@ -925,7 +925,7 @@ auto ActivityThread::update_messagability(Messagability value) noexcept -> bool
 
 auto ActivityThread::update_payment_codes() noexcept -> bool
 {
-    auto map = std::map<core::UnitType, std::string>{};
+    auto map = std::pmr::map<core::UnitType, std::string>{};
 
     if (1 != contacts_.size()) { OT_FAIL; }
 

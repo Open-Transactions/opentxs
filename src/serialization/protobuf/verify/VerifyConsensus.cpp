@@ -47,18 +47,18 @@ auto ServerContextAllowedPendingCommand() noexcept -> const VersionMap&
     return output;
 }
 auto ServerContextAllowedState() noexcept
-    -> const std::map<std::uint32_t, std::set<int>>&
+    -> const std::pmr::map<std::uint32_t, std::pmr::set<int>>&
 {
     static const auto output =
-        std::map<std::uint32_t, std::set<int>>{{3, {1, 2, 3, 4, 5}}};
+        std::pmr::map<std::uint32_t, std::pmr::set<int>>{{3, {1, 2, 3, 4, 5}}};
 
     return output;
 }
 auto ServerContextAllowedStatus() noexcept
-    -> const std::map<std::uint32_t, std::set<int>>&
+    -> const std::pmr::map<std::uint32_t, std::pmr::set<int>>&
 {
     static const auto output =
-        std::map<std::uint32_t, std::set<int>>{{3, {1, 2, 3, 4, 5}}};
+        std::pmr::map<std::uint32_t, std::pmr::set<int>>{{3, {1, 2, 3, 4, 5}}};
 
     return output;
 }

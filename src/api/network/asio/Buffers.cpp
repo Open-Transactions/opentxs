@@ -39,7 +39,7 @@ struct Buffers::Imp {
 private:
     mutable std::mutex lock_{};
     Index counter_{-1};
-    std::map<Index, Space> buffers_{};
+    std::pmr::map<Index, Space> buffers_{};
 };
 
 Buffers::Buffers() noexcept

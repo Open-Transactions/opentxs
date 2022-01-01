@@ -51,11 +51,11 @@ struct Test_BitcoinBlock : public ::testing::Test {
     const ot::api::session::Client& api_;
 
     auto CompareElements(
-        const std::vector<ot::OTData>& input,
-        std::vector<std::string> expected) const -> bool
+        const std::pmr::vector<ot::OTData>& input,
+        std::pmr::vector<std::string> expected) const -> bool
     {
-        auto inputHex = std::vector<std::string>{};
-        auto difference = std::vector<std::string>{};
+        auto inputHex = std::pmr::vector<std::string>{};
+        auto difference = std::pmr::vector<std::string>{};
         std::transform(
             std::begin(input), std::end(input), std::back_inserter(inputHex), [
             ](const auto& in) -> auto { return in->asHex(); });
@@ -112,9 +112,9 @@ struct Test_BitcoinBlock : public ::testing::Test {
         const Bip158Vector& vector,
         const ot::blockchain::block::Block& block,
         const std::size_t encodedElements) const noexcept
-        -> std::vector<ot::OTData>
+        -> std::pmr::vector<ot::OTData>
     {
-        auto output = std::vector<ot::OTData>{};
+        auto output = std::pmr::vector<ot::OTData>{};
 
         for (const auto& bytes : block.Internal().ExtractElements(
                  ot::blockchain::filter::Type::Basic_BIP158)) {

@@ -59,7 +59,7 @@ BlockchainSelection::BlockchainSelection(
     , Worker(api, {})
     , filter_(filter(type))
     , chain_state_([&] {
-        auto out = std::map<blockchain::Type, bool>{};
+        auto out = std::pmr::map<blockchain::Type, bool>{};
 
         for (const auto chain : filter_) { out[chain] = false; }
 
@@ -135,7 +135,7 @@ auto BlockchainSelection::EnabledCount() const noexcept -> std::size_t
 }
 
 auto BlockchainSelection::filter(const ui::Blockchains type) noexcept
-    -> std::set<blockchain::Type>
+    -> std::pmr::set<blockchain::Type>
 {
     auto complete = blockchain::SupportedChains();
 

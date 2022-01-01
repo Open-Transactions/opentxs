@@ -50,7 +50,8 @@ auto ZAPRequest(
 
 namespace opentxs::network::zeromq::zap
 {
-const std::set<std::string> Request::Imp::accept_versions_{default_version_};
+const std::pmr::set<std::string> Request::Imp::accept_versions_{
+    default_version_};
 const Request::Imp::MechanismMap Request::Imp::mechanism_map_{
     {Mechanism::Null, "NULL"},
     {Mechanism::Plain, "PLAIN"},

@@ -75,20 +75,21 @@ public:
 
     auto AssociateTransaction(
         const Txid& txid,
-        const std::vector<PatternID>& patterns) const noexcept -> bool;
+        const std::pmr::vector<PatternID>& patterns) const noexcept -> bool;
     auto LoadTransaction(const ReadView txid) const noexcept
         -> std::unique_ptr<block::bitcoin::Transaction>;
     auto LookupContact(const Data& pubkeyHash) const noexcept
-        -> std::set<OTIdentifier>;
+        -> std::pmr::set<OTIdentifier>;
     auto LookupTransactions(const PatternID pattern) const noexcept
-        -> std::vector<pTxid>;
+        -> std::pmr::vector<pTxid>;
     auto StoreTransaction(const block::bitcoin::Transaction& tx) const noexcept
         -> bool;
     auto UpdateContact(const contact::Contact& contact) const noexcept
-        -> std::vector<pTxid>;
+        -> std::pmr::vector<pTxid>;
     auto UpdateMergedContact(
         const contact::Contact& parent,
-        const contact::Contact& child) const noexcept -> std::vector<pTxid>;
+        const contact::Contact& child) const noexcept
+        -> std::pmr::vector<pTxid>;
 
     Wallet(
         const api::Session& api,
@@ -99,10 +100,10 @@ public:
     ~Wallet();
 
 private:
-    using ContactToElement = std::map<OTIdentifier, std::set<OTData>>;
-    using ElementToContact = std::map<OTData, std::set<OTIdentifier>>;
-    using TransactionToPattern = std::map<pTxid, std::set<PatternID>>;
-    using PatternToTransaction = std::map<PatternID, std::set<pTxid>>;
+    using ContactToElement = std::pmr::map<OTIdentifier, std::pmr::set<OTData>>;
+    using ElementToContact = std::pmr::map<OTData, std::pmr::set<OTIdentifier>>;
+    using TransactionToPattern = std::pmr::map<pTxid, std::pmr::set<PatternID>>;
+    using PatternToTransaction = std::pmr::map<PatternID, std::pmr::set<pTxid>>;
 
     const api::Session& api_;
     const api::crypto::Blockchain& blockchain_;
@@ -117,8 +118,8 @@ private:
 
     auto update_contact(
         const Lock& lock,
-        const std::set<OTData>& existing,
-        const std::set<OTData>& incoming,
-        const Identifier& contactID) const noexcept -> std::vector<pTxid>;
+        const std::pmr::set<OTData>& existing,
+        const std::pmr::set<OTData>& incoming,
+        const Identifier& contactID) const noexcept -> std::pmr::vector<pTxid>;
 };
 }  // namespace opentxs::blockchain::database::common

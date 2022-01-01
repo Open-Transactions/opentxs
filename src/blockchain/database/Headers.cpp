@@ -553,7 +553,7 @@ auto Headers::push_best(
     return output.first;
 }
 
-auto Headers::RecentHashes() const noexcept -> std::vector<block::pHash>
+auto Headers::RecentHashes() const noexcept -> std::pmr::vector<block::pHash>
 {
     Lock lock(lock_);
 
@@ -561,9 +561,9 @@ auto Headers::RecentHashes() const noexcept -> std::vector<block::pHash>
 }
 
 auto Headers::recent_hashes(const Lock& lock) const noexcept
-    -> std::vector<block::pHash>
+    -> std::pmr::vector<block::pHash>
 {
-    auto output = std::vector<block::pHash>{};
+    auto output = std::pmr::vector<block::pHash>{};
     lmdb_.Read(
         BlockHeaderBest,
         [&](const auto, const auto value) -> bool {

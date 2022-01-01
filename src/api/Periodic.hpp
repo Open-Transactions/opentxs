@@ -9,6 +9,7 @@
 #include <chrono>
 #include <functional>
 #include <map>
+#include <memory_resource>
 #include <mutex>
 #include <thread>
 #include <thread>
@@ -48,7 +49,7 @@ protected:
 private:
     /** Last performed, Interval, Task */
     using TaskItem = std::tuple<Time, std::chrono::seconds, PeriodicTask>;
-    using TaskList = std::map<int, TaskItem>;
+    using TaskList = std::pmr::map<int, TaskItem>;
 
     mutable std::atomic<int> next_id_;
     mutable std::mutex periodic_lock_;

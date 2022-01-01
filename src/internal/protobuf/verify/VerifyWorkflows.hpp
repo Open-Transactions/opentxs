@@ -32,13 +32,13 @@ namespace proto
 {
 using PaymentWorkflowVersion = std::pair<std::uint32_t, PaymentWorkflowType>;
 using WorkflowEventMap =
-    std::map<PaymentWorkflowVersion, std::set<PaymentEventType>>;
+    std::pmr::map<PaymentWorkflowVersion, std::pmr::set<PaymentEventType>>;
 using PaymentTypeVersion = std::pair<std::uint32_t, PaymentWorkflowType>;
 using WorkflowStateMap =
-    std::map<PaymentTypeVersion, std::set<PaymentWorkflowState>>;
+    std::pmr::map<PaymentTypeVersion, std::pmr::set<PaymentWorkflowState>>;
 using PaymentEventVersion = std::pair<std::uint32_t, PaymentEventType>;
 using EventTransportMap =
-    std::map<PaymentEventVersion, std::set<EventTransportMethod>>;
+    std::pmr::map<PaymentEventVersion, std::pmr::set<EventTransportMethod>>;
 
 auto PaymentEventAllowedTransportMethod() noexcept -> const EventTransportMap&;
 auto PaymentWorkflowAllowedEventTypes() noexcept -> const WorkflowEventMap&;

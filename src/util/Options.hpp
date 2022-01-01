@@ -8,6 +8,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <map>
+#include <memory_resource>
 #include <optional>
 #include <set>
 #include <string>
@@ -21,12 +22,12 @@ class QObject;
 namespace opentxs
 {
 struct Options::Imp final {
-    std::set<blockchain::Type> blockchain_disabled_chains_;
-    std::set<std::string> blockchain_ipv4_bind_;
-    std::set<std::string> blockchain_ipv6_bind_;
+    std::pmr::set<blockchain::Type> blockchain_disabled_chains_;
+    std::pmr::set<std::string> blockchain_ipv4_bind_;
+    std::pmr::set<std::string> blockchain_ipv6_bind_;
     std::optional<int> blockchain_storage_level_;
     std::optional<bool> blockchain_sync_server_enabled_;
-    std::set<std::string> blockchain_sync_servers_;
+    std::pmr::set<std::string> blockchain_sync_servers_;
     std::optional<bool> blockchain_wallet_enabled_;
     std::optional<std::size_t> default_mint_key_bytes_;
     std::optional<std::string> home_;
@@ -38,10 +39,10 @@ struct Options::Imp final {
     std::optional<std::string> notary_bind_ip_;
     std::optional<std::uint16_t> notary_bind_port_;
     std::optional<std::string> notary_name_;
-    std::set<std::string> notary_public_eep_;
-    std::set<std::string> notary_public_ipv4_;
-    std::set<std::string> notary_public_ipv6_;
-    std::set<std::string> notary_public_onion_;
+    std::pmr::set<std::string> notary_public_eep_;
+    std::pmr::set<std::string> notary_public_ipv4_;
+    std::pmr::set<std::string> notary_public_ipv6_;
+    std::pmr::set<std::string> notary_public_onion_;
     std::optional<std::uint16_t> notary_public_port_;
     std::optional<std::string> notary_terms_;
     std::optional<QObject*> qt_root_object_;

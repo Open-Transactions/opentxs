@@ -109,8 +109,8 @@ public:
     ~DeterministicStateData() final = default;
 
 private:
-    using MatchedTransaction =
-        std::pair<std::vector<Bip32Index>, const block::bitcoin::Transaction*>;
+    using MatchedTransaction = std::
+        pair<std::pmr::vector<Bip32Index>, const block::bitcoin::Transaction*>;
 
     class Index final : public wallet::Index
     {

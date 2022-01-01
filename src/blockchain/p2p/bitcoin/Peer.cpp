@@ -127,7 +127,7 @@ auto BitcoinP2PPeerLegacy(
 
 namespace opentxs::blockchain::p2p::bitcoin::implementation
 {
-const std::map<Command, Peer::CommandFunction> Peer::command_map_{
+const std::pmr::map<Command, Peer::CommandFunction> Peer::command_map_{
     {Command::addr, &Peer::process_addr},
     {Command::block, &Peer::process_block},
     {Command::blocktxn, &Peer::process_blocktxn},
@@ -179,7 +179,7 @@ Peer::Peer(
     const int id,
     std::unique_ptr<internal::Address> address,
     const bool relay,
-    const std::set<p2p::Service>& localServices,
+    const std::pmr::set<p2p::Service>& localServices,
     const ProtocolVersion protocol) noexcept
     : p2p::implementation::Peer(
           api,
@@ -218,7 +218,7 @@ auto Peer::broadcast_block(zmq::Message&& in) noexcept -> void
     const auto id = api_.Factory().Data(body.at(1));
     auto payload = [&] {
         using Inventory = blockchain::bitcoin::Inventory;
-        auto output = std::vector<Inventory>{};
+        auto output = std::pmr::vector<Inventory>{};
         output.emplace_back(Inventory::Type::MsgBlock, id);
 
         return output;
@@ -240,7 +240,7 @@ auto Peer::broadcast_block(zmq::Message&& in) noexcept -> void
 }
 
 auto Peer::broadcast_inv(
-    std::vector<blockchain::bitcoin::Inventory>&& inv) noexcept -> void
+    std::pmr::vector<blockchain::bitcoin::Inventory>&& inv) noexcept -> void
 {
     auto pMsg = std::unique_ptr<Message>{
         factory::BitcoinP2PInv(api_, chain_, std::move(inv))};
@@ -273,7 +273,7 @@ auto Peer::broadcast_inv_transaction(ReadView txid) noexcept -> void
             return Type::MsgTx;
         }
     }();
-    auto inv = std::vector<Inventory>{};
+    auto inv = std::pmr::vector<Inventory>{};
     inv.emplace_back(type, api_.Factory().Data(txid));
     broadcast_inv(std::move(inv));
 }
@@ -322,7 +322,8 @@ auto Peer::get_local_services(
     const ProtocolVersion version,
     const blockchain::Type network,
     const database::BlockStorage policy,
-    const std::set<p2p::Service>& input) noexcept -> std::set<p2p::Service>
+    const std::pmr::set<p2p::Service>& input) noexcept
+    -> std::pmr::set<p2p::Service>
 {
     auto output{input};
 
@@ -432,7 +433,7 @@ auto Peer::process_addr(
     const auto& message = *pMessage;
     download_peers_.Bump();
     using DB = blockchain::node::internal::PeerDatabase;
-    auto peers = std::vector<DB::Address>{};
+    auto peers = std::pmr::vector<DB::Address>{};
 
     for (const auto& address : message) {
         auto pAddress = address.clone_internal();
@@ -929,7 +930,8 @@ auto Peer::process_getcfheaders(
 
     if (previousHeader->empty()) { return; }
 
-    auto filterHashes = std::vector<node::internal::FilterOracle::Header>{};
+    auto filterHashes =
+        std::pmr::vector<node::internal::FilterOracle::Header>{};
     const auto start = std::size_t{fromGenesis ? 0u : 1u};
     static const auto blank = std::array<char, 32>{};
     const auto previous = fromGenesis ? ReadView{blank.data(), blank.size()}
@@ -1029,7 +1031,7 @@ auto Peer::process_getcfilters(
         return;
     }
 
-    auto data = std::vector<std::unique_ptr<const GCS>>{};
+    auto data = std::pmr::vector<std::unique_ptr<const GCS>>{};
     data.reserve(count);
     const auto& filters = network_.FilterOracle();
     const auto type = message.Type();
@@ -1093,7 +1095,7 @@ auto Peer::process_getdata(
 
     const auto& message = *pMessage;
     using Type = blockchain::bitcoin::Inventory::Type;
-    auto notFound = std::vector<blockchain::bitcoin::Inventory>{};
+    auto notFound = std::pmr::vector<blockchain::bitcoin::Inventory>{};
 
     for (const auto& inv : message) {
         switch (inv.type_) {
@@ -1206,7 +1208,7 @@ auto Peer::process_getheaders(
     auto previous = node::HeaderOracle::Hashes{};
     std::copy(in.begin(), in.end(), std::back_inserter(previous));
     const auto hashes = headers_.BestHashes(previous, in.StopHash(), 2000);
-    auto headers = std::vector<std::unique_ptr<block::bitcoin::Header>>{};
+    auto headers = std::pmr::vector<std::unique_ptr<block::bitcoin::Header>>{};
     std::transform(
         hashes.begin(),
         hashes.end(),
@@ -1341,8 +1343,8 @@ auto Peer::process_inv(
     const auto& message = *pMessage;
     using Inventory = blockchain::bitcoin::Inventory;
     using Type = Inventory::Type;
-    auto txReceived = std::vector<Inventory>{};
-    auto txToDownload = std::vector<Inventory>{};
+    auto txReceived = std::pmr::vector<Inventory>{};
+    auto txToDownload = std::pmr::vector<Inventory>{};
 
     for (const auto& inv : message) {
         const auto& hash = inv.hash_.get();
@@ -1367,7 +1369,7 @@ auto Peer::process_inv(
 
     if (0 < txReceived.size()) {
         const auto hashes = [&] {
-            auto out = std::vector<ReadView>{};
+            auto out = std::pmr::vector<ReadView>{};
             std::transform(
                 txReceived.begin(),
                 txReceived.end(),
@@ -1725,7 +1727,7 @@ auto Peer::reconcile_mempool() noexcept -> void
 {
     const auto local = mempool_.Dump();
     const auto remote = [&] {
-        auto out = std::set<std::string>{};
+        auto out = std::pmr::set<std::string>{};
         std::copy(
             known_transactions_.begin(),
             known_transactions_.end(),
@@ -1734,7 +1736,7 @@ auto Peer::reconcile_mempool() noexcept -> void
         return out;
     }();
     const auto missing = [&] {
-        auto out = std::vector<std::string>{};
+        auto out = std::pmr::vector<std::string>{};
         out.reserve(local.size());
         std::set_difference(
             local.begin(),
@@ -1758,7 +1760,7 @@ auto Peer::reconcile_mempool() noexcept -> void
             return Type::MsgTx;
         }
     }();
-    auto inv = std::vector<Inventory>{};
+    auto inv = std::pmr::vector<Inventory>{};
 
     for (const auto& hash : missing) {
         inv.emplace_back(type, api_.Factory().Data(hash));
@@ -1799,8 +1801,8 @@ auto Peer::request_block(zmq::Message&& in) noexcept -> void
 
     using Inventory = blockchain::bitcoin::Inventory;
     using Type = Inventory::Type;
-    using BlockList = std::vector<Inventory>;
-    auto blocks = std::vector<BlockList>{};
+    using BlockList = std::pmr::vector<Inventory>;
+    auto blocks = std::pmr::vector<BlockList>{};
     blocks.emplace_back();
     static constexpr auto limit = std::size_t{50000};
 
@@ -1840,7 +1842,7 @@ auto Peer::request_blocks() noexcept -> void
     try {
         using Inventory = blockchain::bitcoin::Inventory;
         using Type = Inventory::Type;
-        auto blocks = std::vector<Inventory>{};
+        auto blocks = std::pmr::vector<Inventory>{};
 
         for (const auto& task : data) {
             blocks.emplace_back(Type::MsgBlock, task->position_.second);
@@ -2070,7 +2072,7 @@ auto Peer::request_mempool() noexcept -> void
 }
 
 auto Peer::request_transactions(
-    std::vector<blockchain::bitcoin::Inventory>&& inv) noexcept -> void
+    std::pmr::vector<blockchain::bitcoin::Inventory>&& inv) noexcept -> void
 {
     auto pMessage = std::unique_ptr<Message>{
         factory::BitcoinP2PGetdata(api_, chain_, std::move(inv))};

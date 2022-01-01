@@ -48,8 +48,8 @@ namespace opentxs
 class OPENTXS_EXPORT String
 {
 public:
-    using List = std::list<std::string>;
-    using Map = std::map<std::string, std::string>;
+    using List = std::pmr::list<std::string>;
+    using Map = std::pmr::map<std::string, std::string>;
 
     static auto Factory() -> opentxs::Pimpl<opentxs::String>;
     static auto Factory(const Armored& value)

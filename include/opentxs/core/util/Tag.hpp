@@ -10,6 +10,7 @@
 #include <algorithm>
 #include <map>
 #include <memory>
+#include <memory_resource>
 #include <string>
 #include <vector>
 
@@ -18,8 +19,8 @@ namespace opentxs
 class Tag;
 
 using TagPtr = std::shared_ptr<Tag>;
-using map_strings = std::map<std::string, std::string>;
-using vector_tags = std::vector<TagPtr>;
+using map_strings = std::pmr::map<std::string, std::string>;
+using vector_tags = std::pmr::vector<TagPtr>;
 
 class Tag
 {

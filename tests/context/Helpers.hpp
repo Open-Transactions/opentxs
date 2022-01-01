@@ -9,6 +9,7 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <memory_resource>
 #include <set>
 #include <string>
 
@@ -23,12 +24,12 @@ class Options;
 namespace ottest
 {
 struct OptionsData {
-    std::set<std::string> blockchain_bind_ipv4_;
-    std::set<std::string> blockchain_bind_ipv6_;
-    std::set<opentxs::blockchain::Type> blockchain_disabled_chains_;
+    std::pmr::set<std::string> blockchain_bind_ipv4_;
+    std::pmr::set<std::string> blockchain_bind_ipv6_;
+    std::pmr::set<opentxs::blockchain::Type> blockchain_disabled_chains_;
     int blockchain_storage_level_;
     bool blockchain_sync_server_enabled_;
-    std::set<std::string> blockchain_sync_servers_;
+    std::pmr::set<std::string> blockchain_sync_servers_;
     bool blockchain_wallet_enabled_;
     std::string home_;
     opentxs::Options::ConnectionMode ipv4_connection_mode_;
@@ -40,10 +41,10 @@ struct OptionsData {
     std::string notary_bind_ip_;
     std::uint16_t notary_bind_port_;
     std::string notary_name_;
-    std::set<std::string> notary_public_eep_;
-    std::set<std::string> notary_public_ipv4_;
-    std::set<std::string> notary_public_ipv6_;
-    std::set<std::string> notary_public_onion_;
+    std::pmr::set<std::string> notary_public_eep_;
+    std::pmr::set<std::string> notary_public_ipv4_;
+    std::pmr::set<std::string> notary_public_ipv6_;
+    std::pmr::set<std::string> notary_public_onion_;
     std::uint16_t notary_public_port_;
     std::string notary_terms_;
     std::string storage_primary_plugin_;

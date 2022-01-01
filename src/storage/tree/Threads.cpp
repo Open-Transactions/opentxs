@@ -94,9 +94,9 @@ auto Threads::AddIndex(const Data& txid, const Identifier& thread) noexcept
 }
 
 auto Threads::BlockchainThreadMap(const Data& txid) const noexcept
-    -> std::vector<OTIdentifier>
+    -> std::pmr::vector<OTIdentifier>
 {
-    auto output = std::vector<OTIdentifier>{};
+    auto output = std::pmr::vector<OTIdentifier>{};
     Lock lock(blockchain_.lock_);
 
     try {
@@ -108,9 +108,10 @@ auto Threads::BlockchainThreadMap(const Data& txid) const noexcept
     return output;
 }
 
-auto Threads::BlockchainTransactionList() const noexcept -> std::vector<OTData>
+auto Threads::BlockchainTransactionList() const noexcept
+    -> std::pmr::vector<OTData>
 {
-    auto output = std::vector<OTData>{};
+    auto output = std::pmr::vector<OTData>{};
     Lock lock(blockchain_.lock_);
     std::transform(
         std::begin(blockchain_.map_),
@@ -124,7 +125,7 @@ auto Threads::BlockchainTransactionList() const noexcept -> std::vector<OTData>
 auto Threads::create(
     const Lock& lock,
     const std::string& id,
-    const std::set<std::string>& participants) -> std::string
+    const std::pmr::set<std::string>& participants) -> std::string
 {
     OT_ASSERT(verify_write_lock(lock));
 
@@ -155,7 +156,7 @@ auto Threads::create(
 
 auto Threads::Create(
     const std::string& id,
-    const std::set<std::string>& participants) -> std::string
+    const std::pmr::set<std::string>& participants) -> std::string
 {
     Lock lock(write_lock_);
 

@@ -40,7 +40,7 @@ public:
     // account number, weight
     using Subcontract = std::pair<std::string, std::uint64_t>;
     // unit definition id, subcontract
-    using Subcontracts = std::map<std::string, Subcontract>;
+    using Subcontracts = std::pmr::map<std::string, Subcontract>;
 
     static auto CalculateBasketID(
         const api::Session& api,

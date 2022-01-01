@@ -103,7 +103,7 @@ private:
     const Flag& primary_bucket_;
     const storage::Config& config_;
     std::unique_ptr<storage::Plugin> primary_plugin_;
-    std::vector<std::unique_ptr<storage::Plugin>> backup_plugins_;
+    std::pmr::vector<std::unique_ptr<storage::Plugin>> backup_plugins_;
     OTSymmetricKey null_;
 
     auto Cleanup() -> void;

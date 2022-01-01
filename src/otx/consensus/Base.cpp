@@ -88,9 +88,9 @@ Base::Base(
     , request_number_(serialized.requestnumber())
     , acknowledged_request_numbers_()
     , local_nymbox_hash_(
-          api_.Factory().Identifier(serialized.localnymboxhash()))
+          api_.Factory().IdentifierFromBase58(serialized.localnymboxhash()))
     , remote_nymbox_hash_(
-          api_.Factory().Identifier(serialized.remotenymboxhash()))
+          api_.Factory().IdentifierFromBase58(serialized.remotenymboxhash()))
     , target_version_(targetVersion)
 {
     for (const auto& it : serialized.acknowledgedrequestnumber()) {
@@ -106,7 +106,7 @@ Base::Base(
     }
 }
 
-auto Base::AcknowledgedNumbers() const -> std::set<RequestNumber>
+auto Base::AcknowledgedNumbers() const -> std::pmr::set<RequestNumber>
 {
     auto lock = Lock{lock_};
 
@@ -154,7 +154,7 @@ auto Base::calculate_id(
     preimage->Assign(client->ID());
     preimage.get() += server->ID();
 
-    return api.Factory().Identifier(preimage->Bytes());
+    return api.Factory().IdentifierFromBytes(preimage->Bytes());
 }
 
 auto Base::consume_available(const Lock& lock, const TransactionNumber& number)
@@ -226,12 +226,12 @@ auto Base::contract(const Lock& lock) const -> proto::Context
 // are not on the provided set
 auto Base::finish_acknowledgements(
     const Lock& lock,
-    const std::set<RequestNumber>& req) -> void
+    const std::pmr::set<RequestNumber>& req) -> void
 {
     OT_ASSERT(verify_write_lock(lock));
 
     clear_signatures(lock);
-    auto toErase = std::set<RequestNumber>{};
+    auto toErase = std::pmr::set<RequestNumber>{};
 
     for (const auto& number : acknowledged_request_numbers_) {
         if (0 == req.count(number)) { toErase.insert(number); }
@@ -411,7 +411,7 @@ auto Base::issue_number(const Lock& lock, const TransactionNumber& number)
     return output;
 }
 
-auto Base::IssuedNumbers() const -> std::set<TransactionNumber>
+auto Base::IssuedNumbers() const -> std::pmr::set<TransactionNumber>
 {
     auto lock = Lock{lock_};
 
@@ -510,7 +510,7 @@ auto Base::RemoteNymboxHash() const -> OTIdentifier
 
 auto Base::remove_acknowledged_number(
     const Lock& lock,
-    const std::set<RequestNumber>& req) -> bool
+    const std::pmr::set<RequestNumber>& req) -> bool
 {
     OT_ASSERT(verify_write_lock(lock));
 
@@ -524,7 +524,8 @@ auto Base::remove_acknowledged_number(
     return (0 < removed);
 }
 
-auto Base::RemoveAcknowledgedNumber(const std::set<RequestNumber>& req) -> bool
+auto Base::RemoveAcknowledgedNumber(const std::pmr::set<RequestNumber>& req)
+    -> bool
 {
     auto lock = Lock{lock_};
 

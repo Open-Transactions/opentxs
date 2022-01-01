@@ -207,9 +207,9 @@ auto BlockchainImp::enable(
     return start(lock, type, seednode);
 }
 
-auto BlockchainImp::EnabledChains() const noexcept -> std::set<Chain>
+auto BlockchainImp::EnabledChains() const noexcept -> std::pmr::set<Chain>
 {
-    auto out = std::set<Chain>{};
+    auto out = std::pmr::set<Chain>{};
     init_.get();
     const auto data = [&] {
         auto lock = Lock{lock_};
@@ -338,12 +338,12 @@ auto BlockchainImp::Init(
         return {};
     }();
     init_promise_.set_value();
-    static const auto defaultServers = std::vector<std::string>{
+    static const auto defaultServers = std::pmr::vector<std::string>{
         "tcp://54.39.129.45:8814",
         "tcp://54.38.193.222:8814",
     };
     const auto existing = [&] {
-        auto out = std::set<std::string>{};
+        auto out = std::pmr::set<std::string>{};
         auto v = GetSyncServers();
         std::move(v.begin(), v.end(), std::inserter(out, out.end()));
 

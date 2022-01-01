@@ -17,7 +17,7 @@ namespace opentxs
 {
 class BasketItem;
 
-using dequeOfBasketItems = std::deque<BasketItem*>;
+using dequeOfBasketItems = std::pmr::deque<BasketItem*>;
 
 class OPENTXS_EXPORT BasketItem
 {

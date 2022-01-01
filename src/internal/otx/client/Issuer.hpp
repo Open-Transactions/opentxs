@@ -59,30 +59,31 @@ public:
     virtual auto AccountList(
         const core::UnitType type,
         const identifier::UnitDefinition& unitID) const
-        -> std::set<OTIdentifier> = 0;
+        -> std::pmr::set<OTIdentifier> = 0;
     virtual auto BailmentInitiated(
         const identifier::UnitDefinition& unitID) const -> bool = 0;
     virtual auto BailmentInstructions(
         const api::Session& client,
         const identifier::UnitDefinition& unitID,
-        const bool onlyUnused = true) const -> std::vector<BailmentDetails> = 0;
+        const bool onlyUnused = true) const
+        -> std::pmr::vector<BailmentDetails> = 0;
     virtual auto ConnectionInfo(
         const api::Session& client,
         const contract::peer::ConnectionInfoType type) const
-        -> std::vector<ConnectionDetails> = 0;
+        -> std::pmr::vector<ConnectionDetails> = 0;
     virtual auto ConnectionInfoInitiated(
         const contract::peer::ConnectionInfoType type) const -> bool = 0;
     virtual auto GetRequests(
         const contract::peer::PeerRequestType type,
         const RequestStatus state = RequestStatus::All) const
-        -> std::set<std::tuple<OTIdentifier, OTIdentifier, bool>> = 0;
+        -> std::pmr::set<std::tuple<OTIdentifier, OTIdentifier, bool>> = 0;
     virtual auto IssuerID() const -> const identifier::Nym& = 0;
     virtual auto LocalNymID() const -> const identifier::Nym& = 0;
     virtual auto Paired() const -> bool = 0;
     virtual auto PairingCode() const -> const std::string& = 0;
     virtual auto PrimaryServer() const -> OTServerID = 0;
     virtual auto RequestTypes() const
-        -> std::set<contract::peer::PeerRequestType> = 0;
+        -> std::pmr::set<contract::peer::PeerRequestType> = 0;
     OPENTXS_NO_EXPORT virtual auto Serialize(proto::Issuer&) const -> bool = 0;
     virtual auto StoreSecretComplete() const -> bool = 0;
     virtual auto StoreSecretInitiated() const -> bool = 0;

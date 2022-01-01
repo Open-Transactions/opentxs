@@ -68,9 +68,9 @@ private:
     static const VersionNumber MergeIndexVersion{1};
     static const VersionNumber NymIndexVersion{1};
 
-    std::map<std::string, std::set<std::string>> merge_;
-    std::map<std::string, std::string> merged_;
-    mutable std::map<std::string, std::string> nym_contact_index_;
+    std::pmr::map<std::string, std::pmr::set<std::string>> merge_;
+    std::pmr::map<std::string, std::string> merged_;
+    mutable std::pmr::map<std::string, std::string> nym_contact_index_;
 
     void extract_nyms(const Lock& lock, const proto::Contact& data) const;
     auto nomalize_id(const std::string& input) const -> const std::string&;

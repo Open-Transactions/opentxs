@@ -27,13 +27,13 @@ struct BlockIndex::Imp {
         return 0 < set_.count(block.str());
     }
 
-    auto Add(const std::vector<block::Position>& blocks) noexcept -> void
+    auto Add(const std::pmr::vector<block::Position>& blocks) noexcept -> void
     {
         auto lock = Lock{lock_};
 
         for (const auto& [height, hash] : blocks) { set_.emplace(hash->str()); }
     }
-    auto Forget(const std::vector<block::pHash>& blocks) noexcept -> void
+    auto Forget(const std::pmr::vector<block::pHash>& blocks) noexcept -> void
     {
         auto lock = Lock{lock_};
 
@@ -50,7 +50,7 @@ struct BlockIndex::Imp {
 
 private:
     mutable std::mutex lock_;
-    std::unordered_set<std::string> set_;  // TODO benchmark robin hood set
+    std::pmr::unordered_set<std::string> set_;  // TODO benchmark robin hood set
 
     Imp(const Imp&) = delete;
     Imp(Imp&&) = delete;
@@ -63,13 +63,13 @@ BlockIndex::BlockIndex() noexcept
 {
 }
 
-auto BlockIndex::Add(const std::vector<block::Position>& blocks) noexcept
+auto BlockIndex::Add(const std::pmr::vector<block::Position>& blocks) noexcept
     -> void
 {
     imp_->Add(blocks);
 }
 
-auto BlockIndex::Forget(const std::vector<block::pHash>& blocks) noexcept
+auto BlockIndex::Forget(const std::pmr::vector<block::pHash>& blocks) noexcept
     -> void
 {
     imp_->Forget(blocks);

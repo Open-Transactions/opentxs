@@ -277,7 +277,7 @@ void Server::CreateMainFile(bool& mainFileExists)
         String::Factory(std::to_string(bindPort)),
         notUsed);
 
-    auto endpoints = std::list<contract::Server::Endpoint>{};
+    auto endpoints = std::pmr::list<contract::Server::Endpoint>{};
     const auto inproc = args.NotaryInproc();
 
     if (inproc) {

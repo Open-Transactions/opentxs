@@ -98,7 +98,7 @@ auto FilterOracle::BlockIndexer::batch_size(const std::size_t in) const noexcept
 }
 
 auto FilterOracle::BlockIndexer::calculate_cfheaders(
-    std::vector<BlockIndexerData>& cache) const noexcept -> bool
+    std::pmr::vector<BlockIndexerData>& cache) const noexcept -> bool
 {
     auto failures{0};
 
@@ -304,9 +304,9 @@ auto FilterOracle::BlockIndexer::queue_processing(
 {
     if (0u == data.size()) { return; }
 
-    auto filters = std::vector<internal::FilterDatabase::Filter>{};
-    auto headers = std::vector<internal::FilterDatabase::Header>{};
-    auto cache = std::vector<BlockIndexerData>{};
+    auto filters = std::pmr::vector<internal::FilterDatabase::Filter>{};
+    auto headers = std::pmr::vector<internal::FilterDatabase::Header>{};
+    auto cache = std::pmr::vector<BlockIndexerData>{};
     const auto& tip = data.back();
 
     {

@@ -153,7 +153,8 @@ public:
     ~Context() final;
 
 private:
-    using ConfigMap = std::map<std::string, std::unique_ptr<api::Settings>>;
+    using ConfigMap =
+        std::pmr::map<std::string, std::unique_ptr<api::Settings>>;
 
     const Options args_;
     const std::string home_;
@@ -175,8 +176,8 @@ private:
     std::unique_ptr<OTCaller> default_external_password_callback_;
     OTCaller* external_password_callback_;
     mutable boost::interprocess::file_lock file_lock_;
-    mutable std::vector<std::unique_ptr<api::session::Notary>> server_;
-    mutable std::vector<std::unique_ptr<api::session::Client>> client_;
+    mutable std::pmr::vector<std::unique_ptr<api::session::Notary>> server_;
+    mutable std::pmr::vector<std::unique_ptr<api::session::Client>> client_;
     std::unique_ptr<rpc::internal::RPC> rpc_;
 
     static auto client_instance(const int count) -> int;

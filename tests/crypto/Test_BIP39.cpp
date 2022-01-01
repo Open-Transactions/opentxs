@@ -52,50 +52,52 @@ class Test_BIP39 : public ::testing::Test
 public:
     static constexpr auto type_{ot::crypto::SeedStyle::BIP39};
     static constexpr auto lang_{ot::crypto::Language::en};
-    static std::set<std::string> generated_seeds_;
+    static std::pmr::set<std::string> generated_seeds_;
 
     const ot::api::session::Client& api_;
     const ot::OTPasswordPrompt reason_;
-    using Languages = std::map<ot::crypto::Language, std::string>;
-    using Strengths = std::map<ot::crypto::SeedStrength, std::string>;
-    using Types = std::map<ot::crypto::SeedStyle, std::string>;
+    using Languages = std::pmr::map<ot::crypto::Language, std::string>;
+    using Strengths = std::pmr::map<ot::crypto::SeedStrength, std::string>;
+    using Types = std::pmr::map<ot::crypto::SeedStyle, std::string>;
 
     static auto expected_seed_languages() noexcept
-        -> const std::map<ot::crypto::SeedStyle, Languages>&
+        -> const std::pmr::map<ot::crypto::SeedStyle, Languages>&
     {
         using Language = ot::crypto::Language;
-        static const auto data = std::map<ot::crypto::SeedStyle, Languages>{
-            {ot::crypto::SeedStyle::BIP39,
-             {
-                 {Language::en, "English"},
-             }},
-            {ot::crypto::SeedStyle::PKT,
-             {
-                 {Language::en, "English"},
-             }},
-        };
+        static const auto data =
+            std::pmr::map<ot::crypto::SeedStyle, Languages>{
+                {ot::crypto::SeedStyle::BIP39,
+                 {
+                     {Language::en, "English"},
+                 }},
+                {ot::crypto::SeedStyle::PKT,
+                 {
+                     {Language::en, "English"},
+                 }},
+            };
 
         return data;
     }
     static auto expected_seed_strength() noexcept
-        -> const std::map<ot::crypto::SeedStyle, Strengths>&
+        -> const std::pmr::map<ot::crypto::SeedStyle, Strengths>&
     {
         using Style = ot::crypto::SeedStyle;
         using Strength = ot::crypto::SeedStrength;
-        static const auto data = std::map<ot::crypto::SeedStyle, Strengths>{
-            {Style::BIP39,
-             {
-                 {Strength::Twelve, "12"},
-                 {Strength::Fifteen, "15"},
-                 {Strength::Eighteen, "18"},
-                 {Strength::TwentyOne, "21"},
-                 {Strength::TwentyFour, "24"},
-             }},
-            {Style::PKT,
-             {
-                 {Strength::Fifteen, "15"},
-             }},
-        };
+        static const auto data =
+            std::pmr::map<ot::crypto::SeedStyle, Strengths>{
+                {Style::BIP39,
+                 {
+                     {Strength::Twelve, "12"},
+                     {Strength::Fifteen, "15"},
+                     {Strength::Eighteen, "18"},
+                     {Strength::TwentyOne, "21"},
+                     {Strength::TwentyFour, "24"},
+                 }},
+                {Style::PKT,
+                 {
+                     {Strength::Fifteen, "15"},
+                 }},
+            };
 
         return data;
     }
@@ -160,7 +162,7 @@ public:
     }
 };
 
-std::set<std::string> Test_BIP39::generated_seeds_{};
+std::pmr::set<std::string> Test_BIP39::generated_seeds_{};
 
 TEST_F(Test_BIP39, seed_types)
 {
@@ -214,7 +216,7 @@ TEST_F(Test_BIP39, seed_strength)
 
 TEST_F(Test_BIP39, word_count)
 {
-    static const auto vector = std::map<std::string, std::size_t>{
+    static const auto vector = std::pmr::map<std::string, std::size_t>{
         {"", 0},
         {" ", 0},
         {"     ", 0},
@@ -293,7 +295,7 @@ TEST_F(Test_BIP39, twentyfour_words)
 TEST_F(Test_BIP39, match_a)
 {
     const auto test = std::string{"a"};
-    const auto expected = std::vector<std::string>{
+    const auto expected = std::pmr::vector<std::string>{
         "abandon", "ability",  "able",     "about",    "above",    "absent",
         "absorb",  "abstract", "absurd",   "abuse",    "access",   "accident",
         "account", "accuse",   "achieve",  "acid",     "acoustic", "acquire",
@@ -327,7 +329,7 @@ TEST_F(Test_BIP39, match_a)
 TEST_F(Test_BIP39, match_ar)
 {
     const auto test = std::string{"ar"};
-    const auto expected = std::vector<std::string>{
+    const auto expected = std::pmr::vector<std::string>{
         "arch",
         "arctic",
         "area",
@@ -356,7 +358,7 @@ TEST_F(Test_BIP39, match_arr)
 {
     const auto test = std::string{"arr"};
     const auto expected =
-        std::vector<std::string>{"arrange", "arrest", "arrive", "arrow"};
+        std::pmr::vector<std::string>{"arrange", "arrest", "arrive", "arrow"};
     const auto suggestions =
         api_.Crypto().Seed().ValidateWord(type_, lang_, test);
 
@@ -366,7 +368,7 @@ TEST_F(Test_BIP39, match_arr)
 TEST_F(Test_BIP39, match_arri)
 {
     const auto test = std::string{"arri"};
-    const auto expected = std::vector<std::string>{"arrive"};
+    const auto expected = std::pmr::vector<std::string>{"arrive"};
     const auto suggestions =
         api_.Crypto().Seed().ValidateWord(type_, lang_, test);
 
@@ -376,7 +378,7 @@ TEST_F(Test_BIP39, match_arri)
 TEST_F(Test_BIP39, match_arrive)
 {
     const auto test = std::string{"arrive"};
-    const auto expected = std::vector<std::string>{"arrive"};
+    const auto expected = std::pmr::vector<std::string>{"arrive"};
     const auto suggestions =
         api_.Crypto().Seed().ValidateWord(type_, lang_, test);
 
@@ -386,7 +388,7 @@ TEST_F(Test_BIP39, match_arrive)
 TEST_F(Test_BIP39, match_arrived)
 {
     const auto test = std::string{"arrived"};
-    const auto expected = std::vector<std::string>{};
+    const auto expected = std::pmr::vector<std::string>{};
     const auto suggestions =
         api_.Crypto().Seed().ValidateWord(type_, lang_, test);
 
@@ -396,7 +398,7 @@ TEST_F(Test_BIP39, match_arrived)
 TEST_F(Test_BIP39, match_axe)
 {
     const auto test = std::string{"axe"};
-    const auto expected = std::vector<std::string>{};
+    const auto expected = std::pmr::vector<std::string>{};
     const auto suggestions =
         api_.Crypto().Seed().ValidateWord(type_, lang_, test);
 
@@ -406,7 +408,7 @@ TEST_F(Test_BIP39, match_axe)
 TEST_F(Test_BIP39, match_empty_string)
 {
     const auto test = std::string{""};
-    const auto expected = std::vector<std::string>{};
+    const auto expected = std::pmr::vector<std::string>{};
     const auto suggestions =
         api_.Crypto().Seed().ValidateWord(type_, lang_, test);
 
@@ -433,7 +435,7 @@ TEST_F(Test_BIP39, pkt_seed_import)
     static constexpr auto password{"Password123#"};
     static constexpr auto expected_seed_bytes_{
         "498d7c2713178cb9c78ac00061b0969429792f"};
-    static const auto expected_secret_keys_ = std::vector<std::string>{
+    static const auto expected_secret_keys_ = std::pmr::vector<std::string>{
         "885e744b15e847044bbb33c80c8aeb26abb7a2c2a5120b0a64dec8c12062f3a6",
         "0e9bfa981927a86d2a1329984c5a45a3fa8a0a684c351e1970380d6a2d5fecc1",
         "63e72656faf5f756d82430f9f45e273abc24d4303d11ba5cca78ac49f8f1a73d",

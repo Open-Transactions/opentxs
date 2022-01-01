@@ -36,7 +36,7 @@ namespace crypto
 class OPENTXS_EXPORT Envelope
 {
 public:
-    using Recipients = std::set<Nym_p>;
+    using Recipients = std::pmr::set<Nym_p>;
     using SerializedType = proto::Envelope;
 
     virtual auto Armored(opentxs::Armored& ciphertext) const noexcept

@@ -162,9 +162,10 @@ public:
         return local_chain_height_.load();
     }
     auto GetPeerCount() const noexcept -> std::size_t final;
-    auto GetTransactions() const noexcept -> std::vector<block::pTxid> final;
+    auto GetTransactions() const noexcept
+        -> std::pmr::vector<block::pTxid> final;
     auto GetTransactions(const identifier::Nym& account) const noexcept
-        -> std::vector<block::pTxid> final;
+        -> std::pmr::vector<block::pTxid> final;
     auto GetType() const noexcept -> Type final { return chain_; }
     auto GetVerifiedPeerCount() const noexcept -> std::size_t final;
     auto HeaderOracle() const noexcept -> const node::HeaderOracle& final
@@ -193,7 +194,7 @@ public:
     auto Reorg() const noexcept
         -> const network::zeromq::socket::Publish& final;
     auto RequestBlock(const block::Hash& block) const noexcept -> bool final;
-    auto RequestBlocks(const std::vector<ReadView>& hashes) const noexcept
+    auto RequestBlocks(const std::pmr::vector<ReadView>& hashes) const noexcept
         -> bool final;
     auto SendToAddress(
         const opentxs::identifier::Nym& sender,
@@ -299,7 +300,7 @@ private:
     private:
         std::mutex lock_{};
         int counter_{-1};
-        std::map<int, std::promise<void>> map_{};
+        std::pmr::map<int, std::promise<void>> map_{};
     };
     struct SendPromises {
         auto finish(int index) noexcept -> std::promise<SendOutcome>
@@ -326,7 +327,7 @@ private:
     private:
         std::mutex lock_{};
         int counter_{-1};
-        std::map<int, std::promise<SendOutcome>> map_{};
+        std::pmr::map<int, std::promise<SendOutcome>> map_{};
     };
 
     const Time start_;

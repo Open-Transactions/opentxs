@@ -27,8 +27,8 @@ namespace context
 {
 TransactionStatement::TransactionStatement(
     const std::string& notary,
-    const std::set<TransactionNumber>& issued,
-    const std::set<TransactionNumber>& available)
+    const std::pmr::set<TransactionNumber>& issued,
+    const std::pmr::set<TransactionNumber>& available)
     : version_("1.0")
     , nym_id_("")
     , notary_(notary)
@@ -166,7 +166,8 @@ TransactionStatement::operator OTString() const
     return String::Factory(result.c_str());
 }
 
-auto TransactionStatement::Issued() const -> const std::set<TransactionNumber>&
+auto TransactionStatement::Issued() const
+    -> const std::pmr::set<TransactionNumber>&
 {
     return issued_;
 }

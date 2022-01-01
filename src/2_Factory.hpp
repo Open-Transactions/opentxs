@@ -603,7 +603,7 @@ public:
     static auto ServerContract(
         const api::Session& api,
         const Nym_p& nym,
-        const std::list<Endpoint>& endpoints,
+        const std::pmr::list<Endpoint>& endpoints,
         const std::string& terms,
         const std::string& name,
         const VersionNumber version,

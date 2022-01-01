@@ -30,10 +30,10 @@ class Work;
 namespace opentxs::blockchain::node::wallet
 {
 using Cookie = unsigned long long int;
-using BlockMap = std::map<Cookie, Work*>;
-using Indices = std::vector<Bip32Index>;
+using BlockMap = std::pmr::map<Cookie, Work*>;
+using Indices = std::pmr::vector<Bip32Index>;
 using Result = std::pair<ReadView, Indices>;
-using Results = std::vector<Result>;
-using ProgressBatch = std::vector<
+using Results = std::pmr::vector<Result>;
+using ProgressBatch = std::pmr::vector<
     std::pair<std::reference_wrapper<const block::Position>, std::size_t>>;
 }  // namespace opentxs::blockchain::node::wallet

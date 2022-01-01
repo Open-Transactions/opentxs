@@ -11,5 +11,5 @@
 
 namespace opentxs
 {
-using VersionConversionMap = std::map<VersionNumber, VersionNumber>;
+using VersionConversionMap = std::pmr::map<VersionNumber, VersionNumber>;
 }  // namespace opentxs

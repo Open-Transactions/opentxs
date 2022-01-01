@@ -43,7 +43,7 @@ public:
         -> std::string;
     auto Import(const std::string& formatted) const noexcept(false) -> Amount;
     auto Prefix() const noexcept -> std::string;
-    auto Ratios() const noexcept -> const std::vector<Ratio>&;
+    auto Ratios() const noexcept -> const std::pmr::vector<Ratio>&;
     auto Suffix() const noexcept -> std::string;
 
     virtual auto swap(Scale& rhs) noexcept -> void;
@@ -53,7 +53,7 @@ public:
     Scale(
         const std::string& prefix,
         const std::string& suffix,
-        const std::vector<Ratio>& ratios,
+        const std::pmr::vector<Ratio>& ratios,
         const OptionalInt defaultMinDecimals = std::nullopt,
         const OptionalInt defaultMaxDecimals = std::nullopt) noexcept;
     Scale(const Scale&) noexcept;

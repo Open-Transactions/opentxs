@@ -222,7 +222,7 @@ auto BlockchainAccountStatus::populate(
             const auto path = subaccount.Path();
             populate(
                 subaccount,
-                api.Factory().Identifier(path.root()),
+                api.Factory().IdentifierFromBase58(path.root()),
                 api.Crypto().Seed().SeedDescription(path.root()),
                 subaccount.Name(),
                 subchain,
@@ -267,7 +267,7 @@ auto BlockchainAccountStatus::populate(
 
     auto& subaccounts = [&]() -> auto&
     {
-        using Subaccounts = std::vector<BlockchainSubaccountSourceRowData>;
+        using Subaccounts = std::pmr::vector<BlockchainSubaccountSourceRowData>;
         auto* ptr = [&] {
             auto& custom = data.second;
 
@@ -287,7 +287,7 @@ auto BlockchainAccountStatus::populate(
         return *reinterpret_cast<Subaccounts*>(ptr);
     }
     ();
-    using Subchains = std::vector<BlockchainSubaccountRowData>;
+    using Subchains = std::pmr::vector<BlockchainSubaccountRowData>;
     auto& subaccount = subaccounts.emplace_back(
         node.ID(), subaccountName, CustomData{}, CustomData{});
     auto& subchainData = [&]() -> auto&
@@ -305,7 +305,8 @@ auto BlockchainAccountStatus::populate(
         return *reinterpret_cast<Subchains*>(ptr);
     }
     ();
-    const auto subchainList = [&]() -> std::set<blockchain::crypto::Subchain> {
+    const auto subchainList =
+        [&]() -> std::pmr::set<blockchain::crypto::Subchain> {
         if (blockchain::crypto::Subchain::Error == subchain) {
 
             return node.AllowedSubchains();

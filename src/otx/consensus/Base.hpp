@@ -55,11 +55,11 @@ class Base : virtual public internal::Base,
              public opentxs::contract::implementation::Signable
 {
 public:
-    auto AcknowledgedNumbers() const -> std::set<RequestNumber> final;
+    auto AcknowledgedNumbers() const -> std::pmr::set<RequestNumber> final;
     auto AvailableNumbers() const -> std::size_t final;
     auto HaveLocalNymboxHash() const -> bool final;
     auto HaveRemoteNymboxHash() const -> bool final;
-    auto IssuedNumbers() const -> std::set<TransactionNumber> final;
+    auto IssuedNumbers() const -> std::pmr::set<TransactionNumber> final;
     auto Name() const noexcept -> std::string final;
     auto NymboxHashMatch() const -> bool final;
     auto LegacyDataFolder() const -> std::string final;
@@ -99,7 +99,7 @@ public:
     auto RecoverAvailableNumber(const TransactionNumber& number) -> bool final;
     auto Refresh(proto::Context& out, const PasswordPrompt& reason)
         -> bool final;
-    auto RemoveAcknowledgedNumber(const std::set<RequestNumber>& req)
+    auto RemoveAcknowledgedNumber(const std::pmr::set<RequestNumber>& req)
         -> bool final;
     auto Reset() -> void final;
     auto SetLocalNymboxHash(const Identifier& hash) -> void final;
@@ -111,10 +111,10 @@ public:
 protected:
     const OTServerID server_id_;
     Nym_p remote_nym_;
-    std::set<TransactionNumber> available_transaction_numbers_;
-    std::set<TransactionNumber> issued_transaction_numbers_;
+    std::pmr::set<TransactionNumber> available_transaction_numbers_;
+    std::pmr::set<TransactionNumber> issued_transaction_numbers_;
     std::atomic<RequestNumber> request_number_;
-    std::set<RequestNumber> acknowledged_request_numbers_;
+    std::pmr::set<RequestNumber> acknowledged_request_numbers_;
     OTIdentifier local_nymbox_hash_;
     OTIdentifier remote_nymbox_hash_;
 
@@ -134,7 +134,7 @@ protected:
         -> bool;
     auto finish_acknowledgements(
         const Lock& lock,
-        const std::set<RequestNumber>& req) -> void;
+        const std::pmr::set<RequestNumber>& req) -> void;
     auto issue_number(const Lock& lock, const TransactionNumber& number)
         -> bool;
     auto recover_available_number(
@@ -142,7 +142,7 @@ protected:
         const TransactionNumber& number) -> bool;
     auto remove_acknowledged_number(
         const Lock& lock,
-        const std::set<RequestNumber>& req) -> bool;
+        const std::pmr::set<RequestNumber>& req) -> bool;
     auto save(const Lock& lock, const PasswordPrompt& reason) -> bool;
     auto set_local_nymbox_hash(const Lock& lock, const Identifier& hash)
         -> void;

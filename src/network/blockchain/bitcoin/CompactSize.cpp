@@ -164,7 +164,7 @@ auto CompactSize::CalculateSize(const std::byte first) noexcept -> std::uint64_t
 
 template <typename SizeType>
 void CompactSize::Imp::convert_from_raw(
-    const std::vector<std::byte>& bytes) noexcept
+    const std::pmr::vector<std::byte>& bytes) noexcept
 {
     SizeType value{0};
     std::memcpy(&value, bytes.data(), sizeof(value));
@@ -199,7 +199,8 @@ auto CompactSize::Imp::convert_to_raw(AllocateOutput output) const noexcept
     return true;
 }
 
-auto CompactSize::Decode(const std::vector<std::byte>& bytes) noexcept -> bool
+auto CompactSize::Decode(const std::pmr::vector<std::byte>& bytes) noexcept
+    -> bool
 {
     bool output{true};
 
@@ -220,7 +221,7 @@ auto CompactSize::Decode(const std::vector<std::byte>& bytes) noexcept -> bool
     return output;
 }
 
-auto CompactSize::Encode() const noexcept -> std::vector<std::byte>
+auto CompactSize::Encode() const noexcept -> std::pmr::vector<std::byte>
 {
     auto output = Space{};
     Encode(writer(output));

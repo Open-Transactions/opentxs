@@ -20,9 +20,9 @@ namespace ottest
 struct VectorV3 {
     std::string words_{};
     std::string payment_code_{};
-    std::vector<std::string> locators_{};
+    std::pmr::vector<std::string> locators_{};
     ot::blockchain::Type receive_chain_{};
-    std::vector<std::string> receive_keys_{};
+    std::pmr::vector<std::string> receive_keys_{};
     std::string change_key_secret_{};
     std::string change_key_public_{};
     std::string blinded_payment_code_{};

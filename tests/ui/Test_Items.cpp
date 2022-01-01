@@ -24,7 +24,7 @@ namespace ottest
 using Key = std::string;
 using ValueType = std::string;
 using ID = int;
-using Active = std::vector<ID>;
+using Active = std::pmr::vector<ID>;
 
 struct Value final : public opentxs::ui::internal::Row {
     ValueType data_;
@@ -105,7 +105,7 @@ struct Data {
     Value value_;
 };
 
-using Vector = std::vector<Data>;
+using Vector = std::pmr::vector<Data>;
 
 Type items_{0, false};
 const Vector vector_{

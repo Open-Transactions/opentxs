@@ -78,8 +78,8 @@ private:  // Private prevents erroneous use by other classes.
     using ot_super = OTCronItem;
 
 public:
-    using mapOfAccounts = std::map<std::string, SharedAccount>;
-    using mapOfStashes = std::map<std::string, OTStash*>;
+    using mapOfAccounts = std::pmr::map<std::string, SharedAccount>;
+    using mapOfStashes = std::pmr::map<std::string, OTStash*>;
 
     auto GetOriginType() const -> originType override
     {
@@ -154,8 +154,9 @@ public:
     void HarvestClosingNumbers(
         const identity::Nym& pSignerNym,
         const PasswordPrompt& reason,
-        std::set<OTParty*>* pFailedParties = nullptr);  // Used on server-side.
-                                                        // Assumes the
+        std::pmr::set<OTParty*>* pFailedParties = nullptr);  // Used on
+                                                             // server-side.
+                                                             // Assumes the
     // related Nyms are already loaded and
     // known to *this. Purpose of
     // pSignerNymm is to pass in the

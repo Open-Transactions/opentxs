@@ -127,21 +127,21 @@ public:
     {
         return database_.RecentHashes();
     }
-    auto Siblings() const noexcept -> std::set<block::pHash> final;
+    auto Siblings() const noexcept -> std::pmr::set<block::pHash> final;
 
     auto AddCheckpoint(
         const block::Height position,
         const block::Hash& requiredHash) noexcept -> bool final;
     auto AddHeader(std::unique_ptr<block::Header> header) noexcept
         -> bool final;
-    auto AddHeaders(std::vector<std::unique_ptr<block::Header>>&) noexcept
+    auto AddHeaders(std::pmr::vector<std::unique_ptr<block::Header>>&) noexcept
         -> bool final;
     auto DeleteCheckpoint() noexcept -> bool final;
     auto Init() noexcept -> void final;
     auto Internal() noexcept -> internal::HeaderOracle& final { return *this; }
     auto ProcessSyncData(
         block::Hash& prior,
-        std::vector<block::pHash>& hashes,
+        std::pmr::vector<block::pHash>& hashes,
         const network::p2p::Data& data) noexcept -> std::size_t final;
 
     HeaderOracle(
@@ -154,10 +154,10 @@ public:
 private:
     struct Candidate {
         bool blacklisted_{false};
-        std::deque<block::Position> chain_{};
+        std::pmr::deque<block::Position> chain_{};
     };
 
-    using Candidates = std::vector<Candidate>;
+    using Candidates = std::pmr::vector<Candidate>;
 
     const api::Session& api_;
     const internal::HeaderDatabase& database_;

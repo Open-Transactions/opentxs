@@ -131,8 +131,8 @@ public:
 private:
     const api::Session& api_;
     mutable std::mutex lock_;
-    mutable std::vector<opentxs::network::asio::Endpoint> listeners_;
-    mutable std::map<int, opentxs::network::asio::Socket> sockets_;
+    mutable std::pmr::vector<opentxs::network::asio::Endpoint> listeners_;
+    mutable std::pmr::map<int, opentxs::network::asio::Socket> sockets_;
 
     auto accept(
         p2p::Network type,

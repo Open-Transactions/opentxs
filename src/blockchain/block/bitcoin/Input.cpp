@@ -15,6 +15,7 @@
 #include <cstring>
 #include <iosfwd>
 #include <iterator>
+#include <memory_resource>
 #include <optional>
 #include <set>
 #include <sstream>
@@ -88,7 +89,7 @@ auto BitcoinTransactionInput(
 
     // TODO if this is input spends a segwit script then make a dummy witness
     auto elements = bb::ScriptElements{};
-    auto witness = std::vector<Space>{};
+    auto witness = std::pmr::vector<Space>{};
 
     switch (prevOut.Script().Type()) {
         case bb::Script::Pattern::PayToWitnessPubkeyHash: {
@@ -150,7 +151,7 @@ auto BitcoinTransactionInput(
     const ReadView script,
     const ReadView sequence,
     const bool coinbase,
-    std::vector<Space>&& witness) noexcept
+    std::pmr::vector<Space>&& witness) noexcept
     -> std::unique_ptr<blockchain::block::bitcoin::internal::Input>
 {
     try {
@@ -199,7 +200,7 @@ auto BitcoinTransactionInput(
     -> std::unique_ptr<blockchain::block::bitcoin::internal::Input>
 {
     const auto& outpoint = in.previous();
-    auto witness = std::vector<Space>{};
+    auto witness = std::pmr::vector<Space>{};
 
     for (const auto& bytes : in.witness().item()) {
         const auto it = reinterpret_cast<const std::byte*>(bytes.data());
@@ -285,7 +286,7 @@ Input::Input(
     const blockchain::Type chain,
     const std::uint32_t sequence,
     Outpoint&& previous,
-    std::vector<Space>&& witness,
+    std::pmr::vector<Space>&& witness,
     std::unique_ptr<const internal::Script> script,
     Space&& coinbase,
     const VersionNumber version,
@@ -323,7 +324,7 @@ Input::Input(
     const blockchain::Type chain,
     const std::uint32_t sequence,
     Outpoint&& previous,
-    std::vector<Space>&& witness,
+    std::pmr::vector<Space>&& witness,
     std::unique_ptr<const internal::Script> script,
     const VersionNumber version,
     std::optional<std::size_t> size) noexcept(false)
@@ -350,7 +351,7 @@ Input::Input(
     const blockchain::Type chain,
     const std::uint32_t sequence,
     Outpoint&& previous,
-    std::vector<Space>&& witness,
+    std::pmr::vector<Space>&& witness,
     std::unique_ptr<const internal::Script> script,
     const VersionNumber version,
     std::unique_ptr<const internal::Output> output,
@@ -378,7 +379,7 @@ Input::Input(
     const blockchain::Type chain,
     const std::uint32_t sequence,
     Outpoint&& previous,
-    std::vector<Space>&& witness,
+    std::pmr::vector<Space>&& witness,
     const ReadView coinbase,
     const VersionNumber version,
     std::unique_ptr<const internal::Output> output,
@@ -471,7 +472,7 @@ auto Input::AddSignatures(const Signatures& signatures) noexcept -> bool
         return bool(script);
     } else {
         // TODO this only works for P2WPKH
-        auto& witness = const_cast<std::vector<Space>&>(witness_);
+        auto& witness = const_cast<std::pmr::vector<Space>&>(witness_);
         witness.clear();
 
         for (const auto& [sig, key] : signatures) {
@@ -488,8 +489,8 @@ auto Input::AddSignatures(const Signatures& signatures) noexcept -> bool
     }
 }
 
-auto Input::AssociatedLocalNyms(std::vector<OTNymID>& output) const noexcept
-    -> void
+auto Input::AssociatedLocalNyms(
+    std::pmr::vector<OTNymID>& output) const noexcept -> void
 {
     cache_.for_each_key([&](const auto& key) {
         const auto& owner = api_.Crypto().Blockchain().Owner(key);
@@ -499,7 +500,7 @@ auto Input::AssociatedLocalNyms(std::vector<OTNymID>& output) const noexcept
 }
 
 auto Input::AssociatedRemoteContacts(
-    std::vector<OTIdentifier>& output) const noexcept -> void
+    std::pmr::vector<OTIdentifier>& output) const noexcept -> void
 {
     const auto hashes = script_->LikelyPubkeyHashes(api_);
     std::for_each(std::begin(hashes), std::end(hashes), [&](const auto& hash) {
@@ -644,9 +645,9 @@ auto Input::decode_coinbase() const noexcept -> std::string
 }
 
 auto Input::ExtractElements(const filter::Type style) const noexcept
-    -> std::vector<Space>
+    -> std::pmr::vector<Space>
 {
-    auto output = std::vector<Space>{};
+    auto output = std::pmr::vector<Space>{};
 
     if (Script::Position::Coinbase == script_->Role()) { return output; }
 
@@ -739,7 +740,7 @@ auto Input::FindMatches(
     return matches;
 }
 
-auto Input::GetPatterns() const noexcept -> std::vector<PatternID>
+auto Input::GetPatterns() const noexcept -> std::pmr::vector<PatternID>
 {
     return {std::begin(pubkey_hashes_), std::end(pubkey_hashes_)};
 }

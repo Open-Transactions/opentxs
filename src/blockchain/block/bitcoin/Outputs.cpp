@@ -11,6 +11,7 @@
 #include <cstddef>
 #include <cstring>
 #include <iterator>
+#include <memory_resource>
 #include <numeric>
 #include <optional>
 #include <stdexcept>
@@ -33,8 +34,8 @@ namespace opentxs::factory
 using ReturnType = blockchain::block::bitcoin::implementation::Outputs;
 
 auto BitcoinTransactionOutputs(
-    std::vector<std::unique_ptr<blockchain::block::bitcoin::internal::Output>>&&
-        outputs,
+    std::pmr::vector<std::unique_ptr<
+        blockchain::block::bitcoin::internal::Output>>&& outputs,
     std::optional<std::size_t> size) noexcept
     -> std::unique_ptr<blockchain::block::bitcoin::internal::Outputs>
 {
@@ -70,8 +71,8 @@ Outputs::Outputs(const Outputs& rhs) noexcept
 {
 }
 
-auto Outputs::AssociatedLocalNyms(std::vector<OTNymID>& output) const noexcept
-    -> void
+auto Outputs::AssociatedLocalNyms(
+    std::pmr::vector<OTNymID>& output) const noexcept -> void
 {
     std::for_each(
         std::begin(outputs_), std::end(outputs_), [&](const auto& item) {
@@ -80,7 +81,7 @@ auto Outputs::AssociatedLocalNyms(std::vector<OTNymID>& output) const noexcept
 }
 
 auto Outputs::AssociatedRemoteContacts(
-    std::vector<OTIdentifier>& output) const noexcept -> void
+    std::pmr::vector<OTIdentifier>& output) const noexcept -> void
 {
     std::for_each(
         std::begin(outputs_), std::end(outputs_), [&](const auto& item) {
@@ -116,9 +117,9 @@ auto Outputs::clone(const OutputList& rhs) noexcept -> OutputList
 }
 
 auto Outputs::ExtractElements(const filter::Type style) const noexcept
-    -> std::vector<Space>
+    -> std::pmr::vector<Space>
 {
-    auto output = std::vector<Space>{};
+    auto output = std::pmr::vector<Space>{};
     LogTrace()(OT_PRETTY_CLASS())("processing ")(size())(" outputs").Flush();
 
     for (const auto& txout : *this) {
@@ -172,9 +173,9 @@ auto Outputs::ForTestingOnlyAddKey(
     }
 }
 
-auto Outputs::GetPatterns() const noexcept -> std::vector<PatternID>
+auto Outputs::GetPatterns() const noexcept -> std::pmr::vector<PatternID>
 {
-    auto output = std::vector<PatternID>{};
+    auto output = std::pmr::vector<PatternID>{};
     std::for_each(
         std::begin(outputs_), std::end(outputs_), [&](const auto& txout) {
             const auto patterns = txout->GetPatterns();
@@ -186,9 +187,9 @@ auto Outputs::GetPatterns() const noexcept -> std::vector<PatternID>
     return output;
 }
 
-auto Outputs::Keys() const noexcept -> std::vector<crypto::Key>
+auto Outputs::Keys() const noexcept -> std::pmr::vector<crypto::Key>
 {
-    auto out = std::vector<crypto::Key>{};
+    auto out = std::pmr::vector<crypto::Key>{};
 
     for (const auto& output : *this) {
         auto keys = output.Keys();

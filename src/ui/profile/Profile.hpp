@@ -129,8 +129,8 @@ private:
     std::string name_;
     std::string payment_code_;
 
-    static const std::set<contact::SectionType> allowed_types_;
-    static const std::map<contact::SectionType, int> sort_keys_;
+    static const std::pmr::set<contact::SectionType> allowed_types_;
+    static const std::pmr::map<contact::SectionType, int> sort_keys_;
 
     static auto sort_key(const contact::SectionType type) noexcept -> int;
     static auto check_type(const contact::SectionType type) noexcept -> bool;

@@ -22,8 +22,8 @@ auto ContextAllowedClient() noexcept -> const VersionMap&;
 auto ContextAllowedSignature() noexcept -> const VersionMap&;
 auto ServerContextAllowedPendingCommand() noexcept -> const VersionMap&;
 auto ServerContextAllowedState() noexcept
-    -> const std::map<std::uint32_t, std::set<int>>&;
+    -> const std::pmr::map<std::uint32_t, std::pmr::set<int>>&;
 auto ServerContextAllowedStatus() noexcept
-    -> const std::map<std::uint32_t, std::set<int>>&;
+    -> const std::pmr::map<std::uint32_t, std::pmr::set<int>>&;
 }  // namespace proto
 }  // namespace opentxs

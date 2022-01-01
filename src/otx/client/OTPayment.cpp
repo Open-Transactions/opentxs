@@ -494,7 +494,7 @@ void OTPayment::lowLevelSetTempValuesFromSmartContract(
     // inside OTScriptable! This way I can see exactly which opening number came
     // first, and I can use that for the display transaction num.
 
-    const std::vector<std::int64_t>& openingNumsInOrderOfSigning =
+    const std::pmr::vector<std::int64_t>& openingNumsInOrderOfSigning =
         theInput.openingNumsInOrderOfSigning();
 
     m_lTransNumDisplay = openingNumsInOrderOfSigning.size() > 0

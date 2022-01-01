@@ -51,6 +51,7 @@ struct WalletDatabase;
 namespace wallet
 {
 class Accounts;
+class DeterministicStateData;
 class SubchainStateData;
 }  // namespace wallet
 }  // namespace node

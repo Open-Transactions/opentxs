@@ -219,8 +219,8 @@ private:
         if (0 == data.size()) { return; }
 
         const auto& previous = data.front()->previous_.get();
-        auto hashes = std::vector<block::pHash>{};
-        auto headers = std::vector<internal::FilterDatabase::Header>{};
+        auto hashes = std::pmr::vector<block::pHash>{};
+        auto headers = std::pmr::vector<internal::FilterDatabase::Header>{};
 
         for (const auto& task : data) {
             const auto& hash = hashes.emplace_back(task->data_.get());

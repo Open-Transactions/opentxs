@@ -83,7 +83,7 @@ TEST_F(Test_NymData, AddClaim)
         std::string("claimValue"),
         NULL_START,
         NULL_END,
-        std::set<std::uint32_t>{
+        std::pmr::set<std::uint32_t>{
             static_cast<uint32_t>(ot::contact::Attribute::Active)});
 
     auto added = nymData_.AddClaim(claim, reason_);
@@ -235,7 +235,7 @@ TEST_F(Test_NymData, DeleteClaim)
         std::string("claimValue"),
         NULL_START,
         NULL_END,
-        std::set<std::uint32_t>{
+        std::pmr::set<std::uint32_t>{
             static_cast<uint32_t>(ot::contact::Attribute::Active)});
 
     auto added = nymData_.AddClaim(claim, reason_);
@@ -484,12 +484,12 @@ TEST_F(Test_NymData, SocialMediaProfiles)
 
 TEST_F(Test_NymData, SocialMediaProfileTypes)
 {
-    std::set<ot::proto::ContactItemType> profileTypes =
+    std::pmr::set<ot::proto::ContactItemType> profileTypes =
         ot::proto::AllowedItemTypes().at(ot::proto::ContactSectionVersion(
             CONTACT_CONTACT_DATA_VERSION,
             ot::translate(ot::contact::SectionType::Profile)));
 
-    std::set<ot::contact::ClaimType> output;
+    std::pmr::set<ot::contact::ClaimType> output;
     std::transform(
         profileTypes.begin(),
         profileTypes.end(),

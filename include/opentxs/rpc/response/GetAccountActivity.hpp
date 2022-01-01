@@ -26,6 +26,8 @@ namespace request
 {
 class GetAccountActivity;
 }  // namespace request
+
+class AccountEvent;
 }  // namespace rpc
 }  // namespace opentxs
 
@@ -38,7 +40,7 @@ namespace response
 class OPENTXS_EXPORT GetAccountActivity final : public Base
 {
 public:
-    using Events = std::vector<AccountEvent>;
+    using Events = std::pmr::vector<AccountEvent>;
 
     auto Activity() const noexcept -> const Events&;
 

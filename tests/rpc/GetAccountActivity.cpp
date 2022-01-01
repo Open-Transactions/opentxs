@@ -16,7 +16,6 @@
 #include "opentxs/api/session/Contacts.hpp"
 #include "opentxs/api/session/Notary.hpp"
 #include "opentxs/core/UnitType.hpp"
-#include "opentxs/core/display/Scale.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/rpc/CommandType.hpp"

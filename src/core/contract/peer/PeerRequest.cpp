@@ -70,7 +70,7 @@ Request::Request(
           serialized.version(),
           conditions,
           "",
-          api.Factory().Identifier(serialized.id()),
+          api.Factory().IdentifierFromBase58(serialized.id()),
           serialized.has_signature()
               ? Signatures{std::make_shared<proto::Signature>(
                     serialized.signature())}

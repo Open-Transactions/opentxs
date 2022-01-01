@@ -82,7 +82,7 @@ auto BitcoinP2PCfheaders(
         return nullptr;
     }
 
-    std::vector<blockchain::filter::pHash> headers{};
+    std::pmr::vector<blockchain::filter::pHash> headers{};
 
     if (count > 0) {
         for (std::size_t i{0}; i < count; ++i) {
@@ -117,7 +117,7 @@ auto BitcoinP2PCfheaders(
     const blockchain::filter::Type type,
     const blockchain::block::Hash& stop,
     const ReadView previous,
-    const std::vector<blockchain::filter::pHash>& headers)
+    const std::pmr::vector<blockchain::filter::pHash>& headers)
     -> blockchain::p2p::bitcoin::message::internal::Cfheaders*
 {
     namespace bitcoin = blockchain::p2p::bitcoin;
@@ -135,7 +135,7 @@ Cfheaders::Cfheaders(
     const filter::Type type,
     const block::Hash& stop,
     const ReadView previousHeader,
-    const std::vector<filter::pHash>& headers) noexcept(false)
+    const std::pmr::vector<filter::pHash>& headers) noexcept(false)
     : Message(api, network, bitcoin::Command::cfheaders)
     , type_(type)
     , stop_(stop)
@@ -157,7 +157,7 @@ Cfheaders::Cfheaders(
     const filter::Type type,
     const block::Hash& stop,
     const filter::Header& previous,
-    const std::vector<filter::pHash>& headers) noexcept(false)
+    const std::pmr::vector<filter::pHash>& headers) noexcept(false)
     : Message(api, std::move(header))
     , type_(type)
     , stop_(stop)

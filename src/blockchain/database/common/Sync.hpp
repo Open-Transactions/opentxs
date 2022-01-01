@@ -65,7 +65,7 @@ public:
     using Height = opentxs::blockchain::block::Height;
     using Block = opentxs::network::p2p::Block;
     using Message = opentxs::network::p2p::Data;
-    using Items = std::vector<Block>;
+    using Items = std::pmr::vector<Block>;
 
     auto Load(const Chain chain, const Height height, Message& output)
         const noexcept -> bool;

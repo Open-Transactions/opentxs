@@ -213,7 +213,7 @@ auto SubchainStateData::get_block_targets(const block::Hash& id, Tested& tested)
 // NOTE: this version is for matching before a block is downloaded
 auto SubchainStateData::get_targets(
     const Patterns& elements,
-    const std::vector<WalletDatabase::UTXO>& utxos,
+    const std::pmr::vector<WalletDatabase::UTXO>& utxos,
     Targets& targets) const noexcept -> void
 {
     targets.reserve(elements.size() + utxos.size());
@@ -239,7 +239,7 @@ auto SubchainStateData::get_targets(
 // NOTE: this version is for matching after a block is downloaded
 auto SubchainStateData::get_targets(
     const Patterns& elements,
-    const std::vector<WalletDatabase::UTXO>& utxos,
+    const std::pmr::vector<WalletDatabase::UTXO>& utxos,
     Targets& targets,
     Patterns& outpoints,
     Tested& tested) const noexcept -> void
@@ -447,10 +447,10 @@ auto SubchainStateData::Shutdown() noexcept -> void
     process_.Shutdown();
 }
 
-auto SubchainStateData::supported_scripts(
-    const crypto::Element& element) const noexcept -> std::vector<ScriptForm>
+auto SubchainStateData::supported_scripts(const crypto::Element& element)
+    const noexcept -> std::pmr::vector<ScriptForm>
 {
-    auto out = std::vector<ScriptForm>{};
+    auto out = std::pmr::vector<ScriptForm>{};
     const auto chain = node_.Chain();
     using Type = ScriptForm::Type;
     out.emplace_back(api_, element, chain, Type::PayToPubkey);
@@ -461,7 +461,7 @@ auto SubchainStateData::supported_scripts(
 }
 
 auto SubchainStateData::translate(
-    const std::vector<WalletDatabase::UTXO>& utxos,
+    const std::pmr::vector<WalletDatabase::UTXO>& utxos,
     Patterns& outpoints) const noexcept -> void
 {
     for (const auto& [outpoint, output] : utxos) {
@@ -476,7 +476,7 @@ auto SubchainStateData::translate(
 
         for (auto& key : keys) {
             const auto& [id, subchain, index] = key;
-            auto account = api_.Factory().Identifier(id);
+            auto account = api_.Factory().IdentifierFromBase58(id);
 
             OT_ASSERT(false == account->empty());
             // TODO the assertion below will not always be true in the future

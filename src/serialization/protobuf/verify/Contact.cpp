@@ -1638,10 +1638,10 @@ auto AllowedSectionNames() noexcept -> const ContactSectionMap&
 
     return output;
 }
-auto AllowedSubtypes() noexcept -> const std::set<ContactSectionName>&
+auto AllowedSubtypes() noexcept -> const std::pmr::set<ContactSectionName>&
 {
     static const auto output =
-        std::set<ContactSectionName>{CONTACTSECTION_PROCEDURE};
+        std::pmr::set<ContactSectionName>{CONTACTSECTION_PROCEDURE};
 
     return output;
 }

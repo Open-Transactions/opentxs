@@ -513,7 +513,7 @@ struct LMDB::Imp {
 
 private:
     using NewKey = std::tuple<Table, Mode, std::string, std::string>;
-    using Pending = std::vector<NewKey>;
+    using Pending = std::pmr::vector<NewKey>;
 
     const TableNames& names_;
     mutable MDB_env* env_;

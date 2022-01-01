@@ -55,8 +55,8 @@ public:
 
         BitcoinFormat_1(
             const bitcoin::ProtocolVersion version,
-            const std::set<bitcoin::Service>& localServices,
-            const std::set<bitcoin::Service>& remoteServices,
+            const std::pmr::set<bitcoin::Service>& localServices,
+            const std::pmr::set<bitcoin::Service>& remoteServices,
             const tcp::endpoint& remoteAddress,
             const Time time) noexcept;
         BitcoinFormat_1() noexcept;
@@ -67,7 +67,7 @@ public:
         NonceField nonce_{};
 
         BitcoinFormat_106(
-            const std::set<bitcoin::Service>& localServices,
+            const std::pmr::set<bitcoin::Service>& localServices,
             const tcp::endpoint localAddress,
             const bitcoin::Nonce nonce) noexcept;
         BitcoinFormat_106() noexcept;
@@ -86,7 +86,7 @@ public:
         return local_address_;
     }
     auto LocalServices() const noexcept
-        -> std::set<blockchain::p2p::Service> final
+        -> std::pmr::set<blockchain::p2p::Service> final
     {
         return local_services_;
     }
@@ -101,7 +101,7 @@ public:
         return remote_address_;
     }
     auto RemoteServices() const noexcept
-        -> std::set<blockchain::p2p::Service> final
+        -> std::pmr::set<blockchain::p2p::Service> final
     {
         return remote_services_;
     }
@@ -116,9 +116,9 @@ public:
         const bitcoin::ProtocolVersion version,
         const tcp::endpoint localAddress,
         const tcp::endpoint remoteAddress,
-        const std::set<blockchain::p2p::Service>& services,
-        const std::set<blockchain::p2p::Service>& localServices,
-        const std::set<blockchain::p2p::Service>& remoteServices,
+        const std::pmr::set<blockchain::p2p::Service>& services,
+        const std::pmr::set<blockchain::p2p::Service>& localServices,
+        const std::pmr::set<blockchain::p2p::Service>& remoteServices,
         const bitcoin::Nonce nonce,
         const std::string& userAgent,
         const block::Height height,
@@ -130,9 +130,9 @@ public:
         const bitcoin::ProtocolVersion version,
         const tcp::endpoint localAddress,
         const tcp::endpoint remoteAddress,
-        const std::set<blockchain::p2p::Service>& services,
-        const std::set<blockchain::p2p::Service>& localServices,
-        const std::set<blockchain::p2p::Service>& remoteServices,
+        const std::pmr::set<blockchain::p2p::Service>& services,
+        const std::pmr::set<blockchain::p2p::Service>& localServices,
+        const std::pmr::set<blockchain::p2p::Service>& remoteServices,
         const bitcoin::Nonce nonce,
         const std::string& userAgent,
         const block::Height height,
@@ -145,9 +145,9 @@ private:
     const bitcoin::ProtocolVersion version_;
     const tcp::endpoint local_address_;
     const tcp::endpoint remote_address_;
-    const std::set<blockchain::p2p::Service> services_;
-    const std::set<blockchain::p2p::Service> local_services_;
-    const std::set<blockchain::p2p::Service> remote_services_;
+    const std::pmr::set<blockchain::p2p::Service> services_;
+    const std::pmr::set<blockchain::p2p::Service> local_services_;
+    const std::pmr::set<blockchain::p2p::Service> remote_services_;
     const bitcoin::Nonce nonce_;
     const std::string user_agent_;
     const block::Height height_;

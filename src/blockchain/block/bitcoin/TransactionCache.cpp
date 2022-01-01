@@ -8,6 +8,7 @@
 #include "blockchain/block/bitcoin/Transaction.hpp"  // IWYU pragma: associated
 
 #include <algorithm>
+#include <memory_resource>
 #include <stdexcept>
 #include <utility>
 
@@ -19,7 +20,7 @@ namespace opentxs::blockchain::block::bitcoin::implementation
 {
 Transaction::Cache::Cache(
     const std::string& memo,
-    std::vector<blockchain::Type>&& chains,
+    std::pmr::vector<blockchain::Type>&& chains,
     block::Position&& minedPosition) noexcept(false)
     : lock_()
     , normalized_id_()
@@ -59,7 +60,7 @@ auto Transaction::Cache::add(blockchain::Type chain) noexcept -> void
 }
 
 auto Transaction::Cache::chains() const noexcept
-    -> std::vector<blockchain::Type>
+    -> std::pmr::vector<blockchain::Type>
 {
     auto lock = rLock{lock_};
 

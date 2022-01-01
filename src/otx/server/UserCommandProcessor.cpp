@@ -508,7 +508,7 @@ auto UserCommandProcessor::cmd_add_claim(ReplyMessage& reply) const -> bool
     const std::uint32_t type = msgIn.m_strInstrumentDefinitionID->ToUint();
     const std::string value = msgIn.m_strAcctID->Get();
     const bool primary = msgIn.m_bBool;
-    std::set<std::uint32_t> attributes;
+    std::pmr::set<std::uint32_t> attributes;
 
     if (primary) { attributes.insert(translate(contact::Attribute::Primary)); }
 
@@ -1861,7 +1861,7 @@ auto UserCommandProcessor::cmd_query_instrument_definitions(
     if (nullptr == inputMap) { return false; }
 
     auto& map = inputMap->the_map;
-    std::map<std::string, std::string> newMap{};
+    std::pmr::map<std::string, std::string> newMap{};
 
     for (auto& it : map) {
         const auto& unitID = it.first;

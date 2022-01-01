@@ -68,8 +68,8 @@ protected:
 private:
     mutable int next_task_;
     mutable std::mutex task_lock_;
-    mutable std::map<int, SocketCallback> socket_tasks_;
-    mutable std::map<int, bool> task_result_;
+    mutable std::pmr::map<int, SocketCallback> socket_tasks_;
+    mutable std::pmr::map<int, bool> task_result_;
 
     auto add_task(SocketCallback&& cb) const noexcept -> int;
     auto task_result(const int id) const noexcept -> bool;

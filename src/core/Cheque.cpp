@@ -170,7 +170,8 @@ auto Cheque::ProcessXMLNode(IrrXMLReader*& xml) -> std::int32_t
         const auto INSTRUMENT_DEFINITION_ID =
             api_.Factory().UnitID(strInstrumentDefinitionID);
         const auto NOTARY_ID = api_.Factory().ServerID(strNotaryID);
-        const auto SENDER_ACCT_ID = api_.Factory().Identifier(strSenderAcctID);
+        const auto SENDER_ACCT_ID =
+            api_.Factory().IdentifierFromBase58(strSenderAcctID);
         const auto SENDER_NYM_ID = api_.Factory().NymID(strSenderNymID);
 
         SetInstrumentDefinitionID(INSTRUMENT_DEFINITION_ID);

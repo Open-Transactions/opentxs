@@ -597,7 +597,7 @@ auto Nym::ContactCredentialVersion() const -> VersionNumber
 }
 
 auto Nym::Contracts(const core::UnitType currency, const bool onlyActive) const
-    -> std::set<OTIdentifier>
+    -> std::pmr::set<OTIdentifier>
 {
     eLock lock(shared_lock_);
 
@@ -1250,7 +1250,7 @@ void Nym::revoke_contact_credentials(const eLock& lock)
 {
     OT_ASSERT(verify_lock(lock));
 
-    std::list<std::string> revokedIDs;
+    std::pmr::list<std::string> revokedIDs;
 
     for (auto& it : active_) {
         if (nullptr != it.second) {
@@ -1265,7 +1265,7 @@ void Nym::revoke_verification_credentials(const eLock& lock)
 {
     OT_ASSERT(verify_lock(lock));
 
-    std::list<std::string> revokedIDs;
+    std::pmr::list<std::string> revokedIDs;
 
     for (auto& it : active_) {
         if (nullptr != it.second) {
@@ -1528,7 +1528,8 @@ auto Nym::SocialMediaProfiles(const contact::ClaimType type, bool active) const
     return contact_data_->SocialMediaProfiles(type, active);
 }
 
-auto Nym::SocialMediaProfileTypes() const -> const std::set<contact::ClaimType>
+auto Nym::SocialMediaProfileTypes() const
+    -> const std::pmr::set<contact::ClaimType>
 {
     eLock lock(shared_lock_);
 

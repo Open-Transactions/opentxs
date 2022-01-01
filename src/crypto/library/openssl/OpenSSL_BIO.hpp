@@ -30,7 +30,7 @@ private:
         const std::size_t amount,
         std::size_t& read,
         std::size_t& total,
-        std::vector<std::byte>& output);
+        std::pmr::vector<std::byte>& output);
 
 public:
     OpenSSL_BIO(BIO* pBIO);
@@ -42,7 +42,7 @@ public:
     void release();
     void setFreeOnly();
 
-    auto ToBytes() -> std::vector<std::byte>;
+    auto ToBytes() -> std::pmr::vector<std::byte>;
     auto ToString() -> OTString;
 };
 }  // namespace opentxs::crypto::implementation

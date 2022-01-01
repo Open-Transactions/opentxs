@@ -57,18 +57,19 @@ class Tag;
 
 namespace opentxs
 {
-using mapOfBylaws = std::map<std::string, OTBylaw*>;
-using mapOfClauses = std::map<std::string, OTClause*>;
-using mapOfParties = std::map<std::string, OTParty*>;
-using mapOfVariables = std::map<std::string, OTVariable*>;
+using mapOfBylaws = std::pmr::map<std::string, OTBylaw*>;
+using mapOfClauses = std::pmr::map<std::string, OTClause*>;
+using mapOfParties = std::pmr::map<std::string, OTParty*>;
+using mapOfVariables = std::pmr::map<std::string, OTVariable*>;
 
-auto vectorToString(const std::vector<std::int64_t>& v) -> std::string;
-auto stringToVector(const std::string& s) -> std::vector<std::int64_t>;
+auto vectorToString(const std::pmr::vector<std::int64_t>& v) -> std::string;
+auto stringToVector(const std::string& s) -> std::pmr::vector<std::int64_t>;
 
 class OPENTXS_EXPORT OTScriptable : public Contract
 {
 public:
-    auto openingNumsInOrderOfSigning() const -> const std::vector<std::int64_t>&
+    auto openingNumsInOrderOfSigning() const
+        -> const std::pmr::vector<std::int64_t>&
     {
         return openingNumsInOrderOfSigning_;
     }
@@ -291,7 +292,7 @@ public:
 protected:
     // This is how we know the opening numbers for each signer, IN THE ORDER
     // that they signed.
-    std::vector<std::int64_t> openingNumsInOrderOfSigning_;
+    std::pmr::vector<std::int64_t> openingNumsInOrderOfSigning_;
 
     mapOfParties m_mapParties;  // The parties to the contract. Could be Nyms,
                                 // or

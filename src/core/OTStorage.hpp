@@ -183,8 +183,9 @@ using InstantiateFuncKey = std::pair<PackType, StoredObjectType>;  // Those
 // "protocol buffers", those form the KEY for looking up the LoomAcctPB
 // instantiator.
 using mapOfFunctions =
-    std::map<InstantiateFuncKey, InstantiateFunc*>;  //...basically implementing
-                                                     // my own vtable, eh?
+    std::pmr::map<InstantiateFuncKey, InstantiateFunc*>;  //...basically
+                                                          // implementing
+                                                          // my own vtable, eh?
 
 // OTDB Namespace PRIVATE MEMBERS
 // this "details" naming is a common C++ idiom for "private" in a namespace.
@@ -710,7 +711,7 @@ bool EraseValueByKey(
 #define DECLARE_GET_ADD_REMOVE(name)                                           \
                                                                                \
 protected:                                                                     \
-    std::deque<std::shared_ptr<name>> list_##name##s;                          \
+    std::pmr::deque<std::shared_ptr<name>> list_##name##s;                     \
                                                                                \
 public:                                                                        \
     size_t Get##name##Count();                                                 \
@@ -767,9 +768,8 @@ protected:
 public:
     ~Blob() override = default;
 
-    std::vector<std::uint8_t> m_memBuffer;  // Where the actual binary data is
-                                            // stored,
-                                            // before packing.
+    std::pmr::vector<std::uint8_t> m_memBuffer;  // Where the actual binary data
+                                                 // is stored, before packing.
 
     DEFINE_OT_DYNAMIC_CAST(Blob)
 };
@@ -792,7 +792,7 @@ protected:
 public:
     ~StringMap() override = default;
 
-    std::map<std::string, std::string> the_map;
+    std::pmr::map<std::string, std::string> the_map;
 
     void SetValue(const std::string& strKey, const std::string& strValue)
     {

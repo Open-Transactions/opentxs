@@ -71,7 +71,7 @@ public:
     ~Imp() override;
 
 protected:
-    using listOfSignatures = std::list<OTSignature>;
+    using listOfSignatures = std::pmr::list<OTSignature>;
 
     const api::Session& api_;
     OTString m_strName;
@@ -82,7 +82,7 @@ protected:
     OTString m_strRawFile;
     crypto::HashType m_strSigHashType;
     OTString m_strContractType;
-    std::map<std::string, Nym_p> m_mapNyms;
+    std::pmr::map<std::string, Nym_p> m_mapNyms;
     listOfSignatures m_listSignatures;
     OTString m_strVersion;
     OTString m_strEntityShortName;

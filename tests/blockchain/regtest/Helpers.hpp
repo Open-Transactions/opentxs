@@ -313,9 +313,9 @@ private:
 struct TXOState {
     struct Data {
         ot::blockchain::Balance balance_;
-        std::map<
+        std::pmr::map<
             ot::blockchain::node::TxoState,
-            std::set<ot::blockchain::block::Outpoint>>
+            std::pmr::set<ot::blockchain::block::Outpoint>>
             data_;
 
         Data() noexcept;
@@ -323,13 +323,13 @@ struct TXOState {
 
     struct NymData {
         Data nym_;
-        std::map<ot::OTIdentifier, Data> accounts_;
+        std::pmr::map<ot::OTIdentifier, Data> accounts_;
 
         NymData() noexcept;
     };
 
     Data wallet_;
-    std::map<ot::OTNymID, NymData> nyms_;
+    std::pmr::map<ot::OTNymID, NymData> nyms_;
 
     TXOState() noexcept;
 };
@@ -386,7 +386,7 @@ public:
 protected:
     using Height = b::block::Height;
     using Transaction = ot::api::session::Factory::Transaction_p;
-    using Transactions = std::deque<ot::blockchain::block::pTxid>;
+    using Transactions = std::pmr::deque<ot::blockchain::block::pTxid>;
     using Generator = std::function<Transaction(Height)>;
     using Outpoint = ot::blockchain::block::Outpoint;
     using Script = ot::blockchain::block::bitcoin::Script;
@@ -394,7 +394,7 @@ protected:
     using Key = ot::OTData;
     using Amount = ot::Amount;
     using OutpointMetadata = std::tuple<Key, Amount, Pattern>;
-    using Expected = std::map<Outpoint, OutpointMetadata>;
+    using Expected = std::pmr::map<Outpoint, OutpointMetadata>;
     using Subchain = bca::Subchain;
 
     static bool init_;
@@ -424,9 +424,10 @@ protected:
         const Height ancestor,
         const std::size_t count,
         const Generator& gen,
-        const std::vector<Transaction>& extra = {}) noexcept -> bool;
-    auto TestUTXOs(const Expected& expected, const std::vector<UTXO>& utxos)
-        const noexcept -> bool;
+        const std::pmr::vector<Transaction>& extra = {}) noexcept -> bool;
+    auto TestUTXOs(
+        const Expected& expected,
+        const std::pmr::vector<UTXO>& utxos) const noexcept -> bool;
     auto TestWallet(const ot::api::session::Client& api, const TXOState& state)
         const noexcept -> bool;
 
@@ -444,10 +445,10 @@ protected:
         const ot::Options& clientArgs);
 
 private:
-    using BlockListen = std::map<int, std::unique_ptr<BlockListener>>;
-    using WalletListen = std::map<int, std::unique_ptr<WalletListener>>;
+    using BlockListen = std::pmr::map<int, std::unique_ptr<BlockListener>>;
+    using WalletListen = std::pmr::map<int, std::unique_ptr<WalletListener>>;
 
-    static const std::set<ot::blockchain::node::TxoState> states_;
+    static const std::pmr::set<ot::blockchain::node::TxoState> states_;
     static std::unique_ptr<const ot::OTBlockchainAddress> listen_address_;
     static std::unique_ptr<const PeerListener> peer_listener_;
     static std::unique_ptr<MinedBlocks> mined_block_cache_;
@@ -488,7 +489,7 @@ private:
     auto compare_outpoints(
         const ot::blockchain::node::TxoState type,
         const TXOState::Data& expected,
-        const std::vector<UTXO>& got) const noexcept -> bool;
+        const std::pmr::vector<UTXO>& got) const noexcept -> bool;
 };
 
 class Regtest_fixture_normal : public Regtest_fixture_base

@@ -59,7 +59,7 @@ struct AccountActivityRow {
     int polarity_{};
     ot::Amount amount_{};
     std::string display_amount_{};
-    std::vector<std::string> contacts_{};
+    std::pmr::vector<std::string> contacts_{};
     std::string memo_{};
     std::string workflow_{};
     std::string text_{};
@@ -81,13 +81,14 @@ struct AccountActivityData {
     ot::Amount balance_{};
     std::string display_balance_{};
     std::string default_deposit_address_{};
-    std::map<ot::blockchain::Type, std::string> deposit_addresses_{};
-    std::vector<ot::blockchain::Type> deposit_chains_{};
+    std::pmr::map<ot::blockchain::Type, std::string> deposit_addresses_{};
+    std::pmr::vector<ot::blockchain::Type> deposit_chains_{};
     double sync_{};
     std::pair<int, int> progress_{};
-    std::vector<std::pair<std::string, bool>> addresses_to_validate_{};
-    std::vector<std::pair<std::string, std::string>> amounts_to_validate_{};
-    std::vector<AccountActivityRow> rows_{};
+    std::pmr::vector<std::pair<std::string, bool>> addresses_to_validate_{};
+    std::pmr::vector<std::pair<std::string, std::string>>
+        amounts_to_validate_{};
+    std::pmr::vector<AccountActivityRow> rows_{};
 };
 
 struct AccountListRow {
@@ -105,7 +106,7 @@ struct AccountListRow {
 };
 
 struct AccountListData {
-    std::vector<AccountListRow> rows_{};
+    std::pmr::vector<AccountListRow> rows_{};
 };
 
 struct ActivityThreadRow {
@@ -128,8 +129,8 @@ struct ActivityThreadData {
     std::string display_name_{};
     std::string draft_{};
     std::string participants_{};
-    std::map<ot::core::UnitType, std::string> payment_codes_{};
-    std::vector<ActivityThreadRow> rows_{};
+    std::pmr::map<ot::core::UnitType, std::string> payment_codes_{};
+    std::pmr::vector<ActivityThreadRow> rows_{};
 };
 
 struct BlockchainSelectionRow {
@@ -140,7 +141,7 @@ struct BlockchainSelectionRow {
 };
 
 struct BlockchainSelectionData {
-    std::vector<BlockchainSelectionRow> rows_{};
+    std::pmr::vector<BlockchainSelectionRow> rows_{};
 };
 
 struct BlockchainSubchainData {
@@ -151,20 +152,20 @@ struct BlockchainSubchainData {
 struct BlockchainSubaccountData {
     std::string name_;
     std::string id_;
-    std::vector<BlockchainSubchainData> rows_;
+    std::pmr::vector<BlockchainSubchainData> rows_;
 };
 
 struct BlockchainSubaccountSourceData {
     std::string name_;
     std::string id_;
     ot::blockchain::crypto::SubaccountType type_;
-    std::vector<BlockchainSubaccountData> rows_;
+    std::pmr::vector<BlockchainSubaccountData> rows_;
 };
 
 struct BlockchainAccountStatusData {
     std::string owner_;
     ot::blockchain::Type chain_;
-    std::vector<BlockchainSubaccountSourceData> rows_;
+    std::pmr::vector<BlockchainSubaccountSourceData> rows_;
 };
 
 struct ContactListRow {
@@ -176,7 +177,7 @@ struct ContactListRow {
 };
 
 struct ContactListData {
-    std::vector<ContactListRow> rows_{};
+    std::pmr::vector<ContactListRow> rows_{};
 };
 
 auto activity_thread_send_message(

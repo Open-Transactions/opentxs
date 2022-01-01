@@ -193,7 +193,7 @@ auto Work::operator+(const blockchain::Work& rhs) const noexcept -> OTWork
 
 auto Work::asHex() const noexcept -> std::string
 {
-    std::vector<unsigned char> bytes;
+    std::pmr::vector<unsigned char> bytes;
 
     try {
         // Export as big endian

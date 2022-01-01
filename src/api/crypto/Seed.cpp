@@ -131,7 +131,7 @@ auto Seed::AccountKey(
     auto fingerprint{rootPath.root()};
     const auto change =
         (INTERNAL_CHAIN == internal) ? Bip32Index{1u} : Bip32Index{0u};
-    auto path = std::vector<Bip32Index>{};
+    auto path = std::pmr::vector<Bip32Index>{};
 
     for (const auto& child : rootPath.child()) { path.emplace_back(child); }
 
@@ -141,23 +141,26 @@ auto Seed::AccountKey(
 }
 
 auto Seed::AllowedSeedTypes() const noexcept
-    -> const std::map<opentxs::crypto::SeedStyle, std::string>&
+    -> const std::pmr::map<opentxs::crypto::SeedStyle, std::string>&
 {
-    static const auto map = std::map<opentxs::crypto::SeedStyle, std::string>{
-        {opentxs::crypto::SeedStyle::BIP39, "BIP-39"},
-        {opentxs::crypto::SeedStyle::PKT, "Legacy pktwallet"},
-    };
+    static const auto map =
+        std::pmr::map<opentxs::crypto::SeedStyle, std::string>{
+            {opentxs::crypto::SeedStyle::BIP39, "BIP-39"},
+            {opentxs::crypto::SeedStyle::PKT, "Legacy pktwallet"},
+        };
 
     return map;
 }
 
-auto Seed::AllowedLanguages(const opentxs::crypto::SeedStyle type)
-    const noexcept -> const std::map<opentxs::crypto::Language, std::string>&
+auto Seed::AllowedLanguages(
+    const opentxs::crypto::SeedStyle type) const noexcept
+    -> const std::pmr::map<opentxs::crypto::Language, std::string>&
 {
-    static const auto null = std::map<opentxs::crypto::Language, std::string>{};
-    static const auto map = std::map<
+    static const auto null =
+        std::pmr::map<opentxs::crypto::Language, std::string>{};
+    static const auto map = std::pmr::map<
         opentxs::crypto::SeedStyle,
-        std::map<opentxs::crypto::Language, std::string>>{
+        std::pmr::map<opentxs::crypto::Language, std::string>>{
         {opentxs::crypto::SeedStyle::BIP39,
          {
              {opentxs::crypto::Language::en, "English"},
@@ -178,13 +181,13 @@ auto Seed::AllowedLanguages(const opentxs::crypto::SeedStyle type)
 
 auto Seed::AllowedSeedStrength(
     const opentxs::crypto::SeedStyle type) const noexcept
-    -> const std::map<opentxs::crypto::SeedStrength, std::string>&
+    -> const std::pmr::map<opentxs::crypto::SeedStrength, std::string>&
 {
     static const auto null =
-        std::map<opentxs::crypto::SeedStrength, std::string>{};
-    static const auto map = std::map<
+        std::pmr::map<opentxs::crypto::SeedStrength, std::string>{};
+    static const auto map = std::pmr::map<
         opentxs::crypto::SeedStyle,
-        std::map<opentxs::crypto::SeedStrength, std::string>>{
+        std::pmr::map<opentxs::crypto::SeedStrength, std::string>>{
         {opentxs::crypto::SeedStyle::BIP39,
          {
              {opentxs::crypto::SeedStrength::Twelve, "12"},
@@ -234,7 +237,7 @@ auto Seed::DefaultSeed() const -> std::string
 auto Seed::GetHDKey(
     const std::string& fingerprint,
     const EcdsaCurve& curve,
-    const std::vector<Bip32Index>& path,
+    const std::pmr::vector<Bip32Index>& path,
     const PasswordPrompt& reason) const
     -> std::unique_ptr<opentxs::crypto::key::HD>
 {
@@ -250,7 +253,7 @@ auto Seed::GetHDKey(
 auto Seed::GetHDKey(
     const std::string& fingerprint,
     const EcdsaCurve& curve,
-    const std::vector<Bip32Index>& path,
+    const std::pmr::vector<Bip32Index>& path,
     const opentxs::crypto::key::asymmetric::Role role,
     const PasswordPrompt& reason) const
     -> std::unique_ptr<opentxs::crypto::key::HD>
@@ -267,7 +270,7 @@ auto Seed::GetHDKey(
 auto Seed::GetHDKey(
     const std::string& fingerprint,
     const EcdsaCurve& curve,
-    const std::vector<Bip32Index>& path,
+    const std::pmr::vector<Bip32Index>& path,
     const VersionNumber version,
     const PasswordPrompt& reason) const
     -> std::unique_ptr<opentxs::crypto::key::HD>
@@ -284,7 +287,7 @@ auto Seed::GetHDKey(
 auto Seed::GetHDKey(
     const std::string& fingerprint,
     const EcdsaCurve& curve,
-    const std::vector<Bip32Index>& path,
+    const std::pmr::vector<Bip32Index>& path,
     const opentxs::crypto::key::asymmetric::Role role,
     const VersionNumber version,
     const PasswordPrompt& reason) const
@@ -673,7 +676,7 @@ auto Seed::UpdateIndex(
 auto Seed::ValidateWord(
     const opentxs::crypto::SeedStyle type,
     const opentxs::crypto::Language lang,
-    const std::string_view word) const noexcept -> std::vector<std::string>
+    const std::string_view word) const noexcept -> std::pmr::vector<std::string>
 {
     switch (type) {
         case opentxs::crypto::SeedStyle::BIP39:
@@ -704,7 +707,7 @@ auto Seed::WordCount(
     }
 
     static const auto map =
-        std::map<opentxs::crypto::SeedStrength, std::size_t>{
+        std::pmr::map<opentxs::crypto::SeedStrength, std::size_t>{
             {opentxs::crypto::SeedStrength::Twelve, 12},
             {opentxs::crypto::SeedStrength::Fifteen, 15},
             {opentxs::crypto::SeedStrength::Eighteen, 18},

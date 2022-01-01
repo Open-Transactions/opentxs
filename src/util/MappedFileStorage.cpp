@@ -60,7 +60,7 @@ struct MappedFileStorage::Imp {
     const int table_;
     const std::size_t key_;
     mutable IndexData::MemoryPosition next_position_;
-    mutable std::vector<boost::iostreams::mapped_file> files_;
+    mutable std::pmr::vector<boost::iostreams::mapped_file> files_;
 
     auto calculate_file_name(
         const std::string& prefix,
@@ -85,7 +85,8 @@ struct MappedFileStorage::Imp {
     auto create_or_load(
         const std::string& prefix,
         const FileCounter file,
-        std::vector<boost::iostreams::mapped_file>& output) noexcept -> void
+        std::pmr::vector<boost::iostreams::mapped_file>& output) noexcept
+        -> void
     {
         auto params = boost::iostreams::mapped_file_params{
             calculate_file_name(prefix, file)};
@@ -191,9 +192,9 @@ struct MappedFileStorage::Imp {
     auto init_files(
         const std::string& prefix,
         const IndexData::MemoryPosition position) noexcept
-        -> std::vector<boost::iostreams::mapped_file>
+        -> std::pmr::vector<boost::iostreams::mapped_file>
     {
-        auto output = std::vector<boost::iostreams::mapped_file>{};
+        auto output = std::pmr::vector<boost::iostreams::mapped_file>{};
         const auto target = get_file_count(position);
         output.reserve(target);
 

@@ -54,7 +54,7 @@ public:
     OPENTXS_NO_EXPORT virtual auto Internal() const noexcept
         -> const internal::Output& = 0;
     virtual auto Note() const noexcept -> std::string = 0;
-    virtual auto Keys() const noexcept -> std::vector<crypto::Key> = 0;
+    virtual auto Keys() const noexcept -> std::pmr::vector<crypto::Key> = 0;
     virtual auto Payee() const noexcept -> ContactID = 0;
     virtual auto Payer() const noexcept -> ContactID = 0;
     virtual auto Print() const noexcept -> std::string = 0;

@@ -50,7 +50,7 @@ public:
         return parent_;
     }
 
-    auto MakeBatch(std::vector<socket::Type>&& types) noexcept
+    auto MakeBatch(std::pmr::vector<socket::Type>&& types) noexcept
         -> internal::Batch&;
     auto Modify(SocketID id, ModifyCallback cb) noexcept -> AsyncResult;
     auto DoModify(SocketID id, ModifyCallback& cb) noexcept -> bool final;
@@ -73,7 +73,8 @@ private:
     Gatekeeper gate_;
     robin_hood::unordered_node_map<unsigned int, Thread> threads_;
     robin_hood::unordered_node_map<BatchID, internal::Batch> batches_;
-    robin_hood::unordered_node_map<BatchID, std::vector<SocketID>> batch_index_;
+    robin_hood::unordered_node_map<BatchID, std::pmr::vector<SocketID>>
+        batch_index_;
     robin_hood::unordered_node_map<SocketID, std::pair<BatchID, socket::Raw*>>
         socket_index_;
 

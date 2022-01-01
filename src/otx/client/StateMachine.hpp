@@ -296,11 +296,11 @@ private:
     std::atomic<int> counter_;
     mutable std::atomic<int> task_count_;
     mutable std::mutex lock_;
-    std::vector<RefreshTask> tasks_;
+    std::pmr::vector<RefreshTask> tasks_;
     mutable State state_;
-    mutable std::map<OTNymID, int> unknown_nyms_;
-    mutable std::map<OTServerID, int> unknown_servers_;
-    mutable std::map<OTUnitID, int> unknown_units_;
+    mutable std::pmr::map<OTNymID, int> unknown_nyms_;
+    mutable std::pmr::map<OTServerID, int> unknown_servers_;
+    mutable std::pmr::map<OTUnitID, int> unknown_units_;
 
     static auto task_done(bool done) -> TaskDone
     {

@@ -80,6 +80,17 @@ class Message;
 }  // namespace zeromq
 }  // namespace network
 
+namespace otx
+{
+namespace client
+{
+namespace implementation
+{
+class StateMachine;
+}  // namespace implementation
+}  // namespace client
+}  // namespace otx
+
 class OTClient;
 }  // namespace opentxs
 
@@ -146,7 +157,8 @@ public:
         -> std::size_t final;
     auto DepositCheques(
         const identifier::Nym& nymID,
-        const std::set<OTIdentifier>& chequeIDs) const -> std::size_t final;
+        const std::pmr::set<OTIdentifier>& chequeIDs) const
+        -> std::size_t final;
     auto DepositPayment(
         const identifier::Nym& recipientNymID,
         const std::shared_ptr<const OTPayment>& payment) const
@@ -309,7 +321,7 @@ public:
 
 private:
     using TaskStatusMap =
-        std::map<TaskID, std::pair<ThreadStatus, std::promise<Result>>>;
+        std::pmr::map<TaskID, std::pair<ThreadStatus, std::promise<Result>>>;
     using ContextID = std::pair<OTNymID, OTServerID>;
 
     ContextLockCallback lock_callback_;
@@ -319,16 +331,16 @@ private:
     mutable std::mutex nym_fetch_lock_{};
     mutable std::mutex task_status_lock_{};
     mutable std::atomic<std::uint64_t> refresh_counter_{0};
-    mutable std::map<ContextID, otx::client::implementation::StateMachine>
+    mutable std::pmr::map<ContextID, otx::client::implementation::StateMachine>
         operations_;
-    mutable std::map<OTIdentifier, UniqueQueue<OTNymID>> server_nym_fetch_;
+    mutable std::pmr::map<OTIdentifier, UniqueQueue<OTNymID>> server_nym_fetch_;
     UniqueQueue<otx::client::CheckNymTask> missing_nyms_;
     UniqueQueue<otx::client::CheckNymTask> outdated_nyms_;
     UniqueQueue<OTServerID> missing_servers_;
     UniqueQueue<OTUnitID> missing_unit_definitions_;
     mutable std::unique_ptr<OTServerID> introduction_server_id_;
     mutable TaskStatusMap task_status_;
-    mutable std::map<TaskID, MessageID> task_message_id_;
+    mutable std::pmr::map<TaskID, MessageID> task_message_id_;
     OTZMQListenCallback account_subscriber_callback_;
     OTZMQSubscribeSocket account_subscriber_;
     OTZMQListenCallback notification_listener_callback_;

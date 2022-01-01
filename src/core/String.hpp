@@ -102,10 +102,10 @@ private:
 
     std::uint32_t length_{0};
     std::uint32_t position_{0};
-    std::vector<char> internal_{};
+    std::pmr::vector<char> internal_{};
 
     static auto make_string(const char* str, std::uint32_t length)
-        -> std::vector<char>;
+        -> std::pmr::vector<char>;
 
     auto clone() const -> String* override;
     auto tokenize_basic(Map& map) const -> bool;

@@ -52,9 +52,9 @@ BlockchainBalanceItem::BlockchainBalanceItem(
 }
 
 auto BlockchainBalanceItem::Contacts() const noexcept
-    -> std::vector<std::string>
+    -> std::pmr::vector<std::string>
 {
-    auto output = std::vector<std::string>{};
+    auto output = std::pmr::vector<std::string>{};
 
     for (const auto& id : api_.Storage().BlockchainThreadMap(nym_id_, txid_)) {
         if (0 < id->size()) { output.emplace_back(id->str()); }

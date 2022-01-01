@@ -53,7 +53,7 @@ auto Factory::ServerContract(const api::Session& api) noexcept
 auto Factory::ServerContract(
     const api::Session& api,
     const Nym_p& nym,
-    const std::list<Endpoint>& endpoints,
+    const std::pmr::list<Endpoint>& endpoints,
     const std::string& terms,
     const std::string& name,
     const VersionNumber version,
@@ -65,7 +65,7 @@ auto Factory::ServerContract(
         return {};
     }
 
-    auto list = std::list<contract::Server::Endpoint>{};
+    auto list = std::pmr::list<contract::Server::Endpoint>{};
     std::transform(
         std::begin(endpoints),
         std::end(endpoints),
@@ -150,7 +150,7 @@ Server::Server(
     const VersionNumber version,
     const std::string& terms,
     const std::string& name,
-    std::list<contract::Server::Endpoint>&& endpoints,
+    std::pmr::list<contract::Server::Endpoint>&& endpoints,
     OTData&& key,
     OTServerID&& id,
     Signatures&& signatures)
@@ -215,9 +215,9 @@ auto Server::EffectiveName() const -> std::string
 }
 
 auto Server::extract_endpoints(const proto::ServerContract& serialized) noexcept
-    -> std::list<contract::Server::Endpoint>
+    -> std::pmr::list<contract::Server::Endpoint>
 {
-    auto output = std::list<contract::Server::Endpoint>{};
+    auto output = std::pmr::list<contract::Server::Endpoint>{};
 
     for (auto& listen : serialized.address()) {
         // WARNING: preserve the order of this list, or signature verfication

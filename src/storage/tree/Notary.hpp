@@ -54,8 +54,8 @@ public:
 
 private:
     friend Tree;
-    using SeriesMap = std::map<MintSeries, std::string>;
-    using UnitMap = std::map<std::string, SeriesMap>;
+    using SeriesMap = std::pmr::map<MintSeries, std::string>;
+    using UnitMap = std::pmr::map<std::string, SeriesMap>;
 
     std::string id_;
 

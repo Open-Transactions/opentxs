@@ -143,7 +143,8 @@ auto BlockchainAccountActivity::display_balance(
 
 auto BlockchainAccountActivity::load_thread() noexcept -> void
 {
-    const auto transactions = [&]() -> std::vector<blockchain::block::pTxid> {
+    const auto transactions =
+        [&]() -> std::pmr::vector<blockchain::block::pTxid> {
         try {
             const auto& chain =
                 Widget::api_.Network().Blockchain().GetChain(chain_);
@@ -155,7 +156,7 @@ auto BlockchainAccountActivity::load_thread() noexcept -> void
             return {};
         }
     }();
-    auto active = std::set<AccountActivityRowID>{};
+    auto active = std::pmr::set<AccountActivityRowID>{};
 
     for (const auto& txid : transactions) {
         if (const auto id = process_txid(txid); id.has_value()) {
@@ -294,7 +295,7 @@ auto BlockchainAccountActivity::process_contact(const Message& in) noexcept
 
     const auto contactID = Widget::api_.Factory().Identifier(body.at(1))->str();
     const auto txids = [&] {
-        auto out = std::set<OTData>{};
+        auto out = std::pmr::set<OTData>{};
         for_each_row([&](const auto& row) {
             for (const auto& id : row.Contacts()) {
                 if (contactID == id) {

@@ -14,7 +14,7 @@
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/blockchain/Blockchain.hpp"
 #include "opentxs/blockchain/BlockchainType.hpp"
-#include "opentxs/blockchain/crypto/Wallet.hpp"
+#include "opentxs/blockchain/crypto/Wallet.hpp"  // IWYU pragma: keep
 
 namespace opentxs::api::crypto::blockchain
 {
@@ -33,7 +33,7 @@ Wallets::Wallets(
 }
 
 auto Wallets::AccountList(const identifier::Nym& nym) const noexcept
-    -> std::set<OTIdentifier>
+    -> std::pmr::set<OTIdentifier>
 {
     populate();
 
@@ -41,14 +41,14 @@ auto Wallets::AccountList(const identifier::Nym& nym) const noexcept
 }
 
 auto Wallets::AccountList(const opentxs::blockchain::Type chain) const noexcept
-    -> std::set<OTIdentifier>
+    -> std::pmr::set<OTIdentifier>
 {
     populate();
 
     return index_.AccountList(chain);
 }
 
-auto Wallets::AccountList() const noexcept -> std::set<OTIdentifier>
+auto Wallets::AccountList() const noexcept -> std::pmr::set<OTIdentifier>
 {
     populate();
 

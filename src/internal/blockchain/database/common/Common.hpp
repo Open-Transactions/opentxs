@@ -77,5 +77,5 @@ enum Table {
 
 auto ChainToSyncTable(const opentxs::blockchain::Type chain) noexcept(false)
     -> int;
-auto SyncTables() noexcept -> const std::vector<SyncTableData>&;
+auto SyncTables() noexcept -> const std::pmr::vector<SyncTableData>&;
 }  // namespace opentxs::blockchain::database::common

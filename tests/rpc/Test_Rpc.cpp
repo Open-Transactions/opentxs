@@ -130,7 +130,7 @@ protected:
     static std::string nym3_account2_id_;
     static std::string seed_id_;
     static std::string seed2_id_;
-    static std::map<std::string, int> widget_update_counters_;
+    static std::pmr::map<std::string, int> widget_update_counters_;
     static std::string workflow_id_;
     static std::string claim_id_;
 
@@ -279,7 +279,7 @@ std::string Test_Rpc::nym3_id_{};
 std::string Test_Rpc::nym3_account2_id_{};
 std::string Test_Rpc::seed_id_{};
 std::string Test_Rpc::seed2_id_{};
-std::map<std::string, int> Test_Rpc::widget_update_counters_{};
+std::pmr::map<std::string, int> Test_Rpc::widget_update_counters_{};
 std::string Test_Rpc::workflow_id_{};
 std::string Test_Rpc::claim_id_{};
 
@@ -1403,7 +1403,7 @@ TEST_F(Test_Rpc, Rename_Accounts)
     auto command = init(proto::RPCCOMMAND_RENAMEACCOUNT);
     command.set_session(0);
     ot_.ClientSession(0);
-    const std::vector<std::string> accounts{
+    const std::pmr::vector<std::string> accounts{
         issuer_account_id_,
         nym2_account_id_,
         nym3_account1_id_,

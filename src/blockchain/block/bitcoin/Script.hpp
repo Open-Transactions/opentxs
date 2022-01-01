@@ -68,14 +68,14 @@ public:
     }
     auto end() const noexcept -> const_iterator final { return cend(); }
     auto ExtractElements(const filter::Type style) const noexcept
-        -> std::vector<Space> final;
+        -> std::pmr::vector<Space> final;
     auto ExtractPatterns(const api::Session& api) const noexcept
-        -> std::vector<PatternID> final;
+        -> std::pmr::vector<PatternID> final;
     auto IsNotification(
         const std::uint8_t version,
         const PaymentCode& recipient) const noexcept -> bool final;
     auto LikelyPubkeyHashes(const api::Session& api) const noexcept
-        -> std::vector<OTData> final;
+        -> std::pmr::vector<OTData> final;
     auto M() const noexcept -> std::optional<std::uint8_t> final;
     auto MultisigPubkey(const std::size_t position) const noexcept
         -> std::optional<ReadView> final;

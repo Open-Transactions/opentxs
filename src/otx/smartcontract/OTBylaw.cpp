@@ -336,7 +336,7 @@ auto OTBylaw::Compare(OTBylaw& rhs) -> bool
             // above) and that should actually be good enough.
         }
 
-        std::set<std::string> theHookSet;
+        std::pmr::set<std::string> theHookSet;
 
         // There might be MANY entries with the SAME HOOK NAME. So we add them
         // all to a SET in order to get unique keys.
@@ -502,7 +502,7 @@ auto OTBylaw::RemoveClause(std::string str_Name) -> bool
     // Why AFTER? Because RemoveCallback calls RemoveClause again,
     // and we don't want this call to go into an infinite recursive loop.
     //
-    std::list<std::string> listStrings;
+    std::pmr::list<std::string> listStrings;
 
     for (auto& cb : m_mapCallbacks) {
         const std::string& str_callback_name = cb.first;

@@ -76,9 +76,9 @@ public:
     virtual auto cend() const noexcept -> const_iterator = 0;
     virtual auto end() const noexcept -> const_iterator = 0;
     virtual auto ExtractElements(const filter::Type style) const noexcept
-        -> std::vector<Space> = 0;
+        -> std::pmr::vector<Space> = 0;
     virtual auto ExtractPatterns(const api::Session& api) const noexcept
-        -> std::vector<PatternID> = 0;
+        -> std::pmr::vector<PatternID> = 0;
     virtual auto IsNotification(
         const std::uint8_t version,
         const PaymentCode& recipient) const noexcept -> bool = 0;

@@ -67,9 +67,9 @@ auto BlockchainAccountKeys(
     const blockchain::crypto::Wallet& parent,
     const blockchain::crypto::AccountIndex& index,
     const identifier::Nym& id,
-    const std::set<OTIdentifier>& hdAccounts,
-    const std::set<OTIdentifier>& importedAccounts,
-    const std::set<OTIdentifier>& paymentCodeAccounts) noexcept
+    const std::pmr::set<OTIdentifier>& hdAccounts,
+    const std::pmr::set<OTIdentifier>& importedAccounts,
+    const std::pmr::set<OTIdentifier>& paymentCodeAccounts) noexcept
     -> std::unique_ptr<blockchain::crypto::Account>;
 auto BlockchainHDSubaccount(
     const api::Session& api,

@@ -295,7 +295,7 @@ auto PeerManager::Peers::get_dns_peer() const noexcept -> Endpoint
             return {};
         }
 
-        auto seeds = std::vector<std::string>{};
+        auto seeds = std::pmr::vector<std::string>{};
         const auto count = std::size_t{1};
         std::sample(
             std::begin(dns),
@@ -472,7 +472,7 @@ auto PeerManager::Peers::get_preferred_peer(
 }
 
 auto PeerManager::Peers::get_preferred_services(
-    const internal::Config& config) noexcept -> std::set<p2p::Service>
+    const internal::Config& config) noexcept -> std::pmr::set<p2p::Service>
 {
     if (config.download_cfilters_) {
 
@@ -483,11 +483,12 @@ auto PeerManager::Peers::get_preferred_services(
     }
 }
 
-auto PeerManager::Peers::get_types() const noexcept -> std::set<p2p::Network>
+auto PeerManager::Peers::get_types() const noexcept
+    -> std::pmr::set<p2p::Network>
 {
     using Type = blockchain::p2p::Network;
     using Mode = Options::ConnectionMode;
-    auto output = std::set<p2p::Network>{};
+    auto output = std::pmr::set<p2p::Network>{};
 
     switch (api_.GetOptions().Ipv4ConnectionMode()) {
         case Mode::off: {

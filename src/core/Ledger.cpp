@@ -143,7 +143,7 @@ auto Ledger::VerifyAccount(const identity::Nym& theNym) -> bool
         case ledgerType::paymentInbox:
         case ledgerType::recordBox:
         case ledgerType::expiredBox: {
-            std::set<std::int64_t> setUnloaded;
+            std::pmr::set<std::int64_t> setUnloaded;
             LoadBoxReceipts(&setUnloaded);  // Note: Also useful for
                                             // suppressing errors here.
         } break;
@@ -240,11 +240,11 @@ auto Ledger::DeleteBoxReceipt(const std::int64_t& lTransactionNum) -> bool
 // then add that transaction# to the set. (psetUnloaded)
 
 // if psetUnloaded passed in, then use it to return the #s that weren't there.
-auto Ledger::LoadBoxReceipts(std::set<std::int64_t>* psetUnloaded) -> bool
+auto Ledger::LoadBoxReceipts(std::pmr::set<std::int64_t>* psetUnloaded) -> bool
 {
     // Grab a copy of all the transaction #s stored inside this ledger.
     //
-    std::set<std::int64_t> the_set;
+    std::pmr::set<std::int64_t> the_set;
 
     for (auto& [number, pTransaction] : m_mapTransactions) {
         OT_ASSERT(pTransaction);
@@ -370,10 +370,10 @@ auto Ledger::LoadBoxReceipt(const std::int64_t& lTransactionNum) -> bool
 }
 
 auto Ledger::GetTransactionNums(
-    const std::set<std::int32_t>* pOnlyForIndices /*=nullptr*/) const
-    -> std::set<std::int64_t>
+    const std::pmr::set<std::int32_t>* pOnlyForIndices /*=nullptr*/) const
+    -> std::pmr::set<std::int64_t>
 {
-    std::set<std::int64_t> the_set{};
+    std::pmr::set<std::int64_t> the_set{};
 
     std::int32_t current_index{-1};
 
@@ -1408,7 +1408,7 @@ auto Ledger::GenerateBalanceStatement(
         context,
         theAccount,
         theOutbox,
-        std::set<TransactionNumber>(),
+        std::pmr::set<TransactionNumber>(),
         reason);
 }
 
@@ -1418,10 +1418,10 @@ auto Ledger::GenerateBalanceStatement(
     const otx::context::Server& context,
     const Account& theAccount,
     Ledger& theOutbox,
-    const std::set<TransactionNumber>& without,
+    const std::pmr::set<TransactionNumber>& without,
     const PasswordPrompt& reason) const -> std::unique_ptr<Item>
 {
-    std::set<TransactionNumber> removing = without;
+    std::pmr::set<TransactionNumber> removing = without;
 
     if (ledgerType::inbox != GetType()) {
         LogError()(OT_PRETTY_CLASS())("Wrong ledger type.").Flush();
@@ -1535,7 +1535,7 @@ auto Ledger::GenerateBalanceStatement(
         } break;
     }
 
-    std::set<TransactionNumber> adding;
+    std::pmr::set<TransactionNumber> adding;
     auto statement = context.Statement(adding, removing, reason);
 
     if (!statement) { return nullptr; }
@@ -1864,7 +1864,8 @@ auto Ledger::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
             return (-1);
         }
 
-        const auto ACCOUNT_ID = api_.Factory().Identifier(strLedgerAcctID);
+        const auto ACCOUNT_ID =
+            api_.Factory().IdentifierFromBase58(strLedgerAcctID);
         const auto NOTARY_ID = api_.Factory().ServerID(strLedgerAcctNotaryID);
         const auto NYM_ID = api_.Factory().NymID(strNymID);
 

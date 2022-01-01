@@ -781,7 +781,7 @@ TEST_F(Regtest_payment_code, confirm_send)
     account_list_bob_.expected_ += 0;
     const auto& txid = transactions_.at(1).get();
     const auto extra = [&] {
-        auto output = std::vector<Transaction>{};
+        auto output = std::pmr::vector<Transaction>{};
         const auto pTX = output.emplace_back(
             client_1_.Crypto().Blockchain().LoadTransactionBitcoin(txid));
 
@@ -807,7 +807,7 @@ TEST_F(Regtest_payment_code, second_block)
     const auto& blockchain =
         client_1_.Network().Blockchain().GetChain(test_chain_);
     const auto blockHash = blockchain.HeaderOracle().BestHash(height_);
-    auto expected = std::vector<ot::Space>{};
+    auto expected = std::pmr::vector<ot::Space>{};
 
     ASSERT_FALSE(blockHash->empty());
 

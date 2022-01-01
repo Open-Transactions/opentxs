@@ -112,7 +112,7 @@ private:
     OTFlag status_;
     OTFlag use_proxy_;
     mutable std::mutex registration_lock_;
-    std::map<OTNymID, bool> registered_for_push_;
+    std::pmr::map<OTNymID, bool> registered_for_push_;
 
     auto async_socket(const Lock& lock) const -> OTZMQDealerSocket;
     auto clone() const -> ServerConnection* final { return nullptr; }

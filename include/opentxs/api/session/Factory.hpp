@@ -258,7 +258,7 @@ public:
         const opentxs::blockchain::block::Header& previous,
         const Transaction_p generationTransaction,
         const std::uint32_t nBits,
-        const std::vector<Transaction_p>& extraTransactions = {},
+        const std::pmr::vector<Transaction_p>& extraTransactions = {},
         const std::int32_t version = 2,
         const AbortFunction abort = {}) const noexcept
         -> std::shared_ptr<
@@ -266,23 +266,23 @@ public:
     using OutputBuilder = std::tuple<
         opentxs::blockchain::Amount,
         std::unique_ptr<const opentxs::blockchain::block::bitcoin::Script>,
-        std::set<opentxs::blockchain::crypto::Key>>;
+        std::pmr::set<opentxs::blockchain::crypto::Key>>;
     virtual auto BitcoinGenerationTransaction(
         const opentxs::blockchain::Type chain,
         const opentxs::blockchain::block::Height height,
-        std::vector<OutputBuilder>&& outputs,
+        std::pmr::vector<OutputBuilder>&& outputs,
         const std::string& coinbase = {},
         const std::int32_t version = 1) const noexcept -> Transaction_p = 0;
     virtual auto BitcoinScriptNullData(
         const opentxs::blockchain::Type chain,
-        const std::vector<ReadView>& data) const noexcept
+        const std::pmr::vector<ReadView>& data) const noexcept
         -> std::unique_ptr<
             const opentxs::blockchain::block::bitcoin::Script> = 0;
     virtual auto BitcoinScriptP2MS(
         const opentxs::blockchain::Type chain,
         const std::uint8_t M,
         const std::uint8_t N,
-        const std::vector<const opentxs::crypto::key::EllipticCurve*>&
+        const std::pmr::vector<const opentxs::crypto::key::EllipticCurve*>&
             publicKeys) const noexcept
         -> std::unique_ptr<
             const opentxs::blockchain::block::bitcoin::Script> = 0;
@@ -325,7 +325,7 @@ public:
         const std::uint16_t port,
         const opentxs::blockchain::Type chain,
         const Time lastConnected,
-        const std::set<opentxs::blockchain::p2p::Service>& services,
+        const std::pmr::set<opentxs::blockchain::p2p::Service>& services,
         const bool incoming = false) const -> OTBlockchainAddress = 0;
     virtual auto BlockchainAddress(
         const opentxs::blockchain::p2p::Address::SerializedType& serialized)
@@ -410,9 +410,10 @@ public:
     virtual auto Data(const std::uint32_t input) const -> OTData = 0;
     virtual auto Data(const std::string& input, const StringStyle mode) const
         -> OTData = 0;
-    virtual auto Data(const std::vector<unsigned char>& input) const
+    virtual auto Data(const std::pmr::vector<unsigned char>& input) const
         -> OTData = 0;
-    virtual auto Data(const std::vector<std::byte>& input) const -> OTData = 0;
+    virtual auto Data(const std::pmr::vector<std::byte>& input) const
+        -> OTData = 0;
     virtual auto Data(const ReadView input) const -> OTData = 0;
     virtual auto Envelope() const noexcept -> OTEnvelope = 0;
     virtual auto Envelope(const opentxs::Armored& ciphertext) const
@@ -423,16 +424,17 @@ public:
     virtual auto Envelope(const opentxs::ReadView& serialized) const
         noexcept(false) -> OTEnvelope = 0;
     virtual auto Identifier() const -> OTIdentifier = 0;
-    virtual auto Identifier(const std::string& serialized) const
-        -> OTIdentifier = 0;
-    virtual auto Identifier(const opentxs::String& serialized) const
-        -> OTIdentifier = 0;
     virtual auto Identifier(const opentxs::Contract& contract) const
         -> OTIdentifier = 0;
     virtual auto Identifier(const opentxs::Item& item) const
         -> OTIdentifier = 0;
-    virtual auto Identifier(const ReadView bytes) const -> OTIdentifier = 0;
     virtual auto Identifier(const opentxs::network::zeromq::Frame& bytes) const
+        -> OTIdentifier = 0;
+    virtual auto IdentifierFromBase58(const std::string& serialized) const
+        -> OTIdentifier = 0;
+    virtual auto IdentifierFromBase58(const opentxs::String& serialized) const
+        -> OTIdentifier = 0;
+    virtual auto IdentifierFromBytes(const ReadView bytes) const
         -> OTIdentifier = 0;
     OPENTXS_NO_EXPORT virtual auto InternalSession() const noexcept
         -> const internal::Factory& = 0;

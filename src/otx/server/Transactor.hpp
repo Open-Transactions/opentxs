@@ -95,7 +95,7 @@ public:
 private:
     friend MainFile;
 
-    using BasketsMap = std::map<std::string, std::string>;
+    using BasketsMap = std::pmr::map<std::string, std::string>;
 
     Server& server_;
     const PasswordPrompt& reason_;

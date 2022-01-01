@@ -26,7 +26,7 @@ namespace bitcoin
 class OPENTXS_EXPORT CompactSize
 {
 public:
-    using Bytes = std::vector<std::byte>;
+    using Bytes = std::pmr::vector<std::byte>;
 
     // Returns the number of bytes SUBSEQUENT to the marker byte
     // Possible output values are: 0, 2, 4, 8
