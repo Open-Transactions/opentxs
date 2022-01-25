@@ -11,10 +11,10 @@
 #include <utility>
 
 #include "2_Factory.hpp"
-#include "core/contract/UnitDefinition.hpp"
+#include "core/contract/Unit.hpp"
 #include "internal/serialization/protobuf/Check.hpp"
 #include "internal/serialization/protobuf/verify/UnitDefinition.hpp"
-#include "opentxs/core/contract/UnitDefinition.hpp"
+#include "opentxs/core/contract/Unit.hpp"
 #include "serialization/protobuf/Signature.pb.h"
 #include "serialization/protobuf/UnitDefinition.pb.h"
 

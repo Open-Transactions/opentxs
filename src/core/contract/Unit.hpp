@@ -18,7 +18,7 @@
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/Types.hpp"
-#include "opentxs/core/contract/UnitDefinition.hpp"
+#include "opentxs/core/contract/Unit.hpp"
 #include "opentxs/core/contract/UnitType.hpp"
 #include "opentxs/core/display/Definition.hpp"
 #include "opentxs/core/identifier/Generic.hpp"

@@ -8,7 +8,7 @@
 #include <cstdint>
 
 #include "Proto.hpp"
-#include "core/contract/UnitDefinition.hpp"
+#include "core/contract/Unit.hpp"
 #include "opentxs/Types.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/core/Types.hpp"

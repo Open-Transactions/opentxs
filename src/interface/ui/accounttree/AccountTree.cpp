@@ -36,7 +36,7 @@
 #include "opentxs/blockchain/crypto/Account.hpp"
 #include "opentxs/core/AccountType.hpp"
 #include "opentxs/core/Amount.hpp"
-#include "opentxs/core/contract/UnitDefinition.hpp"
+#include "opentxs/core/contract/Unit.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
 #include "opentxs/interface/ui/AccountCurrency.hpp"
 #include "opentxs/network/zeromq/Pipeline.hpp"

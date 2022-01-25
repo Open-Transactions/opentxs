@@ -5,7 +5,7 @@
 
 #include "0_stdafx.hpp"                      // IWYU pragma: associated
 #include "1_Internal.hpp"                    // IWYU pragma: associated
-#include "core/contract/UnitDefinition.hpp"  // IWYU pragma: associated
+#include "core/contract/Unit.hpp"  // IWYU pragma: associated
 
 #include <algorithm>
 #include <cmath>  // IWYU pragma: keep

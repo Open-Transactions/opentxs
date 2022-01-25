@@ -21,8 +21,8 @@ target_sources(
     "ServerContract.hpp"
     "Signable.cpp"
     "Signable.hpp"
-    "UnitDefinition.cpp"
-    "UnitDefinition.hpp"
+    "Unit.cpp"
+    "Unit.hpp"
 )
 target_include_directories(
   opentxs-common SYSTEM
@@ -37,7 +37,7 @@ set(cxx-install-headers
     "${opentxs_SOURCE_DIR}/include/opentxs/core/contract/ServerContract.hpp"
     "${opentxs_SOURCE_DIR}/include/opentxs/core/contract/Signable.hpp"
     "${opentxs_SOURCE_DIR}/include/opentxs/core/contract/Types.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/core/contract/UnitDefinition.hpp"
+    "${opentxs_SOURCE_DIR}/include/opentxs/core/contract/Unit.hpp"
     "${opentxs_SOURCE_DIR}/include/opentxs/core/contract/UnitType.hpp"
 )
 target_sources(opentxs-common PRIVATE ${cxx-install-headers})
