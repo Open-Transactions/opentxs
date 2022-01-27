@@ -648,6 +648,8 @@ auto Peer::subscribe() noexcept -> void
         (1 == address_.Services().count(p2p::Service::Limited));
     const auto cfilter =
         (1 == address_.Services().count(p2p::Service::CompactFilters));
+    const auto bloom =
+        (1 == address_.Services().count(p2p::Service::Bloom));
 
     if (network || limited || header_probe_) {
         pipeline_.PullFrom(manager_.Endpoint(Task::Getheaders));
@@ -655,7 +657,6 @@ auto Peer::subscribe() noexcept -> void
         pipeline_.PullFrom(manager_.Endpoint(Task::BroadcastTransaction));
         pipeline_.SubscribeTo(manager_.Endpoint(Task::JobAvailableBlock));
     }
-
     if (cfilter || cfilter_probe_) {
         pipeline_.SubscribeTo(manager_.Endpoint(Task::JobAvailableCfheaders));
         pipeline_.SubscribeTo(manager_.Endpoint(Task::JobAvailableCfilters));
@@ -665,7 +666,9 @@ auto Peer::subscribe() noexcept -> void
     pipeline_.SubscribeTo(api_.Endpoints().BlockchainMempool());
     request_headers();
     request_addresses();
-    request_mempool();
+    if (bloom) {
+        request_mempool();
+    }
 }
 
 auto Peer::transmit(zmq::Message&& message) noexcept -> void
