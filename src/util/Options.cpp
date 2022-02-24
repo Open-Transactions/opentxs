@@ -38,14 +38,10 @@ struct Options::Imp::Parser {
     static constexpr auto blockchain_disable_{"disable_blockchain"};
     static constexpr auto blockchain_ipv4_bind_{"blockchain_bind_ipv4"};
     static constexpr auto blockchain_ipv6_bind_{"blockchain_bind_ipv6"};
-    static constexpr auto blockchain_storage_{"blockchain_storage"};
     static constexpr auto blockchain_sync_provide_{"provide_sync_server"};
-    static constexpr auto blockchain_sync_connect_{"blockchain_sync_server"};
     static constexpr auto blockchain_wallet_enable_{"blockchain_wallet"};
     static constexpr auto default_mint_key_bytes_{"mint_key_default_bytes"};
     static constexpr auto home_{"ot_home"};
-    static constexpr auto ipv4_connection_mode_{"ipv4_connection_mode"};
-    static constexpr auto ipv6_connection_mode_{"ipv6_connection_mode"};
     static constexpr auto log_endpoint_{"log_endpoint"};
     static constexpr auto log_level_{"log_level"};
     static constexpr auto notary_inproc_{"notary_inproc"};
@@ -83,19 +79,9 @@ struct Options::Imp::Parser {
                 "Local ipv6 addresses to bind for incoming blockchain "
                 "connections");
             out.add_options()(
-                blockchain_storage_,
-                po::value<int>(),
-                "Blockchain block persistence level.\n    0: do not save any "
-                "blocks\n    1: save blocks downloaded by the wallet\n    2: "
-                "download and save all blocks");
-            out.add_options()(
                 blockchain_sync_provide_,
                 po::value<bool>()->implicit_value(true),
                 "Enable blockchain sync server support");
-            out.add_options()(
-                blockchain_sync_connect_,
-                po::value<Multistring>()->multitoken()->composing(),
-                "Blockchain sync server(s) to connect to as a client");
             out.add_options()(
                 blockchain_wallet_enable_,
                 po::value<bool>()->implicit_value(true),
@@ -108,16 +94,6 @@ struct Options::Imp::Parser {
                 home_,
                 po::value<UnallocatedCString>(),
                 "Path to opentxs data directory");
-            out.add_options()(
-                ipv4_connection_mode_,
-                po::value<int>(),
-                "Connection policy for ipv4 peers. -1 = ipv4 disabled, 0 = "
-                "automatic, 1 = ipv4 enabled");
-            out.add_options()(
-                ipv6_connection_mode_,
-                po::value<int>(),
-                "Connection policy for ipv6 peers. -1 = ipv6 disabled, 0 = "
-                "automatic, 1 = ipv6 enabled");
             out.add_options()(
                 log_endpoint_,
                 po::value<UnallocatedCString>(),
@@ -199,15 +175,15 @@ Options::Imp::Imp() noexcept
     : blockchain_disabled_chains_()
     , blockchain_ipv4_bind_()
     , blockchain_ipv6_bind_()
-    , blockchain_storage_level_(std::nullopt)
+    , blockchain_storage_level_(1)
     , blockchain_sync_server_enabled_(std::nullopt)
     , blockchain_sync_servers_()
     , blockchain_wallet_enabled_(std::nullopt)
     , default_mint_key_bytes_(std::nullopt)
     , home_(std::nullopt)
     , log_endpoint_(std::nullopt)
-    , ipv4_connection_mode_(std::nullopt)
-    , ipv6_connection_mode_(std::nullopt)
+    , ipv4_connection_mode_(opentxs::Options::ConnectionMode::on)
+    , ipv6_connection_mode_(opentxs::Options::ConnectionMode::automatic)
     , log_level_(std::nullopt)
     , notary_bind_inproc_(std::nullopt)
     , notary_bind_ip_(std::nullopt)
@@ -320,28 +296,18 @@ auto Options::Imp::import_value(const char* key, const char* value) noexcept
             blockchain_ipv4_bind_.emplace(value);
         } else if (0 == std::strcmp(key, Parser::blockchain_ipv6_bind_)) {
             blockchain_ipv6_bind_.emplace(value);
-        } else if (0 == std::strcmp(key, Parser::blockchain_storage_)) {
-            blockchain_storage_level_ = std::stoi(value);
         } else if (0 == std::strcmp(key, Parser::blockchain_sync_provide_)) {
             blockchain_sync_server_enabled_ = to_bool(value);
 
             if (blockchain_sync_server_enabled_) {
                 blockchain_wallet_enabled_ = false;
             }
-        } else if (0 == std::strcmp(key, Parser::blockchain_sync_connect_)) {
-            blockchain_sync_servers_.emplace(value);
         } else if (0 == std::strcmp(key, Parser::blockchain_wallet_enable_)) {
             blockchain_wallet_enabled_ = to_bool(value);
         } else if (0 == std::strcmp(key, Parser::default_mint_key_bytes_)) {
             default_mint_key_bytes_ = std::stoull(value);
         } else if (0 == std::strcmp(key, Parser::home_)) {
             home_ = value;
-        } else if (0 == std::strcmp(key, Parser::ipv4_connection_mode_)) {
-            ipv4_connection_mode_ =
-                static_cast<ConnectionMode>(std::stoi(value));
-        } else if (0 == std::strcmp(key, Parser::ipv6_connection_mode_)) {
-            ipv6_connection_mode_ =
-                static_cast<ConnectionMode>(std::stoi(value));
         } else if (0 == std::strcmp(key, Parser::log_endpoint_)) {
             log_endpoint_ = value;
         } else if (0 == std::strcmp(key, Parser::log_level_)) {
@@ -433,11 +399,6 @@ auto Options::Imp::parse(int argc, char** argv) noexcept(false) -> void
                     std::inserter(dest, dest.end()));
             } catch (...) {
             }
-        } else if (name == Parser::blockchain_storage_) {
-            try {
-                blockchain_storage_level_ = value.as<int>();
-            } catch (...) {
-            }
         } else if (name == Parser::blockchain_sync_provide_) {
             try {
                 blockchain_sync_server_enabled_ = value.as<bool>();
@@ -445,16 +406,6 @@ auto Options::Imp::parse(int argc, char** argv) noexcept(false) -> void
                 if (blockchain_sync_server_enabled_) {
                     blockchain_wallet_enabled_ = false;
                 }
-            } catch (...) {
-            }
-        } else if (name == Parser::blockchain_sync_connect_) {
-            try {
-                const auto& servers = value.as<Parser::Multistring>();
-                auto& dest = blockchain_sync_servers_;
-                std::copy(
-                    servers.begin(),
-                    servers.end(),
-                    std::inserter(dest, dest.end()));
             } catch (...) {
             }
         } else if (name == Parser::blockchain_wallet_enable_) {
@@ -470,18 +421,6 @@ auto Options::Imp::parse(int argc, char** argv) noexcept(false) -> void
         } else if (name == Parser::home_) {
             try {
                 home_ = value.as<UnallocatedCString>();
-            } catch (...) {
-            }
-        } else if (name == Parser::ipv4_connection_mode_) {
-            try {
-                ipv4_connection_mode_ =
-                    static_cast<ConnectionMode>(value.as<int>());
-            } catch (...) {
-            }
-        } else if (name == Parser::ipv6_connection_mode_) {
-            try {
-                ipv6_connection_mode_ =
-                    static_cast<ConnectionMode>(value.as<int>());
             } catch (...) {
             }
         } else if (name == Parser::log_endpoint_) {
