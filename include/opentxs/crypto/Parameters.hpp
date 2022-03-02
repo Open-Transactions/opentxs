@@ -74,45 +74,48 @@ public:
     static auto DefaultSource() noexcept -> identity::SourceType;
     static auto DefaultType() noexcept -> ParameterType;
 
-    auto Algorithm() const noexcept -> key::asymmetric::Algorithm;
-    auto ChangeType(const ParameterType type) const noexcept -> Parameters;
-    auto credentialType() const noexcept -> identity::CredentialType;
-    auto CredIndex() const noexcept -> Bip32Index;
-    auto Credset() const noexcept -> Bip32Index;
-    auto Default() const noexcept -> bool;
-    auto DHParams() const noexcept -> ReadView;
-    auto Entropy() const noexcept -> const Secret&;
-    auto Keypair() const noexcept -> const key::Keypair&;
-    auto keySize() const noexcept -> std::int32_t;
-    OPENTXS_NO_EXPORT auto Internal() const noexcept
+    virtual auto Algorithm() const noexcept -> key::asymmetric::Algorithm;
+    virtual auto ChangeType(const ParameterType type) const noexcept
+        -> Parameters;
+    virtual auto credentialType() const noexcept -> identity::CredentialType;
+    virtual auto CredIndex() const noexcept -> Bip32Index;
+    virtual auto Credset() const noexcept -> Bip32Index;
+    virtual auto Default() const noexcept -> bool;
+    virtual auto DHParams() const noexcept -> ReadView;
+    virtual auto Entropy() const noexcept -> const Secret&;
+    virtual auto Keypair() const noexcept -> const key::Keypair&;
+    virtual auto keySize() const noexcept -> std::int32_t;
+    OPENTXS_NO_EXPORT virtual auto Internal() const noexcept
         -> const internal::Parameters&;
-    auto Nym() const noexcept -> Bip32Index;
-    auto nymParameterType() const noexcept -> ParameterType;
-    auto PaymentCodeVersion() const noexcept -> std::uint8_t;
-    auto Seed() const noexcept -> UnallocatedCString;
-    auto SeedLanguage() const noexcept -> Language;
-    auto SeedStrength() const noexcept -> crypto::SeedStrength;
-    auto SeedStyle() const noexcept -> crypto::SeedStyle;
-    auto SourceProofType() const noexcept -> identity::SourceProofType;
-    auto SourceType() const noexcept -> identity::SourceType;
-    auto UseAutoIndex() const noexcept -> bool;
+    virtual auto Nym() const noexcept -> Bip32Index;
+    virtual auto nymParameterType() const noexcept -> ParameterType;
+    virtual auto PaymentCodeVersion() const noexcept -> std::uint8_t;
+    virtual auto Seed() const noexcept -> UnallocatedCString;
+    virtual auto SeedLanguage() const noexcept -> Language;
+    virtual auto SeedStrength() const noexcept -> crypto::SeedStrength;
+    virtual auto SeedStyle() const noexcept -> crypto::SeedStyle;
+    virtual auto SourceProofType() const noexcept -> identity::SourceProofType;
+    virtual auto SourceType() const noexcept -> identity::SourceType;
+    virtual auto UseAutoIndex() const noexcept -> bool;
 
-    OPENTXS_NO_EXPORT auto Internal() noexcept -> internal::Parameters&;
-    auto Keypair() noexcept -> OTKeypair&;
-    auto SetCredIndex(const Bip32Index path) noexcept -> void;
-    auto SetCredset(const Bip32Index path) noexcept -> void;
-    auto SetDefault(const bool in) noexcept -> void;
-    auto SetEntropy(const Secret& entropy) noexcept -> void;
-    auto setKeySize(std::int32_t keySize) noexcept -> void;
-    auto SetNym(const Bip32Index path) noexcept -> void;
-    auto SetDHParams(const ReadView bytes) noexcept -> void;
-    auto SetPaymentCodeVersion(const std::uint8_t version) noexcept -> void;
-    auto SetSeed(const UnallocatedCString& seed) noexcept -> void;
-    auto SetSeedLanguage(const Language lang) noexcept -> void;
-    auto SetSeedStrength(const crypto::SeedStrength value) noexcept -> void;
-    auto SetSeedStyle(const crypto::SeedStyle type) noexcept -> void;
-    auto SetUseAutoIndex(const bool use) noexcept -> void;
-    auto swap(Parameters& rhs) noexcept -> void;
+    OPENTXS_NO_EXPORT virtual auto Internal() noexcept -> internal::Parameters&;
+    virtual auto Keypair() noexcept -> OTKeypair&;
+    virtual auto SetCredIndex(const Bip32Index path) noexcept -> void;
+    virtual auto SetCredset(const Bip32Index path) noexcept -> void;
+    virtual auto SetDefault(const bool in) noexcept -> void;
+    virtual auto SetEntropy(const Secret& entropy) noexcept -> void;
+    virtual auto setKeySize(std::int32_t keySize) noexcept -> void;
+    virtual auto SetNym(const Bip32Index path) noexcept -> void;
+    virtual auto SetDHParams(const ReadView bytes) noexcept -> void;
+    virtual auto SetPaymentCodeVersion(const std::uint8_t version) noexcept
+        -> void;
+    virtual auto SetSeed(const UnallocatedCString& seed) noexcept -> void;
+    virtual auto SetSeedLanguage(const Language lang) noexcept -> void;
+    virtual auto SetSeedStrength(const crypto::SeedStrength value) noexcept
+        -> void;
+    virtual auto SetSeedStyle(const crypto::SeedStyle type) noexcept -> void;
+    virtual auto SetUseAutoIndex(const bool use) noexcept -> void;
+    virtual auto swap(Parameters& rhs) noexcept -> void;
 
     Parameters(
         const ParameterType type = DefaultType(),

@@ -4,8 +4,10 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 add_opentx_test(unittests-opentxs-identity Test_Nym.cpp)
+add_opentx_test(unittests-opentxs-identity-source Test_Source.cpp)
+
 target_compile_definitions(
-  unittests-opentxs-identity
+  unittests-opentxs-identity-source
   PRIVATE
     "OT_STORAGE_LMDB=${LMDB_EXPORT}"
     "OT_STORAGE_FS=${FS_EXPORT}"
