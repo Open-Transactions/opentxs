@@ -14,7 +14,7 @@
 #include "opentxs/otx/blind/Purse.hpp"
 #include "serialization/protobuf/BlockchainPeerAddress.pb.h"
 
-namespace opentxs
+namespace opentxs::v1
 {
 
 class Item
@@ -612,12 +612,6 @@ public:
         OTPeerRequest,
         PeerRequest,
         (const Nym_p&, const ReadView&),
-        (const, final));
-
-    MOCK_METHOD(
-        opentxs::network::zeromq::Pipeline,
-        Pipeline,
-        (std::function<void(opentxs::network::zeromq::Message&&)>),
         (const, final));
 
     MOCK_METHOD(
