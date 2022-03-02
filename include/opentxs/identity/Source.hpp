@@ -10,6 +10,7 @@
 #include <memory>
 
 #include "opentxs/identity/Types.hpp"
+#include "opentxs/core/String.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
