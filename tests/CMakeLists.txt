@@ -40,6 +40,9 @@ function(
       opentxs::libopentxs
       Boost::program_options
       opentxs-test-helpers
+          GTest::gtest
+          GTest::gtest_main
+          GTest::gmock
   )
 
   target_include_directories(
