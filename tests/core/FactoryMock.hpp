@@ -409,17 +409,23 @@ public:
         (const opentxs::Item&),
         (const, final));
 
-    MOCK_METHOD(
-        OTIdentifier,
-        Identifier,
-        (const ReadView),
-        (const, final));
+//    MOCK_METHOD(
+//        OTIdentifier,
+//        Identifier,
+//        (const ReadView),
+//        (const, final));
 
     MOCK_METHOD(
         OTIdentifier,
         Identifier,
         (const opentxs::network::zeromq::Frame&),
         (const, final));
+
+    auto Identifier(const ReadView bytes) const -> OTIdentifier final
+    {
+        std::cout << "Identifier(const ReadView)\n";
+        return opentxs::Identifier::Factory();
+    }
 
     MOCK_METHOD(
         OTKeypair,
