@@ -14,7 +14,7 @@
 #include "opentxs/otx/blind/Purse.hpp"
 #include "serialization/protobuf/BlockchainPeerAddress.pb.h"
 
-namespace opentxs::v1
+namespace opentxs
 {
 
 class Item
