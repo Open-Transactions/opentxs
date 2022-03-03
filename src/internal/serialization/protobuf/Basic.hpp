@@ -11,10 +11,10 @@
 #include "opentxs/Version.hpp"
 #include "opentxs/util/Container.hpp"
 
-namespace opentxs::v1::proto
+namespace opentxs::proto
 {
 // This defined a map between the version of the parent object and the (minimum,
 // maximum) acceptable versions of a child object.
 using VersionMap =
     UnallocatedMap<std::uint32_t, std::pair<std::uint32_t, std::uint32_t>>;
-}  // namespace opentxs::v1::proto
+}  // namespace opentxs::proto

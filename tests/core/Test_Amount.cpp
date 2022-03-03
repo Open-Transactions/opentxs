@@ -13,6 +13,7 @@
 
 #include "internal/core/Amount.hpp"
 #include "internal/core/Factory.hpp"
+#include "opentxs/Version.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/util/Container.hpp"

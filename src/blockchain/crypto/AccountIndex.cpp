@@ -17,7 +17,7 @@
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/util/Container.hpp"
 
-namespace opentxs::v1::blockchain::crypto
+namespace opentxs::blockchain::crypto
 {
 struct AccountIndex::Imp {
     using Accounts = UnallocatedSet<OTIdentifier>;
@@ -147,4 +147,4 @@ AccountIndex::~AccountIndex()
         imp_ = nullptr;
     }
 }
-}  // namespace opentxs::v1::blockchain::crypto
+}  // namespace opentxs::blockchain::crypto

@@ -5,6 +5,7 @@
 
 #pragma once
 
+#include "opentxs/Version.hpp"
 #include "opentxs/util/Container.hpp"
 
 namespace ot = opentxs;

@@ -5,7 +5,7 @@
 
 #pragma once
 
-namespace opentxs::v1
+namespace opentxs
 {
 template <typename I>
 auto polarity(const I value) -> int
@@ -14,4 +14,4 @@ auto polarity(const I value) -> int
 
     return (0 < value) ? 1 : -1;
 }
-}  // namespace opentxs::v1
+}  // namespace opentxs

@@ -17,7 +17,7 @@
 #include "opentxs/crypto/key/asymmetric/Algorithm.hpp"
 #include "serialization/protobuf/AsymmetricKey.pb.h"
 
-namespace opentxs::v1::crypto::key::blank
+namespace opentxs::crypto::key::blank
 {
 class Keypair final : virtual public key::Keypair
 {
@@ -353,4 +353,4 @@ private:
     auto operator=(const Symmetric&) -> Symmetric& = delete;
     auto operator=(Symmetric&&) -> Symmetric& = delete;
 };
-}  // namespace opentxs::v1::crypto::key::blank
+}  // namespace opentxs::crypto::key::blank

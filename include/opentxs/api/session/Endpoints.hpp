@@ -14,8 +14,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace api
 {
 namespace session
@@ -31,11 +31,11 @@ namespace identifier
 {
 class Nym;
 }  // namespace identifier
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::api::session
+namespace opentxs::api::session
 {
 class OPENTXS_EXPORT Endpoints
 {
@@ -560,4 +560,4 @@ private:
     auto operator=(const Endpoints&) -> Endpoints& = delete;
     auto operator=(Endpoints&&) -> Endpoints& = delete;
 };
-}  // namespace opentxs::v1::api::session
+}  // namespace opentxs::api::session

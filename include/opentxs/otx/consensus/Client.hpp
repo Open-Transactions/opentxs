@@ -12,8 +12,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace otx
 {
 namespace context
@@ -26,11 +26,11 @@ class Client;
 class TransactionStatement;
 }  // namespace context
 }  // namespace otx
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::otx::context
+namespace opentxs::otx::context
 {
 class OPENTXS_EXPORT Client : virtual public Base
 {
@@ -71,4 +71,4 @@ private:
     auto operator=(const Client&) -> Client& = delete;
     auto operator=(Client&&) -> Client& = delete;
 };
-}  // namespace opentxs::v1::otx::context
+}  // namespace opentxs::otx::context

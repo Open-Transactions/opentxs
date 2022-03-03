@@ -30,7 +30,7 @@
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Pimpl.hpp"
 
-namespace opentxs::v1
+namespace opentxs
 {
 OTParty::OTParty(
     const api::session::Wallet& wallet,
@@ -1699,4 +1699,4 @@ OTParty::~OTParty()
 
     m_pOwnerAgreement = nullptr;
 }
-}  // namespace opentxs::v1
+}  // namespace opentxs

@@ -23,7 +23,7 @@
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Pimpl.hpp"
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto BitcoinP2PFilteradd(
     const api::Session& api,
@@ -57,9 +57,9 @@ auto BitcoinP2PFilteradd(
 
     return new ReturnType(api, network, element);
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory
 
-namespace opentxs::v1::blockchain::p2p::bitcoin::message::implementation
+namespace opentxs::blockchain::p2p::bitcoin::message::implementation
 {
 Filteradd::Filteradd(
     const api::Session& api,
@@ -107,4 +107,4 @@ auto Filteradd::payload(AllocateOutput out) const noexcept -> bool
         return false;
     }
 }
-}  // namespace opentxs::v1::blockchain::p2p::bitcoin::message::implementation
+}  // namespace opentxs::blockchain::p2p::bitcoin::message::implementation

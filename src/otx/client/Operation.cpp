@@ -52,7 +52,6 @@
 #include "opentxs/api/session/Wallet.hpp"
 #include "opentxs/api/session/Workflow.hpp"
 #include "opentxs/core/Armored.hpp"
-#include "opentxs/core/Data.hpp"
 #include "opentxs/core/contract/ContractType.hpp"
 #include "opentxs/core/contract/ServerContract.hpp"
 #include "opentxs/core/contract/Unit.hpp"
@@ -293,7 +292,7 @@
 
 namespace zmq = opentxs::network::zeromq;
 
-namespace opentxs::v1
+namespace opentxs
 {
 auto Factory::Operation(
     const api::session::Client& api,
@@ -303,9 +302,9 @@ auto Factory::Operation(
 {
     return new otx::client::implementation::Operation(api, nym, server, reason);
 }
-}  // namespace opentxs::v1
+}  // namespace opentxs
 
-namespace opentxs::v1::otx::client::implementation
+namespace opentxs::otx::client::implementation
 {
 const UnallocatedMap<otx::OperationType, Operation::Category>
     Operation::category_{
@@ -2826,4 +2825,4 @@ Operation::~Operation()
 
     if (needPromise) { set_result({otx::LastReplyStatus::Unknown, nullptr}); }
 }
-}  // namespace opentxs::v1::otx::client::implementation
+}  // namespace opentxs::otx::client::implementation

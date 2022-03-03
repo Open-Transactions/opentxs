@@ -7,7 +7,7 @@
 #include "1_Internal.hpp"                // IWYU pragma: associated
 #include "internal/interface/ui/UI.hpp"  // IWYU pragma: associated
 
-namespace opentxs::v1::ui
+namespace opentxs::ui
 {
 auto claim_ownership(QObject*) noexcept -> void {}
-}  // namespace opentxs::v1::ui
+}  // namespace opentxs::ui

@@ -42,7 +42,7 @@
 #include "opentxs/util/Pimpl.hpp"
 #include "opentxs/util/Time.hpp"
 
-namespace opentxs::v1
+namespace opentxs
 {
 enum { TradeProcessIntervalSeconds = 10 };
 
@@ -1251,4 +1251,4 @@ void OTTrade::InitTrade()
 }
 
 OTTrade::~OTTrade() { Release_Trade(); }
-}  // namespace opentxs::v1
+}  // namespace opentxs

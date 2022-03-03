@@ -37,7 +37,7 @@
 #include "otx/server/Server.hpp"
 #include "otx/server/Transactor.hpp"
 
-namespace opentxs::v1::server
+namespace opentxs::server
 {
 MainFile::MainFile(Server& server, const PasswordPrompt& reason)
     : server_(server)
@@ -475,4 +475,4 @@ auto MainFile::LoadServerUserAndContract() -> bool
 
     return bSuccess;
 }
-}  // namespace opentxs::v1::server
+}  // namespace opentxs::server

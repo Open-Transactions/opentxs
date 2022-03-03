@@ -9,7 +9,7 @@
 
 #include <memory>
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto UnitListItem(
     const ui::implementation::UnitListInternalInterface& parent,
@@ -23,9 +23,9 @@ auto UnitListItem(
 
     return std::make_shared<ReturnType>(parent, api, rowID, sortKey, custom);
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory
 
-namespace opentxs::v1::ui::implementation
+namespace opentxs::ui::implementation
 {
 UnitListItem::UnitListItem(
     const UnitListInternalInterface& parent,
@@ -37,4 +37,4 @@ UnitListItem::UnitListItem(
     , name_(sortKey)
 {
 }
-}  // namespace opentxs::v1::ui::implementation
+}  // namespace opentxs::ui::implementation

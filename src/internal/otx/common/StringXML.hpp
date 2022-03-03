@@ -19,14 +19,14 @@ class IFileReadCallBack;
 }
 }  // namespace irr
 
-namespace opentxs::v1
+namespace opentxs
 {
 class StringXML;
 
 using OTStringXML = Pimpl<StringXML>;
-}  // namespace opentxs::v1
+}  // namespace opentxs
 
-namespace opentxs::v1
+namespace opentxs
 {
 class StringXML : virtual public String
 {
@@ -52,4 +52,4 @@ private:
     StringXML(StringXML&&) = delete;
     auto operator=(StringXML&&) -> StringXML& = delete;
 };
-}  // namespace opentxs::v1
+}  // namespace opentxs

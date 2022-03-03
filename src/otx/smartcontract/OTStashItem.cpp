@@ -13,7 +13,7 @@
 #include "opentxs/core/String.hpp"
 #include "opentxs/util/Log.hpp"
 
-namespace opentxs::v1
+namespace opentxs
 {
 OTStashItem::OTStashItem()
     : m_strInstrumentDefinitionID(String::Factory())
@@ -109,4 +109,4 @@ auto OTStashItem::DebitStash(const std::int64_t& lAmount) -> bool
     return true;
 }
 
-}  // namespace opentxs::v1
+}  // namespace opentxs

@@ -24,8 +24,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace api
 {
 class Session;
@@ -44,18 +44,18 @@ struct Input;
 }  // namespace bitcoin
 }  // namespace block
 }  // namespace blockchain
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
 namespace be = boost::endian;
 
-namespace opentxs::v1::blockchain
+namespace opentxs::blockchain
 {
 static constexpr auto standard_hash_size_ = std::size_t{32};
-}  // namespace opentxs::v1::blockchain
+}  // namespace opentxs::blockchain
 
-namespace opentxs::v1::blockchain::bitcoin
+namespace opentxs::blockchain::bitcoin
 {
 using Byte = const std::byte;
 using ByteIterator = Byte*;
@@ -188,4 +188,4 @@ private:
         const std::size_t total,
         const SigHash& sigHash) noexcept -> std::unique_ptr<Hash>;
 };
-}  // namespace opentxs::v1::blockchain::bitcoin
+}  // namespace opentxs::blockchain::bitcoin

@@ -13,18 +13,18 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace proto
 {
 class Signature;
 class Verification;
 }  // namespace proto
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::identity::wot::verification
+namespace opentxs::identity::wot::verification
 {
 class OPENTXS_EXPORT Item
 {
@@ -58,4 +58,4 @@ private:
     auto operator=(const Item&) -> Item& = delete;
     auto operator=(Item&&) -> Item& = delete;
 };
-}  // namespace opentxs::v1::identity::wot::verification
+}  // namespace opentxs::identity::wot::verification

@@ -19,8 +19,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace network
 {
 namespace zeromq
@@ -38,11 +38,11 @@ class ReplyCallback;
 
 using OTZMQListenCallback = Pimpl<network::zeromq::ListenCallback>;
 using OTZMQReplyCallback = Pimpl<network::zeromq::ReplyCallback>;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::network::zeromq::internal
+namespace opentxs::network::zeromq::internal
 {
 class Batch
 {
@@ -69,4 +69,4 @@ private:
     auto operator=(const Batch&) -> Batch& = delete;
     auto operator=(Batch&&) -> Batch& = delete;
 };
-}  // namespace opentxs::v1::network::zeromq::internal
+}  // namespace opentxs::network::zeromq::internal

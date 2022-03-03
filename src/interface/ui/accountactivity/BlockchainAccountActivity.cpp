@@ -17,6 +17,7 @@
 
 #include "interface/ui/base/List.hpp"
 #include "interface/ui/base/Widget.hpp"
+#include "internal/api/crypto/blockchain/Types.hpp"
 #include "internal/blockchain/Blockchain.hpp"
 #include "internal/blockchain/Params.hpp"
 #include "internal/blockchain/block/bitcoin/Bitcoin.hpp"
@@ -57,7 +58,7 @@
 #include "serialization/protobuf/PaymentWorkflowEnums.pb.h"
 #include "util/Container.hpp"
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto BlockchainAccountActivityModel(
     const api::session::Client& api,
@@ -74,9 +75,9 @@ auto BlockchainAccountActivityModel(
 
     return std::make_unique<ReturnType>(api, chain, nymID, accountID, cb);
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory
 
-namespace opentxs::v1::ui::implementation
+namespace opentxs::ui::implementation
 {
 BlockchainAccountActivity::BlockchainAccountActivity(
     const api::session::Client& api,
@@ -109,8 +110,8 @@ BlockchainAccountActivity::BlockchainAccountActivity(
         UnallocatedCString{api.Endpoints().ContactUpdate()},
     });
     balance_socket_->Send([&] {
-        auto work =
-            network::zeromq::tagged_message(WorkType::BlockchainBalance);
+        using Job = api::crypto::blockchain::BalanceOracleJobs;
+        auto work = network::zeromq::tagged_message(Job::registration);
         work.AddFrame(chain_);
         work.AddFrame(nymID);
 
@@ -546,4 +547,4 @@ BlockchainAccountActivity::~BlockchainAccountActivity()
     wait_for_startup();
     signal_shutdown().get();
 }
-}  // namespace opentxs::v1::ui::implementation
+}  // namespace opentxs::ui::implementation

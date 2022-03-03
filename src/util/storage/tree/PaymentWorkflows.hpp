@@ -23,8 +23,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace proto
 {
 class PaymentWorkflow;
@@ -35,11 +35,11 @@ namespace storage
 class Driver;
 class Nym;
 }  // namespace storage
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTENd(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::storage
+namespace opentxs::storage
 {
 class PaymentWorkflows final : public Node
 {
@@ -110,4 +110,4 @@ private:
     auto operator=(const PaymentWorkflows&) -> PaymentWorkflows = delete;
     auto operator=(PaymentWorkflows&&) -> PaymentWorkflows = delete;
 };
-}  // namespace opentxs::v1::storage
+}  // namespace opentxs::storage

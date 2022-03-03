@@ -9,7 +9,7 @@
 
 #include "internal/network/Factory.hpp"
 
-namespace opentxs::v1::network::implementation
+namespace opentxs::network::implementation
 {
 struct OpenDHT final : public network::OpenDHT {
     auto Insert(
@@ -27,9 +27,9 @@ struct OpenDHT final : public network::OpenDHT {
 
     ~OpenDHT() final = default;
 };
-}  // namespace opentxs::v1::network::implementation
+}  // namespace opentxs::network::implementation
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto OpenDHT(const network::DhtConfig&) noexcept
     -> std::unique_ptr<network::OpenDHT>
@@ -38,4 +38,4 @@ auto OpenDHT(const network::DhtConfig&) noexcept
 
     return std::make_unique<ReturnType>();
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory

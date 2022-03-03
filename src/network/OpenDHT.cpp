@@ -20,7 +20,7 @@
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto OpenDHT(const network::DhtConfig& config) noexcept
     -> std::unique_ptr<network::OpenDHT>
@@ -29,9 +29,9 @@ auto OpenDHT(const network::DhtConfig& config) noexcept
 
     return std::make_unique<ReturnType>(config);
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory
 
-namespace opentxs::v1::network::implementation
+namespace opentxs::network::implementation
 {
 OpenDHT::OpenDHT(const DhtConfig& config) noexcept
     : config_(config)
@@ -176,4 +176,4 @@ OpenDHT::~OpenDHT()
 {
     if (node_) { node_->join(); }
 }
-}  // namespace opentxs::v1::network::implementation
+}  // namespace opentxs::network::implementation

@@ -58,8 +58,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace api
 {
 namespace crypto
@@ -158,16 +158,17 @@ class BlockchainTransactionOutput;
 class BlockchainTransactionProposal;
 }  // namespace proto
 
+class Data;
 template <typename T>
 struct make_blank;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
 namespace zmq = opentxs::network::zeromq;
 
 #if OT_BLOCKCHAIN
-namespace opentxs::v1
+namespace opentxs
 {
 template <>
 struct make_blank<blockchain::block::Height> {
@@ -185,9 +186,9 @@ struct make_blank<blockchain::block::Position> {
             blockchain::block::BlankHash()};
     }
 };
-}  // namespace opentxs::v1
+}  // namespace opentxs
 
-namespace opentxs::v1::blockchain::node
+namespace opentxs::blockchain::node
 {
 // parent hash, child hash
 using ChainSegment = std::pair<block::pHash, block::pHash>;
@@ -207,10 +208,10 @@ using CfilterJob =
     download::Batch<std::unique_ptr<const GCS>, filter::pHeader, filter::Type>;
 using BlockJob =
     download::Batch<std::shared_ptr<const block::bitcoin::Block>, int>;
-}  // namespace opentxs::v1::blockchain::node
+}  // namespace opentxs::blockchain::node
 #endif  // OT_BLOCKCHAIN
 
-namespace opentxs::v1::blockchain::node::internal
+namespace opentxs::blockchain::node::internal
 {
 #if OT_BLOCKCHAIN
 struct BlockDatabase {
@@ -685,4 +686,4 @@ struct WalletDatabase {
     virtual ~WalletDatabase() = default;
 };
 #endif  // OT_BLOCKCHAIN
-}  // namespace opentxs::v1::blockchain::node::internal
+}  // namespace opentxs::blockchain::node::internal

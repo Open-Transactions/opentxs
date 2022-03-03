@@ -26,7 +26,7 @@
 #include "util/Container.hpp"
 #include "util/Random.hpp"
 
-namespace opentxs::v1::rpc::request
+namespace opentxs::rpc::request
 {
 Base::Imp::Imp(
     const Base* parent,
@@ -335,4 +335,4 @@ auto Base::Type() const noexcept -> CommandType { return imp_->type_; }
 auto Base::Version() const noexcept -> VersionNumber { return imp_->version_; }
 
 Base::~Base() = default;
-}  // namespace opentxs::v1::rpc::request
+}  // namespace opentxs::rpc::request

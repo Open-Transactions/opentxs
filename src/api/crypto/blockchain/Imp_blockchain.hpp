@@ -19,13 +19,14 @@
 #include <tuple>
 #include <utility>
 
-#include "api/crypto/blockchain/BalanceOracle.hpp"
 #include "api/crypto/blockchain/Blockchain.hpp"
 #include "api/crypto/blockchain/Imp.hpp"
 #include "blockchain/database/common/Database.hpp"
+#include "internal/api/crypto/blockchain/BalanceOracle.hpp"
 #include "internal/blockchain/database/common/Common.hpp"
 #include "internal/blockchain/node/Node.hpp"
 #include "opentxs/Types.hpp"
+#include "opentxs/Version.hpp"
 #include "opentxs/api/Context.hpp"
 #include "opentxs/api/crypto/Blockchain.hpp"
 #include "opentxs/blockchain/Blockchain.hpp"
@@ -48,8 +49,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace api
 {
 namespace crypto
@@ -107,13 +108,13 @@ class Data;
 class Identifier;
 class Options;
 class PasswordPrompt;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
 namespace zmq = opentxs::network::zeromq;
 
-namespace opentxs::v1::api::crypto::imp
+namespace opentxs::api::crypto::imp
 {
 struct BlockchainImp final : public Blockchain::Imp {
     using Txid = opentxs::blockchain::block::Txid;
@@ -229,4 +230,4 @@ private:
         const opentxs::blockchain::block::bitcoin::Transaction& tx)
         const noexcept -> bool;
 };
-}  // namespace opentxs::v1::api::crypto::imp
+}  // namespace opentxs::api::crypto::imp

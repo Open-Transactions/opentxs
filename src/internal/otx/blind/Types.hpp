@@ -13,7 +13,7 @@
 
 #include "serialization/protobuf/CashEnums.pb.h"
 
-namespace opentxs::v1
+namespace opentxs
 {
 auto translate(const otx::blind::CashType in) noexcept -> proto::CashType;
 auto translate(const otx::blind::PurseType in) noexcept -> proto::PurseType;
@@ -21,4 +21,4 @@ auto translate(const otx::blind::TokenState in) noexcept -> proto::TokenState;
 auto translate(const proto::CashType in) noexcept -> otx::blind::CashType;
 auto translate(const proto::PurseType in) noexcept -> otx::blind::PurseType;
 auto translate(const proto::TokenState in) noexcept -> otx::blind::TokenState;
-}  // namespace opentxs::v1
+}  // namespace opentxs

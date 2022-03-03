@@ -25,7 +25,7 @@ class error_code;
 }  // namespace system
 }  // namespace boost
 
-namespace opentxs::v1
+namespace opentxs
 {
 class Timer::Imp
 {
@@ -39,4 +39,4 @@ public:
 
     virtual ~Imp() = default;
 };
-}  // namespace opentxs::v1
+}  // namespace opentxs

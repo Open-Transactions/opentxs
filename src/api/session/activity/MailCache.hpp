@@ -14,8 +14,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace api
 {
 class Session;
@@ -40,11 +40,11 @@ class Publish;
 class Identifier;
 class Message;
 class PasswordPrompt;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::api::session::activity
+namespace opentxs::api::session::activity
 {
 class MailCache
 {
@@ -84,4 +84,4 @@ private:
     auto operator=(const MailCache&) -> MailCache& = delete;
     auto operator=(MailCache&&) -> MailCache& = delete;
 };
-}  // namespace opentxs::v1::api::session::activity
+}  // namespace opentxs::api::session::activity

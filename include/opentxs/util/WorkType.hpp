@@ -9,7 +9,7 @@
 
 #include <cstdint>
 
-namespace opentxs::v1
+namespace opentxs
 {
 using OTZMQWorkType = std::uint16_t;
 
@@ -335,4 +335,4 @@ constexpr auto value(const WorkType in) noexcept
  *          1: message header (always 24 bytes)
  *          2: payload (0 - 333554432 bytes)
  */
-}  // namespace opentxs::v1
+}  // namespace opentxs

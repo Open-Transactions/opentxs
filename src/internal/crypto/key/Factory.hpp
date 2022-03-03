@@ -23,8 +23,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace api
 {
 class Session;
@@ -58,11 +58,11 @@ class SymmetricKey;
 class Data;
 class PasswordPrompt;
 class Secret;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto Ed25519Key(
     const api::Session& api,
@@ -195,4 +195,4 @@ auto SymmetricKey(
     const opentxs::Secret& raw,
     const opentxs::PasswordPrompt& reason) noexcept
     -> std::unique_ptr<crypto::key::Symmetric>;
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory

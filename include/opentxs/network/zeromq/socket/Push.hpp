@@ -14,8 +14,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace network
 {
 namespace zeromq
@@ -28,11 +28,11 @@ class Push;
 }  // namespace network
 
 using OTZMQPushSocket = Pimpl<network::zeromq::socket::Push>;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::network::zeromq::socket
+namespace opentxs::network::zeromq::socket
 {
 class OPENTXS_EXPORT Push : virtual public curve::Client, virtual public Sender
 {
@@ -52,4 +52,4 @@ private:
     auto operator=(const Push&) -> Push& = delete;
     auto operator=(Push&&) -> Push& = delete;
 };
-}  // namespace opentxs::v1::network::zeromq::socket
+}  // namespace opentxs::network::zeromq::socket

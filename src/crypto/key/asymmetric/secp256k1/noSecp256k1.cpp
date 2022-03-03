@@ -9,7 +9,7 @@
 
 #include "internal/crypto/key/Null.hpp"
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto Secp256k1Key(
     const api::Session&,
@@ -91,4 +91,4 @@ auto Secp256k1Key(const api::Session&, const ReadView, const ReadView) noexcept
 
     return std::make_unique<ReturnType>();
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory

@@ -21,8 +21,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace contract
 {
 class Server;
@@ -36,11 +36,11 @@ class ServerContract;
 class PasswordPrompt;
 
 using OTServerContract = SharedPimpl<contract::Server>;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::contract
+namespace opentxs::contract
 {
 class OPENTXS_EXPORT Server : virtual public opentxs::contract::Signable
 {
@@ -90,4 +90,4 @@ private:
     auto operator=(const Server&) -> Server& = delete;
     auto operator=(Server&&) -> Server& = delete;
 };
-}  // namespace opentxs::v1::contract
+}  // namespace opentxs::contract

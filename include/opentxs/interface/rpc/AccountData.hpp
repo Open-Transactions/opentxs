@@ -16,18 +16,18 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace proto
 {
 class AccountData;
 }  // namespace proto
 class Amount;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::rpc
+namespace opentxs::rpc
 {
 class OPENTXS_EXPORT AccountData
 {
@@ -72,4 +72,4 @@ private:
     auto operator=(const AccountData&) -> AccountData& = delete;
     auto operator=(AccountData&&) -> AccountData& = delete;
 };
-}  // namespace opentxs::v1::rpc
+}  // namespace opentxs::rpc

@@ -14,17 +14,17 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace proto
 {
 class Ciphertext;
 }  // namespace proto
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::crypto
+namespace opentxs::crypto
 {
 class OPENTXS_EXPORT SymmetricProvider
 {
@@ -73,4 +73,4 @@ private:
     auto operator=(const SymmetricProvider&) -> SymmetricProvider& = delete;
     auto operator=(SymmetricProvider&&) -> SymmetricProvider& = delete;
 };
-}  // namespace opentxs::v1::crypto
+}  // namespace opentxs::crypto

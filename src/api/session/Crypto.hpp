@@ -29,8 +29,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace api
 {
 namespace crypto
@@ -77,11 +77,11 @@ namespace zeromq
 class Context;
 }  // namespace zeromq
 }  // namespace network
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::api::session::imp
+namespace opentxs::api::session::imp
 {
 class Crypto final : public internal::Crypto
 {
@@ -203,4 +203,4 @@ private:
     auto operator=(const Crypto&) -> Crypto& = delete;
     auto operator=(Crypto&&) -> Crypto& = delete;
 };
-}  // namespace opentxs::v1::api::session::imp
+}  // namespace opentxs::api::session::imp

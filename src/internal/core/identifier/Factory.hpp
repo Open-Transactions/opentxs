@@ -10,8 +10,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace identifier
 {
 class Nym;
@@ -25,11 +25,11 @@ class Identifier;
 }  // namespace proto
 
 class Identifier;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto IdentifierGeneric() noexcept -> std::unique_ptr<opentxs::Identifier>;
 auto IdentifierGeneric(const proto::Identifier& in) noexcept
@@ -45,4 +45,4 @@ auto IdentifierUnit() noexcept
     -> std::unique_ptr<opentxs::identifier::UnitDefinition>;
 auto IdentifierUnit(const proto::Identifier& in) noexcept
     -> std::unique_ptr<opentxs::identifier::UnitDefinition>;
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory

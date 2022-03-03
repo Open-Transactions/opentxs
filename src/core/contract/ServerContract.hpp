@@ -25,8 +25,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace api
 {
 class Session;
@@ -41,11 +41,11 @@ class Factory;
 class OTPassword;
 class PasswordPrompt;
 class String;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::contract::implementation
+namespace opentxs::contract::implementation
 {
 class Server final : public contract::Server,
                      public opentxs::contract::implementation::Signable
@@ -120,4 +120,4 @@ private:
     auto operator=(const Server&) -> Server& = delete;
     auto operator=(Server&&) -> Server& = delete;
 };
-}  // namespace opentxs::v1::contract::implementation
+}  // namespace opentxs::contract::implementation

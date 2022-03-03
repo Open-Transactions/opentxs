@@ -8,7 +8,7 @@
 #include "serialization/protobuf/SendMessage.pb.h"
 #include "serialization/protobuf/verify/Check.hpp"
 
-namespace opentxs::v1::proto
+namespace opentxs::proto
 {
 auto CheckProto_1(const SendMessage& input, const bool silent) -> bool
 {
@@ -114,4 +114,4 @@ auto CheckProto_20(const SendMessage& input, const bool silent) -> bool
 {
     UNDEFINED_VERSION(20)
 }
-}  // namespace opentxs::v1::proto
+}  // namespace opentxs::proto

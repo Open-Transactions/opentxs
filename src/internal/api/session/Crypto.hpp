@@ -14,8 +14,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace api
 {
 namespace crypto
@@ -25,11 +25,11 @@ class Blockchain;
 
 class Session;
 }  // namespace api
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::api::session::internal
+namespace opentxs::api::session::internal
 {
 class Crypto : virtual public session::Crypto,
                virtual public api::internal::Crypto
@@ -50,4 +50,4 @@ public:
 
     ~Crypto() override = default;
 };
-}  // namespace opentxs::v1::api::session::internal
+}  // namespace opentxs::api::session::internal

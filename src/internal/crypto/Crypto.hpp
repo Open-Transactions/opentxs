@@ -8,21 +8,21 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace api
 {
 class Factory;
 }  // namespace api
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::crypto::internal
+namespace opentxs::crypto::internal
 {
 struct Bip32 {
     virtual auto Init(const api::Factory& factory) noexcept -> void = 0;
 
     virtual ~Bip32() = default;
 };
-}  // namespace opentxs::v1::crypto::internal
+}  // namespace opentxs::crypto::internal

@@ -29,17 +29,17 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace proto
 {
 class BlockchainTransaction;
 }  // namespace proto
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::blockchain::block::bitcoin::implementation
+namespace opentxs::blockchain::block::bitcoin::implementation
 {
 class Outputs final : public internal::Outputs
 {
@@ -151,4 +151,4 @@ private:
     auto operator=(const Outputs&) -> Outputs& = delete;
     auto operator=(Outputs&&) -> Outputs& = delete;
 };
-}  // namespace opentxs::v1::blockchain::block::bitcoin::implementation
+}  // namespace opentxs::blockchain::block::bitcoin::implementation

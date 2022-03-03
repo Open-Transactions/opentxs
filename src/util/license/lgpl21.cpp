@@ -9,7 +9,7 @@
 
 #include <cstddef>
 
-namespace opentxs::v1
+namespace opentxs
 {
 auto text_lgpl_v2_1() noexcept -> std::string_view
 {
@@ -2058,4 +2058,4 @@ auto text_lgpl_v2_1() noexcept -> std::string_view
 
     return {reinterpret_cast<const char*>(lgpl_2_1), lgpl_2_1_len};
 }
-}  // namespace opentxs::v1
+}  // namespace opentxs

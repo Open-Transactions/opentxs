@@ -28,8 +28,8 @@ class QVariant;
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace api
 {
 namespace session
@@ -42,11 +42,11 @@ namespace ui
 {
 class BlockchainSubaccountSource;
 }  // namespace ui
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::ui::implementation
+namespace opentxs::ui::implementation
 {
 using BlockchainSubaccountSourceList = List<
     BlockchainSubaccountSourceExternalInterface,
@@ -119,6 +119,6 @@ private:
     auto operator=(BlockchainSubaccountSource&&)
         -> BlockchainSubaccountSource& = delete;
 };
-}  // namespace opentxs::v1::ui::implementation
+}  // namespace opentxs::ui::implementation
 
 template class opentxs::SharedPimpl<opentxs::ui::BlockchainSubaccountSource>;

@@ -28,8 +28,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace api
 {
 namespace session
@@ -55,11 +55,11 @@ class UnitDefinition;
 
 class Amount;
 class OTPayment;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::api::session
+namespace opentxs::api::session
 {
 class OPENTXS_EXPORT OTX
 {
@@ -311,4 +311,4 @@ private:
     auto operator=(const OTX&) -> OTX& = delete;
     auto operator=(OTX&&) -> OTX& = delete;
 };
-}  // namespace opentxs::v1::api::session
+}  // namespace opentxs::api::session

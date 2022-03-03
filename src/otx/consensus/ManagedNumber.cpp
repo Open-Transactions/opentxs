@@ -12,15 +12,15 @@
 #include "opentxs/otx/consensus/ManagedNumber.hpp"
 #include "opentxs/otx/consensus/Server.hpp"
 
-namespace opentxs::v1
+namespace opentxs
 {
 auto operator<(const OTManagedNumber& lhs, const OTManagedNumber& rhs) -> bool
 {
     return lhs->Value() < rhs->Value();
 }
-}  // namespace opentxs::v1
+}  // namespace opentxs
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto ManagedNumber(
     const TransactionNumber number,
@@ -30,9 +30,9 @@ auto ManagedNumber(
 
     return new ReturnType(number, context);
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory
 
-namespace opentxs::v1::otx::context::implementation
+namespace opentxs::otx::context::implementation
 {
 ManagedNumber::ManagedNumber(
     const TransactionNumber number,
@@ -58,4 +58,4 @@ ManagedNumber::~ManagedNumber()
 
     context_.RecoverAvailableNumber(number_);
 }
-}  // namespace opentxs::v1::otx::context::implementation
+}  // namespace opentxs::otx::context::implementation

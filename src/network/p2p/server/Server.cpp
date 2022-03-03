@@ -56,7 +56,7 @@
 #include "opentxs/util/Log.hpp"
 #include "util/Work.hpp"
 
-namespace opentxs::v1::network::p2p
+namespace opentxs::network::p2p
 {
 Server::Imp::Imp(const api::Session& api, const zeromq::Context& zmq) noexcept
     : api_(api)
@@ -303,9 +303,9 @@ Server::Imp::~Imp()
     gate_.shutdown();
     handle_.Release();
 }
-}  // namespace opentxs::v1::network::p2p
+}  // namespace opentxs::network::p2p
 
-namespace opentxs::v1::network::p2p
+namespace opentxs::network::p2p
 {
 Server::Server(const api::Session& api, const zeromq::Context& zmq) noexcept
     : imp_(std::make_unique<Imp>(api, zmq).release())
@@ -414,4 +414,4 @@ Server::~Server()
         imp_ = nullptr;
     }
 }
-}  // namespace opentxs::v1::network::p2p
+}  // namespace opentxs::network::p2p

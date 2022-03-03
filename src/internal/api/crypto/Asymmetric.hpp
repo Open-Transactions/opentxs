@@ -10,8 +10,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace api
 {
 class Session;
@@ -31,11 +31,11 @@ namespace proto
 {
 class AsymmetricKey;
 }  // namespace proto
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::api::crypto::internal
+namespace opentxs::api::crypto::internal
 {
 class Asymmetric : virtual public api::crypto::Asymmetric
 {
@@ -55,4 +55,4 @@ public:
 
     ~Asymmetric() override = default;
 };
-}  // namespace opentxs::v1::api::crypto::internal
+}  // namespace opentxs::api::crypto::internal

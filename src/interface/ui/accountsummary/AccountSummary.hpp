@@ -28,8 +28,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace api
 {
 namespace session
@@ -50,11 +50,11 @@ class Publish;
 class Message;
 }  // namespace zeromq
 }  // namespace network
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::ui::implementation
+namespace opentxs::ui::implementation
 {
 using AccountSummaryList = List<
     AccountSummaryExternalInterface,
@@ -112,4 +112,4 @@ private:
     auto operator=(const AccountSummary&) -> AccountSummary& = delete;
     auto operator=(AccountSummary&&) -> AccountSummary& = delete;
 };
-}  // namespace opentxs::v1::ui::implementation
+}  // namespace opentxs::ui::implementation

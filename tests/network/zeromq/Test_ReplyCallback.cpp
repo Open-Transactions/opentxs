@@ -6,6 +6,7 @@
 #include <gtest/gtest.h>
 #include <utility>
 
+#include "opentxs/Version.hpp"
 #include "opentxs/network/zeromq/ReplyCallback.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
 #include "opentxs/network/zeromq/message/FrameIterator.hpp"

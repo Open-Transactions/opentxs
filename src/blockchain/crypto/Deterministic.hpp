@@ -36,8 +36,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace api
 {
 class Session;
@@ -58,11 +58,11 @@ class BlockchainDeterministicAccountData;
 }  // namespace proto
 
 class PasswordPrompt;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::blockchain::crypto::implementation
+namespace opentxs::blockchain::crypto::implementation
 {
 class Deterministic : virtual public internal::Deterministic, public Subaccount
 {
@@ -291,4 +291,4 @@ private:
     auto operator=(const Deterministic&) -> Deterministic& = delete;
     auto operator=(Deterministic&&) -> Deterministic& = delete;
 };
-}  // namespace opentxs::v1::blockchain::crypto::implementation
+}  // namespace opentxs::blockchain::crypto::implementation

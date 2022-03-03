@@ -56,8 +56,8 @@ class QAbstractItemModel;
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace api
 {
 namespace crypto
@@ -147,11 +147,11 @@ class UnitListQt;
 }  // namespace ui
 
 class Flag;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::api::session::imp
+namespace opentxs::api::session::imp
 {
 class UI::Imp : public Lockable
 {
@@ -538,4 +538,4 @@ private:
     auto operator=(const Imp&) -> Imp& = delete;
     auto operator=(Imp&&) -> Imp& = delete;
 };
-}  // namespace opentxs::v1::api::session::imp
+}  // namespace opentxs::api::session::imp

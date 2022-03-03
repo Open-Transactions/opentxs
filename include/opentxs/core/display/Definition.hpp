@@ -19,14 +19,14 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 class Amount;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::display
+namespace opentxs::display
 {
 class Definition
 {
@@ -69,4 +69,4 @@ private:
 };
 
 auto GetDefinition(UnitType) noexcept -> const Definition&;
-}  // namespace opentxs::v1::display
+}  // namespace opentxs::display

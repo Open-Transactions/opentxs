@@ -15,8 +15,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace client
 {
 class ServerAction;
@@ -38,11 +38,11 @@ class Amount;
 class OTPaymentPlan;
 class OTSmartContract;
 class PasswordPrompt;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::otx::client
+namespace opentxs::otx::client
 {
 class ServerAction
 {
@@ -173,4 +173,4 @@ private:
     auto operator=(const ServerAction&) -> ServerAction& = delete;
     auto operator=(ServerAction&&) -> ServerAction& = delete;
 };
-}  // namespace opentxs::v1::otx::client
+}  // namespace opentxs::otx::client

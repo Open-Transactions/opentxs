@@ -15,8 +15,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace api
 {
 namespace session
@@ -32,11 +32,11 @@ namespace zeromq
 class Context;
 }  // namespace zeromq
 }  // namespace network
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::api::session
+namespace opentxs::api::session
 {
 class ZMQ
 {
@@ -64,4 +64,4 @@ private:
     auto operator=(const ZMQ&) -> ZMQ& = delete;
     auto operator=(ZMQ&&) -> ZMQ& = delete;
 };
-}  // namespace opentxs::v1::api::session
+}  // namespace opentxs::api::session

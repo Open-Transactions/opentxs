@@ -29,7 +29,7 @@
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Pimpl.hpp"
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto ContactModel(
     const api::session::Client& api,
@@ -40,9 +40,9 @@ auto ContactModel(
 
     return std::make_unique<ReturnType>(api, contactID, cb);
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory
 
-namespace opentxs::v1::ui::implementation
+namespace opentxs::ui::implementation
 {
 const UnallocatedSet<identity::wot::claim::SectionType> Contact::allowed_types_{
     identity::wot::claim::SectionType::Communication,
@@ -216,4 +216,4 @@ Contact::~Contact()
 {
     for (auto& it : listeners_) { delete it.second; }
 }
-}  // namespace opentxs::v1::ui::implementation
+}  // namespace opentxs::ui::implementation

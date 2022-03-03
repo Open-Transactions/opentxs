@@ -20,7 +20,7 @@
 #include "serialization/protobuf/BlockchainTransactionProposal.pb.h"
 #include "util/LMDB.hpp"
 
-namespace opentxs::v1::blockchain::database::wallet
+namespace opentxs::blockchain::database::wallet
 {
 using Direction = storage::lmdb::LMDB::Dir;
 constexpr auto table_{Table::Proposals};
@@ -207,4 +207,4 @@ auto Proposal::LoadProposals() const noexcept
 }
 
 Proposal::~Proposal() = default;
-}  // namespace opentxs::v1::blockchain::database::wallet
+}  // namespace opentxs::blockchain::database::wallet

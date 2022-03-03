@@ -9,7 +9,7 @@
 
 #include "internal/otx/blind/Factory.hpp"
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto MintLucre(const api::Session& api) noexcept -> otx::blind::Mint
 {
@@ -38,4 +38,4 @@ auto MintLucre(
 
     return std::make_unique<ReturnType>(api).release();
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory

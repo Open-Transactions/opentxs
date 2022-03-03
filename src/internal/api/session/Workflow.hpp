@@ -7,7 +7,7 @@
 
 #include "opentxs/api/session/Workflow.hpp"
 
-namespace opentxs::v1::api::session::internal
+namespace opentxs::api::session::internal
 {
 class Workflow : virtual public session::Workflow
 {
@@ -21,4 +21,4 @@ public:
 
     ~Workflow() override = default;
 };
-}  // namespace opentxs::v1::api::session::internal
+}  // namespace opentxs::api::session::internal

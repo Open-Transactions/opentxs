@@ -30,7 +30,7 @@
 #include "opentxs/util/Pimpl.hpp"
 #include "util/LMDB.hpp"
 
-namespace opentxs::v1::blockchain::database
+namespace opentxs::blockchain::database
 {
 Blocks::Blocks(
     const api::Session& api,
@@ -125,4 +125,4 @@ auto Blocks::Tip() const noexcept -> block::Position
 
     return output;
 }
-}  // namespace opentxs::v1::blockchain::database
+}  // namespace opentxs::blockchain::database

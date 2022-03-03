@@ -8,7 +8,7 @@
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
 
-namespace opentxs::v1
+namespace opentxs
 {
 using VersionConversionMap = UnallocatedMap<VersionNumber, VersionNumber>;
-}  // namespace opentxs::v1
+}  // namespace opentxs

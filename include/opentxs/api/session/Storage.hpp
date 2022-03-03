@@ -28,8 +28,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace api
 {
 namespace session
@@ -71,11 +71,11 @@ class UnitDefinition;
 using NymLambda = std::function<void(const proto::Nym&)>;
 using ServerLambda = std::function<void(const proto::ServerContract&)>;
 using UnitLambda = std::function<void(const proto::UnitDefinition&)>;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::api::session
+namespace opentxs::api::session
 {
 class Storage
 {
@@ -469,4 +469,4 @@ private:
     auto operator=(const Storage&) -> Storage& = delete;
     auto operator=(Storage&&) -> Storage& = delete;
 };
-}  // namespace opentxs::v1::api::session
+}  // namespace opentxs::api::session

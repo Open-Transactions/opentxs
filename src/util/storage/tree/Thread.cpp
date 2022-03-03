@@ -23,7 +23,7 @@
 #include "util/storage/tree/Mailbox.hpp"
 #include "util/storage/tree/Node.hpp"
 
-namespace opentxs::v1::storage
+namespace opentxs::storage
 {
 Thread::Thread(
     const Driver& storage,
@@ -359,4 +359,4 @@ void Thread::upgrade(const Lock& lock)
 
     if (changed) { save(lock); }
 }
-}  // namespace opentxs::v1::storage
+}  // namespace opentxs::storage

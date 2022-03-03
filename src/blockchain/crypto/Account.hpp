@@ -41,8 +41,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace api
 {
 namespace session
@@ -69,11 +69,11 @@ class HDPath;
 
 class PasswordPrompt;
 class PaymentCode;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::blockchain::crypto::implementation
+namespace opentxs::blockchain::crypto::implementation
 {
 class Account final : public internal::Account
 {
@@ -361,4 +361,4 @@ private:
     auto operator=(const Account&) -> Account& = delete;
     auto operator=(Account&&) -> Account& = delete;
 };
-}  // namespace opentxs::v1::blockchain::crypto::implementation
+}  // namespace opentxs::blockchain::crypto::implementation

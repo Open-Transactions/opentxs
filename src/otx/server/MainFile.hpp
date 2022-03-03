@@ -10,8 +10,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace server
 {
 class Server;
@@ -19,11 +19,11 @@ class Server;
 
 class PasswordPrompt;
 class String;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::server
+namespace opentxs::server
 {
 class MainFile
 {
@@ -49,4 +49,4 @@ private:
     auto operator=(const MainFile&) -> MainFile& = delete;
     auto operator=(MainFile&&) -> MainFile& = delete;
 };
-}  // namespace opentxs::v1::server
+}  // namespace opentxs::server

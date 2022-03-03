@@ -15,7 +15,7 @@
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Pimpl.hpp"
 
-namespace opentxs::v1::blockchain::node::implementation
+namespace opentxs::blockchain::node::implementation
 {
 BlockOracle::Cache::Mem::Mem(const std::size_t limit) noexcept
     : limit_(limit)
@@ -62,4 +62,4 @@ auto BlockOracle::Cache::Mem::push(
         queue_.pop_front();
     }
 }
-}  // namespace opentxs::v1::blockchain::node::implementation
+}  // namespace opentxs::blockchain::node::implementation

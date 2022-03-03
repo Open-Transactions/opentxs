@@ -25,7 +25,7 @@
 #include "opentxs/interface/ui/Blockchains.hpp"
 #include "opentxs/util/Container.hpp"
 
-namespace opentxs::v1::api::session::ui
+namespace opentxs::api::session::ui
 {
 ImpQt::ImpQt(
     const api::session::Client& api,
@@ -473,4 +473,4 @@ auto ImpQt::UnitListQt(const identifier::Nym& nymID, const SimpleCallback cb)
 }
 
 ImpQt::~ImpQt() { Shutdown(); }
-}  // namespace opentxs::v1::api::session::ui
+}  // namespace opentxs::api::session::ui

@@ -12,7 +12,7 @@
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Session.hpp"
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto Ed25519Key(
     const api::Session& api,
@@ -43,4 +43,4 @@ auto Ed25519Key(
         sessionKey,
         reason);
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory

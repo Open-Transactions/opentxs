@@ -19,7 +19,7 @@ template class google::protobuf::RepeatedField<unsigned long>;
 // TODO I have no idea why those lines above are necessary to fix linking errors
 // on Windows but they are.
 
-namespace opentxs::v1
+namespace opentxs
 {
 auto operator==(const ProtobufType& lhs, const ProtobufType& rhs) noexcept
     -> bool
@@ -31,9 +31,9 @@ auto operator==(const ProtobufType& lhs, const ProtobufType& rhs) noexcept
 
     return sLeft == sRight;
 }
-}  // namespace opentxs::v1
+}  // namespace opentxs
 
-namespace opentxs::v1::proto
+namespace opentxs::proto
 {
 auto ToString(const ProtobufType& input) -> UnallocatedCString
 {
@@ -58,4 +58,4 @@ auto write(const ProtobufType& in, const AllocateOutput out) noexcept -> bool
 
     return in.SerializeToArray(dest.data(), static_cast<int>(dest.size()));
 }
-}  // namespace opentxs::v1::proto
+}  // namespace opentxs::proto

@@ -26,7 +26,7 @@
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/util/Log.hpp"
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto BlockchainSyncPushTransaction() noexcept -> network::p2p::PushTransaction
 {
@@ -76,9 +76,9 @@ auto BlockchainSyncPushTransaction_p(
     return std::make_unique<ReturnType>(
         std::make_unique<ReturnType::Imp>(api, chain, id, payload).release());
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory
 
-namespace opentxs::v1::network::p2p
+namespace opentxs::network::p2p
 {
 class PushTransaction::Imp final : public Base::Imp
 {
@@ -195,4 +195,4 @@ PushTransaction::~PushTransaction()
         Base::imp_ = nullptr;
     }
 }
-}  // namespace opentxs::v1::network::p2p
+}  // namespace opentxs::network::p2p

@@ -13,7 +13,7 @@
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/util/Pimpl.hpp"
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto NymListItem(
     const ui::implementation::NymListInternalInterface& parent,
@@ -27,9 +27,9 @@ auto NymListItem(
 
     return std::make_shared<ReturnType>(parent, api, rowID, key);
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory
 
-namespace opentxs::v1::ui::implementation
+namespace opentxs::ui::implementation
 {
 NymListItem::NymListItem(
     const NymListInternalInterface& parent,
@@ -64,4 +64,4 @@ auto NymListItem::reindex(
 
     return changed;
 }
-}  // namespace opentxs::v1::ui::implementation
+}  // namespace opentxs::ui::implementation

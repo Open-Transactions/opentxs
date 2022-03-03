@@ -9,7 +9,7 @@
 
 #include "util/ByteLiterals.hpp"
 
-namespace opentxs::v1
+namespace opentxs
 {
 constexpr auto db_file_size() noexcept -> std::size_t
 {
@@ -20,4 +20,4 @@ constexpr auto mapped_file_size() noexcept -> std::size_t
 {
     return @OT_MAPPED_FILE_SIZE@;
 }
-}  // namespace opentxs::v1
+}  // namespace opentxs

@@ -28,14 +28,14 @@ class value;
 
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 class Timer;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1
+namespace opentxs
 {
 enum class ThreadPool {
     General,
@@ -43,9 +43,9 @@ enum class ThreadPool {
     Storage,
     Blockchain,
 };
-}  // namespace opentxs::v1
+}  // namespace opentxs
 
-namespace opentxs::v1::api::network::internal
+namespace opentxs::api::network::internal
 {
 class Asio
 {
@@ -83,4 +83,4 @@ private:
     Asio& operator=(const Asio&) = delete;
     Asio& operator=(Asio&&) = delete;
 };
-}  // namespace opentxs::v1::api::network::internal
+}  // namespace opentxs::api::network::internal

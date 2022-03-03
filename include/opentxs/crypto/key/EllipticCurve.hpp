@@ -15,17 +15,17 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace crypto
 {
 class EcdsaProvider;
 }  // namespace crypto
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::crypto::key
+namespace opentxs::crypto::key
 {
 class OPENTXS_EXPORT EllipticCurve : virtual public Asymmetric
 {
@@ -60,4 +60,4 @@ private:
     auto operator=(const EllipticCurve&) -> EllipticCurve& = delete;
     auto operator=(EllipticCurve&&) -> EllipticCurve& = delete;
 };
-}  // namespace opentxs::v1::crypto::key
+}  // namespace opentxs::crypto::key

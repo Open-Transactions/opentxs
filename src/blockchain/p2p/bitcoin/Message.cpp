@@ -33,7 +33,7 @@
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Pimpl.hpp"
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto BitcoinP2PMessage(
     const api::Session& api,
@@ -193,9 +193,9 @@ auto BitcoinP2PMessage(
 
     return pMessage;
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory
 
-namespace opentxs::v1::blockchain::p2p::bitcoin
+namespace opentxs::blockchain::p2p::bitcoin
 {
 auto Message::MaxPayload() -> std::size_t
 {
@@ -205,9 +205,9 @@ auto Message::MaxPayload() -> std::size_t
 
     return std::numeric_limits<std::uint32_t>::max();
 }
-}  // namespace opentxs::v1::blockchain::p2p::bitcoin
+}  // namespace opentxs::blockchain::p2p::bitcoin
 
-namespace opentxs::v1::blockchain::p2p::bitcoin::message::implementation
+namespace opentxs::blockchain::p2p::bitcoin::message::implementation
 {
 Message::Message(
     const api::Session& api,
@@ -285,4 +285,4 @@ auto Message::verify_checksum() const noexcept(false) -> void
         throw std::runtime_error("checksum failure");
     }
 }
-}  // namespace opentxs::v1::blockchain::p2p::bitcoin::message::implementation
+}  // namespace opentxs::blockchain::p2p::bitcoin::message::implementation

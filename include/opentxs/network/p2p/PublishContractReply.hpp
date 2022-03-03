@@ -12,14 +12,14 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 class Identifier;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::network::p2p
+namespace opentxs::network::p2p
 {
 class OPENTXS_EXPORT PublishContractReply final : public Base
 {
@@ -45,4 +45,4 @@ private:
         -> PublishContractReply& = delete;
     auto operator=(PublishContractReply&&) -> PublishContractReply& = delete;
 };
-}  // namespace opentxs::v1::network::p2p
+}  // namespace opentxs::network::p2p

@@ -37,7 +37,7 @@
 #include "opentxs/util/Pimpl.hpp"
 #include "otx/common/OTStorage.hpp"
 
-namespace opentxs::v1::otx::blind::mint
+namespace opentxs::otx::blind::mint
 {
 
 Mint::Mint(
@@ -744,4 +744,4 @@ void Mint::GenerateNewMint(
 }
 
 Mint::~Mint() { Release_Mint(); }
-}  // namespace opentxs::v1::otx::blind::mint
+}  // namespace opentxs::otx::blind::mint

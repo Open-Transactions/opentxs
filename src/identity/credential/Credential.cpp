@@ -15,7 +15,7 @@
 #include "serialization/protobuf/Enums.pb.h"
 #include "util/Container.hpp"
 
-namespace opentxs::v1::identity::credential
+namespace opentxs::identity::credential
 {
 using CredentialRoleMap =
     robin_hood::unordered_flat_map<CredentialRole, proto::CredentialRole>;
@@ -28,9 +28,9 @@ using CredentialTypeReverseMap =
 
 auto credentialrole_map() noexcept -> const CredentialRoleMap&;
 auto credentialtype_map() noexcept -> const CredentialTypeMap&;
-}  // namespace opentxs::v1::identity::credential
+}  // namespace opentxs::identity::credential
 
-namespace opentxs::v1::identity::credential
+namespace opentxs::identity::credential
 {
 auto credentialrole_map() noexcept -> const CredentialRoleMap&
 {
@@ -55,9 +55,9 @@ auto credentialtype_map() noexcept -> const CredentialTypeMap&
 
     return map;
 }
-}  // namespace opentxs::v1::identity::credential
+}  // namespace opentxs::identity::credential
 
-namespace opentxs::v1
+namespace opentxs
 {
 auto translate(const identity::CredentialRole in) noexcept
     -> proto::CredentialRole
@@ -110,4 +110,4 @@ auto translate(const proto::CredentialType in) noexcept
         return identity::CredentialType::Error;
     }
 }
-}  // namespace opentxs::v1
+}  // namespace opentxs

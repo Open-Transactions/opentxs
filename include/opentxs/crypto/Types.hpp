@@ -12,7 +12,7 @@
 
 #include "opentxs/util/Container.hpp"
 
-namespace opentxs::v1
+namespace opentxs
 {
 namespace crypto
 {
@@ -35,4 +35,4 @@ enum class Bip43Purpose : Bip32Index;
 enum class Bip44Type : Bip32Index;
 
 auto print(crypto::SeedStyle) noexcept -> UnallocatedCString;
-}  // namespace opentxs::v1
+}  // namespace opentxs

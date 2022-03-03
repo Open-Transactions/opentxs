@@ -17,7 +17,7 @@
 #include "opentxs/network/asio/Endpoint.hpp"
 #include "opentxs/util/Container.hpp"
 
-namespace opentxs::v1::network::asio
+namespace opentxs::network::asio
 {
 Socket::Imp::Imp(const Endpoint& endpoint, Asio& asio) noexcept
     : endpoint_(endpoint)
@@ -121,4 +121,4 @@ auto Socket::Transmit(const ReadView data, Notification notifier) noexcept
 }
 
 Socket::~Socket() { std::unique_ptr<Imp>{imp_}.reset(); }
-}  // namespace opentxs::v1::network::asio
+}  // namespace opentxs::network::asio

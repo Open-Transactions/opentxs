@@ -8,7 +8,7 @@
 #include "opentxs/Version.hpp"       // IWYU pragma: associated
 #include "opentxs/crypto/Types.hpp"  // IWYU pragma: associated
 
-namespace opentxs::v1
+namespace opentxs
 {
 enum class Bip32Child : Bip32Index {
     AUTH_KEY = 0x41555448,
@@ -16,4 +16,4 @@ enum class Bip32Child : Bip32Index {
     SIGN_KEY = 0x5349474e,
     HARDENED = 0x80000000,
 };
-}  // namespace opentxs::v1
+}  // namespace opentxs

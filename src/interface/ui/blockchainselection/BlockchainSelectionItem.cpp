@@ -13,7 +13,7 @@
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/Types.hpp"
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto BlockchainSelectionItem(
     const ui::implementation::BlockchainSelectionInternalInterface& parent,
@@ -27,9 +27,9 @@ auto BlockchainSelectionItem(
 
     return std::make_shared<ReturnType>(parent, api, rowID, sortKey, custom);
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory
 
-namespace opentxs::v1::ui::implementation
+namespace opentxs::ui::implementation
 {
 BlockchainSelectionItem::BlockchainSelectionItem(
     const BlockchainSelectionInternalInterface& parent,
@@ -63,4 +63,4 @@ auto BlockchainSelectionItem::reindex(
 }
 
 BlockchainSelectionItem::~BlockchainSelectionItem() = default;
-}  // namespace opentxs::v1::ui::implementation
+}  // namespace opentxs::ui::implementation

@@ -17,8 +17,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace blockchain
 {
 namespace node
@@ -29,11 +29,11 @@ class SubchainStateData;
 }  // namespace wallet
 }  // namespace node
 }  // namespace blockchain
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::blockchain::node::wallet
+namespace opentxs::blockchain::node::wallet
 {
 class Job
 {
@@ -76,4 +76,4 @@ private:
     auto operator=(const Job&) -> Job& = delete;
     auto operator=(Job&&) -> Job& = delete;
 };
-}  // namespace opentxs::v1::blockchain::node::wallet
+}  // namespace opentxs::blockchain::node::wallet

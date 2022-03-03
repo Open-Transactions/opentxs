@@ -15,8 +15,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace api
 {
 namespace network
@@ -47,11 +47,11 @@ class Plugin;
 }  // namespace storage
 
 class Flag;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::storage::driver::filesystem
+namespace opentxs::storage::driver::filesystem
 {
 class Archiving final : public Common, public virtual storage::Driver
 {
@@ -97,4 +97,4 @@ private:
     auto operator=(const Archiving&) -> Archiving& = delete;
     auto operator=(Archiving&&) -> Archiving& = delete;
 };
-}  // namespace opentxs::v1::storage::driver::filesystem
+}  // namespace opentxs::storage::driver::filesystem

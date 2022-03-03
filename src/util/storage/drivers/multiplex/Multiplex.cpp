@@ -26,7 +26,7 @@
 #include "util/storage/tree/Root.hpp"
 #include "util/storage/tree/Tree.hpp"
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto StorageMultiplex(
     const api::Crypto& crypto,
@@ -42,9 +42,9 @@ auto StorageMultiplex(
     return std::make_unique<ReturnType>(
         crypto, asio, factory, parent, primaryBucket, config);
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory
 
-namespace opentxs::v1::storage::driver
+namespace opentxs::storage::driver
 {
 Multiplex::Multiplex(
     const api::Crypto& crypto,
@@ -484,4 +484,4 @@ void Multiplex::SynchronizePlugins(
 }
 
 Multiplex::~Multiplex() { Cleanup_Multiplex(); }
-}  // namespace opentxs::v1::storage::driver
+}  // namespace opentxs::storage::driver

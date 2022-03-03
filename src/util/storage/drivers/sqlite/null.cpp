@@ -10,7 +10,7 @@
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/storage/Plugin.hpp"
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto StorageSqlite3(
     const api::Crypto& crypto,
@@ -21,4 +21,4 @@ auto StorageSqlite3(
 {
     return nullptr;
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory

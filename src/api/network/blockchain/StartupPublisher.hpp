@@ -10,8 +10,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace api
 {
 namespace session
@@ -40,11 +40,11 @@ class Context;
 class ListenCallback;
 }  // namespace zeromq
 }  // namespace network
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::api::network::blockchain
+namespace opentxs::api::network::blockchain
 {
 class StartupPublisher
 {
@@ -70,4 +70,4 @@ private:
     opentxs::network::zeromq::socket::Raw& pull_;
     opentxs::network::zeromq::internal::Thread* thread_;
 };
-}  // namespace opentxs::v1::api::network::blockchain
+}  // namespace opentxs::api::network::blockchain

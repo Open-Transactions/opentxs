@@ -13,8 +13,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace api
 {
 namespace crypto
@@ -64,11 +64,11 @@ class Config;
 
 class Flag;
 class Options;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto ActivityAPI(
     const api::Session& api,
@@ -133,4 +133,4 @@ auto Workflow(
     const api::session::Activity& activity,
     const api::session::Contacts& contact) noexcept
     -> std::unique_ptr<api::session::Workflow>;
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory

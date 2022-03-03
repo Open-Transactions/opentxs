@@ -32,8 +32,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace api
 {
 class Session;
@@ -55,11 +55,11 @@ namespace lmdb
 class LMDB;
 }  // namespace lmdb
 }  // namespace storage
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::blockchain::database::common
+namespace opentxs::blockchain::database::common
 {
 class Sync
 {
@@ -89,4 +89,4 @@ private:
 
     std::unique_ptr<Imp> imp_;
 };
-}  // namespace opentxs::v1::blockchain::database::common
+}  // namespace opentxs::blockchain::database::common

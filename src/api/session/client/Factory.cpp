@@ -42,7 +42,7 @@
 #include "opentxs/util/Log.hpp"
 #include "serialization/protobuf/BlockchainBlockHeader.pb.h"
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto SessionFactoryAPI(const api::session::Client& parent) noexcept
     -> std::unique_ptr<api::session::Factory>
@@ -58,9 +58,9 @@ auto SessionFactoryAPI(const api::session::Client& parent) noexcept
         return {};
     }
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory
 
-namespace opentxs::v1::api::session::client
+namespace opentxs::api::session::client
 {
 Factory::Factory(const api::session::Client& parent)
     : session::imp::Factory(parent)
@@ -321,4 +321,4 @@ auto Factory::PeerObject(
     return std::unique_ptr<opentxs::PeerObject>{
         opentxs::factory::PeerObject(client_, recipientNym, encrypted, reason)};
 }
-}  // namespace opentxs::v1::api::session::client
+}  // namespace opentxs::api::session::client

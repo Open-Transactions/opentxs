@@ -8,7 +8,7 @@
 #include "internal/blockchain/database/Database.hpp"
 #include "internal/blockchain/node/Node.hpp"
 
-namespace opentxs::v1::blockchain::database::wallet
+namespace opentxs::blockchain::database::wallet
 {
 using Parent = node::internal::WalletDatabase;
 using SubchainIndex = Parent::SubchainIndex;
@@ -21,4 +21,4 @@ using ElementMap = Parent::ElementMap;
 using MatchingIndices = Parent::MatchingIndices;
 using PatternID = Identifier;
 using pPatternID = OTIdentifier;
-}  // namespace opentxs::v1::blockchain::database::wallet
+}  // namespace opentxs::blockchain::database::wallet

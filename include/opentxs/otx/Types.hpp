@@ -10,7 +10,7 @@
 #include <cstddef>
 #include <cstdint>
 
-namespace opentxs::v1
+namespace opentxs
 {
 namespace otx
 {
@@ -46,4 +46,4 @@ constexpr auto value(const otx::ServerRequestType in) noexcept
 {
     return static_cast<std::uint8_t>(in);
 }
-}  // namespace opentxs::v1
+}  // namespace opentxs

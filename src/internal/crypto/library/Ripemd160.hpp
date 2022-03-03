@@ -8,7 +8,7 @@
 #include <cstddef>  // IWYU pragma: keep
 #include <cstdint>
 
-namespace opentxs::v1::crypto
+namespace opentxs::crypto
 {
 class Ripemd160
 {
@@ -29,4 +29,4 @@ private:
     auto operator=(const Ripemd160&) -> Ripemd160& = delete;
     auto operator=(Ripemd160&&) -> Ripemd160& = delete;
 };
-}  // namespace opentxs::v1::crypto
+}  // namespace opentxs::crypto

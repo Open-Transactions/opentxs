@@ -10,7 +10,7 @@
 #include "api/network/blockchain/Imp.hpp"
 #include "opentxs/api/network/Blockchain.hpp"
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto BlockchainNetworkAPI(
     const api::Session& api,
@@ -22,4 +22,4 @@ auto BlockchainNetworkAPI(
 
     return std::make_unique<ReturnType>(api, endpoints, zmq).release();
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory

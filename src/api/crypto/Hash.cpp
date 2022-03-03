@@ -28,7 +28,7 @@
 #include "opentxs/util/Pimpl.hpp"
 #include "smhasher/src/MurmurHash3.h"
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto Hash(
     const api::crypto::Encode& encode,
@@ -43,9 +43,9 @@ auto Hash(
     return std::make_unique<ReturnType>(
         encode, sha, blake, pbkdf2, ripe, scrypt);
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory
 
-namespace opentxs::v1::api::crypto::imp
+namespace opentxs::api::crypto::imp
 {
 using Provider = opentxs::crypto::HashingProvider;
 
@@ -398,4 +398,4 @@ auto Hash::sha_256_double_checksum(
 
     return true;
 }
-}  // namespace opentxs::v1::api::crypto::imp
+}  // namespace opentxs::api::crypto::imp

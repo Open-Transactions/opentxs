@@ -46,8 +46,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace api
 {
 class Session;
@@ -76,11 +76,11 @@ auto reader(const ArrayType& in) noexcept -> ReadView
 {
     return {reinterpret_cast<const char*>(in.data()), in.size()};
 }
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 using BlockReturnType = blockchain::block::bitcoin::implementation::Block;
 using ByteIterator = const std::byte*;
@@ -112,4 +112,4 @@ auto parse_transactions(
     BlockReturnType::CalculatedSize& sizeData,
     ByteIterator& it,
     std::size_t& expectedSize) -> ParsedTransactions;
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory

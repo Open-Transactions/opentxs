@@ -38,7 +38,6 @@
 #include "opentxs/api/session/Wallet.hpp"
 #include "opentxs/core/AddressType.hpp"
 #include "opentxs/core/Armored.hpp"
-#include "opentxs/core/Data.hpp"
 #include "opentxs/core/Secret.hpp"
 #include "opentxs/core/String.hpp"
 #include "opentxs/core/contract/ProtocolVersion.hpp"
@@ -77,7 +76,7 @@
 
 namespace zmq = opentxs::network::zeromq;
 
-namespace opentxs::v1::server
+namespace opentxs::server
 {
 Server::Server(
     const opentxs::api::session::Notary& manager,
@@ -944,4 +943,4 @@ auto Server::TransportKey(Data& pubkey) const -> OTSecret
 }
 
 Server::~Server() = default;
-}  // namespace opentxs::v1::server
+}  // namespace opentxs::server

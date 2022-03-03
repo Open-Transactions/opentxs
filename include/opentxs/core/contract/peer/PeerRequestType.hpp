@@ -10,7 +10,7 @@
 
 #include <cstdint>
 
-namespace opentxs::v1::contract::peer
+namespace opentxs::contract::peer
 {
 enum class PeerRequestType : std::uint8_t {
     Error = 0,
@@ -22,4 +22,4 @@ enum class PeerRequestType : std::uint8_t {
     VerificationOffer = 6,
     Faucet = 7,
 };
-}  // namespace opentxs::v1::contract::peer
+}  // namespace opentxs::contract::peer

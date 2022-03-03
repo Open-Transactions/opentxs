@@ -12,7 +12,7 @@
 #include "opentxs/network/zeromq/zap/Callback.hpp"
 #include "opentxs/network/zeromq/zap/Handler.hpp"
 
-namespace opentxs::v1
+namespace opentxs
 {
 namespace network
 {
@@ -26,9 +26,9 @@ auto Factory::ZAP(const network::zeromq::Context& context) -> api::network::ZAP*
 {
     return new api::network::imp::ZAP(context);
 }
-}  // namespace opentxs::v1
+}  // namespace opentxs
 
-namespace opentxs::v1::api::network::imp
+namespace opentxs::api::network::imp
 {
 ZAP::ZAP(const opentxs::network::zeromq::Context& context)
     : context_(context)
@@ -48,4 +48,4 @@ auto ZAP::SetDefaultPolicy(const Policy policy) const -> bool
 {
     return callback_->SetPolicy(policy);
 }
-}  // namespace opentxs::v1::api::network::imp
+}  // namespace opentxs::api::network::imp

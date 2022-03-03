@@ -10,11 +10,11 @@
 #include "opentxs/interface/rpc/request/Base.hpp"
 #include "opentxs/interface/rpc/response/Base.hpp"
 
-namespace opentxs::v1::api::imp
+namespace opentxs::api::imp
 {
 auto Context::RPC(const ReadView command, const AllocateOutput response)
     const noexcept -> bool
 {
     return RPC(*rpc::request::Factory(command))->Serialize(response);
 }
-}  // namespace opentxs::v1::api::imp
+}  // namespace opentxs::api::imp

@@ -12,14 +12,14 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 class Secret;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1
+namespace opentxs
 {
 class OPENTXS_EXPORT PasswordCallback
 {
@@ -40,4 +40,4 @@ public:
     PasswordCallback() = default;
     virtual ~PasswordCallback() = default;
 };
-}  // namespace opentxs::v1
+}  // namespace opentxs

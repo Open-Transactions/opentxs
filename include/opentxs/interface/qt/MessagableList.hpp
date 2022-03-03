@@ -17,8 +17,8 @@ class QObject;
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace ui
 {
 namespace internal
@@ -28,7 +28,7 @@ struct MessagableList;
 
 class MessagableListQt;
 }  // namespace ui
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

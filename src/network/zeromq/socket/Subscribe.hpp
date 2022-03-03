@@ -15,8 +15,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace network
 {
 namespace zeromq
@@ -31,11 +31,11 @@ class ListenCallback;
 class Message;
 }  // namespace zeromq
 }  // namespace network
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::network::zeromq::socket::implementation
+namespace opentxs::network::zeromq::socket::implementation
 {
 class Subscribe : public Receiver<zeromq::socket::Subscribe>,
                   public zeromq::curve::implementation::Client
@@ -66,4 +66,4 @@ private:
     auto operator=(const Subscribe&) -> Subscribe& = delete;
     auto operator=(Subscribe&&) -> Subscribe& = delete;
 };
-}  // namespace opentxs::v1::network::zeromq::socket::implementation
+}  // namespace opentxs::network::zeromq::socket::implementation

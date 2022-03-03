@@ -19,8 +19,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace blockchain
 {
 namespace block
@@ -28,7 +28,7 @@ namespace block
 class Outpoint;
 }  // namespace block
 }  // namespace blockchain
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -41,7 +41,7 @@ struct hash<opentxs::blockchain::block::Outpoint> {
 };
 }  // namespace std
 
-namespace opentxs::v1::blockchain::block
+namespace opentxs::blockchain::block
 {
 class OPENTXS_EXPORT Outpoint
 {
@@ -69,4 +69,4 @@ public:
     auto operator=(const Outpoint&) noexcept -> Outpoint&;
     auto operator=(Outpoint&&) noexcept -> Outpoint&;
 };
-}  // namespace opentxs::v1::blockchain::block
+}  // namespace opentxs::blockchain::block

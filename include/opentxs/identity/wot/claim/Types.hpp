@@ -15,14 +15,14 @@
 #include "opentxs/core/Types.hpp"
 #include "opentxs/identity/Types.hpp"
 
-namespace opentxs::v1::identity::wot::claim
+namespace opentxs::identity::wot::claim
 {
 enum class Attribute : std::uint8_t;
 enum class ClaimType : std::uint32_t;
 enum class SectionType : std::uint8_t;
-}  // namespace opentxs::v1::identity::wot::claim
+}  // namespace opentxs::identity::wot::claim
 
-namespace opentxs::v1
+namespace opentxs
 {
 OPENTXS_EXPORT auto ClaimToNym(
     const identity::wot::claim::ClaimType in) noexcept -> identity::Type;
@@ -32,4 +32,4 @@ OPENTXS_EXPORT auto NymToClaim(const identity::Type in) noexcept
     -> identity::wot::claim::ClaimType;
 OPENTXS_EXPORT auto UnitToClaim(const UnitType in) noexcept
     -> identity::wot::claim::ClaimType;
-}  // namespace opentxs::v1
+}  // namespace opentxs

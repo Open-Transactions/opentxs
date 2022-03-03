@@ -34,7 +34,7 @@ extern "C" {
 #include "opentxs/util/Pimpl.hpp"
 #include "util/Sodium.hpp"
 
-namespace opentxs::v1::crypto
+namespace opentxs::crypto
 {
 auto AsymmetricProvider::CurveToKeyType(const EcdsaCurve& curve)
     -> crypto::key::asymmetric::Algorithm
@@ -82,9 +82,9 @@ auto AsymmetricProvider::KeyTypeToCurve(
 
     return output;
 }
-}  // namespace opentxs::v1::crypto
+}  // namespace opentxs::crypto
 
-namespace opentxs::v1::crypto::implementation
+namespace opentxs::crypto::implementation
 {
 AsymmetricProvider::AsymmetricProvider() noexcept
 {
@@ -206,4 +206,4 @@ auto AsymmetricProvider::VerifyContractSignature(
 
     return Verify(reader(plaintext), key, signature->Bytes(), hashType);
 }
-}  // namespace opentxs::v1::crypto::implementation
+}  // namespace opentxs::crypto::implementation

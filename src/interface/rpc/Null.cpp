@@ -11,7 +11,7 @@
 #include "opentxs/interface/rpc/response/Base.hpp"
 #include "serialization/protobuf/RPCResponse.pb.h"
 
-namespace opentxs::v1
+namespace opentxs
 {
 auto Factory::RPC(const api::Context& api) -> rpc::internal::RPC*
 {
@@ -32,4 +32,4 @@ auto Factory::RPC(const api::Context& api) -> rpc::internal::RPC*
 
     return std::make_unique<Blank>().release();
 }
-}  // namespace opentxs::v1
+}  // namespace opentxs

@@ -39,7 +39,7 @@
 #include "util/LMDB.hpp"
 #include "util/ScopeGuard.hpp"
 
-namespace opentxs::v1::blockchain::database::wallet
+namespace opentxs::blockchain::database::wallet
 {
 struct SubchainData::Imp {
     auto GetSubchainID(
@@ -466,4 +466,4 @@ auto SubchainData::SubchainSetLastScanned(
 }
 
 SubchainData::~SubchainData() = default;
-}  // namespace opentxs::v1::blockchain::database::wallet
+}  // namespace opentxs::blockchain::database::wallet

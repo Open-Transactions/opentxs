@@ -7,7 +7,7 @@
 
 #include "opentxs/network/zeromq/Context.hpp"
 
-namespace opentxs::v1::network::zeromq::socket::internal
+namespace opentxs::network::zeromq::socket::internal
 {
 class Socket : virtual public socket::Socket
 {
@@ -22,4 +22,4 @@ public:
 
     ~Socket() override = default;
 };
-}  // namespace opentxs::v1::network::zeromq::socket::internal
+}  // namespace opentxs::network::zeromq::socket::internal

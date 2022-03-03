@@ -29,7 +29,7 @@
 #include "opentxs/util/Pimpl.hpp"
 #include "util/Container.hpp"
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto ZAPRequest(
     const ReadView address,
@@ -45,9 +45,9 @@ auto ZAPRequest(
                address, domain, mechanism, requestID, identity, version)
         .release();
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory
 
-namespace opentxs::v1::network::zeromq::zap
+namespace opentxs::network::zeromq::zap
 {
 const UnallocatedSet<UnallocatedCString> Request::Imp::accept_versions_{
     default_version_};
@@ -108,9 +108,9 @@ auto Request::Imp::string_to_mechanism(const ReadView in) -> zap::Mechanism
         return Mechanism::Unknown;
     }
 }
-}  // namespace opentxs::v1::network::zeromq::zap
+}  // namespace opentxs::network::zeromq::zap
 
-namespace opentxs::v1::network::zeromq::zap
+namespace opentxs::network::zeromq::zap
 {
 Request::Request(Imp* imp) noexcept
     : imp_(imp)
@@ -493,4 +493,4 @@ Request::~Request()
         Message::imp_ = nullptr;
     }
 }
-}  // namespace opentxs::v1::network::zeromq::zap
+}  // namespace opentxs::network::zeromq::zap

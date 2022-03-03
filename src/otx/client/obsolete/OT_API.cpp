@@ -75,7 +75,7 @@
 #define CLIENT_MASTER_KEY_TIMEOUT_DEFAULT 300
 
 // The #defines for the latency values can be found in ServerConnection.cpp.
-namespace opentxs::v1
+namespace opentxs
 {
 namespace
 {
@@ -5593,4 +5593,4 @@ OT_API::~OT_API()
     m_pClient.reset();
     Cleanup();
 }
-}  // namespace opentxs::v1
+}  // namespace opentxs

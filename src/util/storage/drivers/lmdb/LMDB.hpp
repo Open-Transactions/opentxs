@@ -18,8 +18,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace api
 {
 namespace network
@@ -42,11 +42,11 @@ class Plugin;
 }  // namespace storage
 
 class Flag;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::storage::driver
+namespace opentxs::storage::driver
 {
 // LMDB implementation of opentxs::storage
 class LMDB final : public virtual implementation::Plugin,
@@ -102,4 +102,4 @@ private:
     auto operator=(const LMDB&) -> LMDB& = delete;
     auto operator=(LMDB&&) -> LMDB& = delete;
 };
-}  // namespace opentxs::v1::storage::driver
+}  // namespace opentxs::storage::driver

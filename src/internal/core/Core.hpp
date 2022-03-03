@@ -27,8 +27,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace api
 {
 class Session;
@@ -44,11 +44,11 @@ class UnitDefinition;
 class Identifier;
 class PasswordPrompt;
 class Secret;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1
+namespace opentxs
 {
 template <typename T>
 struct make_blank;
@@ -57,17 +57,17 @@ template <>
 struct make_blank<OTData> {
     static auto value(const api::Session&) -> OTData { return Data::Factory(); }
 };
-}  // namespace opentxs::v1
+}  // namespace opentxs
 
-namespace opentxs::v1::internal
+namespace opentxs::internal
 {
 struct NymFile : virtual public opentxs::NymFile {
     virtual auto LoadSignedNymFile(const PasswordPrompt& reason) -> bool = 0;
     virtual auto SaveSignedNymFile(const PasswordPrompt& reason) -> bool = 0;
 };
-}  // namespace opentxs::v1::internal
+}  // namespace opentxs::internal
 
-namespace opentxs::v1::blockchain
+namespace opentxs::blockchain
 {
 auto AccountName(const Type chain) noexcept -> UnallocatedCString;
 auto Chain(const api::Session& api, const identifier::Nym& id) noexcept -> Type;
@@ -82,18 +82,18 @@ auto NotaryID(const api::Session& api, const Type chain) noexcept
     -> const identifier::Notary&;
 auto UnitID(const api::Session& api, const Type chain) noexcept
     -> const identifier::UnitDefinition&;
-}  // namespace opentxs::v1::blockchain
+}  // namespace opentxs::blockchain
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto Secret(const std::size_t bytes) noexcept
     -> std::unique_ptr<opentxs::Secret>;
 auto Secret(const ReadView bytes, const bool mode) noexcept
     -> std::unique_ptr<opentxs::Secret>;
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory
 
-namespace opentxs::v1
+namespace opentxs
 {
 auto translate(const AddressType in) noexcept -> proto::AddressType;
 auto translate(const proto::AddressType in) noexcept -> AddressType;
-}  // namespace opentxs::v1
+}  // namespace opentxs

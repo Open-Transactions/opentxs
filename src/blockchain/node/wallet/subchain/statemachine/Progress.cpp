@@ -24,7 +24,7 @@
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Pimpl.hpp"
 
-namespace opentxs::v1::blockchain::node::wallet
+namespace opentxs::blockchain::node::wallet
 {
 struct Progress::Imp {
     auto Dirty() const noexcept -> std::optional<block::Position>
@@ -230,4 +230,4 @@ Progress::~Progress()
         imp_ = nullptr;
     }
 }
-}  // namespace opentxs::v1::blockchain::node::wallet
+}  // namespace opentxs::blockchain::node::wallet

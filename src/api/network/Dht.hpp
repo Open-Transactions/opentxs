@@ -26,8 +26,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace api
 {
 namespace network
@@ -57,11 +57,11 @@ class Nym;
 class ServerContract;
 class UnitDefinition;
 }  // namespace proto
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::api::network::imp
+namespace opentxs::api::network::imp
 {
 class Dht final : virtual public internal::Dht
 {
@@ -130,4 +130,4 @@ private:
     auto operator=(const Dht&) -> Dht& = delete;
     auto operator=(Dht&&) -> Dht& = delete;
 };
-}  // namespace opentxs::v1::api::network::imp
+}  // namespace opentxs::api::network::imp

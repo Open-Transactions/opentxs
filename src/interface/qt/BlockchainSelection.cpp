@@ -19,7 +19,7 @@
 #include "opentxs/blockchain/BlockchainType.hpp"
 #include "opentxs/util/Container.hpp"
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto BlockchainSelectionQtModel(
     ui::internal::BlockchainSelection& parent) noexcept
@@ -29,9 +29,9 @@ auto BlockchainSelectionQtModel(
 
     return std::make_unique<ReturnType>(parent);
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory
 
-namespace opentxs::v1::ui
+namespace opentxs::ui
 {
 struct BlockchainSelectionQt::Imp {
     internal::BlockchainSelection& parent_;
@@ -120,9 +120,9 @@ BlockchainSelectionQt::~BlockchainSelectionQt()
         imp_ = nullptr;
     }
 }
-}  // namespace opentxs::v1::ui
+}  // namespace opentxs::ui
 
-namespace opentxs::v1::ui::implementation
+namespace opentxs::ui::implementation
 {
 auto BlockchainSelectionItem::qt_data(
     const int column,
@@ -156,4 +156,4 @@ auto BlockchainSelectionItem::qt_data(
         }
     }
 }
-}  // namespace opentxs::v1::ui::implementation
+}  // namespace opentxs::ui::implementation

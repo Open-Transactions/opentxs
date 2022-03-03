@@ -18,7 +18,7 @@
 #include "serialization/protobuf/RPCCommand.pb.h"
 #include "serialization/protobuf/SendPayment.pb.h"
 
-namespace opentxs::v1::rpc::request::implementation
+namespace opentxs::rpc::request::implementation
 {
 struct SendPayment final : public Base::Imp {
     const VersionNumber send_payment_version_;
@@ -97,9 +97,9 @@ private:
     auto operator=(const SendPayment&) -> SendPayment& = delete;
     auto operator=(SendPayment&&) -> SendPayment& = delete;
 };
-}  // namespace opentxs::v1::rpc::request::implementation
+}  // namespace opentxs::rpc::request::implementation
 
-namespace opentxs::v1::rpc::request
+namespace opentxs::rpc::request
 {
 SendPayment::SendPayment(
     SessionIndex session,
@@ -221,4 +221,4 @@ auto SendPayment::SourceAccount() const noexcept -> const UnallocatedCString&
 }
 
 SendPayment::~SendPayment() = default;
-}  // namespace opentxs::v1::rpc::request
+}  // namespace opentxs::rpc::request

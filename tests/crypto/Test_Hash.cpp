@@ -11,6 +11,7 @@
 #include <utility>
 
 #include "opentxs/OT.hpp"
+#include "opentxs/Version.hpp"
 #include "opentxs/api/Context.hpp"
 #include "opentxs/api/Factory.hpp"
 #include "opentxs/api/crypto/Crypto.hpp"

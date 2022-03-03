@@ -22,7 +22,7 @@
 #include "opentxs/interface/ui/Blockchains.hpp"
 #include "opentxs/util/Container.hpp"
 
-namespace opentxs::v1::api::session::imp
+namespace opentxs::api::session::imp
 {
 UI::Imp::Imp(
     const api::session::Client& api,
@@ -693,4 +693,4 @@ auto UI::Imp::UnitList(const identifier::Nym& nymID, const SimpleCallback cb)
 }
 
 UI::Imp::~Imp() { Shutdown(); }
-}  // namespace opentxs::v1::api::session::imp
+}  // namespace opentxs::api::session::imp

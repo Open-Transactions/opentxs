@@ -12,7 +12,7 @@
 #include <iosfwd>
 #include <mutex>
 
-namespace opentxs::v1::crypto::implementation
+namespace opentxs::crypto::implementation
 {
 class Ripemd160 : virtual public crypto::Ripemd160
 {
@@ -35,4 +35,4 @@ private:
     auto operator=(const Ripemd160&) -> Ripemd160& = delete;
     auto operator=(Ripemd160&&) -> Ripemd160& = delete;
 };
-}  // namespace opentxs::v1::crypto::implementation
+}  // namespace opentxs::crypto::implementation

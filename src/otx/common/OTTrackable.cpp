@@ -16,7 +16,7 @@
 #include "opentxs/core/String.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 
-namespace opentxs::v1
+namespace opentxs
 {
 OTTrackable::OTTrackable(const api::Session& api)
     : Instrument(api)
@@ -101,4 +101,4 @@ void OTTrackable::SetSenderNymID(const identifier::Nym& NYM_ID)
 void OTTrackable::UpdateContents(const PasswordPrompt& reason) {}
 
 OTTrackable::~OTTrackable() { Release_Trackable(); }
-}  // namespace opentxs::v1
+}  // namespace opentxs

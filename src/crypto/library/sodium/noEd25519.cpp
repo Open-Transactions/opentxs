@@ -7,7 +7,7 @@
 #include "1_Internal.hpp"                    // IWYU pragma: associated
 #include "crypto/library/sodium/Sodium.hpp"  // IWYU pragma: associated
 
-namespace opentxs::v1::crypto::implementation
+namespace opentxs::crypto::implementation
 {
 auto Sodium::PubkeyAdd(const ReadView, const ReadView, const AllocateOutput)
     const noexcept -> bool
@@ -63,4 +63,4 @@ auto Sodium::Verify(
 {
     return {};
 }
-}  // namespace opentxs::v1::crypto::implementation
+}  // namespace opentxs::crypto::implementation

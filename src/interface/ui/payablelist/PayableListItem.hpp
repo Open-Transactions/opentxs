@@ -24,8 +24,8 @@ class QVariant;
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace api
 {
 namespace session
@@ -49,11 +49,11 @@ namespace ui
 {
 class PayableListItem;
 }  // namespace ui
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::ui::implementation
+namespace opentxs::ui::implementation
 {
 class PayableListItem final : public PayableListRowInternal,
                               public implementation::ContactListItem
@@ -96,6 +96,6 @@ private:
     auto operator=(const PayableListItem&) -> PayableListItem& = delete;
     auto operator=(PayableListItem&&) -> PayableListItem& = delete;
 };
-}  // namespace opentxs::v1::ui::implementation
+}  // namespace opentxs::ui::implementation
 
 template class opentxs::SharedPimpl<opentxs::ui::PayableListItem>;

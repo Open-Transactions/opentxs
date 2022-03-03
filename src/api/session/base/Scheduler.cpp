@@ -22,7 +22,7 @@
 #include "serialization/protobuf/ServerContract.pb.h"
 #include "serialization/protobuf/UnitDefinition.pb.h"
 
-namespace opentxs::v1::api::session
+namespace opentxs::api::session
 {
 Scheduler::Scheduler(const api::Context& parent, Flag& running)
     : Lockable()
@@ -128,4 +128,4 @@ Scheduler::~Scheduler()
 {
     if (periodic_.joinable()) { periodic_.join(); }
 }
-}  // namespace opentxs::v1::api::session
+}  // namespace opentxs::api::session

@@ -18,7 +18,7 @@
 #include "opentxs/Types.hpp"
 #include "opentxs/util/Container.hpp"
 
-namespace opentxs::v1
+namespace opentxs
 {
 using OutstandingMap = UnallocatedMap<int, std::atomic_int>;
 
@@ -200,4 +200,4 @@ Outstanding::~Outstanding()
         imp_ = nullptr;
     }
 }
-}  // namespace opentxs::v1
+}  // namespace opentxs

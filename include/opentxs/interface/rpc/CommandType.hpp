@@ -10,7 +10,7 @@
 
 #include <limits>
 
-namespace opentxs::v1::rpc
+namespace opentxs::rpc
 {
 enum class CommandType : TypeEnum {
     error = 0,
@@ -60,4 +60,4 @@ enum class CommandType : TypeEnum {
     lookup_accountid = 44,
     rename_account = 45,
 };
-}  // namespace opentxs::v1::rpc
+}  // namespace opentxs::rpc

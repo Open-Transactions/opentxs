@@ -26,7 +26,7 @@
 
 template class opentxs::Pimpl<opentxs::network::zeromq::socket::Pair>;
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto PairSocket(
     const network::zeromq::Context& context,
@@ -58,9 +58,9 @@ auto PairSocket(
 
     return std::make_unique<ReturnType>(context, callback, endpoint);
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory
 
-namespace opentxs::v1::network::zeromq::socket::implementation
+namespace opentxs::network::zeromq::socket::implementation
 {
 Pair::Pair(
     const zeromq::Context& context,
@@ -138,4 +138,4 @@ void Pair::process_incoming(const Lock& lock, Message&& message) noexcept
 }
 
 Pair::~Pair() SHUTDOWN_SOCKET
-}  // namespace opentxs::v1::network::zeromq::socket::implementation
+}  // namespace opentxs::network::zeromq::socket::implementation

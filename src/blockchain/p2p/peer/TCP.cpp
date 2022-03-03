@@ -19,6 +19,7 @@
 #include "opentxs/api/network/Network.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
+#include "opentxs/core/Data.hpp"
 #include "opentxs/network/asio/Endpoint.hpp"
 #include "opentxs/network/asio/Socket.hpp"
 #include "opentxs/network/zeromq/Pipeline.hpp"
@@ -34,7 +35,7 @@
 namespace asio = boost::asio;
 using tcp = asio::ip::tcp;
 
-namespace opentxs::v1::blockchain::p2p::peer
+namespace opentxs::blockchain::p2p::peer
 {
 struct TCPConnectionManager : virtual public ConnectionManager {
     const api::Session& api_;
@@ -346,4 +347,4 @@ auto ConnectionManager::TCPIncoming(
         headerSize,
         std::move(socket));
 }
-}  // namespace opentxs::v1::blockchain::p2p::peer
+}  // namespace opentxs::blockchain::p2p::peer

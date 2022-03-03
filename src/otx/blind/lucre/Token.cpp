@@ -48,7 +48,7 @@ extern "C" {
 
 #define LUCRE_TOKEN_VERSION 1
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto TokenLucre(
     const otx::blind::Token& token,
@@ -90,9 +90,9 @@ auto TokenLucre(
     return std::make_unique<ReturnType>(api, owner, mint, value, purse, reason)
         .release();
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory
 
-namespace opentxs::v1::otx::blind::token
+namespace opentxs::otx::blind::token
 {
 Lucre::Lucre(
     const api::Session& api,
@@ -754,4 +754,4 @@ void Lucre::serialize_spendable(proto::LucreTokenData& lucre) const
 
     *lucre.mutable_spendable() = *spend_;
 }
-}  // namespace opentxs::v1::otx::blind::token
+}  // namespace opentxs::otx::blind::token

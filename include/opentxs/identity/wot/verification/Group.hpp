@@ -14,8 +14,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace identifier
 {
 class Nym;
@@ -38,11 +38,11 @@ class VerificationGroup;
 }  // namespace proto
 
 class PasswordPrompt;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::identity::wot::verification
+namespace opentxs::identity::wot::verification
 {
 class OPENTXS_EXPORT Group
 {
@@ -98,4 +98,4 @@ private:
     auto operator=(const Group&) -> Group& = delete;
     auto operator=(Group&&) -> Group& = delete;
 };
-}  // namespace opentxs::v1::identity::wot::verification
+}  // namespace opentxs::identity::wot::verification

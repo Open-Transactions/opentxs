@@ -22,7 +22,7 @@ class Context;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::network::zeromq::internal
+namespace opentxs::network::zeromq::internal
 {
 class Handle
 {
@@ -42,4 +42,4 @@ public:
 private:
     const internal::Context* context_;
 };
-}  // namespace opentxs::v1::network::zeromq::internal
+}  // namespace opentxs::network::zeromq::internal

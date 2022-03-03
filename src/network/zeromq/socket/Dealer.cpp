@@ -27,7 +27,7 @@
 
 template class opentxs::Pimpl<opentxs::network::zeromq::socket::Dealer>;
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto DealerSocket(
     const network::zeromq::Context& context,
@@ -42,9 +42,9 @@ auto DealerSocket(
         static_cast<network::zeromq::socket::Direction>(direction),
         callback);
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory
 
-namespace opentxs::v1::network::zeromq::socket::implementation
+namespace opentxs::network::zeromq::socket::implementation
 {
 Dealer::Dealer(
     const zeromq::Context& context,
@@ -77,4 +77,4 @@ void Dealer::process_incoming(
 }
 
 Dealer::~Dealer() SHUTDOWN_SOCKET
-}  // namespace opentxs::v1::network::zeromq::socket::implementation
+}  // namespace opentxs::network::zeromq::socket::implementation

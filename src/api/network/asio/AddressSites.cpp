@@ -7,7 +7,7 @@
 #include "1_Internal.hpp"            // IWYU pragma: associated
 #include "api/network/asio/Imp.hpp"  // IWYU pragma: associated
 
-namespace opentxs::v1::api::network
+namespace opentxs::api::network
 {
 const Vector<Asio::Imp::Site> Asio::Imp::sites{
     {
@@ -42,4 +42,4 @@ const Vector<Asio::Imp::Site> Asio::Imp::sites{
         IPversion::IPV6,
         11,
     }};
-}  // namespace opentxs::v1::api::network
+}  // namespace opentxs::api::network

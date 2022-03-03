@@ -28,7 +28,7 @@ extern "C" {
 
 template class opentxs::Pimpl<opentxs::Data>;
 
-namespace opentxs::v1
+namespace opentxs
 {
 auto operator==(const OTData& lhs, const Data& rhs) noexcept -> bool
 {
@@ -495,4 +495,4 @@ void Data::zeroMemory()
     if (0 < data_.size()) { data_.assign(data_.size(), 0); }
 }
 }  // namespace implementation
-}  // namespace opentxs::v1
+}  // namespace opentxs

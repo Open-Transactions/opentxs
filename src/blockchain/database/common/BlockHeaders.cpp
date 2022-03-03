@@ -26,7 +26,7 @@
 #include "util/LMDB.hpp"
 #include "util/MappedFileStorage.hpp"
 
-namespace opentxs::v1::blockchain::database::common
+namespace opentxs::blockchain::database::common
 {
 BlockHeader::BlockHeader(storage::lmdb::LMDB& lmdb, Bulk& bulk) noexcept(false)
     : lmdb_(lmdb)
@@ -159,4 +159,4 @@ auto BlockHeader::store(
         return false;
     }
 }
-}  // namespace opentxs::v1::blockchain::database::common
+}  // namespace opentxs::blockchain::database::common

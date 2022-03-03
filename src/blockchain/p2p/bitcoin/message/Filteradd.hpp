@@ -18,8 +18,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace api
 {
 class Session;
@@ -37,11 +37,11 @@ class Header;
 }  // namespace blockchain
 
 class Factory;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::blockchain::p2p::bitcoin::message::implementation
+namespace opentxs::blockchain::p2p::bitcoin::message::implementation
 {
 class Filteradd final : virtual public internal::Filteradd,
                         public implementation::Message
@@ -71,4 +71,4 @@ private:
     auto operator=(const Filteradd&) -> Filteradd& = delete;
     auto operator=(Filteradd&&) -> Filteradd& = delete;
 };
-}  // namespace opentxs::v1::blockchain::p2p::bitcoin::message::implementation
+}  // namespace opentxs::blockchain::p2p::bitcoin::message::implementation

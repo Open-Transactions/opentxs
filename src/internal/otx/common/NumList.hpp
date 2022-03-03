@@ -10,7 +10,7 @@
 #include "opentxs/Version.hpp"
 #include "opentxs/util/Container.hpp"
 
-namespace opentxs::v1
+namespace opentxs
 {
 class String;
 
@@ -97,4 +97,4 @@ public:
     auto Output(String& strOutput) const -> bool;
     void Release();
 };
-}  // namespace opentxs::v1
+}  // namespace opentxs

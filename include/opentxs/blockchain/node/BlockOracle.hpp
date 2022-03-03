@@ -19,8 +19,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace blockchain
 {
 namespace block
@@ -38,11 +38,11 @@ struct BlockOracle;
 }  // namespace internal
 }  // namespace node
 }  // namespace blockchain
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::blockchain::node
+namespace opentxs::blockchain::node
 {
 class OPENTXS_EXPORT BlockOracle
 {
@@ -74,4 +74,4 @@ private:
     auto operator=(const BlockOracle&) -> BlockOracle& = delete;
     auto operator=(BlockOracle&&) -> BlockOracle& = delete;
 };
-}  // namespace opentxs::v1::blockchain::node
+}  // namespace opentxs::blockchain::node

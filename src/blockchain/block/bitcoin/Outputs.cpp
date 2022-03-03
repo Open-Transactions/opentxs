@@ -27,7 +27,7 @@
 #include "serialization/protobuf/BlockchainTransaction.pb.h"
 #include "util/Container.hpp"
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto BitcoinTransactionOutputs(
     UnallocatedVector<std::unique_ptr<
@@ -46,9 +46,9 @@ auto BitcoinTransactionOutputs(
         return {};
     }
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory
 
-namespace opentxs::v1::blockchain::block::bitcoin::implementation
+namespace opentxs::blockchain::block::bitcoin::implementation
 {
 Outputs::Outputs(
     OutputList&& outputs,
@@ -296,4 +296,4 @@ auto Outputs::SetKeyData(const KeyData& data) noexcept -> void
 {
     for (auto& output : outputs_) { output->SetKeyData(data); }
 }
-}  // namespace opentxs::v1::blockchain::block::bitcoin::implementation
+}  // namespace opentxs::blockchain::block::bitcoin::implementation

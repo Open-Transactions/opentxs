@@ -109,7 +109,7 @@
 // false == error.
 //
 
-namespace opentxs::v1
+namespace opentxs
 {
 
 OTMessageStrategyManager Message::messageStrategyManager;
@@ -4488,4 +4488,4 @@ public:
 RegisterStrategy StrategyAddClaimResponse::reg(
     ADD_CLAIM_RESPONSE,
     new StrategyAddClaimResponse());
-}  // namespace opentxs::v1
+}  // namespace opentxs

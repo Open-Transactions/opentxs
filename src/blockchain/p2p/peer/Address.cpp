@@ -13,7 +13,7 @@
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/Types.hpp"
 
-namespace opentxs::v1::blockchain::p2p::peer
+namespace opentxs::blockchain::p2p::peer
 {
 Address::Address(std::unique_ptr<internal::Address> address) noexcept
     : lock_()
@@ -94,4 +94,4 @@ auto Address::UpdateTime(const Time& time) noexcept -> pointer
 
     return address_->clone_internal();
 }
-}  // namespace opentxs::v1::blockchain::p2p::peer
+}  // namespace opentxs::blockchain::p2p::peer

@@ -31,7 +31,7 @@
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Pimpl.hpp"
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto PaymentItem(
     const ui::implementation::ActivityThreadInternalInterface& parent,
@@ -58,9 +58,9 @@ auto PaymentItem(
         std::move(memo),
         std::move(contract));
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory
 
-namespace opentxs::v1::ui::implementation
+namespace opentxs::ui::implementation
 {
 PaymentItem::PaymentItem(
     const ActivityThreadInternalInterface& parent,
@@ -253,4 +253,4 @@ auto PaymentItem::reindex(
 }
 
 PaymentItem::~PaymentItem() = default;
-}  // namespace opentxs::v1::ui::implementation
+}  // namespace opentxs::ui::implementation

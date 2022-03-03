@@ -13,8 +13,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace api
 {
 class Session;
@@ -29,11 +29,11 @@ class Basket;
 }  // namespace contract
 
 using OTBasketContract = SharedPimpl<contract::unit::Basket>;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::contract::unit
+namespace opentxs::contract::unit
 {
 class OPENTXS_EXPORT Basket : virtual public contract::Unit
 {
@@ -73,4 +73,4 @@ private:
     auto operator=(const Basket&) -> Basket& = delete;
     auto operator=(Basket&&) -> Basket& = delete;
 };
-}  // namespace opentxs::v1::contract::unit
+}  // namespace opentxs::contract::unit

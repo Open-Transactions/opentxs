@@ -10,7 +10,7 @@
 
 #include <cstdint>
 
-namespace opentxs::v1::crypto::key::symmetric
+namespace opentxs::crypto::key::symmetric
 {
 enum class Algorithm : std::uint8_t {
     Error = 0,
@@ -21,4 +21,4 @@ constexpr auto value(const Algorithm in) noexcept
 {
     return static_cast<std::uint8_t>(in);
 }
-}  // namespace opentxs::v1::crypto::key::symmetric
+}  // namespace opentxs::crypto::key::symmetric

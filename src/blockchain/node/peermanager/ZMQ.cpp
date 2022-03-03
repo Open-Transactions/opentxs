@@ -45,7 +45,7 @@
 #include "opentxs/util/WorkType.hpp"
 #include "util/Work.hpp"
 
-namespace opentxs::v1::blockchain::node::implementation
+namespace opentxs::blockchain::node::implementation
 {
 class ZMQIncomingConnectionManager final
     : public PeerManager::IncomingConnectionManager
@@ -311,4 +311,4 @@ auto PeerManager::IncomingConnectionManager::ZMQ(
 {
     return std::make_unique<ZMQIncomingConnectionManager>(api, parent);
 }
-}  // namespace opentxs::v1::blockchain::node::implementation
+}  // namespace opentxs::blockchain::node::implementation

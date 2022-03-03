@@ -48,7 +48,7 @@
 #include "serialization/protobuf/Envelope.pb.h"
 #include "serialization/protobuf/TaggedKey.pb.h"
 
-namespace opentxs::v1
+namespace opentxs
 {
 auto Factory::Envelope(const api::Session& api) noexcept
     -> std::unique_ptr<crypto::Envelope>
@@ -77,9 +77,9 @@ auto Factory::Envelope(
 
     return std::make_unique<ReturnType>(api, serialized);
 }
-}  // namespace opentxs::v1
+}  // namespace opentxs
 
-namespace opentxs::v1::crypto::implementation
+namespace opentxs::crypto::implementation
 {
 const VersionNumber Envelope::default_version_{2};
 const VersionNumber Envelope::tagged_key_version_{1};
@@ -608,4 +608,4 @@ auto Envelope::unlock_session_key(
 
     throw std::runtime_error("No session key usable by this nym");
 }
-}  // namespace opentxs::v1::crypto::implementation
+}  // namespace opentxs::crypto::implementation

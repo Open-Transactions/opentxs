@@ -27,7 +27,7 @@
 #define CONFIG_FILE_EXT ".cfg"
 #define PID_FILE "opentxs.lock"
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto Legacy(const UnallocatedCString& home) noexcept
     -> std::unique_ptr<api::Legacy>
@@ -36,9 +36,9 @@ auto Legacy(const UnallocatedCString& home) noexcept
 
     return std::make_unique<ReturnType>(home);
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory
 
-namespace opentxs::v1::api
+namespace opentxs::api
 {
 auto Legacy::PathSeparator() noexcept -> const char* { return "/"; }
 
@@ -169,9 +169,9 @@ auto Legacy::GetFilenameLst(const UnallocatedCString& filename) noexcept
     return Legacy::internal_concatenate(filename.c_str(), ext);
 }
 
-}  // namespace opentxs::v1::api
+}  // namespace opentxs::api
 
-namespace opentxs::v1::api::imp
+namespace opentxs::api::imp
 {
 const char* Legacy::account_{"account"};
 const char* Legacy::common_{"storage"};
@@ -395,4 +395,4 @@ auto Legacy::ServerDataFolder(const int instance) const noexcept
 {
     return get_path(server_data_folder_, instance);
 }
-}  // namespace opentxs::v1::api::imp
+}  // namespace opentxs::api::imp

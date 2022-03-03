@@ -8,7 +8,7 @@
 #include "opentxs/blockchain/Blockchain.hpp"
 #include "opentxs/util/Container.hpp"
 
-namespace opentxs::v1::blockchain::node::wallet
+namespace opentxs::blockchain::node::wallet
 {
 class BlockIndex
 {
@@ -32,4 +32,4 @@ private:
     auto operator=(const BlockIndex&) -> BlockIndex& = delete;
     auto operator=(BlockIndex&&) -> BlockIndex& = delete;
 };
-}  // namespace opentxs::v1::blockchain::node::wallet
+}  // namespace opentxs::blockchain::node::wallet

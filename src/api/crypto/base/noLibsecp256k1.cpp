@@ -9,7 +9,7 @@
 
 #include "internal/util/LogMacros.hpp"
 
-namespace opentxs::v1::api::imp
+namespace opentxs::api::imp
 {
 auto Crypto::Init_Libsecp256k1() noexcept -> void {}
 
@@ -17,4 +17,4 @@ auto Crypto::Libsecp256k1() const noexcept -> const opentxs::crypto::Secp256k1&
 {
     OT_FAIL;
 }
-}  // namespace opentxs::v1::api::imp
+}  // namespace opentxs::api::imp

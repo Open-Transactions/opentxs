@@ -15,8 +15,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace api
 {
 class Session;
@@ -45,11 +45,11 @@ class Token;
 
 class PasswordPrompt;
 class String;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::otx::blind::mint
+namespace opentxs::otx::blind::mint
 {
 class Lucre final : public mint::Mint
 {
@@ -82,4 +82,4 @@ public:
 
     ~Lucre() final = default;
 };
-}  // namespace opentxs::v1::otx::blind::mint
+}  // namespace opentxs::otx::blind::mint

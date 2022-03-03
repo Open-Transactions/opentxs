@@ -8,8 +8,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace network
 {
 namespace zeromq
@@ -19,15 +19,15 @@ class FrameIterator;
 class Message;
 }  // namespace zeromq
 }  // namespace network
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::network::zeromq::internal
+namespace opentxs::network::zeromq::internal
 {
 class FrameSection
 {
 public:
     virtual ~FrameSection() = default;
 };
-}  // namespace opentxs::v1::network::zeromq::internal
+}  // namespace opentxs::network::zeromq::internal

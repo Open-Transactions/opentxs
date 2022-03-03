@@ -15,8 +15,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace api
 {
 class Session;
@@ -34,11 +34,11 @@ struct WalletDatabase;
 }  // namespace internal
 }  // namespace node
 }  // namespace blockchain
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::blockchain::node::wallet
+namespace opentxs::blockchain::node::wallet
 {
 class Accounts
 {
@@ -66,4 +66,4 @@ private:
     auto operator=(const Accounts&) -> Accounts& = delete;
     auto operator=(Accounts&&) -> Accounts& = delete;
 };
-}  // namespace opentxs::v1::blockchain::node::wallet
+}  // namespace opentxs::blockchain::node::wallet

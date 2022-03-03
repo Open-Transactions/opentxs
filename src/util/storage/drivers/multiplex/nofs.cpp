@@ -10,7 +10,7 @@
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/util/Container.hpp"
 
-namespace opentxs::v1::storage::driver
+namespace opentxs::storage::driver
 {
 auto Multiplex::init_fs(std::unique_ptr<storage::Plugin>& plugin) -> void
 {
@@ -21,4 +21,4 @@ auto Multiplex::init_fs_backup(const UnallocatedCString& dir) -> void
 {
     return;
 }
-}  // namespace opentxs::v1::storage::driver
+}  // namespace opentxs::storage::driver

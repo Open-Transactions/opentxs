@@ -17,16 +17,16 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 class Amount;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
 namespace bmp = boost::multiprecision;
 
-namespace opentxs::v1::amount
+namespace opentxs::amount
 {
 static constexpr auto fractional_bits_{
     std::numeric_limits<std::uint64_t>::digits};
@@ -45,9 +45,9 @@ using Float = bmp::cpp_dec_float_100;
 auto FloatToInteger(const Float& rhs) noexcept(false) -> Integer;
 auto GetScale() noexcept -> Float;
 auto IntegerToFloat(const Integer& rhs) noexcept -> Float;
-}  // namespace opentxs::v1::amount
+}  // namespace opentxs::amount
 
-namespace opentxs::v1::internal
+namespace opentxs::internal
 {
 auto FloatToAmount(const amount::Float& rhs) noexcept(false)
     -> opentxs::Amount::Imp*;
@@ -72,4 +72,4 @@ public:
 
     virtual ~Amount() = default;
 };
-}  // namespace opentxs::v1::internal
+}  // namespace opentxs::internal

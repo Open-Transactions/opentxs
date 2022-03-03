@@ -19,7 +19,7 @@
 #include "opentxs/util/Pimpl.hpp"
 #include "otx/client/obsolete/OTAPI_Func.hpp"
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto ServerAction(
     const api::session::Client& api,
@@ -27,9 +27,9 @@ auto ServerAction(
 {
     return new otx::client::implementation::ServerAction(api, lockCallback);
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory
 
-namespace opentxs::v1::otx::client::implementation
+namespace opentxs::otx::client::implementation
 {
 ServerAction::ServerAction(
     const api::session::Client& api,
@@ -379,4 +379,4 @@ auto ServerAction::WithdrawVoucher(
         amount,
         memo*/));
 }
-}  // namespace opentxs::v1::otx::client::implementation
+}  // namespace opentxs::otx::client::implementation

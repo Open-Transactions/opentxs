@@ -29,7 +29,7 @@
 
 namespace zmq = opentxs::network::zeromq;
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto BlockchainAPI(
     const api::Session& api,
@@ -44,17 +44,17 @@ auto BlockchainAPI(
     return std::make_shared<ReturnType>(
         api, activity, contacts, legacy, dataFolder, args);
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory
 
-namespace opentxs::v1::api::crypto::blank
+namespace opentxs::api::crypto::blank
 {
 Blockchain::Blockchain(const session::Factory& factory) noexcept
     : id_(factory.NymID())
 {
 }
-}  // namespace opentxs::v1::api::crypto::blank
+}  // namespace opentxs::api::crypto::blank
 
-namespace opentxs::v1::api::crypto
+namespace opentxs::api::crypto
 {
 auto Blockchain::Bip44(Chain chain) noexcept(false) -> Bip44Type
 {
@@ -76,9 +76,9 @@ auto Blockchain::Bip44Path(
     output.add_child(Bip32Index{0} | hard);
     return write(output, destination);
 }
-}  // namespace opentxs::v1::api::crypto
+}  // namespace opentxs::api::crypto
 
-namespace opentxs::v1::api::crypto::imp
+namespace opentxs::api::crypto::imp
 {
 auto Blockchain::Account(const identifier::Nym& nymID, const Chain chain) const
     noexcept(false) -> const opentxs::blockchain::crypto::Account&
@@ -427,4 +427,4 @@ auto Blockchain::Wallet(const Chain chain) const noexcept(false)
 }
 
 Blockchain::~Blockchain() = default;
-}  // namespace opentxs::v1::api::crypto::imp
+}  // namespace opentxs::api::crypto::imp

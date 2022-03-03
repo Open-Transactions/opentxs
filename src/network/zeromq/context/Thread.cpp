@@ -31,7 +31,7 @@
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/util/Container.hpp"
 
-namespace opentxs::v1::network::zeromq::context
+namespace opentxs::network::zeromq::context
 {
 Thread::Thread(zeromq::internal::Pool& parent) noexcept
     : parent_(parent)
@@ -277,4 +277,4 @@ auto Thread::wait() noexcept -> void
 Thread::Items::~Items() = default;
 
 Thread::~Thread() { wait(); }
-}  // namespace opentxs::v1::network::zeromq::context
+}  // namespace opentxs::network::zeromq::context

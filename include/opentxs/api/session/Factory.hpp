@@ -58,8 +58,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace api
 {
 namespace session
@@ -136,11 +136,11 @@ class Server;
 
 class Secret;
 class PaymentCode;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::api::session
+namespace opentxs::api::session
 {
 class OPENTXS_EXPORT Factory : virtual public api::Factory
 {
@@ -613,4 +613,4 @@ private:
     auto operator=(const Factory&) -> Factory& = delete;
     auto operator=(Factory&&) -> Factory& = delete;
 };
-}  // namespace opentxs::v1::api::session
+}  // namespace opentxs::api::session

@@ -36,7 +36,7 @@
 
 template class opentxs::Pimpl<opentxs::otx::Request>;
 
-namespace opentxs::v1::otx
+namespace opentxs::otx
 {
 const VersionNumber Request::DefaultVersion{2};
 const VersionNumber Request::MaxVersion{2};
@@ -77,9 +77,9 @@ auto Request::Factory(const api::Session& api, const ReadView& view)
     return OTXRequest{new implementation::Request(
         api, proto::Factory<proto::ServerRequest>(view))};
 }
-}  // namespace opentxs::v1::otx
+}  // namespace opentxs::otx
 
-namespace opentxs::v1::otx::implementation
+namespace opentxs::otx::implementation
 {
 Request::Request(
     const api::Session& api,
@@ -316,4 +316,4 @@ auto Request::verify_signature(
 
     return nym_->Verify(serialized, sigProto);
 }
-}  // namespace opentxs::v1::otx::implementation
+}  // namespace opentxs::otx::implementation

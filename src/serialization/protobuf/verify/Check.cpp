@@ -13,7 +13,7 @@
 #include "internal/serialization/protobuf/Check.hpp"
 #include "opentxs/util/Container.hpp"
 
-namespace opentxs::v1::proto
+namespace opentxs::proto
 {
 void PrintErrorMessage(const char* proto, const char* error) noexcept
 {
@@ -76,4 +76,4 @@ void WriteLogMessage(const std::stringstream& out) noexcept
     std::cerr << out.str();
 #endif
 }
-}  // namespace opentxs::v1::proto
+}  // namespace opentxs::proto

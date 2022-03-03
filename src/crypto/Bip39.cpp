@@ -40,7 +40,7 @@
 #include "util/ByteLiterals.hpp"
 #include "util/Container.hpp"
 
-namespace opentxs::v1
+namespace opentxs
 {
 auto Factory::Bip39(const api::Crypto& api) noexcept
     -> std::unique_ptr<crypto::Bip39>
@@ -49,9 +49,9 @@ auto Factory::Bip39(const api::Crypto& api) noexcept
 
     return std::make_unique<ReturnType>(api);
 }
-}  // namespace opentxs::v1
+}  // namespace opentxs
 
-namespace opentxs::v1::crypto::implementation
+namespace opentxs::crypto::implementation
 {
 const std::size_t Bip39::BitsPerWord{11};
 const std::uint8_t Bip39::ByteBits{8};
@@ -486,4 +486,4 @@ auto Bip39::WordsToSeed(
         }
     }
 }
-}  // namespace opentxs::v1::crypto::implementation
+}  // namespace opentxs::crypto::implementation

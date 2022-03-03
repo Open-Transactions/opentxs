@@ -14,19 +14,19 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace ui
 {
 class AccountSummaryItem;
 }  // namespace ui
 
 using OTUIAccountSummaryItem = SharedPimpl<ui::AccountSummaryItem>;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::ui
+namespace opentxs::ui
 {
 class OPENTXS_EXPORT AccountSummaryItem : virtual public ListRow
 {
@@ -47,4 +47,4 @@ private:
     auto operator=(const AccountSummaryItem&) -> AccountSummaryItem& = delete;
     auto operator=(AccountSummaryItem&&) -> AccountSummaryItem& = delete;
 };
-}  // namespace opentxs::v1::ui
+}  // namespace opentxs::ui

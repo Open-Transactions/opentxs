@@ -15,7 +15,7 @@
 
 class QString;
 
-namespace opentxs::v1::ui::implementation
+namespace opentxs::ui::implementation
 {
 class SendMonitor
 {
@@ -40,4 +40,4 @@ private:
     auto operator=(const SendMonitor&) -> SendMonitor& = delete;
     auto operator=(SendMonitor&&) -> SendMonitor& = delete;
 };
-}  // namespace opentxs::v1::ui::implementation
+}  // namespace opentxs::ui::implementation

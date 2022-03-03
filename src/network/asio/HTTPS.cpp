@@ -22,7 +22,7 @@
 #include "network/asio/WebRequest.tpp"
 #include "opentxs/util/Log.hpp"
 
-namespace opentxs::v1::network::asio
+namespace opentxs::network::asio
 {
 HTTPS::HTTPS(
     const std::string_view hostname,
@@ -151,4 +151,4 @@ HTTPS::~HTTPS()
         LogTrace()(OT_PRETTY_CLASS())(e.what()).Flush();
     }
 }
-}  // namespace opentxs::v1::network::asio
+}  // namespace opentxs::network::asio

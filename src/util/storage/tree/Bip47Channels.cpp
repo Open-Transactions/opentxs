@@ -37,7 +37,7 @@
 #define CHANNEL_VERSION 1
 #define CHANNEL_INDEX_VERSION 1
 
-namespace opentxs::v1::storage
+namespace opentxs::storage
 {
 Bip47Channels::Bip47Channels(
     const Driver& storage,
@@ -229,4 +229,4 @@ auto Bip47Channels::Store(const Identifier& id, const proto::Bip47Channel& data)
 
     return store_proto(data, id.str(), "");
 }
-}  // namespace opentxs::v1::storage
+}  // namespace opentxs::storage

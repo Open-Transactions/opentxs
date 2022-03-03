@@ -24,7 +24,7 @@
 #include "opentxs/util/Pimpl.hpp"
 #include "serialization/protobuf/HDPath.pb.h"
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto Secp256k1Key(
     const api::Session& api,
@@ -120,4 +120,4 @@ auto Secp256k1Key(
         opentxs::crypto::key::asymmetric::Role::Sign,
         opentxs::crypto::key::EllipticCurve::DefaultVersion);
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory

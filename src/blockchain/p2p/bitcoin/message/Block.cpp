@@ -20,7 +20,7 @@
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Pimpl.hpp"
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto BitcoinP2PBlock(
     const api::Session& api,
@@ -55,9 +55,9 @@ auto BitcoinP2PBlock(
 
     return new ReturnType(api, network, raw_block);
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory
 
-namespace opentxs::v1::blockchain::p2p::bitcoin::message::implementation
+namespace opentxs::blockchain::p2p::bitcoin::message::implementation
 {
 Block::Block(
     const api::Session& api,
@@ -92,4 +92,4 @@ auto Block::payload(AllocateOutput out) const noexcept -> bool
         return false;
     }
 }
-}  // namespace opentxs::v1::blockchain::p2p::bitcoin::message::implementation
+}  // namespace opentxs::blockchain::p2p::bitcoin::message::implementation

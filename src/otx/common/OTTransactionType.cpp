@@ -21,7 +21,7 @@
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/util/Log.hpp"
 
-namespace opentxs::v1
+namespace opentxs
 {
 // keeping constructor private in order to force people to use the other
 // constructors and therefore provide the requisite IDs.
@@ -362,4 +362,4 @@ void OTTransactionType::SetReferenceToNum(std::int64_t lTransactionNum)
 }
 
 OTTransactionType::~OTTransactionType() { Release_TransactionType(); }
-}  // namespace opentxs::v1
+}  // namespace opentxs

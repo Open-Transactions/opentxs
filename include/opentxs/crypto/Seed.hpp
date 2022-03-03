@@ -16,8 +16,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace crypto
 {
 namespace internal
@@ -30,7 +30,7 @@ class Seed;
 
 class Identifier;
 class Secret;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -50,7 +50,7 @@ struct OPENTXS_EXPORT less<opentxs::crypto::Seed> {
 };
 }  // namespace std
 
-namespace opentxs::v1::crypto
+namespace opentxs::crypto
 {
 OPENTXS_EXPORT auto operator<(const Seed& lhs, const Seed& rhs) noexcept
     -> bool;
@@ -86,4 +86,4 @@ public:
 private:
     Imp* imp_;
 };
-}  // namespace opentxs::v1::crypto
+}  // namespace opentxs::crypto

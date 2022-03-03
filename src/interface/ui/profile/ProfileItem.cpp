@@ -23,7 +23,7 @@
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/NymEditor.hpp"
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto ProfileItemWidget(
     const ui::implementation::ProfileSubsectionInternalInterface& parent,
@@ -37,9 +37,9 @@ auto ProfileItemWidget(
 
     return std::make_shared<ReturnType>(parent, api, rowID, sortKey, custom);
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory
 
-namespace opentxs::v1::ui::implementation
+namespace opentxs::ui::implementation
 {
 ProfileItem::ProfileItem(
     const ProfileSubsectionInternalInterface& parent,
@@ -145,4 +145,4 @@ auto ProfileItem::SetValue(const UnallocatedCString& newValue) const noexcept
 
     return add_claim(claim);
 }
-}  // namespace opentxs::v1::ui::implementation
+}  // namespace opentxs::ui::implementation

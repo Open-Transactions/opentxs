@@ -38,7 +38,6 @@
 #include "opentxs/otx/blind/Token.hpp"
 #include "opentxs/otx/blind/TokenState.hpp"
 #include "opentxs/util/Bytes.hpp"
-#include "opentxs/util/Container.hpp"
 #include "opentxs/util/Iterator.hpp"
 #include "opentxs/util/PasswordPrompt.hpp"
 #include "opentxs/util/Pimpl.hpp"

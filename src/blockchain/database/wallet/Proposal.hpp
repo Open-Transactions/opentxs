@@ -15,8 +15,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace proto
 {
 class BlockchainTransactionProposal;
@@ -29,7 +29,7 @@ namespace lmdb
 class LMDB;
 }  // namespace lmdb
 }  // namespace storage
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -37,7 +37,7 @@ extern "C" {
 typedef struct MDB_txn MDB_txn;
 }
 
-namespace opentxs::v1::blockchain::database::wallet
+namespace opentxs::blockchain::database::wallet
 {
 class Proposal
 {
@@ -71,4 +71,4 @@ private:
     auto operator=(const Proposal&) -> Proposal& = delete;
     auto operator=(Proposal&&) -> Proposal& = delete;
 };
-}  // namespace opentxs::v1::blockchain::database::wallet
+}  // namespace opentxs::blockchain::database::wallet

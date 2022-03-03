@@ -54,7 +54,7 @@
 #include "serialization/protobuf/BlockchainP2PHello.pb.h"
 #include "serialization/protobuf/BlockchainP2PSync.pb.h"
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto BlockchainSyncMessage(
     const api::Session& api,
@@ -315,4 +315,4 @@ auto BlockchainSyncMessage(
         return std::make_unique<network::p2p::Base>();
     }
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory

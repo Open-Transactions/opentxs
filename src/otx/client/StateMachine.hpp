@@ -41,8 +41,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace api
 {
 namespace session
@@ -63,7 +63,7 @@ class Server;
 class Flag;
 class OTPassword;
 class Secret;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -179,7 +179,7 @@ struct less<PEERREQUESTTASK> {
 };
 }  // namespace std
 
-namespace opentxs::v1::otx::client::implementation
+namespace opentxs::otx::client::implementation
 {
 class StateMachine final : public opentxs::internal::StateMachine,
                            public otx::client::internal::StateMachine
@@ -446,4 +446,4 @@ private:
 
     StateMachine() = delete;
 };
-}  // namespace opentxs::v1::otx::client::implementation
+}  // namespace opentxs::otx::client::implementation

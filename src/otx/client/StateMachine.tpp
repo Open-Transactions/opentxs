@@ -9,7 +9,7 @@
 
 #include "opentxs/api/session/Wallet.hpp"
 
-namespace opentxs::v1::otx::client::implementation
+namespace opentxs::otx::client::implementation
 {
 template <>
 auto StateMachine::get_param() -> CheckNymTask&
@@ -291,4 +291,4 @@ template StateMachine::BackgroundTask StateMachine::StartTask(
     const SendTransferTask& params) const;
 template StateMachine::BackgroundTask StateMachine::StartTask(
     const WithdrawCashTask& params) const;
-}  // namespace opentxs::v1::otx::client::implementation
+}  // namespace opentxs::otx::client::implementation

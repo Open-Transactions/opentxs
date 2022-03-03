@@ -18,8 +18,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace api
 {
 namespace session
@@ -51,11 +51,11 @@ class PaymentWorkflow;
 }  // namespace proto
 
 class Identifier;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::ui::implementation
+namespace opentxs::ui::implementation
 {
 class ChequeBalanceItem final : public BalanceItem
 {
@@ -99,4 +99,4 @@ private:
     auto operator=(const ChequeBalanceItem&) -> ChequeBalanceItem& = delete;
     auto operator=(ChequeBalanceItem&&) -> ChequeBalanceItem& = delete;
 };
-}  // namespace opentxs::v1::ui::implementation
+}  // namespace opentxs::ui::implementation

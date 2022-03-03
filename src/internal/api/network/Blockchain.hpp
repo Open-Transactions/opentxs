@@ -14,8 +14,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace api
 {
 namespace crypto
@@ -49,11 +49,11 @@ class Publish;
 }  // namespace network
 
 class Options;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::api::network::internal
+namespace opentxs::api::network::internal
 {
 class Blockchain
 {
@@ -108,4 +108,4 @@ private:
     Blockchain& operator=(const Blockchain&) = delete;
     Blockchain& operator=(Blockchain&&) = delete;
 };
-}  // namespace opentxs::v1::api::network::internal
+}  // namespace opentxs::api::network::internal

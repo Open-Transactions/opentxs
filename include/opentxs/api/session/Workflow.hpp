@@ -18,8 +18,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace api
 {
 namespace session
@@ -55,11 +55,11 @@ class Purse;
 }  // namespace proto
 
 class OTTransaction;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::api::session
+namespace opentxs::api::session
 {
 /** Store and retrieve payment workflow events
  *
@@ -340,4 +340,4 @@ private:
     auto operator=(const Workflow&) -> Workflow& = delete;
     auto operator=(Workflow&&) -> Workflow& = delete;
 };
-}  // namespace opentxs::v1::api::session
+}  // namespace opentxs::api::session

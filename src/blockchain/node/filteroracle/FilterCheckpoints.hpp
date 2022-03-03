@@ -12,7 +12,7 @@
 #include "opentxs/blockchain/BlockchainType.hpp"
 #include "opentxs/blockchain/FilterType.hpp"
 
-namespace opentxs::v1::blockchain::node::implementation
+namespace opentxs::blockchain::node::implementation
 {
 const FilterOracle::CheckpointMap FilterOracle::filter_checkpoints_{
     {blockchain::Type::Bitcoin,
@@ -127,4 +127,4 @@ const FilterOracle::CheckpointMap FilterOracle::filter_checkpoints_{
           }},
      }},
 };
-}  // namespace opentxs::v1::blockchain::node::implementation
+}  // namespace opentxs::blockchain::node::implementation

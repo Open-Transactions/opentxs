@@ -13,7 +13,7 @@
 
 #include "opentxs/util/Allocator.hpp"
 
-namespace opentxs::v1::alloc
+namespace opentxs::alloc
 {
 class BoostWrap final : public Resource
 {
@@ -86,4 +86,4 @@ private:
 using BoostMonotonic = Boost<boost::container::pmr::monotonic_buffer_resource>;
 using BoostPool = Boost<boost::container::pmr::unsynchronized_pool_resource>;
 using BoostPoolSync = Boost<boost::container::pmr::synchronized_pool_resource>;
-}  // namespace opentxs::v1::alloc
+}  // namespace opentxs::alloc

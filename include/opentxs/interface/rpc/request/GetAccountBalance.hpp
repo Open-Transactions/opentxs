@@ -15,17 +15,17 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace proto
 {
 class RPCCommand;
 }  // namespace proto
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::rpc::request
+namespace opentxs::rpc::request
 {
 class OPENTXS_EXPORT GetAccountBalance final : public Base
 {
@@ -51,4 +51,4 @@ private:
     auto operator=(const GetAccountBalance&) -> GetAccountBalance& = delete;
     auto operator=(GetAccountBalance&&) -> GetAccountBalance& = delete;
 };
-}  // namespace opentxs::v1::rpc::request
+}  // namespace opentxs::rpc::request

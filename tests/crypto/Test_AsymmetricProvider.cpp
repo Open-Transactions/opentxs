@@ -14,9 +14,9 @@
 #include "internal/util/LogMacros.hpp"  // IWYU pragma: keep
 #include "opentxs/OT.hpp"
 #include "opentxs/Types.hpp"
+#include "opentxs/Version.hpp"
 #include "opentxs/api/Context.hpp"
 #include "opentxs/api/crypto/Config.hpp"
-#include "opentxs/api/crypto/Crypto.hpp"
 #include "opentxs/api/crypto/Seed.hpp"
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/Crypto.hpp"

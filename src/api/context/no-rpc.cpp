@@ -7,11 +7,11 @@
 #include "1_Internal.hpp"           // IWYU pragma: associated
 #include "api/context/Context.hpp"  // IWYU pragma: associated
 
-namespace opentxs::v1::api::imp
+namespace opentxs::api::imp
 {
 auto Context::RPC(const ReadView command, const AllocateOutput response)
     const noexcept -> bool
 {
     return false;
 }
-}  // namespace opentxs::v1::api::imp
+}  // namespace opentxs::api::imp

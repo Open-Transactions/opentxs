@@ -9,7 +9,7 @@
 
 #include "internal/util/LogMacros.hpp"
 
-namespace opentxs::v1::api::imp
+namespace opentxs::api::imp
 {
 auto Crypto::Init_OpenSSL() noexcept -> void {}
 
@@ -17,4 +17,4 @@ auto Crypto::OpenSSL() const noexcept -> const opentxs::crypto::OpenSSL&
 {
     OT_FAIL
 }
-}  // namespace opentxs::v1::api::imp
+}  // namespace opentxs::api::imp

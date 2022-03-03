@@ -20,7 +20,7 @@
 
 template class opentxs::Pimpl<opentxs::network::zeromq::socket::Publish>;
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto PublishSocket(const opentxs::network::zeromq::Context& context)
     -> std::unique_ptr<network::zeromq::socket::Publish>
@@ -29,9 +29,9 @@ auto PublishSocket(const opentxs::network::zeromq::Context& context)
 
     return std::make_unique<ReturnType>(context);
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory
 
-namespace opentxs::v1::network::zeromq::socket::implementation
+namespace opentxs::network::zeromq::socket::implementation
 {
 Publish::Publish(const zeromq::Context& context) noexcept
     : Socket(context, socket::Type::Publish, Direction::Bind)
@@ -42,4 +42,4 @@ Publish::Publish(const zeromq::Context& context) noexcept
 }
 
 Publish::~Publish() SHUTDOWN_SOCKET
-}  // namespace opentxs::v1::network::zeromq::socket::implementation
+}  // namespace opentxs::network::zeromq::socket::implementation

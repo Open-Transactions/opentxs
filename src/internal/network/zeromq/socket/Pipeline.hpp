@@ -10,8 +10,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace network
 {
 namespace zeromq
@@ -24,11 +24,11 @@ class Raw;
 class Message;
 }  // namespace zeromq
 }  // namespace network
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::network::zeromq::internal
+namespace opentxs::network::zeromq::internal
 {
 class Pipeline
 {
@@ -52,4 +52,4 @@ public:
 
     virtual ~Pipeline() = default;
 };
-}  // namespace opentxs::v1::network::zeromq::internal
+}  // namespace opentxs::network::zeromq::internal

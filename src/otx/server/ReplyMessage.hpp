@@ -20,8 +20,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace api
 {
 namespace session
@@ -54,11 +54,11 @@ class Data;
 class Identifier;
 class PasswordPrompt;
 class String;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::server
+namespace opentxs::server
 {
 class ReplyMessage
 {
@@ -132,4 +132,4 @@ private:
     auto operator=(const ReplyMessage&) -> ReplyMessage& = delete;
     auto operator=(ReplyMessage&&) -> ReplyMessage& = delete;
 };
-}  // namespace opentxs::v1::server
+}  // namespace opentxs::server

@@ -10,7 +10,7 @@
 
 #include <cstdint>
 
-namespace opentxs::v1::crypto::key::asymmetric
+namespace opentxs::crypto::key::asymmetric
 {
 enum class Role : std::uint8_t {
     Error = 0,
@@ -18,4 +18,4 @@ enum class Role : std::uint8_t {
     Encrypt = 2,
     Sign = 3,
 };
-}  // namespace opentxs::v1::crypto::key::asymmetric
+}  // namespace opentxs::crypto::key::asymmetric

@@ -34,7 +34,7 @@
 
 #define GET_TEXT_MILLISECONDS 10
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto ActivitySummaryItem(
     const ui::implementation::ActivitySummaryInternalInterface& parent,
@@ -58,9 +58,9 @@ auto ActivitySummaryItem(
         running,
         ReturnType::LoadItemText(api, nymID, custom));
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory
 
-namespace opentxs::v1::ui::implementation
+namespace opentxs::ui::implementation
 {
 ActivitySummaryItem::ActivitySummaryItem(
     const ActivitySummaryInternalInterface& parent,
@@ -244,4 +244,4 @@ ActivitySummaryItem::~ActivitySummaryItem()
         newest_item_thread_.reset();
     }
 }
-}  // namespace opentxs::v1::ui::implementation
+}  // namespace opentxs::ui::implementation

@@ -22,8 +22,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace api
 {
 namespace session
@@ -43,11 +43,11 @@ class Driver;
 class Nym;
 class Tree;
 }  // namespace storage
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::storage
+namespace opentxs::storage
 {
 class Nyms final : public Node
 {
@@ -102,4 +102,4 @@ private:
     auto operator=(const Nyms&) -> Nyms = delete;
     auto operator=(Nyms&&) -> Nyms = delete;
 };
-}  // namespace opentxs::v1::storage
+}  // namespace opentxs::storage

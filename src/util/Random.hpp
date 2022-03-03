@@ -10,8 +10,8 @@
 
 #include "opentxs/util/Bytes.hpp"
 
-namespace opentxs::v1
+namespace opentxs
 {
 auto random_bytes_non_crypto(AllocateOutput dest, std::size_t bytes) noexcept
     -> bool;
-}  // namespace opentxs::v1
+}  // namespace opentxs

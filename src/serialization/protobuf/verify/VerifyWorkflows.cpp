@@ -7,7 +7,7 @@
 
 #include "internal/serialization/protobuf/Basic.hpp"
 
-namespace opentxs::v1::proto
+namespace opentxs::proto
 {
 auto PaymentEventAllowedTransportMethod() noexcept -> const EventTransportMap&
 {
@@ -271,4 +271,4 @@ auto PaymentWorkflowAllowedState() noexcept -> const WorkflowStateMap&
 
     return output;
 }
-}  // namespace opentxs::v1::proto
+}  // namespace opentxs::proto

@@ -10,10 +10,10 @@
 
 #include <cstdint>
 
-namespace opentxs::v1::otx::blind
+namespace opentxs::otx::blind
 {
 enum class CashType : std::uint8_t {
     Error = 0,
     Lucre = 1,
 };
-}  // namespace opentxs::v1::otx::blind
+}  // namespace opentxs::otx::blind

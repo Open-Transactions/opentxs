@@ -19,7 +19,7 @@
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/interface/ui/SeedTreeNym.hpp"
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto SeedTreeItemModel(
     const ui::implementation::SeedTreeInternalInterface& parent,
@@ -33,9 +33,9 @@ auto SeedTreeItemModel(
 
     return std::make_shared<ReturnType>(parent, api, rowID, key, custom);
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory
 
-namespace opentxs::v1::ui::implementation
+namespace opentxs::ui::implementation
 {
 SeedTreeItem::SeedTreeItem(
     const SeedTreeInternalInterface& parent,
@@ -118,4 +118,4 @@ auto SeedTreeItem::reindex(
 }
 
 SeedTreeItem::~SeedTreeItem() = default;
-}  // namespace opentxs::v1::ui::implementation
+}  // namespace opentxs::ui::implementation

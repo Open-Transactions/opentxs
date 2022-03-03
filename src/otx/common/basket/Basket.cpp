@@ -67,7 +67,7 @@
 //    be performed at all (obviously.)
 //
 
-namespace opentxs::v1
+namespace opentxs
 {
 Basket::Basket(
     const api::Session& api,
@@ -396,4 +396,4 @@ void Basket::Release()
 }
 
 Basket::~Basket() { Release_Basket(); }
-}  // namespace opentxs::v1
+}  // namespace opentxs

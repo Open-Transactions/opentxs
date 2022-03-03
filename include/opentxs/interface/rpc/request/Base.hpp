@@ -20,8 +20,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace proto
 {
 class RPCCommand;
@@ -39,11 +39,11 @@ class ListNyms;
 class SendPayment;
 }  // namespace request
 }  // namespace rpc
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::rpc::request
+namespace opentxs::rpc::request
 {
 auto Factory(ReadView serialized) noexcept -> std::unique_ptr<Base>;
 auto Factory(const proto::RPCCommand& serialized) noexcept
@@ -88,4 +88,4 @@ private:
     auto operator=(const Base&) -> Base& = delete;
     auto operator=(Base&&) -> Base& = delete;
 };
-}  // namespace opentxs::v1::rpc::request
+}  // namespace opentxs::rpc::request

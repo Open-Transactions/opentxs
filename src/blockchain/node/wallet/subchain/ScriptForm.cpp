@@ -16,7 +16,7 @@
 #include "opentxs/blockchain/crypto/Element.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
 
-namespace opentxs::v1::blockchain::node::wallet
+namespace opentxs::blockchain::node::wallet
 {
 ScriptForm::ScriptForm(
     const api::Session& api,
@@ -183,4 +183,4 @@ auto ScriptForm::operator=(ScriptForm&& rhs) noexcept -> ScriptForm&
 
     return *this;
 }
-}  // namespace opentxs::v1::blockchain::node::wallet
+}  // namespace opentxs::blockchain::node::wallet

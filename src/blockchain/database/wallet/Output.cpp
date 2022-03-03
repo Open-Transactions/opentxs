@@ -57,7 +57,7 @@
 #include "serialization/protobuf/BlockchainTransactionOutput.pb.h"  // IWYU pragma: keep
 #include "util/LMDB.hpp"
 
-namespace opentxs::v1::blockchain::database::wallet
+namespace opentxs::blockchain::database::wallet
 {
 struct Output::Imp {
     auto GetBalance() const noexcept -> Balance
@@ -1900,4 +1900,4 @@ auto Output::StartReorg(
 }
 
 Output::~Output() = default;
-}  // namespace opentxs::v1::blockchain::database::wallet
+}  // namespace opentxs::blockchain::database::wallet

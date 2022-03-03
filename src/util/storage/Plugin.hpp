@@ -24,8 +24,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace api
 {
 namespace network
@@ -47,11 +47,11 @@ class Config;
 }  // namespace storage
 
 class Flag;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::storage::implementation
+namespace opentxs::storage::implementation
 {
 class Plugin : virtual public storage::Plugin
 {
@@ -122,9 +122,9 @@ private:
     auto operator=(const Plugin&) -> Plugin& = delete;
     auto operator=(Plugin&&) -> Plugin& = delete;
 };
-}  // namespace opentxs::v1::storage::implementation
+}  // namespace opentxs::storage::implementation
 
-namespace opentxs::v1::storage
+namespace opentxs::storage
 {
 template <class T>
 auto Driver::LoadProto(
@@ -195,4 +195,4 @@ auto Driver::StoreProto(const T& data) const -> bool
 
     return StoreProto<T>(data, notUsed);
 }
-}  // namespace opentxs::v1::storage
+}  // namespace opentxs::storage

@@ -18,8 +18,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace identifier
 {
 class Notary;
@@ -31,11 +31,11 @@ class Server;
 }  // namespace server
 
 class PasswordPrompt;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1
+namespace opentxs
 {
 // Note: from OTUnitDefinition.h and .cpp.
 // This is a subclass of AccountVisitor, which is used whenever OTUnitDefinition
@@ -88,4 +88,4 @@ public:
 
     ~PayDividendVisitor() final;
 };
-}  // namespace opentxs::v1
+}  // namespace opentxs

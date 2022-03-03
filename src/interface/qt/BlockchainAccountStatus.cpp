@@ -14,7 +14,7 @@
 #include <QVariant>
 #include <memory>
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto BlockchainAccountStatusQtModel(
     ui::internal::BlockchainAccountStatus& parent) noexcept
@@ -24,9 +24,9 @@ auto BlockchainAccountStatusQtModel(
 
     return std::make_unique<ReturnType>(parent);
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory
 
-namespace opentxs::v1::ui
+namespace opentxs::ui
 {
 struct BlockchainAccountStatusQt::Imp {
     internal::BlockchainAccountStatus& parent_;
@@ -72,9 +72,9 @@ BlockchainAccountStatusQt::~BlockchainAccountStatusQt()
         imp_ = nullptr;
     }
 }
-}  // namespace opentxs::v1::ui
+}  // namespace opentxs::ui
 
-namespace opentxs::v1::ui::implementation
+namespace opentxs::ui::implementation
 {
 auto BlockchainSubaccount::qt_data(
     const int column,
@@ -165,4 +165,4 @@ auto BlockchainSubchain::qt_data(
         }
     };
 }
-}  // namespace opentxs::v1::ui::implementation
+}  // namespace opentxs::ui::implementation

@@ -44,16 +44,16 @@ constexpr auto BITMASK(std::uint64_t n) noexcept -> std::uint64_t
 
 namespace bmp = boost::multiprecision;
 
-namespace opentxs::v1::blockchain
+namespace opentxs::blockchain
 {
 auto GetDefinition(blockchain::Type in) noexcept -> const display::Definition&
 {
     return display::GetDefinition(BlockchainToUnit(in));
 }
 
-}  // namespace opentxs::v1::blockchain
+}  // namespace opentxs::blockchain
 
-namespace opentxs::v1::blockchain::block
+namespace opentxs::blockchain::block
 {
 auto operator>(const Position& lhs, const Position& rhs) noexcept -> bool
 {
@@ -66,9 +66,9 @@ auto operator>(const Position& lhs, const Position& rhs) noexcept -> bool
 
     return lHash != rHash;
 }
-}  // namespace opentxs::v1::blockchain::block
+}  // namespace opentxs::blockchain::block
 
-namespace opentxs::v1::blockchain::internal
+namespace opentxs::blockchain::internal
 {
 BitReader::BitReader(const Space& bytes)
     : raw_data_(Data::Factory(bytes))
@@ -479,9 +479,9 @@ auto Ticker(const Type chain) noexcept -> UnallocatedCString
 {
     return TickerSymbol(chain);
 }
-}  // namespace opentxs::v1::blockchain::internal
+}  // namespace opentxs::blockchain::internal
 
-namespace opentxs::v1::blockchain::p2p
+namespace opentxs::blockchain::p2p
 {
 const UnallocatedMap<Service, UnallocatedCString> service_name_map_{
     {Service::None, "none"},
@@ -510,5 +510,5 @@ auto DisplayService(const Service service) noexcept -> UnallocatedCString
         return {};
     }
 }
-}  // namespace opentxs::v1::blockchain::p2p
+}  // namespace opentxs::blockchain::p2p
 #undef BITMASK

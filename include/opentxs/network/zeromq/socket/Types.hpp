@@ -9,14 +9,14 @@
 
 #include <cstdint>
 
-namespace opentxs::v1::network::zeromq::socket
+namespace opentxs::network::zeromq::socket
 {
 enum class Direction : bool { Bind = false, Connect = true };
 enum class Type : std::uint8_t;
-}  // namespace opentxs::v1::network::zeromq::socket
+}  // namespace opentxs::network::zeromq::socket
 
-namespace opentxs::v1
+namespace opentxs
 {
 auto print(const network::zeromq::socket::Type) noexcept -> const char*;
 auto to_native(const network::zeromq::socket::Type) noexcept -> int;
-}  // namespace opentxs::v1
+}  // namespace opentxs

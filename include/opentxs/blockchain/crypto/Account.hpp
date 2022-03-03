@@ -21,8 +21,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace blockchain
 {
 namespace crypto
@@ -48,11 +48,11 @@ class Nym;
 class Identifier;
 class PasswordPrompt;
 class PaymentCode;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::blockchain::crypto
+namespace opentxs::blockchain::crypto
 {
 class OPENTXS_EXPORT Account
 {
@@ -162,4 +162,4 @@ private:
     auto operator=(const Account&) -> Account& = delete;
     auto operator=(Account&&) -> Account& = delete;
 };
-}  // namespace opentxs::v1::blockchain::crypto
+}  // namespace opentxs::blockchain::crypto

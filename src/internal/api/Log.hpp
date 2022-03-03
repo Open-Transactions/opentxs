@@ -5,11 +5,11 @@
 
 #pragma once
 
-namespace opentxs::v1::api::internal
+namespace opentxs::api::internal
 {
 class Log
 {
 public:
     virtual ~Log() = default;
 };
-}  // namespace opentxs::v1::api::internal
+}  // namespace opentxs::api::internal

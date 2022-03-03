@@ -27,7 +27,7 @@
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 
-namespace opentxs::v1::ui::qt::internal
+namespace opentxs::ui::qt::internal
 {
 struct Model::Imp {
     using RowID = std::ptrdiff_t;
@@ -583,9 +583,9 @@ Model::~Model()
         imp_ = nullptr;
     }
 }
-}  // namespace opentxs::v1::ui::qt::internal
+}  // namespace opentxs::ui::qt::internal
 
-namespace opentxs::v1::ui::qt
+namespace opentxs::ui::qt
 {
 RowWrapper::RowWrapper(std::shared_ptr<opentxs::ui::internal::Row> row) noexcept
     : row_(std::move(row))
@@ -610,9 +610,9 @@ auto RowWrapper::operator=(const RowWrapper& rhs) noexcept -> RowWrapper&
 }
 
 RowWrapper::~RowWrapper() = default;
-}  // namespace opentxs::v1::ui::qt
+}  // namespace opentxs::ui::qt
 
-namespace opentxs::v1::ui::qt
+namespace opentxs::ui::qt
 {
 ModelHelper::ModelHelper(Model* model) noexcept
 {
@@ -675,9 +675,9 @@ auto ModelHelper::requestMoveRow(
 }
 
 ModelHelper::~ModelHelper() { disconnect(); }
-}  // namespace opentxs::v1::ui::qt
+}  // namespace opentxs::ui::qt
 
-namespace opentxs::v1::ui::qt
+namespace opentxs::ui::qt
 {
 Model::Model(internal::Model* internal) noexcept
     : QAbstractItemModel(nullptr)
@@ -882,13 +882,13 @@ Model::~Model()
         internal_ = nullptr;
     }
 }
-}  // namespace opentxs::v1::ui::qt
+}  // namespace opentxs::ui::qt
 
-namespace opentxs::v1::ui::internal
+namespace opentxs::ui::internal
 {
 auto List::MakeQT(const api::Session& api) noexcept -> ui::qt::internal::Model*
 {
     return std::make_unique<ui::qt::internal::Model>(api.QtRootObject())
         .release();
 }
-}  // namespace opentxs::v1::ui::internal
+}  // namespace opentxs::ui::internal

@@ -18,7 +18,7 @@
 #include "opentxs/interface/rpc/request/GetAccountActivity.hpp"
 #include "serialization/protobuf/RPCResponse.pb.h"
 
-namespace opentxs::v1::rpc::response::implementation
+namespace opentxs::rpc::response::implementation
 {
 struct GetAccountActivity final : public Base::Imp {
     using Events = response::GetAccountActivity::Events;
@@ -77,9 +77,9 @@ private:
     auto operator=(const GetAccountActivity&) -> GetAccountActivity& = delete;
     auto operator=(GetAccountActivity&&) -> GetAccountActivity& = delete;
 };
-}  // namespace opentxs::v1::rpc::response::implementation
+}  // namespace opentxs::rpc::response::implementation
 
-namespace opentxs::v1::rpc::response
+namespace opentxs::rpc::response
 {
 GetAccountActivity::GetAccountActivity(
     const request::GetAccountActivity& request,
@@ -113,4 +113,4 @@ auto GetAccountActivity::Activity() const noexcept -> const Events&
 }
 
 GetAccountActivity::~GetAccountActivity() = default;
-}  // namespace opentxs::v1::rpc::response
+}  // namespace opentxs::rpc::response

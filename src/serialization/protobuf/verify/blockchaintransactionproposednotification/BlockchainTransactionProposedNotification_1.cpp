@@ -12,7 +12,7 @@
 #include "serialization/protobuf/BlockchainTransactionProposedNotification.pb.h"
 #include "serialization/protobuf/verify/Check.hpp"
 
-namespace opentxs::v1::proto
+namespace opentxs::proto
 {
 auto CheckProto_1(
     const BlockchainTransactionProposedNotification& input,
@@ -161,4 +161,4 @@ auto CheckProto_20(
 {
     UNDEFINED_VERSION(20)
 }
-}  // namespace opentxs::v1::proto
+}  // namespace opentxs::proto

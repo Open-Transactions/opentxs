@@ -17,7 +17,7 @@
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto PendingSend(
     const ui::implementation::ActivityThreadInternalInterface& parent,
@@ -42,9 +42,9 @@ auto PendingSend(
         std::move(display),
         std::move(memo));
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory
 
-namespace opentxs::v1::ui::implementation
+namespace opentxs::ui::implementation
 {
 PendingSend::PendingSend(
     const ActivityThreadInternalInterface& parent,
@@ -120,4 +120,4 @@ auto PendingSend::reindex(
 
     return output;
 }
-}  // namespace opentxs::v1::ui::implementation
+}  // namespace opentxs::ui::implementation

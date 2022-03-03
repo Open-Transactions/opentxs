@@ -18,8 +18,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace storage
 {
 namespace lmdb
@@ -32,11 +32,11 @@ namespace util
 {
 struct IndexData;
 }  // namespace util
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::blockchain::database::common
+namespace opentxs::blockchain::database::common
 {
 class Bulk
 {
@@ -77,4 +77,4 @@ private:
     Bulk& operator=(const Bulk&) = delete;
     Bulk& operator=(Bulk&&) = delete;
 };
-}  // namespace opentxs::v1::blockchain::database::common
+}  // namespace opentxs::blockchain::database::common

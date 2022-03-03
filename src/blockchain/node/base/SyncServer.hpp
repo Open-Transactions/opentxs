@@ -46,7 +46,7 @@
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/WorkType.hpp"
 
-namespace opentxs::v1::blockchain::node::base
+namespace opentxs::blockchain::node::base
 {
 using SyncDM = download::
     Manager<SyncServer, std::unique_ptr<const GCS>, int, filter::Type>;
@@ -481,4 +481,4 @@ private:
         ::zmq_disconnect(socket_.get(), endpoint_.c_str());
     }
 };
-}  // namespace opentxs::v1::blockchain::node::base
+}  // namespace opentxs::blockchain::node::base

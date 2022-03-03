@@ -62,7 +62,7 @@
 #define MINT_VALID_MONTHS 12
 #define MINT_GENERATE_DAYS 7
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto NotarySession(
     const api::Context& parent,
@@ -118,14 +118,14 @@ auto NotarySession(
         return {};
     }
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory
 
-namespace opentxs::v1::api::session
+namespace opentxs::api::session
 {
 auto Notary::DefaultMintKeyBytes() noexcept -> std::size_t { return 1536u; }
-}  // namespace opentxs::v1::api::session
+}  // namespace opentxs::api::session
 
-namespace opentxs::v1::api::session::imp
+namespace opentxs::api::session::imp
 {
 Notary::Notary(
     const api::Context& parent,
@@ -615,4 +615,4 @@ Notary::~Notary()
 
     Cleanup();
 }
-}  // namespace opentxs::v1::api::session::imp
+}  // namespace opentxs::api::session::imp

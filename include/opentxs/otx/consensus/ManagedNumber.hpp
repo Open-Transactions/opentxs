@@ -13,8 +13,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace otx
 {
 namespace context
@@ -28,11 +28,11 @@ using OTManagedNumber = Pimpl<otx::context::ManagedNumber>;
 OPENTXS_EXPORT auto operator<(
     const OTManagedNumber& lhs,
     const OTManagedNumber& rhs) -> bool;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::otx::context
+namespace opentxs::otx::context
 {
 class OPENTXS_EXPORT ManagedNumber
 {
@@ -52,4 +52,4 @@ private:
     auto operator=(const ManagedNumber&) -> ManagedNumber& = delete;
     auto operator=(ManagedNumber&&) -> ManagedNumber& = delete;
 };
-}  // namespace opentxs::v1::otx::context
+}  // namespace opentxs::otx::context

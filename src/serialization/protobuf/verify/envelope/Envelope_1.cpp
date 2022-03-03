@@ -18,7 +18,7 @@
 #include "serialization/protobuf/Envelope.pb.h"
 #include "serialization/protobuf/verify/Check.hpp"
 
-namespace opentxs::v1::proto
+namespace opentxs::proto
 {
 const UnallocatedMap<std::uint32_t, UnallocatedSet<AsymmetricKeyType>>
     allowed_types_{
@@ -156,4 +156,4 @@ auto CheckProto_20(const Envelope& input, const bool silent) -> bool
 {
     UNDEFINED_VERSION(20)
 }
-}  // namespace opentxs::v1::proto
+}  // namespace opentxs::proto

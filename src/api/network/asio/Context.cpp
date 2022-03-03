@@ -18,7 +18,7 @@
 #include "internal/util/Signals.hpp"
 #include "opentxs/Types.hpp"
 
-namespace opentxs::v1::api::network::asio
+namespace opentxs::api::network::asio
 {
 struct Context::Imp {
     operator boost::asio::io_context&() noexcept { return context_; }
@@ -108,4 +108,4 @@ Context::~Context()
         imp_ = nullptr;
     }
 }
-}  // namespace opentxs::v1::api::network::asio
+}  // namespace opentxs::api::network::asio

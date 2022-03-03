@@ -27,7 +27,7 @@
 #include "opentxs/util/Pimpl.hpp"
 #include "otx/server/UserCommandProcessor.hpp"
 
-namespace opentxs::v1::server
+namespace opentxs::server
 {
 ReplyMessage::ReplyMessage(
     const UserCommandProcessor& parent,
@@ -345,4 +345,4 @@ ReplyMessage::~ReplyMessage()
     message_.SignContract(signer_, reason_);
     message_.SaveContract();
 }
-}  // namespace opentxs::v1::server
+}  // namespace opentxs::server

@@ -23,7 +23,7 @@
 #include "util/JobCounter.hpp"
 #include "util/ScopeGuard.hpp"
 
-namespace opentxs::v1::blockchain::node::wallet
+namespace opentxs::blockchain::node::wallet
 {
 Job::Job(const ThreadPool pool, SubchainStateData& parent) noexcept
     : parent_(parent)
@@ -123,4 +123,4 @@ auto Job::wait(Lock& lock) const noexcept -> void
             .Flush();
     }
 }
-}  // namespace opentxs::v1::blockchain::node::wallet
+}  // namespace opentxs::blockchain::node::wallet

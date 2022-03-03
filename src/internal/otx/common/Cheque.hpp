@@ -18,7 +18,7 @@
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/util/Time.hpp"
 
-namespace opentxs::v1
+namespace opentxs
 {
 namespace api
 {
@@ -136,4 +136,4 @@ private:  // Private prevents erroneous use by other classes.
 
     Cheque() = delete;
 };
-}  // namespace opentxs::v1
+}  // namespace opentxs

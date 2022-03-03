@@ -7,7 +7,7 @@
 #include "1_Internal.hpp"                // IWYU pragma: associated
 #include "blockchain/p2p/peer/Peer.hpp"  // IWYU pragma: associated
 
-namespace opentxs::v1::blockchain::p2p::implementation
+namespace opentxs::blockchain::p2p::implementation
 {
 Peer::DownloadPeers::DownloadPeers() noexcept
     : downloaded_(Clock::now())
@@ -20,4 +20,4 @@ auto Peer::DownloadPeers::Bump() noexcept -> void
 }
 
 auto Peer::DownloadPeers::get() const noexcept -> Time { return downloaded_; }
-}  // namespace opentxs::v1::blockchain::p2p::implementation
+}  // namespace opentxs::blockchain::p2p::implementation

@@ -26,8 +26,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace api
 {
 class Session;
@@ -43,11 +43,11 @@ class Header;
 }  // namespace bitcoin
 }  // namespace p2p
 }  // namespace blockchain
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::blockchain::p2p::bitcoin::message
+namespace opentxs::blockchain::p2p::bitcoin::message
 {
 class Getblocks final : public implementation::Message
 {
@@ -133,4 +133,4 @@ private:
     auto operator=(const Getblocks&) -> Getblocks& = delete;
     auto operator=(Getblocks&&) -> Getblocks& = delete;
 };
-}  // namespace opentxs::v1::blockchain::p2p::bitcoin::message
+}  // namespace opentxs::blockchain::p2p::bitcoin::message

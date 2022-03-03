@@ -19,17 +19,17 @@ class ChaiScript;
 
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 class OTScriptable;
 class OTSmartContract;
 class OTVariable;
 class String;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1
+namespace opentxs
 {
 class OTScriptChai final : public OTScript
 {
@@ -55,4 +55,4 @@ private:
     auto operator=(const OTScriptChai&) -> OTScriptChai& = delete;
     auto operator=(OTScriptChai&&) -> OTScriptChai& = delete;
 };
-}  // namespace opentxs::v1
+}  // namespace opentxs

@@ -14,8 +14,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace crypto
 {
 class Envelope;
@@ -29,11 +29,11 @@ class Envelope;
 class PasswordPrompt;
 
 using OTEnvelope = Pimpl<crypto::Envelope>;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::crypto
+namespace opentxs::crypto
 {
 class OPENTXS_EXPORT Envelope
 {
@@ -74,4 +74,4 @@ private:
     auto operator=(const Envelope&) -> Envelope& = delete;
     auto operator=(Envelope&&) -> Envelope& = delete;
 };
-}  // namespace opentxs::v1::crypto
+}  // namespace opentxs::crypto

@@ -48,7 +48,7 @@
 #include "opentxs/util/Time.hpp"
 #include "otx/common/OTStorage.hpp"
 
-namespace opentxs::v1
+namespace opentxs
 {
 
 char const* const __TypeStringsLedger[] = {
@@ -2385,4 +2385,4 @@ void Ledger::Release()
 }
 
 Ledger::~Ledger() { Release_Ledger(); }
-}  // namespace opentxs::v1
+}  // namespace opentxs

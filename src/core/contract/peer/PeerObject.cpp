@@ -40,7 +40,7 @@
 #include "serialization/protobuf/PeerObject.pb.h"
 #include "serialization/protobuf/PeerRequest.pb.h"
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto PeerObject(
     const api::Session& api,
@@ -202,9 +202,9 @@ auto PeerObject(
         return nullptr;
     }
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory
 
-namespace opentxs::v1::peer::implementation
+namespace opentxs::peer::implementation
 {
 Object::Object(
     const api::Session& api,
@@ -503,4 +503,4 @@ auto Object::Validate() const noexcept -> bool
 }
 
 Object::~Object() = default;
-}  // namespace opentxs::v1::peer::implementation
+}  // namespace opentxs::peer::implementation

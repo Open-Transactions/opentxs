@@ -47,7 +47,7 @@
 #include "util/JobCounter.hpp"
 #include "util/Work.hpp"
 
-namespace opentxs::v1::blockchain::node::wallet
+namespace opentxs::blockchain::node::wallet
 {
 auto print(SubchainJobs job) noexcept -> std::string_view
 {
@@ -76,9 +76,9 @@ auto print(SubchainJobs job) noexcept -> std::string_view
         OT_FAIL;
     }
 }
-}  // namespace opentxs::v1::blockchain::node::wallet
+}  // namespace opentxs::blockchain::node::wallet
 
-namespace opentxs::v1::blockchain::node::wallet
+namespace opentxs::blockchain::node::wallet
 {
 SubchainStateData::SubchainStateData(
     const api::Session& api,
@@ -737,4 +737,4 @@ SubchainStateData::~SubchainStateData()
     signal_shutdown();
     finish_background_tasks();
 }
-}  // namespace opentxs::v1::blockchain::node::wallet
+}  // namespace opentxs::blockchain::node::wallet

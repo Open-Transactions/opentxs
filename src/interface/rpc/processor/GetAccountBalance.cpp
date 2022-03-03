@@ -41,7 +41,7 @@
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Pimpl.hpp"
 
-namespace opentxs::v1::rpc::implementation
+namespace opentxs::rpc::implementation
 {
 auto RPC::get_account_balance(const request::Base& base) const noexcept
     -> std::unique_ptr<response::Base>
@@ -152,4 +152,4 @@ auto RPC::get_account_balance_custodial(
         codes.emplace_back(index, ResponseCode::account_not_found);
     }
 }
-}  // namespace opentxs::v1::rpc::implementation
+}  // namespace opentxs::rpc::implementation

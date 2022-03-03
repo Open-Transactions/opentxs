@@ -27,7 +27,7 @@
 
 template class opentxs::Pimpl<opentxs::network::zeromq::socket::Subscribe>;
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto SubscribeSocket(
     const network::zeromq::Context& context,
@@ -38,9 +38,9 @@ auto SubscribeSocket(
 
     return std::make_unique<ReturnType>(context, callback);
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory
 
-namespace opentxs::v1::network::zeromq::socket::implementation
+namespace opentxs::network::zeromq::socket::implementation
 {
 Subscribe::Subscribe(
     const zeromq::Context& context,
@@ -93,4 +93,4 @@ auto Subscribe::SetSocksProxy(const UnallocatedCString& proxy) const noexcept
 }
 
 Subscribe::~Subscribe() SHUTDOWN_SOCKET
-}  // namespace opentxs::v1::network::zeromq::socket::implementation
+}  // namespace opentxs::network::zeromq::socket::implementation

@@ -18,7 +18,7 @@
 #include "serialization/protobuf/Signature.pb.h"
 #include "serialization/protobuf/UnitDefinition.pb.h"
 
-namespace opentxs::v1
+namespace opentxs
 {
 auto Factory::CurrencyContract(
     const api::Session& api,
@@ -86,9 +86,9 @@ auto Factory::CurrencyContract(
 
     return std::move(output);
 }
-}  // namespace opentxs::v1
+}  // namespace opentxs
 
-namespace opentxs::v1::contract::unit::implementation
+namespace opentxs::contract::unit::implementation
 {
 Currency::Currency(
     const api::Session& api,
@@ -134,4 +134,4 @@ auto Currency::IDVersion(const Lock& lock) const -> SerializedType
 
     return contract;
 }
-}  // namespace opentxs::v1::contract::unit::implementation
+}  // namespace opentxs::contract::unit::implementation

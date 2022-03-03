@@ -14,7 +14,7 @@
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/storage/Plugin.hpp"
 
-namespace opentxs::v1::storage::driver
+namespace opentxs::storage::driver
 {
 auto Multiplex::init_sqlite(std::unique_ptr<storage::Plugin>& plugin) -> void
 {
@@ -23,4 +23,4 @@ auto Multiplex::init_sqlite(std::unique_ptr<storage::Plugin>& plugin) -> void
     plugin = factory::StorageSqlite3(
         crypto_, asio_, storage_, config_, primary_bucket_);
 }
-}  // namespace opentxs::v1::storage::driver
+}  // namespace opentxs::storage::driver

@@ -22,9 +22,10 @@
 #include "opentxs/network/zeromq/socket/Publish.hpp"
 #include "opentxs/network/zeromq/socket/Push.hpp"
 #include "opentxs/network/zeromq/socket/Sender.hpp"
+#include "opentxs/network/zeromq/socket/Types.hpp"
 #include "opentxs/util/Container.hpp"
 
-namespace opentxs::v1::blockchain::node::implementation
+namespace opentxs::blockchain::node::implementation
 {
 PeerManager::Jobs::Jobs(const api::Session& api) noexcept
     : zmq_(api.Network().ZeroMQ())
@@ -126,4 +127,4 @@ auto PeerManager::Jobs::Work(const Task task) const noexcept
 {
     return network::zeromq::tagged_message(task);
 }
-}  // namespace opentxs::v1::blockchain::node::implementation
+}  // namespace opentxs::blockchain::node::implementation

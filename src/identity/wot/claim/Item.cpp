@@ -24,7 +24,7 @@
 #include "opentxs/util/Pimpl.hpp"
 #include "serialization/protobuf/ContactItem.pb.h"
 
-namespace opentxs::v1::identity::wot::claim
+namespace opentxs::identity::wot::claim
 {
 static auto extract_attributes(const proto::ContactItem& serialized)
     -> UnallocatedSet<claim::Attribute>
@@ -440,4 +440,4 @@ auto Item::Value() const -> const UnallocatedCString& { return imp_->value_; }
 auto Item::Version() const -> VersionNumber { return imp_->version_; }
 
 Item::~Item() = default;
-}  // namespace opentxs::v1::identity::wot::claim
+}  // namespace opentxs::identity::wot::claim

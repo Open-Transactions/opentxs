@@ -20,8 +20,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace api
 {
 namespace imp
@@ -53,11 +53,11 @@ class Seeds;
 class Servers;
 class Units;
 }  // namespace storage
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::storage
+namespace opentxs::storage
 {
 class Tree final : public Node
 {
@@ -166,4 +166,4 @@ private:
     auto operator=(const Tree&) -> Tree = delete;
     auto operator=(Tree&&) -> Tree = delete;
 };
-}  // namespace opentxs::v1::storage
+}  // namespace opentxs::storage

@@ -18,7 +18,7 @@
 #include "opentxs/network/p2p/State.hpp"
 #include "opentxs/util/Container.hpp"
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto BlockchainSyncAcknowledgement() noexcept -> network::p2p::Acknowledgement
 {
@@ -49,9 +49,9 @@ auto BlockchainSyncAcknowledgement_p(
         std::make_unique<ReturnType::Imp>(std::move(in), std::move(endpoint))
             .release());
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory
 
-namespace opentxs::v1::network::p2p
+namespace opentxs::network::p2p
 {
 class Acknowledgement::Imp final : public Base::Imp
 {
@@ -128,4 +128,4 @@ Acknowledgement::~Acknowledgement()
         Base::imp_ = nullptr;
     }
 }
-}  // namespace opentxs::v1::network::p2p
+}  // namespace opentxs::network::p2p

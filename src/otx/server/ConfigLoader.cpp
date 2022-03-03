@@ -23,7 +23,7 @@
 #define SERVER_WALLET_FILENAME "notaryServer.xml"
 #define SERVER_MASTER_KEY_TIMEOUT_DEFAULT -1
 
-namespace opentxs::v1::server
+namespace opentxs::server
 {
 auto ConfigLoader::load(
     const api::Session& api,
@@ -450,4 +450,4 @@ auto ConfigLoader::load(
     return true;
 }
 
-}  // namespace opentxs::v1::server
+}  // namespace opentxs::server

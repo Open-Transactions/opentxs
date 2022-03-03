@@ -16,15 +16,15 @@ extern "C" {
 
 #include "opentxs/util/Allocator.hpp"
 
-namespace opentxs::v1
+namespace opentxs
 {
 auto SetThisThreadsPriority(ThreadPriority) noexcept -> void
 {
     // TODO
 }
-}  // namespace opentxs::v1
+}  // namespace opentxs
 
-namespace opentxs::v1::api::imp
+namespace opentxs::api::imp
 {
 auto Context::set_desired_files(::rlimit& out) noexcept -> void
 {
@@ -38,12 +38,12 @@ auto Legacy::get_suffix() noexcept -> fs::path
 }
 
 auto Legacy::use_dot() noexcept -> bool { return false; }
-}  // namespace opentxs::v1::api::imp
+}  // namespace opentxs::api::imp
 
-namespace opentxs::v1::network::zeromq::implementation
+namespace opentxs::network::zeromq::implementation
 {
 auto Context::max_sockets() noexcept -> int { return 10240; }
-}  // namespace opentxs::v1::network::zeromq::implementation
+}  // namespace opentxs::network::zeromq::implementation
 
 // TODO after libc++ finally incorporates this into std, and after Apple ships
 // that version of libc++, then this can be removed

@@ -17,7 +17,7 @@
 #include "opentxs/crypto/key/HD.hpp"             // IWYU pragma: keep
 #include "opentxs/util/Container.hpp"
 
-namespace opentxs::v1
+namespace opentxs
 {
 auto swap(PaymentCode& lhs, PaymentCode& rhs) noexcept -> void
 {
@@ -220,4 +220,4 @@ PaymentCode::~PaymentCode()
         imp_ = nullptr;
     }
 }
-}  // namespace opentxs::v1
+}  // namespace opentxs

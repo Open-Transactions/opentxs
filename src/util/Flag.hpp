@@ -9,7 +9,7 @@
 
 #include "internal/util/Flag.hpp"
 
-namespace opentxs::v1::implementation
+namespace opentxs::implementation
 {
 class Flag final : virtual public opentxs::Flag
 {
@@ -36,4 +36,4 @@ private:
     auto operator=(const Flag&) -> Flag& = delete;
     auto operator=(Flag&&) -> Flag& = delete;
 };
-}  // namespace opentxs::v1::implementation
+}  // namespace opentxs::implementation

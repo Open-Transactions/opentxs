@@ -10,17 +10,17 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace proto
 {
 class SymmetricKey;
 }  // namespace proto
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::api::crypto::internal
+namespace opentxs::api::crypto::internal
 {
 class Symmetric : virtual public api::crypto::Symmetric
 {
@@ -40,4 +40,4 @@ public:
 
     ~Symmetric() override = default;
 };
-}  // namespace opentxs::v1::api::crypto::internal
+}  // namespace opentxs::api::crypto::internal

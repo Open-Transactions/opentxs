@@ -10,10 +10,10 @@
 
 #include <cstdint>
 
-namespace opentxs::v1::crypto
+namespace opentxs::crypto
 {
 enum class SecretStyle : std::uint8_t {
     Default = 0,
     X_only = 1,
 };
-}  // namespace opentxs::v1::crypto
+}  // namespace opentxs::crypto

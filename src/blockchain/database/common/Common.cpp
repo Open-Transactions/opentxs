@@ -12,7 +12,7 @@
 #include "opentxs/blockchain/Blockchain.hpp"
 #include "opentxs/util/Container.hpp"
 
-namespace opentxs::v1::blockchain::database::common
+namespace opentxs::blockchain::database::common
 {
 constexpr auto sync_map_ = [] {
     constexpr auto offset{65536};
@@ -48,4 +48,4 @@ auto SyncTables() noexcept -> const UnallocatedVector<SyncTableData>&
 
     return map;
 }
-}  // namespace opentxs::v1::blockchain::database::common
+}  // namespace opentxs::blockchain::database::common

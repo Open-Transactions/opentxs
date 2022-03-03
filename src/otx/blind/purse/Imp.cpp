@@ -12,6 +12,7 @@
 #include <cstdint>
 #include <limits>
 #include <stdexcept>
+#include <type_traits>
 #include <utility>
 
 #include "Proto.hpp"
@@ -50,7 +51,7 @@
 
 #define OT_PURSE_VERSION 1
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto Purse(
     const api::Session& api,
@@ -203,9 +204,9 @@ auto Purse(
 
     return output.release();
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory
 
-namespace opentxs::v1::otx::blind::purse
+namespace opentxs::otx::blind::purse
 {
 const opentxs::crypto::key::symmetric::Algorithm Purse::mode_{
     opentxs::crypto::key::symmetric::Algorithm::ChaCha20Poly1305};
@@ -1002,4 +1003,4 @@ auto Purse::Verify(const api::session::Notary& server) const -> bool
 
     return true;
 }
-}  // namespace opentxs::v1::otx::blind::purse
+}  // namespace opentxs::otx::blind::purse

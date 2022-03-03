@@ -25,7 +25,7 @@ template class opentxs::Pimpl<opentxs::network::zeromq::socket::Pull>;
 
 //"opentxs::network::zeromq::socket::implementation::Pull::"
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto PullSocket(const network::zeromq::Context& context, const bool direction)
     -> std::unique_ptr<network::zeromq::socket::Pull>
@@ -49,9 +49,9 @@ auto PullSocket(
         static_cast<network::zeromq::socket::Direction>(direction),
         callback);
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory
 
-namespace opentxs::v1::network::zeromq::socket::implementation
+namespace opentxs::network::zeromq::socket::implementation
 {
 Pull::Pull(
     const zeromq::Context& context,
@@ -94,4 +94,4 @@ auto Pull::process_incoming(const Lock& lock, Message&& message) noexcept
 }
 
 Pull::~Pull() SHUTDOWN_SOCKET
-}  // namespace opentxs::v1::network::zeromq::socket::implementation
+}  // namespace opentxs::network::zeromq::socket::implementation

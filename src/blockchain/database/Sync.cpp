@@ -25,7 +25,7 @@
 #include "opentxs/util/Log.hpp"
 #include "util/LMDB.hpp"
 
-namespace opentxs::v1::blockchain::database
+namespace opentxs::blockchain::database
 {
 Sync::Sync(
     const api::Session& api,
@@ -108,4 +108,4 @@ auto Sync::Tip() const noexcept -> block::Position
 
     return output;
 }
-}  // namespace opentxs::v1::blockchain::database
+}  // namespace opentxs::blockchain::database

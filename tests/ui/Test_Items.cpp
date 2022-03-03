@@ -14,6 +14,7 @@
 #include "interface/ui/base/Items.hpp"
 #include "internal/interface/ui/UI.hpp"
 #include "opentxs/Types.hpp"
+#include "opentxs/Version.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/util/Container.hpp"
 
@@ -74,7 +75,7 @@ using Type =
 
 }  // namespace ottest
 
-namespace opentxs::v1::ui::implementation
+namespace opentxs::ui::implementation
 {
 template <>
 auto ListItems<ottest::ID, ottest::Key, std::shared_ptr<ottest::Value>>::
@@ -95,7 +96,7 @@ auto ListItems<ottest::ID, ottest::Key, std::shared_ptr<ottest::Value>>::
 
     return compare(lhs, rhs);
 }
-}  // namespace opentxs::v1::ui::implementation
+}  // namespace opentxs::ui::implementation
 
 namespace ottest
 {

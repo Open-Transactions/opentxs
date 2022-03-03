@@ -12,14 +12,14 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 class String;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::api
+namespace opentxs::api
 {
 class Legacy
 {
@@ -107,4 +107,4 @@ private:
         const char* name,
         const UnallocatedCString& ext) noexcept -> UnallocatedCString;
 };
-}  // namespace opentxs::v1::api
+}  // namespace opentxs::api

@@ -21,13 +21,13 @@
 #include "opentxs/otx/consensus/Server.hpp"
 #include "util/Blank.hpp"
 
-namespace opentxs::v1
+namespace opentxs
 {
 struct OT_DownloadNymboxType {
 };
 struct OT_GetTransactionNumbersType {
 };
-}  // namespace opentxs::v1
+}  // namespace opentxs
 
 namespace std
 {
@@ -51,7 +51,7 @@ struct less<opentxs::OT_GetTransactionNumbersType> {
 };
 }  // namespace std
 
-namespace opentxs::v1::otx::client
+namespace opentxs::otx::client
 {
 using CheckNymTask = OTNymID;
 /** DepositPaymentTask: unit id, accountID, payment */
@@ -92,9 +92,9 @@ using SendTransferTask =
     std::tuple<OTIdentifier, OTIdentifier, Amount, UnallocatedCString>;
 /** WithdrawCashTask: Account ID, amount*/
 using WithdrawCashTask = std::pair<OTIdentifier, Amount>;
-}  // namespace opentxs::v1::otx::client
+}  // namespace opentxs::otx::client
 
-namespace opentxs::v1
+namespace opentxs
 {
 template <>
 struct make_blank<otx::client::DepositPaymentTask> {
@@ -209,9 +209,9 @@ struct make_blank<otx::client::WithdrawCashTask> {
         return {make_blank<OTIdentifier>::value(api), 0};
     }
 };
-}  // namespace opentxs::v1
+}  // namespace opentxs
 
-namespace opentxs::v1::otx::client::internal
+namespace opentxs::otx::client::internal
 {
 struct Operation {
     using Result = otx::context::Server::DeliveryResult;
@@ -313,4 +313,4 @@ struct StateMachine {
 
     virtual ~StateMachine() = default;
 };
-}  // namespace opentxs::v1::otx::client::internal
+}  // namespace opentxs::otx::client::internal

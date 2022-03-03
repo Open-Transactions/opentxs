@@ -16,8 +16,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace network
 {
 class OpenDHT;
@@ -29,11 +29,11 @@ class Nym;
 class ServerContract;
 class UnitDefinition;
 }  // namespace proto
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::api::network::internal
+namespace opentxs::api::network::internal
 {
 class Dht : virtual public network::Dht
 {
@@ -60,4 +60,4 @@ public:
 
     ~Dht() override = default;
 };
-}  // namespace opentxs::v1::api::network::internal
+}  // namespace opentxs::api::network::internal

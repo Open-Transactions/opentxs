@@ -11,7 +11,7 @@
 #include <type_traits>
 #include <utility>
 
-namespace opentxs::v1::api::network::asio
+namespace opentxs::api::network::asio
 {
 class Buffers
 {
@@ -38,4 +38,4 @@ private:
     Buffers& operator=(const Buffers&) = delete;
     Buffers& operator=(Buffers&&) = delete;
 };
-}  // namespace opentxs::v1::api::network::asio
+}  // namespace opentxs::api::network::asio

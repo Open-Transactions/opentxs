@@ -14,7 +14,7 @@
 #include "network/asio/Socket.hpp"
 #include "opentxs/network/asio/Socket.hpp"
 
-namespace opentxs::v1::api::network
+namespace opentxs::api::network
 {
 Asio::Asio(const opentxs::network::zeromq::Context& zmq) noexcept
     : imp_(std::make_unique<Imp>(zmq).release())
@@ -71,4 +71,4 @@ auto Asio::Resolve(std::string_view server, std::uint16_t port) const noexcept
 auto Asio::Shutdown() noexcept -> void { imp_->Shutdown(); }
 
 Asio::~Asio() { std::unique_ptr<Imp>{imp_}.reset(); }
-}  // namespace opentxs::v1::api::network
+}  // namespace opentxs::api::network

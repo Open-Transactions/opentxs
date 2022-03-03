@@ -18,8 +18,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace api
 {
 class Session;
@@ -31,11 +31,11 @@ class Nym;
 }  // namespace identifier
 
 class Identifier;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::blockchain::crypto
+namespace opentxs::blockchain::crypto
 {
 class AccountIndex
 {
@@ -68,4 +68,4 @@ private:
     auto operator=(const AccountIndex&) -> AccountIndex& = delete;
     auto operator=(AccountIndex&&) -> AccountIndex& = delete;
 };
-}  // namespace opentxs::v1::blockchain::crypto
+}  // namespace opentxs::blockchain::crypto

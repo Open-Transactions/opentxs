@@ -10,7 +10,7 @@
 
 #include <limits>
 
-namespace opentxs::v1::rpc
+namespace opentxs::rpc
 {
 enum class AccountType : TypeEnum {
     error = 0,
@@ -18,4 +18,4 @@ enum class AccountType : TypeEnum {
     issuer = 2,
     blockchain = 3,
 };
-}  // namespace opentxs::v1::rpc
+}  // namespace opentxs::rpc

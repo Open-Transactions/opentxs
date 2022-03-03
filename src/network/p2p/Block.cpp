@@ -16,7 +16,7 @@
 #include "opentxs/util/Numbers.hpp"
 #include "serialization/protobuf/BlockchainP2PSync.pb.h"
 
-namespace opentxs::v1::network::p2p
+namespace opentxs::network::p2p
 {
 
 struct Block::Imp {
@@ -146,4 +146,4 @@ auto Block::Serialize(AllocateOutput dest) const noexcept -> bool
 }
 
 Block::~Block() { std::unique_ptr<Imp>(imp_).reset(); }
-}  // namespace opentxs::v1::network::p2p
+}  // namespace opentxs::network::p2p

@@ -21,7 +21,7 @@
 #include "opentxs/blockchain/p2p/Types.hpp"
 #include "opentxs/util/Log.hpp"
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto BitcoinP2PTx(
     const api::Session& api,
@@ -62,9 +62,9 @@ auto BitcoinP2PTx(
 
     return std::make_unique<ReturnType>(api, network, transaction);
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory
 
-namespace opentxs::v1::blockchain::p2p::bitcoin::message
+namespace opentxs::blockchain::p2p::bitcoin::message
 {
 Tx::Tx(
     const api::Session& api,
@@ -107,4 +107,4 @@ auto Tx::Transaction() const noexcept
     return api_.Factory().BitcoinTransaction(
         header_->Network(), payload_->Bytes(), false);
 }
-}  // namespace opentxs::v1::blockchain::p2p::bitcoin::message
+}  // namespace opentxs::blockchain::p2p::bitcoin::message

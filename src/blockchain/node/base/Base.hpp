@@ -50,8 +50,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace api
 {
 class Session;
@@ -112,13 +112,13 @@ class Message;
 }  // namespace network
 
 class PaymentCode;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
 namespace zmq = opentxs::network::zeromq;
 
-namespace opentxs::v1::blockchain::node::implementation
+namespace opentxs::blockchain::node::implementation
 {
 class Base : virtual public node::internal::Network,
              public Worker<Base, api::Session>
@@ -380,4 +380,4 @@ private:
     auto operator=(const Base&) -> Base& = delete;
     auto operator=(Base&&) -> Base& = delete;
 };
-}  // namespace opentxs::v1::blockchain::node::implementation
+}  // namespace opentxs::blockchain::node::implementation

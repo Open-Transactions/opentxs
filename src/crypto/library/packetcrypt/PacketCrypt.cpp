@@ -43,7 +43,7 @@ extern "C" {
 
 namespace be = boost::endian;
 
-namespace opentxs::v1::crypto::implementation
+namespace opentxs::crypto::implementation
 {
 struct PacketCrypt::Imp {
     using PktBlock = blockchain::block::pkt::Block;
@@ -242,4 +242,4 @@ auto PacketCrypt::Validate(const BitcoinBlock& block) const noexcept -> bool
 }
 
 PacketCrypt::~PacketCrypt() = default;
-}  // namespace opentxs::v1::crypto::implementation
+}  // namespace opentxs::crypto::implementation

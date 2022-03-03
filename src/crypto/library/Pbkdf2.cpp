@@ -20,7 +20,7 @@ extern "C" {
 #include "opentxs/crypto/library/HashingProvider.hpp"
 #include "opentxs/util/Log.hpp"
 
-namespace opentxs::v1::crypto::implementation
+namespace opentxs::crypto::implementation
 {
 Pbkdf2::Pbkdf2() noexcept
     : pbkdf_lock_()
@@ -99,4 +99,4 @@ auto Pbkdf2::PKCS5_PBKDF2_HMAC(
 
     return true;
 }
-}  // namespace opentxs::v1::crypto::implementation
+}  // namespace opentxs::crypto::implementation

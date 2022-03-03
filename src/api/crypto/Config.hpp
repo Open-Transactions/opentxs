@@ -14,8 +14,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace api
 {
 namespace crypto
@@ -25,11 +25,11 @@ class Config;
 
 class Settings;
 }  // namespace api
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::api::crypto::imp
+namespace opentxs::api::crypto::imp
 {
 class Config final : public internal::Config
 {
@@ -68,4 +68,4 @@ private:
     auto operator=(const Config&) -> Config& = delete;
     auto operator=(Config&&) -> Config& = delete;
 };
-}  // namespace opentxs::v1::api::crypto::imp
+}  // namespace opentxs::api::crypto::imp

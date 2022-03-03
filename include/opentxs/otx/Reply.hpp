@@ -17,8 +17,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace api
 {
 class Session;
@@ -36,11 +36,11 @@ class ServerReply;
 }  // namespace proto
 
 using OTXReply = Pimpl<otx::Reply>;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::otx
+namespace opentxs::otx
 {
 class OPENTXS_EXPORT Reply : virtual public opentxs::contract::Signable
 {
@@ -105,4 +105,4 @@ private:
     auto operator=(const Reply&) -> Reply& = delete;
     auto operator=(Reply&&) -> Reply& = delete;
 };
-}  // namespace opentxs::v1::otx
+}  // namespace opentxs::otx

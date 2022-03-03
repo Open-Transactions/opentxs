@@ -18,8 +18,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace api
 {
 class Session;
@@ -35,11 +35,11 @@ class OTPassword;
 class PasswordPrompt;
 class Secret;
 class Signature;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::crypto::key::implementation
+namespace opentxs::crypto::key::implementation
 {
 class Keypair final : virtual public key::Keypair
 {
@@ -85,4 +85,4 @@ private:
     auto operator=(const Keypair&) -> Keypair& = delete;
     auto operator=(Keypair&&) -> Keypair& = delete;
 };
-}  // namespace opentxs::v1::crypto::key::implementation
+}  // namespace opentxs::crypto::key::implementation

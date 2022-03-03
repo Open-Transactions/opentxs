@@ -11,7 +11,7 @@
 
 #include "internal/interface/ui/UI.hpp"
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto MessagableListQtModel(ui::internal::MessagableList& parent) noexcept
     -> std::unique_ptr<ui::MessagableListQt>
@@ -20,9 +20,9 @@ auto MessagableListQtModel(ui::internal::MessagableList& parent) noexcept
 
     return std::make_unique<ReturnType>(parent);
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory
 
-namespace opentxs::v1::ui
+namespace opentxs::ui
 {
 struct MessagableListQt::Imp {
     internal::MessagableList& parent_;
@@ -53,4 +53,4 @@ MessagableListQt::~MessagableListQt()
         imp_ = nullptr;
     }
 }
-}  // namespace opentxs::v1::ui
+}  // namespace opentxs::ui

@@ -18,7 +18,7 @@
 #include "opentxs/core/Secret.hpp"
 #include "opentxs/util/Log.hpp"
 
-namespace opentxs::v1::network::zeromq::curve::implementation
+namespace opentxs::network::zeromq::curve::implementation
 {
 Server::Server(zeromq::socket::implementation::Socket& socket) noexcept
     : parent_(socket)
@@ -96,4 +96,4 @@ auto Server::set_private_key(const void* key, const std::size_t keySize)
 
     return parent_.apply_socket(std::move(cb));
 }
-}  // namespace opentxs::v1::network::zeromq::curve::implementation
+}  // namespace opentxs::network::zeromq::curve::implementation

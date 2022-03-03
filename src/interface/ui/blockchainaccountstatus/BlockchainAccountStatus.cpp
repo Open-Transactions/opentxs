@@ -45,7 +45,7 @@
 #include "opentxs/util/Log.hpp"
 #include "serialization/protobuf/HDPath.pb.h"
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto BlockchainAccountStatusModel(
     const api::session::Client& api,
@@ -58,9 +58,9 @@ auto BlockchainAccountStatusModel(
 
     return std::make_unique<ReturnType>(api, id, chain, cb);
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory
 
-namespace opentxs::v1::ui::implementation
+namespace opentxs::ui::implementation
 {
 BlockchainAccountStatus::BlockchainAccountStatus(
     const api::session::Client& api,
@@ -486,4 +486,4 @@ auto BlockchainAccountStatus::subchain_display_name(
 }
 
 BlockchainAccountStatus::~BlockchainAccountStatus() = default;
-}  // namespace opentxs::v1::ui::implementation
+}  // namespace opentxs::ui::implementation

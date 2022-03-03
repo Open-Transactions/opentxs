@@ -9,7 +9,7 @@
 
 #include "opentxs/util/Container.hpp"
 
-namespace opentxs::v1
+namespace opentxs
 {
 auto formatBool(bool in) -> UnallocatedCString { return in ? "true" : "false"; }
 
@@ -32,4 +32,4 @@ auto parseTimestamp(UnallocatedCString in) -> opentxs::Time
         return {};
     }
 }
-}  // namespace opentxs::v1
+}  // namespace opentxs

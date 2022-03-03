@@ -25,7 +25,7 @@
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Pimpl.hpp"
 
-namespace opentxs::v1::rpc::implementation
+namespace opentxs::rpc::implementation
 {
 auto RPC::list_accounts(const request::Base& base) const noexcept
     -> std::unique_ptr<response::Base>
@@ -216,4 +216,4 @@ auto RPC::list_accounts(const request::Base& base) const noexcept
         return reply(ResponseCode::bad_session);
     }
 }
-}  // namespace opentxs::v1::rpc::implementation
+}  // namespace opentxs::rpc::implementation

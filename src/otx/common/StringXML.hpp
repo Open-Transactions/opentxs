@@ -22,14 +22,14 @@ class IFileReadCallBack;
 
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 class String;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::implementation
+namespace opentxs::implementation
 {
 class StringXML final : virtual public opentxs::StringXML, public String
 {
@@ -58,4 +58,4 @@ private:
     auto operator=(const StringXML&) -> StringXML& = delete;
     auto operator=(StringXML&&) -> StringXML& = delete;
 };
-}  // namespace opentxs::v1::implementation
+}  // namespace opentxs::implementation

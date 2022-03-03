@@ -44,7 +44,7 @@
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/PasswordPrompt.hpp"  // IWYU pragma: keep
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto OTScriptChai() -> std::shared_ptr<opentxs::OTScript>
 {
@@ -56,9 +56,9 @@ auto OTScriptChai(const UnallocatedCString& script_contents)
 {
     return std::make_shared<opentxs::OTScriptChai>(script_contents);
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory
 
-namespace opentxs::v1
+namespace opentxs
 {
 auto OTScriptChai::ExecuteScript(OTVariable* pReturnVar) -> bool
 {
@@ -524,4 +524,4 @@ OTScriptChai::~OTScriptChai()
 
     // chai = nullptr;  (It's const).
 }
-}  // namespace opentxs::v1
+}  // namespace opentxs

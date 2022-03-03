@@ -18,8 +18,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace api
 {
 namespace network
@@ -38,14 +38,14 @@ namespace asio
 class Endpoint;
 }  // namespace asio
 }  // namespace network
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
 namespace asio = boost::asio;
 namespace ip = asio::ip;
 
-namespace opentxs::v1::network::asio
+namespace opentxs::network::asio
 {
 struct Socket::Imp {
     using Asio = api::network::internal::Asio;
@@ -75,4 +75,4 @@ private:
     Imp& operator=(const Imp&) = delete;
     Imp& operator=(Imp&&) = delete;
 };
-}  // namespace opentxs::v1::network::asio
+}  // namespace opentxs::network::asio

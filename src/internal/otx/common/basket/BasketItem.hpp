@@ -11,7 +11,7 @@
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
 
-namespace opentxs::v1
+namespace opentxs
 {
 class BasketItem;
 
@@ -35,4 +35,4 @@ public:
     BasketItem();
     ~BasketItem() = default;
 };
-}  // namespace opentxs::v1
+}  // namespace opentxs

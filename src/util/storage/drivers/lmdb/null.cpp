@@ -10,7 +10,7 @@
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/storage/Plugin.hpp"
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto StorageLMDB(
     const api::Crypto& crypto,
@@ -21,4 +21,4 @@ auto StorageLMDB(
 {
     return {};
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory

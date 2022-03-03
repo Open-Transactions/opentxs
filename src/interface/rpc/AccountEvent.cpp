@@ -21,7 +21,7 @@
 #include "serialization/protobuf/AccountEvent.pb.h"
 #include "serialization/protobuf/PaymentWorkflowEnums.pb.h"
 
-namespace opentxs::v1::rpc
+namespace opentxs::rpc
 {
 struct AccountEvent::Imp {
     static constexpr auto default_version_ = VersionNumber{2};
@@ -253,4 +253,4 @@ AccountEvent::~AccountEvent()
     std::unique_ptr<Imp>{imp_}.reset();
     imp_ = nullptr;
 }
-}  // namespace opentxs::v1::rpc
+}  // namespace opentxs::rpc

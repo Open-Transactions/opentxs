@@ -10,7 +10,7 @@
 
 #include <limits>
 
-namespace opentxs::v1::blockchain::crypto
+namespace opentxs::blockchain::crypto
 {
 enum class SubaccountType : std::uint16_t {
     Error = 0,
@@ -19,4 +19,4 @@ enum class SubaccountType : std::uint16_t {
     Imported = 3,
     Notification = std::numeric_limits<std::uint16_t>::max(),
 };
-}  // namespace opentxs::v1::blockchain::crypto
+}  // namespace opentxs::blockchain::crypto

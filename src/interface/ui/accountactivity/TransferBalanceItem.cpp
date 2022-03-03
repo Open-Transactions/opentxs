@@ -28,7 +28,7 @@
 #include "serialization/protobuf/PaymentWorkflow.pb.h"
 #include "serialization/protobuf/PaymentWorkflowEnums.pb.h"
 
-namespace opentxs::v1::ui::implementation
+namespace opentxs::ui::implementation
 {
 TransferBalanceItem::TransferBalanceItem(
     const AccountActivityInternalInterface& parent,
@@ -257,4 +257,4 @@ auto TransferBalanceItem::UUID() const noexcept -> UnallocatedCString
 
     return {};
 }
-}  // namespace opentxs::v1::ui::implementation
+}  // namespace opentxs::ui::implementation

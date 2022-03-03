@@ -22,7 +22,7 @@
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto AccountSummaryQtModel(ui::internal::AccountSummary& parent) noexcept
     -> std::unique_ptr<ui::AccountSummaryQt>
@@ -31,9 +31,9 @@ auto AccountSummaryQtModel(ui::internal::AccountSummary& parent) noexcept
 
     return std::make_unique<ReturnType>(parent);
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory
 
-namespace opentxs::v1::ui
+namespace opentxs::ui
 {
 struct AccountSummaryQt::Imp {
     internal::AccountSummary& parent_;
@@ -65,9 +65,9 @@ AccountSummaryQt::~AccountSummaryQt()
         imp_ = nullptr;
     }
 }
-}  // namespace opentxs::v1::ui
+}  // namespace opentxs::ui
 
-namespace opentxs::v1::ui::implementation
+namespace opentxs::ui::implementation
 {
 auto AccountSummaryItem::qt_data(
     const int column,
@@ -141,4 +141,4 @@ auto IssuerItem::qt_data(const int column, const int role, QVariant& out)
         }
     }
 }
-}  // namespace opentxs::v1::ui::implementation
+}  // namespace opentxs::ui::implementation

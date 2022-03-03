@@ -45,7 +45,7 @@
 #include "serialization/protobuf/BlockchainTransactionOutput.pb.h"  // IWYU pragma: keep
 #include "util/LMDB.hpp"
 
-namespace opentxs::v1::blockchain::database::wallet
+namespace opentxs::blockchain::database::wallet
 {
 auto all_states() noexcept -> const States&
 {
@@ -103,9 +103,9 @@ auto OutputCache::load_output_index(
 
     return set;
 }
-}  // namespace opentxs::v1::blockchain::database::wallet
+}  // namespace opentxs::blockchain::database::wallet
 
-namespace opentxs::v1::blockchain::database::wallet
+namespace opentxs::blockchain::database::wallet
 {
 const Outpoints OutputCache::empty_outputs_{};
 const Nyms OutputCache::empty_nyms_{};
@@ -1217,4 +1217,4 @@ auto OutputCache::write_output(
 }
 
 OutputCache::~OutputCache() = default;
-}  // namespace opentxs::v1::blockchain::database::wallet
+}  // namespace opentxs::blockchain::database::wallet

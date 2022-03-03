@@ -40,8 +40,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace api
 {
 namespace session
@@ -88,13 +88,13 @@ class AccountData;
 
 class Identifier;
 class Options;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
 namespace zmq = opentxs::network::zeromq;
 
-namespace opentxs::v1::rpc::implementation
+namespace opentxs::rpc::implementation
 {
 class RPC final : virtual public rpc::internal::RPC, Lockable
 {
@@ -326,4 +326,4 @@ private:
     auto operator=(const RPC&) -> RPC& = delete;
     auto operator=(RPC&&) -> RPC& = delete;
 };
-}  // namespace opentxs::v1::rpc::implementation
+}  // namespace opentxs::rpc::implementation

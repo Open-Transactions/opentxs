@@ -25,7 +25,7 @@ typedef struct MDB_txn MDB_txn;
 typedef unsigned int MDB_dbi;
 }
 
-namespace opentxs::v1::storage::lmdb
+namespace opentxs::storage::lmdb
 {
 using Callback = std::function<void(const ReadView data)>;
 using Flags = unsigned int;
@@ -172,4 +172,4 @@ private:
     auto operator=(const LMDB&) -> LMDB& = delete;
     auto operator=(LMDB&&) -> LMDB& = delete;
 };
-}  // namespace opentxs::v1::storage::lmdb
+}  // namespace opentxs::storage::lmdb

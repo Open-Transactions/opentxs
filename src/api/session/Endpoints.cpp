@@ -15,7 +15,7 @@
 #include "opentxs/network/zeromq/ZeroMQ.hpp"
 #include "opentxs/util/Container.hpp"
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto EndpointsAPI(const int instance) noexcept
     -> std::unique_ptr<api::session::Endpoints>
@@ -24,9 +24,9 @@ auto EndpointsAPI(const int instance) noexcept
 
     return std::make_unique<ReturnType>(instance);
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory
 
-namespace opentxs::v1::api::session::imp
+namespace opentxs::api::session::imp
 {
 Endpoints::Endpoints(const int instance) noexcept
     : instance_(instance)
@@ -418,4 +418,4 @@ auto Endpoints::WorkflowAccountUpdate() const noexcept -> std::string_view
 {
     return workflow_account_update_;
 }
-}  // namespace opentxs::v1::api::session::imp
+}  // namespace opentxs::api::session::imp

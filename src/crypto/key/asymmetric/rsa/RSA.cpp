@@ -19,7 +19,7 @@
 #include "serialization/protobuf/AsymmetricKey.pb.h"
 #include "serialization/protobuf/Ciphertext.pb.h"
 
-namespace opentxs::v1::crypto::key::implementation
+namespace opentxs::crypto::key::implementation
 {
 RSA::RSA(
     const api::Session& api,
@@ -122,4 +122,4 @@ auto RSA::serialize(const Lock& lock, Serialized& output) const noexcept -> bool
 
     return true;
 }
-}  // namespace opentxs::v1::crypto::key::implementation
+}  // namespace opentxs::crypto::key::implementation

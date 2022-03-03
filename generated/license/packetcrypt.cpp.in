@@ -7,10 +7,10 @@
 #include "1_Internal.hpp"            // IWYU pragma: associated
 #include "util/license/License.hpp"  // IWYU pragma: associated
 
-namespace opentxs::v1
+namespace opentxs
 {
 auto license_packetcrypt(LicenseMap& out) noexcept -> void
 {
     out.emplace("packetcrypt", UnallocatedCString{text_lgpl_v2_1()});
 }
-}  // namespace opentxs::v1
+}  // namespace opentxs

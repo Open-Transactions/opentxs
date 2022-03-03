@@ -25,7 +25,7 @@
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto BitcoinP2PNotfound(
     const api::Session& api,
@@ -98,9 +98,9 @@ auto BitcoinP2PNotfound(
 
     return new ReturnType(api, network, std::move(payload));
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory
 
-namespace opentxs::v1::blockchain::p2p::bitcoin::message::implementation
+namespace opentxs::blockchain::p2p::bitcoin::message::implementation
 {
 Notfound::Notfound(
     const api::Session& api,
@@ -153,4 +153,4 @@ auto Notfound::payload(AllocateOutput out) const noexcept -> bool
         return false;
     }
 }
-}  // namespace opentxs::v1::blockchain::p2p::bitcoin::message::implementation
+}  // namespace opentxs::blockchain::p2p::bitcoin::message::implementation

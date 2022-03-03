@@ -11,7 +11,7 @@
 
 #include "opentxs/util/Container.hpp"
 
-namespace opentxs::v1
+namespace opentxs
 {
 auto license_argon(LicenseMap& out) noexcept -> void
 {
@@ -1515,4 +1515,4 @@ auto license_argon(LicenseMap& out) noexcept -> void
             reinterpret_cast<const char*>(deps_argon2_LICENSE),
             deps_argon2_LICENSE_len});
 }
-}  // namespace opentxs::v1
+}  // namespace opentxs

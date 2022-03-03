@@ -19,7 +19,7 @@
 #include "serialization/protobuf/PeerRequest.pb.h"
 #include "serialization/protobuf/verify/Check.hpp"
 
-namespace opentxs::v1::proto
+namespace opentxs::proto
 {
 auto CheckProto_3(const PeerRequest& input, const bool silent) -> bool
 {
@@ -94,4 +94,4 @@ auto CheckProto_3(const PeerRequest& input, const bool silent) -> bool
 
     return true;
 }
-}  // namespace opentxs::v1::proto
+}  // namespace opentxs::proto

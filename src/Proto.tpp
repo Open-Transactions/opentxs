@@ -20,7 +20,7 @@
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Pimpl.hpp"
 
-namespace opentxs::v1::proto
+namespace opentxs::proto
 {
 UnallocatedCString ToString(const ProtobufType& input);
 
@@ -100,4 +100,4 @@ Output StringToProto(const String& input)
         return Factory<Output>(Data::Factory(armored));
     }
 }
-}  // namespace opentxs::v1::proto
+}  // namespace opentxs::proto

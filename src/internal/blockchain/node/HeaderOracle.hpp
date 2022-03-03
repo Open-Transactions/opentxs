@@ -14,8 +14,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace blockchain
 {
 namespace block
@@ -34,11 +34,11 @@ namespace p2p
 class Data;
 }  // namespace p2p
 }  // namespace network
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::blockchain::node::internal
+namespace opentxs::blockchain::node::internal
 {
 class HeaderOracle : virtual public node::HeaderOracle
 {
@@ -71,5 +71,5 @@ public:
 
     ~HeaderOracle() override = default;
 };
-}  // namespace opentxs::v1::blockchain::node::internal
+}  // namespace opentxs::blockchain::node::internal
 #endif  // OT_BLOCKCHAIN

@@ -34,7 +34,7 @@
 #include "opentxs/interface/qt/Profile.hpp"
 #include "opentxs/util/Pimpl.hpp"
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto IdentityManagerQt(const api::session::Client& api) noexcept
     -> ui::IdentityManagerQt
@@ -43,9 +43,9 @@ auto IdentityManagerQt(const api::session::Client& api) noexcept
 
     return std::make_unique<ReturnType::Imp>(api).release();
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory
 
-namespace opentxs::v1::ui
+namespace opentxs::ui
 {
 IdentityManagerQt::Imp::Imp(const api::session::Client& api) noexcept
     : api_(api)
@@ -190,9 +190,9 @@ auto IdentityManagerQt::Imp::setActiveNym(QString id) noexcept -> void
 
     if (changed) { parent_->activeNymChanged(std::move(id)); }
 }
-}  // namespace opentxs::v1::ui
+}  // namespace opentxs::ui
 
-namespace opentxs::v1::ui
+namespace opentxs::ui
 {
 IdentityManagerQt::IdentityManagerQt(Imp* imp) noexcept
     : imp_(imp)
@@ -321,4 +321,4 @@ IdentityManagerQt::~IdentityManagerQt()
         imp_ = nullptr;
     }
 }
-}  // namespace opentxs::v1::ui
+}  // namespace opentxs::ui

@@ -45,7 +45,7 @@
 #include "serialization/protobuf/HDPath.pb.h"
 #include "serialization/protobuf/PaymentCode.pb.h"
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto BlockchainPCSubaccount(
     const api::Session& api,
@@ -95,9 +95,9 @@ auto BlockchainPCSubaccount(
         return nullptr;
     }
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory
 
-namespace opentxs::v1::blockchain::crypto::internal
+namespace opentxs::blockchain::crypto::internal
 {
 auto PaymentCode::GetID(
     const api::Session& api,
@@ -114,9 +114,9 @@ auto PaymentCode::GetID(
 
     return out;
 }
-}  // namespace opentxs::v1::blockchain::crypto::internal
+}  // namespace opentxs::blockchain::crypto::internal
 
-namespace opentxs::v1::blockchain::crypto::implementation
+namespace opentxs::blockchain::crypto::implementation
 {
 PaymentCode::PaymentCode(
     const api::Session& api,
@@ -417,4 +417,4 @@ auto PaymentCode::save(const rLock& lock) const noexcept -> bool
 
     return saved;
 }
-}  // namespace opentxs::v1::blockchain::crypto::implementation
+}  // namespace opentxs::blockchain::crypto::implementation

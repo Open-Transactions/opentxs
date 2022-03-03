@@ -26,8 +26,8 @@ class QAbstractItemModel;
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace api
 {
 namespace session
@@ -87,11 +87,11 @@ class UnitListQt;
 }  // namespace ui
 
 class Identifier;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::api::session
+namespace opentxs::api::session
 {
 class OPENTXS_EXPORT UI
 {
@@ -278,4 +278,4 @@ private:
     auto operator=(const UI&) -> UI& = delete;
     auto operator=(UI&&) -> UI& = delete;
 };
-}  // namespace opentxs::v1::api::session
+}  // namespace opentxs::api::session

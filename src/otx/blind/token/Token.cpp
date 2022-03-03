@@ -23,7 +23,7 @@
 #include "otx/blind/token/Token.hpp"
 #include "serialization/protobuf/Token.pb.h"
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto Token(
     const otx::blind::Token& token,
@@ -92,9 +92,9 @@ auto Token(
         }
     }
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory
 
-namespace opentxs::v1::otx::blind
+namespace opentxs::otx::blind
 {
 auto Token::Imp::Notary() const -> const identifier::Notary&
 {
@@ -116,9 +116,9 @@ auto Token::Imp::Unit() const -> const identifier::UnitDefinition&
 
     return *id;
 }
-}  // namespace opentxs::v1::otx::blind
+}  // namespace opentxs::otx::blind
 
-namespace opentxs::v1::otx::blind
+namespace opentxs::otx::blind
 {
 auto swap(Token& lhs, Token& rhs) noexcept -> void { lhs.swap(rhs); }
 
@@ -209,4 +209,4 @@ Token::~Token()
         imp_ = nullptr;
     }
 }
-}  // namespace opentxs::v1::otx::blind
+}  // namespace opentxs::otx::blind

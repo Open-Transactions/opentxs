@@ -7,7 +7,7 @@
 #include "1_Internal.hpp"                          // IWYU pragma: associated
 #include "internal/otx/common/AccountVisitor.hpp"  // IWYU pragma: associated
 
-namespace opentxs::v1
+namespace opentxs
 {
 AccountVisitor::AccountVisitor(
     const api::session::Wallet& wallet,
@@ -17,4 +17,4 @@ AccountVisitor::AccountVisitor(
     , loadedAccounts_(nullptr)
 {
 }
-}  // namespace opentxs::v1
+}  // namespace opentxs

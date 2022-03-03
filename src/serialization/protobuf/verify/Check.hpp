@@ -15,7 +15,7 @@
 #include "opentxs/util/Container.hpp"
 #include "serialization/protobuf/Enums.pb.h"
 
-namespace opentxs::v1::proto
+namespace opentxs::proto
 {
 static const UnallocatedMap<std::uint32_t, UnallocatedSet<AsymmetricKeyType>>
     AsymmetricKeyAllowedTypes{
@@ -46,7 +46,7 @@ auto GetProtoName(const T& in) noexcept -> std::string
 }
 
 void WriteLogMessage(const std::stringstream& message) noexcept;
-}  // namespace opentxs::v1::proto
+}  // namespace opentxs::proto
 
 #define FAIL_1(b)                                                              \
     {                                                                          \

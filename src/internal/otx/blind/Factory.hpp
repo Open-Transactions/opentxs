@@ -16,8 +16,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace api
 {
 class Session;
@@ -64,11 +64,11 @@ class Token;
 class Amount;
 class PasswordPrompt;
 class String;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto MintLucre(const api::Session& api) noexcept -> otx::blind::Mint;
 auto MintLucre(
@@ -140,4 +140,4 @@ auto TokenLucre(
     const otx::blind::Denomination value,
     otx::blind::internal::Purse& purse,
     const opentxs::PasswordPrompt& reason) noexcept -> otx::blind::Token;
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory

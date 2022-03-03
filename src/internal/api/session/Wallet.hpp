@@ -17,8 +17,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace otx
 {
 namespace client
@@ -40,11 +40,11 @@ class Account;
 
 using ExclusiveAccount = Exclusive<Account>;
 using SharedAccount = Shared<Account>;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::api::session::internal
+namespace opentxs::api::session::internal
 {
 class Wallet : virtual public api::session::Wallet
 {
@@ -218,4 +218,4 @@ public:
 
     ~Wallet() override = default;
 };
-}  // namespace opentxs::v1::api::session::internal
+}  // namespace opentxs::api::session::internal

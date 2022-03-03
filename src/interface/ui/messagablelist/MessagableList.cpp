@@ -29,7 +29,7 @@
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Pimpl.hpp"
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto MessagableListModel(
     const api::session::Client& api,
@@ -41,9 +41,9 @@ auto MessagableListModel(
 
     return std::make_unique<ReturnType>(api, nymID, cb);
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory
 
-namespace opentxs::v1::ui::implementation
+namespace opentxs::ui::implementation
 {
 MessagableList::MessagableList(
     const api::session::Client& api,
@@ -204,4 +204,4 @@ MessagableList::~MessagableList()
     wait_for_startup();
     signal_shutdown().get();
 }
-}  // namespace opentxs::v1::ui::implementation
+}  // namespace opentxs::ui::implementation

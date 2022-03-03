@@ -14,8 +14,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace identity
 {
 namespace credential
@@ -29,11 +29,11 @@ namespace proto
 class Credential;
 class NymIDSource;
 }  // namespace proto
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::identity
+namespace opentxs::identity
 {
 class OPENTXS_EXPORT Source
 {
@@ -63,4 +63,4 @@ private:
     auto operator=(const Source&) -> Source&;
     auto operator=(Source&&) -> Source&;
 };
-}  // namespace opentxs::v1::identity
+}  // namespace opentxs::identity

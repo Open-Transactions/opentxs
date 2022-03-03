@@ -17,7 +17,7 @@
 #include "opentxs/crypto/key/asymmetric/Algorithm.hpp"
 #include "util/Sodium.hpp"
 
-namespace opentxs::v1::crypto::key::implementation
+namespace opentxs::crypto::key::implementation
 {
 Ed25519::Ed25519(
     const api::Session& api,
@@ -113,4 +113,4 @@ auto Ed25519::TransportKey(
         privateKey.WriteInto(Secret::Mode::Mem),
         publicKey.WriteInto());
 }
-}  // namespace opentxs::v1::crypto::key::implementation
+}  // namespace opentxs::crypto::key::implementation

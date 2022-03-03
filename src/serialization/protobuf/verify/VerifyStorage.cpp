@@ -5,7 +5,7 @@
 
 #include "internal/serialization/protobuf/verify/VerifyStorage.hpp"  // IWYU pragma: associated
 
-namespace opentxs::v1::proto
+namespace opentxs::proto
 {
 auto BlindedSeriesListAllowedStorageItemHash() noexcept -> const VersionMap&
 {
@@ -288,4 +288,4 @@ auto StorageUnitsAllowedStorageItemHash() noexcept -> const VersionMap&
 
     return output;
 }
-}  // namespace opentxs::v1::proto
+}  // namespace opentxs::proto

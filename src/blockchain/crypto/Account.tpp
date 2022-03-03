@@ -14,8 +14,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace proto
 {
 class Bip47Channel;
@@ -24,11 +24,11 @@ class HDPath;
 }  // namespace proto
 
 class PaymentCode;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::blockchain::crypto::implementation
+namespace opentxs::blockchain::crypto::implementation
 {
 template <>
 struct Account::Factory<crypto::HD, proto::HDPath, HDProtocol, PasswordPrompt> {
@@ -144,4 +144,4 @@ auto Account::NodeGroup<InterfaceType, PayloadType>::add(
 
     return true;
 }
-}  // namespace opentxs::v1::blockchain::crypto::implementation
+}  // namespace opentxs::blockchain::crypto::implementation

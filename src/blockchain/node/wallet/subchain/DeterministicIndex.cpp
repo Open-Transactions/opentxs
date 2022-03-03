@@ -15,7 +15,7 @@
 #include "opentxs/util/Log.hpp"
 #include "util/ScopeGuard.hpp"
 
-namespace opentxs::v1::blockchain::node::wallet
+namespace opentxs::blockchain::node::wallet
 {
 DeterministicStateData::Index::Index(
     const crypto::Deterministic& subaccount,
@@ -86,4 +86,4 @@ auto DeterministicStateData::Index::need_index(
 
     return std::nullopt;
 }
-}  // namespace opentxs::v1::blockchain::node::wallet
+}  // namespace opentxs::blockchain::node::wallet

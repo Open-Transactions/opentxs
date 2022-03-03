@@ -50,8 +50,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace api
 {
 namespace session
@@ -106,13 +106,13 @@ class OTPayment;
 class PasswordPrompt;
 class PeerObject;
 class String;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
 namespace zmq = opentxs::network::zeromq;
 
-namespace opentxs::v1::otx::context::implementation
+namespace opentxs::otx::context::implementation
 {
 class Server final : virtual public internal::Server,
                      public Base,
@@ -786,4 +786,4 @@ private:
     auto operator=(const Server&) -> Server& = delete;
     auto operator=(Server&&) -> Server& = delete;
 };
-}  // namespace opentxs::v1::otx::context::implementation
+}  // namespace opentxs::otx::context::implementation

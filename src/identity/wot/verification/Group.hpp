@@ -23,8 +23,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace api
 {
 class Session;
@@ -37,11 +37,11 @@ class Nym;
 
 class Factory;
 class PasswordPrompt;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::identity::wot::verification::implementation
+namespace opentxs::identity::wot::verification::implementation
 {
 class Group final : public internal::Group
 {
@@ -137,4 +137,4 @@ private:
     auto operator=(const Group&) -> Group& = delete;
     auto operator=(Group&&) -> Group& = delete;
 };
-}  // namespace opentxs::v1::identity::wot::verification::implementation
+}  // namespace opentxs::identity::wot::verification::implementation

@@ -17,8 +17,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace api
 {
 namespace network
@@ -41,11 +41,11 @@ class Plugin;
 }  // namespace storage
 
 class Flag;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::storage::driver
+namespace opentxs::storage::driver
 {
 // In-memory implementation of opentxs::storage
 class MemDB final : public implementation::Plugin,
@@ -93,4 +93,4 @@ private:
     auto operator=(const MemDB&) -> MemDB& = delete;
     auto operator=(MemDB&&) -> MemDB& = delete;
 };
-}  // namespace opentxs::v1::storage::driver
+}  // namespace opentxs::storage::driver

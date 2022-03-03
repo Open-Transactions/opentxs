@@ -16,7 +16,7 @@
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/storage/Plugin.hpp"
 
-namespace opentxs::v1::storage::driver
+namespace opentxs::storage::driver
 {
 auto Multiplex::init_fs(std::unique_ptr<storage::Plugin>& plugin) -> void
 {
@@ -31,4 +31,4 @@ auto Multiplex::init_fs_backup(const UnallocatedCString& dir) -> void
     backup_plugins_.emplace_back(factory::StorageFSArchive(
         crypto_, asio_, storage_, config_, primary_bucket_, dir, null_));
 }
-}  // namespace opentxs::v1::storage::driver
+}  // namespace opentxs::storage::driver

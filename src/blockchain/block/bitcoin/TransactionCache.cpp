@@ -15,7 +15,7 @@
 #include "opentxs/core/identifier/Generic.hpp"
 #include "util/Container.hpp"
 
-namespace opentxs::v1::blockchain::block::bitcoin::implementation
+namespace opentxs::blockchain::block::bitcoin::implementation
 {
 Transaction::Cache::Cache(
     const UnallocatedCString& memo,
@@ -129,4 +129,4 @@ auto Transaction::Cache::set_position(const block::Position& pos) noexcept
     auto lock = rLock{lock_};
     mined_position_ = pos;
 }
-}  // namespace opentxs::v1::blockchain::block::bitcoin::implementation
+}  // namespace opentxs::blockchain::block::bitcoin::implementation

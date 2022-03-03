@@ -5,7 +5,7 @@
 
 #include "internal/serialization/protobuf/verify/VerifyContracts.hpp"  // IWYU pragma: associated
 
-namespace opentxs::v1::proto
+namespace opentxs::proto
 {
 auto BasketParamsAllowedBasketItem() noexcept -> const VersionMap&
 {
@@ -128,4 +128,4 @@ auto UnitDefinitionAllowedSignature() noexcept -> const VersionMap&
 
     return output;
 }
-}  // namespace opentxs::v1::proto
+}  // namespace opentxs::proto

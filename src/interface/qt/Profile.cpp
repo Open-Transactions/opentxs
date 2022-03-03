@@ -12,7 +12,7 @@
 #include "internal/interface/ui/UI.hpp"
 #include "opentxs/util/Container.hpp"
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto ProfileQtModel(ui::internal::Profile& parent) noexcept
     -> std::unique_ptr<ui::ProfileQt>
@@ -21,9 +21,9 @@ auto ProfileQtModel(ui::internal::Profile& parent) noexcept
 
     return std::make_unique<ReturnType>(parent);
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory
 
-namespace opentxs::v1::ui
+namespace opentxs::ui
 {
 struct ProfileQt::Imp {
     internal::Profile& parent_;
@@ -71,4 +71,4 @@ ProfileQt::~ProfileQt()
         imp_ = nullptr;
     }
 }
-}  // namespace opentxs::v1::ui
+}  // namespace opentxs::ui

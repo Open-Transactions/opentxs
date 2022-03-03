@@ -33,6 +33,7 @@
 #include "internal/api/network/Blockchain.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
 #include "internal/util/Timer.hpp"
+#include "opentxs/Version.hpp"
 #include "opentxs/api/network/Asio.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/network/asio/Endpoint.hpp"
@@ -66,8 +67,8 @@ class error_code;
 
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace network
 {
 namespace asio
@@ -86,7 +87,7 @@ class Context;
 class Message;
 }  // namespace zeromq
 }  // namespace network
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -97,7 +98,7 @@ namespace ip = boost::asio::ip;
 namespace ssl = boost::asio::ssl;
 namespace zmq = opentxs::network::zeromq;
 
-namespace opentxs::v1::api::network
+namespace opentxs::api::network
 {
 struct Asio::Imp final : public api::network::internal::Asio,
                          public opentxs::internal::StateMachine {
@@ -211,4 +212,4 @@ private:
     Imp& operator=(const Imp&) = delete;
     Imp& operator=(Imp&&) = delete;
 };
-}  // namespace opentxs::v1::api::network
+}  // namespace opentxs::api::network

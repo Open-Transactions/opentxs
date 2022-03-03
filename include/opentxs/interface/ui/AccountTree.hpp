@@ -13,8 +13,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace identifier
 {
 class Nym;
@@ -25,11 +25,11 @@ namespace ui
 class AccountTree;
 class AccountCurrency;
 }  // namespace ui
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::ui
+namespace opentxs::ui
 {
 class OPENTXS_EXPORT AccountTree : virtual public List
 {
@@ -52,4 +52,4 @@ private:
     auto operator=(const AccountTree&) -> AccountTree& = delete;
     auto operator=(AccountTree&&) -> AccountTree& = delete;
 };
-}  // namespace opentxs::v1::ui
+}  // namespace opentxs::ui

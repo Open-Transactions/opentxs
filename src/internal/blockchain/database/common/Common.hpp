@@ -22,8 +22,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace blockchain
 {
 namespace p2p
@@ -34,11 +34,11 @@ struct Address;
 }  // namespace internal
 }  // namespace p2p
 }  // namespace blockchain
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::blockchain::database::common
+namespace opentxs::blockchain::database::common
 {
 using Chain = opentxs::blockchain::Type;
 using Address = opentxs::blockchain::p2p::internal::Address;
@@ -83,4 +83,4 @@ enum Table {
 auto ChainToSyncTable(const opentxs::blockchain::Type chain) noexcept(false)
     -> int;
 auto SyncTables() noexcept -> const UnallocatedVector<SyncTableData>&;
-}  // namespace opentxs::v1::blockchain::database::common
+}  // namespace opentxs::blockchain::database::common

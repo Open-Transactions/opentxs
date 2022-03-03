@@ -23,7 +23,7 @@
 
 namespace be = boost::endian;
 
-namespace opentxs::v1::network::blockchain::bitcoin
+namespace opentxs::network::blockchain::bitcoin
 {
 auto DecodeSize(
     ByteIterator& it,
@@ -301,4 +301,4 @@ auto CompactSize::Value() const noexcept -> std::uint64_t
 }
 
 CompactSize::~CompactSize() = default;
-}  // namespace opentxs::v1::network::blockchain::bitcoin
+}  // namespace opentxs::network::blockchain::bitcoin

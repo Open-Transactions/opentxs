@@ -10,7 +10,7 @@
 
 #include <cstdint>
 
-namespace opentxs::v1::crypto
+namespace opentxs::crypto
 {
 enum class ParameterType : std::uint8_t {
     invalid = 0,
@@ -18,4 +18,4 @@ enum class ParameterType : std::uint8_t {
     secp256k1 = 2,
     ed25519 = 3
 };
-}  // namespace opentxs::v1::crypto
+}  // namespace opentxs::crypto

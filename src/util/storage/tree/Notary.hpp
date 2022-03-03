@@ -21,8 +21,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace identifier
 {
 class UnitDefinition;
@@ -33,11 +33,11 @@ namespace storage
 class Driver;
 class Tree;
 }  // namespace storage
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::storage
+namespace opentxs::storage
 {
 class Notary final : public Node
 {
@@ -89,4 +89,4 @@ private:
     auto operator=(const Notary&) -> Notary = delete;
     auto operator=(Notary&&) -> Notary = delete;
 };
-}  // namespace opentxs::v1::storage
+}  // namespace opentxs::storage

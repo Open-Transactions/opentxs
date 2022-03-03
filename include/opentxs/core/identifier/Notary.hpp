@@ -15,15 +15,15 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace identifier
 {
 class Notary;
 }  // namespace identifier
 
 using OTNotaryID = Pimpl<identifier::Notary>;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -43,7 +43,7 @@ struct OPENTXS_EXPORT less<opentxs::OTNotaryID> {
 };
 }  // namespace std
 
-namespace opentxs::v1
+namespace opentxs
 {
 OPENTXS_EXPORT auto operator==(
     const OTNotaryID& lhs,
@@ -63,9 +63,9 @@ OPENTXS_EXPORT auto operator<=(
 OPENTXS_EXPORT auto operator>=(
     const OTNotaryID& lhs,
     const opentxs::Identifier& rhs) noexcept -> bool;
-}  // namespace opentxs::v1
+}  // namespace opentxs
 
-namespace opentxs::v1::identifier
+namespace opentxs::identifier
 {
 class OPENTXS_EXPORT Notary : virtual public opentxs::Identifier
 {
@@ -90,4 +90,4 @@ private:
     auto operator=(const Notary&) -> Notary& = delete;
     auto operator=(Notary&&) -> Notary& = delete;
 };
-}  // namespace opentxs::v1::identifier
+}  // namespace opentxs::identifier

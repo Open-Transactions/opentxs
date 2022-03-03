@@ -12,7 +12,7 @@
 #include "api/network/Blockchain.hpp"
 #include "internal/api/network/Factory.hpp"
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto BlockchainNetworkAPINull() noexcept -> api::network::Blockchain::Imp*
 {
@@ -20,9 +20,9 @@ auto BlockchainNetworkAPINull() noexcept -> api::network::Blockchain::Imp*
 
     return std::make_unique<ReturnType::Imp>().release();
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory
 
-namespace opentxs::v1::api::network
+namespace opentxs::api::network
 {
 Blockchain::Blockchain(Imp* imp) noexcept
     : imp_(imp)
@@ -106,4 +106,4 @@ Blockchain::~Blockchain()
         imp_ = nullptr;
     }
 }
-}  // namespace opentxs::v1::api::network
+}  // namespace opentxs::api::network

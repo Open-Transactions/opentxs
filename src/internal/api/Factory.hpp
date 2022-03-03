@@ -12,8 +12,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace api
 {
 namespace internal
@@ -44,11 +44,11 @@ class Flag;
 class Options;
 class PasswordCaller;
 class String;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto Context(
     Flag& running,
@@ -65,4 +65,4 @@ auto FactoryAPI(const api::Crypto& crypto) noexcept
     -> std::unique_ptr<api::Factory>;
 auto Settings(const api::Legacy& legacy, const String& path) noexcept
     -> std::unique_ptr<api::Settings>;
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory

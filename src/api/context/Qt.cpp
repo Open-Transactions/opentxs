@@ -10,7 +10,7 @@
 #include <QObject>
 #include <memory>
 
-namespace opentxs::v1::api::imp
+namespace opentxs::api::imp
 {
 auto Context::get_qt() const noexcept -> std::unique_ptr<QObject>&
 {
@@ -33,4 +33,4 @@ auto Context::QtRootObject() const noexcept -> QObject*
 
     return qt.get();
 }
-}  // namespace opentxs::v1::api::imp
+}  // namespace opentxs::api::imp

@@ -11,7 +11,7 @@
 #include "opentxs/crypto/HashType.hpp"
 #include "opentxs/util/Pimpl.hpp"
 
-namespace opentxs::v1::crypto
+namespace opentxs::crypto
 {
 auto HashingProvider::StringToHashType(const String& inputString)
     -> crypto::HashType
@@ -107,4 +107,4 @@ auto HashingProvider::HashSize(const crypto::HashType hashType) -> std::size_t
 
     return 0;
 }
-}  // namespace opentxs::v1::crypto
+}  // namespace opentxs::crypto

@@ -14,7 +14,7 @@
 
 template class opentxs::Pimpl<opentxs::Flag>;
 
-namespace opentxs::v1
+namespace opentxs
 {
 auto Flag::Factory(const bool state) -> OTFlag
 {
@@ -37,4 +37,4 @@ auto Flag::Toggle() -> bool
     return expected;
 }
 }  // namespace implementation
-}  // namespace opentxs::v1
+}  // namespace opentxs

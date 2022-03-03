@@ -17,7 +17,7 @@
 #include "opentxs/core/identifier/UnitDefinition.hpp"
 #include "opentxs/util/Time.hpp"
 
-namespace opentxs::v1
+namespace opentxs
 {
 namespace api
 {
@@ -246,4 +246,4 @@ private:
 
     OTOffer() = delete;
 };
-}  // namespace opentxs::v1
+}  // namespace opentxs

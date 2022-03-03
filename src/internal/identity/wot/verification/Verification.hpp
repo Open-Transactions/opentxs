@@ -13,17 +13,17 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace api
 {
 class Session;
 }  // namespace api
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::identity::wot::verification::internal
+namespace opentxs::identity::wot::verification::internal
 {
 struct Group : virtual public verification::Group {
     virtual auto API() const noexcept -> const api::Session& = 0;
@@ -67,4 +67,4 @@ struct Set : virtual public verification::Set {
 
     ~Set() override = default;
 };
-}  // namespace opentxs::v1::identity::wot::verification::internal
+}  // namespace opentxs::identity::wot::verification::internal

@@ -15,8 +15,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace blockchain
 {
 namespace crypto
@@ -27,11 +27,11 @@ struct HD;
 }  // namespace internal
 }  // namespace crypto
 }  // namespace blockchain
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::blockchain::crypto
+namespace opentxs::blockchain::crypto
 {
 class OPENTXS_EXPORT HD : virtual public Deterministic
 {
@@ -52,4 +52,4 @@ private:
     auto operator=(const HD&) -> HD& = delete;
     auto operator=(HD&&) -> HD& = delete;
 };
-}  // namespace opentxs::v1::blockchain::crypto
+}  // namespace opentxs::blockchain::crypto

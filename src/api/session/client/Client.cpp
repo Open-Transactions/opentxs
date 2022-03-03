@@ -52,7 +52,7 @@
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Options.hpp"
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto ClientSession(
     const api::Context& parent,
@@ -82,9 +82,9 @@ auto ClientSession(
         return {};
     }
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory
 
-namespace opentxs::v1::api::session::imp
+namespace opentxs::api::session::imp
 {
 Client::Client(
     const api::Context& parent,
@@ -329,4 +329,4 @@ Client::~Client()
     running_.Off();
     Cleanup();
 }
-}  // namespace opentxs::v1::api::session::imp
+}  // namespace opentxs::api::session::imp

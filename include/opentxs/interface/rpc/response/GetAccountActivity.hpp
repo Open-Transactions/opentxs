@@ -15,8 +15,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace proto
 {
 class RPCResponse;
@@ -31,11 +31,11 @@ class GetAccountActivity;
 
 class AccountEvent;
 }  // namespace rpc
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::rpc::response
+namespace opentxs::rpc::response
 {
 class OPENTXS_EXPORT GetAccountActivity final : public Base
 {
@@ -61,4 +61,4 @@ private:
     auto operator=(const GetAccountActivity&) -> GetAccountActivity& = delete;
     auto operator=(GetAccountActivity&&) -> GetAccountActivity& = delete;
 };
-}  // namespace opentxs::v1::rpc::response
+}  // namespace opentxs::rpc::response

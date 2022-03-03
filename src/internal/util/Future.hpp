@@ -11,7 +11,7 @@
 
 #include "opentxs/util/Time.hpp"  // IWYU pragma: keep
 
-namespace opentxs::v1
+namespace opentxs
 {
 template <typename Future>
 auto IsReady(const Future& future) noexcept -> bool
@@ -26,4 +26,4 @@ auto IsReady(const Future& future) noexcept -> bool
         return false;
     }
 }
-}  // namespace opentxs::v1
+}  // namespace opentxs

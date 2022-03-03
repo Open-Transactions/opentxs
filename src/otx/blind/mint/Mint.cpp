@@ -18,7 +18,7 @@
 #include "opentxs/util/Pimpl.hpp"
 #include "otx/blind/mint/Mint.hpp"
 
-namespace opentxs::v1::otx::blind::internal
+namespace opentxs::otx::blind::internal
 {
 Mint::Mint(const api::Session& api) noexcept
     : Contract(api)
@@ -36,9 +36,9 @@ Mint::Mint(
     }())
 {
 }
-}  // namespace opentxs::v1::otx::blind::internal
+}  // namespace opentxs::otx::blind::internal
 
-namespace opentxs::v1::otx::blind
+namespace opentxs::otx::blind
 {
 Mint::Imp::Imp(const api::Session& api) noexcept
     : otx::blind::internal::Mint(api)
@@ -64,9 +64,9 @@ auto Mint::Imp::InstrumentDefinitionID() const
 
     return blank.get();
 }
-}  // namespace opentxs::v1::otx::blind
+}  // namespace opentxs::otx::blind
 
-namespace opentxs::v1::otx::blind
+namespace opentxs::otx::blind
 {
 auto swap(Mint& lhs, Mint& rhs) noexcept -> void { lhs.swap(rhs); }
 
@@ -164,4 +164,4 @@ Mint::~Mint()
         imp_ = nullptr;
     }
 }
-}  // namespace opentxs::v1::otx::blind
+}  // namespace opentxs::otx::blind

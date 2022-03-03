@@ -20,7 +20,7 @@ namespace ba = boost::asio;
 namespace ip = ba::ip;
 using tcp = ip::tcp;
 
-namespace opentxs::v1::blockchain::p2p::internal
+namespace opentxs::blockchain::p2p::internal
 {
 struct Address : virtual public p2p::Address {
     virtual auto clone_internal() const noexcept
@@ -39,9 +39,9 @@ struct Peer : virtual public p2p::Peer {
 
     virtual ~Peer() override = default;
 };
-}  // namespace opentxs::v1::blockchain::p2p::internal
+}  // namespace opentxs::blockchain::p2p::internal
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto BlockchainAddress(
     const api::Session& api,
@@ -58,4 +58,4 @@ auto BlockchainAddress(
     const api::Session& api,
     const proto::BlockchainPeerAddress serialized) noexcept
     -> std::unique_ptr<blockchain::p2p::internal::Address>;
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory

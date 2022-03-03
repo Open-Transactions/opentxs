@@ -21,7 +21,7 @@
 #include "opentxs/blockchain/p2p/Types.hpp"
 #include "opentxs/util/Log.hpp"
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto BitcoinP2PGetcfilters(
     const api::Session& api,
@@ -76,9 +76,9 @@ auto BitcoinP2PGetcfilters(
 
     return new ReturnType(api, network, type, start, stop);
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory
 
-namespace opentxs::v1::blockchain::p2p::bitcoin::message::implementation
+namespace opentxs::blockchain::p2p::bitcoin::message::implementation
 {
 Getcfilters::Getcfilters(
     const api::Session& api,
@@ -132,4 +132,4 @@ auto Getcfilters::payload(AllocateOutput out) const noexcept -> bool
         return false;
     }
 }
-}  // namespace opentxs::v1::blockchain::p2p::bitcoin::message::implementation
+}  // namespace opentxs::blockchain::p2p::bitcoin::message::implementation

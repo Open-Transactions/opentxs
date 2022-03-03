@@ -23,7 +23,7 @@
 #include "opentxs/util/Iterator.hpp"
 #include "opentxs/util/Pimpl.hpp"
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto BlockchainWalletKeys(
     const api::Session& api,
@@ -37,9 +37,9 @@ auto BlockchainWalletKeys(
 
     return std::make_unique<ReturnType>(api, contacts, parent, index, chain);
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory
 
-namespace opentxs::v1::blockchain::crypto::implementation
+namespace opentxs::blockchain::crypto::implementation
 {
 Wallet::Wallet(
     const api::Session& api,
@@ -167,4 +167,4 @@ void Wallet::init() noexcept
         add(lock, nymID, factory(nymID, hdAccounts, pcAccounts));
     }
 }
-}  // namespace opentxs::v1::blockchain::crypto::implementation
+}  // namespace opentxs::blockchain::crypto::implementation

@@ -48,7 +48,7 @@ extern "C" {
 constexpr auto false_byte_ = std::byte{0x0};
 constexpr auto true_byte_ = std::byte{0x1};
 
-namespace opentxs::v1::blockchain::database::common
+namespace opentxs::blockchain::database::common
 {
 struct Database::Imp {
     using SiphashKey = Space;
@@ -661,4 +661,4 @@ auto Database::UpdateMergedContact(const Contact& parent, const Contact& child)
 }
 
 Database::~Database() = default;
-}  // namespace opentxs::v1::blockchain::database::common
+}  // namespace opentxs::blockchain::database::common

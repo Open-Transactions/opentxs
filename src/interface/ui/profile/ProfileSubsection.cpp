@@ -24,7 +24,7 @@
 #include "opentxs/identity/wot/claim/Item.hpp"
 #include "opentxs/util/Container.hpp"
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto ProfileSubsectionWidget(
     const ui::implementation::ProfileSectionInternalInterface& parent,
@@ -38,9 +38,9 @@ auto ProfileSubsectionWidget(
 
     return std::make_shared<ReturnType>(parent, api, rowID, key, custom);
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory
 
-namespace opentxs::v1::ui::implementation
+namespace opentxs::ui::implementation
 {
 ProfileSubsection::ProfileSubsection(
     const ProfileSectionInternalInterface& parent,
@@ -163,4 +163,4 @@ void ProfileSubsection::startup(
     process_group(group);
     finish_startup();
 }
-}  // namespace opentxs::v1::ui::implementation
+}  // namespace opentxs::ui::implementation

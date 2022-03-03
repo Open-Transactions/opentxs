@@ -25,8 +25,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace api
 {
 class Session;
@@ -39,11 +39,11 @@ class Signature;
 }  // namespace proto
 
 class PasswordPrompt;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::otx::implementation
+namespace opentxs::otx::implementation
 {
 class Reply final : public otx::Reply,
                     public opentxs::contract::implementation::Signable
@@ -110,4 +110,4 @@ private:
     auto operator=(const Reply& rhs) -> Reply& = delete;
     auto operator=(Reply&& rhs) -> Reply& = delete;
 };
-}  // namespace opentxs::v1::otx::implementation
+}  // namespace opentxs::otx::implementation

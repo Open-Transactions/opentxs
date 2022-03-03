@@ -22,7 +22,7 @@ template class opentxs::Pimpl<opentxs::network::zeromq::PairEventCallback>;
 
 //"opentxs::network::zeromq::implementation::PairEventCallback::"
 
-namespace opentxs::v1::network::zeromq
+namespace opentxs::network::zeromq
 {
 auto PairEventCallback::Factory(
     zeromq::PairEventCallback::ReceiveCallback callback)
@@ -31,9 +31,9 @@ auto PairEventCallback::Factory(
     return OTZMQPairEventCallback(
         new implementation::PairEventCallback(callback));
 }
-}  // namespace opentxs::v1::network::zeromq
+}  // namespace opentxs::network::zeromq
 
-namespace opentxs::v1::network::zeromq::implementation
+namespace opentxs::network::zeromq::implementation
 {
 PairEventCallback::PairEventCallback(
     zeromq::PairEventCallback::ReceiveCallback callback)
@@ -72,4 +72,4 @@ auto PairEventCallback::Process(zeromq::Message&& message) const noexcept
 }
 
 PairEventCallback::~PairEventCallback() = default;
-}  // namespace opentxs::v1::network::zeromq::implementation
+}  // namespace opentxs::network::zeromq::implementation

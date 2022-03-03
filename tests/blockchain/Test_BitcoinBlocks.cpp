@@ -14,6 +14,7 @@
 #include <memory>
 #include <utility>
 
+#include "1_Internal.hpp"
 #include "Helpers.hpp"
 #include "bip158/Bip158.hpp"
 #include "bip158/bch_filter_1307544.hpp"

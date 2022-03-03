@@ -19,8 +19,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace api
 {
 namespace crypto
@@ -49,11 +49,11 @@ class Frame;
 class Data;
 class OTPassword;
 class Secret;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::api::crypto::imp
+namespace opentxs::api::crypto::imp
 {
 class Hash final : public internal::Hash
 {
@@ -159,4 +159,4 @@ private:
     auto operator=(const Hash&) -> Hash& = delete;
     auto operator=(Hash&&) -> Hash& = delete;
 };
-}  // namespace opentxs::v1::api::crypto::imp
+}  // namespace opentxs::api::crypto::imp

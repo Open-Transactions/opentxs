@@ -21,8 +21,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace api
 {
 namespace network
@@ -47,11 +47,11 @@ namespace zeromq
 class Context;
 }  // namespace zeromq
 }  // namespace network
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::api::network
+namespace opentxs::api::network
 {
 class OPENTXS_EXPORT Asio
 {
@@ -131,4 +131,4 @@ private:
     auto operator=(const Asio&) -> Asio& = delete;
     auto operator=(Asio&&) -> Asio& = delete;
 };
-}  // namespace opentxs::v1::api::network
+}  // namespace opentxs::api::network

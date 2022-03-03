@@ -10,17 +10,17 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace proto
 {
 class StorageBlockchainTransactions;
 }  // namespace proto
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::proto
+namespace opentxs::proto
 {
 auto CheckProto_1(
     const StorageBlockchainTransactions& transactions,
@@ -44,4 +44,4 @@ auto CheckProto_17(const StorageBlockchainTransactions&, const bool) -> bool;
 auto CheckProto_18(const StorageBlockchainTransactions&, const bool) -> bool;
 auto CheckProto_19(const StorageBlockchainTransactions&, const bool) -> bool;
 auto CheckProto_20(const StorageBlockchainTransactions&, const bool) -> bool;
-}  // namespace opentxs::v1::proto
+}  // namespace opentxs::proto

@@ -17,7 +17,7 @@
 #include "serialization/protobuf/BlockchainBlockHeader.pb.h"
 #include "serialization/protobuf/verify/Check.hpp"
 
-namespace opentxs::v1::proto
+namespace opentxs::proto
 {
 auto CheckProto_1(const BlockchainBlockHeader& input, const bool silent) -> bool
 {
@@ -168,4 +168,4 @@ auto CheckProto_20(const BlockchainBlockHeader& input, const bool silent)
 {
     UNDEFINED_VERSION(20)
 }
-}  // namespace opentxs::v1::proto
+}  // namespace opentxs::proto

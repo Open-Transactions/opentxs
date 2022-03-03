@@ -5,7 +5,7 @@
 
 #include "internal/serialization/protobuf/verify/VerifyBlockchain.hpp"  // IWYU pragma: associated
 
-namespace opentxs::v1::proto
+namespace opentxs::proto
 {
 auto Bip47ChainAllowedBip47Channel() noexcept -> const VersionMap&
 {
@@ -267,4 +267,4 @@ auto HDAccountAllowedBlockchainHDAccountData() noexcept -> const VersionMap&
 
     return output;
 }
-}  // namespace opentxs::v1::proto
+}  // namespace opentxs::proto

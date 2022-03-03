@@ -25,8 +25,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace api
 {
 namespace session
@@ -61,11 +61,11 @@ class NumList;
 class OTTransaction;
 class PasswordPrompt;
 class String;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1
+namespace opentxs
 {
 using listOfItems = UnallocatedList<std::shared_ptr<Item>>;
 
@@ -283,4 +283,4 @@ private:  // Private prevents erroneous use by other classes.
 
     Item() = delete;
 };
-}  // namespace opentxs::v1
+}  // namespace opentxs

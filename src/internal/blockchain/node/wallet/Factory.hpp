@@ -18,8 +18,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace api
 {
 class Session;
@@ -36,11 +36,11 @@ class FeeSource;
 }  // namespace wallet
 }  // namespace node
 }  // namespace blockchain
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto FeeOracle(
     const api::Session& api,
@@ -58,4 +58,4 @@ auto BTCFeeSources(
     const std::string_view endpoint,
     alloc::Resource* alloc = nullptr) noexcept
     -> ForwardList<blockchain::node::wallet::FeeSource>;
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory

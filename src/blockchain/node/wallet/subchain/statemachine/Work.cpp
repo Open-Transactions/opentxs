@@ -33,7 +33,7 @@
 #include "opentxs/util/Time.hpp"
 #include "util/ScopeGuard.hpp"
 
-namespace opentxs::v1::blockchain::node::wallet
+namespace opentxs::blockchain::node::wallet
 {
 Work::Work(const block::Position& position, Batch& batch) noexcept
     : id_(NextCookie())
@@ -153,4 +153,4 @@ auto Work::NextCookie() noexcept -> Cookie
 }
 
 Work::~Work() = default;
-}  // namespace opentxs::v1::blockchain::node::wallet
+}  // namespace opentxs::blockchain::node::wallet

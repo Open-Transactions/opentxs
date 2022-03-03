@@ -43,7 +43,7 @@
 
 #define OT_BITCOIN_BLOCK_HEADER_SIZE 80
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto BitcoinBlockHeader(
     const api::Session& api,
@@ -209,9 +209,9 @@ auto BitcoinBlockHeader(
         return {};
     }
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory
 
-namespace opentxs::v1::blockchain::block::bitcoin::implementation
+namespace opentxs::blockchain::block::bitcoin::implementation
 {
 const VersionNumber Header::local_data_version_{1};
 const VersionNumber Header::subversion_default_{1};
@@ -632,4 +632,4 @@ auto Header::Target() const noexcept -> OTNumericHash
 {
     return OTNumericHash{factory::NumericHashNBits(nbits_)};
 }
-}  // namespace opentxs::v1::blockchain::block::bitcoin::implementation
+}  // namespace opentxs::blockchain::block::bitcoin::implementation

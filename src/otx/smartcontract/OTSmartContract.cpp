@@ -556,7 +556,7 @@ receipts directly in response to their server messages, they can still compare
 various sequence numbers. Hm.
  */
 
-namespace opentxs::v1
+namespace opentxs
 {
 
 // TODO: Finish up Smart Contracts (this file.)
@@ -6117,4 +6117,4 @@ auto OTSmartContract::MoveFunds(
 }
 
 OTSmartContract::~OTSmartContract() { Release_SmartContract(); }
-}  // namespace opentxs::v1
+}  // namespace opentxs

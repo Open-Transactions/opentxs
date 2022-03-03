@@ -21,8 +21,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace identity
 {
 namespace wot
@@ -38,11 +38,11 @@ namespace proto
 {
 class ContactSection;
 }  // namespace proto
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::identity::wot::claim
+namespace opentxs::identity::wot::claim
 {
 class OPENTXS_EXPORT Group
 {
@@ -89,4 +89,4 @@ private:
     auto operator=(const Group&) -> Group& = delete;
     auto operator=(Group&&) -> Group& = delete;
 };
-}  // namespace opentxs::v1::identity::wot::claim
+}  // namespace opentxs::identity::wot::claim

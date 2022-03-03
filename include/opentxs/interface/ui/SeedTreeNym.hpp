@@ -13,7 +13,7 @@
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/SharedPimpl.hpp"
 
-namespace opentxs::v1::ui
+namespace opentxs::ui
 {
 class OPENTXS_EXPORT SeedTreeNym : virtual public ListRow
 {
@@ -33,4 +33,4 @@ private:
     auto operator=(const SeedTreeNym&) -> SeedTreeNym& = delete;
     auto operator=(SeedTreeNym&&) -> SeedTreeNym& = delete;
 };
-}  // namespace opentxs::v1::ui
+}  // namespace opentxs::ui

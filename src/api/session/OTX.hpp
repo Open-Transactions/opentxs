@@ -52,8 +52,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace api
 {
 namespace session
@@ -93,11 +93,11 @@ class StateMachine;
 }  // namespace otx
 
 class OTClient;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::api::session::imp
+namespace opentxs::api::session::imp
 {
 class OTX final : virtual public internal::OTX, Lockable
 {
@@ -468,4 +468,4 @@ private:
     auto operator=(const OTX&) -> OTX& = delete;
     auto operator=(OTX&&) -> OTX& = delete;
 };
-}  // namespace opentxs::v1::api::session::imp
+}  // namespace opentxs::api::session::imp

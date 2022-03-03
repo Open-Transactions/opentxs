@@ -17,7 +17,7 @@
 #error polymorphic allocator support is required
 #endif
 
-namespace opentxs::v1::alloc
+namespace opentxs::alloc
 {
 #if __has_include(<memory_resource>)
 template <typename T>
@@ -31,4 +31,4 @@ using Resource = std::experimental::pmr::memory_resource;
 using Default = PMR<std::byte>;
 auto System() noexcept -> Resource*;
 auto Null() noexcept -> Resource*;
-}  // namespace opentxs::v1::alloc
+}  // namespace opentxs::alloc

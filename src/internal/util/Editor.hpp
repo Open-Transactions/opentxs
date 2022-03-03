@@ -13,7 +13,7 @@
 #include "opentxs/Version.hpp"
 #include "opentxs/util/Log.hpp"
 
-namespace opentxs::v1
+namespace opentxs
 {
 template <class ChildType, class MutexType = std::mutex>
 class Editor
@@ -101,4 +101,4 @@ private:
     Editor(const Editor&) = delete;
     auto operator=(const Editor&) -> Editor& = delete;
 };  // class Editor
-}  // namespace opentxs::v1
+}  // namespace opentxs

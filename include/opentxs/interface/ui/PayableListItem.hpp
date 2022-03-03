@@ -14,19 +14,19 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace ui
 {
 class PayableListItem;
 }  // namespace ui
 
 using OTUIPayableListItem = SharedPimpl<ui::PayableListItem>;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::ui
+namespace opentxs::ui
 {
 class OPENTXS_EXPORT PayableListItem : virtual public ContactListItem
 {
@@ -44,4 +44,4 @@ private:
     auto operator=(const PayableListItem&) -> PayableListItem& = delete;
     auto operator=(PayableListItem&&) -> PayableListItem& = delete;
 };
-}  // namespace opentxs::v1::ui
+}  // namespace opentxs::ui

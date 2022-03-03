@@ -12,6 +12,7 @@
 #include <thread>
 #include <utility>
 
+#include "internal/api/crypto/blockchain/Types.hpp"
 #include "internal/identity/wot/claim/Types.hpp"
 #include "internal/serialization/protobuf/verify/VerifyContacts.hpp"
 #include "internal/util/LogMacros.hpp"
@@ -26,7 +27,6 @@
 #include "opentxs/blockchain/Blockchain.hpp"
 #include "opentxs/blockchain/BlockchainType.hpp"
 #include "opentxs/blockchain/Types.hpp"
-#include "opentxs/core/Data.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/identity/wot/claim/Types.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
@@ -38,11 +38,10 @@
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Pimpl.hpp"
-#include "opentxs/util/WorkType.hpp"
 
 namespace zmq = opentxs::network::zeromq;
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto UnitListModel(
     const api::session::Client& api,
@@ -54,22 +53,20 @@ auto UnitListModel(
 
     return std::make_unique<ReturnType>(api, nymID, cb);
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory
 
-namespace opentxs::v1::ui::implementation
+namespace opentxs::ui::implementation
 {
 UnitList::UnitList(
     const api::session::Client& api,
     const identifier::Nym& nymID,
     const SimpleCallback& cb) noexcept
     : UnitListList(api, nymID, cb, false)
-#if OT_BLOCKCHAIN
     , blockchain_balance_cb_(zmq::ListenCallback::Factory(
           [this](const auto& in) { process_blockchain_balance(in); }))
     , blockchain_balance_(api_.Network().ZeroMQ().DealerSocket(
           blockchain_balance_cb_,
           zmq::socket::Direction::Connect))
-#endif  // OT_BLOCKCHAIN
     , listeners_{
           {api_.Endpoints().AccountUpdate().data(),
            new MessageProcessor<UnitList>(&UnitList::process_account)}}
@@ -107,7 +104,6 @@ auto UnitList::process_account(const Identifier& id) noexcept -> void
     process_unit(api_.Storage().AccountUnit(id));
 }
 
-#if OT_BLOCKCHAIN
 auto UnitList::process_blockchain_balance(const Message& message) noexcept
     -> void
 {
@@ -126,7 +122,6 @@ auto UnitList::process_blockchain_balance(const Message& message) noexcept
         return;
     }
 }
-#endif  // OT_BLOCKCHAIN
 
 auto UnitList::process_unit(const UnitListRowID& id) noexcept -> void
 {
@@ -134,7 +129,6 @@ auto UnitList::process_unit(const UnitListRowID& id) noexcept -> void
     add_item(id, proto::TranslateItemType(translate(UnitToClaim(id))), custom);
 }
 
-#if OT_BLOCKCHAIN
 auto UnitList::setup_listeners(const ListenerDefinitions& definitions) noexcept
     -> void
 {
@@ -144,7 +138,6 @@ auto UnitList::setup_listeners(const ListenerDefinitions& definitions) noexcept
 
     OT_ASSERT(connected);
 }
-#endif  // OT_BLOCKCHAIN
 
 auto UnitList::startup() noexcept -> void
 {
@@ -154,22 +147,20 @@ auto UnitList::startup() noexcept -> void
 
     for (const auto& id : accounts) { process_account(id); }
 
-#if OT_BLOCKCHAIN
     for (const auto& chain : blockchain::SupportedChains()) {
         if (0 < api_.Crypto()
                     .Blockchain()
                     .SubaccountList(primary_id_, chain)
                     .size()) {
             blockchain_balance_->Send([&] {
-                auto work = network::zeromq::tagged_message(
-                    WorkType::BlockchainBalance);
+                using Job = api::crypto::blockchain::BalanceOracleJobs;
+                auto work = network::zeromq::tagged_message(Job::registration);
                 work.AddFrame(chain);
 
                 return work;
             }());
         }
     }
-#endif  // OT_BLOCKCHAIN
 
     finish_startup();
 }
@@ -178,4 +169,4 @@ UnitList::~UnitList()
 {
     for (auto& it : listeners_) { delete it.second; }
 }
-}  // namespace opentxs::v1::ui::implementation
+}  // namespace opentxs::ui::implementation

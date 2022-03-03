@@ -46,7 +46,7 @@
 #include "util/storage/tree/Thread.hpp"  // IWYU pragma: keep
 #include "util/storage/tree/Threads.hpp"
 
-namespace opentxs::v1::storage
+namespace opentxs::storage
 {
 template <>
 void Nym::_save(
@@ -929,4 +929,4 @@ auto Nym::workflows() const -> storage::PaymentWorkflows*
 }
 
 Nym::~Nym() = default;
-}  // namespace opentxs::v1::storage
+}  // namespace opentxs::storage

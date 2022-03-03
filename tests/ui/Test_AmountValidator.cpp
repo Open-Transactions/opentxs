@@ -16,6 +16,7 @@
 #include "integration/Helpers.hpp"
 #include "internal/api/session/Client.hpp"
 #include "internal/otx/client/Pair.hpp"
+#include "opentxs/Version.hpp"
 #include "opentxs/api/Context.hpp"
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/OTX.hpp"

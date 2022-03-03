@@ -19,8 +19,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace api
 {
 class Session;
@@ -36,11 +36,11 @@ namespace identifier
 class Nym;
 class UnitDefinition;
 }  // namespace identifier
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::otx::client
+namespace opentxs::otx::client
 {
 class Issuer
 {
@@ -123,4 +123,4 @@ private:
     auto operator=(const Issuer&) -> Issuer& = delete;
     auto operator=(Issuer&&) -> Issuer& = delete;
 };
-}  // namespace opentxs::v1::otx::client
+}  // namespace opentxs::otx::client

@@ -19,7 +19,7 @@
 #include "serialization/protobuf/ZMQEnums.pb.h"
 #include "util/Container.hpp"
 
-namespace opentxs::v1::contract::peer::internal
+namespace opentxs::contract::peer::internal
 {
 PairEvent::PairEvent(const ReadView view)
     : PairEvent(proto::Factory<proto::PairEvent>(view))
@@ -43,9 +43,9 @@ PairEvent::PairEvent(
     , issuer_(issuer)
 {
 }
-}  // namespace opentxs::v1::contract::peer::internal
+}  // namespace opentxs::contract::peer::internal
 
-namespace opentxs::v1::contract::peer
+namespace opentxs::contract::peer
 {
 using ConnectionInfoTypeMap = robin_hood::
     unordered_flat_map<ConnectionInfoType, proto::ConnectionInfoType>;
@@ -73,9 +73,9 @@ auto paireventtype_map() noexcept -> const PairEventTypeMap&;
 auto peerobjecttype_map() noexcept -> const PeerObjectTypeMap&;
 auto peerrequesttype_map() noexcept -> const PeerRequestTypeMap&;
 auto secrettype_map() noexcept -> const SecretTypeMap&;
-}  // namespace opentxs::v1::contract::peer
+}  // namespace opentxs::contract::peer
 
-namespace opentxs::v1::contract::peer
+namespace opentxs::contract::peer
 {
 auto connectioninfotype_map() noexcept -> const ConnectionInfoTypeMap&
 {
@@ -143,9 +143,9 @@ auto secrettype_map() noexcept -> const SecretTypeMap&
 
     return map;
 }
-}  // namespace opentxs::v1::contract::peer
+}  // namespace opentxs::contract::peer
 
-namespace opentxs::v1
+namespace opentxs
 {
 auto translate(const contract::peer::ConnectionInfoType in) noexcept
     -> proto::ConnectionInfoType
@@ -275,4 +275,4 @@ auto translate(const proto::SecretType in) noexcept
         return contract::peer::SecretType::Error;
     }
 }
-}  // namespace opentxs::v1
+}  // namespace opentxs

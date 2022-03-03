@@ -31,7 +31,7 @@
 #include "serialization/protobuf/VerificationSet.pb.h"  // IWYU pragma: keep
 #include "serialization/protobuf/verify/Check.hpp"
 
-namespace opentxs::v1::proto
+namespace opentxs::proto
 {
 
 auto CheckProto_1(
@@ -565,4 +565,4 @@ auto CheckProto_20(
 {
     UNDEFINED_VERSION(20)
 }
-}  // namespace opentxs::v1::proto
+}  // namespace opentxs::proto

@@ -48,7 +48,7 @@
 // This function also assumes that once you are done, you will call
 // ClearTemporaryPointers().
 //
-namespace opentxs::v1
+namespace opentxs
 {
 OTAgent::OTAgent(const api::session::Wallet& wallet)
     : wallet_{wallet}
@@ -1052,4 +1052,4 @@ OTAgent::~OTAgent()
     m_pForParty = nullptr;  // The agent probably has a pointer to the party it
                             // acts on behalf of.
 }
-}  // namespace opentxs::v1
+}  // namespace opentxs

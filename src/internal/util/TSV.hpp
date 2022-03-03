@@ -5,11 +5,11 @@
 
 #pragma once
 
-namespace opentxs::v1
+namespace opentxs
 {
 template <typename Input>
 constexpr auto tsv(const Input& in) noexcept -> ReadView
 {
     return {reinterpret_cast<const char*>(&in), sizeof(in)};
 }
-}  // namespace opentxs::v1
+}  // namespace opentxs

@@ -11,17 +11,17 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace proto
 {
 class Purse;
 }  // namespace proto
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::proto
+namespace opentxs::proto
 {
 auto CheckProto_1(const Purse& input, const bool silent) -> bool;
 auto CheckProto_1(
@@ -123,4 +123,4 @@ auto CheckProto_20(
     const Purse& input,
     const bool silent,
     UnallocatedCString& value) -> bool;
-}  // namespace opentxs::v1::proto
+}  // namespace opentxs::proto

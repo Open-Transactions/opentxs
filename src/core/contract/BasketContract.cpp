@@ -28,7 +28,7 @@
 #include "serialization/protobuf/Signature.pb.h"
 #include "serialization/protobuf/UnitDefinition.pb.h"
 
-namespace opentxs::v1
+namespace opentxs
 {
 // Unlike the other factory functions, this one does not produce a complete,
 // valid contract. This is used on the client side to produce a template for
@@ -84,9 +84,9 @@ auto Factory::BasketContract(
 
     return std::move(output);
 }
-}  // namespace opentxs::v1
+}  // namespace opentxs
 
-namespace opentxs::v1::contract::unit
+namespace opentxs::contract::unit
 {
 auto Basket::CalculateBasketID(
     const api::Session& api,
@@ -145,9 +145,9 @@ auto Basket::FinalizeTemplate(
 
     return false;
 }
-}  // namespace opentxs::v1::contract::unit
+}  // namespace opentxs::contract::unit
 
-namespace opentxs::v1::contract::unit::implementation
+namespace opentxs::contract::unit::implementation
 {
 Basket::Basket(
     const api::Session& api,
@@ -238,4 +238,4 @@ auto Basket::BasketIDVersion(const Lock& lock) const -> SerializedType
 
     return contract;
 }
-}  // namespace opentxs::v1::contract::unit::implementation
+}  // namespace opentxs::contract::unit::implementation

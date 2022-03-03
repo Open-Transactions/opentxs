@@ -16,8 +16,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace api
 {
 namespace session
@@ -50,11 +50,11 @@ class Server;
 }  // namespace server
 
 class Options;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::api::session
+namespace opentxs::api::session
 {
 class OPENTXS_EXPORT Notary : virtual public api::Session
 {
@@ -98,4 +98,4 @@ private:
     auto operator=(const Notary&) -> Notary& = delete;
     auto operator=(Notary&&) -> Notary& = delete;
 };
-}  // namespace opentxs::v1::api::session
+}  // namespace opentxs::api::session

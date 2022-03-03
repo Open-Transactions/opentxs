@@ -19,7 +19,7 @@
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 
-namespace opentxs::v1::api::network::asio
+namespace opentxs::api::network::asio
 {
 struct Acceptors::Imp {
     auto Start(
@@ -123,4 +123,4 @@ Acceptors::~Acceptors()
         imp_ = nullptr;
     }
 }
-}  // namespace opentxs::v1::api::network::asio
+}  // namespace opentxs::api::network::asio

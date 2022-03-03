@@ -10,17 +10,17 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace proto
 {
 class TaggedKey;
 }  // namespace proto
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::proto
+namespace opentxs::proto
 {
 auto CheckProto_1(const TaggedKey& data, const bool silent) -> bool;
 auto CheckProto_2(const TaggedKey& data, const bool silent) -> bool;
@@ -42,4 +42,4 @@ auto CheckProto_17(const TaggedKey& data, const bool silent) -> bool;
 auto CheckProto_18(const TaggedKey& data, const bool silent) -> bool;
 auto CheckProto_19(const TaggedKey& data, const bool silent) -> bool;
 auto CheckProto_20(const TaggedKey& data, const bool silent) -> bool;
-}  // namespace opentxs::v1::proto
+}  // namespace opentxs::proto

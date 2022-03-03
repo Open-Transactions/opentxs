@@ -20,8 +20,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace identity
 {
 namespace credential
@@ -41,11 +41,11 @@ class VerificationSet;
 }  // namespace proto
 
 class Secret;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::identity
+namespace opentxs::identity
 {
 class OPENTXS_EXPORT Authority
 {
@@ -164,4 +164,4 @@ private:
     auto operator=(const Authority&) -> Authority& = delete;
     auto operator=(Authority&&) -> Authority& = delete;
 };
-}  // namespace opentxs::v1::identity
+}  // namespace opentxs::identity

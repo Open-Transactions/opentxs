@@ -21,17 +21,17 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace api
 {
 class Session;
 }  // namespace api
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1
+namespace opentxs
 {
 namespace blockchain
 {
@@ -338,7 +338,7 @@ using SendOutcome = std::pair<SendResult, block::pTxid>;
 }  // namespace blockchain
 
 auto print(const blockchain::block::Position&) noexcept -> UnallocatedCString;
-}  // namespace opentxs::v1
+}  // namespace opentxs
 
 namespace std
 {

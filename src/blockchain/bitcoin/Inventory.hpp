@@ -15,7 +15,7 @@
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 
-namespace opentxs::v1::blockchain::bitcoin
+namespace opentxs::blockchain::bitcoin
 {
 class Inventory
 {
@@ -80,4 +80,4 @@ private:
     auto operator=(const Inventory&) -> Inventory& = delete;
     auto operator=(Inventory&&) -> Inventory& = delete;
 };
-}  // namespace opentxs::v1::blockchain::bitcoin
+}  // namespace opentxs::blockchain::bitcoin

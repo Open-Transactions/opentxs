@@ -24,7 +24,7 @@
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 
-namespace opentxs::v1::api::network::blockchain
+namespace opentxs::api::network::blockchain
 {
 StartupPublisher::StartupPublisher(
     const api::session::Endpoints& endpoints,
@@ -79,4 +79,4 @@ StartupPublisher::StartupPublisher(
 }
 
 StartupPublisher::~StartupPublisher() { handle_.Release(); }
-}  // namespace opentxs::v1::api::network::blockchain
+}  // namespace opentxs::api::network::blockchain

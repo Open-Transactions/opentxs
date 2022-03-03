@@ -12,8 +12,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace proto
 {
 class RPCResponse;
@@ -35,11 +35,11 @@ class ListNyms;
 class SendPayment;
 }  // namespace response
 }  // namespace rpc
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::rpc::response
+namespace opentxs::rpc::response
 {
 struct Base::Imp {
     const Base* parent_;
@@ -104,4 +104,4 @@ private:
     auto operator=(const Imp&) -> Imp& = delete;
     auto operator=(Imp&&) -> Imp& = delete;
 };
-}  // namespace opentxs::v1::rpc::response
+}  // namespace opentxs::rpc::response

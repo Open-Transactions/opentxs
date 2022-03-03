@@ -17,6 +17,7 @@
 #include "Helpers.hpp"
 #include "internal/util/Signals.hpp"
 #include "opentxs/OT.hpp"
+#include "opentxs/Version.hpp"
 #include "opentxs/api/Context.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"

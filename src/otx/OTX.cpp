@@ -18,7 +18,7 @@
 #include "serialization/protobuf/OTXEnums.pb.h"
 #include "util/Container.hpp"
 
-namespace opentxs::v1::otx
+namespace opentxs::otx
 {
 using ConsensusTypeMap =
     robin_hood::unordered_flat_map<ConsensusType, proto::ConsensusType>;
@@ -46,9 +46,9 @@ auto lastreplystatus_map() noexcept -> const LastReplyStatusMap&;
 auto otxpushtype_map() noexcept -> const OTXPushTypeMap&;
 auto serverreplytype_map() noexcept -> const ServerReplyTypeMap&;
 auto serverrequesttype_map() noexcept -> const ServerRequestTypeMap&;
-}  // namespace opentxs::v1::otx
+}  // namespace opentxs::otx
 
-namespace opentxs::v1::otx
+namespace opentxs::otx
 {
 auto consensustype_map() noexcept -> const ConsensusTypeMap&
 {
@@ -109,9 +109,9 @@ auto serverrequesttype_map() noexcept -> const ServerRequestTypeMap&
 
     return map;
 }
-}  // namespace opentxs::v1::otx
+}  // namespace opentxs::otx
 
-namespace opentxs::v1
+namespace opentxs
 {
 auto translate(const otx::ConsensusType in) noexcept -> proto::ConsensusType
 {
@@ -229,4 +229,4 @@ auto translate(const proto::ServerRequestType in) noexcept
         return otx::ServerRequestType::Error;
     }
 }
-}  // namespace opentxs::v1
+}  // namespace opentxs

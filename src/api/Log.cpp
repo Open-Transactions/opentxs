@@ -33,7 +33,7 @@ extern "C" {
 
 namespace zmq = opentxs::network::zeromq;
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto Log(const zmq::Context& zmq, const UnallocatedCString& endpoint) noexcept
     -> std::unique_ptr<api::internal::Log>
@@ -43,9 +43,9 @@ auto Log(const zmq::Context& zmq, const UnallocatedCString& endpoint) noexcept
 
     return std::make_unique<ReturnType>(zmq, endpoint);
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory
 
-namespace opentxs::v1::api::imp
+namespace opentxs::api::imp
 {
 Log::Log(const zmq::Context& zmq, const UnallocatedCString& endpoint)
     : callback_(opentxs::network::zeromq::ListenCallback::Factory(
@@ -135,4 +135,4 @@ void Log::print_android(
     }
 }
 #endif
-}  // namespace opentxs::v1::api::imp
+}  // namespace opentxs::api::imp

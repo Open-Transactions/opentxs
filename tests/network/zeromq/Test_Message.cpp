@@ -7,6 +7,7 @@
 #include <cstddef>
 #include <iterator>
 
+#include "opentxs/Version.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
 #include "opentxs/network/zeromq/message/FrameIterator.hpp"

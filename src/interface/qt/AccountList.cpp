@@ -17,7 +17,7 @@
 #include "opentxs/util/Container.hpp"
 #include "util/Polarity.hpp"  // IWYU pragma: keep
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto AccountListQtModel(ui::internal::AccountList& parent) noexcept
     -> std::unique_ptr<ui::AccountListQt>
@@ -26,9 +26,9 @@ auto AccountListQtModel(ui::internal::AccountList& parent) noexcept
 
     return std::make_unique<ReturnType>(parent);
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory
 
-namespace opentxs::v1::ui
+namespace opentxs::ui
 {
 struct AccountListQt::Imp {
     internal::AccountList& parent_;
@@ -67,9 +67,9 @@ AccountListQt::~AccountListQt()
         imp_ = nullptr;
     }
 }
-}  // namespace opentxs::v1::ui
+}  // namespace opentxs::ui
 
-namespace opentxs::v1::ui::implementation
+namespace opentxs::ui::implementation
 {
 auto AccountListItem::qt_data(const int column, const int role, QVariant& out)
     const noexcept -> void
@@ -129,4 +129,4 @@ auto AccountListItem::qt_data(const int column, const int role, QVariant& out)
         }
     }
 }
-}  // namespace opentxs::v1::ui::implementation
+}  // namespace opentxs::ui::implementation

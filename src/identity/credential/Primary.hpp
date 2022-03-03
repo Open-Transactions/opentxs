@@ -25,8 +25,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace api
 {
 class Session;
@@ -57,11 +57,11 @@ class Signature;
 class Factory;
 class Identifier;
 class PasswordPrompt;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::identity::credential::implementation
+namespace opentxs::identity::credential::implementation
 {
 class Primary final : virtual public credential::internal::Primary,
                       credential::implementation::Key
@@ -129,4 +129,4 @@ private:
     auto operator=(const Primary&) -> Primary& = delete;
     auto operator=(Primary&&) -> Primary& = delete;
 };
-}  // namespace opentxs::v1::identity::credential::implementation
+}  // namespace opentxs::identity::credential::implementation

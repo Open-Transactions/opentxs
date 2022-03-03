@@ -7,9 +7,9 @@
 #include "1_Internal.hpp"             // IWYU pragma: associated
 #include "otx/blind/lucre/Lucre.hpp"  // IWYU pragma: associated
 
-namespace opentxs::v1::otx::blind
+namespace opentxs::otx::blind
 {
 auto LucreDumper::IsEnabled() noexcept -> bool { return @OT_LUCRE_ENABLED@; }
 
 auto LucreDumper::init() noexcept -> void { @OT_LUCRE_INIT@(); }
-}  // namespace opentxs::v1::otx::blind
+}  // namespace opentxs::otx::blind

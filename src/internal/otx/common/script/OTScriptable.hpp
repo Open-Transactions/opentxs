@@ -17,8 +17,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace api
 {
 class Session;
@@ -53,11 +53,11 @@ class OTScript;
 class OTVariable;
 class PasswordPrompt;
 class Tag;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1
+namespace opentxs
 {
 using mapOfBylaws = UnallocatedMap<UnallocatedCString, OTBylaw*>;
 using mapOfClauses = UnallocatedMap<UnallocatedCString, OTClause*>;
@@ -407,4 +407,4 @@ private:
 
     OTScriptable() = delete;
 };
-}  // namespace opentxs::v1
+}  // namespace opentxs

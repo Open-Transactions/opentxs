@@ -22,7 +22,7 @@
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Pimpl.hpp"
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto Work(const UnallocatedCString& hex) -> blockchain::Work*
 {
@@ -83,9 +83,9 @@ auto Work(const blockchain::Type chain, const blockchain::NumericHash& input)
 
     return new ReturnType(std::move(value));
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory
 
-namespace opentxs::v1
+namespace opentxs
 {
 auto operator==(const OTWork& lhs, const blockchain::Work& rhs) noexcept -> bool
 {
@@ -122,9 +122,9 @@ auto operator+(const OTWork& lhs, const blockchain::Work& rhs) noexcept
 {
     return lhs.get() + rhs;
 }
-}  // namespace opentxs::v1
+}  // namespace opentxs
 
-namespace opentxs::v1::blockchain::implementation
+namespace opentxs::blockchain::implementation
 {
 Work::Work(Type&& data) noexcept
     : blockchain::Work()
@@ -207,4 +207,4 @@ auto Work::asHex() const noexcept -> UnallocatedCString
 
     return opentxs::Data::Factory(bytes.data(), bytes.size())->asHex();
 }
-}  // namespace opentxs::v1::blockchain::implementation
+}  // namespace opentxs::blockchain::implementation

@@ -22,7 +22,7 @@
 #include "opentxs/crypto/HashType.hpp"
 #include "opentxs/util/Pimpl.hpp"
 
-namespace opentxs::v1
+namespace opentxs
 {
 auto blockchain_thread_item_id(
     const api::Crypto& crypto,
@@ -135,4 +135,4 @@ auto print(const blockchain::crypto::Key& key) noexcept -> UnallocatedCString
 
     return account + " / " + print(subchain) + " / " + std::to_string(index);
 }
-}  // namespace opentxs::v1
+}  // namespace opentxs

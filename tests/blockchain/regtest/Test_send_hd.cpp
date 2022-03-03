@@ -118,7 +118,7 @@ TEST_F(Regtest_fixture_hd, account_activity_initial)
         {},
     };
 
-    ASSERT_TRUE(wait_for_counter(account_activity_));
+    EXPECT_TRUE(wait_for_counter(account_activity_));
     EXPECT_TRUE(check_account_activity(alice_, id, expected));
     EXPECT_TRUE(check_account_activity_qt(alice_, id, expected));
     EXPECT_TRUE(check_account_activity_rpc(alice_, id, expected));
@@ -140,7 +140,7 @@ TEST_F(Regtest_fixture_hd, account_list_initial)
          u8"0 units"},
     }};
 
-    ASSERT_TRUE(wait_for_counter(account_list_));
+    EXPECT_TRUE(wait_for_counter(account_list_));
     EXPECT_TRUE(check_account_list(alice_, expected));
     EXPECT_TRUE(check_account_list_qt(alice_, expected));
     EXPECT_TRUE(check_account_list_rpc(alice_, expected));
@@ -234,7 +234,7 @@ TEST_F(Regtest_fixture_hd, account_activity_immature)
         },
     };
 
-    ASSERT_TRUE(wait_for_counter(account_activity_));
+    EXPECT_TRUE(wait_for_counter(account_activity_));
     EXPECT_TRUE(check_account_activity(alice_, id, expected));
     EXPECT_TRUE(check_account_activity_qt(alice_, id, expected));
     EXPECT_TRUE(check_account_activity_rpc(alice_, id, expected));
@@ -256,7 +256,7 @@ TEST_F(Regtest_fixture_hd, account_list_immature)
          u8"0 units"},
     }};
 
-    ASSERT_TRUE(wait_for_counter(account_list_));
+    EXPECT_TRUE(wait_for_counter(account_list_));
     EXPECT_TRUE(check_account_list(alice_, expected));
     EXPECT_TRUE(check_account_list_qt(alice_, expected));
     EXPECT_TRUE(check_account_list_rpc(alice_, expected));
@@ -322,7 +322,7 @@ TEST_F(Regtest_fixture_hd, account_activity_one_block_before_maturation)
         },
     };
 
-    ASSERT_TRUE(wait_for_counter(account_activity_));
+    EXPECT_TRUE(wait_for_counter(account_activity_));
     EXPECT_TRUE(check_account_activity(alice_, id, expected));
     EXPECT_TRUE(check_account_activity_qt(alice_, id, expected));
     EXPECT_TRUE(check_account_activity_rpc(alice_, id, expected));
@@ -344,7 +344,7 @@ TEST_F(Regtest_fixture_hd, account_list_one_block_before_maturation)
          u8"0 units"},
     }};
 
-    ASSERT_TRUE(wait_for_counter(account_list_));
+    EXPECT_TRUE(wait_for_counter(account_list_));
     EXPECT_TRUE(check_account_list(alice_, expected));
     EXPECT_TRUE(check_account_list_qt(alice_, expected));
     EXPECT_TRUE(check_account_list_rpc(alice_, expected));
@@ -447,7 +447,7 @@ TEST_F(Regtest_fixture_hd, account_activity_mature)
         },
     };
 
-    ASSERT_TRUE(wait_for_counter(account_activity_));
+    EXPECT_TRUE(wait_for_counter(account_activity_));
     EXPECT_TRUE(check_account_activity(alice_, id, expected));
     EXPECT_TRUE(check_account_activity_qt(alice_, id, expected));
     EXPECT_TRUE(check_account_activity_rpc(alice_, id, expected));
@@ -469,7 +469,7 @@ TEST_F(Regtest_fixture_hd, account_list_mature)
          u8"100.000\u202F049\u202F5 units"},
     }};
 
-    ASSERT_TRUE(wait_for_counter(account_list_));
+    EXPECT_TRUE(wait_for_counter(account_list_));
     EXPECT_TRUE(check_account_list(alice_, expected));
     EXPECT_TRUE(check_account_list_qt(alice_, expected));
     EXPECT_TRUE(check_account_list_rpc(alice_, expected));
@@ -533,7 +533,7 @@ TEST_F(Regtest_fixture_hd, account_activity_failed_spend)
         },
     };
 
-    ASSERT_TRUE(wait_for_counter(account_activity_));
+    EXPECT_TRUE(wait_for_counter(account_activity_));
     EXPECT_TRUE(check_account_activity(alice_, id, expected));
     EXPECT_TRUE(check_account_activity_qt(alice_, id, expected));
     EXPECT_TRUE(check_account_activity_rpc(alice_, id, expected));
@@ -555,7 +555,7 @@ TEST_F(Regtest_fixture_hd, account_list_failed_spend)
          u8"100.000\u202F049\u202F5 units"},
     }};
 
-    ASSERT_TRUE(wait_for_counter(account_list_));
+    EXPECT_TRUE(wait_for_counter(account_list_));
     EXPECT_TRUE(check_account_list(alice_, expected));
     EXPECT_TRUE(check_account_list_qt(alice_, expected));
     EXPECT_TRUE(check_account_list_rpc(alice_, expected));
@@ -656,7 +656,7 @@ TEST_F(Regtest_fixture_hd, account_activity_unconfirmed_spend)
         },
     };
 
-    ASSERT_TRUE(wait_for_counter(account_activity_));
+    EXPECT_TRUE(wait_for_counter(account_activity_));
     EXPECT_TRUE(check_account_activity(alice_, id, expected));
     EXPECT_TRUE(check_account_activity_qt(alice_, id, expected));
     EXPECT_TRUE(check_account_activity_rpc(alice_, id, expected));
@@ -678,7 +678,7 @@ TEST_F(Regtest_fixture_hd, account_list_unconfirmed_spend)
          u8"86.000\u202F026\u202F52 units"},
     }};
 
-    ASSERT_TRUE(wait_for_counter(account_list_));
+    EXPECT_TRUE(wait_for_counter(account_list_));
     EXPECT_TRUE(check_account_list(alice_, expected));
     EXPECT_TRUE(check_account_list_qt(alice_, expected));
     EXPECT_TRUE(check_account_list_rpc(alice_, expected));
@@ -801,7 +801,7 @@ TEST_F(Regtest_fixture_hd, account_activity_confirmed_spend)
         },
     };
 
-    ASSERT_TRUE(wait_for_counter(account_activity_));
+    EXPECT_TRUE(wait_for_counter(account_activity_));
     EXPECT_TRUE(check_account_activity(alice_, id, expected));
     EXPECT_TRUE(check_account_activity_qt(alice_, id, expected));
     EXPECT_TRUE(check_account_activity_rpc(alice_, id, expected));
@@ -823,7 +823,7 @@ TEST_F(Regtest_fixture_hd, account_list_confirmed_spend)
          u8"86.000\u202F026\u202F52 units"},
     }};
 
-    ASSERT_TRUE(wait_for_counter(account_list_));
+    EXPECT_TRUE(wait_for_counter(account_list_));
     EXPECT_TRUE(check_account_list(alice_, expected));
     EXPECT_TRUE(check_account_list_qt(alice_, expected));
     EXPECT_TRUE(check_account_list_rpc(alice_, expected));

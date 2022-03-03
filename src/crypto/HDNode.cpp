@@ -23,7 +23,7 @@
 #include "opentxs/crypto/key/HD.hpp"
 #include "util/Sodium.hpp"
 
-namespace opentxs::v1::crypto::implementation
+namespace opentxs::crypto::implementation
 {
 HDNode::HDNode(const api::Crypto& crypto) noexcept
     : data_space_(Context().Factory().Secret(0))
@@ -174,4 +174,4 @@ auto HDNode::ParentPublic() const noexcept -> ReadView
 
     return ReadView{start, 33};
 }
-}  // namespace opentxs::v1::crypto::implementation
+}  // namespace opentxs::crypto::implementation

@@ -34,7 +34,7 @@
 #include "opentxs/util/Pimpl.hpp"
 #include "serialization/protobuf/UnitDefinition.pb.h"
 
-namespace opentxs::v1
+namespace opentxs
 {
 auto VerifyStringVal(const UnallocatedCString& nValue) -> bool
 {
@@ -639,4 +639,4 @@ void OTAPI_Func::run()
 }
 
 OTAPI_Func::~OTAPI_Func() = default;
-}  // namespace opentxs::v1
+}  // namespace opentxs

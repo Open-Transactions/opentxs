@@ -24,7 +24,7 @@
 #include "opentxs/core/PaymentCode.hpp"
 #include "opentxs/util/Container.hpp"
 
-namespace opentxs::v1::ui
+namespace opentxs::ui
 {
 #if OT_BLOCKCHAIN
 using Super = DestinationValidator::Imp;
@@ -174,4 +174,4 @@ auto DestinationValidator::Imp::Blockchain(
     return nullptr;
 #endif  // OT_BLOCKCHAIN
 }
-}  // namespace opentxs::v1::ui
+}  // namespace opentxs::ui

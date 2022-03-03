@@ -7,7 +7,7 @@
 
 #include <cstdint>
 
-namespace opentxs::v1
+namespace opentxs
 {
 enum class itemType : std::uint8_t {
     // TRANSFER
@@ -393,4 +393,4 @@ enum class transactionType : std::int8_t {
     error_state
 };  // If you add any types to this list, update the list of strings at the
 // top of OTTransaction.cpp.
-}  // namespace opentxs::v1
+}  // namespace opentxs

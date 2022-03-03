@@ -11,7 +11,7 @@
 
 #include "opentxs/util/Bytes.hpp"
 
-namespace opentxs::v1::paymentcode
+namespace opentxs::paymentcode
 {
 struct XpubPreimage {
     std::array<std::byte, 33> key_;
@@ -189,4 +189,4 @@ struct Base58Preimage_3 {
     {
     }
 };
-}  // namespace opentxs::v1::paymentcode
+}  // namespace opentxs::paymentcode

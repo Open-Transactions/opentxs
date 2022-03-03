@@ -23,7 +23,7 @@
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Pimpl.hpp"
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 // We have a header and a raw payload. Parse it.
 auto BitcoinP2PGetblocktxn(
@@ -130,9 +130,9 @@ auto BitcoinP2PGetblocktxn(
 
     return new ReturnType(api, network, block_hash, txn_indices);
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory
 
-namespace opentxs::v1::blockchain::p2p::bitcoin::message
+namespace opentxs::blockchain::p2p::bitcoin::message
 {
 
 auto Getblocktxn::payload(AllocateOutput out) const noexcept -> bool
@@ -202,4 +202,4 @@ Getblocktxn::Getblocktxn(
     verify_checksum();
 }
 
-}  // namespace opentxs::v1::blockchain::p2p::bitcoin::message
+}  // namespace opentxs::blockchain::p2p::bitcoin::message

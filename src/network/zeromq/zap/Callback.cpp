@@ -23,7 +23,7 @@
 
 template class opentxs::Pimpl<opentxs::network::zeromq::zap::Callback>;
 
-namespace opentxs::v1::network::zeromq::zap
+namespace opentxs::network::zeromq::zap
 {
 auto Callback::Factory(
     const UnallocatedCString& domain,
@@ -39,9 +39,9 @@ auto Callback::Factory() -> OTZMQZAPCallback
 {
     return OTZMQZAPCallback(new implementation::Callback());
 }
-}  // namespace opentxs::v1::network::zeromq::zap
+}  // namespace opentxs::network::zeromq::zap
 
-namespace opentxs::v1::network::zeromq::zap::implementation
+namespace opentxs::network::zeromq::zap::implementation
 {
 Callback::Callback()
     : default_callback_(
@@ -122,4 +122,4 @@ auto Callback::SetPolicy(const Policy policy) const -> bool
 
     return true;
 }
-}  // namespace opentxs::v1::network::zeromq::zap::implementation
+}  // namespace opentxs::network::zeromq::zap::implementation

@@ -40,7 +40,7 @@
 #define OT_KEY_PUBLIC_KEYSIZE "public_keysize"
 #define OT_KEY_PUBLIC_KEYSIZE_MAX "public_keysize_max"
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto CryptoConfig(const api::Settings& settings) noexcept
     -> std::unique_ptr<api::crypto::Config>
@@ -49,9 +49,9 @@ auto CryptoConfig(const api::Settings& settings) noexcept
 
     return std::make_unique<ReturnType>(settings);
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory
 
-namespace opentxs::v1::api::crypto
+namespace opentxs::api::crypto
 {
 auto HaveSupport(opentxs::crypto::key::symmetric::Algorithm val) noexcept
     -> bool
@@ -70,9 +70,9 @@ auto HaveSupport(opentxs::crypto::key::symmetric::Algorithm val) noexcept
         return false;
     }
 }
-}  // namespace opentxs::v1::api::crypto
+}  // namespace opentxs::api::crypto
 
-namespace opentxs::v1::api::crypto::imp
+namespace opentxs::api::crypto::imp
 {
 Config::Config(const api::Settings& settings) noexcept
     : config_(settings)
@@ -180,4 +180,4 @@ auto Config::PublicKeysizeMax() const -> std::uint32_t
 {
     return sp_nPublicKeysizeMax;
 }
-}  // namespace opentxs::v1::api::crypto::imp
+}  // namespace opentxs::api::crypto::imp

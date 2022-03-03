@@ -13,7 +13,7 @@
 #include "opentxs/Types.hpp"
 #include "opentxs/interface/ui/Widget.hpp"
 
-namespace opentxs::v1::ui
+namespace opentxs::ui
 {
 class OPENTXS_EXPORT List : virtual public Widget
 {
@@ -29,4 +29,4 @@ private:
     auto operator=(const List&) -> List& = delete;
     auto operator=(List&&) -> List& = delete;
 };
-}  // namespace opentxs::v1::ui
+}  // namespace opentxs::ui

@@ -11,7 +11,7 @@
 #include <tuple>
 #include <utility>
 
-namespace opentxs::v1::network::blockchain::bitcoin
+namespace opentxs::network::blockchain::bitcoin
 {
 struct CompactSize::Imp {
     using ThresholdDefinition = std::pair<std::size_t, std::byte>;
@@ -45,4 +45,4 @@ private:
     Imp(Imp&&) = delete;
     auto operator=(Imp&&) noexcept -> Imp& = delete;
 };
-}  // namespace opentxs::v1::network::blockchain::bitcoin
+}  // namespace opentxs::network::blockchain::bitcoin

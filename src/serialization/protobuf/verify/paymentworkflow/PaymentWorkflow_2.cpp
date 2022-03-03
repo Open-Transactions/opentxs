@@ -32,7 +32,7 @@
             std::to_string(static_cast<std::uint32_t>(input.state())))         \
     }
 
-namespace opentxs::v1::proto
+namespace opentxs::proto
 {
 auto CheckProto_2(const PaymentWorkflow& input, const bool silent) -> bool
 {
@@ -1056,4 +1056,4 @@ auto CheckProto_2(const PaymentWorkflow& input, const bool silent) -> bool
 
     return true;
 }
-}  // namespace opentxs::v1::proto
+}  // namespace opentxs::proto

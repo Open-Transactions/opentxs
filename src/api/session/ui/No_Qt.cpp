@@ -9,7 +9,7 @@
 
 #include "api/session/ui/Imp-base.hpp"
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto UI(
     const api::session::Client& api,
@@ -21,4 +21,4 @@ auto UI(
     return std::make_unique<ReturnType>(
         std::make_unique<api::session::imp::UI::Imp>(api, blockchain, running));
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory

@@ -26,8 +26,8 @@ extern "C" {
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace api
 {
 namespace network
@@ -48,11 +48,11 @@ namespace storage
 class Config;
 class Plugin;
 }  // namespace storage
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::storage::driver
+namespace opentxs::storage::driver
 {
 // SQLite3 implementation of opentxs::storage
 class Sqlite3 final : public virtual implementation::Plugin,
@@ -128,4 +128,4 @@ private:
     auto operator=(const Sqlite3&) -> Sqlite3& = delete;
     auto operator=(Sqlite3&&) -> Sqlite3& = delete;
 };
-}  // namespace opentxs::v1::storage::driver
+}  // namespace opentxs::storage::driver

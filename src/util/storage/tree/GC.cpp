@@ -20,7 +20,7 @@
 #include "util/storage/tree/Node.hpp"
 #include "util/storage/tree/Tree.hpp"
 
-namespace opentxs::v1::storage
+namespace opentxs::storage
 {
 Root::GC::GC(
     const api::network::Asio& asio,
@@ -151,4 +151,4 @@ auto Root::GC::Serialize(proto::StorageRoot& out) const noexcept -> void
 }
 
 Root::GC::~GC() { Cleanup(); }
-}  // namespace opentxs::v1::storage
+}  // namespace opentxs::storage

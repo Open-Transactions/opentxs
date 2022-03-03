@@ -20,7 +20,7 @@
 #include "opentxs/util/Allocated.hpp"
 #include "opentxs/util/Log.hpp"
 
-namespace opentxs::v1::blockchain::node::wallet
+namespace opentxs::blockchain::node::wallet
 {
 class Bitcoiner_live final : public FeeSource::Imp
 {
@@ -358,9 +358,9 @@ private:
         }
     }
 };
-}  // namespace opentxs::v1::blockchain::node::wallet
+}  // namespace opentxs::blockchain::node::wallet
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto BTCFeeSources(
     const api::Session& api,
@@ -431,4 +431,4 @@ auto BTCFeeSources(
 
     return sources;
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory

@@ -32,8 +32,8 @@ class QVariant;
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace api
 {
 namespace session
@@ -59,11 +59,11 @@ namespace ui
 {
 class IssuerItem;
 }  // namespace ui
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1
+namespace opentxs
 {
 template <typename T>
 struct make_blank;
@@ -76,9 +76,9 @@ struct make_blank<ui::implementation::IssuerItemRowID> {
         return {api.Factory().Identifier(), UnitType::Error};
     }
 };
-}  // namespace opentxs::v1
+}  // namespace opentxs
 
-namespace opentxs::v1::ui::implementation
+namespace opentxs::ui::implementation
 {
 using IssuerItemList = List<
     IssuerItemExternalInterface,
@@ -142,6 +142,6 @@ private:
     auto operator=(const IssuerItem&) -> IssuerItem& = delete;
     auto operator=(IssuerItem&&) -> IssuerItem& = delete;
 };
-}  // namespace opentxs::v1::ui::implementation
+}  // namespace opentxs::ui::implementation
 
 template class opentxs::SharedPimpl<opentxs::ui::IssuerItem>;

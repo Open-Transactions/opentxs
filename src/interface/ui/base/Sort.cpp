@@ -17,7 +17,7 @@
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 
-namespace opentxs::v1::ui::implementation
+namespace opentxs::ui::implementation
 {
 template <>
 auto ListItems<
@@ -45,9 +45,9 @@ auto ListItems<
 
     return compare(lhs, rhs);
 }
-}  // namespace opentxs::v1::ui::implementation
+}  // namespace opentxs::ui::implementation
 
-namespace opentxs::v1::ui::implementation
+namespace opentxs::ui::implementation
 {
 template <>
 auto ListItems<
@@ -75,9 +75,9 @@ auto ListItems<
 
     return compare(lhs, rhs);
 }
-}  // namespace opentxs::v1::ui::implementation
+}  // namespace opentxs::ui::implementation
 
-namespace opentxs::v1::ui::implementation
+namespace opentxs::ui::implementation
 {
 template <>
 auto ListItems<
@@ -104,9 +104,9 @@ auto ListItems<
 
     return compare(lhs, rhs);
 }
-}  // namespace opentxs::v1::ui::implementation
+}  // namespace opentxs::ui::implementation
 
-namespace opentxs::v1::ui::implementation
+namespace opentxs::ui::implementation
 {
 template <>
 auto ListItems<
@@ -134,9 +134,9 @@ auto ListItems<
 
     return compare(lhs, rhs);
 }
-}  // namespace opentxs::v1::ui::implementation
+}  // namespace opentxs::ui::implementation
 
-namespace opentxs::v1::ui::implementation
+namespace opentxs::ui::implementation
 {
 template <>
 auto ListItems<
@@ -163,9 +163,9 @@ auto ListItems<
 
     return compare(lhs, rhs);
 }
-}  // namespace opentxs::v1::ui::implementation
+}  // namespace opentxs::ui::implementation
 
-namespace opentxs::v1::ui::implementation
+namespace opentxs::ui::implementation
 {
 template <>
 auto ListItems<
@@ -192,9 +192,9 @@ auto ListItems<
 
     return compare(lhs, rhs);
 }
-}  // namespace opentxs::v1::ui::implementation
+}  // namespace opentxs::ui::implementation
 
-namespace opentxs::v1::ui::implementation
+namespace opentxs::ui::implementation
 {
 template <>
 auto ListItems<
@@ -222,9 +222,9 @@ auto ListItems<
 
     return compare(lhs, rhs);
 }
-}  // namespace opentxs::v1::ui::implementation
+}  // namespace opentxs::ui::implementation
 
-namespace opentxs::v1::ui::implementation
+namespace opentxs::ui::implementation
 {
 template <>
 auto ListItems<
@@ -252,9 +252,9 @@ auto ListItems<
 
     return compare(lhs, rhs);
 }
-}  // namespace opentxs::v1::ui::implementation
+}  // namespace opentxs::ui::implementation
 
-namespace opentxs::v1::ui::implementation
+namespace opentxs::ui::implementation
 {
 template <>
 auto ListItems<
@@ -283,9 +283,9 @@ auto ListItems<
 
     return compare(lhs, rhs);
 }
-}  // namespace opentxs::v1::ui::implementation
+}  // namespace opentxs::ui::implementation
 
-namespace opentxs::v1::ui::implementation
+namespace opentxs::ui::implementation
 {
 template <>
 auto ListItems<
@@ -314,9 +314,9 @@ auto ListItems<
 
     return compare(lhs, rhs);
 }
-}  // namespace opentxs::v1::ui::implementation
+}  // namespace opentxs::ui::implementation
 
-namespace opentxs::v1::ui::implementation
+namespace opentxs::ui::implementation
 {
 template <>
 auto ListItems<
@@ -345,9 +345,9 @@ auto ListItems<
 
     return compare(lhs, rhs);
 }
-}  // namespace opentxs::v1::ui::implementation
+}  // namespace opentxs::ui::implementation
 
-namespace opentxs::v1::ui::implementation
+namespace opentxs::ui::implementation
 {
 template <>
 auto ListItems<
@@ -376,9 +376,9 @@ auto ListItems<
 
     return compare(lhs, rhs);
 }
-}  // namespace opentxs::v1::ui::implementation
+}  // namespace opentxs::ui::implementation
 
-namespace opentxs::v1::ui::implementation
+namespace opentxs::ui::implementation
 {
 template <>
 auto ListItems<
@@ -407,9 +407,9 @@ auto ListItems<
 
     return compare(lhs, rhs);
 }
-}  // namespace opentxs::v1::ui::implementation
+}  // namespace opentxs::ui::implementation
 
-namespace opentxs::v1::ui::implementation
+namespace opentxs::ui::implementation
 {
 template <>
 auto ListItems<
@@ -436,9 +436,9 @@ auto ListItems<
 
     return compare(lhs, rhs);
 }
-}  // namespace opentxs::v1::ui::implementation
+}  // namespace opentxs::ui::implementation
 
-namespace opentxs::v1::ui::implementation
+namespace opentxs::ui::implementation
 {
 template <>
 auto ListItems<
@@ -466,9 +466,9 @@ auto ListItems<
 
     return compare(lhs, rhs);
 }
-}  // namespace opentxs::v1::ui::implementation
+}  // namespace opentxs::ui::implementation
 
-namespace opentxs::v1::ui::implementation
+namespace opentxs::ui::implementation
 {
 template <>
 auto ListItems<
@@ -497,9 +497,9 @@ auto ListItems<
 
     return compare(lhs, rhs);
 }
-}  // namespace opentxs::v1::ui::implementation
+}  // namespace opentxs::ui::implementation
 
-namespace opentxs::v1::ui::implementation
+namespace opentxs::ui::implementation
 {
 template <>
 auto ListItems<
@@ -526,9 +526,9 @@ auto ListItems<
 
     return compare(lhs, rhs);
 }
-}  // namespace opentxs::v1::ui::implementation
+}  // namespace opentxs::ui::implementation
 
-namespace opentxs::v1::ui::implementation
+namespace opentxs::ui::implementation
 {
 template <>
 auto ListItems<
@@ -555,9 +555,9 @@ auto ListItems<
 
     return compare(lhs, rhs);
 }
-}  // namespace opentxs::v1::ui::implementation
+}  // namespace opentxs::ui::implementation
 
-namespace opentxs::v1::ui::implementation
+namespace opentxs::ui::implementation
 {
 template <>
 auto ListItems<
@@ -584,9 +584,9 @@ auto ListItems<
 
     return compare(lhs, rhs);
 }
-}  // namespace opentxs::v1::ui::implementation
+}  // namespace opentxs::ui::implementation
 
-namespace opentxs::v1::ui::implementation
+namespace opentxs::ui::implementation
 {
 template <>
 auto ListItems<
@@ -613,9 +613,9 @@ auto ListItems<
 
     return compare(lhs, rhs);
 }
-}  // namespace opentxs::v1::ui::implementation
+}  // namespace opentxs::ui::implementation
 
-namespace opentxs::v1::ui::implementation
+namespace opentxs::ui::implementation
 {
 template <>
 auto ListItems<
@@ -643,9 +643,9 @@ auto ListItems<
 
     return compare(lhs, rhs);
 }
-}  // namespace opentxs::v1::ui::implementation
+}  // namespace opentxs::ui::implementation
 
-namespace opentxs::v1::ui::implementation
+namespace opentxs::ui::implementation
 {
 template <>
 auto ListItems<
@@ -674,9 +674,9 @@ auto ListItems<
 
     return compare(lhs, rhs);
 }
-}  // namespace opentxs::v1::ui::implementation
+}  // namespace opentxs::ui::implementation
 
-namespace opentxs::v1::ui::implementation
+namespace opentxs::ui::implementation
 {
 template <>
 auto ListItems<
@@ -703,9 +703,9 @@ auto ListItems<
 
     return compare(lhs, rhs);
 }
-}  // namespace opentxs::v1::ui::implementation
+}  // namespace opentxs::ui::implementation
 
-namespace opentxs::v1::ui::implementation
+namespace opentxs::ui::implementation
 {
 template <>
 auto ListItems<
@@ -732,9 +732,9 @@ auto ListItems<
 
     return compare(lhs, rhs);
 }
-}  // namespace opentxs::v1::ui::implementation
+}  // namespace opentxs::ui::implementation
 
-namespace opentxs::v1::ui::implementation
+namespace opentxs::ui::implementation
 {
 template <>
 auto ListItems<
@@ -761,4 +761,4 @@ auto ListItems<
 
     return compare(lhs, rhs);
 }
-}  // namespace opentxs::v1::ui::implementation
+}  // namespace opentxs::ui::implementation

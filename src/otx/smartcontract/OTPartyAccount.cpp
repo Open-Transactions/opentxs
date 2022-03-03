@@ -33,7 +33,7 @@
 // This also makes sure that Nyms and Entities don't ever share IDs, so the
 // IDs become more and more interchangeable.
 
-namespace opentxs::v1
+namespace opentxs
 {
 OTPartyAccount::OTPartyAccount(
     const api::session::Wallet& wallet,
@@ -457,4 +457,4 @@ OTPartyAccount::~OTPartyAccount()
     // m_pForParty NOT cleaned up here. pointer is only for convenience.
     m_pForParty = nullptr;
 }
-}  // namespace opentxs::v1
+}  // namespace opentxs

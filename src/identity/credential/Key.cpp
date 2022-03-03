@@ -40,7 +40,7 @@
 #include "serialization/protobuf/KeyCredential.pb.h"
 #include "serialization/protobuf/Signature.pb.h"
 
-namespace opentxs::v1::identity::credential::implementation
+namespace opentxs::identity::credential::implementation
 {
 const VersionConversionMap Key::credential_subversion_{
     {1, 1},
@@ -669,4 +669,4 @@ auto Key::VerifySignedBySelf(const Lock& lock) const -> bool
 
     return true;
 }
-}  // namespace opentxs::v1::identity::credential::implementation
+}  // namespace opentxs::identity::credential::implementation

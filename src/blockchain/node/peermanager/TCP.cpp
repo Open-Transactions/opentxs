@@ -27,7 +27,7 @@
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Pimpl.hpp"
 
-namespace opentxs::v1::blockchain::node::implementation
+namespace opentxs::blockchain::node::implementation
 {
 class TCPIncomingConnectionManager final
     : public PeerManager::IncomingConnectionManager
@@ -177,4 +177,4 @@ auto PeerManager::IncomingConnectionManager::TCP(
 {
     return std::make_unique<TCPIncomingConnectionManager>(api, parent);
 }
-}  // namespace opentxs::v1::blockchain::node::implementation
+}  // namespace opentxs::blockchain::node::implementation

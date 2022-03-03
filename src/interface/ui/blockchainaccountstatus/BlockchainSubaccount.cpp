@@ -12,7 +12,7 @@
 #include "interface/ui/base/List.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto BlockchainSubaccountWidget(
     const ui::implementation::BlockchainSubaccountSourceInternalInterface&
@@ -28,9 +28,9 @@ auto BlockchainSubaccountWidget(
 
     return std::make_unique<ReturnType>(parent, api, rowID, key, custom);
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory
 
-namespace opentxs::v1::ui::implementation
+namespace opentxs::ui::implementation
 {
 BlockchainSubaccount::BlockchainSubaccount(
     const BlockchainSubaccountSourceInternalInterface& parent,
@@ -65,4 +65,4 @@ auto BlockchainSubaccount::reindex(
 }
 
 BlockchainSubaccount::~BlockchainSubaccount() = default;
-}  // namespace opentxs::v1::ui::implementation
+}  // namespace opentxs::ui::implementation

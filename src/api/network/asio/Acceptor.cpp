@@ -28,7 +28,7 @@
 
 namespace ip = boost::asio::ip;
 
-namespace opentxs::v1::api::network::asio
+namespace opentxs::api::network::asio
 {
 struct Acceptor::Imp {
     static constexpr auto backlog_size_{8};
@@ -166,4 +166,4 @@ Acceptor::~Acceptor()
         imp_ = nullptr;
     }
 }
-}  // namespace opentxs::v1::api::network::asio
+}  // namespace opentxs::api::network::asio

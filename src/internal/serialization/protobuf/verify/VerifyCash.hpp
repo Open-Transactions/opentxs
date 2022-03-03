@@ -8,7 +8,7 @@
 #include "internal/serialization/protobuf/Basic.hpp"
 #include "opentxs/Version.hpp"
 
-namespace opentxs::v1::proto
+namespace opentxs::proto
 {
 auto LucreTokenDataAllowedCiphertext() noexcept -> const VersionMap&;
 auto PurseAllowedCiphertext() noexcept -> const VersionMap&;
@@ -17,4 +17,4 @@ auto PurseAllowedSymmetricKey() noexcept -> const VersionMap&;
 auto PurseAllowedToken() noexcept -> const VersionMap&;
 auto PurseExchangeAllowedPurse() noexcept -> const VersionMap&;
 auto TokenAllowedLucreTokenData() noexcept -> const VersionMap&;
-}  // namespace opentxs::v1::proto
+}  // namespace opentxs::proto

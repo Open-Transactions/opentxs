@@ -22,8 +22,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace api
 {
 class Session;
@@ -33,11 +33,11 @@ namespace proto
 {
 class GCS;
 }  // namespace proto
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::blockchain::implementation
+namespace opentxs::blockchain::implementation
 {
 class GCS final : virtual public blockchain::GCS
 {
@@ -107,4 +107,4 @@ private:
     auto operator=(const GCS&) -> GCS& = delete;
     auto operator=(GCS&&) -> GCS& = delete;
 };
-}  // namespace opentxs::v1::blockchain::implementation
+}  // namespace opentxs::blockchain::implementation

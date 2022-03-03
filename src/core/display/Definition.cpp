@@ -21,7 +21,7 @@
 #include "opentxs/core/display/Scale.hpp"
 #include "opentxs/util/Container.hpp"
 
-namespace opentxs::v1::display
+namespace opentxs::display
 {
 using DefinitionMap = robin_hood::unordered_flat_map<UnitType, Definition>;
 
@@ -211,4 +211,4 @@ auto GetDefinition(UnitType in) noexcept -> const Definition&
         return defaultDefinition;
     }
 }
-}  // namespace opentxs::v1::display
+}  // namespace opentxs::display

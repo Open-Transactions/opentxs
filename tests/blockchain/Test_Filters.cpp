@@ -13,8 +13,8 @@
 #include <string_view>
 #include <utility>
 
+#include "1_Internal.hpp"
 #include "internal/blockchain/Blockchain.hpp"
-#include "internal/blockchain/node/Node.hpp"
 #include "opentxs/OT.hpp"
 #include "opentxs/Types.hpp"
 #include "opentxs/api/Context.hpp"

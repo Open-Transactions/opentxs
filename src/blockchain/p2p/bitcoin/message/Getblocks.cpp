@@ -21,7 +21,7 @@
 #include "opentxs/network/blockchain/bitcoin/CompactSize.hpp"
 #include "opentxs/util/Log.hpp"
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 // We have a header and a raw payload. Parse it.
 auto BitcoinP2PGetblocks(
@@ -137,9 +137,9 @@ auto BitcoinP2PGetblocks(
 
     return new ReturnType(api, network, version, header_hashes, stop_hash);
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory
 
-namespace opentxs::v1::blockchain::p2p::bitcoin::message
+namespace opentxs::blockchain::p2p::bitcoin::message
 {
 // We have all the data members to create the message from scratch (for sending)
 Getblocks::Getblocks(
@@ -210,4 +210,4 @@ auto Getblocks::payload(AllocateOutput out) const noexcept -> bool
         return false;
     }
 }
-}  // namespace opentxs::v1::blockchain::p2p::bitcoin::message
+}  // namespace opentxs::blockchain::p2p::bitcoin::message

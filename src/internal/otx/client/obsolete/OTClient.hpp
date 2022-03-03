@@ -19,8 +19,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace api
 {
 class Session;
@@ -43,11 +43,11 @@ class Account;
 class Identifier;
 class Message;
 class PasswordPrompt;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1
+namespace opentxs
 {
 class OTClient
 {
@@ -68,4 +68,4 @@ public:
 protected:
     const api::Session& api_;
 };
-}  // namespace opentxs::v1
+}  // namespace opentxs

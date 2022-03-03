@@ -36,8 +36,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace api
 {
 class Session;
@@ -68,11 +68,11 @@ namespace node
 class UpdateTransaction;
 }  // namespace node
 }  // namespace blockchain
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::blockchain::database
+namespace opentxs::blockchain::database
 {
 struct Headers {
 public:
@@ -140,4 +140,4 @@ private:
     auto recent_hashes(const Lock& lock) const noexcept
         -> UnallocatedVector<block::pHash>;
 };
-}  // namespace opentxs::v1::blockchain::database
+}  // namespace opentxs::blockchain::database

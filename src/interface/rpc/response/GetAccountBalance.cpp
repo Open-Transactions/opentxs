@@ -18,7 +18,7 @@
 #include "opentxs/interface/rpc/request/GetAccountBalance.hpp"
 #include "serialization/protobuf/RPCResponse.pb.h"
 
-namespace opentxs::v1::rpc::response::implementation
+namespace opentxs::rpc::response::implementation
 {
 struct GetAccountBalance final : public Base::Imp {
     using Data = response::GetAccountBalance::Data;
@@ -77,9 +77,9 @@ private:
     auto operator=(const GetAccountBalance&) -> GetAccountBalance& = delete;
     auto operator=(GetAccountBalance&&) -> GetAccountBalance& = delete;
 };
-}  // namespace opentxs::v1::rpc::response::implementation
+}  // namespace opentxs::rpc::response::implementation
 
-namespace opentxs::v1::rpc::response
+namespace opentxs::rpc::response
 {
 GetAccountBalance::GetAccountBalance(
     const request::GetAccountBalance& request,
@@ -112,4 +112,4 @@ auto GetAccountBalance::Balances() const noexcept -> const Data&
 }
 
 GetAccountBalance::~GetAccountBalance() = default;
-}  // namespace opentxs::v1::rpc::response
+}  // namespace opentxs::rpc::response

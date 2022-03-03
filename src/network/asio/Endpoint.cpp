@@ -16,7 +16,7 @@
 
 #include "network/asio/Endpoint.hpp"
 
-namespace opentxs::v1::network::asio
+namespace opentxs::network::asio
 {
 Endpoint::Imp::Imp(Type type, ReadView raw, Port port) noexcept(false)
     : type_(type)
@@ -166,4 +166,4 @@ auto Endpoint::str() const noexcept -> UnallocatedCString
 }
 
 Endpoint::~Endpoint() { std::unique_ptr<Imp>{imp_}.reset(); }
-}  // namespace opentxs::v1::network::asio
+}  // namespace opentxs::network::asio

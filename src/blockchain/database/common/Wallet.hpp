@@ -19,8 +19,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace api
 {
 namespace crypto
@@ -59,11 +59,11 @@ class LMDB;
 }  // namespace storage
 
 class Contact;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::blockchain::database::common
+namespace opentxs::blockchain::database::common
 {
 class Wallet
 {
@@ -123,4 +123,4 @@ private:
         const UnallocatedSet<OTData>& incoming,
         const Identifier& contactID) const noexcept -> UnallocatedVector<pTxid>;
 };
-}  // namespace opentxs::v1::blockchain::database::common
+}  // namespace opentxs::blockchain::database::common

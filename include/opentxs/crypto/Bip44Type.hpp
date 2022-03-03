@@ -8,7 +8,7 @@
 #include "opentxs/Version.hpp"       // IWYU pragma: associated
 #include "opentxs/crypto/Types.hpp"  // IWYU pragma: associated
 
-namespace opentxs::v1
+namespace opentxs
 {
 enum class Bip44Type : Bip32Index {
     BITCOIN = 0,
@@ -26,4 +26,4 @@ enum class Bip44Type : Bip32Index {
     BITCOINCASH = 145,
     PKT = 390,
 };
-}  // namespace opentxs::v1
+}  // namespace opentxs

@@ -22,7 +22,7 @@
 #include "opentxs/interface/rpc/response/SendPayment.hpp"
 #include "serialization/protobuf/RPCResponse.pb.h"
 
-namespace opentxs::v1::rpc::response
+namespace opentxs::rpc::response
 {
 auto Factory(ReadView serialized) noexcept -> std::unique_ptr<Base>
 {
@@ -64,4 +64,4 @@ auto Factory(ReadView serialized) noexcept -> std::unique_ptr<Base>
         return std::make_unique<Base>();
     }
 }
-}  // namespace opentxs::v1::rpc::response
+}  // namespace opentxs::rpc::response

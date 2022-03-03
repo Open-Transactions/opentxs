@@ -13,8 +13,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace contract
 {
 namespace unit
@@ -24,11 +24,11 @@ class Security;
 }  // namespace contract
 
 using OTSecurityContract = SharedPimpl<contract::unit::Security>;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::contract::unit
+namespace opentxs::contract::unit
 {
 class OPENTXS_EXPORT Security : virtual public contract::Unit
 {
@@ -50,4 +50,4 @@ private:
     auto operator=(const Security&) -> Security& = delete;
     auto operator=(Security&&) -> Security& = delete;
 };
-}  // namespace opentxs::v1::contract::unit
+}  // namespace opentxs::contract::unit

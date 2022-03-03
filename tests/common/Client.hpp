@@ -9,13 +9,14 @@
 
 #include "common/Base.hpp"
 #include "integration/Helpers.hpp"
+#include "opentxs/Version.hpp"
 #include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace api
 {
 namespace session
@@ -27,7 +28,7 @@ class Notary;
 
 class Session;
 }  // namespace api
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 
 namespace ottest

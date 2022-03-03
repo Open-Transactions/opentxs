@@ -16,8 +16,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace api
 {
 namespace session
@@ -63,11 +63,11 @@ class Context;
 class Context;
 class Identifier;
 class PasswordPrompt;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::api::session::client
+namespace opentxs::api::session::client
 {
 class Wallet final : public session::imp::Wallet
 {
@@ -117,4 +117,4 @@ private:
     auto operator=(const Wallet&) -> Wallet& = delete;
     auto operator=(Wallet&&) -> Wallet& = delete;
 };
-}  // namespace opentxs::v1::api::session::client
+}  // namespace opentxs::api::session::client

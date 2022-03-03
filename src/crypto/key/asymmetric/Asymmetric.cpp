@@ -49,7 +49,7 @@
 
 template class opentxs::Pimpl<opentxs::crypto::key::Asymmetric>;
 
-namespace opentxs::v1::crypto::key
+namespace opentxs::crypto::key
 {
 const VersionNumber Asymmetric::DefaultVersion{2};
 const VersionNumber Asymmetric::MaxVersion{2};
@@ -58,9 +58,9 @@ auto Asymmetric::Factory() noexcept -> OTAsymmetricKey
 {
     return OTAsymmetricKey(new blank::Asymmetric);
 }
-}  // namespace opentxs::v1::crypto::key
+}  // namespace opentxs::crypto::key
 
-namespace opentxs::v1::crypto::key::implementation
+namespace opentxs::crypto::key::implementation
 {
 const robin_hood::unordered_flat_map<crypto::SignatureRole, VersionNumber>
     Asymmetric::sig_version_{
@@ -816,4 +816,4 @@ auto Asymmetric::Verify(const Data& plaintext, const proto::Signature& sig)
 }
 
 Asymmetric::~Asymmetric() = default;
-}  // namespace opentxs::v1::crypto::key::implementation
+}  // namespace opentxs::crypto::key::implementation

@@ -24,17 +24,17 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace proto
 {
 class PairEvent;
 }  // namespace proto
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::contract::peer::internal
+namespace opentxs::contract::peer::internal
 {
 enum class PairEventType : std::uint8_t {
     Error = 0,
@@ -62,9 +62,9 @@ private:
     auto operator=(const PairEvent&) -> PairEvent& = delete;
     auto operator=(PairEvent&&) -> PairEvent& = delete;
 };
-}  // namespace opentxs::v1::contract::peer::internal
+}  // namespace opentxs::contract::peer::internal
 
-namespace opentxs::v1
+namespace opentxs
 {
 auto translate(const contract::peer::ConnectionInfoType in) noexcept
     -> proto::ConnectionInfoType;
@@ -86,4 +86,4 @@ auto translate(const proto::PeerRequestType in) noexcept
     -> contract::peer::PeerRequestType;
 auto translate(const proto::SecretType in) noexcept
     -> contract::peer::SecretType;
-}  // namespace opentxs::v1
+}  // namespace opentxs

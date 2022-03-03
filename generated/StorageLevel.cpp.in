@@ -7,8 +7,8 @@
 #include "1_Internal.hpp"                           // IWYU pragma: associated
 #include "blockchain/database/common/Database.hpp"  // IWYU pragma: associated
 
-namespace opentxs::v1::blockchain::database::common
+namespace opentxs::blockchain::database::common
 {
 const int Database::default_storage_level_{@OPENTXS_DEFAULT_BLOCK_STORAGE_POLICY@};
 const int Database::storage_enabled_{@OPENTXS_BLOCK_STORAGE_ENABLED@};
-}  // namespace opentxs::v1::blockchain::database::common
+}  // namespace opentxs::blockchain::database::common

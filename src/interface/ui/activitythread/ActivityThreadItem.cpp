@@ -18,7 +18,7 @@
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/util/Pimpl.hpp"
 
-namespace opentxs::v1::ui::implementation
+namespace opentxs::ui::implementation
 {
 ActivityThreadItem::ActivityThreadItem(
     const ActivityThreadInternalInterface& parent,
@@ -109,4 +109,4 @@ auto ActivityThreadItem::Timestamp() const noexcept -> Time
 
     return time_;
 }
-}  // namespace opentxs::v1::ui::implementation
+}  // namespace opentxs::ui::implementation

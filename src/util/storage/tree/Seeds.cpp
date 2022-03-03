@@ -26,7 +26,7 @@
 #include "util/storage/Plugin.hpp"
 #include "util/storage/tree/Node.hpp"
 
-namespace opentxs::v1::storage
+namespace opentxs::storage
 {
 Seeds::Seeds(const Driver& storage, const UnallocatedCString& hash)
     : Node(storage, hash)
@@ -173,4 +173,4 @@ auto Seeds::Store(const proto::Seed& data) -> bool
 
     return save(lock);
 }
-}  // namespace opentxs::v1::storage
+}  // namespace opentxs::storage

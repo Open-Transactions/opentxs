@@ -6,6 +6,7 @@
 #include <gtest/gtest.h>
 #include <zmq.h>
 
+#include "opentxs/Version.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"

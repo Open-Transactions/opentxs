@@ -13,7 +13,7 @@
 
 #include "opentxs/Types.hpp"
 
-namespace opentxs::v1::internal
+namespace opentxs::internal
 {
 class StateMachine
 {
@@ -103,4 +103,4 @@ private:
     auto operator=(const StateMachine&) -> StateMachine& = delete;
     auto operator=(StateMachine&&) -> StateMachine& = delete;
 };
-}  // namespace opentxs::v1::internal
+}  // namespace opentxs::internal

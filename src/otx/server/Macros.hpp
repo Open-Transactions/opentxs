@@ -8,7 +8,7 @@
 #include "opentxs/util/Log.hpp"
 #include "otx/server/ServerSettings.hpp"
 
-namespace opentxs::v1::server
+namespace opentxs::server
 {
 // For NYM_IS_ALLOWED() to evaluate to TRUE, either the boolean value itself is
 // set to true (meaning, "YES any Nym is allowed..") OR (it only continues if
@@ -38,4 +38,4 @@ namespace opentxs::v1::server
             return false;                                                      \
         }                                                                      \
     }
-}  // namespace opentxs::v1::server
+}  // namespace opentxs::server

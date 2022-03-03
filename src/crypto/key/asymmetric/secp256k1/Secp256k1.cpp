@@ -13,7 +13,7 @@
 #include "opentxs/crypto/key/Secp256k1.hpp"
 #include "opentxs/crypto/key/asymmetric/Algorithm.hpp"
 
-namespace opentxs::v1::crypto::key::implementation
+namespace opentxs::crypto::key::implementation
 {
 Secp256k1::Secp256k1(
     const api::Session& api,
@@ -138,4 +138,4 @@ auto Secp256k1::blank_private() const noexcept -> ReadView
 
     return reader(blank);
 }
-}  // namespace opentxs::v1::crypto::key::implementation
+}  // namespace opentxs::crypto::key::implementation

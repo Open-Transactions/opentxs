@@ -32,13 +32,12 @@
 #include "opentxs/network/zeromq/Pipeline.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
 #include "opentxs/network/zeromq/message/FrameSection.hpp"
-#include "opentxs/network/zeromq/socket/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 
 namespace zmq = opentxs::network::zeromq;
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto BlockchainStatisticsModel(
     const api::session::Client& api,
@@ -49,9 +48,9 @@ auto BlockchainStatisticsModel(
 
     return std::make_unique<ReturnType>(api, cb);
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory
 
-namespace opentxs::v1::ui::implementation
+namespace opentxs::ui::implementation
 {
 BlockchainStatistics::BlockchainStatistics(
     const api::session::Client& api,
@@ -214,4 +213,4 @@ BlockchainStatistics::~BlockchainStatistics()
     wait_for_startup();
     signal_shutdown().get();
 }
-}  // namespace opentxs::v1::ui::implementation
+}  // namespace opentxs::ui::implementation

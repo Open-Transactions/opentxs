@@ -7,7 +7,7 @@
 #include "1_Internal.hpp"                // IWYU pragma: associated
 #include "blockchain/p2p/peer/Peer.hpp"  // IWYU pragma: associated
 
-namespace opentxs::v1::blockchain::p2p::implementation
+namespace opentxs::blockchain::p2p::implementation
 {
 Peer::SendPromises::SendPromises() noexcept
     : lock_()
@@ -48,4 +48,4 @@ auto Peer::SendPromises::SetPromise(const int promise, const bool value) -> void
         map_.erase(it);
     }
 }
-}  // namespace opentxs::v1::blockchain::p2p::implementation
+}  // namespace opentxs::blockchain::p2p::implementation

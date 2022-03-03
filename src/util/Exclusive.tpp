@@ -10,7 +10,7 @@
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/util/Log.hpp"
 
-namespace opentxs::v1
+namespace opentxs
 {
 template <class C>
 Exclusive<C>::Exclusive() noexcept
@@ -137,4 +137,4 @@ Exclusive<C>::~Exclusive()
 {
     Release();
 }
-}  // namespace opentxs::v1
+}  // namespace opentxs

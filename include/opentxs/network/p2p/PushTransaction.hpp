@@ -17,14 +17,14 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 class Identifier;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::network::p2p
+namespace opentxs::network::p2p
 {
 class OPENTXS_EXPORT PushTransaction final : public Base
 {
@@ -50,4 +50,4 @@ private:
     auto operator=(const PushTransaction&) -> PushTransaction& = delete;
     auto operator=(PushTransaction&&) -> PushTransaction& = delete;
 };
-}  // namespace opentxs::v1::network::p2p
+}  // namespace opentxs::network::p2p

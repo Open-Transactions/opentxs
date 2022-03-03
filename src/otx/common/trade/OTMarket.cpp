@@ -51,7 +51,7 @@
 #include "opentxs/util/Pimpl.hpp"
 #include "otx/common/OTStorage.hpp"
 
-namespace opentxs::v1
+namespace opentxs
 {
 OTMarket::OTMarket(const api::Session& api, const char* szFilename)
     : Contract(api)
@@ -2877,4 +2877,4 @@ void OTMarket::Release()
 }
 
 OTMarket::~OTMarket() { Release_Market(); }
-}  // namespace opentxs::v1
+}  // namespace opentxs

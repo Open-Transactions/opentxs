@@ -26,7 +26,7 @@
 #include "opentxs/util/Pimpl.hpp"
 #include "otx/client/DepositPayment.hpp"
 
-namespace opentxs::v1::otx::client::implementation
+namespace opentxs::otx::client::implementation
 {
 PaymentTasks::PaymentTasks(client::internal::StateMachine& parent)
     : StateMachine(std::bind(&PaymentTasks::cleanup, this))
@@ -162,4 +162,4 @@ auto PaymentTasks::PaymentTasks::Queue(const DepositPaymentTask& task)
 
     return output;
 }
-}  // namespace opentxs::v1::otx::client::implementation
+}  // namespace opentxs::otx::client::implementation

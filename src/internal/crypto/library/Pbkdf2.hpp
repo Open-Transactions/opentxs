@@ -10,7 +10,7 @@
 #include "Proto.hpp"
 #include "opentxs/crypto/Types.hpp"
 
-namespace opentxs::v1::crypto
+namespace opentxs::crypto
 {
 class Pbkdf2
 {
@@ -36,4 +36,4 @@ private:
     auto operator=(const Pbkdf2&) -> Pbkdf2& = delete;
     auto operator=(Pbkdf2&&) -> Pbkdf2& = delete;
 };
-}  // namespace opentxs::v1::crypto
+}  // namespace opentxs::crypto

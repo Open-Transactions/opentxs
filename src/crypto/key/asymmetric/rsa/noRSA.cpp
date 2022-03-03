@@ -9,7 +9,7 @@
 
 #include "internal/crypto/key/Null.hpp"
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto RSAKey(
     const api::Session&,
@@ -34,4 +34,4 @@ auto RSAKey(
 
     return std::make_unique<ReturnType>();
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory

@@ -10,7 +10,7 @@
 #include "opentxs/core/String.hpp"
 #include "opentxs/util/Container.hpp"
 
-namespace opentxs::v1
+namespace opentxs
 {
 class OTBylaw;
 class OTScript;
@@ -132,4 +132,4 @@ public:
     void Serialize(Tag& parent, bool bCalculatingID = false) const;
 };
 
-}  // namespace opentxs::v1
+}  // namespace opentxs

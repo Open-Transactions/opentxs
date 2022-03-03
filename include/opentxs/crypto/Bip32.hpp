@@ -22,8 +22,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace crypto
 {
 namespace key
@@ -43,11 +43,11 @@ class HDPath;
 }  // namespace proto
 
 class PasswordPrompt;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::crypto
+namespace opentxs::crypto
 {
 auto Print(const proto::HDPath& node) noexcept -> UnallocatedCString;
 auto Print(const proto::HDPath& node, bool showSeedID) noexcept
@@ -121,4 +121,4 @@ private:
     auto operator=(const Bip32&) -> Bip32& = delete;
     auto operator=(Bip32&&) -> Bip32& = delete;
 };
-}  // namespace opentxs::v1::crypto
+}  // namespace opentxs::crypto

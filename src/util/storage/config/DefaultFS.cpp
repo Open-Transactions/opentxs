@@ -7,7 +7,7 @@
 #include "1_Internal.hpp"           // IWYU pragma: associated
 #include "util/storage/Config.hpp"  // IWYU pragma: associated
 
-namespace opentxs::v1::storage
+namespace opentxs::storage
 {
 const UnallocatedCString Config::default_plugin_{OT_STORAGE_PRIMARY_PLUGIN_FS};
-}  // namespace opentxs::v1::storage
+}  // namespace opentxs::storage

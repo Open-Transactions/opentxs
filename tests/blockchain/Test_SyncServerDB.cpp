@@ -11,6 +11,7 @@
 
 #include "Helpers.hpp"
 #include "opentxs/OT.hpp"
+#include "opentxs/Version.hpp"
 #include "opentxs/api/Context.hpp"
 #include "opentxs/api/network/Blockchain.hpp"
 #include "opentxs/api/network/Network.hpp"

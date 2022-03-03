@@ -23,7 +23,7 @@
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 
-namespace opentxs::v1::display
+namespace opentxs::display
 {
 struct Definition::Imp {
     using Scales = Vector<NamedScale>;
@@ -79,4 +79,4 @@ struct Definition::Imp {
     {
     }
 };
-}  // namespace opentxs::v1::display
+}  // namespace opentxs::display

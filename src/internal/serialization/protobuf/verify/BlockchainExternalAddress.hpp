@@ -10,17 +10,17 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace proto
 {
 class BlockchainExternalAddress;
 }  // namespace proto
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::proto
+namespace opentxs::proto
 {
 auto CheckProto_1(const BlockchainExternalAddress& input, const bool silent)
     -> bool;
@@ -62,4 +62,4 @@ auto CheckProto_19(const BlockchainExternalAddress& input, const bool silent)
     -> bool;
 auto CheckProto_20(const BlockchainExternalAddress& input, const bool silent)
     -> bool;
-}  // namespace opentxs::v1::proto
+}  // namespace opentxs::proto

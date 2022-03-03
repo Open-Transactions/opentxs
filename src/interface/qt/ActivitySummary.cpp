@@ -16,7 +16,7 @@
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Time.hpp"
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto ActivitySummaryQtModel(ui::internal::ActivitySummary& parent) noexcept
     -> std::unique_ptr<ui::ActivitySummaryQt>
@@ -25,9 +25,9 @@ auto ActivitySummaryQtModel(ui::internal::ActivitySummary& parent) noexcept
 
     return std::make_unique<ReturnType>(parent);
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory
 
-namespace opentxs::v1::ui
+namespace opentxs::ui
 {
 struct ActivitySummaryQt::Imp {
     internal::ActivitySummary& parent_;
@@ -52,9 +52,9 @@ ActivitySummaryQt::~ActivitySummaryQt()
         imp_ = nullptr;
     }
 }
-}  // namespace opentxs::v1::ui
+}  // namespace opentxs::ui
 
-namespace opentxs::v1::ui::implementation
+namespace opentxs::ui::implementation
 {
 auto ActivitySummaryItem::qt_data(
     const int column,
@@ -86,4 +86,4 @@ auto ActivitySummaryItem::qt_data(
         }
     }
 }
-}  // namespace opentxs::v1::ui::implementation
+}  // namespace opentxs::ui::implementation

@@ -53,7 +53,7 @@
 
 namespace be = boost::endian;
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto BitcoinTransaction(
     const api::Session& api,
@@ -366,9 +366,9 @@ auto BitcoinTransaction(
         return {};
     }
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory
 
-namespace opentxs::v1::blockchain::block::bitcoin::implementation
+namespace opentxs::blockchain::block::bitcoin::implementation
 {
 const VersionNumber Transaction::default_version_{1};
 
@@ -934,4 +934,4 @@ auto Transaction::vBytes(blockchain::Type chain) const noexcept -> std::size_t
         return CalculateSize();
     }
 }
-}  // namespace opentxs::v1::blockchain::block::bitcoin::implementation
+}  // namespace opentxs::blockchain::block::bitcoin::implementation

@@ -10,7 +10,7 @@
 #include "opentxs/crypto/library/AsymmetricProvider.hpp"
 #include "opentxs/crypto/library/HashingProvider.hpp"
 
-namespace opentxs::v1::crypto
+namespace opentxs::crypto
 {
 class OpenSSL : virtual public HashingProvider,
                 virtual public Pbkdf2,
@@ -29,4 +29,4 @@ private:
     auto operator=(const OpenSSL&) -> OpenSSL& = delete;
     auto operator=(OpenSSL&&) -> OpenSSL& = delete;
 };
-}  // namespace opentxs::v1::crypto
+}  // namespace opentxs::crypto

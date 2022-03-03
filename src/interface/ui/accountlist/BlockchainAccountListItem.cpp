@@ -12,7 +12,7 @@
 #include "opentxs/blockchain/Blockchain.hpp"
 #include "opentxs/blockchain/Types.hpp"
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto AccountListItemBlockchain(
     const ui::implementation::AccountListInternalInterface& parent,
@@ -26,9 +26,9 @@ auto AccountListItemBlockchain(
 
     return std::make_shared<ReturnType>(parent, api, rowID, sortKey, custom);
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory
 
-namespace opentxs::v1::ui::implementation
+namespace opentxs::ui::implementation
 {
 BlockchainAccountListItem::BlockchainAccountListItem(
     const AccountListInternalInterface& parent,
@@ -43,4 +43,4 @@ BlockchainAccountListItem::BlockchainAccountListItem(
 }
 
 BlockchainAccountListItem::~BlockchainAccountListItem() = default;
-}  // namespace opentxs::v1::ui::implementation
+}  // namespace opentxs::ui::implementation

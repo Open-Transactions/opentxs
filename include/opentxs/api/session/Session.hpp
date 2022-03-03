@@ -14,8 +14,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace api
 {
 namespace crypto
@@ -49,13 +49,13 @@ class Settings;
 }  // namespace api
 
 class Options;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
 class QObject;
 
-namespace opentxs::v1::api
+namespace opentxs::api
 {
 class OPENTXS_EXPORT Session : virtual public Periodic
 {
@@ -91,4 +91,4 @@ private:
     auto operator=(const Session&) -> Session& = delete;
     auto operator=(Session&&) -> Session& = delete;
 };
-}  // namespace opentxs::v1::api
+}  // namespace opentxs::api

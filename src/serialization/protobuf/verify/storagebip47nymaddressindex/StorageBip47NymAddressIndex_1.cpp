@@ -8,7 +8,7 @@
 #include "serialization/protobuf/StorageBip47NymAddressIndex.pb.h"
 #include "serialization/protobuf/verify/Check.hpp"
 
-namespace opentxs::v1::proto
+namespace opentxs::proto
 {
 
 auto CheckProto_1(const StorageBip47NymAddressIndex& input, const bool silent)
@@ -134,4 +134,4 @@ auto CheckProto_20(const StorageBip47NymAddressIndex& input, const bool silent)
 {
     UNDEFINED_VERSION(20)
 }
-}  // namespace opentxs::v1::proto
+}  // namespace opentxs::proto

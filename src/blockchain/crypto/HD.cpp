@@ -48,7 +48,7 @@
 #include "serialization/protobuf/HDPath.pb.h"
 #include "util/HDIndex.hpp"
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto BlockchainHDSubaccount(
     const api::Session& api,
@@ -86,9 +86,9 @@ auto BlockchainHDSubaccount(
         return nullptr;
     }
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory
 
-namespace opentxs::v1::blockchain::crypto::implementation
+namespace opentxs::blockchain::crypto::implementation
 {
 HD::HD(
     const api::Session& api,
@@ -309,4 +309,4 @@ auto HD::save(const rLock& lock) const noexcept -> bool
 
     return saved;
 }
-}  // namespace opentxs::v1::blockchain::crypto::implementation
+}  // namespace opentxs::blockchain::crypto::implementation

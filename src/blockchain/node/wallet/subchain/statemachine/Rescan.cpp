@@ -28,7 +28,7 @@
 #include "opentxs/util/Pimpl.hpp"
 #include "opentxs/util/Time.hpp"
 
-namespace opentxs::v1::blockchain::node::wallet
+namespace opentxs::blockchain::node::wallet
 {
 Rescan::Rescan(
     SubchainStateData& parent,
@@ -232,4 +232,4 @@ auto Rescan::SetCeiling(const block::Position& ceiling) noexcept -> void
     auto lock = Lock{lock_};
     ceiling_ = ceiling;
 }
-}  // namespace opentxs::v1::blockchain::node::wallet
+}  // namespace opentxs::blockchain::node::wallet

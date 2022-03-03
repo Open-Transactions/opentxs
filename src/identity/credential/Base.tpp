@@ -17,8 +17,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace api
 {
 class Session;
@@ -40,11 +40,11 @@ class Source;
 }  // namespace identity
 
 class PasswordPrompt;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1
+namespace opentxs
 {
 template identity::credential::internal::Secondary* Factory::Credential(
     const api::Session&,
@@ -267,4 +267,4 @@ auto Factory::Credential(
 
     return output.release();
 }
-}  // namespace opentxs::v1
+}  // namespace opentxs

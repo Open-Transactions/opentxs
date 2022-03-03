@@ -22,8 +22,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace api
 {
 class Session;
@@ -47,11 +47,11 @@ class ContactSection;
 }  // namespace proto
 
 class Identifier;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::identity::wot::claim
+namespace opentxs::identity::wot::claim
 {
 class OPENTXS_EXPORT Section
 {
@@ -115,4 +115,4 @@ private:
     auto operator=(const Section&) -> Section& = delete;
     auto operator=(Section&&) -> Section& = delete;
 };
-}  // namespace opentxs::v1::identity::wot::claim
+}  // namespace opentxs::identity::wot::claim

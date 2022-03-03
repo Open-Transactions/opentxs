@@ -17,7 +17,7 @@
 #include "util/LMDB.hpp"
 #include "util/storage/Config.hpp"
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto StorageLMDB(
     const api::Crypto& crypto,
@@ -30,9 +30,9 @@ auto StorageLMDB(
 
     return std::make_unique<ReturnType>(crypto, asio, parent, config, bucket);
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory
 
-namespace opentxs::v1::storage::driver
+namespace opentxs::storage::driver
 {
 LMDB::LMDB(
     const api::Crypto& crypto,
@@ -134,4 +134,4 @@ auto LMDB::StoreRoot(const bool commit, const UnallocatedCString& hash) const
 }
 
 LMDB::~LMDB() { Cleanup_LMDB(); }
-}  // namespace opentxs::v1::storage::driver
+}  // namespace opentxs::storage::driver

@@ -9,7 +9,7 @@
 
 #include "internal/crypto/key/Null.hpp"
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto Ed25519Key(
     const api::Session& api,
@@ -52,4 +52,4 @@ auto Ed25519Key(
 
     return std::make_unique<ReturnType>();
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory

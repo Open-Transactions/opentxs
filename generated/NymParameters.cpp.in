@@ -11,7 +11,7 @@
 #include "opentxs/identity/CredentialType.hpp"
 #include "opentxs/identity/SourceType.hpp"
 
-namespace opentxs::v1::crypto
+namespace opentxs::crypto
 {
 auto Parameters::DefaultCredential() noexcept -> identity::CredentialType
 {
@@ -27,4 +27,4 @@ auto Parameters::DefaultType() noexcept -> ParameterType
 {
     return @OPENTXS_DEFAULT_KEY_TYPE@;
 }
-}  // namespace opentxs::v1::crypto
+}  // namespace opentxs::crypto

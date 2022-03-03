@@ -10,7 +10,7 @@
 
 #include <cstdint>
 
-namespace opentxs::v1::identity
+namespace opentxs::identity
 {
 enum class CredentialRole : std::uint32_t {
     Error = 0,
@@ -24,4 +24,4 @@ constexpr auto value(const CredentialRole in) noexcept
 {
     return static_cast<std::uint32_t>(in);
 }
-}  // namespace opentxs::v1::identity
+}  // namespace opentxs::identity

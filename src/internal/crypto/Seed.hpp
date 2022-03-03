@@ -9,7 +9,7 @@
 
 #include "opentxs/crypto/Types.hpp"
 
-namespace opentxs::v1::crypto::internal
+namespace opentxs::crypto::internal
 {
 class Seed
 {
@@ -20,4 +20,4 @@ public:
 
     virtual ~Seed() = default;
 };
-}  // namespace opentxs::v1::crypto::internal
+}  // namespace opentxs::crypto::internal

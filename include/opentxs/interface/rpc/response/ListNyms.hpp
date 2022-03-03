@@ -13,8 +13,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace proto
 {
 class RPCResponse;
@@ -27,11 +27,11 @@ namespace request
 class ListNyms;
 }  // namespace request
 }  // namespace rpc
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::rpc::response
+namespace opentxs::rpc::response
 {
 class OPENTXS_EXPORT ListNyms final : public Base
 {
@@ -55,4 +55,4 @@ private:
     auto operator=(const ListNyms&) -> ListNyms& = delete;
     auto operator=(ListNyms&&) -> ListNyms& = delete;
 };
-}  // namespace opentxs::v1::rpc::response
+}  // namespace opentxs::rpc::response

@@ -25,7 +25,7 @@
 #include "opentxs/network/zeromq/socket/SocketType.hpp"
 #include "opentxs/network/zeromq/socket/Types.hpp"
 
-namespace opentxs::v1
+namespace opentxs
 {
 auto print(const network::zeromq::socket::Type type) noexcept -> const char*
 {
@@ -76,9 +76,9 @@ auto to_native(const network::zeromq::socket::Type type) noexcept -> int
         return 0;
     }
 }
-}  // namespace opentxs::v1
+}  // namespace opentxs
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto ZMQSocket(
     const network::zeromq::Context& context,
@@ -96,9 +96,9 @@ auto ZMQSocketNull() noexcept -> network::zeromq::socket::Raw
 
     return std::make_unique<ReturnType::Imp>().release();
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory
 
-namespace opentxs::v1::network::zeromq::socket::implementation
+namespace opentxs::network::zeromq::socket::implementation
 {
 Raw::Raw(const Context& context, const socket::Type type) noexcept
     : Imp()
@@ -476,9 +476,9 @@ auto Raw::UnbindAll() noexcept -> bool
 }
 
 Raw::~Raw() { Close(); }
-}  // namespace opentxs::v1::network::zeromq::socket::implementation
+}  // namespace opentxs::network::zeromq::socket::implementation
 
-namespace opentxs::v1::network::zeromq::socket
+namespace opentxs::network::zeromq::socket
 {
 auto swap(Raw& lhs, Raw& rhs) noexcept -> void { lhs.swap(rhs); }
 
@@ -609,4 +609,4 @@ Raw::~Raw()
         imp_ = nullptr;
     }
 }
-}  // namespace opentxs::v1::network::zeromq::socket
+}  // namespace opentxs::network::zeromq::socket

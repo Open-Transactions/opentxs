@@ -31,8 +31,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace api
 {
 namespace crypto
@@ -76,11 +76,11 @@ class Nym;
 
 class Contact;
 class PaymentCode;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::api::session::imp
+namespace opentxs::api::session::imp
 {
 class Contacts final : public session::internal::Contacts
 {
@@ -204,4 +204,4 @@ private:
     auto operator=(const Contacts&) -> Contacts& = delete;
     auto operator=(Contacts&&) -> Contacts& = delete;
 };
-}  // namespace opentxs::v1::api::session::imp
+}  // namespace opentxs::api::session::imp

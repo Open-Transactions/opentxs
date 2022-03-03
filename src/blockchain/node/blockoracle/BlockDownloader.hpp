@@ -27,7 +27,7 @@
 #include "opentxs/network/zeromq/socket/Socket.hpp"
 #include "opentxs/util/Log.hpp"
 
-namespace opentxs::v1::blockchain::node::implementation
+namespace opentxs::blockchain::node::implementation
 {
 using BlockDMBlock = download::Manager<
     BlockOracle::BlockDownloader,
@@ -240,4 +240,4 @@ private:
         }
     }
 };
-}  // namespace opentxs::v1::blockchain::node::implementation
+}  // namespace opentxs::blockchain::node::implementation

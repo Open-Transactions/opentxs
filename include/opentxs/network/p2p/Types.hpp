@@ -14,7 +14,7 @@
 
 #include "opentxs/util/Container.hpp"
 
-namespace opentxs::v1::network::p2p
+namespace opentxs::network::p2p
 {
 using TypeEnum = std::uint32_t;
 
@@ -25,9 +25,9 @@ class State;
 
 using StateData = UnallocatedVector<p2p::State>;
 using SyncData = UnallocatedVector<p2p::Block>;
-}  // namespace opentxs::v1::network::p2p
+}  // namespace opentxs::network::p2p
 
-namespace opentxs::v1
+namespace opentxs
 {
 OPENTXS_EXPORT auto print(network::p2p::MessageType in) noexcept
     -> UnallocatedCString;
@@ -36,4 +36,4 @@ constexpr auto value(network::p2p::MessageType type) noexcept
 {
     return static_cast<network::p2p::TypeEnum>(type);
 }
-}  // namespace opentxs::v1
+}  // namespace opentxs

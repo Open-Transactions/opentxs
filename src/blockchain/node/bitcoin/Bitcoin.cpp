@@ -13,7 +13,7 @@
 #include "opentxs/blockchain/block/Header.hpp"
 #include "serialization/protobuf/BlockchainBlockHeader.pb.h"  // IWYU pragma: keep
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto BlockchainNetworkBitcoin(
     const api::Session& api,
@@ -28,9 +28,9 @@ auto BlockchainNetworkBitcoin(
     return std::make_unique<ReturnType>(
         api, type, config, seednode, syncEndpoint);
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory
 
-namespace opentxs::v1::blockchain::node::base
+namespace opentxs::blockchain::node::base
 {
 Bitcoin::Bitcoin(
     const api::Session& api,
@@ -53,4 +53,4 @@ auto Bitcoin::instantiate_header(const ReadView payload) const noexcept
 }
 
 Bitcoin::~Bitcoin() { Shutdown(); }
-}  // namespace opentxs::v1::blockchain::node::base
+}  // namespace opentxs::blockchain::node::base

@@ -12,7 +12,7 @@
 #include "serialization/protobuf/BlindedSeriesList.pb.h"
 #include "serialization/protobuf/verify/Check.hpp"
 
-namespace opentxs::v1::proto
+namespace opentxs::proto
 {
 auto CheckProto_1(
     const BlindedSeriesList& input,
@@ -182,4 +182,4 @@ auto CheckProto_20(
 {
     UNDEFINED_VERSION(20)
 }
-}  // namespace opentxs::v1::proto
+}  // namespace opentxs::proto

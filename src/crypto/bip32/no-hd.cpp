@@ -7,7 +7,7 @@
 #include "1_Internal.hpp"        // IWYU pragma: associated
 #include "crypto/bip32/Imp.hpp"  // IWYU pragma: associated
 
-namespace opentxs::v1::crypto
+namespace opentxs::crypto
 {
 auto Bip32::Imp::DeriveKey(const EcdsaCurve&, const Secret&, const Path&) const
     -> Key
@@ -40,4 +40,4 @@ auto Bip32::Imp::root_node(
 {
     return false;
 }
-}  // namespace opentxs::v1::crypto
+}  // namespace opentxs::crypto

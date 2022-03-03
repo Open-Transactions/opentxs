@@ -27,7 +27,7 @@
 
 template class opentxs::Pimpl<opentxs::network::zeromq::socket::Router>;
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto RouterSocket(
     const network::zeromq::Context& context,
@@ -42,9 +42,9 @@ auto RouterSocket(
         static_cast<network::zeromq::socket::Direction>(direction),
         callback);
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory
 
-namespace opentxs::v1::network::zeromq::socket::implementation
+namespace opentxs::network::zeromq::socket::implementation
 {
 Router::Router(
     const zeromq::Context& context,
@@ -80,4 +80,4 @@ void Router::process_incoming(const Lock& lock, Message&& message) noexcept
 }
 
 Router::~Router() SHUTDOWN_SOCKET
-}  // namespace opentxs::v1::network::zeromq::socket::implementation
+}  // namespace opentxs::network::zeromq::socket::implementation

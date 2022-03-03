@@ -30,8 +30,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace api
 {
 class Crypto;
@@ -58,11 +58,11 @@ class Data;
 class OTPassword;
 class PasswordPrompt;
 class Secret;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::crypto::implementation
+namespace opentxs::crypto::implementation
 {
 class Sodium final : virtual public crypto::Sodium,
                      public AsymmetricProvider,
@@ -182,4 +182,4 @@ private:
     auto operator=(const Sodium&) -> Sodium& = delete;
     auto operator=(Sodium&&) -> Sodium& = delete;
 };
-}  // namespace opentxs::v1::crypto::implementation
+}  // namespace opentxs::crypto::implementation

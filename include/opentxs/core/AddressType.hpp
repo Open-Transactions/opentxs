@@ -10,7 +10,7 @@
 
 #include <cstdint>
 
-namespace opentxs::v1
+namespace opentxs
 {
 enum class AddressType : std::uint8_t {
     Error = 0,
@@ -20,4 +20,4 @@ enum class AddressType : std::uint8_t {
     EEP = 4,
     Inproc = 5,
 };
-}  // namespace opentxs::v1
+}  // namespace opentxs

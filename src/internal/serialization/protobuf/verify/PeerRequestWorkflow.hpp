@@ -10,17 +10,17 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace proto
 {
 class PeerRequestWorkflow;
 }  // namespace proto
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::proto
+namespace opentxs::proto
 {
 auto CheckProto_1(const PeerRequestWorkflow& input, const bool silent) -> bool;
 auto CheckProto_2(const PeerRequestWorkflow&, const bool) -> bool;
@@ -42,4 +42,4 @@ auto CheckProto_17(const PeerRequestWorkflow&, const bool) -> bool;
 auto CheckProto_18(const PeerRequestWorkflow&, const bool) -> bool;
 auto CheckProto_19(const PeerRequestWorkflow&, const bool) -> bool;
 auto CheckProto_20(const PeerRequestWorkflow&, const bool) -> bool;
-}  // namespace opentxs::v1::proto
+}  // namespace opentxs::proto

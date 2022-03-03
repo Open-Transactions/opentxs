@@ -11,7 +11,7 @@
 #include "opentxs/crypto/key/HD.hpp"
 #include "opentxs/util/Log.hpp"
 
-namespace opentxs::v1::crypto::key::implementation
+namespace opentxs::crypto::key::implementation
 {
 auto HD::ChildKey(const Bip32Index, const PasswordPrompt&) const noexcept
     -> std::unique_ptr<key::HD>
@@ -20,4 +20,4 @@ auto HD::ChildKey(const Bip32Index, const PasswordPrompt&) const noexcept
 
     return {};
 }
-}  // namespace opentxs::v1::crypto::key::implementation
+}  // namespace opentxs::crypto::key::implementation

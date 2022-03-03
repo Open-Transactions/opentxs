@@ -14,7 +14,7 @@
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/core/Secret.hpp"
 
-namespace opentxs::v1
+namespace opentxs
 {
 auto Factory::PasswordPrompt(
     const api::Session& api,
@@ -61,4 +61,4 @@ auto PasswordPrompt::SetPassword(const Secret& password) -> bool
 auto PasswordPrompt::Password() const -> const Secret& { return password_; }
 
 PasswordPrompt::~PasswordPrompt() = default;
-}  // namespace opentxs::v1
+}  // namespace opentxs

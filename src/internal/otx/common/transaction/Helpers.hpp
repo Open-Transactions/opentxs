@@ -17,7 +17,7 @@
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Time.hpp"
 
-namespace opentxs::v1
+namespace opentxs
 {
 namespace api
 {
@@ -110,4 +110,4 @@ auto SetupBoxReceiptFilename(
     String& strFolder2name,
     String& strFolder3name,
     String& strFilename) -> bool;
-}  // namespace opentxs::v1
+}  // namespace opentxs

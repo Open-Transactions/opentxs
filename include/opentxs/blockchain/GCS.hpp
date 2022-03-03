@@ -17,17 +17,17 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace proto
 {
 class GCS;
 }  // namespace proto
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::blockchain
+namespace opentxs::blockchain
 {
 class OPENTXS_EXPORT GCS
 {
@@ -57,4 +57,4 @@ public:
     virtual ~GCS() = default;
 };
 
-}  // namespace opentxs::v1::blockchain
+}  // namespace opentxs::blockchain

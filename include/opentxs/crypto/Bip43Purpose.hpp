@@ -8,7 +8,7 @@
 #include "opentxs/Version.hpp"       // IWYU pragma: associated
 #include "opentxs/crypto/Types.hpp"  // IWYU pragma: associated
 
-namespace opentxs::v1
+namespace opentxs
 {
 enum class Bip43Purpose : Bip32Index {
     HDWALLET = 44,     // BIP-44
@@ -18,4 +18,4 @@ enum class Bip43Purpose : Bip32Index {
     FS = 0x4f544653,   // OTFS
     NYM = 0x4f544e4d   // OTNM
 };
-}  // namespace opentxs::v1
+}  // namespace opentxs

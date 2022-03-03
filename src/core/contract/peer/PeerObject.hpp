@@ -23,8 +23,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace api
 {
 namespace session
@@ -51,11 +51,11 @@ class PeerObject;
 class Armored;
 class Factory;
 class PasswordPrompt;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::peer::implementation
+namespace opentxs::peer::implementation
 {
 class Object final : virtual public opentxs::PeerObject
 {
@@ -148,4 +148,4 @@ private:
 
     Object() = delete;
 };
-}  // namespace opentxs::v1::peer::implementation
+}  // namespace opentxs::peer::implementation

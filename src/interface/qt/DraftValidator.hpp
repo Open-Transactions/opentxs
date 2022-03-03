@@ -15,8 +15,8 @@ class QObject;
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace ui
 {
 namespace implementation
@@ -29,11 +29,11 @@ namespace internal
 struct ActivityThread;
 }  // namespace internal
 }  // namespace ui
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::ui::implementation
+namespace opentxs::ui::implementation
 {
 class DraftValidator final : public QValidator
 {
@@ -56,4 +56,4 @@ private:
     DraftValidator& operator=(const DraftValidator&) = delete;
     DraftValidator& operator=(DraftValidator&&) = delete;
 };
-}  // namespace opentxs::v1::ui::implementation
+}  // namespace opentxs::ui::implementation

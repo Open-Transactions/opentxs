@@ -13,7 +13,7 @@
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/identity/wot/claim/Item.hpp"
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto ContactItemWidget(
     const ui::implementation::ContactSubsectionInternalInterface& parent,
@@ -27,9 +27,9 @@ auto ContactItemWidget(
 
     return std::make_shared<ReturnType>(parent, api, rowID, sortKey, custom);
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory
 
-namespace opentxs::v1::ui::implementation
+namespace opentxs::ui::implementation
 {
 ContactItem::ContactItem(
     const ContactSubsectionInternalInterface& parent,
@@ -56,4 +56,4 @@ auto ContactItem::reindex(
 
     return true;
 }
-}  // namespace opentxs::v1::ui::implementation
+}  // namespace opentxs::ui::implementation

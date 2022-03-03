@@ -42,16 +42,16 @@
 
 template class opentxs::Pimpl<opentxs::network::ServerConnection>;
 
-namespace opentxs::v1
+namespace opentxs
 {
 auto Factory::ZMQ(const api::Session& api, const Flag& running)
     -> api::network::ZMQ*
 {
     return new api::network::imp::ZMQ(api, running);
 }
-}  // namespace opentxs::v1
+}  // namespace opentxs
 
-namespace opentxs::v1::api::network::imp
+namespace opentxs::api::network::imp
 {
 ZMQ::ZMQ(const api::Session& api, const Flag& running)
     : api_(api)
@@ -296,4 +296,4 @@ auto ZMQ::verify_lock(const Lock& lock) const -> bool
 }
 
 ZMQ::~ZMQ() { server_connections_.clear(); }
-}  // namespace opentxs::v1::api::network::imp
+}  // namespace opentxs::api::network::imp

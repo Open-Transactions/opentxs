@@ -3,42 +3,53 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-// IWYU pragma: no_include "opentxs/blockchain/BlockchainType.hpp"
-
 #pragma once
 
-#include <memory>
+#include <boost/smart_ptr/shared_ptr.hpp>
+#include <tuple>
+#include <utility>
 
-#include "opentxs/blockchain/Types.hpp"
+#include "internal/api/crypto/blockchain/BalanceOracle.hpp"
+#include "internal/api/crypto/blockchain/Types.hpp"
+#include "internal/network/zeromq/Types.hpp"
+#include "opentxs/core/Data.hpp"
+#include "opentxs/core/identifier/Nym.hpp"
+#include "opentxs/network/zeromq/ListenCallback.hpp"
+#include "opentxs/util/Allocated.hpp"
+#include "opentxs/util/Bytes.hpp"
+#include "opentxs/util/Container.hpp"
+#include "opentxs/util/WorkType.hpp"
+#include "util/Actor.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace api
 {
 class Session;
 }  // namespace api
 
-namespace identifier
+namespace network
 {
-class Nym;
-}  // namespace identifier
-}  // namespace v1
+namespace zeromq
+{
+namespace socket
+{
+class Raw;
+}  // namespace socket
+}  // namespace zeromq
+}  // namespace network
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::api::crypto::blockchain
+namespace opentxs::api::crypto::blockchain
 {
-class BalanceOracle
+class BalanceOracle::Imp final : public opentxs::Actor<Imp, BalanceOracleJobs>
 {
 public:
-    using Balance = opentxs::blockchain::Balance;
-    using Chain = opentxs::blockchain::Type;
-
-    auto RefreshBalance(const identifier::Nym& owner, const Chain chain)
-        const noexcept -> void;
     auto UpdateBalance(const Chain chain, const Balance balance) const noexcept
         -> void;
     auto UpdateBalance(
@@ -46,15 +57,59 @@ public:
         const Chain chain,
         const Balance balance) const noexcept -> void;
 
-    BalanceOracle(const api::Session& api) noexcept;
+    auto Init(boost::shared_ptr<Imp> me) noexcept -> void
+    {
+        signal_startup(me);
+    }
+    auto Shutdown() noexcept -> void { signal_shutdown(); }
 
-    ~BalanceOracle();
+    Imp(const api::Session& api,
+        const opentxs::network::zeromq::BatchID batch,
+        allocator_type alloc) noexcept;
+
+    ~Imp() final;
 
 private:
-    struct Imp;
+    friend opentxs::Actor<Imp, BalanceOracleJobs>;
 
-    std::unique_ptr<Imp> imp_;
+    using Subscribers = Set<OTData>;
+    using Data = std::pair<Balance, Subscribers>;
+    using NymData = Map<OTNymID, Data>;
+    using ChainData = std::pair<Data, NymData>;
 
-    BalanceOracle() = delete;
+    const api::Session& api_;
+    opentxs::network::zeromq::socket::Raw& router_;
+    opentxs::network::zeromq::socket::Raw& publish_;
+    Map<Chain, ChainData> data_;
+
+    auto make_message(
+        const ReadView connectionID,
+        const identifier::Nym* owner,
+        const Chain chain,
+        const Balance& balance,
+        const WorkType type) const noexcept -> Message;
+
+    auto do_shutdown() noexcept -> void {}
+    auto notify_subscribers(
+        const Subscribers& recipients,
+        const Balance& balance,
+        const Chain chain) noexcept -> void;
+    auto notify_subscribers(
+        const Subscribers& recipients,
+        const identifier::Nym& owner,
+        const Balance& balance,
+        const Chain chain) noexcept -> void;
+    auto pipeline(const Work work, Message&& msg) noexcept -> void;
+    auto process_registration(Message&& in) noexcept -> void;
+    auto process_update_balance(const Chain chain, Balance balance) noexcept
+        -> void;
+    auto process_update_balance(
+        const identifier::Nym& owner,
+        const Chain chain,
+        Balance balance) noexcept -> void;
+    auto process_update_chain_balance(Message&& in) noexcept -> void;
+    auto process_update_nym_balance(Message&& in) noexcept -> void;
+    auto startup() noexcept -> void {}
+    auto work() noexcept -> bool { return false; }
 };
-}  // namespace opentxs::v1::api::crypto::blockchain
+}  // namespace opentxs::api::crypto::blockchain

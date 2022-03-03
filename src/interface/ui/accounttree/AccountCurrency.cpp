@@ -17,7 +17,7 @@
 #include "opentxs/core/Types.hpp"
 #include "opentxs/interface/ui/AccountTreeItem.hpp"
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto AccountCurrencyWidget(
     const ui::implementation::AccountTreeInternalInterface& parent,
@@ -31,9 +31,9 @@ auto AccountCurrencyWidget(
 
     return std::make_unique<ReturnType>(parent, api, rowID, key, custom);
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory
 
-namespace opentxs::v1::ui::implementation
+namespace opentxs::ui::implementation
 {
 AccountCurrency::AccountCurrency(
     const AccountTreeInternalInterface& parent,
@@ -100,4 +100,4 @@ auto AccountCurrency::reindex(
 }
 
 AccountCurrency::~AccountCurrency() = default;
-}  // namespace opentxs::v1::ui::implementation
+}  // namespace opentxs::ui::implementation

@@ -51,7 +51,7 @@
 #include "serialization/protobuf/PeerRequestWorkflow.pb.h"
 #include "serialization/protobuf/UnitAccountMap.pb.h"
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto Issuer(
     const api::session::Wallet& wallet,
@@ -72,9 +72,9 @@ auto Issuer(
 
     return new ReturnType(wallet, nymID, issuerID);
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory
 
-namespace opentxs::v1::otx::client::implementation
+namespace opentxs::otx::client::implementation
 {
 Issuer::Issuer(
     const api::session::Wallet& wallet,
@@ -795,4 +795,4 @@ auto Issuer::StoreSecretInitiated() const -> bool
 }
 
 Issuer::~Issuer() {}
-}  // namespace opentxs::v1::otx::client::implementation
+}  // namespace opentxs::otx::client::implementation

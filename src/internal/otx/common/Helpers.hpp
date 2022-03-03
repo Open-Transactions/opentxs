@@ -10,18 +10,18 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 class String;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1
+namespace opentxs
 {
 auto TranslateAccountTypeStringToEnum(const String& acctTypeString) noexcept
     -> Account::AccountType;
 auto TranslateAccountTypeToString(
     Account::AccountType type,
     String& acctType) noexcept -> void;
-}  // namespace opentxs::v1
+}  // namespace opentxs

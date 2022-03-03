@@ -15,8 +15,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace api
 {
 namespace crypto
@@ -34,11 +34,11 @@ class HD;
 }  // namespace crypto
 
 using OTHDKey = Pimpl<crypto::key::HD>;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::crypto::key
+namespace opentxs::crypto::key
 {
 class OPENTXS_EXPORT HD : virtual public EllipticCurve
 {
@@ -70,4 +70,4 @@ private:
     auto operator=(const HD&) -> HD& = delete;
     auto operator=(HD&&) -> HD& = delete;
 };
-}  // namespace opentxs::v1::crypto::key
+}  // namespace opentxs::crypto::key

@@ -50,7 +50,7 @@
 namespace be = boost::endian;
 namespace bmp = boost::multiprecision;
 
-namespace opentxs::v1
+namespace opentxs
 {
 constexpr auto bitmask(const std::uint64_t n) -> std::uint64_t
 {
@@ -61,9 +61,9 @@ constexpr auto range(std::uint32_t N, std::uint32_t M) noexcept -> std::uint64_t
 {
     return std::uint64_t{N} * std::uint64_t{M};
 }
-}  // namespace opentxs::v1
+}  // namespace opentxs
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto GCS(
     const api::Session& api,
@@ -205,9 +205,9 @@ auto GCS(
         return nullptr;
     }
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory
 
-namespace opentxs::v1::gcs
+namespace opentxs::gcs
 {
 using BitReader = blockchain::internal::BitReader;
 using BitWriter = blockchain::internal::BitWriter;
@@ -342,9 +342,9 @@ auto HashedSetConstruct(
 
     return output;
 }
-}  // namespace opentxs::v1::gcs
+}  // namespace opentxs::gcs
 
-namespace opentxs::v1::blockchain::implementation
+namespace opentxs::blockchain::implementation
 {
 GCS::GCS(
     const api::Session& api,
@@ -602,4 +602,4 @@ auto GCS::transform(const UnallocatedVector<Space>& in) noexcept
 
     return output;
 }
-}  // namespace opentxs::v1::blockchain::implementation
+}  // namespace opentxs::blockchain::implementation

@@ -23,7 +23,7 @@
 #include "opentxs/util/Pimpl.hpp"
 #include "otx/common/OTStorage.hpp"
 
-namespace opentxs::v1
+namespace opentxs
 {
 OTSignedFile::OTSignedFile(const api::Session& api)
     : Contract(api)
@@ -292,4 +292,4 @@ void OTSignedFile::Release()
 }
 
 OTSignedFile::~OTSignedFile() { Release_SignedFile(); }
-}  // namespace opentxs::v1
+}  // namespace opentxs

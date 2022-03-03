@@ -23,7 +23,7 @@
 #include "serialization/protobuf/Signature.pb.h"
 #include "serialization/protobuf/Verification.pb.h"
 
-namespace opentxs::v1
+namespace opentxs
 {
 auto Factory::VerificationItem(
     const identity::wot::verification::internal::Nym& parent,
@@ -77,14 +77,14 @@ auto Factory::VerificationItem(
         return nullptr;
     }
 }
-}  // namespace opentxs::v1
+}  // namespace opentxs
 
-namespace opentxs::v1::identity::wot::verification
+namespace opentxs::identity::wot::verification
 {
 const VersionNumber Item::DefaultVersion{1};
 }
 
-namespace opentxs::v1::identity::wot::verification::implementation
+namespace opentxs::identity::wot::verification::implementation
 {
 Item::Item(
     const internal::Nym& parent,
@@ -235,4 +235,4 @@ auto Item::sig_form(
 
     return output;
 }
-}  // namespace opentxs::v1::identity::wot::verification::implementation
+}  // namespace opentxs::identity::wot::verification::implementation

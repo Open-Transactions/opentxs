@@ -12,8 +12,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace blockchain
 {
 namespace block
@@ -49,11 +49,11 @@ class Nym;
 }  // namespace identifier
 
 class PaymentCode;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::blockchain::node
+namespace opentxs::blockchain::node
 {
 class OPENTXS_EXPORT Manager
 {
@@ -115,4 +115,4 @@ private:
     auto operator=(const Manager&) -> Manager& = delete;
     auto operator=(Manager&&) -> Manager& = delete;
 };
-}  // namespace opentxs::v1::blockchain::node
+}  // namespace opentxs::blockchain::node

@@ -29,7 +29,7 @@ extern "C" {
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/util/Log.hpp"
 
-namespace opentxs::v1
+namespace opentxs
 {
 auto SetThisThreadsPriority(ThreadPriority priority) noexcept -> void
 {
@@ -62,9 +62,9 @@ auto Signals::handle() -> void
 {
     std::cout << "Signal handling is not supported on Windows\n";
 }
-}  // namespace opentxs::v1
+}  // namespace opentxs
 
-namespace opentxs::v1::implementation
+namespace opentxs::implementation
 {
 auto String::tokenize_basic(
     UnallocatedMap<UnallocatedCString, UnallocatedCString>& mapOutput) const
@@ -135,9 +135,9 @@ auto String::tokenize_enhanced(
 {
     return false;
 }
-}  // namespace opentxs::v1::implementation
+}  // namespace opentxs::implementation
 
-namespace opentxs::v1::api::imp
+namespace opentxs::api::imp
 {
 auto Context::HandleSignals(ShutdownCallback* callback) const noexcept -> void
 {
@@ -171,9 +171,9 @@ auto Legacy::get_suffix() noexcept -> fs::path
 auto Legacy::prepend() noexcept -> UnallocatedCString { return {}; }
 
 auto Legacy::use_dot() noexcept -> bool { return false; }
-}  // namespace opentxs::v1::api::imp
+}  // namespace opentxs::api::imp
 
-namespace opentxs::v1::network::zeromq::implementation
+namespace opentxs::network::zeromq::implementation
 {
 auto Context::max_sockets() noexcept -> int { return 10240; }
-}  // namespace opentxs::v1::network::zeromq::implementation
+}  // namespace opentxs::network::zeromq::implementation

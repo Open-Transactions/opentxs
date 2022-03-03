@@ -15,8 +15,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace api
 {
 namespace session
@@ -42,7 +42,7 @@ class Nym;
 
 class Secret;
 class PasswordPrompt;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -56,7 +56,7 @@ using INTERNAL_PASSWORD_CALLBACK =
 }
 }  // namespace
 
-namespace opentxs::v1::api::session::internal
+namespace opentxs::api::session::internal
 {
 class Session : virtual public api::Session
 {
@@ -81,4 +81,4 @@ public:
 
     ~Session() override = default;
 };
-}  // namespace opentxs::v1::api::session::internal
+}  // namespace opentxs::api::session::internal

@@ -16,8 +16,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace api
 {
 namespace network
@@ -52,11 +52,11 @@ class Server;
 class PasswordPrompt;
 
 using OTServerConnection = Pimpl<network::ServerConnection>;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::network
+namespace opentxs::network
 {
 class OPENTXS_EXPORT ServerConnection
 {
@@ -98,4 +98,4 @@ private:
     auto operator=(const ServerConnection&) -> ServerConnection& = delete;
     auto operator=(ServerConnection&&) -> ServerConnection& = delete;
 };
-}  // namespace opentxs::v1::network
+}  // namespace opentxs::network

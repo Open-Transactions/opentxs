@@ -26,14 +26,14 @@ class error_code;
 
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 class Timer;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1
+namespace opentxs
 {
 auto operator<(const Timer& lhs, const Timer& rhs) noexcept -> bool;
 auto operator==(const Timer& lhs, const Timer& rhs) noexcept -> bool;
@@ -69,9 +69,9 @@ private:
     Timer(const Timer&) = delete;
     auto operator=(const Timer&) -> Timer& = delete;
 };
-}  // namespace opentxs::v1
+}  // namespace opentxs
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto Timer(boost::asio::io_context& asio) noexcept -> opentxs::Timer;
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory

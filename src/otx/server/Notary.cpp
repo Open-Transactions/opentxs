@@ -90,7 +90,7 @@
 
 namespace zmq = opentxs::network::zeromq;
 
-namespace opentxs::v1::server
+namespace opentxs::server
 {
 using listOfAccounts = UnallocatedVector<ExclusiveAccount>;
 
@@ -9031,4 +9031,4 @@ auto Notary::verify_token(otx::blind::Mint& mint, otx::blind::Token& token)
         return true;
     }
 }
-}  // namespace opentxs::v1::server
+}  // namespace opentxs::server

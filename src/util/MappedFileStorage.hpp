@@ -14,7 +14,7 @@
 #include "opentxs/util/Container.hpp"
 #include "util/LMDB.hpp"
 
-namespace opentxs::v1::util
+namespace opentxs::util
 {
 // Stores items in a memory mapped, sparse backing file.
 struct IndexData {
@@ -73,4 +73,4 @@ private:
     mutable std::unique_ptr<Imp> imp_p_;
     Imp& imp_;
 };
-}  // namespace opentxs::v1::util
+}  // namespace opentxs::util

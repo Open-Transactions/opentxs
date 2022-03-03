@@ -18,7 +18,7 @@
 #include "serialization/protobuf/ContactEnums.pb.h"
 #include "util/Container.hpp"
 
-namespace opentxs::v1::identity::wot::claim
+namespace opentxs::identity::wot::claim
 {
 using AttributeMap = robin_hood::
     unordered_flat_map<claim::Attribute, proto::ContactItemAttribute>;
@@ -45,9 +45,9 @@ auto claimtype_map() noexcept -> const ClaimTypeMap&;
 auto identitytype_map() noexcept -> const NymTypeMap&;
 auto sectiontype_map() noexcept -> const SectionTypeMap&;
 auto unittype_map() noexcept -> const UnitTypeMap&;
-}  // namespace opentxs::v1::identity::wot::claim
+}  // namespace opentxs::identity::wot::claim
 
-namespace opentxs::v1::identity::wot::claim
+namespace opentxs::identity::wot::claim
 {
 auto attribute_map() noexcept -> const AttributeMap&
 {
@@ -835,9 +835,9 @@ auto unittype_map() noexcept -> const UnitTypeMap&
 
     return map;
 }
-}  // namespace opentxs::v1::identity::wot::claim
+}  // namespace opentxs::identity::wot::claim
 
-namespace opentxs::v1
+namespace opentxs
 {
 auto ClaimToNym(const identity::wot::claim::ClaimType in) noexcept
     -> identity::Type
@@ -968,4 +968,4 @@ auto UnitToClaim(const UnitType in) noexcept -> identity::wot::claim::ClaimType
         return identity::wot::claim::ClaimType::Error;
     }
 }
-}  // namespace opentxs::v1
+}  // namespace opentxs

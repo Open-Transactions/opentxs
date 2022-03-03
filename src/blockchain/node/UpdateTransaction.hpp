@@ -14,8 +14,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace api
 {
 class Session;
@@ -30,11 +30,11 @@ class Header;
 }  // namespace blockchain
 
 class Factory;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::blockchain::node
+namespace opentxs::blockchain::node
 {
 class UpdateTransaction
 {
@@ -116,4 +116,4 @@ private:
         const bool newHeader,
         std::unique_ptr<block::Header> header) noexcept -> block::Header&;
 };
-}  // namespace opentxs::v1::blockchain::node
+}  // namespace opentxs::blockchain::node

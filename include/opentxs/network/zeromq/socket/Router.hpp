@@ -15,8 +15,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace network
 {
 namespace zeromq
@@ -29,11 +29,11 @@ class Router;
 }  // namespace network
 
 using OTZMQRouterSocket = Pimpl<network::zeromq::socket::Router>;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::network::zeromq::socket
+namespace opentxs::network::zeromq::socket
 {
 class OPENTXS_EXPORT Router : virtual public curve::Server,
                               virtual public curve::Client,
@@ -58,4 +58,4 @@ private:
     auto operator=(const Router&) -> Router& = delete;
     auto operator=(Router&&) -> Router& = delete;
 };
-}  // namespace opentxs::v1::network::zeromq::socket
+}  // namespace opentxs::network::zeromq::socket

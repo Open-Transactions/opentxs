@@ -16,7 +16,7 @@
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Pimpl.hpp"
 
-namespace opentxs::v1::blockchain::node::wallet
+namespace opentxs::blockchain::node::wallet
 {
 struct BlockIndex::Imp {
     auto Query(const block::Hash& block) const noexcept -> bool
@@ -87,4 +87,4 @@ BlockIndex::~BlockIndex()
         imp_ = nullptr;
     }
 }
-}  // namespace opentxs::v1::blockchain::node::wallet
+}  // namespace opentxs::blockchain::node::wallet

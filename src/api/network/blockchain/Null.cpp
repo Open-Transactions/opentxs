@@ -7,7 +7,7 @@
 #include "1_Internal.hpp"                    // IWYU pragma: associated
 #include "internal/api/network/Factory.hpp"  // IWYU pragma: associated
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto BlockchainNetworkAPI(
     const api::Session&,
@@ -17,4 +17,4 @@ auto BlockchainNetworkAPI(
 {
     return BlockchainNetworkAPINull();
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory

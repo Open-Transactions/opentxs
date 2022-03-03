@@ -10,7 +10,7 @@
 
 #include <cstdint>
 
-namespace opentxs::v1::identity
+namespace opentxs::identity
 {
 enum class Type : std::uint32_t {
     invalid = 0,
@@ -21,4 +21,4 @@ enum class Type : std::uint32_t {
     server = 5,
     bot = 6,
 };
-}  // namespace opentxs::v1::identity
+}  // namespace opentxs::identity

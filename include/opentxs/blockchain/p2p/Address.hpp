@@ -16,8 +16,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace blockchain
 {
 namespace p2p
@@ -32,11 +32,11 @@ class BlockchainPeerAddress;
 }  // namespace proto
 
 using OTBlockchainAddress = Pimpl<blockchain::p2p::Address>;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::blockchain::p2p
+namespace opentxs::blockchain::p2p
 {
 class OPENTXS_EXPORT Address
 {
@@ -76,4 +76,4 @@ private:
     auto operator=(const Address&) -> Address& = delete;
     auto operator=(Address&&) -> Address& = delete;
 };
-}  // namespace opentxs::v1::blockchain::p2p
+}  // namespace opentxs::blockchain::p2p

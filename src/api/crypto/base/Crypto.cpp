@@ -31,7 +31,7 @@
 #include "opentxs/crypto/library/SymmetricProvider.hpp"
 #include "opentxs/util/Log.hpp"
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto CryptoAPI(const api::Settings& settings) noexcept
     -> std::unique_ptr<api::Crypto>
@@ -40,9 +40,9 @@ auto CryptoAPI(const api::Settings& settings) noexcept
 
     return std::make_unique<ReturnType>(settings);
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory
 
-namespace opentxs::v1::api::imp
+namespace opentxs::api::imp
 {
 const opentxs::crypto::blank::EcdsaProvider Crypto::blank_{};
 
@@ -272,4 +272,4 @@ auto Crypto::SymmetricProvider(opentxs::crypto::key::symmetric::Source type)
 auto Crypto::Util() const noexcept -> const crypto::Util& { return util_; }
 
 Crypto::~Crypto() { Cleanup(); }
-}  // namespace opentxs::v1::api::imp
+}  // namespace opentxs::api::imp

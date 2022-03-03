@@ -23,7 +23,7 @@
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Pimpl.hpp"
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 // We have a header and a raw payload. Parse it.
 auto BitcoinP2PMerkleblock(
@@ -167,9 +167,9 @@ auto BitcoinP2PMerkleblock(
 
     return new ReturnType(api, network, block_header, txn_count, hashes, flags);
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory
 
-namespace opentxs::v1::blockchain::p2p::bitcoin::message
+namespace opentxs::blockchain::p2p::bitcoin::message
 {
 // We have all the data members to create the message from scratch (for sending)
 Merkleblock::Merkleblock(
@@ -265,4 +265,4 @@ auto Merkleblock::payload(AllocateOutput out) const noexcept -> bool
         return false;
     }
 }
-}  // namespace opentxs::v1::blockchain::p2p::bitcoin::message
+}  // namespace opentxs::blockchain::p2p::bitcoin::message

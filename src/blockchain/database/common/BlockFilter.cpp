@@ -27,7 +27,7 @@
 #include "util/LMDB.hpp"
 #include "util/MappedFileStorage.hpp"
 
-namespace opentxs::v1::blockchain::database::common
+namespace opentxs::blockchain::database::common
 {
 BlockFilter::BlockFilter(
     const api::Session& api,
@@ -305,4 +305,4 @@ auto BlockFilter::translate_header(const filter::Type type) noexcept(false)
         }
     }
 }
-}  // namespace opentxs::v1::blockchain::database::common
+}  // namespace opentxs::blockchain::database::common

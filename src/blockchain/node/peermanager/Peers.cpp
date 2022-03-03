@@ -41,7 +41,7 @@
 #include "opentxs/util/Options.hpp"
 #include "opentxs/util/Pimpl.hpp"
 
-namespace opentxs::v1::blockchain::node::implementation
+namespace opentxs::blockchain::node::implementation
 {
 PeerManager::Peers::Peers(
     const api::Session& api,
@@ -649,4 +649,4 @@ auto PeerManager::Peers::Shutdown() noexcept -> void
 }
 
 PeerManager::Peers::~Peers() = default;
-}  // namespace opentxs::v1::blockchain::node::implementation
+}  // namespace opentxs::blockchain::node::implementation

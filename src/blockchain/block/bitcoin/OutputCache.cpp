@@ -21,7 +21,7 @@
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Pimpl.hpp"
 
-namespace opentxs::v1::blockchain::block::bitcoin::implementation
+namespace opentxs::blockchain::block::bitcoin::implementation
 {
 Output::Cache::Cache(
     const api::Session& api,
@@ -223,4 +223,4 @@ auto Output::Cache::tags() const noexcept -> UnallocatedSet<node::TxoTag>
 
     return tags_;
 }
-}  // namespace opentxs::v1::blockchain::block::bitcoin::implementation
+}  // namespace opentxs::blockchain::block::bitcoin::implementation

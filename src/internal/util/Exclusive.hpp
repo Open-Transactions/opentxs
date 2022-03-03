@@ -17,7 +17,7 @@
 #include "internal/otx/common/Account.hpp"
 #include "opentxs/Types.hpp"
 
-namespace opentxs::v1
+namespace opentxs
 {
 template <typename C>
 class Exclusive
@@ -57,4 +57,4 @@ private:
     Exclusive(const Exclusive&) = delete;
     auto operator=(const Exclusive&) noexcept -> Exclusive& = delete;
 };  // class Exclusive
-}  // namespace opentxs::v1
+}  // namespace opentxs

@@ -88,8 +88,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace api
 {
 namespace session
@@ -239,19 +239,19 @@ class UnitListQt;
 }  // namespace ui
 
 class Flag;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
 class QObject;
 class QVariant;
 
-namespace opentxs::v1::ui
+namespace opentxs::ui
 {
 auto claim_ownership(QObject* object) noexcept -> void;
-}  // namespace opentxs::v1::ui
+}  // namespace opentxs::ui
 
-namespace opentxs::v1::ui::implementation
+namespace opentxs::ui::implementation
 {
 using CustomData = UnallocatedVector<void*>;
 
@@ -592,9 +592,9 @@ auto account_name_custodial(
     const identifier::Notary& notary,
     const identifier::UnitDefinition& unit,
     UnallocatedCString&& alias) noexcept -> UnallocatedCString;
-}  // namespace opentxs::v1::ui::implementation
+}  // namespace opentxs::ui::implementation
 
-namespace opentxs::v1::ui::internal
+namespace opentxs::ui::internal
 {
 struct List : virtual public ui::List {
     static auto MakeQT(const api::Session& api) noexcept
@@ -1639,9 +1639,9 @@ struct UnitListItem final : virtual public Row,
 auto make_progress(
     blockchain::block::Height& actual,
     blockchain::block::Height& target) noexcept -> double;
-}  // namespace opentxs::v1::ui::internal
+}  // namespace opentxs::ui::internal
 
-namespace opentxs::v1::ui::qt::internal
+namespace opentxs::ui::qt::internal
 {
 struct Index {
     bool valid_{false};
@@ -1710,9 +1710,9 @@ private:
     Model& operator=(const Model&) = delete;
     Model& operator=(Model&&) = delete;
 };
-}  // namespace opentxs::v1::ui::qt::internal
+}  // namespace opentxs::ui::qt::internal
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto AccountActivityQtModel(ui::internal::AccountActivity& parent) noexcept
     -> std::unique_ptr<ui::AccountActivityQt>;
@@ -2086,4 +2086,4 @@ auto UnitListModel(
     -> std::unique_ptr<ui::internal::UnitList>;
 auto UnitListQtModel(ui::internal::UnitList& parent) noexcept
     -> std::unique_ptr<ui::UnitListQt>;
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory

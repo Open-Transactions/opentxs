@@ -19,7 +19,7 @@
 #include "opentxs/core/display/Definition.hpp"
 #include "opentxs/util/Bytes.hpp"
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto AccountTreeItem(
     const ui::implementation::AccountCurrencyInternalInterface& parent,
@@ -45,9 +45,9 @@ auto AccountTreeItem(
         }
     }
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory
 
-namespace opentxs::v1::ui::implementation
+namespace opentxs::ui::implementation
 {
 AccountTreeItem::AccountTreeItem(
     const AccountCurrencyInternalInterface& parent,
@@ -129,4 +129,4 @@ auto AccountTreeItem::reindex(
 }
 
 AccountTreeItem::~AccountTreeItem() = default;
-}  // namespace opentxs::v1::ui::implementation
+}  // namespace opentxs::ui::implementation

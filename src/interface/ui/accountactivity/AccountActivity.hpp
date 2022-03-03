@@ -39,8 +39,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace api
 {
 namespace session
@@ -79,11 +79,11 @@ class AmountValidator;
 class DestinationValidator;
 class DisplayScaleQt;
 }  // namespace ui
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1
+namespace opentxs
 {
 template <typename T>
 struct make_blank;
@@ -96,9 +96,9 @@ struct make_blank<ui::implementation::AccountActivityRowID> {
         return {api.Factory().Identifier(), proto::PAYMENTEVENTTYPE_ERROR};
     }
 };
-}  // namespace opentxs::v1
+}  // namespace opentxs
 
-namespace opentxs::v1::ui::implementation
+namespace opentxs::ui::implementation
 {
 using AccountActivityList = List<
     AccountActivityExternalInterface,
@@ -297,4 +297,4 @@ private:
     auto operator=(const AccountActivity&) -> AccountActivity& = delete;
     auto operator=(AccountActivity&&) -> AccountActivity& = delete;
 };
-}  // namespace opentxs::v1::ui::implementation
+}  // namespace opentxs::ui::implementation

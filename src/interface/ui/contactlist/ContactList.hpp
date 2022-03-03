@@ -31,8 +31,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace api
 {
 namespace session
@@ -57,7 +57,7 @@ class Message;
 }  // namespace network
 
 class Identifier;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -84,7 +84,7 @@ struct less<CONTACTLISTID> {
 };
 }  // namespace std
 
-namespace opentxs::v1::ui::implementation
+namespace opentxs::ui::implementation
 {
 using ContactListList = List<
     ContactListExternalInterface,
@@ -170,4 +170,4 @@ private:
     auto operator=(const ContactList&) -> ContactList& = delete;
     auto operator=(ContactList&&) -> ContactList& = delete;
 };
-}  // namespace opentxs::v1::ui::implementation
+}  // namespace opentxs::ui::implementation

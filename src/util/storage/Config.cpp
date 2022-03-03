@@ -21,7 +21,7 @@ namespace C = std::chrono;
 
 #define STORAGE_CONFIG_KEY "storage"
 
-namespace opentxs::v1::storage
+namespace opentxs::storage
 {
 Config::Config(
     const api::Legacy& legacy,
@@ -373,4 +373,4 @@ Config::Config(
 
     config.Save();
 }
-}  // namespace opentxs::v1::storage
+}  // namespace opentxs::storage

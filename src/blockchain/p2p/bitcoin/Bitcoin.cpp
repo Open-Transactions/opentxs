@@ -23,7 +23,7 @@
 #include "opentxs/util/Pimpl.hpp"
 #include "util/Container.hpp"
 
-namespace opentxs::v1::blockchain::p2p::bitcoin
+namespace opentxs::blockchain::p2p::bitcoin
 {
 const CommandMap command_map_{
     {Command::addr, "addr"},
@@ -320,4 +320,4 @@ auto TranslateServices(
 
     return output;
 }
-}  // namespace opentxs::v1::blockchain::p2p::bitcoin
+}  // namespace opentxs::blockchain::p2p::bitcoin

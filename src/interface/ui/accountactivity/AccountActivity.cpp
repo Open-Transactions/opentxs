@@ -20,7 +20,7 @@
 #include "opentxs/util/Pimpl.hpp"
 #include "util/Work.hpp"
 
-namespace opentxs::v1::ui::implementation
+namespace opentxs::ui::implementation
 {
 AccountActivity::AccountActivity(
     const api::session::Client& api,
@@ -112,4 +112,4 @@ AccountActivity::~AccountActivity()
     signal_shutdown().get();
     shutdown_qt();
 }
-}  // namespace opentxs::v1::ui::implementation
+}  // namespace opentxs::ui::implementation

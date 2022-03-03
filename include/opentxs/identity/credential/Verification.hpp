@@ -12,8 +12,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace api
 {
 class Session;
@@ -23,11 +23,11 @@ namespace proto
 {
 class Verification;
 }  // namespace proto
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::identity::credential
+namespace opentxs::identity::credential
 {
 class OPENTXS_EXPORT Verification : virtual public Base
 {
@@ -49,4 +49,4 @@ private:
     auto operator=(const Verification&) -> Verification& = delete;
     auto operator=(Verification&&) -> Verification& = delete;
 };
-}  // namespace opentxs::v1::identity::credential
+}  // namespace opentxs::identity::credential

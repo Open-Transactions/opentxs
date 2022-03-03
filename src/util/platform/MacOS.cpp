@@ -7,10 +7,10 @@
 #include "1_Internal.hpp"  // IWYU pragma: associated
 #include "api/Legacy.hpp"  // IWYU pragma: associated
 
-namespace opentxs::v1::api::imp
+namespace opentxs::api::imp
 {
 auto Legacy::prepend() noexcept -> UnallocatedCString
 {
     return "Library/Application Support/";
 }
-}  // namespace opentxs::v1::api::imp
+}  // namespace opentxs::api::imp

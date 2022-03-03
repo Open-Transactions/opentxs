@@ -7,7 +7,7 @@
 #include "1_Internal.hpp"       // IWYU pragma: associated
 #include "util/license/License.hpp"  // IWYU pragma: associated
 
-namespace opentxs::v1
+namespace opentxs
 {
 auto license_opentxs(LicenseMap& out) noexcept -> void
 {
@@ -17,4 +17,4 @@ auto license_opentxs(LicenseMap& out) noexcept -> void
             UnallocatedCString{R"~!~(@OPENTXS_CREDITS_TEXT@)~!~"} +
             UnallocatedCString{text_mpl_v2()});
 }
-}  // namespace opentxs::v1
+}  // namespace opentxs

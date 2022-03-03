@@ -11,7 +11,7 @@
 
 #include "internal/util/BoostPMR.hpp"
 
-namespace opentxs::v1::alloc
+namespace opentxs::alloc
 {
 auto System() noexcept -> Resource*
 {
@@ -32,4 +32,4 @@ auto Null() noexcept -> Resource*
 
     return &resource;
 }
-}  // namespace opentxs::v1::alloc
+}  // namespace opentxs::alloc

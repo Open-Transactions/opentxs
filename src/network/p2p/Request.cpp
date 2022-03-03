@@ -16,7 +16,7 @@
 #include "opentxs/network/p2p/MessageType.hpp"
 #include "opentxs/network/p2p/State.hpp"
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto BlockchainSyncRequest() noexcept -> network::p2p::Request
 {
@@ -41,9 +41,9 @@ auto BlockchainSyncRequest_p(network::p2p::StateData in) noexcept
     return std::make_unique<ReturnType>(
         std::make_unique<ReturnType::Imp>(std::move(in)).release());
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory
 
-namespace opentxs::v1::network::p2p
+namespace opentxs::network::p2p
 {
 class Request::Imp final : public Base::Imp
 {
@@ -104,4 +104,4 @@ Request::~Request()
         Base::imp_ = nullptr;
     }
 }
-}  // namespace opentxs::v1::network::p2p
+}  // namespace opentxs::network::p2p

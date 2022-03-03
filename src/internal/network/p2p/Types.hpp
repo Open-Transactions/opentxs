@@ -8,7 +8,7 @@
 #include "opentxs/util/WorkType.hpp"
 #include "util/Work.hpp"
 
-namespace opentxs::v1::network::p2p
+namespace opentxs::network::p2p
 {
 enum class Job : OTZMQWorkType {
     Shutdown = value(WorkType::Shutdown),
@@ -27,4 +27,4 @@ enum class Job : OTZMQWorkType {
     Processed = OT_ZMQ_INTERNAL_SIGNAL + 2,
     StateMachine = OT_ZMQ_STATE_MACHINE_SIGNAL,
 };
-}  // namespace opentxs::v1::network::p2p
+}  // namespace opentxs::network::p2p

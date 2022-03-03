@@ -45,7 +45,7 @@
 #include "serialization/protobuf/SourceProof.pb.h"
 #include "util/Container.hpp"
 
-namespace opentxs::v1
+namespace opentxs
 {
 auto Factory::NymIDSource(
     const api::Session& api,
@@ -135,9 +135,9 @@ auto Factory::NymIDSource(
 
     return new ReturnType{api.Factory(), serialized};
 }
-}  // namespace opentxs::v1
+}  // namespace opentxs
 
-namespace opentxs::v1::identity::implementation
+namespace opentxs::identity::implementation
 {
 const VersionConversionMap Source::key_to_source_version_{
     {1, 1},
@@ -399,7 +399,7 @@ auto Source::Verify(
     }
 
     return true;
-}  // namespace opentxs::v1::identity::implementation
+}  // namespace opentxs::identity::implementation
 
 auto Source::Sign(
     [[maybe_unused]] const identity::credential::Primary& credential,
@@ -450,4 +450,4 @@ auto Source::Description() const noexcept -> OTString
 
     return description;
 }
-}  // namespace opentxs::v1::identity::implementation
+}  // namespace opentxs::identity::implementation

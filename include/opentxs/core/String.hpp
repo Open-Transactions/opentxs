@@ -19,8 +19,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 class Armored;
 class Contract;
 class Identifier;
@@ -29,11 +29,11 @@ class Signature;
 class String;
 
 using OTString = Pimpl<String>;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1
+namespace opentxs
 {
 class OPENTXS_EXPORT String
 {
@@ -140,4 +140,4 @@ private:
     auto operator=(const String& rhs) -> String& = delete;
     auto operator=(String&& rhs) -> String& = delete;
 };
-}  // namespace opentxs::v1
+}  // namespace opentxs

@@ -16,8 +16,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace network
 {
 namespace zeromq
@@ -30,11 +30,11 @@ class Raw;
 class Message;
 }  // namespace zeromq
 }  // namespace network
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::network::zeromq
+namespace opentxs::network::zeromq
 {
 using BatchID = std::size_t;
 using SocketID = std::size_t;
@@ -49,4 +49,4 @@ using SocketData = std::pair<socket::Type, EndpointArgs>;
 
 auto GetBatchID() noexcept -> BatchID;
 auto GetSocketID() noexcept -> SocketID;
-}  // namespace opentxs::v1::network::zeromq
+}  // namespace opentxs::network::zeromq

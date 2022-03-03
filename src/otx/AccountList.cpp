@@ -29,7 +29,7 @@
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Pimpl.hpp"
 
-namespace opentxs::v1::otx::internal
+namespace opentxs::otx::internal
 {
 AccountList::AccountList(const api::Session& api)
     : api_(api)
@@ -232,4 +232,4 @@ auto AccountList::GetOrRegisterAccount(
 }
 
 AccountList::~AccountList() { Release_AcctList(); }
-}  // namespace opentxs::v1::otx::internal
+}  // namespace opentxs::otx::internal

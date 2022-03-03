@@ -24,8 +24,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace proto
 {
 class RPCResponse;
@@ -43,11 +43,11 @@ class ListNyms;
 class SendPayment;
 }  // namespace response
 }  // namespace rpc
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::rpc::response
+namespace opentxs::rpc::response
 {
 auto OPENTXS_EXPORT Factory(ReadView serialized) noexcept
     -> std::unique_ptr<Base>;
@@ -95,4 +95,4 @@ private:
     auto operator=(const Base&) -> Base& = delete;
     auto operator=(Base&&) -> Base& = delete;
 };
-}  // namespace opentxs::v1::rpc::response
+}  // namespace opentxs::rpc::response

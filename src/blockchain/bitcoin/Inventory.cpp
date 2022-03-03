@@ -18,7 +18,7 @@
 #include "opentxs/util/Log.hpp"
 #include "util/Container.hpp"
 
-namespace opentxs::v1::blockchain::bitcoin
+namespace opentxs::blockchain::bitcoin
 {
 const std::size_t Inventory::EncodedSize{sizeof(BitcoinFormat)};
 
@@ -177,4 +177,4 @@ auto Inventory::Serialize(AllocateOutput out) const noexcept -> bool
         return false;
     }
 }
-}  // namespace opentxs::v1::blockchain::bitcoin
+}  // namespace opentxs::blockchain::bitcoin

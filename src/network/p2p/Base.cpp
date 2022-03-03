@@ -38,7 +38,7 @@
 #include "serialization/protobuf/BlockchainP2PSync.pb.h"
 #include "util/Container.hpp"
 
-namespace opentxs::v1::network::p2p
+namespace opentxs::network::p2p
 {
 using LocalType = Base::Imp::LocalType;
 using RemoteType = Base::Imp::RemoteType;
@@ -78,9 +78,9 @@ auto WorkToMessage() noexcept -> const ReverseMap&
 
     return data;
 }
-}  // namespace opentxs::v1::network::p2p
+}  // namespace opentxs::network::p2p
 
-namespace opentxs::v1::network::p2p
+namespace opentxs::network::p2p
 {
 Base::Imp::Imp(
     VersionNumber version,
@@ -329,4 +329,4 @@ Base::~Base()
         imp_ = nullptr;
     }
 }
-}  // namespace opentxs::v1::network::p2p
+}  // namespace opentxs::network::p2p

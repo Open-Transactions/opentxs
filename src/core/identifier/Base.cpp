@@ -52,7 +52,7 @@
 #include "serialization/protobuf/HDPath.pb.h"
 #include "serialization/protobuf/Identifier.pb.h"
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto decode_identifier_proto(const proto::Identifier& in) noexcept
     -> std::unique_ptr<implementation::Identifier>;
@@ -162,9 +162,9 @@ auto decode_identifier_proto(const proto::Identifier& in) noexcept
             blank, identifier::Algorithm::invalid, identifier::Type::invalid);
     }
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory
 
-namespace opentxs::v1
+namespace opentxs
 {
 using Imp = implementation::Identifier;
 
@@ -536,9 +536,9 @@ auto Identifier::Validate(const UnallocatedCString& input) -> bool
 
     return (0 < id->size());
 }
-}  // namespace opentxs::v1
+}  // namespace opentxs
 
-namespace opentxs::v1::implementation
+namespace opentxs::implementation
 {
 Identifier::Identifier(
     Vector&& data,
@@ -972,4 +972,4 @@ auto Identifier::to_string() const noexcept -> UnallocatedCString
 
     return ss.str();
 }
-}  // namespace opentxs::v1::implementation
+}  // namespace opentxs::implementation

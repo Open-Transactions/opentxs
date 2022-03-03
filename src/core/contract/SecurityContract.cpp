@@ -20,7 +20,7 @@
 #include "serialization/protobuf/Signature.pb.h"
 #include "serialization/protobuf/UnitDefinition.pb.h"
 
-namespace opentxs::v1
+namespace opentxs
 {
 auto Factory::SecurityContract(
     const api::Session& api,
@@ -87,9 +87,9 @@ auto Factory::SecurityContract(
 
     return std::move(output);
 }
-}  // namespace opentxs::v1
+}  // namespace opentxs
 
-namespace opentxs::v1::contract::unit::implementation
+namespace opentxs::contract::unit::implementation
 {
 Security::Security(
     const api::Session& api,
@@ -139,4 +139,4 @@ auto Security::IDVersion(const Lock& lock) const -> proto::UnitDefinition
 
     return contract;
 }
-}  // namespace opentxs::v1::contract::unit::implementation
+}  // namespace opentxs::contract::unit::implementation

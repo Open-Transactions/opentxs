@@ -16,8 +16,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace network
 {
 namespace zeromq
@@ -43,11 +43,11 @@ class Pipeline;
 class ReplyCallback;
 }  // namespace zeromq
 }  // namespace network
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto DealerSocket(
     const network::zeromq::Context& context,
@@ -108,4 +108,4 @@ auto ZMQSocket(
     const network::zeromq::socket::Type type) noexcept
     -> network::zeromq::socket::Raw;
 auto ZMQSocketNull() noexcept -> network::zeromq::socket::Raw;
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory

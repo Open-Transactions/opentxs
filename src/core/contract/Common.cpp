@@ -13,7 +13,7 @@
 #include "opentxs/core/contract/ProtocolVersion.hpp"
 #include "opentxs/core/contract/UnitType.hpp"
 
-namespace opentxs::v1
+namespace opentxs
 {
 auto print(contract::ProtocolVersion in) noexcept -> const char*
 {
@@ -70,4 +70,4 @@ auto print(contract::UnitType in) noexcept -> const char*
         return "invalid";
     }
 }
-}  // namespace opentxs::v1
+}  // namespace opentxs

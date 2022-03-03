@@ -10,7 +10,7 @@
 
 #include <cstdint>
 
-namespace opentxs::v1::contract::peer
+namespace opentxs::contract::peer
 {
 enum class PeerObjectType : std::uint8_t {
     Error = 0,
@@ -20,4 +20,4 @@ enum class PeerObjectType : std::uint8_t {
     Payment = 4,
     Cash = 5,
 };
-}  // namespace opentxs::v1::contract::peer
+}  // namespace opentxs::contract::peer

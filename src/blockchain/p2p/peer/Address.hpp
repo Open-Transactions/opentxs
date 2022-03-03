@@ -21,8 +21,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace blockchain
 {
 namespace p2p
@@ -39,11 +39,11 @@ class Identifier;
 
 using OTData = Pimpl<Data>;
 using OTIdentifier = Pimpl<Identifier>;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::blockchain::p2p::peer
+namespace opentxs::blockchain::p2p::peer
 {
 class Address
 {
@@ -69,4 +69,4 @@ private:
     mutable std::mutex lock_;
     pointer address_;
 };
-}  // namespace opentxs::v1::blockchain::p2p::peer
+}  // namespace opentxs::blockchain::p2p::peer

@@ -23,8 +23,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace proto
 {
 class Bip47Channel;
@@ -38,11 +38,11 @@ class Nym;
 }  // namespace storage
 
 class Identifier;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::storage
+namespace opentxs::storage
 {
 class Bip47Channels final : public Node
 {
@@ -97,4 +97,4 @@ private:
     auto operator=(const Bip47Channels&) -> Bip47Channels = delete;
     auto operator=(Bip47Channels&&) -> Bip47Channels = delete;
 };
-}  // namespace opentxs::v1::storage
+}  // namespace opentxs::storage

@@ -74,7 +74,7 @@
 #include "util/storage/tree/Tree.hpp"
 #include "util/storage/tree/Units.hpp"
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto StorageAPI(
     const api::Crypto& crypto,
@@ -92,9 +92,9 @@ auto StorageAPI(
     return std::make_unique<api::session::imp::Storage>(
         crypto, asio, factory, running, config);
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory
 
-namespace opentxs::v1::api::session::imp
+namespace opentxs::api::session::imp
 {
 const std::uint32_t Storage::HASH_TYPE = 2;  // BTC160
 
@@ -2376,4 +2376,4 @@ auto Storage::verify_write_lock(const Lock& lock) const -> bool
 }
 
 Storage::~Storage() { Cleanup_Storage(); }
-}  // namespace opentxs::v1::api::session::imp
+}  // namespace opentxs::api::session::imp

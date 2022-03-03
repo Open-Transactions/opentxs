@@ -10,19 +10,19 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace network
 {
 class DhtConfig;
 class OpenDHT;
 }  // namespace network
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto OpenDHT(const network::DhtConfig& config) noexcept
     -> std::unique_ptr<network::OpenDHT>;
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory

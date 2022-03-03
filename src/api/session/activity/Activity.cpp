@@ -54,7 +54,7 @@
 #include "serialization/protobuf/StorageThread.pb.h"
 #include "serialization/protobuf/StorageThreadItem.pb.h"
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto ActivityAPI(
     const api::Session& api,
@@ -65,9 +65,9 @@ auto ActivityAPI(
 
     return std::make_unique<ReturnType>(api, contact);
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory
 
-namespace opentxs::v1::api::session::imp
+namespace opentxs::api::session::imp
 {
 Activity::Activity(
     const api::Session& api,
@@ -847,4 +847,4 @@ auto Activity::verify_thread_exists(
 }
 
 Activity::~Activity() = default;
-}  // namespace opentxs::v1::api::session::imp
+}  // namespace opentxs::api::session::imp

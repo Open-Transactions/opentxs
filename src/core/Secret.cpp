@@ -22,7 +22,7 @@ extern "C" {
 
 template class opentxs::Pimpl<opentxs::Secret>;
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto Secret(const std::size_t bytes) noexcept
     -> std::unique_ptr<opentxs::Secret>
@@ -39,7 +39,7 @@ auto Secret(const ReadView bytes, const bool mode) noexcept
     return std::make_unique<ReturnType>(
         bytes, static_cast<ReturnType::Mode>(mode));
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory
 
 namespace std
 {
@@ -51,7 +51,7 @@ auto less<opentxs::Pimpl<opentxs::Secret>>::operator()(
 }
 }  // namespace std
 
-namespace opentxs::v1
+namespace opentxs
 {
 auto operator==(const OTSecret& lhs, const Secret& rhs) noexcept -> bool
 {
@@ -109,9 +109,9 @@ auto operator+=(OTSecret& lhs, const ReadView rhs) noexcept -> Secret&
 {
     return lhs->operator+=(rhs);
 }
-}  // namespace opentxs::v1
+}  // namespace opentxs
 
-namespace opentxs::v1::implementation
+namespace opentxs::implementation
 {
 constexpr auto effective_size(const std::size_t size, const Secret::Mode mode)
 {
@@ -266,4 +266,4 @@ auto Secret::WriteInto(const std::optional<Mode> mode) noexcept
         return WritableView{data(), this->size()};
     };
 }
-}  // namespace opentxs::v1::implementation
+}  // namespace opentxs::implementation

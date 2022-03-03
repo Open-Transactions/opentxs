@@ -10,7 +10,7 @@
 #include "internal/crypto/library/OpenSSL.hpp"
 #include "internal/util/LogMacros.hpp"
 
-namespace opentxs::v1::api::imp
+namespace opentxs::api::imp
 {
 auto Crypto::Init_OpenSSL() noexcept -> void { OT_ASSERT(ssl_); }
 
@@ -18,4 +18,4 @@ auto Crypto::OpenSSL() const noexcept -> const opentxs::crypto::OpenSSL&
 {
     return *ssl_;
 }
-}  // namespace opentxs::v1::api::imp
+}  // namespace opentxs::api::imp

@@ -14,8 +14,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace network
 {
 namespace asio
@@ -23,10 +23,10 @@ namespace asio
 class Socket;
 }  // namespace asio
 }  // namespace network
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
-namespace opentxs::v1::blockchain::node::implementation
+namespace opentxs::blockchain::node::implementation
 {
 class PeerManager::IncomingConnectionManager
 {
@@ -66,4 +66,4 @@ private:
     auto operator=(IncomingConnectionManager&&)
         -> IncomingConnectionManager& = delete;
 };
-}  // namespace opentxs::v1::blockchain::node::implementation
+}  // namespace opentxs::blockchain::node::implementation

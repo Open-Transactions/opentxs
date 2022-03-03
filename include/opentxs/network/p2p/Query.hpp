@@ -9,7 +9,7 @@
 
 #include "opentxs/network/p2p/Base.hpp"
 
-namespace opentxs::v1::network::p2p
+namespace opentxs::network::p2p
 {
 class OPENTXS_EXPORT Query final : public Base
 {
@@ -31,4 +31,4 @@ private:
     auto operator=(const Query&) -> Query& = delete;
     auto operator=(Query&&) -> Query& = delete;
 };
-}  // namespace opentxs::v1::network::p2p
+}  // namespace opentxs::network::p2p

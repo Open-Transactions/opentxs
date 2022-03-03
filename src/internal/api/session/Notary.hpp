@@ -8,7 +8,7 @@
 #include "internal/api/session/Session.hpp"
 #include "opentxs/api/session/Notary.hpp"
 
-namespace opentxs::v1::api::session::internal
+namespace opentxs::api::session::internal
 {
 class Notary : virtual public session::Notary, virtual public Session
 {
@@ -28,4 +28,4 @@ public:
 
     ~Notary() override = default;
 };
-}  // namespace opentxs::v1::api::session::internal
+}  // namespace opentxs::api::session::internal

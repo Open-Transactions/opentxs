@@ -12,17 +12,17 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace blockchain
 {
 class GCS;
 }  // namespace blockchain
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::blockchain::node
+namespace opentxs::blockchain::node
 {
 class OPENTXS_EXPORT FilterOracle
 {
@@ -47,4 +47,4 @@ private:
     auto operator=(const FilterOracle&) -> FilterOracle& = delete;
     auto operator=(FilterOracle&&) -> FilterOracle& = delete;
 };
-}  // namespace opentxs::v1::blockchain::node
+}  // namespace opentxs::blockchain::node

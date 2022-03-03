@@ -7,6 +7,8 @@ target_sources(
   opentxs-common
   PRIVATE
     "${opentxs_SOURCE_DIR}/src/internal/api/crypto/Blockchain.hpp"
+    "${opentxs_SOURCE_DIR}/src/internal/api/crypto/blockchain/BalanceOracle.hpp"
+    "${opentxs_SOURCE_DIR}/src/internal/api/crypto/blockchain/Types.hpp"
     "AccountCache.cpp"
     "AccountCache.hpp"
     "Blockchain.cpp"
@@ -23,6 +25,7 @@ target_sources(opentxs-common PRIVATE ${cxx-install-headers})
 target_link_libraries(opentxs-common PRIVATE bech32)
 target_include_directories(
   opentxs-common SYSTEM PRIVATE "${opentxs_SOURCE_DIR}/deps/bech32/ref/c++"
+                                "${opentxs_SOURCE_DIR}/deps/cs_libguarded/src"
 )
 
 if(OT_BLOCKCHAIN_EXPORT)
@@ -35,7 +38,13 @@ if(OT_BLOCKCHAIN_EXPORT)
       "Imp_blockchain.hpp"
       "NonNull.cpp"
   )
-  target_link_libraries(opentxs-common PRIVATE lmdb "${OT_ZMQ_TARGET}")
+  target_link_libraries(
+    opentxs-common
+    PRIVATE
+      lmdb
+      Boost::headers
+      "${OT_ZMQ_TARGET}"
+  )
   target_link_libraries(opentxs PUBLIC lmdb "${OT_ZMQ_TARGET}")
 else()
   target_sources(opentxs-common PRIVATE "Null.cpp")

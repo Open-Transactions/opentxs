@@ -14,15 +14,15 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 class Flag;
 class String;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::api
+namespace opentxs::api
 {
 class OPENTXS_EXPORT Settings
 {
@@ -177,4 +177,4 @@ private:
     auto operator=(const Settings&) -> Settings& = delete;
     auto operator=(Settings&&) -> Settings& = delete;
 };
-}  // namespace opentxs::v1::api
+}  // namespace opentxs::api

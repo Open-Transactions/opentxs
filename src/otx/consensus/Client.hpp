@@ -26,8 +26,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace api
 {
 class Session;
@@ -40,11 +40,11 @@ class Nym;
 }  // namespace identifier
 
 class PasswordPrompt;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::otx::context::implementation
+namespace opentxs::otx::context::implementation
 {
 class ClientContext final : virtual public internal::Client, public Base
 {
@@ -117,4 +117,4 @@ private:
         -> otx::context::Client& = delete;
     auto operator=(ClientContext&&) -> otx::context::Client& = delete;
 };
-}  // namespace opentxs::v1::otx::context::implementation
+}  // namespace opentxs::otx::context::implementation

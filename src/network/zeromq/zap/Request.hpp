@@ -18,7 +18,7 @@
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 
-namespace opentxs::v1::network::zeromq::zap
+namespace opentxs::network::zeromq::zap
 {
 class Request::Imp final : public zeromq::Message::Imp
 {
@@ -63,4 +63,4 @@ private:
     auto operator=(const Imp&) -> Imp& = delete;
     auto operator=(Imp&&) -> Imp& = delete;
 };
-}  // namespace opentxs::v1::network::zeromq::zap
+}  // namespace opentxs::network::zeromq::zap

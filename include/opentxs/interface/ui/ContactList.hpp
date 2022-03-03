@@ -13,18 +13,18 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace ui
 {
 class ContactList;
 class ContactListItem;
 }  // namespace ui
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::ui
+namespace opentxs::ui
 {
 class OPENTXS_EXPORT ContactList : virtual public List
 {
@@ -50,4 +50,4 @@ private:
     auto operator=(const ContactList&) -> ContactList& = delete;
     auto operator=(ContactList&&) -> ContactList& = delete;
 };
-}  // namespace opentxs::v1::ui
+}  // namespace opentxs::ui

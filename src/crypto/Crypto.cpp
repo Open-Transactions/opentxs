@@ -12,7 +12,7 @@
 #include "opentxs/crypto/SeedStyle.hpp"
 #include "opentxs/util/Container.hpp"
 
-namespace opentxs::v1
+namespace opentxs
 {
 auto print(crypto::SeedStyle type) noexcept -> UnallocatedCString
 {
@@ -33,4 +33,4 @@ auto print(crypto::SeedStyle type) noexcept -> UnallocatedCString
         return map.at(Type::Error);
     }
 }
-}  // namespace opentxs::v1
+}  // namespace opentxs

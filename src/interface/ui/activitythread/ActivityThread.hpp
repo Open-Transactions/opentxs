@@ -42,8 +42,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace api
 {
 namespace session
@@ -79,7 +79,7 @@ class StorageThreadItem;
 }  // namespace proto
 
 class Contact;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -110,7 +110,7 @@ struct less<STORAGEID> {
 };
 }  // namespace std
 
-namespace opentxs::v1
+namespace opentxs
 {
 template <>
 struct make_blank<ui::implementation::ActivityThreadRowID> {
@@ -134,9 +134,9 @@ struct make_blank<DraftTask> {
             make_blank<api::session::OTX::BackgroundTask>::value(api)};
     }
 };
-}  // namespace opentxs::v1
+}  // namespace opentxs
 
-namespace opentxs::v1::ui::implementation
+namespace opentxs::ui::implementation
 {
 using ActivityThreadList = List<
     ActivityThreadExternalInterface,
@@ -250,4 +250,4 @@ private:
     auto operator=(const ActivityThread&) -> ActivityThread& = delete;
     auto operator=(ActivityThread&&) -> ActivityThread& = delete;
 };
-}  // namespace opentxs::v1::ui::implementation
+}  // namespace opentxs::ui::implementation

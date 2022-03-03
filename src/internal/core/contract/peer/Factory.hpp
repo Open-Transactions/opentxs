@@ -8,8 +8,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace api
 {
 namespace session
@@ -19,11 +19,11 @@ class Client;
 
 class Session;
 }  // namespace api
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto PeerObject(
     const api::Session& api,
@@ -66,4 +66,4 @@ auto PeerReply(const api::Session& api) noexcept
 
 auto PeerRequest(const api::Session& api) noexcept
     -> std::unique_ptr<contract::peer::Request>;
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory

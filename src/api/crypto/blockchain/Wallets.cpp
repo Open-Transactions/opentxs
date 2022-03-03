@@ -16,7 +16,7 @@
 #include "opentxs/blockchain/crypto/Wallet.hpp"  // IWYU pragma: keep
 #include "opentxs/util/Container.hpp"
 
-namespace opentxs::v1::api::crypto::blockchain
+namespace opentxs::api::crypto::blockchain
 {
 Wallets::Wallets(
     const api::Session& api,
@@ -103,4 +103,4 @@ auto Wallets::populate(const Lock& lock) const noexcept -> void
 
     populated_ = true;
 }
-}  // namespace opentxs::v1::api::crypto::blockchain
+}  // namespace opentxs::api::crypto::blockchain

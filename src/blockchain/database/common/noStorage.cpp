@@ -8,7 +8,7 @@
 #include "blockchain/database/common/Blocks.hpp"  // IWYU pragma: associated
 #include "blockchain/database/common/Sync.hpp"    // IWYU pragma: associated
 
-namespace opentxs::v1::blockchain::database::common
+namespace opentxs::blockchain::database::common
 {
 struct Blocks::Imp {
 };
@@ -28,9 +28,9 @@ auto Blocks::Store(const Hash&, const std::size_t) const noexcept -> BlockWriter
 }
 
 Blocks::~Blocks() = default;
-}  // namespace opentxs::v1::blockchain::database::common
+}  // namespace opentxs::blockchain::database::common
 
-namespace opentxs::v1::blockchain::database::common
+namespace opentxs::blockchain::database::common
 {
 struct Sync::Imp {
 };
@@ -62,4 +62,4 @@ auto Sync::Store(const Chain chain, const Items& items) const noexcept -> bool
 auto Sync::Tip(const Chain chain) const noexcept -> Height { return -1; }
 
 Sync::~Sync() = default;
-}  // namespace opentxs::v1::blockchain::database::common
+}  // namespace opentxs::blockchain::database::common

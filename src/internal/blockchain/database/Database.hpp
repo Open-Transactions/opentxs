@@ -13,7 +13,7 @@
 #include "opentxs/Types.hpp"
 #include "opentxs/util/Bytes.hpp"
 
-namespace opentxs::v1::blockchain::database
+namespace opentxs::blockchain::database
 {
 using BlockReader = ProtectedView<ReadView, std::shared_mutex, sLock>;
 using BlockWriter = ProtectedView<WritableView, std::shared_mutex, eLock>;
@@ -62,4 +62,4 @@ enum class BlockStorage : std::uint8_t {
     Cache = 1,
     All = 2,
 };
-}  // namespace opentxs::v1::blockchain::database
+}  // namespace opentxs::blockchain::database

@@ -55,7 +55,7 @@
 #include "opentxs/util/Pimpl.hpp"
 #include "util/ScopeGuard.hpp"
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto BlockchainFilterOracle(
     const api::Session& api,
@@ -74,9 +74,9 @@ auto BlockchainFilterOracle(
     return std::make_unique<ReturnType>(
         api, config, node, header, block, database, chain, filter, shutdown);
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory
 
-namespace opentxs::v1::blockchain::node::implementation
+namespace opentxs::blockchain::node::implementation
 {
 struct FilterOracle::SyncClientFilterData {
     using Future = std::future<filter::pHeader>;
@@ -916,4 +916,4 @@ auto FilterOracle::Start() noexcept -> void
 }
 
 FilterOracle::~FilterOracle() { Shutdown(); }
-}  // namespace opentxs::v1::blockchain::node::implementation
+}  // namespace opentxs::blockchain::node::implementation

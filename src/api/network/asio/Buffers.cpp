@@ -17,7 +17,7 @@
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 
-namespace opentxs::v1::api::network::asio
+namespace opentxs::api::network::asio
 {
 struct Buffers::Imp {
     auto clear(Index id) noexcept -> void
@@ -61,4 +61,4 @@ Buffers::~Buffers()
         imp_ = nullptr;
     }
 }
-}  // namespace opentxs::v1::api::network::asio
+}  // namespace opentxs::api::network::asio

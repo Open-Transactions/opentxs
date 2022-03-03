@@ -21,8 +21,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace proto
 {
 class StorageThreadItem;
@@ -34,11 +34,11 @@ class Driver;
 class Mailbox;
 class Threads;
 }  // namespace storage
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::storage
+namespace opentxs::storage
 {
 class Thread final : public Node
 {
@@ -107,4 +107,4 @@ public:
 
     ~Thread() final = default;
 };
-}  // namespace opentxs::v1::storage
+}  // namespace opentxs::storage

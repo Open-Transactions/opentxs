@@ -23,7 +23,7 @@
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/util/Container.hpp"
 
-namespace opentxs::v1::blockchain::block::bitcoin::implementation
+namespace opentxs::blockchain::block::bitcoin::implementation
 {
 auto Input::Cache::add(crypto::Key&& key) noexcept -> void
 {
@@ -139,4 +139,4 @@ auto Input::Cache::spends() const noexcept(false) -> const internal::Output&
         throw std::runtime_error("previous output missing");
     }
 }
-}  // namespace opentxs::v1::blockchain::block::bitcoin::implementation
+}  // namespace opentxs::blockchain::block::bitcoin::implementation

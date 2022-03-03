@@ -9,7 +9,7 @@
 
 #include <robin_hood.h>
 
-namespace opentxs::v1
+namespace opentxs
 {
 auto print(ThreadPriority priority) noexcept -> const char*
 {
@@ -32,4 +32,4 @@ auto print(ThreadPriority priority) noexcept -> const char*
         return "error";
     }
 }
-}  // namespace opentxs::v1
+}  // namespace opentxs

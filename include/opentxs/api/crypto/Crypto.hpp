@@ -10,8 +10,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace api
 {
 namespace crypto
@@ -33,11 +33,11 @@ namespace crypto
 class Bip32;
 class Bip39;
 }  // namespace crypto
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::api
+namespace opentxs::api
 {
 class OPENTXS_EXPORT Crypto
 {
@@ -64,4 +64,4 @@ private:
     auto operator=(const Crypto&) -> Crypto& = delete;
     auto operator=(Crypto&&) -> Crypto& = delete;
 };
-}  // namespace opentxs::v1::api
+}  // namespace opentxs::api

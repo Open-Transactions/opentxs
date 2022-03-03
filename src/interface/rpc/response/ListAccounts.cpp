@@ -13,7 +13,7 @@
 
 #include "opentxs/interface/rpc/request/ListAccounts.hpp"
 
-namespace opentxs::v1::rpc::response::implementation
+namespace opentxs::rpc::response::implementation
 {
 struct ListAccounts final : public Base::Imp {
     auto asListAccounts() const noexcept -> const response::ListAccounts& final
@@ -55,9 +55,9 @@ private:
     auto operator=(const ListAccounts&) -> ListAccounts& = delete;
     auto operator=(ListAccounts&&) -> ListAccounts& = delete;
 };
-}  // namespace opentxs::v1::rpc::response::implementation
+}  // namespace opentxs::rpc::response::implementation
 
-namespace opentxs::v1::rpc::response
+namespace opentxs::rpc::response
 {
 ListAccounts::ListAccounts(
     const request::ListAccounts& request,
@@ -87,4 +87,4 @@ auto ListAccounts::AccountIDs() const noexcept -> const Identifiers&
 }
 
 ListAccounts::~ListAccounts() = default;
-}  // namespace opentxs::v1::rpc::response
+}  // namespace opentxs::rpc::response

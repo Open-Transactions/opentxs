@@ -14,7 +14,7 @@
 #include "opentxs/network/zeromq/ListenCallback.hpp"
 #include "opentxs/network/zeromq/ReplyCallback.hpp"
 
-namespace opentxs::v1::network::zeromq::internal
+namespace opentxs::network::zeromq::internal
 {
 Batch::Batch(
     const BatchID id,
@@ -42,4 +42,4 @@ auto Batch::ClearCallbacks() noexcept -> void
 }
 
 Batch::~Batch() = default;
-}  // namespace opentxs::v1::network::zeromq::internal
+}  // namespace opentxs::network::zeromq::internal

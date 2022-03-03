@@ -15,7 +15,7 @@
 #include "blockchain/node/wallet/subchain/statemachine/Work.hpp"
 #include "internal/blockchain/node/Node.hpp"
 
-namespace opentxs::v1::blockchain::node::wallet
+namespace opentxs::blockchain::node::wallet
 {
 Batch::Batch() noexcept
     : id_(NextID())
@@ -87,4 +87,4 @@ auto Batch::Write(const Identifier& key, const internal::WalletDatabase& db)
 }
 
 Batch::~Batch() = default;
-}  // namespace opentxs::v1::blockchain::node::wallet
+}  // namespace opentxs::blockchain::node::wallet

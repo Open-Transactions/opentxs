@@ -34,7 +34,7 @@
 #include "opentxs/util/WorkType.hpp"
 #include "util/Work.hpp"
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto BlockchainWallet(
     const api::Session& api,
@@ -50,9 +50,9 @@ auto BlockchainWallet(
     return std::make_unique<ReturnType>(
         api, parent, db, mempool, chain, shutdown);
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory
 
-namespace opentxs::v1::blockchain::node::wallet
+namespace opentxs::blockchain::node::wallet
 {
 auto print(WalletJobs job) noexcept -> std::string_view
 {
@@ -72,9 +72,9 @@ auto print(WalletJobs job) noexcept -> std::string_view
         OT_FAIL;
     }
 }
-}  // namespace opentxs::v1::blockchain::node::wallet
+}  // namespace opentxs::blockchain::node::wallet
 
-namespace opentxs::v1::blockchain::node::implementation
+namespace opentxs::blockchain::node::implementation
 {
 Wallet::Wallet(
     const api::Session& api,
@@ -276,4 +276,4 @@ auto Wallet::state_machine() noexcept -> bool
 }
 
 Wallet::~Wallet() { signal_shutdown().get(); }
-}  // namespace opentxs::v1::blockchain::node::implementation
+}  // namespace opentxs::blockchain::node::implementation

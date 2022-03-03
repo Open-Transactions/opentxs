@@ -21,8 +21,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace api
 {
 namespace session
@@ -46,13 +46,13 @@ namespace ui
 {
 class ProfileItem;
 }  // namespace ui
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
 template class opentxs::SharedPimpl<opentxs::ui::ProfileItem>;
 
-namespace opentxs::v1::ui::implementation
+namespace opentxs::ui::implementation
 {
 using ProfileItemRow =
     Row<ProfileSubsectionRowInternal,
@@ -115,4 +115,4 @@ private:
     auto operator=(const ProfileItem&) -> ProfileItem& = delete;
     auto operator=(ProfileItem&&) -> ProfileItem& = delete;
 };
-}  // namespace opentxs::v1::ui::implementation
+}  // namespace opentxs::ui::implementation

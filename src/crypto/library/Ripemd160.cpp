@@ -19,7 +19,7 @@ extern "C" {
 #include "opentxs/Types.hpp"
 #include "opentxs/util/Log.hpp"
 
-namespace opentxs::v1::crypto::implementation
+namespace opentxs::crypto::implementation
 {
 Ripemd160::Ripemd160() noexcept
     : ripemd_lock_()
@@ -46,4 +46,4 @@ auto Ripemd160::RIPEMD160(
 
     return true;
 }
-}  // namespace opentxs::v1::crypto::implementation
+}  // namespace opentxs::crypto::implementation

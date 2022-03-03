@@ -28,7 +28,7 @@
 #include "opentxs/util/Pimpl.hpp"
 #include "otx/client/PaymentTasks.hpp"
 
-namespace opentxs::v1::otx::client::implementation
+namespace opentxs::otx::client::implementation
 {
 DepositPayment::DepositPayment(
     client::internal::StateMachine& parent,
@@ -198,4 +198,4 @@ auto DepositPayment::get_account_id(const identifier::UnitDefinition& unit)
 }
 
 DepositPayment::~DepositPayment() { Stop(); }
-}  // namespace opentxs::v1::otx::client::implementation
+}  // namespace opentxs::otx::client::implementation

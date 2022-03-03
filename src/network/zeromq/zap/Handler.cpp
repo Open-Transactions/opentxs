@@ -26,7 +26,7 @@ template class opentxs::Pimpl<opentxs::network::zeromq::zap::Handler>;
 template class opentxs::network::zeromq::socket::implementation::Receiver<
     opentxs::network::zeromq::zap::Request>;
 
-namespace opentxs::v1::network::zeromq::zap
+namespace opentxs::network::zeromq::zap
 {
 auto Handler::Factory(
     const zeromq::Context& context,
@@ -34,9 +34,9 @@ auto Handler::Factory(
 {
     return OTZMQZAPHandler(new implementation::Handler(context, callback));
 }
-}  // namespace opentxs::v1::network::zeromq::zap
+}  // namespace opentxs::network::zeromq::zap
 
-namespace opentxs::v1::network::zeromq::zap::implementation
+namespace opentxs::network::zeromq::zap::implementation
 {
 Handler::Handler(
     const zeromq::Context& context,
@@ -67,4 +67,4 @@ auto Handler::process_incoming(
 }
 
 Handler::~Handler() SHUTDOWN_SOCKET
-}  // namespace opentxs::v1::network::zeromq::zap::implementation
+}  // namespace opentxs::network::zeromq::zap::implementation

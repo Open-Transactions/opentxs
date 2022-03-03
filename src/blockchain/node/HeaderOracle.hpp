@@ -27,8 +27,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace api
 {
 class Session;
@@ -64,11 +64,11 @@ namespace zeromq
 class Message;
 }  // namespace zeromq
 }  // namespace network
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::blockchain::node::implementation
+namespace opentxs::blockchain::node::implementation
 {
 class HeaderOracle final : virtual public node::internal::HeaderOracle
 {
@@ -247,4 +247,4 @@ private:
     auto operator=(const HeaderOracle&) -> HeaderOracle& = delete;
     auto operator=(HeaderOracle&&) -> HeaderOracle& = delete;
 };
-}  // namespace opentxs::v1::blockchain::node::implementation
+}  // namespace opentxs::blockchain::node::implementation

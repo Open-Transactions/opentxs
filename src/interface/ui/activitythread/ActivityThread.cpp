@@ -47,7 +47,6 @@
 #include "opentxs/network/zeromq/Pipeline.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
 #include "opentxs/network/zeromq/message/FrameSection.hpp"
-#include "opentxs/network/zeromq/socket/Types.hpp"
 #include "opentxs/otx/LastReplyStatus.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
@@ -61,7 +60,7 @@ template class std::
 
 namespace zmq = opentxs::network::zeromq;
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto ActivityThreadModel(
     const api::session::Client& api,
@@ -74,9 +73,9 @@ auto ActivityThreadModel(
 
     return std::make_unique<ReturnType>(api, nymID, threadID, cb);
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory
 
-namespace opentxs::v1::ui::implementation
+namespace opentxs::ui::implementation
 {
 ActivityThread::ActivityThread(
     const api::session::Client& api,
@@ -983,4 +982,4 @@ ActivityThread::~ActivityThread()
     wait_for_startup();
     signal_shutdown().get();
 }
-}  // namespace opentxs::v1::ui::implementation
+}  // namespace opentxs::ui::implementation

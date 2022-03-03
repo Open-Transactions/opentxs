@@ -10,7 +10,7 @@
 #include "opentxs/OT.hpp"
 #include "opentxs/util/Container.hpp"
 
-namespace opentxs::v1
+namespace opentxs
 {
 auto license_argon(LicenseMap& out) noexcept -> void;
 auto license_base58(LicenseMap& out) noexcept -> void;
@@ -28,4 +28,4 @@ auto license_simpleini(LicenseMap& out) noexcept -> void;
 auto license_trezor(LicenseMap& out) noexcept -> void;
 auto text_lgpl_v2_1() noexcept -> std::string_view;
 auto text_mpl_v2() noexcept -> std::string_view;
-}  // namespace opentxs::v1
+}  // namespace opentxs

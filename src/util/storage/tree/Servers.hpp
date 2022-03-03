@@ -18,8 +18,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace proto
 {
 class ServerContract;
@@ -30,11 +30,11 @@ namespace storage
 class Driver;
 class Tree;
 }  // namespace storage
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::storage
+namespace opentxs::storage
 {
 class Servers final : public Node
 {
@@ -71,4 +71,4 @@ public:
 
     ~Servers() final = default;
 };
-}  // namespace opentxs::v1::storage
+}  // namespace opentxs::storage

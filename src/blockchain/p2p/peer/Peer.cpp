@@ -29,7 +29,7 @@
 
 namespace zmq = opentxs::network::zeromq;
 
-namespace opentxs::v1::blockchain::p2p::implementation
+namespace opentxs::blockchain::p2p::implementation
 {
 Peer::Peer(
     const api::Session& api,
@@ -755,4 +755,4 @@ auto Peer::update_address_services(
 }
 
 Peer::~Peer() { signal_shutdown().get(); }
-}  // namespace opentxs::v1::blockchain::p2p::implementation
+}  // namespace opentxs::blockchain::p2p::implementation

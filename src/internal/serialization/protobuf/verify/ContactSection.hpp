@@ -13,17 +13,17 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace proto
 {
 class ContactSection;
 }  // namespace proto
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::proto
+namespace opentxs::proto
 {
 auto CheckProto_1(
     const ContactSection& contactSection,
@@ -125,4 +125,4 @@ auto CheckProto_20(
     const bool silent,
     const ClaimType indexed,
     const uint32_t parentVersion = 0xffffffff) -> bool;
-}  // namespace opentxs::v1::proto
+}  // namespace opentxs::proto

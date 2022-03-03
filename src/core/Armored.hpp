@@ -16,8 +16,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace OTDB
 {
 class OTPacker;
@@ -31,11 +31,11 @@ class Envelope;
 class Data;
 class Factory;
 class String;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::implementation
+namespace opentxs::implementation
 {
 class Armored : virtual public opentxs::Armored, public String
 {
@@ -90,4 +90,4 @@ private:
     auto operator=(const opentxs::String& strValue) -> Armored&;
     auto operator=(const Armored& strValue) -> Armored&;
 };
-}  // namespace opentxs::v1::implementation
+}  // namespace opentxs::implementation

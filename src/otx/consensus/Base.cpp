@@ -36,7 +36,7 @@
 #define OT_MAX_ACK_NUMS 100
 #endif
 
-namespace opentxs::v1::otx::context::implementation
+namespace opentxs::otx::context::implementation
 {
 Base::Base(
     const api::Session& api,
@@ -768,4 +768,4 @@ auto Base::VerifyIssuedNumber(const TransactionNumber& number) const -> bool
 
     return verify_issued_number(lock, number);
 }
-}  // namespace opentxs::v1::otx::context::implementation
+}  // namespace opentxs::otx::context::implementation

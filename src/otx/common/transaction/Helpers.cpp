@@ -109,7 +109,7 @@ char const* const OriginTypeStrings[] = {
 
 }  // namespace
 
-namespace opentxs::v1
+namespace opentxs
 {
 
 auto GetTransactionTypeString(int transactionTypeIndex) -> const
@@ -643,4 +643,4 @@ auto SetupBoxReceiptFilename(
         strFolder3name,
         strFilename);
 }
-}  // namespace opentxs::v1
+}  // namespace opentxs

@@ -13,18 +13,18 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace ui
 {
 class UnitList;
 class UnitListItem;
 }  // namespace ui
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::ui
+namespace opentxs::ui
 {
 class OPENTXS_EXPORT UnitList : virtual public List
 {
@@ -45,4 +45,4 @@ private:
     auto operator=(const UnitList&) -> UnitList& = delete;
     auto operator=(UnitList&&) -> UnitList& = delete;
 };
-}  // namespace opentxs::v1::ui
+}  // namespace opentxs::ui

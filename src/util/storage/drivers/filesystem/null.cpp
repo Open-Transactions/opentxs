@@ -10,7 +10,7 @@
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/storage/Plugin.hpp"
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto StorageFSArchive(
     const api::Crypto& crypto,
@@ -33,4 +33,4 @@ auto StorageFSGC(
 {
     return nullptr;
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory

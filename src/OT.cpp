@@ -18,7 +18,7 @@
 #include "opentxs/util/Options.hpp"
 #include "opentxs/util/Time.hpp"
 
-namespace opentxs::v1
+namespace opentxs
 {
 api::internal::Context* instance_pointer_{nullptr};
 OTFlag running_{Flag::Factory(true)};
@@ -81,4 +81,4 @@ auto Join() noexcept -> void
 {
     while (nullptr != instance_pointer_) { Sleep(250ms); }
 }
-}  // namespace opentxs::v1
+}  // namespace opentxs

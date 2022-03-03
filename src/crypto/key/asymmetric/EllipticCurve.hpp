@@ -27,8 +27,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace api
 {
 class Session;
@@ -56,11 +56,11 @@ class Data;
 class OTPassword;
 class PasswordPrompt;
 class Secret;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::crypto::key::implementation
+namespace opentxs::crypto::key::implementation
 {
 class EllipticCurve : virtual public key::EllipticCurve, public Asymmetric
 {
@@ -164,4 +164,4 @@ private:
     auto operator=(const EllipticCurve&) -> EllipticCurve& = delete;
     auto operator=(EllipticCurve&&) -> EllipticCurve& = delete;
 };
-}  // namespace opentxs::v1::crypto::key::implementation
+}  // namespace opentxs::crypto::key::implementation

@@ -37,7 +37,7 @@
 #include "serialization/protobuf/Credential.pb.h"
 #include "serialization/protobuf/Signature.pb.h"
 
-namespace opentxs::v1
+namespace opentxs
 {
 auto Factory::ContactCredential(
     const api::Session& api,
@@ -85,9 +85,9 @@ auto Factory::ContactCredential(
         return nullptr;
     }
 }
-}  // namespace opentxs::v1
+}  // namespace opentxs
 
-namespace opentxs::v1::identity::credential
+namespace opentxs::identity::credential
 {
 // static
 auto Contact::ClaimID(
@@ -160,9 +160,9 @@ auto Contact::asClaim(
         item.end(),
         attributes};
 }
-}  // namespace opentxs::v1::identity::credential
+}  // namespace opentxs::identity::credential
 
-namespace opentxs::v1::identity::credential::implementation
+namespace opentxs::identity::credential::implementation
 {
 Contact::Contact(
     const api::Session& api,
@@ -250,4 +250,4 @@ auto Contact::serialize(
     return serializedCredential;
 }
 
-}  // namespace opentxs::v1::identity::credential::implementation
+}  // namespace opentxs::identity::credential::implementation

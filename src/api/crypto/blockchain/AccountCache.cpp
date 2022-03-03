@@ -24,7 +24,7 @@
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Pimpl.hpp"
 
-namespace opentxs::v1::api::crypto::blockchain
+namespace opentxs::api::crypto::blockchain
 {
 AccountCache::AccountCache(const api::Session& api) noexcept
     : api_(api)
@@ -154,4 +154,4 @@ auto AccountCache::Type(const Identifier& accountID) const noexcept
         return opentxs::blockchain::crypto::SubaccountType::Error;
     }
 }
-}  // namespace opentxs::v1::api::crypto::blockchain
+}  // namespace opentxs::api::crypto::blockchain

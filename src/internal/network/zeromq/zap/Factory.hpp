@@ -11,8 +11,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace network
 {
 namespace zeromq
@@ -24,11 +24,11 @@ class Request;
 }  // namespace zap
 }  // namespace zeromq
 }  // namespace network
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto ZAPRequest(
     const ReadView address,
@@ -48,4 +48,4 @@ auto ZAPReply(
     const ReadView userID,
     const ReadView metadata,
     const ReadView version) noexcept -> network::zeromq::zap::Reply;
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory

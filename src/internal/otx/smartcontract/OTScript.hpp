@@ -13,19 +13,19 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 class OTParty;
 class OTPartyAccount;
 class OTScriptable;
 class OTSmartContract;
 class OTVariable;
 class String;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1
+namespace opentxs
 {
 using mapOfParties = UnallocatedMap<UnallocatedCString, OTParty*>;
 using mapOfPartyAccounts = UnallocatedMap<UnallocatedCString, OTPartyAccount*>;
@@ -112,4 +112,4 @@ public:
 
     virtual auto ExecuteScript(OTVariable* pReturnVar = nullptr) -> bool;
 };
-}  // namespace opentxs::v1
+}  // namespace opentxs

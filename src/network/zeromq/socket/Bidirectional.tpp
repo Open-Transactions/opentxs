@@ -24,7 +24,7 @@
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/util/Log.hpp"
 
-namespace opentxs::v1::network::zeromq::socket::implementation
+namespace opentxs::network::zeromq::socket::implementation
 {
 template <typename InterfaceType, typename MessageType>
 Bidirectional<InterfaceType, MessageType>::Bidirectional(
@@ -287,4 +287,4 @@ void Bidirectional<InterfaceType, MessageType>::thread() noexcept
 
     LogTrace()(OT_PRETTY_CLASS())("Shutting down").Flush();
 }
-}  // namespace opentxs::v1::network::zeromq::socket::implementation
+}  // namespace opentxs::network::zeromq::socket::implementation

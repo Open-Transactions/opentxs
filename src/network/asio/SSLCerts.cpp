@@ -10,7 +10,7 @@
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 
-namespace opentxs::v1::network::asio
+namespace opentxs::network::asio
 {
 const Vector<CString> HTTPS::ssl_certs_{[] {
     auto out = Vector<CString>{alloc::System()};
@@ -51,4 +51,4 @@ const Vector<CString> HTTPS::ssl_certs_{[] {
 
     return out;
 }()};
-}  // namespace opentxs::v1::network::asio
+}  // namespace opentxs::network::asio

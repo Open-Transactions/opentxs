@@ -26,7 +26,7 @@
 #include "serialization/protobuf/BlockchainPeerAddress.pb.h"
 #include "util/LMDB.hpp"
 
-namespace opentxs::v1::blockchain::database::common
+namespace opentxs::blockchain::database::common
 {
 Peers::Peers(const api::Session& api, storage::lmdb::LMDB& lmdb) noexcept(false)
     : api_(api)
@@ -392,4 +392,4 @@ auto Peers::load_address(const UnallocatedCString& id) const noexcept(false)
 
     return factory::BlockchainAddress(api_, serialized);
 }
-}  // namespace opentxs::v1::blockchain::database::common
+}  // namespace opentxs::blockchain::database::common

@@ -26,8 +26,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace api
 {
 namespace network
@@ -61,11 +61,11 @@ namespace implementation
 class Driver;
 }  // namespace implementation
 }  // namespace storage
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::storage
+namespace opentxs::storage
 {
 class Root final : public Node
 {
@@ -167,4 +167,4 @@ private:
     auto operator=(const Root&) -> Root = delete;
     auto operator=(Root&&) -> Root = delete;
 };
-}  // namespace opentxs::v1::storage
+}  // namespace opentxs::storage

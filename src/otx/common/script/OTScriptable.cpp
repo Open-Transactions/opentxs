@@ -56,7 +56,7 @@
     "callback_party_may_execute_clause"
 #endif
 
-namespace opentxs::v1
+namespace opentxs
 {
 OTScriptable::OTScriptable(const api::Session& api)
     : Contract(api)
@@ -3489,4 +3489,4 @@ void OTScriptable::Release()
 
 OTScriptable::~OTScriptable() { Release_Scriptable(); }
 
-}  // namespace opentxs::v1
+}  // namespace opentxs

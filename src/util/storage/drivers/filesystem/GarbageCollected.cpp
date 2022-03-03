@@ -20,7 +20,7 @@
 #include "opentxs/api/network/Asio.hpp"
 #include "util/storage/Config.hpp"
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto StorageFSGC(
     const api::Crypto& crypto,
@@ -33,9 +33,9 @@ auto StorageFSGC(
 
     return std::make_unique<ReturnType>(crypto, asio, parent, config, bucket);
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory
 
-namespace opentxs::v1::storage::driver::filesystem
+namespace opentxs::storage::driver::filesystem
 {
 GarbageCollected::GarbageCollected(
     const api::Crypto& crypto,
@@ -121,4 +121,4 @@ auto GarbageCollected::root_filename() const -> UnallocatedCString
 }
 
 GarbageCollected::~GarbageCollected() { Cleanup_GarbageCollected(); }
-}  // namespace opentxs::v1::storage::driver::filesystem
+}  // namespace opentxs::storage::driver::filesystem

@@ -13,6 +13,7 @@
 #include <utility>
 
 #include "interface/ui/base/List.hpp"
+#include "internal/api/crypto/blockchain/Types.hpp"
 #include "internal/api/session/Wallet.hpp"
 #include "internal/core/Core.hpp"
 #include "internal/core/Factory.hpp"
@@ -40,14 +41,13 @@
 #include "opentxs/network/zeromq/message/FrameSection.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/network/zeromq/message/Message.tpp"
-#include "opentxs/network/zeromq/socket/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Pimpl.hpp"
 
 namespace zmq = opentxs::network::zeromq;
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto AccountListModel(
     const api::session::Client& api,
@@ -59,9 +59,9 @@ auto AccountListModel(
 
     return std::make_unique<ReturnType>(api, nymID, cb);
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory
 
-namespace opentxs::v1::ui::implementation
+namespace opentxs::ui::implementation
 {
 AccountList::AccountList(
     const api::session::Client& api,
@@ -77,7 +77,6 @@ AccountList::AccountList(
         UnallocatedCString{api.Endpoints().AccountUpdate()},
         UnallocatedCString{api.Endpoints().BlockchainAccountCreated()},
     });
-    // TODO this model might never initialize if blockchain support is disabled
     pipeline_.ConnectDealer(api.Endpoints().BlockchainBalance(), [](auto) {
         return MakeWork(Work::init);
     });
@@ -365,8 +364,8 @@ auto AccountList::startup() noexcept -> void
 auto AccountList::subscribe(const blockchain::Type chain) const noexcept -> void
 {
     pipeline_.Send([&] {
-        auto work =
-            network::zeromq::tagged_message(WorkType::BlockchainBalance);
+        using Job = api::crypto::blockchain::BalanceOracleJobs;
+        auto work = network::zeromq::tagged_message(Job::registration);
         work.AddFrame(chain);
         work.AddFrame(primary_id_);
 
@@ -379,4 +378,4 @@ AccountList::~AccountList()
     wait_for_startup();
     signal_shutdown().get();
 }
-}  // namespace opentxs::v1::ui::implementation
+}  // namespace opentxs::ui::implementation

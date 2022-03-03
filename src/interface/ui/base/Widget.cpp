@@ -19,7 +19,7 @@
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Pimpl.hpp"
 
-namespace opentxs::v1::ui::implementation
+namespace opentxs::ui::implementation
 {
 auto verify_empty(const CustomData& custom) noexcept -> bool
 {
@@ -87,4 +87,4 @@ auto Widget::UpdateNotify() const noexcept -> void
 }
 
 Widget::~Widget() { ClearCallbacks(); }
-}  // namespace opentxs::v1::ui::implementation
+}  // namespace opentxs::ui::implementation

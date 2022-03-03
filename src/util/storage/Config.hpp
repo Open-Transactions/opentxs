@@ -22,8 +22,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace api
 {
 class Legacy;
@@ -32,11 +32,11 @@ class Settings;
 
 class Options;
 class String;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::storage
+namespace opentxs::storage
 {
 using InsertCB =
     std::function<void(const UnallocatedCString&, const UnallocatedCString&)>;
@@ -80,4 +80,4 @@ public:
         const Options& cli,
         const String& dataFolder) noexcept;
 };
-}  // namespace opentxs::v1::storage
+}  // namespace opentxs::storage

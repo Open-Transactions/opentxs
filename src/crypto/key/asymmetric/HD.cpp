@@ -40,7 +40,7 @@
 #include "serialization/protobuf/HDPath.pb.h"
 #include "util/HDIndex.hpp"
 
-namespace opentxs::v1::crypto::key
+namespace opentxs::crypto::key
 {
 auto HD::CalculateFingerprint(
     const api::crypto::Hash& hash,
@@ -73,9 +73,9 @@ auto HD::CalculateFingerprint(
 
     return output;
 }
-}  // namespace opentxs::v1::crypto::key
+}  // namespace opentxs::crypto::key
 
-namespace opentxs::v1::crypto::key::implementation
+namespace opentxs::crypto::key::implementation
 {
 HD::HD(
     const api::Session& api,
@@ -425,4 +425,4 @@ auto HD::Xpub(const PasswordPrompt& reason) const noexcept -> UnallocatedCString
         api_.Factory().Data(chaincode(lock, reason)),
         api_.Factory().Data(PublicKey()));
 }
-}  // namespace opentxs::v1::crypto::key::implementation
+}  // namespace opentxs::crypto::key::implementation

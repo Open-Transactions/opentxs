@@ -16,7 +16,7 @@ extern "C" {
 
 #include "internal/util/LogMacros.hpp"
 
-namespace opentxs::v1::otx::blind
+namespace opentxs::otx::blind
 {
 class LucreDumper::Imp
 {
@@ -64,4 +64,4 @@ auto LucreDumper::log_to_file() noexcept -> void { imp_->LogToFile(); }
 auto LucreDumper::log_to_screen() noexcept -> void { imp_->LogToScreen(); }
 
 LucreDumper::~LucreDumper() = default;
-}  // namespace opentxs::v1::otx::blind
+}  // namespace opentxs::otx::blind

@@ -14,7 +14,7 @@
 #include "opentxs/api/session/Notary.hpp"
 #include "opentxs/util/Log.hpp"
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto SessionFactoryAPI(const api::session::Notary& parent) noexcept
     -> std::unique_ptr<api::session::Factory>
@@ -30,9 +30,9 @@ auto SessionFactoryAPI(const api::session::Notary& parent) noexcept
         return {};
     }
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory
 
-namespace opentxs::v1::api::session::server
+namespace opentxs::api::session::server
 {
 Factory::Factory(const api::session::Notary& parent)
     : session::imp::Factory(parent)
@@ -47,4 +47,4 @@ auto Factory::Cron() const -> std::unique_ptr<OTCron>
 
     return output;
 }
-}  // namespace opentxs::v1::api::session::server
+}  // namespace opentxs::api::session::server

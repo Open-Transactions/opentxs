@@ -34,7 +34,7 @@
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 
-namespace opentxs::v1
+namespace opentxs
 {
 auto BlockchainToUnit(const blockchain::Type type) noexcept -> UnitType
 {
@@ -118,9 +118,9 @@ auto print(const blockchain::block::Position& in) noexcept -> UnallocatedCString
 
     return out.str();
 }
-}  // namespace opentxs::v1
+}  // namespace opentxs
 
-namespace opentxs::v1::blockchain
+namespace opentxs::blockchain
 {
 auto BlockHash(
     const api::Session& api,
@@ -415,9 +415,9 @@ auto TransactionHash(
         }
     }
 }
-}  // namespace opentxs::v1::blockchain
+}  // namespace opentxs::blockchain
 
-namespace opentxs::v1::blockchain::block
+namespace opentxs::blockchain::block
 {
 auto BlankHash() noexcept -> pHash
 {
@@ -425,9 +425,9 @@ auto BlankHash() noexcept -> pHash
         "0x0000000000000000000000000000000000000000000000000000000000000000",
         Data::Mode::Hex);
 }
-}  // namespace opentxs::v1::blockchain::block
+}  // namespace opentxs::blockchain::block
 
-namespace opentxs::v1::blockchain::internal
+namespace opentxs::blockchain::internal
 {
 auto Format(const Type chain, const opentxs::Amount& amount) noexcept
     -> UnallocatedCString
@@ -442,9 +442,9 @@ auto Format(const Type chain, const opentxs::Amount& amount) noexcept
         return {};
     }
 }
-}  // namespace opentxs::v1::blockchain::internal
+}  // namespace opentxs::blockchain::internal
 
-namespace opentxs::v1::blockchain::params
+namespace opentxs::blockchain::params
 {
 #if OT_BLOCKCHAIN
 auto Data::Bip158() noexcept -> const FilterTypes&
@@ -1462,4 +1462,4 @@ auto Data::Services() noexcept -> const ServiceBits&
     return data;
 }
 #endif  // OT_BLOCKCHAIN
-}  // namespace opentxs::v1::blockchain::params
+}  // namespace opentxs::blockchain::params

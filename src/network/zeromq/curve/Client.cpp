@@ -20,7 +20,7 @@
 #include "opentxs/core/contract/ServerContract.hpp"
 #include "opentxs/util/Log.hpp"
 
-namespace opentxs::v1::network::zeromq
+namespace opentxs::network::zeromq
 {
 auto curve::Client::RandomKeypair() noexcept
     -> std::pair<UnallocatedCString, UnallocatedCString>
@@ -44,9 +44,9 @@ auto curve::Client::RandomKeypair() noexcept
 
     return output;
 }
-}  // namespace opentxs::v1::network::zeromq
+}  // namespace opentxs::network::zeromq
 
-namespace opentxs::v1::network::zeromq::curve::implementation
+namespace opentxs::network::zeromq::curve::implementation
 {
 Client::Client(socket::implementation::Socket& socket) noexcept
     : parent_(socket)
@@ -213,4 +213,4 @@ auto Client::set_remote_key(const void* key, const std::size_t size)
 
     return parent_.apply_socket(std::move(cb));
 }
-}  // namespace opentxs::v1::network::zeromq::curve::implementation
+}  // namespace opentxs::network::zeromq::curve::implementation

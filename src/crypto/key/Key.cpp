@@ -15,7 +15,7 @@
 #include "serialization/protobuf/Enums.pb.h"
 #include "util/Container.hpp"
 
-namespace opentxs::v1::crypto::key
+namespace opentxs::crypto::key
 {
 using AsymmetricAlgorithmMap = robin_hood::
     unordered_flat_map<asymmetric::Algorithm, proto::AsymmetricKeyType>;
@@ -43,9 +43,9 @@ auto mode_map() noexcept -> const ModeMap&;
 auto role_map() noexcept -> const RoleMap&;
 auto source_map() noexcept -> const SourceMap&;
 auto symmetricalgorithm_map() noexcept -> const SymmetricAlgorithmMap&;
-}  // namespace opentxs::v1::crypto::key
+}  // namespace opentxs::crypto::key
 
-namespace opentxs::v1::crypto::key
+namespace opentxs::crypto::key
 {
 auto asymmetricalgorithm_map() noexcept -> const AsymmetricAlgorithmMap&
 {
@@ -106,9 +106,9 @@ auto symmetricalgorithm_map() noexcept -> const SymmetricAlgorithmMap&
 
     return map;
 }
-}  // namespace opentxs::v1::crypto::key
+}  // namespace opentxs::crypto::key
 
-namespace opentxs::v1
+namespace opentxs
 {
 auto translate(const crypto::key::asymmetric::Algorithm in) noexcept
     -> proto::AsymmetricKeyType
@@ -236,4 +236,4 @@ auto translate(const proto::SymmetricMode in) noexcept
         return crypto::key::symmetric::Algorithm::Error;
     }
 }
-}  // namespace opentxs::v1
+}  // namespace opentxs

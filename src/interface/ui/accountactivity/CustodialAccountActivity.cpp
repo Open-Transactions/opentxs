@@ -48,7 +48,7 @@
 #include "serialization/protobuf/PaymentWorkflow.pb.h"
 #include "serialization/protobuf/PaymentWorkflowEnums.pb.h"
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto CustodialAccountActivityModel(
     const api::session::Client& api,
@@ -61,9 +61,9 @@ auto CustodialAccountActivityModel(
 
     return std::make_unique<ReturnType>(api, nymID, accountID, cb);
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory
 
-namespace opentxs::v1::ui::implementation
+namespace opentxs::ui::implementation
 {
 CustodialAccountActivity::CustodialAccountActivity(
     const api::session::Client& api,
@@ -608,4 +608,4 @@ CustodialAccountActivity::~CustodialAccountActivity()
     wait_for_startup();
     signal_shutdown().get();
 }
-}  // namespace opentxs::v1::ui::implementation
+}  // namespace opentxs::ui::implementation

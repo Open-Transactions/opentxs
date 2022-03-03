@@ -10,7 +10,7 @@
 
 #include <cstdint>
 
-namespace opentxs::v1::otx::blind
+namespace opentxs::otx::blind
 {
 enum class PurseType : std::uint8_t {
     Error = 0,
@@ -18,4 +18,4 @@ enum class PurseType : std::uint8_t {
     Issue = 2,
     Normal = 3,
 };
-}  // namespace opentxs::v1::otx::blind
+}  // namespace opentxs::otx::blind

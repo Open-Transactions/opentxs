@@ -29,7 +29,7 @@
 #include "opentxs/util/Time.hpp"
 #include "util/ScopeGuard.hpp"
 
-namespace opentxs::v1::blockchain::node::wallet
+namespace opentxs::blockchain::node::wallet
 {
 Process::Process(SubchainStateData& parent, Progress& progress) noexcept
     : Job(ThreadPool::Blockchain, parent)
@@ -414,4 +414,4 @@ auto Process::Run() noexcept -> bool
 
     return again;
 }
-}  // namespace opentxs::v1::blockchain::node::wallet
+}  // namespace opentxs::blockchain::node::wallet

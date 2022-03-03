@@ -17,7 +17,7 @@
 #include "serialization/protobuf/CashEnums.pb.h"
 #include "util/Container.hpp"
 
-namespace opentxs::v1::otx::blind
+namespace opentxs::otx::blind
 {
 using CashTypeMap =
     robin_hood::unordered_flat_map<blind::CashType, proto::CashType>;
@@ -35,9 +35,9 @@ using TokenStateReverseMap =
 auto cashtype_map() noexcept -> const CashTypeMap&;
 auto pursetype_map() noexcept -> const PurseTypeMap&;
 auto tokenstate_map() noexcept -> const TokenStateMap&;
-}  // namespace opentxs::v1::otx::blind
+}  // namespace opentxs::otx::blind
 
-namespace opentxs::v1::otx::blind
+namespace opentxs::otx::blind
 {
 auto cashtype_map() noexcept -> const CashTypeMap&
 {
@@ -74,9 +74,9 @@ auto tokenstate_map() noexcept -> const TokenStateMap&
 
     return map;
 }
-}  // namespace opentxs::v1::otx::blind
+}  // namespace opentxs::otx::blind
 
-namespace opentxs::v1
+namespace opentxs
 {
 auto print(otx::blind::CashType in) noexcept -> UnallocatedCString
 {
@@ -165,4 +165,4 @@ auto translate(const proto::TokenState in) noexcept -> otx::blind::TokenState
         return otx::blind::TokenState::Error;
     }
 }
-}  // namespace opentxs::v1
+}  // namespace opentxs

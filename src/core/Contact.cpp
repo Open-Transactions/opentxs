@@ -58,7 +58,7 @@
 
 #define ID_BYTES 32
 
-namespace opentxs::v1
+namespace opentxs
 {
 const robin_hood::
     unordered_flat_map<blockchain::crypto::AddressStyle, UnallocatedCString>
@@ -1169,4 +1169,4 @@ void Contact::Update(const proto::Nym& serialized)
 
 Contact::~Contact() = default;
 
-}  // namespace opentxs::v1
+}  // namespace opentxs

@@ -19,7 +19,7 @@
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto OTScript(const UnallocatedCString& script_type)
     -> std::shared_ptr<opentxs::OTScript>
@@ -52,9 +52,9 @@ auto OTScript(
         return std::make_shared<opentxs::OTScript>();
     }
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory
 
-namespace opentxs::v1
+namespace opentxs
 {
 // A script should be "Dumb", meaning that you just stick it with its
 // parties and other resources, and it EXPECTS them to be the correct
@@ -271,4 +271,4 @@ auto OTScript::RegisterNativeSmartContractCalls(OTSmartContract&) noexcept
     -> void
 {
 }
-}  // namespace opentxs::v1
+}  // namespace opentxs

@@ -28,8 +28,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace proto
 {
 class Contact;
@@ -43,11 +43,11 @@ namespace storage
 class Driver;
 class Root;
 }  // namespace storage
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::storage
+namespace opentxs::storage
 {
 using keyFunction = std::function<bool(const UnallocatedCString&)>;
 /** A set of metadata associated with a stored object
@@ -278,4 +278,4 @@ public:
 
     virtual ~Node() = default;
 };
-}  // namespace opentxs::v1::storage
+}  // namespace opentxs::storage

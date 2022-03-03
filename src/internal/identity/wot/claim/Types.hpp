@@ -14,7 +14,7 @@
 #include "opentxs/util/Numbers.hpp"
 #include "serialization/protobuf/ContactEnums.pb.h"
 
-namespace opentxs::v1
+namespace opentxs
 {
 auto translate(const identity::wot::claim::Attribute in) noexcept
     -> proto::ContactItemAttribute;
@@ -28,9 +28,9 @@ auto translate(const proto::ContactItemType in) noexcept
     -> identity::wot::claim::ClaimType;
 auto translate(const proto::ContactSectionName in) noexcept
     -> identity::wot::claim::SectionType;
-}  // namespace opentxs::v1
+}  // namespace opentxs
 
-namespace opentxs::v1::identity::wot::claim
+namespace opentxs::identity::wot::claim
 {
 constexpr auto check_version(
     const VersionNumber in,
@@ -41,4 +41,4 @@ constexpr auto check_version(
 
     return in;
 }
-}  // namespace opentxs::v1::identity::wot::claim
+}  // namespace opentxs::identity::wot::claim

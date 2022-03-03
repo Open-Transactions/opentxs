@@ -38,7 +38,7 @@
 #include "opentxs/util/Pimpl.hpp"
 #include "opentxs/util/Time.hpp"
 
-namespace opentxs::v1::rpc::implementation
+namespace opentxs::rpc::implementation
 {
 auto RPC::send_payment(const request::Base& base) const noexcept
     -> std::unique_ptr<response::Base>
@@ -235,4 +235,4 @@ auto RPC::send_payment_custodial(
         }
     }
 }
-}  // namespace opentxs::v1::rpc::implementation
+}  // namespace opentxs::rpc::implementation

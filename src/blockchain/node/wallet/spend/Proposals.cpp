@@ -44,7 +44,7 @@
 #include "serialization/protobuf/BlockchainTransactionProposedNotification.pb.h"
 #include "util/ScopeGuard.hpp"
 
-namespace opentxs::v1::blockchain::node::wallet
+namespace opentxs::blockchain::node::wallet
 {
 struct Proposals::Imp {
 public:
@@ -499,4 +499,4 @@ auto Proposals::Add(const Proposal& tx, std::promise<SendOutcome>&& promise)
 auto Proposals::Run() noexcept -> bool { return imp_->Run(); }
 
 Proposals::~Proposals() = default;
-}  // namespace opentxs::v1::blockchain::node::wallet
+}  // namespace opentxs::blockchain::node::wallet

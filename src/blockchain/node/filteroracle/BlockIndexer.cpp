@@ -39,7 +39,7 @@
 #include "util/JobCounter.hpp"
 #include "util/ScopeGuard.hpp"
 
-namespace opentxs::v1::blockchain::node::implementation
+namespace opentxs::blockchain::node::implementation
 {
 FilterOracle::BlockIndexer::BlockIndexer(
     const api::Session& api,
@@ -397,4 +397,4 @@ auto FilterOracle::BlockIndexer::update_tip(
 }
 
 FilterOracle::BlockIndexer::~BlockIndexer() { signal_shutdown().get(); }
-}  // namespace opentxs::v1::blockchain::node::implementation
+}  // namespace opentxs::blockchain::node::implementation

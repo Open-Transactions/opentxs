@@ -14,7 +14,7 @@
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/Types.hpp"
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto SeedTreeNym(
     const ui::implementation::SeedTreeItemInternalInterface& parent,
@@ -28,9 +28,9 @@ auto SeedTreeNym(
 
     return std::make_shared<ReturnType>(parent, api, rowID, sortKey, custom);
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory
 
-namespace opentxs::v1::ui::implementation
+namespace opentxs::ui::implementation
 {
 SeedTreeNym::SeedTreeNym(
     const SeedTreeItemInternalInterface& parent,
@@ -72,4 +72,4 @@ auto SeedTreeNym::reindex(
 }
 
 SeedTreeNym::~SeedTreeNym() = default;
-}  // namespace opentxs::v1::ui::implementation
+}  // namespace opentxs::ui::implementation

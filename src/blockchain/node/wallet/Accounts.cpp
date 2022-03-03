@@ -55,7 +55,7 @@
 #include "util/LMDB.hpp"
 #include "util/Work.hpp"
 
-namespace opentxs::v1::blockchain::node::wallet
+namespace opentxs::blockchain::node::wallet
 {
 auto print(AccountsJobs job) noexcept -> std::string_view
 {
@@ -80,9 +80,9 @@ auto print(AccountsJobs job) noexcept -> std::string_view
         OT_FAIL;
     }
 }
-}  // namespace opentxs::v1::blockchain::node::wallet
+}  // namespace opentxs::blockchain::node::wallet
 
-namespace opentxs::v1::blockchain::node::wallet
+namespace opentxs::blockchain::node::wallet
 {
 Accounts::Imp::Imp(
     const api::Session& api,
@@ -570,9 +570,9 @@ auto Accounts::Imp::work() noexcept -> bool
 }
 
 Accounts::Imp::~Imp() = default;
-}  // namespace opentxs::v1::blockchain::node::wallet
+}  // namespace opentxs::blockchain::node::wallet
 
-namespace opentxs::v1::blockchain::node::wallet
+namespace opentxs::blockchain::node::wallet
 {
 Accounts::Accounts(
     const api::Session& api,
@@ -607,4 +607,4 @@ Accounts::Accounts(
 }
 
 Accounts::~Accounts() { imp_->Shutdown(); }
-}  // namespace opentxs::v1::blockchain::node::wallet
+}  // namespace opentxs::blockchain::node::wallet

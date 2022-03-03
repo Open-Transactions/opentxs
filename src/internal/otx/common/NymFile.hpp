@@ -11,8 +11,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace identifier
 {
 class Nym;
@@ -23,11 +23,11 @@ class Message;
 class OTPayment;
 class PasswordPrompt;
 class String;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1
+namespace opentxs
 {
 class NymFile
 {
@@ -91,4 +91,4 @@ private:
     auto operator=(const NymFile&) -> NymFile& = delete;
     auto operator=(NymFile&&) -> NymFile& = delete;
 };
-}  // namespace opentxs::v1
+}  // namespace opentxs

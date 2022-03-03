@@ -12,14 +12,14 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 class OTScript;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto OTScript(const UnallocatedCString& script_type = "")
     -> std::shared_ptr<opentxs::OTScript>;
@@ -30,4 +30,4 @@ auto OTScript(
 auto OTScriptChai() -> std::shared_ptr<opentxs::OTScript>;
 auto OTScriptChai(const UnallocatedCString& script_contents)
     -> std::shared_ptr<opentxs::OTScript>;
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory

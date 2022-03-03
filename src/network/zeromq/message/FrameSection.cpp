@@ -18,7 +18,7 @@
 #include "opentxs/network/zeromq/message/FrameIterator.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 
-namespace opentxs::v1::network::zeromq::blank
+namespace opentxs::network::zeromq::blank
 {
 class FrameSection final : public zeromq::FrameSection::Imp
 {
@@ -55,17 +55,17 @@ private:
     auto operator=(const FrameSection&) -> FrameSection& = delete;
     auto operator=(FrameSection&) -> FrameSection& = delete;
 };
-}  // namespace opentxs::v1::network::zeromq::blank
+}  // namespace opentxs::network::zeromq::blank
 
-namespace opentxs::v1::network::zeromq
+namespace opentxs::network::zeromq
 {
 auto swap(FrameSection& lhs, FrameSection& rhs) noexcept -> void
 {
     lhs.swap(rhs);
 }
-}  // namespace opentxs::v1::network::zeromq
+}  // namespace opentxs::network::zeromq
 
-namespace opentxs::v1::network::zeromq::implementation
+namespace opentxs::network::zeromq::implementation
 {
 FrameSection::FrameSection(
     const Message* parent,
@@ -119,9 +119,9 @@ auto FrameSection::end() noexcept -> FrameIterator
 }
 
 auto FrameSection::size() const noexcept -> std::size_t { return size_; }
-}  // namespace opentxs::v1::network::zeromq::implementation
+}  // namespace opentxs::network::zeromq::implementation
 
-namespace opentxs::v1::network::zeromq
+namespace opentxs::network::zeromq
 {
 FrameSection::FrameSection(Imp* imp) noexcept
     : imp_(imp)
@@ -185,4 +185,4 @@ FrameSection::~FrameSection()
         imp_ = nullptr;
     }
 }
-}  // namespace opentxs::v1::network::zeromq
+}  // namespace opentxs::network::zeromq

@@ -9,7 +9,7 @@
 
 #include <memory>
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto MessagableListItem(
     const ui::implementation::ContactListInternalInterface& parent,
@@ -22,9 +22,9 @@ auto MessagableListItem(
 
     return std::make_shared<ReturnType>(parent, api, rowID, key);
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory
 
-namespace opentxs::v1::ui::implementation
+namespace opentxs::ui::implementation
 {
 MessagableListItem::MessagableListItem(
     const ContactListInternalInterface& parent,
@@ -34,4 +34,4 @@ MessagableListItem::MessagableListItem(
     : ot_super(parent, api, rowID, key)
 {
 }
-}  // namespace opentxs::v1::ui::implementation
+}  // namespace opentxs::ui::implementation

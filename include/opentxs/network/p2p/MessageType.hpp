@@ -9,7 +9,7 @@
 
 #include "opentxs/network/p2p/Types.hpp"
 
-namespace opentxs::v1::network::p2p
+namespace opentxs::network::p2p
 {
 enum class MessageType : TypeEnum {
     error = 0,
@@ -25,4 +25,4 @@ enum class MessageType : TypeEnum {
     pushtx = 10,
     pushtx_reply = 11,
 };
-}  // namespace opentxs::v1::network::p2p
+}  // namespace opentxs::network::p2p

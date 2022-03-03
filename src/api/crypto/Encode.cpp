@@ -34,7 +34,7 @@
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Pimpl.hpp"
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto Encode(const api::Crypto& crypto) noexcept
     -> std::unique_ptr<api::crypto::Encode>
@@ -43,9 +43,9 @@ auto Encode(const api::Crypto& crypto) noexcept
 
     return std::make_unique<ReturnType>(crypto);
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory
 
-namespace opentxs::v1::api::crypto::imp
+namespace opentxs::api::crypto::imp
 {
 Encode::Encode(const api::Crypto& crypto) noexcept
     : crypto_(crypto)
@@ -308,4 +308,4 @@ auto Encode::Z85Decode(const UnallocatedCString& input) const
         return {};
     }
 }
-}  // namespace opentxs::v1::api::crypto::imp
+}  // namespace opentxs::api::crypto::imp

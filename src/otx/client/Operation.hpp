@@ -47,8 +47,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace api
 {
 namespace session
@@ -82,11 +82,11 @@ class Factory;
 class OTPayment;
 class OTTransaction;
 class PeerObject;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::otx::client::implementation
+namespace opentxs::otx::client::implementation
 {
 class Operation final : virtual public otx::client::internal::Operation,
                         public opentxs::internal::StateMachine
@@ -352,4 +352,4 @@ private:
     auto operator=(const Operation&) -> Operation& = delete;
     auto operator=(Operation&&) -> Operation& = delete;
 };
-}  // namespace opentxs::v1::otx::client::implementation
+}  // namespace opentxs::otx::client::implementation

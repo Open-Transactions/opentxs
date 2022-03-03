@@ -37,7 +37,7 @@
 #include "opentxs/util/Time.hpp"
 #include "util/ScopeGuard.hpp"
 
-namespace opentxs::v1::blockchain::node::wallet
+namespace opentxs::blockchain::node::wallet
 {
 Scan::Scan(SubchainStateData& parent, Process& process, Rescan& rescan) noexcept
     : Job(ThreadPool::General, parent)
@@ -316,4 +316,4 @@ auto Scan::update_tip(const Lock& lock) noexcept -> block::Position
 
     return filter_tip_.value();
 }
-}  // namespace opentxs::v1::blockchain::node::wallet
+}  // namespace opentxs::blockchain::node::wallet

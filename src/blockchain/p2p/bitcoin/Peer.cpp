@@ -67,7 +67,7 @@
 #include "util/ScopeGuard.hpp"
 #include "util/Work.hpp"
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto BitcoinP2PPeerLegacy(
     const api::Session& api,
@@ -123,9 +123,9 @@ auto BitcoinP2PPeerLegacy(
         id,
         std::move(address));
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory
 
-namespace opentxs::v1::blockchain::p2p::bitcoin::implementation
+namespace opentxs::blockchain::p2p::bitcoin::implementation
 {
 const UnallocatedMap<Command, Peer::CommandFunction> Peer::command_map_{
     {Command::addr, &Peer::process_addr},
@@ -2147,4 +2147,4 @@ auto Peer::start_handshake() noexcept -> void
 }
 
 Peer::~Peer() { Shutdown(); }
-}  // namespace opentxs::v1::blockchain::p2p::bitcoin::implementation
+}  // namespace opentxs::blockchain::p2p::bitcoin::implementation

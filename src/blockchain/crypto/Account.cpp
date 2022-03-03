@@ -46,7 +46,7 @@
 #include "serialization/protobuf/Bip47Channel.pb.h"
 #include "serialization/protobuf/HDAccount.pb.h"
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto BlockchainAccountKeys(
     const api::Session& api,
@@ -64,9 +64,9 @@ auto BlockchainAccountKeys(
     return std::make_unique<ReturnType>(
         api, contacts, parent, index, id, hd, imported, pc);
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory
 
-namespace opentxs::v1::blockchain::crypto::implementation
+namespace opentxs::blockchain::crypto::implementation
 {
 Account::Account(
     const api::Session& api,
@@ -352,4 +352,4 @@ auto Account::Subaccount(const Identifier& id) const noexcept(false)
 
     return *output;
 }
-}  // namespace opentxs::v1::blockchain::crypto::implementation
+}  // namespace opentxs::blockchain::crypto::implementation

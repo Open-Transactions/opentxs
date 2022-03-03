@@ -28,7 +28,7 @@
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto BlockOracle(
     const api::Session& api,
@@ -43,9 +43,9 @@ auto BlockOracle(
 
     return std::make_unique<ReturnType>(api, node, header, db, chain, shutdown);
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory
 
-namespace opentxs::v1::blockchain::node::implementation
+namespace opentxs::blockchain::node::implementation
 {
 BlockOracle::BlockOracle(
     const api::Session& api,
@@ -197,4 +197,4 @@ auto BlockOracle::SubmitBlock(const ReadView in) const noexcept -> void
 }
 
 BlockOracle::~BlockOracle() { signal_shutdown().get(); }
-}  // namespace opentxs::v1::blockchain::node::implementation
+}  // namespace opentxs::blockchain::node::implementation

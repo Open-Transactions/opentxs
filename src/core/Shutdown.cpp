@@ -18,7 +18,7 @@
 
 namespace zmq = opentxs::network::zeromq;
 
-namespace opentxs::v1::internal
+namespace opentxs::internal
 {
 ShutdownSender::ShutdownSender(
     const network::zeromq::Context& zmq,
@@ -84,4 +84,4 @@ ShutdownReceiver::~ShutdownReceiver()
     } catch (...) {
     }
 }
-}  // namespace opentxs::v1::internal
+}  // namespace opentxs::internal

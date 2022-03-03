@@ -12,7 +12,7 @@
 
 #include "opentxs/util/Container.hpp"
 
-namespace opentxs::v1
+namespace opentxs
 {
 enum class AccountType : std::int8_t;
 enum class AddressType : std::uint8_t;
@@ -21,4 +21,4 @@ enum class UnitType : std::uint32_t;
 auto print(AccountType) noexcept -> UnallocatedCString;
 auto print(AddressType) noexcept -> UnallocatedCString;
 auto print(UnitType) noexcept -> UnallocatedCString;
-}  // namespace opentxs::v1
+}  // namespace opentxs

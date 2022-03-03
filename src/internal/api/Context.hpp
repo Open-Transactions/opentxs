@@ -10,19 +10,19 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace api
 {
 class Legacy;
 }  // namespace api
 
 class PasswordCaller;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::api::internal
+namespace opentxs::api::internal
 {
 class Context : virtual public api::Context
 {
@@ -37,4 +37,4 @@ public:
 
     ~Context() override = default;
 };
-}  // namespace opentxs::v1::api::internal
+}  // namespace opentxs::api::internal

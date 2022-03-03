@@ -22,8 +22,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace crypto
 {
 namespace key
@@ -48,11 +48,11 @@ class PasswordPrompt;
 class Secret;
 
 using OTAsymmetricKey = Pimpl<crypto::key::Asymmetric>;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::crypto::key
+namespace opentxs::crypto::key
 {
 class OPENTXS_EXPORT Asymmetric
 {
@@ -146,4 +146,4 @@ private:
     auto operator=(const Asymmetric&) -> Asymmetric& = delete;
     auto operator=(Asymmetric&&) -> Asymmetric& = delete;
 };
-}  // namespace opentxs::v1::crypto::key
+}  // namespace opentxs::crypto::key

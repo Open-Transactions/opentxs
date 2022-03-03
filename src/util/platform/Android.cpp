@@ -9,10 +9,10 @@
 
 #include "opentxs/util/Allocator.hpp"
 
-namespace opentxs::v1::api::imp
+namespace opentxs::api::imp
 {
 auto Legacy::use_dot() noexcept -> bool { return false; }
-}  // namespace opentxs::v1::api::imp
+}  // namespace opentxs::api::imp
 
 // TODO after libc++ finally incorporates this into std, and after a new version
 // of the ndk is released which uses that version of libc++, then this can be

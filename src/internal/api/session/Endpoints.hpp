@@ -9,7 +9,7 @@
 
 #include "opentxs/api/session/Endpoints.hpp"
 
-namespace opentxs::v1::api::session::internal
+namespace opentxs::api::session::internal
 {
 class Endpoints : virtual public api::session::Endpoints
 {
@@ -31,4 +31,4 @@ public:
 
     ~Endpoints() override = default;
 };
-}  // namespace opentxs::v1::api::session::internal
+}  // namespace opentxs::api::session::internal

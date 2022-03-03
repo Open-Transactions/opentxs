@@ -32,7 +32,7 @@
             std::to_string(static_cast<std::uint32_t>(input.state())))         \
     }
 
-namespace opentxs::v1::proto
+namespace opentxs::proto
 {
 auto CheckProto_3(const PaymentWorkflow& input, const bool silent) -> bool
 {
@@ -1285,4 +1285,4 @@ auto CheckProto_20(const PaymentWorkflow& input, const bool silent) -> bool
 {
     UNDEFINED_VERSION(20)
 }
-}  // namespace opentxs::v1::proto
+}  // namespace opentxs::proto

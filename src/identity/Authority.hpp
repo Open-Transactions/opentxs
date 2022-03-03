@@ -39,8 +39,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace api
 {
 class Session;
@@ -82,11 +82,11 @@ class OTPassword;
 class PasswordPrompt;
 class Secret;
 class Signature;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::identity::implementation
+namespace opentxs::identity::implementation
 {
 class Authority final : virtual public identity::internal::Authority
 {
@@ -340,4 +340,4 @@ private:
     auto operator=(const Authority&) -> Authority& = delete;
     auto operator=(Authority&&) -> Authority& = delete;
 };
-}  // namespace opentxs::v1::identity::implementation
+}  // namespace opentxs::identity::implementation

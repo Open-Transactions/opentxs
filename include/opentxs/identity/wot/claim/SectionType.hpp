@@ -10,7 +10,7 @@
 
 #include <cstdint>
 
-namespace opentxs::v1::identity::wot::claim
+namespace opentxs::identity::wot::claim
 {
 enum class SectionType : std::uint8_t {
     Error = 0,
@@ -25,4 +25,4 @@ enum class SectionType : std::uint8_t {
     Contract = 9,
     Procedure = 10,
 };
-}  // namespace opentxs::v1::identity::wot::claim
+}  // namespace opentxs::identity::wot::claim

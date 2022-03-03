@@ -17,7 +17,7 @@
 #include "opentxs/identity/credential/Verification.hpp"
 #include "serialization/protobuf/Enums.pb.h"
 
-namespace opentxs::v1::identity::credential::internal
+namespace opentxs::identity::credential::internal
 {
 struct Base : virtual public identity::credential::Base {
     virtual void ReleaseSignatures(const bool onlyPrivate) = 0;
@@ -66,9 +66,9 @@ struct Verification : virtual public Base,
 #endif  // _MSC_VER
     ~Verification() override = default;
 };
-}  // namespace opentxs::v1::identity::credential::internal
+}  // namespace opentxs::identity::credential::internal
 
-namespace opentxs::v1
+namespace opentxs
 {
 auto translate(const identity::CredentialRole in) noexcept
     -> proto::CredentialRole;
@@ -78,4 +78,4 @@ auto translate(const proto::CredentialRole in) noexcept
     -> identity::CredentialRole;
 auto translate(const proto::CredentialType in) noexcept
     -> identity::CredentialType;
-}  // namespace opentxs::v1
+}  // namespace opentxs

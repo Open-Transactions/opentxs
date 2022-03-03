@@ -15,7 +15,7 @@
 #include "serialization/protobuf/ConsensusEnums.pb.h"
 #include "serialization/protobuf/OTXEnums.pb.h"
 
-namespace opentxs::v1
+namespace opentxs
 {
 auto translate(const otx::ConsensusType in) noexcept -> proto::ConsensusType;
 auto translate(const otx::LastReplyStatus in) noexcept
@@ -33,4 +33,4 @@ auto translate(const proto::ServerReplyType in) noexcept
     -> otx::ServerReplyType;
 auto translate(const proto::ServerRequestType in) noexcept
     -> otx::ServerRequestType;
-}  // namespace opentxs::v1
+}  // namespace opentxs

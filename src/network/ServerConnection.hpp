@@ -33,8 +33,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace api
 {
 namespace network
@@ -74,11 +74,11 @@ class Server;
 }  // namespace otx
 
 class PasswordPrompt;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::network::implementation
+namespace opentxs::network::implementation
 {
 class ServerConnection final
     : virtual public opentxs::network::ServerConnection,
@@ -157,4 +157,4 @@ private:
     auto operator=(const ServerConnection&) -> ServerConnection& = delete;
     auto operator=(ServerConnection&&) -> ServerConnection& = delete;
 };
-}  // namespace opentxs::v1::network::implementation
+}  // namespace opentxs::network::implementation

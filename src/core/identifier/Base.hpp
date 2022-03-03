@@ -30,8 +30,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace identity
 {
 class Nym;
@@ -45,11 +45,11 @@ class Identifier;
 
 class Contract;
 class String;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::implementation
+namespace opentxs::implementation
 {
 class Identifier final : virtual public opentxs::Identifier,
                          virtual public opentxs::identifier::Nym,
@@ -182,4 +182,4 @@ private:
     auto operator=(const Identifier& rhs) -> Identifier& = delete;
     auto operator=(Identifier&& rhs) -> Identifier& = delete;
 };
-}  // namespace opentxs::v1::implementation
+}  // namespace opentxs::implementation

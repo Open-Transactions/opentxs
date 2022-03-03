@@ -7,7 +7,7 @@ syntax = "proto2";
 
 import public "BlockchainP2PChainState.proto";
 
-package opentxs.v1.proto;
+package opentxs.proto;
 option java_package = "org.opentransactions.proto";
 option java_outer_classname = "BlockchainP2PHello";
 option optimize_for = LITE_RUNTIME;

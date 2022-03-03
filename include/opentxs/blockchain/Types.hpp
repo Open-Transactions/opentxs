@@ -21,14 +21,14 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 class Amount;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1
+namespace opentxs
 {
 namespace blockchain
 {
@@ -63,4 +63,4 @@ OPENTXS_EXPORT auto UnitToBlockchain(const UnitType type) noexcept
 OPENTXS_EXPORT auto print(blockchain::SendResult) noexcept
     -> UnallocatedCString;
 OPENTXS_EXPORT auto print(blockchain::Type) noexcept -> UnallocatedCString;
-}  // namespace opentxs::v1
+}  // namespace opentxs

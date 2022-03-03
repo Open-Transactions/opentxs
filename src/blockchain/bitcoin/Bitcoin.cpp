@@ -26,7 +26,7 @@
 
 namespace bb = opentxs::blockchain::bitcoin;
 
-namespace opentxs::v1::blockchain::bitcoin
+namespace opentxs::blockchain::bitcoin
 {
 const auto cb = [](const auto lhs, const auto& in) -> std::size_t {
     return lhs + in.size();
@@ -769,4 +769,4 @@ auto SigHash::Type() const noexcept -> SigOption
 
     return SigOption::All;
 }
-}  // namespace opentxs::v1::blockchain::bitcoin
+}  // namespace opentxs::blockchain::bitcoin

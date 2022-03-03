@@ -20,7 +20,7 @@
 #include "opentxs/util/Numbers.hpp"
 #include "serialization/protobuf/AccountData.pb.h"
 
-namespace opentxs::v1::rpc
+namespace opentxs::rpc
 {
 struct AccountData::Imp {
     static constexpr auto default_version_ = VersionNumber{2};
@@ -215,4 +215,4 @@ AccountData::~AccountData()
     std::unique_ptr<Imp>{imp_}.reset();
     imp_ = nullptr;
 }
-}  // namespace opentxs::v1::rpc
+}  // namespace opentxs::rpc

@@ -16,8 +16,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace network
 {
 namespace zeromq
@@ -33,7 +33,9 @@ class FrameSection;
 class Message;
 }  // namespace zeromq
 }  // namespace network
-}  // namespace v1
+
+class Amount;
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -43,7 +45,7 @@ template <>
 struct hash<opentxs::network::zeromq::Message>;
 }  // namespace std
 
-namespace opentxs::v1::network::zeromq
+namespace opentxs::network::zeromq
 {
 OPENTXS_EXPORT auto operator<(const Message& lhs, const Message& rhs) noexcept
     -> bool;
@@ -90,6 +92,7 @@ public:
     auto Total() const noexcept -> std::size_t;
 
     auto AddFrame() noexcept -> Frame&;
+    auto AddFrame(const Amount& amount) noexcept -> Frame&;
     auto AddFrame(Frame&& frame) noexcept -> Frame&;
     auto AddFrame(const char*) noexcept -> Frame&;
     template <
@@ -139,4 +142,4 @@ protected:
 
     Imp* imp_;
 };
-}  // namespace opentxs::v1::network::zeromq
+}  // namespace opentxs::network::zeromq

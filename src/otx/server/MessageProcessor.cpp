@@ -62,7 +62,7 @@
 #include "serialization/protobuf/ServerReply.pb.h"
 #include "serialization/protobuf/ServerRequest.pb.h"
 
-namespace opentxs::v1::server
+namespace opentxs::server
 {
 MessageProcessor::MessageProcessor(
     Server& server,
@@ -646,4 +646,4 @@ MessageProcessor::~MessageProcessor()
 
     if (thread_.joinable()) { thread_.join(); }
 }
-}  // namespace opentxs::v1::server
+}  // namespace opentxs::server

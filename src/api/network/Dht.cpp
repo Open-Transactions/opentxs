@@ -24,7 +24,6 @@
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/api/session/Wallet.hpp"
-#include "opentxs/core/Data.hpp"
 #include "opentxs/core/String.hpp"
 #include "opentxs/core/contract/ContractType.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
@@ -46,7 +45,7 @@
 
 namespace zmq = opentxs::network::zeromq;
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto DhtAPI(
     const api::Session& api,
@@ -129,9 +128,9 @@ auto DhtAPI(
     return std::make_unique<ReturnType>(
         api, zeromq, endpoints, std::move(config));
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory
 
-namespace opentxs::v1::api::network::imp
+namespace opentxs::api::network::imp
 {
 Dht::Dht(
     const api::Session& api,
@@ -440,4 +439,4 @@ auto Dht::RegisterCallbacks(const CallbackMap& callbacks) const noexcept -> void
     auto lock = eLock{lock_};
     callback_map_ = callbacks;
 }
-}  // namespace opentxs::v1::api::network::imp
+}  // namespace opentxs::api::network::imp

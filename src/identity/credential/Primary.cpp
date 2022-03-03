@@ -42,7 +42,7 @@
 #include "serialization/protobuf/SourceProof.pb.h"
 #include "util/Container.hpp"
 
-namespace opentxs::v1
+namespace opentxs
 {
 auto Factory::PrimaryCredential(
     const api::Session& api,
@@ -87,9 +87,9 @@ auto Factory::PrimaryCredential(
         return nullptr;
     }
 }
-}  // namespace opentxs::v1
+}  // namespace opentxs
 
-namespace opentxs::v1::identity::credential::implementation
+namespace opentxs::identity::credential::implementation
 {
 const VersionConversionMap Primary::credential_to_master_params_{
     {1, 1},
@@ -356,4 +356,4 @@ auto Primary::verify_internally(const Lock& lock) const -> bool
 
     return true;
 }
-}  // namespace opentxs::v1::identity::credential::implementation
+}  // namespace opentxs::identity::credential::implementation

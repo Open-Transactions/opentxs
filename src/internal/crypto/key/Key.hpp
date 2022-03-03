@@ -12,7 +12,7 @@
 #include "opentxs/crypto/key/symmetric/Source.hpp"
 #include "serialization/protobuf/Enums.pb.h"
 
-namespace opentxs::v1
+namespace opentxs
 {
 auto translate(const crypto::key::asymmetric::Algorithm in) noexcept
     -> proto::AsymmetricKeyType;
@@ -34,4 +34,4 @@ auto translate(const proto::SymmetricKeyType in) noexcept
     -> crypto::key::symmetric::Source;
 auto translate(const proto::SymmetricMode in) noexcept
     -> crypto::key::symmetric::Algorithm;
-}  // namespace opentxs::v1
+}  // namespace opentxs

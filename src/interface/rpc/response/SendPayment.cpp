@@ -13,7 +13,7 @@
 
 #include "opentxs/interface/rpc/request/SendPayment.hpp"
 
-namespace opentxs::v1::rpc::response::implementation
+namespace opentxs::rpc::response::implementation
 {
 struct SendPayment final : public Base::Imp {
     auto asSendPayment() const noexcept -> const response::SendPayment& final
@@ -55,9 +55,9 @@ private:
     auto operator=(const SendPayment&) -> SendPayment& = delete;
     auto operator=(SendPayment&&) -> SendPayment& = delete;
 };
-}  // namespace opentxs::v1::rpc::response::implementation
+}  // namespace opentxs::rpc::response::implementation
 
-namespace opentxs::v1::rpc::response
+namespace opentxs::rpc::response
 {
 SendPayment::SendPayment(
     const request::SendPayment& request,
@@ -87,4 +87,4 @@ auto SendPayment::Pending() const noexcept -> const Tasks&
 }
 
 SendPayment::~SendPayment() = default;
-}  // namespace opentxs::v1::rpc::response
+}  // namespace opentxs::rpc::response

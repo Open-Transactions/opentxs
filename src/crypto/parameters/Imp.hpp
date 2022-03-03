@@ -28,18 +28,18 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace proto
 {
 class ContactData;
 class VerificationSet;
 }  // namespace proto
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::crypto
+namespace opentxs::crypto
 {
 class Parameters::Imp final : public internal::Parameters
 {
@@ -88,4 +88,4 @@ public:
     Imp() noexcept;
     Imp(const Imp& rhs) noexcept;
 };
-}  // namespace opentxs::v1::crypto
+}  // namespace opentxs::crypto

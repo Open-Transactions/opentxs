@@ -34,7 +34,7 @@
 #include "serialization/protobuf/AsymmetricKey.pb.h"
 #include "serialization/protobuf/BlockchainAddress.pb.h"
 
-namespace opentxs::v1::blockchain::crypto::implementation
+namespace opentxs::blockchain::crypto::implementation
 {
 Element::Element(
     const api::Session& api,
@@ -484,4 +484,4 @@ auto Element::update_element(rLock& lock) const noexcept -> void
     lock.unlock();
     parent_.Internal().UpdateElement(hashes);
 }
-}  // namespace opentxs::v1::blockchain::crypto::implementation
+}  // namespace opentxs::blockchain::crypto::implementation

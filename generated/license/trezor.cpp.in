@@ -7,7 +7,7 @@
 #include "1_Internal.hpp"            // IWYU pragma: associated
 #include "util/license/License.hpp"  // IWYU pragma: associated
 
-namespace opentxs::v1
+namespace opentxs
 {
 auto license_trezor(LicenseMap& out) noexcept -> void
 {
@@ -15,4 +15,4 @@ auto license_trezor(LicenseMap& out) noexcept -> void
         "ripemd160 and pbkdf2 (via Trezor)",
         UnallocatedCString{R"~!~(@TREZOR_LICENSE_TEXT@)~!~"});
 }
-}  // namespace opentxs::v1
+}  // namespace opentxs

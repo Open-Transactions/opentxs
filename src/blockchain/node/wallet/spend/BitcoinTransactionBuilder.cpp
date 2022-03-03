@@ -29,7 +29,6 @@
 #include "internal/blockchain/Params.hpp"
 #include "internal/blockchain/bitcoin/Bitcoin.hpp"
 #include "internal/blockchain/block/bitcoin/Bitcoin.hpp"
-#include "internal/blockchain/node/Node.hpp"
 #include "internal/core/Amount.hpp"
 #include "internal/core/Factory.hpp"
 #include "internal/core/PaymentCode.hpp"
@@ -75,7 +74,7 @@
 
 namespace be = boost::endian;
 
-namespace opentxs::v1::blockchain::node::wallet
+namespace opentxs::blockchain::node::wallet
 {
 struct BitcoinTransactionBuilder::Imp {
     auto IsFunded() const noexcept -> bool
@@ -1330,4 +1329,4 @@ auto BitcoinTransactionBuilder::Spender() const noexcept
 }
 
 BitcoinTransactionBuilder::~BitcoinTransactionBuilder() = default;
-}  // namespace opentxs::v1::blockchain::node::wallet
+}  // namespace opentxs::blockchain::node::wallet

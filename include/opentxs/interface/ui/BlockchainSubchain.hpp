@@ -14,7 +14,7 @@
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/SharedPimpl.hpp"
 
-namespace opentxs::v1::ui
+namespace opentxs::ui
 {
 class OPENTXS_EXPORT BlockchainSubchain : virtual public ListRow
 {
@@ -34,4 +34,4 @@ private:
     auto operator=(const BlockchainSubchain&) -> BlockchainSubchain& = delete;
     auto operator=(BlockchainSubchain&&) -> BlockchainSubchain& = delete;
 };
-}  // namespace opentxs::v1::ui
+}  // namespace opentxs::ui

@@ -10,7 +10,7 @@
 
 #include <cstdint>
 
-namespace opentxs::v1::identifier
+namespace opentxs::identifier
 {
 enum class Type : std::uint16_t {
     invalid = 0,
@@ -19,4 +19,4 @@ enum class Type : std::uint16_t {
     notary = 3,
     unitdefinition = 4,
 };
-}  // namespace opentxs::v1::identifier
+}  // namespace opentxs::identifier

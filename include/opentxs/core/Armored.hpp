@@ -17,17 +17,17 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 class Armored;
 class Data;
 
 using OTArmored = Pimpl<Armored>;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1
+namespace opentxs
 {
 extern const char* OT_BEGIN_ARMORED;
 extern const char* OT_END_ARMORED;
@@ -139,4 +139,4 @@ private:
     auto operator=(const Armored&) -> Armored& = delete;
     auto operator=(Armored&&) -> Armored& = delete;
 };
-}  // namespace opentxs::v1
+}  // namespace opentxs

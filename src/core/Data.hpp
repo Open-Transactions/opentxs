@@ -15,14 +15,14 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 class Armored;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::implementation
+namespace opentxs::implementation
 {
 class Data : virtual public opentxs::Data
 {
@@ -149,4 +149,4 @@ private:
     auto operator=(const Data& rhs) -> Data& = delete;
     auto operator=(Data&& rhs) -> Data& = delete;
 };
-}  // namespace opentxs::v1::implementation
+}  // namespace opentxs::implementation

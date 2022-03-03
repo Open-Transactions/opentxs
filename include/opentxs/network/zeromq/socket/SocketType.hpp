@@ -9,7 +9,7 @@
 
 #include <cstdint>
 
-namespace opentxs::v1::network::zeromq::socket
+namespace opentxs::network::zeromq::socket
 {
 enum class Type : std::uint8_t {
     Error = 0,
@@ -23,4 +23,4 @@ enum class Type : std::uint8_t {
     Dealer = 8,
     Router = 9,
 };
-}  // namespace opentxs::v1::network::zeromq::socket
+}  // namespace opentxs::network::zeromq::socket

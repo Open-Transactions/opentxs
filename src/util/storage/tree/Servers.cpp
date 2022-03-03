@@ -25,7 +25,7 @@
 #include "util/storage/Plugin.hpp"
 #include "util/storage/tree/Node.hpp"
 
-namespace opentxs::v1::storage
+namespace opentxs::storage
 {
 Servers::Servers(const Driver& storage, const UnallocatedCString& hash)
     : Node(storage, hash)
@@ -127,4 +127,4 @@ auto Servers::Store(
 {
     return store_proto(data, data.id(), alias, plaintext);
 }
-}  // namespace opentxs::v1::storage
+}  // namespace opentxs::storage

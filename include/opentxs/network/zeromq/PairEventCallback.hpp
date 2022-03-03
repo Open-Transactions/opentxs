@@ -15,8 +15,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace network
 {
 namespace zeromq
@@ -31,11 +31,11 @@ class PairEvent;
 }  // namespace proto
 
 using OTZMQPairEventCallback = Pimpl<network::zeromq::PairEventCallback>;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::network::zeromq
+namespace opentxs::network::zeromq
 {
 class OPENTXS_EXPORT PairEventCallback : virtual public ListenCallback
 {
@@ -61,4 +61,4 @@ private:
     auto operator=(const PairEventCallback&) -> PairEventCallback& = delete;
     auto operator=(PairEventCallback&&) -> PairEventCallback& = delete;
 };
-}  // namespace opentxs::v1::network::zeromq
+}  // namespace opentxs::network::zeromq

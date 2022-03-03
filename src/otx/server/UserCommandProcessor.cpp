@@ -89,7 +89,7 @@
 #define INBOX_DEPTH 1
 #define OUTBOX_DEPTH 2
 
-namespace opentxs::v1::server
+namespace opentxs::server
 {
 UserCommandProcessor::FinalizeResponse::FinalizeResponse(
     const api::Session& api,
@@ -3148,4 +3148,4 @@ auto UserCommandProcessor::verify_transaction(
 
     return transaction->VerifySignature(signer);
 }
-}  // namespace opentxs::v1::server
+}  // namespace opentxs::server

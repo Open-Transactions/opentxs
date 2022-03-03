@@ -20,7 +20,7 @@
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/util/Pimpl.hpp"
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto BlockchainActivityThreadItem(
     const ui::implementation::ActivityThreadInternalInterface& parent,
@@ -48,9 +48,9 @@ auto BlockchainActivityThreadItem(
         std::move(display),
         std::move(memo));
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory
 
-namespace opentxs::v1::ui::implementation
+namespace opentxs::ui::implementation
 {
 BlockchainActivityThreadItem::BlockchainActivityThreadItem(
     const ActivityThreadInternalInterface& parent,
@@ -141,4 +141,4 @@ auto BlockchainActivityThreadItem::reindex(
 
     return output;
 }
-}  // namespace opentxs::v1::ui::implementation
+}  // namespace opentxs::ui::implementation

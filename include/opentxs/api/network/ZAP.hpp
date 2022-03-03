@@ -10,7 +10,7 @@
 #include "opentxs/network/zeromq/zap/Callback.hpp"
 #include "opentxs/util/Container.hpp"
 
-namespace opentxs::v1::api::network
+namespace opentxs::api::network
 {
 class OPENTXS_EXPORT ZAP
 {
@@ -52,4 +52,4 @@ private:
     auto operator=(const ZAP&) -> ZAP& = delete;
     auto operator=(ZAP&&) -> ZAP& = delete;
 };
-}  // namespace opentxs::v1::api::network
+}  // namespace opentxs::api::network

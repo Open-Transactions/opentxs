@@ -13,8 +13,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace blockchain
 {
 namespace block
@@ -30,11 +30,11 @@ namespace client
 class HeaderOracle;
 }  // namespace client
 }  // namespace blockchain
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::crypto::implementation
+namespace opentxs::crypto::implementation
 {
 class PacketCrypt final : public blockchain::node::internal::BlockValidator
 {
@@ -58,4 +58,4 @@ private:
     auto operator=(const PacketCrypt&) -> PacketCrypt& = delete;
     auto operator=(PacketCrypt&&) -> PacketCrypt& = delete;
 };
-}  // namespace opentxs::v1::crypto::implementation
+}  // namespace opentxs::crypto::implementation

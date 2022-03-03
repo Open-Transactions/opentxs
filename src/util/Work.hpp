@@ -11,7 +11,7 @@
 #include "opentxs/network/zeromq/message/Message.tpp"
 #include "opentxs/util/WorkType.hpp"
 
-namespace opentxs::v1
+namespace opentxs
 {
 constexpr auto OT_ZMQ_INTERNAL_SIGNAL = OTZMQWorkType{32768};
 constexpr auto OT_ZMQ_HIGHEST_SIGNAL = OTZMQWorkType{65535};
@@ -50,4 +50,4 @@ auto MakeWork(const Enum type) noexcept -> network::zeromq::Message
 {
     return network::zeromq::tagged_message<Enum>(type);
 }
-}  // namespace opentxs::v1
+}  // namespace opentxs

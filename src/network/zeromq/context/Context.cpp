@@ -29,7 +29,7 @@
 #include "opentxs/network/zeromq/socket/Router.hpp"
 #include "opentxs/network/zeromq/socket/Subscribe.hpp"
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto ZMQContext() noexcept -> std::unique_ptr<network::zeromq::Context>
 {
@@ -37,9 +37,9 @@ auto ZMQContext() noexcept -> std::unique_ptr<network::zeromq::Context>
 
     return std::make_unique<ReturnType>();
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory
 
-namespace opentxs::v1::network::zeromq
+namespace opentxs::network::zeromq
 {
 auto GetBatchID() noexcept -> BatchID
 {
@@ -54,9 +54,9 @@ auto GetSocketID() noexcept -> SocketID
 
     return ++counter;
 }
-}  // namespace opentxs::v1::network::zeromq
+}  // namespace opentxs::network::zeromq
 
-namespace opentxs::v1::network::zeromq::implementation
+namespace opentxs::network::zeromq::implementation
 {
 Context::Context() noexcept
     : context_(::zmq_ctx_new())
@@ -259,4 +259,4 @@ Context::~Context()
         context_ = nullptr;
     }
 }
-}  // namespace opentxs::v1::network::zeromq::implementation
+}  // namespace opentxs::network::zeromq::implementation

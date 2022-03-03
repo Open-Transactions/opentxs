@@ -26,7 +26,7 @@ template class opentxs::network::zeromq::socket::implementation::Receiver<
 
 //"opentxs::network::zeromq::socket::implementation::Reply::"
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto ReplySocket(
     const network::zeromq::Context& context,
@@ -41,9 +41,9 @@ auto ReplySocket(
         static_cast<network::zeromq::socket::Direction>(direction),
         callback);
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory
 
-namespace opentxs::v1::network::zeromq::socket::implementation
+namespace opentxs::network::zeromq::socket::implementation
 {
 Reply::Reply(
     const zeromq::Context& context,
@@ -72,4 +72,4 @@ auto Reply::process_incoming(const Lock& lock, Message&& message) noexcept
 }
 
 Reply::~Reply() SHUTDOWN_SOCKET
-}  // namespace opentxs::v1::network::zeromq::socket::implementation
+}  // namespace opentxs::network::zeromq::socket::implementation

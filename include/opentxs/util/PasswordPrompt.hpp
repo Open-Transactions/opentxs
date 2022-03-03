@@ -16,8 +16,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace api
 {
 namespace session
@@ -35,11 +35,11 @@ class Factory;
 class PasswordPrompt;
 
 using OTPasswordPrompt = Pimpl<PasswordPrompt>;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1
+namespace opentxs
 {
 /*
  PasswordPrompt
@@ -94,4 +94,4 @@ private:
     auto operator=(const PasswordPrompt&) -> const PasswordPrompt& = delete;
     auto operator=(const PasswordPrompt&&) -> const PasswordPrompt& = delete;
 };
-}  // namespace opentxs::v1
+}  // namespace opentxs

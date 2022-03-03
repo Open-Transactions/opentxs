@@ -49,7 +49,7 @@
 
 #define OT_ERROR_AMOUNT INT64_MIN
 
-namespace opentxs::v1
+namespace opentxs
 {
 #ifndef OT_ERROR
 const std::int32_t OT_ERROR = (-1);
@@ -2837,4 +2837,4 @@ auto OTAPI_Exec::Wallet_ImportSeed(
         crypto::Language::en,
         reason);
 }
-}  // namespace opentxs::v1
+}  // namespace opentxs

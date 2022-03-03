@@ -50,8 +50,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace api
 {
 class Session;
@@ -102,11 +102,11 @@ class LMDB;
 
 class Data;
 class Identifier;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::blockchain::database
+namespace opentxs::blockchain::database
 {
 class Wallet
 {
@@ -236,4 +236,4 @@ private:
     auto operator=(const Wallet&) -> Wallet& = delete;
     auto operator=(Wallet&&) -> Wallet& = delete;
 };
-}  // namespace opentxs::v1::blockchain::database
+}  // namespace opentxs::blockchain::database

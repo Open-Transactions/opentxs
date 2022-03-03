@@ -10,6 +10,7 @@
 #include <cstddef>
 #include <cstdint>
 
+#include "opentxs/Version.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Options.hpp"
@@ -17,10 +18,10 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 class Options;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

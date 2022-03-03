@@ -7,7 +7,7 @@
 #include "1_Internal.hpp"       // IWYU pragma: associated
 #include "util/ScopeGuard.hpp"  // IWYU pragma: associated
 
-namespace opentxs::v1
+namespace opentxs
 {
 ScopeGuard::ScopeGuard(SimpleCallback cb) noexcept
     : cb_(cb)
@@ -18,4 +18,4 @@ ScopeGuard::~ScopeGuard()
 {
     if (cb_) { cb_(); }
 }
-}  // namespace opentxs::v1
+}  // namespace opentxs

@@ -18,8 +18,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace proto
 {
 class Issuer;
@@ -30,11 +30,11 @@ namespace storage
 class Driver;
 class Nym;
 }  // namespace storage
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::storage
+namespace opentxs::storage
 {
 class Issuers final : public Node
 {
@@ -67,4 +67,4 @@ private:
     auto operator=(const Issuers&) -> Issuers = delete;
     auto operator=(Issuers&&) -> Issuers = delete;
 };
-}  // namespace opentxs::v1::storage
+}  // namespace opentxs::storage

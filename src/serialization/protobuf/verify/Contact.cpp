@@ -11,7 +11,7 @@
 #include "opentxs/api/crypto/Hash.hpp"
 #include "opentxs/crypto/HashType.hpp"
 
-namespace opentxs::v1::proto
+namespace opentxs::proto
 {
 auto AllowedItemAttributes() noexcept -> const ItemAttributeMap&
 {
@@ -2076,4 +2076,4 @@ auto RelationshipMap() noexcept -> const RelationshipReciprocity&
 
     return output;
 }
-}  // namespace opentxs::v1::proto
+}  // namespace opentxs::proto

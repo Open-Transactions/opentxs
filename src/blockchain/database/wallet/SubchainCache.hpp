@@ -29,8 +29,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace api
 {
 class Session;
@@ -51,11 +51,11 @@ struct Position;
 }  // namespace wallet
 }  // namespace database
 }  // namespace blockchain
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::blockchain::database::wallet
+namespace opentxs::blockchain::database::wallet
 {
 using Mode = storage::lmdb::LMDB::Mode;
 
@@ -166,4 +166,4 @@ private:
     auto load_pattern_index(const SubchainIndex& key) noexcept
         -> const dbPatternIndex&;
 };
-}  // namespace opentxs::v1::blockchain::database::wallet
+}  // namespace opentxs::blockchain::database::wallet

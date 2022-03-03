@@ -44,7 +44,7 @@
 #include "opentxs/util/Pimpl.hpp"
 #include "util/ScopeGuard.hpp"
 
-namespace opentxs::v1::blockchain::node::wallet
+namespace opentxs::blockchain::node::wallet
 {
 DeterministicStateData::DeterministicStateData(
     const api::Session& api,
@@ -289,4 +289,4 @@ auto DeterministicStateData::type() const noexcept -> std::stringstream
 
     return output;
 }
-}  // namespace opentxs::v1::blockchain::node::wallet
+}  // namespace opentxs::blockchain::node::wallet

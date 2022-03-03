@@ -16,7 +16,7 @@
 #include "opentxs/identity/SourceType.hpp"
 #include "opentxs/util/Container.hpp"
 
-namespace opentxs::v1
+namespace opentxs
 {
 auto print(identity::CredentialRole in) noexcept -> std::string_view
 {
@@ -103,4 +103,4 @@ auto print(identity::SourceType in) noexcept -> std::string_view
         return "invalid";
     }
 }
-}  // namespace opentxs::v1
+}  // namespace opentxs

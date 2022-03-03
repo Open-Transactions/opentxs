@@ -12,7 +12,7 @@
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/util/Numbers.hpp"
 
-namespace opentxs::v1
+namespace opentxs
 {
 namespace api
 {
@@ -93,4 +93,4 @@ protected:
 private:
     OTTrackable() = delete;
 };
-}  // namespace opentxs::v1
+}  // namespace opentxs

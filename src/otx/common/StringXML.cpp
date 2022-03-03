@@ -12,7 +12,7 @@
 #include "core/String.hpp"
 #include "opentxs/core/String.hpp"
 
-namespace opentxs::v1
+namespace opentxs
 {
 auto StringXML::Factory() -> OTStringXML
 {
@@ -23,9 +23,9 @@ auto StringXML::Factory(const String& value) -> OTStringXML
 {
     return OTStringXML(new implementation::StringXML(value));
 }
-}  // namespace opentxs::v1
+}  // namespace opentxs
 
-namespace opentxs::v1::implementation
+namespace opentxs::implementation
 {
 class StringXML::StringXMLPvt final : public irr::io::IFileReadCallBack
 {
@@ -112,4 +112,4 @@ auto StringXML::read(void* buffer, std::uint32_t sizeToRead) -> std::int32_t
 auto StringXML::getSize() -> std::int32_t { return GetLength(); }
 
 StringXML::~StringXML() { delete pvt_; }
-}  // namespace opentxs::v1::implementation
+}  // namespace opentxs::implementation

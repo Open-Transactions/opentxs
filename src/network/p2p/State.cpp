@@ -21,7 +21,7 @@
 #include "opentxs/util/Pimpl.hpp"
 #include "serialization/protobuf/BlockchainP2PChainState.pb.h"
 
-namespace opentxs::v1::network::p2p
+namespace opentxs::network::p2p
 {
 struct State::Imp {
     static constexpr auto default_version_ = VersionNumber{1};
@@ -94,4 +94,4 @@ auto State::Serialize(proto::BlockchainP2PChainState& dest) const noexcept
 }
 
 State::~State() { std::unique_ptr<Imp>(imp_).reset(); }
-}  // namespace opentxs::v1::network::p2p
+}  // namespace opentxs::network::p2p

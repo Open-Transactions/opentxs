@@ -16,8 +16,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace network
 {
 namespace zeromq
@@ -30,11 +30,11 @@ class Pair;
 }  // namespace network
 
 using OTZMQPairSocket = Pimpl<network::zeromq::socket::Pair>;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::network::zeromq::socket
+namespace opentxs::network::zeromq::socket
 {
 class OPENTXS_EXPORT Pair : virtual public socket::Socket, virtual public Sender
 {
@@ -56,4 +56,4 @@ private:
     auto operator=(const Pair&) -> Pair& = delete;
     auto operator=(Pair&&) -> Pair& = delete;
 };
-}  // namespace opentxs::v1::network::zeromq::socket
+}  // namespace opentxs::network::zeromq::socket

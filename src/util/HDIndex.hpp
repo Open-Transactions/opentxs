@@ -7,7 +7,7 @@
 
 #include "opentxs/Types.hpp"
 
-namespace opentxs::v1
+namespace opentxs
 {
 template <typename I>
 struct HDIndex {
@@ -28,4 +28,4 @@ struct HDIndex {
 
 template <typename Bip43Purpose>
 HDIndex(const Bip43Purpose, const Bip32Child) -> HDIndex<Bip43Purpose>;
-}  // namespace opentxs::v1
+}  // namespace opentxs

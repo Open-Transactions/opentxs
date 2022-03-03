@@ -20,7 +20,7 @@
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Pimpl.hpp"
 
-namespace opentxs::v1::blockchain::p2p::bitcoin::message
+namespace opentxs::blockchain::p2p::bitcoin::message
 {
 FilterPrefixBasic::FilterPrefixBasic(
     const blockchain::Type chain,
@@ -176,4 +176,4 @@ auto VerifyChecksum(
 
     return header.Checksum() == checksum;
 }
-}  // namespace opentxs::v1::blockchain::p2p::bitcoin::message
+}  // namespace opentxs::blockchain::p2p::bitcoin::message

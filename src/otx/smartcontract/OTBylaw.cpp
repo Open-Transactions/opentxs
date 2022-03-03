@@ -20,7 +20,7 @@
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 
-namespace opentxs::v1
+namespace opentxs
 {
 OTBylaw::OTBylaw()
     : m_strName(String::Factory())
@@ -1059,4 +1059,4 @@ OTBylaw::~OTBylaw()
     //
 }
 
-}  // namespace opentxs::v1
+}  // namespace opentxs

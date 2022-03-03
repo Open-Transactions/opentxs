@@ -9,7 +9,7 @@
 
 #include "opentxs/crypto/Language.hpp"
 
-namespace opentxs::v1::crypto::implementation
+namespace opentxs::crypto::implementation
 {
 const Bip39::Words Bip39::words_{
     {Language::en,
@@ -359,4 +359,4 @@ const Bip39::Words Bip39::words_{
      }},
 };
 const Bip39::LongestWords Bip39::longest_words_{find_longest_words(words_)};
-}  // namespace opentxs::v1::crypto::implementation
+}  // namespace opentxs::crypto::implementation

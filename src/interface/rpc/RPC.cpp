@@ -195,15 +195,15 @@
     [[maybe_unused]] auto [taskID, future] = client.OTX().a(__VA_ARGS__);      \
     [[maybe_unused]] const auto ready = (0 != taskID);
 
-namespace opentxs::v1
+namespace opentxs
 {
 auto Factory::RPC(const api::Context& native) -> rpc::internal::RPC*
 {
     return new rpc::implementation::RPC(native);
 }
-}  // namespace opentxs::v1
+}  // namespace opentxs
 
-namespace opentxs::v1::rpc::implementation
+namespace opentxs::rpc::implementation
 {
 static const UnallocatedMap<VersionNumber, VersionNumber> StatusVersionMap{
     {1, 1},
@@ -2055,4 +2055,4 @@ RPC::~RPC()
     rpc_publisher_->Close();
     push_receiver_->Close();
 }
-}  // namespace opentxs::v1::rpc::implementation
+}  // namespace opentxs::rpc::implementation

@@ -14,16 +14,16 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 class Factory;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
 namespace bmp = boost::multiprecision;
 
-namespace opentxs::v1::blockchain::implementation
+namespace opentxs::blockchain::implementation
 {
 class Work final : public blockchain::Work
 {
@@ -61,4 +61,4 @@ private:
     auto operator=(const Work& rhs) -> Work& = delete;
     auto operator=(Work&& rhs) -> Work& = delete;
 };
-}  // namespace opentxs::v1::blockchain::implementation
+}  // namespace opentxs::blockchain::implementation

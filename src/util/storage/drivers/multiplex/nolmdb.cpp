@@ -9,10 +9,10 @@
 
 #include "internal/util/LogMacros.hpp"
 
-namespace opentxs::v1::storage::driver
+namespace opentxs::storage::driver
 {
 auto Multiplex::init_lmdb(std::unique_ptr<storage::Plugin>& plugin) -> void
 {
     LogError()(OT_PRETTY_CLASS())("Sqlite3 driver not compiled in.").Flush();
 }
-}  // namespace opentxs::v1::storage::driver
+}  // namespace opentxs::storage::driver

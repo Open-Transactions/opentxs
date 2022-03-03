@@ -18,7 +18,7 @@
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Pimpl.hpp"
 
-namespace opentxs::v1::blockchain::database::wallet::db
+namespace opentxs::blockchain::database::wallet::db
 {
 SubchainID::SubchainID(
     const crypto::Subchain type,
@@ -128,4 +128,4 @@ auto SubchainID::Version() const noexcept -> VersionNumber
 
     return version_.value();
 }
-}  // namespace opentxs::v1::blockchain::database::wallet::db
+}  // namespace opentxs::blockchain::database::wallet::db

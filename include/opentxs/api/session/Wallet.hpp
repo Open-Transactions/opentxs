@@ -27,8 +27,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace api
 {
 namespace crypto
@@ -68,17 +68,17 @@ class Server;
 class Account;
 class NymData;
 class PeerObject;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1
+namespace opentxs
 {
 /** AccountInfo: accountID, nymID, serverID, unitID*/
 using AccountInfo = std::tuple<OTIdentifier, OTNymID, OTNotaryID, OTUnitID>;
-}  // namespace opentxs::v1
+}  // namespace opentxs
 
-namespace opentxs::v1::api::session
+namespace opentxs::api::session
 {
 /** \brief This class manages instantiated contracts and provides easy access
  *  to them.
@@ -666,4 +666,4 @@ private:
     auto operator=(const Wallet&) -> Wallet& = delete;
     auto operator=(Wallet&&) -> Wallet& = delete;
 };
-}  // namespace opentxs::v1::api::session
+}  // namespace opentxs::api::session

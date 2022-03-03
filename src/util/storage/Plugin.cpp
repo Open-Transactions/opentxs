@@ -16,7 +16,7 @@
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Log.hpp"
 
-namespace opentxs::v1::storage::implementation
+namespace opentxs::storage::implementation
 {
 Plugin::Plugin(
     const api::Crypto& crypto,
@@ -150,4 +150,4 @@ auto Plugin::Store(
 
     return false;
 }
-}  // namespace opentxs::v1::storage::implementation
+}  // namespace opentxs::storage::implementation

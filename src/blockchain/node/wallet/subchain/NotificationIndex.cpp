@@ -20,7 +20,7 @@
 #include "opentxs/util/Log.hpp"
 #include "util/ScopeGuard.hpp"
 
-namespace opentxs::v1::blockchain::node::wallet
+namespace opentxs::blockchain::node::wallet
 {
 NotificationStateData::Index::Index(
     SubchainStateData& parent,
@@ -89,4 +89,4 @@ auto NotificationStateData::Index::need_index(
         return std::nullopt;
     }
 }
-}  // namespace opentxs::v1::blockchain::node::wallet
+}  // namespace opentxs::blockchain::node::wallet

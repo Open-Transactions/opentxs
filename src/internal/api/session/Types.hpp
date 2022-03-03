@@ -13,7 +13,7 @@
 
 #include "serialization/protobuf/PaymentWorkflowEnums.pb.h"
 
-namespace opentxs::v1
+namespace opentxs
 {
 auto translate(const otx::client::PaymentWorkflowState in) noexcept
     -> proto::PaymentWorkflowState;
@@ -23,4 +23,4 @@ auto translate(const proto::PaymentWorkflowState in) noexcept
     -> otx::client::PaymentWorkflowState;
 auto translate(const proto::PaymentWorkflowType in) noexcept
     -> otx::client::PaymentWorkflowType;
-}  // namespace opentxs::v1
+}  // namespace opentxs

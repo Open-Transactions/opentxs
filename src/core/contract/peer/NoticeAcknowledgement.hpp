@@ -18,8 +18,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace api
 {
 class Session;
@@ -34,11 +34,11 @@ class Nym;
 class Factory;
 class Identifier;
 class PasswordPrompt;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::contract::peer::reply::implementation
+namespace opentxs::contract::peer::reply::implementation
 {
 class Acknowledgement final : public reply::Acknowledgement,
                               public peer::implementation::Reply
@@ -84,4 +84,4 @@ private:
     auto operator=(const Acknowledgement&) -> Acknowledgement& = delete;
     auto operator=(Acknowledgement&&) -> Acknowledgement& = delete;
 };
-}  // namespace opentxs::v1::contract::peer::reply::implementation
+}  // namespace opentxs::contract::peer::reply::implementation

@@ -19,7 +19,7 @@
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Time.hpp"
 
-namespace opentxs::v1::network::zeromq
+namespace opentxs::network::zeromq
 {
 constexpr auto inproc_prefix_{"inproc://opentxs/"};
 constexpr auto path_seperator_{"/"};
@@ -144,4 +144,4 @@ auto Z85ToRaw(const ReadView input, const AllocateOutput destination) noexcept
 
     return ::zmq_z85_decode(out.as<std::uint8_t>(), input.data());
 }
-}  // namespace opentxs::v1::network::zeromq
+}  // namespace opentxs::network::zeromq

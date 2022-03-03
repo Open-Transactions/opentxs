@@ -10,17 +10,17 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace proto
 {
 class HDPath;
 }  // namespace proto
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::api::crypto::internal
+namespace opentxs::api::crypto::internal
 {
 class Seed : virtual public crypto::Seed
 {
@@ -54,4 +54,4 @@ public:
 
     ~Seed() override = default;
 };
-}  // namespace opentxs::v1::api::crypto::internal
+}  // namespace opentxs::api::crypto::internal

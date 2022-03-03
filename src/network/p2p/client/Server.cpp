@@ -14,7 +14,7 @@
 
 #include "opentxs/network/p2p/State.hpp"
 
-namespace opentxs::v1::network::p2p::client
+namespace opentxs::network::p2p::client
 {
 Server::Server(const std::string_view endpoint) noexcept
     : endpoint_(endpoint)
@@ -103,4 +103,4 @@ auto Server::SetStalled() noexcept -> void
     connected_ = false;
     chains_.clear();
 }
-}  // namespace opentxs::v1::network::p2p::client
+}  // namespace opentxs::network::p2p::client

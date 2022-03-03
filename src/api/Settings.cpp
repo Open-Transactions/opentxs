@@ -18,7 +18,7 @@
 #include "opentxs/Types.hpp"
 #include "opentxs/util/Log.hpp"
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto Settings(const api::Legacy& legacy, const String& path) noexcept
     -> std::unique_ptr<api::Settings>
@@ -27,9 +27,9 @@ auto Settings(const api::Legacy& legacy, const String& path) noexcept
 
     return std::make_unique<ReturnType>(legacy, path);
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory
 
-namespace opentxs::v1::api::imp
+namespace opentxs::api::imp
 {
 auto StringFill(
     opentxs::String& out_strString,
@@ -54,9 +54,9 @@ auto StringFill(
 
     return true;
 }
-}  // namespace opentxs::v1::api::imp
+}  // namespace opentxs::api::imp
 
-namespace opentxs::v1::api::imp
+namespace opentxs::api::imp
 {
 const OTString Settings::blank_{String::Factory()};
 
@@ -840,4 +840,4 @@ Settings::~Settings()
     Save();
     Reset();
 }
-}  // namespace opentxs::v1::api::imp
+}  // namespace opentxs::api::imp

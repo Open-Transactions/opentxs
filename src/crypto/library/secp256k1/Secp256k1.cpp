@@ -52,7 +52,7 @@ auto get_x_value(
 }
 }
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto Secp256k1(
     const api::Crypto& crypto,
@@ -63,9 +63,9 @@ auto Secp256k1(
 
     return std::make_unique<ReturnType>(crypto, util);
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory
 
-namespace opentxs::v1::crypto::implementation
+namespace opentxs::crypto::implementation
 {
 bool Secp256k1::Initialized_ = false;
 
@@ -575,4 +575,4 @@ Secp256k1::~Secp256k1()
 
     Initialized_ = false;
 }
-}  // namespace opentxs::v1::crypto::implementation
+}  // namespace opentxs::crypto::implementation

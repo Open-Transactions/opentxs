@@ -8,7 +8,7 @@
 #include "internal/serialization/protobuf/Basic.hpp"
 #include "opentxs/Version.hpp"
 
-namespace opentxs::v1::proto
+namespace opentxs::proto
 {
 auto AsymmetricKeyAllowedCiphertext() noexcept -> const VersionMap&;
 auto AsymmetricKeyAllowedHDPath() noexcept -> const VersionMap&;
@@ -33,4 +33,4 @@ auto NymIDSourceAllowedPaymentCode() noexcept -> const VersionMap&;
 auto SeedAllowedCiphertext() noexcept -> const VersionMap&;
 auto SymmetricKeyAllowedCiphertext() noexcept -> const VersionMap&;
 auto TaggedKeyAllowedSymmetricKey() noexcept -> const VersionMap&;
-}  // namespace opentxs::v1::proto
+}  // namespace opentxs::proto

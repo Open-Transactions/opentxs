@@ -29,8 +29,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace api
 {
 class Session;
@@ -45,11 +45,11 @@ class Data;
 class Factory;
 class PasswordPrompt;
 class String;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::crypto::key::implementation
+namespace opentxs::crypto::key::implementation
 {
 class Symmetric final : virtual public key::Symmetric
 {
@@ -215,4 +215,4 @@ private:
     Symmetric(const Symmetric&);
     auto operator=(const Symmetric&) -> Symmetric& = delete;
 };
-}  // namespace opentxs::v1::crypto::key::implementation
+}  // namespace opentxs::crypto::key::implementation

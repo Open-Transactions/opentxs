@@ -23,7 +23,7 @@
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Pimpl.hpp"
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto ContactSubsectionWidget(
     const ui::implementation::ContactSectionInternalInterface& parent,
@@ -37,9 +37,9 @@ auto ContactSubsectionWidget(
 
     return std::make_shared<ReturnType>(parent, api, rowID, key, custom);
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory
 
-namespace opentxs::v1::ui::implementation
+namespace opentxs::ui::implementation
 {
 ContactSubsection::ContactSubsection(
     const ContactSectionInternalInterface& parent,
@@ -113,4 +113,4 @@ void ContactSubsection::startup(
     process_group(group);
     finish_startup();
 }
-}  // namespace opentxs::v1::ui::implementation
+}  // namespace opentxs::ui::implementation

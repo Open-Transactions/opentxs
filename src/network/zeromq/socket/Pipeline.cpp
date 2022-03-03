@@ -32,7 +32,7 @@
 #include "opentxs/util/Container.hpp"
 #include "util/Gatekeeper.hpp"
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto Pipeline(
     const network::zeromq::Context& context,
@@ -60,9 +60,9 @@ auto Pipeline(
 
     return imp;
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory
 
-namespace opentxs::v1::network::zeromq
+namespace opentxs::network::zeromq
 {
 Pipeline::Imp::Imp(
     const zeromq::Context& context,
@@ -426,9 +426,9 @@ auto Pipeline::Imp::SubscribeTo(const std::string_view endpoint) const noexcept
 }
 
 Pipeline::Imp::~Imp() { Close(); }
-}  // namespace opentxs::v1::network::zeromq
+}  // namespace opentxs::network::zeromq
 
-namespace opentxs::v1::network::zeromq
+namespace opentxs::network::zeromq
 {
 Pipeline::Pipeline(Imp* imp) noexcept
     : imp_(imp)
@@ -525,4 +525,4 @@ Pipeline::~Pipeline()
         imp_ = nullptr;
     }
 }
-}  // namespace opentxs::v1::network::zeromq
+}  // namespace opentxs::network::zeromq

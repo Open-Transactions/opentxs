@@ -17,8 +17,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace api
 {
 namespace crypto
@@ -61,11 +61,11 @@ class Publish;
 }  // namespace socket
 }  // namespace zeromq
 }  // namespace network
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::blockchain::node
+namespace opentxs::blockchain::node
 {
 class Mempool final : public internal::Mempool
 {
@@ -100,4 +100,4 @@ private:
     auto operator=(const Mempool&) -> Mempool& = delete;
     auto operator=(Mempool&&) -> Mempool& = delete;
 };
-}  // namespace opentxs::v1::blockchain::node
+}  // namespace opentxs::blockchain::node

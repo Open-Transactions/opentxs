@@ -9,7 +9,7 @@
 
 #include "opentxs/util/Container.hpp"
 
-namespace opentxs::v1
+namespace opentxs
 {
 template <typename T>
 auto contains(const UnallocatedVector<T>& vector, const T& value) noexcept
@@ -97,4 +97,4 @@ auto reverse_map(const robin_hood::unordered_flat_map<Key, Value>& map) noexcept
         robin_hood::unordered_flat_map<Key, Value>>(map);
 }
 
-}  // namespace opentxs::v1
+}  // namespace opentxs

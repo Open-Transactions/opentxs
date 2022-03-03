@@ -32,7 +32,7 @@ extern "C" {
 
 template class opentxs::Pimpl<opentxs::String>;
 
-namespace opentxs::v1
+namespace opentxs
 {
 auto operator<<(std::ostream& os, const String& obj) -> std::ostream&
 {
@@ -211,9 +211,9 @@ auto String::UlongToString(const std::uint64_t& uNumber) -> UnallocatedCString
 
     return strNumber;
 }
-}  // namespace opentxs::v1
+}  // namespace opentxs
 
-namespace opentxs::v1::implementation
+namespace opentxs::implementation
 {
 const UnallocatedCString String::empty_{""};
 
@@ -869,4 +869,4 @@ void String::zeroMemory()
 }
 
 String::~String() { Release_String(); }
-}  // namespace opentxs::v1::implementation
+}  // namespace opentxs::implementation

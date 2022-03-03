@@ -28,7 +28,7 @@
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto BitcoinP2PCfilter(
     const api::Session& api,
@@ -128,9 +128,9 @@ auto BitcoinP2PCfilter(
     return new ReturnType(
         api, network, type, hash, filter.ElementCount(), filter.Compressed());
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory
 
-namespace opentxs::v1::blockchain::p2p::bitcoin::message::implementation
+namespace opentxs::blockchain::p2p::bitcoin::message::implementation
 {
 Cfilter::Cfilter(
     const api::Session& api,
@@ -204,4 +204,4 @@ auto Cfilter::payload(AllocateOutput out) const noexcept -> bool
         return false;
     }
 }
-}  // namespace opentxs::v1::blockchain::p2p::bitcoin::message::implementation
+}  // namespace opentxs::blockchain::p2p::bitcoin::message::implementation

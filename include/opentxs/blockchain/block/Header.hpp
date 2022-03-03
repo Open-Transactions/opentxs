@@ -18,8 +18,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace blockchain
 {
 namespace block
@@ -35,11 +35,11 @@ namespace proto
 {
 class BlockchainBlockHeader;
 }  // namespace proto
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::blockchain::block
+namespace opentxs::blockchain::block
 {
 class OPENTXS_EXPORT Header
 {
@@ -103,4 +103,4 @@ private:
     auto operator=(const Header&) -> Header& = delete;
     auto operator=(Header&&) -> Header& = delete;
 };
-}  // namespace opentxs::v1::blockchain::block
+}  // namespace opentxs::blockchain::block

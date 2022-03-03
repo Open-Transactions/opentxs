@@ -8,8 +8,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace api
 {
 class Session;
@@ -17,11 +17,11 @@ class Settings;
 }  // namespace api
 
 class String;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::server
+namespace opentxs::server
 {
 struct ConfigLoader {
     static auto load(
@@ -29,4 +29,4 @@ struct ConfigLoader {
         const api::Settings& config,
         String& walletFilename) -> bool;
 };
-}  // namespace opentxs::v1::server
+}  // namespace opentxs::server

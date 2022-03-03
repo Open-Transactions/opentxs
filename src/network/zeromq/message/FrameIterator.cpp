@@ -16,7 +16,7 @@
 #include "network/zeromq/message/FrameIterator.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 
-namespace opentxs::v1::network::zeromq
+namespace opentxs::network::zeromq
 {
 auto swap(FrameIterator& lhs, FrameIterator& rhs) noexcept -> void
 {
@@ -34,9 +34,9 @@ auto operator==(const FrameIterator& lhs, const FrameIterator& rhs) noexcept
 {
     return lhs.imp_->operator==(rhs);
 }
-}  // namespace opentxs::v1::network::zeromq
+}  // namespace opentxs::network::zeromq
 
-namespace opentxs::v1::network::zeromq
+namespace opentxs::network::zeromq
 {
 FrameIterator::Imp::Imp(Message* parent, std::size_t position) noexcept
     : parent_(parent)
@@ -80,9 +80,9 @@ auto FrameIterator::Imp::hash() const noexcept -> std::size_t
 }
 
 FrameIterator::Imp::~Imp() = default;
-}  // namespace opentxs::v1::network::zeromq
+}  // namespace opentxs::network::zeromq
 
-namespace opentxs::v1::network::zeromq
+namespace opentxs::network::zeromq
 {
 FrameIterator::FrameIterator(Imp* imp) noexcept
     : imp_(imp)
@@ -190,4 +190,4 @@ FrameIterator::~FrameIterator()
         imp_ = nullptr;
     }
 }
-}  // namespace opentxs::v1::network::zeromq
+}  // namespace opentxs::network::zeromq

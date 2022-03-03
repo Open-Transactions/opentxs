@@ -19,7 +19,7 @@
 #include "opentxs/util/Pimpl.hpp"
 #include "serialization/protobuf/ContactSection.pb.h"
 
-namespace opentxs::v1::identity::wot::claim
+namespace opentxs::identity::wot::claim
 {
 struct Group::Imp {
     const UnallocatedCString nym_{};
@@ -316,4 +316,4 @@ auto Group::Size() const -> std::size_t { return imp_->items_.size(); }
 auto Group::Type() const -> const claim::ClaimType& { return imp_->type_; }
 
 Group::~Group() = default;
-}  // namespace opentxs::v1::identity::wot::claim
+}  // namespace opentxs::identity::wot::claim

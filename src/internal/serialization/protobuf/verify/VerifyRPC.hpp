@@ -8,7 +8,7 @@
 #include "internal/serialization/protobuf/Basic.hpp"
 #include "opentxs/Version.hpp"
 
-namespace opentxs::v1::proto
+namespace opentxs::proto
 {
 auto AddClaimAllowedContactItem() noexcept -> const VersionMap&;
 auto ContactEventAllowedAccountEvent() noexcept -> const VersionMap&;
@@ -44,4 +44,4 @@ auto RPCResponseAllowedSessionData() noexcept -> const VersionMap&;
 auto RPCResponseAllowedTransactionData() noexcept -> const VersionMap&;
 auto RPCResponseAllowedUnitDefinition() noexcept -> const VersionMap&;
 auto RPCResponseAllowedWorkflow() noexcept -> const VersionMap&;
-}  // namespace opentxs::v1::proto
+}  // namespace opentxs::proto

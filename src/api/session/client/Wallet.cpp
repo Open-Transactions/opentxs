@@ -37,7 +37,7 @@
 #include "serialization/protobuf/Context.pb.h"
 #include "serialization/protobuf/ServerContext.pb.h"
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto WalletAPI(const api::session::Client& parent) noexcept
     -> std::unique_ptr<api::session::Wallet>
@@ -53,9 +53,9 @@ auto WalletAPI(const api::session::Client& parent) noexcept
         return {};
     }
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory
 
-namespace opentxs::v1::api::session::client
+namespace opentxs::api::session::client
 {
 Wallet::Wallet(const api::session::Client& parent)
     : ot_super(parent)
@@ -197,4 +197,4 @@ auto Wallet::signer_nym(const identifier::Nym& id) const -> Nym_p
 {
     return Nym(id);
 }
-}  // namespace opentxs::v1::api::session::client
+}  // namespace opentxs::api::session::client

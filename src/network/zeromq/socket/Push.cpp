@@ -19,7 +19,7 @@
 
 template class opentxs::Pimpl<opentxs::network::zeromq::socket::Push>;
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto PushSocket(const network::zeromq::Context& context, const bool direction)
     -> std::unique_ptr<network::zeromq::socket::Push>
@@ -29,9 +29,9 @@ auto PushSocket(const network::zeromq::Context& context, const bool direction)
     return std::make_unique<ReturnType>(
         context, static_cast<network::zeromq::socket::Direction>(direction));
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory
 
-namespace opentxs::v1::network::zeromq::socket::implementation
+namespace opentxs::network::zeromq::socket::implementation
 {
 Push::Push(const zeromq::Context& context, const Direction direction) noexcept
     : Socket(context, socket::Type::Push, direction)
@@ -42,4 +42,4 @@ Push::Push(const zeromq::Context& context, const Direction direction) noexcept
 }
 
 Push::~Push() SHUTDOWN_SOCKET
-}  // namespace opentxs::v1::network::zeromq::socket::implementation
+}  // namespace opentxs::network::zeromq::socket::implementation

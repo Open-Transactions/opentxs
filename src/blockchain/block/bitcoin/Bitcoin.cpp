@@ -19,7 +19,7 @@
 
 namespace be = boost::endian;
 
-namespace opentxs::v1::blockchain::block::bitcoin::internal
+namespace opentxs::blockchain::block::bitcoin::internal
 {
 auto DecodeBip34(const ReadView coinbase) noexcept -> block::Height
 {
@@ -127,4 +127,4 @@ auto PushData(const ReadView in) noexcept(false) -> ScriptElement
 
     return output;
 }
-}  // namespace opentxs::v1::blockchain::block::bitcoin::internal
+}  // namespace opentxs::blockchain::block::bitcoin::internal

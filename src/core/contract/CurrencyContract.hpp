@@ -24,8 +24,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace api
 {
 class Session;
@@ -37,11 +37,11 @@ class Definition;
 }  // namespace display
 
 class PasswordPrompt;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::contract::unit::implementation
+namespace opentxs::contract::unit::implementation
 {
 class Currency final : public unit::Currency,
                        public contract::implementation::Unit
@@ -80,4 +80,4 @@ private:
     auto operator=(const Currency&) -> Currency& = delete;
     auto operator=(Currency&&) -> Currency& = delete;
 };
-}  // namespace opentxs::v1::contract::unit::implementation
+}  // namespace opentxs::contract::unit::implementation

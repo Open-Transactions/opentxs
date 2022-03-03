@@ -25,7 +25,7 @@
 #include "util/storage/Plugin.hpp"
 #include "util/storage/tree/Node.hpp"
 
-namespace opentxs::v1::storage
+namespace opentxs::storage
 {
 Mailbox::Mailbox(const Driver& storage, const UnallocatedCString& hash)
     : Node(storage, hash)
@@ -114,4 +114,4 @@ auto Mailbox::Store(
 {
     return store_raw(data, id, alias);
 }
-}  // namespace opentxs::v1::storage
+}  // namespace opentxs::storage

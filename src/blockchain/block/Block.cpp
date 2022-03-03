@@ -7,11 +7,11 @@
 #include "1_Internal.hpp"              // IWYU pragma: associated
 #include "blockchain/block/Block.hpp"  // IWYU pragma: associated
 
-namespace opentxs::v1::blockchain::block::implementation
+namespace opentxs::blockchain::block::implementation
 {
 Block::Block(const api::Session& api, const block::Header& header) noexcept
     : api_(api)
     , base_header_(header)
 {
 }
-}  // namespace opentxs::v1::blockchain::block::implementation
+}  // namespace opentxs::blockchain::block::implementation

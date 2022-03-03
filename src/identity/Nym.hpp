@@ -39,8 +39,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace api
 {
 class Session;
@@ -75,11 +75,11 @@ class PasswordPrompt;
 class PaymentCode;
 class Signature;
 class Tag;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::identity::implementation
+namespace opentxs::identity::implementation
 {
 class Nym final : virtual public identity::internal::Nym, Lockable
 {
@@ -355,4 +355,4 @@ private:
     auto operator=(const Nym&) -> Nym& = delete;
     auto operator=(Nym&&) -> Nym& = delete;
 };
-}  // namespace opentxs::v1::identity::implementation
+}  // namespace opentxs::identity::implementation

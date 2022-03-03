@@ -26,7 +26,7 @@
 
 // opentxs::blockchain::p2p::bitcoin::message::implementation::Addr::"
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto BitcoinP2PAddr(
     const api::Session& api,
@@ -147,9 +147,9 @@ auto BitcoinP2PAddr(
 
     return new ReturnType(api, network, version, std::move(addresses));
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory
 
-namespace opentxs::v1::blockchain::p2p::bitcoin::message::implementation
+namespace opentxs::blockchain::p2p::bitcoin::message::implementation
 {
 Addr::Addr(
     const api::Session& api,
@@ -287,4 +287,4 @@ auto Addr::SerializeTimestamp(const ProtocolVersion version) noexcept -> bool
 {
     return version >= 31402;
 }
-}  // namespace opentxs::v1::blockchain::p2p::bitcoin::message::implementation
+}  // namespace opentxs::blockchain::p2p::bitcoin::message::implementation

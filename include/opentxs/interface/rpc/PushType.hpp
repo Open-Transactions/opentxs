@@ -10,7 +10,7 @@
 
 #include <limits>
 
-namespace opentxs::v1::rpc
+namespace opentxs::rpc
 {
 enum class PushType : TypeEnum {
     error = 0,
@@ -18,4 +18,4 @@ enum class PushType : TypeEnum {
     contact = 2,
     task = 3,
 };
-}  // namespace opentxs::v1::rpc
+}  // namespace opentxs::rpc

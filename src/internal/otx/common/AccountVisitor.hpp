@@ -9,7 +9,7 @@
 #include "opentxs/core/identifier/Notary.hpp"
 #include "opentxs/util/Container.hpp"
 
-namespace opentxs::v1
+namespace opentxs
 {
 namespace api
 {
@@ -52,4 +52,4 @@ private:
     auto operator=(const AccountVisitor&) -> AccountVisitor& = delete;
     auto operator=(AccountVisitor&&) -> AccountVisitor& = delete;
 };
-}  // namespace opentxs::v1
+}  // namespace opentxs

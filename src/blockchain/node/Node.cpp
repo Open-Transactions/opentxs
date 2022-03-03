@@ -16,7 +16,7 @@
 #include "opentxs/blockchain/node/TxoTag.hpp"
 #include "opentxs/network/zeromq/socket/Sender.hpp"  // IWYU pragma: keep
 
-namespace opentxs::v1::blockchain::node::internal
+namespace opentxs::blockchain::node::internal
 {
 auto Config::print() const noexcept -> UnallocatedCString
 {
@@ -41,9 +41,9 @@ auto Config::print() const noexcept -> UnallocatedCString
 
     return output.str();
 }
-}  // namespace opentxs::v1::blockchain::node::internal
+}  // namespace opentxs::blockchain::node::internal
 
-namespace opentxs::v1
+namespace opentxs
 {
 auto print(blockchain::node::TxoState in) noexcept -> UnallocatedCString
 {
@@ -86,4 +86,4 @@ auto print(blockchain::node::TxoTag in) noexcept -> UnallocatedCString
         return {};
     }
 }
-}  // namespace opentxs::v1
+}  // namespace opentxs

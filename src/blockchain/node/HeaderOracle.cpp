@@ -32,7 +32,7 @@
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto HeaderOracle(
     const api::Session& api,
@@ -44,9 +44,9 @@ auto HeaderOracle(
 
     return std::make_unique<ReturnType>(api, database, type);
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory
 
-namespace opentxs::v1::blockchain::node
+namespace opentxs::blockchain::node
 {
 auto HeaderOracle::GenesisBlockHash(const blockchain::Type type)
     -> const block::Hash&
@@ -74,9 +74,9 @@ auto HeaderOracle::GenesisBlockHash(const blockchain::Type type)
         throw;
     }
 }
-}  // namespace opentxs::v1::blockchain::node
+}  // namespace opentxs::blockchain::node
 
-namespace opentxs::v1::blockchain::node::implementation
+namespace opentxs::blockchain::node::implementation
 {
 HeaderOracle::HeaderOracle(
     const api::Session& api,
@@ -1055,4 +1055,4 @@ auto HeaderOracle::Siblings() const noexcept -> UnallocatedSet<block::pHash>
 
     return database_.SiblingHashes();
 }
-}  // namespace opentxs::v1::blockchain::node::implementation
+}  // namespace opentxs::blockchain::node::implementation

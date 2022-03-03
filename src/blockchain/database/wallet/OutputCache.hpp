@@ -37,8 +37,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace api
 {
 class Session;
@@ -61,11 +61,11 @@ class Output;
 class Outpoint;
 }  // namespace block
 }  // namespace blockchain
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::blockchain::database::wallet
+namespace opentxs::blockchain::database::wallet
 {
 constexpr auto accounts_{Table::AccountOutputs};
 constexpr auto generation_{Table::GenerationOutputs};
@@ -245,4 +245,4 @@ private:
         const block::bitcoin::Output& output,
         MDB_txn* tx) noexcept -> bool;
 };
-}  // namespace opentxs::v1::blockchain::database::wallet
+}  // namespace opentxs::blockchain::database::wallet

@@ -150,7 +150,7 @@
         if (shutdown().load()) { return false; }                               \
     }
 
-namespace opentxs::v1::otx::client::implementation
+namespace opentxs::otx::client::implementation
 {
 StateMachine::StateMachine(
     const api::session::Client& client,
@@ -1208,4 +1208,4 @@ auto StateMachine::write_and_send_cheque_wrapper(
 
     return TaskDone::yes == done;
 }
-}  // namespace opentxs::v1::otx::client::implementation
+}  // namespace opentxs::otx::client::implementation

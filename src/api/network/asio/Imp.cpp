@@ -60,7 +60,7 @@
 #include "util/Thread.hpp"
 #include "util/Work.hpp"
 
-namespace opentxs::v1::api::network
+namespace opentxs::api::network
 {
 Asio::Imp::Imp(const zmq::Context& zmq) noexcept
     : StateMachine([&] { return state_machine(); })
@@ -688,4 +688,4 @@ auto Asio::Imp::state_machine() noexcept -> bool
 }
 
 Asio::Imp::~Imp() { Shutdown(); }
-}  // namespace opentxs::v1::api::network
+}  // namespace opentxs::api::network

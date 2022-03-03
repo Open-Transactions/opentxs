@@ -31,7 +31,7 @@
 
 namespace be = boost::endian;
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto NumericHashNBits(const std::uint32_t input) noexcept
     -> std::unique_ptr<blockchain::NumericHash>
@@ -81,9 +81,9 @@ auto NumericHash(const blockchain::block::Hash& hash) noexcept
 
     return std::make_unique<ReturnType>(value);
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory
 
-namespace opentxs::v1
+namespace opentxs
 {
 auto operator==(
     const OTNumericHash& lhs,
@@ -112,9 +112,9 @@ auto operator<=(
 {
     return lhs.get() <= rhs;
 }
-}  // namespace opentxs::v1
+}  // namespace opentxs
 
-namespace opentxs::v1::blockchain
+namespace opentxs::blockchain
 {
 auto HashToNumber(const api::Session& api, ReadView hex) noexcept
     -> UnallocatedCString
@@ -154,9 +154,9 @@ auto NumberToHash(const api::Session& api, ReadView hex) noexcept -> pHash
 
     return out;
 }
-}  // namespace opentxs::v1::blockchain
+}  // namespace opentxs::blockchain
 
-namespace opentxs::v1::blockchain::implementation
+namespace opentxs::blockchain::implementation
 {
 NumericHash::NumericHash(const Type& data) noexcept
     : blockchain::NumericHash()
@@ -224,4 +224,4 @@ auto NumericHash::asHex(const std::size_t minimumBytes) const noexcept
 
     return opentxs::Data::Factory(bytes.data(), bytes.size())->asHex();
 }
-}  // namespace opentxs::v1::blockchain::implementation
+}  // namespace opentxs::blockchain::implementation

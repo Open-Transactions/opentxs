@@ -11,16 +11,16 @@
 #include <cstdint>
 #include <string_view>
 
-namespace opentxs::v1::identity
+namespace opentxs::identity
 {
 enum class CredentialRole : std::uint32_t;
 enum class CredentialType : std::uint32_t;
 enum class Type : std::uint32_t;
 enum class SourceProofType : std::uint32_t;
 enum class SourceType : std::uint32_t;
-}  // namespace opentxs::v1::identity
+}  // namespace opentxs::identity
 
-namespace opentxs::v1
+namespace opentxs
 {
 OPENTXS_EXPORT auto print(identity::CredentialRole value) noexcept
     -> std::string_view;
@@ -31,4 +31,4 @@ OPENTXS_EXPORT auto print(identity::SourceProofType value) noexcept
     -> std::string_view;
 OPENTXS_EXPORT auto print(identity::SourceType value) noexcept
     -> std::string_view;
-}  // namespace opentxs::v1
+}  // namespace opentxs

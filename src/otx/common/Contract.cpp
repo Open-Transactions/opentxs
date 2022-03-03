@@ -40,7 +40,7 @@
 #include "otx/common/OTStorage.hpp"
 #include "serialization/protobuf/Nym.pb.h"
 
-namespace opentxs::v1
+namespace opentxs
 {
 
 Contract::Contract(const api::Session& api)
@@ -1619,4 +1619,4 @@ auto Contract::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
     }
     return 0;
 }
-}  // namespace opentxs::v1
+}  // namespace opentxs

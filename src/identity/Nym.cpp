@@ -67,7 +67,7 @@
 #include "serialization/protobuf/Signature.pb.h"
 #include "util/HDIndex.hpp"
 
-namespace opentxs::v1
+namespace opentxs
 {
 auto Factory::Nym(
     const api::Session& api,
@@ -153,15 +153,15 @@ auto Factory::Nym(
     return Nym(api, proto::Factory<proto::Nym>(view), alias);
 }
 
-}  // namespace opentxs::v1
+}  // namespace opentxs
 
-namespace opentxs::v1::identity
+namespace opentxs::identity
 {
 const VersionNumber Nym::DefaultVersion{6};
 const VersionNumber Nym::MaxVersion{6};
-}  // namespace opentxs::v1::identity
+}  // namespace opentxs::identity
 
-namespace opentxs::v1::identity::implementation
+namespace opentxs::identity::implementation
 {
 auto session_key_from_iv(
     const api::Session& api,
@@ -1665,4 +1665,4 @@ auto Nym::WriteCredentials() const -> bool
 
     return true;
 }
-}  // namespace opentxs::v1::identity::implementation
+}  // namespace opentxs::identity::implementation

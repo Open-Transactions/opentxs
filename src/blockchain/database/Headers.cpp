@@ -41,7 +41,7 @@
 #include "util/LMDB.hpp"
 #include "util/Work.hpp"
 
-namespace opentxs::v1::blockchain::database
+namespace opentxs::blockchain::database
 {
 Headers::Headers(
     const api::Session& api,
@@ -605,4 +605,4 @@ auto Headers::TryLoadHeader(const block::Hash& hash) const noexcept
         return {};
     }
 }
-}  // namespace opentxs::v1::blockchain::database
+}  // namespace opentxs::blockchain::database

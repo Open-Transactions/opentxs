@@ -15,7 +15,7 @@
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 
-namespace opentxs::v1
+namespace opentxs
 {
 const UnallocatedMap<int, std::function<bool()>> Signals::handler_{
     {1, &Signals::handle_1},   {2, &Signals::handle_2},
@@ -69,4 +69,4 @@ Signals::~Signals()
 {
     if (thread_) { thread_->detach(); }
 }
-}  // namespace opentxs::v1
+}  // namespace opentxs

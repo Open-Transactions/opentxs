@@ -18,7 +18,7 @@
 
 template class opentxs::Pimpl<opentxs::network::zeromq::ListenCallback>;
 
-namespace opentxs::v1::network::zeromq
+namespace opentxs::network::zeromq
 {
 auto ListenCallback::Factory(zeromq::ListenCallback::ReceiveCallback callback)
     -> OTZMQListenCallback
@@ -31,9 +31,9 @@ auto ListenCallback::Factory() -> OTZMQListenCallback
     return OTZMQListenCallback(
         new implementation::ListenCallback([](zeromq::Message&&) -> void {}));
 }
-}  // namespace opentxs::v1::network::zeromq
+}  // namespace opentxs::network::zeromq
 
-namespace opentxs::v1::network::zeromq::implementation
+namespace opentxs::network::zeromq::implementation
 {
 ListenCallback::ListenCallback(zeromq::ListenCallback::ReceiveCallback callback)
     : execute_lock_()
@@ -80,4 +80,4 @@ auto ListenCallback::Replace(ReceiveCallback cb) noexcept -> void
 }
 
 ListenCallback::~ListenCallback() {}
-}  // namespace opentxs::v1::network::zeromq::implementation
+}  // namespace opentxs::network::zeromq::implementation

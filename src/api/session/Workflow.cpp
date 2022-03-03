@@ -72,7 +72,7 @@
 
 namespace zmq = opentxs::network::zeromq;
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto Workflow(
     const api::Session& api,
@@ -84,9 +84,9 @@ auto Workflow(
 
     return std::make_unique<ReturnType>(api, activity, contact);
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory
 
-namespace opentxs::v1::api::session
+namespace opentxs::api::session
 {
 using PaymentWorkflowState = otx::client::PaymentWorkflowState;
 using PaymentWorkflowType = otx::client::PaymentWorkflowType;
@@ -433,9 +433,9 @@ auto Workflow::UUID(
 
     return output;
 }
-}  // namespace opentxs::v1::api::session
+}  // namespace opentxs::api::session
 
-namespace opentxs::v1::api::session::imp
+namespace opentxs::api::session::imp
 {
 using PaymentWorkflowState = otx::client::PaymentWorkflowState;
 using PaymentWorkflowType = otx::client::PaymentWorkflowType;
@@ -3018,4 +3018,4 @@ auto Workflow::WriteCheque(const opentxs::Cheque& cheque) const -> OTIdentifier
 
     return workflowID;
 }
-}  // namespace opentxs::v1::api::session::imp
+}  // namespace opentxs::api::session::imp

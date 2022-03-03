@@ -9,7 +9,7 @@
 
 #include "crypto/library/packetcrypt/PacketCrypt.hpp"
 
-namespace opentxs::v1::blockchain::node::implementation
+namespace opentxs::blockchain::node::implementation
 {
 auto BlockOracle::get_validator(
     const blockchain::Type chain,
@@ -24,4 +24,4 @@ auto BlockOracle::get_validator(
     return std::make_unique<opentxs::crypto::implementation::PacketCrypt>(
         headers);
 }
-}  // namespace opentxs::v1::blockchain::node::implementation
+}  // namespace opentxs::blockchain::node::implementation

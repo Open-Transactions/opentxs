@@ -35,8 +35,8 @@ class MessageLite;
 
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace api
 {
 class Session;
@@ -60,11 +60,11 @@ class Proxy;
 class ReplyCallback;
 }  // namespace zeromq
 }  // namespace network
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::network::zeromq
+namespace opentxs::network::zeromq
 {
 class OPENTXS_EXPORT Context
 {
@@ -126,4 +126,4 @@ private:
     auto operator=(const Context&) -> Context& = delete;
     auto operator=(Context&&) -> Context& = delete;
 };
-}  // namespace opentxs::v1::network::zeromq
+}  // namespace opentxs::network::zeromq

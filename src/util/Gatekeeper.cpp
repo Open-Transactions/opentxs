@@ -13,7 +13,7 @@
 
 #include "internal/util/LogMacros.hpp"
 
-namespace opentxs::v1
+namespace opentxs
 {
 struct Gatekeeper::Imp {
     std::atomic_int count_;
@@ -123,4 +123,4 @@ Ticket::operator bool() const noexcept
 Gatekeeper::~Gatekeeper() { shutdown(); }
 
 Ticket::~Ticket() = default;
-}  // namespace opentxs::v1
+}  // namespace opentxs

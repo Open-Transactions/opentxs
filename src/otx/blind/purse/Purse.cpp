@@ -19,7 +19,7 @@
 #include "opentxs/otx/blind/PurseType.hpp"
 #include "opentxs/otx/blind/Token.hpp"
 
-namespace opentxs::v1::otx::blind
+namespace opentxs::otx::blind
 {
 auto Purse::Imp::at(const std::size_t) const -> const Token&
 {
@@ -70,9 +70,9 @@ auto Purse::Imp::Value() const -> const Amount&
 
     return blank;
 }
-}  // namespace opentxs::v1::otx::blind
+}  // namespace opentxs::otx::blind
 
-namespace opentxs::v1::otx::blind
+namespace opentxs::otx::blind
 {
 Purse::Purse(Imp* imp) noexcept
     : imp_(imp)
@@ -219,4 +219,4 @@ Purse::~Purse()
         imp_ = nullptr;
     }
 }
-}  // namespace opentxs::v1::otx::blind
+}  // namespace opentxs::otx::blind

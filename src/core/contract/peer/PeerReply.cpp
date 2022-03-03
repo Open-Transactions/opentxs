@@ -34,16 +34,16 @@
 #include "serialization/protobuf/PeerReply.pb.h"
 #include "serialization/protobuf/Signature.pb.h"
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto PeerReply(const api::Session& api) noexcept
     -> std::unique_ptr<contract::peer::Reply>
 {
     return std::make_unique<contract::peer::blank::Reply>(api);
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory
 
-namespace opentxs::v1::contract::peer::implementation
+namespace opentxs::contract::peer::implementation
 {
 Reply::Reply(
     const api::Session& api,
@@ -326,4 +326,4 @@ auto Reply::verify_signature(
 
     return nym_->Verify(serialized, sigProto);
 }
-}  // namespace opentxs::v1::contract::peer::implementation
+}  // namespace opentxs::contract::peer::implementation

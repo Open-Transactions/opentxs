@@ -17,7 +17,7 @@
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Pimpl.hpp"
 
-namespace opentxs::v1::blockchain::node
+namespace opentxs::blockchain::node
 {
 UpdateTransaction::UpdateTransaction(
     const api::Session& api,
@@ -272,4 +272,4 @@ auto UpdateTransaction::stage(
 
     return *it->second.first;
 }
-}  // namespace opentxs::v1::blockchain::node
+}  // namespace opentxs::blockchain::node

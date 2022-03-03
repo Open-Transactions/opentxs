@@ -20,7 +20,7 @@
 #include "opentxs/crypto/library/SymmetricProvider.hpp"
 #include "serialization/protobuf/Ciphertext.pb.h"
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto Symmetric(const api::Session& api) noexcept
     -> std::unique_ptr<api::crypto::Symmetric>
@@ -29,9 +29,9 @@ auto Symmetric(const api::Session& api) noexcept
 
     return std::make_unique<ReturnType>(api);
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory
 
-namespace opentxs::v1::api::crypto::imp
+namespace opentxs::api::crypto::imp
 {
 Symmetric::Symmetric(const api::Session& api) noexcept
     : api_(api)
@@ -105,4 +105,4 @@ auto Symmetric::Key(
     return api_.Factory().SymmetricKey(
         provider, seed, salt, operations, difficulty, parallel, bytes, type);
 }
-}  // namespace opentxs::v1::api::crypto::imp
+}  // namespace opentxs::api::crypto::imp

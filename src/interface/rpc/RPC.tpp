@@ -21,7 +21,7 @@
 #include "serialization/protobuf/ConsensusEnums.pb.h"
 #include "serialization/protobuf/RPCEnums.pb.h"
 
-namespace opentxs::v1::rpc::implementation
+namespace opentxs::rpc::implementation
 {
 template <typename T>
 void RPC::evaluate_register_account(
@@ -78,4 +78,4 @@ void RPC::evaluate_transaction_reply(
         add_output_status(output, code);
     }
 }
-}  // namespace opentxs::v1::rpc::implementation
+}  // namespace opentxs::rpc::implementation

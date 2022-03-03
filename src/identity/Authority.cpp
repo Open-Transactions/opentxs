@@ -56,7 +56,7 @@
 #include "serialization/protobuf/Signature.pb.h"
 #include "serialization/protobuf/Verification.pb.h"
 
-namespace opentxs::v1
+namespace opentxs
 {
 template <typename Range, typename Function>
 auto for_each(Range& range, Function f) -> Function
@@ -107,9 +107,9 @@ auto Factory::Authority(
         return nullptr;
     }
 }
-}  // namespace opentxs::v1
+}  // namespace opentxs
 
-namespace opentxs::v1::identity::internal
+namespace opentxs::identity::internal
 {
 auto Authority::NymToContactCredential(const VersionNumber nym) noexcept(false)
     -> VersionNumber
@@ -119,9 +119,9 @@ auto Authority::NymToContactCredential(const VersionNumber nym) noexcept(false)
     return ReturnType::authority_to_contact_.at(
         ReturnType::nym_to_authority_.at(nym));
 }
-}  // namespace opentxs::v1::identity::internal
+}  // namespace opentxs::identity::internal
 
-namespace opentxs::v1::identity::implementation
+namespace opentxs::identity::implementation
 {
 const VersionConversionMap Authority::authority_to_contact_{
     {1, 1},
@@ -1311,4 +1311,4 @@ auto Authority::WriteCredentials() const -> bool
 
     return output;
 }
-}  // namespace opentxs::v1::identity::implementation
+}  // namespace opentxs::identity::implementation

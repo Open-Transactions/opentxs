@@ -35,7 +35,7 @@
 #include "serialization/protobuf/PaymentWorkflow.pb.h"
 #include "serialization/protobuf/PaymentWorkflowEnums.pb.h"
 
-namespace opentxs::v1::rpc::implementation
+namespace opentxs::rpc::implementation
 {
 auto RPC::get_account_activity(const request::Base& base) const
     -> std::unique_ptr<response::Base>
@@ -184,4 +184,4 @@ auto RPC::get_account_event_type(StorageBox storagebox, Amount amount) noexcept
         }
     }
 }
-}  // namespace opentxs::v1::rpc::implementation
+}  // namespace opentxs::rpc::implementation

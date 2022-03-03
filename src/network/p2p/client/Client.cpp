@@ -39,7 +39,6 @@
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/blockchain/Blockchain.hpp"
-#include "opentxs/blockchain/Types.hpp"
 #include "opentxs/network/p2p/Acknowledgement.hpp"
 #include "opentxs/network/p2p/Base.hpp"
 #include "opentxs/network/p2p/Data.hpp"
@@ -65,7 +64,7 @@
 
 namespace bc = opentxs::blockchain;
 
-namespace opentxs::v1::network::p2p
+namespace opentxs::network::p2p
 {
 Client::Imp::Imp(
     const api::Session& api,
@@ -969,9 +968,9 @@ auto Client::Imp::state_machine() noexcept -> void
 }
 
 Client::Imp::~Imp() { shutdown(); }
-}  // namespace opentxs::v1::network::p2p
+}  // namespace opentxs::network::p2p
 
-namespace opentxs::v1::network::p2p
+namespace opentxs::network::p2p
 {
 Client::Client(const api::Session& api) noexcept
     : Client(api, api.Network().ZeroMQ().Internal().MakeBatch([] {
@@ -1015,4 +1014,4 @@ Client::~Client()
         imp_ = nullptr;
     }
 }
-}  // namespace opentxs::v1::network::p2p
+}  // namespace opentxs::network::p2p

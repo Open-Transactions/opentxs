@@ -46,7 +46,6 @@
 #include "opentxs/api/crypto/Seed.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Session.hpp"
-#include "opentxs/blockchain/Types.hpp"
 #if OT_BLOCKCHAIN
 #include "opentxs/blockchain/block/bitcoin/Script.hpp"
 #include "opentxs/blockchain/p2p/Address.hpp"
@@ -120,7 +119,7 @@
 #include "serialization/protobuf/UnitDefinition.pb.h"
 #include "util/HDIndex.hpp"
 
-namespace opentxs::v1::api::session::imp
+namespace opentxs::api::session::imp
 {
 Factory::Factory(const api::Session& api)
     : api::internal::Factory()
@@ -2687,4 +2686,4 @@ auto Factory::UnitID(const google::protobuf::MessageLite& proto) const
 
     return Identifier(id->str());
 }
-}  // namespace opentxs::v1::api::session::imp
+}  // namespace opentxs::api::session::imp

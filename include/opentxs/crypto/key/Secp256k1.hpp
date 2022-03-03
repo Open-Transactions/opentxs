@@ -9,7 +9,7 @@
 
 #include "opentxs/crypto/key/HD.hpp"
 
-namespace opentxs::v1::crypto::key
+namespace opentxs::crypto::key
 {
 class Secp256k1 : virtual public HD
 {
@@ -25,4 +25,4 @@ private:
     auto operator=(const Secp256k1&) -> Secp256k1& = delete;
     auto operator=(Secp256k1&&) -> Secp256k1& = delete;
 };
-}  // namespace opentxs::v1::crypto::key
+}  // namespace opentxs::crypto::key

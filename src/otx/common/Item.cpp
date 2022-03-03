@@ -40,7 +40,7 @@
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Pimpl.hpp"
 
-namespace opentxs::v1
+namespace opentxs
 {
 // this one is private (I hope to keep it that way.)
 // probvably not actually. If I end up back here, it's because
@@ -797,7 +797,7 @@ auto Item::GetItemCountInRefTo(std::int64_t lReference) -> std::int32_t
     }
 
     return nCount;
-}  // namespace opentxs::v1
+}  // namespace opentxs
 
 // The final receipt item MAY be present, and co-relates to others that share
 // its "in reference to" value. (Others such as marketReceipts and
@@ -1137,7 +1137,7 @@ void Item::CalculateNumberOfOrigin()
             SetNumberOfOrigin(GetTransactionNum());
             break;
     }  // switch
-}  // namespace opentxs::v1
+}  // namespace opentxs
 
 void Item::GetAttachment(String& theStr) const
 {
@@ -2012,4 +2012,4 @@ void Item::UpdateContents(const PasswordPrompt& reason)  // Before transmission
 }
 
 Item::~Item() { Release_Item(); }
-}  // namespace opentxs::v1
+}  // namespace opentxs

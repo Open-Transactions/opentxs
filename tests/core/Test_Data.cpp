@@ -6,6 +6,7 @@
 #include <gtest/gtest.h>
 #include <cstdint>
 
+#include "opentxs/Version.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Pimpl.hpp"

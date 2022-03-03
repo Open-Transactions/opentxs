@@ -30,7 +30,7 @@
 #include "opentxs/util/Pimpl.hpp"
 #include "util/HDIndex.hpp"
 
-namespace opentxs::v1::crypto
+namespace opentxs::crypto
 {
 Bip32::Imp::Imp(const api::Crypto& crypto) noexcept
     : crypto_(crypto)
@@ -372,4 +372,4 @@ auto Bip32::Imp::SerializePublic(
 
     return crypto_.Encode().IdentifierEncode(output);
 }
-}  // namespace opentxs::v1::crypto
+}  // namespace opentxs::crypto

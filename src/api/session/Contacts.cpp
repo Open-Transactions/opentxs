@@ -58,7 +58,7 @@
 #include "serialization/protobuf/Contact.pb.h"  // IWYU pragma: keep
 #include "serialization/protobuf/Nym.pb.h"      // IWYU pragma: keep
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto ContactAPI(const api::session::Client& api) noexcept
     -> std::unique_ptr<api::session::Contacts>
@@ -67,9 +67,9 @@ auto ContactAPI(const api::session::Client& api) noexcept
 
     return std::make_unique<ReturnType>(api);
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory
 
-namespace opentxs::v1::api::session::imp
+namespace opentxs::api::session::imp
 {
 Contacts::Contacts(const api::session::Client& api)
     : api_(api)
@@ -1128,4 +1128,4 @@ Contacts::~Contacts()
     timer_.Cancel();
     pipeline_.Close();
 }
-}  // namespace opentxs::v1::api::session::imp
+}  // namespace opentxs::api::session::imp

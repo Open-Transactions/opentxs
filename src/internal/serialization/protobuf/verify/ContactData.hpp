@@ -11,17 +11,17 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace proto
 {
 class ContactData;
 }  // namespace proto
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::proto
+namespace opentxs::proto
 {
 auto CheckProto_1(
     const ContactData& contactData,
@@ -55,4 +55,4 @@ auto CheckProto_17(const ContactData&, const bool, const ClaimType) -> bool;
 auto CheckProto_18(const ContactData&, const bool, const ClaimType) -> bool;
 auto CheckProto_19(const ContactData&, const bool, const ClaimType) -> bool;
 auto CheckProto_20(const ContactData&, const bool, const ClaimType) -> bool;
-}  // namespace opentxs::v1::proto
+}  // namespace opentxs::proto

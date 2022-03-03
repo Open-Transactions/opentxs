@@ -8,20 +8,20 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace api
 {
 class Session;
 }  // namespace api
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1
+namespace opentxs
 {
 template <typename T>
 struct make_blank {
     static auto value(const api::Session&) -> T { return T{}; }
 };
-}  // namespace opentxs::v1
+}  // namespace opentxs

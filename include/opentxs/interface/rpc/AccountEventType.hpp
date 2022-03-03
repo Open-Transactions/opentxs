@@ -10,7 +10,7 @@
 
 #include <limits>
 
-namespace opentxs::v1::rpc
+namespace opentxs::rpc
 {
 enum class AccountEventType : TypeEnum {
     error = 0,
@@ -25,4 +25,4 @@ enum class AccountEventType : TypeEnum {
     incoming_blockchain = 9,
     outgoing_blockchain = 10,
 };
-}  // namespace opentxs::v1::rpc
+}  // namespace opentxs::rpc

@@ -10,7 +10,7 @@
 #include "2_Factory.hpp"
 #include "opentxs/core/Secret.hpp"
 
-namespace opentxs::v1
+namespace opentxs
 {
 auto Factory::NullCallback() -> PasswordCallback*
 {
@@ -23,9 +23,9 @@ auto DefaultPassword() noexcept -> const char*
 
     return password;
 }
-}  // namespace opentxs::v1
+}  // namespace opentxs
 
-namespace opentxs::v1::implementation
+namespace opentxs::implementation
 {
 auto NullCallback::runOne(
     const char*,
@@ -42,4 +42,4 @@ auto NullCallback::runTwo(
 {
     runOne(display, output, key);
 }
-}  // namespace opentxs::v1::implementation
+}  // namespace opentxs::implementation

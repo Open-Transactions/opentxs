@@ -19,8 +19,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace api
 {
 class Session;
@@ -33,11 +33,11 @@ class Nym;
 
 class Factory;
 class PasswordPrompt;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::contract::peer::request::implementation
+namespace opentxs::contract::peer::request::implementation
 {
 class BailmentNotice final : public request::BailmentNotice,
                              public peer::implementation::Request
@@ -88,4 +88,4 @@ private:
     auto operator=(const BailmentNotice&) -> BailmentNotice& = delete;
     auto operator=(BailmentNotice&&) -> BailmentNotice& = delete;
 };
-}  // namespace opentxs::v1::contract::peer::request::implementation
+}  // namespace opentxs::contract::peer::request::implementation

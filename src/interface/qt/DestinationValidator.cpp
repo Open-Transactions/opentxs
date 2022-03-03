@@ -15,7 +15,7 @@
 #include "opentxs/core/AccountType.hpp"
 #include "opentxs/util/Container.hpp"
 
-namespace opentxs::v1::ui
+namespace opentxs::ui
 {
 auto DestinationValidator::Imp::strip_invalid(
     QString& input,
@@ -58,4 +58,4 @@ auto DestinationValidator::validate(QString& input, int& pos) const -> State
 }
 
 DestinationValidator::~DestinationValidator() = default;
-}  // namespace opentxs::v1::ui
+}  // namespace opentxs::ui

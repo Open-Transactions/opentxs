@@ -17,7 +17,7 @@
 #include "serialization/protobuf/UnitDefinition.pb.h"
 #include "util/Container.hpp"
 
-namespace opentxs::v1::contract::peer::blank
+namespace opentxs::contract::peer::blank
 {
 auto Reply::asAcknowledgement() const noexcept
     -> const peer::reply::Acknowledgement&
@@ -88,9 +88,9 @@ auto Request::Serialize(SerializedType& output) const -> bool
     output = {};
     return true;
 }
-}  // namespace opentxs::v1::contract::peer::blank
+}  // namespace opentxs::contract::peer::blank
 
-namespace opentxs::v1::contract::blank
+namespace opentxs::contract::blank
 {
 auto Server::Serialize(proto::ServerContract& output, bool includeNym) const
     -> bool
@@ -105,9 +105,9 @@ auto Unit::Serialize(proto::UnitDefinition& output, bool includeNym) const
     output = {};
     return true;
 }
-}  // namespace opentxs::v1::contract::blank
+}  // namespace opentxs::contract::blank
 
-namespace opentxs::v1::contract
+namespace opentxs::contract
 {
 using ProtocolVersionMap =
     robin_hood::unordered_flat_map<ProtocolVersion, proto::ProtocolVersion>;
@@ -119,9 +119,9 @@ using UnitTypeReverseMap =
 
 auto protocolversion_map() noexcept -> const ProtocolVersionMap&;
 auto unittype_map() noexcept -> const UnitTypeMap&;
-}  // namespace opentxs::v1::contract
+}  // namespace opentxs::contract
 
-namespace opentxs::v1::contract
+namespace opentxs::contract
 {
 auto protocolversion_map() noexcept -> const ProtocolVersionMap&
 {
@@ -145,9 +145,9 @@ auto unittype_map() noexcept -> const UnitTypeMap&
 
     return map;
 }
-}  // namespace opentxs::v1::contract
+}  // namespace opentxs::contract
 
-namespace opentxs::v1
+namespace opentxs
 {
 auto translate(const contract::ProtocolVersion in) noexcept
     -> proto::ProtocolVersion
@@ -196,4 +196,4 @@ auto translate(const proto::UnitType in) noexcept -> contract::UnitType
         return contract::UnitType::Error;
     }
 }
-}  // namespace opentxs::v1
+}  // namespace opentxs

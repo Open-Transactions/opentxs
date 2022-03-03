@@ -29,7 +29,7 @@
 #include "opentxs/util/Log.hpp"
 #include "serialization/protobuf/HDPath.pb.h"
 
-namespace opentxs::v1::crypto::key::implementation
+namespace opentxs::crypto::key::implementation
 {
 auto HD::ChildKey(const Bip32Index index, const PasswordPrompt& reason)
     const noexcept -> std::unique_ptr<key::HD>
@@ -112,4 +112,4 @@ auto HD::ChildKey(const Bip32Index index, const PasswordPrompt& reason)
         return {};
     }
 }
-}  // namespace opentxs::v1::crypto::key::implementation
+}  // namespace opentxs::crypto::key::implementation

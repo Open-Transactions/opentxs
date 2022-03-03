@@ -27,7 +27,6 @@
 #include "opentxs/api/Context.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/core/Armored.hpp"
-#include "opentxs/core/Data.hpp"
 #include "opentxs/core/String.hpp"
 #include "opentxs/core/UnitType.hpp"
 #include "opentxs/core/display/Definition.hpp"
@@ -47,7 +46,7 @@
 
 namespace zmq = opentxs::network::zeromq;
 
-namespace opentxs::v1::internal
+namespace opentxs::internal
 {
 auto Log::Endpoint() noexcept -> const char*
 {
@@ -71,9 +70,9 @@ auto Log::Shutdown() noexcept -> void
 }
 
 auto Log::Start() noexcept -> void {}
-}  // namespace opentxs::v1::internal
+}  // namespace opentxs::internal
 
-namespace opentxs::v1
+namespace opentxs
 {
 Log::Imp::Logger Log::Imp::logger_{};
 
@@ -240,9 +239,9 @@ auto Log::Imp::Trace(
 
     send(false);
 }
-}  // namespace opentxs::v1
+}  // namespace opentxs
 
-namespace opentxs::v1
+namespace opentxs
 {
 Log::Log(const int logLevel) noexcept
     : imp_(std::make_unique<Imp>(logLevel, *this).release())
@@ -465,9 +464,9 @@ Log::~Log()
         imp_ = nullptr;
     }
 }
-}  // namespace opentxs::v1
+}  // namespace opentxs
 
-namespace opentxs::v1
+namespace opentxs
 {
 auto LogConsole() noexcept -> Log&
 {
@@ -525,4 +524,4 @@ auto PrintStackTrace() noexcept -> UnallocatedCString
 
     return output.str();
 }
-}  // namespace opentxs::v1
+}  // namespace opentxs

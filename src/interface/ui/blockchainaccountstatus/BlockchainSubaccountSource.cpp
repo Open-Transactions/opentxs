@@ -12,7 +12,7 @@
 #include "interface/ui/base/List.hpp"
 #include "internal/core/identifier/Identifier.hpp"  // IWYU pragma: keep
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto BlockchainSubaccountSourceWidget(
     const ui::implementation::BlockchainAccountStatusInternalInterface& parent,
@@ -26,9 +26,9 @@ auto BlockchainSubaccountSourceWidget(
 
     return std::make_unique<ReturnType>(parent, api, rowID, key, custom);
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory
 
-namespace opentxs::v1::ui::implementation
+namespace opentxs::ui::implementation
 {
 BlockchainSubaccountSource::BlockchainSubaccountSource(
     const BlockchainAccountStatusInternalInterface& parent,
@@ -63,4 +63,4 @@ auto BlockchainSubaccountSource::reindex(
 }
 
 BlockchainSubaccountSource::~BlockchainSubaccountSource() = default;
-}  // namespace opentxs::v1::ui::implementation
+}  // namespace opentxs::ui::implementation

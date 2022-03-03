@@ -24,7 +24,7 @@
 #include "opentxs/util/Log.hpp"
 #include "serialization/protobuf/BlockchainPeerAddress.pb.h"
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 using ReturnType = blockchain::p2p::implementation::Address;
 
@@ -82,9 +82,9 @@ auto BlockchainAddress(
         return {};
     }
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory
 
-namespace opentxs::v1::blockchain::p2p::implementation
+namespace opentxs::blockchain::p2p::implementation
 {
 const VersionNumber Address::DefaultVersion{1};
 
@@ -281,4 +281,4 @@ auto Address::Serialize(SerializedType& output) const noexcept -> bool
 
     return true;
 }
-}  // namespace opentxs::v1::blockchain::p2p::implementation
+}  // namespace opentxs::blockchain::p2p::implementation

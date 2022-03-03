@@ -11,7 +11,7 @@
 
 #include "api/network/asio/Context.hpp"  // IWYU pragma: keep
 
-namespace opentxs::v1::network::asio
+namespace opentxs::network::asio
 {
 template <typename CRTP>
 WebRequest<CRTP>::WebRequest(
@@ -168,4 +168,4 @@ WebRequest<CRTP>::~WebRequest()
 {
     finish();
 }
-}  // namespace opentxs::v1::network::asio
+}  // namespace opentxs::network::asio

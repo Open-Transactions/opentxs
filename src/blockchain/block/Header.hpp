@@ -22,8 +22,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace api
 {
 class Session;
@@ -39,11 +39,11 @@ class Header;
 }  // namespace bitcoin
 }  // namespace block
 }  // namespace blockchain
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::blockchain::block::implementation
+namespace opentxs::blockchain::block::implementation
 {
 class Header : virtual public block::Header
 {
@@ -122,4 +122,4 @@ private:
     auto operator=(const Header&) -> Header& = delete;
     auto operator=(Header&&) -> Header& = delete;
 };
-}  // namespace opentxs::v1::blockchain::block::implementation
+}  // namespace opentxs::blockchain::block::implementation

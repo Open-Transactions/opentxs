@@ -14,7 +14,7 @@
 #include "serialization/protobuf/PaymentWorkflowEnums.pb.h"
 #include "util/Container.hpp"
 
-namespace opentxs::v1::api::session
+namespace opentxs::api::session
 {
 using PaymentWorkflowStateMap = robin_hood::unordered_flat_map<
     otx::client::PaymentWorkflowState,
@@ -31,9 +31,9 @@ using PaymentWorkflowTypeReverseMap = robin_hood::unordered_flat_map<
 
 auto paymentworkflowstate_map() noexcept -> const PaymentWorkflowStateMap&;
 auto paymentworkflowtype_map() noexcept -> const PaymentWorkflowTypeMap&;
-}  // namespace opentxs::v1::api::session
+}  // namespace opentxs::api::session
 
-namespace opentxs::v1::api::session
+namespace opentxs::api::session
 {
 using PaymentWorkflowState = otx::client::PaymentWorkflowState;
 using PaymentWorkflowType = otx::client::PaymentWorkflowType;
@@ -87,9 +87,9 @@ auto paymentworkflowtype_map() noexcept -> const PaymentWorkflowTypeMap&
 
     return map;
 }
-}  // namespace opentxs::v1::api::session
+}  // namespace opentxs::api::session
 
-namespace opentxs::v1
+namespace opentxs
 {
 auto translate(const otx::client::PaymentWorkflowState in) noexcept
     -> proto::PaymentWorkflowState
@@ -142,4 +142,4 @@ auto translate(const proto::PaymentWorkflowType in) noexcept
         return otx::client::PaymentWorkflowType::Error;
     }
 }
-}  // namespace opentxs::v1
+}  // namespace opentxs

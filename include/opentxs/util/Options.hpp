@@ -16,7 +16,7 @@
 
 class QObject;
 
-namespace opentxs::v1
+namespace opentxs
 {
 class OPENTXS_EXPORT Options final
 {
@@ -117,4 +117,4 @@ constexpr auto value(Options::ConnectionMode val) noexcept -> int
 {
     return static_cast<int>(val);
 }
-}  // namespace opentxs::v1
+}  // namespace opentxs

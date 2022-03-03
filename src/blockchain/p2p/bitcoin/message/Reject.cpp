@@ -26,7 +26,7 @@
 
 namespace be = boost::endian;
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto BitcoinP2PReject(
     const api::Session& api,
@@ -178,9 +178,9 @@ auto BitcoinP2PReject(
         reason,
         extra);
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory
 
-namespace opentxs::v1::blockchain::p2p::bitcoin::message
+namespace opentxs::blockchain::p2p::bitcoin::message
 {
 
 Reject::Reject(
@@ -253,4 +253,4 @@ auto Reject::payload(AllocateOutput out) const noexcept -> bool
         return false;
     }
 }
-}  // namespace opentxs::v1::blockchain::p2p::bitcoin::message
+}  // namespace opentxs::blockchain::p2p::bitcoin::message

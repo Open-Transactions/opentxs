@@ -23,7 +23,7 @@
 #include "opentxs/util/Bytes.hpp"
 #include "serialization/protobuf/Identifier.pb.h"
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto BlockchainSyncQueryContract() noexcept -> network::p2p::QueryContract
 {
@@ -49,9 +49,9 @@ auto BlockchainSyncQueryContract_p(
     return std::make_unique<ReturnType>(
         std::make_unique<ReturnType::Imp>(api, id).release());
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory
 
-namespace opentxs::v1::network::p2p
+namespace opentxs::network::p2p
 {
 class QueryContract::Imp final : public Base::Imp
 {
@@ -141,4 +141,4 @@ QueryContract::~QueryContract()
         Base::imp_ = nullptr;
     }
 }
-}  // namespace opentxs::v1::network::p2p
+}  // namespace opentxs::network::p2p

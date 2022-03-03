@@ -17,7 +17,7 @@
 
 template class opentxs::Pimpl<opentxs::network::zeromq::ReplyCallback>;
 
-namespace opentxs::v1::network::zeromq
+namespace opentxs::network::zeromq
 {
 auto ReplyCallback::Factory(zeromq::ReplyCallback::ReceiveCallback callback)
     -> OTZMQReplyCallback
@@ -30,9 +30,9 @@ auto ReplyCallback::Factory() -> OTZMQReplyCallback
     return OTZMQReplyCallback(
         new implementation::ReplyCallback([](auto&&) { return Message{}; }));
 }
-}  // namespace opentxs::v1::network::zeromq
+}  // namespace opentxs::network::zeromq
 
-namespace opentxs::v1::network::zeromq::implementation
+namespace opentxs::network::zeromq::implementation
 {
 ReplyCallback::ReplyCallback(zeromq::ReplyCallback::ReceiveCallback callback)
     : execute_lock_()
@@ -69,4 +69,4 @@ auto ReplyCallback::Process(zeromq::Message&& message) const noexcept -> Message
 }
 
 ReplyCallback::~ReplyCallback() {}
-}  // namespace opentxs::v1::network::zeromq::implementation
+}  // namespace opentxs::network::zeromq::implementation

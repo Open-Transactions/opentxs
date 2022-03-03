@@ -21,8 +21,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace proto
 {
 class RPCCommand;
@@ -41,11 +41,11 @@ namespace response
 class Base;
 }  // namespace response
 }  // namespace rpc
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1
+namespace opentxs
 {
 auto translate(const rpc::AccountEventType type) noexcept
     -> proto::AccountEventType;
@@ -66,9 +66,9 @@ auto translate(const proto::RPCCommandType type) noexcept -> rpc::CommandType;
 auto translate(const proto::RPCPaymentType type) noexcept -> rpc::PaymentType;
 auto translate(const proto::RPCPushType type) noexcept -> rpc::PushType;
 auto translate(const proto::RPCResponseCode type) noexcept -> rpc::ResponseCode;
-}  // namespace opentxs::v1
+}  // namespace opentxs
 
-namespace opentxs::v1::rpc::internal
+namespace opentxs::rpc::internal
 {
 struct RPC {
     virtual auto Process(const proto::RPCCommand& command) const
@@ -78,4 +78,4 @@ struct RPC {
 
     virtual ~RPC() = default;
 };
-}  // namespace opentxs::v1::rpc::internal
+}  // namespace opentxs::rpc::internal

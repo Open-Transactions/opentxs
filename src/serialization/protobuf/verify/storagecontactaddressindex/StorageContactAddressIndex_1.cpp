@@ -11,7 +11,7 @@
 #include "serialization/protobuf/StorageContactAddressIndex.pb.h"
 #include "serialization/protobuf/verify/Check.hpp"
 
-namespace opentxs::v1::proto
+namespace opentxs::proto
 {
 
 auto CheckProto_1(const StorageContactAddressIndex& input, const bool silent)
@@ -158,4 +158,4 @@ auto CheckProto_20(const StorageContactAddressIndex& input, const bool silent)
 {
     UNDEFINED_VERSION(20)
 }
-}  // namespace opentxs::v1::proto
+}  // namespace opentxs::proto

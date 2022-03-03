@@ -33,8 +33,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace api
 {
 class Session;
@@ -64,13 +64,13 @@ class GCS;
 }  // namespace proto
 
 class Amount;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
 namespace be = boost::endian;
 
-namespace opentxs::v1::gcs
+namespace opentxs::gcs
 {
 auto GolombDecode(
     const std::uint32_t N,
@@ -91,14 +91,14 @@ auto HashedSetConstruct(
     const std::uint32_t M,
     const UnallocatedVector<ReadView> items) noexcept(false)
     -> UnallocatedVector<std::uint64_t>;
-}  // namespace opentxs::v1::gcs
+}  // namespace opentxs::gcs
 
-namespace opentxs::v1::blockchain
+namespace opentxs::blockchain
 {
 auto GetDefinition(blockchain::Type) noexcept -> const display::Definition&;
-}  // namespace opentxs::v1::blockchain
+}  // namespace opentxs::blockchain
 
-namespace opentxs::v1::blockchain::internal
+namespace opentxs::blockchain::internal
 {
 // Source of BitReader class:
 // https://github.com/rasky/gcs/blob/master/cpp/gcs.cpp
@@ -201,13 +201,13 @@ auto Serialize(const Type chain, const filter::Type type) noexcept(false)
     -> std::uint8_t;
 auto Serialize(const block::Position& position) noexcept -> Space;
 auto Ticker(const Type chain) noexcept -> UnallocatedCString;
-}  // namespace opentxs::v1::blockchain::internal
+}  // namespace opentxs::blockchain::internal
 
-namespace opentxs::v1::blockchain::script
+namespace opentxs::blockchain::script
 {
-}  // namespace opentxs::v1::blockchain::script
+}  // namespace opentxs::blockchain::script
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 #if OT_BLOCKCHAIN
 auto BloomFilter(
@@ -256,4 +256,4 @@ auto Work(const UnallocatedCString& hex) -> blockchain::Work*;
 auto Work(const blockchain::Type chain, const blockchain::NumericHash& target)
     -> blockchain::Work*;
 #endif  // OT_BLOCKCHAIN
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory

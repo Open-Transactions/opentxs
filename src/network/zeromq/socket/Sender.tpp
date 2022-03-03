@@ -9,7 +9,7 @@
 
 #include "network/zeromq/socket/Socket.hpp"
 
-namespace opentxs::v1::network::zeromq::socket::implementation
+namespace opentxs::network::zeromq::socket::implementation
 {
 template <typename Interface, typename ImplementationParent>
 Sender<Interface, ImplementationParent>::Sender() noexcept
@@ -26,4 +26,4 @@ auto Sender<Interface, ImplementationParent>::Send(
 
     return this->send_message(lock, std::move(message));
 }
-}  // namespace opentxs::v1::network::zeromq::socket::implementation
+}  // namespace opentxs::network::zeromq::socket::implementation

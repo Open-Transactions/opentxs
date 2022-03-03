@@ -25,8 +25,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace api
 {
 namespace session
@@ -58,11 +58,11 @@ class Signature;
 
 class Factory;
 class PasswordPrompt;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::identity::implementation
+namespace opentxs::identity::implementation
 {
 class Source final : virtual public identity::Source
 {
@@ -131,4 +131,4 @@ private:
     auto operator=(const Source&) -> Source&;
     auto operator=(Source&&) -> Source&;
 };
-}  // namespace opentxs::v1::identity::implementation
+}  // namespace opentxs::identity::implementation

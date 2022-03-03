@@ -14,8 +14,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace api
 {
 namespace session
@@ -39,11 +39,11 @@ class Publish;
 
 class NymFile;
 class PasswordPrompt;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::otx::context::internal
+namespace opentxs::otx::context::internal
 {
 class Base : virtual public opentxs::otx::context::Base
 {
@@ -130,9 +130,9 @@ public:
 #endif  // _MSC_VER
     ~Server() override = default;
 };
-}  // namespace opentxs::v1::otx::context::internal
+}  // namespace opentxs::otx::context::internal
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto ClientContext(
     const api::Session& api,
@@ -163,4 +163,4 @@ auto ServerContext(
     const Nym_p& local,
     const Nym_p& remote,
     network::ServerConnection& connection) -> otx::context::internal::Server*;
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory

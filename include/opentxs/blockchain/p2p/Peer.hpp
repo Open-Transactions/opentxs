@@ -9,7 +9,7 @@
 
 #include <future>
 
-namespace opentxs::v1::blockchain::p2p
+namespace opentxs::blockchain::p2p
 {
 class OPENTXS_EXPORT Peer
 {
@@ -33,4 +33,4 @@ private:
     auto operator=(const Peer&) -> Peer& = delete;
     auto operator=(Peer&&) -> Peer& = delete;
 };
-}  // namespace opentxs::v1::blockchain::p2p
+}  // namespace opentxs::blockchain::p2p

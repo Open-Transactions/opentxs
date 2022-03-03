@@ -40,7 +40,7 @@
 #include "serialization/protobuf/Seed.pb.h"
 #include "util/Container.hpp"
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto Seed(
     const api::Session& api,
@@ -129,9 +129,9 @@ auto Seed(
                api, bip39, symmetric, factory, storage, proto, reason)
         .release();
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory
 
-namespace opentxs::v1::crypto::internal
+namespace opentxs::crypto::internal
 {
 using SeedTypeMap = robin_hood::unordered_flat_map<SeedStyle, proto::SeedType>;
 using SeedTypeReverseMap =
@@ -213,9 +213,9 @@ auto Seed::Translate(const int proto) noexcept -> SeedStyle
 {
     return translate(static_cast<proto::SeedType>(proto));
 }
-}  // namespace opentxs::v1::crypto::internal
+}  // namespace opentxs::crypto::internal
 
-namespace opentxs::v1::crypto
+namespace opentxs::crypto
 {
 auto operator<(const Seed& lhs, const Seed& rhs) noexcept -> bool
 {
@@ -228,9 +228,9 @@ auto operator==(const Seed& lhs, const Seed& rhs) noexcept -> bool
 }
 
 auto swap(Seed& lhs, Seed& rhs) noexcept -> void { lhs.swap(rhs); }
-}  // namespace opentxs::v1::crypto
+}  // namespace opentxs::crypto
 
-namespace opentxs::v1::crypto
+namespace opentxs::crypto
 {
 Seed::Imp::Imp() noexcept
     : Imp(Context().Factory())
@@ -585,9 +585,9 @@ auto Seed::Imp::save(const MutableData& data) const noexcept -> bool
 
     return true;
 }
-}  // namespace opentxs::v1::crypto
+}  // namespace opentxs::crypto
 
-namespace opentxs::v1::crypto
+namespace opentxs::crypto
 {
 Seed::Seed(Imp* imp) noexcept
     : imp_(imp)
@@ -651,4 +651,4 @@ Seed::~Seed()
         imp_ = nullptr;
     }
 }
-}  // namespace opentxs::v1::crypto
+}  // namespace opentxs::crypto

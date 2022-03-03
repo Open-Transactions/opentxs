@@ -12,7 +12,7 @@
 
 #include "opentxs/interface/rpc/CommandType.hpp"
 
-namespace opentxs::v1::rpc::request::implementation
+namespace opentxs::rpc::request::implementation
 {
 struct ListNyms final : public Base::Imp {
     auto asListNyms() const noexcept -> const request::ListNyms& final
@@ -45,9 +45,9 @@ private:
     auto operator=(const ListNyms&) -> ListNyms& = delete;
     auto operator=(ListNyms&&) -> ListNyms& = delete;
 };
-}  // namespace opentxs::v1::rpc::request::implementation
+}  // namespace opentxs::rpc::request::implementation
 
-namespace opentxs::v1::rpc::request
+namespace opentxs::rpc::request
 {
 ListNyms::ListNyms(SessionIndex session, const AssociateNyms& nyms)
     : Base(std::make_unique<implementation::ListNyms>(
@@ -71,4 +71,4 @@ ListNyms::ListNyms() noexcept
 auto ListNyms::DefaultVersion() noexcept -> VersionNumber { return 3u; }
 
 ListNyms::~ListNyms() = default;
-}  // namespace opentxs::v1::rpc::request
+}  // namespace opentxs::rpc::request

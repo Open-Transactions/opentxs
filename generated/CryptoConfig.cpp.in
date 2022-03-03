@@ -11,7 +11,7 @@
 #include "opentxs/crypto/key/asymmetric/Algorithm.hpp"
 #include "opentxs/util/Container.hpp"
 
-namespace opentxs::v1::api::crypto
+namespace opentxs::api::crypto
 {
 auto HaveHDKeys() noexcept -> bool { return @OPENTXS_HAVE_HD_KEYS@; }
 
@@ -54,4 +54,4 @@ auto HaveSupport(opentxs::crypto::key::asymmetric::Algorithm val) noexcept
         return false;
     }
 }
-}  // namespace opentxs::v1::api::crypto
+}  // namespace opentxs::api::crypto

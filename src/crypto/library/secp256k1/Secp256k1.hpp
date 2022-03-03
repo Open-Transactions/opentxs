@@ -28,8 +28,8 @@ extern "C" {
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace api
 {
 namespace crypto
@@ -55,11 +55,11 @@ class Parameters;
 class OTPassword;
 class PasswordPrompt;
 class Secret;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::crypto::implementation
+namespace opentxs::crypto::implementation
 {
 class Secp256k1 final : virtual public crypto::Secp256k1,
                         public AsymmetricProvider,
@@ -133,4 +133,4 @@ private:
     auto operator=(const Secp256k1&) -> Secp256k1& = delete;
     auto operator=(Secp256k1&&) -> Secp256k1& = delete;
 };
-}  // namespace opentxs::v1::crypto::implementation
+}  // namespace opentxs::crypto::implementation

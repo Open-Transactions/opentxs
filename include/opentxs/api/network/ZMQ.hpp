@@ -17,8 +17,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace network
 {
 namespace zeromq
@@ -30,11 +30,11 @@ class ServerConnection;
 }  // namespace network
 
 class Flag;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::api::network
+namespace opentxs::api::network
 {
 class OPENTXS_EXPORT ZMQ
 {
@@ -69,4 +69,4 @@ private:
     auto operator=(const ZMQ&) -> ZMQ& = delete;
     auto operator=(const ZMQ&&) -> ZMQ& = delete;
 };
-}  // namespace opentxs::v1::api::network
+}  // namespace opentxs::api::network

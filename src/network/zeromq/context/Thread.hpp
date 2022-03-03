@@ -31,8 +31,8 @@ struct zmq_pollitem_t;
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace network
 {
 namespace zeromq
@@ -51,11 +51,11 @@ class Raw;
 class Message;
 }  // namespace zeromq
 }  // namespace network
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::network::zeromq::context
+namespace opentxs::network::zeromq::context
 {
 class Thread final : public zeromq::internal::Thread
 {
@@ -113,4 +113,4 @@ private:
     auto operator=(const Thread&) -> Thread& = delete;
     auto operator=(Thread&&) -> Thread& = delete;
 };
-}  // namespace opentxs::v1::network::zeromq::context
+}  // namespace opentxs::network::zeromq::context

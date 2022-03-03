@@ -25,7 +25,7 @@
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto BitcoinP2PHeader(
     const api::Session& api,
@@ -37,9 +37,9 @@ auto BitcoinP2PHeader(
     return new ReturnType(
         api, raw.Network(), raw.Command(), raw.PayloadSize(), raw.Checksum());
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory
 
-namespace opentxs::v1::blockchain::p2p::bitcoin
+namespace opentxs::blockchain::p2p::bitcoin
 {
 Header::Header(
     const api::Session& api,
@@ -179,4 +179,4 @@ auto Header::SetChecksum(const std::size_t payload, OTData&& checksum) noexcept
     payload_size_ = payload;
     checksum_ = std::move(checksum);
 }
-}  // namespace opentxs::v1::blockchain::p2p::bitcoin
+}  // namespace opentxs::blockchain::p2p::bitcoin

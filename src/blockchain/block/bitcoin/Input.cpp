@@ -50,7 +50,7 @@
 
 namespace be = boost::endian;
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto BitcoinTransactionInput(
     const api::Session& api,
@@ -276,9 +276,9 @@ auto BitcoinTransactionInput(
         return {};
     }
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory
 
-namespace opentxs::v1::blockchain::block::bitcoin::implementation
+namespace opentxs::blockchain::block::bitcoin::implementation
 {
 const VersionNumber Input::default_version_{1};
 const VersionNumber Input::outpoint_version_{1};
@@ -987,4 +987,4 @@ auto Input::SignatureVersion(std::unique_ptr<internal::Script> subscript)
 {
     return std::make_unique<Input>(*this, std::move(subscript));
 }
-}  // namespace opentxs::v1::blockchain::block::bitcoin::implementation
+}  // namespace opentxs::blockchain::block::bitcoin::implementation

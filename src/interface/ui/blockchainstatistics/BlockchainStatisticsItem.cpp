@@ -15,7 +15,7 @@
 #include "opentxs/Types.hpp"
 #include "opentxs/core/Amount.hpp"
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto BlockchainStatisticsItem(
     const ui::implementation::BlockchainStatisticsInternalInterface& parent,
@@ -29,9 +29,9 @@ auto BlockchainStatisticsItem(
 
     return std::make_shared<ReturnType>(parent, api, rowID, sortKey, custom);
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory
 
-namespace opentxs::v1::ui::implementation
+namespace opentxs::ui::implementation
 {
 BlockchainStatisticsItem::BlockchainStatisticsItem(
     const BlockchainStatisticsInternalInterface& parent,
@@ -90,4 +90,4 @@ auto BlockchainStatisticsItem::reindex(
 }
 
 BlockchainStatisticsItem::~BlockchainStatisticsItem() = default;
-}  // namespace opentxs::v1::ui::implementation
+}  // namespace opentxs::ui::implementation

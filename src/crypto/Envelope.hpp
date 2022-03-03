@@ -28,8 +28,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace api
 {
 class Session;
@@ -47,11 +47,11 @@ class Ciphertext;
 
 class Armored;
 class PasswordPrompt;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::crypto::implementation
+namespace opentxs::crypto::implementation
 {
 class Envelope final : public crypto::Envelope
 {
@@ -168,4 +168,4 @@ private:
     auto operator=(const Envelope&) -> Envelope& = delete;
     auto operator=(Envelope&&) -> Envelope& = delete;
 };
-}  // namespace opentxs::v1::crypto::implementation
+}  // namespace opentxs::crypto::implementation

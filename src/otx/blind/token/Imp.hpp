@@ -29,8 +29,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace api
 {
 class Session;
@@ -70,13 +70,13 @@ class Token;
 }  // namespace proto
 
 class PasswordPrompt;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
 #define OT_TOKEN_VERSION 1
 
-namespace opentxs::v1::otx::blind::token
+namespace opentxs::otx::blind::token
 {
 class Token : virtual public blind::Token::Imp
 {
@@ -166,4 +166,4 @@ private:
     auto operator=(const Token&) -> Token& = delete;
     auto operator=(Token&&) -> Token& = delete;
 };
-}  // namespace opentxs::v1::otx::blind::token
+}  // namespace opentxs::otx::blind::token

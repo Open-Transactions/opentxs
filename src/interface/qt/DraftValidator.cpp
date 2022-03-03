@@ -9,7 +9,7 @@
 
 #include "internal/interface/ui/UI.hpp"
 
-namespace opentxs::v1::ui::implementation
+namespace opentxs::ui::implementation
 {
 DraftValidator::DraftValidator(internal::ActivityThread& parent) noexcept
     : parent_(parent)
@@ -39,4 +39,4 @@ auto DraftValidator::validate(QString& input, int&) const -> State
 
     return Invalid;
 }
-}  // namespace opentxs::v1::ui::implementation
+}  // namespace opentxs::ui::implementation

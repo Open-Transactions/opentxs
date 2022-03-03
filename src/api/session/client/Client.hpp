@@ -29,8 +29,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace api
 {
 namespace session
@@ -78,11 +78,11 @@ class Identifier;
 class OTAPI_Exec;
 class OT_API;
 class Options;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::api::session::imp
+namespace opentxs::api::session::imp
 {
 class Client final : public internal::Client, public Session
 {
@@ -146,4 +146,4 @@ private:
     auto operator=(const Client&) -> Client& = delete;
     auto operator=(Client&&) -> Client& = delete;
 };
-}  // namespace opentxs::v1::api::session::imp
+}  // namespace opentxs::api::session::imp

@@ -28,7 +28,7 @@
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/util/Log.hpp"
 
-namespace opentxs::v1::display
+namespace opentxs::display
 {
 class Scale::Imp
 {
@@ -251,4 +251,4 @@ private:
         return output;
     }
 };
-}  // namespace opentxs::v1::display
+}  // namespace opentxs::display

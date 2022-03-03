@@ -31,8 +31,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace api
 {
 namespace session
@@ -54,11 +54,11 @@ namespace identifier
 {
 class Nym;
 }  // namespace identifier
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::ui::implementation
+namespace opentxs::ui::implementation
 {
 using BlockchainAccountStatusType = List<
     BlockchainAccountStatusExternalInterface,
@@ -152,4 +152,4 @@ private:
     auto operator=(BlockchainAccountStatus&&)
         -> BlockchainAccountStatus& = delete;
 };
-}  // namespace opentxs::v1::ui::implementation
+}  // namespace opentxs::ui::implementation

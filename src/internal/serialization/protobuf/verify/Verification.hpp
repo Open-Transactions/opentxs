@@ -11,17 +11,17 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace proto
 {
 class Verification;
 }  // namespace proto
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::proto
+namespace opentxs::proto
 {
 auto CheckProto_1(
     const Verification& verification,
@@ -65,4 +65,4 @@ auto CheckProto_19(const Verification&, const bool, const VerificationType)
     -> bool;
 auto CheckProto_20(const Verification&, const bool, const VerificationType)
     -> bool;
-}  // namespace opentxs::v1::proto
+}  // namespace opentxs::proto

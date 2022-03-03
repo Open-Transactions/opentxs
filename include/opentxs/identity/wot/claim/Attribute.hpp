@@ -10,7 +10,7 @@
 
 #include <cstdint>
 
-namespace opentxs::v1::identity::wot::claim
+namespace opentxs::identity::wot::claim
 {
 enum class Attribute : std::uint8_t {
     Error = 0,
@@ -18,4 +18,4 @@ enum class Attribute : std::uint8_t {
     Primary = 2,
     Local = 3,
 };
-}  // namespace opentxs::v1::identity::wot::claim
+}  // namespace opentxs::identity::wot::claim

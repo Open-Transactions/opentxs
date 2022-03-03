@@ -20,8 +20,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace api
 {
 class Session;
@@ -73,11 +73,11 @@ class Message;
 }  // namespace network
 
 class Identifier;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto BlockchainSyncAcknowledgement() noexcept -> network::p2p::Acknowledgement;
 auto BlockchainSyncAcknowledgement(
@@ -179,4 +179,4 @@ auto BlockchainSyncRequest(network::p2p::StateData in) noexcept
     -> network::p2p::Request;
 auto BlockchainSyncRequest_p(network::p2p::StateData in) noexcept
     -> std::unique_ptr<network::p2p::Request>;
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory

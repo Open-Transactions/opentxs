@@ -23,7 +23,7 @@
 #include "opentxs/util/Container.hpp"
 #include "serialization/protobuf/ContactEnums.pb.h"
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto ContactSectionWidget(
     const ui::implementation::ContactInternalInterface& parent,
@@ -37,9 +37,9 @@ auto ContactSectionWidget(
 
     return std::make_shared<ReturnType>(parent, api, rowID, key, custom);
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory
 
-namespace opentxs::v1::ui::implementation
+namespace opentxs::ui::implementation
 {
 const std::map<
     identity::wot::claim::SectionType,
@@ -206,4 +206,4 @@ void ContactSection::startup(
     process_section(section);
     finish_startup();
 }
-}  // namespace opentxs::v1::ui::implementation
+}  // namespace opentxs::ui::implementation

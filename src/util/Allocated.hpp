@@ -9,7 +9,7 @@
 
 #include "opentxs/util/Container.hpp"
 
-namespace opentxs::v1::implementation
+namespace opentxs::implementation
 {
 class Allocated : virtual public opentxs::Allocated
 {
@@ -37,4 +37,4 @@ protected:
     {
     }
 };
-}  // namespace opentxs::v1::implementation
+}  // namespace opentxs::implementation

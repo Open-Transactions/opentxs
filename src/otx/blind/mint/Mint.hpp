@@ -26,8 +26,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace api
 {
 namespace session
@@ -61,11 +61,11 @@ class Token;
 class Armored;
 class PasswordPrompt;
 class String;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::otx::blind
+namespace opentxs::otx::blind
 {
 class Mint::Imp : public otx::blind::internal::Mint
 {
@@ -170,4 +170,4 @@ public:
 private:
     Imp() = delete;
 };
-}  // namespace opentxs::v1::otx::blind
+}  // namespace opentxs::otx::blind

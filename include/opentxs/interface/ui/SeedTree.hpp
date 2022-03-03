@@ -15,8 +15,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace identifier
 {
 class Nym;
@@ -27,11 +27,11 @@ namespace ui
 class SeedTree;
 class SeedTreeItem;
 }  // namespace ui
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::ui
+namespace opentxs::ui
 {
 class OPENTXS_EXPORT SeedTree : virtual public List
 {
@@ -55,4 +55,4 @@ private:
     auto operator=(const SeedTree&) -> SeedTree& = delete;
     auto operator=(SeedTree&&) -> SeedTree& = delete;
 };
-}  // namespace opentxs::v1::ui
+}  // namespace opentxs::ui

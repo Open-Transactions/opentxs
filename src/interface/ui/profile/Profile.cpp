@@ -40,7 +40,7 @@
 
 template struct std::pair<int, opentxs::UnallocatedCString>;
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto ProfileModel(
     const api::session::Client& api,
@@ -51,9 +51,9 @@ auto ProfileModel(
 
     return std::make_unique<ReturnType>(api, nymID, cb);
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory
 
-namespace opentxs::v1::ui::implementation
+namespace opentxs::ui::implementation
 {
 const UnallocatedSet<identity::wot::claim::SectionType> Profile::allowed_types_{
     identity::wot::claim::SectionType::Communication,
@@ -373,4 +373,4 @@ Profile::~Profile()
 {
     for (auto& it : listeners_) { delete it.second; }
 }
-}  // namespace opentxs::v1::ui::implementation
+}  // namespace opentxs::ui::implementation

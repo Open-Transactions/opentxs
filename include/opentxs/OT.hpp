@@ -16,8 +16,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace api
 {
 class Context;
@@ -25,11 +25,11 @@ class Context;
 
 class Options;
 class PasswordCaller;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1
+namespace opentxs
 {
 /** Context accessor
  *
@@ -79,4 +79,4 @@ OPENTXS_EXPORT auto VersionMajor() noexcept -> unsigned int;
 OPENTXS_EXPORT auto VersionMinor() noexcept -> unsigned int;
 OPENTXS_EXPORT auto VersionPatch() noexcept -> unsigned int;
 OPENTXS_EXPORT auto VersionString() noexcept -> const char*;
-}  // namespace opentxs::v1
+}  // namespace opentxs

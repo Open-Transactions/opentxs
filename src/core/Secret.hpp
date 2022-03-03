@@ -21,7 +21,7 @@ extern "C" {
 #include "opentxs/util/Log.hpp"
 #include "util/Allocator.hpp"
 
-namespace opentxs::v1::implementation
+namespace opentxs::implementation
 {
 class Secret final : virtual public opentxs::Secret
 {
@@ -119,4 +119,4 @@ private:
     auto operator=(const Secret& rhs) -> Secret& = delete;
     auto operator=(Secret&& rhs) -> Secret& = delete;
 };
-}  // namespace opentxs::v1::implementation
+}  // namespace opentxs::implementation

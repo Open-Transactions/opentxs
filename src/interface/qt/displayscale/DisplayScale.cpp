@@ -10,7 +10,7 @@
 #include "opentxs/core/display/Definition.hpp"
 #include "opentxs/util/Container.hpp"
 
-namespace opentxs::v1::ui
+namespace opentxs::ui
 {
 DisplayScaleQt::DisplayScaleQt(const display::Definition& data) noexcept
     : data_(data)
@@ -47,4 +47,4 @@ auto DisplayScaleQt::rowCount(const QModelIndex&) const -> int
 {
     return static_cast<int>(data_.GetScales().size());
 }
-}  // namespace opentxs::v1::ui
+}  // namespace opentxs::ui

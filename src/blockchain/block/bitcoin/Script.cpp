@@ -34,7 +34,7 @@
 
 namespace be = boost::endian;
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto BitcoinScript(
     const blockchain::Type chain,
@@ -212,9 +212,9 @@ auto BitcoinScript(
 
     return std::make_unique<ReturnType>(chain, role, std::move(elements));
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory
 
-namespace opentxs::v1::blockchain::block::bitcoin::internal
+namespace opentxs::blockchain::block::bitcoin::internal
 {
 auto Script::blank_signature(const blockchain::Type chain) noexcept
     -> const Space&
@@ -233,9 +233,9 @@ auto Script::blank_pubkey(
 
     return mode ? compressed : uncompressed;
 }
-}  // namespace opentxs::v1::blockchain::block::bitcoin::internal
+}  // namespace opentxs::blockchain::block::bitcoin::internal
 
-namespace opentxs::v1::blockchain::block::bitcoin::implementation
+namespace opentxs::blockchain::block::bitcoin::implementation
 {
 Script::Script(
     const blockchain::Type chain,
@@ -1265,4 +1265,4 @@ auto Script::Value(const std::size_t position) const noexcept
 
     return get_data(index);
 }
-}  // namespace opentxs::v1::blockchain::block::bitcoin::implementation
+}  // namespace opentxs::blockchain::block::bitcoin::implementation

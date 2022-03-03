@@ -20,8 +20,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace api
 {
 class Session;
@@ -33,11 +33,11 @@ class Parameters;
 }  // namespace crypto
 
 class Signature;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::crypto
+namespace opentxs::crypto
 {
 class OPENTXS_EXPORT AsymmetricProvider
 {
@@ -110,4 +110,4 @@ private:
     auto operator=(const AsymmetricProvider&) -> AsymmetricProvider& = delete;
     auto operator=(AsymmetricProvider&&) -> AsymmetricProvider& = delete;
 };
-}  // namespace opentxs::v1::crypto
+}  // namespace opentxs::crypto

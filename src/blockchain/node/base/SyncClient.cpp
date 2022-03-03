@@ -55,7 +55,7 @@
 
 namespace bcsync = opentxs::network::p2p;
 
-namespace opentxs::v1::blockchain::node::base
+namespace opentxs::blockchain::node::base
 {
 class SyncClient::Imp
 {
@@ -539,4 +539,4 @@ SyncClient::~SyncClient()
         imp_ = nullptr;
     }
 }
-}  // namespace opentxs::v1::blockchain::node::base
+}  // namespace opentxs::blockchain::node::base

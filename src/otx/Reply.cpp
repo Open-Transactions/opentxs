@@ -37,7 +37,7 @@
 
 template class opentxs::Pimpl<opentxs::otx::Reply>;
 
-namespace opentxs::v1::otx
+namespace opentxs::otx
 {
 const VersionNumber Reply::DefaultVersion{1};
 const VersionNumber Reply::MaxVersion{1};
@@ -124,9 +124,9 @@ auto Reply::Factory(const api::Session& api, const ReadView& view) -> OTXReply
     return OTXReply{new implementation::Reply(
         api, proto::Factory<proto::ServerReply>(view))};
 }
-}  // namespace opentxs::v1::otx
+}  // namespace opentxs::otx
 
-namespace opentxs::v1::otx::implementation
+namespace opentxs::otx::implementation
 {
 Reply::Reply(
     const api::Session& api,
@@ -348,4 +348,4 @@ auto Reply::verify_signature(
 
     return nym_->Verify(serialized, sigProto);
 }
-}  // namespace opentxs::v1::otx::implementation
+}  // namespace opentxs::otx::implementation

@@ -30,8 +30,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace api
 {
 namespace session
@@ -67,11 +67,11 @@ class Purse;
 }  // namespace proto
 
 class PasswordPrompt;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::otx::blind::purse
+namespace opentxs::otx::blind::purse
 {
 class Purse final : public blind::Purse::Imp
 {
@@ -210,4 +210,4 @@ private:
     auto operator=(const Purse&) -> Purse& = delete;
     auto operator=(Purse&&) -> Purse& = delete;
 };
-}  // namespace opentxs::v1::otx::blind::purse
+}  // namespace opentxs::otx::blind::purse

@@ -63,7 +63,7 @@
 
 namespace be = boost::endian;
 
-namespace opentxs::v1::implementation
+namespace opentxs::implementation
 {
 const std::size_t PaymentCode::pubkey_size_{
     sizeof(paymentcode::XpubPreimage::key_)};
@@ -1231,4 +1231,4 @@ auto PaymentCode::Verify(
     return key_->Verify(
         api_.Factory().InternalSession().Data(copy), sourceSignature);
 }
-}  // namespace opentxs::v1::implementation
+}  // namespace opentxs::implementation

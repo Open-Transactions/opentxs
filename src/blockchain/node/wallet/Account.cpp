@@ -49,7 +49,7 @@
 #include "opentxs/util/WorkType.hpp"
 #include "util/Work.hpp"
 
-namespace opentxs::v1::blockchain::node::wallet
+namespace opentxs::blockchain::node::wallet
 {
 auto print(AccountJobs job) noexcept -> std::string_view
 {
@@ -74,9 +74,9 @@ auto print(AccountJobs job) noexcept -> std::string_view
         OT_FAIL;
     }
 }
-}  // namespace opentxs::v1::blockchain::node::wallet
+}  // namespace opentxs::blockchain::node::wallet
 
-namespace opentxs::v1::blockchain::node::wallet
+namespace opentxs::blockchain::node::wallet
 {
 Account::Imp::Imp(
     const api::Session& api,
@@ -562,9 +562,9 @@ auto Account::Imp::work() noexcept -> bool
 }
 
 Account::Imp::~Imp() { signal_shutdown(); }
-}  // namespace opentxs::v1::blockchain::node::wallet
+}  // namespace opentxs::blockchain::node::wallet
 
-namespace opentxs::v1::blockchain::node::wallet
+namespace opentxs::blockchain::node::wallet
 {
 Account::Account(
     const api::Session& api,
@@ -620,4 +620,4 @@ auto Account::ProcessReorg(
 }
 
 Account::~Account() { imp_->Shutdown(); }
-}  // namespace opentxs::v1::blockchain::node::wallet
+}  // namespace opentxs::blockchain::node::wallet

@@ -15,8 +15,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace network
 {
 namespace zeromq
@@ -25,11 +25,11 @@ class Context;
 class Message;
 }  // namespace zeromq
 }  // namespace network
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::api::imp
+namespace opentxs::api::imp
 {
 class Log final : virtual public api::internal::Log
 {
@@ -63,4 +63,4 @@ private:
     auto operator=(const Log&) -> Log& = delete;
     auto operator=(Log&&) -> Log& = delete;
 };
-}  // namespace opentxs::v1::api::imp
+}  // namespace opentxs::api::imp

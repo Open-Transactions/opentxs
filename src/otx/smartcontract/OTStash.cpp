@@ -23,7 +23,7 @@
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Pimpl.hpp"
 
-namespace opentxs::v1
+namespace opentxs
 {
 OTStash::OTStash()
     : m_str_stash_name()
@@ -248,4 +248,4 @@ OTStash::~OTStash()
         m_mapStashItems.erase(m_mapStashItems.begin());
     }
 }
-}  // namespace opentxs::v1
+}  // namespace opentxs

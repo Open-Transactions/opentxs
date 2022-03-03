@@ -89,7 +89,7 @@
 #include "serialization/protobuf/HDPath.pb.h"
 #include "serialization/protobuf/PaymentCode.pb.h"
 
-namespace opentxs::v1::blockchain::node::implementation
+namespace opentxs::blockchain::node::implementation
 {
 constexpr auto proposal_version_ = VersionNumber{1};
 constexpr auto notification_version_ = VersionNumber{1};
@@ -1384,4 +1384,4 @@ auto Base::UpdateLocalHeight(const block::Position position) const noexcept
 }
 
 Base::~Base() { Shutdown().get(); }
-}  // namespace opentxs::v1::blockchain::node::implementation
+}  // namespace opentxs::blockchain::node::implementation

@@ -13,8 +13,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace contract
 {
 namespace unit
@@ -24,11 +24,11 @@ class Currency;
 }  // namespace contract
 
 using OTCurrencyContract = SharedPimpl<contract::unit::Currency>;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::contract::unit
+namespace opentxs::contract::unit
 {
 class OPENTXS_EXPORT Currency : virtual public contract::Unit
 {
@@ -50,4 +50,4 @@ private:
     auto operator=(const Currency&) -> Currency& = delete;
     auto operator=(Currency&&) -> Currency& = delete;
 };
-}  // namespace opentxs::v1::contract::unit
+}  // namespace opentxs::contract::unit

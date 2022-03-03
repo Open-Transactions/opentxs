@@ -22,7 +22,7 @@
 #include "opentxs/util/Pimpl.hpp"
 #include "serialization/protobuf/Token.pb.h"
 
-namespace opentxs::v1::otx::blind::token
+namespace opentxs::otx::blind::token
 {
 const opentxs::crypto::key::symmetric::Algorithm Token::mode_{
     opentxs::crypto::key::symmetric::Algorithm::ChaCha20Poly1305};
@@ -159,4 +159,4 @@ auto Token::Serialize(proto::Token& output) const noexcept -> bool
 
     return true;
 }
-}  // namespace opentxs::v1::otx::blind::token
+}  // namespace opentxs::otx::blind::token

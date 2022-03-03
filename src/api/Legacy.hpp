@@ -15,16 +15,16 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 class String;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
 namespace fs = boost::filesystem;
 
-namespace opentxs::v1::api::imp
+namespace opentxs::api::imp
 {
 class Legacy final : public api::Legacy
 {
@@ -119,4 +119,4 @@ private:
     auto operator=(const Legacy&) -> Legacy& = delete;
     auto operator=(Legacy&&) -> Legacy& = delete;
 };
-}  // namespace opentxs::v1::api::imp
+}  // namespace opentxs::api::imp

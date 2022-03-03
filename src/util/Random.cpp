@@ -13,7 +13,7 @@
 #include <iterator>
 #include <random>
 
-namespace opentxs::v1
+namespace opentxs
 {
 auto random_bytes_non_crypto(AllocateOutput dest, std::size_t bytes) noexcept
     -> bool
@@ -40,4 +40,4 @@ auto random_bytes_non_crypto(AllocateOutput dest, std::size_t bytes) noexcept
 
     return true;
 }
-}  // namespace opentxs::v1
+}  // namespace opentxs

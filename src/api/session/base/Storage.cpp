@@ -23,7 +23,7 @@
 #include "opentxs/util/Options.hpp"
 #include "opentxs/util/Pimpl.hpp"
 
-namespace opentxs::v1::api::session::base
+namespace opentxs::api::session::base
 {
 Storage::Storage(
     const Flag& running,
@@ -118,4 +118,4 @@ auto Storage::start() noexcept -> void
 }
 
 Storage::~Storage() = default;
-}  // namespace opentxs::v1::api::session::base
+}  // namespace opentxs::api::session::base

@@ -32,7 +32,6 @@
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/core/Armored.hpp"
-#include "opentxs/core/Data.hpp"
 #include "opentxs/core/String.hpp"
 #include "opentxs/core/contract/ServerContract.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
@@ -64,7 +63,7 @@
 
 namespace zmq = opentxs::network::zeromq;
 
-namespace opentxs::v1::network
+namespace opentxs::network
 {
 auto ServerConnection::Factory(
     const api::Session& api,
@@ -75,9 +74,9 @@ auto ServerConnection::Factory(
     return OTServerConnection(
         new implementation::ServerConnection(api, zmq, updates, contract));
 }
-}  // namespace opentxs::v1::network
+}  // namespace opentxs::network
 
-namespace opentxs::v1::network::implementation
+namespace opentxs::network::implementation
 {
 ServerConnection::ServerConnection(
     const api::Session& api,
@@ -596,4 +595,4 @@ ServerConnection::~ServerConnection()
 {
     if (thread_.joinable()) { thread_.join(); }
 }
-}  // namespace opentxs::v1::network::implementation
+}  // namespace opentxs::network::implementation

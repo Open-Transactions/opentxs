@@ -217,7 +217,7 @@ const char* opentxs::OTDB::StoredObjectTypeStrings[] = {
     "StoredObjError"  // (Should never be.)
 };
 
-namespace opentxs::v1::OTDB
+namespace opentxs::OTDB
 {
 // NAMESPACE CONSTRUCTOR / DESTRUCTOR
 
@@ -3033,4 +3033,4 @@ auto StorageFS::FormPathString(
     return ConstructAndConfirmPath(
         api, strOutput, dataFolder, strFolder, oneStr, twoStr, threeStr);
 }
-}  // namespace opentxs::v1::OTDB
+}  // namespace opentxs::OTDB

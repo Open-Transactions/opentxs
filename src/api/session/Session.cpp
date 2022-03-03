@@ -81,7 +81,7 @@ extern "C" auto internal_password_cb(
 }
 }  // namespace
 
-namespace opentxs::v1::api::session::imp
+namespace opentxs::api::session::imp
 {
 Session::Session(
     const api::Context& parent,
@@ -353,4 +353,4 @@ auto Session::Wallet() const noexcept -> const api::session::Wallet&
 }
 
 Session::~Session() { cleanup(); }
-}  // namespace opentxs::v1::api::session::imp
+}  // namespace opentxs::api::session::imp

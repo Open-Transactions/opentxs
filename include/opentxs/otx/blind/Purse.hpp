@@ -18,8 +18,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace api
 {
 namespace session
@@ -63,11 +63,11 @@ class Token;
 
 class Amount;
 class PasswordPrompt;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::otx::blind
+namespace opentxs::otx::blind
 {
 auto swap(Purse& lhs, Purse& rhs) noexcept -> void;
 
@@ -123,4 +123,4 @@ public:
 private:
     Imp* imp_;
 };
-}  // namespace opentxs::v1::otx::blind
+}  // namespace opentxs::otx::blind

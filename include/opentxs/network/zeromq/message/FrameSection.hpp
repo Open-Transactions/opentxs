@@ -17,8 +17,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace network
 {
 namespace zeromq
@@ -29,11 +29,11 @@ class FrameSection;
 class Message;
 }  // namespace zeromq
 }  // namespace network
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::network::zeromq
+namespace opentxs::network::zeromq
 {
 OPENTXS_EXPORT auto swap(FrameSection& lhs, FrameSection& rhs) noexcept -> void;
 
@@ -71,4 +71,4 @@ private:
     FrameSection(const FrameSection&) = delete;
     auto operator=(const FrameSection&) -> FrameSection& = delete;
 };
-}  // namespace opentxs::v1::network::zeromq
+}  // namespace opentxs::network::zeromq

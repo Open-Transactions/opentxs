@@ -23,7 +23,7 @@
 #include "serialization/protobuf/ContactItem.pb.h"
 #include "serialization/protobuf/ContactSection.pb.h"
 
-namespace opentxs::v1::identity::wot::claim
+namespace opentxs::identity::wot::claim
 {
 static auto create_group(
     const UnallocatedCString& nym,
@@ -405,4 +405,4 @@ auto Section::Type() const -> const claim::SectionType&
 auto Section::Version() const -> VersionNumber { return imp_->version_; }
 
 Section::~Section() = default;
-}  // namespace opentxs::v1::identity::wot::claim
+}  // namespace opentxs::identity::wot::claim

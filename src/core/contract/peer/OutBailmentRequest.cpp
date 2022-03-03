@@ -30,7 +30,7 @@
 #include "serialization/protobuf/OutBailment.pb.h"
 #include "serialization/protobuf/PeerRequest.pb.h"
 
-namespace opentxs::v1
+namespace opentxs
 {
 auto Factory::OutbailmentRequest(
     const api::Session& api,
@@ -103,9 +103,9 @@ auto Factory::OutbailmentRequest(
         return {};
     }
 }
-}  // namespace opentxs::v1
+}  // namespace opentxs
 
-namespace opentxs::v1::contract::peer::request::implementation
+namespace opentxs::contract::peer::request::implementation
 {
 Outbailment::Outbailment(
     const api::Session& api,
@@ -164,4 +164,4 @@ auto Outbailment::IDVersion(const Lock& lock) const -> SerializedType
 
     return contract;
 }
-}  // namespace opentxs::v1::contract::peer::request::implementation
+}  // namespace opentxs::contract::peer::request::implementation

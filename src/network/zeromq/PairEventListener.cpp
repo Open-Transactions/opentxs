@@ -18,7 +18,7 @@
 #define PAIR_EVENT_ENDPOINT_PATH "pairevent"
 #define PAIR_EVENT_ENDPOINT_VERSION 1
 
-namespace opentxs::v1::network::zeromq::implementation
+namespace opentxs::network::zeromq::implementation
 {
 PairEventListener::PairEventListener(
     const zeromq::Context& context,
@@ -43,4 +43,4 @@ auto PairEventListener::clone() const noexcept -> PairEventListener*
         dynamic_cast<const zeromq::PairEventCallback&>(callback_),
         instance_);
 }
-}  // namespace opentxs::v1::network::zeromq::implementation
+}  // namespace opentxs::network::zeromq::implementation

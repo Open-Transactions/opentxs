@@ -24,7 +24,7 @@
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Pimpl.hpp"
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto BitcoinP2PGetheaders(
     const api::Session& api,
@@ -133,9 +133,9 @@ auto BitcoinP2PGetheaders(
     return new ReturnType(
         api, network, version, std::move(history), std::move(stop));
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory
 
-namespace opentxs::v1::blockchain::p2p::bitcoin::message::implementation
+namespace opentxs::blockchain::p2p::bitcoin::message::implementation
 {
 Getheaders::Getheaders(
     const api::Session& api,
@@ -216,4 +216,4 @@ auto Getheaders::payload(AllocateOutput out) const noexcept -> bool
         return false;
     }
 }
-}  // namespace opentxs::v1::blockchain::p2p::bitcoin::message::implementation
+}  // namespace opentxs::blockchain::p2p::bitcoin::message::implementation

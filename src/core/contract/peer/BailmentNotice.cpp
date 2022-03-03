@@ -30,7 +30,7 @@
 #include "serialization/protobuf/PeerRequest.pb.h"
 #include "serialization/protobuf/PendingBailment.pb.h"
 
-namespace opentxs::v1
+namespace opentxs
 {
 auto Factory::BailmentNotice(
     const api::Session& api,
@@ -101,9 +101,9 @@ auto Factory::BailmentNotice(
         return {};
     }
 }
-}  // namespace opentxs::v1
+}  // namespace opentxs
 
-namespace opentxs::v1::contract::peer::request::implementation
+namespace opentxs::contract::peer::request::implementation
 {
 BailmentNotice::BailmentNotice(
     const api::Session& api,
@@ -169,4 +169,4 @@ auto BailmentNotice::IDVersion(const Lock& lock) const -> SerializedType
 
     return contract;
 }
-}  // namespace opentxs::v1::contract::peer::request::implementation
+}  // namespace opentxs::contract::peer::request::implementation

@@ -46,8 +46,8 @@ class QObject;
 
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace api
 {
 namespace crypto
@@ -91,11 +91,11 @@ class Flag;
 class OTPassword;
 class Options;
 class PasswordPrompt;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::api::session::imp
+namespace opentxs::api::session::imp
 {
 class Session : virtual public internal::Session,
                 public ZMQ,
@@ -209,4 +209,4 @@ private:
     auto operator=(const Session&) -> Session& = delete;
     auto operator=(Session&&) -> Session& = delete;
 };
-}  // namespace opentxs::v1::api::session::imp
+}  // namespace opentxs::api::session::imp

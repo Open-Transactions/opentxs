@@ -27,7 +27,7 @@
 #include "opentxs/util/Pimpl.hpp"
 #include "util/Container.hpp"
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto ZAPReply(
     const network::zeromq::zap::Request& request,
@@ -54,9 +54,9 @@ auto ZAPReply(
                request, code, status, userID, metadata, version)
         .release();
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory
 
-namespace opentxs::v1::network::zeromq::zap
+namespace opentxs::network::zeromq::zap
 {
 const Reply::Imp::CodeMap Reply::Imp::code_map_{
     {Status::Success, "200"},
@@ -147,9 +147,9 @@ auto Reply::Imp::string_to_code(const ReadView string) noexcept -> zap::Status
         return Status::Unknown;
     }
 }
-}  // namespace opentxs::v1::network::zeromq::zap
+}  // namespace opentxs::network::zeromq::zap
 
-namespace opentxs::v1::network::zeromq::zap
+namespace opentxs::network::zeromq::zap
 {
 Reply::Reply(Imp* imp) noexcept
     : Message(imp)
@@ -304,4 +304,4 @@ Reply::~Reply()
         Message::imp_ = nullptr;
     }
 }
-}  // namespace opentxs::v1::network::zeromq::zap
+}  // namespace opentxs::network::zeromq::zap

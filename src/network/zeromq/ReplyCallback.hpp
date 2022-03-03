@@ -10,7 +10,7 @@
 #include "opentxs/network/zeromq/ReplyCallback.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 
-namespace opentxs::v1::network::zeromq::implementation
+namespace opentxs::network::zeromq::implementation
 {
 class ReplyCallback : virtual public zeromq::ReplyCallback
 {
@@ -36,4 +36,4 @@ private:
     auto operator=(const ReplyCallback&) -> ReplyCallback& = delete;
     auto operator=(ReplyCallback&&) -> ReplyCallback& = delete;
 };
-}  // namespace opentxs::v1::network::zeromq::implementation
+}  // namespace opentxs::network::zeromq::implementation

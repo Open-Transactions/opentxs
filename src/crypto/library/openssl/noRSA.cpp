@@ -7,7 +7,7 @@
 #include "1_Internal.hpp"                      // IWYU pragma: associated
 #include "crypto/library/openssl/OpenSSL.hpp"  // IWYU pragma: associated
 
-namespace opentxs::v1::crypto::implementation
+namespace opentxs::crypto::implementation
 {
 auto OpenSSL::generate_dh(const Parameters&, ::EVP_PKEY*) const noexcept -> bool
 {
@@ -93,4 +93,4 @@ auto OpenSSL::write_keypair(
 {
     return false;
 }
-}  // namespace opentxs::v1::crypto::implementation
+}  // namespace opentxs::crypto::implementation

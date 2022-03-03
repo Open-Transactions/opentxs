@@ -7,9 +7,9 @@
 #include "1_Internal.hpp"           // IWYU pragma: associated
 #include "api/context/Context.hpp"  // IWYU pragma: associated
 
-namespace opentxs::v1::api::imp
+namespace opentxs::api::imp
 {
 auto Context::shutdown_qt() noexcept -> void {}
 
 auto Context::QtRootObject() const noexcept -> QObject* { return nullptr; }
-}  // namespace opentxs::v1::api::imp
+}  // namespace opentxs::api::imp

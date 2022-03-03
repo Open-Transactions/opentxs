@@ -25,8 +25,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace api
 {
 class Session;
@@ -58,11 +58,11 @@ class Signature;
 }  // namespace proto
 
 class PasswordPrompt;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::contract::peer::implementation
+namespace opentxs::contract::peer::implementation
 {
 class Request : virtual public peer::Request,
                 public opentxs::contract::implementation::Signable
@@ -146,4 +146,4 @@ private:
 
     Request() = delete;
 };
-}  // namespace opentxs::v1::contract::peer::implementation
+}  // namespace opentxs::contract::peer::implementation

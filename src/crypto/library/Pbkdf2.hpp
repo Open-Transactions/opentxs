@@ -12,7 +12,7 @@
 #include "internal/crypto/library/Pbkdf2.hpp"
 #include "opentxs/crypto/HashType.hpp"
 
-namespace opentxs::v1::crypto::implementation
+namespace opentxs::crypto::implementation
 {
 class Pbkdf2 : virtual public crypto::Pbkdf2
 {
@@ -40,4 +40,4 @@ private:
     auto operator=(const Pbkdf2&) -> Pbkdf2& = delete;
     auto operator=(Pbkdf2&&) -> Pbkdf2& = delete;
 };
-}  // namespace opentxs::v1::crypto::implementation
+}  // namespace opentxs::crypto::implementation

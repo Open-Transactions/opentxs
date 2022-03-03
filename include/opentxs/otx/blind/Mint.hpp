@@ -16,8 +16,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace api
 {
 class Session;
@@ -43,11 +43,11 @@ class Mint;
 
 class Amount;
 class Armored;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::otx::blind
+namespace opentxs::otx::blind
 {
 OPENTXS_EXPORT auto swap(Mint& lhs, Mint& rhs) noexcept -> void;
 
@@ -91,4 +91,4 @@ private:
     Mint(const Mint&) = delete;
     auto operator=(const Mint&) -> Mint& = delete;
 };
-}  // namespace opentxs::v1::otx::blind
+}  // namespace opentxs::otx::blind

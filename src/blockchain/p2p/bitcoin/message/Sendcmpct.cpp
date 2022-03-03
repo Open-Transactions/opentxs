@@ -21,7 +21,7 @@
 #include "opentxs/blockchain/p2p/Types.hpp"
 #include "opentxs/util/Log.hpp"
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 // We have a header and a raw payload. Parse it.
 auto BitcoinP2PSendcmpct(
@@ -80,9 +80,9 @@ auto BitcoinP2PSendcmpct(
 
     return new ReturnType(api, network, announce, version);
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory
 
-namespace opentxs::v1::blockchain::p2p::bitcoin::message
+namespace opentxs::blockchain::p2p::bitcoin::message
 {
 // We have all the data members to create the message from scratch (for sending)
 Sendcmpct::Sendcmpct(
@@ -147,4 +147,4 @@ auto Sendcmpct::payload(AllocateOutput out) const noexcept -> bool
         return false;
     }
 }
-}  // namespace opentxs::v1::blockchain::p2p::bitcoin::message
+}  // namespace opentxs::blockchain::p2p::bitcoin::message

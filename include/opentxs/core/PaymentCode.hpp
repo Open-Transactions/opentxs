@@ -20,8 +20,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace crypto
 {
 namespace key
@@ -45,7 +45,7 @@ class PaymentCode;
 class Data;
 class PaymentCode;
 class PasswordPrompt;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -58,7 +58,7 @@ struct hash<opentxs::PaymentCode> {
 };
 }  // namespace std
 
-namespace opentxs::v1
+namespace opentxs
 {
 class OPENTXS_EXPORT PaymentCode
 {
@@ -147,4 +147,4 @@ auto swap(PaymentCode& lhs, PaymentCode& rhs) noexcept -> void;
 auto operator<(const PaymentCode& lhs, const PaymentCode& rhs) noexcept -> bool;
 auto operator==(const PaymentCode& lhs, const PaymentCode& rhs) noexcept
     -> bool;
-}  // namespace opentxs::v1
+}  // namespace opentxs

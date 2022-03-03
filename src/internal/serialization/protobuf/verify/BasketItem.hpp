@@ -13,17 +13,17 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-namespace v1
-{
+// inline namespace v1
+// {
 namespace proto
 {
 class BasketItem;
 }  // namespace proto
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::proto
+namespace opentxs::proto
 {
 using BasketItemMap = UnallocatedMap<UnallocatedCString, std::uint64_t>;
 
@@ -48,4 +48,4 @@ auto CheckProto_17(const BasketItem&, const bool, BasketItemMap&) -> bool;
 auto CheckProto_18(const BasketItem&, const bool, BasketItemMap&) -> bool;
 auto CheckProto_19(const BasketItem&, const bool, BasketItemMap&) -> bool;
 auto CheckProto_20(const BasketItem&, const bool, BasketItemMap&) -> bool;
-}  // namespace opentxs::v1::proto
+}  // namespace opentxs::proto

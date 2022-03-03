@@ -10,7 +10,7 @@
 
 #include <limits>
 
-namespace opentxs::v1::rpc
+namespace opentxs::rpc
 {
 enum class ContactEventType : TypeEnum {
     error = 0,
@@ -19,4 +19,4 @@ enum class ContactEventType : TypeEnum {
     incoming_payment = 3,
     outgoing_payment = 4,
 };
-}  // namespace opentxs::v1::rpc
+}  // namespace opentxs::rpc

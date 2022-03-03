@@ -17,8 +17,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace crypto
 {
 namespace key
@@ -39,11 +39,11 @@ class Secret;
 class Signature;
 
 using OTKeypair = Pimpl<crypto::key::Keypair>;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::crypto::key
+namespace opentxs::crypto::key
 {
 class OPENTXS_EXPORT Keypair
 {
@@ -86,4 +86,4 @@ private:
     auto operator=(const Keypair&) -> Keypair& = delete;
     auto operator=(Keypair&&) -> Keypair& = delete;
 };
-}  // namespace opentxs::v1::crypto::key
+}  // namespace opentxs::crypto::key

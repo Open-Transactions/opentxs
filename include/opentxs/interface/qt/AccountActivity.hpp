@@ -21,8 +21,8 @@ class QObject;
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace ui
 {
 namespace internal
@@ -33,7 +33,7 @@ struct AccountActivity;
 class AccountActivityQt;
 class DisplayScaleQt;
 }  // namespace ui
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces
 

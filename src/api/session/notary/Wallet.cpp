@@ -34,7 +34,7 @@
 #include "opentxs/util/Pimpl.hpp"
 #include "opentxs/util/SharedPimpl.hpp"
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto WalletAPI(const api::session::Notary& parent) noexcept
     -> std::unique_ptr<api::session::Wallet>
@@ -50,9 +50,9 @@ auto WalletAPI(const api::session::Notary& parent) noexcept
         return {};
     }
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory
 
-namespace opentxs::v1::api::session::server
+namespace opentxs::api::session::server
 {
 Wallet::Wallet(const api::session::Notary& parent)
     : ot_super(parent)
@@ -217,4 +217,4 @@ auto Wallet::signer_nym(const identifier::Nym&) const -> Nym_p
 {
     return Nym(server_.NymID());
 }
-}  // namespace opentxs::v1::api::session::server
+}  // namespace opentxs::api::session::server

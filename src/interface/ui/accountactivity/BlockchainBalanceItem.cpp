@@ -25,7 +25,7 @@
 #include "serialization/protobuf/PaymentEvent.pb.h"
 #include "serialization/protobuf/PaymentWorkflow.pb.h"
 
-namespace opentxs::v1::ui::implementation
+namespace opentxs::ui::implementation
 {
 BlockchainBalanceItem::BlockchainBalanceItem(
     const AccountActivityInternalInterface& parent,
@@ -129,4 +129,4 @@ auto BlockchainBalanceItem::UUID() const noexcept -> UnallocatedCString
 {
     return blockchain::HashToNumber(txid_);
 }
-}  // namespace opentxs::v1::ui::implementation
+}  // namespace opentxs::ui::implementation

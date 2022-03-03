@@ -14,7 +14,7 @@
 #include "internal/blockchain/database/common/Common.hpp"
 #include "util/MappedFileStorage.hpp"
 
-namespace opentxs::v1::blockchain::database::common
+namespace opentxs::blockchain::database::common
 {
 struct Bulk::Imp final : private util::MappedFileStorage {
     auto Mutex() const noexcept -> std::mutex& { return lock_; }
@@ -93,4 +93,4 @@ auto Bulk::WriteView(
 }
 
 Bulk::~Bulk() = default;
-}  // namespace opentxs::v1::blockchain::database::common
+}  // namespace opentxs::blockchain::database::common

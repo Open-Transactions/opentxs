@@ -23,7 +23,7 @@ extern "C" {
 #include "util/FileSize.hpp"
 #include "util/ScopeGuard.hpp"
 
-namespace opentxs::v1::storage::lmdb
+namespace opentxs::storage::lmdb
 {
 struct LMDB::Imp {
     auto Commit() const noexcept -> bool
@@ -855,4 +855,4 @@ auto LMDB::TransactionRW(MDB_txn* parent) const noexcept(false) -> Transaction
 }
 
 LMDB::~LMDB() = default;
-}  // namespace opentxs::v1::storage::lmdb
+}  // namespace opentxs::storage::lmdb

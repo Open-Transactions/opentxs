@@ -34,7 +34,7 @@
 #include "serialization/protobuf/ContactItem.pb.h"
 #include "serialization/protobuf/ContactSection.pb.h"
 
-namespace opentxs::v1::identity::wot::claim
+namespace opentxs::identity::wot::claim
 {
 static auto extract_sections(
     const api::Session& api,
@@ -1093,4 +1093,4 @@ auto Data::Type() const -> claim::ClaimType { return imp_->scope().first; }
 auto Data::Version() const -> VersionNumber { return imp_->version_; }
 
 Data::~Data() = default;
-}  // namespace opentxs::v1::identity::wot::claim
+}  // namespace opentxs::identity::wot::claim

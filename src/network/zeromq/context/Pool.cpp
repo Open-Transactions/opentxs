@@ -23,7 +23,7 @@
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 
-namespace opentxs::v1::network::zeromq::context
+namespace opentxs::network::zeromq::context
 {
 Pool::Pool(const Context& parent) noexcept
     : parent_(parent)
@@ -242,4 +242,4 @@ auto Pool::UpdateIndex(BatchID id) noexcept -> void
 }
 
 Pool::~Pool() { stop(); }
-}  // namespace opentxs::v1::network::zeromq::context
+}  // namespace opentxs::network::zeromq::context

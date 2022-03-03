@@ -12,7 +12,7 @@
 
 #include "opentxs/interface/rpc/CommandType.hpp"
 
-namespace opentxs::v1::rpc::request::implementation
+namespace opentxs::rpc::request::implementation
 {
 struct ListAccounts final : public Base::Imp {
     auto asListAccounts() const noexcept -> const request::ListAccounts& final
@@ -68,9 +68,9 @@ private:
     auto operator=(const ListAccounts&) -> ListAccounts& = delete;
     auto operator=(ListAccounts&&) -> ListAccounts& = delete;
 };
-}  // namespace opentxs::v1::rpc::request::implementation
+}  // namespace opentxs::rpc::request::implementation
 
-namespace opentxs::v1::rpc::request
+namespace opentxs::rpc::request
 {
 ListAccounts::ListAccounts(
     SessionIndex session,
@@ -117,4 +117,4 @@ auto ListAccounts::FilterUnit() const noexcept -> const UnallocatedCString&
 }
 
 ListAccounts::~ListAccounts() = default;
-}  // namespace opentxs::v1::rpc::request
+}  // namespace opentxs::rpc::request

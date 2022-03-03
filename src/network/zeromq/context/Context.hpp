@@ -44,8 +44,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace api
 {
 class Session;
@@ -75,11 +75,11 @@ class ReplyCallback;
 }  // namespace network
 
 class Factory;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::network::zeromq::implementation
+namespace opentxs::network::zeromq::implementation
 {
 class Context final : virtual public internal::Context
 {
@@ -163,4 +163,4 @@ private:
     auto operator=(const Context&) -> Context& = delete;
     auto operator=(Context&&) -> Context& = delete;
 };
-}  // namespace opentxs::v1::network::zeromq::implementation
+}  // namespace opentxs::network::zeromq::implementation

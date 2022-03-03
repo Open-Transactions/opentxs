@@ -10,7 +10,7 @@
 
 #include <cstdint>
 
-namespace opentxs::v1::contract
+namespace opentxs::contract
 {
 enum class Type : std::uint32_t {
     invalid = 0,
@@ -18,4 +18,4 @@ enum class Type : std::uint32_t {
     notary = 2,
     unit = 3,
 };
-}  // namespace opentxs::v1::contract
+}  // namespace opentxs::contract

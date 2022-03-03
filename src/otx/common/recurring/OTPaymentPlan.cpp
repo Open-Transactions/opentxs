@@ -45,7 +45,7 @@
 
 // return -1 if error, 0 if nothing, and 1 if the node was processed.
 
-namespace opentxs::v1
+namespace opentxs
 {
 OTPaymentPlan::OTPaymentPlan(const api::Session& api)
     : ot_super(api)
@@ -1669,4 +1669,4 @@ void OTPaymentPlan::Release()
 }
 
 OTPaymentPlan::~OTPaymentPlan() { Release_PaymentPlan(); }
-}  // namespace opentxs::v1
+}  // namespace opentxs

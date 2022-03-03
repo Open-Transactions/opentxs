@@ -10,7 +10,7 @@
 
 #include "opentxs/util/Bytes.hpp"
 
-namespace opentxs::v1::crypto::sodium
+namespace opentxs::crypto::sodium
 {
 using SiphashKey = std::array<unsigned char, 16>;
 
@@ -26,4 +26,4 @@ auto ToCurveKeypair(
     const ReadView edPublic,
     const AllocateOutput curvePrivate,
     const AllocateOutput curvePublic) noexcept -> bool;
-}  // namespace opentxs::v1::crypto::sodium
+}  // namespace opentxs::crypto::sodium

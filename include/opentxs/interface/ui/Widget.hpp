@@ -11,7 +11,7 @@
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/util/Container.hpp"
 
-namespace opentxs::v1::ui
+namespace opentxs::ui
 {
 class OPENTXS_EXPORT Widget
 {
@@ -31,4 +31,4 @@ private:
     auto operator=(const Widget&) -> Widget& = delete;
     auto operator=(Widget&&) -> Widget& = delete;
 };
-}  // namespace opentxs::v1::ui
+}  // namespace opentxs::ui

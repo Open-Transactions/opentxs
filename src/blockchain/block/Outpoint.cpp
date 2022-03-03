@@ -20,7 +20,7 @@
 
 namespace be = boost::endian;
 
-namespace opentxs::v1::blockchain::block
+namespace opentxs::blockchain::block
 {
 Outpoint::Outpoint() noexcept
     : txid_()
@@ -162,4 +162,4 @@ auto Outpoint::Txid() const noexcept -> ReadView
 {
     return {reinterpret_cast<const char*>(txid_.data()), txid_.size()};
 }
-}  // namespace opentxs::v1::blockchain::block
+}  // namespace opentxs::blockchain::block

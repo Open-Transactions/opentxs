@@ -32,7 +32,7 @@
 #include "util/storage/tree/Thread.hpp"
 #include "util/storage/tree/Threads.hpp"
 
-namespace opentxs::v1::storage
+namespace opentxs::storage
 {
 Nyms::Nyms(
     const Driver& storage,
@@ -327,4 +327,4 @@ void Nyms::UpgradeLocalnym()
 
     save(lock);
 }
-}  // namespace opentxs::v1::storage
+}  // namespace opentxs::storage

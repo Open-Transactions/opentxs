@@ -29,7 +29,7 @@
 #include "serialization/protobuf/BlockchainBlockHeader.pb.h"  // IWYU pragma: keep
 #include "serialization/protobuf/BlockchainBlockLocalData.pb.h"
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto GenesisBlockHeader(
     const api::Session& api,
@@ -64,9 +64,9 @@ auto GenesisBlockHeader(
         }
     }
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory
 
-namespace opentxs::v1::blockchain::block::implementation
+namespace opentxs::blockchain::block::implementation
 {
 Header::Header(
     const api::Session& api,
@@ -241,4 +241,4 @@ auto Header::Work() const noexcept -> OTWork
         return work_ + inherit_work_;
     }
 }
-}  // namespace opentxs::v1::blockchain::block::implementation
+}  // namespace opentxs::blockchain::block::implementation

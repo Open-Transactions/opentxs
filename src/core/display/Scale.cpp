@@ -15,7 +15,7 @@
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/util/Container.hpp"
 
-namespace opentxs::v1::display
+namespace opentxs::display
 {
 Scale::Scale(
     std::string_view prefix,
@@ -110,4 +110,4 @@ Scale::~Scale()
         imp_ = nullptr;
     }
 }
-}  // namespace opentxs::v1::display
+}  // namespace opentxs::display

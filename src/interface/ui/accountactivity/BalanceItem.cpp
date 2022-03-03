@@ -37,7 +37,7 @@
 #include "interface/ui/accountactivity/TransferBalanceItem.hpp"
 #include "interface/ui/base/Widget.hpp"
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto BalanceItem(
     const ui::implementation::AccountActivityInternalInterface& parent,
@@ -103,9 +103,9 @@ auto BalanceItem(
 
     return nullptr;
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory
 
-namespace opentxs::v1::ui::implementation
+namespace opentxs::ui::implementation
 {
 BalanceItem::BalanceItem(
     const AccountActivityInternalInterface& parent,
@@ -249,4 +249,4 @@ auto BalanceItem::Timestamp() const noexcept -> Time
 }
 
 BalanceItem::~BalanceItem() = default;
-}  // namespace opentxs::v1::ui::implementation
+}  // namespace opentxs::ui::implementation

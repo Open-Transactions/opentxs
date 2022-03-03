@@ -10,6 +10,7 @@
 
 #include "internal/blockchain/Blockchain.hpp"
 #include "opentxs/OT.hpp"
+#include "opentxs/Version.hpp"
 #include "opentxs/api/Context.hpp"
 #include "opentxs/blockchain/BlockchainType.hpp"
 #include "opentxs/blockchain/NumericHash.hpp"
@@ -18,7 +19,7 @@
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Pimpl.hpp"
 
-namespace opentxs::v1
+namespace opentxs
 {
 namespace api
 {
@@ -27,7 +28,7 @@ namespace session
 class Client;
 }  // namespace session
 }  // namespace api
-}  // namespace opentxs::v1
+}  // namespace opentxs
 
 namespace be = boost::endian;
 namespace ot = opentxs;

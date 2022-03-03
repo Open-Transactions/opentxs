@@ -25,8 +25,8 @@ namespace ip = boost::asio::ip;
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace api
 {
 namespace network
@@ -37,11 +37,11 @@ class Context;
 }  // namespace asio
 }  // namespace network
 }  // namespace api
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::network::asio
+namespace opentxs::network::asio
 {
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wnon-virtual-dtor"
@@ -94,4 +94,4 @@ private:
     inline auto sp() noexcept { return this->shared_from_this(); }
 };
 #pragma GCC diagnostic pop
-}  // namespace opentxs::v1::network::asio
+}  // namespace opentxs::network::asio

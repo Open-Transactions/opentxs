@@ -12,7 +12,7 @@
 
 #include "opentxs/util/Container.hpp"
 
-namespace opentxs::v1::otx::blind
+namespace opentxs::otx::blind
 {
 class LucreDumper
 {
@@ -32,4 +32,4 @@ private:
 
     std::unique_ptr<Imp> imp_;
 };
-}  // namespace opentxs::v1::otx::blind
+}  // namespace opentxs::otx::blind

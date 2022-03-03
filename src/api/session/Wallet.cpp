@@ -114,7 +114,7 @@
 template class opentxs::Exclusive<opentxs::Account>;
 template class opentxs::Shared<opentxs::Account>;
 
-namespace opentxs::v1::api::session::imp
+namespace opentxs::api::session::imp
 {
 Wallet::Wallet(const api::Session& api)
     : api_(api)
@@ -3421,4 +3421,4 @@ auto Wallet::SaveCredential(const proto::Credential& credential) const -> bool
 }
 
 Wallet::~Wallet() { handle_.Release(); }
-}  // namespace opentxs::v1::api::session::imp
+}  // namespace opentxs::api::session::imp

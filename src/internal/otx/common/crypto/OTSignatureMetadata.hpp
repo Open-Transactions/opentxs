@@ -7,7 +7,7 @@
 
 #include "opentxs/Version.hpp"
 
-namespace opentxs::v1
+namespace opentxs
 {
 namespace api
 {
@@ -67,4 +67,4 @@ private:
     // first letter of a Credential ID (signed by that Master.)
     char metaChildCredID_{0x0};
 };
-}  // namespace opentxs::v1
+}  // namespace opentxs

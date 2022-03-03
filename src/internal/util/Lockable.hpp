@@ -12,7 +12,7 @@
 #include "opentxs/Version.hpp"
 #include "opentxs/util/Log.hpp"
 
-namespace opentxs::v1
+namespace opentxs
 {
 template <typename L, typename M>
 auto CheckLock(const L& lock, const M& mutex) noexcept -> bool
@@ -68,4 +68,4 @@ private:
     auto operator=(const Lockable&) -> Lockable& = delete;
     auto operator=(Lockable&&) -> Lockable& = delete;
 };
-}  // namespace opentxs::v1
+}  // namespace opentxs

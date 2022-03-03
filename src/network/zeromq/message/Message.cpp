@@ -16,13 +16,14 @@
 #include "internal/util/LogMacros.hpp"
 #include "network/zeromq/message/FrameIterator.hpp"
 #include "network/zeromq/message/FrameSection.hpp"
+#include "opentxs/core/Amount.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
 #include "opentxs/network/zeromq/message/FrameIterator.hpp"
 #include "opentxs/network/zeromq/message/FrameSection.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/util/Container.hpp"
 
-namespace opentxs::v1::network::zeromq
+namespace opentxs::network::zeromq
 {
 auto operator<(const Message& lhs, const Message& rhs) noexcept -> bool
 {
@@ -106,9 +107,9 @@ auto tagged_message(const void* tag, const std::size_t tagBytes) noexcept
 
     return output;
 }
-}  // namespace opentxs::v1::network::zeromq
+}  // namespace opentxs::network::zeromq
 
-namespace opentxs::v1::network::zeromq
+namespace opentxs::network::zeromq
 {
 Message::Imp::Imp() noexcept
     : parent_(nullptr)
@@ -125,6 +126,13 @@ Message::Imp::Imp(const Imp& rhs) noexcept
 auto Message::Imp::AddFrame() noexcept -> Frame&
 {
     return frames_.emplace_back();
+}
+
+auto Message::Imp::AddFrame(const Amount& amount) noexcept -> Frame&
+{
+    amount.Serialize(AppendBytes());
+
+    return frames_.back();
 }
 
 auto Message::Imp::AddFrame(Frame&& frame) noexcept -> Frame&
@@ -405,9 +413,9 @@ auto Message::Imp::Total() const noexcept -> std::size_t
         std::size_t{0},
         [](const auto& lhs, const auto& rhs) { return lhs + rhs.size(); });
 }
-}  // namespace opentxs::v1::network::zeromq
+}  // namespace opentxs::network::zeromq
 
-namespace opentxs::v1::network::zeromq
+namespace opentxs::network::zeromq
 {
 Message::Message(Imp* imp) noexcept
     : imp_(imp)
@@ -450,6 +458,11 @@ auto Message::operator=(Message&& rhs) noexcept -> Message&
 }
 
 auto Message::AddFrame() noexcept -> Frame& { return imp_->AddFrame(); }
+
+auto Message::AddFrame(const Amount& in) noexcept -> Frame&
+{
+    return imp_->AddFrame(in);
+}
 
 auto Message::AddFrame(const char* in) noexcept -> Frame&
 {
@@ -569,4 +582,4 @@ Message::~Message()
         imp_ = nullptr;
     }
 }
-}  // namespace opentxs::v1::network::zeromq
+}  // namespace opentxs::network::zeromq

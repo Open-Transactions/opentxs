@@ -16,8 +16,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace network
 {
 namespace p2p
@@ -41,11 +41,11 @@ namespace zeromq
 class Message;
 }  // namespace zeromq
 }  // namespace network
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::network::p2p
+namespace opentxs::network::p2p
 {
 class OPENTXS_EXPORT Base
 {
@@ -82,4 +82,4 @@ private:
     auto operator=(const Base&) -> Base& = delete;
     auto operator=(Base&&) -> Base& = delete;
 };
-}  // namespace opentxs::v1::network::p2p
+}  // namespace opentxs::network::p2p

@@ -20,7 +20,7 @@
 #include "opentxs/util/Log.hpp"
 #include "util/Work.hpp"
 
-namespace opentxs::v1::blockchain::download
+namespace opentxs::blockchain::download
 {
 template <
     typename CRTP,
@@ -465,4 +465,4 @@ private:
     auto operator=(const Manager& rhs) -> Manager& = delete;
     auto operator=(Manager&& rhs) -> Manager& = delete;
 };
-}  // namespace opentxs::v1::blockchain::download
+}  // namespace opentxs::blockchain::download

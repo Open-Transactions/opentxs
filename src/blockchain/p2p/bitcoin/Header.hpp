@@ -28,8 +28,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace api
 {
 class Session;
@@ -42,14 +42,14 @@ namespace zeromq
 class Frame;
 }  // namespace zeromq
 }  // namespace network
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
 namespace ot = opentxs;
 namespace zmq = opentxs::network::zeromq;
 
-namespace opentxs::v1::blockchain::p2p::bitcoin
+namespace opentxs::blockchain::p2p::bitcoin
 {
 class Header final
 {
@@ -115,4 +115,4 @@ private:
     auto operator=(const Header&) -> Header& = delete;
     auto operator=(Header&&) -> Header& = delete;
 };
-}  // namespace opentxs::v1::blockchain::p2p::bitcoin
+}  // namespace opentxs::blockchain::p2p::bitcoin

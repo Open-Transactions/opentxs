@@ -26,7 +26,7 @@
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Pimpl.hpp"
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto BitcoinP2PCfcheckpt(
     const api::Session& api,
@@ -121,9 +121,9 @@ auto BitcoinP2PCfcheckpt(
 
     return new ReturnType(api, network, type, stop, headers);
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory
 
-namespace opentxs::v1::blockchain::p2p::bitcoin::message::implementation
+namespace opentxs::blockchain::p2p::bitcoin::message::implementation
 {
 Cfcheckpt::Cfcheckpt(
     const api::Session& api,
@@ -186,4 +186,4 @@ auto Cfcheckpt::payload(AllocateOutput out) const noexcept -> bool
         return false;
     }
 }
-}  // namespace opentxs::v1::blockchain::p2p::bitcoin::message::implementation
+}  // namespace opentxs::blockchain::p2p::bitcoin::message::implementation

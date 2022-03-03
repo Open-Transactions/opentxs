@@ -23,7 +23,7 @@
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Pimpl.hpp"
 
-namespace opentxs::v1::blockchain::node::wallet
+namespace opentxs::blockchain::node::wallet
 {
 Index::Index(
     SubchainStateData& parent,
@@ -153,4 +153,4 @@ auto Index::Run() noexcept -> bool
 
     return again;
 }
-}  // namespace opentxs::v1::blockchain::node::wallet
+}  // namespace opentxs::blockchain::node::wallet

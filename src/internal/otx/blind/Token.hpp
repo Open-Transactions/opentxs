@@ -11,8 +11,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace identifier
 {
 class Notary;
@@ -43,11 +43,11 @@ class Token;
 }  // namespace proto
 
 class PasswordPrompt;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::otx::blind::internal
+namespace opentxs::otx::blind::internal
 {
 class Token
 {
@@ -78,4 +78,4 @@ public:
 
     virtual ~Token() = default;
 };
-}  // namespace opentxs::v1::otx::blind::internal
+}  // namespace opentxs::otx::blind::internal

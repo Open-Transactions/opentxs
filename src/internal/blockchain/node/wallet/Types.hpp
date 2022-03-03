@@ -10,7 +10,7 @@
 #include "opentxs/util/WorkType.hpp"
 #include "util/Work.hpp"
 
-namespace opentxs::v1::blockchain::node::wallet
+namespace opentxs::blockchain::node::wallet
 {
 // WARNING update print function if new values are added or removed
 enum class WalletJobs : OTZMQWorkType {
@@ -63,4 +63,4 @@ auto print(WalletJobs) noexcept -> std::string_view;
 auto print(AccountsJobs) noexcept -> std::string_view;
 auto print(AccountJobs) noexcept -> std::string_view;
 auto print(SubchainJobs) noexcept -> std::string_view;
-}  // namespace opentxs::v1::blockchain::node::wallet
+}  // namespace opentxs::blockchain::node::wallet

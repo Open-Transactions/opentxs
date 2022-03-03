@@ -9,7 +9,7 @@
 
 #include "internal/otx/smartcontract/OTScript.hpp"
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto OTScriptChai() -> std::shared_ptr<opentxs::OTScript>
 {
@@ -21,4 +21,4 @@ auto OTScriptChai(const UnallocatedCString&)
 {
     return std::make_shared<opentxs::OTScript>();
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory

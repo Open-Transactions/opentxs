@@ -23,7 +23,7 @@ extern "C" {
 #include "opentxs/crypto/library/HashingProvider.hpp"
 #include "opentxs/util/Log.hpp"
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto OpenSSL() noexcept -> std::unique_ptr<crypto::OpenSSL>
 {
@@ -31,9 +31,9 @@ auto OpenSSL() noexcept -> std::unique_ptr<crypto::OpenSSL>
 
     return std::make_unique<ReturnType>();
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory
 
-namespace opentxs::v1::crypto::implementation
+namespace opentxs::crypto::implementation
 {
 OpenSSL::OpenSSL() noexcept {}
 
@@ -389,4 +389,4 @@ auto OpenSSL::RIPEMD160(
 {
     return Digest(crypto::HashType::Ripemd160, input, inputSize, output);
 }
-}  // namespace opentxs::v1::crypto::implementation
+}  // namespace opentxs::crypto::implementation

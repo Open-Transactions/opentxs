@@ -19,7 +19,7 @@
 
 // OTNumList (helper class.)
 
-namespace opentxs::v1
+namespace opentxs
 {
 NumList::NumList()
     : m_setData()
@@ -366,4 +366,4 @@ auto NumList::Count() const -> std::int32_t
 
 void NumList::Release() { m_setData.clear(); }
 
-}  // namespace opentxs::v1
+}  // namespace opentxs

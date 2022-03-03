@@ -11,7 +11,7 @@
 #include "opentxs/Types.hpp"
 #include "opentxs/util/Container.hpp"
 
-namespace opentxs::v1
+namespace opentxs
 {
 /// So maybe you have a member variable that you want to return by const
 /// reference, but also you need to be thread safe and, rarely, this member
@@ -63,4 +63,4 @@ private:
     mutable std::mutex lock_;
     UnallocatedList<Store> versions_;
 };
-}  // namespace opentxs::v1
+}  // namespace opentxs

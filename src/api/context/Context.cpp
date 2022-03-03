@@ -50,7 +50,7 @@
 #include "opentxs/util/PasswordCaller.hpp"
 #include "opentxs/util/Pimpl.hpp"
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto Context(
     Flag& running,
@@ -63,9 +63,9 @@ auto Context(
     return std::make_unique<ReturnType>(
         running, args, externalPasswordCallback);
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory
 
-namespace opentxs::v1::api
+namespace opentxs::api
 {
 auto Context::PrepareSignalHandling() noexcept -> void { Signals::Block(); }
 
@@ -74,9 +74,9 @@ auto Context::SuggestFolder(const UnallocatedCString& app) noexcept
 {
     return Legacy::SuggestFolder(app);
 }
-}  // namespace opentxs::v1::api
+}  // namespace opentxs::api
 
-namespace opentxs::v1::api::imp
+namespace opentxs::api::imp
 {
 Context::Context(
     Flag& running,
@@ -508,4 +508,4 @@ auto Context::ZAP() const noexcept -> const api::network::ZAP&
 }
 
 Context::~Context() { shutdown(); }
-}  // namespace opentxs::v1::api::imp
+}  // namespace opentxs::api::imp

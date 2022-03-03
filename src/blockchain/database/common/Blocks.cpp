@@ -24,7 +24,7 @@
 #include "util/LMDB.hpp"
 #include "util/MappedFileStorage.hpp"
 
-namespace opentxs::v1::blockchain::database::common
+namespace opentxs::blockchain::database::common
 {
 struct Blocks::Imp {
     storage::lmdb::LMDB& lmdb_;
@@ -150,4 +150,4 @@ auto Blocks::Store(const Hash& block, const std::size_t bytes) const noexcept
 }
 
 Blocks::~Blocks() = default;
-}  // namespace opentxs::v1::blockchain::database::common
+}  // namespace opentxs::blockchain::database::common

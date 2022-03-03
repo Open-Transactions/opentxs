@@ -23,7 +23,7 @@
 
 namespace fs = boost::filesystem;
 
-namespace opentxs::v1::util
+namespace opentxs::util
 {
 constexpr auto get_file_count(const std::size_t bytes) noexcept -> std::size_t
 {
@@ -315,4 +315,4 @@ auto MappedFileStorage::get_write_view(
 }
 
 MappedFileStorage::~MappedFileStorage() = default;
-}  // namespace opentxs::v1::util
+}  // namespace opentxs::util

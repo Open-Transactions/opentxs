@@ -18,8 +18,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace api
 {
 namespace crypto
@@ -51,11 +51,11 @@ class Seed;
 
 class PasswordPrompt;
 class Secret;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto Bip32(const api::Crypto& crypto) noexcept -> crypto::Bip32;
 auto Seed(
@@ -96,4 +96,4 @@ auto Seed(
     const api::session::Storage& storage,
     const proto::Seed& proto,
     const opentxs::PasswordPrompt& reason) noexcept(false) -> crypto::Seed;
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory

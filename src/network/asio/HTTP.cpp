@@ -16,7 +16,7 @@
 #include "network/asio/WebRequest.tpp"
 #include "opentxs/util/Time.hpp"  // IWYU pragma: keep
 
-namespace opentxs::v1::network::asio
+namespace opentxs::network::asio
 {
 HTTP::HTTP(
     const std::string_view hostname,
@@ -51,4 +51,4 @@ auto HTTP::Start() noexcept -> void
 }
 
 HTTP::~HTTP() = default;
-}  // namespace opentxs::v1::network::asio
+}  // namespace opentxs::network::asio

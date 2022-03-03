@@ -19,19 +19,19 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace ui
 {
 class BalanceItem;
 }  // namespace ui
 
 using OTUIBalanceItem = SharedPimpl<ui::BalanceItem>;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::ui
+namespace opentxs::ui
 {
 class OPENTXS_EXPORT BalanceItem : virtual public ListRow
 {
@@ -59,4 +59,4 @@ private:
     auto operator=(const BalanceItem&) -> BalanceItem& = delete;
     auto operator=(BalanceItem&&) -> BalanceItem& = delete;
 };
-}  // namespace opentxs::v1::ui
+}  // namespace opentxs::ui

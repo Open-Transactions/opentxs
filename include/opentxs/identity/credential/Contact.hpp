@@ -17,8 +17,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace api
 {
 class Session;
@@ -29,11 +29,11 @@ namespace proto
 class Claim;
 class ContactItem;
 }  // namespace proto
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::identity::credential
+namespace opentxs::identity::credential
 {
 class OPENTXS_EXPORT Contact : virtual public Base
 {
@@ -72,4 +72,4 @@ private:
     auto operator=(const Contact&) -> Contact& = delete;
     auto operator=(Contact&&) -> Contact& = delete;
 };
-}  // namespace opentxs::v1::identity::credential
+}  // namespace opentxs::identity::credential

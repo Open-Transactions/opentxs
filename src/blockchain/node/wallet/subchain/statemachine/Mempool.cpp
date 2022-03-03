@@ -18,7 +18,7 @@
 #include "opentxs/Types.hpp"
 #include "opentxs/blockchain/block/bitcoin/Transaction.hpp"
 
-namespace opentxs::v1::blockchain::node::wallet
+namespace opentxs::blockchain::node::wallet
 {
 Mempool::Mempool(SubchainStateData& parent) noexcept
     : Job(ThreadPool::General, parent)
@@ -84,4 +84,4 @@ auto Mempool::Run() noexcept -> bool
 }
 
 auto Mempool::type() const noexcept -> const char* { return "mempool"; }
-}  // namespace opentxs::v1::blockchain::node::wallet
+}  // namespace opentxs::blockchain::node::wallet

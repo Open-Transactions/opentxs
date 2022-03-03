@@ -16,6 +16,7 @@
 #include "Proto.hpp"
 #include "internal/network/zeromq/Handle.hpp"
 #include "internal/util/Lockable.hpp"
+#include "opentxs/Version.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/network/zeromq/ListenCallback.hpp"
@@ -34,8 +35,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace api
 {
 namespace session
@@ -76,13 +77,13 @@ class Server;
 class OTPassword;
 class PasswordPrompt;
 class Secret;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
 namespace zmq = opentxs::network::zeromq;
 
-namespace opentxs::v1::server
+namespace opentxs::server
 {
 class MessageProcessor final : Lockable
 {
@@ -167,4 +168,4 @@ private:
     auto operator=(const MessageProcessor&) -> MessageProcessor& = delete;
     auto operator=(MessageProcessor&&) -> MessageProcessor& = delete;
 };
-}  // namespace opentxs::v1::server
+}  // namespace opentxs::server

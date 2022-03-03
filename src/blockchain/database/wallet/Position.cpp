@@ -19,7 +19,7 @@
 #include "opentxs/core/Data.hpp"
 #include "opentxs/util/Container.hpp"
 
-namespace opentxs::v1::blockchain::database::wallet::db
+namespace opentxs::blockchain::database::wallet::db
 {
 Position::Position(const block::Position& position) noexcept
     : data_([&] {
@@ -79,4 +79,4 @@ auto Position::Height() const noexcept -> block::Height
 
     return out;
 }
-}  // namespace opentxs::v1::blockchain::database::wallet::db
+}  // namespace opentxs::blockchain::database::wallet::db

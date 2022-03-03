@@ -32,7 +32,7 @@
 #include "interface/qt/SendMonitor.hpp"
 #include "opentxs/util/Log.hpp"
 
-namespace opentxs::v1::ui::implementation
+namespace opentxs::ui::implementation
 {
 auto AccountActivity::DisplayScaleQt() noexcept -> ui::DisplayScaleQt&
 {
@@ -168,17 +168,17 @@ auto UnitListItem::qt_data(const int, const int, QVariant&) const noexcept
     -> void
 {
 }
-}  // namespace opentxs::v1::ui::implementation
+}  // namespace opentxs::ui::implementation
 
-namespace opentxs::v1::ui::internal
+namespace opentxs::ui::internal
 {
 auto List::MakeQT(const api::Session&) noexcept -> ui::qt::internal::Model*
 {
     return nullptr;
 }
-}  // namespace opentxs::v1::ui::internal
+}  // namespace opentxs::ui::internal
 
-namespace opentxs::v1::ui::qt::internal
+namespace opentxs::ui::qt::internal
 {
 auto Model::ChangeRow(ui::internal::Row*, ui::internal::Row*) noexcept -> void
 {
@@ -201,4 +201,4 @@ auto Model::MoveRow(
 }
 
 Model::~Model() = default;
-}  // namespace opentxs::v1::ui::qt::internal
+}  // namespace opentxs::ui::qt::internal

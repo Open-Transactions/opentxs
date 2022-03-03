@@ -7,7 +7,7 @@
 #include "1_Internal.hpp"         // IWYU pragma: associated
 #include "core/StateMachine.hpp"  // IWYU pragma: associated
 
-namespace opentxs::v1::internal
+namespace opentxs::internal
 {
 StateMachine::StateMachine(const Callback callback) noexcept
     : decision_lock_()
@@ -101,4 +101,4 @@ auto StateMachine::Wait() const noexcept -> StateMachine::WaitFuture
 
     return waiting_future_;
 }
-}  // namespace opentxs::v1::internal
+}  // namespace opentxs::internal

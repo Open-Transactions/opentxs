@@ -16,8 +16,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace api
 {
 class Factory;
@@ -32,11 +32,11 @@ class Secp256k1;
 class Sodium;
 class SymmetricProvider;
 }  // namespace crypto
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::api::internal
+namespace opentxs::api::internal
 {
 class Crypto : virtual public api::Crypto
 {
@@ -68,4 +68,4 @@ public:
 
     ~Crypto() override = default;
 };
-}  // namespace opentxs::v1::api::internal
+}  // namespace opentxs::api::internal

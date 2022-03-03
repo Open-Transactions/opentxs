@@ -31,8 +31,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace api
 {
 class Session;
@@ -77,7 +77,7 @@ class LMDB;
 }  // namespace storage
 
 class Identifier;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -85,7 +85,7 @@ extern "C" {
 typedef struct MDB_txn MDB_txn;
 }
 
-namespace opentxs::v1::blockchain::database::wallet
+namespace opentxs::blockchain::database::wallet
 {
 using AccountID = Identifier;
 using SubchainID = Identifier;
@@ -172,4 +172,4 @@ private:
     auto operator=(const Output&) -> Output& = delete;
     auto operator=(Output&&) -> Output& = delete;
 };
-}  // namespace opentxs::v1::blockchain::database::wallet
+}  // namespace opentxs::blockchain::database::wallet

@@ -31,7 +31,7 @@
 #include "serialization/protobuf/BlockchainAccountData.pb.h"
 #include "serialization/protobuf/BlockchainActivity.pb.h"
 
-namespace opentxs::v1::blockchain::crypto::implementation
+namespace opentxs::blockchain::crypto::implementation
 {
 Subaccount::Subaccount(
     const api::Session& api,
@@ -382,4 +382,4 @@ auto Subaccount::UpdateElement(
 {
     parent_.Parent().Parent().Internal().UpdateElement(pubkeyHashes);
 }
-}  // namespace opentxs::v1::blockchain::crypto::implementation
+}  // namespace opentxs::blockchain::crypto::implementation

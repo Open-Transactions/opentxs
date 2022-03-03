@@ -10,7 +10,7 @@
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Pimpl.hpp"
 
-namespace opentxs::v1
+namespace opentxs
 {
 namespace blockchain
 {
@@ -40,9 +40,9 @@ OPENTXS_EXPORT auto operator>=(
 OPENTXS_EXPORT auto operator+(
     const OTWork& lhs,
     const blockchain::Work& rhs) noexcept -> OTWork;
-}  // namespace opentxs::v1
+}  // namespace opentxs
 
-namespace opentxs::v1::blockchain
+namespace opentxs::blockchain
 {
 class OPENTXS_EXPORT Work
 {
@@ -80,4 +80,4 @@ private:
     auto operator=(const Work& rhs) -> Work& = delete;
     auto operator=(Work&& rhs) -> Work& = delete;
 };
-}  // namespace opentxs::v1::blockchain
+}  // namespace opentxs::blockchain

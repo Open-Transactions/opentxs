@@ -21,8 +21,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace identity
 {
 class Nym;
@@ -31,11 +31,11 @@ class Nym;
 class Identifier;
 class Message;
 class String;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1
+namespace opentxs
 {
 using CredentialIndexModeFlag = bool;
 static const CredentialIndexModeFlag CREDENTIAL_INDEX_MODE_ONLY_IDS = true;
@@ -235,4 +235,4 @@ enum class PaymentType : int {
     Transfer = 3,
     Blinded = 4,
 };
-}  // namespace opentxs::v1
+}  // namespace opentxs

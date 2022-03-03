@@ -12,7 +12,7 @@
 #include "interface/rpc/response/Base.hpp"
 #include "opentxs/interface/rpc/ResponseCode.hpp"
 
-namespace opentxs::v1::rpc::response
+namespace opentxs::rpc::response
 {
 Invalid::Invalid(const request::Base& request) noexcept
     : Base(std::make_unique<Imp>(
@@ -23,4 +23,4 @@ Invalid::Invalid(const request::Base& request) noexcept
 }
 
 Invalid::~Invalid() = default;
-}  // namespace opentxs::v1::rpc::response
+}  // namespace opentxs::rpc::response

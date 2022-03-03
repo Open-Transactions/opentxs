@@ -10,17 +10,17 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-namespace v1
-{
+// inline namespace v1
+// {
 namespace proto
 {
 class UnitDefinition;
 }  // namespace proto
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::proto
+namespace opentxs::proto
 {
 auto CheckProto_1(
     const UnitDefinition& contract,
@@ -86,4 +86,4 @@ auto CheckProto_20(
     const UnitDefinition&,
     const bool,
     const bool checkSig = true) -> bool;
-}  // namespace opentxs::v1::proto
+}  // namespace opentxs::proto

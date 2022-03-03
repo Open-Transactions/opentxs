@@ -15,19 +15,17 @@
 #include "opentxs/Version.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
-#if OT_BLOCKCHAIN
+#include "opentxs/interface/ui/UnitList.hpp"
 #include "opentxs/network/zeromq/ListenCallback.hpp"
 #include "opentxs/network/zeromq/socket/Dealer.hpp"
-#endif  // OT_BLOCKCHAIN
-#include "opentxs/interface/ui/UnitList.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/SharedPimpl.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace api
 {
 namespace session
@@ -55,11 +53,11 @@ class Message;
 }  // namespace network
 
 class Identifier;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::ui::implementation
+namespace opentxs::ui::implementation
 {
 using UnitListList = List<
     UnitListExternalInterface,
@@ -82,10 +80,8 @@ public:
     ~UnitList() final;
 
 private:
-#if OT_BLOCKCHAIN
     OTZMQListenCallback blockchain_balance_cb_;
     OTZMQDealerSocket blockchain_balance_;
-#endif  // OT_BLOCKCHAIN
     const ListenerDefinitions listeners_;
 
     auto construct_row(
@@ -95,14 +91,10 @@ private:
 
     auto process_account(const Message& message) noexcept -> void;
     auto process_account(const Identifier& id) noexcept -> void;
-#if OT_BLOCKCHAIN
     auto process_blockchain_balance(const Message& message) noexcept -> void;
-#endif  // OT_BLOCKCHAIN
     auto process_unit(const UnitListRowID& id) noexcept -> void;
-#if OT_BLOCKCHAIN
     auto setup_listeners(const ListenerDefinitions& definitions) noexcept
         -> void final;
-#endif  // OT_BLOCKCHAIN
     auto startup() noexcept -> void;
 
     UnitList() = delete;
@@ -111,4 +103,4 @@ private:
     auto operator=(const UnitList&) -> UnitList& = delete;
     auto operator=(UnitList&&) -> UnitList& = delete;
 };
-}  // namespace opentxs::v1::ui::implementation
+}  // namespace opentxs::ui::implementation

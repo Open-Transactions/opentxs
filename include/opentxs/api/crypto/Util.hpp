@@ -12,8 +12,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace api
 {
 namespace crypto
@@ -24,11 +24,11 @@ class Util;
 }  // namespace internal
 }  // namespace crypto
 }  // namespace api
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::api::crypto
+namespace opentxs::api::crypto
 {
 class Util
 {
@@ -52,4 +52,4 @@ private:
     auto operator=(const Util&) -> Util& = delete;
     auto operator=(Util&&) -> Util& = delete;
 };
-}  // namespace opentxs::v1::api::crypto
+}  // namespace opentxs::api::crypto

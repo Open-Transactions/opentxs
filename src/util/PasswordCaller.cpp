@@ -10,7 +10,7 @@
 #include "opentxs/util/PasswordCallback.hpp"
 #include "opentxs/util/PasswordPrompt.hpp"
 
-namespace opentxs::v1
+namespace opentxs
 {
 PasswordCaller::PasswordCaller()
     : callback_(nullptr)
@@ -48,4 +48,4 @@ void PasswordCaller::SetCallback(PasswordCallback* callback)
 }
 
 PasswordCaller::~PasswordCaller() { callback_ = nullptr; }
-}  // namespace opentxs::v1
+}  // namespace opentxs

@@ -14,7 +14,7 @@
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 
-namespace opentxs::v1
+namespace opentxs
 {
 OTSignatureMetadata::OTSignatureMetadata(const api::Session& api)
     : api_(api)
@@ -98,4 +98,4 @@ auto OTSignatureMetadata::operator==(const OTSignatureMetadata& rhs) const
         (FirstCharMasterCredID() == rhs.FirstCharMasterCredID()) &&
         (FirstCharChildCredID() == rhs.FirstCharChildCredID()));
 }
-}  // namespace opentxs::v1
+}  // namespace opentxs

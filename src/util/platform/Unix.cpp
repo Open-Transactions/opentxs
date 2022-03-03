@@ -22,7 +22,7 @@ extern "C" {
 
 #include "opentxs/util/Log.hpp"
 
-namespace opentxs::v1
+namespace opentxs
 {
 auto SetThisThreadsPriority(ThreadPriority priority) noexcept -> void
 {
@@ -48,9 +48,9 @@ auto SetThisThreadsPriority(ThreadPriority priority) noexcept -> void
             .Flush();
     }
 }
-}  // namespace opentxs::v1
+}  // namespace opentxs
 
-namespace opentxs::v1::api::imp
+namespace opentxs::api::imp
 {
 auto Context::set_desired_files(::rlimit& out) noexcept -> void
 {
@@ -61,9 +61,9 @@ auto Context::set_desired_files(::rlimit& out) noexcept -> void
 auto Legacy::get_suffix() noexcept -> fs::path { return get_suffix("ot"); }
 
 auto Legacy::prepend() noexcept -> UnallocatedCString { return {}; }
-}  // namespace opentxs::v1::api::imp
+}  // namespace opentxs::api::imp
 
-namespace opentxs::v1::network::zeromq::implementation
+namespace opentxs::network::zeromq::implementation
 {
 auto Context::max_sockets() noexcept -> int { return 16384; }
-}  // namespace opentxs::v1::network::zeromq::implementation
+}  // namespace opentxs::network::zeromq::implementation

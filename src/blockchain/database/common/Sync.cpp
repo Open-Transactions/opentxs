@@ -46,7 +46,7 @@ extern "C" {
 #include "util/LMDB.hpp"
 #include "util/MappedFileStorage.hpp"
 
-namespace opentxs::v1::blockchain::database::common
+namespace opentxs::blockchain::database::common
 {
 struct Sync::Imp final : private util::MappedFileStorage {
     auto Load(const Chain chain, const Height height, Message& output)
@@ -456,4 +456,4 @@ auto Sync::Tip(const Chain chain) const noexcept -> Height
 }
 
 Sync::~Sync() = default;
-}  // namespace opentxs::v1::blockchain::database::common
+}  // namespace opentxs::blockchain::database::common

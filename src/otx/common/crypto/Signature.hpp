@@ -12,17 +12,17 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace api
 {
 class Session;
 }  // namespace api
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::implementation
+namespace opentxs::implementation
 {
 class Signature final : virtual public opentxs::Signature, public Armored
 {
@@ -42,4 +42,4 @@ private:
 
     OTSignatureMetadata metadata_;
 };
-}  // namespace opentxs::v1::implementation
+}  // namespace opentxs::implementation

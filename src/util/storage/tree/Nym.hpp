@@ -30,8 +30,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace identity
 {
 class Nym;
@@ -60,11 +60,11 @@ class Threads;
 
 class Data;
 class Identifier;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::storage
+namespace opentxs::storage
 {
 class Nym final : public Node
 {
@@ -255,4 +255,4 @@ private:
     auto operator=(const identity::Nym&) -> Nym = delete;
     auto operator=(Nym&&) -> Nym = delete;
 };
-}  // namespace opentxs::v1::storage
+}  // namespace opentxs::storage

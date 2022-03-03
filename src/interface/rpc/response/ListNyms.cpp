@@ -13,7 +13,7 @@
 
 #include "opentxs/interface/rpc/request/ListNyms.hpp"
 
-namespace opentxs::v1::rpc::response::implementation
+namespace opentxs::rpc::response::implementation
 {
 struct ListNyms final : public Base::Imp {
     auto asListNyms() const noexcept -> const response::ListNyms& final
@@ -55,9 +55,9 @@ private:
     auto operator=(const ListNyms&) -> ListNyms& = delete;
     auto operator=(ListNyms&&) -> ListNyms& = delete;
 };
-}  // namespace opentxs::v1::rpc::response::implementation
+}  // namespace opentxs::rpc::response::implementation
 
-namespace opentxs::v1::rpc::response
+namespace opentxs::rpc::response
 {
 ListNyms::ListNyms(
     const request::ListNyms& request,
@@ -87,4 +87,4 @@ auto ListNyms::NymIDs() const noexcept -> const Identifiers&
 }
 
 ListNyms::~ListNyms() = default;
-}  // namespace opentxs::v1::rpc::response
+}  // namespace opentxs::rpc::response

@@ -32,8 +32,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace crypto
 {
 namespace key
@@ -50,7 +50,7 @@ class Parameters;
 }  // namespace crypto
 
 class Secret;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -63,7 +63,7 @@ struct hash<opentxs::crypto::Parameters> {
 };
 }  // namespace std
 
-namespace opentxs::v1::crypto
+namespace opentxs::crypto
 {
 class OPENTXS_EXPORT Parameters
 {
@@ -143,4 +143,4 @@ private:
 auto swap(Parameters& lhs, Parameters& rhs) noexcept -> void;
 auto operator<(const Parameters& lhs, const Parameters& rhs) noexcept -> bool;
 auto operator==(const Parameters& lhs, const Parameters& rhs) noexcept -> bool;
-}  // namespace opentxs::v1::crypto
+}  // namespace opentxs::crypto

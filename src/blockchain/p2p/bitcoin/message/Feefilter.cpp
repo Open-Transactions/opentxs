@@ -24,7 +24,7 @@
 
 using FeeRateField = be::little_uint64_buf_t;
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto BitcoinP2PFeefilter(
     const api::Session& api,
@@ -81,9 +81,9 @@ auto BitcoinP2PFeefilter(
 
     return new ReturnType(api, network, fee_rate);
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory
 
-namespace opentxs::v1::blockchain::p2p::bitcoin::message
+namespace opentxs::blockchain::p2p::bitcoin::message
 {
 Feefilter::Feefilter(
     const api::Session& api,
@@ -129,4 +129,4 @@ auto Feefilter::payload(AllocateOutput out) const noexcept -> bool
         return false;
     }
 }
-}  // namespace opentxs::v1::blockchain::p2p::bitcoin::message
+}  // namespace opentxs::blockchain::p2p::bitcoin::message

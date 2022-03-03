@@ -16,7 +16,6 @@
 #include "opentxs/Types.hpp"
 #include "opentxs/api/network/Network.hpp"
 #include "opentxs/api/session/Session.hpp"
-#include "opentxs/core/Data.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/network/zeromq/ListenCallback.hpp"
 #include "opentxs/network/zeromq/socket/Subscribe.hpp"

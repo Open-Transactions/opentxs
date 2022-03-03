@@ -29,8 +29,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace api
 {
 class Session;
@@ -64,11 +64,11 @@ class Signature;
 }  // namespace proto
 
 class PasswordPrompt;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::implementation
+namespace opentxs::implementation
 {
 class PaymentCode final : public opentxs::PaymentCode::Imp
 {
@@ -266,4 +266,4 @@ private:
     auto operator=(const PaymentCode&) -> PaymentCode&;
     auto operator=(PaymentCode&&) -> PaymentCode&;
 };
-}  // namespace opentxs::v1::implementation
+}  // namespace opentxs::implementation

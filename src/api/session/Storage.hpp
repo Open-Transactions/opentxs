@@ -45,8 +45,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace api
 {
 namespace network
@@ -113,11 +113,11 @@ class Root;
 
 class Data;
 class String;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::api::session::imp
+namespace opentxs::api::session::imp
 {
 // Content-aware storage module for opentxs
 //
@@ -547,4 +547,4 @@ private:
     auto operator=(const Storage&) -> Storage& = delete;
     auto operator=(Storage&&) -> Storage& = delete;
 };
-}  // namespace opentxs::v1::api::session::imp
+}  // namespace opentxs::api::session::imp

@@ -9,7 +9,7 @@
 #include "opentxs/crypto/library/EcdsaProvider.hpp"
 #include "opentxs/crypto/library/SymmetricProvider.hpp"
 
-namespace opentxs::v1::crypto::blank
+namespace opentxs::crypto::blank
 {
 class AsymmetricProvider : virtual public crypto::AsymmetricProvider
 {
@@ -212,4 +212,4 @@ private:
     auto operator=(const SymmetricProvider&) -> SymmetricProvider& = delete;
     auto operator=(SymmetricProvider&&) -> SymmetricProvider& = delete;
 };
-}  // namespace opentxs::v1::crypto::blank
+}  // namespace opentxs::crypto::blank

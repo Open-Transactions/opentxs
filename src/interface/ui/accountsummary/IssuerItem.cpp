@@ -36,7 +36,7 @@
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Pimpl.hpp"
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto IssuerItem(
     const ui::implementation::AccountSummaryInternalInterface& parent,
@@ -52,9 +52,9 @@ auto IssuerItem(
     return std::make_shared<ReturnType>(
         parent, api, rowID, sortKey, custom, currency);
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory
 
-namespace opentxs::v1::ui::implementation
+namespace opentxs::ui::implementation
 {
 IssuerItem::IssuerItem(
     const AccountSummaryInternalInterface& parent,
@@ -183,4 +183,4 @@ IssuerItem::~IssuerItem()
 {
     for (auto& it : listeners_) { delete it.second; }
 }
-}  // namespace opentxs::v1::ui::implementation
+}  // namespace opentxs::ui::implementation

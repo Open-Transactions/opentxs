@@ -28,7 +28,7 @@
 
 template class opentxs::Pimpl<opentxs::network::zeromq::socket::Request>;
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto RequestSocket(const network::zeromq::Context& context)
     -> std::unique_ptr<network::zeromq::socket::Request>
@@ -37,9 +37,9 @@ auto RequestSocket(const network::zeromq::Context& context)
 
     return std::make_unique<ReturnType>(context);
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory
 
-namespace opentxs::v1::network::zeromq::socket::implementation
+namespace opentxs::network::zeromq::socket::implementation
 {
 Request::Request(const zeromq::Context& context) noexcept
     : Socket(context, socket::Type::Request, Direction::Connect)
@@ -132,4 +132,4 @@ auto Request::wait(const Lock& lock) const noexcept -> bool
 }
 
 Request::~Request() SHUTDOWN_SOCKET
-}  // namespace opentxs::v1::network::zeromq::socket::implementation
+}  // namespace opentxs::network::zeromq::socket::implementation

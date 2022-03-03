@@ -12,7 +12,7 @@
 #include "internal/api/Factory.hpp"
 #include "internal/core/Core.hpp"
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto FactoryAPI(const api::Crypto& crypto) noexcept
     -> std::unique_ptr<api::Factory>
@@ -21,9 +21,9 @@ auto FactoryAPI(const api::Crypto& crypto) noexcept
 
     return std::make_unique<ReturnType>(crypto);
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory
 
-namespace opentxs::v1::api::imp
+namespace opentxs::api::imp
 {
 Factory::Factory(const api::Crypto& crypto) noexcept
     : crypto_(crypto)
@@ -46,4 +46,4 @@ auto Factory::SecretFromText(const std::string_view text) const noexcept
 {
     return OTSecret{factory::Secret(text, false).release()};
 }
-}  // namespace opentxs::v1::api::imp
+}  // namespace opentxs::api::imp

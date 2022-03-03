@@ -10,7 +10,7 @@
 
 #include <limits>
 
-namespace opentxs::v1::blockchain::node
+namespace opentxs::blockchain::node
 {
 enum class TxoState : std::uint16_t {
     Error = 0,
@@ -23,4 +23,4 @@ enum class TxoState : std::uint16_t {
     Immature = 7,
     All = std::numeric_limits<std::uint16_t>::max(),
 };
-}  // namespace opentxs::v1::blockchain::node
+}  // namespace opentxs::blockchain::node

@@ -30,7 +30,7 @@
 #include "opentxs/util/Log.hpp"
 #include "serialization/protobuf/Identifier.pb.h"
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto BlockchainSyncPublishContract() noexcept -> network::p2p::PublishContract
 {
@@ -130,9 +130,9 @@ auto BlockchainSyncPublishContract_p(
     return std::make_unique<ReturnType>(
         std::make_unique<ReturnType::Imp>(api, type, id, payload).release());
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory
 
-namespace opentxs::v1::network::p2p
+namespace opentxs::network::p2p
 {
 class PublishContract::Imp final : public Base::Imp
 {
@@ -254,4 +254,4 @@ PublishContract::~PublishContract()
         Base::imp_ = nullptr;
     }
 }
-}  // namespace opentxs::v1::network::p2p
+}  // namespace opentxs::network::p2p

@@ -10,11 +10,11 @@
 
 #include <cstdint>
 
-namespace opentxs::v1
+namespace opentxs
 {
 enum class AccountType : std::int8_t {
     Error = 0,
     Blockchain = 1,
     Custodial = 2,
 };
-}  // namespace opentxs::v1
+}  // namespace opentxs

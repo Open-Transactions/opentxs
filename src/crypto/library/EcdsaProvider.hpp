@@ -12,8 +12,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace api
 {
 class Crypto;
@@ -28,11 +28,11 @@ class Asymmetric;
 }  // namespace crypto
 
 class PasswordPrompt;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::crypto::implementation
+namespace opentxs::crypto::implementation
 {
 class EcdsaProvider : virtual public crypto::EcdsaProvider
 {
@@ -60,4 +60,4 @@ private:
     auto operator=(const EcdsaProvider&) -> EcdsaProvider& = delete;
     auto operator=(EcdsaProvider&&) -> EcdsaProvider& = delete;
 };
-}  // namespace opentxs::v1::crypto::implementation
+}  // namespace opentxs::crypto::implementation

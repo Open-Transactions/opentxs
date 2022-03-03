@@ -15,19 +15,19 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace blockchain
 {
 class NumericHash;
 }  // namespace blockchain
 
 using OTNumericHash = Pimpl<blockchain::NumericHash>;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1
+namespace opentxs
 {
 OPENTXS_EXPORT auto operator==(
     const OTNumericHash& lhs,
@@ -41,9 +41,9 @@ OPENTXS_EXPORT auto operator<(
 OPENTXS_EXPORT auto operator<=(
     const OTNumericHash& lhs,
     const blockchain::NumericHash& rhs) noexcept -> bool;
-}  // namespace opentxs::v1
+}  // namespace opentxs
 
-namespace opentxs::v1::blockchain
+namespace opentxs::blockchain
 {
 class OPENTXS_EXPORT NumericHash
 {
@@ -78,4 +78,4 @@ private:
     auto operator=(const NumericHash& rhs) -> NumericHash& = delete;
     auto operator=(NumericHash&& rhs) -> NumericHash& = delete;
 };
-}  // namespace opentxs::v1::blockchain
+}  // namespace opentxs::blockchain

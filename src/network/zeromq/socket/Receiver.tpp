@@ -24,7 +24,7 @@
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Time.hpp"
 
-namespace opentxs::v1::network::zeromq::socket::implementation
+namespace opentxs::network::zeromq::socket::implementation
 {
 template <typename InterfaceType, typename MessageType>
 Receiver<InterfaceType, MessageType>::Receiver(
@@ -192,4 +192,4 @@ Receiver<InterfaceType, MessageType>::~Receiver()
 {
     if (receiver_thread_.joinable()) { receiver_thread_.join(); }
 }
-}  // namespace opentxs::v1::network::zeromq::socket::implementation
+}  // namespace opentxs::network::zeromq::socket::implementation

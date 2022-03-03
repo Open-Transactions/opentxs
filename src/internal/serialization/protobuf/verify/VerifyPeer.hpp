@@ -8,7 +8,7 @@
 #include "internal/serialization/protobuf/Basic.hpp"
 #include "opentxs/Version.hpp"
 
-namespace opentxs::v1::proto
+namespace opentxs::proto
 {
 auto PeerObjectAllowedNym() noexcept -> const VersionMap&;
 auto PeerObjectAllowedPeerReply() noexcept -> const VersionMap&;
@@ -27,4 +27,4 @@ auto PeerRequestAllowedPendingBailment() noexcept -> const VersionMap&;
 auto PeerRequestAllowedSignature() noexcept -> const VersionMap&;
 auto PeerRequestAllowedStoreSecret() noexcept -> const VersionMap&;
 auto PeerRequestAllowedVerificationOffer() noexcept -> const VersionMap&;
-}  // namespace opentxs::v1::proto
+}  // namespace opentxs::proto

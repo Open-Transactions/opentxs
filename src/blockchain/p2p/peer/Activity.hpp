@@ -22,8 +22,8 @@ class error_code;
 
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace api
 {
 class Session;
@@ -36,11 +36,11 @@ namespace zeromq
 class Pipeline;
 }  // namespace zeromq
 }  // namespace network
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::blockchain::p2p::peer
+namespace opentxs::blockchain::p2p::peer
 {
 class Activity
 {
@@ -66,4 +66,4 @@ private:
     auto reset_disconnect() noexcept -> void;
     auto reset_ping() noexcept -> void;
 };
-}  // namespace opentxs::v1::blockchain::p2p::peer
+}  // namespace opentxs::blockchain::p2p::peer

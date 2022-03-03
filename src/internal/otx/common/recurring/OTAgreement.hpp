@@ -27,8 +27,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace api
 {
 class Session;
@@ -56,11 +56,11 @@ class Server;
 
 class NumList;
 class PasswordPrompt;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1
+namespace opentxs
 {
 // An Agreement occurs between TWO PEOPLE, and is for a CONSIDERATION.
 // Thus, we add the RECIPIENT (already have SENDER from OTTrackable.)
@@ -486,4 +486,4 @@ protected:
 
     OTAgreement() = delete;
 };
-}  // namespace opentxs::v1
+}  // namespace opentxs

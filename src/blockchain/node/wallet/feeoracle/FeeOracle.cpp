@@ -38,7 +38,7 @@
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/util/Log.hpp"
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto FeeOracle(
     const api::Session& api,
@@ -58,9 +58,9 @@ auto FeeOracle(
         std::move(alloc),
         network::zeromq::MakeArbitraryInproc(resource)};
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory
 
-namespace opentxs::v1::blockchain::node::wallet
+namespace opentxs::blockchain::node::wallet
 {
 FeeOracle::Imp::Imp(
     const api::Session& api,
@@ -211,9 +211,9 @@ auto FeeOracle::Imp::shutdown(std::promise<void>& promise) noexcept -> void
 }
 
 FeeOracle::Imp::~Imp() { signal_shutdown().get(); }
-}  // namespace opentxs::v1::blockchain::node::wallet
+}  // namespace opentxs::blockchain::node::wallet
 
-namespace opentxs::v1::blockchain::node::wallet
+namespace opentxs::blockchain::node::wallet
 {
 FeeOracle::FeeOracle(Imp* imp) noexcept
     : imp_(imp)
@@ -243,4 +243,4 @@ FeeOracle::~FeeOracle()
         imp_ = nullptr;
     }
 }
-}  // namespace opentxs::v1::blockchain::node::wallet
+}  // namespace opentxs::blockchain::node::wallet

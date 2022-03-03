@@ -10,7 +10,7 @@
 #include "opentxs/interface/ui/Widget.hpp"
 #include "opentxs/util/Container.hpp"
 
-namespace opentxs::v1::ui
+namespace opentxs::ui
 {
 class OPENTXS_EXPORT ListRow : virtual public Widget
 {
@@ -29,4 +29,4 @@ private:
     auto operator=(const ListRow&) -> ListRow& = delete;
     auto operator=(ListRow&&) -> ListRow& = delete;
 };
-}  // namespace opentxs::v1::ui
+}  // namespace opentxs::ui

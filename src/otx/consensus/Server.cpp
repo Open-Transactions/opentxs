@@ -130,7 +130,7 @@
         return {};                                                             \
     }
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto ServerContext(
     const api::session::Client& api,
@@ -161,9 +161,9 @@ auto ServerContext(
     return new ReturnType(
         api, requestSent, replyReceived, serialized, local, remote, connection);
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory
 
-namespace opentxs::v1::otx::context::implementation
+namespace opentxs::otx::context::implementation
 {
 const UnallocatedSet<MessageType> Server::do_not_need_request_number_{
     MessageType::pingNotary,
@@ -7855,4 +7855,4 @@ Server::~Server()
             proto::DELIVERTYSTATE_IDLE);
     }
 }
-}  // namespace opentxs::v1::otx::context::implementation
+}  // namespace opentxs::otx::context::implementation

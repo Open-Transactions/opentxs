@@ -16,7 +16,7 @@
 #include "internal/interface/ui/UI.hpp"
 #include "opentxs/util/Container.hpp"
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto BlockchainStatisticsQtModel(
     ui::internal::BlockchainStatistics& parent) noexcept
@@ -26,9 +26,9 @@ auto BlockchainStatisticsQtModel(
 
     return std::make_unique<ReturnType>(parent);
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory
 
-namespace opentxs::v1::ui
+namespace opentxs::ui
 {
 struct BlockchainStatisticsQt::Imp {
     internal::BlockchainStatistics& parent_;
@@ -100,9 +100,9 @@ BlockchainStatisticsQt::~BlockchainStatisticsQt()
         imp_ = nullptr;
     }
 }
-}  // namespace opentxs::v1::ui
+}  // namespace opentxs::ui
 
-namespace opentxs::v1::ui::implementation
+namespace opentxs::ui::implementation
 {
 auto BlockchainStatisticsItem::qt_data(
     const int column,
@@ -179,4 +179,4 @@ auto BlockchainStatisticsItem::qt_data(
         }
     }
 }
-}  // namespace opentxs::v1::ui::implementation
+}  // namespace opentxs::ui::implementation

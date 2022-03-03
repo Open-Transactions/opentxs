@@ -11,7 +11,7 @@
 
 #include "opentxs/network/zeromq/message/Message.hpp"
 
-namespace opentxs::v1::network::zeromq
+namespace opentxs::network::zeromq
 {
 template <
     typename Tag,
@@ -37,4 +37,4 @@ auto tagged_reply_to_message(const Message& request, const Tag& tag) noexcept
 {
     return reply_to_message(request, &tag, sizeof(tag));
 }
-}  // namespace opentxs::v1::network::zeromq
+}  // namespace opentxs::network::zeromq

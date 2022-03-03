@@ -34,7 +34,7 @@
 // Also allows for x == 1.
 //
 
-namespace opentxs::v1
+namespace opentxs
 {
 OTOffer::OTOffer(const api::Session& api)
     : Instrument(api)
@@ -521,4 +521,4 @@ void OTOffer::InitOffer()
 }
 
 OTOffer::~OTOffer() { Release_Offer(); }
-}  // namespace opentxs::v1
+}  // namespace opentxs

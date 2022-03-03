@@ -44,7 +44,6 @@
 #include "opentxs/api/session/Wallet.hpp"
 #include "opentxs/api/session/Workflow.hpp"
 #include "opentxs/core/Contact.hpp"
-#include "opentxs/core/Data.hpp"
 #include "opentxs/core/String.hpp"
 #include "opentxs/core/contract/ServerContract.hpp"
 #include "opentxs/core/contract/peer/BailmentNotice.hpp"
@@ -147,7 +146,7 @@
 
 namespace zmq = opentxs::network::zeromq;
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto OTX(
     const Flag& running,
@@ -159,9 +158,9 @@ auto OTX(
 
     return std::make_unique<ReturnType>(running, client, lockCallback);
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory
 
-namespace opentxs::v1::api::session::imp
+namespace opentxs::api::session::imp
 {
 OTX::OTX(
     const Flag& running,
@@ -2480,4 +2479,4 @@ OTX::~OTX()
         }
     }
 }
-}  // namespace opentxs::v1::api::session::imp
+}  // namespace opentxs::api::session::imp

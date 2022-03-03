@@ -9,7 +9,7 @@
 
 #include "opentxs/core/identifier/Generic.hpp"
 
-namespace opentxs::v1
+namespace opentxs
 {
 BasketItem::BasketItem()
     : SUB_CONTRACT_ID(Identifier::Factory())
@@ -18,4 +18,4 @@ BasketItem::BasketItem()
     , lClosingTransactionNo(0)
 {
 }
-}  // namespace opentxs::v1
+}  // namespace opentxs

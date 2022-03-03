@@ -27,7 +27,7 @@
 #include "serialization/protobuf/Verification.pb.h"
 #include "serialization/protobuf/VerificationIdentity.pb.h"
 
-namespace opentxs::v1
+namespace opentxs
 {
 auto Factory::VerificationNym(
     identity::wot::verification::internal::Group& parent,
@@ -68,14 +68,14 @@ auto Factory::VerificationNym(
         return nullptr;
     }
 }
-}  // namespace opentxs::v1
+}  // namespace opentxs
 
-namespace opentxs::v1::identity::wot::verification
+namespace opentxs::identity::wot::verification
 {
 const VersionNumber Nym::DefaultVersion{1};
 }
 
-namespace opentxs::v1::identity::wot::verification::implementation
+namespace opentxs::identity::wot::verification::implementation
 {
 Nym::Nym(
     internal::Group& parent,
@@ -299,4 +299,4 @@ auto Nym::UpgradeItemVersion(
         return false;
     }
 }
-}  // namespace opentxs::v1::identity::wot::verification::implementation
+}  // namespace opentxs::identity::wot::verification::implementation

@@ -10,8 +10,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace rpc
 {
 namespace request
@@ -19,11 +19,11 @@ namespace request
 class Base;
 }  // namespace request
 }  // namespace rpc
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::rpc::response
+namespace opentxs::rpc::response
 {
 struct Invalid final : Base {
     Invalid(const request::Base& request) noexcept;
@@ -37,4 +37,4 @@ private:
     auto operator=(const Invalid&) -> Invalid& = delete;
     auto operator=(Invalid&&) -> Invalid& = delete;
 };
-}  // namespace opentxs::v1::rpc::response
+}  // namespace opentxs::rpc::response

@@ -15,7 +15,7 @@ extern "C" {
 #include "opentxs/core/String.hpp"
 #include "opentxs/util/Container.hpp"
 
-namespace opentxs::v1::crypto::openssl
+namespace opentxs::crypto::openssl
 {
 class BIO
 {
@@ -47,4 +47,4 @@ public:
     auto ToBytes() -> UnallocatedVector<std::byte>;
     auto ToString() -> OTString;
 };
-}  // namespace opentxs::v1::crypto::openssl
+}  // namespace opentxs::crypto::openssl

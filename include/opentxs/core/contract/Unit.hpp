@@ -18,8 +18,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace contract
 {
 class Unit;
@@ -36,11 +36,11 @@ class Amount;
 class PasswordPrompt;
 
 using OTUnitDefinition = SharedPimpl<contract::Unit>;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::contract
+namespace opentxs::contract
 {
 class OPENTXS_EXPORT Unit : virtual public opentxs::contract::Signable
 {
@@ -89,4 +89,4 @@ private:
     auto operator=(const Unit&) -> Unit& = delete;
     auto operator=(Unit&&) -> Unit& = delete;
 };
-}  // namespace opentxs::v1::contract
+}  // namespace opentxs::contract

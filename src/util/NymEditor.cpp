@@ -25,7 +25,7 @@
 #include "serialization/protobuf/ContactData.pb.h"
 #include "serialization/protobuf/Nym.pb.h"  // IWYU pragma: keep
 
-namespace opentxs::v1
+namespace opentxs
 {
 NymData::NymData(
     const api::session::Factory& factory,
@@ -335,4 +335,4 @@ auto NymData::Type() const -> identity::wot::claim::ClaimType
 auto NymData::Valid() const -> bool { return bool(nym_); }
 
 NymData::~NymData() { release(); }
-}  // namespace opentxs::v1
+}  // namespace opentxs

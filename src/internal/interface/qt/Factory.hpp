@@ -8,8 +8,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace api
 {
 namespace session
@@ -22,12 +22,12 @@ namespace ui
 {
 class IdentityManagerQt;
 }  // namespace ui
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto IdentityManagerQt(const api::session::Client& api) noexcept
     -> ui::IdentityManagerQt;
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory

@@ -21,7 +21,7 @@
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Pimpl.hpp"
 
-namespace opentxs::v1
+namespace opentxs
 {
 auto AddBookendsAroundContent(
     String& strOutput,
@@ -442,4 +442,4 @@ auto trim(const String& str) -> OTString
     UnallocatedCString s(str.Get(), str.GetLength());
     return String::Factory(String::trim(s));
 }
-}  // namespace opentxs::v1
+}  // namespace opentxs

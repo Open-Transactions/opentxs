@@ -19,7 +19,7 @@
 #include "serialization/protobuf/Enums.pb.h"
 #include "serialization/protobuf/Signature.pb.h"
 
-namespace opentxs::v1
+namespace opentxs
 {
 auto Factory::SecondaryCredential(
     const api::Session& api,
@@ -67,9 +67,9 @@ auto Factory::SecondaryCredential(
         return nullptr;
     }
 }
-}  // namespace opentxs::v1
+}  // namespace opentxs
 
-namespace opentxs::v1::identity::credential::implementation
+namespace opentxs::identity::credential::implementation
 {
 Secondary::Secondary(
     const api::Session& api,
@@ -137,4 +137,4 @@ auto Secondary::serialize(
 
     return serializedCredential;
 }
-}  // namespace opentxs::v1::identity::credential::implementation
+}  // namespace opentxs::identity::credential::implementation

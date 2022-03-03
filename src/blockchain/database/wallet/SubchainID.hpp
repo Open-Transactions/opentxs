@@ -18,17 +18,17 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace api
 {
 class Session;
 }  // namespace api
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::blockchain::database::wallet::db
+namespace opentxs::blockchain::database::wallet::db
 {
 class SubchainID
 {
@@ -66,4 +66,4 @@ private:
     auto operator=(const SubchainID&) -> SubchainID& = delete;
     auto operator=(SubchainID&&) -> SubchainID& = delete;
 };
-}  // namespace opentxs::v1::blockchain::database::wallet::db
+}  // namespace opentxs::blockchain::database::wallet::db

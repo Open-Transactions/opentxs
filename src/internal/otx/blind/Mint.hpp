@@ -15,8 +15,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace api
 {
 namespace session
@@ -43,11 +43,11 @@ class Token;
 }  // namespace otx
 
 class Amount;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::otx::blind::internal
+namespace opentxs::otx::blind::internal
 {
 class Mint : public Contract
 {
@@ -122,4 +122,4 @@ public:
 private:
     Mint() = delete;
 };
-}  // namespace opentxs::v1::otx::blind::internal
+}  // namespace opentxs::otx::blind::internal

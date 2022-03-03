@@ -17,7 +17,7 @@
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Pimpl.hpp"
 
-namespace opentxs::v1::contract::implementation
+namespace opentxs::contract::implementation
 {
 Signable::Signable(
     const api::Session& api,
@@ -217,4 +217,4 @@ auto Signable::verify_signature(const Lock& lock, const proto::Signature&) const
 }
 
 auto Signable::Version() const noexcept -> VersionNumber { return version_; }
-}  // namespace opentxs::v1::contract::implementation
+}  // namespace opentxs::contract::implementation

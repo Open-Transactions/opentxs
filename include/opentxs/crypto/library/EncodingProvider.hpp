@@ -10,7 +10,7 @@
 #include "opentxs/Types.hpp"
 #include "opentxs/util/Container.hpp"
 
-namespace opentxs::v1::crypto
+namespace opentxs::crypto
 {
 class OPENTXS_EXPORT EncodingProvider
 {
@@ -33,4 +33,4 @@ private:
     EncodingProvider& operator=(const EncodingProvider&) = delete;
     EncodingProvider& operator=(EncodingProvider&&) = delete;
 };
-}  // namespace opentxs::v1::crypto
+}  // namespace opentxs::crypto

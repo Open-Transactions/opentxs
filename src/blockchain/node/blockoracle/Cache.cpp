@@ -31,7 +31,7 @@
 #include "opentxs/util/Pimpl.hpp"
 #include "opentxs/util/WorkType.hpp"
 
-namespace opentxs::v1::blockchain::node::implementation
+namespace opentxs::blockchain::node::implementation
 {
 const std::size_t BlockOracle::Cache::cache_limit_{16};
 const std::chrono::seconds BlockOracle::Cache::download_timeout_{60};
@@ -324,4 +324,4 @@ auto BlockOracle::Cache::StateMachine() const noexcept -> bool
 
     return 0 < pending_.size();
 }
-}  // namespace opentxs::v1::blockchain::node::implementation
+}  // namespace opentxs::blockchain::node::implementation

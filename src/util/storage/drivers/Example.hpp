@@ -5,7 +5,7 @@
 
 #pragma once
 
-namespace opentxs::v1::storage
+namespace opentxs::storage
 {
 /** \brief An example implementation of \ref Storage which demonstrates how
  *  to implement support for new storage backends.
@@ -216,4 +216,4 @@ public:
     ~StorageExample() { Cleanup_StorageExample(); }
 };
 
-}  // namespace opentxs::v1::storage
+}  // namespace opentxs::storage

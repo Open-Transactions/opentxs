@@ -18,7 +18,7 @@
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/util/Numbers.hpp"
 
-namespace opentxs::v1
+namespace opentxs
 {
 namespace api
 {
@@ -738,4 +738,4 @@ private:
 
     OTTransactionType() = delete;
 };
-}  // namespace opentxs::v1
+}  // namespace opentxs

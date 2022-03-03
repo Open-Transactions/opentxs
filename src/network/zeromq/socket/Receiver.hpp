@@ -21,8 +21,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace network
 {
 namespace zeromq
@@ -30,13 +30,13 @@ namespace zeromq
 class Context;
 }  // namespace zeromq
 }  // namespace network
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
 #define RECEIVER_METHOD "opentxs::network::zeromq::implementation::Receiver::"
 
-namespace opentxs::v1::network::zeromq::socket::implementation
+namespace opentxs::network::zeromq::socket::implementation
 {
 template <typename InterfaceType, typename MessageType = zeromq::Message>
 class Receiver : virtual public InterfaceType, public Socket
@@ -86,4 +86,4 @@ private:
     auto operator=(const Receiver&) -> Receiver& = delete;
     auto operator=(Receiver&&) -> Receiver& = delete;
 };
-}  // namespace opentxs::v1::network::zeromq::socket::implementation
+}  // namespace opentxs::network::zeromq::socket::implementation

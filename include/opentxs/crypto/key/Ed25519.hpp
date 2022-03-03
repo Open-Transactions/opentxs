@@ -9,7 +9,7 @@
 
 #include "opentxs/crypto/key/HD.hpp"
 
-namespace opentxs::v1::crypto::key
+namespace opentxs::crypto::key
 {
 class OPENTXS_EXPORT Ed25519 : virtual public HD
 {
@@ -25,4 +25,4 @@ private:
     auto operator=(const Ed25519&) -> Ed25519& = delete;
     auto operator=(Ed25519&&) -> Ed25519& = delete;
 };
-}  // namespace opentxs::v1::crypto::key
+}  // namespace opentxs::crypto::key

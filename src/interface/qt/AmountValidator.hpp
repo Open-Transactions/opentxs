@@ -38,8 +38,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace implementation
 {
 namespace implementation
@@ -47,11 +47,11 @@ namespace implementation
 class AccountActivity;
 }  // namespace implementation
 }  // namespace implementation
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::ui
+namespace opentxs::ui
 {
 struct AmountValidator::Imp {
     using Parent = ui::AccountActivity;
@@ -364,4 +364,4 @@ private:
 
     auto unittype() const noexcept -> UnitType;
 };
-}  // namespace opentxs::v1::ui
+}  // namespace opentxs::ui

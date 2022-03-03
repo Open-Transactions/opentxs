@@ -8,7 +8,7 @@
 #include "opentxs/core/String.hpp"
 #include "opentxs/util/Container.hpp"
 
-namespace opentxs::v1
+namespace opentxs
 {
 class OTBylaw;
 class Tag;
@@ -43,4 +43,4 @@ public:
 
     void Serialize(Tag& parent) const;
 };
-}  // namespace opentxs::v1
+}  // namespace opentxs

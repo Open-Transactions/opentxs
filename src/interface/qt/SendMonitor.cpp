@@ -23,7 +23,7 @@
 #include "opentxs/util/Time.hpp"
 #include "util/ScopeGuard.hpp"
 
-namespace opentxs::v1::ui::implementation
+namespace opentxs::ui::implementation
 {
 struct SendMonitor::Imp {
     using Key = int;
@@ -152,4 +152,4 @@ auto SendMonitor::watch(Future&& future, Callback&& cb) noexcept -> int
 }
 
 SendMonitor::~SendMonitor() { shutdown(); }
-}  // namespace opentxs::v1::ui::implementation
+}  // namespace opentxs::ui::implementation

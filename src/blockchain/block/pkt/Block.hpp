@@ -20,8 +20,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace api
 {
 namespace crypto
@@ -47,11 +47,11 @@ class Block;
 }  // namespace bitcoin
 }  // namespace block
 }  // namespace blockchain
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::blockchain::block::pkt
+namespace opentxs::blockchain::block::pkt
 {
 class Block final : public bitcoin::implementation::Block
 {
@@ -89,4 +89,4 @@ private:
     auto operator=(const Block&) -> Block& = delete;
     auto operator=(Block&&) -> Block& = delete;
 };
-}  // namespace opentxs::v1::blockchain::block::pkt
+}  // namespace opentxs::blockchain::block::pkt

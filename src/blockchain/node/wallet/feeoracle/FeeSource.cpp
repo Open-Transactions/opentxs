@@ -30,7 +30,7 @@
 #include "opentxs/network/zeromq/socket/SocketType.hpp"
 #include "opentxs/util/Log.hpp"
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto FeeSources(
     const api::Session& api,
@@ -56,9 +56,9 @@ auto FeeSources(
         }
     }
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory
 
-namespace opentxs::v1::blockchain::node::wallet
+namespace opentxs::blockchain::node::wallet
 {
 const display::Scale FeeSource::Imp::scale_{"", "", {{10, 0}}, 0, 3};
 
@@ -256,9 +256,9 @@ auto FeeSource::Imp::shutdown(std::promise<void>& promise) noexcept -> void
 }
 
 FeeSource::Imp::~Imp() = default;
-}  // namespace opentxs::v1::blockchain::node::wallet
+}  // namespace opentxs::blockchain::node::wallet
 
-namespace opentxs::v1::blockchain::node::wallet
+namespace opentxs::blockchain::node::wallet
 {
 FeeSource::FeeSource(Imp* imp) noexcept
     : imp_(imp)
@@ -291,4 +291,4 @@ FeeSource::~FeeSource()
         imp_ = nullptr;
     }
 }
-}  // namespace opentxs::v1::blockchain::node::wallet
+}  // namespace opentxs::blockchain::node::wallet

@@ -11,21 +11,21 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 class Factory;
 class OTPassword;
 class Secret;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1
+namespace opentxs
 {
 auto DefaultPassword() noexcept -> const char*;
-}  // namespace opentxs::v1
+}  // namespace opentxs
 
-namespace opentxs::v1::implementation
+namespace opentxs::implementation
 {
 class NullCallback final : virtual public PasswordCallback
 {
@@ -51,4 +51,4 @@ private:
     auto operator=(const NullCallback&) -> NullCallback& = delete;
     auto operator=(NullCallback&&) -> NullCallback& = delete;
 };
-}  // namespace opentxs::v1::implementation
+}  // namespace opentxs::implementation

@@ -26,7 +26,7 @@ extern "C" {
 
 #define PATH_SEPERATOR "/"
 
-namespace opentxs::v1::storage::driver::filesystem
+namespace opentxs::storage::driver::filesystem
 {
 Common::Common(
     const api::Crypto& crypto,
@@ -245,4 +245,4 @@ auto Common::write_file(
 
 Common::~Common() { Cleanup_Common(); }
 
-}  // namespace opentxs::v1::storage::driver::filesystem
+}  // namespace opentxs::storage::driver::filesystem

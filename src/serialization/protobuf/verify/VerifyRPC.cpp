@@ -5,7 +5,7 @@
 
 #include "internal/serialization/protobuf/verify/VerifyRPC.hpp"  // IWYU pragma: associated
 
-namespace opentxs::v1::proto
+namespace opentxs::proto
 {
 auto AddClaimAllowedContactItem() noexcept -> const VersionMap&
 {
@@ -363,4 +363,4 @@ auto RPCResponseAllowedWorkflow() noexcept -> const VersionMap&
 
     return output;
 }
-}  // namespace opentxs::v1::proto
+}  // namespace opentxs::proto

@@ -31,7 +31,7 @@
 
 template class opentxs::SharedPimpl<opentxs::ui::ProfileSection>;
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto ProfileSectionWidget(
     const ui::implementation::ProfileInternalInterface& parent,
@@ -45,9 +45,9 @@ auto ProfileSectionWidget(
 
     return std::make_shared<ReturnType>(parent, api, rowID, key, custom);
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory
 
-namespace opentxs::v1::ui
+namespace opentxs::ui
 {
 static const std::map<
     identity::wot::claim::SectionType,
@@ -146,9 +146,9 @@ auto ProfileSection::AllowedItems(
 
     return output;
 }
-}  // namespace opentxs::v1::ui
+}  // namespace opentxs::ui
 
-namespace opentxs::v1::ui::implementation
+namespace opentxs::ui::implementation
 {
 ProfileSection::ProfileSection(
     const ProfileInternalInterface& parent,
@@ -306,4 +306,4 @@ void ProfileSection::startup(
     process_section(section);
     finish_startup();
 }
-}  // namespace opentxs::v1::ui::implementation
+}  // namespace opentxs::ui::implementation

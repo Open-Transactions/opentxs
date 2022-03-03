@@ -13,7 +13,7 @@
 #include "opentxs/core/String.hpp"
 #include "opentxs/util/Container.hpp"
 
-namespace opentxs::v1
+namespace opentxs
 {
 namespace api
 {
@@ -201,4 +201,4 @@ private:
     auto operator=(const OTPartyAccount&) -> OTPartyAccount& = delete;
     auto operator=(OTPartyAccount&&) -> OTPartyAccount& = delete;
 };
-}  // namespace opentxs::v1
+}  // namespace opentxs

@@ -59,7 +59,7 @@
 #define PATH_VERSION 1
 #define COMPRESSED_PUBKEY_SIZE 33
 
-namespace opentxs::v1::api::crypto
+namespace opentxs::api::crypto
 {
 enum class Prefix : std::uint8_t {
     Unknown = 0,
@@ -162,9 +162,9 @@ const HrpMap hrp_map_{
     {opentxs::blockchain::Type::UnitTest, "bcrt"},
 };
 const HrpReverseMap hrp_reverse_map_{reverse_map(hrp_map_)};
-}  // namespace opentxs::v1::api::crypto
+}  // namespace opentxs::api::crypto
 
-namespace opentxs::v1::api::crypto::imp
+namespace opentxs::api::crypto::imp
 {
 Blockchain::Imp::Imp(
     const api::Session& api,
@@ -1320,4 +1320,4 @@ auto Blockchain::Imp::Wallet(const opentxs::blockchain::Type chain) const
 
     return wallets_.Get(chain);
 }
-}  // namespace opentxs::v1::api::crypto::imp
+}  // namespace opentxs::api::crypto::imp

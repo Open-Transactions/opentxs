@@ -16,8 +16,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace ui
 {
 class ProfileSection;
@@ -25,11 +25,11 @@ class ProfileSubsection;
 }  // namespace ui
 
 using OTUIProfileSection = SharedPimpl<ui::ProfileSection>;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::ui
+namespace opentxs::ui
 {
 class OPENTXS_EXPORT ProfileSection : virtual public List,
                                       virtual public ListRow
@@ -83,4 +83,4 @@ private:
     auto operator=(const ProfileSection&) -> ProfileSection& = delete;
     auto operator=(ProfileSection&&) -> ProfileSection& = delete;
 };
-}  // namespace opentxs::v1::ui
+}  // namespace opentxs::ui

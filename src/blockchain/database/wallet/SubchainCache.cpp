@@ -28,7 +28,7 @@
 #include "opentxs/util/Pimpl.hpp"
 #include "opentxs/util/Time.hpp"  // IWYU pragma: keep
 
-namespace opentxs::v1::blockchain::database::wallet
+namespace opentxs::blockchain::database::wallet
 {
 SubchainCache::SubchainCache(
     const api::Session& api,
@@ -651,4 +651,4 @@ auto SubchainCache::subchain_index(
 }
 
 SubchainCache::~SubchainCache() = default;
-}  // namespace opentxs::v1::blockchain::database::wallet
+}  // namespace opentxs::blockchain::database::wallet

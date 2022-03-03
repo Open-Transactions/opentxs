@@ -15,7 +15,7 @@
 #include "serialization/protobuf/StorageEnums.pb.h"
 #include "serialization/protobuf/StorageItemHash.pb.h"
 
-namespace opentxs::v1::storage
+namespace opentxs::storage
 {
 const UnallocatedCString Node::BLANK_HASH = "blankblankblankblankblank";
 
@@ -299,4 +299,4 @@ auto Node::verify_write_lock(const Lock& lock) const -> bool
 
     return true;
 }
-}  // namespace opentxs::v1::storage
+}  // namespace opentxs::storage

@@ -7,7 +7,7 @@
 #include "1_Internal.hpp"                   // IWYU pragma: associated
 #include "blockchain/node/BlockOracle.hpp"  // IWYU pragma: associated
 
-namespace opentxs::v1::blockchain::node::implementation
+namespace opentxs::blockchain::node::implementation
 {
 auto BlockOracle::get_validator(
     [[maybe_unused]] const blockchain::Type chain,
@@ -16,4 +16,4 @@ auto BlockOracle::get_validator(
 {
     return std::make_unique<internal::BlockValidator>();
 }
-}  // namespace opentxs::v1::blockchain::node::implementation
+}  // namespace opentxs::blockchain::node::implementation

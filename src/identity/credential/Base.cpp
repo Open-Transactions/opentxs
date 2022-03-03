@@ -40,7 +40,7 @@
 #include "serialization/protobuf/Enums.pb.h"
 #include "serialization/protobuf/Signature.pb.h"
 
-namespace opentxs::v1::identity::credential::implementation
+namespace opentxs::identity::credential::implementation
 {
 Base::Base(
     const api::Session& api,
@@ -479,4 +479,4 @@ auto Base::verify_master_signature(const Lock& lock) const -> bool
     return (parent_.GetMasterCredential().Verify(
         *serialized, role_, parent_.GetMasterCredID(), *masterSig));
 }
-}  // namespace opentxs::v1::identity::credential::implementation
+}  // namespace opentxs::identity::credential::implementation

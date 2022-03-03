@@ -14,6 +14,7 @@
 #include <utility>
 
 #include "internal/blockchain/node/Node.hpp"
+#include "opentxs/Version.hpp"
 #include "opentxs/blockchain/p2p/Types.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/util/Container.hpp"
@@ -21,8 +22,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace api
 {
 class Session;
@@ -59,13 +60,13 @@ class Message;
 class Pipeline;
 }  // namespace zeromq
 }  // namespace network
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
 namespace zmq = opentxs::network::zeromq;
 
-namespace opentxs::v1::blockchain::p2p::peer
+namespace opentxs::blockchain::p2p::peer
 {
 using Task = node::internal::PeerManager::Task;
 
@@ -140,4 +141,4 @@ public:
 protected:
     ConnectionManager() = default;
 };
-}  // namespace opentxs::v1::blockchain::p2p::peer
+}  // namespace opentxs::blockchain::p2p::peer

@@ -71,8 +71,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace api
 {
 namespace session
@@ -114,11 +114,11 @@ class Armored;
 class Data;
 class PasswordPrompt;
 class PeerObject;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::api::session::client
+namespace opentxs::api::session::client
 {
 class Factory final : public session::imp::Factory
 {
@@ -202,4 +202,4 @@ private:
     auto operator=(const Factory&) -> Factory& = delete;
     auto operator=(Factory&&) -> Factory& = delete;
 };
-}  // namespace opentxs::v1::api::session::client
+}  // namespace opentxs::api::session::client

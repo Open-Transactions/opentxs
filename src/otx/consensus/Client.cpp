@@ -20,7 +20,7 @@
 #include "serialization/protobuf/ClientContext.pb.h"
 #include "serialization/protobuf/Context.pb.h"
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto ClientContext(
     const api::Session& api,
@@ -44,9 +44,9 @@ auto ClientContext(
 
     return new ReturnType(api, serialized, local, remote, server);
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory
 
-namespace opentxs::v1::otx::context::implementation
+namespace opentxs::otx::context::implementation
 {
 ClientContext::ClientContext(
     const api::Session& api,
@@ -299,4 +299,4 @@ auto ClientContext::VerifyIssuedNumber(
 
     return VerifyIssuedNumber(number);
 }
-}  // namespace opentxs::v1::otx::context::implementation
+}  // namespace opentxs::otx::context::implementation

@@ -21,7 +21,7 @@
 #include "opentxs/core/identifier/UnitDefinition.hpp"
 #include "opentxs/util/Bytes.hpp"
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto AccountSummaryItem(
     const ui::implementation::IssuerItemInternalInterface& parent,
@@ -35,9 +35,9 @@ auto AccountSummaryItem(
 
     return std::make_shared<ReturnType>(parent, api, rowID, sortKey, custom);
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory
 
-namespace opentxs::v1::ui::implementation
+namespace opentxs::ui::implementation
 {
 AccountSummaryItem::AccountSummaryItem(
     const IssuerItemInternalInterface& parent,
@@ -110,4 +110,4 @@ auto AccountSummaryItem::reindex(
 
     return true;
 }
-}  // namespace opentxs::v1::ui::implementation
+}  // namespace opentxs::ui::implementation

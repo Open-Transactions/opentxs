@@ -21,7 +21,7 @@
 #include "serialization/protobuf/RPCEnums.pb.h"
 #include "util/Container.hpp"
 
-namespace opentxs::v1
+namespace opentxs
 {
 auto print(rpc::AccountEventType value) noexcept -> UnallocatedCString
 {
@@ -238,9 +238,9 @@ auto print(rpc::ResponseCode value) noexcept -> UnallocatedCString
         return "error";
     }
 }
-}  // namespace opentxs::v1
+}  // namespace opentxs
 
-namespace opentxs::v1::rpc
+namespace opentxs::rpc
 {
 using AccountEventMap =
     robin_hood::unordered_flat_map<AccountEventType, proto::AccountEventType>;
@@ -478,9 +478,9 @@ auto response_code_map() noexcept -> ResponseCodeMap
 
     return map;
 }
-}  // namespace opentxs::v1::rpc
+}  // namespace opentxs::rpc
 
-namespace opentxs::v1
+namespace opentxs
 {
 auto translate(const rpc::AccountEventType type) noexcept
     -> proto::AccountEventType
@@ -661,4 +661,4 @@ auto translate(const proto::RPCResponseCode type) noexcept -> rpc::ResponseCode
         return rpc::ResponseCode::invalid;
     }
 }
-}  // namespace opentxs::v1
+}  // namespace opentxs

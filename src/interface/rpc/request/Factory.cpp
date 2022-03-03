@@ -22,7 +22,7 @@
 #include "opentxs/interface/rpc/request/SendPayment.hpp"
 #include "serialization/protobuf/RPCCommand.pb.h"
 
-namespace opentxs::v1::rpc::request
+namespace opentxs::rpc::request
 {
 auto Factory(const proto::RPCCommand& proto) noexcept -> std::unique_ptr<Base>
 {
@@ -66,4 +66,4 @@ auto Factory(ReadView serialized) noexcept -> std::unique_ptr<Base>
 {
     return Factory(proto::Factory<proto::RPCCommand>(serialized));
 }
-}  // namespace opentxs::v1::rpc::request
+}  // namespace opentxs::rpc::request

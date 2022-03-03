@@ -13,8 +13,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace otx
 {
 namespace context
@@ -22,11 +22,11 @@ namespace context
 class Server;
 }  // namespace context
 }  // namespace otx
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::otx::context::implementation
+namespace opentxs::otx::context::implementation
 {
 class ManagedNumber final : virtual public otx::context::ManagedNumber
 {
@@ -50,4 +50,4 @@ private:
     auto operator=(const ManagedNumber&) -> ManagedNumber& = delete;
     auto operator=(ManagedNumber&&) -> ManagedNumber& = delete;
 };
-}  // namespace opentxs::v1::otx::context::implementation
+}  // namespace opentxs::otx::context::implementation

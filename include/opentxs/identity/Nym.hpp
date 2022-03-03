@@ -33,8 +33,8 @@ class MessageLite;
 
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace crypto
 {
 namespace key
@@ -76,11 +76,11 @@ class PasswordPrompt;
 class PaymentCode;
 class Signature;
 class Tag;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::identity
+namespace opentxs::identity
 {
 class OPENTXS_EXPORT Nym
 {
@@ -272,4 +272,4 @@ private:
     auto operator=(const Nym&) -> Nym& = delete;
     auto operator=(Nym&&) -> Nym& = delete;
 };
-}  // namespace opentxs::v1::identity
+}  // namespace opentxs::identity

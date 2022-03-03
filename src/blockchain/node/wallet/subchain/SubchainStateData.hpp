@@ -56,8 +56,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace api
 {
 class Session;
@@ -108,11 +108,11 @@ class Raw;
 }  // namespace socket
 }  // namespace zeromq
 }  // namespace network
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::blockchain::node::wallet
+namespace opentxs::blockchain::node::wallet
 {
 class SubchainStateData : virtual public Subchain,
                           public opentxs::Actor<SubchainStateData, SubchainJobs>
@@ -277,4 +277,4 @@ private:
     SubchainStateData& operator=(const SubchainStateData&) = delete;
     SubchainStateData& operator=(SubchainStateData&&) = delete;
 };
-}  // namespace opentxs::v1::blockchain::node::wallet
+}  // namespace opentxs::blockchain::node::wallet

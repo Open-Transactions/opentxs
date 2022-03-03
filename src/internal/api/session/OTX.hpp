@@ -12,8 +12,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace identifier
 {
 class Nym;
@@ -25,11 +25,11 @@ class Identifier;
 class OTPayment;
 template <class T>
 class UniqueQueue;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::api::session::internal
+namespace opentxs::api::session::internal
 {
 class OTX : virtual public api::session::OTX
 {
@@ -59,4 +59,4 @@ public:
 
     auto Internal() noexcept -> internal::OTX& final { return *this; }
 };
-}  // namespace opentxs::v1::api::session::internal
+}  // namespace opentxs::api::session::internal

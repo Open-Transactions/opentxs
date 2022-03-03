@@ -14,7 +14,7 @@
 
 #include "opentxs/util/Container.hpp"
 
-namespace opentxs::v1::blockchain::database::wallet::db
+namespace opentxs::blockchain::database::wallet::db
 {
 auto operator==(const Pattern& lhs, const Pattern& rhs) noexcept -> bool
 {
@@ -68,4 +68,4 @@ auto Pattern::Index() const noexcept -> Bip32Index
 
     return out;
 }
-}  // namespace opentxs::v1::blockchain::database::wallet::db
+}  // namespace opentxs::blockchain::database::wallet::db

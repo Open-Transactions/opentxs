@@ -23,7 +23,7 @@
 #include "opentxs/network/zeromq/socket/Types.hpp"
 #include "opentxs/util/Container.hpp"
 
-namespace opentxs::v1::network::zeromq::socket::implementation
+namespace opentxs::network::zeromq::socket::implementation
 {
 Socket::Socket(
     const zeromq::Context& context,
@@ -319,4 +319,4 @@ Socket::~Socket()
         socket_ = nullptr;
     }
 }
-}  // namespace opentxs::v1::network::zeromq::socket::implementation
+}  // namespace opentxs::network::zeromq::socket::implementation

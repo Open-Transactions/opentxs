@@ -12,8 +12,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace contract
 {
 namespace peer
@@ -27,11 +27,11 @@ class Acknowledgement;
 
 using OTReplyAcknowledgement =
     SharedPimpl<contract::peer::reply::Acknowledgement>;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::contract::peer::reply
+namespace opentxs::contract::peer::reply
 {
 class OPENTXS_EXPORT Acknowledgement : virtual public peer::Reply
 {
@@ -53,4 +53,4 @@ private:
     auto operator=(const Acknowledgement&) -> Acknowledgement& = delete;
     auto operator=(Acknowledgement&&) -> Acknowledgement& = delete;
 };
-}  // namespace opentxs::v1::contract::peer::reply
+}  // namespace opentxs::contract::peer::reply

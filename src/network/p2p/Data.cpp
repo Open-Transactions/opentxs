@@ -30,7 +30,7 @@
 #include "opentxs/util/WorkType.hpp"
 #include "serialization/protobuf/BlockchainP2PSync.pb.h"
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto BlockchainSyncData() noexcept -> network::p2p::Data
 {
@@ -65,9 +65,9 @@ auto BlockchainSyncData_p(
             type, std::move(state), std::move(blocks), cfheader)
             .release());
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory
 
-namespace opentxs::v1::network::p2p
+namespace opentxs::network::p2p
 {
 class Data::Imp final : public Base::Imp
 {
@@ -211,4 +211,4 @@ Data::~Data()
         Base::imp_ = nullptr;
     }
 }
-}  // namespace opentxs::v1::network::p2p
+}  // namespace opentxs::network::p2p

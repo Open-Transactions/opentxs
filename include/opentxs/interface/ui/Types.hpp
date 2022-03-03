@@ -10,7 +10,7 @@
 #include <cstddef>
 #include <cstdint>
 
-namespace opentxs::v1::ui
+namespace opentxs::ui
 {
 enum class Blockchains : std::uint8_t;
-}  // namespace opentxs::v1::ui
+}  // namespace opentxs::ui

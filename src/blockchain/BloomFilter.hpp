@@ -22,21 +22,21 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace api
 {
 class Session;
 }  // namespace api
 
 class Data;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
 namespace be = boost::endian;
 
-namespace opentxs::v1::blockchain::implementation
+namespace opentxs::blockchain::implementation
 {
 class BloomFilter final : virtual public blockchain::BloomFilter
 {
@@ -95,4 +95,4 @@ private:
     auto operator=(const BloomFilter&) -> BloomFilter& = delete;
     auto operator=(BloomFilter&&) -> BloomFilter& = delete;
 };
-}  // namespace opentxs::v1::blockchain::implementation
+}  // namespace opentxs::blockchain::implementation

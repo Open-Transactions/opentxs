@@ -11,17 +11,17 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace proto
 {
 class Credential;
 }  // namespace proto
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::proto
+namespace opentxs::proto
 {
 auto CheckProto_1(
     const Credential& serializedCred,
@@ -143,4 +143,4 @@ auto CheckProto_20(
     const KeyMode& mode = KEYMODE_ERROR,
     const CredentialRole role = CREDROLE_ERROR,
     const bool withSigs = true) -> bool;
-}  // namespace opentxs::v1::proto
+}  // namespace opentxs::proto

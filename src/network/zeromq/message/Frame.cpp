@@ -17,7 +17,7 @@
 #include "internal/network/zeromq/message/Factory.hpp"
 #include "internal/util/LogMacros.hpp"
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto ZMQFrame(const std::size_t size) noexcept -> network::zeromq::Frame
 {
@@ -40,9 +40,9 @@ auto ZMQFrame(const ProtobufType& data) noexcept -> network::zeromq::Frame
 
     return std::make_unique<ReturnType::Imp>(data).release();
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory
 
-namespace opentxs::v1::network::zeromq
+namespace opentxs::network::zeromq
 {
 auto operator<(const Frame& lhs, const Frame& rhs) noexcept -> bool
 {
@@ -112,9 +112,9 @@ auto Frame::Imp::operator==(const zeromq::Frame& rhs) const noexcept -> bool
 }
 
 Frame::Imp::~Imp() { ::zmq_msg_close(&message_); }
-}  // namespace opentxs::v1::network::zeromq
+}  // namespace opentxs::network::zeromq
 
-namespace opentxs::v1::network::zeromq
+namespace opentxs::network::zeromq
 {
 Frame::Frame(Imp* imp) noexcept
     : imp_(imp)
@@ -201,4 +201,4 @@ Frame::~Frame()
         imp_ = nullptr;
     }
 }
-}  // namespace opentxs::v1::network::zeromq
+}  // namespace opentxs::network::zeromq

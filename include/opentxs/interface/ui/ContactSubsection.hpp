@@ -15,19 +15,19 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace ui
 {
 class ContactSubsection;
 }  // namespace ui
 
 using OTUIContactSubsection = SharedPimpl<ui::ContactSubsection>;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::ui
+namespace opentxs::ui
 {
 class OPENTXS_EXPORT ContactSubsection : virtual public List,
                                          virtual public ListRow
@@ -52,4 +52,4 @@ private:
     auto operator=(const ContactSubsection&) -> ContactSubsection& = delete;
     auto operator=(ContactSubsection&&) -> ContactSubsection& = delete;
 };
-}  // namespace opentxs::v1::ui
+}  // namespace opentxs::ui

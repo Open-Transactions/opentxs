@@ -15,8 +15,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace api
 {
 namespace crypto
@@ -68,11 +68,11 @@ namespace internal
 struct Database;
 }  // namespace internal
 }  // namespace blockchain
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto BlockchainDatabase(
     const api::Session& api,
@@ -134,4 +134,4 @@ auto HeaderOracle(
     const blockchain::node::internal::HeaderDatabase& database,
     const blockchain::Type type) noexcept
     -> std::unique_ptr<blockchain::node::HeaderOracle>;
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory

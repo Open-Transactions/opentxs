@@ -12,7 +12,7 @@
 #include "crypto/key/asymmetric/rsa/RSA.hpp"
 #include "opentxs/util/Log.hpp"
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto RSAKey(
     const api::Session& api,
@@ -53,4 +53,4 @@ auto RSAKey(
         return {};
     }
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory

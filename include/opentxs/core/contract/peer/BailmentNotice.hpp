@@ -13,8 +13,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace contract
 {
 namespace peer
@@ -27,11 +27,11 @@ class BailmentNotice;
 }  // namespace contract
 
 using OTBailmentNotice = SharedPimpl<contract::peer::request::BailmentNotice>;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::contract::peer::request
+namespace opentxs::contract::peer::request
 {
 class OPENTXS_EXPORT BailmentNotice : virtual public peer::Request
 {
@@ -53,4 +53,4 @@ private:
     auto operator=(const BailmentNotice&) -> BailmentNotice& = delete;
     auto operator=(BailmentNotice&&) -> BailmentNotice& = delete;
 };
-}  // namespace opentxs::v1::contract::peer::request
+}  // namespace opentxs::contract::peer::request

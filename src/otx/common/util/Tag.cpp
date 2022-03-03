@@ -12,7 +12,7 @@
 
 #include "opentxs/util/Container.hpp"
 
-namespace opentxs::v1
+namespace opentxs
 {
 void Tag::add_attribute(
     const UnallocatedCString& str_att_name,
@@ -97,4 +97,4 @@ Tag::Tag(const UnallocatedCString& str_name, const char* sztext)
     , tags_()
 {
 }
-}  // namespace opentxs::v1
+}  // namespace opentxs

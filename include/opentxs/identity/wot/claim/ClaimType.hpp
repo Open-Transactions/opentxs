@@ -10,7 +10,7 @@
 
 #include <cstdint>
 
-namespace opentxs::v1::identity::wot::claim
+namespace opentxs::identity::wot::claim
 {
 enum class ClaimType : std::uint32_t {
     Error = 0,
@@ -438,4 +438,4 @@ enum class ClaimType : std::uint32_t {
     Zwd = 422,    // Zimbabwe Dollar
     Custom = 423,
 };
-}  // namespace opentxs::v1::identity::wot::claim
+}  // namespace opentxs::identity::wot::claim

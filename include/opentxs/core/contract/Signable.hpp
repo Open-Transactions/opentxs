@@ -15,17 +15,17 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace proto
 {
 class Signature;
 }  // namespace proto
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::contract
+namespace opentxs::contract
 {
 class OPENTXS_EXPORT Signable
 {
@@ -62,4 +62,4 @@ private:
     auto operator=(const Signable&) -> Signable& = delete;
     auto operator=(Signable&&) -> Signable& = delete;
 };
-}  // namespace opentxs::v1::contract
+}  // namespace opentxs::contract

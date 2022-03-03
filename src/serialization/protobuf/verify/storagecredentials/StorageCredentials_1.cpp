@@ -16,7 +16,7 @@
 #include "serialization/protobuf/StorageItemHash.pb.h"
 #include "serialization/protobuf/verify/Check.hpp"
 
-namespace opentxs::v1::proto
+namespace opentxs::proto
 {
 
 auto CheckProto_1(const StorageCredentials& input, const bool silent) -> bool
@@ -138,4 +138,4 @@ auto CheckProto_20(const StorageCredentials& input, const bool silent) -> bool
 {
     UNDEFINED_VERSION(20)
 }
-}  // namespace opentxs::v1::proto
+}  // namespace opentxs::proto

@@ -11,7 +11,7 @@
 #include "opentxs/Version.hpp"
 #include "opentxs/util/Container.hpp"
 
-namespace opentxs::v1
+namespace opentxs
 {
 class Tag;
 
@@ -59,7 +59,7 @@ public:
     void outputXML(UnallocatedCString& str_output) const;
 };
 
-}  // namespace opentxs::v1
+}  // namespace opentxs
 
 /*
 

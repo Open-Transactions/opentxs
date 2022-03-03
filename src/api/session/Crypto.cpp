@@ -15,7 +15,7 @@
 #include "opentxs/api/crypto/Seed.hpp"
 #include "opentxs/api/session/Factory.hpp"
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto SessionCryptoAPI(
     api::Crypto& parent,
@@ -31,9 +31,9 @@ auto SessionCryptoAPI(
     return std::make_unique<ReturnType>(
         parent, session, endpoints, factory, storage, zmq);
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory
 
-namespace opentxs::v1::api::session::imp
+namespace opentxs::api::session::imp
 {
 Crypto::Crypto(
     api::Crypto& parent,
@@ -93,4 +93,4 @@ auto Crypto::PrepareShutdown() noexcept -> void
 }
 
 Crypto::~Crypto() = default;
-}  // namespace opentxs::v1::api::session::imp
+}  // namespace opentxs::api::session::imp

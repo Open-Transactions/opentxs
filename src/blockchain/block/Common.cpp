@@ -14,7 +14,7 @@
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
 
-namespace opentxs::v1::blockchain::block
+namespace opentxs::blockchain::block
 {
 ParsedPatterns::ParsedPatterns(const Patterns& in) noexcept
     : data_()
@@ -30,9 +30,9 @@ ParsedPatterns::ParsedPatterns(const Patterns& in) noexcept
 
     std::sort(data_.begin(), data_.end());
 }
-}  // namespace opentxs::v1::blockchain::block
+}  // namespace opentxs::blockchain::block
 
-namespace opentxs::v1::blockchain::block::internal
+namespace opentxs::blockchain::block::internal
 {
 auto SetIntersection(
     const api::Session& api,
@@ -61,4 +61,4 @@ auto SetIntersection(
 
     return output;
 }
-}  // namespace opentxs::v1::blockchain::block::internal
+}  // namespace opentxs::blockchain::block::internal

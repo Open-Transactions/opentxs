@@ -27,13 +27,13 @@ using IrrXMLReader = IIrrXMLReader<char, IXMLBase>;
 }  // namespace io
 }  // namespace irr
 
-namespace opentxs::v1
+namespace opentxs
 {
 class Armored;
 class String;
-}  // namespace opentxs::v1
+}  // namespace opentxs
 
-namespace opentxs::v1
+namespace opentxs
 {
 using listOfSignatures = UnallocatedList<OTSignature>;
 
@@ -65,4 +65,4 @@ auto SkipAfterLoadingField(irr::io::IrrXMLReader*& xml) -> bool;
 auto SkipToElement(irr::io::IrrXMLReader*& xml) -> bool;
 auto SkipToTextField(irr::io::IrrXMLReader*& xml) -> bool;
 auto trim(const String& str) -> OTString;
-}  // namespace opentxs::v1
+}  // namespace opentxs

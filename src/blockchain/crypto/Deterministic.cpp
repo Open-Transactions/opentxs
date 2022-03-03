@@ -34,7 +34,7 @@
 #include "opentxs/util/Pimpl.hpp"
 #include "serialization/protobuf/HDPath.pb.h"
 
-namespace opentxs::v1::blockchain::crypto::implementation
+namespace opentxs::blockchain::crypto::implementation
 {
 Deterministic::Deterministic(
     const api::Session& api,
@@ -766,4 +766,4 @@ auto Deterministic::use_next(
         return {};
     }
 }
-}  // namespace opentxs::v1::blockchain::crypto::implementation
+}  // namespace opentxs::blockchain::crypto::implementation

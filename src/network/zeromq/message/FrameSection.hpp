@@ -16,8 +16,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace network
 {
 namespace zeromq
@@ -27,11 +27,11 @@ class FrameIterator;
 class Message;
 }  // namespace zeromq
 }  // namespace network
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::network::zeromq
+namespace opentxs::network::zeromq
 {
 class FrameSection::Imp : public internal::FrameSection
 {
@@ -57,9 +57,9 @@ private:
     auto operator=(const Imp&) -> Imp& = delete;
     auto operator=(Imp&) -> Imp& = delete;
 };
-}  // namespace opentxs::v1::network::zeromq
+}  // namespace opentxs::network::zeromq
 
-namespace opentxs::v1::network::zeromq::implementation
+namespace opentxs::network::zeromq::implementation
 {
 class FrameSection final : public zeromq::FrameSection::Imp
 {
@@ -92,4 +92,4 @@ private:
     auto operator=(const FrameSection&) -> FrameSection& = delete;
     auto operator=(FrameSection&) -> FrameSection& = delete;
 };
-}  // namespace opentxs::v1::network::zeromq::implementation
+}  // namespace opentxs::network::zeromq::implementation

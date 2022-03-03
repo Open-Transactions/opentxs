@@ -20,7 +20,7 @@
 
 template class opentxs::Pimpl<opentxs::network::zeromq::Proxy>;
 
-namespace opentxs::v1::network::zeromq
+namespace opentxs::network::zeromq
 {
 auto Proxy::Factory(
     const zeromq::Context& context,
@@ -29,9 +29,9 @@ auto Proxy::Factory(
 {
     return OTZMQProxy(new implementation::Proxy(context, frontend, backend));
 }
-}  // namespace opentxs::v1::network::zeromq
+}  // namespace opentxs::network::zeromq
 
-namespace opentxs::v1::network::zeromq::implementation
+namespace opentxs::network::zeromq::implementation
 {
 Proxy::Proxy(
     const zeromq::Context& context,
@@ -73,4 +73,4 @@ Proxy::~Proxy()
 
     if (thread_ && thread_->joinable()) { thread_->join(); }
 }
-}  // namespace opentxs::v1::network::zeromq::implementation
+}  // namespace opentxs::network::zeromq::implementation

@@ -28,7 +28,7 @@ extern "C" {
 #include "opentxs/util/Pimpl.hpp"
 #include "util/Sodium.hpp"
 
-namespace opentxs::v1::crypto::implementation
+namespace opentxs::crypto::implementation
 {
 auto Sodium::PubkeyAdd(
     [[maybe_unused]] const ReadView pubkey,
@@ -307,4 +307,4 @@ auto Sodium::Verify(
 
     return success;
 }
-}  // namespace opentxs::v1::crypto::implementation
+}  // namespace opentxs::crypto::implementation

@@ -5,7 +5,7 @@
 
 #include "opentxs/OT.hpp"  // IWYU pragma: associated
 
-namespace opentxs::v1
+namespace opentxs
 {
 auto VersionMajor() noexcept -> unsigned int { return @opentxs_VERSION_MAJOR@; }
 
@@ -14,4 +14,4 @@ auto VersionMinor() noexcept -> unsigned int { return @opentxs_VERSION_MINOR@; }
 auto VersionPatch() noexcept -> unsigned int { return @opentxs_VERSION_PATCH@; }
 
 auto VersionString() noexcept -> const char* { return "@opentxs_VERSION_STRING@"; }
-}  // namespace opentxs::v1
+}  // namespace opentxs

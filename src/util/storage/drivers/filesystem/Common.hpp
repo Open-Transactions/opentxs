@@ -29,8 +29,8 @@ class file_descriptor_sink;
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace api
 {
 namespace network
@@ -50,11 +50,11 @@ namespace storage
 {
 class Config;
 }  // namespace storage
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::storage::driver::filesystem
+namespace opentxs::storage::driver::filesystem
 {
 // Simple filesystem implementation of opentxs::storage
 class Common : public implementation::Plugin
@@ -127,4 +127,4 @@ private:
     auto operator=(const Common&) -> Common& = delete;
     auto operator=(Common&&) -> Common& = delete;
 };
-}  // namespace opentxs::v1::storage::driver::filesystem
+}  // namespace opentxs::storage::driver::filesystem

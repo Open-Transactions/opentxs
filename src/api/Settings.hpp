@@ -19,17 +19,17 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace api
 {
 class Legacy;
 }  // namespace api
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::api::imp
+namespace opentxs::api::imp
 {
 class Settings final : public api::Settings
 {
@@ -203,4 +203,4 @@ private:
     Settings(const Settings&) = delete;
     auto operator=(const Settings&) -> Settings& = delete;
 };
-}  // namespace opentxs::v1::api::imp
+}  // namespace opentxs::api::imp

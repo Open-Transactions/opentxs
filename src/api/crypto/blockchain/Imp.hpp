@@ -19,6 +19,7 @@
 #include "api/crypto/blockchain/Wallets.hpp"
 #include "internal/api/crypto/Blockchain.hpp"
 #include "opentxs/Types.hpp"
+#include "opentxs/Version.hpp"
 #include "opentxs/api/Context.hpp"
 #include "opentxs/api/crypto/Blockchain.hpp"
 #include "opentxs/blockchain/Blockchain.hpp"
@@ -44,8 +45,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace api
 {
 namespace crypto
@@ -123,13 +124,13 @@ class HDPath;
 class Contact;
 class PasswordPrompt;
 class PaymentCode;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
 namespace zmq = opentxs::network::zeromq;
 
-namespace opentxs::v1::api::crypto::imp
+namespace opentxs::api::crypto::imp
 {
 struct Blockchain::Imp {
     using IDLock = UnallocatedMap<OTIdentifier, std::mutex>;
@@ -345,4 +346,4 @@ private:
     {
     }
 };
-}  // namespace opentxs::v1::api::crypto::imp
+}  // namespace opentxs::api::crypto::imp

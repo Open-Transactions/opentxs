@@ -32,8 +32,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace api
 {
 namespace crypto
@@ -73,11 +73,11 @@ class StorageThread;
 
 class Contact;
 class PeerObject;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::api::session::imp
+namespace opentxs::api::session::imp
 {
 class Activity final : virtual public internal::Activity, Lockable
 {
@@ -230,4 +230,4 @@ private:
     auto operator=(const Activity&) -> Activity& = delete;
     auto operator=(Activity&&) -> Activity& = delete;
 };
-}  // namespace opentxs::v1::api::session::imp
+}  // namespace opentxs::api::session::imp

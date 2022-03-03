@@ -24,11 +24,11 @@
 
 #pragma GCC diagnostic pop
 
-namespace opentxs::v1::proto
+namespace opentxs::proto
 {
 using ContactSectionVersion = std::pair<uint32_t, ContactSectionName>;
 using EnumLang = std::pair<uint32_t, UnallocatedCString>;
-}  // namespace opentxs::v1::proto
+}  // namespace opentxs::proto
 
 namespace std
 {
@@ -44,7 +44,7 @@ struct hash<opentxs::proto::EnumLang> {
 };
 }  // namespace std
 
-namespace opentxs::v1::proto
+namespace opentxs::proto
 {
 // A map of allowed section names by ContactData version
 using ContactSectionMap = robin_hood::
@@ -71,4 +71,4 @@ auto ContactSectionNames() noexcept -> const EnumTranslation&;
 auto ContactItemTypes() noexcept -> const EnumTranslation&;
 auto ContactItemAttributes() noexcept -> const EnumTranslation&;
 auto RelationshipMap() noexcept -> const RelationshipReciprocity&;
-}  // namespace opentxs::v1::proto
+}  // namespace opentxs::proto

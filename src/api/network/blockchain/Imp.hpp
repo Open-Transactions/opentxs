@@ -24,6 +24,7 @@
 #include "internal/network/p2p/Client.hpp"
 #include "internal/network/p2p/Server.hpp"
 #include "opentxs/Types.hpp"
+#include "opentxs/Version.hpp"
 #include "opentxs/api/network/Blockchain.hpp"
 #include "opentxs/blockchain/Blockchain.hpp"
 #include "opentxs/blockchain/BlockchainType.hpp"
@@ -38,8 +39,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace api
 {
 namespace crypto
@@ -96,13 +97,13 @@ class Context;
 }  // namespace network
 
 class Options;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
 namespace zmq = opentxs::network::zeromq;
 
-namespace opentxs::v1::api::network
+namespace opentxs::api::network
 {
 struct BlockchainImp final : public Blockchain::Imp {
     auto AddSyncServer(const UnallocatedCString& endpoint) const noexcept
@@ -232,4 +233,4 @@ private:
     auto operator=(const BlockchainImp&) -> BlockchainImp& = delete;
     auto operator=(BlockchainImp&&) -> BlockchainImp& = delete;
 };
-}  // namespace opentxs::v1::api::network
+}  // namespace opentxs::api::network

@@ -10,6 +10,7 @@
 #include <stdexcept>
 #include <utility>
 
+#include "opentxs/Version.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/core/UnitType.hpp"
 #include "opentxs/core/display/Definition.hpp"

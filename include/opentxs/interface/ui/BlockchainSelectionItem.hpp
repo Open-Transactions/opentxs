@@ -15,19 +15,19 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace ui
 {
 class BlockchainSelectionItem;
 }  // namespace ui
 
 using OTUIBlockchainSelectionItem = SharedPimpl<ui::BlockchainSelectionItem>;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::ui
+namespace opentxs::ui
 {
 class OPENTXS_EXPORT BlockchainSelectionItem : virtual public ListRow
 {
@@ -50,4 +50,4 @@ private:
     auto operator=(BlockchainSelectionItem&&)
         -> BlockchainSelectionItem& = delete;
 };
-}  // namespace opentxs::v1::ui
+}  // namespace opentxs::ui

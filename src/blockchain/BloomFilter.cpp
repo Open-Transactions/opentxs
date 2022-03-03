@@ -30,7 +30,7 @@
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Pimpl.hpp"
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto BloomFilter(
     const api::Session& api,
@@ -72,9 +72,9 @@ auto BloomFilter(const api::Session& api, const Data& serialized)
         raw.function_count_.value(),
         filter);
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory
 
-namespace opentxs::v1::blockchain::implementation
+namespace opentxs::blockchain::implementation
 {
 const std::size_t BloomFilter::max_filter_bytes_ = 36000;
 const std::size_t BloomFilter::max_hash_function_count_ = 50;
@@ -225,4 +225,4 @@ auto BloomFilter::Test(const Data& in) const noexcept -> bool
 
     return true;
 }
-}  // namespace opentxs::v1::blockchain::implementation
+}  // namespace opentxs::blockchain::implementation

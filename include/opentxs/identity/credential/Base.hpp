@@ -19,8 +19,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace proto
 {
 class Credential;
@@ -30,11 +30,11 @@ class VerificationSet;
 
 class PasswordPrompt;
 class Secret;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::identity::credential
+namespace opentxs::identity::credential
 {
 class OPENTXS_EXPORT Base : virtual public opentxs::contract::Signable
 {
@@ -90,4 +90,4 @@ private:
     auto operator=(const Base&) -> Base& = delete;
     auto operator=(Base&&) -> Base& = delete;
 };
-}  // namespace opentxs::v1::identity::credential
+}  // namespace opentxs::identity::credential

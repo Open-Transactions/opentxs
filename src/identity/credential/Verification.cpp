@@ -35,7 +35,7 @@
 #include "serialization/protobuf/VerificationIdentity.pb.h"
 #include "serialization/protobuf/VerificationSet.pb.h"
 
-namespace opentxs::v1
+namespace opentxs
 {
 auto Factory::VerificationCredential(
     const api::Session& api,
@@ -83,9 +83,9 @@ auto Factory::VerificationCredential(
         return nullptr;
     }
 }
-}  // namespace opentxs::v1
+}  // namespace opentxs
 
-namespace opentxs::v1::identity::credential
+namespace opentxs::identity::credential
 {
 // static
 auto Verification::SigningForm(const proto::Verification& item)
@@ -104,9 +104,9 @@ auto Verification::VerificationID(
 {
     return api.Factory().InternalSession().Identifier(item)->str();
 }
-}  // namespace opentxs::v1::identity::credential
+}  // namespace opentxs::identity::credential
 
-namespace opentxs::v1::identity::credential::implementation
+namespace opentxs::identity::credential::implementation
 {
 Verification::Verification(
     const api::Session& api,
@@ -217,4 +217,4 @@ auto Verification::verify_internally(const Lock& lock) const -> bool
 
     return true;
 }
-}  // namespace opentxs::v1::identity::credential::implementation
+}  // namespace opentxs::identity::credential::implementation

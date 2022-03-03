@@ -20,8 +20,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace proto
 {
 class HDPath;
@@ -34,7 +34,7 @@ class Identifier;
 class Item;
 
 using OTIdentifier = Pimpl<Identifier>;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -54,7 +54,7 @@ struct OPENTXS_EXPORT less<opentxs::OTIdentifier> {
 };
 }  // namespace std
 
-namespace opentxs::v1
+namespace opentxs
 {
 OPENTXS_EXPORT auto default_identifier_algorithm() noexcept
     -> identifier::Algorithm;
@@ -76,9 +76,9 @@ OPENTXS_EXPORT auto operator<=(
 OPENTXS_EXPORT auto operator>=(
     const opentxs::Pimpl<opentxs::Identifier>& lhs,
     const opentxs::Identifier& rhs) noexcept -> bool;
-}  // namespace opentxs::v1
+}  // namespace opentxs
 
-namespace opentxs::v1
+namespace opentxs
 {
 /** An Identifier is basically a 256 bit hash value. This class makes it easy to
  * convert IDs back and forth to strings. */
@@ -154,4 +154,4 @@ private:
     auto operator=(const Identifier&) -> Identifier& = delete;
     auto operator=(Identifier&&) -> Identifier& = delete;
 };
-}  // namespace opentxs::v1
+}  // namespace opentxs

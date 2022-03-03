@@ -31,8 +31,8 @@ class QVariant;
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace api
 {
 namespace crypto
@@ -61,13 +61,13 @@ namespace ui
 {
 class BlockchainSelectionItem;
 }  // namespace ui
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wnon-virtual-dtor"
-namespace opentxs::v1::ui::implementation
+namespace opentxs::ui::implementation
 {
 using BlockchainSelectionItemRow =
     Row<BlockchainSelectionRowInternal,
@@ -112,7 +112,7 @@ private:
     auto operator=(BlockchainSelectionItem&&)
         -> BlockchainSelectionItem& = delete;
 };
-}  // namespace opentxs::v1::ui::implementation
+}  // namespace opentxs::ui::implementation
 #pragma GCC diagnostic pop
 
 template class opentxs::SharedPimpl<opentxs::ui::BlockchainSelectionItem>;

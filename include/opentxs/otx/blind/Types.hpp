@@ -17,14 +17,14 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 class Amount;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::otx::blind
+namespace opentxs::otx::blind
 {
 enum class CashType : std::uint8_t;
 enum class PurseType : std::uint8_t;
@@ -32,11 +32,11 @@ enum class TokenState : std::uint8_t;
 
 using Denomination = Amount;
 using MintSeries = std::uint64_t;
-}  // namespace opentxs::v1::otx::blind
+}  // namespace opentxs::otx::blind
 
-namespace opentxs::v1
+namespace opentxs
 {
 auto print(otx::blind::CashType) noexcept -> UnallocatedCString;
 auto supported_otx_token_types() noexcept
     -> UnallocatedSet<otx::blind::CashType>;
-}  // namespace opentxs::v1
+}  // namespace opentxs

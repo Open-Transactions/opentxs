@@ -13,7 +13,7 @@
 #include "api/session/base/Scheduler.hpp"
 #include "internal/api/network/Factory.hpp"
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto NetworkAPI(
     const api::Session& api,
@@ -41,9 +41,9 @@ auto NetworkAPI(
                config.unit_refresh_interval_)
         .release();
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory
 
-namespace opentxs::v1::api::network
+namespace opentxs::api::network
 {
 Network::Network(Imp* imp) noexcept
     : imp_(imp)
@@ -80,4 +80,4 @@ Network::~Network()
         imp_ = nullptr;
     }
 }
-}  // namespace opentxs::v1::api::network
+}  // namespace opentxs::api::network

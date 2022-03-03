@@ -54,7 +54,7 @@
 #include "opentxs/util/Pimpl.hpp"
 #include "serialization/protobuf/HDPath.pb.h"
 
-namespace opentxs::v1::blockchain::node::wallet
+namespace opentxs::blockchain::node::wallet
 {
 NotificationStateData::NotificationStateData(
     const api::Session& api,
@@ -303,4 +303,4 @@ auto NotificationStateData::work() noexcept -> bool
 
     return again;
 }
-}  // namespace opentxs::v1::blockchain::node::wallet
+}  // namespace opentxs::blockchain::node::wallet

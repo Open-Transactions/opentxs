@@ -15,18 +15,18 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace ui
 {
 class BlockchainSelection;
 class BlockchainSelectionItem;
 }  // namespace ui
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::ui
+namespace opentxs::ui
 {
 class OPENTXS_EXPORT BlockchainSelection : virtual public List
 {
@@ -51,4 +51,4 @@ private:
     auto operator=(const BlockchainSelection&) -> BlockchainSelection& = delete;
     auto operator=(BlockchainSelection&&) -> BlockchainSelection& = delete;
 };
-}  // namespace opentxs::v1::ui
+}  // namespace opentxs::ui

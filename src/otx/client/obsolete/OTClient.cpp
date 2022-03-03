@@ -26,7 +26,7 @@
 #include "opentxs/util/Numbers.hpp"
 #include "opentxs/util/Pimpl.hpp"
 
-namespace opentxs::v1
+namespace opentxs
 {
 OTClient::OTClient(const api::Session& api)
     : api_(api)
@@ -201,4 +201,4 @@ auto OTClient::ProcessUserCommand(
 
     return static_cast<std::int32_t>(lReturnValue);
 }
-}  // namespace opentxs::v1
+}  // namespace opentxs

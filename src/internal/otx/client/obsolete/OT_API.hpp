@@ -34,8 +34,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace api
 {
 namespace network
@@ -93,11 +93,11 @@ class Message;
 class OTClient;
 class OTPaymentPlan;
 class PasswordPrompt;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1
+namespace opentxs
 {
 // The C++ high-level interface to the Open Transactions client-side.
 class OT_API : Lockable
@@ -691,4 +691,4 @@ private:
     auto operator=(const OT_API&) -> OT_API = delete;
     auto operator=(OT_API&&) -> OT_API = delete;
 };
-}  // namespace opentxs::v1
+}  // namespace opentxs

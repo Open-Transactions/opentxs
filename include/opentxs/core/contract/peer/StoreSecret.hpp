@@ -13,8 +13,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {
-inline namespace v1
-{
+// inline namespace v1
+// {
 namespace contract
 {
 namespace peer
@@ -27,11 +27,11 @@ class StoreSecret;
 }  // namespace contract
 
 using OTStoreSecret = SharedPimpl<contract::peer::request::StoreSecret>;
-}  // namespace v1
+// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::v1::contract::peer::request
+namespace opentxs::contract::peer::request
 {
 class OPENTXS_EXPORT StoreSecret : virtual public peer::Request
 {
@@ -53,4 +53,4 @@ private:
     auto operator=(const StoreSecret&) -> StoreSecret& = delete;
     auto operator=(StoreSecret&&) -> StoreSecret& = delete;
 };
-}  // namespace opentxs::v1::contract::peer::request
+}  // namespace opentxs::contract::peer::request

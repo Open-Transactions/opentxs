@@ -5,7 +5,7 @@
 
 syntax = "proto2";
 
-package opentxs.v1.proto;
+package opentxs.proto;
 option java_package = "org.opentransactions.proto";
 option java_outer_classname = "OTContact";
 option optimize_for = LITE_RUNTIME;

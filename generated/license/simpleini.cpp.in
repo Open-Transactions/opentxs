@@ -7,10 +7,10 @@
 #include "1_Internal.hpp"            // IWYU pragma: associated
 #include "util/license/License.hpp"  // IWYU pragma: associated
 
-namespace opentxs::v1
+namespace opentxs
 {
 auto license_simpleini(LicenseMap& out) noexcept -> void
 {
     out.emplace("simpleini", UnallocatedCString{R"~!~(@SIMPLEINI_LICENSE_TEXT@)~!~"});
 }
-}  // namespace opentxs::v1
+}  // namespace opentxs

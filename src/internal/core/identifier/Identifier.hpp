@@ -11,7 +11,7 @@
 #include "opentxs/core/identifier/UnitDefinition.hpp"
 #include "util/Blank.hpp"
 
-namespace opentxs::v1
+namespace opentxs
 {
 template <>
 struct make_blank<OTIdentifier> {
@@ -44,4 +44,4 @@ struct make_blank<OTUnitID> {
         return identifier::UnitDefinition::Factory();
     }
 };
-}  // namespace opentxs::v1
+}  // namespace opentxs

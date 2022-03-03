@@ -31,7 +31,7 @@
 #include "serialization/protobuf/StorageThread.pb.h"
 #include "serialization/protobuf/StorageThreadItem.pb.h"
 
-namespace opentxs::v1::factory
+namespace opentxs::factory
 {
 auto ActivitySummaryModel(
     const api::session::Client& api,
@@ -44,9 +44,9 @@ auto ActivitySummaryModel(
 
     return std::make_unique<ReturnType>(api, running, nymID, cb);
 }
-}  // namespace opentxs::v1::factory
+}  // namespace opentxs::factory
 
-namespace opentxs::v1::ui::implementation
+namespace opentxs::ui::implementation
 {
 ActivitySummary::ActivitySummary(
     const api::session::Client& api,
@@ -183,4 +183,4 @@ ActivitySummary::~ActivitySummary()
 {
     for (auto& it : listeners_) { delete it.second; }
 }
-}  // namespace opentxs::v1::ui::implementation
+}  // namespace opentxs::ui::implementation
