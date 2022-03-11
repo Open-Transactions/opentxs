@@ -4,31 +4,42 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 #pragma once
-#include <gtest/gtest.h>
 #include <gmock/gmock.h>
+#include <gtest/gtest.h>
 
 #include "opentxs/crypto/key/Keypair.hpp"
 
 namespace opentxs::crypto::key
 {
 
-class KeypairMock : public Keypair {
+class KeypairMock : public Keypair
+{
 public:
-
     MOCK_METHOD(bool, BracketOperator, (), (const, noexcept));
-    virtual operator bool() const noexcept{ return true; }
+    virtual operator bool() const noexcept { return true; }
 
-    MOCK_METHOD(bool, CheckCapability, (const NymCapability& capability), (const, noexcept, override));
+    MOCK_METHOD(
+        bool,
+        CheckCapability,
+        (const NymCapability& capability),
+        (const, noexcept, override));
     MOCK_METHOD(const Asymmetric&, GetPrivateKey, (), (const, override));
     MOCK_METHOD(const Asymmetric&, GetPublicKey, (), (const, override));
-    MOCK_METHOD(std::int32_t, GetPublicKeyBySignature, (Keys& listOutput,
-                                                             const Signature& theSignature,
-                                                             bool bInclusive ), (const, noexcept, override));
-    MOCK_METHOD(bool , Serialize, (proto::AsymmetricKey& serialized,
-                                               bool privateKey), (const, noexcept, override));
-    MOCK_METHOD(bool , GetTransportKey, (Data& publicKey,
-                                        Secret& privateKey,
-                                        const PasswordPrompt& reason), (const, noexcept, override));
+    MOCK_METHOD(
+        std::int32_t,
+        GetPublicKeyBySignature,
+        (Keys & listOutput, const Signature& theSignature, bool bInclusive),
+        (const, noexcept, override));
+    MOCK_METHOD(
+        bool,
+        Serialize,
+        (proto::AsymmetricKey & serialized, bool privateKey),
+        (const, noexcept, override));
+    MOCK_METHOD(
+        bool,
+        GetTransportKey,
+        (Data & publicKey, Secret& privateKey, const PasswordPrompt& reason),
+        (const, noexcept, override));
     MOCK_METHOD(Keypair*, clone, (), (const, override));
 };
-}
+}  // namespace opentxs::crypto::key

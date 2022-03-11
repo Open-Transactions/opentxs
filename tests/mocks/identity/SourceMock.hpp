@@ -4,28 +4,41 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 #pragma once
-#include <gtest/gtest.h>
 #include <gmock/gmock.h>
+#include <gtest/gtest.h>
 
-#include "opentxs/identity/Source.hpp"
-#include "opentxs/identity/Types.hpp"
 #include "opentxs/core/String.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
+#include "opentxs/identity/Source.hpp"
+#include "opentxs/identity/Types.hpp"
 #include "opentxs/util/PasswordPrompt.hpp"
 
 namespace opentxs::identity
 {
-class SourceMock : public Source {
+class SourceMock : public Source
+{
 public:
     MOCK_METHOD(OTString, asString, (), (const, noexcept, override));
     MOCK_METHOD(OTString, Description, (), (const, noexcept, override));
     MOCK_METHOD(identity::SourceType, Type, (), (const, noexcept, override));
     MOCK_METHOD(OTNymID, NymID, (), (const, noexcept, override));
-    MOCK_METHOD(bool, Serialize, (proto::NymIDSource& serialized), (const, noexcept, override));
-    MOCK_METHOD(bool, Verify, (const proto::Credential& master,
-                               const proto::Signature& sourceSignature), (const, noexcept, override));
-    MOCK_METHOD(bool, Sign, (const identity::credential::Primary& credential,
-                                     proto::Signature& sig,
-                                     const PasswordPrompt& reason), (const, noexcept, override));
+    MOCK_METHOD(
+        bool,
+        Serialize,
+        (proto::NymIDSource & serialized),
+        (const, noexcept, override));
+    MOCK_METHOD(
+        bool,
+        Verify,
+        (const proto::Credential& master,
+         const proto::Signature& sourceSignature),
+        (const, noexcept, override));
+    MOCK_METHOD(
+        bool,
+        Sign,
+        (const identity::credential::Primary& credential,
+         proto::Signature& sig,
+         const PasswordPrompt& reason),
+        (const, noexcept, override));
 };
-}
+}  // namespace opentxs::identity

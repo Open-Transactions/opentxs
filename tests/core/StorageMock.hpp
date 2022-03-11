@@ -28,11 +28,10 @@
 
 namespace opentxs::api::session::internal
 {
-    class Storage : virtual public session::Storage
-    {
-
-    };
-}
+class Storage : virtual public session::Storage
+{
+};
+}  // namespace opentxs::api::session::internal
 
 class MStoreage
 {
@@ -48,21 +47,17 @@ public:
         AccountAlias,
         (const opentxs::Identifier&),
         (const, final));
-    MOCK_METHOD(
-        opentxs::ObjectList,
-        AccountList,
-        (),
-        (const, final));
+    MOCK_METHOD(opentxs::ObjectList, AccountList, (), (const, final));
     MOCK_METHOD(
         opentxs::OTUnitID,
         AccountContract,
         (const opentxs::Identifier& accountID),
         (const, final));
-////    MOCK_METHOD(
-////        ,
-////        ,
-////        (),
-////        ());
+    ////    MOCK_METHOD(
+    ////        ,
+    ////        ,
+    ////        (),
+    ////        ());
     MOCK_METHOD(
         opentxs::OTNymID,
         AccountIssuer,
@@ -131,7 +126,8 @@ public:
     MOCK_METHOD(
         opentxs::UnitType,
         BlockchainAccountType,
-        (const opentxs::UnallocatedCString&, const opentxs::UnallocatedCString&),
+        (const opentxs::UnallocatedCString&,
+         const opentxs::UnallocatedCString&),
         (const, final));
     MOCK_METHOD(
         opentxs::UnallocatedVector<opentxs::OTIdentifier>,
@@ -146,18 +142,17 @@ public:
     MOCK_METHOD(
         bool,
         CheckTokenSpent,
-        (const opentxs::identifier::Notary&, const opentxs::identifier::UnitDefinition&, const std::uint64_t, const opentxs::UnallocatedCString&),
+        (const opentxs::identifier::Notary&,
+         const opentxs::identifier::UnitDefinition&,
+         const std::uint64_t,
+         const opentxs::UnallocatedCString&),
         (const, final));
     MOCK_METHOD(
         opentxs::UnallocatedCString,
         ContactAlias,
         (const opentxs::UnallocatedCString&),
         (const, final));
-    MOCK_METHOD(
-        opentxs::ObjectList,
-        ContactList,
-        (),
-        (const, final));
+    MOCK_METHOD(opentxs::ObjectList, ContactList, (), (const, final));
     MOCK_METHOD(
         opentxs::ObjectList,
         ContextList,
@@ -168,11 +163,7 @@ public:
         ContactOwnerNym,
         (const opentxs::UnallocatedCString&),
         (const, final));
-    MOCK_METHOD(
-        void,
-        ContactSaveIndices,
-        (),
-        (const, final));
+    MOCK_METHOD(void, ContactSaveIndices, (), (const, final));
     MOCK_METHOD(
         opentxs::VersionNumber,
         ContactUpgradeLevel,
@@ -181,23 +172,17 @@ public:
     MOCK_METHOD(
         bool,
         CreateThread,
-        (const opentxs::UnallocatedCString&, const opentxs::UnallocatedCString&, const opentxs::UnallocatedSet<opentxs::UnallocatedCString>&),
+        (const opentxs::UnallocatedCString&,
+         const opentxs::UnallocatedCString&,
+         const opentxs::UnallocatedSet<opentxs::UnallocatedCString>&),
         (const, final));
     MOCK_METHOD(
         bool,
         DeleteAccount,
         (const opentxs::UnallocatedCString&),
         (const, final));
-    MOCK_METHOD(
-        opentxs::OTNymID,
-        DefaultNym,
-        (),
-        (const, final));
-    MOCK_METHOD(
-        opentxs::UnallocatedCString,
-        DefaultSeed,
-        (),
-        (const, final));
+    MOCK_METHOD(opentxs::OTNymID, DefaultNym, (), (const, final));
+    MOCK_METHOD(opentxs::UnallocatedCString, DefaultSeed, (), (const, final));
     MOCK_METHOD(
         bool,
         DeleteContact,
@@ -206,15 +191,13 @@ public:
     MOCK_METHOD(
         bool,
         DeletePaymentWorkflow,
-        (const opentxs::UnallocatedCString&, const opentxs::UnallocatedCString&),
+        (const opentxs::UnallocatedCString&,
+         const opentxs::UnallocatedCString&),
         (const, final));
-    MOCK_METHOD(
-        std::uint32_t,
-        HashType,
-        (),
-        (const, final));
+    MOCK_METHOD(std::uint32_t, HashType, (), (const, final));
 
-    auto Internal() const noexcept -> const opentxs::api::session::internal::Storage& final
+    auto Internal() const noexcept
+        -> const opentxs::api::session::internal::Storage& final
     {
         return *this;
     }
@@ -233,7 +216,10 @@ public:
     MOCK_METHOD(
         bool,
         LoadHelper,
-        (const opentxs::UnallocatedCString&, opentxs::UnallocatedCString&, opentxs::UnallocatedCString&, const bool),
+        (const opentxs::UnallocatedCString&,
+         opentxs::UnallocatedCString&,
+         opentxs::UnallocatedCString&,
+         const bool),
         (const));
 
     auto Load(
@@ -248,7 +234,10 @@ public:
     MOCK_METHOD(
         bool,
         LoadHelper,
-        (const opentxs::UnallocatedCString&, const opentxs::UnallocatedCString&, opentxs::proto::HDAccount&, const bool checking),
+        (const opentxs::UnallocatedCString&,
+         const opentxs::UnallocatedCString&,
+         opentxs::proto::HDAccount&,
+         const bool checking),
         (const));
 
     auto Load(
@@ -259,11 +248,11 @@ public:
     {
         return LoadHelper(nymID, accountID, output, checking);
     }
-////    MOCK_METHOD(
-////        ,
-////        ,
-////        (),
-////        ())
+    ////    MOCK_METHOD(
+    ////        ,
+    ////        ,
+    ////        (),
+    ////        ())
     auto Load(
         const opentxs::identifier::Nym& nymID,
         const opentxs::Identifier& channelID,
@@ -272,11 +261,11 @@ public:
     {
         return false;
     }
-////    MOCK_METHOD(
-////        ,
-////        ,
-////        (),
-////        ())
+    ////    MOCK_METHOD(
+    ////        ,
+    ////        ,
+    ////        (),
+    ////        ())
     auto Load(
         const opentxs::UnallocatedCString& id,
         opentxs::proto::Contact& contact,
@@ -284,11 +273,11 @@ public:
     {
         return false;
     }
-////    MOCK_METHOD(
-////        ,
-////        ,
-////        (),
-////        ())
+    ////    MOCK_METHOD(
+    ////        ,
+    ////        ,
+    ////        (),
+    ////        ())
     auto Load(
         const opentxs::UnallocatedCString& id,
         opentxs::proto::Contact& contact,
@@ -297,11 +286,11 @@ public:
     {
         return false;
     }
-////    MOCK_METHOD(
-////        ,
-////        ,
-////        (),
-////        ())
+    ////    MOCK_METHOD(
+    ////        ,
+    ////        ,
+    ////        (),
+    ////        ())
     auto Load(
         const opentxs::UnallocatedCString& nym,
         const opentxs::UnallocatedCString& id,
@@ -310,11 +299,11 @@ public:
     {
         return false;
     }
-////    MOCK_METHOD(
-////        ,
-////        ,
-////        (),
-////        ())
+    ////    MOCK_METHOD(
+    ////        ,
+    ////        ,
+    ////        (),
+    ////        ())
     auto Load(
         const opentxs::UnallocatedCString& id,
         opentxs::proto::Credential& cred,
@@ -322,11 +311,11 @@ public:
     {
         return false;
     }
-////    MOCK_METHOD(
-////        ,
-////        ,
-////        (),
-////        ())
+    ////    MOCK_METHOD(
+    ////        ,
+    ////        ,
+    ////        (),
+    ////        ())
     auto Load(
         const opentxs::identifier::Nym& id,
         opentxs::proto::Nym& nym,
@@ -334,11 +323,11 @@ public:
     {
         return false;
     }
-////    MOCK_METHOD(
-////        ,
-////        ,
-////        (),
-////        ());
+    ////    MOCK_METHOD(
+    ////        ,
+    ////        ,
+    ////        (),
+    ////        ());
     auto Load(
         const opentxs::identifier::Nym& id,
         opentxs::proto::Nym& nym,
@@ -382,7 +371,12 @@ public:
     MOCK_METHOD(
         bool,
         LoadHelper,
-        (const opentxs::UnallocatedCString&, const opentxs::UnallocatedCString&, const opentxs::StorageBox, opentxs::UnallocatedCString&, opentxs::UnallocatedCString&, const bool),
+        (const opentxs::UnallocatedCString&,
+         const opentxs::UnallocatedCString&,
+         const opentxs::StorageBox,
+         opentxs::UnallocatedCString&,
+         opentxs::UnallocatedCString&,
+         const bool),
         (const));
 
     virtual auto Load(
@@ -469,8 +463,9 @@ public:
         return false;
     }
 
-    virtual auto Load(opentxs::proto::Ciphertext& output, const bool checking = false)
-        const -> bool final
+    virtual auto Load(
+        opentxs::proto::Ciphertext& output,
+        const bool checking = false) const -> bool final
     {
         return false;
     }
@@ -498,17 +493,9 @@ public:
         (),
         (const, final));
 
-    MOCK_METHOD(
-        void,
-        MapPublicNyms,
-        (opentxs::NymLambda&),
-        (const, final));
+    MOCK_METHOD(void, MapPublicNyms, (opentxs::NymLambda&), (const, final));
 
-    MOCK_METHOD(
-        void,
-        MapServers,
-        (opentxs::ServerLambda&),
-        (const, final));
+    MOCK_METHOD(void, MapServers, (opentxs::ServerLambda&), (const, final));
 
     MOCK_METHOD(
         void,
@@ -519,13 +506,19 @@ public:
     MOCK_METHOD(
         bool,
         MarkTokenSpent,
-        (const opentxs::identifier::Notary&, const opentxs::identifier::UnitDefinition&, const std::uint64_t, const opentxs::UnallocatedCString&),
+        (const opentxs::identifier::Notary&,
+         const opentxs::identifier::UnitDefinition&,
+         const std::uint64_t,
+         const opentxs::UnallocatedCString&),
         (const, final));
 
     MOCK_METHOD(
         bool,
         MoveThreadItem,
-        (const opentxs::UnallocatedCString&, const opentxs::UnallocatedCString&, const opentxs::UnallocatedCString&, const opentxs::UnallocatedCString&),
+        (const opentxs::UnallocatedCString&,
+         const opentxs::UnallocatedCString&,
+         const opentxs::UnallocatedCString&,
+         const opentxs::UnallocatedCString&),
         (const, final));
 
     MOCK_METHOD(
@@ -534,11 +527,7 @@ public:
         (const opentxs::UnallocatedCString&, const opentxs::StorageBox box),
         (const, final));
 
-    MOCK_METHOD(
-        opentxs::ObjectList,
-        NymList,
-        (),
-        (const, final));
+    MOCK_METHOD(opentxs::ObjectList, NymList, (), (const, final));
 
     MOCK_METHOD(
         opentxs::ObjectList,
@@ -549,49 +538,63 @@ public:
     MOCK_METHOD(
         opentxs::UnallocatedCString,
         PaymentWorkflowLookup,
-        (const opentxs::UnallocatedCString&, const opentxs::UnallocatedCString&),
+        (const opentxs::UnallocatedCString&,
+         const opentxs::UnallocatedCString&),
         (const, final));
 
     MOCK_METHOD(
         opentxs::UnallocatedSet<opentxs::UnallocatedCString>,
         PaymentWorkflowsByAccount,
-        (const opentxs::UnallocatedCString&, const opentxs::UnallocatedCString&),
+        (const opentxs::UnallocatedCString&,
+         const opentxs::UnallocatedCString&),
         (const, final));
 
     MOCK_METHOD(
         opentxs::UnallocatedSet<opentxs::UnallocatedCString>,
         PaymentWorkflowsByState,
-        (const opentxs::UnallocatedCString&, const opentxs::otx::client::PaymentWorkflowType, const opentxs::otx::client::PaymentWorkflowState),
+        (const opentxs::UnallocatedCString&,
+         const opentxs::otx::client::PaymentWorkflowType,
+         const opentxs::otx::client::PaymentWorkflowState),
         (const, final));
 
     MOCK_METHOD(
         (opentxs::UnallocatedSet<opentxs::UnallocatedCString>),
         PaymentWorkflowsByUnit,
-        (const opentxs::UnallocatedCString&, const opentxs::UnallocatedCString&),
+        (const opentxs::UnallocatedCString&,
+         const opentxs::UnallocatedCString&),
         (const, final));
 
     MOCK_METHOD(
-        (std::pair<opentxs::otx::client::PaymentWorkflowType, opentxs::otx::client::PaymentWorkflowState>),
+        (std::pair<
+            opentxs::otx::client::PaymentWorkflowType,
+            opentxs::otx::client::PaymentWorkflowState>),
         PaymentWorkflowState,
-        (const opentxs::UnallocatedCString&, const opentxs::UnallocatedCString&),
+        (const opentxs::UnallocatedCString&,
+         const opentxs::UnallocatedCString&),
         (const, final));
 
     MOCK_METHOD(
         bool,
         RelabelThread,
-        (const opentxs::UnallocatedCString&, const opentxs::UnallocatedCString&),
+        (const opentxs::UnallocatedCString&,
+         const opentxs::UnallocatedCString&),
         (const, final));
 
     MOCK_METHOD(
         bool,
         RemoveBlockchainThreadItem,
-        (const opentxs::identifier::Nym&, const opentxs::Identifier&, const opentxs::blockchain::Type, const opentxs::Data&),
+        (const opentxs::identifier::Nym&,
+         const opentxs::Identifier&,
+         const opentxs::blockchain::Type,
+         const opentxs::Data&),
         (const, noexcept, final));
 
     MOCK_METHOD(
         bool,
         RemoveNymBoxItem,
-        (const opentxs::UnallocatedCString&, const opentxs::StorageBox, const opentxs::UnallocatedCString&),
+        (const opentxs::UnallocatedCString&,
+         const opentxs::StorageBox,
+         const opentxs::UnallocatedCString&),
         (const, final));
 
     MOCK_METHOD(
@@ -603,7 +606,9 @@ public:
     MOCK_METHOD(
         bool,
         RemoveThreadItem,
-        (const opentxs::identifier::Nym&, const opentxs::Identifier&, const opentxs::UnallocatedCString&),
+        (const opentxs::identifier::Nym&,
+         const opentxs::Identifier&,
+         const opentxs::UnallocatedCString&),
         (const, final));
 
     MOCK_METHOD(
@@ -615,14 +620,12 @@ public:
     MOCK_METHOD(
         bool,
         RenameThread,
-        (const opentxs::UnallocatedCString&, const opentxs::UnallocatedCString&, const opentxs::UnallocatedCString&),
+        (const opentxs::UnallocatedCString&,
+         const opentxs::UnallocatedCString&,
+         const opentxs::UnallocatedCString&),
         (const, final));
 
-    MOCK_METHOD(
-        void,
-        RunGC,
-        (),
-        (const, final));
+    MOCK_METHOD(void, RunGC, (), (const, final));
 
     MOCK_METHOD(
         opentxs::UnallocatedCString,
@@ -630,28 +633,22 @@ public:
         (const opentxs::UnallocatedCString&),
         (const, final));
 
-    MOCK_METHOD(
-        opentxs::ObjectList,
-        ServerList,
-        (),
-        (const, final));
+    MOCK_METHOD(opentxs::ObjectList, ServerList, (), (const, final));
 
-    MOCK_METHOD(
-        opentxs::ObjectList,
-        SeedList,
-        (),
-        (const, final));
+    MOCK_METHOD(opentxs::ObjectList, SeedList, (), (const, final));
 
     MOCK_METHOD(
         bool,
         SetAccountAlias,
-        (const opentxs::UnallocatedCString&, const opentxs::UnallocatedCString&),
+        (const opentxs::UnallocatedCString&,
+         const opentxs::UnallocatedCString&),
         (const, final));
 
     MOCK_METHOD(
         bool,
         SetContactAlias,
-        (const opentxs::UnallocatedCString&, const opentxs::UnallocatedCString&),
+        (const opentxs::UnallocatedCString&,
+         const opentxs::UnallocatedCString&),
         (const, final));
 
     MOCK_METHOD(
@@ -675,68 +672,82 @@ public:
     MOCK_METHOD(
         bool,
         SetPeerRequestTime,
-        (const opentxs::UnallocatedCString&, const opentxs::UnallocatedCString&, const opentxs::StorageBox),
+        (const opentxs::UnallocatedCString&,
+         const opentxs::UnallocatedCString&,
+         const opentxs::StorageBox),
         (const, final));
 
     MOCK_METHOD(
         bool,
         SetReadState,
-        (const opentxs::UnallocatedCString&, const opentxs::UnallocatedCString&, const opentxs::UnallocatedCString&, const bool unread),
+        (const opentxs::UnallocatedCString&,
+         const opentxs::UnallocatedCString&,
+         const opentxs::UnallocatedCString&,
+         const bool unread),
         (const, final));
 
     MOCK_METHOD(
         bool,
         SetSeedAlias,
-        (const opentxs::UnallocatedCString&, const opentxs::UnallocatedCString&),
+        (const opentxs::UnallocatedCString&,
+         const opentxs::UnallocatedCString&),
         (const, final));
 
     MOCK_METHOD(
         bool,
         SetServerAlias,
-        (const opentxs::identifier::Notary&, const opentxs::UnallocatedCString&),
+        (const opentxs::identifier::Notary&,
+         const opentxs::UnallocatedCString&),
         (const, final));
 
     MOCK_METHOD(
         bool,
         SetThreadAlias,
-        (const opentxs::UnallocatedCString&, const opentxs::UnallocatedCString&, const opentxs::UnallocatedCString&),
+        (const opentxs::UnallocatedCString&,
+         const opentxs::UnallocatedCString&,
+         const opentxs::UnallocatedCString&),
         (const, final));
 
     MOCK_METHOD(
         bool,
         SetUnitDefinitionAlias,
-        (const opentxs::identifier::UnitDefinition&, const opentxs::UnallocatedCString&),
+        (const opentxs::identifier::UnitDefinition&,
+         const opentxs::UnallocatedCString&),
         (const, final));
 
     MOCK_METHOD(
         bool,
         Store,
-        (const opentxs::UnallocatedCString&, const opentxs::UnallocatedCString&, const opentxs::UnallocatedCString&, const opentxs::identifier::Nym&, const opentxs::identifier::Nym&, const opentxs::identifier::Nym&, const opentxs::identifier::Notary&, const opentxs::identifier::UnitDefinition&, const opentxs::UnitType),
+        (const opentxs::UnallocatedCString&,
+         const opentxs::UnallocatedCString&,
+         const opentxs::UnallocatedCString&,
+         const opentxs::identifier::Nym&,
+         const opentxs::identifier::Nym&,
+         const opentxs::identifier::Nym&,
+         const opentxs::identifier::Notary&,
+         const opentxs::identifier::UnitDefinition&,
+         const opentxs::UnitType),
         (const, final));
 
     MOCK_METHOD(
         bool,
         Store,
-        (const opentxs::UnallocatedCString&, const opentxs::identity::wot::claim::ClaimType, const opentxs::proto::HDAccount&),
+        (const opentxs::UnallocatedCString&,
+         const opentxs::identity::wot::claim::ClaimType,
+         const opentxs::proto::HDAccount&),
         (const, final));
 
     MOCK_METHOD(
         bool,
         Store,
-        (const opentxs::identifier::Nym&, const opentxs::Identifier&, const opentxs::proto::Bip47Channel&),
+        (const opentxs::identifier::Nym&,
+         const opentxs::Identifier&,
+         const opentxs::proto::Bip47Channel&),
         (const, final));
 
-    MOCK_METHOD(
-        bool,
-        Store,
-        (const opentxs::proto::Contact&),
-        (const, final));
+    MOCK_METHOD(bool, Store, (const opentxs::proto::Contact&), (const, final));
 
-    MOCK_METHOD(
-        bool,
-        Store,
-        (const opentxs::proto::Context&),
-        (const, final));
+    MOCK_METHOD(bool, Store, (const opentxs::proto::Context&), (const, final));
 
     MOCK_METHOD(
         bool,
@@ -779,13 +790,21 @@ public:
     MOCK_METHOD(
         bool,
         Store,
-        (const opentxs::UnallocatedCString&, const opentxs::proto::PaymentWorkflow&),
+        (const opentxs::UnallocatedCString&,
+         const opentxs::proto::PaymentWorkflow&),
         (const, final));
 
     MOCK_METHOD(
         bool,
         StoreHelper,
-        (const opentxs::UnallocatedCString&, const opentxs::UnallocatedCString&, const opentxs::UnallocatedCString&, const std::uint64_t, const opentxs::UnallocatedCString&, const opentxs::UnallocatedCString&, const opentxs::StorageBox, const opentxs::UnallocatedCString&),
+        (const opentxs::UnallocatedCString&,
+         const opentxs::UnallocatedCString&,
+         const opentxs::UnallocatedCString&,
+         const std::uint64_t,
+         const opentxs::UnallocatedCString&,
+         const opentxs::UnallocatedCString&,
+         const opentxs::StorageBox,
+         const opentxs::UnallocatedCString&),
         (const));
 
     virtual auto Store(
@@ -798,25 +817,34 @@ public:
         const opentxs::StorageBox box,
         const opentxs::UnallocatedCString& account = {}) const -> bool final
     {
-        return StoreHelper(nymid, threadid, itemid, time, alias, data, box, account);
+        return StoreHelper(
+            nymid, threadid, itemid, time, alias, data, box, account);
     };
 
     MOCK_METHOD(
         bool,
         Store,
-        (const opentxs::identifier::Nym&, const opentxs::Identifier&, const opentxs::blockchain::Type, const opentxs::Data&, const opentxs::Time),
+        (const opentxs::identifier::Nym&,
+         const opentxs::Identifier&,
+         const opentxs::blockchain::Type,
+         const opentxs::Data&,
+         const opentxs::Time),
         (const, noexcept, final));
 
     MOCK_METHOD(
         bool,
         Store,
-        (const opentxs::proto::PeerReply&, const opentxs::UnallocatedCString&, const opentxs::StorageBox),
+        (const opentxs::proto::PeerReply&,
+         const opentxs::UnallocatedCString&,
+         const opentxs::StorageBox),
         (const, final));
 
     MOCK_METHOD(
         bool,
         Store,
-        (const opentxs::proto::PeerRequest&, const opentxs::UnallocatedCString&, const opentxs::StorageBox),
+        (const opentxs::proto::PeerRequest&,
+         const opentxs::UnallocatedCString&,
+         const opentxs::StorageBox),
         (const, final));
 
     MOCK_METHOD(
@@ -825,16 +853,13 @@ public:
         (const opentxs::identifier::Nym&, const opentxs::proto::Purse&),
         (const, final));
 
-    MOCK_METHOD(
-        bool,
-        Store,
-        (const opentxs::proto::Seed&),
-        (const, final));
+    MOCK_METHOD(bool, Store, (const opentxs::proto::Seed&), (const, final));
 
     MOCK_METHOD(
         bool,
         StoreHelper,
-        (const opentxs::proto::ServerContract&, const opentxs::UnallocatedCString&),
+        (const opentxs::proto::ServerContract&,
+         const opentxs::UnallocatedCString&),
         (const));
 
     virtual auto Store(
@@ -853,7 +878,8 @@ public:
     MOCK_METHOD(
         bool,
         StoreHelper,
-        (const opentxs::proto::UnitDefinition& data, const opentxs::UnallocatedCString&),
+        (const opentxs::proto::UnitDefinition& data,
+         const opentxs::UnallocatedCString&),
         (const));
 
     virtual auto Store(
@@ -872,7 +898,8 @@ public:
     MOCK_METHOD(
         opentxs::UnallocatedCString,
         ThreadAlias,
-        (const opentxs::UnallocatedCString&, const opentxs::UnallocatedCString&),
+        (const opentxs::UnallocatedCString&,
+         const opentxs::UnallocatedCString&),
         (const, final));
 
     MOCK_METHOD(
@@ -887,21 +914,14 @@ public:
         (const opentxs::UnallocatedCString&),
         (const, final));
 
-    MOCK_METHOD(
-        opentxs::ObjectList,
-        UnitDefinitionList,
-        (),
-        (const, final));
+    MOCK_METHOD(opentxs::ObjectList, UnitDefinitionList, (), (const, final));
 
     MOCK_METHOD(
         std::size_t,
         UnreadCount,
-        (const opentxs::UnallocatedCString&, const opentxs::UnallocatedCString&),
+        (const opentxs::UnallocatedCString&,
+         const opentxs::UnallocatedCString&),
         (const, final));
 
-    MOCK_METHOD(
-        void,
-        UpgradeNyms,
-        (),
-        (final));
+    MOCK_METHOD(void, UpgradeNyms, (), (final));
 };

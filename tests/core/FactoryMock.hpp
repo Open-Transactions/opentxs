@@ -5,28 +5,28 @@
 #pragma once
 
 #include <gmock/gmock.h>
-
-#include "opentxs/api/session/Factory.hpp"
-#include "opentxs/core/identifier/Generic.hpp"
-#include "opentxs/otx/blind/Mint.hpp"
-#include "opentxs/core/PaymentCode.hpp"
-#include "opentxs/network/zeromq/Pipeline.hpp"
-#include "opentxs/otx/blind/Purse.hpp"
-#include "serialization/protobuf/BlockchainPeerAddress.pb.h"
-#include "serialization/protobuf/BlockchainBlockHeader.pb.h"
-#include "serialization/protobuf/PeerObject.pb.h"
 #include <google/protobuf/message_lite.h>
-#include "serialization/protobuf/Identifier.pb.h"
+
 #include "internal/api/session/FactoryAPI.hpp"
-#include "internal/otx/common/basket/Basket.hpp"
+#include "internal/otx/client/OTPayment.hpp"
 #include "internal/otx/common/Cheque.hpp"
+#include "internal/otx/common/Message.hpp"
+#include "internal/otx/common/basket/Basket.hpp"
 #include "internal/otx/common/cron/OTCron.hpp"
 #include "internal/otx/common/cron/OTCronItem.hpp"
-#include "internal/otx/common/trade/OTMarket.hpp"
-#include "internal/otx/common/Message.hpp"
-#include "internal/otx/client/OTPayment.hpp"
 #include "internal/otx/common/crypto/OTSignedFile.hpp"
+#include "internal/otx/common/trade/OTMarket.hpp"
 #include "internal/otx/common/trade/OTTrade.hpp"
+#include "opentxs/api/session/Factory.hpp"
+#include "opentxs/core/PaymentCode.hpp"
+#include "opentxs/core/identifier/Generic.hpp"
+#include "opentxs/network/zeromq/Pipeline.hpp"
+#include "opentxs/otx/blind/Mint.hpp"
+#include "opentxs/otx/blind/Purse.hpp"
+#include "serialization/protobuf/BlockchainBlockHeader.pb.h"
+#include "serialization/protobuf/BlockchainPeerAddress.pb.h"
+#include "serialization/protobuf/Identifier.pb.h"
+#include "serialization/protobuf/PeerObject.pb.h"
 
 namespace opentxs
 {
@@ -36,11 +36,7 @@ class FactoryMock : virtual public api::session::internal::Factory
 public:
     FactoryMock() = default;
 
-    MOCK_METHOD(
-        OTArmored,
-        Armored,
-        (),
-        (const, final));
+    MOCK_METHOD(OTArmored, Armored, (), (const, final));
 
     MOCK_METHOD(
         OTArmored,
@@ -48,17 +44,9 @@ public:
         (const UnallocatedCString&),
         (const, final));
 
-    MOCK_METHOD(
-        OTArmored,
-        Armored,
-        (const opentxs::Data&),
-        (const, final));
+    MOCK_METHOD(OTArmored, Armored, (const opentxs::Data&), (const, final));
 
-    MOCK_METHOD(
-        OTArmored,
-        Armored,
-        (const opentxs::String&),
-        (const, final));
+    MOCK_METHOD(OTArmored, Armored, (const opentxs::String&), (const, final));
 
     MOCK_METHOD(
         OTArmored,
@@ -69,7 +57,10 @@ public:
     MOCK_METHOD(
         OTAsymmetricKey,
         AsymmetricKeyHelper,
-        (const opentxs::crypto::Parameters&, const opentxs::PasswordPrompt&, const opentxs::crypto::key::asymmetric::Role, const VersionNumber),
+        (const opentxs::crypto::Parameters&,
+         const opentxs::PasswordPrompt&,
+         const opentxs::crypto::key::asymmetric::Role,
+         const VersionNumber),
         (const));
 
     virtual auto AsymmetricKey(
@@ -87,19 +78,35 @@ public:
     MOCK_METHOD(
         OTBailmentNotice,
         BailmentNotice,
-        (const Nym_p&, const identifier::Nym&, const identifier::UnitDefinition&, const identifier::Notary&, const opentxs::Identifier&, const UnallocatedCString&, const Amount&, const opentxs::PasswordPrompt&),
+        (const Nym_p&,
+         const identifier::Nym&,
+         const identifier::UnitDefinition&,
+         const identifier::Notary&,
+         const opentxs::Identifier&,
+         const UnallocatedCString&,
+         const Amount&,
+         const opentxs::PasswordPrompt&),
         (const, final));
 
     MOCK_METHOD(
         OTBailmentReply,
         BailmentReply,
-        (const Nym_p& nym, const identifier::Nym&, const opentxs::Identifier&, const identifier::Notary&, const UnallocatedCString&, const opentxs::PasswordPrompt&),
+        (const Nym_p& nym,
+         const identifier::Nym&,
+         const opentxs::Identifier&,
+         const identifier::Notary&,
+         const UnallocatedCString&,
+         const opentxs::PasswordPrompt&),
         (const, final));
 
     MOCK_METHOD(
         OTBailmentRequest,
         BailmentRequest,
-        (const Nym_p&, const identifier::Nym&, const identifier::UnitDefinition&, const identifier::Notary&, const opentxs::PasswordPrompt&),
+        (const Nym_p&,
+         const identifier::Nym&,
+         const identifier::UnitDefinition&,
+         const identifier::Notary&,
+         const opentxs::PasswordPrompt&),
         (const, final));
 
     MOCK_METHOD(
@@ -111,7 +118,14 @@ public:
     MOCK_METHOD(
         OTBasketContract,
         BasketContract,
-        (const Nym_p&, const UnallocatedCString&, const UnallocatedCString&, const std::uint64_t, const UnitType, const VersionNumber, const display::Definition&, const Amount&),
+        (const Nym_p&,
+         const UnallocatedCString&,
+         const UnallocatedCString&,
+         const std::uint64_t,
+         const UnitType,
+         const VersionNumber,
+         const display::Definition&,
+         const Amount&),
         (const, final));
 
 #if OT_BLOCKCHAIN
@@ -125,7 +139,12 @@ public:
     MOCK_METHOD(
         std::shared_ptr<const opentxs::blockchain::block::bitcoin::Block>,
         BitcoinBlockHelper,
-        (const opentxs::blockchain::block::Header&, const Transaction_p, const std::uint32_t, const UnallocatedVector<Transaction_p>&, const std::int32_t, const AbortFunction),
+        (const opentxs::blockchain::block::Header&,
+         const Transaction_p,
+         const std::uint32_t,
+         const UnallocatedVector<Transaction_p>&,
+         const std::int32_t,
+         const AbortFunction),
         (const, noexcept));
 
     auto BitcoinBlock(
@@ -138,13 +157,23 @@ public:
         -> std::shared_ptr<
             const opentxs::blockchain::block::bitcoin::Block> final
     {
-        return BitcoinBlockHelper(previous, generationTransaction, nBits, extraTransactions, version, abort);
+        return BitcoinBlockHelper(
+            previous,
+            generationTransaction,
+            nBits,
+            extraTransactions,
+            version,
+            abort);
     }
 
     MOCK_METHOD(
         Transaction_p,
         BitcoinGenerationTransactionHelper,
-        (const opentxs::blockchain::Type, const opentxs::blockchain::block::Height, UnallocatedVector<OutputBuilder>&&, const UnallocatedCString& coinbase, const std::int32_t),
+        (const opentxs::blockchain::Type,
+         const opentxs::blockchain::block::Height,
+         UnallocatedVector<OutputBuilder>&&,
+         const UnallocatedCString& coinbase,
+         const std::int32_t),
         (const, noexcept));
 
     virtual auto BitcoinGenerationTransaction(
@@ -154,7 +183,8 @@ public:
         const UnallocatedCString& coinbase = {},
         const std::int32_t version = 1) const noexcept -> Transaction_p final
     {
-        return BitcoinGenerationTransactionHelper(chain, height, std::move(outputs), coinbase, version);
+        return BitcoinGenerationTransactionHelper(
+            chain, height, std::move(outputs), coinbase, version);
     };
 
     MOCK_METHOD(
@@ -166,43 +196,54 @@ public:
     MOCK_METHOD(
         std::unique_ptr<const opentxs::blockchain::block::bitcoin::Script>,
         BitcoinScriptP2MS,
-        (const opentxs::blockchain::Type, const std::uint8_t, const std::uint8_t, const UnallocatedVector<const opentxs::crypto::key::EllipticCurve*>&),
+        (const opentxs::blockchain::Type,
+         const std::uint8_t,
+         const std::uint8_t,
+         const UnallocatedVector<const opentxs::crypto::key::EllipticCurve*>&),
         (const, noexcept, final));
 
     MOCK_METHOD(
         std::unique_ptr<const opentxs::blockchain::block::bitcoin::Script>,
         BitcoinScriptP2PK,
-        (const opentxs::blockchain::Type, const opentxs::crypto::key::EllipticCurve&),
+        (const opentxs::blockchain::Type,
+         const opentxs::crypto::key::EllipticCurve&),
         (const, noexcept, final));
 
     MOCK_METHOD(
         std::unique_ptr<const opentxs::blockchain::block::bitcoin::Script>,
         BitcoinScriptP2PKH,
-        (const opentxs::blockchain::Type, const opentxs::crypto::key::EllipticCurve&),
+        (const opentxs::blockchain::Type,
+         const opentxs::crypto::key::EllipticCurve&),
         (const, noexcept, final));
 
     MOCK_METHOD(
         std::unique_ptr<const opentxs::blockchain::block::bitcoin::Script>,
         BitcoinScriptP2SH,
-        (const opentxs::blockchain::Type, const opentxs::blockchain::block::bitcoin::Script&),
+        (const opentxs::blockchain::Type,
+         const opentxs::blockchain::block::bitcoin::Script&),
         (const, noexcept, final));
 
     MOCK_METHOD(
         std::unique_ptr<const opentxs::blockchain::block::bitcoin::Script>,
         BitcoinScriptP2WPKH,
-        (const opentxs::blockchain::Type, const opentxs::crypto::key::EllipticCurve&),
+        (const opentxs::blockchain::Type,
+         const opentxs::crypto::key::EllipticCurve&),
         (const, noexcept, final));
 
     MOCK_METHOD(
         std::unique_ptr<const opentxs::blockchain::block::bitcoin::Script>,
         BitcoinScriptP2WSH,
-        (const opentxs::blockchain::Type, const opentxs::blockchain::block::bitcoin::Script&),
+        (const opentxs::blockchain::Type,
+         const opentxs::blockchain::block::bitcoin::Script&),
         (const, noexcept, final));
 
     MOCK_METHOD(
         std::unique_ptr<const opentxs::blockchain::block::bitcoin::Transaction>,
         BitcoinTransactionHelper,
-        (const opentxs::blockchain::Type, const ReadView, const bool, const Time&),
+        (const opentxs::blockchain::Type,
+         const ReadView,
+         const bool,
+         const Time&),
         (const));
 
     virtual auto BitcoinTransaction(
@@ -219,7 +260,14 @@ public:
     MOCK_METHOD(
         OTBlockchainAddress,
         BlockchainAddressHelper,
-        (const opentxs::blockchain::p2p::Protocol, const opentxs::blockchain::p2p::Network, const opentxs::Data&, const std::uint16_t, const opentxs::blockchain::Type, const Time, const UnallocatedSet<opentxs::blockchain::p2p::Service>&, const bool),
+        (const opentxs::blockchain::p2p::Protocol,
+         const opentxs::blockchain::p2p::Network,
+         const opentxs::Data&,
+         const std::uint16_t,
+         const opentxs::blockchain::Type,
+         const Time,
+         const UnallocatedSet<opentxs::blockchain::p2p::Service>&,
+         const bool),
         (const));
 
     virtual auto BlockchainAddress(
@@ -232,7 +280,15 @@ public:
         const UnallocatedSet<opentxs::blockchain::p2p::Service>& services,
         const bool incoming = false) const -> OTBlockchainAddress
     {
-        return BlockchainAddressHelper(protocol, network, bytes, port, chain, lastConnected, services, incoming);
+        return BlockchainAddressHelper(
+            protocol,
+            network,
+            bytes,
+            port,
+            chain,
+            lastConnected,
+            services,
+            incoming);
     }
 
     MOCK_METHOD(
@@ -247,11 +303,7 @@ public:
         (const opentxs::network::zeromq::Message&),
         (const, noexcept, final));
 
-    MOCK_METHOD(
-        BlockHeaderP,
-        BlockHeader,
-        (const ReadView),
-        (const, final));
+    MOCK_METHOD(BlockHeaderP, BlockHeader, (const ReadView), (const, final));
 
     MOCK_METHOD(
         BlockHeaderP,
@@ -268,7 +320,9 @@ public:
     MOCK_METHOD(
         BlockHeaderP,
         BlockHeaderForUnitTests,
-        (const opentxs::blockchain::block::Hash&, const opentxs::blockchain::block::Hash&, const opentxs::blockchain::block::Height),
+        (const opentxs::blockchain::block::Hash&,
+         const opentxs::blockchain::block::Hash&,
+         const opentxs::blockchain::block::Height),
         (const, final));
 
 #endif  // OT_BLOCKCHAIN
@@ -276,32 +330,44 @@ public:
     MOCK_METHOD(
         OTConnectionReply,
         ConnectionReply,
-        (const Nym_p&, const identifier::Nym&, const opentxs::Identifier&, const identifier::Notary&, const bool ack, const UnallocatedCString&, const UnallocatedCString&, const UnallocatedCString&, const UnallocatedCString&, const opentxs::PasswordPrompt&),
+        (const Nym_p&,
+         const identifier::Nym&,
+         const opentxs::Identifier&,
+         const identifier::Notary&,
+         const bool ack,
+         const UnallocatedCString&,
+         const UnallocatedCString&,
+         const UnallocatedCString&,
+         const UnallocatedCString&,
+         const opentxs::PasswordPrompt&),
         (const, final));
 
     MOCK_METHOD(
         OTConnectionRequest,
         ConnectionRequest,
-        (const Nym_p&, const identifier::Nym&, const contract::peer::ConnectionInfoType, const identifier::Notary&, const opentxs::PasswordPrompt&),
+        (const Nym_p&,
+         const identifier::Nym&,
+         const contract::peer::ConnectionInfoType,
+         const identifier::Notary&,
+         const opentxs::PasswordPrompt&),
         (const, final));
 
     MOCK_METHOD(
         OTCurrencyContract,
         CurrencyContract,
-        (const Nym_p&, const UnallocatedCString&, const UnallocatedCString&, const UnitType, const VersionNumber, const opentxs::PasswordPrompt&, const display::Definition&, const Amount&),
+        (const Nym_p&,
+         const UnallocatedCString&,
+         const UnallocatedCString&,
+         const UnitType,
+         const VersionNumber,
+         const opentxs::PasswordPrompt&,
+         const display::Definition&,
+         const Amount&),
         (const, noexcept, final));
 
-    MOCK_METHOD(
-        OTData,
-        Data,
-        (const opentxs::Armored&),
-        (const, final));
+    MOCK_METHOD(OTData, Data, (const opentxs::Armored&), (const, final));
 
-    MOCK_METHOD(
-        OTData,
-        Data,
-        (),
-        (const, final));
+    MOCK_METHOD(OTData, Data, (), (const, final));
 
     MOCK_METHOD(
         OTData,
@@ -309,17 +375,9 @@ public:
         (const opentxs::network::zeromq::Frame&),
         (const, final));
 
-    MOCK_METHOD(
-        OTData,
-        Data,
-        (const std::uint8_t),
-        (const, final));
+    MOCK_METHOD(OTData, Data, (const std::uint8_t), (const, final));
 
-    MOCK_METHOD(
-        OTData,
-        Data,
-        (const std::uint32_t),
-        (const, final));
+    MOCK_METHOD(OTData, Data, (const std::uint32_t), (const, final));
 
     MOCK_METHOD(
         OTData,
@@ -339,17 +397,9 @@ public:
         (const UnallocatedVector<std::byte>&),
         (const, final));
 
-    MOCK_METHOD(
-        OTData,
-        Data,
-        (const ReadView),
-        (const, final));
+    MOCK_METHOD(OTData, Data, (const ReadView), (const, final));
 
-    MOCK_METHOD(
-        OTEnvelope,
-        Envelope,
-        (),
-        (const, noexcept, final));
+    MOCK_METHOD(OTEnvelope, Envelope, (), (const, noexcept, final));
 
     MOCK_METHOD(
         OTEnvelope,
@@ -369,11 +419,7 @@ public:
         (const opentxs::ReadView&),
         (const, final));
 
-    MOCK_METHOD(
-        OTIdentifier,
-        Identifier,
-        (),
-        (const, final));
+    MOCK_METHOD(OTIdentifier, Identifier, (), (const, final));
 
     MOCK_METHOD(
         OTIdentifier,
@@ -399,11 +445,11 @@ public:
         (const opentxs::Item&),
         (const, final));
 
-//    MOCK_METHOD(
-//        OTIdentifier,
-//        Identifier,
-//        (const ReadView),
-//        (const, final));
+    //    MOCK_METHOD(
+    //        OTIdentifier,
+    //        Identifier,
+    //        (const ReadView),
+    //        (const, final));
 
     MOCK_METHOD(
         OTIdentifier,
@@ -420,20 +466,25 @@ public:
     MOCK_METHOD(
         OTKeypair,
         Keypair,
-        (const opentxs::crypto::Parameters&, const VersionNumber, const opentxs::crypto::key::asymmetric::Role, const opentxs::PasswordPrompt&),
+        (const opentxs::crypto::Parameters&,
+         const VersionNumber,
+         const opentxs::crypto::key::asymmetric::Role,
+         const opentxs::PasswordPrompt&),
         (const, final));
 
     MOCK_METHOD(
         OTKeypair,
         Keypair,
-        (const UnallocatedCString&, const Bip32Index, const Bip32Index, const Bip32Index, const EcdsaCurve&, const opentxs::crypto::key::asymmetric::Role, const opentxs::PasswordPrompt&),
+        (const UnallocatedCString&,
+         const Bip32Index,
+         const Bip32Index,
+         const Bip32Index,
+         const EcdsaCurve&,
+         const opentxs::crypto::key::asymmetric::Role,
+         const opentxs::PasswordPrompt&),
         (const, final));
 
-    MOCK_METHOD(
-        otx::blind::Mint,
-        Mint,
-        (),
-        (const, noexcept. final));
+    MOCK_METHOD(otx::blind::Mint, Mint, (), (const, noexcept.final));
 
     MOCK_METHOD(
         otx::blind::Mint,
@@ -450,38 +501,33 @@ public:
     MOCK_METHOD(
         otx::blind::Mint,
         Mint,
-        (const otx::blind::CashType, const identifier::Notary&, const identifier::UnitDefinition&),
+        (const otx::blind::CashType,
+         const identifier::Notary&,
+         const identifier::UnitDefinition&),
         (const, noexcept, final));
 
     MOCK_METHOD(
         otx::blind::Mint,
         Mint,
-        (const identifier::Notary&, const identifier::Nym&, const identifier::UnitDefinition&),
+        (const identifier::Notary&,
+         const identifier::Nym&,
+         const identifier::UnitDefinition&),
         (const, noexcept, final));
 
     MOCK_METHOD(
         otx::blind::Mint,
         Mint,
-        (const otx::blind::CashType, const identifier::Notary&, const identifier::Nym&, const identifier::UnitDefinition&),
+        (const otx::blind::CashType,
+         const identifier::Notary&,
+         const identifier::Nym&,
+         const identifier::UnitDefinition&),
         (const, noexcept, final));
 
-    MOCK_METHOD(
-        OTNymID,
-        NymID,
-        (),
-        (const, final));
+    MOCK_METHOD(OTNymID, NymID, (), (const, final));
 
-    MOCK_METHOD(
-        OTNymID,
-        NymID,
-        (const UnallocatedCString&),
-        (const, final));
+    MOCK_METHOD(OTNymID, NymID, (const UnallocatedCString&), (const, final));
 
-    MOCK_METHOD(
-        OTNymID,
-        NymID,
-        (const opentxs::String&),
-        (const, final));
+    MOCK_METHOD(OTNymID, NymID, (const opentxs::String&), (const, final));
 
     MOCK_METHOD(
         OTNymID,
@@ -498,13 +544,24 @@ public:
     MOCK_METHOD(
         OTOutbailmentReply,
         OutbailmentReply,
-        (const Nym_p&, const identifier::Nym&, const opentxs::Identifier&, const identifier::Notary&, const UnallocatedCString&, const opentxs::PasswordPrompt&),
+        (const Nym_p&,
+         const identifier::Nym&,
+         const opentxs::Identifier&,
+         const identifier::Notary&,
+         const UnallocatedCString&,
+         const opentxs::PasswordPrompt&),
         (const, final));
 
     MOCK_METHOD(
         OTOutbailmentRequest,
         OutbailmentRequest,
-        (const Nym_p&, const identifier::Nym&, const identifier::UnitDefinition&, const identifier::Notary&, const Amount&, const UnallocatedCString&, const opentxs::PasswordPrompt&),
+        (const Nym_p&,
+         const identifier::Nym&,
+         const identifier::UnitDefinition&,
+         const identifier::Notary&,
+         const Amount&,
+         const UnallocatedCString&,
+         const opentxs::PasswordPrompt&),
         (const, final));
 
     MOCK_METHOD(
@@ -534,7 +591,13 @@ public:
     MOCK_METHOD(
         opentxs::PaymentCode,
         PaymentCodeHelper,
-        (const UnallocatedCString&, const Bip32Index, const std::uint8_t, const opentxs::PasswordPrompt&, const bool, const std::uint8_t, const std::uint8_t),
+        (const UnallocatedCString&,
+         const Bip32Index,
+         const std::uint8_t,
+         const opentxs::PasswordPrompt&,
+         const bool,
+         const std::uint8_t,
+         const std::uint8_t),
         (const, noexcept));
 
     auto PaymentCode(
@@ -547,7 +610,14 @@ public:
         const std::uint8_t bitmessageStream = 0) const noexcept
         -> opentxs::PaymentCode final
     {
-        return PaymentCodeHelper(seed, nym, version, reason, bitmessage, bitmessageVersion, bitmessageStream);
+        return PaymentCodeHelper(
+            seed,
+            nym,
+            version,
+            reason,
+            bitmessage,
+            bitmessageVersion,
+            bitmessageStream);
     }
 
     MOCK_METHOD(
@@ -586,11 +656,7 @@ public:
         (const Nym_p&, const opentxs::Armored&, const opentxs::PasswordPrompt&),
         (const, final));
 
-    MOCK_METHOD(
-        OTPeerReply,
-        PeerReply,
-        (),
-        (const, noexcept, final));
+    MOCK_METHOD(OTPeerReply, PeerReply, (), (const, noexcept, final));
 
     MOCK_METHOD(
         OTPeerReply,
@@ -598,11 +664,7 @@ public:
         (const Nym_p&, const ReadView&),
         (const, final));
 
-    MOCK_METHOD(
-        OTPeerRequest,
-        PeerRequest,
-        (),
-        (const, noexcept, final));
+    MOCK_METHOD(OTPeerRequest, PeerRequest, (), (const, noexcept, final));
 
     MOCK_METHOD(
         OTPeerRequest,
@@ -613,50 +675,71 @@ public:
     MOCK_METHOD(
         otx::blind::Purse,
         Purse,
-        (const otx::context::Server&, const identifier::UnitDefinition&, const otx::blind::Mint&, const Amount&, const opentxs::PasswordPrompt&),
+        (const otx::context::Server&,
+         const identifier::UnitDefinition&,
+         const otx::blind::Mint&,
+         const Amount&,
+         const opentxs::PasswordPrompt&),
         (const, noexcept, final));
 
     MOCK_METHOD(
         otx::blind::Purse,
         Purse,
-        (const otx::context::Server&, const identifier::UnitDefinition&, const otx::blind::Mint&, const Amount&, const otx::blind::CashType, const opentxs::PasswordPrompt&),
+        (const otx::context::Server&,
+         const identifier::UnitDefinition&,
+         const otx::blind::Mint&,
+         const Amount&,
+         const otx::blind::CashType,
+         const opentxs::PasswordPrompt&),
         (const, noexcept, final));
 
     MOCK_METHOD(
         otx::blind::Purse,
         Purse,
-        (const identity::Nym&, const identifier::Notary&, const identifier::UnitDefinition&, const opentxs::PasswordPrompt&),
+        (const identity::Nym&,
+         const identifier::Notary&,
+         const identifier::UnitDefinition&,
+         const opentxs::PasswordPrompt&),
         (const, noexcept, final));
 
     MOCK_METHOD(
         otx::blind::Purse,
         Purse,
-        (const identity::Nym&, const identifier::Notary&, const identifier::UnitDefinition&, const otx::blind::CashType, const opentxs::PasswordPrompt&),
+        (const identity::Nym&,
+         const identifier::Notary&,
+         const identifier::UnitDefinition&,
+         const otx::blind::CashType,
+         const opentxs::PasswordPrompt&),
         (const, noexcept final));
 
     MOCK_METHOD(
         OTReplyAcknowledgement,
         ReplyAcknowledgement,
-        (const Nym_p&, const identifier::Nym&, const opentxs::Identifier&, const identifier::Notary&, const contract::peer::PeerRequestType, const bool&, const opentxs::PasswordPrompt&),
+        (const Nym_p&,
+         const identifier::Nym&,
+         const opentxs::Identifier&,
+         const identifier::Notary&,
+         const contract::peer::PeerRequestType,
+         const bool&,
+         const opentxs::PasswordPrompt&),
         (const, final));
 
     MOCK_METHOD(
         OTSecurityContract,
         SecurityContract,
-        (const Nym_p&, const UnallocatedCString&, const UnallocatedCString&, const UnitType, const VersionNumber, const opentxs::PasswordPrompt&, const display::Definition&, const Amount&),
+        (const Nym_p&,
+         const UnallocatedCString&,
+         const UnallocatedCString&,
+         const UnitType,
+         const VersionNumber,
+         const opentxs::PasswordPrompt&,
+         const display::Definition&,
+         const Amount&),
         (const, final));
 
-    MOCK_METHOD(
-        OTServerContract,
-        ServerContract,
-        (),
-        (const, final));
+    MOCK_METHOD(OTServerContract, ServerContract, (), (const, final));
 
-    MOCK_METHOD(
-        OTNotaryID,
-        ServerID,
-        (),
-        (const, final));
+    MOCK_METHOD(OTNotaryID, ServerID, (), (const, final));
 
     MOCK_METHOD(
         OTNotaryID,
@@ -664,11 +747,7 @@ public:
         (const UnallocatedCString&),
         (const, final));
 
-    MOCK_METHOD(
-        OTNotaryID,
-        ServerID,
-        (const opentxs::String&),
-        (const, final));
+    MOCK_METHOD(OTNotaryID, ServerID, (const opentxs::String&), (const, final));
 
     MOCK_METHOD(
         OTNotaryID,
@@ -679,19 +758,23 @@ public:
     MOCK_METHOD(
         OTStoreSecret,
         StoreSecret,
-        (const Nym_p&, const identifier::Nym&, const contract::peer::SecretType, const UnallocatedCString&, const UnallocatedCString&, const identifier::Notary&, const opentxs::PasswordPrompt&),
+        (const Nym_p&,
+         const identifier::Nym&,
+         const contract::peer::SecretType,
+         const UnallocatedCString&,
+         const UnallocatedCString&,
+         const identifier::Notary&,
+         const opentxs::PasswordPrompt&),
         (const, final));
 
-    MOCK_METHOD(
-        OTSymmetricKey,
-        SymmetricKey,
-        (),
-        (const, final));
+    MOCK_METHOD(OTSymmetricKey, SymmetricKey, (), (const, final));
 
     MOCK_METHOD(
         OTSymmetricKey,
         SymmetricKeyHelper,
-        (const opentxs::crypto::SymmetricProvider&, const opentxs::PasswordPrompt&, const opentxs::crypto::key::symmetric::Algorithm),
+        (const opentxs::crypto::SymmetricProvider&,
+         const opentxs::PasswordPrompt&,
+         const opentxs::crypto::key::symmetric::Algorithm),
         (const));
 
     virtual auto SymmetricKey(
@@ -707,38 +790,40 @@ public:
     MOCK_METHOD(
         OTSymmetricKey,
         SymmetricKey,
-        (const opentxs::crypto::SymmetricProvider&, const opentxs::Secret&, const std::uint64_t, const std::uint64_t, const std::size_t, const opentxs::crypto::key::symmetric::Source),
+        (const opentxs::crypto::SymmetricProvider&,
+         const opentxs::Secret&,
+         const std::uint64_t,
+         const std::uint64_t,
+         const std::size_t,
+         const opentxs::crypto::key::symmetric::Source),
         (const, final));
 
     MOCK_METHOD(
         OTSymmetricKey,
         SymmetricKey,
-        (const opentxs::crypto::SymmetricProvider&, const opentxs::Secret&, const ReadView, const std::uint64_t, const std::uint64_t,  const std::uint64_t, const std::size_t, const opentxs::crypto::key::symmetric::Source),
+        (const opentxs::crypto::SymmetricProvider&,
+         const opentxs::Secret&,
+         const ReadView,
+         const std::uint64_t,
+         const std::uint64_t,
+         const std::uint64_t,
+         const std::size_t,
+         const opentxs::crypto::key::symmetric::Source),
         (const, final));
 
     MOCK_METHOD(
         OTSymmetricKey,
         SymmetricKey,
-        (const opentxs::crypto::SymmetricProvider&, const opentxs::Secret&, const opentxs::PasswordPrompt&),
+        (const opentxs::crypto::SymmetricProvider&,
+         const opentxs::Secret&,
+         const opentxs::PasswordPrompt&),
         (const, final));
 
-    MOCK_METHOD(
-        OTUnitID,
-        UnitID,
-        (),
-        (const, final));
+    MOCK_METHOD(OTUnitID, UnitID, (), (const, final));
 
-    MOCK_METHOD(
-        OTUnitID,
-        UnitID,
-        (const UnallocatedCString&),
-        (const, final));
+    MOCK_METHOD(OTUnitID, UnitID, (const UnallocatedCString&), (const, final));
 
-    MOCK_METHOD(
-        OTUnitID,
-        UnitID,
-        (const opentxs::String&),
-        (const, final));
+    MOCK_METHOD(OTUnitID, UnitID, (const opentxs::String&), (const, final));
 
     MOCK_METHOD(
         OTUnitID,
@@ -746,11 +831,7 @@ public:
         (const opentxs::network::zeromq::Frame&),
         (const, final));
 
-    MOCK_METHOD(
-        OTUnitDefinition,
-        UnitDefinition,
-        (),
-        (const, noexcept, final));
+    MOCK_METHOD(OTUnitDefinition, UnitDefinition, (), (const, noexcept, final));
 
     MOCK_METHOD(
         OTSecret,
@@ -782,11 +863,7 @@ public:
         (const google::protobuf::MessageLite&, const UnallocatedCString&),
         (const, final));
 
-    MOCK_METHOD(
-        const api::crypto::Asymmetric&,
-        Asymmetric,
-        (),
-        (const, final));
+    MOCK_METHOD(const api::crypto::Asymmetric&, Asymmetric, (), (const, final));
 
     MOCK_METHOD(
         OTAsymmetricKey,
@@ -795,7 +872,7 @@ public:
         (const, noexcept, final));
 
     MOCK_METHOD(
-        OTBailmentNotice ,
+        OTBailmentNotice,
         BailmentNotice,
         (const Nym_p&, const proto::PeerRequest&),
         (const, final));
@@ -812,11 +889,7 @@ public:
         (const Nym_p&, const proto::PeerRequest&),
         (const, final));
 
-    MOCK_METHOD(
-        std::unique_ptr<opentxs::Basket>,
-        Basket,
-        (),
-        (const, final));
+    MOCK_METHOD(std::unique_ptr<opentxs::Basket>, Basket, (), (const, final));
 
     MOCK_METHOD(
         std::unique_ptr<opentxs::Basket>,
@@ -846,11 +919,7 @@ public:
         (const OTTransaction&),
         (const, final));
 
-    MOCK_METHOD(
-        std::unique_ptr<opentxs::Cheque>,
-        Cheque,
-        (),
-        (const, final));
+    MOCK_METHOD(std::unique_ptr<opentxs::Cheque>, Cheque, (), (const, final));
 
     MOCK_METHOD(
         std::unique_ptr<opentxs::Cheque>,
@@ -876,11 +945,7 @@ public:
         (const String&),
         (const, final));
 
-    MOCK_METHOD(
-        std::unique_ptr<OTCron>,
-        Cron,
-        (),
-        (const, final));
+    MOCK_METHOD(std::unique_ptr<OTCron>, Cron, (), (const, final));
 
     MOCK_METHOD(
         std::unique_ptr<OTCronItem>,
@@ -939,7 +1004,10 @@ public:
     MOCK_METHOD(
         std::unique_ptr<opentxs::Item>,
         Item,
-        (const identifier::Nym&, const OTTransaction&, itemType theType, const opentxs::Identifier&),
+        (const identifier::Nym&,
+         const OTTransaction&,
+         itemType theType,
+         const opentxs::Identifier&),
         (const, final));
 
     MOCK_METHOD(
@@ -975,30 +1043,34 @@ public:
     MOCK_METHOD(
         std::unique_ptr<opentxs::Ledger>,
         Ledger,
-        (const identifier::Nym&, const opentxs::Identifier&, const identifier::Notary&),
+        (const identifier::Nym&,
+         const opentxs::Identifier&,
+         const identifier::Notary&),
         (const, final));
 
     MOCK_METHOD(
         std::unique_ptr<opentxs::Ledger>,
         LedgerHelper,
-        (const identifier::Nym&, const opentxs::Identifier&, const identifier::Notary&, ledgerType, bool),
+        (const identifier::Nym&,
+         const opentxs::Identifier&,
+         const identifier::Notary&,
+         ledgerType,
+         bool),
         (const));
 
     auto Ledger(
-            const identifier::Nym& theNymID,
-            const opentxs::Identifier& theAcctID,
-            const identifier::Notary& theNotaryID,
-            ledgerType theType,
-            bool bCreateFile = false) const -> std::unique_ptr<opentxs::Ledger> final
+        const identifier::Nym& theNymID,
+        const opentxs::Identifier& theAcctID,
+        const identifier::Notary& theNotaryID,
+        ledgerType theType,
+        bool bCreateFile = false) const
+        -> std::unique_ptr<opentxs::Ledger> final
     {
-        return LedgerHelper(theNymID, theAcctID, theNotaryID, theType, bCreateFile);
+        return LedgerHelper(
+            theNymID, theAcctID, theNotaryID, theType, bCreateFile);
     }
 
-    MOCK_METHOD(
-        std::unique_ptr<OTMarket>,
-        Market,
-        (),
-        (const, final));
+    MOCK_METHOD(std::unique_ptr<OTMarket>, Market, (), (const, final));
 
     MOCK_METHOD(
         std::unique_ptr<OTMarket>,
@@ -1009,14 +1081,13 @@ public:
     MOCK_METHOD(
         std::unique_ptr<OTMarket>,
         Market,
-        (const identifier::Notary&, const identifier::UnitDefinition&, const identifier::UnitDefinition&, const Amount&),
+        (const identifier::Notary&,
+         const identifier::UnitDefinition&,
+         const identifier::UnitDefinition&,
+         const Amount&),
         (const, final));
 
-    MOCK_METHOD(
-        std::unique_ptr<opentxs::Message>,
-        Message,
-        (),
-        (const, final));
+    MOCK_METHOD(std::unique_ptr<opentxs::Message>, Message, (), (const, final));
 
     MOCK_METHOD(
         OTOutbailmentReply,
@@ -1042,23 +1113,18 @@ public:
         (const proto::Identifier&),
         (const, noexcept, final));
 
-    MOCK_METHOD(
-        std::unique_ptr<OTOffer>,
-        Offer,
-        (),
-        (const, final));
+    MOCK_METHOD(std::unique_ptr<OTOffer>, Offer, (), (const, final));
 
     MOCK_METHOD(
         std::unique_ptr<OTOffer>,
         Offer,
-        (const identifier::Notary&, const identifier::UnitDefinition&, const identifier::UnitDefinition&, const Amount&),
+        (const identifier::Notary&,
+         const identifier::UnitDefinition&,
+         const identifier::UnitDefinition&,
+         const Amount&),
         (const, final));
 
-    MOCK_METHOD(
-        std::unique_ptr<OTPayment>,
-        Payment,
-        (),
-        (const, final));
+    MOCK_METHOD(std::unique_ptr<OTPayment>, Payment, (), (const, final));
 
     MOCK_METHOD(
         std::unique_ptr<OTPayment>,
@@ -1093,7 +1159,12 @@ public:
     MOCK_METHOD(
         std::unique_ptr<OTPaymentPlan>,
         PaymentPlan,
-        (const identifier::Notary&, const identifier::UnitDefinition&, const opentxs::Identifier&, const identifier::Nym&, const opentxs::Identifier&, const identifier::Nym&),
+        (const identifier::Notary&,
+         const identifier::UnitDefinition&,
+         const opentxs::Identifier&,
+         const identifier::Nym&,
+         const opentxs::Identifier&,
+         const identifier::Nym&),
         (const, final));
 
     MOCK_METHOD(
@@ -1156,11 +1227,7 @@ public:
         (const String&),
         (const, final));
 
-    MOCK_METHOD(
-        std::unique_ptr<OTSignedFile>,
-        SignedFile,
-        (),
-        (const, final));
+    MOCK_METHOD(std::unique_ptr<OTSignedFile>, SignedFile, (), (const, final));
 
     MOCK_METHOD(
         std::unique_ptr<OTSignedFile>,
@@ -1198,11 +1265,7 @@ public:
         (const Nym_p&, const proto::PeerRequest&),
         (const, final));
 
-    MOCK_METHOD(
-        const api::crypto::Symmetric&,
-        Symmetric,
-        (),
-        (const, final));
+    MOCK_METHOD(const api::crypto::Symmetric&, Symmetric, (), (const, final));
 
     MOCK_METHOD(
         OTSymmetricKey,
@@ -1210,16 +1273,17 @@ public:
         (const opentxs::crypto::SymmetricProvider&, const proto::SymmetricKey),
         (const, final));
 
-    MOCK_METHOD(
-        std::unique_ptr<OTTrade>,
-        Trade,
-        (),
-        (const, final));
+    MOCK_METHOD(std::unique_ptr<OTTrade>, Trade, (), (const, final));
 
     MOCK_METHOD(
         std::unique_ptr<OTTrade>,
         Trade,
-        (const identifier::Notary&, const identifier::UnitDefinition&, const opentxs::Identifier&, const identifier::Nym&, const identifier::UnitDefinition&, const opentxs::Identifier&),
+        (const identifier::Notary&,
+         const identifier::UnitDefinition&,
+         const opentxs::Identifier&,
+         const identifier::Nym&,
+         const identifier::UnitDefinition&,
+         const opentxs::Identifier&),
         (const, final));
 
     MOCK_METHOD(
@@ -1237,15 +1301,18 @@ public:
     MOCK_METHOD(
         std::unique_ptr<OTTransaction>,
         TransactionHelper,
-        (const identifier::Nym&, const opentxs::Identifier&, const identifier::Notary&, originType),
+        (const identifier::Nym&,
+         const opentxs::Identifier&,
+         const identifier::Notary&,
+         originType),
         (const));
 
     virtual auto Transaction(
-            const identifier::Nym& theNymID,
-            const opentxs::Identifier& theAccountID,
-            const identifier::Notary& theNotaryID,
-            originType theOriginType = originType::not_applicable) const
-    -> std::unique_ptr<OTTransaction> final
+        const identifier::Nym& theNymID,
+        const opentxs::Identifier& theAccountID,
+        const identifier::Notary& theNotaryID,
+        originType theOriginType = originType::not_applicable) const
+        -> std::unique_ptr<OTTransaction> final
     {
         return Transaction(theNymID, theAccountID, theNotaryID, theOriginType);
     }
@@ -1253,25 +1320,38 @@ public:
     MOCK_METHOD(
         std::unique_ptr<OTTransaction>,
         TransactionHelper,
-        (const identifier::Nym&, const opentxs::Identifier&, const identifier::Notary&, std::int64_t, originType),
+        (const identifier::Nym&,
+         const opentxs::Identifier&,
+         const identifier::Notary&,
+         std::int64_t,
+         originType),
         (const));
 
     auto Transaction(
-            const identifier::Nym& theNymID,
-            const opentxs::Identifier& theAccountID,
-            const identifier::Notary& theNotaryID,
-            std::int64_t lTransactionNum,
-            originType theOriginType = originType::not_applicable) const
-    -> std::unique_ptr<OTTransaction> final
+        const identifier::Nym& theNymID,
+        const opentxs::Identifier& theAccountID,
+        const identifier::Notary& theNotaryID,
+        std::int64_t lTransactionNum,
+        originType theOriginType = originType::not_applicable) const
+        -> std::unique_ptr<OTTransaction> final
     {
-        return TransactionHelper(theNymID, theAccountID, theNotaryID, lTransactionNum, theOriginType);
+        return TransactionHelper(
+            theNymID,
+            theAccountID,
+            theNotaryID,
+            lTransactionNum,
+            theOriginType);
     }
 
-//    MOCK_METHOD(
-//        std::unique_ptr<OTTransaction>,
-//        TransactionHelper,
-//        (const identifier::Nym&, const opentxs::Identifier&, const identifier::Notary&, const std::int64_t&, originType, const std::int64_t&, const std::int64_t&, const std::int64_t&,const Time, transactionType, const String&, const Amount&, const Amount&, const std::int64_t&, const std::int64_t&, bool, NumList*),
-//        (const));
+    //    MOCK_METHOD(
+    //        std::unique_ptr<OTTransaction>,
+    //        TransactionHelper,
+    //        (const identifier::Nym&, const opentxs::Identifier&, const
+    //        identifier::Notary&, const std::int64_t&, originType, const
+    //        std::int64_t&, const std::int64_t&, const std::int64_t&,const
+    //        Time, transactionType, const String&, const Amount&, const
+    //        Amount&, const std::int64_t&, const std::int64_t&, bool,
+    //        NumList*), (const));
 
     virtual auto Transaction(
         const identifier::Nym& theNymID,
@@ -1291,43 +1371,63 @@ public:
         const std::int64_t& lRequestNum,
         bool bReplyTransSuccess,
         NumList* pNumList = nullptr) const
-    -> std::unique_ptr<OTTransaction> final
+        -> std::unique_ptr<OTTransaction> final
     {
-        return nullptr;//TransactionHelper(theNymID, theAccountID, theNotaryID, lNumberOfOrigin, theOriginType, lTransactionNum, lInRefTo, lInRefDisplay, the_DATE_SIGNED, theType, strHash, lAdjustment, lDisplayValue, lClosingNum, lRequestNum, bReplyTransSuccess, pNumList);
+        return nullptr;  // TransactionHelper(theNymID, theAccountID,
+                         // theNotaryID, lNumberOfOrigin, theOriginType,
+                         // lTransactionNum, lInRefTo, lInRefDisplay,
+                         // the_DATE_SIGNED, theType, strHash, lAdjustment,
+                         // lDisplayValue, lClosingNum, lRequestNum,
+                         // bReplyTransSuccess, pNumList);
     }
 
     MOCK_METHOD(
         std::unique_ptr<OTTransaction>,
         TransactionHelper,
-        (const identifier::Nym&, const opentxs::Identifier&, const identifier::Notary&, transactionType, originType, std::int64_t),
+        (const identifier::Nym&,
+         const opentxs::Identifier&,
+         const identifier::Notary&,
+         transactionType,
+         originType,
+         std::int64_t),
         (const));
 
     auto Transaction(
-            const identifier::Nym& theNymID,
-            const opentxs::Identifier& theAccountID,
-            const identifier::Notary& theNotaryID,
-            transactionType theType,
-            originType theOriginType = originType::not_applicable,
-            std::int64_t lTransactionNum = 0) const
-    -> std::unique_ptr<OTTransaction> final
+        const identifier::Nym& theNymID,
+        const opentxs::Identifier& theAccountID,
+        const identifier::Notary& theNotaryID,
+        transactionType theType,
+        originType theOriginType = originType::not_applicable,
+        std::int64_t lTransactionNum = 0) const
+        -> std::unique_ptr<OTTransaction> final
     {
-        return TransactionHelper(theNymID, theAccountID, theNotaryID, theType, theOriginType, lTransactionNum);
+        return TransactionHelper(
+            theNymID,
+            theAccountID,
+            theNotaryID,
+            theType,
+            theOriginType,
+            lTransactionNum);
     }
 
     MOCK_METHOD(
         std::unique_ptr<OTTransaction>,
         TransactionHelper,
-        (const opentxs::Ledger&, transactionType theType, originType, std::int64_t),
+        (const opentxs::Ledger&,
+         transactionType theType,
+         originType,
+         std::int64_t),
         (const));
 
     auto Transaction(
-            const opentxs::Ledger& theOwner,
-            transactionType theType,
-            originType theOriginType = originType::not_applicable,
-            std::int64_t lTransactionNum = 0) const
-    -> std::unique_ptr<OTTransaction> final
+        const opentxs::Ledger& theOwner,
+        transactionType theType,
+        originType theOriginType = originType::not_applicable,
+        std::int64_t lTransactionNum = 0) const
+        -> std::unique_ptr<OTTransaction> final
     {
-        return TransactionHelper(theOwner, theType, theOriginType, lTransactionNum);
+        return TransactionHelper(
+            theOwner, theType, theOriginType, lTransactionNum);
     }
 
     MOCK_METHOD(
@@ -1355,4 +1455,4 @@ public:
         (const, final));
 };
 
-}
+}  // namespace opentxs

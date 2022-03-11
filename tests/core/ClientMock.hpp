@@ -6,9 +6,9 @@
 
 #include <gmock/gmock.h>
 
-#include "opentxs/api/session/Client.hpp"
-#include "opentxs/api/session/Activity.hpp"
 #include "StorageMock.hpp"
+#include "opentxs/api/session/Activity.hpp"
+#include "opentxs/api/session/Client.hpp"
 
 namespace opentxs
 {
@@ -24,7 +24,7 @@ class Client : public api::session::Client, virtual public Session
 {
 };
 
-}
+}  // namespace api::session::internal
 
 class ClientMock : virtual public api::session::internal::Client
 {
@@ -37,23 +37,11 @@ public:
     {
     }
 
-    MOCK_METHOD(
-        const api::session::Activity&,
-        Activity,
-        (),
-        (const, final));
-    MOCK_METHOD(
-        const api::session::Contacts&,
-        Contacts,
-        (),
-        (const, final));
+    MOCK_METHOD(const api::session::Activity&, Activity, (), (const, final));
+    MOCK_METHOD(const api::session::Contacts&, Contacts, (), (const, final));
     MOCK_METHOD(const api::session::OTX&, OTX, (), (const, final));
     MOCK_METHOD(const api::session::UI&, UI, (), (const, final));
-    MOCK_METHOD(
-        const api::session::Workflow&,
-        Workflow,
-        (),
-        (const, final));
+    MOCK_METHOD(const api::session::Workflow&, Workflow, (), (const, final));
     MOCK_METHOD(const api::network::ZMQ&, ZMQ, (), (const, final));
     MOCK_METHOD(bool, Cancel, (const int task), (const, final));
     MOCK_METHOD(
@@ -69,13 +57,10 @@ public:
     {
         return 0;
     }
-    //    MOCK_METHOD(int, Schedule, (const std::chrono::seconds, const PeriodicTask&, const std::chrono::seconds&), (const, final));
+    //    MOCK_METHOD(int, Schedule, (const std::chrono::seconds, const
+    //    PeriodicTask&, const std::chrono::seconds&), (const, final));
 
-    MOCK_METHOD(
-        api::Settings&,
-        Config,
-        (),
-        (const, noexcept, final));
+    MOCK_METHOD(api::Settings&, Config, (), (const, noexcept, final));
     MOCK_METHOD(
         const api::session::Crypto&,
         Crypto,
@@ -96,11 +81,7 @@ public:
         Factory,
         (),
         (const, noexcept, final));
-    MOCK_METHOD(
-        const Options&,
-        GetOptions,
-        (),
-        (const, noexcept, final));
+    MOCK_METHOD(const Options&, GetOptions, (), (const, noexcept, final));
     MOCK_METHOD(int, Instance, (), (const, noexcept, final));
     MOCK_METHOD(
         const api::network::Network&,
@@ -124,7 +105,9 @@ public:
     //        InternalClient,
     //        (),
     //        (noexcept, final));
-    //    MOCK_METHOD(api::session::internal::Client&, InternalClient, (), (noexept, final)); OPENTXS_NO_EXPORT virtual auto InternalClient() const
+    //    MOCK_METHOD(api::session::internal::Client&, InternalClient, (),
+    //    (noexept, final)); OPENTXS_NO_EXPORT virtual auto InternalClient()
+    //    const
     //        -> const api::session::internal::Client& noexcept final
     //    {
     //        return *this;
@@ -135,8 +118,7 @@ public:
     {
         return *this;
     }
-    auto InternalClient() noexcept
-        -> api::session::internal::Client& final
+    auto InternalClient() noexcept -> api::session::internal::Client& final
     {
         return *this;
     }
@@ -156,6 +138,6 @@ public:
     }
 };
 
-}
+}  // namespace opentxs
 
 //}

@@ -29,6 +29,9 @@
 #include "opentxs/blockchain/crypto/HDProtocol.hpp"
 #include "opentxs/blockchain/crypto/Subchain.hpp"
 #include "opentxs/core/PaymentCode.hpp"
+#include "opentxs/crypto/Bip32.hpp"
+#include "opentxs/crypto/Bip32Child.hpp"
+#include "opentxs/crypto/Bip43Purpose.hpp"
 #include "opentxs/crypto/Bip44Type.hpp"
 #include "opentxs/crypto/Language.hpp"
 #include "opentxs/crypto/Parameters.hpp"  // IWYU pragma: keep
@@ -49,9 +52,6 @@
 #include "serialization/protobuf/NymIDSource.pb.h"  // IWYU pragma: keep
 #include "serialization/protobuf/SourceProof.pb.h"
 #include "util/HDIndex.hpp"
-#include "opentxs/crypto/Bip43Purpose.hpp"
-#include "opentxs/crypto/Bip32Child.hpp"
-#include "opentxs/crypto/Bip32.hpp"
 
 using namespace testing;
 namespace opentxs
@@ -92,8 +92,7 @@ public:
         parameters.SetSeed(seed);
         parameters.SetNym(nym_);
 
-        source_.reset(
-            ot::Factory::NymIDSource(client_, parameters, reason_));
+        source_.reset(ot::Factory::NymIDSource(client_, parameters, reason_));
     }
 
     void setupSourceForPubKey(ot::crypto::SeedStyle seedStyle)
@@ -109,8 +108,7 @@ public:
 
         parameters.SetSeed(seed);
         parameters.SetNym(nym_);
-        source_.reset(
-            ot::Factory::NymIDSource(client_, parameters, reason_));
+        source_.reset(ot::Factory::NymIDSource(client_, parameters, reason_));
     }
 };
 
@@ -191,8 +189,7 @@ TEST_F(
         identity::SourceType::Error,
         version_};
 
-    EXPECT_EQ(
-        ot::Factory::NymIDSource(client_, parameters, reason_), nullptr);
+    EXPECT_EQ(ot::Factory::NymIDSource(client_, parameters, reason_), nullptr);
 }
 
 /////////////// Serialize ////////////////
@@ -254,31 +251,36 @@ TEST_F(Test_Source, Verify_seedPubKeySourceBip47_ShouldReturnTrue)
     auto masterId = "SOME ID BIGGER THAN 20 CHARS";
     auto nymId = "SOME NYM ID BIGGER THAN 20 CHARS";
     crypto::Parameters parameters{
-            crypto::key::asymmetric::Algorithm::Secp256k1,
-            identity::CredentialType::HD,
-            identity::SourceType::PubKey,
-            version_};
+        crypto::key::asymmetric::Algorithm::Secp256k1,
+        identity::CredentialType::HD,
+        identity::SourceType::PubKey,
+        version_};
 
     auto seed = client_.Crypto().Seed().ImportSeed(
-            words_, phrase_, ot::crypto::SeedStyle::BIP39, ot::crypto::Language::en, reason_);
+        words_,
+        phrase_,
+        ot::crypto::SeedStyle::BIP39,
+        ot::crypto::Language::en,
+        reason_);
 
     parameters.SetSeed(seed);
     parameters.SetNym(nym_);
-    source_.reset(
-            ot::Factory::NymIDSource(client_, parameters, reason_));
+    source_.reset(ot::Factory::NymIDSource(client_, parameters, reason_));
 
     const auto path = UnallocatedVector<Bip32Index>{
-            HDIndex{Bip43Purpose::NYM, Bip32Child::HARDENED},
-            HDIndex{nym_, Bip32Child::HARDENED},
-            HDIndex{0, Bip32Child::HARDENED},
-            HDIndex{0, Bip32Child::HARDENED},
-            HDIndex{Bip32Child::SIGN_KEY, Bip32Child::HARDENED}};
+        HDIndex{Bip43Purpose::NYM, Bip32Child::HARDENED},
+        HDIndex{nym_, Bip32Child::HARDENED},
+        HDIndex{0, Bip32Child::HARDENED},
+        HDIndex{0, Bip32Child::HARDENED},
+        HDIndex{Bip32Child::SIGN_KEY, Bip32Child::HARDENED}};
 
     opentxs::Bip32Index idx{0};
 
-    const auto& derivedKey =  client_.Crypto().BIP32().DeriveKey(EcdsaCurve::secp256k1, client_.Crypto().Seed().GetSeed(parameters.Seed(), idx, reason_)
-            ,    path);
-    const auto & pubkey = std::get<2>(derivedKey);
+    const auto& derivedKey = client_.Crypto().BIP32().DeriveKey(
+        EcdsaCurve::secp256k1,
+        client_.Crypto().Seed().GetSeed(parameters.Seed(), idx, reason_),
+        path);
+    const auto& pubkey = std::get<2>(derivedKey);
 
     opentxs::proto::Credential credential;
     credential.set_version(version_);

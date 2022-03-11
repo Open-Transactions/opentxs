@@ -13,12 +13,12 @@ namespace opentxs
 
 namespace api::crypto::internal
 {
-    class Encode : public api::crypto::Encode
-    {
-    public:
-        Encode() = default;
-    };
-}
+class Encode : public api::crypto::Encode
+{
+public:
+    Encode() = default;
+};
+}  // namespace api::crypto::internal
 
 class EncodeMock : public api::crypto::internal::Encode
 {
@@ -30,11 +30,7 @@ public:
         (const UnallocatedCString&),
         (const, final));
 
-    MOCK_METHOD(
-        UnallocatedCString,
-        DataEncode,
-        (const Data&),
-        (const, final));
+    MOCK_METHOD(UnallocatedCString, DataEncode, (const Data&), (const, final));
 
     MOCK_METHOD(
         UnallocatedCString,
@@ -54,29 +50,13 @@ public:
         (const UnallocatedCString&),
         (const, final));
 
-    MOCK_METHOD(
-        bool,
-        IsBase62,
-        (const UnallocatedCString&),
-        (const, final));
+    MOCK_METHOD(bool, IsBase62, (const UnallocatedCString&), (const, final));
 
-    MOCK_METHOD(
-        OTString,
-        Nonce,
-        (const std::uint32_t),
-        (const, final));
+    MOCK_METHOD(OTString, Nonce, (const std::uint32_t), (const, final));
 
-    MOCK_METHOD(
-        OTString,
-        Nonce,
-        (const std::uint32_t, Data&),
-        (const, final));
+    MOCK_METHOD(OTString, Nonce, (const std::uint32_t, Data&), (const, final));
 
-    MOCK_METHOD(
-        UnallocatedCString,
-        RandomFilename,
-        (),
-        (const, final));
+    MOCK_METHOD(UnallocatedCString, RandomFilename, (), (const, final));
 
     MOCK_METHOD(
         UnallocatedCString,
@@ -90,11 +70,7 @@ public:
         (const UnallocatedCString&),
         (const, final));
 
-    MOCK_METHOD(
-        UnallocatedCString,
-        Z85Encode,
-        (const Data&),
-        (const, final));
+    MOCK_METHOD(UnallocatedCString, Z85Encode, (const Data&), (const, final));
 
     MOCK_METHOD(
         UnallocatedCString,
@@ -102,11 +78,7 @@ public:
         (const UnallocatedCString&),
         (const, final));
 
-    MOCK_METHOD(
-        OTData,
-        Z85Decode,
-        (const Data&),
-        (const, final));
+    MOCK_METHOD(OTData, Z85Decode, (const Data&), (const, final));
 
     MOCK_METHOD(
         UnallocatedCString,
@@ -114,7 +86,8 @@ public:
         (const UnallocatedCString&),
         (const, final));
 
-    auto InternalEncode() const noexcept -> const api::crypto::internal::Encode& final
+    auto InternalEncode() const noexcept
+        -> const api::crypto::internal::Encode& final
     {
         return *this;
     }
@@ -125,4 +98,4 @@ public:
     }
 };
 
-}
+}  // namespace opentxs
