@@ -128,8 +128,7 @@ public:
         const cfilter::Type filter,
         const network::zeromq::BatchID batch,
         const Type chain,
-        const std::string_view fromParent,
-        const std::string_view toParent,
+        const std::string_view parent,
         opentxs::PaymentCode&& code,
         proto::HDPath&& path,
         allocator_type alloc) noexcept;

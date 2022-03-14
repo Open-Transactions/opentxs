@@ -258,7 +258,7 @@ auto Rescan::Imp::process_update(Message&& msg) noexcept -> void
     if (active_) {
         do_work();
     } else if (0u < clean.size()) {
-        to_progress_.Send(std::move(msg));
+        to_progress_.SendDeferred(std::move(msg));
     }
 }
 
@@ -329,7 +329,7 @@ auto Rescan::Imp::state_normal(const Work work, Message&& msg) noexcept -> void
         case Work::shutdown_begin: {
             state_ = State::shutdown;
             parent_p_.reset();
-            to_progress_.Send(std::move(msg));
+            to_progress_.SendDeferred(std::move(msg));
         } break;
         case Work::shutdown:
         case Work::mempool:
@@ -408,7 +408,7 @@ auto Rescan::Imp::transition_state_normal(Message&& msg) noexcept -> void
     state_ = State::normal;
     log_(OT_PRETTY_CLASS())(parent_.name_)(" transitioned to normal state ")
         .Flush();
-    to_index_.Send(std::move(msg));
+    to_index_.SendDeferred(std::move(msg));
     flush_cache();
     do_work();
 }
@@ -419,7 +419,7 @@ auto Rescan::Imp::transition_state_reorg(Message&& msg) noexcept -> void
     state_ = State::reorg;
     log_(OT_PRETTY_CLASS())(parent_.name_)(" transitioned to reorg state ")
         .Flush();
-    to_progress_.Send(std::move(msg));
+    to_progress_.SendDeferred(std::move(msg));
 }
 
 auto Rescan::Imp::VerifyState(const State state) const noexcept -> void
@@ -438,7 +438,7 @@ auto Rescan::Imp::work() noexcept -> bool
 
     const auto notify = [&] {
         auto clean = Vector<ScanStatus>{get_allocator()};
-        to_progress_.Send([&] {
+        to_progress_.SendDeferred([&] {
             clean.emplace_back(ScanState::rescan_clean, last_scanned_.value());
             auto out = MakeWork(Work::update);
             encode(clean, out);
@@ -500,7 +500,7 @@ auto Rescan::Imp::work() noexcept -> bool
         log_(OT_PRETTY_CLASS())(parent_.name_)(" re-processing ")(
             count)(" items ")
             .Flush();
-        to_process_.Send([&] {
+        to_process_.SendDeferred([&] {
             auto out = MakeWork(Work::update);
             encode(dirty, out);
 

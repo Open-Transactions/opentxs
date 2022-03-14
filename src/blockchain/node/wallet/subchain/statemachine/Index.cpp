@@ -166,7 +166,7 @@ auto Index::Imp::process_update(Message&& msg) noexcept -> void
     }
 
     do_work();
-    to_rescan_.Send(std::move(msg));
+    to_rescan_.SendDeferred(std::move(msg));
 }
 
 auto Index::Imp::startup() noexcept -> void
@@ -175,7 +175,7 @@ auto Index::Imp::startup() noexcept -> void
     do_work();
     log_(OT_PRETTY_CLASS())(parent_.name_)(" notifying scan task to begin work")
         .Flush();
-    to_scan_.Send(MakeWork(Work::startup));
+    to_scan_.SendDeferred(MakeWork(Work::startup));
 }
 
 auto Index::Imp::state_normal(const Work work, Message&& msg) noexcept -> void
@@ -200,7 +200,7 @@ auto Index::Imp::state_normal(const Work work, Message&& msg) noexcept -> void
         case Work::shutdown_begin: {
             state_ = State::shutdown;
             parent_p_.reset();
-            to_rescan_.Send(std::move(msg));
+            to_rescan_.SendDeferred(std::move(msg));
         } break;
         case Work::shutdown:
         case Work::filter:
@@ -269,7 +269,7 @@ auto Index::Imp::transition_state_normal(Message&& msg) noexcept -> void
     state_ = State::normal;
     log_(OT_PRETTY_CLASS())(parent_.name_)(" transitioned to normal state ")
         .Flush();
-    to_process_.Send(std::move(msg));
+    to_process_.SendDeferred(std::move(msg));
     flush_cache();
     do_work();
 }
@@ -280,7 +280,7 @@ auto Index::Imp::transition_state_reorg(Message&& msg) noexcept -> void
     state_ = State::reorg;
     log_(OT_PRETTY_CLASS())(parent_.name_)(" transitioned to reorg state ")
         .Flush();
-    to_rescan_.Send(std::move(msg));
+    to_rescan_.SendDeferred(std::move(msg));
 }
 
 auto Index::Imp::VerifyState(const State state) const noexcept -> void

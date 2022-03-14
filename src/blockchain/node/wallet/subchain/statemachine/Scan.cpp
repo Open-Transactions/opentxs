@@ -200,7 +200,7 @@ auto Scan::Imp::startup() noexcept -> void
         last_scanned_ = filter_tip_;
     }
 
-    to_process_.Send([&] {
+    to_process_.SendDeferred([&] {
         auto out = MakeWork(Work::update);
         auto clean = Vector<ScanStatus>{get_allocator()};
         clean.emplace_back(ScanState::scan_clean, last_scanned_.value());
@@ -270,7 +270,7 @@ auto Scan::Imp::state_normal(const Work work, Message&& msg) noexcept -> void
         case Work::shutdown_begin: {
             state_ = State::shutdown;
             parent_p_.reset();
-            to_process_.Send(std::move(msg));
+            to_process_.SendDeferred(std::move(msg));
         } break;
         case Work::shutdown:
         case Work::mempool:
@@ -337,7 +337,7 @@ auto Scan::Imp::transition_state_normal(Message&& msg) noexcept -> void
     state_ = State::normal;
     log_(OT_PRETTY_CLASS())(parent_.name_)(" transitioned to normal state ")
         .Flush();
-    to_parent_.Send(MakeWork(Work::reorg_end_ack));
+    to_parent_.SendDeferred(MakeWork(Work::reorg_end_ack));
     flush_cache();
     do_work();
 }
@@ -348,7 +348,7 @@ auto Scan::Imp::transition_state_reorg(Message&& msg) noexcept -> void
     state_ = State::reorg;
     log_(OT_PRETTY_CLASS())(parent_.name_)(" transitioned to reorg state ")
         .Flush();
-    to_process_.Send(std::move(msg));
+    to_process_.SendDeferred(std::move(msg));
 }
 
 auto Scan::Imp::VerifyState(const State state) const noexcept -> void
@@ -394,7 +394,7 @@ auto Scan::Imp::work() noexcept -> bool
         log_(OT_PRETTY_CLASS())(parent_.name_)(" ")(
             count)(" blocks queued for processing ")
             .Flush();
-        to_process_.Send([&] {
+        to_process_.SendDeferred([&] {
             auto out = MakeWork(Work::update);
             encode(dirty, out);
 
@@ -404,7 +404,7 @@ auto Scan::Imp::work() noexcept -> bool
 
     if (highestClean.has_value()) {
         clean.emplace_back(ScanState::scan_clean, highestClean.value());
-        to_process_.Send([&] {
+        to_process_.SendDeferred([&] {
             auto out = MakeWork(Work::update);
             encode(clean, out);
 

@@ -15,6 +15,7 @@
 #include <optional>
 #include <random>
 #include <string_view>
+#include <utility>
 
 #include "blockchain/node/wallet/subchain/DeterministicStateData.hpp"  // IWYU pragma: keep
 #include "internal/blockchain/node/Node.hpp"
@@ -23,6 +24,7 @@
 #include "internal/blockchain/node/wallet/subchain/Subchain.hpp"
 #include "internal/network/zeromq/Types.hpp"
 #include "internal/util/BoostPMR.hpp"
+#include "internal/util/Timer.hpp"
 #include "opentxs/Types.hpp"
 #include "opentxs/blockchain/BlockchainType.hpp"
 #include "opentxs/blockchain/bitcoin/cfilter/FilterType.hpp"
@@ -116,8 +118,7 @@ public:
         const network::zeromq::BatchID batch,
         const Type chain,
         const cfilter::Type filter,
-        const std::string_view fromParent,
-        const std::string_view toParent,
+        const std::string_view parent,
         allocator_type alloc) noexcept;
 
     ~Imp() final;
@@ -138,7 +139,10 @@ private:
         }
     };
     using Subchains =
-        Map<OTIdentifier, boost::shared_ptr<DeterministicStateData>>;
+        Map<OTIdentifier,
+            std::pair<
+                network::zeromq::socket::Raw,
+                boost::shared_ptr<DeterministicStateData>>>;
     using Subtype = node::internal::WalletDatabase::Subchain;
 
     const api::Session& api_;
@@ -148,10 +152,8 @@ private:
     const node::internal::Mempool& mempool_;
     const Type chain_;
     const cfilter::Type filter_type_;
-    const CString to_children_endpoint_;
     const CString from_children_endpoint_;
     network::zeromq::socket::Raw& to_parent_;
-    network::zeromq::socket::Raw& to_children_;
     std::atomic<State> state_;
     std::optional<ReorgData> reorg_;
     std::optional<ReorgData> shutdown_;
@@ -159,15 +161,23 @@ private:
     Subchains external_;
     Subchains outgoing_;
     Subchains incoming_;
+    Timer reorg_timer_;
 
     auto reorg_children() const noexcept -> std::size_t;
-    auto verify_child_state(const Subchain::State state) const noexcept -> void;
 
     auto check_hd(const Identifier& subaccount) noexcept -> void;
     auto check_hd(const crypto::HD& subaccount) noexcept -> void;
     auto check_pc(const Identifier& subaccount) noexcept -> void;
     auto check_pc(const crypto::PaymentCode& subaccount) noexcept -> void;
     auto do_shutdown() noexcept -> void;
+    template <typename Callback>
+    auto for_each(const Callback& cb) noexcept -> void
+    {
+        std::for_each(internal_.begin(), internal_.end(), cb);
+        std::for_each(external_.begin(), external_.end(), cb);
+        std::for_each(outgoing_.begin(), outgoing_.end(), cb);
+        std::for_each(incoming_.begin(), incoming_.end(), cb);
+    }
     auto get(
         const crypto::Deterministic& subaccount,
         const Subtype subchain,
@@ -186,6 +196,7 @@ private:
     auto ready_for_reorg() noexcept -> void;
     auto ready_for_shutdown() noexcept -> void;
     auto scan_subchains() noexcept -> void;
+    auto send_to_children(const Message& msg) noexcept -> void;
     auto startup() noexcept -> void;
     auto state_normal(const Work work, Message&& msg) noexcept -> void;
     auto state_post_reorg(const Work work, Message&& msg) noexcept -> void;
@@ -198,6 +209,7 @@ private:
     auto transition_state_pre_shutdown(Message&& in) noexcept -> void;
     auto transition_state_reorg(Message&& in) noexcept -> void;
     auto transition_state_shutdown(Message&& in) noexcept -> void;
+    auto verify_child_state(const Subchain::State state) noexcept -> void;
     [[noreturn]] auto work() noexcept -> bool;
 
     Imp(const api::Session& api,
@@ -208,10 +220,8 @@ private:
         const network::zeromq::BatchID batch,
         const Type chain,
         const cfilter::Type filter,
-        const std::string_view fromParent,
-        const std::string_view toParent,
+        const std::string_view parent,
         CString&& fromChildren,
-        CString&& toChildren,
         allocator_type alloc) noexcept;
 };
 }  // namespace opentxs::blockchain::node::wallet

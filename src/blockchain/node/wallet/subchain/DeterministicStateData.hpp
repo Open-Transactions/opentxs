@@ -118,8 +118,7 @@ public:
         const cfilter::Type filter,
         const Subchain subchain,
         const network::zeromq::BatchID batch,
-        const std::string_view fromParent,
-        const std::string_view toParent,
+        const std::string_view parent,
         allocator_type alloc) noexcept;
 
     ~DeterministicStateData() final = default;

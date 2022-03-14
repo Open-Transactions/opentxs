@@ -316,18 +316,21 @@ auto BlockchainImp::Init(
     if (base_config_->use_sync_server_) { sync_client_.emplace(api_); }
 
     init_promise_.set_value();
-    static const auto defaultServers = UnallocatedVector<UnallocatedCString>{
+    static const auto defaultServers = Vector<UnallocatedCString>{
         "tcp://metier1.opentransactions.org:8814",
         "tcp://metier2.opentransactions.org:8814",
     };
     const auto existing = [&] {
-        auto out = UnallocatedSet<UnallocatedCString>{};
+        auto out = Set<UnallocatedCString>{};
         auto v = GetSyncServers();
         std::move(v.begin(), v.end(), std::inserter(out, out.end()));
 
         for (const auto& server : defaultServers) {
             if (0 == out.count(server)) {
-                AddSyncServer(server);
+                if (false == api_.GetOptions().TestMode()) {
+                    AddSyncServer(server);
+                }
+
                 out.emplace(server);
             }
         }

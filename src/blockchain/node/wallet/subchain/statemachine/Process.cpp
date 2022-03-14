@@ -171,7 +171,7 @@ auto Process::Imp::process_block(const block::Hash& hash) noexcept -> void
         OT_ASSERT(block);
 
         parent_.ProcessBlock(position, *block);
-        const auto sent = to_index_.Send([&] {
+        const auto sent = to_index_.SendDeferred([&] {
             auto out = MakeWork(Work::update);
             encode(
                 [&] {
@@ -228,7 +228,7 @@ auto Process::Imp::process_update(Message&& msg) noexcept -> void
         waiting_.emplace_back(std::move(position));
     }
 
-    to_index_.Send(std::move(msg));
+    to_index_.SendDeferred(std::move(msg));
     do_work();
 }
 
@@ -270,7 +270,7 @@ auto Process::Imp::state_normal(const Work work, Message&& msg) noexcept -> void
         case Work::shutdown_begin: {
             state_ = State::shutdown;
             parent_p_.reset();
-            to_index_.Send(std::move(msg));
+            to_index_.SendDeferred(std::move(msg));
         } break;
         case Work::shutdown:
         case Work::filter:
@@ -338,7 +338,7 @@ auto Process::Imp::transition_state_normal(Message&& msg) noexcept -> void
     state_ = State::normal;
     log_(OT_PRETTY_CLASS())(parent_.name_)(" transitioned to normal state ")
         .Flush();
-    to_scan_.Send(std::move(msg));
+    to_scan_.SendDeferred(std::move(msg));
     flush_cache();
     do_work();
 }
@@ -349,7 +349,7 @@ auto Process::Imp::transition_state_reorg(Message&& msg) noexcept -> void
     state_ = State::reorg;
     log_(OT_PRETTY_CLASS())(parent_.name_)(" transitioned to reorg state ")
         .Flush();
-    to_index_.Send(std::move(msg));
+    to_index_.SendDeferred(std::move(msg));
 }
 
 auto Process::Imp::VerifyState(const State state) const noexcept -> void

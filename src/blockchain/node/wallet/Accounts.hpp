@@ -23,6 +23,7 @@
 #include "internal/blockchain/node/wallet/Types.hpp"
 #include "internal/blockchain/node/wallet/subchain/Subchain.hpp"
 #include "internal/network/zeromq/Types.hpp"
+#include "internal/util/Timer.hpp"
 #include "opentxs/Types.hpp"
 #include "opentxs/blockchain/bitcoin/cfilter/FilterType.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
@@ -144,9 +145,13 @@ private:
         }
     };
 
-    using AccountMap = Map<OTNymID, wallet::Account>;
+    using AccountMap =
+        Map<OTNymID, std::pair<network::zeromq::socket::Raw, wallet::Account>>;
     using NotificationMap =
-        Map<OTIdentifier, boost::shared_ptr<NotificationStateData>>;
+        Map<OTIdentifier,
+            std::pair<
+                network::zeromq::socket::Raw,
+                boost::shared_ptr<NotificationStateData>>>;
 
     const api::Session& api_;
     const node::internal::Network& node_;
@@ -154,15 +159,14 @@ private:
     const node::internal::Mempool& mempool_;
     const Type chain_;
     const cfilter::Type filter_type_;
-    const CString to_children_endpoint_;
     const CString from_children_endpoint_;
     network::zeromq::socket::Raw& to_parent_;
-    network::zeromq::socket::Raw& to_children_;
     State state_;
     std::optional<ReorgData> reorg_;
     std::optional<ShutdownData> shutdown_;
     AccountMap accounts_;
-    NotificationMap notification_channels_;
+    NotificationMap codes_;
+    Timer reorg_timer_;
 
     auto reorg_children() const noexcept -> std::size_t;
     auto verify_child_state(
@@ -179,6 +183,7 @@ private:
     auto process_nym(Message&& in) noexcept -> bool;
     auto process_nym(const identifier::Nym& nym) noexcept -> bool;
     auto process_reorg_ready(Message&& in) noexcept -> void;
+    auto send_to_children(const Message& msg) noexcept -> void;
     auto startup() noexcept -> void;
     auto state_normal(const Work work, Message&& msg) noexcept -> void;
     auto state_post_reorg(const Work work, Message&& msg) noexcept -> void;
@@ -198,7 +203,6 @@ private:
         const network::zeromq::BatchID batch,
         const Type chain,
         const std::string_view toParent,
-        CString&& toChildren,
         CString&& fromChildren,
         allocator_type alloc) noexcept;
 };

@@ -146,7 +146,7 @@ auto Progress::Imp::state_normal(const Work work, Message&& msg) noexcept
         case Work::shutdown_begin: {
             state_ = State::shutdown;
             parent_p_.reset();
-            to_parent_.Send(MakeWork(Work::shutdown_ready));
+            to_parent_.SendDeferred(MakeWork(Work::shutdown_ready));
         } break;
         case Work::shutdown:
         case Work::filter:
@@ -216,7 +216,7 @@ auto Progress::Imp::transition_state_normal(Message&& msg) noexcept -> void
     state_ = State::normal;
     log_(OT_PRETTY_CLASS())(parent_.name_)(" transitioned to normal state ")
         .Flush();
-    to_rescan_.Send(std::move(msg));
+    to_rescan_.SendDeferred(std::move(msg));
     flush_cache();
 }
 
@@ -226,7 +226,7 @@ auto Progress::Imp::transition_state_reorg(Message&& msg) noexcept -> void
     state_ = State::reorg;
     log_(OT_PRETTY_CLASS())(parent_.name_)(" transitioned to reorg state ")
         .Flush();
-    to_parent_.Send(MakeWork(Work::reorg_begin_ack));
+    to_parent_.SendDeferred(MakeWork(Work::reorg_begin_ack));
 }
 
 auto Progress::Imp::VerifyState(const State state) const noexcept -> void

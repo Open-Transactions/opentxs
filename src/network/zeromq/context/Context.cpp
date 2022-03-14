@@ -201,6 +201,11 @@ auto Context::PushSocket(const socket::Direction direction) const noexcept
         factory::PushSocket(*this, static_cast<bool>(direction))};
 }
 
+auto Context::RawSocket(socket::Type type) const noexcept -> socket::Raw
+{
+    return factory::ZMQSocket(*this, type);
+}
+
 auto Context::ReplySocket(
     const ReplyCallback& callback,
     const socket::Direction direction) const noexcept -> OTZMQReplySocket

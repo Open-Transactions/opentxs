@@ -7,6 +7,7 @@
 #include "1_Internal.hpp"  // IWYU pragma: associated
 #include "blockchain/node/wallet/subchain/SubchainStateData.hpp"  // IWYU pragma: associated
 
+#include <boost/system/error_code.hpp>
 #include <algorithm>
 #include <chrono>
 #include <iterator>
@@ -17,12 +18,15 @@
 
 #include "blockchain/node/wallet/subchain/ScriptForm.hpp"
 #include "internal/api/crypto/Blockchain.hpp"
+#include "internal/api/network/Asio.hpp"
 #include "internal/blockchain/block/bitcoin/Bitcoin.hpp"
 #include "internal/blockchain/node/HeaderOracle.hpp"
 #include "internal/network/zeromq/socket/Pipeline.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/api/crypto/Blockchain.hpp"
+#include "opentxs/api/network/Asio.hpp"
+#include "opentxs/api/network/Network.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
@@ -98,8 +102,7 @@ SubchainStateData::SubchainStateData(
     OTNymID&& owner,
     OTIdentifier&& id,
     const std::string_view display,
-    const std::string_view fromParent,
-    const std::string_view toParent,
+    const std::string_view parent,
     CString&& fromChildren,
     CString&& toChildren,
     CString&& toScan,
@@ -111,17 +114,15 @@ SubchainStateData::SubchainStateData(
           0ms,
           batch,
           alloc,
-          {
-              {CString{fromParent, alloc}, Direction::Connect},
-          },
+          {},
           {
               {fromChildren, Direction::Bind},
           },
           {},
           {
-              {SocketType::Push,
+              {SocketType::Pair,
                {
-                   {CString{toParent, alloc}, Direction::Connect},
+                   {CString{parent, alloc}, Direction::Connect},
                }},
               {SocketType::Publish,
                {
@@ -171,6 +172,7 @@ SubchainStateData::SubchainStateData(
     , process_(std::nullopt)
     , scan_(std::nullopt)
     , me_()
+    , reorg_timer_(api_.Network().Asio().Internal().GetTimer())
 {
     OT_ASSERT(false == owner_->empty());
     OT_ASSERT(false == id_->empty());
@@ -188,8 +190,7 @@ SubchainStateData::SubchainStateData(
     OTNymID&& owner,
     OTIdentifier&& id,
     const std::string_view display,
-    const std::string_view fromParent,
-    const std::string_view toParent,
+    const std::string_view parent,
     allocator_type alloc) noexcept
     : SubchainStateData(
           api,
@@ -203,8 +204,7 @@ SubchainStateData::SubchainStateData(
           std::move(owner),
           std::move(id),
           display,
-          fromParent,
-          toParent,
+          parent,
           network::zeromq::MakeArbitraryInproc(alloc.resource()),
           network::zeromq::MakeArbitraryInproc(alloc.resource()),
           network::zeromq::MakeArbitraryInproc(alloc.resource()),
@@ -317,7 +317,7 @@ auto SubchainStateData::do_shutdown() noexcept -> void
     index_.reset();
     rescan_.reset();
     progress_.reset();
-    to_children_.Send(MakeWork(WorkType::Shutdown));
+    to_children_.SendDeferred(MakeWork(WorkType::Shutdown));
 }
 
 auto SubchainStateData::get_account_targets() const noexcept
@@ -573,7 +573,7 @@ auto SubchainStateData::ready_for_normal() noexcept -> void
     reorg_.reset();
     state_ = State::normal;
     log_(OT_PRETTY_CLASS())(name_)(" transitioned to normal state ").Flush();
-    to_parent_.Send(MakeWork(AccountJobs::reorg_end_ack));
+    to_parent_.SendDeferred(MakeWork(AccountJobs::reorg_end_ack));
     flush_cache();
 }
 
@@ -581,7 +581,7 @@ auto SubchainStateData::ready_for_reorg() noexcept -> void
 {
     state_ = State::reorg;
     log_(OT_PRETTY_CLASS())(name_)(" transitioned to reorg state ").Flush();
-    to_parent_.Send(MakeWork(AccountJobs::reorg_begin_ack));
+    to_parent_.SendDeferred(MakeWork(AccountJobs::reorg_begin_ack));
 }
 
 auto SubchainStateData::ReportScan(const block::Position& pos) const noexcept
@@ -989,7 +989,7 @@ auto SubchainStateData::transition_state_post_reorg(Message&& in) noexcept
             reorg_->target_)(
             " children prior to acknowledging reorg completion")
             .Flush();
-        to_progress_.Send(MakeWork(SubchainJobs::reorg_end));
+        to_progress_.SendDeferred(MakeWork(SubchainJobs::reorg_end));
         state_ = State::post_reorg;
     } else {
         log_(OT_PRETTY_CLASS())(name_)(
@@ -1011,8 +1011,23 @@ auto SubchainStateData::transition_state_pre_reorg(Message&& in) noexcept
         log_(OT_PRETTY_CLASS())(name_)(" waiting for acknowledgements from ")(
             reorg_->target_)(" children prior to acknowledging reorg")
             .Flush();
-        to_scan_.Send(MakeWork(SubchainJobs::reorg_begin));
+        to_scan_.SendDeferred(MakeWork(SubchainJobs::reorg_begin));
         state_ = State::pre_reorg;
+        reorg_timer_.SetRelative(8 * 60s);
+        reorg_timer_.Wait([this](const auto& ec) {
+            if (ec) {
+                if (boost::system::errc::operation_canceled != ec.value()) {
+                    LogError()(OT_PRETTY_CLASS())(ec).Flush();
+                }
+            } else {
+                LogError()(OT_PRETTY_CLASS())(
+                    name_)(" timeout while waiting for children to acknowledge "
+                           "reorg")
+                    .Flush();
+
+                OT_FAIL;
+            }
+        });
     } else {
         log_(OT_PRETTY_CLASS())(name_)(
             " no children instantiated therefore reorg may be acknowledged "
@@ -1026,7 +1041,7 @@ auto SubchainStateData::transition_state_pre_shutdown(Message&& in) noexcept
     -> void
 {
     state_ = State::pre_shutdown;
-    to_scan_.Send(std::move(in));
+    to_scan_.SendDeferred(std::move(in));
 }
 
 auto SubchainStateData::transition_state_reorg(Message&& in) noexcept -> void
@@ -1045,6 +1060,7 @@ auto SubchainStateData::transition_state_reorg(Message&& in) noexcept -> void
 
         return;
     } else if (counter == target) {
+        reorg_timer_.Cancel();
         log_(OT_PRETTY_CLASS())(name_)(" all ")(
             target)(" children ready for reorg")
             .Flush();
@@ -1068,7 +1084,7 @@ auto SubchainStateData::transition_state_shutdown(Message&& in) noexcept -> void
     index_->VerifyState(Index::State::shutdown);
     process_->VerifyState(Process::State::shutdown);
     scan_->VerifyState(Scan::State::shutdown);
-    to_parent_.Send(std::move(in));
+    to_parent_.SendDeferred(std::move(in));
 }
 
 auto SubchainStateData::translate(
@@ -1110,5 +1126,9 @@ auto SubchainStateData::VerifyState(const State state) const noexcept -> void
 
 auto SubchainStateData::work() noexcept -> bool { return false; }
 
-SubchainStateData::~SubchainStateData() { signal_shutdown(); }
+SubchainStateData::~SubchainStateData()
+{
+    reorg_timer_.Cancel();
+    signal_shutdown();
+}
 }  // namespace opentxs::blockchain::node::wallet

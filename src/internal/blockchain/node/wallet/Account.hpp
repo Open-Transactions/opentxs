@@ -78,8 +78,7 @@ public:
         const node::internal::Mempool& mempool,
         const Type chain,
         const cfilter::Type filter,
-        const std::string_view fromParent,
-        const std::string_view toParent) noexcept;
+        const std::string_view parent) noexcept;
     Account(Account&&) noexcept;
 
     ~Account();

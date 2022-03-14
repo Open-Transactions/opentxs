@@ -195,7 +195,8 @@ class PeerListener
 
 public:
     std::future<void> done_;
-    std::atomic_int miner_peers_;
+    std::atomic_int miner_1_peers_;
+    std::atomic_int sync_server_peers_;
     std::atomic_int client_1_peers_;
     std::atomic_int client_2_peers_;
 
@@ -203,6 +204,7 @@ public:
         const bool waitForHandshake,
         const int clientCount,
         const ot::api::session::Client& miner,
+        const ot::api::session::Client& syncServer,
         const ot::api::session::Client& client1,
         const ot::api::session::Client& client2);
 
@@ -435,6 +437,7 @@ protected:
     static Transactions transactions_;
     static ot::blockchain::block::Height height_;
     static std::optional<BlockchainStartup> miner_startup_s_;
+    static std::optional<BlockchainStartup> sync_server_startup_s_;
     static std::optional<BlockchainStartup> client_1_startup_s_;
     static std::optional<BlockchainStartup> client_2_startup_s_;
 
@@ -442,9 +445,11 @@ protected:
     const ot::Options client_args_;
     const int client_count_;
     const ot::api::session::Client& miner_;
+    const ot::api::session::Client& sync_server_;
     const ot::api::session::Client& client_1_;
     const ot::api::session::Client& client_2_;
     const BlockchainStartup& miner_startup_;
+    const BlockchainStartup& sync_server_startup_;
     const BlockchainStartup& client_1_startup_;
     const BlockchainStartup& client_2_startup_;
     const b::p2p::Address& address_;
@@ -507,6 +512,7 @@ private:
         const bool waitForHandshake,
         const int clientCount,
         const ot::api::session::Client& miner,
+        const ot::api::session::Client& syncServer,
         const ot::api::session::Client& client1,
         const ot::api::session::Client& client2) noexcept
         -> const PeerListener&;
@@ -536,6 +542,9 @@ class Regtest_fixture_normal : public Regtest_fixture_base
 {
 protected:
     Regtest_fixture_normal(const int clientCount);
+    Regtest_fixture_normal(
+        const int clientCount,
+        const ot::Options& clientArgs);
 };
 
 class Regtest_fixture_hd : public Regtest_fixture_normal
@@ -613,6 +622,7 @@ class Regtest_fixture_single : public Regtest_fixture_normal
 {
 protected:
     Regtest_fixture_single();
+    Regtest_fixture_single(const ot::Options& clientArgs);
 };
 
 class Regtest_fixture_tcp : public Regtest_fixture_base
@@ -627,7 +637,7 @@ private:
     const ot::OTBlockchainAddress tcp_listen_address_;
 };
 
-class Regtest_fixture_sync : public Regtest_fixture_base
+class Regtest_fixture_sync : public Regtest_fixture_single
 {
 protected:
     static const User alex_;
@@ -636,9 +646,6 @@ protected:
 
     SyncSubscriber& sync_sub_;
     SyncRequestor& sync_req_;
-
-    using Regtest_fixture_base::Connect;
-    auto Connect() noexcept -> bool final;
 
     auto Shutdown() noexcept -> void final;
 

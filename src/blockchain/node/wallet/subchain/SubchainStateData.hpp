@@ -30,6 +30,7 @@
 #include "internal/blockchain/node/wallet/subchain/statemachine/Scan.hpp"
 #include "internal/blockchain/node/wallet/subchain/statemachine/Types.hpp"
 #include "internal/network/zeromq/Types.hpp"
+#include "internal/util/Timer.hpp"
 #include "opentxs/Types.hpp"
 #include "opentxs/blockchain/BlockchainType.hpp"
 #include "opentxs/blockchain/Types.hpp"
@@ -211,8 +212,7 @@ protected:
         OTNymID&& owner,
         OTIdentifier&& id,
         const std::string_view display,
-        const std::string_view fromParent,
-        const std::string_view toParent,
+        const std::string_view parent,
         allocator_type alloc) noexcept;
 
 private:
@@ -243,6 +243,7 @@ private:
     std::optional<wallet::Process> process_;
     std::optional<wallet::Scan> scan_;
     boost::shared_ptr<SubchainStateData> me_;
+    Timer reorg_timer_;
 
     static auto describe(
         const blockchain::Type chain,
@@ -308,8 +309,7 @@ private:
         OTNymID&& owner,
         OTIdentifier&& id,
         const std::string_view display,
-        const std::string_view fromParent,
-        const std::string_view toParent,
+        const std::string_view parent,
         CString&& fromChildren,
         CString&& toChildren,
         CString&& toScan,
