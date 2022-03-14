@@ -29,8 +29,8 @@
 #include "opentxs/api/session/Contacts.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
-#include "opentxs/blockchain/FilterType.hpp"
 #include "opentxs/blockchain/Types.hpp"
+#include "opentxs/blockchain/bitcoin/cfilter/FilterType.hpp"
 #include "opentxs/blockchain/block/Outpoint.hpp"
 #include "opentxs/blockchain/block/bitcoin/Input.hpp"
 #include "opentxs/blockchain/block/bitcoin/Output.hpp"
@@ -520,7 +520,7 @@ auto Transaction::IDNormalized() const noexcept -> const Identifier&
     });
 }
 
-auto Transaction::ExtractElements(const filter::Type style) const noexcept
+auto Transaction::ExtractElements(const cfilter::Type style) const noexcept
     -> UnallocatedVector<Space>
 {
     auto output = inputs_->ExtractElements(style);
@@ -535,7 +535,7 @@ auto Transaction::ExtractElements(const filter::Type style) const noexcept
         std::make_move_iterator(temp.begin()),
         std::make_move_iterator(temp.end()));
 
-    if (filter::Type::ES == style) {
+    if (cfilter::Type::ES == style) {
         const auto* data = static_cast<const std::byte*>(txid_->data());
         output.emplace_back(data, data + txid_->size());
     }
@@ -549,7 +549,7 @@ auto Transaction::ExtractElements(const filter::Type style) const noexcept
 }
 
 auto Transaction::FindMatches(
-    const filter::Type style,
+    const cfilter::Type style,
     const Patterns& txos,
     const ParsedPatterns& elements) const noexcept -> Matches
 {

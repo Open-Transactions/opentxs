@@ -26,8 +26,8 @@
 #include "opentxs/Types.hpp"
 #include "opentxs/Version.hpp"
 #include "opentxs/api/network/Blockchain.hpp"
-#include "opentxs/blockchain/Blockchain.hpp"
 #include "opentxs/blockchain/BlockchainType.hpp"
+#include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/blockchain/node/Manager.hpp"
 #include "opentxs/core/Amount.hpp"
@@ -224,7 +224,8 @@ private:
     auto start(
         const Lock& lock,
         const Chain type,
-        const UnallocatedCString& seednode) const noexcept -> bool;
+        const UnallocatedCString& seednode,
+        const bool startWallet = true) const noexcept -> bool;
     auto stop(const Lock& lock, const Chain type) const noexcept -> bool;
 
     BlockchainImp() = delete;

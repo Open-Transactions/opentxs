@@ -16,6 +16,7 @@ namespace opentxs::blockchain::node::wallet
 enum class WalletJobs : OTZMQWorkType {
     shutdown = value(WorkType::Shutdown),
     init = OT_ZMQ_INIT_SIGNAL,
+    shutdown_ready = OT_ZMQ_ACKNOWLEDGE_SHUTDOWN,
     statemachine = OT_ZMQ_STATE_MACHINE_SIGNAL,
 };
 
@@ -28,18 +29,23 @@ enum class AccountsJobs : OTZMQWorkType {
     reorg_begin_ack = OT_ZMQ_INTERNAL_SIGNAL + 2,
     reorg_end_ack = OT_ZMQ_INTERNAL_SIGNAL + 4,
     init = OT_ZMQ_INIT_SIGNAL,
+    shutdown_begin = OT_ZMQ_PREPARE_SHUTDOWN,
+    shutdown_ready = OT_ZMQ_ACKNOWLEDGE_SHUTDOWN,
     statemachine = OT_ZMQ_STATE_MACHINE_SIGNAL,
 };
 
 // WARNING update print function if new values are added or removed
 enum class AccountJobs : OTZMQWorkType {
     shutdown = value(WorkType::Shutdown),
+    subaccount = value(WorkType::BlockchainAccountCreated),
     reorg_begin = OT_ZMQ_INTERNAL_SIGNAL + 1,
     reorg_begin_ack = OT_ZMQ_INTERNAL_SIGNAL + 2,
     reorg_end = OT_ZMQ_INTERNAL_SIGNAL + 3,
     reorg_end_ack = OT_ZMQ_INTERNAL_SIGNAL + 4,
     init = OT_ZMQ_INIT_SIGNAL,
     key = OT_ZMQ_NEW_BLOCKCHAIN_WALLET_KEY_SIGNAL,
+    shutdown_begin = OT_ZMQ_PREPARE_SHUTDOWN,
+    shutdown_ready = OT_ZMQ_ACKNOWLEDGE_SHUTDOWN,
     statemachine = OT_ZMQ_STATE_MACHINE_SIGNAL,
 };
 
@@ -49,13 +55,16 @@ enum class SubchainJobs : OTZMQWorkType {
     filter = value(WorkType::BlockchainNewFilter),
     mempool = value(WorkType::BlockchainMempoolUpdated),
     block = value(WorkType::BlockchainBlockAvailable),
-    job_finished = OT_ZMQ_INTERNAL_SIGNAL + 0,
     reorg_begin = OT_ZMQ_INTERNAL_SIGNAL + 1,
     reorg_begin_ack = OT_ZMQ_INTERNAL_SIGNAL + 2,
     reorg_end = OT_ZMQ_INTERNAL_SIGNAL + 3,
     reorg_end_ack = OT_ZMQ_INTERNAL_SIGNAL + 4,
+    startup = OT_ZMQ_INTERNAL_SIGNAL + 5,
+    update = OT_ZMQ_INTERNAL_SIGNAL + 6,
     init = OT_ZMQ_INIT_SIGNAL,
     key = OT_ZMQ_NEW_BLOCKCHAIN_WALLET_KEY_SIGNAL,
+    shutdown_begin = OT_ZMQ_PREPARE_SHUTDOWN,
+    shutdown_ready = OT_ZMQ_ACKNOWLEDGE_SHUTDOWN,
     statemachine = OT_ZMQ_STATE_MACHINE_SIGNAL,
 };
 

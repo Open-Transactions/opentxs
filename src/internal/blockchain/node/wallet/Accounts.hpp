@@ -43,13 +43,14 @@ namespace opentxs::blockchain::node::wallet
 class Accounts
 {
 public:
+    auto Init() noexcept -> void;
+
     Accounts(
         const api::Session& api,
         const node::internal::Network& node,
         const node::internal::WalletDatabase& db,
         const node::internal::Mempool& mempool,
         const Type chain,
-        const std::string_view shutdown,
         const std::string_view toParent) noexcept;
 
     ~Accounts();

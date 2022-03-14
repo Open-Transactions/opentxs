@@ -20,6 +20,7 @@
 #include "internal/blockchain/p2p/bitcoin/Bitcoin.hpp"
 #include "internal/blockchain/p2p/bitcoin/message/Message.hpp"
 #include "internal/util/LogMacros.hpp"
+#include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/blockchain/p2p/Types.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/network/blockchain/bitcoin/CompactSize.hpp"
@@ -80,7 +81,7 @@ auto BitcoinP2PCfcheckpt(
         return nullptr;
     }
 
-    UnallocatedVector<blockchain::filter::pHash> headers{};
+    UnallocatedVector<blockchain::cfilter::pHash> headers{};
 
     if (count > 0) {
         for (std::size_t i{0}; i < count; ++i) {
@@ -111,9 +112,9 @@ auto BitcoinP2PCfcheckpt(
 auto BitcoinP2PCfcheckpt(
     const api::Session& api,
     const blockchain::Type network,
-    const blockchain::filter::Type type,
-    const blockchain::filter::Hash& stop,
-    const UnallocatedVector<blockchain::filter::pHash>& headers)
+    const blockchain::cfilter::Type type,
+    const blockchain::cfilter::Hash& stop,
+    const UnallocatedVector<blockchain::cfilter::pHash>& headers)
     -> blockchain::p2p::bitcoin::message::internal::Cfcheckpt*
 {
     namespace bitcoin = blockchain::p2p::bitcoin;
@@ -128,9 +129,9 @@ namespace opentxs::blockchain::p2p::bitcoin::message::implementation
 Cfcheckpt::Cfcheckpt(
     const api::Session& api,
     const blockchain::Type network,
-    const filter::Type type,
-    const filter::Hash& stop,
-    const UnallocatedVector<filter::pHash>& headers) noexcept
+    const cfilter::Type type,
+    const cfilter::Hash& stop,
+    const UnallocatedVector<cfilter::pHash>& headers) noexcept
     : Message(api, network, bitcoin::Command::cfcheckpt)
     , type_(type)
     , stop_(stop)
@@ -142,9 +143,9 @@ Cfcheckpt::Cfcheckpt(
 Cfcheckpt::Cfcheckpt(
     const api::Session& api,
     std::unique_ptr<Header> header,
-    const filter::Type type,
-    const filter::Hash& stop,
-    const UnallocatedVector<filter::pHash>& headers) noexcept
+    const cfilter::Type type,
+    const cfilter::Hash& stop,
+    const UnallocatedVector<cfilter::pHash>& headers) noexcept
     : Message(api, std::move(header))
     , type_(type)
     , stop_(stop)

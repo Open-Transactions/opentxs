@@ -225,7 +225,7 @@ struct Output::Imp {
                 }
 
                 try {
-                    auto& existing = cache_.GetOutput(lock, outpoint);
+                    auto& existing = cache_.GetOutput(lock, subchain, outpoint);
 
                     if (!copy.AssociatePreviousOutput(inputIndex, existing)) {
                         LogError()(OT_PRETTY_CLASS())(
@@ -236,9 +236,12 @@ struct Output::Imp {
                         return false;
                     }
 
-                    if (false ==
-                        change_state(
+                    if (change_state(
                             lock, tx, outpoint, existing, consumed, block)) {
+                        LogTrace()(OT_PRETTY_CLASS())("output ")(
+                            outpoint.str())(" marked as ")(print(consumed))
+                            .Flush();
+                    } else {
                         LogError()(OT_PRETTY_CLASS())(
                             "Error updating consumed output state")
                             .Flush();
@@ -247,6 +250,11 @@ struct Output::Imp {
                         return false;
                     }
                 } catch (...) {
+                    const auto& log = LogInsane();
+                    const auto& outpoint = input.PreviousOutput();
+                    log(OT_PRETTY_CLASS())("outpoint ")(outpoint.str())(
+                        " does not belong to this subchain")
+                        .Flush();
                 }
 
                 // NOTE consider the case of parallel chain scanning where one
@@ -349,7 +357,7 @@ struct Output::Imp {
                     "Failed to commit database transaction"};
             }
 
-            // NOTE uncomment this for detailed debugging: print(lock);
+            // NOTE uncomment this for detailed debugging: cache_.Print(lock);
             publish_balance(lock);
 
             return true;
@@ -551,7 +559,7 @@ struct Output::Imp {
                     "Failed to commit database transaction"};
             }
 
-            // NOTE uncomment this for detailed debugging: print(lock);
+            // NOTE uncomment this for detailed debugging: cache_.Print(lock);
             publish_balance(lock);
 
             return true;
@@ -1400,14 +1408,14 @@ private:
                 return change_state(lock, tx, id, existing, newState, blank_);
             } else if (state == newState) {
                 LogVerbose()(OT_PRETTY_CLASS())("Warning: outpoint ")(id.str())(
-                    " already in desired state: ")(opentxs::print(newState))
+                    " already in desired state: ")(print(newState))
                     .Flush();
 
                 return true;
             } else {
                 LogError()(OT_PRETTY_CLASS())("incorrect state for outpoint ")(
-                    id.str())(". Expected: ")(opentxs::print(oldState))(
-                    ", actual: ")(opentxs::print(state))
+                    id.str())(". Expected: ")(print(oldState))(", actual: ")(
+                    print(state))
                     .Flush();
 
                 return false;
@@ -1546,11 +1554,11 @@ private:
 
                 if (changed) {
                     LogTrace()(OT_PRETTY_CLASS())("Updated ")(outpoint.str())(
-                        " to state ")(opentxs::print(state))
+                        " to state ")(print(state))
                         .Flush();
                 } else {
                     LogError()(OT_PRETTY_CLASS())("Failed to update ")(
-                        outpoint.str())(" to state ")(opentxs::print(state))
+                        outpoint.str())(" to state ")(print(state))
                         .Flush();
 
                     return false;

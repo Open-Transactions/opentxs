@@ -11,7 +11,7 @@
 #include <future>
 #include <memory>
 
-#include "opentxs/blockchain/Blockchain.hpp"
+#include "opentxs/blockchain/node/Types.hpp"
 
 class QString;
 
@@ -20,7 +20,7 @@ namespace opentxs::ui::implementation
 class SendMonitor
 {
 public:
-    using Future = std::future<blockchain::SendOutcome>;
+    using Future = std::future<blockchain::node::SendOutcome>;
     using Callback = std::function<void(int, int, QString)>;
 
     auto shutdown() noexcept -> void;

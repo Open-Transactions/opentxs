@@ -6,17 +6,19 @@
 target_sources(
   opentxs-common
   PRIVATE
+    "${opentxs_SOURCE_DIR}/src/internal/blockchain/node/wallet/subchain/statemachine/Index.hpp"
+    "${opentxs_SOURCE_DIR}/src/internal/blockchain/node/wallet/subchain/statemachine/Process.hpp"
+    "${opentxs_SOURCE_DIR}/src/internal/blockchain/node/wallet/subchain/statemachine/Progress.hpp"
+    "${opentxs_SOURCE_DIR}/src/internal/blockchain/node/wallet/subchain/statemachine/Rescan.hpp"
+    "${opentxs_SOURCE_DIR}/src/internal/blockchain/node/wallet/subchain/statemachine/Scan.hpp"
     "${opentxs_SOURCE_DIR}/src/internal/blockchain/node/wallet/subchain/statemachine/Types.hpp"
-    "Batch.cpp"
-    "Batch.hpp"
-    "BlockIndex.cpp"
-    "BlockIndex.hpp"
+    "Common.cpp"
+    "DeterministicIndex.cpp"
+    "DeterministicIndex.hpp"
     "Index.cpp"
     "Index.hpp"
-    "Job.cpp"
-    "Job.hpp"
-    "Mempool.cpp"
-    "Mempool.hpp"
+    "NotificationIndex.cpp"
+    "NotificationIndex.hpp"
     "Process.cpp"
     "Process.hpp"
     "Progress.cpp"
@@ -25,6 +27,9 @@ target_sources(
     "Rescan.hpp"
     "Scan.cpp"
     "Scan.hpp"
-    "Work.cpp"
-    "Work.hpp"
+)
+target_include_directories(
+  opentxs-common SYSTEM
+  PRIVATE "${opentxs_SOURCE_DIR}/deps/cs_libguarded/src"
+          "${opentxs_SOURCE_DIR}/deps/robin-hood/src/include"
 )

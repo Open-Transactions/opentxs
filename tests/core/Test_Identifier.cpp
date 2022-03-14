@@ -7,6 +7,7 @@
 
 #include "internal/api/session/FactoryAPI.hpp"
 #include "opentxs/OT.hpp"
+#include "opentxs/Version.hpp"
 #include "opentxs/api/Context.hpp"
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/Factory.hpp"

@@ -24,9 +24,9 @@
 #include "opentxs/Types.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
-#include "opentxs/blockchain/Blockchain.hpp"
 #include "opentxs/blockchain/BlockchainType.hpp"
-#include "opentxs/blockchain/Types.hpp"
+#include "opentxs/blockchain/bitcoin/cfilter/Types.hpp"
+#include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/contract/ContractType.hpp"
 #include "opentxs/network/p2p/Acknowledgement.hpp"
@@ -233,7 +233,7 @@ auto BlockchainSyncMessage(
                 auto data = UnallocatedVector<network::p2p::Block>{};
                 using Chain = opentxs::blockchain::Type;
                 auto chain = std::optional<Chain>{std::nullopt};
-                using FilterType = opentxs::blockchain::filter::Type;
+                using FilterType = opentxs::blockchain::cfilter::Type;
                 auto filterType = std::optional<FilterType>{std::nullopt};
                 using Height = opentxs::blockchain::block::Height;
                 auto height = Height{-1};

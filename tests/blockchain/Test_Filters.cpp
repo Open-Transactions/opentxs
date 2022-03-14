@@ -23,12 +23,12 @@
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
-#include "opentxs/blockchain/Blockchain.hpp"
 #include "opentxs/blockchain/BlockchainType.hpp"
-#include "opentxs/blockchain/BloomFilter.hpp"
-#include "opentxs/blockchain/BloomUpdateFlag.hpp"
-#include "opentxs/blockchain/FilterType.hpp"
-#include "opentxs/blockchain/GCS.hpp"
+#include "opentxs/blockchain/bitcoin/bloom/BloomFilter.hpp"
+#include "opentxs/blockchain/bitcoin/bloom/BloomUpdateFlag.hpp"
+#include "opentxs/blockchain/bitcoin/cfilter/FilterType.hpp"
+#include "opentxs/blockchain/bitcoin/cfilter/GCS.hpp"
+#include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/blockchain/node/HeaderOracle.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/crypto/HashType.hpp"
@@ -41,7 +41,7 @@ namespace ot = opentxs;
 namespace ottest
 {
 const auto params_ = ot::blockchain::internal::GetFilterParams(
-    ot::blockchain::filter::Type::Basic_BIP158);
+    ot::blockchain::cfilter::Type::Basic_BIP158);
 using Hash = ot::OTData;
 auto stress_test_ = ot::UnallocatedVector<Hash>{};
 
@@ -564,7 +564,7 @@ TEST_F(Test_Filters, test_set_intersection)
     namespace bc = ot::blockchain::internal;
 
     const auto params = ot::blockchain::internal::GetFilterParams(
-        ot::blockchain::filter::Type::ES);
+        ot::blockchain::cfilter::Type::ES);
     const auto hash = [&] {
         auto out = api_.Factory().Data();
         out->SetSize(32);

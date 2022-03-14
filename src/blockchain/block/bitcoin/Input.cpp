@@ -29,12 +29,13 @@
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/api/crypto/Blockchain.hpp"
 #include "opentxs/api/session/Crypto.hpp"
-#include "opentxs/blockchain/Blockchain.hpp"
-#include "opentxs/blockchain/FilterType.hpp"
 #include "opentxs/blockchain/Types.hpp"
+#include "opentxs/blockchain/bitcoin/cfilter/FilterType.hpp"
 #include "opentxs/blockchain/block/Outpoint.hpp"
+#include "opentxs/blockchain/block/bitcoin/Opcodes.hpp"
 #include "opentxs/blockchain/block/bitcoin/Output.hpp"
 #include "opentxs/blockchain/block/bitcoin/Script.hpp"
+#include "opentxs/blockchain/block/bitcoin/Types.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
@@ -645,7 +646,7 @@ auto Input::decode_coinbase() const noexcept -> UnallocatedCString
     return out.str();
 }
 
-auto Input::ExtractElements(const filter::Type style) const noexcept
+auto Input::ExtractElements(const cfilter::Type style) const noexcept
     -> UnallocatedVector<Space>
 {
     auto output = UnallocatedVector<Space>{};
@@ -653,7 +654,7 @@ auto Input::ExtractElements(const filter::Type style) const noexcept
     if (Script::Position::Coinbase == script_->Role()) { return output; }
 
     switch (style) {
-        case filter::Type::ES: {
+        case cfilter::Type::ES: {
 
             LogTrace()(OT_PRETTY_CLASS())("processing input script").Flush();
             output = script_->ExtractElements(style);
@@ -696,13 +697,13 @@ auto Input::ExtractElements(const filter::Type style) const noexcept
 
             [[fallthrough]];
         }
-        case filter::Type::Basic_BCHVariant: {
+        case cfilter::Type::Basic_BCHVariant: {
             LogTrace()(OT_PRETTY_CLASS())("processing consumed outpoint")
                 .Flush();
             auto it = reinterpret_cast<const std::byte*>(&previous_);
             output.emplace_back(it, it + sizeof(previous_));
         } break;
-        case filter::Type::Basic_BIP158:
+        case cfilter::Type::Basic_BIP158:
         default: {
             LogTrace()(OT_PRETTY_CLASS())("skipping input").Flush();
         }
@@ -717,7 +718,7 @@ auto Input::ExtractElements(const filter::Type style) const noexcept
 
 auto Input::FindMatches(
     const ReadView txid,
-    const filter::Type type,
+    const cfilter::Type type,
     const Patterns& txos,
     const ParsedPatterns&) const noexcept -> Matches
 {

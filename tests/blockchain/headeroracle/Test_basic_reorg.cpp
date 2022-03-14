@@ -9,7 +9,7 @@
 #include <utility>
 
 #include "Helpers.hpp"
-#include "opentxs/blockchain/Blockchain.hpp"
+#include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/blockchain/node/HeaderOracle.hpp"
 #include "opentxs/util/Container.hpp"
 

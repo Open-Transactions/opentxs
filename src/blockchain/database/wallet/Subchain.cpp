@@ -278,7 +278,7 @@ struct SubchainData::Imp {
 
     Imp(const api::Session& api,
         const storage::lmdb::LMDB& lmdb,
-        const blockchain::filter::Type filter) noexcept
+        const blockchain::cfilter::Type filter) noexcept
         : api_(api)
         , lmdb_(lmdb)
         , default_filter_type_(filter)
@@ -319,7 +319,7 @@ struct SubchainData::Imp {
 private:
     const api::Session& api_;
     const storage::lmdb::LMDB& lmdb_;
-    const filter::Type default_filter_type_;
+    const cfilter::Type default_filter_type_;
     const VersionNumber current_version_;
     std::promise<void> upgrade_promise_;
     std::shared_future<void> upgrade_future_;
@@ -361,7 +361,7 @@ private:
     auto subchain_index(
         const NodeID& subaccount,
         const Subchain subchain,
-        const filter::Type type,
+        const cfilter::Type type,
         const VersionNumber version) const noexcept -> pSubchainIndex
     {
         auto preimage = api_.Factory().Data();
@@ -394,7 +394,7 @@ private:
 SubchainData::SubchainData(
     const api::Session& api,
     const storage::lmdb::LMDB& lmdb,
-    const blockchain::filter::Type filter) noexcept
+    const blockchain::cfilter::Type filter) noexcept
     : imp_(std::make_unique<Imp>(api, lmdb, filter))
 {
     OT_ASSERT(imp_);

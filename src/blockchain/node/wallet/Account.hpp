@@ -20,16 +20,18 @@
 #include "internal/blockchain/node/Node.hpp"
 #include "internal/blockchain/node/wallet/Account.hpp"
 #include "internal/blockchain/node/wallet/Types.hpp"
+#include "internal/blockchain/node/wallet/subchain/Subchain.hpp"
 #include "internal/network/zeromq/Types.hpp"
 #include "internal/network/zeromq/Types.hpp"
 #include "internal/util/BoostPMR.hpp"
 #include "opentxs/Types.hpp"
-#include "opentxs/blockchain/Blockchain.hpp"
 #include "opentxs/blockchain/BlockchainType.hpp"
-#include "opentxs/blockchain/FilterType.hpp"
+#include "opentxs/blockchain/bitcoin/cfilter/FilterType.hpp"
+#include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/blockchain/crypto/Account.hpp"
 #include "opentxs/blockchain/crypto/HD.hpp"
 #include "opentxs/blockchain/crypto/PaymentCode.hpp"
+#include "opentxs/blockchain/crypto/SubaccountType.hpp"
 #include "opentxs/blockchain/crypto/Subchain.hpp"  // IWYU pragma: keep
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/util/Allocated.hpp"
@@ -97,6 +99,8 @@ namespace opentxs::blockchain::node::wallet
 class Account::Imp final : public opentxs::Actor<Imp, AccountJobs>
 {
 public:
+    auto VerifyState(const State state) const noexcept -> void;
+
     auto Init(boost::shared_ptr<Imp> me) noexcept -> void;
     auto ProcessReorg(
         const Lock& headerOracleLock,
@@ -112,8 +116,7 @@ public:
         const node::internal::Mempool& mempool,
         const network::zeromq::BatchID batch,
         const Type chain,
-        const filter::Type filter,
-        const std::string_view shutdown,
+        const cfilter::Type filter,
         const std::string_view fromParent,
         const std::string_view toParent,
         allocator_type alloc) noexcept;
@@ -122,13 +125,6 @@ public:
 
 private:
     friend opentxs::Actor<Imp, AccountJobs>;
-
-    enum class State {
-        normal,
-        pre_reorg,
-        reorg,
-        post_reorg,
-    };
 
     struct ReorgData {
         const std::size_t target_;
@@ -152,20 +148,21 @@ private:
     const node::internal::WalletDatabase& db_;
     const node::internal::Mempool& mempool_;
     const Type chain_;
-    const filter::Type filter_type_;
-    const CString shutdown_endpoint_;
+    const cfilter::Type filter_type_;
     const CString to_children_endpoint_;
     const CString from_children_endpoint_;
     network::zeromq::socket::Raw& to_parent_;
     network::zeromq::socket::Raw& to_children_;
-    State state_;
+    std::atomic<State> state_;
     std::optional<ReorgData> reorg_;
+    std::optional<ReorgData> shutdown_;
     Subchains internal_;
     Subchains external_;
     Subchains outgoing_;
     Subchains incoming_;
 
     auto reorg_children() const noexcept -> std::size_t;
+    auto verify_child_state(const Subchain::State state) const noexcept -> void;
 
     auto check_hd(const Identifier& subaccount) noexcept -> void;
     auto check_hd(const crypto::HD& subaccount) noexcept -> void;
@@ -182,19 +179,27 @@ private:
         Subchains& map) noexcept -> Subchain&;
     auto pipeline(const Work work, Message&& msg) noexcept -> void;
     auto process_key(Message&& in) noexcept -> void;
+    auto process_subaccount(Message&& in) noexcept -> void;
+    auto process_subaccount(
+        const Identifier& id,
+        const crypto::SubaccountType type) noexcept -> void;
     auto ready_for_normal() noexcept -> void;
     auto ready_for_reorg() noexcept -> void;
+    auto ready_for_shutdown() noexcept -> void;
     auto scan_subchains() noexcept -> void;
     auto startup() noexcept -> void;
     auto state_normal(const Work work, Message&& msg) noexcept -> void;
     auto state_post_reorg(const Work work, Message&& msg) noexcept -> void;
     auto state_pre_reorg(const Work work, Message&& msg) noexcept -> void;
+    auto state_pre_shutdown(const Work work, Message&& msg) noexcept -> void;
     auto state_reorg(const Work work, Message&& msg) noexcept -> void;
     auto transition_state_normal(Message&& in) noexcept -> void;
     auto transition_state_post_reorg(Message&& in) noexcept -> void;
     auto transition_state_pre_reorg(Message&& in) noexcept -> void;
+    auto transition_state_pre_shutdown(Message&& in) noexcept -> void;
     auto transition_state_reorg(Message&& in) noexcept -> void;
-    auto work() noexcept -> bool;
+    auto transition_state_shutdown(Message&& in) noexcept -> void;
+    [[noreturn]] auto work() noexcept -> bool;
 
     Imp(const api::Session& api,
         const crypto::Account& account,
@@ -203,8 +208,7 @@ private:
         const node::internal::Mempool& mempool,
         const network::zeromq::BatchID batch,
         const Type chain,
-        const filter::Type filter,
-        const std::string_view shutdown,
+        const cfilter::Type filter,
         const std::string_view fromParent,
         const std::string_view toParent,
         CString&& fromChildren,

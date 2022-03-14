@@ -15,7 +15,6 @@
 
 #include "Basic.hpp"
 #include "opentxs/Types.hpp"
-#include "opentxs/blockchain/Blockchain.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/PasswordPrompt.hpp"
 #include "opentxs/util/Time.hpp"

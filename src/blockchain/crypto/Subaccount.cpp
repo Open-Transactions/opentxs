@@ -18,6 +18,7 @@
 #include "internal/api/crypto/Blockchain.hpp"
 #include "internal/core/Factory.hpp"
 #include "internal/identity/wot/claim/Types.hpp"
+#include "internal/util/LogMacros.hpp"
 #include "opentxs/api/crypto/Blockchain.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
@@ -28,6 +29,7 @@
 #include "opentxs/crypto/key/HD.hpp"  // IWYU pragma: keep
 #include "opentxs/identity/wot/claim/Types.hpp"
 #include "opentxs/util/Container.hpp"
+#include "opentxs/util/Log.hpp"
 #include "serialization/protobuf/BlockchainAccountData.pb.h"
 #include "serialization/protobuf/BlockchainActivity.pb.h"
 
@@ -141,6 +143,8 @@ auto Subaccount::Confirm(
             return false;
         }
     } catch (...) {
+        LogError()(OT_PRETTY_CLASS())("invalid subchain or index").Flush();
+
         return false;
     }
 }

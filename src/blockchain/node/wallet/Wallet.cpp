@@ -57,10 +57,12 @@ namespace opentxs::blockchain::node::wallet
 auto print(WalletJobs job) noexcept -> std::string_view
 {
     try {
-        static const auto map = Map<WalletJobs, CString>{
-            {WalletJobs::shutdown, "shutdown"},
-            {WalletJobs::init, "init"},
-            {WalletJobs::statemachine, "statemachine"},
+        using Job = WalletJobs;
+        static const auto map = Map<Job, CString>{
+            {Job::shutdown, "shutdown"},
+            {Job::init, "init"},
+            {Job::shutdown_ready, "shutdown_ready"},
+            {Job::statemachine, "statemachine"},
         };
 
         return map.at(job);
@@ -98,8 +100,9 @@ Wallet::Wallet(
     , chain_(chain)
     , to_accounts_(pipeline_.Internal().ExtraSocket(0))
     , fee_oracle_(factory::FeeOracle(api_, chain))
-    , accounts_(api, parent_, db_, mempool, chain_, shutdown, accounts)
+    , accounts_(api, parent_, db_, mempool, chain_, accounts)
     , proposals_(api, parent_, db_, chain_)
+    , shutdown_sent_(false)
 {
     init_executor({
         UnallocatedCString{shutdown},
@@ -204,7 +207,11 @@ auto Wallet::Height() const noexcept -> block::Height
     return db_.GetWalletHeight();
 }
 
-auto Wallet::Init() noexcept -> void { trigger(); }
+auto Wallet::Init() noexcept -> void
+{
+    accounts_.Init();
+    trigger();
+}
 
 auto Wallet::pipeline(const zmq::Message& in) noexcept -> void
 {
@@ -213,8 +220,7 @@ auto Wallet::pipeline(const zmq::Message& in) noexcept -> void
     const auto body = in.Body();
 
     if (1 > body.size()) {
-        LogError()(OT_PRETTY_CLASS())(DisplayString(chain_))(
-            ": invalid message")
+        LogError()(OT_PRETTY_CLASS())(print(chain_))(": invalid message")
             .Flush();
 
         OT_FAIL;
@@ -233,15 +239,16 @@ auto Wallet::pipeline(const zmq::Message& in) noexcept -> void
 
     switch (work) {
         case Work::shutdown: {
-            to_accounts_.Send(MakeWork(wallet::AccountsJobs::shutdown));
+            process_shutdown();
+        } break;
+        case Work::shutdown_ready: {
             shutdown(shutdown_promise_);
         } break;
         case Work::statemachine: {
             do_work();
         } break;
         default: {
-            LogError()(OT_PRETTY_CLASS())(DisplayString(chain_))(
-                ": unhandled type")
+            LogError()(OT_PRETTY_CLASS())(print(chain_))(": unhandled type")
                 .Flush();
 
             OT_FAIL;
@@ -252,16 +259,25 @@ auto Wallet::pipeline(const zmq::Message& in) noexcept -> void
     const auto elapsed = std::chrono::nanoseconds{Clock::now() - start};
 
     if (elapsed > limit) {
-        LogTrace()(OT_PRETTY_CLASS())(DisplayString(chain_))(": spent ")(
-            elapsed)(" processing ")(CString{print(work)})(" signal")
+        LogTrace()(OT_PRETTY_CLASS())(print(chain_))(": spent ")(
+            elapsed)(" processing ")(print(work))(" signal")
             .Flush();
+    }
+}
+
+auto Wallet::process_shutdown() noexcept -> void
+{
+    if (auto previous = shutdown_sent_.exchange(true); false == previous) {
+        to_accounts_.Send(MakeWork(wallet::AccountsJobs::shutdown_begin));
     }
 }
 
 auto Wallet::shutdown(std::promise<void>& promise) noexcept -> void
 {
     if (auto previous = running_.exchange(false); previous) {
-        LogDetail()("Shutting down ")(DisplayString(chain_))(" wallet").Flush();
+        LogDetail()("Shutting down ")(print(chain_))(" wallet").Flush();
+        process_shutdown();
+        to_accounts_.Send(MakeWork(wallet::AccountsJobs::shutdown));
         pipeline_.Close();
         fee_oracle_.Shutdown();
         promise.set_value();
@@ -275,5 +291,5 @@ auto Wallet::state_machine() noexcept -> bool
     return proposals_.Run();
 }
 
-Wallet::~Wallet() { signal_shutdown().get(); }
+Wallet::~Wallet() { stop_worker().get(); }
 }  // namespace opentxs::blockchain::node::implementation

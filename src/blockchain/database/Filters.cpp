@@ -24,8 +24,7 @@
 #include "opentxs/Types.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
-#include "opentxs/blockchain/Blockchain.hpp"
-#include "opentxs/blockchain/GCS.hpp"
+#include "opentxs/blockchain/bitcoin/cfilter/GCS.hpp"
 #include "opentxs/blockchain/block/Header.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/util/Log.hpp"
@@ -48,7 +47,7 @@ Filters::Filters(
     import_genesis(chain);
 }
 
-auto Filters::CurrentHeaderTip(const filter::Type type) const noexcept
+auto Filters::CurrentHeaderTip(const cfilter::Type type) const noexcept
     -> block::Position
 {
     auto output{blank_position_};
@@ -61,7 +60,7 @@ auto Filters::CurrentHeaderTip(const filter::Type type) const noexcept
     return output;
 }
 
-auto Filters::CurrentTip(const filter::Type type) const noexcept
+auto Filters::CurrentTip(const cfilter::Type type) const noexcept
     -> block::Position
 {
     auto output{blank_position_};
@@ -73,14 +72,14 @@ auto Filters::CurrentTip(const filter::Type type) const noexcept
     return output;
 }
 
-auto Filters::HaveFilter(const filter::Type type, const block::Hash& block)
+auto Filters::HaveFilter(const cfilter::Type type, const block::Hash& block)
     const noexcept -> bool
 {
     return common_.HaveFilter(type, block.Bytes());
 }
 
 auto Filters::HaveFilterHeader(
-    const filter::Type type,
+    const cfilter::Type type,
     const block::Hash& block) const noexcept -> bool
 {
     return common_.HaveFilterHeader(type, block.Bytes());
@@ -146,13 +145,13 @@ auto Filters::import_genesis(const blockchain::Type chain) const noexcept
     }
 }
 
-auto Filters::LoadFilter(const filter::Type type, const ReadView block)
+auto Filters::LoadFilter(const cfilter::Type type, const ReadView block)
     const noexcept -> std::unique_ptr<const blockchain::GCS>
 {
     return common_.LoadFilter(type, block);
 }
 
-auto Filters::LoadFilterHash(const filter::Type type, const ReadView block)
+auto Filters::LoadFilterHash(const cfilter::Type type, const ReadView block)
     const noexcept -> Hash
 {
     auto output = api_.Factory().Data();
@@ -165,7 +164,7 @@ auto Filters::LoadFilterHash(const filter::Type type, const ReadView block)
     return api_.Factory().Data();
 }
 
-auto Filters::LoadFilterHeader(const filter::Type type, const ReadView block)
+auto Filters::LoadFilterHeader(const cfilter::Type type, const ReadView block)
     const noexcept -> Hash
 {
     auto output = api_.Factory().Data();
@@ -179,7 +178,7 @@ auto Filters::LoadFilterHeader(const filter::Type type, const ReadView block)
 }
 
 auto Filters::SetHeaderTip(
-    const filter::Type type,
+    const cfilter::Type type,
     const block::Position& position) const noexcept -> bool
 {
     return lmdb_
@@ -190,7 +189,7 @@ auto Filters::SetHeaderTip(
         .first;
 }
 
-auto Filters::SetTip(const filter::Type type, const block::Position& position)
+auto Filters::SetTip(const cfilter::Type type, const block::Position& position)
     const noexcept -> bool
 {
     return lmdb_
@@ -202,7 +201,7 @@ auto Filters::SetTip(const filter::Type type, const block::Position& position)
 }
 
 auto Filters::StoreFilters(
-    const filter::Type type,
+    const cfilter::Type type,
     const UnallocatedVector<Header>& headers,
     const UnallocatedVector<Filter>& filters,
     const block::Position& tip) const noexcept -> bool
@@ -250,14 +249,14 @@ auto Filters::StoreFilters(
 }
 
 auto Filters::StoreFilters(
-    const filter::Type type,
+    const cfilter::Type type,
     UnallocatedVector<Filter> filters) const noexcept -> bool
 {
     return common_.StoreFilters(type, filters);
 }
 
 auto Filters::StoreHeaders(
-    const filter::Type type,
+    const cfilter::Type type,
     const ReadView previous,
     const UnallocatedVector<Header> headers) const noexcept -> bool
 {

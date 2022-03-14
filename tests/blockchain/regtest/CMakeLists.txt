@@ -21,6 +21,7 @@ add_opentx_test(
 add_opentx_test(
   unittests-opentxs-blockchain-regtest-payment-code Test_payment_code.cpp
 )
+add_opentx_test(unittests-opentxs-blockchain-regtest-reorg Test_reorg.cpp)
 add_opentx_test(
   unittests-opentxs-blockchain-regtest-send-receive-hd Test_send_hd.cpp
 )

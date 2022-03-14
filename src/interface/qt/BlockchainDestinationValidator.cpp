@@ -9,6 +9,7 @@
 
 #include <QObject>
 #include <sstream>
+#include <string_view>
 #include <type_traits>
 #include <utility>
 
@@ -19,6 +20,7 @@
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/blockchain/Blockchain.hpp"
 #include "opentxs/blockchain/BlockchainType.hpp"
+#include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/crypto/AddressStyle.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/PaymentCode.hpp"
@@ -73,7 +75,7 @@ struct BlockchainDestinationValidator final : public Super {
         OT_ASSERT(0 < chains.size());
 
         const auto type = *chains.begin();
-        const auto chain = blockchain::DisplayString(type);
+        const auto chain = print(type);
         const auto validChain = (0u < chains.count(chain_));
         using Style = blockchain::crypto::AddressStyle;
 

@@ -4,7 +4,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 // IWYU pragma: no_include "opentxs/blockchain/BlockchainType.hpp"
-// IWYU pragma: no_include "opentxs/blockchain/FilterType.hpp"
+// IWYU pragma: no_include "opentxs/blockchain/bitcoin/cfilter/FilterType.hpp"
 
 #pragma once
 
@@ -12,8 +12,9 @@
 
 #include <cstdint>
 
-#include "opentxs/blockchain/Blockchain.hpp"
 #include "opentxs/blockchain/Types.hpp"
+#include "opentxs/blockchain/bitcoin/cfilter/Types.hpp"
+#include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/util/Bytes.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -37,7 +38,7 @@ public:
     auto Chain() const noexcept -> opentxs::blockchain::Type;
     auto Filter() const noexcept -> ReadView;
     auto FilterElements() const noexcept -> std::uint32_t;
-    auto FilterType() const noexcept -> opentxs::blockchain::filter::Type;
+    auto FilterType() const noexcept -> opentxs::blockchain::cfilter::Type;
     auto Header() const noexcept -> ReadView;
     auto Height() const noexcept -> opentxs::blockchain::block::Height;
     OPENTXS_NO_EXPORT auto Serialize(
@@ -50,7 +51,7 @@ public:
     OPENTXS_NO_EXPORT Block(
         opentxs::blockchain::Type chain,
         opentxs::blockchain::block::Height height,
-        opentxs::blockchain::filter::Type type,
+        opentxs::blockchain::cfilter::Type type,
         std::uint32_t count,
         ReadView header,
         ReadView filter) noexcept(false);

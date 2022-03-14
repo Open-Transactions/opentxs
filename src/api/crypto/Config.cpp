@@ -22,23 +22,23 @@
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 #endif
 
-#define OT_DEFAULT_ITERATION_COUNT 65535       // in bytes
-#define OT_DEFAULT_SYMMETRIC_SALT_SIZE 8       // in bytes
-#define OT_DEFAULT_SYMMETRIC_KEY_SIZE 32       // in bytes
-#define OT_DEFAULT_SYMMETRIC_KEY_SIZE_MAX 64   // in bytes == 512 bits
-#define OT_DEFAULT_SYMMETRIC_IV_SIZE 32        // in bytes
-#define OT_DEFAULT_SYMMETRIC_BUFFER_SIZE 4096  // in bytes
-#define OT_DEFAULT_PUBLIC_KEYSIZE 128          // in bytes == 4096 bits
-#define OT_DEFAULT_PUBLIC_KEYSIZE_MAX 512      // in bytes == 1024 bits
+constexpr auto OT_DEFAULT_ITERATION_COUNT = 65535;       // in bytes
+constexpr auto OT_DEFAULT_SYMMETRIC_SALT_SIZE = 8;       // in bytes
+constexpr auto OT_DEFAULT_SYMMETRIC_KEY_SIZE = 32;       // in bytes
+constexpr auto OT_DEFAULT_SYMMETRIC_KEY_SIZE_MAX = 64;   // in bytes == 512 bits
+constexpr auto OT_DEFAULT_SYMMETRIC_IV_SIZE = 32;        // in bytes
+constexpr auto OT_DEFAULT_SYMMETRIC_BUFFER_SIZE = 4096;  // in bytes
+constexpr auto OT_DEFAULT_PUBLIC_KEYSIZE = 128;      // in bytes == 4096 bits
+constexpr auto OT_DEFAULT_PUBLIC_KEYSIZE_MAX = 512;  // in bytes == 1024 bits
 
-#define OT_KEY_ITERATION_COUNT "iteration_count"
-#define OT_KEY_SYMMETRIC_SALT_SIZE "symmetric_salt_size"
-#define OT_KEY_SYMMETRIC_KEY_SIZE "symmetric_key_size"
-#define OT_KEY_SYMMETRIC_KEY_SIZE_MAX "symmetric_key_size_max"
-#define OT_KEY_SYMMETRIC_IV_SIZE "symmetric_iv_size"
-#define OT_KEY_SYMMETRIC_BUFFER_SIZE "symmetric_buffer_size"
-#define OT_KEY_PUBLIC_KEYSIZE "public_keysize"
-#define OT_KEY_PUBLIC_KEYSIZE_MAX "public_keysize_max"
+constexpr auto OT_KEY_ITERATION_COUNT = "iteration_count";
+constexpr auto OT_KEY_SYMMETRIC_SALT_SIZE = "symmetric_salt_size";
+constexpr auto OT_KEY_SYMMETRIC_KEY_SIZE = "symmetric_key_size";
+constexpr auto OT_KEY_SYMMETRIC_KEY_SIZE_MAX = "symmetric_key_size_max";
+constexpr auto OT_KEY_SYMMETRIC_IV_SIZE = "symmetric_iv_size";
+constexpr auto OT_KEY_SYMMETRIC_BUFFER_SIZE = "symmetric_buffer_size";
+constexpr auto OT_KEY_PUBLIC_KEYSIZE = "public_keysize";
+constexpr auto OT_KEY_PUBLIC_KEYSIZE_MAX = "public_keysize_max";
 
 namespace opentxs::factory
 {

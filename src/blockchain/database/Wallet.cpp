@@ -12,7 +12,6 @@
 
 #include "blockchain/database/common/Database.hpp"
 #include "internal/util/LogMacros.hpp"
-#include "opentxs/blockchain/Blockchain.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Pimpl.hpp"
@@ -26,7 +25,7 @@ Wallet::Wallet(
     const common::Database& common,
     const storage::lmdb::LMDB& lmdb,
     const blockchain::Type chain,
-    const blockchain::filter::Type filter) noexcept
+    const blockchain::cfilter::Type filter) noexcept
     : api_(api)
     , common_(common)
     , lmdb_(lmdb)

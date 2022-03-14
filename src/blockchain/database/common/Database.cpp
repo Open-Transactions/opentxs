@@ -35,7 +35,7 @@ extern "C" {
 #include "internal/api/Legacy.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/TSV.hpp"
-#include "opentxs/blockchain/GCS.hpp"  // IWYU pragma: keep
+#include "opentxs/blockchain/bitcoin/cfilter/GCS.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/block/bitcoin/Transaction.hpp"  // IWYU pragma: keep
 #include "opentxs/core/String.hpp"
 #include "opentxs/util/Container.hpp"
@@ -486,14 +486,14 @@ auto Database::HashKey() const noexcept -> ReadView
     return reader(imp_.siphash_key_);
 }
 
-auto Database::HaveFilter(const filter::Type type, const ReadView blockHash)
+auto Database::HaveFilter(const cfilter::Type type, const ReadView blockHash)
     const noexcept -> bool
 {
     return imp_.filters_.HaveFilter(type, blockHash);
 }
 
 auto Database::HaveFilterHeader(
-    const filter::Type type,
+    const cfilter::Type type,
     const ReadView blockHash) const noexcept -> bool
 {
     return imp_.filters_.HaveFilterHeader(type, blockHash);
@@ -510,14 +510,14 @@ auto Database::LoadBlockHeader(const BlockHash& hash) const noexcept(false)
     return imp_.headers_.Load(hash);
 }
 
-auto Database::LoadFilter(const filter::Type type, const ReadView blockHash)
+auto Database::LoadFilter(const cfilter::Type type, const ReadView blockHash)
     const noexcept -> std::unique_ptr<const opentxs::blockchain::GCS>
 {
     return imp_.filters_.LoadFilter(type, blockHash);
 }
 
 auto Database::LoadFilterHash(
-    const filter::Type type,
+    const cfilter::Type type,
     const ReadView blockHash,
     const AllocateOutput filterHash) const noexcept -> bool
 {
@@ -525,7 +525,7 @@ auto Database::LoadFilterHash(
 }
 
 auto Database::LoadFilterHeader(
-    const filter::Type type,
+    const cfilter::Type type,
     const ReadView blockHash,
     const AllocateOutput header) const noexcept -> bool
 {
@@ -610,21 +610,21 @@ auto Database::StoreBlockHeaders(const UpdatedHeader& headers) const noexcept
 }
 
 auto Database::StoreFilterHeaders(
-    const filter::Type type,
+    const cfilter::Type type,
     const UnallocatedVector<FilterHeader>& headers) const noexcept -> bool
 {
     return imp_.filters_.StoreFilterHeaders(type, headers);
 }
 
 auto Database::StoreFilters(
-    const filter::Type type,
+    const cfilter::Type type,
     UnallocatedVector<FilterData>& filters) const noexcept -> bool
 {
     return imp_.filters_.StoreFilters(type, filters);
 }
 
 auto Database::StoreFilters(
-    const filter::Type type,
+    const cfilter::Type type,
     const UnallocatedVector<FilterHeader>& headers,
     const UnallocatedVector<FilterData>& filters) const noexcept -> bool
 {

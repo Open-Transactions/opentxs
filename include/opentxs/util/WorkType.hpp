@@ -216,7 +216,7 @@ constexpr auto value(const WorkType in) noexcept
  *   BlockchainNewFilter: reports the receipt of a new cfilter
  *       * Additional frames:
  *          1: chain type as blockchain::Type
- *          2: filter type as blockchain::filter::Type
+ *          2: filter type as blockchain::cfilter::Type
  *          3: corresponding height as blockchain::block::Height
  *          4: corresponding block hash as blockchain::block::Hash (encoded as
  *             byte sequence)

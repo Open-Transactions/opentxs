@@ -10,7 +10,7 @@
 #include <iosfwd>
 
 #include "internal/blockchain/p2p/bitcoin/message/Message.hpp"
-#include "opentxs/blockchain/Blockchain.hpp"
+#include "opentxs/blockchain/Types.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"

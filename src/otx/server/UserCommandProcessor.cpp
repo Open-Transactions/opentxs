@@ -83,11 +83,14 @@
 #include "serialization/protobuf/ServerContract.pb.h"
 #include "serialization/protobuf/UnitDefinition.pb.h"
 
-#define MAX_UNUSED_NUMBERS 100
-#define ISSUE_NUMBER_BATCH 100
-#define NYMBOX_DEPTH 0
-#define INBOX_DEPTH 1
-#define OUTBOX_DEPTH 2
+namespace
+{
+constexpr auto MAX_UNUSED_NUMBERS = 100;
+constexpr auto ISSUE_NUMBER_BATCH = 100;
+constexpr auto NYMBOX_DEPTH = 0;
+constexpr auto INBOX_DEPTH = 1;
+constexpr auto OUTBOX_DEPTH = 2;
+}  // namespace
 
 namespace opentxs::server
 {

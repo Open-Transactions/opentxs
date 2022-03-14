@@ -149,7 +149,7 @@ auto ValidContactItemAttribute(
 
 auto TranslateSectionName(
     const std::uint32_t enumValue,
-    const UnallocatedCString& lang) -> UnallocatedCString
+    const std::string_view lang) -> std::string_view
 {
     EnumLang langPair{enumValue, lang};
 
@@ -157,11 +157,11 @@ auto TranslateSectionName(
         if (langPair == it.first) { return it.second; }
     }
 
-    return "";
+    return {};
 }
 auto TranslateItemType(
     const std::uint32_t enumValue,
-    const UnallocatedCString& lang) -> UnallocatedCString
+    const std::string_view lang) -> std::string_view
 {
     EnumLang langPair{enumValue, lang};
 
@@ -169,11 +169,11 @@ auto TranslateItemType(
         if (langPair == it.first) { return it.second; }
     }
 
-    return "";
+    return {};
 }
 auto TranslateItemAttributes(
     const std::uint32_t enumValue,
-    const UnallocatedCString& lang) -> UnallocatedCString
+    const std::string_view lang) -> std::string_view
 {
     EnumLang langPair{enumValue, lang};
 
@@ -181,7 +181,7 @@ auto TranslateItemAttributes(
         if (langPair == it.first) { return it.second; }
     }
 
-    return "";
+    return {};
 }
 
 auto ReciprocalRelationship(const std::uint32_t relationship) -> std::uint32_t

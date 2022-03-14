@@ -126,7 +126,11 @@ auto UnitList::process_blockchain_balance(const Message& message) noexcept
 auto UnitList::process_unit(const UnitListRowID& id) noexcept -> void
 {
     auto custom = CustomData{};
-    add_item(id, proto::TranslateItemType(translate(UnitToClaim(id))), custom);
+    add_item(
+        id,
+        UnallocatedCString{
+            proto::TranslateItemType(translate(UnitToClaim(id)))},
+        custom);
 }
 
 auto UnitList::setup_listeners(const ListenerDefinitions& definitions) noexcept

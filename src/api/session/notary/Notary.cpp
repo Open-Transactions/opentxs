@@ -55,12 +55,15 @@
 #include "otx/server/Server.hpp"
 #include "otx/server/ServerSettings.hpp"
 
-#define SERIES_DIVIDER "."
-#define PUBLIC_SERIES ".PUBLIC"
-#define MAX_MINT_SERIES 10000
-#define MINT_EXPIRE_MONTHS 6
-#define MINT_VALID_MONTHS 12
-#define MINT_GENERATE_DAYS 7
+namespace
+{
+constexpr auto SERIES_DIVIDER = ".";
+constexpr auto PUBLIC_SERIES = ".PUBLIC";
+constexpr auto MAX_MINT_SERIES = 10000;
+constexpr auto MINT_EXPIRE_MONTHS = 6;
+constexpr auto MINT_VALID_MONTHS = 12;
+constexpr auto MINT_GENERATE_DAYS = 7;
+}  // namespace
 
 namespace opentxs::factory
 {

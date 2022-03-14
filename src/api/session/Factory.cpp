@@ -46,8 +46,11 @@
 #include "opentxs/api/crypto/Seed.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Session.hpp"
+#include "opentxs/blockchain/Blockchain.hpp"
 #if OT_BLOCKCHAIN
+#include "opentxs/blockchain/block/bitcoin/Opcodes.hpp"
 #include "opentxs/blockchain/block/bitcoin/Script.hpp"
+#include "opentxs/blockchain/block/bitcoin/Types.hpp"
 #include "opentxs/blockchain/p2p/Address.hpp"
 #endif  // OT_BLOCKCHAIN
 #include "internal/otx/common/Cheque.hpp"

@@ -9,8 +9,7 @@
 
 #include <cstddef>
 #include <cstdint>
-
-#include "opentxs/util/Container.hpp"
+#include <string_view>
 
 namespace opentxs
 {
@@ -18,7 +17,7 @@ enum class AccountType : std::int8_t;
 enum class AddressType : std::uint8_t;
 enum class UnitType : std::uint32_t;
 
-auto print(AccountType) noexcept -> UnallocatedCString;
-auto print(AddressType) noexcept -> UnallocatedCString;
-auto print(UnitType) noexcept -> UnallocatedCString;
+auto print(AccountType) noexcept -> std::string_view;
+auto print(AddressType) noexcept -> std::string_view;
+auto print(UnitType) noexcept -> std::string_view;
 }  // namespace opentxs

@@ -7,7 +7,7 @@
 #include <memory>
 
 #include "Helpers.hpp"
-#include "opentxs/blockchain/Blockchain.hpp"
+#include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/blockchain/node/HeaderOracle.hpp"
 
 namespace ottest

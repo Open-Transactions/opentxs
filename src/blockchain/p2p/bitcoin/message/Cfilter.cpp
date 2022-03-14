@@ -22,7 +22,7 @@
 #include "internal/blockchain/p2p/bitcoin/Bitcoin.hpp"
 #include "internal/blockchain/p2p/bitcoin/message/Message.hpp"
 #include "internal/util/LogMacros.hpp"
-#include "opentxs/blockchain/GCS.hpp"
+#include "opentxs/blockchain/bitcoin/cfilter/GCS.hpp"
 #include "opentxs/blockchain/p2p/Types.hpp"
 #include "opentxs/network/blockchain/bitcoin/CompactSize.hpp"
 #include "opentxs/util/Container.hpp"
@@ -117,7 +117,7 @@ auto BitcoinP2PCfilter(
 auto BitcoinP2PCfilter(
     const api::Session& api,
     const blockchain::Type network,
-    const blockchain::filter::Type type,
+    const blockchain::cfilter::Type type,
     const blockchain::block::Hash& hash,
     const blockchain::GCS& filter)
     -> blockchain::p2p::bitcoin::message::internal::Cfilter*
@@ -135,7 +135,7 @@ namespace opentxs::blockchain::p2p::bitcoin::message::implementation
 Cfilter::Cfilter(
     const api::Session& api,
     const blockchain::Type network,
-    const filter::Type type,
+    const cfilter::Type type,
     const block::Hash& hash,
     const std::uint32_t count,
     const Space& compressed) noexcept
@@ -152,7 +152,7 @@ Cfilter::Cfilter(
 Cfilter::Cfilter(
     const api::Session& api,
     std::unique_ptr<Header> header,
-    const filter::Type type,
+    const cfilter::Type type,
     const block::Hash& hash,
     const std::uint32_t count,
     Space&& compressed) noexcept

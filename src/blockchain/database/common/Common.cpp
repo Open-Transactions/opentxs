@@ -8,6 +8,7 @@
 #include "internal/blockchain/database/common/Common.hpp"  // IWYU pragma: associated
 
 #include <robin_hood.h>
+#include <string_view>
 
 #include "opentxs/blockchain/Blockchain.hpp"
 #include "opentxs/util/Container.hpp"
@@ -21,7 +22,7 @@ constexpr auto sync_map_ = [] {
     for (const auto& chain : opentxs::blockchain::DefinedChains()) {
         auto& [table, name] = map[chain];
         table = offset + static_cast<int>(chain);
-        name = DisplayString(chain);
+        name = print(chain);
     }
 
     return map;

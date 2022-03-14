@@ -9,10 +9,10 @@
 #include "internal/blockchain/Params.hpp"      // IWYU pragma: associated
 
 #include <boost/container/vector.hpp>
-#include <robin_hood.h>
 #include <iosfwd>
 #include <memory>
 #include <sstream>
+#include <string_view>
 #include <type_traits>
 
 #include "opentxs/api/crypto/Hash.hpp"
@@ -20,9 +20,8 @@
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/blockchain/Blockchain.hpp"
 #include "opentxs/blockchain/BlockchainType.hpp"
-#include "opentxs/blockchain/FilterType.hpp"
-#include "opentxs/blockchain/SendResult.hpp"
 #include "opentxs/blockchain/Types.hpp"
+#include "opentxs/blockchain/bitcoin/cfilter/FilterType.hpp"
 #include "opentxs/blockchain/crypto/AddressStyle.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/core/Data.hpp"
@@ -66,46 +65,6 @@ auto UnitToBlockchain(const UnitType type) noexcept -> blockchain::Type
     } catch (...) {
         return blockchain::Type::Unknown;
     }
-}
-
-using Code = blockchain::SendResult;
-
-auto print(Code code) noexcept -> UnallocatedCString
-{
-    static const auto map =
-        robin_hood::unordered_flat_map<Code, UnallocatedCString>{
-            {Code::InvalidSenderNym, "invalid sender nym"},
-            {Code::AddressNotValidforChain,
-             "provided address is not valid for specified blockchain"},
-            {Code::UnsupportedAddressFormat, "address format is not supported"},
-            {Code::SenderMissingPaymentCode,
-             "sender nym does not contain a valid payment code"},
-            {Code::UnsupportedRecipientPaymentCode,
-             "recipient payment code version is not supported"},
-            {Code::HDDerivationFailure, "key derivation error"},
-            {Code::DatabaseError, "database error"},
-            {Code::DuplicateProposal, "duplicate spend proposal"},
-            {Code::OutputCreationError, "failed to create transaction outputs"},
-            {Code::ChangeError, "failed to create change output"},
-            {Code::InsufficientFunds, "insufficient funds"},
-            {Code::InputCreationError, "failed to create transaction inputs"},
-            {Code::SignatureError, "error signing transaction"},
-            {Code::SendFailed, "failed to broadcast transaction"},
-            {Code::Sent, "successfully broadcast transaction"},
-        };
-
-    try {
-
-        return map.at(code);
-    } catch (...) {
-
-        return "unspecified error";
-    }
-}
-
-auto print(blockchain::Type type) noexcept -> UnallocatedCString
-{
-    return blockchain::DisplayString(type);
 }
 
 auto print(const blockchain::block::Position& in) noexcept -> UnallocatedCString
@@ -161,11 +120,6 @@ auto DefinedChains() noexcept -> const UnallocatedSet<Type>&
     }();
 
     return output;
-}
-
-auto DisplayString(const Type type) noexcept -> UnallocatedCString
-{
-    return opentxs::print(BlockchainToUnit(type));
 }
 
 auto FilterHash(
@@ -262,6 +216,11 @@ auto P2PMessageHash(
                 opentxs::crypto::HashType::Sha256DC, input, output);
         }
     }
+}
+
+auto print(Type type) noexcept -> std::string_view
+{
+    return opentxs::print(BlockchainToUnit(type));
 }
 
 auto ProofOfWorkHash(
@@ -452,50 +411,50 @@ auto Data::Bip158() noexcept -> const FilterTypes&
     static const auto data = FilterTypes{
         {Type::Bitcoin,
          {
-             {filter::Type::Basic_BIP158, 0x0},
-             {filter::Type::ES, 0x58},
+             {cfilter::Type::Basic_BIP158, 0x0},
+             {cfilter::Type::ES, 0x58},
          }},
         {Type::Bitcoin_testnet3,
          {
-             {filter::Type::Basic_BIP158, 0x0},
-             {filter::Type::ES, 0x58},
+             {cfilter::Type::Basic_BIP158, 0x0},
+             {cfilter::Type::ES, 0x58},
          }},
         {Type::BitcoinCash,
          {
-             {filter::Type::Basic_BCHVariant, 0x0},
-             {filter::Type::ES, 0x58},
+             {cfilter::Type::Basic_BCHVariant, 0x0},
+             {cfilter::Type::ES, 0x58},
          }},
         {Type::BitcoinCash_testnet3,
          {
-             {filter::Type::Basic_BCHVariant, 0x0},
-             {filter::Type::ES, 0x58},
+             {cfilter::Type::Basic_BCHVariant, 0x0},
+             {cfilter::Type::ES, 0x58},
          }},
         {Type::Ethereum_frontier, {}},
         {Type::Ethereum_ropsten, {}},
         {Type::Litecoin,
          {
-             {filter::Type::Basic_BIP158, 0x0},
-             {filter::Type::ES, 0x58},
+             {cfilter::Type::Basic_BIP158, 0x0},
+             {cfilter::Type::ES, 0x58},
          }},
         {Type::Litecoin_testnet4,
          {
-             {filter::Type::Basic_BIP158, 0x0},
-             {filter::Type::ES, 0x58},
+             {cfilter::Type::Basic_BIP158, 0x0},
+             {cfilter::Type::ES, 0x58},
          }},
         {Type::PKT,
          {
-             {filter::Type::Basic_BIP158, 0x0},
-             {filter::Type::ES, 0x58},
+             {cfilter::Type::Basic_BIP158, 0x0},
+             {cfilter::Type::ES, 0x58},
          }},
         {Type::PKT_testnet,
          {
-             {filter::Type::Basic_BIP158, 0x0},
-             {filter::Type::ES, 0x58},
+             {cfilter::Type::Basic_BIP158, 0x0},
+             {cfilter::Type::ES, 0x58},
          }},
         {Type::UnitTest,
          {
-             {filter::Type::Basic_BIP158, 0x0},
-             {filter::Type::ES, 0x58},
+             {cfilter::Type::Basic_BIP158, 0x0},
+             {cfilter::Type::ES, 0x58},
          }},
     };
 
@@ -535,7 +494,7 @@ auto Data::Chains() noexcept -> const ChainData&
               "0",
               "2b9004f975a42b8b911731ff2f703ed12f0bafdcbcbf71fc12d2cfef9b0ce0b"
               "6"},
-             filter::Type::ES,
+             cfilter::Type::ES,
              p2p::Protocol::bitcoin,
              3652501241,
              8333,
@@ -593,7 +552,7 @@ auto Data::Chains() noexcept -> const ChainData&
               "0",
               "072fffbbd1723b1796b92743fb8af34f8e62173985dd3249b663c2e62da6e8a"
               "9"},
-             filter::Type::ES,
+             cfilter::Type::ES,
              p2p::Protocol::bitcoin,
              118034699,
              18333,
@@ -648,7 +607,7 @@ auto Data::Chains() noexcept -> const ChainData&
               "0",
               "fb2e542d6e1aa15d763a3a1add8262fa7cb609063d8047372deae34118f8836"
               "a"},
-             filter::Type::ES,
+             cfilter::Type::ES,
              p2p::Protocol::bitcoin,
              3908297187,
              8333,
@@ -703,7 +662,7 @@ auto Data::Chains() noexcept -> const ChainData&
               "0",
               "fb2e542d6e1aa15d763a3a1add8262fa7cb609063d8047372deae34118f8836"
               "a"},
-             filter::Type::ES,
+             cfilter::Type::ES,
              p2p::Protocol::bitcoin,
              4109624820,
              18333,
@@ -817,7 +776,7 @@ auto Data::Chains() noexcept -> const ChainData&
               "6",
               "bfff6ef3acccc9d4d4e593864514eeaa8c78aa1b0e29efb3aa92228a4f97fea"
               "1"},
-             filter::Type::ES,
+             cfilter::Type::ES,
              p2p::Protocol::bitcoin,
              3686187259,
              9333,
@@ -872,7 +831,7 @@ auto Data::Chains() noexcept -> const ChainData&
               "b",
               "85ca75a1084b9ab7bd7dde196260e175d841064fccc7a247bf2766eda2b0194"
               "b"},
-             filter::Type::ES,
+             cfilter::Type::ES,
              p2p::Protocol::bitcoin,
              4056470269,
              19335,
@@ -1097,7 +1056,7 @@ auto Data::Chains() noexcept -> const ChainData&
               "4",
               "ad3f11fe94a2c7f6b18f0c206712c7bab44eaeb8a4a469daaa009043eec092e"
               "1"},
-             filter::Type::ES,
+             cfilter::Type::ES,
              p2p::Protocol::bitcoin,
              137298172,
              64764,
@@ -1141,7 +1100,7 @@ auto Data::Chains() noexcept -> const ChainData&
               "0000000000000000000000000000000000000000000000000000000000000000"
               "526b0656def40fcb65ef87a75337001fae57a1d17dc17e103fb536cfddedd36"
               "c"},
-             filter::Type::ES,
+             cfilter::Type::ES,
              p2p::Protocol::bitcoin,
              118034940,
              64764,
@@ -1194,7 +1153,7 @@ auto Data::Chains() noexcept -> const ChainData&
               "0",
               "5e0aa302450f931bc2e4fab27632231a06964277ea8dfcdd93c19149a24fe78"
               "8"},
-             filter::Type::ES,
+             cfilter::Type::ES,
              p2p::Protocol::bitcoin,
              3669344250,
              18444,
@@ -1225,103 +1184,103 @@ auto Data::Filters() noexcept -> const FilterData&
     static const auto data = FilterData{
         {blockchain::Type::Bitcoin,
          {
-             {filter::Type::Basic_BIP158,
+             {cfilter::Type::Basic_BIP158,
               {"9f3c30f0c37fb977cf3e1a3173c631e8ff119ad3088b6f5b2bced0802139c20"
                "2",
                "017fa880"}},
-             {filter::Type::ES,
+             {cfilter::Type::ES,
               {"fad52acc389a391c1d6d94e8984fe77323fbda24fb31299b88635d7bee0278e"
                "8",
                "049dc75e903561289b0029337bcf4e6720"}},
          }},
         {blockchain::Type::BitcoinCash,
          {
-             {filter::Type::Basic_BCHVariant,
+             {cfilter::Type::Basic_BCHVariant,
               {"9f3c30f0c37fb977cf3e1a3173c631e8ff119ad3088b6f5b2bced0802139c20"
                "2",
                "017fa880"}},
-             {filter::Type::ES,
+             {cfilter::Type::ES,
               {"fad52acc389a391c1d6d94e8984fe77323fbda24fb31299b88635d7bee0278e"
                "8",
                "049dc75e903561289b0029337bcf4e6720"}},
          }},
         {blockchain::Type::Litecoin,
          {
-             {filter::Type::Basic_BIP158,
+             {cfilter::Type::Basic_BIP158,
               {"8aa75530308cf8247a151c37c24e7aaa281ae3b5cecedb581aacb3a0d07c245"
                "1",
                "019e8738"}},
-             {filter::Type::ES,
+             {cfilter::Type::ES,
               {"23b8dae37cf04c8a278bd50bcbcf23a03051ea902f67c4760eb35be96d42832"
                "0",
                "049de896b2cc882671e81f336fdf119b00"}},
          }},
         {blockchain::Type::Bitcoin_testnet3,
          {
-             {filter::Type::Basic_BIP158,
+             {cfilter::Type::Basic_BIP158,
               {"50b781aed7b7129012a6d20e2d040027937f3affaee573779908ebb77945582"
                "1",
                "019dfca8"}},
-             {filter::Type::ES,
+             {cfilter::Type::ES,
               {"995cfe5d055c9158c5a388b71fb2ddbe292c9ca2d30dca91359d8cbbe4603e0"
                "2",
                "04e2f5880d851afd74c662d38d49e29130"}},
          }},
         {blockchain::Type::BitcoinCash_testnet3,
          {
-             {filter::Type::Basic_BCHVariant,
+             {cfilter::Type::Basic_BCHVariant,
               {"50b781aed7b7129012a6d20e2d040027937f3affaee573779908ebb77945582"
                "1",
                "019dfca8"}},
-             {filter::Type::ES,
+             {cfilter::Type::ES,
               {"995cfe5d055c9158c5a388b71fb2ddbe292c9ca2d30dca91359d8cbbe4603e0"
                "2",
                "04e2f5880d851afd74c662d38d49e29130"}},
          }},
         {blockchain::Type::Litecoin_testnet4,
          {
-             {filter::Type::Basic_BIP158,
+             {cfilter::Type::Basic_BIP158,
               {"02d023da9d271b849f717089aad7e03a515dac982c9fb2cfd952e2ce1c61879"
                "2",
                "014c8c60"}},
-             {filter::Type::ES,
+             {cfilter::Type::ES,
               {"ad242bb97aaf6a8f973dc2054d5356a4fcc87f575b29bbb3e0d953cfaedff8c"
                "6",
                "048b3d60cc5692c061eb30ca191005f1c0"}},
          }},
         {blockchain::Type::PKT,
          {
-             {filter::Type::Basic_BIP158,
+             {cfilter::Type::Basic_BIP158,
               {"526b0656def40fcb65ef87a75337001fae57a1d17dc17e103fb536cfddedd36"
                "c",
                "01902168"}},
-             {filter::Type::ES,
+             {cfilter::Type::ES,
               {"155e1700eff3f9019ba1716316295a8753ec44d2a7730eee1c1c73e2b511e13"
                "4",
                "02649a42b26e818d40"}},
          }},
         {blockchain::Type::PKT_testnet,
          {
-             {filter::Type::Basic_BIP158,
+             {cfilter::Type::Basic_BIP158,
               {"526b0656def40fcb65ef87a75337001fae57a1d17dc17e103fb536cfddedd36"
                "c",
                "01902168"}},
-             {filter::Type::ES,
+             {cfilter::Type::ES,
               {"155e1700eff3f9019ba1716316295a8753ec44d2a7730eee1c1c73e2b511e13"
                "4",
                "02649a42b26e818d40"}},
          }},
         {blockchain::Type::UnitTest,
          {
-             {filter::Type::Basic_BIP158,
+             {cfilter::Type::Basic_BIP158,
               {"2b5adc66021d5c775f630efd91518cf6ce3e9f525bbf54d9f0d709451e305e4"
                "8",
                "014756c0"}},
-             {filter::Type::Basic_BCHVariant,
+             {cfilter::Type::Basic_BCHVariant,
               {"2b5adc66021d5c775f630efd91518cf6ce3e9f525bbf54d9f0d709451e305e4"
                "8",
                "014756c0"}},
-             {filter::Type::ES,
+             {cfilter::Type::ES,
               {"5e0aa302450f931bc2e4fab27632231a06964277ea8dfcdd93c19149a24fe78"
                "8",
                "042547f61f786604db036044c4f7f36fe0"}},

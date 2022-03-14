@@ -10,6 +10,7 @@
 #include <algorithm>
 #include <memory>
 #include <stdexcept>
+#include <string_view>
 #include <thread>
 #include <type_traits>
 #include <utility>
@@ -215,7 +216,8 @@ auto ProfileSection::Items(const UnallocatedCString& lang) const noexcept
 auto ProfileSection::Name(const UnallocatedCString& lang) const noexcept
     -> UnallocatedCString
 {
-    return proto::TranslateSectionName(translate(row_id_), lang);
+    return UnallocatedCString{
+        proto::TranslateSectionName(translate(row_id_), lang)};
 }
 
 auto ProfileSection::process_section(

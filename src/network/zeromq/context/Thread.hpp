@@ -94,6 +94,7 @@ private:
     using Data = libguarded::deferred_guarded<Items, std::shared_mutex>;
 
     zeromq::internal::Pool& parent_;
+    std::atomic_bool shutdown_;
     socket::Raw null_;
     alloc::BoostPoolSync alloc_;
     Gatekeeper gate_;

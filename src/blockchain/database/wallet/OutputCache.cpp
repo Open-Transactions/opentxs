@@ -14,6 +14,7 @@
 #include <iosfwd>
 #include <ostream>
 #include <stdexcept>
+#include <string_view>
 #include <tuple>
 #include <utility>
 
@@ -313,7 +314,7 @@ auto OutputCache::AddToState(
             id,
             static_cast<std::size_t>(id),
             "state",
-            opentxs::print(id),
+            UnallocatedCString{print(id)},
             states_);
         auto rc = lmdb_
                       .Store(
@@ -456,6 +457,12 @@ auto OutputCache::ChangeState(
                 .Flush();
         }
 
+        if (1u != deleted.size()) {
+            LogError()(OT_PRETTY_CLASS())("Warning: output ")(id.str())(
+                " found in multiple state indices")
+                .Flush();
+        }
+
         auto rc = lmdb_
                       .Store(
                           wallet::states_,
@@ -468,12 +475,17 @@ auto OutputCache::ChangeState(
             throw std::runtime_error{"Failed to add new state index"};
         }
 
-        auto& from = states_[oldState];
-        auto& to = states_[newState];
-        from.erase(id);
-        to.emplace(id);
+        for (const auto& state : all_states()) {
+            if (auto it = states_.find(state); states_.end() != it) {
+                auto& from = it->second;
+                from.erase(id);
 
-        if (0u == from.size()) { states_.erase(oldState); }
+                if (0u == from.size()) { states_.erase(it); }
+            }
+        }
+
+        auto& to = states_[newState];
+        to.emplace(id);
 
         return rc;
     } catch (const std::exception& e) {
@@ -663,6 +675,21 @@ auto OutputCache::GetOutput(const eLock&, const block::Outpoint& id) noexcept(
     return load_output(id);
 }
 
+auto OutputCache::GetOutput(
+    const eLock& lock,
+    const SubchainID& subchain,
+    const block::Outpoint& id) noexcept(false)
+    -> block::bitcoin::internal::Output&
+{
+    const auto& relevant = GetSubchain(lock, subchain);
+
+    if (0u == relevant.count(id)) {
+        throw std::out_of_range{"outpoint not found in this subchain"};
+    }
+
+    return GetOutput(lock, id);
+}
+
 auto OutputCache::GetPosition(const eLock&) noexcept -> const db::Position&
 {
     return get_position();
@@ -749,7 +776,7 @@ auto OutputCache::GetState(const sLock&, const node::TxoState id) noexcept
             id,
             static_cast<std::size_t>(id),
             "state",
-            opentxs::print(id),
+            UnallocatedCString{print(id)},
             states_);
     } catch (...) {
 
@@ -772,7 +799,7 @@ auto OutputCache::GetState(const eLock&, const node::TxoState id) noexcept
             id,
             static_cast<std::size_t>(id),
             "state",
-            opentxs::print(id),
+            UnallocatedCString{print(id)},
             states_);
     } catch (...) {
 
@@ -994,7 +1021,7 @@ auto OutputCache::Print(const eLock&) const noexcept -> void
             }
         }
 
-        out.text_ << ", state: " << opentxs::print(item.State());
+        out.text_ << ", state: " << print(item.State());
     }
 
     const auto& unconfirmed = output[node::TxoState::UnconfirmedNew];
@@ -1089,7 +1116,7 @@ auto OutputCache::Print(const eLock&) const noexcept -> void
     log(OT_PRETTY_CLASS())("Outputs by state:\n");
 
     for (const auto& [state, outputs] : states_) {
-        log("  * ")(opentxs::print(state))("\n");
+        log("  * ")(print(state))("\n");
 
         for (const auto& outpoint : outputs) {
             log("    * ")(outpoint.str())("\n");

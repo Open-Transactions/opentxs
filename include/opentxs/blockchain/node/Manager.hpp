@@ -9,6 +9,8 @@
 
 #include <future>
 
+#include "opentxs/blockchain/node/Types.hpp"
+
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
 {

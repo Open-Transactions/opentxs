@@ -5,26 +5,24 @@
 
 #pragma once
 
+#include "internal/blockchain/node/wallet/subchain/statemachine/Process.hpp"
+
+#include <boost/smart_ptr/shared_ptr.hpp>
+#include <robin_hood.h>
 #include <atomic>
 #include <cstddef>
-#include <functional>
-#include <memory>
-#include <mutex>
-#include <optional>
 #include <queue>
-#include <utility>
 
-#include "blockchain/node/wallet/subchain/statemachine/Batch.hpp"
-#include "blockchain/node/wallet/subchain/statemachine/Job.hpp"
-#include "internal/blockchain/node/Node.hpp"
-#include "internal/blockchain/node/wallet/subchain/statemachine/Types.hpp"
-#include "opentxs/Types.hpp"
-#include "opentxs/blockchain/Blockchain.hpp"
+#include "internal/blockchain/node/wallet/Types.hpp"
+#include "internal/network/zeromq/Types.hpp"
+#include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/blockchain/node/BlockOracle.hpp"
+#include "opentxs/util/Allocated.hpp"
 #include "opentxs/util/Container.hpp"
+#include "util/Actor.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs  // NOLINT
+namespace opentxs
 {
 // inline namespace v1
 // {
@@ -34,101 +32,82 @@ namespace node
 {
 namespace wallet
 {
-class Progress;
 class SubchainStateData;
-class Work;
 }  // namespace wallet
 }  // namespace node
 }  // namespace blockchain
+
+namespace network
+{
+namespace zeromq
+{
+namespace socket
+{
+class Raw;
+}  // namespace socket
+}  // namespace zeromq
+}  // namespace network
 // }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
 namespace opentxs::blockchain::node::wallet
 {
-class Process final : public Job
+class Process::Imp final : public Actor<Imp, SubchainJobs>
 {
 public:
-    auto Reorg(const block::Position& parent) noexcept -> void final;
-    auto Request(
-        const std::optional<block::Position>& highestClean,
-        const UnallocatedVector<block::Position>& blocks,
-        UnallocatedVector<std::unique_ptr<Batch>>&& batches,
-        UnallocatedVector<Work*>&& jobs) noexcept -> void;
-    auto Run() noexcept -> bool final;
+    auto VerifyState(const State state) const noexcept -> void;
 
-    Process(SubchainStateData& parent, Progress& progress) noexcept;
+    auto Init(boost::shared_ptr<Imp> me) noexcept -> void
+    {
+        signal_startup(me);
+    }
+    auto ProcessReorg(const block::Position& parent) noexcept -> void;
+    auto Shutdown() noexcept -> void { signal_shutdown(); }
 
-    ~Process() final = default;
+    Imp(const boost::shared_ptr<const SubchainStateData>& parent,
+        const network::zeromq::BatchID batch,
+        allocator_type alloc) noexcept;
+    Imp() = delete;
+    Imp(const Imp&) = delete;
+    Imp(Imp&&) = delete;
+    Imp& operator=(const Imp&) = delete;
+    Imp& operator=(Imp&&) = delete;
+
+    ~Imp() final = default;
 
 private:
-    class Cache
-    {
-    public:
-        using BatchMap = UnallocatedMap<Batch::ID, std::unique_ptr<Batch>>;
+    friend Actor<Imp, SubchainJobs>;
 
-        auto FinishBatch(BatchMap::iterator batch) noexcept -> void;
-        auto Flush() noexcept -> UnallocatedVector<BatchMap::iterator>;
-        auto Pop(BlockMap& destination) noexcept -> bool;
-        auto Push(
-            UnallocatedVector<std::unique_ptr<Batch>>&& batches,
-            UnallocatedVector<Work*>&& jobs) noexcept -> void;
-        auto Reorg(const block::Position& parent) noexcept -> void;
-        auto ReRequest(Work* job) noexcept -> void;
+    using Waiting = Deque<block::Position>;
+    using Downloading = Map<block::Position, BlockOracle::BitcoinBlockFuture>;
+    using Index = Map<block::pHash, Downloading::iterator>;
 
-        Cache(const SubchainStateData& parent) noexcept;
+    static constexpr auto download_limit_ = std::size_t{400u};
 
-    private:
-        const SubchainStateData& parent_;
-        const std::size_t limit_;
-        mutable std::mutex lock_;
-        BatchMap batches_;
-        UnallocatedDeque<Work*> pending_;
-        BlockMap downloading_;
+    network::zeromq::socket::Raw& to_parent_;
+    network::zeromq::socket::Raw& to_scan_;
+    network::zeromq::socket::Raw& to_index_;
+    boost::shared_ptr<const SubchainStateData> parent_p_;
+    const SubchainStateData& parent_;
+    std::atomic<State> state_;
+    Waiting waiting_;
+    Downloading downloading_;
+    Index index_;
+    Downloading downloaded_;
+    robin_hood::unordered_flat_set<block::pHash> txid_cache_;
 
-        auto download(const Lock& lock) noexcept -> void;
-        auto request(const Lock& lock, Work* job) noexcept -> void;
-
-        Cache() = delete;
-        Cache(const Cache&) = delete;
-        Cache(Cache&&) = delete;
-        auto operator=(const Cache&) -> Cache& = delete;
-        auto operator=(Cache&&) -> Cache& = delete;
-    };
-
-    friend Cache;
-
-    Progress& progress_;
-    Cache cache_;
-    BlockMap waiting_;
-    BlockMap processing_;
-
-    static auto flush(const block::Position& parent, BlockMap& map) noexcept
-        -> void;
-    static auto move_nodes(
-        BlockMap& from,
-        BlockMap& to,
-        std::function<bool(BlockMap::iterator)> moveCondition,
-        std::function<bool(std::size_t)> breakCondition,
-        std::function<void(BlockMap::iterator)> post) noexcept -> void;
-    static auto move_nodes(
-        UnallocatedVector<BlockMap::iterator>& items,
-        BlockMap& from,
-        BlockMap& to,
-        std::function<void(BlockMap::iterator)> cb = {}) noexcept -> void;
-
-    auto limit(const Lock& lock, const std::size_t outstanding) const noexcept
-        -> bool;
-    auto type() const noexcept -> const char* final { return "process"; }
-
-    auto FinishBatches() noexcept -> bool;
-    auto ProcessPosition(const Cookie key, Work* work) noexcept -> void;
-    auto ProcessBatch(Cache::BatchMap::iterator it) noexcept -> void;
-
-    Process() = delete;
-    Process(const Process&) = delete;
-    Process(Process&&) = delete;
-    auto operator=(const Process&) -> Process& = delete;
-    auto operator=(Process&&) -> Process& = delete;
+    auto do_shutdown() noexcept -> void;
+    auto pipeline(const Work work, Message&& msg) noexcept -> void;
+    auto process_block(Message&& in) noexcept -> void;
+    auto process_block(const block::Hash& block) noexcept -> void;
+    auto process_mempool(Message&& in) noexcept -> void;
+    auto process_update(Message&& msg) noexcept -> void;
+    auto startup() noexcept -> void;
+    auto state_normal(const Work work, Message&& msg) noexcept -> void;
+    auto state_reorg(const Work work, Message&& msg) noexcept -> void;
+    auto transition_state_normal(Message&& msg) noexcept -> void;
+    auto transition_state_reorg(Message&& msg) noexcept -> void;
+    auto work() noexcept -> bool;
 };
 }  // namespace opentxs::blockchain::node::wallet

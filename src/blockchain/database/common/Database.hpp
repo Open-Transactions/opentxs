@@ -20,10 +20,10 @@
 #include "internal/blockchain/node/Node.hpp"
 #include "internal/blockchain/p2p/P2P.hpp"
 #include "opentxs/Types.hpp"
-#include "opentxs/blockchain/Blockchain.hpp"
 #include "opentxs/blockchain/BlockchainType.hpp"
-#include "opentxs/blockchain/FilterType.hpp"
 #include "opentxs/blockchain/Types.hpp"
+#include "opentxs/blockchain/bitcoin/cfilter/FilterType.hpp"
+#include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/String.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
@@ -134,22 +134,22 @@ public:
         const UnallocatedSet<Service> withServices) const noexcept -> Address_p;
     auto GetSyncServers() const noexcept -> Endpoints;
     auto HashKey() const noexcept -> ReadView;
-    auto HaveFilter(const filter::Type type, const ReadView blockHash)
+    auto HaveFilter(const cfilter::Type type, const ReadView blockHash)
         const noexcept -> bool;
-    auto HaveFilterHeader(const filter::Type type, const ReadView blockHash)
+    auto HaveFilterHeader(const cfilter::Type type, const ReadView blockHash)
         const noexcept -> bool;
     auto Import(UnallocatedVector<Address_p> peers) const noexcept -> bool;
     auto LoadBlockHeader(const BlockHash& hash) const noexcept(false)
         -> proto::BlockchainBlockHeader;
     auto LoadEnabledChains() const noexcept -> UnallocatedVector<EnabledChain>;
-    auto LoadFilter(const filter::Type type, const ReadView blockHash)
+    auto LoadFilter(const cfilter::Type type, const ReadView blockHash)
         const noexcept -> std::unique_ptr<const opentxs::blockchain::GCS>;
     auto LoadFilterHash(
-        const filter::Type type,
+        const cfilter::Type type,
         const ReadView blockHash,
         const AllocateOutput filterHash) const noexcept -> bool;
     auto LoadFilterHeader(
-        const filter::Type type,
+        const cfilter::Type type,
         const ReadView blockHash,
         const AllocateOutput header) const noexcept -> bool;
     auto LoadSync(
@@ -168,13 +168,13 @@ public:
         const noexcept -> bool;
     auto StoreBlockHeaders(const UpdatedHeader& headers) const noexcept -> bool;
     auto StoreFilterHeaders(
-        const filter::Type type,
+        const cfilter::Type type,
         const UnallocatedVector<FilterHeader>& headers) const noexcept -> bool;
     auto StoreFilters(
-        const filter::Type type,
+        const cfilter::Type type,
         UnallocatedVector<FilterData>& filters) const noexcept -> bool;
     auto StoreFilters(
-        const filter::Type type,
+        const cfilter::Type type,
         const UnallocatedVector<FilterHeader>& headers,
         const UnallocatedVector<FilterData>& filters) const noexcept -> bool;
     auto StoreSync(const Chain chain, const SyncItems& items) const noexcept

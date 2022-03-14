@@ -13,7 +13,7 @@
 #include "internal/blockchain/node/Node.hpp"
 #include "opentxs/Types.hpp"
 #include "opentxs/api/session/Client.hpp"
-#include "opentxs/blockchain/FilterType.hpp"
+#include "opentxs/blockchain/bitcoin/cfilter/FilterType.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "util/LMDB.hpp"
@@ -57,28 +57,28 @@ namespace opentxs::blockchain::database::common
 class BlockFilter
 {
 public:
-    auto HaveFilter(const filter::Type type, const ReadView blockHash)
+    auto HaveFilter(const cfilter::Type type, const ReadView blockHash)
         const noexcept -> bool;
-    auto HaveFilterHeader(const filter::Type type, const ReadView blockHash)
+    auto HaveFilterHeader(const cfilter::Type type, const ReadView blockHash)
         const noexcept -> bool;
-    auto LoadFilter(const filter::Type type, const ReadView blockHash)
+    auto LoadFilter(const cfilter::Type type, const ReadView blockHash)
         const noexcept -> std::unique_ptr<const opentxs::blockchain::GCS>;
     auto LoadFilterHash(
-        const filter::Type type,
+        const cfilter::Type type,
         const ReadView blockHash,
         const AllocateOutput filterHash) const noexcept -> bool;
     auto LoadFilterHeader(
-        const filter::Type type,
+        const cfilter::Type type,
         const ReadView blockHash,
         const AllocateOutput header) const noexcept -> bool;
     auto StoreFilterHeaders(
-        const filter::Type type,
+        const cfilter::Type type,
         const UnallocatedVector<FilterHeader>& headers) const noexcept -> bool;
     auto StoreFilters(
-        const filter::Type type,
+        const cfilter::Type type,
         UnallocatedVector<FilterData>& filters) const noexcept -> bool;
     auto StoreFilters(
-        const filter::Type type,
+        const cfilter::Type type,
         const UnallocatedVector<FilterHeader>& headers,
         const UnallocatedVector<FilterData>& filters) const noexcept -> bool;
 
@@ -97,16 +97,16 @@ private:
     storage::lmdb::LMDB& lmdb_;
     Bulk& bulk_;
 
-    static auto translate_filter(const filter::Type type) noexcept(false)
+    static auto translate_filter(const cfilter::Type type) noexcept(false)
         -> Table;
-    static auto translate_header(const filter::Type type) noexcept(false)
+    static auto translate_header(const cfilter::Type type) noexcept(false)
         -> Table;
 
     auto store(
         const Lock& lock,
         storage::lmdb::LMDB::Transaction& tx,
         const ReadView blockHash,
-        const filter::Type type,
+        const cfilter::Type type,
         const GCS& filter) const noexcept -> bool;
 };
 }  // namespace opentxs::blockchain::database::common

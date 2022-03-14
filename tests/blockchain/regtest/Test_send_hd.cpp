@@ -19,6 +19,7 @@
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/UI.hpp"
+#include "opentxs/blockchain/Blockchain.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/bitcoin/Block.hpp"
 #include "opentxs/blockchain/block/bitcoin/Input.hpp"
@@ -684,7 +685,7 @@ TEST_F(Regtest_fixture_hd, account_list_unconfirmed_spend)
     EXPECT_TRUE(check_account_list_rpc(alice_, expected));
 }
 
-TEST_F(Regtest_fixture_hd, wallet_unconfirmed_spend)
+TEST_F(Regtest_fixture_hd, txodb_unconfirmed_spend)
 {
     EXPECT_TRUE(CheckTXODB());
 }
@@ -698,7 +699,7 @@ TEST_F(Regtest_fixture_hd, confirm)
     auto future1 = listener_.get_future(SendHD(), Subchain::External, end);
     auto future2 = listener_.get_future(SendHD(), Subchain::Internal, end);
     account_list_.expected_ += 2;
-    account_activity_.expected_ += ((3 * count) + 2);
+    account_activity_.expected_ += ((3 * count) + 3);
     const auto& txid = transactions_.at(1).get();
     const auto extra = [&] {
         auto output = ot::UnallocatedVector<Transaction>{};
@@ -829,10 +830,7 @@ TEST_F(Regtest_fixture_hd, account_list_confirmed_spend)
     EXPECT_TRUE(check_account_list_rpc(alice_, expected));
 }
 
-TEST_F(Regtest_fixture_hd, wallet_confirmed_spend)
-{
-    EXPECT_TRUE(CheckTXODB());
-}
+TEST_F(Regtest_fixture_hd, txodb_confirmed_spend) { EXPECT_TRUE(CheckTXODB()); }
 
 // TEST_F(Regtest_fixture_hd, reorg_matured_coins)
 // {

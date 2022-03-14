@@ -22,7 +22,8 @@
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
-#include "opentxs/blockchain/Work.hpp"
+#include "opentxs/blockchain/Types.hpp"
+#include "opentxs/blockchain/bitcoin/Work.hpp"
 #include "opentxs/blockchain/block/Header.hpp"
 #include "opentxs/blockchain/block/bitcoin/Header.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/node/HeaderOracle.hpp"
@@ -459,25 +460,31 @@ auto HeaderOracle::best_hashes(
     auto output = Hashes{};
     const auto limitIsZero = (0 == limit);
     auto current{start};
-    const auto last{
-        current + static_cast<block::Height>(limit) -
-        static_cast<block::Height>(1)};
+    const auto tip = best_chain(lock);
+    const auto last = [&] {
+        if (limitIsZero) {
 
-    while (limitIsZero || (current <= last)) {
-        try {
-            auto hash = database_.BestBlock(current++);
+            return tip.first;
+        } else {
+            const auto requestedEnd = block::Height{
+                current + static_cast<block::Height>(limit) -
+                static_cast<block::Height>(1)};
 
-            // TODO this check shouldn't be necessary but BestBlock doesn't
-            // throw the exception documented in its declaration.
-            if (hash->empty()) { break; }
-
-            const auto stopHere = stop.empty() ? false : (stop == hash);
-            output.emplace_back(std::move(hash));
-
-            if (stopHere) { break; }
-        } catch (...) {
-            break;
+            return std::min<block::Height>(requestedEnd, tip.first);
         }
+    }();
+
+    while (current <= last) {
+        auto hash = database_.BestBlock(current++);
+
+        // TODO this check shouldn't be necessary but BestBlock doesn't
+        // throw the exception documented in its declaration.
+        if (hash->empty()) { break; }
+
+        const auto stopHere = stop.empty() ? false : (stop == hash);
+        output.emplace_back(std::move(hash));
+
+        if (stopHere) { break; }
     }
 
     return output;
@@ -811,7 +818,7 @@ auto HeaderOracle::Init() noexcept -> void
 
     // Remove existing checkpoint if it is set
     if (existingHeight != null.first) {
-        LogConsole()(DisplayString(chain_))(
+        LogConsole()(print(chain_))(
             ": Removing obsolete checkpoint at height ")(existingHeight)
             .Flush();
         const auto deleted = DeleteCheckpoint();
@@ -820,7 +827,7 @@ auto HeaderOracle::Init() noexcept -> void
     }
 
     if (1 < defaultHeight) {
-        LogConsole()(DisplayString(chain_))(": Updating checkpoint to hash ")(
+        LogConsole()(print(chain_))(": Updating checkpoint to hash ")(
             defaultBlockhash->asHex())(" at height ")(defaultHeight)
             .Flush();
 

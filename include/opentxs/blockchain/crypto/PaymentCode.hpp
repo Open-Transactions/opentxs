@@ -7,7 +7,6 @@
 
 #include "opentxs/Version.hpp"  // IWYU pragma: associated
 
-#include "opentxs/blockchain/Blockchain.hpp"
 #include "opentxs/blockchain/crypto/Deterministic.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)

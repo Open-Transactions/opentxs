@@ -20,7 +20,8 @@
 #include "internal/util/TSV.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
-#include "opentxs/blockchain/FilterType.hpp"
+#include "opentxs/blockchain/bitcoin/cfilter/FilterType.hpp"
+#include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/util/Container.hpp"
@@ -183,7 +184,7 @@ auto SubchainCache::GetIndex(
     const sLock&,
     const NodeID& subaccount,
     const Subchain subchain,
-    const filter::Type type,
+    const cfilter::Type type,
     const VersionNumber version,
     MDB_txn* tx) noexcept -> pSubchainIndex
 {
@@ -636,7 +637,7 @@ auto SubchainCache::SetLastScanned(
 auto SubchainCache::subchain_index(
     const NodeID& subaccount,
     const Subchain subchain,
-    const filter::Type type,
+    const cfilter::Type type,
     const VersionNumber version) const noexcept -> pSubchainIndex
 {
     auto preimage = api_.Factory().Data();

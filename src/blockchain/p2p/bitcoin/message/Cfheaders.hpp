@@ -12,10 +12,11 @@
 #include "blockchain/p2p/bitcoin/Message.hpp"
 #include "internal/blockchain/p2p/bitcoin/message/Message.hpp"
 #include "opentxs/Types.hpp"
-#include "opentxs/blockchain/Blockchain.hpp"
 #include "opentxs/blockchain/BlockchainType.hpp"
-#include "opentxs/blockchain/FilterType.hpp"
 #include "opentxs/blockchain/Types.hpp"
+#include "opentxs/blockchain/bitcoin/cfilter/FilterType.hpp"
+#include "opentxs/blockchain/bitcoin/cfilter/Types.hpp"
+#include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
@@ -67,36 +68,36 @@ public:
     {
         return const_iterator(this, payload_.size());
     }
-    auto Previous() const noexcept -> const filter::Header& final
+    auto Previous() const noexcept -> const cfilter::Header& final
     {
         return previous_;
     }
     auto size() const noexcept -> std::size_t final { return payload_.size(); }
     auto Stop() const noexcept -> const block::Hash& final { return stop_; }
-    auto Type() const noexcept -> filter::Type final { return type_; }
+    auto Type() const noexcept -> cfilter::Type final { return type_; }
 
     Cfheaders(
         const api::Session& api,
         const blockchain::Type network,
-        const filter::Type type,
+        const cfilter::Type type,
         const block::Hash& stop,
         const ReadView previousHeader,
-        const UnallocatedVector<filter::pHash>& headers) noexcept(false);
+        const UnallocatedVector<cfilter::pHash>& headers) noexcept(false);
     Cfheaders(
         const api::Session& api,
         std::unique_ptr<Header> header,
-        const filter::Type type,
+        const cfilter::Type type,
         const block::Hash& stop,
-        const filter::Header& previous,
-        const UnallocatedVector<filter::pHash>& headers) noexcept(false);
+        const cfilter::Header& previous,
+        const UnallocatedVector<cfilter::pHash>& headers) noexcept(false);
 
     ~Cfheaders() final = default;
 
 private:
-    const filter::Type type_;
+    const cfilter::Type type_;
     const block::pHash stop_;
-    const filter::pHeader previous_;
-    const UnallocatedVector<filter::pHash> payload_;
+    const cfilter::pHeader previous_;
+    const UnallocatedVector<cfilter::pHash> payload_;
 
     using implementation::Message::payload;
     auto payload(AllocateOutput out) const noexcept -> bool final;

@@ -122,12 +122,12 @@
 #include "serialization/protobuf/TaskComplete.pb.h"
 #include "serialization/protobuf/UnitDefinition.pb.h"
 
-#define ACCOUNTEVENT_VERSION 2
-#define RPCTASK_VERSION 1
-#define SEED_VERSION 1
-#define SESSION_DATA_VERSION 1
-#define RPCPUSH_VERSION 3
-#define TASKCOMPLETE_VERSION 2
+constexpr auto ACCOUNTEVENT_VERSION = 2;
+constexpr auto RPCTASK_VERSION = 1;
+constexpr auto SEED_VERSION = 1;
+constexpr auto SESSION_DATA_VERSION = 1;
+constexpr auto RPCPUSH_VERSION = 3;
+constexpr auto TASKCOMPLETE_VERSION = 2;
 
 #define CHECK_INPUT(field, error)                                              \
     if (0 == command.field().size()) {                                         \

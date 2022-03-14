@@ -12,6 +12,7 @@
 #include <iosfwd>
 #include <memory>
 #include <sstream>  // IWYU pragma: keep
+#include <string_view>
 #include <type_traits>
 
 #include "Proto.hpp"

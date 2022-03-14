@@ -27,10 +27,9 @@
 #include "opentxs/api/crypto/Blockchain.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
-#include "opentxs/blockchain/Blockchain.hpp"
 #include "opentxs/blockchain/BlockchainType.hpp"
-#include "opentxs/blockchain/FilterType.hpp"
 #include "opentxs/blockchain/Types.hpp"
+#include "opentxs/blockchain/bitcoin/cfilter/FilterType.hpp"
 #include "opentxs/blockchain/block/Outpoint.hpp"
 #include "opentxs/blockchain/block/bitcoin/Input.hpp"
 #include "opentxs/blockchain/block/bitcoin/Script.hpp"
@@ -88,11 +87,11 @@ public:
     {
         return std::make_unique<Input>(*this);
     }
-    auto ExtractElements(const filter::Type style) const noexcept
+    auto ExtractElements(const cfilter::Type style) const noexcept
         -> UnallocatedVector<Space> final;
     auto FindMatches(
         const ReadView txid,
-        const filter::Type type,
+        const cfilter::Type type,
         const Patterns& txos,
         const ParsedPatterns& elements) const noexcept -> Matches final;
     auto GetBytes(std::size_t& base, std::size_t& witness) const noexcept

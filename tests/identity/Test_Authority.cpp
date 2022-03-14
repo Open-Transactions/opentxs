@@ -4,22 +4,18 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 #include <gtest/gtest.h>
-#include <iostream>
 #include <memory>
 
-#include "../tests/mocks/crypto/key/Asymmetric.hpp"
-#include "../tests/mocks/crypto/key/KeypairMock.hpp"
-#include "../tests/mocks/identity/NymMock.hpp"
-#include "../tests/mocks/identity/SourceMock.hpp"
-#include "../tests/mocks/identity/credential/PrimaryMock.hpp"
 #include "2_Factory.hpp"
 #include "identity/credential/Primary.hpp"
+#include "internal/api/Crypto.hpp"
 #include "internal/api/crypto/Seed.hpp"
 #include "internal/identity/Identity.hpp"
 #include "internal/otx/common/crypto/Signature.hpp"
 #include "internal/otx/common/util/Tag.hpp"
 #include "opentxs/OT.hpp"
 #include "opentxs/api/Context.hpp"
+#include "opentxs/api/crypto/Crypto.hpp"
 #include "opentxs/api/crypto/Seed.hpp"
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/Crypto.hpp"
@@ -28,12 +24,14 @@
 #include "opentxs/api/session/Wallet.hpp"
 #include "opentxs/core/Contact.hpp"
 #include "opentxs/core/PaymentCode.hpp"
-#include "opentxs/core/identifier/Nym.hpp"
+#include "opentxs/core/identifier/Algorithm.hpp"
+#include "opentxs/core/identifier/Type.hpp"
 #include "opentxs/crypto/Language.hpp"
 #include "opentxs/crypto/ParameterType.hpp"
 #include "opentxs/crypto/Parameters.hpp"
 #include "opentxs/crypto/SeedStyle.hpp"
 #include "opentxs/crypto/key/asymmetric/Algorithm.hpp"
+#include "opentxs/crypto/library/SymmetricProvider.hpp"
 #include "opentxs/identity/IdentityType.hpp"
 #include "opentxs/identity/SourceType.hpp"
 #include "opentxs/identity/Types.hpp"
@@ -43,8 +41,6 @@
 #include "serialization/protobuf/Credential.pb.h"
 #include "serialization/protobuf/Nym.pb.h"
 #include "serialization/protobuf/Signature.pb.h"
-#include "opentxs/core/identifier/Algorithm.hpp"
-#include "opentxs/core/identifier/Type.hpp"
 
 using namespace testing;
 
@@ -61,14 +57,10 @@ public:
     OTSecret words_;
     const std::uint8_t version_ = 6;
     const int nym_ = 1;
-    const identity::SourceMock sourceMock_;
-    const identity::NymMock nymMock_;
     crypto::Parameters parameters_;
     std::unique_ptr<identity::Source> source_;
-    ot::OTNymID* nymID;
     std::unique_ptr<ot::identity::internal::Nym> internalNym_;
     const ot::UnallocatedCString alias_ = ot::UnallocatedCString{"alias"};
-
     std::unique_ptr<identity::internal::Authority> authority_;
 
     Test_Authority()
@@ -122,11 +114,6 @@ public:
     }
 };
 
-/////////////// Constructors ////////////////
-UnallocatedCString func();
-
-UnallocatedCString func() { return "Test"; }
-
 TEST_F(Test_Authority, GetPublicAuthKey_DefaultSetup_ShouldReturnDefaultKey)
 {
     const auto& asymmetricKey = authority_->GetPublicAuthKey(
@@ -178,7 +165,8 @@ TEST_F(
 {
     proto::VerificationSet verificationSet;
     verificationSet.set_version(1);
-    EXPECT_TRUE(authority_->AddVerificationCredential(verificationSet, reason_));
+    EXPECT_TRUE(
+        authority_->AddVerificationCredential(verificationSet, reason_));
 
     proto::VerificationSet verificationSet2;
     EXPECT_TRUE(authority_->GetVerificationSet(verificationSet2));
@@ -291,7 +279,7 @@ TEST_F(
 
 TEST_F(
     Test_Authority,
-    RevokeVerificationCredentials_AddVerificationCredential_ShouldReturnProperData)
+    RevokeVerificationCredentials_AddVerificationCredentialCalledFirst_ShouldReturnProperData)
 {
     UnallocatedList<UnallocatedCString> list;
     authority_->RevokeVerificationCredentials(list);
@@ -299,15 +287,14 @@ TEST_F(
 
     proto::VerificationSet verificationSet;
     verificationSet.set_version(1);
-    EXPECT_TRUE(authority_->AddVerificationCredential(verificationSet, reason_));
+    EXPECT_TRUE(
+        authority_->AddVerificationCredential(verificationSet, reason_));
 
     authority_->RevokeVerificationCredentials(list);
     EXPECT_FALSE(list.empty());
 }
 
-TEST_F(
-    Test_Authority,
-    EncryptionTargets_DefaultSetup_ShouldReturnProperData)
+TEST_F(Test_Authority, EncryptionTargets_DefaultSetup_ShouldReturnProperData)
 {
     const auto& keyCredentials = authority_->EncryptionTargets();
     const auto& masterCredID = authority_->GetMasterCredID();
@@ -315,7 +302,11 @@ TEST_F(
         crypto::key::asymmetric::Algorithm::Secp256k1);
 
     EXPECT_EQ(keyCredentials.first, masterCredID);
-    EXPECT_EQ(keyCredentials.second.front(), tagCredential.GetKeypair(crypto::key::asymmetric::Role::Encrypt).GetPublicKey().keyType());
+    EXPECT_EQ(
+        keyCredentials.second.front(),
+        tagCredential.GetKeypair(crypto::key::asymmetric::Role::Encrypt)
+            .GetPublicKey()
+            .keyType());
     EXPECT_EQ(keyCredentials.second.size(), 1);
 }
 
@@ -339,18 +330,21 @@ TEST_F(
         crypto::key::asymmetric::Algorithm::ED25519);
 
     EXPECT_EQ(keyCredentials2.first, masterCredID);
-    EXPECT_EQ(keyCredentials2.second.back(), tagCredential2.GetKeypair(crypto::key::asymmetric::Role::Encrypt).GetPublicKey().keyType());
+    EXPECT_EQ(
+        keyCredentials2.second.back(),
+        tagCredential2.GetKeypair(crypto::key::asymmetric::Role::Encrypt)
+            .GetPublicKey()
+            .keyType());
     EXPECT_EQ(keyCredentials2.second.size(), 2);
 }
 
-TEST_F(
-    Test_Authority,
-    GetMasterCredID_DefaultSetup_ShouldReturnProperData)
+TEST_F(Test_Authority, GetMasterCredID_DefaultSetup_ShouldReturnProperData)
 {
     const auto& masterCredID = authority_->GetMasterCredID();
 
-    EXPECT_EQ(identifier::Type::generic , masterCredID.get().Type());
-    EXPECT_EQ(identifier::Algorithm::blake2b256 , masterCredID.get().Algorithm());
+    EXPECT_EQ(identifier::Type::generic, masterCredID.get().Type());
+    EXPECT_EQ(
+        identifier::Algorithm::blake2b256, masterCredID.get().Algorithm());
 }
 
 TEST_F(
@@ -366,33 +360,32 @@ TEST_F(
     EXPECT_EQ(1, authority_->GetPublicKeysBySignature(keys, signature, 'A'));
     EXPECT_EQ(1, keys.size());
 
-    EXPECT_EQ(crypto::key::asymmetric::Algorithm::Secp256k1, keys.front()->keyType());
+    EXPECT_EQ(
+        crypto::key::asymmetric::Algorithm::Secp256k1, keys.front()->keyType());
 }
 
 TEST_F(
     Test_Authority,
-    hasCapability_DefaultSetup_ShouldReturnProperData)
+    HasCapability_DefaultSetup_ShouldReturnProperTrueForBothParameters)
 {
-       EXPECT_TRUE(authority_->hasCapability(NymCapability::SIGN_CHILDCRED));
-       EXPECT_TRUE(authority_->hasCapability(NymCapability::SIGN_MESSAGE));
+    EXPECT_TRUE(authority_->hasCapability(NymCapability::SIGN_CHILDCRED));
+    EXPECT_TRUE(authority_->hasCapability(NymCapability::SIGN_MESSAGE));
 }
 
-TEST_F(
-    Test_Authority,
-    Params_DefaultSetup_ShouldReturnProperData)
+TEST_F(Test_Authority, Params_Secp256k1AsParameter_ShouldReturnProperData)
 {
-    const auto& params = authority_->Params(
-        crypto::key::asymmetric::Algorithm::Secp256k1);
+    const auto& params =
+        authority_->Params(crypto::key::asymmetric::Algorithm::Secp256k1);
 
     EXPECT_EQ(params.size(), 0);
 }
 
 TEST_F(
     Test_Authority,
-    Params_AddChildKeyCredentialCalledFirst_ShouldReturnProperData)
+    Params_AddChildKeyCredentialCalledFirstLegacyAsParameter_ShouldReturnProperData)
 {
-    const auto& params = authority_->Params(
-        crypto::key::asymmetric::Algorithm::Legacy);
+    const auto& params =
+        authority_->Params(crypto::key::asymmetric::Algorithm::Legacy);
 
     EXPECT_EQ(params.size(), 0);
 
@@ -405,15 +398,13 @@ TEST_F(
     parameters.SetSeed(parameters_.Seed());
     authority_->AddChildKeyCredential(parameters, reason_);
 
-    const auto& params2 = authority_->Params(
-                     crypto::key::asymmetric::Algorithm::Legacy);
+    const auto& params2 =
+        authority_->Params(crypto::key::asymmetric::Algorithm::Legacy);
 
     EXPECT_NE(params2.size(), 0);
 }
 
-TEST_F(
-    Test_Authority,
-    Path_DefaultSetup_ShouldReturnProperData)
+TEST_F(Test_Authority, Path_DefaultSetup_ShouldReturnProperData)
 {
     proto::HDPath output;
     EXPECT_EQ(output.child_size(), 0);
@@ -425,9 +416,7 @@ TEST_F(
     EXPECT_EQ(output.has_version(), true);
 }
 
-TEST_F(
-    Test_Authority,
-    SerializeDefaultSetup_ShouldReturnProperData)
+TEST_F(Test_Authority, Serialize_AddedCredentialsFirst_ShouldReturnProperData)
 {
     proto::ContactData contactData;
     contactData.set_version(version_);
@@ -448,7 +437,8 @@ TEST_F(
     authority_->RevokeContactCredentials(list);
     authority_->RevokeVerificationCredentials(list2);
 
-    //Under 1th index there is some credential created during Authority creation
+    // Under 1th index there is some credential created during Authority
+    // creation
     EXPECT_EQ(serialized.activechildids(1), list.front());
     EXPECT_EQ(serialized.activechildids(2), list2.front());
 
@@ -456,23 +446,181 @@ TEST_F(
     EXPECT_EQ(serialized.nymid(), internalNym_->ID().str());
 }
 
-TEST_F(
-    Test_Authority,
-    Sign_ShouldReturnProperData)
+UnallocatedCString func();
+
+UnallocatedCString func() { return "Test"; }
+
+TEST_F(Test_Authority, Sign_ShouldReturnProperData)
 {
+    std::function<UnallocatedCString()> fc = func;
 
-        std::function<UnallocatedCString()> fc = func;
+    crypto::SignatureRole role = crypto::SignatureRole::PublicCredential;
+    proto::Signature signature;
+    EXPECT_TRUE(authority_->Sign(fc, role, signature, reason_));
 
-        crypto::SignatureRole role = crypto::SignatureRole::PublicCredential;
-        proto::Signature signature1;
-        std::cerr << "1: " << authority_->Sign(fc, role, signature1, reason_);
+    EXPECT_EQ(signature.version(), 1);
 }
 
-//Not sure how to trigger fail here. It looks like you cannot add invalid credentials
-//here so WriteCredentials be always successful
+TEST_F(Test_Authority, Sign_SignatureRoleIsNymIDSource_ShouldReturnProperData)
+{
+    std::function<UnallocatedCString()> fc = func;
+
+    crypto::SignatureRole role = crypto::SignatureRole::NymIDSource;
+    proto::Signature signature;
+    EXPECT_FALSE(authority_->Sign(fc, role, signature, reason_));
+
+    EXPECT_FALSE(signature.has_version());
+}
+
 TEST_F(
     Test_Authority,
-    WriteCredentials_DefaultSetup_ShouldReturnProperData)
+    Sign_SignatureRoleIsPrivateCredential_ShouldReturnProperData)
+{
+    std::function<UnallocatedCString()> fc = func;
+
+    crypto::SignatureRole role = crypto::SignatureRole::PrivateCredential;
+    proto::Signature signature;
+    EXPECT_FALSE(authority_->Sign(fc, role, signature, reason_));
+
+    EXPECT_FALSE(signature.has_version());
+}
+
+TEST_F(
+    Test_Authority,
+    Sign_SignatureRoleIsServerContract_ShouldReturnProperData)
+{
+    std::function<UnallocatedCString()> fc = func;
+
+    crypto::SignatureRole role = crypto::SignatureRole::ServerContract;
+    proto::Signature signature;
+    EXPECT_TRUE(authority_->Sign(fc, role, signature, reason_));
+
+    EXPECT_TRUE(signature.has_version());
+}
+
+TEST_F(Test_Authority, Source_DefaultSetup_ShouldReturnProperData)
+{
+    const auto& source = authority_->Source();
+    EXPECT_EQ(std::addressof(source), std::addressof(internalNym_->Source()));
+}
+
+TEST_F(Test_Authority, Unlock_DefaultSetup_ShouldReturnProperData)
+{
+    auto testTag = std::uint32_t{};
+    const auto symmetricKey = crypto::key::Symmetric::Factory();
+    const auto& str = authority_->GetPublicAuthKey(
+        crypto::key::asymmetric::Algorithm::Secp256k1);
+
+    const auto& tagCredential = authority_->GetTagCredential(
+        crypto::key::asymmetric::Algorithm::Secp256k1);
+
+    const auto& encryptKey =
+        tagCredential.GetKeypair(crypto::key::asymmetric::Role::Encrypt)
+            .GetPrivateKey();
+
+    encryptKey.CalculateTag(
+        str, authority_->GetMasterCredID(), reason_, testTag);
+
+    EXPECT_FALSE(authority_->Unlock(
+        str,
+        testTag,
+        crypto::key::asymmetric::Algorithm::Secp256k1,
+        symmetricKey,
+        nonConstReason_));
+}
+
+TEST_F(Test_Authority, Unlock_DefaultSetup_ShouldReturnProperData2)
+{
+    const auto& tagCredential = authority_->GetTagCredential(
+        crypto::key::asymmetric::Algorithm::Secp256k1);
+
+    const auto& encryptKey =
+        tagCredential.GetKeypair(crypto::key::asymmetric::Role::Encrypt)
+            .GetPrivateKey();
+
+    auto testTag = std::uint32_t{};
+    const auto& provider = client_.Crypto().Internal().SymmetricProvider(
+        opentxs::crypto::key::symmetric::Algorithm::ChaCha20Poly1305);
+
+    const auto key = client_.Factory().SymmetricKey(provider, reason_);
+
+    const auto& str = authority_->GetPublicAuthKey(
+        crypto::key::asymmetric::Algorithm::Secp256k1);
+
+    encryptKey.CalculateTag(
+        str, authority_->GetMasterCredID(), reason_, testTag);
+
+    EXPECT_TRUE(authority_->Unlock(
+        str,
+        testTag,
+        crypto::key::asymmetric::Algorithm::Secp256k1,
+        key,
+        nonConstReason_));
+}
+
+TEST_F(Test_Authority, TransportKey_DefaultSetup_ShouldReturnTrue)
+{
+    auto publicKey = Data::Factory();
+    EXPECT_TRUE(authority_->TransportKey(publicKey, words_, reason_));
+}
+
+TEST_F(
+    Test_Authority,
+    VerificationCredentialVersion_DefaultSetup_ShouldReturnProperData)
+{
+    EXPECT_EQ(authority_->VerificationCredentialVersion(), 1);
+}
+
+TEST_F(Test_Authority, Verify_DefaultSetup_ShouldReturnProperData)
+{
+    auto publicKey2 = Data::Factory();
+    proto::Signature signature2;
+    EXPECT_FALSE(authority_->Verify(
+        publicKey2, signature2, opentxs::crypto::key::asymmetric::Role::Auth));
+}
+
+TEST_F(
+    Test_Authority,
+    Verify_WithCredentialsEqualToMasterCredID_ShouldReturnFalse)
+{
+    auto publicKey = Data::Factory();
+    proto::Signature signature;
+    *signature.mutable_credentialid() = authority_->GetMasterCredID()->str();
+
+    EXPECT_FALSE(authority_->Verify(
+        publicKey, signature, opentxs::crypto::key::asymmetric::Role::Auth));
+}
+TEST_F(Test_Authority, Verify_WithChildKeyCredential_ShouldReturnFalse)
+{
+    auto publicKey = Data::Factory();
+
+    crypto::Parameters parameters{
+        crypto::ParameterType::ed25519,
+        identity::CredentialType::HD,
+        identity::SourceType::PubKey,
+        2};
+
+    parameters.SetSeed(parameters_.Seed());
+    auto credential = authority_->AddChildKeyCredential(parameters, reason_);
+
+    proto::Signature signature;
+    *signature.mutable_credentialid() = credential;
+
+    EXPECT_FALSE(authority_->Verify(
+        publicKey, signature, opentxs::crypto::key::asymmetric::Role::Auth));
+}
+
+TEST_F(Test_Authority, Verify_DefaultSetup_ShouldReturnFalse)
+{
+    proto::Verification verification;
+    EXPECT_FALSE(authority_->Verify(verification));
+}
+TEST_F(Test_Authority, VerifyInternally_DefaultSetup_ShouldReturnTrue)
+{
+    EXPECT_TRUE(authority_->VerifyInternally());
+}
+
+TEST_F(Test_Authority, WriteCredentials_DefaultSetup_ShouldReturnProperData)
 {
     EXPECT_TRUE(authority_->WriteCredentials());
 
@@ -498,10 +646,9 @@ TEST_F(
     authority_->AddChildKeyCredential(parameters, reason_);
 
     EXPECT_TRUE(authority_->WriteCredentials());
-
 }
 //???????
-TEST_F(Test_Authority, Get___KeyPairs_DefaultSetup_ShouldReturnProperData)
+TEST_F(Test_Authority, GetPairs_DefaultSetup_ShouldReturnProperData)
 {
     const auto& authKeyPair = authority_->GetAuthKeypair(
         crypto::key::asymmetric::Algorithm::Secp256k1);
@@ -534,7 +681,6 @@ TEST_F(Test_Authority, Get___KeyPairs_DefaultSetup_ShouldReturnProperData)
         crypto::key::asymmetric::Role::Sign);
 }
 
-//???????
 TEST_F(Test_Authority, GetTagCredential_DefaultSetup_ShouldReturnProperData)
 {
     const auto& tagCredential = authority_->GetTagCredential(
@@ -549,52 +695,4 @@ TEST_F(Test_Authority, GetTagCredential_DefaultSetup_ShouldReturnProperData)
         keyPair.GetPrivateKey().Role(), crypto::key::asymmetric::Role::Sign);
 }
 
-TEST_F(Test_Authority, Constructor_WithReason_ShouldNotThrow4221)
-{
-
-
-    // EXPECT_CALL(nymMock_, ID()).WillRepeatedly(ReturnRef(nym.ID()));
-
-
-    //const auto& source = authority_->Source();
-
-    // EXPECT_EQ(source.Type(), version_);
-    //EXPECT_EQ(source.NymID(), id);
-   // EXPECT_EQ(std::addressof(source), std::addressof(internalNym_->Source()));
-
-    auto publicKey = Data::Factory();
-    std::cerr << "1: " << authority_->TransportKey(publicKey, words_, reason_);
-
-    const auto asymmetricKeyMock = crypto::key::AsymmetricMock();
-    const auto symmetricKey = crypto::key::Symmetric::Factory();
-    const std::uint32_t tag = 1;
-    const auto& str = authority_->GetPublicAuthKey(
-        crypto::key::asymmetric::Algorithm::Secp256k1);
-    // EXPECT_CALL(asymmetricKeyMock,
-    // PublicKey()).WillRepeatedly(Return(str.PublicKey()));
-
-    std::cerr << "1: "
-              << authority_->Unlock(
-                     str,
-                     tag,
-                     crypto::key::asymmetric::Algorithm::Secp256k1,
-                     symmetricKey,
-                     nonConstReason_);
-
-    std::cerr << "1: " << authority_->VerificationCredentialVersion();
-
-    auto publicKey2 = Data::Factory();
-    proto::Signature signature2;
-    std::cerr << "1: "
-              << authority_->Verify(
-                     publicKey2,
-                     signature2,
-                     opentxs::crypto::key::asymmetric::Role::Auth);
-
-    proto::Verification verification;
-    std::cerr << "1: " << authority_->Verify(verification);
-
-    std::cerr << "1: " << authority_->VerifyInternally();
-}
-
-}
+}  // namespace opentxs

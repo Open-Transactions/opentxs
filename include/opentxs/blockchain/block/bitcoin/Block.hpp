@@ -10,7 +10,6 @@
 #include <cstdint>
 #include <memory>
 
-#include "opentxs/blockchain/Blockchain.hpp"
 #include "opentxs/blockchain/block/Block.hpp"
 #include "opentxs/util/Iterator.hpp"
 

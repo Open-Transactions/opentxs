@@ -24,7 +24,9 @@
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
-#include "opentxs/blockchain/FilterType.hpp"
+#include "opentxs/blockchain/Blockchain.hpp"
+#include "opentxs/blockchain/bitcoin/cfilter/FilterType.hpp"
+#include "opentxs/blockchain/block/bitcoin/Opcodes.hpp"
 #include "opentxs/blockchain/block/bitcoin/Script.hpp"
 #include "opentxs/core/PaymentCode.hpp"
 #include "opentxs/util/Container.hpp"
@@ -624,7 +626,7 @@ auto Script::evaluate_segwit(const ScriptElements& script) noexcept -> Pattern
     return Pattern::Custom;
 }
 
-auto Script::ExtractElements(const filter::Type style) const noexcept
+auto Script::ExtractElements(const cfilter::Type style) const noexcept
     -> UnallocatedVector<Space>
 {
     if (0 == elements_.size()) {
@@ -636,7 +638,7 @@ auto Script::ExtractElements(const filter::Type style) const noexcept
     auto output = UnallocatedVector<Space>{};
 
     switch (style) {
-        case filter::Type::ES: {
+        case cfilter::Type::ES: {
             LogTrace()(OT_PRETTY_CLASS())("processing data pushes").Flush();
 
             for (const auto& element : *this) {
@@ -674,8 +676,8 @@ auto Script::ExtractElements(const filter::Type style) const noexcept
                     std::make_move_iterator(temp.end()));
             }
         } break;
-        case filter::Type::Basic_BIP158:
-        case filter::Type::Basic_BCHVariant:
+        case cfilter::Type::Basic_BIP158:
+        case cfilter::Type::Basic_BCHVariant:
         default: {
             if (OP::RETURN == elements_.at(0).opcode_) {
                 LogTrace()(OT_PRETTY_CLASS())("skipping null data script")

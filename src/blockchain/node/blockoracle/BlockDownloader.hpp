@@ -128,7 +128,7 @@ private:
 
         OT_ASSERT(saved);
 
-        LogDetail()(DisplayString(chain_))(" block chain updated to height ")(
+        LogDetail()(print(chain_))(" block chain updated to height ")(
             position.first)
             .Flush();
         auto work = MakeWork(OT_ZMQ_NEW_FULL_BLOCK_SIGNAL);

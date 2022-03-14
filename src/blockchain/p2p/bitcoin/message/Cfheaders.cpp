@@ -82,7 +82,7 @@ auto BitcoinP2PCfheaders(
         return nullptr;
     }
 
-    UnallocatedVector<blockchain::filter::pHash> headers{};
+    UnallocatedVector<blockchain::cfilter::pHash> headers{};
 
     if (count > 0) {
         for (std::size_t i{0}; i < count; ++i) {
@@ -114,10 +114,10 @@ auto BitcoinP2PCfheaders(
 auto BitcoinP2PCfheaders(
     const api::Session& api,
     const blockchain::Type network,
-    const blockchain::filter::Type type,
+    const blockchain::cfilter::Type type,
     const blockchain::block::Hash& stop,
     const ReadView previous,
-    const UnallocatedVector<blockchain::filter::pHash>& headers)
+    const UnallocatedVector<blockchain::cfilter::pHash>& headers)
     -> blockchain::p2p::bitcoin::message::internal::Cfheaders*
 {
     namespace bitcoin = blockchain::p2p::bitcoin;
@@ -132,10 +132,10 @@ namespace opentxs::blockchain::p2p::bitcoin::message::implementation
 Cfheaders::Cfheaders(
     const api::Session& api,
     const blockchain::Type network,
-    const filter::Type type,
+    const cfilter::Type type,
     const block::Hash& stop,
     const ReadView previousHeader,
-    const UnallocatedVector<filter::pHash>& headers) noexcept(false)
+    const UnallocatedVector<cfilter::pHash>& headers) noexcept(false)
     : Message(api, network, bitcoin::Command::cfheaders)
     , type_(type)
     , stop_(stop)
@@ -154,10 +154,10 @@ Cfheaders::Cfheaders(
 Cfheaders::Cfheaders(
     const api::Session& api,
     std::unique_ptr<Header> header,
-    const filter::Type type,
+    const cfilter::Type type,
     const block::Hash& stop,
-    const filter::Header& previous,
-    const UnallocatedVector<filter::pHash>& headers) noexcept(false)
+    const cfilter::Header& previous,
+    const UnallocatedVector<cfilter::pHash>& headers) noexcept(false)
     : Message(api, std::move(header))
     , type_(type)
     , stop_(stop)

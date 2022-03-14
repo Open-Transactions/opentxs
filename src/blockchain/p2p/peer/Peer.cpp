@@ -9,6 +9,7 @@
 
 #include <chrono>
 #include <stdexcept>
+#include <string_view>
 
 #include "blockchain/DownloadTask.hpp"
 #include "blockchain/p2p/peer/ConnectionManager.hpp"
@@ -16,7 +17,7 @@
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/api/session/Endpoints.hpp"
 #include "opentxs/api/session/Session.hpp"
-#include "opentxs/blockchain/Blockchain.hpp"
+#include "opentxs/blockchain/Types.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/network/asio/Socket.hpp"  // IWYU pragma: keep
 #include "opentxs/network/zeromq/Pipeline.hpp"
@@ -51,7 +52,7 @@ Peer::Peer(
     , manager_(manager)
     , mempool_(mempool)
     , chain_(address->Chain())
-    , display_chain_(DisplayString(chain_))
+    , display_chain_(print(chain_))
     , header_probe_(false)
     , cfilter_probe_(false)
     , address_(std::move(address))
@@ -160,8 +161,8 @@ auto Peer::check_handshake() noexcept -> void
         (false == state.done())) {
         LogDetail()(
             address_.Incoming() ? "Incoming connection from "
-                                : "Connected to ")(
-            DisplayString(address_.Chain()))(" peer at ")(address_.Display())
+                                : "Connected to ")(print(address_.Chain()))(
+            " peer at ")(address_.Display())
             .Flush();
         LogVerbose()("Advertised services: ").Flush();
 

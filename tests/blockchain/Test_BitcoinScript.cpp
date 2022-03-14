@@ -16,9 +16,10 @@
 #include "1_Internal.hpp"  // IWYU pragma: keep
 #include "Basic.hpp"       // IWYU pragma: keep
 #include "internal/blockchain/block/bitcoin/Bitcoin.hpp"
-#include "opentxs/blockchain/Blockchain.hpp"
 #include "opentxs/blockchain/BlockchainType.hpp"
+#include "opentxs/blockchain/block/bitcoin/Opcodes.hpp"
 #include "opentxs/blockchain/block/bitcoin/Script.hpp"
+#include "opentxs/blockchain/block/bitcoin/Types.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 

@@ -35,10 +35,12 @@ set(cxx-install-headers
     "${opentxs_SOURCE_DIR}/include/opentxs/blockchain/block/bitcoin/Header.hpp"
     "${opentxs_SOURCE_DIR}/include/opentxs/blockchain/block/bitcoin/Input.hpp"
     "${opentxs_SOURCE_DIR}/include/opentxs/blockchain/block/bitcoin/Inputs.hpp"
+    "${opentxs_SOURCE_DIR}/include/opentxs/blockchain/block/bitcoin/Opcodes.hpp"
     "${opentxs_SOURCE_DIR}/include/opentxs/blockchain/block/bitcoin/Output.hpp"
     "${opentxs_SOURCE_DIR}/include/opentxs/blockchain/block/bitcoin/Outputs.hpp"
     "${opentxs_SOURCE_DIR}/include/opentxs/blockchain/block/bitcoin/Script.hpp"
     "${opentxs_SOURCE_DIR}/include/opentxs/blockchain/block/bitcoin/Transaction.hpp"
+    "${opentxs_SOURCE_DIR}/include/opentxs/blockchain/block/bitcoin/Types.hpp"
 )
 target_sources(opentxs-common PRIVATE ${cxx-install-headers})
 target_include_directories(

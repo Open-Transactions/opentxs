@@ -15,9 +15,8 @@
 #include <memory>
 
 #include "opentxs/Version.hpp"
-#include "opentxs/blockchain/Blockchain.hpp"
 #include "opentxs/blockchain/BlockchainType.hpp"
-#include "opentxs/blockchain/FilterType.hpp"
+#include "opentxs/blockchain/bitcoin/cfilter/FilterType.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
@@ -54,7 +53,7 @@ struct FilterVector {
 };
 struct ChainVector {
     ot::UnallocatedCString genesis_block_hex_{};
-    boost::container::flat_map<ot::blockchain::filter::Type, FilterVector>
+    boost::container::flat_map<ot::blockchain::cfilter::Type, FilterVector>
         filters_{};
 };
 struct Listener {

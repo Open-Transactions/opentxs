@@ -12,5 +12,3 @@ add_opentx_test(unittests-opentxs-core-ledger Test_Ledger.cpp)
 add_opentx_test(unittests-opentxs-core-nym Test_Nym.cpp)
 add_opentx_test(unittests-opentxs-core-statemachine Test_StateMachine.cpp)
 add_opentx_test(unittests-opentxs-core-display Test_DisplayScale.cpp)
-add_opentx_test(unittests-opentxs-core-contact Test_Contact.cpp)
-

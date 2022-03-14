@@ -5,7 +5,7 @@
 
 // IWYU pragma: no_include "internal/blockchain/p2p/P2P.hpp"
 // IWYU pragma: no_include "opentxs/blockchain/BlockchainType.hpp"
-// IWYU pragma: no_include "opentxs/blockchain/filter::Type.hpp"
+// IWYU pragma: no_include "opentxs/blockchain/cfilter::Type.hpp"
 
 #pragma once
 
@@ -14,8 +14,8 @@
 #include <utility>
 
 #include "internal/blockchain/node/Node.hpp"
-#include "opentxs/blockchain/Blockchain.hpp"
 #include "opentxs/blockchain/Types.hpp"
+#include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/blockchain/p2p/Types.hpp"
 #include "opentxs/util/Container.hpp"
 

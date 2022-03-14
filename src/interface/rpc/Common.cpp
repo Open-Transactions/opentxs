@@ -8,6 +8,7 @@
 #include "internal/interface/rpc/RPC.hpp"  // IWYU pragma: associated
 
 #include <robin_hood.h>
+#include <string_view>
 
 #include "opentxs/interface/rpc/AccountEventType.hpp"
 #include "opentxs/interface/rpc/AccountType.hpp"
@@ -23,26 +24,28 @@
 
 namespace opentxs
 {
+using namespace std::literals;
+
 auto print(rpc::AccountEventType value) noexcept -> UnallocatedCString
 {
     using Type = rpc::AccountEventType;
     static const auto map =
-        robin_hood::unordered_flat_map<Type, UnallocatedCString>{
-            {Type::incoming_cheque, "incoming cheque"},
-            {Type::outgoing_cheque, "outgoing cheque"},
-            {Type::incoming_transfer, "incoming transfer"},
-            {Type::outgoing_transfer, "outgoing transfer"},
-            {Type::incoming_invoice, "incoming invoice"},
-            {Type::outgoing_invoice, "outgoing invoice"},
-            {Type::incoming_voucher, "incoming voucher"},
-            {Type::outgoing_voucher, "outgoing voucher"},
-            {Type::incoming_blockchain, "incoming blockchain"},
-            {Type::outgoing_blockchain, "outgoing blockchain"},
+        robin_hood::unordered_flat_map<Type, std::string_view>{
+            {Type::incoming_cheque, "incoming cheque"sv},
+            {Type::outgoing_cheque, "outgoing cheque"sv},
+            {Type::incoming_transfer, "incoming transfer"sv},
+            {Type::outgoing_transfer, "outgoing transfer"sv},
+            {Type::incoming_invoice, "incoming invoice"sv},
+            {Type::outgoing_invoice, "outgoing invoice"sv},
+            {Type::incoming_voucher, "incoming voucher"sv},
+            {Type::outgoing_voucher, "outgoing voucher"sv},
+            {Type::incoming_blockchain, "incoming blockchain"sv},
+            {Type::outgoing_blockchain, "outgoing blockchain"sv},
         };
 
     try {
 
-        return map.at(value);
+        return UnallocatedCString{map.at(value)};
     } catch (...) {
 
         return "error";
@@ -53,15 +56,15 @@ auto print(rpc::AccountType value) noexcept -> UnallocatedCString
 {
     using Type = rpc::AccountType;
     static const auto map =
-        robin_hood::unordered_flat_map<Type, UnallocatedCString>{
-            {Type::normal, "custodial"},
-            {Type::issuer, "custodial issuer"},
-            {Type::blockchain, "blockchain"},
+        robin_hood::unordered_flat_map<Type, std::string_view>{
+            {Type::normal, "custodial"sv},
+            {Type::issuer, "custodial issuer"sv},
+            {Type::blockchain, "blockchain"sv},
         };
 
     try {
 
-        return map.at(value);
+        return UnallocatedCString{map.at(value)};
     } catch (...) {
 
         return "error";
@@ -72,57 +75,57 @@ auto print(rpc::CommandType value) noexcept -> UnallocatedCString
 {
     using Type = rpc::CommandType;
     static const auto map =
-        robin_hood::unordered_flat_map<Type, UnallocatedCString>{
-            {Type::add_client_session, "add client session"},
-            {Type::add_server_session, "add server session"},
-            {Type::list_client_sessions, "list client sessions"},
-            {Type::list_server_sessions, "list server sessions"},
-            {Type::import_hd_seed, "import hd seed"},
-            {Type::list_hd_seeds, "list hd seeds"},
-            {Type::get_hd_seed, "get hd seed"},
-            {Type::create_nym, "create nym"},
-            {Type::list_nyms, "list nyms"},
-            {Type::get_nym, "get nym"},
-            {Type::add_claim, "add claim"},
-            {Type::delete_claim, "delete claim"},
-            {Type::import_server_contract, "import server contract"},
-            {Type::list_server_contracts, "list server contracts"},
-            {Type::register_nym, "register nym"},
-            {Type::create_unit_definition, "create unit definition"},
-            {Type::list_unit_definitions, "list unit definitions"},
-            {Type::issue_unit_definition, "issue unit definition"},
-            {Type::create_account, "create account"},
-            {Type::list_accounts, "list accounts"},
-            {Type::get_account_balance, "get account balance"},
-            {Type::get_account_activity, "get account activity"},
-            {Type::send_payment, "send payment"},
-            {Type::move_funds, "move funds"},
-            {Type::add_contact, "add contact"},
-            {Type::list_contacts, "list contacts"},
-            {Type::get_contact, "get contact"},
-            {Type::add_contact_claim, "add contact claim"},
-            {Type::delete_contact_claim, "delete contact claim"},
-            {Type::verify_claim, "verify claim"},
-            {Type::accept_verification, "accept verification"},
-            {Type::send_contact_message, "send contact message"},
-            {Type::get_contact_activity, "get contact activity"},
-            {Type::get_server_contract, "get server contract"},
-            {Type::get_pending_payments, "get pending payments"},
-            {Type::accept_pending_payments, "accept pending payments"},
-            {Type::get_compatible_accounts, "get compatible accounts"},
-            {Type::create_compatible_account, "create compatible account"},
-            {Type::get_workflow, "get workflow"},
-            {Type::get_server_password, "get server password"},
-            {Type::get_admin_nym, "get admin nym"},
-            {Type::get_unit_definition, "get unit definition"},
-            {Type::get_transaction_data, "get transaction data"},
-            {Type::lookup_accountid, "lookup accountid"},
-            {Type::rename_account, "rename account"},
+        robin_hood::unordered_flat_map<Type, std::string_view>{
+            {Type::add_client_session, "add client session"sv},
+            {Type::add_server_session, "add server session"sv},
+            {Type::list_client_sessions, "list client sessions"sv},
+            {Type::list_server_sessions, "list server sessions"sv},
+            {Type::import_hd_seed, "import hd seed"sv},
+            {Type::list_hd_seeds, "list hd seeds"sv},
+            {Type::get_hd_seed, "get hd seed"sv},
+            {Type::create_nym, "create nym"sv},
+            {Type::list_nyms, "list nyms"sv},
+            {Type::get_nym, "get nym"sv},
+            {Type::add_claim, "add claim"sv},
+            {Type::delete_claim, "delete claim"sv},
+            {Type::import_server_contract, "import server contract"sv},
+            {Type::list_server_contracts, "list server contracts"sv},
+            {Type::register_nym, "register nym"sv},
+            {Type::create_unit_definition, "create unit definition"sv},
+            {Type::list_unit_definitions, "list unit definitions"sv},
+            {Type::issue_unit_definition, "issue unit definition"sv},
+            {Type::create_account, "create account"sv},
+            {Type::list_accounts, "list accounts"sv},
+            {Type::get_account_balance, "get account balance"sv},
+            {Type::get_account_activity, "get account activity"sv},
+            {Type::send_payment, "send payment"sv},
+            {Type::move_funds, "move funds"sv},
+            {Type::add_contact, "add contact"sv},
+            {Type::list_contacts, "list contacts"sv},
+            {Type::get_contact, "get contact"sv},
+            {Type::add_contact_claim, "add contact claim"sv},
+            {Type::delete_contact_claim, "delete contact claim"sv},
+            {Type::verify_claim, "verify claim"sv},
+            {Type::accept_verification, "accept verification"sv},
+            {Type::send_contact_message, "send contact message"sv},
+            {Type::get_contact_activity, "get contact activity"sv},
+            {Type::get_server_contract, "get server contract"sv},
+            {Type::get_pending_payments, "get pending payments"sv},
+            {Type::accept_pending_payments, "accept pending payments"sv},
+            {Type::get_compatible_accounts, "get compatible accounts"sv},
+            {Type::create_compatible_account, "create compatible account"sv},
+            {Type::get_workflow, "get workflow"sv},
+            {Type::get_server_password, "get server password"sv},
+            {Type::get_admin_nym, "get admin nym"sv},
+            {Type::get_unit_definition, "get unit definition"sv},
+            {Type::get_transaction_data, "get transaction data"sv},
+            {Type::lookup_accountid, "lookup accountid"sv},
+            {Type::rename_account, "rename account"sv},
         };
 
     try {
 
-        return map.at(value);
+        return UnallocatedCString{map.at(value)};
     } catch (...) {
 
         return "error";
@@ -133,16 +136,16 @@ auto print(rpc::ContactEventType value) noexcept -> UnallocatedCString
 {
     using Type = rpc::ContactEventType;
     static const auto map =
-        robin_hood::unordered_flat_map<Type, UnallocatedCString>{
-            {Type::incoming_message, "incoming message"},
-            {Type::outgoing_message, "outgoing message"},
-            {Type::incoming_payment, "incoming payment"},
-            {Type::outgoing_payment, "outgoing payment"},
+        robin_hood::unordered_flat_map<Type, std::string_view>{
+            {Type::incoming_message, "incoming message"sv},
+            {Type::outgoing_message, "outgoing message"sv},
+            {Type::incoming_payment, "incoming payment"sv},
+            {Type::outgoing_payment, "outgoing payment"sv},
         };
 
     try {
 
-        return map.at(value);
+        return UnallocatedCString{map.at(value)};
     } catch (...) {
 
         return "error";
@@ -153,18 +156,18 @@ auto print(rpc::PaymentType value) noexcept -> UnallocatedCString
 {
     using Type = rpc::PaymentType;
     static const auto map =
-        robin_hood::unordered_flat_map<Type, UnallocatedCString>{
-            {Type::cheque, "cheque"},
-            {Type::transfer, "transfer"},
-            {Type::voucher, "voucher"},
-            {Type::invoice, "invoice"},
-            {Type::blinded, "blinded"},
-            {Type::blockchain, "blockchain"},
+        robin_hood::unordered_flat_map<Type, std::string_view>{
+            {Type::cheque, "cheque"sv},
+            {Type::transfer, "transfer"sv},
+            {Type::voucher, "voucher"sv},
+            {Type::invoice, "invoice"sv},
+            {Type::blinded, "blinded"sv},
+            {Type::blockchain, "blockchain"sv},
         };
 
     try {
 
-        return map.at(value);
+        return UnallocatedCString{map.at(value)};
     } catch (...) {
 
         return "error";
@@ -175,15 +178,15 @@ auto print(rpc::PushType value) noexcept -> UnallocatedCString
 {
     using Type = rpc::PushType;
     static const auto map =
-        robin_hood::unordered_flat_map<Type, UnallocatedCString>{
-            {Type::account, "account"},
-            {Type::contact, "contact"},
-            {Type::task, "task"},
+        robin_hood::unordered_flat_map<Type, std::string_view>{
+            {Type::account, "account"sv},
+            {Type::contact, "contact"sv},
+            {Type::task, "task"sv},
         };
 
     try {
 
-        return map.at(value);
+        return UnallocatedCString{map.at(value)};
     } catch (...) {
 
         return "error";
@@ -194,45 +197,45 @@ auto print(rpc::ResponseCode value) noexcept -> UnallocatedCString
 {
     using Type = rpc::ResponseCode;
     static const auto map =
-        robin_hood::unordered_flat_map<Type, UnallocatedCString>{
-            {Type::invalid, "invalid"},
-            {Type::success, "success"},
-            {Type::bad_session, "bad_session"},
-            {Type::none, "none"},
-            {Type::queued, "queued"},
-            {Type::unnecessary, "unnecessary"},
-            {Type::retry, "retry"},
-            {Type::no_path_to_recipient, "no path to recipient"},
-            {Type::bad_server_argument, "bad server argument"},
-            {Type::cheque_not_found, "cheque not found"},
-            {Type::payment_not_found, "payment not found"},
-            {Type::start_task_failed, "start task failed"},
-            {Type::nym_not_found, "nym not found"},
-            {Type::add_claim_failed, "add claim failed"},
-            {Type::add_contact_failed, "add contact failed"},
-            {Type::register_account_failed, "register account failed"},
-            {Type::bad_server_response, "bad server response"},
-            {Type::workflow_not_found, "workflow not found"},
-            {Type::unit_definition_not_found, "unit definition not found"},
-            {Type::session_not_found, "session not found"},
-            {Type::create_nym_failed, "create nym failed"},
+        robin_hood::unordered_flat_map<Type, std::string_view>{
+            {Type::invalid, "invalid"sv},
+            {Type::success, "success"sv},
+            {Type::bad_session, "bad_session"sv},
+            {Type::none, "none"sv},
+            {Type::queued, "queued"sv},
+            {Type::unnecessary, "unnecessary"sv},
+            {Type::retry, "retry"sv},
+            {Type::no_path_to_recipient, "no path to recipient"sv},
+            {Type::bad_server_argument, "bad server argument"sv},
+            {Type::cheque_not_found, "cheque not found"sv},
+            {Type::payment_not_found, "payment not found"sv},
+            {Type::start_task_failed, "start task failed"sv},
+            {Type::nym_not_found, "nym not found"sv},
+            {Type::add_claim_failed, "add claim failed"sv},
+            {Type::add_contact_failed, "add contact failed"sv},
+            {Type::register_account_failed, "register account failed"sv},
+            {Type::bad_server_response, "bad server response"sv},
+            {Type::workflow_not_found, "workflow not found"sv},
+            {Type::unit_definition_not_found, "unit definition not found"sv},
+            {Type::session_not_found, "session not found"sv},
+            {Type::create_nym_failed, "create nym failed"sv},
             {Type::create_unit_definition_failed,
-             "create unit definition failed"},
-            {Type::delete_claim_failed, "delete claim failed"},
-            {Type::account_not_found, "account not found"},
-            {Type::move_funds_failed, "move funds failed"},
-            {Type::register_nym_failed, "register nym failed"},
-            {Type::contact_not_found, "contact not found"},
-            {Type::account_owner_not_found, "account owner not found"},
-            {Type::send_payment_failed, "send payment failed"},
-            {Type::transaction_failed, "transaction failed"},
-            {Type::txid, "txid"},
-            {Type::unimplemented, "unimplemented"},
+             "create unit definition failed"sv},
+            {Type::delete_claim_failed, "delete claim failed"sv},
+            {Type::account_not_found, "account not found"sv},
+            {Type::move_funds_failed, "move funds failed"sv},
+            {Type::register_nym_failed, "register nym failed"sv},
+            {Type::contact_not_found, "contact not found"sv},
+            {Type::account_owner_not_found, "account owner not found"sv},
+            {Type::send_payment_failed, "send payment failed"sv},
+            {Type::transaction_failed, "transaction failed"sv},
+            {Type::txid, "txid"sv},
+            {Type::unimplemented, "unimplemented"sv},
         };
 
     try {
 
-        return map.at(value);
+        return UnallocatedCString{map.at(value)};
     } catch (...) {
 
         return "error";

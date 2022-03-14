@@ -26,16 +26,16 @@ namespace opentxs::blockchain::node::implementation
 {
 using HeaderDM = download::Manager<
     FilterOracle::HeaderDownloader,
-    filter::pHash,
-    filter::pHeader,
-    filter::Type>;
+    cfilter::pHash,
+    cfilter::pHeader,
+    cfilter::Type>;
 using HeaderWorker = Worker<FilterOracle::HeaderDownloader, api::Session>;
 
 class FilterOracle::HeaderDownloader : public HeaderDM, public HeaderWorker
 {
 public:
     using Callback =
-        std::function<Position(const Position&, const filter::Header&)>;
+        std::function<Position(const Position&, const cfilter::Header&)>;
 
     auto NextBatch() noexcept { return allocate_batch(type_); }
 
@@ -46,13 +46,13 @@ public:
         const internal::Network& node,
         FilterOracle::FilterDownloader& filter,
         const blockchain::Type chain,
-        const filter::Type type,
+        const cfilter::Type type,
         const UnallocatedCString& shutdown,
         Callback&& cb) noexcept
         : HeaderDM(
               [&] { return db.FilterHeaderTip(type); }(),
               [&] {
-                  auto promise = std::promise<filter::pHeader>{};
+                  auto promise = std::promise<cfilter::pHeader>{};
                   const auto tip = db.FilterHeaderTip(type);
                   promise.set_value(
                       db.LoadFilterHeader(type, tip.second->Bytes()));
@@ -88,7 +88,7 @@ private:
     const internal::Network& node_;
     FilterOracle::FilterDownloader& filter_;
     const blockchain::Type chain_;
-    const filter::Type type_;
+    const cfilter::Type type_;
     const Callback checkpoint_;
 
     auto batch_ready() const noexcept -> void
@@ -113,15 +113,15 @@ private:
     }
     auto check_task(TaskType&) const noexcept -> void {}
     auto trigger_state_machine() const noexcept -> void { trigger(); }
-    auto update_tip(const Position& position, const filter::pHeader&)
+    auto update_tip(const Position& position, const cfilter::pHeader&)
         const noexcept -> void
     {
         const auto saved = db_.SetFilterHeaderTip(type_, position);
 
         OT_ASSERT(saved);
 
-        LogDetail()(DisplayString(chain_))(
-            " cfheader chain updated to height ")(position.first)
+        LogDetail()(print(chain_))(" cfheader chain updated to height ")(
+            position.first)
             .Flush();
         filter_.UpdatePosition(position);
     }
@@ -194,7 +194,7 @@ private:
             auto& first = hashes.front();
 
             if (first != current) {
-                auto promise = std::promise<filter::pHeader>{};
+                auto promise = std::promise<cfilter::pHeader>{};
                 promise.set_value(
                     db_.LoadFilterHeader(type_, first.second->Bytes()));
                 prior.emplace(std::move(first), promise.get_future());
@@ -211,7 +211,7 @@ private:
 
         auto position = Position{
             body.at(1).as<block::Height>(), api_.Factory().Data(body.at(2))};
-        auto promise = std::promise<filter::pHeader>{};
+        auto promise = std::promise<cfilter::pHeader>{};
         promise.set_value(api_.Factory().Data(body.at(3)));
         Reset(position, promise.get_future());
     }

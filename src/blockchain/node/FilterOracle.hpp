@@ -25,10 +25,11 @@
 #include "opentxs/Types.hpp"
 #include "opentxs/Version.hpp"
 #include "opentxs/api/network/Network.hpp"
-#include "opentxs/blockchain/Blockchain.hpp"
 #include "opentxs/blockchain/BlockchainType.hpp"
-#include "opentxs/blockchain/FilterType.hpp"
 #include "opentxs/blockchain/Types.hpp"
+#include "opentxs/blockchain/bitcoin/cfilter/FilterType.hpp"
+#include "opentxs/blockchain/bitcoin/cfilter/Types.hpp"
+#include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/blockchain/node/BlockOracle.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/core/Data.hpp"
@@ -108,7 +109,7 @@ public:
     struct SyncClientFilterData;
 
     using NotifyCallback =
-        std::function<void(const filter::Type, const block::Position&)>;
+        std::function<void(const cfilter::Type, const block::Position&)>;
 
     enum class Work : OTZMQWorkType {
         shutdown = value(WorkType::Shutdown),
@@ -120,11 +121,11 @@ public:
         statemachine = OT_ZMQ_STATE_MACHINE_SIGNAL,
     };
 
-    auto DefaultType() const noexcept -> filter::Type final
+    auto DefaultType() const noexcept -> cfilter::Type final
     {
         return default_type_;
     }
-    auto FilterTip(const filter::Type type) const noexcept
+    auto FilterTip(const cfilter::Type type) const noexcept
         -> block::Position final
     {
         return database_.FilterTip(type);
@@ -132,18 +133,18 @@ public:
     auto GetFilterJob() const noexcept -> CfilterJob final;
     auto GetHeaderJob() const noexcept -> CfheaderJob final;
     auto Heartbeat() const noexcept -> void final;
-    auto LoadFilter(const filter::Type type, const block::Hash& block)
+    auto LoadFilter(const cfilter::Type type, const block::Hash& block)
         const noexcept -> std::unique_ptr<const GCS> final
     {
         return database_.LoadFilter(type, block.Bytes());
     }
-    auto LoadFilterHeader(const filter::Type type, const block::Hash& block)
+    auto LoadFilterHeader(const cfilter::Type type, const block::Hash& block)
         const noexcept -> Header final
     {
         return database_.LoadFilterHeader(type, block.Bytes());
     }
     auto LoadFilterOrResetTip(
-        const filter::Type type,
+        const cfilter::Type type,
         const block::Position& position) const noexcept
         -> std::unique_ptr<const GCS> final;
     auto ProcessBlock(const block::bitcoin::Block& block) const noexcept
@@ -156,7 +157,7 @@ public:
     auto ProcessSyncData(SyncClientFilterData& data) const noexcept -> void;
     auto ProcessSyncData(
         UnallocatedVector<SyncClientFilterData>& cache) const noexcept -> bool;
-    auto Tip(const filter::Type type) const noexcept -> block::Position final
+    auto Tip(const cfilter::Type type) const noexcept -> block::Position final
     {
         return database_.FilterTip(type);
     }
@@ -172,7 +173,7 @@ public:
         const internal::BlockOracle& block,
         const internal::FilterDatabase& database,
         const blockchain::Type chain,
-        const blockchain::filter::Type filter,
+        const blockchain::cfilter::Type filter,
         const UnallocatedCString& shutdown) noexcept;
 
     ~FilterOracle() final;
@@ -182,7 +183,7 @@ private:
     friend internal::FilterOracle;
 
     using FilterHeaderHex = UnallocatedCString;
-    using FilterHeaderMap = UnallocatedMap<filter::Type, FilterHeaderHex>;
+    using FilterHeaderMap = UnallocatedMap<cfilter::Type, FilterHeaderHex>;
     using ChainMap = UnallocatedMap<block::Height, FilterHeaderMap>;
     using CheckpointMap = UnallocatedMap<blockchain::Type, ChainMap>;
     using OutstandingMap = UnallocatedMap<int, std::atomic_int>;
@@ -195,7 +196,7 @@ private:
     const internal::FilterDatabase& database_;
     const network::zeromq::socket::Publish& filter_notifier_;
     const blockchain::Type chain_;
-    const filter::Type default_type_;
+    const cfilter::Type default_type_;
     mutable std::recursive_mutex lock_;
     OTZMQPublishSocket new_filters_;
     const NotifyCallback cb_;
@@ -203,32 +204,32 @@ private:
     mutable std::unique_ptr<HeaderDownloader> header_downloader_;
     mutable std::unique_ptr<BlockIndexer> block_indexer_;
     mutable Time last_sync_progress_;
-    mutable UnallocatedMap<filter::Type, block::Position> last_broadcast_;
+    mutable UnallocatedMap<cfilter::Type, block::Position> last_broadcast_;
     mutable JobCounter outstanding_jobs_;
     std::atomic_bool running_;
 
     auto new_tip(
         const rLock&,
-        const filter::Type type,
+        const cfilter::Type type,
         const block::Position& tip) const noexcept -> void;
     auto process_block(
-        const filter::Type type,
+        const cfilter::Type type,
         const block::bitcoin::Block& block) const noexcept
         -> std::unique_ptr<const GCS>;
     auto reset_tips_to(
-        const filter::Type type,
+        const cfilter::Type type,
         const block::Position& position,
         const std::optional<bool> resetHeader = std::nullopt,
         const std::optional<bool> resetfilter = std::nullopt) const noexcept
         -> bool;
     auto reset_tips_to(
-        const filter::Type type,
+        const cfilter::Type type,
         const block::Position& headerTip,
         const block::Position& position,
         const std::optional<bool> resetHeader = std::nullopt) const noexcept
         -> bool;
     auto reset_tips_to(
-        const filter::Type type,
+        const cfilter::Type type,
         const block::Position& headerTip,
         const block::Position& filterTip,
         const block::Position& position,
@@ -237,7 +238,7 @@ private:
 
     auto compare_header_to_checkpoint(
         const block::Position& block,
-        const filter::Header& header) noexcept -> block::Position;
+        const cfilter::Header& header) noexcept -> block::Position;
     auto compare_tips_to_checkpoint() noexcept -> void;
     auto compare_tips_to_header_chain() noexcept -> bool;
 

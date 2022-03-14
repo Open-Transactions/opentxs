@@ -8,11 +8,11 @@ jobs:
       fail-fast: false
       matrix:
         binding: [all]
-        arch: [arm64, arm, x64]
+        arch: [arm64, arm, x64, x86]
         include:
           - binding: all
             platform: ubuntu-20.04
-            docker: 13
+            docker: 14
     runs-on: ${{ matrix.platform }}
     steps:
     - uses: actions/checkout@v2.3.4

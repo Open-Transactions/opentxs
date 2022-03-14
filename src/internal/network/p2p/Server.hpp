@@ -8,7 +8,6 @@
 #include <string_view>
 
 #include "internal/api/network/Blockchain.hpp"
-#include "opentxs/blockchain/Blockchain.hpp"
 #include "opentxs/blockchain/BlockchainType.hpp"
 #include "opentxs/util/Container.hpp"
 

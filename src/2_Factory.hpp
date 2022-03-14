@@ -5,7 +5,6 @@
 
 #pragma once
 
-#include "opentxs/blockchain/Blockchain.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/core/Types.hpp"
 #include "opentxs/core/contract/peer/PeerReply.hpp"

@@ -6,6 +6,7 @@
 #include "Helpers.hpp"  // IWYU pragma: associated
 
 #include <gtest/gtest.h>
+#include <algorithm>
 
 #include "opentxs/util/Options.hpp"
 

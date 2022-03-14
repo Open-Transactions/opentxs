@@ -9,9 +9,11 @@
 
 #include <atomic>
 #include <chrono>
+#include <deque>
 #include <functional>
 #include <future>
 #include <memory>
+#include <queue>
 
 #include "internal/network/zeromq/Context.hpp"
 #include "internal/network/zeromq/Types.hpp"
@@ -45,6 +47,8 @@ namespace api
 {
 class Session;
 }  // namespace api
+
+class Log;
 // }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
@@ -72,6 +76,7 @@ protected:
     using Direction = network::zeromq::socket::Direction;
     using SocketType = network::zeromq::socket::Type;
 
+    const Log& log_;
     Gatekeeper gatekeeper_;
     network::zeromq::Pipeline pipeline_;
     bool disable_automatic_processing_;
@@ -103,37 +108,48 @@ protected:
     }
     auto wait_for_init() const noexcept -> void { init_future_.get(); }
 
-    auto do_work() noexcept
+    auto defer(Message&& message) noexcept -> void
+    {
+        cache_.emplace(std::move(message));
+    }
+    auto do_work() noexcept -> void
     {
         rate_limit_state_machine();
         state_machine_queued_.store(false);
         repeat(downcast().work());
     }
+    auto flush_cache() noexcept -> void
+    {
+        log_(OT_PRETTY_CLASS())("flushing ")(cache_.size())(" cached messages")
+            .Flush();
+
+        while (0u < cache_.size()) {
+            auto message = Message{std::move(cache_.front())};
+            cache_.pop();
+            worker(std::move(message));
+        }
+    }
     auto init_complete() noexcept -> void { init_promise_.set_value(); }
 
     Actor(
         const api::Session& api,
+        const Log& logger,
         const std::chrono::milliseconds rateLimit,
         const network::zeromq::BatchID batch,
         allocator_type alloc,
         const network::zeromq::EndpointArgs& subscribe = {},
         const network::zeromq::EndpointArgs& pull = {},
         const network::zeromq::EndpointArgs& dealer = {},
-        const Vector<network::zeromq::SocketData>& extra = {}) noexcept
+        const Vector<network::zeromq::SocketData>& extra = {},
+        Set<Work>&& neverDrop = {}) noexcept
         : init_promise_()
         , init_future_(init_promise_.get_future())
         , running_(true)
+        , log_(logger)
         , gatekeeper_()
         , pipeline_(api.Network().ZeroMQ().Internal().Pipeline(
               {},
-              [&] {
-                  using Direction = network::zeromq::socket::Direction;
-                  auto out{subscribe};
-                  out.emplace_back(
-                      api.Endpoints().Shutdown(), Direction::Connect);
-
-                  return out;
-              }(),
+              subscribe,
               pull,
               dealer,
               extra,
@@ -141,7 +157,9 @@ protected:
               alloc.resource()))
         , disable_automatic_processing_(false)
         , rate_limit_(rateLimit)
+        , never_drop_(std::move(neverDrop))
         , last_executed_(Clock::now())
+        , cache_(alloc)
         , state_machine_queued_(false)
     {
         LogTrace()(OT_PRETTY_CLASS())("using ZMQ batch ")(pipeline_.BatchID())
@@ -152,7 +170,9 @@ protected:
 
 private:
     const std::chrono::milliseconds rate_limit_;
+    const Set<Work> never_drop_;
     Time last_executed_;
+    std::queue<Message, Deque<Message>> cache_;
     mutable std::atomic<bool> state_machine_queued_;
 
     auto rate_limit_state_machine() const noexcept
@@ -189,8 +209,7 @@ private:
     }
     auto worker(network::zeromq::Message&& in) noexcept -> void
     {
-        const auto& log = LogTrace();
-        log(OT_PRETTY_CLASS())("Message received").Flush();
+        log_(OT_PRETTY_CLASS())("Message received").Flush();
         const auto body = in.Body();
 
         if (1 > body.size()) {
@@ -209,15 +228,16 @@ private:
             }
         }();
         const auto type = CString{print(work)};
-        log(OT_PRETTY_CLASS())("message type is: ")(type).Flush();
+        log_(OT_PRETTY_CLASS())("message type is: ")(type).Flush();
 
         if (OT_ZMQ_INIT_SIGNAL == static_cast<OTZMQWorkType>(work)) {
-            log(OT_PRETTY_CLASS())("initializing").Flush();
+            log_(OT_PRETTY_CLASS())("initializing").Flush();
             downcast().startup();
 
             try {
                 init_promise_.set_value();
-                log(OT_PRETTY_CLASS())("initialization complete").Flush();
+                log_(OT_PRETTY_CLASS())("initialization complete").Flush();
+                flush_cache();
             } catch (...) {
                 LogError()(OT_PRETTY_CLASS())("init message received twice")
                     .Flush();
@@ -230,9 +250,16 @@ private:
 
         // NOTE: do not process any messages until init is received
         if (false == IsReady(init_future_)) {
-            log(OT_PRETTY_CLASS())("dropping message of type ")(
-                type)(" until init is processed")
-                .Flush();
+            if (0u < never_drop_.count(work)) {
+                log_(OT_PRETTY_CLASS())("queueing message of type ")(
+                    type)(" until init is processed")
+                    .Flush();
+                defer(std::move(in));
+            } else {
+                log_(OT_PRETTY_CLASS())("dropping message of type ")(
+                    type)(" until init is processed")
+                    .Flush();
+            }
 
             return;
         }
@@ -244,7 +271,8 @@ private:
             if (shutdown || (false == running_)) { return; }
 
             if (disable_automatic_processing_) {
-                log(OT_PRETTY_CLASS())("processing ")(type).Flush();
+                log_(OT_PRETTY_CLASS())("processing ")(type)(" in bypass mode")
+                    .Flush();
                 downcast().pipeline(work, std::move(in));
 
                 return;
@@ -252,21 +280,21 @@ private:
 
             switch (static_cast<OTZMQWorkType>(work)) {
                 case value(WorkType::Shutdown): {
-                    log(OT_PRETTY_CLASS())("shutting down").Flush();
+                    log_(OT_PRETTY_CLASS())("shutting down").Flush();
                     this->shutdown();
                 } break;
                 case OT_ZMQ_STATE_MACHINE_SIGNAL: {
-                    log(OT_PRETTY_CLASS())("executing state machine").Flush();
+                    log_(OT_PRETTY_CLASS())("executing state machine").Flush();
                     do_work();
                 } break;
                 default: {
-                    log(OT_PRETTY_CLASS())("processing ")(type).Flush();
+                    log_(OT_PRETTY_CLASS())("processing ")(type).Flush();
                     downcast().pipeline(work, std::move(in));
                 }
             }
         }
 
-        log(OT_PRETTY_CLASS())("message processing complete").Flush();
+        log_(OT_PRETTY_CLASS())("message processing complete").Flush();
 
         if (false == running_) { gatekeeper_.shutdown(); }
     }

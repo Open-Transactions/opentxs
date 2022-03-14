@@ -18,12 +18,14 @@
 #include <utility>
 
 #include "blockchain/node/wallet/subchain/NotificationStateData.hpp"  // IWYU pragma: keep
+#include "internal/blockchain/node/wallet/Account.hpp"
 #include "internal/blockchain/node/wallet/Accounts.hpp"
 #include "internal/blockchain/node/wallet/Types.hpp"
+#include "internal/blockchain/node/wallet/subchain/Subchain.hpp"
 #include "internal/network/zeromq/Types.hpp"
 #include "opentxs/Types.hpp"
-#include "opentxs/blockchain/Blockchain.hpp"
-#include "opentxs/blockchain/FilterType.hpp"
+#include "opentxs/blockchain/bitcoin/cfilter/FilterType.hpp"
+#include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/util/Allocated.hpp"
@@ -96,7 +98,6 @@ public:
         const node::internal::Mempool& mempool,
         const network::zeromq::BatchID batch,
         const Type chain,
-        const std::string_view shutdown,
         const std::string_view toParent,
         allocator_type alloc) noexcept;
 
@@ -109,6 +110,8 @@ private:
         normal,
         reorg,
         post_reorg,
+        pre_shutdown,
+        shutdown,
     };
 
     struct ReorgData {
@@ -130,6 +133,16 @@ private:
         {
         }
     };
+    struct ShutdownData {
+        const std::size_t target_;
+        std::size_t ready_;
+
+        ShutdownData(std::size_t target) noexcept
+            : target_(target)
+            , ready_(0)
+        {
+        }
+    };
 
     using AccountMap = Map<OTNymID, wallet::Account>;
     using NotificationMap =
@@ -140,22 +153,26 @@ private:
     const node::internal::WalletDatabase& db_;
     const node::internal::Mempool& mempool_;
     const Type chain_;
-    const filter::Type filter_type_;
-    const CString shutdown_endpoint_;
+    const cfilter::Type filter_type_;
     const CString to_children_endpoint_;
     const CString from_children_endpoint_;
     network::zeromq::socket::Raw& to_parent_;
     network::zeromq::socket::Raw& to_children_;
     State state_;
     std::optional<ReorgData> reorg_;
+    std::optional<ShutdownData> shutdown_;
     AccountMap accounts_;
     NotificationMap notification_channels_;
 
     auto reorg_children() const noexcept -> std::size_t;
+    auto verify_child_state(
+        const Subchain::State subchain,
+        const Account::State account) const noexcept -> void;
 
     auto do_reorg() noexcept -> void;
     auto do_shutdown() noexcept -> void;
     auto finish_reorg() noexcept -> void;
+    auto finish_shutdown() noexcept -> void;
     auto index_nym(const identifier::Nym& id) noexcept -> void;
     auto pipeline(const Work work, Message&& msg) noexcept -> void;
     auto process_block_header(Message&& in) noexcept -> void;
@@ -165,11 +182,14 @@ private:
     auto startup() noexcept -> void;
     auto state_normal(const Work work, Message&& msg) noexcept -> void;
     auto state_post_reorg(const Work work, Message&& msg) noexcept -> void;
+    auto state_pre_shutdown(const Work work, Message&& msg) noexcept -> void;
     auto state_reorg(const Work work, Message&& msg) noexcept -> void;
     auto transition_state_normal(Message&& in) noexcept -> void;
     auto transition_state_post_reorg(Message&& in) noexcept -> void;
+    auto transition_state_pre_shutdown(Message&& in) noexcept -> void;
     auto transition_state_reorg(Message&& in) noexcept -> void;
-    auto work() noexcept -> bool;
+    auto transition_state_shutdown(Message&& in) noexcept -> void;
+    [[noreturn]] auto work() noexcept -> bool;
 
     Imp(const api::Session& api,
         const node::internal::Network& node,
@@ -177,7 +197,6 @@ private:
         const node::internal::Mempool& mempool,
         const network::zeromq::BatchID batch,
         const Type chain,
-        const std::string_view shutdown,
         const std::string_view toParent,
         CString&& toChildren,
         CString&& fromChildren,

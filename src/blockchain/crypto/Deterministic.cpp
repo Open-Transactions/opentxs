@@ -289,33 +289,41 @@ auto Deterministic::confirm(
     const Subchain type,
     const Bip32Index index) noexcept -> void
 {
-    try {
-        auto& used = used_.at(type);
+    const auto checkUsed = [&] {
+        try {
+            auto& used = used_.at(type);
 
-        if (index < used) { return; }
+            if (index < used) { return; }
 
-        static const auto blank = api_.Factory().Identifier();
+            static const auto blank = api_.Factory().Identifier();
 
-        for (auto i{index}; i > used; --i) {
-            const auto& element = this->element(lock, type, i - 1u);
+            for (auto i{index}; i > used; --i) {
+                const auto& element = this->element(lock, type, i - 1u);
 
-            if (Status::Used != element.Internal().IsAvailable(blank, "")) {
-                return;
+                if (Status::Used != element.Internal().IsAvailable(blank, "")) {
+                    return;
+                }
             }
-        }
 
-        for (auto i{index}; i < generated_.at(type); ++i) {
-            const auto& element = this->element(lock, type, i);
+            for (auto i{index}; i < generated_.at(type); ++i) {
+                const auto& element = this->element(lock, type, i);
 
-            if (Status::Used == element.Internal().IsAvailable(blank, "")) {
-                used = std::max(used, i + 1u);
-            } else {
+                if (Status::Used == element.Internal().IsAvailable(blank, "")) {
+                    used = std::max(used, i + 1u);
+                } else {
 
-                return;
+                    return;
+                }
             }
+        } catch (...) {
+            LogError()(OT_PRETTY_CLASS())("invalid subchain or index").Flush();
         }
-    } catch (...) {
-    }
+    };
+    checkUsed();
+    auto generated = Batch{};
+    const auto reason = api_.Factory().PasswordPrompt(
+        "Generate account keys for wallet scanning.");
+    check_lookahead(lock, type, generated, reason);
 }
 
 auto Deterministic::element(

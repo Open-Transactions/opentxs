@@ -12,7 +12,7 @@
 #include "internal/blockchain/database/common/Common.hpp"
 #include "opentxs/Types.hpp"
 #include "opentxs/api/session/Client.hpp"
-#include "opentxs/blockchain/Blockchain.hpp"
+#include "opentxs/blockchain/block/Types.hpp"
 #include "serialization/protobuf/BlockchainBlockHeader.pb.h"
 #include "util/LMDB.hpp"
 

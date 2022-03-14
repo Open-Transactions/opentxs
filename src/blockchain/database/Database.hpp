@@ -31,12 +31,12 @@
 #include "internal/blockchain/database/common/Common.hpp"
 #include "internal/blockchain/node/Node.hpp"
 #include "opentxs/Types.hpp"
-#include "opentxs/blockchain/Blockchain.hpp"
 #include "opentxs/blockchain/BlockchainType.hpp"
-#include "opentxs/blockchain/FilterType.hpp"
-#include "opentxs/blockchain/GCS.hpp"
 #include "opentxs/blockchain/Types.hpp"
+#include "opentxs/blockchain/bitcoin/cfilter/FilterType.hpp"
+#include "opentxs/blockchain/bitcoin/cfilter/GCS.hpp"
 #include "opentxs/blockchain/block/Outpoint.hpp"
+#include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/blockchain/block/bitcoin/Header.hpp"
 #include "opentxs/blockchain/block/bitcoin/Input.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
@@ -222,12 +222,12 @@ public:
     {
         return wallet_.CancelProposal(id);
     }
-    auto FilterHeaderTip(const filter::Type type) const noexcept
+    auto FilterHeaderTip(const cfilter::Type type) const noexcept
         -> block::Position final
     {
         return filters_.CurrentHeaderTip(type);
     }
-    auto FilterTip(const filter::Type type) const noexcept
+    auto FilterTip(const cfilter::Type type) const noexcept
         -> block::Position final
     {
         return filters_.CurrentTip(type);
@@ -352,12 +352,12 @@ public:
     {
         return headers_.HaveCheckpoint();
     }
-    auto HaveFilter(const filter::Type type, const block::Hash& block)
+    auto HaveFilter(const cfilter::Type type, const block::Hash& block)
         const noexcept -> bool final
     {
         return filters_.HaveFilter(type, block);
     }
-    auto HaveFilterHeader(const filter::Type type, const block::Hash& block)
+    auto HaveFilterHeader(const cfilter::Type type, const block::Hash& block)
         const noexcept -> bool final
     {
         return filters_.HaveFilterHeader(type, block);
@@ -374,17 +374,17 @@ public:
     {
         return headers_.IsSibling(hash);
     }
-    auto LoadFilter(const filter::Type type, const ReadView block)
-        const noexcept -> std::unique_ptr<const GCS> final
+    auto LoadFilter(const cfilter::Type type, const ReadView block)
+        const noexcept -> std::unique_ptr<const blockchain::GCS> final
     {
         return filters_.LoadFilter(type, block);
     }
-    auto LoadFilterHash(const filter::Type type, const ReadView block)
+    auto LoadFilterHash(const cfilter::Type type, const ReadView block)
         const noexcept -> Hash final
     {
         return filters_.LoadFilterHash(type, block);
     }
-    auto LoadFilterHeader(const filter::Type type, const ReadView block)
+    auto LoadFilterHeader(const cfilter::Type type, const ReadView block)
         const noexcept -> Hash final
     {
         return filters_.LoadFilterHeader(type, block);
@@ -450,12 +450,12 @@ public:
         return blocks_.SetTip(position);
     }
     auto SetFilterHeaderTip(
-        const filter::Type type,
+        const cfilter::Type type,
         const block::Position& position) const noexcept -> bool final
     {
         return filters_.SetHeaderTip(type, position);
     }
-    auto SetFilterTip(const filter::Type type, const block::Position& position)
+    auto SetFilterTip(const cfilter::Type type, const block::Position& position)
         const noexcept -> bool final
     {
         return filters_.SetTip(type, position);
@@ -474,13 +474,13 @@ public:
         return lmdb_.TransactionRW();
     }
     auto StoreFilters(
-        const filter::Type type,
+        const cfilter::Type type,
         UnallocatedVector<Filter> filters) const noexcept -> bool final
     {
         return filters_.StoreFilters(type, std::move(filters));
     }
     auto StoreFilters(
-        const filter::Type type,
+        const cfilter::Type type,
         const UnallocatedVector<Header>& headers,
         const UnallocatedVector<Filter>& filters,
         const block::Position& tip) const noexcept -> bool final
@@ -488,7 +488,7 @@ public:
         return filters_.StoreFilters(type, headers, filters, tip);
     }
     auto StoreFilterHeaders(
-        const filter::Type type,
+        const cfilter::Type type,
         const ReadView previous,
         const UnallocatedVector<Header> headers) const noexcept -> bool final
     {
@@ -550,7 +550,7 @@ public:
         const node::internal::Network& network,
         const database::common::Database& common,
         const blockchain::Type chain,
-        const blockchain::filter::Type filter) noexcept;
+        const blockchain::cfilter::Type filter) noexcept;
 
     ~Database() final = default;
 

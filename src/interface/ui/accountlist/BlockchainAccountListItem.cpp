@@ -8,8 +8,8 @@
 #include "interface/ui/accountlist/BlockchainAccountListItem.hpp"  // IWYU pragma: associated
 
 #include <memory>
+#include <string_view>
 
-#include "opentxs/blockchain/Blockchain.hpp"
 #include "opentxs/blockchain/Types.hpp"
 
 namespace opentxs::factory
@@ -38,7 +38,7 @@ BlockchainAccountListItem::BlockchainAccountListItem(
     CustomData& custom) noexcept
     : AccountListItem(parent, api, rowID, sortKey, custom)
     , chain_(UnitToBlockchain(unit_))
-    , notary_name_(blockchain::DisplayString(chain_))
+    , notary_name_(print(chain_))
 {
 }
 

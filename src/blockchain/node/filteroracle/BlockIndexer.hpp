@@ -23,9 +23,10 @@
 #include "internal/blockchain/Blockchain.hpp"
 #include "internal/blockchain/node/Node.hpp"
 #include "opentxs/api/session/Session.hpp"
-#include "opentxs/blockchain/Blockchain.hpp"
 #include "opentxs/blockchain/BlockchainType.hpp"
-#include "opentxs/blockchain/FilterType.hpp"
+#include "opentxs/blockchain/Types.hpp"
+#include "opentxs/blockchain/bitcoin/cfilter/FilterType.hpp"
+#include "opentxs/blockchain/bitcoin/cfilter/Types.hpp"
 #include "opentxs/blockchain/block/bitcoin/Block.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/util/Container.hpp"
@@ -84,8 +85,8 @@ namespace opentxs::blockchain::node::implementation
 using BlockDMFilter = download::Manager<
     FilterOracle::BlockIndexer,
     std::shared_ptr<const block::bitcoin::Block>,
-    filter::pHeader,
-    filter::Type>;
+    cfilter::pHeader,
+    cfilter::Type>;
 using BlockWorkerFilter = Worker<FilterOracle::BlockIndexer, api::Session>;
 
 class FilterOracle::BlockIndexer : public BlockDMFilter,
@@ -102,7 +103,7 @@ public:
         const internal::Network& node,
         FilterOracle& parent,
         const blockchain::Type chain,
-        const filter::Type type,
+        const cfilter::Type type,
         const UnallocatedCString& shutdown,
         const NotifyCallback& notify) noexcept;
 
@@ -118,7 +119,7 @@ private:
     const internal::Network& node_;
     FilterOracle& parent_;
     const blockchain::Type chain_;
-    const filter::Type type_;
+    const cfilter::Type type_;
     const NotifyCallback& notify_;
     JobCounter job_counter_;
 
@@ -128,7 +129,7 @@ private:
         UnallocatedVector<BlockIndexerData>& cache) const noexcept -> bool;
     auto check_task(TaskType&) const noexcept -> void {}
     auto trigger_state_machine() const noexcept -> void { trigger(); }
-    auto update_tip(const Position& position, const filter::pHeader&)
+    auto update_tip(const Position& position, const cfilter::pHeader&)
         const noexcept -> void;
 
     auto download() noexcept -> void;
@@ -144,8 +145,8 @@ struct FilterOracle::BlockIndexerData {
     using Task = FilterOracle::BlockIndexer::BatchType::TaskType;
 
     const Task& incoming_data_;
-    const filter::Type type_;
-    filter::pHash filter_hash_;
+    const cfilter::Type type_;
+    cfilter::pHash filter_hash_;
     internal::FilterDatabase::Filter& filter_data_;
     internal::FilterDatabase::Header& header_data_;
     Outstanding& job_counter_;
@@ -153,7 +154,7 @@ struct FilterOracle::BlockIndexerData {
     BlockIndexerData(
         OTData blank,
         const Task& data,
-        const filter::Type type,
+        const cfilter::Type type,
         internal::FilterDatabase::Filter& filter,
         internal::FilterDatabase::Header& header,
         Outstanding& jobCounter) noexcept

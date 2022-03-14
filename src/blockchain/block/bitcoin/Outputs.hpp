@@ -14,8 +14,8 @@
 #include "internal/blockchain/block/Block.hpp"
 #include "internal/blockchain/block/bitcoin/Bitcoin.hpp"
 #include "opentxs/Types.hpp"
-#include "opentxs/blockchain/Blockchain.hpp"
 #include "opentxs/blockchain/Types.hpp"
+#include "opentxs/blockchain/bitcoin/cfilter/Types.hpp"
 #include "opentxs/blockchain/block/bitcoin/Output.hpp"
 #include "opentxs/blockchain/block/bitcoin/Outputs.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
@@ -70,11 +70,11 @@ public:
         return std::make_unique<Outputs>(*this);
     }
     auto end() const noexcept -> const_iterator final { return cend(); }
-    auto ExtractElements(const filter::Type style) const noexcept
+    auto ExtractElements(const cfilter::Type style) const noexcept
         -> UnallocatedVector<Space> final;
     auto FindMatches(
         const ReadView txid,
-        const filter::Type type,
+        const cfilter::Type type,
         const ParsedPatterns& elements) const noexcept -> Matches final;
     auto GetPatterns() const noexcept -> UnallocatedVector<PatternID> final;
     auto Keys() const noexcept -> UnallocatedVector<crypto::Key> final;

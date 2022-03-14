@@ -114,7 +114,7 @@ auto Outputs::clone(const OutputList& rhs) noexcept -> OutputList
     return output;
 }
 
-auto Outputs::ExtractElements(const filter::Type style) const noexcept
+auto Outputs::ExtractElements(const cfilter::Type style) const noexcept
     -> UnallocatedVector<Space>
 {
     auto output = UnallocatedVector<Space>{};
@@ -137,7 +137,7 @@ auto Outputs::ExtractElements(const filter::Type style) const noexcept
 
 auto Outputs::FindMatches(
     const ReadView txid,
-    const filter::Type type,
+    const cfilter::Type type,
     const ParsedPatterns& patterns) const noexcept -> Matches
 {
     auto output = Matches{};

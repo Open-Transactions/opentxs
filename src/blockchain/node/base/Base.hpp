@@ -25,12 +25,13 @@
 #include "opentxs/Types.hpp"
 #include "opentxs/Version.hpp"
 #include "opentxs/api/session/Client.hpp"
-#include "opentxs/blockchain/Blockchain.hpp"
 #include "opentxs/blockchain/BlockchainType.hpp"
-#include "opentxs/blockchain/FilterType.hpp"
 #include "opentxs/blockchain/Types.hpp"
+#include "opentxs/blockchain/bitcoin/cfilter/FilterType.hpp"
+#include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/blockchain/node/HeaderOracle.hpp"
 #include "opentxs/blockchain/node/Manager.hpp"
+#include "opentxs/blockchain/node/Types.hpp"
 #include "opentxs/blockchain/node/Wallet.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/core/Data.hpp"
@@ -230,6 +231,7 @@ public:
     {
         return signal_shutdown();
     }
+    auto StartWallet() noexcept -> void final;
     auto Wallet() const noexcept -> const node::Wallet& final
     {
         return wallet_;
@@ -238,7 +240,7 @@ public:
     ~Base() override;
 
 private:
-    const filter::Type filter_type_;
+    const cfilter::Type filter_type_;
     opentxs::internal::ShutdownSender shutdown_sender_;
     std::unique_ptr<blockchain::internal::Database> database_p_;
     const node::internal::Config& config_;

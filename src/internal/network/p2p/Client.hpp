@@ -9,7 +9,6 @@
 
 #include <string_view>
 
-#include "opentxs/blockchain/Blockchain.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/WorkType.hpp"
 #include "util/Work.hpp"

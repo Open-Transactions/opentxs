@@ -16,6 +16,7 @@
 #include "internal/blockchain/Blockchain.hpp"
 #include "internal/blockchain/Params.hpp"
 #include "internal/util/LogMacros.hpp"
+#include "opentxs/blockchain/Blockchain.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Pimpl.hpp"
@@ -24,7 +25,7 @@ namespace opentxs::blockchain::p2p::bitcoin::message
 {
 FilterPrefixBasic::FilterPrefixBasic(
     const blockchain::Type chain,
-    const filter::Type type,
+    const cfilter::Type type,
     const block::Hash& hash) noexcept(false)
     : type_(blockchain::internal::Serialize(chain, type))
     , hash_()
@@ -45,22 +46,22 @@ FilterPrefixBasic::FilterPrefixBasic() noexcept
     static_assert(33 == sizeof(FilterPrefixBasic));
 }
 
-auto FilterPrefixBasic::Hash() const noexcept -> filter::pHash
+auto FilterPrefixBasic::Hash() const noexcept -> cfilter::pHash
 {
     return Data::Factory(hash_.data(), hash_.size());
 }
 
 auto FilterPrefixBasic::Type(const blockchain::Type chain) const noexcept
-    -> filter::Type
+    -> cfilter::Type
 {
     return blockchain::internal::Deserialize(chain, type_.value());
 }
 
 FilterPrefixChained::FilterPrefixChained(
     const blockchain::Type chain,
-    const filter::Type type,
+    const cfilter::Type type,
     const block::Hash& stop,
-    const filter::Header& previous) noexcept(false)
+    const cfilter::Header& previous) noexcept(false)
     : type_(blockchain::internal::Serialize(chain, type))
     , hash_()
     , previous_()
@@ -87,7 +88,7 @@ FilterPrefixChained::FilterPrefixChained() noexcept
     static_assert(65 == sizeof(FilterPrefixChained));
 }
 
-auto FilterPrefixChained::Previous() const noexcept -> filter::pHeader
+auto FilterPrefixChained::Previous() const noexcept -> cfilter::pHeader
 {
     return Data::Factory(previous_.data(), previous_.size());
 }
@@ -98,16 +99,16 @@ auto FilterPrefixChained::Stop() const noexcept -> block::pHash
 }
 
 auto FilterPrefixChained::Type(const blockchain::Type chain) const noexcept
-    -> filter::Type
+    -> cfilter::Type
 {
     return blockchain::internal::Deserialize(chain, type_.value());
 }
 
 FilterRequest::FilterRequest(
     const blockchain::Type chain,
-    const filter::Type type,
+    const cfilter::Type type,
     const block::Height start,
-    const filter::Hash& stop) noexcept(false)
+    const cfilter::Hash& stop) noexcept(false)
     : type_(blockchain::internal::Serialize(chain, type))
     , start_(static_cast<std::uint32_t>(start))
     , stop_()
@@ -137,13 +138,13 @@ auto FilterRequest::Start() const noexcept -> block::Height
     return start_.value();
 }
 
-auto FilterRequest::Stop() const noexcept -> filter::pHash
+auto FilterRequest::Stop() const noexcept -> cfilter::pHash
 {
     return Data::Factory(stop_.data(), stop_.size());
 }
 
 auto FilterRequest::Type(const blockchain::Type chain) const noexcept
-    -> filter::Type
+    -> cfilter::Type
 {
     return blockchain::internal::Deserialize(chain, type_.value());
 }

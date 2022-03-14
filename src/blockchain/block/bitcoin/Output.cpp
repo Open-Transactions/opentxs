@@ -363,7 +363,7 @@ auto Output::CalculateSize() const noexcept -> std::size_t
     });
 }
 
-auto Output::ExtractElements(const filter::Type style) const noexcept
+auto Output::ExtractElements(const cfilter::Type style) const noexcept
     -> UnallocatedVector<Space>
 {
     return script_->ExtractElements(style);
@@ -371,7 +371,7 @@ auto Output::ExtractElements(const filter::Type style) const noexcept
 
 auto Output::FindMatches(
     const ReadView txid,
-    const filter::Type type,
+    const cfilter::Type type,
     const ParsedPatterns& patterns) const noexcept -> Matches
 {
     const auto output = block::internal::SetIntersection(

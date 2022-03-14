@@ -66,7 +66,7 @@ auto BitcoinP2PGetcfheaders(
 auto BitcoinP2PGetcfheaders(
     const api::Session& api,
     const blockchain::Type network,
-    const blockchain::filter::Type type,
+    const blockchain::cfilter::Type type,
     const blockchain::block::Height start,
     const blockchain::block::Hash& stop)
     -> blockchain::p2p::bitcoin::message::internal::Getcfheaders*
@@ -83,9 +83,9 @@ namespace opentxs::blockchain::p2p::bitcoin::message::implementation
 Getcfheaders::Getcfheaders(
     const api::Session& api,
     const blockchain::Type network,
-    const filter::Type type,
+    const cfilter::Type type,
     const block::Height start,
-    const filter::Hash& stop) noexcept
+    const cfilter::Hash& stop) noexcept
     : Message(api, network, bitcoin::Command::getcfheaders)
     , type_(type)
     , start_(start)
@@ -97,9 +97,9 @@ Getcfheaders::Getcfheaders(
 Getcfheaders::Getcfheaders(
     const api::Session& api,
     std::unique_ptr<Header> header,
-    const filter::Type type,
+    const cfilter::Type type,
     const block::Height start,
-    const filter::Hash& stop) noexcept
+    const cfilter::Hash& stop) noexcept
     : Message(api, std::move(header))
     , type_(type)
     , start_(start)

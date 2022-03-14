@@ -18,6 +18,7 @@
 #include "opentxs/Types.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
+#include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/bitcoin/Block.hpp"
 #include "opentxs/blockchain/node/BlockOracle.hpp"
 #include "opentxs/core/Data.hpp"
@@ -293,8 +294,8 @@ auto BlockOracle::Cache::StateMachine() const noexcept -> bool
 
     if (false == running_) { return false; }
 
-    LogVerbose()(OT_PRETTY_CLASS())(DisplayString(chain_))(
-        " download queue contains ")(pending_.size())(" blocks.")
+    LogVerbose()(OT_PRETTY_CLASS())(print(chain_))(" download queue contains ")(
+        pending_.size())(" blocks.")
         .Flush();
     auto blockList = UnallocatedVector<ReadView>{};
     blockList.reserve(pending_.size());
@@ -307,15 +308,15 @@ auto BlockOracle::Cache::StateMachine() const noexcept -> bool
         const auto timeout = download_timeout_ <= elapsed;
 
         if (timeout || (false == queued)) {
-            LogVerbose()(OT_PRETTY_CLASS())("Requesting ")(
-                DisplayString(chain_))(" block ")(hash->asHex())(" from peers")
+            LogVerbose()(OT_PRETTY_CLASS())("Requesting ")(print(chain_))(
+                " block ")(hash->asHex())(" from peers")
                 .Flush();
             blockList.emplace_back(hash->Bytes());
             queued = true;
             time = now;
         } else {
             LogVerbose()(OT_PRETTY_CLASS())(elapsed)(" elapsed waiting for ")(
-                DisplayString(chain_))(" block ")(hash->asHex())
+                print(chain_))(" block ")(hash->asHex())
                 .Flush();
         }
     }

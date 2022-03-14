@@ -44,8 +44,10 @@
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/blockchain/BlockchainType.hpp"
-#include "opentxs/blockchain/FilterType.hpp"
-#include "opentxs/blockchain/GCS.hpp"
+#include "opentxs/blockchain/Types.hpp"
+#include "opentxs/blockchain/bitcoin/cfilter/FilterType.hpp"
+#include "opentxs/blockchain/bitcoin/cfilter/GCS.hpp"
+#include "opentxs/blockchain/bitcoin/cfilter/Types.hpp"
 #include "opentxs/blockchain/block/Header.hpp"
 #include "opentxs/blockchain/block/bitcoin/Block.hpp"
 #include "opentxs/blockchain/block/bitcoin/Header.hpp"
@@ -424,7 +426,8 @@ auto Peer::process_addr(
             payload.size())};
 
     if (false == bool(pMessage)) {
-        LogError()(OT_PRETTY_CLASS())("Failed to decode message payload")
+        LogError()(OT_PRETTY_CLASS())("failed to decode ")(
+            display_chain_)(" message payload")
             .Flush();
 
         return;
@@ -502,7 +505,8 @@ auto Peer::process_blocktxn(
             payload.size())};
 
     if (false == bool(pMessage)) {
-        LogError()(OT_PRETTY_CLASS())("Failed to decode message payload")
+        LogError()(OT_PRETTY_CLASS())("failed to decode ")(
+            display_chain_)(" message payload")
             .Flush();
 
         return;
@@ -524,7 +528,8 @@ auto Peer::process_cfcheckpt(
             payload.size())};
 
     if (false == bool(pMessage)) {
-        LogError()(OT_PRETTY_CLASS())("Failed to decode message payload")
+        LogError()(OT_PRETTY_CLASS())("failed to decode ")(
+            display_chain_)(" message payload")
             .Flush();
 
         return;
@@ -556,7 +561,8 @@ auto Peer::process_cfheaders(
             payload.size())};
 
     if (false == bool(pMessage)) {
-        LogError()(OT_PRETTY_CLASS())("Failed to decode message payload")
+        LogError()(OT_PRETTY_CLASS())("failed to decode ")(
+            display_chain_)(" message payload")
             .Flush();
 
         return;
@@ -719,7 +725,8 @@ auto Peer::process_cmpctblock(
             payload.size())};
 
     if (false == bool(pMessage)) {
-        LogError()(OT_PRETTY_CLASS())("Failed to decode message payload")
+        LogError()(OT_PRETTY_CLASS())("failed to decode ")(
+            display_chain_)(" message payload")
             .Flush();
 
         return;
@@ -741,7 +748,8 @@ auto Peer::process_feefilter(
             payload.size())};
 
     if (false == bool(pMessage)) {
-        LogError()(OT_PRETTY_CLASS())("Failed to decode message payload")
+        LogError()(OT_PRETTY_CLASS())("failed to decode ")(
+            display_chain_)(" message payload")
             .Flush();
 
         return;
@@ -763,7 +771,8 @@ auto Peer::process_filteradd(
             payload.size())};
 
     if (false == bool(pMessage)) {
-        LogError()(OT_PRETTY_CLASS())("Failed to decode message payload")
+        LogError()(OT_PRETTY_CLASS())("failed to decode ")(
+            display_chain_)(" message payload")
             .Flush();
 
         return;
@@ -780,7 +789,8 @@ auto Peer::process_filterclear(
         factory::BitcoinP2PFilterclear(api_, std::move(header))};
 
     if (false == bool(pMessage)) {
-        LogError()(OT_PRETTY_CLASS())("Failed to decode message payload")
+        LogError()(OT_PRETTY_CLASS())("failed to decode ")(
+            display_chain_)(" message payload")
             .Flush();
 
         return;
@@ -802,7 +812,8 @@ auto Peer::process_filterload(
             payload.size())};
 
     if (false == bool(pMessage)) {
-        LogError()(OT_PRETTY_CLASS())("Failed to decode message payload")
+        LogError()(OT_PRETTY_CLASS())("failed to decode ")(
+            display_chain_)(" message payload")
             .Flush();
 
         return;
@@ -819,7 +830,8 @@ auto Peer::process_getaddr(
         factory::BitcoinP2PGetaddr(api_, std::move(header))};
 
     if (false == bool(pMessage)) {
-        LogError()(OT_PRETTY_CLASS())("Failed to decode message payload")
+        LogError()(OT_PRETTY_CLASS())("failed to decode ")(
+            display_chain_)(" message payload")
             .Flush();
 
         return;
@@ -841,7 +853,8 @@ auto Peer::process_getblocks(
             payload.size())};
 
     if (false == bool(pMessage)) {
-        LogError()(OT_PRETTY_CLASS())("Failed to decode message payload")
+        LogError()(OT_PRETTY_CLASS())("failed to decode ")(
+            display_chain_)(" message payload")
             .Flush();
 
         return;
@@ -863,7 +876,8 @@ auto Peer::process_getblocktxn(
             payload.size())};
 
     if (false == bool(pMessage)) {
-        LogError()(OT_PRETTY_CLASS())("Failed to decode message payload")
+        LogError()(OT_PRETTY_CLASS())("failed to decode ")(
+            display_chain_)(" message payload")
             .Flush();
 
         return;
@@ -885,7 +899,8 @@ auto Peer::process_getcfcheckpt(
             payload.size())};
 
     if (false == bool(pMessage)) {
-        LogError()(OT_PRETTY_CLASS())("Failed to decode message payload")
+        LogError()(OT_PRETTY_CLASS())("failed to decode ")(
+            display_chain_)(" message payload")
             .Flush();
 
         return;
@@ -907,7 +922,8 @@ auto Peer::process_getcfheaders(
             payload.size())};
 
     if (false == bool(pIn)) {
-        LogError()(OT_PRETTY_CLASS())("Failed to decode message payload")
+        LogError()(OT_PRETTY_CLASS())("failed to decode ")(
+            display_chain_)(" message payload")
             .Flush();
 
         return;
@@ -979,7 +995,8 @@ auto Peer::process_getcfilters(
             payload.size())};
 
     if (false == bool(pMessage)) {
-        LogError()(OT_PRETTY_CLASS())("Failed to decode message payload")
+        LogError()(OT_PRETTY_CLASS())("failed to decode ")(
+            display_chain_)(" message payload")
             .Flush();
 
         return;
@@ -1087,7 +1104,8 @@ auto Peer::process_getdata(
             payload.size())};
 
     if (false == bool(pMessage)) {
-        LogError()(OT_PRETTY_CLASS())("Failed to decode message payload")
+        LogError()(OT_PRETTY_CLASS())("failed to decode ")(
+            display_chain_)(" message payload")
             .Flush();
 
         return;
@@ -1198,7 +1216,8 @@ auto Peer::process_getheaders(
             payload.size())};
 
     if (false == bool(pIn)) {
-        LogError()(OT_PRETTY_CLASS())("Failed to decode message payload")
+        LogError()(OT_PRETTY_CLASS())("failed to decode ")(
+            display_chain_)(" message payload")
             .Flush();
 
         return;
@@ -1334,7 +1353,8 @@ auto Peer::process_inv(
             payload.size())};
 
     if (false == bool(pMessage)) {
-        LogError()(OT_PRETTY_CLASS())("Failed to decode message payload")
+        LogError()(OT_PRETTY_CLASS())("failed to decode ")(
+            display_chain_)(" message payload")
             .Flush();
 
         return;
@@ -1402,7 +1422,8 @@ auto Peer::process_mempool(
         factory::BitcoinP2PMempool(api_, std::move(header))};
 
     if (false == bool(pMessage)) {
-        LogError()(OT_PRETTY_CLASS())("Failed to decode message payload")
+        LogError()(OT_PRETTY_CLASS())("failed to decode ")(
+            display_chain_)(" message payload")
             .Flush();
 
         return;
@@ -1424,7 +1445,8 @@ auto Peer::process_merkleblock(
             payload.size())};
 
     if (false == bool(pMessage)) {
-        LogError()(OT_PRETTY_CLASS())("Failed to decode message payload")
+        LogError()(OT_PRETTY_CLASS())("failed to decode ")(
+            display_chain_)(" message payload")
             .Flush();
 
         return;
@@ -1515,7 +1537,8 @@ auto Peer::process_notfound(
             payload.size())};
 
     if (false == bool(pMessage)) {
-        LogError()(OT_PRETTY_CLASS())("Failed to decode message payload")
+        LogError()(OT_PRETTY_CLASS())("failed to decode ")(
+            display_chain_)(" message payload")
             .Flush();
 
         return;
@@ -1537,7 +1560,8 @@ auto Peer::process_ping(
             payload.size())};
 
     if (false == bool(pMessage)) {
-        LogError()(OT_PRETTY_CLASS())("Failed to decode message payload")
+        LogError()(OT_PRETTY_CLASS())("failed to decode ")(
+            display_chain_)(" message payload")
             .Flush();
 
         return;
@@ -1568,7 +1592,8 @@ auto Peer::process_pong(
             payload.size())};
 
     if (false == bool(pMessage)) {
-        LogError()(OT_PRETTY_CLASS())("Failed to decode message payload")
+        LogError()(OT_PRETTY_CLASS())("failed to decode ")(
+            display_chain_)(" message payload")
             .Flush();
 
         return;
@@ -1587,7 +1612,8 @@ auto Peer::process_reject(
         payload.size())};
 
     if (false == bool(pMessage)) {
-        LogError()(OT_PRETTY_CLASS())("Failed to decode message payload")
+        LogError()(OT_PRETTY_CLASS())("failed to decode ")(
+            display_chain_)(" message payload")
             .Flush();
 
         return;
@@ -1609,7 +1635,8 @@ auto Peer::process_sendcmpct(
             payload.size())};
 
     if (false == bool(pMessage)) {
-        LogError()(OT_PRETTY_CLASS())("Failed to decode message payload")
+        LogError()(OT_PRETTY_CLASS())("failed to decode ")(
+            display_chain_)(" message payload")
             .Flush();
 
         return;
@@ -1626,7 +1653,8 @@ auto Peer::process_sendheaders(
         factory::BitcoinP2PSendheaders(api_, std::move(header))};
 
     if (false == bool(pMessage)) {
-        LogError()(OT_PRETTY_CLASS())("Failed to decode message payload")
+        LogError()(OT_PRETTY_CLASS())("failed to decode ")(
+            display_chain_)(" message payload")
             .Flush();
 
         return;
@@ -1647,7 +1675,8 @@ auto Peer::process_tx(
         payload.size());
 
     if (false == bool(pMessage)) {
-        LogError()(OT_PRETTY_CLASS())("Failed to decode message payload")
+        LogError()(OT_PRETTY_CLASS())("failed to decode ")(
+            display_chain_)(" message payload")
             .Flush();
 
         return;
@@ -1669,7 +1698,8 @@ auto Peer::process_verack(
         factory::BitcoinP2PVerack(api_, std::move(header))};
 
     if (false == bool(pMessage)) {
-        LogError()(OT_PRETTY_CLASS())("Failed to decode message payload")
+        LogError()(OT_PRETTY_CLASS())("failed to decode ")(
+            display_chain_)(" message payload")
             .Flush();
 
         return;
@@ -1692,7 +1722,8 @@ auto Peer::process_version(
             payload.size())};
 
     if (false == bool(pVersion)) {
-        LogError()(OT_PRETTY_CLASS())("Failed to decode message payload")
+        LogError()(OT_PRETTY_CLASS())("failed to decode ")(
+            display_chain_)(" message payload")
             .Flush();
 
         return;

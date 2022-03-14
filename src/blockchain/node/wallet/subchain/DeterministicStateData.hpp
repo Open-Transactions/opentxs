@@ -16,16 +16,16 @@
 #include <utility>
 
 #include "blockchain/node/wallet/subchain/SubchainStateData.hpp"
-#include "blockchain/node/wallet/subchain/statemachine/Index.hpp"
 #include "internal/blockchain/Blockchain.hpp"
 #include "internal/blockchain/block/Block.hpp"
 #include "internal/blockchain/node/Node.hpp"
+#include "internal/blockchain/node/wallet/subchain/statemachine/Index.hpp"
 #include "internal/network/zeromq/Types.hpp"
 #include "opentxs/Types.hpp"
-#include "opentxs/blockchain/Blockchain.hpp"
-#include "opentxs/blockchain/FilterType.hpp"
 #include "opentxs/blockchain/Types.hpp"
+#include "opentxs/blockchain/bitcoin/cfilter/FilterType.hpp"
 #include "opentxs/blockchain/block/Block.hpp"
+#include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/blockchain/crypto/HD.hpp"
 #include "opentxs/blockchain/crypto/Subaccount.hpp"
 #include "opentxs/blockchain/node/BlockOracle.hpp"
@@ -36,6 +36,12 @@
 #include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
+namespace boost
+{
+template <class T>
+class shared_ptr;
+}  // namespace boost
+
 namespace opentxs  // NOLINT
 {
 // inline namespace v1
@@ -109,10 +115,9 @@ public:
         const node::internal::WalletDatabase& db,
         const node::internal::Mempool& mempool,
         const crypto::Deterministic& subaccount,
-        const filter::Type filter,
+        const cfilter::Type filter,
         const Subchain subchain,
         const network::zeromq::BatchID batch,
-        const std::string_view shutdown,
         const std::string_view fromParent,
         const std::string_view toParent,
         allocator_type alloc) noexcept;
@@ -123,46 +128,21 @@ private:
     using MatchedTransaction = std::
         pair<UnallocatedVector<Bip32Index>, const block::bitcoin::Transaction*>;
 
-    class Index final : public wallet::Index
-    {
-    public:
-        auto Do(std::optional<Bip32Index> current, Bip32Index target) noexcept
-            -> void final;
-
-        Index(
-            const crypto::Deterministic& subaccount,
-            SubchainStateData& parent,
-            Scan& scan,
-            Rescan& rescan,
-            Progress& progress) noexcept;
-
-        ~Index() final = default;
-
-    private:
-        const crypto::Deterministic& subaccount_;
-
-        auto need_index(const std::optional<Bip32Index>& current) const noexcept
-            -> std::optional<Bip32Index> final;
-    };
-
-    Index index_;
-
-    auto report_scan(const block::Position& pos) const noexcept -> void final;
-    auto type() const noexcept -> std::stringstream final;
-
-    auto get_index() noexcept -> Index& final { return index_; }
+    auto get_index(const boost::shared_ptr<const SubchainStateData>& me)
+        const noexcept -> Index final;
     auto handle_confirmed_matches(
         const block::bitcoin::Block& block,
         const block::Position& position,
-        const block::Matches& confirmed) noexcept -> void final;
+        const block::Matches& confirmed) const noexcept -> void final;
     auto handle_mempool_matches(
         const block::Matches& matches,
-        std::unique_ptr<const block::bitcoin::Transaction> tx) noexcept
+        std::unique_ptr<const block::bitcoin::Transaction> tx) const noexcept
         -> void final;
     auto process(
         const block::Match match,
         const block::bitcoin::Transaction& tx,
-        MatchedTransaction& output) noexcept -> void;
+        MatchedTransaction& output) const noexcept -> void;
+    auto ReportScan(const block::Position& pos) const noexcept -> void final;
 
     DeterministicStateData() = delete;
     DeterministicStateData(const DeterministicStateData&) = delete;

@@ -8,35 +8,35 @@
 #include <boost/smart_ptr/shared_ptr.hpp>
 #include <atomic>
 #include <condition_variable>
+#include <cstddef>
 #include <functional>
 #include <memory>
 #include <mutex>
 #include <optional>
 #include <queue>
-#include <sstream>
 #include <string_view>
 #include <tuple>
 #include <utility>
 
-#include "blockchain/node/wallet/subchain/statemachine/BlockIndex.hpp"
-#include "blockchain/node/wallet/subchain/statemachine/Mempool.hpp"
-#include "blockchain/node/wallet/subchain/statemachine/Process.hpp"
-#include "blockchain/node/wallet/subchain/statemachine/Progress.hpp"
-#include "blockchain/node/wallet/subchain/statemachine/Rescan.hpp"
-#include "blockchain/node/wallet/subchain/statemachine/Scan.hpp"
 #include "internal/blockchain/Blockchain.hpp"
 #include "internal/blockchain/block/Block.hpp"
 #include "internal/blockchain/node/Node.hpp"
 #include "internal/blockchain/node/wallet/Types.hpp"
 #include "internal/blockchain/node/wallet/subchain/Subchain.hpp"
+#include "internal/blockchain/node/wallet/subchain/statemachine/Index.hpp"
+#include "internal/blockchain/node/wallet/subchain/statemachine/Process.hpp"
+#include "internal/blockchain/node/wallet/subchain/statemachine/Progress.hpp"
+#include "internal/blockchain/node/wallet/subchain/statemachine/Rescan.hpp"
+#include "internal/blockchain/node/wallet/subchain/statemachine/Scan.hpp"
+#include "internal/blockchain/node/wallet/subchain/statemachine/Types.hpp"
 #include "internal/network/zeromq/Types.hpp"
 #include "opentxs/Types.hpp"
-#include "opentxs/blockchain/Blockchain.hpp"
 #include "opentxs/blockchain/BlockchainType.hpp"
-#include "opentxs/blockchain/FilterType.hpp"
-#include "opentxs/blockchain/GCS.hpp"
 #include "opentxs/blockchain/Types.hpp"
+#include "opentxs/blockchain/bitcoin/cfilter/FilterType.hpp"
+#include "opentxs/blockchain/bitcoin/cfilter/GCS.hpp"
 #include "opentxs/blockchain/block/Block.hpp"
+#include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/blockchain/block/bitcoin/Script.hpp"
 #include "opentxs/blockchain/crypto/Subaccount.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
@@ -122,25 +122,50 @@ public:
     using Subchain = WalletDatabase::Subchain;
     using SubchainIndex = WalletDatabase::pSubchainIndex;
 
+    static constexpr auto scan_batch_ = std::size_t{1000u};
+
     const api::Session& api_;
     const node::internal::Network& node_;
     const node::internal::WalletDatabase& db_;
     const node::internal::Mempool& mempool_oracle_;
-    const std::function<void(const Identifier&, const char*)> task_finished_;
-    const UnallocatedCString name_;
     const OTNymID owner_;
     const crypto::SubaccountType account_type_;
     const OTIdentifier id_;
     const Subchain subchain_;
     const Type chain_;
-    const filter::Type filter_type_;
+    const cfilter::Type filter_type_;
+    const CString name_;
     const SubchainIndex db_key_;
     const block::Position null_position_;
+    const block::Position genesis_;
+    const CString to_children_endpoint_;
+    const CString from_children_endpoint_;
+    const CString to_index_endpoint_;
+    const CString to_scan_endpoint_;
+    const CString to_rescan_endpoint_;
+    const CString to_process_endpoint_;
+    const CString to_progress_endpoint_;
 
-    auto Init(boost::shared_ptr<SubchainStateData> me) noexcept -> void final
-    {
-        signal_startup(me);
-    }
+    auto IndexElement(
+        const cfilter::Type type,
+        const blockchain::crypto::Element& input,
+        const Bip32Index index,
+        WalletDatabase::ElementMap& output) const noexcept -> void;
+    auto ProcessBlock(
+        const block::Position& position,
+        const block::bitcoin::Block& block) const noexcept -> void;
+    auto ProcessTransaction(
+        const block::bitcoin::Transaction& tx) const noexcept -> void;
+    virtual auto ReportScan(const block::Position& pos) const noexcept -> void;
+    auto Scan(
+        const block::Position best,
+        const block::Height stop,
+        block::Position& highestTested,
+        Vector<ScanStatus>& out) const noexcept
+        -> std::optional<block::Position>;
+    auto VerifyState(const State state) const noexcept -> void final;
+
+    auto Init(boost::shared_ptr<SubchainStateData> me) noexcept -> void final;
     auto ProcessReorg(
         const Lock& headerOracleLock,
         storage::lmdb::LMDB::Transaction& tx,
@@ -158,46 +183,20 @@ protected:
     using Targets = GCS::Targets;
     using Tested = WalletDatabase::MatchingIndices;
 
-    network::zeromq::socket::Raw& to_parent_;
-    mutable BlockIndex block_index_;
-    JobCounter jobs_;
-    Outstanding job_counter_;
-    Progress progress_;
-    Process process_;
-    Rescan rescan_;
-    Scan scan_;
-
-    auto describe() const noexcept -> UnallocatedCString;
     auto get_account_targets() const noexcept
         -> std::tuple<Patterns, UTXOs, Targets>;
     auto get_block_targets(const block::Hash& id, const UTXOs& utxos)
         const noexcept -> std::pair<Patterns, Targets>;
     auto get_block_targets(const block::Hash& id, Tested& tested) const noexcept
         -> std::tuple<Patterns, UTXOs, Targets, Patterns>;
-    auto index_element(
-        const filter::Type type,
-        const blockchain::crypto::Element& input,
-        const Bip32Index index,
-        WalletDatabase::ElementMap& output) const noexcept -> void;
-    virtual auto report_scan(const block::Position& pos) const noexcept -> void;
     auto set_key_data(block::bitcoin::Transaction& tx) const noexcept -> void;
     auto supported_scripts(const crypto::Element& element) const noexcept
         -> UnallocatedVector<ScriptForm>;
     auto translate(
         const UnallocatedVector<WalletDatabase::UTXO>& utxos,
         Patterns& outpoints) const noexcept -> void;
-    virtual auto type() const noexcept -> std::stringstream = 0;
-    auto update_scan(const block::Position& pos, bool reorg) const noexcept
-        -> void;
 
-    virtual auto get_index() noexcept -> Index& = 0;
-    virtual auto handle_confirmed_matches(
-        const block::bitcoin::Block& block,
-        const block::Position& position,
-        const block::Matches& confirmed) noexcept -> void = 0;
     virtual auto startup() noexcept -> void;
-    auto state_normal(const Work work, Message&& msg) noexcept -> void;
-    auto state_reorg(const Work work, Message&& msg) noexcept -> void;
     virtual auto work() noexcept -> bool;
 
     SubchainStateData(
@@ -206,34 +205,54 @@ protected:
         const node::internal::WalletDatabase& db,
         const node::internal::Mempool& mempool,
         const crypto::SubaccountType accountType,
-        const filter::Type filter,
+        const cfilter::Type filter,
         const Subchain subchain,
         const network::zeromq::BatchID batch,
         OTNymID&& owner,
         OTIdentifier&& id,
-        const std::string_view shutdown,
+        const std::string_view display,
         const std::string_view fromParent,
         const std::string_view toParent,
         allocator_type alloc) noexcept;
 
 private:
     friend opentxs::Actor<SubchainStateData, SubchainJobs>;
-    friend wallet::Index;
-    friend wallet::Job;
-    friend wallet::Mempool;
-    friend wallet::Process;
-    friend wallet::Progress;
-    friend wallet::Scan;
-    friend wallet::Work;
 
-    enum class State {
-        normal,
-        reorg,
+    struct ReorgData {
+        const std::size_t target_;
+        std::size_t ready_;
+        std::size_t done_;
+
+        ReorgData(std::size_t target) noexcept
+            : target_(target)
+            , ready_(0)
+            , done_(0)
+        {
+        }
     };
 
-    Mempool mempool_;
-    State state_;
+    network::zeromq::socket::Raw& to_parent_;
+    network::zeromq::socket::Raw& to_children_;
+    network::zeromq::socket::Raw& to_scan_;
+    network::zeromq::socket::Raw& to_progress_;
+    std::atomic<State> state_;
+    std::optional<ReorgData> reorg_;
+    std::optional<wallet::Progress> progress_;
+    std::optional<wallet::Rescan> rescan_;
+    std::optional<wallet::Index> index_;
+    std::optional<wallet::Process> process_;
+    std::optional<wallet::Scan> scan_;
+    boost::shared_ptr<SubchainStateData> me_;
 
+    static auto describe(
+        const blockchain::Type chain,
+        const Identifier& id,
+        const std::string_view type,
+        const Subchain subchain,
+        allocator_type alloc) noexcept -> CString;
+
+    virtual auto get_index(const boost::shared_ptr<const SubchainStateData>& me)
+        const noexcept -> Index = 0;
     auto get_targets(
         const Patterns& elements,
         const UnallocatedVector<WalletDatabase::UTXO>& utxos,
@@ -244,6 +263,15 @@ private:
         Targets& targets,
         Patterns& outpoints,
         Tested& tested) const noexcept -> void;
+    virtual auto handle_confirmed_matches(
+        const block::bitcoin::Block& block,
+        const block::Position& position,
+        const block::Matches& confirmed) const noexcept -> void = 0;
+    virtual auto handle_mempool_matches(
+        const block::Matches& matches,
+        std::unique_ptr<const block::bitcoin::Transaction> tx) const noexcept
+        -> void = 0;
+    auto reorg_children() const noexcept -> std::size_t;
 
     auto do_reorg(
         const Lock& headerOracleLock,
@@ -251,25 +279,42 @@ private:
         std::atomic_int& errors,
         const block::Position ancestor) noexcept -> void;
     auto do_shutdown() noexcept -> void;
-    auto finish_background_tasks() noexcept -> void;
-    virtual auto handle_mempool_matches(
-        const block::Matches& matches,
-        std::unique_ptr<const block::bitcoin::Transaction> tx) noexcept
-        -> void = 0;
     auto pipeline(const Work work, Message&& msg) noexcept -> void;
-    auto process_block(Message&& in) noexcept -> void;
-    auto process_block(const block::Hash& block) noexcept -> void;
-    auto process_filter(Message&& in) noexcept -> void;
-    auto process_filter(const block::Position& tip) noexcept -> void;
-    auto process_key(Message&& in) noexcept -> void;
-    auto process_job_finished(Message&& in) noexcept -> void;
-    auto process_job_finished(const Identifier& id, const char* type) noexcept
-        -> void;
-    auto process_mempool(Message&& in) noexcept -> void;
-    auto process_mempool(
-        std::shared_ptr<const block::bitcoin::Transaction> tx) noexcept -> void;
+    auto process_shutdown_begin(Message&& msg) noexcept -> void;
+    auto process_shutdown_ready(Message&& msg) noexcept -> void;
+    auto ready_for_normal() noexcept -> void;
+    auto ready_for_reorg() noexcept -> void;
+    auto state_normal(const Work work, Message&& msg) noexcept -> void;
+    auto state_post_reorg(const Work work, Message&& msg) noexcept -> void;
+    auto state_pre_reorg(const Work work, Message&& msg) noexcept -> void;
+    auto state_pre_shutdown(const Work work, Message&& msg) noexcept -> void;
+    auto state_reorg(const Work work, Message&& msg) noexcept -> void;
     auto transition_state_normal(Message&& in) noexcept -> void;
+    auto transition_state_post_reorg(Message&& in) noexcept -> void;
+    auto transition_state_pre_reorg(Message&& in) noexcept -> void;
+    auto transition_state_pre_shutdown(Message&& in) noexcept -> void;
     auto transition_state_reorg(Message&& in) noexcept -> void;
+    auto transition_state_shutdown(Message&& in) noexcept -> void;
+
+    SubchainStateData(
+        const api::Session& api,
+        const node::internal::Network& node,
+        const node::internal::WalletDatabase& db,
+        const node::internal::Mempool& mempool,
+        const crypto::SubaccountType accountType,
+        const cfilter::Type filter,
+        const Subchain subchain,
+        const network::zeromq::BatchID batch,
+        OTNymID&& owner,
+        OTIdentifier&& id,
+        const std::string_view display,
+        const std::string_view fromParent,
+        const std::string_view toParent,
+        CString&& fromChildren,
+        CString&& toChildren,
+        CString&& toScan,
+        CString&& toProgress,
+        allocator_type alloc) noexcept;
 
     SubchainStateData() = delete;
     SubchainStateData(const SubchainStateData&) = delete;

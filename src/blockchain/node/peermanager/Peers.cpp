@@ -32,6 +32,7 @@
 #include "opentxs/api/network/Network.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
+#include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/p2p/Address.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/network/asio/Endpoint.hpp"
@@ -362,9 +363,9 @@ auto PeerManager::Peers::get_dns_peer() const noexcept -> Endpoint
                 database_.AddOrUpdate(output->clone_internal());
 
                 if (previous_failure_timeout(output->ID())) {
-                    LogVerbose()(OT_PRETTY_CLASS())("Skipping ")(DisplayString(
-                        chain_))(" peer ")(output->Display())(" due to retry "
-                                                              "timeout")
+                    LogVerbose()(OT_PRETTY_CLASS())("Skipping ")(print(chain_))(
+                        " peer ")(output->Display())(" due to retry "
+                                                     "timeout")
                         .Flush();
 
                     continue;
@@ -464,8 +465,8 @@ auto PeerManager::Peers::get_preferred_peer(
     }
 
     if (output && previous_failure_timeout(output->ID())) {
-        LogVerbose()(OT_PRETTY_CLASS())("Skipping ")(DisplayString(chain_))(
-            " peer ")(output->Display())(" due to retry timeout")
+        LogVerbose()(OT_PRETTY_CLASS())("Skipping ")(print(chain_))(" peer ")(
+            output->Display())(" due to retry timeout")
             .Flush();
 
         return {};

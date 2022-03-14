@@ -12,7 +12,7 @@
 #include "blockchain/DownloadManager.hpp"
 #include "internal/blockchain/Blockchain.hpp"
 #include "internal/blockchain/node/HeaderOracle.hpp"
-#include "opentxs/blockchain/GCS.hpp"
+#include "opentxs/blockchain/bitcoin/cfilter/GCS.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/network/zeromq/Pipeline.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
@@ -27,8 +27,8 @@ namespace opentxs::blockchain::node::implementation
 using FilterDM = download::Manager<
     FilterOracle::FilterDownloader,
     std::unique_ptr<const GCS>,
-    filter::pHeader,
-    filter::Type>;
+    cfilter::pHeader,
+    cfilter::Type>;
 using FilterWorker = Worker<FilterOracle::FilterDownloader, api::Session>;
 
 class FilterOracle::FilterDownloader : public FilterDM, public FilterWorker
@@ -47,7 +47,7 @@ public:
             auto& first = hashes.front();
 
             if (first != current) {
-                auto promise = std::promise<filter::pHeader>{};
+                auto promise = std::promise<cfilter::pHeader>{};
                 auto header =
                     db_.LoadFilterHeader(type_, first.second->Bytes());
 
@@ -68,13 +68,13 @@ public:
         const HeaderOracle& header,
         const internal::Network& node,
         const blockchain::Type chain,
-        const filter::Type type,
+        const cfilter::Type type,
         const UnallocatedCString& shutdown,
         const NotifyCallback& notify) noexcept
         : FilterDM(
               [&] { return db.FilterTip(type); }(),
               [&] {
-                  auto promise = std::promise<filter::pHeader>{};
+                  auto promise = std::promise<cfilter::pHeader>{};
                   const auto tip = db.FilterTip(type);
                   promise.set_value(
                       db.LoadFilterHeader(type, tip.second->Bytes()));
@@ -105,7 +105,7 @@ private:
     const HeaderOracle& header_;
     const internal::Network& node_;
     const blockchain::Type chain_;
-    const filter::Type type_;
+    const cfilter::Type type_;
     const NotifyCallback& notify_;
 
     auto batch_ready() const noexcept -> void
@@ -130,14 +130,14 @@ private:
     }
     auto check_task(TaskType&) const noexcept -> void {}
     auto trigger_state_machine() const noexcept -> void { trigger(); }
-    auto update_tip(const Position& position, const filter::pHeader&)
+    auto update_tip(const Position& position, const cfilter::pHeader&)
         const noexcept -> void
     {
         const auto saved = db_.SetFilterTip(type_, position);
 
         OT_ASSERT(saved);
 
-        LogDetail()(DisplayString(chain_))(" cfilter chain updated to height ")(
+        LogDetail()(print(chain_))(" cfilter chain updated to height ")(
             position.first)
             .Flush();
         notify_(type_, position);
@@ -189,7 +189,7 @@ private:
 
         auto position = Position{
             body.at(1).as<block::Height>(), api_.Factory().Data(body.at(2))};
-        auto promise = std::promise<filter::pHeader>{};
+        auto promise = std::promise<cfilter::pHeader>{};
         promise.set_value(api_.Factory().Data(body.at(3)));
         Reset(position, promise.get_future());
     }

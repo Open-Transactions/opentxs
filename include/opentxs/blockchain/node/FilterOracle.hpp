@@ -7,7 +7,8 @@
 
 #include "opentxs/Version.hpp"  // IWYU pragma: associated
 
-#include "opentxs/blockchain/Blockchain.hpp"
+#include "opentxs/blockchain/bitcoin/cfilter/Types.hpp"
+#include "opentxs/blockchain/block/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
@@ -27,14 +28,14 @@ namespace opentxs::blockchain::node
 class OPENTXS_EXPORT FilterOracle
 {
 public:
-    virtual auto DefaultType() const noexcept -> filter::Type = 0;
-    virtual auto FilterTip(const filter::Type type) const noexcept
+    virtual auto DefaultType() const noexcept -> cfilter::Type = 0;
+    virtual auto FilterTip(const cfilter::Type type) const noexcept
         -> block::Position = 0;
-    virtual auto LoadFilter(const filter::Type type, const block::Hash& block)
+    virtual auto LoadFilter(const cfilter::Type type, const block::Hash& block)
         const noexcept -> std::unique_ptr<const GCS> = 0;
     virtual auto LoadFilterHeader(
-        const filter::Type type,
-        const block::Hash& block) const noexcept -> filter::pHeader = 0;
+        const cfilter::Type type,
+        const block::Hash& block) const noexcept -> cfilter::pHeader = 0;
 
     virtual ~FilterOracle() = default;
 

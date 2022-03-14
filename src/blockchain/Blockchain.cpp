@@ -26,8 +26,8 @@
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/blockchain/Blockchain.hpp"
 #include "opentxs/blockchain/BlockchainType.hpp"
-#include "opentxs/blockchain/FilterType.hpp"
 #include "opentxs/blockchain/Types.hpp"
+#include "opentxs/blockchain/bitcoin/cfilter/FilterType.hpp"
 #include "opentxs/blockchain/p2p/Types.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/display/Definition.hpp"
@@ -341,28 +341,28 @@ auto DecodeSerializedCfilter(const ReadView bytes) noexcept(false)
     return output;
 }
 
-auto DefaultFilter(const Type type) noexcept -> filter::Type
+auto DefaultFilter(const Type type) noexcept -> cfilter::Type
 {
     try {
 
         return params::Data::Chains().at(type).default_filter_type_;
     } catch (...) {
-        return filter::Type::Unknown;
+        return cfilter::Type::Unknown;
     }
 }
 
 auto Deserialize(const Type chain, const std::uint8_t type) noexcept
-    -> filter::Type
+    -> cfilter::Type
 {
     switch (type) {
         case 0: {
             return DefaultFilter(chain);
         };
         case 88: {
-            return filter::Type::ES;
+            return cfilter::Type::ES;
         }
         default: {
-            return filter::Type::Unknown;
+            return cfilter::Type::Unknown;
         }
     }
 }
@@ -430,18 +430,18 @@ auto FilterToHeader(
         api, FilterToHash(api, filter)->Bytes(), previous);
 }
 
-auto GetFilterParams(const filter::Type type) noexcept(false) -> FilterParams
+auto GetFilterParams(const cfilter::Type type) noexcept(false) -> FilterParams
 {
-    static const auto gcs_bits_ = UnallocatedMap<filter::Type, std::uint8_t>{
-        {filter::Type::Basic_BIP158, 19u},
-        {filter::Type::Basic_BCHVariant, 19u},
-        {filter::Type::ES, 29u},
+    static const auto gcs_bits_ = UnallocatedMap<cfilter::Type, std::uint8_t>{
+        {cfilter::Type::Basic_BIP158, 19u},
+        {cfilter::Type::Basic_BCHVariant, 19u},
+        {cfilter::Type::ES, 29u},
     };
     static const auto gcs_fp_rate_ =
-        UnallocatedMap<filter::Type, std::uint32_t>{
-            {filter::Type::Basic_BIP158, 784931u},
-            {filter::Type::Basic_BCHVariant, 784931u},
-            {filter::Type::ES, 803769307u},
+        UnallocatedMap<cfilter::Type, std::uint32_t>{
+            {cfilter::Type::Basic_BIP158, 784931u},
+            {cfilter::Type::Basic_BCHVariant, 784931u},
+            {cfilter::Type::ES, 803769307u},
         };
 
     return {gcs_bits_.at(type), gcs_fp_rate_.at(type)};
@@ -458,7 +458,7 @@ auto Grind(const std::function<void()> function) noexcept -> void
     for (auto& thread : threads) { thread.join(); }
 }
 
-auto Serialize(const Type chain, const filter::Type type) noexcept(false)
+auto Serialize(const Type chain, const cfilter::Type type) noexcept(false)
     -> std::uint8_t
 {
     return params::Data::Bip158().at(chain).at(type);

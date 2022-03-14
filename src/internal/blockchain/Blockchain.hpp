@@ -20,10 +20,10 @@
 #include "internal/blockchain/node/Node.hpp"
 #include "opentxs/Types.hpp"
 #include "opentxs/Version.hpp"
-#include "opentxs/blockchain/Blockchain.hpp"
 #include "opentxs/blockchain/BlockchainType.hpp"
-#include "opentxs/blockchain/FilterType.hpp"
-#include "opentxs/blockchain/Types.hpp"
+#include "opentxs/blockchain/bitcoin/bloom/Types.hpp"
+#include "opentxs/blockchain/bitcoin/cfilter/FilterType.hpp"
+#include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/display/Definition.hpp"
 #include "opentxs/util/Bytes.hpp"
@@ -175,11 +175,11 @@ struct Database : virtual public node::internal::BlockDatabase,
 
 using FilterParams = std::pair<std::uint8_t, std::uint32_t>;
 
-auto DefaultFilter(const Type type) noexcept -> filter::Type;
+auto DefaultFilter(const Type type) noexcept -> cfilter::Type;
 auto DecodeSerializedCfilter(const ReadView bytes) noexcept(false)
     -> std::pair<std::uint32_t, ReadView>;
 auto Deserialize(const Type chain, const std::uint8_t type) noexcept
-    -> filter::Type;
+    -> cfilter::Type;
 auto Deserialize(const api::Session& api, const ReadView bytes) noexcept
     -> block::Position;
 auto BlockHashToFilterKey(const ReadView hash) noexcept(false) -> ReadView;
@@ -195,9 +195,9 @@ auto FilterToHeader(
     const ReadView previous = {}) noexcept -> OTData;
 auto Format(const Type chain, const opentxs::Amount&) noexcept
     -> UnallocatedCString;
-auto GetFilterParams(const filter::Type type) noexcept(false) -> FilterParams;
+auto GetFilterParams(const cfilter::Type type) noexcept(false) -> FilterParams;
 auto Grind(const std::function<void()> function) noexcept -> void;
-auto Serialize(const Type chain, const filter::Type type) noexcept(false)
+auto Serialize(const Type chain, const cfilter::Type type) noexcept(false)
     -> std::uint8_t;
 auto Serialize(const block::Position& position) noexcept -> Space;
 auto Ticker(const Type chain) noexcept -> UnallocatedCString;
@@ -227,7 +227,7 @@ auto GCS(
     -> std::unique_ptr<blockchain::GCS>;
 auto GCS(
     const api::Session& api,
-    const blockchain::filter::Type type,
+    const blockchain::cfilter::Type type,
     const blockchain::block::Block& block) noexcept
     -> std::unique_ptr<blockchain::GCS>;
 auto GCS(const api::Session& api, const proto::GCS& serialized) noexcept
@@ -243,7 +243,7 @@ auto GCS(
     const ReadView filter) noexcept -> std::unique_ptr<blockchain::GCS>;
 auto GCS(
     const api::Session& api,
-    const blockchain::filter::Type type,
+    const blockchain::cfilter::Type type,
     const ReadView key,
     const ReadView encoded) noexcept -> std::unique_ptr<blockchain::GCS>;
 #endif  // OT_BLOCKCHAIN

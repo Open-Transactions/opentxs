@@ -18,11 +18,9 @@
 #include "opentxs/api/Factory.hpp"
 #include "opentxs/api/crypto/Symmetric.hpp"
 #include "opentxs/api/session/Factory.hpp"
-#if OT_BLOCKCHAIN
-#include "opentxs/blockchain/Blockchain.hpp"
-#endif  // OT_BLOCKCHAIN
 #include "opentxs/blockchain/BlockchainType.hpp"
 #include "opentxs/blockchain/Types.hpp"
+#include "opentxs/blockchain/block/Types.hpp"
 #if OT_BLOCKCHAIN
 #include "opentxs/blockchain/p2p/Address.hpp"
 #endif  // OT_BLOCKCHAIN

@@ -3,6 +3,8 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_include "opentxs/blockchain/block/bitcoin/Opcodes.hpp"
+
 #pragma once
 
 #include <cstddef>
@@ -12,11 +14,11 @@
 
 #include "internal/blockchain/block/bitcoin/Bitcoin.hpp"
 #include "opentxs/Types.hpp"
-#include "opentxs/blockchain/Blockchain.hpp"
 #include "opentxs/blockchain/BlockchainType.hpp"
-#include "opentxs/blockchain/FilterType.hpp"
 #include "opentxs/blockchain/Types.hpp"
+#include "opentxs/blockchain/bitcoin/cfilter/FilterType.hpp"
 #include "opentxs/blockchain/block/bitcoin/Script.hpp"
+#include "opentxs/blockchain/block/bitcoin/Types.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
@@ -71,7 +73,7 @@ public:
         return const_iterator(this, elements_.size());
     }
     auto end() const noexcept -> const_iterator final { return cend(); }
-    auto ExtractElements(const filter::Type style) const noexcept
+    auto ExtractElements(const cfilter::Type style) const noexcept
         -> UnallocatedVector<Space> final;
     auto ExtractPatterns(const api::Session& api) const noexcept
         -> UnallocatedVector<PatternID> final;

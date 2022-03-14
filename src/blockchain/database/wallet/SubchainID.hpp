@@ -9,7 +9,7 @@
 #include <optional>
 
 #include "opentxs/Types.hpp"
-#include "opentxs/blockchain/Types.hpp"
+#include "opentxs/blockchain/bitcoin/cfilter/Types.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/util/Bytes.hpp"
@@ -35,7 +35,7 @@ class SubchainID
 public:
     const Space data_;
 
-    auto FilterType() const noexcept -> filter::Type;
+    auto FilterType() const noexcept -> cfilter::Type;
     auto SubaccountID(const api::Session& api) const noexcept
         -> const Identifier&;
     auto Type() const noexcept -> crypto::Subchain;
@@ -43,7 +43,7 @@ public:
 
     SubchainID(
         const crypto::Subchain type,
-        const filter::Type filter,
+        const cfilter::Type filter,
         const VersionNumber version,
         const Identifier& subaccount) noexcept;
     SubchainID(const ReadView bytes) noexcept(false);
@@ -51,12 +51,13 @@ public:
     ~SubchainID() = default;
 
 private:
-    static constexpr auto fixed_ =
-        sizeof(crypto::Subchain) + sizeof(filter::Type) + sizeof(VersionNumber);
+    static constexpr auto fixed_ = sizeof(crypto::Subchain) +
+                                   sizeof(cfilter::Type) +
+                                   sizeof(VersionNumber);
 
     mutable std::mutex lock_;
     mutable std::optional<crypto::Subchain> subchain_;
-    mutable std::optional<filter::Type> filter_;
+    mutable std::optional<cfilter::Type> filter_;
     mutable std::optional<VersionNumber> version_;
     mutable std::optional<OTIdentifier> subaccount_;
 

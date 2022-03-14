@@ -22,9 +22,9 @@
 #include "internal/blockchain/database/Database.hpp"
 #include "internal/util/TSV.hpp"
 #include "opentxs/Types.hpp"
-#include "opentxs/blockchain/Blockchain.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/Outpoint.hpp"
+#include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/blockchain/node/TxoState.hpp"
 #include "opentxs/blockchain/node/Types.hpp"
@@ -163,6 +163,11 @@ public:
     auto GetOutput(const sLock&, const block::Outpoint& id) noexcept(false)
         -> const block::bitcoin::internal::Output&;
     auto GetOutput(const eLock&, const block::Outpoint& id) noexcept(false)
+        -> block::bitcoin::internal::Output&;
+    auto GetOutput(
+        const eLock&,
+        const SubchainID& subchain,
+        const block::Outpoint& id) noexcept(false)
         -> block::bitcoin::internal::Output&;
     auto GetPosition(const eLock&) noexcept -> const db::Position&;
     auto GetPosition(const sLock&, const block::Position& id) noexcept

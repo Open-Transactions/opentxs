@@ -38,11 +38,11 @@
 #include "internal/blockchain/node/wallet/FeeOracle.hpp"
 #include "internal/blockchain/node/wallet/Types.hpp"
 #include "opentxs/Types.hpp"
-#include "opentxs/blockchain/Blockchain.hpp"
 #include "opentxs/blockchain/BlockchainType.hpp"
-#include "opentxs/blockchain/FilterType.hpp"
 #include "opentxs/blockchain/Types.hpp"
+#include "opentxs/blockchain/bitcoin/cfilter/FilterType.hpp"
 #include "opentxs/blockchain/block/Outpoint.hpp"
+#include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/blockchain/block/bitcoin/Input.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/blockchain/node/Types.hpp"
@@ -149,7 +149,9 @@ public:
     auto Init() noexcept -> void final;
     auto Shutdown() noexcept -> std::shared_future<void> final
     {
-        return signal_shutdown();
+        process_shutdown();
+
+        return shutdown_;
     }
 
     Wallet(
@@ -174,8 +176,10 @@ private:
     wallet::FeeOracle fee_oracle_;
     wallet::Accounts accounts_;
     wallet::Proposals proposals_;
+    std::atomic_bool shutdown_sent_;
 
     auto pipeline(const zmq::Message& in) noexcept -> void;
+    auto process_shutdown() noexcept -> void;
     auto shutdown(std::promise<void>& promise) noexcept -> void;
     auto state_machine() noexcept -> bool;
 

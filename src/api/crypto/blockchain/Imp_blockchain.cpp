@@ -31,7 +31,6 @@
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/api/session/Storage.hpp"
-#include "opentxs/blockchain/Blockchain.hpp"
 #include "opentxs/blockchain/block/bitcoin/Transaction.hpp"
 #include "opentxs/blockchain/crypto/SubaccountType.hpp"
 #include "opentxs/core/Amount.hpp"
@@ -171,7 +170,7 @@ auto BlockchainImp::ActivityDescription(
         output << "Outgoing ";
     }
 
-    output << opentxs::blockchain::DisplayString(chain);
+    output << print(chain);
     output << " transaction";
 
     if (0 < names.size()) {

@@ -29,8 +29,9 @@
 #include "internal/core/Core.hpp"
 #include "opentxs/Types.hpp"
 #include "opentxs/Version.hpp"
-#include "opentxs/blockchain/Blockchain.hpp"
 #include "opentxs/blockchain/Types.hpp"
+#include "opentxs/blockchain/bitcoin/cfilter/Types.hpp"
+#include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
 #if OT_BLOCKCHAIN
 #include "opentxs/blockchain/node/BlockOracle.hpp"
@@ -203,9 +204,9 @@ using Segments = UnallocatedSet<ChainSegment>;
 using DisconnectedList = UnallocatedMultimap<block::pHash, block::pHash>;
 
 using CfheaderJob =
-    download::Batch<filter::pHash, filter::pHeader, filter::Type>;
-using CfilterJob =
-    download::Batch<std::unique_ptr<const GCS>, filter::pHeader, filter::Type>;
+    download::Batch<cfilter::pHash, cfilter::pHeader, cfilter::Type>;
+using CfilterJob = download::
+    Batch<std::unique_ptr<const GCS>, cfilter::pHeader, cfilter::Type>;
 using BlockJob =
     download::Batch<std::shared_ptr<const block::bitcoin::Block>, int>;
 }  // namespace opentxs::blockchain::node
@@ -270,41 +271,42 @@ struct Config {
 struct FilterDatabase {
     using Hash = block::pHash;
     /// block hash, filter header, filter hash
-    using Header = std::tuple<block::pHash, filter::pHeader, ReadView>;
+    using Header = std::tuple<block::pHash, cfilter::pHeader, ReadView>;
     /// block hash, filter
     using Filter = std::pair<ReadView, std::unique_ptr<const GCS>>;
 
-    virtual auto FilterHeaderTip(const filter::Type type) const noexcept
+    virtual auto FilterHeaderTip(const cfilter::Type type) const noexcept
         -> block::Position = 0;
-    virtual auto FilterTip(const filter::Type type) const noexcept
+    virtual auto FilterTip(const cfilter::Type type) const noexcept
         -> block::Position = 0;
-    virtual auto HaveFilter(const filter::Type type, const block::Hash& block)
+    virtual auto HaveFilter(const cfilter::Type type, const block::Hash& block)
         const noexcept -> bool = 0;
     virtual auto HaveFilterHeader(
-        const filter::Type type,
+        const cfilter::Type type,
         const block::Hash& block) const noexcept -> bool = 0;
-    virtual auto LoadFilter(const filter::Type type, const ReadView block)
-        const noexcept -> std::unique_ptr<const GCS> = 0;
-    virtual auto LoadFilterHash(const filter::Type type, const ReadView block)
+    virtual auto LoadFilter(const cfilter::Type type, const ReadView block)
+        const noexcept -> std::unique_ptr<const blockchain::GCS> = 0;
+    virtual auto LoadFilterHash(const cfilter::Type type, const ReadView block)
         const noexcept -> Hash = 0;
-    virtual auto LoadFilterHeader(const filter::Type type, const ReadView block)
-        const noexcept -> Hash = 0;
+    virtual auto LoadFilterHeader(
+        const cfilter::Type type,
+        const ReadView block) const noexcept -> Hash = 0;
     virtual auto SetFilterHeaderTip(
-        const filter::Type type,
+        const cfilter::Type type,
         const block::Position& position) const noexcept -> bool = 0;
     virtual auto SetFilterTip(
-        const filter::Type type,
+        const cfilter::Type type,
         const block::Position& position) const noexcept -> bool = 0;
     virtual auto StoreFilters(
-        const filter::Type type,
+        const cfilter::Type type,
         UnallocatedVector<Filter> filters) const noexcept -> bool = 0;
     virtual auto StoreFilters(
-        const filter::Type type,
+        const cfilter::Type type,
         const UnallocatedVector<Header>& headers,
         const UnallocatedVector<Filter>& filters,
         const block::Position& tip) const noexcept -> bool = 0;
     virtual auto StoreFilterHeaders(
-        const filter::Type type,
+        const cfilter::Type type,
         const ReadView previous,
         const UnallocatedVector<Header> headers) const noexcept -> bool = 0;
 
@@ -318,7 +320,7 @@ struct FilterOracle : virtual public node::FilterOracle {
     virtual auto GetHeaderJob() const noexcept -> CfheaderJob = 0;
     virtual auto Heartbeat() const noexcept -> void = 0;
     virtual auto LoadFilterOrResetTip(
-        const filter::Type type,
+        const cfilter::Type type,
         const block::Position& position) const noexcept
         -> std::unique_ptr<const GCS> = 0;
     virtual auto ProcessBlock(const block::bitcoin::Block& block) const noexcept
@@ -327,7 +329,7 @@ struct FilterOracle : virtual public node::FilterOracle {
         const block::Hash& prior,
         const UnallocatedVector<block::pHash>& hashes,
         const network::p2p::Data& data) const noexcept -> void = 0;
-    virtual auto Tip(const filter::Type type) const noexcept
+    virtual auto Tip(const cfilter::Type type) const noexcept
         -> block::Position = 0;
 
     virtual auto Start() noexcept -> void = 0;
@@ -471,6 +473,7 @@ struct Network : virtual public node::Manager {
         Heartbeat = OT_ZMQ_INTERNAL_SIGNAL + 3,
         SendToAddress = OT_ZMQ_INTERNAL_SIGNAL + 4,
         SendToPaymentCode = OT_ZMQ_INTERNAL_SIGNAL + 5,
+        StartWallet = OT_ZMQ_INTERNAL_SIGNAL + 6,
         FilterUpdate = OT_ZMQ_NEW_FILTER_SIGNAL,
         StateMachine = OT_ZMQ_STATE_MACHINE_SIGNAL,
     };
@@ -512,6 +515,7 @@ struct Network : virtual public node::Manager {
 
     virtual auto FilterOracleInternal() noexcept -> internal::FilterOracle& = 0;
     virtual auto Shutdown() noexcept -> std::shared_future<void> = 0;
+    virtual auto StartWallet() noexcept -> void = 0;
 
     ~Network() override = default;
 };

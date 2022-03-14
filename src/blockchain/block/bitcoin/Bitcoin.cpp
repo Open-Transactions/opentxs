@@ -16,6 +16,7 @@
 #include <stdexcept>
 
 #include "internal/util/LogMacros.hpp"
+#include "opentxs/blockchain/block/bitcoin/Opcodes.hpp"
 
 namespace be = boost::endian;
 

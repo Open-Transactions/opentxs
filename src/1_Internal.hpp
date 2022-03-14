@@ -9,21 +9,21 @@
 #include "opentxs/Version.hpp"  // IWYU pragma: associated
 // IWYU pragma: end_exports
 
-#define PAYMENT_CODE_VERSION 1
-#define PEER_MESSAGE_VERSION 2
-#define PEER_PAYMENT_VERSION 5
-#define PEER_CASH_VERSION 7
-#define PEER_OBJECT_PEER_REQUEST 7
-#define PEER_OBJECT_PEER_REPLY 7
-#define OT_CONTACT_VERSION 3
-#define CONTACT_CONTACT_DATA_VERSION 6
-#define MESSAGE_SEND_ERROR -1
-#define MESSAGE_NOT_SENT_NO_ERROR 0
-#define MESSAGE_SENT 1
-#define REPLY_NOT_RECEIVED -1
-#define MESSAGE_SUCCESS_FALSE 0
-#define MESSAGE_SUCCESS_TRUE 1
-#define FIRST_REQUEST_NUMBER 1
+constexpr auto PAYMENT_CODE_VERSION = 1;
+constexpr auto PEER_MESSAGE_VERSION = 2;
+constexpr auto PEER_PAYMENT_VERSION = 5;
+constexpr auto PEER_CASH_VERSION = 7;
+constexpr auto PEER_OBJECT_PEER_REQUEST = 7;
+constexpr auto PEER_OBJECT_PEER_REPLY = 7;
+constexpr auto OT_CONTACT_VERSION = 3;
+constexpr auto CONTACT_CONTACT_DATA_VERSION = 6;
+constexpr auto MESSAGE_SEND_ERROR = -1;
+constexpr auto MESSAGE_NOT_SENT_NO_ERROR = 0;
+constexpr auto MESSAGE_SENT = 1;
+constexpr auto REPLY_NOT_RECEIVED = -1;
+constexpr auto MESSAGE_SUCCESS_FALSE = 0;
+constexpr auto MESSAGE_SUCCESS_TRUE = 1;
+constexpr auto FIRST_REQUEST_NUMBER = 1;
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT

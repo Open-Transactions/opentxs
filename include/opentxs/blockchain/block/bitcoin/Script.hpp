@@ -11,7 +11,8 @@
 #include <optional>
 #include <tuple>
 
-#include "opentxs/blockchain/Blockchain.hpp"
+#include "opentxs/blockchain/bitcoin/cfilter/Types.hpp"
+#include "opentxs/blockchain/block/bitcoin/Types.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Iterator.hpp"
@@ -74,7 +75,7 @@ public:
     virtual auto cbegin() const noexcept -> const_iterator = 0;
     virtual auto cend() const noexcept -> const_iterator = 0;
     virtual auto end() const noexcept -> const_iterator = 0;
-    virtual auto ExtractElements(const filter::Type style) const noexcept
+    virtual auto ExtractElements(const cfilter::Type style) const noexcept
         -> UnallocatedVector<Space> = 0;
     virtual auto ExtractPatterns(const api::Session& api) const noexcept
         -> UnallocatedVector<PatternID> = 0;

@@ -15,7 +15,7 @@
 #include "internal/blockchain/node/Node.hpp"
 #include "opentxs/Types.hpp"
 #include "opentxs/api/session/Client.hpp"
-#include "opentxs/blockchain/Blockchain.hpp"
+#include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/util/Container.hpp"
 #include "util/LMDB.hpp"

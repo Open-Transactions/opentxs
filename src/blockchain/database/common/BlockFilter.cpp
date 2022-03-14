@@ -18,7 +18,7 @@
 #include "internal/blockchain/Blockchain.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/TSV.hpp"
-#include "opentxs/blockchain/GCS.hpp"
+#include "opentxs/blockchain/bitcoin/cfilter/GCS.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
@@ -39,7 +39,7 @@ BlockFilter::BlockFilter(
 {
 }
 
-auto BlockFilter::HaveFilter(const filter::Type type, const ReadView blockHash)
+auto BlockFilter::HaveFilter(const cfilter::Type type, const ReadView blockHash)
     const noexcept -> bool
 {
     try {
@@ -52,7 +52,7 @@ auto BlockFilter::HaveFilter(const filter::Type type, const ReadView blockHash)
 }
 
 auto BlockFilter::HaveFilterHeader(
-    const filter::Type type,
+    const cfilter::Type type,
     const ReadView blockHash) const noexcept -> bool
 {
     try {
@@ -64,7 +64,7 @@ auto BlockFilter::HaveFilterHeader(
     }
 }
 
-auto BlockFilter::LoadFilter(const filter::Type type, const ReadView blockHash)
+auto BlockFilter::LoadFilter(const cfilter::Type type, const ReadView blockHash)
     const noexcept -> std::unique_ptr<const opentxs::blockchain::GCS>
 {
     auto output = std::unique_ptr<const opentxs::blockchain::GCS>{};
@@ -95,7 +95,7 @@ auto BlockFilter::LoadFilter(const filter::Type type, const ReadView blockHash)
 }
 
 auto BlockFilter::LoadFilterHash(
-    const filter::Type type,
+    const cfilter::Type type,
     const ReadView blockHash,
     const AllocateOutput filterHash) const noexcept -> bool
 {
@@ -126,7 +126,7 @@ auto BlockFilter::LoadFilterHash(
 }
 
 auto BlockFilter::LoadFilterHeader(
-    const filter::Type type,
+    const cfilter::Type type,
     const ReadView blockHash,
     const AllocateOutput header) const noexcept -> bool
 {
@@ -160,7 +160,7 @@ auto BlockFilter::store(
     const Lock& lock,
     storage::lmdb::LMDB::Transaction& tx,
     const ReadView blockHash,
-    const filter::Type type,
+    const cfilter::Type type,
     const GCS& filter) const noexcept -> bool
 {
     try {
@@ -215,21 +215,21 @@ auto BlockFilter::store(
 }
 
 auto BlockFilter::StoreFilterHeaders(
-    const filter::Type type,
+    const cfilter::Type type,
     const UnallocatedVector<FilterHeader>& headers) const noexcept -> bool
 {
     return StoreFilters(type, headers, {});
 }
 
 auto BlockFilter::StoreFilters(
-    const filter::Type type,
+    const cfilter::Type type,
     UnallocatedVector<FilterData>& filters) const noexcept -> bool
 {
     return StoreFilters(type, {}, filters);
 }
 
 auto BlockFilter::StoreFilters(
-    const filter::Type type,
+    const cfilter::Type type,
     const UnallocatedVector<FilterHeader>& headers,
     const UnallocatedVector<FilterData>& filters) const noexcept -> bool
 {
@@ -268,17 +268,17 @@ auto BlockFilter::StoreFilters(
     return tx.Finalize(true);
 }
 
-auto BlockFilter::translate_filter(const filter::Type type) noexcept(false)
+auto BlockFilter::translate_filter(const cfilter::Type type) noexcept(false)
     -> Table
 {
     switch (type) {
-        case filter::Type::Basic_BIP158: {
+        case cfilter::Type::Basic_BIP158: {
             return FilterIndexBasic;
         }
-        case filter::Type::Basic_BCHVariant: {
+        case cfilter::Type::Basic_BCHVariant: {
             return FilterIndexBCH;
         }
-        case filter::Type::ES: {
+        case cfilter::Type::ES: {
             return FilterIndexES;
         }
         default: {
@@ -287,17 +287,17 @@ auto BlockFilter::translate_filter(const filter::Type type) noexcept(false)
     }
 }
 
-auto BlockFilter::translate_header(const filter::Type type) noexcept(false)
+auto BlockFilter::translate_header(const cfilter::Type type) noexcept(false)
     -> Table
 {
     switch (type) {
-        case filter::Type::Basic_BIP158: {
+        case cfilter::Type::Basic_BIP158: {
             return FilterHeadersBasic;
         }
-        case filter::Type::Basic_BCHVariant: {
+        case cfilter::Type::Basic_BCHVariant: {
             return FilterHeadersBCH;
         }
-        case filter::Type::ES: {
+        case cfilter::Type::ES: {
             return FilterHeadersOpentxs;
         }
         default: {

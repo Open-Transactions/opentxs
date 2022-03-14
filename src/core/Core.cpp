@@ -11,6 +11,7 @@
 #include <iosfwd>
 #include <mutex>
 #include <sstream>
+#include <string_view>
 #include <utility>
 
 #include "internal/blockchain/Params.hpp"
@@ -215,12 +216,14 @@ static auto addresstype_map() noexcept -> const AddressTypeMap&
 
 namespace opentxs
 {
-auto print(AccountType in) noexcept -> UnallocatedCString
+using namespace std::literals;
+
+auto print(AccountType in) noexcept -> std::string_view
 {
     static const auto map =
-        robin_hood::unordered_flat_map<AccountType, const char*>{
-            {AccountType::Blockchain, "blockchain"},
-            {AccountType::Custodial, "custodial"},
+        robin_hood::unordered_flat_map<AccountType, std::string_view>{
+            {AccountType::Blockchain, "blockchain"sv},
+            {AccountType::Custodial, "custodial"sv},
         };
 
     try {
@@ -228,19 +231,19 @@ auto print(AccountType in) noexcept -> UnallocatedCString
         return map.at(in);
     } catch (...) {
 
-        return "invalid";
+        return "invalid"sv;
     }
 }
 
-auto print(AddressType in) noexcept -> UnallocatedCString
+auto print(AddressType in) noexcept -> std::string_view
 {
     static const auto map =
-        robin_hood::unordered_flat_map<AddressType, const char*>{
-            {AddressType::IPV4, "ipv4"},
-            {AddressType::IPV6, "ipv6"},
-            {AddressType::Onion2, "onion"},
-            {AddressType::EEP, "eep"},
-            {AddressType::Inproc, "inproc"},
+        robin_hood::unordered_flat_map<AddressType, std::string_view>{
+            {AddressType::IPV4, "ipv4"sv},
+            {AddressType::IPV6, "ipv6"sv},
+            {AddressType::Onion2, "onion"sv},
+            {AddressType::EEP, "eep"sv},
+            {AddressType::Inproc, "inproc"sv},
         };
 
     try {
@@ -248,11 +251,11 @@ auto print(AddressType in) noexcept -> UnallocatedCString
         return map.at(in);
     } catch (...) {
 
-        return "invalid";
+        return "invalid"sv;
     }
 }
 
-auto print(UnitType in) noexcept -> UnallocatedCString
+auto print(UnitType in) noexcept -> std::string_view
 {
     return proto::TranslateItemType(translate(UnitToClaim(in)));
 }

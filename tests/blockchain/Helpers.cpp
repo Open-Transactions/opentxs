@@ -142,15 +142,15 @@ const boost::container::flat_map<ot::blockchain::Type, ChainVector>
           "09a67962e0ea1f61deb649f6bc3f4cef38c4f35504e51ec112de5c384df7ba0b8d57"
           "8a4c702b6bf11d5fac00000000",
           {
-              {ot::blockchain::filter::Type::Basic_BIP158,
+              {ot::blockchain::cfilter::Type::Basic_BIP158,
                {"014756c0",
                 "2b5adc66021d5c775f630efd91518cf6ce3e9f525bbf54d9f0d709451e305e"
                 "48"}},
-              {ot::blockchain::filter::Type::Basic_BCHVariant,
+              {ot::blockchain::cfilter::Type::Basic_BCHVariant,
                {"014756c0",
                 "2b5adc66021d5c775f630efd91518cf6ce3e9f525bbf54d9f0d709451e305e"
                 "48"}},
-              {ot::blockchain::filter::Type::ES,
+              {ot::blockchain::cfilter::Type::ES,
                {"042547f61f786604db036044c4f7f36fe0",
                 "5e0aa302450f931bc2e4fab27632231a06964277ea8dfcdd93c19149a24fe7"
                 "88"}},
@@ -166,11 +166,11 @@ const boost::container::flat_map<ot::blockchain::Type, ChainVector>
           "09a67962e0ea1f61deb649f6bc3f4cef38c4f35504e51ec112de5c384df7ba0b8d57"
           "8a4c702b6bf11d5fac00000000",
           {
-              {ot::blockchain::filter::Type::Basic_BIP158,
+              {ot::blockchain::cfilter::Type::Basic_BIP158,
                {"017fa880",
                 "9f3c30f0c37fb977cf3e1a3173c631e8ff119ad3088b6f5b2bced0802139c2"
                 "02"}},
-              {ot::blockchain::filter::Type::ES,
+              {ot::blockchain::cfilter::Type::ES,
                {"049dc75e903561289b0029337bcf4e6720",
                 "fad52acc389a391c1d6d94e8984fe77323fbda24fb31299b88635d7bee0278"
                 "e8"}},
@@ -186,11 +186,11 @@ const boost::container::flat_map<ot::blockchain::Type, ChainVector>
           "09a67962e0ea1f61deb649f6bc3f4cef38c4f35504e51ec112de5c384df7ba0b8d57"
           "8a4c702b6bf11d5fac00000000",
           {
-              {ot::blockchain::filter::Type::Basic_BIP158,
+              {ot::blockchain::cfilter::Type::Basic_BIP158,
                {"019dfca8",
                 "50b781aed7b7129012a6d20e2d040027937f3affaee573779908ebb7794558"
                 "21"}},
-              {ot::blockchain::filter::Type::ES,
+              {ot::blockchain::cfilter::Type::ES,
                {"04e2f5880d851afd74c662d38d49e29130",
                 "995cfe5d055c9158c5a388b71fb2ddbe292c9ca2d30dca91359d8cbbe4603e"
                 "02"}},
@@ -206,11 +206,11 @@ const boost::container::flat_map<ot::blockchain::Type, ChainVector>
           "09a67962e0ea1f61deb649f6bc3f4cef38c4f35504e51ec112de5c384df7ba0b8d57"
           "8a4c702b6bf11d5fac00000000",
           {
-              {ot::blockchain::filter::Type::Basic_BCHVariant,
+              {ot::blockchain::cfilter::Type::Basic_BCHVariant,
                {"017fa880",
                 "9f3c30f0c37fb977cf3e1a3173c631e8ff119ad3088b6f5b2bced0802139c2"
                 "02"}},
-              {ot::blockchain::filter::Type::ES,
+              {ot::blockchain::cfilter::Type::ES,
                {"049dc75e903561289b0029337bcf4e6720",
                 "fad52acc389a391c1d6d94e8984fe77323fbda24fb31299b88635d7bee0278"
                 "e8"}},
@@ -226,11 +226,11 @@ const boost::container::flat_map<ot::blockchain::Type, ChainVector>
           "09a67962e0ea1f61deb649f6bc3f4cef38c4f35504e51ec112de5c384df7ba0b8d57"
           "8a4c702b6bf11d5fac00000000",
           {
-              {ot::blockchain::filter::Type::Basic_BCHVariant,
+              {ot::blockchain::cfilter::Type::Basic_BCHVariant,
                {"019dfca8",
                 "50b781aed7b7129012a6d20e2d040027937f3affaee573779908ebb7794558"
                 "21"}},
-              {ot::blockchain::filter::Type::ES,
+              {ot::blockchain::cfilter::Type::ES,
                {"04e2f5880d851afd74c662d38d49e29130",
                 "995cfe5d055c9158c5a388b71fb2ddbe292c9ca2d30dca91359d8cbbe4603e"
                 "02"}},
@@ -246,11 +246,11 @@ const boost::container::flat_map<ot::blockchain::Type, ChainVector>
           "a8e4d3eb4b10f4d4604fa08dce601aaf0f470216fe1b51850b4acf21b179c45070ac"
           "7b03a9ac00000000",
           {
-              {ot::blockchain::filter::Type::Basic_BIP158,
+              {ot::blockchain::cfilter::Type::Basic_BIP158,
                {"019e8738",
                 "8aa75530308cf8247a151c37c24e7aaa281ae3b5cecedb581aacb3a0d07c24"
                 "51"}},
-              {ot::blockchain::filter::Type::ES,
+              {ot::blockchain::cfilter::Type::ES,
                {"049de896b2cc882671e81f336fdf119b00",
                 "23b8dae37cf04c8a278bd50bcbcf23a03051ea902f67c4760eb35be96d4283"
                 "20"}},
@@ -266,11 +266,11 @@ const boost::container::flat_map<ot::blockchain::Type, ChainVector>
           "a8e4d3eb4b10f4d4604fa08dce601aaf0f470216fe1b51850b4acf21b179c45070ac"
           "7b03a9ac00000000",
           {
-              {ot::blockchain::filter::Type::Basic_BIP158,
+              {ot::blockchain::cfilter::Type::Basic_BIP158,
                {"014c8c60",
                 "02d023da9d271b849f717089aad7e03a515dac982c9fb2cfd952e2ce1c6187"
                 "92"}},
-              {ot::blockchain::filter::Type::ES,
+              {ot::blockchain::cfilter::Type::ES,
                {"048b3d60cc5692c061eb30ca191005f1c0",
                 "ad242bb97aaf6a8f973dc2054d5356a4fcc87f575b29bbb3e0d953cfaedff8"
                 "c6"}},
@@ -450,11 +450,11 @@ const boost::container::flat_map<ot::blockchain::Type, ChainVector>
           "0000000000000000326a3009f91102ffff0f20f935b3001ef51ba8f24921a404bc37"
           "6a0c713274bd1cc68c2c57f66f5c0be7ca001000000000000000000000",
           {
-              {ot::blockchain::filter::Type::Basic_BIP158,
+              {ot::blockchain::cfilter::Type::Basic_BIP158,
                {"01902168",
                 "526b0656def40fcb65ef87a75337001fae57a1d17dc17e103fb536cfddedd3"
                 "6c"}},
-              {ot::blockchain::filter::Type::ES,
+              {ot::blockchain::cfilter::Type::ES,
                {"02649a42b26e818d40",
                 "155e1700eff3f9019ba1716316295a8753ec44d2a7730eee1c1c73e2b511e1"
                 "34"}},

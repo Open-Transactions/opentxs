@@ -39,7 +39,7 @@
 #include "opentxs/api/session/Endpoints.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/api/session/UI.hpp"
-#include "opentxs/blockchain/FilterType.hpp"
+#include "opentxs/blockchain/bitcoin/cfilter/FilterType.hpp"
 #include "opentxs/blockchain/block/Header.hpp"
 #include "opentxs/blockchain/block/bitcoin/Block.hpp"
 #include "opentxs/blockchain/block/bitcoin/Header.hpp"
@@ -1748,7 +1748,7 @@ auto SyncRequestor::check(const State& state, const std::size_t index) const
 auto SyncRequestor::check(const otsync::Block& block, const std::size_t index)
     const noexcept -> bool
 {
-    constexpr auto filterType{ot::blockchain::filter::Type::ES};
+    constexpr auto filterType{ot::blockchain::cfilter::Type::ES};
     const auto& chain = imp_->api_.Network().Blockchain().GetChain(test_chain_);
     const auto header =
         chain.HeaderOracle().LoadHeader(imp_->cache_.get(index).get());

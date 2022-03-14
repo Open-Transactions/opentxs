@@ -35,6 +35,7 @@ namespace opentxs::network::zeromq::context
 {
 Thread::Thread(zeromq::internal::Pool& parent) noexcept
     : parent_(parent)
+    , shutdown_(false)
     , null_(factory::ZMQSocketNull())
     , alloc_()
     , gate_()
@@ -115,7 +116,7 @@ auto Thread::Modify(SocketID socket, ModifyCallback cb) noexcept -> AsyncResult
 
 auto Thread::poll(Items& data) noexcept -> void
 {
-    if (0u == data.items_.size()) {
+    if ((0u == data.items_.size()) || shutdown_) {
         thread_.running_ = false;
 
         return;
@@ -258,7 +259,11 @@ auto Thread::run() noexcept -> void
     }
 }
 
-auto Thread::Shutdown() noexcept -> void { wait(); }
+auto Thread::Shutdown() noexcept -> void
+{
+    shutdown_ = true;
+    wait();
+}
 
 auto Thread::start() noexcept -> void
 {

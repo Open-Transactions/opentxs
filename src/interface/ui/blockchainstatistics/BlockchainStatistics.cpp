@@ -11,6 +11,7 @@
 #include <cstddef>
 #include <future>
 #include <memory>
+#include <string_view>
 
 #include "interface/ui/base/List.hpp"
 #include "internal/util/LogMacros.hpp"
@@ -20,9 +21,9 @@
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/Endpoints.hpp"
 #include "opentxs/api/session/Factory.hpp"
-#include "opentxs/blockchain/Blockchain.hpp"
 #include "opentxs/blockchain/BlockchainType.hpp"
 #include "opentxs/blockchain/Types.hpp"
+#include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/blockchain/node/BlockOracle.hpp"
 #include "opentxs/blockchain/node/FilterOracle.hpp"
 #include "opentxs/blockchain/node/HeaderOracle.hpp"
@@ -177,7 +178,7 @@ auto BlockchainStatistics::process_chain(
     BlockchainStatisticsRowID chain) noexcept -> void
 {
     auto data = custom(chain);
-    add_item(chain, blockchain::DisplayString(chain), data);
+    add_item(chain, UnallocatedCString{print(chain)}, data);
     delete_inactive(blockchain_.EnabledChains());
 }
 

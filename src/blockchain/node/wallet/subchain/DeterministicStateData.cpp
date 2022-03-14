@@ -7,9 +7,10 @@
 #include "1_Internal.hpp"  // IWYU pragma: associated
 #include "blockchain/node/wallet/subchain/DeterministicStateData.hpp"  // IWYU pragma: associated
 
+#include <boost/smart_ptr/shared_ptr.hpp>
+#include <chrono>
 #include <memory>
 #include <optional>
-#include <sstream>
 #include <string_view>
 #include <type_traits>
 #include <utility>
@@ -22,7 +23,8 @@
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
-#include "opentxs/blockchain/FilterType.hpp"
+#include "opentxs/blockchain/Types.hpp"
+#include "opentxs/blockchain/bitcoin/cfilter/FilterType.hpp"
 #include "opentxs/blockchain/block/bitcoin/Block.hpp"
 #include "opentxs/blockchain/block/bitcoin/Output.hpp"
 #include "opentxs/blockchain/block/bitcoin/Outputs.hpp"
@@ -52,10 +54,9 @@ DeterministicStateData::DeterministicStateData(
     const node::internal::WalletDatabase& db,
     const node::internal::Mempool& mempool,
     const crypto::Deterministic& subaccount,
-    const filter::Type filter,
+    const cfilter::Type filter,
     const Subchain subchain,
     const network::zeromq::BatchID batch,
-    const std::string_view shutdown,
     const std::string_view fromParent,
     const std::string_view toParent,
     allocator_type alloc) noexcept
@@ -70,19 +71,43 @@ DeterministicStateData::DeterministicStateData(
           batch,
           OTNymID{subaccount.Parent().NymID()},
           OTIdentifier{subaccount.ID()},
-          shutdown,
+          [&] {
+              using namespace std::literals;
+
+              switch (subchain) {
+                  case Subchain::Internal:
+                  case Subchain::External: {
+
+                      return "HD"sv;
+                  }
+                  case Subchain::Incoming:
+                  case Subchain::Outgoing: {
+
+                      return "payment code"sv;
+                  }
+                  default: {
+                      OT_FAIL;
+                  }
+              }
+          }(),
           fromParent,
           toParent,
           std::move(alloc))
     , subaccount_(subaccount)
-    , index_(subaccount_, *this, scan_, rescan_, progress_)
 {
+}
+
+auto DeterministicStateData::get_index(
+    const boost::shared_ptr<const SubchainStateData>& me) const noexcept
+    -> Index
+{
+    return Index::DeterministicFactory(me, *this);
 }
 
 auto DeterministicStateData::handle_confirmed_matches(
     const block::bitcoin::Block& block,
     const block::Position& position,
-    const block::Matches& confirmed) noexcept -> void
+    const block::Matches& confirmed) const noexcept -> void
 {
     const auto& [utxo, general] = confirmed;
     auto transactions = UnallocatedMap<
@@ -125,12 +150,17 @@ auto DeterministicStateData::handle_confirmed_matches(
             id_, subchain_, position, index.value(), outputs, *pTX);
 
         OT_ASSERT(updated);  // TODO handle database errors
+
+        log_(OT_PRETTY_CLASS())(name_)(
+            " finished processing confirmed transaction ")(tx.ID().asHex())
+            .Flush();
     }
 }
 
 auto DeterministicStateData::handle_mempool_matches(
     const block::Matches& matches,
-    std::unique_ptr<const block::bitcoin::Transaction> tx) noexcept -> void
+    std::unique_ptr<const block::bitcoin::Transaction> in) const noexcept
+    -> void
 {
     const auto& [utxo, general] = matches;
 
@@ -139,19 +169,24 @@ auto DeterministicStateData::handle_mempool_matches(
     auto data = MatchedTransaction{};
     auto& [outputs, pTX] = data;
 
-    for (const auto& match : general) { process(match, *tx, data); }
+    for (const auto& match : general) { process(match, *in, data); }
 
     if (nullptr == pTX) { return; }
 
-    auto updated = db_.AddMempoolTransaction(id_, subchain_, outputs, *pTX);
+    const auto& tx = *pTX;
+    auto updated = db_.AddMempoolTransaction(id_, subchain_, outputs, tx);
 
     OT_ASSERT(updated);  // TODO handle database errors
+
+    log_(OT_PRETTY_CLASS())(name_)(
+        " finished processing unconfirmed transaction ")(tx.ID().asHex())
+        .Flush();
 }
 
 auto DeterministicStateData::process(
     const block::Match match,
     const block::bitcoin::Transaction& transaction,
-    MatchedTransaction& output) noexcept -> void
+    MatchedTransaction& output) const noexcept -> void
 {
     auto& [outputs, pTX] = output;
     const auto& [txid, elementID] = match;
@@ -177,14 +212,16 @@ auto DeterministicStateData::process(
                 const auto& key = *pKey;
 
                 if (key.PublicKey() == script.Pubkey().value()) {
-                    LogVerbose()(OT_PRETTY_CLASS())(name_)(" element ")(
-                        index)(": P2PK match found for ")(
-                        DisplayString(node_.Chain()))(" transaction ")(
-                        txid->asHex())(" output ")(i)(" via ")(
+                    log_(OT_PRETTY_CLASS())(name_)(" element ")(
+                        index)(": P2PK match found for ")(print(node_.Chain()))(
+                        " transaction ")(txid->asHex())(" output ")(i)(" via ")(
                         api_.Factory().Data(key.PublicKey())->asHex())
                         .Flush();
                     outputs.emplace_back(i);
-                    api_.Crypto().Blockchain().Confirm(element.KeyID(), txid);
+                    const auto confirmed = api_.Crypto().Blockchain().Confirm(
+                        element.KeyID(), txid);
+
+                    OT_ASSERT(confirmed);
 
                     if (nullptr == pTX) { pTX = &transaction; }
                 }
@@ -195,13 +232,16 @@ auto DeterministicStateData::process(
                 OT_ASSERT(script.PubkeyHash().has_value());
 
                 if (hash->Bytes() == script.PubkeyHash().value()) {
-                    LogVerbose()(OT_PRETTY_CLASS())(name_)(" element ")(
+                    log_(OT_PRETTY_CLASS())(name_)(" element ")(
                         index)(": P2PKH match found for ")(
-                        DisplayString(node_.Chain()))(" transaction ")(
-                        txid->asHex())(" output ")(i)(" via ")(hash->asHex())
+                        print(node_.Chain()))(" transaction ")(txid->asHex())(
+                        " output ")(i)(" via ")(hash->asHex())
                         .Flush();
                     outputs.emplace_back(i);
-                    api_.Crypto().Blockchain().Confirm(element.KeyID(), txid);
+                    const auto confirmed = api_.Crypto().Blockchain().Confirm(
+                        element.KeyID(), txid);
+
+                    OT_ASSERT(confirmed);
 
                     if (nullptr == pTX) { pTX = &transaction; }
                 }
@@ -212,13 +252,16 @@ auto DeterministicStateData::process(
                 OT_ASSERT(script.PubkeyHash().has_value());
 
                 if (hash->Bytes() == script.PubkeyHash().value()) {
-                    LogVerbose()(OT_PRETTY_CLASS())(name_)(" element ")(
+                    log_(OT_PRETTY_CLASS())(name_)(" element ")(
                         index)(": P2WPKH match found for ")(
-                        DisplayString(node_.Chain()))(" transaction ")(
-                        txid->asHex())(" output ")(i)(" via ")(hash->asHex())
+                        print(node_.Chain()))(" transaction ")(txid->asHex())(
+                        " output ")(i)(" via ")(hash->asHex())
                         .Flush();
                     outputs.emplace_back(i);
-                    api_.Crypto().Blockchain().Confirm(element.KeyID(), txid);
+                    const auto confirmed = api_.Crypto().Blockchain().Confirm(
+                        element.KeyID(), txid);
+
+                    OT_ASSERT(confirmed);
 
                     if (nullptr == pTX) { pTX = &transaction; }
                 }
@@ -243,14 +286,17 @@ auto DeterministicStateData::process(
                 const auto& key = *pKey;
 
                 if (key.PublicKey() == script.MultisigPubkey(0).value()) {
-                    LogVerbose()(OT_PRETTY_CLASS())(name_)(" element ")(
-                        index)(": ")(m.value())(" of ")(n.value())(
-                        " P2MS match found for ")(DisplayString(node_.Chain()))(
-                        " transaction ")(txid->asHex())(" output ")(i)(" via ")(
+                    log_(OT_PRETTY_CLASS())(name_)(" element ")(index)(": ")(
+                        m.value())(" of ")(n.value())(" P2MS match found for ")(
+                        print(node_.Chain()))(" transaction ")(txid->asHex())(
+                        " output ")(i)(" via ")(
                         api_.Factory().Data(key.PublicKey())->asHex())
                         .Flush();
                     outputs.emplace_back(i);
-                    api_.Crypto().Blockchain().Confirm(element.KeyID(), txid);
+                    const auto confirmed = api_.Crypto().Blockchain().Confirm(
+                        element.KeyID(), txid);
+
+                    OT_ASSERT(confirmed);
 
                     if (nullptr == pTX) { pTX = &transaction; }
                 }
@@ -262,31 +308,10 @@ auto DeterministicStateData::process(
     }
 }
 
-auto DeterministicStateData::report_scan(
+auto DeterministicStateData::ReportScan(
     const block::Position& pos) const noexcept -> void
 {
     subaccount_.Internal().SetScanProgress(pos, subchain_);
-    SubchainStateData::report_scan(pos);
-}
-
-auto DeterministicStateData::type() const noexcept -> std::stringstream
-{
-    auto output = std::stringstream{};
-
-    switch (subchain_) {
-        case Subchain::Internal:
-        case Subchain::External: {
-            output << "HD";
-        } break;
-        case Subchain::Incoming:
-        case Subchain::Outgoing: {
-            output << "Payment code";
-        } break;
-        default: {
-            OT_FAIL;
-        }
-    }
-
-    return output;
+    SubchainStateData::ReportScan(pos);
 }
 }  // namespace opentxs::blockchain::node::wallet

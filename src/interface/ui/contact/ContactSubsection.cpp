@@ -8,6 +8,7 @@
 #include "interface/ui/contact/ContactSubsection.hpp"  // IWYU pragma: associated
 
 #include <memory>
+#include <string_view>
 #include <thread>
 #include <type_traits>
 
@@ -75,7 +76,8 @@ auto ContactSubsection::construct_row(
 auto ContactSubsection::Name(const UnallocatedCString& lang) const noexcept
     -> UnallocatedCString
 {
-    return proto::TranslateItemType(translate(row_id_.second), lang);
+    return UnallocatedCString{
+        proto::TranslateItemType(translate(row_id_.second), lang)};
 }
 
 auto ContactSubsection::process_group(

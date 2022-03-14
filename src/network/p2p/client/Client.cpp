@@ -328,7 +328,7 @@ auto Client::Imp::forward_to_all(Chain chain, Message&& message) noexcept
     const auto& providers = providers_[chain];
 
     if (0 == providers.size()) {
-        LogTrace()(OT_PRETTY_CLASS())("No connected ")(DisplayString(chain))(
+        LogTrace()(OT_PRETTY_CLASS())("No connected ")(print(chain))(
             " peers available")
             .Flush();
         auto& pending = pending_chain_[chain];
@@ -507,14 +507,13 @@ auto Client::Imp::process_external(Message&& msg) noexcept -> void
 
                     if (acceptable) {
                         providers.emplace(endpoint);
-                        LogVerbose()(endpoint)(" has data for ")(
-                            DisplayString(chain))
+                        LogVerbose()(endpoint)(" has data for ")(print(chain))
                             .Flush();
                         flush_pending(chain);
                     } else {
                         providers.erase(endpoint);
                         LogVerbose()(endpoint)(" is out of date for ")(
-                            DisplayString(chain))
+                            print(chain))
                             .Flush();
                     }
 
@@ -556,8 +555,10 @@ auto Client::Imp::process_external(Message&& msg) noexcept -> void
                 const auto identity = get_chain(chain);
 
                 if (identity.empty()) {
-                    const auto error = CString{} + "No active clients for " +
-                                       DisplayString(chain).c_str();
+                    using namespace std::literals;
+                    const auto error = CString{}
+                                           .append("No active clients for "sv)
+                                           .append(print(chain));
 
                     throw std::runtime_error{error.c_str()};
                 }
@@ -604,7 +605,7 @@ auto Client::Imp::process_header(Message&& msg) noexcept -> void
     auto& height = progress_[chain];
     height = body.at(index).as<Height>();
     LogVerbose()(OT_PRETTY_CLASS())("minimum acceptable height for ")(
-        DisplayString(chain))(" is ")(height)
+        print(chain))(" is ")(height)
         .Flush();
 }
 
@@ -715,7 +716,7 @@ auto Client::Imp::process_register(Message&& msg) noexcept -> void
     clients_[chain] = identity.Bytes();
     const auto& providers = providers_[chain];
     LogVerbose()(OT_PRETTY_CLASS())("querying ")(providers.size())(
-        " providers for ")(DisplayString(chain))
+        " providers for ")(print(chain))
         .Flush();
 
     for (const auto& endpoint : providers) {
@@ -734,8 +735,7 @@ auto Client::Imp::process_request(Message&& msg) noexcept -> void
     const auto provider = get_provider(chain);
 
     if (provider.empty()) {
-        LogError()(OT_PRETTY_CLASS())("no provider for ")(DisplayString(chain))
-            .Flush();
+        LogError()(OT_PRETTY_CLASS())("no provider for ")(print(chain)).Flush();
 
         return;
     }

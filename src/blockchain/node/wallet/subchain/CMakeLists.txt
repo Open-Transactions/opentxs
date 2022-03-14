@@ -9,10 +9,8 @@ target_sources(
   opentxs-common
   PRIVATE
     "${opentxs_SOURCE_DIR}/src/internal/blockchain/node/wallet/subchain/Subchain.hpp"
-    "DeterministicIndex.cpp"
     "DeterministicStateData.cpp"
     "DeterministicStateData.hpp"
-    "NotificationIndex.cpp"
     "NotificationStateData.cpp"
     "NotificationStateData.hpp"
     "ScriptForm.cpp"

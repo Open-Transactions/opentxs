@@ -7,6 +7,7 @@
 
 #include <algorithm>
 #include <cstdint>
+#include <string_view>
 #include <utility>
 
 #include "internal/serialization/protobuf/Basic.hpp"
@@ -16,6 +17,8 @@
 
 namespace opentxs::proto
 {
+using namespace std::literals;
+
 enum class ClaimType : bool {
     Indexed = true,
     Normal = false,
@@ -47,13 +50,13 @@ auto ValidContactItemAttribute(
 
 auto TranslateSectionName(
     const std::uint32_t enumValue,
-    const UnallocatedCString& lang = "en") -> UnallocatedCString;
+    const std::string_view lang = "en"sv) -> std::string_view;
 auto TranslateItemType(
     const std::uint32_t enumValue,
-    const UnallocatedCString& lang = "en") -> UnallocatedCString;
+    const std::string_view lang = "en"sv) -> std::string_view;
 auto TranslateItemAttributes(
     const std::uint32_t enumValue,
-    const UnallocatedCString& lang = "en") -> UnallocatedCString;
+    const std::string_view lang = "en"sv) -> std::string_view;
 auto ReciprocalRelationship(const std::uint32_t relationship) -> std::uint32_t;
 auto CheckCombination(
     const ContactSectionName section,

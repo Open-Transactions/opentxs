@@ -8,7 +8,6 @@
 #include "api/network/blockchain/Imp.hpp"  // IWYU pragma: associated
 
 #include <algorithm>
-#include <cstdint>
 #include <iterator>
 #include <utility>
 
@@ -22,6 +21,7 @@
 #include "opentxs/api/network/Network.hpp"
 #include "opentxs/api/session/Endpoints.hpp"
 #include "opentxs/api/session/Session.hpp"
+#include "opentxs/blockchain/Blockchain.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/node/FilterOracle.hpp"
 #include "opentxs/blockchain/p2p/Types.hpp"
@@ -408,9 +408,13 @@ auto BlockchainImp::RestoreNetworks() const noexcept -> void
 
     if (sync_client_) { sync_client_->Init(api_.Network().Blockchain()); }
 
+    auto lock = Lock{lock_};
+
     for (const auto& [chain, peer] : db_->LoadEnabledChains()) {
-        Start(chain, peer);
+        start(lock, chain, peer, false);
     }
+
+    for (auto& [chain, pNode] : networks_) { pNode->StartWallet(); }
 }
 
 auto BlockchainImp::Shutdown() noexcept -> void
@@ -438,7 +442,8 @@ auto BlockchainImp::Start(const Chain type, const UnallocatedCString& seednode)
 auto BlockchainImp::start(
     const Lock& lock,
     const Chain type,
-    const UnallocatedCString& seednode) const noexcept -> bool
+    const UnallocatedCString& seednode,
+    const bool startWallet) const noexcept -> bool
 {
     init_.get();
 
@@ -454,6 +459,8 @@ auto BlockchainImp::start(
         LogVerbose()(OT_PRETTY_CLASS())("Chain already running").Flush();
 
         return true;
+    } else {
+        LogConsole()("Starting ")(print(type))(" client").Flush();
     }
 
     namespace p2p = opentxs::blockchain::p2p;
@@ -486,12 +493,13 @@ auto BlockchainImp::start(
                 type,
                 factory::BlockchainNetworkBitcoin(
                     api_, type, config, seednode, endpoint));
-            LogVerbose()(OT_PRETTY_CLASS())("started chain ")(
-                static_cast<std::uint32_t>(type))
-                .Flush();
+            LogConsole()(print(type))(" client is running").Flush();
             publish_chain_state(type, true);
+            auto& node = *(it->second);
 
-            return it->second->Connect();
+            if (startWallet) { node.StartWallet(); }
+
+            return node.Connect();
         }
         case p2p::Protocol::opentxs:
         case p2p::Protocol::ethereum:
@@ -541,8 +549,7 @@ auto BlockchainImp::stop(const Lock& lock, const Chain type) const noexcept
     sync_server_.Disable(type);
     it->second->Shutdown().get();
     networks_.erase(it);
-    LogVerbose()(OT_PRETTY_CLASS())("stopped chain ")(opentxs::print(type))
-        .Flush();
+    LogVerbose()(OT_PRETTY_CLASS())("stopped chain ")(print(type)).Flush();
     publish_chain_state(type, false);
 
     return true;

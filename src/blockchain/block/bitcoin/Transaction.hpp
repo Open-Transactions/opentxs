@@ -14,10 +14,10 @@
 #include "internal/blockchain/block/Block.hpp"
 #include "internal/blockchain/block/bitcoin/Bitcoin.hpp"
 #include "opentxs/Types.hpp"
-#include "opentxs/blockchain/Blockchain.hpp"
 #include "opentxs/blockchain/BlockchainType.hpp"
-#include "opentxs/blockchain/FilterType.hpp"
 #include "opentxs/blockchain/Types.hpp"
+#include "opentxs/blockchain/bitcoin/cfilter/FilterType.hpp"
+#include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/blockchain/block/bitcoin/Inputs.hpp"
 #include "opentxs/blockchain/block/bitcoin/Outputs.hpp"
 #include "opentxs/blockchain/block/bitcoin/Transaction.hpp"
@@ -108,10 +108,10 @@ public:
     {
         return cache_.height();
     }
-    auto ExtractElements(const filter::Type style) const noexcept
+    auto ExtractElements(const cfilter::Type style) const noexcept
         -> UnallocatedVector<Space> final;
     auto FindMatches(
-        const filter::Type type,
+        const cfilter::Type type,
         const Patterns& txos,
         const ParsedPatterns& elements) const noexcept -> Matches final;
     auto GetPatterns() const noexcept -> UnallocatedVector<PatternID> final;

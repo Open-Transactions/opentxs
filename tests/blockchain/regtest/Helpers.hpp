@@ -3,9 +3,9 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-// IWYU pragma: no_include "opentxs/blockchain/FilterType.hpp"
-// IWYU pragma: no_include "opentxs/blockchain/FilterType.hpp"
-// IWYU pragma: no_include "opentxs/blockchain/FilterType.hpp"
+// IWYU pragma: no_include "opentxs/blockchain/bitcoin/cfilter/FilterType.hpp"
+// IWYU pragma: no_include "opentxs/blockchain/bitcoin/cfilter/FilterType.hpp"
+// IWYU pragma: no_include "opentxs/blockchain/bitcoin/cfilter/FilterType.hpp"
 // IWYU pragma: no_include "opentxs/blockchain/block/Outpoint.hpp"
 // IWYU pragma: no_include "opentxs/blockchain/crypto/Subaccount.hpp"
 // IWYU pragma: no_include "opentxs/blockchain/crypto/Subchain.hpp"
@@ -41,9 +41,10 @@
 #include "opentxs/Types.hpp"
 #include "opentxs/Version.hpp"
 #include "opentxs/api/session/Factory.hpp"
-#include "opentxs/blockchain/Blockchain.hpp"
 #include "opentxs/blockchain/BlockchainType.hpp"
 #include "opentxs/blockchain/Types.hpp"
+#include "opentxs/blockchain/bitcoin/cfilter/Types.hpp"
+#include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/blockchain/block/bitcoin/Script.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/blockchain/node/Types.hpp"
@@ -148,7 +149,7 @@ namespace ottest
 using Position = ot::blockchain::block::Position;
 using State = otsync::State;
 using Pattern = ot::blockchain::block::bitcoin::Script::Pattern;
-using FilterType = ot::blockchain::filter::Type;
+using FilterType = ot::blockchain::cfilter::Type;
 
 constexpr auto test_chain_{b::Type::UnitTest};
 constexpr auto sync_server_update_public_{

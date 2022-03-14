@@ -9,6 +9,7 @@
 
 #include <future>
 #include <memory>
+#include <string_view>
 #include <utility>
 
 #include "interface/ui/base/List.hpp"
@@ -20,6 +21,7 @@
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/Endpoints.hpp"
 #include "opentxs/blockchain/Blockchain.hpp"
+#include "opentxs/blockchain/Types.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/interface/ui/Blockchains.hpp"
 #include "opentxs/network/zeromq/Pipeline.hpp"
@@ -259,7 +261,7 @@ auto BlockchainSelection::process_state(
     custom.emplace_back(new bool{enabled});
     const_cast<BlockchainSelection&>(*this).add_item(
         chain,
-        {blockchain::DisplayString(chain), blockchain::IsTestnet(chain)},
+        {UnallocatedCString{print(chain)}, blockchain::IsTestnet(chain)},
         custom);
 }
 

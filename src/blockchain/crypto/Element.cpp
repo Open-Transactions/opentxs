@@ -186,7 +186,11 @@ auto Element::Confirmed() const noexcept -> Txids
 
 auto Element::Confirm(const Txid& tx) noexcept -> bool
 {
-    if (tx.empty()) { return false; }
+    if (tx.empty()) {
+        LogError()(OT_PRETTY_CLASS())("invalid txid").Flush();
+
+        return false;
+    }
 
     auto lock = rLock{lock_};
     unconfirmed_.erase(tx);

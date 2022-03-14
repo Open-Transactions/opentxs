@@ -5,6 +5,7 @@
 
 #pragma once
 
+#include <cs_shared_guarded.h>
 #include <atomic>
 #include <functional>
 #include <iosfwd>
@@ -12,20 +13,21 @@
 #include <mutex>
 #include <optional>
 #include <queue>
+#include <shared_mutex>
 #include <string_view>
 
 #include "blockchain/node/wallet/subchain/SubchainStateData.hpp"
-#include "blockchain/node/wallet/subchain/statemachine/Index.hpp"
 #include "internal/blockchain/Blockchain.hpp"
 #include "internal/blockchain/block/Block.hpp"
 #include "internal/blockchain/node/Node.hpp"
+#include "internal/blockchain/node/wallet/subchain/statemachine/Index.hpp"
 #include "internal/network/zeromq/Types.hpp"
 #include "opentxs/Types.hpp"
-#include "opentxs/blockchain/Blockchain.hpp"
 #include "opentxs/blockchain/BlockchainType.hpp"
-#include "opentxs/blockchain/FilterType.hpp"
 #include "opentxs/blockchain/Types.hpp"
+#include "opentxs/blockchain/bitcoin/cfilter/FilterType.hpp"
 #include "opentxs/blockchain/block/Block.hpp"
+#include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/blockchain/crypto/HD.hpp"
 #include "opentxs/blockchain/crypto/Subaccount.hpp"
 #include "opentxs/blockchain/node/BlockOracle.hpp"
@@ -41,6 +43,12 @@
 #include "serialization/protobuf/HDPath.pb.h"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
+namespace boost
+{
+template <class T>
+class shared_ptr;
+}  // namespace boost
+
 namespace opentxs  // NOLINT
 {
 // inline namespace v1
@@ -109,7 +117,7 @@ public:
     static auto calculate_id(
         const api::Session& api,
         const Type chain,
-        const PaymentCode& code) noexcept -> OTIdentifier;
+        const opentxs::PaymentCode& code) noexcept -> OTIdentifier;
 
     NotificationStateData(
         const api::Session& api,
@@ -117,65 +125,45 @@ public:
         const node::internal::WalletDatabase& db,
         const node::internal::Mempool& mempool,
         const identifier::Nym& nym,
-        const filter::Type filter,
+        const cfilter::Type filter,
         const network::zeromq::BatchID batch,
         const Type chain,
-        const std::string_view shutdown,
         const std::string_view fromParent,
         const std::string_view toParent,
-        PaymentCode&& code,
+        opentxs::PaymentCode&& code,
         proto::HDPath&& path,
         allocator_type alloc) noexcept;
 
     ~NotificationStateData() final = default;
 
 private:
-    class Index final : public wallet::Index
-    {
-    public:
-        PaymentCode code_;
-
-        auto Do(std::optional<Bip32Index> current, Bip32Index target) noexcept
-            -> void final;
-
-        Index(
-            SubchainStateData& parent,
-            Scan& scan,
-            Rescan& rescan,
-            Progress& progress,
-            PaymentCode&& code) noexcept;
-
-        ~Index() final = default;
-
-    private:
-        auto need_index(const std::optional<Bip32Index>& current) const noexcept
-            -> std::optional<Bip32Index> final;
-    };
+    using PaymentCode =
+        libguarded::shared_guarded<opentxs::PaymentCode, std::shared_mutex>;
 
     const proto::HDPath path_;
-    Index index_;
-    PaymentCode& code_;
+    const CString pc_display_;
+    mutable PaymentCode code_;
 
-    auto type() const noexcept -> std::stringstream final;
-
-    auto get_index() noexcept -> Index& final { return index_; }
+    auto get_index(const boost::shared_ptr<const SubchainStateData>& me)
+        const noexcept -> Index final;
     auto handle_confirmed_matches(
         const block::bitcoin::Block& block,
         const block::Position& position,
-        const block::Matches& confirmed) noexcept -> void final;
+        const block::Matches& confirmed) const noexcept -> void final;
     auto handle_mempool_matches(
         const block::Matches& matches,
-        std::unique_ptr<const block::bitcoin::Transaction> tx) noexcept
+        std::unique_ptr<const block::bitcoin::Transaction> tx) const noexcept
         -> void final;
-    auto init_contacts() noexcept -> void;
-    auto init_keys() noexcept -> OTPasswordPrompt;
+    auto init_keys() const noexcept -> OTPasswordPrompt;
     auto process(
         const block::Match match,
         const block::bitcoin::Transaction& tx,
-        const PasswordPrompt& reason) noexcept -> void;
+        const PasswordPrompt& reason) const noexcept -> void;
     auto process(
         const opentxs::PaymentCode& remote,
-        const PasswordPrompt& reason) noexcept -> void;
+        const PasswordPrompt& reason) const noexcept -> void;
+
+    auto init_contacts() noexcept -> void;
     auto startup() noexcept -> void final;
     auto work() noexcept -> bool final;
 

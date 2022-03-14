@@ -27,7 +27,7 @@
 #include "network/zeromq/socket/Socket.hpp"
 #include "opentxs/api/network/Network.hpp"
 #include "opentxs/api/session/Factory.hpp"
-#include "opentxs/blockchain/GCS.hpp"
+#include "opentxs/blockchain/bitcoin/cfilter/GCS.hpp"
 #include "opentxs/blockchain/block/bitcoin/Block.hpp"
 #include "opentxs/blockchain/block/bitcoin/Header.hpp"
 #include "opentxs/network/p2p/Block.hpp"
@@ -49,7 +49,7 @@
 namespace opentxs::blockchain::node::base
 {
 using SyncDM = download::
-    Manager<SyncServer, std::unique_ptr<const GCS>, int, filter::Type>;
+    Manager<SyncServer, std::unique_ptr<const GCS>, int, cfilter::Type>;
 using SyncWorker = Worker<SyncServer, api::Session>;
 
 class SyncServer : public SyncDM, public SyncWorker
@@ -77,7 +77,7 @@ public:
         const node::internal::FilterOracle& filter,
         const node::internal::Network& node,
         const blockchain::Type chain,
-        const filter::Type type,
+        const cfilter::Type type,
         const UnallocatedCString& shutdown,
         const UnallocatedCString& publishEndpoint) noexcept
         : SyncDM(
@@ -128,7 +128,7 @@ private:
     const node::internal::FilterOracle& filter_;
     const node::internal::Network& node_;
     const blockchain::Type chain_;
-    const filter::Type type_;
+    const cfilter::Type type_;
     const int linger_;
     const UnallocatedCString endpoint_;
     Socket socket_;
@@ -174,7 +174,7 @@ private:
 
         OT_ASSERT(saved);
 
-        LogDetail()(DisplayString(chain_))(" sync data updated to height ")(
+        LogDetail()(print(chain_))(" sync data updated to height ")(
             position.first)
             .Flush();
     }
@@ -235,7 +235,7 @@ private:
 
         OT_ASSERT(body.size() > 3);
 
-        const auto type = body.at(1).as<filter::Type>();
+        const auto type = body.at(1).as<cfilter::Type>();
 
         if (type != type_) { return; }
 

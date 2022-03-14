@@ -32,8 +32,9 @@
 #include "opentxs/api/session/Endpoints.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
-#include "opentxs/blockchain/Blockchain.hpp"
 #include "opentxs/blockchain/BlockchainType.hpp"
+#include "opentxs/blockchain/Types.hpp"
+#include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/network/p2p/Acknowledgement.hpp"
 #include "opentxs/network/p2p/Base.hpp"
@@ -199,7 +200,7 @@ private:
     {
         auto msg = MakeWork(Task::Register);
         msg.AddFrame(chain_);
-        LogDebug()(OT_PRETTY_CLASS())("registering ")(DisplayString(chain_))(
+        LogDebug()(OT_PRETTY_CLASS())("registering ")(print(chain_))(
             " with high level api")
             .Flush();
         auto lock = Lock{lock_};
@@ -219,7 +220,7 @@ private:
             return proto;
         }());
         LogVerbose()(OT_PRETTY_CLASS())("requesting sync data for ")(
-            DisplayString(chain_))(" starting from block ")(position.first)
+            print(chain_))(" starting from block ")(position.first)
             .Flush();
         auto lock = Lock{lock_};
         OTSocket::send_message(lock, dealer_.get(), std::move(msg));
@@ -236,8 +237,8 @@ private:
 
         const auto bytes = msg.Total();
         LogDebug()(OT_PRETTY_CLASS())("buffering ")(
-            bytes)(" bytes of sync data for ")(DisplayString(chain_))(
-            " blocks ")(blocks.front().Height())(" to ")(blocks.back().Height())
+            bytes)(" bytes of sync data for ")(print(chain_))(" blocks ")(
+            blocks.front().Height())(" to ")(blocks.back().Height())
             .Flush();
         queued_bytes_ += bytes;
         queue_.emplace(std::move(msg));
@@ -285,7 +286,7 @@ private:
 
         if (timer_.test(retry_interval_)) {
             LogVerbose()(OT_PRETTY_CLASS())("more than ")(limit.count())(
-                " minutes since data received for ")(DisplayString(chain_))
+                " minutes since data received for ")(print(chain_))
                 .Flush();
 
             return true;
@@ -297,23 +298,21 @@ private:
     auto need_sync() noexcept -> bool
     {
         if (local_position_ == remote_position_) {
-            LogTrace()(OT_PRETTY_CLASS())(DisplayString(chain_))(
-                " is up to date")
+            LogTrace()(OT_PRETTY_CLASS())(print(chain_))(" is up to date")
                 .Flush();
 
             return false;
         }
 
         if (queue_position_ == remote_position_) {
-            LogTrace()(OT_PRETTY_CLASS())(DisplayString(chain_))(
-                " data already queued")
+            LogTrace()(OT_PRETTY_CLASS())(print(chain_))(" data already queued")
                 .Flush();
 
             return false;
         }
 
         if (queued_bytes_ >= limit_) {
-            LogTrace()(OT_PRETTY_CLASS())(DisplayString(chain_))(
+            LogTrace()(OT_PRETTY_CLASS())(print(chain_))(
                 " buffer is full with ")(queued_bytes_)(" bytes ")
                 .Flush();
 
@@ -357,7 +356,7 @@ private:
                     update_remote_position(ack.State(chain_));
                     activity_ = Clock::now();
                     LogVerbose()(OT_PRETTY_CLASS())("best chain tip for ")(
-                        DisplayString(chain_))(" according to sync peer is ")(
+                        print(chain_))(" according to sync peer is ")(
                         remote_position_.second->asHex())(" at height ")(
                         remote_position_.first)
                         .Flush();
@@ -384,7 +383,7 @@ private:
                         case State::Sync:
                         default: {
                             LogDebug()(OT_PRETTY_CLASS())("ignoring ")(
-                                DisplayString(chain_))(
+                                print(chain_))(
                                 " push notification until sync is complete")
                                 .Flush();
                         }
@@ -428,7 +427,7 @@ private:
                     const auto time =
                         std::chrono::duration_cast<std::chrono::seconds>(
                             Clock::now() - begin_sync_);
-                    LogError()(DisplayString(chain_))(" sync completed in ")(
+                    LogError()(print(chain_))(" sync completed in ")(
                         time.count())(" seconds.")
                         .Flush();
                     state_.store(State::Run);

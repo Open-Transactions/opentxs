@@ -110,6 +110,6 @@ private:
     auto process_update_chain_balance(Message&& in) noexcept -> void;
     auto process_update_nym_balance(Message&& in) noexcept -> void;
     auto startup() noexcept -> void {}
-    auto work() noexcept -> bool { return false; }
+    [[noreturn]] auto work() noexcept -> bool;
 };
 }  // namespace opentxs::api::crypto::blockchain

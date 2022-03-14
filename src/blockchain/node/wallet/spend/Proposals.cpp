@@ -29,8 +29,9 @@
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/blockchain/BlockchainType.hpp"
-#include "opentxs/blockchain/SendResult.hpp"
+#include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/crypto/PaymentCode.hpp"
+#include "opentxs/blockchain/node/SendResult.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/PaymentCode.hpp"  // IWYU pragma: keep
 #include "opentxs/core/identifier/Generic.hpp"
@@ -330,8 +331,8 @@ private:
             if (sent) {
                 auto bytes = api_.Factory().Data();
                 transaction.Serialize(bytes->WriteInto());
-                LogError()("Broadcasting ")(DisplayString(chain_))(
-                    " transaction ")(txid->asHex())
+                LogError()("Broadcasting ")(print(chain_))(" transaction ")(
+                    txid->asHex())
                     .Flush();
                 LogError()(bytes->asHex()).Flush();
             } else {

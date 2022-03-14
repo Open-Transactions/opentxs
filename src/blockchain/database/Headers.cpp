@@ -26,7 +26,7 @@
 #include "internal/util/TSV.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
-#include "opentxs/blockchain/Blockchain.hpp"
+#include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/Header.hpp"
 #include "opentxs/blockchain/block/bitcoin/Header.hpp"
 #include "opentxs/blockchain/node/HeaderOracle.hpp"
@@ -226,7 +226,7 @@ auto Headers::ApplyUpdate(const node::UpdateTransaction& update) noexcept
     if (update.HaveReorg()) {
         const auto [pHeight, pHash] = update.ReorgParent();
         const auto pBytes = pHash->Bytes();
-        LogConsole()(DisplayString(network_.Chain()))(
+        LogConsole()(print(network_.Chain()))(
             " reorg detected. Last common ancestor is ")(pHash->asHex())(
             " at height ")(pHeight)
             .Flush();

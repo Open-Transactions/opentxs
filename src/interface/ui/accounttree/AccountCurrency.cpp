@@ -10,6 +10,7 @@
 #include <iosfwd>
 #include <memory>
 #include <sstream>
+#include <string_view>
 
 #include "interface/ui/base/List.hpp"
 #include "interface/ui/base/Widget.hpp"

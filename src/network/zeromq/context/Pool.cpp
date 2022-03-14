@@ -15,13 +15,11 @@
 #include <stdexcept>
 #include <thread>
 
-#include "internal/network/zeromq/Batch.hpp"
 #include "internal/network/zeromq/Handle.hpp"
 #include "internal/util/BoostPMR.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "network/zeromq/context/Thread.hpp"
 #include "opentxs/util/Container.hpp"
-#include "opentxs/util/Log.hpp"
 
 namespace opentxs::network::zeromq::context
 {
@@ -99,7 +97,6 @@ auto Pool::MakeBatch(const BatchID id, Vector<socket::Type>&& types) noexcept
     assert(added);
 
     auto& batch = it->second;
-    LogTrace()(OT_PRETTY_CLASS())("ZMQ batch ")(batch.id_)(" created").Flush();
 
     return {parent_.Internal(), batch};
 }
@@ -233,8 +230,6 @@ auto Pool::UpdateIndex(BatchID id) noexcept -> void
                 }
             });
             batch_index.erase(batch);
-            LogTrace()(OT_PRETTY_CLASS())("ZMQ batch ")(id)(" destroyed")
-                .Flush();
         }
     });
 

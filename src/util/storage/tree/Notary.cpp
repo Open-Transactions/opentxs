@@ -28,10 +28,13 @@
 #include "util/storage/Plugin.hpp"
 #include "util/storage/tree/Node.hpp"
 
-#define STORAGE_NOTARY_VERSION 1
-#define STORAGE_MINT_SERIES_VERSION 1
-#define STORAGE_MINT_SERIES_HASH_VERSION 2
-#define STORAGE_MINT_SPENT_LIST_VERSION 1
+namespace
+{
+constexpr auto STORAGE_NOTARY_VERSION = 1;
+constexpr auto STORAGE_MINT_SERIES_VERSION = 1;
+constexpr auto STORAGE_MINT_SERIES_HASH_VERSION = 2;
+constexpr auto STORAGE_MINT_SPENT_LIST_VERSION = 1;
+}  // namespace
 
 namespace opentxs::storage
 {

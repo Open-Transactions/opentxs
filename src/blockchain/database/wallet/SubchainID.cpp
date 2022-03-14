@@ -22,7 +22,7 @@ namespace opentxs::blockchain::database::wallet::db
 {
 SubchainID::SubchainID(
     const crypto::Subchain type,
-    const filter::Type filter,
+    const cfilter::Type filter,
     const VersionNumber version,
     const Identifier& subaccount) noexcept
     : data_([&] {
@@ -64,12 +64,12 @@ SubchainID::SubchainID(const ReadView bytes) noexcept(false)
     }
 }
 
-auto SubchainID::FilterType() const noexcept -> filter::Type
+auto SubchainID::FilterType() const noexcept -> cfilter::Type
 {
     auto lock = Lock{lock_};
 
     if (false == filter_.has_value()) {
-        auto type = filter::Type{};
+        auto type = cfilter::Type{};
         static constexpr auto offset = sizeof(crypto::Subchain);
         static constexpr auto size = sizeof(type);
         const auto start = std::next(data_.data(), offset);
@@ -119,7 +119,7 @@ auto SubchainID::Version() const noexcept -> VersionNumber
     if (false == version_.has_value()) {
         auto type = VersionNumber{};
         static constexpr auto offset =
-            sizeof(crypto::Subchain) + sizeof(filter::Type);
+            sizeof(crypto::Subchain) + sizeof(cfilter::Type);
         static constexpr auto size = sizeof(type);
         const auto start = std::next(data_.data(), offset);
         std::memcpy(&type, start, size);

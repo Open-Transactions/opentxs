@@ -10,10 +10,11 @@
 #include "blockchain/p2p/bitcoin/Message.hpp"
 #include "internal/blockchain/p2p/bitcoin/message/Message.hpp"
 #include "opentxs/Types.hpp"
-#include "opentxs/blockchain/Blockchain.hpp"
 #include "opentxs/blockchain/BlockchainType.hpp"
-#include "opentxs/blockchain/FilterType.hpp"
 #include "opentxs/blockchain/Types.hpp"
+#include "opentxs/blockchain/bitcoin/cfilter/FilterType.hpp"
+#include "opentxs/blockchain/bitcoin/cfilter/Types.hpp"
+#include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/util/Bytes.hpp"
 
@@ -51,25 +52,25 @@ public:
 
     auto Start() const noexcept -> block::Height final { return start_; }
     auto Stop() const noexcept -> const block::Hash& final { return stop_; }
-    auto Type() const noexcept -> filter::Type final { return type_; }
+    auto Type() const noexcept -> cfilter::Type final { return type_; }
 
     Getcfilters(
         const api::Session& api,
         const blockchain::Type network,
-        const filter::Type type,
+        const cfilter::Type type,
         const block::Height start,
-        const filter::Hash& stop) noexcept;
+        const cfilter::Hash& stop) noexcept;
     Getcfilters(
         const api::Session& api,
         std::unique_ptr<Header> header,
-        const filter::Type type,
+        const cfilter::Type type,
         const block::Height start,
-        const filter::Hash& stop) noexcept;
+        const cfilter::Hash& stop) noexcept;
 
     ~Getcfilters() final = default;
 
 private:
-    const filter::Type type_;
+    const cfilter::Type type_;
     const block::Height start_;
     const block::pHash stop_;
 

@@ -55,6 +55,7 @@ protected:
     const std::chrono::milliseconds rate_limit_;
     std::atomic<bool> running_;
     std::promise<void> shutdown_promise_;
+    std::shared_future<void> shutdown_;
     network::zeromq::Pipeline pipeline_;
 
     auto trigger() const noexcept -> void
@@ -102,13 +103,13 @@ protected:
         , rate_limit_(rateLimit)
         , running_(true)
         , shutdown_promise_()
+        , shutdown_(shutdown_promise_.get_future())
         , pipeline_(api.Network().ZeroMQ().Internal().Pipeline(
               [this](auto&& in) { downcast().pipeline(std::move(in)); },
               {},
               {},
               {},
               extra))
-        , shutdown_(shutdown_promise_.get_future())
         , last_executed_(Clock::now())
         , state_machine_queued_(false)
     {
@@ -119,7 +120,6 @@ protected:
     ~Worker() { stop_worker().get(); }
 
 private:
-    std::shared_future<void> shutdown_;
     Time last_executed_;
     mutable std::atomic<bool> state_machine_queued_;
 

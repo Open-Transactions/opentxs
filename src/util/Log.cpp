@@ -14,6 +14,7 @@
 #include <cassert>
 #include <chrono>
 #include <cstdlib>
+#include <cstring>
 #include <future>
 #include <memory>
 #include <thread>
@@ -164,7 +165,8 @@ auto Log::Imp::get_buffer(UnallocatedCString& out) noexcept -> Logger::Source&
     return buffer.source_->second;
 }
 
-auto Log::Imp::operator()(const char* in) const noexcept -> const opentxs::Log&
+auto Log::Imp::operator()(const std::string_view in) const noexcept
+    -> const opentxs::Log&
 {
     if (false == active()) { return parent_; }
 
@@ -252,22 +254,27 @@ auto Log::operator()() const noexcept -> const Log& { return *this; }
 
 auto Log::operator()(char* in) const noexcept -> const Log&
 {
-    return operator()(UnallocatedCString(in));
+    return operator()(std::string_view{in, std::strlen(in)});
 }
 
 auto Log::operator()(const char* in) const noexcept -> const Log&
+{
+    return operator()(std::string_view{in, std::strlen(in)});
+}
+
+auto Log::operator()(const std::string_view in) const noexcept -> const Log&
 {
     return (*imp_)(in);
 }
 
 auto Log::operator()(const CString& in) const noexcept -> const Log&
 {
-    return operator()(in.c_str());
+    return (*imp_)(in);
 }
 
 auto Log::operator()(const UnallocatedCString& in) const noexcept -> const Log&
 {
-    return operator()(in.c_str());
+    return (*imp_)(in);
 }
 
 auto Log::operator()(const std::chrono::nanoseconds& in) const noexcept
@@ -301,12 +308,12 @@ auto Log::operator()(const std::chrono::nanoseconds& in) const noexcept
         value << std::to_string(in.count() / hourRatio) << " hours";
     }
 
-    return operator()(value.str());
+    return (*imp_)(value.str());
 }
 
 auto Log::operator()(const OTString& in) const noexcept -> const Log&
 {
-    return operator()(in.get());
+    return (*imp_)(in->Bytes());
 }
 
 auto Log::operator()(const OTArmored& in) const noexcept -> const Log&
@@ -379,7 +386,7 @@ auto Log::operator()(const Identifier& in) const noexcept -> const Log&
 {
     if (false == imp_->active()) { return *this; }
 
-    return operator()(in.str().c_str());
+    return (*imp_)(in.str());
 }
 
 auto Log::operator()(const OTNymID& in) const noexcept -> const Log&
@@ -391,7 +398,7 @@ auto Log::operator()(const identifier::Nym& in) const noexcept -> const Log&
 {
     if (false == imp_->active()) { return *this; }
 
-    return operator()(in.str().c_str());
+    return (*imp_)(in.str());
 }
 
 auto Log::operator()(const OTNotaryID& in) const noexcept -> const Log&
@@ -403,7 +410,7 @@ auto Log::operator()(const identifier::Notary& in) const noexcept -> const Log&
 {
     if (false == imp_->active()) { return *this; }
 
-    return operator()(in.str().c_str());
+    return (*imp_)(in.str());
 }
 
 auto Log::operator()(const OTUnitID& in) const noexcept -> const Log&
@@ -416,7 +423,7 @@ auto Log::operator()(const identifier::UnitDefinition& in) const noexcept
 {
     if (false == imp_->active()) { return *this; }
 
-    return operator()(in.str().c_str());
+    return (*imp_)(in.str());
 }
 
 auto Log::operator()(const Time in) const noexcept -> const Log&

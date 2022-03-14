@@ -11,6 +11,7 @@
 #include <boost/container/flat_map.hpp>
 #include <segwit_addr.h>
 #include <algorithm>
+#include <chrono>
 #include <cstddef>
 #include <cstdint>
 #include <iterator>
@@ -30,6 +31,7 @@
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/api/session/Storage.hpp"
 #include "opentxs/api/session/Wallet.hpp"
+#include "opentxs/blockchain/Blockchain.hpp"
 #include "opentxs/blockchain/block/bitcoin/Transaction.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/crypto/Account.hpp"
 #include "opentxs/blockchain/crypto/AddressStyle.hpp"
@@ -186,9 +188,14 @@ auto Blockchain::Imp::Account(
     -> const opentxs::blockchain::crypto::Account&
 {
     if (false == validate_nym(nymID)) {
-        throw std::runtime_error(
-            UnallocatedCString{"Unable to load "} + DisplayString(chain) +
-            " account for nym (" + nymID.str() + ')');
+        using namespace std::literals;
+        const auto error = CString{"Unable to load "sv}
+                               .append(print(chain))
+                               .append(" account for nym ("sv)
+                               .append(nymID.str()) +
+                           ')';
+
+        throw std::runtime_error{error.c_str()};
     }
 
     return Wallet(chain).Account(nymID);
@@ -407,6 +414,7 @@ auto Blockchain::Imp::Confirm(
 
         return get_node(accountID).Internal().Confirm(subchain, index, tx);
     } catch (...) {
+        LogError()(OT_PRETTY_CLASS())("Invalid key index").Flush();
 
         return false;
     }
@@ -857,7 +865,7 @@ auto Blockchain::Imp::NewHDSubaccount(
         OT_ASSERT(false == accountID->empty());
 
         LogVerbose()(OT_PRETTY_CLASS())("Created new HD subaccount ")(
-            accountID)(" for ")(DisplayString(targetChain))(" account ")(
+            accountID)(" for ")(print(targetChain))(" account ")(
             tree.AccountID())(" owned by ")(nymID.str())(" using path ")(
             opentxs::crypto::Print(accountPath))
             .Flush();
@@ -950,9 +958,9 @@ auto Blockchain::Imp::new_payment_code(
         OT_ASSERT(false == accountID->empty());
 
         LogVerbose()(OT_PRETTY_CLASS())("Created new payment code subaccount ")(
-            accountID)(" for  ")(DisplayString(chain))(" account ")(
-            tree.AccountID())(" owned by ")(nymID.str())(
-            "in reference to remote payment code ")(remote.asBase58())
+            accountID)(" for  ")(print(chain))(" account ")(tree.AccountID())(
+            " owned by ")(nymID.str())("in reference to remote payment code ")(
+            remote.asBase58())
             .Flush();
         accounts_.New(
             opentxs::blockchain::crypto::SubaccountType::PaymentCode,
@@ -1007,8 +1015,7 @@ auto Blockchain::Imp::p2pkh(
 
         return api_.Crypto().Encode().IdentifierEncode(preimage);
     } catch (...) {
-        LogError()(OT_PRETTY_CLASS())("Unsupported chain (")(
-            opentxs::print(chain))(")")
+        LogError()(OT_PRETTY_CLASS())("Unsupported chain (")(print(chain))(")")
             .Flush();
 
         return "";
@@ -1030,8 +1037,7 @@ auto Blockchain::Imp::p2sh(
 
         return api_.Crypto().Encode().IdentifierEncode(preimage);
     } catch (...) {
-        LogError()(OT_PRETTY_CLASS())("Unsupported chain (")(
-            opentxs::print(chain))(")")
+        LogError()(OT_PRETTY_CLASS())("Unsupported chain (")(print(chain))(")")
             .Flush();
 
         return "";
@@ -1059,8 +1065,7 @@ auto Blockchain::Imp::p2wpkh(
 
         return segwit_addr::encode(hrp, 0, prog);
     } catch (...) {
-        LogError()(OT_PRETTY_CLASS())("Unsupported chain (")(
-            opentxs::print(chain))(")")
+        LogError()(OT_PRETTY_CLASS())("Unsupported chain (")(print(chain))(")")
             .Flush();
 
         return "";

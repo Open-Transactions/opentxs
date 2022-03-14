@@ -45,29 +45,37 @@
 #include "opentxs/api/session/Workflow.hpp"
 #include "opentxs/blockchain/Blockchain.hpp"
 #include "opentxs/blockchain/BlockchainType.hpp"
-#if OT_BLOCKCHAIN
-#include "opentxs/blockchain/BloomFilter.hpp"
-#include "opentxs/blockchain/BloomUpdateFlag.hpp"
-#include "opentxs/blockchain/FilterType.hpp"
-#include "opentxs/blockchain/GCS.hpp"
-#include "opentxs/blockchain/NumericHash.hpp"
-#endif  // OT_BLOCKCHAIN
-#include "opentxs/blockchain/SendResult.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #if OT_BLOCKCHAIN
-#include "opentxs/blockchain/Work.hpp"
+#include "opentxs/blockchain/bitcoin/NumericHash.hpp"
+#include "opentxs/blockchain/bitcoin/Work.hpp"
+#include "opentxs/blockchain/bitcoin/bloom/BloomFilter.hpp"
+#include "opentxs/blockchain/bitcoin/bloom/BloomUpdateFlag.hpp"
+#include "opentxs/blockchain/bitcoin/bloom/Types.hpp"
+#endif  // OT_BLOCKCHAIN
+#include "opentxs/blockchain/bitcoin/cfilter/FilterType.hpp"
+#if OT_BLOCKCHAIN
+#include "opentxs/blockchain/bitcoin/cfilter/GCS.hpp"
+#endif  // OT_BLOCKCHAIN
+#include "opentxs/blockchain/bitcoin/cfilter/Types.hpp"
+#if OT_BLOCKCHAIN
 #include "opentxs/blockchain/block/Block.hpp"
 #include "opentxs/blockchain/block/Header.hpp"
 #include "opentxs/blockchain/block/Outpoint.hpp"
+#endif  // OT_BLOCKCHAIN
+#include "opentxs/blockchain/block/Types.hpp"
+#if OT_BLOCKCHAIN
 #include "opentxs/blockchain/block/bitcoin/Block.hpp"
 #include "opentxs/blockchain/block/bitcoin/Header.hpp"
 #include "opentxs/blockchain/block/bitcoin/Input.hpp"
 #include "opentxs/blockchain/block/bitcoin/Inputs.hpp"
+#include "opentxs/blockchain/block/bitcoin/Opcodes.hpp"
 #include "opentxs/blockchain/block/bitcoin/Output.hpp"
 #include "opentxs/blockchain/block/bitcoin/Outputs.hpp"
 #include "opentxs/blockchain/block/bitcoin/Script.hpp"
 #include "opentxs/blockchain/block/bitcoin/Transaction.hpp"
 #endif  // OT_BLOCKCHAIN
+#include "opentxs/blockchain/block/bitcoin/Types.hpp"
 #include "opentxs/blockchain/crypto/Account.hpp"
 #include "opentxs/blockchain/crypto/AddressStyle.hpp"
 #include "opentxs/blockchain/crypto/Deterministic.hpp"
@@ -87,9 +95,14 @@
 #include "opentxs/blockchain/node/FilterOracle.hpp"
 #include "opentxs/blockchain/node/HeaderOracle.hpp"
 #include "opentxs/blockchain/node/Manager.hpp"
+#endif  // OT_BLOCKCHAIN
+#include "opentxs/blockchain/node/SendResult.hpp"
+#if OT_BLOCKCHAIN
 #include "opentxs/blockchain/node/TxoState.hpp"
 #include "opentxs/blockchain/node/TxoTag.hpp"
+#endif  // OT_BLOCKCHAIN
 #include "opentxs/blockchain/node/Types.hpp"
+#if OT_BLOCKCHAIN
 #include "opentxs/blockchain/node/Wallet.hpp"
 #include "opentxs/blockchain/p2p/Address.hpp"
 #include "opentxs/blockchain/p2p/Peer.hpp"

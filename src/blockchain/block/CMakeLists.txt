@@ -21,6 +21,7 @@ set(cxx-install-headers
     "${opentxs_SOURCE_DIR}/include/opentxs/blockchain/block/Block.hpp"
     "${opentxs_SOURCE_DIR}/include/opentxs/blockchain/block/Header.hpp"
     "${opentxs_SOURCE_DIR}/include/opentxs/blockchain/block/Outpoint.hpp"
+    "${opentxs_SOURCE_DIR}/include/opentxs/blockchain/block/Types.hpp"
 )
 target_sources(opentxs-common PRIVATE ${cxx-install-headers})
 

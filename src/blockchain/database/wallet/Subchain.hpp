@@ -14,9 +14,9 @@
 #include "internal/blockchain/database/Database.hpp"
 #include "internal/blockchain/node/Node.hpp"
 #include "opentxs/Types.hpp"
-#include "opentxs/blockchain/Blockchain.hpp"
-#include "opentxs/blockchain/FilterType.hpp"
 #include "opentxs/blockchain/Types.hpp"
+#include "opentxs/blockchain/bitcoin/cfilter/FilterType.hpp"
+#include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/util/Bytes.hpp"
@@ -93,7 +93,7 @@ public:
     SubchainData(
         const api::Session& api,
         const storage::lmdb::LMDB& lmdb,
-        const blockchain::filter::Type filter) noexcept;
+        const blockchain::cfilter::Type filter) noexcept;
 
     ~SubchainData();
 

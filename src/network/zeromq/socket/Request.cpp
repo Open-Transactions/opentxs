@@ -122,7 +122,7 @@ auto Request::wait(const Lock& lock) const noexcept -> bool
                 ".")
                 .Flush();
 
-            return false;
+            continue;  // TODO
         }
 
         return true;

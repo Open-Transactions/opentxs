@@ -86,8 +86,6 @@
 #include "serialization/protobuf/OTXPush.pb.h"
 #include "serialization/protobuf/Purse.pb.h"
 
-#define OTX_PUSH_VERSION 1
-
 namespace zmq = opentxs::network::zeromq;
 
 namespace opentxs::server
@@ -8741,6 +8739,8 @@ void Notary::send_push_notification(
     const std::shared_ptr<const Ledger>& outbox,
     const std::shared_ptr<const OTTransaction>& item) const
 {
+    constexpr auto OTX_PUSH_VERSION = 1;
+
     OT_ASSERT(inbox);
     OT_ASSERT(outbox);
 

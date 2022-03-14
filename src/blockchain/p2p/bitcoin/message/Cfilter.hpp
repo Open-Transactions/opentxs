@@ -12,10 +12,10 @@
 #include "internal/blockchain/Blockchain.hpp"
 #include "internal/blockchain/p2p/bitcoin/message/Message.hpp"
 #include "opentxs/Types.hpp"
-#include "opentxs/blockchain/Blockchain.hpp"
 #include "opentxs/blockchain/BlockchainType.hpp"
-#include "opentxs/blockchain/FilterType.hpp"
 #include "opentxs/blockchain/Types.hpp"
+#include "opentxs/blockchain/bitcoin/cfilter/FilterType.hpp"
+#include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
@@ -59,19 +59,19 @@ public:
     }
     auto Filter() const noexcept -> ReadView final { return reader(filter_); }
     auto Hash() const noexcept -> const block::Hash& final { return hash_; }
-    auto Type() const noexcept -> filter::Type final { return type_; }
+    auto Type() const noexcept -> cfilter::Type final { return type_; }
 
     Cfilter(
         const api::Session& api,
         const blockchain::Type network,
-        const filter::Type type,
+        const cfilter::Type type,
         const block::Hash& hash,
         const std::uint32_t count,
         const Space& compressed) noexcept;
     Cfilter(
         const api::Session& api,
         std::unique_ptr<Header> header,
-        const filter::Type type,
+        const cfilter::Type type,
         const block::Hash& hash,
         const std::uint32_t count,
         Space&& compressed) noexcept;
@@ -79,7 +79,7 @@ public:
     ~Cfilter() final = default;
 
 private:
-    const filter::Type type_;
+    const cfilter::Type type_;
     const block::pHash hash_;
     const std::uint32_t count_;
     const Space filter_;

@@ -36,6 +36,7 @@
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/blockchain/Blockchain.hpp"
 #include "opentxs/blockchain/BlockchainType.hpp"
+#include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/bitcoin/Transaction.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/node/Manager.hpp"
 #include "opentxs/network/p2p/Acknowledgement.hpp"
@@ -126,7 +127,7 @@ Server::Imp::Imp(const api::Session& api, const zeromq::Context& zmq) noexcept
                     .first->second;
             socket.get().Bind(endpoint.c_str());
             LogTrace()(OT_PRETTY_CLASS())("socket ")(socket.get().ID())(
-                " for ")(DisplayString(chain))(" bound to ")(endpoint)
+                " for ")(print(chain))(" bound to ")(endpoint)
                 .Flush();
         }
 

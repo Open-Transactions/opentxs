@@ -29,13 +29,13 @@
 #include "opentxs/api/crypto/Asymmetric.hpp"
 #include "opentxs/api/crypto/Symmetric.hpp"
 #include "opentxs/api/session/Factory.hpp"
-#if OT_BLOCKCHAIN
-#include "opentxs/blockchain/Blockchain.hpp"
-#endif  // OT_BLOCKCHAIN
 #include "opentxs/blockchain/BlockchainType.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #if OT_BLOCKCHAIN
 #include "opentxs/blockchain/block/Header.hpp"
+#endif  // OT_BLOCKCHAIN
+#include "opentxs/blockchain/block/Types.hpp"
+#if OT_BLOCKCHAIN
 #include "opentxs/blockchain/block/bitcoin/Script.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/block/bitcoin/Transaction.hpp"
 #include "opentxs/blockchain/p2p/Address.hpp"

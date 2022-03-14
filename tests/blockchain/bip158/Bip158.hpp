@@ -11,7 +11,6 @@
 #include "Basic.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
-#include "opentxs/blockchain/Blockchain.hpp"
 #include "opentxs/core/Data.hpp"
 
 namespace

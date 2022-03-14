@@ -26,7 +26,7 @@ auto BlockchainDatabase(
     const blockchain::node::internal::Network& network,
     const blockchain::database::common::Database& common,
     const blockchain::Type chain,
-    const blockchain::filter::Type filter) noexcept
+    const blockchain::cfilter::Type filter) noexcept
     -> std::unique_ptr<blockchain::internal::Database>
 {
     using ReturnType = blockchain::implementation::Database;
@@ -72,7 +72,7 @@ Database::Database(
     const node::internal::Network& network,
     const database::common::Database& common,
     const blockchain::Type chain,
-    const blockchain::filter::Type filter) noexcept
+    const blockchain::cfilter::Type filter) noexcept
     : api_(api)
     , chain_(chain)
     , common_(common)

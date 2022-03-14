@@ -13,6 +13,7 @@
 #include <future>
 #include <memory>
 #include <sstream>
+#include <string_view>
 #include <type_traits>
 #include <utility>
 

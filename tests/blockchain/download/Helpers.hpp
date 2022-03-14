@@ -8,6 +8,7 @@
 #include <gtest/gtest.h>
 
 #include "blockchain/DownloadManager.hpp"
+#include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/util/Container.hpp"
 

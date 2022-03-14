@@ -12,6 +12,7 @@
 #include <iosfwd>
 #include <sstream>
 
+#include "opentxs/blockchain/node/SendResult.hpp"
 #include "opentxs/blockchain/node/TxoState.hpp"
 #include "opentxs/blockchain/node/TxoTag.hpp"
 #include "opentxs/network/zeromq/socket/Sender.hpp"  // IWYU pragma: keep
@@ -43,21 +44,61 @@ auto Config::print() const noexcept -> UnallocatedCString
 }
 }  // namespace opentxs::blockchain::node::internal
 
-namespace opentxs
+namespace opentxs::blockchain::node
 {
-auto print(blockchain::node::TxoState in) noexcept -> UnallocatedCString
+auto print(SendResult code) noexcept -> std::string_view
 {
-    using Type = blockchain::node::TxoState;
+    using namespace std::literals;
+    using Code = SendResult;
     static const auto map =
-        robin_hood::unordered_flat_map<Type, UnallocatedCString>{
-            {Type::Error, "error"},
-            {Type::UnconfirmedNew, "unspent (unconfirmed)"},
-            {Type::UnconfirmedSpend, "spent (unconfirmed)"},
-            {Type::ConfirmedNew, "unspent"},
-            {Type::ConfirmedSpend, "spent"},
-            {Type::OrphanedNew, "orphaned"},
-            {Type::OrphanedSpend, "orphaned"},
-            {Type::Immature, "newly generated"},
+        robin_hood::unordered_flat_map<Code, std::string_view>{
+            {Code::InvalidSenderNym, "invalid sender nym"sv},
+            {Code::AddressNotValidforChain,
+             "provided address is not valid for specified blockchain"sv},
+            {Code::UnsupportedAddressFormat,
+             "address format is not supported"sv},
+            {Code::SenderMissingPaymentCode,
+             "sender nym does not contain a valid payment code"sv},
+            {Code::UnsupportedRecipientPaymentCode,
+             "recipient payment code version is not supported"sv},
+            {Code::HDDerivationFailure, "key derivation error"sv},
+            {Code::DatabaseError, "database error"sv},
+            {Code::DuplicateProposal, "duplicate spend proposal"sv},
+            {Code::OutputCreationError,
+             "failed to create transaction outputs"sv},
+            {Code::ChangeError, "failed to create change output"sv},
+            {Code::InsufficientFunds, "insufficient funds"sv},
+            {Code::InputCreationError, "failed to create transaction inputs"sv},
+            {Code::SignatureError, "error signing transaction"sv},
+            {Code::SendFailed, "failed to broadcast transaction"sv},
+            {Code::Sent, "successfully broadcast transaction"sv},
+        };
+
+    try {
+
+        return map.at(code);
+    } catch (...) {
+
+        return "unspecified error"sv;
+    }
+}
+
+auto print(TxoState in) noexcept -> std::string_view
+{
+    using namespace std::literals;
+    using Type = TxoState;
+    // WARNING these strings are used as blockchain wallet database keys. Never
+    // change their values.
+    static const auto map =
+        robin_hood::unordered_flat_map<Type, std::string_view>{
+            {Type::Error, "error"sv},
+            {Type::UnconfirmedNew, "unspent (unconfirmed)"sv},
+            {Type::UnconfirmedSpend, "spent (unconfirmed)"sv},
+            {Type::ConfirmedNew, "unspent"sv},
+            {Type::ConfirmedSpend, "spent"sv},
+            {Type::OrphanedNew, "orphaned"sv},
+            {Type::OrphanedSpend, "orphaned"sv},
+            {Type::Immature, "newly generated"sv},
         };
 
     try {
@@ -69,13 +110,14 @@ auto print(blockchain::node::TxoState in) noexcept -> UnallocatedCString
     }
 }
 
-auto print(blockchain::node::TxoTag in) noexcept -> UnallocatedCString
+auto print(TxoTag in) noexcept -> std::string_view
 {
-    using Type = blockchain::node::TxoTag;
+    using namespace std::literals;
+    using Type = TxoTag;
     static const auto map =
-        robin_hood::unordered_flat_map<Type, UnallocatedCString>{
-            {Type::Normal, "normal"},
-            {Type::Generation, "generated"},
+        robin_hood::unordered_flat_map<Type, std::string_view>{
+            {Type::Normal, "normal"sv},
+            {Type::Generation, "generated"sv},
         };
 
     try {
@@ -86,4 +128,4 @@ auto print(blockchain::node::TxoTag in) noexcept -> UnallocatedCString
         return {};
     }
 }
-}  // namespace opentxs
+}  // namespace opentxs::blockchain::node

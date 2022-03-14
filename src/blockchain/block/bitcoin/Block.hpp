@@ -16,10 +16,11 @@
 #include "blockchain/block/Block.hpp"
 #include "internal/blockchain/block/Block.hpp"
 #include "opentxs/Types.hpp"
-#include "opentxs/blockchain/Blockchain.hpp"
 #include "opentxs/blockchain/BlockchainType.hpp"
 #include "opentxs/blockchain/Types.hpp"
+#include "opentxs/blockchain/bitcoin/cfilter/Types.hpp"
 #include "opentxs/blockchain/block/Block.hpp"
+#include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/blockchain/block/bitcoin/Block.hpp"
 #include "opentxs/network/blockchain/bitcoin/CompactSize.hpp"
 #include "opentxs/util/Bytes.hpp"
@@ -105,10 +106,10 @@ public:
         return const_iterator(this, index_.size());
     }
     auto end() const noexcept -> const_iterator final { return cend(); }
-    auto ExtractElements(const filter::Type style) const noexcept
+    auto ExtractElements(const cfilter::Type style) const noexcept
         -> UnallocatedVector<Space> final;
     auto FindMatches(
-        const filter::Type type,
+        const cfilter::Type type,
         const Patterns& outpoints,
         const Patterns& scripts) const noexcept -> Matches final;
     auto Print() const noexcept -> UnallocatedCString override;

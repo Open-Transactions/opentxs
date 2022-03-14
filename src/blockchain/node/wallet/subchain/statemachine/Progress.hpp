@@ -5,14 +5,20 @@
 
 #pragma once
 
+#include "internal/blockchain/node/wallet/subchain/statemachine/Progress.hpp"
+
+#include <boost/smart_ptr/shared_ptr.hpp>
+#include <atomic>
 #include <optional>
 
-#include "internal/blockchain/node/wallet/subchain/statemachine/Types.hpp"
-#include "opentxs/blockchain/Blockchain.hpp"
-#include "opentxs/util/Container.hpp"
+#include "internal/blockchain/node/wallet/Types.hpp"
+#include "internal/network/zeromq/Types.hpp"
+#include "opentxs/blockchain/block/Types.hpp"
+#include "opentxs/util/Allocated.hpp"
+#include "util/Actor.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs  // NOLINT
+namespace opentxs
 {
 // inline namespace v1
 // {
@@ -26,38 +32,66 @@ class SubchainStateData;
 }  // namespace wallet
 }  // namespace node
 }  // namespace blockchain
+
+namespace network
+{
+namespace zeromq
+{
+namespace socket
+{
+class Raw;
+}  // namespace socket
+}  // namespace zeromq
+}  // namespace network
 // }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
 namespace opentxs::blockchain::node::wallet
 {
-class Progress
+class Progress::Imp final : public Actor<Imp, SubchainJobs>
 {
 public:
-    auto Dirty() const noexcept -> std::optional<block::Position>;
-    auto Get() const noexcept -> block::Position;
+    auto VerifyState(const State state) const noexcept -> void;
 
-    auto Init() noexcept -> void;
-    auto Reorg(const block::Position& parent) noexcept -> void;
-    auto UpdateProcess(const ProgressBatch& processed) noexcept -> void;
-    auto UpdateScan(
-        const std::optional<block::Position>& highestClean,
-        const UnallocatedVector<block::Position>& dirtyBlocks) noexcept -> void;
+    auto Init(boost::shared_ptr<Imp> me) noexcept -> void
+    {
+        signal_startup(me);
+    }
+    auto ProcessReorg(const block::Position& parent) noexcept -> void;
+    auto Shutdown() noexcept -> void { signal_shutdown(); }
 
-    Progress(const SubchainStateData& parent) noexcept;
+    Imp(const boost::shared_ptr<const SubchainStateData>& parent,
+        const network::zeromq::BatchID batch,
+        allocator_type alloc) noexcept;
+    Imp() = delete;
+    Imp(const Imp&) = delete;
+    Imp(Imp&&) = delete;
+    Imp& operator=(const Imp&) = delete;
+    Imp& operator=(Imp&&) = delete;
 
-    ~Progress();
+    ~Imp() final = default;
 
 private:
-    struct Imp;
+    friend Actor<Imp, SubchainJobs>;
 
-    Imp* imp_;
+    network::zeromq::socket::Raw& to_parent_;
+    network::zeromq::socket::Raw& to_rescan_;
+    boost::shared_ptr<const SubchainStateData> parent_p_;
+    const SubchainStateData& parent_;
+    std::atomic<State> state_;
+    std::optional<block::Position> last_reported_;
 
-    Progress() = delete;
-    Progress(const Progress&) = delete;
-    Progress(Progress&&) = delete;
-    auto operator=(const Progress&) -> Progress& = delete;
-    auto operator=(Progress&&) -> Progress& = delete;
+    auto notify(const block::Position& pos) const noexcept -> void;
+
+    auto do_shutdown() noexcept -> void;
+    auto pipeline(const Work work, Message&& msg) noexcept -> void;
+    auto process_update(Message&& msg) noexcept -> void;
+    auto startup() noexcept -> void {}
+    auto state_normal(const Work work, Message&& msg) noexcept -> void;
+    auto state_reorg(const Work work, Message&& msg) noexcept -> void;
+    auto transition_state_normal(Message&& msg) noexcept -> void;
+    auto transition_state_reorg(Message&& msg) noexcept -> void;
+    [[noreturn]] auto work() noexcept -> bool;
 };
 }  // namespace opentxs::blockchain::node::wallet

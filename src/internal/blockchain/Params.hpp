@@ -4,7 +4,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 // IWYU pragma: no_include "opentxs/blockchain/BlockchainType.hpp"
-// IWYU pragma: no_include "opentxs/blockchain/FilterType.hpp"
+// IWYU pragma: no_include "opentxs/blockchain/bitcoin/cfilter/FilterType.hpp"
 // IWYU pragma: no_include "opentxs/blockchain/crypto/AddressStyle.hpp"
 // IWYU pragma: no_include "opentxs/identity/wot/claim/ClaimType.hpp"
 // IWYU pragma: no_include "opentxs/core/UnitType.hpp"
@@ -28,8 +28,9 @@
 #endif  // OT_BLOCKCHAIN
 #include "opentxs/Types.hpp"
 #include "opentxs/Version.hpp"
-#include "opentxs/blockchain/Blockchain.hpp"
 #include "opentxs/blockchain/Types.hpp"
+#include "opentxs/blockchain/bitcoin/cfilter/Types.hpp"
+#include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/blockchain/p2p/Types.hpp"
 #include "opentxs/core/Amount.hpp"
@@ -45,10 +46,10 @@ struct Data {
     using FilterData = boost::container::flat_map<
         blockchain::Type,
         boost::container::flat_map<
-            filter::Type,
+            cfilter::Type,
             std::pair<UnallocatedCString, UnallocatedCString>>>;
     using FilterTypes =
-        UnallocatedMap<Type, UnallocatedMap<filter::Type, std::uint8_t>>;
+        UnallocatedMap<Type, UnallocatedMap<cfilter::Type, std::uint8_t>>;
     using ServiceBits = std::map<
         blockchain::Type,
         UnallocatedMap<p2p::bitcoin::Service, p2p::Service>>;
@@ -75,7 +76,7 @@ struct Data {
     UnallocatedCString genesis_hash_hex_{};
     UnallocatedCString genesis_block_hex_{};
     Checkpoint checkpoint_{};
-    filter::Type default_filter_type_{};
+    cfilter::Type default_filter_type_{};
     p2p::Protocol p2p_protocol_{};
     std::uint32_t p2p_magic_bits_{};
     std::uint16_t default_port_{};

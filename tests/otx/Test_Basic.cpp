@@ -33,6 +33,7 @@
 #include "internal/util/Shared.hpp"
 #include "opentxs/OT.hpp"
 #include "opentxs/Types.hpp"
+#include "opentxs/Version.hpp"
 #include "opentxs/api/Context.hpp"
 #include "opentxs/api/network/ZMQ.hpp"
 #include "opentxs/api/session/Activity.hpp"

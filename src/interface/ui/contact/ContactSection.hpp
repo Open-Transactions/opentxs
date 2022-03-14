@@ -6,6 +6,7 @@
 #pragma once
 
 #include <iosfwd>
+#include <string_view>
 #include <utility>
 
 #include "1_Internal.hpp"
@@ -93,7 +94,8 @@ public:
     auto Name(const UnallocatedCString& lang) const noexcept
         -> UnallocatedCString final
     {
-        return proto::TranslateSectionName(translate(row_id_), lang);
+        return UnallocatedCString{
+            proto::TranslateSectionName(translate(row_id_), lang)};
     }
     auto Type() const noexcept -> identity::wot::claim::SectionType final
     {

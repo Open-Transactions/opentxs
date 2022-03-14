@@ -17,8 +17,8 @@
 #include "internal/blockchain/database/Database.hpp"
 #include "internal/util/TSV.hpp"
 #include "opentxs/Types.hpp"
-#include "opentxs/blockchain/Blockchain.hpp"
-#include "opentxs/blockchain/FilterType.hpp"
+#include "opentxs/blockchain/bitcoin/cfilter/FilterType.hpp"
+#include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/util/Bytes.hpp"
@@ -96,7 +96,7 @@ public:
         const sLock&,
         const NodeID& subaccount,
         const Subchain subchain,
-        const filter::Type type,
+        const cfilter::Type type,
         const VersionNumber version,
         MDB_txn* tx) noexcept -> pSubchainIndex;
     auto GetLastIndexed(const sLock&, const SubchainIndex& subchain) noexcept
@@ -152,7 +152,7 @@ private:
     auto subchain_index(
         const NodeID& subaccount,
         const Subchain subchain,
-        const filter::Type type,
+        const cfilter::Type type,
         const VersionNumber version) const noexcept -> pSubchainIndex;
 
     auto load_index(const SubchainIndex& key) noexcept(false)

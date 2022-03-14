@@ -85,10 +85,13 @@ BalanceOracle::Imp::Imp(
     allocator_type alloc) noexcept
     : Actor(
           api,
+          LogTrace(),
           0ms,
           batch,
           alloc,
-          {},
+          {
+              {CString{api.Endpoints().Shutdown(), alloc}, Direction::Connect},
+          },
           {},
           {},
           {
@@ -143,7 +146,7 @@ auto BalanceOracle::Imp::notify_subscribers(
 
     for (const auto& id : recipients) {
         log(OT_PRETTY_CLASS())("notifying connection ")(id->asHex())(" for ")(
-            DisplayString(chain))(" balance update");
+            print(chain))(" balance update");
         router_.Send(make_message(
             id->Bytes(), nullptr, chain, balance, WorkType::BlockchainBalance));
     }
@@ -161,7 +164,7 @@ auto BalanceOracle::Imp::notify_subscribers(
 
     for (const auto& id : recipients) {
         log(OT_PRETTY_CLASS())("notifying connection ")(id->asHex())(" for ")(
-            DisplayString(chain))(" balance update for nym ")(owner);
+            print(chain))(" balance update for nym ")(owner);
         router_.Send(make_message(
             id->Bytes(), &owner, chain, balance, WorkType::BlockchainBalance));
     }
@@ -250,7 +253,7 @@ auto BalanceOracle::Imp::process_registration(Message&& in) noexcept -> void
         subscribers.emplace(api_.Factory().Data(connectionID.Bytes()))
             .first->get();
     const auto& log = LogTrace();
-    log(OT_PRETTY_CLASS())(id.asHex())(" subscribed to ")(DisplayString(chain))(
+    log(OT_PRETTY_CLASS())(id.asHex())(" subscribed to ")(print(chain))(
         " balance updates");
 
     if (haveNym) { log(" for nym ")(nym); }
@@ -385,6 +388,8 @@ auto BalanceOracle::Imp::UpdateBalance(
         return out;
     }());
 }
+
+auto BalanceOracle::Imp::work() noexcept -> bool { OT_FAIL; }
 
 BalanceOracle::Imp::~Imp() { signal_shutdown(); }
 }  // namespace opentxs::api::crypto::blockchain

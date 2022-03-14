@@ -12,9 +12,12 @@
 #include "opentxs/Version.hpp"  // IWYU pragma: associated
 
 #include <cstdint>
+#include <functional>
+#include <string_view>
 #include <tuple>
 #include <utility>
 
+#include "opentxs/core/Data.hpp"
 #include "opentxs/core/Types.hpp"
 #include "opentxs/util/Container.hpp"
 
@@ -28,25 +31,11 @@ class Amount;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs
+namespace opentxs::blockchain
 {
-namespace blockchain
-{
-namespace block
-{
-using Version = std::int32_t;
-}  // namespace block
-
 using TypeEnum = std::uint32_t;
 
-namespace filter
-{
 enum class Type : TypeEnum;
-}  // namespace filter
-
-enum class Type : TypeEnum;
-enum class BloomUpdateFlag : std::uint8_t;
-enum class SendResult : TypeEnum;
 
 using Amount = opentxs::Amount;
 using ChainHeight = std::int64_t;
@@ -54,13 +43,17 @@ using HDIndex = std::uint32_t;
 using ConfirmedBalance = Amount;
 using UnconfirmedBalance = Amount;
 using Balance = std::pair<ConfirmedBalance, UnconfirmedBalance>;
-}  // namespace blockchain
+using PatternID = std::uint64_t;
+using Hash = Data;
+using pHash = OTData;
 
+OPENTXS_EXPORT auto print(Type) noexcept -> std::string_view;
+}  // namespace opentxs::blockchain
+
+namespace opentxs
+{
 OPENTXS_EXPORT auto BlockchainToUnit(const blockchain::Type type) noexcept
     -> UnitType;
 OPENTXS_EXPORT auto UnitToBlockchain(const UnitType type) noexcept
     -> blockchain::Type;
-OPENTXS_EXPORT auto print(blockchain::SendResult) noexcept
-    -> UnallocatedCString;
-OPENTXS_EXPORT auto print(blockchain::Type) noexcept -> UnallocatedCString;
 }  // namespace opentxs

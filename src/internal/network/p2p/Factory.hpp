@@ -10,8 +10,8 @@
 
 #include <memory>
 
-#include "opentxs/blockchain/Blockchain.hpp"
 #include "opentxs/blockchain/Types.hpp"
+#include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/core/contract/Types.hpp"
 #include "opentxs/network/p2p/Types.hpp"
 #include "opentxs/util/Bytes.hpp"

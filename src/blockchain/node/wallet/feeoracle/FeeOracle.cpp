@@ -28,7 +28,6 @@
 #include "opentxs/api/network/Asio.hpp"
 #include "opentxs/api/network/Network.hpp"
 #include "opentxs/api/session/Session.hpp"
-#include "opentxs/blockchain/Blockchain.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/core/display/Scale.hpp"
 #include "opentxs/network/zeromq/Pipeline.hpp"
@@ -182,13 +181,12 @@ auto FeeOracle::Imp::state_machine() noexcept -> bool
                               auto& value) mutable {
         if (0 < average) {
             static const auto scale = display::Scale{"", "", {{10, 0}}, 0, 0};
-            LogDetail()("Updated ")(DisplayString(chain_))(" fee estimate to ")(
+            LogDetail()("Updated ")(print(chain_))(" fee estimate to ")(
                 scale.Format(average))(" sat / 1000 vBytes")
                 .Flush();
             value.emplace(std::move(average));
         } else {
-            LogDetail()("Fee estimate for ")(DisplayString(chain_))(
-                " not available")
+            LogDetail()("Fee estimate for ")(print(chain_))(" not available")
                 .Flush();
             value = std::nullopt;
         }

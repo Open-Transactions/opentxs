@@ -35,8 +35,8 @@ extern "C" {
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/blockchain/Blockchain.hpp"
-#include "opentxs/blockchain/FilterType.hpp"
-#include "opentxs/blockchain/GCS.hpp"
+#include "opentxs/blockchain/bitcoin/cfilter/FilterType.hpp"
+#include "opentxs/blockchain/bitcoin/cfilter/GCS.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/network/p2p/Block.hpp"
 #include "opentxs/util/Bytes.hpp"
@@ -347,7 +347,7 @@ private:
         const auto items = [&] {
             using Params = opentxs::blockchain::params::Data;
             const auto& data = Params::Chains().at(chain);
-            constexpr auto filterType = opentxs::blockchain::filter::Type::ES;
+            constexpr auto filterType = opentxs::blockchain::cfilter::Type::ES;
             auto gcs = [&] {
                 const auto& filter = Params::Filters().at(chain).at(filterType);
                 const auto bytes =

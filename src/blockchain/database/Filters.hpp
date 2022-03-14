@@ -20,10 +20,10 @@
 #include "internal/blockchain/database/Database.hpp"
 #include "internal/blockchain/node/Node.hpp"
 #include "opentxs/Types.hpp"
-#include "opentxs/blockchain/Blockchain.hpp"
 #include "opentxs/blockchain/BlockchainType.hpp"
-#include "opentxs/blockchain/FilterType.hpp"
 #include "opentxs/blockchain/Types.hpp"
+#include "opentxs/blockchain/bitcoin/cfilter/FilterType.hpp"
+#include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/blockchain/block/bitcoin/Input.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
@@ -76,33 +76,33 @@ public:
     using Header = Parent::Header;
     using Filter = Parent::Filter;
 
-    auto CurrentHeaderTip(const filter::Type type) const noexcept
+    auto CurrentHeaderTip(const cfilter::Type type) const noexcept
         -> block::Position;
-    auto CurrentTip(const filter::Type type) const noexcept -> block::Position;
-    auto HaveFilter(const filter::Type type, const block::Hash& block)
+    auto CurrentTip(const cfilter::Type type) const noexcept -> block::Position;
+    auto HaveFilter(const cfilter::Type type, const block::Hash& block)
         const noexcept -> bool;
-    auto HaveFilterHeader(const filter::Type type, const block::Hash& block)
+    auto HaveFilterHeader(const cfilter::Type type, const block::Hash& block)
         const noexcept -> bool;
-    auto LoadFilter(const filter::Type type, const ReadView block)
+    auto LoadFilter(const cfilter::Type type, const ReadView block)
         const noexcept -> std::unique_ptr<const blockchain::GCS>;
-    auto LoadFilterHash(const filter::Type type, const ReadView block)
+    auto LoadFilterHash(const cfilter::Type type, const ReadView block)
         const noexcept -> Hash;
-    auto LoadFilterHeader(const filter::Type type, const ReadView block)
+    auto LoadFilterHeader(const cfilter::Type type, const ReadView block)
         const noexcept -> Hash;
-    auto SetHeaderTip(const filter::Type type, const block::Position& position)
+    auto SetHeaderTip(const cfilter::Type type, const block::Position& position)
         const noexcept -> bool;
-    auto SetTip(const filter::Type type, const block::Position& position)
+    auto SetTip(const cfilter::Type type, const block::Position& position)
         const noexcept -> bool;
     auto StoreFilters(
-        const filter::Type type,
+        const cfilter::Type type,
         const UnallocatedVector<Header>& headers,
         const UnallocatedVector<Filter>& filters,
         const block::Position& tip) const noexcept -> bool;
     auto StoreFilters(
-        const filter::Type type,
+        const cfilter::Type type,
         UnallocatedVector<Filter> filters) const noexcept -> bool;
     auto StoreHeaders(
-        const filter::Type type,
+        const cfilter::Type type,
         const ReadView previous,
         const UnallocatedVector<Header> headers) const noexcept -> bool;
 

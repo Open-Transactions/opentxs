@@ -9,6 +9,7 @@
 #include <cstddef>
 #include <mutex>
 #include <sstream>
+#include <string_view>
 #include <thread>
 #include <tuple>
 #include <utility>
@@ -53,7 +54,8 @@ struct Log::Imp final : public internal::Log {
     static Logger logger_;
 
     auto active() const noexcept -> bool;
-    auto operator()(const char* in) const noexcept -> const opentxs::Log&;
+    auto operator()(const std::string_view in) const noexcept
+        -> const opentxs::Log&;
     auto operator()(const boost::system::error_code& error) const noexcept
         -> const opentxs::Log&;
 

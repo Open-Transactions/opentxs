@@ -12,7 +12,6 @@
 #include <cstdint>
 #include <limits>
 #include <stdexcept>
-#include <type_traits>
 #include <utility>
 
 #include "Proto.hpp"

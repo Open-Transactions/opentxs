@@ -27,8 +27,9 @@
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/UI.hpp"
-#include "opentxs/blockchain/Blockchain.hpp"
 #include "opentxs/blockchain/BlockchainType.hpp"
+#include "opentxs/blockchain/Types.hpp"
+#include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/blockchain/block/bitcoin/Transaction.hpp"
 #include "opentxs/blockchain/crypto/HD.hpp"
 #include "opentxs/blockchain/crypto/Subchain.hpp"
@@ -183,7 +184,7 @@ TEST_F(Test_BlockchainActivity, blockchain_selection)
 
     ASSERT_TRUE(row->Valid());
 
-    EXPECT_EQ(row->Name(), ot::blockchain::DisplayString(expected));
+    EXPECT_EQ(row->Name(), print(expected));
     EXPECT_EQ(row->Type(), expected);
     EXPECT_FALSE(row->IsEnabled());
     EXPECT_FALSE(row->IsTestnet());
@@ -193,7 +194,7 @@ TEST_F(Test_BlockchainActivity, blockchain_selection)
     row = widget.Next();
     expected = ot::blockchain::Type::BitcoinCash;
 
-    EXPECT_EQ(row->Name(), ot::blockchain::DisplayString(expected));
+    EXPECT_EQ(row->Name(), print(expected));
     EXPECT_EQ(row->Type(), expected);
     EXPECT_FALSE(row->IsEnabled());
     EXPECT_FALSE(row->IsTestnet());
@@ -203,7 +204,7 @@ TEST_F(Test_BlockchainActivity, blockchain_selection)
     row = widget.Next();
     expected = ot::blockchain::Type::Litecoin;
 
-    EXPECT_EQ(row->Name(), ot::blockchain::DisplayString(expected));
+    EXPECT_EQ(row->Name(), print(expected));
     EXPECT_EQ(row->Type(), expected);
     EXPECT_FALSE(row->IsEnabled());
     EXPECT_FALSE(row->IsTestnet());
@@ -213,7 +214,7 @@ TEST_F(Test_BlockchainActivity, blockchain_selection)
     row = widget.Next();
     expected = ot::blockchain::Type::PKT;
 
-    EXPECT_EQ(row->Name(), ot::blockchain::DisplayString(expected));
+    EXPECT_EQ(row->Name(), print(expected));
     EXPECT_EQ(row->Type(), expected);
     EXPECT_FALSE(row->IsEnabled());
     EXPECT_FALSE(row->IsTestnet());
@@ -223,7 +224,7 @@ TEST_F(Test_BlockchainActivity, blockchain_selection)
     row = widget.Next();
     expected = ot::blockchain::Type::Bitcoin_testnet3;
 
-    EXPECT_EQ(row->Name(), ot::blockchain::DisplayString(expected));
+    EXPECT_EQ(row->Name(), print(expected));
     EXPECT_EQ(row->Type(), expected);
     EXPECT_FALSE(row->IsEnabled());
     EXPECT_TRUE(row->IsTestnet());
@@ -233,7 +234,7 @@ TEST_F(Test_BlockchainActivity, blockchain_selection)
     row = widget.Next();
     expected = ot::blockchain::Type::BitcoinCash_testnet3;
 
-    EXPECT_EQ(row->Name(), ot::blockchain::DisplayString(expected));
+    EXPECT_EQ(row->Name(), print(expected));
     EXPECT_EQ(row->Type(), expected);
     EXPECT_FALSE(row->IsEnabled());
     EXPECT_TRUE(row->IsTestnet());
@@ -243,7 +244,7 @@ TEST_F(Test_BlockchainActivity, blockchain_selection)
     row = widget.Next();
     expected = ot::blockchain::Type::Litecoin_testnet4;
 
-    EXPECT_EQ(row->Name(), ot::blockchain::DisplayString(expected));
+    EXPECT_EQ(row->Name(), print(expected));
     EXPECT_EQ(row->Type(), expected);
     EXPECT_FALSE(row->IsEnabled());
     EXPECT_TRUE(row->IsTestnet());
@@ -280,9 +281,7 @@ TEST_F(Test_BlockchainActivity, blockchain_selection_qt)
             widget.data(widget.index(row, 0), Model::IsTestnet);
 
         EXPECT_EQ(type.toInt(), static_cast<int>(expected));
-        EXPECT_EQ(
-            name.toString().toStdString(),
-            ot::blockchain::DisplayString(expected));
+        EXPECT_EQ(name.toString().toStdString(), print(expected));
         EXPECT_FALSE(enabled.toBool());
         EXPECT_FALSE(testnet.toBool());
     }
@@ -300,9 +299,7 @@ TEST_F(Test_BlockchainActivity, blockchain_selection_qt)
             widget.data(widget.index(row, 0), Model::IsTestnet);
 
         EXPECT_EQ(type.toInt(), static_cast<int>(expected));
-        EXPECT_EQ(
-            name.toString().toStdString(),
-            ot::blockchain::DisplayString(expected));
+        EXPECT_EQ(name.toString().toStdString(), print(expected));
         EXPECT_FALSE(enabled.toBool());
         EXPECT_FALSE(testnet.toBool());
     }
@@ -320,9 +317,7 @@ TEST_F(Test_BlockchainActivity, blockchain_selection_qt)
             widget.data(widget.index(row, 0), Model::IsTestnet);
 
         EXPECT_EQ(type.toInt(), static_cast<int>(expected));
-        EXPECT_EQ(
-            name.toString().toStdString(),
-            ot::blockchain::DisplayString(expected));
+        EXPECT_EQ(name.toString().toStdString(), print(expected));
         EXPECT_FALSE(enabled.toBool());
         EXPECT_FALSE(testnet.toBool());
     }
@@ -340,9 +335,7 @@ TEST_F(Test_BlockchainActivity, blockchain_selection_qt)
             widget.data(widget.index(row, 0), Model::IsTestnet);
 
         EXPECT_EQ(type.toInt(), static_cast<int>(expected));
-        EXPECT_EQ(
-            name.toString().toStdString(),
-            ot::blockchain::DisplayString(expected));
+        EXPECT_EQ(name.toString().toStdString(), print(expected));
         EXPECT_FALSE(enabled.toBool());
         EXPECT_FALSE(testnet.toBool());
     }
@@ -360,9 +353,7 @@ TEST_F(Test_BlockchainActivity, blockchain_selection_qt)
             widget.data(widget.index(row, 0), Model::IsTestnet);
 
         EXPECT_EQ(type.toInt(), static_cast<int>(expected));
-        EXPECT_EQ(
-            name.toString().toStdString(),
-            ot::blockchain::DisplayString(expected));
+        EXPECT_EQ(name.toString().toStdString(), print(expected));
         EXPECT_FALSE(enabled.toBool());
         EXPECT_TRUE(testnet.toBool());
     }
@@ -380,9 +371,7 @@ TEST_F(Test_BlockchainActivity, blockchain_selection_qt)
             widget.data(widget.index(row, 0), Model::IsTestnet);
 
         EXPECT_EQ(type.toInt(), static_cast<int>(expected));
-        EXPECT_EQ(
-            name.toString().toStdString(),
-            ot::blockchain::DisplayString(expected));
+        EXPECT_EQ(name.toString().toStdString(), print(expected));
         EXPECT_FALSE(enabled.toBool());
         EXPECT_TRUE(testnet.toBool());
     }
@@ -400,9 +389,7 @@ TEST_F(Test_BlockchainActivity, blockchain_selection_qt)
             widget.data(widget.index(row, 0), Model::IsTestnet);
 
         EXPECT_EQ(type.toInt(), static_cast<int>(expected));
-        EXPECT_EQ(
-            name.toString().toStdString(),
-            ot::blockchain::DisplayString(expected));
+        EXPECT_EQ(name.toString().toStdString(), print(expected));
         EXPECT_FALSE(enabled.toBool());
         EXPECT_TRUE(testnet.toBool());
     }

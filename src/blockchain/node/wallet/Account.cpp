@@ -10,6 +10,7 @@
 #include "blockchain/node/wallet/Account.hpp"  // IWYU pragma: associated
 
 #include <boost/smart_ptr/make_shared.hpp>
+#include <algorithm>
 #include <chrono>
 #include <utility>
 
@@ -23,15 +24,18 @@
 #include "opentxs/api/crypto/Blockchain.hpp"
 #include "opentxs/api/network/Network.hpp"
 #include "opentxs/api/session/Crypto.hpp"
+#include "opentxs/api/session/Endpoints.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/api/session/Wallet.hpp"
-#include "opentxs/blockchain/FilterType.hpp"
+#include "opentxs/blockchain/Types.hpp"
+#include "opentxs/blockchain/bitcoin/cfilter/FilterType.hpp"
 #include "opentxs/blockchain/crypto/Account.hpp"
 #include "opentxs/blockchain/crypto/Deterministic.hpp"
 #include "opentxs/blockchain/crypto/HD.hpp"
 #include "opentxs/blockchain/crypto/PaymentCode.hpp"
 #include "opentxs/blockchain/crypto/SubaccountType.hpp"
+#include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/network/zeromq/Pipeline.hpp"
@@ -54,15 +58,19 @@ namespace opentxs::blockchain::node::wallet
 auto print(AccountJobs job) noexcept -> std::string_view
 {
     try {
-        static const auto map = Map<AccountJobs, CString>{
-            {AccountJobs::shutdown, "shutdown"},
-            {AccountJobs::reorg_begin, "reorg_begin"},
-            {AccountJobs::reorg_begin_ack, "reorg_begin_ack"},
-            {AccountJobs::reorg_end, "reorg_end"},
-            {AccountJobs::reorg_end_ack, "reorg_end_ack"},
-            {AccountJobs::init, "init"},
-            {AccountJobs::key, "key"},
-            {AccountJobs::statemachine, "statemachine"},
+        using Job = AccountJobs;
+        static const auto map = Map<Job, CString>{
+            {Job::shutdown, "shutdown"},
+            {Job::subaccount, "subaccount"},
+            {Job::reorg_begin, "reorg_begin"},
+            {Job::reorg_begin_ack, "reorg_begin_ack"},
+            {Job::reorg_end, "reorg_end"},
+            {Job::reorg_end_ack, "reorg_end_ack"},
+            {Job::init, "init"},
+            {Job::key, "key"},
+            {Job::shutdown_begin, "shutdown_begin"},
+            {Job::shutdown_ready, "shutdown_ready"},
+            {Job::statemachine, "statemachine"},
         };
 
         return map.at(job);
@@ -86,8 +94,7 @@ Account::Imp::Imp(
     const node::internal::Mempool& mempool,
     const network::zeromq::BatchID batch,
     const Type chain,
-    const filter::Type filter,
-    const std::string_view shutdown,
+    const cfilter::Type filter,
     const std::string_view fromParent,
     const std::string_view toParent,
     CString&& fromChildren,
@@ -95,15 +102,17 @@ Account::Imp::Imp(
     allocator_type alloc) noexcept
     : Actor(
           api,
+          LogTrace(),
           0ms,
           batch,
           alloc,
           {
-              {CString{shutdown, alloc}, Direction::Connect},
               {CString{fromParent, alloc}, Direction::Connect},
               {CString{
                    api.Crypto().Blockchain().Internal().KeyEndpoint(),
                    alloc},
+               Direction::Connect},
+              {CString{api.Endpoints().BlockchainAccountCreated(), alloc},
                Direction::Connect},
           },
           {
@@ -127,13 +136,13 @@ Account::Imp::Imp(
     , mempool_(mempool)
     , chain_(chain)
     , filter_type_(node_.FilterOracleInternal().DefaultType())
-    , shutdown_endpoint_(shutdown, alloc)
     , to_children_endpoint_(std::move(toChildren))
     , from_children_endpoint_(std::move(fromChildren))
     , to_parent_(pipeline_.Internal().ExtraSocket(0))
     , to_children_(pipeline_.Internal().ExtraSocket(1))
     , state_(State::normal)
     , reorg_(std::nullopt)
+    , shutdown_(std::nullopt)
     , internal_(alloc)
     , external_(alloc)
     , outgoing_(alloc)
@@ -149,8 +158,7 @@ Account::Imp::Imp(
     const node::internal::Mempool& mempool,
     const network::zeromq::BatchID batch,
     const Type chain,
-    const filter::Type filter,
-    const std::string_view shutdown,
+    const cfilter::Type filter,
     const std::string_view fromParent,
     const std::string_view toParent,
     allocator_type alloc) noexcept
@@ -162,7 +170,6 @@ Account::Imp::Imp(
           batch,
           chain,
           filter,
-          shutdown,
           fromParent,
           toParent,
           network::zeromq::MakeArbitraryInproc(alloc.resource()),
@@ -225,6 +232,10 @@ auto Account::Imp::instantiate(
     const Subtype subchain,
     Subchains& map) noexcept -> Subchain&
 {
+    LogTrace()("Instantiating ")(print(chain_))(" subaccount ")(
+        subaccount.ID())(" ")(opentxs::print(subchain))(" subchain for ")(
+        subaccount.Parent().NymID())
+        .Flush();
     const auto& asio = api_.Network().ZeroMQ().Internal();
     const auto batchID = asio.PreallocateBatch();
     auto [it, added] = map.try_emplace(
@@ -239,7 +250,6 @@ auto Account::Imp::instantiate(
             filter_type_,
             subchain,
             batchID,
-            shutdown_endpoint_,
             to_children_endpoint_,
             from_children_endpoint_));
     auto& ptr = it->second;
@@ -268,6 +278,12 @@ auto Account::Imp::pipeline(const Work work, Message&& msg) noexcept -> void
         case State::post_reorg: {
             state_post_reorg(work, std::move(msg));
         } break;
+        case State::pre_shutdown: {
+            state_pre_shutdown(work, std::move(msg));
+        } break;
+        case State::shutdown: {
+            // NOTE do not process any messages
+        } break;
         default: {
             OT_FAIL;
         }
@@ -288,15 +304,40 @@ auto Account::Imp::process_key(Message&& in) noexcept -> void
 
     if (owner != account_.NymID()) { return; }
 
-    const auto subaccount = api_.Factory().Identifier(body.at(3));
+    const auto id = api_.Factory().Identifier(body.at(3));
     const auto type = body.at(5).as<crypto::SubaccountType>();
+    process_subaccount(id, type);
+}
 
+auto Account::Imp::process_subaccount(Message&& in) noexcept -> void
+{
+    const auto body = in.Body();
+
+    OT_ASSERT(4 < body.size());
+
+    const auto chain = body.at(1).as<blockchain::Type>();
+
+    if (chain != chain_) { return; }
+
+    const auto owner = api_.Factory().NymID(body.at(2));
+
+    if (owner != account_.NymID()) { return; }
+
+    const auto type = body.at(3).as<crypto::SubaccountType>();
+    const auto id = api_.Factory().Identifier(body.at(4));
+    process_subaccount(id, type);
+}
+
+auto Account::Imp::process_subaccount(
+    const Identifier& id,
+    const crypto::SubaccountType type) noexcept -> void
+{
     switch (type) {
         case crypto::SubaccountType::HD: {
-            check_hd(subaccount);
+            check_hd(id);
         } break;
         case crypto::SubaccountType::PaymentCode: {
-            check_pc(subaccount);
+            check_pc(id);
         } break;
         default: {
 
@@ -333,13 +374,23 @@ auto Account::Imp::ready_for_normal() noexcept -> void
     disable_automatic_processing_ = false;
     reorg_ = std::nullopt;
     state_ = State::normal;
+    log_(OT_PRETTY_CLASS())("transitioned to normal state").Flush();
     to_parent_.Send(MakeWork(AccountsJobs::reorg_end_ack));
+    flush_cache();
 }
 
 auto Account::Imp::ready_for_reorg() noexcept -> void
 {
     state_ = State::reorg;
+    log_(OT_PRETTY_CLASS())("transitioned to reorg state").Flush();
     to_parent_.Send(MakeWork(AccountsJobs::reorg_begin_ack));
+}
+
+auto Account::Imp::ready_for_shutdown() noexcept -> void
+{
+    state_ = State::shutdown;
+    log_(OT_PRETTY_CLASS())("transitioned to shutdown state").Flush();
+    to_parent_.Send(MakeWork(AccountsJobs::shutdown_ready));
 }
 
 auto Account::Imp::reorg_children() const noexcept -> std::size_t
@@ -366,16 +417,21 @@ auto Account::Imp::startup() noexcept -> void
 auto Account::Imp::state_normal(const Work work, Message&& msg) noexcept -> void
 {
     OT_ASSERT(false == reorg_.has_value());
+    OT_ASSERT(false == shutdown_.has_value());
 
     switch (work) {
+        case Work::subaccount: {
+            process_subaccount(std::move(msg));
+        } break;
         case Work::reorg_begin: {
             transition_state_pre_reorg(std::move(msg));
         } break;
         case Work::reorg_begin_ack:
         case Work::reorg_end:
-        case Work::reorg_end_ack: {
-            LogError()(OT_PRETTY_CLASS())(": wrong state for message ")(
-                CString{print(work), get_allocator()})
+        case Work::reorg_end_ack:
+        case Work::shutdown_ready: {
+            LogError()(OT_PRETTY_CLASS())(print(chain_))(" wrong state for ")(
+                print(work))(" message")
                 .Flush();
 
             OT_FAIL;
@@ -383,8 +439,15 @@ auto Account::Imp::state_normal(const Work work, Message&& msg) noexcept -> void
         case Work::key: {
             process_key(std::move(msg));
         } break;
+        case Work::shutdown_begin: {
+            transition_state_pre_shutdown(std::move(msg));
+        } break;
+        case Work::init:
+        case Work::shutdown:
         default: {
-            LogError()(OT_PRETTY_CLASS())(": unhandled type").Flush();
+            LogError()(OT_PRETTY_CLASS())(print(chain_))(
+                " unhandled message type ")(static_cast<OTZMQWorkType>(work))
+                .Flush();
 
             OT_FAIL;
         }
@@ -395,29 +458,34 @@ auto Account::Imp::state_post_reorg(const Work work, Message&& msg) noexcept
     -> void
 {
     OT_ASSERT(reorg_.has_value());
+    OT_ASSERT(false == shutdown_.has_value());
 
     switch (work) {
         case Work::shutdown:
+        case Work::subaccount:
         case Work::key:
         case Work::statemachine: {
-            // NOTE defer processing of non-reorg messages until after reorg is
-            // complete
-            pipeline_.Push(std::move(msg));
+            defer(std::move(msg));
         } break;
         case Work::reorg_end_ack: {
             transition_state_normal(std::move(msg));
         } break;
         case Work::reorg_begin:
         case Work::reorg_begin_ack:
-        case Work::reorg_end: {
-            LogError()(OT_PRETTY_CLASS())(": wrong state for message ")(
-                CString{print(work), get_allocator()})
+        case Work::reorg_end:
+        case Work::shutdown_begin:
+        case Work::shutdown_ready: {
+            LogError()(OT_PRETTY_CLASS())(print(chain_))(" wrong state for ")(
+                print(work))(" message")
                 .Flush();
 
             OT_FAIL;
         }
+        case Work::init:
         default: {
-            LogError()(OT_PRETTY_CLASS())(": unhandled type").Flush();
+            LogError()(OT_PRETTY_CLASS())(print(chain_))(
+                " unhandled message type ")(static_cast<OTZMQWorkType>(work))
+                .Flush();
 
             OT_FAIL;
         }
@@ -428,29 +496,70 @@ auto Account::Imp::state_pre_reorg(const Work work, Message&& msg) noexcept
     -> void
 {
     OT_ASSERT(reorg_.has_value());
+    OT_ASSERT(false == shutdown_.has_value());
 
     switch (work) {
         case Work::shutdown:
+        case Work::subaccount:
         case Work::key:
         case Work::statemachine: {
-            // NOTE defer processing of non-reorg messages until after reorg is
-            // complete
-            pipeline_.Push(std::move(msg));
+            defer(std::move(msg));
         } break;
         case Work::reorg_begin_ack: {
             transition_state_reorg(std::move(msg));
         } break;
         case Work::reorg_begin:
         case Work::reorg_end:
-        case Work::reorg_end_ack: {
-            LogError()(OT_PRETTY_CLASS())(": wrong state for message ")(
-                CString{print(work), get_allocator()})
+        case Work::reorg_end_ack:
+        case Work::shutdown_begin:
+        case Work::shutdown_ready: {
+            LogError()(OT_PRETTY_CLASS())(print(chain_))(" wrong state for ")(
+                print(work))(" message")
                 .Flush();
 
             OT_FAIL;
         }
         default: {
-            LogError()(OT_PRETTY_CLASS())(": unhandled type").Flush();
+            LogError()(OT_PRETTY_CLASS())(print(chain_))(
+                " unhandled message type ")(static_cast<OTZMQWorkType>(work))
+                .Flush();
+
+            OT_FAIL;
+        }
+    }
+}
+
+auto Account::Imp::state_pre_shutdown(const Work work, Message&& msg) noexcept
+    -> void
+{
+    OT_ASSERT(false == reorg_.has_value());
+    OT_ASSERT(shutdown_.has_value());
+
+    switch (work) {
+        case Work::subaccount:
+        case Work::key: {
+            // NOTE drop non-shutdown messages
+        } break;
+        case Work::reorg_begin:
+        case Work::reorg_begin_ack:
+        case Work::reorg_end:
+        case Work::reorg_end_ack:
+        case Work::shutdown_begin: {
+            LogError()(OT_PRETTY_CLASS())(print(chain_))(" wrong state for ")(
+                print(work))(" message")
+                .Flush();
+
+            OT_FAIL;
+        }
+        case Work::shutdown_ready: {
+            transition_state_shutdown(std::move(msg));
+        } break;
+        case Work::init:
+        case Work::shutdown:
+        default: {
+            LogError()(OT_PRETTY_CLASS())(print(chain_))(
+                " unhandled message type ")(static_cast<OTZMQWorkType>(work))
+                .Flush();
 
             OT_FAIL;
         }
@@ -460,28 +569,32 @@ auto Account::Imp::state_pre_reorg(const Work work, Message&& msg) noexcept
 auto Account::Imp::state_reorg(const Work work, Message&& msg) noexcept -> void
 {
     OT_ASSERT(reorg_.has_value());
+    OT_ASSERT(false == shutdown_.has_value());
 
     switch (work) {
         case Work::shutdown:
         case Work::key:
         case Work::statemachine: {
-            // NOTE defer processing of non-reorg messages until after reorg is
-            // complete
-            pipeline_.Push(std::move(msg));
+            defer(std::move(msg));
         } break;
         case Work::reorg_end: {
             transition_state_post_reorg(std::move(msg));
         } break;
+        case Work::reorg_begin:
         case Work::reorg_begin_ack:
-        case Work::reorg_end_ack: {
-            LogError()(OT_PRETTY_CLASS())(": wrong state for message ")(
-                CString{print(work), get_allocator()})
+        case Work::reorg_end_ack:
+        case Work::shutdown_begin:
+        case Work::shutdown_ready: {
+            LogError()(OT_PRETTY_CLASS())(print(chain_))(" wrong state for ")(
+                print(work))(" message")
                 .Flush();
 
             OT_FAIL;
         }
         default: {
-            LogError()(OT_PRETTY_CLASS())(": unhandled type").Flush();
+            LogError()(OT_PRETTY_CLASS())(print(chain_))(
+                " unhandled message type ")(static_cast<OTZMQWorkType>(work))
+                .Flush();
 
             OT_FAIL;
         }
@@ -490,7 +603,7 @@ auto Account::Imp::state_reorg(const Work work, Message&& msg) noexcept -> void
 
 auto Account::Imp::transition_state_normal(Message&& in) noexcept -> void
 {
-    OT_ASSERT(0u < reorg_children());
+    OT_ASSERT(0u < reorg_->target_);
 
     auto& reorg = reorg_.value();
     const auto& target = reorg.target_;
@@ -498,9 +611,16 @@ auto Account::Imp::transition_state_normal(Message&& in) noexcept -> void
     ++counter;
 
     if (counter < target) {
+        log_(OT_PRETTY_CLASS())(print(chain_))(" ")(counter)(" of ")(
+            target)(" children finished with reorg")
+            .Flush();
 
         return;
     } else if (counter == target) {
+        verify_child_state(Subchain::State::normal);
+        log_(OT_PRETTY_CLASS())(print(chain_))(" all ")(
+            target)(" children finished with reorg")
+            .Flush();
         ready_for_normal();
     } else {
 
@@ -513,9 +633,17 @@ auto Account::Imp::transition_state_post_reorg(Message&& in) noexcept -> void
     const auto& reorg = reorg_.value();
 
     if (0u < reorg.target_) {
+        log_(OT_PRETTY_CLASS())(print(chain_))(
+            " waiting for acknowledgements from ")(reorg_->target_)(
+            " children prior to acknowledging reorg completion")
+            .Flush();
         to_children_.Send(MakeWork(SubchainJobs::reorg_end));
         state_ = State::post_reorg;
     } else {
+        log_(OT_PRETTY_CLASS())(print(chain_))(
+            " no children instantiated therefore reorg may be completed "
+            "immediately")
+            .Flush();
         ready_for_normal();
     }
 }
@@ -527,16 +655,45 @@ auto Account::Imp::transition_state_pre_reorg(Message&& in) noexcept -> void
     const auto& reorg = reorg_.value();
 
     if (0u < reorg.target_) {
+        log_(OT_PRETTY_CLASS())(print(chain_))(
+            " waiting for acknowledgements from ")(reorg_->target_)(
+            " children prior to acknowledging reorg")
+            .Flush();
         to_children_.Send(MakeWork(SubchainJobs::reorg_begin));
         state_ = State::pre_reorg;
     } else {
+        log_(OT_PRETTY_CLASS())(print(chain_))(
+            " no children instantiated therefore reorg may be acknowledged "
+            "immediately")
+            .Flush();
         ready_for_reorg();
+    }
+}
+
+auto Account::Imp::transition_state_pre_shutdown(Message&& in) noexcept -> void
+{
+    shutdown_.emplace(reorg_children());
+    const auto& reorg = shutdown_.value();
+
+    if (0u < reorg.target_) {
+        log_(OT_PRETTY_CLASS())(print(chain_))(
+            " waiting for acknowledgements from ")(reorg_->target_)(
+            " children prior to acknowledging shutdown")
+            .Flush();
+        to_children_.Send(std::move(in));
+        state_ = State::pre_shutdown;
+    } else {
+        log_(OT_PRETTY_CLASS())(print(chain_))(
+            " no children instantiated therefore shutdown may be acknowledged "
+            "immediately")
+            .Flush();
+        ready_for_shutdown();
     }
 }
 
 auto Account::Imp::transition_state_reorg(Message&& in) noexcept -> void
 {
-    OT_ASSERT(0u < reorg_children());
+    OT_ASSERT(0u < reorg_->target_);
 
     auto& reorg = reorg_.value();
     const auto& target = reorg.target_;
@@ -544,9 +701,16 @@ auto Account::Imp::transition_state_reorg(Message&& in) noexcept -> void
     ++counter;
 
     if (counter < target) {
+        log_(OT_PRETTY_CLASS())(print(chain_))(" ")(counter)(" of ")(
+            target)(" children ready for reorg")
+            .Flush();
 
         return;
     } else if (counter == target) {
+        verify_child_state(Subchain::State::reorg);
+        log_(OT_PRETTY_CLASS())(print(chain_))(" all ")(
+            target)(" children ready for reorg")
+            .Flush();
         ready_for_reorg();
     } else {
 
@@ -554,12 +718,49 @@ auto Account::Imp::transition_state_reorg(Message&& in) noexcept -> void
     }
 }
 
-auto Account::Imp::work() noexcept -> bool
+auto Account::Imp::transition_state_shutdown(Message&& in) noexcept -> void
 {
-    to_children_.Send(MakeWork(OT_ZMQ_STATE_MACHINE_SIGNAL));
+    OT_ASSERT(0u < shutdown_->target_);
 
-    return false;
+    auto& reorg = shutdown_.value();
+    const auto& target = reorg.target_;
+    auto& counter = reorg.ready_;
+    ++counter;
+
+    if (counter < target) {
+        log_(OT_PRETTY_CLASS())(print(chain_))(" ")(counter)(" of ")(
+            target)(" children ready for shutdown")
+            .Flush();
+
+        return;
+    } else if (counter == target) {
+        verify_child_state(Subchain::State::shutdown);
+        log_(OT_PRETTY_CLASS())(print(chain_))(" all ")(
+            target)(" children ready for shutdown")
+            .Flush();
+        ready_for_shutdown();
+    } else {
+
+        OT_FAIL;
+    }
 }
+
+auto Account::Imp::VerifyState(const State state) const noexcept -> void
+{
+    OT_ASSERT(state == state_);
+}
+
+auto Account::Imp::verify_child_state(
+    const Subchain::State state) const noexcept -> void
+{
+    const auto cb = [&](const auto& data) { data.second->VerifyState(state); };
+    std::for_each(internal_.begin(), internal_.end(), cb);
+    std::for_each(external_.begin(), external_.end(), cb);
+    std::for_each(outgoing_.begin(), outgoing_.end(), cb);
+    std::for_each(incoming_.begin(), incoming_.end(), cb);
+}
+
+auto Account::Imp::work() noexcept -> bool { OT_FAIL; }
 
 Account::Imp::~Imp() { signal_shutdown(); }
 }  // namespace opentxs::blockchain::node::wallet
@@ -573,8 +774,7 @@ Account::Account(
     const node::internal::WalletDatabase& db,
     const node::internal::Mempool& mempool,
     const Type chain,
-    const filter::Type filter,
-    const std::string_view shutdown,
+    const cfilter::Type filter,
     const std::string_view fromParent,
     const std::string_view toParent) noexcept
     : imp_([&] {
@@ -594,7 +794,6 @@ Account::Account(
             batchID,
             chain,
             filter,
-            shutdown,
             fromParent,
             toParent);
     }())
@@ -617,6 +816,11 @@ auto Account::ProcessReorg(
     const block::Position& parent) noexcept -> void
 {
     imp_->ProcessReorg(headerOracleLock, tx, errors, parent);
+}
+
+auto Account::VerifyState(const State state) const noexcept -> void
+{
+    imp_->VerifyState(state);
 }
 
 Account::~Account() { imp_->Shutdown(); }

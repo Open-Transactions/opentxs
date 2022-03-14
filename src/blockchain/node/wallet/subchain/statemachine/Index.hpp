@@ -5,20 +5,19 @@
 
 #pragma once
 
-#include <cstddef>
-#include <optional>
-#include <queue>
-#include <tuple>
-#include <utility>
+#include "internal/blockchain/node/wallet/subchain/statemachine/Index.hpp"
 
-#include "blockchain/node/wallet/subchain/statemachine/Job.hpp"
+#include <boost/smart_ptr/shared_ptr.hpp>
+#include <atomic>
+#include <optional>
+
 #include "internal/blockchain/node/Node.hpp"
-#include "internal/blockchain/node/wallet/subchain/statemachine/Types.hpp"
-#include "opentxs/Types.hpp"
-#include "opentxs/blockchain/Blockchain.hpp"
-#include "opentxs/blockchain/FilterType.hpp"
+#include "internal/blockchain/node/wallet/Types.hpp"
+#include "internal/network/zeromq/Types.hpp"
+#include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/crypto/Types.hpp"
-#include "opentxs/util/Container.hpp"
+#include "opentxs/util/Allocated.hpp"
+#include "util/Actor.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
@@ -27,90 +26,89 @@ namespace opentxs  // NOLINT
 // {
 namespace blockchain
 {
-namespace crypto
-{
-class Element;
-}  // namespace crypto
-
 namespace node
 {
-namespace internal
-{
-struct WalletDatabase;
-}  // namespace internal
-
 namespace wallet
 {
-class Progress;
-class Rescan;
-class Scan;
 class SubchainStateData;
 }  // namespace wallet
 }  // namespace node
 }  // namespace blockchain
+
+namespace network
+{
+namespace zeromq
+{
+namespace socket
+{
+class Raw;
+}  // namespace socket
+}  // namespace zeromq
+}  // namespace network
 // }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
 namespace opentxs::blockchain::node::wallet
 {
-class Index : public Job
+class Index::Imp : public Actor<Imp, SubchainJobs>
 {
 public:
-    auto Processed(const ProgressBatch& processed) noexcept -> void;
-    auto Reorg(const block::Position& parent) noexcept -> void final;
-    auto Run() noexcept -> bool final;
+    auto VerifyState(const State state) const noexcept -> void;
 
-    Index(
-        SubchainStateData& parent,
-        Scan& scan,
-        Rescan& rescan,
-        Progress& progress) noexcept;
+    auto Init(boost::shared_ptr<Imp> me) noexcept -> void
+    {
+        signal_startup(me);
+    }
+    auto ProcessReorg(const block::Position& parent) noexcept -> void;
+    auto Shutdown() noexcept -> void { signal_shutdown(); }
 
-    ~Index() override = default;
+    Imp(const boost::shared_ptr<const SubchainStateData>& parent,
+        const network::zeromq::BatchID batch,
+        allocator_type alloc) noexcept;
+    Imp() = delete;
+    Imp(const Imp&) = delete;
+    Imp(Imp&&) = delete;
+    Imp& operator=(const Imp&) = delete;
+    Imp& operator=(Imp&&) = delete;
 
-protected:
-    Scan& scan_;
-    Rescan& rescan_;
-    Progress& progress_;
-    std::optional<Bip32Index> last_indexed_;
-
-    auto done(
-        const block::Position& original,
-        const node::internal::WalletDatabase::ElementMap& elements) noexcept
-        -> void;
-    auto index_element(
-        const filter::Type type,
-        const blockchain::crypto::Element& input,
-        const Bip32Index index,
-        node::internal::WalletDatabase::ElementMap& output) const noexcept
-        -> void;
-    // NOTE this function does not lock the mutex. Use carefully.
-    auto ready_for_scan() noexcept -> void;
+    ~Imp() override = default;
 
 private:
-    static constexpr auto lookback_ = block::Height{240};
+    friend Actor<Imp, SubchainJobs>;
 
-    bool first_;
-    std::queue<std::pair<block::Position, std::size_t>> queue_;
+    network::zeromq::socket::Raw& to_parent_;
+    network::zeromq::socket::Raw& to_scan_;
+    network::zeromq::socket::Raw& to_rescan_;
+    network::zeromq::socket::Raw& to_process_;
+    boost::shared_ptr<const SubchainStateData> parent_p_;
 
-    auto rescan(
-        const Lock& lock,
-        const block::Position& pos,
-        const std::size_t matches) noexcept -> void;
-    auto type() const noexcept -> const char* final { return "index"; }
+protected:
+    const SubchainStateData& parent_;
 
-    virtual auto Do(
-        std::optional<Bip32Index> current,
-        Bip32Index target) noexcept -> void = 0;
-    // NOTE always called when no other threads are running
+    auto done(
+        const node::internal::WalletDatabase::ElementMap& elements) noexcept
+        -> void;
+
+private:
+    std::atomic<State> state_;
+    std::optional<Bip32Index> last_indexed_;
+
     virtual auto need_index(const std::optional<Bip32Index>& current)
         const noexcept -> std::optional<Bip32Index> = 0;
 
-    Index() = delete;
-    Index(const Index&) = delete;
-    Index(Index&&) = delete;
-    auto operator=(const Index&) -> Index& = delete;
-    auto operator=(Index&&) -> Index& = delete;
+    auto do_shutdown() noexcept -> void;
+    auto pipeline(const Work work, Message&& msg) noexcept -> void;
+    virtual auto process(
+        const std::optional<Bip32Index>& current,
+        Bip32Index target) noexcept -> void = 0;
+    auto process_key(Message&& in) noexcept -> void;
+    auto process_update(Message&& msg) noexcept -> void;
+    auto startup() noexcept -> void;
+    auto state_normal(const Work work, Message&& msg) noexcept -> void;
+    auto state_reorg(const Work work, Message&& msg) noexcept -> void;
+    auto transition_state_normal(Message&& msg) noexcept -> void;
+    auto transition_state_reorg(Message&& msg) noexcept -> void;
+    auto work() noexcept -> bool;
 };
 }  // namespace opentxs::blockchain::node::wallet
