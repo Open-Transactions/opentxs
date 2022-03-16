@@ -14,6 +14,8 @@ class Outstanding
     struct Imp;
 
 public:
+    auto is_limited() const noexcept -> bool;
+
     auto operator++() noexcept -> Outstanding&;
     auto operator--() noexcept -> Outstanding&;
     auto wait_for_finished() noexcept -> void;

@@ -49,6 +49,7 @@ enum class SubchainJobs : OTZMQWorkType {
     block = value(WorkType::BlockchainBlockAvailable),
     prepare_shutdown = OT_ZMQ_PREPARE_SHUTDOWN + 0,
     update = OT_ZMQ_INTERNAL_SIGNAL + 1,
+    process = OT_ZMQ_INTERNAL_SIGNAL + 2,
     init = OT_ZMQ_INIT_SIGNAL,
     key = OT_ZMQ_NEW_BLOCKCHAIN_WALLET_KEY_SIGNAL,
     statemachine = OT_ZMQ_STATE_MACHINE_SIGNAL,

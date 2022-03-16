@@ -25,7 +25,6 @@
 #include "opentxs/network/zeromq/message/FrameSection.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/util/Log.hpp"
-#include "opentxs/util/Pimpl.hpp"
 #include "opentxs/util/WorkType.hpp"
 
 namespace opentxs::blockchain::node::wallet
@@ -66,7 +65,7 @@ Job::Job(
     : Actor(
           parent.api_,
           logger,
-          0s,
+          1ms,
           batch,
           alloc,
           subscribe,
@@ -146,11 +145,10 @@ auto Job::process_block(Message&& in) noexcept -> void
 
     if (parent_.chain_ != chain) { return; }
 
-    const auto hash = parent_.api_.Factory().Data(body.at(2));
-    process_block(hash);
+    process_block(parent_.api_.Factory().Data(body.at(2)));
 }
 
-auto Job::process_block(const block::Hash& hash) noexcept -> void
+auto Job::process_block(block::pHash&&) noexcept -> void
 {
     LogError()(OT_PRETTY_CLASS())(name_)("unhandled message type").Flush();
 
@@ -184,6 +182,24 @@ auto Job::process_filter(block::Position&& tip) noexcept -> void
 }
 
 auto Job::process_key(Message&& in) noexcept -> void
+{
+    LogError()(OT_PRETTY_CLASS())(name_)("unhandled message type").Flush();
+
+    OT_FAIL;
+}
+
+auto Job::process_process(Message&& in) noexcept -> void
+{
+    const auto body = in.Body();
+
+    OT_ASSERT(2 < body.size());
+
+    process_process(block::Position{
+        body.at(1).as<block::Height>(),
+        parent_.api_.Factory().Data(body.at(2))});
+}
+
+auto Job::process_process(block::Position&&) noexcept -> void
 {
     LogError()(OT_PRETTY_CLASS())(name_)("unhandled message type").Flush();
 
@@ -233,6 +249,9 @@ auto Job::state_normal(const Work work, Message&& msg) noexcept -> void
         } break;
         case Work::update: {
             process_update(std::move(msg));
+        } break;
+        case Work::process: {
+            process_process(std::move(msg));
         } break;
         case Work::init: {
             do_init();

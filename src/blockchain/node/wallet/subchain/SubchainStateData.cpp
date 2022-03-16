@@ -57,6 +57,7 @@ auto print(SubchainJobs job) noexcept -> std::string_view
             {Job::mempool, "mempool"},
             {Job::block, "block"},
             {Job::update, "update"},
+            {Job::process, "process"},
             {Job::prepare_shutdown, "prepare_shutdown"},
             {Job::init, "init"},
             {Job::key, "key"},

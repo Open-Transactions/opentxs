@@ -21,6 +21,7 @@
 #include "opentxs/util/Allocated.hpp"
 #include "opentxs/util/Container.hpp"
 #include "util/Actor.hpp"
+#include "util/JobCounter.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
@@ -73,21 +74,30 @@ public:
 private:
     using Waiting = Deque<block::Position>;
     using Downloading = Map<block::Position, BlockOracle::BitcoinBlockFuture>;
-    using Index = Map<block::pHash, Downloading::iterator>;
+    using DownloadIndex = Map<block::pHash, Downloading::iterator>;
+    using Ready = Map<block::Position, BlockOracle::BitcoinBlock_p>;
 
-    static constexpr auto download_limit_ = std::size_t{400u};
-
+    const std::size_t download_limit_;
     network::zeromq::socket::Raw& to_index_;
     Waiting waiting_;
     Downloading downloading_;
-    Index index_;
-    Downloading downloaded_;
+    DownloadIndex downloading_index_;
+    Ready ready_;
+    Ready processing_;
     robin_hood::unordered_flat_set<block::pHash> txid_cache_;
+    JobCounter counter_;
+    Outstanding running_;
 
+    auto do_process(
+        const block::Position position,
+        const BlockOracle::BitcoinBlock_p block) noexcept -> void;
     auto do_startup() noexcept -> void final;
-    auto process_block(const block::Hash& block) noexcept -> void final;
+    auto process_block(block::pHash&& block) noexcept -> void final;
     auto process_mempool(Message&& in) noexcept -> void final;
+    auto process_process(block::Position&& position) noexcept -> void final;
     auto process_update(Message&& msg) noexcept -> void final;
+    auto queue_downloads() noexcept -> void;
+    auto queue_process() noexcept -> void;
     auto work() noexcept -> bool final;
 };
 }  // namespace opentxs::blockchain::node::wallet

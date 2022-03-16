@@ -383,7 +383,7 @@ public:
     auto LoadFilters(
         const cfilter::Type type,
         const Vector<block::pHash>& blocks) const noexcept
-        -> Vector<std::unique_ptr<const GCS>> final
+        -> Vector<std::unique_ptr<const blockchain::GCS>> final
     {
         return filters_.LoadFilters(type, blocks);
     }
