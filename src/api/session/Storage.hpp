@@ -170,9 +170,9 @@ public:
     auto BlockchainAccountList(
         const UnallocatedCString& nymID,
         const UnitType type) const -> UnallocatedSet<UnallocatedCString> final;
-    auto BlockchainAccountType(
-        const UnallocatedCString& nymID,
-        const UnallocatedCString& accountID) const -> UnitType final;
+    auto BlockchainSubaccountAccountType(
+        const identifier::Nym& owner,
+        const Identifier& id) const -> UnitType final;
     auto BlockchainThreadMap(const identifier::Nym& nym, const Data& txid)
         const noexcept -> UnallocatedVector<OTIdentifier> final;
     auto BlockchainTransactionList(const identifier::Nym& nym) const noexcept

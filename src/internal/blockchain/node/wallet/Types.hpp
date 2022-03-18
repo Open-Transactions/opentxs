@@ -5,6 +5,8 @@
 
 #pragma once
 
+#include <memory>
+#include <mutex>
 #include <string_view>
 
 #include "opentxs/util/WorkType.hpp"
@@ -16,7 +18,6 @@ namespace opentxs::blockchain::node::wallet
 enum class WalletJobs : OTZMQWorkType {
     shutdown = value(WorkType::Shutdown),
     init = OT_ZMQ_INIT_SIGNAL,
-    shutdown_ready = OT_ZMQ_ACKNOWLEDGE_SHUTDOWN,
     statemachine = OT_ZMQ_STATE_MACHINE_SIGNAL,
 };
 
@@ -26,11 +27,7 @@ enum class AccountsJobs : OTZMQWorkType {
     nym = value(WorkType::NymCreated),
     header = value(WorkType::BlockchainNewHeader),
     reorg = value(WorkType::BlockchainReorg),
-    reorg_begin_ack = OT_ZMQ_INTERNAL_SIGNAL + 2,
-    reorg_end_ack = OT_ZMQ_INTERNAL_SIGNAL + 4,
     init = OT_ZMQ_INIT_SIGNAL,
-    shutdown_begin = OT_ZMQ_PREPARE_SHUTDOWN,
-    shutdown_ready = OT_ZMQ_ACKNOWLEDGE_SHUTDOWN,
     statemachine = OT_ZMQ_STATE_MACHINE_SIGNAL,
 };
 
@@ -38,14 +35,9 @@ enum class AccountsJobs : OTZMQWorkType {
 enum class AccountJobs : OTZMQWorkType {
     shutdown = value(WorkType::Shutdown),
     subaccount = value(WorkType::BlockchainAccountCreated),
-    reorg_begin = OT_ZMQ_INTERNAL_SIGNAL + 1,
-    reorg_begin_ack = OT_ZMQ_INTERNAL_SIGNAL + 2,
-    reorg_end = OT_ZMQ_INTERNAL_SIGNAL + 3,
-    reorg_end_ack = OT_ZMQ_INTERNAL_SIGNAL + 4,
+    prepare_shutdown = OT_ZMQ_PREPARE_SHUTDOWN + 0,
     init = OT_ZMQ_INIT_SIGNAL,
     key = OT_ZMQ_NEW_BLOCKCHAIN_WALLET_KEY_SIGNAL,
-    shutdown_begin = OT_ZMQ_PREPARE_SHUTDOWN,
-    shutdown_ready = OT_ZMQ_ACKNOWLEDGE_SHUTDOWN,
     statemachine = OT_ZMQ_STATE_MACHINE_SIGNAL,
 };
 
@@ -55,19 +47,15 @@ enum class SubchainJobs : OTZMQWorkType {
     filter = value(WorkType::BlockchainNewFilter),
     mempool = value(WorkType::BlockchainMempoolUpdated),
     block = value(WorkType::BlockchainBlockAvailable),
-    reorg_begin = OT_ZMQ_INTERNAL_SIGNAL + 1,
-    reorg_begin_ack = OT_ZMQ_INTERNAL_SIGNAL + 2,
-    reorg_end = OT_ZMQ_INTERNAL_SIGNAL + 3,
-    reorg_end_ack = OT_ZMQ_INTERNAL_SIGNAL + 4,
-    startup = OT_ZMQ_INTERNAL_SIGNAL + 5,
-    update = OT_ZMQ_INTERNAL_SIGNAL + 6,
+    prepare_shutdown = OT_ZMQ_PREPARE_SHUTDOWN + 0,
+    update = OT_ZMQ_INTERNAL_SIGNAL + 1,
     init = OT_ZMQ_INIT_SIGNAL,
     key = OT_ZMQ_NEW_BLOCKCHAIN_WALLET_KEY_SIGNAL,
-    shutdown_begin = OT_ZMQ_PREPARE_SHUTDOWN,
-    shutdown_ready = OT_ZMQ_ACKNOWLEDGE_SHUTDOWN,
     statemachine = OT_ZMQ_STATE_MACHINE_SIGNAL,
 };
 
+auto lock_for_reorg(std::recursive_timed_mutex& mutex) noexcept
+    -> std::unique_lock<std::recursive_timed_mutex>;
 auto print(WalletJobs) noexcept -> std::string_view;
 auto print(AccountsJobs) noexcept -> std::string_view;
 auto print(AccountJobs) noexcept -> std::string_view;

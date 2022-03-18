@@ -65,5 +65,5 @@ auto Legacy::prepend() noexcept -> UnallocatedCString { return {}; }
 
 namespace opentxs::network::zeromq::implementation
 {
-auto Context::max_sockets() noexcept -> int { return 16384; }
+auto Context::max_sockets() noexcept -> int { return 32768; }
 }  // namespace opentxs::network::zeromq::implementation

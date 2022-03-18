@@ -6,6 +6,7 @@
 if(OT_BLOCKCHAIN_EXPORT)
   add_subdirectory(base)
   add_subdirectory(bitcoin)
+  add_subdirectory(p2p)
   add_subdirectory(peermanager)
   add_subdirectory(wallet)
 endif()

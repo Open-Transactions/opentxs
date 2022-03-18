@@ -74,20 +74,20 @@ public:
         const api::Session& api,
         const blockchain::Type network,
         const bitcoin::ProtocolVersionUnsigned version,
-        UnallocatedVector<block::pHash>&& hashes,
+        Vector<block::pHash>&& hashes,
         block::pHash&& stop) noexcept;
     Getheaders(
         const api::Session& api,
         std::unique_ptr<Header> header,
         const bitcoin::ProtocolVersionUnsigned version,
-        UnallocatedVector<block::pHash>&& hashes,
+        Vector<block::pHash>&& hashes,
         block::pHash&& stop) noexcept;
 
     ~Getheaders() final = default;
 
 private:
     const bitcoin::ProtocolVersionUnsigned version_;
-    const UnallocatedVector<block::pHash> payload_;
+    const Vector<block::pHash> payload_;
     const block::pHash stop_;
 
     using implementation::Message::payload;

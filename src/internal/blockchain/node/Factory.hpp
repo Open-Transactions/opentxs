@@ -87,7 +87,7 @@ auto BlockchainFilterOracle(
     const blockchain::node::internal::Network& node,
     const blockchain::node::HeaderOracle& header,
     const blockchain::node::internal::BlockOracle& block,
-    const blockchain::node::internal::FilterDatabase& database,
+    blockchain::node::internal::FilterDatabase& database,
     const blockchain::Type chain,
     const blockchain::cfilter::Type filter,
     const UnallocatedCString& shutdown) noexcept
@@ -107,7 +107,7 @@ auto BlockchainPeerManager(
     const blockchain::node::HeaderOracle& headers,
     const blockchain::node::internal::FilterOracle& filter,
     const blockchain::node::internal::BlockOracle& block,
-    const blockchain::node::internal::PeerDatabase& database,
+    blockchain::node::internal::PeerDatabase& database,
     const blockchain::Type type,
     const blockchain::database::BlockStorage policy,
     const UnallocatedCString& seednode,
@@ -116,7 +116,7 @@ auto BlockchainPeerManager(
 auto BlockchainWallet(
     const api::Session& api,
     const blockchain::node::internal::Network& parent,
-    const blockchain::node::internal::WalletDatabase& db,
+    blockchain::node::internal::WalletDatabase& db,
     const blockchain::node::internal::Mempool& mempool,
     const blockchain::Type chain,
     const std::string_view shutdown)
@@ -125,13 +125,13 @@ auto BlockOracle(
     const api::Session& api,
     const blockchain::node::internal::Network& node,
     const blockchain::node::HeaderOracle& header,
-    const blockchain::node::internal::BlockDatabase& db,
+    blockchain::node::internal::BlockDatabase& db,
     const blockchain::Type chain,
     const UnallocatedCString& shutdown) noexcept
     -> std::unique_ptr<blockchain::node::internal::BlockOracle>;
 auto HeaderOracle(
     const api::Session& api,
-    const blockchain::node::internal::HeaderDatabase& database,
+    blockchain::node::internal::HeaderDatabase& database,
     const blockchain::Type type) noexcept
     -> std::unique_ptr<blockchain::node::HeaderOracle>;
 }  // namespace opentxs::factory

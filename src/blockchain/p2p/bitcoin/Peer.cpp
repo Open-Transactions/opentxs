@@ -80,6 +80,7 @@ auto BitcoinP2PPeerLegacy(
     const blockchain::node::internal::FilterOracle& filter,
     const blockchain::node::internal::BlockOracle& block,
     const blockchain::node::internal::PeerManager& manager,
+    blockchain::node::internal::PeerDatabase& db,
     const blockchain::database::BlockStorage policy,
     const int id,
     std::unique_ptr<blockchain::p2p::internal::Address> address,
@@ -120,6 +121,7 @@ auto BitcoinP2PPeerLegacy(
         filter,
         block,
         manager,
+        db,
         policy,
         shutdown,
         id,
@@ -176,6 +178,7 @@ Peer::Peer(
     const node::internal::FilterOracle& filter,
     const node::internal::BlockOracle& block,
     const node::internal::PeerManager& manager,
+    node::internal::PeerDatabase& database,
     const database::BlockStorage policy,
     const UnallocatedCString& shutdown,
     const int id,
@@ -191,6 +194,7 @@ Peer::Peer(
           filter,
           block,
           manager,
+          database,
           id,
           shutdown,
           HeaderType::Size(),
@@ -447,7 +451,7 @@ auto Peer::process_addr(
         peers.emplace_back(std::move(pAddress));
     }
 
-    manager_.Database().Import(std::move(peers));
+    database_.Import(std::move(peers));
 }
 
 auto Peer::process_block(

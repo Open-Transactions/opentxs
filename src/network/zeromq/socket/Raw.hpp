@@ -62,6 +62,7 @@ public:
     virtual auto DisconnectAll() noexcept -> bool { return {}; }
     virtual auto Native() noexcept -> void* { return nullptr; }
     virtual auto Send(Message&&) noexcept -> bool { return {}; }
+    virtual auto SendDeferred(Message&&) noexcept -> bool { return {}; }
     virtual auto SendExternal(Message&&) noexcept -> bool { return {}; }
     virtual auto SetExposedUntrusted() noexcept -> bool { return false; }
     virtual auto SetIncomingHWM(int) noexcept -> bool { return {}; }
@@ -108,6 +109,7 @@ public:
     auto DisconnectAll() noexcept -> bool final;
     auto Native() noexcept -> void* final { return socket_.get(); }
     auto Send(Message&& msg) noexcept -> bool final;
+    auto SendDeferred(Message&& msg) noexcept -> bool final;
     auto SendExternal(Message&& msg) noexcept -> bool final;
     auto SetExposedUntrusted() noexcept -> bool final;
     auto SetIncomingHWM(int value) noexcept -> bool final;

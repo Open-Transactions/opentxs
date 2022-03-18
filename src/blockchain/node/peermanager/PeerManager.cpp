@@ -45,7 +45,7 @@ auto BlockchainPeerManager(
     const blockchain::node::HeaderOracle& headers,
     const blockchain::node::internal::FilterOracle& filter,
     const blockchain::node::internal::BlockOracle& block,
-    const blockchain::node::internal::PeerDatabase& database,
+    blockchain::node::internal::PeerDatabase& database,
     const blockchain::Type type,
     const blockchain::database::BlockStorage policy,
     const UnallocatedCString& seednode,
@@ -80,7 +80,7 @@ PeerManager::PeerManager(
     const HeaderOracle& headers,
     const internal::FilterOracle& filter,
     const internal::BlockOracle& block,
-    const internal::PeerDatabase& database,
+    internal::PeerDatabase& database,
     const Type chain,
     const database::BlockStorage policy,
     const UnallocatedCString& seednode,
@@ -123,7 +123,8 @@ auto PeerManager::AddIncomingPeer(const int id, std::uintptr_t endpoint)
     pipeline_.Push(std::move(work));
 }
 
-auto PeerManager::AddPeer(const p2p::Address& address) const noexcept -> bool
+auto PeerManager::AddPeer(
+    const blockchain::p2p::Address& address) const noexcept -> bool
 {
     if (false == running_.load()) { return false; }
 
@@ -234,7 +235,8 @@ auto PeerManager::JobReady(const Task type) const noexcept -> void
     }
 }
 
-auto PeerManager::Listen(const p2p::Address& address) const noexcept -> bool
+auto PeerManager::Listen(const blockchain::p2p::Address& address) const noexcept
+    -> bool
 {
     if (false == running_.load()) { return false; }
 
@@ -365,8 +367,8 @@ auto PeerManager::pipeline(zmq::Message&& message) noexcept -> void
             OT_ASSERT(2 < body.size());
 
             const auto id = body.at(1).as<int>();
-            auto endpoint =
-                Peers::Endpoint{reinterpret_cast<p2p::internal::Address*>(
+            auto endpoint = Peers::Endpoint{
+                reinterpret_cast<blockchain::p2p::internal::Address*>(
                     body.at(2).as<std::uintptr_t>())};
 
             OT_ASSERT(0 <= id);

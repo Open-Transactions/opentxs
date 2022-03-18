@@ -8,8 +8,8 @@
 #include "blockchain/crypto/Deterministic.hpp"  // IWYU pragma: associated
 
 #include <boost/container/vector.hpp>
-#include <robin_hood.h>
 #include <algorithm>
+#include <iterator>
 #include <memory>
 #include <stdexcept>
 #include <tuple>
@@ -52,8 +52,6 @@ Deterministic::Deterministic(
     , last_allocation_()
     , cached_key_()
 {
-    data_.internal_.map_.reserve(1024u);
-    data_.internal_.map_.reserve(1024u);
 }
 
 Deterministic::Deterministic(
@@ -528,7 +526,29 @@ auto Deterministic::mutable_element(
     const Subchain type,
     const Bip32Index index) noexcept(false) -> crypto::Element&
 {
-    return *data_.Get(type).map_.at(index);
+    auto& data = data_.Get(type).map_;
+
+    try {
+
+        return *data.at(index);
+    } catch (...) {
+        auto error = CString{"index "}
+                         .append(std::to_string(index))
+                         .append(" does not exist for ")
+                         .append(opentxs::print(type))
+                         .append(" subchain which contains ");
+
+        if (0u == data.size()) {
+            error.append("no elements");
+        } else {
+            error.append("elements ")
+                .append(std::to_string(data.cbegin()->first))
+                .append(" through ")
+                .append(std::to_string(data.crbegin()->first));
+        }
+
+        throw std::out_of_range{error.c_str()};
+    }
 }
 
 auto Deterministic::need_lookahead(const rLock& lock, const Subchain type)

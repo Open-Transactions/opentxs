@@ -153,7 +153,7 @@ struct Mempool::Imp {
     }
 
     Imp(const api::crypto::Blockchain& crypto,
-        const internal::WalletDatabase& wallet,
+        internal::WalletDatabase& wallet,
         const network::zeromq::socket::Publish& socket,
         const Type chain) noexcept
         : crypto_(crypto)
@@ -181,7 +181,7 @@ private:
     static constexpr auto txid_limit_ = std::chrono::hours{24};
 
     const api::crypto::Blockchain& crypto_;
-    const internal::WalletDatabase& wallet_;
+    internal::WalletDatabase& wallet_;
     const Type chain_;
     mutable std::shared_mutex lock_;
     mutable TransactionMap transactions_;
@@ -226,7 +226,7 @@ private:
 
 Mempool::Mempool(
     const api::crypto::Blockchain& crypto,
-    const internal::WalletDatabase& wallet,
+    internal::WalletDatabase& wallet,
     const network::zeromq::socket::Publish& socket,
     const Type chain) noexcept
     : imp_(std::make_unique<Imp>(crypto, wallet, socket, chain))

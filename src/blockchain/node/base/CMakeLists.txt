@@ -8,8 +8,6 @@ target_sources(
   PRIVATE
     "Base.cpp"
     "Base.hpp"
-    "SyncClient.cpp"
-    "SyncClient.hpp"
     "SyncServer.hpp"
 )
 target_link_libraries(opentxs-common PRIVATE "${OT_ZMQ_TARGET}")

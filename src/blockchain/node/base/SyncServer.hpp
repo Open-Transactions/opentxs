@@ -72,7 +72,7 @@ public:
 
     SyncServer(
         const api::Session& api,
-        const node::internal::SyncDatabase& db,
+        node::internal::SyncDatabase& db,
         const node::HeaderOracle& header,
         const node::internal::FilterOracle& filter,
         const node::internal::Network& node,
@@ -123,7 +123,7 @@ private:
     using OTSocket = network::zeromq::socket::implementation::Socket;
     using Work = node::implementation::Base::Work;
 
-    const node::internal::SyncDatabase& db_;
+    node::internal::SyncDatabase& db_;
     const node::HeaderOracle& header_;
     const node::internal::FilterOracle& filter_;
     const node::internal::Network& node_;

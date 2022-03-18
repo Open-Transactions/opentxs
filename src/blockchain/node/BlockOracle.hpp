@@ -117,7 +117,7 @@ public:
         const api::Session& api,
         const internal::Network& node,
         const HeaderOracle& header,
-        const internal::BlockDatabase& db,
+        internal::BlockDatabase& db,
         const blockchain::Type chain,
         const UnallocatedCString& shutdown) noexcept;
 
@@ -145,7 +145,7 @@ private:
         Cache(
             const api::Session& api_,
             const internal::Network& node,
-            const internal::BlockDatabase& db,
+            internal::BlockDatabase& db,
             const network::zeromq::socket::Publish& blockAvailable,
             const network::zeromq::socket::Publish& downloadCache,
             const blockchain::Type chain) noexcept;
@@ -177,7 +177,7 @@ private:
 
         const api::Session& api_;
         const internal::Network& node_;
-        const internal::BlockDatabase& db_;
+        internal::BlockDatabase& db_;
         const network::zeromq::socket::Publish& block_available_;
         const network::zeromq::socket::Publish& cache_size_publisher_;
         const blockchain::Type chain_;
@@ -192,7 +192,7 @@ private:
     };
 
     const internal::Network& node_;
-    const internal::BlockDatabase& db_;
+    internal::BlockDatabase& db_;
     mutable std::mutex lock_;
     Cache cache_;
     std::unique_ptr<BlockDownloader> block_downloader_;

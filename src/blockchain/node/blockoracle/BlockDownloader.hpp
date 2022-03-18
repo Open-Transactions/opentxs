@@ -47,7 +47,7 @@ public:
 
     BlockDownloader(
         const api::Session& api,
-        const internal::BlockDatabase& db,
+        internal::BlockDatabase& db,
         const HeaderOracle& header,
         const internal::Network& node,
         const blockchain::Type chain,
@@ -84,7 +84,7 @@ private:
     friend BlockDMBlock;
     friend BlockWorkerBlock;
 
-    const internal::BlockDatabase& db_;
+    internal::BlockDatabase& db_;
     const HeaderOracle& header_;
     const internal::Network& node_;
     const blockchain::Type chain_;

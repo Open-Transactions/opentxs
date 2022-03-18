@@ -10,14 +10,16 @@
 #include "blockchain/node/wallet/subchain/statemachine/Rescan.hpp"  // IWYU pragma: associated
 
 #include <boost/smart_ptr/make_shared.hpp>
+#include <boost/smart_ptr/shared_ptr.hpp>
 #include <algorithm>
-#include <chrono>
 #include <iterator>
 #include <limits>
 #include <utility>
 
 #include "blockchain/node/wallet/subchain/SubchainStateData.hpp"
 #include "internal/blockchain/node/Node.hpp"
+#include "internal/blockchain/node/wallet/Types.hpp"
+#include "internal/blockchain/node/wallet/subchain/statemachine/Job.hpp"
 #include "internal/blockchain/node/wallet/subchain/statemachine/Types.hpp"
 #include "internal/network/zeromq/Context.hpp"
 #include "internal/network/zeromq/socket/Pipeline.hpp"
@@ -25,71 +27,50 @@
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/api/network/Network.hpp"
 #include "opentxs/api/session/Endpoints.hpp"
-#include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
-#include "opentxs/blockchain/BlockchainType.hpp"
-#include "opentxs/blockchain/bitcoin/cfilter/FilterType.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/network/zeromq/Pipeline.hpp"
-#include "opentxs/network/zeromq/message/Frame.hpp"
-#include "opentxs/network/zeromq/message/FrameSection.hpp"
-#include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/network/zeromq/socket/SocketType.hpp"
 #include "opentxs/network/zeromq/socket/Types.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Pimpl.hpp"
-#include "opentxs/util/WorkType.hpp"
 #include "util/Work.hpp"
 
 namespace opentxs::blockchain::node::wallet
 {
 Rescan::Imp::Imp(
-    const boost::shared_ptr<const SubchainStateData>& parent,
+    const SubchainStateData& parent,
     const network::zeromq::BatchID batch,
     allocator_type alloc) noexcept
-    : Actor(
-          parent->api_,
-          LogTrace(),
-          0ms,
+    : Job(LogTrace(),
+          parent,
           batch,
+          CString{"rescan", alloc},
           alloc,
           {
-              {parent->to_children_endpoint_, Direction::Connect},
-              {CString{parent->api_.Endpoints().BlockchainNewFilter()},
+              {parent.shutdown_endpoint_, Direction::Connect},
+              {CString{parent.api_.Endpoints().BlockchainNewFilter()},
                Direction::Connect},
           },
           {
-              {parent->to_rescan_endpoint_, Direction::Bind},
+              {parent.to_rescan_endpoint_, Direction::Bind},
           },
           {},
           {
               {SocketType::Push,
                {
-                   {parent->from_children_endpoint_, Direction::Connect},
+                   {parent.to_process_endpoint_, Direction::Connect},
                }},
               {SocketType::Push,
                {
-                   {parent->to_process_endpoint_, Direction::Connect},
-               }},
-              {SocketType::Push,
-               {
-                   {parent->to_progress_endpoint_, Direction::Connect},
-               }},
-              {SocketType::Push,
-               {
-                   {parent->to_index_endpoint_, Direction::Connect},
+                   {parent.to_progress_endpoint_, Direction::Connect},
                }},
           })
-    , to_parent_(pipeline_.Internal().ExtraSocket(0))
-    , to_process_(pipeline_.Internal().ExtraSocket(1))
-    , to_progress_(pipeline_.Internal().ExtraSocket(2))
-    , to_index_(pipeline_.Internal().ExtraSocket(3))
-    , parent_p_(parent)
-    , parent_(*parent_p_)
-    , state_(State::normal)
+    , to_process_(pipeline_.Internal().ExtraSocket(0))
+    , to_progress_(pipeline_.Internal().ExtraSocket(1))
     , active_(false)
     , last_scanned_(std::nullopt)
     , filter_tip_(std::nullopt)
@@ -125,7 +106,30 @@ auto Rescan::Imp::caught_up() const noexcept -> bool
            filter_tip_.value_or(parent_.null_position_);
 }
 
-auto Rescan::Imp::do_shutdown() noexcept -> void { parent_p_.reset(); }
+auto Rescan::Imp::do_startup() noexcept -> void
+{
+    const auto& node = parent_.node_;
+    const auto& filters = node.FilterOracleInternal();
+    last_scanned_ = parent_.db_.SubchainLastScanned(parent_.db_key_);
+    filter_tip_ = filters.FilterTip(parent_.filter_type_);
+
+    OT_ASSERT(last_scanned_.has_value());
+    OT_ASSERT(filter_tip_.has_value());
+
+    log_(OT_PRETTY_CLASS())(parent_.name_)(" loaded last scanned value of ")(
+        opentxs::print(last_scanned_.value()))(" from database")
+        .Flush();
+    log_(OT_PRETTY_CLASS())(parent_.name_)(" loaded filter tip value of ")(
+        opentxs::print(last_scanned_.value()))(" from filter oracle")
+        .Flush();
+
+    if (last_scanned_.value() > filter_tip_.value()) {
+        log_(OT_PRETTY_CLASS())(parent_.name_)(" last scanned reset to ")(
+            opentxs::print(filter_tip_.value()))
+            .Flush();
+        last_scanned_ = filter_tip_;
+    }
+}
 
 auto Rescan::Imp::highest_clean(const Set<block::Position>& clean)
     const noexcept -> std::optional<block::Position>
@@ -140,24 +144,6 @@ auto Rescan::Imp::highest_clean(const Set<block::Position>& clean)
     } else {
 
         return std::nullopt;
-    }
-}
-
-auto Rescan::Imp::pipeline(const Work work, Message&& msg) noexcept -> void
-{
-    switch (state_) {
-        case State::normal: {
-            state_normal(work, std::move(msg));
-        } break;
-        case State::reorg: {
-            state_reorg(work, std::move(msg));
-        } break;
-        case State::shutdown: {
-            // NOTE do not process any messages
-        } break;
-        default: {
-            OT_FAIL;
-        }
     }
 }
 
@@ -191,25 +177,6 @@ auto Rescan::Imp::ProcessReorg(const block::Position& parent) noexcept -> void
     }
 
     dirty_.erase(dirty_.upper_bound(parent), dirty_.end());
-}
-
-auto Rescan::Imp::process_filter(Message&& in) noexcept -> void
-{
-    const auto body = in.Body();
-
-    OT_ASSERT(4 < body.size());
-
-    const auto chain = body.at(1).as<blockchain::Type>();
-
-    if (parent_.chain_ != chain) { return; }
-
-    const auto type = body.at(2).as<cfilter::Type>();
-
-    if (type != parent_.node_.FilterOracleInternal().DefaultType()) { return; }
-
-    process_filter(block::Position{
-        body.at(3).as<block::Height>(),
-        parent_.api_.Factory().Data(body.at(4))});
 }
 
 auto Rescan::Imp::process_filter(block::Position&& tip) noexcept -> void
@@ -258,7 +225,7 @@ auto Rescan::Imp::process_update(Message&& msg) noexcept -> void
     if (active_) {
         do_work();
     } else if (0u < clean.size()) {
-        to_progress_.Send(std::move(msg));
+        to_progress_.SendDeferred(std::move(msg));
     }
 }
 
@@ -282,116 +249,6 @@ auto Rescan::Imp::prune() noexcept -> void
     }
 }
 
-auto Rescan::Imp::startup() noexcept -> void
-{
-    const auto& node = parent_.node_;
-    const auto& filters = node.FilterOracleInternal();
-    last_scanned_ = parent_.db_.SubchainLastScanned(parent_.db_key_);
-    filter_tip_ = filters.FilterTip(parent_.filter_type_);
-
-    OT_ASSERT(last_scanned_.has_value());
-    OT_ASSERT(filter_tip_.has_value());
-
-    log_(OT_PRETTY_CLASS())(parent_.name_)(" loaded last scanned value of ")(
-        opentxs::print(last_scanned_.value()))(" from database")
-        .Flush();
-    log_(OT_PRETTY_CLASS())(parent_.name_)(" loaded filter tip value of ")(
-        opentxs::print(last_scanned_.value()))(" from filter oracle")
-        .Flush();
-
-    if (last_scanned_.value() > filter_tip_.value()) {
-        log_(OT_PRETTY_CLASS())(parent_.name_)(" last scanned reset to ")(
-            opentxs::print(filter_tip_.value()))
-            .Flush();
-        last_scanned_ = filter_tip_;
-    }
-}
-
-auto Rescan::Imp::state_normal(const Work work, Message&& msg) noexcept -> void
-{
-    switch (work) {
-        case Work::filter: {
-            process_filter(std::move(msg));
-        } break;
-        case Work::reorg_begin: {
-            transition_state_reorg(std::move(msg));
-        } break;
-        case Work::reorg_end: {
-            LogError()(OT_PRETTY_CLASS())(parent_.name_)(" wrong state for ")(
-                print(work))(" message")
-                .Flush();
-
-            OT_FAIL;
-        }
-        case Work::update: {
-            process_update(std::move(msg));
-        } break;
-        case Work::shutdown_begin: {
-            state_ = State::shutdown;
-            parent_p_.reset();
-            to_progress_.Send(std::move(msg));
-        } break;
-        case Work::shutdown:
-        case Work::mempool:
-        case Work::block:
-        case Work::reorg_begin_ack:
-        case Work::reorg_end_ack:
-        case Work::startup:
-        case Work::init:
-        case Work::key:
-        case Work::shutdown_ready:
-        case Work::statemachine:
-        default: {
-            LogError()(OT_PRETTY_CLASS())(parent_.name_)(
-                " unhandled message type ")(static_cast<OTZMQWorkType>(work))
-                .Flush();
-
-            OT_FAIL;
-        }
-    }
-}
-
-auto Rescan::Imp::state_reorg(const Work work, Message&& msg) noexcept -> void
-{
-    switch (work) {
-        case Work::shutdown:
-        case Work::filter:
-        case Work::update:
-        case Work::statemachine: {
-            log_(OT_PRETTY_CLASS())(parent_.name_)(" deferring ")(print(work))(
-                " message processing until reorg is complete")
-                .Flush();
-            defer(std::move(msg));
-        } break;
-        case Work::reorg_end: {
-            transition_state_normal(std::move(msg));
-        } break;
-        case Work::reorg_begin:
-        case Work::shutdown_begin: {
-            LogError()(OT_PRETTY_CLASS())(parent_.name_)(" wrong state for ")(
-                print(work))(" message")
-                .Flush();
-
-            OT_FAIL;
-        }
-        case Work::mempool:
-        case Work::block:
-        case Work::reorg_begin_ack:
-        case Work::reorg_end_ack:
-        case Work::startup:
-        case Work::init:
-        case Work::key:
-        case Work::shutdown_ready:
-        default: {
-            LogError()(OT_PRETTY_CLASS())(parent_.name_)(
-                " unhandled message type ")(static_cast<OTZMQWorkType>(work))
-                .Flush();
-
-            OT_FAIL;
-        }
-    }
-}
-
 auto Rescan::Imp::stop() const noexcept -> block::Height
 {
     if (0u == dirty_.size()) {
@@ -400,31 +257,6 @@ auto Rescan::Imp::stop() const noexcept -> block::Height
     }
 
     return std::max<block::Height>(0, dirty_.cbegin()->first - 1);
-}
-
-auto Rescan::Imp::transition_state_normal(Message&& msg) noexcept -> void
-{
-    disable_automatic_processing_ = false;
-    state_ = State::normal;
-    log_(OT_PRETTY_CLASS())(parent_.name_)(" transitioned to normal state ")
-        .Flush();
-    to_index_.Send(std::move(msg));
-    flush_cache();
-    do_work();
-}
-
-auto Rescan::Imp::transition_state_reorg(Message&& msg) noexcept -> void
-{
-    disable_automatic_processing_ = true;
-    state_ = State::reorg;
-    log_(OT_PRETTY_CLASS())(parent_.name_)(" transitioned to reorg state ")
-        .Flush();
-    to_progress_.Send(std::move(msg));
-}
-
-auto Rescan::Imp::VerifyState(const State state) const noexcept -> void
-{
-    OT_ASSERT(state == state_);
 }
 
 auto Rescan::Imp::work() noexcept -> bool
@@ -438,7 +270,7 @@ auto Rescan::Imp::work() noexcept -> bool
 
     const auto notify = [&] {
         auto clean = Vector<ScanStatus>{get_allocator()};
-        to_progress_.Send([&] {
+        to_progress_.SendDeferred([&] {
             clean.emplace_back(ScanState::rescan_clean, last_scanned_.value());
             auto out = MakeWork(Work::update);
             encode(clean, out);
@@ -480,7 +312,8 @@ auto Rescan::Imp::work() noexcept -> bool
         last_scanned_ = std::move(highestClean);
         prune();
     } else {
-        OT_ASSERT(0u < dirty.size());
+        // NOTE either the first tested block was dirty or else the scan was
+        // interrupted for a state change
     }
 
     if (last_scanned_.has_value()) {
@@ -500,7 +333,7 @@ auto Rescan::Imp::work() noexcept -> bool
         log_(OT_PRETTY_CLASS())(parent_.name_)(" re-processing ")(
             count)(" items ")
             .Flush();
-        to_process_.Send([&] {
+        to_process_.SendDeferred([&] {
             auto out = MakeWork(Work::update);
             encode(dirty, out);
 
@@ -525,10 +358,9 @@ auto Rescan::Imp::work() noexcept -> bool
 
 namespace opentxs::blockchain::node::wallet
 {
-Rescan::Rescan(
-    const boost::shared_ptr<const SubchainStateData>& parent) noexcept
+Rescan::Rescan(const SubchainStateData& parent) noexcept
     : imp_([&] {
-        const auto& asio = parent->api_.Network().ZeroMQ().Internal();
+        const auto& asio = parent.api_.Network().ZeroMQ().Internal();
         const auto batchID = asio.PreallocateBatch();
         // TODO the version of libc++ present in android ndk 23.0.7599858
         // has a broken std::allocate_shared function so we're using
@@ -541,15 +373,18 @@ Rescan::Rescan(
     imp_->Init(imp_);
 }
 
+auto Rescan::ChangeState(const State state) noexcept -> bool
+{
+    return imp_->ChangeState(state);
+}
+
 auto Rescan::ProcessReorg(const block::Position& parent) noexcept -> void
 {
     imp_->ProcessReorg(parent);
 }
 
-auto Rescan::VerifyState(const State state) const noexcept -> void
+Rescan::~Rescan()
 {
-    imp_->VerifyState(state);
+    if (imp_) { imp_->Shutdown(); }
 }
-
-Rescan::~Rescan() = default;
 }  // namespace opentxs::blockchain::node::wallet

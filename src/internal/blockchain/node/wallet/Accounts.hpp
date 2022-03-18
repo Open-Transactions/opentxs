@@ -44,14 +44,14 @@ class Accounts
 {
 public:
     auto Init() noexcept -> void;
+    auto Shutdown() noexcept -> void;
 
     Accounts(
         const api::Session& api,
         const node::internal::Network& node,
-        const node::internal::WalletDatabase& db,
+        node::internal::WalletDatabase& db,
         const node::internal::Mempool& mempool,
-        const Type chain,
-        const std::string_view toParent) noexcept;
+        const Type chain) noexcept;
 
     ~Accounts();
 

@@ -101,6 +101,7 @@ auto BitcoinP2PPeerLegacy(
     const blockchain::node::internal::FilterOracle& filter,
     const blockchain::node::internal::BlockOracle& block,
     const blockchain::node::internal::PeerManager& manager,
+    blockchain::node::internal::PeerDatabase& db,
     const blockchain::database::BlockStorage policy,
     const int id,
     std::unique_ptr<blockchain::p2p::internal::Address> address,

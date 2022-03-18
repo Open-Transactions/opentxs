@@ -8,8 +8,13 @@
 #include "opentxs/network/p2p/Types.hpp"  // IWYU pragma: associated
 
 #include <robin_hood.h>
+#include <string_view>
 
+#include "internal/network/p2p/Types.hpp"
+#include "internal/util/LogMacros.hpp"
 #include "opentxs/network/p2p/MessageType.hpp"
+#include "opentxs/util/Log.hpp"
+#include "opentxs/util/WorkType.hpp"
 
 namespace opentxs
 {
@@ -39,3 +44,39 @@ auto print(Type value) noexcept -> UnallocatedCString
     }
 }
 }  // namespace opentxs
+
+namespace opentxs::network::p2p
+{
+auto print(Job job) noexcept -> std::string_view
+{
+    try {
+        using namespace std::literals;
+        static const auto map = Map<Job, std::string_view>{
+            {Job::Shutdown, "Shutdown"sv},
+            {Job::BlockHeader, "BlockHeader"sv},
+            {Job::Reorg, "Reorg"sv},
+            {Job::SyncServerUpdated, "SyncServerUpdated"sv},
+            {Job::SyncAck, "SyncAck"sv},
+            {Job::SyncReply, "SyncReply"sv},
+            {Job::SyncPush, "SyncPush"sv},
+            {Job::Response, "Response"sv},
+            {Job::PublishContract, "PublishContract"sv},
+            {Job::QueryContract, "QueryContract"sv},
+            {Job::PushTransaction, "PushTransaction"sv},
+            {Job::Register, "Register"sv},
+            {Job::Request, "Request"sv},
+            {Job::Processed, "Processed"sv},
+            {Job::Init, "Init"sv},
+            {Job::StateMachine, "StateMachine"sv},
+        };
+
+        return map.at(job);
+    } catch (...) {
+        LogError()(__FUNCTION__)("invalid Job: ")(
+            static_cast<OTZMQWorkType>(job))
+            .Flush();
+
+        OT_FAIL;
+    }
+}
+}  // namespace opentxs::network::p2p

@@ -186,8 +186,18 @@ struct LMDB::Imp {
         const Callback cb,
         const Mode multiple) const noexcept -> bool
     {
+        auto tx = TransactionRO();
+
+        return Load(table, index, cb, multiple, tx);
+    }
+    auto Load(
+        const Table table,
+        const ReadView index,
+        const Callback cb,
+        const Mode multiple,
+        MDB_txn* tx) const noexcept -> bool
+    {
         try {
-            auto tx = TransactionRO();
             MDB_cursor* cursor{nullptr};
             auto post = ScopeGuard{[&] {
                 if (nullptr != cursor) {
@@ -748,6 +758,16 @@ auto LMDB::Load(
     const Mode multiple) const noexcept -> bool
 {
     return imp_->Load(table, index, cb, multiple);
+}
+
+auto LMDB::Load(
+    const Table table,
+    const ReadView index,
+    const Callback cb,
+    Transaction& tx,
+    const Mode multiple) const noexcept -> bool
+{
+    return imp_->Load(table, index, cb, multiple, tx);
 }
 
 auto LMDB::Load(

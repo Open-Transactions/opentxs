@@ -36,17 +36,15 @@ Wallet::Wallet(
 }
 
 auto Wallet::AddConfirmedTransaction(
-    const NodeID& balanceNode,
-    const Subchain subchain,
+    const NodeID& accountID,
+    const SubchainIndex& index,
     const block::Position& block,
     const std::size_t blockIndex,
     const UnallocatedVector<std::uint32_t> outputIndices,
     const block::bitcoin::Transaction& original) const noexcept -> bool
 {
-    const auto id = subchains_.GetSubchainID(balanceNode, subchain, nullptr);
-
     return outputs_.AddConfirmedTransaction(
-        balanceNode, id, block, blockIndex, outputIndices, original);
+        accountID, index, block, blockIndex, outputIndices, original);
 }
 
 auto Wallet::AddMempoolTransaction(
@@ -125,30 +123,35 @@ auto Wallet::GetBalance(const crypto::Key& key) const noexcept -> Balance
     return outputs_.GetBalance(key);
 }
 
-auto Wallet::GetOutputs(node::TxoState type) const noexcept
-    -> UnallocatedVector<UTXO>
+auto Wallet::GetOutputs(node::TxoState type, alloc::Resource* alloc)
+    const noexcept -> Vector<UTXO>
 {
-    return outputs_.GetOutputs(type);
+    return outputs_.GetOutputs(type, alloc);
 }
 
-auto Wallet::GetOutputs(const identifier::Nym& owner, node::TxoState type)
-    const noexcept -> UnallocatedVector<UTXO>
+auto Wallet::GetOutputs(
+    const identifier::Nym& owner,
+    node::TxoState type,
+    alloc::Resource* alloc) const noexcept -> Vector<UTXO>
 {
-    return outputs_.GetOutputs(owner, type);
+    return outputs_.GetOutputs(owner, type, alloc);
 }
 
 auto Wallet::GetOutputs(
     const identifier::Nym& owner,
     const Identifier& node,
-    node::TxoState type) const noexcept -> UnallocatedVector<UTXO>
+    node::TxoState type,
+    alloc::Resource* alloc) const noexcept -> Vector<UTXO>
 {
-    return outputs_.GetOutputs(owner, node, type);
+    return outputs_.GetOutputs(owner, node, type, alloc);
 }
 
-auto Wallet::GetOutputs(const crypto::Key& key, node::TxoState type)
-    const noexcept -> UnallocatedVector<UTXO>
+auto Wallet::GetOutputs(
+    const crypto::Key& key,
+    node::TxoState type,
+    alloc::Resource* alloc) const noexcept -> Vector<UTXO>
 {
-    return outputs_.GetOutputs(key, type);
+    return outputs_.GetOutputs(key, type, alloc);
 }
 
 auto Wallet::GetOutputTags(const block::Outpoint& output) const noexcept
@@ -157,9 +160,10 @@ auto Wallet::GetOutputTags(const block::Outpoint& output) const noexcept
     return outputs_.GetOutputTags(output);
 }
 
-auto Wallet::GetPatterns(const SubchainIndex& index) const noexcept -> Patterns
+auto Wallet::GetPatterns(const SubchainIndex& index, alloc::Resource* alloc)
+    const noexcept -> Patterns
 {
-    return subchains_.GetPatterns(index);
+    return subchains_.GetPatterns(index, alloc);
 }
 
 auto Wallet::GetSubchainID(const NodeID& balanceNode, const Subchain subchain)
@@ -185,25 +189,28 @@ auto Wallet::GetUnconfirmedTransactions() const noexcept
     return outputs_.GetUnconfirmedTransactions();
 }
 
-auto Wallet::GetUnspentOutputs() const noexcept -> UnallocatedVector<UTXO>
+auto Wallet::GetUnspentOutputs(alloc::Resource* alloc) const noexcept
+    -> Vector<UTXO>
 {
-    return outputs_.GetUnspentOutputs();
+    return outputs_.GetUnspentOutputs(alloc);
 }
 
 auto Wallet::GetUnspentOutputs(
     const NodeID& balanceNode,
-    const Subchain subchain) const noexcept -> UnallocatedVector<UTXO>
+    const Subchain subchain,
+    alloc::Resource* alloc) const noexcept -> Vector<UTXO>
 {
     const auto id = subchains_.GetSubchainID(balanceNode, subchain, nullptr);
 
-    return outputs_.GetUnspentOutputs(id);
+    return outputs_.GetUnspentOutputs(id, alloc);
 }
 
 auto Wallet::GetUntestedPatterns(
     const SubchainIndex& index,
-    const ReadView blockID) const noexcept -> Patterns
+    const ReadView blockID,
+    alloc::Resource* alloc) const noexcept -> Patterns
 {
-    return subchains_.GetUntestedPatterns(index, blockID);
+    return subchains_.GetUntestedPatterns(index, blockID, alloc);
 }
 
 auto Wallet::GetWalletHeight() const noexcept -> block::Height

@@ -133,8 +133,6 @@ HD::HD(
                   ChainData{api, internal_type_, false, external_type_, true};
               auto& internal = out.internal_.map_;
               auto& external = out.external_.map_;
-              internal.reserve(serialized.internaladdress().size());
-              external.reserve(serialized.externaladdress().size());
 
               for (const auto& address : serialized.internaladdress()) {
                   internal.emplace(

@@ -64,7 +64,7 @@ auto BlockchainFilterOracle(
     const blockchain::node::internal::Network& node,
     const blockchain::node::HeaderOracle& header,
     const blockchain::node::internal::BlockOracle& block,
-    const blockchain::node::internal::FilterDatabase& database,
+    blockchain::node::internal::FilterDatabase& database,
     const blockchain::Type chain,
     const blockchain::cfilter::Type filter,
     const UnallocatedCString& shutdown) noexcept
@@ -118,7 +118,7 @@ FilterOracle::FilterOracle(
     const internal::Network& node,
     const HeaderOracle& header,
     const internal::BlockOracle& block,
-    const internal::FilterDatabase& database,
+    internal::FilterDatabase& database,
     const blockchain::Type chain,
     const blockchain::cfilter::Type filter,
     const UnallocatedCString& shutdown) noexcept

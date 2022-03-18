@@ -257,7 +257,7 @@ auto Blockchain::Imp::AssignContact(
     auto lock = Lock{nym_mutex(nymID)};
 
     const auto chain = UnitToBlockchain(
-        api_.Storage().BlockchainAccountType(nymID.str(), accountID.str()));
+        api_.Storage().BlockchainSubaccountAccountType(nymID, accountID));
 
     OT_ASSERT(opentxs::blockchain::Type::Unknown != chain);
 
@@ -296,7 +296,7 @@ auto Blockchain::Imp::AssignLabel(
     auto lock = Lock{nym_mutex(nymID)};
 
     const auto chain = UnitToBlockchain(
-        api_.Storage().BlockchainAccountType(nymID.str(), accountID.str()));
+        api_.Storage().BlockchainSubaccountAccountType(nymID, accountID));
 
     OT_ASSERT(opentxs::blockchain::Type::Unknown != chain);
 
@@ -413,8 +413,8 @@ auto Blockchain::Imp::Confirm(
         const auto accountID = api_.Factory().Identifier(id);
 
         return get_node(accountID).Internal().Confirm(subchain, index, tx);
-    } catch (...) {
-        LogError()(OT_PRETTY_CLASS())("Invalid key index").Flush();
+    } catch (const std::exception& e) {
+        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
 
         return false;
     }
@@ -645,15 +645,16 @@ auto Blockchain::Imp::get_node(const Identifier& accountID) const
     noexcept(false) -> opentxs::blockchain::crypto::Subaccount&
 {
     const auto& nymID = accounts_.Owner(accountID);
-    const auto nym = nymID.str();
-    const auto id = accountID.str();
     const auto& wallet = [&]() -> auto&
     {
-        const auto type = api_.Storage().BlockchainAccountType(nym, id);
+        const auto type =
+            api_.Storage().BlockchainSubaccountAccountType(nymID, accountID);
 
         if (UnitType::Error == type) {
-            const auto error = UnallocatedCString{"account "} + id +
-                               " for nym " + nym + " does not exist";
+            const auto error =
+                UnallocatedCString{"unable to determine unit type for "
+                                   "blockchain subaccount "} +
+                accountID.str() + " belonging to nym " + nymID.str();
 
             throw std::out_of_range(error);
         }
@@ -689,13 +690,12 @@ auto Blockchain::Imp::HDSubaccount(
     const Identifier& accountID) const noexcept(false)
     -> const opentxs::blockchain::crypto::HD&
 {
-    const auto id = accountID.str();
-    const auto nym = nymID.str();
-    const auto type = api_.Storage().BlockchainAccountType(nym, id);
+    const auto type =
+        api_.Storage().BlockchainSubaccountAccountType(nymID, accountID);
 
     if (UnitType::Error == type) {
-        const auto error = UnallocatedCString{"HD account "} + id + " for " +
-                           nym + " does not exist";
+        const auto error = UnallocatedCString{"HD account "} + accountID.str() +
+                           " for " + nymID.str() + " does not exist";
 
         throw std::out_of_range(error);
     }

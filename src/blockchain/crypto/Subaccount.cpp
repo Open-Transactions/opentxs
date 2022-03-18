@@ -142,8 +142,8 @@ auto Subaccount::Confirm(
 
             return false;
         }
-    } catch (...) {
-        LogError()(OT_PRETTY_CLASS())("invalid subchain or index").Flush();
+    } catch (const std::exception& e) {
+        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
 
         return false;
     }

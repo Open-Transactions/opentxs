@@ -100,6 +100,12 @@ public:
         const Mode mode = Mode::One) const noexcept -> bool;
     auto Load(
         const Table table,
+        const ReadView key,
+        const Callback cb,
+        Transaction& tx,
+        const Mode mode = Mode::One) const noexcept -> bool;
+    auto Load(
+        const Table table,
         const std::size_t key,
         const Callback cb,
         const Mode mode = Mode::One) const noexcept -> bool;

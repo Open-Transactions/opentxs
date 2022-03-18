@@ -9,6 +9,7 @@
 
 #include "opentxs/blockchain/bitcoin/cfilter/Types.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
+#include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
@@ -33,6 +34,10 @@ public:
         -> block::Position = 0;
     virtual auto LoadFilter(const cfilter::Type type, const block::Hash& block)
         const noexcept -> std::unique_ptr<const GCS> = 0;
+    virtual auto LoadFilters(
+        const cfilter::Type type,
+        const Vector<block::pHash>& blocks) const noexcept
+        -> Vector<std::unique_ptr<const GCS>> = 0;
     virtual auto LoadFilterHeader(
         const cfilter::Type type,
         const block::Hash& block) const noexcept -> cfilter::pHeader = 0;

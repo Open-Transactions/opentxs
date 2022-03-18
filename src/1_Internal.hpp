@@ -197,10 +197,13 @@ namespace internal
 {
 }  // namespace internal
 
+namespace p2p
+{
+}  // namespace p2p
+
 namespace wallet
 {
 }  // namespace wallet
-
 }  // namespace node
 
 namespace p2p

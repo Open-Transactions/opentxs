@@ -65,9 +65,10 @@ public:
         internal_index_.erase(internalID);
         peers_.erase(it);
     }
-    auto Listen(const p2p::Address& address) const noexcept -> bool final
+    auto Listen(const blockchain::p2p::Address& address) const noexcept
+        -> bool final
     {
-        if (p2p::Network::zmq != address.Type()) {
+        if (blockchain::p2p::Network::zmq != address.Type()) {
             LogError()(OT_PRETTY_CLASS())("Invalid address").Flush();
 
             return false;
@@ -172,8 +173,8 @@ private:
             const auto zmq = inproc + ':' + std::to_string(port);
             auto address = factory::BlockchainAddress(
                 api_,
-                p2p::Protocol::bitcoin,
-                p2p::Network::zmq,
+                blockchain::p2p::Protocol::bitcoin,
+                blockchain::p2p::Network::zmq,
                 api_.Factory().Data(inproc, StringStyle::Raw),
                 port,
                 parent_.chain_,

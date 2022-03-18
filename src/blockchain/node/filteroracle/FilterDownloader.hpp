@@ -64,7 +64,7 @@ public:
 
     FilterDownloader(
         const api::Session& api,
-        const internal::FilterDatabase& db,
+        internal::FilterDatabase& db,
         const HeaderOracle& header,
         const internal::Network& node,
         const blockchain::Type chain,
@@ -101,7 +101,7 @@ private:
     friend FilterDM;
     friend FilterWorker;
 
-    const internal::FilterDatabase& db_;
+    internal::FilterDatabase& db_;
     const HeaderOracle& header_;
     const internal::Network& node_;
     const blockchain::Type chain_;

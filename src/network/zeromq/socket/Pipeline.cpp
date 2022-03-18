@@ -412,6 +412,11 @@ auto Pipeline::Imp::Send(zeromq::Message&& msg) const noexcept -> bool
     return true;
 }
 
+auto Pipeline::Imp::SendFromThread(zeromq::Message&& msg) noexcept -> bool
+{
+    return dealer_.Send(std::move(msg));
+}
+
 auto Pipeline::Imp::SetCallback(Callback&& cb) const noexcept -> void
 {
     auto& listener =

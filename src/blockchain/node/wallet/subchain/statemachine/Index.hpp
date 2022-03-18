@@ -11,6 +11,7 @@
 #include <atomic>
 #include <optional>
 
+#include "blockchain/node/wallet/subchain/statemachine/Job.hpp"
 #include "internal/blockchain/node/Node.hpp"
 #include "internal/blockchain/node/wallet/Types.hpp"
 #include "internal/network/zeromq/Types.hpp"
@@ -51,19 +52,12 @@ class Raw;
 
 namespace opentxs::blockchain::node::wallet
 {
-class Index::Imp : public Actor<Imp, SubchainJobs>
+class Index::Imp : public statemachine::Job
 {
 public:
-    auto VerifyState(const State state) const noexcept -> void;
+    auto ProcessReorg(const block::Position& parent) noexcept -> void final;
 
-    auto Init(boost::shared_ptr<Imp> me) noexcept -> void
-    {
-        signal_startup(me);
-    }
-    auto ProcessReorg(const block::Position& parent) noexcept -> void;
-    auto Shutdown() noexcept -> void { signal_shutdown(); }
-
-    Imp(const boost::shared_ptr<const SubchainStateData>& parent,
+    Imp(const SubchainStateData& parent,
         const network::zeromq::BatchID batch,
         allocator_type alloc) noexcept;
     Imp() = delete;
@@ -74,41 +68,24 @@ public:
 
     ~Imp() override = default;
 
-private:
-    friend Actor<Imp, SubchainJobs>;
-
-    network::zeromq::socket::Raw& to_parent_;
-    network::zeromq::socket::Raw& to_scan_;
-    network::zeromq::socket::Raw& to_rescan_;
-    network::zeromq::socket::Raw& to_process_;
-    boost::shared_ptr<const SubchainStateData> parent_p_;
-
 protected:
-    const SubchainStateData& parent_;
-
     auto done(
         const node::internal::WalletDatabase::ElementMap& elements) noexcept
         -> void;
 
 private:
-    std::atomic<State> state_;
+    network::zeromq::socket::Raw& to_rescan_;
     std::optional<Bip32Index> last_indexed_;
 
     virtual auto need_index(const std::optional<Bip32Index>& current)
         const noexcept -> std::optional<Bip32Index> = 0;
 
-    auto do_shutdown() noexcept -> void;
-    auto pipeline(const Work work, Message&& msg) noexcept -> void;
+    auto do_startup() noexcept -> void final;
     virtual auto process(
         const std::optional<Bip32Index>& current,
         Bip32Index target) noexcept -> void = 0;
-    auto process_key(Message&& in) noexcept -> void;
-    auto process_update(Message&& msg) noexcept -> void;
-    auto startup() noexcept -> void;
-    auto state_normal(const Work work, Message&& msg) noexcept -> void;
-    auto state_reorg(const Work work, Message&& msg) noexcept -> void;
-    auto transition_state_normal(Message&& msg) noexcept -> void;
-    auto transition_state_reorg(Message&& msg) noexcept -> void;
-    auto work() noexcept -> bool;
+    auto process_key(Message&& in) noexcept -> void final;
+    auto process_update(Message&& msg) noexcept -> void final;
+    auto work() noexcept -> bool final;
 };
 }  // namespace opentxs::blockchain::node::wallet

@@ -83,7 +83,7 @@ public:
 
     Mempool(
         const api::crypto::Blockchain& crypto,
-        const internal::WalletDatabase& wallet,
+        internal::WalletDatabase& db,
         const network::zeromq::socket::Publish& socket,
         const Type chain) noexcept;
 

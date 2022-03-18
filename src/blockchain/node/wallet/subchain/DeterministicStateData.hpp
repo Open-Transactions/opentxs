@@ -112,14 +112,13 @@ public:
     DeterministicStateData(
         const api::Session& api,
         const node::internal::Network& node,
-        const node::internal::WalletDatabase& db,
+        node::internal::WalletDatabase& db,
         const node::internal::Mempool& mempool,
         const crypto::Deterministic& subaccount,
         const cfilter::Type filter,
         const Subchain subchain,
         const network::zeromq::BatchID batch,
-        const std::string_view fromParent,
-        const std::string_view toParent,
+        const std::string_view parent,
         allocator_type alloc) noexcept;
 
     ~DeterministicStateData() final = default;
@@ -128,8 +127,7 @@ private:
     using MatchedTransaction = std::
         pair<UnallocatedVector<Bip32Index>, const block::bitcoin::Transaction*>;
 
-    auto get_index(const boost::shared_ptr<const SubchainStateData>& me)
-        const noexcept -> Index final;
+    auto get_index(const SubchainStateData& me) const noexcept -> Index final;
     auto handle_confirmed_matches(
         const block::bitcoin::Block& block,
         const block::Position& position,

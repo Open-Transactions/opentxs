@@ -56,6 +56,9 @@ public:
      *  This function aborts if the message can not be sent.
      */
     auto Send(Message&& msg) noexcept -> bool;
+    /** Send to a recipient without ZMQ_DONTWAIT
+     */
+    auto SendDeferred(Message&& msg) noexcept -> bool;
     /** Send to a remote recipient
      *
      *  This function returns false if the message can not be sent.

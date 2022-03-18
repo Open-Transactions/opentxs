@@ -52,7 +52,7 @@ PeerManager::Peers::Peers(
     const HeaderOracle& headers,
     const internal::FilterOracle& filter,
     const internal::BlockOracle& block,
-    const internal::PeerDatabase& database,
+    internal::PeerDatabase& database,
     const internal::PeerManager& parent,
     const database::BlockStorage policy,
     const UnallocatedCString& shutdown,
@@ -101,7 +101,7 @@ PeerManager::Peers::Peers(
     database_.AddOrUpdate(Endpoint{factory::BlockchainAddress(
         api_,
         data.p2p_protocol_,
-        p2p::Network::ipv4,
+        blockchain::p2p::Network::ipv4,
         default_peer_,
         data.default_port_,
         chain_,
@@ -168,11 +168,11 @@ auto PeerManager::Peers::adjust_count(int adjustment) noexcept -> void
 }
 
 auto PeerManager::Peers::AddListener(
-    const p2p::Address& address,
+    const blockchain::p2p::Address& address,
     std::promise<bool>& promise) noexcept -> void
 {
     switch (address.Type()) {
-        case p2p::Network::zmq: {
+        case blockchain::p2p::Network::zmq: {
             auto& manager = incoming_zmq_;
 
             if (false == bool(manager)) {
@@ -183,8 +183,8 @@ auto PeerManager::Peers::AddListener(
 
             promise.set_value(manager->Listen(address));
         } break;
-        case p2p::Network::ipv6:
-        case p2p::Network::ipv4: {
+        case blockchain::p2p::Network::ipv6:
+        case blockchain::p2p::Network::ipv4: {
             auto& manager = incoming_tcp_;
 
             if (false == bool(manager)) {
@@ -195,10 +195,10 @@ auto PeerManager::Peers::AddListener(
 
             promise.set_value(manager->Listen(address));
         } break;
-        case p2p::Network::onion2:
-        case p2p::Network::onion3:
-        case p2p::Network::eep:
-        case p2p::Network::cjdns:
+        case blockchain::p2p::Network::onion2:
+        case blockchain::p2p::Network::onion3:
+        case blockchain::p2p::Network::eep:
+        case blockchain::p2p::Network::cjdns:
         default: {
             promise.set_value(false);
         }
@@ -206,7 +206,7 @@ auto PeerManager::Peers::AddListener(
 }
 
 auto PeerManager::Peers::AddPeer(
-    const p2p::Address& address,
+    const blockchain::p2p::Address& address,
     std::promise<bool>& promise) noexcept -> void
 {
     auto ticket = gatekeeper_.get();
@@ -278,7 +278,7 @@ auto PeerManager::Peers::get_default_peer() const noexcept -> Endpoint
     return Endpoint{factory::BlockchainAddress(
         api_,
         data.p2p_protocol_,
-        p2p::Network::ipv4,
+        blockchain::p2p::Network::ipv4,
         default_peer_,
         data.default_port_,
         chain_,
@@ -331,14 +331,14 @@ auto PeerManager::Peers::get_dns_peer() const noexcept -> Endpoint
                 endpoint.GetAddress())
                 .Flush();
             auto output = Endpoint{};
-            auto network = p2p::Network{};
+            auto network = blockchain::p2p::Network{};
 
             switch (endpoint.GetType()) {
                 case network::asio::Endpoint::Type::ipv4: {
-                    network = p2p::Network::ipv4;
+                    network = blockchain::p2p::Network::ipv4;
                 } break;
                 case network::asio::Endpoint::Type::ipv6: {
-                    network = p2p::Network::ipv6;
+                    network = blockchain::p2p::Network::ipv6;
                 } break;
                 default: {
                     LogVerbose()(OT_PRETTY_CLASS())("unknown endpoint type")
@@ -390,7 +390,7 @@ auto PeerManager::Peers::get_dns_peer() const noexcept -> Endpoint
 }
 
 auto PeerManager::Peers::get_fallback_peer(
-    const p2p::Protocol protocol) const noexcept -> Endpoint
+    const blockchain::p2p::Protocol protocol) const noexcept -> Endpoint
 {
     return database_.Get(protocol, get_types(), {});
 }
@@ -453,7 +453,7 @@ auto PeerManager::Peers::get_peer() const noexcept -> Endpoint
 }
 
 auto PeerManager::Peers::get_preferred_peer(
-    const p2p::Protocol protocol) const noexcept -> Endpoint
+    const blockchain::p2p::Protocol protocol) const noexcept -> Endpoint
 {
     auto output = database_.Get(protocol, get_types(), preferred_services_);
 
@@ -476,11 +476,12 @@ auto PeerManager::Peers::get_preferred_peer(
 }
 
 auto PeerManager::Peers::get_preferred_services(
-    const internal::Config& config) noexcept -> UnallocatedSet<p2p::Service>
+    const internal::Config& config) noexcept
+    -> UnallocatedSet<blockchain::p2p::Service>
 {
     if (config.download_cfilters_) {
 
-        return {p2p::Service::CompactFilters};
+        return {blockchain::p2p::Service::CompactFilters};
     } else {
 
         return {};
@@ -488,11 +489,11 @@ auto PeerManager::Peers::get_preferred_services(
 }
 
 auto PeerManager::Peers::get_types() const noexcept
-    -> UnallocatedSet<p2p::Network>
+    -> UnallocatedSet<blockchain::p2p::Network>
 {
     using Type = blockchain::p2p::Network;
     using Mode = Options::ConnectionMode;
-    auto output = UnallocatedSet<p2p::Network>{};
+    auto output = UnallocatedSet<blockchain::p2p::Network>{};
 
     switch (api_.GetOptions().Ipv4ConnectionMode()) {
         case Mode::off: {
@@ -537,7 +538,7 @@ auto PeerManager::Peers::get_types() const noexcept
 }
 
 auto PeerManager::Peers::is_not_connected(
-    const p2p::Address& endpoint) const noexcept -> bool
+    const blockchain::p2p::Address& endpoint) const noexcept -> bool
 {
     return 0 == connected_.count(endpoint.ID());
 }
@@ -553,10 +554,10 @@ auto PeerManager::Peers::LookupIncomingSocket(const int id) noexcept(false)
 }
 
 auto PeerManager::Peers::peer_factory(Endpoint endpoint, const int id) noexcept
-    -> std::unique_ptr<p2p::internal::Peer>
+    -> std::unique_ptr<blockchain::p2p::internal::Peer>
 {
     switch (params::Data::Chains().at(chain_).p2p_protocol_) {
-        case p2p::Protocol::bitcoin: {
+        case blockchain::p2p::Protocol::bitcoin: {
             return factory::BitcoinP2PPeerLegacy(
                 api_,
                 config_,
@@ -566,13 +567,14 @@ auto PeerManager::Peers::peer_factory(Endpoint endpoint, const int id) noexcept
                 filter_,
                 block_,
                 parent_,
+                database_,
                 policy_,
                 id,
                 std::move(endpoint),
                 shutdown_endpoint_);
         }
-        case p2p::Protocol::opentxs:
-        case p2p::Protocol::ethereum:
+        case blockchain::p2p::Protocol::opentxs:
+        case blockchain::p2p::Protocol::ethereum:
         default: {
             OT_FAIL;
         }

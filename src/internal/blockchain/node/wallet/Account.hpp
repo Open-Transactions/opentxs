@@ -13,6 +13,7 @@
 
 #include "internal/blockchain/crypto/Crypto.hpp"
 #include "internal/blockchain/node/Node.hpp"
+#include "internal/blockchain/node/wallet/subchain/statemachine/Types.hpp"
 #include "opentxs/Types.hpp"
 #include "opentxs/blockchain/bitcoin/cfilter/FilterType.hpp"
 #include "util/LMDB.hpp"
@@ -53,15 +54,9 @@ namespace opentxs::blockchain::node::wallet
 class Account
 {
 public:
-    enum class State {
-        normal,
-        pre_reorg,
-        reorg,
-        post_reorg,
-        pre_shutdown,
-        shutdown,
-    };
+    using State = JobState;
 
+    [[nodiscard]] auto ChangeState(const State state) noexcept -> bool;
     auto VerifyState(const State state) const noexcept -> void;
 
     auto ProcessReorg(
@@ -74,12 +69,11 @@ public:
         const api::Session& api,
         const crypto::Account& account,
         const node::internal::Network& node,
-        const node::internal::WalletDatabase& db,
+        node::internal::WalletDatabase& db,
         const node::internal::Mempool& mempool,
         const Type chain,
         const cfilter::Type filter,
-        const std::string_view fromParent,
-        const std::string_view toParent) noexcept;
+        const std::string_view shutdown) noexcept;
     Account(Account&&) noexcept;
 
     ~Account();

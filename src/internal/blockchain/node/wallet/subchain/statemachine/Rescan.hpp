@@ -7,6 +7,8 @@
 
 #include <boost/smart_ptr/shared_ptr.hpp>
 
+#include "internal/blockchain/node/wallet/subchain/statemachine/Job.hpp"
+#include "internal/blockchain/node/wallet/subchain/statemachine/Types.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -30,27 +32,20 @@ class SubchainStateData;
 
 namespace opentxs::blockchain::node::wallet
 {
-class Rescan
+class Rescan final : public Job
 {
 public:
-    enum class State {
-        normal,
-        reorg,
-        shutdown,
-    };
+    auto ChangeState(const State state) noexcept -> bool final;
+    auto ProcessReorg(const block::Position& parent) noexcept -> void final;
 
-    auto VerifyState(const State state) const noexcept -> void;
-
-    auto ProcessReorg(const block::Position& parent) noexcept -> void;
-
-    Rescan(const boost::shared_ptr<const SubchainStateData>& parent) noexcept;
+    Rescan(const SubchainStateData& parent) noexcept;
     Rescan() = delete;
     Rescan(const Rescan&) = delete;
     Rescan(Rescan&&) = delete;
     Rescan& operator=(const Rescan&) = delete;
     Rescan& operator=(Rescan&&) = delete;
 
-    ~Rescan();
+    ~Rescan() final;
 
 private:
     class Imp;

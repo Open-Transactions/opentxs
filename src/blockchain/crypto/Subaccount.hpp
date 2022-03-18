@@ -6,7 +6,6 @@
 #pragma once
 
 #include <boost/container/flat_set.hpp>
-#include <robin_hood.h>
 #include <atomic>
 #include <cstdint>
 #include <memory>
@@ -141,8 +140,7 @@ public:
     ~Subaccount() override = default;
 
 protected:
-    using AddressMap =
-        robin_hood::unordered_flat_map<Bip32Index, std::unique_ptr<Element>>;
+    using AddressMap = Map<Bip32Index, std::unique_ptr<Element>>;
     using Revision = std::uint64_t;
 
     struct AddressData {

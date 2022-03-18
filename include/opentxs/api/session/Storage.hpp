@@ -114,9 +114,9 @@ public:
     virtual auto BlockchainAccountList(
         const UnallocatedCString& nymID,
         const UnitType type) const -> UnallocatedSet<UnallocatedCString> = 0;
-    virtual auto BlockchainAccountType(
-        const UnallocatedCString& nymID,
-        const UnallocatedCString& accountID) const -> UnitType = 0;
+    virtual auto BlockchainSubaccountAccountType(
+        const identifier::Nym& owner,
+        const Identifier& id) const -> UnitType = 0;
     virtual auto BlockchainThreadMap(
         const identifier::Nym& nym,
         const Data& txid) const noexcept -> UnallocatedVector<OTIdentifier> = 0;

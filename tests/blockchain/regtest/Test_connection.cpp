@@ -41,7 +41,7 @@ TEST_F(Regtest_fixture_single, client_disconnection_timeout)
         ot::Sleep(1s);
     }
 
-    EXPECT_EQ(count, 0);
+    EXPECT_EQ(count, 1);
 }
 
 TEST_F(Regtest_fixture_single, shutdown) { Shutdown(); }

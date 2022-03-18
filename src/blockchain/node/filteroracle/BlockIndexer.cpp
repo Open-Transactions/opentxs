@@ -46,7 +46,7 @@ namespace opentxs::blockchain::node::implementation
 {
 FilterOracle::BlockIndexer::BlockIndexer(
     const api::Session& api,
-    const internal::FilterDatabase& db,
+    internal::FilterDatabase& db,
     const HeaderOracle& header,
     const internal::BlockOracle& block,
     const internal::Network& node,

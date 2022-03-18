@@ -8,10 +8,11 @@
 #include "blockchain/database/wallet/Subchain.hpp"  // IWYU pragma: associated
 
 #include <algorithm>
+#include <array>
+#include <cstddef>
 #include <cstring>
 #include <future>
 #include <iterator>
-#include <mutex>
 #include <shared_mutex>
 #include <stdexcept>
 #include <utility>
@@ -22,6 +23,7 @@
 #include "internal/api/network/Asio.hpp"
 #include "internal/blockchain/database/Database.hpp"
 #include "internal/blockchain/node/HeaderOracle.hpp"
+#include "internal/util/BoostPMR.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/TSV.hpp"
 #include "opentxs/Types.hpp"
@@ -51,22 +53,18 @@ struct SubchainData::Imp {
         upgrade_future_.get();
 
         return cache_.GetIndex(
-            lock,
-            subaccount,
-            subchain,
-            default_filter_type_,
-            current_version_,
-            tx);
+            subaccount, subchain, default_filter_type_, current_version_, tx);
     }
-    auto GetPatterns(const SubchainIndex& id) const noexcept -> Patterns
+    auto GetPatterns(const SubchainIndex& id, alloc::Resource* alloc)
+        const noexcept -> Patterns
     {
         auto lock = sLock{lock_};
         upgrade_future_.get();
 
         try {
-            const auto& key = cache_.DecodeIndex(lock, id);
+            const auto& key = cache_.DecodeIndex(id);
 
-            return load_patterns(lock, key, cache_.GetPatternIndex(lock, id));
+            return load_patterns(lock, key, cache_.GetPatternIndex(id), alloc);
         } catch (const std::exception& e) {
             LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
 
@@ -75,18 +73,23 @@ struct SubchainData::Imp {
     }
     auto GetUntestedPatterns(
         const SubchainIndex& subchain,
-        const ReadView blockID) const noexcept -> Patterns
+        const ReadView blockID,
+        alloc::Resource* alloc) const noexcept -> Patterns
     {
         auto lock = sLock{lock_};
         upgrade_future_.get();
 
         try {
-            const auto& key = cache_.DecodeIndex(lock, subchain);
+            const auto& key = cache_.DecodeIndex(subchain);
+            auto buf = std::array<std::byte, 1000u * sizeof(pPatternID)>{};
+            auto pmr = alloc::BoostMonotonic{
+                buf.data(), buf.size(), alloc::standard_to_boost(alloc)};
             const auto patterns = [&] {
-                const auto all = cache_.GetPatternIndex(lock, subchain);
-                const auto matches = cache_.GetMatchIndex(lock, blockID);
-                auto out = UnallocatedVector<pPatternID>{};
-                out.reserve(std::min(all.size(), matches.size()));
+                const auto& all = cache_.GetPatternIndex(subchain);
+                const auto& matches = cache_.GetMatchIndex(blockID);
+                const auto count = std::min(all.size(), matches.size());
+                auto out = Vector<pPatternID>{&pmr};
+                out.reserve(count);
                 std::set_difference(
                     std::begin(all),
                     std::end(all),
@@ -97,7 +100,7 @@ struct SubchainData::Imp {
                 return out;
             }();
 
-            return load_patterns(lock, key, patterns);
+            return load_patterns(lock, key, patterns, alloc);
         } catch (const std::exception& e) {
             LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
 
@@ -112,9 +115,9 @@ struct SubchainData::Imp {
         const block::Height lastGoodHeight) const noexcept(false) -> bool
     {
         auto lock = eLock{lock_};
-        const auto post = ScopeGuard{[&] { cache_.Clear(lock); }};
+        const auto post = ScopeGuard{[&] { cache_.Clear(); }};
         upgrade_future_.get();
-        const auto [height, hash] = cache_.GetLastScanned(lock, subchain);
+        const auto [height, hash] = cache_.GetLastScanned(subchain);
         auto target = block::Height{};
 
         if (height < lastGoodHeight) {
@@ -131,7 +134,6 @@ struct SubchainData::Imp {
             target = std::max<block::Height>(lastGoodHeight - 1, 0);
 
             return cache_.SetLastScanned(
-                lock,
                 subchain,
                 headers.Internal().GetPosition(
                     headerOracleLock, lastGoodHeight - 1),
@@ -144,7 +146,7 @@ struct SubchainData::Imp {
             position.second->asHex())(" at height ")(target)
             .Flush();
 
-        if (false == cache_.SetLastScanned(lock, subchain, position, tx)) {
+        if (false == cache_.SetLastScanned(subchain, position, tx)) {
             throw std::runtime_error{"database error"};
         }
 
@@ -169,8 +171,7 @@ struct SubchainData::Imp {
                 highest = std::max(highest, index);
 
                 for (const auto& pattern : patterns) {
-                    output =
-                        cache_.AddPattern(lock, id, index, reader(pattern), tx);
+                    output = cache_.AddPattern(id, index, reader(pattern), tx);
 
                     if (false == output) {
                         throw std::runtime_error{"failed to store pattern"};
@@ -178,14 +179,14 @@ struct SubchainData::Imp {
                 }
             }
 
-            output = cache_.SetLastIndexed(lock, subchain, highest, tx);
+            output = cache_.SetLastIndexed(subchain, highest, tx);
 
             if (false == output) {
                 throw std::runtime_error{"failed to update highest indexed"};
             }
 
             for (auto& patternID : newIndices) {
-                output = cache_.AddPatternIndex(lock, subchain, patternID, tx);
+                output = cache_.AddPatternIndex(subchain, patternID, tx);
 
                 if (false == output) {
                     throw std::runtime_error{
@@ -202,7 +203,7 @@ struct SubchainData::Imp {
             return true;
         } catch (const std::exception& e) {
             LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
-            cache_.Clear(lock);
+            cache_.Clear();
 
             return false;
         }
@@ -213,7 +214,7 @@ struct SubchainData::Imp {
         auto lock = sLock{lock_};
         upgrade_future_.get();
 
-        return cache_.GetLastIndexed(lock, subchain);
+        return cache_.GetLastIndexed(subchain);
     }
     auto SubchainLastScanned(const SubchainIndex& subchain) const noexcept
         -> block::Position
@@ -221,7 +222,7 @@ struct SubchainData::Imp {
         auto lock = sLock{lock_};
         upgrade_future_.get();
 
-        return cache_.GetLastScanned(lock, subchain);
+        return cache_.GetLastScanned(subchain);
     }
     auto SubchainMatchBlock(
         const SubchainIndex& subchain,
@@ -237,7 +238,7 @@ struct SubchainData::Imp {
             for (const auto& [blockID, indices] : results) {
                 for (const auto& index : indices) {
                     const auto id = pattern_id(subchain, index);
-                    output = cache_.AddMatch(lock, blockID, id, tx);
+                    output = cache_.AddMatch(blockID, id, tx);
 
                     if (false == output) {
                         throw std::runtime_error{"Failed to add match"};
@@ -254,7 +255,7 @@ struct SubchainData::Imp {
             return output;
         } catch (const std::exception& e) {
             LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
-            cache_.Clear(lock);
+            cache_.Clear();
 
             return false;
         }
@@ -266,11 +267,11 @@ struct SubchainData::Imp {
         auto lock = eLock{lock_};
         upgrade_future_.get();
 
-        if (cache_.SetLastScanned(lock, subchain, position, nullptr)) {
+        if (cache_.SetLastScanned(subchain, position, nullptr)) {
 
             return true;
         } else {
-            cache_.Clear(lock);
+            cache_.Clear();
 
             return false;
         }
@@ -330,14 +331,15 @@ private:
     auto load_patterns(
         const LockType& lock,
         const db::SubchainID& key,
-        const Container& patterns) const noexcept(false) -> Patterns
+        const Container& patterns,
+        alloc::Resource* alloc) const noexcept(false) -> Patterns
     {
-        auto output = Patterns{};
+        auto output = Patterns{alloc};
         const auto& subaccount = key.SubaccountID(api_);
         const auto subchain = key.Type();
 
         for (const auto& id : patterns) {
-            for (const auto& data : cache_.GetPattern(lock, id)) {
+            for (const auto& data : cache_.GetPattern(id)) {
                 output.emplace_back(Parent::Pattern{
                     {data.Index(), {subchain, subaccount}},
                     space(data.Data())});
@@ -408,17 +410,19 @@ auto SubchainData::GetSubchainID(
     return imp_->GetSubchainID(subaccount, subchain, tx);
 }
 
-auto SubchainData::GetPatterns(const SubchainIndex& subchain) const noexcept
-    -> Patterns
+auto SubchainData::GetPatterns(
+    const SubchainIndex& subchain,
+    alloc::Resource* alloc) const noexcept -> Patterns
 {
-    return imp_->GetPatterns(subchain);
+    return imp_->GetPatterns(subchain, alloc);
 }
 
 auto SubchainData::GetUntestedPatterns(
     const SubchainIndex& subchain,
-    const ReadView blockID) const noexcept -> Patterns
+    const ReadView blockID,
+    alloc::Resource* alloc) const noexcept -> Patterns
 {
-    return imp_->GetUntestedPatterns(subchain, blockID);
+    return imp_->GetUntestedPatterns(subchain, blockID, alloc);
 }
 
 auto SubchainData::Reorg(

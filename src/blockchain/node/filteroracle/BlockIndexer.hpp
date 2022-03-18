@@ -97,7 +97,7 @@ public:
 
     BlockIndexer(
         const api::Session& api,
-        const internal::FilterDatabase& db,
+        internal::FilterDatabase& db,
         const HeaderOracle& header,
         const internal::BlockOracle& block,
         const internal::Network& node,
@@ -113,7 +113,7 @@ private:
     friend BlockDMFilter;
     friend BlockWorkerFilter;
 
-    const internal::FilterDatabase& db_;
+    internal::FilterDatabase& db_;
     const HeaderOracle& header_;
     const internal::BlockOracle& block_;
     const internal::Network& node_;

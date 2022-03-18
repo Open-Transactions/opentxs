@@ -122,7 +122,7 @@ public:
 
     BitcoinTransactionBuilder(
         const api::Session& api,
-        const node::internal::WalletDatabase& db,
+        node::internal::WalletDatabase& db,
         const Identifier& id,
         const Proposal& proposal,
         const Type chain,

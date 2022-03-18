@@ -138,6 +138,13 @@ public:
     {
         return database_.LoadFilter(type, block.Bytes());
     }
+    auto LoadFilters(
+        const cfilter::Type type,
+        const Vector<block::pHash>& blocks) const noexcept
+        -> Vector<std::unique_ptr<const GCS>> final
+    {
+        return database_.LoadFilters(type, blocks);
+    }
     auto LoadFilterHeader(const cfilter::Type type, const block::Hash& block)
         const noexcept -> Header final
     {
@@ -171,7 +178,7 @@ public:
         const internal::Network& node,
         const HeaderOracle& header,
         const internal::BlockOracle& block,
-        const internal::FilterDatabase& database,
+        internal::FilterDatabase& database,
         const blockchain::Type chain,
         const blockchain::cfilter::Type filter,
         const UnallocatedCString& shutdown) noexcept;
@@ -193,7 +200,7 @@ private:
     const api::Session& api_;
     const internal::Network& node_;
     const HeaderOracle& header_;
-    const internal::FilterDatabase& database_;
+    internal::FilterDatabase& database_;
     const network::zeromq::socket::Publish& filter_notifier_;
     const blockchain::Type chain_;
     const cfilter::Type default_type_;

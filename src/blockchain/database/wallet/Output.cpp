@@ -9,6 +9,7 @@
 
 #include <robin_hood.h>
 #include <algorithm>
+#include <chrono>
 #include <cstring>
 #include <iosfwd>
 #include <iterator>
@@ -54,6 +55,7 @@
 #include "opentxs/util/Iterator.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Pimpl.hpp"
+#include "opentxs/util/Time.hpp"
 #include "serialization/protobuf/BlockchainTransactionOutput.pb.h"  // IWYU pragma: keep
 #include "util/LMDB.hpp"
 
@@ -91,18 +93,20 @@ struct Output::Imp {
 
         return get_balance(lock, owner, node, &key);
     }
-    auto GetOutputs(node::TxoState type) const noexcept
-        -> UnallocatedVector<UTXO>
+    auto GetOutputs(node::TxoState type, alloc::Resource* alloc) const noexcept
+        -> Vector<UTXO>
     {
         if (node::TxoState::Error == type) { return {}; }
 
         auto lock = sLock{lock_};
 
         return get_outputs(
-            lock, states(type), nullptr, nullptr, nullptr, nullptr);
+            lock, states(type), nullptr, nullptr, nullptr, nullptr, alloc);
     }
-    auto GetOutputs(const identifier::Nym& owner, node::TxoState type)
-        const noexcept -> UnallocatedVector<UTXO>
+    auto GetOutputs(
+        const identifier::Nym& owner,
+        node::TxoState type,
+        alloc::Resource* alloc) const noexcept -> Vector<UTXO>
     {
         if (node::TxoState::Error == type) { return {}; }
 
@@ -111,12 +115,13 @@ struct Output::Imp {
         if (owner.empty()) { return {}; }
 
         return get_outputs(
-            lock, states(type), &owner, nullptr, nullptr, nullptr);
+            lock, states(type), &owner, nullptr, nullptr, nullptr, alloc);
     }
     auto GetOutputs(
         const identifier::Nym& owner,
         const Identifier& node,
-        node::TxoState type) const noexcept -> UnallocatedVector<UTXO>
+        node::TxoState type,
+        alloc::Resource* alloc) const noexcept -> Vector<UTXO>
     {
         if (node::TxoState::Error == type) { return {}; }
 
@@ -124,16 +129,20 @@ struct Output::Imp {
 
         if (owner.empty() || node.empty()) { return {}; }
 
-        return get_outputs(lock, states(type), &owner, &node, nullptr, nullptr);
+        return get_outputs(
+            lock, states(type), &owner, &node, nullptr, nullptr, alloc);
     }
-    auto GetOutputs(const crypto::Key& key, node::TxoState type) const noexcept
-        -> UnallocatedVector<UTXO>
+    auto GetOutputs(
+        const crypto::Key& key,
+        node::TxoState type,
+        alloc::Resource* alloc) const noexcept -> Vector<UTXO>
     {
         if (node::TxoState::Error == type) { return {}; }
 
         auto lock = sLock{lock_};
 
-        return get_outputs(lock, states(type), nullptr, nullptr, nullptr, &key);
+        return get_outputs(
+            lock, states(type), nullptr, nullptr, nullptr, &key, alloc);
     }
     auto GetOutputTags(const block::Outpoint& output) const noexcept
         -> UnallocatedSet<node::TxoTag>
@@ -151,18 +160,20 @@ struct Output::Imp {
     }
     auto GetTransactions() const noexcept -> UnallocatedVector<block::pTxid>
     {
-        return translate(GetOutputs(node::TxoState::All));
+        return translate(GetOutputs(node::TxoState::All, alloc::System()));
     }
     auto GetTransactions(const identifier::Nym& account) const noexcept
         -> UnallocatedVector<block::pTxid>
     {
-        return translate(GetOutputs(account, node::TxoState::All));
+        return translate(
+            GetOutputs(account, node::TxoState::All, alloc::System()));
     }
     auto GetUnconfirmedTransactions() const noexcept
         -> UnallocatedSet<block::pTxid>
     {
         auto out = UnallocatedSet<block::pTxid>{};
-        const auto unconfirmed = GetOutputs(node::TxoState::UnconfirmedNew);
+        const auto unconfirmed =
+            GetOutputs(node::TxoState::UnconfirmedNew, alloc::System());
 
         for (const auto& [outpoint, output] : unconfirmed) {
             out.emplace(api_.Factory().Data(outpoint.Txid()));
@@ -170,18 +181,19 @@ struct Output::Imp {
 
         return out;
     }
-    auto GetUnspentOutputs() const noexcept -> UnallocatedVector<UTXO>
+    auto GetUnspentOutputs(alloc::Resource* alloc) const noexcept
+        -> Vector<UTXO>
     {
         static const auto blank = api_.Factory().Identifier();
 
-        return GetUnspentOutputs(blank);
+        return GetUnspentOutputs(blank, alloc);
     }
-    auto GetUnspentOutputs(const NodeID& id) const noexcept
-        -> UnallocatedVector<UTXO>
+    auto GetUnspentOutputs(const NodeID& id, alloc::Resource* alloc)
+        const noexcept -> Vector<UTXO>
     {
         auto lock = sLock{lock_};
 
-        return get_unspent_outputs(lock, id);
+        return get_unspent_outputs(lock, id, alloc);
     }
     auto GetWalletHeight() const noexcept -> block::Height
     {
@@ -199,7 +211,10 @@ struct Output::Imp {
         const node::TxoState consumed,
         const node::TxoState created) noexcept -> bool
     {
+        const auto& log = LogTrace();
+        const auto start = Clock::now();
         auto lock = eLock{lock_};
+        const auto haveLock = Clock::now();
         const auto& api = api_.Crypto().Blockchain();
 
         try {
@@ -238,8 +253,8 @@ struct Output::Imp {
 
                     if (change_state(
                             lock, tx, outpoint, existing, consumed, block)) {
-                        LogTrace()(OT_PRETTY_CLASS())("output ")(
-                            outpoint.str())(" marked as ")(print(consumed))
+                        log(OT_PRETTY_CLASS())("output ")(outpoint.str())(
+                            " marked as ")(print(consumed))
                             .Flush();
                     } else {
                         LogError()(OT_PRETTY_CLASS())(
@@ -250,7 +265,6 @@ struct Output::Imp {
                         return false;
                     }
                 } catch (...) {
-                    const auto& log = LogInsane();
                     const auto& outpoint = input.PreviousOutput();
                     log(OT_PRETTY_CLASS())("outpoint ")(outpoint.str())(
                         " does not belong to this subchain")
@@ -344,6 +358,7 @@ struct Output::Imp {
                 }
             }
 
+            const auto haveDatabase = Clock::now();
             const auto reason = api_.Factory().PasswordPrompt(
                 "Save a received blockchain transaction");
 
@@ -352,11 +367,26 @@ struct Output::Imp {
                     "Error adding transaction to database"};
             }
 
+            const auto haveAPI = Clock::now();
+
             if (false == tx.Finalize(true)) {
                 throw std::runtime_error{
                     "Failed to commit database transaction"};
             }
 
+            const auto haveFinalized = Clock::now();
+            log(OT_PRETTY_CLASS())("time to acquire lock: ")(
+                std::chrono::nanoseconds{haveLock - start})
+                .Flush();
+            log(OT_PRETTY_CLASS())("time to create database transaction: ")(
+                std::chrono::nanoseconds{haveDatabase - haveLock})
+                .Flush();
+            log(OT_PRETTY_CLASS())("time to update key metadata: ")(
+                std::chrono::nanoseconds{haveAPI - haveDatabase})
+                .Flush();
+            log(OT_PRETTY_CLASS())("time to finalize database transaction: ")(
+                std::chrono::nanoseconds{haveFinalized - haveAPI})
+                .Flush();
             // NOTE uncomment this for detailed debugging: cache_.Print(lock);
             publish_balance(lock);
 
@@ -1212,10 +1242,11 @@ private:
         const identifier::Nym* owner,
         const AccountID* account,
         const NodeID* subchain,
-        const crypto::Key* key) const noexcept -> UnallocatedVector<UTXO>
+        const crypto::Key* key,
+        alloc::Resource* alloc) const noexcept -> Vector<UTXO>
     {
         const auto matches = match(lock, states, owner, account, subchain, key);
-        auto output = UnallocatedVector<UTXO>{};
+        auto output = Vector<UTXO>{alloc};
 
         for (const auto& outpoint : matches) {
             const auto& existing = cache_.GetOutput(lock, outpoint);
@@ -1224,8 +1255,10 @@ private:
 
         return output;
     }
-    auto get_unspent_outputs(const sLock& lock, const NodeID& id) const noexcept
-        -> UnallocatedVector<UTXO>
+    auto get_unspent_outputs(
+        const sLock& lock,
+        const NodeID& id,
+        alloc::Resource* alloc) const noexcept -> Vector<UTXO>
     {
         const auto* pSub = id.empty() ? nullptr : &id;
 
@@ -1237,7 +1270,8 @@ private:
             nullptr,
             nullptr,
             pSub,
-            nullptr);
+            nullptr,
+            alloc);
     }
     template <typename LockType>
     auto has_account(
@@ -1333,7 +1367,7 @@ private:
             api.Internal().UpdateBalance(nym, chain_, balance);
         }
     }
-    auto translate(UnallocatedVector<UTXO>&& outputs) const noexcept
+    auto translate(Vector<UTXO>&& outputs) const noexcept
         -> UnallocatedVector<block::pTxid>
     {
         auto out = UnallocatedVector<block::pTxid>{};
@@ -1826,30 +1860,35 @@ auto Output::GetBalance(const crypto::Key& key) const noexcept -> Balance
     return imp_->GetBalance(key);
 }
 
-auto Output::GetOutputs(node::TxoState type) const noexcept
-    -> UnallocatedVector<UTXO>
+auto Output::GetOutputs(node::TxoState type, alloc::Resource* alloc)
+    const noexcept -> Vector<UTXO>
 {
-    return imp_->GetOutputs(type);
+    return imp_->GetOutputs(type, alloc);
 }
 
-auto Output::GetOutputs(const identifier::Nym& owner, node::TxoState type)
-    const noexcept -> UnallocatedVector<UTXO>
+auto Output::GetOutputs(
+    const identifier::Nym& owner,
+    node::TxoState type,
+    alloc::Resource* alloc) const noexcept -> Vector<UTXO>
 {
-    return imp_->GetOutputs(owner, type);
+    return imp_->GetOutputs(owner, type, alloc);
 }
 
 auto Output::GetOutputs(
     const identifier::Nym& owner,
     const NodeID& node,
-    node::TxoState type) const noexcept -> UnallocatedVector<UTXO>
+    node::TxoState type,
+    alloc::Resource* alloc) const noexcept -> Vector<UTXO>
 {
-    return imp_->GetOutputs(owner, node, type);
+    return imp_->GetOutputs(owner, node, type, alloc);
 }
 
-auto Output::GetOutputs(const crypto::Key& key, node::TxoState type)
-    const noexcept -> UnallocatedVector<UTXO>
+auto Output::GetOutputs(
+    const crypto::Key& key,
+    node::TxoState type,
+    alloc::Resource* alloc) const noexcept -> Vector<UTXO>
 {
-    return imp_->GetOutputs(key, type);
+    return imp_->GetOutputs(key, type, alloc);
 }
 
 auto Output::GetOutputTags(const block::Outpoint& output) const noexcept
@@ -1875,15 +1914,17 @@ auto Output::GetUnconfirmedTransactions() const noexcept
     return imp_->GetUnconfirmedTransactions();
 }
 
-auto Output::GetUnspentOutputs() const noexcept -> UnallocatedVector<UTXO>
+auto Output::GetUnspentOutputs(alloc::Resource* alloc) const noexcept
+    -> Vector<UTXO>
 {
-    return imp_->GetUnspentOutputs();
+    return imp_->GetUnspentOutputs(alloc);
 }
 
-auto Output::GetUnspentOutputs(const NodeID& balanceNode) const noexcept
-    -> UnallocatedVector<UTXO>
+auto Output::GetUnspentOutputs(
+    const NodeID& balanceNode,
+    alloc::Resource* alloc) const noexcept -> Vector<UTXO>
 {
-    return imp_->GetUnspentOutputs(balanceNode);
+    return imp_->GetUnspentOutputs(balanceNode, alloc);
 }
 
 auto Output::GetWalletHeight() const noexcept -> block::Height

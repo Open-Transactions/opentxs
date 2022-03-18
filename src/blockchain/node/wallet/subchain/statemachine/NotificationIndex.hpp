@@ -43,7 +43,7 @@ class NotificationIndex final : public Index::Imp
 {
 public:
     NotificationIndex(
-        const boost::shared_ptr<const SubchainStateData>& parent,
+        const SubchainStateData& parent,
         const PaymentCode& code,
         const network::zeromq::BatchID batch,
         allocator_type alloc) noexcept;

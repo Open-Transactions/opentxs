@@ -28,6 +28,7 @@
 #include "opentxs/blockchain/block/bitcoin/Input.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
+#include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Pimpl.hpp"
@@ -96,7 +97,8 @@ public:
     {
         return load_header(hash);
     }
-    auto RecentHashes() const noexcept -> UnallocatedVector<block::pHash>;
+    auto RecentHashes(alloc::Resource* alloc) const noexcept
+        -> Vector<block::pHash>;
     auto SiblingHashes() const noexcept -> node::Hashes;
     // Returns null pointer if the header does not exist
     auto TryLoadBitcoinHeader(const block::Hash& hash) const noexcept
@@ -137,7 +139,7 @@ private:
         const block::Position next,
         const bool setTip,
         MDB_txn* parent) const noexcept -> bool;
-    auto recent_hashes(const Lock& lock) const noexcept
-        -> UnallocatedVector<block::pHash>;
+    auto recent_hashes(const Lock& lock, alloc::Resource* alloc) const noexcept
+        -> Vector<block::pHash>;
 };
 }  // namespace opentxs::blockchain::database

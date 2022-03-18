@@ -45,7 +45,7 @@ class DeterministicIndex final : public Index::Imp
 {
 public:
     DeterministicIndex(
-        const boost::shared_ptr<const SubchainStateData>& parent,
+        const SubchainStateData& parent,
         const DeterministicStateData& deterministic,
         const network::zeromq::BatchID batch,
         allocator_type alloc) noexcept;

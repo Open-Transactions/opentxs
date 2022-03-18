@@ -40,9 +40,7 @@ function(
       opentxs::libopentxs
       Boost::program_options
       opentxs-test-helpers
-          GTest::gtest
-          GTest::gtest_main
-          GTest::gmock
+      GTest::gmock
   )
 
   target_include_directories(
@@ -154,3 +152,4 @@ add_subdirectory(otx)
 add_subdirectory(paymentcode)
 add_subdirectory(rpc)
 add_subdirectory(ui)
+add_subdirectory(dummy)

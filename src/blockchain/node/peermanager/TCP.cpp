@@ -38,7 +38,8 @@ public:
         auto lock = Lock{lock_};
         sockets_.erase(id);
     }
-    auto Listen(const p2p::Address& address) const noexcept -> bool final
+    auto Listen(const blockchain::p2p::Address& address) const noexcept
+        -> bool final
     {
         const auto type = address.Type();
         const auto port = address.Port();
@@ -58,10 +59,10 @@ public:
                 auto network = EndpointType::Type{};
 
                 switch (type) {
-                    case p2p::Network::ipv4: {
+                    case blockchain::p2p::Network::ipv4: {
                         network = EndpointType::Type::ipv4;
                     } break;
-                    case p2p::Network::ipv6: {
+                    case blockchain::p2p::Network::ipv6: {
                         network = EndpointType::Type::ipv6;
                     } break;
                     default: {
@@ -134,7 +135,7 @@ private:
     mutable UnallocatedMap<int, opentxs::network::asio::Socket> sockets_;
 
     auto accept(
-        p2p::Network type,
+        blockchain::p2p::Network type,
         std::uint16_t port,
         Space bytes,
         opentxs::network::asio::Socket&& socket) const noexcept -> void
@@ -142,7 +143,7 @@ private:
         auto lock = Lock{lock_};
         auto address = factory::BlockchainAddress(
             api_,
-            p2p::Protocol::bitcoin,
+            blockchain::p2p::Protocol::bitcoin,
             type,
             api_.Factory().Data(reader(bytes)),
             port,

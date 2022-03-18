@@ -54,6 +54,7 @@
 #include "opentxs/network/zeromq/message/Frame.hpp"
 #include "opentxs/network/zeromq/message/FrameIterator.hpp"
 #include "opentxs/network/zeromq/message/FrameSection.hpp"
+#include "opentxs/network/zeromq/message/Message.tpp"
 #include "opentxs/network/zeromq/socket/SocketType.hpp"  // IWYU pragma: keep
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
@@ -180,7 +181,8 @@ Client::Imp::Imp(
 
         LogTrace()(OT_PRETTY_CLASS())("wallet socket connected to ")(endpoint)
             .Flush();
-        out.Send(MakeWork(Job::Register));
+        // TODO use a timer to re-send this message if necessary
+        out.SendDeferred(MakeWork(Job::Register));
 
         return out;
     }())
@@ -723,6 +725,8 @@ auto Client::Imp::process_register(Message&& msg) noexcept -> void
         auto& server = servers_.at(endpoint);
         server.new_local_handler_ = true;
     }
+
+    internal_router_.Send(tagged_reply_to_message(msg, Job::Register));
 }
 
 auto Client::Imp::process_request(Message&& msg) noexcept -> void

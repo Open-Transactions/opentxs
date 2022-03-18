@@ -7,6 +7,8 @@
 
 #include <boost/smart_ptr/shared_ptr.hpp>
 
+#include "internal/blockchain/node/wallet/subchain/statemachine/Job.hpp"
+#include "internal/blockchain/node/wallet/subchain/statemachine/Types.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -33,27 +35,20 @@ class PaymentCode;
 
 namespace opentxs::blockchain::node::wallet
 {
-class Index
+class Index final : public Job
 {
 public:
     class Imp;
 
-    enum class State {
-        normal,
-        reorg,
-        shutdown,
-    };
-
     static auto DeterministicFactory(
-        const boost::shared_ptr<const SubchainStateData>& parent,
+        const SubchainStateData& parent,
         const DeterministicStateData& deterministic) noexcept -> Index;
     static auto NotificationFactory(
-        const boost::shared_ptr<const SubchainStateData>& parent,
+        const SubchainStateData& parent,
         const PaymentCode& code) noexcept -> Index;
 
-    auto VerifyState(const State state) const noexcept -> void;
-
-    auto ProcessReorg(const block::Position& parent) noexcept -> void;
+    auto ChangeState(const State state) noexcept -> bool final;
+    auto ProcessReorg(const block::Position& parent) noexcept -> void final;
 
     Index() = delete;
     Index(const Index&) = delete;
@@ -61,7 +56,7 @@ public:
     Index& operator=(const Index&) = delete;
     Index& operator=(Index&&) = delete;
 
-    ~Index();
+    ~Index() final;
 
 private:
     // TODO switch to std::shared_ptr once the android ndk ships a version of

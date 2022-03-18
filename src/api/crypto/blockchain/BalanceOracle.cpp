@@ -174,6 +174,9 @@ auto BalanceOracle::Imp::pipeline(const Work work, Message&& msg) noexcept
     -> void
 {
     switch (work) {
+        case Work::shutdown: {
+            shutdown_actor();
+        } break;
         case Work::update_chain_balance: {
             process_update_chain_balance(std::move(msg));
         } break;
@@ -182,6 +185,9 @@ auto BalanceOracle::Imp::pipeline(const Work work, Message&& msg) noexcept
         } break;
         case Work::registration: {
             process_registration(std::move(msg));
+        } break;
+        case Work::init: {
+            do_init();
         } break;
         default: {
             LogError()(OT_PRETTY_CLASS())(": unhandled type").Flush();
@@ -389,7 +395,7 @@ auto BalanceOracle::Imp::UpdateBalance(
     }());
 }
 
-auto BalanceOracle::Imp::work() noexcept -> bool { OT_FAIL; }
+auto BalanceOracle::Imp::work() noexcept -> bool { return false; }
 
 BalanceOracle::Imp::~Imp() { signal_shutdown(); }
 }  // namespace opentxs::api::crypto::blockchain

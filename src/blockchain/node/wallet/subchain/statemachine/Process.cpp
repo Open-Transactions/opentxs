@@ -10,14 +10,16 @@
 #include "blockchain/node/wallet/subchain/statemachine/Process.hpp"  // IWYU pragma: associated
 
 #include <boost/smart_ptr/make_shared.hpp>
+#include <boost/smart_ptr/shared_ptr.hpp>
 #include <algorithm>
-#include <chrono>
 #include <memory>
 #include <type_traits>
 #include <utility>
 
 #include "blockchain/node/wallet/subchain/SubchainStateData.hpp"
 #include "internal/blockchain/node/Node.hpp"
+#include "internal/blockchain/node/wallet/Types.hpp"
+#include "internal/blockchain/node/wallet/subchain/statemachine/Job.hpp"
 #include "internal/blockchain/node/wallet/subchain/statemachine/Types.hpp"
 #include "internal/network/zeromq/Context.hpp"
 #include "internal/network/zeromq/socket/Pipeline.hpp"
@@ -39,54 +41,39 @@
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Pimpl.hpp"
-#include "opentxs/util/WorkType.hpp"
 #include "util/Work.hpp"
 
 namespace opentxs::blockchain::node::wallet
 {
 Process::Imp::Imp(
-    const boost::shared_ptr<const SubchainStateData>& parent,
+    const SubchainStateData& parent,
     const network::zeromq::BatchID batch,
     allocator_type alloc) noexcept
-    : Actor(
-          parent->api_,
-          LogTrace(),
-          0ms,
+    : Job(LogTrace(),
+          parent,
           batch,
+          CString{"process", alloc},
           alloc,
           {
-              {parent->to_children_endpoint_, Direction::Connect},
+              {parent.shutdown_endpoint_, Direction::Connect},
               {CString{
-                   parent->api_.Endpoints().BlockchainBlockAvailable(),
+                   parent.api_.Endpoints().BlockchainBlockAvailable(),
                    alloc},
                Direction::Connect},
-              {CString{parent->api_.Endpoints().BlockchainMempool(), alloc},
+              {CString{parent.api_.Endpoints().BlockchainMempool(), alloc},
                Direction::Connect},
           },
           {
-              {parent->to_process_endpoint_, Direction::Bind},
+              {parent.to_process_endpoint_, Direction::Bind},
           },
           {},
           {
               {SocketType::Push,
                {
-                   {parent->from_children_endpoint_, Direction::Connect},
-               }},
-              {SocketType::Push,
-               {
-                   {parent->to_scan_endpoint_, Direction::Connect},
-               }},
-              {SocketType::Push,
-               {
-                   {parent->to_index_endpoint_, Direction::Connect},
+                   {parent.to_index_endpoint_, Direction::Connect},
                }},
           })
-    , to_parent_(pipeline_.Internal().ExtraSocket(0))
-    , to_scan_(pipeline_.Internal().ExtraSocket(1))
-    , to_index_(pipeline_.Internal().ExtraSocket(2))
-    , parent_p_(parent)
-    , parent_(*parent_p_)
-    , state_(State::normal)
+    , to_index_(pipeline_.Internal().ExtraSocket(0))
     , waiting_(alloc)
     , downloading_(alloc)
     , index_(alloc)
@@ -96,24 +83,17 @@ Process::Imp::Imp(
     txid_cache_.reserve(1024);
 }
 
-auto Process::Imp::do_shutdown() noexcept -> void { parent_p_.reset(); }
-
-auto Process::Imp::pipeline(const Work work, Message&& msg) noexcept -> void
+auto Process::Imp::do_startup() noexcept -> void
 {
-    switch (state_) {
-        case State::normal: {
-            state_normal(work, std::move(msg));
-        } break;
-        case State::reorg: {
-            state_reorg(work, std::move(msg));
-        } break;
-        case State::shutdown: {
-            // NOTE do not process any messages
-        } break;
-        default: {
-            OT_FAIL;
+    const auto& oracle = parent_.mempool_oracle_;
+
+    for (const auto& txid : oracle.Dump()) {
+        if (auto tx = oracle.Query(txid); tx) {
+            parent_.ProcessTransaction(*tx);
         }
     }
+
+    do_work();
 }
 
 auto Process::Imp::ProcessReorg(const block::Position& parent) noexcept -> void
@@ -144,20 +124,6 @@ auto Process::Imp::ProcessReorg(const block::Position& parent) noexcept -> void
     }
 }
 
-auto Process::Imp::process_block(Message&& in) noexcept -> void
-{
-    const auto body = in.Body();
-
-    OT_ASSERT(2 < body.size());
-
-    const auto chain = body.at(1).as<blockchain::Type>();
-
-    if (parent_.chain_ != chain) { return; }
-
-    const auto hash = parent_.api_.Factory().Data(body.at(2));
-    process_block(hash);
-}
-
 auto Process::Imp::process_block(const block::Hash& hash) noexcept -> void
 {
     if (auto index = index_.find(hash); index_.end() != index) {
@@ -171,7 +137,7 @@ auto Process::Imp::process_block(const block::Hash& hash) noexcept -> void
         OT_ASSERT(block);
 
         parent_.ProcessBlock(position, *block);
-        const auto sent = to_index_.Send([&] {
+        const auto sent = to_index_.SendDeferred([&] {
             auto out = MakeWork(Work::update);
             encode(
                 [&] {
@@ -228,133 +194,8 @@ auto Process::Imp::process_update(Message&& msg) noexcept -> void
         waiting_.emplace_back(std::move(position));
     }
 
-    to_index_.Send(std::move(msg));
+    to_index_.SendDeferred(std::move(msg));
     do_work();
-}
-
-auto Process::Imp::startup() noexcept -> void
-{
-    const auto& oracle = parent_.mempool_oracle_;
-
-    for (const auto& txid : oracle.Dump()) {
-        if (auto tx = oracle.Query(txid); tx) {
-            parent_.ProcessTransaction(*tx);
-        }
-    }
-
-    do_work();
-}
-
-auto Process::Imp::state_normal(const Work work, Message&& msg) noexcept -> void
-{
-    switch (work) {
-        case Work::mempool: {
-            process_mempool(std::move(msg));
-        } break;
-        case Work::block: {
-            process_block(std::move(msg));
-        } break;
-        case Work::reorg_begin: {
-            transition_state_reorg(std::move(msg));
-        } break;
-        case Work::reorg_end: {
-            LogError()(OT_PRETTY_CLASS())(parent_.name_)(" wrong state for ")(
-                print(work))(" message")
-                .Flush();
-
-            OT_FAIL;
-        }
-        case Work::update: {
-            process_update(std::move(msg));
-        } break;
-        case Work::shutdown_begin: {
-            state_ = State::shutdown;
-            parent_p_.reset();
-            to_index_.Send(std::move(msg));
-        } break;
-        case Work::shutdown:
-        case Work::filter:
-        case Work::reorg_begin_ack:
-        case Work::reorg_end_ack:
-        case Work::startup:
-        case Work::init:
-        case Work::key:
-        case Work::shutdown_ready:
-        case Work::statemachine:
-        default: {
-            LogError()(OT_PRETTY_CLASS())(parent_.name_)(
-                " unhandled message type ")(static_cast<OTZMQWorkType>(work))
-                .Flush();
-
-            OT_FAIL;
-        }
-    }
-}
-
-auto Process::Imp::state_reorg(const Work work, Message&& msg) noexcept -> void
-{
-    switch (work) {
-        case Work::shutdown:
-        case Work::mempool:
-        case Work::block:
-        case Work::update:
-        case Work::statemachine: {
-            log_(OT_PRETTY_CLASS())(parent_.name_)(" deferring ")(print(work))(
-                " message processing until reorg is complete")
-                .Flush();
-            defer(std::move(msg));
-        } break;
-        case Work::reorg_end: {
-            transition_state_normal(std::move(msg));
-        } break;
-        case Work::reorg_begin:
-        case Work::shutdown_begin: {
-            LogError()(OT_PRETTY_CLASS())(parent_.name_)(" wrong state for ")(
-                print(work))(" message")
-                .Flush();
-
-            OT_FAIL;
-        }
-        case Work::filter:
-        case Work::reorg_begin_ack:
-        case Work::reorg_end_ack:
-        case Work::startup:
-        case Work::init:
-        case Work::key:
-        case Work::shutdown_ready:
-        default: {
-            LogError()(OT_PRETTY_CLASS())(parent_.name_)(
-                " unhandled message type ")(static_cast<OTZMQWorkType>(work))
-                .Flush();
-
-            OT_FAIL;
-        }
-    }
-}
-
-auto Process::Imp::transition_state_normal(Message&& msg) noexcept -> void
-{
-    disable_automatic_processing_ = false;
-    state_ = State::normal;
-    log_(OT_PRETTY_CLASS())(parent_.name_)(" transitioned to normal state ")
-        .Flush();
-    to_scan_.Send(std::move(msg));
-    flush_cache();
-    do_work();
-}
-
-auto Process::Imp::transition_state_reorg(Message&& msg) noexcept -> void
-{
-    disable_automatic_processing_ = true;
-    state_ = State::reorg;
-    log_(OT_PRETTY_CLASS())(parent_.name_)(" transitioned to reorg state ")
-        .Flush();
-    to_index_.Send(std::move(msg));
-}
-
-auto Process::Imp::VerifyState(const State state) const noexcept -> void
-{
-    OT_ASSERT(state == state_);
 }
 
 auto Process::Imp::work() noexcept -> bool
@@ -377,10 +218,9 @@ auto Process::Imp::work() noexcept -> bool
 
 namespace opentxs::blockchain::node::wallet
 {
-Process::Process(
-    const boost::shared_ptr<const SubchainStateData>& parent) noexcept
+Process::Process(const SubchainStateData& parent) noexcept
     : imp_([&] {
-        const auto& asio = parent->api_.Network().ZeroMQ().Internal();
+        const auto& asio = parent.api_.Network().ZeroMQ().Internal();
         const auto batchID = asio.PreallocateBatch();
         // TODO the version of libc++ present in android ndk 23.0.7599858
         // has a broken std::allocate_shared function so we're using
@@ -393,15 +233,18 @@ Process::Process(
     imp_->Init(imp_);
 }
 
+auto Process::ChangeState(const State state) noexcept -> bool
+{
+    return imp_->ChangeState(state);
+}
+
 auto Process::ProcessReorg(const block::Position& parent) noexcept -> void
 {
     imp_->ProcessReorg(parent);
 }
 
-auto Process::VerifyState(const State state) const noexcept -> void
+Process::~Process()
 {
-    imp_->VerifyState(state);
+    if (imp_) { imp_->Shutdown(); }
 }
-
-Process::~Process() = default;
 }  // namespace opentxs::blockchain::node::wallet

@@ -65,7 +65,7 @@ public:
     virtual auto AddBlock(
         const std::shared_ptr<const block::bitcoin::Block> block) const noexcept
         -> bool = 0;
-    virtual auto AddPeer(const p2p::Address& address) const noexcept
+    virtual auto AddPeer(const blockchain::p2p::Address& address) const noexcept
         -> bool = 0;
     virtual auto BlockOracle() const noexcept -> const node::BlockOracle& = 0;
     virtual auto FilterOracle() const noexcept -> const node::FilterOracle& = 0;
@@ -81,7 +81,8 @@ public:
     virtual auto HeaderOracle() const noexcept -> const node::HeaderOracle& = 0;
     OPENTXS_NO_EXPORT virtual auto Internal() const noexcept
         -> const internal::Network& = 0;
-    virtual auto Listen(const p2p::Address& address) const noexcept -> bool = 0;
+    virtual auto Listen(const blockchain::p2p::Address& address) const noexcept
+        -> bool = 0;
     virtual auto SendToAddress(
         const identifier::Nym& sender,
         const UnallocatedCString& address,

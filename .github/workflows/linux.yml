@@ -14,11 +14,11 @@ jobs:
           - compiler: gcc-10
             platform: ubuntu-20.04
             command: /usr/bin/build-opentxs-gcc
-            docker: 5
+            docker: 8
           - compiler: clang-10
             platform: ubuntu-20.04
             command: /usr/bin/build-opentxs-clang
-            docker: 6
+            docker: 8
     runs-on:  ${{ matrix.platform }}
     steps:
     - uses: actions/checkout@v2.3.4

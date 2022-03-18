@@ -12,6 +12,7 @@
 #include "internal/api/crypto/blockchain/BalanceOracle.hpp"
 #include "internal/api/crypto/blockchain/Types.hpp"
 #include "internal/network/zeromq/Types.hpp"
+#include "internal/util/Timer.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/network/zeromq/ListenCallback.hpp"
@@ -90,6 +91,7 @@ private:
         const WorkType type) const noexcept -> Message;
 
     auto do_shutdown() noexcept -> void {}
+    auto do_startup() noexcept -> void {}
     auto notify_subscribers(
         const Subscribers& recipients,
         const Balance& balance,
@@ -109,7 +111,6 @@ private:
         Balance balance) noexcept -> void;
     auto process_update_chain_balance(Message&& in) noexcept -> void;
     auto process_update_nym_balance(Message&& in) noexcept -> void;
-    auto startup() noexcept -> void {}
-    [[noreturn]] auto work() noexcept -> bool;
+    auto work() noexcept -> bool;
 };
 }  // namespace opentxs::api::crypto::blockchain

@@ -75,7 +75,7 @@ public:
 
     Imp(const api::Session& api,
         const node::internal::Network& node,
-        const node::internal::WalletDatabase& db,
+        node::internal::WalletDatabase& db,
         const Type chain) noexcept
         : api_(api)
         , node_(node)
@@ -192,7 +192,7 @@ private:
 
     const api::Session& api_;
     const node::internal::Network& node_;
-    const node::internal::WalletDatabase& db_;
+    node::internal::WalletDatabase& db_;
     const Type chain_;
     mutable std::mutex lock_;
     mutable Pending pending_;
@@ -484,7 +484,7 @@ private:
 Proposals::Proposals(
     const api::Session& api,
     const node::internal::Network& node,
-    const node::internal::WalletDatabase& db,
+    node::internal::WalletDatabase& db,
     const Type chain) noexcept
     : imp_(std::make_unique<Imp>(api, node, db, chain))
 {

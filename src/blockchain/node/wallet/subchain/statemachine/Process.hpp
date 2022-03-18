@@ -13,6 +13,7 @@
 #include <cstddef>
 #include <queue>
 
+#include "blockchain/node/wallet/subchain/statemachine/Job.hpp"
 #include "internal/blockchain/node/wallet/Types.hpp"
 #include "internal/network/zeromq/Types.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
@@ -22,7 +23,7 @@
 #include "util/Actor.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs
+namespace opentxs  // NOLINT
 {
 // inline namespace v1
 // {
@@ -53,19 +54,12 @@ class Raw;
 
 namespace opentxs::blockchain::node::wallet
 {
-class Process::Imp final : public Actor<Imp, SubchainJobs>
+class Process::Imp final : public statemachine::Job
 {
 public:
-    auto VerifyState(const State state) const noexcept -> void;
+    auto ProcessReorg(const block::Position& parent) noexcept -> void final;
 
-    auto Init(boost::shared_ptr<Imp> me) noexcept -> void
-    {
-        signal_startup(me);
-    }
-    auto ProcessReorg(const block::Position& parent) noexcept -> void;
-    auto Shutdown() noexcept -> void { signal_shutdown(); }
-
-    Imp(const boost::shared_ptr<const SubchainStateData>& parent,
+    Imp(const SubchainStateData& parent,
         const network::zeromq::BatchID batch,
         allocator_type alloc) noexcept;
     Imp() = delete;
@@ -77,37 +71,23 @@ public:
     ~Imp() final = default;
 
 private:
-    friend Actor<Imp, SubchainJobs>;
-
     using Waiting = Deque<block::Position>;
     using Downloading = Map<block::Position, BlockOracle::BitcoinBlockFuture>;
     using Index = Map<block::pHash, Downloading::iterator>;
 
     static constexpr auto download_limit_ = std::size_t{400u};
 
-    network::zeromq::socket::Raw& to_parent_;
-    network::zeromq::socket::Raw& to_scan_;
     network::zeromq::socket::Raw& to_index_;
-    boost::shared_ptr<const SubchainStateData> parent_p_;
-    const SubchainStateData& parent_;
-    std::atomic<State> state_;
     Waiting waiting_;
     Downloading downloading_;
     Index index_;
     Downloading downloaded_;
     robin_hood::unordered_flat_set<block::pHash> txid_cache_;
 
-    auto do_shutdown() noexcept -> void;
-    auto pipeline(const Work work, Message&& msg) noexcept -> void;
-    auto process_block(Message&& in) noexcept -> void;
-    auto process_block(const block::Hash& block) noexcept -> void;
-    auto process_mempool(Message&& in) noexcept -> void;
-    auto process_update(Message&& msg) noexcept -> void;
-    auto startup() noexcept -> void;
-    auto state_normal(const Work work, Message&& msg) noexcept -> void;
-    auto state_reorg(const Work work, Message&& msg) noexcept -> void;
-    auto transition_state_normal(Message&& msg) noexcept -> void;
-    auto transition_state_reorg(Message&& msg) noexcept -> void;
-    auto work() noexcept -> bool;
+    auto do_startup() noexcept -> void final;
+    auto process_block(const block::Hash& block) noexcept -> void final;
+    auto process_mempool(Message&& in) noexcept -> void final;
+    auto process_update(Message&& msg) noexcept -> void final;
+    auto work() noexcept -> bool final;
 };
 }  // namespace opentxs::blockchain::node::wallet

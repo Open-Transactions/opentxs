@@ -7,7 +7,6 @@
 #include "1_Internal.hpp"  // IWYU pragma: associated
 #include "blockchain/node/wallet/subchain/DeterministicStateData.hpp"  // IWYU pragma: associated
 
-#include <boost/smart_ptr/shared_ptr.hpp>
 #include <chrono>
 #include <memory>
 #include <optional>
@@ -44,6 +43,7 @@
 #include "opentxs/util/Iterator.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Pimpl.hpp"
+#include "opentxs/util/Time.hpp"
 #include "util/ScopeGuard.hpp"
 
 namespace opentxs::blockchain::node::wallet
@@ -51,14 +51,13 @@ namespace opentxs::blockchain::node::wallet
 DeterministicStateData::DeterministicStateData(
     const api::Session& api,
     const node::internal::Network& node,
-    const node::internal::WalletDatabase& db,
+    node::internal::WalletDatabase& db,
     const node::internal::Mempool& mempool,
     const crypto::Deterministic& subaccount,
     const cfilter::Type filter,
     const Subchain subchain,
     const network::zeromq::BatchID batch,
-    const std::string_view fromParent,
-    const std::string_view toParent,
+    const std::string_view parent,
     allocator_type alloc) noexcept
     : SubchainStateData(
           api,
@@ -90,16 +89,14 @@ DeterministicStateData::DeterministicStateData(
                   }
               }
           }(),
-          fromParent,
-          toParent,
+          parent,
           std::move(alloc))
     , subaccount_(subaccount)
 {
 }
 
 auto DeterministicStateData::get_index(
-    const boost::shared_ptr<const SubchainStateData>& me) const noexcept
-    -> Index
+    const SubchainStateData& me) const noexcept -> Index
 {
     return Index::DeterministicFactory(me, *this);
 }
@@ -109,6 +106,7 @@ auto DeterministicStateData::handle_confirmed_matches(
     const block::Position& position,
     const block::Matches& confirmed) const noexcept -> void
 {
+    const auto start = Clock::now();
     const auto& [utxo, general] = confirmed;
     auto transactions = UnallocatedMap<
         block::pTxid,
@@ -130,11 +128,18 @@ auto DeterministicStateData::handle_confirmed_matches(
         process(match, transaction, arg);
     }
 
+    const auto processMatches = Clock::now();
+
     for (const auto& [tx, outpoint, element] : utxo) {
         auto& pTx = transactions[tx].second;
 
         if (nullptr == pTx) { pTx = block.at(tx->Bytes()).get(); }
     }
+
+    const auto buildTransactionMap = Clock::now();
+    log_(OT_PRETTY_CLASS())(name_)(" adding ")(transactions.size())(
+        " confirmed transaction to database")
+        .Flush();
 
     for (const auto& [txid, data] : transactions) {
         auto& [outputs, pTX] = data;
@@ -147,7 +152,7 @@ auto DeterministicStateData::handle_confirmed_matches(
         OT_ASSERT(index.has_value());
 
         auto updated = db_.AddConfirmedTransaction(
-            id_, subchain_, position, index.value(), outputs, *pTX);
+            id_, db_key_, position, index.value(), outputs, *pTX);
 
         OT_ASSERT(updated);  // TODO handle database errors
 
@@ -155,6 +160,17 @@ auto DeterministicStateData::handle_confirmed_matches(
             " finished processing confirmed transaction ")(tx.ID().asHex())
             .Flush();
     }
+
+    const auto updateDatabase = Clock::now();
+    log_(OT_PRETTY_CLASS())(name_)(" time to process matches: ")(
+        std::chrono::nanoseconds{processMatches - start})
+        .Flush();
+    log_(OT_PRETTY_CLASS())(name_)(" time to build transaction map: ")(
+        std::chrono::nanoseconds{buildTransactionMap - processMatches})
+        .Flush();
+    log_(OT_PRETTY_CLASS())(name_)(" time to update database: ")(
+        std::chrono::nanoseconds{updateDatabase - buildTransactionMap})
+        .Flush();
 }
 
 auto DeterministicStateData::handle_mempool_matches(

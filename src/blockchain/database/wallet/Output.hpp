@@ -25,6 +25,7 @@
 #include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/blockchain/node/Wallet.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
+#include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 #include "util/LMDB.hpp"
 
@@ -103,24 +104,30 @@ public:
     auto GetBalance(const identifier::Nym& owner, const NodeID& node)
         const noexcept -> Balance;
     auto GetBalance(const crypto::Key& key) const noexcept -> Balance;
-    auto GetOutputs(node::TxoState type) const noexcept
-        -> UnallocatedVector<UTXO>;
-    auto GetOutputs(const identifier::Nym& owner, node::TxoState type)
-        const noexcept -> UnallocatedVector<UTXO>;
+    auto GetOutputs(node::TxoState type, alloc::Resource* alloc) const noexcept
+        -> Vector<UTXO>;
+    auto GetOutputs(
+        const identifier::Nym& owner,
+        node::TxoState type,
+        alloc::Resource* alloc) const noexcept -> Vector<UTXO>;
     auto GetOutputs(
         const identifier::Nym& owner,
         const Identifier& node,
-        node::TxoState type) const noexcept -> UnallocatedVector<UTXO>;
-    auto GetOutputs(const crypto::Key& key, node::TxoState type) const noexcept
-        -> UnallocatedVector<UTXO>;
+        node::TxoState type,
+        alloc::Resource* alloc) const noexcept -> Vector<UTXO>;
+    auto GetOutputs(
+        const crypto::Key& key,
+        node::TxoState type,
+        alloc::Resource* alloc) const noexcept -> Vector<UTXO>;
     auto GetTransactions() const noexcept -> UnallocatedVector<block::pTxid>;
     auto GetTransactions(const identifier::Nym& account) const noexcept
         -> UnallocatedVector<block::pTxid>;
     auto GetUnconfirmedTransactions() const noexcept
         -> UnallocatedSet<block::pTxid>;
-    auto GetUnspentOutputs() const noexcept -> UnallocatedVector<UTXO>;
-    auto GetUnspentOutputs(const NodeID& balanceNode) const noexcept
-        -> UnallocatedVector<UTXO>;
+    auto GetUnspentOutputs(alloc::Resource* alloc) const noexcept
+        -> Vector<UTXO>;
+    auto GetUnspentOutputs(const NodeID& balanceNode, alloc::Resource* alloc)
+        const noexcept -> Vector<UTXO>;
 
     auto AddConfirmedTransaction(
         const AccountID& account,

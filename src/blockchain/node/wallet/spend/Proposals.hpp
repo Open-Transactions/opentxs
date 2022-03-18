@@ -91,7 +91,7 @@ public:
     Proposals(
         const api::Session& api,
         const node::internal::Network& node,
-        const node::internal::WalletDatabase& db,
+        node::internal::WalletDatabase& db,
         const Type chain) noexcept;
     ~Proposals();
 

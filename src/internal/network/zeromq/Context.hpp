@@ -32,6 +32,11 @@ class Handle;
 class Thread;
 }  // namespace internal
 
+namespace socket
+{
+class Raw;
+}  // namespace socket
+
 class Pipeline;
 }  // namespace zeromq
 }  // namespace network
@@ -69,6 +74,7 @@ public:
         const std::optional<BatchID>& preallocated = std::nullopt,
         alloc::Resource* pmr = alloc::System()) const noexcept
         -> zeromq::Pipeline = 0;
+    virtual auto RawSocket(socket::Type type) const noexcept -> socket::Raw = 0;
     virtual auto Start(BatchID id, StartArgs&& sockets) const noexcept
         -> Thread* = 0;
     virtual auto Thread(BatchID id) const noexcept -> Thread* = 0;

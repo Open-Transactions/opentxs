@@ -22,6 +22,7 @@
 { "include": ["@<chaiscript/.*>", "private", "<chaiscript/chaiscript.hpp>", "public"] },
 { "include": ["@<opendht/.*>", "private", "<opendht.h>", "public"] },
 { "include": ["@<sodium/.*>", "private", "<sodium.h>", "public"] },
+{ "include": ["@<gmock/.*>", "private", "<gmock/gmock.h>", "public"] },
 { "include": ["@<gtest/.*>", "private", "<gtest/gtest.h>", "public"] },
 { "include": ["<QtCore/qglobal.h>", "private", "<QtGlobal>", "public"] },
 { "include": ["<qabstractitemmodel.h>", "private", "<QAbstractItemModel>", "public"] },

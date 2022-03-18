@@ -20,6 +20,7 @@ boost-type-index
 fontconfig
 gettext
 gtest
+gmock
 libsodium
 lmdb
 openssl

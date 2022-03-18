@@ -93,6 +93,7 @@ public:
     auto PullFrom(const std::string_view endpoint) const noexcept -> bool;
     auto Push(zeromq::Message&& data) const noexcept -> bool;
     auto Send(zeromq::Message&& data) const noexcept -> bool;
+    auto SendFromThread(zeromq::Message&& msg) noexcept -> bool final;
     auto SetCallback(Callback&& cb) const noexcept -> void final;
     auto SubscribeTo(const std::string_view endpoint) const noexcept -> bool;
 

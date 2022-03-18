@@ -20,6 +20,7 @@
 #include "internal/network/zeromq/Handle.hpp"
 #include "internal/network/zeromq/Thread.hpp"
 #include "internal/network/zeromq/Types.hpp"
+#include "internal/network/zeromq/socket/Raw.hpp"
 #include "network/zeromq/context/Pool.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/network/zeromq/Pipeline.hpp"
@@ -131,6 +132,7 @@ public:
         -> OTZMQPullSocket final;
     auto PushSocket(const socket::Direction direction) const noexcept
         -> OTZMQPushSocket final;
+    auto RawSocket(socket::Type type) const noexcept -> socket::Raw final;
     auto ReplySocket(
         const ReplyCallback& callback,
         const socket::Direction direction) const noexcept

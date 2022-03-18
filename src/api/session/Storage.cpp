@@ -250,11 +250,16 @@ auto Storage::BlockchainAccountList(
     return Root().Tree().Nyms().Nym(nymID).BlockchainAccountList(type);
 }
 
-auto Storage::BlockchainAccountType(
-    const UnallocatedCString& nymID,
-    const UnallocatedCString& accountID) const -> UnitType
+auto Storage::BlockchainSubaccountAccountType(
+    const identifier::Nym& owner,
+    const Identifier& subaccount) const -> UnitType
 {
-    return Root().Tree().Nyms().Nym(nymID).BlockchainAccountType(accountID);
+    const auto& nym = Root().Tree().Nyms().Nym(owner.str());
+    auto out = nym.BlockchainAccountType(subaccount.str());
+
+    if (UnitType::Error == out) { out = nym.Bip47Channels().Chain(subaccount); }
+
+    return out;
 }
 
 auto Storage::BlockchainThreadMap(const identifier::Nym& nym, const Data& txid)

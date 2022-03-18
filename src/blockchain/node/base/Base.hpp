@@ -83,9 +83,13 @@ namespace node
 {
 namespace base
 {
-class SyncClient;
 class SyncServer;
 }  // namespace base
+
+namespace p2p
+{
+class Requestor;
+}  // namespace p2p
 }  // namespace node
 
 namespace p2p
@@ -136,7 +140,8 @@ public:
 
     auto AddBlock(const std::shared_ptr<const block::bitcoin::Block> block)
         const noexcept -> bool final;
-    auto AddPeer(const p2p::Address& address) const noexcept -> bool final;
+    auto AddPeer(const blockchain::p2p::Address& address) const noexcept
+        -> bool final;
     auto BlockOracle() const noexcept
         -> const node::internal::BlockOracle& final
     {
@@ -188,7 +193,8 @@ public:
     {
         return *this;
     }
-    auto Listen(const p2p::Address& address) const noexcept -> bool final;
+    auto Listen(const blockchain::p2p::Address& address) const noexcept
+        -> bool final;
     auto Mempool() const noexcept -> const internal::Mempool& final
     {
         return mempool_;
@@ -335,8 +341,9 @@ private:
 
     const Time start_;
     const UnallocatedCString sync_endpoint_;
+    const UnallocatedCString requestor_endpoint_;
     std::unique_ptr<base::SyncServer> sync_server_;
-    std::unique_ptr<base::SyncClient> sync_client_;
+    std::unique_ptr<p2p::Requestor> p2p_requestor_;
     OTZMQListenCallback sync_cb_;
     OTZMQPairSocket sync_socket_;
     mutable std::atomic<block::Height> local_chain_height_;

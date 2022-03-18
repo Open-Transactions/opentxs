@@ -125,7 +125,7 @@ public:
     class IncomingConnectionManager;
 
     struct Peers {
-        using Endpoint = std::unique_ptr<p2p::internal::Address>;
+        using Endpoint = std::unique_ptr<blockchain::p2p::internal::Address>;
 
         const Type chain_;
 
@@ -136,10 +136,10 @@ public:
             add_peer(id, std::move(endpoint));
         }
         auto AddListener(
-            const p2p::Address& address,
+            const blockchain::p2p::Address& address,
             std::promise<bool>& promise) noexcept -> void;
         auto AddPeer(
-            const p2p::Address& address,
+            const blockchain::p2p::Address& address,
             std::promise<bool>& promise) noexcept -> void;
         auto ConstructPeer(Endpoint endpoint) noexcept -> int;
         auto LookupIncomingSocket(const int id) noexcept(false)
@@ -156,7 +156,7 @@ public:
             const node::HeaderOracle& headers,
             const node::internal::FilterOracle& filter,
             const node::internal::BlockOracle& block,
-            const node::internal::PeerDatabase& database,
+            node::internal::PeerDatabase& database,
             const node::internal::PeerManager& parent,
             const database::BlockStorage policy,
             const UnallocatedCString& shutdown,
@@ -167,7 +167,7 @@ public:
         ~Peers();
 
     private:
-        using Peer = std::unique_ptr<p2p::internal::Peer>;
+        using Peer = std::unique_ptr<blockchain::p2p::internal::Peer>;
         using Resolver = boost::asio::ip::tcp::resolver;
         using Addresses = boost::container::flat_set<OTIdentifier>;
 
@@ -178,7 +178,7 @@ public:
         const node::HeaderOracle& headers_;
         const node::internal::FilterOracle& filter_;
         const node::internal::BlockOracle& block_;
-        const node::internal::PeerDatabase& database_;
+        node::internal::PeerDatabase& database_;
         const node::internal::PeerManager& parent_;
         const network::zeromq::socket::Publish& connected_peers_;
         const database::BlockStorage policy_;
@@ -186,7 +186,7 @@ public:
         const bool invalid_peer_;
         const OTData localhost_peer_;
         const OTData default_peer_;
-        const UnallocatedSet<p2p::Service> preferred_services_;
+        const UnallocatedSet<blockchain::p2p::Service> preferred_services_;
         std::atomic<int> next_id_;
         std::atomic<std::size_t> minimum_peers_;
         UnallocatedMap<int, Peer> peers_;
@@ -200,7 +200,7 @@ public:
 
         static auto get_preferred_services(
             const node::internal::Config& config) noexcept
-            -> UnallocatedSet<p2p::Service>;
+            -> UnallocatedSet<blockchain::p2p::Service>;
         static auto set_default_peer(
             const UnallocatedCString node,
             const Data& localhost,
@@ -208,14 +208,15 @@ public:
 
         auto get_default_peer() const noexcept -> Endpoint;
         auto get_dns_peer() const noexcept -> Endpoint;
-        auto get_fallback_peer(const p2p::Protocol protocol) const noexcept
-            -> Endpoint;
+        auto get_fallback_peer(const blockchain::p2p::Protocol protocol)
+            const noexcept -> Endpoint;
         auto get_peer() const noexcept -> Endpoint;
-        auto get_preferred_peer(const p2p::Protocol protocol) const noexcept
-            -> Endpoint;
-        auto get_types() const noexcept -> UnallocatedSet<p2p::Network>;
-        auto is_not_connected(const p2p::Address& endpoint) const noexcept
-            -> bool;
+        auto get_preferred_peer(const blockchain::p2p::Protocol protocol)
+            const noexcept -> Endpoint;
+        auto get_types() const noexcept
+            -> UnallocatedSet<blockchain::p2p::Network>;
+        auto is_not_connected(
+            const blockchain::p2p::Address& endpoint) const noexcept -> bool;
 
         auto add_peer(Endpoint endpoint) noexcept -> int;
         auto add_peer(const int id, Endpoint endpoint) noexcept -> int;
@@ -223,7 +224,7 @@ public:
         auto previous_failure_timeout(
             const Identifier& addressID) const noexcept -> bool;
         auto peer_factory(Endpoint endpoint, const int id) noexcept
-            -> std::unique_ptr<p2p::internal::Peer>;
+            -> std::unique_ptr<blockchain::p2p::internal::Peer>;
     };
 
     enum class Work : OTZMQWorkType {
@@ -237,14 +238,11 @@ public:
 
     auto AddIncomingPeer(const int id, std::uintptr_t endpoint) const noexcept
         -> void final;
-    auto AddPeer(const p2p::Address& address) const noexcept -> bool final;
+    auto AddPeer(const blockchain::p2p::Address& address) const noexcept
+        -> bool final;
     auto BroadcastBlock(const block::Block& block) const noexcept -> bool final;
     auto BroadcastTransaction(
         const block::bitcoin::Transaction& tx) const noexcept -> bool final;
-    auto Database() const noexcept -> const node::internal::PeerDatabase& final
-    {
-        return database_;
-    }
     auto Connect() noexcept -> bool final;
     auto Disconnect(const int id) const noexcept -> void final;
     auto Endpoint(const Task type) const noexcept -> UnallocatedCString final
@@ -261,7 +259,8 @@ public:
         jobs_.Dispatch(Task::Heartbeat);
     }
     auto JobReady(const Task type) const noexcept -> void final;
-    auto Listen(const p2p::Address& address) const noexcept -> bool final;
+    auto Listen(const blockchain::p2p::Address& address) const noexcept
+        -> bool final;
     auto LookupIncomingSocket(const int id) const noexcept(false)
         -> opentxs::network::asio::Socket final;
     auto RequestBlock(const block::Hash& block) const noexcept -> bool final;
@@ -286,7 +285,7 @@ public:
         const node::HeaderOracle& headers,
         const node::internal::FilterOracle& filter,
         const node::internal::BlockOracle& block,
-        const node::internal::PeerDatabase& database,
+        node::internal::PeerDatabase& database,
         const Type chain,
         const database::BlockStorage policy,
         const UnallocatedCString& seednode,
@@ -332,7 +331,7 @@ private:
     };
 
     const node::internal::Network& node_;
-    const node::internal::PeerDatabase& database_;
+    node::internal::PeerDatabase& database_;
     const Type chain_;
     mutable Jobs jobs_;
     mutable Peers peers_;

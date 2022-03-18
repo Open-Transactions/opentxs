@@ -614,7 +614,7 @@ auto BitcoinP2PGetheaders(
     const api::Session& api,
     const blockchain::Type network,
     const blockchain::p2p::bitcoin::ProtocolVersionUnsigned version,
-    UnallocatedVector<blockchain::block::pHash>&& history,
+    Vector<blockchain::block::pHash>&& history,
     blockchain::block::pHash&& stop)
     -> blockchain::p2p::bitcoin::message::internal::Getheaders*;
 auto BitcoinP2PHeaders(

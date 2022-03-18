@@ -24,6 +24,7 @@ target_sources(
     "SubchainID.hpp"
     "Types.hpp"
 )
+target_link_libraries(opentxs-common PRIVATE Boost::headers)
 target_include_directories(
   opentxs-common SYSTEM
   PRIVATE "${opentxs_SOURCE_DIR}/deps/robin-hood/src/include"

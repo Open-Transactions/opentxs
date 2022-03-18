@@ -41,6 +41,7 @@
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/crypto/Types.hpp"
+#include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Pimpl.hpp"
@@ -125,8 +126,8 @@ public:
     using UTXO = Parent::UTXO;
 
     auto AddConfirmedTransaction(
-        const NodeID& balanceNode,
-        const Subchain subchain,
+        const NodeID& accountID,
+        const SubchainIndex& index,
         const block::Position& block,
         const std::size_t blockIndex,
         const UnallocatedVector<std::uint32_t> outputIndices,
@@ -156,19 +157,25 @@ public:
     auto GetBalance(const identifier::Nym& owner, const NodeID& node)
         const noexcept -> Balance;
     auto GetBalance(const crypto::Key& key) const noexcept -> Balance;
-    auto GetOutputs(node::TxoState type) const noexcept
-        -> UnallocatedVector<UTXO>;
-    auto GetOutputs(const identifier::Nym& owner, node::TxoState type)
-        const noexcept -> UnallocatedVector<UTXO>;
+    auto GetOutputs(node::TxoState type, alloc::Resource* alloc) const noexcept
+        -> Vector<UTXO>;
+    auto GetOutputs(
+        const identifier::Nym& owner,
+        node::TxoState type,
+        alloc::Resource* alloc) const noexcept -> Vector<UTXO>;
     auto GetOutputs(
         const identifier::Nym& owner,
         const Identifier& node,
-        node::TxoState type) const noexcept -> UnallocatedVector<UTXO>;
-    auto GetOutputs(const crypto::Key& key, node::TxoState type) const noexcept
-        -> UnallocatedVector<UTXO>;
+        node::TxoState type,
+        alloc::Resource* alloc) const noexcept -> Vector<UTXO>;
+    auto GetOutputs(
+        const crypto::Key& key,
+        node::TxoState type,
+        alloc::Resource* alloc) const noexcept -> Vector<UTXO>;
     auto GetOutputTags(const block::Outpoint& output) const noexcept
         -> UnallocatedSet<node::TxoTag>;
-    auto GetPatterns(const SubchainIndex& index) const noexcept -> Patterns;
+    auto GetPatterns(const SubchainIndex& index, alloc::Resource* alloc)
+        const noexcept -> Patterns;
     auto GetSubchainID(const NodeID& balanceNode, const Subchain subchain)
         const noexcept -> pSubchainIndex;
     auto GetTransactions() const noexcept -> UnallocatedVector<block::pTxid>;
@@ -176,11 +183,16 @@ public:
         -> UnallocatedVector<block::pTxid>;
     auto GetUnconfirmedTransactions() const noexcept
         -> UnallocatedSet<block::pTxid>;
-    auto GetUnspentOutputs() const noexcept -> UnallocatedVector<UTXO>;
-    auto GetUnspentOutputs(const NodeID& balanceNode, const Subchain subchain)
-        const noexcept -> UnallocatedVector<UTXO>;
-    auto GetUntestedPatterns(const SubchainIndex& index, const ReadView blockID)
-        const noexcept -> Patterns;
+    auto GetUnspentOutputs(alloc::Resource* alloc) const noexcept
+        -> Vector<UTXO>;
+    auto GetUnspentOutputs(
+        const NodeID& balanceNode,
+        const Subchain subchain,
+        alloc::Resource* alloc) const noexcept -> Vector<UTXO>;
+    auto GetUntestedPatterns(
+        const SubchainIndex& index,
+        const ReadView blockID,
+        alloc::Resource* alloc) const noexcept -> Patterns;
     auto GetWalletHeight() const noexcept -> block::Height;
     auto LoadProposal(const Identifier& id) const noexcept
         -> std::optional<proto::BlockchainTransactionProposal>;

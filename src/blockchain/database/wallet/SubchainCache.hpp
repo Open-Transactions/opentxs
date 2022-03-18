@@ -5,6 +5,8 @@
 
 #pragma once
 
+#include <boost/thread/shared_mutex.hpp>
+#include <boost/thread/thread.hpp>
 #include <robin_hood.h>
 #include <cstddef>
 #include <mutex>
@@ -21,6 +23,7 @@
 #include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/crypto/Types.hpp"
+#include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
@@ -71,53 +74,43 @@ class SubchainCache
 {
 public:
     using dbPatterns = robin_hood::unordered_node_set<db::Pattern>;
-    using dbPatternIndex = UnallocatedSet<pPatternID>;
+    using dbPatternIndex = Set<pPatternID>;
 
     auto AddMatch(
-        const eLock&,
         const ReadView key,
         const PatternID& value,
         MDB_txn* tx) noexcept -> bool;
     auto AddPattern(
-        const eLock&,
         const PatternID& id,
         const Bip32Index index,
         const ReadView data,
         MDB_txn* tx) noexcept -> bool;
     auto AddPatternIndex(
-        const eLock&,
         const SubchainIndex& key,
         const PatternID& value,
         MDB_txn* tx) noexcept -> bool;
-    auto Clear(const eLock&) noexcept -> void;
-    auto DecodeIndex(const sLock&, const SubchainIndex& key) noexcept(false)
+    auto Clear() noexcept -> void;
+    auto DecodeIndex(const SubchainIndex& key) noexcept(false)
         -> const db::SubchainID&;
     auto GetIndex(
-        const sLock&,
         const NodeID& subaccount,
         const Subchain subchain,
         const cfilter::Type type,
         const VersionNumber version,
         MDB_txn* tx) noexcept -> pSubchainIndex;
-    auto GetLastIndexed(const sLock&, const SubchainIndex& subchain) noexcept
+    auto GetLastIndexed(const SubchainIndex& subchain) noexcept
         -> std::optional<Bip32Index>;
-    auto GetLastScanned(const sLock&, const SubchainIndex& subchain) noexcept
+    auto GetLastScanned(const SubchainIndex& subchain) noexcept
         -> block::Position;
-    auto GetLastScanned(const eLock&, const SubchainIndex& subchain) noexcept
-        -> block::Position;
-    auto GetMatchIndex(const sLock&, const ReadView id) noexcept
-        -> const dbPatternIndex&;
-    auto GetPattern(const sLock&, const PatternID& id) noexcept
-        -> const dbPatterns&;
-    auto GetPatternIndex(const sLock&, const SubchainIndex& id) noexcept
+    auto GetMatchIndex(const ReadView id) noexcept -> const dbPatternIndex&;
+    auto GetPattern(const PatternID& id) noexcept -> const dbPatterns&;
+    auto GetPatternIndex(const SubchainIndex& id) noexcept
         -> const dbPatternIndex&;
     auto SetLastIndexed(
-        const eLock&,
         const SubchainIndex& subchain,
         const Bip32Index value,
         MDB_txn* tx) noexcept -> bool;
     auto SetLastScanned(
-        const eLock&,
         const SubchainIndex& subchain,
         const block::Position& value,
         MDB_txn* tx) noexcept -> bool;
@@ -131,23 +124,33 @@ public:
 private:
     static constexpr auto reserve_ = std::size_t{1000u};
 
-    // NOTE if an exclusive lock is being held in the parent then locking
-    // these mutexes is redundant
+    using SubchainIDMap =
+        robin_hood::unordered_node_map<pSubchainIndex, db::SubchainID>;
+    using LastIndexedMap =
+        robin_hood::unordered_flat_map<pSubchainIndex, Bip32Index>;
+    using LastScannedMap =
+        robin_hood::unordered_node_map<pSubchainIndex, db::Position>;
+    using PatternsMap = robin_hood::unordered_node_map<pPatternID, dbPatterns>;
+    using PatternIndexMap =
+        robin_hood::unordered_node_map<pSubchainIndex, dbPatternIndex>;
+    using MatchIndexMap =
+        robin_hood::unordered_node_map<block::pHash, dbPatternIndex>;
+    using Mutex = boost::upgrade_mutex;
+
     const api::Session& api_;
     const storage::lmdb::LMDB& lmdb_;
-    std::mutex id_lock_;
-    robin_hood::unordered_node_map<pSubchainIndex, db::SubchainID> subchain_id_;
-    std::mutex index_lock_;
-    robin_hood::unordered_flat_map<pSubchainIndex, Bip32Index> last_indexed_;
-    std::mutex scanned_lock_;
-    robin_hood::unordered_node_map<pSubchainIndex, db::Position> last_scanned_;
-    std::mutex pattern_lock_;
-    robin_hood::unordered_node_map<pPatternID, dbPatterns> patterns_;
-    std::mutex pattern_index_lock_;
-    robin_hood::unordered_node_map<pSubchainIndex, dbPatternIndex>
-        pattern_index_;
-    std::mutex match_index_lock_;
-    robin_hood::unordered_node_map<block::pHash, dbPatternIndex> match_index_;
+    Mutex subchain_id_lock_;
+    SubchainIDMap subchain_id_;
+    Mutex last_indexed_lock_;
+    LastIndexedMap last_indexed_;
+    Mutex last_scanned_lock_;
+    LastScannedMap last_scanned_;
+    Mutex patterns_lock_;
+    PatternsMap patterns_;
+    Mutex pattern_index_lock_;
+    PatternIndexMap pattern_index_;
+    Mutex match_index_lock_;
+    MatchIndexMap match_index_;
 
     auto subchain_index(
         const NodeID& subaccount,

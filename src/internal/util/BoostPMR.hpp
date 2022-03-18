@@ -52,6 +52,8 @@ template <typename T>
 class Boost final : public Resource
 {
 public:
+    T boost_;
+
     auto do_allocate(std::size_t bytes, std::size_t alignment) -> void* final
     {
         return boost_.allocate(bytes, alignment);
@@ -78,12 +80,12 @@ public:
     auto operator=(Boost&&) -> Boost& = delete;
 
     ~Boost() final = default;
-
-private:
-    T boost_;
 };
 
 using BoostMonotonic = Boost<boost::container::pmr::monotonic_buffer_resource>;
 using BoostPool = Boost<boost::container::pmr::unsynchronized_pool_resource>;
 using BoostPoolSync = Boost<boost::container::pmr::synchronized_pool_resource>;
+
+auto standard_to_boost(Resource* standard) noexcept
+    -> boost::container::pmr::memory_resource*;
 }  // namespace opentxs::alloc

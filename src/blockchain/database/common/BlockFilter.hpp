@@ -14,9 +14,11 @@
 #include "opentxs/Types.hpp"
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/blockchain/bitcoin/cfilter/FilterType.hpp"
+#include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "util/LMDB.hpp"
+#include "util/MappedFileStorage.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
@@ -48,6 +50,11 @@ namespace lmdb
 class LMDB;
 }  // namespace lmdb
 }  // namespace storage
+
+namespace util
+{
+struct IndexData;
+}  // namespace util
 // }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
@@ -63,6 +70,10 @@ public:
         const noexcept -> bool;
     auto LoadFilter(const cfilter::Type type, const ReadView blockHash)
         const noexcept -> std::unique_ptr<const opentxs::blockchain::GCS>;
+    auto LoadFilters(
+        const cfilter::Type type,
+        const Vector<block::pHash>& blocks) const noexcept
+        -> Vector<std::unique_ptr<const GCS>>;
     auto LoadFilterHash(
         const cfilter::Type type,
         const ReadView blockHash,
@@ -102,6 +113,15 @@ private:
     static auto translate_header(const cfilter::Type type) noexcept(false)
         -> Table;
 
+    auto load_filter_index(
+        const cfilter::Type type,
+        const ReadView blockHash,
+        util::IndexData& out) const noexcept(false) -> void;
+    auto load_filter_index(
+        const cfilter::Type type,
+        const ReadView blockHash,
+        storage::lmdb::LMDB::Transaction& tx,
+        util::IndexData& out) const noexcept(false) -> void;
     auto store(
         const Lock& lock,
         storage::lmdb::LMDB::Transaction& tx,

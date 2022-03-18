@@ -7,7 +7,6 @@
 #include "1_Internal.hpp"                     // IWYU pragma: associated
 #include "blockchain/crypto/PaymentCode.hpp"  // IWYU pragma: associated
 
-#include <robin_hood.h>
 #include <cstdint>
 #include <iterator>
 #include <memory>
@@ -185,8 +184,6 @@ PaymentCode::PaymentCode(
                   ChainData{api, internal_type_, false, external_type_, false};
               auto& internal = out.internal_.map_;
               auto& external = out.external_.map_;
-              internal.reserve(serialized.outgoing().address().size());
-              external.reserve(serialized.incoming().address().size());
 
               for (const auto& address : serialized.outgoing().address()) {
                   internal.emplace(

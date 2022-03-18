@@ -206,6 +206,11 @@ auto Raw::Send(Message&& msg) noexcept -> bool
     return sent;
 }
 
+auto Raw::SendDeferred(Message&& msg) noexcept -> bool
+{
+    return send(std::move(msg), 0);
+}
+
 auto Raw::SendExternal(Message&& msg) noexcept -> bool
 {
     return send(std::move(msg), ZMQ_DONTWAIT);
@@ -532,6 +537,11 @@ auto Raw::Native() noexcept -> void* { return imp_->Native(); }
 auto Raw::Send(Message&& msg) noexcept -> bool
 {
     return imp_->Send(std::move(msg));
+}
+
+auto Raw::SendDeferred(Message&& msg) noexcept -> bool
+{
+    return imp_->SendDeferred(std::move(msg));
 }
 
 auto Raw::SendExternal(Message&& msg) noexcept -> bool

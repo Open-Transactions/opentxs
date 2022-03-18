@@ -12,5 +12,11 @@ add_opentx_test(unittests-opentxs-integration-pair Test_Pair.cpp)
 
 set_tests_properties(unittests-opentxs-integration PROPERTIES DISABLED TRUE)
 set_tests_properties(
+  unittests-opentxs-integration-addcontact PROPERTIES DISABLED TRUE
+)
+set_tests_properties(
+  unittests-opentxs-integration-deposit PROPERTIES DISABLED TRUE
+)
+set_tests_properties(
   unittests-opentxs-integration-pair PROPERTIES DISABLED TRUE
 )

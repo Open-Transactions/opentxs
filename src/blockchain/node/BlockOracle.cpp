@@ -34,7 +34,7 @@ auto BlockOracle(
     const api::Session& api,
     const blockchain::node::internal::Network& node,
     const blockchain::node::HeaderOracle& header,
-    const blockchain::node::internal::BlockDatabase& db,
+    blockchain::node::internal::BlockDatabase& db,
     const blockchain::Type chain,
     const UnallocatedCString& shutdown) noexcept
     -> std::unique_ptr<blockchain::node::internal::BlockOracle>
@@ -51,7 +51,7 @@ BlockOracle::BlockOracle(
     const api::Session& api,
     const internal::Network& node,
     const HeaderOracle& header,
-    const internal::BlockDatabase& db,
+    internal::BlockDatabase& db,
     const blockchain::Type chain,
     const UnallocatedCString& shutdown) noexcept
     : Worker(api, 500ms)

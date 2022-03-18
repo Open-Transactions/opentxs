@@ -7,6 +7,8 @@
 #include "1_Internal.hpp"  // IWYU pragma: associated
 #include "blockchain/database/common/BlockFilter.hpp"  // IWYU pragma: associated
 
+#include <array>
+#include <cstddef>
 #include <cstring>
 #include <stdexcept>
 #include <type_traits>
@@ -16,12 +18,14 @@
 #include "Proto.tpp"
 #include "blockchain/database/common/Bulk.hpp"
 #include "internal/blockchain/Blockchain.hpp"
+#include "internal/util/BoostPMR.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/TSV.hpp"
 #include "opentxs/blockchain/bitcoin/cfilter/GCS.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
+#include "opentxs/util/Pimpl.hpp"
 #include "serialization/protobuf/BlockchainFilterHeader.pb.h"
 #include "serialization/protobuf/GCS.pb.h"
 #include "util/LMDB.hpp"
@@ -64,6 +68,31 @@ auto BlockFilter::HaveFilterHeader(
     }
 }
 
+auto BlockFilter::load_filter_index(
+    const cfilter::Type type,
+    const ReadView blockHash,
+    util::IndexData& out) const noexcept(false) -> void
+{
+    auto tx = lmdb_.TransactionRO();
+    load_filter_index(type, blockHash, tx, out);
+}
+
+auto BlockFilter::load_filter_index(
+    const cfilter::Type type,
+    const ReadView blockHash,
+    storage::lmdb::LMDB::Transaction& tx,
+    util::IndexData& out) const noexcept(false) -> void
+{
+    auto cb = [&out](const ReadView in) {
+        if (sizeof(out) != in.size()) { return; }
+
+        std::memcpy(static_cast<void*>(&out), in.data(), in.size());
+    };
+    lmdb_.Load(translate_filter(type), blockHash, cb, tx);
+
+    if (0 == out.size_) { throw std::out_of_range("Cfilter not found"); }
+}
+
 auto BlockFilter::LoadFilter(const cfilter::Type type, const ReadView blockHash)
     const noexcept -> std::unique_ptr<const opentxs::blockchain::GCS>
 {
@@ -72,16 +101,7 @@ auto BlockFilter::LoadFilter(const cfilter::Type type, const ReadView blockHash)
     try {
         const auto index = [&] {
             auto out = util::IndexData{};
-            auto cb = [&out](const ReadView in) {
-                if (sizeof(out) != in.size()) { return; }
-
-                std::memcpy(static_cast<void*>(&out), in.data(), in.size());
-            };
-            lmdb_.Load(translate_filter(type), blockHash, cb);
-
-            if (0 == out.size_) {
-                throw std::out_of_range("Cfilter not found");
-            }
+            load_filter_index(type, blockHash, out);
 
             return out;
         }();
@@ -89,6 +109,52 @@ auto BlockFilter::LoadFilter(const cfilter::Type type, const ReadView blockHash)
             api_, proto::Factory<proto::GCS>(bulk_.ReadView(index)));
     } catch (const std::exception& e) {
         LogVerbose()(OT_PRETTY_CLASS())(e.what()).Flush();
+    }
+
+    return output;
+}
+
+auto BlockFilter::LoadFilters(
+    const cfilter::Type type,
+    const Vector<block::pHash>& blocks) const noexcept
+    -> Vector<std::unique_ptr<const GCS>>
+{
+    auto output = Vector<std::unique_ptr<const GCS>>{blocks.get_allocator()};
+    output.reserve(blocks.size());
+    // TODO use a named constant for the cfilter scan batch size.
+    constexpr auto allocBytes =
+        (1000u * sizeof(util::IndexData)) + sizeof(Vector<util::IndexData>);
+    auto buf = std::array<std::byte, allocBytes>{};
+    auto alloc = alloc::BoostMonotonic{buf.data(), buf.size()};
+    const auto indices = [&] {
+        auto out = Vector<util::IndexData>{&alloc};
+        out.reserve(1000u);
+        auto tx = lmdb_.TransactionRO();
+
+        for (const auto& hash : blocks) {
+            try {
+                auto& index = out.emplace_back();
+                load_filter_index(type, hash->Bytes(), tx, index);
+            } catch (const std::exception& e) {
+                LogVerbose()(OT_PRETTY_CLASS())(e.what()).Flush();
+                out.pop_back();
+
+                break;
+            }
+        }
+
+        return out;
+    }();
+
+    for (const auto& index : indices) {
+        try {
+            output.emplace_back(factory::GCS(
+                api_, proto::Factory<proto::GCS>(bulk_.ReadView(index))));
+        } catch (const std::exception& e) {
+            LogVerbose()(OT_PRETTY_CLASS())(e.what()).Flush();
+
+            break;
+        }
     }
 
     return output;

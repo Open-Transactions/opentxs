@@ -19,6 +19,7 @@
 #include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/crypto/Types.hpp"
+#include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "util/LMDB.hpp"
@@ -65,10 +66,12 @@ public:
         const NodeID& subaccount,
         const Subchain subchain,
         MDB_txn* tx) const noexcept -> pSubchainIndex;
-    auto GetPatterns(const SubchainIndex& subchain) const noexcept -> Patterns;
+    auto GetPatterns(const SubchainIndex& subchain, alloc::Resource* alloc)
+        const noexcept -> Patterns;
     auto GetUntestedPatterns(
         const SubchainIndex& subchain,
-        const ReadView blockID) const noexcept -> Patterns;
+        const ReadView blockID,
+        alloc::Resource* alloc) const noexcept -> Patterns;
     auto Reorg(
         const Lock& headerOracleLock,
         MDB_txn* tx,

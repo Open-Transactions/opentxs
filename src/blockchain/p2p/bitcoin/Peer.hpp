@@ -55,6 +55,7 @@ struct Config;
 struct FilterOracle;
 struct Mempool;
 struct Network;
+struct PeerDatabase;
 struct PeerManager;
 }  // namespace internal
 
@@ -99,6 +100,7 @@ public:
         const node::internal::FilterOracle& filter,
         const node::internal::BlockOracle& block,
         const node::internal::PeerManager& manager,
+        node::internal::PeerDatabase& database,
         const database::BlockStorage policy,
         const UnallocatedCString& shutdown,
         const int id,

@@ -7,6 +7,7 @@
 #include "1_Internal.hpp"       // IWYU pragma: associated
 #include "util/JobCounter.hpp"  // IWYU pragma: associated
 
+#include <algorithm>
 #include <atomic>
 #include <condition_variable>
 #include <memory>
@@ -62,8 +63,22 @@ struct Outstanding::Imp {
         ready_.wait(lock, [this] { return false == limited(); });
     }
 
-    Imp(JobCounter::Imp& parent, OutstandingMap::iterator position) noexcept
-        : parent_(parent)
+    Imp(JobCounter::Imp& parent,
+        OutstandingMap::iterator position,
+        int limit) noexcept
+        : limit_([&] {
+            const auto threads =
+                static_cast<int>(std::thread::hardware_concurrency());
+
+            if (0 >= limit) {
+
+                return threads;
+            } else {
+
+                return std::min<int>(threads, limit);
+            }
+        }())
+        , parent_(parent)
         , lock_()
         , idle_(true)
         , limited_(false)
@@ -76,6 +91,7 @@ struct Outstanding::Imp {
     ~Imp();
 
 private:
+    const int limit_;
     JobCounter::Imp& parent_;
     std::mutex lock_;
     bool idle_;
@@ -87,13 +103,7 @@ private:
     auto finished() const noexcept -> bool { return finished(value()); }
     auto finished(int count) const noexcept -> bool { return 0 == count; }
     auto limited() const noexcept -> bool { return limited(value()); }
-    auto limited(int count) const noexcept -> bool
-    {
-        static const auto limit =
-            static_cast<int>(std::thread::hardware_concurrency());
-
-        return count >= limit;
-    }
+    auto limited(int count) const noexcept -> bool { return count >= limit_; }
     auto value() const noexcept -> int { return position_->second; }
 
     Imp(const Imp&) = delete;
@@ -103,7 +113,7 @@ private:
 };
 
 struct JobCounter::Imp {
-    auto Allocate() noexcept -> Outstanding
+    auto Allocate(int limit) noexcept -> Outstanding
     {
         auto lock = Lock{lock_};
         auto [it, added] = map_.emplace(++counter_, 0);
@@ -111,7 +121,7 @@ struct JobCounter::Imp {
         OT_ASSERT(added);
 
         return Outstanding{
-            std::make_unique<Outstanding::Imp>(*this, it).release()};
+            std::make_unique<Outstanding::Imp>(*this, it, limit).release()};
     }
     auto Deallocate(OutstandingMap::iterator position) noexcept -> void
     {
@@ -144,7 +154,10 @@ JobCounter::JobCounter() noexcept
 {
 }
 
-auto JobCounter::Allocate() noexcept -> Outstanding { return imp_->Allocate(); }
+auto JobCounter::Allocate(int limit) noexcept -> Outstanding
+{
+    return imp_->Allocate(limit);
+}
 
 Outstanding::Outstanding(Imp* imp) noexcept
     : imp_(imp)

@@ -85,6 +85,10 @@ public:
         const noexcept -> bool;
     auto LoadFilter(const cfilter::Type type, const ReadView block)
         const noexcept -> std::unique_ptr<const blockchain::GCS>;
+    auto LoadFilters(
+        const cfilter::Type type,
+        const Vector<block::pHash>& blocks) const noexcept
+        -> Vector<std::unique_ptr<const GCS>>;
     auto LoadFilterHash(const cfilter::Type type, const ReadView block)
         const noexcept -> Hash;
     auto LoadFilterHeader(const cfilter::Type type, const ReadView block)

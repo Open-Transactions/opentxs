@@ -5,6 +5,8 @@
 
 #pragma once
 
+#include <string_view>
+
 #include "opentxs/util/WorkType.hpp"
 #include "util/Work.hpp"
 
@@ -25,6 +27,9 @@ enum class Job : OTZMQWorkType {
     Register = OT_ZMQ_INTERNAL_SIGNAL + 0,
     Request = OT_ZMQ_INTERNAL_SIGNAL + 1,
     Processed = OT_ZMQ_INTERNAL_SIGNAL + 2,
+    Init = OT_ZMQ_INIT_SIGNAL,
     StateMachine = OT_ZMQ_STATE_MACHINE_SIGNAL,
 };
+
+auto print(Job) noexcept -> std::string_view;
 }  // namespace opentxs::network::p2p

@@ -547,17 +547,18 @@ auto Headers::push_best(
     return output.first;
 }
 
-auto Headers::RecentHashes() const noexcept -> UnallocatedVector<block::pHash>
+auto Headers::RecentHashes(alloc::Resource* alloc) const noexcept
+    -> Vector<block::pHash>
 {
     Lock lock(lock_);
 
-    return recent_hashes(lock);
+    return recent_hashes(lock, alloc);
 }
 
-auto Headers::recent_hashes(const Lock& lock) const noexcept
-    -> UnallocatedVector<block::pHash>
+auto Headers::recent_hashes(const Lock& lock, alloc::Resource* alloc)
+    const noexcept -> Vector<block::pHash>
 {
-    auto output = UnallocatedVector<block::pHash>{};
+    auto output = Vector<block::pHash>{alloc};
     lmdb_.Read(
         BlockHeaderBest,
         [&](const auto, const auto value) -> bool {

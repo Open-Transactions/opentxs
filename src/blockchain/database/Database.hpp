@@ -44,6 +44,7 @@
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/crypto/Types.hpp"
+#include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
@@ -123,28 +124,21 @@ class Database final : public internal::Database
 {
 public:
     auto AddConfirmedTransaction(
-        const NodeID& balanceNode,
-        const Subchain subchain,
+        const NodeID& accountID,
+        const SubchainIndex& index,
         const block::Position& block,
         const std::size_t blockIndex,
         const UnallocatedVector<std::uint32_t> outputIndices,
-        const block::bitcoin::Transaction& transaction) const noexcept
-        -> bool final
+        const block::bitcoin::Transaction& transaction) noexcept -> bool final
     {
         return wallet_.AddConfirmedTransaction(
-            balanceNode,
-            subchain,
-            block,
-            blockIndex,
-            outputIndices,
-            transaction);
+            accountID, index, block, blockIndex, outputIndices, transaction);
     }
     auto AddMempoolTransaction(
         const NodeID& balanceNode,
         const Subchain subchain,
         const UnallocatedVector<std::uint32_t> outputIndices,
-        const block::bitcoin::Transaction& transaction) const noexcept
-        -> bool final
+        const block::bitcoin::Transaction& transaction) noexcept -> bool final
     {
         return wallet_.AddMempoolTransaction(
             balanceNode, subchain, outputIndices, transaction);
@@ -152,24 +146,22 @@ public:
     auto AddOutgoingTransaction(
         const Identifier& proposalID,
         const proto::BlockchainTransactionProposal& proposal,
-        const block::bitcoin::Transaction& transaction) const noexcept
-        -> bool final
+        const block::bitcoin::Transaction& transaction) noexcept -> bool final
     {
         return wallet_.AddOutgoingTransaction(
             proposalID, proposal, transaction);
     }
-    auto AddOrUpdate(Address address) const noexcept -> bool final
+    auto AddOrUpdate(Address address) noexcept -> bool final
     {
         return common_.AddOrUpdate(std::move(address));
     }
     auto AddProposal(
         const Identifier& id,
-        const proto::BlockchainTransactionProposal& tx) const noexcept
-        -> bool final
+        const proto::BlockchainTransactionProposal& tx) noexcept -> bool final
     {
         return wallet_.AddProposal(id, tx);
     }
-    auto AdvanceTo(const block::Position& pos) const noexcept -> bool final
+    auto AdvanceTo(const block::Position& pos) noexcept -> bool final
     {
         return wallet_.AdvanceTo(pos);
     }
@@ -197,7 +189,7 @@ public:
     {
         return common_.BlockPolicy();
     }
-    auto BlockStore(const block::Block& block) const noexcept -> bool final
+    auto BlockStore(const block::Block& block) noexcept -> bool final
     {
         return blocks_.Store(block);
     }
@@ -218,7 +210,7 @@ public:
     {
         return headers_.CurrentCheckpoint();
     }
-    auto CancelProposal(const Identifier& id) const noexcept -> bool final
+    auto CancelProposal(const Identifier& id) noexcept -> bool final
     {
         return wallet_.CancelProposal(id);
     }
@@ -234,11 +226,11 @@ public:
     }
     auto FinalizeReorg(
         storage::lmdb::LMDB::Transaction& tx,
-        const block::Position& pos) const noexcept -> bool final
+        const block::Position& pos) noexcept -> bool final
     {
         return wallet_.FinalizeReorg(tx, pos);
     }
-    auto ForgetProposals(const UnallocatedSet<OTIdentifier>& ids) const noexcept
+    auto ForgetProposals(const UnallocatedSet<OTIdentifier>& ids) noexcept
         -> bool final
     {
         return wallet_.ForgetProposals(ids);
@@ -273,37 +265,42 @@ public:
     {
         return wallet_.GetBalance(key);
     }
-    auto GetOutputs(node::TxoState type) const noexcept
-        -> UnallocatedVector<UTXO> final
+    auto GetOutputs(node::TxoState type, alloc::Resource* alloc) const noexcept
+        -> Vector<UTXO> final
     {
-        return wallet_.GetOutputs(type);
+        return wallet_.GetOutputs(type, alloc);
     }
-    auto GetOutputs(const identifier::Nym& owner, node::TxoState type)
-        const noexcept -> UnallocatedVector<UTXO> final
+    auto GetOutputs(
+        const identifier::Nym& owner,
+        node::TxoState type,
+        alloc::Resource* alloc) const noexcept -> Vector<UTXO> final
     {
-        return wallet_.GetOutputs(owner, type);
+        return wallet_.GetOutputs(owner, type, alloc);
     }
     auto GetOutputs(
         const identifier::Nym& owner,
         const Identifier& node,
-        node::TxoState type) const noexcept -> UnallocatedVector<UTXO> final
+        node::TxoState type,
+        alloc::Resource* alloc) const noexcept -> Vector<UTXO> final
     {
-        return wallet_.GetOutputs(owner, node, type);
+        return wallet_.GetOutputs(owner, node, type, alloc);
     }
-    auto GetOutputs(const crypto::Key& key, node::TxoState type) const noexcept
-        -> UnallocatedVector<UTXO> final
+    auto GetOutputs(
+        const crypto::Key& key,
+        node::TxoState type,
+        alloc::Resource* alloc) const noexcept -> Vector<UTXO> final
     {
-        return wallet_.GetOutputs(key, type);
+        return wallet_.GetOutputs(key, type, alloc);
     }
     auto GetOutputTags(const block::Outpoint& output) const noexcept
         -> UnallocatedSet<node::TxoTag> final
     {
         return wallet_.GetOutputTags(output);
     }
-    auto GetPatterns(const SubchainIndex& index) const noexcept
-        -> Patterns final
+    auto GetPatterns(const SubchainIndex& index, alloc::Resource* alloc)
+        const noexcept -> Patterns final
     {
-        return wallet_.GetPatterns(index);
+        return wallet_.GetPatterns(index, alloc);
     }
     auto GetSubchainID(const NodeID& balanceNode, const Subchain subchain)
         const noexcept -> pSubchainIndex final
@@ -325,19 +322,24 @@ public:
     {
         return wallet_.GetUnconfirmedTransactions();
     }
-    auto GetUnspentOutputs() const noexcept -> UnallocatedVector<UTXO> final
+    auto GetUnspentOutputs(alloc::Resource* alloc) const noexcept
+        -> Vector<UTXO> final
     {
-        return wallet_.GetUnspentOutputs();
+        return wallet_.GetUnspentOutputs(alloc);
     }
-    auto GetUnspentOutputs(const NodeID& balanceNode, const Subchain subchain)
-        const noexcept -> UnallocatedVector<UTXO> final
+    auto GetUnspentOutputs(
+        const NodeID& balanceNode,
+        const Subchain subchain,
+        alloc::Resource* alloc) const noexcept -> Vector<UTXO> final
     {
-        return wallet_.GetUnspentOutputs(balanceNode, subchain);
+        return wallet_.GetUnspentOutputs(balanceNode, subchain, alloc);
     }
-    auto GetUntestedPatterns(const SubchainIndex& index, const ReadView blockID)
-        const noexcept -> Patterns final
+    auto GetUntestedPatterns(
+        const SubchainIndex& index,
+        const ReadView blockID,
+        alloc::Resource* alloc) const noexcept -> Patterns final
     {
-        return wallet_.GetUntestedPatterns(index, blockID);
+        return wallet_.GetUntestedPatterns(index, blockID, alloc);
     }
     auto GetWalletHeight() const noexcept -> block::Height final
     {
@@ -366,7 +368,7 @@ public:
     {
         return headers_.HeaderExists(hash);
     }
-    auto Import(UnallocatedVector<Address> peers) const noexcept -> bool final
+    auto Import(UnallocatedVector<Address> peers) noexcept -> bool final
     {
         return common_.Import(std::move(peers));
     }
@@ -378,6 +380,13 @@ public:
         const noexcept -> std::unique_ptr<const blockchain::GCS> final
     {
         return filters_.LoadFilter(type, block);
+    }
+    auto LoadFilters(
+        const cfilter::Type type,
+        const Vector<block::pHash>& blocks) const noexcept
+        -> Vector<std::unique_ptr<const blockchain::GCS>> final
+    {
+        return filters_.LoadFilters(type, blocks);
     }
     auto LoadFilterHash(const cfilter::Type type, const ReadView block)
         const noexcept -> Hash final
@@ -405,8 +414,7 @@ public:
     {
         return wallet_.LoadProposals();
     }
-    auto LoadSync(const Height height, Message& output) const noexcept
-        -> bool final
+    auto LoadSync(const Height height, Message& output) noexcept -> bool final
     {
         return sync_.Load(height, output);
     }
@@ -415,11 +423,12 @@ public:
     {
         return wallet_.LookupContact(pubkeyHash);
     }
-    auto RecentHashes() const noexcept -> UnallocatedVector<block::pHash> final
+    auto RecentHashes(alloc::Resource* alloc) const noexcept
+        -> Vector<block::pHash> final
     {
-        return headers_.RecentHashes();
+        return headers_.RecentHashes(alloc);
     }
-    auto ReorgSync(const Height height) const noexcept -> bool final
+    auto ReorgSync(const Height height) noexcept -> bool final
     {
         return sync_.Reorg(height);
     }
@@ -430,8 +439,7 @@ public:
         const NodeID& balanceNode,
         const Subchain subchain,
         const SubchainIndex& index,
-        const UnallocatedVector<block::Position>& reorg) const noexcept
-        -> bool final
+        const UnallocatedVector<block::Position>& reorg) noexcept -> bool final
     {
         return wallet_.ReorgTo(
             headerOracleLock, tx, headers, balanceNode, subchain, index, reorg);
@@ -439,29 +447,28 @@ public:
     auto ReserveUTXO(
         const identifier::Nym& spender,
         const Identifier& proposal,
-        node::internal::SpendPolicy& policy) const noexcept
+        node::internal::SpendPolicy& policy) noexcept
         -> std::optional<UTXO> final
     {
         return wallet_.ReserveUTXO(spender, proposal, policy);
     }
-    auto SetBlockTip(const block::Position& position) const noexcept
-        -> bool final
+    auto SetBlockTip(const block::Position& position) noexcept -> bool final
     {
         return blocks_.SetTip(position);
     }
     auto SetFilterHeaderTip(
         const cfilter::Type type,
-        const block::Position& position) const noexcept -> bool final
+        const block::Position& position) noexcept -> bool final
     {
         return filters_.SetHeaderTip(type, position);
     }
-    auto SetFilterTip(const cfilter::Type type, const block::Position& position)
-        const noexcept -> bool final
+    auto SetFilterTip(
+        const cfilter::Type type,
+        const block::Position& position) noexcept -> bool final
     {
         return filters_.SetTip(type, position);
     }
-    auto SetSyncTip(const block::Position& position) const noexcept
-        -> bool final
+    auto SetSyncTip(const block::Position& position) noexcept -> bool final
     {
         return sync_.SetTip(position);
     }
@@ -469,13 +476,13 @@ public:
     {
         return headers_.SiblingHashes();
     }
-    auto StartReorg() const noexcept -> storage::lmdb::LMDB::Transaction final
+    auto StartReorg() noexcept -> storage::lmdb::LMDB::Transaction final
     {
         return lmdb_.TransactionRW();
     }
     auto StoreFilters(
         const cfilter::Type type,
-        UnallocatedVector<Filter> filters) const noexcept -> bool final
+        UnallocatedVector<Filter> filters) noexcept -> bool final
     {
         return filters_.StoreFilters(type, std::move(filters));
     }
@@ -483,25 +490,25 @@ public:
         const cfilter::Type type,
         const UnallocatedVector<Header>& headers,
         const UnallocatedVector<Filter>& filters,
-        const block::Position& tip) const noexcept -> bool final
+        const block::Position& tip) noexcept -> bool final
     {
         return filters_.StoreFilters(type, headers, filters, tip);
     }
     auto StoreFilterHeaders(
         const cfilter::Type type,
         const ReadView previous,
-        const UnallocatedVector<Header> headers) const noexcept -> bool final
+        const UnallocatedVector<Header> headers) noexcept -> bool final
     {
         return filters_.StoreHeaders(type, previous, std::move(headers));
     }
-    auto StoreSync(const block::Position& tip, const Items& items)
-        const noexcept -> bool final
+    auto StoreSync(const block::Position& tip, const Items& items) noexcept
+        -> bool final
     {
         return sync_.Store(tip, items);
     }
     auto SubchainAddElements(
         const SubchainIndex& index,
-        const ElementMap& elements) const noexcept -> bool final
+        const ElementMap& elements) noexcept -> bool final
     {
         return wallet_.SubchainAddElements(index, elements);
     }

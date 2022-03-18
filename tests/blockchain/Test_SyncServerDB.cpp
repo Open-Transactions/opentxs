@@ -67,7 +67,7 @@ protected:
 
 std::unique_ptr<Listener> SyncServerDB::listener_p_{};
 
-static constexpr auto default_server_count_ = std::size_t{2u};
+static constexpr auto default_server_count_ = std::size_t{0};
 
 TEST_F(SyncServerDB, init_library) {}
 

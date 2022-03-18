@@ -151,6 +151,14 @@ auto Filters::LoadFilter(const cfilter::Type type, const ReadView block)
     return common_.LoadFilter(type, block);
 }
 
+auto Filters::LoadFilters(
+    const cfilter::Type type,
+    const Vector<block::pHash>& blocks) const noexcept
+    -> Vector<std::unique_ptr<const GCS>>
+{
+    return common_.LoadFilters(type, blocks);
+}
+
 auto Filters::LoadFilterHash(const cfilter::Type type, const ReadView block)
     const noexcept -> Hash
 {

@@ -40,6 +40,7 @@ Peer::Peer(
     const node::internal::FilterOracle& filter,
     const node::internal::BlockOracle& block,
     const node::internal::PeerManager& manager,
+    node::internal::PeerDatabase& database,
     const int id,
     const UnallocatedCString& shutdown,
     const std::size_t headerSize,
@@ -50,6 +51,7 @@ Peer::Peer(
     , filter_(filter)
     , block_(block)
     , manager_(manager)
+    , database_(database)
     , mempool_(mempool)
     , chain_(address->Chain())
     , display_chain_(print(chain_))
@@ -746,13 +748,13 @@ auto Peer::transmit(zmq::Message&& message) noexcept -> void
 
 auto Peer::update_address_activity() noexcept -> void
 {
-    manager_.Database().AddOrUpdate(address_.UpdateTime(activity_.get()));
+    database_.AddOrUpdate(address_.UpdateTime(activity_.get()));
 }
 
 auto Peer::update_address_services(
     const UnallocatedSet<p2p::Service>& services) noexcept -> void
 {
-    manager_.Database().AddOrUpdate(address_.UpdateServices(services));
+    database_.AddOrUpdate(address_.UpdateServices(services));
 }
 
 Peer::~Peer() { signal_shutdown().get(); }

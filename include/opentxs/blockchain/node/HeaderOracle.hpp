@@ -12,6 +12,7 @@
 
 #include "opentxs/Types.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
+#include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -43,7 +44,7 @@ namespace opentxs::blockchain::node
 class OPENTXS_EXPORT HeaderOracle
 {
 public:
-    using Hashes = UnallocatedVector<block::pHash>;
+    using Hashes = Vector<block::pHash>;
     using Positions = UnallocatedVector<block::Position>;
 
     /// Throws std::out_of_range for invalid type
@@ -100,15 +101,18 @@ public:
         const block::Position& check) const noexcept -> block::pHash = 0;
     virtual auto BestHashes(
         const block::Height start,
-        const std::size_t limit = 0) const noexcept -> Hashes = 0;
+        const std::size_t limit = 0,
+        alloc::Resource* alloc = alloc::System()) const noexcept -> Hashes = 0;
     virtual auto BestHashes(
         const block::Height start,
         const block::Hash& stop,
-        const std::size_t limit = 0) const noexcept -> Hashes = 0;
+        const std::size_t limit = 0,
+        alloc::Resource* alloc = alloc::System()) const noexcept -> Hashes = 0;
     virtual auto BestHashes(
         const Hashes& previous,
         const block::Hash& stop,
-        const std::size_t limit) const noexcept -> Hashes = 0;
+        const std::size_t limit,
+        alloc::Resource* alloc = alloc::System()) const noexcept -> Hashes = 0;
     /** Determine how which ancestors of a orphaned tip must be rolled back
      *  due to a chain reorg
      *
@@ -146,7 +150,8 @@ public:
         -> bool = 0;
     virtual auto LoadHeader(const block::Hash& hash) const noexcept
         -> std::unique_ptr<block::Header> = 0;
-    virtual auto RecentHashes() const noexcept -> Hashes = 0;
+    virtual auto RecentHashes(
+        alloc::Resource* alloc = alloc::System()) const noexcept -> Hashes = 0;
     virtual auto Siblings() const noexcept -> UnallocatedSet<block::pHash> = 0;
 
     virtual auto AddCheckpoint(

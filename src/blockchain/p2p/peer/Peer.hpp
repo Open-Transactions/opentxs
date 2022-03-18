@@ -248,6 +248,7 @@ protected:
     const node::internal::FilterOracle& filter_;
     const node::internal::BlockOracle& block_;
     const node::internal::PeerManager& manager_;
+    node::internal::PeerDatabase& database_;
     const node::internal::Mempool& mempool_;
     const blockchain::Type chain_;
     const UnallocatedCString display_chain_;
@@ -301,6 +302,7 @@ protected:
         const node::internal::FilterOracle& filter,
         const node::internal::BlockOracle& block,
         const node::internal::PeerManager& manager,
+        node::internal::PeerDatabase& database,
         const int id,
         const UnallocatedCString& shutdown,
         const std::size_t headerSize,

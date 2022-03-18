@@ -9,11 +9,12 @@
 #include "1_Internal.hpp"  // IWYU pragma: associated
 #include "blockchain/node/wallet/subchain/statemachine/Index.hpp"  // IWYU pragma: associated
 
-#include <chrono>
+#include <boost/smart_ptr/shared_ptr.hpp>
 #include <utility>
 
 #include "blockchain/node/wallet/subchain/SubchainStateData.hpp"
 #include "internal/api/crypto/Blockchain.hpp"
+#include "internal/blockchain/node/wallet/subchain/statemachine/Job.hpp"
 #include "internal/blockchain/node/wallet/subchain/statemachine/Types.hpp"
 #include "internal/network/zeromq/socket/Pipeline.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
@@ -36,88 +37,55 @@
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Pimpl.hpp"
-#include "opentxs/util/WorkType.hpp"
-#include "util/Work.hpp"
 
 namespace opentxs::blockchain::node::wallet
 {
 Index::Imp::Imp(
-    const boost::shared_ptr<const SubchainStateData>& parent,
+    const SubchainStateData& parent,
     const network::zeromq::BatchID batch,
     allocator_type alloc) noexcept
-    : Actor(
-          parent->api_,
-          LogTrace(),
-          0ms,
+    : Job(LogTrace(),
+          parent,
           batch,
+          CString{"index", alloc},
           alloc,
           {
-              {parent->to_children_endpoint_, Direction::Connect},
+              {parent.shutdown_endpoint_, Direction::Connect},
               {CString{
-                   parent->api_.Crypto().Blockchain().Internal().KeyEndpoint(),
+                   parent.api_.Crypto().Blockchain().Internal().KeyEndpoint(),
                    alloc},
                Direction::Connect},
           },
           {
-              {parent->to_index_endpoint_, Direction::Bind},
+              {parent.to_index_endpoint_, Direction::Bind},
           },
           {},
           {
               {SocketType::Push,
                {
-                   {parent->from_children_endpoint_, Direction::Connect},
-               }},
-              {SocketType::Push,
-               {
-                   {parent->to_scan_endpoint_, Direction::Connect},
-               }},
-              {SocketType::Push,
-               {
-                   {parent->to_rescan_endpoint_, Direction::Connect},
-               }},
-              {SocketType::Push,
-               {
-                   {parent->to_process_endpoint_, Direction::Connect},
+                   {parent.to_rescan_endpoint_, Direction::Connect},
                }},
           })
-    , to_parent_(pipeline_.Internal().ExtraSocket(0))
-    , to_scan_(pipeline_.Internal().ExtraSocket(1))
-    , to_rescan_(pipeline_.Internal().ExtraSocket(2))
-    , to_process_(pipeline_.Internal().ExtraSocket(3))
-    , parent_p_(parent)
-    , parent_(*parent_p_)
-    , state_(State::normal)
+    , to_rescan_(pipeline_.Internal().ExtraSocket(0))
     , last_indexed_(std::nullopt)
 {
+}
+
+auto Index::Imp::do_startup() noexcept -> void
+{
+    last_indexed_ = parent_.db_.SubchainLastIndexed(parent_.db_key_);
+    do_work();
+    log_(OT_PRETTY_CLASS())(parent_.name_)(" notifying scan task to begin work")
+        .Flush();
 }
 
 auto Index::Imp::done(
     const node::internal::WalletDatabase::ElementMap& elements) noexcept -> void
 {
-    const auto& db = parent_.db_;
+    auto& db = parent_.db_;
     const auto& index = parent_.db_key_;
     db.SubchainAddElements(index, elements);
     last_indexed_ = parent_.db_.SubchainLastIndexed(index);
-}
-
-auto Index::Imp::do_shutdown() noexcept -> void { parent_p_.reset(); }
-
-auto Index::Imp::pipeline(const Work work, Message&& msg) noexcept -> void
-{
-    switch (state_) {
-        case State::normal: {
-            state_normal(work, std::move(msg));
-        } break;
-        case State::reorg: {
-            state_reorg(work, std::move(msg));
-        } break;
-        case State::shutdown: {
-            // NOTE do not process any messages
-        } break;
-        default: {
-            OT_FAIL;
-        }
-    }
 }
 
 auto Index::Imp::ProcessReorg(const block::Position& parent) noexcept -> void
@@ -166,126 +134,7 @@ auto Index::Imp::process_update(Message&& msg) noexcept -> void
     }
 
     do_work();
-    to_rescan_.Send(std::move(msg));
-}
-
-auto Index::Imp::startup() noexcept -> void
-{
-    last_indexed_ = parent_.db_.SubchainLastIndexed(parent_.db_key_);
-    do_work();
-    log_(OT_PRETTY_CLASS())(parent_.name_)(" notifying scan task to begin work")
-        .Flush();
-    to_scan_.Send(MakeWork(Work::startup));
-}
-
-auto Index::Imp::state_normal(const Work work, Message&& msg) noexcept -> void
-{
-    switch (work) {
-        case Work::reorg_begin: {
-            transition_state_reorg(std::move(msg));
-        } break;
-        case Work::reorg_end: {
-            LogError()(OT_PRETTY_CLASS())(parent_.name_)(" wrong state for ")(
-                print(work))(" message")
-                .Flush();
-
-            OT_FAIL;
-        }
-        case Work::update: {
-            process_update(std::move(msg));
-        } break;
-        case Work::key: {
-            process_key(std::move(msg));
-        } break;
-        case Work::shutdown_begin: {
-            state_ = State::shutdown;
-            parent_p_.reset();
-            to_rescan_.Send(std::move(msg));
-        } break;
-        case Work::shutdown:
-        case Work::filter:
-        case Work::mempool:
-        case Work::block:
-        case Work::reorg_begin_ack:
-        case Work::reorg_end_ack:
-        case Work::startup:
-        case Work::init:
-        case Work::shutdown_ready:
-        case Work::statemachine:
-        default: {
-            LogError()(OT_PRETTY_CLASS())(parent_.name_)(
-                " unhandled message type ")(static_cast<OTZMQWorkType>(work))
-                .Flush();
-
-            OT_FAIL;
-        }
-    }
-}
-
-auto Index::Imp::state_reorg(const Work work, Message&& msg) noexcept -> void
-{
-    switch (work) {
-        case Work::shutdown:
-        case Work::update:
-        case Work::key:
-        case Work::statemachine: {
-            log_(OT_PRETTY_CLASS())(parent_.name_)(" deferring ")(print(work))(
-                " message processing until reorg is complete")
-                .Flush();
-            defer(std::move(msg));
-        } break;
-        case Work::reorg_end: {
-            transition_state_normal(std::move(msg));
-        } break;
-        case Work::reorg_begin:
-        case Work::shutdown_begin: {
-            LogError()(OT_PRETTY_CLASS())(parent_.name_)(" wrong state for ")(
-                print(work))(" message")
-                .Flush();
-
-            OT_FAIL;
-        }
-        case Work::filter:
-        case Work::mempool:
-        case Work::block:
-        case Work::reorg_begin_ack:
-        case Work::reorg_end_ack:
-        case Work::startup:
-        case Work::init:
-        case Work::shutdown_ready:
-        default: {
-            LogError()(OT_PRETTY_CLASS())(parent_.name_)(
-                " unhandled message type ")(static_cast<OTZMQWorkType>(work))
-                .Flush();
-
-            OT_FAIL;
-        }
-    }
-}
-
-auto Index::Imp::transition_state_normal(Message&& msg) noexcept -> void
-{
-    disable_automatic_processing_ = false;
-    state_ = State::normal;
-    log_(OT_PRETTY_CLASS())(parent_.name_)(" transitioned to normal state ")
-        .Flush();
-    to_process_.Send(std::move(msg));
-    flush_cache();
-    do_work();
-}
-
-auto Index::Imp::transition_state_reorg(Message&& msg) noexcept -> void
-{
-    disable_automatic_processing_ = true;
-    state_ = State::reorg;
-    log_(OT_PRETTY_CLASS())(parent_.name_)(" transitioned to reorg state ")
-        .Flush();
-    to_rescan_.Send(std::move(msg));
-}
-
-auto Index::Imp::VerifyState(const State state) const noexcept -> void
-{
-    OT_ASSERT(state == state_);
+    to_rescan_.SendDeferred(std::move(msg));
 }
 
 auto Index::Imp::work() noexcept -> bool
@@ -311,15 +160,18 @@ Index::Index(Index&& rhs) noexcept
 {
 }
 
+auto Index::ChangeState(const State state) noexcept -> bool
+{
+    return imp_->ChangeState(state);
+}
+
 auto Index::ProcessReorg(const block::Position& parent) noexcept -> void
 {
     imp_->ProcessReorg(parent);
 }
 
-auto Index::VerifyState(const State state) const noexcept -> void
+Index::~Index()
 {
-    imp_->VerifyState(state);
+    if (imp_) { imp_->Shutdown(); }
 }
-
-Index::~Index() = default;
 }  // namespace opentxs::blockchain::node::wallet

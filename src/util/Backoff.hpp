@@ -8,7 +8,7 @@
 #include <algorithm>
 #include <chrono>
 
-#include "opentxs/Types.hpp"
+#include "opentxs/util/Time.hpp"
 
 namespace opentxs
 {

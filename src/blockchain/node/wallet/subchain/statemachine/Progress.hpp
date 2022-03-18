@@ -11,6 +11,7 @@
 #include <atomic>
 #include <optional>
 
+#include "blockchain/node/wallet/subchain/statemachine/Job.hpp"
 #include "internal/blockchain/node/wallet/Types.hpp"
 #include "internal/network/zeromq/Types.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
@@ -18,7 +19,7 @@
 #include "util/Actor.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs
+namespace opentxs  // NOLINT
 {
 // inline namespace v1
 // {
@@ -49,19 +50,12 @@ class Raw;
 
 namespace opentxs::blockchain::node::wallet
 {
-class Progress::Imp final : public Actor<Imp, SubchainJobs>
+class Progress::Imp final : public statemachine::Job
 {
 public:
-    auto VerifyState(const State state) const noexcept -> void;
+    auto ProcessReorg(const block::Position& parent) noexcept -> void final;
 
-    auto Init(boost::shared_ptr<Imp> me) noexcept -> void
-    {
-        signal_startup(me);
-    }
-    auto ProcessReorg(const block::Position& parent) noexcept -> void;
-    auto Shutdown() noexcept -> void { signal_shutdown(); }
-
-    Imp(const boost::shared_ptr<const SubchainStateData>& parent,
+    Imp(const SubchainStateData& parent,
         const network::zeromq::BatchID batch,
         allocator_type alloc) noexcept;
     Imp() = delete;
@@ -73,25 +67,12 @@ public:
     ~Imp() final = default;
 
 private:
-    friend Actor<Imp, SubchainJobs>;
-
-    network::zeromq::socket::Raw& to_parent_;
-    network::zeromq::socket::Raw& to_rescan_;
-    boost::shared_ptr<const SubchainStateData> parent_p_;
-    const SubchainStateData& parent_;
-    std::atomic<State> state_;
     std::optional<block::Position> last_reported_;
 
     auto notify(const block::Position& pos) const noexcept -> void;
 
-    auto do_shutdown() noexcept -> void;
-    auto pipeline(const Work work, Message&& msg) noexcept -> void;
-    auto process_update(Message&& msg) noexcept -> void;
-    auto startup() noexcept -> void {}
-    auto state_normal(const Work work, Message&& msg) noexcept -> void;
-    auto state_reorg(const Work work, Message&& msg) noexcept -> void;
-    auto transition_state_normal(Message&& msg) noexcept -> void;
-    auto transition_state_reorg(Message&& msg) noexcept -> void;
-    [[noreturn]] auto work() noexcept -> bool;
+    auto do_startup() noexcept -> void final {}
+    auto process_update(Message&& msg) noexcept -> void final;
+    auto work() noexcept -> bool final { return false; }
 };
 }  // namespace opentxs::blockchain::node::wallet

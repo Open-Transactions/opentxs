@@ -144,6 +144,10 @@ public:
     auto LoadEnabledChains() const noexcept -> UnallocatedVector<EnabledChain>;
     auto LoadFilter(const cfilter::Type type, const ReadView blockHash)
         const noexcept -> std::unique_ptr<const opentxs::blockchain::GCS>;
+    auto LoadFilters(
+        const cfilter::Type type,
+        const Vector<block::pHash>& blocks) const noexcept
+        -> Vector<std::unique_ptr<const GCS>>;
     auto LoadFilterHash(
         const cfilter::Type type,
         const ReadView blockHash,

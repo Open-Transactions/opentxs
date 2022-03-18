@@ -472,12 +472,98 @@ TEST_F(Regtest_fixture_hd, account_list_reorg)
     EXPECT_TRUE(check_account_list_rpc(alice_, expected));
 }
 
-TEST_F(Regtest_fixture_hd, txodb_inital_reorg) { EXPECT_TRUE(CheckTXODB()); }
+TEST_F(Regtest_fixture_hd, txodb_reorg) { EXPECT_TRUE(CheckTXODB()); }
+
+TEST_F(Regtest_fixture_hd, advance_after_reorg)
+{
+    constexpr auto orphan{0};
+    const auto count = 5;
+    const auto start = height_ - orphan;
+    const auto end{start + count};
+    auto future1 = listener_.get_future(SendHD(), Subchain::External, end);
+    auto future2 = listener_.get_future(SendHD(), Subchain::Internal, end);
+    account_list_.expected_ += 0;
+    account_activity_.expected_ += (2u * count);
+
+    EXPECT_EQ(start, 13);
+    EXPECT_EQ(end, 18);
+    EXPECT_TRUE(Mine(start, count));
+    EXPECT_TRUE(listener_.wait(future1));
+    EXPECT_TRUE(listener_.wait(future2));
+    EXPECT_TRUE(txos_.Mature(end));
+}
+
+TEST_F(Regtest_fixture_hd, account_activity_final)
+{
+    const auto& id = SendHD().Parent().AccountID();
+    const auto expected = AccountActivityData{
+        expected_account_type_,
+        id.str(),
+        expected_account_name_,
+        expected_unit_type_,
+        expected_unit_.str(),
+        expected_display_unit_,
+        expected_notary_.str(),
+        expected_notary_name_,
+        1,
+        10000004950,
+        u8"100.000\u202F049\u202F5 units",
+        "",
+        {},
+        {test_chain_},
+        100,
+        {height_, height_},
+        {},
+        {{u8"100.0000495", u8"100.000\u202F049\u202F5 units"}},
+        {
+            {
+                ot::StorageBox::BLOCKCHAIN,
+                1,
+                10000004950,
+                u8"100.000\u202F049\u202F5 units",
+                {},
+                "",
+                "",
+                "Incoming Unit Test Simulation transaction",
+                ot::blockchain::HashToNumber(transactions_.at(0)),
+                std::nullopt,
+                18,
+            },
+        },
+    };
+
+    EXPECT_TRUE(wait_for_counter(account_activity_));
+    EXPECT_TRUE(check_account_activity(alice_, id, expected));
+    EXPECT_TRUE(check_account_activity_qt(alice_, id, expected));
+    EXPECT_TRUE(check_account_activity_rpc(alice_, id, expected));
+}
+
+TEST_F(Regtest_fixture_hd, account_list_final)
+{
+    const auto expected = AccountListData{{
+        {SendHD().Parent().AccountID().str(),
+         expected_unit_.str(),
+         expected_display_unit_,
+         expected_account_name_,
+         expected_notary_.str(),
+         expected_notary_name_,
+         expected_account_type_,
+         expected_unit_type_,
+         1,
+         10000004950,
+         u8"100.000\u202F049\u202F5 units"},
+    }};
+
+    EXPECT_TRUE(wait_for_counter(account_list_));
+    EXPECT_TRUE(check_account_list(alice_, expected));
+    EXPECT_TRUE(check_account_list_qt(alice_, expected));
+    EXPECT_TRUE(check_account_list_rpc(alice_, expected));
+}
+
+TEST_F(Regtest_fixture_hd, txodb_final) { EXPECT_TRUE(CheckTXODB()); }
 
 TEST_F(Regtest_fixture_hd, shutdown)
 {
-    ot::Sleep(60s);
-
     EXPECT_EQ(account_list_.expected_, account_list_.updated_);
     EXPECT_EQ(account_activity_.expected_, account_activity_.updated_);
 

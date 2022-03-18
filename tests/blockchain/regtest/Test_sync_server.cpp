@@ -53,7 +53,7 @@ TEST_F(Regtest_fixture_sync, connect_peers) { EXPECT_TRUE(Connect()); }
 TEST_F(Regtest_fixture_sync, sync_genesis)
 {
     sync_req_.expected_ += 2;
-    const auto& chain = client_2_.Network().Blockchain().GetChain(test_chain_);
+    const auto& chain = client_1_.Network().Blockchain().GetChain(test_chain_);
     const auto pos = chain.HeaderOracle().BestChain();
 
     EXPECT_TRUE(sync_req_.request(pos));
@@ -61,7 +61,7 @@ TEST_F(Regtest_fixture_sync, sync_genesis)
 
     {
         const auto& msg = sync_req_.get(++sync_req_.checked_);
-        const auto base = client_2_.Factory().BlockchainSyncMessage(msg);
+        const auto base = client_1_.Factory().BlockchainSyncMessage(msg);
 
         ASSERT_TRUE(base);
         ASSERT_EQ(base->Type(), otsync::MessageType::sync_ack);
@@ -75,7 +75,7 @@ TEST_F(Regtest_fixture_sync, sync_genesis)
     }
     {
         const auto& msg = sync_req_.get(++sync_req_.checked_);
-        const auto base = client_2_.Factory().BlockchainSyncMessage(msg);
+        const auto base = client_1_.Factory().BlockchainSyncMessage(msg);
 
         ASSERT_TRUE(base);
         ASSERT_EQ(base->Type(), otsync::MessageType::sync_reply);
@@ -97,7 +97,8 @@ TEST_F(Regtest_fixture_sync, mine)
     EXPECT_TRUE(Mine(0, count));
     EXPECT_TRUE(sync_sub_.wait());
 
-    const auto& chain = client_1_.Network().Blockchain().GetChain(test_chain_);
+    const auto& chain =
+        sync_server_.Network().Blockchain().GetChain(test_chain_);
     const auto best = chain.HeaderOracle().BestChain();
 
     EXPECT_EQ(best.first, 10);
@@ -107,7 +108,7 @@ TEST_F(Regtest_fixture_sync, mine)
 TEST_F(Regtest_fixture_sync, sync_full)
 {
     sync_req_.expected_ += 2;
-    const auto& chain = client_2_.Network().Blockchain().GetChain(test_chain_);
+    const auto& chain = client_1_.Network().Blockchain().GetChain(test_chain_);
     const auto genesis = Position{0, chain.HeaderOracle().BestHash(0)};
 
     EXPECT_TRUE(sync_req_.request(genesis));
@@ -115,7 +116,7 @@ TEST_F(Regtest_fixture_sync, sync_full)
 
     {
         const auto& msg = sync_req_.get(++sync_req_.checked_);
-        const auto base = client_2_.Factory().BlockchainSyncMessage(msg);
+        const auto base = client_1_.Factory().BlockchainSyncMessage(msg);
 
         ASSERT_TRUE(base);
         ASSERT_EQ(base->Type(), otsync::MessageType::sync_ack);
@@ -129,7 +130,7 @@ TEST_F(Regtest_fixture_sync, sync_full)
     }
     {
         const auto& msg = sync_req_.get(++sync_req_.checked_);
-        const auto base = client_2_.Factory().BlockchainSyncMessage(msg);
+        const auto base = client_1_.Factory().BlockchainSyncMessage(msg);
 
         ASSERT_TRUE(base);
         ASSERT_EQ(base->Type(), otsync::MessageType::sync_reply);
@@ -163,7 +164,7 @@ TEST_F(Regtest_fixture_sync, sync_partial)
 
     {
         const auto& msg = sync_req_.get(++sync_req_.checked_);
-        const auto base = client_2_.Factory().BlockchainSyncMessage(msg);
+        const auto base = client_1_.Factory().BlockchainSyncMessage(msg);
 
         ASSERT_TRUE(base);
         ASSERT_EQ(base->Type(), otsync::MessageType::sync_ack);
@@ -177,7 +178,7 @@ TEST_F(Regtest_fixture_sync, sync_partial)
     }
     {
         const auto& msg = sync_req_.get(++sync_req_.checked_);
-        const auto base = client_2_.Factory().BlockchainSyncMessage(msg);
+        const auto base = client_1_.Factory().BlockchainSyncMessage(msg);
 
         ASSERT_TRUE(base);
         ASSERT_EQ(base->Type(), otsync::MessageType::sync_reply);
@@ -203,7 +204,8 @@ TEST_F(Regtest_fixture_sync, reorg)
     EXPECT_TRUE(Mine(8, count));
     EXPECT_TRUE(sync_sub_.wait());
 
-    const auto& chain = client_1_.Network().Blockchain().GetChain(test_chain_);
+    const auto& chain =
+        sync_server_.Network().Blockchain().GetChain(test_chain_);
     const auto best = chain.HeaderOracle().BestChain();
 
     EXPECT_EQ(best.first, 12);
@@ -220,7 +222,7 @@ TEST_F(Regtest_fixture_sync, sync_reorg)
 
     {
         const auto& msg = sync_req_.get(++sync_req_.checked_);
-        const auto base = client_2_.Factory().BlockchainSyncMessage(msg);
+        const auto base = client_1_.Factory().BlockchainSyncMessage(msg);
 
         ASSERT_TRUE(base);
         ASSERT_EQ(base->Type(), otsync::MessageType::sync_ack);
@@ -234,7 +236,7 @@ TEST_F(Regtest_fixture_sync, sync_reorg)
     }
     {
         const auto& msg = sync_req_.get(++sync_req_.checked_);
-        const auto base = client_2_.Factory().BlockchainSyncMessage(msg);
+        const auto base = client_1_.Factory().BlockchainSyncMessage(msg);
 
         ASSERT_TRUE(base);
         ASSERT_EQ(base->Type(), otsync::MessageType::sync_reply);
@@ -276,7 +278,7 @@ TEST_F(Regtest_fixture_sync, query)
         EXPECT_EQ(header.size(), 0);
         EXPECT_EQ(body.size(), 1);
 
-        auto recovered = client_2_.Factory().BlockchainSyncMessage(serialized);
+        auto recovered = client_1_.Factory().BlockchainSyncMessage(serialized);
 
         ASSERT_TRUE(recovered);
 
@@ -309,7 +311,7 @@ TEST_F(Regtest_fixture_sync, query)
         EXPECT_EQ(header.size(), 2);
         EXPECT_EQ(body.size(), 1);
 
-        auto recovered = client_2_.Factory().BlockchainSyncMessage(serialized);
+        auto recovered = client_1_.Factory().BlockchainSyncMessage(serialized);
 
         ASSERT_TRUE(recovered);
 
@@ -330,8 +332,8 @@ TEST_F(Regtest_fixture_sync, make_contracts)
     ASSERT_FALSE(notary_.has_value());
     ASSERT_FALSE(unit_.has_value());
 
-    const auto reason = client_2_.Factory().PasswordPrompt(__func__);
-    notary_.emplace(client_2_.Wallet().Server(
+    const auto reason = client_1_.Factory().PasswordPrompt(__func__);
+    notary_.emplace(client_1_.Wallet().Server(
         alex_.nym_id_->str(),
         "Example notary",
         "Don't use",
@@ -346,7 +348,7 @@ TEST_F(Regtest_fixture_sync, make_contracts)
     ASSERT_TRUE(notary_.has_value());
     ASSERT_FALSE(notary_.value()->ID()->empty());
 
-    unit_.emplace(client_2_.Wallet().CurrencyContract(
+    unit_.emplace(client_1_.Wallet().CurrencyContract(
         alex_.nym_id_->str(),
         "My Dollars",
         "Example only",
@@ -389,7 +391,7 @@ TEST_F(Regtest_fixture_sync, query_nonexistent_nym)
         EXPECT_EQ(header.size(), 0);
         EXPECT_EQ(body.size(), 2);
 
-        auto recovered = client_2_.Factory().BlockchainSyncMessage(serialized);
+        auto recovered = client_1_.Factory().BlockchainSyncMessage(serialized);
 
         ASSERT_TRUE(recovered);
 
@@ -410,7 +412,7 @@ TEST_F(Regtest_fixture_sync, query_nonexistent_nym)
 
     {
         const auto& msg = sync_req_.get(++sync_req_.checked_);
-        const auto base = client_2_.Factory().BlockchainSyncMessage(msg);
+        const auto base = client_1_.Factory().BlockchainSyncMessage(msg);
 
         ASSERT_TRUE(base);
         ASSERT_EQ(base->Type(), otsync::MessageType::contract);
@@ -454,7 +456,7 @@ TEST_F(Regtest_fixture_sync, query_nonexistent_notary)
         EXPECT_EQ(header.size(), 0);
         EXPECT_EQ(body.size(), 2);
 
-        auto recovered = client_2_.Factory().BlockchainSyncMessage(serialized);
+        auto recovered = client_1_.Factory().BlockchainSyncMessage(serialized);
 
         ASSERT_TRUE(recovered);
 
@@ -475,7 +477,7 @@ TEST_F(Regtest_fixture_sync, query_nonexistent_notary)
 
     {
         const auto& msg = sync_req_.get(++sync_req_.checked_);
-        const auto base = client_2_.Factory().BlockchainSyncMessage(msg);
+        const auto base = client_1_.Factory().BlockchainSyncMessage(msg);
 
         ASSERT_TRUE(base);
         ASSERT_EQ(base->Type(), otsync::MessageType::contract);
@@ -519,7 +521,7 @@ TEST_F(Regtest_fixture_sync, query_nonexistent_unit)
         EXPECT_EQ(header.size(), 0);
         EXPECT_EQ(body.size(), 2);
 
-        auto recovered = client_2_.Factory().BlockchainSyncMessage(serialized);
+        auto recovered = client_1_.Factory().BlockchainSyncMessage(serialized);
 
         ASSERT_TRUE(recovered);
 
@@ -540,7 +542,7 @@ TEST_F(Regtest_fixture_sync, query_nonexistent_unit)
 
     {
         const auto& msg = sync_req_.get(++sync_req_.checked_);
-        const auto base = client_2_.Factory().BlockchainSyncMessage(msg);
+        const auto base = client_1_.Factory().BlockchainSyncMessage(msg);
 
         ASSERT_TRUE(base);
         ASSERT_EQ(base->Type(), otsync::MessageType::contract);
@@ -583,7 +585,7 @@ TEST_F(Regtest_fixture_sync, publish_nym)
         EXPECT_EQ(header.size(), 0);
         EXPECT_EQ(body.size(), 4);
 
-        auto recovered = client_2_.Factory().BlockchainSyncMessage(serialized);
+        auto recovered = client_1_.Factory().BlockchainSyncMessage(serialized);
 
         ASSERT_TRUE(recovered);
 
@@ -605,7 +607,7 @@ TEST_F(Regtest_fixture_sync, publish_nym)
 
     {
         const auto& msg = sync_req_.get(++sync_req_.checked_);
-        const auto base = client_2_.Factory().BlockchainSyncMessage(msg);
+        const auto base = client_1_.Factory().BlockchainSyncMessage(msg);
 
         ASSERT_TRUE(base);
         ASSERT_EQ(base->Type(), otsync::MessageType::publish_ack);
@@ -647,7 +649,7 @@ TEST_F(Regtest_fixture_sync, publish_notary)
         EXPECT_EQ(header.size(), 0);
         EXPECT_EQ(body.size(), 4);
 
-        auto recovered = client_2_.Factory().BlockchainSyncMessage(serialized);
+        auto recovered = client_1_.Factory().BlockchainSyncMessage(serialized);
 
         ASSERT_TRUE(recovered);
 
@@ -669,7 +671,7 @@ TEST_F(Regtest_fixture_sync, publish_notary)
 
     {
         const auto& msg = sync_req_.get(++sync_req_.checked_);
-        const auto base = client_2_.Factory().BlockchainSyncMessage(msg);
+        const auto base = client_1_.Factory().BlockchainSyncMessage(msg);
 
         ASSERT_TRUE(base);
         ASSERT_EQ(base->Type(), otsync::MessageType::publish_ack);
@@ -711,7 +713,7 @@ TEST_F(Regtest_fixture_sync, publish_unit)
         EXPECT_EQ(header.size(), 0);
         EXPECT_EQ(body.size(), 4);
 
-        auto recovered = client_2_.Factory().BlockchainSyncMessage(serialized);
+        auto recovered = client_1_.Factory().BlockchainSyncMessage(serialized);
 
         ASSERT_TRUE(recovered);
 
@@ -733,7 +735,7 @@ TEST_F(Regtest_fixture_sync, publish_unit)
 
     {
         const auto& msg = sync_req_.get(++sync_req_.checked_);
-        const auto base = client_2_.Factory().BlockchainSyncMessage(msg);
+        const auto base = client_1_.Factory().BlockchainSyncMessage(msg);
 
         ASSERT_TRUE(base);
         ASSERT_EQ(base->Type(), otsync::MessageType::publish_ack);
@@ -751,7 +753,7 @@ TEST_F(Regtest_fixture_sync, query_nym)
 
     const auto& id = alex_.nym_id_.get();
     const auto expected = [&] {
-        auto out = client_2_.Factory().Data();
+        auto out = client_1_.Factory().Data();
         alex_.nym_->Serialize(out->WriteInto());
 
         return out;
@@ -772,7 +774,7 @@ TEST_F(Regtest_fixture_sync, query_nym)
 
     {
         const auto& msg = sync_req_.get(++sync_req_.checked_);
-        const auto base = client_2_.Factory().BlockchainSyncMessage(msg);
+        const auto base = client_1_.Factory().BlockchainSyncMessage(msg);
 
         ASSERT_TRUE(base);
         ASSERT_EQ(base->Type(), otsync::MessageType::contract);
@@ -792,7 +794,7 @@ TEST_F(Regtest_fixture_sync, query_notary)
 
     const auto id = notary_.value()->ID();
     const auto expected = [&] {
-        auto out = client_2_.Factory().Data();
+        auto out = client_1_.Factory().Data();
         notary_.value()->Serialize(out->WriteInto());
 
         return out;
@@ -813,7 +815,7 @@ TEST_F(Regtest_fixture_sync, query_notary)
 
     {
         const auto& msg = sync_req_.get(++sync_req_.checked_);
-        const auto base = client_2_.Factory().BlockchainSyncMessage(msg);
+        const auto base = client_1_.Factory().BlockchainSyncMessage(msg);
 
         ASSERT_TRUE(base);
         ASSERT_EQ(base->Type(), otsync::MessageType::contract);
@@ -833,7 +835,7 @@ TEST_F(Regtest_fixture_sync, query_unit)
 
     const auto id = unit_.value()->ID();
     const auto expected = [&] {
-        auto out = client_2_.Factory().Data();
+        auto out = client_1_.Factory().Data();
         unit_.value()->Serialize(out->WriteInto());
 
         return out;
@@ -864,7 +866,7 @@ TEST_F(Regtest_fixture_sync, query_unit)
         EXPECT_EQ(header.size(), 0);
         EXPECT_EQ(body.size(), 2);
 
-        auto recovered = client_2_.Factory().BlockchainSyncMessage(serialized);
+        auto recovered = client_1_.Factory().BlockchainSyncMessage(serialized);
 
         ASSERT_TRUE(recovered);
 
@@ -885,7 +887,7 @@ TEST_F(Regtest_fixture_sync, query_unit)
 
     {
         const auto& msg = sync_req_.get(++sync_req_.checked_);
-        const auto base = client_2_.Factory().BlockchainSyncMessage(msg);
+        const auto base = client_1_.Factory().BlockchainSyncMessage(msg);
 
         ASSERT_TRUE(base);
         ASSERT_EQ(base->Type(), otsync::MessageType::contract);
@@ -913,8 +915,8 @@ TEST_F(Regtest_fixture_sync, pushtx)
         "66d7f01cc44a0220573a954c4518331561406f90300e8f3358f51928d43c212a8c"
         "aed02de67eebee0121025476c2e83188368da1ff3e292e7acafcdb3566bb0ad253"
         "f62fc70f07aeee635711000000"};
-    const auto data = client_2_.Factory().Data(hex, ot::StringStyle::Hex);
-    const auto tx = client_2_.Factory().BitcoinTransaction(
+    const auto data = client_1_.Factory().Data(hex, ot::StringStyle::Hex);
+    const auto tx = client_1_.Factory().BitcoinTransaction(
         test_chain_, data->Bytes(), false);
 
     ASSERT_TRUE(tx);
@@ -945,7 +947,7 @@ TEST_F(Regtest_fixture_sync, pushtx)
         EXPECT_EQ(header.size(), 0);
         EXPECT_EQ(body.size(), 4);
 
-        auto recovered = client_2_.Factory().BlockchainSyncMessage(serialized);
+        auto recovered = client_1_.Factory().BlockchainSyncMessage(serialized);
 
         ASSERT_TRUE(recovered);
 
@@ -968,7 +970,7 @@ TEST_F(Regtest_fixture_sync, pushtx)
 
     {
         const auto& msg = sync_req_.get(++sync_req_.checked_);
-        const auto base = client_2_.Factory().BlockchainSyncMessage(msg);
+        const auto base = client_1_.Factory().BlockchainSyncMessage(msg);
 
         ASSERT_TRUE(base);
         ASSERT_EQ(base->Type(), otsync::MessageType::pushtx_reply);
@@ -995,10 +997,10 @@ TEST_F(Regtest_fixture_sync, pushtx_chain_not_active)
         "66d7f01cc44a0220573a954c4518331561406f90300e8f3358f51928d43c212a8c"
         "aed02de67eebee0121025476c2e83188368da1ff3e292e7acafcdb3566bb0ad253"
         "f62fc70f07aeee635711000000"};
-    const auto data = client_2_.Factory().Data(hex, ot::StringStyle::Hex);
+    const auto data = client_1_.Factory().Data(hex, ot::StringStyle::Hex);
     const constexpr auto chain = ot::blockchain::Type::Bitcoin;
     const auto tx =
-        client_2_.Factory().BitcoinTransaction(chain, data->Bytes(), false);
+        client_1_.Factory().BitcoinTransaction(chain, data->Bytes(), false);
 
     ASSERT_TRUE(tx);
 
@@ -1018,7 +1020,7 @@ TEST_F(Regtest_fixture_sync, pushtx_chain_not_active)
 
     {
         const auto& msg = sync_req_.get(++sync_req_.checked_);
-        const auto base = client_2_.Factory().BlockchainSyncMessage(msg);
+        const auto base = client_1_.Factory().BlockchainSyncMessage(msg);
 
         ASSERT_TRUE(base);
         ASSERT_EQ(base->Type(), otsync::MessageType::pushtx_reply);

@@ -7,7 +7,9 @@
 
 #pragma once
 
+#include <boost/smart_ptr/shared_ptr.hpp>
 #include <memory>
+#include <string_view>
 
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/util/Container.hpp"
@@ -36,26 +38,29 @@ class Transaction;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::blockchain::node::base
+namespace opentxs::blockchain::node::p2p
 {
-class SyncClient
+class Requestor
 {
 public:
-    auto Endpoint() const noexcept -> const UnallocatedCString&;
+    Requestor(
+        const api::Session& api,
+        const Type chain,
+        const std::string_view toParent) noexcept;
 
-    SyncClient(const api::Session& api, const Type chain) noexcept;
-
-    ~SyncClient();
+    ~Requestor();
 
 private:
     class Imp;
 
-    Imp* imp_;
+    // TODO switch to std::shared_ptr once the android ndk ships a version of
+    // libc++ with unfucked pmr / allocate_shared support
+    boost::shared_ptr<Imp> imp_;
 
-    SyncClient() = delete;
-    SyncClient(const SyncClient&) = delete;
-    SyncClient(SyncClient&&) = delete;
-    auto operator=(const SyncClient&) -> SyncClient& = delete;
-    auto operator=(SyncClient&&) -> SyncClient& = delete;
+    Requestor() = delete;
+    Requestor(const Requestor&) = delete;
+    Requestor(Requestor&&) = delete;
+    auto operator=(const Requestor&) -> Requestor& = delete;
+    auto operator=(Requestor&&) -> Requestor& = delete;
 };
-}  // namespace opentxs::blockchain::node::base
+}  // namespace opentxs::blockchain::node::p2p

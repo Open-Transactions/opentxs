@@ -37,7 +37,7 @@ private:
 class JobCounter
 {
 public:
-    auto Allocate() noexcept -> Outstanding;
+    auto Allocate(int limit = 0) noexcept -> Outstanding;
 
     JobCounter() noexcept;
 

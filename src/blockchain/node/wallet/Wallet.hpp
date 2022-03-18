@@ -53,6 +53,7 @@
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/network/blockchain/bitcoin/CompactSize.hpp"
 #include "opentxs/network/zeromq/socket/Push.hpp"
+#include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/WorkType.hpp"
@@ -127,21 +128,35 @@ public:
     auto GetBalance(const identifier::Nym& owner, const Identifier& subaccount)
         const noexcept -> Balance final;
     auto GetBalance(const crypto::Key& key) const noexcept -> Balance final;
-    auto GetOutputs() const noexcept -> UnallocatedVector<UTXO> final;
-    auto GetOutputs(TxoState type) const noexcept
-        -> UnallocatedVector<UTXO> final;
-    auto GetOutputs(const identifier::Nym& owner) const noexcept
-        -> UnallocatedVector<UTXO> final;
-    auto GetOutputs(const identifier::Nym& owner, TxoState type) const noexcept
-        -> UnallocatedVector<UTXO> final;
-    auto GetOutputs(const identifier::Nym& owner, const Identifier& subaccount)
-        const noexcept -> UnallocatedVector<UTXO> final;
+    auto GetOutputs(alloc::Resource* alloc = alloc::System()) const noexcept
+        -> Vector<UTXO> final;
+    auto GetOutputs(TxoState type, alloc::Resource* alloc = alloc::System())
+        const noexcept -> Vector<UTXO> final;
+    auto GetOutputs(
+        const identifier::Nym& owner,
+        alloc::Resource* alloc = alloc::System()) const noexcept
+        -> Vector<UTXO> final;
+    auto GetOutputs(
+        const identifier::Nym& owner,
+        TxoState type,
+        alloc::Resource* alloc = alloc::System()) const noexcept
+        -> Vector<UTXO> final;
     auto GetOutputs(
         const identifier::Nym& owner,
         const Identifier& subaccount,
-        TxoState type) const noexcept -> UnallocatedVector<UTXO> final;
-    auto GetOutputs(const crypto::Key& key, TxoState type) const noexcept
-        -> UnallocatedVector<UTXO> final;
+        alloc::Resource* alloc = alloc::System()) const noexcept
+        -> Vector<UTXO> final;
+    auto GetOutputs(
+        const identifier::Nym& owner,
+        const Identifier& subaccount,
+        TxoState type,
+        alloc::Resource* alloc = alloc::System()) const noexcept
+        -> Vector<UTXO> final;
+    auto GetOutputs(
+        const crypto::Key& key,
+        TxoState type,
+        alloc::Resource* alloc = alloc::System()) const noexcept
+        -> Vector<UTXO> final;
     auto GetTags(const block::Outpoint& output) const noexcept
         -> UnallocatedSet<TxoTag> final;
     auto Height() const noexcept -> block::Height final;
@@ -149,15 +164,13 @@ public:
     auto Init() noexcept -> void final;
     auto Shutdown() noexcept -> std::shared_future<void> final
     {
-        process_shutdown();
-
-        return shutdown_;
+        return signal_shutdown();
     }
 
     Wallet(
         const api::Session& api,
         const node::internal::Network& parent,
-        const node::internal::WalletDatabase& db,
+        node::internal::WalletDatabase& db,
         const node::internal::Mempool& mempool,
         const Type chain,
         const std::string_view shutdown) noexcept;
@@ -170,27 +183,16 @@ private:
     using Work = wallet::WalletJobs;
 
     const node::internal::Network& parent_;
-    const node::internal::WalletDatabase& db_;
+    node::internal::WalletDatabase& db_;
     const Type chain_;
-    network::zeromq::socket::Raw& to_accounts_;
     wallet::FeeOracle fee_oracle_;
     wallet::Accounts accounts_;
     wallet::Proposals proposals_;
-    std::atomic_bool shutdown_sent_;
 
     auto pipeline(const zmq::Message& in) noexcept -> void;
-    auto process_shutdown() noexcept -> void;
     auto shutdown(std::promise<void>& promise) noexcept -> void;
     auto state_machine() noexcept -> bool;
 
-    Wallet(
-        const api::Session& api,
-        const node::internal::Network& parent,
-        const node::internal::WalletDatabase& db,
-        const node::internal::Mempool& mempool,
-        const Type chain,
-        const std::string_view shutdown,
-        const CString accounts) noexcept;
     Wallet() = delete;
     Wallet(const Wallet&) = delete;
     Wallet(Wallet&&) = delete;

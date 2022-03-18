@@ -11,16 +11,16 @@
 #include <atomic>
 #include <optional>
 
+#include "blockchain/node/wallet/subchain/statemachine/Job.hpp"
 #include "internal/blockchain/node/wallet/Types.hpp"
 #include "internal/blockchain/node/wallet/subchain/statemachine/Types.hpp"
 #include "internal/network/zeromq/Types.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/util/Allocated.hpp"
 #include "opentxs/util/Container.hpp"
-#include "util/Actor.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs
+namespace opentxs  // NOLINT
 {
 // inline namespace v1
 // {
@@ -51,19 +51,12 @@ class Raw;
 
 namespace opentxs::blockchain::node::wallet
 {
-class Scan::Imp final : public Actor<Imp, SubchainJobs>
+class Scan::Imp final : public statemachine::Job
 {
 public:
-    auto VerifyState(const State state) const noexcept -> void;
+    auto ProcessReorg(const block::Position& parent) noexcept -> void final;
 
-    auto Init(boost::shared_ptr<Imp> me) noexcept -> void
-    {
-        signal_startup(me);
-    }
-    auto ProcessReorg(const block::Position& parent) noexcept -> void;
-    auto Shutdown() noexcept -> void { signal_shutdown(); }
-
-    Imp(const boost::shared_ptr<const SubchainStateData>& parent,
+    Imp(const SubchainStateData& parent,
         const network::zeromq::BatchID batch,
         allocator_type alloc) noexcept;
     Imp() = delete;
@@ -75,33 +68,17 @@ public:
     ~Imp() final = default;
 
 private:
-    friend Actor<Imp, SubchainJobs>;
-
     static constexpr auto batch_size_ = block::Height{1000};
 
-    network::zeromq::socket::Raw& to_parent_;
-    network::zeromq::socket::Raw& to_progress_;
     network::zeromq::socket::Raw& to_process_;
-    boost::shared_ptr<const SubchainStateData> parent_p_;
-    const SubchainStateData& parent_;
-    std::atomic<State> state_;
     std::optional<block::Position> last_scanned_;
     std::optional<block::Position> filter_tip_;
 
     auto caught_up() const noexcept -> bool;
 
-    auto do_shutdown() noexcept -> void;
-    auto pipeline(const Work work, Message&& msg) noexcept -> void;
-    auto process_filter(Message&& in) noexcept -> void;
-    auto process_filter(block::Position&& tip) noexcept -> void;
-    auto process_startup(Message&& msg) noexcept -> void;
+    auto do_startup() noexcept -> void final;
+    auto process_filter(block::Position&& tip) noexcept -> void final;
     auto scan(Vector<ScanStatus>& out) noexcept -> void;
-    auto startup() noexcept -> void;
-    auto state_init(const Work work, Message&& msg) noexcept -> void;
-    auto state_normal(const Work work, Message&& msg) noexcept -> void;
-    auto state_reorg(const Work work, Message&& msg) noexcept -> void;
-    auto transition_state_normal(Message&& msg) noexcept -> void;
-    auto transition_state_reorg(Message&& msg) noexcept -> void;
-    auto work() noexcept -> bool;
+    auto work() noexcept -> bool final;
 };
 }  // namespace opentxs::blockchain::node::wallet

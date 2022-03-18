@@ -41,7 +41,8 @@ public:
         -> std::unique_ptr<IncomingConnectionManager>;
 
     virtual auto Disconnect(const int peer) const noexcept -> void = 0;
-    virtual auto Listen(const p2p::Address& address) const noexcept -> bool = 0;
+    virtual auto Listen(const blockchain::p2p::Address& address) const noexcept
+        -> bool = 0;
 
     virtual auto LookupIncomingSocket(const int id) noexcept(false)
         -> opentxs::network::asio::Socket = 0;

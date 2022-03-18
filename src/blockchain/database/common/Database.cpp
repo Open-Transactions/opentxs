@@ -516,6 +516,14 @@ auto Database::LoadFilter(const cfilter::Type type, const ReadView blockHash)
     return imp_.filters_.LoadFilter(type, blockHash);
 }
 
+auto Database::LoadFilters(
+    const cfilter::Type type,
+    const Vector<block::pHash>& blocks) const noexcept
+    -> Vector<std::unique_ptr<const GCS>>
+{
+    return imp_.filters_.LoadFilters(type, blocks);
+}
+
 auto Database::LoadFilterHash(
     const cfilter::Type type,
     const ReadView blockHash,

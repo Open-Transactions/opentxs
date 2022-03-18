@@ -16,6 +16,7 @@
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/blockchain/node/Types.hpp"
+#include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -62,23 +63,37 @@ public:
         const Identifier& subaccount) const noexcept -> Balance = 0;
     virtual auto GetBalance(const crypto::Key& key) const noexcept
         -> Balance = 0;
-    virtual auto GetOutputs() const noexcept -> UnallocatedVector<UTXO> = 0;
-    virtual auto GetOutputs(TxoState type) const noexcept
-        -> UnallocatedVector<UTXO> = 0;
-    virtual auto GetOutputs(const identifier::Nym& owner) const noexcept
-        -> UnallocatedVector<UTXO> = 0;
-    virtual auto GetOutputs(const identifier::Nym& owner, TxoState type)
-        const noexcept -> UnallocatedVector<UTXO> = 0;
+    virtual auto GetOutputs(alloc::Resource* alloc = alloc::System())
+        const noexcept -> Vector<UTXO> = 0;
+    virtual auto GetOutputs(
+        TxoState type,
+        alloc::Resource* alloc = alloc::System()) const noexcept
+        -> Vector<UTXO> = 0;
     virtual auto GetOutputs(
         const identifier::Nym& owner,
-        const Identifier& subaccount) const noexcept
-        -> UnallocatedVector<UTXO> = 0;
+        alloc::Resource* alloc = alloc::System()) const noexcept
+        -> Vector<UTXO> = 0;
+    virtual auto GetOutputs(
+        const identifier::Nym& owner,
+        TxoState type,
+        alloc::Resource* alloc = alloc::System()) const noexcept
+        -> Vector<UTXO> = 0;
     virtual auto GetOutputs(
         const identifier::Nym& owner,
         const Identifier& subaccount,
-        TxoState type) const noexcept -> UnallocatedVector<UTXO> = 0;
-    virtual auto GetOutputs(const crypto::Key& key, TxoState type)
-        const noexcept -> UnallocatedVector<UTXO> = 0;
+        alloc::Resource* alloc = alloc::System()) const noexcept
+        -> Vector<UTXO> = 0;
+    virtual auto GetOutputs(
+        const identifier::Nym& owner,
+        const Identifier& subaccount,
+        TxoState type,
+        alloc::Resource* alloc = alloc::System()) const noexcept
+        -> Vector<UTXO> = 0;
+    virtual auto GetOutputs(
+        const crypto::Key& key,
+        TxoState type,
+        alloc::Resource* alloc = alloc::System()) const noexcept
+        -> Vector<UTXO> = 0;
     virtual auto GetTags(const block::Outpoint& output) const noexcept
         -> UnallocatedSet<TxoTag> = 0;
     virtual auto Height() const noexcept -> block::Height = 0;

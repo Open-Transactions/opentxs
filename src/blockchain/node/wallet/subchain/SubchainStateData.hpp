@@ -47,6 +47,7 @@
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/util/Allocated.hpp"
+#include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "util/Actor.hpp"
@@ -115,7 +116,7 @@ class Raw;
 namespace opentxs::blockchain::node::wallet
 {
 class SubchainStateData : virtual public Subchain,
-                          public opentxs::Actor<SubchainStateData, SubchainJobs>
+                          public Actor<SubchainStateData, SubchainJobs>
 {
 public:
     using WalletDatabase = node::internal::WalletDatabase;
@@ -126,7 +127,7 @@ public:
 
     const api::Session& api_;
     const node::internal::Network& node_;
-    const node::internal::WalletDatabase& db_;
+    node::internal::WalletDatabase& db_;
     const node::internal::Mempool& mempool_oracle_;
     const OTNymID owner_;
     const crypto::SubaccountType account_type_;
@@ -138,14 +139,14 @@ public:
     const SubchainIndex db_key_;
     const block::Position null_position_;
     const block::Position genesis_;
-    const CString to_children_endpoint_;
-    const CString from_children_endpoint_;
     const CString to_index_endpoint_;
     const CString to_scan_endpoint_;
     const CString to_rescan_endpoint_;
     const CString to_process_endpoint_;
     const CString to_progress_endpoint_;
+    const CString shutdown_endpoint_;
 
+    auto ChangeState(const State state) noexcept -> bool final;
     auto IndexElement(
         const cfilter::Type type,
         const blockchain::crypto::Element& input,
@@ -163,7 +164,6 @@ public:
         block::Position& highestTested,
         Vector<ScanStatus>& out) const noexcept
         -> std::optional<block::Position>;
-    auto VerifyState(const State state) const noexcept -> void final;
 
     auto Init(boost::shared_ptr<SubchainStateData> me) noexcept -> void final;
     auto ProcessReorg(
@@ -172,37 +172,42 @@ public:
         std::atomic_int& errors,
         const block::Position& ancestor) noexcept -> void final;
 
-    ~SubchainStateData() override;
+    ~SubchainStateData() override { signal_shutdown(); }
 
 protected:
     using Transactions =
-        UnallocatedVector<std::shared_ptr<const block::bitcoin::Transaction>>;
+        Vector<std::shared_ptr<const block::bitcoin::Transaction>>;
     using Task = node::internal::Wallet::Task;
     using Patterns = WalletDatabase::Patterns;
-    using UTXOs = UnallocatedVector<WalletDatabase::UTXO>;
+    using UTXOs = Vector<WalletDatabase::UTXO>;
     using Targets = GCS::Targets;
     using Tested = WalletDatabase::MatchingIndices;
 
-    auto get_account_targets() const noexcept
+    auto get_account_targets(alloc::Resource* alloc) const noexcept
         -> std::tuple<Patterns, UTXOs, Targets>;
-    auto get_block_targets(const block::Hash& id, const UTXOs& utxos)
-        const noexcept -> std::pair<Patterns, Targets>;
-    auto get_block_targets(const block::Hash& id, Tested& tested) const noexcept
+    auto get_block_targets(
+        const block::Hash& id,
+        const UTXOs& utxos,
+        alloc::Resource* alloc) const noexcept -> std::pair<Patterns, Targets>;
+    auto get_block_targets(
+        const block::Hash& id,
+        Tested& tested,
+        alloc::Resource* alloc) const noexcept
         -> std::tuple<Patterns, UTXOs, Targets, Patterns>;
     auto set_key_data(block::bitcoin::Transaction& tx) const noexcept -> void;
     auto supported_scripts(const crypto::Element& element) const noexcept
         -> UnallocatedVector<ScriptForm>;
     auto translate(
-        const UnallocatedVector<WalletDatabase::UTXO>& utxos,
+        const Vector<WalletDatabase::UTXO>& utxos,
         Patterns& outpoints) const noexcept -> void;
 
-    virtual auto startup() noexcept -> void;
+    virtual auto do_startup() noexcept -> void;
     virtual auto work() noexcept -> bool;
 
     SubchainStateData(
         const api::Session& api,
         const node::internal::Network& node,
-        const node::internal::WalletDatabase& db,
+        node::internal::WalletDatabase& db,
         const node::internal::Mempool& mempool,
         const crypto::SubaccountType accountType,
         const cfilter::Type filter,
@@ -211,38 +216,19 @@ protected:
         OTNymID&& owner,
         OTIdentifier&& id,
         const std::string_view display,
-        const std::string_view fromParent,
-        const std::string_view toParent,
+        const std::string_view parent,
         allocator_type alloc) noexcept;
 
 private:
-    friend opentxs::Actor<SubchainStateData, SubchainJobs>;
+    friend Actor<SubchainStateData, SubchainJobs>;
 
-    struct ReorgData {
-        const std::size_t target_;
-        std::size_t ready_;
-        std::size_t done_;
-
-        ReorgData(std::size_t target) noexcept
-            : target_(target)
-            , ready_(0)
-            , done_(0)
-        {
-        }
-    };
-
-    network::zeromq::socket::Raw& to_parent_;
-    network::zeromq::socket::Raw& to_children_;
-    network::zeromq::socket::Raw& to_scan_;
-    network::zeromq::socket::Raw& to_progress_;
+    std::atomic<State> pending_state_;
     std::atomic<State> state_;
-    std::optional<ReorgData> reorg_;
     std::optional<wallet::Progress> progress_;
     std::optional<wallet::Rescan> rescan_;
     std::optional<wallet::Index> index_;
     std::optional<wallet::Process> process_;
     std::optional<wallet::Scan> scan_;
-    boost::shared_ptr<SubchainStateData> me_;
 
     static auto describe(
         const blockchain::Type chain,
@@ -251,15 +237,15 @@ private:
         const Subchain subchain,
         allocator_type alloc) noexcept -> CString;
 
-    virtual auto get_index(const boost::shared_ptr<const SubchainStateData>& me)
-        const noexcept -> Index = 0;
+    virtual auto get_index(const SubchainStateData& me) const noexcept
+        -> Index = 0;
     auto get_targets(
         const Patterns& elements,
-        const UnallocatedVector<WalletDatabase::UTXO>& utxos,
+        const Vector<WalletDatabase::UTXO>& utxos,
         Targets& targets) const noexcept -> void;
     auto get_targets(
         const Patterns& elements,
-        const UnallocatedVector<WalletDatabase::UTXO>& utxos,
+        const Vector<WalletDatabase::UTXO>& utxos,
         Targets& targets,
         Patterns& outpoints,
         Tested& tested) const noexcept -> void;
@@ -282,24 +268,16 @@ private:
     auto pipeline(const Work work, Message&& msg) noexcept -> void;
     auto process_shutdown_begin(Message&& msg) noexcept -> void;
     auto process_shutdown_ready(Message&& msg) noexcept -> void;
-    auto ready_for_normal() noexcept -> void;
-    auto ready_for_reorg() noexcept -> void;
     auto state_normal(const Work work, Message&& msg) noexcept -> void;
-    auto state_post_reorg(const Work work, Message&& msg) noexcept -> void;
-    auto state_pre_reorg(const Work work, Message&& msg) noexcept -> void;
-    auto state_pre_shutdown(const Work work, Message&& msg) noexcept -> void;
     auto state_reorg(const Work work, Message&& msg) noexcept -> void;
-    auto transition_state_normal(Message&& in) noexcept -> void;
-    auto transition_state_post_reorg(Message&& in) noexcept -> void;
-    auto transition_state_pre_reorg(Message&& in) noexcept -> void;
-    auto transition_state_pre_shutdown(Message&& in) noexcept -> void;
-    auto transition_state_reorg(Message&& in) noexcept -> void;
-    auto transition_state_shutdown(Message&& in) noexcept -> void;
+    auto transition_state_normal() noexcept -> void;
+    auto transition_state_reorg() noexcept -> void;
+    auto transition_state_shutdown() noexcept -> void;
 
     SubchainStateData(
         const api::Session& api,
         const node::internal::Network& node,
-        const node::internal::WalletDatabase& db,
+        node::internal::WalletDatabase& db,
         const node::internal::Mempool& mempool,
         const crypto::SubaccountType accountType,
         const cfilter::Type filter,
@@ -308,8 +286,7 @@ private:
         OTNymID&& owner,
         OTIdentifier&& id,
         const std::string_view display,
-        const std::string_view fromParent,
-        const std::string_view toParent,
+        const std::string_view parent,
         CString&& fromChildren,
         CString&& toChildren,
         CString&& toScan,

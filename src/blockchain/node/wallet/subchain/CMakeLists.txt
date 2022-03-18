@@ -18,3 +18,4 @@ target_sources(
     "SubchainStateData.cpp"
     "SubchainStateData.hpp"
 )
+target_link_libraries(opentxs-common PRIVATE Boost::headers)

@@ -355,10 +355,12 @@ struct PeerListener::Imp {
     PeerListener& parent_;
     const int client_count_;
     mutable std::mutex lock_;
-    ot::OTZMQListenCallback miner_cb_;
+    ot::OTZMQListenCallback miner_1_cb_;
+    ot::OTZMQListenCallback ss_cb_;
     ot::OTZMQListenCallback client_1_cb_;
     ot::OTZMQListenCallback client_2_cb_;
     ot::OTZMQSubscribeSocket m_socket_;
+    ot::OTZMQSubscribeSocket ss_socket_;
     ot::OTZMQSubscribeSocket c1_socket_;
     ot::OTZMQSubscribeSocket c2_socket_;
 
@@ -369,10 +371,12 @@ struct PeerListener::Imp {
         OT_ASSERT(2 < body.size());
 
         ++counter;
-
         auto lock = ot::Lock{lock_};
+        const auto target = client_count_ + 1;
 
-        if (client_count_ != parent_.miner_peers_) { return; }
+        if (target != parent_.miner_1_peers_) { return; }
+
+        if (0 == parent_.sync_server_peers_) { return; }
 
         if ((0 < client_count_) && (0 == parent_.client_1_peers_)) { return; }
 
@@ -388,13 +392,20 @@ struct PeerListener::Imp {
         const bool waitForHandshake,
         const int clientCount,
         const ot::api::session::Client& miner,
+        const ot::api::session::Client& syncServer,
         const ot::api::session::Client& client1,
         const ot::api::session::Client& client2)
         : parent_(parent)
         , client_count_(clientCount)
         , lock_()
-        , miner_cb_(ot::network::zeromq::ListenCallback::Factory(
-              [this](auto&& msg) { cb(std::move(msg), parent_.miner_peers_); }))
+        , miner_1_cb_(
+              ot::network::zeromq::ListenCallback::Factory([this](auto&& msg) {
+                  cb(std::move(msg), parent_.miner_1_peers_);
+              }))
+        , ss_cb_(
+              ot::network::zeromq::ListenCallback::Factory([this](auto&& msg) {
+                  cb(std::move(msg), parent_.sync_server_peers_);
+              }))
         , client_1_cb_(
               ot::network::zeromq::ListenCallback::Factory([this](auto&& msg) {
                   cb(std::move(msg), parent_.client_1_peers_);
@@ -403,7 +414,8 @@ struct PeerListener::Imp {
               ot::network::zeromq::ListenCallback::Factory([this](auto&& msg) {
                   cb(std::move(msg), parent_.client_2_peers_);
               }))
-        , m_socket_(miner.Network().ZeroMQ().SubscribeSocket(miner_cb_))
+        , m_socket_(miner.Network().ZeroMQ().SubscribeSocket(miner_1_cb_))
+        , ss_socket_(syncServer.Network().ZeroMQ().SubscribeSocket(ss_cb_))
         , c1_socket_(client1.Network().ZeroMQ().SubscribeSocket(client_1_cb_))
         , c2_socket_(client2.Network().ZeroMQ().SubscribeSocket(client_2_cb_))
     {
@@ -413,6 +425,14 @@ struct PeerListener::Imp {
                               : miner.Endpoints().BlockchainPeerConnection())
                              .data())) {
             throw std::runtime_error("Error connecting to miner socket");
+        }
+
+        if (false == ss_socket_->Start(
+                         (waitForHandshake
+                              ? miner.Endpoints().BlockchainPeer()
+                              : miner.Endpoints().BlockchainPeerConnection())
+                             .data())) {
+            throw std::runtime_error("Error connecting to sync server socket");
         }
 
         if (false == c1_socket_->Start(
@@ -436,6 +456,7 @@ struct PeerListener::Imp {
     {
         c2_socket_->Close();
         c1_socket_->Close();
+        ss_socket_->Close();
         m_socket_->Close();
     }
 };
@@ -444,15 +465,23 @@ PeerListener::PeerListener(
     const bool waitForHandshake,
     const int clientCount,
     const ot::api::session::Client& miner,
+    const ot::api::session::Client& syncServer,
     const ot::api::session::Client& client1,
     const ot::api::session::Client& client2)
     : promise_()
     , done_(promise_.get_future())
-    , miner_peers_(0)
+    , miner_1_peers_(0)
+    , sync_server_peers_(0)
     , client_1_peers_(0)
     , client_2_peers_(0)
-    , imp_(std::make_unique<
-           Imp>(*this, waitForHandshake, clientCount, miner, client1, client2))
+    , imp_(std::make_unique<Imp>(
+          *this,
+          waitForHandshake,
+          clientCount,
+          miner,
+          syncServer,
+          client1,
+          client2))
 {
 }
 
@@ -471,14 +500,27 @@ Regtest_fixture_base::Regtest_fixture_base(
               .SetBlockchainStorageLevel(2)
               .SetBlockchainWalletEnabled(false),
           0))
-    , client_1_(ot_.StartClientSession(client_args_, 1))
-    , client_2_(ot_.StartClientSession(client_args_, 2))
+    , sync_server_(ot_.StartClientSession(
+          ot::Options{}
+              .SetBlockchainStorageLevel(2)
+              .SetBlockchainWalletEnabled(false)
+              .SetBlockchainSyncEnabled(true),
+          1))
+    , client_1_(ot_.StartClientSession(client_args_, 2))
+    , client_2_(ot_.StartClientSession(client_args_, 3))
     , miner_startup_([&]() -> auto& {
         if (false == miner_startup_s_.has_value()) {
             miner_startup_s_.emplace(miner_, test_chain_);
         }
 
         return miner_startup_s_.value();
+    }())
+    , sync_server_startup_([&]() -> auto& {
+        if (false == sync_server_startup_s_.has_value()) {
+            sync_server_startup_s_.emplace(sync_server_, test_chain_);
+        }
+
+        return sync_server_startup_s_.value();
     }())
     , client_1_startup_([&]() -> auto& {
         if (false == client_1_startup_s_.has_value()) {
@@ -499,6 +541,7 @@ Regtest_fixture_base::Regtest_fixture_base(
           waitForHandshake,
           client_count_,
           miner_,
+          sync_server_,
           client_1_,
           client_2_))
     , default_([&](Height height) -> Transaction {
@@ -587,7 +630,7 @@ auto Regtest_fixture_base::compare_outpoints(
 auto Regtest_fixture_base::compare_outpoints(
     const ot::blockchain::node::TxoState type,
     const TXOState::Data& expected,
-    const ot::UnallocatedVector<UTXO>& got) const noexcept -> bool
+    const ot::Vector<UTXO>& got) const noexcept -> bool
 {
     auto output{true};
     static const auto emptySet =
@@ -632,13 +675,34 @@ auto Regtest_fixture_base::Connect(const b::p2p::Address& address) noexcept
     const auto miner = [&]() -> std::function<bool()> {
         const auto& miner = miner_.Network().Blockchain().GetChain(test_chain_);
         const auto listen = miner.Listen(address);
+        const auto target = client_count_ + 1;
 
         EXPECT_TRUE(listen);
 
         return [=] {
-            EXPECT_EQ(connection_.miner_peers_, client_count_);
+            EXPECT_EQ(connection_.miner_1_peers_, target);
 
-            return listen && (client_count_ == connection_.miner_peers_);
+            return listen && (target == connection_.miner_1_peers_);
+        };
+    }();
+    const auto syncServer = [&]() -> std::function<bool()> {
+        const auto& client =
+            sync_server_.Network().Blockchain().GetChain(test_chain_);
+        const auto added = client.AddPeer(address);
+        const auto started =
+            sync_server_.Network().Blockchain().StartSyncServer(
+                sync_server_sync_,
+                sync_server_sync_public_,
+                sync_server_update_,
+                sync_server_update_public_);
+
+        EXPECT_TRUE(added);
+        EXPECT_TRUE(started);
+
+        return [=] {
+            EXPECT_GT(connection_.sync_server_peers_, 0);
+
+            return added && started && (0 < connection_.sync_server_peers_);
         };
     }();
     const auto client1 = [&]() -> std::function<bool()> {
@@ -650,9 +714,9 @@ auto Regtest_fixture_base::Connect(const b::p2p::Address& address) noexcept
             EXPECT_TRUE(added);
 
             return [=] {
-                EXPECT_EQ(connection_.client_1_peers_, 1);
+                EXPECT_GT(connection_.client_1_peers_, 0);
 
-                return added && (1 == connection_.client_1_peers_);
+                return added && (0 < connection_.client_1_peers_);
             };
         } else {
 
@@ -668,9 +732,9 @@ auto Regtest_fixture_base::Connect(const b::p2p::Address& address) noexcept
             EXPECT_TRUE(added);
 
             return [=] {
-                EXPECT_EQ(connection_.client_2_peers_, 1);
+                EXPECT_GT(connection_.client_2_peers_, 0);
 
-                return added && (1 == connection_.client_2_peers_);
+                return added && (0 < connection_.client_2_peers_);
             };
         } else {
 
@@ -678,12 +742,12 @@ auto Regtest_fixture_base::Connect(const b::p2p::Address& address) noexcept
         }
     }();
 
-    const auto status = connection_.done_.wait_for(1min);
+    const auto status = connection_.done_.wait_for(2min);
     const auto future = (std::future_status::ready == status);
 
     OT_ASSERT(future);
 
-    return future && miner() && client1() && client2();
+    return future && miner() && syncServer() && client1() && client2();
 }
 
 auto Regtest_fixture_base::get_bytes(const Script& script) noexcept
@@ -762,12 +826,13 @@ auto Regtest_fixture_base::init_peer(
     const bool waitForHandshake,
     const int clientCount,
     const ot::api::session::Client& miner,
+    const ot::api::session::Client& syncServer,
     const ot::api::session::Client& client1,
     const ot::api::session::Client& client2) noexcept -> const PeerListener&
 {
     if (false == bool(peer_listener_)) {
         peer_listener_ = std::make_unique<PeerListener>(
-            waitForHandshake, clientCount, miner, client1, client2);
+            waitForHandshake, clientCount, miner, syncServer, client1, client2);
     }
 
     OT_ASSERT(peer_listener_);
@@ -898,6 +963,7 @@ auto Regtest_fixture_base::Shutdown() noexcept -> void
 {
     client_2_startup_s_ = std::nullopt;
     client_1_startup_s_ = std::nullopt;
+    sync_server_startup_s_ = std::nullopt;
     miner_startup_s_ = std::nullopt;
     wallet_listener_.clear();
     block_listener_.clear();
@@ -910,6 +976,16 @@ auto Regtest_fixture_base::Start() noexcept -> bool
 {
     const auto miner = [&]() -> std::function<bool()> {
         const auto start = miner_.Network().Blockchain().Start(test_chain_);
+
+        return [=] {
+            EXPECT_TRUE(start);
+
+            return start;
+        };
+    }();
+    const auto syncServer = [&]() -> std::function<bool()> {
+        const auto start =
+            sync_server_.Network().Blockchain().Start(test_chain_);
 
         return [=] {
             EXPECT_TRUE(start);
@@ -948,12 +1024,12 @@ auto Regtest_fixture_base::Start() noexcept -> bool
         }
     }();
 
-    return miner() && client1() && client2();
+    return miner() && syncServer() && client1() && client2();
 }
 
 auto Regtest_fixture_base::TestUTXOs(
     const Expected& expected,
-    const ot::UnallocatedVector<UTXO>& utxos) const noexcept -> bool
+    const ot::Vector<UTXO>& utxos) const noexcept -> bool
 {
     auto out = true;
 
@@ -1226,11 +1302,22 @@ auto Regtest_fixture_hd::Shutdown() noexcept -> void
     Regtest_fixture_normal::Shutdown();
 }
 
+Regtest_fixture_normal::Regtest_fixture_normal(
+    const int clientCount,
+    const ot::Options& clientArgs)
+    : Regtest_fixture_base(true, clientCount, clientArgs)
+{
+}
+
 Regtest_fixture_normal::Regtest_fixture_normal(const int clientCount)
-    : Regtest_fixture_base(
-          true,
+    : Regtest_fixture_normal(
           clientCount,
           ot::Options{}.SetBlockchainStorageLevel(1))
+{
+}
+
+Regtest_fixture_single::Regtest_fixture_single(const ot::Options& clientArgs)
+    : Regtest_fixture_normal(1, clientArgs)
 {
 }
 
@@ -1240,15 +1327,11 @@ Regtest_fixture_single::Regtest_fixture_single()
 }
 
 Regtest_fixture_sync::Regtest_fixture_sync()
-    : Regtest_fixture_base(
-          true,
-          2,
-          ot::Options{}.SetBlockchainStorageLevel(2).SetBlockchainSyncEnabled(
-              true))
+    : Regtest_fixture_single(ot::Options{}.SetBlockchainWalletEnabled(false))
     , sync_sub_([&]() -> SyncSubscriber& {
         if (!sync_subscriber_) {
             sync_subscriber_ =
-                std::make_unique<SyncSubscriber>(client_2_, mined_blocks_);
+                std::make_unique<SyncSubscriber>(client_1_, mined_blocks_);
         }
 
         return *sync_subscriber_;
@@ -1256,7 +1339,7 @@ Regtest_fixture_sync::Regtest_fixture_sync()
     , sync_req_([&]() -> SyncRequestor& {
         if (!sync_requestor_) {
             sync_requestor_ =
-                std::make_unique<SyncRequestor>(client_2_, mined_blocks_);
+                std::make_unique<SyncRequestor>(client_1_, mined_blocks_);
         }
 
         return *sync_requestor_;
@@ -1264,24 +1347,12 @@ Regtest_fixture_sync::Regtest_fixture_sync()
 {
     if (false == init_) {
         auto& alex = const_cast<User&>(alex_);
-        alex.init(client_2_);
+        alex.init(client_1_);
 
         OT_ASSERT(alex.payment_code_ == GetVectors3().alice_.payment_code_);
 
         init_ = true;
     }
-}
-
-auto Regtest_fixture_sync::Connect() noexcept -> bool
-{
-    auto output = Regtest_fixture_base::Connect();
-    output &= client_1_.Network().Blockchain().StartSyncServer(
-        sync_server_sync_,
-        sync_server_sync_public_,
-        sync_server_update_,
-        sync_server_update_public_);
-
-    return output;
 }
 
 auto Regtest_fixture_sync::Shutdown() noexcept -> void
@@ -2454,6 +2525,7 @@ Regtest_fixture_base::Expected Regtest_fixture_base::expected_{};
 Regtest_fixture_base::Transactions Regtest_fixture_base::transactions_{};
 ot::blockchain::block::Height Regtest_fixture_base::height_{0};
 std::optional<BlockchainStartup> Regtest_fixture_base::miner_startup_s_{};
+std::optional<BlockchainStartup> Regtest_fixture_base::sync_server_startup_s_{};
 std::optional<BlockchainStartup> Regtest_fixture_base::client_1_startup_s_{};
 std::optional<BlockchainStartup> Regtest_fixture_base::client_2_startup_s_{};
 using TxoState = ot::blockchain::node::TxoState;

@@ -41,7 +41,7 @@ public:
 
     HeaderDownloader(
         const api::Session& api,
-        const internal::FilterDatabase& db,
+        internal::FilterDatabase& db,
         const HeaderOracle& header,
         const internal::Network& node,
         FilterOracle::FilterDownloader& filter,
@@ -83,7 +83,7 @@ private:
     friend HeaderDM;
     friend HeaderWorker;
 
-    const internal::FilterDatabase& db_;
+    internal::FilterDatabase& db_;
     const HeaderOracle& header_;
     const internal::Network& node_;
     FilterOracle::FilterDownloader& filter_;
