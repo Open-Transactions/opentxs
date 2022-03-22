@@ -80,6 +80,7 @@ jobs:
           name: "build"
           command: |
             docker run --mount type=bind,src=/home/circleci/project,dst=/home/src --mount type=bind,src=/tmp/opentxs,dst=/home/output -i --entrypoint /usr/bin/build-opentxs-<<parameters.command>> <<parameters.docker-image>> <<parameters.mode>> 
+      #TODO run unit tests
 
 workflows:
   opentxs-android:
