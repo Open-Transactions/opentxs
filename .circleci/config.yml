@@ -50,19 +50,23 @@ commands:
 jobs:
   build-android:
     parameters:
+      docker-image:
+        type: string
       arch:
         type: string
     executor: host_executor
     steps:
       - prepare_env:
-          docker-image: opentransactions/android:<<pipeline.parameters.docker-image-android-tag>>
+          docker-image: <<parameters.docker-image>>
           temp-path: opentxs-for-android/<<parameters.arch>>
       - run:
           name: "build"
           command: |
-            docker run --mount type=bind,src=/home/circleci/project,dst=/home/src --mount type=bind,src=/home/circleci/opentxs-for-android/<<parameters.arch>>,dst=/home/output -i opentransactions/android:<<pipeline.parameters.docker-image-android-tag>> <<parameters.arch>> all
+            docker run --mount type=bind,src=/home/circleci/project,dst=/home/src --mount type=bind,src=/home/circleci/opentxs-for-android/<<parameters.arch>>,dst=/home/output -i <<parameters.docker-image>> <<parameters.arch>> all
   build-linux:
     parameters:
+      docker-image:
+        type: string
       command:
         type: string
       mode:
@@ -70,23 +74,25 @@ jobs:
     executor: host_executor
     steps:
       - prepare_env:
-          docker-image: opentransactions/ci:<<pipeline.parameters.docker-image-ci-tag>>
+          docker-image: <<parameters.docker-image>>
           temp-path: "/tmp/opentxs"
       - run:
           name: "build"
           command: |
-            docker run --mount type=bind,src=/home/circleci/project,dst=/home/src --mount type=bind,src=/tmp/opentxs,dst=/home/output -i --entrypoint /usr/bin/build-opentxs-<<parameters.command>> opentransactions/ci:<<pipeline.parameters.docker-image-ci-tag>> <<parameters.mode>> 
+            docker run --mount type=bind,src=/home/circleci/project,dst=/home/src --mount type=bind,src=/tmp/opentxs,dst=/home/output -i --entrypoint /usr/bin/build-opentxs-<<parameters.command>> <<parameters.docker-image>> <<parameters.mode>> 
 
 workflows:
-  build-opentxs-android:
+  opentxs-android:
     jobs:
       - build-android:
+          docker-image: opentransactions/android:<<pipeline.parameters.docker-image-android-tag>>
           matrix:
             parameters:
               arch: [arm64, arm, x64, x86]
-  build-opentxs-linux:
+  opentxs-linux:
     jobs:
       - build-linux:
+          docker-image: opentransactions/ci:<<pipeline.parameters.docker-image-ci-tag>>
           matrix:
             parameters:
               command: [gcc, clang]
