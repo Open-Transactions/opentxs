@@ -60,7 +60,7 @@ jobs:
       - run:
           name: "build"
           command: |
-            docker run --mount type=bind,src=/home/circleci/project,dst=/home/src --mount type=bind,src=/home/circleci/opentxs-for-android/<<parameters.arch>>,dst=/home/output -i opentransactions/android:14 <<parameters.arch>> all
+            docker run --mount type=bind,src=/home/circleci/project,dst=/home/src --mount type=bind,src=/home/circleci/opentxs-for-android/<<parameters.arch>>,dst=/home/output -i opentransactions/android:<<pipeline.parameters.docker-image-android-tag>> <<parameters.arch>> all
   build-linux:
     parameters:
       command:
@@ -75,7 +75,7 @@ jobs:
       - run:
           name: "build"
           command: |
-            docker run --mount type=bind,src=/home/circleci/project,dst=/home/src --mount type=bind,src=/tmp/opentxs,dst=/home/output -i --entrypoint <<parameters.command>> opentransactions/ci:8 <<parameters.mode>> 
+            docker run --mount type=bind,src=/home/circleci/project,dst=/home/src --mount type=bind,src=/tmp/opentxs,dst=/home/output -i --entrypoint /usr/bin/build-opentxs-<<parameters.command>> opentransactions/ci:<<pipeline.parameters.docker-image-ci-tag>> <<parameters.mode>> 
 
 workflows:
   build-opentxs-android:
@@ -89,5 +89,5 @@ workflows:
       - build-linux:
           matrix:
             parameters:
-              command: [/usr/bin/build-opentxs-gcc, /usr/bin/build-opentxs-clang]
+              command: [gcc, clang]
               mode: [test01, test02, test03, test04, test05, test06, test07, test08, nopch, full]
