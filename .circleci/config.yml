@@ -4,10 +4,6 @@ parameters:
   docker-image-tag:
     default: "14"
     type: string
-  #https://discuss.circleci.com/t/circleci-orb-with-array-parameters-and-for-loop/36964/2
-  architectures:
-    default: "arm64 arm x64 x86"
-    type: string
 
 executors:
   host_executor:
@@ -17,6 +13,9 @@ executors:
 commands:
   prepare_env:
     description: "command to prepare all build dependencies: code deps, gems, tools"
+    parameters:
+      arch:
+        type: string
     steps:
       #pulling docker image is somehow much slower than using docker image as executor
       #pulling        : 2m 44s
@@ -32,7 +31,7 @@ commands:
             sudo rm -rf /usr/share/dotnet
       - checkout
       - run:
-          name: "checkout submodules, circleci doesn't do that by default"
+          name: "checkout submodules (circleci doesn't do that by default)"
           working_directory: "~/project"
           command: |
             git submodule sync --recursive
@@ -41,50 +40,30 @@ commands:
           name: "prepare temp dirs"
           working_directory: "~/"
           command: |
-            for i in <<pipeline.parameters.architectures>>; do
-              mkdir -p opentxs-for-android/$i
-            done
+            mkdir -p opentxs-for-android/<<parameters.arch>>
 
 jobs:
-  build-android-arm64:
+  build-android:
+    parameters:
+      arch:
+        type: string
     executor: host_executor
     steps:
-      - prepare_env
+      - prepare_env:
+          arch: <<parameters.arch>>
       - run:
-          name: "build arm64"
+          name: "build"
           command: |
-            docker run --mount type=bind,src=/home/circleci/project,dst=/home/src --mount type=bind,src=/home/circleci/opentxs-for-android/arm64,dst=/home/output -i opentransactions/android:14 arm64 all
-  build-android-arm:
-    executor: host_executor
-    steps:
-      - prepare_env
-      - run:
-          name: "build arm"
-          command: |
-            docker run --mount type=bind,src=/home/circleci/project,dst=/home/src --mount type=bind,src=/home/circleci/opentxs-for-android/arm64,dst=/home/output -i opentransactions/android:14 arm all
-  build-android-x64:
-    executor: host_executor
-    steps:
-      - prepare_env
-      - run:
-          name: "build x64"
-          command: |
-            docker run --mount type=bind,src=/home/circleci/project,dst=/home/src --mount type=bind,src=/home/circleci/opentxs-for-android/arm64,dst=/home/output -i opentransactions/android:14 x64 all
-  build-android-x86:
-    executor: host_executor
-    steps:
-      - prepare_env
-      - run:
-          name: "build x86"
-          command: |
-            docker run --mount type=bind,src=/home/circleci/project,dst=/home/src --mount type=bind,src=/home/circleci/opentxs-for-android/arm64,dst=/home/output -i opentransactions/android:14 x86 all
+            docker run --mount type=bind,src=/home/circleci/project,dst=/home/src --mount type=bind,src=/home/circleci/opentxs-for-android/<<parameters.arch>>,dst=/home/output -i opentransactions/android:14 <<parameters.arch>> all
 
 # Invoke jobs via workflows
 # See: https://circleci.com/docs/2.0/configuration-reference/#workflows
 workflows:
   build-opentxs-android:
     jobs:
-      - build-android-arm64
-      - build-android-arm
-      - build-android-x64
-      - build-android-x86
+      - build-android:
+          matrix:
+            parameters:
+              arch: [arm64, arm, x64, x86]
+              
+
