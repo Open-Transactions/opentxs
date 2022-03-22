@@ -1,8 +1,11 @@
 version: 2.1
 
 parameters:
-  docker-image-tag:
+  docker-image-android-tag:
     default: "14"
+    type: string
+  docker-image-ci-tag:
+    default: "8"
     type: string
 
 executors:
@@ -14,7 +17,9 @@ commands:
   prepare_env:
     description: "command to prepare all build dependencies: code deps, gems, tools"
     parameters:
-      arch:
+      docker-image:
+        type: string
+      temp-path:
         type: string
     steps:
       #pulling docker image is somehow much slower than using docker image as executor
@@ -22,7 +27,7 @@ commands:
       #docker executor: 1m 40s
       - run:
           name: "pull docker image"
-          command: docker pull opentransactions/android:<<pipeline.parameters.docker-image-tag>>
+          command: docker pull <<parameters.docker-image>>
       #TODO check if that does anything at all (ssh into running image)
       - run:
           name: "get more disk space"
@@ -40,7 +45,7 @@ commands:
           name: "prepare temp dirs"
           working_directory: "~/"
           command: |
-            mkdir -p opentxs-for-android/<<parameters.arch>>
+            mkdir -p <<parameters.temp-path>>
 
 jobs:
   build-android:
@@ -50,11 +55,27 @@ jobs:
     executor: host_executor
     steps:
       - prepare_env:
-          arch: <<parameters.arch>>
+          docker-image: opentransactions/android:<<pipeline.parameters.docker-image-android-tag>>
+          temp-path: opentxs-for-android/<<parameters.arch>>
       - run:
           name: "build"
           command: |
             docker run --mount type=bind,src=/home/circleci/project,dst=/home/src --mount type=bind,src=/home/circleci/opentxs-for-android/<<parameters.arch>>,dst=/home/output -i opentransactions/android:14 <<parameters.arch>> all
+  build-linux:
+    parameters:
+      command:
+        type: string
+      mode:
+        type: string
+    executor: host_executor
+    steps:
+      - prepare_env:
+          docker-image: opentransactions/ci:<<pipeline.parameters.docker-image-ci-tag>>
+          temp-path: "/tmp/opentxs"
+      - run:
+          name: "build"
+          command: |
+            docker run --mount type=bind,src=/home/circleci/project,dst=/home/src --mount type=bind,src=/tmp/opentxs,dst=/home/output -i --entrypoint <<parameters.command>> opentransactions/ci:8 <<parameters.mode>> 
 
 workflows:
   build-opentxs-android:
@@ -63,3 +84,10 @@ workflows:
           matrix:
             parameters:
               arch: [arm64, arm, x64, x86]
+  build-opentxs-linux:
+    jobs:
+      - build-linux:
+          matrix:
+            parameters:
+              command: [/usr/bin/build-opentxs-gcc, /usr/bin/build-opentxs-clang]
+              mode: [test01, test02, test03, test04, test05, test06, test07, test08, nopch, full]
