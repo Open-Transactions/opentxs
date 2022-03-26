@@ -9,6 +9,9 @@
 #include "opentxs/Version.hpp"  // IWYU pragma: associated
 // IWYU pragma: end_exports
 
+// NOLINTBEGIN(modernize-concat-nested-namespaces)
+namespace opentxs  // NOLINT
+{
 constexpr auto PAYMENT_CODE_VERSION = 1;
 constexpr auto PEER_MESSAGE_VERSION = 2;
 constexpr auto PEER_PAYMENT_VERSION = 5;
@@ -25,9 +28,6 @@ constexpr auto MESSAGE_SUCCESS_FALSE = 0;
 constexpr auto MESSAGE_SUCCESS_TRUE = 1;
 constexpr auto FIRST_REQUEST_NUMBER = 1;
 
-// NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs  // NOLINT
-{
 // inline namespace v1
 // {
 namespace amount
