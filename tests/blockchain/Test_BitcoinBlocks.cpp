@@ -367,6 +367,29 @@ TEST_F(Test_BitcoinBlock, bsv_genesis_testnet)
     api_.Network().Blockchain().Stop(ot::blockchain::Type::BitcoinSV_testnet3);
 }
 
+TEST_F(Test_BitcoinBlock, xec_genesis_mainnet)
+{
+    EXPECT_TRUE(GenerateGenesisFilter(
+        ot::blockchain::Type::eCash,
+        ot::blockchain::cfilter::Type::Basic_BCHVariant));
+    EXPECT_TRUE(GenerateGenesisFilter(
+        ot::blockchain::Type::eCash, ot::blockchain::cfilter::Type::ES));
+
+    api_.Network().Blockchain().Stop(ot::blockchain::Type::eCash);
+}
+
+TEST_F(Test_BitcoinBlock, xec_genesis_testnet)
+{
+    EXPECT_TRUE(GenerateGenesisFilter(
+        ot::blockchain::Type::eCash_testnet3,
+        ot::blockchain::cfilter::Type::Basic_BCHVariant));
+    EXPECT_TRUE(GenerateGenesisFilter(
+        ot::blockchain::Type::eCash_testnet3,
+        ot::blockchain::cfilter::Type::ES));
+
+    api_.Network().Blockchain().Stop(ot::blockchain::Type::eCash_testnet3);
+}
+
 TEST_F(Test_BitcoinBlock, bip158)
 {
     for (const auto& vector : bip_158_vectors_) {

@@ -438,5 +438,6 @@ enum class ClaimType : std::uint32_t {
     Zwd = 422,    // Zimbabwe Dollar
     Custom = 423,
     Tnbsv = 424,
+    TnXec = 425,  // eCash testnet
 };
 }  // namespace opentxs::identity::wot::claim

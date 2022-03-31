@@ -70,11 +70,23 @@ struct Data {
     std::uint32_t p2p_magic_bits_{};
     std::uint16_t default_port_{};
     UnallocatedVector<std::string_view> dns_seeds_{};
-    Amount default_fee_rate_{};  // satoshis per 1000 bytes
+    // Satoshis per 1000 bytes. Something we have to check the reference node
+    // implementation for, to see what fee rates will be relayed by default. It
+    // can change from time to time though so it needs to be periodically
+    // re-checked.
+    Amount default_fee_rate_{};
+    // A safety feature we use to ensure that we don't try to load too many
+    // blocks in memory as we download them.
     std::size_t block_download_batch_{};
     ScriptMap scripts_{};
     StylePref styles_{};
+    // Justus: it is always 100 for every blockchain that I know about, and it's
+    // part of a blockchain's consensus definition.
     block::Height maturation_interval_{};
+    // Used to seed the adaptive scan interval algorithm. It's something we have
+    // to derive ourselves and its purpose is to keep the algorithm from
+    // attempting to scan too many cfilters on its first run, before it has
+    // collected any data regarding the average cfilter size.
     std::size_t cfilter_element_count_estimate_{};
 };
 

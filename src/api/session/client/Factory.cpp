@@ -200,6 +200,8 @@ auto Factory::BlockHeader(const proto::BlockchainBlockHeader& serialized) const
         case opentxs::blockchain::Type::PKT_testnet:
         case opentxs::blockchain::Type::BitcoinSV:
         case opentxs::blockchain::Type::BitcoinSV_testnet3:
+        case opentxs::blockchain::Type::eCash:
+        case opentxs::blockchain::Type::eCash_testnet3:
         case opentxs::blockchain::Type::UnitTest: {
             return factory::BitcoinBlockHeader(client_, serialized);
         }
@@ -236,6 +238,8 @@ auto Factory::BlockHeader(
         case opentxs::blockchain::Type::PKT_testnet:
         case opentxs::blockchain::Type::BitcoinSV:
         case opentxs::blockchain::Type::BitcoinSV_testnet3:
+        case opentxs::blockchain::Type::eCash:
+        case opentxs::blockchain::Type::eCash_testnet3:
         case opentxs::blockchain::Type::UnitTest: {
             return factory::BitcoinBlockHeader(client_, type, raw);
         }

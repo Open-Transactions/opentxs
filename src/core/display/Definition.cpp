@@ -208,6 +208,22 @@ auto GetDefinition(UnitType in) noexcept -> const Definition&
               {u8"μBSV", {"", u8"μBSV", {{10, 2}}, 0, 2}},
               {u8"satoshi", {"", u8"satoshis", {{10, 0}}, 0, 0}},
           }}},
+        {UnitType::Xec,
+         {u8"XEC",
+          {
+              {u8"MXEC", {"", u8"MXEC", {{10, 8}}, 0, 8}},
+              {u8"kXEC", {"", u8"kXEC", {{10, 5}}, 0, 5}},
+              {u8"XEC", {"", u8"XEC", {{10, 2}}, 0, 2}},
+              {u8"mXEC", {"", u8"mXEC", {{10, 0}}, 0, 0}},
+          }}},
+        {UnitType::TnXec,
+         {u8"tnXEC",
+          {
+              {u8"MtXEC", {"", u8"MtXEC", {{10, 8}}, 0, 8}},
+              {u8"ktXEC", {"", u8"ktXEC", {{10, 5}}, 0, 5}},
+              {u8"tXEC", {"", u8"tXEC", {{10, 2}}, 0, 2}},
+              {u8"mtXEC", {"", u8"mtXEC", {{10, 0}}, 0, 0}},
+          }}},
         {UnitType::Regtest,
          {u8"UNITTEST",
           {

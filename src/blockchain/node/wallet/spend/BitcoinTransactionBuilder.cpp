@@ -1086,7 +1086,9 @@ private:
             case Type::BitcoinCash:
             case Type::BitcoinCash_testnet3:
             case Type::BitcoinSV:
-            case Type::BitcoinSV_testnet3: {
+            case Type::BitcoinSV_testnet3:
+            case Type::eCash:
+            case Type::eCash_testnet3: {
 
                 return sign_input_bch(index, input, bip143);
             }

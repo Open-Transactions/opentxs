@@ -125,6 +125,10 @@ const StyleMap address_style_map_{
      {Prefix::BitcoinTestnetP2PKH, {}}},
     {{Style::P2PKH, opentxs::blockchain::Type::BitcoinCash},
      {Prefix::BitcoinP2PKH, {}}},
+    {{Style::P2PKH, opentxs::blockchain::Type::eCash_testnet3},
+     {Prefix::BitcoinTestnetP2PKH, {}}},
+    {{Style::P2PKH, opentxs::blockchain::Type::eCash},
+     {Prefix::BitcoinP2PKH, {}}},
     {{Style::P2PKH, opentxs::blockchain::Type::Bitcoin_testnet3},
      {Prefix::BitcoinTestnetP2PKH, {}}},
     {{Style::P2PKH, opentxs::blockchain::Type::Bitcoin},
@@ -145,6 +149,10 @@ const StyleMap address_style_map_{
     {{Style::P2SH, opentxs::blockchain::Type::BitcoinCash_testnet3},
      {Prefix::BitcoinTestnetP2SH, {}}},
     {{Style::P2SH, opentxs::blockchain::Type::BitcoinCash},
+     {Prefix::BitcoinP2SH, {}}},
+    {{Style::P2SH, opentxs::blockchain::Type::eCash_testnet3},
+     {Prefix::BitcoinTestnetP2SH, {}}},
+    {{Style::P2SH, opentxs::blockchain::Type::eCash},
      {Prefix::BitcoinP2SH, {}}},
     {{Style::P2SH, opentxs::blockchain::Type::Bitcoin_testnet3},
      {Prefix::BitcoinTestnetP2SH, {}}},
@@ -362,6 +370,10 @@ auto Blockchain::Imp::bip44_type(const UnitType type) const noexcept
 
             return Bip44Type::BITCOINSV;
         }
+        case UnitType::Xec: {
+
+            return Bip44Type::ECASH;
+        }
         case UnitType::Tnbch:
         case UnitType::Tnbtc:
         case UnitType::Tnxrp:
@@ -378,6 +390,7 @@ auto Blockchain::Imp::bip44_type(const UnitType type) const noexcept
         case UnitType::Tnsteem:
         case UnitType::Tnpkt:
         case UnitType::Tnbsv:
+        case UnitType::TnXec:
         case UnitType::Regtest: {
             return Bip44Type::TESTNET;
         }

@@ -721,9 +721,12 @@ SigHash::SigHash(
         case blockchain::Type::BitcoinCash:
         case blockchain::Type::BitcoinCash_testnet3:
         case blockchain::Type::BitcoinSV:
-        case blockchain::Type::BitcoinSV_testnet3: {
+        case blockchain::Type::BitcoinSV_testnet3:
+        case blockchain::Type::eCash:
+        case blockchain::Type::eCash_testnet3: {
             flags_ |= Fork_ID;
-        } break;
+            break;
+        }
         case opentxs::blockchain::Type::Unknown:
         case opentxs::blockchain::Type::Bitcoin:
         case opentxs::blockchain::Type::Bitcoin_testnet3:

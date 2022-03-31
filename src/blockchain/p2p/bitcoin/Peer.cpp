@@ -352,7 +352,9 @@ auto Peer::get_local_services(
         case blockchain::Type::BitcoinCash:
         case blockchain::Type::BitcoinCash_testnet3:
         case blockchain::Type::BitcoinSV:
-        case blockchain::Type::BitcoinSV_testnet3: {
+        case blockchain::Type::BitcoinSV_testnet3:
+        case blockchain::Type::eCash:
+        case blockchain::Type::eCash_testnet3: {
             output.emplace(p2p::Service::BitcoinCash);
         } break;
         case blockchain::Type::Unknown:

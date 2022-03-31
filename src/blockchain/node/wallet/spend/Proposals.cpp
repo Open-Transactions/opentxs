@@ -395,6 +395,8 @@ private:
             case Type::PKT_testnet:
             case Type::BitcoinSV:
             case Type::BitcoinSV_testnet3:
+            case Type::eCash:
+            case Type::eCash_testnet3:
             case Type::UnitTest: {
 
                 return [this](const auto& id, auto& in, auto& out) -> auto
