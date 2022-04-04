@@ -167,7 +167,18 @@ TEST_F(Regtest_fixture_hd, generate)
     EXPECT_TRUE(Mine(start, count, hd_generator_));
     EXPECT_TRUE(listener_.wait(future1));
     EXPECT_TRUE(listener_.wait(future2));
+
+
+    const auto& network =
+        client_1_.Network().Blockchain().GetChain(test_chain_);
+    const auto& wallet = network.Wallet();
+    const auto & balance = wallet.GetBalance();
+    (void)balance;
     EXPECT_TRUE(txos_.Mature(end));
+    const auto & balance2= wallet.GetBalance();
+    (void)balance2;
+    auto x = 10;
+    (void)x;
 }
 
 TEST_F(Regtest_fixture_hd, first_block)
@@ -196,6 +207,13 @@ TEST_F(Regtest_fixture_hd, first_block)
     EXPECT_EQ(tx.BlockPosition(), 0);
     EXPECT_EQ(tx.Outputs().size(), 100);
     EXPECT_TRUE(tx.IsGeneration());
+    const auto& network =
+        client_1_.Network().Blockchain().GetChain(test_chain_);
+    const auto& wallet = network.Wallet();
+    const auto & balance2= wallet.GetBalance();
+    (void)balance2;
+    EXPECT_TRUE(tx.IsGeneration());
+
 }
 
 TEST_F(Regtest_fixture_hd, account_activity_immature)
@@ -241,6 +259,13 @@ TEST_F(Regtest_fixture_hd, account_activity_immature)
     EXPECT_TRUE(check_account_activity(alice_, id, expected));
     EXPECT_TRUE(check_account_activity_qt(alice_, id, expected));
     EXPECT_TRUE(check_account_activity_rpc(alice_, id, expected));
+    const auto& network =
+        client_1_.Network().Blockchain().GetChain(test_chain_);
+    const auto& wallet = network.Wallet();
+    const auto & balance2= wallet.GetBalance();
+    (void)balance2;
+    EXPECT_TRUE(check_account_activity_rpc(alice_, id, expected));
+
 }
 
 TEST_F(Regtest_fixture_hd, account_list_immature)
@@ -860,6 +885,11 @@ TEST_F(Regtest_fixture_hd, txodb_confirmed_spend) { EXPECT_TRUE(CheckTXODB()); }
 
 TEST_F(Regtest_fixture_hd, shutdown)
 {
+    const auto& network =
+        client_1_.Network().Blockchain().GetChain(test_chain_);
+    const auto& wallet = network.Wallet();
+    const auto & balance2= wallet.GetBalance();
+    (void)balance2;
     EXPECT_EQ(account_list_.expected_, account_list_.updated_);
     EXPECT_EQ(account_activity_.expected_, account_activity_.updated_);
 

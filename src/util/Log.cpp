@@ -218,7 +218,10 @@ auto Log::Imp::send(const bool terminate) const noexcept -> void
         future.wait_for(10s);
     }
 
-    if (terminate) { abort(); }
+    if (terminate) {
+        abort();
+    }
+
 }
 
 auto Log::Imp::Trace(

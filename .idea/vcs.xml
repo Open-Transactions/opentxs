@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="VcsDirectoryMappings">
+    <mapping directory="$PROJECT_DIR$" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/cmake" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/deps/ChaiScript" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/deps/SHA1" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/deps/bech32" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/deps/cs_libguarded" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/deps/lucre" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/deps/packetcrypt/packetcrypt_rs" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/deps/robin-hood" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/deps/secp256k1" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/deps/simpleini" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/deps/smhasher" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/deps/vcpkg" vcs="Git" />
+  </component>
+</project>

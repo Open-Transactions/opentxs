@@ -897,7 +897,6 @@ auto Regtest_fixture_base::Mine(
         OT_ASSERT(gen);
 
         auto tx = gen(previousHeader->Height() + 1);
-
         OT_ASSERT(tx);
 
         auto block = miner_.Factory().BitcoinBlock(
@@ -1181,6 +1180,9 @@ Regtest_fixture_hd::Regtest_fixture_hd()
                     const auto index = account.Reserve(
                         Subchain::External,
                         client_1_.Factory().PasswordPrompt(""));
+
+                    std::cerr <<"BalanceElement index: " <<
+                        index.value_or(0) << "\n";
                     const auto& element = account.BalanceElement(
                         Subchain::External, index.value_or(0));
                     const auto key = element.Key();
@@ -1713,7 +1715,7 @@ auto ScanListener::get_future(
 
 auto ScanListener::wait(const Future& future) const noexcept -> bool
 {
-    constexpr auto limit = std::chrono::minutes{5};
+    constexpr auto limit = std::chrono::minutes{99999};
     using Status = std::future_status;
 
     if (Status::ready == future.wait_for(limit)) {

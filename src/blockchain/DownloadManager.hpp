@@ -336,7 +336,7 @@ private:
         const auto& data = batch.data_;
 
         OT_ASSERT(0 < data.size());
-
+        std::cerr << "finish_downloading: " <<  data.size() <<"\n";
         const auto& first = data.front();
         auto index = std::size_t{0};
         auto b =
