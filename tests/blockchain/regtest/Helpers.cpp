@@ -295,7 +295,7 @@ BlockListener::BlockListener(const ot::api::Session& api) noexcept
 {
 }
 
-auto BlockListener::GetFuture(const Height height) noexcept
+auto BlockListener::GetFuture(const Height height) noexcept -> Future
 {
     auto lock = ot::Lock{imp_->lock_};
     imp_->target_ = height;

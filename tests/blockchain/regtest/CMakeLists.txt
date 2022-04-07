@@ -3,7 +3,7 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-target_sources(opentxs-test-helpers PRIVATE "Helpers.hpp" "Helpers.cpp")
+target_sources(opentxs-test-helpers PRIVATE "Helpers.hpp" "Helpers.cpp" "Regtest_fixture_simple.hpp" "Regtest_fixture_simple.cpp")
 
 add_opentx_test(
   unittests-opentxs-blockchain-regtest-block-propagation
@@ -39,4 +39,8 @@ set_tests_properties(
 
 set_tests_properties(
   unittests-opentxs-blockchain-regtest-payment-code PROPERTIES DISABLED TRUE
+)
+
+add_opentx_test(
+        unittests-opentxs-blockchain-regtest-sync-client Test_sync_client.cpp
 )
