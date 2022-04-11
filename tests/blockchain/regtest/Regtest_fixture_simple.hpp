@@ -11,18 +11,29 @@
 namespace ottest
 {
 
+struct RegtestListener {
+    RegtestListener(const ot::api::session::Client& client);
+
+    std::unique_ptr<BlockListener> block_listener;
+    std::unique_ptr<WalletListener> wallet_listener;
+    std::unique_ptr<ScanListener> scan_listener;
+};
+
 class Regtest_fixture_simple : virtual public Regtest_fixture_single
 {
     //const ot::api::Context& ot_;
+
 protected:
     Regtest_fixture_simple();
 
-    using UserIndex = ot::UnallocatedMap<ot::UnallocatedCString , User>;
+    using UserIndex = ot::UnallocatedMap<ot::UnallocatedCString, User>;
+    using UserListeners = ot::UnallocatedMap<ot::UnallocatedCString, RegtestListener>;
 
     UserIndex users_;
+    UserListeners user_listeners_;
     bool wait_for_handshake_ = true;
     static constexpr auto wait_time_limit_ = std::chrono::minutes(5);
-    const unsigned amount_in_transaction_ = 10000000;
+    const unsigned amount_in_transaction_ = 1000;
     const unsigned transaction_in_block_ = 100;
 
     auto CreateNym(
@@ -58,6 +69,10 @@ protected:
         const Generator& gen,
         const ot::UnallocatedVector<Transaction>& extra) noexcept
         -> std::unique_ptr<opentxs::blockchain::block::bitcoin::Header>;
+
+    auto MineBlocks(
+        const Height ancestor,
+        const std::size_t count) noexcept -> bool;
 
     auto TransactionGenerator(
         const User& user,

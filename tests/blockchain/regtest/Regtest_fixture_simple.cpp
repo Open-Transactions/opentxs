@@ -21,6 +21,13 @@
 namespace ottest
 {
 
+RegtestListener::RegtestListener(const ot::api::session::Client& client)
+{
+    block_listener = std::make_unique<BlockListener>(client);
+    wallet_listener = std::make_unique<WalletListener>(client);
+    scan_listener = std::make_unique<ScanListener>(client);
+}
+
 Regtest_fixture_simple::Regtest_fixture_simple()
     : Regtest_fixture_single(ot::Options{}.SetBlockchainStorageLevel(1))
 {
@@ -123,6 +130,43 @@ auto Regtest_fixture_simple::TransactionGenerator(
     return output_transaction;
 }
 
+
+auto Regtest_fixture_simple::MineBlocks(
+    const Height ancestor,
+    const std::size_t count) noexcept -> bool
+{
+    auto target = ancestor + static_cast<int>(count);
+    auto blocks = ot::UnallocatedVector<BlockListener::Future>{};
+    auto wallets = ot::UnallocatedVector<WalletListener::Future>{};
+    blocks.reserve(users_.size());
+    wallets.reserve(users_.size());
+
+    for(auto& listeners : user_listeners_) {
+        blocks.emplace_back(listeners.second.block_listener->GetFuture(target));
+        wallets.emplace_back(listeners.second.wallet_listener->GetFuture(target));
+    }
+
+    auto success = Mine(ancestor, count);
+
+    for (auto& future : blocks) {
+        EXPECT_TRUE(future.wait_for(wait_time_limit_) == std::future_status::ready);
+
+//        const auto [height, hash] = future.get();
+//
+//        EXPECT_EQ(hash, mined_header);
+    }
+
+    for (auto& future : wallets) {
+        EXPECT_TRUE(future.wait_for(wait_time_limit_) == std::future_status::ready);
+
+        //        const auto height = future.get();
+        //
+        //        EXPECT_EQ(height, targetHeight);
+    }
+
+    return success;
+}
+
 auto Regtest_fixture_simple::MineBlocks(
     const User& user,
     Height ancestor,
@@ -131,8 +175,38 @@ auto Regtest_fixture_simple::MineBlocks(
     unsigned amount) noexcept
     -> std::unique_ptr<opentxs::blockchain::block::bitcoin::Header>
 {
+
+    auto target = ancestor + block_number;
+    auto blocks = ot::UnallocatedVector<BlockListener::Future>{};
+    auto wallets = ot::UnallocatedVector<WalletListener::Future>{};
+    blocks.reserve(users_.size());
+    wallets.reserve(users_.size());
+
+    for(auto& listeners : user_listeners_) {
+        blocks.emplace_back(listeners.second.block_listener->GetFuture(target));
+        wallets.emplace_back(listeners.second.wallet_listener->GetFuture(target));
+    }
+
     Generator gen = [&](Height height) -> Transaction { return TransactionGenerator(user, height, transaction_number, amount); };
-    return MineBlocks(ancestor, block_number, gen, {});
+    auto mined_header = MineBlocks(ancestor, block_number, gen, {});
+
+    for (auto& future : blocks) {
+        EXPECT_TRUE(future.wait_for(wait_time_limit_) == std::future_status::ready);
+
+        const auto [height, hash] = future.get();
+
+        EXPECT_EQ(hash, mined_header->Hash());
+    }
+
+    for (auto& future : wallets) {
+        EXPECT_TRUE(future.wait_for(wait_time_limit_) == std::future_status::ready);
+
+//        const auto height = future.get();
+//
+//        EXPECT_EQ(height, targetHeight);
+    }
+
+    return mined_header;
 }
 
 auto Regtest_fixture_simple::MineBlocks(
@@ -209,6 +283,8 @@ auto Regtest_fixture_simple::
     auto& user_no_const = const_cast<User&>(user);
     user_no_const.init_custom(client, cb);
 
+    const auto [it, listener_added] = user_listeners_.emplace(name, client);
+
     std::promise<void> promise;
     std::future<void> done = promise.get_future();
     auto cb_connected = [&](zmq::Message&& msg, std::atomic_int& counter) {
@@ -230,7 +306,7 @@ auto Regtest_fixture_simple::
     const auto status = done.wait_for(std::chrono::minutes(2));
     const auto future = (std::future_status::ready == status);
 
-    return {user, added && start && future};
+    return {user, added && start && future && listener_added};
 }
 
 auto Regtest_fixture_simple::GetBalance(const User& user) -> const Amount

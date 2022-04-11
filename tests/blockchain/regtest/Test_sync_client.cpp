@@ -39,7 +39,7 @@ TEST_F(Regtest_fixture_simple, start_stop_client)
     EXPECT_TRUE(Start());
     EXPECT_TRUE(Connect());
 
-    const size_t numbers_of_test = 4;
+    const size_t numbers_of_test = 5;
     const std::string name = "Alice";
     const std::string words = "worry myself exile unit believe climb pitch theme two truly alter daughter";
     const auto blocks_number = 2;
@@ -51,8 +51,9 @@ TEST_F(Regtest_fixture_simple, start_stop_client)
         account_activity_.expected_ += 0;
         account_list_.expected_ += 1;
 
+        auto user_name = name;
         auto [user, success] =
-            CreateClient(opentxs::Options{}, number_of_test + 3, name, words, address_);
+            CreateClient(opentxs::Options{}, number_of_test + 3, user_name, words, address_);
         EXPECT_TRUE(success);
 
         init_account_activity(
@@ -62,11 +63,13 @@ TEST_F(Regtest_fixture_simple, start_stop_client)
         targetHeight += static_cast<Height>(blocks_number);
 
         auto scan_listener = std::make_unique<ScanListener>(*user.api_);
-        auto block_listener = std::make_unique<BlockListener>(*user.api_);
-        auto wallet_listener = std::make_unique<WalletListener>(*user.api_);
 
-        auto block_listener_f = block_listener->GetFuture(targetHeight);
-        auto wallet_listener_f = wallet_listener->GetFuture(targetHeight);
+        ot::Sleep(std::chrono::seconds(1));
+
+        auto scan_listener_external_f = scan_listener->get_future(
+            GetHDAccount(user), bca::Subchain::External, targetHeight);
+        auto scan_listener_internal_f = scan_listener->get_future(
+            GetHDAccount(user), bca::Subchain::Internal, targetHeight);
 
         // mine coin for Alice
         auto mined_header = MineBlocks(
@@ -76,32 +79,34 @@ TEST_F(Regtest_fixture_simple, start_stop_client)
             transaction_in_block_,
             amount_in_transaction_);
 
-        EXPECT_TRUE(
-            block_listener_f.wait_for(wait_time_limit_) == std::future_status::ready);
-        const auto [height, hash] = block_listener_f.get();
-        EXPECT_EQ(hash, mined_header->Hash());
-
-        begin += blocks_number;
-        targetHeight += static_cast<int>(MaturationInterval());
-
-        auto scan_listener_external_f = scan_listener->get_future(
-            GetHDAccount(user), bca::Subchain::External, targetHeight);
-        auto scan_listener_internal_f = scan_listener->get_future(
-            GetHDAccount(user), bca::Subchain::Internal, targetHeight);
-        block_listener_f = block_listener->GetFuture(targetHeight);
-        wallet_listener_f = wallet_listener->GetFuture(targetHeight);
-
-        // mine MaturationInterval number block with
-        Mine(begin, static_cast<int>(MaturationInterval()));
-        begin += MaturationInterval();
-
-        EXPECT_TRUE(
-            block_listener_f.wait_for(wait_time_limit_) == std::future_status::ready);
         EXPECT_TRUE(scan_listener->wait(scan_listener_external_f));
         EXPECT_TRUE(scan_listener->wait(scan_listener_internal_f));
-        EXPECT_EQ(GetBalance(user), amount_in_transaction_ * (blocks_number * (number_of_test + 1)) * transaction_in_block_);
 
-        users_.erase(name);
+        begin += blocks_number;
+        auto count = static_cast<int>(MaturationInterval());
+        targetHeight += count;
+
+        scan_listener_external_f = scan_listener->get_future(
+            GetHDAccount(user), bca::Subchain::External, targetHeight);
+        scan_listener_internal_f = scan_listener->get_future(
+            GetHDAccount(user), bca::Subchain::Internal, targetHeight);
+
+        // mine MaturationInterval number block with
+        MineBlocks(begin, count);
+        begin += count;
+
+        EXPECT_TRUE(scan_listener->wait(scan_listener_external_f));
+        EXPECT_TRUE(scan_listener->wait(scan_listener_internal_f));
+
+        EXPECT_EQ(
+            GetBalance(user),
+            amount_in_transaction_ *
+                (blocks_number * (number_of_test + 1)) *
+                transaction_in_block_);
+
+        users_.erase(user_name);
+        user.api_->Network().Blockchain().Stop(test_chain_);
+        user_listeners_.erase(user_name);
     }
 
     Shutdown();
@@ -145,16 +150,16 @@ TEST_F(Regtest_fixture_simple, send_to_client)
     init_account_list(user_bob, account_list2_);
 
     auto scan_listener_alice = std::make_unique<ScanListener>(*user_alice.api_);
-    auto block_listener_alice = std::make_unique<BlockListener>(*user_alice.api_);
-    auto wallet_listener_alice = std::make_unique<WalletListener>(*user_alice.api_);
+//    auto block_listener_alice = std::make_unique<BlockListener>(*user_alice.api_);
+//    auto wallet_listener_alice = std::make_unique<WalletListener>(*user_alice.api_);
 
     auto scan_listener_bob = std::make_unique<ScanListener>(*user_bob.api_);
-    auto block_listener_bob = std::make_unique<BlockListener>(*user_bob.api_);
-    auto wallet_listener_bob = std::make_unique<WalletListener>(*user_bob.api_);
+//    auto block_listener_bob = std::make_unique<BlockListener>(*user_bob.api_);
+//    auto wallet_listener_bob = std::make_unique<WalletListener>(*user_bob.api_);
 
     targetHeight += blocks_number;
-    auto block_listener_alice_f = block_listener_alice->GetFuture(targetHeight);
-    auto block_listener_bob_f = block_listener_bob->GetFuture(targetHeight);
+//    auto block_listener_alice_f = block_listener_alice->GetFuture(targetHeight);
+//    auto block_listener_bob_f = block_listener_bob->GetFuture(targetHeight);
 
     std::cout << "Mine for alice\n";
     // mine coin for Alice
@@ -165,15 +170,15 @@ TEST_F(Regtest_fixture_simple, send_to_client)
         transaction_in_block_,
         amount_in_transaction_);
 
-    EXPECT_TRUE(
-        block_listener_alice_f.wait_for(wait_time_limit_) == std::future_status::ready);
-    EXPECT_TRUE(
-        block_listener_bob_f.wait_for(wait_time_limit_) == std::future_status::ready);
+//    EXPECT_TRUE(
+//        block_listener_alice_f.wait_for(wait_time_limit_) == std::future_status::ready);
+//    EXPECT_TRUE(
+//        block_listener_bob_f.wait_for(wait_time_limit_) == std::future_status::ready);
 
     begin += blocks_number;
     targetHeight += blocks_number;
-    block_listener_alice_f = block_listener_alice->GetFuture(targetHeight);
-    block_listener_bob_f = block_listener_bob->GetFuture(targetHeight);
+//    block_listener_alice_f = block_listener_alice->GetFuture(targetHeight);
+//    block_listener_bob_f = block_listener_bob->GetFuture(targetHeight);
 
     std::cout << "Mine for bob\n";
     // mine coin for Bob
@@ -184,10 +189,10 @@ TEST_F(Regtest_fixture_simple, send_to_client)
         transaction_in_block_,
         amount_in_transaction_);
 
-    EXPECT_TRUE(
-        block_listener_alice_f.wait_for(wait_time_limit_) == std::future_status::ready);
-    EXPECT_TRUE(
-        block_listener_bob_f.wait_for(wait_time_limit_) == std::future_status::ready);
+//    EXPECT_TRUE(
+//        block_listener_alice_f.wait_for(wait_time_limit_) == std::future_status::ready);
+//    EXPECT_TRUE(
+//        block_listener_bob_f.wait_for(wait_time_limit_) == std::future_status::ready);
 
     begin += blocks_number;
     targetHeight += static_cast<int>(MaturationInterval()) + 1;
@@ -201,19 +206,19 @@ TEST_F(Regtest_fixture_simple, send_to_client)
     auto scan_listener_internal_bob_f = scan_listener_bob->get_future(
         GetHDAccount(user_bob), bca::Subchain::Internal, targetHeight);
 
-    block_listener_alice_f = block_listener_alice->GetFuture(targetHeight);
-    block_listener_bob_f = block_listener_bob->GetFuture(targetHeight);
+//    block_listener_alice_f = block_listener_alice->GetFuture(targetHeight);
+//    block_listener_bob_f = block_listener_bob->GetFuture(targetHeight);
     //    auto wallet_listener_f = wallet_listener->GetFuture(targetHeight);
 
     std::cout << "Mine targetHeight: " << targetHeight << std::endl;
     // mine MaturationInterval number block with
-    Mine(begin, static_cast<int>(MaturationInterval()) + 1);
+    MineBlocks(begin, static_cast<int>(MaturationInterval()) + 1);
     begin += MaturationInterval() + 1;
 
-    EXPECT_TRUE(
-        block_listener_alice_f.wait_for(wait_time_limit_) == std::future_status::ready);
-    EXPECT_TRUE(
-        block_listener_bob_f.wait_for(wait_time_limit_) == std::future_status::ready);
+//    EXPECT_TRUE(
+//        block_listener_alice_f.wait_for(wait_time_limit_) == std::future_status::ready);
+//    EXPECT_TRUE(
+//        block_listener_bob_f.wait_for(wait_time_limit_) == std::future_status::ready);
 
     EXPECT_TRUE(scan_listener_alice->wait(scan_listener_external_alice_f));
     EXPECT_TRUE(scan_listener_alice->wait(scan_listener_internal_alice_f));
