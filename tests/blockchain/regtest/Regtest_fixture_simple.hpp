@@ -16,7 +16,6 @@ struct RegtestListener {
 
     std::unique_ptr<BlockListener> block_listener;
     std::unique_ptr<WalletListener> wallet_listener;
-    std::unique_ptr<ScanListener> scan_listener;
 };
 
 class Regtest_fixture_simple : virtual public Regtest_fixture_single
@@ -33,7 +32,7 @@ protected:
     UserListeners user_listeners_;
     bool wait_for_handshake_ = true;
     static constexpr auto wait_time_limit_ = std::chrono::minutes(5);
-    const unsigned amount_in_transaction_ = 1000;
+    const unsigned amount_in_transaction_ = 100000;
     const unsigned transaction_in_block_ = 100;
 
     auto CreateNym(

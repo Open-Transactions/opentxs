@@ -25,7 +25,6 @@ RegtestListener::RegtestListener(const ot::api::session::Client& client)
 {
     block_listener = std::make_unique<BlockListener>(client);
     wallet_listener = std::make_unique<WalletListener>(client);
-    scan_listener = std::make_unique<ScanListener>(client);
 }
 
 Regtest_fixture_simple::Regtest_fixture_simple()
