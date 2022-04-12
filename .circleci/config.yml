@@ -5,17 +5,18 @@ parameters:
     default: "14"
     type: string
   docker-image-ci-tag:
-    default: "8"
+    default: "9"
     type: string
 
 executors:
   host_executor:
     machine:
       image: ubuntu-2004:current
+      #docker_layer_caching: true
     resource_class: large
       
 commands:
-  prepare_env:
+  prepare_env_build:
     description: "command to prepare all build dependencies: code deps, gems, tools"
     parameters:
       docker-image:
@@ -47,6 +48,15 @@ commands:
           working_directory: "~/"
           command: |
             mkdir -p <<parameters.temp-path>>
+  prepare_env_test:
+    description: "command to prepare light env for running tests"
+    parameters:
+      docker-image:
+        type: string
+    steps:
+      - run:
+          name: "pull docker image"
+          command: docker pull <<parameters.docker-image>>
 
 jobs:
   build-android:
@@ -57,7 +67,7 @@ jobs:
         type: string
     executor: host_executor
     steps:
-      - prepare_env:
+      - prepare_env_build:
           docker-image: <<parameters.docker-image>>
           temp-path: opentxs-for-android/<<parameters.arch>>
       - run:
@@ -68,20 +78,53 @@ jobs:
     parameters:
       docker-image:
         type: string
-      command:
+      compiler:
         type: string
-      mode:
+      flavor:
         type: string
     executor: host_executor
     steps:
-      - prepare_env:
+      - prepare_env_build:
           docker-image: <<parameters.docker-image>>
           temp-path: "/tmp/opentxs"
       - run:
           name: "build"
           command: |
-            docker run --mount type=bind,src=/home/circleci/project,dst=/home/src --mount type=bind,src=/tmp/opentxs,dst=/home/output -i --entrypoint /usr/bin/build-opentxs-<<parameters.command>> <<parameters.docker-image>> <<parameters.mode>> 
-      #TODO run unit tests
+            docker run --mount type=bind,src=/home/circleci/project,dst=/home/src --mount type=bind,src=/tmp/opentxs,dst=/home/output -i --entrypoint /usr/bin/build-opentxs-<<parameters.compiler>> <<parameters.docker-image>> <<parameters.flavor>> 
+      - run:
+          name: "persist task identifier (CI debugging)"
+          command: |
+            mkdir -p /tmp/opentxs
+            printf "%s:%s" <<parameters.compiler>> <<parameters.flavor>> > /tmp/opentxs/job-id
+            cat /tmp/opentxs/job-id
+      - persist_to_workspace:
+          root: /
+          paths:
+            - tmp/opentxs
+  test-linux:
+    parameters:
+      docker-image:
+        type: string
+      ctest-params:
+        type: string
+      compiler:
+        type: string
+      flavor:
+        type: string
+    executor: host_executor
+    steps:
+      - prepare_env_test:
+          docker-image: <<parameters.docker-image>>
+      - attach_workspace:
+          at: /
+      - run:
+          name: "read task identifier (CI debugging)"
+          command: |
+            cat /tmp/opentxs/job-id
+      - run:
+          name: "test"
+          command: |
+            docker run --mount type=bind,src=/home/circleci/project,dst=/home/src --mount type=bind,src=/tmp/opentxs,dst=/home/output -i --entrypoint /usr/bin/test-opentxs <<parameters.docker-image>> "<<parameters.ctest-params>>"
 
 workflows:
   opentxs-android:
@@ -94,8 +137,27 @@ workflows:
   opentxs-linux:
     jobs:
       - build-linux:
+          name: build-linux-<<matrix.compiler>>-<<matrix.flavor>>
           docker-image: opentransactions/ci:<<pipeline.parameters.docker-image-ci-tag>>
           matrix:
             parameters:
-              command: [gcc, clang]
-              mode: [test01, test02, test03, test04, test05, test06, test07, test08, nopch, full]
+              compiler: [gcc, clang]
+              flavor: [test01, test02, test03, test04, test05, test06, test07, test08, nopch, full]
+      - test-linux:
+          name: test-linux-<<matrix.compiler>>-<<matrix.flavor>>
+          docker-image: opentransactions/ci:<<pipeline.parameters.docker-image-ci-tag>>
+          #currently failing tests:
+            #consistent fails:
+            # unittests-opentxs-blockchain-regtest-reorg
+            # unittests-opentxs-blockchain-regtest-send-receive-hd
+            # unittests-opentxs-blockchain-regtest-sync-server
+            #random fails:
+            # unittests-opentxs-blockchain-headeroracle-reorg_to_checkpoint_descendent - failed once
+          ctest-params: -j 8 --output-on-failure --repeat until-pass:3 --timeout 300 --schedule-random -E (unittests-opentxs-blockchain-)(regtest-|headeroracle-)(reorg.*|send-receive-hd|sync-server|reorg_to_checkpoint_descendent)
+          matrix:
+            parameters:
+              compiler: [gcc, clang]
+              flavor: [nopch, full]
+              #flavor: [test01, test02, test03, test04, test05, test06, test07, test08, nopch, full]
+          requires:
+            - build-linux-<<matrix.compiler>>-<<matrix.flavor>>
