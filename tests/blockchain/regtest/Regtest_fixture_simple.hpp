@@ -80,7 +80,12 @@ protected:
         unsigned amount)
         -> Transaction;
 
+    auto WaitForSynchro(const User& user, const Height target, const Amount expected_balance) -> void;
+
     auto GetBalance(const User& user) -> const Amount;
+    auto GetDisplayBalance(const User& user) -> const ot::UnallocatedCString;
+    auto GetSyncProgress(const User& user) -> const std::pair<int, int>;
+    auto GetSyncPercentage(const User& user) -> double;
 
     auto GetNextBlockchainAddress(const User& user) -> const ot::UnallocatedCString;
 

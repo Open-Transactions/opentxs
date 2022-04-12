@@ -316,6 +316,30 @@ auto Regtest_fixture_simple::GetBalance(const User& user) -> const Amount
     return widget.Balance();
 }
 
+auto Regtest_fixture_simple::GetDisplayBalance(const User& user) -> const ot::UnallocatedCString
+{
+    auto& account = GetHDAccount(user);
+    auto& id = account.Parent().AccountID();
+    const auto& widget = user.api_->UI().AccountActivity(user.nym_id_, id);
+    return widget.DisplayBalance();
+}
+
+auto Regtest_fixture_simple::GetSyncProgress(const User& user) -> const std::pair<int, int>
+{
+    auto& account = GetHDAccount(user);
+    auto& id = account.Parent().AccountID();
+    const auto& widget = user.api_->UI().AccountActivity(user.nym_id_, id);
+    return widget.SyncProgress();
+}
+
+auto Regtest_fixture_simple::GetSyncPercentage(const User& user) -> double
+{
+    auto& account = GetHDAccount(user);
+    auto& id = account.Parent().AccountID();
+    const auto& widget = user.api_->UI().AccountActivity(user.nym_id_, id);
+    return widget.SyncPercentage();
+}
+
 auto Regtest_fixture_simple::GetHDAccount(const User& user) const noexcept -> const bca::HD&
 {
     return user.api_->Crypto()
@@ -335,6 +359,29 @@ auto Regtest_fixture_simple::GetNextBlockchainAddress(const User& user) -> const
         Subchain::External, index.value_or(0));
 
     return element.Address(opentxs::blockchain::crypto::AddressStyle::P2PKH);
+}
+
+auto Regtest_fixture_simple::WaitForSynchro(const User& user, const Height target, const Amount expected_balance) -> void
+{
+    if(expected_balance == 0) {
+        return;
+    }
+
+    auto begin = std::chrono::steady_clock::now();
+    auto now = begin;
+    auto end = begin + wait_time_limit_;
+
+    while(now < end) {
+        now = std::chrono::steady_clock::now();
+        auto progress = GetSyncProgress(user);
+        auto balance = GetBalance(user);
+        std::cout << "Waiting for synchro, balance: " << GetDisplayBalance(user) << ", sync percentage: " << GetSyncPercentage(user) << "%, sync progress [" << progress.first <<"," << progress.second << "]" << ", target height: " << target << std::endl;
+        if((progress.first == target && progress.second == target) || (balance == expected_balance)) {
+            std::cout << "Client synchronized in " << std::chrono::duration_cast<std::chrono::seconds>(now - begin).count() << " seconds" << std::endl;
+            break;
+        }
+        ot::Sleep(std::chrono::seconds(5));
+    }
 }
 
 }

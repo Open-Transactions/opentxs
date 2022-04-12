@@ -34,7 +34,7 @@
 namespace ottest
 {
 
-TEST_F(Regtest_fixture_simple, start_stop_client)
+TEST_F(Regtest_fixture_simple, start_mine_stop_client)
 {
     EXPECT_TRUE(Start());
     EXPECT_TRUE(Connect());
@@ -44,8 +44,10 @@ TEST_F(Regtest_fixture_simple, start_stop_client)
     const std::string words = "worry myself exile unit believe climb pitch theme two truly alter daughter";
     const auto blocks_number = 2;
     Height targetHeight = 0, begin = 0;
+    auto expected_balance = 0;
 
     for(size_t number_of_test =  0; number_of_test < numbers_of_test; number_of_test++) {
+        std::cout << "TEST NUMBER: " << number_of_test + 1 << std::endl;
         Counter account_list_{};
         Counter account_activity_{};
         account_activity_.expected_ += 0;
@@ -64,7 +66,7 @@ TEST_F(Regtest_fixture_simple, start_stop_client)
 
         auto scan_listener = std::make_unique<ScanListener>(*user.api_);
 
-        ot::Sleep(std::chrono::seconds(1));
+        WaitForSynchro(user, targetHeight, expected_balance);
 
         auto scan_listener_external_f = scan_listener->get_future(
             GetHDAccount(user), bca::Subchain::External, targetHeight);
@@ -98,11 +100,10 @@ TEST_F(Regtest_fixture_simple, start_stop_client)
         EXPECT_TRUE(scan_listener->wait(scan_listener_external_f));
         EXPECT_TRUE(scan_listener->wait(scan_listener_internal_f));
 
-        EXPECT_EQ(
-            GetBalance(user),
-            amount_in_transaction_ *
-                (blocks_number * (number_of_test + 1)) *
-                transaction_in_block_);
+        expected_balance += amount_in_transaction_ * blocks_number * transaction_in_block_;
+        WaitForSynchro(user, targetHeight, expected_balance);
+
+        EXPECT_EQ(GetBalance(user), expected_balance);
 
         users_.erase(user_name);
         user.api_->Network().Blockchain().Stop(test_chain_);
