@@ -459,5 +459,45 @@ const boost::container::flat_map<ot::blockchain::Type, ChainVector>
                 "155e1700eff3f9019ba1716316295a8753ec44d2a7730eee1c1c73e2b511e1"
                 "34"}},
           }}},
+        {ot::blockchain::Type::BitcoinSV,
+         {"01000000000000000000000000000000000000000000000000000000000000000000"
+          "00003ba3edfd7a7b12b27ac72c3e67768f617fc81bc3888a51323a9fb8aa4b1e5e4a"
+          "29ab5f49ffff001d1dac2b7c01010000000100000000000000000000000000000000"
+          "00000000000000000000000000000000ffffffff4d04ffff001d0104455468652054"
+          "696d65732030332f4a616e2f32303039204368616e63656c6c6f72206f6e20627269"
+          "6e6b206f66207365636f6e64206261696c6f757420666f722062616e6b73ffffffff"
+          "0100f2052a01000000434104678afdb0fe5548271967f1a67130b7105cd6a828e039"
+          "09a67962e0ea1f61deb649f6bc3f4cef38c4f35504e51ec112de5c384df7ba0b8d57"
+          "8a4c702b6bf11d5fac00000000",
+          {
+              {ot::blockchain::cfilter::Type::Basic_BCHVariant,
+               {"017fa880",
+                "9f3c30f0c37fb977cf3e1a3173c631e8ff119ad3088b6f5b2bced0802139c2"
+                "02"}},
+              {ot::blockchain::cfilter::Type::ES,
+               {"049dc75e903561289b0029337bcf4e6720",
+                "fad52acc389a391c1d6d94e8984fe77323fbda24fb31299b88635d7bee0278"
+                "e8"}},
+          }}},
+        {ot::blockchain::Type::BitcoinSV_testnet3,
+         {"01000000000000000000000000000000000000000000000000000000000000000000"
+          "00003ba3edfd7a7b12b27ac72c3e67768f617fc81bc3888a51323a9fb8aa4b1e5e4a"
+          "dae5494dffff001d1aa4ae1801010000000100000000000000000000000000000000"
+          "00000000000000000000000000000000ffffffff4d04ffff001d0104455468652054"
+          "696d65732030332f4a616e2f32303039204368616e63656c6c6f72206f6e20627269"
+          "6e6b206f66207365636f6e64206261696c6f757420666f722062616e6b73ffffffff"
+          "0100f2052a01000000434104678afdb0fe5548271967f1a67130b7105cd6a828e039"
+          "09a67962e0ea1f61deb649f6bc3f4cef38c4f35504e51ec112de5c384df7ba0b8d57"
+          "8a4c702b6bf11d5fac00000000",
+          {
+              {ot::blockchain::cfilter::Type::Basic_BCHVariant,
+               {"019dfca8",
+                "50b781aed7b7129012a6d20e2d040027937f3affaee573779908ebb7794558"
+                "21"}},
+              {ot::blockchain::cfilter::Type::ES,
+               {"04e2f5880d851afd74c662d38d49e29130",
+                "995cfe5d055c9158c5a388b71fb2ddbe292c9ca2d30dca91359d8cbbe4603e"
+                "02"}},
+          }}},
     };
 }  // namespace ottest

@@ -11,6 +11,7 @@
 #include <robin_hood.h>
 #include <atomic>
 #include <cstddef>
+#include <memory>
 #include <queue>
 
 #include "blockchain/node/wallet/subchain/statemachine/Job.hpp"
@@ -20,6 +21,7 @@
 #include "opentxs/blockchain/block/Position.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/blockchain/node/BlockOracle.hpp"
+#include "opentxs/blockchain/node/Types.hpp"
 #include "opentxs/util/Allocated.hpp"
 #include "opentxs/util/Container.hpp"
 #include "util/Actor.hpp"
@@ -34,6 +36,11 @@ namespace blockchain
 {
 namespace block
 {
+namespace bitcoin
+{
+class Block;
+}  // namespace bitcoin
+
 class Hash;
 }  // namespace block
 
@@ -80,9 +87,10 @@ public:
 
 private:
     using Waiting = Deque<block::Position>;
-    using Downloading = Map<block::Position, BlockOracle::BitcoinBlockFuture>;
+    using Downloading = Map<block::Position, BitcoinBlockResult>;
     using DownloadIndex = Map<block::Hash, Downloading::iterator>;
-    using Ready = Map<block::Position, BlockOracle::BitcoinBlock_p>;
+    using Ready =
+        Map<block::Position, std::shared_ptr<const block::bitcoin::Block>>;
 
     const std::size_t download_limit_;
     network::zeromq::socket::Raw& to_index_;
@@ -95,17 +103,25 @@ private:
     JobCounter counter_;
     Outstanding running_;
 
+    auto active() const noexcept -> std::size_t;
+
     auto check_cache() noexcept -> void;
     auto do_process(
         const block::Position position,
-        const BlockOracle::BitcoinBlock_p block) noexcept -> void;
+        const std::shared_ptr<const block::bitcoin::Block> block) noexcept
+        -> void;
     auto do_startup() noexcept -> void final;
+    auto download(block::Position&& position) noexcept -> void;
+    auto download(
+        block::Position&& position,
+        BitcoinBlockResult&& future) noexcept -> void;
     auto process_block(block::Hash&& block) noexcept -> void final;
     auto process_mempool(Message&& in) noexcept -> void final;
     auto process_process(block::Position&& position) noexcept -> void final;
+    auto process_reprocess(Message&& msg) noexcept -> void final;
     auto process_update(Message&& msg) noexcept -> void final;
     auto queue_downloads() noexcept -> void;
-    auto queue_process() noexcept -> void;
+    auto queue_process() noexcept -> bool;
     auto work() noexcept -> bool final;
 };
 }  // namespace opentxs::blockchain::node::wallet

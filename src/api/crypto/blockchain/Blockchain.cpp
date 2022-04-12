@@ -58,7 +58,7 @@ namespace opentxs::api::crypto
 {
 auto Blockchain::Bip44(Chain chain) noexcept(false) -> Bip44Type
 {
-    return opentxs::blockchain::params::Data::Chains().at(chain).bip44_;
+    return opentxs::blockchain::params::Chains().at(chain).bip44_;
 }
 
 auto Blockchain::Bip44Path(

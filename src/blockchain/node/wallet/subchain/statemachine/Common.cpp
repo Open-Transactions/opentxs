@@ -76,22 +76,26 @@ auto encode(
     const Vector<ScanStatus>& in,
     network::zeromq::Message& out) noexcept -> void
 {
+    for (const auto& status : in) { encode(status, out); }
+}
+
+auto encode(const ScanStatus& in, network::zeromq::Message& out) noexcept
+    -> void
+{
     static constexpr auto fixed = sizeof(ScanState) + sizeof(block::Height);
+    const auto& [status, position] = in;
+    const auto& [height, hash] = position;
+    const auto size = fixed + hash.size();  // TODO constexpr
+    auto bytes = out.AppendBytes()(size);
 
-    for (const auto& [status, position] : in) {
-        const auto& [height, hash] = position;
-        const auto size = fixed + hash.size();  // TODO constexpr
-        auto bytes = out.AppendBytes()(size);
+    OT_ASSERT(bytes.valid(size));
 
-        OT_ASSERT(bytes.valid(size));
-
-        auto* i = bytes.as<std::byte>();
-        std::memcpy(i, &status, sizeof(status));
-        std::advance(i, sizeof(status));
-        std::memcpy(i, &height, sizeof(height));
-        std::advance(i, sizeof(height));
-        std::memcpy(i, hash.data(), hash.size());
-    }
+    auto* i = bytes.as<std::byte>();
+    std::memcpy(i, &status, sizeof(status));
+    std::advance(i, sizeof(status));
+    std::memcpy(i, &height, sizeof(height));
+    std::advance(i, sizeof(height));
+    std::memcpy(i, hash.data(), hash.size());
 }
 
 auto extract_dirty(

@@ -161,10 +161,10 @@
         MessageType::notarizeTransaction));                                    \
     auto& managedNumber = *numbers_.rbegin();                                  \
     LogVerbose()(OT_PRETTY_CLASS())("Allocating transaction number ")(         \
-        managedNumber->Value())                                                \
+        managedNumber.Value())                                                 \
         .Flush();                                                              \
                                                                                \
-    if (false == managedNumber->Valid()) {                                     \
+    if (false == managedNumber.Valid()) {                                      \
         LogError()(OT_PRETTY_CLASS())(                                         \
             "No transaction numbers were available. Suggest requesting the "   \
             "server for one.")                                                 \
@@ -174,9 +174,9 @@
     }                                                                          \
                                                                                \
     LogVerbose()(OT_PRETTY_CLASS())("Allocated transaction number ")(          \
-        managedNumber->Value())                                                \
+        managedNumber.Value())                                                 \
         .Flush();                                                              \
-    const auto transactionNum = managedNumber->Value();                        \
+    const auto transactionNum = managedNumber.Value();                         \
     auto pLedger{api_.Factory().InternalSession().Ledger(                      \
         nymID, account_id_, serverID)};                                        \
                                                                                \

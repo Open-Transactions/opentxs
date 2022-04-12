@@ -29,20 +29,14 @@ class GCS;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::blockchain::internal
-{
-class GCS
-{
-public:
-    virtual auto Serialize(proto::GCS& out) const noexcept -> bool = 0;
-
-    virtual ~GCS() = default;
-};
-}  // namespace opentxs::blockchain::internal
-
 namespace opentxs::gcs
 {
-using Elements = Vector<std::uint64_t>;
+using Delta = std::uint64_t;
+using Element = std::uint64_t;
+using Elements = Vector<Element>;
+using Hash = std::uint64_t;
+using Hashes = Vector<Hash>;
+using Range = std::uint64_t;
 
 auto GolombDecode(
     const std::uint32_t N,
@@ -56,8 +50,9 @@ auto GolombEncode(
 auto HashToRange(
     const api::Session& api,
     const ReadView key,
-    const std::uint64_t range,
-    const ReadView item) noexcept(false) -> std::uint64_t;
+    const Range range,
+    const ReadView item) noexcept(false) -> Element;
+auto HashToRange(const Range range, const Hash hash) noexcept(false) -> Element;
 auto HashedSetConstruct(
     const api::Session& api,
     const ReadView key,
@@ -65,4 +60,25 @@ auto HashedSetConstruct(
     const std::uint32_t M,
     const blockchain::GCS::Targets& items,
     alloc::Default alloc) noexcept(false) -> Elements;
+auto Siphash(
+    const api::Session& api,
+    const ReadView key,
+    const ReadView item) noexcept(false) -> Hash;
 }  // namespace opentxs::gcs
+
+namespace opentxs::blockchain::internal
+{
+class GCS
+{
+public:
+    using PrehashedMatches = Vector<gcs::Hashes::const_iterator>;
+
+    virtual auto Match(const gcs::Hashes& prehashed) const noexcept
+        -> PrehashedMatches = 0;
+    virtual auto Range() const noexcept -> gcs::Range = 0;
+    virtual auto Serialize(proto::GCS& out) const noexcept -> bool = 0;
+    virtual auto Test(const gcs::Hashes& targets) const noexcept -> bool = 0;
+
+    virtual ~GCS() = default;
+};
+}  // namespace opentxs::blockchain::internal

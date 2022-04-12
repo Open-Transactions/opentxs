@@ -8,48 +8,36 @@
 #include "opentxs/Version.hpp"  // IWYU pragma: associated
 
 #include "opentxs/util/Numbers.hpp"
-#include "opentxs/util/Pimpl.hpp"
-
-// NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs  // NOLINT
-{
-// inline namespace v1
-// {
-namespace otx
-{
-namespace context
-{
-class ManagedNumber;
-}  // namespace context
-}  // namespace otx
-
-using OTManagedNumber = Pimpl<otx::context::ManagedNumber>;
-
-OPENTXS_EXPORT auto operator<(
-    const OTManagedNumber& lhs,
-    const OTManagedNumber& rhs) -> bool;
-// }  // namespace v1
-}  // namespace opentxs
-// NOLINTEND(modernize-concat-nested-namespaces)
 
 namespace opentxs::otx::context
 {
+class ManagedNumber;
+
+OPENTXS_EXPORT auto operator<(
+    const ManagedNumber& lhs,
+    const ManagedNumber& rhs) noexcept -> bool;
+
 class OPENTXS_EXPORT ManagedNumber
 {
 public:
-    virtual void SetSuccess(const bool value = true) const = 0;
-    virtual auto Valid() const -> bool = 0;
-    virtual auto Value() const -> TransactionNumber = 0;
+    class Imp;
+    void SetSuccess(const bool value = true) const;
+    auto Valid() const -> bool;
+    auto Value() const -> TransactionNumber;
 
-    virtual ~ManagedNumber() = default;
+    virtual auto swap(ManagedNumber& rhs) noexcept -> void;
 
-protected:
-    ManagedNumber() = default;
+    ManagedNumber(Imp* imp) noexcept;
+    ManagedNumber(const ManagedNumber&) = delete;
+    ManagedNumber(ManagedNumber&& rhs) noexcept;
+    auto operator=(const ManagedNumber&) -> ManagedNumber& = delete;
+    auto operator=(ManagedNumber&&) noexcept -> ManagedNumber&;
+
+    virtual ~ManagedNumber();
 
 private:
-    ManagedNumber(const ManagedNumber&) = delete;
-    ManagedNumber(ManagedNumber&& rhs) = delete;
-    auto operator=(const ManagedNumber&) -> ManagedNumber& = delete;
-    auto operator=(ManagedNumber&&) -> ManagedNumber& = delete;
+    Imp* imp_;
+    friend auto operator<(const ManagedNumber&, const ManagedNumber&) noexcept
+        -> bool;
 };
 }  // namespace opentxs::otx::context

@@ -49,6 +49,7 @@
 #include "opentxs/util/Pimpl.hpp"
 #include "opentxs/util/Time.hpp"
 #include "opentxs/util/Types.hpp"
+#include "util/Container.hpp"
 #include "util/ScopeGuard.hpp"
 
 namespace opentxs::blockchain::node::wallet
@@ -87,7 +88,7 @@ auto DeterministicStateData::CheckCache(
     cache_.modify([=](auto& data) {
         auto& [time, blockMap] = data;
         using namespace std::literals;
-        static constexpr auto maxTime = 30s;
+        static constexpr auto maxTime = 10s;
         static constexpr auto maxBlocks = std::size_t{1000};
         const auto blocks = blockMap.size();
         const auto interval = Clock::now() - time;
@@ -107,25 +108,32 @@ auto DeterministicStateData::flush_cache(
 {
     const auto start = Clock::now();
     const auto& log = log_;
-    auto txoCreated = TXOs{get_allocator()};
-    auto txoConsumed = TXOs{get_allocator()};
-    auto positions = Vector<block::Position>{get_allocator()};
-    positions.reserve(matches.size());
-    std::transform(
-        matches.begin(),
-        matches.end(),
-        std::back_inserter(positions),
-        [](const auto& data) { return data.first; });
-    auto updated = db_.AddConfirmedTransactions(
-        id_, db_key_, matches, txoCreated, txoConsumed);
 
-    OT_ASSERT(updated);  // TODO handle database errors
+    if (0u < matches.size()) {
+        auto txoCreated = TXOs{get_allocator()};
+        auto txoConsumed = TXOs{get_allocator()};
+        auto positions = Vector<block::Position>{get_allocator()};
+        positions.reserve(matches.size());
+        std::transform(
+            matches.begin(),
+            matches.end(),
+            std::back_inserter(positions),
+            [](const auto& data) { return data.first; });
+        auto updated = db_.AddConfirmedTransactions(
+            id_, db_key_, matches, txoCreated, txoConsumed);
 
-    element_cache_.lock()->Add(std::move(txoCreated), std::move(txoConsumed));
+        OT_ASSERT(updated);  // TODO handle database errors
 
-    if (cb) { cb(positions); }
+        element_cache_.lock()->Add(
+            std::move(txoCreated), std::move(txoConsumed));
 
-    matches.clear();
+        if (cb) { cb(positions); }
+
+        matches.clear();
+    } else {
+        log(OT_PRETTY_CLASS())(name_)(" no cached transactions").Flush();
+    }
+
     log(OT_PRETTY_CLASS())(name_)(" finished flushing cache in ")(
         std::chrono::duration_cast<std::chrono::nanoseconds>(
             Clock::now() - start))
@@ -168,19 +176,39 @@ auto DeterministicStateData::handle_confirmed_matches(
     for (const auto& [tx, outpoint, element] : utxo) {
         auto& pTx = transactions[tx].second;
 
-        if (!pTx) { pTx = block.at(tx->Bytes()); }
+        if (!pTx) { pTx = block.at(tx->Bytes())->clone(); }
     }
 
     const auto buildTransactionMap = Clock::now();
     log(OT_PRETTY_CLASS())(name_)(" adding ")(transactions.size())(
         " confirmed transaction to cache")
         .Flush();
-    cache_.modify([position, matches = std::move(transactions)](auto& data) {
+    cache_.modify([this, position, matches = std::move(transactions)](
+                      auto& data) {
         auto& [time, blockMap] = data;
 
-        OT_ASSERT(0u == blockMap.count(position));
+        if (auto i = blockMap.find(position); blockMap.end() == i) {
+            blockMap.emplace(std::move(position), std::move(matches));
+        } else {
+            auto& existing = i->second;
 
-        blockMap.emplace(std::move(position), std::move(matches));
+            for (auto& [txid, newMatchData] : matches) {
+                if (auto e = existing.find(txid); existing.end() == e) {
+                    existing.emplace(std::move(txid), std::move(newMatchData));
+                } else {
+                    auto& [eIndices, eTX] = e->second;
+                    const auto& [nIndices, nTX] = newMatchData;
+                    eIndices.insert(
+                        eIndices.end(), nIndices.begin(), nIndices.end());
+                    dedup(eIndices);
+
+                    OT_ASSERT(nTX);
+                    OT_ASSERT(eTX);
+
+                    eTX->Internal().MergeMetadata(chain_, nTX->Internal());
+                }
+            }
+        }
     });
     const auto updateCache = Clock::now();
     log(OT_PRETTY_CLASS())(name_)(" time to process matches: ")(

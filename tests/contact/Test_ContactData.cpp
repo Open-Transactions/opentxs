@@ -43,14 +43,14 @@ public:
         , contactData_(
               dynamic_cast<const ot::api::session::Client&>(api_),
               ot::UnallocatedCString("contactDataNym"),
-              CONTACT_CONTACT_DATA_VERSION,
-              CONTACT_CONTACT_DATA_VERSION,
+              opentxs::CONTACT_CONTACT_DATA_VERSION,
+              opentxs::CONTACT_CONTACT_DATA_VERSION,
               {})
         , activeContactItem_(new ot::identity::wot::claim::Item(
               dynamic_cast<const ot::api::session::Client&>(api_),
               ot::UnallocatedCString("activeContactItem"),
-              CONTACT_CONTACT_DATA_VERSION,
-              CONTACT_CONTACT_DATA_VERSION,
+              opentxs::CONTACT_CONTACT_DATA_VERSION,
+              opentxs::CONTACT_CONTACT_DATA_VERSION,
               ot::identity::wot::claim::SectionType::Identifier,
               ot::identity::wot::claim::ClaimType::Employee,
               ot::UnallocatedCString("activeContactItemValue"),
@@ -80,14 +80,14 @@ public:
     void testAddItemMethod(
         const CallbackType1 contactDataMethod,
         ot::identity::wot::claim::SectionType sectionName,
-        std::uint32_t version = CONTACT_CONTACT_DATA_VERSION,
+        std::uint32_t version = opentxs::CONTACT_CONTACT_DATA_VERSION,
         std::uint32_t targetVersion = 0);
 
     void testAddItemMethod2(
         const CallbackType2 contactDataMethod,
         ot::identity::wot::claim::SectionType sectionName,
         ot::identity::wot::claim::ClaimType itemType,
-        std::uint32_t version = CONTACT_CONTACT_DATA_VERSION,
+        std::uint32_t version = opentxs::CONTACT_CONTACT_DATA_VERSION,
         std::uint32_t targetVersion = 0);
 };
 
@@ -415,14 +415,14 @@ void Test_ContactData::testAddItemMethod2(
 
 static const ot::UnallocatedCString expectedStringOutput =
     ot::UnallocatedCString{"Version "} +
-    std::to_string(CONTACT_CONTACT_DATA_VERSION) +
+    std::to_string(opentxs::CONTACT_CONTACT_DATA_VERSION) +
     ot::UnallocatedCString(
         " contact data\nSections found: 1\n- Section: Identifier, version: ") +
-    std::to_string(CONTACT_CONTACT_DATA_VERSION) +
+    std::to_string(opentxs::CONTACT_CONTACT_DATA_VERSION) +
     ot::UnallocatedCString{
         " containing 1 item(s).\n-- Item type: \"employee of\", value: "
         "\"activeContactItemValue\", start: 0, end: 0, version: "} +
-    std::to_string(CONTACT_CONTACT_DATA_VERSION) +
+    std::to_string(opentxs::CONTACT_CONTACT_DATA_VERSION) +
     ot::UnallocatedCString{"\n--- Attributes: Active \n"};
 
 TEST_F(Test_ContactData, first_constructor)
@@ -431,8 +431,8 @@ TEST_F(Test_ContactData, first_constructor)
         new ot::identity::wot::claim::Section(
             dynamic_cast<const ot::api::session::Client&>(api_),
             "testContactSectionNym1",
-            CONTACT_CONTACT_DATA_VERSION,
-            CONTACT_CONTACT_DATA_VERSION,
+            opentxs::CONTACT_CONTACT_DATA_VERSION,
+            opentxs::CONTACT_CONTACT_DATA_VERSION,
             ot::identity::wot::claim::SectionType::Identifier,
             activeContactItem_));
 
@@ -442,10 +442,10 @@ TEST_F(Test_ContactData, first_constructor)
     const ot::identity::wot::claim::Data contactData(
         dynamic_cast<const ot::api::session::Client&>(api_),
         ot::UnallocatedCString("contactDataNym"),
-        CONTACT_CONTACT_DATA_VERSION,
-        CONTACT_CONTACT_DATA_VERSION,
+        opentxs::CONTACT_CONTACT_DATA_VERSION,
+        opentxs::CONTACT_CONTACT_DATA_VERSION,
         map);
-    ASSERT_EQ(CONTACT_CONTACT_DATA_VERSION, contactData.Version());
+    ASSERT_EQ(opentxs::CONTACT_CONTACT_DATA_VERSION, contactData.Version());
     ASSERT_NE(
         nullptr,
         contactData.Section(ot::identity::wot::claim::SectionType::Identifier));
@@ -465,10 +465,10 @@ TEST_F(Test_ContactData, first_constructor_no_sections)
     const ot::identity::wot::claim::Data contactData(
         dynamic_cast<const ot::api::session::Client&>(api_),
         ot::UnallocatedCString("contactDataNym"),
-        CONTACT_CONTACT_DATA_VERSION,
-        CONTACT_CONTACT_DATA_VERSION,
+        opentxs::CONTACT_CONTACT_DATA_VERSION,
+        opentxs::CONTACT_CONTACT_DATA_VERSION,
         {});
-    ASSERT_EQ(CONTACT_CONTACT_DATA_VERSION, contactData.Version());
+    ASSERT_EQ(opentxs::CONTACT_CONTACT_DATA_VERSION, contactData.Version());
 }
 
 TEST_F(Test_ContactData, first_constructor_different_versions)
@@ -476,10 +476,10 @@ TEST_F(Test_ContactData, first_constructor_different_versions)
     const ot::identity::wot::claim::Data contactData(
         dynamic_cast<const ot::api::session::Client&>(api_),
         ot::UnallocatedCString("contactDataNym"),
-        CONTACT_CONTACT_DATA_VERSION - 1,  // previous version
-        CONTACT_CONTACT_DATA_VERSION,
+        opentxs::CONTACT_CONTACT_DATA_VERSION - 1,  // previous version
+        opentxs::CONTACT_CONTACT_DATA_VERSION,
         {});
-    ASSERT_EQ(CONTACT_CONTACT_DATA_VERSION, contactData.Version());
+    ASSERT_EQ(opentxs::CONTACT_CONTACT_DATA_VERSION, contactData.Version());
 }
 
 TEST_F(Test_ContactData, copy_constructor)
@@ -488,8 +488,8 @@ TEST_F(Test_ContactData, copy_constructor)
         new ot::identity::wot::claim::Section(
             dynamic_cast<const ot::api::session::Client&>(api_),
             "testContactSectionNym1",
-            CONTACT_CONTACT_DATA_VERSION,
-            CONTACT_CONTACT_DATA_VERSION,
+            opentxs::CONTACT_CONTACT_DATA_VERSION,
+            opentxs::CONTACT_CONTACT_DATA_VERSION,
             ot::identity::wot::claim::SectionType::Identifier,
             activeContactItem_));
 
@@ -499,13 +499,14 @@ TEST_F(Test_ContactData, copy_constructor)
     const ot::identity::wot::claim::Data contactData(
         dynamic_cast<const ot::api::session::Client&>(api_),
         ot::UnallocatedCString("contactDataNym"),
-        CONTACT_CONTACT_DATA_VERSION,
-        CONTACT_CONTACT_DATA_VERSION,
+        opentxs::CONTACT_CONTACT_DATA_VERSION,
+        opentxs::CONTACT_CONTACT_DATA_VERSION,
         map);
 
     const ot::identity::wot::claim::Data copiedContactData(contactData);
 
-    ASSERT_EQ(CONTACT_CONTACT_DATA_VERSION, copiedContactData.Version());
+    ASSERT_EQ(
+        opentxs::CONTACT_CONTACT_DATA_VERSION, copiedContactData.Version());
     ASSERT_NE(
         nullptr,
         copiedContactData.Section(
@@ -530,8 +531,8 @@ TEST_F(Test_ContactData, operator_plus)
         new ot::identity::wot::claim::Item(
             dynamic_cast<const ot::api::session::Client&>(api_),
             ot::UnallocatedCString("contactItem2"),
-            CONTACT_CONTACT_DATA_VERSION,
-            CONTACT_CONTACT_DATA_VERSION,
+            opentxs::CONTACT_CONTACT_DATA_VERSION,
+            opentxs::CONTACT_CONTACT_DATA_VERSION,
             ot::identity::wot::claim::SectionType::Identifier,
             ot::identity::wot::claim::ClaimType::Employee,
             ot::UnallocatedCString("contactItemValue2"),
@@ -550,8 +551,8 @@ TEST_F(Test_ContactData, operator_plus)
         new ot::identity::wot::claim::Section(
             dynamic_cast<const ot::api::session::Client&>(api_),
             "contactSectionNym2",
-            CONTACT_CONTACT_DATA_VERSION,
-            CONTACT_CONTACT_DATA_VERSION,
+            opentxs::CONTACT_CONTACT_DATA_VERSION,
+            opentxs::CONTACT_CONTACT_DATA_VERSION,
             ot::identity::wot::claim::SectionType::Identifier,
             ot::identity::wot::claim::Section::GroupMap{
                 {contactItem2->Type(), group2}}));
@@ -559,8 +560,8 @@ TEST_F(Test_ContactData, operator_plus)
     const ot::identity::wot::claim::Data data2(
         dynamic_cast<const ot::api::session::Client&>(api_),
         ot::UnallocatedCString("contactDataNym2"),
-        CONTACT_CONTACT_DATA_VERSION,
-        CONTACT_CONTACT_DATA_VERSION,
+        opentxs::CONTACT_CONTACT_DATA_VERSION,
+        opentxs::CONTACT_CONTACT_DATA_VERSION,
         ot::identity::wot::claim::Data::SectionMap{
             {ot::identity::wot::claim::SectionType::Identifier, section2}});
 
@@ -594,8 +595,8 @@ TEST_F(Test_ContactData, operator_plus)
         new ot::identity::wot::claim::Item(
             dynamic_cast<const ot::api::session::Client&>(api_),
             ot::UnallocatedCString("contactItem4"),
-            CONTACT_CONTACT_DATA_VERSION,
-            CONTACT_CONTACT_DATA_VERSION,
+            opentxs::CONTACT_CONTACT_DATA_VERSION,
+            opentxs::CONTACT_CONTACT_DATA_VERSION,
             ot::identity::wot::claim::SectionType::Address,
             ot::identity::wot::claim::ClaimType::Physical,
             ot::UnallocatedCString("contactItemValue4"),
@@ -614,8 +615,8 @@ TEST_F(Test_ContactData, operator_plus)
         new ot::identity::wot::claim::Section(
             dynamic_cast<const ot::api::session::Client&>(api_),
             "contactSectionNym4",
-            CONTACT_CONTACT_DATA_VERSION,
-            CONTACT_CONTACT_DATA_VERSION,
+            opentxs::CONTACT_CONTACT_DATA_VERSION,
+            opentxs::CONTACT_CONTACT_DATA_VERSION,
             ot::identity::wot::claim::SectionType::Address,
             ot::identity::wot::claim::Section::GroupMap{
                 {contactItem4->Type(), group4}}));
@@ -623,8 +624,8 @@ TEST_F(Test_ContactData, operator_plus)
     const ot::identity::wot::claim::Data data4(
         dynamic_cast<const ot::api::session::Client&>(api_),
         ot::UnallocatedCString("contactDataNym4"),
-        CONTACT_CONTACT_DATA_VERSION,
-        CONTACT_CONTACT_DATA_VERSION,
+        opentxs::CONTACT_CONTACT_DATA_VERSION,
+        opentxs::CONTACT_CONTACT_DATA_VERSION,
         ot::identity::wot::claim::Data::SectionMap{
             {ot::identity::wot::claim::SectionType::Address, section4}});
 
@@ -682,18 +683,18 @@ TEST_F(Test_ContactData, operator_plus_different_version)
     const ot::identity::wot::claim::Data contactData2(
         dynamic_cast<const ot::api::session::Client&>(api_),
         ot::UnallocatedCString("contactDataNym"),
-        CONTACT_CONTACT_DATA_VERSION - 1,
-        CONTACT_CONTACT_DATA_VERSION - 1,
+        opentxs::CONTACT_CONTACT_DATA_VERSION - 1,
+        opentxs::CONTACT_CONTACT_DATA_VERSION - 1,
         {});
 
     const auto& contactData3 = contactData_ + contactData2;
     // Verify the new contact data has the latest version.
-    ASSERT_EQ(CONTACT_CONTACT_DATA_VERSION, contactData3.Version());
+    ASSERT_EQ(opentxs::CONTACT_CONTACT_DATA_VERSION, contactData3.Version());
 
     // lhs version less than rhs
     const auto& contactData4 = contactData2 + contactData_;
     // Verify the new contact data has the latest version.
-    ASSERT_EQ(CONTACT_CONTACT_DATA_VERSION, contactData4.Version());
+    ASSERT_EQ(opentxs::CONTACT_CONTACT_DATA_VERSION, contactData4.Version());
 }
 
 TEST_F(Test_ContactData, operator_string)
@@ -906,8 +907,8 @@ TEST_F(Test_ContactData, AddItem_item)
         new ot::identity::wot::claim::Item(
             dynamic_cast<const ot::api::session::Client&>(api_),
             ot::UnallocatedCString("contactItem2"),
-            CONTACT_CONTACT_DATA_VERSION,
-            CONTACT_CONTACT_DATA_VERSION,
+            opentxs::CONTACT_CONTACT_DATA_VERSION,
+            opentxs::CONTACT_CONTACT_DATA_VERSION,
             ot::identity::wot::claim::SectionType::Identifier,
             ot::identity::wot::claim::ClaimType::Employee,
             ot::UnallocatedCString("contactItemValue2"),
@@ -962,8 +963,8 @@ TEST_F(Test_ContactData, AddItem_item_different_versions)
         new ot::identity::wot::claim::Item(
             dynamic_cast<const ot::api::session::Client&>(api_),
             ot::UnallocatedCString("contactItem1"),
-            CONTACT_CONTACT_DATA_VERSION,
-            CONTACT_CONTACT_DATA_VERSION,
+            opentxs::CONTACT_CONTACT_DATA_VERSION,
+            opentxs::CONTACT_CONTACT_DATA_VERSION,
             ot::identity::wot::claim::SectionType::Contract,
             ot::identity::wot::claim::ClaimType::Bch,
             ot::UnallocatedCString("contactItemValue1"),
@@ -1033,8 +1034,8 @@ TEST_F(Test_ContactData, AddPreferredOTServer)
         new ot::identity::wot::claim::Section(
             dynamic_cast<const ot::api::session::Client&>(api_),
             "contactSectionNym1",
-            CONTACT_CONTACT_DATA_VERSION,
-            CONTACT_CONTACT_DATA_VERSION,
+            opentxs::CONTACT_CONTACT_DATA_VERSION,
+            opentxs::CONTACT_CONTACT_DATA_VERSION,
             ot::identity::wot::claim::SectionType::Communication,
             ot::identity::wot::claim::Section::GroupMap{
                 {ot::identity::wot::claim::ClaimType::Opentxs, group1}}));
@@ -1042,8 +1043,8 @@ TEST_F(Test_ContactData, AddPreferredOTServer)
     const ot::identity::wot::claim::Data data1(
         dynamic_cast<const ot::api::session::Client&>(api_),
         ot::UnallocatedCString("contactDataNym1"),
-        CONTACT_CONTACT_DATA_VERSION,
-        CONTACT_CONTACT_DATA_VERSION,
+        opentxs::CONTACT_CONTACT_DATA_VERSION,
+        opentxs::CONTACT_CONTACT_DATA_VERSION,
         ot::identity::wot::claim::Data::SectionMap{
             {ot::identity::wot::claim::SectionType::Communication, section1}});
 
@@ -1531,8 +1532,8 @@ TEST_F(Test_ContactData, Delete)
         new ot::identity::wot::claim::Item(
             dynamic_cast<const ot::api::session::Client&>(api_),
             ot::UnallocatedCString("contactItem2"),
-            CONTACT_CONTACT_DATA_VERSION,
-            CONTACT_CONTACT_DATA_VERSION,
+            opentxs::CONTACT_CONTACT_DATA_VERSION,
+            opentxs::CONTACT_CONTACT_DATA_VERSION,
             ot::identity::wot::claim::SectionType::Identifier,
             ot::identity::wot::claim::ClaimType::Employee,
             ot::UnallocatedCString("contactItemValue2"),
@@ -1646,8 +1647,8 @@ TEST_F(Test_ContactData, Name)
         new ot::identity::wot::claim::Section(
             dynamic_cast<const ot::api::session::Client&>(api_),
             "contactSectionNym1",
-            CONTACT_CONTACT_DATA_VERSION,
-            CONTACT_CONTACT_DATA_VERSION,
+            opentxs::CONTACT_CONTACT_DATA_VERSION,
+            opentxs::CONTACT_CONTACT_DATA_VERSION,
             ot::identity::wot::claim::SectionType::Scope,
             ot::identity::wot::claim::Section::GroupMap{
                 {ot::identity::wot::claim::ClaimType::Individual, group1}}));
@@ -1655,8 +1656,8 @@ TEST_F(Test_ContactData, Name)
     const ot::identity::wot::claim::Data data1(
         dynamic_cast<const ot::api::session::Client&>(api_),
         ot::UnallocatedCString("contactDataNym1"),
-        CONTACT_CONTACT_DATA_VERSION,
-        CONTACT_CONTACT_DATA_VERSION,
+        opentxs::CONTACT_CONTACT_DATA_VERSION,
+        opentxs::CONTACT_CONTACT_DATA_VERSION,
         ot::identity::wot::claim::Data::SectionMap{
             {ot::identity::wot::claim::SectionType::Scope, section1}});
     // Verify that Name returns an empty string.
@@ -1708,8 +1709,8 @@ TEST_F(Test_ContactData, PreferredOTServer)
         new ot::identity::wot::claim::Section(
             dynamic_cast<const ot::api::session::Client&>(api_),
             "contactSectionNym1",
-            CONTACT_CONTACT_DATA_VERSION,
-            CONTACT_CONTACT_DATA_VERSION,
+            opentxs::CONTACT_CONTACT_DATA_VERSION,
+            opentxs::CONTACT_CONTACT_DATA_VERSION,
             ot::identity::wot::claim::SectionType::Communication,
             ot::identity::wot::claim::Section::GroupMap{
                 {ot::identity::wot::claim::ClaimType::Opentxs, group1}}));
@@ -1717,8 +1718,8 @@ TEST_F(Test_ContactData, PreferredOTServer)
     const ot::identity::wot::claim::Data data1(
         dynamic_cast<const ot::api::session::Client&>(api_),
         ot::UnallocatedCString("contactDataNym1"),
-        CONTACT_CONTACT_DATA_VERSION,
-        CONTACT_CONTACT_DATA_VERSION,
+        opentxs::CONTACT_CONTACT_DATA_VERSION,
+        opentxs::CONTACT_CONTACT_DATA_VERSION,
         ot::identity::wot::claim::Data::SectionMap{
             {ot::identity::wot::claim::SectionType::Communication, section1}});
 
@@ -1920,6 +1921,6 @@ TEST_F(Test_ContactData, Type)
 
 TEST_F(Test_ContactData, Version)
 {
-    ASSERT_EQ(CONTACT_CONTACT_DATA_VERSION, contactData_.Version());
+    ASSERT_EQ(opentxs::CONTACT_CONTACT_DATA_VERSION, contactData_.Version());
 }
 }  // namespace ottest

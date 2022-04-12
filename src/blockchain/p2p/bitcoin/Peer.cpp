@@ -9,6 +9,7 @@
 
 #include <algorithm>
 #include <iterator>
+#include <optional>
 #include <stdexcept>
 #include <type_traits>
 #include <utility>
@@ -30,6 +31,8 @@
 #include "internal/blockchain/Params.hpp"
 #include "internal/blockchain/block/bitcoin/Bitcoin.hpp"
 #include "internal/blockchain/database/Database.hpp"
+#include "internal/blockchain/node/BlockBatch.hpp"
+#include "internal/blockchain/node/BlockOracle.hpp"
 #include "internal/blockchain/node/HeaderOracle.hpp"
 #include "internal/blockchain/node/Node.hpp"
 #include "internal/blockchain/p2p/P2P.hpp"
@@ -87,7 +90,8 @@ auto BitcoinP2PPeerLegacy(
     const blockchain::database::BlockStorage policy,
     const int id,
     std::unique_ptr<blockchain::p2p::internal::Address> address,
-    const UnallocatedCString& shutdown)
+    const UnallocatedCString& shutdown,
+    const blockchain::p2p::bitcoin::ProtocolVersion p2p_protocol_version)
     -> std::unique_ptr<blockchain::p2p::internal::Peer>
 {
     namespace p2p = blockchain::p2p;
@@ -128,7 +132,8 @@ auto BitcoinP2PPeerLegacy(
         policy,
         shutdown,
         id,
-        std::move(address));
+        std::move(address),
+        p2p_protocol_version);
 }
 }  // namespace opentxs::factory
 
@@ -186,9 +191,9 @@ Peer::Peer(
     const UnallocatedCString& shutdown,
     const int id,
     std::unique_ptr<internal::Address> address,
+    const ProtocolVersion protocol,
     const bool relay,
-    const UnallocatedSet<p2p::Service>& localServices,
-    const ProtocolVersion protocol) noexcept
+    const UnallocatedSet<p2p::Service>& localServices) noexcept
     : p2p::implementation::Peer(
           api,
           config,
@@ -272,7 +277,7 @@ auto Peer::broadcast_inv_transaction(ReadView txid) noexcept -> void
     using Inventory = blockchain::bitcoin::Inventory;
     using Type = Inventory::Type;
     const auto type = [&] {
-        const auto& segwit = params::Data::Chains().at(chain_).segwit_;
+        const auto& segwit = params::Chains().at(chain_).segwit_;
 
         if (segwit) {
 
@@ -345,7 +350,9 @@ auto Peer::get_local_services(
             output.emplace(p2p::Service::Witness);
         } break;
         case blockchain::Type::BitcoinCash:
-        case blockchain::Type::BitcoinCash_testnet3: {
+        case blockchain::Type::BitcoinCash_testnet3:
+        case blockchain::Type::BitcoinSV:
+        case blockchain::Type::BitcoinSV_testnet3: {
             output.emplace(p2p::Service::BitcoinCash);
         } break;
         case blockchain::Type::Unknown:
@@ -456,9 +463,36 @@ auto Peer::process_addr(
     database_.Import(std::move(peers));
 }
 
-auto Peer::process_block(
-    std::unique_ptr<HeaderType> header,
-    const zmq::Frame& payload) -> void
+auto Peer::process_block(std::unique_ptr<HeaderType>, const zmq::Frame& payload)
+    -> void
+{
+    if (block_batch_.has_value()) {
+        process_block_batch(payload);
+    } else {
+        process_block_job(payload);
+    }
+}
+
+auto Peer::process_block_batch(const zmq::Frame& payload) noexcept -> void
+{
+    OT_ASSERT(block_batch_.has_value());
+
+    auto& job = block_batch_.value();
+    job.Submit(payload.Bytes());
+
+    if (const auto remaining = job.Remaining(); 0u == remaining) {
+        log_(OT_PRETTY_CLASS())("block download batch ")(job.ID())(
+            " is complete")
+            .Flush();
+        reset_block_batch();
+    } else {
+        log_(OT_PRETTY_CLASS())(remaining)(
+            " hashes remaining in block download batch ")(job.ID())
+            .Flush();
+    }
+}
+
+auto Peer::process_block_job(const zmq::Frame& payload) noexcept -> void
 {
     try {
         if (0 == payload.size()) {
@@ -481,7 +515,12 @@ auto Peer::process_block(
 
             submit = !block_job_.Download(header->Position(), std::move(block));
 
-            if (block_job_.isDownloaded()) { reset_block_job(); }
+            if (block_job_.isDownloaded()) {
+                log_(OT_PRETTY_CLASS())("finished block download task ")(
+                    block_job_.id_)
+                    .Flush();
+                reset_block_job();
+            }
         }
 
         if (submit) {
@@ -607,7 +646,7 @@ auto Peer::process_cfheaders(
         log_("Filter checkpoint validated for ")(display_chain_)(" peer ")(
             address_.Display())
             .Flush();
-        cfilter_probe_ = true;
+        cfheader_checkpoint_verified_ = true;
         success = true;
         check_verify();
     } else if (cfheader_job_) {
@@ -1319,7 +1358,7 @@ auto Peer::process_headers(
         log_("Block checkpoint validated for ")(display_chain_)(" peer ")(
             address_.Display())
             .Flush();
-        header_probe_ = true;
+        header_checkpoint_verified_ = true;
         success = true;
         check_verify();
     } else {
@@ -1487,7 +1526,7 @@ auto Peer::process_message(zmq::Message&& message) noexcept -> void
     const auto& headerBytes = body.at(1);
     const auto& payloadBytes = body.at(2);
     auto pHeader = std::unique_ptr<HeaderType>{
-        factory::BitcoinP2PHeader(api_, headerBytes)};
+        factory::BitcoinP2PHeader(api_, chain_, headerBytes)};
 
     if (false == bool(pHeader)) {
         log_()("Disconnecting ")(display_chain_)(" peer ")(address_.Display())(
@@ -1796,7 +1835,7 @@ auto Peer::reconcile_mempool() noexcept -> void
     using Inventory = blockchain::bitcoin::Inventory;
     using Type = Inventory::Type;
     const auto type = [&] {
-        const auto& segwit = params::Data::Chains().at(chain_).segwit_;
+        const auto& segwit = params::Chains().at(chain_).segwit_;
 
         if (segwit) {
 
@@ -1878,10 +1917,41 @@ auto Peer::request_block(zmq::Message&& in) noexcept -> void
     }
 }
 
-auto Peer::request_blocks() noexcept -> void
+auto Peer::request_block_batch() noexcept -> void
 {
-    if (false == running_.load()) { return; }
+    const auto& job = block_batch_;
+    const auto& data = job->Get();
 
+    try {
+        using Inventory = blockchain::bitcoin::Inventory;
+        using Type = Inventory::Type;
+        auto blocks = UnallocatedVector<Inventory>{};
+
+        for (const auto& hash : data) {
+            blocks.emplace_back(Type::MsgBlock, hash);
+        }
+
+        if (0 == blocks.size()) { return; }
+
+        auto pMessage = std::unique_ptr<Message>{
+            factory::BitcoinP2PGetdata(api_, chain_, std::move(blocks))};
+
+        if (false == bool(pMessage)) {
+            throw std::runtime_error("Failed to construct getdata");
+        }
+
+        log_("sending getdata(block) message to ")(display_chain_)(" peer ")(
+            address_.Display())
+            .Flush();
+        const auto& message = *pMessage;
+        send(message.Transmit());
+    } catch (const std::exception& e) {
+        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+    }
+}
+
+auto Peer::request_block_job() noexcept -> void
+{
     const auto& job = block_job_;
     const auto& data = job.data_;
 
@@ -1910,6 +1980,18 @@ auto Peer::request_blocks() noexcept -> void
         send(message.Transmit());
     } catch (const std::exception& e) {
         LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+    }
+}
+
+auto Peer::request_blocks() noexcept -> void
+{
+    if (false == running_.load()) {
+
+        return;
+    } else if (block_batch_.has_value()) {
+        request_block_batch();
+    } else {
+        request_block_job();
     }
 }
 

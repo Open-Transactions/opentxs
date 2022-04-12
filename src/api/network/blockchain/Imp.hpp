@@ -16,13 +16,15 @@
 #include <thread>
 #include <tuple>
 
-#include "api/network/Blockchain.hpp"
+#include "api/network/blockchain/Blockchain.hpp"
 #include "api/network/blockchain/StartupPublisher.hpp"
 #include "blockchain/database/common/Database.hpp"
 #include "internal/api/network/Blockchain.hpp"
 #include "internal/blockchain/node/Node.hpp"
 #include "internal/network/p2p/Client.hpp"
 #include "internal/network/p2p/Server.hpp"
+#include "internal/network/zeromq/Handle.hpp"
+#include "internal/network/zeromq/Types.hpp"
 #include "internal/util/Mutex.hpp"
 #include "opentxs/Version.hpp"
 #include "opentxs/api/network/Blockchain.hpp"
@@ -92,6 +94,17 @@ class Server;
 
 namespace zeromq
 {
+namespace internal
+{
+class Batch;
+class Thread;
+}  // namespace internal
+
+namespace socket
+{
+class Raw;
+}  // namespace socket
+
 class Context;
 }  // namespace zeromq
 }  // namespace network
@@ -108,13 +121,13 @@ namespace opentxs::api::network
 struct BlockchainImp final : public Blockchain::Imp {
     auto AddSyncServer(const UnallocatedCString& endpoint) const noexcept
         -> bool final;
-    auto BlockAvailable() const noexcept -> const zmq::socket::Publish& final
+    auto BlockAvailableEndpoint() const noexcept -> std::string_view final
     {
-        return block_available_;
+        return block_available_endpoint_;
     }
-    auto BlockQueueUpdate() const noexcept -> const zmq::socket::Publish& final
+    auto BlockQueueUpdateEndpoint() const noexcept -> std::string_view final
     {
-        return block_download_queue_;
+        return block_queue_endpoint_;
     }
     auto ConnectedSyncServers() const noexcept -> Endpoints final;
     auto Database() const noexcept
@@ -194,9 +207,18 @@ private:
     const api::Session& api_;
     const api::crypto::Blockchain* crypto_;
     std::unique_ptr<opentxs::blockchain::database::common::Database> db_;
+    const UnallocatedCString block_available_endpoint_;
+    const UnallocatedCString block_queue_endpoint_;
+    opentxs::network::zeromq::internal::Handle handle_;
+    opentxs::network::zeromq::internal::Batch& batch_;
+    opentxs::network::zeromq::socket::Raw& block_available_out_;
+    opentxs::network::zeromq::socket::Raw& block_queue_out_;
+    opentxs::network::zeromq::socket::Raw& block_available_in_;
+    opentxs::network::zeromq::socket::Raw& block_queue_in_;
+    opentxs::network::zeromq::internal::Thread* thread_;
+    // TODO move the rest of these publish sockets into the batch. Giving out
+    // references to these sockets can cause shutdown race conditions
     OTZMQPublishSocket active_peer_updates_;
-    OTZMQPublishSocket block_available_;
-    OTZMQPublishSocket block_download_queue_;
     OTZMQPublishSocket chain_state_publisher_;
     OTZMQPublishSocket connected_peer_updates_;
     OTZMQPublishSocket new_filters_;

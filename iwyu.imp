@@ -15,6 +15,7 @@
 { "include": ["@<boost/program_options/.*>", "private", "<boost/program_options.hpp>", "public"] },
 { "include": ["@<boost/stacktrace/.*>", "private", "<boost/stacktrace.hpp>", "public"] },
 { "include": ["@<boost/thread/.*>", "private", "<boost/thread/thread.hpp>", "public"] },
+{ "include": ["<boost/container/detail/std_fwd.hpp>", "private", "<boost/container/container_fwd.hpp>", "public"] },
 { "include": ["<boost/smart_ptr/make_shared_object.hpp>", "private", "<boost/smart_ptr/make_shared.hpp>", "public"] },
 { "include": ["<boost/system/detail/errc.hpp>", "private", "<boost/system/error_code.hpp>", "public"] },
 { "include": ["<boost/system/detail/error_code.hpp>", "private", "<boost/system/error_code.hpp>", "public"] },

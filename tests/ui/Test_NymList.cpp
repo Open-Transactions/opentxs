@@ -6,18 +6,17 @@
 #include <gtest/gtest.h>
 #include <atomic>
 #include <memory>
+#include <utility>
 
-#include "integration/Helpers.hpp"
 #include "opentxs/OT.hpp"
 #include "opentxs/api/Context.hpp"
 #include "opentxs/api/session/Client.hpp"
-#include "opentxs/api/session/Contacts.hpp"
 #include "opentxs/api/session/Factory.hpp"
-#include "opentxs/core/Contact.hpp"
-#include "opentxs/core/PaymentCode.hpp"
-#include "opentxs/crypto/Parameters.hpp"
+#include "opentxs/api/session/Wallet.hpp"
+#include "opentxs/core/identifier/Nym.hpp"
+#include "opentxs/crypto/Parameters.hpp"  // IWYU pragma: keep
+#include "opentxs/identity/Nym.hpp"
 #include "opentxs/util/Container.hpp"
-#include "opentxs/util/NymEditor.hpp"
 #include "opentxs/util/PasswordPrompt.hpp"
 #include "ui/Helpers.hpp"
 

@@ -58,12 +58,22 @@ class Block;
 }  // namespace bitcoin
 }  // namespace block
 
+namespace internal
+{
+class BlockOracle;
+}  // namespace internal
+
 namespace node
 {
 namespace implementation
 {
 class FilterOracle;
 }  // namespace implementation
+
+namespace internal
+{
+class BlockOracle;
+}  // namespace internal
 
 class HeaderOracle;
 }  // namespace node

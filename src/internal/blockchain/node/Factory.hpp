@@ -46,7 +46,7 @@ namespace node
 namespace internal
 {
 struct BlockDatabase;
-struct BlockOracle;
+class BlockOracle;
 struct Config;
 struct FilterDatabase;
 struct FilterOracle;
@@ -127,7 +127,7 @@ auto BlockOracle(
     blockchain::node::internal::BlockDatabase& db,
     const blockchain::Type chain,
     const UnallocatedCString& shutdown) noexcept
-    -> std::unique_ptr<blockchain::node::internal::BlockOracle>;
+    -> blockchain::node::internal::BlockOracle;
 auto HeaderOracle(
     const api::Session& api,
     blockchain::node::internal::HeaderDatabase& database,

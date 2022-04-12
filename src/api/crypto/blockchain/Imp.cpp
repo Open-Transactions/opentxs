@@ -136,6 +136,10 @@ const StyleMap address_style_map_{
     {{Style::P2PKH, opentxs::blockchain::Type::PKT_testnet},
      {Prefix::BitcoinTestnetP2PKH, {}}},
     {{Style::P2PKH, opentxs::blockchain::Type::PKT}, {Prefix::PKTP2PKH, {}}},
+    {{Style::P2PKH, opentxs::blockchain::Type::BitcoinSV_testnet3},
+     {Prefix::BitcoinTestnetP2PKH, {}}},
+    {{Style::P2PKH, opentxs::blockchain::Type::BitcoinSV},
+     {Prefix::BitcoinP2PKH, {}}},
     {{Style::P2SH, opentxs::blockchain::Type::UnitTest},
      {Prefix::BitcoinTestnetP2SH, {}}},
     {{Style::P2SH, opentxs::blockchain::Type::BitcoinCash_testnet3},
@@ -153,6 +157,10 @@ const StyleMap address_style_map_{
     {{Style::P2SH, opentxs::blockchain::Type::PKT_testnet},
      {Prefix::BitcoinTestnetP2SH, {}}},
     {{Style::P2SH, opentxs::blockchain::Type::PKT}, {Prefix::PKTP2SH, {}}},
+    {{Style::P2SH, opentxs::blockchain::Type::BitcoinSV_testnet3},
+     {Prefix::BitcoinTestnetP2SH, {}}},
+    {{Style::P2SH, opentxs::blockchain::Type::BitcoinSV},
+     {Prefix::BitcoinP2SH, {}}},
 };
 const StyleReverseMap address_style_reverse_map_{reverse(address_style_map_)};
 const HrpMap hrp_map_{
@@ -350,6 +358,10 @@ auto Blockchain::Imp::bip44_type(const UnitType type) const noexcept
 
             return Bip44Type::PKT;
         }
+        case UnitType::Bsv: {
+
+            return Bip44Type::BITCOINSV;
+        }
         case UnitType::Tnbch:
         case UnitType::Tnbtc:
         case UnitType::Tnxrp:
@@ -365,6 +377,7 @@ auto Blockchain::Imp::bip44_type(const UnitType type) const noexcept
         case UnitType::Tnsc:
         case UnitType::Tnsteem:
         case UnitType::Tnpkt:
+        case UnitType::Tnbsv:
         case UnitType::Regtest: {
             return Bip44Type::TESTNET;
         }
@@ -432,7 +445,7 @@ auto Blockchain::Imp::DecodeAddress(
         if (Style::Unknown == style) { return output; }
         if (0 == chains.size()) { return output; }
 
-        const auto& params = opentxs::blockchain::params::Data::Chains();
+        const auto& params = opentxs::blockchain::params::Chains();
 
         for (const auto& chain : chains) {
             try {

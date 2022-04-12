@@ -8,6 +8,7 @@
 #include "otx/Request.hpp"  // IWYU pragma: associated
 
 #include <memory>
+#include <utility>
 
 #include "Proto.hpp"
 #include "Proto.tpp"
@@ -30,12 +31,9 @@
 #include "opentxs/otx/Request.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
-#include "opentxs/util/Pimpl.hpp"
 #include "serialization/protobuf/Nym.pb.h"
 #include "serialization/protobuf/ServerRequest.pb.h"
 #include "serialization/protobuf/Signature.pb.h"
-
-template class opentxs::Pimpl<opentxs::otx::Request>;
 
 namespace opentxs::otx
 {
@@ -48,11 +46,11 @@ auto Request::Factory(
     const identifier::Notary& server,
     const otx::ServerRequestType type,
     const RequestNumber number,
-    const PasswordPrompt& reason) -> OTXRequest
+    const PasswordPrompt& reason) -> Request
 {
     OT_ASSERT(signer);
 
-    std::unique_ptr<implementation::Request> output{new implementation::Request(
+    auto output{std::make_unique<Request::Imp>(
         api, signer, signer->ID(), server, type, number)};
 
     OT_ASSERT(output);
@@ -62,27 +60,123 @@ auto Request::Factory(
 
     OT_ASSERT(false == output->id(lock)->empty());
 
-    return OTXRequest{output.release()};
+    return Request{output.release()};
 }
 
 auto Request::Factory(
     const api::Session& api,
-    const proto::ServerRequest serialized) -> OTXRequest
+    const proto::ServerRequest serialized) -> Request
 {
-    return OTXRequest{new implementation::Request(api, serialized)};
+    return Request{new Request::Imp(api, serialized)};
 }
 
-auto Request::Factory(const api::Session& api, const ReadView& view)
-    -> OTXRequest
+auto Request::Factory(const api::Session& api, const ReadView& view) -> Request
 {
-    return OTXRequest{new implementation::Request(
-        api, proto::Factory<proto::ServerRequest>(view))};
+    return Request{
+        new Request::Imp(api, proto::Factory<proto::ServerRequest>(view))};
 }
-}  // namespace opentxs::otx
 
-namespace opentxs::otx::implementation
+auto Request::Number() const -> RequestNumber { return imp_->Number(); }
+
+auto Request::Initiator() const -> const identifier::Nym&
 {
-Request::Request(
+    return imp_->Initiator();
+}
+
+auto Request::Serialize() const noexcept -> OTData { return imp_->Serialize(); }
+
+auto Request::Serialize(AllocateOutput destination) const -> bool
+{
+    return imp_->Serialize(destination);
+}
+
+auto Request::Serialize(proto::ServerRequest& serialized) const -> bool
+{
+    return imp_->Serialize(serialized);
+}
+
+auto Request::Server() const -> const identifier::Notary&
+{
+    return imp_->Server();
+}
+
+auto Request::Type() const -> otx::ServerRequestType { return imp_->Type(); }
+
+auto Request::SetIncludeNym(const bool include, const PasswordPrompt& reason)
+    -> bool
+{
+    return imp_->SetIncludeNym(include, reason);
+}
+
+auto Request::Alias() const noexcept -> UnallocatedCString
+{
+    return imp_->Alias();
+}
+
+auto Request::ID() const noexcept -> OTIdentifier { return imp_->ID(); }
+
+auto Request::Nym() const noexcept -> Nym_p { return imp_->Nym(); }
+
+auto Request::Terms() const noexcept -> const UnallocatedCString&
+{
+    return imp_->Terms();
+}
+
+auto Request::Validate() const noexcept -> bool { return imp_->Validate(); }
+
+auto Request::Version() const noexcept -> VersionNumber
+{
+    return imp_->Version();
+}
+
+auto Request::SetAlias(const UnallocatedCString& alias) noexcept -> bool
+{
+    return imp_->SetAlias(alias);
+}
+
+auto Request::swap(Request& rhs) noexcept -> void { std::swap(imp_, rhs.imp_); }
+
+Request::Request(Imp* imp) noexcept
+    : imp_(imp)
+{
+    OT_ASSERT(nullptr != imp);
+}
+
+Request::Request(const Request& rhs) noexcept
+    : Request(std::make_unique<Imp>(*rhs.imp_).release())
+{
+}
+
+Request::Request(Request&& rhs) noexcept
+    : imp_{nullptr}
+{
+    swap(rhs);
+}
+
+auto Request::operator=(const Request& rhs) noexcept -> Request&
+{
+    auto old = std::unique_ptr<Imp>{imp_};
+    imp_ = std::make_unique<Imp>(*rhs.imp_).release();
+
+    return *this;
+}
+
+auto Request::operator=(Request&& rhs) noexcept -> Request&
+{
+    swap(rhs);
+
+    return *this;
+}
+
+Request::~Request()
+{
+    if (nullptr != imp_) {
+        delete imp_;
+        imp_ = nullptr;
+    }
+}
+
+Request::Imp::Imp(
     const api::Session& api,
     const Nym_p signer,
     const identifier::Nym& initiator,
@@ -100,7 +194,9 @@ Request::Request(
     first_time_init(lock);
 }
 
-Request::Request(const api::Session& api, const proto::ServerRequest serialized)
+Request::Imp::Imp(
+    const api::Session& api,
+    const proto::ServerRequest serialized)
     : Signable(
           api,
           extract_nym(api, serialized),
@@ -122,7 +218,7 @@ Request::Request(const api::Session& api, const proto::ServerRequest serialized)
     init_serialized(lock);
 }
 
-Request::Request(const Request& rhs)
+Request::Imp::Imp(const Imp& rhs) noexcept
     : Signable(rhs)
     , initiator_(rhs.initiator_)
     , server_(rhs.server_)
@@ -132,7 +228,7 @@ Request::Request(const Request& rhs)
 {
 }
 
-auto Request::extract_nym(
+auto Request::Imp::extract_nym(
     const api::Session& api,
     const proto::ServerRequest serialized) -> Nym_p
 {
@@ -147,7 +243,7 @@ auto Request::extract_nym(
     return nullptr;
 }
 
-auto Request::full_version(const Lock& lock) const -> proto::ServerRequest
+auto Request::Imp::full_version(const Lock& lock) const -> proto::ServerRequest
 {
     auto contract = signature_version(lock);
 
@@ -164,12 +260,12 @@ auto Request::full_version(const Lock& lock) const -> proto::ServerRequest
     return contract;
 }
 
-auto Request::GetID(const Lock& lock) const -> OTIdentifier
+auto Request::Imp::GetID(const Lock& lock) const -> OTIdentifier
 {
     return api_.Factory().InternalSession().Identifier(id_version(lock));
 }
 
-auto Request::id_version(const Lock& lock) const -> proto::ServerRequest
+auto Request::Imp::id_version(const Lock& lock) const -> proto::ServerRequest
 {
     proto::ServerRequest output{};
     output.set_version(version_);
@@ -183,21 +279,21 @@ auto Request::id_version(const Lock& lock) const -> proto::ServerRequest
     return output;
 }
 
-auto Request::Number() const -> RequestNumber
+auto Request::Imp::Number() const -> RequestNumber
 {
     Lock lock(lock_);
 
     return number_;
 }
 
-auto Request::Serialize() const noexcept -> OTData
+auto Request::Imp::Serialize() const noexcept -> OTData
 {
     Lock lock(lock_);
 
     return api_.Factory().InternalSession().Data(full_version(lock));
 }
 
-auto Request::Serialize(AllocateOutput destination) const -> bool
+auto Request::Imp::Serialize(AllocateOutput destination) const -> bool
 {
     Lock lock(lock_);
 
@@ -207,23 +303,24 @@ auto Request::Serialize(AllocateOutput destination) const -> bool
     return write(serialized, destination);
 }
 
-auto Request::serialize(const Lock& lock, proto::ServerRequest& output) const
-    -> bool
+auto Request::Imp::serialize(const Lock& lock, proto::ServerRequest& output)
+    const -> bool
 {
     output = full_version(lock);
 
     return true;
 }
 
-auto Request::Serialize(proto::ServerRequest& output) const -> bool
+auto Request::Imp::Serialize(proto::ServerRequest& output) const -> bool
 {
     Lock lock(lock_);
 
     return serialize(lock, output);
 }
 
-auto Request::SetIncludeNym(const bool include, const PasswordPrompt& reason)
-    -> bool
+auto Request::Imp::SetIncludeNym(
+    const bool include,
+    const PasswordPrompt& reason) -> bool
 {
     Lock lock(lock_);
 
@@ -236,7 +333,8 @@ auto Request::SetIncludeNym(const bool include, const PasswordPrompt& reason)
     return update_signature(lock, reason);
 }
 
-auto Request::signature_version(const Lock& lock) const -> proto::ServerRequest
+auto Request::Imp::signature_version(const Lock& lock) const
+    -> proto::ServerRequest
 {
     auto contract = id_version(lock);
     contract.set_id(id_->str());
@@ -244,8 +342,9 @@ auto Request::signature_version(const Lock& lock) const -> proto::ServerRequest
     return contract;
 }
 
-auto Request::update_signature(const Lock& lock, const PasswordPrompt& reason)
-    -> bool
+auto Request::Imp::update_signature(
+    const Lock& lock,
+    const PasswordPrompt& reason) -> bool
 {
     if (false == Signable::update_signature(lock, reason)) { return false; }
 
@@ -265,7 +364,7 @@ auto Request::update_signature(const Lock& lock, const PasswordPrompt& reason)
     return success;
 }
 
-auto Request::validate(const Lock& lock) const -> bool
+auto Request::Imp::validate(const Lock& lock) const -> bool
 {
     bool validNym{false};
 
@@ -305,7 +404,7 @@ auto Request::validate(const Lock& lock) const -> bool
     return true;
 }
 
-auto Request::verify_signature(
+auto Request::Imp::verify_signature(
     const Lock& lock,
     const proto::Signature& signature) const -> bool
 {
@@ -317,4 +416,4 @@ auto Request::verify_signature(
 
     return nym_->Internal().Verify(serialized, sigProto);
 }
-}  // namespace opentxs::otx::implementation
+}  // namespace opentxs::otx

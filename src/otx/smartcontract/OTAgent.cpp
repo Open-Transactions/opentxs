@@ -930,7 +930,7 @@ auto OTAgent::ReserveClosingTransNum(
         const auto number = context.InternalServer().NextTransactionNumber(
             MessageType::notarizeTransaction);
 
-        if (0 == number->Value()) {
+        if (0 == number.Value()) {
             LogError()(OT_PRETTY_CLASS())("Error: Strangely, "
                                           "unable to get a transaction number.")
                 .Flush();
@@ -940,9 +940,9 @@ auto OTAgent::ReserveClosingTransNum(
 
         // Above this line, the transaction number will be recovered
         // automatically
-        number->SetSuccess(true);
+        number.SetSuccess(true);
         LogError()(OT_PRETTY_CLASS())("Allocated closing transaction number ")(
-            number->Value())(".")
+            number.Value())(".")
             .Flush();
 
         // BELOW THIS POINT, TRANSACTION # HAS BEEN RESERVED, AND MUST BE
@@ -950,7 +950,7 @@ auto OTAgent::ReserveClosingTransNum(
         // Any errors below this point will require this call before returning:
         // HarvestAllTransactionNumbers(strNotaryID);
         //
-        thePartyAcct.SetClosingTransNo(number->Value());
+        thePartyAcct.SetClosingTransNo(number.Value());
         thePartyAcct.SetAgentName(m_strName);
 
         return true;
@@ -993,7 +993,7 @@ auto OTAgent::ReserveOpeningTransNum(otx::context::Server& context) -> bool
         const auto number = context.InternalServer().NextTransactionNumber(
             MessageType::notarizeTransaction);
 
-        if (0 == number->Value()) {
+        if (0 == number.Value()) {
             LogError()(OT_PRETTY_CLASS())("Error: Strangely, "
                                           "unable to get a transaction number.")
                 .Flush();
@@ -1003,9 +1003,9 @@ auto OTAgent::ReserveOpeningTransNum(otx::context::Server& context) -> bool
 
         // Above this line, the transaction number will be recovered
         // automatically
-        number->SetSuccess(true);
+        number.SetSuccess(true);
         LogError()(OT_PRETTY_CLASS())("Allocated opening transaction number ")(
-            number->Value())(".")
+            number.Value())(".")
             .Flush();
 
         // BELOW THIS POINT, TRANSACTION # HAS BEEN RESERVED, AND MUST BE
@@ -1013,7 +1013,7 @@ auto OTAgent::ReserveOpeningTransNum(otx::context::Server& context) -> bool
         // Any errors below this point will require this call before returning:
         // HarvestAllTransactionNumbers(strNotaryID);
         //
-        m_pForParty->SetOpeningTransNo(number->Value());
+        m_pForParty->SetOpeningTransNo(number.Value());
         m_pForParty->SetAuthorizingAgentName(m_strName->Get());
 
         return true;

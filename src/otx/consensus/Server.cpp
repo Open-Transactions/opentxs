@@ -908,8 +908,8 @@ auto Server::attempt_delivery(
 
                 return out;
             }());
-            static UnallocatedSet<OTManagedNumber> empty{};
-            UnallocatedSet<OTManagedNumber>* numbers = numbers_;
+            static UnallocatedSet<otx::context::ManagedNumber> empty{};
+            UnallocatedSet<otx::context::ManagedNumber>* numbers = numbers_;
 
             if (nullptr == numbers) { numbers = &empty; }
 
@@ -2617,7 +2617,7 @@ auto Server::need_request_number(const MessageType type) -> bool
 }
 
 auto Server::next_transaction_number(const Lock& lock, const MessageType reason)
-    -> OTManagedNumber
+    -> otx::context::ManagedNumber
 {
     OT_ASSERT(verify_write_lock(lock));
 
@@ -2642,17 +2642,18 @@ auto Server::next_transaction_number(const Lock& lock, const MessageType reason)
 
     if (reserve >= available_transaction_numbers_.size()) {
 
-        return OTManagedNumber(factory::ManagedNumber(0, *this));
+        return factory::ManagedNumber(0, *this);
     }
 
     auto first = available_transaction_numbers_.begin();
     const auto output = *first;
     available_transaction_numbers_.erase(first);
 
-    return OTManagedNumber(factory::ManagedNumber(output, *this));
+    return factory::ManagedNumber(output, *this);
 }
 
-auto Server::NextTransactionNumber(const MessageType reason) -> OTManagedNumber
+auto Server::NextTransactionNumber(const MessageType reason)
+    -> otx::context::ManagedNumber
 {
     Lock lock(lock_);
 
@@ -4904,7 +4905,7 @@ auto Server::process_register_nym_response(
 auto Server::process_reply(
     const Lock& lock,
     const api::session::Client& client,
-    const UnallocatedSet<OTManagedNumber>& managed,
+    const UnallocatedSet<otx::context::ManagedNumber>& managed,
     const Message& reply,
     const PasswordPrompt& reason) -> bool
 {
@@ -4936,7 +4937,7 @@ auto Server::process_reply(
     }
 
     if (reply.m_bSuccess) {
-        for (const auto& number : managed) { number->SetSuccess(true); }
+        for (const auto& number : managed) { number.SetSuccess(true); }
     } else {
         LogVerbose()(OT_PRETTY_CLASS())("Message status: failed for ")(
             reply.m_strCommand)
@@ -6450,7 +6451,7 @@ auto Server::Queue(
     std::shared_ptr<Message> message,
     std::shared_ptr<Ledger> inbox,
     std::shared_ptr<Ledger> outbox,
-    UnallocatedSet<OTManagedNumber>* numbers,
+    UnallocatedSet<otx::context::ManagedNumber>* numbers,
     const PasswordPrompt& reason,
     const ExtraArgs& args) -> Server::QueueResult
 {
@@ -7186,7 +7187,7 @@ void Server::scan_number_set(
 
 auto Server::SendMessage(
     const api::session::Client& client,
-    const UnallocatedSet<OTManagedNumber>& pending,
+    const UnallocatedSet<otx::context::ManagedNumber>& pending,
     otx::context::Server& context,
     const Message& message,
     const PasswordPrompt& reason,
@@ -7425,7 +7426,7 @@ auto Server::start(
     const ActionType type,
     std::shared_ptr<Ledger> inbox,
     std::shared_ptr<Ledger> outbox,
-    UnallocatedSet<OTManagedNumber>* numbers) -> Server::QueueResult
+    UnallocatedSet<otx::context::ManagedNumber>* numbers) -> Server::QueueResult
 {
     Lock contextLock(lock_);
     client_.store(&client);

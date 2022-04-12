@@ -344,11 +344,11 @@ private:
         if (0 <= tips_.at(chain)) { return; }
 
         const auto items = [&] {
-            using Params = opentxs::blockchain::params::Data;
-            const auto& data = Params::Chains().at(chain);
+            namespace params = opentxs::blockchain::params;
+            const auto& data = params::Chains().at(chain);
             constexpr auto filterType = opentxs::blockchain::cfilter::Type::ES;
             auto gcs = [&] {
-                const auto& filter = Params::Filters().at(chain).at(filterType);
+                const auto& filter = params::Filters().at(chain).at(filterType);
                 const auto bytes = api_.Factory().DataFromHex(filter.second);
                 const auto blockHash =
                     api_.Factory().DataFromHex(data.genesis_hash_hex_);

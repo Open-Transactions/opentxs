@@ -41,8 +41,6 @@
 #define CLIENT_RECV_TIMEOUT CLIENT_RECV_TIMEOUT_SECONDS
 #define KEEP_ALIVE_SECONDS 30
 
-template class opentxs::Pimpl<opentxs::network::ServerConnection>;
-
 namespace opentxs
 {
 auto Factory::ZMQ(const api::Session& api, const Flag& running)
@@ -197,7 +195,7 @@ auto ZMQ::Server(const UnallocatedCString& id) const noexcept(false)
 
     OT_ASSERT(created);
 
-    if (false == socks_proxy_.empty()) { connection->EnableProxy(); }
+    if (false == socks_proxy_.empty()) { connection.EnableProxy(); }
 
     return connection;
 }
@@ -268,7 +266,7 @@ auto ZMQ::Status(const UnallocatedCString& server) const
     lock.unlock();
 
     if (haveConnection) {
-        if (it->second->Status()) {
+        if (it->second.Status()) {
 
             return opentxs::network::ConnectionState::ACTIVE;
         } else {

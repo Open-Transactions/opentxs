@@ -848,9 +848,8 @@ auto Regtest_fixture_base::init_wallet(
 auto Regtest_fixture_base::MaturationInterval() noexcept
     -> ot::blockchain::block::Height
 {
-    static const auto interval = ot::blockchain::params::Data::Chains()
-                                     .at(test_chain_)
-                                     .maturation_interval_;
+    static const auto interval =
+        ot::blockchain::params::Chains().at(test_chain_).maturation_interval_;
 
     return interval;
 }

@@ -167,8 +167,7 @@ private:
             }
         } else {
             const auto inproc = network::zeromq::MakeArbitraryInproc();
-            const auto port =
-                params::Data::Chains().at(parent_.chain_).default_port_;
+            const auto port = params::Chains().at(parent_.chain_).default_port_;
             const auto zmq = inproc + ':' + std::to_string(port);
             auto address = factory::BlockchainAddress(
                 api_,

@@ -36,8 +36,6 @@
 #include "serialization/protobuf/ServerReply.pb.h"
 #include "serialization/protobuf/Signature.pb.h"
 
-template class opentxs::Pimpl<opentxs::otx::Reply>;
-
 namespace opentxs::otx
 {
 const VersionNumber Reply::DefaultVersion{1};
@@ -65,11 +63,11 @@ auto Reply::Factory(
     const RequestNumber number,
     const bool success,
     const PasswordPrompt& reason,
-    std::shared_ptr<const proto::OTXPush>&& push) -> OTXReply
+    std::shared_ptr<const proto::OTXPush>&& push) -> Reply
 {
     OT_ASSERT(signer);
 
-    std::unique_ptr<implementation::Reply> output{new implementation::Reply(
+    auto output{std::make_unique<Reply::Imp>(
         api,
         signer,
         recipient,
@@ -86,7 +84,7 @@ auto Reply::Factory(
 
     OT_ASSERT(false == output->id(lock)->empty());
 
-    return OTXReply{output.release()};
+    return output.release();
 }
 
 auto Reply::Factory(
@@ -99,7 +97,7 @@ auto Reply::Factory(
     const bool success,
     const PasswordPrompt& reason,
     opentxs::otx::OTXPushType pushtype,
-    const UnallocatedCString& payload) -> OTXReply
+    const UnallocatedCString& payload) -> Reply
 {
     return Factory(
         api,
@@ -115,21 +113,118 @@ auto Reply::Factory(
 
 auto Reply::Factory(
     const api::Session& api,
-    const proto::ServerReply serialized) -> OTXReply
+    const proto::ServerReply serialized) -> Reply
 {
-    return OTXReply{new implementation::Reply(api, serialized)};
+    return Reply{new Reply::Imp(api, serialized)};
 }
 
-auto Reply::Factory(const api::Session& api, const ReadView& view) -> OTXReply
+auto Reply::Factory(const api::Session& api, const ReadView& view) -> Reply
 {
-    return OTXReply{new implementation::Reply(
-        api, proto::Factory<proto::ServerReply>(view))};
+    return Reply{new Reply::Imp(api, proto::Factory<proto::ServerReply>(view))};
 }
-}  // namespace opentxs::otx
 
-namespace opentxs::otx::implementation
+auto Reply::Number() const -> RequestNumber { return imp_->Number(); }
+
+auto Reply::Push() const -> std::shared_ptr<const proto::OTXPush>
 {
-Reply::Reply(
+    return imp_->Push();
+}
+
+auto Reply::Recipient() const -> const identifier::Nym&
+{
+    return imp_->Recipient();
+}
+
+auto Reply::Serialize() const noexcept -> OTData { return imp_->Serialize(); }
+
+auto Reply::Serialize(AllocateOutput destination) const -> bool
+{
+    return imp_->Serialize(destination);
+}
+
+auto Reply::Serialize(proto::ServerReply& serialized) const -> bool
+{
+    return imp_->Serialize(serialized);
+}
+
+auto Reply::Server() const -> const identifier::Notary&
+{
+    return imp_->Server();
+}
+
+auto Reply::Success() const -> bool { return imp_->Success(); }
+
+auto Reply::Type() const -> otx::ServerReplyType { return imp_->Type(); }
+
+auto Reply::Alias() const noexcept -> UnallocatedCString
+{
+    return imp_->Alias();
+}
+
+auto Reply::ID() const noexcept -> OTIdentifier { return imp_->ID(); }
+
+auto Reply::Nym() const noexcept -> Nym_p { return imp_->Nym(); }
+
+auto Reply::Terms() const noexcept -> const UnallocatedCString&
+{
+    return imp_->Terms();
+}
+
+auto Reply::Validate() const noexcept -> bool { return imp_->Validate(); }
+
+auto Reply::Version() const noexcept -> VersionNumber
+{
+    return imp_->Version();
+}
+
+auto Reply::SetAlias(const UnallocatedCString& alias) noexcept -> bool
+{
+    return imp_->SetAlias(alias);
+}
+
+auto Reply::swap(Reply& rhs) noexcept -> void { std::swap(imp_, rhs.imp_); }
+
+Reply::Reply(Imp* imp) noexcept
+    : imp_(imp)
+{
+    OT_ASSERT(nullptr != imp);
+}
+
+Reply::Reply(const Reply& rhs) noexcept
+    : Reply(std::make_unique<Imp>(*rhs.imp_).release())
+{
+}
+
+Reply::Reply(Reply&& rhs) noexcept
+    : imp_{nullptr}
+{
+    swap(rhs);
+}
+
+auto Reply::operator=(const Reply& rhs) noexcept -> Reply&
+{
+    auto old = std::unique_ptr<Imp>{imp_};
+    imp_ = std::make_unique<Imp>(*rhs.imp_).release();
+
+    return *this;
+}
+
+auto Reply::operator=(Reply&& rhs) noexcept -> Reply&
+{
+    swap(rhs);
+
+    return *this;
+}
+
+Reply::~Reply()
+{
+    if (nullptr != imp_) {
+        delete imp_;
+        imp_ = nullptr;
+    }
+}
+
+Reply::Imp::Imp(
     const api::Session& api,
     const Nym_p signer,
     const identifier::Nym& recipient,
@@ -150,7 +245,7 @@ Reply::Reply(
     first_time_init(lock);
 }
 
-Reply::Reply(const api::Session& api, const proto::ServerReply serialized)
+Reply::Imp::Imp(const api::Session& api, const proto::ServerReply serialized)
     : Signable(
           api,
           extract_nym(api, serialized),
@@ -176,7 +271,7 @@ Reply::Reply(const api::Session& api, const proto::ServerReply serialized)
     init_serialized(lock);
 }
 
-Reply::Reply(const Reply& rhs)
+Reply::Imp::Imp(const Imp& rhs) noexcept
     : Signable(rhs)
     , recipient_(rhs.recipient_)
     , server_(rhs.server_)
@@ -187,7 +282,7 @@ Reply::Reply(const Reply& rhs)
 {
 }
 
-auto Reply::extract_nym(
+auto Reply::Imp::extract_nym(
     const api::Session& api,
     const proto::ServerReply serialized) -> Nym_p
 {
@@ -202,7 +297,7 @@ auto Reply::extract_nym(
     }
 }
 
-auto Reply::full_version(const Lock& lock) const -> proto::ServerReply
+auto Reply::Imp::full_version(const Lock& lock) const -> proto::ServerReply
 {
     auto contract = signature_version(lock);
 
@@ -213,12 +308,12 @@ auto Reply::full_version(const Lock& lock) const -> proto::ServerReply
     return contract;
 }
 
-auto Reply::GetID(const Lock& lock) const -> OTIdentifier
+auto Reply::Imp::GetID(const Lock& lock) const -> OTIdentifier
 {
     return api_.Factory().InternalSession().Identifier(id_version(lock));
 }
 
-auto Reply::id_version(const Lock& lock) const -> proto::ServerReply
+auto Reply::Imp::id_version(const Lock& lock) const -> proto::ServerReply
 {
     proto::ServerReply output{};
     output.set_version(version_);
@@ -236,14 +331,14 @@ auto Reply::id_version(const Lock& lock) const -> proto::ServerReply
     return output;
 }
 
-auto Reply::Serialize() const noexcept -> OTData
+auto Reply::Imp::Serialize() const noexcept -> OTData
 {
     Lock lock(lock_);
 
     return api_.Factory().InternalSession().Data(full_version(lock));
 }
 
-auto Reply::Serialize(AllocateOutput destination) const -> bool
+auto Reply::Imp::Serialize(AllocateOutput destination) const -> bool
 {
     Lock lock(lock_);
 
@@ -253,7 +348,14 @@ auto Reply::Serialize(AllocateOutput destination) const -> bool
     return write(serialized, destination);
 }
 
-auto Reply::serialize(const Lock& lock, proto::ServerReply& output) const
+auto Reply::Imp::Serialize(proto::ServerReply& output) const -> bool
+{
+    Lock lock(lock_);
+
+    return serialize(lock, output);
+}
+
+auto Reply::Imp::serialize(const Lock& lock, proto::ServerReply& output) const
     -> bool
 {
     output = full_version(lock);
@@ -261,14 +363,7 @@ auto Reply::serialize(const Lock& lock, proto::ServerReply& output) const
     return true;
 }
 
-auto Reply::Serialize(proto::ServerReply& output) const -> bool
-{
-    Lock lock(lock_);
-
-    return serialize(lock, output);
-}
-
-auto Reply::signature_version(const Lock& lock) const -> proto::ServerReply
+auto Reply::Imp::signature_version(const Lock& lock) const -> proto::ServerReply
 {
     auto contract = id_version(lock);
     contract.set_id(id_->str());
@@ -276,8 +371,9 @@ auto Reply::signature_version(const Lock& lock) const -> proto::ServerReply
     return contract;
 }
 
-auto Reply::update_signature(const Lock& lock, const PasswordPrompt& reason)
-    -> bool
+auto Reply::Imp::update_signature(
+    const Lock& lock,
+    const PasswordPrompt& reason) -> bool
 {
     if (false == Signable::update_signature(lock, reason)) { return false; }
 
@@ -297,7 +393,7 @@ auto Reply::update_signature(const Lock& lock, const PasswordPrompt& reason)
     return success;
 }
 
-auto Reply::validate(const Lock& lock) const -> bool
+auto Reply::Imp::validate(const Lock& lock) const -> bool
 {
     bool validNym{false};
 
@@ -337,7 +433,7 @@ auto Reply::validate(const Lock& lock) const -> bool
     return true;
 }
 
-auto Reply::verify_signature(
+auto Reply::Imp::verify_signature(
     const Lock& lock,
     const proto::Signature& signature) const -> bool
 {
@@ -349,4 +445,4 @@ auto Reply::verify_signature(
 
     return nym_->Internal().Verify(serialized, sigProto);
 }
-}  // namespace opentxs::otx::implementation
+}  // namespace opentxs::otx

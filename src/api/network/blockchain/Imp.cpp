@@ -17,6 +17,9 @@
 #include "internal/blockchain/database/Database.hpp"
 #include "internal/blockchain/node/Factory.hpp"
 #include "internal/blockchain/node/Node.hpp"
+#include "internal/network/zeromq/Batch.hpp"
+#include "internal/network/zeromq/Context.hpp"
+#include "internal/network/zeromq/socket/Raw.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/api/network/Network.hpp"
 #include "opentxs/api/session/Endpoints.hpp"
@@ -26,9 +29,11 @@
 #include "opentxs/blockchain/node/FilterOracle.hpp"
 #include "opentxs/blockchain/p2p/Types.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
+#include "opentxs/network/zeromq/ZeroMQ.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/network/zeromq/message/Message.tpp"
 #include "opentxs/network/zeromq/socket/Push.hpp"
+#include "opentxs/network/zeromq/socket/SocketType.hpp"
 #include "opentxs/network/zeromq/socket/Types.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Options.hpp"
@@ -45,27 +50,72 @@ BlockchainImp::BlockchainImp(
     : api_(api)
     , crypto_(nullptr)
     , db_(nullptr)
+    , block_available_endpoint_(opentxs::network::zeromq::MakeArbitraryInproc())
+    , block_queue_endpoint_(opentxs::network::zeromq::MakeArbitraryInproc())
+    , handle_(zmq.Internal().MakeBatch([&] {
+        using Type = opentxs::network::zeromq::socket::Type;
+        auto out = Vector<Type>{};
+        out.emplace_back(Type::Publish);  // NOTE block_available_out_
+        out.emplace_back(Type::Publish);  // NOTE block_queue_out_
+        out.emplace_back(Type::Pull);     // NOTE block_available_in_
+        out.emplace_back(Type::Pull);     // NOTE block_queue_in_
+
+        return out;
+    }()))
+    , batch_(handle_.batch_)
+    , block_available_out_([&]() -> auto& {
+        auto& socket = batch_.sockets_.at(0);
+        const auto endpoint =
+            UnallocatedCString{endpoints.BlockchainBlockAvailable()};
+        const auto rc = socket.Bind(endpoint.c_str());
+
+        OT_ASSERT(rc);
+
+        return socket;
+    }())
+    , block_queue_out_([&]() -> auto& {
+        auto& socket = batch_.sockets_.at(1);
+        const auto endpoint =
+            UnallocatedCString{endpoints.BlockchainBlockDownloadQueue()};
+        const auto rc = socket.Bind(endpoint.c_str());
+
+        OT_ASSERT(rc);
+
+        return socket;
+    }())
+    , block_available_in_([&]() -> auto& {
+        auto& socket = batch_.sockets_.at(2);
+        const auto rc = socket.Bind(block_available_endpoint_.c_str());
+
+        OT_ASSERT(rc);
+
+        return socket;
+    }())
+    , block_queue_in_([&]() -> auto& {
+        auto& socket = batch_.sockets_.at(3);
+        const auto rc = socket.Bind(block_queue_endpoint_.c_str());
+
+        OT_ASSERT(rc);
+
+        return socket;
+    }())
+    , thread_(zmq.Internal().Start(
+          batch_.id_,
+          {
+              {block_available_in_.ID(),
+               &block_available_in_,
+               [socket = &block_available_out_](auto&& m) {
+                   socket->SendDeferred(std::move(m));
+               }},
+              {block_queue_in_.ID(),
+               &block_queue_in_,
+               [socket = &block_queue_out_](auto&& m) {
+                   socket->SendDeferred(std::move(m));
+               }},
+          }))
     , active_peer_updates_([&] {
         auto out = zmq.PublishSocket();
         const auto listen = out->Start(endpoints.BlockchainPeer().data());
-
-        OT_ASSERT(listen);
-
-        return out;
-    }())
-    , block_available_([&] {
-        auto out = zmq.PublishSocket();
-        const auto listen =
-            out->Start(endpoints.BlockchainBlockAvailable().data());
-
-        OT_ASSERT(listen);
-
-        return out;
-    }())
-    , block_download_queue_([&] {
-        auto out = zmq.PublishSocket();
-        const auto listen =
-            out->Start(endpoints.BlockchainBlockDownloadQueue().data());
 
         OT_ASSERT(listen);
 
@@ -132,6 +182,7 @@ BlockchainImp::BlockchainImp(
     , init_(init_promise_.get_future())
     , running_(true)
 {
+    OT_ASSERT(nullptr != thread_);
 }
 
 auto BlockchainImp::AddSyncServer(
@@ -316,7 +367,8 @@ auto BlockchainImp::Init(
     if (base_config_->use_sync_server_) { sync_client_.emplace(api_); }
 
     init_promise_.set_value();
-    static const auto defaultServers = Vector<UnallocatedCString>{
+
+    static const auto defaultServers = UnallocatedVector<UnallocatedCString>{
         "tcp://metier1.opentransactions.org:8814",
         "tcp://metier2.opentransactions.org:8814",
     };
@@ -468,8 +520,7 @@ auto BlockchainImp::start(
 
     namespace p2p = opentxs::blockchain::p2p;
 
-    switch (
-        opentxs::blockchain::params::Data::Chains().at(type).p2p_protocol_) {
+    switch (opentxs::blockchain::params::Chains().at(type).p2p_protocol_) {
         case p2p::Protocol::bitcoin: {
             auto endpoint = UnallocatedCString{};
 
@@ -579,5 +630,5 @@ auto BlockchainImp::UpdatePeer(
     active_peer_updates_->Send(std::move(work));
 }
 
-BlockchainImp::~BlockchainImp() = default;
+BlockchainImp::~BlockchainImp() { batch_.ClearCallbacks(); }
 }  // namespace opentxs::api::network

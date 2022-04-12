@@ -719,7 +719,9 @@ SigHash::SigHash(
 
     switch (chain) {
         case blockchain::Type::BitcoinCash:
-        case blockchain::Type::BitcoinCash_testnet3: {
+        case blockchain::Type::BitcoinCash_testnet3:
+        case blockchain::Type::BitcoinSV:
+        case blockchain::Type::BitcoinSV_testnet3: {
             flags_ |= Fork_ID;
         } break;
         case opentxs::blockchain::Type::Unknown:

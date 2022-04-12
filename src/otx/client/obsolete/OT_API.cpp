@@ -1907,7 +1907,7 @@ auto OT_API::WriteCheque(
     const auto number = context.get().InternalServer().NextTransactionNumber(
         MessageType::notarizeTransaction);
 
-    if (false == number->Valid()) {
+    if (false == number.Valid()) {
         LogError()(OT_PRETTY_CLASS())(
             "User attempted to write a cheque, but had no "
             "transaction numbers.")
@@ -1917,7 +1917,7 @@ auto OT_API::WriteCheque(
     }
 
     LogVerbose()(OT_PRETTY_CLASS())("Allocated transaction number ")(
-        number->Value())(".")
+        number.Value())(".")
         .Flush();
 
     // At this point, I know that number contains one I can use.
@@ -1931,7 +1931,7 @@ auto OT_API::WriteCheque(
     // have to delete, or return to the caller.
     bool bIssueCheque = pCheque->IssueCheque(
         CHEQUE_AMOUNT,
-        number->Value(),
+        number.Value(),
         VALID_FROM,
         VALID_TO,
         SENDER_accountID,
@@ -1961,7 +1961,7 @@ auto OT_API::WriteCheque(
     }
 
     // Above this line, the transaction number will be recovered automatically
-    number->SetSuccess(true);
+    number.SetSuccess(true);
 
     return pCheque.release();
 }
@@ -2684,7 +2684,7 @@ auto OT_API::AddBasketExchangeItem(
     const auto number = context.get().InternalServer().NextTransactionNumber(
         MessageType::notarizeTransaction);
 
-    if (false == number->Valid()) {
+    if (false == number.Valid()) {
         LogError()(OT_PRETTY_CLASS())("Failed getting next "
                                       "transaction number.")
             .Flush();
@@ -2693,11 +2693,11 @@ auto OT_API::AddBasketExchangeItem(
     }
 
     LogVerbose()(OT_PRETTY_CLASS())("Allocated transaction number ")(
-        number->Value())(".")
+        number.Value())(".")
         .Flush();
-    number->SetSuccess(true);
+    number.SetSuccess(true);
     theBasket.AddRequestSubContract(
-        INSTRUMENT_DEFINITION_ID, ASSET_ACCOUNT_ID, number->Value());
+        INSTRUMENT_DEFINITION_ID, ASSET_ACCOUNT_ID, number.Value());
     theBasket.ReleaseSignatures();
     theBasket.SignContract(*nym, reason);
     theBasket.SaveContract();
@@ -2900,12 +2900,12 @@ auto OT_API::exchangeBasket(
         return output;
     }
 
-    UnallocatedSet<OTManagedNumber> managed{};
+    UnallocatedSet<otx::context::ManagedNumber> managed{};
     managed.emplace(context.InternalServer().NextTransactionNumber(
         MessageType::notarizeTransaction));
     auto& managedNumber = *managed.rbegin();
 
-    if (false == managedNumber->Valid()) {
+    if (false == managedNumber.Valid()) {
         LogError()(OT_PRETTY_CLASS())(
             "No transaction numbers were available. "
             "Try requesting the server for a new one.")
@@ -2916,9 +2916,9 @@ auto OT_API::exchangeBasket(
     }
 
     LogVerbose()(OT_PRETTY_CLASS())("Allocated transaction number ")(
-        managedNumber->Value())(".")
+        managedNumber.Value())(".")
         .Flush();
-    transactionNum = managedNumber->Value();
+    transactionNum = managedNumber.Value();
     auto transaction{api_.Factory().InternalSession().Transaction(
         nymID,
         accountID,
@@ -2938,7 +2938,7 @@ auto OT_API::exchangeBasket(
         MessageType::notarizeTransaction));
     auto& closingNumber = *managed.rbegin();
 
-    if (false == closingNumber->Valid()) {
+    if (false == closingNumber.Valid()) {
         LogError()(OT_PRETTY_CLASS())(
             "No transaction numbers were available. "
             "Try requesting the server for a new one.")
@@ -2948,9 +2948,9 @@ auto OT_API::exchangeBasket(
     }
 
     LogVerbose()(OT_PRETTY_CLASS())("Allocated transaction number ")(
-        closingNumber->Value())(".")
+        closingNumber.Value())(".")
         .Flush();
-    basket->SetClosingNum(closingNumber->Value());
+    basket->SetClosingNum(closingNumber.Value());
     basket->SetExchangingIn(bExchangeInOrOut);
     basket->ReleaseSignatures();
     basket->SignContract(nym, reason);
@@ -3158,12 +3158,12 @@ auto OT_API::payDividend(
         return output;
     }
 
-    UnallocatedSet<OTManagedNumber> managed{};
+    UnallocatedSet<otx::context::ManagedNumber> managed{};
     managed.insert(context.InternalServer().NextTransactionNumber(
         MessageType::notarizeTransaction));
     auto& managedNumber = *managed.rbegin();
 
-    if (false == managedNumber->Valid()) {
+    if (false == managedNumber.Valid()) {
         LogError()(OT_PRETTY_CLASS())(
             "No transaction numbers were available. Try requesting the "
             "server for a new one.")
@@ -3174,9 +3174,9 @@ auto OT_API::payDividend(
     }
 
     LogVerbose()(OT_PRETTY_CLASS())("Allocated transaction number ")(
-        managedNumber->Value())(".")
+        managedNumber.Value())(".")
         .Flush();
-    transactionNum = managedNumber->Value();
+    transactionNum = managedNumber.Value();
 
     const auto SHARES_ISSUER_accountID =
         api_.Factory().Identifier(issuerAccount.get());
@@ -3374,7 +3374,7 @@ auto OT_API::withdrawVoucher(
     const auto voucherNumber = context.InternalServer().NextTransactionNumber(
         MessageType::notarizeTransaction);
 
-    if ((!withdrawalNumber->Valid()) || (!voucherNumber->Valid())) {
+    if ((!withdrawalNumber.Valid()) || (!voucherNumber.Valid())) {
         LogError()(OT_PRETTY_CLASS())(
             "Not enough Transaction Numbers were available. "
             "(Suggest requesting the server for more).")
@@ -3384,11 +3384,11 @@ auto OT_API::withdrawVoucher(
     }
 
     LogVerbose()(OT_PRETTY_CLASS())("Allocated transaction number ")(
-        withdrawalNumber->Value())(" for withdrawal.")
+        withdrawalNumber.Value())(" for withdrawal.")
         .Flush();
 
     LogVerbose()(OT_PRETTY_CLASS())("Allocated transaction number ")(
-        voucherNumber->Value())(" for voucher.")
+        voucherNumber.Value())(" for voucher.")
         .Flush();
 
     const auto strChequeMemo = String::Factory(CHEQUE_MEMO.Get());
@@ -3406,7 +3406,7 @@ auto OT_API::withdrawVoucher(
 
     bool bIssueCheque = theRequestVoucher->IssueCheque(
         amount,
-        voucherNumber->Value(),
+        voucherNumber.Value(),
         VALID_FROM,
         VALID_TO,
         accountID,
@@ -3441,7 +3441,7 @@ auto OT_API::withdrawVoucher(
         serverID,
         transactionType::withdrawal,
         originType::not_applicable,
-        withdrawalNumber->Value())};
+        withdrawalNumber.Value())};
     if (false == bool(transaction)) { return output; }
 
     auto item{api_.Factory().InternalSession().Item(
@@ -4097,12 +4097,12 @@ auto OT_API::cancelCronItem(
         return output;
     }
 
-    UnallocatedSet<OTManagedNumber> managed{};
+    UnallocatedSet<otx::context::ManagedNumber> managed{};
     managed.insert(context.InternalServer().NextTransactionNumber(
         MessageType::notarizeTransaction));
     auto& managedNumber = *managed.rbegin();
 
-    if (false == managedNumber->Valid()) {
+    if (false == managedNumber.Valid()) {
         LogError()(OT_PRETTY_CLASS())(
             "No transaction numbers were available. Suggest "
             "requesting the server for one.")
@@ -4113,9 +4113,9 @@ auto OT_API::cancelCronItem(
     }
 
     LogVerbose()(OT_PRETTY_CLASS())("Allocated transaction number ")(
-        managedNumber->Value())(".")
+        managedNumber.Value())(".")
         .Flush();
-    transactionNum = managedNumber->Value();
+    transactionNum = managedNumber.Value();
     auto transaction{api_.Factory().InternalSession().Transaction(
         nymID,
         ASSET_ACCOUNT_ID,
@@ -4263,12 +4263,12 @@ auto OT_API::issueMarketOffer(
         return output;
     }
 
-    UnallocatedSet<OTManagedNumber> managed{};
+    UnallocatedSet<otx::context::ManagedNumber> managed{};
     managed.insert(context.InternalServer().NextTransactionNumber(
         MessageType::notarizeTransaction));
     auto& openingNumber = *managed.rbegin();
 
-    if (false == openingNumber->Valid()) {
+    if (false == openingNumber.Valid()) {
         LogError()(OT_PRETTY_CLASS())(
             "No transaction numbers were available. Suggest "
             "requesting the server for one.")
@@ -4278,14 +4278,14 @@ auto OT_API::issueMarketOffer(
     }
 
     LogVerbose()(OT_PRETTY_CLASS())("Allocated transaction number ")(
-        openingNumber->Value())(".")
+        openingNumber.Value())(".")
         .Flush();
-    transactionNum = openingNumber->Value();
+    transactionNum = openingNumber.Value();
     managed.insert(context.InternalServer().NextTransactionNumber(
         MessageType::notarizeTransaction));
     auto& assetClosingNumber = *managed.rbegin();
 
-    if (false == openingNumber->Valid()) {
+    if (false == openingNumber.Valid()) {
         LogError()(OT_PRETTY_CLASS())(
             "No assetClosingNumber numbers were available. Suggest "
             "requesting the server for one.")
@@ -4295,13 +4295,13 @@ auto OT_API::issueMarketOffer(
     }
 
     LogVerbose()(OT_PRETTY_CLASS())("Allocated transaction number ")(
-        assetClosingNumber->Value())(".")
+        assetClosingNumber.Value())(".")
         .Flush();
     managed.insert(context.InternalServer().NextTransactionNumber(
         MessageType::notarizeTransaction));
     auto& currencyClosingNumber = *managed.rbegin();
 
-    if (false == currencyClosingNumber->Valid()) {
+    if (false == currencyClosingNumber.Valid()) {
         LogError()(OT_PRETTY_CLASS())(
             "No transaction numbers were available. Suggest "
             "requesting the server for one.")
@@ -4311,7 +4311,7 @@ auto OT_API::issueMarketOffer(
     }
 
     LogVerbose()(OT_PRETTY_CLASS())("Allocated transaction number ")(
-        currencyClosingNumber->Value())(".")
+        currencyClosingNumber.Value())(".")
         .Flush();
 
     // defaults to RIGHT NOW aka OT_API_GetTime() if set to 0 anyway.
@@ -4401,16 +4401,16 @@ auto OT_API::issueMarketOffer(
     OT_ASSERT(false != bool(trade));
 
     bool bCreateOffer = offer->MakeOffer(
-        bBuyingOrSelling,        // True == SELLING, False == BUYING
-        lPriceLimit,             // Per Minimum Increment...
-        lTotalAssetsOnOffer,     // Total assets available for sale or
-                                 // purchase.
-        lMinimumIncrement,       // The minimum increment that must be bought or
-                                 // sold for each transaction
-        openingNumber->Value(),  // Transaction number matches on
-                                 // transaction, item, offer, and trade.
-        VALID_FROM,              // defaults to RIGHT NOW
-        VALID_TO);               // defaults to 24 hours (a "Day Order")
+        bBuyingOrSelling,       // True == SELLING, False == BUYING
+        lPriceLimit,            // Per Minimum Increment...
+        lTotalAssetsOnOffer,    // Total assets available for sale or
+                                // purchase.
+        lMinimumIncrement,      // The minimum increment that must be bought or
+                                // sold for each transaction
+        openingNumber.Value(),  // Transaction number matches on
+                                // transaction, item, offer, and trade.
+        VALID_FROM,             // defaults to RIGHT NOW
+        VALID_TO);              // defaults to 24 hours (a "Day Order")
 
     if (false == bCreateOffer) {
         LogError()(OT_PRETTY_CLASS())("Unable to create offer or issue trade.")
@@ -4469,10 +4469,10 @@ auto OT_API::issueMarketOffer(
     // useful for baskets. Since this is a market offer, it needs a closing
     // number (for later cancellation or expiration.) assetClosingNumber=0,
     // currencyClosingNumber=0;
-    trade->AddClosingTransactionNo(assetClosingNumber->Value());
-    trade->AddClosingTransactionNo(currencyClosingNumber->Value());
+    trade->AddClosingTransactionNo(assetClosingNumber.Value());
+    trade->AddClosingTransactionNo(currencyClosingNumber.Value());
     LogError()(OT_PRETTY_CLASS())("Placing market offer ")(
-        openingNumber->Value())(", type: ")(
+        openingNumber.Value())(", type: ")(
         bBuyingOrSelling ? "selling" : "buying")(", ")(offer_type)(", ")(
         price_limit)(".")(" Assets for sale/purchase: ")(
         lTotalAssetsOnOffer, unittype)(". In minimum increments of: ")(
@@ -4485,7 +4485,7 @@ auto OT_API::issueMarketOffer(
         serverID,
         transactionType::marketOffer,
         originType::origin_market_offer,
-        openingNumber->Value())};
+        openingNumber.Value())};
 
     if (false == bool(transaction)) { return output; }
 
@@ -5419,7 +5419,7 @@ auto OT_API::get_or_create_process_inbox(
         const auto number = context.InternalServer().NextTransactionNumber(
             MessageType::processInbox);
 
-        if (false == number->Valid()) {
+        if (false == number.Valid()) {
             LogError()(OT_PRETTY_CLASS())("Nym ")(
                 nymID)(" is all out of transaction numbers.")
                 .Flush();
@@ -5428,7 +5428,7 @@ auto OT_API::get_or_create_process_inbox(
         }
 
         LogVerbose()(OT_PRETTY_CLASS())("Allocated transaction number ")(
-            number->Value())(".")
+            number.Value())(".")
             .Flush();
 
         auto newProcessInbox{api_.Factory().InternalSession().Transaction(
@@ -5437,7 +5437,7 @@ auto OT_API::get_or_create_process_inbox(
             serverID,
             transactionType::processInbox,
             originType::not_applicable,
-            number->Value())};
+            number.Value())};
 
         if (false == bool(newProcessInbox)) {
             LogError()(OT_PRETTY_CLASS())(
@@ -5450,7 +5450,7 @@ auto OT_API::get_or_create_process_inbox(
 
         // Above this line, the transaction number will be recovered
         // automatically
-        number->SetSuccess(true);
+        number.SetSuccess(true);
         processInbox.reset(newProcessInbox.release());
         response.AddTransaction(processInbox);
     }

@@ -839,8 +839,7 @@ private:
         static constexpr auto markerBytes = std::size_t{2u};
         const auto segwit = markerBytes + witness_total_;
         const auto total = base + segwit;
-        const auto scale =
-            params::Data::Chains().at(chain_).segwit_scale_factor_;
+        const auto scale = params::Chains().at(chain_).segwit_scale_factor_;
 
         OT_ASSERT(0 < scale);
 
@@ -1085,7 +1084,9 @@ private:
     {
         switch (chain_) {
             case Type::BitcoinCash:
-            case Type::BitcoinCash_testnet3: {
+            case Type::BitcoinCash_testnet3:
+            case Type::BitcoinSV:
+            case Type::BitcoinSV_testnet3: {
 
                 return sign_input_bch(index, input, bip143);
             }

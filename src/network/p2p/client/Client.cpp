@@ -405,7 +405,7 @@ auto Client::Imp::get_required_height(Chain chain) const noexcept -> Height
     const auto checkpoint = [&]() -> Height {
         try {
 
-            return bc::params::Data::Chains().at(chain).checkpoint_.height_;
+            return bc::params::Chains().at(chain).checkpoint_.height_;
         } catch (...) {
 
             return 0;

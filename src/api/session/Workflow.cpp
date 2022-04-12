@@ -67,11 +67,11 @@
 #include "serialization/protobuf/RPCEnums.pb.h"
 #include "serialization/protobuf/RPCPush.pb.h"
 
-namespace
+namespace opentxs
 {
 constexpr auto RPC_ACCOUNT_EVENT_VERSION = 1;
 constexpr auto RPC_PUSH_VERSION = 1;
-}  // namespace
+}  // namespace opentxs
 
 namespace zmq = opentxs::network::zeromq;
 

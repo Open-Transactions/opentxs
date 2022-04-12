@@ -3,6 +3,8 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+add_subdirectory(blockoracle)
+
 if(OT_BLOCKCHAIN_EXPORT)
   add_subdirectory(base)
   add_subdirectory(bitcoin)
@@ -24,10 +26,6 @@ if(OT_BLOCKCHAIN_EXPORT)
       "${opentxs_SOURCE_DIR}/src/internal/blockchain/node/Factory.hpp"
       "${opentxs_SOURCE_DIR}/src/internal/blockchain/node/HeaderOracle.hpp"
       "${opentxs_SOURCE_DIR}/src/internal/blockchain/node/Node.hpp"
-      "blockoracle/Cache.cpp"
-      "blockoracle/Mem.cpp"
-      "BlockOracle.cpp"
-      "BlockOracle.hpp"
       "HeaderOracle.cpp"
       "HeaderOracle.hpp"
       "Mempool.cpp"
@@ -39,7 +37,6 @@ if(OT_BLOCKCHAIN_EXPORT)
   list(
     APPEND
     cxx-install-headers
-    "${opentxs_SOURCE_DIR}/include/opentxs/blockchain/node/BlockOracle.hpp"
     "${opentxs_SOURCE_DIR}/include/opentxs/blockchain/node/HeaderOracle.hpp"
     "${opentxs_SOURCE_DIR}/include/opentxs/blockchain/node/Manager.hpp"
     "${opentxs_SOURCE_DIR}/include/opentxs/blockchain/node/TxoState.hpp"

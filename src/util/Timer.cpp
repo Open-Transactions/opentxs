@@ -18,12 +18,14 @@
 #include <type_traits>
 #include <utility>
 
+#include "api/network/asio/Context.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/util/Log.hpp"
 
 namespace opentxs::factory
 {
-auto Timer(boost::asio::io_context& asio) noexcept -> opentxs::Timer
+auto Timer(std::shared_ptr<api::network::asio::Context> asio) noexcept
+    -> opentxs::Timer
 {
     class DeadlineTimer final : public opentxs::Timer::Imp
     {
@@ -85,14 +87,18 @@ auto Timer(boost::asio::io_context& asio) noexcept -> opentxs::Timer
             }
         }
 
-        DeadlineTimer(boost::asio::io_context& asio) noexcept
-            : timer_(asio)
+        DeadlineTimer(
+            std::shared_ptr<api::network::asio::Context> asio) noexcept
+            : asio_(asio)
+            , timer_(asio_->get())
         {
+            OT_ASSERT(asio_);
         }
 
         ~DeadlineTimer() final = default;
 
     private:
+        std::shared_ptr<api::network::asio::Context> asio_;
         boost::asio::deadline_timer timer_;
     };
 

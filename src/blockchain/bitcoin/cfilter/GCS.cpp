@@ -7,7 +7,6 @@
 #include "1_Internal.hpp"                      // IWYU pragma: associated
 #include "blockchain/bitcoin/cfilter/GCS.hpp"  // IWYU pragma: associated
 
-#include <boost/cstdint.hpp>
 #include <boost/endian/buffers.hpp>
 #include <boost/multiprecision/cpp_int.hpp>
 #include <algorithm>
@@ -60,9 +59,9 @@ constexpr auto bitmask(const std::uint64_t n) -> std::uint64_t
     return (1u << n) - 1u;
 }
 
-constexpr auto range(std::uint32_t N, std::uint32_t M) noexcept -> std::uint64_t
+constexpr auto range(std::uint32_t N, std::uint32_t M) noexcept -> gcs::Range
 {
-    return std::uint64_t{N} * std::uint64_t{M};
+    return gcs::Range{N} * gcs::Range{M};
 }
 }  // namespace opentxs
 
@@ -282,36 +281,25 @@ namespace opentxs::gcs
 using BitReader = blockchain::internal::BitReader;
 using BitWriter = blockchain::internal::BitWriter;
 
-auto golomb_decode(const std::uint8_t P, BitReader& stream) noexcept(false)
-    -> std::uint64_t;
-auto golomb_encode(
-    const std::uint8_t P,
-    const std::uint64_t value,
-    BitWriter& stream) noexcept -> void;
-auto siphash(
-    const api::Session& api,
-    const ReadView key,
-    const ReadView item) noexcept(false) -> std::uint64_t;
-
-auto golomb_decode(const std::uint8_t P, BitReader& stream) noexcept(false)
-    -> std::uint64_t
+static auto golomb_decode(const std::uint8_t P, BitReader& stream) noexcept(
+    false) -> Delta
 {
-    auto quotient = std::uint64_t{0};
+    auto quotient = Delta{0};
 
     while (1 == stream.read(1)) { quotient++; }
 
     auto remainder = stream.read(P);
 
-    return std::uint64_t{(quotient << P) + remainder};
+    return Delta{(quotient << P) + remainder};
 }
 
-auto golomb_encode(
+static auto golomb_encode(
     const std::uint8_t P,
-    const std::uint64_t value,
+    const Delta value,
     BitWriter& stream) noexcept -> void
 {
-    auto remainder = std::uint64_t{value & bitmask(P)};
-    auto quotient = std::uint64_t{value >> P};
+    auto remainder = Delta{value & bitmask(P)};
+    auto quotient = Delta{value >> P};
 
     while (quotient > 0) {
         stream.write(1, 1);
@@ -330,7 +318,7 @@ auto GolombDecode(
 {
     auto output = Elements{alloc};
     auto stream = BitReader{encoded};
-    auto last = std::uint64_t{0};
+    auto last = Element{0};
 
     for (auto i = std::size_t{0}; i < N; ++i) {
         auto delta = golomb_decode(P, stream);
@@ -350,10 +338,10 @@ auto GolombEncode(
     auto output = Vector<std::byte>{alloc};
     output.reserve(hashedSet.size() * P * 2u);
     auto stream = BitWriter{output};
-    auto last = std::uint64_t{0};
+    auto last = Element{0};
 
     for (const auto& item : hashedSet) {
-        auto delta = std::uint64_t{item - last};
+        auto delta = Delta{item - last};
 
         if (delta != 0) { golomb_encode(P, delta, stream); }
 
@@ -365,33 +353,19 @@ auto GolombEncode(
     return output;
 }
 
-auto siphash(
-    const api::Session& api,
-    const ReadView key,
-    const ReadView item) noexcept(false) -> std::uint64_t
-{
-    if (16 != key.size()) { throw std::runtime_error("Invalid key"); }
-
-    auto output = std::uint64_t{};
-    auto writer = preallocated(sizeof(output), &output);
-
-    if (false == api.Crypto().Hash().HMAC(
-                     crypto::HashType::SipHash24, key, item, writer)) {
-        throw std::runtime_error("siphash failed");
-    }
-
-    return output;
-}
-
 auto HashToRange(
     const api::Session& api,
     const ReadView key,
-    const std::uint64_t range,
-    const ReadView item) noexcept(false) -> std::uint64_t
+    const Range range,
+    const ReadView item) noexcept(false) -> Element
 {
-    return ((bmp::uint128_t{siphash(api, key, item)} * bmp::uint128_t{range}) >>
-            64u)
-        .convert_to<std::uint64_t>();
+    return HashToRange(range, Siphash(api, key, item));
+}
+
+auto HashToRange(const Range range, const Hash hash) noexcept(false) -> Element
+{
+    return ((bmp::uint128_t{hash} * bmp::uint128_t{range}) >> 64u)
+        .convert_to<Element>();
 }
 
 auto HashedSetConstruct(
@@ -411,6 +385,24 @@ auto HashedSetConstruct(
             return HashToRange(api, key, range(N, M), item);
         });
     std::sort(output.begin(), output.end());
+
+    return output;
+}
+
+auto Siphash(
+    const api::Session& api,
+    const ReadView key,
+    const ReadView item) noexcept(false) -> Hash
+{
+    if (16 != key.size()) { throw std::runtime_error("Invalid key"); }
+
+    auto output = Hash{};
+    auto writer = preallocated(sizeof(output), &output);
+
+    if (false == api.Crypto().Hash().HMAC(
+                     crypto::HashType::SipHash24, key, item, writer)) {
+        throw std::runtime_error("siphash failed");
+    }
 
     return output;
 }
@@ -610,6 +602,21 @@ auto GCS::hashed_set_construct(
     return hashed_set_construct(transform(elements, alloc), alloc);
 }
 
+auto GCS::hashed_set_construct(const gcs::Hashes& targets, allocator_type alloc)
+    const noexcept -> gcs::Elements
+{
+    auto out = gcs::Elements{alloc};
+    out.reserve(targets.size());
+    const auto range = Range();
+    std::transform(
+        targets.begin(),
+        targets.end(),
+        std::back_inserter(out),
+        [&](const auto& hash) { return gcs::HashToRange(range, hash); });
+
+    return out;
+}
+
 auto GCS::hashed_set_construct(const Targets& elements, allocator_type alloc)
     const noexcept -> gcs::Elements
 {
@@ -617,10 +624,9 @@ auto GCS::hashed_set_construct(const Targets& elements, allocator_type alloc)
         api_, reader(key_), count_, false_positive_rate_, elements, alloc);
 }
 
-auto GCS::hash_to_range(const ReadView in) const noexcept -> std::uint64_t
+auto GCS::hash_to_range(const ReadView in) const noexcept -> gcs::Range
 {
-    return gcs::HashToRange(
-        api_, reader(key_), range(count_, false_positive_rate_), in);
+    return gcs::HashToRange(api_, reader(key_), Range(), in);
 }
 
 auto GCS::Header(const cfilter::Header& previous) const noexcept
@@ -638,39 +644,85 @@ auto GCS::Match(const Targets& targets, allocator_type alloc) const noexcept
     static constexpr auto reserveMatches = std::size_t{16};
     auto output = Matches{alloc};
     output.reserve(reserveMatches);
-    using Map = opentxs::Map<std::uint64_t, Targets::const_iterator>;
-    static constexpr auto bytesPerTarget = (2 * sizeof(std::uint64_t));
+    using Map = opentxs::Map<gcs::Element, Matches>;
+    static constexpr auto bytesPerTarget = (2 * sizeof(gcs::Element));
     auto allocHash = alloc::BoostMonotonic{targets.size() * bytesPerTarget};
     auto hashed = gcs::Elements{&allocHash};
     hashed.reserve(targets.size());
     static constexpr auto bytesPerMatch =
-        sizeof(std::uint64_t) + sizeof(Map::value_type);
+        sizeof(gcs::Element) + sizeof(Map::value_type);
     auto buf = std::array<std::byte, reserveMatches * bytesPerMatch>{};
     auto allocMatches = alloc::BoostMonotonic{buf.data(), buf.size()};
     auto matches = gcs::Elements{&allocMatches};
     matches.reserve(reserveMatches);
     auto map = Map{&allocMatches};
-    const auto& set = decompress();
 
     for (auto i = targets.cbegin(); i != targets.cend(); ++i) {
         const auto& hash = hashed.emplace_back(hash_to_range(*i));
-        map.emplace(hash, i);
+        map[hash].emplace_back(i);
     }
 
-    std::sort(std::begin(hashed), std::end(hashed));
+    dedup(hashed);
+    const auto& set = decompress();
     std::set_intersection(
         std::begin(hashed),
         std::end(hashed),
         std::begin(set),
         std::end(set),
         std::back_inserter(matches));
-    std::transform(
-        std::begin(matches),
-        std::end(matches),
-        std::back_inserter(output),
-        [&](const auto& in) { return map.at(in); });
+
+    for (const auto& match : matches) {
+        auto& values = map.at(match);
+        std::copy(values.begin(), values.end(), std::back_inserter(output));
+    }
 
     return output;
+}
+
+auto GCS::Match(const gcs::Hashes& prehashed) const noexcept -> PrehashedMatches
+{
+    static constexpr auto reserveMatches = std::size_t{16};
+    auto output = PrehashedMatches{prehashed.get_allocator()};
+    output.reserve(reserveMatches);
+    using Map = opentxs::Map<gcs::Element, PrehashedMatches>;
+    static constexpr auto bytesPerTarget = (2 * sizeof(gcs::Element));
+    auto allocHash = alloc::BoostMonotonic{prehashed.size() * bytesPerTarget};
+    auto hashed = gcs::Elements{&allocHash};
+    hashed.reserve(prehashed.size());
+    static constexpr auto bytesPerMatch =
+        sizeof(gcs::Element) + sizeof(Map::value_type);
+    auto buf = std::array<std::byte, reserveMatches * bytesPerMatch>{};
+    auto allocMatches = alloc::BoostMonotonic{buf.data(), buf.size()};
+    auto matches = gcs::Elements{&allocMatches};
+    matches.reserve(reserveMatches);
+    auto map = Map{&allocMatches};
+    const auto range = Range();
+
+    for (auto i = prehashed.cbegin(); i != prehashed.cend(); ++i) {
+        const auto& hash = hashed.emplace_back(gcs::HashToRange(range, *i));
+        map[hash].emplace_back(i);
+    }
+
+    dedup(hashed);
+    const auto& set = decompress();
+    std::set_intersection(
+        std::begin(hashed),
+        std::end(hashed),
+        std::begin(set),
+        std::end(set),
+        std::back_inserter(matches));
+
+    for (const auto& match : matches) {
+        auto& values = map.at(match);
+        std::copy(values.begin(), values.end(), std::back_inserter(output));
+    }
+
+    return output;
+}
+
+auto GCS::Range() const noexcept -> gcs::Range
+{
+    return range(count_, false_positive_rate_);
 }
 
 auto GCS::Serialize(proto::GCS& output) const noexcept -> bool
@@ -704,7 +756,7 @@ auto GCS::Test(const ReadView target) const noexcept -> bool
 {
     auto buf = std::array<
         std::byte,
-        sizeof(target) + sizeof(ReadView) + sizeof(std::uint64_t)>{};
+        sizeof(target) + sizeof(ReadView) + sizeof(gcs::Element)>{};
     auto alloc = alloc::BoostMonotonic{buf.data(), buf.size()};
     const auto input = [&] {
         auto out = Targets{&alloc};
@@ -734,7 +786,7 @@ auto GCS::Test(const ReadView target) const noexcept -> bool
 auto GCS::Test(const Vector<OTData>& targets) const noexcept -> bool
 {
     const auto size =
-        targets.size() * ((2 * sizeof(ReadView)) + sizeof(std::uint64_t));
+        targets.size() * ((2 * sizeof(ReadView)) + sizeof(gcs::Element));
     auto alloc = alloc::BoostMonotonic{size};
 
     return test(hashed_set_construct(targets, &alloc));
@@ -743,7 +795,16 @@ auto GCS::Test(const Vector<OTData>& targets) const noexcept -> bool
 auto GCS::Test(const Vector<Space>& targets) const noexcept -> bool
 {
     const auto size =
-        targets.size() * ((2 * sizeof(ReadView)) + sizeof(std::uint64_t));
+        targets.size() * ((2 * sizeof(ReadView)) + sizeof(gcs::Element));
+    auto alloc = alloc::BoostMonotonic{size};
+
+    return test(hashed_set_construct(targets, &alloc));
+}
+
+auto GCS::Test(const gcs::Hashes& targets) const noexcept -> bool
+{
+    const auto size =
+        targets.size() * ((2 * sizeof(ReadView)) + sizeof(gcs::Element));
     auto alloc = alloc::BoostMonotonic{size};
 
     return test(hashed_set_construct(targets, &alloc));
@@ -753,7 +814,7 @@ auto GCS::test(const gcs::Elements& targets) const noexcept -> bool
 {
     const auto& set = decompress();
     auto alloc = alloc::BoostMonotonic{1024};
-    auto matches = Vector<std::uint64_t>{&alloc};
+    auto matches = Vector<gcs::Element>{&alloc};
     std::set_intersection(
         std::begin(targets),
         std::end(targets),

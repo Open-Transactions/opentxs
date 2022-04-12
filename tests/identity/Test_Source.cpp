@@ -133,12 +133,8 @@ public:
 
         authority_.reset(Factory().Authority(
             client_, nn, *source_, parameters_, 6, reason_));
-
-        /*    auto nym = client_.Wallet().Nym(reason_);
-
-            authority_.reset(Factory().Authority(
-                client_, *nym, *source_, parameters_, version_, reason_));*/
     }
+
     void setupSourceForBip47(ot::crypto::SeedStyle seedStyle)
     {
         auto seed = client_.Crypto().Seed().ImportSeed(
@@ -177,8 +173,9 @@ TEST_F(Test_Source, Constructor_WithProtoOfTypeBIP47_ShouldNotThrow)
 {
     opentxs::proto::NymIDSource nymIdProto;
     nymIdProto.set_type(proto::SOURCETYPE_BIP47);
-
-    EXPECT_NO_THROW(ot::Factory::NymIDSource(client_, nymIdProto));
+    *nymIdProto.mutable_paymentcode()->mutable_chaincode() = "test";
+    source_.reset(ot::Factory::NymIDSource(client_, nymIdProto));
+    EXPECT_NE(source_, nullptr);
 }
 
 TEST_F(Test_Source, Constructor_WithProtoOfTypePUBKEY_ShouldNotThrow)
@@ -186,7 +183,8 @@ TEST_F(Test_Source, Constructor_WithProtoOfTypePUBKEY_ShouldNotThrow)
     opentxs::proto::NymIDSource nymIdProto;
     nymIdProto.set_type(proto::SOURCETYPE_PUBKEY);
 
-    EXPECT_NO_THROW(ot::Factory::NymIDSource(client_, nymIdProto));
+    source_.reset(ot::Factory::NymIDSource(client_, nymIdProto));
+    EXPECT_NE(source_, nullptr);
 }
 
 TEST_F(Test_Source, Constructor_WithCredentialTypeError_ShouldThrow)
@@ -209,7 +207,9 @@ TEST_F(Test_Source, Constructor_WithCredentialTypeError_ShouldThrow)
         std::runtime_error);
 }
 
-TEST_F(Test_Source, Constructor_WithParametersCredentialTypeHD_ShouldNotThrow)
+TEST_F(
+    Test_Source,
+    Constructor_WithParametersCredentialTypeHD_ShouldNotReturnNullptr)
 {
     crypto::Parameters parameters{
         crypto::key::asymmetric::Algorithm::Secp256k1,
@@ -224,19 +224,21 @@ TEST_F(Test_Source, Constructor_WithParametersCredentialTypeHD_ShouldNotThrow)
         reason_);
 
     parameters.SetSeed(seed);
-    EXPECT_NO_THROW(ot::Factory::NymIDSource(client_, parameters, reason_));
+    source_.reset(ot::Factory::NymIDSource(client_, parameters, reason_));
+    EXPECT_NE(source_, nullptr);
 }
 
 TEST_F(
     Test_Source,
-    Constructor_WithParametersCredentialTypeLegacy_ShouldNotThrow)
+    Constructor_WithParametersCredentialTypeLegacy_ShouldNotReturnNullptr)
 {
     crypto::Parameters parameters{
         crypto::key::asymmetric::Algorithm::Secp256k1,
         identity::CredentialType::Legacy,
         identity::SourceType::PubKey,
         version_};
-    EXPECT_NO_THROW(ot::Factory::NymIDSource(client_, parameters, reason_));
+    source_.reset(ot::Factory::NymIDSource(client_, parameters, reason_));
+    EXPECT_NE(source_, nullptr);
 }
 
 TEST_F(

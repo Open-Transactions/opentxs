@@ -133,7 +133,7 @@ auto IssuerID(const api::Session& api, const blockchain::Type chain) noexcept
 
     try {
         const auto& hex =
-            blockchain::params::Data::Chains().at(chain).genesis_hash_hex_;
+            blockchain::params::Chains().at(chain).genesis_hash_hex_;
         const auto genesis = api.Factory().DataFromHex(hex);
         output->CalculateDigest(genesis->Bytes());
     } catch (...) {

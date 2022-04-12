@@ -7,6 +7,7 @@
 #include "1_Internal.hpp"                      // IWYU pragma: associated
 #include "internal/blockchain/Blockchain.hpp"  // IWYU pragma: associated
 
+#include <boost/container/flat_map.hpp>
 #include <boost/multiprecision/cpp_int.hpp>
 #include <algorithm>
 #include <cstddef>
@@ -338,7 +339,7 @@ auto DefaultFilter(const Type type) noexcept -> cfilter::Type
 {
     try {
 
-        return params::Data::Chains().at(type).default_filter_type_;
+        return params::Chains().at(type).default_filter_type_;
     } catch (...) {
         return cfilter::Type::Unknown;
     }
@@ -453,7 +454,7 @@ auto Grind(const std::function<void()> function) noexcept -> void
 auto Serialize(const Type chain, const cfilter::Type type) noexcept(false)
     -> std::uint8_t
 {
-    return params::Data::Bip158().at(chain).at(type);
+    return params::Bip158().at(chain).at(type);
 }
 
 auto Serialize(const block::Position& in) noexcept -> Space

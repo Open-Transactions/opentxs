@@ -52,7 +52,9 @@ private:
 #ifdef _WIN32
 public:
 #endif
-    virtual auto clone() const noexcept -> Signable* = 0;
+    // tmp solution this function is toremove once all classes which inherites
+    // by it will be rewritten
+    virtual auto clone() const noexcept -> Signable* { return nullptr; }
 #ifdef _WIN32
 private:
 #endif

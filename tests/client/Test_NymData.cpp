@@ -521,7 +521,7 @@ TEST_F(Test_NymData, SocialMediaProfileTypes)
 {
     ot::UnallocatedSet<ot::proto::ContactItemType> profileTypes =
         ot::proto::AllowedItemTypes().at(ot::proto::ContactSectionVersion(
-            CONTACT_CONTACT_DATA_VERSION,
+            opentxs::CONTACT_CONTACT_DATA_VERSION,
             ot::translate(ot::identity::wot::claim::SectionType::Profile)));
 
     ot::UnallocatedSet<ot::identity::wot::claim::ClaimType> output;

@@ -34,7 +34,7 @@ Sync::Sync(
     , blank_position_(make_blank<block::Position>::value(api))
     , chain_(type)
     , genesis_([&] {
-        const auto& hex = params::Data::Chains().at(chain_).genesis_hash_hex_;
+        const auto& hex = params::Chains().at(chain_).genesis_hash_hex_;
         auto out = block::Hash{};
         const auto rc = out.DecodeHex(hex);
 

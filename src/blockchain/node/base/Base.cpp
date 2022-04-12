@@ -59,7 +59,6 @@
 #include "opentxs/blockchain/crypto/PaymentCode.hpp"
 #include "opentxs/blockchain/crypto/Subchain.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
-#include "opentxs/blockchain/node/BlockOracle.hpp"
 #include "opentxs/blockchain/node/SendResult.hpp"
 #include "opentxs/blockchain/node/Types.hpp"
 #include "opentxs/blockchain/p2p/Types.hpp"
@@ -225,7 +224,7 @@ Base::Base(
           api_.Network().Blockchain().Internal().Mempool(),
           chain_)
     , header_p_(factory::HeaderOracle(api, *database_p_, chain_))
-    , block_p_(factory::BlockOracle(
+    , block_(factory::BlockOracle(
           api,
           *this,
           *header_p_,
@@ -237,7 +236,7 @@ Base::Base(
           config_,
           *this,
           *header_p_,
-          *block_p_,
+          block_,
           *database_p_,
           chain_,
           filter_type_,
@@ -249,7 +248,7 @@ Base::Base(
           *this,
           *header_p_,
           *filter_p_,
-          *block_p_,
+          block_,
           *database_p_,
           chain_,
           database_p_->BlockPolicy(),
@@ -273,7 +272,6 @@ Base::Base(
     , filters_(*filter_p_)
     , header_(*header_p_)
     , peer_(*peer_p_)
-    , block_(*block_p_)
     , wallet_(*wallet_p_)
     , start_(Clock::now())
     , sync_endpoint_(syncEndpoint)
@@ -309,8 +307,7 @@ Base::Base(
     , sync_socket_(
           api_.Network().ZeroMQ().PairSocket(sync_cb_, requestor_endpoint_))
     , local_chain_height_(0)
-    , remote_chain_height_(
-          params::Data::Chains().at(chain_).checkpoint_.height_)
+    , remote_chain_height_(params::Chains().at(chain_).checkpoint_.height_)
     , waiting_for_headers_(Flag::Factory(false))
     , headers_requested_(Clock::now())
     , headers_received_()
@@ -327,7 +324,6 @@ Base::Base(
     OT_ASSERT(filter_p_);
     OT_ASSERT(header_p_);
     OT_ASSERT(peer_p_);
-    OT_ASSERT(block_p_);
     OT_ASSERT(wallet_p_);
 
     header_.Internal().Init();
@@ -355,7 +351,7 @@ Base::Base(
 
                     return out;
                 }(),
-                params::Data::Chains().at(chain_).default_port_,
+                params::Chains().at(chain_).default_port_,
                 chain_,
                 {},
                 {},
@@ -391,7 +387,7 @@ Base::Base(
 
                     return out;
                 }(),
-                params::Data::Chains().at(chain_).default_port_,
+                params::Chains().at(chain_).default_port_,
                 chain_,
                 {},
                 {},
@@ -520,7 +516,7 @@ auto Base::FeeRate() const noexcept -> Amount
     // recent blocks
     // TODO on networks that support it, query the fee rate from network peers
     const auto http = wallet_.FeeEstimate();
-    const auto fallback = params::Data::Chains().at(chain_).default_fee_rate_;
+    const auto fallback = params::Chains().at(chain_).default_fee_rate_;
     const auto chain = print(chain_);
     LogConsole()(chain)(" defined minimum fee rate is: ")(fallback).Flush();
 
@@ -671,6 +667,11 @@ auto Base::notify_sync_client() const noexcept -> void
             return msg;
         }());
     }
+}
+
+auto Base::PeerTarget() const noexcept -> std::size_t
+{
+    return peer_.PeerTarget();
 }
 
 auto Base::pipeline(zmq::Message&& in) noexcept -> void

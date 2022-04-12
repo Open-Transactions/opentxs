@@ -61,7 +61,7 @@ auto HeaderOracle::GenesisBlockHash(const blockchain::Type type)
             if (cache.end() != it) { return it->second; }
         }
 
-        const auto& data = params::Data::Chains().at(type);
+        const auto& data = params::Chains().at(type);
         const auto [it, added] = cache.emplace(type, [&] {
             auto out = block::Hash();
             const auto rc = out.DecodeHex(data.genesis_hash_hex_);
@@ -767,7 +767,7 @@ auto HeaderOracle::evaluate_candidate(
 
 auto HeaderOracle::GetDefaultCheckpoint() const noexcept -> CheckpointData
 {
-    const auto& checkpoint = params::Data::Chains().at(chain_).checkpoint_;
+    const auto& checkpoint = params::Chains().at(chain_).checkpoint_;
 
     return CheckpointData{
         checkpoint.height_,

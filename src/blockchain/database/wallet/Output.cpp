@@ -576,8 +576,7 @@ public:
 
             const auto stop = std::max<block::Height>(
                 0,
-                start - params::Data::Chains().at(chain_).maturation_interval_ -
-                    1);
+                start - params::Chains().at(chain_).maturation_interval_ - 1);
             const auto matured = [&] {
                 auto m = UnallocatedSet<block::Outpoint>{};
                 lmdb_.Read(
@@ -1033,8 +1032,7 @@ public:
         , subchain_(subchains)
         , proposals_(proposals)
         , blank_(-1, block::Hash{})
-        , maturation_target_(
-              params::Data::Chains().at(chain_).maturation_interval_)
+        , maturation_target_(params::Chains().at(chain_).maturation_interval_)
         , cache_(api_, lmdb_, chain_, blank_)
     {
     }

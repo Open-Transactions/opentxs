@@ -6,9 +6,9 @@
 #include "rpc/Helpers.hpp"  // IWYU pragma: associated
 
 #include <gtest/gtest.h>
-#include <algorithm>
 #include <atomic>
-#include <iterator>
+#include <iosfwd>
+#include <iostream>
 
 #include "integration/Helpers.hpp"
 #include "opentxs/api/Context.hpp"
@@ -16,21 +16,17 @@
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/Contacts.hpp"
 #include "opentxs/api/session/Crypto.hpp"
+#include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Notary.hpp"
 #include "opentxs/blockchain/BlockchainType.hpp"
 #include "opentxs/blockchain/crypto/Account.hpp"
 #include "opentxs/blockchain/crypto/HDProtocol.hpp"
 #include "opentxs/core/AccountType.hpp"
 #include "opentxs/core/UnitType.hpp"
-#include "opentxs/core/display/Scale.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
+#include "opentxs/core/identifier/Notary.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
-#include "opentxs/interface/rpc/CommandType.hpp"
-#include "opentxs/interface/rpc/ResponseCode.hpp"
-#include "opentxs/interface/rpc/request/Base.hpp"
-#include "opentxs/interface/rpc/request/GetAccountActivity.hpp"
-#include "opentxs/interface/rpc/response/Base.hpp"
-#include "opentxs/interface/rpc/response/GetAccountActivity.hpp"
+#include "opentxs/util/Pimpl.hpp"
 #include "paymentcode/VectorsV3.hpp"
 #include "ui/Helpers.hpp"
 

@@ -194,7 +194,7 @@ public:
         const PasswordPrompt& reason)
         -> Editor<blind::Purse, std::shared_mutex> final;
     auto NextTransactionNumber(const MessageType reason)
-        -> OTManagedNumber final;
+        -> otx::context::ManagedNumber final;
     auto PingNotary(const PasswordPrompt& reason)
         -> client::NetworkReplyMessage final;
     auto ProcessNotification(
@@ -211,7 +211,7 @@ public:
         std::shared_ptr<Message> message,
         std::shared_ptr<Ledger> inbox,
         std::shared_ptr<Ledger> outbox,
-        UnallocatedSet<OTManagedNumber>* numbers,
+        UnallocatedSet<otx::context::ManagedNumber>* numbers,
         const PasswordPrompt& reason,
         const ExtraArgs& args) -> QueueResult final;
     auto RefreshNymbox(
@@ -222,7 +222,7 @@ public:
     auto Resync(const proto::Context& serialized) -> bool final;
     auto SendMessage(
         const api::session::Client& client,
-        const UnallocatedSet<OTManagedNumber>& pending,
+        const UnallocatedSet<otx::context::ManagedNumber>& pending,
         otx::context::Server&,
         const Message& message,
         const PasswordPrompt& reason,
@@ -317,7 +317,7 @@ private:
     std::atomic<int> failure_counter_;
     std::shared_ptr<Ledger> inbox_;
     std::shared_ptr<Ledger> outbox_;
-    UnallocatedSet<OTManagedNumber>* numbers_;
+    UnallocatedSet<otx::context::ManagedNumber>* numbers_;
     OTZMQPushSocket find_nym_;
     OTZMQPushSocket find_server_;
     OTZMQPushSocket find_unit_definition_;
@@ -515,7 +515,7 @@ private:
         const api::session::Client& client,
         const PasswordPrompt& reason);
     auto next_transaction_number(const Lock& lock, const MessageType reason)
-        -> OTManagedNumber;
+        -> otx::context::ManagedNumber;
     void pending_send(
         const api::session::Client& client,
         const PasswordPrompt& reason);
@@ -643,7 +643,7 @@ private:
     auto process_reply(
         const Lock& lock,
         const api::session::Client& client,
-        const UnallocatedSet<OTManagedNumber>& managed,
+        const UnallocatedSet<otx::context::ManagedNumber>& managed,
         const Message& reply,
         const PasswordPrompt& reason) -> bool;
     void process_response_transaction(
@@ -747,7 +747,8 @@ private:
         const ActionType type = ActionType::Normal,
         std::shared_ptr<Ledger> inbox = {},
         std::shared_ptr<Ledger> outbox = {},
-        UnallocatedSet<OTManagedNumber>* numbers = nullptr) -> QueueResult;
+        UnallocatedSet<otx::context::ManagedNumber>* numbers = nullptr)
+        -> QueueResult;
     auto state_machine() noexcept -> bool;
     auto statement(
         const Lock& lock,

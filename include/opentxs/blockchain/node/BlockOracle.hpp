@@ -14,6 +14,7 @@
 
 #include "opentxs/blockchain/block/Position.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
+#include "opentxs/blockchain/node/Types.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 
@@ -31,11 +32,12 @@ namespace bitcoin
 class Block;
 }  // namespace bitcoin
 }  // namespace block
+
 namespace node
 {
 namespace internal
 {
-struct BlockOracle;
+class BlockOracle;
 }  // namespace internal
 }  // namespace node
 }  // namespace blockchain
@@ -48,21 +50,16 @@ namespace opentxs::blockchain::node
 class OPENTXS_EXPORT BlockOracle
 {
 public:
-    using BitcoinBlock = block::bitcoin::Block;
-    using BitcoinBlock_p = std::shared_ptr<const BitcoinBlock>;
-    using BitcoinBlockFuture = std::shared_future<BitcoinBlock_p>;
-    using BlockHashes = UnallocatedVector<block::Hash>;
-    using BitcoinBlockFutures = UnallocatedVector<BitcoinBlockFuture>;
-
-    virtual auto Tip() const noexcept -> block::Position = 0;
     virtual auto DownloadQueue() const noexcept -> std::size_t = 0;
     OPENTXS_NO_EXPORT virtual auto Internal() const noexcept
         -> const internal::BlockOracle& = 0;
     virtual auto LoadBitcoin(const block::Hash& block) const noexcept
-        -> BitcoinBlockFuture = 0;
-    virtual auto LoadBitcoin(const BlockHashes& hashes) const noexcept
-        -> BitcoinBlockFutures = 0;
-    virtual auto Validate(const BitcoinBlock& block) const noexcept -> bool = 0;
+        -> BitcoinBlockResult = 0;
+    virtual auto LoadBitcoin(const Vector<block::Hash>& hashes) const noexcept
+        -> BitcoinBlockResults = 0;
+    virtual auto Tip() const noexcept -> block::Position = 0;
+    virtual auto Validate(const block::bitcoin::Block& block) const noexcept
+        -> bool = 0;
 
     OPENTXS_NO_EXPORT virtual ~BlockOracle() = default;
 

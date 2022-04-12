@@ -449,6 +449,7 @@ enum ContactItemType {
     CITEMTYPE_ZMW = 421;
     CITEMTYPE_ZWD = 422;
     CITEMTYPE_CUSTOM = 423;
+    CITEMTYPE_TNBSV = 424;
 }
 
 enum ContactItemAttribute {

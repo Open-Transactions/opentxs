@@ -140,7 +140,7 @@ Config::Config(
         config.CheckSet_long(
             String::Factory(STORAGE_CONFIG_KEY),
             String::Factory("gc_interval"),
-            C::duration_cast<C::seconds>(C::minutes(10)).count(),
+            0,
             output,
             notUsed);
 

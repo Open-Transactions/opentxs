@@ -19,6 +19,7 @@
 #include "blockchain/DownloadTask.hpp"
 #include "internal/api/network/Asio.hpp"
 #include "internal/api/session/Endpoints.hpp"
+#include "internal/blockchain/node/BlockOracle.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/api/network/Asio.hpp"
 #include "opentxs/api/network/Network.hpp"

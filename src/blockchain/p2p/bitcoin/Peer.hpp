@@ -50,7 +50,7 @@ namespace node
 {
 namespace internal
 {
-struct BlockOracle;
+class BlockOracle;
 struct Config;
 struct FilterOracle;
 struct Mempool;
@@ -105,9 +105,9 @@ public:
         const UnallocatedCString& shutdown,
         const int id,
         std::unique_ptr<internal::Address> address,
+        const ProtocolVersion protocol = 0,
         const bool relay = true,
-        const UnallocatedSet<p2p::Service>& localServices = {},
-        const ProtocolVersion protocol = 0) noexcept;
+        const UnallocatedSet<p2p::Service>& localServices = {}) noexcept;
 
     ~Peer() final;
 
@@ -178,11 +178,15 @@ private:
     auto broadcast_transaction(zmq::Message&& message) noexcept -> void final;
     auto ping() noexcept -> void final;
     auto pong(Nonce) noexcept -> void final;
+    auto process_block_batch(const zmq::Frame& payload) noexcept -> void;
+    auto process_block_job(const zmq::Frame& payload) noexcept -> void;
     auto process_message(zmq::Message&& message) noexcept -> void final;
     auto reconcile_mempool() noexcept -> void;
     auto request_addresses() noexcept -> void final;
     auto request_block(zmq::Message&& message) noexcept -> void final;
     auto request_blocks() noexcept -> void final;
+    auto request_block_batch() noexcept -> void;
+    auto request_block_job() noexcept -> void;
     auto request_cfheaders() noexcept -> void final;
     auto request_cfilter() noexcept -> void final;
     auto request_checkpoint_block_header() noexcept -> void final;

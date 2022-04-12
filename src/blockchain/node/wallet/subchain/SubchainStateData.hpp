@@ -169,6 +169,9 @@ public:
     const CString shutdown_endpoint_;
     mutable ElementCache element_cache_;
     mutable MatchCache match_cache_;
+    mutable std::atomic_bool scan_dirty_;
+    mutable std::atomic<std::size_t> process_queue_;
+    mutable std::atomic<block::Height> rescan_progress_;
 
     auto ChangeState(const State state, StateSequence reorg) noexcept
         -> bool final;
@@ -253,13 +256,17 @@ private:
     using BlockHashes = HeaderOracle::Hashes;
     using MatchesToTest = std::pair<Patterns, Patterns>;
 
+    class PrehashData;
+
     static constexpr auto cfilter_size_window_ = std::size_t{1000u};
 
+    network::zeromq::socket::Raw& to_block_oracle_;
     network::zeromq::socket::Raw& to_children_;
     std::atomic<State> pending_state_;
     std::atomic<State> state_;
     mutable Deque<std::size_t> filter_sizes_;
     mutable std::atomic<std::size_t> elements_per_cfilter_;
+    mutable JobCounter job_counter_;
     HandledReorgs reorgs_;
     std::optional<wallet::Progress> progress_;
     std::optional<wallet::Rescan> rescan_;
@@ -275,6 +282,8 @@ private:
         const Subchain subchain,
         allocator_type alloc) noexcept -> CString;
 
+    auto choose_thread_count(std::size_t elements) const noexcept
+        -> std::size_t;
     auto clear_children() noexcept -> void;
     auto get_account_targets(const Elements& elements, alloc::Resource* alloc)
         const noexcept -> Targets;
@@ -292,13 +301,6 @@ private:
         const block::Matches& matches,
         std::unique_ptr<const block::bitcoin::Transaction> tx) const noexcept
         -> void = 0;
-    auto match(
-        const std::string_view procedure,
-        const Log& log,
-        const block::Position& position,
-        const BlockTarget& targets,
-        const GCS& cfilter,
-        wallet::MatchCache::Results& results) const noexcept -> bool;
     auto reorg_children() const noexcept -> std::size_t;
     auto supported_scripts(const crypto::Element& element) const noexcept
         -> UnallocatedVector<ScriptForm>;

@@ -10,12 +10,16 @@
 namespace opentxs
 {
 ScopeGuard::ScopeGuard(SimpleCallback cb) noexcept
-    : cb_(cb)
+    : post_(cb)
 {
 }
 
 ScopeGuard::~ScopeGuard()
 {
-    if (cb_) { cb_(); }
+    try {
+        if (post_) { std::invoke(post_); }
+    } catch (...) {
+        OT_FAIL;
+    }
 }
 }  // namespace opentxs

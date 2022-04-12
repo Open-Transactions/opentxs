@@ -114,5 +114,6 @@ private:
     auto clone() const -> Data* override;
 };
 
+// NOTE sorry Windows users, MSVC throws an ICE if we export this symbol
 extern template class OPENTXS_EXPORT_TEMPLATE FixedByteArray<32>;
 }  // namespace opentxs

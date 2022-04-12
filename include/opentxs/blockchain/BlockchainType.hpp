@@ -24,6 +24,8 @@ enum class Type : TypeEnum {
     Litecoin_testnet4 = 8,
     PKT = 9,
     PKT_testnet = 10,
+    BitcoinSV = 11,
+    BitcoinSV_testnet3 = 12,
     UnitTest = std::numeric_limits<TypeEnum>::max(),
 };
 }  // namespace opentxs::blockchain

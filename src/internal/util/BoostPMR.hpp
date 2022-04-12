@@ -15,6 +15,12 @@
 
 namespace opentxs::alloc
 {
+/// This class adapts a boost::container::pmr::memory_resource* to a
+/// std::pmr::memory_resource
+///
+/// Its purpose is to allow resources returned by functions such as
+/// boost::container::pmr::new_delete_resource() to be used with std::pmr
+/// containers.
 class BoostWrap final : public Resource
 {
 public:
@@ -48,6 +54,11 @@ private:
     boost::container::pmr::memory_resource* boost_;
 };
 
+/// This class adapts any boost::container::pmr::memory_resource to a
+/// std::pmr::memory_resource
+///
+/// It allows you to construct the boost memory_resource of your choice and use
+/// it for std::pmr containers
 template <typename T>
 class Boost final : public Resource
 {
@@ -82,10 +93,46 @@ public:
     ~Boost() final = default;
 };
 
+/// This class adapts a std::pmr::memory_resource* to a
+/// boost::container::pmr::memory_resource
+///
+/// Its purpose is to allow std::pmr::memory_resource objects to act as upstream
+/// allocators for boost memory_resource objects
+class StandardToBoost final : public boost::container::pmr::memory_resource
+{
+public:
+    auto do_allocate(std::size_t bytes, std::size_t alignment) -> void* final
+    {
+        return std_->allocate(bytes, alignment);
+    }
+
+    auto do_deallocate(void* p, std::size_t size, std::size_t alignment)
+        -> void final
+    {
+        return std_->deallocate(p, size, alignment);
+    }
+    auto do_is_equal(const boost::container::pmr::memory_resource& other)
+        const noexcept -> bool final
+    {
+        return &other == this;
+    }
+
+    StandardToBoost(Resource* std) noexcept
+        : std_(std)
+    {
+    }
+    StandardToBoost(const StandardToBoost&) = delete;
+    StandardToBoost(StandardToBoost&&) = delete;
+    auto operator=(const StandardToBoost&) -> StandardToBoost& = delete;
+    auto operator=(StandardToBoost&&) -> StandardToBoost& = delete;
+
+    ~StandardToBoost() final = default;
+
+private:
+    Resource* std_;
+};
+
 using BoostMonotonic = Boost<boost::container::pmr::monotonic_buffer_resource>;
 using BoostPool = Boost<boost::container::pmr::unsynchronized_pool_resource>;
 using BoostPoolSync = Boost<boost::container::pmr::synchronized_pool_resource>;
-
-auto standard_to_boost(Resource* standard) noexcept
-    -> boost::container::pmr::memory_resource*;
 }  // namespace opentxs::alloc

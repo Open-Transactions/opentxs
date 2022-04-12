@@ -131,7 +131,7 @@ auto BlockchainAccountActivity::DepositAddress(
         Widget::api_.Crypto().Blockchain().Account(primary_id_, chain_);
     const auto reason = Widget::api_.Factory().PasswordPrompt(
         "Calculating next deposit address");
-    const auto& styles = blockchain::params::Data::Chains().at(chain_).styles_;
+    const auto& styles = blockchain::params::Chains().at(chain_).styles_;
 
     if (0u == styles.size()) { return {}; }
 

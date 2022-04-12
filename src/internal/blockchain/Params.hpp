@@ -15,11 +15,13 @@
 
 #include <boost/container/flat_map.hpp>
 #include <boost/container/vector.hpp>
+#include <boost/cstdint.hpp>
 #include <boost/move/algo/move.hpp>
 #include <cstddef>
 #include <cstdint>
 #include <functional>
 #include <iosfwd>
+#include <string_view>
 #include <tuple>
 #include <utility>
 
@@ -39,30 +41,17 @@
 
 namespace opentxs::blockchain::params
 {
+struct Checkpoint {
+    block::Height height_{};
+    std::string_view block_hash_{};
+    std::string_view previous_block_hash_{};
+    std::string_view filter_header_{};
+};
+
 struct Data {
-    using ChainData = boost::container::flat_map<blockchain::Type, Data>;
-#if OT_BLOCKCHAIN
-    using FilterData = boost::container::flat_map<
-        blockchain::Type,
-        boost::container::flat_map<
-            cfilter::Type,
-            std::pair<UnallocatedCString, UnallocatedCString>>>;
-    using FilterTypes =
-        UnallocatedMap<Type, UnallocatedMap<cfilter::Type, std::uint8_t>>;
-    using ServiceBits = std::map<
-        blockchain::Type,
-        UnallocatedMap<p2p::bitcoin::Service, p2p::Service>>;
-#endif  // OT_BLOCKCHAIN
     using Style = blockchain::crypto::AddressStyle;
     using ScriptMap = boost::container::flat_map<Style, bool>;
-    using StylePref = UnallocatedVector<std::pair<Style, UnallocatedCString>>;
-
-    struct Checkpoint {
-        block::Height height_{};
-        UnallocatedCString block_hash_{};
-        UnallocatedCString previous_block_hash_{};
-        UnallocatedCString filter_header_{};
-    };
+    using StylePref = UnallocatedVector<std::pair<Style, std::string_view>>;
 
     bool supported_{};
     bool testnet_{};
@@ -71,29 +60,41 @@ struct Data {
     UnitType itemtype_{};
     Bip44Type bip44_{};
     std::int32_t nBits_{};
-    UnallocatedCString genesis_header_hex_{};
-    UnallocatedCString genesis_hash_hex_{};
-    UnallocatedCString genesis_block_hex_{};
+    std::string_view genesis_header_hex_{};
+    std::string_view genesis_hash_hex_{};
+    std::string_view genesis_block_hex_{};
     Checkpoint checkpoint_{};
     cfilter::Type default_filter_type_{};
     p2p::Protocol p2p_protocol_{};
+    p2p::bitcoin::ProtocolVersion p2p_protocol_version_{};
     std::uint32_t p2p_magic_bits_{};
     std::uint16_t default_port_{};
-    UnallocatedVector<UnallocatedCString> dns_seeds_{};
+    UnallocatedVector<std::string_view> dns_seeds_{};
     Amount default_fee_rate_{};  // satoshis per 1000 bytes
     std::size_t block_download_batch_{};
     ScriptMap scripts_{};
     StylePref styles_{};
     block::Height maturation_interval_{};
     std::size_t cfilter_element_count_estimate_{};
+};
+
+using ChainData = boost::container::flat_map<blockchain::Type, Data>;
+
+auto Chains() noexcept -> const ChainData&;
 
 #if OT_BLOCKCHAIN
-    static auto Bip158() noexcept -> const FilterTypes&;
+using FilterData = boost::container::flat_map<
+    blockchain::Type,
+    boost::container::
+        flat_map<cfilter::Type, std::pair<std::string_view, std::string_view>>>;
+using FilterTypes = boost::container::
+    flat_map<Type, boost::container::flat_map<cfilter::Type, std::uint8_t>>;
+using ServiceBits = std::map<
+    blockchain::Type,
+    boost::container::flat_map<p2p::bitcoin::Service, p2p::Service>>;
+
+auto Bip158() noexcept -> const FilterTypes&;
+auto Filters() noexcept -> const FilterData&;
+auto Services() noexcept -> const ServiceBits&;
 #endif  // OT_BLOCKCHAIN
-    static auto Chains() noexcept -> const ChainData&;
-#if OT_BLOCKCHAIN
-    static auto Filters() noexcept -> const FilterData&;
-    static auto Services() noexcept -> const ServiceBits&;
-#endif  // OT_BLOCKCHAIN
-};
 }  // namespace opentxs::blockchain::params

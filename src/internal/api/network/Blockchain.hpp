@@ -58,10 +58,10 @@ namespace opentxs::api::network::internal
 class Blockchain
 {
 public:
-    virtual auto BlockAvailable() const noexcept
-        -> const opentxs::network::zeromq::socket::Publish& = 0;
-    virtual auto BlockQueueUpdate() const noexcept
-        -> const opentxs::network::zeromq::socket::Publish& = 0;
+    virtual auto BlockAvailableEndpoint() const noexcept
+        -> std::string_view = 0;
+    virtual auto BlockQueueUpdateEndpoint() const noexcept
+        -> std::string_view = 0;
     virtual auto Database() const noexcept
         -> const opentxs::blockchain::database::common::Database& = 0;
     virtual auto FilterUpdate() const noexcept

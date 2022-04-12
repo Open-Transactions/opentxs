@@ -1660,8 +1660,8 @@ void OTX::process_notification(const zmq::Message& message) const
     const auto& frame = message.Body().at(0);
     const auto notification =
         otx::Reply::Factory(api_, proto::Factory<proto::ServerReply>(frame));
-    const auto& nymID = notification->Recipient();
-    const auto& serverID = notification->Server();
+    const auto& nymID = notification.Recipient();
+    const auto& serverID = notification.Server();
 
     if (false == valid_context(nymID, serverID)) {
         LogError()(OT_PRETTY_CLASS())(
@@ -1674,13 +1674,13 @@ void OTX::process_notification(const zmq::Message& message) const
     auto context = api_.Wallet().Internal().mutable_ServerContext(
         nymID, serverID, reason_);
 
-    switch (notification->Type()) {
+    switch (notification.Type()) {
         case otx::ServerReplyType::Push: {
             context.get().ProcessNotification(api_, notification, reason_);
         } break;
         default: {
             LogError()(OT_PRETTY_CLASS())(": Unsupported server reply type: ")(
-                value(notification->Type()))(".")
+                value(notification.Type()))(".")
                 .Flush();
         }
     }

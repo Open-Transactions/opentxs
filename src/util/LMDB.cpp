@@ -565,7 +565,6 @@ private:
                           names_.at(table).c_str(),
                           MDB_CREATE | flags,
                           &output);
-
         if (!static_cast<bool>(status)) {  // free memory allocated in
                                            // mdb_txn_begin - transaction
             ::mdb_txn_abort(transaction);

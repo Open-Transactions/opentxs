@@ -5,6 +5,9 @@
 
 #pragma once
 
+#include <functional>
+
+#include "internal/util/LogMacros.hpp"
 #include "opentxs/util/Types.hpp"
 
 namespace opentxs
@@ -13,9 +16,20 @@ class ScopeGuard
 {
 public:
     ScopeGuard(SimpleCallback cb) noexcept;
+    template <typename Pre, typename Post>
+    ScopeGuard(Pre pre, Post post) noexcept
+        : ScopeGuard(std::move(post))
+    {
+        try {
+            std::invoke(pre);
+        } catch (...) {
+            OT_FAIL;
+        }
+    }
+
     ~ScopeGuard();
 
 private:
-    const SimpleCallback cb_;
+    const SimpleCallback post_;
 };
 }  // namespace opentxs

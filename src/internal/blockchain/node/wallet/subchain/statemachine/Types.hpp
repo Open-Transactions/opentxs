@@ -87,6 +87,8 @@ auto decode(
 auto encode(
     const Vector<ScanStatus>& in,
     network::zeromq::Message& out) noexcept -> void;
+auto encode(const ScanStatus& in, network::zeromq::Message& out) noexcept
+    -> void;
 auto extract_dirty(
     const api::Session& api,
     network::zeromq::Message& in,

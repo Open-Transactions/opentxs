@@ -44,28 +44,34 @@ class PasswordPrompt;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::otx::implementation
+namespace opentxs::otx
 {
-class Reply final : public otx::Reply,
-                    public opentxs::contract::implementation::Signable
+class Reply::Imp final : public opentxs::contract::implementation::Signable
 {
 public:
-    auto Number() const -> RequestNumber final { return number_; }
-    auto Push() const -> std::shared_ptr<const proto::OTXPush> final
+    auto Number() const -> RequestNumber { return number_; }
+    auto Push() const -> std::shared_ptr<const proto::OTXPush>
     {
         return payload_;
     }
-    auto Recipient() const -> const identifier::Nym& final
-    {
-        return recipient_;
-    }
-    auto Serialize(proto::ServerReply& serialize) const -> bool final;
-    auto Serialize(AllocateOutput destination) const -> bool final;
-    auto Server() const -> const identifier::Notary& final { return server_; }
-    auto Success() const -> bool final { return success_; }
-    auto Type() const -> otx::ServerReplyType final { return type_; }
+    auto Recipient() const -> const identifier::Nym& { return recipient_; }
+    auto Serialize(proto::ServerReply& serialize) const -> bool;
+    auto Serialize(AllocateOutput destination) const -> bool;
+    auto Server() const -> const identifier::Notary& { return server_; }
+    auto Success() const -> bool { return success_; }
+    auto Type() const -> otx::ServerReplyType { return type_; }
 
-    ~Reply() final = default;
+    Imp(const api::Session& api,
+        const Nym_p signer,
+        const identifier::Nym& recipient,
+        const identifier::Notary& server,
+        const otx::ServerReplyType type,
+        const RequestNumber number,
+        const bool success,
+        std::shared_ptr<const proto::OTXPush>&& push);
+    Imp(const api::Session& api, const proto::ServerReply serialized);
+    Imp(const Imp& rhs) noexcept;
+    ~Imp() final = default;
 
 private:
     friend otx::Reply;
@@ -81,7 +87,6 @@ private:
         const api::Session& api,
         const proto::ServerReply serialized) -> Nym_p;
 
-    auto clone() const noexcept -> Reply* final { return new Reply(*this); }
     auto GetID(const Lock& lock) const -> OTIdentifier final;
     auto full_version(const Lock& lock) const -> proto::ServerReply;
     auto id_version(const Lock& lock) const -> proto::ServerReply;
@@ -95,20 +100,9 @@ private:
     auto verify_signature(const Lock& lock, const proto::Signature& signature)
         const -> bool final;
 
-    Reply(
-        const api::Session& api,
-        const Nym_p signer,
-        const identifier::Nym& recipient,
-        const identifier::Notary& server,
-        const otx::ServerReplyType type,
-        const RequestNumber number,
-        const bool success,
-        std::shared_ptr<const proto::OTXPush>&& push);
-    Reply(const api::Session& api, const proto::ServerReply serialized);
-    Reply() = delete;
-    Reply(const Reply& rhs);
-    Reply(Reply&& rhs) = delete;
-    auto operator=(const Reply& rhs) -> Reply& = delete;
-    auto operator=(Reply&& rhs) -> Reply& = delete;
+    Imp() = delete;
+    Imp(Imp&& rhs) = delete;
+    auto operator=(const Imp& rhs) -> Imp& = delete;
+    auto operator=(Imp&& rhs) -> Imp& = delete;
 };
-}  // namespace opentxs::otx::implementation
+}  // namespace opentxs::otx

@@ -15,6 +15,7 @@
 #include <iosfwd>
 #include <memory>
 #include <mutex>
+#include <optional>
 #include <queue>
 #include <type_traits>
 #include <utility>
@@ -23,6 +24,7 @@
 #include "blockchain/p2p/peer/Address.hpp"
 #include "blockchain/p2p/peer/ConnectionManager.hpp"
 #include "core/Worker.hpp"
+#include "internal/blockchain/node/BlockBatch.hpp"
 #include "internal/blockchain/node/Node.hpp"
 #include "internal/blockchain/p2p/P2P.hpp"
 #include "internal/blockchain/p2p/bitcoin/Bitcoin.hpp"
@@ -81,6 +83,7 @@ namespace node
 {
 namespace internal
 {
+class BlockOracle;
 struct Mempool;
 }  // namespace internal
 }  // namespace node
@@ -259,14 +262,15 @@ protected:
     const Log& log_;
     const blockchain::Type chain_;
     const UnallocatedCString display_chain_;
-    std::atomic_bool header_probe_;
-    std::atomic_bool cfilter_probe_;
+    std::atomic_bool header_checkpoint_verified_;
+    std::atomic_bool cfheader_checkpoint_verified_;
     peer::Address address_;
     DownloadPeers download_peers_;
     States state_;
     node::CfheaderJob cfheader_job_;
     node::CfilterJob cfilter_job_;
     node::BlockJob block_job_;
+    std::optional<node::internal::BlockBatch> block_batch_;
     KnownHashes known_transactions_;
 
     auto connection() const noexcept -> const peer::ConnectionManager&
@@ -290,6 +294,7 @@ protected:
     virtual auto request_blocks() noexcept -> void = 0;
     virtual auto request_headers() noexcept -> void = 0;
     virtual auto request_mempool() noexcept -> void = 0;
+    auto reset_block_batch() noexcept -> void;
     auto reset_block_job() noexcept -> void;
     auto reset_cfheader_job() noexcept -> void;
     auto reset_cfilter_job() noexcept -> void;

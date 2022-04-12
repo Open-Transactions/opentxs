@@ -111,6 +111,30 @@ const FilterOracle::CheckpointMap FilterOracle::filter_checkpoints_{
                 "34"}},
           }},
      }},
+    {blockchain::Type::BitcoinSV,
+     {
+         {0,
+          {
+              {cfilter::Type::Basic_BIP158,
+               {"9f3c30f0c37fb977cf3e1a3173c631e8ff119ad3088b6f5b2bced0802139c2"
+                "02"}},
+              {cfilter::Type::ES,
+               {"fad52acc389a391c1d6d94e8984fe77323fbda24fb31299b88635d7bee0278"
+                "e8"}},
+          }},
+     }},
+    {blockchain::Type::BitcoinSV_testnet3,
+     {
+         {0,
+          {
+              {cfilter::Type::Basic_BCHVariant,
+               {"50b781aed7b7129012a6d20e2d040027937f3affaee573779908ebb7794558"
+                "21"}},
+              {cfilter::Type::ES,
+               {"995cfe5d055c9158c5a388b71fb2ddbe292c9ca2d30dca91359d8cbbe4603e"
+                "02"}},
+          }},
+     }},
     {blockchain::Type::UnitTest,
      {
          {0,

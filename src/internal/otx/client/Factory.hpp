@@ -60,5 +60,6 @@ auto PairAPI(const Flag& running, const api::session::Client& client)
     -> otx::client::Pair*;
 auto ServerAction(
     const api::session::Client& api,
-    const ContextLockCallback& lockCallback) -> otx::client::ServerAction*;
+    const ContextLockCallback& lockCallback)
+    -> std::unique_ptr<otx::client::ServerAction>;
 }  // namespace opentxs::factory

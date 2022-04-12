@@ -155,7 +155,7 @@ public:
         std::shared_ptr<Message> message,
         std::shared_ptr<Ledger> inbox,
         std::shared_ptr<Ledger> outbox,
-        UnallocatedSet<OTManagedNumber>* numbers,
+        UnallocatedSet<ManagedNumber>* numbers,
         const PasswordPrompt& reason,
         const ExtraArgs& args = ExtraArgs{}) -> QueueResult = 0;
     virtual auto RefreshNymbox(
@@ -167,7 +167,7 @@ public:
     virtual auto Resync(const proto::Context& serialized) -> bool = 0;
     [[deprecated]] virtual auto SendMessage(
         const api::session::Client& client,
-        const UnallocatedSet<OTManagedNumber>& pending,
+        const UnallocatedSet<ManagedNumber>& pending,
         Server& context,
         const Message& message,
         const PasswordPrompt& reason,

@@ -8740,8 +8740,6 @@ void Notary::send_push_notification(
     const std::shared_ptr<const Ledger>& outbox,
     const std::shared_ptr<const OTTransaction>& item) const
 {
-    constexpr auto OTX_PUSH_VERSION = 1;
-
     OT_ASSERT(inbox);
     OT_ASSERT(outbox);
 

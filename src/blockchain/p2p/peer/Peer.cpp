@@ -13,6 +13,7 @@
 
 #include "blockchain/DownloadTask.hpp"
 #include "blockchain/p2p/peer/ConnectionManager.hpp"
+#include "internal/blockchain/node/BlockOracle.hpp"
 #include "internal/util/Future.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/api/session/Endpoints.hpp"
@@ -56,14 +57,15 @@ Peer::Peer(
     , log_(LogTrace())
     , chain_(address->Chain())
     , display_chain_(print(chain_))
-    , header_probe_(false)
-    , cfilter_probe_(false)
+    , header_checkpoint_verified_(false)
+    , cfheader_checkpoint_verified_(false)
     , address_(std::move(address))
     , download_peers_()
     , state_()
     , cfheader_job_()
     , cfilter_job_()
     , block_job_()
+    , block_batch_()
     , known_transactions_()
     , init_start_(Clock::now())
     , verify_filter_checkpoint_(config.download_cfilters_)
@@ -135,23 +137,45 @@ auto Peer::check_init() noexcept -> void
 
 auto Peer::check_jobs() noexcept -> void
 {
-    constexpr auto limit = std::chrono::minutes(1);
+    constexpr auto limit = std::chrono::minutes{2};
 
     if (auto& job = cfheader_job_; job) {
         if (job.Elapsed() >= limit) { reset_cfheader_job(); }
-    } else if (cfilter_probe_) {
+    } else if (cfheader_checkpoint_verified_) {
         reset_cfheader_job();
     }
 
     if (auto& job = cfilter_job_; job) {
         if (job.Elapsed() >= limit) { reset_cfilter_job(); }
-    } else if (cfilter_probe_) {
+    } else if (cfheader_checkpoint_verified_) {
         reset_cfilter_job();
+    }
+
+    if (auto& job = block_batch_; job.has_value()) {
+        if (const auto elapsed = job->LastActivity(); elapsed >= limit) {
+            log_(OT_PRETTY_CLASS())("cancelling block download batch ")(
+                job->ID())(" due to ")(
+                std::chrono::duration_cast<std::chrono::nanoseconds>(elapsed))(
+                " of inactivity")
+                .Flush();
+            reset_block_batch();
+        } else {
+            log_(OT_PRETTY_CLASS())("block download batch ")(job->ID())(
+                " is running and will not time out until ")(
+                std::chrono::duration_cast<std::chrono::nanoseconds>(
+                    limit - elapsed))(" of inactivity")
+                .Flush();
+        }
+    } else if (header_checkpoint_verified_) {
+        log_(OT_PRETTY_CLASS())(
+            "requesting block download batch from block oracle")
+            .Flush();
+        reset_block_batch();
     }
 
     if (auto& job = block_job_; job) {
         if (job.Elapsed() >= limit) { reset_block_job(); }
-    } else if (header_probe_) {
+    } else if (header_checkpoint_verified_) {
         reset_block_job();
     }
 }
@@ -443,14 +467,49 @@ auto Peer::process_state_machine() noexcept -> void
     }
 }
 
+auto Peer::reset_block_batch() noexcept -> void
+{
+    auto& job = block_batch_;
+    job.reset();
+
+    if (false == header_checkpoint_verified_) { return; }
+    if (block_job_) { return; }
+
+    job.emplace(block_.GetBlockBatch());
+
+    OT_ASSERT(job.has_value());
+
+    if (0u == job->Remaining()) {
+        log_(OT_PRETTY_CLASS())(
+            "block oracle does not have block download work")
+            .Flush();
+        job.reset();
+    } else {
+        log_(OT_PRETTY_CLASS())("received block download job ")(job->ID())
+            .Flush();
+        request_blocks();
+    }
+}
+
 auto Peer::reset_block_job() noexcept -> void
 {
     auto& job = block_job_;
     job = {};
 
-    if (header_probe_) { job = block_.GetBlockJob(); }
+    if (false == header_checkpoint_verified_) { return; }
+    if (block_batch_.has_value()) { return; }
 
-    if (job) { request_blocks(); }
+    job = block_.GetBlockJob();
+
+    if (job) {
+        log_(OT_PRETTY_CLASS())("received block download job ")(job.id_)
+            .Flush();
+        request_blocks();
+    } else {
+        log_(OT_PRETTY_CLASS())(
+            "block oracle does not have block download work")
+            .Flush();
+    }
 }
 
 auto Peer::reset_cfheader_job() noexcept -> void
@@ -458,7 +517,7 @@ auto Peer::reset_cfheader_job() noexcept -> void
     auto& job = cfheader_job_;
     job = {};
 
-    if (cfilter_probe_) { job = filter_.GetHeaderJob(); }
+    if (cfheader_checkpoint_verified_) { job = filter_.GetHeaderJob(); }
 
     if (job) { request_cfheaders(); }
 }
@@ -468,7 +527,7 @@ auto Peer::reset_cfilter_job() noexcept -> void
     auto& job = cfilter_job_;
     job = {};
 
-    if (cfilter_probe_) { job = filter_.GetFilterJob(); }
+    if (cfheader_checkpoint_verified_) { job = filter_.GetFilterJob(); }
 
     if (job) { request_cfilter(); }
 }
@@ -656,13 +715,13 @@ auto Peer::subscribe() noexcept -> void
         (1 == address_.Services().count(p2p::Service::CompactFilters));
     const auto bloom = (1 == address_.Services().count(p2p::Service::Bloom));
 
-    if (network || limited || header_probe_) {
+    if (network || limited || header_checkpoint_verified_) {
         pipeline_.PullFrom(manager_.Endpoint(Task::Getheaders));
         pipeline_.PullFrom(manager_.Endpoint(Task::Getblock));
         pipeline_.PullFrom(manager_.Endpoint(Task::BroadcastTransaction));
         pipeline_.SubscribeTo(manager_.Endpoint(Task::JobAvailableBlock));
     }
-    if (cfilter || cfilter_probe_) {
+    if (cfilter || cfheader_checkpoint_verified_) {
         pipeline_.SubscribeTo(manager_.Endpoint(Task::JobAvailableCfheaders));
         pipeline_.SubscribeTo(manager_.Endpoint(Task::JobAvailableCfilters));
     }

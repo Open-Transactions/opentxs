@@ -7,17 +7,13 @@
 
 #include <chrono>
 #include <functional>
+#include <memory>
 
 #include "opentxs/util/Time.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace boost
 {
-namespace asio
-{
-class io_context;
-}  // namespace asio
-
 namespace system
 {
 class error_code;
@@ -28,6 +24,17 @@ namespace opentxs  // NOLINT
 {
 // inline namespace v1
 // {
+namespace api
+{
+namespace network
+{
+namespace asio
+{
+class Context;
+}  // namespace asio
+}  // namespace network
+}  // namespace api
+
 class Timer;
 // }  // namespace v1
 }  // namespace opentxs
@@ -73,5 +80,6 @@ private:
 
 namespace opentxs::factory
 {
-auto Timer(boost::asio::io_context& asio) noexcept -> opentxs::Timer;
+auto Timer(std::shared_ptr<api::network::asio::Context> asio) noexcept
+    -> opentxs::Timer;
 }  // namespace opentxs::factory

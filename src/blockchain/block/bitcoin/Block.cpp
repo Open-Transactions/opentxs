@@ -119,6 +119,8 @@ auto BitcoinBlock(
             case blockchain::Type::BitcoinCash_testnet3:
             case blockchain::Type::Litecoin:
             case blockchain::Type::Litecoin_testnet4:
+            case blockchain::Type::BitcoinSV:
+            case blockchain::Type::BitcoinSV_testnet3:
             case blockchain::Type::UnitTest: {
 
                 return std::make_shared<Block>(
@@ -165,6 +167,8 @@ auto BitcoinBlock(
             case blockchain::Type::BitcoinCash_testnet3:
             case blockchain::Type::Litecoin:
             case blockchain::Type::Litecoin_testnet4:
+            case blockchain::Type::BitcoinSV:
+            case blockchain::Type::BitcoinSV_testnet3:
             case blockchain::Type::UnitTest: {
                 return parse_normal_block(api, chain, in);
             }

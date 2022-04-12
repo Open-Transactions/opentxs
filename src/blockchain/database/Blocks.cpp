@@ -25,7 +25,6 @@
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/FixedByteArray.hpp"
 #include "opentxs/util/Bytes.hpp"
-#include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Pimpl.hpp"
 #include "util/LMDB.hpp"
@@ -43,7 +42,7 @@ Blocks::Blocks(
     , blank_position_(make_blank<block::Position>::value(api))
     , chain_(type)
     , genesis_([&] {
-        const auto& hex = params::Data::Chains().at(chain_).genesis_hash_hex_;
+        const auto& hex = params::Chains().at(chain_).genesis_hash_hex_;
         auto out = block::Hash{};
         const auto rc = out.DecodeHex(hex);
 
@@ -61,7 +60,7 @@ auto Blocks::LoadBitcoin(const block::Hash& block) const noexcept
     -> std::shared_ptr<const block::bitcoin::Block>
 {
     if (block == genesis_) {
-        const auto& hex = params::Data::Chains().at(chain_).genesis_block_hex_;
+        const auto& hex = params::Chains().at(chain_).genesis_block_hex_;
         const auto data = api_.Factory().DataFromHex(hex);
 
         if (data->empty()) {

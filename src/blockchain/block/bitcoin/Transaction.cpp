@@ -922,7 +922,7 @@ auto Transaction::SetKeyData(const KeyData& data) noexcept -> void
 
 auto Transaction::vBytes(blockchain::Type chain) const noexcept -> std::size_t
 {
-    const auto& data = params::Data::Chains().at(chain);
+    const auto& data = params::Chains().at(chain);
     const auto total = CalculateSize();
 
     if (data.segwit_) {

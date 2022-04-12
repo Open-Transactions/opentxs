@@ -67,15 +67,14 @@
 #include "serialization/protobuf/OTXPush.pb.h"
 #include "serialization/protobuf/ServerContract.pb.h"
 
-namespace
+namespace opentxs
 {
-constexpr auto OTX_PUSH_VERSION = 1;
 constexpr auto SEED_BACKUP_FILE = "seed_backup.json";
 constexpr auto SERVER_CONTRACT_FILE = "NEW_SERVER_CONTRACT.otc";
 constexpr auto SERVER_CONFIG_LISTEN_SECTION = "listen";
 constexpr auto SERVER_CONFIG_BIND_KEY = "bindip";
 constexpr auto SERVER_CONFIG_PORT_KEY = "command";
-}  // namespace
+}  // namespace opentxs
 
 namespace zmq = opentxs::network::zeromq;
 

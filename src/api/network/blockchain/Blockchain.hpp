@@ -87,14 +87,13 @@ struct Blockchain::Imp : virtual public internal::Blockchain {
     {
         return {};
     }
-    auto BlockAvailable() const noexcept -> const zmq::socket::Publish& override
+    auto BlockAvailableEndpoint() const noexcept -> std::string_view override
     {
-        OT_FAIL;
+        return {};
     }
-    auto BlockQueueUpdate() const noexcept
-        -> const zmq::socket::Publish& override
+    auto BlockQueueUpdateEndpoint() const noexcept -> std::string_view override
     {
-        OT_FAIL;
+        return {};
     }
     virtual auto ConnectedSyncServers() const noexcept -> Endpoints
     {

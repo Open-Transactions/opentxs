@@ -48,7 +48,8 @@ struct OPENTXS_EXPORT less<opentxs::blockchain::cfilter::Header> {
 
 namespace opentxs::blockchain::cfilter
 {
-class Header : virtual public FixedByteArray<32>
+// NOTE sorry Windows users, MSVC throws an ICE if we export this symbol
+class OPENTXS_EXPORT_TEMPLATE Header : virtual public FixedByteArray<32>
 {
 public:
     Header() noexcept;

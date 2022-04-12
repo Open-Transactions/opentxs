@@ -9,33 +9,20 @@
 #include "opentxs/otx/consensus/ManagedNumber.hpp"
 #include "opentxs/util/Numbers.hpp"
 
-// NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs  // NOLINT
-{
-// inline namespace v1
-// {
-namespace otx
-{
-namespace context
+namespace opentxs::otx::context
 {
 class Server;
-}  // namespace context
-}  // namespace otx
-// }  // namespace v1
-}  // namespace opentxs
-// NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::otx::context::implementation
-{
-class ManagedNumber final : virtual public otx::context::ManagedNumber
+class ManagedNumber::Imp final
 {
 public:
-    void SetSuccess(const bool value = true) const final;
-    auto Valid() const -> bool final;
-    auto Value() const -> TransactionNumber final;
+    auto operator<(const ManagedNumber&) const noexcept -> bool;
+    void SetSuccess(const bool value = true) const;
+    auto Valid() const -> bool;
+    auto Value() const -> TransactionNumber;
 
-    ManagedNumber(const TransactionNumber number, otx::context::Server&);
-    ~ManagedNumber() final;
+    Imp(const TransactionNumber, otx::context::Server&);
+    virtual ~Imp();
 
 private:
     otx::context::Server& context_;
@@ -43,10 +30,10 @@ private:
     mutable OTFlag success_;
     bool managed_{true};
 
-    ManagedNumber() = delete;
-    ManagedNumber(const ManagedNumber&) = delete;
-    ManagedNumber(ManagedNumber&& rhs) = delete;
-    auto operator=(const ManagedNumber&) -> ManagedNumber& = delete;
-    auto operator=(ManagedNumber&&) -> ManagedNumber& = delete;
+    Imp() = delete;
+    Imp(const Imp&) = delete;
+    Imp(Imp&&) = delete;
+    auto operator=(const Imp&) -> Imp& = delete;
+    auto operator=(Imp&&) -> Imp& = delete;
 };
-}  // namespace opentxs::otx::context::implementation
+}  // namespace opentxs::otx::context

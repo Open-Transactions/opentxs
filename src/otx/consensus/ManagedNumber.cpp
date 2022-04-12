@@ -7,34 +7,78 @@
 #include "1_Internal.hpp"                   // IWYU pragma: associated
 #include "otx/consensus/ManagedNumber.hpp"  // IWYU pragma: associated
 
+#include <utility>
+
 #include "internal/otx/consensus/Consensus.hpp"
 #include "internal/util/Flag.hpp"
 #include "opentxs/otx/consensus/ManagedNumber.hpp"
 #include "opentxs/otx/consensus/Server.hpp"
 
-namespace opentxs
+namespace opentxs::otx::context
 {
-auto operator<(const OTManagedNumber& lhs, const OTManagedNumber& rhs) -> bool
+auto operator<(const ManagedNumber& lhs, const ManagedNumber& rhs) noexcept
+    -> bool
 {
-    return lhs->Value() < rhs->Value();
+    return lhs.imp_->operator<(rhs);
 }
-}  // namespace opentxs
+}  // namespace opentxs::otx::context
 
 namespace opentxs::factory
 {
 auto ManagedNumber(
     const TransactionNumber number,
-    otx::context::Server& context) -> otx::context::ManagedNumber*
+    otx::context::Server& context) -> otx::context::ManagedNumber
 {
-    using ReturnType = otx::context::implementation::ManagedNumber;
+    using ReturnType = otx::context::ManagedNumber;
 
-    return new ReturnType(number, context);
+    return ReturnType{new ReturnType::Imp{number, context}};
 }
 }  // namespace opentxs::factory
 
-namespace opentxs::otx::context::implementation
+namespace opentxs::otx::context
 {
-ManagedNumber::ManagedNumber(
+
+ManagedNumber::ManagedNumber(Imp* imp) noexcept
+    : imp_(imp)
+{
+}
+
+ManagedNumber::ManagedNumber(ManagedNumber&& rhs) noexcept
+    : imp_{nullptr}
+{
+    swap(rhs);
+}
+
+auto ManagedNumber::operator=(ManagedNumber&& rhs) noexcept -> ManagedNumber&
+{
+    swap(rhs);
+
+    return *this;
+}
+
+ManagedNumber::~ManagedNumber()
+{
+    if (nullptr != imp_) {
+        delete imp_;
+        imp_ = nullptr;
+    }
+}
+
+auto ManagedNumber::swap(ManagedNumber& rhs) noexcept -> void
+{
+    std::swap(imp_, rhs.imp_);
+}
+
+void ManagedNumber::SetSuccess(const bool value) const
+{
+    imp_->SetSuccess(value);
+}
+
+auto ManagedNumber::Valid() const -> bool { return imp_->Valid(); }
+
+auto ManagedNumber::Value() const -> TransactionNumber { return imp_->Value(); }
+
+ManagedNumber::Imp::Imp(
     const TransactionNumber number,
     otx::context::Server& context)
     : context_(context)
@@ -44,13 +88,7 @@ ManagedNumber::ManagedNumber(
 {
 }
 
-void ManagedNumber::SetSuccess(const bool value) const { success_->Set(value); }
-
-auto ManagedNumber::Valid() const -> bool { return managed_; }
-
-auto ManagedNumber::Value() const -> TransactionNumber { return number_; }
-
-ManagedNumber::~ManagedNumber()
+ManagedNumber::Imp::~Imp()
 {
     if (false == managed_) { return; }
 
@@ -58,4 +96,20 @@ ManagedNumber::~ManagedNumber()
 
     context_.RecoverAvailableNumber(number_);
 }
-}  // namespace opentxs::otx::context::implementation
+
+auto ManagedNumber::Imp::operator<(const ManagedNumber& rhs) const noexcept
+    -> bool
+{
+    return Value() < rhs.Value();
+}
+
+void ManagedNumber::Imp::SetSuccess(const bool value) const
+{
+    success_->Set(value);
+}
+
+auto ManagedNumber::Imp::Valid() const -> bool { return managed_; }
+
+auto ManagedNumber::Imp::Value() const -> TransactionNumber { return number_; }
+
+}  // namespace opentxs::otx::context

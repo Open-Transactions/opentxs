@@ -118,7 +118,7 @@ public:
         return *this;
     }
     virtual auto NextTransactionNumber(const MessageType reason)
-        -> OTManagedNumber = 0;
+        -> ManagedNumber = 0;
 
     auto InternalServer() noexcept -> internal::Server& final { return *this; }
     virtual auto mutable_Purse(
@@ -147,7 +147,7 @@ auto ClientContext(
     const Nym_p& remote,
     const identifier::Notary& server) -> otx::context::internal::Client*;
 auto ManagedNumber(const TransactionNumber number, otx::context::Server&)
-    -> otx::context::ManagedNumber*;
+    -> otx::context::ManagedNumber;
 auto ServerContext(
     const api::session::Client& api,
     const network::zeromq::socket::Publish& requestSent,

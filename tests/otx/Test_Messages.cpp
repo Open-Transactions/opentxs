@@ -112,39 +112,39 @@ TEST_F(Test_Messages, activateRequest)
     auto request = ot::otx::Request::Factory(
         client_, alice, server_id_, type, 1, reason_c_);
 
-    ASSERT_TRUE(request->Nym());
-    EXPECT_EQ(alice_nym_id_.get(), request->Nym()->ID());
-    EXPECT_EQ(alice_nym_id_.get(), request->Initiator());
-    EXPECT_EQ(server_id_, request->Server());
-    EXPECT_EQ(type, request->Type());
-    EXPECT_EQ(1, request->Number());
+    ASSERT_TRUE(request.Nym());
+    EXPECT_EQ(alice_nym_id_.get(), request.Nym()->ID());
+    EXPECT_EQ(alice_nym_id_.get(), request.Initiator());
+    EXPECT_EQ(server_id_, request.Server());
+    EXPECT_EQ(type, request.Type());
+    EXPECT_EQ(1, request.Number());
 
-    requestID = request->ID();
+    requestID = request.ID();
 
     EXPECT_FALSE(requestID->empty());
-    EXPECT_TRUE(request->Validate());
+    EXPECT_TRUE(request.Validate());
 
-    EXPECT_EQ(ot::otx::Request::DefaultVersion, request->Version());
-    EXPECT_EQ(requestID->str(), request->ID()->str());
+    EXPECT_EQ(ot::otx::Request::DefaultVersion, request.Version());
+    EXPECT_EQ(requestID->str(), request.ID()->str());
 
-    request->SetIncludeNym(true, reason_c_);
+    request.SetIncludeNym(true, reason_c_);
 
-    EXPECT_TRUE(request->Validate());
+    EXPECT_TRUE(request.Validate());
 
     auto bytes = ot::Space{};
-    EXPECT_TRUE(request->Serialize(ot::writer(bytes)));
+    EXPECT_TRUE(request.Serialize(ot::writer(bytes)));
 
     const auto serverCopy =
         ot::otx::Request::Factory(server_, ot::reader(bytes));
 
-    ASSERT_TRUE(serverCopy->Nym());
-    EXPECT_EQ(alice_nym_id_.get(), serverCopy->Nym()->ID());
-    EXPECT_EQ(alice_nym_id_.get(), serverCopy->Initiator());
-    EXPECT_EQ(server_id_, serverCopy->Server());
-    EXPECT_EQ(type, serverCopy->Type());
-    EXPECT_EQ(1, serverCopy->Number());
-    EXPECT_EQ(requestID.get(), serverCopy->ID());
-    EXPECT_TRUE(serverCopy->Validate());
+    ASSERT_TRUE(serverCopy.Nym());
+    EXPECT_EQ(alice_nym_id_.get(), serverCopy.Nym()->ID());
+    EXPECT_EQ(alice_nym_id_.get(), serverCopy.Initiator());
+    EXPECT_EQ(server_id_, serverCopy.Server());
+    EXPECT_EQ(type, serverCopy.Type());
+    EXPECT_EQ(1, serverCopy.Number());
+    EXPECT_EQ(requestID.get(), serverCopy.ID());
+    EXPECT_TRUE(serverCopy.Validate());
 }
 
 TEST_F(Test_Messages, pushReply)
@@ -168,37 +168,37 @@ TEST_F(Test_Messages, pushReply)
         ot::otx::OTXPushType::Nymbox,
         payload);
 
-    ASSERT_TRUE(reply->Nym());
-    EXPECT_EQ(server_.NymID(), reply->Nym()->ID());
-    EXPECT_EQ(alice_nym_id_.get(), reply->Recipient());
-    EXPECT_EQ(server_id_, reply->Server());
-    EXPECT_EQ(type, reply->Type());
-    EXPECT_EQ(1, reply->Number());
-    EXPECT_TRUE(reply->Push());
+    ASSERT_TRUE(reply.Nym());
+    EXPECT_EQ(server_.NymID(), reply.Nym()->ID());
+    EXPECT_EQ(alice_nym_id_.get(), reply.Recipient());
+    EXPECT_EQ(server_id_, reply.Server());
+    EXPECT_EQ(type, reply.Type());
+    EXPECT_EQ(1, reply.Number());
+    EXPECT_TRUE(reply.Push());
 
-    replyID = reply->ID();
+    replyID = reply.ID();
 
     EXPECT_FALSE(replyID->empty());
-    EXPECT_TRUE(reply->Validate());
+    EXPECT_TRUE(reply.Validate());
 
     auto bytes = ot::Space{};
-    EXPECT_TRUE(reply->Serialize(ot::writer(bytes)));
+    EXPECT_TRUE(reply.Serialize(ot::writer(bytes)));
 
-    EXPECT_EQ(ot::otx::Reply::DefaultVersion, reply->Version());
-    EXPECT_EQ(replyID->str(), reply->ID()->str());
+    EXPECT_EQ(ot::otx::Reply::DefaultVersion, reply.Version());
+    EXPECT_EQ(replyID->str(), reply.ID()->str());
 
-    EXPECT_TRUE(reply->Validate());
+    EXPECT_TRUE(reply.Validate());
 
     const auto aliceCopy = ot::otx::Reply::Factory(client_, ot::reader(bytes));
 
-    ASSERT_TRUE(aliceCopy->Nym());
-    EXPECT_EQ(server_.NymID(), aliceCopy->Nym()->ID());
-    EXPECT_EQ(alice_nym_id_.get(), aliceCopy->Recipient());
-    EXPECT_EQ(server_id_, aliceCopy->Server());
-    EXPECT_EQ(type, aliceCopy->Type());
-    EXPECT_EQ(1, aliceCopy->Number());
-    EXPECT_EQ(replyID.get(), aliceCopy->ID());
-    ASSERT_TRUE(aliceCopy->Push());
-    EXPECT_TRUE(aliceCopy->Validate());
+    ASSERT_TRUE(aliceCopy.Nym());
+    EXPECT_EQ(server_.NymID(), aliceCopy.Nym()->ID());
+    EXPECT_EQ(alice_nym_id_.get(), aliceCopy.Recipient());
+    EXPECT_EQ(server_id_, aliceCopy.Server());
+    EXPECT_EQ(type, aliceCopy.Type());
+    EXPECT_EQ(1, aliceCopy.Number());
+    EXPECT_EQ(replyID.get(), aliceCopy.ID());
+    ASSERT_TRUE(aliceCopy.Push());
+    EXPECT_TRUE(aliceCopy.Validate());
 }
 }  // namespace ottest

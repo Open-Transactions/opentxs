@@ -9,7 +9,7 @@
 
 #include <memory>
 
-#include "api/network/Blockchain.hpp"
+#include "api/network/blockchain/Blockchain.hpp"
 #include "internal/api/network/Factory.hpp"
 
 namespace opentxs::factory

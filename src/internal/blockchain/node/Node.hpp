@@ -18,6 +18,7 @@
 #include <mutex>
 #include <optional>
 #include <shared_mutex>
+#include <string_view>
 #include <tuple>
 #include <utility>
 
@@ -217,6 +218,18 @@ using CfheaderJob =
 using CfilterJob = download::Batch<GCS, cfilter::Header, cfilter::Type>;
 using BlockJob =
     download::Batch<std::shared_ptr<const block::bitcoin::Block>, int>;
+
+// WARNING update print function if new values are added or removed
+enum class BlockOracleJobs : OTZMQWorkType {
+    shutdown = value(WorkType::Shutdown),
+    request_blocks = OT_ZMQ_INTERNAL_SIGNAL + 0,
+    process_block = OT_ZMQ_INTERNAL_SIGNAL + 1,
+    start_downloader = OT_ZMQ_INTERNAL_SIGNAL + 2,
+    init = OT_ZMQ_INIT_SIGNAL,
+    statemachine = OT_ZMQ_STATE_MACHINE_SIGNAL,
+};
+
+auto print(BlockOracleJobs) noexcept -> std::string_view;
 }  // namespace opentxs::blockchain::node
 #endif  // OT_BLOCKCHAIN
 
@@ -236,23 +249,6 @@ struct BlockDatabase {
         -> bool = 0;
 
     virtual ~BlockDatabase() = default;
-};
-
-struct BlockOracle : virtual public node::BlockOracle {
-    enum class Task : OTZMQWorkType {
-        ProcessBlock = OT_ZMQ_INTERNAL_SIGNAL + 0,
-        StateMachine = OT_ZMQ_STATE_MACHINE_SIGNAL,
-        Shutdown = value(WorkType::Shutdown),
-    };
-
-    virtual auto GetBlockJob() const noexcept -> BlockJob = 0;
-    virtual auto Heartbeat() const noexcept -> void = 0;
-    virtual auto SubmitBlock(const ReadView in) const noexcept -> void = 0;
-
-    virtual auto Init() noexcept -> void = 0;
-    virtual auto Shutdown() noexcept -> std::shared_future<void> = 0;
-
-    ~BlockOracle() override = default;
 };
 
 struct BlockValidator {
@@ -461,6 +457,7 @@ struct PeerManager {
         -> bool = 0;
     virtual auto LookupIncomingSocket(const int id) const noexcept(false)
         -> opentxs::network::asio::Socket = 0;
+    virtual auto PeerTarget() const noexcept -> std::size_t = 0;
     virtual auto RequestBlock(const block::Hash& block) const noexcept
         -> bool = 0;
     virtual auto RequestBlocks(
@@ -511,6 +508,7 @@ struct Network : virtual public node::Manager {
     virtual auto JobReady(const PeerManager::Task type) const noexcept
         -> void = 0;
     virtual auto Mempool() const noexcept -> const internal::Mempool& = 0;
+    virtual auto PeerTarget() const noexcept -> std::size_t = 0;
     virtual auto Reorg() const noexcept
         -> const network::zeromq::socket::Publish& = 0;
     virtual auto RequestBlock(const block::Hash& block) const noexcept
@@ -588,9 +586,8 @@ struct WalletDatabase {
     using Pattern = std::pair<ElementID, Vector<std::byte>>;
     using Patterns = Vector<Pattern>;
     using MatchingIndices = Vector<Bip32Index>;
-    using MatchedTransaction = std::pair<
-        MatchingIndices,
-        std::shared_ptr<const block::bitcoin::Transaction>>;
+    using MatchedTransaction = std::
+        pair<MatchingIndices, std::shared_ptr<block::bitcoin::Transaction>>;
     using BlockMatches = Map<block::pTxid, MatchedTransaction>;
     using BatchedMatches = Map<block::Position, BlockMatches>;
     using UTXO = std::pair<

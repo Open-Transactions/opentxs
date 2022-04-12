@@ -82,6 +82,12 @@ public:
     {
         return {};
     }
+    auto Match(const gcs::Hashes& prehashed) const noexcept
+        -> PrehashedMatches override
+    {
+        return {};
+    }
+    auto Range() const noexcept -> gcs::Range override { return {}; }
     auto Serialize(proto::GCS& out) const noexcept -> bool override
     {
         return {};
@@ -100,6 +106,10 @@ public:
         return {};
     }
     virtual auto Test(const Vector<Space>& targets) const noexcept -> bool
+    {
+        return {};
+    }
+    auto Test(const gcs::Hashes& targets) const noexcept -> bool override
     {
         return {};
     }
@@ -131,12 +141,16 @@ public:
         -> cfilter::Header final;
     auto IsValid() const noexcept -> bool final { return true; }
     auto Match(const Targets&, allocator_type) const noexcept -> Matches final;
+    auto Match(const gcs::Hashes& prehashed) const noexcept
+        -> PrehashedMatches final;
+    auto Range() const noexcept -> gcs::Range final;
     auto Serialize(proto::GCS& out) const noexcept -> bool final;
     auto Serialize(AllocateOutput out) const noexcept -> bool final;
     auto Test(const Data& target) const noexcept -> bool final;
     auto Test(const ReadView target) const noexcept -> bool final;
     auto Test(const Vector<OTData>& targets) const noexcept -> bool final;
     auto Test(const Vector<Space>& targets) const noexcept -> bool final;
+    auto Test(const gcs::Hashes& targets) const noexcept -> bool final;
 
     GCS(const api::Session& api,
         const std::uint8_t bits,
@@ -189,10 +203,12 @@ private:
     auto hashed_set_construct(
         const Vector<Space>& elements,
         allocator_type alloc) const noexcept -> gcs::Elements;
+    auto hashed_set_construct(const gcs::Hashes& targets, allocator_type alloc)
+        const noexcept -> gcs::Elements;
     auto hashed_set_construct(const Targets& elements, allocator_type alloc)
         const noexcept -> gcs::Elements;
     auto test(const gcs::Elements& targetHashes) const noexcept -> bool;
-    auto hash_to_range(const ReadView in) const noexcept -> std::uint64_t;
+    auto hash_to_range(const ReadView in) const noexcept -> gcs::Range;
 
     GCS(const api::Session& api,
         const std::uint8_t bits,

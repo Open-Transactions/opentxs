@@ -71,16 +71,64 @@ auto ServerConnection::Factory(
     const api::Session& api,
     const api::network::ZMQ& zmq,
     const zeromq::socket::Publish& updates,
-    const OTServerContract& contract) -> OTServerConnection
+    const OTServerContract& contract) -> ServerConnection
 {
-    return OTServerConnection(
-        new implementation::ServerConnection(api, zmq, updates, contract));
+    return {new ServerConnection::Imp(api, zmq, updates, contract)};
 }
-}  // namespace opentxs::network
 
-namespace opentxs::network::implementation
+ServerConnection::ServerConnection(Imp* imp) noexcept
+    : imp_(imp)
 {
-ServerConnection::ServerConnection(
+    OT_ASSERT(nullptr != imp);
+}
+
+ServerConnection::ServerConnection(ServerConnection&& rhs) noexcept
+    : imp_{nullptr}
+{
+    swap(rhs);
+}
+
+auto ServerConnection::operator=(ServerConnection&& rhs) noexcept
+    -> ServerConnection&
+{
+    swap(rhs);
+
+    return *this;
+}
+
+ServerConnection::~ServerConnection()
+{
+    if (nullptr != imp_) {
+        delete imp_;
+        imp_ = nullptr;
+    }
+}
+
+auto ServerConnection::swap(ServerConnection& rhs) noexcept -> void
+{
+    std::swap(imp_, rhs.imp_);
+}
+
+auto ServerConnection::ChangeAddressType(const AddressType type) -> bool
+{
+    return imp_->ChangeAddressType(type);
+}
+
+auto ServerConnection::ClearProxy() -> bool { return imp_->ClearProxy(); }
+
+auto ServerConnection::EnableProxy() -> bool { return imp_->EnableProxy(); }
+
+auto ServerConnection::Send(
+    const otx::context::Server& context,
+    const Message& message,
+    const PasswordPrompt& reason,
+    const Push push) -> otx::client::NetworkReplyMessage
+{
+    return imp_->Send(context, message, reason, push);
+}
+auto ServerConnection::Status() const -> bool { return imp_->Status(); }
+
+ServerConnection::Imp::Imp(
     const api::Session& api,
     const api::network::ZMQ& zmq,
     const zeromq::socket::Publish& updates,
@@ -107,14 +155,19 @@ ServerConnection::ServerConnection(
     , registration_lock_()
     , registered_for_push_()
 {
-    thread_ = std::thread(&ServerConnection::activity_timer, this);
+    thread_ = std::thread(&Imp::activity_timer, this);
     const auto started = notification_socket_->Start(
         api_.Endpoints().Internal().ProcessPushNotification().data());
 
     OT_ASSERT(started);
 }
 
-auto ServerConnection::activity_timer() -> void
+ServerConnection::Imp::~Imp()
+{
+    if (thread_.joinable()) { thread_.join(); }
+}
+
+auto ServerConnection::Imp::activity_timer() -> void
 {
     while (zmq_.Running()) {
         const auto limit = zmq_.KeepAlive();
@@ -140,7 +193,8 @@ auto ServerConnection::activity_timer() -> void
     }
 }
 
-auto ServerConnection::async_socket(const Lock& lock) const -> OTZMQDealerSocket
+auto ServerConnection::Imp::async_socket(const Lock& lock) const
+    -> OTZMQDealerSocket
 {
     auto output =
         zmq_.Context().DealerSocket(callback_, zmq::socket::Direction::Connect);
@@ -152,7 +206,7 @@ auto ServerConnection::async_socket(const Lock& lock) const -> OTZMQDealerSocket
     return output;
 }
 
-auto ServerConnection::ChangeAddressType(const AddressType type) -> bool
+auto ServerConnection::Imp::ChangeAddressType(const AddressType type) -> bool
 {
     Lock lock(lock_);
     address_type_ = type;
@@ -161,7 +215,7 @@ auto ServerConnection::ChangeAddressType(const AddressType type) -> bool
     return true;
 }
 
-auto ServerConnection::ClearProxy() -> bool
+auto ServerConnection::Imp::ClearProxy() -> bool
 {
     Lock lock(lock_);
     use_proxy_->Off();
@@ -170,7 +224,7 @@ auto ServerConnection::ClearProxy() -> bool
     return true;
 }
 
-auto ServerConnection::EnableProxy() -> bool
+auto ServerConnection::Imp::EnableProxy() -> bool
 {
     Lock lock(lock_);
     use_proxy_->On();
@@ -179,13 +233,13 @@ auto ServerConnection::EnableProxy() -> bool
     return true;
 }
 
-auto ServerConnection::disable_push(const identifier::Nym& nymID) -> void
+auto ServerConnection::Imp::disable_push(const identifier::Nym& nymID) -> void
 {
     Lock registrationLock(registration_lock_);
     registered_for_push_[nymID] = true;
 }
 
-auto ServerConnection::endpoint() const -> UnallocatedCString
+auto ServerConnection::Imp::endpoint() const -> UnallocatedCString
 {
     std::uint32_t port{0};
     UnallocatedCString hostname{""};
@@ -207,7 +261,7 @@ auto ServerConnection::endpoint() const -> UnallocatedCString
     return endpoint;
 }
 
-auto ServerConnection::form_endpoint(
+auto ServerConnection::Imp::form_endpoint(
     AddressType type,
     UnallocatedCString hostname,
     std::uint32_t port) const -> UnallocatedCString
@@ -227,7 +281,8 @@ auto ServerConnection::form_endpoint(
     return output.str();
 }
 
-auto ServerConnection::get_async(const Lock& lock) -> zeromq::socket::Dealer&
+auto ServerConnection::Imp::get_async(const Lock& lock)
+    -> zeromq::socket::Dealer&
 {
     OT_ASSERT(verify_lock(lock))
 
@@ -240,7 +295,8 @@ auto ServerConnection::get_async(const Lock& lock) -> zeromq::socket::Dealer&
     return registration_socket_;
 }
 
-auto ServerConnection::get_sync(const Lock& lock) -> zeromq::socket::Request&
+auto ServerConnection::Imp::get_sync(const Lock& lock)
+    -> zeromq::socket::Request&
 {
     OT_ASSERT(verify_lock(lock))
 
@@ -253,12 +309,12 @@ auto ServerConnection::get_sync(const Lock& lock) -> zeromq::socket::Request&
     return socket_;
 }
 
-auto ServerConnection::get_timeout() -> Time
+auto ServerConnection::Imp::get_timeout() -> Time
 {
     return Clock::now() + zmq_.SendTimeout();
 }
 
-auto ServerConnection::process_incoming(const zeromq::Message& in) -> void
+auto ServerConnection::Imp::process_incoming(const zeromq::Message& in) -> void
 {
     if (status_->On()) { publish(); }
 
@@ -304,7 +360,7 @@ auto ServerConnection::process_incoming(const zeromq::Message& in) -> void
 
         const auto message = otx::Reply::Factory(api_, proto);
 
-        if (false == message->Validate()) {
+        if (false == message.Validate()) {
             throw std::runtime_error{"Invalid message"};
         }
 
@@ -319,7 +375,7 @@ auto ServerConnection::process_incoming(const zeromq::Message& in) -> void
     }
 }
 
-auto ServerConnection::publish() const -> void
+auto ServerConnection::Imp::publish() const -> void
 {
     updates_.Send([&] {
         const auto status = bool{status_.get()};
@@ -332,7 +388,7 @@ auto ServerConnection::publish() const -> void
     }());
 }
 
-auto ServerConnection::register_for_push(
+auto ServerConnection::Imp::register_for_push(
     const otx::context::Server& context,
     const PasswordPrompt& reason) -> void
 {
@@ -355,11 +411,11 @@ auto ServerConnection::register_for_push(
         otx::ServerRequestType::Activate,
         0,
         reason);
-    request->SetIncludeNym(true, reason);
+    request.SetIncludeNym(true, reason);
     auto message = zmq::Message{};
     message.AddFrame();
     auto serialized = proto::ServerRequest{};
-    if (false == request->Serialize(serialized)) {
+    if (false == request.Serialize(serialized)) {
         LogVerbose()(OT_PRETTY_CLASS())("Failed to serialize request.").Flush();
 
         return;
@@ -370,19 +426,19 @@ auto ServerConnection::register_for_push(
     isRegistered = get_async(socketLock).Send(std::move(message));
 }
 
-auto ServerConnection::reset_socket(const Lock& lock) -> void
+auto ServerConnection::Imp::reset_socket(const Lock& lock) -> void
 {
     OT_ASSERT(verify_lock(lock))
 
     sockets_ready_->Off();
 }
 
-auto ServerConnection::reset_timer() -> void
+auto ServerConnection::Imp::reset_timer() -> void
 {
     last_activity_.store(std::time(nullptr));
 }
 
-auto ServerConnection::Send(
+auto ServerConnection::Imp::Send(
     const otx::context::Server& context,
     const Message& message,
     const PasswordPrompt& reason,
@@ -390,7 +446,7 @@ auto ServerConnection::Send(
 {
     struct Cleanup {
         const Lock& lock_;
-        ServerConnection& connection_;
+        Imp& connection_;
         otx::client::SendResult& result_;
         std::shared_ptr<Message>& reply_;
         bool success_{false};
@@ -404,7 +460,7 @@ auto ServerConnection::Send(
 
         Cleanup(
             const Lock& lock,
-            ServerConnection& connection,
+            Imp& connection,
             otx::client::SendResult& result,
             std::shared_ptr<Message>& reply)
             : lock_(lock)
@@ -543,7 +599,7 @@ auto ServerConnection::Send(
     return output;
 }
 
-auto ServerConnection::set_curve(
+auto ServerConnection::Imp::set_curve(
     const Lock& lock,
     zeromq::curve::Client& socket) const -> void
 {
@@ -554,7 +610,7 @@ auto ServerConnection::set_curve(
     OT_ASSERT(set);
 }
 
-auto ServerConnection::set_proxy(
+auto ServerConnection::Imp::set_proxy(
     const Lock& lock,
     zeromq::socket::Dealer& socket) const -> void
 {
@@ -572,7 +628,7 @@ auto ServerConnection::set_proxy(
     }
 }
 
-auto ServerConnection::set_timeouts(
+auto ServerConnection::Imp::set_timeouts(
     const Lock& lock,
     zeromq::socket::Socket& socket) const -> void
 {
@@ -584,7 +640,8 @@ auto ServerConnection::set_timeouts(
     OT_ASSERT(set);
 }
 
-auto ServerConnection::sync_socket(const Lock& lock) const -> OTZMQRequestSocket
+auto ServerConnection::Imp::sync_socket(const Lock& lock) const
+    -> OTZMQRequestSocket
 {
     auto output = zmq_.Context().RequestSocket();
     set_timeouts(lock, output);
@@ -594,10 +651,5 @@ auto ServerConnection::sync_socket(const Lock& lock) const -> OTZMQRequestSocket
     return output;
 }
 
-auto ServerConnection::Status() const -> bool { return status_.get(); }
-
-ServerConnection::~ServerConnection()
-{
-    if (thread_.joinable()) { thread_.join(); }
-}
-}  // namespace opentxs::network::implementation
+auto ServerConnection::Imp::Status() const -> bool { return status_.get(); }
+}  // namespace opentxs::network

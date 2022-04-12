@@ -134,7 +134,7 @@ auto NumericHash::MaxTarget(const blockchain::Type chain) noexcept
 {
     try {
 
-        return params::Data::Chains().at(chain).nBits_;
+        return params::Chains().at(chain).nBits_;
     } catch (...) {
 
         return {};

@@ -10,7 +10,7 @@
 #include "opentxs/Version.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
-#include "opentxs/util/Pimpl.hpp"
+#include "otx/client/obsolete/OTAPI_Func.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
@@ -35,7 +35,6 @@ class UnitDefinition;
 }  // namespace proto
 
 class Amount;
-class Identifier;
 class OTPaymentPlan;
 class OTSmartContract;
 class PasswordPrompt;
@@ -48,7 +47,7 @@ namespace opentxs::otx::client
 class ServerAction
 {
 public:
-    using Action = Pimpl<opentxs::client::ServerAction>;
+    using Action = std::unique_ptr<opentxs::client::ServerAction>;
 
     virtual auto ActivateSmartContract(
         const PasswordPrompt& reason,

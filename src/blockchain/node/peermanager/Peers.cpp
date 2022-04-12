@@ -17,6 +17,7 @@
 #include <memory>
 #include <random>
 #include <stdexcept>
+#include <string_view>
 #include <utility>
 
 #include "IncomingConnectionManager.hpp"
@@ -95,7 +96,7 @@ PeerManager::Peers::Peers(
     , attempt_()
     , gatekeeper_()
 {
-    const auto& data = params::Data::Chains().at(chain_);
+    const auto& data = params::Chains().at(chain_);
     database_.AddOrUpdate(Endpoint{factory::BlockchainAddress(
         api_,
         data.p2p_protocol_,
@@ -271,7 +272,7 @@ auto PeerManager::Peers::get_default_peer() const noexcept -> Endpoint
 {
     if (localhost_peer_.get() == default_peer_) { return {}; }
 
-    const auto& data = params::Data::Chains().at(chain_);
+    const auto& data = params::Chains().at(chain_);
 
     return Endpoint{factory::BlockchainAddress(
         api_,
@@ -290,7 +291,7 @@ auto PeerManager::Peers::get_dns_peer() const noexcept -> Endpoint
     if (api_.GetOptions().TestMode()) { return {}; }
 
     try {
-        const auto& data = params::Data::Chains().at(chain_);
+        const auto& data = params::Chains().at(chain_);
         const auto& dns = data.dns_seeds_;
 
         if (0 == dns.size()) {
@@ -299,7 +300,7 @@ auto PeerManager::Peers::get_dns_peer() const noexcept -> Endpoint
             return {};
         }
 
-        auto seeds = UnallocatedVector<UnallocatedCString>{};
+        auto seeds = UnallocatedVector<std::string_view>{};
         const auto count = std::size_t{1};
         std::sample(
             std::begin(dns),
@@ -397,7 +398,7 @@ auto PeerManager::Peers::get_fallback_peer(
 
 auto PeerManager::Peers::get_peer() const noexcept -> Endpoint
 {
-    const auto protocol = params::Data::Chains().at(chain_).p2p_protocol_;
+    const auto protocol = params::Chains().at(chain_).p2p_protocol_;
     auto pAddress = get_default_peer();
 
     if (pAddress) {
@@ -556,7 +557,7 @@ auto PeerManager::Peers::LookupIncomingSocket(const int id) noexcept(false)
 auto PeerManager::Peers::peer_factory(Endpoint endpoint, const int id) noexcept
     -> std::unique_ptr<blockchain::p2p::internal::Peer>
 {
-    switch (params::Data::Chains().at(chain_).p2p_protocol_) {
+    switch (params::Chains().at(chain_).p2p_protocol_) {
         case blockchain::p2p::Protocol::bitcoin: {
             return factory::BitcoinP2PPeerLegacy(
                 api_,
@@ -571,7 +572,8 @@ auto PeerManager::Peers::peer_factory(Endpoint endpoint, const int id) noexcept
                 policy_,
                 id,
                 std::move(endpoint),
-                shutdown_endpoint_);
+                shutdown_endpoint_,
+                params::Chains().at(chain_).p2p_protocol_version_);
         }
         case blockchain::p2p::Protocol::opentxs:
         case blockchain::p2p::Protocol::ethereum:

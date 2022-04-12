@@ -73,6 +73,11 @@ class Block;
 
 namespace node
 {
+namespace internal
+{
+class BlockOracle;
+}  // namespace internal
+
 class HeaderOracle;
 }  // namespace node
 

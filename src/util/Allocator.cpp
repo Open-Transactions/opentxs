@@ -13,24 +13,6 @@
 
 namespace opentxs::alloc
 {
-auto standard_to_boost(Resource* standard) noexcept
-    -> boost::container::pmr::memory_resource*
-{
-    auto* poolSync = dynamic_cast<alloc::BoostPoolSync*>(standard);
-
-    if (nullptr != poolSync) { return &(poolSync->boost_); }
-
-    auto* mono = dynamic_cast<alloc::BoostMonotonic*>(standard);
-
-    if (nullptr != mono) { return &(mono->boost_); }
-
-    auto* pool = dynamic_cast<alloc::BoostPool*>(standard);
-
-    if (nullptr != pool) { return &(pool->boost_); }
-
-    return boost::container::pmr::new_delete_resource();
-}
-
 auto System() noexcept -> Resource*
 {
     // TODO replace with std::pmr::new_delete_resource once Android and Apple

@@ -5,10 +5,12 @@
 
 #include <gtest/gtest.h>
 #include <memory>
+#include <utility>
 
 #include "2_Factory.hpp"
 #include "internal/identity/Nym.hpp"
 #include "opentxs/OT.hpp"
+#include "opentxs/Version.hpp"
 #include "opentxs/api/Context.hpp"
 #include "opentxs/api/crypto/Config.hpp"
 #include "opentxs/api/session/Client.hpp"
@@ -21,6 +23,7 @@
 #include "opentxs/crypto/key/asymmetric/Algorithm.hpp"
 #include "opentxs/identity/CredentialType.hpp"
 #include "opentxs/identity/IdentityType.hpp"
+#include "opentxs/identity/Nym.hpp"
 #include "opentxs/identity/Source.hpp"
 #include "opentxs/identity/SourceType.hpp"
 #include "opentxs/identity/Types.hpp"
@@ -34,6 +37,7 @@
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Options.hpp"
 #include "opentxs/util/PasswordPrompt.hpp"
+#include "opentxs/util/Pimpl.hpp"
 
 namespace ot = opentxs;
 

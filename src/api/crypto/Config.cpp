@@ -22,6 +22,8 @@
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 #endif
 
+namespace opentxs
+{
 constexpr auto OT_DEFAULT_ITERATION_COUNT = 65535;       // in bytes
 constexpr auto OT_DEFAULT_SYMMETRIC_SALT_SIZE = 8;       // in bytes
 constexpr auto OT_DEFAULT_SYMMETRIC_KEY_SIZE = 32;       // in bytes
@@ -39,6 +41,7 @@ constexpr auto OT_KEY_SYMMETRIC_IV_SIZE = "symmetric_iv_size";
 constexpr auto OT_KEY_SYMMETRIC_BUFFER_SIZE = "symmetric_buffer_size";
 constexpr auto OT_KEY_PUBLIC_KEYSIZE = "public_keysize";
 constexpr auto OT_KEY_PUBLIC_KEYSIZE_MAX = "public_keysize_max";
+}  // namespace opentxs
 
 namespace opentxs::factory
 {

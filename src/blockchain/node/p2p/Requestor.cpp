@@ -18,9 +18,9 @@
 #include <string_view>
 #include <utility>
 
-#include "internal/blockchain/Params.hpp"
 #include "internal/api/network/Asio.hpp"
 #include "internal/api/network/Blockchain.hpp"
+#include "internal/blockchain/Params.hpp"
 #include "internal/network/zeromq/Context.hpp"
 #include "internal/network/zeromq/message/Message.hpp"
 #include "internal/network/zeromq/socket/Pipeline.hpp"
@@ -517,8 +517,7 @@ auto Requestor::Imp::state_sync(const Work work, Message&& msg) noexcept -> void
 
 auto Requestor::Imp::transition_state_run() noexcept -> void
 {
-    const auto checkpoint =
-        params::Data::Chains().at(chain_).checkpoint_.height_;
+    const auto checkpoint = params::Chains().at(chain_).checkpoint_.height_;
 
     if (remote_position_.first < checkpoint) { return; }
 

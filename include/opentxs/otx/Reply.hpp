@@ -11,7 +11,6 @@
 
 #include "opentxs/core/contract/Signable.hpp"
 #include "opentxs/otx/Types.hpp"
-#include "opentxs/util/Pimpl.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
@@ -22,6 +21,12 @@ namespace api
 {
 class Session;
 }  // namespace api
+
+namespace identifier
+{
+class Notary;
+class Nym;
+}  // namespace identifier
 
 namespace otx
 {
@@ -34,16 +39,18 @@ class OTXPush;
 class ServerReply;
 }  // namespace proto
 
-using OTXReply = Pimpl<otx::Reply>;
+class PasswordPrompt;
 // }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
 namespace opentxs::otx
 {
-class OPENTXS_EXPORT Reply : virtual public opentxs::contract::Signable
+class OPENTXS_EXPORT Reply
 {
 public:
+    class Imp;
+
     static const VersionNumber DefaultVersion;
     static const VersionNumber MaxVersion;
 
@@ -56,8 +63,7 @@ public:
         const RequestNumber number,
         const bool success,
         const PasswordPrompt& reason,
-        std::shared_ptr<const proto::OTXPush>&& push = {})
-        -> Pimpl<opentxs::otx::Reply>;
+        std::shared_ptr<const proto::OTXPush>&& push = {}) -> Reply;
     static auto Factory(
         const api::Session& api,
         const Nym_p signer,
@@ -68,40 +74,42 @@ public:
         const bool success,
         const PasswordPrompt& reason,
         opentxs::otx::OTXPushType pushtype,
-        const UnallocatedCString& payload) -> Pimpl<opentxs::otx::Reply>;
+        const UnallocatedCString& payload) -> Reply;
     OPENTXS_NO_EXPORT static auto Factory(
         const api::Session& api,
-        const proto::ServerReply serialized) -> Pimpl<opentxs::otx::Reply>;
-    static auto Factory(const api::Session& api, const ReadView& view)
-        -> Pimpl<opentxs::otx::Reply>;
+        const proto::ServerReply serialized) -> Reply;
+    static auto Factory(const api::Session& api, const ReadView& view) -> Reply;
 
-    virtual auto Number() const -> RequestNumber = 0;
-    OPENTXS_NO_EXPORT virtual auto Push() const
-        -> std::shared_ptr<const proto::OTXPush> = 0;
-    virtual auto Recipient() const -> const identifier::Nym& = 0;
-    using Signable::Serialize;
-    virtual auto Serialize(AllocateOutput destination) const -> bool = 0;
-    OPENTXS_NO_EXPORT virtual auto Serialize(
-        proto::ServerReply& serialized) const -> bool = 0;
-    virtual auto Server() const -> const identifier::Notary& = 0;
-    virtual auto Success() const -> bool = 0;
-    virtual auto Type() const -> otx::ServerReplyType = 0;
+    auto Number() const -> RequestNumber;
+    auto Push() const -> std::shared_ptr<const proto::OTXPush>;
+    auto Recipient() const -> const identifier::Nym&;
+    auto Serialize() const noexcept -> OTData;
+    auto Serialize(AllocateOutput destination) const -> bool;
+    auto Serialize(proto::ServerReply& serialized) const -> bool;
+    auto Server() const -> const identifier::Notary&;
+    auto Success() const -> bool;
+    auto Type() const -> otx::ServerReplyType;
 
-    ~Reply() override = default;
+    auto Alias() const noexcept -> UnallocatedCString;
+    auto ID() const noexcept -> OTIdentifier;
+    auto Nym() const noexcept -> Nym_p;
+    auto Terms() const noexcept -> const UnallocatedCString&;
+    auto Validate() const noexcept -> bool;
+    auto Version() const noexcept -> VersionNumber;
+    auto SetAlias(const UnallocatedCString& alias) noexcept -> bool;
 
-protected:
-    Reply() = default;
+    virtual auto swap(Reply& rhs) noexcept -> void;
+
+    OPENTXS_NO_EXPORT Reply(Imp* imp) noexcept;
+    Reply(const Reply&) noexcept;
+    Reply(Reply&&) noexcept;
+    auto operator=(const Reply&) noexcept -> Reply&;
+    auto operator=(Reply&&) noexcept -> Reply&;
+
+    virtual ~Reply();
 
 private:
-    friend OTXReply;
-
-#ifndef _WIN32
-    auto clone() const noexcept -> Reply* override = 0;
-#endif
-
-    Reply(const Reply&) = delete;
-    Reply(Reply&&) = delete;
-    auto operator=(const Reply&) -> Reply& = delete;
-    auto operator=(Reply&&) -> Reply& = delete;
+    Imp* imp_;
 };
+
 }  // namespace opentxs::otx

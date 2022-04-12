@@ -69,6 +69,17 @@ namespace opentxs  // NOLINT
 {
 // inline namespace v1
 // {
+namespace api
+{
+namespace network
+{
+namespace asio
+{
+class Context;
+}  // namespace asio
+}  // namespace network
+}  // namespace api
+
 namespace network
 {
 namespace asio
@@ -165,7 +176,7 @@ private:
     OTZMQRouterSocket data_socket_;
     asio::Buffers buffers_;
     mutable std::shared_mutex lock_;
-    mutable asio::Context io_context_;
+    mutable std::shared_ptr<asio::Context> io_context_;
     mutable UnallocatedMap<ThreadPool, asio::Context> thread_pools_;
     mutable asio::Acceptors acceptors_;
     mutable NotificationMap notify_;

@@ -72,6 +72,7 @@ namespace node
 {
 namespace internal
 {
+class BlockOracle;
 struct Mempool;
 }  // namespace internal
 
@@ -263,6 +264,10 @@ public:
         -> bool final;
     auto LookupIncomingSocket(const int id) const noexcept(false)
         -> opentxs::network::asio::Socket final;
+    auto PeerTarget() const noexcept -> std::size_t final
+    {
+        return peer_target_;
+    }
     auto RequestBlock(const block::Hash& block) const noexcept -> bool final;
     auto RequestBlocks(const UnallocatedVector<ReadView>& hashes) const noexcept
         -> bool final;
@@ -333,6 +338,7 @@ private:
     const node::internal::Network& node_;
     node::internal::PeerDatabase& database_;
     const Type chain_;
+    const std::size_t peer_target_;
     mutable Jobs jobs_;
     mutable Peers peers_;
     mutable std::mutex verified_lock_;

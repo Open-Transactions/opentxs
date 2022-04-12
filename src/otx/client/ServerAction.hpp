@@ -14,6 +14,7 @@
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
+#include "otx/client/obsolete/OTAPI_Func.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
@@ -30,8 +31,8 @@ class Client;
 
 namespace identifier
 {
-class Nym;
 class Notary;
+class Nym;
 class UnitDefinition;
 }  // namespace identifier
 
@@ -48,9 +49,9 @@ class PasswordPrompt;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::otx::client::implementation
+namespace opentxs::otx::client::imp
 {
-class ServerAction final : virtual public opentxs::otx::client::ServerAction
+class ServerAction final : public opentxs::otx::client::ServerAction
 {
 public:
     auto ActivateSmartContract(
@@ -182,4 +183,4 @@ private:
     auto operator=(const ServerAction&) -> ServerAction& = delete;
     auto operator=(ServerAction&&) -> ServerAction& = delete;
 };
-}  // namespace opentxs::otx::client::implementation
+}  // namespace opentxs::otx::client::imp

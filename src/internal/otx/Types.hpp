@@ -9,6 +9,8 @@
 
 namespace opentxs
 {
+constexpr auto OTX_PUSH_VERSION = 1;
+
 enum class itemType : std::uint8_t {
     // TRANSFER
     transfer,    // this item is an outgoing transfer, probably part of an

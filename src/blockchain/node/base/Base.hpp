@@ -17,6 +17,7 @@
 #include "core/Shutdown.hpp"
 #include "core/Worker.hpp"
 #include "internal/blockchain/Blockchain.hpp"
+#include "internal/blockchain/node/BlockOracle.hpp"
 #include "internal/blockchain/node/HeaderOracle.hpp"
 #include "internal/blockchain/node/Node.hpp"
 #include "internal/util/Flag.hpp"
@@ -147,7 +148,7 @@ public:
     auto BlockOracle() const noexcept
         -> const node::internal::BlockOracle& final
     {
-        return *block_p_;
+        return block_;
     }
     auto BroadcastTransaction(
         const block::bitcoin::Transaction& tx,
@@ -202,6 +203,7 @@ public:
     {
         return mempool_;
     }
+    auto PeerTarget() const noexcept -> std::size_t final;
     auto Reorg() const noexcept
         -> const network::zeromq::socket::Publish& final;
     auto RequestBlock(const block::Hash& block) const noexcept -> bool final;
@@ -255,7 +257,11 @@ private:
     const node::internal::Config& config_;
     node::Mempool mempool_;
     std::unique_ptr<node::HeaderOracle> header_p_;
-    std::unique_ptr<node::internal::BlockOracle> block_p_;
+
+protected:
+    node::internal::BlockOracle block_;
+
+private:
     std::unique_ptr<node::internal::FilterOracle> filter_p_;
     std::unique_ptr<node::internal::PeerManager> peer_p_;
     std::unique_ptr<node::internal::Wallet> wallet_p_;
@@ -265,7 +271,6 @@ protected:
     node::internal::FilterOracle& filters_;
     node::HeaderOracle& header_;
     node::internal::PeerManager& peer_;
-    node::internal::BlockOracle& block_;
     node::internal::Wallet& wallet_;
 
     // NOTE call init in every final constructor body

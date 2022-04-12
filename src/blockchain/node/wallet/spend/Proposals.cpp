@@ -393,6 +393,8 @@ private:
             case Type::Litecoin_testnet4:
             case Type::PKT:
             case Type::PKT_testnet:
+            case Type::BitcoinSV:
+            case Type::BitcoinSV_testnet3:
             case Type::UnitTest: {
 
                 return [this](const auto& id, auto& in, auto& out) -> auto

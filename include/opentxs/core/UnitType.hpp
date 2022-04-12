@@ -315,6 +315,7 @@ enum class UnitType : std::uint32_t {
     Zmw = 296,    // Zambia Kwacha
     Zwd = 297,    // Zimbabwe Dollar
     Custom = 298,
+    Tnbsv = 299,
 
     Unknown = std::numeric_limits<std::uint32_t>::max(),
 };

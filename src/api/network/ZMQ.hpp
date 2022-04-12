@@ -74,7 +74,9 @@ private:
     mutable std::atomic<std::chrono::seconds> keep_alive_;
     mutable std::mutex lock_;
     mutable UnallocatedCString socks_proxy_;
-    mutable UnallocatedMap<UnallocatedCString, OTServerConnection>
+    mutable UnallocatedMap<
+        UnallocatedCString,
+        opentxs::network::ServerConnection>
         server_connections_;
     OTZMQPublishSocket status_publisher_;
 

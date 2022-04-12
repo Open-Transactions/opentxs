@@ -90,7 +90,7 @@ auto Filters::HaveFilterHeader(
 auto Filters::import_genesis(const blockchain::Type chain) const noexcept
     -> void
 {
-    for (const auto& [style, genesis] : params::Data::Filters().at(chain)) {
+    for (const auto& [style, genesis] : params::Filters().at(chain)) {
         const auto needHeader =
             blank_position_.first == CurrentHeaderTip(style).first;
         const auto needFilter =

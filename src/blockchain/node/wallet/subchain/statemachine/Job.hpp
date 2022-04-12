@@ -120,6 +120,7 @@ private:
     virtual auto process_filter(block::Position&& tip) noexcept -> void;
     virtual auto process_mempool(Message&& in) noexcept -> void;
     virtual auto process_process(block::Position&& position) noexcept -> void;
+    virtual auto process_reprocess(Message&& msg) noexcept -> void;
     virtual auto process_startup(Message&& in) noexcept -> void;
     virtual auto process_update(Message&& msg) noexcept -> void;
     virtual auto work() noexcept -> bool = 0;

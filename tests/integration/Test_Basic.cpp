@@ -3,6 +3,8 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_forward_declare opentxs::api::session::Notary
+
 #include <gtest/gtest.h>
 #include <atomic>
 #include <future>
@@ -63,6 +65,7 @@
 #include "opentxs/interface/ui/Profile.hpp"
 #include "opentxs/interface/ui/ProfileSection.hpp"
 #include "opentxs/otx/LastReplyStatus.hpp"
+#include "opentxs/otx/client/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/NymEditor.hpp"
 #include "opentxs/util/PasswordPrompt.hpp"

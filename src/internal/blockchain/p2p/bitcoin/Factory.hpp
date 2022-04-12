@@ -31,7 +31,7 @@ namespace client
 {
 namespace internal
 {
-struct BlockOracle;
+class BlockOracle;
 struct Config;
 struct FilterOracle;
 class HeaderOracle;
@@ -44,7 +44,7 @@ namespace node
 {
 namespace internal
 {
-struct BlockOracle;
+class BlockOracle;
 struct Config;
 struct FilterOracle;
 class HeaderOracle;
@@ -84,6 +84,7 @@ namespace opentxs::factory
 {
 auto BitcoinP2PHeader(
     const api::Session& api,
+    const blockchain::Type& chain,
     const network::zeromq::Frame& bytes) -> blockchain::p2p::bitcoin::Header*;
 auto BitcoinP2PMessage(
     const api::Session& api,
@@ -104,6 +105,7 @@ auto BitcoinP2PPeerLegacy(
     const blockchain::database::BlockStorage policy,
     const int id,
     std::unique_ptr<blockchain::p2p::internal::Address> address,
-    const UnallocatedCString& shutdown)
+    const UnallocatedCString& shutdown,
+    const blockchain::p2p::bitcoin::ProtocolVersion p2p_protocol_version)
     -> std::unique_ptr<blockchain::p2p::internal::Peer>;
 }  // namespace opentxs::factory

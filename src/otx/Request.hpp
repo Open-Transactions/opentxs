@@ -43,26 +43,30 @@ class PasswordPrompt;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::otx::implementation
+namespace opentxs::otx
 {
-class Request final : public otx::Request,
-                      public opentxs::contract::implementation::Signable
+class Request::Imp final : public opentxs::contract::implementation::Signable
 {
 public:
-    auto Initiator() const -> const identifier::Nym& final
-    {
-        return initiator_;
-    }
-    auto Number() const -> RequestNumber final;
-    auto Serialize(AllocateOutput destination) const -> bool final;
-    auto Serialize(proto::ServerRequest& serialized) const -> bool final;
-    auto Server() const -> const identifier::Notary& final { return server_; }
-    auto Type() const -> otx::ServerRequestType final { return type_; }
+    auto Initiator() const -> const identifier::Nym& { return initiator_; }
+    auto Number() const -> RequestNumber;
+    auto Serialize(AllocateOutput destination) const -> bool;
+    auto Serialize(proto::ServerRequest& serialized) const -> bool;
+    auto Server() const -> const identifier::Notary& { return server_; }
+    auto Type() const -> otx::ServerRequestType { return type_; }
 
     auto SetIncludeNym(const bool include, const PasswordPrompt& reason)
-        -> bool final;
+        -> bool;
 
-    ~Request() final = default;
+    Imp(const api::Session& api,
+        const Nym_p signer,
+        const identifier::Nym& initiator,
+        const identifier::Notary& server,
+        const otx::ServerRequestType type,
+        const RequestNumber number);
+    Imp(const api::Session& api, const proto::ServerRequest serialized);
+    Imp(const Imp& rhs) noexcept;
+    ~Imp() final = default;
 
 private:
     friend otx::Request;
@@ -77,7 +81,6 @@ private:
         const api::Session& api,
         const proto::ServerRequest serialized) -> Nym_p;
 
-    auto clone() const noexcept -> Request* final { return new Request(*this); }
     auto GetID(const Lock& lock) const -> OTIdentifier final;
     auto full_version(const Lock& lock) const -> proto::ServerRequest;
     auto id_version(const Lock& lock) const -> proto::ServerRequest;
@@ -92,18 +95,9 @@ private:
     auto verify_signature(const Lock& lock, const proto::Signature& signature)
         const -> bool final;
 
-    Request(
-        const api::Session& api,
-        const Nym_p signer,
-        const identifier::Nym& initiator,
-        const identifier::Notary& server,
-        const otx::ServerRequestType type,
-        const RequestNumber number);
-    Request(const api::Session& api, const proto::ServerRequest serialized);
-    Request() = delete;
-    Request(const Request& rhs);
-    Request(Request&& rhs) = delete;
-    auto operator=(const Request& rhs) -> Request& = delete;
-    auto operator=(Request&& rhs) -> Request& = delete;
+    Imp() = delete;
+    Imp(Imp&& rhs) = delete;
+    auto operator=(const Imp& rhs) -> Imp& = delete;
+    auto operator=(Imp&& rhs) -> Imp& = delete;
 };
-}  // namespace opentxs::otx::implementation
+}  // namespace opentxs::otx

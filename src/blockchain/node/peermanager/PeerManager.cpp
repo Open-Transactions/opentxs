@@ -91,6 +91,7 @@ PeerManager::PeerManager(
     , node_(node)
     , database_(database)
     , chain_(chain)
+    , peer_target_(peer_target(chain_, policy))
     , jobs_(api)
     , peers_(
           api,
@@ -106,7 +107,7 @@ PeerManager::PeerManager(
           shutdown,
           chain,
           seednode,
-          peer_target(chain, policy))
+          peer_target_)
     , verified_lock_()
     , verified_peers_()
     , init_promise_()

@@ -54,6 +54,6 @@ public:
 private:
     Imp(Imp&&) = delete;
     auto operator=(const Imp&) -> Imp& = delete;
-    auto operator=(Imp&) -> Imp& = delete;
+    auto operator=(Imp&&) -> Imp& = delete;
 };
 }  // namespace opentxs::network::zeromq

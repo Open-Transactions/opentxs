@@ -310,8 +310,8 @@ auto MessageProcessor::process_command(
 
     auto request = otx::Request::Factory(api_, serialized);
 
-    if (request->Validate()) {
-        nymID.Assign(request->Initiator());
+    if (request.Validate()) {
+        nymID.Assign(request.Initiator());
     } else {
         LogError()(OT_PRETTY_CLASS())("Invalid request.").Flush();
 
@@ -531,11 +531,11 @@ auto MessageProcessor::process_notification(zmq::Message&& incoming) noexcept
         reason_,
         proto::DynamicFactory<proto::OTXPush>(payload));
 
-    OT_ASSERT(message->Validate());
+    OT_ASSERT(message.Validate());
 
     auto serialized = proto::ServerReply{};
 
-    if (false == message->Serialize(serialized)) {
+    if (false == message.Serialize(serialized)) {
         LogVerbose()(OT_PRETTY_CLASS())("Failed to serialize reply.").Flush();
 
         return;

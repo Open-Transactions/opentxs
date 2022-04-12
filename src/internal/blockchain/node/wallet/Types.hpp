@@ -56,6 +56,7 @@ enum class SubchainJobs : OTZMQWorkType {
     process = OT_ZMQ_INTERNAL_SIGNAL + 2,
     watchdog = OT_ZMQ_INTERNAL_SIGNAL + 3,
     watchdog_ack = OT_ZMQ_INTERNAL_SIGNAL + 4,
+    reprocess = OT_ZMQ_INTERNAL_SIGNAL + 5,
     init = OT_ZMQ_INIT_SIGNAL,
     key = OT_ZMQ_NEW_BLOCKCHAIN_WALLET_KEY_SIGNAL,
     prepare_shutdown = OT_ZMQ_PREPARE_SHUTDOWN,

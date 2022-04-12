@@ -489,6 +489,8 @@ auto claimtype_map() noexcept -> const ClaimTypeMap&
         {ClaimType::Zmw, proto::CITEMTYPE_ZMW},
         {ClaimType::Zwd, proto::CITEMTYPE_ZWD},
         {ClaimType::Custom, proto::CITEMTYPE_CUSTOM},
+        {ClaimType::Tnbsv, proto::CITEMTYPE_TNBSV},
+
     };
 
     return map;
@@ -831,6 +833,7 @@ auto unittype_map() noexcept -> const UnitTypeMap&
         {UnitType::Zmw, ClaimType::Zmw},
         {UnitType::Zwd, ClaimType::Zwd},
         {UnitType::Custom, ClaimType::Custom},
+        {UnitType::Tnbsv, ClaimType::Tnbsv},
     };
 
     return map;

@@ -29,6 +29,7 @@
 #include <utility>
 
 #include "api/network/asio/Acceptors.hpp"
+#include "api/network/asio/Context.hpp"
 #include "core/StateMachine.hpp"
 #include "internal/network/asio/HTTP.hpp"
 #include "internal/network/asio/HTTPS.hpp"
@@ -74,7 +75,7 @@ Asio::Imp::Imp(const zmq::Context& zmq) noexcept
     , data_socket_(zmq_.RouterSocket(data_cb_, zmq::socket::Direction::Bind))
     , buffers_()
     , lock_()
-    , io_context_()
+    , io_context_(std::make_shared<asio::Context>())
     , thread_pools_([] {
         auto out = UnallocatedMap<ThreadPool, asio::Context>{};
         out[ThreadPool::General];
@@ -83,13 +84,15 @@ Asio::Imp::Imp(const zmq::Context& zmq) noexcept
 
         return out;
     }())
-    , acceptors_(*this, io_context_)
+    , acceptors_(*this, *io_context_)
     , notify_()
     , ipv4_promise_()
     , ipv6_promise_()
     , ipv4_future_(ipv4_promise_.get_future())
     , ipv6_future_(ipv6_promise_.get_future())
 {
+    OT_ASSERT(io_context_);
+
     Trigger();
 }
 
@@ -143,7 +146,7 @@ auto Asio::Imp::Connect(
 
 auto Asio::Imp::IOContext() noexcept -> boost::asio::io_context&
 {
-    return io_context_;
+    return *io_context_;
 }
 
 auto Asio::Imp::data_callback(zmq::Message&& in) noexcept -> void
@@ -239,7 +242,7 @@ auto Asio::Imp::Init() noexcept -> void
 
     const auto threads =
         std::max<unsigned int>(std::thread::hardware_concurrency(), 1u);
-    io_context_.Init(
+    io_context_->Init(
         std::max<unsigned int>(threads / 8u, 1u), ThreadPriority::Normal);
     thread_pools_.at(ThreadPool::General)
         .Init(
@@ -267,7 +270,7 @@ auto Asio::Imp::Post(ThreadPool type, Asio::Callback cb) noexcept -> bool
     {
         if (ThreadPool::Network == type) {
 
-            return io_context_;
+            return *io_context_;
         } else {
 
             return thread_pools_.at(type);
@@ -409,7 +412,7 @@ auto Asio::Imp::Resolve(std::string_view server, std::uint16_t port)
     if (shutdown()) { return output; }
 
     try {
-        auto resolver = Resolver{io_context_.get()};
+        auto resolver = Resolver{io_context_->get()};
         const auto results = resolver.resolve(
             server, std::to_string(port), Resolver::query::numeric_service);
         output.reserve(results.size());
@@ -449,12 +452,12 @@ auto Asio::Imp::retrieve_address_async(
     using HTTP = opentxs::network::asio::HTTP;
     auto alloc = alloc::Default{};
     boost::asio::post(
-        io_context_.get(),
+        io_context_->get(),
         [job = std::allocate_shared<HTTP>(
              alloc,
              site.host,
              site.target,
-             io_context_,
+             *io_context_,
              [this, promise = std::move(pPromise), type = site.response_type](
                  auto&& future) mutable {
                  process_address_query(
@@ -469,12 +472,12 @@ auto Asio::Imp::retrieve_address_async_ssl(
     using HTTPS = opentxs::network::asio::HTTPS;
     auto alloc = alloc::Default{};
     boost::asio::post(
-        io_context_.get(),
+        io_context_->get(),
         [job = std::allocate_shared<HTTPS>(
              alloc,
              site.host,
              site.target,
-             io_context_,
+             *io_context_,
              [this, promise = std::move(pPromise), type = site.response_type](
                  auto&& future) mutable {
                  process_address_query(
@@ -492,12 +495,12 @@ auto Asio::Imp::retrieve_json_http(
     using HTTP = opentxs::network::asio::HTTP;
     auto alloc = alloc::Default{};
     boost::asio::post(
-        io_context_.get(),
+        io_context_->get(),
         [job = std::allocate_shared<HTTP>(
              alloc,
              host,
              path,
-             io_context_,
+             *io_context_,
              [this,
               promise = std::move(pPromise),
               socket = CString{notify, alloc}](auto&& future) mutable {
@@ -515,12 +518,12 @@ auto Asio::Imp::retrieve_json_https(
     using HTTPS = opentxs::network::asio::HTTPS;
     auto alloc = alloc::Default{};
     boost::asio::post(
-        io_context_.get(),
+        io_context_->get(),
         [job = std::allocate_shared<HTTPS>(
              alloc,
              host,
              path,
-             io_context_,
+             *io_context_,
              [this,
               promise = std::move(pPromise),
               socket = CString{notify, alloc}](auto&& future) mutable {
@@ -581,7 +584,7 @@ auto Asio::Imp::Shutdown() noexcept -> void
     {
         auto lock = eLock{lock_};
         acceptors_.Stop();
-        io_context_.Stop();
+        io_context_->Stop();
 
         for (auto& [type, pool] : thread_pools_) { pool.Stop(); }
 

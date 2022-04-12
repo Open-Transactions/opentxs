@@ -926,7 +926,7 @@ auto OTAgreement::SetProposal(
     const auto closingNumber = context.InternalServer().NextTransactionNumber(
         MessageType::notarizeTransaction);
 
-    if (0 == openingNumber->Value()) {
+    if (0 == openingNumber.Value()) {
         LogError()(OT_PRETTY_CLASS())(
             "Error: Unable to get a transaction number.")
             .Flush();
@@ -934,7 +934,7 @@ auto OTAgreement::SetProposal(
         return false;
     }
 
-    if (0 == closingNumber->Value()) {
+    if (0 == closingNumber.Value()) {
         LogError()(OT_PRETTY_CLASS())("Error: Unable to get a closing "
                                       "transaction number.")
             .Flush();
@@ -945,14 +945,14 @@ auto OTAgreement::SetProposal(
     }
 
     // Above this line, the transaction numbers will be recovered automatically
-    openingNumber->SetSuccess(true);
-    closingNumber->SetSuccess(true);
+    openingNumber.SetSuccess(true);
+    closingNumber.SetSuccess(true);
     LogError()(OT_PRETTY_CLASS())("Allocated opening transaction number ")(
-        openingNumber->Value())(".")
+        openingNumber.Value())(".")
         .Flush();
 
     LogError()(OT_PRETTY_CLASS())("Allocated closing transaction number ")(
-        closingNumber->Value())(".")
+        closingNumber.Value())(".")
         .Flush();
 
     // At this point we now have 2 transaction numbers...
@@ -962,8 +962,8 @@ auto OTAgreement::SetProposal(
     // Set the Transaction Number and the Closing transaction number... (for
     // merchant / recipient.)
     //
-    AddRecipientClosingTransactionNo(openingNumber->Value());
-    AddRecipientClosingTransactionNo(closingNumber->Value());
+    AddRecipientClosingTransactionNo(openingNumber.Value());
+    AddRecipientClosingTransactionNo(closingNumber.Value());
     // (They just both go onto this same list.)
 
     // Set the Consideration memo...
@@ -1093,7 +1093,7 @@ auto OTAgreement::Confirm(
     const auto closingNumber = context.InternalServer().NextTransactionNumber(
         MessageType::notarizeTransaction);
 
-    if (0 == openingNumber->Value()) {
+    if (0 == openingNumber.Value()) {
         LogError()(OT_PRETTY_CLASS())(
             "Error: Strangely unable to get a transaction number.")
             .Flush();
@@ -1101,7 +1101,7 @@ auto OTAgreement::Confirm(
         return false;
     }
 
-    if (false == closingNumber->Value()) {
+    if (false == closingNumber.Value()) {
         LogError()(OT_PRETTY_CLASS())(
             "Error: Strangely unable to get a closing "
             "transaction number.")
@@ -1111,16 +1111,16 @@ auto OTAgreement::Confirm(
     }
 
     // Above this line, the transaction numbers will be recovered automatically
-    openingNumber->SetSuccess(true);
-    closingNumber->SetSuccess(true);
+    openingNumber.SetSuccess(true);
+    closingNumber.SetSuccess(true);
 
     // At this point we now HAVE 2 transaction numbers (for payer / sender)...
     // We can't return without USING THEM or PUTTING THEM BACK.
     //
 
-    SetTransactionNum(openingNumber->Value());  // Set the Transaction Number
-    AddClosingTransactionNo(closingNumber->Value());  // and the Closing Number
-                                                      // (both for sender)...
+    SetTransactionNum(openingNumber.Value());  // Set the Transaction Number
+    AddClosingTransactionNo(closingNumber.Value());  // and the Closing Number
+                                                     // (both for sender)...
 
     // CREATION DATE was set in the Merchant's proposal, and it's RESET here in
     // the Confirm.

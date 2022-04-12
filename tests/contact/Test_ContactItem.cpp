@@ -34,8 +34,8 @@ public:
         , contactItem_(
               dynamic_cast<const ot::api::session::Client&>(api_),
               ot::UnallocatedCString("testNym"),
-              CONTACT_CONTACT_DATA_VERSION,
-              CONTACT_CONTACT_DATA_VERSION,
+              opentxs::CONTACT_CONTACT_DATA_VERSION,
+              opentxs::CONTACT_CONTACT_DATA_VERSION,
               ot::identity::wot::claim::SectionType::Identifier,
               ot::identity::wot::claim::ClaimType::Employee,
               ot::UnallocatedCString("testValue"),
@@ -55,8 +55,8 @@ TEST_F(Test_ContactItem, first_constructor)
     const ot::identity::wot::claim::Item contactItem1(
         dynamic_cast<const ot::api::session::Client&>(api_),
         ot::UnallocatedCString("testContactItemNym"),
-        CONTACT_CONTACT_DATA_VERSION,
-        CONTACT_CONTACT_DATA_VERSION,
+        opentxs::CONTACT_CONTACT_DATA_VERSION,
+        opentxs::CONTACT_CONTACT_DATA_VERSION,
         ot::identity::wot::claim::SectionType::Identifier,
         ot::identity::wot::claim::ClaimType::Employee,
         ot::UnallocatedCString("testValue"),
@@ -76,7 +76,7 @@ TEST_F(Test_ContactItem, first_constructor)
             "testValue",
             "")));
     ASSERT_EQ(identifier, contactItem1.ID());
-    ASSERT_EQ(CONTACT_CONTACT_DATA_VERSION, contactItem1.Version());
+    ASSERT_EQ(opentxs::CONTACT_CONTACT_DATA_VERSION, contactItem1.Version());
     ASSERT_EQ(
         ot::identity::wot::claim::SectionType::Identifier,
         contactItem1.Section());
@@ -96,8 +96,8 @@ TEST_F(Test_ContactItem, first_constructor_different_versions)
     const ot::identity::wot::claim::Item contactItem1(
         dynamic_cast<const ot::api::session::Client&>(api_),
         ot::UnallocatedCString("testContactItemNym"),
-        CONTACT_CONTACT_DATA_VERSION - 1,  // previous version
-        CONTACT_CONTACT_DATA_VERSION,
+        opentxs::CONTACT_CONTACT_DATA_VERSION - 1,  // previous version
+        opentxs::CONTACT_CONTACT_DATA_VERSION,
         ot::identity::wot::claim::SectionType::Identifier,
         ot::identity::wot::claim::ClaimType::Employee,
         ot::UnallocatedCString("testValue"),
@@ -105,7 +105,7 @@ TEST_F(Test_ContactItem, first_constructor_different_versions)
         NULL_START,
         NULL_END,
         "");
-    ASSERT_EQ(CONTACT_CONTACT_DATA_VERSION, contactItem1.Version());
+    ASSERT_EQ(opentxs::CONTACT_CONTACT_DATA_VERSION, contactItem1.Version());
 }
 
 TEST_F(Test_ContactItem, second_constructor)
@@ -113,8 +113,8 @@ TEST_F(Test_ContactItem, second_constructor)
     const ot::identity::wot::claim::Item contactItem1(
         dynamic_cast<const ot::api::session::Client&>(api_),
         ot::UnallocatedCString("testContactItemNym"),
-        CONTACT_CONTACT_DATA_VERSION,
-        CONTACT_CONTACT_DATA_VERSION,
+        opentxs::CONTACT_CONTACT_DATA_VERSION,
+        opentxs::CONTACT_CONTACT_DATA_VERSION,
         ot::Claim(
             "",
             ot::translate(ot::identity::wot::claim::SectionType::Identifier),
@@ -136,7 +136,7 @@ TEST_F(Test_ContactItem, second_constructor)
             "testValue",
             "")));
     ASSERT_EQ(identifier, contactItem1.ID());
-    ASSERT_EQ(CONTACT_CONTACT_DATA_VERSION, contactItem1.Version());
+    ASSERT_EQ(opentxs::CONTACT_CONTACT_DATA_VERSION, contactItem1.Version());
     ASSERT_EQ(
         ot::identity::wot::claim::SectionType::Identifier,
         contactItem1.Section());
@@ -178,8 +178,8 @@ TEST_F(Test_ContactItem, operator_equal_false)
     ot::identity::wot::claim::Item contactItem2(
         dynamic_cast<const ot::api::session::Client&>(api_),
         ot::UnallocatedCString("testNym2"),
-        CONTACT_CONTACT_DATA_VERSION,
-        CONTACT_CONTACT_DATA_VERSION,
+        opentxs::CONTACT_CONTACT_DATA_VERSION,
+        opentxs::CONTACT_CONTACT_DATA_VERSION,
         ot::identity::wot::claim::SectionType::Identifier,
         ot::identity::wot::claim::ClaimType::Employee,
         ot::UnallocatedCString("testValue2"),
@@ -214,7 +214,7 @@ TEST_F(Test_ContactItem, public_accessors)
     ASSERT_EQ("testValue", contactItem_.Value());
     ASSERT_EQ(contactItem_.Start(), NULL_START);
     ASSERT_EQ(contactItem_.End(), NULL_END);
-    ASSERT_EQ(CONTACT_CONTACT_DATA_VERSION, contactItem_.Version());
+    ASSERT_EQ(opentxs::CONTACT_CONTACT_DATA_VERSION, contactItem_.Version());
 
     ASSERT_TRUE(contactItem_.isActive());
     ASSERT_FALSE(contactItem_.isLocal());

@@ -71,25 +71,36 @@ public:
     ~Imp() final = default;
 
 private:
+    network::zeromq::socket::Raw& to_scan_;
     network::zeromq::socket::Raw& to_process_;
     network::zeromq::socket::Raw& to_progress_;
-    bool active_;
     std::optional<block::Position> last_scanned_;
     std::optional<block::Position> filter_tip_;
     Set<block::Position> dirty_;
 
+    auto before(const block::Position& position) const noexcept
+        -> block::Position;
+    auto can_advance() const noexcept -> bool;
     auto caught_up() const noexcept -> bool;
+    auto current() const noexcept -> const block::Position&;
     auto highest_clean(const Set<block::Position>& clean) const noexcept
         -> std::optional<block::Position>;
     auto stop() const noexcept -> block::Height;
 
     auto adjust_last_scanned(
-        std::optional<block::Position>&& highestClean) noexcept -> void;
+        const std::optional<block::Position>& highestClean) noexcept -> void;
     auto do_startup() noexcept -> void final;
-    auto process(const Set<ScanStatus>& clean) noexcept -> void;
+    auto process_clean(const Set<ScanStatus>& clean) noexcept -> void;
+    auto process_dirty(const Set<block::Position>& dirty) noexcept -> void;
     auto process_filter(block::Position&& tip) noexcept -> void final;
     auto process_update(Message&& msg) noexcept -> void final;
     auto prune() noexcept -> void;
+    auto set_last_scanned(const block::Position& value) noexcept -> void;
+    auto set_last_scanned(const std::optional<block::Position>& value) noexcept
+        -> void;
+    auto set_last_scanned(std::optional<block::Position>&& value) noexcept
+        -> void;
+    auto update_progress() noexcept -> void;
     auto work() noexcept -> bool final;
 };
 }  // namespace opentxs::blockchain::node::wallet
