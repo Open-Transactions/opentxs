@@ -17,6 +17,7 @@
 #include "opentxs/blockchain/block/bitcoin/Block.hpp"
 #include "opentxs/blockchain/block/bitcoin/Script.hpp"
 #include "opentxs/blockchain/block/bitcoin/Transaction.hpp"
+#include "opentxs/api/crypto/Seed.hpp"
 
 namespace ottest
 {
@@ -47,7 +48,7 @@ auto Regtest_fixture_simple::CreateNym(
         name,
         api.Crypto().Seed().Passphrase(seed, reason));
 
-    OT_ASSERT(added);
+    EXPECT_TRUE(added);
 
     auto& user = it->second;
 
