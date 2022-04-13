@@ -22,13 +22,16 @@ namespace ottest
 {
 
 RegtestListener::RegtestListener(const ot::api::session::Client& client)
+    : block_listener(std::make_unique<BlockListener>(client))
+    , wallet_listener(std::make_unique<WalletListener>(client))
 {
-    block_listener = std::make_unique<BlockListener>(client);
-    wallet_listener = std::make_unique<WalletListener>(client);
+
 }
 
 Regtest_fixture_simple::Regtest_fixture_simple()
     : Regtest_fixture_single(ot::Options{}.SetBlockchainStorageLevel(1))
+    , users_()
+    , user_listeners_()
 {
 
 }

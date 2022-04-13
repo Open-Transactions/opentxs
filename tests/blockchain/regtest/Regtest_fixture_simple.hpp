@@ -20,8 +20,6 @@ struct RegtestListener {
 
 class Regtest_fixture_simple : virtual public Regtest_fixture_single
 {
-    //const ot::api::Context& ot_;
-
 protected:
     Regtest_fixture_simple();
 
