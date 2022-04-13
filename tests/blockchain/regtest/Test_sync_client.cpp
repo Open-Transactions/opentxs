@@ -27,6 +27,7 @@
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/api/session/Endpoints.hpp"
 #include "opentxs/blockchain/crypto/AddressStyle.hpp"
+#include "opentxs/util/Log.hpp"
 
 #include <chrono>
 #include <thread>
@@ -50,26 +51,18 @@ TEST_F(Regtest_fixture_simple, start_stop_client)
 
     for (int number_of_test = 0; number_of_test < numbers_of_test;
          number_of_test++) {
-        std::cout << "Test number: " << number_of_test + 1 << std::endl;
-        Counter account_list_{};
-        Counter account_activity_{};
-        account_activity_.expected_ += 0;
-        account_list_.expected_ += 1;
+        ot::LogConsole()("Start test number: " + std::to_string(number_of_test))
+            .Flush();
 
         auto [user, success] = CreateClient(
             opentxs::Options{}, number_of_test + 3, name, words, address_);
         EXPECT_TRUE(success);
 
-        init_account_activity(
-            user, GetHDAccount(user).Parent().AccountID(), account_activity_);
-        init_account_list(user, account_list_);
-
+        WaitForSynchro(user, targetHeight, expected_balance);
         if (!mine_only_in_first_test || number_of_test == 0) {
             targetHeight += static_cast<Height>(blocks_mine_for_alice);
 
             auto scan_listener = std::make_unique<ScanListener>(*user.api_);
-
-            WaitForSynchro(user, targetHeight, expected_balance);
 
             auto scan_listener_external_f = scan_listener->get_future(
                 GetHDAccount(user), bca::Subchain::External, targetHeight);
@@ -105,9 +98,8 @@ TEST_F(Regtest_fixture_simple, start_stop_client)
 
             expected_balance += amount_in_transaction_ * blocks_mine_for_alice *
                                 transaction_in_block_;
+            WaitForSynchro(user, targetHeight, expected_balance);
         }
-
-        WaitForSynchro(user, targetHeight, expected_balance);
 
         EXPECT_EQ(GetBalance(user), expected_balance);
 
@@ -139,37 +131,17 @@ TEST_F(Regtest_fixture_simple, send_to_client)
     auto [user_alice, success_alice] =
         CreateClient(opentxs::Options{}, 3, name_alice, words_alice, address_);
     EXPECT_TRUE(success_alice);
-    Counter account_list_{};
-    Counter account_activity_{};
-    account_activity_.expected_ += 0;
-    account_list_.expected_ += 1;
 
     auto [user_bob, success_bob] =
         CreateClient(opentxs::Options{}, 4, name_bob, words_bob, address_);
     EXPECT_TRUE(success_bob);
-    Counter account_list2_{};
-    Counter account_activity2_{};
-    account_activity2_.expected_ += 0;
-    account_list2_.expected_ += 1;
-
-    init_account_activity(
-        user_alice,
-        GetHDAccount(user_alice).Parent().AccountID(),
-        account_activity_);
-    init_account_list(user_alice, account_list_);
-
-    init_account_activity(
-        user_bob,
-        GetHDAccount(user_bob).Parent().AccountID(),
-        account_activity2_);
-    init_account_list(user_bob, account_list2_);
 
     auto scan_listener_alice = std::make_unique<ScanListener>(*user_alice.api_);
     auto scan_listener_bob = std::make_unique<ScanListener>(*user_bob.api_);
 
     targetHeight += blocks_number;
 
-    std::cout << "Mine for alice\n";
+    ot::LogConsole()("Mine for alice").Flush();
     // mine coin for Alice
     auto mined_header = MineBlocks(
         user_alice,
@@ -181,7 +153,7 @@ TEST_F(Regtest_fixture_simple, send_to_client)
     begin += blocks_number;
     targetHeight += blocks_number;
 
-    std::cout << "Mine for bob\n";
+    ot::LogConsole()("Mine for bob").Flush();
     // mine coin for Bob
     auto mined_header2 = MineBlocks(
         user_bob,
@@ -202,7 +174,6 @@ TEST_F(Regtest_fixture_simple, send_to_client)
     auto scan_listener_internal_bob_f = scan_listener_bob->get_future(
         GetHDAccount(user_bob), bca::Subchain::Internal, targetHeight);
 
-    std::cout << "Mine targetHeight: " << targetHeight << std::endl;
     // mine MaturationInterval number block with
     MineBlocks(begin, static_cast<int>(MaturationInterval()) + 1);
     begin += MaturationInterval() + 1;
@@ -237,8 +208,10 @@ TEST_F(Regtest_fixture_simple, send_to_client)
 
         const auto address = GetNextBlockchainAddress(*receiver);
 
-        std::cout << sender->name_ + " send " << coin_to_send << " to "
-                  << receiver->name_ << " address: " << address << std::endl;
+        ot::LogConsole()(
+            sender->name_ + " send " + std::to_string(coin_to_send) + " to " +
+            receiver->name_ + " address: " + address)
+            .Flush();
 
         auto future = network.SendToAddress(
             sender->nym_id_, address, coin_to_send, memo_outgoing);

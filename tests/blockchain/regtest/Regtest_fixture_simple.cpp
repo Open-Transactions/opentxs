@@ -18,6 +18,11 @@
 #include "opentxs/blockchain/block/bitcoin/Script.hpp"
 #include "opentxs/blockchain/block/bitcoin/Transaction.hpp"
 #include "opentxs/api/crypto/Seed.hpp"
+#include "opentxs/api/session/UI.hpp"
+#include "opentxs/blockchain/crypto/AddressStyle.hpp"
+#include "opentxs/api/session/Endpoints.hpp"
+#include "opentxs/crypto/Language.hpp"
+#include "opentxs/network/zeromq/socket/Subscribe.hpp"
 
 namespace ottest
 {
@@ -272,6 +277,10 @@ auto Regtest_fixture_simple::CreateClient(
     auto& user_no_const = const_cast<User&>(user);
     user_no_const.init_custom(client, cb);
 
+    client.UI().AccountActivity(
+        user.nym_id_, GetHDAccount(user).Parent().AccountID(), []() {});
+    client.UI().AccountList(user.nym_id_, []() {});
+
     const auto [it, listener_added] = user_listeners_.emplace(name, client);
 
     std::promise<void> promise;
@@ -370,12 +379,13 @@ auto Regtest_fixture_simple::WaitForSynchro(
         now = std::chrono::steady_clock::now();
         auto progress = GetSyncProgress(user);
         auto balance = GetBalance(user);
-        std::cout << "Waiting for synchro, balance: " << GetDisplayBalance(user)
+        std::cout << "Waiting for synchronization, balance: "
+                  << GetDisplayBalance(user)
                   << ", sync percentage: " << GetSyncPercentage(user)
                   << "%, sync progress [" << progress.first << ","
                   << progress.second << "]"
                   << ", target height: " << target << std::endl;
-        if ((progress.first == target && progress.second == target) ||
+        if (progress.first == target && progress.second == target &&
             (balance == expected_balance)) {
             std::cout << "Client synchronized in "
                       << std::chrono::duration_cast<std::chrono::seconds>(
