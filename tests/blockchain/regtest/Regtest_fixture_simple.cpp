@@ -25,7 +25,6 @@ RegtestListener::RegtestListener(const ot::api::session::Client& client)
     : block_listener(std::make_unique<BlockListener>(client))
     , wallet_listener(std::make_unique<WalletListener>(client))
 {
-
 }
 
 Regtest_fixture_simple::Regtest_fixture_simple()
@@ -33,7 +32,6 @@ Regtest_fixture_simple::Regtest_fixture_simple()
     , users_()
     , user_listeners_()
 {
-
 }
 
 auto Regtest_fixture_simple::CreateNym(
@@ -52,10 +50,6 @@ auto Regtest_fixture_simple::CreateNym(
     OT_ASSERT(added);
 
     auto& user = it->second;
-//    user.init(api, ot::identity::Type::individual, index);
-//    auto& nym = user.nym_;
-
-//    OT_ASSERT(nym);
 
     return user;
 }
@@ -95,30 +89,29 @@ auto Regtest_fixture_simple::TransactionGenerator(
     const auto keys = ot::UnallocatedSet<ot::blockchain::crypto::Key>{};
     static const auto baseAmount = ot::blockchain::Amount{amount};
 
-    const auto reason =
-        user.api_->Factory().PasswordPrompt(__func__);
+    const auto reason = user.api_->Factory().PasswordPrompt(__func__);
     auto& account = GetHDAccount(user);
 
     for (auto i = Index{0}; i < Index{count}; ++i) {
         const auto index = account.Reserve(
-            Subchain::External,
-            client_1_.Factory().PasswordPrompt(""));
-        const auto& element = account.BalanceElement(
-            Subchain::External, index.value_or(0));
+            Subchain::External, client_1_.Factory().PasswordPrompt(""));
+        const auto& element =
+            account.BalanceElement(Subchain::External, index.value_or(0));
         const auto key = element.Key();
 
-        const auto& [bytes, value, pattern] =
-            meta.emplace_back(
-                element.PubkeyHash(),
-                baseAmount,
-                Pattern::PayToPubkeyHash);
-        output.emplace_back(value, miner_.Factory().BitcoinScriptP2PKH(test_chain_, *key), keys);
+        const auto& [bytes, value, pattern] = meta.emplace_back(
+            element.PubkeyHash(), baseAmount, Pattern::PayToPubkeyHash);
+        output.emplace_back(
+            value,
+            miner_.Factory().BitcoinScriptP2PKH(test_chain_, *key),
+            keys);
     }
 
     auto output_transaction = miner_.Factory().BitcoinGenerationTransaction(
         test_chain_, height, std::move(output), coinbase_fun_);
 
-    const auto& txid = transactions_.emplace_back(output_transaction->ID()).get();
+    const auto& txid =
+        transactions_.emplace_back(output_transaction->ID()).get();
 
     for (auto i = Index{0}; i < Index{count}; ++i) {
         auto& [bytes, amount, pattern] = meta.at(i);
@@ -132,7 +125,6 @@ auto Regtest_fixture_simple::TransactionGenerator(
     return output_transaction;
 }
 
-
 auto Regtest_fixture_simple::MineBlocks(
     const Height ancestor,
     const std::size_t count) noexcept -> bool
@@ -143,27 +135,22 @@ auto Regtest_fixture_simple::MineBlocks(
     blocks.reserve(users_.size());
     wallets.reserve(users_.size());
 
-    for(auto& listeners : user_listeners_) {
+    for (auto& listeners : user_listeners_) {
         blocks.emplace_back(listeners.second.block_listener->GetFuture(target));
-        wallets.emplace_back(listeners.second.wallet_listener->GetFuture(target));
+        wallets.emplace_back(
+            listeners.second.wallet_listener->GetFuture(target));
     }
 
     auto success = Mine(ancestor, count);
 
     for (auto& future : blocks) {
-        EXPECT_TRUE(future.wait_for(wait_time_limit_) == std::future_status::ready);
-
-//        const auto [height, hash] = future.get();
-//
-//        EXPECT_EQ(hash, mined_header);
+        EXPECT_TRUE(
+            future.wait_for(wait_time_limit_) == std::future_status::ready);
     }
 
     for (auto& future : wallets) {
-        EXPECT_TRUE(future.wait_for(wait_time_limit_) == std::future_status::ready);
-
-        //        const auto height = future.get();
-        //
-        //        EXPECT_EQ(height, targetHeight);
+        EXPECT_TRUE(
+            future.wait_for(wait_time_limit_) == std::future_status::ready);
     }
 
     return success;
@@ -184,16 +171,20 @@ auto Regtest_fixture_simple::MineBlocks(
     blocks.reserve(users_.size());
     wallets.reserve(users_.size());
 
-    for(auto& listeners : user_listeners_) {
+    for (auto& listeners : user_listeners_) {
         blocks.emplace_back(listeners.second.block_listener->GetFuture(target));
-        wallets.emplace_back(listeners.second.wallet_listener->GetFuture(target));
+        wallets.emplace_back(
+            listeners.second.wallet_listener->GetFuture(target));
     }
 
-    Generator gen = [&](Height height) -> Transaction { return TransactionGenerator(user, height, transaction_number, amount); };
+    Generator gen = [&](Height height) -> Transaction {
+        return TransactionGenerator(user, height, transaction_number, amount);
+    };
     auto mined_header = MineBlocks(ancestor, block_number, gen, {});
 
     for (auto& future : blocks) {
-        EXPECT_TRUE(future.wait_for(wait_time_limit_) == std::future_status::ready);
+        EXPECT_TRUE(
+            future.wait_for(wait_time_limit_) == std::future_status::ready);
 
         const auto [height, hash] = future.get();
 
@@ -201,11 +192,8 @@ auto Regtest_fixture_simple::MineBlocks(
     }
 
     for (auto& future : wallets) {
-        EXPECT_TRUE(future.wait_for(wait_time_limit_) == std::future_status::ready);
-
-//        const auto height = future.get();
-//
-//        EXPECT_EQ(height, targetHeight);
+        EXPECT_TRUE(
+            future.wait_for(wait_time_limit_) == std::future_status::ready);
     }
 
     return mined_header;
@@ -252,14 +240,12 @@ auto Regtest_fixture_simple::MineBlocks(
     return previousHeader;
 }
 
-auto Regtest_fixture_simple::
-    CreateClient(
-        ot::Options client_args,
-        int instance,
-        const ot::UnallocatedCString& name,
-        const ot::UnallocatedCString& words,
-        const b::p2p::Address& address)
-        -> std::pair<const User&, bool>
+auto Regtest_fixture_simple::CreateClient(
+    ot::Options client_args,
+    int instance,
+    const ot::UnallocatedCString& name,
+    const ot::UnallocatedCString& words,
+    const b::p2p::Address& address) -> std::pair<const User&, bool>
 {
     auto& client = ot_.StartClientSession(client_args, instance);
 
@@ -293,10 +279,11 @@ auto Regtest_fixture_simple::
         promise.set_value();
     };
     std::atomic_int client_peers;
-    ot::OTZMQListenCallback client_cb_(ot::network::zeromq::ListenCallback::Factory([&](auto&& msg) {
-        cb_connected(std::move(msg), client_peers);
-    }));
-    ot::OTZMQSubscribeSocket client_socket(user.api_->Network().ZeroMQ().SubscribeSocket(client_cb_));
+    ot::OTZMQListenCallback client_cb_(
+        ot::network::zeromq::ListenCallback::Factory(
+            [&](auto&& msg) { cb_connected(std::move(msg), client_peers); }));
+    ot::OTZMQSubscribeSocket client_socket(
+        user.api_->Network().ZeroMQ().SubscribeSocket(client_cb_));
     if (!client_socket->Start(
             (wait_for_handshake_
                  ? user.api_->Endpoints().BlockchainPeer()
@@ -319,7 +306,8 @@ auto Regtest_fixture_simple::GetBalance(const User& user) -> const Amount
     return widget.Balance();
 }
 
-auto Regtest_fixture_simple::GetDisplayBalance(const User& user) -> const ot::UnallocatedCString
+auto Regtest_fixture_simple::GetDisplayBalance(const User& user)
+    -> const ot::UnallocatedCString
 {
     auto& account = GetHDAccount(user);
     auto& id = account.Parent().AccountID();
@@ -327,7 +315,8 @@ auto Regtest_fixture_simple::GetDisplayBalance(const User& user) -> const ot::Un
     return widget.DisplayBalance();
 }
 
-auto Regtest_fixture_simple::GetSyncProgress(const User& user) -> const std::pair<int, int>
+auto Regtest_fixture_simple::GetSyncProgress(const User& user)
+    -> const std::pair<int, int>
 {
     auto& account = GetHDAccount(user);
     auto& id = account.Parent().AccountID();
@@ -343,7 +332,8 @@ auto Regtest_fixture_simple::GetSyncPercentage(const User& user) -> double
     return widget.SyncPercentage();
 }
 
-auto Regtest_fixture_simple::GetHDAccount(const User& user) const noexcept -> const bca::HD&
+auto Regtest_fixture_simple::GetHDAccount(const User& user) const noexcept
+    -> const bca::HD&
 {
     return user.api_->Crypto()
         .Blockchain()
@@ -352,39 +342,49 @@ auto Regtest_fixture_simple::GetHDAccount(const User& user) const noexcept -> co
         .at(0);
 }
 
-auto Regtest_fixture_simple::GetNextBlockchainAddress(const User& user) -> const ot::UnallocatedCString
+auto Regtest_fixture_simple::GetNextBlockchainAddress(const User& user)
+    -> const ot::UnallocatedCString
 {
     auto& account = GetHDAccount(user);
     const auto index = account.Reserve(
-        Subchain::External,
-        user.api_->Factory().PasswordPrompt(""));
-    const auto& element = account.BalanceElement(
-        Subchain::External, index.value_or(0));
+        Subchain::External, user.api_->Factory().PasswordPrompt(""));
+    const auto& element =
+        account.BalanceElement(Subchain::External, index.value_or(0));
 
     return element.Address(opentxs::blockchain::crypto::AddressStyle::P2PKH);
 }
 
-auto Regtest_fixture_simple::WaitForSynchro(const User& user, const Height target, const Amount expected_balance) -> void
+auto Regtest_fixture_simple::WaitForSynchro(
+    const User& user,
+    const Height target,
+    const Amount expected_balance) -> void
 {
-    if(expected_balance == 0) {
-        return;
-    }
+    if (expected_balance == 0) { return; }
 
     auto begin = std::chrono::steady_clock::now();
     auto now = begin;
     auto end = begin + wait_time_limit_;
 
-    while(now < end) {
+    while (now < end) {
         now = std::chrono::steady_clock::now();
         auto progress = GetSyncProgress(user);
         auto balance = GetBalance(user);
-        std::cout << "Waiting for synchro, balance: " << GetDisplayBalance(user) << ", sync percentage: " << GetSyncPercentage(user) << "%, sync progress [" << progress.first <<"," << progress.second << "]" << ", target height: " << target << std::endl;
-        if((progress.first == target && progress.second == target) || (balance == expected_balance)) {
-            std::cout << "Client synchronized in " << std::chrono::duration_cast<std::chrono::seconds>(now - begin).count() << " seconds" << std::endl;
+        std::cout << "Waiting for synchro, balance: " << GetDisplayBalance(user)
+                  << ", sync percentage: " << GetSyncPercentage(user)
+                  << "%, sync progress [" << progress.first << ","
+                  << progress.second << "]"
+                  << ", target height: " << target << std::endl;
+        if ((progress.first == target && progress.second == target) ||
+            (balance == expected_balance)) {
+            std::cout << "Client synchronized in "
+                      << std::chrono::duration_cast<std::chrono::seconds>(
+                             now - begin)
+                             .count()
+                      << " seconds" << std::endl;
             break;
         }
         ot::Sleep(std::chrono::seconds(5));
     }
 }
 
-}
+}  // namespace ottest

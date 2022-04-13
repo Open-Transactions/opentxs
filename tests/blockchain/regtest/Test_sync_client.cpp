@@ -41,13 +41,15 @@ TEST_F(Regtest_fixture_simple, start_stop_client)
 
     const size_t numbers_of_test = 5;
     const std::string name = "Alice";
-    const std::string words = "worry myself exile unit believe climb pitch theme two truly alter daughter";
+    const std::string words = "worry myself exile unit believe climb pitch "
+                              "theme two truly alter daughter";
     const auto blocks_mine_for_alice = 2;
     bool mine_only_in_first_test = false;
     Height targetHeight = 0, begin = 0;
     auto expected_balance = 0;
 
-    for(size_t number_of_test =  0; number_of_test < numbers_of_test; number_of_test++) {
+    for (size_t number_of_test = 0; number_of_test < numbers_of_test;
+         number_of_test++) {
         std::cout << "Test number: " << number_of_test + 1 << std::endl;
         Counter account_list_{};
         Counter account_activity_{};
@@ -123,23 +125,27 @@ TEST_F(Regtest_fixture_simple, send_to_client)
     EXPECT_TRUE(Connect());
 
     const std::string name_alice = "Alice";
-    const std::string words_alice = "worry myself exile unit believe climb pitch theme two truly alter daughter";
+    const std::string words_alice = "worry myself exile unit believe climb "
+                                    "pitch theme two truly alter daughter";
 
     const std::string name_bob = "Bob";
-    const std::string words_bob = "myself two exile unit believe worry daughter climb pitch theme truly alter";
+    const std::string words_bob = "myself two exile unit believe worry "
+                                  "daughter climb pitch theme truly alter";
 
     Height targetHeight = 0, begin = 0;
     const auto blocks_number = 2;
     const auto coin_to_send = 100000;
 
-    auto [user_alice, success_alice] = CreateClient(opentxs::Options{}, 3, name_alice, words_alice, address_);
+    auto [user_alice, success_alice] =
+        CreateClient(opentxs::Options{}, 3, name_alice, words_alice, address_);
     EXPECT_TRUE(success_alice);
     Counter account_list_{};
     Counter account_activity_{};
     account_activity_.expected_ += 0;
     account_list_.expected_ += 1;
 
-    auto [user_bob, success_bob] = CreateClient(opentxs::Options{}, 4, name_bob, words_bob, address_);
+    auto [user_bob, success_bob] =
+        CreateClient(opentxs::Options{}, 4, name_bob, words_bob, address_);
     EXPECT_TRUE(success_bob);
     Counter account_list2_{};
     Counter account_activity2_{};
@@ -147,11 +153,15 @@ TEST_F(Regtest_fixture_simple, send_to_client)
     account_list2_.expected_ += 1;
 
     init_account_activity(
-        user_alice, GetHDAccount(user_alice).Parent().AccountID(), account_activity_);
+        user_alice,
+        GetHDAccount(user_alice).Parent().AccountID(),
+        account_activity_);
     init_account_list(user_alice, account_list_);
 
     init_account_activity(
-        user_bob, GetHDAccount(user_bob).Parent().AccountID(), account_activity2_);
+        user_bob,
+        GetHDAccount(user_bob).Parent().AccountID(),
+        account_activity2_);
     init_account_list(user_bob, account_list2_);
 
     auto scan_listener_alice = std::make_unique<ScanListener>(*user_alice.api_);
@@ -199,20 +209,27 @@ TEST_F(Regtest_fixture_simple, send_to_client)
 
     EXPECT_TRUE(scan_listener_alice->wait(scan_listener_external_alice_f));
     EXPECT_TRUE(scan_listener_alice->wait(scan_listener_internal_alice_f));
-    EXPECT_EQ(GetBalance(user_alice), amount_in_transaction_ * blocks_number * transaction_in_block_);
+    EXPECT_EQ(
+        GetBalance(user_alice),
+        amount_in_transaction_ * blocks_number * transaction_in_block_);
 
     EXPECT_TRUE(scan_listener_bob->wait(scan_listener_external_bob_f));
     EXPECT_TRUE(scan_listener_bob->wait(scan_listener_internal_bob_f));
-    EXPECT_EQ(GetBalance(user_bob), amount_in_transaction_ * blocks_number * transaction_in_block_);
+    EXPECT_EQ(
+        GetBalance(user_bob),
+        amount_in_transaction_ * blocks_number * transaction_in_block_);
 
     const User* sender = &user_alice;
     const User* receiver = &user_bob;
-    Amount sender_amount = amount_in_transaction_ * blocks_number * transaction_in_block_;
-    Amount receiver_amount = amount_in_transaction_ * blocks_number * transaction_in_block_;
+    Amount sender_amount =
+        amount_in_transaction_ * blocks_number * transaction_in_block_;
+    Amount receiver_amount =
+        amount_in_transaction_ * blocks_number * transaction_in_block_;
 
     const size_t numbers_of_test = 4;
 
-    for(size_t number_of_test =  0; number_of_test < numbers_of_test; number_of_test++) {
+    for (size_t number_of_test = 0; number_of_test < numbers_of_test;
+         number_of_test++) {
         const auto& network =
             sender->api_->Network().Blockchain().GetChain(test_chain_);
 
@@ -241,4 +258,4 @@ TEST_F(Regtest_fixture_simple, send_to_client)
     Shutdown();
 }
 
-}
+}  // namespace ottest
