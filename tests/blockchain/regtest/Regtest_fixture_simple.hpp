@@ -18,7 +18,7 @@ struct RegtestListener {
     std::unique_ptr<WalletListener> wallet_listener;
 };
 
-class Regtest_fixture_simple : virtual public Regtest_fixture_single
+class Regtest_fixture_simple : public Regtest_fixture_single
 {
 protected:
     Regtest_fixture_simple();
@@ -55,8 +55,8 @@ protected:
     auto MineBlocks(
         const User& user,
         Height ancestor,
-        std::size_t block_number,
-        std::size_t transaction_number,
+        unsigned block_number,
+        unsigned transaction_number,
         unsigned amount) noexcept
         -> std::unique_ptr<opentxs::blockchain::block::bitcoin::Header>;
 

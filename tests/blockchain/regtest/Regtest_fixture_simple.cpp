@@ -159,8 +159,8 @@ auto Regtest_fixture_simple::MineBlocks(
 auto Regtest_fixture_simple::MineBlocks(
     const User& user,
     Height ancestor,
-    std::size_t block_number,
-    std::size_t transaction_number,
+    unsigned block_number,
+    unsigned transaction_number,
     unsigned amount) noexcept
     -> std::unique_ptr<opentxs::blockchain::block::bitcoin::Header>
 {

@@ -39,7 +39,7 @@ TEST_F(Regtest_fixture_simple, start_stop_client)
     EXPECT_TRUE(Start());
     EXPECT_TRUE(Connect());
 
-    const size_t numbers_of_test = 5;
+    const int numbers_of_test = 5;
     const std::string name = "Alice";
     const std::string words = "worry myself exile unit believe climb pitch "
                               "theme two truly alter daughter";
@@ -48,7 +48,7 @@ TEST_F(Regtest_fixture_simple, start_stop_client)
     Height targetHeight = 0, begin = 0;
     auto expected_balance = 0;
 
-    for (size_t number_of_test = 0; number_of_test < numbers_of_test;
+    for (int number_of_test = 0; number_of_test < numbers_of_test;
          number_of_test++) {
         std::cout << "Test number: " << number_of_test + 1 << std::endl;
         Counter account_list_{};
