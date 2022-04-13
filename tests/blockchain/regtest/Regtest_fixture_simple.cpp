@@ -23,6 +23,10 @@
 #include "opentxs/api/session/Endpoints.hpp"
 #include "opentxs/crypto/Language.hpp"
 #include "opentxs/network/zeromq/socket/Subscribe.hpp"
+#include "opentxs/interface/ui/AccountActivity.hpp"
+#include "opentxs/network/zeromq/Context.hpp"
+#include "opentxs/blockchain/crypto/HDProtocol.hpp"
+#include "opentxs/util/Log.hpp"
 
 namespace ottest
 {
@@ -379,19 +383,26 @@ auto Regtest_fixture_simple::WaitForSynchro(
         now = std::chrono::steady_clock::now();
         auto progress = GetSyncProgress(user);
         auto balance = GetBalance(user);
-        std::cout << "Waiting for synchronization, balance: "
-                  << GetDisplayBalance(user)
-                  << ", sync percentage: " << GetSyncPercentage(user)
-                  << "%, sync progress [" << progress.first << ","
-                  << progress.second << "]"
-                  << ", target height: " << target << std::endl;
+        std::ostringstream percentage;
+        percentage.precision(2);
+        percentage << std::fixed << GetSyncPercentage(user);
+
+        ot::LogConsole()(
+            "Waiting for synchronization, balance: " + GetDisplayBalance(user) +
+            ", sync percentage: " + percentage.str() + "%, sync progress [" +
+            std::to_string(progress.first) + "," +
+            std::to_string(progress.second) + "]" +
+            ", target height: " + std::to_string(target))
+            .Flush();
         if (progress.first == target && progress.second == target &&
             (balance == expected_balance)) {
-            std::cout << "Client synchronized in "
-                      << std::chrono::duration_cast<std::chrono::seconds>(
-                             now - begin)
-                             .count()
-                      << " seconds" << std::endl;
+            ot::LogConsole()(
+                "Client synchronized in " +
+                std::to_string(std::chrono::duration_cast<std::chrono::seconds>(
+                                   now - begin)
+                                   .count()) +
+                " seconds")
+                .Flush();
             break;
         }
         ot::Sleep(std::chrono::seconds(5));
