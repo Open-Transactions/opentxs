@@ -44,3 +44,8 @@ set_tests_properties(
 add_opentx_test(
         unittests-opentxs-blockchain-regtest-sync-client Test_sync_client.cpp
 )
+
+add_opentx_test(
+        unittests-opentxs-blockchain-regtest-simple_transfer Test_simple_transfer.cpp
+)
+
