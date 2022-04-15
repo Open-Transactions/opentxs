@@ -224,7 +224,7 @@ public:
     using Position = b::block::Position;
     using Future = std::future<Position>;
 
-    auto GetFuture(const Height height) noexcept;
+    auto GetFuture(const Height height) noexcept -> Future;
 
     BlockListener(const ot::api::Session& api) noexcept;
 
