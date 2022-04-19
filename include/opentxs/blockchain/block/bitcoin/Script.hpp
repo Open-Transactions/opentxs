@@ -108,6 +108,7 @@ public:
     /// Value only present for NullData patterns, 0 indexed
     virtual auto Value(const std::size_t position) const noexcept
         -> std::optional<ReadView> = 0;
+    virtual bool CompareScriptElements(const Script& other) const = 0;
 
     virtual ~Script() = default;
 

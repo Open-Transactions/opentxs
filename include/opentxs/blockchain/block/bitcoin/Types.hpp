@@ -26,6 +26,16 @@ struct ScriptElement {
     std::optional<InvalidOpcode> invalid_{};
     std::optional<ScriptPushBytes> bytes_{};
     std::optional<ScriptData> data_{};
+
+    auto operator==(const ScriptElement& other) const noexcept -> bool
+    {
+        return opcode_ == other.opcode_ && invalid_ == other.invalid_ &&
+               bytes_ == other.bytes_ && data_ == other.data_;
+    }
+    auto operator!=(const ScriptElement& other) const noexcept -> bool
+    {
+        return !(*this == other);
+    }
 };
 
 using ScriptElements = UnallocatedVector<ScriptElement>;

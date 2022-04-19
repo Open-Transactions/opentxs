@@ -49,3 +49,6 @@ add_opentx_test(
         unittests-opentxs-blockchain-regtest-simple_transfer Test_simple_transfer.cpp
 )
 
+add_opentx_test(
+        unittests-opentxs-blockchain-regtest-restart Test_restart.cpp
+)

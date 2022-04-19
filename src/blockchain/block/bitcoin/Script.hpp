@@ -105,6 +105,9 @@ public:
     auto Value(const std::size_t position) const noexcept
         -> std::optional<ReadView> final;
 
+    virtual bool CompareScriptElements(
+        const bitcoin::Script& other) const noexcept override;
+
     Script(
         const blockchain::Type chain,
         const Position role,
