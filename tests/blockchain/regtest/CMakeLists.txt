@@ -23,3 +23,7 @@ set_tests_properties(ottest-blockchain-regtest-stress PROPERTIES DISABLED TRUE)
 set_tests_properties(
   ottest-blockchain-regtest-payment-code PROPERTIES DISABLED TRUE
 )
+
+add_opentx_test(
+        ottest-blockchain-regtest-sync-client SyncClient.cpp
+)

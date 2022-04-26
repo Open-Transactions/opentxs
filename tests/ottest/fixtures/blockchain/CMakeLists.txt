@@ -15,5 +15,7 @@ target_sources(
     "HeaderOracle.hpp"
     "Regtest.cpp"
     "Regtest.hpp"
+    "RegtestSimple.cpp"
+    "RegtestSimple.hpp"
     "StartStop.hpp"
 )
