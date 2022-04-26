@@ -25,3 +25,4 @@ set_tests_properties(
 )
 
 add_opentx_test(ottest-blockchain-regtest-sync-client SyncClient.cpp)
+add_opentx_test(ottest-blockchain-regtest-simple-transfer SimpleTransfer.cpp)
