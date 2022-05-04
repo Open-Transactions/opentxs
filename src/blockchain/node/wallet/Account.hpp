@@ -103,7 +103,7 @@ class Identifier;
 
 namespace opentxs::blockchain::node::wallet
 {
-class Account::Imp final : public Actor<Imp, AccountJobs>
+class Account::Imp final : public Actor<AccountJobs>
 {
 public:
     auto VerifyState(const State state) const noexcept -> void;
@@ -130,9 +130,13 @@ public:
 
     ~Imp() final { signal_shutdown(); }
 
-private:
-    friend Actor<Imp, AccountJobs>;
+protected:
+    auto do_startup() noexcept -> void override;
+    auto do_shutdown() noexcept -> void override;
+    auto pipeline(const Work work, Message&& msg) noexcept -> void override;
+    auto work() noexcept -> bool override;
 
+private:
     using Subchains = Map<OTIdentifier, boost::shared_ptr<SubchainStateData>>;
     using HandledReorgs = Set<StateSequence>;
 
@@ -161,8 +165,6 @@ private:
     auto check_pc(const Identifier& subaccount) noexcept -> void;
     auto check_pc(const crypto::PaymentCode& subaccount) noexcept -> void;
     auto clear_children() noexcept -> void;
-    auto do_shutdown() noexcept -> void;
-    auto do_startup() noexcept -> void;
     template <typename Callback>
     auto for_each(const Callback& cb) noexcept -> void
     {
@@ -181,7 +183,6 @@ private:
         const crypto::Deterministic& subaccount,
         const crypto::Subchain subchain,
         Subchains& map) noexcept -> Subchain&;
-    auto pipeline(const Work work, Message&& msg) noexcept -> void;
     auto process_key(Message&& in) noexcept -> void;
     auto process_prepare_reorg(Message&& in) noexcept -> void;
     auto process_subaccount(Message&& in) noexcept -> void;
@@ -194,7 +195,6 @@ private:
     auto transition_state_normal() noexcept -> bool;
     auto transition_state_reorg(StateSequence id) noexcept -> bool;
     auto transition_state_shutdown() noexcept -> bool;
-    auto work() noexcept -> bool;
 
     Imp(const api::Session& api,
         const crypto::Account& account,

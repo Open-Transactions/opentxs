@@ -396,6 +396,10 @@ auto BalanceOracle::Imp::UpdateBalance(
     }());
 }
 
+auto BalanceOracle::Imp::do_startup() noexcept -> void {}
+
+auto BalanceOracle::Imp::do_shutdown() noexcept -> void {}
+
 auto BalanceOracle::Imp::work() noexcept -> bool { return false; }
 
 BalanceOracle::Imp::~Imp() { signal_shutdown(); }

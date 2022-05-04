@@ -183,6 +183,7 @@ auto Job::ChangeState(const State state, StateSequence reorg) noexcept -> bool
 }
 
 auto Job::do_shutdown() noexcept -> void {}
+auto Job::do_startup() noexcept -> void {}
 
 auto Job::last_reorg() const noexcept -> std::optional<StateSequence>
 {
