@@ -63,7 +63,7 @@ class Log;
 
 namespace opentxs
 {
-template <typename CRTP, typename JobType>
+template <typename JobType>
 class Actor : virtual public Allocated
 {
 public:
@@ -78,6 +78,12 @@ public:
 
 protected:
     using Work = JobType;
+    virtual auto do_startup() noexcept -> void = 0;
+    virtual auto do_shutdown() noexcept -> void = 0;
+    virtual auto pipeline(const Work work, Message&& msg) noexcept -> void = 0;
+    virtual auto work() noexcept -> bool = 0;
+
+protected:
     using Direction = network::zeromq::socket::Direction;
     using SocketType = network::zeromq::socket::Type;
 
@@ -107,8 +113,6 @@ protected:
             pipeline_.Push(MakeWork(OT_ZMQ_INIT_SIGNAL));
         }
     }
-    auto wait_for_init() const noexcept -> void { init_future_.get(); }
-
     auto defer(Message&& message) noexcept -> void
     {
         cache_.emplace(std::move(message));
@@ -116,7 +120,7 @@ protected:
     auto do_init() noexcept -> void
     {
         log_(name_)(" ")(__FUNCTION__)(": initializing").Flush();
-        downcast().do_startup();
+        do_startup();
 
         try {
             init_promise_.set_value();
@@ -134,7 +138,7 @@ protected:
     {
         rate_limit_state_machine();
         state_machine_queued_.store(false);
-        repeat(downcast().work());
+        repeat(work());
     }
     auto flush_cache() noexcept -> void
     {
@@ -154,16 +158,20 @@ protected:
             handle_message(std::move(message));
         }
     }
+private:
+    // unused - remove?
     auto init_complete() noexcept -> void { init_promise_.set_value(); }
+protected:
     auto shutdown_actor() noexcept -> void
     {
         init_future_.get();
 
         if (auto previous = running_.exchange(false); previous) {
-            downcast().do_shutdown();
+            do_shutdown();
             pipeline_.Close();
         }
     }
+protected:
 
     Actor(
         const api::Session& api,
@@ -207,6 +215,9 @@ protected:
     }
 
     ~Actor() override { retry_.Cancel(); }
+
+private:
+    auto wait_for_init() const noexcept -> void { init_future_.get(); }
 
 private:
     const std::chrono::milliseconds rate_limit_;
@@ -253,6 +264,7 @@ private:
                     "message does not contain a valid work tag"};
             }
         }();
+
         const auto type = print(work);
         log_(name_)(" ")(__FUNCTION__)(": message type is: ")(type).Flush();
         const auto isInit =
@@ -261,10 +273,6 @@ private:
         const auto initFinished = IsReady(init_future_);
 
         return std::make_tuple(work, type, isInit, canDrop, initFinished);
-    }
-    inline auto downcast() noexcept -> CRTP&
-    {
-        return static_cast<CRTP&>(*this);
     }
     auto handle_message(network::zeromq::Message&& in) noexcept -> void
     {
@@ -342,7 +350,7 @@ private:
     auto handle_message(const Work work, Message&& msg) noexcept -> void
     {
         try {
-            downcast().pipeline(work, std::move(msg));
+            pipeline(work, std::move(msg));
         } catch (const std::exception& e) {
             log_(name_)(" ")(__FUNCTION__)(": error processing ")(print(work))(
                 " message: ")(e.what())

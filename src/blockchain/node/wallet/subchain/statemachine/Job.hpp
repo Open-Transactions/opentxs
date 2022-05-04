@@ -62,7 +62,7 @@ class Log;
 
 namespace opentxs::blockchain::node::wallet::statemachine
 {
-class Job : virtual public wallet::Job, public Actor<Job, SubchainJobs>
+class Job : virtual public wallet::Job, public Actor<SubchainJobs>
 {
     boost::shared_ptr<const SubchainStateData> parent_p_;
 
@@ -78,11 +78,14 @@ public:
     ~Job() override;
 
 protected:
+    auto do_startup() noexcept -> void override;
+    auto do_shutdown() noexcept -> void override;
+    auto pipeline(const Work work, Message&& msg) noexcept -> void override;
+    auto work() noexcept -> bool override;
+
     const SubchainStateData& parent_;
 
     auto last_reorg() const noexcept -> std::optional<StateSequence>;
-
-    virtual auto work() noexcept -> bool;
 
     Job(const Log& logger,
         const boost::shared_ptr<const SubchainStateData>& parent,
@@ -96,8 +99,6 @@ protected:
         Set<Work>&& neverDrop = {}) noexcept;
 
 private:
-    friend Actor<Job, SubchainJobs>;
-
     using HandledReorgs = Set<StateSequence>;
 
     const JobType job_type_;
@@ -107,8 +108,6 @@ private:
     HandledReorgs reorgs_;
     Timer watchdog_;
 
-    auto do_shutdown() noexcept -> void;
-    auto pipeline(const Work work, Message&& msg) noexcept -> void;
     auto process_block(Message&& in) noexcept -> void;
     auto process_filter(Message&& in) noexcept -> void;
     auto process_prepare_reorg(Message&& in) noexcept -> void;
@@ -120,7 +119,6 @@ private:
     auto transition_state_reorg(StateSequence id) noexcept -> bool;
     auto transition_state_shutdown() noexcept -> bool;
 
-    virtual auto do_startup() noexcept -> void = 0;
     virtual auto process_block(block::Hash&& block) noexcept -> void;
     virtual auto process_key(Message&& in) noexcept -> void;
     virtual auto process_filter(Message&& in, block::Position&& tip) noexcept

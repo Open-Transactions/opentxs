@@ -136,7 +136,7 @@ namespace opentxs::blockchain::node::wallet
 {
 class SubchainStateData
     : virtual public Subchain,
-      public Actor<SubchainStateData, SubchainJobs>,
+      public Actor<SubchainJobs>,
       public boost::enable_shared_from_this<SubchainStateData>
 {
 public:
@@ -216,11 +216,13 @@ public:
     ~SubchainStateData() override;
 
 protected:
+    auto do_startup() noexcept -> void override;
+    auto do_shutdown() noexcept -> void override;
+    auto pipeline(const Work work, Message&& msg) noexcept -> void override;
+    auto work() noexcept -> bool override;
+
     using TXOs = WalletDatabase::TXOs;
     auto set_key_data(block::bitcoin::Transaction& tx) const noexcept -> void;
-
-    virtual auto do_startup() noexcept -> void;
-    virtual auto work() noexcept -> bool;
 
     SubchainStateData(
         const api::Session& api,
@@ -234,9 +236,8 @@ protected:
         const std::string_view parent,
         allocator_type alloc) noexcept;
 
-private:
-    friend Actor<SubchainStateData, SubchainJobs>;
 
+private:
     using Transactions =
         Vector<std::shared_ptr<const block::bitcoin::Transaction>>;
     using Task = node::internal::Wallet::Task;
@@ -353,8 +354,6 @@ private:
         storage::lmdb::LMDB::Transaction& tx,
         std::atomic_int& errors,
         const block::Position ancestor) noexcept -> void;
-    auto do_shutdown() noexcept -> void;
-    auto pipeline(const Work work, Message&& msg) noexcept -> void;
     auto process_prepare_reorg(Message&& in) noexcept -> void;
     auto process_watchdog_ack(Message&& in) noexcept -> void;
     auto state_normal(const Work work, Message&& msg) noexcept -> void;

@@ -68,7 +68,7 @@ class Message;
 
 namespace opentxs::blockchain::node::p2p
 {
-class Requestor::Imp final : public Actor<Imp, network::p2p::Job>
+class Requestor::Imp final : public Actor<network::p2p::Job>
 {
 public:
     auto Init(boost::shared_ptr<Imp> me) noexcept -> void
@@ -85,9 +85,13 @@ public:
 
     ~Imp() final;
 
-private:
-    friend Actor<Imp, network::p2p::Job>;
+protected:
+    auto do_startup() noexcept -> void override;
+    auto do_shutdown() noexcept -> void override;
+    auto pipeline(const Work work, Message&& msg) noexcept -> void override;
+    auto work() noexcept -> bool override;
 
+private:
     enum class State { init, sync, run };
 
     static constexpr std::size_t limit_{32_MiB};
@@ -126,13 +130,10 @@ private:
     auto check_remote_position() noexcept -> void;
     auto do_common() noexcept -> void;
     auto do_init() noexcept -> void;
-    auto do_shutdown() noexcept -> void;
-    auto do_startup() noexcept -> void;
     auto do_run() noexcept -> void;
     auto do_sync() noexcept -> void;
     auto have_pending_request() noexcept -> bool;
     auto need_sync() noexcept -> bool;
-    auto pipeline(const Work work, Message&& msg) noexcept -> void;
     auto process_push_tx(Message&& in) noexcept -> void;
     auto process_sync_ack(Message&& in) noexcept -> void;
     auto process_sync_processed(Message&& in) noexcept -> void;
@@ -159,7 +160,6 @@ private:
         -> void;
     auto update_remote_position(const network::p2p::State& state) noexcept
         -> void;
-    auto work() noexcept -> bool;
 
     Imp() = delete;
     Imp(const Imp&) = delete;
