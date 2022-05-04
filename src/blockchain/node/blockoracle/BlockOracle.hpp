@@ -100,7 +100,7 @@ class Message;
 
 namespace opentxs::blockchain::node::internal
 {
-class BlockOracle::Imp final : public Actor<Imp, BlockOracleJobs>
+class BlockOracle::Imp final : public Actor<BlockOracleJobs>
 {
 public:
     auto DownloadQueue() const noexcept -> std::size_t
@@ -143,9 +143,13 @@ public:
 
     ~Imp() final;
 
-private:
-    friend Actor<Imp, BlockOracleJobs>;
+protected:
+    auto do_startup() noexcept -> void override;
+    auto do_shutdown() noexcept -> void override;
+    auto pipeline(const Work work, Message&& msg) noexcept -> void override;
+    auto work() noexcept -> bool override;
 
+private:
     using Task = BlockOracleJobs;
     using Cache =
         libguarded::shared_guarded<blockoracle::Cache, std::shared_mutex>;
@@ -162,11 +166,6 @@ private:
         const blockchain::Type chain,
         const node::HeaderOracle& headers) noexcept
         -> std::unique_ptr<const internal::BlockValidator>;
-
-    auto do_shutdown() noexcept -> void;
-    auto do_startup() noexcept -> void;
-    auto pipeline(const Work work, Message&& msg) noexcept -> void;
-    auto work() noexcept -> bool;
 
     Imp(const api::Session& api,
         const internal::Network& node,

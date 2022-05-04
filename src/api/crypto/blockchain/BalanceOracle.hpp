@@ -50,7 +50,7 @@ class Raw;
 
 namespace opentxs::api::crypto::blockchain
 {
-class BalanceOracle::Imp final : public opentxs::Actor<Imp, BalanceOracleJobs>
+class BalanceOracle::Imp final : public opentxs::Actor<BalanceOracleJobs>
 {
 public:
     auto UpdateBalance(const Chain chain, const Balance balance) const noexcept
@@ -72,9 +72,13 @@ public:
 
     ~Imp() final;
 
-private:
-    friend opentxs::Actor<Imp, BalanceOracleJobs>;
+protected:
+    auto do_startup() noexcept -> void override;
+    auto do_shutdown() noexcept -> void override;
+    auto pipeline(const Work work, Message&& msg) noexcept -> void override;
+    auto work() noexcept -> bool override;
 
+private:
     using Subscribers = Set<OTData>;
     using Data = std::pair<Balance, Subscribers>;
     using NymData = Map<OTNymID, Data>;
@@ -92,8 +96,6 @@ private:
         const Balance& balance,
         const WorkType type) const noexcept -> Message;
 
-    auto do_shutdown() noexcept -> void {}
-    auto do_startup() noexcept -> void {}
     auto notify_subscribers(
         const Subscribers& recipients,
         const Balance& balance,
@@ -103,7 +105,6 @@ private:
         const identifier::Nym& owner,
         const Balance& balance,
         const Chain chain) noexcept -> void;
-    auto pipeline(const Work work, Message&& msg) noexcept -> void;
     auto process_registration(Message&& in) noexcept -> void;
     auto process_update_balance(const Chain chain, Balance balance) noexcept
         -> void;
@@ -113,6 +114,5 @@ private:
         Balance balance) noexcept -> void;
     auto process_update_chain_balance(Message&& in) noexcept -> void;
     auto process_update_nym_balance(Message&& in) noexcept -> void;
-    auto work() noexcept -> bool;
 };
 }  // namespace opentxs::api::crypto::blockchain
