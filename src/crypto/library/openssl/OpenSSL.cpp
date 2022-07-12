@@ -34,7 +34,17 @@ auto OpenSSL() noexcept -> std::unique_ptr<crypto::OpenSSL>
 
 namespace opentxs::crypto::implementation
 {
-OpenSSL::OpenSSL() noexcept = default;
+OpenSSL::OpenSSL() noexcept
+#if __has_include(<openssl/provider.h>)
+       : default_provider_(OSSL_PROVIDER_load(nullptr, "legacy"))
+       , legacy_provider_(OSSL_PROVIDER_load(nullptr, "default"))
+#endif
+{
+#if __has_include(<openssl/provider.h>)
+       OT_ASSERT(nullptr != default_provider_);
+       OT_ASSERT(nullptr != legacy_provider_);
+#endif
+}
 
 #if OPENSSL_VERSION_NUMBER >= 0x1010000fl
 OpenSSL::BIO::BIO(const BIO_METHOD* type) noexcept
@@ -433,5 +443,13 @@ auto OpenSSL::RIPEMD160(const ReadView data, const AllocateOutput destination)
     const noexcept -> bool
 {
     return Digest(crypto::HashType::Ripemd160, data, destination);
+}
+
+OpenSSL::~OpenSSL()
+{
+#if __has_include(<openssl/provider.h>)
+       OSSL_PROVIDER_unload(legacy_provider_);
+       OSSL_PROVIDER_unload(default_provider_);
+#endif
 }
 }  // namespace opentxs::crypto::implementation

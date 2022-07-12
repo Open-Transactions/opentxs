@@ -15,6 +15,12 @@ extern "C" {
 #include <openssl/rsa.h>
 }
 
+#if __has_include(<openssl/provider.h>)
+extern "C" {
+#include <openssl/provider.h>
+}
+#endif
+
 #include <cstddef>
 #include <cstdint>
 #include <functional>
@@ -132,7 +138,7 @@ public:
     auto operator=(const OpenSSL&) -> OpenSSL& = delete;
     auto operator=(OpenSSL&&) -> OpenSSL& = delete;
 
-    ~OpenSSL() final = default;
+    ~OpenSSL() final;
 
 private:
     struct BIO {
@@ -205,6 +211,10 @@ private:
 
     using Instantiate = std::function<::EVP_PKEY*(::BIO*)>;
 
+#if __has_include(<openssl/provider.h>)
+    OSSL_PROVIDER* default_provider_;
+    OSSL_PROVIDER* legacy_provider_;
+#endif
     static auto init_key(
         const ReadView bytes,
         const Instantiate function,
