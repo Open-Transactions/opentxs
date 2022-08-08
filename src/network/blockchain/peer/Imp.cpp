@@ -1277,13 +1277,15 @@ auto Peer::Imp::transmit(
     std::pair<zeromq::Frame, zeromq::Frame>&& data) noexcept -> void
 {
     switch (state_) {
+        case State::connect:
         case State::handshake:
         case State::verify:
         case State::run: {
         } break;
         default: {
-
-            OT_FAIL;
+            LogAbort()(OT_PRETTY_CLASS())("attempting to transmit in state ")(
+                static_cast<int>(state_))
+                .Abort();
         }
     }
 

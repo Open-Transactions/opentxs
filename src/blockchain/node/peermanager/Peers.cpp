@@ -291,7 +291,7 @@ auto Peers::Disconnect(const int id) noexcept -> void
             auto& [address, socket] = it->second;
             auto out{address};
             socket.SendDeferred(
-                MakeWork(WorkType::Shutdown), __FILE__, __LINE__);
+                MakeWork(WorkType::Shutdown), __FILE__, __LINE__, true);
             peers_.erase(it);
 
             return out;

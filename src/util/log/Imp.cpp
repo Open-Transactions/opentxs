@@ -47,6 +47,7 @@ Log::Imp::Imp(const int logLevel) noexcept
 
 auto Log::Imp::Abort() const noexcept -> void
 {
+    buffer(PrintStackTrace());
     send(LogAction::terminate, Console::err);
     wait_for_terminate();
 }
