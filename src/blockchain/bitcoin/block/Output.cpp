@@ -29,6 +29,7 @@
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/api/crypto/Blockchain.hpp"
 #include "opentxs/api/session/Crypto.hpp"
+#include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/blockchain/bitcoin/block/Script.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
@@ -118,7 +119,9 @@ auto BitcoinTransactionOutput(
             const auto subchain = static_cast<blockchain::crypto::Subchain>(
                 static_cast<std::uint8_t>(key.subchain()));
             auto keyid = blockchain::crypto::Key{
-                key.subaccount(), subchain, key.index()};
+                api.Factory().IdentifierFromBase58(key.subaccount()),
+                subchain,
+                key.index()};
 
             if (blockchain::crypto::Subchain::Outgoing == subchain) {
                 LogError()("opentxs::factory::")(__func__)(
@@ -379,8 +382,7 @@ auto Output::FindMatches(
             const auto& [txid, element] = match;
             const auto& [index, subchainID] = element;
             const auto& [subchain, account] = subchainID;
-            auto keyid =
-                crypto::Key{account.asBase58(api_.Crypto()), subchain, index};
+            auto keyid = crypto::Key{account, subchain, index};
             log(OT_PRETTY_CLASS())("output ")(index_)(" of transaction ")
                 .asHex(tx)(" matches ")(print(keyid))
                 .Flush();
@@ -553,7 +555,7 @@ auto Output::Serialize(SerializeType& out) const noexcept -> bool
         serializedKey.set_chain(
             translate(UnitToClaim(BlockchainToUnit(chain_))));
         serializedKey.set_nym(api.Owner(key).asBase58(api_.Crypto()));
-        serializedKey.set_subaccount(accountID);
+        serializedKey.set_subaccount(accountID.asBase58(api_.Crypto()));
         serializedKey.set_subchain(static_cast<std::uint32_t>(subchain));
         serializedKey.set_index(index);
     });

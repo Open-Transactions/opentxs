@@ -138,7 +138,7 @@ struct Account : virtual public crypto::Account {
         UnallocatedSet<identifier::Generic>& contacts,
         const PasswordPrompt& reason) const noexcept -> bool = 0;
     virtual auto ClaimAccountID(
-        const UnallocatedCString& id,
+        const identifier::Generic& id,
         crypto::Subaccount* node) const noexcept -> void = 0;
     virtual auto FindNym(const identifier::Nym& id) const noexcept -> void = 0;
     virtual auto LookupUTXO(const Coin& coin) const noexcept

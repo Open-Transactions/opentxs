@@ -504,7 +504,8 @@ struct BitcoinTransactionBuilder::Imp {
 
                 using Subchain = blockchain::crypto::Subchain;
                 out.emplace(
-                    output.paymentcodechannel(),
+                    api_.Factory().IdentifierFromBase58(
+                        output.paymentcodechannel()),
                     Subchain::Outgoing,
                     output.index());
             }

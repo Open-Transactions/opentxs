@@ -52,7 +52,6 @@
 #include "opentxs/api/network/Asio.hpp"
 #include "opentxs/api/network/Network.hpp"
 #include "opentxs/api/session/Crypto.hpp"
-#include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/blockchain/bitcoin/block/Block.hpp"
 #include "opentxs/blockchain/bitcoin/block/Output.hpp"
@@ -356,7 +355,7 @@ private:
             const auto matches = cb(prehashed);
 
             for (const auto& index : selected.first) {
-                if (0u == matches.count(index)) {
+                if (0_uz == matches.count(index)) {
                     clean.emplace(index);
                 } else {
                     dirty.emplace(index);
@@ -953,9 +952,10 @@ auto SubchainStateData::ProcessTransaction(
     const bitcoin::block::Transaction& tx,
     const Log& log) const noexcept -> void
 {
-    auto buf = std::array<std::byte, 4_kib>{};
+    auto buf = std::array<std::byte, 256_kib>{};
     auto upstream = alloc::StandardToBoost{get_allocator().resource()};
     auto alloc = alloc::BoostMonotonic{buf.data(), buf.size(), &upstream};
+    auto* mr = std::addressof(alloc);
     auto copy = tx.clone();
 
     OT_ASSERT(copy);
@@ -963,15 +963,10 @@ auto SubchainStateData::ProcessTransaction(
     const auto matches = [&] {
         auto handle = element_cache_.lock_shared();
         const auto& elements = handle->GetElements();
-        const auto targets = get_account_targets(elements, &alloc);
-        const auto patterns = to_patterns(elements, &alloc);
-        const auto parsed = block::ParsedPatterns{patterns};
-        const auto outpoints = [&]() {
-            auto out = SubchainStateData::Patterns{&alloc};
-            translate(elements.txos_, out);
-
-            return out;
-        }();
+        const auto targets = get_account_targets(elements, mr);
+        const auto patterns = to_patterns(elements, mr);
+        const auto parsed = block::ParsedPatterns{patterns};  // TODO allocator
+        const auto outpoints = translate(elements.txos_, mr);
 
         return copy->Internal().FindMatches(
             filter_type_, outpoints, parsed, log);
@@ -1042,7 +1037,7 @@ auto SubchainStateData::scan(
             const auto elementsPerFilter = [this] {
                 const auto cached = elements_per_cfilter_.load();
 
-                if (0u == cached) {
+                if (0_uz == cached) {
                     const auto chainDefault =
                         params::Chains()
                             .at(chain_)
@@ -1055,7 +1050,7 @@ auto SubchainStateData::scan(
                 }
             }();
 
-            OT_ASSERT(0u < elementsPerFilter);
+            OT_ASSERT(0_uz < elementsPerFilter);
 
             constexpr auto GetBatchSize = [](std::size_t cfilter,
                                              std::size_t user) {
@@ -1159,7 +1154,7 @@ auto SubchainStateData::scan(
             if (1_uz < prehash.job_count_) {
                 auto count = job_counter_.Allocate();
 
-                for (auto n{0u}; n < prehash.job_count_; ++n) {
+                for (auto n{0_uz}; n < prehash.job_count_; ++n) {
                     tp = api_.Network().Asio().Internal().Post(
                         ThreadPool::General,
                         [post = std::make_shared<ScopeGuard>(
@@ -1171,7 +1166,7 @@ auto SubchainStateData::scan(
                     if (false == tp) { throw std::runtime_error{""}; }
                 }
             } else {
-                prehash(0u);
+                prehash(0_uz);
             }
 
             const auto havePrehash = Clock::now();
@@ -1204,12 +1199,12 @@ auto SubchainStateData::scan(
             auto data = MatchResults{std::make_tuple(
                 Positions{alloc}, Positions{alloc}, FilterMap{alloc})};
 
-            OT_ASSERT(0u < selected.size());
+            OT_ASSERT(0_uz < selected.size());
 
             if ((1_uz < prehash.job_count_)) {
                 auto count = job_counter_.Allocate();
 
-                for (auto n{0u}; n < prehash.job_count_; ++n) {
+                for (auto n{0_uz}; n < prehash.job_count_; ++n) {
                     tp = api_.Network().Asio().Internal().Post(
                         ThreadPool::General,
                         [&,
@@ -1231,7 +1226,7 @@ auto SubchainStateData::scan(
                 }
             } else {
                 prehash(
-                    procedure, log, cfilters, atLeastOnce, 0u, results, data);
+                    procedure, log, cfilters, atLeastOnce, 0_uz, results, data);
             }
 
             {
@@ -1287,7 +1282,7 @@ auto SubchainStateData::scan(
         }();
 
         if (atLeastOnce.load()) {
-            if (0u < resultMap.size()) {
+            if (0_uz < resultMap.size()) {
                 match_cache_.lock()->Add(std::move(resultMap));
             }
 
@@ -1325,15 +1320,13 @@ auto SubchainStateData::select_all(
         }
     };
     const auto SelectTxo = [&](const auto& all, auto& out) {
-        const auto self = id_.asBase58(api_.Crypto());
-
         for (const auto& [outpoint, pOutput] : all) {
             OT_ASSERT(pOutput);
 
             for (const auto& key : pOutput->Keys()) {
                 const auto& [id, subchain, index] = key;
 
-                if (self != id) { continue; }
+                if (id_ != id) { continue; }
                 if (subchain_ != subchain) { continue; }
 
                 out.emplace_back(std::make_pair(
@@ -1362,10 +1355,10 @@ auto SubchainStateData::select_matches(
     auto alloc = outpoint.get_allocator();
     const auto SelectKey =
         [&](const auto& all, const auto& selected, auto& out) {
-            if (0u == selected.size()) { return; }
+            if (0_uz == selected.size()) { return; }
 
             for (const auto& [index, data] : all) {
-                if (0u < selected.count(index)) {
+                if (0_uz < selected.count(index)) {
                     out.emplace_back(std::make_pair(
                         std::make_pair(index, subchainID),
                         space(reader(data), alloc.resource())));
@@ -1374,18 +1367,16 @@ auto SubchainStateData::select_matches(
         };
     const auto SelectTxo =
         [&](const auto& all, const auto& selected, auto& out) {
-            if (0u == selected.size()) { return; }
-
-            const auto self = id_.asBase58(api_.Crypto());
+            if (0_uz == selected.size()) { return; }
 
             for (const auto& [outpoint, pOutput] : all) {
-                if (0u < selected.count(outpoint)) {
+                if (0_uz < selected.count(outpoint)) {
                     OT_ASSERT(pOutput);
 
                     for (const auto& key : pOutput->Keys()) {
                         const auto& [id, subchain, index] = key;
 
-                        if (self != id) { continue; }
+                        if (id_ != id) { continue; }
                         if (subchain_ != subchain) { continue; }
 
                         out.emplace_back(std::make_pair(
@@ -1478,7 +1469,7 @@ auto SubchainStateData::select_targets(
             const auto& no = matches->confirmed_no_match_.match_20_;
             const auto& yes = matches->confirmed_match_.match_20_;
 
-            if ((0u == no.count(index)) && (0u == yes.count(index))) {
+            if ((0_uz == no.count(index)) && (0_uz == yes.count(index))) {
                 ChooseKey(index, data, s20);
             }
         } else {
@@ -1491,7 +1482,7 @@ auto SubchainStateData::select_targets(
             const auto& no = matches->confirmed_no_match_.match_32_;
             const auto& yes = matches->confirmed_match_.match_32_;
 
-            if ((0u == no.count(index)) && (0u == yes.count(index))) {
+            if ((0_uz == no.count(index)) && (0_uz == yes.count(index))) {
                 ChooseKey(index, data, s32);
             }
         } else {
@@ -1504,7 +1495,7 @@ auto SubchainStateData::select_targets(
             const auto& no = matches->confirmed_no_match_.match_33_;
             const auto& yes = matches->confirmed_match_.match_33_;
 
-            if ((0u == no.count(index)) && (0u == yes.count(index))) {
+            if ((0_uz == no.count(index)) && (0_uz == yes.count(index))) {
                 ChooseKey(index, data, s33);
             }
         } else {
@@ -1517,7 +1508,7 @@ auto SubchainStateData::select_targets(
             const auto& no = matches->confirmed_no_match_.match_64_;
             const auto& yes = matches->confirmed_match_.match_64_;
 
-            if ((0u == no.count(index)) && (0u == yes.count(index))) {
+            if ((0_uz == no.count(index)) && (0_uz == yes.count(index))) {
                 ChooseKey(index, data, s64);
             }
         } else {
@@ -1530,7 +1521,7 @@ auto SubchainStateData::select_targets(
             const auto& no = matches->confirmed_no_match_.match_65_;
             const auto& yes = matches->confirmed_match_.match_65_;
 
-            if ((0u == no.count(index)) && (0u == yes.count(index))) {
+            if ((0_uz == no.count(index)) && (0_uz == yes.count(index))) {
                 ChooseKey(index, data, s65);
             }
         } else {
@@ -1543,7 +1534,7 @@ auto SubchainStateData::select_targets(
             const auto& no = matches->confirmed_no_match_.match_txo_;
             const auto& yes = matches->confirmed_match_.match_txo_;
 
-            if ((0u == no.count(outpoint)) && (0u == yes.count(outpoint))) {
+            if ((0_uz == no.count(outpoint)) && (0_uz == yes.count(outpoint))) {
                 ChooseTxo(outpoint, stxo);
             }
         } else {
@@ -1759,22 +1750,25 @@ auto SubchainStateData::transition_state_reorg(StateSequence id) noexcept
     }
 }
 
-auto SubchainStateData::translate(const TXOs& utxos, Patterns& outpoints)
-    const noexcept -> void
+auto SubchainStateData::translate(const TXOs& utxos, allocator_type alloc)
+    const noexcept -> Patterns
 {
+    auto outpoints = Patterns{alloc};
+    outpoints.reserve(utxos.size());
+    outpoints.clear();
+
     for (const auto& [outpoint, output] : utxos) {
         OT_ASSERT(output);
 
-        auto keys = output->Keys();
+        const auto keys = output->Keys();
 
         OT_ASSERT(0 < keys.size());
         // TODO the assertion below will not always be true in the future but
         // for now it will catch some bugs
         OT_ASSERT(1 == keys.size());
 
-        for (auto& key : keys) {
-            const auto& [id, subchain, index] = key;
-            auto account = api_.Factory().IdentifierFromBase58(id);
+        for (const auto& key : keys) {
+            const auto& [account, subchain, index] = key;
 
             OT_ASSERT(false == account.empty());
             // TODO the assertion below will not always be true in the future
@@ -1789,6 +1783,8 @@ auto SubchainStateData::translate(const TXOs& utxos, Patterns& outpoints)
                 space(outpoint.Bytes(), outpoints.get_allocator().resource()));
         }
     }
+
+    return outpoints;
 }
 
 auto SubchainStateData::work() noexcept -> bool

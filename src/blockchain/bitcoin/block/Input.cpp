@@ -24,7 +24,6 @@
 #include <sstream>
 #include <stdexcept>
 #include <string_view>
-#include <type_traits>
 #include <utility>
 
 #include "Proto.hpp"
@@ -241,7 +240,7 @@ auto BitcoinTransactionInput(
 
             for (const auto& key : in.key()) {
                 keys.emplace(
-                    key.subaccount(),
+                    api.Factory().IdentifierFromBase58(key.subaccount()),
                     static_cast<blockchain::crypto::Subchain>(
                         static_cast<std::uint8_t>(key.subchain())),
                     key.index());
@@ -737,7 +736,7 @@ auto Input::FindMatches(
         inputs.emplace_back(txid, previous_.Bytes(), element);
         const auto& [index, subchainID] = element;
         const auto& [subchain, account] = subchainID;
-        cache_.add({account.asBase58(api_.Crypto()), subchain, index});
+        cache_.add({account, subchain, index});
         log(OT_PRETTY_CLASS())("input ")(position)(" of transaction ")
             .asHex(txid)(" spends ")(
                 blockchain::block::Outpoint{reader(outpoint)})
@@ -965,7 +964,7 @@ auto Input::Serialize(const std::uint32_t index, SerializeType& out)
             translate(UnitToClaim(BlockchainToUnit(chain_))));
         serializedKey.set_nym(
             api_.Crypto().Blockchain().Owner(key).asBase58(api_.Crypto()));
-        serializedKey.set_subaccount(accountID);
+        serializedKey.set_subaccount(accountID.asBase58(api_.Crypto()));
         serializedKey.set_subchain(static_cast<std::uint32_t>(subchain));
         serializedKey.set_index(index);
     });

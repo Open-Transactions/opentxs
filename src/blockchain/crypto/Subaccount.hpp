@@ -187,11 +187,14 @@ protected:
         google::protobuf::RepeatedPtrField<proto::BlockchainActivity>;
     using SerializedType = proto::BlockchainAccountData;
 
-    static auto convert(Activity&& in) noexcept -> proto::BlockchainActivity;
-    static auto convert(const proto::BlockchainActivity& in) noexcept
-        -> Activity;
-    static auto convert(const SerializedActivity& in) noexcept
-        -> UnallocatedVector<Activity>;
+    static auto convert(const api::Session& api, Activity&& in) noexcept
+        -> proto::BlockchainActivity;
+    static auto convert(
+        const api::Session& api,
+        const proto::BlockchainActivity& in) noexcept -> Activity;
+    static auto convert(
+        const api::Session& api,
+        const SerializedActivity& in) noexcept -> UnallocatedVector<Activity>;
     static auto convert(const UnallocatedVector<Activity>& in) noexcept
         -> internal::ActivityMap;
     static auto describe(

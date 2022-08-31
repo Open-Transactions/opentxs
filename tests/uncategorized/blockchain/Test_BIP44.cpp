@@ -153,11 +153,11 @@ TEST_F(Test_BIP44, balance_elements)
         output &= (next.value() == i);
         const auto& element = account_.BalanceElement(subchain, i);
         const auto [account, sub, index] = element.KeyID();
-        output &= (account == account_id_);
+        output &= (account.asBase58(api_.Crypto()) == account_id_);
         output &= (sub == subchain);
         output &= (index == i);
 
-        EXPECT_EQ(account, account_id_);
+        EXPECT_EQ(account.asBase58(api_.Crypto()), account_id_);
         EXPECT_EQ(sub, subchain);
         EXPECT_EQ(index, i);
 

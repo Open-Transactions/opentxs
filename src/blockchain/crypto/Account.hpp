@@ -95,7 +95,7 @@ public:
     {
         return chain_;
     }
-    auto ClaimAccountID(const UnallocatedCString& id, crypto::Subaccount* node)
+    auto ClaimAccountID(const identifier::Generic& id, crypto::Subaccount* node)
         const noexcept -> void final;
     auto FindNym(const identifier::Nym& id) const noexcept -> void final;
     auto GetDepositAddress(
@@ -321,11 +321,11 @@ private:
     };
 
     struct NodeIndex {
-        auto Find(const UnallocatedCString& id) const noexcept
+        auto Find(const identifier::Generic& id) const noexcept
             -> crypto::Subaccount*;
 
         void Add(
-            const UnallocatedCString& id,
+            const identifier::Generic& id,
             crypto::Subaccount* node) noexcept;
 
         NodeIndex() noexcept
@@ -336,7 +336,7 @@ private:
 
     private:
         mutable std::mutex lock_;
-        UnallocatedMap<UnallocatedCString, crypto::Subaccount*> index_;
+        UnallocatedMap<identifier::Generic, crypto::Subaccount*> index_;
     };
 
     using HDNodes = NodeGroup<HDAccounts, crypto::HD>;

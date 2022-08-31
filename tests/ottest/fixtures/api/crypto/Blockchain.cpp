@@ -176,8 +176,7 @@ auto ApiCryptoBlockchain::check_hd_index(
     EXPECT_EQ(target, encoded);
 
     output &= (target == encoded);
-    const auto locator = ot::blockchain::crypto::Key{
-        accountID.asBase58(api_.Crypto()), subchain, i};
+    const auto locator = ot::blockchain::crypto::Key{accountID, subchain, i};
     const auto& element = account.BalanceElement(subchain, i);
 
     EXPECT_EQ(element.Address(AddressStyle::P2PKH), target);

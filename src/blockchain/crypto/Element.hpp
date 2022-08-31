@@ -107,7 +107,7 @@ public:
     auto Key() const noexcept -> ECKey final;
     auto KeyID() const noexcept -> crypto::Key final
     {
-        return {ID().asBase58(api_.Crypto()), subchain_, index_};
+        return {ID(), subchain_, index_};
     }
     auto Label() const noexcept -> UnallocatedCString final;
     auto LastActivity() const noexcept -> Time final;
