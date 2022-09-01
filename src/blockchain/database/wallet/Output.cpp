@@ -433,9 +433,7 @@ public:
                         OT_ASSERT(1 == keys.size());
 
                         const auto& key = keys.at(0);
-                        const auto& [nodeID, subchain, index] = key;
-                        auto accountID =
-                            api_.Factory().IdentifierFromBase58(nodeID);
+                        const auto& [accountID, subchain, index] = key;
                         auto subchainID =
                             subchain_.GetSubchainID(accountID, subchain, tx);
 

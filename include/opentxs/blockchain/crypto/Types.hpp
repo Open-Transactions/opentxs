@@ -19,6 +19,7 @@
 #include <variant>
 
 #include "opentxs/blockchain/Types.hpp"
+#include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
@@ -36,6 +37,11 @@ class EllipticCurve;
 class HD;
 }  // namespace key
 }  // namespace crypto
+
+namespace identifier
+{
+class Generic;
+}  // namespace identifier
 // }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
@@ -52,7 +58,7 @@ using Coin = std::pair<UnallocatedCString, std::size_t>;
 using ECKey = std::shared_ptr<const opentxs::crypto::key::EllipticCurve>;
 using HDKey = std::shared_ptr<const opentxs::crypto::key::HD>;
 /// account id, chain, index
-using Key = std::tuple<UnallocatedCString, Subchain, Bip32Index>;
+using Key = std::tuple<identifier::Generic, Subchain, Bip32Index>;
 using Activity = std::tuple<Coin, Key, Amount>;
 
 OPENTXS_EXPORT auto is_notification(Subchain) noexcept -> bool;

@@ -373,8 +373,8 @@ private:
         BlockTargets& out) const noexcept -> void;
     auto to_patterns(const Elements& in, allocator_type alloc) const noexcept
         -> Patterns;
-    auto translate(const TXOs& utxos, Patterns& outpoints) const noexcept
-        -> void;
+    auto translate(const TXOs& utxos, allocator_type alloc) const noexcept
+        -> Patterns;
 
     auto do_reorg(
         const node::HeaderOracle& oracle,

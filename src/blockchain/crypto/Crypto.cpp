@@ -18,6 +18,8 @@
 #include <type_traits>
 
 #include "internal/util/LogMacros.hpp"
+#include "opentxs/OT.hpp"
+#include "opentxs/api/Context.hpp"
 #include "opentxs/api/Factory.hpp"
 #include "opentxs/api/crypto/Crypto.hpp"
 #include "opentxs/api/crypto/Hash.hpp"
@@ -122,7 +124,7 @@ auto print(const Key& key) noexcept -> UnallocatedCString
 {
     const auto& [account, subchain, index] = key;
     auto out = std::stringstream{};
-    out << account;
+    out << account.asBase58(Context().Crypto());
     out << " / ";
     out << print(subchain);
     out << " / ";
@@ -190,7 +192,7 @@ auto deserialize(const ReadView in) noexcept -> blockchain::crypto::Key
     const auto idbytes = in.size() - sizeof(subchain) - sizeof(index);
 
     const auto* i = in.data();
-    id.assign(ReadView{i, idbytes});
+    id.Assign(ReadView{i, idbytes});
     std::advance(i, idbytes);
     std::memcpy(&subchain, i, sizeof(subchain));
     std::advance(i, sizeof(subchain));

@@ -722,8 +722,7 @@ auto Blockchain::Imp::Confirm(
     const opentxs::blockchain::block::Txid& tx) const noexcept -> bool
 {
     try {
-        const auto [id, subchain, index] = key;
-        const auto accountID = api_.Factory().IdentifierFromBase58(id);
+        const auto& [accountID, subchain, index] = key;
 
         return get_node(accountID).Internal().Confirm(subchain, index, tx);
     } catch (const std::exception& e) {
@@ -932,8 +931,7 @@ auto Blockchain::Imp::EncodeAddress(
 auto Blockchain::Imp::GetKey(const Key& id) const noexcept(false)
     -> const opentxs::blockchain::crypto::Element&
 {
-    const auto [str, subchain, index] = id;
-    const auto account = api_.Factory().IdentifierFromBase58(str);
+    const auto& [account, subchain, index] = id;
     using Type = opentxs::blockchain::crypto::SubaccountType;
 
     switch (accounts_.Type(account)) {
@@ -1317,7 +1315,7 @@ auto Blockchain::Imp::Owner(const Key& key) const noexcept
 
     if (Subchain::Outgoing == subchain) { return blank; }
 
-    return Owner(api_.Factory().IdentifierFromBase58(account));
+    return Owner(account);
 }
 
 auto Blockchain::Imp::p2pkh(
@@ -1488,12 +1486,11 @@ auto Blockchain::Imp::RecipientContact(const Key& key) const noexcept
     -> identifier::Generic
 {
     static const auto blank = identifier::Generic{};
-    const auto& [account, subchain, index] = key;
+    const auto& [accountID, subchain, index] = key;
     using Subchain = opentxs::blockchain::crypto::Subchain;
 
     if (is_notification(subchain)) { return blank; }
 
-    const auto accountID = api_.Factory().IdentifierFromBase58(account);
     const auto& owner = Owner(accountID);
 
     try {
@@ -1529,8 +1526,7 @@ auto Blockchain::Imp::RecipientContact(const Key& key) const noexcept
 auto Blockchain::Imp::Release(const Key key) const noexcept -> bool
 {
     try {
-        const auto [id, subchain, index] = key;
-        const auto accountID = api_.Factory().IdentifierFromBase58(id);
+        const auto& [accountID, subchain, index] = key;
 
         return get_node(accountID).Internal().Unreserve(subchain, index);
     } catch (...) {
@@ -1553,12 +1549,11 @@ auto Blockchain::Imp::SenderContact(const Key& key) const noexcept
     -> identifier::Generic
 {
     static const auto blank = identifier::Generic{};
-    const auto& [account, subchain, index] = key;
+    const auto& [accountID, subchain, index] = key;
     using Subchain = opentxs::blockchain::crypto::Subchain;
 
     if (is_notification(subchain)) { return blank; }
 
-    const auto accountID = api_.Factory().IdentifierFromBase58(account);
     const auto& owner = Owner(accountID);
 
     try {
@@ -1597,8 +1592,7 @@ auto Blockchain::Imp::Unconfirm(
     const Time time) const noexcept -> bool
 {
     try {
-        const auto [id, subchain, index] = key;
-        const auto accountID = api_.Factory().IdentifierFromBase58(id);
+        const auto& [accountID, subchain, index] = key;
 
         return get_node(accountID).Internal().Unconfirm(
             subchain, index, tx, time);

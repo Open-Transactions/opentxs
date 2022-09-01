@@ -119,7 +119,7 @@ Account::Account(
 }
 
 auto Account::NodeIndex::Add(
-    const UnallocatedCString& id,
+    const identifier::Generic& id,
     crypto::Subaccount* node) noexcept -> void
 {
     OT_ASSERT(nullptr != node);
@@ -128,7 +128,7 @@ auto Account::NodeIndex::Add(
     index_[id] = node;
 }
 
-auto Account::NodeIndex::Find(const UnallocatedCString& id) const noexcept
+auto Account::NodeIndex::Find(const identifier::Generic& id) const noexcept
     -> crypto::Subaccount*
 {
     Lock lock(lock_);
@@ -161,7 +161,7 @@ auto Account::AssociateTransaction(
 {
     using ActivityVector = UnallocatedVector<Activity>;
     using ActivityPair = std::pair<ActivityVector, ActivityVector>;
-    using ActivityMap = UnallocatedMap<UnallocatedCString, ActivityPair>;
+    using ActivityMap = UnallocatedMap<identifier::Generic, ActivityPair>;
 
     Lock lock(lock_);
     auto sorted = ActivityMap{};
@@ -228,7 +228,7 @@ auto Account::AssociateTransaction(
 }
 
 auto Account::ClaimAccountID(
-    const UnallocatedCString& id,
+    const identifier::Generic& id,
     crypto::Subaccount* node) const noexcept -> void
 {
     node_index_.Add(id, node);
@@ -376,7 +376,7 @@ auto Account::LookupUTXO(const Coin& coin) const noexcept
 auto Account::Subaccount(const identifier::Generic& id) const noexcept(false)
     -> const crypto::Subaccount&
 {
-    auto* output = node_index_.Find(id.asBase58(api_.Crypto()));
+    auto* output = node_index_.Find(id);
 
     if (nullptr == output) { throw std::out_of_range("Account not found"); }
 

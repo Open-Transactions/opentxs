@@ -10,7 +10,6 @@
 #include <BlockchainBlockHeader.pb.h>
 #include <cstring>
 #include <stdexcept>
-#include <type_traits>
 #include <utility>
 
 #include "Proto.hpp"

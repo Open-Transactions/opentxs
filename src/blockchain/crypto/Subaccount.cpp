@@ -82,8 +82,8 @@ Subaccount::Subaccount(
           type,
           api.Factory().IdentifierFromBase58(serialized.id()),
           serialized.revision(),
-          convert(serialized.unspent()),
-          convert(serialized.spent()),
+          convert(api, serialized.unspent()),
+          convert(api, serialized.spent()),
           out)
 {
     if (UnitToBlockchain(ClaimToUnit(translate(serialized.chain()))) !=
@@ -169,25 +169,27 @@ auto Subaccount::Confirm(
     }
 }
 
-auto Subaccount::convert(Activity&& in) noexcept -> proto::BlockchainActivity
+auto Subaccount::convert(const api::Session& api, Activity&& in) noexcept
+    -> proto::BlockchainActivity
 {
     const auto& [coin, key, value] = in;
     const auto& [txid, out] = coin;
     const auto& [account, chain, index] = key;
-    proto::BlockchainActivity output{};
+    auto output = proto::BlockchainActivity{};
     output.set_version(ActivityVersion);
     output.set_txid(txid);
     output.set_output(out);
     value.Serialize(writer(output.mutable_amount()));
-    output.set_account(account);
+    output.set_account(account.asBase58(api.Crypto()));
     output.set_subchain(static_cast<std::uint32_t>(chain));
     output.set_index(index);
 
     return output;
 }
 
-auto Subaccount::convert(const proto::BlockchainActivity& in) noexcept
-    -> Activity
+auto Subaccount::convert(
+    const api::Session& api,
+    const proto::BlockchainActivity& in) noexcept -> Activity
 {
     Activity output{};
     auto& [coin, key, value] = output;
@@ -196,19 +198,22 @@ auto Subaccount::convert(const proto::BlockchainActivity& in) noexcept
     txid = in.txid();
     out = in.output();
     value = factory::Amount(in.amount());
-    account = in.account();
+    account = api.Factory().IdentifierFromBase58(in.account());
     chain = static_cast<Subchain>(in.subchain());
     index = in.index();
 
     return output;
 }
 
-auto Subaccount::convert(const SerializedActivity& in) noexcept
-    -> UnallocatedVector<Activity>
+auto Subaccount::convert(
+    const api::Session& api,
+    const SerializedActivity& in) noexcept -> UnallocatedVector<Activity>
 {
     auto output = UnallocatedVector<Activity>{};
 
-    for (const auto& activity : in) { output.emplace_back(convert(activity)); }
+    for (const auto& activity : in) {
+        output.emplace_back(convert(api, activity));
+    }
 
     return output;
 }
@@ -267,7 +272,7 @@ auto Subaccount::IncomingTransactions(const Key& element) const noexcept
 
 void Subaccount::init() noexcept
 {
-    parent_.Internal().ClaimAccountID(id_.asBase58(api_.Crypto()), this);
+    parent_.Internal().ClaimAccountID(id_, this);
 }
 
 // Due to asynchronous blockchain scanning, spends may be discovered out of
@@ -330,12 +335,12 @@ auto Subaccount::serialize_common(
 
     for (const auto& [coin, data] : unspent_) {
         auto converted = Activity{coin, data.first, data.second};
-        *out.add_unspent() = convert(std::move(converted));
+        *out.add_unspent() = convert(api_, std::move(converted));
     }
 
     for (const auto& [coin, data] : spent_) {
         auto converted = Activity{coin, data.first, data.second};
-        *out.add_spent() = convert(std::move(converted));
+        *out.add_spent() = convert(api_, std::move(converted));
     }
 }
 

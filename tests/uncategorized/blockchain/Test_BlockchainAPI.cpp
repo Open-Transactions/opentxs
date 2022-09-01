@@ -523,9 +523,7 @@ TEST_F(ApiCryptoBlockchain, set_metadata)
         const auto& txid = address_data_.txids_.emplace_back(random());
 
         EXPECT_TRUE(api_.Crypto().Blockchain().Unconfirm(
-            {accountID.asBase58(api_.Crypto()), subchain, index},
-            txid,
-            address_data_.times_.at(time)));
+            {accountID, subchain, index}, txid, address_data_.times_.at(time)));
 
         const auto& element = account.BalanceElement(subchain, index);
         const auto transactions = element.Unconfirmed();
@@ -542,7 +540,7 @@ TEST_F(ApiCryptoBlockchain, set_metadata)
         const auto& txid = address_data_.txids_.emplace_back(random());
 
         EXPECT_TRUE(api_.Crypto().Blockchain().Unconfirm(
-            {accountID.asBase58(api_.Crypto()), subchain, index}, txid));
+            {accountID, subchain, index}, txid));
 
         const auto& element = account.BalanceElement(subchain, index);
         const auto transactions = element.Unconfirmed();
@@ -555,7 +553,7 @@ TEST_F(ApiCryptoBlockchain, set_metadata)
         const auto& txid = address_data_.txids_.at(++tIndex);
 
         EXPECT_TRUE(api_.Crypto().Blockchain().Confirm(
-            {accountID.asBase58(api_.Crypto()), subchain, index}, txid));
+            {accountID, subchain, index}, txid));
 
         const auto& element = account.BalanceElement(subchain, index);
         const auto transactions = element.Confirmed();
@@ -642,24 +640,24 @@ TEST_F(ApiCryptoBlockchain, release)
     const auto& account = bc.Account(nym, chain).GetHD().at(accountID);
     const auto subchain = Subchain::External;
 
-    EXPECT_FALSE(bc.Release({accountID.asBase58(api_.Crypto()), subchain, 7}));
-    EXPECT_FALSE(bc.Release({accountID.asBase58(api_.Crypto()), subchain, 15}));
-    EXPECT_FALSE(bc.Release({accountID.asBase58(api_.Crypto()), subchain, 23}));
-    EXPECT_TRUE(bc.Release({accountID.asBase58(api_.Crypto()), subchain, 0}));
-    EXPECT_TRUE(bc.Release({accountID.asBase58(api_.Crypto()), subchain, 2}));
-    EXPECT_TRUE(bc.Release({accountID.asBase58(api_.Crypto()), subchain, 5}));
-    EXPECT_TRUE(bc.Release({accountID.asBase58(api_.Crypto()), subchain, 8}));
-    EXPECT_TRUE(bc.Release({accountID.asBase58(api_.Crypto()), subchain, 10}));
-    EXPECT_TRUE(bc.Release({accountID.asBase58(api_.Crypto()), subchain, 12}));
-    EXPECT_TRUE(bc.Release({accountID.asBase58(api_.Crypto()), subchain, 13}));
-    EXPECT_TRUE(bc.Release({accountID.asBase58(api_.Crypto()), subchain, 14}));
-    EXPECT_TRUE(bc.Release({accountID.asBase58(api_.Crypto()), subchain, 16}));
-    EXPECT_TRUE(bc.Release({accountID.asBase58(api_.Crypto()), subchain, 17}));
-    EXPECT_TRUE(bc.Release({accountID.asBase58(api_.Crypto()), subchain, 18}));
-    EXPECT_TRUE(bc.Release({accountID.asBase58(api_.Crypto()), subchain, 19}));
-    EXPECT_TRUE(bc.Release({accountID.asBase58(api_.Crypto()), subchain, 20}));
-    EXPECT_TRUE(bc.Release({accountID.asBase58(api_.Crypto()), subchain, 21}));
-    EXPECT_TRUE(bc.Release({accountID.asBase58(api_.Crypto()), subchain, 22}));
+    EXPECT_FALSE(bc.Release({accountID, subchain, 7}));
+    EXPECT_FALSE(bc.Release({accountID, subchain, 15}));
+    EXPECT_FALSE(bc.Release({accountID, subchain, 23}));
+    EXPECT_TRUE(bc.Release({accountID, subchain, 0}));
+    EXPECT_TRUE(bc.Release({accountID, subchain, 2}));
+    EXPECT_TRUE(bc.Release({accountID, subchain, 5}));
+    EXPECT_TRUE(bc.Release({accountID, subchain, 8}));
+    EXPECT_TRUE(bc.Release({accountID, subchain, 10}));
+    EXPECT_TRUE(bc.Release({accountID, subchain, 12}));
+    EXPECT_TRUE(bc.Release({accountID, subchain, 13}));
+    EXPECT_TRUE(bc.Release({accountID, subchain, 14}));
+    EXPECT_TRUE(bc.Release({accountID, subchain, 16}));
+    EXPECT_TRUE(bc.Release({accountID, subchain, 17}));
+    EXPECT_TRUE(bc.Release({accountID, subchain, 18}));
+    EXPECT_TRUE(bc.Release({accountID, subchain, 19}));
+    EXPECT_TRUE(bc.Release({accountID, subchain, 20}));
+    EXPECT_TRUE(bc.Release({accountID, subchain, 21}));
+    EXPECT_TRUE(bc.Release({accountID, subchain, 22}));
 
     {
         auto index = account.Reserve(subchain, reason_);
@@ -727,64 +725,53 @@ TEST_F(ApiCryptoBlockchain, floor)
     const auto subchain = Subchain::External;
     auto& txids = address_data_.txids_;
 
-    EXPECT_TRUE(bc.Confirm(
-        {accountID.asBase58(api_.Crypto()), subchain, 6},
-        txids.emplace_back(random())));
+    EXPECT_TRUE(
+        bc.Confirm({accountID, subchain, 6}, txids.emplace_back(random())));
     EXPECT_EQ(account.Floor(subchain).value_or(999), 0);
-    EXPECT_TRUE(bc.Confirm(
-        {accountID.asBase58(api_.Crypto()), subchain, 5},
-        txids.emplace_back(random())));
+    EXPECT_TRUE(
+        bc.Confirm({accountID, subchain, 5}, txids.emplace_back(random())));
     EXPECT_EQ(account.Floor(subchain).value_or(999), 0);
-    EXPECT_TRUE(bc.Confirm(
-        {accountID.asBase58(api_.Crypto()), subchain, 4},
-        txids.emplace_back(random())));
+    EXPECT_TRUE(
+        bc.Confirm({accountID, subchain, 4}, txids.emplace_back(random())));
     EXPECT_EQ(account.Floor(subchain).value_or(999), 0);
-    EXPECT_TRUE(bc.Confirm(
-        {accountID.asBase58(api_.Crypto()), subchain, 3},
-        txids.emplace_back(random())));
+    EXPECT_TRUE(
+        bc.Confirm({accountID, subchain, 3}, txids.emplace_back(random())));
     EXPECT_EQ(account.Floor(subchain).value_or(999), 0);
-    EXPECT_TRUE(bc.Confirm(
-        {accountID.asBase58(api_.Crypto()), subchain, 2},
-        txids.emplace_back(random())));
+    EXPECT_TRUE(
+        bc.Confirm({accountID, subchain, 2}, txids.emplace_back(random())));
     EXPECT_EQ(account.Floor(subchain).value_or(999), 0);
-    EXPECT_TRUE(bc.Confirm(
-        {accountID.asBase58(api_.Crypto()), subchain, 1},
-        txids.emplace_back(random())));
+    EXPECT_TRUE(
+        bc.Confirm({accountID, subchain, 1}, txids.emplace_back(random())));
     EXPECT_EQ(account.Floor(subchain).value_or(999), 0);
-    EXPECT_TRUE(bc.Confirm(
-        {accountID.asBase58(api_.Crypto()), subchain, 0},
-        txids.emplace_back(random())));
+    EXPECT_TRUE(
+        bc.Confirm({accountID, subchain, 0}, txids.emplace_back(random())));
     EXPECT_EQ(account.Floor(subchain).value_or(999), 8);
     ASSERT_EQ(account.BalanceElement(subchain, 7).Confirmed().size(), 1);
     EXPECT_TRUE(bc.Unconfirm(
-        {accountID.asBase58(api_.Crypto()), subchain, 7},
+        {accountID, subchain, 7},
         account.BalanceElement(subchain, 7).Confirmed().front()));
     EXPECT_EQ(account.BalanceElement(subchain, 7).Confirmed().size(), 0);
     EXPECT_EQ(account.Floor(subchain).value_or(999), 7);
-    EXPECT_TRUE(bc.Confirm(
-        {accountID.asBase58(api_.Crypto()), subchain, 7}, txids.at(0)));
+    EXPECT_TRUE(bc.Confirm({accountID, subchain, 7}, txids.at(0)));
     EXPECT_EQ(account.Floor(subchain).value_or(999), 8);
-    EXPECT_TRUE(bc.Confirm(
-        {accountID.asBase58(api_.Crypto()), subchain, 7}, txids.at(1)));
+    EXPECT_TRUE(bc.Confirm({accountID, subchain, 7}, txids.at(1)));
     EXPECT_EQ(account.Floor(subchain).value_or(999), 8);
-    EXPECT_TRUE(bc.Unconfirm(
-        {accountID.asBase58(api_.Crypto()), subchain, 7}, txids.at(1)));
+    EXPECT_TRUE(bc.Unconfirm({accountID, subchain, 7}, txids.at(1)));
     EXPECT_EQ(account.Floor(subchain).value_or(999), 8);
     ASSERT_EQ(account.BalanceElement(subchain, 15).Confirmed().size(), 1);
     EXPECT_TRUE(bc.Unconfirm(
-        {accountID.asBase58(api_.Crypto()), subchain, 15},
+        {accountID, subchain, 15},
         account.BalanceElement(subchain, 15).Confirmed().front()));
     EXPECT_EQ(account.BalanceElement(subchain, 15).Confirmed().size(), 0);
     EXPECT_EQ(account.Floor(subchain).value_or(999), 8);
     ASSERT_EQ(account.BalanceElement(subchain, 0).Confirmed().size(), 1);
     EXPECT_TRUE(bc.Unconfirm(
-        {accountID.asBase58(api_.Crypto()), subchain, 0},
+        {accountID, subchain, 0},
         account.BalanceElement(subchain, 0).Confirmed().front()));
     EXPECT_EQ(account.BalanceElement(subchain, 0).Confirmed().size(), 0);
     EXPECT_EQ(account.Floor(subchain).value_or(999), 0);
-    EXPECT_TRUE(bc.Confirm(
-        {accountID.asBase58(api_.Crypto()), subchain, 0},
-        txids.emplace_back(random())));
+    EXPECT_TRUE(
+        bc.Confirm({accountID, subchain, 0}, txids.emplace_back(random())));
     EXPECT_EQ(account.Floor(subchain).value_or(999), 8);
 
     {
