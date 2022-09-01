@@ -5,6 +5,7 @@
 
 #pragma once
 
+#include <boost/thread/thread.hpp>
 #include <zmq.h>
 #include <atomic>
 #include <future>
@@ -59,10 +60,7 @@ class Thread final : public zeromq::internal::Thread
 {
 public:
     auto Alloc() noexcept -> alloc::Resource* final { return &alloc_; }
-    auto ID() const noexcept -> std::thread::id final
-    {
-        return thread_.get_id();
-    }
+    auto ID() const noexcept -> std::thread::id final;
 
     Thread(
         const unsigned int index,
@@ -97,7 +95,9 @@ private:
     socket::Raw control_;
     Items data_;
     CString thread_name_;
-    std::thread thread_;
+    std::promise<std::thread::id> id_promise_;
+    std::shared_future<std::thread::id> id_;
+    boost::thread thread_;
 
     auto poll() noexcept -> void;
     auto receive_message(void* socket, Message& message) noexcept -> bool;

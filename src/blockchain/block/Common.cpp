@@ -18,11 +18,15 @@
 
 namespace opentxs::blockchain::block
 {
-ParsedPatterns::ParsedPatterns(const Patterns& in) noexcept
-    : data_()
-    , map_()
+ParsedPatterns::ParsedPatterns(
+    const Patterns& in,
+    allocator_type alloc) noexcept
+    : data_(alloc)
+    , map_(alloc)
 {
     data_.reserve(in.size());
+    data_.clear();
+    map_.clear();
 
     for (auto i{in.cbegin()}; i != in.cend(); std::advance(i, 1)) {
         const auto& [elementID, data] = *i;
@@ -31,6 +35,11 @@ ParsedPatterns::ParsedPatterns(const Patterns& in) noexcept
     }
 
     std::sort(data_.begin(), data_.end());
+}
+
+auto ParsedPatterns::get_allocator() const noexcept -> allocator_type
+{
+    return data_.get_allocator();
 }
 }  // namespace opentxs::blockchain::block
 

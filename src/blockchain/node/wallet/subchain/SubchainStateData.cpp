@@ -952,10 +952,11 @@ auto SubchainStateData::ProcessTransaction(
     const bitcoin::block::Transaction& tx,
     const Log& log) const noexcept -> void
 {
-    auto buf = std::array<std::byte, 256_kib>{};
+    // NOLINTNEXTLINE(modernize-avoid-c-arrays)
+    std::byte buf[thread_pool_stack_size_ / 2];
     auto upstream = alloc::StandardToBoost{get_allocator().resource()};
-    auto alloc = alloc::BoostMonotonic{buf.data(), buf.size(), &upstream};
-    auto* mr = std::addressof(alloc);
+    auto mr = alloc::BoostMonotonic{buf, sizeof(buf), &upstream};
+    auto alloc = allocator_type{std::addressof(mr)};
     auto copy = tx.clone();
 
     OT_ASSERT(copy);
@@ -963,10 +964,10 @@ auto SubchainStateData::ProcessTransaction(
     const auto matches = [&] {
         auto handle = element_cache_.lock_shared();
         const auto& elements = handle->GetElements();
-        const auto targets = get_account_targets(elements, mr);
-        const auto patterns = to_patterns(elements, mr);
-        const auto parsed = block::ParsedPatterns{patterns};  // TODO allocator
-        const auto outpoints = translate(elements.txos_, mr);
+        const auto targets = get_account_targets(elements, alloc);
+        const auto patterns = to_patterns(elements, alloc);
+        const auto parsed = block::ParsedPatterns{patterns, alloc};
+        const auto outpoints = translate(elements.txos_, alloc);
 
         return copy->Internal().FindMatches(
             filter_type_, outpoints, parsed, log);
@@ -985,7 +986,7 @@ auto SubchainStateData::ReportScan(const block::Position& pos) const noexcept
 
 auto SubchainStateData::reorg_children() const noexcept -> std::size_t
 {
-    return 1u;
+    return 1_uz;
 }
 
 auto SubchainStateData::ReorgTarget(
@@ -1043,7 +1044,7 @@ auto SubchainStateData::scan(
                             .at(chain_)
                             .cfilter_element_count_estimate_;
 
-                    return std::max<std::size_t>(1u, chainDefault);
+                    return std::max<std::size_t>(1_uz, chainDefault);
                 } else {
 
                     return cached;
@@ -1063,7 +1064,7 @@ auto SubchainStateData::scan(
                     std::max<std::size_t>(
                         (target * (cfilterWeight * walletWeight)) /
                             ((cfilterWeight * cfilter) + (walletWeight * user)),
-                        1u),
+                        1_uz),
                     max);
             };
             static_assert(GetBatchSize(1, 1) == 10000);
@@ -1080,7 +1081,7 @@ auto SubchainStateData::scan(
             auto handle = element_cache_.lock_shared();
             const auto& elements = handle->GetElements();
             const auto elementCount =
-                std::max<std::size_t>(elements.size(), 1u);
+                std::max<std::size_t>(elements.size(), 1_uz);
             // NOTE attempting to scan too many filters at once causes this
             // function to take excessive time to execute, which means the Scan
             // and Rescan Actors will be unable to process new messages for an
