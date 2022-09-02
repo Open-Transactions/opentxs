@@ -7,6 +7,8 @@
 
 #include <string_view>
 
+#include "util/ByteLiterals.hpp"
+
 namespace opentxs
 {
 enum class ThreadPriority {
@@ -18,6 +20,8 @@ enum class ThreadPriority {
     Highest,
     TimeCritical,
 };
+
+constexpr auto thread_pool_stack_size_ = 2_mib;
 
 auto print(ThreadPriority priority) noexcept -> const char*;
 auto MaxJobs() noexcept -> unsigned int;

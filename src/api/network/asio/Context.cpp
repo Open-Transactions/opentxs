@@ -16,6 +16,7 @@
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/Mutex.hpp"
 #include "internal/util/Signals.hpp"
+#include "internal/util/Thread.hpp"
 
 namespace opentxs::api::network::asio
 {
@@ -28,12 +29,20 @@ struct Context::Imp {
             work_ = boost::asio::require(
                 context_.get_executor(),
                 boost::asio::execution::outstanding_work.tracked);
+            static const auto options = [] {
+                auto out = boost::thread::attributes{};
+                out.set_stack_size(thread_pool_stack_size_);
+
+                return out;
+            }();
 
             for (unsigned int i{0}; i < threads; ++i) {
-                auto* thread = thread_pool_.create_thread(
-                    [this, priority] { run(priority); });
+                auto thread = std::make_unique<boost::thread>(
+                    options, [this, priority] { run(priority); });
 
-                if (nullptr == thread) { OT_FAIL; }
+                OT_ASSERT(thread);
+
+                thread_pool_.add_thread(thread.release());
             }
 
             running_ = true;

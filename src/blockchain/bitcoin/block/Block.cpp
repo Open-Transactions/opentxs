@@ -435,7 +435,8 @@ auto Block::FindMatches(
         .Flush();
     auto output = blockchain::block::Matches{};
     auto& [inputs, outputs] = output;
-    const auto parsed = blockchain::block::ParsedPatterns{patterns};
+    // TODO allocator
+    const auto parsed = blockchain::block::ParsedPatterns{patterns, {}};
 
     for (const auto& [txid, tx] : transactions_) {
         auto temp = tx->Internal().FindMatches(style, outpoints, parsed, log);

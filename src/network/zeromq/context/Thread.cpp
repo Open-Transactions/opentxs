@@ -85,10 +85,21 @@ Thread::Thread(
         return out;
     }())
     , thread_name_()
-    , thread_(&Thread::run, this)
+    , id_promise_()
+    , id_(id_promise_.get_future())
+    , thread_(
+          [] {
+              auto out = boost::thread::attributes{};
+              out.set_stack_size(thread_pool_stack_size_);
+
+              return out;
+          }(),
+          [this] { run(); })
 {
     thread_.detach();
 }
+
+auto Thread::ID() const noexcept -> std::thread::id { return id_.get(); }
 
 auto Thread::modify(Message&& message) noexcept -> void
 {
@@ -260,6 +271,7 @@ auto Thread::receive_message(void* socket, Message& message) noexcept -> bool
 auto Thread::run() noexcept -> void
 {
     Signals::Block();
+    id_promise_.set_value(std::this_thread::get_id());
 
     while (false == shutdown_) { poll(); }
 

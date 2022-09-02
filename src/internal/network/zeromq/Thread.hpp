@@ -5,31 +5,9 @@
 
 #pragma once
 
-#include <future>
 #include <thread>
-#include <tuple>
 
-#include "internal/network/zeromq/Types.hpp"
 #include "opentxs/util/Allocator.hpp"
-
-// NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs  // NOLINT
-{
-// inline namespace v1
-// {
-namespace network
-{
-namespace zeromq
-{
-namespace socket
-{
-class Raw;
-}  // namespace socket
-}  // namespace zeromq
-}  // namespace network
-// }  // namespace v1
-}  // namespace opentxs
-// NOLINTEND(modernize-concat-nested-namespaces)
 
 namespace opentxs::network::zeromq::internal
 {

@@ -13,6 +13,7 @@
 #include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/crypto/Types.hpp"
+#include "opentxs/util/Allocated.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 
@@ -58,11 +59,21 @@ using KeyID = blockchain::crypto::Key;
 using ContactID = identifier::Generic;
 using KeyData = UnallocatedMap<KeyID, std::pair<ContactID, ContactID>>;
 
-struct ParsedPatterns {
+struct ParsedPatterns final : Allocated {
     Vector<Vector<std::byte>> data_;
-    UnallocatedMap<ReadView, Patterns::const_iterator> map_;
+    Map<ReadView, Patterns::const_iterator> map_;
 
-    ParsedPatterns(const Patterns& in) noexcept;
+    auto get_allocator() const noexcept -> allocator_type final;
+
+    ParsedPatterns(const Patterns& in, allocator_type alloc) noexcept;
+
+    ParsedPatterns() = delete;
+    ParsedPatterns(const ParsedPatterns&) = delete;
+    ParsedPatterns(ParsedPatterns&&) = delete;
+    auto operator=(const ParsedPatterns&) -> ParsedPatterns& = delete;
+    auto operator=(ParsedPatterns&&) -> ParsedPatterns& = delete;
+
+    ~ParsedPatterns() final = default;
 };
 }  // namespace opentxs::blockchain::block
 
