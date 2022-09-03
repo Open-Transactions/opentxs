@@ -26,7 +26,8 @@ public:
     auto Internal() const noexcept -> const Endpoints& final { return *this; }
     virtual auto OTDHTBlockchain(opentxs::blockchain::Type chain) const noexcept
         -> std::string_view = 0;
-    virtual auto OTDHTNode() const noexcept -> std::string_view = 0;
+    virtual auto OTDHTNodePublish() const noexcept -> std::string_view = 0;
+    virtual auto OTDHTNodeRouter() const noexcept -> std::string_view = 0;
     virtual auto OTDHTWallet() const noexcept -> std::string_view = 0;
     virtual auto ProcessPushNotification() const noexcept
         -> std::string_view = 0;

@@ -101,6 +101,7 @@ auto print(OTZMQWorkType in) noexcept -> std::string_view
             {value(WorkType::OTXResponse), "WorkType::OTXResponse"sv},
             {value(WorkType::OTXPush), "WorkType::OTXPush"sv},
             {value(WorkType::OTXLegacyXML), "WorkType::OTXLegacyXML"sv},
+            {OT_ZMQ_OTDHT_PEER_LIST, "OT_ZMQ_OTDHT_PEER_LIST"sv},
             {OT_ZMQ_HEADER_ORACLE_JOB_READY,
              "OT_ZMQ_HEADER_ORACLE_JOB_READY"sv},
             {OT_ZMQ_REORG_SIGNAL, "OT_ZMQ_REORG_SIGNAL"sv},

@@ -41,6 +41,7 @@ auto print(DHTJob job) noexcept -> std::string_view
             {Job::response, "response"sv},
             {Job::push_tx, "push_tx"sv},
             {Job::job_processed, "job_processed"sv},
+            {Job::peer_list, "peer_list"sv},
             {Job::registration, "registration"sv},
             {Job::init, "init"sv},
             {Job::cfilter, "cfilter"sv},

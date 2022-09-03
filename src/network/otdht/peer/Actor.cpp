@@ -10,9 +10,7 @@
 #include "network/otdht/peer/Actor.hpp"  // IWYU pragma: associated
 
 #include <algorithm>
-#include <atomic>
 #include <chrono>
-#include <cstddef>
 #include <iterator>
 #include <memory>
 #include <stdexcept>
@@ -64,6 +62,7 @@ using namespace std::literals;
 Peer::Actor::Actor(
     std::shared_ptr<const api::Session> api,
     boost::shared_ptr<Node::Shared> shared,
+    std::string_view routingID,
     std::string_view toRemote,
     std::string_view fromNode,
     zeromq::BatchID batchID,
@@ -146,7 +145,7 @@ Peer::Actor::Actor(
 
         return socket;
     }())
-    , routing_id_(next_id(alloc))
+    , routing_id_(routingID, alloc)
     , blockchain_([&] {
         auto out = BlockchainSockets{alloc};
         auto index = 1_uz;
@@ -267,15 +266,6 @@ auto Peer::Actor::forward_to_chain(
         blockchain_.at(chain).SendDeferred(
             std::move(msg), __FILE__, __LINE__, true);
     }
-}
-
-auto Peer::Actor::next_id(allocator_type alloc) noexcept -> CString
-{
-    static auto counter = std::atomic<std::size_t>{};
-    auto out = CString{"OTDHT peer #", alloc};
-    out.append(std::to_string(++counter));
-
-    return out;
 }
 
 auto Peer::Actor::ping() noexcept -> void

@@ -10,14 +10,20 @@
 #include "network/otdht/node/Actor.hpp"  // IWYU pragma: associated
 
 #include <boost/smart_ptr/shared_ptr.hpp>
+#include <algorithm>
 #include <chrono>
+#include <iterator>
 #include <memory>
 #include <utility>
 
 #include "internal/api/session/Endpoints.hpp"
 #include "internal/api/session/Session.hpp"
+#include "internal/network/blockchain/Types.hpp"
 #include "internal/network/otdht/Peer.hpp"
 #include "internal/network/zeromq/Context.hpp"
+#include "internal/network/zeromq/message/Message.hpp"
+#include "internal/network/zeromq/socket/Pipeline.hpp"
+#include "internal/network/zeromq/socket/Raw.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "opentxs/api/network/Blockchain.hpp"
@@ -32,15 +38,19 @@
 #include "opentxs/blockchain/node/FilterOracle.hpp"
 #include "opentxs/blockchain/node/Manager.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
+#include "opentxs/network/zeromq/Pipeline.hpp"
 #include "opentxs/network/zeromq/ZeroMQ.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
+#include "opentxs/network/zeromq/message/FrameIterator.hpp"
 #include "opentxs/network/zeromq/message/FrameSection.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
+#include "opentxs/network/zeromq/message/Message.tpp"
 #include "opentxs/network/zeromq/socket/SocketType.hpp"
 #include "opentxs/network/zeromq/socket/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/WorkType.hpp"
+#include "util/Work.hpp"
 
 namespace opentxs::network::otdht
 {
@@ -74,19 +84,38 @@ Node::Actor::Actor(
 
               return sub;
           }(),
+          {},
+          {},
           [&] {
-              using Dir = zeromq::socket::Direction;
-              auto pull = zeromq::EndpointArgs{alloc};
-              pull.emplace_back(
-                  CString{api->Endpoints().Internal().OTDHTNode(), alloc},
-                  Dir::Bind);
+              auto out = Vector<network::zeromq::SocketData>{alloc};
+              using Socket = network::zeromq::socket::Type;
+              using Args = network::zeromq::EndpointArgs;
+              using Dir = network::zeromq::socket::Direction;
+              out.emplace_back(std::make_pair<Socket, Args>(
+                  Socket::Publish,
+                  {
+                      {CString{
+                           api->Endpoints().Internal().OTDHTNodePublish(),
+                           alloc},
+                       Dir::Bind},
+                  }));
+              out.emplace_back(std::make_pair<Socket, Args>(
+                  Socket::Router,
+                  {
+                      {CString{
+                           api->Endpoints().Internal().OTDHTNodeRouter(),
+                           alloc},
+                       Dir::Bind},
+                  }));
 
-              return pull;
+              return out;
           }())
     , api_p_(std::move(api))
     , shared_p_(std::move(shared))
     , api_(*api_p_)
     , data_(shared_p_->data_)
+    , publish_(pipeline_.Internal().ExtraSocket(0))
+    , router_(pipeline_.Internal().ExtraSocket(1))
     , peers_(alloc)
 {
 }
@@ -105,6 +134,23 @@ auto Node::Actor::do_startup() noexcept -> bool
     load_peers();
 
     return false;
+}
+
+auto Node::Actor::get_peers() const noexcept -> Set<CString>
+{
+    auto out = Set<CString>{get_allocator()};
+    std::transform(
+        peers_.begin(),
+        peers_.end(),
+        std::inserter(out, out.end()),
+        [](const auto& data) { return std::get<0>(data.second); });
+
+    return out;
+}
+
+auto Node::Actor::get_peers(Message& out) const noexcept -> void
+{
+    for (const auto& endpoint : get_peers()) { out.AddFrame(endpoint); }
 }
 
 auto Node::Actor::load_peers() noexcept -> void
@@ -132,6 +178,18 @@ auto Node::Actor::load_positions() noexcept -> void
 
 auto Node::Actor::pipeline(const Work work, Message&& msg) noexcept -> void
 {
+    const auto id = msg.Internal().ExtractFront().as<zeromq::SocketID>();
+
+    if (router_.ID() == id) {
+        pipeline_router(work, std::move(msg));
+    } else {
+        pipeline_other(work, std::move(msg));
+    }
+}
+
+auto Node::Actor::pipeline_other(const Work work, Message&& msg) noexcept
+    -> void
+{
     switch (work) {
         case Work::chain_state: {
             process_chain_state(std::move(msg));
@@ -143,8 +201,38 @@ auto Node::Actor::pipeline(const Work work, Message&& msg) noexcept -> void
             process_new_peer(std::move(msg));
         } break;
         case Work::shutdown:
+        case Work::registration:
         case Work::init:
-        case Work::statemachine:
+        case Work::statemachine: {
+            LogAbort()(OT_PRETTY_CLASS())(name_)(": unhandled message type ")(
+                print(work))
+                .Abort();
+        }
+        default: {
+            LogAbort()(OT_PRETTY_CLASS())(name_)(": unhandled message type ")(
+                static_cast<OTZMQWorkType>(work))
+                .Abort();
+        }
+    }
+}
+
+auto Node::Actor::pipeline_router(const Work work, Message&& msg) noexcept
+    -> void
+{
+    switch (work) {
+        case Work::registration: {
+            process_registration(std::move(msg));
+        } break;
+        case Work::shutdown:
+        case Work::chain_state:
+        case Work::new_cfilter:
+        case Work::new_peer:
+        case Work::init:
+        case Work::statemachine: {
+            LogAbort()(OT_PRETTY_CLASS())(name_)(": unhandled message type ")(
+                print(work))
+                .Abort();
+        }
         default: {
             LogAbort()(OT_PRETTY_CLASS())(name_)(": unhandled message type ")(
                 static_cast<OTZMQWorkType>(work))
@@ -163,6 +251,14 @@ auto Node::Actor::process_cfilter(
     if (auto it = map.find(chain); map.end() != it) {
         it->second = std::move(tip);
     }
+
+    send_to_peers([&] {
+        auto work = MakeWork(WorkType::BlockchainStateChange);
+        work.AddFrame(chain);
+        work.AddFrame(true);
+
+        return work;
+    }());
 }
 
 auto Node::Actor::process_chain_state(Message&& msg) noexcept -> void
@@ -203,10 +299,7 @@ auto Node::Actor::process_chain_state(Message&& msg) noexcept -> void
         map.erase(chain);
     }
 
-    for (auto& [key, value] : peers_) {
-        auto& [endpoint, socket] = value;
-        socket.SendDeferred(Message{msg}, __FILE__, __LINE__);
-    }
+    send_to_peers(std::move(msg));
 }
 
 auto Node::Actor::process_new_cfilter(Message&& msg) noexcept -> void
@@ -245,18 +338,89 @@ auto Node::Actor::process_peer(std::string_view endpoint) noexcept -> void
     using Socket = zeromq::socket::Type;
     auto [it, rc] = peers_.try_emplace(
         CString{endpoint, alloc},
+        Peer::NextID(alloc),
         zeromq::MakeArbitraryInproc(alloc),
         api_.Network().ZeroMQ().Internal().RawSocket(Socket::Push));
 
     OT_ASSERT(rc);
 
-    auto& [pushEndpoint, socket] = it->second;
+    auto& [routingID, pushEndpoint, socket] = it->second;
 
     rc = socket.Connect(pushEndpoint.data());
 
     OT_ASSERT(rc);
 
-    Peer{api_p_, shared_p_, endpoint, pushEndpoint};
+    Peer{api_p_, shared_p_, routingID, endpoint, pushEndpoint}.Init();
+    publish_peers();
+}
+
+auto Node::Actor::process_registration(Message&& msg) noexcept -> void
+{
+    const auto body = msg.Body();
+
+    if (3 >= body.size()) {
+        LogAbort()(OT_PRETTY_CLASS())(name_)(": invalid message").Abort();
+    }
+
+    process_cfilter(
+        body.at(1).as<opentxs::blockchain::Type>(),
+        {body.at(2).as<opentxs::blockchain::block::Height>(),
+         body.at(3).Bytes()});
+    const auto local = get_peers();
+    const auto remote = [&] {
+        auto out = Set<CString>{get_allocator()};
+
+        for (auto i = std::next(body.begin(), 4_z), stop = body.end();
+             i != stop;
+             ++i) {
+            out.emplace(i->Bytes());
+        }
+
+        return out;
+    }();
+    const auto missing = [&] {
+        auto out = Vector<CString>{get_allocator()};
+        std::set_difference(
+            local.begin(),
+            local.end(),
+            remote.begin(),
+            remote.end(),
+            std::back_inserter(out));
+
+        return out;
+    }();
+    router_.SendDeferred(
+        [&] {
+            auto out = zeromq::tagged_reply_to_message(
+                msg, blockchain::DHTJob::registration);
+
+            for (const auto& endpoint : missing) { out.AddFrame(endpoint); }
+
+            return out;
+        }(),
+        __FILE__,
+        __LINE__);
+    publish_peers();
+}
+
+auto Node::Actor::publish_peers() noexcept -> void
+{
+    publish_.SendDeferred(
+        [&] {
+            auto out = MakeWork(OT_ZMQ_OTDHT_PEER_LIST);
+            get_peers(out);
+            return out;
+        }(),
+        __FILE__,
+        __LINE__);
+}
+
+auto Node::Actor::send_to_peers(Message&& msg) noexcept -> void
+{
+    for (auto& [key, value] : peers_) {
+        auto& [routingID, endpoint, socket] = value;
+        socket.SendDeferred(Message{msg}, __FILE__, __LINE__);
+    }
 }
 
 auto Node::Actor::work() noexcept -> bool { return false; }

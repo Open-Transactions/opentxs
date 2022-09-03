@@ -11,6 +11,8 @@
 
 #include <boost/smart_ptr/make_shared.hpp>
 #include <boost/smart_ptr/shared_ptr.hpp>
+#include <atomic>
+#include <cstddef>
 #include <string_view>
 
 #include "internal/network/otdht/Types.hpp"
@@ -61,29 +63,42 @@ namespace opentxs::network::otdht
 Peer::Peer(
     std::shared_ptr<const api::Session> api,
     boost::shared_ptr<Node::Shared> shared,
+    std::string_view routingID,
     std::string_view toRemote,
     std::string_view fromNode) noexcept
+    : actor_([&] {
+        OT_ASSERT(api);
+        OT_ASSERT(shared);
+
+        const auto& zmq = api->Network().ZeroMQ().Internal();
+        const auto batchID = zmq.PreallocateBatch();
+        // TODO the version of libc++ present in android ndk 23.0.7599858 has a
+        // broken std::allocate_shared function so we're using boost::shared_ptr
+        // instead of std::shared_ptr
+
+        return boost::allocate_shared<Actor>(
+            alloc::PMR<Actor>{zmq.Alloc(batchID)},
+            api,
+            shared,
+            routingID,
+            toRemote,
+            fromNode,
+            batchID);
+    }())
 {
-    OT_ASSERT(api);
-    OT_ASSERT(shared);
-
-    const auto& zmq = api->Network().ZeroMQ().Internal();
-    const auto batchID = zmq.PreallocateBatch();
-    // TODO the version of libc++ present in android ndk 23.0.7599858 has a
-    // broken std::allocate_shared function so we're using boost::shared_ptr
-    // instead of std::shared_ptr
-    auto actor = boost::allocate_shared<Actor>(
-        alloc::PMR<Actor>{zmq.Alloc(batchID)},
-        api,
-        shared,
-        toRemote,
-        fromNode,
-        batchID);
-
-    OT_ASSERT(actor);
-
-    actor->Init(actor);
+    OT_ASSERT(actor_);
 }
+
+auto Peer::NextID(alloc::Default alloc) noexcept -> CString
+{
+    static auto counter = std::atomic<std::size_t>{};
+    auto out = CString{"OTDHT peer #", alloc};
+    out.append(std::to_string(++counter));
+
+    return out;
+}
+
+auto Peer::Init() noexcept -> void { actor_->Init(actor_); }
 
 Peer::~Peer() = default;
 }  // namespace opentxs::network::otdht

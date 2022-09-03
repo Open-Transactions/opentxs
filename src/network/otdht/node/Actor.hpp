@@ -42,6 +42,17 @@ namespace block
 class Position;
 }  // namespace block
 }  // namespace blockchain
+
+namespace network
+{
+namespace zeromq
+{
+namespace socket
+{
+class Raw;
+}  // namespace socket
+}  // namespace zeromq
+}  // namespace network
 // }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
@@ -72,27 +83,37 @@ public:
 private:
     friend opentxs::Actor<Node::Actor, NodeJob>;
 
-    using PeerData = std::pair<CString, zeromq::socket::Raw>;
+    using PeerData = std::tuple<CString, CString, zeromq::socket::Raw>;
     using Peers = Map<CString, PeerData>;
 
     std::shared_ptr<const api::Session> api_p_;
     boost::shared_ptr<Shared> shared_p_;
     const api::Session& api_;
     Shared::Guarded& data_;
+    zeromq::socket::Raw& publish_;
+    zeromq::socket::Raw& router_;
     Peers peers_;
+
+    auto get_peers() const noexcept -> Set<CString>;
+    auto get_peers(Message& out) const noexcept -> void;
 
     auto do_shutdown() noexcept -> void;
     auto do_startup() noexcept -> bool;
     auto load_peers() noexcept -> void;
     auto load_positions() noexcept -> void;
     auto pipeline(const Work work, Message&& msg) noexcept -> void;
+    auto pipeline_other(const Work work, Message&& msg) noexcept -> void;
+    auto pipeline_router(const Work work, Message&& msg) noexcept -> void;
     auto process_cfilter(
         opentxs::blockchain::Type chain,
         opentxs::blockchain::block::Position&& tip) noexcept -> void;
     auto process_chain_state(Message&& msg) noexcept -> void;
     auto process_new_cfilter(Message&& msg) noexcept -> void;
     auto process_new_peer(Message&& msg) noexcept -> void;
+    auto process_registration(Message&& msg) noexcept -> void;
     auto process_peer(std::string_view endpoint) noexcept -> void;
+    auto publish_peers() noexcept -> void;
+    auto send_to_peers(Message&& msg) noexcept -> void;
     auto work() noexcept -> bool;
 };
 }  // namespace opentxs::network::otdht

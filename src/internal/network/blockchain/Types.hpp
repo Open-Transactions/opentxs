@@ -57,6 +57,7 @@ enum class DHTJob : OTZMQWorkType {
     response = value(WorkType::P2PResponse),
     push_tx = value(WorkType::P2PPushTransaction),
     job_processed = OT_ZMQ_INTERNAL_SIGNAL + 0,
+    peer_list = OT_ZMQ_OTDHT_PEER_LIST,
     registration = OT_ZMQ_REGISTER_SIGNAL,
     init = OT_ZMQ_INIT_SIGNAL,
     cfilter = OT_ZMQ_NEW_FILTER_SIGNAL,
