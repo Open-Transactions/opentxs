@@ -46,6 +46,8 @@ public:
     class Imp;
 
     auto Blocks() const noexcept -> const SyncData&;
+    auto FirstPosition(const api::Session& api) const noexcept
+        -> opentxs::blockchain::block::Position;
     auto LastPosition(const api::Session& api) const noexcept
         -> opentxs::blockchain::block::Position;
     auto PreviousCfheader() const noexcept -> ReadView;

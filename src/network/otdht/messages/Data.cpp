@@ -21,7 +21,6 @@
 #include "network/otdht/messages/Base.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
-#include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/blockchain/block/Header.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/network/otdht/Block.hpp"
@@ -168,15 +167,36 @@ auto Data::Add(ReadView data) noexcept -> bool
 
 auto Data::Blocks() const noexcept -> const SyncData& { return imp_->blocks_; }
 
-auto Data::LastPosition(const api::Session& api) const noexcept
+auto Data::FirstPosition(const api::Session& api) const noexcept
     -> opentxs::blockchain::block::Position
 {
-    static const auto blank = opentxs::blockchain::block::Position{
-        -1, opentxs::blockchain::block::Hash{}};
+    static const auto blank = opentxs::blockchain::block::Position{};
 #if OT_BLOCKCHAIN
     const auto& blocks = imp_->blocks_;
 
-    if (0u == blocks.size()) { return blank; }
+    if (blocks.empty()) { return blank; }
+
+    const auto& first = blocks.front();
+    const auto header =
+        api.Factory().BlockHeader(first.Chain(), first.Header());
+
+    if (!header) { return blank; }
+
+    return {first.Height(), header->Hash()};
+#else
+
+    return blank;
+#endif  // OT_BLOCKCHAIN
+}
+
+auto Data::LastPosition(const api::Session& api) const noexcept
+    -> opentxs::blockchain::block::Position
+{
+    static const auto blank = opentxs::blockchain::block::Position{};
+#if OT_BLOCKCHAIN
+    const auto& blocks = imp_->blocks_;
+
+    if (blocks.empty()) { return blank; }
 
     const auto& last = blocks.back();
     const auto header = api.Factory().BlockHeader(last.Chain(), last.Header());

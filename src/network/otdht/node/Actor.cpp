@@ -250,6 +250,8 @@ auto Node::Actor::process_cfilter(
 
     if (auto it = map.find(chain); map.end() != it) {
         it->second = std::move(tip);
+    } else {
+        map.try_emplace(chain, std::move(tip));
     }
 
     send_to_peers([&] {

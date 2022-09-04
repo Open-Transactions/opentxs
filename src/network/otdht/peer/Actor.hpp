@@ -11,6 +11,7 @@
 #include <chrono>
 #include <exception>
 #include <memory>
+#include <optional>
 #include <string_view>
 
 #include "internal/network/otdht/Node.hpp"
@@ -101,6 +102,7 @@ private:
     Chains registered_chains_;
     Queue queue_;
     sTime last_activity_;
+    std::optional<Message> last_ack_;
     Timer ping_timer_;
     Timer registration_timer_;
 
@@ -116,6 +118,9 @@ private:
     auto forward_to_chain(
         opentxs::blockchain::Type chain,
         Message&& msg) noexcept -> void;
+    auto forward_to_subscribers(
+        const Acknowledgement& ack,
+        const Message& msg) noexcept -> void;
     auto ping() noexcept -> void;
     auto pipeline(const Work work, Message&& msg) noexcept -> void;
     auto pipeline_external(const Work work, Message&& msg) noexcept -> void;
