@@ -63,6 +63,7 @@ constexpr auto OT_ZMQ_BLOCKCHAIN_WALLET_PREPARE_REORG =         OTZMQWorkType{OT
 constexpr auto OT_ZMQ_NEW_BLOCK_HEADER_SIGNAL =                 OTZMQWorkType{OT_ZMQ_HIGHEST_SIGNAL - 43};
 constexpr auto OT_ZMQ_REORG_SIGNAL =                            OTZMQWorkType{OT_ZMQ_HIGHEST_SIGNAL - 44};
 constexpr auto OT_ZMQ_HEADER_ORACLE_JOB_READY =                 OTZMQWorkType{OT_ZMQ_HIGHEST_SIGNAL - 45};
+constexpr auto OT_ZMQ_OTDHT_PEER_LIST =                         OTZMQWorkType{OT_ZMQ_HIGHEST_SIGNAL - 46};
 // clang-format on
 
 template <typename Enum>

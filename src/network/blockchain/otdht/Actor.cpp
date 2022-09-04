@@ -12,6 +12,7 @@
 #include <algorithm>
 #include <chrono>
 #include <cstddef>
+#include <iterator>
 #include <memory>
 #include <random>
 #include <stdexcept>
@@ -40,6 +41,7 @@
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/blockchain/Types.hpp"
+#include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/blockchain/node/FilterOracle.hpp"
@@ -64,6 +66,7 @@
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/WorkType.hpp"
+#include "util/Work.hpp"
 
 namespace opentxs::network::blockchain
 {
@@ -95,6 +98,10 @@ OTDHT::Actor::Actor(
                   CString{
                       node->Internal().Endpoints().new_filter_publish_, alloc},
                   Dir::Connect);
+              sub.emplace_back(
+                  CString{
+                      api->Endpoints().Internal().OTDHTNodePublish(), alloc},
+                  Dir::Connect);
 
               return sub;
           }(),
@@ -107,7 +114,15 @@ OTDHT::Actor::Actor(
 
               return pull;
           }(),
-          {},
+          [&] {
+              using Dir = zeromq::socket::Direction;
+              auto dealer = zeromq::EndpointArgs{alloc};
+              dealer.emplace_back(
+                  CString{api->Endpoints().Internal().OTDHTNodeRouter(), alloc},
+                  Dir::Connect);
+
+              return dealer;
+          }(),
           [&] {
               auto out = Vector<zeromq::SocketData>{alloc};
               using Socket = zeromq::socket::Type;
@@ -161,15 +176,49 @@ OTDHT::Actor::Actor(
             }
         }
     }())
+    , known_peers_(alloc)
     , peers_(alloc)
     , local_position_()
     , best_remote_position_()
     , best_pending_position_()
     , processing_(false)
     , last_request_(std::nullopt)
+    , registration_timer_(api_.Network().Asio().Internal().GetTimer())
     , request_timer_(api_.Network().Asio().Internal().GetTimer())
     , rand_(std::random_device{}())
+    , registered_with_node_(false)
 {
+}
+
+auto OTDHT::Actor::add_peers(Set<PeerID>&& peers) noexcept -> void
+{
+    const auto& log = log_;
+
+    for (const auto& id : peers) {
+        const auto [endpoint, added] = known_peers_.emplace(id);
+
+        if (added) {
+            log(OT_PRETTY_CLASS())(name_)(": discovered new peer ")(*endpoint)
+                .Flush();
+        }
+    }
+}
+
+auto OTDHT::Actor::check_registration() noexcept -> bool
+{
+    if (registered_with_node_) {
+
+        return false;
+    } else {
+        send_registration();
+
+        return true;
+    }
+}
+
+auto OTDHT::Actor::check_peers() noexcept -> bool
+{
+    return get_peers() != known_peers_;
 }
 
 auto OTDHT::Actor::check_request_timer() noexcept -> void
@@ -192,6 +241,7 @@ auto OTDHT::Actor::check_request_timer() noexcept -> void
 auto OTDHT::Actor::do_shutdown() noexcept -> void
 {
     request_timer_.Cancel();
+    registration_timer_.Cancel();
     node_p_.reset();
     api_p_.reset();
 }
@@ -273,39 +323,67 @@ auto OTDHT::Actor::get_peer(const Message& msg) const noexcept -> ReadView
     return header.at(0).Bytes();
 }
 
+auto OTDHT::Actor::get_peers() const noexcept -> Set<PeerID>
+{
+    auto out = Set<PeerID>{get_allocator()};
+
+    for (const auto& [endpoint, _] : peers_) { out.emplace(endpoint); }
+
+    return out;
+}
+
+auto OTDHT::Actor::get_peers(
+    const zeromq::FrameSection& body,
+    std::ptrdiff_t offset) const noexcept -> Set<PeerID>
+{
+    auto out = Set<PeerID>{get_allocator()};
+
+    for (auto i = std::next(body.begin(), offset), stop = body.end(); i != stop;
+         ++i) {
+        out.emplace(i->Bytes());
+    }
+
+    return out;
+}
+
 auto OTDHT::Actor::pipeline(const Work work, Message&& msg) noexcept -> void
 {
     const auto id = msg.Internal().ExtractFront().as<zeromq::SocketID>();
 
     if (router_.ID() == id) {
-        pipeline_external(work, std::move(msg));
+        pipeline_router(work, std::move(msg));
     } else {
-        pipeline_internal(work, std::move(msg));
+        pipeline_other(work, std::move(msg));
     }
 
     do_work();
 }
 
-auto OTDHT::Actor::pipeline_external(const Work work, Message&& msg) noexcept
+auto OTDHT::Actor::pipeline_other(const Work work, Message&& msg) noexcept
     -> void
 {
     switch (work) {
-        case Work::sync_ack:
-        case Work::sync_reply:
-        case Work::sync_push: {
-            process_sync_external(std::move(msg));
+        case Work::push_tx: {
+            process_pushtx_internal(std::move(msg));
         } break;
-        case Work::response: {
-            process_response(std::move(msg));
+        case Work::job_processed: {
+            process_job_processed(std::move(msg));
+        } break;
+        case Work::peer_list: {
+            process_peer_list(std::move(msg));
         } break;
         case Work::registration: {
-            process_registration(std::move(msg));
+            process_registration_node(std::move(msg));
         } break;
-        case Work::push_tx:
-        case Work::job_processed:
+        case Work::cfilter: {
+            process_cfilter(std::move(msg));
+        } break;
         case Work::shutdown:
+        case Work::sync_ack:
+        case Work::sync_reply:
+        case Work::sync_push:
+        case Work::response:
         case Work::init:
-        case Work::cfilter:
         case Work::statemachine: {
             LogAbort()(OT_PRETTY_CLASS())(name_)(": unhandled message type ")(
                 print(work))
@@ -319,26 +397,27 @@ auto OTDHT::Actor::pipeline_external(const Work work, Message&& msg) noexcept
     }
 }
 
-auto OTDHT::Actor::pipeline_internal(const Work work, Message&& msg) noexcept
+auto OTDHT::Actor::pipeline_router(const Work work, Message&& msg) noexcept
     -> void
 {
     switch (work) {
-        case Work::push_tx: {
-            process_pushtx_internal(std::move(msg));
-        } break;
-        case Work::job_processed: {
-            process_job_processed(std::move(msg));
-        } break;
-        case Work::cfilter: {
-            process_cfilter(std::move(msg));
-        } break;
-        case Work::shutdown:
         case Work::sync_ack:
         case Work::sync_reply:
-        case Work::sync_push:
-        case Work::response:
-        case Work::registration:
+        case Work::sync_push: {
+            process_sync_peer(std::move(msg));
+        } break;
+        case Work::response: {
+            process_response_peer(std::move(msg));
+        } break;
+        case Work::registration: {
+            process_registration_peer(std::move(msg));
+        } break;
+        case Work::shutdown:
+        case Work::push_tx:
+        case Work::job_processed:
+        case Work::peer_list:
         case Work::init:
+        case Work::cfilter:
         case Work::statemachine: {
             LogAbort()(OT_PRETTY_CLASS())(name_)(": unhandled message type ")(
                 print(work))
@@ -416,6 +495,35 @@ auto OTDHT::Actor::process_job_processed(Message&& msg) noexcept -> void
         body.at(2).Bytes()};
 }
 
+auto OTDHT::Actor::process_peer_list(Message&& msg) noexcept -> void
+{
+    auto newPeers = get_peers(msg.Body(), 1_z);
+    add_peers([&] {
+        auto out = Set<PeerID>{get_allocator()};
+        std::set_difference(
+            newPeers.begin(),
+            newPeers.end(),
+            known_peers_.begin(),
+            known_peers_.end(),
+            std::inserter(out, out.end()));
+
+        return out;
+    }());
+    remove_peers([&] {
+        auto out = Set<PeerID>{get_allocator()};
+        std::set_difference(
+            known_peers_.begin(),
+            known_peers_.end(),
+            newPeers.begin(),
+            newPeers.end(),
+            std::inserter(out, out.end()));
+
+        return out;
+    }());
+    known_peers_.swap(newPeers);
+    do_work();
+}
+
 auto OTDHT::Actor::process_pushtx_internal(Message&& msg) noexcept -> void
 {
     // TODO c++20 capture structured binding
@@ -435,13 +543,22 @@ auto OTDHT::Actor::process_pushtx_internal(Message&& msg) noexcept -> void
     }
 }
 
-auto OTDHT::Actor::process_registration(Message&& msg) noexcept -> void
+auto OTDHT::Actor::process_registration_node(Message&& msg) noexcept -> void
 {
+    registered_with_node_ = true;
+    add_peers(get_peers(msg.Body(), 1_z));
+    do_work();
+}
+
+auto OTDHT::Actor::process_registration_peer(Message&& msg) noexcept -> void
+{
+    const auto& log = log_;
     using Position = opentxs::blockchain::block::Position;
     const auto peer = PeerID{get_peer(msg), get_allocator()};
-    log_(OT_PRETTY_CLASS())(name_)(
-        ": received registration message from peer ")(peer)
+    log(OT_PRETTY_CLASS())(name_)(": received registration message from peer ")(
+        peer)
         .Flush();
+    known_peers_.emplace(peer);
     peers_.try_emplace(peer, Position{});
     using PeerJob = otdht::PeerJob;
     router_.SendDeferred(
@@ -455,7 +572,7 @@ auto OTDHT::Actor::process_registration(Message&& msg) noexcept -> void
         __LINE__);
 }
 
-auto OTDHT::Actor::process_response(Message&& msg) noexcept -> void
+auto OTDHT::Actor::process_response_peer(Message&& msg) noexcept -> void
 {
     try {
         const auto base = api_.Factory().BlockchainSyncMessage(msg);
@@ -521,7 +638,7 @@ auto OTDHT::Actor::process_state(
     return true;
 }
 
-auto OTDHT::Actor::process_sync_external(Message&& msg) noexcept -> void
+auto OTDHT::Actor::process_sync_peer(Message&& msg) noexcept -> void
 {
     try {
         const auto peer = PeerID{get_peer(msg), get_allocator()};
@@ -575,10 +692,23 @@ auto OTDHT::Actor::process_sync_external(Message&& msg) noexcept -> void
     }
 }
 
+auto OTDHT::Actor::remove_peers(Set<PeerID>&& peers) noexcept -> void
+{
+    const auto& log = log_;
+
+    for (const auto& id : peers) {
+        log(OT_PRETTY_CLASS())(name_)(": removing stale peer ")(id).Flush();
+        known_peers_.erase(id);
+        peers_.erase(id);
+    }
+}
+
 auto OTDHT::Actor::request_next() noexcept -> void
 {
+    const auto& log = log_;
+
     if (last_request_.has_value()) {
-        log_(OT_PRETTY_CLASS())(name_)(
+        log(OT_PRETTY_CLASS())(name_)(
             ": waiting for existing request to arrive or time out")
             .Flush();
 
@@ -586,21 +716,26 @@ auto OTDHT::Actor::request_next() noexcept -> void
     }
 
     const auto& local = std::max(local_position_, best_pending_position_);
-    log_(OT_PRETTY_CLASS())(name_)(": remote position: ")(best_remote_position_)
+    log(OT_PRETTY_CLASS())(name_)(": remote position: ")(best_remote_position_)
         .Flush();
-    log_(OT_PRETTY_CLASS())(name_)(": requested position: ")(
+    log(OT_PRETTY_CLASS())(name_)(": requested position: ")(
         best_pending_position_)
         .Flush();
-    log_(OT_PRETTY_CLASS())(name_)(": local position: ")(local_position_)
+    log(OT_PRETTY_CLASS())(name_)(": local position: ")(local_position_)
         .Flush();
-    log_(OT_PRETTY_CLASS())(name_)(": effective local position: ")(local)
+    log(OT_PRETTY_CLASS())(name_)(": effective local position: ")(local)
         .Flush();
 
     if (local < best_remote_position_) {
         send_request(local);
     } else {
-        log_(OT_PRETTY_CLASS())(name_)(": no need to request data ")().Flush();
+        log(OT_PRETTY_CLASS())(name_)(": no need to request data ")().Flush();
     }
+}
+
+auto OTDHT::Actor::reset_registration_timer() noexcept -> void
+{
+    reset_timer(1s, registration_timer_, Work::statemachine);
 }
 
 auto OTDHT::Actor::reset_request_timer() noexcept -> void
@@ -608,18 +743,33 @@ auto OTDHT::Actor::reset_request_timer() noexcept -> void
     reset_timer(request_timeout_, request_timer_, Work::statemachine);
 }
 
+auto OTDHT::Actor::send_registration() noexcept -> void
+{
+    pipeline_.Internal().SendFromThread([&] {
+        auto out = MakeWork(otdht::NodeJob::registration);
+        out.AddFrame(chain_);
+        out.AddFrame(local_position_.height_);
+        out.AddFrame(local_position_.hash_);
+
+        for (const auto& endpoint : get_peers()) { out.AddFrame(endpoint); }
+
+        return out;
+    }());
+}
+
 auto OTDHT::Actor::send_request(
     const opentxs::blockchain::block::Position& best) noexcept -> void
 {
+    const auto& log = log_;
     const auto peer = choose_peer(best);
 
     if (peer.has_value()) {
-        log_(OT_PRETTY_CLASS())(name_)(
+        log(OT_PRETTY_CLASS())(name_)(
             ": requesting sync data starting from block ")(best.height_)(
             " from peer (") (*peer)(")")
             .Flush();
     } else {
-        log_(OT_PRETTY_CLASS())(name_)(
+        log(OT_PRETTY_CLASS())(name_)(
             ": no known peers with positions higher than ")(best)
             .Flush();
 
@@ -674,13 +824,18 @@ auto OTDHT::Actor::update_remote_position(
 
 auto OTDHT::Actor::work() noexcept -> bool
 {
+    const auto& log = log_;
+
+    if (check_registration() || check_peers()) { reset_registration_timer(); }
+
     switch (mode_) {
         case Mode::client: {
             check_request_timer();
 
             if (processing_) {
-                log_(OT_PRETTY_CLASS())(name_)(
-                    ": waiting for processing to finish before requesting next "
+                log(OT_PRETTY_CLASS())(name_)(
+                    ": waiting for processing to finish before "
+                    "requesting next "
                     "block")
                     .Flush();
             } else {
@@ -689,8 +844,7 @@ auto OTDHT::Actor::work() noexcept -> bool
         } break;
         case Mode::disabled:
         case Mode::server: {
-            log_(OT_PRETTY_CLASS())(name_)(
-                ": no actions necessary in this mode")
+            log(OT_PRETTY_CLASS())(name_)(": no actions necessary in this mode")
                 .Flush();
         } break;
         default: {

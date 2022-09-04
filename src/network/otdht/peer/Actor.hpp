@@ -67,6 +67,7 @@ public:
     Actor(
         std::shared_ptr<const api::Session> api,
         boost::shared_ptr<Node::Shared> shared,
+        std::string_view routingID,
         std::string_view toRemote,
         std::string_view fromNode,
         zeromq::BatchID batchID,
@@ -103,7 +104,6 @@ private:
     Timer ping_timer_;
     Timer registration_timer_;
 
-    static auto next_id(allocator_type alloc) noexcept -> CString;
     static auto strip_header(Message&& in) noexcept -> Message;
 
     auto check_ping() noexcept -> void;

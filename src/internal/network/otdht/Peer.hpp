@@ -10,6 +10,8 @@
 #include <string_view>
 
 #include "internal/network/otdht/Node.hpp"
+#include "opentxs/util/Allocator.hpp"
+#include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
@@ -31,9 +33,14 @@ class Peer
 public:
     class Actor;
 
+    static auto NextID(alloc::Default alloc) noexcept -> CString;
+
+    auto Init() noexcept -> void;
+
     Peer(
         std::shared_ptr<const api::Session> api,
         boost::shared_ptr<Node::Shared> shared,
+        std::string_view routingID,
         std::string_view toRemote,
         std::string_view fromNode) noexcept;
     Peer() = delete;
@@ -43,5 +50,8 @@ public:
     auto operator=(Peer&&) -> Peer& = delete;
 
     ~Peer();
+
+private:
+    boost::shared_ptr<Actor> actor_;
 };
 }  // namespace opentxs::network::otdht

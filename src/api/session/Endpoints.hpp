@@ -83,7 +83,8 @@ public:
     auto NymDownload() const noexcept -> std::string_view final;
     auto OTDHTBlockchain(opentxs::blockchain::Type chain) const noexcept
         -> std::string_view final;
-    auto OTDHTNode() const noexcept -> std::string_view final;
+    auto OTDHTNodePublish() const noexcept -> std::string_view final;
+    auto OTDHTNodeRouter() const noexcept -> std::string_view final;
     auto OTDHTWallet() const noexcept -> std::string_view final;
     auto PairEvent() const noexcept -> std::string_view final;
     auto PeerReplyUpdate() const noexcept -> std::string_view final;
@@ -150,7 +151,8 @@ private:
     const CString nym_created_;
     const CString nym_download_;
     const BlockchainMap otdht_blockchain_;
-    const CString otdht_node_;
+    const CString otdht_node_router_;
+    const CString otdht_node_publish_;
     const CString otdht_wallet_;
     const CString pair_event_;
     const CString peer_reply_update_;

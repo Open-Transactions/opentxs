@@ -40,6 +40,7 @@ enum class NodeJob : OTZMQWorkType {
     chain_state = value(WorkType::BlockchainStateChange),
     new_cfilter = value(WorkType::BlockchainNewFilter),
     new_peer = value(WorkType::SyncServerUpdated),
+    registration = OT_ZMQ_REGISTER_SIGNAL,
     init = OT_ZMQ_INIT_SIGNAL,
     statemachine = OT_ZMQ_STATE_MACHINE_SIGNAL,
 };

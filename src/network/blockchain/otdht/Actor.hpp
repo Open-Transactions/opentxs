@@ -11,6 +11,7 @@
 #include <boost/smart_ptr/shared_ptr.hpp>
 #include <chrono>
 #include <exception>
+#include <iosfwd>
 #include <memory>
 #include <optional>
 #include <random>
@@ -64,6 +65,8 @@ namespace socket
 {
 class Raw;
 }  // namespace socket
+
+class FrameSection;
 }  // namespace zeromq
 }  // namespace network
 // }  // namespace v1
@@ -111,19 +114,28 @@ private:
     const opentxs::blockchain::Type chain_;
     const opentxs::blockchain::cfilter::Type filter_type_;
     const Mode mode_;
+    Set<PeerID> known_peers_;
     Peers peers_;
     opentxs::blockchain::block::Position local_position_;
     opentxs::blockchain::block::Position best_remote_position_;
     opentxs::blockchain::block::Position best_pending_position_;
     bool processing_;
     std::optional<std::pair<sTime, PeerID>> last_request_;
+    Timer registration_timer_;
     Timer request_timer_;
     std::mt19937_64 rand_;
+    bool registered_with_node_;
 
     auto filter_peers(const opentxs::blockchain::block::Position& target)
         const noexcept -> Vector<PeerID>;
     auto get_peer(const Message& msg) const noexcept -> ReadView;
+    auto get_peers() const noexcept -> Set<PeerID>;
+    auto get_peers(const zeromq::FrameSection& body, std::ptrdiff_t offset)
+        const noexcept -> Set<PeerID>;
 
+    auto add_peers(Set<PeerID>&& peers) noexcept -> void;
+    auto check_registration() noexcept -> bool;
+    auto check_peers() noexcept -> bool;
     auto check_request_timer() noexcept -> void;
     auto choose_peer(
         const opentxs::blockchain::block::Position& target) noexcept
@@ -132,22 +144,27 @@ private:
     auto do_startup() noexcept -> bool;
     auto finish_request() noexcept -> void;
     auto pipeline(const Work work, Message&& msg) noexcept -> void;
-    auto pipeline_external(const Work work, Message&& msg) noexcept -> void;
-    auto pipeline_internal(const Work work, Message&& msg) noexcept -> void;
+    auto pipeline_other(const Work work, Message&& msg) noexcept -> void;
+    auto pipeline_router(const Work work, Message&& msg) noexcept -> void;
     auto process_ack(
         const Message& msg,
         const otdht::Acknowledgement& ack) noexcept -> void;
     auto process_cfilter(Message&& msg) noexcept -> void;
     auto process_data(Message&& msg, const otdht::Data& data) noexcept -> void;
     auto process_job_processed(Message&& msg) noexcept -> void;
+    auto process_peer_list(Message&& msg) noexcept -> void;
     auto process_pushtx_internal(Message&& msg) noexcept -> void;
-    auto process_registration(Message&& msg) noexcept -> void;
-    auto process_response(Message&& msg) noexcept -> void;
+    auto process_registration_node(Message&& msg) noexcept -> void;
+    auto process_registration_peer(Message&& msg) noexcept -> void;
+    auto process_response_peer(Message&& msg) noexcept -> void;
     auto process_state(const Message& msg, const otdht::State& state) noexcept
         -> bool;
-    auto process_sync_external(Message&& msg) noexcept -> void;
+    auto process_sync_peer(Message&& msg) noexcept -> void;
+    auto remove_peers(Set<PeerID>&& peers) noexcept -> void;
     auto request_next() noexcept -> void;
+    auto reset_registration_timer() noexcept -> void;
     auto reset_request_timer() noexcept -> void;
+    auto send_registration() noexcept -> void;
     auto send_request(const opentxs::blockchain::block::Position& best) noexcept
         -> void;
     auto update_pending_position(

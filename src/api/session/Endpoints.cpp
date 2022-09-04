@@ -114,7 +114,10 @@ Endpoints::Endpoints(const int instance) noexcept
 
         return out;
     }())
-    , otdht_node_(build_inproc_path("internal/otdht/node", version_1_))
+    , otdht_node_router_(
+          build_inproc_path("internal/otdht/node/router", version_1_))
+    , otdht_node_publish_(
+          build_inproc_path("internal/otdht/node/publish", version_1_))
     , otdht_wallet_(build_inproc_path("internal/otdht/wallet", version_1_))
     , pair_event_(build_inproc_path("pairevent", version_1_))
     , peer_reply_update_(build_inproc_path("peerreplyupdate", version_1_))
@@ -330,9 +333,14 @@ auto Endpoints::OTDHTBlockchain(
     return otdht_blockchain_.at(chain);
 }
 
-auto Endpoints::OTDHTNode() const noexcept -> std::string_view
+auto Endpoints::OTDHTNodePublish() const noexcept -> std::string_view
 {
-    return otdht_node_;
+    return otdht_node_publish_;
+}
+
+auto Endpoints::OTDHTNodeRouter() const noexcept -> std::string_view
+{
+    return otdht_node_router_;
 }
 
 auto Endpoints::OTDHTWallet() const noexcept -> std::string_view
