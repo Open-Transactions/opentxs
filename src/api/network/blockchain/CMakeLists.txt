@@ -24,6 +24,8 @@ if(OT_BLOCKCHAIN_EXPORT)
     opentxs-common
     PRIVATE
       "Factory.cpp"
+      "Actor.cpp"
+      "Actor.hpp"
       "Imp.cpp"
       "Imp.hpp"
       "StartupPublisher.cpp"

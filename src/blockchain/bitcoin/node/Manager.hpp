@@ -62,8 +62,7 @@ public:
         const api::Session& api,
         const Type type,
         const internal::Config& config,
-        std::string_view seednode,
-        std::string_view syncEndpoint);
+        std::string_view seednode);
     Bitcoin() = delete;
     Bitcoin(const Bitcoin&) = delete;
     Bitcoin(Bitcoin&&) = delete;

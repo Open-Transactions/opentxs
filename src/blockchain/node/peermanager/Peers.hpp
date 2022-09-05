@@ -21,6 +21,7 @@
 #include "internal/blockchain/p2p/P2P.hpp"
 #include "internal/blockchain/p2p/bitcoin/Bitcoin.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
+#include "internal/network/zeromq/socket/Raw.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/p2p/Types.hpp"
 #include "opentxs/core/ByteArray.hpp"
@@ -93,14 +94,6 @@ namespace internal
 class Peer;
 }  // namespace internal
 }  // namespace blockchain
-
-namespace zeromq
-{
-namespace socket
-{
-class Publish;
-}  // namespace socket
-}  // namespace zeromq
 }  // namespace network
 
 class Data;
@@ -180,7 +173,7 @@ private:
     const node::Manager& node_;
     database::Peer& database_;
     node::internal::PeerManager& parent_;
-    const network::zeromq::socket::Publish& connected_peers_;
+    opentxs::network::zeromq::socket::Raw to_blockchain_api_;
     const node::Endpoints& endpoints_;
     const bool invalid_peer_;
     const ByteArray localhost_peer_;

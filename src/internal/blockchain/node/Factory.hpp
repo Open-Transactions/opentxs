@@ -74,8 +74,7 @@ auto BlockchainNetworkBitcoin(
     const api::Session& api,
     const blockchain::Type type,
     const blockchain::node::internal::Config& config,
-    std::string_view seednode,
-    std::string_view syncEndpoint) noexcept
+    std::string_view seednode) noexcept
     -> std::shared_ptr<blockchain::node::Manager>;
 auto BlockchainPeerManager(
     const api::Session& api,

@@ -3,6 +3,7 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_include "opentxs/blockchain/node/Stats.hpp"
 // IWYU pragma: no_include "opentxs/util/BlockchainProfile.hpp"
 
 #pragma once
@@ -41,6 +42,7 @@ namespace blockchain
 namespace node
 {
 class Manager;
+class Stats;
 }  // namespace node
 }  // namespace blockchain
 // }  // namespace v1
@@ -69,6 +71,7 @@ public:
     auto Profile() const noexcept -> BlockchainProfile final;
     auto Start(const Chain type, const std::string_view seednode = "")
         const noexcept -> bool final;
+    auto Stats() const noexcept -> opentxs::blockchain::node::Stats final;
     auto Stop(const Chain type) const noexcept -> bool final;
 
     auto Internal() noexcept -> internal::Blockchain& final;

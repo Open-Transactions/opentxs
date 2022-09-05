@@ -78,7 +78,6 @@ Scan::Imp::Imp(
     , to_process_(pipeline_.Internal().ExtraSocket(1))
     , last_scanned_(std::nullopt)
     , filter_tip_(std::nullopt)
-    , enabled_(false)
     , index_ready_(false)
 {
 }
@@ -228,22 +227,6 @@ auto Scan::Imp::work() noexcept -> bool
             .Flush();
 
         return false;
-    }
-
-    if (false == enabled_) {
-        enabled_ = parent_.node_.Internal().IsWalletScanEnabled();
-
-        if (false == enabled_) {
-            log_(OT_PRETTY_CLASS())(name_)(
-                " waiting to begin scan until cfilter sync is complete")
-                .Flush();
-
-            return false;
-        } else {
-            log_(OT_PRETTY_CLASS())(name_)(
-                " starting scan since cfilter sync is complete")
-                .Flush();
-        }
     }
 
     if (caught_up()) {

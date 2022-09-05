@@ -52,7 +52,15 @@ struct Block::Imp {
         if (0 == filter_.size()) { throw std::runtime_error{"invalid filter"}; }
     }
     Imp() noexcept = delete;
-    Imp(const Imp&) = delete;
+    Imp(const Imp& rhs) noexcept
+        : Imp(rhs.chain_,
+              rhs.height_,
+              rhs.type_,
+              rhs.count_,
+              reader(rhs.header_),
+              reader(rhs.filter_))
+    {
+    }
     Imp(Imp&&) = delete;
     auto operator=(const Imp&) -> Imp& = delete;
     auto operator=(Imp&&) -> Imp& = delete;
@@ -78,6 +86,11 @@ Block::Block(
     ReadView filter) noexcept(false)
     : imp_(std::make_unique<Imp>(chain, height, type, count, header, filter)
                .release())
+{
+}
+
+Block::Block(const Block& rhs) noexcept
+    : imp_(std::make_unique<Imp>(*rhs.imp_).release())
 {
 }
 

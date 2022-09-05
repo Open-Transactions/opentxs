@@ -16,6 +16,7 @@ struct Endpoints final : public Allocated {
     const CString block_fetcher_job_ready_publish_;
     const CString block_fetcher_pull_;
     const CString block_oracle_pull_;
+    const CString block_tip_publish_;
     const CString cfilter_downloader_pull_;
     const CString fee_oracle_pull_;
     const CString filter_oracle_reindex_publish_;

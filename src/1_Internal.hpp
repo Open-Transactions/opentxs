@@ -196,6 +196,10 @@ namespace internal
 {
 }  // namespace internal
 
+namespace stats
+{
+}  // namespace stats
+
 namespace wallet
 {
 }  // namespace wallet
@@ -398,6 +402,10 @@ namespace blockchain
 namespace internal
 {
 }  // namespace internal
+
+namespace otdht
+{
+}  // namespace otdht
 }  // namespace blockchain
 
 namespace implementation

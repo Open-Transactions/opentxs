@@ -75,6 +75,7 @@ public:
 
     virtual auto ApplyUpdate(const node::UpdateTransaction& update) noexcept
         -> bool = 0;
+    virtual auto ReportHeaderTip() noexcept -> void = 0;
 
     virtual ~Header() = default;
 };

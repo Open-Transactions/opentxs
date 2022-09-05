@@ -36,6 +36,7 @@
 #include "internal/util/Flag.hpp"
 #include "internal/util/Lockable.hpp"
 #include "internal/util/LogMacros.hpp"
+#include "internal/util/P0330.hpp"
 #include "internal/util/Shared.hpp"
 #include "opentxs/api/Settings.hpp"
 #include "opentxs/api/network/Network.hpp"
@@ -888,7 +889,7 @@ auto OTX::DepositCheques(
     const identifier::Nym& nymID,
     const UnallocatedSet<identifier::Generic>& chequeIDs) const -> std::size_t
 {
-    std::size_t output{0};
+    auto output = 0_uz;
 
     if (chequeIDs.empty()) { return DepositCheques(nymID); }
 
@@ -903,7 +904,7 @@ auto OTX::DepositCheques(
         if (queue_cheque_deposit(nymID, *cheque)) { ++output; }
     }
 
-    return {};
+    return output;
 }
 
 auto OTX::DepositPayment(

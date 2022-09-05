@@ -7,7 +7,6 @@
 #include "1_Internal.hpp"  // IWYU pragma: associated
 #include "util/storage/drivers/multiplex/Multiplex.hpp"  // IWYU pragma: associated
 
-#include <cstddef>
 #include <cstdint>
 #include <filesystem>
 #include <limits>
@@ -215,8 +214,6 @@ auto Multiplex::Load(
             .Flush();
     }
 
-    std::size_t count{0};
-
     for (const auto& plugin : backup_plugins_) {
         OT_ASSERT(plugin);
 
@@ -232,8 +229,6 @@ auto Multiplex::Load(
                 "key not found by backup storage plugin ")
                 .Flush();
         }
-
-        ++count;
     }
 
     if (false == checking) {

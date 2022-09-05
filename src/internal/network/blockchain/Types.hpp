@@ -51,12 +51,14 @@ enum class PeerJob : OTZMQWorkType {
 // WARNING update print function if new values are added or removed
 enum class DHTJob : OTZMQWorkType {
     shutdown = value(WorkType::Shutdown),
+    sync_request = value(WorkType::P2PBlockchainSyncRequest),
     sync_ack = value(WorkType::P2PBlockchainSyncAck),
     sync_reply = value(WorkType::P2PBlockchainSyncReply),
     sync_push = value(WorkType::P2PBlockchainNewBlock),
     response = value(WorkType::P2PResponse),
     push_tx = value(WorkType::P2PPushTransaction),
     job_processed = OT_ZMQ_INTERNAL_SIGNAL + 0,
+    report = OT_ZMQ_BLOCKCHAIN_REPORT_STATUS,
     peer_list = OT_ZMQ_OTDHT_PEER_LIST,
     registration = OT_ZMQ_REGISTER_SIGNAL,
     init = OT_ZMQ_INIT_SIGNAL,

@@ -50,7 +50,6 @@
 #include "opentxs/network/otdht/Data.hpp"
 #include "opentxs/network/otdht/Types.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
-#include "opentxs/network/zeromq/socket/Publish.hpp"
 #include "opentxs/util/BlockchainProfile.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
@@ -129,15 +128,18 @@ auto Shared::broadcast_cfilter_tip(
         }(),
         __FILE__,
         __LINE__);
-    data.filter_notifier_.Send([&] {
-        auto work = MakeWork(WorkType::BlockchainNewFilter);
-        work.AddFrame(chain_);
-        work.AddFrame(type);
-        work.AddFrame(tip.height_);
-        work.AddFrame(tip.hash_);
+    data.to_blockchain_api_.SendDeferred(
+        [&] {
+            auto work = MakeWork(WorkType::BlockchainNewFilter);
+            work.AddFrame(chain_);
+            work.AddFrame(type);
+            work.AddFrame(tip.height_);
+            work.AddFrame(tip.hash_);
 
-        return work;
-    }());
+            return work;
+        }(),
+        __FILE__,
+        __LINE__);
 }
 
 auto Shared::CfheaderTip() const noexcept -> block::Position
@@ -826,6 +828,14 @@ auto Shared::process_sync_data(
     } catch (const std::exception& e) {
         LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
     }
+}
+
+auto Shared::Report() noexcept -> void
+{
+    auto handle = data_.lock();
+    auto& data = *handle;
+    broadcast_cfilter_tip(
+        default_type_, data.db_.get()->FilterTip(default_type_), data);
 }
 
 auto Shared::reset_tips_to(

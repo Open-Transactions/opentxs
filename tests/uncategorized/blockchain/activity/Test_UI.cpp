@@ -554,7 +554,7 @@ TEST_F(Test_BlockchainActivity, initial_state_account_activity_qt)
 TEST_F(Test_BlockchainActivity, initial_state_account_summary)
 {
     wait_for_counter(account_summary_, false);
-    // FIXME
+    // TODO
 }
 
 TEST_F(Test_BlockchainActivity, initial_state_activity_summary)
@@ -641,9 +641,9 @@ TEST_F(Test_BlockchainActivity, receive_assigned_account_list)
 
     ASSERT_TRUE(row->Valid());
     EXPECT_EQ(row->AccountID(), btc_account_id_);
-    EXPECT_EQ(row->Balance(), 0);  // FIXME
+    EXPECT_EQ(row->Balance(), 0);  // TODO
     EXPECT_EQ(row->ContractID(), btc_unit_id_);
-    EXPECT_EQ(row->DisplayBalance(), u8"0 ₿");  // FIXME
+    EXPECT_EQ(row->DisplayBalance(), u8"0 ₿");  // TODO
     EXPECT_EQ(row->DisplayUnit(), u8"BTC");
     EXPECT_EQ(row->Name(), u8"On chain account (this device)");
     EXPECT_EQ(row->NotaryID(), btc_notary_id_);
@@ -661,15 +661,15 @@ TEST_F(Test_BlockchainActivity, receive_assigned_account_activity)
         nym_1_id(), api_.Factory().IdentifierFromBase58(btc_account_id_));
 
     EXPECT_EQ(widget.AccountID(), btc_account_id_);
-    EXPECT_EQ(widget.Balance(), 0);          // FIXME
-    EXPECT_EQ(widget.BalancePolarity(), 0);  // FIXME
+    EXPECT_EQ(widget.Balance(), 0);          // TODO
+    EXPECT_EQ(widget.BalancePolarity(), 0);  // TODO
     EXPECT_EQ(widget.ContractID(), btc_unit_id_);
 
     const auto chains = widget.DepositChains();
 
     ASSERT_EQ(chains.size(), 1);
     EXPECT_EQ(chains.at(0), ot::blockchain::Type::Bitcoin);
-    EXPECT_EQ(widget.DisplayBalance(), u8"0 ₿");  // FIXME
+    EXPECT_EQ(widget.DisplayBalance(), u8"0 ₿");  // TODO
     EXPECT_EQ(widget.DisplayUnit(), u8"BTC");
     EXPECT_EQ(widget.Name(), u8"On chain account (this device)");
     EXPECT_EQ(widget.NotaryID(), btc_notary_id_);
@@ -728,8 +728,8 @@ TEST_F(Test_BlockchainActivity, receive_assigned_account_activity_qt)
     EXPECT_EQ(widget.columnCount(), 5);
     EXPECT_EQ(widget.rowCount(), 2);
     EXPECT_EQ(widget.accountID().toStdString(), btc_account_id_);
-    EXPECT_EQ(widget.balancePolarity(), 0);         // FIXME
-    EXPECT_EQ(widget.displayBalance(), u8"0 ₿");  // FIXME
+    EXPECT_EQ(widget.balancePolarity(), 0);       // TODO
+    EXPECT_EQ(widget.displayBalance(), u8"0 ₿");  // TODO
 
     {
         const auto chains = widget.depositChains();
@@ -845,7 +845,7 @@ TEST_F(Test_BlockchainActivity, receive_assigned_account_activity_qt)
 TEST_F(Test_BlockchainActivity, receive_assigned_account_summary)
 {
     wait_for_counter(account_summary_, false);
-    // FIXME
+    // TODO
 }
 
 TEST_F(Test_BlockchainActivity, receive_assigned_activity_summary)
@@ -987,15 +987,15 @@ TEST_F(Test_BlockchainActivity, send_account_activity)
         nym_1_id(), api_.Factory().IdentifierFromBase58(btc_account_id_));
 
     EXPECT_EQ(widget.AccountID(), btc_account_id_);
-    EXPECT_EQ(widget.Balance(), 0);          // FIXME
-    EXPECT_EQ(widget.BalancePolarity(), 0);  // FIXME
+    EXPECT_EQ(widget.Balance(), 0);          // TODO
+    EXPECT_EQ(widget.BalancePolarity(), 0);  // TODO
     EXPECT_EQ(widget.ContractID(), btc_unit_id_);
 
     const auto chains = widget.DepositChains();
 
     ASSERT_EQ(chains.size(), 1);
     EXPECT_EQ(chains.at(0), ot::blockchain::Type::Bitcoin);
-    EXPECT_EQ(widget.DisplayBalance(), u8"0 ₿");  // FIXME
+    EXPECT_EQ(widget.DisplayBalance(), u8"0 ₿");  // TODO
     EXPECT_EQ(widget.DisplayUnit(), u8"BTC");
     EXPECT_EQ(widget.Name(), u8"On chain account (this device)");
     EXPECT_EQ(widget.NotaryID(), btc_notary_id_);
@@ -1071,8 +1071,8 @@ TEST_F(Test_BlockchainActivity, send_account_activity_qt)
     EXPECT_EQ(widget.columnCount(), 5);
     EXPECT_EQ(widget.rowCount(), 3);
     EXPECT_EQ(widget.accountID().toStdString(), btc_account_id_);
-    EXPECT_EQ(widget.balancePolarity(), 0);         // FIXME
-    EXPECT_EQ(widget.displayBalance(), u8"0 ₿");  // FIXME
+    EXPECT_EQ(widget.balancePolarity(), 0);       // TODO
+    EXPECT_EQ(widget.displayBalance(), u8"0 ₿");  // TODO
 
     {
         const auto chains = widget.depositChains();
@@ -1327,15 +1327,15 @@ TEST_F(Test_BlockchainActivity, receive_unassigned_account_activity)
         nym_1_id(), api_.Factory().IdentifierFromBase58(btc_account_id_));
 
     EXPECT_EQ(widget.AccountID(), btc_account_id_);
-    EXPECT_EQ(widget.Balance(), 0);          // FIXME
-    EXPECT_EQ(widget.BalancePolarity(), 0);  // FIXME
+    EXPECT_EQ(widget.Balance(), 0);          // TODO
+    EXPECT_EQ(widget.BalancePolarity(), 0);  // TODO
     EXPECT_EQ(widget.ContractID(), btc_unit_id_);
 
     const auto chains = widget.DepositChains();
 
     ASSERT_EQ(chains.size(), 1);
     EXPECT_EQ(chains.at(0), ot::blockchain::Type::Bitcoin);
-    EXPECT_EQ(widget.DisplayBalance(), u8"0 ₿");  // FIXME
+    EXPECT_EQ(widget.DisplayBalance(), u8"0 ₿");  // TODO
     EXPECT_EQ(widget.DisplayUnit(), u8"BTC");
     EXPECT_EQ(widget.Name(), u8"On chain account (this device)");
     EXPECT_EQ(widget.NotaryID(), btc_notary_id_);
@@ -1427,8 +1427,8 @@ TEST_F(Test_BlockchainActivity, receive_unassigned_account_activity_qt)
     EXPECT_EQ(widget.columnCount(), 5);
     EXPECT_EQ(widget.rowCount(), 4);
     EXPECT_EQ(widget.accountID().toStdString(), btc_account_id_);
-    EXPECT_EQ(widget.balancePolarity(), 0);         // FIXME
-    EXPECT_EQ(widget.displayBalance(), u8"0 ₿");  // FIXME
+    EXPECT_EQ(widget.balancePolarity(), 0);       // TODO
+    EXPECT_EQ(widget.displayBalance(), u8"0 ₿");  // TODO
 
     {
         const auto chains = widget.depositChains();

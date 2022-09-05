@@ -107,6 +107,7 @@ public:
 
 private:
     const int level_;
+    const std::shared_ptr<internal::Logger> logger_;
 
     static auto get_buffer() noexcept -> internal::LogBuffer&;
     static auto get_data() noexcept

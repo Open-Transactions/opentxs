@@ -42,6 +42,7 @@ namespace opentxs
 {
 Log::Imp::Imp(const int logLevel) noexcept
     : level_(logLevel)
+    , logger_(GetLogger())
 {
 }
 
@@ -54,7 +55,7 @@ auto Log::Imp::Abort() const noexcept -> void
 
 auto Log::Imp::active() const noexcept -> bool
 {
-    return GetLogger().verbosity_.load() >= level_;
+    return logger_->verbosity_.load() >= level_;
 }
 
 auto Log::Imp::asHex(const Data& in) const noexcept -> void

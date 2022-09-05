@@ -3,6 +3,8 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_include "opentxs/blockchain/node/Stats.hpp"
+
 #pragma once
 
 #include <atomic>
@@ -25,8 +27,6 @@
 #include "internal/api/network/Blockchain.hpp"
 #include "internal/blockchain/node/Config.hpp"
 #include "internal/blockchain/node/Manager.hpp"
-#include "internal/network/zeromq/Handle.hpp"
-#include "internal/network/zeromq/Types.hpp"
 #include "internal/util/AsyncConst.hpp"
 #include "internal/util/Mutex.hpp"
 #include "opentxs/Version.hpp"
@@ -42,7 +42,6 @@
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/BlockchainProfile.hpp"
 #include "opentxs/util/Container.hpp"
-#include "opentxs/util/WorkType.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
@@ -87,7 +86,13 @@ namespace internal
 struct Config;
 }  // namespace internal
 
+namespace stats
+{
+class Shared;
+}  // namespace stats
+
 class Manager;
+class Stats;
 }  // namespace node
 }  // namespace blockchain
 
@@ -101,17 +106,6 @@ class Server;
 
 namespace zeromq
 {
-namespace internal
-{
-class Batch;
-class Thread;
-}  // namespace internal
-
-namespace socket
-{
-class Raw;
-}  // namespace socket
-
 class Context;
 }  // namespace zeromq
 }  // namespace network
@@ -129,15 +123,6 @@ struct BlockchainImp final : public Blockchain::Imp {
     using Imp::AddSyncServer;
     auto AddSyncServer(const std::string_view endpoint) const noexcept
         -> bool final;
-    auto BlockAvailableEndpoint() const noexcept -> std::string_view final
-    {
-        return block_available_endpoint_;
-    }
-    auto BlockQueueUpdateEndpoint() const noexcept -> std::string_view final
-    {
-        return block_queue_endpoint_;
-    }
-    auto ConnectedSyncServers() const noexcept -> Endpoints final;
     auto Database() const noexcept
         -> const opentxs::blockchain::database::common::Database& final
     {
@@ -149,47 +134,20 @@ struct BlockchainImp final : public Blockchain::Imp {
     auto Enable(const Imp::Chain type, const std::string_view seednode)
         const noexcept -> bool final;
     auto EnabledChains(alloc::Default) const noexcept -> Set<Imp::Chain> final;
-    auto FilterUpdate() const noexcept -> const zmq::socket::Publish& final
-    {
-        return new_filters_;
-    }
-    auto Hello(alloc::Default) const noexcept
-        -> opentxs::network::otdht::StateData final;
     auto IsEnabled(const Chain chain) const noexcept -> bool final;
     auto GetChain(const Imp::Chain type) const noexcept(false)
         -> BlockchainHandle final;
     auto GetSyncServers(alloc::Default alloc) const noexcept
         -> Imp::Endpoints final;
-    auto Mempool() const noexcept -> const zmq::socket::Publish& final
-    {
-        return mempool_;
-    }
-    auto PeerUpdate() const noexcept -> const zmq::socket::Publish& final
-    {
-        return connected_peer_updates_;
-    }
     auto Profile() const noexcept -> BlockchainProfile final;
-    auto PublishStartup(
-        const opentxs::blockchain::Type chain,
-        OTZMQWorkType type) const noexcept -> bool final;
-    auto ReorgEndpoint() const noexcept -> std::string_view final
-    {
-        return reorg_endpoint_;
-    }
-    auto ReportProgress(
-        const Chain chain,
-        const opentxs::blockchain::block::Height current,
-        const opentxs::blockchain::block::Height target) const noexcept
-        -> void final;
     auto RestoreNetworks() const noexcept -> void final;
     auto Start(const Imp::Chain type, const std::string_view seednode)
         const noexcept -> bool final;
+    auto Stats() const noexcept -> opentxs::blockchain::node::Stats final;
     auto Stop(const Imp::Chain type) const noexcept -> bool final;
-    auto UpdatePeer(
-        const opentxs::blockchain::Type chain,
-        const std::string_view address) const noexcept -> void final;
 
     auto Init(
+        std::shared_ptr<const api::Session> api,
         const api::crypto::Blockchain& crypto,
         const api::Legacy& legacy,
         const std::filesystem::path& dataFolder,
@@ -216,32 +174,14 @@ private:
 
     const api::Session& api_;
     const api::crypto::Blockchain* crypto_;
-    const CString block_available_endpoint_;
-    const CString block_queue_endpoint_;
-    const CString reorg_endpoint_;
-    opentxs::network::zeromq::internal::Handle handle_;
-    opentxs::network::zeromq::internal::Batch& batch_;
-    opentxs::network::zeromq::socket::Raw& block_available_out_;
-    opentxs::network::zeromq::socket::Raw& block_queue_out_;
-    opentxs::network::zeromq::socket::Raw& reorg_out_;
-    opentxs::network::zeromq::socket::Raw& block_available_in_;
-    opentxs::network::zeromq::socket::Raw& block_queue_in_;
-    opentxs::network::zeromq::socket::Raw& reorg_in_;
-    opentxs::network::zeromq::internal::Thread* thread_;
-    // TODO move the rest of these publish sockets into the batch. Giving out
-    // references to these sockets can cause shutdown race conditions
-    OTZMQPublishSocket active_peer_updates_;
     OTZMQPublishSocket chain_state_publisher_;
-    OTZMQPublishSocket connected_peer_updates_;
-    OTZMQPublishSocket new_filters_;
-    OTZMQPublishSocket sync_updates_;
-    OTZMQPublishSocket mempool_;
     blockchain::StartupPublisher startup_publisher_;
     AsyncConst<Config> base_config_;
     AsyncConst<DB> db_;
     mutable std::mutex lock_;
     mutable UnallocatedMap<Chain, Config> config_;
     mutable UnallocatedMap<Chain, pNode> networks_;
+    std::shared_ptr<opentxs::blockchain::node::stats::Shared> stats_;
     std::atomic_bool running_;
 
     auto disable(const Lock& lock, const Chain type) const noexcept -> bool;
@@ -249,8 +189,6 @@ private:
         const Lock& lock,
         const Chain type,
         const std::string_view seednode) const noexcept -> bool;
-    auto hello(const Lock&, const Chains& chains, alloc::Default alloc)
-        const noexcept -> opentxs::network::otdht::StateData;
     auto publish_chain_state(Chain type, bool state) const -> void;
     auto start(
         const Lock& lock,

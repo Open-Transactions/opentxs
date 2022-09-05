@@ -39,6 +39,7 @@ namespace blockchain
 namespace node
 {
 class Manager;
+class Stats;
 }  // namespace node
 }  // namespace blockchain
 // }  // namespace v1
@@ -69,6 +70,7 @@ public:
     virtual auto Profile() const noexcept -> BlockchainProfile = 0;
     virtual auto Start(const Chain type, const std::string_view seednode = {})
         const noexcept -> bool = 0;
+    virtual auto Stats() const noexcept -> opentxs::blockchain::node::Stats = 0;
     virtual auto Stop(const Chain type) const noexcept -> bool = 0;
 
     OPENTXS_NO_EXPORT virtual auto Internal() noexcept

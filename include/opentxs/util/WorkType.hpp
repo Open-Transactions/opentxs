@@ -36,7 +36,7 @@ enum class WorkType : OTZMQWorkType {
     BlockchainPeerAdded = 132,
     BlockchainReorg = 133,
     BlockchainStateChange = 134,
-    BlockchainSyncProgress = 145,
+    BlockchainSyncProgress = 135,
     BlockchainWalletScanProgress = 136,
     BlockchainNewFilter = 137,
     BlockchainBlockDownloadQueue = 138,
@@ -45,6 +45,8 @@ enum class WorkType : OTZMQWorkType {
     SyncServerUpdated = 141,
     BlockchainMempoolUpdated = 142,
     BlockchainBlockAvailable = 143,
+    BlockchainSyncServerProgress = 144,
+    BlockchainBlockOracleProgress = 145,
     OTXConnectionStatus = 256,
     OTXTaskComplete = 257,
     OTXSearchNym = 258,
@@ -185,6 +187,7 @@ auto print(OTZMQWorkType in) noexcept -> std::string_view;
  *       * Additional frames:
  *          1: chain type as blockchain::Type
  *          2: peer address as string
+ *          3: active peer count as std::size_t
  *
  *   BlockchainReorg: reports the receipt of a new blockchain header which
  *                    reorganizes the chain
@@ -262,6 +265,22 @@ auto print(OTZMQWorkType in) noexcept -> std::string_view;
  *       * Additional frames:
  *          1: chain type as blockchain::Type
  *          2: block hash (encoded as byte sequence)
+ *
+ *   BlockchainSyncServerProgress: reports that a sync indexer has added a new
+ *                                 block to its database
+ *       * Additional frames:
+ *          1: chain type as blockchain::Type
+ *          2: corresponding height as blockchain::block::Height
+ *          3: corresponding block hash as blockchain::block::Hash (encoded as
+ *             byte sequence)
+ *
+ *   BlockchainBlockOracleProgress: reports that a block oracle has downloaded a
+ *                                  new block
+ *       * Additional frames:
+ *          1: chain type as blockchain::Type
+ *          2: corresponding height as blockchain::block::Height
+ *          3: corresponding block hash as blockchain::block::Hash (encoded as
+ *             byte sequence)
  *
  *   OTXConnectionStatus: reports state changes to notary connections
  *       * Additional frames:

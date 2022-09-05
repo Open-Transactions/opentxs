@@ -5,6 +5,7 @@
 
 add_subdirectory(blockoracle)
 add_subdirectory(headeroracle)
+add_subdirectory(stats)
 
 if(OT_BLOCKCHAIN_EXPORT)
   add_subdirectory(filteroracle)
@@ -51,7 +52,8 @@ if(OT_BLOCKCHAIN_EXPORT)
   target_link_libraries(opentxs PUBLIC Boost::system)
   target_include_directories(
     opentxs-common SYSTEM
-    PRIVATE "${opentxs_SOURCE_DIR}/deps/robin-hood/src/include"
+    PRIVATE "${opentxs_SOURCE_DIR}/deps/cs_libguarded/src"
+            "${opentxs_SOURCE_DIR}/deps/robin-hood/src/include"
   )
 
   if(PACKETCRYPT_EXPORT)

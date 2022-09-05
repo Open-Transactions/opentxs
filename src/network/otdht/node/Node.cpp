@@ -40,6 +40,7 @@ auto print(NodeJob job) noexcept -> std::string_view
             {Job::chain_state, "chain_state"sv},
             {Job::new_cfilter, "new_cfilter"sv},
             {Job::new_peer, "new_peer"sv},
+            {Job::add_listener, "add_listener"sv},
             {Job::registration, "registration"sv},
             {Job::init, "init"sv},
             {Job::statemachine, "statemachine"sv},

@@ -55,10 +55,9 @@ public:
         std::uint32_t count,
         ReadView header,
         ReadView filter) noexcept(false);
-    OPENTXS_NO_EXPORT Block(Block&&) noexcept;
-
     Block() noexcept = delete;
-    Block(const Block&) = delete;
+    Block(const Block& rhs) noexcept;
+    OPENTXS_NO_EXPORT Block(Block&&) noexcept;
     auto operator=(const Block&) -> Block& = delete;
     auto operator=(Block&&) -> Block& = delete;
 

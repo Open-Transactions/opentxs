@@ -21,9 +21,9 @@
 
 namespace opentxs
 {
-auto GetLogger() noexcept -> internal::Logger&
+auto GetLogger() noexcept -> std::shared_ptr<internal::Logger>
 {
-    static auto logger = internal::Logger{};
+    static auto logger = std::make_shared<internal::Logger>();
 
     return logger;
 }

@@ -9,8 +9,6 @@
 #include "1_Internal.hpp"                         // IWYU pragma: associated
 #include "internal/network/blockchain/OTDHT.hpp"  // IWYU pragma: associated
 
-#include <boost/smart_ptr/make_shared.hpp>
-#include <boost/smart_ptr/shared_ptr.hpp>
 #include <string_view>
 
 #include "internal/network/blockchain/Types.hpp"
@@ -20,7 +18,6 @@
 #include "opentxs/api/network/Network.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
-#include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/WorkType.hpp"
@@ -35,12 +32,14 @@ auto print(DHTJob job) noexcept -> std::string_view
         using Job = DHTJob;
         static const auto map = Map<Job, std::string_view>{
             {Job::shutdown, "shutdown"sv},
+            {Job::sync_request, "sync_request"sv},
             {Job::sync_ack, "sync_ack"sv},
             {Job::sync_reply, "sync_reply"sv},
             {Job::sync_push, "sync_push"sv},
             {Job::response, "response"sv},
             {Job::push_tx, "push_tx"sv},
             {Job::job_processed, "job_processed"sv},
+            {Job::report, "report"sv},
             {Job::peer_list, "peer_list"sv},
             {Job::registration, "registration"sv},
             {Job::init, "init"sv},
@@ -68,15 +67,7 @@ OTDHT::OTDHT(
 
     const auto& zmq = api->Network().ZeroMQ().Internal();
     const auto batchID = zmq.PreallocateBatch();
-    // TODO the version of libc++ present in android ndk 23.0.7599858 has a
-    // broken std::allocate_shared function so we're using boost::shared_ptr
-    // instead of std::shared_ptr
-    auto actor = boost::allocate_shared<Actor>(
-        alloc::PMR<Actor>{zmq.Alloc(batchID)}, api, node, batchID);
-
-    OT_ASSERT(actor);
-
-    actor->Init(actor);
+    Actor::Factory(api, node, batchID);
 }
 
 auto OTDHT::Init() noexcept -> void

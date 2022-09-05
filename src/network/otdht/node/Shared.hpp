@@ -66,6 +66,11 @@ public:
     static auto Chains() noexcept -> const Set<opentxs::blockchain::Type>&;
 
     Shared(zeromq::BatchID batchID, allocator_type alloc) noexcept;
+    Shared() = delete;
+    Shared(const Shared&) = delete;
+    Shared(Shared&&) = delete;
+    auto operator=(const Shared&) -> Shared& = delete;
+    auto operator=(Shared&&) -> Shared& = delete;
 
     ~Shared() final;
 };

@@ -14,16 +14,23 @@
 #include <string_view>
 #include <utility>
 
+#include "internal/api/session/Endpoints.hpp"
 #include "internal/blockchain/database/Wallet.hpp"
+#include "internal/network/zeromq/Context.hpp"
+#include "internal/network/zeromq/socket/Raw.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/Mutex.hpp"
 #include "opentxs/api/crypto/Blockchain.hpp"
+#include "opentxs/api/network/Network.hpp"
+#include "opentxs/api/session/Endpoints.hpp"
+#include "opentxs/api/session/Session.hpp"
 #include "opentxs/blockchain/bitcoin/block/Transaction.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/core/ByteArray.hpp"
+#include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/network/zeromq/message/Message.tpp"
-#include "opentxs/network/zeromq/socket/Publish.hpp"
+#include "opentxs/network/zeromq/socket/SocketType.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Time.hpp"
@@ -115,7 +122,7 @@ struct Mempool::Imp {
 
             if (!existing) {
                 existing = std::move(tx);
-                notify(txid);
+                notify(lock, txid);
                 active_.emplace(txid);
                 unexpired_tx_.emplace(now, std::move(txid));
             }
@@ -152,19 +159,32 @@ struct Mempool::Imp {
         }
     }
 
-    Imp(const api::crypto::Blockchain& crypto,
-        database::Wallet& wallet,
-        const network::zeromq::socket::Publish& socket,
-        const Type chain) noexcept
+    Imp(const api::Session& api,
+        const api::crypto::Blockchain& crypto,
+        const Type chain,
+        database::Wallet& db) noexcept
         : crypto_(crypto)
-        , wallet_(wallet)
+        , wallet_(db)
         , chain_(chain)
         , lock_()
         , transactions_()
         , active_()
         , unexpired_txid_()
         , unexpired_tx_()
-        , socket_(socket)
+        , to_blockchain_api_([&] {
+            using Type = opentxs::network::zeromq::socket::Type;
+            auto out = api.Network().ZeroMQ().Internal().RawSocket(Type::Push);
+            const auto endpoint =
+                UnallocatedCString{api.Endpoints()
+                                       .Internal()
+                                       .Internal()
+                                       .BlockchainMessageRouter()};
+            const auto rc = out.Connect(endpoint.c_str());
+
+            OT_ASSERT(rc);
+
+            return out;
+        }())
     {
         init();
     }
@@ -188,18 +208,21 @@ private:
     mutable UnallocatedSet<Hash> active_;
     mutable Cache unexpired_txid_;
     mutable Cache unexpired_tx_;
-    const network::zeromq::socket::Publish& socket_;
+    mutable opentxs::network::zeromq::socket::Raw to_blockchain_api_;
 
-    auto notify(ReadView txid) const noexcept -> void
+    auto notify(const eLock&, ReadView txid) const noexcept -> void
     {
-        socket_.Send([&] {
-            auto work = network::zeromq::tagged_message(
-                WorkType::BlockchainMempoolUpdated);
-            work.AddFrame(chain_);
-            work.AddFrame(txid.data(), txid.size());
+        to_blockchain_api_.SendDeferred(
+            [&] {
+                auto work = network::zeromq::tagged_message(
+                    WorkType::BlockchainMempoolUpdated);
+                work.AddFrame(chain_);
+                work.AddFrame(txid.data(), txid.size());
 
-            return work;
-        }());
+                return work;
+            }(),
+            __FILE__,
+            __LINE__);
     }
 
     auto init() noexcept -> void
@@ -225,11 +248,11 @@ private:
 };
 
 Mempool::Mempool(
+    const api::Session& api,
     const api::crypto::Blockchain& crypto,
-    database::Wallet& wallet,
-    const network::zeromq::socket::Publish& socket,
-    const Type chain) noexcept
-    : imp_(std::make_unique<Imp>(crypto, wallet, socket, chain))
+    const Type chain,
+    database::Wallet& db) noexcept
+    : imp_(std::make_unique<Imp>(api, crypto, chain, db))
 {
 }
 

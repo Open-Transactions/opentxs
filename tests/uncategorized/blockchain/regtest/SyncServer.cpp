@@ -975,55 +975,5 @@ TEST_F(Regtest_fixture_sync_server, pushtx)
     }
 }
 
-TEST_F(Regtest_fixture_sync_server, pushtx_chain_not_active)
-{
-    static const auto hex = ot::UnallocatedCString{
-        "01000000000102fff7f7881a8099afa6940d42d1e7f6362bec38171ea3edf43354"
-        "1db4e4ad969f00000000494830450221008b9d1dc26ba6a9cb62127b02742fa9d7"
-        "54cd3bebf337f7a55d114c8e5cdd30be022040529b194ba3f9281a99f2b1c0a19c"
-        "0489bc22ede944ccf4ecbab4cc618ef3ed01eeffffffef51e1b804cc89d182d279"
-        "655c3aa89e815b1b309fe287d9b2b55d57b90ec68a0100000000ffffffff02202c"
-        "b206000000001976a9148280b37df378db99f66f85c95a783a76ac7a6d5988ac90"
-        "93510d000000001976a9143bde42dbee7e4dbe6a21b2d50ce2f0167faa815988ac"
-        "000247304402203609e17b84f6a7d30c80bfa610b5b4542f32a8a0d5447a12fb13"
-        "66d7f01cc44a0220573a954c4518331561406f90300e8f3358f51928d43c212a8c"
-        "aed02de67eebee0121025476c2e83188368da1ff3e292e7acafcdb3566bb0ad253"
-        "f62fc70f07aeee635711000000"};
-    const auto data = miner_.Factory().DataFromHex(hex);
-    const constexpr auto chain = ot::blockchain::Type::Bitcoin;
-    const auto tx =
-        miner_.Factory().BitcoinTransaction(chain, data.Bytes(), false);
-
-    ASSERT_TRUE(tx);
-
-    const auto original =
-        opentxs::factory::BlockchainSyncPushTransaction(chain, *tx);
-
-    EXPECT_EQ(original.Type(), MessageType::pushtx);
-    EXPECT_NE(original.Version(), 0);
-    EXPECT_EQ(original.Chain(), chain);
-    EXPECT_EQ(original.ID(), tx->ID());
-    EXPECT_EQ(original.Payload(), data.Bytes());
-
-    Requestor().expected_ += 1;
-
-    EXPECT_TRUE(Requestor().request(original));
-    ASSERT_TRUE(Requestor().wait());
-
-    {
-        const auto& msg = Requestor().get(++Requestor().checked_);
-        const auto base = miner_.Factory().BlockchainSyncMessage(msg);
-
-        ASSERT_TRUE(base);
-        ASSERT_EQ(base->Type(), MessageType::pushtx_reply);
-
-        const auto& reply = base->asPushTransactionReply();
-
-        EXPECT_EQ(reply.Chain(), original.Chain());
-        EXPECT_EQ(reply.ID(), original.ID());
-        EXPECT_FALSE(reply.Success());
-    }
-}
-
 TEST_F(Regtest_fixture_sync_server, shutdown) { Shutdown(); }
 }  // namespace ottest

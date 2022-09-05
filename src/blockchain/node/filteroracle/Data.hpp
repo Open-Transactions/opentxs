@@ -70,10 +70,10 @@ namespace opentxs::blockchain::node::filteroracle
 class Data
 {
 public:
-    const network::zeromq::socket::Publish& filter_notifier_;
     AsyncConst<database::Cfilter*> db_;
     sTime last_sync_progress_;
     Map<cfilter::Type, block::Position> last_broadcast_;
+    network::zeromq::socket::Raw to_blockchain_api_;
     network::zeromq::socket::Raw filter_notifier_internal_;
     network::zeromq::socket::Raw reindex_blocks_;
     std::unique_ptr<filteroracle::CfilterDownloader> filter_downloader_;

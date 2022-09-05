@@ -343,10 +343,17 @@ auto BlockFetcher::Shared::Data::remove_block_from_job(
 auto BlockFetcher::Shared::Data::ReviseTip(
     const block::Position& newTip) noexcept -> bool
 {
-    const auto before{tip_};
-    tip_ = newTip;
+    log_(OT_PRETTY_CLASS())("previous tip: ")(tip_).Flush();
+    log_(OT_PRETTY_CLASS())(" updated tip: ")(newTip).Flush();
 
-    return before != tip_;
+    if (newTip == tip_) {
+
+        return false;
+    } else {
+        tip_ = newTip;
+
+        return true;
+    }
 }
 
 auto BlockFetcher::Shared::Data::UpdateTip() noexcept

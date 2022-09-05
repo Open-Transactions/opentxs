@@ -6,9 +6,10 @@
 target_sources(
   opentxs-common
   PRIVATE
-    "${opentxs_SOURCE_DIR}/src/internal/network/otdht/Server.hpp"
-    "Server.cpp"
-    "Server.hpp"
+    "${opentxs_SOURCE_DIR}/src/internal/network/otdht/Listener.hpp"
+    "Actor.cpp"
+    "Actor.hpp"
+    "Listener.cpp"
 )
-target_link_libraries(opentxs-common PRIVATE "${OT_ZMQ_TARGET}")
-target_link_libraries(opentxs PUBLIC "${OT_ZMQ_TARGET}")
+target_link_libraries(opentxs-common PRIVATE Boost::headers)
+target_link_libraries(opentxs PUBLIC Boost::system)

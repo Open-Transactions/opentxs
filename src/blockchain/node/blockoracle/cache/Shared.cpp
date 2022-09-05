@@ -16,7 +16,7 @@
 #include <utility>
 
 #include "blockchain/node/blockoracle/BlockBatch.hpp"
-#include "internal/api/network/Blockchain.hpp"
+#include "internal/api/session/Endpoints.hpp"
 #include "internal/blockchain/database/Block.hpp"
 #include "internal/blockchain/database/Database.hpp"
 #include "internal/blockchain/node/Config.hpp"
@@ -29,8 +29,8 @@
 #include "internal/network/zeromq/Context.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
-#include "opentxs/api/network/Blockchain.hpp"
 #include "opentxs/api/network/Network.hpp"
+#include "opentxs/api/session/Endpoints.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/blockchain/Types.hpp"
@@ -86,22 +86,11 @@ Cache::Shared::Data::Data(
         }
     }())
     , peer_target_(node_.Internal().GetConfig().PeerTarget(chain_))
-    , block_available_([&] {
+    , to_blockchain_api_([&] {
         using Type = opentxs::network::zeromq::socket::Type;
         auto out = api.Network().ZeroMQ().Internal().RawSocket(Type::Push);
         const auto endpoint = UnallocatedCString{
-            api.Network().Blockchain().Internal().BlockAvailableEndpoint()};
-        const auto rc = out.Connect(endpoint.c_str());
-
-        OT_ASSERT(rc);
-
-        return out;
-    }())
-    , cache_size_publisher_([&] {
-        using Type = opentxs::network::zeromq::socket::Type;
-        auto out = api.Network().ZeroMQ().Internal().RawSocket(Type::Push);
-        const auto endpoint = UnallocatedCString{
-            api.Network().Blockchain().Internal().BlockQueueUpdateEndpoint()};
+            api.Endpoints().Internal().Internal().BlockchainMessageRouter()};
         const auto rc = out.Connect(endpoint.c_str());
 
         OT_ASSERT(rc);
@@ -321,7 +310,7 @@ auto Cache::Shared::Data::ProcessBlockRequests(
 
 auto Cache::Shared::Data::publish(const block::Hash& block) noexcept -> void
 {
-    block_available_.SendDeferred(
+    to_blockchain_api_.SendDeferred(
         [&] {
             auto work = network::zeromq::tagged_message(
                 WorkType::BlockchainBlockAvailable);
@@ -343,7 +332,7 @@ auto Cache::Shared::Data::publish_download_queue() noexcept -> void
     LogTrace()(OT_PRETTY_CLASS())(total)(" in download queue: ")(
         waiting)(" waiting / ")(assigned)(" downloading")
         .Flush();
-    cache_size_publisher_.SendDeferred(
+    to_blockchain_api_.SendDeferred(
         [&] {
             auto work = network::zeromq::tagged_message(
                 WorkType::BlockchainBlockDownloadQueue);

@@ -98,6 +98,18 @@ public:
     virtual auto BlockchainBlockDownloadQueue() const noexcept
         -> std::string_view = 0;
 
+    /** Blockchain block oracle update notifications
+     *
+     *  A subscribe socket can connect to this endpoint to receive
+     *  BlockchainBlockOracleProgress tagged messages
+     *
+     *  See opentxs/util/WorkTypes.hpp for message format documentation
+     *
+     *  This endpoint is active for client sessions only.
+     */
+    virtual auto BlockchainBlockOracleProgress() const noexcept
+        -> std::string_view = 0;
+
     /** Blockchain mempool updates
      *
      *  A subscribe socket can connect to this endpoint to receive
@@ -187,6 +199,18 @@ public:
      *  This endpoint is active for client sessions only.
      */
     virtual auto BlockchainSyncProgress() const noexcept
+        -> std::string_view = 0;
+
+    /** Blockchain sync server indexing progress
+     *
+     *  A subscribe socket can connect to this endpoint to receive
+     *  BlockchainSyncServerProgress tagged messages
+     *
+     *  See opentxs/util/WorkTypes.hpp for message format documentation
+     *
+     *  This endpoint is active for client sessions only.
+     */
+    virtual auto BlockchainSyncServerProgress() const noexcept
         -> std::string_view = 0;
 
     /** Blockchain sync server database changes

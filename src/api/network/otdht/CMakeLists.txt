@@ -7,16 +7,8 @@ target_sources(
   opentxs-common
   PRIVATE
     "${opentxs_SOURCE_DIR}/src/internal/api/network/OTDHT.hpp"
-    "ChainEndpoint.cpp"
-    "ChainEndpoint.hpp"
-    "Disable.cpp"
-    "Disable.hpp"
-    "Enable.cpp"
-    "Enable.hpp"
     "OTDHT.cpp"
     "OTDHT.hpp"
-    "Start.cpp"
-    "Start.hpp"
 )
 set(cxx-install-headers
     "${opentxs_SOURCE_DIR}/include/opentxs/api/network/OTDHT.hpp"

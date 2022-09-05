@@ -7,6 +7,8 @@
 
 #pragma once
 
+#include <string_view>
+
 #include "blockchain/DownloadTask.hpp"
 #include "opentxs/blockchain/bitcoin/cfilter/Types.hpp"
 #include "opentxs/util/WorkType.hpp"
@@ -83,10 +85,23 @@ enum class SyncServerJobs : OTZMQWorkType {
     statemachine = OT_ZMQ_STATE_MACHINE_SIGNAL,
 };
 
+enum class StatsJobs : OTZMQWorkType {
+    shutdown = value(WorkType::Shutdown),
+    block_header = value(WorkType::BlockchainNewHeader),
+    reorg = value(WorkType::BlockchainReorg),
+    cfilter = value(WorkType::BlockchainNewFilter),
+    peer = value(WorkType::BlockchainPeerAdded),
+    sync_server = value(WorkType::BlockchainSyncServerProgress),
+    block = value(WorkType::BlockchainBlockOracleProgress),
+    init = OT_ZMQ_INIT_SIGNAL,
+    statemachine = OT_ZMQ_STATE_MACHINE_SIGNAL,
+};
+
 using CfheaderJob =
     download::Batch<cfilter::Hash, cfilter::Header, cfilter::Type>;
 using CfilterJob = download::Batch<GCS, cfilter::Header, cfilter::Type>;
 
+auto print(StatsJobs) noexcept -> std::string_view;
 constexpr auto value(PeerManagerJobs job) noexcept
 {
     return static_cast<OTZMQWorkType>(job);

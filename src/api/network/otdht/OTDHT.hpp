@@ -5,15 +5,15 @@
 
 #pragma once
 
+#include <cs_plain_guarded.h>
 #include <cs_shared_guarded.h>
 #include <memory>
 #include <shared_mutex>
 #include <string_view>
-#include <variant>
 
 #include "internal/api/network/OTDHT.hpp"
 #include "internal/network/otdht/Node.hpp"
-#include "internal/network/otdht/Server.hpp"
+#include "internal/network/zeromq/socket/Raw.hpp"
 #include "opentxs/api/network/OTDHT.hpp"
 #include "opentxs/util/Allocator.hpp"
 
@@ -29,6 +29,11 @@ namespace network
 class Blockchain;
 }  // namespace network
 
+namespace session
+{
+class Endpoints;
+}  // namespace session
+
 class Session;
 }  // namespace api
 
@@ -39,6 +44,11 @@ namespace otdht
 class Node;
 class Server;
 }  // namespace otdht
+
+namespace zeromq
+{
+class Context;
+}  // namespace zeromq
 }  // namespace network
 // }  // namespace v1
 }  // namespace opentxs
@@ -50,11 +60,7 @@ class OTDHT final : public internal::OTDHT
 {
 public:
     auto AddPeer(std::string_view endpoint) const noexcept -> bool final;
-    auto ConnectedPeers() const noexcept -> Endpoints final;
     auto DeletePeer(std::string_view endpoint) const noexcept -> bool final;
-    auto Disable(const Chain chain) const noexcept -> void final;
-    auto Enable(const Chain chain) const noexcept -> void final;
-    auto Endpoint(const Chain chain) const noexcept -> std::string_view final;
     auto KnownPeers(alloc::Default alloc) const noexcept -> Endpoints final;
     auto StartListener(
         std::string_view syncEndpoint,
@@ -64,7 +70,11 @@ public:
 
     auto Start(std::shared_ptr<const api::Session> api) noexcept -> void final;
 
-    OTDHT(const api::Session& api, const api::network::Blockchain& blockchain)
+    OTDHT(
+        const api::Session& api,
+        const opentxs::network::zeromq::Context& zmq,
+        const api::session::Endpoints& endpoints,
+        const api::network::Blockchain& blockchain)
     noexcept;
     OTDHT() = delete;
     OTDHT(const OTDHT&) = delete;
@@ -75,16 +85,11 @@ public:
     ~OTDHT() final;
 
 private:
-    class ChainEndpoint;
-    class DisableChain;
-    class EnableChain;
-    class StartServer;
-
-    using Node = std::variant<std::monostate, opentxs::network::otdht::Server>;
-    using GuardedNode = libguarded::shared_guarded<Node, std::shared_mutex>;
+    using GuardedSocket =
+        libguarded::plain_guarded<opentxs::network::zeromq::socket::Raw>;
 
     const api::Session& api_;
     const api::network::Blockchain& blockchain_;
-    mutable GuardedNode node_;
+    mutable GuardedSocket to_node_;
 };
 }  // namespace opentxs::api::network::implementation

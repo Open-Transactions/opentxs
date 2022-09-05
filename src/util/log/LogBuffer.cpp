@@ -23,13 +23,14 @@ LogBuffer::LogBuffer(
 
         return buf.str();
     }())
+    , logger_(GetLogger())
     , session_counter_(data.first)
     , data_(std::move(data.second))
 {
 }
 
 LogBuffer::LogBuffer(std::thread::id id) noexcept
-    : LogBuffer(id, GetLogger().Register(id))
+    : LogBuffer(id, GetLogger()->Register(id))
 {
 }
 
@@ -45,7 +46,7 @@ auto LogBuffer::Get() noexcept -> std::shared_ptr<Source>
 
 auto LogBuffer::Refresh() noexcept -> std::shared_ptr<Source>
 {
-    auto& logger = GetLogger();
+    auto& logger = *logger_;
 
     if (logger.Session() != session_counter_) {
         std::tie(session_counter_, data_) = logger.Register(id_);
@@ -70,5 +71,9 @@ auto LogBuffer::ThreadID() const noexcept -> std::string_view
     return hex_id_;
 }
 
-LogBuffer::~LogBuffer() { GetLogger().Unregister(id_); }
+LogBuffer::~LogBuffer()
+{
+    auto& logger = *logger_;
+    logger.Unregister(id_);
+}
 }  // namespace opentxs::internal

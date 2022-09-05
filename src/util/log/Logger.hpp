@@ -36,7 +36,7 @@ namespace opentxs
 {
 class Gatekeeper;
 
-auto GetLogger() noexcept -> internal::Logger&;
+auto GetLogger() noexcept -> std::shared_ptr<internal::Logger>;
 }  // namespace opentxs
 
 namespace opentxs::internal

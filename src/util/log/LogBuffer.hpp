@@ -15,6 +15,19 @@
 #include "opentxs/util/Container.hpp"
 #include "util/log/Logger.hpp"
 
+// NOLINTBEGIN(modernize-concat-nested-namespaces)
+namespace opentxs
+{
+// inline namespace v1
+// {
+namespace internal
+{
+class Logger;
+}  // namespace internal
+// }  // namespace v1
+}  // namespace opentxs
+// NOLINTEND(modernize-concat-nested-namespaces)
+
 namespace opentxs::internal
 {
 class LogBuffer
@@ -42,6 +55,7 @@ public:
 private:
     const std::thread::id id_;
     const CString hex_id_;
+    const std::shared_ptr<internal::Logger> logger_;
     int session_counter_;
     std::weak_ptr<Source> data_;
 

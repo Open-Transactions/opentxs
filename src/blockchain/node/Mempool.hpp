@@ -25,6 +25,8 @@ namespace crypto
 {
 class Blockchain;
 }  // namespace crypto
+
+class Session;
 }  // namespace api
 
 namespace blockchain
@@ -47,17 +49,6 @@ namespace database
 class Wallet;
 }  // namespace database
 }  // namespace blockchain
-
-namespace network
-{
-namespace zeromq
-{
-namespace socket
-{
-class Publish;
-}  // namespace socket
-}  // namespace zeromq
-}  // namespace network
 // }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
@@ -79,10 +70,10 @@ public:
     auto Heartbeat() noexcept -> void final;
 
     Mempool(
+        const api::Session& api,
         const api::crypto::Blockchain& crypto,
-        database::Wallet& db,
-        const network::zeromq::socket::Publish& socket,
-        const Type chain) noexcept;
+        const Type chain,
+        database::Wallet& db) noexcept;
     Mempool() = delete;
     Mempool(const Mempool&) = delete;
     Mempool(Mempool&&) = delete;
