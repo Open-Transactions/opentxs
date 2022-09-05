@@ -14,6 +14,7 @@
 #include <iterator>
 #include <memory>
 #include <stdexcept>
+#include <type_traits>
 #include <utility>
 
 #include "internal/api/network/Asio.hpp"
@@ -171,6 +172,7 @@ Peer::Actor::Actor(
     , registered_chains_(alloc)
     , queue_(alloc)
     , last_activity_()
+    , last_ack_(std::nullopt)
     , ping_timer_(api_.Network().Asio().Internal().GetTimer())
     , registration_timer_(api_.Network().Asio().Internal().GetTimer())
 {
@@ -256,20 +258,44 @@ auto Peer::Actor::forward_to_chain(
     opentxs::blockchain::Type chain,
     Message&& msg) noexcept -> void
 {
+    const auto& log = log_;
+
     // TODO c++20 use contains
-    if (0_uz == active_chains_.count(chain)) { return; }
+    if (0_uz == active_chains_.count(chain)) {
+        log(OT_PRETTY_CLASS())(name_)(": ")(print(chain))(" is not active")
+            .Flush();
+
+        return;
+    }
 
     // TODO c++20 use contains
     if (0_uz == registered_chains_.count(chain)) {
+        log(OT_PRETTY_CLASS())(name_)(": adding message to queue until ")(
+            print(chain))(" completes registration")
+            .Flush();
         queue_[chain].emplace_back(std::move(msg));
     } else {
+        log(OT_PRETTY_CLASS())(name_)(": forwarding message to ")(print(chain))
+            .Flush();
         blockchain_.at(chain).SendDeferred(
             std::move(msg), __FILE__, __LINE__, true);
     }
 }
 
+auto Peer::Actor::forward_to_subscribers(
+    const Acknowledgement& ack,
+    const Message& msg) noexcept -> void
+{
+    for (const auto& state : ack.State()) {
+        const auto chain = state.Chain();
+        forward_to_chain(chain, msg);
+    }
+}
+
 auto Peer::Actor::ping() noexcept -> void
 {
+    const auto& log = log_;
+    log(OT_PRETTY_CLASS())(name_)(": requesting status").Flush();
     external_dealer_.SendExternal(
         [&] {
             auto msg = zeromq::Message{};
@@ -396,6 +422,7 @@ auto Peer::Actor::process_pushtx_internal(Message&& msg) noexcept -> void
 
 auto Peer::Actor::process_registration(Message&& msg) noexcept -> void
 {
+    const auto& log = log_;
     const auto body = msg.Body();
 
     if (1 >= body.size()) {
@@ -403,12 +430,33 @@ auto Peer::Actor::process_registration(Message&& msg) noexcept -> void
     }
 
     const auto chain = body.at(1).as<opentxs::blockchain::Type>();
+    log(OT_PRETTY_CLASS())(name_)(": received registration message from ")(
+        print(chain))(" worker")
+        .Flush();
     registered_chains_.emplace(chain);
 
     if (auto i = queue_.find(chain); queue_.end() != i) {
+        log(OT_PRETTY_CLASS())(name_)(": flushing ")(queue_.size())(
+            " queued messages for ")(print(chain))(" worker")
+            .Flush();
         auto post = ScopeGuard{[&] { queue_.erase(i); }};
 
         for (auto& msg : i->second) { forward_to_chain(chain, std::move(msg)); }
+    } else if (last_ack_.has_value()) {
+        const auto& last = *last_ack_;
+        const auto sync = api_.Factory().BlockchainSyncMessage(last);
+        const auto& ack = sync->asAcknowledgement();
+
+        for (const auto& state : ack.State()) {
+            if (state.Chain() == chain) {
+                log(OT_PRETTY_CLASS())(name_)(
+                    ": sending last acknowledgement message to ")(print(chain))(
+                    " worker")
+                    .Flush();
+                forward_to_chain(chain, last);
+                break;
+            }
+        }
     }
 }
 
@@ -456,20 +504,20 @@ auto Peer::Actor::process_response(Message&& msg) noexcept -> void
 
 auto Peer::Actor::process_sync(Message&& msg) noexcept -> void
 {
+    const auto& log = log_;
+
     try {
         const auto sync = api_.Factory().BlockchainSyncMessage(msg);
         const auto type = sync->Type();
+        log(OT_PRETTY_CLASS())(name_)(": received ")(print(type)).Flush();
         using Type = opentxs::network::otdht::MessageType;
 
         switch (type) {
             case Type::sync_ack: {
                 const auto& ack = sync->asAcknowledgement();
                 subscribe(ack);
-
-                for (const auto& state : ack.State()) {
-                    const auto chain = state.Chain();
-                    forward_to_chain(chain, msg);
-                }
+                forward_to_subscribers(ack, msg);
+                last_ack_ = std::move(msg);
             } break;
             case Type::sync_reply:
             case Type::new_block_header: {
@@ -539,6 +587,7 @@ auto Peer::Actor::strip_header(Message&& in) noexcept -> Message
 
 auto Peer::Actor::subscribe(const Acknowledgement& ack) noexcept -> void
 {
+    const auto& log = log_;
     const auto endpoint = ack.Endpoint();
 
     if (endpoint.empty()) { return; }
@@ -547,7 +596,7 @@ auto Peer::Actor::subscribe(const Acknowledgement& ack) noexcept -> void
     if (0_uz < subscriptions_.count(endpoint)) { return; }
 
     if (external_sub_.Connect(endpoint.data())) {
-        log_(OT_PRETTY_CLASS())(name_)(": subscribed to endpoint ")(
+        log(OT_PRETTY_CLASS())(name_)(": subscribed to endpoint ")(
             endpoint)(" for new block notifications")
             .Flush();
     } else {

@@ -11,9 +11,9 @@
 
 #include <algorithm>
 #include <chrono>
-#include <cstddef>
 #include <iterator>
 #include <memory>
+#include <numeric>
 #include <random>
 #include <stdexcept>
 #include <string_view>
@@ -34,7 +34,6 @@
 #include "internal/network/zeromq/socket/Pipeline.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
 #include "internal/util/LogMacros.hpp"
-#include "internal/util/P0330.hpp"
 #include "opentxs/api/network/Asio.hpp"
 #include "opentxs/api/network/Network.hpp"
 #include "opentxs/api/session/Endpoints.hpp"
@@ -65,8 +64,25 @@
 #include "opentxs/util/BlockchainProfile.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
+#include "opentxs/util/Types.hpp"
 #include "opentxs/util/WorkType.hpp"
+#include "util/ScopeGuard.hpp"
 #include "util/Work.hpp"
+
+namespace opentxs::network::blockchain
+{
+OTDHT::Actor::PeerData::PeerData(allocator_type alloc) noexcept
+    : position_()
+    , samples_(max_samples_, start_weight_, alloc)
+    , weight_(calculate_weight(samples_))
+{
+}
+
+auto OTDHT::Actor::PeerData::get_allocator() const noexcept -> allocator_type
+{
+    return samples_.get_allocator();
+}
+}  // namespace opentxs::network::blockchain
 
 namespace opentxs::network::blockchain
 {
@@ -180,14 +196,24 @@ OTDHT::Actor::Actor(
     , peers_(alloc)
     , local_position_()
     , best_remote_position_()
-    , best_pending_position_()
+    , processing_position_()
     , processing_(false)
     , last_request_(std::nullopt)
     , registration_timer_(api_.Network().Asio().Internal().GetTimer())
     , request_timer_(api_.Network().Asio().Internal().GetTimer())
     , rand_(std::random_device{}())
     , registered_with_node_(false)
+    , queue_(alloc)
 {
+}
+
+auto OTDHT::Actor::add_contribution(
+    Samples& samples,
+    Weight& weight,
+    Weight value) noexcept -> void
+{
+    samples.push_back(value);
+    weight = calculate_weight(samples);
 }
 
 auto OTDHT::Actor::add_peers(Set<PeerID>&& peers) noexcept -> void
@@ -202,6 +228,49 @@ auto OTDHT::Actor::add_peers(Set<PeerID>&& peers) noexcept -> void
                 .Flush();
         }
     }
+}
+
+auto OTDHT::Actor::best_position() const noexcept
+    -> const opentxs::blockchain::block::Position&
+{
+    if (queue_.empty()) {
+        if (processing_) {
+
+            return processing_position_;
+        } else {
+
+            return local_position_;
+        }
+    } else {
+
+        return queue_.back().second;
+    }
+}
+
+auto OTDHT::Actor::calculate_weight(const Samples& samples) noexcept -> Weight
+{
+    const auto average =
+        std::reduce(samples.begin(), samples.end(), 0_z) / samples.size();
+
+    return std::max<Weight>(min_weight_, average);
+}
+
+auto OTDHT::Actor::can_connect(const otdht::Data& data) const noexcept -> bool
+{
+    const auto& log = log_;
+    const auto& best = best_position();
+    const auto max = best.height_ + 1;
+    const auto start = data.FirstPosition(api_);
+
+    if (start.height_ > max) {
+        log(OT_PRETTY_CLASS())(name_)(": incoming data starts at height ")(
+            start.height_)(" however local data stops at height ")(best.height_)
+            .Flush();
+
+        return false;
+    }
+
+    return true;
 }
 
 auto OTDHT::Actor::check_registration() noexcept -> bool
@@ -233,8 +302,43 @@ auto OTDHT::Actor::check_request_timer() noexcept -> void
 
     if ((sClock::now() - time) > request_timeout_) {
         log_(OT_PRETTY_CLASS())(name_)(": request timeout").Flush();
-        finish_request();
-        request_next();
+        finish_request(false);
+    }
+}
+
+auto OTDHT::Actor::choose_peer(
+    const opentxs::blockchain::block::Position& target) noexcept
+    -> std::optional<PeerID>
+{
+    const auto peers = filter_peers(target);
+    const auto count = peers.size();
+
+    if (peers.empty()) { return std::nullopt; }
+
+    try {
+        // NOTE peer selection is performed via a weighted random sample where
+        // each peer's weight increases as it fulfills requests promptly and
+        // decreases if it times out
+        auto range = Weight{0};
+        auto map = Map<Weight, PeerID>{get_allocator()};
+
+        for (const auto& id : peers) {
+            const auto& [position, samples, weight] = peers_.at(id);
+            range += weight;
+            map.emplace(range, id);
+        }
+
+        OT_ASSERT(map.size() == count);
+
+        auto dist = std::uniform_int_distribution<Weight>{0_z, range - 1_z};
+
+        const auto i = map.upper_bound(dist(rand_));
+
+        OT_ASSERT(map.end() != i);
+
+        return i->second;
+    } catch (const std::exception& e) {
+        LogAbort()(OT_PRETTY_CLASS())(name_)(": ")(e.what()).Abort();
     }
 }
 
@@ -259,29 +363,50 @@ auto OTDHT::Actor::do_startup() noexcept -> bool
     return false;
 }
 
-auto OTDHT::Actor::choose_peer(
-    const opentxs::blockchain::block::Position& target) noexcept
-    -> std::optional<PeerID>
+auto OTDHT::Actor::drain_queue() noexcept -> void
 {
-    const auto peers = filter_peers(target);
-    const auto count = peers.size();
-    log_(OT_PRETTY_CLASS())(name_)(": choosing 1 of ")(count)(" peers").Flush();
+    const auto& log = log_;
 
-    if (0_uz == count) {
-
-        return std::nullopt;
+    if (processing_) {
+        log(OT_PRETTY_CLASS())(name_)(": still processing last message")
+            .Flush();
+    } else if (queue_.empty()) {
+        log(OT_PRETTY_CLASS())(name_)(": no queued messages to process")
+            .Flush();
     } else {
-        auto dist =
-            std::uniform_int_distribution<std::size_t>{0_uz, count - 1_uz};
-        const auto index = dist(rand_);
+        auto post = ScopeGuard{[&] { queue_.pop_front(); }};
+        auto& [msg, position] = queue_.front();
+        processing_ = true;
+        processing_position_ = std::move(position);
+        to_node_.SendDeferred(std::move(msg), __FILE__, __LINE__);
+    }
+}
 
-        OT_ASSERT(index < count);
+auto OTDHT::Actor::fill_queue() noexcept -> void
+{
+    const auto& log = log_;
+    const auto& target = best_remote_position_;
+    const auto& local = local_position_;
 
-        const auto& out = peers.at(index);
-
-        OT_ASSERT(0_uz < out.size());
-
-        return out;
+    if (last_request_.has_value()) {
+        log(OT_PRETTY_CLASS())(name_)(
+            ": waiting for existing request to arrive or time out before "
+            "requesting new data")
+            .Flush();
+    } else if (queue_.size() >= queue_limit_) {
+        log(OT_PRETTY_CLASS())(name_)(
+            ": avoiding requests for new data while queue is full")
+            .Flush();
+    } else if (local >= target) {
+        log(OT_PRETTY_CLASS())(name_)(
+            ": no peers report data better than current position ")(local)
+            .Flush();
+    } else {
+        const auto& best = best_position();
+        log(OT_PRETTY_CLASS())(name_)(": requesting data for blocks after ")(
+            best)
+            .Flush();
+        send_request(best);
     }
 }
 
@@ -289,11 +414,14 @@ auto OTDHT::Actor::filter_peers(
     const opentxs::blockchain::block::Position& target) const noexcept
     -> Vector<PeerID>
 {
+    const auto& log = log_;
     auto out = Vector<PeerID>{get_allocator()};
     out.clear();
 
-    for (const auto& [id, position] : peers_) {
+    for (const auto& [id, peer] : peers_) {
         OT_ASSERT(0_uz < id.size());
+
+        const auto& [position, samples, weight] = peer;
 
         if (position > target) {
             const auto& val = out.emplace_back(id);
@@ -302,14 +430,45 @@ auto OTDHT::Actor::filter_peers(
         }
     }
 
+    log(OT_PRETTY_CLASS())(name_)(": ")(out.size())(" of ")(peers_.size())(
+        " connected peers report chain data better than local position ")(
+        target)
+        .Flush();
+
     return out;
 }
 
-auto OTDHT::Actor::finish_request() noexcept -> void
+auto OTDHT::Actor::finish_request(bool success) noexcept -> void
 {
+    OT_ASSERT(last_request_.has_value());
+
+    const auto& log = log_;
+
+    try {
+        const auto& [start, id] = *last_request_;
+        auto& [position, samples, weight] = peers_.at(id);
+
+        if (success) {
+            const auto elapsed = std::chrono::duration_cast<ScoreInterval>(
+                sClock::now() - start);
+            const auto remaining = std::chrono::duration_cast<ScoreInterval>(
+                request_timeout_ - elapsed);
+            const auto credit =
+                std::max<Weight>(remaining.count(), min_weight_);
+            add_contribution(samples, weight, credit);
+        } else {
+            add_contribution(samples, weight, min_weight_);
+        }
+
+        log(OT_PRETTY_CLASS())(name_)(": weight for ")(id)(" updated to ")(
+            weight)
+            .Flush();
+    } catch (const std::exception& e) {
+        LogAbort()(OT_PRETTY_CLASS())(name_)(": ")(e.what()).Abort();
+    }
+
     last_request_.reset();
     request_timer_.Cancel();
-    best_pending_position_ = {};
 }
 
 auto OTDHT::Actor::get_peer(const Message& msg) const noexcept -> ReadView
@@ -468,17 +627,29 @@ auto OTDHT::Actor::process_cfilter(Message&& msg) noexcept -> void
 auto OTDHT::Actor::process_data(Message&& msg, const otdht::Data& data) noexcept
     -> void
 {
+    const auto& log = log_;
+
     if (false == process_state(msg, data.State())) {
         LogError()(OT_PRETTY_CLASS())(name_)(": received data for wrong chain")
             .Flush();
 
         return;
+    } else if (data.Blocks().empty()) {
+        log(OT_PRETTY_CLASS())(name_)(": ignoring empty update").Flush();
+
+        return;
+    } else if (false == can_connect(data)) {
+        log(OT_PRETTY_CLASS())(name_)(": ignoring non-contiguous update")
+            .Flush();
+
+        return;
     }
 
-    processing_ = true;
-    update_pending_position(data.LastPosition(api_));
-    to_node_.SendDeferred(std::move(msg), __FILE__, __LINE__);
-    request_next();
+    const auto& [_, position] =
+        queue_.emplace_back(std::move(msg), data.LastPosition(api_));
+    log(OT_PRETTY_CLASS())(name_)(": queued data for block range ending at ")(
+        position)
+        .Flush();
 }
 
 auto OTDHT::Actor::process_job_processed(Message&& msg) noexcept -> void
@@ -493,6 +664,7 @@ auto OTDHT::Actor::process_job_processed(Message&& msg) noexcept -> void
     local_position_ = {
         body.at(1).as<opentxs::blockchain::block::Height>(),
         body.at(2).Bytes()};
+    processing_position_ = {};
 }
 
 auto OTDHT::Actor::process_peer_list(Message&& msg) noexcept -> void
@@ -521,7 +693,6 @@ auto OTDHT::Actor::process_peer_list(Message&& msg) noexcept -> void
         return out;
     }());
     known_peers_.swap(newPeers);
-    do_work();
 }
 
 auto OTDHT::Actor::process_pushtx_internal(Message&& msg) noexcept -> void
@@ -547,19 +718,17 @@ auto OTDHT::Actor::process_registration_node(Message&& msg) noexcept -> void
 {
     registered_with_node_ = true;
     add_peers(get_peers(msg.Body(), 1_z));
-    do_work();
 }
 
 auto OTDHT::Actor::process_registration_peer(Message&& msg) noexcept -> void
 {
     const auto& log = log_;
-    using Position = opentxs::blockchain::block::Position;
     const auto peer = PeerID{get_peer(msg), get_allocator()};
     log(OT_PRETTY_CLASS())(name_)(": received registration message from peer ")(
         peer)
         .Flush();
     known_peers_.emplace(peer);
-    peers_.try_emplace(peer, Position{});
+    peers_[peer].position_ = {};
     using PeerJob = otdht::PeerJob;
     router_.SendDeferred(
         [&] {
@@ -623,16 +792,7 @@ auto OTDHT::Actor::process_state(
     if (state.Chain() != chain_) { return false; }
 
     const auto& position = state.Position();
-    auto peer = PeerID{get_peer(msg), get_allocator()};
-
-    if (auto i = peers_.find(peer); peers_.end() == i) {
-        const auto [_, rc] = peers_.try_emplace(std::move(peer), position);
-
-        OT_ASSERT(rc);
-    } else {
-        i->second = position;
-    }
-
+    peers_[PeerID{get_peer(msg), get_allocator()}].position_ = position;
     update_remote_position(position);
 
     return true;
@@ -685,7 +845,7 @@ auto OTDHT::Actor::process_sync_peer(Message&& msg) noexcept -> void
         }
 
         if (finish && last_request_.has_value()) {
-            if (peer == last_request_->second) { finish_request(); }
+            if (peer == last_request_->second) { finish_request(true); }
         }
     } catch (const std::exception& e) {
         LogError()(OT_PRETTY_CLASS())(name_)(": ")(e.what()).Flush();
@@ -700,36 +860,6 @@ auto OTDHT::Actor::remove_peers(Set<PeerID>&& peers) noexcept -> void
         log(OT_PRETTY_CLASS())(name_)(": removing stale peer ")(id).Flush();
         known_peers_.erase(id);
         peers_.erase(id);
-    }
-}
-
-auto OTDHT::Actor::request_next() noexcept -> void
-{
-    const auto& log = log_;
-
-    if (last_request_.has_value()) {
-        log(OT_PRETTY_CLASS())(name_)(
-            ": waiting for existing request to arrive or time out")
-            .Flush();
-
-        return;
-    }
-
-    const auto& local = std::max(local_position_, best_pending_position_);
-    log(OT_PRETTY_CLASS())(name_)(": remote position: ")(best_remote_position_)
-        .Flush();
-    log(OT_PRETTY_CLASS())(name_)(": requested position: ")(
-        best_pending_position_)
-        .Flush();
-    log(OT_PRETTY_CLASS())(name_)(": local position: ")(local_position_)
-        .Flush();
-    log(OT_PRETTY_CLASS())(name_)(": effective local position: ")(local)
-        .Flush();
-
-    if (local < best_remote_position_) {
-        send_request(local);
-    } else {
-        log(OT_PRETTY_CLASS())(name_)(": no need to request data ")().Flush();
     }
 }
 
@@ -800,12 +930,6 @@ auto OTDHT::Actor::send_request(
     reset_request_timer();
 }
 
-auto OTDHT::Actor::update_pending_position(
-    const opentxs::blockchain::block::Position& incoming) noexcept -> void
-{
-    update_position(incoming, best_pending_position_);
-}
-
 auto OTDHT::Actor::update_position(
     const opentxs::blockchain::block::Position& incoming,
     opentxs::blockchain::block::Position& existing) noexcept -> void
@@ -831,16 +955,8 @@ auto OTDHT::Actor::work() noexcept -> bool
     switch (mode_) {
         case Mode::client: {
             check_request_timer();
-
-            if (processing_) {
-                log(OT_PRETTY_CLASS())(name_)(
-                    ": waiting for processing to finish before "
-                    "requesting next "
-                    "block")
-                    .Flush();
-            } else {
-                request_next();
-            }
+            drain_queue();
+            fill_queue();
         } break;
         case Mode::disabled:
         case Mode::server: {
