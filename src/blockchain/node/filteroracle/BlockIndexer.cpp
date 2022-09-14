@@ -401,7 +401,6 @@ auto BlockIndexer::Imp::drain_queue() noexcept -> std::size_t
 {
     const auto limit =
         params::Chains().at(shared_.chain_).block_download_batch_;
-    const auto& oracle = node_.BlockOracle();
     auto handle = blocks_.lock();
     auto& blocks = *handle;
     auto count = blocks.requested_.size() + blocks.ready_.size();
@@ -410,7 +409,7 @@ auto BlockIndexer::Imp::drain_queue() noexcept -> std::size_t
         auto post = ScopeGuard{[&] { queue_.pop_front(); }};
         const auto& block = queue_.front();
         const auto [_, added] = blocks.requested_.try_emplace(
-            block, oracle.LoadBitcoin(block.hash_));
+            block, node_.BlockOracle().LoadBitcoin(block.hash_));
 
         if (added) { ++count; }
     }
@@ -553,13 +552,12 @@ auto BlockIndexer::Imp::process_block_ready(Message&& in) noexcept -> void
     auto hash = block::Hash{body.at(2).Bytes()};
 
     if (auto i = index_.find(hash); index_.end() != i) {
-        process_block_ready(std::move(i->second));
-        index_.erase(i);
+        if (process_block_ready(std::move(i->second))) { index_.erase(i); }
     }
 }
 
 auto BlockIndexer::Imp::process_block_ready(block::Position&& position) noexcept
-    -> void
+    -> bool
 {
     const auto& log = log_;
     log(OT_PRETTY_CLASS())(name_)(": block ")(
@@ -569,7 +567,28 @@ auto BlockIndexer::Imp::process_block_ready(block::Position&& position) noexcept
     auto& blocks = *handle;
     auto& from = blocks.requested_;
     auto& to = blocks.ready_;
-    to.insert(from.extract(position));
+    auto i = from.find(position);
+
+    if (from.end() != i) {
+        auto& future = i->second;
+
+        if (IsReady(future)) {
+            to.insert(from.extract(i));
+
+            return true;
+        } else {
+            LogError()(OT_PRETTY_CLASS())(name_)(": future for ")(
+                position)(" should be ready but isn't")
+                .Flush();
+            future = node_.BlockOracle().LoadBitcoin(position.hash_);
+
+            return false;
+        }
+    } else {
+        LogAbort()(OT_PRETTY_CLASS())(name_)(": ")(
+            position)(" missing from requested map")
+            .Abort();
+    }
 }
 
 auto BlockIndexer::Imp::process_reindex(Message&&) noexcept -> void

@@ -153,7 +153,7 @@ private:
     auto process_block(Message&& in) noexcept -> void;
     auto process_block(block::Position&& position) noexcept -> void;
     auto process_block_ready(Message&& in) noexcept -> void;
-    auto process_block_ready(block::Position&& position) noexcept -> void;
+    auto process_block_ready(block::Position&& position) noexcept -> bool;
     auto process_reindex(Message&& in) noexcept -> void;
     auto process_reorg(Message&& in) noexcept -> void;
     auto process_reorg(block::Position&& parent) noexcept -> void;
