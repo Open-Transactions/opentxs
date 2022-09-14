@@ -287,29 +287,30 @@ auto Node::Actor::process_add_listener(Message&& msg) noexcept -> void
 
     auto alloc = get_allocator();
     using Socket = zeromq::socket::Type;
-    auto [it, rc] = peers_.try_emplace(
+    auto [it, added] = peers_.try_emplace(
         CString{routerAdvertise, alloc},
         Listener::NextID(alloc),
         zeromq::MakeArbitraryInproc(alloc),
         api_.Network().ZeroMQ().Internal().RawSocket(Socket::Push));
 
-    OT_ASSERT(rc);
+    if (added) {
+        auto& [routingID, pushEndpoint, socket] = it->second;
+        const auto rc = socket.Connect(pushEndpoint.data());
 
-    auto& [routingID, pushEndpoint, socket] = it->second;
-    rc = socket.Connect(pushEndpoint.data());
+        OT_ASSERT(rc);
 
-    OT_ASSERT(rc);
+        Listener{
+            api_p_,
+            shared_p_,
+            routerBind,
+            routerAdvertise,
+            publishBind,
+            publishAdvertise,
+            routingID,
+            pushEndpoint}
+            .Init();
+    }
 
-    Listener{
-        api_p_,
-        shared_p_,
-        routerBind,
-        routerAdvertise,
-        publishBind,
-        publishAdvertise,
-        routingID,
-        pushEndpoint}
-        .Init();
     publish_peers();
 }
 
