@@ -67,6 +67,7 @@ auto print(Job job) noexcept -> std::string_view
             {Job::job_finished, "job_finished"sv},
             {Job::submit_block_header, "submit_block_header"sv},
             {Job::submit_block_hash, "submit_block_hash"sv},
+            {Job::report, "report"sv},
             {Job::init, "init"sv},
             {Job::statemachine, "statemachine"sv},
         };

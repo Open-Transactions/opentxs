@@ -1204,6 +1204,11 @@ auto HeaderOracle::Shared::recent_hashes(
     return data.database_.RecentHashes(alloc);
 }
 
+auto HeaderOracle::Shared::Report() noexcept -> void
+{
+    data_.lock()->database_.ReportHeaderTip();
+}
+
 auto HeaderOracle::Shared::Siblings() const noexcept
     -> UnallocatedSet<block::Hash>
 {

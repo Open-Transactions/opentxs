@@ -19,6 +19,7 @@ enum class Job : OTZMQWorkType {
     job_finished = OT_ZMQ_INTERNAL_SIGNAL + 1,
     submit_block_header = OT_ZMQ_INTERNAL_SIGNAL + 2,
     submit_block_hash = OT_ZMQ_INTERNAL_SIGNAL + 3,
+    report = OT_ZMQ_BLOCKCHAIN_REPORT_STATUS,
     init = OT_ZMQ_INIT_SIGNAL,
     statemachine = OT_ZMQ_STATE_MACHINE_SIGNAL,
 };

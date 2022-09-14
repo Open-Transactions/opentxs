@@ -19,6 +19,7 @@
 #include "internal/api/session/Endpoints.hpp"
 #include "internal/api/session/Session.hpp"
 #include "internal/network/blockchain/Types.hpp"
+#include "internal/network/otdht/Listener.hpp"
 #include "internal/network/otdht/Peer.hpp"
 #include "internal/network/zeromq/Context.hpp"
 #include "internal/network/zeromq/message/Message.hpp"
@@ -84,7 +85,15 @@ Node::Actor::Actor(
 
               return sub;
           }(),
-          {},
+          [&] {
+              using Dir = zeromq::socket::Direction;
+              auto pull = zeromq::EndpointArgs{alloc};
+              pull.emplace_back(
+                  CString{api->Endpoints().Internal().OTDHTNodePull(), alloc},
+                  Dir::Bind);
+
+              return pull;
+          }(),
           {},
           [&] {
               auto out = Vector<network::zeromq::SocketData>{alloc};
@@ -117,6 +126,8 @@ Node::Actor::Actor(
     , publish_(pipeline_.Internal().ExtraSocket(0))
     , router_(pipeline_.Internal().ExtraSocket(1))
     , peers_(alloc)
+    , listeners_(alloc)
+    , listen_endpoints_(alloc)
 {
 }
 
@@ -142,6 +153,11 @@ auto Node::Actor::get_peers() const noexcept -> Set<CString>
     std::transform(
         peers_.begin(),
         peers_.end(),
+        std::inserter(out, out.end()),
+        [](const auto& data) { return std::get<0>(data.second); });
+    std::transform(
+        listeners_.begin(),
+        listeners_.end(),
         std::inserter(out, out.end()),
         [](const auto& data) { return std::get<0>(data.second); });
 
@@ -200,6 +216,9 @@ auto Node::Actor::pipeline_other(const Work work, Message&& msg) noexcept
         case Work::new_peer: {
             process_new_peer(std::move(msg));
         } break;
+        case Work::add_listener: {
+            process_add_listener(std::move(msg));
+        } break;
         case Work::shutdown:
         case Work::registration:
         case Work::init:
@@ -227,6 +246,7 @@ auto Node::Actor::pipeline_router(const Work work, Message&& msg) noexcept
         case Work::chain_state:
         case Work::new_cfilter:
         case Work::new_peer:
+        case Work::add_listener:
         case Work::init:
         case Work::statemachine: {
             LogAbort()(OT_PRETTY_CLASS())(name_)(": unhandled message type ")(
@@ -239,6 +259,58 @@ auto Node::Actor::pipeline_router(const Work work, Message&& msg) noexcept
                 .Abort();
         }
     }
+}
+
+auto Node::Actor::process_add_listener(Message&& msg) noexcept -> void
+{
+    const auto body = msg.Body();
+
+    if (4 >= body.size()) {
+        LogAbort()(OT_PRETTY_CLASS())(name_)(": invalid message").Abort();
+    }
+
+    const auto routerBind = body.at(1).Bytes();
+    const auto routerAdvertise = body.at(2).Bytes();
+    const auto publishBind = body.at(3).Bytes();
+    const auto publishAdvertise = body.at(4).Bytes();
+
+    // TODO c++20 use contains
+    if (0_uz < listen_endpoints_.count(routerBind)) { return; }
+    if (0_uz < listen_endpoints_.count(routerAdvertise)) { return; }
+    if (0_uz < listen_endpoints_.count(publishBind)) { return; }
+    if (0_uz < listen_endpoints_.count(publishAdvertise)) { return; }
+
+    listen_endpoints_.emplace(routerBind);
+    listen_endpoints_.emplace(routerAdvertise);
+    listen_endpoints_.emplace(publishBind);
+    listen_endpoints_.emplace(publishAdvertise);
+
+    auto alloc = get_allocator();
+    using Socket = zeromq::socket::Type;
+    auto [it, rc] = peers_.try_emplace(
+        CString{routerAdvertise, alloc},
+        Listener::NextID(alloc),
+        zeromq::MakeArbitraryInproc(alloc),
+        api_.Network().ZeroMQ().Internal().RawSocket(Socket::Push));
+
+    OT_ASSERT(rc);
+
+    auto& [routingID, pushEndpoint, socket] = it->second;
+    rc = socket.Connect(pushEndpoint.data());
+
+    OT_ASSERT(rc);
+
+    Listener{
+        api_p_,
+        shared_p_,
+        routerBind,
+        routerAdvertise,
+        publishBind,
+        publishAdvertise,
+        routingID,
+        pushEndpoint}
+        .Init();
+    publish_peers();
 }
 
 auto Node::Actor::process_cfilter(
@@ -347,7 +419,6 @@ auto Node::Actor::process_peer(std::string_view endpoint) noexcept -> void
     OT_ASSERT(rc);
 
     auto& [routingID, pushEndpoint, socket] = it->second;
-
     rc = socket.Connect(pushEndpoint.data());
 
     OT_ASSERT(rc);

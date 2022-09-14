@@ -8,7 +8,10 @@
 #pragma once
 
 #include <boost/smart_ptr/shared_ptr.hpp>
+#include <cs_shared_guarded.h>
+#include <cstddef>
 #include <memory>
+#include <shared_mutex>
 #include <string_view>
 
 #include "internal/blockchain/node/filteroracle/BlockIndexer.hpp"
@@ -18,9 +21,11 @@
 #include "opentxs/blockchain/bitcoin/cfilter/Header.hpp"
 #include "opentxs/blockchain/bitcoin/cfilter/Types.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
+#include "opentxs/blockchain/node/Types.hpp"
 #include "opentxs/util/Allocated.hpp"
 #include "opentxs/util/Container.hpp"
 #include "util/Actor.hpp"
+#include "util/JobCounter.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
@@ -36,6 +41,7 @@ namespace blockchain
 {
 namespace block
 {
+class Hash;
 class Position;
 }  // namespace block
 
@@ -84,10 +90,43 @@ public:
 private:
     friend Actor<Imp, BlockIndexerJob>;
 
-    enum class State {
-        normal,
-        shutdown,
+    struct BlockQueue {
+        using Map = opentxs::Map<block::Position, BitcoinBlockResult>;
+
+        Map requested_;
+        Map ready_;
+
+        auto Reorg(const block::Position& parent) noexcept -> void;
+
+        BlockQueue(allocator_type alloc) noexcept;
+        BlockQueue() = delete;
+        BlockQueue(const BlockQueue&) = delete;
+        BlockQueue(BlockQueue&&) = delete;
+        auto operator=(const BlockQueue&) -> BlockQueue& = delete;
+        auto operator=(BlockQueue&&) -> BlockQueue& = delete;
     };
+    struct WorkQueue {
+        block::Position position_;
+        cfilter::Header cfheader_;
+        block::Position previous_position_;
+        cfilter::Header previous_cfheader_;
+
+        auto Reorg(const Shared& shared, const block::Position& parent) noexcept
+            -> void;
+        auto Reset(const Shared& shared, block::Position tip) noexcept -> void;
+
+        WorkQueue() noexcept;
+        WorkQueue(const WorkQueue&) = delete;
+        WorkQueue(WorkQueue&&) = delete;
+        auto operator=(const WorkQueue&) -> WorkQueue& = delete;
+        auto operator=(WorkQueue&&) -> WorkQueue& = delete;
+    };
+    using GuardedBlocks =
+        libguarded::shared_guarded<BlockQueue, std::shared_mutex>;
+    using GuardedWork =
+        libguarded::shared_guarded<WorkQueue, std::shared_mutex>;
+    using GuardedPosition =
+        libguarded::shared_guarded<block::Position, std::shared_mutex>;
 
     std::shared_ptr<const api::Session> api_p_;
     std::shared_ptr<const node::Manager> node_p_;
@@ -95,27 +134,31 @@ private:
     const api::Session& api_;
     const node::Manager& node_;
     Shared& shared_;
-    State state_;
-    cfilter::Header previous_header_;
-    cfilter::Header current_header_;
+    Map<block::Hash, block::Position> index_;
     block::Position best_position_;
-    block::Position current_position_;
+    Deque<block::Position> queue_;
+    GuardedBlocks blocks_;
+    GuardedWork work_;
+    GuardedPosition tip_;
+    JobCounter counter_;
+    Outstanding running_;
 
-    auto calculate_next_block() noexcept -> bool;
+    auto background() noexcept -> void;
+    auto check_blocks() noexcept -> void;
     auto do_shutdown() noexcept -> void;
     auto do_startup() noexcept -> bool;
+    auto drain_queue() noexcept -> std::size_t;
+    auto fill_queue() noexcept -> void;
     auto pipeline(const Work work, Message&& msg) noexcept -> void;
-    auto process_block(network::zeromq::Message&& in) noexcept -> void;
+    auto process_block(Message&& in) noexcept -> void;
     auto process_block(block::Position&& position) noexcept -> void;
-    auto process_reindex(network::zeromq::Message&& in) noexcept -> void;
-    auto process_reorg(network::zeromq::Message&& in) noexcept -> void;
-    auto process_reorg(block::Position&& commonParent) noexcept -> void;
-    auto reset(block::Position&& to) noexcept -> void;
-    auto state_normal(const Work work, network::zeromq::Message&& msg) noexcept
-        -> void;
-    auto transition_state_shutdown() noexcept -> void;
+    auto process_block_ready(Message&& in) noexcept -> void;
+    auto process_block_ready(block::Position&& position) noexcept -> void;
+    auto process_reindex(Message&& in) noexcept -> void;
+    auto process_reorg(Message&& in) noexcept -> void;
+    auto process_reorg(block::Position&& parent) noexcept -> void;
+    auto process_report(Message&& in) noexcept -> void;
     auto update_best_position(block::Position&& position) noexcept -> void;
-    auto update_current_position(block::Position&& position) noexcept -> void;
     auto work() noexcept -> bool;
 };
 }  // namespace opentxs::blockchain::node::filteroracle

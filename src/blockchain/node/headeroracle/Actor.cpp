@@ -20,6 +20,7 @@
 #include "blockchain/node/headeroracle/HeaderOraclePrivate.hpp"
 #include "blockchain/node/headeroracle/Shared.hpp"
 #include "internal/api/network/Asio.hpp"
+#include "internal/api/session/Endpoints.hpp"
 #include "internal/api/session/Session.hpp"
 #include "internal/blockchain/database/Header.hpp"
 #include "internal/blockchain/node/Endpoints.hpp"
@@ -77,6 +78,9 @@ HeaderOracle::Actor::Actor(
           [&] {
               auto sub = network::zeromq::EndpointArgs{alloc};
               sub.emplace_back(api->Endpoints().Shutdown(), Direction::Connect);
+              sub.emplace_back(
+                  api->Endpoints().Internal().BlockchainReportStatus(),
+                  Direction::Connect);
               sub.emplace_back(
                   node->Internal().Endpoints().shutdown_publish_,
                   Direction::Connect);
@@ -150,9 +154,6 @@ auto HeaderOracle::Actor::pipeline(const Work work, Message&& msg) noexcept
     -> void
 {
     switch (work) {
-        case Work::shutdown: {
-            shutdown_actor();
-        } break;
         case Work::update_remote_height: {
             process_update_remote_height(std::move(msg));
         } break;
@@ -165,12 +166,16 @@ auto HeaderOracle::Actor::pipeline(const Work work, Message&& msg) noexcept
         case Work::submit_block_hash: {
             process_submit_submit_block_hash(std::move(msg));
         } break;
-        case Work::init: {
-            do_init();
+        case Work::report: {
+            process_report(std::move(msg));
         } break;
+        case Work::shutdown:
+        case Work::init:
         case Work::statemachine: {
-            do_work();
-        } break;
+            LogAbort()(OT_PRETTY_CLASS())(name_)(": unhandled message type ")(
+                print(work))
+                .Abort();
+        }
         default: {
             LogAbort()(OT_PRETTY_CLASS())(name_)(" unhandled message type ")(
                 static_cast<OTZMQWorkType>(work))
@@ -179,8 +184,7 @@ auto HeaderOracle::Actor::pipeline(const Work work, Message&& msg) noexcept
     }
 }
 
-auto HeaderOracle::Actor::process_job_finished(
-    network::zeromq::Message&& in) noexcept -> void
+auto HeaderOracle::Actor::process_job_finished(Message&& in) noexcept -> void
 {
     auto handle = shared_.data_.lock();
     auto& data = *handle;
@@ -188,8 +192,13 @@ auto HeaderOracle::Actor::process_job_finished(
     reset_job_timer();
 }
 
+auto HeaderOracle::Actor::process_report(Message&& msg) noexcept -> void
+{
+    shared_.Report();
+}
+
 auto HeaderOracle::Actor::process_submit_submit_block_hash(
-    network::zeromq::Message&& in) noexcept -> void
+    Message&& in) noexcept -> void
 {
     const auto body = in.Body();
 
@@ -214,8 +223,8 @@ auto HeaderOracle::Actor::process_submit_submit_block_hash(
     do_work();
 }
 
-auto HeaderOracle::Actor::process_submit_block_header(
-    network::zeromq::Message&& in) noexcept -> void
+auto HeaderOracle::Actor::process_submit_block_header(Message&& in) noexcept
+    -> void
 {
     const auto body = in.Body();
 
@@ -237,8 +246,8 @@ auto HeaderOracle::Actor::process_submit_block_header(
     if (false == headers.empty()) { shared_.AddHeaders(headers); }
 }
 
-auto HeaderOracle::Actor::process_update_remote_height(
-    network::zeromq::Message&& in) noexcept -> void
+auto HeaderOracle::Actor::process_update_remote_height(Message&& in) noexcept
+    -> void
 {
     const auto body = in.Body();
 

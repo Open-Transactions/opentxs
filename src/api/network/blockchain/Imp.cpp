@@ -3,48 +3,45 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_include <boost/smart_ptr/detail/operator_bool.hpp>
+
 #include "0_stdafx.hpp"                    // IWYU pragma: associated
 #include "1_Internal.hpp"                  // IWYU pragma: associated
 #include "api/network/blockchain/Imp.hpp"  // IWYU pragma: associated
 
+#include <boost/smart_ptr/make_shared.hpp>
+#include <boost/smart_ptr/shared_ptr.hpp>
 #include <algorithm>
 #include <future>
 #include <iterator>
 #include <type_traits>
 #include <utility>
 
+#include "api/network/blockchain/Actor.hpp"
 #include "api/network/blockchain/BlockchainHandle.hpp"
 #include "blockchain/database/common/Database.hpp"
-#include "internal/api/network/OTDHT.hpp"
-#include "internal/api/session/Endpoints.hpp"
+#include "blockchain/node/stats/Imp.hpp"
+#include "blockchain/node/stats/Shared.hpp"
 #include "internal/blockchain/Params.hpp"
 #include "internal/blockchain/node/Factory.hpp"
 #include "internal/blockchain/node/Manager.hpp"
-#include "internal/network/zeromq/Batch.hpp"
 #include "internal/network/zeromq/Context.hpp"
-#include "internal/network/zeromq/socket/Raw.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/api/network/Network.hpp"
-#include "opentxs/api/network/OTDHT.hpp"
 #include "opentxs/api/session/Endpoints.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/blockchain/Blockchain.hpp"
+#include "opentxs/blockchain/BlockchainType.hpp"
 #include "opentxs/blockchain/Types.hpp"
-#include "opentxs/blockchain/node/FilterOracle.hpp"
 #include "opentxs/blockchain/node/Manager.hpp"
 #include "opentxs/blockchain/p2p/Types.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
-#include "opentxs/network/zeromq/ZeroMQ.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/network/zeromq/message/Message.tpp"
-#include "opentxs/network/zeromq/socket/Push.hpp"
-#include "opentxs/network/zeromq/socket/SocketType.hpp"
-#include "opentxs/network/zeromq/socket/Types.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Options.hpp"
 #include "opentxs/util/Pimpl.hpp"
 #include "opentxs/util/WorkType.hpp"
-#include "util/Work.hpp"
 
 namespace opentxs::api::network::implementation
 {
@@ -54,140 +51,11 @@ BlockchainImp::BlockchainImp(
     const opentxs::network::zeromq::Context& zmq) noexcept
     : api_(api)
     , crypto_(nullptr)
-    , block_available_endpoint_(opentxs::network::zeromq::MakeArbitraryInproc())
-    , block_queue_endpoint_(opentxs::network::zeromq::MakeArbitraryInproc())
-    , reorg_endpoint_(opentxs::network::zeromq::MakeArbitraryInproc())
-    , handle_(zmq.Internal().MakeBatch(
-          [&] {
-              using Type = opentxs::network::zeromq::socket::Type;
-              auto out = Vector<Type>{};
-              out.emplace_back(Type::Publish);  // NOTE block_available_out_
-              out.emplace_back(Type::Publish);  // NOTE block_queue_out_
-              out.emplace_back(Type::Publish);  // NOTE reorg_out_
-              out.emplace_back(Type::Pull);     // NOTE block_available_in_
-              out.emplace_back(Type::Pull);     // NOTE block_queue_in_
-              out.emplace_back(Type::Pull);     // NOTE reorg_in_
-
-              return out;
-          }(),
-          "api::network::Blockchain"))
-    , batch_(handle_.batch_)
-    , block_available_out_([&]() -> auto& {
-        auto& socket = batch_.sockets_.at(0);
-        const auto rc =
-            socket.Bind(endpoints.BlockchainBlockAvailable().data());
-
-        OT_ASSERT(rc);
-
-        return socket;
-    }())
-    , block_queue_out_([&]() -> auto& {
-        auto& socket = batch_.sockets_.at(1);
-        const auto rc =
-            socket.Bind(endpoints.BlockchainBlockDownloadQueue().data());
-
-        OT_ASSERT(rc);
-
-        return socket;
-    }())
-    , reorg_out_([&]() -> auto& {
-        auto& socket = batch_.sockets_.at(2);
-        const auto rc = socket.Bind(endpoints.BlockchainReorg().data());
-
-        OT_ASSERT(rc);
-
-        return socket;
-    }())
-    , block_available_in_([&]() -> auto& {
-        auto& socket = batch_.sockets_.at(3);
-        const auto rc = socket.Bind(block_available_endpoint_.c_str());
-
-        OT_ASSERT(rc);
-
-        return socket;
-    }())
-    , block_queue_in_([&]() -> auto& {
-        auto& socket = batch_.sockets_.at(4);
-        const auto rc = socket.Bind(block_queue_endpoint_.c_str());
-
-        OT_ASSERT(rc);
-
-        return socket;
-    }())
-    , reorg_in_([&]() -> auto& {
-        auto& socket = batch_.sockets_.at(5);
-        const auto rc = socket.Bind(reorg_endpoint_.c_str());
-
-        OT_ASSERT(rc);
-
-        return socket;
-    }())
-    , thread_(zmq.Internal().Start(
-          batch_.id_,
-          {
-              {block_available_in_.ID(),
-               &block_available_in_,
-               [socket = &block_available_out_](auto&& m) {
-                   socket->SendDeferred(std::move(m), __FILE__, __LINE__);
-               }},
-              {block_queue_in_.ID(),
-               &block_queue_in_,
-               [socket = &block_queue_out_](auto&& m) {
-                   socket->SendDeferred(std::move(m), __FILE__, __LINE__);
-               }},
-              {reorg_in_.ID(),
-               &reorg_in_,
-               [socket = &reorg_out_](auto&& m) {
-                   socket->SendDeferred(std::move(m), __FILE__, __LINE__);
-               }},
-          }))
-    , active_peer_updates_([&] {
-        auto out = zmq.PublishSocket();
-        const auto listen = out->Start(endpoints.BlockchainPeer().data());
-
-        OT_ASSERT(listen);
-
-        return out;
-    }())
     , chain_state_publisher_([&] {
         auto out = zmq.PublishSocket();
         auto rc = out->Start(endpoints.BlockchainStateChange().data());
 
         OT_ASSERT(rc);
-
-        return out;
-    }())
-    , connected_peer_updates_([&] {
-        auto out = zmq.PublishSocket();
-        const auto listen =
-            out->Start(endpoints.BlockchainPeerConnection().data());
-
-        OT_ASSERT(listen);
-
-        return out;
-    }())
-    , new_filters_([&] {
-        auto out = zmq.PublishSocket();
-        const auto listen = out->Start(endpoints.BlockchainNewFilter().data());
-
-        OT_ASSERT(listen);
-
-        return out;
-    }())
-    , sync_updates_([&] {
-        auto out = zmq.PublishSocket();
-        const auto listen =
-            out->Start(endpoints.BlockchainSyncProgress().data());
-
-        OT_ASSERT(listen);
-
-        return out;
-    }())
-    , mempool_([&] {
-        auto out = zmq.PublishSocket();
-        const auto listen = out->Start(endpoints.BlockchainMempool().data());
-
-        OT_ASSERT(listen);
 
         return out;
     }())
@@ -197,20 +65,15 @@ BlockchainImp::BlockchainImp(
     , lock_()
     , config_()
     , networks_()
+    , stats_()
     , running_(true)
 {
-    OT_ASSERT(nullptr != thread_);
 }
 
 auto BlockchainImp::AddSyncServer(
     const std::string_view endpoint) const noexcept -> bool
 {
     return db_.get().AddSyncServer(endpoint);
-}
-
-auto BlockchainImp::ConnectedSyncServers() const noexcept -> Endpoints
-{
-    return {};  // TODO
 }
 
 auto BlockchainImp::DeleteSyncServer(
@@ -305,46 +168,15 @@ auto BlockchainImp::GetSyncServers(alloc::Default alloc) const noexcept
     return db_.get().GetSyncServers(alloc);
 }
 
-auto BlockchainImp::Hello(alloc::Default alloc) const noexcept
-    -> opentxs::network::otdht::StateData
-{
-    auto lock = Lock{lock_};
-    auto chains = [&] {
-        auto output = Chains{};
-
-        for (const auto& [chain, network] : networks_) {
-            output.emplace_back(chain);
-        }
-
-        return output;
-    }();
-
-    return hello(lock, chains, alloc);
-}
-
-auto BlockchainImp::hello(
-    const Lock&,
-    const Chains& chains,
-    alloc::Default alloc) const noexcept -> opentxs::network::otdht::StateData
-{
-    auto output = opentxs::network::otdht::StateData{alloc};
-
-    for (const auto chain : chains) {
-        const auto& network = networks_.at(chain);
-        const auto& filter = network->FilterOracle();
-        const auto type = filter.DefaultType();
-        output.emplace_back(chain, filter.FilterTip(type));
-    }
-
-    return output;
-}
-
 auto BlockchainImp::Init(
+    std::shared_ptr<const api::Session> api,
     const api::crypto::Blockchain& crypto,
     const api::Legacy& legacy,
     const std::filesystem::path& dataFolder,
     const Options& options) noexcept -> void
 {
+    OT_ASSERT(api);
+
     crypto_ = &crypto;
     base_config_.set_value([&] {
         auto output = Config{};
@@ -372,6 +204,22 @@ auto BlockchainImp::Init(
         return output;
     }());
     db_.set_value(DB{api_, crypto, legacy, dataFolder, options});
+    {
+        const auto& zmq = api->Network().ZeroMQ().Internal();
+        const auto batchID = zmq.PreallocateBatch();
+        auto* alloc = zmq.Alloc(batchID);
+        // TODO the version of libc++ present in android ndk 23.0.7599858 has a
+        // broken std::allocate_shared function so we're using boost::shared_ptr
+        // instead of std::shared_ptr
+        auto actor = boost::allocate_shared<blockchain::Actor>(
+            alloc::PMR<blockchain::Actor>{alloc}, api, batchID);
+
+        OT_ASSERT(actor);
+
+        actor->Init(actor);
+    }
+    stats_ = std::make_shared<opentxs::blockchain::node::stats::Shared>();
+    stats_->Start(api, stats_);
 }
 
 auto BlockchainImp::IsEnabled(
@@ -398,40 +246,6 @@ auto BlockchainImp::publish_chain_state(Chain type, bool state) const -> void
             WorkType::BlockchainStateChange);
         work.AddFrame(type);
         work.AddFrame(state);
-
-        return work;
-    }());
-}
-
-auto BlockchainImp::PublishStartup(
-    const opentxs::blockchain::Type chain,
-    OTZMQWorkType type) const noexcept -> bool
-{
-    using Dir = opentxs::network::zeromq::socket::Direction;
-    auto push = api_.Network().ZeroMQ().PushSocket(Dir::Connect);
-    auto out =
-        push->Start(api_.Endpoints().Internal().BlockchainStartupPull().data());
-    out &= push->Send([&] {
-        auto out = MakeWork(type);
-        out.AddFrame(chain);
-
-        return out;
-    }());
-
-    return out;
-}
-
-auto BlockchainImp::ReportProgress(
-    const Chain chain,
-    const opentxs::blockchain::block::Height current,
-    const opentxs::blockchain::block::Height target) const noexcept -> void
-{
-    sync_updates_->Send([&] {
-        auto work = opentxs::network::zeromq::tagged_message(
-            WorkType::BlockchainSyncProgress);
-        work.AddFrame(chain);
-        work.AddFrame(current);
-        work.AddFrame(target);
 
         return work;
     }());
@@ -498,14 +312,6 @@ auto BlockchainImp::start(
 
     switch (opentxs::blockchain::params::Chains().at(type).p2p_protocol_) {
         case p2p::Protocol::bitcoin: {
-            auto endpoint = UnallocatedCString{};
-
-            if (base_config_.get().provide_sync_server_) {
-                const auto& dht = api_.Network().OTDHT().Internal();
-                dht.Enable(type);
-                endpoint = dht.Endpoint(type);
-            }
-
             const auto& config = [&]() -> const Config& {
                 {
                     auto it = config_.find(type);
@@ -536,7 +342,7 @@ auto BlockchainImp::start(
             auto [it, added] = networks_.emplace(
                 type,
                 factory::BlockchainNetworkBitcoin(
-                    api_, type, config, seednode, endpoint));
+                    api_, type, config, seednode));
             LogConsole()(print(type))(" client is running").Flush();
             publish_chain_state(type, true);
             auto& pNode = it->second;
@@ -556,6 +362,15 @@ auto BlockchainImp::start(
     return false;
 }
 
+auto BlockchainImp::Stats() const noexcept -> opentxs::blockchain::node::Stats
+{
+    OT_ASSERT(stats_);
+
+    using Imp = opentxs::blockchain::node::Stats::Imp;
+
+    return std::make_unique<Imp>(stats_).release();
+}
+
 auto BlockchainImp::Stop(const Chain type) const noexcept -> bool
 {
     auto lock = Lock{lock_};
@@ -572,7 +387,6 @@ auto BlockchainImp::stop(const Lock& lock, const Chain type) const noexcept
 
     OT_ASSERT(it->second);
 
-    api_.Network().OTDHT().Internal().Disable(type);
     it->second->Internal().Shutdown().get();
     networks_.erase(it);
     LogVerbose()(OT_PRETTY_CLASS())("stopped chain ")(print(type)).Flush();
@@ -581,18 +395,5 @@ auto BlockchainImp::stop(const Lock& lock, const Chain type) const noexcept
     return true;
 }
 
-auto BlockchainImp::UpdatePeer(
-    const opentxs::blockchain::Type chain,
-    const std::string_view address) const noexcept -> void
-{
-    active_peer_updates_->Send([&] {
-        auto work = MakeWork(WorkType::BlockchainPeerAdded);
-        work.AddFrame(chain);
-        work.AddFrame(address.data(), address.size());
-
-        return work;
-    }());
-}
-
-BlockchainImp::~BlockchainImp() { batch_.ClearCallbacks(); }
+BlockchainImp::~BlockchainImp() = default;
 }  // namespace opentxs::api::network::implementation

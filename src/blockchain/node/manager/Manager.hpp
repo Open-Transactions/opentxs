@@ -14,6 +14,7 @@
 #include <iosfwd>
 #include <memory>
 #include <mutex>
+#include <shared_mutex>
 #include <string_view>
 #include <utility>
 
@@ -102,11 +103,6 @@ class Database;
 
 namespace node
 {
-namespace base
-{
-class SyncServer;
-}  // namespace base
-
 namespace internal
 {
 class PeerManager;
@@ -194,11 +190,6 @@ public:
     auto GetType() const noexcept -> Type final { return chain_; }
     auto GetVerifiedPeerCount() const noexcept -> std::size_t final;
     auto HeaderOracle() const noexcept -> const node::HeaderOracle& final;
-    auto IsSynchronized() const noexcept -> bool final
-    {
-        return is_synchronized_headers();
-    }
-    auto IsWalletScanEnabled() const noexcept -> bool final;
     auto JobReady(const node::PeerManagerJobs type) const noexcept
         -> void final;
     auto Internal() const noexcept -> const Manager& final { return *this; }
@@ -226,7 +217,6 @@ public:
         const Amount amount,
         const UnallocatedCString& memo) const noexcept -> PendingOutgoing final;
     auto ShuttingDown() const noexcept -> bool final;
-    auto SyncTip() const noexcept -> block::Position final;
 
     auto Connect() noexcept -> bool final;
     auto Disconnect() noexcept -> bool final;
@@ -277,19 +267,10 @@ protected:
         const api::Session& api,
         const Type type,
         const node::internal::Config& config,
-        std::string_view seednode,
-        std::string_view syncEndpoint) noexcept;
+        std::string_view seednode) noexcept;
 
 private:
     friend Worker<Base, api::Session>;
-
-    enum class State : int {
-        UpdatingHeaders,
-        UpdatingBlocks,
-        UpdatingFilters,
-        UpdatingSyncData,
-        Normal
-    };
 
     struct SendPromises {
         auto finish(int index) noexcept -> std::promise<SendOutcome>
@@ -327,25 +308,14 @@ private:
     network::zeromq::socket::Raw& to_block_cache_;
     network::zeromq::socket::Raw& to_wallet_;
     network::zeromq::socket::Raw& to_dht_;
-    const Time start_;
-    const UnallocatedCString sync_endpoint_;
-    std::unique_ptr<base::SyncServer> sync_server_;
+    network::zeromq::socket::Raw& to_blockchain_api_;
     mutable SendPromises send_promises_;
     Timer heartbeat_;
-    Time header_sync_;
-    Time filter_sync_;
-    std::atomic<State> state_;
     std::promise<void> init_promise_;
     std::shared_future<void> init_;
     mutable GuardedSelf self_;
 
-    auto is_synchronized_blocks() const noexcept -> bool;
-    auto is_synchronized_filters() const noexcept -> bool;
-    auto is_synchronized_headers() const noexcept -> bool;
-    auto is_synchronized_sync_server() const noexcept -> bool;
     auto notify_sync_client() const noexcept -> void;
-    auto target() const noexcept -> block::Height;
-
     auto pipeline(network::zeromq::Message&& in) noexcept -> void;
     auto process_block(network::zeromq::Message&& in) noexcept -> void;
     auto process_filter_update(network::zeromq::Message&& in) noexcept -> void;
@@ -357,17 +327,12 @@ private:
     auto reset_heartbeat() noexcept -> void;
     auto shutdown(std::promise<void>& promise) noexcept -> void;
     auto state_machine() noexcept -> bool;
-    auto state_transition_blocks() noexcept -> void;
-    auto state_transition_filters() noexcept -> void;
-    auto state_transition_normal() noexcept -> void;
-    auto state_transition_sync() noexcept -> void;
 
     Base(
         const api::Session& api,
         const Type type,
         const node::internal::Config& config,
         std::string_view seednode,
-        std::string_view syncEndpoint,
         node::Endpoints endpoints) noexcept;
 };
 }  // namespace opentxs::blockchain::node::implementation

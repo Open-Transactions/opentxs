@@ -4,6 +4,9 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 add_subdirectory(bitcoin)
-add_subdirectory(connectionmanager)
-add_subdirectory(otdht)
-add_subdirectory(peer)
+
+if(OT_BLOCKCHAIN_EXPORT)
+  add_subdirectory(connectionmanager)
+  add_subdirectory(otdht)
+  add_subdirectory(peer)
+endif()

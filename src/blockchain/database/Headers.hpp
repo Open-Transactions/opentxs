@@ -114,6 +114,7 @@ public:
         -> std::unique_ptr<block::Header>;
 
     auto ApplyUpdate(const node::UpdateTransaction& update) noexcept -> bool;
+    auto ReportTip() noexcept -> void;
 
     Headers(
         const api::Session& api,
@@ -136,7 +137,7 @@ private:
     const blockchain::Type chain_;
     mutable std::mutex lock_;
     network::zeromq::socket::Raw publish_tip_internal_;
-    network::zeromq::socket::Raw publish_tip_;
+    network::zeromq::socket::Raw to_blockchain_api_;
     LastUpdate last_update_;
 
     auto best() const noexcept -> block::Position;
@@ -157,5 +158,8 @@ private:
         MDB_txn* parent) const noexcept -> bool;
     auto recent_hashes(const Lock& lock, alloc::Default alloc) const noexcept
         -> Vector<block::Hash>;
+
+    auto report(const Lock&) noexcept -> void;
+    auto report(const Lock&, const block::Position& tip) noexcept -> void;
 };
 }  // namespace opentxs::blockchain::database

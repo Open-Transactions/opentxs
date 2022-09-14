@@ -85,7 +85,6 @@ private:
     network::zeromq::socket::Raw& to_process_;
     std::optional<block::Position> last_scanned_;
     std::optional<block::Position> filter_tip_;
-    bool enabled_;
     bool index_ready_;
 
     auto caught_up() const noexcept -> bool;

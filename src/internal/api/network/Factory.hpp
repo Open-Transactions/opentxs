@@ -66,6 +66,8 @@ auto NetworkAPI(
     -> std::unique_ptr<api::network::Network>;
 auto OTDHT(
     const api::Session& api,
+    const network::zeromq::Context& zmq,
+    const api::session::Endpoints& endpoints,
     const api::network::Blockchain& blockchain) noexcept
     -> std::unique_ptr<api::network::OTDHT>;
 }  // namespace opentxs::factory

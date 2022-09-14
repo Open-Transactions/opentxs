@@ -9,13 +9,13 @@
 
 #include "blockchain/node/filteroracle/CfheaderDownloader.hpp"
 #include "blockchain/node/filteroracle/CfilterDownloader.hpp"
-#include "internal/api/network/Blockchain.hpp"
+#include "internal/api/session/Endpoints.hpp"
 #include "internal/blockchain/node/Endpoints.hpp"
 #include "internal/blockchain/node/Manager.hpp"
 #include "internal/network/zeromq/Context.hpp"
 #include "internal/util/LogMacros.hpp"
-#include "opentxs/api/network/Blockchain.hpp"
 #include "opentxs/api/network/Network.hpp"
+#include "opentxs/api/session/Endpoints.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/blockchain/node/Manager.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
@@ -25,10 +25,20 @@
 namespace opentxs::blockchain::node::filteroracle
 {
 Data::Data(const api::Session& api, const node::Manager& node) noexcept
-    : filter_notifier_(api.Network().Blockchain().Internal().FilterUpdate())
-    , db_()
+    : db_()
     , last_sync_progress_()
     , last_broadcast_()  // TODO allocator
+    , to_blockchain_api_([&] {
+        using Type = opentxs::network::zeromq::socket::Type;
+        auto out = api.Network().ZeroMQ().Internal().RawSocket(Type::Push);
+        const auto endpoint = UnallocatedCString{
+            api.Endpoints().Internal().Internal().BlockchainMessageRouter()};
+        const auto rc = out.Connect(endpoint.c_str());
+
+        OT_ASSERT(rc);
+
+        return out;
+    }())
     , filter_notifier_internal_([&] {
         using Socket = network::zeromq::socket::Type;
         auto socket =

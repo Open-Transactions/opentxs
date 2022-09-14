@@ -39,7 +39,6 @@ public:
     using Endpoints = Vector<CString>;
 
     virtual auto AddPeer(std::string_view endpoint) const noexcept -> bool = 0;
-    virtual auto ConnectedPeers() const noexcept -> Endpoints = 0;
     virtual auto DeletePeer(std::string_view endpoint) const noexcept
         -> bool = 0;
     OPENTXS_NO_EXPORT virtual auto Internal() const noexcept

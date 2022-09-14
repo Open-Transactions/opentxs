@@ -8,6 +8,7 @@
 #include "internal/util/Log.hpp"  // IWYU pragma: associated
 
 #include <atomic>
+#include <memory>
 
 #include "opentxs/network/zeromq/ZeroMQ.hpp"
 #include "opentxs/util/Container.hpp"
@@ -25,19 +26,22 @@ auto Log::Endpoint() noexcept -> const char*
 
 auto Log::SetVerbosity(const int level) noexcept -> void
 {
-    static auto& logger = GetLogger();
-    logger.verbosity_ = level;
+    static auto logger = GetLogger();
+
+    if (logger) { logger->verbosity_ = level; }
 }
 
 auto Log::Shutdown() noexcept -> void
 {
-    static auto& logger = GetLogger();
-    logger.Stop();
+    static auto logger = GetLogger();
+
+    if (logger) { logger->Stop(); }
 }
 
 auto Log::Start() noexcept -> void
 {
-    static auto& logger = GetLogger();
-    logger.Start();
+    static auto logger = GetLogger();
+
+    if (logger) { logger->Start(); }
 }
 }  // namespace opentxs::internal

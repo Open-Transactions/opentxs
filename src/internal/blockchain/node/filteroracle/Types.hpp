@@ -31,9 +31,11 @@ enum class DownloadJob : OTZMQWorkType {
 // WARNING update print function if new values are added or removed
 enum class BlockIndexerJob : OTZMQWorkType {
     shutdown = value(WorkType::Shutdown),
-    header = value(WorkType::BlockchainNewHeader),
-    reorg = value(WorkType::BlockchainReorg),
+    block_ready = value(WorkType::BlockchainBlockAvailable),
     reindex = OT_ZMQ_INTERNAL_SIGNAL + 0,
+    report = OT_ZMQ_BLOCKCHAIN_REPORT_STATUS,
+    reorg = OT_ZMQ_REORG_SIGNAL,
+    header = OT_ZMQ_NEW_BLOCK_HEADER_SIGNAL,
     full_block = OT_ZMQ_NEW_FULL_BLOCK_SIGNAL,
     init = OT_ZMQ_INIT_SIGNAL,
     statemachine = OT_ZMQ_STATE_MACHINE_SIGNAL,

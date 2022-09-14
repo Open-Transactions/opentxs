@@ -27,6 +27,7 @@ enum class BlockFetcherJob : OTZMQWorkType {
     header = value(WorkType::BlockchainNewHeader),
     reorg = value(WorkType::BlockchainReorg),
     heartbeat = OT_ZMQ_INTERNAL_SIGNAL + 0u,
+    report = OT_ZMQ_BLOCKCHAIN_REPORT_STATUS,
     init = OT_ZMQ_INIT_SIGNAL,
     statemachine = OT_ZMQ_STATE_MACHINE_SIGNAL,
 };

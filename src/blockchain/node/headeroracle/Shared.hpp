@@ -157,6 +157,7 @@ public:
         block::Hash& prior,
         Vector<block::Hash>& hashes,
         const network::otdht::Data& data) noexcept -> std::size_t;
+    auto Report() noexcept -> void;
     auto SubmitBlock(const ReadView in) noexcept -> void;
 
     Shared(

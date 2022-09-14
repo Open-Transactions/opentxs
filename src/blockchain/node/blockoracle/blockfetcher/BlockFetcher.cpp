@@ -42,6 +42,7 @@ auto print(BlockFetcherJob job) noexcept -> std::string_view
             {Job::header, "header"sv},
             {Job::reorg, "reorg"sv},
             {Job::heartbeat, "heartbeat"sv},
+            {Job::report, "report"sv},
             {Job::init, "init"sv},
             {Job::statemachine, "statemachine"sv},
         };

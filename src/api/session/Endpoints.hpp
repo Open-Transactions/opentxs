@@ -54,18 +54,22 @@ public:
     auto BlockchainBlockAvailable() const noexcept -> std::string_view final;
     auto BlockchainBlockDownloadQueue() const noexcept
         -> std::string_view final;
-    auto BlockchainBlockUpdated(const opentxs::blockchain::Type chain)
-        const noexcept -> std::string_view final;
+    auto BlockchainBlockOracleProgress() const noexcept
+        -> std::string_view final;
     auto BlockchainMempool() const noexcept -> std::string_view final;
+    auto BlockchainMessageRouter() const noexcept -> std::string_view final;
     auto BlockchainNewFilter() const noexcept -> std::string_view final;
     auto BlockchainPeer() const noexcept -> std::string_view final;
     auto BlockchainPeerConnection() const noexcept -> std::string_view final;
     auto BlockchainReorg() const noexcept -> std::string_view final;
+    auto BlockchainReportStatus() const noexcept -> std::string_view final;
     auto BlockchainScanProgress() const noexcept -> std::string_view final;
     auto BlockchainStartupPublish() const noexcept -> std::string_view final;
     auto BlockchainStartupPull() const noexcept -> std::string_view final;
     auto BlockchainStateChange() const noexcept -> std::string_view final;
     auto BlockchainSyncProgress() const noexcept -> std::string_view final;
+    auto BlockchainSyncServerProgress() const noexcept
+        -> std::string_view final;
     auto BlockchainSyncServerUpdated() const noexcept -> std::string_view final;
     auto BlockchainTransactions() const noexcept -> std::string_view final;
     auto BlockchainTransactions(const identifier::Nym& nym) const noexcept
@@ -84,6 +88,7 @@ public:
     auto OTDHTBlockchain(opentxs::blockchain::Type chain) const noexcept
         -> std::string_view final;
     auto OTDHTNodePublish() const noexcept -> std::string_view final;
+    auto OTDHTNodePull() const noexcept -> std::string_view final;
     auto OTDHTNodeRouter() const noexcept -> std::string_view final;
     auto OTDHTWallet() const noexcept -> std::string_view final;
     auto PairEvent() const noexcept -> std::string_view final;
@@ -126,17 +131,20 @@ private:
     const CString blockchain_balance_;
     const CString blockchain_block_available_;
     const CString blockchain_block_download_queue_;
-    const BlockchainMap blockchain_block_updated_;
     const CString blockchain_mempool_;
+    const CString blockchain_message_router_;
+    const CString blockchain_oracle_progress_;
     const CString blockchain_new_filter_;
     const CString blockchain_peer_;
     const CString blockchain_peer_connection_;
     const CString blockchain_reorg_;
+    const CString blockchain_report_status_;
     const CString blockchain_scan_progress_;
     const CString blockchain_startup_publish_;
     const CString blockchain_startup_pull_;
     const CString blockchain_state_change_;
     const CString blockchain_sync_progress_;
+    const CString blockchain_sync_server_progress_;
     const CString blockchain_server_updated_;
     const CString blockchain_transactions_;
     const CString blockchain_wallet_updated_;
@@ -153,6 +161,7 @@ private:
     const BlockchainMap otdht_blockchain_;
     const CString otdht_node_router_;
     const CString otdht_node_publish_;
+    const CString otdht_node_pull_;
     const CString otdht_wallet_;
     const CString pair_event_;
     const CString peer_reply_update_;

@@ -45,7 +45,7 @@ Network::Network(
     : asio_(asio)
     , zmq_(zmq)
     , blockchain_(std::move(blockchain))
-    , otdht_(factory::OTDHT(api, *blockchain_))
+    , otdht_(factory::OTDHT(api, zmq, endpoints, *blockchain_))
 {
     OT_ASSERT(blockchain_);
     OT_ASSERT(otdht_);
@@ -58,7 +58,7 @@ auto Network::Start(
     const std::filesystem::path& dataFolder,
     const Options& args) noexcept -> void
 {
-    blockchain_->Internal().Init(crypto, legacy, dataFolder, args);
+    blockchain_->Internal().Init(api, crypto, legacy, dataFolder, args);
     otdht_->Internal().Start(api);
 }
 

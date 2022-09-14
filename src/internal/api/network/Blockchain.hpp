@@ -9,11 +9,9 @@
 #include <memory>
 #include <string_view>
 
-#include "opentxs/network/otdht/State.hpp"
-#include "opentxs/network/otdht/Types.hpp"
+#include "opentxs/blockchain/Types.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
-#include "opentxs/util/WorkType.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
@@ -42,17 +40,6 @@ class Database;
 }  // namespace database
 }  // namespace blockchain
 
-namespace network
-{
-namespace zeromq
-{
-namespace socket
-{
-class Publish;
-}  // namespace socket
-}  // namespace zeromq
-}  // namespace network
-
 class Options;
 // }  // namespace v1
 }  // namespace opentxs
@@ -67,42 +54,18 @@ public:
 
     virtual auto AddSyncServer(const std::string_view endpoint) const noexcept
         -> bool = 0;
-    virtual auto BlockAvailableEndpoint() const noexcept
-        -> std::string_view = 0;
-    virtual auto BlockQueueUpdateEndpoint() const noexcept
-        -> std::string_view = 0;
-    virtual auto ConnectedSyncServers() const noexcept -> Endpoints = 0;
     virtual auto Database() const noexcept
         -> const opentxs::blockchain::database::common::Database& = 0;
     virtual auto DeleteSyncServer(
         const std::string_view endpoint) const noexcept -> bool = 0;
-    virtual auto FilterUpdate() const noexcept
-        -> const opentxs::network::zeromq::socket::Publish& = 0;
     virtual auto GetSyncServers(alloc::Default alloc = {}) const noexcept
         -> Endpoints = 0;
-    virtual auto Hello(alloc::Default alloc) const noexcept
-        -> opentxs::network::otdht::StateData = 0;
     virtual auto IsEnabled(const opentxs::blockchain::Type chain) const noexcept
         -> bool = 0;
-    virtual auto Mempool() const noexcept
-        -> const opentxs::network::zeromq::socket::Publish& = 0;
-    virtual auto PeerUpdate() const noexcept
-        -> const opentxs::network::zeromq::socket::Publish& = 0;
-    virtual auto PublishStartup(
-        const opentxs::blockchain::Type chain,
-        OTZMQWorkType type) const noexcept -> bool = 0;
-    virtual auto ReorgEndpoint() const noexcept -> std::string_view = 0;
-    virtual auto ReportProgress(
-        const opentxs::blockchain::Type chain,
-        const opentxs::blockchain::block::Height current,
-        const opentxs::blockchain::block::Height target) const noexcept
-        -> void = 0;
     virtual auto RestoreNetworks() const noexcept -> void = 0;
-    virtual auto UpdatePeer(
-        const opentxs::blockchain::Type chain,
-        const std::string_view address) const noexcept -> void = 0;
 
     virtual auto Init(
+        std::shared_ptr<const api::Session> api,
         const api::crypto::Blockchain& crypto,
         const api::Legacy& legacy,
         const std::filesystem::path& dataFolder,

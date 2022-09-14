@@ -75,6 +75,11 @@ auto Blockchain::Start(const Chain type, const std::string_view seednode)
     return imp_->Start(type, seednode);
 }
 
+auto Blockchain::Stats() const noexcept -> opentxs::blockchain::node::Stats
+{
+    return imp_->Stats();
+}
+
 auto Blockchain::Stop(const Chain type) const noexcept -> bool
 {
     return imp_->Stop(type);

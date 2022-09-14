@@ -209,7 +209,15 @@ auto Peer::Actor::check_registration() noexcept -> void
     for (const auto& chain : unregistered) {
         using DHTJob = opentxs::network::blockchain::DHTJob;
         blockchain_.at(chain).SendDeferred(
-            MakeWork(DHTJob::registration), __FILE__, __LINE__, true);
+            [] {
+                auto out = MakeWork(DHTJob::registration);
+                out.AddFrame(outgoing_peer_);
+
+                return out;
+            }(),
+            __FILE__,
+            __LINE__,
+            true);
     }
 
     if (unregistered.empty()) {
@@ -319,6 +327,8 @@ auto Peer::Actor::pipeline(const Work work, Message&& msg) noexcept -> void
     } else {
         pipeline_internal(work, std::move(msg));
     }
+
+    do_work();
 }
 
 auto Peer::Actor::pipeline_external(const Work work, Message&& msg) noexcept
@@ -352,8 +362,6 @@ auto Peer::Actor::pipeline_external(const Work work, Message&& msg) noexcept
                 .Flush();
         }
     }
-
-    do_work();
 }
 
 auto Peer::Actor::pipeline_internal(const Work work, Message&& msg) noexcept
@@ -389,8 +397,6 @@ auto Peer::Actor::pipeline_internal(const Work work, Message&& msg) noexcept
                 .Abort();
         }
     }
-
-    do_work();
 }
 
 auto Peer::Actor::process_chain_state(Message&& msg) noexcept -> void

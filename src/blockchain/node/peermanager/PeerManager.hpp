@@ -27,6 +27,8 @@
 #include "internal/blockchain/p2p/P2P.hpp"
 #include "internal/blockchain/p2p/bitcoin/Bitcoin.hpp"
 #include "internal/network/zeromq/Types.hpp"
+#include "internal/network/zeromq/socket/Raw.hpp"
+#include "internal/util/Mutex.hpp"
 #include "opentxs/Version.hpp"
 #include "opentxs/api/network/Network.hpp"
 #include "opentxs/blockchain/BlockchainType.hpp"
@@ -137,6 +139,7 @@ public:
         AddPeer = OT_ZMQ_INTERNAL_SIGNAL + 1,
         AddListener = OT_ZMQ_INTERNAL_SIGNAL + 2,
         IncomingPeer = OT_ZMQ_INTERNAL_SIGNAL + 3,
+        Report = OT_ZMQ_BLOCKCHAIN_REPORT_STATUS,
         StateMachine = OT_ZMQ_STATE_MACHINE_SIGNAL,
     };
 
@@ -245,8 +248,12 @@ private:
     mutable peermanager::Peers peers_;
     mutable std::mutex verified_lock_;
     mutable UnallocatedSet<int> verified_peers_;
+    mutable network::zeromq::socket::Raw to_blockchain_api_;
     std::promise<void> init_promise_;
     std::shared_future<void> init_;
+
+    auto report(const Lock&, std::string_view address = {}) const noexcept
+        -> void;
 
     auto pipeline(zmq::Message&& message) noexcept -> void;
     auto shutdown(std::promise<void>& promise) noexcept -> void;

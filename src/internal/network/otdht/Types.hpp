@@ -5,6 +5,7 @@
 
 #pragma once
 
+#include <cstdint>
 #include <string_view>
 
 #include "opentxs/util/WorkType.hpp"
@@ -40,6 +41,7 @@ enum class NodeJob : OTZMQWorkType {
     chain_state = value(WorkType::BlockchainStateChange),
     new_cfilter = value(WorkType::BlockchainNewFilter),
     new_peer = value(WorkType::SyncServerUpdated),
+    add_listener = OT_ZMQ_INTERNAL_SIGNAL + 0,
     registration = OT_ZMQ_REGISTER_SIGNAL,
     init = OT_ZMQ_INIT_SIGNAL,
     statemachine = OT_ZMQ_STATE_MACHINE_SIGNAL,
@@ -58,8 +60,28 @@ enum class PeerJob : OTZMQWorkType {
     init = OT_ZMQ_INIT_SIGNAL,
     statemachine = OT_ZMQ_STATE_MACHINE_SIGNAL,
 };
+// WARNING update print function if new values are added or removed
+enum class ListenerJob : OTZMQWorkType {
+    shutdown = value(WorkType::Shutdown),
+    chain_state = value(WorkType::BlockchainStateChange),
+    sync_request = value(WorkType::P2PBlockchainSyncRequest),
+    sync_reply = value(WorkType::P2PBlockchainSyncReply),
+    sync_push = value(WorkType::P2PBlockchainNewBlock),
+    sync_query = value(WorkType::P2PBlockchainSyncQuery),
+    response = value(WorkType::P2PResponse),
+    publish_contract = value(WorkType::P2PPublishContract),
+    query_contract = value(WorkType::P2PQueryContract),
+    pushtx = value(WorkType::P2PPushTransaction),
+    registration = OT_ZMQ_REGISTER_SIGNAL,
+    init = OT_ZMQ_INIT_SIGNAL,
+    statemachine = OT_ZMQ_STATE_MACHINE_SIGNAL,
+};
 
 auto print(Job) noexcept -> std::string_view;
 auto print(NodeJob) noexcept -> std::string_view;
 auto print(PeerJob) noexcept -> std::string_view;
+auto print(ListenerJob) noexcept -> std::string_view;
+
+constexpr auto outgoing_peer_ = std::uint8_t{0};
+constexpr auto incoming_peer_ = std::uint8_t{1};
 }  // namespace opentxs::network::otdht

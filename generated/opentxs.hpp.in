@@ -101,6 +101,7 @@
 #include "opentxs/blockchain/node/Manager.hpp"
 #endif  // OT_BLOCKCHAIN
 #include "opentxs/blockchain/node/SendResult.hpp"
+#include "opentxs/blockchain/node/Stats.hpp"
 #if OT_BLOCKCHAIN
 #include "opentxs/blockchain/node/TxoState.hpp"
 #include "opentxs/blockchain/node/TxoTag.hpp"

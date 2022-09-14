@@ -463,6 +463,7 @@ public:
         return wallet_.ReorgTo(
             data, tx, headers, account, subchain, index, reorg);
     }
+    auto ReportHeaderTip() noexcept -> void final { headers_.ReportTip(); }
     auto ReserveUTXO(
         const identifier::Nym& spender,
         const identifier::Generic& proposal,

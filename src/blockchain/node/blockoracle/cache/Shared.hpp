@@ -142,8 +142,7 @@ public:
         const blockchain::Type chain_;
         const bool save_blocks_;
         const std::size_t peer_target_;
-        opentxs::network::zeromq::socket::Raw block_available_;
-        opentxs::network::zeromq::socket::Raw cache_size_publisher_;
+        opentxs::network::zeromq::socket::Raw to_blockchain_api_;
         opentxs::network::zeromq::socket::Raw job_ready_;
         opentxs::network::zeromq::socket::Raw to_header_oracle_;
         opentxs::network::zeromq::socket::Raw to_block_fetcher_;

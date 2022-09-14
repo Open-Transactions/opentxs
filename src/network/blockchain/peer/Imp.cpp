@@ -17,7 +17,6 @@
 
 #include "blockchain/DownloadTask.hpp"
 #include "internal/api/network/Asio.hpp"
-#include "internal/api/session/Endpoints.hpp"
 #include "internal/api/session/Session.hpp"
 #include "internal/blockchain/database/Database.hpp"
 #include "internal/blockchain/database/Peer.hpp"
@@ -1281,7 +1280,7 @@ auto Peer::Imp::transition_state_run() noexcept -> void
 
     if (BlockchainProfile::server == config_.profile_) {
         pipeline.SubscribeFromThread(
-            api_.Endpoints().Internal().BlockchainBlockUpdated(chain_));
+            network_.Internal().Endpoints().block_tip_publish_);
     }
 
     transition_state(State::run);

@@ -16,6 +16,7 @@
 #include <boost/system/error_code.hpp>
 #include <algorithm>
 #include <array>
+#include <atomic>
 #include <chrono>
 #include <iomanip>
 #include <iosfwd>
@@ -26,10 +27,10 @@
 #include <type_traits>
 #include <utility>
 
-#include "blockchain/node/manager/SyncServer.hpp"
 #include "internal/api/crypto/Blockchain.hpp"
 #include "internal/api/network/Asio.hpp"
 #include "internal/api/network/Blockchain.hpp"
+#include "internal/api/session/Endpoints.hpp"
 #include "internal/api/session/Session.hpp"
 #include "internal/blockchain/Blockchain.hpp"
 #include "internal/blockchain/Params.hpp"
@@ -59,6 +60,7 @@
 #include "opentxs/api/network/Network.hpp"
 #include "opentxs/api/session/Contacts.hpp"
 #include "opentxs/api/session/Crypto.hpp"
+#include "opentxs/api/session/Endpoints.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/api/session/Wallet.hpp"
@@ -67,6 +69,7 @@
 #include "opentxs/blockchain/bitcoin/block/Transaction.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/blockchain/block/Header.hpp"
+#include "opentxs/blockchain/block/Position.hpp"
 #include "opentxs/blockchain/crypto/AddressStyle.hpp"
 #include "opentxs/blockchain/crypto/Element.hpp"
 #include "opentxs/blockchain/crypto/PaymentCode.hpp"
@@ -90,6 +93,7 @@
 #include "opentxs/network/zeromq/message/Frame.hpp"
 #include "opentxs/network/zeromq/message/FrameSection.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
+#include "opentxs/network/zeromq/message/Message.tpp"
 #include "opentxs/network/zeromq/socket/SocketType.hpp"
 #include "opentxs/network/zeromq/socket/Types.hpp"
 #include "opentxs/util/Allocator.hpp"
@@ -99,6 +103,8 @@
 #include "opentxs/util/Numbers.hpp"
 #include "opentxs/util/Options.hpp"
 #include "opentxs/util/Pimpl.hpp"
+#include "opentxs/util/Time.hpp"
+#include "opentxs/util/WorkType.hpp"
 #include "util/Work.hpp"
 
 namespace opentxs::blockchain::node::implementation
@@ -112,7 +118,6 @@ Base::Base(
     const Type type,
     const node::internal::Config& config,
     std::string_view seednode,
-    std::string_view syncEndpoint,
     node::Endpoints endpoints) noexcept
     : Worker(
           api,
@@ -143,6 +148,14 @@ Base::Base(
               {network::zeromq::socket::Type::Push,
                {
                    {endpoints.otdht_pull_,
+                    network::zeromq::socket::Direction::Connect},
+               }},
+              {network::zeromq::socket::Type::Push,
+               {
+                   {CString{api.Endpoints()
+                                .Internal()
+                                .Internal()
+                                .BlockchainMessageRouter()},
                     network::zeromq::socket::Direction::Connect},
                }},
           })
@@ -179,11 +192,7 @@ Base::Base(
           api_.Network().Blockchain().Internal().Database(),
           chain_,
           filter_type_))
-    , mempool_(
-          api_.Crypto().Blockchain(),
-          *database_p_,
-          api_.Network().Blockchain().Internal().Mempool(),
-          chain_)
+    , mempool_(api_, api_.Crypto().Blockchain(), chain_, *database_p_)
     , header_(factory::HeaderOracle(api, *this))
     , block_()
     , filter_p_(factory::BlockchainFilterOracle(api, *this, filter_type_))
@@ -207,29 +216,9 @@ Base::Base(
     , to_block_cache_(pipeline_.Internal().ExtraSocket(1))
     , to_wallet_(pipeline_.Internal().ExtraSocket(2))
     , to_dht_(pipeline_.Internal().ExtraSocket(3))
-    , start_(Clock::now())
-    , sync_endpoint_(syncEndpoint)
-    , sync_server_([&] {
-        if (config_.provide_sync_server_) {
-            return std::make_unique<base::SyncServer>(
-                api_,
-                database_,
-                header_,
-                filters_,
-                *this,
-                chain_,
-                filters_.DefaultType(),
-                endpoints_,
-                sync_endpoint_);
-        } else {
-            return std::unique_ptr<base::SyncServer>{};
-        }
-    }())
+    , to_blockchain_api_(pipeline_.Internal().ExtraSocket(4))
     , send_promises_()
     , heartbeat_(api_.Network().Asio().Internal().GetTimer())
-    , header_sync_()
-    , filter_sync_()
-    , state_(State::UpdatingHeaders)
     , init_promise_()
     , init_(init_promise_.get_future())
     , self_()
@@ -319,14 +308,12 @@ Base::Base(
     const api::Session& api,
     const Type type,
     const node::internal::Config& config,
-    std::string_view seednode,
-    std::string_view syncEndpoint) noexcept
+    std::string_view seednode) noexcept
     : Base(
           api,
           type,
           config,
           seednode,
-          syncEndpoint,
           alloc::Default{}  // TODO allocator
       )
 {
@@ -532,54 +519,6 @@ auto Base::init() noexcept -> void
     reset_heartbeat();
 }
 
-auto Base::IsWalletScanEnabled() const noexcept -> bool
-{
-    switch (state_.load()) {
-        case State::UpdatingHeaders:
-        case State::UpdatingBlocks:
-        case State::UpdatingFilters:
-        case State::UpdatingSyncData:
-        case State::Normal: {
-
-            return true;
-        }
-        default: {
-
-            return false;
-        }
-    }
-}
-
-auto Base::is_synchronized_blocks() const noexcept -> bool
-{
-    return block_.Tip().height_ >= this->target();
-}
-
-auto Base::is_synchronized_filters() const noexcept -> bool
-{
-    const auto target = this->target();
-    const auto progress =
-        filters_.Internal().Tip(filters_.DefaultType()).height_;
-
-    return (progress >= target);
-}
-
-auto Base::is_synchronized_headers() const noexcept -> bool
-{
-    return header_.IsSynchronized();
-}
-
-auto Base::is_synchronized_sync_server() const noexcept -> bool
-{
-    if (sync_server_) {
-
-        return sync_server_->Tip().height_ >= this->target();
-    } else {
-
-        return false;
-    }
-}
-
 auto Base::JobReady(const node::PeerManagerJobs type) const noexcept -> void
 {
     if (peer_p_) { peer_.JobReady(type); }
@@ -652,9 +591,6 @@ auto Base::pipeline(network::zeromq::Message&& in) noexcept -> void
             mempool_.Heartbeat();
             filters_.Internal().Heartbeat();
             peer_.Heartbeat();
-
-            if (sync_server_) { sync_server_->Heartbeat(); }
-
             do_work();
             reset_heartbeat();
         } break;
@@ -713,7 +649,7 @@ auto Base::process_filter_update(network::zeromq::Message&& in) noexcept -> void
     OT_ASSERT(2 < body.size());
 
     const auto height = body.at(2).as<block::Height>();
-    const auto target = this->target();
+    const auto target = header_.Target();
 
     {
         const auto progress =
@@ -729,8 +665,18 @@ auto Base::process_filter_update(network::zeromq::Message&& in) noexcept -> void
         }
     }
 
-    api_.Network().Blockchain().Internal().ReportProgress(
-        chain_, height, target);
+    to_blockchain_api_.SendDeferred(
+        [&] {
+            auto work = opentxs::network::zeromq::tagged_message(
+                WorkType::BlockchainSyncProgress);
+            work.AddFrame(chain_);
+            work.AddFrame(height);
+            work.AddFrame(target);
+
+            return work;
+        }(),
+        __FILE__,
+        __LINE__);
 }
 
 auto Base::process_send_to_address(network::zeromq::Message&& in) noexcept
@@ -1061,9 +1007,6 @@ auto Base::shutdown(std::promise<void>& promise) noexcept -> void
         self_.lock()->reset();
         pipeline_.Close();
         shutdown_sender_.Activate();
-
-        if (sync_server_) { sync_server_->Shutdown(); }
-
         peer_.Shutdown();
         filters_.Internal().Shutdown();
         shutdown_sender_.Close();
@@ -1097,6 +1040,7 @@ auto Base::Start(std::shared_ptr<const node::Manager> me) noexcept -> void
     filters_.Internal().Init(api, ptr);
     init_promise_.set_value();
     header_.Start(api, ptr);
+    filters_.Internal().Start();
     peer_.Start();
     wallet_.Internal().Init(api, ptr);
 }
@@ -1108,145 +1052,7 @@ auto Base::StartWallet() noexcept -> void
     }
 }
 
-auto Base::state_machine() noexcept -> bool
-{
-    if (false == running_.load()) { return false; }
-
-    const auto& log = LogTrace();
-    log(OT_PRETTY_CLASS())("Starting state machine for ")(print(chain_))
-        .Flush();
-
-    switch (state_.load()) {
-        case State::UpdatingHeaders: {
-            if (is_synchronized_headers()) {
-                header_sync_ = Clock::now();
-                const auto interval =
-                    std::chrono::duration_cast<std::chrono::nanoseconds>(
-                        header_sync_ - start_);
-                LogConsole()(print(chain_))(
-                    " block header chain synchronized in ")(interval)
-                    .Flush();
-
-                switch (config_.profile_) {
-                    case BlockchainProfile::mobile:
-                    case BlockchainProfile::desktop:
-                    case BlockchainProfile::desktop_native: {
-                        state_transition_filters();
-                    } break;
-                    case BlockchainProfile::server: {
-                        state_transition_blocks();
-                    } break;
-                    default: {
-                        LogAbort()(OT_PRETTY_CLASS())("invalid profile")
-                            .Flush();
-                    }
-                }
-            } else {
-                log(OT_PRETTY_CLASS())("updating ")(print(chain_))(
-                    " header oracle")
-                    .Flush();
-            }
-        } break;
-        case State::UpdatingBlocks: {
-            if (is_synchronized_blocks()) {
-                log(OT_PRETTY_CLASS())(print(chain_))(
-                    " block oracle is synchronized")
-                    .Flush();
-                state_transition_filters();
-            } else {
-                log(OT_PRETTY_CLASS())("updating ")(print(chain_))(
-                    " block oracle")
-                    .Flush();
-
-                break;
-            }
-        } break;
-        case State::UpdatingFilters: {
-            if (is_synchronized_filters()) {
-                filter_sync_ = Clock::now();
-                const auto interval =
-                    std::chrono::duration_cast<std::chrono::nanoseconds>(
-                        filter_sync_ - start_);
-                LogConsole()(print(chain_))(" cfilter chain synchronized in ")(
-                    interval)
-                    .Flush();
-
-                if (config_.provide_sync_server_) {
-                    state_transition_sync();
-                } else {
-                    state_transition_normal();
-                }
-            } else {
-                log(OT_PRETTY_CLASS())("updating ")(print(chain_))(
-                    " filter oracle")
-                    .Flush();
-
-                break;
-            }
-        } break;
-        case State::UpdatingSyncData: {
-            if (is_synchronized_sync_server()) {
-                log(OT_PRETTY_CLASS())(print(chain_))(
-                    " sync server is synchronized")
-                    .Flush();
-                state_transition_normal();
-            } else {
-                log(OT_PRETTY_CLASS())("updating ")(print(chain_))(
-                    " sync server")
-                    .Flush();
-
-                break;
-            }
-        } break;
-        case State::Normal:
-        default: {
-        }
-    }
-
-    log(OT_PRETTY_CLASS())("Completed state machine for ")(print(chain_))
-        .Flush();
-
-    return false;
-}
-
-auto Base::state_transition_blocks() noexcept -> void
-{
-    state_.store(State::UpdatingBlocks);
-}
-
-auto Base::state_transition_filters() noexcept -> void
-{
-    filters_.Internal().Start();
-    state_.store(State::UpdatingFilters);
-}
-
-auto Base::state_transition_normal() noexcept -> void
-{
-    state_.store(State::Normal);
-}
-
-auto Base::state_transition_sync() noexcept -> void
-{
-    OT_ASSERT(sync_server_);
-
-    sync_server_->Start();
-    state_.store(State::UpdatingSyncData);
-}
-
-auto Base::SyncTip() const noexcept -> block::Position
-{
-    static const auto blank = block::Position{};
-
-    if (sync_server_) {
-
-        return sync_server_->Tip();
-    } else {
-
-        return blank;
-    }
-}
-
-auto Base::target() const noexcept -> block::Height { return header_.Target(); }
+auto Base::state_machine() noexcept -> bool { return false; }
 
 auto Base::Wallet() const noexcept -> const node::Wallet& { return wallet_; }
 

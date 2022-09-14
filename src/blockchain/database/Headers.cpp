@@ -21,7 +21,7 @@
 #include "Proto.tpp"
 #include "blockchain/database/common/Database.hpp"
 #include "blockchain/node/UpdateTransaction.hpp"
-#include "internal/api/network/Blockchain.hpp"
+#include "internal/api/session/Endpoints.hpp"
 #include "internal/api/session/FactoryAPI.hpp"
 #include "internal/blockchain/bitcoin/block/Factory.hpp"
 #include "internal/blockchain/bitcoin/block/Header.hpp"  // IWYU pragma: keep
@@ -34,8 +34,8 @@
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/TSV.hpp"
-#include "opentxs/api/network/Blockchain.hpp"
 #include "opentxs/api/network/Network.hpp"
+#include "opentxs/api/session/Endpoints.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/blockchain/Types.hpp"
@@ -130,11 +130,11 @@ Headers::Headers(
 
         return out;
     }())
-    , publish_tip_([&] {
+    , to_blockchain_api_([&] {
         using Type = network::zeromq::socket::Type;
         auto out = api.Network().ZeroMQ().Internal().RawSocket(Type::Push);
         const auto rc = out.Connect(
-            api.Network().Blockchain().Internal().ReorgEndpoint().data());
+            api.Endpoints().Internal().BlockchainMessageRouter().data());
 
         OT_ASSERT(rc);
 
@@ -315,7 +315,7 @@ auto Headers::ApplyUpdate(const node::UpdateTransaction& update) noexcept
             LogConsole()(print(chain_))(
                 " reorg detected. Last common ancestor is ")(parent.print())
                 .Flush();
-            publish_tip_internal_.Send(
+            publish_tip_internal_.SendDeferred(
                 [&] {
                     auto work = MakeWork(OT_ZMQ_REORG_SIGNAL);
                     work.AddFrame(parent.hash_);
@@ -327,7 +327,7 @@ auto Headers::ApplyUpdate(const node::UpdateTransaction& update) noexcept
                 }(),
                 __FILE__,
                 __LINE__);
-            publish_tip_.Send(
+            to_blockchain_api_.SendDeferred(
                 [&] {
                     auto work = MakeWork(WorkType::BlockchainReorg);
                     work.AddFrame(chain_);
@@ -346,30 +346,7 @@ auto Headers::ApplyUpdate(const node::UpdateTransaction& update) noexcept
         auto visitor = IsSameTip{tip};
         auto isSame = std::visit(visitor, last_update_);
 
-        if (false == isSame) {
-            publish_tip_internal_.Send(
-                [&] {
-                    auto work = MakeWork(OT_ZMQ_NEW_BLOCK_HEADER_SIGNAL);
-                    work.AddFrame(tip.hash_);
-                    work.AddFrame(tip.height_);
-
-                    return work;
-                }(),
-                __FILE__,
-                __LINE__);
-            publish_tip_.Send(
-                [&] {
-                    auto work = MakeWork(WorkType::BlockchainNewHeader);
-                    work.AddFrame(chain_);
-                    work.AddFrame(tip.hash_);
-                    work.AddFrame(tip.height_);
-
-                    return work;
-                }(),
-                __FILE__,
-                __LINE__);
-            last_update_ = tip;
-        }
+        if (false == isSame) { report(lock, tip); }
     }
 
     return true;
@@ -704,6 +681,42 @@ auto Headers::recent_hashes(const Lock& lock, alloc::Default alloc)
         storage::lmdb::LMDB::Dir::Backward);
 
     return output;
+}
+
+auto Headers::report(const Lock& lock) noexcept -> void
+{
+    report(lock, best(lock));
+}
+
+auto Headers::report(const Lock&, const block::Position& tip) noexcept -> void
+{
+    publish_tip_internal_.SendDeferred(
+        [&] {
+            auto work = MakeWork(OT_ZMQ_NEW_BLOCK_HEADER_SIGNAL);
+            work.AddFrame(tip.hash_);
+            work.AddFrame(tip.height_);
+
+            return work;
+        }(),
+        __FILE__,
+        __LINE__);
+    to_blockchain_api_.SendDeferred(
+        [&] {
+            auto work = MakeWork(WorkType::BlockchainNewHeader);
+            work.AddFrame(chain_);
+            work.AddFrame(tip.hash_);
+            work.AddFrame(tip.height_);
+
+            return work;
+        }(),
+        __FILE__,
+        __LINE__);
+}
+
+auto Headers::ReportTip() noexcept -> void
+{
+    auto lock = Lock{lock_};
+    report(lock);
 }
 
 auto Headers::SiblingHashes() const noexcept -> database::Hashes

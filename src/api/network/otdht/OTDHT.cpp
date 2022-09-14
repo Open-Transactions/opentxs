@@ -8,30 +8,34 @@
 #include "api/network/otdht/OTDHT.hpp"       // IWYU pragma: associated
 #include "internal/api/network/Factory.hpp"  // IWYU pragma: associated
 
-#include "api/network/otdht/ChainEndpoint.hpp"
-#include "api/network/otdht/Disable.hpp"
-#include "api/network/otdht/Enable.hpp"
-#include "api/network/otdht/Start.hpp"
 #include "internal/api/network/Blockchain.hpp"
+#include "internal/api/session/Endpoints.hpp"
 #include "internal/network/otdht/Node.hpp"
-#include "internal/network/otdht/Server.hpp"
+#include "internal/network/otdht/Types.hpp"
+#include "internal/network/zeromq/Context.hpp"
+#include "internal/util/LogMacros.hpp"
 #include "opentxs/api/network/Blockchain.hpp"
-#include "opentxs/api/network/Network.hpp"
+#include "opentxs/api/session/Endpoints.hpp"
 #include "opentxs/api/session/Session.hpp"
-#include "opentxs/util/BlockchainProfile.hpp"
+#include "opentxs/network/zeromq/Context.hpp"
+#include "opentxs/network/zeromq/message/Message.hpp"
+#include "opentxs/network/zeromq/socket/SocketType.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Options.hpp"
+#include "util/Work.hpp"
 
 namespace opentxs::factory
 {
 auto OTDHT(
     const api::Session& api,
+    const network::zeromq::Context& zmq,
+    const api::session::Endpoints& endpoints,
     const api::network::Blockchain& blockchain) noexcept
     -> std::unique_ptr<api::network::OTDHT>
 {
     using ReturnType = api::network::implementation::OTDHT;
 
-    return std::make_unique<ReturnType>(api, blockchain);
+    return std::make_unique<ReturnType>(api, zmq, endpoints, blockchain);
 }
 }  // namespace opentxs::factory
 
@@ -39,10 +43,21 @@ namespace opentxs::api::network::implementation
 {
 OTDHT::OTDHT(
     const api::Session& api,
+    const opentxs::network::zeromq::Context& zmq,
+    const api::session::Endpoints& endpoints,
     const api::network::Blockchain& blockchain) noexcept
     : api_(api)
     , blockchain_(blockchain)
-    , node_()
+    , to_node_([&] {
+        auto out = zmq.Internal().RawSocket(
+            opentxs::network::zeromq::socket::Type::Push);
+        const auto rc =
+            out.Connect(endpoints.Internal().OTDHTNodePull().data());
+
+        OT_ASSERT(rc);
+
+        return out;
+    }())
 {
 }
 
@@ -51,33 +66,9 @@ auto OTDHT::AddPeer(std::string_view endpoint) const noexcept -> bool
     return blockchain_.Internal().AddSyncServer(endpoint);
 }
 
-auto OTDHT::ConnectedPeers() const noexcept -> Endpoints
-{
-    return blockchain_.Internal().ConnectedSyncServers();
-}
-
 auto OTDHT::DeletePeer(std::string_view endpoint) const noexcept -> bool
 {
     return blockchain_.Internal().DeleteSyncServer(endpoint);
-}
-
-auto OTDHT::Disable(const Chain chain) const noexcept -> void
-{
-    const auto visitor = DisableChain{chain};
-    std::visit(visitor, *node_.lock());
-}
-
-auto OTDHT::Enable(const Chain chain) const noexcept -> void
-{
-    const auto visitor = EnableChain{chain};
-    std::visit(visitor, *node_.lock());
-}
-
-auto OTDHT::Endpoint(const Chain chain) const noexcept -> std::string_view
-{
-    static const auto visitor = ChainEndpoint{chain};
-
-    return std::visit(visitor, *node_.lock_shared());
 }
 
 auto OTDHT::KnownPeers(alloc::Default alloc) const noexcept -> Endpoints
@@ -120,21 +111,7 @@ auto OTDHT::Start(std::shared_ptr<const api::Session> api) noexcept -> void
     } catch (...) {
     }
 
-    switch (options.BlockchainProfile()) {
-        case BlockchainProfile::mobile:
-        case BlockchainProfile::desktop: {
-            opentxs::network::otdht::Node{api_}.Init(api);
-        } break;
-        case BlockchainProfile::server: {
-            if (options.ProvideBlockchainSyncServer()) {
-                *node_.lock() = opentxs::network::otdht::Server{
-                    api_, api_.Network().ZeroMQ()};
-            }
-        } break;
-        case BlockchainProfile::desktop_native:
-        default: {
-        }
-    }
+    opentxs::network::otdht::Node{api_}.Init(api);
 }
 
 auto OTDHT::StartListener(
@@ -143,11 +120,21 @@ auto OTDHT::StartListener(
     std::string_view updateEndpoint,
     std::string_view publicUpdateEndpoint) const noexcept -> bool
 {
-    const auto visitor = StartServer{
-        syncEndpoint, publicSyncEndpoint, updateEndpoint, publicUpdateEndpoint};
+    return to_node_.lock()->SendDeferred(
+        [&] {
+            using Job = opentxs::network::otdht::NodeJob;
+            auto out = MakeWork(Job::add_listener);
+            out.AddFrame(syncEndpoint.data(), syncEndpoint.size());
+            out.AddFrame(publicSyncEndpoint.data(), publicSyncEndpoint.size());
+            out.AddFrame(updateEndpoint.data(), updateEndpoint.size());
+            out.AddFrame(
+                publicUpdateEndpoint.data(), publicUpdateEndpoint.size());
 
-    return std::visit(visitor, *node_.lock());
+            return out;
+        }(),
+        __FILE__,
+        __LINE__);
 }
 
-OTDHT::~OTDHT() { *node_.lock() = std::monostate{}; }
+OTDHT::~OTDHT() = default;
 }  // namespace opentxs::api::network::implementation

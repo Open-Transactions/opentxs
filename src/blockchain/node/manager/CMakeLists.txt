@@ -9,8 +9,6 @@ target_sources(
     "${opentxs_SOURCE_DIR}/src/internal/blockchain/node/Manager.hpp"
     "Manager.cpp"
     "Manager.hpp"
-    "SyncServer.cpp"
-    "SyncServer.hpp"
 )
 target_include_directories(
   opentxs-common SYSTEM PRIVATE "${opentxs_SOURCE_DIR}/deps/cs_libguarded/src"

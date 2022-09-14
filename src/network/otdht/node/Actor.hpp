@@ -93,6 +93,8 @@ private:
     zeromq::socket::Raw& publish_;
     zeromq::socket::Raw& router_;
     Peers peers_;
+    Peers listeners_;
+    Set<CString> listen_endpoints_;
 
     auto get_peers() const noexcept -> Set<CString>;
     auto get_peers(Message& out) const noexcept -> void;
@@ -104,6 +106,7 @@ private:
     auto pipeline(const Work work, Message&& msg) noexcept -> void;
     auto pipeline_other(const Work work, Message&& msg) noexcept -> void;
     auto pipeline_router(const Work work, Message&& msg) noexcept -> void;
+    auto process_add_listener(Message&& msg) noexcept -> void;
     auto process_cfilter(
         opentxs::blockchain::Type chain,
         opentxs::blockchain::block::Position&& tip) noexcept -> void;

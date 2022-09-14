@@ -72,6 +72,11 @@ BlockFetcher::Actor::Actor(
               using Dir = network::zeromq::socket::Direction;
               auto sub = network::zeromq::EndpointArgs{alloc};
               sub.emplace_back(
+                  CString{
+                      api->Endpoints().Internal().BlockchainReportStatus(),
+                      alloc},
+                  Dir::Connect);
+              sub.emplace_back(
                   CString{api->Endpoints().BlockchainReorg(), alloc},
                   Dir::Connect);
               sub.emplace_back(
@@ -102,16 +107,23 @@ BlockFetcher::Actor::Actor(
                            .Endpoints()
                            .block_fetcher_job_ready_publish_,
                        Dir::Bind},
-                  }));
+                  }));  // NOTE job_ready_
               out.emplace_back(std::make_pair<Socket, Args>(
                   Socket::Publish,
                   {
-                      {CString{
-                           api->Endpoints().Internal().BlockchainBlockUpdated(
-                               node->Internal().Chain()),
-                           alloc},
+                      {node->Internal().Endpoints().block_tip_publish_,
                        Dir::Bind},
-                  }));
+                  }));  // NOTE tip_updated_
+              out.emplace_back(std::make_pair<Socket, Args>(
+                  Socket::Push,
+                  {
+                      {CString{
+                           api->Endpoints()
+                               .Internal()
+                               .BlockchainMessageRouter(),
+                           alloc},
+                       Dir::Connect},
+                  }));  // NOTE to_blockchain_api_
 
               return out;
           }())
@@ -123,6 +135,7 @@ BlockFetcher::Actor::Actor(
     , header_oracle_(node_.HeaderOracle())
     , job_ready_(pipeline_.Internal().ExtraSocket(0))
     , tip_updated_(pipeline_.Internal().ExtraSocket(1))
+    , to_blockchain_api_(pipeline_.Internal().ExtraSocket(2))
     , chain_(node_.Internal().Chain())
     , data_(shared_->data_)
     , job_available_(api_.Network().Asio().Internal().GetTimer())
@@ -138,9 +151,26 @@ auto BlockFetcher::Actor::broadcast_tip(
 
     OT_ASSERT(saved);
 
+    broadcast_tip(tip);
+}
+
+auto BlockFetcher::Actor::broadcast_tip(const block::Position& tip) noexcept
+    -> void
+{
     tip_updated_.SendDeferred(
         [&] {
             auto msg = MakeWork(OT_ZMQ_NEW_FULL_BLOCK_SIGNAL);
+            msg.AddFrame(tip.height_);
+            msg.AddFrame(tip.hash_);
+
+            return msg;
+        }(),
+        __FILE__,
+        __LINE__);
+    to_blockchain_api_.SendDeferred(
+        [&] {
+            auto msg = MakeWork(WorkType::BlockchainBlockOracleProgress);
+            msg.AddFrame(chain_);
             msg.AddFrame(tip.height_);
             msg.AddFrame(tip.hash_);
 
@@ -206,22 +236,25 @@ auto BlockFetcher::Actor::pipeline(const Work work, Message&& msg) noexcept
     -> void
 {
     switch (work) {
-        case Work::shutdown: {
-            shutdown_actor();
-        } break;
         case Work::heartbeat: {
             process_heartbeat(std::move(msg));
         } break;
         case Work::reorg: {
             process_reorg(std::move(msg));
         } break;
-        case Work::init: {
-            do_init();
-        } break;
-        case Work::header:
-        case Work::statemachine: {
+        case Work::header: {
             do_work();
         } break;
+        case Work::report: {
+            process_report(std::move(msg));
+        } break;
+        case Work::shutdown:
+        case Work::init:
+        case Work::statemachine: {
+            LogAbort()(OT_PRETTY_CLASS())(name_)(": unhandled message type ")(
+                print(work))
+                .Abort();
+        }
         default: {
             LogAbort()(OT_PRETTY_CLASS())(name_)(": unhandled message type ")(
                 static_cast<OTZMQWorkType>(work))
@@ -263,10 +296,21 @@ auto BlockFetcher::Actor::process_reorg(Message&& msg) noexcept -> void
             tip = header_oracle_.GetPosition(tip.height_ - 1);
         }
 
-        if (data.ReviseTip(tip)) { broadcast_tip(data, tip); }
+        if (data.ReviseTip(tip)) {
+            broadcast_tip(data, tip);
+        } else {
+            log_(OT_PRETTY_CLASS())(name_)(": new tip ")(
+                tip)(" matches previous value")
+                .Flush();
+        }
     }
 
     do_work();
+}
+
+auto BlockFetcher::Actor::process_report(Message&& msg) noexcept -> void
+{
+    broadcast_tip(data_.lock()->Tip());
 }
 
 auto BlockFetcher::Actor::publish_job_ready() noexcept -> void

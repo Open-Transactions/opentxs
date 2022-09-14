@@ -10,9 +10,9 @@ add_subdirectory(otdht)
 target_sources(
   opentxs-common
   PRIVATE
-    "${opentxs_SOURCE_DIR}/src/internal/api/network/Asio.hpp"
     "${opentxs_SOURCE_DIR}/src/internal/api/network/Factory.hpp"
     "${opentxs_SOURCE_DIR}/src/internal/api/network/Network.hpp"
+    "${opentxs_SOURCE_DIR}/src/internal/api/network/Types.hpp"
     "Network.cpp"
     "Network.hpp"
     "ZAP.cpp"
@@ -21,7 +21,6 @@ target_sources(
     "ZMQ.hpp"
 )
 set(cxx-install-headers
-    "${opentxs_SOURCE_DIR}/include/opentxs/api/network/Asio.hpp"
     "${opentxs_SOURCE_DIR}/include/opentxs/api/network/Network.hpp"
     "${opentxs_SOURCE_DIR}/include/opentxs/api/network/ZAP.hpp"
     "${opentxs_SOURCE_DIR}/include/opentxs/api/network/ZMQ.hpp"

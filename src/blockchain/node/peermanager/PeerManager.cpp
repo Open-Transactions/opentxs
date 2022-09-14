@@ -17,19 +17,19 @@
 #include <utility>
 
 #include "core/Worker.hpp"
-#include "internal/api/network/Blockchain.hpp"
 #include "internal/api/session/Endpoints.hpp"
 #include "internal/blockchain/Params.hpp"
 #include "internal/blockchain/bitcoin/block/Transaction.hpp"
 #include "internal/blockchain/node/Endpoints.hpp"
 #include "internal/blockchain/node/Factory.hpp"
 #include "internal/blockchain/p2p/P2P.hpp"  // IWYU pragma: keep
+#include "internal/network/zeromq/Context.hpp"
 #include "internal/network/zeromq/Types.hpp"
 #include "internal/network/zeromq/socket/Pipeline.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/Mutex.hpp"
-#include "opentxs/api/network/Blockchain.hpp"
 #include "opentxs/api/network/Network.hpp"
+#include "opentxs/api/session/Endpoints.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/blockchain/BlockchainType.hpp"
@@ -37,11 +37,13 @@
 #include "opentxs/blockchain/p2p/Address.hpp"
 #include "opentxs/blockchain/p2p/Types.hpp"
 #include "opentxs/core/ByteArray.hpp"
+#include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/network/zeromq/Pipeline.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
 #include "opentxs/network/zeromq/message/FrameIterator.hpp"
 #include "opentxs/network/zeromq/message/FrameSection.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
+#include "opentxs/network/zeromq/socket/SocketType.hpp"
 #include "opentxs/network/zeromq/socket/Types.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Log.hpp"
@@ -117,10 +119,23 @@ PeerManager::PeerManager(
     , peers_(api, config, node_, database_, *this, endpoints, chain, seednode)
     , verified_lock_()
     , verified_peers_()
+    , to_blockchain_api_([&] {
+        using Type = opentxs::network::zeromq::socket::Type;
+        auto out = api.Network().ZeroMQ().Internal().RawSocket(Type::Push);
+        const auto endpoint = UnallocatedCString{
+            api.Endpoints().Internal().Internal().BlockchainMessageRouter()};
+        const auto rc = out.Connect(endpoint.c_str());
+
+        OT_ASSERT(rc);
+
+        return out;
+    }())
     , init_promise_()
     , init_(init_promise_.get_future())
 {
-    init_executor({endpoints.shutdown_publish_.c_str()});
+    init_executor(
+        {api_.Endpoints().Internal().BlockchainReportStatus().data(),
+         endpoints.shutdown_publish_.c_str()});
 }
 
 auto PeerManager::AddIncomingPeer(const int id, std::uintptr_t endpoint)
@@ -331,10 +346,10 @@ auto PeerManager::pipeline(zmq::Message&& message) noexcept -> void
             {
                 auto lock = Lock{verified_lock_};
                 verified_peers_.erase(id);
+                report(lock);
             }
 
             peers_.Disconnect(id);
-            api_.Network().Blockchain().Internal().UpdatePeer(chain_, "");
             do_work();
         } break;
         case Work::AddPeer: {
@@ -391,6 +406,10 @@ auto PeerManager::pipeline(zmq::Message&& message) noexcept -> void
             peers_.AddIncoming(id, std::move(endpoint));
             do_work();
         } break;
+        case Work::Report: {
+            auto lock = Lock{verified_lock_};
+            report(lock);
+        } break;
         case Work::StateMachine: {
             do_work();
         } break;
@@ -398,6 +417,22 @@ auto PeerManager::pipeline(zmq::Message&& message) noexcept -> void
             OT_FAIL;
         }
     }
+}
+
+auto PeerManager::report(const Lock&, std::string_view address) const noexcept
+    -> void
+{
+    to_blockchain_api_.SendDeferred(
+        [&] {
+            auto work = MakeWork(WorkType::BlockchainPeerAdded);
+            work.AddFrame(chain_);
+            work.AddFrame(address.data(), address.size());
+            work.AddFrame(verified_peers_.size());
+
+            return work;
+        }(),
+        __FILE__,
+        __LINE__);
 }
 
 auto PeerManager::Resolve(std::string_view host, std::uint16_t post) noexcept
@@ -441,12 +476,9 @@ auto PeerManager::state_machine() noexcept -> bool
 auto PeerManager::VerifyPeer(const int id, const UnallocatedCString& address)
     const noexcept -> void
 {
-    {
-        auto lock = Lock{verified_lock_};
-        verified_peers_.emplace(id);
-    }
-
-    api_.Network().Blockchain().Internal().UpdatePeer(chain_, address);
+    auto lock = Lock{verified_lock_};
+    verified_peers_.emplace(id);
+    report(lock, address);
 }
 
 PeerManager::~PeerManager() { signal_shutdown().get(); }

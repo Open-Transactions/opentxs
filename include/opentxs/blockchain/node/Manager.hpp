@@ -9,7 +9,6 @@
 
 #include <future>
 
-#include "opentxs/blockchain/block/Position.hpp"
 #include "opentxs/blockchain/node/Types.hpp"
 #include "opentxs/util/Types.hpp"
 
@@ -103,7 +102,6 @@ public:
         const Amount amount,
         const UnallocatedCString& memo = {}) const noexcept
         -> PendingOutgoing = 0;
-    virtual auto SyncTip() const noexcept -> block::Position = 0;
     virtual auto Wallet() const noexcept -> const node::Wallet& = 0;
 
     virtual auto Connect() noexcept -> bool = 0;

@@ -18,8 +18,10 @@ public:
     static auto Asio() noexcept -> std::string_view;
     static auto ContextShutdown() noexcept -> std::string_view;
 
-    virtual auto BlockchainBlockUpdated(const opentxs::blockchain::Type chain)
-        const noexcept -> std::string_view = 0;
+    virtual auto BlockchainMessageRouter() const noexcept
+        -> std::string_view = 0;
+    virtual auto BlockchainReportStatus() const noexcept
+        -> std::string_view = 0;
     virtual auto BlockchainStartupPublish() const noexcept
         -> std::string_view = 0;
     virtual auto BlockchainStartupPull() const noexcept -> std::string_view = 0;
@@ -27,6 +29,7 @@ public:
     virtual auto OTDHTBlockchain(opentxs::blockchain::Type chain) const noexcept
         -> std::string_view = 0;
     virtual auto OTDHTNodePublish() const noexcept -> std::string_view = 0;
+    virtual auto OTDHTNodePull() const noexcept -> std::string_view = 0;
     virtual auto OTDHTNodeRouter() const noexcept -> std::string_view = 0;
     virtual auto OTDHTWallet() const noexcept -> std::string_view = 0;
     virtual auto ProcessPushNotification() const noexcept

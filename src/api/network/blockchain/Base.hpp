@@ -18,13 +18,12 @@
 #include "opentxs/api/network/BlockchainHandle.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
+#include "opentxs/blockchain/node/Stats.hpp"
 #include "opentxs/core/Amount.hpp"
-#include "opentxs/network/otdht/Types.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/BlockchainProfile.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
-#include "opentxs/util/WorkType.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
@@ -54,6 +53,7 @@ class Database;
 namespace node
 {
 class Manager;
+class Stats;
 }  // namespace node
 }  // namespace blockchain
 
@@ -61,17 +61,6 @@ namespace identifier
 {
 class Nym;
 }  // namespace identifier
-
-namespace network
-{
-namespace zeromq
-{
-namespace socket
-{
-class Publish;
-}  // namespace socket
-}  // namespace zeromq
-}  // namespace network
 
 class Options;
 // }  // namespace v1
@@ -87,18 +76,6 @@ struct Blockchain::Imp : virtual public internal::Blockchain {
 
     auto AddSyncServer([[maybe_unused]] const std::string_view endpoint)
         const noexcept -> bool override
-    {
-        return {};
-    }
-    auto BlockAvailableEndpoint() const noexcept -> std::string_view override
-    {
-        return {};
-    }
-    auto BlockQueueUpdateEndpoint() const noexcept -> std::string_view override
-    {
-        return {};
-    }
-    auto ConnectedSyncServers() const noexcept -> Endpoints override
     {
         return {};
     }
@@ -127,10 +104,6 @@ struct Blockchain::Imp : virtual public internal::Blockchain {
     {
         return {};
     }
-    auto FilterUpdate() const noexcept -> const zmq::socket::Publish& override
-    {
-        OT_FAIL;
-    }
     /// throws std::out_of_range if chain has not been started
     virtual auto GetChain([[maybe_unused]] const Chain type) const
         noexcept(false) -> BlockchainHandle
@@ -141,41 +114,12 @@ struct Blockchain::Imp : virtual public internal::Blockchain {
     {
         return {};
     }
-    auto Hello(alloc::Default) const noexcept
-        -> opentxs::network::otdht::StateData override
-    {
-        return {};
-    }
     auto IsEnabled([[maybe_unused]] const Chain chain) const noexcept
         -> bool override
     {
         return {};
     }
-    auto Mempool() const noexcept -> const zmq::socket::Publish& override
-    {
-        OT_FAIL;
-    }
-    auto PeerUpdate() const noexcept -> const zmq::socket::Publish& override
-    {
-        OT_FAIL;
-    }
     virtual auto Profile() const noexcept -> BlockchainProfile { return {}; }
-    auto PublishStartup(const opentxs::blockchain::Type, OTZMQWorkType)
-        const noexcept -> bool override
-    {
-        return false;
-    }
-    auto ReorgEndpoint() const noexcept -> std::string_view override
-    {
-        return {};
-    }
-    auto ReportProgress(
-        [[maybe_unused]] const Chain,
-        [[maybe_unused]] const opentxs::blockchain::block::Height,
-        [[maybe_unused]] const opentxs::blockchain::block::Height)
-        const noexcept -> void override
-    {
-    }
     auto RestoreNetworks() const noexcept -> void override {}
     virtual auto Start(
         [[maybe_unused]] const Chain type,
@@ -183,17 +127,17 @@ struct Blockchain::Imp : virtual public internal::Blockchain {
     {
         return {};
     }
+    virtual auto Stats() const noexcept -> opentxs::blockchain::node::Stats
+    {
+        return {};
+    }
     virtual auto Stop([[maybe_unused]] const Chain type) const noexcept -> bool
     {
         return {};
     }
-    auto UpdatePeer(
-        [[maybe_unused]] const opentxs::blockchain::Type,
-        [[maybe_unused]] const std::string_view) const noexcept -> void override
-    {
-    }
 
     auto Init(
+        [[maybe_unused]] std::shared_ptr<const api::Session> api,
         [[maybe_unused]] const api::crypto::Blockchain& crypto,
         [[maybe_unused]] const api::Legacy& legacy,
         [[maybe_unused]] const std::filesystem::path& dataFolder,

@@ -41,7 +41,9 @@ FixedByteArray<N>::FixedByteArray(const ReadView bytes) noexcept(false)
         const auto error = CString{"input size "}
                                .append(std::to_string(bytes.size()))
                                .append(" vs expected ")
-                               .append(std::to_string(N));
+                               .append(std::to_string(N))
+                               .append("\n")
+                               .append(PrintStackTrace());
 
         throw std::out_of_range{error.c_str()};
     }

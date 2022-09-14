@@ -149,6 +149,7 @@ public:
         const block::Hash& prior,
         const Vector<block::Hash>& hashes,
         const network::otdht::Data& in) noexcept -> void;
+    auto Report() noexcept -> void;
     auto SetCfheaderTip(
         const cfilter::Type type,
         const block::Position& tip) noexcept -> bool;

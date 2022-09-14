@@ -61,21 +61,18 @@ Endpoints::Endpoints(const int instance) noexcept
           build_inproc_path("blockchain/block/available", version_1_))
     , blockchain_block_download_queue_(
           build_inproc_path("blockchain/block/queue", version_1_))
-    , blockchain_block_updated_([] {
-        auto out = BlockchainMap{};
-
-        for (const auto& chain : opentxs::blockchain::DefinedChains()) {
-            out.emplace(chain, opentxs::network::zeromq::MakeArbitraryInproc());
-        }
-
-        return out;
-    }())
     , blockchain_mempool_(build_inproc_path("blockchain/mempool", version_1_))
+    , blockchain_message_router_(
+          opentxs::network::zeromq::MakeArbitraryInproc({}))
+    , blockchain_oracle_progress_(
+          build_inproc_path("blockchain/block/tip", version_1_))
     , blockchain_new_filter_(build_inproc_path("blockchain/filter", version_1_))
     , blockchain_peer_(build_inproc_path("blockchain/peer/active", version_1_))
     , blockchain_peer_connection_(
           build_inproc_path("blockchain/peer/connected", version_1_))
     , blockchain_reorg_(build_inproc_path("blockchain/reorg", version_1_))
+    , blockchain_report_status_(
+          build_inproc_path("blockchain/report_status", version_1_))
     , blockchain_scan_progress_(
           build_inproc_path("blockchain/scan", version_1_))
     , blockchain_startup_publish_(
@@ -86,6 +83,8 @@ Endpoints::Endpoints(const int instance) noexcept
           build_inproc_path("blockchain/state", version_1_))
     , blockchain_sync_progress_(
           build_inproc_path("blockchain/sync", version_1_))
+    , blockchain_sync_server_progress_(
+          build_inproc_path("blockchain/sync/indexer", version_1_))
     , blockchain_server_updated_(
           build_inproc_path("blockchain/sync/db", version_1_))
     , blockchain_transactions_(
@@ -118,6 +117,8 @@ Endpoints::Endpoints(const int instance) noexcept
           build_inproc_path("internal/otdht/node/router", version_1_))
     , otdht_node_publish_(
           build_inproc_path("internal/otdht/node/publish", version_1_))
+    , otdht_node_pull_(
+          build_inproc_path("internal/otdht/node/pull", version_1_))
     , otdht_wallet_(build_inproc_path("internal/otdht/wallet", version_1_))
     , pair_event_(build_inproc_path("pairevent", version_1_))
     , peer_reply_update_(build_inproc_path("peerreplyupdate", version_1_))
@@ -187,15 +188,20 @@ auto Endpoints::BlockchainBlockDownloadQueue() const noexcept
     return blockchain_block_download_queue_;
 }
 
-auto Endpoints::BlockchainBlockUpdated(
-    const opentxs::blockchain::Type chain) const noexcept -> std::string_view
+auto Endpoints::BlockchainBlockOracleProgress() const noexcept
+    -> std::string_view
 {
-    return blockchain_block_updated_.at(chain);
+    return blockchain_oracle_progress_;
 }
 
 auto Endpoints::BlockchainMempool() const noexcept -> std::string_view
 {
     return blockchain_mempool_;
+}
+
+auto Endpoints::BlockchainMessageRouter() const noexcept -> std::string_view
+{
+    return blockchain_message_router_;
 }
 
 auto Endpoints::BlockchainNewFilter() const noexcept -> std::string_view
@@ -216,6 +222,11 @@ auto Endpoints::BlockchainPeerConnection() const noexcept -> std::string_view
 auto Endpoints::BlockchainReorg() const noexcept -> std::string_view
 {
     return blockchain_reorg_;
+}
+
+auto Endpoints::BlockchainReportStatus() const noexcept -> std::string_view
+{
+    return blockchain_report_status_;
 }
 
 auto Endpoints::BlockchainScanProgress() const noexcept -> std::string_view
@@ -241,6 +252,12 @@ auto Endpoints::BlockchainStateChange() const noexcept -> std::string_view
 auto Endpoints::BlockchainSyncProgress() const noexcept -> std::string_view
 {
     return blockchain_sync_progress_;
+}
+
+auto Endpoints::BlockchainSyncServerProgress() const noexcept
+    -> std::string_view
+{
+    return blockchain_sync_server_progress_;
 }
 
 auto Endpoints::BlockchainSyncServerUpdated() const noexcept -> std::string_view
@@ -336,6 +353,11 @@ auto Endpoints::OTDHTBlockchain(
 auto Endpoints::OTDHTNodePublish() const noexcept -> std::string_view
 {
     return otdht_node_publish_;
+}
+
+auto Endpoints::OTDHTNodePull() const noexcept -> std::string_view
+{
+    return otdht_node_pull_;
 }
 
 auto Endpoints::OTDHTNodeRouter() const noexcept -> std::string_view

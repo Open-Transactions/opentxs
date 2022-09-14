@@ -22,7 +22,7 @@
 #include <utility>
 
 #include "IncomingConnectionManager.hpp"
-#include "internal/api/network/Blockchain.hpp"
+#include "internal/api/session/Endpoints.hpp"
 #include "internal/api/session/Session.hpp"
 #include "internal/blockchain/Params.hpp"
 #include "internal/blockchain/database/Peer.hpp"
@@ -37,9 +37,9 @@
 #include "internal/util/P0330.hpp"
 #include "opentxs/api/crypto/Util.hpp"
 #include "opentxs/api/network/Asio.hpp"
-#include "opentxs/api/network/Blockchain.hpp"
 #include "opentxs/api/network/Network.hpp"
 #include "opentxs/api/session/Crypto.hpp"
+#include "opentxs/api/session/Endpoints.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/blockchain/Types.hpp"
@@ -51,7 +51,6 @@
 #include "opentxs/network/zeromq/ZeroMQ.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/network/zeromq/message/Message.tpp"
-#include "opentxs/network/zeromq/socket/Publish.hpp"
 #include "opentxs/network/zeromq/socket/SocketType.hpp"
 #include "opentxs/util/BlockchainProfile.hpp"
 #include "opentxs/util/ConnectionMode.hpp"
@@ -82,7 +81,17 @@ Peers::Peers(
     , node_(node)
     , database_(database)
     , parent_(parent)
-    , connected_peers_(api_.Network().Blockchain().Internal().PeerUpdate())
+    , to_blockchain_api_([&] {
+        using Type = opentxs::network::zeromq::socket::Type;
+        auto out = api.Network().ZeroMQ().Internal().RawSocket(Type::Push);
+        const auto endpoint = UnallocatedCString{
+            api.Endpoints().Internal().Internal().BlockchainMessageRouter()};
+        const auto rc = out.Connect(endpoint.c_str());
+
+        OT_ASSERT(rc);
+
+        return out;
+    }())
     , endpoints_(endpoints)
     , invalid_peer_(false)
     , localhost_peer_(api_.Factory().DataFromHex("0x7f000001"))
@@ -191,14 +200,17 @@ auto Peers::adjust_count(int adjustment) noexcept -> void
         count_.store(0);
     }
 
-    connected_peers_.Send([&] {
-        auto work =
-            network::zeromq::tagged_message(WorkType::BlockchainPeerConnected);
-        work.AddFrame(chain_);
-        work.AddFrame(count_.load());
+    to_blockchain_api_.SendDeferred(
+        [&] {
+            auto work = network::zeromq::tagged_message(
+                WorkType::BlockchainPeerConnected);
+            work.AddFrame(chain_);
+            work.AddFrame(count_.load());
 
-        return work;
-    }());
+            return work;
+        }(),
+        __FILE__,
+        __LINE__);
 }
 
 auto Peers::AddListener(
