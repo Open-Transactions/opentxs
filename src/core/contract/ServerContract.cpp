@@ -110,7 +110,7 @@ auto Factory::ServerContract(
             throw std::runtime_error{"Invalid contract"};
         }
 
-        return std::move(output);
+        return output;
     } catch (const std::exception& e) {
         LogError()(OT_PRETTY_STATIC(Factory))(e.what()).Flush();
 
@@ -140,7 +140,7 @@ auto Factory::ServerContract(
 
     contract->alias_ = contract->name_;
 
-    return std::move(contract);
+    return contract;
 }
 }  // namespace opentxs
 

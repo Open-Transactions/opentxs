@@ -45,6 +45,7 @@
 #include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/blockchain/block/Outpoint.hpp"
 #include "opentxs/core/ByteArray.hpp"
+#include "opentxs/core/Data.hpp"
 #include "opentxs/core/identifier/Algorithm.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/identity/wot/claim/Types.hpp"
@@ -508,7 +509,7 @@ auto Transaction::calculate_witness_size() const noexcept -> std::size_t
         std::begin(*inputs_),
         std::end(*inputs_),
         2_uz,  // NOTE: marker byte and segwit flag byte
-        [=](const std::size_t previous, const auto& input) -> std::size_t {
+        [](const std::size_t previous, const auto& input) -> std::size_t {
             return previous + calculate_witness_size(input.Witness());
         });
 }
@@ -919,7 +920,7 @@ auto Transaction::Serialize() const noexcept -> std::optional<SerializeType>
         output.set_mined_block(UnallocatedCString{hash.Bytes()});
     }
 
-    return std::move(output);
+    return output;
 }
 
 auto Transaction::SetKeyData(const blockchain::block::KeyData& data) noexcept

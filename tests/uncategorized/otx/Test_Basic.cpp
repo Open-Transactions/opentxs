@@ -7,6 +7,7 @@
 #include <opentxs/opentxs.hpp>
 #include <algorithm>
 #include <chrono>
+#include <compare>
 #include <ctime>
 #include <future>
 #include <iostream>

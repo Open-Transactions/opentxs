@@ -9,6 +9,7 @@
 
 #include <atomic>
 #include <chrono>
+#include <compare>
 #include <cstddef>
 #include <exception>
 #include <mutex>
@@ -114,7 +115,7 @@ auto NotarySession(
             }
         }
 
-        return std::move(output);
+        return output;
     } catch (const std::exception& e) {
         LogError()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
 

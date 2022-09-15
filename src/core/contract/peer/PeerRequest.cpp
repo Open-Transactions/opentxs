@@ -9,6 +9,7 @@
 
 #include <PeerRequest.pb.h>
 #include <Signature.pb.h>
+#include <compare>
 #include <memory>
 
 #include "Proto.hpp"
@@ -24,6 +25,7 @@
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/core/ByteArray.hpp"
+#include "opentxs/core/Data.hpp"
 #include "opentxs/core/String.hpp"
 #include "opentxs/core/contract/peer/PeerRequest.hpp"
 #include "opentxs/core/identifier/Generic.hpp"

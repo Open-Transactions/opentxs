@@ -193,6 +193,7 @@ else()
   target_compile_options(
     messages
     PRIVATE
+      -Wno-c++20-compat
       -Wno-effc++
       -Wno-extra-semi
       -Wno-missing-declarations
@@ -203,6 +204,10 @@ else()
       -Wno-undef
       -Wno-unused-macros
   )
+endif()
+
+if(WIN32)
+  set_target_properties(messages PROPERTIES UNITY_BUILD OFF)
 endif()
 
 set_target_properties(

@@ -23,6 +23,8 @@
 
 namespace ottest
 {
+using namespace opentxs::literals;
+
 Server Regtest_payment_code::server_1_{};
 const User Regtest_payment_code::alice_{
     GetPaymentCodeVector3().alice_.words_,
@@ -43,9 +45,9 @@ Regtest_payment_code::Regtest_payment_code()
     , api_server_1_(ot::Context().StartNotarySession(0))
     , expected_notary_(client_1_.UI().BlockchainNotaryID(test_chain_))
     , expected_unit_(client_1_.UI().BlockchainUnitID(test_chain_))
-    , expected_display_unit_(u8"UNITTEST")
-    , expected_account_name_(u8"On chain UNITTEST (this device)")
-    , expected_notary_name_(u8"Unit Test Simulation")
+    , expected_display_unit_(u8"UNITTEST"_sv)
+    , expected_account_name_(u8"On chain UNITTEST (this device)"_sv)
+    , expected_notary_name_(u8"Unit Test Simulation"_sv)
     , memo_outgoing_("memo for outgoing transaction")
     , expected_account_type_(ot::AccountType::Blockchain)
     , expected_unit_type_(ot::UnitType::Regtest)

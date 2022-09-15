@@ -202,7 +202,7 @@ auto BitcoinTransactionOutput(
             out->SetPayee(payee);
         }
 
-        return std::move(out);
+        return out;
     } catch (const std::exception& e) {
         LogError()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
 

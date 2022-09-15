@@ -287,42 +287,6 @@ auto FixedByteArray<N>::IsNull() const -> bool
 }
 
 template <std::size_t N>
-auto FixedByteArray<N>::operator==(const Data& rhs) const noexcept -> bool
-{
-    return Bytes() == rhs.Bytes();
-}
-
-template <std::size_t N>
-auto FixedByteArray<N>::operator!=(const Data& rhs) const noexcept -> bool
-{
-    return Bytes() != rhs.Bytes();
-}
-
-template <std::size_t N>
-auto FixedByteArray<N>::operator<(const Data& rhs) const noexcept -> bool
-{
-    return Bytes() < rhs.Bytes();
-}
-
-template <std::size_t N>
-auto FixedByteArray<N>::operator>(const Data& rhs) const noexcept -> bool
-{
-    return Bytes() > rhs.Bytes();
-}
-
-template <std::size_t N>
-auto FixedByteArray<N>::operator<=(const Data& rhs) const noexcept -> bool
-{
-    return Bytes() <= rhs.Bytes();
-}
-
-template <std::size_t N>
-auto FixedByteArray<N>::operator>=(const Data& rhs) const noexcept -> bool
-{
-    return Bytes() >= rhs.Bytes();
-}
-
-template <std::size_t N>
 auto FixedByteArray<N>::operator+=(const Data& rhs) -> FixedByteArray&
 {
     return operator+=(rhs.Bytes());

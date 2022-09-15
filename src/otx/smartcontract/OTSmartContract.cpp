@@ -8,6 +8,7 @@
 #include "internal/otx/smartcontract/OTSmartContract.hpp"  // IWYU pragma: associated
 
 #include <chrono>
+#include <compare>
 #include <memory>
 #include <string_view>
 #include <utility>
@@ -46,6 +47,7 @@
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/api/session/Wallet.hpp"
 #include "opentxs/core/Amount.hpp"
+#include "opentxs/core/Data.hpp"
 #include "opentxs/core/String.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Notary.hpp"

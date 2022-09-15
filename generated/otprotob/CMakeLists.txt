@@ -22,20 +22,24 @@ target_include_directories(
 if(MSVC)
   target_compile_options(opentxs-core-otprotob PRIVATE "/wd4244" "/wd4267")
 else()
-  target_compile_options(opentxs-core-otprotob PRIVATE "-Wno-effc++")
-endif()
-
-if(${CMAKE_CXX_COMPILER_ID}
-   MATCHES
-   Clang
-)
   target_compile_options(
     opentxs-core-otprotob
     PRIVATE
+      -Wno-c++20-compat
+      -Wno-effc++
       -Wno-extra-semi
-      -Wno-suggest-destructor-override
+      -Wno-missing-declarations
       -Wno-reserved-identifier
+      -Wno-suggest-destructor-override
+      -Wno-switch-default
+      -Wno-switch-enum
+      -Wno-undef
+      -Wno-unused-macros
   )
+endif()
+
+if(WIN32)
+  set_target_properties(messages PROPERTIES UNITY_BUILD OFF)
 endif()
 
 set_target_properties(

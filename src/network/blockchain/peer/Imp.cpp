@@ -10,6 +10,7 @@
 #include "network/blockchain/peer/Imp.hpp"  // IWYU pragma: associated
 
 #include <algorithm>
+#include <compare>
 #include <iterator>
 #include <stdexcept>
 #include <tuple>
@@ -55,6 +56,7 @@
 #include "opentxs/blockchain/node/FilterOracle.hpp"
 #include "opentxs/blockchain/node/HeaderOracle.hpp"
 #include "opentxs/blockchain/node/Manager.hpp"
+#include "opentxs/core/Data.hpp"
 #include "opentxs/network/zeromq/Pipeline.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
 #include "opentxs/network/zeromq/message/FrameSection.hpp"

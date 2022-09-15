@@ -9,6 +9,7 @@
 
 #include <algorithm>
 #include <chrono>
+#include <compare>
 #include <cstddef>
 #include <future>
 #include <iterator>
@@ -45,7 +46,7 @@
 #include "opentxs/blockchain/node/HeaderOracle.hpp"
 #include "opentxs/blockchain/node/Manager.hpp"
 #include "opentxs/core/ByteArray.hpp"
-#include "opentxs/core/FixedByteArray.hpp"
+#include "opentxs/core/Data.hpp"
 #include "opentxs/network/otdht/Block.hpp"
 #include "opentxs/network/otdht/Data.hpp"
 #include "opentxs/network/otdht/Types.hpp"

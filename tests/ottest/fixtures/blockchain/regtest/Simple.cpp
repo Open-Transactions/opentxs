@@ -8,6 +8,7 @@
 #include <gtest/gtest.h>
 #include <opentxs/opentxs.hpp>
 #include <atomic>
+#include <compare>
 #include <future>
 #include <optional>
 #include <ostream>

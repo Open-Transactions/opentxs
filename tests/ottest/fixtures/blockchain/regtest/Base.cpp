@@ -9,6 +9,7 @@
 #include <opentxs/opentxs.hpp>
 #include <atomic>
 #include <chrono>
+#include <compare>
 #include <cstdint>
 #include <future>
 #include <type_traits>
@@ -274,7 +275,7 @@ auto Regtest_fixture_base::Connect(
 
         EXPECT_TRUE(listen);
 
-        return [=] {
+        return [=, this] {
             EXPECT_EQ(connection_.miner_1_peers_, target);
 
             return listen && (target == connection_.miner_1_peers_);
@@ -301,7 +302,7 @@ auto Regtest_fixture_base::Connect(
         EXPECT_TRUE(added);
         EXPECT_TRUE(started);
 
-        return [=] {
+        return [=, this] {
             EXPECT_GT(connection_.sync_server_peers_, 0);
 
             return added && started && (0 < connection_.sync_server_peers_);
@@ -323,7 +324,7 @@ auto Regtest_fixture_base::Connect(
 
             EXPECT_TRUE(added);
 
-            return [=] {
+            return [=, this] {
                 EXPECT_GT(connection_.client_1_peers_, 0);
 
                 return added && (0 < connection_.client_1_peers_);
@@ -349,7 +350,7 @@ auto Regtest_fixture_base::Connect(
 
             EXPECT_TRUE(added);
 
-            return [=] {
+            return [=, this] {
                 EXPECT_GT(connection_.client_2_peers_, 0);
 
                 return added && (0 < connection_.client_2_peers_);

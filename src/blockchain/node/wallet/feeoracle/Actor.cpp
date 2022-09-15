@@ -12,6 +12,7 @@
 
 #include <algorithm>
 #include <chrono>
+#include <compare>
 #include <exception>
 #include <memory>
 #include <numeric>  // IWYU pragma: keep

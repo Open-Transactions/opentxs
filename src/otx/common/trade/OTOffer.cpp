@@ -8,6 +8,7 @@
 #include "internal/otx/common/trade/OTOffer.hpp"  // IWYU pragma: associated
 
 #include <chrono>
+#include <compare>
 #include <cstdint>
 #include <cstring>
 #include <string_view>

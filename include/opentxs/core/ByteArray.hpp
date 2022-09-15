@@ -38,13 +38,6 @@ struct OPENTXS_EXPORT hash<opentxs::ByteArray> {
     auto operator()(const opentxs::ByteArray& data) const noexcept
         -> std::size_t;
 };
-
-template <>
-struct OPENTXS_EXPORT less<opentxs::ByteArray> {
-    auto operator()(
-        const opentxs::ByteArray& lhs,
-        const opentxs::ByteArray& rhs) const -> bool;
-};
 }  // namespace std
 
 namespace opentxs
@@ -84,12 +77,6 @@ public:
         -> bool final;
     auto get_allocator() const noexcept -> allocator_type final;
     auto IsNull() const -> bool final;
-    auto operator==(const Data& rhs) const noexcept -> bool final;
-    auto operator!=(const Data& rhs) const noexcept -> bool final;
-    auto operator<(const Data& rhs) const noexcept -> bool final;
-    auto operator>(const Data& rhs) const noexcept -> bool final;
-    auto operator<=(const Data& rhs) const noexcept -> bool final;
-    auto operator>=(const Data& rhs) const noexcept -> bool final;
     auto size() const -> std::size_t final;
 
     auto Assign(const Data& source) noexcept -> bool final;

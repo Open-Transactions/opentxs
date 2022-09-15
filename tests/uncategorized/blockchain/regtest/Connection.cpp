@@ -6,6 +6,7 @@
 #include <gtest/gtest.h>
 #include <opentxs/opentxs.hpp>
 #include <chrono>
+#include <compare>
 
 #include "internal/util/P0330.hpp"
 #include "ottest/fixtures/blockchain/Common.hpp"

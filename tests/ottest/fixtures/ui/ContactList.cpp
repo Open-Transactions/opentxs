@@ -7,14 +7,18 @@
 
 #include <gtest/gtest.h>
 #include <opentxs/opentxs.hpp>
+#include <compare>
 #include <iterator>
 #include <sstream>
+#include <string_view>
 
 #include "ottest/fixtures/common/Counter.hpp"
 #include "ottest/fixtures/common/User.hpp"
 
 namespace ottest
 {
+using namespace opentxs::literals;
+
 auto check_contact_list(
     const User& user,
     const ContactListData& expected) noexcept -> bool
@@ -168,7 +172,7 @@ auto init_contact_list(const User& user, Counter& counter) noexcept -> void
 {
     user.api_->UI().ContactList(user.nym_id_, make_cb(counter, [&] {
                                     auto out = std::stringstream{};
-                                    out << u8"contact_list_";
+                                    out << u8"contact_list_"_sv;
                                     out << user.name_lower_;
 
                                     return out.str();
@@ -180,7 +184,7 @@ auto init_messagable_list(const User& user, Counter& counter) noexcept -> void
 {
     user.api_->UI().MessagableList(user.nym_id_, make_cb(counter, [&] {
                                        auto out = std::stringstream{};
-                                       out << u8"messagable_list_";
+                                       out << u8"messagable_list_"_sv;
                                        out << user.name_lower_;
 
                                        return out.str();

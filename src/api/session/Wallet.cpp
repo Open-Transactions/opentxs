@@ -20,6 +20,7 @@
 #include <UnitDefinition.pb.h>
 #include <algorithm>
 #include <atomic>
+#include <compare>
 #include <functional>
 #include <iterator>
 #include <stdexcept>
@@ -69,6 +70,7 @@
 #include "opentxs/blockchain/BlockchainType.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"  // IWYU pragma: keep
 #include "opentxs/core/Amount.hpp"
+#include "opentxs/core/Data.hpp"
 #include "opentxs/core/String.hpp"
 #include "opentxs/core/UnitType.hpp"
 #include "opentxs/core/contract/BasketContract.hpp"
@@ -1006,8 +1008,8 @@ auto Wallet::mutable_Issuer(
     OT_ASSERT(pIssuer);
 
     std::function<void(otx::client::Issuer*, const Lock&)> callback =
-        [=](otx::client::Issuer* in, const Lock& lock) -> void {
-        this->save(lock, in);
+        [=, this](otx::client::Issuer* in, const Lock& lock) -> void {
+        save(lock, in);
     };
 
     return {lock, pIssuer.get(), callback};
@@ -1195,7 +1197,7 @@ auto Wallet::Nym(const proto::Nym& serialized) const -> Nym_p
 
             notify_new(nymID);
 
-            return std::move(mapNym);
+            return mapNym;
         } else {
             LogError()(OT_PRETTY_CLASS())("Incoming nym is not valid.").Flush();
         }
@@ -1290,7 +1292,7 @@ auto Wallet::Nym(
                 }());
             }
 
-            return std::move(pNym);
+            return pNym;
         } else {
             LogError()(OT_PRETTY_CLASS())("Failed to save credentials").Flush();
 
@@ -1349,7 +1351,7 @@ auto Wallet::Nymfile(const identifier::Nym& id, const PasswordPrompt& reason)
         return {};
     }
 
-    return std::move(nymfile);
+    return nymfile;
 }
 
 auto Wallet::mutable_Nymfile(

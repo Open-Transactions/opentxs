@@ -10,6 +10,7 @@
 #include <QString>  // IWYU pragma: keep
 #include <atomic>
 #include <chrono>
+#include <compare>
 #include <future>
 #include <mutex>
 #include <thread>

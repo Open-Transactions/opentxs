@@ -6,55 +6,28 @@
 #include "0_stdafx.hpp"    // IWYU pragma: associated
 #include "1_Internal.hpp"  // IWYU pragma: associated
 
+#include <compare>
 #include <memory>
 #include <utility>
 
 #include "internal/interface/ui/UI.hpp"
 #include "internal/otx/client/Client.hpp"
 #include "internal/otx/client/OTPayment.hpp"
-#include "opentxs/blockchain/bitcoin/cfilter/Hash.hpp"
-#include "opentxs/blockchain/bitcoin/cfilter/Header.hpp"
-#include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
-#include "opentxs/core/ByteArray.hpp"
-#include "opentxs/core/FixedByteArray.hpp"
+#include "opentxs/core/Data.hpp"
 #include "opentxs/core/Secret.hpp"
 #include "opentxs/core/contract/peer/PeerReply.hpp"
 #include "opentxs/core/contract/peer/PeerRequest.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
-#include "opentxs/core/identifier/Notary.hpp"
-#include "opentxs/core/identifier/Nym.hpp"
-#include "opentxs/core/identifier/UnitDefinition.hpp"
 #include "opentxs/crypto/Seed.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Pimpl.hpp"  // IWYU pragma: keep
 
 namespace std
 {
-auto less<opentxs::blockchain::block::Hash>::operator()(
-    const opentxs::blockchain::block::Hash& lhs,
-    const opentxs::blockchain::block::Hash& rhs) const noexcept -> bool
-{
-    return lhs < rhs;
-}
-
 auto less<opentxs::blockchain::block::Position>::operator()(
     const opentxs::blockchain::block::Position& lhs,
     const opentxs::blockchain::block::Position& rhs) const noexcept -> bool
-{
-    return lhs < rhs;
-}
-
-auto less<opentxs::blockchain::cfilter::Hash>::operator()(
-    const opentxs::blockchain::cfilter::Hash& lhs,
-    const opentxs::blockchain::cfilter::Hash& rhs) const noexcept -> bool
-{
-    return lhs < rhs;
-}
-
-auto less<opentxs::blockchain::cfilter::Header>::operator()(
-    const opentxs::blockchain::cfilter::Header& lhs,
-    const opentxs::blockchain::cfilter::Header& rhs) const noexcept -> bool
 {
     return lhs < rhs;
 }
@@ -197,41 +170,6 @@ auto less<opentxs::ui::implementation::ContactListSortKey>::operator()(
     return false;
 }
 
-auto less<opentxs::ByteArray>::operator()(
-    const opentxs::ByteArray& lhs,
-    const opentxs::ByteArray& rhs) const -> bool
-{
-    return lhs < rhs;
-}
-
-auto less<opentxs::FixedByteArray<32>>::operator()(
-    const opentxs::FixedByteArray<32>& lhs,
-    const opentxs::FixedByteArray<32>& rhs) const -> bool
-{
-    return lhs < rhs;
-}
-
-auto less<opentxs::identifier::Generic>::operator()(
-    const opentxs::identifier::Generic& lhs,
-    const opentxs::identifier::Generic& rhs) const -> bool
-{
-    return lhs.operator<(rhs);
-}
-
-auto less<opentxs::identifier::Notary>::operator()(
-    const opentxs::identifier::Notary& lhs,
-    const opentxs::identifier::Notary& rhs) const -> bool
-{
-    return lhs.operator<(rhs);
-}
-
-auto less<opentxs::identifier::Nym>::operator()(
-    const opentxs::identifier::Nym& lhs,
-    const opentxs::identifier::Nym& rhs) const -> bool
-{
-    return lhs.operator<(rhs);
-}
-
 auto less<opentxs::OTPeerReply>::operator()(
     const opentxs::OTPeerReply& lhs,
     const opentxs::OTPeerReply& rhs) const -> bool
@@ -251,13 +189,6 @@ auto less<opentxs::OTSecret>::operator()(
     const opentxs::OTSecret& rhs) const -> bool
 {
     return lhs.get().operator<(rhs.get());
-}
-
-auto less<opentxs::identifier::UnitDefinition>::operator()(
-    const opentxs::identifier::UnitDefinition& lhs,
-    const opentxs::identifier::UnitDefinition& rhs) const -> bool
-{
-    return lhs.operator<(rhs);
 }
 
 auto less<opentxs::OT_DownloadNymboxType>::operator()(

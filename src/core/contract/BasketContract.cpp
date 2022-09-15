@@ -82,7 +82,7 @@ auto Factory::BasketContract(
 
     if (!contract.validate(lock)) { return {}; }
 
-    return std::move(output);
+    return output;
 }
 }  // namespace opentxs
 

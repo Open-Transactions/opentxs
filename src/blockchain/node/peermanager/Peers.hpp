@@ -13,6 +13,7 @@
 #include <boost/container/vector.hpp>
 #include <atomic>
 #include <cstddef>
+#include <functional>
 #include <future>
 #include <memory>
 #include <string_view>
@@ -25,6 +26,7 @@
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/p2p/Types.hpp"
 #include "opentxs/core/ByteArray.hpp"
+#include "opentxs/core/Data.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Time.hpp"

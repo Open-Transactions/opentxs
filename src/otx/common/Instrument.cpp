@@ -8,6 +8,7 @@
 #include "internal/otx/common/Instrument.hpp"  // IWYU pragma: associated
 
 #include <chrono>
+#include <compare>
 #include <cstdint>
 
 #include "internal/otx/common/script/OTScriptable.hpp"

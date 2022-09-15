@@ -14,7 +14,6 @@
 #include <limits>
 #include <memory>
 #include <string_view>
-#include <utility>
 
 #include "Proto.hpp"
 #include "Proto.tpp"
@@ -84,7 +83,7 @@ auto SymmetricKey(
 
     output->encrypt_key(lock, key, reason);
 
-    return std::move(output);
+    return output;
 }
 
 auto SymmetricKey(
@@ -161,7 +160,7 @@ auto SymmetricKey(
     output->encrypt_key(lock, raw, reason);
     output->key_size_ = raw.size();
 
-    return std::move(output);
+    return output;
 }
 }  // namespace opentxs::factory
 

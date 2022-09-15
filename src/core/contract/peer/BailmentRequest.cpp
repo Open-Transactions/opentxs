@@ -12,7 +12,6 @@
 #include <memory>
 #include <stdexcept>
 #include <string>
-#include <utility>
 
 #include "2_Factory.hpp"
 #include "Proto.hpp"
@@ -57,7 +56,7 @@ auto Factory::BailmentRequest(
 
         if (false == ParentType::Finish(reply, reason)) { return {}; }
 
-        return std::move(output);
+        return output;
     } catch (const std::exception& e) {
         LogError()("opentxs::Factory::")(__func__)(": ")(e.what()).Flush();
 
@@ -96,7 +95,7 @@ auto Factory::BailmentRequest(
             return {};
         }
 
-        return std::move(output);
+        return output;
     } catch (const std::exception& e) {
         LogError()("opentxs::Factory::")(__func__)(": ")(e.what()).Flush();
 

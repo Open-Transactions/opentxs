@@ -7,6 +7,7 @@
 #include "1_Internal.hpp"         // IWYU pragma: associated
 #include "opentxs/util/Time.hpp"  // IWYU pragma: associated
 
+#include <compare>
 #include <thread>
 
 namespace opentxs

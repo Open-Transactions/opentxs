@@ -3,13 +3,13 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-cmake_minimum_required(VERSION 3.19.5)
+cmake_minimum_required(VERSION 3.20.0)
 cmake_policy(
   SET
   CMP0091
   NEW
 )
-set(CMAKE_OSX_DEPLOYMENT_TARGET 10.15)
+set(CMAKE_OSX_DEPLOYMENT_TARGET 11)
 project(opentxs)
 list(
   APPEND
@@ -215,6 +215,24 @@ option(
   ${OT_CRYPTO_USING_LIBSECP256K1}
 )
 
+if(OT_SCRIPT_USING_CHAI
+   AND (${CMAKE_CXX_COMPILER_ID}
+        MATCHES
+        Clang)
+   AND (CMAKE_CXX_COMPILER_VERSION
+        VERSION_GREATER
+        13.99)
+   AND (CMAKE_CXX_COMPILER_VERSION
+        VERSION_LESS
+        15.0)
+)
+  message(
+    WARNING
+      "clang-14 is not capable of compiling the ChaiScript library in c++20 mode. Use clang version 12, 13, or 15 if you want smart contract support."
+  )
+  set(OT_SCRIPT_USING_CHAI OFF)
+endif()
+
 if(OT_CRYPTO_SUPPORTED_KEY_RSA
    OR OT_CASH_USING_LUCRE
    OR OT_WITH_BLOCKCHAIN
@@ -327,7 +345,7 @@ endif()
 # -----------------------------------------------------------------------------
 # Set compiler options
 
-set_compiler_flags(17 ${OPENTXS_PEDANTIC_BUILD})
+set_compiler_flags(20 ${OPENTXS_PEDANTIC_BUILD})
 
 # temporarily disabled warnings
 if(MSVC)
@@ -337,9 +355,8 @@ if(MSVC)
   set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /ignore:4217")
   set(CMAKE_STATIC_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /ignore:4217")
 else()
-  # TODO c++20 disable -Wreturn-std-move-in-c++11 and enable -Wredundant-move
   set(CMAKE_CXX_FLAGS
-      "${CMAKE_CXX_FLAGS} -Wno-c++2a-compat -Wno-c++20-compat -Wno-deprecated-declarations -Wno-implicit-int-conversion -Wno-noexcept -Wno-redundant-move -Wno-shadow -Wno-sign-conversion -Wno-switch-enum -Wno-unused-parameter"
+      "${CMAKE_CXX_FLAGS} -Wno-deprecated-declarations -Wno-implicit-int-conversion -Wno-noexcept -Wno-return-std-move-in-c++11 -Wno-shadow -Wno-sign-conversion -Wno-switch-enum -Wno-unused-parameter"
   )
 endif()
 

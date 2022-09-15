@@ -72,7 +72,7 @@ public:
             }
             ();
             const auto output = api_.Network().Asio().Internal().Accept(
-                endpoint, [=](auto&& socket) {
+                endpoint, [=, this](auto&& socket) {
                     accept(type, port, bytes, std::move(socket));
                 });
 

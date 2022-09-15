@@ -23,6 +23,7 @@
 #include "internal/util/P0330.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
+#include "opentxs/core/Data.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 
@@ -392,7 +393,7 @@ private:
             level)(": finished decoding list of ")(length)(" bytes")
             .Flush();
 
-        return std::move(out);
+        return out;
     }
     auto decode_long_list() noexcept(false) -> Node
     {

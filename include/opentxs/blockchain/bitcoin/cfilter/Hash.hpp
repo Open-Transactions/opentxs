@@ -37,13 +37,6 @@ struct OPENTXS_EXPORT hash<opentxs::blockchain::cfilter::Hash> {
     auto operator()(const opentxs::blockchain::cfilter::Hash& data)
         const noexcept -> std::size_t;
 };
-
-template <>
-struct OPENTXS_EXPORT less<opentxs::blockchain::cfilter::Hash> {
-    auto operator()(
-        const opentxs::blockchain::cfilter::Hash& lhs,
-        const opentxs::blockchain::cfilter::Hash& rhs) const noexcept -> bool;
-};
 }  // namespace std
 
 namespace opentxs::blockchain::cfilter

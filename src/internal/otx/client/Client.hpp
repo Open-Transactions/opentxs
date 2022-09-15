@@ -129,6 +129,7 @@ using WithdrawCashTask = std::pair<identifier::Generic, Amount>;
 
 namespace std
 {
+// NOLINTBEGIN(cert-dcl58-cpp)
 template <>
 struct less<opentxs::otx::client::MessageTask> {
     auto operator()(
@@ -167,6 +168,7 @@ struct less<opentxs::OT_GetTransactionNumbersType> {
         const opentxs::OT_GetTransactionNumbersType& rhs) const noexcept
         -> bool;
 };
+// NOLINTEND(cert-dcl58-cpp)
 }  // namespace std
 
 namespace opentxs

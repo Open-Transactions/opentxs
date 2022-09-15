@@ -193,7 +193,7 @@ auto EllipticCurve::asPublicEC() const noexcept
         OT_ASSERT(false == copy.has_private(lock));
     }
 
-    return std::move(output);
+    return output;
 }
 
 auto EllipticCurve::extract_key(

@@ -33,6 +33,7 @@
 #include "opentxs/interface/ui/AccountActivity.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
+#include "opentxs/util/Literals.hpp"
 #include "opentxs/util/Log.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -166,8 +167,7 @@ private:
         const noexcept -> void
     {
         const auto decimalSymbol = locale_.decimal_point();
-        static constexpr auto narrowNonBreakingSpace = u8"\u202F";
-        static const auto space = UnallocatedCString{narrowNonBreakingSpace};
+        static const auto space = u8"\u202F"_sv;
         auto distance{0};
         auto counter{-1};
         auto buf = input.toStdString();

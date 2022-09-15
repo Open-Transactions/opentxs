@@ -175,7 +175,7 @@ auto Account::AssociateTransaction(
         if (1 < ++outputs[transaction][output]) { return false; }
         if (0 >= amount) { return false; }
 
-        sorted[account].first.emplace_back(Activity{coin, key, amount});
+        sorted[account].first.emplace_back(coin, key, amount);
     }
 
     for (const auto& [coin, key, amount] : spent) {
@@ -185,7 +185,7 @@ auto Account::AssociateTransaction(
         if (1 < ++outputs[transaction][output]) { return false; }
         if (0 >= amount) { return false; }
 
-        sorted[account].second.emplace_back(Activity{coin, key, amount});
+        sorted[account].second.emplace_back(coin, key, amount);
     }
 
     for (const auto& [accountID, value] : sorted) {

@@ -11,6 +11,7 @@
 #include <string>
 #include <vector>
 
+// NOLINTBEGIN(modernize-loop-convert)
 namespace bitcoin_base58
 {
 /* All alphanumeric characters except for "0", "I", "O", and "l" */
@@ -97,3 +98,4 @@ auto EncodeBase58(const unsigned char* pbegin, const unsigned char* pend)
     return str;
 }
 }  // namespace bitcoin_base58
+// NOLINTEND(modernize-loop-convert)

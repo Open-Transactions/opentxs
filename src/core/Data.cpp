@@ -7,6 +7,7 @@
 #include "1_Internal.hpp"         // IWYU pragma: associated
 #include "opentxs/core/Data.hpp"  // IWYU pragma: associated
 
+#include <cstring>
 #include <iomanip>
 #include <limits>
 #include <sstream>
@@ -31,6 +32,52 @@ auto check_subset(
     if ((pos + target) > size) { return false; }
 
     return true;
+}
+
+auto operator==(const Data& lhs, const Data& rhs) noexcept -> bool
+{
+    const auto lSize = lhs.size();
+    const auto rSize = rhs.size();
+
+    if (lSize == rSize) {
+        if (0_uz == lSize) {
+
+            return true;
+        } else {
+
+            return 0 == std::memcmp(lhs.data(), rhs.data(), lhs.size());
+        }
+    } else {
+
+        return false;
+    }
+}
+
+auto operator<=>(const Data& lhs, const Data& rhs) noexcept
+    -> std::strong_ordering
+{
+    if (auto l = lhs.size(), r = rhs.size(); l < r) {
+
+        return std::strong_ordering::less;
+    } else if (r < l) {
+
+        return std::strong_ordering::greater;
+    } else {
+        if (0_uz == l) {
+
+            return std::strong_ordering::equal;
+        } else if (auto c = std::memcmp(lhs.data(), rhs.data(), lhs.size());
+                   0 == c) {
+
+            return std::strong_ordering::equal;
+        } else if (0 < c) {
+
+            return std::strong_ordering::greater;
+        } else {
+
+            return std::strong_ordering::less;
+        }
+    }
 }
 
 auto to_hex(const std::byte* in, std::size_t size) noexcept

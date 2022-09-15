@@ -9,6 +9,7 @@
 
 #include <PeerReply.pb.h>
 #include <Signature.pb.h>
+#include <compare>
 #include <ctime>
 #include <memory>
 
@@ -27,6 +28,7 @@
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/api/session/Wallet.hpp"
 #include "opentxs/core/ByteArray.hpp"
+#include "opentxs/core/Data.hpp"
 #include "opentxs/core/String.hpp"
 #include "opentxs/core/contract/peer/PeerReply.hpp"
 #include "opentxs/core/identifier/Notary.hpp"

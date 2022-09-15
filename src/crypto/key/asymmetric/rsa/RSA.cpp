@@ -10,7 +10,6 @@
 #include <AsymmetricKey.pb.h>
 #include <Ciphertext.pb.h>
 #include <stdexcept>
-#include <utility>
 
 #include "crypto/key/asymmetric/Asymmetric.hpp"
 #include "internal/util/LogMacros.hpp"
@@ -92,7 +91,7 @@ auto RSA::asPublic() const noexcept -> std::unique_ptr<key::Asymmetric>
         OT_ASSERT(false == copy.has_private(lock));
     }
 
-    return std::move(output);
+    return output;
 }
 
 auto RSA::deserialize_key(

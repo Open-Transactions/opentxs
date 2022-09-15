@@ -54,13 +54,6 @@ struct OPENTXS_EXPORT hash<opentxs::identifier::Generic> {
     auto operator()(const opentxs::identifier::Generic& data) const noexcept
         -> std::size_t;
 };
-
-template <>
-struct OPENTXS_EXPORT less<opentxs::identifier::Generic> {
-    auto operator()(
-        const opentxs::identifier::Generic& lhs,
-        const opentxs::identifier::Generic& rhs) const -> bool;
-};
 }  // namespace std
 
 namespace opentxs
@@ -110,18 +103,6 @@ public:
     auto GetString(const api::Crypto& api, String& theStr) const noexcept
         -> void;
     auto IsNull() const -> bool final;
-    auto operator!=(const Data& rhs) const noexcept -> bool final;
-    auto operator!=(const Generic& rhs) const noexcept -> bool;
-    auto operator<(const Data& rhs) const noexcept -> bool final;
-    auto operator<(const Generic& rhs) const noexcept -> bool;
-    auto operator<=(const Data& rhs) const noexcept -> bool final;
-    auto operator<=(const Generic& rhs) const noexcept -> bool;
-    auto operator==(const Data& rhs) const noexcept -> bool final;
-    auto operator==(const Generic& rhs) const noexcept -> bool;
-    auto operator>(const Data& rhs) const noexcept -> bool final;
-    auto operator>(const Generic& rhs) const noexcept -> bool;
-    auto operator>=(const Data& rhs) const noexcept -> bool final;
-    auto operator>=(const Generic& rhs) const noexcept -> bool;
     auto size() const -> std::size_t final;
     auto Type() const noexcept -> identifier::Type;
 

@@ -13,6 +13,7 @@
 #include <Seed.pb.h>
 #include <robin_hood.h>
 #include <algorithm>
+#include <compare>
 #include <cstddef>
 #include <memory>
 #include <stdexcept>
@@ -28,6 +29,7 @@
 #include "opentxs/api/crypto/Symmetric.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Storage.hpp"
+#include "opentxs/core/Data.hpp"
 #include "opentxs/core/Secret.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/crypto/Bip32.hpp"

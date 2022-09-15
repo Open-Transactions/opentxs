@@ -8,14 +8,18 @@
 #include <gtest/gtest.h>
 #include <opentxs/opentxs.hpp>
 #include <chrono>
+#include <compare>
 #include <iterator>
 #include <sstream>
+#include <string_view>
 
 #include "ottest/fixtures/common/Counter.hpp"
 #include "ottest/fixtures/common/User.hpp"
 
 namespace ottest
 {
+using namespace opentxs::literals;
+
 auto check_account_activity(
     const User& user,
     const ot::identifier::Generic& account,
@@ -149,7 +153,7 @@ auto init_account_activity(
     user.api_->UI().AccountActivity(
         user.nym_id_, account, make_cb(counter, [&] {
             auto out = std::stringstream{};
-            out << u8"account_activity_";
+            out << u8"account_activity_"_sv;
             out << user.name_lower_;
 
             return out.str();

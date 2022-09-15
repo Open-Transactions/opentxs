@@ -5,7 +5,6 @@
 
 #include <gtest/gtest.h>
 #include <opentxs/opentxs.hpp>
-#include <algorithm>
 #include <atomic>
 #include <chrono>
 #include <future>
@@ -30,6 +29,7 @@
 namespace ottest
 {
 using namespace std::literals::chrono_literals;
+using namespace opentxs::literals;
 
 using Protocol = ot::blockchain::crypto::HDProtocol;
 using Subaccount = ot::blockchain::crypto::SubaccountType;
@@ -70,7 +70,7 @@ TEST_F(Regtest_fixture_hd, account_activity_initial)
         expected_notary_name_,
         0,
         0,
-        u8"0 units",
+        u8"0 units"_cstr,
         "",
         {},
         {test_chain_},
@@ -87,19 +87,20 @@ TEST_F(Regtest_fixture_hd, account_activity_initial)
             {"QVk4MvUu7Wb7tZ1wvAeiUvdF7wxhvpyLLK", false},
             {"pS8EA1pKEVBvv3kGsSGH37R8YViBmuRCPn", false},
         },
-        {{u8"0", u8"0 units"},
-         {u8"10", u8"10 units"},
-         {u8"25", u8"25 units"},
-         {u8"300", u8"300 units"},
-         {u8"4000", u8"4,000 units"},
-         {u8"50000", u8"50,000 units"},
-         {u8"600000", u8"600,000 units"},
-         {u8"7000000", u8"7,000,000 units"},
-         {u8"1000000000000000001", u8"1,000,000,000,000,000,001 units"},
-         {u8"74.99999448", u8"74.999\u202F994\u202F48 units"},
-         {u8"86.00002652", u8"86.000\u202F026\u202F52 units"},
-         {u8"89.99999684", u8"89.999\u202F996\u202F84 units"},
-         {u8"100.0000495", u8"100.000\u202F049\u202F5 units"}},
+        {{u8"0"_cstr, u8"0 units"_cstr},
+         {u8"10"_cstr, u8"10 units"_cstr},
+         {u8"25"_cstr, u8"25 units"_cstr},
+         {u8"300"_cstr, u8"300 units"_cstr},
+         {u8"4000"_cstr, u8"4,000 units"_cstr},
+         {u8"50000"_cstr, u8"50,000 units"_cstr},
+         {u8"600000"_cstr, u8"600,000 units"_cstr},
+         {u8"7000000"_cstr, u8"7,000,000 units"_cstr},
+         {u8"1000000000000000001"_cstr,
+          u8"1,000,000,000,000,000,001 units"_cstr},
+         {u8"74.99999448"_cstr, u8"74.999\u202F994\u202F48 units"_cstr},
+         {u8"86.00002652"_cstr, u8"86.000\u202F026\u202F52 units"_cstr},
+         {u8"89.99999684"_cstr, u8"89.999\u202F996\u202F84 units"_cstr},
+         {u8"100.0000495"_cstr, u8"100.000\u202F049\u202F5 units"_cstr}},
         {},
     };
     wait_for_counter(account_activity_, false);
@@ -122,7 +123,7 @@ TEST_F(Regtest_fixture_hd, account_list_initial)
          expected_unit_type_,
          0,
          0,
-         u8"0 units"},
+         u8"0 units"_cstr},
     }};
     wait_for_counter(account_list_, false);
 
@@ -240,20 +241,20 @@ TEST_F(Regtest_fixture_hd, account_activity_immature)
         expected_notary_name_,
         0,
         0,
-        u8"0 units",
+        u8"0 units"_cstr,
         "",
         {},
         {test_chain_},
         100,
         {height_, height_},
         {},
-        {{u8"0", u8"0 units"}},
+        {{u8"0"_cstr, u8"0 units"_cstr}},
         {
             {
                 ot::otx::client::StorageBox::BLOCKCHAIN,
                 1,
                 10000004950,
-                u8"100.000\u202F049\u202F5 units",
+                u8"100.000\u202F049\u202F5 units"_cstr,
                 {},
                 "",
                 "",
@@ -284,7 +285,7 @@ TEST_F(Regtest_fixture_hd, account_list_immature)
          expected_unit_type_,
          0,
          0,
-         u8"0 units"},
+         u8"0 units"_cstr},
     }};
     wait_for_counter(account_list_, false);
 
@@ -371,20 +372,20 @@ TEST_F(Regtest_fixture_hd, account_activity_one_block_before_maturation)
         expected_notary_name_,
         0,
         0,
-        u8"0 units",
+        u8"0 units"_cstr,
         "",
         {},
         {test_chain_},
         100,
         {height_, height_},
         {},
-        {{u8"0", u8"0 units"}},
+        {{u8"0"_cstr, u8"0 units"_cstr}},
         {
             {
                 ot::otx::client::StorageBox::BLOCKCHAIN,
                 1,
                 10000004950,
-                u8"100.000\u202F049\u202F5 units",
+                u8"100.000\u202F049\u202F5 units"_cstr,
                 {},
                 "",
                 "",
@@ -415,7 +416,7 @@ TEST_F(Regtest_fixture_hd, account_list_one_block_before_maturation)
          expected_unit_type_,
          0,
          0,
-         u8"0 units"},
+         u8"0 units"_cstr},
     }};
     wait_for_counter(account_list_, false);
 
@@ -543,20 +544,20 @@ TEST_F(Regtest_fixture_hd, account_activity_mature)
         expected_notary_name_,
         1,
         10000004950,
-        u8"100.000\u202F049\u202F5 units",
+        u8"100.000\u202F049\u202F5 units"_cstr,
         "",
         {},
         {test_chain_},
         100,
         {height_, height_},
         {},
-        {{u8"100.0000495", u8"100.000\u202F049\u202F5 units"}},
+        {{u8"100.0000495"_cstr, u8"100.000\u202F049\u202F5 units"_cstr}},
         {
             {
                 ot::otx::client::StorageBox::BLOCKCHAIN,
                 1,
                 10000004950,
-                u8"100.000\u202F049\u202F5 units",
+                u8"100.000\u202F049\u202F5 units"_cstr,
                 {},
                 "",
                 "",
@@ -587,7 +588,7 @@ TEST_F(Regtest_fixture_hd, account_list_mature)
          expected_unit_type_,
          1,
          10000004950,
-         u8"100.000\u202F049\u202F5 units"},
+         u8"100.000\u202F049\u202F5 units"_cstr},
     }};
     wait_for_counter(account_list_, false);
 
@@ -674,20 +675,20 @@ TEST_F(Regtest_fixture_hd, account_activity_failed_spend)
         expected_notary_name_,
         1,
         10000004950,
-        u8"100.000\u202F049\u202F5 units",
+        u8"100.000\u202F049\u202F5 units"_cstr,
         "",
         {},
         {test_chain_},
         100,
         {height_, height_},
         {},
-        {{u8"100.0000495", u8"100.000\u202F049\u202F5 units"}},
+        {{u8"100.0000495"_cstr, u8"100.000\u202F049\u202F5 units"_cstr}},
         {
             {
                 ot::otx::client::StorageBox::BLOCKCHAIN,
                 1,
                 10000004950,
-                u8"100.000\u202F049\u202F5 units",
+                u8"100.000\u202F049\u202F5 units"_cstr,
                 {},
                 "",
                 "",
@@ -718,7 +719,7 @@ TEST_F(Regtest_fixture_hd, account_list_failed_spend)
          expected_unit_type_,
          1,
          10000004950,
-         u8"100.000\u202F049\u202F5 units"},
+         u8"100.000\u202F049\u202F5 units"_cstr},
     }};
     wait_for_counter(account_list_, false);
 
@@ -740,7 +741,7 @@ TEST_F(Regtest_fixture_hd, spend)
     const auto& network = handle.get();
     const auto& widget = client_1_.UI().AccountActivity(
         alice_.nym_id_, SendHD().Parent().AccountID());
-    constexpr auto sendAmount{u8"14 units"};
+    constexpr auto sendAmount{"14 units"};
     constexpr auto address{"mipcBbFg9gMiCh81Kj8tqqdgoZub1ZJRfn"};
 
     ASSERT_FALSE(widget.ValidateAmount(sendAmount).empty());
@@ -787,20 +788,20 @@ TEST_F(Regtest_fixture_hd, account_activity_unconfirmed_spend)
         expected_notary_name_,
         1,
         8600002652,
-        u8"86.000\u202F026\u202F52 units",
+        u8"86.000\u202F026\u202F52 units"_cstr,
         "",
         {},
         {test_chain_},
         100,
         {height_, height_},
         {},
-        {{u8"86.00002652", u8"86.000\u202F026\u202F52 units"}},
+        {{u8"86.00002652"_cstr, u8"86.000\u202F026\u202F52 units"_cstr}},
         {
             {
                 ot::otx::client::StorageBox::BLOCKCHAIN,
                 -1,
                 -1400002298,
-                u8"-14.000\u202F022\u202F98 units",
+                u8"-14.000\u202F022\u202F98 units"_cstr,
                 {},
                 "",
                 "",
@@ -813,7 +814,7 @@ TEST_F(Regtest_fixture_hd, account_activity_unconfirmed_spend)
                 ot::otx::client::StorageBox::BLOCKCHAIN,
                 1,
                 10000004950,
-                u8"100.000\u202F049\u202F5 units",
+                u8"100.000\u202F049\u202F5 units"_cstr,
                 {},
                 "",
                 "",
@@ -844,7 +845,7 @@ TEST_F(Regtest_fixture_hd, account_list_unconfirmed_spend)
          expected_unit_type_,
          1,
          8600002652,
-         u8"86.000\u202F026\u202F52 units"},
+         u8"86.000\u202F026\u202F52 units"_cstr},
     }};
     wait_for_counter(account_list_, false);
 
@@ -937,20 +938,20 @@ TEST_F(Regtest_fixture_hd, account_activity_confirmed_spend)
         expected_notary_name_,
         1,
         8600002652,
-        u8"86.000\u202F026\u202F52 units",
+        u8"86.000\u202F026\u202F52 units"_cstr,
         "",
         {},
         {test_chain_},
         100,
         {height_, height_},
         {},
-        {{u8"86.00002652", u8"86.000\u202F026\u202F52 units"}},
+        {{u8"86.00002652"_cstr, u8"86.000\u202F026\u202F52 units"_cstr}},
         {
             {
                 ot::otx::client::StorageBox::BLOCKCHAIN,
                 -1,
                 -1400002298,
-                u8"-14.000\u202F022\u202F98 units",
+                u8"-14.000\u202F022\u202F98 units"_cstr,
                 {},
                 "",
                 "",
@@ -963,7 +964,7 @@ TEST_F(Regtest_fixture_hd, account_activity_confirmed_spend)
                 ot::otx::client::StorageBox::BLOCKCHAIN,
                 1,
                 10000004950,
-                u8"100.000\u202F049\u202F5 units",
+                u8"100.000\u202F049\u202F5 units"_cstr,
                 {},
                 "",
                 "",
@@ -994,7 +995,7 @@ TEST_F(Regtest_fixture_hd, account_list_confirmed_spend)
          expected_unit_type_,
          1,
          8600002652,
-         u8"86.000\u202F026\u202F52 units"},
+         u8"86.000\u202F026\u202F52 units"_cstr},
     }};
     wait_for_counter(account_list_, false);
 

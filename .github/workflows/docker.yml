@@ -1,4 +1,4 @@
-name: Linux
+name: Docker
 
 on: [push, pull_request]
 
@@ -7,19 +7,33 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        compiler: [gcc-10, clang-10]
+        compiler: [gcc-10.3, gcc-11.3, gcc-12.2, clang-12, clang-13, clang-14]
         # TODO "prod" configuration requires more ram than is available in the Github Actions runner
         mode: [test01, test02, test03, test04, test05, test06, test07, test08, nopch, full]
         include:
-          - compiler: gcc-10
-            platform: ubuntu-20.04
+          - compiler: gcc-10.3
             command: /usr/bin/build-opentxs-gcc
-            docker: 10
-          - compiler: clang-10
-            platform: ubuntu-20.04
+            docker: 11
+          - compiler: gcc-11.3
+            command: /usr/bin/build-opentxs-gcc
+            docker: 35_0
+          - compiler: gcc-12.2
+            command: /usr/bin/build-opentxs-gcc
+            docker: 36_0
+          - compiler: clang-12
             command: /usr/bin/build-opentxs-clang
-            docker: 10
-    runs-on:  ${{ matrix.platform }}
+            docker: 34_0
+          - compiler: clang-13
+            command: /usr/bin/build-opentxs-clang
+            docker: 35_0
+          - compiler: clang-14
+            command: /usr/bin/build-opentxs-clang
+            docker: 36_0
+          - compiler: clang-tidy-14
+            mode: tidy
+            command: /usr/bin/build-opentxs-clang
+            docker: 36_0
+    runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2.3.4
       with:
@@ -40,31 +54,3 @@ jobs:
 #      run: |
 #        mkdir -p /tmp/opentxs
 #        docker run --tmpfs /tmp/build:rw,nosuid,size=2g --mount type=bind,src=${{ github.workspace }},dst=/home/src --mount type=bind,src=/tmp/opentxs,dst=/home/output -i opentransactions/ci:${{ matrix.docker }} /usr/bin/test-opentxs 2
-  static:
-    strategy:
-      fail-fast: false
-      matrix:
-        compiler: [clang-tidy]
-        include:
-          - compiler: clang-tidy
-            platform: ubuntu-20.04
-            command: /usr/bin/build-opentxs-clang
-            docker: tidy
-            mode: tidy
-    runs-on:  ${{ matrix.platform }}
-    steps:
-    - uses: actions/checkout@v2.3.4
-      with:
-        fetch-depth: '0'
-        submodules: 'recursive'
-    - name: Get more disk space
-      run: |
-        sudo rm -rf /usr/local/lib/android
-        sudo rm -rf /usr/share/dotnet
-    - name: Setup build environment
-      run: |
-        docker pull opentransactions/ci:${{ matrix.docker }}
-    - name: Compile
-      run: |
-        mkdir -p /tmp/opentxs
-        docker run --mount type=bind,src=${{ github.workspace }},dst=/home/src --mount type=bind,src=/tmp/opentxs,dst=/home/output -i --entrypoint ${{ matrix.command }} opentransactions/ci:${{ matrix.docker }} ${{ matrix.mode }}

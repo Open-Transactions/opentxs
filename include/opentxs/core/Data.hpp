@@ -7,6 +7,7 @@
 
 #include "opentxs/Version.hpp"  // IWYU pragma: associated
 
+#include <compare>
 #include <cstddef>
 #include <cstdint>
 #include <functional>
@@ -43,6 +44,9 @@ struct OPENTXS_EXPORT HexType {
 
 static constexpr auto IsHex = HexType{};
 
+OPENTXS_EXPORT auto operator==(const Data&, const Data&) noexcept -> bool;
+OPENTXS_EXPORT auto operator<=>(const Data&, const Data&) noexcept
+    -> std::strong_ordering;
 OPENTXS_EXPORT auto to_hex(const std::byte* in, std::size_t size) noexcept
     -> UnallocatedCString;
 OPENTXS_EXPORT auto to_hex(
@@ -86,12 +90,6 @@ public:
     virtual auto Extract(std::uint64_t& output, const std::size_t pos = 0) const
         -> bool = 0;
     virtual auto IsNull() const -> bool = 0;
-    virtual auto operator==(const Data& rhs) const noexcept -> bool = 0;
-    virtual auto operator!=(const Data& rhs) const noexcept -> bool = 0;
-    virtual auto operator<(const Data& rhs) const noexcept -> bool = 0;
-    virtual auto operator>(const Data& rhs) const noexcept -> bool = 0;
-    virtual auto operator<=(const Data& rhs) const noexcept -> bool = 0;
-    virtual auto operator>=(const Data& rhs) const noexcept -> bool = 0;
     virtual auto size() const -> std::size_t = 0;
 
     virtual auto Assign(const Data& source) noexcept -> bool = 0;

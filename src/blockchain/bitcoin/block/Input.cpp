@@ -1003,7 +1003,7 @@ auto Input::SignatureVersion() const noexcept
 
     output->cache_.reset_size();
 
-    return std::move(output);
+    return output;
 }
 
 auto Input::SignatureVersion(std::unique_ptr<internal::Script> subscript)

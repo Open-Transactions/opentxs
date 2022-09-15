@@ -31,8 +31,8 @@
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Notary.hpp"
 #include "opentxs/api/session/Session.hpp"
+#include "opentxs/core/Data.hpp"
 #include "opentxs/core/Secret.hpp"
-#include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
 #include "opentxs/core/identifier/UnitDefinition.hpp"
 #include "opentxs/crypto/key/Symmetric.hpp"
@@ -477,7 +477,7 @@ auto Purse::deserialize_secondary_key(
                 throw std::runtime_error("Invalid serialized secondary key");
             }
 
-            return std::move(output);
+            return output;
         }
         case blind::PurseType::Normal: {
         } break;
@@ -511,7 +511,7 @@ auto Purse::deserialize_secondary_password(
                     "Invalid serialized secondary password");
             }
 
-            return std::move(output);
+            return output;
         }
         case blind::PurseType::Normal: {
         } break;

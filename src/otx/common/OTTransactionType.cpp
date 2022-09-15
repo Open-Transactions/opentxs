@@ -15,6 +15,7 @@
 #include "internal/otx/common/transaction/Helpers.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/core/Armored.hpp"
+#include "opentxs/core/Data.hpp"
 #include "opentxs/core/String.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/util/Log.hpp"

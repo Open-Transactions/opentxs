@@ -70,11 +70,13 @@ OPENTXS_EXPORT auto print(const Key& key) noexcept -> UnallocatedCString;
 
 namespace std
 {
+// NOLINTBEGIN(cert-dcl58-cpp)
 template <>
 struct hash<opentxs::blockchain::crypto::Key> {
     auto operator()(const opentxs::blockchain::crypto::Key& data) const noexcept
         -> std::size_t;
 };
+// NOLINTEND(cert-dcl58-cpp)
 }  // namespace std
 
 namespace opentxs

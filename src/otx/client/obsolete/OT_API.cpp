@@ -10,6 +10,7 @@
 #include <BasketItem.pb.h>
 #include <BasketParams.pb.h>
 #include <UnitDefinition.pb.h>
+#include <compare>
 #include <cstdlib>
 #include <filesystem>
 #include <iterator>
@@ -59,6 +60,7 @@
 #include "opentxs/api/session/Workflow.hpp"
 #include "opentxs/core/Armored.hpp"
 #include "opentxs/core/ByteArray.hpp"
+#include "opentxs/core/Data.hpp"
 #include "opentxs/core/String.hpp"
 #include "opentxs/core/contract/BasketContract.hpp"
 #include "opentxs/core/contract/UnitType.hpp"

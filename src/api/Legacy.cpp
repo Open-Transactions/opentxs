@@ -11,7 +11,6 @@
 #include <filesystem>
 #include <memory>
 #include <string_view>
-#include <utility>
 
 #include "internal/api/Factory.hpp"
 #include "internal/api/Legacy.hpp"
@@ -312,14 +311,14 @@ auto Legacy::get_home_directory() noexcept -> fs::path
     if (auto* env = ::getenv("HOME"); nullptr != env) {
         home = env;
 
-        return std::move(home);
+        return home;
     }
 
-    if (false == home.empty()) { return std::move(home); }
+    if (false == home.empty()) { return home; }
 
     home = get_home_platform();
 
-    if (false == home.empty()) { return std::move(home); }
+    if (false == home.empty()) { return home; }
 
     LogConsole()("Unable to determine home directory.").Flush();
 
@@ -335,7 +334,7 @@ auto Legacy::get_suffix(std::string_view application) noexcept -> fs::path
     output += application;
     output += fs::path::preferred_separator;
 
-    return std::move(output);
+    return output;
 }
 
 auto Legacy::get_file(const fs::path& fragment, const int instance)
@@ -407,7 +406,7 @@ auto Legacy::remove_trailing_separator(const fs::path& in) noexcept -> fs::path
         val.pop_back();
     }
 
-    return std::move(val);
+    return val;
 }
 
 auto Legacy::ServerConfigFilePath(const int instance) const noexcept -> fs::path

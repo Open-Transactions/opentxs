@@ -8,6 +8,7 @@
 #include "internal/otx/common/OTTransaction.hpp"  // IWYU pragma: associated
 
 #include <chrono>
+#include <compare>
 #include <cstdint>
 #include <cstring>
 #include <filesystem>
@@ -42,6 +43,7 @@
 #include "opentxs/api/session/Storage.hpp"
 #include "opentxs/api/session/Wallet.hpp"
 #include "opentxs/core/Armored.hpp"
+#include "opentxs/core/Data.hpp"
 #include "opentxs/core/String.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Notary.hpp"

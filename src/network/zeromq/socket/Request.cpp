@@ -11,6 +11,7 @@
 #include <array>
 #include <atomic>
 #include <chrono>
+#include <compare>
 #include <memory>
 #include <thread>
 #include <utility>

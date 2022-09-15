@@ -34,6 +34,7 @@
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/core/Armored.hpp"
 #include "opentxs/core/ByteArray.hpp"
+#include "opentxs/core/Data.hpp"
 #include "opentxs/core/Secret.hpp"
 #include "opentxs/core/identifier/Generic.hpp"  // IWYU pragma: keep
 #include "opentxs/core/identifier/Nym.hpp"      // IWYU pragma: keep

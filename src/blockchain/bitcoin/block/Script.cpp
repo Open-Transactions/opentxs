@@ -10,6 +10,7 @@
 #include <boost/endian/buffers.hpp>
 #include <robin_hood.h>
 #include <algorithm>
+#include <compare>
 #include <cstdint>
 #include <cstring>
 #include <iterator>

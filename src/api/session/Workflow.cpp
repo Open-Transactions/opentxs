@@ -17,6 +17,7 @@
 #include <RPCPush.pb.h>
 #include <algorithm>
 #include <chrono>
+#include <compare>
 #include <iterator>
 #include <memory>
 #include <stdexcept>
@@ -49,6 +50,7 @@
 #include "opentxs/api/session/Storage.hpp"
 #include "opentxs/api/session/Workflow.hpp"
 #include "opentxs/core/ByteArray.hpp"
+#include "opentxs/core/Data.hpp"
 #include "opentxs/core/String.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Notary.hpp"

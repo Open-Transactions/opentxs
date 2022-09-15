@@ -10,6 +10,7 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/multiprecision/cpp_int.hpp>
 #include <algorithm>
+#include <compare>
 #include <cstddef>
 #include <cstdint>
 #include <cstring>

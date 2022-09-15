@@ -341,16 +341,6 @@ auto Generic::GetString(const api::Crypto& api, String& out) const noexcept
 
 auto Generic::IsNull() const -> bool { return imp_->IsNull(); }
 
-auto Generic::operator!=(const Data& rhs) const noexcept -> bool
-{
-    return imp_->operator!=(rhs);
-}
-
-auto Generic::operator!=(const Generic& rhs) const noexcept -> bool
-{
-    return imp_->operator!=(rhs);
-}
-
 auto Generic::operator+=(const Data& rhs) noexcept -> Generic&
 {
     return imp_->operator+=(rhs);
@@ -379,56 +369,6 @@ auto Generic::operator+=(const std::uint64_t rhs) noexcept -> Generic&
 auto Generic::operator+=(const std::uint8_t rhs) noexcept -> Generic&
 {
     return imp_->operator+=(rhs);
-}
-
-auto Generic::operator<(const Data& rhs) const noexcept -> bool
-{
-    return imp_->operator<(rhs);
-}
-
-auto Generic::operator<(const Generic& rhs) const noexcept -> bool
-{
-    return imp_->operator<(rhs);
-}
-
-auto Generic::operator<=(const Data& rhs) const noexcept -> bool
-{
-    return imp_->operator<=(rhs);
-}
-
-auto Generic::operator<=(const Generic& rhs) const noexcept -> bool
-{
-    return imp_->operator<=(rhs);
-}
-
-auto Generic::operator==(const Data& rhs) const noexcept -> bool
-{
-    return imp_->operator==(rhs);
-}
-
-auto Generic::operator==(const Generic& rhs) const noexcept -> bool
-{
-    return imp_->operator==(rhs);
-}
-
-auto Generic::operator>(const Data& rhs) const noexcept -> bool
-{
-    return imp_->operator>(rhs);
-}
-
-auto Generic::operator>(const Generic& rhs) const noexcept -> bool
-{
-    return imp_->operator>(rhs);
-}
-
-auto Generic::operator>=(const Data& rhs) const noexcept -> bool
-{
-    return imp_->operator>=(rhs);
-}
-
-auto Generic::operator>=(const Generic& rhs) const noexcept -> bool
-{
-    return imp_->operator>=(rhs);
 }
 
 auto Generic::Randomize(const std::size_t size) -> bool

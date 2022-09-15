@@ -12,6 +12,7 @@
 #include <PaymentWorkflowEnums.pb.h>
 #include <atomic>
 #include <chrono>
+#include <compare>
 #include <future>
 #include <memory>
 
@@ -32,6 +33,7 @@
 #include "opentxs/api/session/Wallet.hpp"
 #include "opentxs/api/session/Workflow.hpp"
 #include "opentxs/core/AccountType.hpp"
+#include "opentxs/core/Data.hpp"
 #include "opentxs/core/contract/ServerContract.hpp"
 #include "opentxs/core/contract/Unit.hpp"
 #include "opentxs/core/display/Definition.hpp"

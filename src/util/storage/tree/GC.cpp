@@ -139,7 +139,9 @@ auto Root::GC::Run(
 {
     asio_.Internal().Post(
         ThreadPool::General,
-        [=, driver = &to] { collect_garbage(from, driver, std::move(cb)); },
+        [=, this, driver = &to] {
+            collect_garbage(from, driver, std::move(cb));
+        },
         "Storage gc");
 
     return true;

@@ -9,5 +9,7 @@
 
 namespace opentxs
 {
+#ifndef _MSC_VER
 template class FixedByteArray<32>;
+#endif
 }  // namespace opentxs

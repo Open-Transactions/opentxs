@@ -7,6 +7,7 @@
 
 #include <gtest/gtest.h>
 #include <opentxs/opentxs.hpp>
+#include <compare>
 #include <iterator>
 
 namespace ottest

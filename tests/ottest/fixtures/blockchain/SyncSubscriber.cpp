@@ -7,6 +7,7 @@
 
 #include <opentxs/opentxs.hpp>
 #include <chrono>
+#include <compare>
 #include <iostream>
 #include <stdexcept>
 #include <utility>

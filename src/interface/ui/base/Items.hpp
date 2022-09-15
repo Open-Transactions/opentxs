@@ -174,7 +174,7 @@ public:
             break;
         }
 
-        return std::move(output);
+        return output;
     }
     auto get_index(const RowID& id) noexcept -> std::optional<std::size_t>
     {

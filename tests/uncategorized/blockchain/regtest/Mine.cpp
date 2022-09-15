@@ -6,6 +6,7 @@
 #include <gtest/gtest.h>
 #include <opentxs/opentxs.hpp>
 #include <chrono>
+#include <compare>
 #include <memory>
 
 #include "internal/blockchain/bitcoin/block/Transaction.hpp"
