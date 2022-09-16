@@ -360,7 +360,7 @@ else()
   )
 endif()
 
-if("${CMAKE_CXX_COMPILER_ID}"
+if(CMAKE_CXX_COMPILER_ID
    MATCHES
    Clang
    AND CMAKE_CXX_COMPILER_VERSION
@@ -368,6 +368,15 @@ if("${CMAKE_CXX_COMPILER_ID}"
        14.0.0
 )
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-reserved-identifier")
+endif()
+
+if(CMAKE_CXX_COMPILER_ID
+   MATCHES
+   AppleClang
+)
+  # NOTE when AppleClang rewrites operator<=> it generates code that causes this
+  # warning to trigger
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-zero-as-null-pointer-constant")
 endif()
 
 # -----------------------------------------------------------------------------

@@ -15,7 +15,8 @@ jobs:
             docker: 17
     runs-on: ${{ matrix.platform }}
     steps:
-    - uses: actions/checkout@v2.3.4
+    - name: Checkout opentxs
+      uses: actions/checkout@v3
       with:
         fetch-depth: '0'
         submodules: 'recursive'

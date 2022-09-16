@@ -1,39 +1,57 @@
 [submodule "cmake"]
 	path = cmake
 	url = https://github.com/Open-Transactions/opentxs-cmake
+	shallow = true
 [submodule "deps/ChaiScript"]
 	path = deps/ChaiScript
 	url = https://github.com/ChaiScript/ChaiScript.git
+	shallow = true
 [submodule "deps/lucre"]
 	path = deps/lucre
 	url = https://github.com/Open-Transactions/lucre.git
+	shallow = true
 [submodule "deps/simpleini"]
 	path = deps/simpleini
 	url = https://github.com/brofield/simpleini.git
+	shallow = true
 [submodule "deps/smhasher"]
 	path = deps/smhasher
 	url = https://github.com/aappleby/smhasher
+	shallow = true
 [submodule "deps/SHA1"]
 	path = deps/SHA1
 	url = https://github.com/983/SHA1
+	shallow = true
 [submodule "deps/vcpkg"]
 	path = deps/vcpkg
 	url = https://github.com/microsoft/vcpkg
+	shallow = true
 [submodule "src/api/client/blockchain/bech32"]
 	path = deps/bech32
 	url = https://github.com/sipa/bech32
 [submodule "deps/robin-hood"]
 	path = deps/robin-hood
 	url = https://github.com/martinus/robin-hood-hashing
+	shallow = true
 [submodule "deps/packetcrypt/packetcrypt_rs"]
 	path = deps/packetcrypt/packetcrypt_rs
 	url = https://github.com/cjdelisle/packetcrypt_rs
+	shallow = true
 [submodule "deps/secp256k1"]
 	path = deps/secp256k1
 	url = https://github.com/Open-Transactions/secp256k1-abc
+	shallow = true
 [submodule "deps/cs_libguarded"]
 	path = deps/cs_libguarded
 	url = https://github.com/copperspice/cs_libguarded
+	shallow = true
 [submodule "tests/ottest/data/blockchain/ethereum"]
 	path = tests/ottest/data/blockchain/ethereum
 	url = https://github.com/ethereum/tests
+	shallow = true
+[submodule "deps/vcpkg_installed"]
+	path = deps/vcpkg_installed
+	url = https://gitlab.com/open-transactions/vcpkg.git/
+	shallow = true
+[submodule "deps/bech32"]
+	shallow = true

@@ -198,6 +198,7 @@ else()
       -Wno-extra-semi
       -Wno-missing-declarations
       -Wno-reserved-identifier
+      -Wno-shorten-64-to-32
       -Wno-suggest-destructor-override
       -Wno-switch-default
       -Wno-switch-enum

@@ -1,0 +1,33 @@
+name: vcpkg
+
+on: [push, pull_request]
+
+jobs:
+  job:
+    name: ${{ matrix.platform }}-${{ matrix.preset }}-${{ github.workflow }}
+    runs-on: ${{ matrix.platform }}
+    strategy:
+      fail-fast: false
+      matrix:
+        platform: [macos-11]
+        preset: [full]
+    env:
+      VCPKG_ROOT: '${{ github.workspace }}/deps/vcpkg'
+      VCPKG_INSTALLED_DIR: '${{ github.workspace }}/deps/vcpkg_installed/${{ matrix.platform }}'
+    steps:
+    - name: Checkout opentxs
+      uses: actions/checkout@v3
+      with:
+        fetch-depth: '0'
+        submodules: 'recursive'
+    - name: Update cmake
+      uses: lukka/get-cmake@latest
+    - name: Setup vcpkg
+      uses: lukka/run-vcpkg@v10
+      with:
+        vcpkgDirectory: '${{ env.VCPKG_ROOT }}'
+    - name: 'Compile'
+      run: |
+        cd '${{ github.workspace }}'
+        cmake -S '${{ github.workspace }}' --preset '${{ matrix.preset }}' -DCMAKE_TOOLCHAIN_FILE='${{ github.workspace }}/deps/vcpkg/scripts/buildsystems/vcpkg.cmake' -DVCPKG_INSTALLED_DIR='${{ env.VCPKG_INSTALLED_DIR }}'
+        cmake --build --preset '${{ matrix.preset }}' -- -k 0
