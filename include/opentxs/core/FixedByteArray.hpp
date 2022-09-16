@@ -49,12 +49,6 @@ public:
     [[nodiscard]] auto Extract(std::uint64_t& output, const std::size_t pos = 0)
         const -> bool final;
     auto IsNull() const -> bool final;
-    auto operator==(const Data& rhs) const noexcept -> bool final;
-    auto operator!=(const Data& rhs) const noexcept -> bool final;
-    auto operator<(const Data& rhs) const noexcept -> bool final;
-    auto operator>(const Data& rhs) const noexcept -> bool final;
-    auto operator<=(const Data& rhs) const noexcept -> bool final;
-    auto operator>=(const Data& rhs) const noexcept -> bool final;
     auto size() const -> std::size_t final { return N; }
 
     [[nodiscard]] auto Assign(const Data& source) noexcept -> bool final;
@@ -109,8 +103,9 @@ private:
     std::array<std::byte, N> data_;
 };
 
-// NOTE sorry Windows users, MSVC throws an ICE if we export this symbol
-extern template class OPENTXS_EXPORT_TEMPLATE FixedByteArray<32>;
+#ifndef _MSC_VER
+extern template class OPENTXS_EXPORT FixedByteArray<32>;
+#endif
 }  // namespace opentxs
 
 namespace std
@@ -119,12 +114,5 @@ template <>
 struct OPENTXS_EXPORT_TEMPLATE hash<opentxs::FixedByteArray<32>> {
     auto operator()(const opentxs::FixedByteArray<32>& data) const noexcept
         -> std::size_t;
-};
-
-template <>
-struct OPENTXS_EXPORT_TEMPLATE less<opentxs::FixedByteArray<32>> {
-    auto operator()(
-        const opentxs::FixedByteArray<32>& lhs,
-        const opentxs::FixedByteArray<32>& rhs) const -> bool;
 };
 }  // namespace std

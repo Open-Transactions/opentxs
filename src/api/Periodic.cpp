@@ -10,6 +10,7 @@
 #include <boost/system/error_code.hpp>
 #include <atomic>
 #include <chrono>
+#include <compare>
 #include <exception>
 #include <functional>
 #include <memory>

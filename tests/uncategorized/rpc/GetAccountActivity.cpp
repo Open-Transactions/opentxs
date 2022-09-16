@@ -20,6 +20,8 @@ namespace rpc = opentxs::rpc;
 
 namespace ottest
 {
+using namespace opentxs::literals;
+
 constexpr auto issuer_{
     "ot2xuVPJDdweZvKLQD42UMCzhCmT3okn3W1PktLgCbmQLRnaKy848sX"};
 constexpr auto brian_{
@@ -67,7 +69,8 @@ TEST_F(RPC_fixture, preconditions)
             "Mt Gox USD",
             "YOLO",
             ot::UnitType::Usd,
-            {u8"USD", {{u8"dollars", {u8"$", u8"", {{10, 0}}, 2, 3}}}});
+            {u8"USD"_cstr,
+             {{u8"dollars"_cstr, {u8"$"_cstr, u8""_cstr, {{10, 0}}, 2, 3}}}});
 
         EXPECT_FALSE(unit.empty());
 

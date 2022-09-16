@@ -25,6 +25,7 @@
 #include "opentxs/api/session/Endpoints.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Wallet.hpp"
+#include "opentxs/core/Data.hpp"
 #include "opentxs/identity/Nym.hpp"
 #include "opentxs/identity/wot/claim/Attribute.hpp"
 #include "opentxs/identity/wot/claim/Data.hpp"
@@ -40,7 +41,9 @@
 #include "opentxs/util/NymEditor.hpp"
 #include "opentxs/util/Pimpl.hpp"
 
+// NOLINTBEGIN(cert-dcl58-cpp)
 template struct std::pair<int, opentxs::UnallocatedCString>;
+// NOLINTEND(cert-dcl58-cpp)
 
 namespace opentxs::factory
 {

@@ -21,7 +21,7 @@
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/blockchain/block/Block.hpp"
 #include "opentxs/core/ByteArray.hpp"
-#include "opentxs/core/FixedByteArray.hpp"
+#include "opentxs/core/Data.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Log.hpp"
 #include "util/LMDB.hpp"

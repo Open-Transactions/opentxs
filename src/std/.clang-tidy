@@ -1,5 +1,5 @@
 {
-  "Checks": "boost-use-to-string,bugprone-argument-comment,bugprone-assert-side-effect,bugprone-bad-signal-to-kill-thread,bugprone-unused-raii,bugprone-use-after-move,cert-*,-cert-oop54-cpp,-cert-err58-cpp,-cert-dcl58-cpp,clang-diagnostic-*,clang-analyzer-*,modernize-*,-modernize-pass-by-value,-modernize-use-default-member-init,-modernize-use-nodiscard,readability-braces-around-statements,readability-qualified-auto",
+  "Checks": "boost-use-to-string,bugprone-argument-comment,bugprone-assert-side-effect,bugprone-bad-signal-to-kill-thread,bugprone-unused-raii,bugprone-use-after-move,cert-*,-cert-oop54-cpp,-cert-err58-cpp,-cert-dcl58-cpp,clang-diagnostic-*,clang-analyzer-*,modernize-*,-modernize-macro-to-enum,-modernize-pass-by-value,-modernize-use-default-member-init,-modernize-use-nodiscard,readability-braces-around-statements,readability-qualified-auto",
   "CheckOptions": [
     {
       "key": "bugprone-argument-comment.IgnoreSingleArgument",

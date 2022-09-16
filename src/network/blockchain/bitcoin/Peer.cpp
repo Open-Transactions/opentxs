@@ -73,6 +73,7 @@
 #include "opentxs/blockchain/node/Manager.hpp"
 #include "opentxs/blockchain/node/Types.hpp"
 #include "opentxs/core/ByteArray.hpp"
+#include "opentxs/core/Data.hpp"
 #include "opentxs/core/FixedByteArray.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"

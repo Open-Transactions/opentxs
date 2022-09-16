@@ -7,14 +7,18 @@
 
 #include <gtest/gtest.h>
 #include <opentxs/opentxs.hpp>
+#include <compare>
 #include <iterator>
 #include <sstream>
+#include <string_view>
 
 #include "ottest/fixtures/common/Counter.hpp"
 #include "ottest/fixtures/common/User.hpp"
 
 namespace ottest
 {
+using namespace opentxs::literals;
+
 auto check_account_tree_items(
     const ot::ui::AccountCurrency& widget,
     const ot::UnallocatedVector<AccountTreeRow>& v) noexcept -> bool;
@@ -129,7 +133,7 @@ auto init_account_tree(const User& user, Counter& counter) noexcept -> void
 {
     user.api_->UI().AccountTree(user.nym_id_, make_cb(counter, [&] {
                                     auto out = std::stringstream{};
-                                    out << u8"account_tree_";
+                                    out << u8"account_tree_"_sv;
                                     out << user.name_lower_;
 
                                     return out.str();

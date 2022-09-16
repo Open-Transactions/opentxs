@@ -18,6 +18,7 @@
 #include "opentxs/api/Context.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/core/Contact.hpp"
+#include "opentxs/core/Data.hpp"
 #include "opentxs/core/PaymentCode.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Notary.hpp"

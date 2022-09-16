@@ -40,6 +40,7 @@
 #include "opentxs/api/session/Wallet.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/core/Contact.hpp"
+#include "opentxs/core/Data.hpp"
 #include "opentxs/core/PaymentCode.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Nym.hpp"

@@ -14,6 +14,7 @@
 #include "internal/interface/ui/UI.hpp"
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/Crypto.hpp"
+#include "opentxs/core/Data.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 
 namespace opentxs::factory
@@ -32,7 +33,7 @@ auto ContactListItem(
     auto out = std::make_shared<ReturnType>(parent, api, rowID, key);
     out->init_contact_list();
 
-    return std::move(out);
+    return out;
 }
 }  // namespace opentxs::factory
 

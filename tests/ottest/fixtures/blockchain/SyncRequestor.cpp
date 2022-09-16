@@ -8,6 +8,7 @@
 #include <gtest/gtest.h>
 #include <opentxs/opentxs.hpp>
 #include <chrono>
+#include <compare>
 #include <mutex>
 #include <stdexcept>
 #include <string_view>

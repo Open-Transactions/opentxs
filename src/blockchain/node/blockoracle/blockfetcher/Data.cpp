@@ -23,7 +23,7 @@
 #include "opentxs/blockchain/bitcoin/block/Block.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
-#include "opentxs/core/FixedByteArray.hpp"
+#include "opentxs/core/Data.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 

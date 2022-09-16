@@ -7,11 +7,12 @@
 #include "1_Internal.hpp"                    // IWYU pragma: associated
 #include "core/paymentcode/PaymentCode.hpp"  // IWYU pragma: associated
 
+#include <compare>
 #include <utility>
 
 #include "internal/util/LogMacros.hpp"
+#include "opentxs/core/Data.hpp"
 #include "opentxs/core/PaymentCode.hpp"
-#include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/crypto/key/EllipticCurve.hpp"  // IWYU pragma: keep
 #include "opentxs/crypto/key/HD.hpp"             // IWYU pragma: keep

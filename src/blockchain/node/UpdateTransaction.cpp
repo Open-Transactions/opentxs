@@ -16,7 +16,7 @@
 #include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/blockchain/block/Header.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
-#include "opentxs/core/FixedByteArray.hpp"
+#include "opentxs/core/Data.hpp"
 #include "opentxs/util/Container.hpp"
 
 namespace opentxs::blockchain::node

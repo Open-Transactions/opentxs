@@ -71,7 +71,7 @@ auto Widget::setup_listeners(
         const auto* copy{functor};
         auto& nextCallback =
             callbacks_.emplace_back(network::zeromq::ListenCallback::Factory(
-                [=](const Message& message) -> void {
+                [=, this](const Message& message) -> void {
                     (*copy)(this, message);
                 }));
         auto& socket =

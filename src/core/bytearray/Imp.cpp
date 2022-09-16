@@ -208,36 +208,6 @@ auto ByteArray::Imp::IsNull() const -> bool
     return true;
 }
 
-auto ByteArray::Imp::operator==(const opentxs::Data& rhs) const noexcept -> bool
-{
-    return 0 == spaceship(rhs);
-}
-
-auto ByteArray::Imp::operator!=(const opentxs::Data& rhs) const noexcept -> bool
-{
-    return 0 != spaceship(rhs);
-}
-
-auto ByteArray::Imp::operator<(const opentxs::Data& rhs) const noexcept -> bool
-{
-    return 0 > spaceship(rhs);
-}
-
-auto ByteArray::Imp::operator>(const opentxs::Data& rhs) const noexcept -> bool
-{
-    return 0 < spaceship(rhs);
-}
-
-auto ByteArray::Imp::operator<=(const opentxs::Data& rhs) const noexcept -> bool
-{
-    return 0 >= spaceship(rhs);
-}
-
-auto ByteArray::Imp::operator>=(const opentxs::Data& rhs) const noexcept -> bool
-{
-    return 0 <= spaceship(rhs);
-}
-
 auto ByteArray::Imp::operator+=(const opentxs::Data& rhs) -> ByteArray&
 {
     Concatenate(rhs.data(), rhs.size());
@@ -311,18 +281,6 @@ auto ByteArray::Imp::SetSize(const std::size_t size) -> bool
     if (size > 0) { data_.assign(size, std::byte{}); }
 
     return true;
-}
-
-auto ByteArray::Imp::spaceship(const opentxs::Data& rhs) const noexcept -> int
-{
-    const auto lSize = data_.size();
-    const auto rSize = rhs.size();
-
-    if ((0u == lSize) && (0u == rSize)) { return 0; }
-    if (lSize < rSize) { return -1; }
-    if (lSize > rSize) { return 1; }
-
-    return std::memcmp(data_.data(), rhs.data(), data_.size());
 }
 
 auto ByteArray::Imp::WriteInto() noexcept -> AllocateOutput

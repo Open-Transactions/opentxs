@@ -13,6 +13,7 @@
 #include <array>
 #include <atomic>
 #include <chrono>
+#include <compare>
 #include <cstdint>
 #include <iterator>
 #include <memory>

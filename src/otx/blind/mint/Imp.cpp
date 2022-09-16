@@ -9,6 +9,7 @@
 
 #include <irrxml/irrXML.hpp>
 #include <chrono>
+#include <compare>
 #include <cstdlib>
 #include <filesystem>
 #include <memory>
@@ -31,6 +32,7 @@
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/api/session/Wallet.hpp"
 #include "opentxs/core/Armored.hpp"
+#include "opentxs/core/Data.hpp"
 #include "opentxs/core/String.hpp"
 #include "opentxs/identity/Nym.hpp"
 #include "opentxs/util/Bytes.hpp"

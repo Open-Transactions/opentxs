@@ -18,6 +18,7 @@
 #include "opentxs/blockchain/BlockchainType.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/core/Amount.hpp"
+#include "opentxs/core/Data.hpp"
 #include "opentxs/core/Types.hpp"
 #include "opentxs/interface/ui/AccountList.hpp"
 #include "opentxs/util/Container.hpp"

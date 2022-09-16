@@ -19,7 +19,7 @@
 #include "opentxs/blockchain/bitcoin/NumericHash.hpp"
 #include "opentxs/blockchain/bitcoin/Work.hpp"
 #include "opentxs/blockchain/block/Header.hpp"
-#include "opentxs/core/FixedByteArray.hpp"
+#include "opentxs/core/Data.hpp"
 #include "opentxs/util/Pimpl.hpp"
 
 namespace opentxs::blockchain::block::implementation

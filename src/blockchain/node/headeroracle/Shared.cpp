@@ -44,7 +44,7 @@
 #include "opentxs/blockchain/block/Position.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/blockchain/node/HeaderOracle.hpp"
-#include "opentxs/core/FixedByteArray.hpp"
+#include "opentxs/core/Data.hpp"
 #include "opentxs/network/otdht/Block.hpp"
 #include "opentxs/network/otdht/Data.hpp"
 #include "opentxs/network/otdht/State.hpp"

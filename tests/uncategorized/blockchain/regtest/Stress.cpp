@@ -5,7 +5,6 @@
 
 #include <gtest/gtest.h>
 #include <opentxs/opentxs.hpp>
-#include <algorithm>
 #include <array>
 #include <atomic>
 #include <chrono>
@@ -13,6 +12,7 @@
 #include <future>
 #include <iostream>
 #include <memory>
+#include <string_view>
 #include <utility>
 
 #include "internal/util/LogMacros.hpp"
@@ -25,6 +25,8 @@
 
 namespace ottest
 {
+using namespace opentxs::literals;
+
 constexpr auto blocks_ = std::uint64_t{200u};
 constexpr auto tx_per_block_ = std::uint64_t{500u};
 constexpr auto transaction_count_ = blocks_ * tx_per_block_;
@@ -183,9 +185,9 @@ protected:
         , expected_account_bob_(bob_account_.Parent().AccountID())
         , expected_notary_(client_1_.UI().BlockchainNotaryID(test_chain_))
         , expected_unit_(client_1_.UI().BlockchainUnitID(test_chain_))
-        , expected_display_unit_(u8"UNITTEST")
-        , expected_account_name_(u8"On chain UNITTEST (this device)")
-        , expected_notary_name_(u8"Unit Test Simulation")
+        , expected_display_unit_(u8"UNITTEST"_sv)
+        , expected_account_name_(u8"On chain UNITTEST (this device)"_sv)
+        , expected_notary_name_(u8"Unit Test Simulation"_sv)
         , memo_outgoing_("memo for outgoing transaction")
         , expected_account_type_(ot::AccountType::Blockchain)
         , expected_unit_type_(ot::UnitType::Regtest)
@@ -500,7 +502,7 @@ TEST_F(Regtest_stress, bob_after_receive)
     const auto& widget = client_2_.UI().AccountActivity(
         bob_.ID(),
         expected_account_bob_,
-        make_cb(account_activity_, u8"account_activity_"));
+        make_cb(account_activity_, u8"account_activity_"_sv));
     constexpr auto expectedTotal = amount_ * transaction_count_;
     wait_for_counter(account_activity_, false);
 

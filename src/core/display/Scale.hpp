@@ -27,6 +27,7 @@
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "opentxs/core/Amount.hpp"
+#include "opentxs/util/Literals.hpp"
 #include "opentxs/util/Log.hpp"
 
 namespace opentxs::display
@@ -103,7 +104,7 @@ public:
 
             if (formatDecimals) {
                 if (0_uz == (counter % 4_uz) && pushed < string.size()) {
-                    static constexpr auto narrowNonBreakingSpace = u8"\u202F";
+                    static const auto narrowNonBreakingSpace = u8"\u202F"_sv;
                     output << narrowNonBreakingSpace;
                     ++counter;
                 }

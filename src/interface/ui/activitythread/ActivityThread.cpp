@@ -55,10 +55,12 @@
 #include "opentxs/util/Pimpl.hpp"
 #include "opentxs/util/Time.hpp"
 
+// NOLINTBEGIN(cert-dcl58-cpp)
 template class std::tuple<
     opentxs::identifier::Generic,
     opentxs::otx::client::StorageBox,
     opentxs::identifier::Generic>;
+// NOLINTEND(cert-dcl58-cpp)
 
 namespace zmq = opentxs::network::zeromq;
 

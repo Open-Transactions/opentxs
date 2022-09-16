@@ -377,6 +377,7 @@
 #include "opentxs/util/ConnectionMode.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Iterator.hpp"
+#include "opentxs/util/Literals.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Numbers.hpp"
 #include "opentxs/util/NymEditor.hpp"

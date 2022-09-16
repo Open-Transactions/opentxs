@@ -12,7 +12,6 @@
 #include <boost/container/flat_map.hpp>
 #include <segwit_addr.h>
 #include <algorithm>
-#include <chrono>
 #include <cstddef>
 #include <cstdint>
 #include <iterator>
@@ -831,7 +830,7 @@ auto Blockchain::Imp::decode_bech23(const UnallocatedCString& encoded)
             copy(reader(bytes), data.WriteInto());
             chains.emplace(hrp_reverse_map_.at(result.hrp));
 
-            return std::move(output);
+            return output;
         } catch (const std::exception& e) {
             LogTrace()(OT_PRETTY_CLASS())(e.what()).Flush();
 
@@ -884,7 +883,7 @@ auto Blockchain::Imp::decode_legacy(const UnallocatedCString& encoded)
                 }
             }
 
-            return std::move(output);
+            return output;
         } catch (const std::exception& e) {
             LogTrace()(OT_PRETTY_CLASS())(e.what()).Flush();
 

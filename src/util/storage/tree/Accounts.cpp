@@ -22,6 +22,7 @@
 #include "internal/serialization/protobuf/verify/StorageAccounts.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/api/session/Factory.hpp"
+#include "opentxs/core/Data.hpp"
 #include "opentxs/core/UnitType.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
 #include "opentxs/core/identifier/Nym.hpp"

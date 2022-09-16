@@ -13,6 +13,7 @@
 #include <boost/smart_ptr/shared_ptr.hpp>
 #include <algorithm>
 #include <chrono>
+#include <compare>
 #include <iterator>
 #include <memory>
 #include <numeric>

@@ -14,8 +14,6 @@
 #include "interface/ui/blockchainselection/BlockchainSelection.hpp"  // IWYU pragma: keep
 #include "interface/ui/contactlist/ContactList.hpp"  // IWYU pragma: keep
 #include "internal/interface/ui/UI.hpp"
-#include "opentxs/core/identifier/Generic.hpp"
-#include "opentxs/core/identifier/Nym.hpp"
 
 namespace opentxs::ui::implementation
 {

@@ -13,6 +13,7 @@
 #include <boost/system/error_code.hpp>
 #include <atomic>
 #include <chrono>
+#include <compare>
 #include <cstdlib>
 #include <sstream>
 #include <utility>

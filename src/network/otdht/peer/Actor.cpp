@@ -11,10 +11,10 @@
 
 #include <algorithm>
 #include <chrono>
+#include <compare>
 #include <iterator>
 #include <memory>
 #include <stdexcept>
-#include <type_traits>
 #include <utility>
 
 #include "internal/api/network/Asio.hpp"

@@ -57,12 +57,6 @@ public:
         return data_.get_allocator();
     }
     auto IsNull() const -> bool;
-    auto operator==(const opentxs::Data& rhs) const noexcept -> bool;
-    auto operator!=(const opentxs::Data& rhs) const noexcept -> bool;
-    auto operator<(const opentxs::Data& rhs) const noexcept -> bool;
-    auto operator>(const opentxs::Data& rhs) const noexcept -> bool;
-    auto operator<=(const opentxs::Data& rhs) const noexcept -> bool;
-    auto operator>=(const opentxs::Data& rhs) const noexcept -> bool;
     auto size() const -> std::size_t { return data_.size(); }
 
     auto Assign(const opentxs::Data& source) noexcept -> bool
@@ -122,6 +116,5 @@ private:
     auto check_sub(const std::size_t pos, const std::size_t target) const
         -> bool;
     auto concatenate(const Vector& data) -> void;
-    auto spaceship(const opentxs::Data& rhs) const noexcept -> int;
 };
 }  // namespace opentxs

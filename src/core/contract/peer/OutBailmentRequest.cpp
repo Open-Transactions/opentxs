@@ -11,7 +11,6 @@
 #include <PeerRequest.pb.h>
 #include <memory>
 #include <stdexcept>
-#include <utility>
 
 #include "2_Factory.hpp"
 #include "Proto.hpp"
@@ -60,7 +59,7 @@ auto Factory::OutbailmentRequest(
 
         if (false == ParentType::Finish(reply, reason)) { return {}; }
 
-        return std::move(output);
+        return output;
     } catch (const std::exception& e) {
         LogError()("opentxs::Factory::")(__func__)(": ")(e.what()).Flush();
 
@@ -99,7 +98,7 @@ auto Factory::OutbailmentRequest(
             return {};
         }
 
-        return std::move(output);
+        return output;
     } catch (const std::exception& e) {
         LogError()("opentxs::Factory::")(__func__)(": ")(e.what()).Flush();
 

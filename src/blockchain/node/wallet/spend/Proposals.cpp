@@ -11,6 +11,7 @@
 #include <BlockchainTransactionProposal.pb.h>
 #include <BlockchainTransactionProposedNotification.pb.h>
 #include <chrono>
+#include <compare>
 #include <cstdint>
 #include <functional>
 #include <mutex>
@@ -40,6 +41,7 @@
 #include "opentxs/blockchain/node/Manager.hpp"
 #include "opentxs/blockchain/node/SendResult.hpp"
 #include "opentxs/core/ByteArray.hpp"
+#include "opentxs/core/Data.hpp"
 #include "opentxs/core/PaymentCode.hpp"  // IWYU pragma: keep
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Nym.hpp"

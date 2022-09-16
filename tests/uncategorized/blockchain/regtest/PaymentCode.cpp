@@ -34,6 +34,8 @@
 
 namespace ottest
 {
+using namespace opentxs::literals;
+
 Counter account_activity_alice_{};
 Counter account_activity_bob_{};
 Counter account_list_alice_{};
@@ -107,14 +109,14 @@ TEST_F(Regtest_payment_code, alice_account_activity_initial)
         expected_notary_name_,
         0,
         0,
-        u8"0 units",
+        u8"0 units"_cstr,
         "",
         {},
         {test_chain_},
         0,
         {height_, height_},
         {},
-        {{u8"0", u8"0 units"}},
+        {{u8"0"_cstr, u8"0 units"_cstr}},
         {},
     };
     wait_for_counter(account_activity_alice_, false);
@@ -137,7 +139,7 @@ TEST_F(Regtest_payment_code, alice_account_list_initial)
          expected_unit_type_,
          0,
          0,
-         u8"0 units"},
+         u8"0 units"_cstr},
     }};
     wait_for_counter(account_list_alice_, false);
 
@@ -195,14 +197,14 @@ TEST_F(Regtest_payment_code, bob_account_activity_initial)
         expected_notary_name_,
         0,
         0,
-        u8"0 units",
+        u8"0 units"_cstr,
         "",
         {},
         {test_chain_},
         0,
         {height_, height_},
         {},
-        {{u8"0", u8"0 units"}},
+        {{u8"0"_cstr, u8"0 units"_cstr}},
         {},
     };
     wait_for_counter(account_activity_bob_, false);
@@ -225,7 +227,7 @@ TEST_F(Regtest_payment_code, bob_account_list_initial)
          expected_unit_type_,
          0,
          0,
-         u8"0 units"},
+         u8"0 units"_cstr},
     }};
     wait_for_counter(account_list_bob_, false);
 
@@ -347,20 +349,20 @@ TEST_F(Regtest_payment_code, alice_account_activity_initial_receive)
         expected_notary_name_,
         1,
         10000000000,
-        u8"100 units",
+        u8"100 units"_cstr,
         "",
         {},
         {test_chain_},
         100,
         {height_, height_},
         {},
-        {{u8"100", u8"100 units"}},
+        {{u8"100"_cstr, u8"100 units"_cstr}},
         {
             {
                 ot::otx::client::StorageBox::BLOCKCHAIN,
                 1,
                 10000000000,
-                u8"100 units",
+                u8"100 units"_cstr,
                 {},
                 "",
                 "",
@@ -391,7 +393,7 @@ TEST_F(Regtest_payment_code, alice_account_list_initial_receive)
          expected_unit_type_,
          1,
          10000000000,
-         u8"100 units"},
+         u8"100 units"_cstr},
     }};
     wait_for_counter(account_list_alice_, false);
 
@@ -416,7 +418,7 @@ TEST_F(Regtest_payment_code, alice_account_tree_initial_receive)
                expected_unit_type_,
                1,
                10000000000,
-               u8"100 units"},
+               u8"100 units"_cstr},
           }}}};
     wait_for_counter(account_tree_alice_, false);
 
@@ -595,20 +597,20 @@ TEST_F(Regtest_payment_code, alice_account_activity_first_spend_unconfirmed)
         expected_notary_name_,
         1,
         8999999684,
-        u8"89.999\u202F996\u202F84 units",
+        u8"89.999\u202F996\u202F84 units"_cstr,
         "",
         {},
         {test_chain_},
         100,
         {height_, height_},
         {},
-        {{u8"89.99999684", u8"89.999\u202F996\u202F84 units"}},
+        {{u8"89.99999684"_cstr, u8"89.999\u202F996\u202F84 units"_cstr}},
         {
             {
                 ot::otx::client::StorageBox::BLOCKCHAIN,
                 -1,
                 -1000000316,
-                u8"-10.000\u202F003\u202F16 units",
+                u8"-10.000\u202F003\u202F16 units"_cstr,
                 {expectedContact.asBase58(ot_.Crypto())},
                 "",
                 "",
@@ -622,7 +624,7 @@ TEST_F(Regtest_payment_code, alice_account_activity_first_spend_unconfirmed)
                 ot::otx::client::StorageBox::BLOCKCHAIN,
                 1,
                 10000000000,
-                u8"100 units",
+                u8"100 units"_cstr,
                 {},
                 "",
                 "",
@@ -653,7 +655,7 @@ TEST_F(Regtest_payment_code, alice_account_list_first_spend_unconfirmed)
          expected_unit_type_,
          1,
          8999999684,
-         u8"89.999\u202F996\u202F84 units"},
+         u8"89.999\u202F996\u202F84 units"_cstr},
     }};
     wait_for_counter(account_list_alice_, false);
 
@@ -678,7 +680,7 @@ TEST_F(Regtest_payment_code, alice_account_tree_first_spend_unconfirmed)
                expected_unit_type_,
                1,
                8999999684,
-               u8"89.999\u202F996\u202F84 units"},
+               u8"89.999\u202F996\u202F84 units"_cstr},
           }}}};
     wait_for_counter(account_tree_alice_, false);
 
@@ -705,7 +707,7 @@ TEST_F(Regtest_payment_code, alice_activity_thread_first_spend_unconfirmed)
                 true,
                 -1,
                 -1000000316,
-                u8"-10.000\u202F003\u202F16 units",
+                u8"-10.000\u202F003\u202F16 units"_cstr,
                 alice_.name_,
                 "Outgoing Unit Test Simulation transaction to "
                 "PD1jFsimY3DQUe7qGtx3z8BohTaT6r4kwJMCYXwp7uY8z6BSaFrpM",
@@ -755,20 +757,20 @@ TEST_F(Regtest_payment_code, bob_account_activity_first_unconfirmed_incoming)
         expected_notary_name_,
         1,
         1000000000,
-        u8"10 units",
+        u8"10 units"_cstr,
         "",
         {},
         {test_chain_},
         100,
         {height_, height_},
         {},
-        {{u8"10", u8"10 units"}},
+        {{u8"10"_cstr, u8"10 units"_cstr}},
         {
             {
                 ot::otx::client::StorageBox::BLOCKCHAIN,
                 1,
                 1000000000,
-                u8"10 units",
+                u8"10 units"_cstr,
                 {expectedContact.asBase58(ot_.Crypto())},
                 "",
                 "",
@@ -800,7 +802,7 @@ TEST_F(Regtest_payment_code, bob_account_list_first_unconfirmed_incoming)
          expected_unit_type_,
          1,
          1000000000,
-         u8"10 units"},
+         u8"10 units"_cstr},
     }};
     wait_for_counter(account_list_bob_, false);
 
@@ -825,7 +827,7 @@ TEST_F(Regtest_payment_code, bob_account_tree_first_unconfirmed_incoming)
                expected_unit_type_,
                1,
                1000000000,
-               u8"10 units"},
+               u8"10 units"_cstr},
           }}}};
     wait_for_counter(account_tree_bob_, false);
 
@@ -1042,20 +1044,20 @@ TEST_F(Regtest_payment_code, alice_account_activity_first_spend_confirmed)
         expected_notary_name_,
         1,
         8999999684,
-        u8"89.999\u202F996\u202F84 units",
+        u8"89.999\u202F996\u202F84 units"_cstr,
         "",
         {},
         {test_chain_},
         100,
         {height_, height_},
         {},
-        {{u8"89.99999684", u8"89.999\u202F996\u202F84 units"}},
+        {{u8"89.99999684"_cstr, u8"89.999\u202F996\u202F84 units"_cstr}},
         {
             {
                 ot::otx::client::StorageBox::BLOCKCHAIN,
                 -1,
                 -1000000316,
-                u8"-10.000\u202F003\u202F16 units",
+                u8"-10.000\u202F003\u202F16 units"_cstr,
                 {expectedContact.asBase58(ot_.Crypto())},
                 "",
                 "",
@@ -1069,7 +1071,7 @@ TEST_F(Regtest_payment_code, alice_account_activity_first_spend_confirmed)
                 ot::otx::client::StorageBox::BLOCKCHAIN,
                 1,
                 10000000000,
-                u8"100 units",
+                u8"100 units"_cstr,
                 {},
                 "",
                 "",
@@ -1144,7 +1146,7 @@ TEST_F(Regtest_payment_code, alice_account_list_first_spend_confirmed)
          expected_unit_type_,
          1,
          8999999684,
-         u8"89.999\u202F996\u202F84 units"},
+         u8"89.999\u202F996\u202F84 units"_cstr},
     }};
     wait_for_counter(account_list_alice_, false);
 
@@ -1169,7 +1171,7 @@ TEST_F(Regtest_payment_code, alice_account_tree_first_spend_confirmed)
                expected_unit_type_,
                1,
                8999999684,
-               u8"89.999\u202F996\u202F84 units"},
+               u8"89.999\u202F996\u202F84 units"_cstr},
           }}}};
     wait_for_counter(account_tree_alice_, false);
 
@@ -1197,20 +1199,20 @@ TEST_F(Regtest_payment_code, bob_account_activity_first_spend_confirmed)
         expected_notary_name_,
         1,
         1000000000,
-        u8"10 units",
+        u8"10 units"_cstr,
         "",
         {},
         {test_chain_},
         100,
         {height_, height_},
         {},
-        {{u8"10", u8"10 units"}},
+        {{u8"10"_cstr, u8"10 units"_cstr}},
         {
             {
                 ot::otx::client::StorageBox::BLOCKCHAIN,
                 1,
                 1000000000,
-                u8"10 units",
+                u8"10 units"_cstr,
                 {expectedContact.asBase58(ot_.Crypto())},
                 "",
                 "",
@@ -1286,7 +1288,7 @@ TEST_F(Regtest_payment_code, bob_account_list_first_spend_confirmed)
          expected_unit_type_,
          1,
          1000000000,
-         u8"10 units"},
+         u8"10 units"_cstr},
     }};
     wait_for_counter(account_list_bob_, false);
 
@@ -1311,7 +1313,7 @@ TEST_F(Regtest_payment_code, bob_account_tree_first_spend_confirmed)
                expected_unit_type_,
                1,
                1000000000,
-               u8"10 units"},
+               u8"10 units"_cstr},
           }}}};
     wait_for_counter(account_tree_bob_, false);
 
@@ -1460,20 +1462,20 @@ TEST_F(Regtest_payment_code, alice_account_activity_second_spend_unconfirmed)
         expected_notary_name_,
         1,
         7499999448,
-        u8"74.999\u202F994\u202F48 units",
+        u8"74.999\u202F994\u202F48 units"_cstr,
         "",
         {},
         {test_chain_},
         100,
         {height_, height_},
         {},
-        {{u8"74.99999448", u8"74.999\u202F994\u202F48 units"}},
+        {{u8"74.99999448"_cstr, u8"74.999\u202F994\u202F48 units"_cstr}},
         {
             {
                 ot::otx::client::StorageBox::BLOCKCHAIN,
                 -1,
                 -1500000236,
-                u8"-15.000\u202F002\u202F36 units",
+                u8"-15.000\u202F002\u202F36 units"_cstr,
                 {expectedContact.asBase58(ot_.Crypto())},
                 "",
                 "",
@@ -1487,7 +1489,7 @@ TEST_F(Regtest_payment_code, alice_account_activity_second_spend_unconfirmed)
                 ot::otx::client::StorageBox::BLOCKCHAIN,
                 -1,
                 -1000000316,
-                u8"-10.000\u202F003\u202F16 units",
+                u8"-10.000\u202F003\u202F16 units"_cstr,
                 {expectedContact.asBase58(ot_.Crypto())},
                 "",
                 "",
@@ -1501,7 +1503,7 @@ TEST_F(Regtest_payment_code, alice_account_activity_second_spend_unconfirmed)
                 ot::otx::client::StorageBox::BLOCKCHAIN,
                 1,
                 10000000000,
-                u8"100 units",
+                u8"100 units"_cstr,
                 {},
                 "",
                 "",
@@ -1576,7 +1578,7 @@ TEST_F(Regtest_payment_code, alice_account_list_second_spend_unconfirmed)
          expected_unit_type_,
          1,
          7499999448,
-         u8"74.999\u202F994\u202F48 units"},
+         u8"74.999\u202F994\u202F48 units"_cstr},
     }};
     wait_for_counter(account_list_alice_, false);
 
@@ -1601,7 +1603,7 @@ TEST_F(Regtest_payment_code, alice_account_tree_second_spend_unconfirmed)
                expected_unit_type_,
                1,
                7499999448,
-               u8"74.999\u202F994\u202F48 units"},
+               u8"74.999\u202F994\u202F48 units"_cstr},
           }}}};
     wait_for_counter(account_tree_alice_, false);
 
@@ -1626,7 +1628,7 @@ TEST_F(Regtest_payment_code, alice_activity_thread_second_spend_unconfirmed)
                 true,
                 -1,
                 -1000000316,
-                u8"-10.000\u202F003\u202F16 units",
+                u8"-10.000\u202F003\u202F16 units"_cstr,
                 alice_.name_,
                 "Outgoing Unit Test Simulation transaction to "
                 "PD1jFsimY3DQUe7qGtx3z8BohTaT6r4kwJMCYXwp7uY8z6BSaFrpM",
@@ -1640,7 +1642,7 @@ TEST_F(Regtest_payment_code, alice_activity_thread_second_spend_unconfirmed)
                 true,
                 -1,
                 -1500000236,
-                u8"-15.000\u202F002\u202F36 units",
+                u8"-15.000\u202F002\u202F36 units"_cstr,
                 alice_.name_,
                 "Outgoing Unit Test Simulation transaction to "
                 "PD1jFsimY3DQUe7qGtx3z8BohTaT6r4kwJMCYXwp7uY8z6BSaFrpM",
@@ -1742,20 +1744,20 @@ TEST_F(Regtest_payment_code, bob_account_activity_second_unconfirmed_incoming)
         expected_notary_name_,
         1,
         2500000000,
-        u8"25 units",
+        u8"25 units"_cstr,
         "",
         {},
         {test_chain_},
         100,
         {height_, height_},
         {},
-        {{u8"25", u8"25 units"}},
+        {{u8"25"_cstr, u8"25 units"_cstr}},
         {
             {
                 ot::otx::client::StorageBox::BLOCKCHAIN,
                 1,
                 1500000000,
-                u8"15 units",
+                u8"15 units"_cstr,
                 {expectedContact.asBase58(ot_.Crypto())},
                 "",
                 "",
@@ -1769,7 +1771,7 @@ TEST_F(Regtest_payment_code, bob_account_activity_second_unconfirmed_incoming)
                 ot::otx::client::StorageBox::BLOCKCHAIN,
                 1,
                 1000000000,
-                u8"10 units",
+                u8"10 units"_cstr,
                 {expectedContact.asBase58(ot_.Crypto())},
                 "",
                 "",
@@ -1845,7 +1847,7 @@ TEST_F(Regtest_payment_code, bob_account_list_second_unconfirmed_incoming)
          expected_unit_type_,
          1,
          2500000000,
-         u8"25 units"},
+         u8"25 units"_cstr},
     }};
     wait_for_counter(account_list_bob_, false);
 
@@ -1870,7 +1872,7 @@ TEST_F(Regtest_payment_code, bob_account_tree_second_unconfirmed_incoming)
                expected_unit_type_,
                1,
                2500000000,
-               u8"25 units"},
+               u8"25 units"_cstr},
           }}}};
     wait_for_counter(account_tree_bob_, false);
 
@@ -1983,20 +1985,20 @@ TEST_F(Regtest_payment_code, alice_account_activity_after_otx)
         expected_notary_name_,
         1,
         7499999448,
-        u8"74.999\u202F994\u202F48 units",
+        u8"74.999\u202F994\u202F48 units"_cstr,
         "",
         {},
         {test_chain_},
         100,
         {height_, height_},
         {},
-        {{u8"74.99999448", u8"74.999\u202F994\u202F48 units"}},
+        {{u8"74.99999448"_cstr, u8"74.999\u202F994\u202F48 units"_cstr}},
         {
             {
                 ot::otx::client::StorageBox::BLOCKCHAIN,
                 -1,
                 -1500000236,
-                u8"-15.000\u202F002\u202F36 units",
+                u8"-15.000\u202F002\u202F36 units"_cstr,
                 {expectedContact.asBase58(ot_.Crypto())},
                 "",
                 "",
@@ -2009,7 +2011,7 @@ TEST_F(Regtest_payment_code, alice_account_activity_after_otx)
                 ot::otx::client::StorageBox::BLOCKCHAIN,
                 -1,
                 -1000000316,
-                u8"-10.000\u202F003\u202F16 units",
+                u8"-10.000\u202F003\u202F16 units"_cstr,
                 {expectedContact.asBase58(ot_.Crypto())},
                 "",
                 "",
@@ -2022,7 +2024,7 @@ TEST_F(Regtest_payment_code, alice_account_activity_after_otx)
                 ot::otx::client::StorageBox::BLOCKCHAIN,
                 1,
                 10000000000,
-                u8"100 units",
+                u8"100 units"_cstr,
                 {},
                 "",
                 "",
@@ -2053,7 +2055,7 @@ TEST_F(Regtest_payment_code, alice_account_list_after_otx)
          expected_unit_type_,
          1,
          7499999448,
-         u8"74.999\u202F994\u202F48 units"},
+         u8"74.999\u202F994\u202F48 units"_cstr},
     }};
     wait_for_counter(account_list_alice_, false);
 
@@ -2078,7 +2080,7 @@ TEST_F(Regtest_payment_code, alice_account_tree_after_otx)
                expected_unit_type_,
                1,
                7499999448,
-               u8"74.999\u202F994\u202F48 units"},
+               u8"74.999\u202F994\u202F48 units"_cstr},
           }}}};
     wait_for_counter(account_tree_alice_, false);
 
@@ -2103,7 +2105,7 @@ TEST_F(Regtest_payment_code, alice_activity_thread_after_otx)
                 true,
                 -1,
                 -1000000316,
-                u8"-10.000\u202F003\u202F16 units",
+                u8"-10.000\u202F003\u202F16 units"_cstr,
                 alice_.name_,
                 "Outgoing Unit Test Simulation transaction to Bob",
                 "",
@@ -2116,7 +2118,7 @@ TEST_F(Regtest_payment_code, alice_activity_thread_after_otx)
                 true,
                 -1,
                 -1500000236,
-                u8"-15.000\u202F002\u202F36 units",
+                u8"-15.000\u202F002\u202F36 units"_cstr,
                 alice_.name_,
                 "Outgoing Unit Test Simulation transaction to Bob",
                 "",
@@ -2158,20 +2160,20 @@ TEST_F(Regtest_payment_code, bob_account_activity_after_otx)
         expected_notary_name_,
         1,
         2500000000,
-        u8"25 units",
+        u8"25 units"_cstr,
         "",
         {},
         {test_chain_},
         100,
         {height_, height_},
         {},
-        {{u8"25", u8"25 units"}},
+        {{u8"25"_cstr, u8"25 units"_cstr}},
         {
             {
                 ot::otx::client::StorageBox::BLOCKCHAIN,
                 1,
                 1500000000,
-                u8"15 units",
+                u8"15 units"_cstr,
                 {expectedContact.asBase58(ot_.Crypto())},
                 "",
                 "",
@@ -2184,7 +2186,7 @@ TEST_F(Regtest_payment_code, bob_account_activity_after_otx)
                 ot::otx::client::StorageBox::BLOCKCHAIN,
                 1,
                 1000000000,
-                u8"10 units",
+                u8"10 units"_cstr,
                 {expectedContact.asBase58(ot_.Crypto())},
                 "",
                 "",
@@ -2259,7 +2261,7 @@ TEST_F(Regtest_payment_code, bob_account_list_after_otx)
          expected_unit_type_,
          1,
          2500000000,
-         u8"25 units"},
+         u8"25 units"_cstr},
     }};
     wait_for_counter(account_list_bob_, false);
 
@@ -2284,7 +2286,7 @@ TEST_F(Regtest_payment_code, bob_account_tree_after_otx)
                expected_unit_type_,
                1,
                2500000000,
-               u8"25 units"},
+               u8"25 units"_cstr},
           }}}};
     wait_for_counter(account_tree_bob_, false);
 
@@ -2363,7 +2365,7 @@ TEST_F(Regtest_payment_code, alice_activity_thread_after_message)
                 true,
                 -1,
                 -1000000316,
-                u8"-10.000\u202F003\u202F16 units",
+                u8"-10.000\u202F003\u202F16 units"_cstr,
                 alice_.name_,
                 "Outgoing Unit Test Simulation transaction to Bob",
                 "",
@@ -2376,7 +2378,7 @@ TEST_F(Regtest_payment_code, alice_activity_thread_after_message)
                 true,
                 -1,
                 -1500000236,
-                u8"-15.000\u202F002\u202F36 units",
+                u8"-15.000\u202F002\u202F36 units"_cstr,
                 alice_.name_,
                 "Outgoing Unit Test Simulation transaction to Bob",
                 "",

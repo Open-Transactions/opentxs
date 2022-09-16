@@ -91,7 +91,7 @@ auto GarbageCollected::EmptyBucket(const bool bucket) const -> bool
 
     asio_.Internal().Post(
         ThreadPool::General,
-        [=] { purge(newName.string()); },
+        [=, this] { purge(newName.string()); },
         "GarbageCollected");
 
     return fs::create_directory(oldDirectory);

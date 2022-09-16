@@ -42,7 +42,7 @@
 
 namespace std
 {
-using namespace opentxs::literals;
+using namespace opentxs::literals;  // NOLINT(cert-dcl58-cpp)
 
 auto hash<opentxs::blockchain::block::Hash>::operator()(
     const opentxs::blockchain::block::Hash& data) const noexcept -> std::size_t

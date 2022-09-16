@@ -7,9 +7,10 @@
 #include "1_Internal.hpp"                         // IWYU pragma: associated
 #include "opentxs/blockchain/block/Position.hpp"  // IWYU pragma: associated
 
+#include <compare>
 #include <sstream>
 
-#include "opentxs/core/FixedByteArray.hpp"
+#include "opentxs/core/Data.hpp"
 
 namespace opentxs::blockchain::block
 {

@@ -48,6 +48,7 @@
 #include "opentxs/blockchain/node/Manager.hpp"
 #include "opentxs/core/AccountType.hpp"
 #include "opentxs/core/ByteArray.hpp"
+#include "opentxs/core/Data.hpp"
 #include "opentxs/core/PaymentCode.hpp"
 #include "opentxs/core/display/Definition.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
@@ -489,7 +490,7 @@ auto BlockchainAccountActivity::process_txid(
     };
     add_item(rowID, sortKey, custom);
 
-    return std::move(rowID);
+    return rowID;
 }
 
 auto BlockchainAccountActivity::Send(

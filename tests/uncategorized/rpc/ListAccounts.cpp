@@ -17,6 +17,8 @@ namespace rpc = opentxs::rpc;
 
 namespace ottest
 {
+using namespace opentxs::literals;
+
 TEST_F(RPC_fixture, preconditions)
 {
     {
@@ -67,14 +69,16 @@ TEST_F(RPC_fixture, preconditions)
             "Mt Gox USD",
             "YOLO",
             ot::UnitType::Usd,
-            {u8"USD", {{u8"dollars", {u8"$", u8"", {{10, 0}}, 2, 3}}}});
+            {u8"USD"_cstr,
+             {{u8"dollars"_cstr, {u8"$"_cstr, u8""_cstr, {{10, 0}}, 2, 3}}}});
         const auto unit2 = IssueUnit(
             server2,
             issuer,
             "Mt Gox BTC",
             "YOLO",
             ot::UnitType::Btc,
-            {u8"BTC", {{u8"BTC", {u8"₿", u8"", {{10, 8}}, 0, 8}}}});
+            {u8"BTC"_cstr,
+             {{u8"BTC"_cstr, {u8"₿"_cstr, u8""_cstr, {{10, 8}}, 0, 8}}}});
 
         EXPECT_FALSE(unit1.empty());
         EXPECT_FALSE(unit2.empty());

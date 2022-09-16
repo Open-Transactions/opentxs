@@ -7,14 +7,18 @@
 
 #include <gtest/gtest.h>
 #include <opentxs/opentxs.hpp>
+#include <compare>
 #include <iterator>
 #include <sstream>
+#include <string_view>
 
 #include "ottest/fixtures/common/Counter.hpp"
 #include "ottest/fixtures/common/User.hpp"
 
 namespace ottest
 {
+using namespace opentxs::literals;
+
 auto check_blockchain_subaccounts(
     const ot::api::Session& api,
     const ot::ui::BlockchainSubaccountSource& widget,
@@ -175,7 +179,7 @@ auto init_blockchain_account_status(
     user.api_->UI().BlockchainAccountStatus(
         user.nym_id_, chain, make_cb(counter, [&] {
             auto out = std::stringstream{};
-            out << u8"blockchain_account_status_";
+            out << u8"blockchain_account_status_"_sv;
             out << user.name_lower_;
 
             return out.str();

@@ -12,6 +12,7 @@
 #include <boost/container/vector.hpp>
 #include <algorithm>
 #include <chrono>
+#include <compare>
 #include <iterator>
 #include <stdexcept>
 #include <utility>

@@ -14,6 +14,7 @@
 #include "opentxs/OT.hpp"
 #include "opentxs/api/Context.hpp"
 #include "opentxs/blockchain/Blockchain.hpp"
+#include "opentxs/core/Data.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/network/zeromq/ZeroMQ.hpp"
 #include "opentxs/util/Container.hpp"

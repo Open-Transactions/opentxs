@@ -8,7 +8,6 @@
 #include "internal/otx/common/XML.hpp"  // IWYU pragma: associated
 
 #include <array>
-#include <chrono>
 #include <cstring>
 #include <string_view>
 #include <utility>

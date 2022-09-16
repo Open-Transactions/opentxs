@@ -10,7 +10,6 @@
 #include <Signature.pb.h>
 #include <UnitDefinition.pb.h>
 #include <memory>
-#include <utility>
 
 #include "2_Factory.hpp"
 #include "Proto.hpp"
@@ -59,7 +58,7 @@ auto Factory::CurrencyContract(
 
     if (!contract.validate(lock)) { return {}; }
 
-    return std::move(output);
+    return output;
 }
 
 auto Factory::CurrencyContract(
@@ -85,7 +84,7 @@ auto Factory::CurrencyContract(
 
     if (!contract.validate(lock)) { return {}; }
 
-    return std::move(output);
+    return output;
 }
 }  // namespace opentxs
 

@@ -8,6 +8,7 @@
 #include "internal/otx/client/obsolete/OTAPI_Exec.hpp"  // IWYU pragma: associated
 
 #include <UnitDefinition.pb.h>
+#include <compare>
 #include <cstdint>
 #include <memory>
 #include <utility>

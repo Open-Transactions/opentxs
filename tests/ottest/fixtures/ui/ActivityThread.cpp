@@ -8,14 +8,18 @@
 #include <gtest/gtest.h>
 #include <opentxs/opentxs.hpp>
 #include <chrono>
+#include <compare>
 #include <iterator>
 #include <sstream>
+#include <string_view>
 
 #include "ottest/fixtures/common/Counter.hpp"
 #include "ottest/fixtures/common/User.hpp"
 
 namespace ottest
 {
+using namespace opentxs::literals;
+
 auto activity_thread_send_message(const User& user, const User& remote) noexcept
     -> bool
 {
@@ -142,7 +146,7 @@ auto init_activity_thread(
     user.api_->UI().ActivityThread(
         user.nym_id_, user.Contact(remote.name_), make_cb(counter, [&] {
             auto out = std::stringstream{};
-            out << u8"activity_thread_";
+            out << u8"activity_thread_"_sv;
             out << user.name_lower_;
             out << '_';
             out << remote.name_lower_;

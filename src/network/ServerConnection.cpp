@@ -11,10 +11,10 @@
 #include <ServerRequest.pb.h>
 #include <atomic>
 #include <chrono>
+#include <compare>
 #include <cstdint>
 #include <ctime>
 #include <memory>
-#include <ratio>
 #include <sstream>
 #include <stdexcept>
 #include <string_view>
@@ -37,6 +37,7 @@
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/core/Armored.hpp"
+#include "opentxs/core/Data.hpp"
 #include "opentxs/core/String.hpp"
 #include "opentxs/core/contract/ServerContract.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
@@ -145,7 +146,7 @@ ServerConnection::Imp::Imp(
     , remote_contract_(contract)
     , thread_()
     , callback_(zeromq::ListenCallback::Factory(
-          [=](const auto& in) { process_incoming(in); }))
+          [this](const auto& in) { process_incoming(in); }))
     , registration_socket_(zmq.Context().DealerSocket(
           callback_,
           zmq::socket::Direction::Connect,

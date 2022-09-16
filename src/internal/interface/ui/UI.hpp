@@ -2092,6 +2092,7 @@ auto UnitListQtModel(ui::internal::UnitList& parent) noexcept
 
 namespace std
 {
+// NOLINTBEGIN(cert-dcl58-cpp)
 template <>
 struct less<opentxs::ui::implementation::ActivityThreadRowID> {
     auto operator()(
@@ -2113,4 +2114,5 @@ struct less<opentxs::ui::implementation::ContactListSortKey> {
         const opentxs::ui::implementation::ContactListSortKey& rhs) const
         -> bool;
 };
+// NOLINTEND(cert-dcl58-cpp)
 }  // namespace std

@@ -10,6 +10,7 @@
 #include <AsymmetricKey.pb.h>
 #include <ContactData.pb.h>
 #include <VerificationSet.pb.h>
+#include <compare>
 #include <cstdint>
 #include <memory>
 
@@ -18,6 +19,7 @@
 #include "opentxs/OT.hpp"
 #include "opentxs/api/Context.hpp"
 #include "opentxs/api/Factory.hpp"
+#include "opentxs/core/Data.hpp"
 #include "opentxs/core/PaymentCode.hpp"
 #include "opentxs/core/Secret.hpp"
 #include "opentxs/crypto/Language.hpp"

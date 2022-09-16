@@ -26,6 +26,7 @@
 #include "opentxs/core/AccountType.hpp"
 #include "opentxs/core/AddressType.hpp"
 #include "opentxs/core/ByteArray.hpp"
+#include "opentxs/core/Data.hpp"
 #include "opentxs/core/Types.hpp"
 #include "opentxs/core/UnitType.hpp"
 #include "opentxs/core/identifier/Notary.hpp"

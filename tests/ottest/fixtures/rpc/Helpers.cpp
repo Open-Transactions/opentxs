@@ -8,9 +8,11 @@
 #include <opentxs/opentxs.hpp>
 #include <algorithm>
 #include <chrono>
+#include <compare>
 #include <future>
 #include <iterator>
 #include <mutex>
+#include <string_view>
 #include <utility>
 
 #include "internal/otx/common/Message.hpp"
@@ -22,6 +24,7 @@
 namespace ottest
 {
 using namespace std::literals::chrono_literals;
+using namespace opentxs::literals;
 
 RPC_fixture::SeedMap RPC_fixture::seed_map_{};
 RPC_fixture::LocalNymMap RPC_fixture::local_nym_map_{};
@@ -262,7 +265,8 @@ auto RPC_fixture::InitAccountActivityCounter(
         nym,
         api.Factory().IdentifierFromBase58(account),
         make_cb(
-            counter, ot::UnallocatedCString{u8"account activity "} + account));
+            counter,
+            ot::UnallocatedCString{u8"account activity "_sv} + account));
 }
 
 auto RPC_fixture::InitAccountTreeCounter(const User& nym, Counter& counter)
@@ -280,7 +284,7 @@ auto RPC_fixture::InitAccountTreeCounter(
         nym,
         make_cb(
             counter,
-            ot::UnallocatedCString{u8"account tree for "} +
+            ot::UnallocatedCString{u8"account tree for "_sv} +
                 nym.asBase58(ot_.Crypto())));
 }
 

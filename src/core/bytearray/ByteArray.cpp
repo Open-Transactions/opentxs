@@ -292,11 +292,6 @@ auto ByteArray::get_allocator() const noexcept -> allocator_type
 
 auto ByteArray::IsNull() const -> bool { return imp_->IsNull(); }
 
-auto ByteArray::operator!=(const Data& rhs) const noexcept -> bool
-{
-    return imp_->operator!=(rhs);
-}
-
 auto ByteArray::operator+=(const Data& rhs) noexcept(false) -> ByteArray&
 {
     return imp_->operator+=(rhs);
@@ -328,31 +323,6 @@ auto ByteArray::operator+=(const std::uint64_t rhs) noexcept(false)
 auto ByteArray::operator+=(const std::uint8_t rhs) noexcept(false) -> ByteArray&
 {
     return imp_->operator+=(rhs);
-}
-
-auto ByteArray::operator<(const Data& rhs) const noexcept -> bool
-{
-    return imp_->operator<(rhs);
-}
-
-auto ByteArray::operator<=(const Data& rhs) const noexcept -> bool
-{
-    return imp_->operator<=(rhs);
-}
-
-auto ByteArray::operator==(const Data& rhs) const noexcept -> bool
-{
-    return imp_->operator==(rhs);
-}
-
-auto ByteArray::operator>(const Data& rhs) const noexcept -> bool
-{
-    return imp_->operator>(rhs);
-}
-
-auto ByteArray::operator>=(const Data& rhs) const noexcept -> bool
-{
-    return imp_->operator>=(rhs);
 }
 
 auto ByteArray::Randomize(const std::size_t size) -> bool

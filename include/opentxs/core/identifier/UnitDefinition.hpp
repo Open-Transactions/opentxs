@@ -34,13 +34,6 @@ struct OPENTXS_EXPORT hash<opentxs::identifier::UnitDefinition> {
     auto operator()(const opentxs::identifier::UnitDefinition& data)
         const noexcept -> std::size_t;
 };
-
-template <>
-struct OPENTXS_EXPORT less<opentxs::identifier::UnitDefinition> {
-    auto operator()(
-        const opentxs::identifier::UnitDefinition& lhs,
-        const opentxs::identifier::UnitDefinition& rhs) const -> bool;
-};
 }  // namespace std
 
 namespace opentxs::identifier

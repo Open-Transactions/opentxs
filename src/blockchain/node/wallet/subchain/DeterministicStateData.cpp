@@ -9,6 +9,7 @@
 
 #include <algorithm>
 #include <chrono>
+#include <compare>
 #include <functional>
 #include <iterator>
 #include <memory>
@@ -36,6 +37,7 @@
 #include "opentxs/blockchain/crypto/Element.hpp"
 #include "opentxs/blockchain/crypto/Subchain.hpp"  // IWYU pragma: keep
 #include "opentxs/core/ByteArray.hpp"
+#include "opentxs/core/Data.hpp"
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/crypto/key/EllipticCurve.hpp"
 #include "opentxs/util/Bytes.hpp"
@@ -76,7 +78,7 @@ auto DeterministicStateData::CheckCache(
     const std::size_t outstanding,
     FinishedCallback cb) const noexcept -> void
 {
-    cache_.modify([=](auto& data) {
+    cache_.modify([=, this](auto& data) {
         auto& [time, blockMap] = data;
         using namespace std::literals;
         static constexpr auto maxTime = 10s;

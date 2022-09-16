@@ -12,6 +12,7 @@
 
 #include "internal/identity/wot/claim/Types.hpp"
 #include "internal/util/LogMacros.hpp"
+#include "opentxs/core/Data.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/identity/wot/claim/ClaimType.hpp"
 #include "opentxs/identity/wot/claim/Item.hpp"

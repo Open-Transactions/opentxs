@@ -9,6 +9,7 @@
 
 #include <robin_hood.h>
 #include <chrono>
+#include <compare>
 #include <queue>
 #include <shared_mutex>
 #include <string_view>

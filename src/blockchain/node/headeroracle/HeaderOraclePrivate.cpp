@@ -29,6 +29,7 @@
 #include "opentxs/blockchain/bitcoin/block/Header.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/block/Header.hpp"
 #include "opentxs/blockchain/node/Manager.hpp"
+#include "opentxs/core/Data.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/network/zeromq/socket/SocketType.hpp"  // IWYU pragma: keep
 #include "opentxs/util/Container.hpp"

@@ -80,6 +80,7 @@ set(cxx-install-headers
     "${opentxs_SOURCE_DIR}/include/opentxs/util/ConnectionMode.hpp"
     "${opentxs_SOURCE_DIR}/include/opentxs/util/Container.hpp"
     "${opentxs_SOURCE_DIR}/include/opentxs/util/Iterator.hpp"
+    "${opentxs_SOURCE_DIR}/include/opentxs/util/Literals.hpp"
     "${opentxs_SOURCE_DIR}/include/opentxs/util/Numbers.hpp"
     "${opentxs_SOURCE_DIR}/include/opentxs/util/NymEditor.hpp"
     "${opentxs_SOURCE_DIR}/include/opentxs/util/Options.hpp"

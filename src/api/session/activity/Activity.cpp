@@ -41,6 +41,7 @@
 #include "opentxs/blockchain/bitcoin/block/Transaction.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/core/Contact.hpp"
+#include "opentxs/core/Data.hpp"
 #include "opentxs/core/String.hpp"
 #include "opentxs/core/contract/Unit.hpp"
 #include "opentxs/core/contract/peer/PeerObject.hpp"
@@ -582,7 +583,7 @@ auto Activity::PaymentText(
         case otx::client::PaymentWorkflowType::IncomingCash:
         default: {
 
-            return std::move(output);
+            return output;
         }
     }
 
@@ -593,7 +594,7 @@ auto Activity::PaymentText(
             nym)(" can not be loaded.")
             .Flush();
 
-        return std::move(output);
+        return output;
     }
 
     switch (type) {
@@ -648,7 +649,7 @@ auto Activity::PaymentText(
         }
     }
 
-    return std::move(output);
+    return output;
 }
 
 auto Activity::PreloadActivity(

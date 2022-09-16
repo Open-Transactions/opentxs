@@ -10,6 +10,7 @@
 #include <Verification.pb.h>
 #include <VerificationIdentity.pb.h>
 #include <chrono>
+#include <compare>
 #include <memory>
 #include <stdexcept>
 #include <utility>
@@ -24,6 +25,7 @@
 #include "opentxs/api/Context.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
+#include "opentxs/core/Data.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/util/Container.hpp"

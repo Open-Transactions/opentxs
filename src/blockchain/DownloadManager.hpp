@@ -131,7 +131,7 @@ protected:
 
                 return output;
             }(),
-            [=](const auto& batch) { finish_downloading(batch); },
+            [this](const auto& batch) { finish_downloading(batch); },
             std::move(extra)};
 
         if (const auto allocated = output.data_.size(); 0 == allocated) {

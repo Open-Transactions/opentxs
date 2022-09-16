@@ -34,13 +34,6 @@ struct OPENTXS_EXPORT hash<opentxs::identifier::Notary> {
     auto operator()(const opentxs::identifier::Notary& data) const noexcept
         -> std::size_t;
 };
-
-template <>
-struct OPENTXS_EXPORT less<opentxs::identifier::Notary> {
-    auto operator()(
-        const opentxs::identifier::Notary& lhs,
-        const opentxs::identifier::Notary& rhs) const -> bool;
-};
 }  // namespace std
 
 namespace opentxs::identifier

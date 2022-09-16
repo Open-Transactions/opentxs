@@ -24,6 +24,7 @@
 #include "opentxs/blockchain/bitcoin/block/Input.hpp"
 #include "opentxs/blockchain/bitcoin/block/Inputs.hpp"
 #include "opentxs/core/ByteArray.hpp"  // IWYU pragma: keep
+#include "opentxs/core/Data.hpp"
 #include "opentxs/network/blockchain/bitcoin/CompactSize.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Iterator.hpp"

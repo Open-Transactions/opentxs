@@ -94,9 +94,9 @@ public:
         , external_index_()
         , internal_index_()
         , cb_ex_(zmq::ListenCallback::Factory(
-              [=](auto&& in) { this->external(std::move(in)); }))
+              [this](auto&& in) { this->external(std::move(in)); }))
         , cb_int_(zmq::ListenCallback::Factory(
-              [=](auto&& in) { this->internal(std::move(in)); }))
+              [this](auto&& in) { this->internal(std::move(in)); }))
         , external_(api_.Network().ZeroMQ().RouterSocket(
               cb_ex_,
               zmq::socket::Direction::Bind,

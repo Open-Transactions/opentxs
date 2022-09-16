@@ -24,7 +24,6 @@ extern "C" {
 #include <iterator>
 #include <optional>
 #include <stdexcept>
-#include <type_traits>
 #include <utility>
 
 #include "blockchain/database/common/BlockFilter.hpp"
@@ -184,7 +183,7 @@ struct Database::Imp {
             return std::nullopt;
         }
 
-        return std::move(output);
+        return output;
     }
 
     auto AllocateStorageFolder(const fs::path& dir) const noexcept -> fs::path

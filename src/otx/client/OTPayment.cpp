@@ -8,6 +8,7 @@
 #include "internal/otx/client/OTPayment.hpp"  // IWYU pragma: associated
 
 #include <chrono>
+#include <compare>
 #include <cstdint>
 #include <memory>
 
@@ -29,6 +30,7 @@
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/core/Armored.hpp"
+#include "opentxs/core/Data.hpp"
 #include "opentxs/core/String.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
 #include "opentxs/core/identifier/Nym.hpp"

@@ -37,9 +37,7 @@ HeaderJob::Imp::Imp(
 
             OT_ASSERT(rc);
 
-            // TODO c++20 disable -Wreturn-std-move-in-c++11
-
-            return std::move(out);
+            return out;
         } else {
 
             return std::nullopt;

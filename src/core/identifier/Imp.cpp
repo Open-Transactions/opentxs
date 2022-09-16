@@ -261,46 +261,6 @@ auto Generic::Imp::IsNull() const -> bool
     return true;
 }
 
-auto Generic::Imp::operator==(const opentxs::Data& rhs) const noexcept -> bool
-{
-    return 0 == spaceship(rhs);
-}
-
-auto Generic::Imp::operator==(const Generic& rhs) const noexcept -> bool
-{
-    return 0 == spaceship(rhs);
-}
-
-auto Generic::Imp::operator!=(const opentxs::Data& rhs) const noexcept -> bool
-{
-    return 0 != spaceship(rhs);
-}
-
-auto Generic::Imp::operator!=(const Generic& rhs) const noexcept -> bool
-{
-    return 0 != spaceship(rhs);
-}
-
-auto Generic::Imp::operator<(const opentxs::Data& rhs) const noexcept -> bool
-{
-    return 0 > spaceship(rhs);
-}
-
-auto Generic::Imp::operator>(const opentxs::Data& rhs) const noexcept -> bool
-{
-    return 0 < spaceship(rhs);
-}
-
-auto Generic::Imp::operator<=(const opentxs::Data& rhs) const noexcept -> bool
-{
-    return 0 >= spaceship(rhs);
-}
-
-auto Generic::Imp::operator>=(const opentxs::Data& rhs) const noexcept -> bool
-{
-    return 0 <= spaceship(rhs);
-}
-
 auto Generic::Imp::operator+=(const opentxs::Data& rhs) noexcept -> Generic&
 {
     Concatenate(rhs.data(), rhs.size());
@@ -395,34 +355,6 @@ auto Generic::Imp::SetSize(const std::size_t size) -> bool
     if (size > 0) { data_.assign(size, std::byte{}); }
 
     return true;
-}
-
-auto Generic::Imp::spaceship(const opentxs::Data& rhs) const noexcept -> int
-{
-    const auto lSize = data_.size();
-    const auto rSize = rhs.size();
-
-    if ((0_uz == lSize) && (0_uz == rSize)) {
-
-        return 0;
-    } else if (lSize < rSize) {
-
-        return -1;
-    } else if (lSize > rSize) {
-
-        return 1;
-    } else {
-
-        return std::memcmp(data_.data(), rhs.data(), data_.size());
-    }
-}
-
-auto Generic::Imp::spaceship(const Generic& rhs) const noexcept -> int
-{
-    // NOTE identifier comparisons only take into account the hash value for
-    // backwards compatibility reasons
-
-    return spaceship(static_cast<const opentxs::Data&>(rhs));
 }
 
 auto Generic::Imp::WriteInto() noexcept -> AllocateOutput

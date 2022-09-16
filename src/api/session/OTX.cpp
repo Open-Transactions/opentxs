@@ -12,6 +12,7 @@
 #include <ServerReply.pb.h>
 #include <atomic>
 #include <chrono>
+#include <compare>
 #include <ctime>
 #include <memory>
 #include <stdexcept>
@@ -49,6 +50,7 @@
 #include "opentxs/api/session/Wallet.hpp"
 #include "opentxs/api/session/Workflow.hpp"
 #include "opentxs/core/Contact.hpp"
+#include "opentxs/core/Data.hpp"
 #include "opentxs/core/String.hpp"
 #include "opentxs/core/contract/ServerContract.hpp"
 #include "opentxs/core/contract/peer/BailmentNotice.hpp"
@@ -858,7 +860,7 @@ auto OTX::ContextIdle(
         auto output = empty.get_future();
         empty.set_value();
 
-        return std::move(output);
+        return output;
     }
 }
 

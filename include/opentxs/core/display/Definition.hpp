@@ -52,7 +52,7 @@ public:
 
     virtual auto swap(Definition& rhs) noexcept -> void;
 
-    Definition(CString&& shortname, Scales&& scales) noexcept;
+    Definition(std::string_view shortname, Scales&& scales) noexcept;
     Definition() noexcept;
     Definition(const Definition&) noexcept;
     Definition(Definition&&) noexcept;

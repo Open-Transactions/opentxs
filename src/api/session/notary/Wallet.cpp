@@ -21,6 +21,7 @@
 #include "opentxs/api/session/Notary.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/api/session/Storage.hpp"
+#include "opentxs/core/Data.hpp"
 #include "opentxs/core/String.hpp"
 #include "opentxs/core/contract/Unit.hpp"
 #include "opentxs/core/identifier/Generic.hpp"

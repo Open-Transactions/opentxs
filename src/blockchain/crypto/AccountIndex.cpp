@@ -12,6 +12,7 @@
 
 #include "internal/util/Mutex.hpp"
 #include "opentxs/blockchain/BlockchainType.hpp"
+#include "opentxs/core/Data.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/util/Container.hpp"

@@ -23,6 +23,7 @@ using EnumLang = std::pair<uint32_t, UnallocatedCString>;
 
 namespace std
 {
+// NOLINTBEGIN(cert-dcl58-cpp)
 template <>
 struct hash<opentxs::proto::ContactSectionVersion> {
     auto operator()(const opentxs::proto::ContactSectionVersion&) const noexcept
@@ -34,6 +35,7 @@ struct hash<opentxs::proto::EnumLang> {
     auto operator()(const opentxs::proto::EnumLang&) const noexcept
         -> std::size_t;
 };
+// NOLINTEND(cert-dcl58-cpp)
 }  // namespace std
 
 namespace opentxs::proto

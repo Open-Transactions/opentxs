@@ -215,7 +215,7 @@ auto PaymentItem::extract(
         }
     }
 
-    return std::move(output);
+    return output;
 }
 
 auto PaymentItem::Memo() const noexcept -> UnallocatedCString
