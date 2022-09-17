@@ -1,0 +1,341 @@
+{
+  "version": 2,
+  "cmakeMinimumRequired": {
+    "major": 3,
+    "minor": 20,
+    "patch": 0
+  },
+  "configurePresets": [
+    {
+      "name": "vcpkg",
+      "hidden": true,
+      "cacheVariables": {
+        "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/deps/vcpkg/scripts/buildsystems/vcpkg.cmake"
+      }
+    },
+    {
+      "name": "default",
+      "displayName": "Default",
+      "description": "Default build using Ninja generator",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build/default",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "OT_PCH": "ON",
+        "CMAKE_UNITY_BUILD": "ON",
+        "OPENTXS_BUILD_TESTS": "ON",
+        "OPENTXS_PEDANTIC_BUILD": "ON",
+        "OT_VALGRIND": "ON",
+        "OT_WITH_BLOCKCHAIN": "ON",
+        "OT_CRYPTO_USING_PACKETCRYPT": "OFF",
+        "OT_ENABLE_RPC": "ON"
+      }
+    },
+    {
+      "name": "full",
+      "displayName": "Full",
+      "description": "Debug build with all available options enabled",
+      "binaryDir": "${sourceDir}/build/full",
+      "inherits": "default",
+      "cacheVariables": {
+        "OT_CRYPTO_SUPPORTED_KEY_RSA": "ON",
+        "OT_CRYPTO_SUPPORTED_KEY_SECP256K1": "ON",
+        "OT_CRYPTO_SUPPORTED_KEY_ED25519": "ON",
+        "OT_CRYPTO_USING_LIBSECP256K1": "ON",
+        "OT_CRYPTO_USING_OPENSSL": "ON",
+        "OT_CASH_USING_LUCRE": "ON",
+        "OT_SCRIPT_USING_CHAI": "ON",
+        "OT_WITH_QT": "ON",
+        "OT_WITH_QML": "ON",
+        "OT_STORAGE_FS": "ON",
+        "OT_STORAGE_SQLITE": "ON",
+        "OT_STORAGE_LMDB": "ON",
+        "OT_WITH_BLOCKCHAIN": "ON",
+        "OT_CRYPTO_USING_PACKETCRYPT": "ON",
+        "OT_ENABLE_RPC": "ON"
+      }
+    },
+    {
+      "name": "prod",
+      "displayName": "Production",
+      "description": "Release build suitable for deployment. Highest memory requirements.",
+      "binaryDir": "${sourceDir}/build/prod",
+      "inherits": "full",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "CMAKE_UNITY_BUILD_BATCH_SIZE": "0",
+        "OPENTXS_BUILD_TESTS": "OFF",
+        "OT_VALGRIND": "OFF",
+        "OT_CRYPTO_USING_PACKETCRYPT": "OFF"
+      }
+    },
+    {
+      "name": "nopch",
+      "displayName": "Production",
+      "description": "Debug build with precompiled headers and jumbo build disabled, and all other options enabled. Use this preset for IWYU and other analysis tools.",
+      "binaryDir": "${sourceDir}/build/prod",
+      "inherits": "full",
+      "cacheVariables": {
+        "OT_PCH": "OFF",
+        "CMAKE_UNITY_BUILD": "OFF",
+        "CMAKE_UNITY_BUILD_BATCH_SIZE": "1"
+      }
+    },
+    {
+      "name": "tidy",
+      "displayName": "clang-tidy",
+      "description": "Run clang-tidy",
+      "binaryDir": "${sourceDir}/build/tidy",
+      "inherits": "nopch",
+      "cacheVariables": {
+        "OT_CLANG_TIDY": "ON"
+      }
+    },
+    {
+      "name": "test01",
+      "displayName": "Build option test #1",
+      "description": "Tests conditional compilation logic for optional features",
+      "binaryDir": "${sourceDir}/build/test01",
+      "inherits": "default",
+      "cacheVariables": {
+        "OT_CRYPTO_SUPPORTED_KEY_RSA": "ON",
+        "OT_CRYPTO_SUPPORTED_KEY_SECP256K1": "ON",
+        "OT_CRYPTO_SUPPORTED_KEY_ED25519": "ON",
+        "OT_CRYPTO_USING_LIBSECP256K1": "ON",
+        "OT_CRYPTO_USING_OPENSSL": "ON",
+        "OT_CASH_USING_LUCRE": "OFF",
+        "OT_SCRIPT_USING_CHAI": "OFF",
+        "OT_WITH_QT": "OFF",
+        "OT_WITH_QML": "OFF",
+        "OT_STORAGE_FS": "ON",
+        "OT_STORAGE_SQLITE": "ON",
+        "OT_STORAGE_LMDB": "ON",
+        "OT_WITH_BLOCKCHAIN": "ON",
+        "OT_CRYPTO_USING_PACKETCRYPT": "OFF",
+        "OT_ENABLE_RPC": "OFF"
+      }
+    },
+    {
+      "name": "test02",
+      "displayName": "Build option test #2",
+      "description": "Tests conditional compilation logic for optional features",
+      "binaryDir": "${sourceDir}/build/test02",
+      "inherits": "default",
+      "cacheVariables": {
+        "OT_CRYPTO_SUPPORTED_KEY_RSA": "ON",
+        "OT_CRYPTO_SUPPORTED_KEY_SECP256K1": "ON",
+        "OT_CRYPTO_SUPPORTED_KEY_ED25519": "OFF",
+        "OT_CRYPTO_USING_LIBSECP256K1": "ON",
+        "OT_CRYPTO_USING_OPENSSL": "ON",
+        "OT_CASH_USING_LUCRE": "ON",
+        "OT_SCRIPT_USING_CHAI": "ON",
+        "OT_WITH_QT": "ON",
+        "OT_WITH_QML": "OFF",
+        "OT_STORAGE_FS": "ON",
+        "OT_STORAGE_SQLITE": "ON",
+        "OT_STORAGE_LMDB": "OFF",
+        "OT_WITH_BLOCKCHAIN": "OFF",
+        "OT_CRYPTO_USING_PACKETCRYPT": "OFF",
+        "OT_ENABLE_RPC": "ON"
+      }
+    },
+    {
+      "name": "test03",
+      "displayName": "Build option test #3",
+      "description": "Tests conditional compilation logic for optional features",
+      "binaryDir": "${sourceDir}/build/test03",
+      "inherits": "default",
+      "cacheVariables": {
+        "OT_CRYPTO_SUPPORTED_KEY_RSA": "ON",
+        "OT_CRYPTO_SUPPORTED_KEY_SECP256K1": "OFF",
+        "OT_CRYPTO_SUPPORTED_KEY_ED25519": "ON",
+        "OT_CRYPTO_USING_LIBSECP256K1": "OFF",
+        "OT_CRYPTO_USING_OPENSSL": "ON",
+        "OT_CASH_USING_LUCRE": "OFF",
+        "OT_SCRIPT_USING_CHAI": "OFF",
+        "OT_WITH_QT": "OFF",
+        "OT_WITH_QML": "OFF",
+        "OT_STORAGE_FS": "ON",
+        "OT_STORAGE_SQLITE": "OFF",
+        "OT_STORAGE_LMDB": "ON",
+        "OT_WITH_BLOCKCHAIN": "OFF",
+        "OT_CRYPTO_USING_PACKETCRYPT": "OFF",
+        "OT_ENABLE_RPC": "ON"
+      }
+    },
+    {
+      "name": "test04",
+      "displayName": "Build option test #4",
+      "description": "Tests conditional compilation logic for optional features",
+      "binaryDir": "${sourceDir}/build/test04",
+      "inherits": "default",
+      "cacheVariables": {
+        "OT_CRYPTO_SUPPORTED_KEY_RSA": "ON",
+        "OT_CRYPTO_SUPPORTED_KEY_SECP256K1": "OFF",
+        "OT_CRYPTO_SUPPORTED_KEY_ED25519": "OFF",
+        "OT_CRYPTO_USING_LIBSECP256K1": "OFF",
+        "OT_CRYPTO_USING_OPENSSL": "ON",
+        "OT_CASH_USING_LUCRE": "ON",
+        "OT_SCRIPT_USING_CHAI": "ON",
+        "OT_WITH_QT": "ON",
+        "OT_WITH_QML": "ON",
+        "OT_STORAGE_FS": "ON",
+        "OT_STORAGE_SQLITE": "OFF",
+        "OT_STORAGE_LMDB": "OFF",
+        "OT_WITH_BLOCKCHAIN": "OFF",
+        "OT_CRYPTO_USING_PACKETCRYPT": "OFF",
+        "OT_ENABLE_RPC": "ON"
+      }
+    },
+    {
+      "name": "test05",
+      "displayName": "Build option test #5",
+      "description": "Tests conditional compilation logic for optional features",
+      "binaryDir": "${sourceDir}/build/test05",
+      "inherits": "default",
+      "cacheVariables": {
+        "OT_CRYPTO_SUPPORTED_KEY_RSA": "OFF",
+        "OT_CRYPTO_SUPPORTED_KEY_SECP256K1": "ON",
+        "OT_CRYPTO_SUPPORTED_KEY_ED25519": "ON",
+        "OT_CRYPTO_USING_LIBSECP256K1": "ON",
+        "OT_CRYPTO_USING_OPENSSL": "OFF",
+        "OT_CASH_USING_LUCRE": "OFF",
+        "OT_SCRIPT_USING_CHAI": "OFF",
+        "OT_WITH_QT": "OFF",
+        "OT_WITH_QML": "OFF",
+        "OT_STORAGE_FS": "OFF",
+        "OT_STORAGE_SQLITE": "ON",
+        "OT_STORAGE_LMDB": "ON",
+        "OT_WITH_BLOCKCHAIN": "OFF",
+        "OT_CRYPTO_USING_PACKETCRYPT": "OFF",
+        "OT_ENABLE_RPC": "ON"
+      }
+    },
+    {
+      "name": "test06",
+      "displayName": "Build option test #6",
+      "description": "Tests conditional compilation logic for optional features",
+      "binaryDir": "${sourceDir}/build/test06",
+      "inherits": "default",
+      "cacheVariables": {
+        "OT_CRYPTO_SUPPORTED_KEY_RSA": "OFF",
+        "OT_CRYPTO_SUPPORTED_KEY_SECP256K1": "ON",
+        "OT_CRYPTO_SUPPORTED_KEY_ED25519": "OFF",
+        "OT_CRYPTO_USING_LIBSECP256K1": "ON",
+        "OT_CRYPTO_USING_OPENSSL": "ON",
+        "OT_CASH_USING_LUCRE": "ON",
+        "OT_SCRIPT_USING_CHAI": "ON",
+        "OT_WITH_QT": "ON",
+        "OT_WITH_QML": "ON",
+        "OT_STORAGE_FS": "OFF",
+        "OT_STORAGE_SQLITE": "ON",
+        "OT_STORAGE_LMDB": "OFF",
+        "OT_WITH_BLOCKCHAIN": "OFF",
+        "OT_CRYPTO_USING_PACKETCRYPT": "OFF",
+        "OT_ENABLE_RPC": "ON"
+      }
+    },
+    {
+      "name": "test07",
+      "displayName": "Build option test #7",
+      "description": "Tests conditional compilation logic for optional features",
+      "binaryDir": "${sourceDir}/build/test07",
+      "inherits": "default",
+      "cacheVariables": {
+        "OT_CRYPTO_SUPPORTED_KEY_RSA": "OFF",
+        "OT_CRYPTO_SUPPORTED_KEY_SECP256K1": "ON",
+        "OT_CRYPTO_SUPPORTED_KEY_ED25519": "OFF",
+        "OT_CRYPTO_USING_LIBSECP256K1": "ON",
+        "OT_CRYPTO_USING_OPENSSL": "ON",
+        "OT_CASH_USING_LUCRE": "OFF",
+        "OT_SCRIPT_USING_CHAI": "OFF",
+        "OT_WITH_QT": "OFF",
+        "OT_WITH_QML": "OFF",
+        "OT_STORAGE_FS": "OFF",
+        "OT_STORAGE_SQLITE": "ON",
+        "OT_STORAGE_LMDB": "OFF",
+        "OT_WITH_BLOCKCHAIN": "OFF",
+        "OT_CRYPTO_USING_PACKETCRYPT": "OFF",
+        "OT_ENABLE_RPC": "ON"
+      }
+    },
+    {
+      "name": "test08",
+      "displayName": "Build option test #8",
+      "description": "Tests conditional compilation logic for optional features",
+      "binaryDir": "${sourceDir}/build/test08",
+      "inherits": "default",
+      "cacheVariables": {
+        "OT_CRYPTO_SUPPORTED_KEY_RSA": "OFF",
+        "OT_CRYPTO_SUPPORTED_KEY_SECP256K1": "OFF",
+        "OT_CRYPTO_SUPPORTED_KEY_ED25519": "ON",
+        "OT_CRYPTO_USING_LIBSECP256K1": "OFF",
+        "OT_CRYPTO_USING_OPENSSL": "OFF",
+        "OT_CASH_USING_LUCRE": "OFF",
+        "OT_SCRIPT_USING_CHAI": "OFF",
+        "OT_WITH_QT": "OFF",
+        "OT_WITH_QML": "OFF",
+        "OT_STORAGE_FS": "OFF",
+        "OT_STORAGE_SQLITE": "OFF",
+        "OT_STORAGE_LMDB": "ON",
+        "OT_WITH_BLOCKCHAIN": "OFF",
+        "OT_CRYPTO_USING_PACKETCRYPT": "OFF",
+        "OT_ENABLE_RPC": "ON"
+      }
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "default",
+      "configurePreset": "default"
+    },
+    {
+      "name": "full",
+      "configurePreset": "full"
+    },
+    {
+      "name": "prod",
+      "configurePreset": "prod"
+    },
+    {
+      "name": "nopch",
+      "configurePreset": "nopch"
+    },
+    {
+      "name": "tidy",
+      "configurePreset": "tidy"
+    },
+    {
+      "name": "test01",
+      "configurePreset": "test01"
+    },
+    {
+      "name": "test02",
+      "configurePreset": "test02"
+    },
+    {
+      "name": "test03",
+      "configurePreset": "test03"
+    },
+    {
+      "name": "test04",
+      "configurePreset": "test04"
+    },
+    {
+      "name": "test05",
+      "configurePreset": "test05"
+    },
+    {
+      "name": "test06",
+      "configurePreset": "test06"
+    },
+    {
+      "name": "test07",
+      "configurePreset": "test07"
+    },
+    {
+      "name": "test08",
+      "configurePreset": "test08"
+    }
+  ]
+}

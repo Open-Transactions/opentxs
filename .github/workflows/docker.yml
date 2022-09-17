@@ -35,7 +35,8 @@ jobs:
             docker: 36_0
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2.3.4
+    - name: Checkout opentxs
+      uses: actions/checkout@v3
       with:
         fetch-depth: '0'
         submodules: 'recursive'
