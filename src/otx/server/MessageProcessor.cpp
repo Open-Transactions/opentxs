@@ -11,8 +11,6 @@
 #include <ServerReply.pb.h>
 #include <ServerRequest.pb.h>
 #include <chrono>
-#include <cstdint>
-#include <limits>
 #include <memory>
 #include <sstream>
 #include <stdexcept>
@@ -36,6 +34,7 @@
 #include "internal/serialization/protobuf/verify/ServerRequest.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/Mutex.hpp"
+#include "internal/util/Size.hpp"
 #include "internal/util/Thread.hpp"
 #include "opentxs/api/network/Network.hpp"
 #include "opentxs/api/session/Endpoints.hpp"
@@ -460,68 +459,69 @@ auto MessageProcessor::Imp::process_message(
 {
     if (messageString.size() < 1) { return true; }
 
-    if (std::numeric_limits<std::uint32_t>::max() < messageString.size()) {
+    try {
+        auto armored = Armored::Factory();
+        armored->MemSet(messageString.data(), shorten(messageString.size()));
+        auto serialized = String::Factory();
+        armored->GetString(serialized);
+        auto request{api_.Factory().InternalSession().Message()};
+
+        if (false == serialized->Exists()) {
+            LogError()(OT_PRETTY_CLASS())("Empty serialized request.").Flush();
+
+            return true;
+        }
+
+        if (false == request->LoadContractFromString(serialized)) {
+            LogError()(OT_PRETTY_CLASS())("Failed to deserialized request.")
+                .Flush();
+
+            return true;
+        }
+
+        auto replymsg{api_.Factory().InternalSession().Message()};
+
+        OT_ASSERT(false != bool(replymsg));
+
+        const bool processed =
+            server_.CommandProcessor().ProcessUserCommand(*request, *replymsg);
+
+        if (false == processed) {
+            LogDetail()(OT_PRETTY_CLASS())("Failed to process user command ")(
+                request->m_strCommand.get())
+                .Flush();
+            LogVerbose()(OT_PRETTY_CLASS())(String::Factory(*request).get())
+                .Flush();
+        } else {
+            LogDetail()(OT_PRETTY_CLASS())(
+                "Successfully processed user command ")(
+                request->m_strCommand.get())
+                .Flush();
+        }
+
+        auto serializedReply = String::Factory(*replymsg);
+
+        if (false == serializedReply->Exists()) {
+            LogError()(OT_PRETTY_CLASS())("Failed to serialize reply.").Flush();
+
+            return true;
+        }
+
+        auto armoredReply = Armored::Factory(serializedReply);
+
+        if (false == armoredReply->Exists()) {
+            LogError()(OT_PRETTY_CLASS())("Failed to armor reply.").Flush();
+
+            return true;
+        }
+
+        reply.assign(armoredReply->Get(), armoredReply->GetLength());
+
+        return false;
+    } catch (...) {
+
         return true;
     }
-
-    auto armored = Armored::Factory();
-    armored->MemSet(
-        messageString.data(), static_cast<std::uint32_t>(messageString.size()));
-    auto serialized = String::Factory();
-    armored->GetString(serialized);
-    auto request{api_.Factory().InternalSession().Message()};
-
-    if (false == serialized->Exists()) {
-        LogError()(OT_PRETTY_CLASS())("Empty serialized request.").Flush();
-
-        return true;
-    }
-
-    if (false == request->LoadContractFromString(serialized)) {
-        LogError()(OT_PRETTY_CLASS())("Failed to deserialized request.")
-            .Flush();
-
-        return true;
-    }
-
-    auto replymsg{api_.Factory().InternalSession().Message()};
-
-    OT_ASSERT(false != bool(replymsg));
-
-    const bool processed =
-        server_.CommandProcessor().ProcessUserCommand(*request, *replymsg);
-
-    if (false == processed) {
-        LogDetail()(OT_PRETTY_CLASS())("Failed to process user command ")(
-            request->m_strCommand.get())
-            .Flush();
-        LogVerbose()(OT_PRETTY_CLASS())(String::Factory(*request).get())
-            .Flush();
-    } else {
-        LogDetail()(OT_PRETTY_CLASS())("Successfully processed user command ")(
-            request->m_strCommand.get())
-            .Flush();
-    }
-
-    auto serializedReply = String::Factory(*replymsg);
-
-    if (false == serializedReply->Exists()) {
-        LogError()(OT_PRETTY_CLASS())("Failed to serialize reply.").Flush();
-
-        return true;
-    }
-
-    auto armoredReply = Armored::Factory(serializedReply);
-
-    if (false == armoredReply->Exists()) {
-        LogError()(OT_PRETTY_CLASS())("Failed to armor reply.").Flush();
-
-        return true;
-    }
-
-    reply.assign(armoredReply->Get(), armoredReply->GetLength());
-
-    return false;
 }
 
 auto MessageProcessor::Imp::process_notification(

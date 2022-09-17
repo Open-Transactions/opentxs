@@ -32,6 +32,7 @@
 #include "internal/util/BoostPMR.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
+#include "internal/util/Size.hpp"
 #include "opentxs/api/crypto/Hash.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Session.hpp"
@@ -88,16 +89,7 @@ auto GCS(
 
         dedup(effective);
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wtautological-type-limit-compare"
-        // std::size_t might be 32 bit
-        if (std::numeric_limits<std::uint32_t>::max() < effective.size()) {
-            throw std::runtime_error(
-                "Too many elements: " + std::to_string(effective.size()));
-        }
-#pragma GCC diagnostic pop
-
-        const auto count = static_cast<std::uint32_t>(effective.size());
+        const auto count = shorten(effective.size());
         auto hashed =
             gcs::HashedSetConstruct(api, key, count, fpRate, effective, alloc);
         auto compressed = gcs::GolombEncode(bits, hashed, alloc);
@@ -241,17 +233,7 @@ auto GCS(
         std::transform(
             std::begin(input), std::end(input), std::back_inserter(elements), [
             ](const auto& element) -> auto{ return reader(element); });
-
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wtautological-type-limit-compare"
-        // std::size_t might be 32 bit
-        if (std::numeric_limits<std::uint32_t>::max() < elements.size()) {
-            throw std::runtime_error(
-                "Too many elements: " + std::to_string(elements.size()));
-        }
-#pragma GCC diagnostic pop
-
-        const auto count = static_cast<std::uint32_t>(elements.size());
+        const auto count = shorten(elements.size());
         const auto key =
             blockchain::internal::BlockHashToFilterKey(block.ID().Bytes());
         auto hashed = gcs::HashedSetConstruct(

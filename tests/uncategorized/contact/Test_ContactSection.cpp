@@ -41,8 +41,8 @@ public:
               ot::identity::wot::claim::ClaimType::Employee,
               ot::UnallocatedCString("activeContactItemValue"),
               {ot::identity::wot::claim::Attribute::Active},
-              NULL_START,
-              NULL_END,
+              {},
+              {},
               ""))
     {
     }
@@ -146,8 +146,8 @@ TEST_F(Test_ContactSection, operator_plus)
             ot::identity::wot::claim::ClaimType::Employee,
             ot::UnallocatedCString("activeContactItemValue2"),
             {ot::identity::wot::claim::Attribute::Active},
-            NULL_START,
-            NULL_END,
+            {},
+            {},
             ""));
     const ot::identity::wot::claim::Section section2(
         dynamic_cast<const ot::api::session::Client&>(api_),
@@ -177,8 +177,8 @@ TEST_F(Test_ContactSection, operator_plus)
             ot::identity::wot::claim::ClaimType::Employee,
             ot::UnallocatedCString("activeContactItemValue3"),
             {ot::identity::wot::claim::Attribute::Active},
-            NULL_START,
-            NULL_END,
+            {},
+            {},
             ""));
     const std::shared_ptr<ot::identity::wot::claim::Item> contactItem4(
         new ot::identity::wot::claim::Item(
@@ -190,8 +190,8 @@ TEST_F(Test_ContactSection, operator_plus)
             ot::identity::wot::claim::ClaimType::Ssl,
             ot::UnallocatedCString("activeContactItemValue4"),
             {ot::identity::wot::claim::Attribute::Active},
-            NULL_START,
-            NULL_END,
+            {},
+            {},
             ""));
     const ot::identity::wot::claim::Section section4(
         dynamic_cast<const ot::api::session::Client&>(api_),
@@ -248,8 +248,8 @@ TEST_F(Test_ContactSection, AddItem)
             ot::identity::wot::claim::ClaimType::Individual,
             ot::UnallocatedCString("scopeContactItemValue"),
             {ot::identity::wot::claim::Attribute::Local},
-            NULL_START,
-            NULL_END,
+            {},
+            {},
             ""));
     const ot::identity::wot::claim::Section section1(
         dynamic_cast<const ot::api::session::Client&>(api_),
@@ -283,8 +283,8 @@ TEST_F(Test_ContactSection, AddItem)
             ot::identity::wot::claim::ClaimType::Employee,
             ot::UnallocatedCString("activeContactItemValue2"),
             {ot::identity::wot::claim::Attribute::Active},
-            NULL_START,
-            NULL_END,
+            {},
+            {},
             ""));
     const auto& section5 = section4.AddItem(contactItem2);
     // Verify there are two items.
@@ -304,8 +304,8 @@ TEST_F(Test_ContactSection, AddItem)
             ot::identity::wot::claim::ClaimType::Ssl,
             ot::UnallocatedCString("activeContactItemValue3"),
             {ot::identity::wot::claim::Attribute::Active},
-            NULL_START,
-            NULL_END,
+            {},
+            {},
             ""));
     const auto& section6 = section5.AddItem(contactItem3);
     // Verify there are two groups.
@@ -328,8 +328,8 @@ TEST_F(Test_ContactSection, AddItem_different_versions)
             ot::identity::wot::claim::ClaimType::Bot,
             ot::UnallocatedCString("scopeContactItemValue"),
             {ot::identity::wot::claim::Attribute::Local},
-            NULL_START,
-            NULL_END,
+            {},
+            {},
             ""));
     const ot::identity::wot::claim::Section section1(
         dynamic_cast<const ot::api::session::Client&>(api_),
@@ -360,8 +360,8 @@ TEST_F(Test_ContactSection, AddItem_different_versions)
             ot::identity::wot::claim::ClaimType::Owner,
             ot::UnallocatedCString("contactItem2Value"),
             {ot::identity::wot::claim::Attribute::Local},
-            NULL_START,
-            NULL_END,
+            {},
+            {},
             ""));
     const ot::identity::wot::claim::Section section3(
         dynamic_cast<const ot::api::session::Client&>(api_),
@@ -416,8 +416,8 @@ TEST_F(Test_ContactSection, Claim_found)
             ot::identity::wot::claim::ClaimType::Ssl,
             ot::UnallocatedCString("activeContactItemValue2"),
             {ot::identity::wot::claim::Attribute::Active},
-            NULL_START,
-            NULL_END,
+            {},
+            {},
             ""));
     const auto& section2 = section1.AddItem(contactItem2);
     const std::shared_ptr<ot::identity::wot::claim::Item>& claim2 =
@@ -479,8 +479,8 @@ TEST_F(Test_ContactSection, HaveClaim_true)
             ot::identity::wot::claim::ClaimType::Ssl,
             ot::UnallocatedCString("activeContactItemValue2"),
             {ot::identity::wot::claim::Attribute::Active},
-            NULL_START,
-            NULL_END,
+            {},
+            {},
             ""));
     const auto& section2 = section1.AddItem(contactItem2);
     ASSERT_TRUE(section2.HaveClaim(contactItem2->ID()));
@@ -507,8 +507,8 @@ TEST_F(Test_ContactSection, Delete)
             ot::identity::wot::claim::ClaimType::Employee,
             ot::UnallocatedCString("activeContactItemValue2"),
             {ot::identity::wot::claim::Attribute::Active},
-            NULL_START,
-            NULL_END,
+            {},
+            {},
             ""));
     const auto& section2 = section1.AddItem(contactItem2);
     ASSERT_EQ(
@@ -539,8 +539,8 @@ TEST_F(Test_ContactSection, Delete)
             ot::identity::wot::claim::ClaimType::Ssl,
             ot::UnallocatedCString("activeContactItemValue3"),
             {ot::identity::wot::claim::Attribute::Active},
-            NULL_START,
-            NULL_END,
+            {},
+            {},
             ""));
     const auto& section5 = section4.AddItem(contactItem3);
     // Verify the section has two groups.
@@ -626,8 +626,8 @@ TEST_F(Test_ContactSection, Size)
             ot::identity::wot::claim::ClaimType::Employee,
             ot::UnallocatedCString("activeContactItemValue2"),
             {ot::identity::wot::claim::Attribute::Active},
-            NULL_START,
-            NULL_END,
+            {},
+            {},
             ""));
     const auto& section2 = section1.AddItem(contactItem2);
     // Verify the size is the same.
@@ -644,8 +644,8 @@ TEST_F(Test_ContactSection, Size)
             ot::identity::wot::claim::ClaimType::Ssl,
             ot::UnallocatedCString("activeContactItemValue3"),
             {ot::identity::wot::claim::Attribute::Active},
-            NULL_START,
-            NULL_END,
+            {},
+            {},
             ""));
     const auto& section3 = section2.AddItem(contactItem3);
     // Verify the size is now two.

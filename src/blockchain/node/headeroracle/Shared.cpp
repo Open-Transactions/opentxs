@@ -464,7 +464,7 @@ auto HeaderOracle::Shared::BestHashes(
 {
     auto handle = data_.lock_shared();
     const auto& data = *handle;
-    auto start = 0_uz;
+    auto start = block::Height{};
 
     for (const auto& hash : previous) {
         const auto [best, height] = is_in_best_chain(data, hash);

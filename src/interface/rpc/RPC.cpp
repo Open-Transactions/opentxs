@@ -65,6 +65,7 @@
 #include "internal/util/Exclusive.hpp"
 #include "internal/util/Lockable.hpp"
 #include "internal/util/Shared.hpp"
+#include "internal/util/Time.hpp"
 #include "opentxs/api/Context.hpp"
 #include "opentxs/api/Factory.hpp"
 #include "opentxs/api/crypto/Blockchain.hpp"
@@ -366,8 +367,8 @@ auto RPC::add_claim(const proto::RPCCommand& command) const
             addclaim.sectionversion(),
             contactitem.type(),
             contactitem.value(),
-            contactitem.start(),
-            contactitem.end(),
+            convert_stime(contactitem.start()),
+            convert_stime(contactitem.end()),
             attributes);
 
         if (nymdata.AddClaim(claim, reason)) {
@@ -672,8 +673,8 @@ auto RPC::create_nym(const proto::RPCCommand& command) const
                 addclaim.sectionversion(),
                 contactitem.type(),
                 contactitem.value(),
-                contactitem.start(),
-                contactitem.end(),
+                convert_stime(contactitem.start()),
+                convert_stime(contactitem.end()),
                 attributes);
             nymdata.AddClaim(claim, reason);
         }

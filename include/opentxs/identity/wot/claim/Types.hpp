@@ -17,6 +17,7 @@
 #include "opentxs/core/Types.hpp"
 #include "opentxs/identity/Types.hpp"
 #include "opentxs/util/Container.hpp"
+#include "opentxs/util/Time.hpp"
 
 namespace opentxs::identity::wot::claim
 {
@@ -35,8 +36,8 @@ using Claim = std::tuple<
     std::uint32_t,                   // section
     std::uint32_t,                   // type
     UnallocatedCString,              // value
-    std::int64_t,                    // start time
-    std::int64_t,                    // end time
+    Time,                            // start time
+    Time,                            // end time
     UnallocatedSet<std::uint32_t>>;  // attributes
 using ClaimTuple = Claim;
 /** C++11 representation of all contact data associated with a nym, aggregating

@@ -122,7 +122,10 @@ auto BlockBatch::Get() const noexcept -> const Vector<block::Hash>&
     return imp_->hashes_;
 }
 
-auto BlockBatch::ID() const noexcept -> std::size_t { return imp_->id_; }
+auto BlockBatch::ID() const noexcept -> std::size_t
+{
+    return static_cast<std::size_t>(imp_->id_);
+}
 
 auto BlockBatch::LastActivity() const noexcept -> std::chrono::seconds
 {

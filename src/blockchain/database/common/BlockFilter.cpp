@@ -368,7 +368,8 @@ auto BlockFilter::StoreFilters(
         }();
         auto arena = google::protobuf::Arena{options};
         auto upstream = alloc::StandardToBoost(alloc::System());
-        auto alloc = alloc::BoostMonotonic{4_mib, &upstream};
+        auto alloc =
+            alloc::BoostMonotonic{static_cast<std::size_t>(4_mib), &upstream};
         auto data = [&] {
             auto out = Vector<StorageItem>{&alloc};
             out.reserve(headers.size());

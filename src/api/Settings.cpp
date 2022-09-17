@@ -17,6 +17,7 @@
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/Mutex.hpp"
 #include "internal/util/P0330.hpp"
+#include "internal/util/Size.hpp"
 #include "opentxs/util/Log.hpp"
 
 namespace opentxs::factory
@@ -544,7 +545,12 @@ auto Settings::Set_long(
 
     // Set New Value
     SI_Error rc = pvt_->iniSimple.SetLongValue(
-        strSection.Get(), strKey.Get(), lValue, szComment, false, true);
+        strSection.Get(),
+        strKey.Get(),
+        convert_to_size(lValue),
+        szComment,
+        false,
+        true);
     if (0 > rc) { return false; }
 
     // Check if the new value is the same as intended.

@@ -21,6 +21,7 @@
 #include "internal/api/crypto/Asymmetric.hpp"
 #include "internal/api/crypto/Blockchain.hpp"
 #include "internal/util/LogMacros.hpp"
+#include "internal/util/Time.hpp"
 #include "opentxs/api/crypto/Asymmetric.hpp"
 #include "opentxs/api/crypto/Blockchain.hpp"
 #include "opentxs/api/session/Crypto.hpp"
@@ -123,7 +124,7 @@ Element::Element(
           address.label(),
           std::move(contact),
           *instantiate(api, address.key()),
-          Clock::from_time_t(address.modified()),
+          convert_stime(address.modified()),
           [&] {
               auto out = Transactions{};
 

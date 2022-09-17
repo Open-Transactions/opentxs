@@ -20,6 +20,7 @@
 #include "internal/core/Amount.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
+#include "internal/util/Size.hpp"
 #include "opentxs/blockchain/Blockchain.hpp"
 #include "opentxs/blockchain/BlockchainType.hpp"
 #include "opentxs/blockchain/Types.hpp"
@@ -347,7 +348,7 @@ auto EncodedTransaction::Deserialize(
         }
 
         script.assign(it, it + scriptBytes.Value());
-        std::advance(it, scriptBytes.Value());
+        std::advance(it, convert_to_size(scriptBytes.Value()));
         expectedSize += sizeof(sequence);
 
         if (in.size() < expectedSize) {
@@ -411,7 +412,7 @@ auto EncodedTransaction::Deserialize(
         }
 
         script.assign(it, it + scriptBytes.Value());
-        std::advance(it, scriptBytes.Value());
+        std::advance(it, convert_to_size(scriptBytes.Value()));
     }
 
     if (segwit.has_value()) {
@@ -445,7 +446,7 @@ auto EncodedTransaction::Deserialize(
                 }
 
                 push.assign(it, it + witnessBytes.Value());
-                std::advance(it, witnessBytes.Value());
+                std::advance(it, convert_to_size(witnessBytes.Value()));
             }
         }
     }

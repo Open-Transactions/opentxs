@@ -33,6 +33,7 @@
 #include "internal/blockchain/bitcoin/block/Types.hpp"
 #include "internal/identity/wot/claim/Types.hpp"
 #include "internal/util/LogMacros.hpp"
+#include "internal/util/Size.hpp"
 #include "opentxs/api/crypto/Blockchain.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
@@ -885,53 +886,55 @@ auto Input::ReplaceScript() noexcept -> bool
 auto Input::serialize(const AllocateOutput destination, const bool normalized)
     const noexcept -> std::optional<std::size_t>
 {
-    if (!destination) {
-        LogError()(OT_PRETTY_CLASS())("Invalid output allocator").Flush();
+    try {
+        if (!destination) {
 
-        return std::nullopt;
-    }
-
-    const auto size = CalculateSize(normalized);
-    auto output = destination(size);
-
-    if (false == output.valid(size)) {
-        LogError()(OT_PRETTY_CLASS())("Failed to allocate output bytes")
-            .Flush();
-
-        return std::nullopt;
-    }
-
-    auto* it = static_cast<std::byte*>(output.data());
-    std::memcpy(static_cast<void*>(it), &previous_, sizeof(previous_));
-    std::advance(it, sizeof(previous_));
-    const auto isCoinbase{0 < coinbase_.size()};
-    const auto cs = normalized ? blockchain::bitcoin::CompactSize(0)
-                               : blockchain::bitcoin::CompactSize(
-                                     isCoinbase ? coinbase_.size()
-                                                : script_->CalculateSize());
-    const auto csData = cs.Encode();
-    std::memcpy(static_cast<void*>(it), csData.data(), csData.size());
-    std::advance(it, csData.size());
-
-    if (false == normalized) {
-        if (isCoinbase) {
-            std::memcpy(it, coinbase_.data(), coinbase_.size());
-        } else {
-            if (false == script_->Serialize(preallocated(cs.Value(), it))) {
-                LogError()(OT_PRETTY_CLASS())("Failed to serialize script")
-                    .Flush();
-
-                return std::nullopt;
-            }
+            throw std::runtime_error{"invalid output allocator"};
         }
 
-        std::advance(it, cs.Value());
+        const auto size = CalculateSize(normalized);
+        auto output = destination(size);
+
+        if (false == output.valid(size)) {
+
+            throw std::runtime_error{"failed to allocate output bytes"};
+        }
+
+        auto* it = static_cast<std::byte*>(output.data());
+        std::memcpy(static_cast<void*>(it), &previous_, sizeof(previous_));
+        std::advance(it, sizeof(previous_));
+        const auto isCoinbase{0 < coinbase_.size()};
+        const auto cs = normalized ? blockchain::bitcoin::CompactSize(0)
+                                   : blockchain::bitcoin::CompactSize(
+                                         isCoinbase ? coinbase_.size()
+                                                    : script_->CalculateSize());
+        const auto csData = cs.Encode();
+        std::memcpy(static_cast<void*>(it), csData.data(), csData.size());
+        std::advance(it, csData.size());
+
+        if (false == normalized) {
+            if (isCoinbase) {
+                std::memcpy(it, coinbase_.data(), coinbase_.size());
+            } else {
+                if (false == script_->Serialize(preallocated(
+                                 convert_to_size(cs.Value()), it))) {
+
+                    throw std::runtime_error{"failed to serialize script"};
+                }
+            }
+
+            std::advance(it, convert_to_size(cs.Value()));
+        }
+
+        auto buf = be::little_uint32_buf_t{sequence_};
+        std::memcpy(static_cast<void*>(it), &buf, sizeof(buf));
+
+        return size;
+    } catch (const std::exception& e) {
+        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+
+        return std::nullopt;
     }
-
-    auto buf = be::little_uint32_buf_t{sequence_};
-    std::memcpy(static_cast<void*>(it), &buf, sizeof(buf));
-
-    return size;
 }
 
 auto Input::Serialize(const AllocateOutput destination) const noexcept

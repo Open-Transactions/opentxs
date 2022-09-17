@@ -13,6 +13,7 @@
 #include "internal/otx/blind/Purse.hpp"
 #include "internal/otx/blind/Types.hpp"
 #include "internal/util/LogMacros.hpp"
+#include "internal/util/Time.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
@@ -85,8 +86,8 @@ Token::Token(
           api.Factory().UnitIDFromBase58(in.mint()),
           in.series(),
           factory::Amount(in.denomination()),
-          Clock::from_time_t(in.validfrom()),
-          Clock::from_time_t(in.validto()),
+          convert_stime(in.validfrom()),
+          convert_stime(in.validto()),
           in.version())
 {
 }

@@ -237,11 +237,6 @@ endif()
 if(OT_INSTALL_LIBRARY_DEPENDENCIES)
   string(TOUPPER "${CMAKE_BUILD_TYPE}" BUILD_TYPE_SUFFIX)
   get_target_property(
-    Boost_iostreams_LIBRARY
-    Boost::iostreams
-    IMPORTED_LOCATION_${BUILD_TYPE_SUFFIX}
-  )
-  get_target_property(
     Boost_system_LIBRARY
     Boost::system
     IMPORTED_LOCATION_${BUILD_TYPE_SUFFIX}
@@ -282,7 +277,6 @@ if(OT_INSTALL_LIBRARY_DEPENDENCIES)
 
   install(
     FILES
-      "${Boost_iostreams_LIBRARY}"
       "${Boost_system_LIBRARY}"
       "${Boost_thread_LIBRARY}"
       "${Protobuf_LITE_LIBRARY}"
@@ -301,6 +295,20 @@ if(OT_INSTALL_LIBRARY_DEPENDENCIES)
     )
     install(
       FILES "${Boost_stacktrace_basic_LIBRARY}"
+      DESTINATION ${CMAKE_INSTALL_LIBDIR}
+      COMPONENT main
+    )
+  endif()
+
+  if(Boost_iostreams_FOUND)
+    get_target_property(
+      Boost_iostreams_LIBRARY
+      Boost::iostreams
+      IMPORTED_LOCATION_${BUILD_TYPE_SUFFIX}
+    )
+    install(
+      FILES
+        "${Boost_iostreams_LIBRARY}"
       DESTINATION ${CMAKE_INSTALL_LIBDIR}
       COMPONENT main
     )

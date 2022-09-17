@@ -18,7 +18,6 @@ extern "C" {
 #include <array>
 #include <cstring>
 #include <functional>
-#include <limits>
 #include <memory>
 #include <stdexcept>
 #include <string_view>
@@ -29,6 +28,7 @@ extern "C" {
 #include "internal/crypto/library/Factory.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
+#include "internal/util/Size.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/crypto/HashType.hpp"
 #include "opentxs/crypto/key/symmetric/Algorithm.hpp"
@@ -251,7 +251,7 @@ auto Sodium::Derive(
                             effective,
                             salt,
                             operations,
-                            difficulty,
+                            static_cast<std::size_t>(difficulty),
                             crypto_pwhash_ALG_ARGON2I13);
                     }
                     case key::symmetric::Source::Argon2id: {
@@ -263,7 +263,7 @@ auto Sodium::Derive(
                             effective,
                             salt,
                             operations,
-                            difficulty,
+                            static_cast<std::size_t>(difficulty),
                             crypto_pwhash_ALG_ARGON2ID13);
                     }
                     case crypto::key::symmetric::Source::Error:
@@ -687,15 +687,9 @@ auto Sodium::SaltSize(const crypto::key::symmetric::Source type) const
 auto Sodium::sha1(const ReadView data, WritableView& output) const -> bool
 {
     try {
-        const auto size = data.size();
-
-        if (std::numeric_limits<std::uint32_t>::max() < size) {
-            throw std::runtime_error{"input too large"};
-        }
-
         auto hex = std::array<char, SHA1_HEX_SIZE>{};
         ::sha1()
-            .add(data.data(), static_cast<std::uint32_t>(size))
+            .add(data.data(), shorten(data.size()))
             .finalize()
             .print_hex(hex.data());
         const auto hash = [&]() {

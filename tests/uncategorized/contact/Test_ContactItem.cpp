@@ -6,7 +6,6 @@
 #include <gtest/gtest.h>
 #include <opentxs/opentxs.hpp>
 #include <cstdint>
-#include <ctime>
 
 #include "1_Internal.hpp"
 #include "internal/identity/wot/claim/Types.hpp"
@@ -29,8 +28,8 @@ public:
               ot::identity::wot::claim::ClaimType::Employee,
               ot::UnallocatedCString("testValue"),
               {ot::identity::wot::claim::Attribute::Active},
-              NULL_START,
-              NULL_END,
+              {},
+              {},
               "")
     {
     }
@@ -50,8 +49,8 @@ TEST_F(Test_ContactItem, first_constructor)
         ot::identity::wot::claim::ClaimType::Employee,
         ot::UnallocatedCString("testValue"),
         {ot::identity::wot::claim::Attribute::Active},
-        NULL_START,
-        NULL_END,
+        {},
+        {},
         "");
 
     const ot::identifier::Generic identifier(
@@ -61,8 +60,8 @@ TEST_F(Test_ContactItem, first_constructor)
                 "testContactItemNym",
                 ot::identity::wot::claim::SectionType::Identifier,
                 ot::identity::wot::claim::ClaimType::Employee,
-                NULL_START,
-                NULL_END,
+                {},
+                {},
                 "testValue",
                 "")));
     ASSERT_EQ(identifier, contactItem1.ID());
@@ -73,8 +72,8 @@ TEST_F(Test_ContactItem, first_constructor)
     ASSERT_EQ(
         ot::identity::wot::claim::ClaimType::Employee, contactItem1.Type());
     ASSERT_EQ("testValue", contactItem1.Value());
-    ASSERT_EQ(contactItem1.Start(), NULL_START);
-    ASSERT_EQ(contactItem1.End(), NULL_END);
+    ASSERT_EQ(contactItem1.Start(), ot::Time{});
+    ASSERT_EQ(contactItem1.End(), ot::Time{});
 
     ASSERT_TRUE(contactItem1.isActive());
     ASSERT_FALSE(contactItem1.isLocal());
@@ -92,8 +91,8 @@ TEST_F(Test_ContactItem, first_constructor_different_versions)
         ot::identity::wot::claim::ClaimType::Employee,
         ot::UnallocatedCString("testValue"),
         {ot::identity::wot::claim::Attribute::Active},
-        NULL_START,
-        NULL_END,
+        {},
+        {},
         "");
     ASSERT_EQ(opentxs::CONTACT_CONTACT_DATA_VERSION, contactItem1.Version());
 }
@@ -110,8 +109,8 @@ TEST_F(Test_ContactItem, second_constructor)
             ot::translate(ot::identity::wot::claim::SectionType::Identifier),
             ot::translate(ot::identity::wot::claim::ClaimType::Employee),
             "testValue",
-            NULL_START,
-            NULL_END,
+            {},
+            {},
             {static_cast<uint32_t>(
                 ot::identity::wot::claim::Attribute::Active)}));
 
@@ -122,8 +121,8 @@ TEST_F(Test_ContactItem, second_constructor)
                 "testContactItemNym",
                 ot::identity::wot::claim::SectionType::Identifier,
                 ot::identity::wot::claim::ClaimType::Employee,
-                NULL_START,
-                NULL_END,
+                {},
+                {},
                 "testValue",
                 "")));
     ASSERT_EQ(identifier, contactItem1.ID());
@@ -134,8 +133,8 @@ TEST_F(Test_ContactItem, second_constructor)
     ASSERT_EQ(
         ot::identity::wot::claim::ClaimType::Employee, contactItem1.Type());
     ASSERT_EQ("testValue", contactItem1.Value());
-    ASSERT_EQ(contactItem1.Start(), NULL_START);
-    ASSERT_EQ(contactItem1.End(), NULL_END);
+    ASSERT_EQ(contactItem1.Start(), ot::Time{});
+    ASSERT_EQ(contactItem1.End(), ot::Time{});
 
     ASSERT_TRUE(contactItem1.isActive());
     ASSERT_FALSE(contactItem1.isLocal());
@@ -175,8 +174,8 @@ TEST_F(Test_ContactItem, operator_equal_false)
         ot::identity::wot::claim::ClaimType::Employee,
         ot::UnallocatedCString("testValue2"),
         {ot::identity::wot::claim::Attribute::Active},
-        NULL_START,
-        NULL_END,
+        {},
+        {},
         "");
 
     // Can't use ASSERT_NE because there's no != operator defined for
@@ -193,8 +192,8 @@ TEST_F(Test_ContactItem, public_accessors)
                 "testNym",
                 ot::identity::wot::claim::SectionType::Identifier,
                 ot::identity::wot::claim::ClaimType::Employee,
-                NULL_START,
-                NULL_END,
+                {},
+                {},
                 "testValue",
                 "")));
     ASSERT_EQ(identifier, contactItem_.ID());
@@ -204,8 +203,8 @@ TEST_F(Test_ContactItem, public_accessors)
     ASSERT_EQ(
         ot::identity::wot::claim::ClaimType::Employee, contactItem_.Type());
     ASSERT_EQ("testValue", contactItem_.Value());
-    ASSERT_EQ(contactItem_.Start(), NULL_START);
-    ASSERT_EQ(contactItem_.End(), NULL_END);
+    ASSERT_EQ(contactItem_.Start(), ot::Time{});
+    ASSERT_EQ(contactItem_.End(), ot::Time{});
     ASSERT_EQ(opentxs::CONTACT_CONTACT_DATA_VERSION, contactItem_.Version());
 
     ASSERT_TRUE(contactItem_.isActive());
@@ -215,7 +214,7 @@ TEST_F(Test_ContactItem, public_accessors)
 
 TEST_F(Test_ContactItem, public_setters)
 {
-    const auto now = std::time(nullptr);
+    const auto now = ot::Clock::now();
 
     const auto& valueItem = contactItem_.SetValue("newTestValue");
     ASSERT_FALSE(valueItem == contactItem_);
@@ -224,12 +223,12 @@ TEST_F(Test_ContactItem, public_setters)
     const auto& startItem = contactItem_.SetStart(now);
     ASSERT_FALSE(startItem == contactItem_);
     ASSERT_EQ(now, startItem.Start());
-    ASSERT_NE(startItem.Start(), NULL_START);
+    ASSERT_NE(startItem.Start(), ot::Time{});
 
     const auto& endItem = contactItem_.SetEnd(now);
     ASSERT_FALSE(endItem == contactItem_);
     ASSERT_EQ(now, endItem.End());
-    ASSERT_NE(NULL_END, endItem.End());
+    ASSERT_NE(ot::Time{}, endItem.End());
 
     // _contactItem is active, so test setting active to false first.
     const auto& notActiveItem = contactItem_.SetActive(false);

@@ -17,6 +17,7 @@
 #include "internal/serialization/protobuf/verify/StorageThread.hpp"
 #include "internal/serialization/protobuf/verify/StorageThreadItem.hpp"
 #include "internal/util/LogMacros.hpp"
+#include "internal/util/Size.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/storage/Driver.hpp"
 #include "util/storage/Plugin.hpp"
@@ -169,7 +170,7 @@ void Thread::init(const UnallocatedCString& hash)
     }
 
     for (const auto& it : serialized->item()) {
-        const auto& index = it.index();
+        const auto index = convert_to_size(it.index());
         items_.emplace(it.id(), it);
 
         if (index >= index_) { index_ = index + 1; }

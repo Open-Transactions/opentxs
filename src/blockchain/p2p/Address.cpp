@@ -15,6 +15,7 @@
 #include "internal/api/session/FactoryAPI.hpp"
 #include "internal/blockchain/p2p/P2P.hpp"
 #include "internal/util/LogMacros.hpp"
+#include "internal/util/Time.hpp"
 #include "opentxs/api/crypto/Encode.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
@@ -73,7 +74,7 @@ auto BlockchainAddress(
             serialized.address(),
             static_cast<std::uint16_t>(serialized.port()),
             static_cast<blockchain::Type>(serialized.chain()),
-            Clock::from_time_t(serialized.time()),
+            convert_stime(serialized.time()),
             ReturnType::instantiate_services(serialized),
             false);
     } catch (const std::exception& e) {
@@ -177,14 +178,7 @@ auto Address::calculate_id(
     const blockchain::Type chain) noexcept -> identifier::Generic
 {
     const auto serialized = serialize(
-        version,
-        protocol,
-        network,
-        bytes,
-        port,
-        chain,
-        Clock::from_time_t(0),
-        {});
+        version, protocol, network, bytes, port, chain, convert_stime(0), {});
 
     return api.Factory().InternalSession().IdentifierFromPreimage(serialized);
 }

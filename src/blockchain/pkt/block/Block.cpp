@@ -16,6 +16,7 @@
 #include "blockchain/bitcoin/block/BlockParser.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
+#include "internal/util/Size.hpp"
 #include "opentxs/blockchain/bitcoin/block/Header.hpp"
 #include "opentxs/network/blockchain/bitcoin/CompactSize.hpp"
 #include "opentxs/util/Log.hpp"
@@ -67,7 +68,7 @@ auto parse_pkt_block(
             throw std::runtime_error("Failed to decode proof size");
         }
 
-        const auto proofBytes{proofCS.Value()};
+        const auto proofBytes = convert_to_size(proofCS.Value());
         expectedSize += proofBytes;
 
         if (in.size() < expectedSize) {

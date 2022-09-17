@@ -24,6 +24,7 @@
 #include "internal/crypto/key/Key.hpp"
 #include "internal/identity/wot/claim/Types.hpp"
 #include "internal/util/LogMacros.hpp"
+#include "internal/util/Time.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
@@ -37,6 +38,7 @@
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Pimpl.hpp"
+#include "opentxs/util/Time.hpp"
 
 namespace opentxs
 {
@@ -116,8 +118,8 @@ auto Contact::ClaimID(
     const UnallocatedCString& nymid,
     const wot::claim::SectionType section,
     const wot::claim::ClaimType type,
-    const std::int64_t start,
-    const std::int64_t end,
+    const Time start,
+    const Time end,
     const UnallocatedCString& value,
     const UnallocatedCString& subtype) -> UnallocatedCString
 {
@@ -126,8 +128,8 @@ auto Contact::ClaimID(
     preimage.set_nymid(nymid);
     preimage.set_section(translate(section));
     preimage.set_type(translate(type));
-    preimage.set_start(start);
-    preimage.set_end(end);
+    preimage.set_start(Clock::to_time_t(start));
+    preimage.set_end(Clock::to_time_t(end));
     preimage.set_value(value);
     preimage.set_subtype(subtype);
 
@@ -157,8 +159,8 @@ auto Contact::asClaim(
         section,
         item.type(),
         item.value(),
-        item.start(),
-        item.end(),
+        convert_stime(item.start()),
+        convert_stime(item.end()),
         attributes};
 }
 }  // namespace opentxs::identity::credential

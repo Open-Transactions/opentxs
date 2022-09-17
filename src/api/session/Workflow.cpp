@@ -40,6 +40,7 @@
 #include "internal/serialization/protobuf/verify/PaymentWorkflow.hpp"
 #include "internal/serialization/protobuf/verify/RPCPush.hpp"
 #include "internal/util/LogMacros.hpp"
+#include "internal/util/Time.hpp"
 #include "opentxs/api/network/Network.hpp"
 #include "opentxs/api/session/Activity.hpp"
 #include "opentxs/api/session/Contacts.hpp"
@@ -1892,7 +1893,7 @@ auto Workflow::DepositCheque(
             workflow->id(),
             cheque.GetAmount(),
             0,
-            Clock::from_time_t(reply->m_lTime),
+            convert_stime(reply->m_lTime),
             cheque.GetMemo().Get());
     }
 
@@ -1966,7 +1967,7 @@ auto Workflow::extract_conveyed_time(const proto::PaymentWorkflow& workflow)
 {
     for (const auto& event : workflow.event()) {
         if (proto::PAYMENTEVENTTYPE_CONVEY == event.type()) {
-            if (event.success()) { return Clock::from_time_t(event.time()); }
+            if (event.success()) { return convert_stime(event.time()); }
         }
     }
 
@@ -3011,7 +3012,7 @@ auto Workflow::WriteCheque(const opentxs::Cheque& cheque) const
         cheque.GetSenderAcctID());
     global.unlock();
     const bool haveWorkflow = (false == workflowID.empty());
-    const auto time{Clock::from_time_t(workflow.event(0).time())};
+    const auto time{convert_stime(workflow.event(0).time())};
 
     if (haveWorkflow && cheque.HasRecipient()) {
         update_activity(

@@ -27,6 +27,7 @@
 #include "internal/otx/smartcontract/OTPartyAccount.hpp"
 #include "internal/otx/smartcontract/OTVariable.hpp"
 #include "internal/util/LogMacros.hpp"
+#include "internal/util/Time.hpp"
 #include "opentxs/api/crypto/Seed.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
@@ -232,8 +233,8 @@ auto OTAPI_Exec::EasyProposePlan(
     OT_VERIFY_ID_STR(RECIPIENT_ACCT_ID);
     OT_VERIFY_STD_STR(PLAN_CONSIDERATION);
 
-    Time VALID_FROM = Clock::from_time_t(0);
-    Time VALID_TO = Clock::from_time_t(0);
+    Time VALID_FROM = convert_stime(0);
+    Time VALID_TO = convert_stime(0);
     std::int64_t INITIAL_PAYMENT_AMOUNT = 0;
     std::chrono::seconds INITIAL_PAYMENT_DELAY{0};
     std::int64_t PAYMENT_PLAN_AMOUNT = 0;
@@ -248,13 +249,13 @@ auto OTAPI_Exec::EasyProposePlan(
         // VALID_FROM
         if (theList.Count() > 0) {
             std::int64_t lVal = 0;
-            if (theList.Peek(lVal)) { VALID_FROM = Clock::from_time_t(lVal); }
+            if (theList.Peek(lVal)) { VALID_FROM = convert_stime(lVal); }
             theList.Pop();
         }
         // VALID_TO
         if (theList.Count() > 0) {
             std::int64_t lVal = 0;
-            if (theList.Peek(lVal)) { VALID_TO = Clock::from_time_t(lVal); }
+            if (theList.Peek(lVal)) { VALID_TO = convert_stime(lVal); }
             theList.Pop();
         }
     }
@@ -417,12 +418,12 @@ auto OTAPI_Exec::Create_SmartContract(
 {
     OT_VERIFY_ID_STR(SIGNER_NYM_ID);
 
-    if (Clock::from_time_t(0) > VALID_FROM) {
+    if (convert_stime(0) > VALID_FROM) {
         LogError()(OT_PRETTY_CLASS())("Negative: VALID_FROM passed in!")
             .Flush();
         return {};
     }
-    if (Clock::from_time_t(0) > VALID_TO) {
+    if (convert_stime(0) > VALID_TO) {
         LogError()(OT_PRETTY_CLASS())("Negative: VALID_TO passed in!").Flush();
         return {};
     }
@@ -481,12 +482,12 @@ auto OTAPI_Exec::SmartContract_SetDates(
     OT_VERIFY_STD_STR(THE_CONTRACT);
     OT_VERIFY_ID_STR(SIGNER_NYM_ID);
 
-    if (Clock::from_time_t(0) > VALID_FROM) {
+    if (convert_stime(0) > VALID_FROM) {
         LogError()(OT_PRETTY_CLASS())("Negative: VALID_FROM passed in!")
             .Flush();
         return {};
     }
-    if (Clock::from_time_t(0) > VALID_TO) {
+    if (convert_stime(0) > VALID_TO) {
         LogError()(OT_PRETTY_CLASS())("Negative: VALID_TO passed in!").Flush();
         return {};
     }

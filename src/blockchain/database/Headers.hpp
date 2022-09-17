@@ -151,7 +151,7 @@ private:
     // Throws std::out_of_range if the header does not exist
     auto load_header(const block::Hash& hash) const noexcept(false)
         -> std::unique_ptr<block::Header>;
-    auto pop_best(const std::size_t i, MDB_txn* parent) const noexcept -> bool;
+    auto pop_best(block::Height i, MDB_txn* parent) const noexcept -> bool;
     auto push_best(
         const block::Position next,
         const bool setTip,

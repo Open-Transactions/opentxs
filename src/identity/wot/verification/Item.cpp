@@ -16,6 +16,7 @@
 #include "internal/api/session/FactoryAPI.hpp"
 #include "internal/identity/Nym.hpp"
 #include "internal/identity/wot/verification/Verification.hpp"
+#include "internal/util/Time.hpp"
 #include "opentxs/OT.hpp"
 #include "opentxs/api/Context.hpp"
 #include "opentxs/api/session/Factory.hpp"
@@ -133,8 +134,8 @@ Item::Item(const internal::Nym& parent, const SerializedType& in) noexcept(
     , claim_(parent.API().Factory().IdentifierFromBase58(in.claim()))
     , value_(static_cast<Type>(in.valid()))
     , valid_(static_cast<Validity>(in.retracted()))
-    , start_(Clock::from_time_t(in.start()))
-    , end_(Clock::from_time_t(in.end()))
+    , start_(convert_stime(in.start()))
+    , end_(convert_stime(in.end()))
     , id_(parent.API().Factory().IdentifierFromBase58(in.id()))
     , sig_(in.sig())
 {

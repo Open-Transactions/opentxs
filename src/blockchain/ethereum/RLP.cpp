@@ -21,6 +21,7 @@
 
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
+#include "internal/util/Size.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/core/Data.hpp"
@@ -291,7 +292,7 @@ private:
         }
     }
     template <typename Buffer>
-    auto decode_big_endian() noexcept(false) -> std::size_t
+    auto decode_big_endian() noexcept(false) -> std::uint64_t
     {
         auto buf = Buffer{};
         const auto bytes = sizeof(buf);
@@ -323,7 +324,7 @@ private:
 
         return api_.Factory().DataFromBytes(bytes);
     }
-    auto decode_length(std::size_t bytes) noexcept(false) -> std::size_t
+    auto decode_length(std::size_t bytes) noexcept(false) -> std::uint64_t
     {
         namespace be = boost::endian;
 
@@ -402,7 +403,7 @@ private:
         const auto bytes = extract(*in_, Const::long_list_);
         finish_read(prefix_);
 
-        return decode_list(decode_length(bytes));
+        return decode_list(convert_to_size(decode_length(bytes)));
     }
     auto decode_long_string() noexcept(false) -> Node
     {
@@ -411,7 +412,7 @@ private:
         const auto bytes = extract(*in_, Const::short_string_);
         finish_read(prefix_);
 
-        return decode_string(decode_length(bytes));
+        return decode_string(convert_to_size(decode_length(bytes)));
     }
     auto decode_null() noexcept(false) -> Node
     {

@@ -9,7 +9,7 @@
 
 #include <zmq.h>  // IWYU pragma: keep
 #include <algorithm>
-#include <cassert>
+#include <exception>
 #include <functional>
 #include <iostream>
 #include <iterator>
@@ -60,12 +60,12 @@ Pool::Pool(std::shared_ptr<const Context> parent) noexcept
                 MakeArbitraryInproc({}),
                 parent_.Internal().RawSocket(socket::Type::Push)));
 
-        assert(rc);
+        if (false == rc) { std::terminate(); }
 
         auto& [endpoint, socket] = i->second;
         rc = socket.lock()->Bind(endpoint.c_str());
 
-        assert(rc);
+        if (false == rc) { std::terminate(); }
 
         threads_.try_emplace(n, n, *this, endpoint);
     }
@@ -122,7 +122,7 @@ auto Pool::DoModify(SocketID id) noexcept -> void
 
             for (const auto& callback : callbacks) {
                 try {
-                    assert(callback);
+                    if (false == callback.operator bool()) { std::terminate(); }
 
                     callback(null);
                 } catch (const std::exception& e) {
@@ -144,7 +144,7 @@ auto Pool::DoModify(SocketID id) noexcept -> void
 
             for (const auto& callback : callbacks) {
                 try {
-                    assert(callback);
+                    if (false == callback.operator bool()) { std::terminate(); }
 
                     callback(*socket);
                 } catch (const std::exception& e) {
@@ -165,7 +165,7 @@ auto Pool::GetStartArgs(BatchID id) noexcept -> ThreadStartArgs
         auto& map = *handle;
         auto i = map.find(id);
 
-        assert(map.end() != i);
+        if (map.end() == i) { std::terminate(); }
 
         auto post = ScopeGuard{[&] { map.erase(i); }};
 
@@ -193,7 +193,7 @@ auto Pool::GetStopArgs(BatchID id) noexcept -> Set<void*>
         auto& map = *handle;
         auto i = map.find(id);
 
-        assert(map.end() != i);
+        if (map.end() == i) { std::terminate(); }
 
         auto post = ScopeGuard{[&] { map.erase(i); }};
 
@@ -236,18 +236,18 @@ auto Pool::MakeBatch(
                 id, parent_, std::move(types), name));
     });
 
-    assert(added);
+    if (false == added) { std::terminate(); }
 
     auto& pBatch = it->second;
 
-    assert(added);
+    if (false == added) { std::terminate(); }
 
     auto& batch = *pBatch;
     index_.modify([&](auto& index) {
         auto& [bIndex, sIndex] = index;
         auto& sockets = bIndex[batch.id_];
 
-        assert(sockets.empty());
+        if (false == sockets.empty()) { std::terminate(); }
 
         sockets.reserve(batch.sockets_.size());
 
@@ -255,12 +255,12 @@ auto Pool::MakeBatch(
             const auto sID = socket.ID();
             sockets.emplace_back(sID);
 
-            assert(0_uz == sIndex.count(sID));
+            if (0_uz != sIndex.count(sID)) { std::terminate(); }
 
             const auto [i, rc] = sIndex.try_emplace(
                 sID, std::make_pair(batch.id_, std::addressof(socket)));
 
-            assert(rc);
+            if (false == rc) { std::terminate(); }
         }
     });
 

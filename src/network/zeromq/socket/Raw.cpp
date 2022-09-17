@@ -9,8 +9,8 @@
 
 #include <robin_hood.h>
 #include <array>
-#include <cassert>
 #include <cstdint>
+#include <exception>
 #include <iostream>
 #include <limits>
 #include <utility>
@@ -194,7 +194,7 @@ auto Raw::record_endpoint(Endpoints& out) noexcept -> void
     const auto rc =
         ::zmq_getsockopt(Native(), ZMQ_LAST_ENDPOINT, buffer.data(), &bytes);
 
-    assert(0 == rc);
+    if (0 != rc) { std::terminate(); }
 
     out.emplace(buffer.data(), bytes);
 }
@@ -314,11 +314,14 @@ auto Raw::SetMaxMessageSize(std::size_t arg) noexcept -> bool
 {
     using ZMQArg = std::int64_t;
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wtautological-constant-out-of-range-compare"
     if (std::numeric_limits<ZMQArg>::max() < arg) {
         std::cerr << (OT_PRETTY_CLASS()) << "Argument too large\n";
 
         return false;
     }
+#pragma GCC diagnostic pop
 
     const auto rc =
         ::zmq_setsockopt(Native(), ZMQ_MAXMSGSIZE, &arg, sizeof(arg));

@@ -13,7 +13,6 @@
 #include <cstddef>
 #include <cstring>
 #include <iterator>
-#include <limits>
 #include <stdexcept>
 #include <string_view>
 #include <utility>
@@ -21,6 +20,7 @@
 #include "internal/blockchain/Params.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
+#include "internal/util/Size.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/blockchain/Blockchain.hpp"
@@ -304,16 +304,8 @@ auto DecodeSerializedCfilter(const ReadView bytes) noexcept(false)
         throw std::runtime_error("Failed to decode CompactSize");
     }
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wtautological-type-limit-compare"
-    // std::size_t might be 32 bit
-    if (elementCount > std::numeric_limits<std::uint32_t>::max()) {
-        throw std::runtime_error("Too many elements");
-    }
-#pragma GCC diagnostic pop
-
-    const auto dataSize = bytes.size() - (1u + csBytes);
-    output.first = static_cast<std::uint32_t>(elementCount);
+    const auto dataSize = bytes.size() - (1_uz + csBytes);
+    output.first = shorten(elementCount);
     output.second = {reinterpret_cast<const char*>(it), dataSize};
 
     return output;

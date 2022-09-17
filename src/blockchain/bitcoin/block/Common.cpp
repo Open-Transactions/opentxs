@@ -14,10 +14,10 @@
 #include <iterator>
 #include <limits>
 #include <optional>
-#include <stdexcept>
 #include <vector>
 
 #include "internal/util/LogMacros.hpp"
+#include "internal/util/Size.hpp"
 #include "opentxs/blockchain/bitcoin/block/Opcodes.hpp"
 
 namespace be = boost::endian;
@@ -89,24 +89,16 @@ auto Opcode(const OP opcode) noexcept(false) -> ScriptElement
 
 auto PushData(const ReadView in) noexcept(false) -> ScriptElement
 {
-    const auto size = in.size();
+    const auto size = shorten(in.size());
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wtautological-type-limit-compare"
-    // std::size_t might be 32 bit
-    if (size > std::numeric_limits<std::uint32_t>::max()) {
-        throw std::out_of_range("Too many bytes");
-    }
-#pragma GCC diagnostic pop
-
-    if ((nullptr == in.data()) || (0 == size)) {
+    if ((nullptr == in.data()) || (0u == size)) {
         return {OP::PUSHDATA1, {}, Space{std::byte{0x0}}, Space{}};
     }
 
     auto output = ScriptElement{};
     auto& [opcode, invalid, bytes, data] = output;
 
-    if (75 >= size) {
+    if (75u >= size) {
         opcode = static_cast<OP>(static_cast<std::uint8_t>(size));
     } else if (std::numeric_limits<std::uint8_t>::max() >= size) {
         opcode = OP::PUSHDATA1;

@@ -9,7 +9,7 @@
 
 #include <zmq.h>
 #include <atomic>
-#include <cassert>
+#include <exception>
 #include <memory>
 #include <thread>
 #include <utility>
@@ -66,13 +66,14 @@ namespace opentxs::network::zeromq::implementation
 Context::Context(const opentxs::Options& args) noexcept
     : context_([] {
         auto* context = ::zmq_ctx_new();
-        assert(nullptr != context);
-        assert(1 == ::zmq_has("curve"));
+
+        if (nullptr == context) { std::terminate(); }
+        if (1 != ::zmq_has("curve")) { std::terminate(); }
 
         const auto init =
             ::zmq_ctx_set(context, ZMQ_MAX_SOCKETS, max_sockets());
 
-        assert(0 == init);
+        if (0 != init) { std::terminate(); }
 
         return context;
     }())
@@ -80,13 +81,13 @@ Context::Context(const opentxs::Options& args) noexcept
     , pool_(std::nullopt)
     , shutdown_()
 {
-    assert(nullptr != context_);
-    assert(log_);
+    if (nullptr == context_) { std::terminate(); }
+    if (false == log_.operator bool()) { std::terminate(); }
 }
 
 Context::operator void*() const noexcept
 {
-    assert(nullptr != context_);
+    if (nullptr == context_) { std::terminate(); }
 
     return context_;
 }
@@ -96,7 +97,7 @@ auto Context::ActiveBatches(alloc::Default alloc) const noexcept -> CString
     auto handle = pool_.lock();
     auto& pool = *handle;
 
-    assert(pool.has_value());
+    if (false == pool.has_value()) { std::terminate(); }
 
     return pool->ActiveBatches(std::move(alloc));
 }
@@ -106,7 +107,7 @@ auto Context::Alloc(BatchID id) const noexcept -> alloc::Resource*
     auto handle = pool_.lock();
     auto& pool = *handle;
 
-    assert(pool.has_value());
+    if (false == pool.has_value()) { std::terminate(); }
 
     return pool->Alloc(id);
 }
@@ -117,7 +118,7 @@ auto Context::BelongsToThreadPool(const std::thread::id id) const noexcept
     auto handle = pool_.lock();
     auto& pool = *handle;
 
-    assert(pool.has_value());
+    if (false == pool.has_value()) { std::terminate(); }
 
     return pool->BelongsToThreadPool(id);
 }
@@ -136,11 +137,11 @@ auto Context::Init(std::shared_ptr<const zeromq::Context> me) noexcept -> void
     auto handle = pool_.lock();
     auto& pool = *handle;
 
-    assert(false == pool.has_value());
+    if (pool.has_value()) { std::terminate(); }
 
     pool.emplace(std::move(me));
 
-    assert(pool.has_value());
+    if (false == pool.has_value()) { std::terminate(); }
 }
 
 auto Context::max_sockets() noexcept -> int { return 32768; }
@@ -151,7 +152,7 @@ auto Context::MakeBatch(Vector<socket::Type>&& types, std::string_view name)
     auto handle = pool_.lock();
     auto& pool = *handle;
 
-    assert(pool.has_value());
+    if (false == pool.has_value()) { std::terminate(); }
 
     return pool->MakeBatch(std::move(types), name);
 }
@@ -164,7 +165,7 @@ auto Context::MakeBatch(
     auto handle = pool_.lock();
     auto& pool = *handle;
 
-    assert(pool.has_value());
+    if (false == pool.has_value()) { std::terminate(); }
 
     return pool->MakeBatch(preallocated, std::move(types), name);
 }
@@ -174,7 +175,7 @@ auto Context::Modify(SocketID id, ModifyCallback cb) const noexcept -> void
     auto handle = pool_.lock();
     auto& pool = *handle;
 
-    assert(pool.has_value());
+    if (false == pool.has_value()) { std::terminate(); }
 
     pool->Modify(id, std::move(cb));
 }
@@ -241,7 +242,7 @@ auto Context::PreallocateBatch() const noexcept -> BatchID
     auto handle = pool_.lock();
     auto& pool = *handle;
 
-    assert(pool.has_value());
+    if (false == pool.has_value()) { std::terminate(); }
 
     return pool->PreallocateBatch();
 }
@@ -317,7 +318,7 @@ auto Context::Start(BatchID id, StartArgs&& sockets) const noexcept
     auto handle = pool_.lock();
     auto& pool = *handle;
 
-    assert(pool.has_value());
+    if (false == pool.has_value()) { std::terminate(); }
 
     return pool->Start(id, std::move(sockets));
 }
@@ -327,7 +328,7 @@ auto Context::Stop(BatchID id) const noexcept -> void
     auto handle = pool_.lock();
     auto& pool = *handle;
 
-    assert(pool.has_value());
+    if (false == pool.has_value()) { std::terminate(); }
 
     pool->Stop(id);
 }
@@ -337,7 +338,7 @@ auto Context::Stop() noexcept -> std::future<void>
     auto handle = pool_.lock();
     auto& pool = *handle;
 
-    assert(pool.has_value());
+    if (false == pool.has_value()) { std::terminate(); }
 
     pool->Shutdown();
 
@@ -357,7 +358,7 @@ auto Context::Thread(BatchID id) const noexcept -> internal::Thread*
     auto handle = pool_.lock();
     auto& pool = *handle;
 
-    assert(pool.has_value());
+    if (false == pool.has_value()) { std::terminate(); }
 
     return pool->Thread(id);
 }
@@ -367,7 +368,7 @@ auto Context::ThreadID(BatchID id) const noexcept -> std::thread::id
     auto handle = pool_.lock();
     auto& pool = *handle;
 
-    assert(pool.has_value());
+    if (false == pool.has_value()) { std::terminate(); }
 
     return pool->ThreadID(id);
 }

@@ -7,6 +7,7 @@
 #include "1_Internal.hpp"                       // IWYU pragma: associated
 #include "internal/otx/common/util/Common.hpp"  // IWYU pragma: associated
 
+#include "internal/util/Time.hpp"
 #include "opentxs/util/Container.hpp"
 
 namespace opentxs
@@ -26,7 +27,7 @@ auto getTimestamp() -> UnallocatedCString
 auto parseTimestamp(UnallocatedCString in) -> opentxs::Time
 {
     try {
-        return opentxs::Clock::from_time_t(std::stoull(in));
+        return opentxs::convert_stime(std::stoull(in));
     } catch (...) {
 
         return {};

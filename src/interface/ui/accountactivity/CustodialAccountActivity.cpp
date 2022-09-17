@@ -25,6 +25,7 @@
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/Mutex.hpp"
 #include "internal/util/Shared.hpp"
+#include "internal/util/Time.hpp"
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Endpoints.hpp"  // IWYU pragma: keep
@@ -46,7 +47,6 @@
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
-#include "opentxs/util/Time.hpp"
 
 namespace opentxs::factory
 {
@@ -125,7 +125,7 @@ auto CustodialAccountActivity::extract_event(
     auto& [time, event_p] = output;
 
     for (const auto& event : workflow.event()) {
-        const auto eventTime = Clock::from_time_t(event.time());
+        const auto eventTime = convert_stime(event.time());
 
         if (eventType != event.type()) { continue; }
 

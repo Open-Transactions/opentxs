@@ -29,6 +29,7 @@ extern "C" {
 #include "internal/otx/blind/Token.hpp"
 #include "internal/otx/blind/Types.hpp"
 #include "internal/util/LogMacros.hpp"
+#include "internal/util/Time.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/api/session/Storage.hpp"
@@ -167,8 +168,8 @@ Lucre::Lucre(
           translate(in.state()),
           in.series(),
           factory::Amount(in.denomination()),
-          Clock::from_time_t(in.validfrom()),
-          Clock::from_time_t(in.validto()),
+          convert_stime(in.validfrom()),
+          convert_stime(in.validto()),
           String::Factory(),
           nullptr,
           nullptr,

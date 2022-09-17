@@ -33,6 +33,7 @@
 #include "internal/identity/wot/claim/Types.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
+#include "internal/util/Time.hpp"
 #include "opentxs/api/session/Contacts.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
@@ -342,7 +343,7 @@ auto BitcoinTransaction(
             in.locktime(),
             api.Factory().DataFromBytes(in.txid()),
             api.Factory().DataFromBytes(in.wtxid()),
-            Clock::from_time_t(in.time()),
+            convert_stime(in.time()),
             in.memo(),
             factory::BitcoinTransactionInputs(std::move(inputs)),
             factory::BitcoinTransactionOutputs(std::move(outputs)),
