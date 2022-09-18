@@ -38,8 +38,8 @@ public:
               claim::ClaimType::Employee,
               ot::UnallocatedCString("activeContactItemValue"),
               ot::UnallocatedSet<claim::Attribute>{claim::Attribute::Active},
-              NULL_START,
-              NULL_END,
+              ot::Time{},
+              ot::Time{},
               ""))
     {
     }
@@ -175,8 +175,8 @@ void Test_ContactData::testAddItemMethod(
                 "contactDataNym1",
                 sectionName,
                 claim::ClaimType::Bch,
-                NULL_START,
-                NULL_END,
+                {},
+                {},
                 "instrumentDefinitionID1",
                 "")));
     const auto contactItem1 = data2.Claim(identifier1);
@@ -195,8 +195,8 @@ void Test_ContactData::testAddItemMethod(
                 "contactDataNym1",
                 sectionName,
                 claim::ClaimType::Bch,
-                NULL_START,
-                NULL_END,
+                {},
+                {},
                 "instrumentDefinitionID2",
                 "")));
     const auto contactItem2 = data3.Claim(identifier2);
@@ -217,8 +217,8 @@ void Test_ContactData::testAddItemMethod(
                 "contactDataNym1",
                 sectionName,
                 claim::ClaimType::Eur,
-                NULL_START,
-                NULL_END,
+                {},
+                {},
                 "instrumentDefinitionID3",
                 "")));
     const auto contactItem3 = data4.Claim(identifier3);
@@ -239,8 +239,8 @@ void Test_ContactData::testAddItemMethod(
                 "contactDataNym1",
                 sectionName,
                 claim::ClaimType::Usd,
-                NULL_START,
-                NULL_END,
+                {},
+                {},
                 "instrumentDefinitionID4",
                 "")));
     const auto contactItem4 = data5.Claim(identifier4);
@@ -259,8 +259,8 @@ void Test_ContactData::testAddItemMethod(
                 "contactDataNym1",
                 sectionName,
                 claim::ClaimType::Usd,
-                NULL_START,
-                NULL_END,
+                {},
+                {},
                 "instrumentDefinitionID5",
                 "")));
     const auto contactItem5 = data6.Claim(identifier5);
@@ -310,8 +310,8 @@ void Test_ContactData::testAddItemMethod2(
                 "contactDataNym1",
                 sectionName,
                 itemType,
-                NULL_START,
-                NULL_END,
+                {},
+                {},
                 "contactValue1",
                 "")));
     const auto contactItem1 = data2.Claim(identifier1);
@@ -329,8 +329,8 @@ void Test_ContactData::testAddItemMethod2(
                 "contactDataNym1",
                 sectionName,
                 itemType,
-                NULL_START,
-                NULL_END,
+                {},
+                {},
                 "contactValue2",
                 "")));
     const auto contactItem2 = data3.Claim(identifier2);
@@ -366,8 +366,8 @@ void Test_ContactData::testAddItemMethod2(
                 "contactDataNym4",
                 sectionName,
                 itemType,
-                NULL_START,
-                NULL_END,
+                {},
+                {},
                 "contactValue3",
                 "")));
     const auto contactItem3 = data5.Claim(identifier3);
@@ -385,8 +385,8 @@ void Test_ContactData::testAddItemMethod2(
                 "contactDataNym4",
                 sectionName,
                 itemType,
-                NULL_START,
-                NULL_END,
+                {},
+                {},
                 "contactValue4",
                 "")));
     const auto contactItem4 = data6.Claim(identifier4);
@@ -506,8 +506,8 @@ TEST_F(Test_ContactData, operator_plus)
         claim::ClaimType::Employee,
         ot::UnallocatedCString("contactItemValue2"),
         ot::UnallocatedSet<claim::Attribute>{claim::Attribute::Active},
-        NULL_START,
-        NULL_END,
+        ot::Time{},
+        ot::Time{},
         "");
     const auto group2 = std::make_shared<claim::Group>(
         "contactGroup2", claim::SectionType::Identifier, contactItem2);
@@ -551,8 +551,8 @@ TEST_F(Test_ContactData, operator_plus)
         claim::ClaimType::Physical,
         ot::UnallocatedCString("contactItemValue4"),
         ot::UnallocatedSet<claim::Attribute>{claim::Attribute::Active},
-        NULL_START,
-        NULL_END,
+        ot::Time{},
+        ot::Time{},
         "");
     const auto group4 = std::make_shared<claim::Group>(
         "contactGroup4", claim::SectionType::Address, contactItem4);
@@ -736,8 +736,8 @@ TEST_F(Test_ContactData, AddItem_claim)
         ot::translate(claim::SectionType::Contract),
         ot::translate(claim::ClaimType::Usd),
         ot::UnallocatedCString("contactItemValue"),
-        NULL_START,
-        NULL_END,
+        ot::Time{},
+        ot::Time{},
         ot::UnallocatedSet<std::uint32_t>{
             static_cast<uint32_t>(claim::Attribute::Active)});
     const auto data1 = contactData_.AddItem(claim);
@@ -783,8 +783,8 @@ TEST_F(Test_ContactData, AddItem_claim_different_versions)
         ot::translate(claim::SectionType::Contract),
         ot::translate(claim::ClaimType::Bch),
         ot::UnallocatedCString("contactItemValue"),
-        NULL_START,
-        NULL_END,
+        ot::Time{},
+        ot::Time{},
         ot::UnallocatedSet<std::uint32_t>{
             static_cast<uint32_t>(claim::Attribute::Active)});
 
@@ -820,8 +820,8 @@ TEST_F(Test_ContactData, AddItem_item)
         claim::ClaimType::Employee,
         ot::UnallocatedCString("contactItemValue2"),
         ot::UnallocatedSet<claim::Attribute>{claim::Attribute::Active},
-        NULL_START,
-        NULL_END,
+        ot::Time{},
+        ot::Time{},
         "");
     const auto data2 = data1.AddItem(contactItem2);
     // Verify the item was added.
@@ -868,8 +868,8 @@ TEST_F(Test_ContactData, AddItem_item_different_versions)
         claim::ClaimType::Bch,
         ot::UnallocatedCString("contactItemValue1"),
         ot::UnallocatedSet<claim::Attribute>{claim::Attribute::Active},
-        NULL_START,
-        NULL_END,
+        ot::Time{},
+        ot::Time{},
         "");
 
     const auto data2 = data1.AddItem(contactItem1);
@@ -949,8 +949,8 @@ TEST_F(Test_ContactData, AddPreferredOTServer)
                 "contactDataNym1",
                 claim::SectionType::Communication,
                 claim::ClaimType::Opentxs,
-                NULL_START,
-                NULL_END,
+                {},
+                {},
                 ot::UnallocatedCString("serverID1"),
                 "")));
     const auto data2 = data1.AddPreferredOTServer(serverIdentifier1, false);
@@ -963,8 +963,8 @@ TEST_F(Test_ContactData, AddPreferredOTServer)
                 "contactDataNym1",
                 claim::SectionType::Communication,
                 claim::ClaimType::Opentxs,
-                NULL_START,
-                NULL_END,
+                {},
+                {},
                 ot::String::Factory(serverIdentifier1)->Get(),
                 "")));
     const auto contactItem1 = data2.Claim(identifier1);
@@ -979,8 +979,8 @@ TEST_F(Test_ContactData, AddPreferredOTServer)
                 "contactDataNym1",
                 claim::SectionType::Communication,
                 claim::ClaimType::Opentxs,
-                NULL_START,
-                NULL_END,
+                {},
+                {},
                 ot::UnallocatedCString("serverID2"),
                 "")));
     const auto data3 = data2.AddPreferredOTServer(serverIdentifier2, false);
@@ -993,8 +993,8 @@ TEST_F(Test_ContactData, AddPreferredOTServer)
                 "contactDataNym1",
                 claim::SectionType::Communication,
                 claim::ClaimType::Opentxs,
-                NULL_START,
-                NULL_END,
+                {},
+                {},
                 ot::String::Factory(serverIdentifier2)->Get(),
                 "")));
     const auto contactItem2 = data3.Claim(identifier2);
@@ -1009,8 +1009,8 @@ TEST_F(Test_ContactData, AddPreferredOTServer)
                 "contactDataNym",
                 claim::SectionType::Communication,
                 claim::ClaimType::Opentxs,
-                NULL_START,
-                NULL_END,
+                {},
+                {},
                 ot::UnallocatedCString("serverID3"),
                 "")));
     const auto data4 =
@@ -1029,8 +1029,8 @@ TEST_F(Test_ContactData, AddPreferredOTServer)
                 "contactDataNym",
                 claim::SectionType::Communication,
                 claim::ClaimType::Opentxs,
-                NULL_START,
-                NULL_END,
+                {},
+                {},
                 ot::String::Factory(serverIdentifier3)->Get(),
                 "")));
     const auto contactItem3 = data4.Claim(identifier3);
@@ -1045,8 +1045,8 @@ TEST_F(Test_ContactData, AddPreferredOTServer)
                 "contactDataNym",
                 claim::SectionType::Communication,
                 claim::ClaimType::Opentxs,
-                NULL_START,
-                NULL_END,
+                {},
+                {},
                 ot::UnallocatedCString("serverID4"),
                 "")));
     const auto data5 = data4.AddPreferredOTServer(serverIdentifier4, true);
@@ -1059,8 +1059,8 @@ TEST_F(Test_ContactData, AddPreferredOTServer)
                 "contactDataNym",
                 claim::SectionType::Communication,
                 claim::ClaimType::Opentxs,
-                NULL_START,
-                NULL_END,
+                {},
+                {},
                 ot::String::Factory(serverIdentifier4)->Get(),
                 "")));
     const auto contactItem4 = data5.Claim(identifier4);
@@ -1095,8 +1095,8 @@ TEST_F(Test_ContactData, AddSocialMediaProfile)
                 "contactDataNym",
                 claim::SectionType::Profile,
                 claim::ClaimType::Aboutme,
-                NULL_START,
-                NULL_END,
+                {},
+                {},
                 "profileValue1",
                 "")));
     const auto contactItem1 = data2.Claim(identifier1);
@@ -1114,8 +1114,8 @@ TEST_F(Test_ContactData, AddSocialMediaProfile)
                 "contactDataNym",
                 claim::SectionType::Profile,
                 claim::ClaimType::Aboutme,
-                NULL_START,
-                NULL_END,
+                {},
+                {},
                 "profileValue2",
                 "")));
     const auto contactItem2 = data3.Claim(identifier2);
@@ -1133,8 +1133,8 @@ TEST_F(Test_ContactData, AddSocialMediaProfile)
                 "contactDataNym",
                 claim::SectionType::Profile,
                 claim::ClaimType::Aboutme,
-                NULL_START,
-                NULL_END,
+                {},
+                {},
                 "profileValue3",
                 "")));
     const auto contactItem3 = data4.Claim(identifier3);
@@ -1153,8 +1153,8 @@ TEST_F(Test_ContactData, AddSocialMediaProfile)
                 "contactDataNym",
                 claim::SectionType::Profile,
                 claim::ClaimType::Linkedin,
-                NULL_START,
-                NULL_END,
+                {},
+                {},
                 "profileValue4",
                 "")));
     const auto contactItem4 = data5.Claim(identifier4);
@@ -1167,8 +1167,8 @@ TEST_F(Test_ContactData, AddSocialMediaProfile)
                 "contactDataNym",
                 claim::SectionType::Communication,
                 claim::ClaimType::Linkedin,
-                NULL_START,
-                NULL_END,
+                {},
+                {},
                 "profileValue4",
                 "")));
     const auto contactItem5 = data5.Claim(identifier5);
@@ -1186,8 +1186,8 @@ TEST_F(Test_ContactData, AddSocialMediaProfile)
                 "contactDataNym",
                 claim::SectionType::Profile,
                 claim::ClaimType::Yahoo,
-                NULL_START,
-                NULL_END,
+                {},
+                {},
                 "profileValue5",
                 "")));
     const auto contactItem6 = data6.Claim(identifier6);
@@ -1200,8 +1200,8 @@ TEST_F(Test_ContactData, AddSocialMediaProfile)
                 "contactDataNym",
                 claim::SectionType::Identifier,
                 claim::ClaimType::Yahoo,
-                NULL_START,
-                NULL_END,
+                {},
+                {},
                 "profileValue5",
                 "")));
     const auto contactItem7 = data6.Claim(identifier7);
@@ -1219,8 +1219,8 @@ TEST_F(Test_ContactData, AddSocialMediaProfile)
                 "contactDataNym",
                 claim::SectionType::Profile,
                 claim::ClaimType::Twitter,
-                NULL_START,
-                NULL_END,
+                {},
+                {},
                 "profileValue6",
                 "")));
     const auto contactItem8 = data7.Claim(identifier8);
@@ -1233,8 +1233,8 @@ TEST_F(Test_ContactData, AddSocialMediaProfile)
                 "contactDataNym",
                 claim::SectionType::Communication,
                 claim::ClaimType::Twitter,
-                NULL_START,
-                NULL_END,
+                {},
+                {},
                 "profileValue6",
                 "")));
     const auto contactItem9 = data7.Claim(identifier9);
@@ -1247,8 +1247,8 @@ TEST_F(Test_ContactData, AddSocialMediaProfile)
                 "contactDataNym",
                 claim::SectionType::Identifier,
                 claim::ClaimType::Twitter,
-                NULL_START,
-                NULL_END,
+                {},
+                {},
                 "profileValue6",
                 "")));
     const auto contactItem10 = data7.Claim(identifier10);
@@ -1406,8 +1406,8 @@ TEST_F(Test_ContactData, Delete)
         claim::ClaimType::Employee,
         ot::UnallocatedCString("contactItemValue2"),
         ot::UnallocatedSet<claim::Attribute>{claim::Attribute::Active},
-        NULL_START,
-        NULL_END,
+        ot::Time{},
+        ot::Time{},
         "");
     const auto data2 = data1.AddItem(contactItem2);
 
@@ -1583,8 +1583,8 @@ TEST_F(Test_ContactData, PreferredOTServer)
                 "contactDataNym",
                 claim::SectionType::Communication,
                 claim::ClaimType::Opentxs,
-                NULL_START,
-                NULL_END,
+                {},
+                {},
                 ot::UnallocatedCString("serverID2"),
                 "")));
     const auto data2 =
@@ -1612,8 +1612,8 @@ TEST_F(Test_ContactData, SetCommonName)
                 "contactDataNym",
                 claim::SectionType::Identifier,
                 claim::ClaimType::Commonname,
-                NULL_START,
-                NULL_END,
+                {},
+                {},
                 ot::UnallocatedCString("commonName"),
                 "")));
     const auto commonNameItem = data1.Claim(identifier);
@@ -1637,8 +1637,8 @@ TEST_F(Test_ContactData, SetName)
                 "contactDataNym",
                 claim::SectionType::Scope,
                 claim::ClaimType::Individual,
-                NULL_START,
-                NULL_END,
+                {},
+                {},
                 ot::UnallocatedCString("secondName"),
                 "")));
     const auto scopeItem1 = data2.Claim(identifier1);
@@ -1656,8 +1656,8 @@ TEST_F(Test_ContactData, SetName)
                 "contactDataNym",
                 claim::SectionType::Scope,
                 claim::ClaimType::Individual,
-                NULL_START,
-                NULL_END,
+                {},
+                {},
                 ot::UnallocatedCString("thirdName"),
                 "")));
     const auto contactItem2 = data3.Claim(identifier2);
@@ -1678,8 +1678,8 @@ TEST_F(Test_ContactData, SetScope)
                 "contactDataNym",
                 claim::SectionType::Scope,
                 claim::ClaimType::Organization,
-                NULL_START,
-                NULL_END,
+                {},
+                {},
                 ot::UnallocatedCString("organizationScope"),
                 "")));
     const auto scopeItem1 = data1.Claim(identifier1);
@@ -1698,8 +1698,8 @@ TEST_F(Test_ContactData, SetScope)
                 "contactDataNym",
                 claim::SectionType::Scope,
                 claim::ClaimType::Business,
-                NULL_START,
-                NULL_END,
+                {},
+                {},
                 ot::UnallocatedCString("businessScope"),
                 "")));
     ASSERT_FALSE(data2.Claim(identifier2));

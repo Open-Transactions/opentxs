@@ -570,8 +570,8 @@ auto Profile::AddClaim(
     claimSection = translate(section);
     claimType = translate(type);
     claimValue = value;
-    start = 0;
-    end = 0;
+    start = {};
+    end = {};
 
     if (primary) {
         attributes.emplace(translate(identity::wot::claim::Attribute::Primary));

@@ -17,6 +17,8 @@
 #include <stdexcept>
 
 #include "internal/util/LogMacros.hpp"
+#include "internal/util/P0330.hpp"
+#include "internal/util/Size.hpp"
 #include "network/blockchain/bitcoin/CompactSize.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
@@ -31,11 +33,17 @@ auto DecodeSize(
     const std::size_t size,
     std::size_t& output) noexcept -> bool
 {
-    auto cs = CompactSize{};
-    auto ret = DecodeSize(it, expected, size, cs);
-    output = cs.Value();
+    try {
+        auto cs = CompactSize{};
+        auto ret = DecodeSize(it, expected, size, cs);
+        output = convert_to_size(cs.Value());
 
-    return ret;
+        return ret;
+    } catch (const std::exception& e) {
+        LogError()(__func__)(": ")(e.what()).Flush();
+
+        return false;
+    }
 }
 
 auto DecodeSize(
@@ -45,12 +53,18 @@ auto DecodeSize(
     std::size_t& output,
     std::size_t& csExtraBytes) noexcept -> bool
 {
-    auto cs = CompactSize{};
-    auto ret = DecodeSize(it, expected, size, cs);
-    output = cs.Value();
-    csExtraBytes = cs.Size() - 1;
+    try {
+        auto cs = CompactSize{};
+        auto ret = DecodeSize(it, expected, size, cs);
+        output = convert_to_size(cs.Value());
+        csExtraBytes = cs.Size() - 1;
 
-    return ret;
+        return ret;
+    } catch (const std::exception& e) {
+        LogError()(__func__)(": ")(e.what()).Flush();
+
+        return false;
+    }
 }
 
 auto DecodeSize(
@@ -59,39 +73,33 @@ auto DecodeSize(
     const std::size_t size,
     CompactSize& output) noexcept -> bool
 {
-    if (std::byte{0} == *it) {
-        output = CompactSize{0};
-        std::advance(it, 1);
-    } else {
-        auto csExtraBytes = CompactSize::CalculateSize(*it);
-
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wtautological-type-limit-compare"
-        // std::size_t might be 32 bit
-        if (sizeof(std::size_t) < csExtraBytes) {
-            LogError()("opentxs::network::blockchain::bitcoin::")(__func__)(
-                ": Size too big")
-                .Flush();
-
-            return false;
-        }
-#pragma GCC diagnostic pop
-
-        expectedSize += csExtraBytes;
-
-        if (expectedSize > size) { return false; }
-
-        if (0 == csExtraBytes) {
-            output = CompactSize{std::to_integer<std::uint8_t>(*it)};
+    try {
+        if (std::byte{0} == *it) {
+            output = CompactSize{0};
             std::advance(it, 1);
         } else {
-            std::advance(it, 1);
-            output = CompactSize(Space{it, it + csExtraBytes}).Value();
-            std::advance(it, csExtraBytes);
-        }
-    }
+            auto csExtraBytes =
+                convert_to_size(CompactSize::CalculateSize(*it));
+            const auto value = csExtraBytes;
+            expectedSize += value;
 
-    return true;
+            if (expectedSize > size) { return false; }
+
+            if (0_uz == value) {
+                output = CompactSize{std::to_integer<std::uint8_t>(*it)};
+                std::advance(it, 1);
+            } else {
+                std::advance(it, 1);
+                output = CompactSize(Space{it, it + value}).Value();
+                std::advance(it, value);
+            }
+        }
+
+        return true;
+    } catch (...) {
+
+        return false;
+    }
 }
 
 CompactSize::CompactSize() noexcept

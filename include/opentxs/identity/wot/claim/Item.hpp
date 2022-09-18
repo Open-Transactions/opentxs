@@ -5,9 +5,6 @@
 
 #pragma once
 
-#define NULL_START 0
-#define NULL_END 0
-
 // IWYU pragma: no_include "opentxs/identity/wot/claim/Attribute.hpp"
 
 #include "opentxs/Version.hpp"  // IWYU pragma: associated
@@ -21,6 +18,7 @@
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
+#include "opentxs/util/Time.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
@@ -52,7 +50,7 @@ class OPENTXS_EXPORT Item
 public:
     auto operator==(const Item& rhs) const -> bool;
 
-    auto End() const -> const std::time_t&;
+    auto End() const -> const Time&;
     auto ID() const -> const identifier::Generic&;
     auto isActive() const -> bool;
     auto isLocal() const -> bool;
@@ -64,12 +62,12 @@ public:
         proto::ContactItem& out,
         const bool withID = false) const -> bool;
     auto SetActive(const bool active) const -> Item;
-    auto SetEnd(const std::time_t end) const -> Item;
+    auto SetEnd(const Time end) const -> Item;
     auto SetLocal(const bool local) const -> Item;
     auto SetPrimary(const bool primary) const -> Item;
-    auto SetStart(const std::time_t start) const -> Item;
+    auto SetStart(const Time start) const -> Item;
     auto SetValue(const UnallocatedCString& value) const -> Item;
-    auto Start() const -> const std::time_t&;
+    auto Start() const -> const Time&;
     auto Subtype() const -> const UnallocatedCString&;
     auto Type() const -> const claim::ClaimType&;
     auto Value() const -> const UnallocatedCString&;
@@ -84,8 +82,8 @@ public:
         const claim::ClaimType& type,
         const UnallocatedCString& value,
         const UnallocatedSet<claim::Attribute>& attributes,
-        const std::time_t start,
-        const std::time_t end,
+        const Time start,
+        const Time end,
         const UnallocatedCString subtype);
     Item(
         const api::Session& api,

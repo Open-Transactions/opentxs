@@ -22,6 +22,7 @@
 #include "internal/core/Factory.hpp"
 #include "internal/identity/wot/claim/Types.hpp"
 #include "internal/util/LogMacros.hpp"
+#include "internal/util/Size.hpp"
 #include "opentxs/api/crypto/Blockchain.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
@@ -196,7 +197,7 @@ auto Subaccount::convert(
     auto& [txid, out] = coin;
     auto& [account, chain, index] = key;
     txid = in.txid();
-    out = in.output();
+    out = convert_to_size(in.output());
     value = factory::Amount(in.amount());
     account = api.Factory().IdentifierFromBase58(in.account());
     chain = static_cast<Subchain>(in.subchain());

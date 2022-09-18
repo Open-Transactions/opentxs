@@ -27,6 +27,7 @@
 #include "internal/core/Factory.hpp"
 #include "internal/identity/wot/claim/Types.hpp"
 #include "internal/util/LogMacros.hpp"
+#include "internal/util/Size.hpp"
 #include "opentxs/api/crypto/Blockchain.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
@@ -502,36 +503,38 @@ auto Output::Script() const noexcept -> const internal::Script&
 auto Output::Serialize(const AllocateOutput destination) const noexcept
     -> std::optional<std::size_t>
 {
-    if (!destination) {
-        LogError()(OT_PRETTY_CLASS())("Invalid output allocator").Flush();
+    try {
+        if (!destination) {
 
-        return std::nullopt;
-    }
+            throw std::runtime_error{"invalid output allocator"};
+        }
 
-    const auto size = CalculateSize();
-    auto output = destination(size);
+        const auto size = CalculateSize();
+        auto output = destination(size);
 
-    if (false == output.valid(size)) {
-        LogError()(OT_PRETTY_CLASS())("Failed to allocate output bytes")
-            .Flush();
+        if (false == output.valid(size)) {
 
-        return std::nullopt;
-    }
+            throw std::runtime_error{"failed to allocate output bytes"};
+        }
 
-    const auto scriptCS =
-        blockchain::bitcoin::CompactSize(script_->CalculateSize());
-    const auto csData = scriptCS.Encode();
-    auto* it = static_cast<std::byte*>(output.data());
-    value_.Internal().SerializeBitcoin(destination);
-    std::advance(it, opentxs::internal::Amount::SerializeBitcoinSize());
-    std::memcpy(static_cast<void*>(it), csData.data(), csData.size());
-    std::advance(it, csData.size());
+        const auto scriptCS =
+            blockchain::bitcoin::CompactSize(script_->CalculateSize());
+        const auto csData = scriptCS.Encode();
+        auto* it = static_cast<std::byte*>(output.data());
+        value_.Internal().SerializeBitcoin(destination);
+        std::advance(it, opentxs::internal::Amount::SerializeBitcoinSize());
+        std::memcpy(static_cast<void*>(it), csData.data(), csData.size());
+        std::advance(it, csData.size());
 
-    if (script_->Serialize(preallocated(scriptCS.Value(), it))) {
+        if (false == script_->Serialize(
+                         preallocated(convert_to_size(scriptCS.Value()), it))) {
+
+            throw std::runtime_error{"failed to serialize script"};
+        }
 
         return size;
-    } else {
-        LogError()(OT_PRETTY_CLASS())("Failed to serialize script").Flush();
+    } catch (const std::exception& e) {
+        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
 
         return std::nullopt;
     }

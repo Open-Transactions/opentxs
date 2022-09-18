@@ -8,6 +8,7 @@
 #include "opentxs/identity/wot/claim/Item.hpp"  // IWYU pragma: associated
 
 #include <ContactItem.pb.h>
+#include <chrono>
 #include <memory>
 #include <tuple>
 #include <utility>
@@ -16,6 +17,7 @@
 #include "Proto.tpp"
 #include "internal/identity/wot/claim/Types.hpp"
 #include "internal/util/LogMacros.hpp"
+#include "internal/util/Time.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/core/Data.hpp"
@@ -59,8 +61,8 @@ struct Item::Imp {
     const claim::SectionType section_;
     const claim::ClaimType type_;
     const UnallocatedCString value_;
-    const std::time_t start_;
-    const std::time_t end_;
+    const Time start_;
+    const Time end_;
     const UnallocatedSet<claim::Attribute> attributes_;
     const identifier::Generic id_;
     const UnallocatedCString subtype_;
@@ -83,8 +85,8 @@ struct Item::Imp {
         const claim::ClaimType& type,
         const UnallocatedCString& value,
         const UnallocatedSet<claim::Attribute>& attributes,
-        const std::time_t start,
-        const std::time_t end,
+        const Time start,
+        const Time end,
         const UnallocatedCString subtype)
         : api_(api)
         , version_(check_version(version, parentVersion))
@@ -166,8 +168,8 @@ Item::Item(
     const claim::ClaimType& type,
     const UnallocatedCString& value,
     const UnallocatedSet<claim::Attribute>& attributes,
-    const std::time_t start,
-    const std::time_t end,
+    const Time start,
+    const Time end,
     const UnallocatedCString subtype)
     : imp_(std::make_unique<Imp>(
           api,
@@ -233,8 +235,8 @@ Item::Item(
           translate(data.type()),
           data.value(),
           extract_attributes(data),
-          data.start(),
-          data.end(),
+          convert_stime(data.start()),
+          convert_stime(data.end()),
           data.subtype())
 {
 }
@@ -277,7 +279,7 @@ auto Item::operator==(const Item& rhs) const -> bool
     return true;
 }
 
-auto Item::End() const -> const std::time_t& { return imp_->end_; }
+auto Item::End() const -> const Time& { return imp_->end_; }
 
 auto Item::ID() const -> const identifier::Generic& { return imp_->id_; }
 
@@ -323,8 +325,8 @@ auto Item::Serialize(proto::ContactItem& output, const bool withID) const
 
     output.set_type(translate(imp_->type_));
     output.set_value(imp_->value_);
-    output.set_start(imp_->start_);
-    output.set_end(imp_->end_);
+    output.set_start(Clock::to_time_t(imp_->start_));
+    output.set_end(Clock::to_time_t(imp_->end_));
 
     for (const auto& attribute : imp_->attributes_) {
         output.add_attribute(translate(attribute));
@@ -343,7 +345,7 @@ auto Item::SetActive(const bool active) const -> Item
     return imp_->set_attribute(claim::Attribute::Active, active);
 }
 
-auto Item::SetEnd(const std::time_t end) const -> Item
+auto Item::SetEnd(const Time end) const -> Item
 {
     if (imp_->end_ == end) { return *this; }
 
@@ -381,7 +383,7 @@ auto Item::SetPrimary(const bool primary) const -> Item
     return imp_->set_attribute(claim::Attribute::Primary, primary);
 }
 
-auto Item::SetStart(const std::time_t start) const -> Item
+auto Item::SetStart(const Time start) const -> Item
 {
     if (imp_->start_ == start) { return *this; }
 
@@ -417,7 +419,7 @@ auto Item::SetValue(const UnallocatedCString& value) const -> Item
         imp_->subtype_};
 }
 
-auto Item::Start() const -> const std::time_t& { return imp_->start_; }
+auto Item::Start() const -> const Time& { return imp_->start_; }
 
 auto Item::Subtype() const -> const UnallocatedCString&
 {

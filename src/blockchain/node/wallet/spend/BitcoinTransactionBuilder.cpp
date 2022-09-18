@@ -20,7 +20,6 @@
 #include <cstring>
 #include <iosfwd>
 #include <iterator>
-#include <limits>
 #include <optional>
 #include <sstream>
 #include <stdexcept>
@@ -46,6 +45,7 @@
 #include "internal/core/PaymentCode.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
+#include "internal/util/Size.hpp"
 #include "opentxs/api/crypto/Blockchain.hpp"
 #include "opentxs/api/crypto/Hash.hpp"  // IWYU pragma: keep
 #include "opentxs/api/session/Contacts.hpp"
@@ -187,15 +187,10 @@ struct BitcoinTransactionBuilder::Imp {
                     throw std::runtime_error{"Failed to construct script"};
                 }
 
-                if (std::numeric_limits<std::uint32_t>::max() <
-                    outputs_.size()) {
-                    throw std::runtime_error{"too many outputs"};
-                }
-
                 return factory::BitcoinTransactionOutput(
                     api_,
                     chain_,
-                    static_cast<std::uint32_t>(outputs_.size()),
+                    shorten(outputs_.size()),
                     Amount{0},
                     std::move(pScript),
                     {keyID});
@@ -863,12 +858,12 @@ private:
 
         return ceil(wu, scale);
     }
-    auto dust() const noexcept -> std::size_t
+    auto dust() const noexcept -> std::uint64_t
     {
         // TODO this should account for script type
 
         const auto amount = 148 * fee_rate_ / 1000;
-        auto dust = 0_uz;
+        auto dust = std::uint64_t{};
         try {
             dust = amount.Internal().ExtractUInt64();
         } catch (const std::exception& e) {

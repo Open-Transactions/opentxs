@@ -10,10 +10,10 @@
 #include "network/zeromq/context/Thread.hpp"  // IWYU pragma: associated
 
 #include <zmq.h>
-#include <cassert>
 #include <cerrno>
 #include <chrono>
 #include <cstdlib>
+#include <exception>
 #include <functional>
 #include <iostream>
 #include <thread>
@@ -69,7 +69,7 @@ Thread::Thread(
         auto out = parent_.Parent().Internal().RawSocket(socket::Type::Pull);
         const auto rc = out.Connect(endpoint.data());
 
-        assert(rc);
+        if (false == rc) { std::terminate(); }
 
         return out;
     }())
@@ -80,7 +80,7 @@ Thread::Thread(
         item.events = ZMQ_POLLIN;
         out.data_.emplace_back([](auto&&) { std::abort(); });
 
-        assert(out.items_.size() == out.data_.size());
+        if (out.items_.size() != out.data_.size()) { std::terminate(); }
 
         return out;
     }())
@@ -110,14 +110,16 @@ auto Thread::modify(Message&& message) noexcept -> void
             const auto batch = body.at(1).as<BatchID>();
 
             for (auto [socket, cb] : parent_.GetStartArgs(batch)) {
-                assert(cb);
+                if (false == cb.operator bool()) { std::terminate(); }
 
                 data_.data_.emplace_back(std::move(cb));
                 auto& s = data_.items_.emplace_back();
                 s.socket = socket->Native();
                 s.events = ZMQ_POLLIN;
 
-                assert(data_.items_.size() == data_.data_.size());
+                if (data_.items_.size() != data_.data_.size()) {
+                    std::terminate();
+                }
             }
         } break;
         case Operation::remove_socket: {
@@ -138,7 +140,7 @@ auto Thread::modify(Message&& message) noexcept -> void
                 }
             }
 
-            assert(data_.items_.size() == data_.data_.size());
+            if (data_.items_.size() != data_.data_.size()) { std::terminate(); }
         } break;
         case Operation::change_socket: {
             const auto socketID = body.at(1).as<SocketID>();
@@ -208,13 +210,13 @@ auto Thread::poll() noexcept -> void
     // NOTE wait until we are no longer iterating over the vectors before adding
     // or removing items
     if (modify) {
-        assert(false == v.empty());
+        if (v.empty()) { std::terminate(); }
 
         auto* socket = v.begin()->socket;
         auto message = Message{};
         const auto rc = receive_message(socket, message);
 
-        assert(rc);
+        if (false == rc) { std::terminate(); }
 
         this->modify(std::move(message));
     }
@@ -260,7 +262,7 @@ auto Thread::receive_message(void* socket, Message& message) noexcept -> bool
             return false;
         }
 
-        assert(optionBytes == sizeof(option));
+        if (optionBytes != sizeof(option)) { std::terminate(); }
 
         if (1 != option) { receiving = false; }
     }

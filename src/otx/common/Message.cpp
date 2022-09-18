@@ -23,6 +23,7 @@
 #include "internal/otx/common/util/Common.hpp"
 #include "internal/otx/common/util/Tag.hpp"
 #include "internal/util/LogMacros.hpp"
+#include "internal/util/Time.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/core/Armored.hpp"
@@ -440,8 +441,7 @@ void Message::UpdateContents(const PasswordPrompt& reason)
     Tag tag("notaryMessage");
 
     tag.add_attribute("version", m_strVersion->Get());
-    tag.add_attribute(
-        "dateSigned", formatTimestamp(Clock::from_time_t(m_lTime)));
+    tag.add_attribute("dateSigned", formatTimestamp(convert_stime(m_lTime)));
 
     if (!updateContentsByType(tag)) {
         TagPtr pTag(new Tag(m_strCommand->Get()));

@@ -12,6 +12,7 @@
 #include "opentxs/identity/credential/Base.hpp"
 #include "opentxs/identity/wot/claim/Types.hpp"
 #include "opentxs/util/Container.hpp"
+#include "opentxs/util/Time.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
@@ -47,8 +48,8 @@ public:
         const UnallocatedCString& nymid,
         const wot::claim::SectionType section,
         const wot::claim::ClaimType type,
-        const std::int64_t start,
-        const std::int64_t end,
+        const Time start,
+        const Time end,
         const UnallocatedCString& value,
         const UnallocatedCString& subtype) -> UnallocatedCString;
     OPENTXS_NO_EXPORT static auto ClaimID(

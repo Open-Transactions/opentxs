@@ -25,6 +25,7 @@
 #include "internal/serialization/protobuf/verify/SymmetricKey.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/Mutex.hpp"
+#include "internal/util/Size.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/core/Data.hpp"
@@ -329,16 +330,19 @@ auto Symmetric::Allocate(const std::size_t size, Data& container) -> bool
 
 auto Symmetric::Allocate(const std::size_t size, String& container) -> bool
 {
-    if (std::numeric_limits<std::uint32_t>::max() < size) { return false; }
+    try {
+        auto blank = UnallocatedVector<char>{};
+        blank.assign(size, 0x7f);
 
-    auto blank = UnallocatedVector<char>{};
-    blank.assign(size, 0x7f);
+        OT_ASSERT(blank.size() == size);
 
-    OT_ASSERT(blank.size() == size);
+        container.Set(blank.data(), shorten(blank.size()));
 
-    container.Set(blank.data(), static_cast<std::uint32_t>(blank.size()));
+        return (size == container.GetLength());
+    } catch (...) {
 
-    return (size == container.GetLength());
+        return false;
+    }
 }
 
 auto Symmetric::Allocate(

@@ -18,6 +18,7 @@
 #include "Proto.hpp"
 #include "interface/ui/base/List.hpp"
 #include "internal/util/LogMacros.hpp"
+#include "internal/util/Time.hpp"
 #include "opentxs/api/session/Activity.hpp"
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/Contacts.hpp"
@@ -113,14 +114,14 @@ auto ActivitySummary::newest_item(
     for (const auto& item : thread.item()) {
         if (nullptr == output) {
             output = &item;
-            *time = Clock::from_time_t(item.time());
+            *time = convert_stime(item.time());
 
             continue;
         }
 
         if (item.time() > output->time()) {
             output = &item;
-            *time = Clock::from_time_t(item.time());
+            *time = convert_stime(item.time());
 
             continue;
         }

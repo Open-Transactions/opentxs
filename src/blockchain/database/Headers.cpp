@@ -10,6 +10,7 @@
 #include <BlockchainBlockHeader.pb.h>
 #include <BlockchainBlockLocalData.pb.h>
 #include <algorithm>
+#include <cstddef>
 #include <cstring>
 #include <iterator>
 #include <memory>
@@ -629,8 +630,7 @@ auto Headers::load_header(const block::Hash& hash) const
     return output;
 }
 
-auto Headers::pop_best(const std::size_t i, MDB_txn* parent) const noexcept
-    -> bool
+auto Headers::pop_best(block::Height i, MDB_txn* parent) const noexcept -> bool
 {
     return lmdb_.Delete(BlockHeaderBest, tsv(i), parent);
 }

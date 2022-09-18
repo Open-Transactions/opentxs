@@ -528,7 +528,7 @@ auto UserCommandProcessor::cmd_add_claim(ReplyMessage& reply) const -> bool
 
     attributes.insert(translate(identity::wot::claim::Attribute::Active));
 
-    Claim claim{"", section, type, value, 0, 0, attributes};
+    Claim claim{"", section, type, value, {}, {}, attributes};
 
     auto overrideNym = String::Factory();
     bool keyExists = false;

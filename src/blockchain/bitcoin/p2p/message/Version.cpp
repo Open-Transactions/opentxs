@@ -20,6 +20,9 @@
 #include "blockchain/bitcoin/p2p/Header.hpp"
 #include "blockchain/bitcoin/p2p/Message.hpp"
 #include "internal/util/LogMacros.hpp"
+#include "internal/util/P0330.hpp"
+#include "internal/util/Size.hpp"
+#include "internal/util/Time.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/util/Log.hpp"
 
@@ -33,146 +36,140 @@ auto BitcoinP2PVersion(
     const std::size_t size)
     -> blockchain::p2p::bitcoin::message::internal::Version*
 {
-    namespace bitcoin = blockchain::p2p::bitcoin;
-    using ReturnType = bitcoin::message::implementation::Version;
+    try {
+        namespace bitcoin = blockchain::p2p::bitcoin;
+        using ReturnType = bitcoin::message::implementation::Version;
 
-    if (false == bool(pHeader)) {
-        LogError()("opentxs::factory::")(__func__)(": Invalid header").Flush();
+        if (false == bool(pHeader)) {
 
-        return nullptr;
-    }
-
-    const auto& header = *pHeader;
-    auto expectedSize = sizeof(ReturnType::BitcoinFormat_1);
-
-    if (expectedSize > size) {
-        LogError()("opentxs::factory::")(__func__)(
-            ": Size below minimum for version 1")
-            .Flush();
-
-        return nullptr;
-    }
-
-    const auto* it{static_cast<const std::byte*>(payload)};
-    ReturnType::BitcoinFormat_1 raw1{};
-    std::memcpy(reinterpret_cast<std::byte*>(&raw1), it, sizeof(raw1));
-    it += sizeof(raw1);
-    bitcoin::ProtocolVersion version{raw1.version_.value()};
-    auto services = bitcoin::GetServices(raw1.services_.value());
-    auto localServices{services};
-    auto timestamp = Clock::from_time_t(raw1.timestamp_.value());
-    auto remoteServices = bitcoin::GetServices(raw1.remote_.services_.value());
-    tcp::endpoint remoteAddress{
-        ip::make_address_v6(raw1.remote_.address_), raw1.remote_.port_.value()};
-    tcp::endpoint localAddress{};
-    bitcoin::Nonce nonce{};
-    UnallocatedCString userAgent{};
-    blockchain::block::Height height{};
-    bool relay{true};
-
-    if (106 <= version) {
-        expectedSize += (1 + sizeof(ReturnType::BitcoinFormat_106));
-
-        if (expectedSize > size) {
-            LogError()("opentxs::factory::")(__func__)(
-                ": Size below minimum for version 106")
-                .Flush();
-
-            return nullptr;
+            throw std::runtime_error{"invalid header"};
         }
 
-        ReturnType::BitcoinFormat_106 raw2{};
-        std::memcpy(reinterpret_cast<std::byte*>(&raw2), it, sizeof(raw2));
-        it += sizeof(raw2);
-        localServices = bitcoin::GetServices(raw2.local_.services_.value());
-        localAddress = {
-            ip::make_address_v6(raw2.local_.address_),
-            raw2.local_.port_.value()};
-        nonce = raw2.nonce_.value();
-        std::size_t uaSize{0};
+        const auto& header = *pHeader;
+        auto expectedSize = sizeof(ReturnType::BitcoinFormat_1);
 
-        if (std::byte{0} == *it) {
-            it += 1;
-        } else {
-            const auto csBytes = bitcoin::CompactSize::CalculateSize(*it);
-            expectedSize += csBytes;
+        if (expectedSize > size) {
+
+            throw std::runtime_error{"size below minimum for version 1"};
+        }
+
+        const auto* it{static_cast<const std::byte*>(payload)};
+        ReturnType::BitcoinFormat_1 raw1{};
+        std::memcpy(reinterpret_cast<std::byte*>(&raw1), it, sizeof(raw1));
+        it += sizeof(raw1);
+        bitcoin::ProtocolVersion version{raw1.version_.value()};
+        auto services = bitcoin::GetServices(raw1.services_.value());
+        auto localServices{services};
+        auto timestamp = convert_stime(raw1.timestamp_.value());
+        auto remoteServices =
+            bitcoin::GetServices(raw1.remote_.services_.value());
+        tcp::endpoint remoteAddress{
+            ip::make_address_v6(raw1.remote_.address_),
+            raw1.remote_.port_.value()};
+        tcp::endpoint localAddress{};
+        bitcoin::Nonce nonce{};
+        UnallocatedCString userAgent{};
+        blockchain::block::Height height{};
+        bool relay{true};
+
+        if (106 <= version) {
+            expectedSize += (1 + sizeof(ReturnType::BitcoinFormat_106));
 
             if (expectedSize > size) {
-                LogError()("opentxs::factory::")(__func__)(
-                    ": CompactSize incomplete")
-                    .Flush();
 
-                return nullptr;
+                throw std::runtime_error{"size below minimum for version 106"};
             }
 
-            if (0 == csBytes) {
-                uaSize = std::to_integer<std::uint8_t>(*it);
+            ReturnType::BitcoinFormat_106 raw2{};
+            std::memcpy(reinterpret_cast<std::byte*>(&raw2), it, sizeof(raw2));
+            it += sizeof(raw2);
+            localServices = bitcoin::GetServices(raw2.local_.services_.value());
+            localAddress = {
+                ip::make_address_v6(raw2.local_.address_),
+                raw2.local_.port_.value()};
+            nonce = raw2.nonce_.value();
+            auto uaSize = 0_uz;
+
+            if (std::byte{0} == *it) {
                 it += 1;
             } else {
-                it += 1;
-                bitcoin::CompactSize::Bytes bytes{it, it + csBytes};
-                uaSize = bitcoin::CompactSize(bytes).Value();
-                it += csBytes;
-            }
+                const auto csBytes = bitcoin::CompactSize::CalculateSize(*it);
+                expectedSize += csBytes;
 
-            expectedSize += uaSize;
+                if (expectedSize > size) {
+
+                    throw std::runtime_error{"CompactSize incomplete"};
+                }
+
+                if (0 == csBytes) {
+                    uaSize = std::to_integer<std::uint8_t>(*it);
+                    it += 1;
+                } else {
+                    it += 1;
+                    uaSize = convert_to_size(
+                        bitcoin::CompactSize(
+                            bitcoin::CompactSize::Bytes{it, it + csBytes})
+                            .Value());
+                    it += csBytes;
+                }
+
+                expectedSize += uaSize;
+
+                if (expectedSize > size) {
+
+                    throw std::runtime_error{"user agent string incomplete"};
+                }
+
+                userAgent = {reinterpret_cast<const char*>(it), uaSize};
+                it += uaSize;
+            }
+        }
+
+        if (209 <= version) {
+            expectedSize += sizeof(ReturnType::BitcoinFormat_209);
 
             if (expectedSize > size) {
-                LogError()("opentxs::factory::")(__func__)(
-                    ": User agent string incomplete")
-                    .Flush();
 
-                return nullptr;
+                throw std::runtime_error{"required height field is missing"};
             }
 
-            userAgent = {reinterpret_cast<const char*>(it), uaSize};
-            it += uaSize;
-        }
-    }
+            ReturnType::BitcoinFormat_209 raw3{};
+            std::memcpy(reinterpret_cast<std::byte*>(&raw3), it, sizeof(raw3));
+            it += sizeof(raw3);
 
-    if (209 <= version) {
-        expectedSize += sizeof(ReturnType::BitcoinFormat_209);
-
-        if (expectedSize > size) {
-            LogError()("opentxs::factory::")(__func__)(
-                ": Required height field is missing")
-                .Flush();
-
-            return nullptr;
+            height = raw3.height_.value();
         }
 
-        ReturnType::BitcoinFormat_209 raw3{};
-        std::memcpy(reinterpret_cast<std::byte*>(&raw3), it, sizeof(raw3));
-        it += sizeof(raw3);
+        if (70001 <= version) {
+            expectedSize += 1;
 
-        height = raw3.height_.value();
-    }
-
-    if (70001 <= version) {
-        expectedSize += 1;
-
-        if (expectedSize == size) {
-            auto value = std::to_integer<std::uint8_t>(*it);
-            relay = (0 == value) ? false : true;
+            if (expectedSize == size) {
+                auto value = std::to_integer<std::uint8_t>(*it);
+                relay = (0 == value) ? false : true;
+            }
         }
+
+        const auto chain = header.Network();
+
+        return new ReturnType(
+            api,
+            std::move(pHeader),
+            version,
+            localAddress,
+            remoteAddress,
+            TranslateServices(chain, version, services),
+            TranslateServices(chain, version, localServices),
+            TranslateServices(chain, version, remoteServices),
+            nonce,
+            userAgent,
+            height,
+            relay,
+            timestamp);
+    } catch (const std::exception& e) {
+        LogError()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
+
+        return nullptr;
     }
-
-    const auto chain = header.Network();
-
-    return new ReturnType(
-        api,
-        std::move(pHeader),
-        version,
-        localAddress,
-        remoteAddress,
-        TranslateServices(chain, version, services),
-        TranslateServices(chain, version, localServices),
-        TranslateServices(chain, version, remoteServices),
-        nonce,
-        userAgent,
-        height,
-        relay,
-        timestamp);
 }
 
 auto BitcoinP2PVersion(

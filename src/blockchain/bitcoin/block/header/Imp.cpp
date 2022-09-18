@@ -27,6 +27,7 @@
 #include "internal/blockchain/Blockchain.hpp"
 #include "internal/blockchain/bitcoin/block/Factory.hpp"
 #include "internal/util/LogMacros.hpp"
+#include "internal/util/Time.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/blockchain/Blockchain.hpp"
@@ -103,7 +104,7 @@ auto BitcoinBlockHeader(
             serialized.version_.value(),
             blockchain::block::Hash{previous.Hash()},
             std::move(merkle),
-            Clock::from_time_t(std::time_t(serialized.time_.value())),
+            convert_stime(std::time_t(serialized.time_.value())),
             serialized.nbits_.value(),
             serialized.nonce_.value(),
             false);
@@ -181,7 +182,7 @@ auto BitcoinBlockHeader(
             serialized.version_.value(),
             ReadView{serialized.previous_.data(), serialized.previous_.size()},
             ReadView{serialized.merkle_.data(), serialized.merkle_.size()},
-            Clock::from_time_t(std::time_t(serialized.time_.value())),
+            convert_stime(std::time_t(serialized.time_.value())),
             serialized.nbits_.value(),
             serialized.nonce_.value(),
             isGenesis);
@@ -354,7 +355,7 @@ Header::Header(
           serialized.bitcoin().version(),
           serialized.bitcoin().block_version(),
           blockchain::block::Hash{serialized.bitcoin().merkle_hash()},
-          Clock::from_time_t(serialized.bitcoin().timestamp()),
+          convert_stime(serialized.bitcoin().timestamp()),
           serialized.bitcoin().nbits(),
           serialized.bitcoin().nonce(),
           true)
@@ -574,7 +575,10 @@ auto Header::Serialize(SerializedType& out) const noexcept -> bool
 {
     const auto time = Clock::to_time_t(timestamp_);
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wtautological-type-limit-compare"
     if (std::numeric_limits<std::uint32_t>::max() < time) { return false; }
+#pragma GCC diagnostic pop
 
     if (false == ot_super::Serialize(out)) { return false; }
 

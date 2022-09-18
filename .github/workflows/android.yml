@@ -12,7 +12,7 @@ jobs:
         include:
           - binding: all
             platform: ubuntu-20.04
-            docker: 17
+            docker: 18
     runs-on: ${{ matrix.platform }}
     steps:
     - name: Checkout opentxs
@@ -23,10 +23,27 @@ jobs:
     - name: Setup build environment
       run: |
         docker pull opentransactions/android:${{ matrix.docker }}
-    - name: Get more disk space
-      run: |
-        sudo rm -rf /usr/local/lib/android
-        sudo rm -rf /usr/share/dotnet
+    - name:  Get more disk space
+      run:   |
+             if [ "$RUNNER_OS" == "Linux" ]; then
+                  sudo rm -rf /usr/lib/mono
+                  sudo rm -rf /usr/local/lib/android
+                  sudo rm -rf /usr/local/share/vcpkg
+                  sudo rm -rf /usr/share/miniconda
+             elif [ "$RUNNER_OS" == "macOS" ]; then
+                  sudo rm -rf "/Library/Frameworks/Mono.framework"
+                  sudo rm -rf "/Users/runner/Library/Android"
+                  sudo rm -rf "/usr/local/miniconda"
+                  sudo rm -rf "/usr/local/share/vcpkg"
+             elif [ "$RUNNER_OS" == "Windows" ]; then
+                  rm -rf "C:\Android"
+                  rm -rf "C:\Miniconda"
+                  rm -rf "C:\Program Files\dotnet"
+                  rm -rf "C:\SeleniumWebDrivers\"
+                  rm -rf "C:\selenium\"
+                  rm -rf "C:\vcpkg"
+             fi
+      shell: bash
     - name: Compile
       run: |
         mkdir -p ${{ runner.temp }}/opentxs-for-android/${{ matrix.arch }}

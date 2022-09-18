@@ -26,6 +26,7 @@
 #include "internal/otx/blind/Token.hpp"
 #include "internal/otx/blind/Types.hpp"
 #include "internal/util/LogMacros.hpp"
+#include "internal/util/Time.hpp"
 #include "opentxs/api/crypto/Symmetric.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
@@ -347,8 +348,8 @@ Purse::Purse(const api::Session& api, const proto::Purse& in) noexcept
           api.Factory().UnitIDFromBase58(in.mint()),
           translate(in.state()),
           factory::Amount(in.totalvalue()),
-          Clock::from_time_t(in.latestvalidfrom()),
-          Clock::from_time_t(in.earliestvalidto()),
+          convert_stime(in.latestvalidfrom()),
+          convert_stime(in.earliestvalidto()),
           {},
           nullptr,
           get_passwords(in),

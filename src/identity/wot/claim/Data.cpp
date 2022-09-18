@@ -38,6 +38,7 @@
 #include "opentxs/identity/wot/claim/Types.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Pimpl.hpp"
+#include "opentxs/util/Time.hpp"
 
 namespace opentxs::identity::wot::claim
 {
@@ -231,8 +232,8 @@ auto Data::AddContract(
         UnitToClaim(currency),
         instrumentDefinitionID,
         attrib,
-        NULL_START,
-        NULL_END,
+        Time{},
+        Time{},
         "");
 
     OT_ASSERT(item);
@@ -272,8 +273,8 @@ auto Data::AddEmail(
         type,
         value,
         attrib,
-        NULL_START,
-        NULL_END,
+        Time{},
+        Time{},
         "");
 
     OT_ASSERT(item);
@@ -367,8 +368,8 @@ auto Data::AddPaymentCode(
         UnitToClaim(currency),
         code,
         attrib,
-        NULL_START,
-        NULL_END,
+        Time{},
+        Time{},
         "");
 
     OT_ASSERT(item);
@@ -408,8 +409,8 @@ auto Data::AddPhoneNumber(
         type,
         value,
         attrib,
-        NULL_START,
-        NULL_END,
+        Time{},
+        Time{},
         "");
 
     OT_ASSERT(item);
@@ -444,8 +445,8 @@ auto Data::AddPreferredOTServer(
         type,
         String::Factory(id)->Get(),
         attrib,
-        NULL_START,
-        NULL_END,
+        Time{},
+        Time{},
         "");
 
     OT_ASSERT(item);
@@ -492,8 +493,8 @@ auto Data::AddSocialMediaProfile(
         type,
         value,
         attrib,
-        NULL_START,
-        NULL_END,
+        Time{},
+        Time{},
         "");
 
     OT_ASSERT(item);
@@ -544,8 +545,8 @@ auto Data::AddSocialMediaProfile(
             type,
             value,
             attrib,
-            NULL_START,
-            NULL_END,
+            Time{},
+            Time{},
             "");
 
         OT_ASSERT(item);
@@ -597,8 +598,8 @@ auto Data::AddSocialMediaProfile(
             type,
             value,
             attrib,
-            NULL_START,
-            NULL_END,
+            Time{},
+            Time{},
             "");
 
         OT_ASSERT(item);
@@ -925,8 +926,8 @@ auto Data::SetCommonName(const UnallocatedCString& name) const -> Data
         type,
         name,
         attrib,
-        NULL_START,
-        NULL_END,
+        Time{},
+        Time{},
         "");
 
     OT_ASSERT(item);
@@ -957,8 +958,8 @@ auto Data::SetName(const UnallocatedCString& name, const bool primary) const
         type,
         name,
         attrib,
-        NULL_START,
-        NULL_END,
+        Time{},
+        Time{},
         "");
 
     OT_ASSERT(item);
@@ -991,8 +992,8 @@ auto Data::SetScope(const claim::ClaimType type, const UnallocatedCString& name)
             type,
             name,
             attrib,
-            NULL_START,
-            NULL_END,
+            Time{},
+            Time{},
             "");
 
         OT_ASSERT(item);

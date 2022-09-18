@@ -63,8 +63,8 @@ TEST_F(Test_NymData, AddClaim)
         ot::translate(ot::identity::wot::claim::SectionType::Contract),
         ot::translate(ot::identity::wot::claim::ClaimType::Usd),
         ot::UnallocatedCString("claimValue"),
-        NULL_START,
-        NULL_END,
+        ot::Time{},
+        ot::Time{},
         ot::UnallocatedSet<std::uint32_t>{static_cast<uint32_t>(
             ot::identity::wot::claim::Attribute::Active)});
 
@@ -84,8 +84,8 @@ TEST_F(Test_NymData, AddContract)
             "testNym",
             ot::identity::wot::claim::SectionType::Contract,
             ot::identity::wot::claim::ClaimType::Usd,
-            NULL_START,
-            NULL_END,
+            {},
+            {},
             "instrumentDefinitionID1",
             "")));
 
@@ -135,8 +135,8 @@ TEST_F(Test_NymData, AddPreferredOTServer)
             "testNym",
             ot::identity::wot::claim::SectionType::Communication,
             ot::identity::wot::claim::ClaimType::Opentxs,
-            NULL_START,
-            NULL_END,
+            {},
+            {},
             "localhost",
             "")));
 
@@ -235,8 +235,8 @@ TEST_F(Test_NymData, DeleteClaim)
         ot::translate(ot::identity::wot::claim::SectionType::Contract),
         ot::translate(ot::identity::wot::claim::ClaimType::Usd),
         ot::UnallocatedCString("claimValue"),
-        NULL_START,
-        NULL_END,
+        ot::Time{},
+        ot::Time{},
         ot::UnallocatedSet<std::uint32_t>{static_cast<uint32_t>(
             ot::identity::wot::claim::Attribute::Active)});
 
@@ -249,8 +249,8 @@ TEST_F(Test_NymData, DeleteClaim)
             "testNym",
             ot::identity::wot::claim::SectionType::Contract,
             ot::identity::wot::claim::ClaimType::Usd,
-            NULL_START,
-            NULL_END,
+            {},
+            {},
             "claimValue",
             "")));
     auto deleted = nymData_.DeleteClaim(identifier, reason_);
@@ -290,8 +290,8 @@ TEST_F(Test_NymData, HaveContract)
             "testNym",
             ot::identity::wot::claim::SectionType::Contract,
             ot::identity::wot::claim::ClaimType::Usd,
-            NULL_START,
-            NULL_END,
+            {},
+            {},
             "instrumentDefinitionID1",
             "")));
 
@@ -325,8 +325,8 @@ TEST_F(Test_NymData, HaveContract)
             "testNym",
             ot::identity::wot::claim::SectionType::Contract,
             ot::identity::wot::claim::ClaimType::Usd,
-            NULL_START,
-            NULL_END,
+            {},
+            {},
             "instrumentDefinitionID2",
             "")));
 
@@ -412,8 +412,8 @@ TEST_F(Test_NymData, PreferredOTServer)
             "testNym",
             ot::identity::wot::claim::SectionType::Communication,
             ot::identity::wot::claim::ClaimType::Opentxs,
-            NULL_START,
-            NULL_END,
+            {},
+            {},
             "localhost",
             "")));
     auto added = nymData_.AddPreferredOTServer(

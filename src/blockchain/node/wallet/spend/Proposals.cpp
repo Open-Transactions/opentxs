@@ -30,6 +30,7 @@
 #include "internal/blockchain/node/SpendPolicy.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/Mutex.hpp"
+#include "internal/util/Time.hpp"
 #include "opentxs/api/crypto/Blockchain.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
@@ -206,7 +207,7 @@ private:
 
     static auto is_expired(const Proposal& tx) noexcept -> bool
     {
-        return Clock::now() > Clock::from_time_t(tx.expires());
+        return Clock::now() > convert_stime(tx.expires());
     }
 
     auto build_transaction_bitcoin(

@@ -16,6 +16,7 @@
 #include "internal/api/Legacy.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
+#include "internal/util/Size.hpp"
 #include "opentxs/OT.hpp"
 #include "opentxs/api/Context.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
@@ -284,7 +285,7 @@ auto Legacy::FileExists(const fs::path& file, std::size_t& size) const noexcept
 
     try {
         if (fs::exists(file)) {
-            size = fs::file_size(file);
+            size = convert_to_size(fs::file_size(file));
 
             return true;
         } else {

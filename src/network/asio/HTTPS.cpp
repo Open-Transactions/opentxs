@@ -58,8 +58,11 @@ auto HTTPS::get_stream() noexcept(false) -> Stream&
         auto& stream = stream_.emplace(asio_.get(), ssl_);
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wold-style-cast"
+        // NOTE const_cast necessary to avoid -Wcast-qual warnings on android /
+        // libressl. This should be removed when android environment is updated
+        // to openssl-3
         const auto rc = ::SSL_set_tlsext_host_name(
-            stream.native_handle(), hostname_.c_str());
+            stream.native_handle(), const_cast<char*>(hostname_.c_str()));
 
         if (false == rc) {
             const auto ec = beast::error_code{

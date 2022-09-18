@@ -16,6 +16,7 @@
 
 #include "internal/core/Factory.hpp"
 #include "internal/interface/rpc/RPC.hpp"
+#include "internal/util/Time.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/interface/rpc/AccountEventType.hpp"
 #include "opentxs/util/Bytes.hpp"
@@ -148,7 +149,7 @@ AccountEvent::AccountEvent(const proto::AccountEvent& in) noexcept(false)
                in.pendingamountformatted(),
                factory::Amount(in.amount()),
                factory::Amount(in.pendingamount()),
-               Clock::from_time_t(in.timestamp()),
+               convert_stime(in.timestamp()),
                in.memo(),
                in.uuid(),
                in.state())

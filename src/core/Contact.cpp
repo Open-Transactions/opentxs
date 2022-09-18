@@ -322,8 +322,8 @@ struct Contact::Imp {
             identity::wot::claim::ClaimType::Contact,
             String::Factory(nymID)->Get(),
             attr,
-            NULL_START,
-            NULL_END,
+            {},
+            {},
             ""));
 
         add_claim(lock, claim);
@@ -581,8 +581,8 @@ auto Contact::AddBlockchainAddress(
         bytes.asHex(),
         {identity::wot::claim::Attribute::Local,
          identity::wot::claim::Attribute::Active},
-        NULL_START,
-        NULL_END,
+        {},
+        {},
         translate_style(style)));
 
     return imp_->add_claim(lock, claim);
@@ -656,8 +656,8 @@ auto Contact::AddPaymentCode(
         UnitToClaim(currency),
         value,
         attr,
-        NULL_START,
-        NULL_END,
+        {},
+        {},
         ""));
 
     if (false == imp_->add_claim(claim)) {
@@ -1167,8 +1167,8 @@ void Contact::Update(const proto::Nym& serialized)
             {identity::wot::claim::Attribute::Primary,
              identity::wot::claim::Attribute::Active,
              identity::wot::claim::Attribute::Local},
-            NULL_START,
-            NULL_END,
+            {},
+            {},
             ""));
     imp_->add_claim(lock, claim);
 }

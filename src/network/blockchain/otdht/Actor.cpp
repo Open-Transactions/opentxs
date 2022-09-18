@@ -423,7 +423,8 @@ auto OTDHT::Actor::finish_request(bool success) noexcept -> void
                     std::chrono::duration_cast<ScoreInterval>(
                         request_timeout_ - elapsed);
 
-                return std::max<Weight>(remaining.count(), min_weight_);
+                return std::max<Weight>(
+                    static_cast<Weight>(remaining.count()), min_weight_);
             } else {
 
                 return min_weight_;

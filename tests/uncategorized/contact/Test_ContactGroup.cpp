@@ -34,8 +34,8 @@ public:
               ot::identity::wot::claim::ClaimType::Employee,
               ot::UnallocatedCString("primaryContactItemValue"),
               {ot::identity::wot::claim::Attribute::Primary},
-              NULL_START,
-              NULL_END,
+              {},
+              {},
               ""))
         , active_(new ot::identity::wot::claim::Item(
               dynamic_cast<const ot::api::session::Client&>(api_),
@@ -46,8 +46,8 @@ public:
               ot::identity::wot::claim::ClaimType::Employee,
               ot::UnallocatedCString("activeContactItemValue"),
               {ot::identity::wot::claim::Attribute::Active},
-              NULL_START,
-              NULL_END,
+              {},
+              {},
               ""))
     {
     }
@@ -71,8 +71,8 @@ TEST_F(Test_ContactGroup, first_constructor)
             ot::identity::wot::claim::ClaimType::Employee,
             ot::UnallocatedCString("primaryContactItemValue2"),
             {ot::identity::wot::claim::Attribute::Primary},
-            NULL_START,
-            NULL_END,
+            {},
+            {},
             ""));
 
     ot::identity::wot::claim::Group::ItemMap map;
@@ -170,8 +170,8 @@ TEST_F(Test_ContactGroup, operator_plus)
             ot::identity::wot::claim::ClaimType::Employee,
             ot::UnallocatedCString("primaryContactItemValue2"),
             {ot::identity::wot::claim::Attribute::Primary},
-            NULL_START,
-            NULL_END,
+            {},
+            {},
             ""));
     const auto& group4 = contactGroup_.AddItem(primary2);
     const auto& group5 = contactGroup_.AddItem(primary_);
@@ -280,8 +280,8 @@ TEST_F(Test_ContactGroup, Best_active_and_local)
             ot::identity::wot::claim::ClaimType::Employee,
             ot::UnallocatedCString("localContactItemValue"),
             {ot::identity::wot::claim::Attribute::Local},
-            NULL_START,
-            NULL_END,
+            {},
+            {},
             ""));
     const auto& group1 = contactGroup_.AddItem(active_);
     const auto& group2 = group1.AddItem(local);

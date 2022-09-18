@@ -18,6 +18,7 @@
 #include "blockchain/bitcoin/p2p/Message.hpp"
 #include "internal/blockchain/p2p/P2P.hpp"
 #include "internal/util/LogMacros.hpp"
+#include "internal/util/Time.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/network/blockchain/bitcoin/CompactSize.hpp"
@@ -98,7 +99,7 @@ auto BitcoinP2PAddr(
                     bytes,
                     raw.data_.port_.value(),
                     chain,
-                    Clock::from_time_t(raw.time_.value()),
+                    convert_stime(raw.time_.value()),
                     bitcoin::TranslateServices(
                         chain,
                         version,

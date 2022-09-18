@@ -23,6 +23,7 @@
 #include "internal/serialization/protobuf/verify/BlockchainPeerAddress.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
+#include "internal/util/Time.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/blockchain/p2p/Address.hpp"
@@ -64,7 +65,7 @@ Peers::Peers(const api::Session& api, storage::lmdb::LMDB& lmdb) noexcept(false)
         }
 
         std::memcpy(&input, key.data(), key.size());
-        connected_.emplace(value, Clock::from_time_t(input));
+        connected_.emplace(value, convert_stime(input));
 
         return true;
     };
