@@ -14,6 +14,7 @@
 #include <iterator>
 #include <stdexcept>
 #include <tuple>
+#include <utility>
 
 #include "crypto/HDNode.hpp"
 #include "internal/util/LogMacros.hpp"

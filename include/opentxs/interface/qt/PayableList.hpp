@@ -7,6 +7,7 @@
 
 #include "opentxs/Version.hpp"  // IWYU pragma: associated
 
+#include <QMetaObject>
 #include <QObject>
 #include <QString>
 

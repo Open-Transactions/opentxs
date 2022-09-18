@@ -6,9 +6,8 @@
 #pragma once
 
 // IWYU pragma: begin_exports
-#include "opentxs/Version.hpp"  // IWYU pragma: associated
-
 #include "opentxs/OT.hpp"
+#include "opentxs/Version.hpp"
 #include "opentxs/api/Context.hpp"
 #include "opentxs/api/Factory.hpp"
 #include "opentxs/api/Periodic.hpp"

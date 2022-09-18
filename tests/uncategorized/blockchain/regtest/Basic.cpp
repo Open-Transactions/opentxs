@@ -5,6 +5,7 @@
 
 #include <gtest/gtest.h>
 #include <opentxs/opentxs.hpp>
+#include <algorithm>
 #include <atomic>
 #include <chrono>
 #include <future>

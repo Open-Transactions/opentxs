@@ -7,8 +7,10 @@
 
 #include "opentxs/Version.hpp"  // IWYU pragma: associated
 
+#include <QMetaObject>
 #include <QObject>
 #include <QString>
+#include <QStringList>
 #include <QVariant>
 
 #include "opentxs/interface/qt/AmountValidator.hpp"       // IWYU pragma: keep

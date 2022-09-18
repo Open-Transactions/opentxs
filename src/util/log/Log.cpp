@@ -8,7 +8,6 @@
 #include "opentxs/util/Log.hpp"  // IWYU pragma: associated
 
 #include <boost/stacktrace.hpp>
-#include <boost/system/error_code.hpp>
 #include <cassert>
 #include <chrono>
 #include <cstring>

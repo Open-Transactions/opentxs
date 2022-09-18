@@ -8,8 +8,10 @@
 #include "opentxs/Version.hpp"  // IWYU pragma: associated
 
 #include <QList>
+#include <QMetaObject>
 #include <QObject>
 #include <QString>
+#include <QStringList>
 #include <QValidator>
 #include <QVector>
 #include <cstdint>

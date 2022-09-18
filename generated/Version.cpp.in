@@ -7,11 +7,23 @@
 
 namespace opentxs
 {
-auto VersionMajor() noexcept -> unsigned int { return @opentxs_VERSION_MAJOR@; }
+auto VersionMajor() noexcept -> unsigned int
+{
+    return @opentxs_VERSION_MAJOR@;
+}
 
-auto VersionMinor() noexcept -> unsigned int { return @opentxs_VERSION_MINOR@; }
+auto VersionMinor() noexcept -> unsigned int
+{
+    return @opentxs_VERSION_MINOR@;
+}
 
-auto VersionPatch() noexcept -> unsigned int { return @opentxs_VERSION_PATCH@; }
+auto VersionPatch() noexcept -> unsigned int
+{
+    return @opentxs_VERSION_PATCH@;
+}
 
-auto VersionString() noexcept -> const char* { return "@opentxs_VERSION_STRING@"; }
+auto VersionString() noexcept -> const char*
+{
+    return "@opentxs_VERSION_STRING@";
+}
 }  // namespace opentxs

@@ -3,8 +3,8 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#include "0_stdafx.hpp"         // IWYU pragma: associated
-#include "1_Internal.hpp"       // IWYU pragma: associated
+#include "0_stdafx.hpp"              // IWYU pragma: associated
+#include "1_Internal.hpp"            // IWYU pragma: associated
 #include "util/license/License.hpp"  // IWYU pragma: associated
 
 #include "opentxs/util/Container.hpp"
@@ -14,6 +14,7 @@ namespace opentxs
 auto license_base58(LicenseMap& out) noexcept -> void
 {
     out.emplace(
-        "base58 (via Bitcoin)", UnallocatedCString{R"~!~(@BASE58_LICENSE_TEXT@)~!~"});
+        "base58 (via Bitcoin)",
+        UnallocatedCString{R"~!~(@BASE58_LICENSE_TEXT@)~!~"});
 }
 }  // namespace opentxs

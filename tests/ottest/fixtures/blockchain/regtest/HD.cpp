@@ -6,6 +6,7 @@
 #include "ottest/fixtures/blockchain/regtest/HD.hpp"  // IWYU pragma: associated
 
 #include <opentxs/opentxs.hpp>
+#include <algorithm>
 #include <optional>
 #include <string_view>
 #include <tuple>

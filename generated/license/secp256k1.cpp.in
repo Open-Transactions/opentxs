@@ -14,6 +14,7 @@ namespace opentxs
 auto license_secp256k1(LicenseMap& out) noexcept -> void
 {
     out.emplace(
-        "secp256k1", UnallocatedCString{R"~!~(@LIBSECP256K1_LICENSE_TEXT@)~!~"});
+        "secp256k1",
+        UnallocatedCString{R"~!~(@LIBSECP256K1_LICENSE_TEXT@)~!~"});
 }
 }  // namespace opentxs

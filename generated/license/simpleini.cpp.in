@@ -13,6 +13,7 @@ namespace opentxs
 {
 auto license_simpleini(LicenseMap& out) noexcept -> void
 {
-    out.emplace("simpleini", UnallocatedCString{R"~!~(@SIMPLEINI_LICENSE_TEXT@)~!~"});
+    out.emplace(
+        "simpleini", UnallocatedCString{R"~!~(@SIMPLEINI_LICENSE_TEXT@)~!~"});
 }
 }  // namespace opentxs

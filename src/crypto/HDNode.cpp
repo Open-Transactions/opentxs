@@ -13,6 +13,7 @@
 #include <stdexcept>
 #include <string_view>
 #include <tuple>
+#include <utility>
 
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
@@ -20,7 +21,6 @@
 #include "opentxs/api/Context.hpp"
 #include "opentxs/api/Factory.hpp"
 #include "opentxs/api/crypto/Crypto.hpp"
-#include "opentxs/core/ByteArray.hpp"
 #include "opentxs/crypto/key/HD.hpp"
 #include "util/Sodium.hpp"
 

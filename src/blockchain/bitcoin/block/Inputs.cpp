@@ -15,6 +15,7 @@
 #include <iterator>
 #include <numeric>
 #include <stdexcept>
+#include <tuple>
 #include <utility>
 
 #include "internal/blockchain/bitcoin/Bitcoin.hpp"

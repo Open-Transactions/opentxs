@@ -307,8 +307,7 @@ if(OT_INSTALL_LIBRARY_DEPENDENCIES)
       IMPORTED_LOCATION_${BUILD_TYPE_SUFFIX}
     )
     install(
-      FILES
-        "${Boost_iostreams_LIBRARY}"
+      FILES "${Boost_iostreams_LIBRARY}"
       DESTINATION ${CMAKE_INSTALL_LIBDIR}
       COMPONENT main
     )

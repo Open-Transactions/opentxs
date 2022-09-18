@@ -9,7 +9,12 @@
 
 extern "C" {
 #include <openssl/bio.h>
-#include <openssl/ossl_typ.h>
+#if __has_include(<openssl/types.h>)
+// TODO openssl-3
+#include <openssl/types.h>  // IWYU pragma: keep
+#elif __has_include(<openssl/ossl_typ.h>)
+#include <openssl/ossl_typ.h>  // IWYU pragma: keep
+#endif
 }
 
 #include <cstdio>
