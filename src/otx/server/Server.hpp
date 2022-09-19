@@ -5,11 +5,9 @@
 
 #pragma once
 
-#include <atomic>
 #include <chrono>
 #include <cstddef>
 #include <cstdint>
-#include <future>
 #include <memory>
 #include <tuple>
 #include <utility>
@@ -20,6 +18,7 @@
 #include "internal/otx/common/Message.hpp"
 #include "internal/otx/common/OTTransaction.hpp"
 #include "internal/otx/common/cron/OTCron.hpp"
+#include "internal/util/AsyncConst.hpp"
 #include "opentxs/core/AddressType.hpp"
 #include "opentxs/core/Secret.hpp"
 #include "opentxs/core/String.hpp"
@@ -70,7 +69,7 @@ namespace opentxs::server
 class Server
 {
 public:
-    auto API() const -> const api::session::Notary& { return manager_; }
+    auto API() const -> const api::session::Notary& { return api_; }
     auto GetConnectInfo(
         AddressType& type,
         UnallocatedCString& hostname,
@@ -131,11 +130,8 @@ private:
     const std::uint32_t MIN_TCP_PORT = 1024;
     const std::uint32_t MAX_TCP_PORT = 63356;
 
-    const api::session::Notary& manager_;
+    const api::session::Notary& api_;
     const PasswordPrompt& reason_;
-    std::promise<void> init_promise_;
-    std::shared_future<void> init_future_;
-    std::atomic<bool> have_id_;
     MainFile mainFile_;
     Notary notary_;
     Transactor transactor_;
@@ -147,7 +143,7 @@ private:
     // this flag so the caller knows to do so.
     bool m_bShutdownFlag{false};
     // A hash of the server contract
-    identifier::Notary m_notaryID;
+    AsyncConst<identifier::Notary> m_notaryID;
     // A hash of the public key that signed the server contract
     UnallocatedCString m_strServerNymID;
     // This is the server's own contract, containing its public key and

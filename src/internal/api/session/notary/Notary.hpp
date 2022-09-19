@@ -8,6 +8,19 @@
 #include "internal/api/session/Session.hpp"
 #include "opentxs/api/session/Notary.hpp"
 
+// NOLINTBEGIN(modernize-concat-nested-namespaces)
+namespace opentxs  // NOLINT
+{
+// inline namespace v1
+// {
+namespace identifier
+{
+class UnitDefinition;
+}  // namespace identifier
+// }  // namespace v1
+}  // namespace opentxs
+// NOLINTEND(modernize-concat-nested-namespaces)
+
 namespace opentxs::api::session::internal
 {
 class Notary : virtual public session::Notary, virtual public Session
@@ -20,6 +33,8 @@ public:
         return *this;
     }
 
+    virtual auto CheckMint(const identifier::UnitDefinition& unit) noexcept
+        -> void = 0;
     auto InternalNotary() noexcept -> session::internal::Notary& final
     {
         return *this;

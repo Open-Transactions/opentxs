@@ -19,7 +19,7 @@ namespace opentxs::factory
 auto SessionFactoryAPI(const api::session::Notary& parent) noexcept
     -> std::unique_ptr<api::session::Factory>
 {
-    using ReturnType = api::session::server::Factory;
+    using ReturnType = api::session::notary::Factory;
 
     try {
 
@@ -32,7 +32,7 @@ auto SessionFactoryAPI(const api::session::Notary& parent) noexcept
 }
 }  // namespace opentxs::factory
 
-namespace opentxs::api::session::server
+namespace opentxs::api::session::notary
 {
 Factory::Factory(const api::session::Notary& parent)
     : session::imp::Factory(parent)
@@ -47,4 +47,4 @@ auto Factory::Cron() const -> std::unique_ptr<OTCron>
 
     return output;
 }
-}  // namespace opentxs::api::session::server
+}  // namespace opentxs::api::session::notary

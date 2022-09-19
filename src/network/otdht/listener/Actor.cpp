@@ -3,8 +3,6 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-// IWYU pragma: no_include <boost/smart_ptr/detail/operator_bool.hpp>
-
 #include "0_stdafx.hpp"                      // IWYU pragma: associated
 #include "1_Internal.hpp"                    // IWYU pragma: associated
 #include "network/otdht/listener/Actor.hpp"  // IWYU pragma: associated

@@ -40,7 +40,7 @@ else()
 endif()
 
 if(WIN32)
-  set_target_properties(messages PROPERTIES UNITY_BUILD OFF)
+  set_target_properties(opentxs-core-otprotob PROPERTIES UNITY_BUILD OFF)
 endif()
 
 set_target_properties(

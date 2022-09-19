@@ -60,14 +60,14 @@ auto ByteArray::Imp::asHex(alloc::Default alloc) const -> CString
 auto ByteArray::Imp::Assign(const void* data, const std::size_t size) noexcept
     -> bool
 {
-    auto rhs = [&]() -> Vector {
+    auto rhs = [&] {
         if ((data == nullptr) || (size == 0_uz)) {
 
-            return {};
+            return Vector{get_allocator()};
         } else {
             const auto* i = static_cast<const std::byte*>(data);
 
-            return {i, std::next(i, size)};
+            return Vector{i, std::next(i, size), get_allocator()};
         }
     }();
     data_.swap(rhs);

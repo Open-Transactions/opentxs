@@ -17,6 +17,7 @@
 { "include": ["@<boost/thread/.*>", "private", "<boost/thread/thread.hpp>", "public"] },
 { "include": ["<boost/container/detail/std_fwd.hpp>", "private", "<boost/container/container_fwd.hpp>", "public"] },
 { "include": ["<boost/core/detail/string_view.hpp>", "private", "<boost/utility/string_view.hpp>", "public"] },
+{ "include": ["<boost/smart_ptr/detail/operator_bool.hpp>", "private", "<boost/smart_ptr/shared_ptr.hpp>", "public"] },
 { "include": ["<boost/smart_ptr/make_shared_object.hpp>", "private", "<boost/smart_ptr/make_shared.hpp>", "public"] },
 { "include": ["<boost/system/detail/errc.hpp>", "private", "<boost/system/error_code.hpp>", "public"] },
 { "include": ["<boost/system/detail/error_code.hpp>", "private", "<boost/system/error_code.hpp>", "public"] },
