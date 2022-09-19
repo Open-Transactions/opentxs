@@ -132,12 +132,11 @@ auto Sqlite3::GetTableName(const bool bucket) const -> UnallocatedCString
 
 void Sqlite3::Init_Sqlite3()
 {
-    const UnallocatedCString filename =
-        folder_ + "/" + config_.sqlite3_db_file_;
+    const auto filename = folder_ / config_.sqlite3_db_file_;
 
     if (SQLITE_OK ==
         sqlite3_open_v2(
-            filename.c_str(),
+            filename.string().c_str(),
             &db_,
             SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE | SQLITE_OPEN_FULLMUTEX,
             nullptr)) {

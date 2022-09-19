@@ -75,18 +75,6 @@ else()
   set(OT_USE_VCPKG_TARGETS_DEFAULT OFF)
 endif()
 
-if(WIN32)
-  set(OT_SCRIPT_USING_CHAI_DEFAULT OFF)
-else()
-  set(OT_SCRIPT_USING_CHAI_DEFAULT ON)
-endif()
-
-if(WIN32 OR APPLE)
-  set(OT_WITH_QT_DEFAULT ON)
-else()
-  set(OT_WITH_QT_DEFAULT OFF)
-endif()
-
 # -----------------------------------------------------------------------------
 # Options
 
@@ -187,12 +175,12 @@ option(
 option(
   OT_SCRIPT_USING_CHAI
   "Use chaiscript"
-  ${OT_SCRIPT_USING_CHAI_DEFAULT}
+  ON
 )
 option(
   OT_WITH_QT
   "Enable Qt model support for ui classes"
-  ${OT_WITH_QT_DEFAULT}
+  ON
 )
 option(
   OT_WITH_QML
@@ -211,8 +199,13 @@ option(
 )
 option(
   OT_BUNDLED_SECP256K1
-  "Embed submodule version of secp256k1 instead of linking to external library"
+  "Compile secp256k1 library as part of opentxs instead of linking to an externally compiled version"
   ${OT_CRYPTO_USING_LIBSECP256K1}
+)
+option(
+  OT_BOOST_JSON_HEADER_ONLY
+  "Compile boost::json library as part of opentxs instead of linking to an externally compiled version"
+  ON
 )
 
 if(OT_SCRIPT_USING_CHAI
@@ -472,6 +465,12 @@ endif()
 
 if(OT_STATIC_DEPENDENCIES)
   set(Protobuf_USE_STATIC_LIBS ON)
+  set(OT_ZMQ_TARGET "libzmq-static")
+  set(OPENSSL_USE_STATIC_LIBS ON)
+else()
+  set(Protobuf_USE_STATIC_LIBS OFF)
+  set(OT_ZMQ_TARGET "libzmq")
+  set(OPENSSL_USE_STATIC_LIBS OFF)
 endif()
 
 find_system_libraries()
@@ -522,12 +521,6 @@ else()
   find_package(unofficial-zeromq REQUIRED)
 endif()
 
-if(OT_STATIC_DEPENDENCIES)
-  set(OT_ZMQ_TARGET "libzmq-static")
-else()
-  set(OT_ZMQ_TARGET "libzmq")
-endif()
-
 if(OT_WITH_BLOCKCHAIN)
   if("${CMAKE_SIZEOF_VOID_P}"
      EQUAL
@@ -552,10 +545,6 @@ endif()
 
 if(OT_STORAGE_LMDB)
   find_package(lmdb REQUIRED)
-endif()
-
-if(OT_STATIC_DEPENDENCIES)
-  set(OPENSSL_USE_STATIC_LIBS ON)
 endif()
 
 if(CMAKE_MSVC_RUNTIME_LIBRARY
@@ -628,22 +617,25 @@ if(CMAKE_BUILD_TYPE
    STREQUAL
    "Debug"
 )
-  if(WIN32)
-    set(OPENTXS_HIDDEN_SYMBOLS ON)
-    set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS On)
-  else()
-    set(OPENTXS_HIDDEN_SYMBOLS OFF)
+  set(OPENTXS_HIDDEN_SYMBOLS OFF)
+
+  if(WIN32 AND BUILD_SHARED_LIBS)
+    message(
+      FATAL_ERROR
+        "Building as a shared library in debug mode is impossible on windows due to linker limitations"
+    )
   endif()
 else()
   set(OPENTXS_HIDDEN_SYMBOLS ON)
 endif()
 
 if(OPENTXS_HIDDEN_SYMBOLS)
-  hide_symbols("OPENTXS_EXPORT")
+  set(CMAKE_CXX_VISIBILITY_PRESET hidden)
+  set(CMAKE_VISIBILITY_INLINES_HIDDEN ON)
+  set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS OFF)
 else()
-  add_compile_definitions(
-    "OPENTXS_EXPORT=__attribute__((visibility(\"default\")))"
-  )
+  set(CMAKE_VISIBILITY_INLINES_HIDDEN OFF)
+  set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
 endif()
 
 if(APPLE)
@@ -825,10 +817,17 @@ include_directories(
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 add_custom_target(generated_code)
+add_library(opentxs-common OBJECT "")
 
 if(OPENTXS_STANDALONE)
   # library type controlled by BUILD_SHARED_LIBS
   add_library(opentxs "")
+
+  if(BUILD_SHARED_LIBS AND OPENTXS_HIDDEN_SYMBOLS)
+    set(OT_EXPORT_MACRO "opentxs_EXPORTS")
+  else()
+    set(OT_EXPORT_MACRO "OPENTXS_STATIC_DEFINE")
+  endif()
 else()
   add_library(opentxs STATIC "")
   target_include_directories(
@@ -839,6 +838,11 @@ else()
       $<BUILD_INTERFACE:${opentxs_SOURCE_DIR}/deps>
       $<BUILD_INTERFACE:${opentxs_SOURCE_DIR}/include>
   )
+  set(OT_EXPORT_MACRO "OPENTXS_STATIC_DEFINE")
+
+  if(OPENTXS_BUILD_TESTS)
+    message(WARNING "tests can only be built in standalone mode")
+  endif()
 endif()
 
 add_library(
@@ -851,7 +855,7 @@ add_subdirectory(generated)
 add_subdirectory(deps)
 add_subdirectory(src)
 
-if(OPENTXS_BUILD_TESTS)
+if(OPENTXS_BUILD_TESTS AND OPENTXS_STANDALONE)
   include(CTest)
   add_subdirectory(tests)
 endif()

@@ -5,11 +5,15 @@
 
 #include "ottest/data/blockchain/Bip158.hpp"  // IWYU pragma: associated
 
+#include <cstdint>
+#include <utility>
+
 namespace ottest
 {
-auto GetBchCfilter1307723() noexcept -> const std::array<std::uint8_t, 430483>&
+auto GetBchCfilter1307723() noexcept -> std::span<const std::byte>
 {
-    static const auto data = std::array<std::uint8_t, 430483>{
+    // NOLINTNEXTLINE(modernize-avoid-c-arrays)
+    static constexpr std::uint8_t data[] = {
         254, 251, 126, 2,   0,   26,  149, 108, 219, 253, 202, 80,  84,  8,
         173, 98,  226, 56,  200, 109, 134, 153, 109, 92,  210, 220, 12,  179,
         124, 197, 187, 131, 86,  39,  23,  36,  165, 103, 178, 69,  10,  185,
@@ -30760,7 +30764,9 @@ auto GetBchCfilter1307723() noexcept -> const std::array<std::uint8_t, 430483>&
         169, 161, 248, 245, 232, 29,  133, 119, 142, 106, 223, 3,   159, 102,
         170, 202, 46,  31,  59,  211, 194, 84,  180, 251, 0,
     };
+    static const auto* p =
+        reinterpret_cast<const std::byte*>(std::addressof(data));
 
-    return data;
+    return {p, sizeof(data)};
 }
 }  // namespace ottest

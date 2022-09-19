@@ -8,11 +8,11 @@
 #include <gtest/gtest.h>
 #include <opentxs/opentxs.hpp>
 #include <algorithm>
-#include <array>
 #include <cstddef>
 #include <functional>
 #include <iterator>
 #include <memory>
+#include <span>
 #include <utility>
 
 #include "internal/blockchain/Blockchain.hpp"
@@ -475,7 +475,7 @@ TEST_F(Test_BitcoinBlock, serialization)
 
 TEST_F(Test_BitcoinBlock, bch_filter_1307544)
 {
-    const auto& filter = GetBchCfilter1307544();
+    const auto filter = GetBchCfilter1307544();
     const auto blockHash = api_.Factory().DataFromHex(
         "a9df8e8b72336137aaf70ac0d390c2a57b2afc826201e9f78b00000000000000");
     const auto encodedFilter = ot::ReadView{
@@ -501,7 +501,7 @@ TEST_F(Test_BitcoinBlock, bch_filter_1307544)
 
 TEST_F(Test_BitcoinBlock, bch_filter_1307723)
 {
-    const auto& filter = GetBchCfilter1307723();
+    const auto filter = GetBchCfilter1307723();
     const auto blockHash = api_.Factory().DataFromHex(
         "c28ca17ec9727809b449447eac0ba416a0b347f3836843f31303000000000000");
     const auto encodedFilter = ot::ReadView{

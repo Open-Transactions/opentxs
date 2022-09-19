@@ -10,7 +10,6 @@
 #include <boost/asio.hpp>
 #include <boost/beast/core.hpp>
 #include <boost/json.hpp>
-#include <boost/json/src.hpp>  // IWYU pragma: keep
 #include <boost/smart_ptr/shared_ptr.hpp>
 #include <boost/system/error_code.hpp>
 #include <cs_plain_guarded.h>

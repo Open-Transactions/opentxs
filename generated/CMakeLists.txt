@@ -63,12 +63,6 @@ else()
 endif()
 
 configure_file(
-  "Platform.hpp.in"
-  "${opentxs_BINARY_DIR}/include/opentxs/util/Platform.hpp"
-  @ONLY
-)
-
-configure_file(
   "Version.cpp.in"
   "${opentxs_BINARY_DIR}/src/Version.cpp"
   @ONLY
@@ -92,6 +86,12 @@ configure_file(
   @ONLY
 )
 
+file(
+  READ
+  "export.in"
+  OPENTXS_CUSTOM_CONTENT_FROM_VARIABLE
+)
+
 include(GenerateExportHeader)
 generate_export_header(
   opentxs
@@ -99,4 +99,6 @@ generate_export_header(
   "${opentxs_BINARY_DIR}/include/opentxs/Export.hpp"
   EXPORT_MACRO_NAME
   OPENTXS_EXPORT
+  CUSTOM_CONTENT_FROM_VARIABLE
+  OPENTXS_CUSTOM_CONTENT_FROM_VARIABLE
 )

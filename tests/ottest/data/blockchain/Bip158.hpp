@@ -7,7 +7,8 @@
 
 #include <opentxs/opentxs.hpp>
 #include <array>
-#include <cstdint>
+#include <cstddef>
+#include <span>
 
 #include "ottest/Basic.hpp"
 
@@ -34,8 +35,8 @@ struct Bip158Vector {
         -> ot::UnallocatedVector<ot::ByteArray>;
 };
 
-auto GetBchCfilter1307544() noexcept -> const std::array<std::uint8_t, 381319>&;
-auto GetBchCfilter1307723() noexcept -> const std::array<std::uint8_t, 430483>&;
+auto GetBchCfilter1307544() noexcept -> std::span<const std::byte>;
+auto GetBchCfilter1307723() noexcept -> std::span<const std::byte>;
 auto GetBip158Elements() noexcept -> const ot::UnallocatedMap<
     ot::blockchain::block::Height,
     ot::UnallocatedVector<ot::UnallocatedCString>>&;

@@ -17,7 +17,6 @@
 #include "opentxs/core/Data.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
-#include "opentxs/util/Platform.hpp"
 #include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -100,15 +99,25 @@ private:
     std::array<std::byte, N> data_;
 };
 
-#ifndef _MSC_VER
-extern template class OPENTXS_EXPORT FixedByteArray<32>;
-#endif
+extern template class OPENTXS_EXPORT_TEMPLATE FixedByteArray<16>;
+extern template class OPENTXS_EXPORT_TEMPLATE FixedByteArray<24>;
+extern template class OPENTXS_EXPORT_TEMPLATE FixedByteArray<32>;
 }  // namespace opentxs
 
 namespace std
 {
 template <>
-struct OPENTXS_EXPORT_TEMPLATE hash<opentxs::FixedByteArray<32>> {
+struct OPENTXS_EXPORT hash<opentxs::FixedByteArray<16>> {
+    auto operator()(const opentxs::FixedByteArray<16>& data) const noexcept
+        -> std::size_t;
+};
+template <>
+struct OPENTXS_EXPORT hash<opentxs::FixedByteArray<24>> {
+    auto operator()(const opentxs::FixedByteArray<24>& data) const noexcept
+        -> std::size_t;
+};
+template <>
+struct OPENTXS_EXPORT hash<opentxs::FixedByteArray<32>> {
     auto operator()(const opentxs::FixedByteArray<32>& data) const noexcept
         -> std::size_t;
 };

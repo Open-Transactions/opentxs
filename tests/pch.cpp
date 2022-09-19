@@ -6,3 +6,7 @@
 #include <gmock/gmock.h>        // IWYU pragma: keep
 #include <gtest/gtest.h>        // IWYU pragma: keep
 #include <opentxs/opentxs.hpp>  // IWYU pragma: keep
+
+#ifdef opentxs_EXPORTS
+#error opentxs_EXPORTS should not be defined outside the opentxs-common target
+#endif

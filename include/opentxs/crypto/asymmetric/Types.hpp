@@ -8,6 +8,8 @@
 #include <cstdint>
 #include <string_view>
 
+#include "opentxs/Export.hpp"
+
 namespace opentxs::crypto::asymmetric
 {
 enum class Algorithm : std::uint8_t;  // IWYU pragma: export

@@ -26,3 +26,7 @@ add_opentx_test(ottest-ui-nym-list Test_NymList.cpp)
 add_opentx_test(ottest-ui-seed-tree Test_SeedTree.cpp)
 
 set_tests_properties(ottest-ui-account-tree PROPERTIES DISABLED TRUE)
+
+if(OT_QT_EXPORT)
+  set_tests_properties(ottest-ui-amountvalidator PROPERTIES DISABLED TRUE)
+endif()

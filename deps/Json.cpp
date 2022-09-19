@@ -3,12 +3,5 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-// IWYU pragma: no_include <opentxs/Export.hpp>
-
-#pragma once
-
-#include "opentxs/Export.hpp"
-
-// clang-format off
-#define OPENTXS_EXPORT_TEMPLATE @OPENTXS_EXPORT_TEMPLATE_PARAM@
-// clang-format on
+#include <boost/json.hpp>      // IWYU pragma: keep
+#include <boost/json/src.hpp>  // IWYU pragma: keep

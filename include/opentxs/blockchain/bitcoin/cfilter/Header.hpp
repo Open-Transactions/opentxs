@@ -11,7 +11,6 @@
 
 #include "opentxs/Export.hpp"
 #include "opentxs/core/FixedByteArray.hpp"
-#include "opentxs/util/Platform.hpp"
 #include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -40,7 +39,6 @@ struct OPENTXS_EXPORT hash<opentxs::blockchain::cfilter::Header> {
 
 namespace opentxs::blockchain::cfilter
 {
-// NOTE sorry Windows users, MSVC throws an ICE if we export this symbol
 class OPENTXS_EXPORT_TEMPLATE Header : virtual public FixedByteArray<32>
 {
 public:
