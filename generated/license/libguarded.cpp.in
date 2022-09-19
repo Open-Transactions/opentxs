@@ -13,6 +13,8 @@ namespace opentxs
 {
 auto license_libguarded(LicenseMap& out) noexcept -> void
 {
-    out.emplace("CsLibGuarded", UnallocatedCString{R"~!~(@LIBGUARDED_LICENSE_TEXT@)~!~"});
+    out.emplace(
+        "CsLibGuarded",
+        UnallocatedCString{R"~!~(@LIBGUARDED_LICENSE_TEXT@)~!~"});
 }
 }  // namespace opentxs

@@ -9,6 +9,7 @@
 
 #include <QAbstractItemModel>
 #include <QHash>
+#include <QMetaObject>
 #include <QMetaType>
 #include <QObject>
 #include <QString>

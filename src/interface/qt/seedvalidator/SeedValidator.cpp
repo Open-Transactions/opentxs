@@ -8,6 +8,7 @@
 #include "opentxs/interface/qt/SeedValidator.hpp"  // IWYU pragma: associated
 
 #include <QChar>
+#include <QList>
 
 #include "opentxs/api/crypto/Seed.hpp"
 #include "opentxs/api/session/Client.hpp"

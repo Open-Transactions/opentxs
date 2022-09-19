@@ -11,15 +11,18 @@ extern "C" {
 #include <openssl/dh.h>
 #include <openssl/evp.h>
 #include <openssl/opensslv.h>
-#include <openssl/ossl_typ.h>
-#include <openssl/rsa.h>
-}
-
 #if __has_include(<openssl/provider.h>)
-extern "C" {
-#include <openssl/provider.h>
-}
+// TODO openssl-3
+#include <openssl/provider.h>  // IWYU pragma: keep
 #endif
+#include <openssl/rsa.h>
+#if __has_include(<openssl/types.h>)
+// TODO openssl-3
+#include <openssl/types.h>  // IWYU pragma: keep
+#elif __has_include(<openssl/ossl_typ.h>)
+#include <openssl/ossl_typ.h>  // IWYU pragma: keep
+#endif
+}
 
 #include <cstddef>
 #include <cstdint>

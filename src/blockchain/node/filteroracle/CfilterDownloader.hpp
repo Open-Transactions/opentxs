@@ -13,6 +13,7 @@
 #include <exception>
 #include <future>
 #include <memory>
+#include <vector>
 
 #include "blockchain/DownloadManager.hpp"
 #include "blockchain/DownloadTask.hpp"

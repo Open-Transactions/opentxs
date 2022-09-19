@@ -19,6 +19,7 @@
 #include <numeric>
 #include <sstream>
 #include <stdexcept>
+#include <tuple>
 #include <type_traits>  // IWYU pragma: keep
 #include <utility>
 

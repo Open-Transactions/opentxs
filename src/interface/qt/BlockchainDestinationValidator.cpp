@@ -7,7 +7,7 @@
 #include "1_Internal.hpp"                         // IWYU pragma: associated
 #include "interface/qt/DestinationValidator.hpp"  // IWYU pragma: associated
 
-#include <QObject>
+#include <QMetaObject>
 #include <sstream>
 #include <string_view>
 #include <type_traits>

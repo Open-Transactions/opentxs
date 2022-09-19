@@ -29,21 +29,17 @@ if(CASH_LUCRE_EXPORT)
         -Wno-effc++
         -Wno-format
         -Wno-old-style-cast
+        -Wno-shorten-64-to-32
         -Wno-sign-conversion
+        -Wno-string-conversion
         -Wno-unused-variable
         -Wno-zero-as-null-pointer-constant
     )
   endif()
 
-  if(${CMAKE_CXX_COMPILER_ID}
-     MATCHES
-     Clang
+  set_target_properties(
+    lucre PROPERTIES C_INCLUDE_WHAT_YOU_USE "" CXX_INCLUDE_WHAT_YOU_USE ""
   )
-    target_compile_options(
-      lucre PRIVATE -Wno-shorten-64-to-32 -Wno-string-conversion
-    )
-  endif()
-
   target_sources(opentxs PRIVATE $<TARGET_OBJECTS:lucre>)
 endif(CASH_LUCRE_EXPORT)
 

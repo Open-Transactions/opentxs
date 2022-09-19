@@ -11,6 +11,10 @@ extern "C" {
 #include <openssl/evp.h>
 #include <openssl/hmac.h>
 #include <openssl/pem.h>
+#if __has_include(<openssl/provider.h>)
+// TODO openssl-3
+#include <openssl/provider.h>  // IWYU pragma: keep
+#endif
 }
 
 #include <limits>

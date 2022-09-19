@@ -9,6 +9,7 @@
 
 #include <QAbstractItemModel>
 #include <QAbstractListModel>
+#include <QMetaObject>
 #include <QModelIndex>
 #include <QObject>
 #include <QString>

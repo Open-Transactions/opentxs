@@ -20,6 +20,7 @@
 #include <optional>
 #include <sstream>
 #include <stdexcept>
+#include <tuple>
 #include <type_traits>
 
 #include "blockchain/bitcoin/block/BlockParser.hpp"

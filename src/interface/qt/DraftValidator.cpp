@@ -7,6 +7,8 @@
 #include "1_Internal.hpp"                   // IWYU pragma: associated
 #include "interface/qt/DraftValidator.hpp"  // IWYU pragma: associated
 
+#include <QString>
+
 #include "internal/interface/ui/UI.hpp"
 
 namespace opentxs::ui::implementation

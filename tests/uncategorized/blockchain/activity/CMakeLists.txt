@@ -6,10 +6,8 @@
 add_opentx_test(ottest-blockchain-activity-labels Test_Labels.cpp)
 add_opentx_test(ottest-blockchain-activity-merge Test_Merge.cpp)
 add_opentx_test(ottest-blockchain-activity-threads Test_Threads.cpp)
-add_opentx_test(ottest-blockchain-activity-ui Test_UI.cpp)
 
 set_tests_properties(ottest-blockchain-activity-merge PROPERTIES DISABLED TRUE)
 set_tests_properties(
   ottest-blockchain-activity-threads PROPERTIES DISABLED TRUE
 )
-set_tests_properties(ottest-blockchain-activity-ui PROPERTIES DISABLED TRUE)

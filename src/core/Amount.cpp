@@ -10,6 +10,7 @@
 
 #include <boost/endian/buffers.hpp>
 #include <boost/exception/exception.hpp>
+#include <boost/lexical_cast/bad_lexical_cast.hpp>
 #include <memory>
 
 #include "core/Amount.hpp"

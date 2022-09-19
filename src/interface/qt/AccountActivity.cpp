@@ -12,7 +12,6 @@
 #include <QList>
 #include <QObject>
 #include <QString>
-#include <QStringList>
 #include <algorithm>
 #include <cstdint>
 #include <iterator>
