@@ -213,7 +213,6 @@ BlockIndexer::Imp::Imp(
     , api_(*api_p_)
     , node_(*node_p_)
     , shared_(*shared_p_)
-    , index_(alloc)
     , best_position_()
     , queue_(alloc)
     , blocks_(alloc)
@@ -343,8 +342,9 @@ auto BlockIndexer::Imp::check_blocks() noexcept -> void
         auto& [position, future] = *i;
 
         if (IsReady(future)) {
-            index_.erase(position.hash_);
             ready.emplace_back(i);
+        } else {
+            break;
         }
     }
 
@@ -474,7 +474,6 @@ auto BlockIndexer::Imp::fill_queue() noexcept -> void
             " blocks to queue from ") (*first)(" to ")(blocks.back())
             .Flush();
         std::for_each(first, blocks.end(), [this](auto& block) {
-            index_.try_emplace(block.hash_, block);
             queue_.emplace_back(std::move(block));
         });
     } else {
@@ -548,26 +547,9 @@ auto BlockIndexer::Imp::process_block_ready(Message&& in) noexcept -> void
 
     OT_ASSERT(body.size() > 2);
 
-    auto hash = block::Hash{body.at(2).Bytes()};
-
-    if (auto i = index_.find(hash); index_.end() != i) {
-        process_block_ready(std::move(i->second));
-        index_.erase(i);
-    }
-}
-
-auto BlockIndexer::Imp::process_block_ready(block::Position&& position) noexcept
-    -> void
-{
-    const auto& log = log_;
-    log(OT_PRETTY_CLASS())(name_)(": block ")(
-        position)(" is available for processing")
+    log_(OT_PRETTY_CLASS())(name_)(": block ")
+        .asHex(body.at(2).Bytes())(" is available for processing")
         .Flush();
-    auto handle = blocks_.lock();
-    auto& blocks = *handle;
-    auto& from = blocks.requested_;
-    auto& to = blocks.ready_;
-    to.insert(from.extract(position));
 }
 
 auto BlockIndexer::Imp::process_reindex(Message&&) noexcept -> void
@@ -602,14 +584,7 @@ auto BlockIndexer::Imp::process_reorg(block::Position&& parent) noexcept -> void
         tip = work.position_;
     }
 
-    // TODO c++20
-    // std::erase_if(queue_, [&](const auto& pos){ return pos > parent; });
-    queue_.erase(
-        std::find_if(
-            queue_.begin(),
-            queue_.end(),
-            [&](const auto& pos) { return pos > parent; }),
-        queue_.end());
+    std::erase_if(queue_, [&](const auto& pos) { return (pos > parent); });
 
     if (best_position_ > parent) { update_best_position(std::move(parent)); }
 }

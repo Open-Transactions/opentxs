@@ -134,7 +134,6 @@ private:
     const api::Session& api_;
     const node::Manager& node_;
     Shared& shared_;
-    Map<block::Hash, block::Position> index_;
     block::Position best_position_;
     Deque<block::Position> queue_;
     GuardedBlocks blocks_;
@@ -153,7 +152,6 @@ private:
     auto process_block(Message&& in) noexcept -> void;
     auto process_block(block::Position&& position) noexcept -> void;
     auto process_block_ready(Message&& in) noexcept -> void;
-    auto process_block_ready(block::Position&& position) noexcept -> void;
     auto process_reindex(Message&& in) noexcept -> void;
     auto process_reorg(Message&& in) noexcept -> void;
     auto process_reorg(block::Position&& parent) noexcept -> void;
