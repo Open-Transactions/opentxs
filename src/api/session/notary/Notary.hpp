@@ -5,6 +5,7 @@
 
 #pragma once
 
+#include <boost/smart_ptr/shared_ptr.hpp>
 #include <atomic>
 #include <cassert>
 #include <cstddef>
@@ -14,13 +15,12 @@
 #include <functional>
 #include <iosfwd>
 #include <memory>
-#include <mutex>
-#include <thread>
 
 #include "api/session/Session.hpp"
-#include "internal/api/session/Notary.hpp"
+#include "api/session/notary/Shared.hpp"
 #include "internal/api/session/Session.hpp"
-#include "internal/util/Mutex.hpp"
+#include "internal/api/session/notary/Notary.hpp"
+#include "internal/api/session/notary/Types.hpp"
 #include "opentxs/Version.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
@@ -38,7 +38,13 @@ namespace api
 {
 namespace session
 {
+namespace notary
+{
+class Shared;
+}  // namespace notary
+
 class Contacts;
+class Notary;
 }  // namespace session
 
 class Context;
@@ -86,6 +92,8 @@ namespace opentxs::api::session::imp
 class Notary final : public session::internal::Notary, public Session
 {
 public:
+    auto CheckMint(const identifier::UnitDefinition& unit) noexcept
+        -> void final;
     auto Contacts() const -> const session::Contacts& final { abort(); }
     auto DropIncoming(const int count) const -> void final;
     auto DropOutgoing(const int count) const -> void final;
@@ -101,7 +109,6 @@ public:
     auto ID() const -> const identifier::Notary& final;
     auto InprocEndpoint() const -> UnallocatedCString final;
     auto NymID() const -> const identifier::Nym& final;
-    auto ScanMints() const -> void final;
     auto Server() const -> opentxs::server::Server& final { return server_; }
     auto SetMintKeySize(const std::size_t size) const -> void final
     {
@@ -110,7 +117,7 @@ public:
     auto UpdateMint(const identifier::UnitDefinition& unitID) const
         -> void final;
 
-    auto Init() -> void;
+    auto Init(std::shared_ptr<session::Notary> me) -> void;
 
     Notary(
         const api::Context& parent,
@@ -130,49 +137,47 @@ public:
     ~Notary() final;
 
 private:
-    using MintSeries = UnallocatedMap<UnallocatedCString, otx::blind::Mint>;
-
     const OTPasswordPrompt reason_;
+    boost::shared_ptr<notary::Shared> shared_p_;
     std::unique_ptr<opentxs::server::Server> server_p_;
-    opentxs::server::Server& server_;
     std::unique_ptr<opentxs::server::MessageProcessor> message_processor_p_;
+    notary::Shared& shared_;
+    opentxs::server::Server& server_;
     opentxs::server::MessageProcessor& message_processor_;
-    std::thread mint_thread_;
-    mutable std::mutex mint_lock_;
-    mutable std::mutex mint_update_lock_;
-    mutable std::mutex mint_scan_lock_;
-    mutable UnallocatedMap<UnallocatedCString, MintSeries> mints_;
-    mutable UnallocatedDeque<UnallocatedCString> mints_to_check_;
     mutable std::atomic<std::size_t> mint_key_size_;
 
     auto generate_mint(
-        const UnallocatedCString& serverID,
-        const UnallocatedCString& unitID,
+        notary::Shared::Map& data,
+        const identifier::Notary& serverID,
+        const identifier::UnitDefinition& unitID,
         const std::uint32_t series) const -> void;
+    auto get_private_mint(
+        notary::Shared::Map& data,
+        const identifier::UnitDefinition& unitID,
+        std::uint32_t series) const noexcept -> otx::blind::Mint&;
     auto last_generated_series(
-        const UnallocatedCString& serverID,
-        const UnallocatedCString& unitID) const -> std::int32_t;
+        notary::Shared::Map& data,
+        const identifier::Notary& serverID,
+        const identifier::UnitDefinition& unitID) const -> std::int32_t;
     auto load_private_mint(
-        const opentxs::Lock& lock,
-        const UnallocatedCString& unitID,
-        const UnallocatedCString seriesID) const -> otx::blind::Mint;
+        notary::Shared::Map& data,
+        const identifier::UnitDefinition& unitID,
+        const notary::MintSeriesID& seriesID) const -> otx::blind::Mint;
     auto load_public_mint(
-        const opentxs::Lock& lock,
-        const UnallocatedCString& unitID,
-        const UnallocatedCString seriesID) const -> otx::blind::Mint;
-    auto mint() const -> void;
-    auto verify_lock(const opentxs::Lock& lock, const std::mutex& mutex) const
-        -> bool;
+        notary::Shared::Map& data,
+        const identifier::UnitDefinition& unitID,
+        const notary::MintSeriesID& seriesID) const -> otx::blind::Mint;
     auto verify_mint(
-        const opentxs::Lock& lock,
-        const UnallocatedCString& unitID,
-        const UnallocatedCString seriesID,
+        notary::Shared::Map& data,
+        const identifier::UnitDefinition& unitID,
+        const notary::MintSeriesID& seriesID,
         otx::blind::Mint&& mint) const -> otx::blind::Mint;
-    auto verify_mint_directory(const UnallocatedCString& serverID) const
-        -> bool;
+    auto verify_mint_directory(
+        notary::Shared::Map& data,
+        const identifier::Notary& serverID) const -> bool;
 
     auto Cleanup() -> void;
     using session::internal::Session::Start;
-    auto Start() -> void;
+    auto Start(std::shared_ptr<session::Notary> me) -> void;
 };
 }  // namespace opentxs::api::session::imp

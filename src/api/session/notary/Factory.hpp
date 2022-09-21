@@ -28,7 +28,7 @@ class OTCron;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::api::session::server
+namespace opentxs::api::session::notary
 {
 class Factory final : public session::imp::Factory
 {
@@ -47,4 +47,4 @@ public:
 private:
     const api::session::Notary& server_;
 };
-}  // namespace opentxs::api::session::server
+}  // namespace opentxs::api::session::notary

@@ -61,7 +61,7 @@ class PasswordPrompt;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::api::session::server
+namespace opentxs::api::session::notary
 {
 class Wallet final : public session::imp::Wallet
 {
@@ -106,4 +106,4 @@ private:
         AccountLock& row) const -> bool final;
     auto signer_nym(const identifier::Nym& id) const -> Nym_p final;
 };
-}  // namespace opentxs::api::session::server
+}  // namespace opentxs::api::session::notary

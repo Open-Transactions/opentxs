@@ -78,7 +78,6 @@ public:
     OPENTXS_NO_EXPORT virtual auto InternalNotary() const noexcept
         -> const session::internal::Notary& = 0;
     virtual auto NymID() const -> const identifier::Nym& = 0;
-    virtual auto ScanMints() const -> void = 0;
     virtual auto Server() const -> opentxs::server::Server& = 0;
     virtual auto SetMintKeySize(const std::size_t size) const -> void = 0;
     virtual auto UpdateMint(const identifier::UnitDefinition& unitID) const

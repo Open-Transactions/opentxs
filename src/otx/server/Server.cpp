@@ -19,8 +19,8 @@
 #include "Proto.tpp"
 #include "internal/api/session/Endpoints.hpp"
 #include "internal/api/session/FactoryAPI.hpp"
-#include "internal/api/session/Notary.hpp"
 #include "internal/api/session/Wallet.hpp"
+#include "internal/api/session/notary/Notary.hpp"
 #include "internal/network/zeromq/message/Message.hpp"
 #include "internal/otx/Types.hpp"
 #include "internal/otx/client/OTPayment.hpp"
@@ -43,7 +43,6 @@
 #include "opentxs/core/AddressType.hpp"
 #include "opentxs/core/Armored.hpp"
 #include "opentxs/core/ByteArray.hpp"
-#include "opentxs/core/Data.hpp"
 #include "opentxs/core/Secret.hpp"
 #include "opentxs/core/String.hpp"
 #include "opentxs/core/contract/ProtocolVersion.hpp"
@@ -86,15 +85,12 @@ namespace opentxs::server
 Server::Server(
     const opentxs::api::session::Notary& manager,
     const PasswordPrompt& reason)
-    : manager_(manager)
+    : api_(manager)
     , reason_(reason)
-    , init_promise_()
-    , init_future_(init_promise_.get_future())
-    , have_id_(false)
     , mainFile_(*this, reason_)
-    , notary_(*this, reason_, manager_)
+    , notary_(*this, reason_, api_)
     , transactor_(*this, reason_)
-    , userCommandProcessor_(*this, reason_, manager_)
+    , userCommandProcessor_(*this, reason_, api_)
     , m_strWalletFilename(String::Factory())
     , m_bReadOnly(false)
     , m_bShutdownFlag(false)
@@ -102,11 +98,11 @@ Server::Server(
     , m_strServerNymID()
     , m_nymServer(nullptr)
     , m_Cron(manager.Factory().InternalSession().Cron())
-    , notification_socket_(manager_.Network().ZeroMQ().PushSocket(
-          zmq::socket::Direction::Connect))
+    , notification_socket_(
+          api_.Network().ZeroMQ().PushSocket(zmq::socket::Direction::Connect))
 {
     const auto bound = notification_socket_->Start(
-        manager_.Endpoints().Internal().PushNotification().data());
+        api_.Endpoints().Internal().PushNotification().data());
 
     OT_ASSERT(bound);
 }
@@ -159,9 +155,7 @@ void Server::ProcessCron()
 
 auto Server::GetServerID() const noexcept -> const identifier::Notary&
 {
-    init_future_.get();
-
-    return m_notaryID;
+    return m_notaryID.get();
 }
 
 auto Server::GetServerNym() const -> const identity::Nym&
@@ -195,20 +189,15 @@ void Server::CreateMainFile(bool& mainFileExists)
 
     if (api::crypto::HaveHDKeys()) {
         const auto backup = OTDB::QueryPlainString(
-            manager_,
-            manager_.DataFolder().string(),
-            SEED_BACKUP_FILE,
-            "",
-            "",
-            "");
+            api_, api_.DataFolder().string(), SEED_BACKUP_FILE, "", "", "");
 
         if (false == backup.empty()) {
             LogError()(OT_PRETTY_CLASS())("Seed backup found. Restoring.")
                 .Flush();
             auto parsed = parse_seed_backup(backup);
-            auto phrase = manager_.Factory().SecretFromText(parsed.first);
-            auto words = manager_.Factory().SecretFromText(parsed.second);
-            seed = manager_.Crypto().Seed().ImportSeed(
+            auto phrase = api_.Factory().SecretFromText(parsed.first);
+            auto words = api_.Factory().SecretFromText(parsed.second);
+            seed = api_.Crypto().Seed().ImportSeed(
                 words,
                 phrase,
                 crypto::SeedStyle::BIP39,
@@ -226,7 +215,7 @@ void Server::CreateMainFile(bool& mainFileExists)
     }
 
     const UnallocatedCString defaultName = DEFAULT_NAME;
-    const UnallocatedCString& userName = manager_.GetUserName();
+    const UnallocatedCString& userName = api_.GetUserName();
     UnallocatedCString name = userName;
 
     if (1 > name.size()) { name = defaultName; }
@@ -235,8 +224,8 @@ void Server::CreateMainFile(bool& mainFileExists)
     nymParameters.SetSeed(seed);
     nymParameters.SetNym(0);
     nymParameters.SetDefault(false);
-    m_nymServer = manager_.Wallet().Nym(
-        nymParameters, identity::Type::server, reason_, name);
+    m_nymServer =
+        api_.Wallet().Nym(nymParameters, identity::Type::server, reason_, name);
 
     if (false == bool(m_nymServer)) {
         LogError()(OT_PRETTY_CLASS())("Error: Failed to create server nym.")
@@ -249,18 +238,18 @@ void Server::CreateMainFile(bool& mainFileExists)
     const auto& nymID = m_nymServer->ID();
     const UnallocatedCString defaultTerms =
         "This is an example server contract.";
-    const UnallocatedCString& userTerms = manager_.GetUserTerms();
+    const UnallocatedCString& userTerms = api_.GetUserTerms();
     UnallocatedCString terms = userTerms;
 
     if (1 > userTerms.size()) { terms = defaultTerms; }
 
-    const auto& args = manager_.GetOptions();
+    const auto& args = api_.GetOptions();
     auto bindIP = UnallocatedCString{args.NotaryBindIP()};
 
     if (5 > bindIP.size()) { bindIP = DEFAULT_BIND_IP; }
 
     bool notUsed = false;
-    manager_.Config().Set_str(
+    api_.Config().Set_str(
         String::Factory(SERVER_CONFIG_LISTEN_SECTION),
         String::Factory(SERVER_CONFIG_BIND_KEY),
         String::Factory(bindIP),
@@ -279,7 +268,7 @@ void Server::CreateMainFile(bool& mainFileExists)
 
         return out;
     }();
-    manager_.Config().Set_str(
+    api_.Config().Set_str(
         String::Factory(SERVER_CONFIG_LISTEN_SECTION),
         String::Factory(SERVER_CONFIG_PORT_KEY),
         String::Factory(std::to_string(bindPort)),
@@ -289,13 +278,12 @@ void Server::CreateMainFile(bool& mainFileExists)
     const auto inproc = args.NotaryInproc();
 
     if (inproc) {
-        LogConsole()("Creating inproc contract for instance ")(
-            manager_.Instance())
+        LogConsole()("Creating inproc contract for instance ")(api_.Instance())
             .Flush();
         endpoints.emplace_back(
             AddressType::Inproc,
             contract::ProtocolVersion::Legacy,
-            manager_.InternalNotary().InprocEndpoint(),
+            api_.InternalNotary().InprocEndpoint(),
             publicPort,
             2);
     } else {
@@ -361,17 +349,16 @@ void Server::CreateMainFile(bool& mainFileExists)
         }
     }
 
-    const auto& wallet = manager_.Wallet();
+    const auto& wallet = api_.Wallet();
     const auto contract = [&] {
-        const auto existing =
-            String::Factory(OTDB::QueryPlainString(
-                                manager_,
-                                manager_.DataFolder().string(),
-                                SERVER_CONTRACT_FILE,
-                                "",
-                                "",
-                                "")
-                                .data());
+        const auto existing = String::Factory(OTDB::QueryPlainString(
+                                                  api_,
+                                                  api_.DataFolder().string(),
+                                                  SERVER_CONTRACT_FILE,
+                                                  "",
+                                                  "",
+                                                  "")
+                                                  .data());
 
         if (existing->empty()) {
 
@@ -410,15 +397,15 @@ void Server::CreateMainFile(bool& mainFileExists)
     OT_ASSERT(m_nymServer);
 
     {
-        auto nymData = manager_.Wallet().mutable_Nym(nymID, reason_);
+        auto nymData = api_.Wallet().mutable_Nym(nymID, reason_);
 
         if (false == nymData.SetCommonName(
-                         contract->ID().asBase58(manager_.Crypto()), reason_)) {
+                         contract->ID().asBase58(api_.Crypto()), reason_)) {
             OT_FAIL;
         }
     }
 
-    m_nymServer = manager_.Wallet().Nym(nymID);
+    m_nymServer = api_.Wallet().Nym(nymID);
 
     OT_ASSERT(m_nymServer);
 
@@ -429,15 +416,14 @@ void Server::CreateMainFile(bool& mainFileExists)
 
         OT_FAIL;
     }
-    const auto signedContract =
-        manager_.Factory().InternalSession().Data(proto);
-    auto ascContract = manager_.Factory().Armored(signedContract);
+    const auto signedContract = api_.Factory().InternalSession().Data(proto);
+    auto ascContract = api_.Factory().Armored(signedContract);
     auto strBookended = String::Factory();
     ascContract->WriteArmoredString(strBookended, "SERVER CONTRACT");
     OTDB::StorePlainString(
-        manager_,
+        api_,
         strBookended->Get(),
-        manager_.DataFolder().string(),
+        api_.DataFolder().string(),
         SERVER_CONTRACT_FILE,
         "",
         "",
@@ -447,10 +433,9 @@ void Server::CreateMainFile(bool& mainFileExists)
         SERVER_CONTRACT_FILE)(" in the server data directory.")
         .Flush();
 
-    const auto seedID = manager_.Storage().DefaultSeed();
-    const auto words = manager_.Crypto().Seed().Words(seedID, reason_);
-    const auto passphrase =
-        manager_.Crypto().Seed().Passphrase(seedID, reason_);
+    const auto seedID = api_.Storage().DefaultSeed();
+    const auto words = api_.Crypto().Seed().Words(seedID, reason_);
+    const auto passphrase = api_.Crypto().Seed().Passphrase(seedID, reason_);
     UnallocatedCString json;
     json += R"({ "passphrase": ")";
     json += passphrase;
@@ -459,25 +444,19 @@ void Server::CreateMainFile(bool& mainFileExists)
     json += "\" }\n";
 
     OTDB::StorePlainString(
-        manager_,
-        json,
-        manager_.DataFolder().string(),
-        SEED_BACKUP_FILE,
-        "",
-        "",
-        "");
+        api_, json, api_.DataFolder().string(), SEED_BACKUP_FILE, "", "", "");
 
     mainFileExists = mainFile_.CreateMainFile(
         strBookended->Get(), strNotaryID, nymID.asBase58(API().Crypto()));
 
-    manager_.Config().Save();
+    api_.Config().Save();
 }
 
 void Server::Init(bool readOnly)
 {
     m_bReadOnly = readOnly;
 
-    if (!ConfigLoader::load(manager_, manager_.Config(), WalletFilename())) {
+    if (!ConfigLoader::load(api_, api_.Config(), WalletFilename())) {
         LogError()(OT_PRETTY_CLASS())("Unable to Load Config File!").Flush();
         OT_FAIL;
     }
@@ -487,8 +466,8 @@ void Server::Init(bool readOnly)
     // Load up the transaction number and other Server data members.
     bool mainFileExists = WalletFilename().Exists()
                               ? OTDB::Exists(
-                                    manager_,
-                                    manager_.DataFolder().string(),
+                                    api_,
+                                    api_.DataFolder().string(),
                                     ".",
                                     WalletFilename().Get(),
                                     "",
@@ -514,8 +493,8 @@ void Server::Init(bool readOnly)
             "Error in Loading Main File, re-creating.")
             .Flush();
         OTDB::EraseValueByKey(
-            manager_,
-            manager_.DataFolder().string(),
+            api_,
+            api_.DataFolder().string(),
             ".",
             WalletFilename().Get(),
             "",
@@ -527,16 +506,16 @@ void Server::Init(bool readOnly)
         if (!mainFile_.LoadMainFile(readOnly)) { OT_FAIL; }
     }
 
-    auto password = manager_.Crypto().Encode().Nonce(16);
+    auto password = api_.Crypto().Encode().Nonce(16);
     auto notUsed = String::Factory();
     bool ignored;
-    manager_.Config().CheckSet_str(
+    api_.Config().CheckSet_str(
         String::Factory("permissions"),
         String::Factory("admin_password"),
         password,
         notUsed,
         ignored);
-    manager_.Config().Save();
+    api_.Config().Save();
 
     // With the Server's private key loaded, and the latest transaction number
     // loaded, and all the various other data (contracts, etc) the server is now
@@ -545,7 +524,7 @@ void Server::Init(bool readOnly)
 
 auto Server::LoadServerNym(const identifier::Nym& nymID) -> bool
 {
-    auto nym = manager_.Wallet().Nym(nymID);
+    auto nym = api_.Wallet().Nym(nymID);
 
     if (false == bool(nym)) {
         LogError()(OT_PRETTY_CLASS())("Server nym does not exist.").Flush();
@@ -729,8 +708,7 @@ auto Server::DropMessageToNymbox(
     const Message* message{nullptr};
 
     if (nullptr == pMsg) {
-        theMsgAngel.reset(
-            manager_.Factory().InternalSession().Message().release());
+        theMsgAngel.reset(api_.Factory().InternalSession().Message().release());
 
         if (nullptr != szCommand) {
             theMsgAngel->m_strCommand = String::Factory(szCommand);
@@ -759,10 +737,10 @@ auto Server::DropMessageToNymbox(
         // Load up the recipient's public key (so we can encrypt the envelope
         // to him that will contain the payment instrument.)
         //
-        auto nymRecipient = manager_.Wallet().Nym(RECIPIENT_NYM_ID);
+        auto nymRecipient = api_.Wallet().Nym(RECIPIENT_NYM_ID);
 
         // Wrap the message up into an envelope and attach it to theMsgAngel.
-        auto theEnvelope = manager_.Factory().Envelope();
+        auto theEnvelope = api_.Factory().Envelope();
         theMsgAngel->m_ascPayload->Release();
 
         if ((!pstrMessage.empty()) &&
@@ -806,7 +784,7 @@ auto Server::DropMessageToNymbox(
     // Grab a string copy of message.
     //
     const auto strInMessage = String::Factory(*message);
-    auto theLedger{manager_.Factory().InternalSession().Ledger(
+    auto theLedger{api_.Factory().InternalSession().Ledger(
         RECIPIENT_NYM_ID, RECIPIENT_NYM_ID, NOTARY_ID)};  // The
                                                           // recipient's
                                                           // Nymbox.
@@ -820,7 +798,7 @@ auto Server::DropMessageToNymbox(
                                            // Signature only.
          theLedger->VerifySignature(*m_nymServer))) {
         // Create the instrumentNotice to put in the Nymbox.
-        auto pTransaction{manager_.Factory().InternalSession().Transaction(
+        auto pTransaction{api_.Factory().InternalSession().Transaction(
             *theLedger, theType, originType::not_applicable, lTransNum)};
 
         if (false != bool(pTransaction))  // The above has an OT_ASSERT within,
@@ -898,7 +876,7 @@ auto Server::GetConnectInfo(
     UnallocatedCString& strHostname,
     std::uint32_t& nPort) const -> bool
 {
-    auto contract = manager_.Wallet().Server(m_notaryID);
+    auto contract = api_.Wallet().Server(m_notaryID);
     UnallocatedCString contractHostname{};
     std::uint32_t contractPort{};
     const auto haveEndpoints =
@@ -908,13 +886,13 @@ auto Server::GetConnectInfo(
 
     bool notUsed = false;
     std::int64_t port = 0;
-    const bool haveIP = manager_.Config().CheckSet_str(
+    const bool haveIP = api_.Config().CheckSet_str(
         String::Factory(SERVER_CONFIG_LISTEN_SECTION),
         String::Factory("bindip"),
         String::Factory(DEFAULT_BIND_IP),
         strHostname,
         notUsed);
-    const bool havePort = manager_.Config().CheckSet_long(
+    const bool havePort = api_.Config().CheckSet_long(
         String::Factory(SERVER_CONFIG_LISTEN_SECTION),
         String::Factory(SERVER_CONFIG_PORT_KEY),
         DEFAULT_PORT,
@@ -923,7 +901,7 @@ auto Server::GetConnectInfo(
     port = (MAX_TCP_PORT < port) ? DEFAULT_PORT : port;
     port = (MIN_TCP_PORT > port) ? DEFAULT_PORT : port;
     nPort = static_cast<std::uint32_t>(port);
-    manager_.Config().Save();
+    api_.Config().Save();
 
     return (haveIP && havePort);
 }
@@ -947,17 +925,12 @@ auto Server::SetNotaryID(const identifier::Notary& id) noexcept -> void
 {
     OT_ASSERT(false == id.empty());
 
-    if (const auto alreadySet = have_id_.exchange(true); false == alreadySet) {
-        m_notaryID = id;
-        init_promise_.set_value();
-    } else {
-        OT_ASSERT(m_notaryID == id);
-    }
+    m_notaryID.set_value(id);
 }
 
 auto Server::TransportKey(Data& pubkey) const -> OTSecret
 {
-    return manager_.Wallet().Server(m_notaryID)->TransportKey(pubkey, reason_);
+    return api_.Wallet().Server(m_notaryID)->TransportKey(pubkey, reason_);
 }
 
 Server::~Server() = default;

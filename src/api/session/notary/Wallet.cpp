@@ -41,7 +41,7 @@ namespace opentxs::factory
 auto WalletAPI(const api::session::Notary& parent) noexcept
     -> std::unique_ptr<api::session::Wallet>
 {
-    using ReturnType = api::session::server::Wallet;
+    using ReturnType = api::session::notary::Wallet;
 
     try {
 
@@ -54,7 +54,7 @@ auto WalletAPI(const api::session::Notary& parent) noexcept
 }
 }  // namespace opentxs::factory
 
-namespace opentxs::api::session::server
+namespace opentxs::api::session::notary
 {
 Wallet::Wallet(const api::session::Notary& parent)
     : ot_super(parent)
@@ -220,4 +220,4 @@ auto Wallet::signer_nym(const identifier::Nym&) const -> Nym_p
 {
     return Nym(server_.NymID());
 }
-}  // namespace opentxs::api::session::server
+}  // namespace opentxs::api::session::notary

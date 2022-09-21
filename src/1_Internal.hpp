@@ -5,9 +5,7 @@
 
 #pragma once
 
-// IWYU pragma: begin_exports
-#include "opentxs/Version.hpp"  // IWYU pragma: associated
-// IWYU pragma: end_exports
+#include "opentxs/Version.hpp"  // IWYU pragma: export
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
@@ -100,9 +98,9 @@ namespace internal
 {
 }  // namespace internal
 
-namespace server
+namespace notary
 {
-}  // namespace server
+}  // namespace notary
 
 namespace ui
 {
