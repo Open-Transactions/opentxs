@@ -13,5 +13,5 @@ namespace opentxs::blockchain
 {
 using TypeEnum = std::uint32_t;
 
-enum class BloomUpdateFlag : std::uint8_t;
+enum class BloomUpdateFlag : std::uint8_t;  // IWYU pragma: export
 }  // namespace opentxs::blockchain

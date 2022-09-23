@@ -13,9 +13,9 @@
 
 namespace opentxs
 {
-enum class AccountType : std::int8_t;
-enum class AddressType : std::uint8_t;
-enum class UnitType : std::uint32_t;
+enum class AccountType : std::int8_t;   // IWYU pragma: export
+enum class AddressType : std::uint8_t;  // IWYU pragma: export
+enum class UnitType : std::uint32_t;    // IWYU pragma: export
 
 auto print(AccountType) noexcept -> std::string_view;
 auto print(AddressType) noexcept -> std::string_view;

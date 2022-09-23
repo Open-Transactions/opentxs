@@ -12,8 +12,8 @@
 
 namespace opentxs::contract::peer
 {
-enum class ConnectionInfoType : std::uint8_t;
-enum class PeerObjectType : std::uint8_t;
-enum class PeerRequestType : std::uint8_t;
-enum class SecretType : std::uint8_t;
+enum class ConnectionInfoType : std::uint8_t;  // IWYU pragma: export
+enum class PeerObjectType : std::uint8_t;      // IWYU pragma: export
+enum class PeerRequestType : std::uint8_t;     // IWYU pragma: export
+enum class SecretType : std::uint8_t;          // IWYU pragma: export
 }  // namespace opentxs::contract::peer

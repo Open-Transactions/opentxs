@@ -14,12 +14,12 @@ namespace opentxs
 {
 namespace otx
 {
-enum class ConsensusType : std::uint8_t;
-enum class LastReplyStatus : std::uint8_t;
-enum class OTXPushType : std::uint8_t;
-enum class OperationType : std::uint16_t;
-enum class ServerReplyType : std::uint8_t;
-enum class ServerRequestType : std::uint8_t;
+enum class ConsensusType : std::uint8_t;      // IWYU pragma: export
+enum class LastReplyStatus : std::uint8_t;    // IWYU pragma: export
+enum class OTXPushType : std::uint8_t;        // IWYU pragma: export
+enum class OperationType : std::uint16_t;     // IWYU pragma: export
+enum class ServerReplyType : std::uint8_t;    // IWYU pragma: export
+enum class ServerRequestType : std::uint8_t;  // IWYU pragma: export
 }  // namespace otx
 
 constexpr auto value(const otx::ConsensusType in) noexcept

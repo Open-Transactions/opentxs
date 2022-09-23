@@ -1,4 +1,4 @@
 {
   "InheritParentConfig": "true",
-  "Checks": "-*"
+  "Checks": "-cert-err33-c"
 }
