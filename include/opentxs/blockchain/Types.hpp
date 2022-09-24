@@ -41,7 +41,7 @@ namespace opentxs::blockchain
 {
 using TypeEnum = std::uint32_t;
 
-enum class Type : TypeEnum;
+enum class Type : TypeEnum;  // IWYU pragma: export
 
 using Amount = opentxs::Amount;
 using ChainHeight = std::int64_t;

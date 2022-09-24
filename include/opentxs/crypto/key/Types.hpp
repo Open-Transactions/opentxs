@@ -14,14 +14,14 @@ namespace opentxs::crypto::key
 {
 namespace asymmetric
 {
-enum class Algorithm : std::uint8_t;
-enum class Mode : std::uint8_t;
-enum class Role : std::uint8_t;
+enum class Algorithm : std::uint8_t;  // IWYU pragma: export
+enum class Mode : std::uint8_t;       // IWYU pragma: export
+enum class Role : std::uint8_t;       // IWYU pragma: export
 }  // namespace asymmetric
 
 namespace symmetric
 {
-enum class Source : std::uint8_t;
-enum class Algorithm : std::uint8_t;
+enum class Source : std::uint8_t;     // IWYU pragma: export
+enum class Algorithm : std::uint8_t;  // IWYU pragma: export
 }  // namespace symmetric
 }  // namespace opentxs::crypto::key

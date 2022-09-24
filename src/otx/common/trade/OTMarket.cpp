@@ -2504,6 +2504,7 @@ auto OTMarket::ProcessTrade(
         // other hand, is first in line.  So we start there, and loop
         // backwards until there are no other bids within my price
         // range.
+        // NOLINTBEGIN(modernize-loop-convert)
         for (auto rr = m_mapBids.rbegin(); rr != m_mapBids.rend(); ++rr) {
             // then I want to start at the highest bidder and loop DOWN
             // until hitting my price limit.
@@ -2601,6 +2602,7 @@ auto OTMarket::ProcessTrade(
 
             pBid = nullptr;
         }
+        // NOLINTEND(modernize-loop-convert)
     }
     // I'm buying
     else {

@@ -43,9 +43,9 @@ namespace opentxs::blockchain::node
 {
 using TypeEnum = std::uint32_t;
 
-enum class SendResult : TypeEnum;
-enum class TxoState : std::uint16_t;
-enum class TxoTag : std::uint16_t;
+enum class SendResult : TypeEnum;     // IWYU pragma: export
+enum class TxoState : std::uint16_t;  // IWYU pragma: export
+enum class TxoTag : std::uint16_t;    // IWYU pragma: export
 
 using BitcoinBlockResult =
     std::shared_future<std::shared_ptr<const bitcoin::block::Block>>;

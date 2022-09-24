@@ -1,43 +1,4 @@
 {
-  "Checks": "boost-use-to-string,bugprone-argument-comment,bugprone-assert-side-effect,bugprone-bad-signal-to-kill-thread,bugprone-unused-raii,bugprone-use-after-move,cert-*,-cert-oop54-cpp,-cert-err58-cpp,clang-diagnostic-*,clang-analyzer-*,modernize-*,-modernize-pass-by-value,-modernize-use-default-member-init,-modernize-use-nodiscard,-modernize-avoid-c-arrays,readability-braces-around-statements,readability-qualified-auto",
-  "CheckOptions": [
-    {
-      "key": "bugprone-argument-comment.IgnoreSingleArgument",
-      "value": "false"
-    },
-    {
-      "key": "bugprone-argument-comment.CommentBoolLiterals",
-      "value": "false"
-    },
-    {
-      "key": "bugprone-argument-comment.CommentIntegerLiterals",
-      "value": "false"
-    },
-    {
-      "key": "bugprone-argument-comment.CommentFloatLiterals",
-      "value": "false"
-    },
-    {
-      "key": "bugprone-argument-comment.CommentCharacterLiterals",
-      "value": "false"
-    },
-    {
-      "key": "bugprone-argument-comment.CommentUserDefinedLiterals",
-      "value": "false"
-    },
-    {
-      "key": "bugprone-argument-comment.CommentNullPtrs",
-      "value": "false"
-    },
-    {
-      "key": ",bugprone-assert-side-effect.AssertMacros",
-      "value": "OT_ASSERT,OT_ASSERT_MSG"
-    },
-    {
-      "key": "readability-braces-around-statements.ShortStatementLines",
-      "value": "0"
-    }
-  ],
-  "FormatStyle": "file",
-  "WarningsAsErrors": "*"
+  "InheritParentConfig": "true",
+  "Checks": "-modernize-avoid-c-arrays"
 }

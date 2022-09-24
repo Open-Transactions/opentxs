@@ -222,13 +222,10 @@ if(OT_SCRIPT_USING_CHAI
    AND (CMAKE_CXX_COMPILER_VERSION
         VERSION_GREATER
         13.99)
-   AND (CMAKE_CXX_COMPILER_VERSION
-        VERSION_LESS
-        15.0)
 )
   message(
     WARNING
-      "clang-14 is not capable of compiling the ChaiScript library in c++20 mode. Use clang version 12, 13, or 15 if you want smart contract support."
+      "clang-14 and above is not capable of compiling the ChaiScript library in c++20 mode."
   )
   set(OT_SCRIPT_USING_CHAI OFF)
 endif()

@@ -21,9 +21,9 @@
 
 namespace opentxs::identity::wot::claim
 {
-enum class Attribute : std::uint8_t;
-enum class ClaimType : std::uint32_t;
-enum class SectionType : std::uint8_t;
+enum class Attribute : std::uint8_t;    // IWYU pragma: export
+enum class ClaimType : std::uint32_t;   // IWYU pragma: export
+enum class SectionType : std::uint8_t;  // IWYU pragma: export
 }  // namespace opentxs::identity::wot::claim
 
 namespace opentxs

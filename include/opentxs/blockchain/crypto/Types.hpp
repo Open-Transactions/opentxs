@@ -48,10 +48,10 @@ class Generic;
 
 namespace opentxs::blockchain::crypto
 {
-enum class AddressStyle : std::uint16_t;
-enum class HDProtocol : std::uint16_t;
-enum class SubaccountType : std::uint16_t;
-enum class Subchain : std::uint8_t;
+enum class AddressStyle : std::uint16_t;    // IWYU pragma: export
+enum class HDProtocol : std::uint16_t;      // IWYU pragma: export
+enum class SubaccountType : std::uint16_t;  // IWYU pragma: export
+enum class Subchain : std::uint8_t;         // IWYU pragma: export
 
 /// transaction id, output index
 using Coin = std::pair<UnallocatedCString, std::size_t>;
