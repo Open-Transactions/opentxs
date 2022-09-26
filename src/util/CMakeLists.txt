@@ -108,23 +108,9 @@ target_link_libraries(
   opentxs
   PUBLIC
     Boost::container
-    Boost::iostreams
     Boost::program_options
     unofficial-sodium::sodium
 )
-
-if(LMDB_EXPORT)
-  target_sources(
-    opentxs-common
-    PRIVATE
-      "LMDB.cpp"
-      "LMDB.hpp"
-      "MappedFileStorage.cpp"
-      "MappedFileStorage.hpp"
-  )
-  target_link_libraries(opentxs-common PRIVATE lmdb)
-  target_link_libraries(opentxs PUBLIC lmdb)
-endif()
 
 target_sources(opentxs-common PRIVATE ${cxx-install-headers})
 

@@ -16,82 +16,59 @@
 #include <utility>
 
 #include "internal/util/Mutex.hpp"
+#include "internal/util/storage/lmdb/Types.hpp"
 #include "opentxs/Version.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 
-extern "C" {
-using MDB_env = struct MDB_env;
-using MDB_txn = struct MDB_txn;
-using MDB_dbi = unsigned int;
-}
+// NOLINTBEGIN(modernize-concat-nested-namespaces)
+namespace opentxs  // NOLINT
+{
+// inline namespace v1
+// {
+namespace storage
+{
+namespace lmdb
+{
+class DatabasePrivate;
+class Transaction;
+}  // namespace lmdb
+}  // namespace storage
+// }  // namespace v1
+}  // namespace opentxs
+// NOLINTEND(modernize-concat-nested-namespaces)
 
 namespace opentxs::storage::lmdb
 {
-using Callback = std::function<void(const ReadView data)>;
-using Flags = unsigned int;
-using ReadCallback =
-    std::function<bool(const ReadView key, const ReadView value)>;
-using Result = std::pair<bool, int>;
-using Table = int;
-using Databases = UnallocatedMap<Table, MDB_dbi>;
-using TablesToInit = UnallocatedVector<std::pair<Table, unsigned int>>;
-using TableNames = UnallocatedMap<Table, const UnallocatedCString>;
-using UpdateCallback = std::function<Space(const ReadView data)>;
-
-class LMDB
+class Database
 {
 public:
-    enum class Dir : bool { Forward = false, Backward = true };
-    enum class Mode : bool { One = false, Multiple = true };
-
-    struct Transaction {
-        bool success_;
-
-        operator MDB_txn*() noexcept { return ptr_; }
-
-        auto Finalize(const std::optional<bool> success = {}) noexcept -> bool;
-
-        Transaction(
-            MDB_env* env,
-            const bool rw,
-            std::unique_ptr<Lock> lock,
-            MDB_txn* parent = nullptr) noexcept(false);
-        Transaction(const Transaction&) = delete;
-        Transaction(Transaction&&) noexcept;
-        auto operator=(const Transaction&) -> Transaction& = delete;
-        auto operator=(Transaction&&) -> Transaction& = delete;
-
-        ~Transaction();
-
-    private:
-        std::unique_ptr<Lock> lock_;
-        MDB_txn* ptr_;
-    };
-
     auto Commit() const noexcept -> bool;
-    auto Delete(const Table table, MDB_txn* parent = nullptr) const noexcept
+    auto Delete(const Table table) const noexcept -> bool;
+    auto Delete(const Table table, Transaction& parent) const noexcept -> bool;
+    auto Delete(const Table table, const ReadView key) const noexcept -> bool;
+    auto Delete(const Table table, const ReadView key, Transaction& parent)
+        const noexcept -> bool;
+    auto Delete(const Table table, const std::size_t key) const noexcept
         -> bool;
-    auto Delete(
-        const Table table,
-        const std::size_t key,
-        MDB_txn* parent = nullptr) const noexcept -> bool;
-    auto Delete(
-        const Table table,
-        const ReadView key,
-        MDB_txn* parent = nullptr) const noexcept -> bool;
+    auto Delete(const Table table, const std::size_t key, Transaction& parent)
+        const noexcept -> bool;
+    auto Delete(const Table table, const std::size_t key, const ReadView value)
+        const noexcept -> bool;
     auto Delete(
         const Table table,
         const std::size_t key,
         const ReadView value,
-        MDB_txn* parent = nullptr) const noexcept -> bool;
+        Transaction& parent) const noexcept -> bool;
+    auto Delete(const Table table, const ReadView key, const ReadView value)
+        const noexcept -> bool;
     auto Delete(
         const Table table,
         const ReadView key,
         const ReadView value,
-        MDB_txn* parent = nullptr) const noexcept -> bool;
+        Transaction& parent) const noexcept -> bool;
     auto Exists(const Table table, const ReadView key) const noexcept -> bool;
-    auto Exists(const Table table, const ReadView key, MDB_txn* tx)
+    auto Exists(const Table table, const ReadView key, Transaction& tx)
         const noexcept -> bool;
     auto Exists(const Table table, const ReadView key, const ReadView value)
         const noexcept -> bool;
@@ -99,7 +76,7 @@ public:
         const Table table,
         const ReadView key,
         const ReadView value,
-        MDB_txn* tx) const noexcept -> bool;
+        Transaction& tx) const noexcept -> bool;
     auto Load(
         const Table table,
         const ReadView key,
@@ -127,11 +104,11 @@ public:
         const Table table,
         const ReadCallback cb,
         const Dir dir,
-        MDB_txn* parent) const noexcept -> bool;
+        Transaction& parent) const noexcept -> bool;
     auto ReadAndDelete(
         const Table table,
         const ReadCallback cb,
-        MDB_txn& tx,
+        Transaction& tx,
         const UnallocatedCString& message) const noexcept -> bool;
     auto ReadFrom(
         const Table table,
@@ -147,47 +124,57 @@ public:
         const Table table,
         const ReadView key,
         const ReadView value,
-        MDB_txn* parent = nullptr,
+        const Flags flags = 0) const noexcept -> Result;
+    auto Store(
+        const Table table,
+        const ReadView key,
+        const ReadView value,
+        Transaction& parent,
         const Flags flags = 0) const noexcept -> Result;
     auto Store(
         const Table table,
         const std::size_t key,
         const ReadView value,
-        MDB_txn* parent = nullptr,
+        const Flags flags = 0) const noexcept -> Result;
+    auto Store(
+        const Table table,
+        const std::size_t key,
+        const ReadView value,
+        Transaction& parent,
         const Flags flags = 0) const noexcept -> Result;
     auto StoreOrUpdate(
         const Table table,
         const ReadView key,
         const UpdateCallback cb,
-        MDB_txn* parent = nullptr,
+        const Flags flags = 0) const noexcept -> Result;
+    auto StoreOrUpdate(
+        const Table table,
+        const ReadView key,
+        const UpdateCallback cb,
+        Transaction& parent,
         const Flags flags = 0) const noexcept -> Result;
     auto TransactionRO() const noexcept(false) -> Transaction;
-    auto TransactionRW(MDB_txn* parent = nullptr) const noexcept(false)
+    auto TransactionRW() const noexcept(false) -> Transaction;
+    auto TransactionRW(Transaction& parent) const noexcept(false)
         -> Transaction;
 
-    LMDB(
+    Database(
         const TableNames& names,
         const std::filesystem::path& folder,
         const TablesToInit init,
         const Flags flags = 0,
-        const std::size_t extraTables = 0)
-    noexcept;
-    LMDB() = delete;
-    LMDB(const LMDB&) = delete;
+        const std::size_t extraTables = 0) noexcept;
+    Database() = delete;
+    Database(const Database&) = delete;
     // NOTE: move constructor is only defined to allow copy elision. It
     // should not be used for any other purpose.
-    LMDB(LMDB&&) noexcept;
-    auto operator=(const LMDB&) -> LMDB& = delete;
-    auto operator=(LMDB&&) -> LMDB& = delete;
+    Database(Database&&) noexcept;
+    auto operator=(const Database&) -> Database& = delete;
+    auto operator=(Database&&) -> Database& = delete;
 
-    ~LMDB();
+    ~Database();
 
 private:
-    struct Imp;
-
-    std::unique_ptr<Imp> imp_;
-
-    auto read(const MDB_dbi dbi, const ReadCallback cb, const Dir dir)
-        const noexcept -> bool;
+    std::unique_ptr<DatabasePrivate> imp_;
 };
 }  // namespace opentxs::storage::lmdb

@@ -20,6 +20,9 @@
 #include "internal/blockchain/block/Factory.hpp"
 #include "internal/blockchain/database/Types.hpp"
 #include "internal/util/LogMacros.hpp"
+#include "internal/util/storage/lmdb/Database.hpp"
+#include "internal/util/storage/lmdb/Transaction.hpp"
+#include "internal/util/storage/lmdb/Types.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/blockchain/bitcoin/cfilter/GCS.hpp"
@@ -29,14 +32,13 @@
 #include "opentxs/blockchain/block/Header.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/util/Log.hpp"
-#include "util/LMDB.hpp"
 
 namespace opentxs::blockchain::database
 {
 Filters::Filters(
     const api::Session& api,
     const common::Database& common,
-    const storage::lmdb::LMDB& lmdb,
+    const storage::lmdb::Database& lmdb,
     const blockchain::Type chain) noexcept
     : api_(api)
     , common_(common)

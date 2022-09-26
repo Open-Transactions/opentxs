@@ -20,6 +20,7 @@
 #include "internal/blockchain/node/wallet/ReorgSlave.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
+#include "internal/util/storage/lmdb/Transaction.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
 #include "opentxs/blockchain/node/HeaderOracle.hpp"
 #include "opentxs/network/zeromq/Pipeline.hpp"
@@ -248,7 +249,7 @@ auto ReorgMasterPrivate::FinishReorg() noexcept -> void
 
 auto ReorgMasterPrivate::GetReorg(
     const block::Position& position,
-    storage::lmdb::LMDB::Transaction&& tx) noexcept -> Reorg::Params&
+    storage::lmdb::Transaction&& tx) noexcept -> Reorg::Params&
 {
     try {
         auto handle = data_.lock();
@@ -444,7 +445,7 @@ auto ReorgMaster::FinishReorg() noexcept -> void { imp_->FinishReorg(); }
 
 auto ReorgMaster::GetReorg(
     const block::Position& position,
-    storage::lmdb::LMDB::Transaction&& tx) noexcept -> Params&
+    storage::lmdb::Transaction&& tx) noexcept -> Params&
 {
     return imp_->GetReorg(position, std::move(tx));
 }

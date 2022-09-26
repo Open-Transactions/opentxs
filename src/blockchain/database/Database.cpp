@@ -16,8 +16,9 @@ extern "C" {
 #include "internal/blockchain/database/Factory.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/TSV.hpp"
+#include "internal/util/storage/lmdb/Database.hpp"
+#include "internal/util/storage/lmdb/Transaction.hpp"
 #include "opentxs/util/Container.hpp"
-#include "util/LMDB.hpp"
 
 namespace opentxs::factory
 {
@@ -77,7 +78,7 @@ Database::Database(
     , chain_(chain)
     , common_(common)
     , lmdb_([&] {
-        auto lmdb = storage::lmdb::LMDB{
+        auto lmdb = storage::lmdb::Database{
             table_names_,
             common.AllocateStorageFolder(
                 std::to_string(static_cast<std::uint32_t>(chain_))),
@@ -122,7 +123,7 @@ Database::Database(
 {
 }
 
-auto Database::init_db(storage::lmdb::LMDB& db) noexcept -> void
+auto Database::init_db(storage::lmdb::Database& db) noexcept -> void
 {
     if (false == db.Exists(database::Config, tsv(database::Key::Version))) {
         const auto stored = db.Store(
@@ -130,5 +131,10 @@ auto Database::init_db(storage::lmdb::LMDB& db) noexcept -> void
 
         OT_ASSERT(stored.first);
     }
+}
+
+auto Database::StartReorg() noexcept -> storage::lmdb::Transaction
+{
+    return lmdb_.TransactionRW();
 }
 }  // namespace opentxs::blockchain::implementation

@@ -19,7 +19,6 @@
 #include "internal/util/P0330.hpp"
 #include "opentxs/util/Allocated.hpp"
 #include "opentxs/util/Container.hpp"
-#include "util/LMDB.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
@@ -53,6 +52,14 @@ class Pipeline;
 }  // namespace zeromq
 }  // namespace network
 
+namespace storage
+{
+namespace lmdb
+{
+class Transaction;
+}  // namespace lmdb
+}  // namespace storage
+
 class Log;
 // }  // namespace v1
 }  // namespace opentxs
@@ -77,7 +84,7 @@ public:
     auto FinishReorg() noexcept -> void;
     [[nodiscard]] auto GetReorg(
         const block::Position& position,
-        storage::lmdb::LMDB::Transaction&& tx) noexcept -> Reorg::Params&;
+        storage::lmdb::Transaction&& tx) noexcept -> Reorg::Params&;
     [[nodiscard]] auto GetSlave(
         const network::zeromq::Pipeline& parent,
         std::string_view name,

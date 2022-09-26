@@ -13,7 +13,23 @@
 #include "opentxs/Version.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
-#include "util/LMDB.hpp"
+
+// NOLINTBEGIN(modernize-concat-nested-namespaces)
+namespace opentxs  // NOLINT
+{
+// inline namespace v1
+// {
+namespace storage
+{
+namespace lmdb
+{
+class Database;
+class Transaction;
+}  // namespace lmdb
+}  // namespace storage
+// }  // namespace v1
+}  // namespace opentxs
+// NOLINTEND(modernize-concat-nested-namespaces)
 
 namespace opentxs::util
 {
@@ -29,10 +45,11 @@ struct IndexData {
 class MappedFileStorage
 {
 protected:
-    using LMDB = opentxs::storage::lmdb::LMDB;
-    using UpdateCallback = std::function<bool(LMDB::Transaction&)>;
+    using Database = opentxs::storage::lmdb::Database;
+    using Transaction = opentxs::storage::lmdb::Transaction;
+    using UpdateCallback = std::function<bool(Transaction&)>;
 
-    LMDB& lmdb_;
+    Database& lmdb_;
 
     // NOTE: this class performs no locking. Inheritors must ensure these
     // functions are not called simultaneously from multiple threads.
@@ -50,17 +67,15 @@ protected:
     //
     // Storing a zero byte object is not allowed.
     auto get_write_view(
-        LMDB::Transaction& tx,
+        Transaction& tx,
         IndexData& index,
         UpdateCallback&& cb,  // will be called if index is changed
         std::size_t size) const noexcept -> WritableView;
-    auto get_write_view(
-        LMDB::Transaction& tx,
-        IndexData& index,
-        std::size_t size) const noexcept -> WritableView;
+    auto get_write_view(Transaction& tx, IndexData& index, std::size_t size)
+        const noexcept -> WritableView;
 
     MappedFileStorage(
-        opentxs::storage::lmdb::LMDB& lmdb,
+        opentxs::storage::lmdb::Database& lmdb,
         const std::filesystem::path& basePath,
         const std::filesystem::path filenamePrefix,
         int table,

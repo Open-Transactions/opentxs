@@ -24,7 +24,6 @@
 #include "opentxs/blockchain/node/Wallet.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
-#include "util/LMDB.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
@@ -84,16 +83,13 @@ namespace storage
 {
 namespace lmdb
 {
-class LMDB;
+class Database;
+class Transaction;
 }  // namespace lmdb
 }  // namespace storage
 // }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
-
-extern "C" {
-using MDB_txn = struct MDB_txn;
-}
 
 namespace opentxs::blockchain::database::wallet
 {
@@ -160,20 +156,21 @@ public:
         const bitcoin::block::Transaction& transaction) noexcept -> bool;
     auto AdvanceTo(const block::Position& pos) noexcept -> bool;
     auto CancelProposal(const identifier::Generic& id) noexcept -> bool;
-    auto FinalizeReorg(MDB_txn* tx, const block::Position& pos) noexcept
-        -> bool;
+    auto FinalizeReorg(
+        storage::lmdb::Transaction& tx,
+        const block::Position& pos) noexcept -> bool;
     auto ReserveUTXO(
         const identifier::Nym& spender,
         const identifier::Generic& proposal,
         node::internal::SpendPolicy& policy) noexcept -> std::optional<UTXO>;
     auto StartReorg(
-        MDB_txn* tx,
+        storage::lmdb::Transaction& tx,
         const SubchainID& subchain,
         const block::Position& position) noexcept -> bool;
 
     Output(
         const api::Session& api,
-        const storage::lmdb::LMDB& lmdb,
+        const storage::lmdb::Database& lmdb,
         const blockchain::Type chain,
         const wallet::SubchainData& subchains,
         wallet::Proposal& proposals) noexcept;

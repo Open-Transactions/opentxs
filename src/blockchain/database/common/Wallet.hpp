@@ -65,7 +65,7 @@ namespace storage
 {
 namespace lmdb
 {
-class LMDB;
+class Database;
 }  // namespace lmdb
 }  // namespace storage
 
@@ -109,7 +109,7 @@ public:
     Wallet(
         const api::Session& api,
         const api::crypto::Blockchain& blockchain,
-        storage::lmdb::LMDB& lmdb,
+        storage::lmdb::Database& lmdb,
         Bulk& bulk) noexcept(false);
 
     ~Wallet();
@@ -126,7 +126,7 @@ private:
 
     const api::Session& api_;
     const api::crypto::Blockchain& blockchain_;
-    storage::lmdb::LMDB& lmdb_;
+    storage::lmdb::Database& lmdb_;
     Bulk& bulk_;
     const int transaction_table_;
     mutable std::mutex lock_;

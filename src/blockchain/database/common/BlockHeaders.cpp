@@ -10,6 +10,7 @@
 #include <BlockchainBlockHeader.pb.h>
 #include <cstring>
 #include <stdexcept>
+#include <type_traits>
 #include <utility>
 
 #include "Proto.hpp"
@@ -19,16 +20,18 @@
 #include "internal/blockchain/database/common/Common.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/TSV.hpp"
+#include "internal/util/storage/lmdb/Database.hpp"
+#include "internal/util/storage/lmdb/Transaction.hpp"
 #include "opentxs/blockchain/block/Header.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
-#include "util/LMDB.hpp"
-#include "util/MappedFileStorage.hpp"
+#include "util/storage/MappedFile.hpp"
 
 namespace opentxs::blockchain::database::common
 {
-BlockHeader::BlockHeader(storage::lmdb::LMDB& lmdb, Bulk& bulk) noexcept(false)
+BlockHeader::BlockHeader(storage::lmdb::Database& lmdb, Bulk& bulk) noexcept(
+    false)
     : lmdb_(lmdb)
     , bulk_(bulk)
     , table_(Table::HeaderIndex)
@@ -102,7 +105,7 @@ auto BlockHeader::Store(const UpdatedHeader& headers) const noexcept -> bool
 auto BlockHeader::store(
     const Lock& lock,
     bool clearLocal,
-    storage::lmdb::LMDB::Transaction& pTx,
+    storage::lmdb::Transaction& pTx,
     const opentxs::blockchain::block::Header& header) const noexcept -> bool
 {
     const auto& hash = header.Hash();

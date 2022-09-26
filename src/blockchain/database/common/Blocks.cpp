@@ -18,17 +18,18 @@
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/Mutex.hpp"
 #include "internal/util/TSV.hpp"
+#include "internal/util/storage/lmdb/Database.hpp"
+#include "internal/util/storage/lmdb/Transaction.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
-#include "util/LMDB.hpp"
-#include "util/MappedFileStorage.hpp"
+#include "util/storage/MappedFile.hpp"
 
 namespace opentxs::blockchain::database::common
 {
 struct Blocks::Imp {
-    storage::lmdb::LMDB& lmdb_;
+    storage::lmdb::Database& lmdb_;
     Bulk& bulk_;
     const int table_;
     mutable std::mutex lock_;
@@ -119,7 +120,7 @@ struct Blocks::Imp {
         return BlockWriter{std::move(view), block_locks_[block]};
     }
 
-    Imp(storage::lmdb::LMDB& lmdb, Bulk& bulk) noexcept
+    Imp(storage::lmdb::Database& lmdb, Bulk& bulk) noexcept
         : lmdb_(lmdb)
         , bulk_(bulk)
         , table_(Table::BlockIndex)
@@ -129,7 +130,7 @@ struct Blocks::Imp {
     }
 };
 
-Blocks::Blocks(storage::lmdb::LMDB& lmdb, Bulk& bulk) noexcept
+Blocks::Blocks(storage::lmdb::Database& lmdb, Bulk& bulk) noexcept
     : imp_(std::make_unique<Imp>(lmdb, bulk))
 {
 }

@@ -12,7 +12,6 @@
 #include "internal/blockchain/node/wallet/Reorg.hpp"
 #include "internal/blockchain/node/wallet/Types.hpp"
 #include "opentxs/util/Allocated.hpp"
-#include "util/LMDB.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
@@ -45,6 +44,14 @@ namespace zeromq
 class Pipeline;
 }  // namespace zeromq
 }  // namespace network
+
+namespace storage
+{
+namespace lmdb
+{
+class Transaction;
+}  // namespace lmdb
+}  // namespace storage
 // }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
@@ -61,7 +68,7 @@ public:
     auto FinishReorg() noexcept -> void;
     [[nodiscard]] auto GetReorg(
         const block::Position& position,
-        storage::lmdb::LMDB::Transaction&& tx) noexcept -> Params&;
+        storage::lmdb::Transaction&& tx) noexcept -> Params&;
     [[nodiscard]] auto GetSlave(
         const network::zeromq::Pipeline& parent,
         std::string_view name,

@@ -3,6 +3,7 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_include "internal/util/storage/lmdb/Transaction.hpp"
 // IWYU pragma: no_include "opentxs/blockchain/node/TxoState.hpp"
 // IWYU pragma: no_include "opentxs/blockchain/node/TxoTag.hpp"
 
@@ -36,6 +37,8 @@
 #include "internal/blockchain/database/Wallet.hpp"
 #include "internal/blockchain/database/common/Common.hpp"
 #include "internal/util/Mutex.hpp"
+#include "internal/util/storage/lmdb/Database.hpp"
+#include "internal/util/storage/lmdb/Types.hpp"
 #include "opentxs/blockchain/BlockchainType.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/bitcoin/block/Header.hpp"
@@ -59,7 +62,6 @@
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
 #include "opentxs/util/Pimpl.hpp"
-#include "util/LMDB.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
@@ -132,6 +134,14 @@ namespace proto
 {
 class BlockchainTransactionProposal;
 }  // namespace proto
+
+namespace storage
+{
+namespace lmdb
+{
+class Transaction;
+}  // namespace lmdb
+}  // namespace storage
 
 class Data;
 // }  // namespace v1
@@ -241,7 +251,7 @@ public:
         return filters_.CurrentTip(type);
     }
     auto FinalizeReorg(
-        storage::lmdb::LMDB::Transaction& tx,
+        storage::lmdb::Transaction& tx,
         const block::Position& pos) noexcept -> bool final
     {
         return wallet_.FinalizeReorg(tx, pos);
@@ -453,7 +463,7 @@ public:
     }
     auto ReorgTo(
         const node::internal::HeaderOraclePrivate& data,
-        storage::lmdb::LMDB::Transaction& tx,
+        storage::lmdb::Transaction& tx,
         const node::HeaderOracle& headers,
         const NodeID& account,
         const crypto::Subchain subchain,
@@ -496,10 +506,7 @@ public:
     {
         return headers_.SiblingHashes();
     }
-    auto StartReorg() noexcept -> storage::lmdb::LMDB::Transaction final
-    {
-        return lmdb_.TransactionRW();
-    }
+    auto StartReorg() noexcept -> storage::lmdb::Transaction final;
     auto StoreFilters(
         const cfilter::Type type,
         Vector<CFilterParams> filters) noexcept -> bool final
@@ -587,13 +594,13 @@ private:
     const api::Session& api_;
     const blockchain::Type chain_;
     const database::common::Database& common_;
-    storage::lmdb::LMDB lmdb_;
+    storage::lmdb::Database lmdb_;
     mutable database::Blocks blocks_;
     mutable database::Filters filters_;
     mutable database::Headers headers_;
     mutable database::implemenation::Wallet wallet_;
     mutable database::implementation::Sync sync_;
 
-    static auto init_db(storage::lmdb::LMDB& db) noexcept -> void;
+    static auto init_db(storage::lmdb::Database& db) noexcept -> void;
 };
 }  // namespace opentxs::blockchain::implementation

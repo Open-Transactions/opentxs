@@ -20,6 +20,7 @@
 #include "blockchain/database/wallet/Types.hpp"
 #include "internal/blockchain/database/Types.hpp"
 #include "internal/util/TSV.hpp"
+#include "internal/util/storage/lmdb/Types.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/blockchain/block/Outpoint.hpp"
@@ -31,7 +32,6 @@
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
-#include "util/LMDB.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
@@ -64,6 +64,15 @@ class Outpoint;
 class Position;
 }  // namespace block
 }  // namespace blockchain
+
+namespace storage
+{
+namespace lmdb
+{
+class Database;
+class Transaction;
+}  // namespace lmdb
+}  // namespace storage
 // }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
@@ -83,8 +92,8 @@ constexpr auto proposal_spent_{Table::ProposalSpentOutputs};
 constexpr auto states_{Table::StateOutputs};
 constexpr auto subchains_{Table::SubchainOutputs};
 
-using Dir = storage::lmdb::LMDB::Dir;
-using Mode = storage::lmdb::LMDB::Mode;
+using Dir = storage::lmdb::Dir;
+using Mode = storage::lmdb::Mode;
 using SubchainID = identifier::Generic;
 using States = UnallocatedVector<node::TxoState>;
 using Matches = UnallocatedVector<block::Outpoint>;
@@ -117,7 +126,7 @@ public:
 
     auto AddOutput(
         const block::Outpoint& id,
-        MDB_txn* tx,
+        storage::lmdb::Transaction& tx,
         std::unique_ptr<bitcoin::block::Output> output) noexcept -> bool;
     auto AddOutput(
         const block::Outpoint& id,
@@ -125,42 +134,42 @@ public:
         const block::Position& position,
         const AccountID& account,
         const SubchainID& subchain,
-        MDB_txn* tx,
+        storage::lmdb::Transaction& tx,
         std::unique_ptr<bitcoin::block::Output> output) noexcept -> bool;
     auto AddToAccount(
         const AccountID& id,
         const block::Outpoint& output,
-        MDB_txn* tx) noexcept -> bool;
+        storage::lmdb::Transaction& tx) noexcept -> bool;
     auto AddToKey(
         const crypto::Key& id,
         const block::Outpoint& output,
-        MDB_txn* tx) noexcept -> bool;
+        storage::lmdb::Transaction& tx) noexcept -> bool;
     auto AddToNym(
         const identifier::Nym& id,
         const block::Outpoint& output,
-        MDB_txn* tx) noexcept -> bool;
+        storage::lmdb::Transaction& tx) noexcept -> bool;
     auto AddToPosition(
         const block::Position& id,
         const block::Outpoint& output,
-        MDB_txn* tx) noexcept -> bool;
+        storage::lmdb::Transaction& tx) noexcept -> bool;
     auto AddToState(
         const node::TxoState id,
         const block::Outpoint& output,
-        MDB_txn* tx) noexcept -> bool;
+        storage::lmdb::Transaction& tx) noexcept -> bool;
     auto AddToSubchain(
         const SubchainID& id,
         const block::Outpoint& output,
-        MDB_txn* tx) noexcept -> bool;
+        storage::lmdb::Transaction& tx) noexcept -> bool;
     auto ChangePosition(
         const block::Position& oldPosition,
         const block::Position& newPosition,
         const block::Outpoint& output,
-        MDB_txn* tx) noexcept -> bool;
+        storage::lmdb::Transaction& tx) noexcept -> bool;
     auto ChangeState(
         const node::TxoState oldState,
         const node::TxoState newState,
         const block::Outpoint& output,
-        MDB_txn* tx) noexcept -> bool;
+        storage::lmdb::Transaction& tx) noexcept -> bool;
     auto Clear() noexcept -> void;
     auto GetOutput(const block::Outpoint& id) noexcept(false)
         -> bitcoin::block::internal::Output&;
@@ -171,12 +180,14 @@ public:
     auto UpdateOutput(
         const block::Outpoint& id,
         const bitcoin::block::Output& output,
-        MDB_txn* tx) noexcept -> bool;
-    auto UpdatePosition(const block::Position&, MDB_txn* tx) noexcept -> bool;
+        storage::lmdb::Transaction& tx) noexcept -> bool;
+    auto UpdatePosition(
+        const block::Position&,
+        storage::lmdb::Transaction& tx) noexcept -> bool;
 
     OutputCache(
         const api::Session& api,
-        const storage::lmdb::LMDB& lmdb,
+        const storage::lmdb::Database& lmdb,
         const blockchain::Type chain,
         const block::Position& blank) noexcept;
 
@@ -188,7 +199,7 @@ private:
     static const Nyms empty_nyms_;
 
     const api::Session& api_;
-    const storage::lmdb::LMDB& lmdb_;
+    const storage::lmdb::Database& lmdb_;
     const blockchain::Type chain_;
     const block::Position& blank_;
     std::optional<db::Position> position_;
@@ -221,6 +232,6 @@ private:
     auto write_output(
         const block::Outpoint& id,
         const bitcoin::block::Output& output,
-        MDB_txn* tx) noexcept -> bool;
+        storage::lmdb::Transaction& tx) noexcept -> bool;
 };
 }  // namespace opentxs::blockchain::database::wallet

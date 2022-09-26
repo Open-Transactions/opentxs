@@ -33,7 +33,6 @@
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Pimpl.hpp"
-#include "util/LMDB.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
@@ -75,6 +74,15 @@ class Manager;
 class UpdateTransaction;
 }  // namespace node
 }  // namespace blockchain
+
+namespace storage
+{
+namespace lmdb
+{
+class Database;
+class Transaction;
+}  // namespace lmdb
+}  // namespace storage
 // }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
@@ -120,7 +128,7 @@ public:
         const api::Session& api,
         const node::Manager& network,
         const common::Database& common,
-        const storage::lmdb::LMDB& lmdb,
+        const storage::lmdb::Database& lmdb,
         const blockchain::Type type) noexcept;
 
 private:
@@ -133,7 +141,7 @@ private:
 
     const api::Session& api_;
     const common::Database& common_;
-    const storage::lmdb::LMDB& lmdb_;
+    const storage::lmdb::Database& lmdb_;
     const blockchain::Type chain_;
     mutable std::mutex lock_;
     network::zeromq::socket::Raw publish_tip_internal_;
@@ -151,11 +159,12 @@ private:
     // Throws std::out_of_range if the header does not exist
     auto load_header(const block::Hash& hash) const noexcept(false)
         -> std::unique_ptr<block::Header>;
-    auto pop_best(block::Height i, MDB_txn* parent) const noexcept -> bool;
+    auto pop_best(block::Height i, storage::lmdb::Transaction& parent)
+        const noexcept -> bool;
     auto push_best(
         const block::Position next,
         const bool setTip,
-        MDB_txn* parent) const noexcept -> bool;
+        storage::lmdb::Transaction& parent) const noexcept -> bool;
     auto recent_hashes(const Lock& lock, alloc::Default alloc) const noexcept
         -> Vector<block::Hash>;
 

@@ -32,7 +32,6 @@
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Pimpl.hpp"
-#include "util/LMDB.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
@@ -66,7 +65,7 @@ namespace storage
 {
 namespace lmdb
 {
-class LMDB;
+class Database;
 }  // namespace lmdb
 }  // namespace storage
 // }  // namespace v1
@@ -119,13 +118,13 @@ public:
     Filters(
         const api::Session& api,
         const common::Database& common,
-        const storage::lmdb::LMDB& lmdb,
+        const storage::lmdb::Database& lmdb,
         const blockchain::Type chain) noexcept;
 
 private:
     const api::Session& api_;
     const common::Database& common_;
-    const storage::lmdb::LMDB& lmdb_;
+    const storage::lmdb::Database& lmdb_;
     const block::Position blank_position_;
     mutable std::mutex lock_;
 

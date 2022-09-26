@@ -25,7 +25,6 @@
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
-#include "util/LMDB.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
@@ -50,7 +49,7 @@ namespace storage
 {
 namespace lmdb
 {
-class LMDB;
+class Database;
 }  // namespace lmdb
 }  // namespace storage
 // }  // namespace v1
@@ -68,11 +67,13 @@ public:
     auto DeleteSyncServer(std::string_view endpoint) const noexcept -> bool;
     auto GetSyncServers(alloc::Default alloc) const noexcept -> Endpoints;
 
-    Configuration(const api::Session& api, storage::lmdb::LMDB& lmdb) noexcept;
+    Configuration(
+        const api::Session& api,
+        storage::lmdb::Database& lmdb) noexcept;
 
 private:
     const api::Session& api_;
-    storage::lmdb::LMDB& lmdb_;
+    storage::lmdb::Database& lmdb_;
     const int config_table_;
     const OTZMQPublishSocket socket_;
 };

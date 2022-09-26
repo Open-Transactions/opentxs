@@ -19,6 +19,7 @@
 #include <string_view>
 #include <utility>
 
+#include "internal/util/storage/lmdb/Types.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/util/Container.hpp"
 
@@ -33,6 +34,8 @@ extern "C" {
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/TSV.hpp"
+#include "internal/util/storage/lmdb/Database.hpp"
+#include "internal/util/storage/lmdb/Transaction.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/blockchain/Blockchain.hpp"
@@ -42,8 +45,7 @@ extern "C" {
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Log.hpp"
 #include "util/ByteLiterals.hpp"
-#include "util/LMDB.hpp"
-#include "util/MappedFileStorage.hpp"
+#include "util/storage/MappedFile.hpp"
 
 namespace opentxs::blockchain::database::common
 {
@@ -109,7 +111,7 @@ struct Sync::Imp final : private util::MappedFileStorage {
         };
 
         try {
-            using Dir = storage::lmdb::LMDB::Dir;
+            using Dir = storage::lmdb::Dir;
             lmdb_.ReadFrom(ChainToSyncTable(chain), start, cb, Dir::Forward);
         } catch (const std::exception& e) {
             LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
@@ -244,14 +246,14 @@ struct Sync::Imp final : private util::MappedFileStorage {
         }
     }
     Imp(const api::Session& api,
-        storage::lmdb::LMDB& lmdb,
+        storage::lmdb::Database& lmdb,
         const std::filesystem::path& path) noexcept(false)
         : MappedFileStorage(
               lmdb,
               path,
               "sync",
               Table::Config,
-              static_cast<std::size_t>(Database::Key::NextSyncAddress))
+              static_cast<std::size_t>(common::Database::Key::NextSyncAddress))
         , api_(api)
         , tip_table_(Table::SyncTips)
         , lock_()
@@ -283,7 +285,7 @@ struct Sync::Imp final : private util::MappedFileStorage {
 
             return true;
         };
-        lmdb_.Read(tip_table_, cb, LMDB::Dir::Forward);
+        lmdb_.Read(tip_table_, cb, storage::lmdb::Dir::Forward);
 
         static_assert(checksum_key_.size() == crypto_shorthash_KEYBYTES);
 
@@ -435,7 +437,7 @@ const std::array<unsigned char, 16> Sync::Imp::checksum_key_{};
 
 Sync::Sync(
     const api::Session& api,
-    storage::lmdb::LMDB& lmdb,
+    storage::lmdb::Database& lmdb,
     const std::filesystem::path& path) noexcept(false)
     : imp_(std::make_unique<Imp>(api, lmdb, path))
 {

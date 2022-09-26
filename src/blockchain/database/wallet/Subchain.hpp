@@ -20,7 +20,6 @@
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
-#include "util/LMDB.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
@@ -54,16 +53,13 @@ namespace storage
 {
 namespace lmdb
 {
-class LMDB;
+class Database;
+class Transaction;
 }  // namespace lmdb
 }  // namespace storage
 // }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
-
-extern "C" {
-using MDB_txn = struct MDB_txn;
-}
 
 namespace opentxs::blockchain::database::wallet
 {
@@ -72,13 +68,16 @@ class SubchainData
 public:
     auto GetSubchainID(
         const NodeID& subaccount,
+        const crypto::Subchain subchain) const noexcept -> SubchainIndex;
+    auto GetSubchainID(
+        const NodeID& subaccount,
         const crypto::Subchain subchain,
-        MDB_txn* tx) const noexcept -> SubchainIndex;
+        storage::lmdb::Transaction& tx) const noexcept -> SubchainIndex;
     auto GetPatterns(const SubchainIndex& subchain, alloc::Default alloc)
         const noexcept -> Patterns;
     auto Reorg(
         const node::internal::HeaderOraclePrivate& data,
-        MDB_txn* tx,
+        storage::lmdb::Transaction& tx,
         const node::HeaderOracle& headers,
         const SubchainIndex& subchain,
         const block::Height lastGoodHeight) const noexcept(false) -> bool;
@@ -95,7 +94,7 @@ public:
 
     SubchainData(
         const api::Session& api,
-        const storage::lmdb::LMDB& lmdb,
+        const storage::lmdb::Database& lmdb,
         const blockchain::cfilter::Type filter) noexcept;
     SubchainData() = delete;
     SubchainData(const SubchainData&) = delete;

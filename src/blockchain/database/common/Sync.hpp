@@ -26,7 +26,6 @@
 #include "opentxs/network/otdht/Types.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
-#include "util/LMDB.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
@@ -51,7 +50,7 @@ namespace storage
 {
 namespace lmdb
 {
-class LMDB;
+class Database;
 }  // namespace lmdb
 }  // namespace storage
 // }  // namespace v1
@@ -77,7 +76,7 @@ public:
 
     Sync(
         const api::Session& api,
-        storage::lmdb::LMDB& lmdb,
+        storage::lmdb::Database& lmdb,
         const std::filesystem::path& path) noexcept(false);
 
     ~Sync();

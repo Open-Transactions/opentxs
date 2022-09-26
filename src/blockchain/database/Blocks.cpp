@@ -17,6 +17,8 @@
 #include "internal/blockchain/database/Types.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/TSV.hpp"
+#include "internal/util/storage/lmdb/Database.hpp"
+#include "internal/util/storage/lmdb/Types.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/blockchain/block/Block.hpp"
@@ -24,14 +26,13 @@
 #include "opentxs/core/Data.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Log.hpp"
-#include "util/LMDB.hpp"
 
 namespace opentxs::blockchain::database
 {
 Blocks::Blocks(
     const api::Session& api,
     const common::Database& common,
-    const storage::lmdb::LMDB& lmdb,
+    const storage::lmdb::Database& lmdb,
     const blockchain::Type type) noexcept
     : api_(api)
     , common_(common)

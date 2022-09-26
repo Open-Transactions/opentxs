@@ -16,7 +16,6 @@
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
-#include "util/LMDB.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
@@ -48,7 +47,8 @@ namespace storage
 {
 namespace lmdb
 {
-class LMDB;
+class Database;
+class Transaction;
 }  // namespace lmdb
 }  // namespace storage
 // }  // namespace v1
@@ -68,17 +68,17 @@ public:
         -> bool;
     auto Store(const UpdatedHeader& headers) const noexcept -> bool;
 
-    BlockHeader(storage::lmdb::LMDB& lmdb, Bulk& bulk) noexcept(false);
+    BlockHeader(storage::lmdb::Database& lmdb, Bulk& bulk) noexcept(false);
 
 private:
-    storage::lmdb::LMDB& lmdb_;
+    storage::lmdb::Database& lmdb_;
     Bulk& bulk_;
     const int table_;
 
     auto store(
         const Lock& lock,
         bool clearLocal,
-        storage::lmdb::LMDB::Transaction& tx,
+        storage::lmdb::Transaction& tx,
         const opentxs::blockchain::block::Header& header) const noexcept
         -> bool;
 };

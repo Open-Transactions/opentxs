@@ -27,20 +27,21 @@
 #include "internal/util/BoostPMR.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/TSV.hpp"
+#include "internal/util/storage/lmdb/Database.hpp"
+#include "internal/util/storage/lmdb/Transaction.hpp"
 #include "opentxs/blockchain/bitcoin/cfilter/GCS.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "util/ByteLiterals.hpp"
-#include "util/LMDB.hpp"
-#include "util/MappedFileStorage.hpp"
+#include "util/storage/MappedFile.hpp"
 
 namespace opentxs::blockchain::database::common
 {
 BlockFilter::BlockFilter(
     const api::Session& api,
-    storage::lmdb::LMDB& lmdb,
+    storage::lmdb::Database& lmdb,
     Bulk& bulk) noexcept
     : api_(api)
     , lmdb_(lmdb)
@@ -85,7 +86,7 @@ auto BlockFilter::load_filter_index(
 auto BlockFilter::load_filter_index(
     const cfilter::Type type,
     const ReadView blockHash,
-    storage::lmdb::LMDB::Transaction& tx,
+    storage::lmdb::Transaction& tx,
     util::IndexData& out) const noexcept(false) -> void
 {
     auto cb = [&out](const ReadView in) {
@@ -231,7 +232,7 @@ auto BlockFilter::LoadFilterHeader(
 
 auto BlockFilter::store(
     const Lock& lock,
-    storage::lmdb::LMDB::Transaction& tx,
+    storage::lmdb::Transaction& tx,
     const ReadView blockHash,
     const cfilter::Type type,
     const GCS& filter) const noexcept -> bool

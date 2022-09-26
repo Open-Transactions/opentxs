@@ -16,15 +16,16 @@
 #include "internal/blockchain/database/Types.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/Mutex.hpp"
+#include "internal/util/storage/lmdb/Database.hpp"
+#include "internal/util/storage/lmdb/Types.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Log.hpp"
-#include "util/LMDB.hpp"
 
 namespace opentxs::blockchain::database::wallet
 {
-using Direction = storage::lmdb::LMDB::Dir;
+using Direction = storage::lmdb::Dir;
 constexpr auto table_{Table::Proposals};
 
 struct Proposal::Imp {
@@ -91,8 +92,9 @@ struct Proposal::Imp {
             return false;
         }
     }
-    auto CancelProposal(MDB_txn* tx, const identifier::Generic& id) noexcept
-        -> bool
+    auto CancelProposal(
+        storage::lmdb::Transaction& tx,
+        const identifier::Generic& id) noexcept -> bool
     {
         if (lmdb_.Delete(table_, id.Bytes(), tx)) {
             LogVerbose()(OT_PRETTY_CLASS())("proposal ")(id)(" cancelled ")
@@ -106,8 +108,9 @@ struct Proposal::Imp {
             return false;
         }
     }
-    auto FinishProposal(MDB_txn* tx, const identifier::Generic& id) noexcept
-        -> bool
+    auto FinishProposal(
+        storage::lmdb::Transaction& tx,
+        const identifier::Generic& id) noexcept -> bool
     {
         const auto out = CancelProposal(tx, id);
         auto lock = Lock{lock_};
@@ -125,7 +128,7 @@ struct Proposal::Imp {
         return true;
     }
 
-    Imp(const storage::lmdb::LMDB& lmdb) noexcept
+    Imp(const storage::lmdb::Database& lmdb) noexcept
         : lmdb_(lmdb)
         , lock_()
         , finished_proposals_()
@@ -139,7 +142,7 @@ struct Proposal::Imp {
 private:
     using FinishedProposals = UnallocatedSet<identifier::Generic>;
 
-    const storage::lmdb::LMDB& lmdb_;
+    const storage::lmdb::Database& lmdb_;
     mutable std::mutex lock_;
     mutable FinishedProposals finished_proposals_;
 
@@ -156,7 +159,7 @@ private:
     }
 };
 
-Proposal::Proposal(const storage::lmdb::LMDB& lmdb) noexcept
+Proposal::Proposal(const storage::lmdb::Database& lmdb) noexcept
     : imp_(std::make_unique<Imp>(lmdb))
 {
     OT_ASSERT(imp_);
@@ -170,7 +173,7 @@ auto Proposal::AddProposal(
 }
 
 auto Proposal::CancelProposal(
-    MDB_txn* tx,
+    storage::lmdb::Transaction& tx,
     const identifier::Generic& id) noexcept -> bool
 {
     return imp_->CancelProposal(tx, id);
@@ -188,7 +191,7 @@ auto Proposal::Exists(const identifier::Generic& id) const noexcept -> bool
 }
 
 auto Proposal::FinishProposal(
-    MDB_txn* tx,
+    storage::lmdb::Transaction& tx,
     const identifier::Generic& id) noexcept -> bool
 {
     return imp_->FinishProposal(tx, id);

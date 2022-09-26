@@ -16,6 +16,8 @@ extern "C" {
 #include "internal/blockchain/database/common/Common.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/TSV.hpp"
+#include "internal/util/storage/lmdb/Database.hpp"
+#include "internal/util/storage/lmdb/Types.hpp"
 #include "opentxs/api/network/Network.hpp"
 #include "opentxs/api/session/Endpoints.hpp"
 #include "opentxs/api/session/Session.hpp"
@@ -25,13 +27,12 @@ extern "C" {
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Pimpl.hpp"
 #include "opentxs/util/WorkType.hpp"
-#include "util/LMDB.hpp"
 
 namespace opentxs::blockchain::database::common
 {
 Configuration::Configuration(
     const api::Session& api,
-    storage::lmdb::LMDB& lmdb) noexcept
+    storage::lmdb::Database& lmdb) noexcept
     : api_(api)
     , lmdb_(lmdb)
     , config_table_(Table::ConfigMulti)
@@ -56,7 +57,6 @@ auto Configuration::AddSyncServer(std::string_view endpoint) const noexcept
         config_table_,
         tsv(Database::Key::SyncServerEndpoint),
         endpoint,
-        nullptr,
         MDB_NODUPDATA);
 
     if (success) {
@@ -84,10 +84,7 @@ auto Configuration::DeleteSyncServer(std::string_view endpoint) const noexcept
     if (endpoint.empty()) { return false; }
 
     const auto output = lmdb_.Delete(
-        config_table_,
-        tsv(Database::Key::SyncServerEndpoint),
-        endpoint,
-        nullptr);
+        config_table_, tsv(Database::Key::SyncServerEndpoint), endpoint);
 
     if (output) {
         static constexpr auto deleted{false};
@@ -114,7 +111,7 @@ auto Configuration::GetSyncServers(alloc::Default alloc) const noexcept
         config_table_,
         tsv(Database::Key::SyncServerEndpoint),
         [&](const auto view) { output.emplace_back(view); },
-        storage::lmdb::LMDB::Mode::Multiple);
+        storage::lmdb::Mode::Multiple);
 
     return output;
 }

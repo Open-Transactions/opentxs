@@ -19,6 +19,8 @@
 #include "blockchain/database/wallet/SubchainID.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/TSV.hpp"
+#include "internal/util/storage/lmdb/Database.hpp"
+#include "internal/util/storage/lmdb/Transaction.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/blockchain/bitcoin/cfilter/FilterType.hpp"
@@ -34,7 +36,7 @@ namespace opentxs::blockchain::database::wallet
 {
 SubchainCache::SubchainCache(
     const api::Session& api,
-    const storage::lmdb::LMDB& lmdb) noexcept
+    const storage::lmdb::Database& lmdb) noexcept
     : api_(api)
     , lmdb_(lmdb)
     , subchain_id_lock_()
@@ -59,7 +61,7 @@ auto SubchainCache::AddPattern(
     const PatternID& id,
     const Bip32Index index,
     const ReadView data,
-    MDB_txn* tx) noexcept -> bool
+    storage::lmdb::Transaction& tx) noexcept -> bool
 {
     try {
         auto lock = boost::unique_lock<Mutex>{patterns_lock_};
@@ -93,7 +95,7 @@ auto SubchainCache::AddPattern(
 auto SubchainCache::AddPatternIndex(
     const SubchainIndex& key,
     const PatternID& value,
-    MDB_txn* tx) noexcept -> bool
+    storage::lmdb::Transaction& tx) noexcept -> bool
 {
     try {
         auto lock = boost::unique_lock<Mutex>{pattern_index_lock_};
@@ -147,7 +149,7 @@ auto SubchainCache::GetIndex(
     const crypto::Subchain subchain,
     const cfilter::Type type,
     const VersionNumber version,
-    MDB_txn* tx) noexcept -> SubchainIndex
+    storage::lmdb::Transaction& tx) noexcept -> SubchainIndex
 {
     const auto index = subchain_index(subaccount, subchain, type, version);
 
@@ -365,7 +367,7 @@ auto SubchainCache::load_pattern_index(const SubchainIndex& key) noexcept
 auto SubchainCache::SetLastIndexed(
     const SubchainIndex& subchain,
     const Bip32Index value,
-    MDB_txn* tx) noexcept -> bool
+    storage::lmdb::Transaction& tx) noexcept -> bool
 {
     try {
         auto lock = boost::unique_lock<Mutex>{last_indexed_lock_};
@@ -389,8 +391,17 @@ auto SubchainCache::SetLastIndexed(
 
 auto SubchainCache::SetLastScanned(
     const SubchainIndex& subchain,
+    const block::Position& value) noexcept -> bool
+{
+    auto tx = lmdb_.TransactionRW();
+
+    return SetLastScanned(subchain, value, tx);
+}
+
+auto SubchainCache::SetLastScanned(
+    const SubchainIndex& subchain,
     const block::Position& value,
-    MDB_txn* tx) noexcept -> bool
+    storage::lmdb::Transaction& tx) noexcept -> bool
 {
     try {
         const auto& scanned = [&]() -> auto&
