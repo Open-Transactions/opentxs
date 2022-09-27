@@ -46,22 +46,22 @@ public:
 
     inline auto GetTransactionNum() const -> TransactionNumber
     {
-        return m_lTransactionNum;
+        return transaction_num_;
     }
 
     inline void SetTransactionNum(TransactionNumber lTransactionNum)
     {
-        m_lTransactionNum = lTransactionNum;
+        transaction_num_ = lTransactionNum;
     }
 
     inline auto GetSenderAcctID() const -> const identifier::Generic&
     {
-        return m_SENDER_ACCT_ID;
+        return sender_account_id_;
     }
 
     inline auto GetSenderNymID() const -> const identifier::Nym&
     {
-        return m_SENDER_NYM_ID;
+        return sender_nym_id_;
     }
 
     OTTrackable() = delete;
@@ -69,12 +69,12 @@ public:
     ~OTTrackable() override;
 
 protected:
-    TransactionNumber m_lTransactionNum{0};
+    TransactionNumber transaction_num_{0};
     // The asset account the instrument is drawn on.
-    identifier::Generic m_SENDER_ACCT_ID;
+    identifier::Generic sender_account_id_;
     // This ID must match the user ID on that asset account,
     // AND must verify the instrument's signature with that user's key.
-    identifier::Nym m_SENDER_NYM_ID;
+    identifier::Nym sender_nym_id_;
 
     void SetSenderAcctID(const identifier::Generic& ACCT_ID);
     void SetSenderNymID(const identifier::Nym& NYM_ID);

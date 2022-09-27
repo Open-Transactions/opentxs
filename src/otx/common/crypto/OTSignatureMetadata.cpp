@@ -18,11 +18,11 @@ namespace opentxs
 {
 OTSignatureMetadata::OTSignatureMetadata(const api::Session& api)
     : api_(api)
-    , hasMetadata_(false)
-    , metaKeyType_(0)
-    , metaNymID_(0)
-    , metaMasterCredID_(0)
-    , metaChildCredID_(0)
+    , has_metadata_(false)
+    , meta_key_type_(0)
+    , meta_nym_id_(0)
+    , meta_master_cred_id_(0)
+    , meta_child_cred_id_(0)
 {
 }
 
@@ -30,11 +30,11 @@ auto OTSignatureMetadata::operator=(const OTSignatureMetadata& rhs)
     -> OTSignatureMetadata&
 {
     if (this != &rhs) {
-        hasMetadata_ = rhs.hasMetadata_;
-        metaKeyType_ = rhs.metaKeyType_;
-        metaNymID_ = rhs.metaNymID_;
-        metaMasterCredID_ = rhs.metaMasterCredID_;
-        metaChildCredID_ = rhs.metaChildCredID_;
+        has_metadata_ = rhs.has_metadata_;
+        meta_key_type_ = rhs.meta_key_type_;
+        meta_nym_id_ = rhs.meta_nym_id_;
+        meta_master_cred_id_ = rhs.meta_master_cred_id_;
+        meta_child_cred_id_ = rhs.meta_child_cred_id_;
     }
 
     return *this;
@@ -79,11 +79,11 @@ auto OTSignatureMetadata::SetMetadata(
         return false;
     }
 
-    metaKeyType_ = metaKeyType;
-    metaNymID_ = metaNymID;
-    metaMasterCredID_ = metaMasterCredID;
-    metaChildCredID_ = metaChildCredID;
-    hasMetadata_ = true;
+    meta_key_type_ = metaKeyType;
+    meta_nym_id_ = metaNymID;
+    meta_master_cred_id_ = metaMasterCredID;
+    meta_child_cred_id_ = metaChildCredID;
+    has_metadata_ = true;
 
     return true;
 }

@@ -1123,7 +1123,7 @@ TEST_F(Integration, issue_dollars)
     ASSERT_TRUE(result.second);
 
     EXPECT_TRUE(issuer_.SetAccount(
-        UNIT_DEFINITION_TLA, result.second->m_strAcctID->Get()));
+        UNIT_DEFINITION_TLA, result.second->acct_id_->Get()));
     EXPECT_FALSE(issuer_.Account(UNIT_DEFINITION_TLA).empty());
 
     api_issuer_.OTX().ContextIdle(issuer_.nym_id_, server_1_.id_).get();

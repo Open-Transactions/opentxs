@@ -185,12 +185,12 @@ auto Lucre::AddDenomination(
     envelope->Armored(pPrivate);
 
     // Add the new key pair to the maps, using denomination as the key
-    m_mapPublic.emplace(denomination, std::move(pPublic));
-    m_mapPrivate.emplace(denomination, std::move(pPrivate));
+    public_.emplace(denomination, std::move(pPublic));
+    private_.emplace(denomination, std::move(pPrivate));
 
     // Grab the Server Nym ID and save it with this Mint
-    theNotary.GetIdentifier(m_ServerNymID);
-    m_nDenominationCount++;
+    theNotary.GetIdentifier(server_nym_id_);
+    denomination_count_++;
     bReturnValue = true;
     LogDetail()(OT_PRETTY_CLASS())("Successfully added denomination: ")(
         denomination)

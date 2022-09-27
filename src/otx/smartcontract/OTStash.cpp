@@ -26,53 +26,53 @@
 namespace opentxs
 {
 OTStash::OTStash()
-    : m_str_stash_name()
-    , m_mapStashItems()
+    : stash_name_()
+    , stash_items_()
 {
 }
 
 OTStash::OTStash(const UnallocatedCString& str_stash_name)
-    : m_str_stash_name(str_stash_name)
-    , m_mapStashItems()
+    : stash_name_(str_stash_name)
+    , stash_items_()
 {
 }
 
 OTStash::OTStash(const String& strInstrumentDefinitionID, std::int64_t lAmount)
-    : m_str_stash_name()
-    , m_mapStashItems()
+    : stash_name_()
+    , stash_items_()
 {
     auto* pItem = new OTStashItem(strInstrumentDefinitionID, lAmount);
     OT_ASSERT(nullptr != pItem);
 
-    m_mapStashItems.insert(std::pair<UnallocatedCString, OTStashItem*>(
+    stash_items_.insert(std::pair<UnallocatedCString, OTStashItem*>(
         strInstrumentDefinitionID.Get(), pItem));
 }
 
 OTStash::OTStash(
     const identifier::Generic& theInstrumentDefinitionID,
     std::int64_t lAmount)
-    : m_str_stash_name()
-    , m_mapStashItems()
+    : stash_name_()
+    , stash_items_()
 {
     auto* pItem = new OTStashItem(theInstrumentDefinitionID, lAmount);
     OT_ASSERT(nullptr != pItem);
 
     auto strInstrumentDefinitionID = String::Factory(theInstrumentDefinitionID);
 
-    m_mapStashItems.insert(std::pair<UnallocatedCString, OTStashItem*>(
+    stash_items_.insert(std::pair<UnallocatedCString, OTStashItem*>(
         strInstrumentDefinitionID->Get(), pItem));
 }
 
 void OTStash::Serialize(Tag& parent) const
 {
-    const auto sizeMapStashItems = m_mapStashItems.size();
+    const auto sizeMapStashItems = stash_items_.size();
 
     TagPtr pTag(new Tag("stash"));
 
-    pTag->add_attribute("name", m_str_stash_name);
+    pTag->add_attribute("name", stash_name_);
     pTag->add_attribute("count", std::to_string(sizeMapStashItems));
 
-    for (const auto& it : m_mapStashItems) {
+    for (const auto& it : stash_items_) {
         const UnallocatedCString str_instrument_definition_id = it.first;
         OTStashItem* pStashItem = it.second;
         OT_ASSERT(
@@ -105,7 +105,7 @@ auto OTStash::ReadFromXMLNode(
         return (-1);
     }
 
-    m_str_stash_name = strStashName.Get();
+    stash_name_ = strStashName.Get();
 
     //
     // Load up the stash items.
@@ -182,17 +182,17 @@ auto OTStash::ReadFromXMLNode(
 auto OTStash::GetStash(const UnallocatedCString& str_instrument_definition_id)
     -> OTStashItem*
 {
-    auto it = m_mapStashItems.find(str_instrument_definition_id);
+    auto it = stash_items_.find(str_instrument_definition_id);
 
-    if (m_mapStashItems.end() == it)  // It's not already there for this
-                                      // instrument definition.
+    if (stash_items_.end() == it)  // It's not already there for this
+                                   // instrument definition.
     {
         const auto strInstrumentDefinitionID =
             String::Factory(str_instrument_definition_id.c_str());
         auto* pStashItem = new OTStashItem(strInstrumentDefinitionID);
         OT_ASSERT(nullptr != pStashItem);
 
-        m_mapStashItems.insert(std::pair<UnallocatedCString, OTStashItem*>(
+        stash_items_.insert(std::pair<UnallocatedCString, OTStashItem*>(
             strInstrumentDefinitionID->Get(), pStashItem));
         return pStashItem;
     }
@@ -240,12 +240,12 @@ auto OTStash::DebitStash(
 
 OTStash::~OTStash()
 {
-    while (!m_mapStashItems.empty()) {
-        OTStashItem* pTemp = m_mapStashItems.begin()->second;
+    while (!stash_items_.empty()) {
+        OTStashItem* pTemp = stash_items_.begin()->second;
         OT_ASSERT(nullptr != pTemp);
         delete pTemp;
         pTemp = nullptr;
-        m_mapStashItems.erase(m_mapStashItems.begin());
+        stash_items_.erase(stash_items_.begin());
     }
 }
 }  // namespace opentxs

@@ -340,7 +340,7 @@ TEST_F(Test_DepositCheques, issue_dollars)
     ASSERT_TRUE(result.second);
 
     issuer_account_id_ = issuer_client_.Factory().IdentifierFromBase58(
-        result.second->m_strAcctID->Bytes());
+        result.second->acct_id_->Bytes());
 
     EXPECT_FALSE(issuer_account_id_.empty());
 

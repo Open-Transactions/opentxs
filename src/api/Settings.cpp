@@ -64,10 +64,10 @@ const OTString Settings::blank_{String::Factory()};
 class Settings::SettingsPvt
 {
 public:
-    CSimpleIniA iniSimple;
+    CSimpleIniA ini_simple_;
 
     SettingsPvt()
-        : iniSimple()
+        : ini_simple_()
     {
     }
     SettingsPvt(const SettingsPvt&) = delete;
@@ -79,11 +79,11 @@ Settings::Settings(const api::Legacy& legacy, const String& strConfigFilePath)
     , pvt_(new SettingsPvt())
     , loaded_(Flag::Factory(false))
     , lock_()
-    , m_strConfigurationFileExactPath(strConfigFilePath)
+    , configuration_file_exact_path_(strConfigFilePath)
 {
-    if (!m_strConfigurationFileExactPath->Exists()) {
+    if (!configuration_file_exact_path_->Exists()) {
         LogError()(OT_PRETTY_CLASS())(
-            "Error: m_strConfigurationFileExactPath is empty!")
+            "Error: configuration_file_exact_path_ is empty!")
             .Flush();
         OT_FAIL;
     }
@@ -143,18 +143,19 @@ auto Settings::Load(const String& strConfigurationFileExactPath) const -> bool
             lFilelength))  // we don't have a config file, lets
                            // create a blank one first.
     {
-        pvt_->iniSimple.Reset();  // clean the config.
+        pvt_->ini_simple_.Reset();  // clean the config.
 
-        SI_Error rc = pvt_->iniSimple.SaveFile(
+        SI_Error rc = pvt_->ini_simple_.SaveFile(
             strConfigurationFileExactPath.Get());  // save a new file.
         if (0 > rc) {
             return false;  // error!
         }
 
-        pvt_->iniSimple.Reset();  // clean the config (again).
+        pvt_->ini_simple_.Reset();  // clean the config (again).
     }
 
-    SI_Error rc = pvt_->iniSimple.LoadFile(strConfigurationFileExactPath.Get());
+    SI_Error rc =
+        pvt_->ini_simple_.LoadFile(strConfigurationFileExactPath.Get());
     if (0 > rc) {
         return false;
     } else {
@@ -171,7 +172,8 @@ auto Settings::Save(const String& strConfigurationFileExactPath) const -> bool
         return false;
     }
 
-    SI_Error rc = pvt_->iniSimple.SaveFile(strConfigurationFileExactPath.Get());
+    SI_Error rc =
+        pvt_->ini_simple_.SaveFile(strConfigurationFileExactPath.Get());
     if (0 > rc) {
         return false;
     } else {
@@ -210,14 +212,14 @@ auto Settings::LogChange_str(
 void Settings::SetConfigFilePath(const String& strConfigFilePath) const
 {
     rLock lock(lock_);
-    m_strConfigurationFileExactPath->Set(strConfigFilePath.Get());
+    configuration_file_exact_path_->Set(strConfigFilePath.Get());
 }
 
 auto Settings::HasConfigFilePath() const -> bool
 {
     rLock lock(lock_);
 
-    return m_strConfigurationFileExactPath->Exists();
+    return configuration_file_exact_path_->Exists();
 }
 
 auto Settings::Load() const -> bool
@@ -225,7 +227,7 @@ auto Settings::Load() const -> bool
     rLock lock(lock_);
     loaded_->Off();
 
-    if (Load(m_strConfigurationFileExactPath)) {
+    if (Load(configuration_file_exact_path_)) {
         loaded_->On();
 
         return true;
@@ -239,7 +241,7 @@ auto Settings::Save() const -> bool
 {
     rLock lock(lock_);
 
-    return Save(m_strConfigurationFileExactPath);
+    return Save(configuration_file_exact_path_);
 }
 
 auto Settings::IsLoaded() const -> const Flag& { return loaded_; }
@@ -247,7 +249,7 @@ auto Settings::IsLoaded() const -> const Flag& { return loaded_; }
 auto Settings::Reset() -> bool
 {
     loaded_->Off();
-    pvt_->iniSimple.Reset();
+    pvt_->ini_simple_.Reset();
 
     return true;
 }
@@ -256,7 +258,7 @@ auto Settings::IsEmpty() const -> bool
 {
     rLock lock(lock_);
 
-    return pvt_->iniSimple.IsEmpty();
+    return pvt_->ini_simple_.IsEmpty();
 }
 
 auto Settings::Check_str(
@@ -286,7 +288,7 @@ auto Settings::Check_str(
     }
 
     const char* szVar =
-        pvt_->iniSimple.GetValue(strSection.Get(), strKey.Get(), nullptr);
+        pvt_->ini_simple_.GetValue(strSection.Get(), strKey.Get(), nullptr);
     auto strVar = String::Factory(szVar);
 
     if (strVar->Exists() && !strVar->Compare("")) {
@@ -327,13 +329,13 @@ auto Settings::Check_long(
     }
 
     const char* szVar =
-        pvt_->iniSimple.GetValue(strSection.Get(), strKey.Get(), nullptr);
+        pvt_->ini_simple_.GetValue(strSection.Get(), strKey.Get(), nullptr);
     auto strVar = String::Factory(szVar);
 
     if (strVar->Exists() && !strVar->Compare("")) {
         out_bKeyExist = true;
         out_lResult =
-            pvt_->iniSimple.GetLongValue(strSection.Get(), strKey.Get(), 0);
+            pvt_->ini_simple_.GetLongValue(strSection.Get(), strKey.Get(), 0);
     } else {
         out_bKeyExist = false;
         out_lResult = 0;
@@ -369,7 +371,7 @@ auto Settings::Check_bool(
     }
 
     const char* szVar =
-        pvt_->iniSimple.GetValue(strSection.Get(), strKey.Get(), nullptr);
+        pvt_->ini_simple_.GetValue(strSection.Get(), strKey.Get(), nullptr);
     auto strVar = String::Factory(szVar);
 
     if (strVar->Exists() &&
@@ -449,7 +451,7 @@ auto Settings::Set_str(
     if (!LogChange_str(strSection, strKey, strValue)) { return false; }
 
     // Set New Value
-    SI_Error rc = pvt_->iniSimple.SetValue(
+    SI_Error rc = pvt_->ini_simple_.SetValue(
         strSection.Get(), strKey.Get(), szValue, szComment, true);
     if (0 > rc) { return false; }
 
@@ -544,7 +546,7 @@ auto Settings::Set_long(
     if (!LogChange_str(strSection, strKey, strValue)) { return false; }
 
     // Set New Value
-    SI_Error rc = pvt_->iniSimple.SetLongValue(
+    SI_Error rc = pvt_->ini_simple_.SetLongValue(
         strSection.Get(),
         strKey.Get(),
         convert_to_size(lValue),
@@ -622,11 +624,11 @@ auto Settings::CheckSetSection(
                                                          : nullptr;
 
     const std::int64_t lSectionSize =
-        pvt_->iniSimple.GetSectionSize(strSection.Get());
+        pvt_->ini_simple_.GetSectionSize(strSection.Get());
 
     if (1 > lSectionSize) {
         out_bIsNewSection = true;
-        SI_Error rc = pvt_->iniSimple.SetValue(
+        SI_Error rc = pvt_->ini_simple_.SetValue(
             strSection.Get(), nullptr, nullptr, szComment, false);
         if (0 > rc) { return false; }
     } else {

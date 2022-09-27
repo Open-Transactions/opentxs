@@ -143,12 +143,12 @@ private:
     using Type = opentxs::network::asio::Endpoint::Type;
 
     struct Site {
-        const CString host{};
-        const CString service{};
-        const CString target{};
-        const ResponseType response_type{};
-        const IPversion protocol{};
-        const unsigned http_version{};
+        const CString host_{};
+        const CString service_{};
+        const CString target_{};
+        const ResponseType response_type_{};
+        const IPversion protocol_{};
+        const unsigned http_version_{};
     };
 
     static auto sites() -> const Vector<Site>&;

@@ -112,11 +112,11 @@ namespace opentxs
  */
 
 OTScript::OTScript(const UnallocatedCString& new_string)
-    : m_str_script(new_string)
-    , m_str_display_filename()
-    , m_mapParties()
-    , m_mapAccounts()
-    , m_mapVariables()
+    : script_(new_string)
+    , display_filename_()
+    , parties_()
+    , accounts_()
+    , variables_()
 {
 }
 
@@ -146,8 +146,8 @@ OTScript::~OTScript()
     // parties.
     // See OTSmartContract, rather, for that.
 
-    while (!m_mapVariables.empty()) {
-        OTVariable* pVar = m_mapVariables.begin()->second;
+    while (!variables_.empty()) {
+        OTVariable* pVar = variables_.begin()->second;
         OT_ASSERT(nullptr != pVar);
 
         // NOTE: We're NOT going to delete pVar, since we don't own it.
@@ -155,28 +155,28 @@ OTScript::~OTScript()
         // pVar doesn't dereference a bad pointer later on.
         //
         pVar->UnregisterScript();
-        m_mapVariables.erase(m_mapVariables.begin());
+        variables_.erase(variables_.begin());
     }
 }
 
 void OTScript::SetScript(const String& strValue)
 {
-    if (strValue.Exists()) { m_str_script = strValue.Get(); }
+    if (strValue.Exists()) { script_ = strValue.Get(); }
 }
 
 void OTScript::SetScript(const char* new_string)
 {
-    if (nullptr != new_string) { m_str_script = new_string; }
+    if (nullptr != new_string) { script_ = new_string; }
 }
 
 void OTScript::SetScript(const char* new_string, std::size_t sizeLength)
 {
-    if (nullptr != new_string) { m_str_script.assign(new_string, sizeLength); }
+    if (nullptr != new_string) { script_.assign(new_string, sizeLength); }
 }
 
 void OTScript::SetScript(const UnallocatedCString& new_string)
 {
-    m_str_script = new_string;
+    script_ = new_string;
 }
 
 // The same OTSmartContract that loads all the clauses (scripts) will
@@ -195,7 +195,7 @@ void OTScript::AddParty(UnallocatedCString str_party_name, OTParty& theParty)
 {
     //  typedef UnallocatedMap<UnallocatedCString, OTParty *> mapOfParties;
 
-    m_mapParties.insert(
+    parties_.insert(
         std::pair<UnallocatedCString, OTParty*>(str_party_name, &theParty));
     // We're just storing these pointers for reference value. Script doesn't
     // actually Own the
@@ -208,7 +208,7 @@ void OTScript::AddAccount(
     UnallocatedCString str_acct_name,
     OTPartyAccount& theAcct)
 {
-    m_mapAccounts.insert(std::pair<UnallocatedCString, OTPartyAccount*>(
+    accounts_.insert(std::pair<UnallocatedCString, OTPartyAccount*>(
         str_acct_name, &theAcct));
 
     // We're just storing these pointers for reference value. Script doesn't
@@ -225,9 +225,9 @@ void OTScript::AddAccount(
 //
 void OTScript::AddVariable(UnallocatedCString str_var_name, OTVariable& theVar)
 {
-    //  mapOfVariables  m_mapVariables;
+    //  mapOfVariables  variables_;
 
-    m_mapVariables.insert(
+    variables_.insert(
         std::pair<UnallocatedCString, OTVariable*>(str_var_name, &theVar));
 
     // We're just storing these pointers for reference value. Script doesn't
@@ -237,8 +237,8 @@ void OTScript::AddVariable(UnallocatedCString str_var_name, OTVariable& theVar)
 
 auto OTScript::FindVariable(UnallocatedCString str_var_name) -> OTVariable*
 {
-    auto it_var = m_mapVariables.find(str_var_name);
-    return it_var != m_mapVariables.end() ? it_var->second : nullptr;
+    auto it_var = variables_.find(str_var_name);
+    return it_var != variables_.end() ? it_var->second : nullptr;
 }
 
 // If a variable is set onto a script, it sets an internal pointer to that
@@ -251,10 +251,10 @@ auto OTScript::FindVariable(UnallocatedCString str_var_name) -> OTVariable*
 void OTScript::RemoveVariable(OTVariable& theVar)
 {
     const UnallocatedCString str_var_name = theVar.GetName().Get();
-    auto it_var = m_mapVariables.find(str_var_name);
+    auto it_var = variables_.find(str_var_name);
 
-    if (it_var != m_mapVariables.end()) {
-        m_mapVariables.erase(it_var);  // no need to delete the variable pointer
+    if (it_var != variables_.end()) {
+        variables_.erase(it_var);  // no need to delete the variable pointer
         // since the script doesn't own it anyway.
     }
 }

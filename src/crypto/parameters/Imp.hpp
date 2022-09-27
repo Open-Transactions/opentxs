@@ -44,10 +44,10 @@ namespace opentxs::crypto
 class Parameters::Imp final : public internal::Parameters
 {
 public:
-    const ParameterType nymType_;
-    const identity::CredentialType credentialType_;
-    const identity::SourceType sourceType_;
-    const identity::SourceProofType sourceProofType_;
+    const ParameterType nym_type_;
+    const identity::CredentialType credential_type_;
+    const identity::SourceType source_type_;
+    const identity::SourceProofType source_proof_type_;
     std::uint8_t payment_code_version_;
     crypto::SeedStyle seed_style_;
     crypto::Language seed_language_;
@@ -59,7 +59,7 @@ public:
     Bip32Index cred_index_;
     bool default_;
     bool use_auto_index_;
-    std::int32_t nBits_;
+    std::int32_t n_bits_;
     Space params_;
     OTKeypair source_keypair_;
     std::shared_ptr<proto::ContactData> contact_data_;

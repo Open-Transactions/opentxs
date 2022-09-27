@@ -55,14 +55,14 @@ namespace opentxs
 {
 OTAgent::OTAgent(const api::Session& api)
     : api_(api)
-    , m_bNymRepresentsSelf(false)
-    , m_bIsAnIndividual(false)
-    , m_pNym(nullptr)
-    , m_pForParty(nullptr)
-    , m_strName(String::Factory())
-    , m_strNymID(String::Factory())
-    , m_strRoleID(String::Factory())
-    , m_strGroupName(String::Factory())
+    , nym_represents_self_(false)
+    , is_an_individual_(false)
+    , nym_(nullptr)
+    , for_party_(nullptr)
+    , name_(String::Factory())
+    , nym_id_(String::Factory())
+    , role_id_(String::Factory())
+    , group_name_(String::Factory())
 {
 }
 
@@ -75,14 +75,14 @@ OTAgent::OTAgent(
     const String& strRoleID,
     const String& strGroupName)
     : api_(api)
-    , m_bNymRepresentsSelf(bNymRepresentsSelf)
-    , m_bIsAnIndividual(bIsAnIndividual)
-    , m_pNym(nullptr)
-    , m_pForParty(nullptr)
-    , m_strName(strName)
-    , m_strNymID(strNymID)
-    , m_strRoleID(strRoleID)
-    , m_strGroupName(strGroupName)
+    , nym_represents_self_(bNymRepresentsSelf)
+    , is_an_individual_(bIsAnIndividual)
+    , nym_(nullptr)
+    , for_party_(nullptr)
+    , name_(strName)
+    , nym_id_(strNymID)
+    , role_id_(strRoleID)
+    , group_name_(strGroupName)
 {
 }
 
@@ -93,19 +93,19 @@ OTAgent::OTAgent(
     const bool bNymRepresentsSelf)
     /*IF false, then: ROLE parameter goes here.*/
     : api_(api)
-    , m_bNymRepresentsSelf(bNymRepresentsSelf)
-    , m_bIsAnIndividual(true)
-    , m_pNym(&theNym)
-    , m_pForParty(nullptr)
-    , m_strName(String::Factory(str_agent_name.c_str()))
-    , m_strNymID(String::Factory())
-    , m_strRoleID(String::Factory())
-    , m_strGroupName(String::Factory())
+    , nym_represents_self_(bNymRepresentsSelf)
+    , is_an_individual_(true)
+    , nym_(&theNym)
+    , for_party_(nullptr)
+    , name_(String::Factory(str_agent_name.c_str()))
+    , nym_id_(String::Factory())
+    , role_id_(String::Factory())
+    , group_name_(String::Factory())
 {
-    // Grab m_strNymID
+    // Grab nym_id_
     auto theNymID = identifier::Nym{};
     theNym.GetIdentifier(theNymID);
-    theNymID.GetString(api_.Crypto(), m_strNymID);
+    theNymID.GetString(api_.Crypto(), nym_id_);
 
     //
 
@@ -128,8 +128,8 @@ auto OTAgent::VerifySignature(const Contract& theContract) const -> bool
     //
     if (!IsAnIndividual() || !DoesRepresentHimself()) {
         LogError()(OT_PRETTY_CLASS())(
-            "Entities and roles are not yet supported. Agent: ")(
-            m_strName.get())(".")
+            "Entities and roles are not yet supported. Agent: ")(name_.get())(
+            ".")
             .Flush();
         return false;
     }  // todo: when adding entities, this will change.
@@ -164,7 +164,7 @@ auto OTAgent::VerifySignature(const Contract& theContract) const -> bool
     //        //
     //    }
     //    else
-    if (nullptr == m_pNym) {
+    if (nullptr == nym_) {
         auto strTemp = String::Factory(theContract);
         LogError()(OT_PRETTY_CLASS())(
             "Attempted to verify signature on "
@@ -175,7 +175,7 @@ auto OTAgent::VerifySignature(const Contract& theContract) const -> bool
         return false;
     }
 
-    return theContract.VerifySignature(*m_pNym);
+    return theContract.VerifySignature(*nym_);
 }
 
 // Low-level.
@@ -193,10 +193,10 @@ auto OTAgent::LoadNym() -> Nym_p
     bool bNymID = GetNymID(theAgentNymID);
 
     if (bNymID) {
-        m_pNym = api_.Wallet().Nym(theAgentNymID);
-        OT_ASSERT(m_pNym);
+        nym_ = api_.Wallet().Nym(theAgentNymID);
+        OT_ASSERT(nym_);
 
-        return m_pNym;
+        return nym_;
     } else {
         LogError()(OT_PRETTY_CLASS())(
             "Failure. Are you sure this agent IS a Nym at all?")
@@ -210,7 +210,7 @@ void OTAgent::SetParty(OTParty& theOwnerParty)  // This happens when the agent
                                                 // is
                                                 // added to the party.
 {
-    m_pForParty = &theOwnerParty;
+    for_party_ = &theOwnerParty;
 
     // A Nym can only act as agent for himself or for an entity
     // (never for another Nym. Start an entity if you want that.)
@@ -229,13 +229,13 @@ void OTAgent::SetParty(OTParty& theOwnerParty)  // This happens when the agent
     if (theOwnerParty.IsNym())  // Thus, this basically means the agent IS the
                                 // party.
     {
-        m_bNymRepresentsSelf = true;
-        m_bIsAnIndividual = true;
+        nym_represents_self_ = true;
+        is_an_individual_ = true;
 
         bool bGetOwnerNymID = false;
         const UnallocatedCString str_owner_nym_id =
             theOwnerParty.GetNymID(&bGetOwnerNymID);
-        m_strNymID->Set(bGetOwnerNymID ? str_owner_nym_id.c_str() : "");
+        nym_id_->Set(bGetOwnerNymID ? str_owner_nym_id.c_str() : "");
 
         // Todo here, instead of copying the Owner's Nym ID like above, just
         // make sure they match.
@@ -250,7 +250,7 @@ void OTAgent::SetParty(OTParty& theOwnerParty)  // This happens when the agent
 
 auto OTAgent::DoesRepresentHimself() const -> bool
 {
-    return m_bNymRepresentsSelf;
+    return nym_represents_self_;
 }
 
 // Whether the agent is a voting group acting for an entity, or is a Nym acting
@@ -259,7 +259,7 @@ auto OTAgent::DoesRepresentHimself() const -> bool
 
 auto OTAgent::DoesRepresentAnEntity() const -> bool
 {
-    return !m_bNymRepresentsSelf;
+    return !nym_represents_self_;
 }
 
 // Only one of these can be true:
@@ -272,13 +272,13 @@ auto OTAgent::DoesRepresentAnEntity() const -> bool
 // he's acting in a role for that entity.) If agent were a group, this would be
 // false.
 
-auto OTAgent::IsAnIndividual() const -> bool { return m_bIsAnIndividual; }
+auto OTAgent::IsAnIndividual() const -> bool { return is_an_individual_; }
 
 // OR: Agent is a voting group, which cannot take proactive or instant action,
 // but only passive and delayed. Entity-ONLY. (A voting group cannot decide on
 // behalf of individual, but only on behalf of the entity it belongs to.)
 
-auto OTAgent::IsAGroup() const -> bool { return !m_bIsAnIndividual; }
+auto OTAgent::IsAGroup() const -> bool { return !is_an_individual_; }
 
 // A Nym cannot act as "agent" for another Nym.
 // Nor can a Group act as "agent" for a Nym. Why not? Because:
@@ -352,7 +352,7 @@ auto OTAgent::IsAGroup() const -> bool { return !m_bIsAnIndividual; }
 auto OTAgent::GetNymID(identifier::Generic& theOutput) const -> bool
 {
     if (IsAnIndividual()) {
-        theOutput = api_.Factory().IdentifierFromBase58(m_strNymID->Bytes());
+        theOutput = api_.Factory().IdentifierFromBase58(nym_id_->Bytes());
 
         return true;
     }
@@ -367,7 +367,7 @@ auto OTAgent::GetNymID(identifier::Generic& theOutput) const -> bool
 auto OTAgent::GetRoleID(identifier::Generic& theOutput) const -> bool
 {
     if (IsAnIndividual() && DoesRepresentAnEntity()) {
-        theOutput = api_.Factory().IdentifierFromBase58(m_strRoleID->Bytes());
+        theOutput = api_.Factory().IdentifierFromBase58(role_id_->Bytes());
 
         return true;
     }
@@ -439,7 +439,7 @@ auto OTAgent::IsValidSigner(const identity::Nym& theNym) -> bool
         // That means theNym *is* the Nym for this agent!
         // We'll save his pointer, for future reference...
         //
-        m_pNym.reset(&theNym);
+        nym_.reset(&theNym);
 
         return true;
     }
@@ -475,11 +475,11 @@ auto OTAgent::GetEntityID(identifier::Generic& theOutput) const -> bool
 {
     // IF represents an entity, then this is its ID. Else fail.
     //
-    if (DoesRepresentAnEntity() && (nullptr != m_pForParty) &&
-        m_pForParty->IsEntity()) {
+    if (DoesRepresentAnEntity() && (nullptr != for_party_) &&
+        for_party_->IsEntity()) {
         bool bSuccessEntityID = false;
         UnallocatedCString str_entity_id =
-            m_pForParty->GetEntityID(&bSuccessEntityID);
+            for_party_->GetEntityID(&bSuccessEntityID);
 
         if (bSuccessEntityID && (str_entity_id.size() > 0)) {
             auto strEntityID = String::Factory(str_entity_id.c_str());
@@ -497,9 +497,9 @@ auto OTAgent::GetEntityID(identifier::Generic& theOutput) const -> bool
 //
 auto OTAgent::IsAuthorizingAgentForParty() -> bool
 {
-    if (nullptr == m_pForParty) { return false; }
+    if (nullptr == for_party_) { return false; }
 
-    if (m_strName->Compare(m_pForParty->GetAuthorizingAgentName().c_str())) {
+    if (name_->Compare(for_party_->GetAuthorizingAgentName().c_str())) {
         return true;
     }
 
@@ -511,14 +511,14 @@ auto OTAgent::IsAuthorizingAgentForParty() -> bool
 //
 auto OTAgent::GetCountAuthorizedAccts() -> std::int32_t
 {
-    if (nullptr == m_pForParty) {
-        LogError()(OT_PRETTY_CLASS())("Error: m_pForParty was "
+    if (nullptr == for_party_) {
+        LogError()(OT_PRETTY_CLASS())("Error: for_party_ was "
                                       "nullptr.")
             .Flush();
         return 0;  // Maybe should log here...
     }
 
-    return m_pForParty->GetAccountCount(m_strName->Get());
+    return for_party_->GetAccountCount(name_->Get());
 }
 
 // For when the agent is a voting group:
@@ -527,7 +527,7 @@ auto OTAgent::GetCountAuthorizedAccts() -> std::int32_t
 auto OTAgent::GetGroupName(String& strGroupName) -> bool
 {
     if (IsAGroup()) {
-        strGroupName.Set(m_strGroupName);
+        strGroupName.Set(group_name_);
 
         return true;
     }
@@ -698,21 +698,21 @@ auto OTAgent::SignContract(Contract& theInput, const PasswordPrompt& reason)
 {
     if (!IsAnIndividual() || !DoesRepresentHimself()) {
         LogError()(OT_PRETTY_CLASS())(
-            "Entities and roles are not yet supported. Agent: ")(
-            m_strName.get())(".")
+            "Entities and roles are not yet supported. Agent: ")(name_.get())(
+            ".")
             .Flush();
         return false;
     }  // todo: when adding entities, this will change.
 
-    if (nullptr == m_pNym) {
+    if (nullptr == nym_) {
         LogError()(OT_PRETTY_CLASS())(
             "Nym was nullptr while trying to sign contract. Agent: ")(
-            m_strName.get())(".")
+            name_.get())(".")
             .Flush();
         return false;
     }  // todo: when adding entities, this will change.
 
-    return theInput.SignContract(*m_pNym, reason);
+    return theInput.SignContract(*nym_, reason);
 }
 
 auto OTAgent::VerifyIssuedNumber(
@@ -723,22 +723,21 @@ auto OTAgent::VerifyIssuedNumber(
     if (!IsAnIndividual() || !DoesRepresentHimself()) {
         LogError()(OT_PRETTY_CLASS())(
             "Error: Entities and Roles are not yet supported. Agent: ")(
-            m_strName.get())(".")
+            name_.get())(".")
             .Flush();
         return false;
     }
 
-    if (nullptr != m_pNym) {
+    if (nullptr != nym_) {
         auto context = api_.Wallet().Context(
-            api_.Factory().NotaryIDFromBase58(strNotaryID.Bytes()),
-            m_pNym->ID());
+            api_.Factory().NotaryIDFromBase58(strNotaryID.Bytes()), nym_->ID());
 
         OT_ASSERT(context);
 
         return context->VerifyIssuedNumber(lNumber);
     } else {
-        LogError()(OT_PRETTY_CLASS())("Error: m_pNym was nullptr. For agent: ")(
-            m_strName.get())(".")
+        LogError()(OT_PRETTY_CLASS())("Error: nym_ was nullptr. For agent: ")(
+            name_.get())(".")
             .Flush();
     }
 
@@ -753,22 +752,21 @@ auto OTAgent::VerifyTransactionNumber(
     if (!IsAnIndividual() || !DoesRepresentHimself()) {
         LogError()(OT_PRETTY_CLASS())(
             "Error: Entities and Roles are not yet supported. Agent: ")(
-            m_strName.get())(".")
+            name_.get())(".")
             .Flush();
         return false;
     }
 
-    if (nullptr != m_pNym) {
+    if (nullptr != nym_) {
         auto context = api_.Wallet().Context(
-            api_.Factory().NotaryIDFromBase58(strNotaryID.Bytes()),
-            m_pNym->ID());
+            api_.Factory().NotaryIDFromBase58(strNotaryID.Bytes()), nym_->ID());
 
         OT_ASSERT(context);
 
         return context->VerifyAvailableNumber(lNumber);
     } else {
-        LogError()(OT_PRETTY_CLASS())("Error: m_pNym was nullptr. For agent: ")(
-            m_strName.get())(".")
+        LogError()(OT_PRETTY_CLASS())("Error: nym_ was nullptr. For agent: ")(
+            name_.get())(".")
             .Flush();
     }
 
@@ -783,12 +781,12 @@ auto OTAgent::RecoverTransactionNumber(
     if (!IsAnIndividual() || !DoesRepresentHimself()) {
         LogError()(OT_PRETTY_CLASS())(
             "Error: Entities and Roles are not yet supported. Agent: ")(
-            m_strName.get())(".")
+            name_.get())(".")
             .Flush();
         return false;
     }
 
-    if (nullptr != m_pNym) {
+    if (nullptr != nym_) {
         // This won't "add it back" unless we're SURE he had it in the first
         // place...
         const bool bSuccess = context.RecoverAvailableNumber(lNumber);
@@ -806,13 +804,13 @@ auto OTAgent::RecoverTransactionNumber(
             return true;
         } else {
             LogError()(OT_PRETTY_CLASS())("Number (")(
-                lNumber)(") failed to verify for agent: ")(m_strName.get())(
+                lNumber)(") failed to verify for agent: ")(name_.get())(
                 " (Thus didn't bother 'adding it back').")
                 .Flush();
         }
     } else {
-        LogError()(OT_PRETTY_CLASS())("Error: m_pNym was nullptr. For agent: ")(
-            m_strName.get())(".")
+        LogError()(OT_PRETTY_CLASS())("Error: nym_ was nullptr. For agent: ")(
+            name_.get())(".")
             .Flush();
     }
 
@@ -824,16 +822,16 @@ auto OTAgent::RecoverTransactionNumber(
     const String& strNotaryID,
     const PasswordPrompt& reason) -> bool
 {
-    if (nullptr != m_pNym) {
+    if (nullptr != nym_) {
         auto context = api_.Wallet().Internal().mutable_Context(
             api_.Factory().NotaryIDFromBase58(strNotaryID.Bytes()),
-            m_pNym->ID(),
+            nym_->ID(),
             reason);
 
         return RecoverTransactionNumber(lNumber, context.get());
     } else {
-        LogError()(OT_PRETTY_CLASS())("Error: m_pNym was nullptr. For agent: ")(
-            m_strName.get())(".")
+        LogError()(OT_PRETTY_CLASS())("Error: nym_ was nullptr. For agent: ")(
+            name_.get())(".")
             .Flush();
     }
 
@@ -852,14 +850,14 @@ auto OTAgent::RemoveTransactionNumber(
     if (!IsAnIndividual() || !DoesRepresentHimself()) {
         LogError()(OT_PRETTY_CLASS())(
             "Error: Entities and Roles are not yet supported. Agent: ")(
-            m_strName.get())(".")
+            name_.get())(".")
             .Flush();
         return false;
     }
 
-    if (nullptr == m_pNym) {
-        LogError()(OT_PRETTY_CLASS())("Error: m_pNym was nullptr. For agent: ")(
-            m_strName.get())(".")
+    if (nullptr == nym_) {
+        LogError()(OT_PRETTY_CLASS())("Error: nym_ was nullptr. For agent: ")(
+            name_.get())(".")
             .Flush();
 
         return false;
@@ -867,7 +865,7 @@ auto OTAgent::RemoveTransactionNumber(
 
     auto context = api_.Wallet().Internal().mutable_Context(
         api_.Factory().NotaryIDFromBase58(strNotaryID.Bytes()),
-        m_pNym->ID(),
+        nym_->ID(),
         reason);
 
     if (context.get().ConsumeAvailable(lNumber)) {
@@ -895,15 +893,15 @@ auto OTAgent::RemoveIssuedNumber(
     if (!IsAnIndividual() || !DoesRepresentHimself()) {
         LogError()(OT_PRETTY_CLASS())(
             "Error: Entities and Roles are not yet supported. Agent: ")(
-            m_strName.get())(".")
+            name_.get())(".")
             .Flush();
 
         return false;
     }
 
-    if (nullptr == m_pNym) {
-        LogError()(OT_PRETTY_CLASS())("Error: m_pNym was nullptr. For agent: ")(
-            m_strName.get())(".")
+    if (nullptr == nym_) {
+        LogError()(OT_PRETTY_CLASS())("Error: nym_ was nullptr. For agent: ")(
+            name_.get())(".")
             .Flush();
 
         return false;
@@ -911,7 +909,7 @@ auto OTAgent::RemoveIssuedNumber(
 
     auto context = api_.Wallet().Internal().mutable_Context(
         api_.Factory().NotaryIDFromBase58(strNotaryID.Bytes()),
-        m_pNym->ID(),
+        nym_->ID(),
         reason);
 
     if (context.get().ConsumeIssued(lNumber)) {
@@ -931,7 +929,7 @@ auto OTAgent::ReserveClosingTransNum(
     otx::context::Server& context,
     OTPartyAccount& thePartyAcct) -> bool
 {
-    if (IsAnIndividual() && DoesRepresentHimself() && (nullptr != m_pNym)) {
+    if (IsAnIndividual() && DoesRepresentHimself() && (nullptr != nym_)) {
         if (thePartyAcct.GetClosingTransNo() > 0) {
             LogConsole()(OT_PRETTY_CLASS())(
                 "Failure: The account ALREADY has a closing transaction number "
@@ -967,7 +965,7 @@ auto OTAgent::ReserveClosingTransNum(
         // HarvestAllTransactionNumbers(strNotaryID);
         //
         thePartyAcct.SetClosingTransNo(number.Value());
-        thePartyAcct.SetAgentName(m_strName);
+        thePartyAcct.SetAgentName(name_);
 
         return true;
     } else  // todo: when entities and roles are added... this function will
@@ -975,8 +973,8 @@ auto OTAgent::ReserveClosingTransNum(
     {
         LogError()(OT_PRETTY_CLASS())(
             "Either the Nym pointer isn't set properly, or you tried to use "
-            "Entities when they haven't been coded yet. Agent: ")(
-            m_strName.get())(".")
+            "Entities when they haven't been coded yet. Agent: ")(name_.get())(
+            ".")
             .Flush();
     }
 
@@ -986,15 +984,15 @@ auto OTAgent::ReserveClosingTransNum(
 // Done
 auto OTAgent::ReserveOpeningTransNum(otx::context::Server& context) -> bool
 {
-    if (IsAnIndividual() && DoesRepresentHimself() && (nullptr != m_pNym)) {
-        if (nullptr == m_pForParty) {
+    if (IsAnIndividual() && DoesRepresentHimself() && (nullptr != nym_)) {
+        if (nullptr == for_party_) {
             LogError()(OT_PRETTY_CLASS())(
                 "Error: Party pointer was nullptr. SHOULD NEVER HAPPEN!!")
                 .Flush();
             return false;
         }
 
-        if (m_pForParty->GetOpeningTransNo() > 0) {
+        if (for_party_->GetOpeningTransNo() > 0) {
             LogConsole()(OT_PRETTY_CLASS())(
                 "Failure: Party ALREADY had an opening transaction number set "
                 "on it. Don't you want to save that first, before overwriting "
@@ -1027,8 +1025,8 @@ auto OTAgent::ReserveOpeningTransNum(otx::context::Server& context) -> bool
         // Any errors below this point will require this call before returning:
         // HarvestAllTransactionNumbers(strNotaryID);
         //
-        m_pForParty->SetOpeningTransNo(number.Value());
-        m_pForParty->SetAuthorizingAgentName(m_strName->Get());
+        for_party_->SetOpeningTransNo(number.Value());
+        for_party_->SetAuthorizingAgentName(name_->Get());
 
         return true;
     } else  // todo: when entities and roles are added... this function will
@@ -1036,8 +1034,8 @@ auto OTAgent::ReserveOpeningTransNum(otx::context::Server& context) -> bool
     {
         LogError()(OT_PRETTY_CLASS())(
             "Either the Nym pointer isn't set properly, or you tried to use "
-            "Entities when they haven't been coded yet. Agent: ")(
-            m_strName.get())(".")
+            "Entities when they haven't been coded yet. Agent: ")(name_.get())(
+            ".")
             .Flush();
     }
 
@@ -1048,20 +1046,20 @@ void OTAgent::Serialize(Tag& parent) const
 {
     TagPtr pTag(new Tag("agent"));
 
-    pTag->add_attribute("name", m_strName->Get());
+    pTag->add_attribute("name", name_->Get());
     pTag->add_attribute(
-        "doesAgentRepresentHimself", formatBool(m_bNymRepresentsSelf));
-    pTag->add_attribute("isAgentAnIndividual", formatBool(m_bIsAnIndividual));
-    pTag->add_attribute("nymID", m_strNymID->Get());
-    pTag->add_attribute("roleID", m_strRoleID->Get());
-    pTag->add_attribute("groupName", m_strGroupName->Get());
+        "doesAgentRepresentHimself", formatBool(nym_represents_self_));
+    pTag->add_attribute("isAgentAnIndividual", formatBool(is_an_individual_));
+    pTag->add_attribute("nymID", nym_id_->Get());
+    pTag->add_attribute("roleID", role_id_->Get());
+    pTag->add_attribute("groupName", group_name_->Get());
 
     parent.add_tag(pTag);
 }
 
 OTAgent::~OTAgent()
 {
-    m_pForParty = nullptr;  // The agent probably has a pointer to the party it
-                            // acts on behalf of.
+    for_party_ = nullptr;  // The agent probably has a pointer to the party it
+                           // acts on behalf of.
 }
 }  // namespace opentxs

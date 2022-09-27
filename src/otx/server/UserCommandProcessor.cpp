@@ -414,7 +414,7 @@ auto UserCommandProcessor::check_ping_notary(const Message& msgIn) const -> bool
     OT_ENFORCE_PERMISSION_MSG(ServerSettings::_cmd_check_notary_id);
 
     const auto serialized =
-        proto::StringToProto<proto::AsymmetricKey>(msgIn.m_strNymPublicKey);
+        proto::StringToProto<proto::AsymmetricKey>(msgIn.nym_public_key_);
     auto nymAuthentKey =
         manager_.Factory().InternalSession().AsymmetricKey(serialized);
 
@@ -440,7 +440,7 @@ auto UserCommandProcessor::check_request_number(
     const Message& msgIn,
     const RequestNumber& correctNumber) const -> bool
 {
-    const RequestNumber messageNumber = msgIn.m_strRequestNum->ToLong();
+    const RequestNumber messageNumber = msgIn.request_num_->ToLong();
 
     if (correctNumber != messageNumber) {
         LogError()(OT_PRETTY_CLASS())(
@@ -516,10 +516,10 @@ auto UserCommandProcessor::cmd_add_claim(ReplyMessage& reply) const -> bool
     const auto& context = reply.Context();
     const auto& nymID = context.RemoteNym().ID();
     const auto requestingNym = String::Factory(nymID);
-    const std::uint32_t section = msgIn.m_strNymID2->ToUint();
-    const std::uint32_t type = msgIn.m_strInstrumentDefinitionID->ToUint();
-    const UnallocatedCString value = msgIn.m_strAcctID->Get();
-    const bool primary = msgIn.m_bBool;
+    const std::uint32_t section = msgIn.nym_id2_->ToUint();
+    const std::uint32_t type = msgIn.instrument_definition_id_->ToUint();
+    const UnallocatedCString value = msgIn.acct_id_->Get();
+    const bool primary = msgIn.bool_;
     UnallocatedSet<std::uint32_t> attributes;
 
     if (primary) {
@@ -552,7 +552,7 @@ auto UserCommandProcessor::cmd_add_claim(ReplyMessage& reply) const -> bool
 auto UserCommandProcessor::cmd_check_nym(ReplyMessage& reply) const -> bool
 {
     const auto& msgIn = reply.Original();
-    const auto& targetNym = msgIn.m_strNymID2;
+    const auto& targetNym = msgIn.nym_id2_;
     reply.SetTargetNym(targetNym);
 
     OT_ENFORCE_PERMISSION_MSG(ServerSettings::_cmd_check_nym);
@@ -590,12 +590,12 @@ auto UserCommandProcessor::cmd_delete_asset_account(ReplyMessage& reply) const
     -> bool
 {
     const auto& msgIn = reply.Original();
-    reply.SetAccount(msgIn.m_strAcctID);
+    reply.SetAccount(msgIn.acct_id_);
 
     OT_ENFORCE_PERMISSION_MSG(ServerSettings::_cmd_del_asset_acct);
 
-    const auto accountID = server_.API().Factory().IdentifierFromBase58(
-        msgIn.m_strAcctID->Bytes());
+    const auto accountID =
+        server_.API().Factory().IdentifierFromBase58(msgIn.acct_id_->Bytes());
     const auto& context = reply.Context();
     const auto& serverNym = *context.Nym();
     auto account =
@@ -771,7 +771,7 @@ auto UserCommandProcessor::cmd_get_account_data(ReplyMessage& reply) const
     -> bool
 {
     const auto& msgIn = reply.Original();
-    reply.SetAccount(msgIn.m_strAcctID);
+    reply.SetAccount(msgIn.acct_id_);
 
     OT_ENFORCE_PERMISSION_MSG(ServerSettings::_cmd_get_inbox);
     OT_ENFORCE_PERMISSION_MSG(ServerSettings::_cmd_get_outbox);
@@ -781,8 +781,8 @@ auto UserCommandProcessor::cmd_get_account_data(ReplyMessage& reply) const
     const auto& nymID = context.RemoteNym().ID();
     const auto& serverID = context.Notary();
     const auto& serverNym = *context.Nym();
-    const auto accountID = server_.API().Factory().IdentifierFromBase58(
-        msgIn.m_strAcctID->Bytes());
+    const auto accountID =
+        server_.API().Factory().IdentifierFromBase58(msgIn.acct_id_->Bytes());
     auto account =
         server_.API().Wallet().Internal().mutable_Account(accountID, reason_);
 
@@ -849,9 +849,9 @@ auto UserCommandProcessor::cmd_get_box_receipt(ReplyMessage& reply) const
     -> bool
 {
     const auto& msgIn = reply.Original();
-    const auto boxType = msgIn.m_lDepth;
-    const TransactionNumber number = msgIn.m_lTransactionNum;
-    reply.SetAccount(msgIn.m_strAcctID);
+    const auto boxType = msgIn.depth_;
+    const TransactionNumber number = msgIn.transaction_num_;
+    reply.SetAccount(msgIn.acct_id_);
     reply.SetDepth(boxType);
     reply.SetTransactionNumber(number);
 
@@ -876,8 +876,8 @@ auto UserCommandProcessor::cmd_get_box_receipt(ReplyMessage& reply) const
     const auto& nymID = context.RemoteNym().ID();
     const auto& serverID = context.Notary();
     const auto& serverNym = *context.Nym();
-    const auto accountID = server_.API().Factory().IdentifierFromBase58(
-        msgIn.m_strAcctID->Bytes());
+    const auto accountID =
+        server_.API().Factory().IdentifierFromBase58(msgIn.acct_id_->Bytes());
     std::unique_ptr<Ledger> box{};
 
     switch (boxType) {
@@ -938,7 +938,7 @@ auto UserCommandProcessor::cmd_get_instrument_definition(
     ReplyMessage& reply) const -> bool
 {
     const auto& msgIn = reply.Original();
-    reply.SetInstrumentDefinitionID(msgIn.m_strInstrumentDefinitionID);
+    reply.SetInstrumentDefinitionID(msgIn.instrument_definition_id_);
 
     OT_ENFORCE_PERMISSION_MSG(ServerSettings::_cmd_get_contract);
 
@@ -951,7 +951,7 @@ auto UserCommandProcessor::cmd_get_instrument_definition(
     switch (static_cast<contract::Type>(msgIn.enum_)) {
         case contract::Type::nym: {
             const auto id = api.Factory().NymIDFromBase58(
-                msgIn.m_strInstrumentDefinitionID->Bytes());
+                msgIn.instrument_definition_id_->Bytes());
             auto contract = api.Wallet().Nym(id);
 
             if (contract) {
@@ -969,7 +969,7 @@ auto UserCommandProcessor::cmd_get_instrument_definition(
         } break;
         case contract::Type::notary: {
             const auto id = api.Factory().NotaryIDFromBase58(
-                msgIn.m_strInstrumentDefinitionID->Bytes());
+                msgIn.instrument_definition_id_->Bytes());
 
             try {
                 const auto contract = api.Wallet().Server(id);
@@ -992,7 +992,7 @@ auto UserCommandProcessor::cmd_get_instrument_definition(
         } break;
         case contract::Type::unit: {
             const auto id = api.Factory().UnitIDFromBase58(
-                msgIn.m_strInstrumentDefinitionID->Bytes());
+                msgIn.instrument_definition_id_->Bytes());
 
             try {
                 const auto contract = api.Wallet().UnitDefinition(id);
@@ -1051,16 +1051,16 @@ auto UserCommandProcessor::cmd_get_market_offers(ReplyMessage& reply) const
     -> bool
 {
     const auto& msgIn = reply.Original();
-    reply.SetTargetNym(msgIn.m_strNymID2);
+    reply.SetTargetNym(msgIn.nym_id2_);
 
     OT_ENFORCE_PERMISSION_MSG(ServerSettings::_cmd_get_market_offers);
 
-    auto depth = msgIn.m_lDepth;
+    auto depth = msgIn.depth_;
 
     if (depth < 0) { depth = 0; }
 
     const auto market = server_.Cron().GetMarket(
-        server_.API().Factory().NymIDFromBase58(msgIn.m_strNymID2->Bytes()));
+        server_.API().Factory().NymIDFromBase58(msgIn.nym_id2_->Bytes()));
 
     if (false == bool(market)) { return false; }
 
@@ -1085,12 +1085,12 @@ auto UserCommandProcessor::cmd_get_market_recent_trades(
     ReplyMessage& reply) const -> bool
 {
     const auto& msgIn = reply.Original();
-    reply.SetTargetNym(msgIn.m_strNymID2);
+    reply.SetTargetNym(msgIn.nym_id2_);
 
     OT_ENFORCE_PERMISSION_MSG(ServerSettings::_cmd_get_market_recent_trades);
 
     const auto market = server_.Cron().GetMarket(
-        server_.API().Factory().NymIDFromBase58(msgIn.m_strNymID2->Bytes()));
+        server_.API().Factory().NymIDFromBase58(msgIn.nym_id2_->Bytes()));
 
     if (false == bool(market)) { return false; }
 
@@ -1113,13 +1113,13 @@ auto UserCommandProcessor::cmd_get_market_recent_trades(
 auto UserCommandProcessor::cmd_get_mint(ReplyMessage& reply) const -> bool
 {
     const auto& msgIn = reply.Original();
-    reply.SetInstrumentDefinitionID(msgIn.m_strInstrumentDefinitionID);
+    reply.SetInstrumentDefinitionID(msgIn.instrument_definition_id_);
 
     OT_ENFORCE_PERMISSION_MSG(ServerSettings::_cmd_get_mint);
 
     reply.SetSuccess(true);
     reply.SetBool(false);
-    const auto& unitID = msgIn.m_strInstrumentDefinitionID;
+    const auto& unitID = msgIn.instrument_definition_id_;
     auto& mint = manager_.GetPublicMint(
         server_.API().Factory().UnitIDFromBase58(unitID->Bytes()));
 
@@ -1334,7 +1334,7 @@ auto UserCommandProcessor::cmd_issue_basket(ReplyMessage& reply) const -> bool
     OT_ENFORCE_PERMISSION_MSG(ServerSettings::_cmd_issue_basket);
 
     auto serialized =
-        proto::Factory<proto::UnitDefinition>(ByteArray{msgIn.m_ascPayload});
+        proto::Factory<proto::UnitDefinition>(ByteArray{msgIn.payload_});
 
     if (false == proto::Validate(serialized, VERBOSE)) {
         LogError()(OT_PRETTY_CLASS())("Invalid contract.").Flush();
@@ -1508,7 +1508,7 @@ auto UserCommandProcessor::cmd_notarize_transaction(ReplyMessage& reply) const
     -> bool
 {
     const auto& msgIn = reply.Original();
-    reply.SetAccount(msgIn.m_strAcctID);
+    reply.SetAccount(msgIn.acct_id_);
 
     OT_ENFORCE_PERMISSION_MSG(ServerSettings::_cmd_notarize_transaction);
 
@@ -1517,8 +1517,8 @@ auto UserCommandProcessor::cmd_notarize_transaction(ReplyMessage& reply) const
     const auto& serverID = context.Notary();
     const auto& serverNym = *context.Nym();
     const auto& serverNymID = serverNym.ID();
-    const auto accountID = server_.API().Factory().IdentifierFromBase58(
-        msgIn.m_strAcctID->Bytes());
+    const auto accountID =
+        server_.API().Factory().IdentifierFromBase58(msgIn.acct_id_->Bytes());
     auto nymboxHash = identifier::Generic{};
     auto input{manager_.Factory().InternalSession().Ledger(
         nymID, accountID, serverID)};
@@ -1534,20 +1534,19 @@ auto UserCommandProcessor::cmd_notarize_transaction(ReplyMessage& reply) const
         return false;
     }
 
-    if (false ==
-        input->LoadLedgerFromString(String::Factory(msgIn.m_ascPayload))) {
+    if (false == input->LoadLedgerFromString(String::Factory(msgIn.payload_))) {
         LogError()(OT_PRETTY_CLASS())("Unable to load input ledger.").Flush();
 
         return false;
     }
 
     // Returning before this point will result in the reply message
-    // m_bSuccess = false, and no reply ledger
+    // success_ = false, and no reply ledger
     FinalizeResponse response(manager_, serverNym, reply, *responseLedger);
     reply.SetSuccess(true);
     reply.DropToNymbox(true);
     // Returning after this point will result in the reply message
-    // m_bSuccess = true, and a signed reply ledger containing at least one
+    // success_ = true, and a signed reply ledger containing at least one
     // transaction
 
     for (const auto& it : input->GetTransactionMap()) {
@@ -1615,7 +1614,7 @@ auto UserCommandProcessor::cmd_ping_notary(ReplyMessage& reply) const -> bool
 auto UserCommandProcessor::cmd_process_inbox(ReplyMessage& reply) const -> bool
 {
     const auto& msgIn = reply.Original();
-    reply.SetAccount(msgIn.m_strAcctID);
+    reply.SetAccount(msgIn.acct_id_);
 
     OT_ENFORCE_PERMISSION_MSG(ServerSettings::_cmd_process_inbox);
 
@@ -1626,8 +1625,8 @@ auto UserCommandProcessor::cmd_process_inbox(ReplyMessage& reply) const -> bool
     const auto& serverNym = *context.Nym();
     const auto& serverNymID = serverNym.ID();
     const auto& nym = reply.Context().RemoteNym();
-    const auto accountID = server_.API().Factory().IdentifierFromBase58(
-        msgIn.m_strAcctID->Bytes());
+    const auto accountID =
+        server_.API().Factory().IdentifierFromBase58(msgIn.acct_id_->Bytes());
     auto nymboxHash = identifier::Generic{};
     auto input{manager_.Factory().InternalSession().Ledger(
         nymID, accountID, serverID)};
@@ -1643,8 +1642,7 @@ auto UserCommandProcessor::cmd_process_inbox(ReplyMessage& reply) const -> bool
         return false;
     }
 
-    if (false ==
-        input->LoadLedgerFromString(String::Factory(msgIn.m_ascPayload))) {
+    if (false == input->LoadLedgerFromString(String::Factory(msgIn.payload_))) {
         LogError()(OT_PRETTY_CLASS())("Unable to load input ledger.").Flush();
 
         return false;
@@ -1706,7 +1704,7 @@ auto UserCommandProcessor::cmd_process_inbox(ReplyMessage& reply) const -> bool
     }
 
     // Returning after this point will result in the reply message
-    // m_bSuccess = true, and a signed reply ledger containing at least one
+    // success_ = true, and a signed reply ledger containing at least one
     // transaction
     FinalizeResponse response(manager_, serverNym, reply, *responseLedger);
     reply.SetSuccess(true);
@@ -1814,20 +1812,19 @@ auto UserCommandProcessor::cmd_process_nymbox(ReplyMessage& reply) const -> bool
         return false;
     }
 
-    if (false ==
-        input->LoadLedgerFromString(String::Factory(msgIn.m_ascPayload))) {
+    if (false == input->LoadLedgerFromString(String::Factory(msgIn.payload_))) {
         LogError()(OT_PRETTY_CLASS())("Unable to load input ledger.").Flush();
 
         return false;
     }
 
     // Returning before this point will result in the reply message
-    // m_bSuccess = false, and no reply ledger
+    // success_ = false, and no reply ledger
     FinalizeResponse response(manager_, serverNym, reply, *responseLedger);
     reply.SetSuccess(true);
     bool nymboxUpdated{false};
     // Returning after this point will result in the reply message
-    // m_bSuccess = true, and a signed reply ledger containing at least one
+    // success_ = true, and a signed reply ledger containing at least one
     // transaction
 
     for (const auto& it : input->GetTransactionMap()) {
@@ -1884,13 +1881,13 @@ auto UserCommandProcessor::cmd_query_instrument_definitions(
 
     OT_ENFORCE_PERMISSION_MSG(ServerSettings::_cmd_get_contract);
 
-    std::unique_ptr<OTDB::Storable> pStorable(OTDB::DecodeObject(
-        OTDB::STORED_OBJ_STRING_MAP, msgIn.m_ascPayload->Get()));
+    std::unique_ptr<OTDB::Storable> pStorable(
+        OTDB::DecodeObject(OTDB::STORED_OBJ_STRING_MAP, msgIn.payload_->Get()));
     auto* inputMap = dynamic_cast<OTDB::StringMap*>(pStorable.get());
 
     if (nullptr == inputMap) { return false; }
 
-    auto& map = inputMap->the_map;
+    auto& map = inputMap->the_map_;
     UnallocatedMap<UnallocatedCString, UnallocatedCString> newMap{};
 
     for (auto& it : map) {
@@ -1940,7 +1937,7 @@ auto UserCommandProcessor::cmd_register_account(ReplyMessage& reply) const
     const auto& serverID = context.Notary();
     const auto& serverNym = *context.Nym();
     const auto contractID = server_.API().Factory().UnitIDFromBase58(
-        msgIn.m_strInstrumentDefinitionID->Bytes());
+        msgIn.instrument_definition_id_->Bytes());
     auto account = server_.API().Wallet().Internal().CreateAccount(
         nymID, serverID, contractID, serverNym, Account::user, 0, reason_);
 
@@ -2063,12 +2060,12 @@ auto UserCommandProcessor::cmd_register_contract(ReplyMessage& reply) const
     switch (type) {
         case (contract::Type::nym): {
             const auto nym =
-                proto::Factory<proto::Nym>(ByteArray{msgIn.m_ascPayload});
+                proto::Factory<proto::Nym>(ByteArray{msgIn.payload_});
             reply.SetSuccess(bool(server_.API().Wallet().Internal().Nym(nym)));
         } break;
         case (contract::Type::notary): {
             const auto server = proto::Factory<proto::ServerContract>(
-                ByteArray{msgIn.m_ascPayload});
+                ByteArray{msgIn.payload_});
             try {
                 server_.API().Wallet().Internal().Server(server);
                 reply.SetSuccess(true);
@@ -2081,7 +2078,7 @@ auto UserCommandProcessor::cmd_register_contract(ReplyMessage& reply) const
             try {
                 server_.API().Wallet().Internal().UnitDefinition(
                     proto::Factory<proto::UnitDefinition>(
-                        ByteArray{msgIn.m_ascPayload}));
+                        ByteArray{msgIn.payload_}));
                 reply.SetSuccess(true);
             } catch (const std::exception& e) {
                 LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
@@ -2104,9 +2101,9 @@ auto UserCommandProcessor::cmd_register_instrument_definition(
     ReplyMessage& reply) const -> bool
 {
     const auto& msgIn = reply.Original();
-    reply.SetInstrumentDefinitionID(msgIn.m_strInstrumentDefinitionID);
+    reply.SetInstrumentDefinitionID(msgIn.instrument_definition_id_);
     const auto contractID = server_.API().Factory().UnitIDFromBase58(
-        msgIn.m_strInstrumentDefinitionID->Bytes());
+        msgIn.instrument_definition_id_->Bytes());
 
     OT_ENFORCE_PERMISSION_MSG(ServerSettings::_cmd_issue_asset);
 
@@ -2122,7 +2119,7 @@ auto UserCommandProcessor::cmd_register_instrument_definition(
     }
 
     const auto serialized =
-        proto::Factory<proto::UnitDefinition>(ByteArray{msgIn.m_ascPayload});
+        proto::Factory<proto::UnitDefinition>(ByteArray{msgIn.payload_});
 
     if (contract::UnitType::Basket == translate(serialized.type())) {
         LogError()(OT_PRETTY_CLASS())("Incorrect unit type.").Flush();
@@ -2195,12 +2192,11 @@ auto UserCommandProcessor::cmd_register_nym(ReplyMessage& reply) const -> bool
     OT_ENFORCE_PERMISSION_MSG(ServerSettings::_cmd_create_user_acct);
 
     auto serialized =
-        proto::Factory<proto::Nym>(ByteArray{reply.Original().m_ascPayload});
+        proto::Factory<proto::Nym>(ByteArray{reply.Original().payload_});
     auto sender_nym = server_.API().Wallet().Internal().Nym(serialized);
 
     if (false == bool(sender_nym)) {
-        LogError()(OT_PRETTY_CLASS())("Invalid nym: ")(msgIn.m_strNymID.get())(
-            ".")
+        LogError()(OT_PRETTY_CLASS())("Invalid nym: ")(msgIn.nym_id_.get())(".")
             .Flush();
 
         return false;
@@ -2253,9 +2249,9 @@ auto UserCommandProcessor::cmd_request_admin(ReplyMessage& reply) const -> bool
 
     OT_ENFORCE_PERMISSION_MSG(ServerSettings::_cmd_request_admin);
 
-    const String& requestingNym = msgIn.m_strNymID;
+    const String& requestingNym = msgIn.nym_id_;
     const UnallocatedCString candidate = requestingNym.Get();
-    const UnallocatedCString providedPassword = msgIn.m_strAcctID->Get();
+    const UnallocatedCString providedPassword = msgIn.acct_id_->Get();
 
     UnallocatedCString overrideNym, password;
     bool notUsed = false;
@@ -2318,7 +2314,7 @@ auto UserCommandProcessor::cmd_send_nym_message(ReplyMessage& reply) const
     const auto& sender = context.RemoteNym().ID();
     const auto& server = context.Notary();
     const auto& msgIn = reply.Original();
-    const auto& targetNym = msgIn.m_strNymID2;
+    const auto& targetNym = msgIn.nym_id2_;
     const auto recipient =
         manager_.Factory().NymIDFromBase58(targetNym->Bytes());
     reply.SetTargetNym(targetNym);
@@ -2358,7 +2354,7 @@ auto UserCommandProcessor::cmd_trigger_clause(ReplyMessage& reply) const -> bool
 
     OT_ENFORCE_PERMISSION_MSG(ServerSettings::_cmd_trigger_clause);
 
-    const auto& number = msgIn.m_lTransactionNum;
+    const auto& number = msgIn.transaction_num_;
     const auto& context = reply.Context();
     const auto& nym = context.RemoteNym();
 
@@ -2409,7 +2405,7 @@ auto UserCommandProcessor::cmd_trigger_clause(ReplyMessage& reply) const -> bool
         return false;
     }
 
-    const UnallocatedCString clauseID = msgIn.m_strNymID2->Get();
+    const UnallocatedCString clauseID = msgIn.nym_id2_->Get();
 
     if (smartContract->CanExecuteClause(party->GetPartyName(), clauseID)) {
         // Execute the clause.
@@ -2462,7 +2458,7 @@ auto UserCommandProcessor::cmd_trigger_clause(ReplyMessage& reply) const -> bool
 auto UserCommandProcessor::cmd_usage_credits(ReplyMessage& reply) const -> bool
 {
     const auto& msgIn = reply.Original();
-    reply.SetTargetNym(msgIn.m_strNymID2);
+    reply.SetTargetNym(msgIn.nym_id2_);
     reply.SetDepth(0);
 
     OT_ENFORCE_PERMISSION_MSG(ServerSettings::_cmd_usage_credits);
@@ -2473,12 +2469,12 @@ auto UserCommandProcessor::cmd_usage_credits(ReplyMessage& reply) const -> bool
     const auto& adminNymID = adminNym.ID();
     const auto& serverNym = *adminContext.Nym();
     const bool admin = isAdmin(adminNymID);
-    auto adjustment = msgIn.m_lDepth;
+    auto adjustment = msgIn.depth_;
 
     if (false == admin) { adjustment = 0; }
 
     const auto targetNymID =
-        server_.API().Factory().NymIDFromBase58(msgIn.m_strNymID2->Bytes());
+        server_.API().Factory().NymIDFromBase58(msgIn.nym_id2_->Bytes());
     auto nymID = identifier::Nym{};
 
     if (targetNymID == adminNymID) {
@@ -2852,7 +2848,7 @@ auto UserCommandProcessor::ProcessUserCommand(
     const Message& msgIn,
     Message& msgOut) -> bool
 {
-    UnallocatedCString command(msgIn.m_strCommand->Get());
+    UnallocatedCString command(msgIn.command_->Get());
     const auto type = Message::Type(command);
     ReplyMessage reply(
         *this,
@@ -2872,7 +2868,7 @@ auto UserCommandProcessor::ProcessUserCommand(
     }
 
     LogConsole()("*** Received a ")(command)(" message. Nym: ")(
-        msgIn.m_strNymID.get())
+        msgIn.nym_id_.get())
         .Flush();
 
     switch (type) {
@@ -2897,8 +2893,8 @@ auto UserCommandProcessor::ProcessUserCommand(
     OT_ASSERT(reply.HaveContext());
 
     auto& context = reply.Context();
-    context.SetRemoteNymboxHash(manager_.Factory().IdentifierFromBase58(
-        msgIn.m_strNymboxHash->Bytes()));
+    context.SetRemoteNymboxHash(
+        manager_.Factory().IdentifierFromBase58(msgIn.nymbox_hash_->Bytes()));
 
     // ENTERING THE INNER SANCTUM OF SECURITY. If the user got all the way to
     // here, Then he has passed multiple levels of security, and all commands
@@ -3023,7 +3019,7 @@ auto UserCommandProcessor::ProcessUserCommand(
                 command)(".")
                 .Flush();
 
-            reply.SetAccount(msgIn.m_strAcctID);
+            reply.SetAccount(msgIn.acct_id_);
             command.append("Response");
             auto response = String::Factory(command);
             reply.OverrideType(response);
@@ -3038,8 +3034,7 @@ auto UserCommandProcessor::reregister_nym(ReplyMessage& reply) const -> bool
     auto& context = reply.Context();
     context.IncrementRequest();
     const auto& msgIn = reply.Original();
-    LogDebug()(OT_PRETTY_CLASS())("Re-registering nym: ")(
-        msgIn.m_strNymID.get())
+    LogDebug()(OT_PRETTY_CLASS())("Re-registering nym: ")(msgIn.nym_id_.get())
         .Flush();
     const auto& nym = reply.Context().RemoteNym();
     const auto& serverNym = *context.Nym();
@@ -3056,7 +3051,7 @@ auto UserCommandProcessor::reregister_nym(ReplyMessage& reply) const -> bool
     if (false == bool(nymbox)) {
         LogError()(OT_PRETTY_CLASS())(
             "Error during nym re-registration. Failed verifying or generating "
-            "nymbox for Nym: ")(msgIn.m_strNymID.get())(".")
+            "nymbox for Nym: ")(msgIn.nym_id_.get())(".")
             .Flush();
 
         return false;

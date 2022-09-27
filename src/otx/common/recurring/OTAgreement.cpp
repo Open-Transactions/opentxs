@@ -51,11 +51,11 @@ namespace opentxs
 {
 OTAgreement::OTAgreement(const api::Session& api)
     : ot_super(api)
-    , m_RECIPIENT_ACCT_ID()
-    , m_RECIPIENT_NYM_ID()
-    , m_strConsideration(String::Factory())
-    , m_strMerchantSignedCopy(String::Factory())
-    , m_dequeRecipientClosingNumbers()
+    , recipient_account_id_()
+    , recipient_nym_id_()
+    , consideration_(String::Factory())
+    , merchant_signed_copy_(String::Factory())
+    , recipient_closing_numbers_()
 {
     InitAgreement();
 }
@@ -65,11 +65,11 @@ OTAgreement::OTAgreement(
     const identifier::Notary& NOTARY_ID,
     const identifier::UnitDefinition& INSTRUMENT_DEFINITION_ID)
     : ot_super(api, NOTARY_ID, INSTRUMENT_DEFINITION_ID)
-    , m_RECIPIENT_ACCT_ID()
-    , m_RECIPIENT_NYM_ID()
-    , m_strConsideration(String::Factory())
-    , m_strMerchantSignedCopy(String::Factory())
-    , m_dequeRecipientClosingNumbers()
+    , recipient_account_id_()
+    , recipient_nym_id_()
+    , consideration_(String::Factory())
+    , merchant_signed_copy_(String::Factory())
+    , recipient_closing_numbers_()
 {
     InitAgreement();
 }
@@ -88,11 +88,11 @@ OTAgreement::OTAgreement(
           INSTRUMENT_DEFINITION_ID,
           SENDER_ACCT_ID,
           SENDER_NYM_ID)
-    , m_RECIPIENT_ACCT_ID()
-    , m_RECIPIENT_NYM_ID()
-    , m_strConsideration(String::Factory())
-    , m_strMerchantSignedCopy(String::Factory())
-    , m_dequeRecipientClosingNumbers()
+    , recipient_account_id_()
+    , recipient_nym_id_()
+    , consideration_(String::Factory())
+    , merchant_signed_copy_(String::Factory())
+    , recipient_closing_numbers_()
 {
     InitAgreement();
     SetRecipientAcctID(RECIPIENT_ACCT_ID);
@@ -319,18 +319,16 @@ auto OTAgreement::HasTransactionNum(const std::int64_t& lInput) const -> bool
 {
     if (lInput == GetTransactionNum()) { return true; }
 
-    const std::size_t nSizeClosing = m_dequeClosingNumbers.size();
+    const std::size_t nSizeClosing = closing_numbers_.size();
 
     for (auto nIndex = 0_uz; nIndex < nSizeClosing; ++nIndex) {
-        if (lInput == m_dequeClosingNumbers.at(nIndex)) { return true; }
+        if (lInput == closing_numbers_.at(nIndex)) { return true; }
     }
 
-    const std::size_t nSizeRecipient = m_dequeRecipientClosingNumbers.size();
+    const std::size_t nSizeRecipient = recipient_closing_numbers_.size();
 
     for (auto nIndex = 0_uz; nIndex < nSizeRecipient; ++nIndex) {
-        if (lInput == m_dequeRecipientClosingNumbers.at(nIndex)) {
-            return true;
-        }
+        if (lInput == recipient_closing_numbers_.at(nIndex)) { return true; }
     }
 
     return false;
@@ -341,17 +339,17 @@ void OTAgreement::GetAllTransactionNumbers(NumList& numlistOutput) const
 
     if (GetTransactionNum() > 0) { numlistOutput.Add(GetTransactionNum()); }
 
-    const std::size_t nSizeClosing = m_dequeClosingNumbers.size();
+    const std::size_t nSizeClosing = closing_numbers_.size();
 
     for (auto nIndex = 0_uz; nIndex < nSizeClosing; ++nIndex) {
-        const std::int64_t lTemp = m_dequeClosingNumbers.at(nIndex);
+        const std::int64_t lTemp = closing_numbers_.at(nIndex);
         if (lTemp > 0) { numlistOutput.Add(lTemp); }
     }
 
-    const std::size_t nSizeRecipient = m_dequeRecipientClosingNumbers.size();
+    const std::size_t nSizeRecipient = recipient_closing_numbers_.size();
 
     for (auto nIndex = 0_uz; nIndex < nSizeRecipient; ++nIndex) {
-        const std::int64_t lTemp = m_dequeRecipientClosingNumbers.at(nIndex);
+        const std::int64_t lTemp = recipient_closing_numbers_.at(nIndex);
         if (lTemp > 0) { numlistOutput.Add(lTemp); }
     }
 }
@@ -693,21 +691,21 @@ auto OTAgreement::GetRecipientClosingTransactionNoAt(std::uint32_t nIndex) const
     -> std::int64_t
 {
     OT_ASSERT_MSG(
-        (nIndex < m_dequeRecipientClosingNumbers.size()),
+        (nIndex < recipient_closing_numbers_.size()),
         "OTAgreement::GetClosingTransactionNoAt: index out of bounds.");
 
-    return m_dequeRecipientClosingNumbers.at(nIndex);
+    return recipient_closing_numbers_.at(nIndex);
 }
 
 auto OTAgreement::GetRecipientCountClosingNumbers() const -> std::int32_t
 {
-    return static_cast<std::int32_t>(m_dequeRecipientClosingNumbers.size());
+    return static_cast<std::int32_t>(recipient_closing_numbers_.size());
 }
 
 void OTAgreement::AddRecipientClosingTransactionNo(
     const std::int64_t& closingNumber)
 {
-    m_dequeRecipientClosingNumbers.push_back(closingNumber);
+    recipient_closing_numbers_.push_back(closingNumber);
 }
 
 // OTCron calls this regularly, which is my chance to expire, etc.
@@ -815,14 +813,13 @@ auto OTAgreement::CanRemoveItemFromCron(const otx::context::Client& context)
 auto OTAgreement::CompareAgreement(const OTAgreement& rhs) const -> bool
 {
     // Compare OTAgreement specific info here.
-    if ((m_strConsideration->Compare(rhs.m_strConsideration)) &&
+    if ((consideration_->Compare(rhs.consideration_)) &&
         (GetRecipientAcctID() == rhs.GetRecipientAcctID()) &&
         (GetRecipientNymID() == rhs.GetRecipientNymID()) &&
-        //        (   m_dequeClosingNumbers == rhs.m_dequeClosingNumbers ) && //
+        //        (   closing_numbers_ == rhs.closing_numbers_ ) && //
         // The merchant wouldn't know the customer's trans#s.
         // (Thus wouldn't expect them to be set in BOTH versions...)
-        (m_dequeRecipientClosingNumbers ==
-         rhs.m_dequeRecipientClosingNumbers) &&
+        (recipient_closing_numbers_ == rhs.recipient_closing_numbers_) &&
         //      (   GetTransactionNum()  == rhs.GetTransactionNum()   ) && //
         // (commented out for same reason as above.)
         //      (   GetSenderAcctID()    == rhs.GetSenderAcctID()     ) && //
@@ -976,7 +973,7 @@ auto OTAgreement::SetProposal(
     // (They just both go onto this same list.)
 
     // Set the Consideration memo...
-    m_strConsideration->Set(strConsideration);
+    consideration_->Set(strConsideration);
     LogTrace()(OT_PRETTY_CLASS())("Successfully performed SetProposal.")
         .Flush();
 
@@ -1145,20 +1142,20 @@ auto OTAgreement::Confirm(
 
 void OTAgreement::InitAgreement()
 {
-    m_strContractType = String::Factory("AGREEMENT");
+    contract_type_ = String::Factory("AGREEMENT");
 }
 
 void OTAgreement::Release_Agreement()
 {
     // If there were any dynamically allocated objects, clean them up here.
     //
-    m_RECIPIENT_ACCT_ID.clear();
-    m_RECIPIENT_NYM_ID.clear();
+    recipient_account_id_.clear();
+    recipient_nym_id_.clear();
 
-    m_strConsideration->Release();
-    m_strMerchantSignedCopy->Release();
+    consideration_->Release();
+    merchant_signed_copy_->Release();
 
-    m_dequeRecipientClosingNumbers.clear();
+    recipient_closing_numbers_.clear();
 }
 
 // the framework will call this at the right time.
@@ -1197,7 +1194,7 @@ auto OTAgreement::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
     }
 
     if (!strcmp("agreement", xml->getNodeName())) {
-        m_strVersion = String::Factory(xml->getAttributeValue("version"));
+        version_ = String::Factory(xml->getAttributeValue("version"));
         SetTransactionNum(
             String::StringToLong(xml->getAttributeValue("transactionNum")));
 
@@ -1229,16 +1226,16 @@ auto OTAgreement::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
                        String::Factory(xml->getAttributeValue("cancelerNymID"));
 
         if (strCanceled->Exists() && strCanceled->Compare("true")) {
-            m_bCanceled = true;
+            canceled_ = true;
 
             if (strCancelerNymID->Exists()) {
-                m_pCancelerNymID =
+                canceler_nym_id_ =
                     api_.Factory().NymIDFromBase58(strCancelerNymID->Bytes());
             }
             // else log
         } else {
-            m_bCanceled = false;
-            m_pCancelerNymID.clear();
+            canceled_ = false;
+            canceler_nym_id_.clear();
         }
 
         const auto NOTARY_ID =
@@ -1261,8 +1258,8 @@ auto OTAgreement::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
         SetRecipientAcctID(RECIPIENT_ACCT_ID);
         SetRecipientNymID(RECIPIENT_NYM_ID);
 
-        LogDetail()(OT_PRETTY_CLASS())(m_bCanceled ? "Canceled a" : "A")(
-            "greement. Transaction Number: ")(m_lTransactionNum)
+        LogDetail()(OT_PRETTY_CLASS())(canceled_ ? "Canceled a" : "A")(
+            "greement. Transaction Number: ")(transaction_num_)
             .Flush();
 
         LogVerbose()(OT_PRETTY_CLASS())("Creation Date: ")(
@@ -1277,7 +1274,7 @@ auto OTAgreement::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
 
         nReturnVal = 1;
     } else if (!strcmp("consideration", xml->getNodeName())) {
-        if (false == LoadEncodedTextField(xml, m_strConsideration)) {
+        if (false == LoadEncodedTextField(xml, consideration_)) {
             LogError()(OT_PRETTY_CLASS())(
                 "Error in OTPaymentPlan::ProcessXMLNode: Consideration "
                 "field without value.")
@@ -1287,7 +1284,7 @@ auto OTAgreement::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
 
         nReturnVal = 1;
     } else if (!strcmp("merchantSignedCopy", xml->getNodeName())) {
-        if (false == LoadEncodedTextField(xml, m_strMerchantSignedCopy)) {
+        if (false == LoadEncodedTextField(xml, merchant_signed_copy_)) {
             LogError()(OT_PRETTY_CLASS())(
                 "Error in OTPaymentPlan::ProcessXMLNode: "
                 "merchant_signed_copy field without value.")
@@ -1298,7 +1295,7 @@ auto OTAgreement::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
         nReturnVal = 1;
     }
 
-    //  UnallocatedDeque<std::int64_t>   m_dequeRecipientClosingNumbers; //
+    //  UnallocatedDeque<std::int64_t>   recipient_closing_numbers_; //
     //  Numbers used
     // for CLOSING a transaction. (finalReceipt.)
     else if (!strcmp("closingRecipientNumber", xml->getNodeName())) {

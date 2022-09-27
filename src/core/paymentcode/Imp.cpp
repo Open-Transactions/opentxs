@@ -84,7 +84,7 @@ PaymentCode::PaymentCode(
     std::unique_ptr<crypto::key::Secp256k1> key) noexcept
     : api_(api)
     , version_(version)
-    , hasBitmessage_(hasBitmessage)
+    , has_bitmessage_(hasBitmessage)
     , pubkey_(api.Factory().DataFromBytes(pubkey))
     , chain_code_(api.Factory().SecretFromBytes(chaincode))
     , bitmessage_version_(bitmessageVersion)
@@ -99,7 +99,7 @@ PaymentCode::PaymentCode(
 PaymentCode::PaymentCode(const PaymentCode& rhs) noexcept
     : api_(rhs.api_)
     , version_(rhs.version_)
-    , hasBitmessage_(rhs.hasBitmessage_)
+    , has_bitmessage_(rhs.has_bitmessage_)
     , pubkey_(rhs.pubkey_)
     , chain_code_(rhs.chain_code_)
     , bitmessage_version_(rhs.bitmessage_version_)
@@ -232,7 +232,7 @@ auto PaymentCode::binary_preimage() const noexcept
 {
     return paymentcode::BinaryPreimage{
         version_,
-        hasBitmessage_,
+        has_bitmessage_,
         pubkey_.Bytes(),
         chain_code_->Bytes(),
         bitmessage_version_,

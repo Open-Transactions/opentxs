@@ -174,41 +174,42 @@ receipt itself is available for
  -- "Save To Abbreviated form" function.
 
  And what does it save?
- transactionType        m_Type;        // blank, pending, processInbox,
+ transactionType        type_;        // blank, pending, processInbox,
 transfer, deposit, withdrawal, trade, etc.
- Time                    m_DATE_SIGNED;        // The date, in seconds, when
+ Time                    date_signed_;        // The date, in seconds, when
 the instrument was last signed.
- std::int64_t                    m_lTransactionNum;    // The server issues this
+ std::int64_t                    transaction_num_;    // The server issues this
 and
 it must be sent with transaction request.
- std::int64_t                    m_lInReferenceToTransaction;
- std::int64_t                    m_lClosingTransactionNo; // used by
+ std::int64_t                    in_reference_to_transaction_;
+ std::int64_t                    closing_transaction_no_; // used by
 finalReceipt
  also:                AMOUNT.  // GetReceiptAmount()
- std::int64_t                m_lAbbrevAmount; // Stored here after loading, but
+ std::int64_t                abbrev_amount_; // Stored here after loading, but
 not
 saved from here in the first place (see GetReceiptAmount())
- std::int64_t                m_lDisplayAmount; // Just like m_lAbbrevAmount,
+ std::int64_t                display_amount_; // Just like abbrev_amount_,
 except
 it stores the display amount. For example, a transferReceipt for a 5000 clam
 transfer has an effective value of 0 (since the transfer is already done) but it
 has a display amount of 5000.
- identifier::Generic        m_Hash;             // Created while saving
+ identifier::Generic        hash_;             // Created while saving
 abbreviated record, loaded back with it, then verified against actual hash when
 loading actual box receipt.
 
  DOES NOT SAVE:
- listOfItems    m_listItems;        // the various items in this transaction.
- Armored   m_ascCancellationRequest; // used by finalReceipt
-//    identifier::Generic    m_ID;            // Account ID. This is in Contract
+ listOfItems    list_items_;        // the various items in this transaction.
+ Armored   cancellation_request_; // used by finalReceipt
+//    identifier::Generic    id_;            // Account ID. This is in Contract
 (parent class). Here we use it for the REAL ACCOUNT ID (set before loading.)
- identifier::Generic    m_AcctID;        // Compare m_AcctID to m_ID after
+ identifier::Generic    account_id_;        // Compare account_id_ to id_ after
 loading it from string or file. They should match, and signature should verify.
- identifier::Generic    m_NotaryID;        // Notary ID as used to instantiate
-the transaction, based on expected NotaryID. identifier::Generic m_AcctNotaryID;
-// Actual NotaryID within the signed portion. (Compare to m_NotaryID upon
-loading.) identifier::Generic    m_AcctNymID;        // NymID of the user who
-created this item. (In the future, this item Armored    m_ascInReferenceTo; //
+ identifier::Generic    notary_id_;        // Notary ID as used to instantiate
+the transaction, based on expected NotaryID. identifier::Generic
+account_notary_id_;
+// Actual NotaryID within the signed portion. (Compare to notary_id_ upon
+loading.) identifier::Generic    account_nym_id_;        // NymID of the user
+who created this item. (In the future, this item Armored    in_reference_to_; //
 This item may be in reference to a different item
 
  Normally we only save the "purported" values. But in "save to ledger" function
@@ -385,55 +386,52 @@ public:
 
     void InitTransaction();
 
-    auto IsCancelled() -> bool { return m_bCancelled; }
+    auto IsCancelled() -> bool { return cancelled_; }
 
-    void SetAsCancelled() { m_bCancelled = true; }
+    void SetAsCancelled() { cancelled_ = true; }
 
-    void SetParent(const Ledger& theParent) { m_pParent = &theParent; }
+    void SetParent(const Ledger& theParent) { parent_ = &theParent; }
 
     auto AddNumbersToTransaction(const NumList& theAddition) -> bool;
 
-    auto IsAbbreviated() const -> bool { return m_bIsAbbreviated; }
+    auto IsAbbreviated() const -> bool { return is_abbreviated_; }
 
-    auto GetAbbrevAdjustment() const -> const Amount&
-    {
-        return m_lAbbrevAmount;
-    }
+    auto GetAbbrevAdjustment() const -> const Amount& { return abbrev_amount_; }
 
     void SetAbbrevAdjustment(const Amount& lAmount)
     {
-        m_lAbbrevAmount = lAmount;
+        abbrev_amount_ = lAmount;
     }
 
     auto GetAbbrevDisplayAmount() const -> const Amount&
     {
-        return m_lDisplayAmount;
+        return display_amount_;
     }
 
     void SetAbbrevDisplayAmount(const Amount& lAmount)
     {
-        m_lDisplayAmount = lAmount;
+        display_amount_ = lAmount;
     }
 
     auto GetAbbrevInRefDisplay() const -> std::int64_t
     {
-        return m_lInRefDisplay;
+        return in_ref_display_;
     }
 
-    void SetAbbrevInRefDisplay(std::int64_t lVal) { m_lInRefDisplay = lVal; }
+    void SetAbbrevInRefDisplay(std::int64_t lVal) { in_ref_display_ = lVal; }
 
     // These are used exclusively by replyNotice (so you can tell
     // which reply message it's a notice of.)
     auto GetRequestNum() const -> const std::int64_t&
     {
-        return m_lRequestNumber;
+        return request_number_;
     }
 
-    void SetRequestNum(const std::int64_t& lNum) { m_lRequestNumber = lNum; }
+    void SetRequestNum(const std::int64_t& lNum) { request_number_ = lNum; }
 
-    auto GetReplyTransSuccess() -> bool { return m_bReplyTransSuccess; }
+    auto GetReplyTransSuccess() -> bool { return reply_trans_success_; }
 
-    void SetReplyTransSuccess(bool bVal) { m_bReplyTransSuccess = bVal; }
+    void SetReplyTransSuccess(bool bVal) { reply_trans_success_ = bVal; }
 
     // These are used for finalReceipt and basketReceipt
     auto GetClosingNum() const -> std::int64_t;
@@ -450,7 +448,7 @@ public:
     auto GetRecipientAcctIDForDisplay(identifier::Generic& theReturnID) -> bool;
     auto GetMemo(String& strMemo) -> bool;
 
-    inline auto GetDateSigned() const -> Time { return m_DATE_SIGNED; }
+    inline auto GetDateSigned() const -> Time { return date_signed_; }
 
     // Tries to determine, based on items within,
     // whether the transaction was a success or fail.
@@ -509,7 +507,7 @@ public:
 
     inline auto GetItemCount() const -> std::int32_t
     {
-        return static_cast<std::int32_t>(m_listItems.size());
+        return static_cast<std::int32_t>(list_items_.size());
     }
 
     auto GetItemCountInRefTo(std::int64_t lReference)
@@ -532,7 +530,7 @@ public:
     // OTTransaction will take care of it from there and will delete it in
     // destructor.
     // used for looping through the items in a few places.
-    inline auto GetItemList() -> listOfItems& { return m_listItems; }
+    inline auto GetItemList() -> listOfItems& { return list_items_; }
 
     // Because all of the actual receipts cannot fit into the single inbox
     // file, you must put their hash, and then store the receipt itself
@@ -597,20 +595,20 @@ public:
         bool bTransactionWasFailure)
         -> bool;  // false until positively asserted.
 
-    auto GetAccountHash() const -> identifier::Generic { return m_accounthash; }
-    auto GetInboxHash() const -> identifier::Generic { return m_inboxhash; }
-    auto GetOutboxHash() const -> identifier::Generic { return m_outboxhash; }
+    auto GetAccountHash() const -> identifier::Generic { return account_hash_; }
+    auto GetInboxHash() const -> identifier::Generic { return inbox_hash_; }
+    auto GetOutboxHash() const -> identifier::Generic { return outbox_hash_; }
     void SetAccountHash(const identifier::Generic& accounthash)
     {
-        m_accounthash = accounthash;
+        account_hash_ = accounthash;
     }
     void SetInboxHash(const identifier::Generic& inboxhash)
     {
-        m_inboxhash = inboxhash;
+        inbox_hash_ = inboxhash;
     }
     void SetOutboxHash(const identifier::Generic& outboxhash)
     {
-        m_outboxhash = outboxhash;
+        outbox_hash_ = outboxhash;
     }
 
     OTTransaction() = delete;
@@ -624,7 +622,7 @@ public:
 protected:
     // Usually a transaction object is inside a ledger object.
     // If this is not nullptr, then you can reference that object.
-    const Ledger* m_pParent{nullptr};
+    const Ledger* parent_{nullptr};
     // Transactions can be loaded in abbreviated form from a ledger, but they
     // are not considered "actually loaded"
     // until their associated "box receipt" is also loaded up from storage, and
@@ -634,7 +632,7 @@ protected:
     // This value defaults to false, so if the transaction was never loaded in
     // abbreviated form, then this is never
     // set to true in the first place.
-    bool m_bIsAbbreviated{false};
+    bool is_abbreviated_{false};
     // The "Amount" of the transaction is not normally stored in the transaction
     // itself, but in one of its
     // transaction items. However, when saving/loading the transaction in
@@ -642,13 +640,13 @@ protected:
     // placed here, which makes it available for necessary calculations without
     // being forced to load up
     // all of the box receipts to do so.
-    Amount m_lAbbrevAmount;
-    // Just like m_lAbbrevAmount, except it stores the display amount. For
+    Amount abbrev_amount_;
+    // Just like abbrev_amount_, except it stores the display amount. For
     // example, a transferReceipt for
     // a 5000 clam transfer has an effective value of 0 (since the transfer is
     // already done) but it has a
     // display amount of 5000.
-    // As with m_lAbbrevAmount, the Display amount value is calculated just
+    // As with abbrev_amount_, the Display amount value is calculated just
     // before saving in abbreviated
     // form, and this variable is only set upon LOADING that value in
     // abbreviated form. The actual value
@@ -660,12 +658,12 @@ protected:
     // current process of loading
     // transaction items from a string every time we need to check the amount,
     // can be time-consuming, CPU-wise.)
-    Amount m_lDisplayAmount;
+    Amount display_amount_;
     // The value of GetReferenceNumForDisplay() is saved when saving an
     // abbreviated record of this transaction,
     // and then loaded into THIS member variable when loading the abbreviated
     // record.
-    std::int64_t m_lInRefDisplay;
+    std::int64_t in_ref_display_;
     // This hash is not stored inside the box receipt itself (a transaction that
     // appears in an inbox, outbox, or nymbox)
     // but rather, is set from above, and then verified against the actual box
@@ -681,16 +679,16 @@ protected:
     // longer care about this variable at all, and do not save it again, since
     // it can be re-calculated the next time we
     // save again in abbreviated form.
-    identifier::Generic m_Hash;  // todo: make this const and force it to be set
-                                 // during construction.
-    Time m_DATE_SIGNED;       // The date, in seconds, when the instrument was
-                              // last signed.
-    transactionType m_Type;   // blank, pending, processInbox,
-                              // transfer, deposit, withdrawal,
-                              // trade, etc.
-    listOfItems m_listItems;  // the various items in this transaction.
-    TransactionNumber m_lClosingTransactionNo;  // used by finalReceipt
-    OTArmored m_ascCancellationRequest;         // used by finalReceipt
+    identifier::Generic hash_;  // todo: make this const and force it to be set
+                                // during construction.
+    Time date_signed_;          // The date, in seconds, when the instrument was
+                                // last signed.
+    transactionType type_;      // blank, pending, processInbox,
+                                // transfer, deposit, withdrawal,
+                                // trade, etc.
+    listOfItems list_items_;    // the various items in this transaction.
+    TransactionNumber closing_transaction_no_;  // used by finalReceipt
+    OTArmored cancellation_request_;            // used by finalReceipt
 
     // ONLY the "replyNotice" transaction uses this field.
     // When replyNotices are dropped into your Nymbox (server notices
@@ -701,9 +699,9 @@ protected:
     // have added a special variable here for request numbers, so that
     // replyNotices in the Nymbox can directly finger the messages they
     // came from.
-    RequestNumber m_lRequestNumber;  // Unused except by "replyNotice" in
-                                     // Nymbox.
-    bool m_bReplyTransSuccess;       // Used only by replyNotice
+    RequestNumber request_number_;  // Unused except by "replyNotice" in
+                                    // Nymbox.
+    bool reply_trans_success_;      // Used only by replyNotice
     // Unused except for notarizeTransactionResponse, specifically for
     // @paymentPlan
     // and @smartContract. (And maybe @depositCheque...) There are specific
@@ -726,16 +724,16 @@ protected:
     //
     // But how do we know the difference between a normal "rejection" versus
     // a "rejection" that corresponds to a successful cancellation? That's
-    // what m_bCancelled is for. If the server has just successfully cancelled
-    // something, it will set m_bCancelled to TRUE (on the reply transaction.)
+    // what cancelled_ is for. If the server has just successfully cancelled
+    // something, it will set cancelled_ to TRUE (on the reply transaction.)
     // This way the client side can tell the difference between an actual
     // failed attempt marked as "rejected", versus a successful cancellation
-    // marked as "rejected." All the client has to do is check m_bCancelled
+    // marked as "rejected." All the client has to do is check cancelled_
     // to see if it's set to TRUE, and it will know.
-    bool m_bCancelled;
-    identifier::Generic m_inboxhash;
-    identifier::Generic m_outboxhash;
-    identifier::Generic m_accounthash;
+    bool cancelled_;
+    identifier::Generic inbox_hash_;
+    identifier::Generic outbox_hash_;
+    identifier::Generic account_hash_;
 
     // return -1 if error, 0 if nothing, and 1 if the node was processed.
     auto ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t override;

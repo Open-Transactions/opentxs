@@ -121,9 +121,9 @@ public:
         std::int64_t newTransactionNo,
         const PasswordPrompt& reason);
 
-    inline auto IsFlaggedForRemoval() const -> bool { return m_bRemovalFlag; }
-    inline void FlagForRemoval() { m_bRemovalFlag = true; }
-    inline void SetCronPointer(OTCron& theCron) { m_pCron = &theCron; }
+    inline auto IsFlaggedForRemoval() const -> bool { return removal_flag_; }
+    inline void FlagForRemoval() { removal_flag_ = true; }
+    inline void SetCronPointer(OTCron& theCron) { cron_ = &theCron; }
 
     static auto LoadCronReceipt(
         const api::Session& api,
@@ -149,37 +149,34 @@ public:
         const identifier::Notary& notaryID) -> bool;
     inline void SetCreationDate(const Time CREATION_DATE)
     {
-        m_CREATION_DATE = CREATION_DATE;
+        creation_date_ = CREATION_DATE;
     }
-    inline auto GetCreationDate() const -> const Time
-    {
-        return m_CREATION_DATE;
-    }
+    inline auto GetCreationDate() const -> const Time { return creation_date_; }
 
     auto SetDateRange(
         const Time VALID_FROM = Time{},
         const Time VALID_TO = Time{}) -> bool;
     inline void SetLastProcessDate(const Time THE_DATE)
     {
-        m_LAST_PROCESS_DATE = THE_DATE;
+        last_process_date_ = THE_DATE;
     }
 
     inline auto GetLastProcessDate() const -> const Time
     {
-        return m_LAST_PROCESS_DATE;
+        return last_process_date_;
     }
 
     inline void SetProcessInterval(const std::chrono::seconds interval)
     {
-        m_PROCESS_INTERVAL = interval;
+        process_interval_ = interval;
     }
     inline auto GetProcessInterval() const -> const std::chrono::seconds
     {
-        return m_PROCESS_INTERVAL;
+        return process_interval_;
     }
 
-    inline auto GetCron() const -> OTCron* { return m_pCron; }
-    void setServerNym(Nym_p serverNym) { serverNym_ = serverNym; }
+    inline auto GetCron() const -> OTCron* { return cron_; }
+    void setServerNym(Nym_p serverNym) { server_nym_ = serverNym; }
     void setNotaryID(const identifier::Notary& notaryID);
     // When first adding anything to Cron, a copy needs to be saved in a
     // folder somewhere.
@@ -204,7 +201,7 @@ public:
     void Release() override;
     void Release_CronItem();
     auto GetCancelerID(identifier::Nym& theOutput) const -> bool;
-    auto IsCanceled() const -> bool { return m_bCanceled; }
+    auto IsCanceled() const -> bool { return canceled_; }
 
     // When canceling a cron item before it
     // has been activated, use this.
@@ -212,7 +209,7 @@ public:
         const identity::Nym& theCancelerNym,
         const PasswordPrompt& reason) -> bool;
 
-    // These are for     UnallocatedDeque<std::int64_t> m_dequeClosingNumbers;
+    // These are for     UnallocatedDeque<std::int64_t> closing_numbers_;
     // They are numbers used for CLOSING a transaction. (finalReceipt.)
     auto GetClosingTransactionNoAt(std::uint32_t nIndex) const -> std::int64_t;
     auto GetCountClosingNumbers() const -> std::int32_t;
@@ -238,24 +235,24 @@ public:
     auto operator=(OTCronItem&&) -> OTCronItem& = delete;
 
 protected:
-    UnallocatedDeque<std::int64_t> m_dequeClosingNumbers;  // Numbers used for
-                                                           // CLOSING a
-                                                           // transaction.
-                                                           // (finalReceipt.)
-    identifier::Nym m_pCancelerNymID;
+    UnallocatedDeque<std::int64_t> closing_numbers_;  // Numbers used for
+                                                      // CLOSING a
+                                                      // transaction.
+                                                      // (finalReceipt.)
+    identifier::Nym canceler_nym_id_;
 
-    bool m_bCanceled{false};  // This defaults to false. But if someone
-                              // cancels it (BEFORE it is ever activated,
-                              // just to nip it in the bud and harvest the
-                              // numbers, and send the notices, etc) -- then
-                              // we set this to true, and we also set the
-                              // canceler Nym ID. (So we can see these
-                              // values later and know whether it was
-                              // canceled before activation, and if so, who
-                              // did it.)
+    bool canceled_{false};  // This defaults to false. But if someone
+                            // cancels it (BEFORE it is ever activated,
+                            // just to nip it in the bud and harvest the
+                            // numbers, and send the notices, etc) -- then
+                            // we set this to true, and we also set the
+                            // canceler Nym ID. (So we can see these
+                            // values later and know whether it was
+                            // canceled before activation, and if so, who
+                            // did it.)
 
-    bool m_bRemovalFlag{false};  // Set this to true and the cronitem will
-                                 // be removed from Cron on next process.
+    bool removal_flag_{false};  // Set this to true and the cronitem will
+                                // be removed from Cron on next process.
     // (And its offer will be removed from the Market as well, if
     // appropriate.)
     virtual void onActivate([[maybe_unused]] const PasswordPrompt& reason) {
@@ -290,13 +287,12 @@ protected:
 private:
     using ot_super = OTTrackable;
 
-    OTCron* m_pCron;
-    Nym_p serverNym_;
-    identifier::Generic notaryID_;
-    Time m_CREATION_DATE;      // The date, in seconds, when the CronItem was
-                               // authorized.
-    Time m_LAST_PROCESS_DATE;  // The last time this item was processed.
-    std::chrono::seconds m_PROCESS_INTERVAL;  // How often to Process Cron
-                                              // on this item.
+    OTCron* cron_;
+    Nym_p server_nym_;
+    Time creation_date_;      // The date, in seconds, when the CronItem was
+                              // authorized.
+    Time last_process_date_;  // The last time this item was processed.
+    std::chrono::seconds process_interval_;  // How often to Process Cron
+                                             // on this item.
 };
 }  // namespace opentxs

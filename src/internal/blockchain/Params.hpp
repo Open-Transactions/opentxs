@@ -59,7 +59,7 @@ struct Data {
     unsigned segwit_scale_factor_{};
     UnitType itemtype_{};
     Bip44Type bip44_{};
-    std::int32_t nBits_{};
+    std::int32_t n_bits_{};
     std::string_view genesis_header_hex_{};
     std::string_view genesis_hash_hex_{};
     std::string_view genesis_block_hex_{};

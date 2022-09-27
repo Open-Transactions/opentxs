@@ -488,14 +488,13 @@ auto MessageProcessor::Imp::process_message(
 
         if (false == processed) {
             LogDetail()(OT_PRETTY_CLASS())("Failed to process user command ")(
-                request->m_strCommand.get())
+                request->command_.get())
                 .Flush();
             LogVerbose()(OT_PRETTY_CLASS())(String::Factory(*request).get())
                 .Flush();
         } else {
             LogDetail()(OT_PRETTY_CLASS())(
-                "Successfully processed user command ")(
-                request->m_strCommand.get())
+                "Successfully processed user command ")(request->command_.get())
                 .Flush();
         }
 

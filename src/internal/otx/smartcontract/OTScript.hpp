@@ -47,17 +47,17 @@ using mapOfVariables = UnallocatedMap<UnallocatedCString, OTVariable*>;
 class OTScript
 {
 protected:
-    UnallocatedCString m_str_script;            // the script itself.
-    UnallocatedCString m_str_display_filename;  // for error handling, there is
-                                                // option to set this string for
-                                                // display.
-    mapOfParties m_mapParties;  // no need to clean this up. Script doesn't own
-                                // the parties, just references them.
-    mapOfPartyAccounts m_mapAccounts;  // no need to clean this up. Script
-                                       // doesn't own the accounts, just
-                                       // references them.
-    mapOfVariables m_mapVariables;  // no need to clean this up. Script doesn't
-                                    // own the variables, just references them.
+    UnallocatedCString script_;            // the script itself.
+    UnallocatedCString display_filename_;  // for error handling, there is
+                                           // option to set this string for
+                                           // display.
+    mapOfParties parties_;  // no need to clean this up. Script doesn't own
+                            // the parties, just references them.
+    mapOfPartyAccounts accounts_;  // no need to clean this up. Script
+                                   // doesn't own the accounts, just
+                                   // references them.
+    mapOfVariables variables_;     // no need to clean this up. Script doesn't
+                                   // own the variables, just references them.
 
     // List
     // Construction -- Destruction
@@ -81,7 +81,7 @@ public:
 
     void SetDisplayFilename(UnallocatedCString str_display_filename)
     {
-        m_str_display_filename = str_display_filename;
+        display_filename_ = str_display_filename;
     }
 
     // The same OTSmartContract that loads all the clauses (scripts) will

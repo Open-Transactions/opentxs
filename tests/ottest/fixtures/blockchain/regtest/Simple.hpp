@@ -66,8 +66,8 @@ class User;
 struct RegtestListener {
     RegtestListener(const ot::api::session::Client& client);
 
-    std::unique_ptr<BlockListener> block_listener;
-    std::unique_ptr<SyncListener> sync_listener;
+    std::unique_ptr<BlockListener> block_listener_;
+    std::unique_ptr<SyncListener> sync_listener_;
 
     ~RegtestListener();
 };

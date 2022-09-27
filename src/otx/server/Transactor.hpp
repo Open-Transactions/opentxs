@@ -56,12 +56,12 @@ public:
 
     auto transactionNumber() const -> TransactionNumber
     {
-        return transactionNumber_;
+        return transaction_number_;
     }
 
     void transactionNumber(TransactionNumber value)
     {
-        transactionNumber_ = value;
+        transaction_number_ = value;
     }
 
     auto addBasketAccountID(
@@ -105,14 +105,14 @@ private:
     Server& server_;
     const PasswordPrompt& reason_;
     // This stores the last VALID AND ISSUED transaction number.
-    TransactionNumber transactionNumber_;
+    TransactionNumber transaction_number_;
     // maps basketId with basketAccountId
-    BasketsMap idToBasketMap_;
+    BasketsMap id_to_basket_map_;
     // basket issuer account ID, which is *different* on each server, using the
     // Basket Currency's ID, which is the *same* on every server.)
     // Need a way to look up a Basket Account ID using its Contract ID
-    BasketsMap contractIdToBasketAccountId_;
+    BasketsMap contract_id_to_basket_account_id_;
     // The list of voucher accounts (see GetVoucherAccount below for details)
-    otx::internal::AccountList voucherAccounts_;
+    otx::internal::AccountList voucher_accounts_;
 };
 }  // namespace opentxs::server

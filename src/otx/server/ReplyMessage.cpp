@@ -56,11 +56,11 @@ ReplyMessage::ReplyMessage(
     , sender_nym_(nullptr)
     , context_(nullptr)
 {
-    message_.m_strRequestNum->Set(original_.m_strRequestNum);
-    message_.m_strNotaryID->Set(original_.m_strNotaryID);
-    message_.m_strNymID = original_.m_strNymID;
-    message_.m_strCommand->Set(Message::ReplyCommand(type).c_str());
-    message_.m_bSuccess = false;
+    message_.request_num_->Set(original_.request_num_);
+    message_.notary_id_->Set(original_.notary_id_);
+    message_.nym_id_ = original_.nym_id_;
+    message_.command_->Set(Message::ReplyCommand(type).c_str());
+    message_.success_ = false;
     attach_request();
     init_ = init();
 }
@@ -68,14 +68,14 @@ ReplyMessage::ReplyMessage(
 auto ReplyMessage::Acknowledged() const -> UnallocatedSet<RequestNumber>
 {
     UnallocatedSet<RequestNumber> output{};
-    original_.m_AcknowledgedReplies.Output(output);
+    original_.acknowledged_replies_.Output(output);
 
     return output;
 }
 
 void ReplyMessage::attach_request()
 {
-    const UnallocatedCString command = original_.m_strCommand->Get();
+    const UnallocatedCString command = original_.command_->Get();
     const auto type = Message::Type(command);
 
     switch (type) {
@@ -106,7 +106,7 @@ void ReplyMessage::attach_request()
             LogVerbose()(OT_PRETTY_CLASS())("Attaching original ")(
                 command)(" message.")
                 .Flush();
-            message_.m_ascInReferenceTo->SetString(String::Factory(original_));
+            message_.in_reference_to_->SetString(String::Factory(original_));
         } break;
         case MessageType::pingNotary:
         case MessageType::usageCredits:
@@ -120,7 +120,7 @@ void ReplyMessage::attach_request()
 
 void ReplyMessage::clear_request()
 {
-    const UnallocatedCString command = original_.m_strCommand->Get();
+    const UnallocatedCString command = original_.command_->Get();
     const auto type = Message::Type(command);
 
     switch (type) {
@@ -132,7 +132,7 @@ void ReplyMessage::clear_request()
             LogVerbose()(OT_PRETTY_CLASS())("Clearing original ")(
                 command)(" message.")
                 .Flush();
-            message_.m_ascInReferenceTo->Release();
+            message_.in_reference_to_->Release();
         } break;
         case MessageType::getMarketOffers:
         case MessageType::getMarketRecentTrades:
@@ -163,7 +163,7 @@ void ReplyMessage::clear_request()
     }
 }
 
-void ReplyMessage::ClearRequest() { message_.m_ascInReferenceTo->Release(); }
+void ReplyMessage::ClearRequest() { message_.in_reference_to_->Release(); }
 
 auto ReplyMessage::Context() -> otx::context::Client&
 {
@@ -188,10 +188,10 @@ auto ReplyMessage::HaveContext() const -> bool { return bool(context_); }
 auto ReplyMessage::init() -> bool
 {
     const auto senderNymID = parent_.server_.API().Factory().NymIDFromBase58(
-        original_.m_strNymID->Bytes());
+        original_.nym_id_->Bytes());
     const auto purportedServerID =
         parent_.server_.API().Factory().NotaryIDFromBase58(
-            original_.m_strNotaryID->Bytes());
+            original_.notary_id_->Bytes());
 
     bool out = UserCommandProcessor::check_server_lock(senderNymID);
 
@@ -213,7 +213,7 @@ auto ReplyMessage::Init() const -> const bool& { return init_; }
 auto ReplyMessage::init_nym() -> bool
 {
     sender_nym_ = wallet_.Nym(parent_.server_.API().Factory().NymIDFromBase58(
-        original_.m_strNymID->Bytes()));
+        original_.nym_id_->Bytes()));
 
     return bool(sender_nym_);
 }
@@ -221,7 +221,7 @@ auto ReplyMessage::init_nym() -> bool
 auto ReplyMessage::LoadContext(const PasswordPrompt& reason) -> bool
 {
     if (false == init_nym()) {
-        LogError()(OT_PRETTY_CLASS())("Nym (")(original_.m_strNymID.get())(
+        LogError()(OT_PRETTY_CLASS())("Nym (")(original_.nym_id_.get())(
             ") does not exist")
             .Flush();
 
@@ -238,17 +238,17 @@ auto ReplyMessage::Original() const -> const Message& { return original_; }
 
 void ReplyMessage::OverrideType(const String& replyCommand)
 {
-    message_.m_strCommand = replyCommand;
+    message_.command_ = replyCommand;
 }
 
 void ReplyMessage::SetAccount(const String& accountID)
 {
     OT_ASSERT(accountID.Exists());
 
-    message_.m_strAcctID = accountID;
+    message_.acct_id_ = accountID;
 }
 
-void ReplyMessage::SetBool(const bool value) { message_.m_bBool = value; }
+void ReplyMessage::SetBool(const bool value) { message_.bool_ = value; }
 
 void ReplyMessage::SetAcknowledgments(const otx::context::Client& context)
 {
@@ -257,81 +257,78 @@ void ReplyMessage::SetAcknowledgments(const otx::context::Client& context)
 
 void ReplyMessage::SetDepth(const std::int64_t depth)
 {
-    message_.m_lDepth = depth;
+    message_.depth_ = depth;
 }
 
 void ReplyMessage::SetEnum(const std::uint8_t value) { message_.enum_ = value; }
 
 void ReplyMessage::SetInboxHash(const identifier::Generic& hash)
 {
-    message_.m_strInboxHash = String::Factory(hash);
+    message_.inbox_hash_ = String::Factory(hash);
 }
 
 void ReplyMessage::SetInstrumentDefinitionID(const String& id)
 {
-    message_.m_strInstrumentDefinitionID = id;
+    message_.instrument_definition_id_ = id;
 }
 
 void ReplyMessage::SetNymboxHash(const identifier::Generic& hash)
 {
-    hash.GetString(parent_.server_.API().Crypto(), message_.m_strNymboxHash);
+    hash.GetString(parent_.server_.API().Crypto(), message_.nymbox_hash_);
 }
 
 void ReplyMessage::SetOutboxHash(const identifier::Generic& hash)
 {
-    message_.m_strOutboxHash = String::Factory(hash);
+    message_.outbox_hash_ = String::Factory(hash);
 }
 
 auto ReplyMessage::SetPayload(const String& payload) -> bool
 {
-    return message_.m_ascPayload->SetString(payload);
+    return message_.payload_->SetString(payload);
 }
 
 auto ReplyMessage::SetPayload(const Data& payload) -> bool
 {
-    return message_.m_ascPayload->SetData(payload);
+    return message_.payload_->SetData(payload);
 }
 
 void ReplyMessage::SetPayload(const Armored& payload)
 {
-    message_.m_ascPayload = payload;
+    message_.payload_ = payload;
 }
 
 auto ReplyMessage::SetPayload2(const String& payload) -> bool
 {
-    return message_.m_ascPayload2->SetString(payload);
+    return message_.payload2_->SetString(payload);
 }
 
 auto ReplyMessage::SetPayload3(const String& payload) -> bool
 {
-    return message_.m_ascPayload3->SetString(payload);
+    return message_.payload3_->SetString(payload);
 }
 
 void ReplyMessage::SetRequestNumber(const RequestNumber number)
 {
-    message_.m_lNewRequestNum = number;
+    message_.new_request_num_ = number;
 }
 
 void ReplyMessage::SetSuccess(const bool success)
 {
-    message_.m_bSuccess = success;
+    message_.success_ = success;
 
     if (success) { clear_request(); }
 }
 
 void ReplyMessage::SetTransactionNumber(const TransactionNumber& number)
 {
-    message_.m_lTransactionNum = number;
+    message_.transaction_num_ = number;
 }
 
-auto ReplyMessage::Success() const -> const bool&
-{
-    return message_.m_bSuccess;
-}
+auto ReplyMessage::Success() const -> const bool& { return message_.success_; }
 
 void ReplyMessage::SetTargetNym(const String& nymID)
 {
-    message_.m_strNymID2 = nymID;
+    message_.nym_id2_ = nymID;
 }
 
 ReplyMessage::~ReplyMessage()
@@ -340,7 +337,7 @@ ReplyMessage::~ReplyMessage()
         parent_.drop_reply_notice_to_nymbox(
             wallet_,
             message_,
-            original_.m_strRequestNum->ToLong(),
+            original_.request_num_->ToLong(),
             drop_status_,
             context_->get(),
             server_);

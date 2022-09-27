@@ -65,7 +65,7 @@ auto MainFile::SaveMainFileToString(String& strMainFile) -> bool
 
     // Save the basket account information
 
-    for (auto& it : server_.GetTransactor().idToBasketMap_) {
+    for (auto& it : server_.GetTransactor().id_to_basket_map_) {
         auto strBasketID = String::Factory(it.first.c_str());
         auto strBasketAcctID = String::Factory(it.second.c_str());
 
@@ -97,7 +97,7 @@ auto MainFile::SaveMainFileToString(String& strMainFile) -> bool
         tag.add_tag(pTag);
     }
 
-    server_.GetTransactor().voucherAccounts_.Serialize(tag);
+    server_.GetTransactor().voucher_accounts_.Serialize(tag);
 
     UnallocatedCString str_result;
     tag.output(str_result);
@@ -323,7 +323,7 @@ auto MainFile::LoadMainFile(bool bReadOnly) -> bool
                             String::Factory(xml->getAttributeValue("count"));
 
                         if ((-1) == server_.GetTransactor()
-                                        .voucherAccounts_.ReadFromXMLNode(
+                                        .voucher_accounts_.ReadFromXMLNode(
                                             xml, strAcctType, strAcctCount)) {
                             LogError()(OT_PRETTY_CLASS())(
                                 "Error loading voucher accountList.")
@@ -413,7 +413,7 @@ auto MainFile::LoadMainFile(bool bReadOnly) -> bool
 auto MainFile::LoadServerUserAndContract() -> bool
 {
     bool bSuccess = false;
-    auto& serverNym = server_.m_nymServer;
+    auto& serverNym = server_.nym_server_;
 
     OT_ASSERT(!version_.empty());
     OT_ASSERT(!server_.GetServerID().empty());

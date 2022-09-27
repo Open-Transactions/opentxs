@@ -226,7 +226,7 @@ auto Unit::AddAccountRecord(
         return false;
     }
 
-    auto& theMap = pMap->the_map;
+    auto& theMap = pMap->the_map_;
     auto map_it = theMap.find(strAcctID->Get());
 
     if (theMap.end() != map_it)  // we found it.
@@ -395,7 +395,7 @@ auto Unit::EraseAccountRecord(
 
     // Before we can erase it, let's see if it's even there....
     //
-    auto& theMap = pMap->the_map;
+    auto& theMap = pMap->the_map_;
     auto map_it = theMap.find(strAcctID->Get());
 
     // we found it!
@@ -683,7 +683,7 @@ auto Unit::VisitAccountRecords(
 
         OT_ASSERT(false == pNotaryID.empty());
 
-        auto& theMap = pMap->the_map;
+        auto& theMap = pMap->the_map_;
 
         // todo: optimize: will probably have to use a database for this,
         // std::int64_t term.

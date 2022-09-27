@@ -40,10 +40,10 @@ public:
     const ot::crypto::HashType ripemd160_{ot::crypto::HashType::Ripemd160};
     const ot::UnallocatedCString plaintext_string_1_{"Test string"};
     const ot::UnallocatedCString plaintext_string_2_{"Another string"};
-    const ot::ByteArray plaintext_1{
+    const ot::ByteArray plaintext_1_{
         plaintext_string_1_.data(),
         plaintext_string_1_.size()};
-    const ot::ByteArray plaintext_2{
+    const ot::ByteArray plaintext_2_{
         plaintext_string_2_.data(),
         plaintext_string_2_.size()};
     ot::OTAsymmetricKey ed_;
@@ -241,14 +241,17 @@ public:
         if ((0 == pubkey.size()) || (0 == seckey.size())) { return false; }
 
         const auto haveSig = lib.Sign(
-            plaintext_1.Bytes(), key.PrivateKey(reason), hash, ot::writer(sig));
+            plaintext_1_.Bytes(),
+            key.PrivateKey(reason),
+            hash,
+            ot::writer(sig));
 
         EXPECT_TRUE(haveSig);
 
         if (false == haveSig) { return false; }
 
         const auto verified = lib.Verify(
-            plaintext_2.Bytes(), key.PublicKey(), ot::reader(sig), hash);
+            plaintext_2_.Bytes(), key.PublicKey(), ot::reader(sig), hash);
 
         EXPECT_FALSE(verified);
 
@@ -271,11 +274,11 @@ TEST_F(Test_Signatures, RSA_unsupported_hash)
             api_.Crypto().Internal().AsymmetricProvider(Type::Legacy);
 
         EXPECT_FALSE(
-            test_signature(plaintext_1, provider, rsa_sign_1_, blake160_));
+            test_signature(plaintext_1_, provider, rsa_sign_1_, blake160_));
         EXPECT_FALSE(
-            test_signature(plaintext_1, provider, rsa_sign_1_, blake256_));
+            test_signature(plaintext_1_, provider, rsa_sign_1_, blake256_));
         EXPECT_FALSE(
-            test_signature(plaintext_1, provider, rsa_sign_1_, blake512_));
+            test_signature(plaintext_1_, provider, rsa_sign_1_, blake512_));
     } else {
         // TODO
     }
@@ -302,11 +305,11 @@ TEST_F(Test_Signatures, RSA_supported_hashes)
             api_.Crypto().Internal().AsymmetricProvider(Type::Legacy);
 
         EXPECT_TRUE(
-            test_signature(plaintext_1, provider, rsa_sign_1_, sha256_));
+            test_signature(plaintext_1_, provider, rsa_sign_1_, sha256_));
         EXPECT_TRUE(
-            test_signature(plaintext_1, provider, rsa_sign_1_, sha512_));
+            test_signature(plaintext_1_, provider, rsa_sign_1_, sha512_));
         EXPECT_TRUE(
-            test_signature(plaintext_1, provider, rsa_sign_1_, ripemd160_));
+            test_signature(plaintext_1_, provider, rsa_sign_1_, ripemd160_));
     } else {
         // TODO
     }
@@ -335,24 +338,24 @@ TEST_F(Test_Signatures, Ed25519_unsupported_hash)
 
         if (have_hd_) {
             EXPECT_FALSE(
-                test_signature(plaintext_1, provider, ed_hd_, sha256_));
+                test_signature(plaintext_1_, provider, ed_hd_, sha256_));
             EXPECT_FALSE(
-                test_signature(plaintext_1, provider, ed_hd_, sha512_));
+                test_signature(plaintext_1_, provider, ed_hd_, sha512_));
             EXPECT_FALSE(
-                test_signature(plaintext_1, provider, ed_hd_, ripemd160_));
+                test_signature(plaintext_1_, provider, ed_hd_, ripemd160_));
             EXPECT_FALSE(
-                test_signature(plaintext_1, provider, ed_hd_, blake160_));
+                test_signature(plaintext_1_, provider, ed_hd_, blake160_));
             EXPECT_FALSE(
-                test_signature(plaintext_1, provider, ed_hd_, blake512_));
+                test_signature(plaintext_1_, provider, ed_hd_, blake512_));
         } else {
             // TODO
         }
 
-        EXPECT_FALSE(test_signature(plaintext_1, provider, ed_, sha256_));
-        EXPECT_FALSE(test_signature(plaintext_1, provider, ed_, sha512_));
-        EXPECT_FALSE(test_signature(plaintext_1, provider, ed_, ripemd160_));
-        EXPECT_FALSE(test_signature(plaintext_1, provider, ed_, blake160_));
-        EXPECT_FALSE(test_signature(plaintext_1, provider, ed_, blake512_));
+        EXPECT_FALSE(test_signature(plaintext_1_, provider, ed_, sha256_));
+        EXPECT_FALSE(test_signature(plaintext_1_, provider, ed_, sha512_));
+        EXPECT_FALSE(test_signature(plaintext_1_, provider, ed_, ripemd160_));
+        EXPECT_FALSE(test_signature(plaintext_1_, provider, ed_, blake160_));
+        EXPECT_FALSE(test_signature(plaintext_1_, provider, ed_, blake512_));
     } else {
         // TODO
     }
@@ -384,12 +387,12 @@ TEST_F(Test_Signatures, Ed25519_supported_hashes)
 
         if (have_hd_) {
             EXPECT_TRUE(
-                test_signature(plaintext_1, provider, ed_hd_, blake256_));
+                test_signature(plaintext_1_, provider, ed_hd_, blake256_));
         } else {
             // TODO
         }
 
-        EXPECT_TRUE(test_signature(plaintext_1, provider, ed_, blake256_));
+        EXPECT_TRUE(test_signature(plaintext_1_, provider, ed_, blake256_));
     } else {
         // TODO
     }
@@ -444,27 +447,27 @@ TEST_F(Test_Signatures, Secp256k1_supported_hashes)
 
         if (have_hd_) {
             EXPECT_TRUE(
-                test_signature(plaintext_1, provider, secp_hd_, sha256_));
+                test_signature(plaintext_1_, provider, secp_hd_, sha256_));
             EXPECT_TRUE(
-                test_signature(plaintext_1, provider, secp_hd_, sha512_));
+                test_signature(plaintext_1_, provider, secp_hd_, sha512_));
             EXPECT_TRUE(
-                test_signature(plaintext_1, provider, secp_hd_, blake160_));
+                test_signature(plaintext_1_, provider, secp_hd_, blake160_));
             EXPECT_TRUE(
-                test_signature(plaintext_1, provider, secp_hd_, blake256_));
+                test_signature(plaintext_1_, provider, secp_hd_, blake256_));
             EXPECT_TRUE(
-                test_signature(plaintext_1, provider, secp_hd_, blake512_));
+                test_signature(plaintext_1_, provider, secp_hd_, blake512_));
             EXPECT_TRUE(
-                test_signature(plaintext_1, provider, secp_hd_, ripemd160_));
+                test_signature(plaintext_1_, provider, secp_hd_, ripemd160_));
         } else {
             // TODO
         }
 
-        EXPECT_TRUE(test_signature(plaintext_1, provider, secp_, sha256_));
-        EXPECT_TRUE(test_signature(plaintext_1, provider, secp_, sha512_));
-        EXPECT_TRUE(test_signature(plaintext_1, provider, secp_, blake256_));
-        EXPECT_TRUE(test_signature(plaintext_1, provider, secp_, blake512_));
-        EXPECT_TRUE(test_signature(plaintext_1, provider, secp_, blake160_));
-        EXPECT_TRUE(test_signature(plaintext_1, provider, secp_, ripemd160_));
+        EXPECT_TRUE(test_signature(plaintext_1_, provider, secp_, sha256_));
+        EXPECT_TRUE(test_signature(plaintext_1_, provider, secp_, sha512_));
+        EXPECT_TRUE(test_signature(plaintext_1_, provider, secp_, blake256_));
+        EXPECT_TRUE(test_signature(plaintext_1_, provider, secp_, blake512_));
+        EXPECT_TRUE(test_signature(plaintext_1_, provider, secp_, blake160_));
+        EXPECT_TRUE(test_signature(plaintext_1_, provider, secp_, ripemd160_));
     } else {
         // TODO
     }

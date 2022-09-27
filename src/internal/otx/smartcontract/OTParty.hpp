@@ -145,20 +145,20 @@ public:
         identity::Nym* pActualNym = nullptr) -> bool;
     // This pointer isn't owned -- just stored for convenience.
     //
-    auto GetOwnerAgreement() -> OTScriptable* { return m_pOwnerAgreement; }
+    auto GetOwnerAgreement() -> OTScriptable* { return owner_agreement_; }
     void SetOwnerAgreement(OTScriptable& theOwner)
     {
-        m_pOwnerAgreement = &theOwner;
+        owner_agreement_ = &theOwner;
     }
     void SetMySignedCopy(const String& strMyCopy)
     {
-        m_strMySignedCopy->Set(strMyCopy.Get());
+        my_signed_copy_->Set(strMyCopy.Get());
     }
-    auto GetMySignedCopy() -> const String& { return m_strMySignedCopy; }
-    auto GetOpeningTransNo() const -> std::int64_t { return m_lOpeningTransNo; }
+    auto GetMySignedCopy() -> const String& { return my_signed_copy_; }
+    auto GetOpeningTransNo() const -> std::int64_t { return opening_trans_no_; }
     void SetOpeningTransNo(const std::int64_t& theNumber)
     {
-        m_lOpeningTransNo = theNumber;
+        opening_trans_no_ = theNumber;
     }
     // There is one of these for each asset account on the party.
     // You need the acct name to look it up.
@@ -206,17 +206,17 @@ public:
     auto AddAgent(OTAgent& theAgent) -> bool;
     auto GetAgentCount() const -> std::int32_t
     {
-        return static_cast<std::int32_t>(m_mapAgents.size());
+        return static_cast<std::int32_t>(agents_.size());
     }
     auto GetAgent(const UnallocatedCString& str_agent_name) const -> OTAgent*;
     auto GetAgentByIndex(std::int32_t nIndex) const -> OTAgent*;
     auto GetAuthorizingAgentName() const -> const UnallocatedCString&
     {
-        return m_str_authorizing_agent;
+        return authorizing_agent_;
     }
     void SetAuthorizingAgentName(UnallocatedCString str_agent_name)
     {
-        m_str_authorizing_agent = str_agent_name;
+        authorizing_agent_ = str_agent_name;
     }
     // If Nym is authorizing agent for Party, set agent's pointer to Nym and
     // return true.
@@ -260,7 +260,7 @@ public:
 
     auto GetAccountCount() const -> std::int32_t
     {
-        return static_cast<std::int32_t>(m_mapPartyAccounts.size());
+        return static_cast<std::int32_t>(party_accounts_.size());
     }  // returns total of all accounts owned by this party.
     auto GetAccountCount(UnallocatedCString str_agent_name) const
         -> std::int32_t;  // Only counts accounts authorized for str_agent_name.
@@ -335,24 +335,24 @@ public:
 private:
     const api::Session& api_;
     const UnallocatedCString data_folder_;
-    UnallocatedCString* m_pstr_party_name;
+    UnallocatedCString* party_name_;
     // true, is "nym". false, is "entity".
-    bool m_bPartyIsNym;
-    UnallocatedCString m_str_owner_id;           // Nym ID or Entity ID.
-    UnallocatedCString m_str_authorizing_agent;  // Contains the name of the
-                                                 // authorizing
-                                                 // agent (the one who supplied
-                                                 // the opening Trans#)
+    bool party_is_nym_;
+    UnallocatedCString owner_id_;           // Nym ID or Entity ID.
+    UnallocatedCString authorizing_agent_;  // Contains the name of the
+                                            // authorizing
+                                            // agent (the one who supplied
+                                            // the opening Trans#)
 
-    mapOfAgents m_mapAgents;                // These are owned.
-    mapOfPartyAccounts m_mapPartyAccounts;  // These are owned. Each contains a
-                                            // Closing Transaction#.
+    mapOfAgents agents_;                 // These are owned.
+    mapOfPartyAccounts party_accounts_;  // These are owned. Each contains a
+                                         // Closing Transaction#.
 
     // Each party (to a smart contract anyway) must provide an opening
     // transaction #.
-    TransactionNumber m_lOpeningTransNo;
-    OTString m_strMySignedCopy;  // One party confirms it and sends it over.
-                                 // Then another confirms it,
+    TransactionNumber opening_trans_no_;
+    OTString my_signed_copy_;  // One party confirms it and sends it over.
+                               // Then another confirms it,
     // which adds his own transaction numbers and signs it. This, unfortunately,
     // invalidates the original version,
     // (since the digital signature ceases to verify, once you change the
@@ -364,7 +364,7 @@ private:
 
     // This Party is owned by an agreement (OTScriptable-derived.) Convenience
     // pointer
-    OTScriptable* m_pOwnerAgreement{nullptr};
+    OTScriptable* owner_agreement_{nullptr};
 
     void recover_closing_numbers(
         OTAgent& theAgent,

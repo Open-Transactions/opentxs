@@ -19,9 +19,9 @@ using dequeOfBasketItems = UnallocatedDeque<BasketItem*>;
 class BasketItem
 {
 public:
-    identifier::Generic SUB_CONTRACT_ID;
-    identifier::Generic SUB_ACCOUNT_ID;
-    TransactionNumber lMinimumTransferAmount{0};
+    identifier::Generic sub_contract_id_;
+    identifier::Generic sub_account_id_;
+    TransactionNumber minimum_transfer_amount_{0};
     // lClosingTransactionNo:
     // Used when EXCHANGING a basket (NOT USED when first creating one.)
     // A basketReceipt must be dropped into each asset account during
@@ -29,7 +29,7 @@ public:
     // receipt is accepted, lClosingTransactionNo will remain open as
     // an issued transaction number (an open transaction) on that Nym.
     // (One must be supplied for EACH asset account during an exchange.)
-    TransactionNumber lClosingTransactionNo{0};
+    TransactionNumber closing_transaction_no_{0};
 
     BasketItem();
     ~BasketItem() = default;

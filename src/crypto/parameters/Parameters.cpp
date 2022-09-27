@@ -72,7 +72,7 @@ Parameters::Parameters(
 Parameters::Parameters(const std::int32_t keySize) noexcept
     : Parameters(ParameterType::rsa, identity::CredentialType::Legacy)
 {
-    imp_->nBits_ = keySize;
+    imp_->n_bits_ = keySize;
 }
 
 Parameters::Parameters(
@@ -121,7 +121,7 @@ auto Parameters::Algorithm() const noexcept
     -> crypto::key::asymmetric::Algorithm
 {
     try {
-        return nym_to_key_.at(imp_->nymType_);
+        return nym_to_key_.at(imp_->nym_type_);
     } catch (...) {
         return crypto::key::asymmetric::Algorithm::Error;
     }
@@ -131,14 +131,15 @@ auto Parameters::ChangeType(const ParameterType type) const noexcept
     -> Parameters
 {
     auto output{*this};
-    const_cast<ParameterType&>(output.imp_->nymType_) = type;
+    const_cast<ParameterType&>(output.imp_->nym_type_) = type;
 
-    if (ParameterType::rsa == output.imp_->nymType_) {
-        const_cast<identity::CredentialType&>(output.imp_->credentialType_) =
+    if (ParameterType::rsa == output.imp_->nym_type_) {
+        const_cast<identity::CredentialType&>(output.imp_->credential_type_) =
             identity::CredentialType::Legacy;
-        const_cast<identity::SourceType&>(output.imp_->sourceType_) =
+        const_cast<identity::SourceType&>(output.imp_->source_type_) =
             identity::SourceType::PubKey;
-        const_cast<identity::SourceProofType&>(output.imp_->sourceProofType_) =
+        const_cast<identity::SourceProofType&>(
+            output.imp_->source_proof_type_) =
             identity::SourceProofType::SelfSignature;
     }
 
@@ -147,7 +148,7 @@ auto Parameters::ChangeType(const ParameterType type) const noexcept
 
 auto Parameters::credentialType() const noexcept -> identity::CredentialType
 {
-    return imp_->credentialType_;
+    return imp_->credential_type_;
 }
 
 auto Parameters::CredIndex() const noexcept -> Bip32Index
@@ -186,14 +187,14 @@ auto Parameters::Keypair() const noexcept -> const crypto::key::Keypair&
 
 auto Parameters::keySize() const noexcept -> std::int32_t
 {
-    return imp_->nBits_;
+    return imp_->n_bits_;
 }
 
 auto Parameters::Nym() const noexcept -> Bip32Index { return imp_->nym_; }
 
 auto Parameters::nymParameterType() const noexcept -> ParameterType
 {
-    return imp_->nymType_;
+    return imp_->nym_type_;
 }
 
 auto Parameters::PaymentCodeVersion() const noexcept -> std::uint8_t
@@ -221,11 +222,11 @@ auto Parameters::SeedStyle() const noexcept -> crypto::SeedStyle
 
 auto Parameters::SourceProofType() const noexcept -> identity::SourceProofType
 {
-    return imp_->sourceProofType_;
+    return imp_->source_proof_type_;
 }
 auto Parameters::SourceType() const noexcept -> identity::SourceType
 {
-    return imp_->sourceType_;
+    return imp_->source_type_;
 }
 
 auto Parameters::UseAutoIndex() const noexcept -> bool
@@ -268,7 +269,7 @@ auto Parameters::SetEntropy(const Secret& entropy) noexcept -> void
 
 auto Parameters::setKeySize(std::int32_t keySize) noexcept -> void
 {
-    imp_->nBits_ = keySize;
+    imp_->n_bits_ = keySize;
 }
 
 auto Parameters::SetNym(const Bip32Index path) noexcept -> void

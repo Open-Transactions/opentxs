@@ -88,7 +88,7 @@ ActivityThread::ActivityThread(
     const SimpleCallback& cb) noexcept
     : ActivityThreadList(api, nymID, cb, false)
     , Worker(api, 100ms, "ui::ActivityThread")
-    , threadID_(threadID)
+    , thread_id_(threadID)
     , self_contact_(api.Contacts().NymToContact(primary_id_))
     , contacts_()
     , participants_()
@@ -279,7 +279,7 @@ auto ActivityThread::new_thread() noexcept -> void
 {
     auto& contacts =
         const_cast<UnallocatedSet<identifier::Generic>&>(contacts_);
-    contacts.emplace(threadID_);
+    contacts.emplace(thread_id_);
 }
 
 auto ActivityThread::Participants() const noexcept -> UnallocatedCString
@@ -656,7 +656,7 @@ auto ActivityThread::process_thread(const Message& message) noexcept -> void
 
     OT_ASSERT(false == threadID.empty());
 
-    if (threadID_ != threadID) { return; }
+    if (thread_id_ != threadID) { return; }
 
     refresh_thread();
 }
@@ -664,7 +664,7 @@ auto ActivityThread::process_thread(const Message& message) noexcept -> void
 auto ActivityThread::refresh_thread() noexcept -> void
 {
     auto thread = proto::StorageThread{};
-    auto loaded = api_.Activity().Thread(primary_id_, threadID_, thread);
+    auto loaded = api_.Activity().Thread(primary_id_, thread_id_, thread);
 
     OT_ASSERT(loaded);
 
@@ -850,7 +850,7 @@ auto ActivityThread::set_participants() noexcept -> void
 auto ActivityThread::startup() noexcept -> void
 {
     auto thread = proto::StorageThread{};
-    auto loaded = api_.Activity().Thread(primary_id_, threadID_, thread);
+    auto loaded = api_.Activity().Thread(primary_id_, thread_id_, thread);
 
     if (loaded) {
         load_contacts(thread);
@@ -896,7 +896,7 @@ auto ActivityThread::state_machine() noexcept -> bool
 
 auto ActivityThread::ThreadID() const noexcept -> UnallocatedCString
 {
-    return threadID_.asBase58(api_.Crypto());
+    return thread_id_.asBase58(api_.Crypto());
 }
 
 auto ActivityThread::update_display_name() noexcept -> bool

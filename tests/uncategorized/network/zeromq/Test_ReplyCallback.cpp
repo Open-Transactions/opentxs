@@ -14,7 +14,7 @@ namespace ottest
 class Test_ReplyCallback : public ::testing::Test
 {
 public:
-    const ot::UnallocatedCString testMessage_{"zeromq test message"};
+    const ot::UnallocatedCString test_message_{"zeromq test message"};
 };
 
 TEST(ReplyCallback, ReplyCallback_Factory)
@@ -35,7 +35,7 @@ TEST_F(Test_ReplyCallback, ReplyCallback_Process)
             -> ot::network::zeromq::Message {
             const auto inputString =
                 ot::UnallocatedCString{input.Body().begin()->Bytes()};
-            EXPECT_EQ(testMessage_, inputString);
+            EXPECT_EQ(test_message_, inputString);
 
             auto reply = ot::network::zeromq::reply_to_message(input);
             reply.AddFrame(inputString);
@@ -45,7 +45,7 @@ TEST_F(Test_ReplyCallback, ReplyCallback_Process)
     ASSERT_NE(nullptr, &replyCallback.get());
 
     auto testMessage = ot::network::zeromq::Message{};
-    testMessage.AddFrame(testMessage_);
+    testMessage.AddFrame(test_message_);
 
     ASSERT_NE(nullptr, &testMessage);
 
@@ -53,6 +53,6 @@ TEST_F(Test_ReplyCallback, ReplyCallback_Process)
 
     const auto messageString =
         ot::UnallocatedCString{message.Body().begin()->Bytes()};
-    ASSERT_EQ(testMessage_, messageString);
+    ASSERT_EQ(test_message_, messageString);
 }
 }  // namespace ottest

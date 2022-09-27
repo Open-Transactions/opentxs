@@ -43,12 +43,12 @@ OTPartyAccount::OTPartyAccount(
     const UnallocatedCString& dataFolder)
     : api_(api)
     , data_folder_{dataFolder}
-    , m_pForParty(nullptr)
-    , m_lClosingTransNo(0)
-    , m_strName(String::Factory())
-    , m_strAcctID(String::Factory())
-    , m_strInstrumentDefinitionID(String::Factory())
-    , m_strAgentName(String::Factory())
+    , for_party_(nullptr)
+    , closing_trans_no_(0)
+    , name_(String::Factory())
+    , acct_id_(String::Factory())
+    , instrument_definition_id_(String::Factory())
+    , agent_name_(String::Factory())
 
 {
 }
@@ -64,14 +64,14 @@ OTPartyAccount::OTPartyAccount(
     std::int64_t lClosingTransNo)
     : api_(api)
     , data_folder_{dataFolder}
-    , m_pForParty(nullptr)
+    , for_party_(nullptr)
     // This gets set when this partyaccount is added to its party.
-    , m_lClosingTransNo(lClosingTransNo)
-    , m_strName(String::Factory(str_account_name.c_str()))
-    , m_strAcctID(String::Factory(theAccount.GetRealAccountID()))
-    , m_strInstrumentDefinitionID(
+    , closing_trans_no_(lClosingTransNo)
+    , name_(String::Factory(str_account_name.c_str()))
+    , acct_id_(String::Factory(theAccount.GetRealAccountID()))
+    , instrument_definition_id_(
           String::Factory(theAccount.GetInstrumentDefinitionID()))
-    , m_strAgentName(strAgentName)
+    , agent_name_(strAgentName)
 {
 }
 
@@ -85,22 +85,22 @@ OTPartyAccount::OTPartyAccount(
     std::int64_t lClosingTransNo)
     : api_(api)
     , data_folder_{dataFolder}
-    , m_pForParty(nullptr)
+    , for_party_(nullptr)
     // This gets set when this partyaccount is added to its party.
-    , m_lClosingTransNo(lClosingTransNo)
-    , m_strName(strName)
-    , m_strAcctID(strAcctID)
-    , m_strInstrumentDefinitionID(strInstrumentDefinitionID)
-    , m_strAgentName(strAgentName)
+    , closing_trans_no_(lClosingTransNo)
+    , name_(strName)
+    , acct_id_(strAcctID)
+    , instrument_definition_id_(strInstrumentDefinitionID)
+    , agent_name_(strAgentName)
 {
 }
 
 auto OTPartyAccount::get_account() const -> SharedAccount
 {
-    if (!m_strAcctID->Exists()) { return {}; }
+    if (!acct_id_->Exists()) { return {}; }
 
     return api_.Wallet().Internal().Account(
-        api_.Factory().IdentifierFromBase58(m_strAcctID->Bytes()));
+        api_.Factory().IdentifierFromBase58(acct_id_->Bytes()));
 }
 
 // Every partyaccount has its own authorized agent's name.
@@ -109,18 +109,18 @@ auto OTPartyAccount::get_account() const -> SharedAccount
 //
 auto OTPartyAccount::GetAuthorizedAgent() -> OTAgent*
 {
-    OT_ASSERT(nullptr != m_pForParty);
+    OT_ASSERT(nullptr != for_party_);
 
-    if (!m_strAgentName->Exists()) {
+    if (!agent_name_->Exists()) {
         LogError()(OT_PRETTY_CLASS())("Error: Authorized agent "
                                       "name (for this account) is blank!")
             .Flush();
         return nullptr;
     }
 
-    const UnallocatedCString str_agent_name = m_strAgentName->Get();
+    const UnallocatedCString str_agent_name = agent_name_->Get();
 
-    OTAgent* pAgent = m_pForParty->GetAgent(str_agent_name);
+    OTAgent* pAgent = for_party_->GetAgent(str_agent_name);
 
     return pAgent;
 }
@@ -129,21 +129,21 @@ auto OTPartyAccount::GetAuthorizedAgent() -> OTAgent*
 //
 void OTPartyAccount::SetParty(OTParty& theOwnerParty)
 {
-    m_pForParty = &theOwnerParty;
+    for_party_ = &theOwnerParty;
 }
 
 auto OTPartyAccount::IsAccountByID(const identifier::Generic& theAcctID) const
     -> bool
 {
-    if (!m_strAcctID->Exists()) { return false; }
+    if (!acct_id_->Exists()) { return false; }
 
-    if (!m_strInstrumentDefinitionID->Exists()) { return false; }
+    if (!instrument_definition_id_->Exists()) { return false; }
 
     const auto theMemberAcctID =
-        api_.Factory().IdentifierFromBase58(m_strAcctID->Bytes());
+        api_.Factory().IdentifierFromBase58(acct_id_->Bytes());
     if (!(theAcctID == theMemberAcctID)) {
         LogTrace()(OT_PRETTY_CLASS())("Account IDs don't match: ")(
-            m_strAcctID.get())(" / ")(theAcctID)
+            acct_id_.get())(" / ")(theAcctID)
             .Flush();
 
         return false;
@@ -156,13 +156,13 @@ auto OTPartyAccount::IsAccountByID(const identifier::Generic& theAcctID) const
 
 auto OTPartyAccount::IsAccount(const Account& theAccount) -> bool
 {
-    if (!m_strAcctID->Exists()) {
-        LogError()(OT_PRETTY_CLASS())("Error: Empty m_strAcctID.").Flush();
+    if (!acct_id_->Exists()) {
+        LogError()(OT_PRETTY_CLASS())("Error: Empty acct_id_.").Flush();
         return false;
     }
 
     bool bCheckAssetId = true;
-    if (!m_strInstrumentDefinitionID->Exists()) {
+    if (!instrument_definition_id_->Exists()) {
         LogError()(OT_PRETTY_CLASS())(
             "FYI, Asset ID is blank in this smart contract, for this account.")
             .Flush();
@@ -170,18 +170,18 @@ auto OTPartyAccount::IsAccount(const Account& theAccount) -> bool
     }
 
     const auto theAcctID =
-        api_.Factory().IdentifierFromBase58(m_strAcctID->Bytes());
+        api_.Factory().IdentifierFromBase58(acct_id_->Bytes());
     if (!(theAccount.GetRealAccountID() == theAcctID)) {
         LogTrace()(OT_PRETTY_CLASS())("Account IDs don't match: ")(
-            m_strAcctID.get())(" / ")(theAccount.GetRealAccountID())
+            acct_id_.get())(" / ")(theAccount.GetRealAccountID())
             .Flush();
 
         return false;
     }
 
     if (bCheckAssetId) {
-        const auto theInstrumentDefinitionID = api_.Factory().UnitIDFromBase58(
-            m_strInstrumentDefinitionID->Bytes());
+        const auto theInstrumentDefinitionID =
+            api_.Factory().UnitIDFromBase58(instrument_definition_id_->Bytes());
         if (!(theAccount.GetInstrumentDefinitionID() ==
               theInstrumentDefinitionID)) {
             auto strRHS =
@@ -189,8 +189,8 @@ auto OTPartyAccount::IsAccount(const Account& theAccount) -> bool
             {
                 LogConsole()(OT_PRETTY_CLASS())(
                     "Instrument Definition IDs don't "
-                    "match ( ")(m_strInstrumentDefinitionID.get())(" / ")(
-                    strRHS.get())(" ) for Acct ID: ")(m_strAcctID.get())(".")
+                    "match ( ")(instrument_definition_id_.get())(" / ")(
+                    strRHS.get())(" ) for Acct ID: ")(acct_id_.get())(".")
                     .Flush();
             }
             return false;
@@ -204,7 +204,7 @@ auto OTPartyAccount::IsAccount(const Account& theAccount) -> bool
 // I will ask him to verify whether he actually owns it.
 auto OTPartyAccount::VerifyOwnership() const -> bool
 {
-    if (nullptr == m_pForParty) {
+    if (nullptr == for_party_) {
         LogError()(OT_PRETTY_CLASS())("Error: nullptr pointer to owner party.")
             .Flush();
         return false;
@@ -220,11 +220,11 @@ auto OTPartyAccount::VerifyOwnership() const -> bool
         return false;
     }  // todo maybe turn the above into OT_ASSERT()s.
 
-    if (!m_pForParty->VerifyOwnershipOfAccount(account.get())) {
+    if (!for_party_->VerifyOwnershipOfAccount(account.get())) {
         {
             LogConsole()(OT_PRETTY_CLASS())(
                 "Party doesn't verify as the ACTUAL owner of account: ")(
-                m_strName.get())(".")
+                name_.get())(".")
                 .Flush();
         }
         return false;
@@ -281,13 +281,13 @@ auto OTPartyAccount::DropFinalReceiptToInbox(
     OTString pstrNote,
     OTString pstrAttachment) -> bool
 {
-    if (nullptr == m_pForParty) {
-        LogError()(OT_PRETTY_CLASS())("nullptr m_pForParty.").Flush();
+    if (nullptr == for_party_) {
+        LogError()(OT_PRETTY_CLASS())("nullptr for_party_.").Flush();
         return false;
-    } else if (!m_strAcctID->Exists()) {
+    } else if (!acct_id_->Exists()) {
         LogError()(OT_PRETTY_CLASS())("Empty Acct ID.").Flush();
         return false;
-    } else if (!m_strAgentName->Exists()) {
+    } else if (!agent_name_->Exists()) {
         LogError()(OT_PRETTY_CLASS())("No agent named for this account.")
             .Flush();
         return false;
@@ -296,23 +296,23 @@ auto OTPartyAccount::DropFinalReceiptToInbox(
     // TODO: When entites and roles are added, this function may change a bit to
     // accommodate them.
 
-    const UnallocatedCString str_agent_name(m_strAgentName->Get());
+    const UnallocatedCString str_agent_name(agent_name_->Get());
 
-    OTAgent* pAgent = m_pForParty->GetAgent(str_agent_name);
+    OTAgent* pAgent = for_party_->GetAgent(str_agent_name);
 
     if (nullptr == pAgent) {
         LogError()(OT_PRETTY_CLASS())("Named agent wasn't found on party.")
             .Flush();
     } else {
         const auto theAccountID =
-            api_.Factory().IdentifierFromBase58(m_strAcctID->Bytes());
+            api_.Factory().IdentifierFromBase58(acct_id_->Bytes());
 
         return pAgent->DropFinalReceiptToInbox(
             strNotaryID,
             theSmartContract,
             theAccountID,  // acct ID from this.
             lNewTransactionNumber,
-            m_lClosingTransNo,  // closing_no from this.
+            closing_trans_no_,  // closing_no from this.
             strOrigCronItem,
             reason,
             pstrNote,
@@ -328,10 +328,10 @@ auto OTPartyAccount::DropFinalReceiptToInbox(
 // because it is appropriate in certain cases.
 auto OTPartyAccount::LoadAccount() -> SharedAccount
 {
-    if (!m_strAcctID->Exists()) {
+    if (!acct_id_->Exists()) {
         {
             LogConsole()(OT_PRETTY_CLASS())(
-                "Bad: Acct ID is blank for account: ")(m_strName.get())(".")
+                "Bad: Acct ID is blank for account: ")(name_.get())(".")
                 .Flush();
         }
 
@@ -339,12 +339,12 @@ auto OTPartyAccount::LoadAccount() -> SharedAccount
     }
 
     auto account = api_.Wallet().Internal().Account(
-        api_.Factory().IdentifierFromBase58(m_strAcctID->Bytes()));
+        api_.Factory().IdentifierFromBase58(acct_id_->Bytes()));
 
     if (false == bool(account)) {
         {
             LogConsole()(OT_PRETTY_CLASS())("Failed trying to load account: ")(
-                m_strName.get())(", with AcctID: ")(m_strAcctID.get())(".")
+                name_.get())(", with AcctID: ")(acct_id_.get())(".")
                 .Flush();
         }
 
@@ -368,25 +368,24 @@ void OTPartyAccount::Serialize(
 {
     TagPtr pTag(new Tag("assetAccount"));
 
-    pTag->add_attribute("name", m_strName->Get());
-    pTag->add_attribute("acctID", bCalculatingID ? "" : m_strAcctID->Get());
+    pTag->add_attribute("name", name_->Get());
+    pTag->add_attribute("acctID", bCalculatingID ? "" : acct_id_->Get());
     pTag->add_attribute(
         "instrumentDefinitionID",
         (bCalculatingID && !bSpecifyInstrumentDefinitionID)
             ? ""
-            : m_strInstrumentDefinitionID->Get());
-    pTag->add_attribute(
-        "agentName", bCalculatingID ? "" : m_strAgentName->Get());
+            : instrument_definition_id_->Get());
+    pTag->add_attribute("agentName", bCalculatingID ? "" : agent_name_->Get());
     pTag->add_attribute(
         "closingTransNo",
-        std::to_string(bCalculatingID ? 0 : m_lClosingTransNo));
+        std::to_string(bCalculatingID ? 0 : closing_trans_no_));
 
     parent.add_tag(pTag);
 }
 
 void OTPartyAccount::RegisterForExecution(OTScript& theScript)
 {
-    const UnallocatedCString str_acct_name = m_strName->Get();
+    const UnallocatedCString str_acct_name = name_->Get();
     theScript.AddAccount(str_acct_name, *this);
 }
 
@@ -460,7 +459,7 @@ auto OTPartyAccount::Compare(const OTPartyAccount& rhs) const -> bool
 
 OTPartyAccount::~OTPartyAccount()
 {
-    // m_pForParty NOT cleaned up here. pointer is only for convenience.
-    m_pForParty = nullptr;
+    // for_party_ NOT cleaned up here. pointer is only for convenience.
+    for_party_ = nullptr;
 }
 }  // namespace opentxs

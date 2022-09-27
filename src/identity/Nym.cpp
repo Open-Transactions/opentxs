@@ -202,8 +202,8 @@ Nym::Nym(
     , revision_(0)
     , contact_data_(nullptr)
     , active_(create_authority(api_, *this, source_, version_, params, reason))
-    , m_mapRevokedSets()
-    , m_listRevokedIDs()
+    , revoked_sets_()
+    , list_revoked_ids_()
 {
     OT_ASSERT(id_.Type() == identifier::Type::nym);
 
@@ -227,9 +227,9 @@ Nym::Nym(
     , revision_(serialized.revision())
     , contact_data_(nullptr)
     , active_(load_authorities(api_, *this, source_, serialized))
-    , m_mapRevokedSets()
-    , m_listRevokedIDs(
-          load_revoked(api_, *this, source_, serialized, m_mapRevokedSets))
+    , revoked_sets_()
+    , list_revoked_ids_(
+          load_revoked(api_, *this, source_, serialized, revoked_sets_))
 {
     OT_ASSERT(id_.Type() == identifier::Type::nym);
 
@@ -730,7 +730,7 @@ auto Nym::get_private_auth_key(
     if (nullptr == pCredential) { OT_FAIL; }
 
     return pCredential->GetPrivateAuthKey(
-        keytype, &m_listRevokedIDs);  // success
+        keytype, &list_revoked_ids_);  // success
 }
 
 auto Nym::GetPrivateAuthKey(crypto::key::asymmetric::Algorithm keytype) const
@@ -766,7 +766,7 @@ auto Nym::GetPrivateEncrKey(crypto::key::asymmetric::Algorithm keytype) const
 
     return pCredential->GetPrivateEncrKey(
         keytype,
-        &m_listRevokedIDs);  // success
+        &list_revoked_ids_);  // success
 }
 
 auto Nym::GetPrivateSignKey(crypto::key::asymmetric::Algorithm keytype) const
@@ -805,7 +805,7 @@ auto Nym::get_private_sign_key(
 
     return pCredential->GetPrivateSignKey(
         keytype,
-        &m_listRevokedIDs);  // success
+        &list_revoked_ids_);  // success
 }
 
 template <typename T>
@@ -836,7 +836,7 @@ auto Nym::get_public_sign_key(
 
     return pCredential->GetPublicSignKey(
         keytype,
-        &m_listRevokedIDs);  // success
+        &list_revoked_ids_);  // success
 }
 
 auto Nym::GetPublicAuthKey(crypto::key::asymmetric::Algorithm keytype) const
@@ -864,7 +864,7 @@ auto Nym::GetPublicAuthKey(crypto::key::asymmetric::Algorithm keytype) const
 
     return pCredential->GetPublicAuthKey(
         keytype,
-        &m_listRevokedIDs);  // success
+        &list_revoked_ids_);  // success
 }
 
 auto Nym::GetPublicEncrKey(crypto::key::asymmetric::Algorithm keytype) const
@@ -891,7 +891,7 @@ auto Nym::GetPublicEncrKey(crypto::key::asymmetric::Algorithm keytype) const
 
     return pCredential->GetPublicEncrKey(
         keytype,
-        &m_listRevokedIDs);  // success
+        &list_revoked_ids_);  // success
 }
 
 // This is being called by:
@@ -1261,7 +1261,7 @@ void Nym::revoke_contact_credentials(const eLock& lock)
         }
     }
 
-    for (auto& it : revokedIDs) { m_listRevokedIDs.push_back(it); }
+    for (auto& it : revokedIDs) { list_revoked_ids_.push_back(it); }
 }
 
 void Nym::revoke_verification_credentials(const eLock& lock)
@@ -1276,7 +1276,7 @@ void Nym::revoke_verification_credentials(const eLock& lock)
         }
     }
 
-    for (auto& it : revokedIDs) { m_listRevokedIDs.push_back(it); }
+    for (auto& it : revokedIDs) { list_revoked_ids_.push_back(it); }
 }
 
 auto Nym::SerializeCredentialIndex(AllocateOutput destination, const Mode mode)
@@ -1320,7 +1320,7 @@ auto Nym::SerializeCredentialIndex(Serialized& index, const Mode mode) const
         }
     }
 
-    for (const auto& it : m_mapRevokedSets) {
+    for (const auto& it : revoked_sets_) {
         if (nullptr != it.second) {
             auto credset = proto::Authority{};
             if (false ==
@@ -1576,7 +1576,7 @@ auto Nym::Unlock(
         if (authority->Unlock(dhKey, tag, type, key, reason)) { return true; }
     }
 
-    for (const auto& [id, authority] : m_mapRevokedSets) {
+    for (const auto& [id, authority] : revoked_sets_) {
         if (authority->Unlock(dhKey, tag, type, key, reason)) { return true; }
     }
 

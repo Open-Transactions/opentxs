@@ -82,20 +82,20 @@ public:
     void ActivateCron();
     auto CommandProcessor() -> UserCommandProcessor&
     {
-        return userCommandProcessor_;
+        return user_command_processor_;
     }
     auto ComputeTimeout() -> std::chrono::milliseconds
     {
-        return m_Cron->computeTimeout();
+        return cron_->computeTimeout();
     }
-    auto Cron() -> OTCron& { return *m_Cron; }
+    auto Cron() -> OTCron& { return *cron_; }
     auto DropMessageToNymbox(
         const identifier::Notary& notaryID,
         const identifier::Nym& senderNymID,
         const identifier::Nym& recipientNymID,
         transactionType transactionType,
         const Message& msg) -> bool;
-    auto GetMainFile() -> MainFile& { return mainFile_; }
+    auto GetMainFile() -> MainFile& { return main_file_; }
     auto GetNotary() -> Notary& { return notary_; }
     auto GetTransactor() -> Transactor& { return transactor_; }
     void Init(bool readOnly = false);
@@ -107,7 +107,7 @@ public:
         const identifier::Nym& recipientNymID,
         const OTPayment& payment,
         const char* command) -> bool;
-    auto WalletFilename() -> String& { return m_strWalletFilename; }
+    auto WalletFilename() -> String& { return wallet_filename_; }
 
     Server(
         const opentxs::api::session::Notary& manager,
@@ -123,34 +123,34 @@ public:
 private:
     friend MainFile;
 
-    const UnallocatedCString DEFAULT_EXTERNAL_IP = "127.0.0.1";
-    const UnallocatedCString DEFAULT_BIND_IP = "127.0.0.1";
-    const UnallocatedCString DEFAULT_NAME = "localhost";
-    const std::uint32_t DEFAULT_PORT = 7085;
-    const std::uint32_t MIN_TCP_PORT = 1024;
-    const std::uint32_t MAX_TCP_PORT = 63356;
+    const UnallocatedCString default_external_ip_ = "127.0.0.1";
+    const UnallocatedCString default_bind_ip_ = "127.0.0.1";
+    const UnallocatedCString default_name_ = "localhost";
+    const std::uint32_t default_port_ = 7085;
+    const std::uint32_t min_tcp_port_ = 1024;
+    const std::uint32_t max_tcp_port_ = 63356;
 
     const api::session::Notary& api_;
     const PasswordPrompt& reason_;
-    MainFile mainFile_;
+    MainFile main_file_;
     Notary notary_;
     Transactor transactor_;
-    UserCommandProcessor userCommandProcessor_;
-    OTString m_strWalletFilename;
+    UserCommandProcessor user_command_processor_;
+    OTString wallet_filename_;
     // Used at least for whether or not to write to the PID.
-    bool m_bReadOnly{false};
+    bool read_only_{false};
     // If the server wants to be shut down, it can set
     // this flag so the caller knows to do so.
-    bool m_bShutdownFlag{false};
+    bool shutdown_flag_{false};
     // A hash of the server contract
-    AsyncConst<identifier::Notary> m_notaryID;
+    AsyncConst<identifier::Notary> notary_id_;
     // A hash of the public key that signed the server contract
-    UnallocatedCString m_strServerNymID;
+    UnallocatedCString server_nym_id_;
     // This is the server's own contract, containing its public key and
     // connect info.
-    Nym_p m_nymServer;
-    std::unique_ptr<OTCron> m_Cron;  // This is where re-occurring and expiring
-                                     // tasks go.
+    Nym_p nym_server_;
+    std::unique_ptr<OTCron> cron_;  // This is where re-occurring and expiring
+                                    // tasks go.
     OTZMQPushSocket notification_socket_;
 
     auto nymbox_push(const identifier::Nym& nymID, const OTTransaction& item)
@@ -171,10 +171,10 @@ private:
         -> std::pair<UnallocatedCString, UnallocatedCString>;
     auto ServerNymID() const -> const UnallocatedCString&
     {
-        return m_strServerNymID;
+        return server_nym_id_;
     }
     auto SetNotaryID(const identifier::Notary& notaryID) noexcept -> void;
-    void SetServerNymID(const char* strNymID) { m_strServerNymID = strNymID; }
+    void SetServerNymID(const char* strNymID) { server_nym_id_ = strNymID; }
 
     auto SendInstrumentToNym(
         const identifier::Notary& notaryID,

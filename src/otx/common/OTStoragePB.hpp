@@ -39,12 +39,12 @@ class BufferPB : public PackedBuffer
 {
     friend PackerSubclass<BufferPB>;
     friend IStorablePB;
-    UnallocatedCString m_buffer;
+    UnallocatedCString buffer_;
 
 public:
     BufferPB()
         : PackedBuffer()
-        , m_buffer()
+        , buffer_()
     {
     }
     ~BufferPB() override = default;
@@ -56,7 +56,7 @@ public:
     auto GetData() -> const std::uint8_t* override;
     auto GetSize() -> std::size_t override;
     void SetData(const std::uint8_t* pData, std::size_t theSize) override;
-    auto GetBuffer() -> UnallocatedCString& { return m_buffer; }
+    auto GetBuffer() -> UnallocatedCString& { return buffer_; }
 };
 
 // Protocol Buffers packer.
@@ -73,7 +73,7 @@ class ProtobufSubclass : public theBaseType, public IStorablePB
 {
 private:
     theInternalType pb_obj_;
-    UnallocatedCString m_Type;
+    UnallocatedCString type_;
 
 public:
     static auto Instantiate() -> Storable*
@@ -86,10 +86,10 @@ public:
         : theBaseType()
         , IStorablePB()
         , pb_obj_()
-        , m_Type(
+        , type_(
               StoredObjectTypeStrings[static_cast<std::int32_t>(theObjectType)])
     {
-        m_Type += "PB";
+        type_ += "PB";
     }
 
     ProtobufSubclass(
@@ -97,10 +97,10 @@ public:
             rhs)
         : theBaseType()
         , IStorablePB()
-        , m_Type(
+        , type_(
               StoredObjectTypeStrings[static_cast<std::int32_t>(theObjectType)])
     {
-        m_Type += "PB";
+        type_ += "PB";
         rhs.CopyToObject(*this);
     }
 

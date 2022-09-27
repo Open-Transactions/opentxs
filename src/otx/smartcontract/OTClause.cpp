@@ -31,19 +31,19 @@
 namespace opentxs
 {
 OTClause::OTClause()
-    : m_strName(String::Factory())
-    , m_strCode(String::Factory())
-    , m_pBylaw(nullptr)
+    : name_(String::Factory())
+    , code_(String::Factory())
+    , bylaw_(nullptr)
 {
 }
 
 OTClause::OTClause(const char* szName, const char* szCode)
-    : m_strName(String::Factory())
-    , m_strCode(String::Factory())
-    , m_pBylaw(nullptr)
+    : name_(String::Factory())
+    , code_(String::Factory())
+    , bylaw_(nullptr)
 {
-    if (nullptr != szName) { m_strName->Set(szName); }
-    if (nullptr != szCode) { m_strCode->Set(szCode); }
+    if (nullptr != szName) { name_->Set(szName); }
+    if (nullptr != szCode) { code_->Set(szCode); }
 
     // Todo security:  validation on the above fields.
 }
@@ -52,18 +52,18 @@ OTClause::~OTClause()
 {
     // nothing to delete.
 
-    m_pBylaw =
+    bylaw_ =
         nullptr;  // I wasn't the owner, it was a pointer for convenience only.
 }
 
 void OTClause::SetCode(const UnallocatedCString& str_code)
 {
-    m_strCode->Set(str_code.c_str());
+    code_->Set(str_code.c_str());
 }
 
 auto OTClause::GetCode() const -> const char*
 {
-    if (m_strCode->Exists()) { return m_strCode->Get(); }
+    if (code_->Exists()) { return code_->Get(); }
 
     return "print(\"(Empty script.)\")";  // todo hardcoding
 }
@@ -72,8 +72,8 @@ void OTClause::Serialize(Tag& parent) const
 {
     auto ascCode = Armored::Factory();
 
-    if (m_strCode->GetLength() > 2) {
-        ascCode->SetString(m_strCode);
+    if (code_->GetLength() > 2) {
+        ascCode->SetString(code_);
     } else {
         LogError()(OT_PRETTY_CLASS())(
             "Empty script code in OTClause::Serialize().")
@@ -82,7 +82,7 @@ void OTClause::Serialize(Tag& parent) const
 
     TagPtr pTag(new Tag("clause", ascCode->Get()));
 
-    pTag->add_attribute("name", m_strName->Get());
+    pTag->add_attribute("name", name_->Get());
 
     parent.add_tag(pTag);
 }
@@ -97,7 +97,7 @@ auto OTClause::Compare(const OTClause& rhs) const -> bool
         return false;
     }
 
-    if (!(m_strCode->Compare(rhs.GetCode()))) {
+    if (!(code_->Compare(rhs.GetCode()))) {
         LogConsole()(OT_PRETTY_CLASS())(
             "Source code for interpreted script fails "
             "to match, on clause: ")(GetName())(".")

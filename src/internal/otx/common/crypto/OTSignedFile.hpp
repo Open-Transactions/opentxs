@@ -59,24 +59,24 @@ public:
     OTSignedFile() = delete;
 
 protected:
-    OTString m_strSignedFilePayload;  // This class exists to wrap another and
-                                      // save it in signed form.
+    OTString signed_file_payload_;  // This class exists to wrap another and
+                                    // save it in signed form.
     // The "payload" (the wrapped contents) are stored in this member.
 
-    OTString m_strLocalDir;  // The local subdirectory where the file is, such
-                             // as "nyms" or "certs"
-    OTString m_strSignedFilename;  // The file stores its own name. Later, when
-                                   // loading it back up, you can
+    OTString local_dir_;  // The local subdirectory where the file is, such
+                          // as "nyms" or "certs"
+    OTString signed_filename_;  // The file stores its own name. Later, when
+                                // loading it back up, you can
     // see that the name matches internally, and that the signature matches,
     // therefore, no one has switched the file or meddled with its contents.
 
-    OTString m_strPurportedLocalDir;  // This is the subdirectory according to
-                                      // the file.
-    OTString m_strPurportedFilename;  // This is the filename according to the
-                                      // file.
+    OTString purported_local_dir_;  // This is the subdirectory according to
+                                    // the file.
+    OTString purported_filename_;   // This is the filename according to the
+                                    // file.
 
-    OTString m_strSignerNymID;  // Optional. Here in case you ever
-                                // want to use it.
+    OTString signer_nym_id_;  // Optional. Here in case you ever
+                              // want to use it.
 
     // THOUGHT: What if someone switched the file for an older version of
     // itself? Seems to me that he could

@@ -831,17 +831,17 @@ auto RPC::evaluate_transaction_reply(
 {
     auto success{true};
     const auto notaryID =
-        api.Factory().NotaryIDFromBase58(reply.m_strNotaryID->Bytes());
-    const auto nymID = api.Factory().NymIDFromBase58(reply.m_strNymID->Bytes());
+        api.Factory().NotaryIDFromBase58(reply.notary_id_->Bytes());
+    const auto nymID = api.Factory().NymIDFromBase58(reply.nym_id_->Bytes());
     const auto accountID =
-        api.Factory().IdentifierFromBase58(reply.m_strAcctID->Bytes());
+        api.Factory().IdentifierFromBase58(reply.acct_id_->Bytes());
     const bool transaction =
-        reply.m_strCommand->Compare("notarizeTransactionResponse") ||
-        reply.m_strCommand->Compare("processInboxResponse") ||
-        reply.m_strCommand->Compare("processNymboxResponse");
+        reply.command_->Compare("notarizeTransactionResponse") ||
+        reply.command_->Compare("processInboxResponse") ||
+        reply.command_->Compare("processNymboxResponse");
 
     if (transaction) {
-        if (const auto sLedger = String::Factory(reply.m_ascPayload);
+        if (const auto sLedger = String::Factory(reply.payload_);
             sLedger->Exists()) {
             if (auto ledger{api.Factory().InternalSession().Ledger(
                     nymID, accountID, notaryID)};

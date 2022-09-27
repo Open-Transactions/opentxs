@@ -51,15 +51,15 @@ enum { TradeProcessIntervalSeconds = 10 };
 
 OTTrade::OTTrade(const api::Session& api)
     : ot_super(api)
-    , currencyTypeID_()
-    , currencyAcctID_()
+    , currency_type_id_()
+    , currency_acct_id_()
     , offer_(nullptr)
-    , hasTradeActivated_(false)
-    , stopPrice_(0)
-    , stopSign_(0)
-    , stopActivated_(false)
-    , tradesAlreadyDone_(0)
-    , marketOffer_(String::Factory())
+    , has_trade_activated_(false)
+    , stop_price_(0)
+    , stop_sign_(0)
+    , stop_activated_(false)
+    , trades_already_done_(0)
+    , market_offer_(String::Factory())
 {
     InitTrade();
 }
@@ -73,15 +73,15 @@ OTTrade::OTTrade(
     const identifier::UnitDefinition& currencyId,
     const identifier::Generic& currencyAcctId)
     : ot_super(api, notaryID, instrumentDefinitionID, assetAcctId, nymID)
-    , currencyTypeID_(currencyId)
-    , currencyAcctID_(currencyAcctId)
+    , currency_type_id_(currencyId)
+    , currency_acct_id_(currencyAcctId)
     , offer_(nullptr)
-    , hasTradeActivated_(false)
-    , stopPrice_(0)
-    , stopSign_(0)
-    , stopActivated_(false)
-    , tradesAlreadyDone_(0)
-    , marketOffer_(String::Factory())
+    , has_trade_activated_(false)
+    , stop_price_(0)
+    , stop_sign_(0)
+    , stop_activated_(false)
+    , trades_already_done_(0)
+    , market_offer_(String::Factory())
 {
     InitTrade();
 }
@@ -132,8 +132,9 @@ auto OTTrade::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
     if (0 != (returnVal = ot_super::ProcessXMLNode(xml))) { return returnVal; }
 
     if (!strcmp("trade", xml->getNodeName())) {
-        m_strVersion = String::Factory(xml->getAttributeValue("version"));
-        tradesAlreadyDone_ = atoi(xml->getAttributeValue("completedNoTrades"));
+        version_ = String::Factory(xml->getAttributeValue("version"));
+        trades_already_done_ =
+            atoi(xml->getAttributeValue("completedNoTrades"));
 
         SetTransactionNum(
             String::StringToLong(xml->getAttributeValue("transactionNum")));
@@ -156,9 +157,9 @@ auto OTTrade::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
             String::Factory(xml->getAttributeValue("hasActivated"));
 
         if (activated->Compare("true")) {
-            hasTradeActivated_ = true;
+            has_trade_activated_ = true;
         } else {
-            hasTradeActivated_ = false;
+            has_trade_activated_ = false;
         }
 
         const auto notaryID =
@@ -193,7 +194,7 @@ auto OTTrade::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
         SetCurrencyAcctID(CURRENCY_ACCT_ID);
 
         LogDebug()(OT_PRETTY_CLASS())("Trade. Transaction Number: ")(
-            m_lTransactionNum)("Completed # of Trades: ")(tradesAlreadyDone_)
+            transaction_num_)("Completed # of Trades: ")(trades_already_done_)
             .Flush();
 
         LogDetail()(OT_PRETTY_CLASS())("Creation Date: ")(
@@ -212,8 +213,8 @@ auto OTTrade::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
         auto sign = String::Factory(xml->getAttributeValue("sign"));
 
         if (sign->Compare("0")) {
-            stopSign_ = 0;  // Zero means it isn't a stop order. So why is the
-                            // tag in the file?
+            stop_sign_ = 0;  // Zero means it isn't a stop order. So why is the
+                             // tag in the file?
             LogError()(OT_PRETTY_CLASS())(
                 "Strange: Stop order tag found in trade, but sign "
                 "character set to 0. "
@@ -221,11 +222,11 @@ auto OTTrade::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
                 .Flush();
             return (-1);
         } else if (sign->Compare("<")) {
-            stopSign_ = '<';
+            stop_sign_ = '<';
         } else if (sign->Compare(">")) {
-            stopSign_ = '>';
+            stop_sign_ = '>';
         } else {
-            stopSign_ = 0;
+            stop_sign_ = 0;
             LogError()(OT_PRETTY_CLASS())(
                 "Unexpected or nonexistent value in stop order sign: ")(
                 sign.get())(".")
@@ -235,29 +236,29 @@ auto OTTrade::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
 
         // Now we know the sign is properly formed, let's grab the price value.
 
-        stopPrice_ = String::StringToLong(xml->getAttributeValue("price"));
+        stop_price_ = String::StringToLong(xml->getAttributeValue("price"));
 
         auto activated =
             String::Factory(xml->getAttributeValue("hasActivated"));
 
         if (activated->Compare("true")) {
-            stopActivated_ = true;
+            stop_activated_ = true;
         } else {
-            stopActivated_ = false;
+            stop_activated_ = false;
         }
 
         const auto unittype = api_.Wallet().CurrencyTypeBasedOnUnitType(
             GetInstrumentDefinitionID());
         LogDebug()(OT_PRETTY_CLASS())("Stop order --")(
-            stopActivated_ ? "Already activated" : "Will activate")(
-            " when price ")(stopActivated_ ? "was" : "reaches")(
-            ('<' == stopSign_) ? "LESS THAN"
-                               : "GREATER THAN")(stopPrice_, unittype)
+            stop_activated_ ? "Already activated" : "Will activate")(
+            " when price ")(stop_activated_ ? "was" : "reaches")(
+            ('<' == stop_sign_) ? "LESS THAN"
+                                : "GREATER THAN")(stop_price_, unittype)
             .Flush();
 
         returnVal = 1;
     } else if (!strcmp("offer", xml->getNodeName())) {
-        if (!LoadEncodedTextField(xml, marketOffer_)) {
+        if (!LoadEncodedTextField(xml, market_offer_)) {
 
             LogError()(OT_PRETTY_CLASS())("Error: Offer field without "
                                           "value.")
@@ -274,7 +275,7 @@ auto OTTrade::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
 void OTTrade::UpdateContents(const PasswordPrompt& reason)
 {
     // I release this because I'm about to repopulate it.
-    m_xmlUnsigned->Release();
+    xml_unsigned_->Release();
 
     const auto NOTARY_ID = String::Factory(GetNotaryID()),
                NYM_ID = String::Factory(GetSenderNymID()),
@@ -286,8 +287,8 @@ void OTTrade::UpdateContents(const PasswordPrompt& reason)
 
     Tag tag("trade");
 
-    tag.add_attribute("version", m_strVersion->Get());
-    tag.add_attribute("hasActivated", formatBool(hasTradeActivated_));
+    tag.add_attribute("version", version_->Get());
+    tag.add_attribute("hasActivated", formatBool(has_trade_activated_));
     tag.add_attribute("notaryID", NOTARY_ID->Get());
     tag.add_attribute(
         "instrumentDefinitionID", INSTRUMENT_DEFINITION_ID->Get());
@@ -295,8 +296,9 @@ void OTTrade::UpdateContents(const PasswordPrompt& reason)
     tag.add_attribute("currencyTypeID", CURRENCY_TYPE_ID->Get());
     tag.add_attribute("currencyAcctID", CURRENCY_ACCT_ID->Get());
     tag.add_attribute("nymID", NYM_ID->Get());
-    tag.add_attribute("completedNoTrades", std::to_string(tradesAlreadyDone_));
-    tag.add_attribute("transactionNum", std::to_string(m_lTransactionNum));
+    tag.add_attribute(
+        "completedNoTrades", std::to_string(trades_already_done_));
+    tag.add_attribute("transactionNum", std::to_string(transaction_num_));
     tag.add_attribute("creationDate", formatTimestamp(GetCreationDate()));
     tag.add_attribute("validFrom", formatTimestamp(GetValidFrom()));
     tag.add_attribute("validTo", formatTimestamp(GetValidTo()));
@@ -315,27 +317,28 @@ void OTTrade::UpdateContents(const PasswordPrompt& reason)
         tag.add_tag(tagClosing);
     }
 
-    if (('<' == stopSign_) || ('>' == stopSign_)) {
+    if (('<' == stop_sign_) || ('>' == stop_sign_)) {
         TagPtr tagStopOrder(new Tag("stopOrder"));
-        tagStopOrder->add_attribute("hasActivated", formatBool(stopActivated_));
-        tagStopOrder->add_attribute("sign", std::to_string(stopSign_));
+        tagStopOrder->add_attribute(
+            "hasActivated", formatBool(stop_activated_));
+        tagStopOrder->add_attribute("sign", std::to_string(stop_sign_));
         tagStopOrder->add_attribute("price", [&] {
             auto buf = UnallocatedCString{};
-            stopPrice_.Serialize(writer(buf));
+            stop_price_.Serialize(writer(buf));
             return buf;
         }());
         tag.add_tag(tagStopOrder);
     }
 
-    if (marketOffer_->Exists()) {
-        auto ascOffer = Armored::Factory(marketOffer_);
+    if (market_offer_->Exists()) {
+        auto ascOffer = Armored::Factory(market_offer_);
         tag.add_tag("offer", ascOffer->Get());
     }
 
     UnallocatedCString str_result;
     tag.output(str_result);
 
-    m_xmlUnsigned->Concatenate(String::Factory(str_result));
+    xml_unsigned_->Concatenate(String::Factory(str_result));
 }
 
 // The trade stores a copy of the Offer in string form.
@@ -442,8 +445,8 @@ auto OTTrade::GetOffer(
 
     // else (BELOW) offer_ IS nullptr, and thus it didn't exist yet...
 
-    if (!marketOffer_->Exists()) {
-        LogError()(OT_PRETTY_CLASS())("Error: Called with empty marketOffer_.")
+    if (!market_offer_->Exists()) {
+        LogError()(OT_PRETTY_CLASS())("Error: Called with empty market_offer_.")
             .Flush();
         return nullptr;
     }
@@ -454,7 +457,7 @@ auto OTTrade::GetOffer(
     // Trying to load the offer from the trader's original signed request
     // (So I can use it to lookup the Market ID, so I can see the offer is
     // already there on the market.)
-    if (!offer->LoadContractFromString(marketOffer_)) {
+    if (!offer->LoadContractFromString(market_offer_)) {
         LogError()(OT_PRETTY_CLASS())("Error loading offer from string.")
             .Flush();
         return nullptr;
@@ -540,7 +543,7 @@ auto OTTrade::GetOffer(
     // this, in the else block.)
     //
     if (!IsStopOrder()) {
-        if (hasTradeActivated_) {
+        if (has_trade_activated_) {
             // Error -- how has the trade already activated, yet not on the
             // market and null in my pointer?
             LogError()(OT_PRETTY_CLASS())(
@@ -564,7 +567,7 @@ auto OTTrade::GetOffer(
             // SUCCESS!
             offer_ = offer.release();
 
-            hasTradeActivated_ = true;
+            has_trade_activated_ = true;
 
             // The Trade (stored on Cron) has a copy of the Original Offer, with
             // the User's signature on it.
@@ -603,7 +606,7 @@ auto OTTrade::GetOffer(
     // It's a stop order, and not activated yet.
     // Should we activate it now?
     //
-    else if (IsStopOrder() && !stopActivated_) {
+    else if (IsStopOrder() && !stop_activated_) {
         Amount relevantPrice = 0;
 
         // If the stop order is trying to sell something, then it cares about
@@ -634,8 +637,8 @@ auto OTTrade::GetOffer(
                 // SUCCESS!
                 offer_ = offer.release();
 
-                stopActivated_ = true;
-                hasTradeActivated_ = true;
+                stop_activated_ = true;
+                has_trade_activated_ = true;
 
                 // The Trade (stored on Cron) has a copy of the Original Offer,
                 // with the User's signature on it.
@@ -700,10 +703,10 @@ void OTTrade::onRemovalFromCron(const PasswordPrompt& reason)
     std::int64_t transactionNum = 0;
 
     if (offer_ == nullptr) {
-        if (!marketOffer_->Exists()) {
+        if (!market_offer_->Exists()) {
             LogError()(OT_PRETTY_CLASS())(
                 "Error: Called with nullptr offer_ and "
-                "empty marketOffer_.")
+                "empty market_offer_.")
                 .Flush();
             return;
         }
@@ -716,7 +719,7 @@ void OTTrade::onRemovalFromCron(const PasswordPrompt& reason)
         // (So I can use it to lookup the Market ID, so I can see if the offer
         // is
         // already there on the market.)
-        if (!offer->LoadContractFromString(marketOffer_)) {
+        if (!offer->LoadContractFromString(market_offer_)) {
             LogError()(OT_PRETTY_CLASS())("Error loading offer from string.")
                 .Flush();
             return;
@@ -1147,19 +1150,19 @@ auto OTTrade::ProcessCron(const PasswordPrompt& reason) -> bool
 }
 
 /*
-X identifier::Generic    currencyTypeID_;    // GOLD (Asset) is trading for
-DOLLARS (Currency). X identifier::Generic    currencyAcctID_;    // My Dollar
+X identifier::Generic    currency_type_id_;    // GOLD (Asset) is trading for
+DOLLARS (Currency). X identifier::Generic    currency_acct_id_;    // My Dollar
 account, used for paying for my Gold (say) trades.
 
-X std::int64_t            stopPrice_;        // The price limit that activates
+X std::int64_t            stop_price_;        // The price limit that activates
 the
 STOP order.
-X char            stopSign_;        // Value is 0, or '<', or '>'.
+X char            stop_sign_;        // Value is 0, or '<', or '>'.
 
-X time64_t        m_CREATION_DATE;    // The date, in seconds, when the trade
+X time64_t        creation_date_;    // The date, in seconds, when the trade
 was authorized.
-X std::int32_t            tradesAlreadyDone_;    // How many trades have already
-processed through this order? We keep track.
+X std::int32_t            trades_already_done_;    // How many trades have
+already processed through this order? We keep track.
 */
 
 // This is called by the client side. First you call MakeOffer() to set up the
@@ -1170,7 +1173,7 @@ auto OTTrade::IssueTrade(OTOffer& offer, char stopSign, const Amount& stopPrice)
 {
     // Make sure the Stop Sign is within parameters (0, '<', or '>')
     if ((stopSign == 0) || (stopSign == '<') || (stopSign == '>')) {
-        stopSign_ = stopSign;
+        stop_sign_ = stopSign;
     } else {
         LogError()(OT_PRETTY_CLASS())(
             "Bad data in Stop Sign while issuing trade: ")(stopSign)(".")
@@ -1180,17 +1183,17 @@ auto OTTrade::IssueTrade(OTOffer& offer, char stopSign, const Amount& stopPrice)
 
     // Make sure, if this IS a Stop order, that the price is within parameters
     // and set.
-    if ((stopSign_ == '<') || (stopSign_ == '>')) {
+    if ((stop_sign_ == '<') || (stop_sign_ == '>')) {
         if (0 >= stopPrice) {
             LogError()(OT_PRETTY_CLASS())("Expected Stop Price for trade.")
                 .Flush();
             return false;
         }
 
-        stopPrice_ = stopPrice;
+        stop_price_ = stopPrice;
     }
 
-    tradesAlreadyDone_ = 0;
+    trades_already_done_ = 0;
 
     SetCreationDate(Clock::now());  // This time is set to TODAY NOW
                                     // (OTCronItem)
@@ -1205,9 +1208,9 @@ auto OTTrade::IssueTrade(OTOffer& offer, char stopSign, const Amount& stopPrice)
         return false;
     }
 
-    //    currencyTypeID_ // This is already set in the constructors of this
+    //    currency_type_id_ // This is already set in the constructors of this
     // and the offer. (And compared.)
-    //    currencyAcctID_ // This is already set in the constructor of this.
+    //    currency_acct_id_ // This is already set in the constructor of this.
 
     // Set the (now validated) date range as per the Offer.
     SetValidFrom(offer.GetValidFrom());
@@ -1218,7 +1221,7 @@ auto OTTrade::IssueTrade(OTOffer& offer, char stopSign, const Amount& stopPrice)
 
     // Save a copy of the offer, in XML form, here on this Trade.
     auto strOffer = String::Factory(offer);
-    marketOffer_->Set(strOffer);
+    market_offer_->Set(strOffer);
 
     return true;
 }
@@ -1227,10 +1230,10 @@ auto OTTrade::IssueTrade(OTOffer& offer, char stopSign, const Amount& stopPrice)
 void OTTrade::Release_Trade()
 {
     // If there were any dynamically allocated objects, clean them up here.
-    currencyTypeID_.clear();
-    currencyAcctID_.clear();
+    currency_type_id_.clear();
+    currency_acct_id_.clear();
 
-    marketOffer_->Release();
+    market_offer_->Release();
 }
 
 // the framework will call this at the right time.
@@ -1249,21 +1252,21 @@ void OTTrade::Release()
 void OTTrade::InitTrade()
 {
     // initialization here. Sometimes also called during cleanup to zero values.
-    m_strContractType = String::Factory("TRADE");
+    contract_type_ = String::Factory("TRADE");
 
     // Trades default to processing every 10 seconds. (vs 1 second for Cron
     // items and 1 hour for payment plans)
     SetProcessInterval(std::chrono::seconds{TradeProcessIntervalSeconds});
 
-    tradesAlreadyDone_ = 0;
+    trades_already_done_ = 0;
 
-    stopSign_ = 0;   // IS THIS a STOP order? Value is 0, or '<', or '>'.
-    stopPrice_ = 0;  // The price limit that activates the STOP order.
-    stopActivated_ = false;  // Once the Stop Order activates, it puts the
-                             // order on the market.
+    stop_sign_ = 0;   // IS THIS a STOP order? Value is 0, or '<', or '>'.
+    stop_price_ = 0;  // The price limit that activates the STOP order.
+    stop_activated_ = false;  // Once the Stop Order activates, it puts the
+                              // order on the market.
     // I'll put a "HasOrderOnMarket()" bool method that answers this for u.
-    hasTradeActivated_ = false;  // I want to keep track of general activations
-                                 // as well, not just stop orders.
+    has_trade_activated_ = false;  // I want to keep track of general
+                                   // activations as well, not just stop orders.
 }
 
 OTTrade::~OTTrade() { Release_Trade(); }

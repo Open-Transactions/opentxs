@@ -20,9 +20,9 @@ class Test_PushPull : public ::testing::Test
 public:
     const zmq::Context& context_;
 
-    const ot::UnallocatedCString testMessage_{"zeromq test message"};
-    const ot::UnallocatedCString testMessage2_{"zeromq test message 2"};
-    const ot::UnallocatedCString testMessage3_{"zeromq test message 3"};
+    const ot::UnallocatedCString test_message_{"zeromq test message"};
+    const ot::UnallocatedCString test_message2_{"zeromq test message 2"};
+    const ot::UnallocatedCString test_message3_{"zeromq test message 3"};
 
     const ot::UnallocatedCString endpoint_{
         "inproc://opentxs/test/push_pull_test"};
@@ -43,7 +43,7 @@ TEST_F(Test_PushPull, Push_Pull)
             const auto inputString =
                 ot::UnallocatedCString{input.Body().begin()->Bytes()};
 
-            EXPECT_EQ(testMessage_, inputString);
+            EXPECT_EQ(test_message_, inputString);
 
             callbackFinished = true;
         });
@@ -69,7 +69,7 @@ TEST_F(Test_PushPull, Push_Pull)
 
     auto sent = pushSocket->Send([&] {
         auto out = opentxs::network::zeromq::Message{};
-        out.AddFrame(testMessage_);
+        out.AddFrame(test_message_);
 
         return out;
     }());

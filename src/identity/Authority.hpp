@@ -241,7 +241,7 @@ private:
     KeyCredentialMap key_credentials_;
     ContactCredentialMap contact_credentials_;
     VerificationCredentialMap verification_credentials_;
-    mapOfCredentials m_mapRevokedCredentials;
+    mapOfCredentials revoked_credentials_;
     proto::KeyMode mode_{proto::KEYMODE_ERROR};
 
     static auto is_revoked(

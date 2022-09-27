@@ -91,7 +91,7 @@ public:
                                               // "Day Order")
     inline void IncrementFinishedSoFar(const Amount& lFinishedSoFar)
     {
-        m_lFinishedSoFar += lFinishedSoFar;
+        finished_so_far_ += lFinishedSoFar;
     }
 
     inline auto GetAmountAvailable() const -> Amount
@@ -100,49 +100,49 @@ public:
     }
     inline auto GetTransactionNum() const -> const std::int64_t&
     {
-        return m_lTransactionNum;
+        return transaction_num_;
     }
 
-    inline auto GetPriceLimit() const -> const Amount& { return m_lPriceLimit; }
+    inline auto GetPriceLimit() const -> const Amount& { return price_limit_; }
     inline auto GetTotalAssetsOnOffer() const -> const Amount&
     {
-        return m_lTotalAssetsOffer;
+        return total_assets_offer_;
     }
     inline auto GetFinishedSoFar() const -> const Amount&
     {
-        return m_lFinishedSoFar;
+        return finished_so_far_;
     }
     inline auto GetMinimumIncrement() -> const Amount&
     {
-        if (m_lMinimumIncrement < 1) { m_lMinimumIncrement = 1; }
-        return m_lMinimumIncrement;
+        if (minimum_increment_ < 1) { minimum_increment_ = 1; }
+        return minimum_increment_;
     }
-    inline auto GetScale() const -> const Amount& { return m_lScale; }
+    inline auto GetScale() const -> const Amount& { return scale_; }
 
     inline auto GetCurrencyID() const -> const identifier::Generic&
     {
-        return m_CURRENCY_TYPE_ID;
+        return currency_type_id_;
     }
     inline void SetCurrencyID(const identifier::UnitDefinition& CURRENCY_ID)
     {
-        m_CURRENCY_TYPE_ID = CURRENCY_ID;
+        currency_type_id_ = CURRENCY_ID;
     }
 
     // Buying or selling?
-    inline auto IsBid() -> bool { return !m_bSelling; }
-    inline auto IsAsk() -> bool { return m_bSelling; }
+    inline auto IsBid() -> bool { return !selling_; }
+    inline auto IsAsk() -> bool { return selling_; }
 
     auto IsMarketOrder() const -> bool;
     auto IsLimitOrder() const -> bool;
 
     // Stores a pointer to theTrade for later use. (Not responsible to clean up,
     // just convenient.)
-    inline auto GetTrade() -> OTTrade* { return m_pTrade; }
+    inline auto GetTrade() -> OTTrade* { return trade_; }
     inline void SetTrade(const OTTrade& theTrade)
     {
-        m_pTrade = &(const_cast<OTTrade&>(theTrade));
+        trade_ = &(const_cast<OTTrade&>(theTrade));
     }
-    // Note: m_tDateAddedToMarket is not saved in the Offer Contract, but
+    // Note: date_added_to_market_ is not saved in the Offer Contract, but
     // OTMarket sets/saves/loads it.
     //
     auto GetDateAddedToMarket() const -> Time;    // Used in
@@ -177,61 +177,61 @@ public:
 
 protected:
     // If this offer is actually connected to a trade, it will have a pointer.
-    OTTrade* m_pTrade{nullptr};
+    OTTrade* trade_{nullptr};
     // GOLD (Asset) is trading for DOLLARS (Currency).
-    identifier::Generic m_CURRENCY_TYPE_ID;
-    bool m_bSelling{false};  // true = ask. false = bid.
+    identifier::Generic currency_type_id_;
+    bool selling_{false};  // true = ask. false = bid.
     // If a bid, this is the most I will pay. If an ask, this is the least I
     // will sell for. My limit.
     // (Normally the price I get is whatever is the best one on the market right
     // now.)
-    Amount m_lPriceLimit{0};  // Denominated in CURRENCY TYPE, and priced
-                              // per SCALE. 1oz market price limit might
-                              // be 1,300
+    Amount price_limit_{0};  // Denominated in CURRENCY TYPE, and priced
+                             // per SCALE. 1oz market price limit might
+                             // be 1,300
     // 100oz market price limit might be 130,000 (or 127,987 or whatever)
 
-    std::int64_t m_lTransactionNum{0};  // Matches to an OTTrade stored in
-                                        // OTCron.
-    Amount m_lTotalAssetsOffer{0};      // Total amount of ASSET TYPE trying
-                                        // to BUY or SELL, this trade.
-    Amount m_lFinishedSoFar{0};         // Number of ASSETs bought or sold
-                                        // already against the above total.
+    std::int64_t transaction_num_{0};  // Matches to an OTTrade stored in
+                                       // OTCron.
+    Amount total_assets_offer_{0};     // Total amount of ASSET TYPE trying
+                                       // to BUY or SELL, this trade.
+    Amount finished_so_far_{0};        // Number of ASSETs bought or sold
+                                       // already against the above total.
 
-    Amount m_lScale{0};  // 1oz market? 100oz market? 10,000oz market?
-                         // This determines size and granularity.
-    Amount m_lMinimumIncrement{0};  // Each sale or purchase against the
-                                    // above total must be in minimum
-                                    // increments.
-    // Minimum Increment must be evenly divisible by m_lScale.
+    Amount scale_{0};              // 1oz market? 100oz market? 10,000oz market?
+                                   // This determines size and granularity.
+    Amount minimum_increment_{0};  // Each sale or purchase against the
+                                   // above total must be in minimum
+                                   // increments.
+    // Minimum Increment must be evenly divisible by scale_.
     // (This effectively becomes a "FILL OR KILL" order if set to the same value
-    // as m_lTotalAssetsOffer. Also, MUST be 1
+    // as total_assets_offer_. Also, MUST be 1
     // or great. CANNOT be zero. Enforce this at class level. You cannot sell
     // something in minimum increments of 0.)
     inline void SetTransactionNum(const std::int64_t& lTransactionNum)
     {
-        m_lTransactionNum = lTransactionNum;
+        transaction_num_ = lTransactionNum;
     }
     inline void SetPriceLimit(const Amount& lPriceLimit)
     {
-        m_lPriceLimit = lPriceLimit;
+        price_limit_ = lPriceLimit;
     }
     inline void SetTotalAssetsOnOffer(const Amount& lTotalAssets)
     {
-        m_lTotalAssetsOffer = lTotalAssets;
+        total_assets_offer_ = lTotalAssets;
     }
     inline void SetFinishedSoFar(const std::int64_t& lFinishedSoFar)
     {
-        m_lFinishedSoFar = lFinishedSoFar;
+        finished_so_far_ = lFinishedSoFar;
     }
     inline void SetMinimumIncrement(const Amount& lMinIncrement)
     {
-        m_lMinimumIncrement = lMinIncrement;
-        if (m_lMinimumIncrement < 1) { m_lMinimumIncrement = 1; }
+        minimum_increment_ = lMinIncrement;
+        if (minimum_increment_ < 1) { minimum_increment_ = 1; }
     }
     inline void SetScale(const Amount& lScale)
     {
-        m_lScale = lScale;
-        if (m_lScale < 1) { m_lScale = 1; }
+        scale_ = lScale;
+        if (scale_ < 1) { scale_ = 1; }
     }
 
 private:
@@ -239,7 +239,7 @@ private:
 
     using ot_super = Instrument;
 
-    Time m_tDateAddedToMarket;
+    Time date_added_to_market_;
 
     auto isPowerOfTen(const std::int64_t& x) -> bool;
 

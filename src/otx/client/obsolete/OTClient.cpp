@@ -78,11 +78,11 @@ auto OTClient::ProcessUserCommand(
             return -1;
         }
 
-        pAccount->GetIdentifier(theMessage.m_strAcctID);
+        pAccount->GetIdentifier(theMessage.acct_id_);
     }
 
-    theMessage.m_strNymID = String::Factory(nym.ID());
-    theMessage.m_strNotaryID = String::Factory(context.Notary());
+    theMessage.nym_id_ = String::Factory(nym.ID());
+    theMessage.notary_id_ = String::Factory(context.Notary());
     std::int64_t lReturnValue = 0;
 
     switch (requestedCommand) {
@@ -114,12 +114,12 @@ auto OTClient::ProcessUserCommand(
         case MessageType::unregisterNym: {
             // (0) Set up the REQUEST NUMBER and then INCREMENT IT
             lRequestNumber = context.Request();
-            theMessage.m_strRequestNum->Set(
+            theMessage.request_num_->Set(
                 std::to_string(lRequestNumber).c_str());
             context.IncrementRequest();
 
             // (1) set up member variables
-            theMessage.m_strCommand->Set("unregisterNym");
+            theMessage.command_->Set("unregisterNym");
             theMessage.SetAcknowledgments(context);
 
             // (2) Sign the Message
@@ -127,7 +127,7 @@ auto OTClient::ProcessUserCommand(
 
             // (3) Save the Message (with signatures and all, back to its
             // internal
-            // member m_strRawFile.)
+            // member raw_file_.)
             theMessage.SaveContract();
 
             lReturnValue = lRequestNumber;
@@ -136,15 +136,15 @@ auto OTClient::ProcessUserCommand(
         {
             // (0) Set up the REQUEST NUMBER and then INCREMENT IT
             lRequestNumber = context.Request();
-            theMessage.m_strRequestNum->Set(
+            theMessage.request_num_->Set(
                 std::to_string(lRequestNumber).c_str());
             context.IncrementRequest();
 
             // (1) Set up member variables
-            theMessage.m_strCommand = String::Factory("processNymbox");
+            theMessage.command_ = String::Factory("processNymbox");
             theMessage.SetAcknowledgments(context);
             const auto& NYMBOX_HASH = context.LocalNymboxHash();
-            NYMBOX_HASH.GetString(api_.Crypto(), theMessage.m_strNymboxHash);
+            NYMBOX_HASH.GetString(api_.Crypto(), theMessage.nymbox_hash_);
 
             if (!String::Factory(NYMBOX_HASH)->Exists()) {
                 LogError()(OT_PRETTY_CLASS())(
@@ -158,7 +158,7 @@ auto OTClient::ProcessUserCommand(
 
             // (3) Save the Message (with signatures and all, back to its
             // internal
-            // member m_strRawFile.)
+            // member raw_file_.)
             theMessage.SaveContract();
 
             lReturnValue = lRequestNumber;
@@ -171,15 +171,15 @@ auto OTClient::ProcessUserCommand(
         {
             // (0) Set up the REQUEST NUMBER and then INCREMENT IT
             lRequestNumber = context.Request();
-            theMessage.m_strRequestNum->Set(
+            theMessage.request_num_->Set(
                 std::to_string(lRequestNumber).c_str());
             context.IncrementRequest();
 
             // (1) Set up member variables
-            theMessage.m_strCommand = String::Factory("getTransactionNumbers");
+            theMessage.command_ = String::Factory("getTransactionNumbers");
             theMessage.SetAcknowledgments(context);
             const auto& NYMBOX_HASH = context.LocalNymboxHash();
-            NYMBOX_HASH.GetString(api_.Crypto(), theMessage.m_strNymboxHash);
+            NYMBOX_HASH.GetString(api_.Crypto(), theMessage.nymbox_hash_);
 
             if (NYMBOX_HASH.empty()) {
                 LogError()(OT_PRETTY_CLASS())(
@@ -192,7 +192,7 @@ auto OTClient::ProcessUserCommand(
             theMessage.SignContract(nym, reason);
 
             // (3) Save the Message (with signatures and all, back to its
-            // internal member m_strRawFile.)
+            // internal member raw_file_.)
             theMessage.SaveContract();
 
             lReturnValue = lRequestNumber;

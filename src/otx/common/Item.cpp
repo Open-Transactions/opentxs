@@ -48,15 +48,15 @@ namespace opentxs
 // because I'm about to load it.
 Item::Item(const api::Session& api)
     : OTTransactionType(api)
-    , m_ascNote(Armored::Factory())
-    , m_ascAttachment(Armored::Factory())
-    , m_AcctToID()
-    , m_lAmount(0)
-    , m_listItems()
-    , m_Type(itemType::error_state)
-    , m_Status(Item::request)
-    , m_lNewOutboxTransNum(0)
-    , m_lClosingTransactionNo(0)
+    , note_(Armored::Factory())
+    , attachment_(Armored::Factory())
+    , account_to_id_()
+    , amount_(0)
+    , list_items_()
+    , type_(itemType::error_state)
+    , status_(Item::request)
+    , new_outbox_trans_num_(0)
+    , closing_transaction_no_(0)
 {
     InitItem();
 }
@@ -73,15 +73,15 @@ Item::Item(
           theOwner.GetRealNotaryID(),
           theOwner.GetTransactionNum(),
           theOwner.GetOriginType())
-    , m_ascNote(Armored::Factory())
-    , m_ascAttachment(Armored::Factory())
-    , m_AcctToID()
-    , m_lAmount(0)
-    , m_listItems()
-    , m_Type(itemType::error_state)
-    , m_Status(Item::request)
-    , m_lNewOutboxTransNum(0)
-    , m_lClosingTransactionNo(0)
+    , note_(Armored::Factory())
+    , attachment_(Armored::Factory())
+    , account_to_id_()
+    , amount_(0)
+    , list_items_()
+    , type_(itemType::error_state)
+    , status_(Item::request)
+    , new_outbox_trans_num_(0)
+    , closing_transaction_no_(0)
 {
     InitItem();
 }
@@ -98,15 +98,15 @@ Item::Item(
           theOwner.GetRealNotaryID(),
           theOwner.GetTransactionNum(),
           theOwner.GetOriginType())
-    , m_ascNote(Armored::Factory())
-    , m_ascAttachment(Armored::Factory())
-    , m_AcctToID()
-    , m_lAmount(0)
-    , m_listItems()
-    , m_Type(itemType::error_state)
-    , m_Status(Item::request)
-    , m_lNewOutboxTransNum(0)
-    , m_lClosingTransactionNo(0)
+    , note_(Armored::Factory())
+    , attachment_(Armored::Factory())
+    , account_to_id_()
+    , amount_(0)
+    , list_items_()
+    , type_(itemType::error_state)
+    , status_(Item::request)
+    , new_outbox_trans_num_(0)
+    , closing_transaction_no_(0)
 {
     InitItem();
 }
@@ -124,27 +124,27 @@ Item::Item(
           theOwner.GetRealNotaryID(),
           theOwner.GetTransactionNum(),
           theOwner.GetOriginType())
-    , m_ascNote(Armored::Factory())
-    , m_ascAttachment(Armored::Factory())
-    , m_AcctToID()
-    , m_lAmount(0)
-    , m_listItems()
-    , m_Type(itemType::error_state)
-    , m_Status(Item::request)
-    , m_lNewOutboxTransNum(0)
-    , m_lClosingTransactionNo(0)
+    , note_(Armored::Factory())
+    , attachment_(Armored::Factory())
+    , account_to_id_()
+    , amount_(0)
+    , list_items_()
+    , type_(itemType::error_state)
+    , status_(Item::request)
+    , new_outbox_trans_num_(0)
+    , closing_transaction_no_(0)
 {
     InitItem();
 
-    m_Type = theType;  // This has to be below the InitItem() call that appears
-                       // just above
+    type_ = theType;  // This has to be below the InitItem() call that appears
+                      // just above
 
     // Most transactions items don't HAVE a "to" account, just a primary
     // account.
     // (If you deposit, or withdraw, you don't need a "to" account.)
     // But for the ones that do, you can pass the "to" account's ID in
     // as a pointer, and we'll set that too....
-    if (!pDestinationAcctID.empty()) { m_AcctToID = pDestinationAcctID; }
+    if (!pDestinationAcctID.empty()) { account_to_id_ = pDestinationAcctID; }
 }
 
 // Server-side.
@@ -730,7 +730,7 @@ auto Item::VerifyBalanceStatement(
 // destructor.
 void Item::AddItem(std::shared_ptr<Item> theItem)
 {
-    m_listItems.push_back(theItem);
+    list_items_.push_back(theItem);
 }
 
 // While processing a transaction, you may wish to query it for items of a
@@ -739,7 +739,7 @@ auto Item::GetItem(std::int32_t nIndex) -> std::shared_ptr<Item>
 {
     std::int32_t nTempIndex = (-1);
 
-    for (auto& it : m_listItems) {
+    for (auto& it : list_items_) {
         const auto pItem = it;
         OT_ASSERT(false != bool(pItem));
 
@@ -755,7 +755,7 @@ auto Item::GetItem(std::int32_t nIndex) const -> std::shared_ptr<const Item>
 {
     std::int32_t nTempIndex = (-1);
 
-    for (const auto& it : m_listItems) {
+    for (const auto& it : list_items_) {
         const auto pItem = it;
         OT_ASSERT(false != bool(pItem));
 
@@ -771,7 +771,7 @@ auto Item::GetItem(std::int32_t nIndex) const -> std::shared_ptr<const Item>
 auto Item::GetItemByTransactionNum(std::int64_t lTransactionNumber)
     -> std::shared_ptr<Item>
 {
-    for (auto& it : m_listItems) {
+    for (auto& it : list_items_) {
         const auto pItem = it;
         OT_ASSERT(false != bool(pItem));
 
@@ -789,7 +789,7 @@ auto Item::GetItemCountInRefTo(std::int64_t lReference) -> std::int32_t
 {
     std::int32_t nCount = 0;
 
-    for (auto& it : m_listItems) {
+    for (auto& it : list_items_) {
         const auto pItem = it;
         OT_ASSERT(false != bool(pItem));
 
@@ -806,7 +806,7 @@ auto Item::GetItemCountInRefTo(std::int64_t lReference) -> std::int32_t
 auto Item::GetFinalReceiptItemByReferenceNum(std::int64_t lReferenceNumber)
     -> std::shared_ptr<Item>
 {
-    for (auto& it : m_listItems) {
+    for (auto& it : list_items_) {
         const auto pItem = it;
         OT_ASSERT(false != bool(pItem));
 
@@ -821,7 +821,7 @@ auto Item::GetFinalReceiptItemByReferenceNum(std::int64_t lReferenceNumber)
 //
 auto Item::AddBlankNumbersToItem(const NumList& theAddition) -> bool
 {
-    return m_Numlist.Add(theAddition);
+    return numlist_.Add(theAddition);
 }
 
 // Need to know the transaction number of the ORIGINAL transaction? Call this.
@@ -829,7 +829,7 @@ auto Item::AddBlankNumbersToItem(const NumList& theAddition) -> bool
 auto Item::GetNumberOfOrigin() -> std::int64_t
 {
 
-    if (0 == m_lNumberOfOrigin) {
+    if (0 == number_of_origin_) {
         switch (GetType()) {
             case itemType::acceptPending:  // this item is a client-side
                                            // acceptance of a pending transfer
@@ -881,7 +881,7 @@ auto Item::GetNumberOfOrigin() -> std::int64_t
         CalculateNumberOfOrigin();
     }
 
-    return m_lNumberOfOrigin;
+    return number_of_origin_;
 }
 
 // virtual
@@ -1027,27 +1027,27 @@ void Item::CalculateNumberOfOrigin()
 
             OT_ASSERT(false != bool(pOriginalItem));
 
-            if (((m_Type == itemType::atDepositCheque) &&
+            if (((type_ == itemType::atDepositCheque) &&
                  (itemType::depositCheque != pOriginalItem->GetType())) ||
-                ((m_Type == itemType::atAcceptPending) &&
+                ((type_ == itemType::atAcceptPending) &&
                  (itemType::acceptPending != pOriginalItem->GetType())) ||
-                ((m_Type == itemType::atRejectPending) &&
+                ((type_ == itemType::atRejectPending) &&
                  (itemType::rejectPending != pOriginalItem->GetType())) ||
-                ((m_Type == itemType::atAcceptCronReceipt) &&
+                ((type_ == itemType::atAcceptCronReceipt) &&
                  (itemType::acceptCronReceipt != pOriginalItem->GetType())) ||
-                ((m_Type == itemType::atAcceptItemReceipt) &&
+                ((type_ == itemType::atAcceptItemReceipt) &&
                  (itemType::acceptItemReceipt != pOriginalItem->GetType())) ||
-                ((m_Type == itemType::atDisputeCronReceipt) &&
+                ((type_ == itemType::atDisputeCronReceipt) &&
                  (itemType::disputeCronReceipt != pOriginalItem->GetType())) ||
-                ((m_Type == itemType::atDisputeItemReceipt) &&
+                ((type_ == itemType::atDisputeItemReceipt) &&
                  (itemType::disputeItemReceipt != pOriginalItem->GetType())) ||
-                ((m_Type == itemType::atAcceptFinalReceipt) &&
+                ((type_ == itemType::atAcceptFinalReceipt) &&
                  (itemType::acceptFinalReceipt != pOriginalItem->GetType())) ||
-                ((m_Type == itemType::atAcceptBasketReceipt) &&
+                ((type_ == itemType::atAcceptBasketReceipt) &&
                  (itemType::acceptBasketReceipt != pOriginalItem->GetType())) ||
-                ((m_Type == itemType::atDisputeFinalReceipt) &&
+                ((type_ == itemType::atDisputeFinalReceipt) &&
                  (itemType::disputeFinalReceipt != pOriginalItem->GetType())) ||
-                ((m_Type == itemType::atDisputeBasketReceipt) &&
+                ((type_ == itemType::atDisputeBasketReceipt) &&
                  (itemType::disputeBasketReceipt !=
                   pOriginalItem->GetType()))) {
                 auto strType = String::Factory();
@@ -1143,34 +1143,31 @@ void Item::CalculateNumberOfOrigin()
 
 void Item::GetAttachment(String& theStr) const
 {
-    m_ascAttachment->GetString(theStr);
+    attachment_->GetString(theStr);
 }
 
-void Item::GetAttachment(Data& output) const
-{
-    m_ascAttachment->GetData(output);
-}
+void Item::GetAttachment(Data& output) const { attachment_->GetData(output); }
 
 void Item::SetAttachment(const String& theStr)
 {
-    m_ascAttachment->SetString(theStr);
+    attachment_->SetString(theStr);
 }
 
-void Item::SetAttachment(const Data& input) { m_ascAttachment->SetData(input); }
+void Item::SetAttachment(const Data& input) { attachment_->SetData(input); }
 
 void Item::SetNote(const String& theStr)
 {
     if (theStr.Exists() && theStr.GetLength() > 2) {
-        m_ascNote->SetString(theStr);
+        note_->SetString(theStr);
     } else {
-        m_ascNote->Release();
+        note_->Release();
     }
 }
 
 void Item::GetNote(String& theStr) const
 {
-    if (m_ascNote->GetLength() > 2) {
-        m_ascNote->GetString(theStr);
+    if (note_->GetLength() > 2) {
+        note_->GetString(theStr);
     } else {
         theStr.Release();
     }
@@ -1178,23 +1175,23 @@ void Item::GetNote(String& theStr) const
 
 void Item::InitItem()
 {
-    m_lAmount = 0;  // Accounts default to ZERO.  They can only change that
-                    // amount by receiving from another account.
-    m_Type = itemType::error_state;
-    m_Status = request;        // (Unless an issuer account, which can
-                               // create currency
-    m_lNewOutboxTransNum = 0;  // When the user puts a "1" in his outbox for a
-                               // balance agreement (since he doesn't know what
-                               // trans# the actual outbox item
+    amount_ = 0;  // Accounts default to ZERO.  They can only change that
+                  // amount by receiving from another account.
+    type_ = itemType::error_state;
+    status_ = request;          // (Unless an issuer account, which can
+                                // create currency
+    new_outbox_trans_num_ = 0;  // When the user puts a "1" in his outbox for a
+                                // balance agreement (since he doesn't know what
+                                // trans# the actual outbox item
     // will have if the transaction is successful, since the server hasn't
     // issued it yet) then the balance receipt will have 1 in
     // the user's portion for that outbox transaction, and the balance receipt
     // will also have, say, #34 (the actual number) here
     // in this variable, in the server's reply portion of that same receipt.
 
-    m_lClosingTransactionNo = 0;
+    closing_transaction_no_ = 0;
 
-    m_strContractType =
+    contract_type_ =
         String::Factory("TRANSACTION ITEM");  // CONTRACT, MESSAGE, TRANSACTION,
                                               // LEDGER, TRANSACTION ITEM
 }
@@ -1210,13 +1207,13 @@ void Item::Release_Item()
 {
     ReleaseItems();
 
-    m_AcctToID.clear();
-    m_lAmount = 0;
-    m_lNewOutboxTransNum = 0;
-    m_lClosingTransactionNo = 0;
+    account_to_id_.clear();
+    amount_ = 0;
+    new_outbox_trans_num_ = 0;
+    closing_transaction_no_ = 0;
 }
 
-void Item::ReleaseItems() { m_listItems.clear(); }
+void Item::ReleaseItems() { list_items_.clear(); }
 
 auto Item::GetItemTypeFromString(const String& strType) -> itemType
 {
@@ -1392,17 +1389,17 @@ auto Item::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
         strStatus = String::Factory(xml->getAttributeValue("status"));
 
         // Type
-        m_Type = GetItemTypeFromString(strType);  // just above.
+        type_ = GetItemTypeFromString(strType);  // just above.
 
         // Status
         if (strStatus->Compare("request")) {
-            m_Status = request;
+            status_ = request;
         } else if (strStatus->Compare("acknowledgement")) {
-            m_Status = acknowledgement;
+            status_ = acknowledgement;
         } else if (strStatus->Compare("rejection")) {
-            m_Status = rejection;
+            status_ = rejection;
         } else {
-            m_Status = error_status;
+            status_ = error_status;
         }
 
         auto strAcctFromID = String::Factory(), strAcctToID = String::Factory(),
@@ -1419,20 +1416,20 @@ auto Item::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
             String::Factory(xml->getAttributeValue("outboxNewTransNum"));
 
         if (strOutboxNewTransNum->Exists()) {
-            m_lNewOutboxTransNum = strOutboxNewTransNum->ToLong();
+            new_outbox_trans_num_ = strOutboxNewTransNum->ToLong();
         }
 
         // an OTTransaction::blank may now contain 20 or 100 new numbers.
         // Therefore, the Item::acceptTransaction must contain the same list,
         // otherwise you haven't actually SIGNED for the list, have you!
         //
-        if (itemType::acceptTransaction == m_Type) {
+        if (itemType::acceptTransaction == type_) {
             const auto strTotalList =
                 String::Factory(xml->getAttributeValue("totalListOfNumbers"));
-            m_Numlist.Release();
+            numlist_.Release();
 
             if (strTotalList->Exists()) {
-                m_Numlist.Add(strTotalList);  // (Comma-separated list of
+                numlist_.Add(strTotalList);  // (Comma-separated list of
             }
             // numbers now becomes
             // UnallocatedSet<std::int64_t>.)
@@ -1446,14 +1443,15 @@ auto Item::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
             api_.Factory().IdentifierFromBase58(strAcctToID->Bytes());
         auto NYM_ID = api_.Factory().NymIDFromBase58(strNymID->Bytes());
 
-        SetPurportedAccountID(ACCOUNT_ID);  // OTTransactionType::m_AcctID  the
-                                            // PURPORTED Account ID
-        SetPurportedNotaryID(NOTARY_ID);    // OTTransactionType::m_AcctNotaryID
-                                            // the PURPORTED Notary ID
+        SetPurportedAccountID(ACCOUNT_ID);  // OTTransactionType::account_id_
+                                            // the PURPORTED Account ID
+        SetPurportedNotaryID(
+            NOTARY_ID);  // OTTransactionType::account_notary_id_
+                         // the PURPORTED Notary ID
         SetDestinationAcctID(DESTINATION_ACCOUNT);
         SetNymID(NYM_ID);
 
-        if (!m_bLoadSecurely) {
+        if (!load_securely_) {
             SetRealAccountID(ACCOUNT_ID);
             SetRealNotaryID(NOTARY_ID);
         }
@@ -1474,7 +1472,7 @@ auto Item::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
         strTemp = String::Factory(xml->getAttributeValue("inReferenceTo"));
         if (strTemp->Exists()) { SetReferenceToNum(strTemp->ToLong()); }
 
-        m_lAmount = factory::Amount(xml->getAttributeValue("amount"));
+        amount_ = factory::Amount(xml->getAttributeValue("amount"));
 
         LogDebug()(OT_PRETTY_CLASS())(
             "Loaded transaction Item, transaction num ")(GetTransactionNum())(
@@ -1488,7 +1486,7 @@ auto Item::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
 
         return 1;
     } else if (!strcmp("note", xml->getNodeName())) {
-        if (!LoadEncodedTextField(xml, m_ascNote)) {
+        if (!LoadEncodedTextField(xml, note_)) {
             LogError()(OT_PRETTY_CLASS())(
                 "Error in Item::ProcessXMLNode: note field without "
                 "value.")
@@ -1498,7 +1496,7 @@ auto Item::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
 
         return 1;
     } else if (!strcmp("inReferenceTo", xml->getNodeName())) {
-        if (false == LoadEncodedTextField(xml, m_ascInReferenceTo)) {
+        if (false == LoadEncodedTextField(xml, in_reference_to_)) {
             LogError()(OT_PRETTY_CLASS())(
                 "Error in Item::ProcessXMLNode: inReferenceTo field "
                 "without value.")
@@ -1508,7 +1506,7 @@ auto Item::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
 
         return 1;
     } else if (!strcmp("attachment", xml->getNodeName())) {
-        if (!LoadEncodedTextField(xml, m_ascAttachment)) {
+        if (!LoadEncodedTextField(xml, attachment_)) {
             LogError()(OT_PRETTY_CLASS())(
                 "Error in Item::ProcessXMLNode: attachment field "
                 "without value.")
@@ -1518,8 +1516,8 @@ auto Item::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
 
         return 1;
     } else if (!strcmp("transactionReport", xml->getNodeName())) {
-        if ((itemType::balanceStatement == m_Type) ||
-            (itemType::atBalanceStatement == m_Type)) {
+        if ((itemType::balanceStatement == type_) ||
+            (itemType::atBalanceStatement == type_)) {
             // Notice it initializes with the wrong transaction number, in this
             // case.
             // That's okay, because I'm setting it below with
@@ -1574,11 +1572,11 @@ auto Item::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
                 api_.Factory().NymIDFromBase58(strNymID->Bytes());
 
             pItem->SetPurportedAccountID(
-                ACCOUNT_ID);  // OTTransactionType::m_AcctID
+                ACCOUNT_ID);  // OTTransactionType::account_id_
                               // the PURPORTED Account
                               // ID
             pItem->SetPurportedNotaryID(
-                NOTARY_ID);  // OTTransactionType::m_AcctNotaryID
+                NOTARY_ID);  // OTTransactionType::account_notary_id_
                              // the PURPORTED Notary ID
             pItem->SetNymID(NYM_ID);
 
@@ -1636,12 +1634,12 @@ auto Item::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
 // Used in balance agreement, part of the inbox report.
 auto Item::GetClosingNum() const -> std::int64_t
 {
-    return m_lClosingTransactionNo;
+    return closing_transaction_no_;
 }
 
 void Item::SetClosingNum(std::int64_t lClosingNum)
 {
-    m_lClosingTransactionNo = lClosingNum;
+    closing_transaction_no_ = lClosingNum;
 }
 
 void Item::GetStringFromType(itemType theType, String& strType)
@@ -1879,9 +1877,9 @@ void Item::UpdateContents(const PasswordPrompt& reason)  // Before transmission
          strType = String::Factory(), strStatus = String::Factory(),
          strNymID = String::Factory(GetNymID());
 
-    GetStringFromType(m_Type, strType);
+    GetStringFromType(type_, strType);
 
-    switch (m_Status) {
+    switch (status_) {
         case request: {
             strStatus->Set("request");
         } break;
@@ -1898,7 +1896,7 @@ void Item::UpdateContents(const PasswordPrompt& reason)  // Before transmission
     }
 
     // I release this because I'm about to repopulate it.
-    m_xmlUnsigned->Release();
+    xml_unsigned_->Release();
 
     Tag tag("item");
 
@@ -1921,7 +1919,7 @@ void Item::UpdateContents(const PasswordPrompt& reason)  // Before transmission
     tag.add_attribute("inReferenceTo", std::to_string(GetReferenceToNum()));
     tag.add_attribute("amount", [&] {
         auto buf = UnallocatedCString{};
-        m_lAmount.Serialize(writer(buf));
+        amount_.Serialize(writer(buf));
         return buf;
     }());
 
@@ -1937,42 +1935,41 @@ void Item::UpdateContents(const PasswordPrompt& reason)  // Before transmission
     // number to verify when he is
     // verifying the outbox against the
     // last signed receipt.
-    if (m_lNewOutboxTransNum > 0) {
+    if (new_outbox_trans_num_ > 0) {
         tag.add_attribute(
-            "outboxNewTransNum", std::to_string(m_lNewOutboxTransNum));
+            "outboxNewTransNum", std::to_string(new_outbox_trans_num_));
     } else {
         // IF this item is "acceptTransaction" then this
         // will serialize the list of transaction numbers
         // being accepted. (They now support multiple
         // numbers.)
-        if ((itemType::acceptTransaction == m_Type) &&
-            (m_Numlist.Count() > 0)) {
-            // m_Numlist.Count is always 0, except for
+        if ((itemType::acceptTransaction == type_) && (numlist_.Count() > 0)) {
+            // numlist_.Count is always 0, except for
             // itemType::acceptTransaction.
             auto strListOfBlanks = String::Factory();
 
-            if (true == m_Numlist.Output(strListOfBlanks)) {
+            if (true == numlist_.Output(strListOfBlanks)) {
                 tag.add_attribute("totalListOfNumbers", strListOfBlanks->Get());
             }
         }
     }
 
-    if (m_ascNote->GetLength() > 2) { tag.add_tag("note", m_ascNote->Get()); }
+    if (note_->GetLength() > 2) { tag.add_tag("note", note_->Get()); }
 
-    if (m_ascInReferenceTo->GetLength() > 2) {
-        tag.add_tag("inReferenceTo", m_ascInReferenceTo->Get());
+    if (in_reference_to_->GetLength() > 2) {
+        tag.add_tag("inReferenceTo", in_reference_to_->Get());
     }
 
-    if (m_ascAttachment->GetLength() > 2) {
-        tag.add_tag("attachment", m_ascAttachment->Get());
+    if (attachment_->GetLength() > 2) {
+        tag.add_tag("attachment", attachment_->Get());
     }
 
-    if ((itemType::balanceStatement == m_Type) ||
-        (itemType::atBalanceStatement == m_Type)) {
+    if ((itemType::balanceStatement == type_) ||
+        (itemType::atBalanceStatement == type_)) {
 
         // loop through the sub-items (only used for balance agreement.)
         //
-        for (auto& it : m_listItems) {
+        for (auto& it : list_items_) {
             const auto pItem = it;
             OT_ASSERT(false != bool(pItem));
 
@@ -2020,7 +2017,7 @@ void Item::UpdateContents(const PasswordPrompt& reason)  // Before transmission
     UnallocatedCString str_result;
     tag.output(str_result);
 
-    m_xmlUnsigned->Concatenate(String::Factory(str_result));
+    xml_unsigned_->Concatenate(String::Factory(str_result));
 }
 
 Item::~Item() { Release_Item(); }

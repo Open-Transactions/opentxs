@@ -44,13 +44,13 @@ PayDividendVisitor::PayDividendVisitor(
     const Amount& lPayoutPerShare)
     : AccountVisitor(server.API().Wallet(), theNotaryID)
     , server_(server)
-    , nymId_(theNymID)
-    , payoutUnitTypeId_(thePayoutUnitTypeId)
-    , voucherAcctId_(theVoucherAcctID)
-    , m_pstrMemo(String::Factory(strMemo.Get()))
-    , m_lPayoutPerShare(lPayoutPerShare)
-    , m_lAmountPaidOut(0)
-    , m_lAmountReturned(0)
+    , nym_id_(theNymID)
+    , payout_unit_type_id_(thePayoutUnitTypeId)
+    , voucher_acct_id_(theVoucherAcctID)
+    , memo_(String::Factory(strMemo.Get()))
+    , payout_per_share_(lPayoutPerShare)
+    , amount_paid_out_(0)
+    , amount_returned_(0)
 {
 }
 
@@ -184,10 +184,10 @@ auto PayDividendVisitor::Trigger(
                 "payDividend");    // todo: hardcoding.
             bReturnValue = bSent;  // <======= RETURN VALUE.
             if (bSent) {
-                m_lAmountPaidOut +=
+                amount_paid_out_ +=
                     lPayoutAmount;  // At the end of iterating all accounts, if
             }
-            // m_lAmountPaidOut is less than
+            // amount_PaidOut is less than
             // lTotalPayoutAmount, then we return to rest
             // to the sender.
         } else {
@@ -258,10 +258,10 @@ auto PayDividendVisitor::Trigger(
                     *theReturnPayment,
                     "payDividend");  // todo: hardcoding.
                 if (bSent) {
-                    m_lAmountReturned +=
+                    amount_returned_ +=
                         lPayoutAmount;  // At the end of iterating all accounts,
                 }
-                // if m_lAmountPaidOut+m_lAmountReturned
+                // if amount_PaidOut+amount_returned_
                 // is less than lTotalPayoutAmount, then
                 // we return the rest to the sender.
             } else {
@@ -301,9 +301,9 @@ auto PayDividendVisitor::Trigger(
 PayDividendVisitor::~PayDividendVisitor()
 {
 
-    m_pstrMemo = String::Factory();
-    m_lPayoutPerShare = 0;
-    m_lAmountPaidOut = 0;
-    m_lAmountReturned = 0;
+    memo_ = String::Factory();
+    payout_per_share_ = 0;
+    amount_paid_out_ = 0;
+    amount_returned_ = 0;
 }
 }  // namespace opentxs

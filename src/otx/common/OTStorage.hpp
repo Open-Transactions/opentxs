@@ -260,11 +260,11 @@ class Storable
 {
 protected:
     Storable()
-        : m_Type("Storable")
+        : type_("Storable")
     {
     }
 
-    UnallocatedCString m_Type;
+    UnallocatedCString type_;
 
 public:
     virtual ~Storable() = default;
@@ -367,24 +367,24 @@ public:
 class Storage
 {
 private:
-    OTPacker* m_pPacker{nullptr};
+    OTPacker* packer_{nullptr};
 
 protected:
     Storage()
-        : m_pPacker(nullptr)
+        : packer_(nullptr)
     {
     }
 
     Storage(const Storage&)
-        : m_pPacker(nullptr)
+        : packer_(nullptr)
     {
     }  // We don't want to copy the pointer. Let it create its own.
 
     // This is called once, in the factory.
     void SetPacker(OTPacker& thePacker)
     {
-        OT_ASSERT(nullptr == m_pPacker);
-        m_pPacker = &thePacker;
+        OT_ASSERT(nullptr == packer_);
+        packer_ = &thePacker;
     }
 
     // OVERRIDABLES
@@ -486,8 +486,8 @@ public:
 
     virtual ~Storage()
     {
-        if (nullptr != m_pPacker) { delete m_pPacker; }
-        m_pPacker = nullptr;
+        if (nullptr != packer_) { delete packer_; }
+        packer_ = nullptr;
     }
 
     // Store/Retrieve a string.
@@ -734,21 +734,21 @@ class OTDBString : public Storable
 protected:
     OTDBString()
         : Storable()
-        , m_string()
+        , string_()
     {
-        m_Type = "OTDBString";
+        type_ = "OTDBString";
     }
     OTDBString(const UnallocatedCString& rhs)
         : Storable()
-        , m_string(rhs)
+        , string_(rhs)
     {
-        m_Type = "OTDBString";
+        type_ = "OTDBString";
     }
 
 public:
     ~OTDBString() override = default;
 
-    UnallocatedCString m_string;
+    UnallocatedCString string_;
 
     DEFINE_OT_DYNAMIC_CAST(OTDBString)
 };
@@ -761,15 +761,15 @@ class Blob : public Storable
 protected:
     Blob()
         : Storable()
-        , m_memBuffer()
+        , mem_buffer_()
     {
-        m_Type = "Blob";
+        type_ = "Blob";
     }
 
 public:
     ~Blob() override = default;
 
-    UnallocatedVector<std::uint8_t> m_memBuffer;  // Where the actual binary
+    UnallocatedVector<std::uint8_t> mem_buffer_;  // Where the actual binary
                                                   // data is stored, before
                                                   // packing.
 
@@ -786,30 +786,30 @@ class StringMap : public Storable
 protected:
     StringMap()
         : Storable()
-        , the_map()
+        , the_map_()
     {
-        m_Type = "StringMap";
+        type_ = "StringMap";
     }
 
 public:
     ~StringMap() override = default;
 
-    UnallocatedMap<UnallocatedCString, UnallocatedCString> the_map;
+    UnallocatedMap<UnallocatedCString, UnallocatedCString> the_map_;
 
     void SetValue(
         const UnallocatedCString& strKey,
         const UnallocatedCString& strValue)
     {
-        auto ii = the_map.find(strKey);
-        if (ii != the_map.end()) { the_map.erase(ii); }
-        the_map[strKey] = strValue;
+        auto ii = the_map_.find(strKey);
+        if (ii != the_map_.end()) { the_map_.erase(ii); }
+        the_map_[strKey] = strValue;
     }
 
     auto GetValue(const UnallocatedCString& strKey) -> UnallocatedCString
     {
         UnallocatedCString ret_val("");
-        auto ii = the_map.find(strKey);
-        if (ii != the_map.end()) { ret_val = (*ii).second; }
+        auto ii = the_map_.find(strKey);
+        if (ii != the_map_.end()) { ret_val = (*ii).second; }
         return ret_val;
     }
 
@@ -824,15 +824,15 @@ class Displayable : public Storable
 protected:
     Displayable()
         : Storable()
-        , gui_label()
+        , gui_label_()
     {
-        m_Type = "Displayable";
+        type_ = "Displayable";
     }
 
 public:
     ~Displayable() override = default;
 
-    UnallocatedCString gui_label;  // The label that appears in the GUI
+    UnallocatedCString gui_label_;  // The label that appears in the GUI
 
     DEFINE_OT_DYNAMIC_CAST(Displayable)
 };
@@ -845,72 +845,73 @@ class MarketData : public Displayable
 protected:
     MarketData()
         : Displayable()
-        , notary_id()
-        , market_id()
-        , instrument_definition_id()
-        , currency_type_id()
-        , scale("0")
-        , total_assets("0")
-        , number_bids("0")
-        , number_asks()
-        , last_sale_price("0")
-        , current_bid("0")
-        , current_ask("0")
-        , volume_trades("0")
-        , volume_assets("0")
-        , volume_currency("0")
-        , recent_highest_bid("0")
-        , recent_lowest_ask("0")
-        , last_sale_date("0")
+        , notary_id_()
+        , market_id_()
+        , instrument_definition_id_()
+        , currency_type_id_()
+        , scale_("0")
+        , total_assets_("0")
+        , number_bids_("0")
+        , number_asks_()
+        , last_sale_price_("0")
+        , current_bid_("0")
+        , current_ask_("0")
+        , volume_trades_("0")
+        , volume_assets_("0")
+        , volume_currency_("0")
+        , recent_highest_bid_("0")
+        , recent_lowest_ask_("0")
+        , last_sale_date_("0")
     {
-        m_Type = "MarketData";
+        type_ = "MarketData";
     }
 
 public:
     ~MarketData() override = default;
 
-    using Displayable::gui_label;  // The label that appears in the GUI
+    using Displayable::gui_label_;  // The label that appears in the GUI
 
-    UnallocatedCString notary_id;
-    UnallocatedCString market_id;
+    UnallocatedCString notary_id_;
+    UnallocatedCString market_id_;
 
-    UnallocatedCString instrument_definition_id;
-    UnallocatedCString currency_type_id;
+    UnallocatedCString instrument_definition_id_;
+    UnallocatedCString currency_type_id_;
 
-    UnallocatedCString scale;  // the Market scale. (A trade in any particular
-                               // asset is measured in X units of SCALE.)
+    UnallocatedCString scale_;  // the Market scale. (A trade in any particular
+                                // asset is measured in X units of SCALE.)
     // IOW, if the scale is 5000 on the gold market, that means "3 units" is
     // 15000 gold
 
-    UnallocatedCString total_assets;  // total amount of assets available on
-                                      // market for purchase.
+    UnallocatedCString total_assets_;  // total amount of assets available on
+                                       // market for purchase.
 
-    UnallocatedCString number_bids;  // number of bids that are currently on the
-                                     // market.
-    UnallocatedCString number_asks;  // number of asks that are currently on the
-                                     // market.
+    UnallocatedCString number_bids_;  // number of bids that are currently on
+                                      // the market.
+    UnallocatedCString number_asks_;  // number of asks that are currently on
+                                      // the market.
 
-    UnallocatedCString last_sale_price;  // The price at which the most recent
-                                         // trade occurred on this market.
-    UnallocatedCString current_bid;  // The highest bid currently on the market.
-    UnallocatedCString current_ask;  // The lowest ask price currently available
-                                     // on the market.
+    UnallocatedCString last_sale_price_;  // The price at which the most recent
+                                          // trade occurred on this market.
+    UnallocatedCString current_bid_;      // The highest bid currently on the
+                                          // market.
+    UnallocatedCString current_ask_;      // The lowest ask price currently
+                                          // available on the market.
 
-    UnallocatedCString volume_trades;  // 24-hour period, number of trades.
+    UnallocatedCString volume_trades_;  // 24-hour period, number of trades.
 
-    UnallocatedCString volume_assets;    // 24-hour volume, amount of assets
-                                         // traded.
-    UnallocatedCString volume_currency;  // 24-hour volume, amount of currency
-                                         // paid for assets traded.
+    UnallocatedCString volume_assets_;    // 24-hour volume, amount of assets
+                                          // traded.
+    UnallocatedCString volume_currency_;  // 24-hour volume, amount of currency
+                                          // paid for assets traded.
 
-    UnallocatedCString recent_highest_bid;  // in a 24hour period, the highest
-                                            // bid to hit the market.
-    UnallocatedCString recent_lowest_ask;  // in a 24hour period, the lowest ask
-                                           // to hit the market.
+    UnallocatedCString recent_highest_bid_;  // in a 24hour period, the highest
+                                             // bid to hit the market.
+    UnallocatedCString recent_lowest_ask_;   // in a 24hour period, the lowest
+                                             // ask to hit the market.
 
-    UnallocatedCString last_sale_date;  // (NEW FIELD) The date on which the
-                                        // most recent trade occurred on this
-                                        // market.
+    UnallocatedCString last_sale_date_;  // (NEW FIELD) The date on which the
+                                         // most recent trade occurred on this
+                                         // market.
 
     DEFINE_OT_DYNAMIC_CAST(MarketData)
 };
@@ -925,7 +926,7 @@ protected:
         : Storable()
         , list_MarketDatas()
     {
-        m_Type = "MarketList";
+        type_ = "MarketList";
     }
 
 public:
@@ -944,23 +945,23 @@ class OfferDataMarket : public Displayable
 protected:
     OfferDataMarket()
         : Displayable()
-        , transaction_id("0")
-        , price_per_scale("1")
-        , available_assets("0")
-        , minimum_increment("1")
-        , date("0")
+        , transaction_id_("0")
+        , price_per_scale_("1")
+        , available_assets_("0")
+        , minimum_increment_("1")
+        , date_("0")
     {
-        m_Type = "OfferDataMarket";
+        type_ = "OfferDataMarket";
     }
 
 public:
     ~OfferDataMarket() override = default;
 
-    using Displayable::gui_label;  // The label that appears in the GUI
+    using Displayable::gui_label_;  // The label that appears in the GUI
 
-    UnallocatedCString transaction_id;
-    UnallocatedCString price_per_scale;
-    UnallocatedCString available_assets;
+    UnallocatedCString transaction_id_;
+    UnallocatedCString price_per_scale_;
+    UnallocatedCString available_assets_;
 
     // Each sale or purchase against (total_assets - finished_so_far) must be in
     // minimum increments.
@@ -970,10 +971,10 @@ public:
     // or greater. CANNOT be zero. Enforce this at class level. You cannot sell
     // something in minimum increments of 0.)
 
-    UnallocatedCString minimum_increment;
+    UnallocatedCString minimum_increment_;
 
-    UnallocatedCString date;  // (NEW FIELD) The date this offer was added to
-                              // the market.
+    UnallocatedCString date_;  // (NEW FIELD) The date this offer was added to
+                               // the market.
 
     DEFINE_OT_DYNAMIC_CAST(OfferDataMarket)
 };
@@ -987,19 +988,19 @@ protected:
     BidData()
         : OfferDataMarket()
     {
-        m_Type = "BidData";
+        type_ = "BidData";
     }
 
 public:
     ~BidData() override = default;
 
-    using Displayable::gui_label;  // The label that appears in the GUI
+    using Displayable::gui_label_;  // The label that appears in the GUI
 
-    using OfferDataMarket::available_assets;
-    using OfferDataMarket::date;
-    using OfferDataMarket::minimum_increment;
-    using OfferDataMarket::price_per_scale;
-    using OfferDataMarket::transaction_id;
+    using OfferDataMarket::available_assets_;
+    using OfferDataMarket::date_;
+    using OfferDataMarket::minimum_increment_;
+    using OfferDataMarket::price_per_scale_;
+    using OfferDataMarket::transaction_id_;
 
     DEFINE_OT_DYNAMIC_CAST(BidData)
 };
@@ -1013,19 +1014,19 @@ protected:
     AskData()
         : OfferDataMarket()
     {
-        m_Type = "AskData";
+        type_ = "AskData";
     }
 
 public:
     ~AskData() override = default;
 
-    using Displayable::gui_label;  // The label that appears in the GUI
+    using Displayable::gui_label_;  // The label that appears in the GUI
 
-    using OfferDataMarket::available_assets;
-    using OfferDataMarket::date;
-    using OfferDataMarket::minimum_increment;
-    using OfferDataMarket::price_per_scale;
-    using OfferDataMarket::transaction_id;
+    using OfferDataMarket::available_assets_;
+    using OfferDataMarket::date_;
+    using OfferDataMarket::minimum_increment_;
+    using OfferDataMarket::price_per_scale_;
+    using OfferDataMarket::transaction_id_;
 
     DEFINE_OT_DYNAMIC_CAST(AskData)
 };
@@ -1041,7 +1042,7 @@ protected:
         , list_BidDatas()
         , list_AskDatas()
     {
-        m_Type = "OfferListMarket";
+        type_ = "OfferListMarket";
     }
 
 public:
@@ -1061,23 +1062,23 @@ class TradeDataMarket : public Displayable
 protected:
     TradeDataMarket()
         : Displayable()
-        , transaction_id("0")
-        , date("0")
-        , price("0")
-        , amount_sold("0")
+        , transaction_id_("0")
+        , date_("0")
+        , price_("0")
+        , amount_sold_("0")
     {
-        m_Type = "TradeDataMarket";
+        type_ = "TradeDataMarket";
     }
 
 public:
     ~TradeDataMarket() override = default;
 
-    using Displayable::gui_label;  // The label that appears in the GUI
+    using Displayable::gui_label_;  // The label that appears in the GUI
 
-    UnallocatedCString transaction_id;  // (transaction number for this trade.)
-    UnallocatedCString date;            // (The date of this trade's execution)
-    UnallocatedCString price;           // (The price this trade executed at.)
-    UnallocatedCString amount_sold;  // (Amount of asset sold for that price.)
+    UnallocatedCString transaction_id_;  // (transaction number for this trade.)
+    UnallocatedCString date_;            // (The date of this trade's execution)
+    UnallocatedCString price_;           // (The price this trade executed at.)
+    UnallocatedCString amount_sold_;  // (Amount of asset sold for that price.)
 
     DEFINE_OT_DYNAMIC_CAST(TradeDataMarket)
 };
@@ -1092,7 +1093,7 @@ protected:
         : Storable()
         , list_TradeDataMarkets()
     {
-        m_Type = "TradeListMarket";
+        type_ = "TradeListMarket";
     }
 
 public:
@@ -1111,53 +1112,53 @@ class OfferDataNym : public Displayable
 protected:
     OfferDataNym()
         : Displayable()
-        , valid_from("0")
-        , valid_to("0")
-        , notary_id()
-        , instrument_definition_id()
-        , asset_acct_id()
-        , currency_type_id()
-        , currency_acct_id()
-        , selling(false)
-        , scale("1")
-        , price_per_scale("1")
-        , transaction_id("0")
-        , total_assets("1")
-        , finished_so_far("0")
-        , minimum_increment("1")
-        , stop_sign()
-        , stop_price("0")
-        , date("0")
+        , valid_from_("0")
+        , valid_to_("0")
+        , notary_id_()
+        , instrument_definition_id_()
+        , asset_acct_id_()
+        , currency_type_id_()
+        , currency_acct_id_()
+        , selling_(false)
+        , scale_("1")
+        , price_per_scale_("1")
+        , transaction_id_("0")
+        , total_assets_("1")
+        , finished_so_far_("0")
+        , minimum_increment_("1")
+        , stop_sign_()
+        , stop_price_("0")
+        , date_("0")
     {
-        m_Type = "OfferDataNym";
+        type_ = "OfferDataNym";
     }
 
 public:
     ~OfferDataNym() override = default;
 
-    using Displayable::gui_label;  // The label that appears in the GUI
+    using Displayable::gui_label_;  // The label that appears in the GUI
 
-    UnallocatedCString valid_from;
-    UnallocatedCString valid_to;
+    UnallocatedCString valid_from_;
+    UnallocatedCString valid_to_;
 
-    UnallocatedCString notary_id;
-    UnallocatedCString instrument_definition_id;  // the instrument definition
-                                                  // on offer.
-    UnallocatedCString asset_acct_id;     // the account where the asset is.
-    UnallocatedCString currency_type_id;  // the currency being used to purchase
-                                          // the asset.
-    UnallocatedCString currency_acct_id;  // the account where currency is.
+    UnallocatedCString notary_id_;
+    UnallocatedCString instrument_definition_id_;  // the instrument definition
+                                                   // on offer.
+    UnallocatedCString asset_acct_id_;     // the account where the asset is.
+    UnallocatedCString currency_type_id_;  // the currency being used to
+                                           // purchase the asset.
+    UnallocatedCString currency_acct_id_;  // the account where currency is.
 
-    bool selling;  // true for ask, false for bid.
+    bool selling_;  // true for ask, false for bid.
 
-    UnallocatedCString scale;  // 1oz market? 100oz market? 10,000oz market?
-                               // This determines size and granularity.
-    UnallocatedCString price_per_scale;
+    UnallocatedCString scale_;  // 1oz market? 100oz market? 10,000oz market?
+                                // This determines size and granularity.
+    UnallocatedCString price_per_scale_;
 
-    UnallocatedCString transaction_id;
+    UnallocatedCString transaction_id_;
 
-    UnallocatedCString total_assets;
-    UnallocatedCString finished_so_far;
+    UnallocatedCString total_assets_;
+    UnallocatedCString finished_so_far_;
 
     // Each sale or purchase against (total_assets - finished_so_far) must be in
     // minimum increments.
@@ -1167,17 +1168,18 @@ public:
     // or greater. CANNOT be zero. Enforce this at class level. You cannot sell
     // something in minimum increments of 0.)
 
-    UnallocatedCString minimum_increment;
+    UnallocatedCString minimum_increment_;
 
-    UnallocatedCString stop_sign;  // If this is a stop order, this will contain
-                                   // '<' or
-                                   // '>'.
-    UnallocatedCString stop_price;  // The price at which the stop order
-                                    // activates (less than X or greater than X,
-                                    // based on sign.)
+    UnallocatedCString stop_sign_;   // If this is a stop order, this will
+                                     // contain
+                                     // '<' or
+                                     // '>'.
+    UnallocatedCString stop_price_;  // The price at which the stop order
+                                     // activates (less than X or greater than
+                                     // X, based on sign.)
 
-    UnallocatedCString date;  // (NEW FIELD) The date on which this offer was
-                              // added to the market.
+    UnallocatedCString date_;  // (NEW FIELD) The date on which this offer was
+                               // added to the market.
 
     DEFINE_OT_DYNAMIC_CAST(OfferDataNym)
 };
@@ -1192,7 +1194,7 @@ protected:
         : Storable()
         , list_OfferDataNyms()
     {
-        m_Type = "OfferListNym";
+        type_ = "OfferListNym";
     }
 
 public:
@@ -1211,64 +1213,64 @@ class TradeDataNym : public Displayable
 protected:
     TradeDataNym()
         : Displayable()
-        , transaction_id("0")
-        , completed_count("0")
-        , date("0")
-        , price("0")
-        , amount_sold("0")
-        , updated_id("0")
-        , offer_price("0")
-        , finished_so_far("0")
-        , instrument_definition_id()
-        , currency_id()
-        , currency_paid("0")
-        , asset_acct_id()
-        , currency_acct_id()
-        , scale("1")
-        , is_bid(true)
-        , asset_receipt()
-        , currency_receipt()
-        , final_receipt()
+        , transaction_id_("0")
+        , completed_count_("0")
+        , date_("0")
+        , price_("0")
+        , amount_sold_("0")
+        , updated_id_("0")
+        , offer_price_("0")
+        , finished_so_far_("0")
+        , instrument_definition_id_()
+        , currency_id_()
+        , currency_paid_("0")
+        , asset_acct_id_()
+        , currency_acct_id_()
+        , scale_("1")
+        , is_bid_(true)
+        , asset_receipt_()
+        , currency_receipt_()
+        , final_receipt_()
     {
-        m_Type = "TradeDataNym";
+        type_ = "TradeDataNym";
     }
 
 public:
     ~TradeDataNym() override = default;
 
-    using Displayable::gui_label;  // The label that appears in the GUI
+    using Displayable::gui_label_;  // The label that appears in the GUI
 
-    UnallocatedCString transaction_id;  // (transaction number for original
-                                        // offer.)
+    UnallocatedCString transaction_id_;  // (transaction number for original
+                                         // offer.)
 
-    UnallocatedCString completed_count;  // (How many trades have processed for
-                                         // the associated offer? We keep count
-                                         // for each trade.)
-    UnallocatedCString date;             // (The date of this trade's execution)
-    UnallocatedCString price;            // (The price this trade executed at.)
-    UnallocatedCString amount_sold;  // (Amount of asset sold for that price.)
-    UnallocatedCString updated_id;   // NEW FIELD (Transaction ID for trade
-                                     // receipt.)
-    UnallocatedCString offer_price;  // NEW FIELD (price limit on the original
-                                     // offer.)
-    UnallocatedCString finished_so_far;  // NEW FIELD (total amount sold across
-                                         // all trades.)
-    UnallocatedCString instrument_definition_id;  // NEW FIELD instrument
-                                                  // definition id for trade
-    UnallocatedCString currency_id;    // NEW FIELD currency ID for trade
-    UnallocatedCString currency_paid;  // NEW FIELD currency paid for trade
+    UnallocatedCString completed_count_;  // (How many trades have processed for
+                                          // the associated offer? We keep count
+                                          // for each trade.)
+    UnallocatedCString date_;         // (The date of this trade's execution)
+    UnallocatedCString price_;        // (The price this trade executed at.)
+    UnallocatedCString amount_sold_;  // (Amount of asset sold for that price.)
+    UnallocatedCString updated_id_;   // NEW FIELD (Transaction ID for trade
+                                      // receipt.)
+    UnallocatedCString offer_price_;  // NEW FIELD (price limit on the original
+                                      // offer.)
+    UnallocatedCString finished_so_far_;  // NEW FIELD (total amount sold across
+                                          // all trades.)
+    UnallocatedCString instrument_definition_id_;  // NEW FIELD instrument
+                                                   // definition id for trade
+    UnallocatedCString currency_id_;    // NEW FIELD currency ID for trade
+    UnallocatedCString currency_paid_;  // NEW FIELD currency paid for trade
 
-    UnallocatedCString asset_acct_id;
-    UnallocatedCString currency_acct_id;
+    UnallocatedCString asset_acct_id_;
+    UnallocatedCString currency_acct_id_;
 
-    UnallocatedCString scale;
-    bool is_bid;
+    UnallocatedCString scale_;
+    bool is_bid_;
 
-    UnallocatedCString asset_receipt;  // FYI TradeDataNym is used on the client
-                                       // side.
-    UnallocatedCString currency_receipt;  // These variables are set on the
-                                          // client side.
-    UnallocatedCString final_receipt;
+    UnallocatedCString asset_receipt_;     // FYI TradeDataNym is used on the
+                                           // client side.
+    UnallocatedCString currency_receipt_;  // These variables are set on the
+                                           // client side.
+    UnallocatedCString final_receipt_;
 
     DEFINE_OT_DYNAMIC_CAST(TradeDataNym)
 };
@@ -1283,7 +1285,7 @@ protected:
         : Storable()
         , list_TradeDataNyms()
     {
-        m_Type = "TradeListNym";
+        type_ = "TradeListNym";
     }
 
 public:
@@ -1304,19 +1306,19 @@ class Acct : public Displayable
 protected:
     Acct()
         : Displayable()
-        , acct_id()
-        , notary_id()
+        , acct_id_()
+        , notary_id_()
     {
-        m_Type = "Acct";
+        type_ = "Acct";
     }
 
 public:
     ~Acct() override = default;
 
-    using Displayable::gui_label;  // The label that appears in the GUI
+    using Displayable::gui_label_;  // The label that appears in the GUI
 
-    UnallocatedCString acct_id;
-    UnallocatedCString notary_id;
+    UnallocatedCString acct_id_;
+    UnallocatedCString notary_id_;
 
     DEFINE_OT_DYNAMIC_CAST(Acct)
 };
@@ -1329,20 +1331,20 @@ class BitcoinAcct : public Acct
 protected:
     BitcoinAcct()
         : Acct()
-        , bitcoin_acct_name()
+        , bitcoin_acct_name_()
     {
-        m_Type = "BitcoinAcct";
+        type_ = "BitcoinAcct";
     }
 
 public:
     ~BitcoinAcct() override = default;
 
-    using Displayable::gui_label;  // The label that appears in the GUI
+    using Displayable::gui_label_;  // The label that appears in the GUI
 
-    using Acct::acct_id;
-    using Acct::notary_id;
+    using Acct::acct_id_;
+    using Acct::notary_id_;
 
-    UnallocatedCString bitcoin_acct_name;
+    UnallocatedCString bitcoin_acct_name_;
 
     DEFINE_OT_DYNAMIC_CAST(BitcoinAcct)
 };
@@ -1357,19 +1359,19 @@ class ServerInfo : public Displayable
 protected:
     ServerInfo()
         : Displayable()
-        , notary_id()
-        , server_type()
+        , notary_id_()
+        , server_type_()
     {
-        m_Type = "ServerInfo";
+        type_ = "ServerInfo";
     }
 
 public:
     ~ServerInfo() override = default;
 
-    using Displayable::gui_label;  // The label that appears in the GUI
+    using Displayable::gui_label_;  // The label that appears in the GUI
 
-    UnallocatedCString notary_id;
-    UnallocatedCString server_type;
+    UnallocatedCString notary_id_;
+    UnallocatedCString server_type_;
 
     DEFINE_OT_DYNAMIC_CAST(ServerInfo)
 };
@@ -1382,22 +1384,22 @@ class Server : public ServerInfo
 protected:
     Server()
         : ServerInfo()
-        , server_host()
-        , server_port()
+        , server_host_()
+        , server_port_()
     {
-        m_Type = "Server";
+        type_ = "Server";
     }
 
 public:
     ~Server() override = default;
 
-    using Displayable::gui_label;  // The label that appears in the GUI
+    using Displayable::gui_label_;  // The label that appears in the GUI
 
-    using ServerInfo::notary_id;    // in base class
-    using ServerInfo::server_type;  // in base class
+    using ServerInfo::notary_id_;    // in base class
+    using ServerInfo::server_type_;  // in base class
 
-    UnallocatedCString server_host;
-    UnallocatedCString server_port;
+    UnallocatedCString server_host_;
+    UnallocatedCString server_port_;
 
     DEFINE_OT_DYNAMIC_CAST(Server)
 };
@@ -1410,25 +1412,25 @@ class BitcoinServer : public Server
 protected:
     BitcoinServer()
         : Server()
-        , bitcoin_username()
-        , bitcoin_password()
+        , bitcoin_username_()
+        , bitcoin_password_()
     {
-        m_Type = "BitcoinServer";
+        type_ = "BitcoinServer";
     }
 
 public:
     ~BitcoinServer() override = default;
 
-    using Displayable::gui_label;  // The label that appears in the GUI
+    using Displayable::gui_label_;  // The label that appears in the GUI
 
-    using ServerInfo::notary_id;    // in base class
-    using ServerInfo::server_type;  // in base class
+    using ServerInfo::notary_id_;    // in base class
+    using ServerInfo::server_type_;  // in base class
 
-    using Server::server_host;  // in base class
-    using Server::server_port;  // in base class
+    using Server::server_host_;  // in base class
+    using Server::server_port_;  // in base class
 
-    UnallocatedCString bitcoin_username;
-    UnallocatedCString bitcoin_password;
+    UnallocatedCString bitcoin_username_;
+    UnallocatedCString bitcoin_password_;
 
     DEFINE_OT_DYNAMIC_CAST(BitcoinServer)
 };
@@ -1441,30 +1443,30 @@ class RippleServer : public Server
 protected:
     RippleServer()
         : Server()
-        , ripple_username()
-        , ripple_password()
-        , namefield_id()
-        , passfield_id()
+        , ripple_username_()
+        , ripple_password_()
+        , namefield_id_()
+        , passfield_id_()
     {
-        m_Type = "RippleServer";
+        type_ = "RippleServer";
     }
 
 public:
     ~RippleServer() override = default;
 
-    using Displayable::gui_label;  // The label that appears in the GUI
+    using Displayable::gui_label_;  // The label that appears in the GUI
 
-    using ServerInfo::notary_id;    // in base class
-    using ServerInfo::server_type;  // in base class
+    using ServerInfo::notary_id_;    // in base class
+    using ServerInfo::server_type_;  // in base class
 
-    using Server::server_host;  // in base class
-    using Server::server_port;  // in base class
+    using Server::server_host_;  // in base class
+    using Server::server_port_;  // in base class
 
-    UnallocatedCString ripple_username;
-    UnallocatedCString ripple_password;
+    UnallocatedCString ripple_username_;
+    UnallocatedCString ripple_password_;
 
-    UnallocatedCString namefield_id;
-    UnallocatedCString passfield_id;
+    UnallocatedCString namefield_id_;
+    UnallocatedCString passfield_id_;
 
     DEFINE_OT_DYNAMIC_CAST(RippleServer)
 };
@@ -1477,26 +1479,26 @@ class LoomServer : public Server
 protected:
     LoomServer()
         : Server()
-        , loom_username()
-        , namefield_id()
+        , loom_username_()
+        , namefield_id_()
     {
-        m_Type = "LoomServer";
+        type_ = "LoomServer";
     }
 
 public:
     ~LoomServer() override = default;
 
-    using Displayable::gui_label;  // The label that appears in the GUI
+    using Displayable::gui_label_;  // The label that appears in the GUI
 
-    using ServerInfo::notary_id;    // in base class
-    using ServerInfo::server_type;  // in base class
+    using ServerInfo::notary_id_;    // in base class
+    using ServerInfo::server_type_;  // in base class
 
-    using Server::server_host;  // in base class
-    using Server::server_port;  // in base class
+    using Server::server_host_;  // in base class
+    using Server::server_port_;  // in base class
 
-    UnallocatedCString loom_username;
+    UnallocatedCString loom_username_;
 
-    UnallocatedCString namefield_id;
+    UnallocatedCString namefield_id_;
 
     DEFINE_OT_DYNAMIC_CAST(LoomServer)
 };
@@ -1509,24 +1511,24 @@ class ContactNym : public Displayable
 protected:
     ContactNym()
         : Displayable()
-        , nym_type()
-        , nym_id()
-        , public_key()
-        , memo()
+        , nym_type_()
+        , nym_id_()
+        , public_key_()
+        , memo_()
         , list_ServerInfos()
     {
-        m_Type = "ContactNym";
+        type_ = "ContactNym";
     }
 
 public:
     ~ContactNym() override;
 
-    using Displayable::gui_label;  // The label that appears in the GUI
+    using Displayable::gui_label_;  // The label that appears in the GUI
 
-    UnallocatedCString nym_type;
-    UnallocatedCString nym_id;
-    UnallocatedCString public_key;
-    UnallocatedCString memo;
+    UnallocatedCString nym_type_;
+    UnallocatedCString nym_id_;
+    UnallocatedCString public_key_;
+    UnallocatedCString memo_;
 
     DECLARE_GET_ADD_REMOVE(ServerInfo);
 
@@ -1546,7 +1548,7 @@ protected:
         , list_RippleServers()
         , list_LoomServers()
     {
-        m_Type = "WalletData";
+        type_ = "WalletData";
     }
 
 public:
@@ -1576,29 +1578,29 @@ class ContactAcct : public Displayable
 protected:
     ContactAcct()
         : Displayable()
-        , server_type()
-        , notary_id()
-        , instrument_definition_id()
-        , acct_id()
-        , nym_id()
-        , memo()
-        , public_key()
+        , server_type_()
+        , notary_id_()
+        , instrument_definition_id_()
+        , acct_id_()
+        , nym_id_()
+        , memo_()
+        , public_key_()
     {
-        m_Type = "ContactAcct";
+        type_ = "ContactAcct";
     }
 
 public:
     ~ContactAcct() override = default;
 
-    using Displayable::gui_label;  // The label that appears in the GUI
+    using Displayable::gui_label_;  // The label that appears in the GUI
 
-    UnallocatedCString server_type;
-    UnallocatedCString notary_id;
-    UnallocatedCString instrument_definition_id;
-    UnallocatedCString acct_id;
-    UnallocatedCString nym_id;
-    UnallocatedCString memo;
-    UnallocatedCString public_key;
+    UnallocatedCString server_type_;
+    UnallocatedCString notary_id_;
+    UnallocatedCString instrument_definition_id_;
+    UnallocatedCString acct_id_;
+    UnallocatedCString nym_id_;
+    UnallocatedCString memo_;
+    UnallocatedCString public_key_;
 
     DEFINE_OT_DYNAMIC_CAST(ContactAcct)
 };
@@ -1611,25 +1613,25 @@ class Contact : public Displayable
 protected:
     Contact()
         : Displayable()
-        , contact_id()
-        , email()
-        , memo()
-        , public_key()
+        , contact_id_()
+        , email_()
+        , memo_()
+        , public_key_()
         , list_ContactNyms()
         , list_ContactAccts()
     {
-        m_Type = "Contact";
+        type_ = "Contact";
     }
 
 public:
     ~Contact() override;
 
-    using Displayable::gui_label;  // The label that appears in the GUI
+    using Displayable::gui_label_;  // The label that appears in the GUI
 
-    UnallocatedCString contact_id;
-    UnallocatedCString email;
-    UnallocatedCString memo;
-    UnallocatedCString public_key;
+    UnallocatedCString contact_id_;
+    UnallocatedCString email_;
+    UnallocatedCString memo_;
+    UnallocatedCString public_key_;
 
     DECLARE_GET_ADD_REMOVE(ContactNym);
     DECLARE_GET_ADD_REMOVE(ContactAcct);
@@ -1647,7 +1649,7 @@ protected:
         : Storable()
         , list_Contacts()
     {
-        m_Type = "AddressBook";
+        type_ = "AddressBook";
     }
 
 public:

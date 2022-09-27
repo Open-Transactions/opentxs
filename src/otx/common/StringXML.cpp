@@ -30,17 +30,17 @@ namespace opentxs::implementation
 class StringXML::StringXMLPvt final : public irr::io::IFileReadCallBack
 {
 public:
-    StringXML* super;
+    StringXML* super_;
 
     auto read(void* buffer, unsigned sizeToRead) -> int final
     {
-        return super->read(buffer, sizeToRead);
+        return super_->read(buffer, sizeToRead);
     }
 
-    auto getSize() -> int final { return super->getSize(); }
+    auto getSize() -> int final { return super_->getSize(); }
 
     StringXMLPvt(StringXML* ptr)
-        : super(ptr)
+        : super_(ptr)
     {
     }
     StringXMLPvt(const StringXMLPvt&) = delete;

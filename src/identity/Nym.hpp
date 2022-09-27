@@ -281,9 +281,9 @@ private:
     std::atomic<std::uint64_t> revision_;
     mutable std::unique_ptr<wot::claim::Data> contact_data_;
     CredentialMap active_;
-    CredentialMap m_mapRevokedSets;
+    CredentialMap revoked_sets_;
     // Revoked child credential IDs
-    String::List m_listRevokedIDs;
+    String::List list_revoked_ids_;
 
     static auto create_authority(
         const api::Session& api,

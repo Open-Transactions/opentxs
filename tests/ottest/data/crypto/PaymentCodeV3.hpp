@@ -20,8 +20,8 @@ struct PaymentCodeVectorV3 {
     ot::UnallocatedCString change_key_secret_{};
     ot::UnallocatedCString change_key_public_{};
     ot::UnallocatedCString blinded_payment_code_{};
-    ot::UnallocatedCString F_{};
-    ot::UnallocatedCString G_{};
+    ot::UnallocatedCString f_{};
+    ot::UnallocatedCString g_{};
 };
 
 struct PaymentCodeVectorsV3 {

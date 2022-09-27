@@ -28,14 +28,14 @@ namespace opentxs
 {
 OTSignedFile::OTSignedFile(const api::Session& api)
     : Contract(api)
-    , m_strSignedFilePayload(String::Factory())
-    , m_strLocalDir(String::Factory())
-    , m_strSignedFilename(String::Factory())
-    , m_strPurportedLocalDir(String::Factory())
-    , m_strPurportedFilename(String::Factory())
-    , m_strSignerNymID(String::Factory())
+    , signed_file_payload_(String::Factory())
+    , local_dir_(String::Factory())
+    , signed_filename_(String::Factory())
+    , purported_local_dir_(String::Factory())
+    , purported_filename_(String::Factory())
+    , signer_nym_id_(String::Factory())
 {
-    m_strContractType->Set("FILE");
+    contract_type_->Set("FILE");
 }
 
 OTSignedFile::OTSignedFile(
@@ -43,14 +43,14 @@ OTSignedFile::OTSignedFile(
     const String& LOCAL_SUBDIR,
     const String& FILE_NAME)
     : Contract(api)
-    , m_strSignedFilePayload(String::Factory())
-    , m_strLocalDir(String::Factory())
-    , m_strSignedFilename(String::Factory())
-    , m_strPurportedLocalDir(String::Factory())
-    , m_strPurportedFilename(String::Factory())
-    , m_strSignerNymID(String::Factory())
+    , signed_file_payload_(String::Factory())
+    , local_dir_(String::Factory())
+    , signed_filename_(String::Factory())
+    , purported_local_dir_(String::Factory())
+    , purported_filename_(String::Factory())
+    , signer_nym_id_(String::Factory())
 {
-    m_strContractType->Set("FILE");
+    contract_type_->Set("FILE");
 
     SetFilename(LOCAL_SUBDIR, FILE_NAME);
 }
@@ -60,14 +60,14 @@ OTSignedFile::OTSignedFile(
     const char* LOCAL_SUBDIR,
     const String& FILE_NAME)
     : Contract(api)
-    , m_strSignedFilePayload(String::Factory())
-    , m_strLocalDir(String::Factory())
-    , m_strSignedFilename(String::Factory())
-    , m_strPurportedLocalDir(String::Factory())
-    , m_strPurportedFilename(String::Factory())
-    , m_strSignerNymID(String::Factory())
+    , signed_file_payload_(String::Factory())
+    , local_dir_(String::Factory())
+    , signed_filename_(String::Factory())
+    , purported_local_dir_(String::Factory())
+    , purported_filename_(String::Factory())
+    , signer_nym_id_(String::Factory())
 {
-    m_strContractType->Set("FILE");
+    contract_type_->Set("FILE");
 
     auto strLocalSubdir = String::Factory(LOCAL_SUBDIR);
 
@@ -79,14 +79,14 @@ OTSignedFile::OTSignedFile(
     const char* LOCAL_SUBDIR,
     const char* FILE_NAME)
     : Contract(api)
-    , m_strSignedFilePayload(String::Factory())
-    , m_strLocalDir(String::Factory())
-    , m_strSignedFilename(String::Factory())
-    , m_strPurportedLocalDir(String::Factory())
-    , m_strPurportedFilename(String::Factory())
-    , m_strSignerNymID(String::Factory())
+    , signed_file_payload_(String::Factory())
+    , local_dir_(String::Factory())
+    , signed_filename_(String::Factory())
+    , purported_local_dir_(String::Factory())
+    , purported_filename_(String::Factory())
+    , signer_nym_id_(String::Factory())
 {
-    m_strContractType->Set("FILE");
+    contract_type_->Set("FILE");
 
     auto strLocalSubdir = String::Factory(LOCAL_SUBDIR),
          strFile_Name = String::Factory(FILE_NAME);
@@ -94,47 +94,44 @@ OTSignedFile::OTSignedFile(
     SetFilename(strLocalSubdir, strFile_Name);
 }
 
-auto OTSignedFile::GetFilePayload() -> String&
-{
-    return m_strSignedFilePayload;
-}
+auto OTSignedFile::GetFilePayload() -> String& { return signed_file_payload_; }
 
 void OTSignedFile::SetFilePayload(const String& strArg)
 {
-    m_strSignedFilePayload = strArg;
+    signed_file_payload_ = strArg;
 }
 
-auto OTSignedFile::GetSignerNymID() -> String& { return m_strSignerNymID; }
+auto OTSignedFile::GetSignerNymID() -> String& { return signer_nym_id_; }
 
 void OTSignedFile::SetSignerNymID(const String& strArg)
 {
-    m_strSignerNymID = strArg;
+    signer_nym_id_ = strArg;
 }
 
 void OTSignedFile::UpdateContents(const PasswordPrompt& reason)
 {
     // I release this because I'm about to repopulate it.
-    m_xmlUnsigned->Release();
+    xml_unsigned_->Release();
 
     Tag tag("signedFile");
 
-    tag.add_attribute("version", m_strVersion->Get());
-    tag.add_attribute("localDir", m_strLocalDir->Get());
-    tag.add_attribute("filename", m_strSignedFilename->Get());
+    tag.add_attribute("version", version_->Get());
+    tag.add_attribute("localDir", local_dir_->Get());
+    tag.add_attribute("filename", signed_filename_->Get());
 
-    if (m_strSignerNymID->Exists()) {
-        tag.add_attribute("signer", m_strSignerNymID->Get());
+    if (signer_nym_id_->Exists()) {
+        tag.add_attribute("signer", signer_nym_id_->Get());
     }
 
-    if (m_strSignedFilePayload->Exists()) {
-        auto ascPayload = Armored::Factory(m_strSignedFilePayload);
+    if (signed_file_payload_->Exists()) {
+        auto ascPayload = Armored::Factory(signed_file_payload_);
         tag.add_tag("filePayload", ascPayload->Get());
     }
 
     UnallocatedCString str_result;
     tag.output(str_result);
 
-    m_xmlUnsigned->Concatenate(String::Factory(str_result));
+    xml_unsigned_->Concatenate(String::Factory(str_result));
 }
 
 auto OTSignedFile::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
@@ -153,17 +150,17 @@ auto OTSignedFile::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
     //    return nReturnVal;
 
     if (!strcmp("signedFile", xml->getNodeName())) {
-        m_strVersion = String::Factory(xml->getAttributeValue("version"));
+        version_ = String::Factory(xml->getAttributeValue("version"));
 
-        m_strPurportedLocalDir =
+        purported_local_dir_ =
             String::Factory(xml->getAttributeValue("localDir"));
-        m_strPurportedFilename =
+        purported_filename_ =
             String::Factory(xml->getAttributeValue("filename"));
-        m_strSignerNymID = String::Factory(xml->getAttributeValue("signer"));
+        signer_nym_id_ = String::Factory(xml->getAttributeValue("signer"));
 
         nReturnVal = 1;
     } else if (!strcmp("filePayload", xml->getNodeName())) {
-        if (false == LoadEncodedTextField(xml, m_strSignedFilePayload)) {
+        if (false == LoadEncodedTextField(xml, signed_file_payload_)) {
             LogError()(OT_PRETTY_CLASS())(
                 "Error in OTSignedFile::ProcessXMLNode: filePayload field "
                 "without value.")
@@ -188,16 +185,15 @@ auto OTSignedFile::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
 // Assumes SetFilename() has been set, and that LoadFile() has just been called.
 auto OTSignedFile::VerifyFile() -> bool
 {
-    if (m_strLocalDir->Compare(m_strPurportedLocalDir) &&
-        m_strSignedFilename->Compare(m_strPurportedFilename)) {
+    if (local_dir_->Compare(purported_local_dir_) &&
+        signed_filename_->Compare(purported_filename_)) {
         return true;
     }
 
     LogError()(OT_PRETTY_CLASS())("Failed verifying signed file: "
-                                  "Expected directory: ")(m_strLocalDir.get())(
-        ". Found: ")(m_strPurportedLocalDir.get())(". Expected filename: ")(
-        m_strSignedFilename.get())(". Found: ")(m_strPurportedFilename.get())(
-        ".")
+                                  "Expected directory: ")(local_dir_.get())(
+        ". Found: ")(purported_local_dir_.get())(". Expected filename: ")(
+        signed_filename_.get())(". Found: ")(purported_filename_.get())(".")
         .Flush();
     return false;
 }
@@ -209,8 +205,8 @@ auto OTSignedFile::VerifyFile() -> bool
 // this method assumes has already been set (using SetFilename())
 auto OTSignedFile::SaveFile() -> bool
 {
-    const auto strTheFileName(m_strFilename);
-    const auto strTheFolderName(m_strFoldername);
+    const auto strTheFileName(filename_);
+    const auto strTheFolderName(foldername_);
 
     // Contract doesn't natively make it easy to save a contract to its own
     // filename.
@@ -231,8 +227,8 @@ auto OTSignedFile::LoadFile() -> bool
     if (OTDB::Exists(
             api_,
             api_.DataFolder().string(),
-            m_strFoldername->Get(),
-            m_strFilename->Get(),
+            foldername_->Get(),
+            filename_->Get(),
             "",
             "")) {
         return LoadContract();
@@ -246,20 +242,20 @@ void OTSignedFile::SetFilename(
     const String& FILE_NAME)
 {
     // OTSignedFile specific variables.
-    m_strLocalDir = LOCAL_SUBDIR;
-    m_strSignedFilename = FILE_NAME;
+    local_dir_ = LOCAL_SUBDIR;
+    signed_filename_ = FILE_NAME;
 
     // Contract variables.
-    m_strFoldername = m_strLocalDir;
-    m_strFilename = m_strSignedFilename;
+    foldername_ = local_dir_;
+    filename_ = signed_filename_;
 
     /*
-    m_strFilename.Format("%s%s" // data_folder/
+    filename_.Format("%s%s" // data_folder/
                          "%s%s" // nyms/
                          "%s",  // 5bf9a88c.nym
                          OTLog::Path(), OTapi::Legacy::PathSeparator(),
-                         m_strLocalDir.Get(), OTapi::Legacy::PathSeparator(),
-                         m_strSignedFilename.Get());
+                         local_dir_.Get(), OTapi::Legacy::PathSeparator(),
+                         signed_filename_.Get());
     */
     // Software Path + Local Sub-directory + Filename
     //
@@ -268,21 +264,21 @@ void OTSignedFile::SetFilename(
 
 void OTSignedFile::Release_SignedFile()
 {
-    m_strSignedFilePayload->Release();  // This is the file contents we were
-                                        // wrapping.
-                                        // We can release this now.
+    signed_file_payload_->Release();  // This is the file contents we were
+                                      // wrapping.
+                                      // We can release this now.
 
-    //  m_strLocalDir.Release();          // We KEEP these, *not* release,
+    //  local_dir_.Release();          // We KEEP these, *not* release,
     //  because LoadContract()
-    //  m_strSignedFilename.Release();    // calls Release(), and these are our
+    //  signed_filename_.Release();    // calls Release(), and these are our
     //  core values. We
     // don't want to lose them when the file is loaded.
 
-    // Note: Additionally, neither does Contract release m_strFilename here,
+    // Note: Additionally, neither does Contract release filename_ here,
     // for the SAME reason.
 
-    m_strPurportedLocalDir->Release();
-    m_strPurportedFilename->Release();
+    purported_local_dir_->Release();
+    purported_filename_->Release();
 }
 
 void OTSignedFile::Release()
@@ -291,7 +287,7 @@ void OTSignedFile::Release()
 
     Contract::Release();
 
-    m_strContractType->Set("FILE");
+    contract_type_->Set("FILE");
 }
 
 OTSignedFile::~OTSignedFile() { Release_SignedFile(); }

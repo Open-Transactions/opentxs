@@ -16,8 +16,8 @@
 namespace opentxs
 {
 OTStashItem::OTStashItem()
-    : m_strInstrumentDefinitionID(String::Factory())
-    , m_lAmount(0)
+    : instrument_definition_id_(String::Factory())
+    , amount_(0)
 
 {
 }
@@ -25,16 +25,16 @@ OTStashItem::OTStashItem()
 OTStashItem::OTStashItem(
     const String& strInstrumentDefinitionID,
     std::int64_t lAmount)
-    : m_strInstrumentDefinitionID(strInstrumentDefinitionID)
-    , m_lAmount(lAmount)
+    : instrument_definition_id_(strInstrumentDefinitionID)
+    , amount_(lAmount)
 {
 }
 
 OTStashItem::OTStashItem(
     const identifier::Generic& theInstrumentDefinitionID,
     std::int64_t lAmount)
-    : m_strInstrumentDefinitionID(String::Factory(theInstrumentDefinitionID))
-    , m_lAmount(lAmount)
+    : instrument_definition_id_(String::Factory(theInstrumentDefinitionID))
+    , amount_(lAmount)
 {
 }
 
@@ -68,13 +68,13 @@ auto OTStashItem::CreditStash(const std::int64_t& lAmount) -> bool
             LogConsole()(OT_PRETTY_CLASS())(
                 "Failed attempt to credit a "
                 "negative amount (")(lAmount)("). Asset Type: ")(
-                m_strInstrumentDefinitionID.get())(".")
+                instrument_definition_id_.get())(".")
                 .Flush();
         }
         return false;
     }
 
-    m_lAmount += lAmount;
+    amount_ += lAmount;
 
     return true;
 }
@@ -86,13 +86,13 @@ auto OTStashItem::DebitStash(const std::int64_t& lAmount) -> bool
             LogConsole()(OT_PRETTY_CLASS())(
                 "Failed attempt to debit a "
                 "negative amount (")(lAmount)("). Asset Type: ")(
-                m_strInstrumentDefinitionID.get())(".")
+                instrument_definition_id_.get())(".")
                 .Flush();
         }
         return false;
     }
 
-    const std::int64_t lTentativeNewBalance = (m_lAmount - lAmount);
+    const std::int64_t lTentativeNewBalance = (amount_ - lAmount);
 
     if (lTentativeNewBalance < 0) {
         {
@@ -100,13 +100,13 @@ auto OTStashItem::DebitStash(const std::int64_t& lAmount) -> bool
                 "Failed attempt to debit (amount of) ")(
                 lAmount)(": New stash balance would have been a negative "
                          "amount (")(lTentativeNewBalance)("). Asset Type: ")(
-                m_strInstrumentDefinitionID.get())(".")
+                instrument_definition_id_.get())(".")
                 .Flush();
         }
         return false;
     }
 
-    m_lAmount = lTentativeNewBalance;
+    amount_ = lTentativeNewBalance;
 
     return true;
 }

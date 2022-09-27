@@ -13,8 +13,8 @@ AccountVisitor::AccountVisitor(
     const api::session::Wallet& wallet,
     const identifier::Notary& notaryID)
     : wallet_(wallet)
-    , notaryID_(notaryID)
-    , loadedAccounts_(nullptr)
+    , notary_id_(notaryID)
+    , loaded_accounts_(nullptr)
 {
 }
 }  // namespace opentxs

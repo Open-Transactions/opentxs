@@ -60,60 +60,63 @@ public:
     // the IDs are correct, or when you have no "real" ID other than what is in
     // the file itself.)
     //
-    void SetLoadInsecure() { m_bLoadSecurely = false; }
+    void SetLoadInsecure() { load_securely_ = false; }
 
     // Someday I'll add EntityID and RoleID here (in lieu of NymID,
     // in cases when the account is owned by an Entity and not a Nym.)
     //
     inline auto GetNymID() const -> const identifier::Nym&
     {
-        return m_AcctNymID;
+        return account_nym_id_;
     }
-    inline void SetNymID(const identifier::Nym& theID) { m_AcctNymID = theID; }
+    inline void SetNymID(const identifier::Nym& theID)
+    {
+        account_nym_id_ = theID;
+    }
 
     // Used for: Load an account based on this ID
     inline auto GetRealAccountID() const -> const identifier::Generic&
     {
-        return m_ID;
+        return id_;
     }
     inline void SetRealAccountID(const identifier::Generic& theID)
     {
-        m_ID = theID;
+        id_ = theID;
     }
 
     // Used for: Verify this ID on a transaction to make sure it matches the one
     // above.
     inline auto GetPurportedAccountID() const -> const identifier::Generic&
     {
-        return m_AcctID;
+        return account_id_;
     }
     inline void SetPurportedAccountID(const identifier::Generic& theID)
     {
-        m_AcctID = theID;
+        account_id_ = theID;
     }
 
     // Used for: Load or save a filename based on this ID.
     inline auto GetRealNotaryID() const -> const identifier::Notary&
     {
-        return m_NotaryID;
+        return notary_id_;
     }
     inline void SetRealNotaryID(const identifier::Notary& theID)
     {
-        m_NotaryID = theID;
+        notary_id_ = theID;
     }
 
     // Used for: Load or save the ID in the file contents into/out of this ID.
     inline auto GetPurportedNotaryID() const -> const identifier::Notary&
     {
-        return m_AcctNotaryID;
+        return account_notary_id_;
     }
     inline void SetPurportedNotaryID(const identifier::Notary& theID)
     {
-        m_AcctNotaryID = theID;
+        account_notary_id_ = theID;
     }
 
-    // Compares the m_AcctID from the xml portion of the contract
-    // with m_ID (supposedly the same number.)
+    // Compares the account_id_ from the xml portion of the contract
+    // with id_ (supposedly the same number.)
     // Also Verifies the NotaryID, since this object type is all about the both
     // of those IDs.
     auto VerifyContractID() const -> bool override;
@@ -174,10 +177,10 @@ protected:
     // Fortunately, Contract already handles the ID, which is the Account ID
     // in the context of all transaction objects. If your "bank account" is
     // acct #350, then
-    // ALL of your transactions will have m_ID of #350 as a rule, and once
-    // loaded from storage and signature verified, m_AcctID should also
+    // ALL of your transactions will have id_ of #350 as a rule, and once
+    // loaded from storage and signature verified, account_id_ should also
     // contain #350. The transaction number is a separate value,
-    // m_lTransactionNum, which uniquely identifies a transaction. The idea
+    // transaction_num_, which uniquely identifies a transaction. The idea
     // is to prevent a file from loading up into the same variable and
     // overwriting what we expected with a new value that we didn't expect
     // (and that perhaps has a good signature on it, but from some other
@@ -509,22 +512,19 @@ protected:
     // we know they are identical anyway. The main use of them is before /
     // during the **loading/verification process.**
     //
-    // -- OTTransaction the_transaction(ID: 5);  m_ID shows me what acct# I
+    // -- OTTransaction the_transaction(ID: 5);  id_ shows me what acct# I
     // expect the_transaction to have (5) perhaps
     // because I got it off of the ledger object. I set this before loading the
     // transaction from string. After loading,
-    // m_AcctID is what shows me the acct# that T actually HAS in its datafile.
-    // They SHOULD match. I verify this at
-    // loading to make sure people haven't swapped the datafile for one from a
-    // different acct but perhaps same
-    // signature/owner. m_AcctID, which is
-    // what I actually loaded, is also the only value I will save back again. If
-    // it said "69" then I will save 69.
-    // I have still forced it to #5 because the item marked #69 causes the
-    // transaction to fail loading. Only a correct #5
-    // will load, and therefore I will only ever SAVE a correct #5 as well.
-    // After all, there are only two times that value
-    // gets set: Upon generation, and upon loading
+    // account_id_ is what shows me the acct# that T actually HAS in its
+    // datafile. They SHOULD match. I verify this at loading to make sure people
+    // haven't swapped the datafile for one from a different acct but perhaps
+    // same signature/owner. account_id_, which is what I actually loaded, is
+    // also the only value I will save back again. If it said "69" then I will
+    // save 69. I have still forced it to #5 because the item marked #69 causes
+    // the transaction to fail loading. Only a correct #5 will load, and
+    // therefore I will only ever SAVE a correct #5 as well. After all, there
+    // are only two times that value gets set: Upon generation, and upon loading
     //
     //
     //    Another example:
@@ -644,15 +644,15 @@ protected:
     // That's really the whole point of this software -- comparing IDs and
     // verifying signatures.
 
-    // Compare m_AcctID to m_ID after loading it from string or file. They
+    // Compare account_id_ to id_ after loading it from string or file. They
     // should match, and signature should verify.
-    identifier::Generic m_AcctID;
+    identifier::Generic account_id_;
     // Notary ID as used to instantiate the transaction, based on expected
     // NotaryID.
-    identifier::Notary m_NotaryID;
-    // Actual NotaryID within the signed portion. (Compare to m_NotaryID upon
+    identifier::Notary notary_id_;
+    // Actual NotaryID within the signed portion. (Compare to notary_id_ upon
     // loading.)
-    identifier::Notary m_AcctNotaryID;
+    identifier::Notary account_notary_id_;
 
     // Update: instead of in the child classes, like OTLedger, OTTransaction,
     // Item, etc, I put the "purported acct ID" and "purported server ID" here
@@ -662,10 +662,10 @@ protected:
     // might be the only reference someone has. They'll want my NymID.)
     // I put this in protected because there are now Get/Set methods...so use
     // them!
-    identifier::Nym m_AcctNymID;
+    identifier::Nym account_nym_id_;
     // The server issues this and it must be sent with transaction request.
-    TransactionNumber m_lTransactionNum{0};
-    TransactionNumber m_lInReferenceToTransaction{0};
+    TransactionNumber transaction_num_{0};
+    TransactionNumber in_reference_to_transaction_{0};
     // Sometimes an item is in reference to some other transaction, which does
     // NOT need to be included in the item (since the server already has it) but
     // instead can be referenced by transaction ID. Let's say Alice sends a
@@ -678,12 +678,12 @@ protected:
 
     // In reference to in reference to in reference to in reference to the
     // origin.
-    TransactionNumber m_lNumberOfOrigin{0};
+    TransactionNumber number_of_origin_{0};
     // (See originType comment.)
-    originType m_originType{originType::not_applicable};
+    originType origin_type_{originType::not_applicable};
     // This item may be in reference to a different item.
-    OTArmored m_ascInReferenceTo;
-    bool m_bLoadSecurely{true};  // Defaults to true.
+    OTArmored in_reference_to_;
+    bool load_securely_{true};  // Defaults to true.
     // For a "blank" or "successNotice" transaction, this contains the list of
     // transaction
     // numbers that are either about to be signed out (blank) or have already
@@ -708,8 +708,8 @@ protected:
     //
     // THIS is where that list is stored:
     //
-    NumList m_Numlist;  // blanks and successNotice use this instead of having
-                        // a separate transaction for EVERY NUMBER.
+    NumList numlist_;  // blanks and successNotice use this instead of having
+                       // a separate transaction for EVERY NUMBER.
     // (Had to fix that... way too many box receipts were being downloaded.)
     // Note: I moved this to OTTransactionType so I can use it from within
     // Item as well, so when I accept transaction

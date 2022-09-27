@@ -71,19 +71,19 @@ class OTAgent
 {
 private:
     const api::Session& api_;
-    bool m_bNymRepresentsSelf;  // Whether this agent represents himself (a nym)
+    bool nym_represents_self_;  // Whether this agent represents himself (a nym)
                                 // or whether he represents an entity of some
                                 // sort.
-    bool m_bIsAnIndividual;     // Whether this agent is a voting group or Nym
+    bool is_an_individual_;     // Whether this agent is a voting group or Nym
                                 // (whether Nym acting for himself or for some
                                 // entity.)
 
     // If agent is active (has a nym), here is the sometimes-available pointer
     // to said Agent Nym. Someday may add a "role" pointer here.
-    Nym_p m_pNym;
+    Nym_p nym_;
 
-    OTParty* m_pForParty;  // The agent probably has a pointer to the party it
-                           // acts on behalf of.
+    OTParty* for_party_;  // The agent probably has a pointer to the party it
+                          // acts on behalf of.
 
     /*
      <Agent type=“group”// could be “nym”, or “role”, or “group”.
@@ -95,22 +95,22 @@ private:
      that controls this agent.
      */
 
-    OTString m_strName;  // agent name (accessible within script language.)
+    OTString name_;  // agent name (accessible within script language.)
 
     // info about agent.
     //
-    OTString m_strNymID;  // If agent is a Nym, then this is the NymID of that
-                          // Nym (whether that Nym is owner or not.)
+    OTString nym_id_;  // If agent is a Nym, then this is the NymID of that
+                       // Nym (whether that Nym is owner or not.)
     // If agent is a group (IsAGroup()) then this will be blank. This is
     // different than the
     // Nym stored in OTParty, which if present ALWAYS refers to the OWNER Nym
     // (Though this Nym
     // MAY ALSO be the owner, that fact is purely incidental here AND this NymID
     // could be blank.)
-    OTString m_strRoleID;  // If agent is Nym working in a role on behalf of an
+    OTString role_id_;     // If agent is Nym working in a role on behalf of an
                            // entity, then this is its RoleID in Entity.
-    OTString m_strGroupName;  // If agent is a voting group in an Entity, this
-                              // is group's Name (inside Entity.)
+    OTString group_name_;  // If agent is a voting group in an Entity, this
+                           // is group's Name (inside Entity.)
 
 public:
     OTAgent(const api::Session& api);
@@ -142,7 +142,7 @@ public:
 
     void Serialize(Tag& parent) const;
 
-    // NOTE: Current iteration, these functions ASSUME that m_pNym is loaded.
+    // NOTE: Current iteration, these functions ASSUME that nym_ is loaded.
     // They will definitely fail if you haven't already loaded the Nym.
     //
     auto VerifyIssuedNumber(
@@ -302,7 +302,7 @@ public:
 
     auto GetName() -> const String&
     {
-        return m_strName;
+        return name_;
     }  // agent's name as used in a script.
     // For when the agent is a voting group:
     //
@@ -327,7 +327,7 @@ public:
     //
     auto GetPartyID(identifier::Generic& theOutput) const -> bool;
 
-    auto GetParty() const -> OTParty* { return m_pForParty; }
+    auto GetParty() const -> OTParty* { return for_party_; }
 
     // IDEA: Put a Nym in the Nyms folder for each entity. While it may
     // not have a public key in the pubkey folder, or embedded within it,

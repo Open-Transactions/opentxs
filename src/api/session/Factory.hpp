@@ -1098,9 +1098,9 @@ public:
 protected:
     const api::Session& api_;
     const api::Factory& primitives_;
-    std::unique_ptr<const api::crypto::Asymmetric> pAsymmetric_;
+    std::unique_ptr<const api::crypto::Asymmetric> p_asymmetric_;
     const api::crypto::Asymmetric& asymmetric_;
-    std::unique_ptr<const api::crypto::Symmetric> pSymmetric_;
+    std::unique_ptr<const api::crypto::Symmetric> p_symmetric_;
     const api::crypto::Symmetric& symmetric_;
 
     Factory(const api::Session& api);

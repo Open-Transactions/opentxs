@@ -68,14 +68,14 @@ Account::Account(
     const identifier::Nym& nymID,
     const identifier::Notary& notaryID)
     : OTTransactionType(api)
-    , acctType_(err_acct)
-    , acctInstrumentDefinitionID_()
-    , balanceDate_(String::Factory())
-    , balanceAmount_(String::Factory())
-    , stashTransNum_(0)
-    , markForDeletion_(false)
-    , inboxHash_()
-    , outboxHash_()
+    , acct_type_(err_acct)
+    , acct_instrument_definition_id_()
+    , balance_date_(String::Factory())
+    , balance_amount_(String::Factory())
+    , stash_trans_num_(0)
+    , mark_for_deletion_(false)
+    , inbox_hash_()
+    , outbox_hash_()
     , alias_()
 {
     InitAccount();
@@ -86,14 +86,14 @@ Account::Account(
 
 Account::Account(const api::Session& api)
     : OTTransactionType(api)
-    , acctType_(err_acct)
-    , acctInstrumentDefinitionID_()
-    , balanceDate_(String::Factory())
-    , balanceAmount_(String::Factory())
-    , stashTransNum_(0)
-    , markForDeletion_(false)
-    , inboxHash_()
-    , outboxHash_()
+    , acct_type_(err_acct)
+    , acct_instrument_definition_id_()
+    , balance_date_(String::Factory())
+    , balance_amount_(String::Factory())
+    , stash_trans_num_(0)
+    , mark_for_deletion_(false)
+    , inbox_hash_()
+    , outbox_hash_()
     , alias_()
 {
     InitAccount();
@@ -106,18 +106,18 @@ Account::Account(
     const identifier::Notary& notaryID,
     const String& name)
     : OTTransactionType(api, nymID, accountId, notaryID)
-    , acctType_(err_acct)
-    , acctInstrumentDefinitionID_()
-    , balanceDate_(String::Factory())
-    , balanceAmount_(String::Factory())
-    , stashTransNum_(0)
-    , markForDeletion_(false)
-    , inboxHash_()
-    , outboxHash_()
+    , acct_type_(err_acct)
+    , acct_instrument_definition_id_()
+    , balance_date_(String::Factory())
+    , balance_amount_(String::Factory())
+    , stash_trans_num_(0)
+    , mark_for_deletion_(false)
+    , inbox_hash_()
+    , outbox_hash_()
     , alias_(name.Get())
 {
     InitAccount();
-    m_strName = name;
+    name_ = name;
 }
 
 Account::Account(
@@ -126,14 +126,14 @@ Account::Account(
     const identifier::Generic& accountId,
     const identifier::Notary& notaryID)
     : OTTransactionType(api, nymID, accountId, notaryID)
-    , acctType_(err_acct)
-    , acctInstrumentDefinitionID_()
-    , balanceDate_(String::Factory())
-    , balanceAmount_(String::Factory())
-    , stashTransNum_(0)
-    , markForDeletion_(false)
-    , inboxHash_()
-    , outboxHash_()
+    , acct_type_(err_acct)
+    , acct_instrument_definition_id_()
+    , balance_date_(String::Factory())
+    , balance_amount_(String::Factory())
+    , stash_trans_num_(0)
+    , mark_for_deletion_(false)
+    , inbox_hash_()
+    , outbox_hash_()
     , alias_()
 {
     InitAccount();
@@ -176,9 +176,9 @@ auto Account::ConsensusHash(
         LogError()(OT_PRETTY_CLASS())("Missing account id.").Flush();
     }
 
-    if (false == balanceAmount_->empty()) {
+    if (false == balance_amount_->empty()) {
         preimage.Concatenate(
-            balanceAmount_->Get(), balanceAmount_->GetLength());
+            balance_amount_->Get(), balance_amount_->GetLength());
     } else {
         LogError()(OT_PRETTY_CLASS())("No account balance.").Flush();
     }
@@ -374,15 +374,15 @@ auto Account::SaveOutbox(Ledger& box, identifier::Generic& hash) -> bool
 
 void Account::SetInboxHash(const identifier::Generic& input)
 {
-    inboxHash_ = input;
+    inbox_hash_ = input;
 }
 
 auto Account::GetInboxHash(identifier::Generic& output) -> bool
 {
     output.clear();
 
-    if (!inboxHash_.empty()) {
-        output = inboxHash_;
+    if (!inbox_hash_.empty()) {
+        output = inbox_hash_;
 
         return true;
     } else if (
@@ -404,15 +404,15 @@ auto Account::GetInboxHash(identifier::Generic& output) -> bool
 
 void Account::SetOutboxHash(const identifier::Generic& input)
 {
-    outboxHash_ = input;
+    outbox_hash_ = input;
 }
 
 auto Account::GetOutboxHash(identifier::Generic& output) -> bool
 {
     output.clear();
 
-    if (!outboxHash_.empty()) {
-        output = outboxHash_;
+    if (!outbox_hash_.empty()) {
+        output = outbox_hash_;
 
         return true;
     } else if (
@@ -511,7 +511,7 @@ auto Account::SaveAccount() -> bool
 // credited somewhere else)
 auto Account::Debit(const Amount& amount) -> bool
 {
-    const auto oldBalance = factory::Amount(balanceAmount_->Get());
+    const auto oldBalance = factory::Amount(balance_amount_->Get());
     // The MINUS here is the big difference between Debit and Credit
     const auto newBalance{oldBalance - amount};
 
@@ -535,8 +535,8 @@ auto Account::Debit(const Amount& amount) -> bool
     else {
         UnallocatedCString _amount;
         newBalance.Serialize(writer(_amount));
-        balanceAmount_->Set(_amount.c_str());
-        balanceDate_->Set(String::Factory(getTimestamp()));
+        balance_amount_->Set(_amount.c_str());
+        balance_date_->Set(String::Factory(getTimestamp()));
         return true;
     }
 }
@@ -545,7 +545,7 @@ auto Account::Debit(const Amount& amount) -> bool
 // debited somewhere else)
 auto Account::Credit(const Amount& amount) -> bool
 {
-    const auto oldBalance = factory::Amount(balanceAmount_->Get());
+    const auto oldBalance = factory::Amount(balance_amount_->Get());
     // The PLUS here is the big difference between Debit and Credit.
     const auto newBalance{oldBalance + amount};
 
@@ -559,9 +559,9 @@ auto Account::Credit(const Amount& amount) -> bool
     // std::int64_t std::int32_t.
     // We'll maybe explicitly check that it's not negative in order to prevent
     // that. TODO.
-    //    if (newBalance > 0 || (OTAccount::user != acctType_))
+    //    if (newBalance > 0 || (OTAccount::user != acct_type_))
     //    {
-    //        balanceAmount_.Format("%" PRId64 "", newBalance);
+    //        balance_amount_.Format("%" PRId64 "", newBalance);
     //        return true;
     //    }
 
@@ -578,8 +578,8 @@ auto Account::Credit(const Amount& amount) -> bool
     else {
         UnallocatedCString _amount;
         newBalance.Serialize(writer(_amount));
-        balanceAmount_->Set(_amount.c_str());
-        balanceDate_->Set(String::Factory(getTimestamp()));
+        balance_amount_->Set(_amount.c_str());
+        balance_date_->Set(String::Factory(getTimestamp()));
         return true;
     }
 }
@@ -587,13 +587,13 @@ auto Account::Credit(const Amount& amount) -> bool
 auto Account::GetInstrumentDefinitionID() const
     -> const identifier::UnitDefinition&
 {
-    return acctInstrumentDefinitionID_;
+    return acct_instrument_definition_id_;
 }
 
 void Account::InitAccount()
 {
-    m_strContractType = String::Factory("ACCOUNT");
-    acctType_ = Account::user;
+    contract_type_ = String::Factory("ACCOUNT");
+    acct_type_ = Account::user;
 }
 
 // Verify Contract ID first, THEN Verify Owner.
@@ -604,13 +604,13 @@ auto Account::VerifyOwner(const identity::Nym& candidate) const -> bool
     auto ID_CANDIDATE = identifier::Nym{};
     candidate.GetIdentifier(ID_CANDIDATE);
 
-    return m_AcctNymID == ID_CANDIDATE;
+    return account_nym_id_ == ID_CANDIDATE;
 }
 
 // TODO: when entities and roles are added, probably more will go here.
 auto Account::VerifyOwnerByID(const identifier::Nym& nymId) const -> bool
 {
-    return nymId == m_AcctNymID;
+    return nymId == account_nym_id_;
 }
 
 auto Account::LoadExistingAccount(
@@ -641,19 +641,18 @@ auto Account::LoadExistingAccount(
     account->SetRealAccountID(accountId);
     account->SetRealNotaryID(notaryID);
     auto strAcctID = String::Factory(accountId);
-    account->m_strFoldername =
-        String::Factory(api.Internal().Legacy().Account());
-    account->m_strFilename = String::Factory(strAcctID->Get());
+    account->foldername_ = String::Factory(api.Internal().Legacy().Account());
+    account->filename_ = String::Factory(strAcctID->Get());
 
     if (!OTDB::Exists(
             api,
             api.DataFolder().string(),
-            account->m_strFoldername->Get(),
-            account->m_strFilename->Get(),
+            account->foldername_->Get(),
+            account->filename_->Get(),
             "",
             "")) {
         LogVerbose()(OT_PRETTY_STATIC(Account))("File does not exist: ")(
-            account->m_strFoldername.get())('/')(account->m_strFilename.get())
+            account->foldername_.get())('/')(account->filename_.get())
             .Flush();
 
         return nullptr;
@@ -698,9 +697,9 @@ auto Account::GenerateNewAccount(
 
 /*
  Just make sure message has these members populated:
-message.m_strNymID;
-message.m_strInstrumentDefinitionID;
-message.m_strNotaryID;
+message.nym_id_;
+message.instrument_definition_id_;
+message.notary_id_;
  */
 auto Account::GenerateNewAccount(
     const identity::Nym& server,
@@ -730,23 +729,23 @@ auto Account::GenerateNewAccount(
     // Might as well set them both. (Safe here to do so, for once.)
     SetPurportedAccountID(newID);
     // So it's not blank. The user can always change it.
-    m_strName->Set(strID);
+    name_->Set(strID);
 
     // Next we create the full path filename for the account using the ID.
-    m_strFoldername = String::Factory(api_.Internal().Legacy().Account());
-    m_strFilename = String::Factory(strID->Get());
+    foldername_ = String::Factory(api_.Internal().Legacy().Account());
+    filename_ = String::Factory(strID->Get());
 
     // Then we try to load it, in order to make sure that it doesn't already
     // exist.
     if (OTDB::Exists(
             api_,
             api_.DataFolder().string(),
-            m_strFoldername->Get(),
-            m_strFilename->Get(),
+            foldername_->Get(),
+            filename_->Get(),
             "",
             "")) {
         LogError()(OT_PRETTY_CLASS())("Account already exists: ")(
-            m_strFilename.get())(".")
+            filename_.get())(".")
             .Flush();
         return false;
     }
@@ -754,17 +753,17 @@ auto Account::GenerateNewAccount(
     // Set up the various important starting values of the account.
     // Account type defaults to OTAccount::user.
     // But there are also issuer accts.
-    acctType_ = acctType;
+    acct_type_ = acctType;
 
     // basket, basketsub, mint, voucher, and stash
     // accounts are all "owned" by the server.
     if (IsInternalServerAcct()) {
-        server.GetIdentifier(m_AcctNymID);
+        server.GetIdentifier(account_nym_id_);
     } else {
-        m_AcctNymID = userNymID;
+        account_nym_id_ = userNymID;
     }
 
-    acctInstrumentDefinitionID_ = instrumentDefinitionID;
+    acct_instrument_definition_id_ = instrumentDefinitionID;
 
     LogDebug()(OT_PRETTY_CLASS())("Creating new account, type: ")(
         instrumentDefinitionID)(".")
@@ -773,8 +772,8 @@ auto Account::GenerateNewAccount(
     SetRealNotaryID(notaryID);
     SetPurportedNotaryID(notaryID);
 
-    balanceDate_->Set(String::Factory(getTimestamp()));
-    balanceAmount_->Set("0");
+    balance_date_->Set(String::Factory(getTimestamp()));
+    balance_amount_->Set("0");
 
     if (IsStashAcct()) {
         OT_ASSERT_MSG(
@@ -782,7 +781,7 @@ auto Account::GenerateNewAccount(
             "You created a stash account, but "
             "with a zero-or-negative transaction "
             "number for its cron item.");
-        stashTransNum_ = stashTransNum;
+        stash_trans_num_ = stashTransNum;
     }
 
     // Sign the Account (so we know that we did)... Otherwise someone could put
@@ -797,7 +796,7 @@ auto Account::GenerateNewAccount(
     SaveAccount();
 
     // Don't know why I had this here. Putting SaveAccount() instead.
-    //    OTString strFilename(m_strFilename);
+    //    OTString strFilename(filename_);
     //    SaveContract(strFilename.Get()); // Saves the account to a specific
     // filename
 
@@ -809,9 +808,9 @@ auto Account::GenerateNewAccount(
 
 auto Account::GetBalance() const -> Amount
 {
-    if (balanceAmount_->Exists()) {
+    if (balance_amount_->Exists()) {
 
-        return factory::Amount(balanceAmount_->Get());
+        return factory::Amount(balance_amount_->Get());
     } else {
 
         return Amount{};
@@ -822,18 +821,18 @@ auto Account::DisplayStatistics(String& contents) const -> bool
 {
     const auto acctType = [&] {
         auto out = String::Factory();
-        TranslateAccountTypeToString(acctType_, out);
+        TranslateAccountTypeToString(acct_type_, out);
 
         return out;
     }();
     contents.Concatenate(" Asset Account ("sv)
         .Concatenate(acctType)
         .Concatenate(") Name: "sv)
-        .Concatenate(m_strName)
+        .Concatenate(name_)
         .Concatenate("\n Last retrieved Balance: "sv)
-        .Concatenate(balanceAmount_)
+        .Concatenate(balance_amount_)
         .Concatenate(" on date: "sv)
-        .Concatenate(balanceDate_)
+        .Concatenate(balance_date_)
         .Concatenate("\n accountID: "sv)
         .Concatenate(GetPurportedAccountID().asBase58(api_.Crypto()))
         .Concatenate("\n nymID: "sv)
@@ -841,7 +840,7 @@ auto Account::DisplayStatistics(String& contents) const -> bool
         .Concatenate("\n notaryID: "sv)
         .Concatenate(GetPurportedNotaryID().asBase58(api_.Crypto()))
         .Concatenate("\n instrumentDefinitionID: "sv)
-        .Concatenate(acctInstrumentDefinitionID_.asBase58(api_.Crypto()))
+        .Concatenate(acct_instrument_definition_id_.asBase58(api_.Crypto()))
         .Concatenate("\n\n"sv);
 
     return true;
@@ -853,21 +852,21 @@ auto Account::SaveContractWallet(Tag& parent) const -> bool
     auto strNotaryID = String::Factory(GetPurportedNotaryID());
     auto strNymID = String::Factory(GetNymID());
     auto strInstrumentDefinitionID =
-        String::Factory(acctInstrumentDefinitionID_);
+        String::Factory(acct_instrument_definition_id_);
 
     auto acctType = String::Factory();
-    TranslateAccountTypeToString(acctType_, acctType);
+    TranslateAccountTypeToString(acct_type_, acctType);
 
     // Name is in the clear in memory,
     // and base64 in storage.
     auto ascName = Armored::Factory();
-    if (m_strName->Exists()) {
-        ascName->SetString(m_strName, false);  // linebreaks == false
+    if (name_->Exists()) {
+        ascName->SetString(name_, false);  // linebreaks == false
     }
 
     TagPtr pTag(new Tag("account"));
 
-    pTag->add_attribute("name", m_strName->Exists() ? ascName->Get() : "");
+    pTag->add_attribute("name", name_->Exists() ? ascName->Get() : "");
     pTag->add_attribute("accountID", strAccountID->Get());
     pTag->add_attribute("nymID", strNymID->Get());
     pTag->add_attribute("notaryID", strNotaryID->Get());
@@ -876,8 +875,8 @@ auto Account::SaveContractWallet(Tag& parent) const -> bool
     // and are not ever actually loaded back up. In the
     // previous version of this code, they were written
     // only as XML comments.
-    pTag->add_attribute("infoLastKnownBalance", balanceAmount_->Get());
-    pTag->add_attribute("infoDateOfLastBalance", balanceDate_->Get());
+    pTag->add_attribute("infoLastKnownBalance", balance_amount_->Get());
+    pTag->add_attribute("infoDateOfLastBalance", balance_date_->Get());
     pTag->add_attribute("infoAccountType", acctType->Get());
     pTag->add_attribute(
         "infoInstrumentDefinitionID", strInstrumentDefinitionID->Get());
@@ -889,31 +888,31 @@ auto Account::SaveContractWallet(Tag& parent) const -> bool
 
 // Most contracts do not override this function...
 // But OTAccount does, because IF THE SIGNER has chosen to SIGN the account
-// based on the current balances, then we need to update the m_xmlUnsigned
+// based on the current balances, then we need to update the xml_unsigned_
 // member with the current balances and other updated information before the
 // signing occurs. (Presumably this is the whole reason why the account is
 // being re-signed.)
 //
-// Normally, in other Contract and derived classes, m_xmlUnsigned is read
+// Normally, in other Contract and derived classes, xml_unsigned_ is read
 // from the file and then kept read-only, since contracts do not normally
 // change. But as accounts change in balance, they must be re-signed to keep the
 // signatures valid.
 void Account::UpdateContents(const PasswordPrompt& reason)
 {
-    auto strAssetTYPEID = String::Factory(acctInstrumentDefinitionID_);
+    auto strAssetTYPEID = String::Factory(acct_instrument_definition_id_);
     auto ACCOUNT_ID = String::Factory(GetPurportedAccountID());
     auto NOTARY_ID = String::Factory(GetPurportedNotaryID());
     auto NYM_ID = String::Factory(GetNymID());
 
     auto acctType = String::Factory();
-    TranslateAccountTypeToString(acctType_, acctType);
+    TranslateAccountTypeToString(acct_type_, acctType);
 
     // I release this because I'm about to repopulate it.
-    m_xmlUnsigned->Release();
+    xml_unsigned_->Release();
 
     Tag tag("account");
 
-    tag.add_attribute("version", m_strVersion->Get());
+    tag.add_attribute("version", version_->Get());
     tag.add_attribute("type", acctType->Get());
     tag.add_attribute("accountID", ACCOUNT_ID->Get());
     tag.add_attribute("nymID", NYM_ID->Get());
@@ -922,17 +921,18 @@ void Account::UpdateContents(const PasswordPrompt& reason)
 
     if (IsStashAcct()) {
         TagPtr tagStash(new Tag("stashinfo"));
-        tagStash->add_attribute("cronItemNum", std::to_string(stashTransNum_));
+        tagStash->add_attribute(
+            "cronItemNum", std::to_string(stash_trans_num_));
         tag.add_tag(tagStash);
     }
-    if (!inboxHash_.empty()) {
-        auto strHash = String::Factory(inboxHash_);
+    if (!inbox_hash_.empty()) {
+        auto strHash = String::Factory(inbox_hash_);
         TagPtr tagBox(new Tag("inboxHash"));
         tagBox->add_attribute("value", strHash->Get());
         tag.add_tag(tagBox);
     }
-    if (!outboxHash_.empty()) {
-        auto strHash = String::Factory(outboxHash_);
+    if (!outbox_hash_.empty()) {
+        auto strHash = String::Factory(outbox_hash_);
         TagPtr tagBox(new Tag("outboxHash"));
         tagBox->add_attribute("value", strHash->Get());
         tag.add_tag(tagBox);
@@ -940,12 +940,12 @@ void Account::UpdateContents(const PasswordPrompt& reason)
 
     TagPtr tagBalance(new Tag("balance"));
 
-    tagBalance->add_attribute("date", balanceDate_->Get());
-    tagBalance->add_attribute("amount", balanceAmount_->Get());
+    tagBalance->add_attribute("date", balance_date_->Get());
+    tagBalance->add_attribute("amount", balance_amount_->Get());
 
     tag.add_tag(tagBalance);
 
-    if (markForDeletion_) {
+    if (mark_for_deletion_) {
         tag.add_tag(
             "MARKED_FOR_DELETION",
             "THIS ACCOUNT HAS BEEN MARKED FOR DELETION AT ITS OWN REQUEST");
@@ -954,7 +954,7 @@ void Account::UpdateContents(const PasswordPrompt& reason)
     UnallocatedCString str_result;
     tag.output(str_result);
 
-    m_xmlUnsigned->Concatenate(String::Factory(str_result));
+    xml_unsigned_->Concatenate(String::Factory(str_result));
 }
 
 // return -1 if error, 0 if nothing, and 1 if the node was processed.
@@ -978,7 +978,7 @@ auto Account::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
     if (strNodeName->Compare("account")) {
         auto acctType = String::Factory();
 
-        m_strVersion = String::Factory(xml->getAttributeValue("version"));
+        version_ = String::Factory(xml->getAttributeValue("version"));
         acctType = String::Factory(xml->getAttributeValue("type"));
 
         if (!acctType->Exists()) {
@@ -988,9 +988,9 @@ auto Account::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
             return -1;
         }
 
-        acctType_ = TranslateAccountTypeStringToEnum(acctType);
+        acct_type_ = TranslateAccountTypeStringToEnum(acctType);
 
-        if (Account::err_acct == acctType_) {
+        if (Account::err_acct == acct_type_) {
             LogError()(OT_PRETTY_CLASS())("Failed: account 'type' "
                                           "attribute contains unknown value.")
                 .Flush();
@@ -1001,7 +1001,7 @@ auto Account::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
             String::Factory(xml->getAttributeValue("instrumentDefinitionID"));
 
         if (strAcctAssetType->Exists()) {
-            acctInstrumentDefinitionID_ =
+            acct_instrument_definition_id_ =
                 api_.Factory().UnitIDFromBase58(strAcctAssetType->Bytes());
         } else {
             LogError()(OT_PRETTY_CLASS())("Failed: missing "
@@ -1025,7 +1025,7 @@ auto Account::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
         SetNymID(NYM_ID);
 
         auto strInstrumentDefinitionID =
-            String::Factory(acctInstrumentDefinitionID_);
+            String::Factory(acct_instrument_definition_id_);
         LogDebug()(OT_PRETTY_CLASS())("Account Type: ")(acctType.get()).Flush();
         LogDebug()(OT_PRETTY_CLASS())("AccountID: ")(strAccountID.get())
             .Flush();
@@ -1041,7 +1041,7 @@ auto Account::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
         auto strHash = String::Factory(xml->getAttributeValue("value"));
 
         if (strHash->Exists()) {
-            inboxHash_ = api_.Factory().IdentifierFromBase58(strHash->Bytes());
+            inbox_hash_ = api_.Factory().IdentifierFromBase58(strHash->Bytes());
         }
 
         LogDebug()(OT_PRETTY_CLASS())("Account inboxHash: ")(strHash.get())
@@ -1052,7 +1052,8 @@ auto Account::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
         auto strHash = String::Factory(xml->getAttributeValue("value"));
 
         if (strHash->Exists()) {
-            outboxHash_ = api_.Factory().IdentifierFromBase58(strHash->Bytes());
+            outbox_hash_ =
+                api_.Factory().IdentifierFromBase58(strHash->Bytes());
         }
 
         LogDebug()(OT_PRETTY_CLASS())("Account outboxHash: ")(strHash.get())
@@ -1060,7 +1061,7 @@ auto Account::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
 
         retval = 1;
     } else if (strNodeName->Compare("MARKED_FOR_DELETION")) {
-        markForDeletion_ = true;
+        mark_for_deletion_ = true;
         LogDebug()(OT_PRETTY_CLASS())(
             "This asset account has been MARKED_FOR_DELETION at some point"
             "prior. ")
@@ -1068,23 +1069,23 @@ auto Account::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
 
         retval = 1;
     } else if (strNodeName->Compare("balance")) {
-        balanceDate_ = String::Factory(xml->getAttributeValue("date"));
-        balanceAmount_ = String::Factory(xml->getAttributeValue("amount"));
+        balance_date_ = String::Factory(xml->getAttributeValue("date"));
+        balance_amount_ = String::Factory(xml->getAttributeValue("amount"));
 
         // I convert to integer / std::int64_t and back to string.
         // (Just an easy way to keep the data clean.)
 
-        const auto date = parseTimestamp((balanceDate_->Get()));
-        const auto amount = factory::Amount(balanceAmount_->Get());
+        const auto date = parseTimestamp((balance_date_->Get()));
+        const auto amount = factory::Amount(balance_amount_->Get());
 
-        balanceDate_->Set(String::Factory(formatTimestamp(date)));
+        balance_date_->Set(String::Factory(formatTimestamp(date)));
         UnallocatedCString balance;
         amount.Serialize(writer(balance));
-        balanceAmount_->Set(balance.c_str());
+        balance_amount_->Set(balance.c_str());
 
-        LogDebug()(OT_PRETTY_CLASS())("BALANCE  -- ")(balanceAmount_.get())
+        LogDebug()(OT_PRETTY_CLASS())("BALANCE  -- ")(balance_amount_.get())
             .Flush();
-        LogDebug()(OT_PRETTY_CLASS())("DATE     --")(balanceDate_.get())
+        LogDebug()(OT_PRETTY_CLASS())("DATE     --")(balance_date_.get())
             .Flush();
 
         retval = 1;
@@ -1102,18 +1103,18 @@ auto Account::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
             String::Factory(xml->getAttributeValue("cronItemNum"));
         if (!strStashTransNum->Exists() ||
             ((lTransNum = strStashTransNum->ToLong()) <= 0)) {
-            stashTransNum_ = 0;
+            stash_trans_num_ = 0;
             LogError()(OT_PRETTY_CLASS())(
                 "Error: Bad transaction number "
                 "for supposed corresponding cron item: ")(lTransNum)(".")
                 .Flush();
             return -1;
         } else {
-            stashTransNum_ = lTransNum;
+            stash_trans_num_ = lTransNum;
         }
 
         LogDebug()(OT_PRETTY_CLASS())("STASH INFO:   CronItemNum     --")(
-            stashTransNum_)
+            stash_trans_num_)
             .Flush();
 
         retval = 1;
@@ -1124,7 +1125,7 @@ auto Account::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
 
 auto Account::IsInternalServerAcct() const -> bool
 {
-    switch (acctType_) {
+    switch (acct_type_) {
         case Account::user:
         case Account::issuer: {
 
@@ -1149,7 +1150,7 @@ auto Account::IsInternalServerAcct() const -> bool
 
 auto Account::IsOwnedByUser() const -> bool
 {
-    switch (acctType_) {
+    switch (acct_type_) {
         case Account::user:
         case Account::issuer: {
 
@@ -1174,11 +1175,11 @@ auto Account::IsOwnedByUser() const -> bool
 
 auto Account::IsOwnedByEntity() const -> bool { return false; }
 
-auto Account::IsIssuer() const -> bool { return Account::issuer == acctType_; }
+auto Account::IsIssuer() const -> bool { return Account::issuer == acct_type_; }
 
 auto Account::IsAllowedToGoNegative() const -> bool
 {
-    switch (acctType_) {
+    switch (acct_type_) {
         // issuer acct controlled by a user
         case Account::issuer:
         // basket issuer acct controlled by the server (for a basket currency)
@@ -1211,10 +1212,10 @@ auto Account::IsAllowedToGoNegative() const -> bool
 
 void Account::Release_Account()
 {
-    balanceDate_->Release();
-    balanceAmount_->Release();
-    inboxHash_.clear();
-    outboxHash_.clear();
+    balance_date_->Release();
+    balance_amount_->Release();
+    inbox_hash_.clear();
+    outbox_hash_.clear();
 }
 
 void Account::Release()

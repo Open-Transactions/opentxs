@@ -16,7 +16,7 @@ class Test_RequestSocket : public ::testing::Test
 public:
     const zmq::Context& context_;
 
-    const ot::UnallocatedCString testMessage_{"zeromq test message"};
+    const ot::UnallocatedCString test_message_{"zeromq test message"};
 
     Test_RequestSocket()
         : context_(ot::Context().ZMQ())

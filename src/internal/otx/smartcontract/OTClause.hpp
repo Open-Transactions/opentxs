@@ -23,16 +23,16 @@ namespace opentxs
 {
 class OTClause
 {
-    OTString m_strName;  // Name of this Clause.
-    OTString m_strCode;  // script code.
-    OTBylaw* m_pBylaw;   // the Bylaw that this clause belongs to.
+    OTString name_;   // Name of this Clause.
+    OTString code_;   // script code.
+    OTBylaw* bylaw_;  // the Bylaw that this clause belongs to.
 
 public:
-    void SetBylaw(OTBylaw& theBylaw) { m_pBylaw = &theBylaw; }
+    void SetBylaw(OTBylaw& theBylaw) { bylaw_ = &theBylaw; }
 
-    auto GetName() const -> const String& { return m_strName; }
+    auto GetName() const -> const String& { return name_; }
 
-    auto GetBylaw() const -> OTBylaw* { return m_pBylaw; }
+    auto GetBylaw() const -> OTBylaw* { return bylaw_; }
 
     auto GetCode() const -> const char*;
 

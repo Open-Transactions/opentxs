@@ -18,10 +18,10 @@ namespace opentxs
 {
 Instrument::Instrument(const api::Session& api)
     : OTScriptable(api)
-    , m_InstrumentDefinitionID()
-    , m_NotaryID()
-    , m_VALID_FROM()
-    , m_VALID_TO()
+    , instrument_definition_id_()
+    , notary_id_()
+    , valid_from_()
+    , valid_to_()
 {
     InitInstrument();
 }
@@ -31,10 +31,10 @@ Instrument::Instrument(
     const identifier::Notary& NOTARY_ID,
     const identifier::UnitDefinition& INSTRUMENT_DEFINITION_ID)
     : OTScriptable(api)
-    , m_InstrumentDefinitionID(INSTRUMENT_DEFINITION_ID)
-    , m_NotaryID(NOTARY_ID)
-    , m_VALID_FROM()
-    , m_VALID_TO()
+    , instrument_definition_id_(INSTRUMENT_DEFINITION_ID)
+    , notary_id_(NOTARY_ID)
+    , valid_from_()
+    , valid_to_()
 {
     InitInstrument();
 }
@@ -53,7 +53,7 @@ auto Instrument::IsExpired() -> bool
     // AND the valid_to is a nonzero number (0 means "doesn't expire")
     // THEN return true (it's expired.)
     //
-    if ((CURRENT_TIME >= m_VALID_TO) && (m_VALID_TO > Time{})) {
+    if ((CURRENT_TIME >= valid_to_) && (valid_to_ > Time{})) {
         return true;
     } else {
         return false;
@@ -65,15 +65,15 @@ auto Instrument::VerifyCurrentDate() -> bool
 {
     const auto CURRENT_TIME = Clock::now();
 
-    if ((CURRENT_TIME >= m_VALID_FROM) &&
-        ((CURRENT_TIME <= m_VALID_TO) || (Time{} == m_VALID_TO))) {
+    if ((CURRENT_TIME >= valid_from_) &&
+        ((CURRENT_TIME <= valid_to_) || (Time{} == valid_to_))) {
         return true;
     } else {
         return false;
     }
 }
 
-void Instrument::InitInstrument() { m_strContractType->Set("INSTRUMENT"); }
+void Instrument::InitInstrument() { contract_type_->Set("INSTRUMENT"); }
 
 void Instrument::Release_Instrument()
 {
@@ -140,7 +140,7 @@ auto Instrument::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
 Instrument::~Instrument()
 {
     Release_Instrument();
-    m_VALID_FROM = Time{};
-    m_VALID_TO = Time{};
+    valid_from_ = Time{};
+    valid_to_ = Time{};
 }
 }  // namespace opentxs

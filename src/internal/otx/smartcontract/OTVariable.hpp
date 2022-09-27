@@ -44,28 +44,28 @@ public:
     };
 
 private:
-    OTString m_strName;              // Name of this variable.
-    UnallocatedCString m_str_Value;  // If a string, the value is stored here.
-    std::int32_t m_nValue{};         // If an integer, the value is stored here.
-    bool m_bValue{false};            // If a bool, the value is stored here.
-    UnallocatedCString m_str_ValueBackup;  // If a string, the value backup is
-                                           // stored here. (So we can see if it
-                                           // has changed since execution)
-    std::int32_t m_nValueBackup{};  // If an integer, the value backup is stored
+    OTString name_;              // Name of this variable.
+    UnallocatedCString string_;  // If a string, the value is stored here.
+    std::int32_t number_{};      // If an integer, the value is stored here.
+    bool bool_{false};           // If a bool, the value is stored here.
+    UnallocatedCString string_backup_;  // If a string, the value backup is
+                                        // stored here. (So we can see if it
+                                        // has changed since execution)
+    std::int32_t number_backup_{};  // If an integer, the value backup is stored
                                     // here.
     // (So we can see if it has changed since execution)
-    bool m_bValueBackup{false};  // If a bool, the value backup is stored here.
-                                 // (So we can check for dirtiness later...)
-    OTBylaw* m_pBylaw{nullptr};  // the Bylaw that this variable belongs to.
-    OTVariable_Type m_Type{Var_Error_Type};  // Currently bool, std::int32_t, or
-                                             // string.
-    OTVariable_Access m_Access{Var_Error_Access};  // Determines how the
-                                                   // variable is used inside
-                                                   // the script.
-    OTScript* m_pScript{nullptr};  // If the variable is set onto a script, this
-                                   // pointer gets set. When the variable
-                                   // destructs, it will remove itself from the
-                                   // script.
+    bool bool_backup_{false};  // If a bool, the value backup is stored here.
+                               // (So we can check for dirtiness later...)
+    OTBylaw* bylaw_{nullptr};  // the Bylaw that this variable belongs to.
+    OTVariable_Type type_{Var_Error_Type};  // Currently bool, std::int32_t, or
+                                            // string.
+    OTVariable_Access access_{Var_Error_Access};  // Determines how the
+                                                  // variable is used inside
+                                                  // the script.
+    OTScript* script_{nullptr};  // If the variable is set onto a script, this
+                                 // pointer gets set. When the variable
+                                 // destructs, it will remove itself from the
+                                 // script.
 
 public:
     void RegisterForExecution(OTScript& theScript);  // We keep an
@@ -84,35 +84,35 @@ public:
                                    // CHANGED since it was last set clean.
     void SetAsClean();  // Sets the variable as clean, so you can check it later
                         // and see if it's been changed (if it's DIRTY again.)
-    auto IsConstant() const -> bool { return (Var_Constant == m_Access); }
+    auto IsConstant() const -> bool { return (Var_Constant == access_); }
     auto IsPersistent() const -> bool
     {
-        return ((Var_Persistent == m_Access) || (Var_Important == m_Access));
+        return ((Var_Persistent == access_) || (Var_Important == access_));
     }  // important vars are persistent, too.
-    auto IsImportant() const -> bool { return (Var_Important == m_Access); }
-    void SetBylaw(OTBylaw& theBylaw) { m_pBylaw = &theBylaw; }
+    auto IsImportant() const -> bool { return (Var_Important == access_); }
+    void SetBylaw(OTBylaw& theBylaw) { bylaw_ = &theBylaw; }
     auto SetValue(const std::int32_t& nValue) -> bool;
     auto SetValue(bool bValue) -> bool;
     auto SetValue(const UnallocatedCString& str_Value) -> bool;
 
     auto GetName() const -> const String&
     {
-        return m_strName;
+        return name_;
     }  // variable's name as used in a script.
-    auto GetType() const -> OTVariable_Type { return m_Type; }
-    auto GetAccess() const -> OTVariable_Access { return m_Access; }
+    auto GetType() const -> OTVariable_Type { return type_; }
+    auto GetAccess() const -> OTVariable_Access { return access_; }
 
-    auto IsInteger() const -> bool { return (Var_Integer == m_Type); }
-    auto IsBool() const -> bool { return (Var_Bool == m_Type); }
-    auto IsString() const -> bool { return (Var_String == m_Type); }
+    auto IsInteger() const -> bool { return (Var_Integer == type_); }
+    auto IsBool() const -> bool { return (Var_Bool == type_); }
+    auto IsString() const -> bool { return (Var_String == type_); }
 
-    auto CopyValueInteger() const -> std::int32_t { return m_nValue; }
-    auto CopyValueBool() const -> bool { return m_bValue; }
-    auto CopyValueString() const -> UnallocatedCString { return m_str_Value; }
+    auto CopyValueInteger() const -> std::int32_t { return number_; }
+    auto CopyValueBool() const -> bool { return bool_; }
+    auto CopyValueString() const -> UnallocatedCString { return string_; }
 
-    auto GetValueInteger() -> std::int32_t& { return m_nValue; }
-    auto GetValueBool() -> bool& { return m_bValue; }
-    auto GetValueString() -> UnallocatedCString& { return m_str_Value; }
+    auto GetValueInteger() -> std::int32_t& { return number_; }
+    auto GetValueBool() -> bool& { return bool_; }
+    auto GetValueString() -> UnallocatedCString& { return string_; }
 
     auto Compare(OTVariable& rhs) -> bool;
 

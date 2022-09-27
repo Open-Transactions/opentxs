@@ -20,9 +20,9 @@ namespace opentxs
 {
 OTTrackable::OTTrackable(const api::Session& api)
     : Instrument(api)
-    , m_lTransactionNum(0)
-    , m_SENDER_ACCT_ID()
-    , m_SENDER_NYM_ID()
+    , transaction_num_(0)
+    , sender_account_id_()
+    , sender_nym_id_()
 {
     InitTrackable();
 }
@@ -32,9 +32,9 @@ OTTrackable::OTTrackable(
     const identifier::Notary& NOTARY_ID,
     const identifier::UnitDefinition& INSTRUMENT_DEFINITION_ID)
     : Instrument(api, NOTARY_ID, INSTRUMENT_DEFINITION_ID)
-    , m_lTransactionNum(0)
-    , m_SENDER_ACCT_ID()
-    , m_SENDER_NYM_ID()
+    , transaction_num_(0)
+    , sender_account_id_()
+    , sender_nym_id_()
 {
     InitTrackable();
 }
@@ -46,9 +46,9 @@ OTTrackable::OTTrackable(
     const identifier::Generic& ACCT_ID,
     const identifier::Nym& NYM_ID)
     : Instrument(api, NOTARY_ID, INSTRUMENT_DEFINITION_ID)
-    , m_lTransactionNum(0)
-    , m_SENDER_ACCT_ID()
-    , m_SENDER_NYM_ID()
+    , transaction_num_(0)
+    , sender_account_id_()
+    , sender_nym_id_()
 {
     InitTrackable();
 
@@ -59,24 +59,24 @@ OTTrackable::OTTrackable(
 void OTTrackable::InitTrackable()
 {
     // Should never happen in practice. A child class will override it.
-    m_strContractType->Set("TRACKABLE");
-    m_lTransactionNum = 0;
+    contract_type_->Set("TRACKABLE");
+    transaction_num_ = 0;
 }
 
 auto OTTrackable::HasTransactionNum(const std::int64_t& lInput) const -> bool
 {
-    return lInput == m_lTransactionNum;
+    return lInput == transaction_num_;
 }
 
 void OTTrackable::GetAllTransactionNumbers(NumList& numlistOutput) const
 {
-    if (m_lTransactionNum > 0) { numlistOutput.Add(m_lTransactionNum); }
+    if (transaction_num_ > 0) { numlistOutput.Add(transaction_num_); }
 }
 
 void OTTrackable::Release_Trackable()
 {
-    m_SENDER_ACCT_ID.clear();
-    m_SENDER_NYM_ID.clear();
+    sender_account_id_.clear();
+    sender_nym_id_.clear();
 }
 
 void OTTrackable::Release()
@@ -90,12 +90,12 @@ void OTTrackable::Release()
 
 void OTTrackable::SetSenderAcctID(const identifier::Generic& ACCT_ID)
 {
-    m_SENDER_ACCT_ID = ACCT_ID;
+    sender_account_id_ = ACCT_ID;
 }
 
 void OTTrackable::SetSenderNymID(const identifier::Nym& NYM_ID)
 {
-    m_SENDER_NYM_ID = NYM_ID;
+    sender_nym_id_ = NYM_ID;
 }
 
 void OTTrackable::UpdateContents(const PasswordPrompt& reason) {}

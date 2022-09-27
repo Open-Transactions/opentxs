@@ -515,7 +515,7 @@ auto Server::accept_entire_nymbox(
     const auto serialized = String::Factory(*processLedger);
     initialize_server_command(
         lock, MessageType::processNymbox, -1, true, true, output);
-    ready &= output.m_ascPayload->SetString(serialized);
+    ready &= output.payload_->SetString(serialized);
     finalize_server_command(output, reason);
 
     OT_ASSERT(ready);
@@ -714,7 +714,7 @@ auto Server::add_item_to_workflow(
     auto plaintext = String::Factory();
 
     try {
-        auto envelope = api_.Factory().Envelope(message->m_ascPayload);
+        auto envelope = api_.Factory().Envelope(message->payload_);
         const auto decrypted =
             envelope->Open(nym, plaintext->WriteInto(), reason);
 
@@ -893,7 +893,7 @@ auto Server::attempt_delivery(
 {
     request_sent_.Send([&] {
         auto out = network::zeromq::Message{};
-        out.AddFrame(message.m_strCommand->Get());
+        out.AddFrame(message.command_->Get());
 
         return out;
     }());
@@ -905,7 +905,7 @@ auto Server::attempt_delivery(
             enable_otx_push_.load()));
     auto& [status, reply] = output;
     const auto needRequestNumber =
-        need_request_number(Message::Type(message.m_strCommand->Get()));
+        need_request_number(Message::Type(message.command_->Get()));
 
     switch (status) {
         case client::SendResult::VALID_REPLY: {
@@ -913,7 +913,7 @@ auto Server::attempt_delivery(
 
             reply_received_.Send([&] {
                 auto out = network::zeromq::Message{};
-                out.AddFrame(message.m_strCommand->Get());
+                out.AddFrame(message.command_->Get());
 
                 return out;
             }());
@@ -926,9 +926,9 @@ auto Server::attempt_delivery(
 
             process_reply(contextLock, client, *numbers, *reply, reason);
 
-            if (reply->m_bSuccess) {
+            if (reply->success_) {
                 LogVerbose()(OT_PRETTY_CLASS())("Success delivering ")(
-                    message.m_strCommand.get())
+                    message.command_.get())
                     .Flush();
 
                 return output;
@@ -949,8 +949,7 @@ auto Server::attempt_delivery(
                 return output;
             } else {
                 LogVerbose()(OT_PRETTY_CLASS())(
-                    "Success resyncing request number ")(
-                    message.m_strCommand.get())
+                    "Success resyncing request number ")(message.command_.get())
                     .Flush();
             }
 
@@ -959,7 +958,7 @@ auto Server::attempt_delivery(
 
             if (false == updated) {
                 LogError()(OT_PRETTY_CLASS())("Unable to update ")(
-                    message.m_strCommand.get())(" with new request number")
+                    message.command_.get())(" with new request number")
                     .Flush();
                 status = client::SendResult::TIMEOUT;
                 reply.reset();
@@ -969,7 +968,7 @@ auto Server::attempt_delivery(
             } else {
                 LogVerbose()(OT_PRETTY_CLASS())(
                     "Success updating request number on ")(
-                    message.m_strCommand.get())
+                    message.command_.get())
                     .Flush();
             }
 
@@ -982,7 +981,7 @@ auto Server::attempt_delivery(
 
             if (client::SendResult::VALID_REPLY == status) {
                 LogVerbose()(OT_PRETTY_CLASS())("Success delivering ")(
-                    message.m_strCommand.get())(" (second attempt)")
+                    message.command_.get())(" (second attempt)")
                     .Flush();
                 process_reply(contextLock, client, {}, *reply, reason);
 
@@ -991,19 +990,18 @@ auto Server::attempt_delivery(
         } break;
         case client::SendResult::TIMEOUT: {
             LogError()(OT_PRETTY_CLASS())("Timeout delivering ")(
-                message.m_strCommand.get())
+                message.command_.get())
                 .Flush();
             ++failure_counter_;
         } break;
         case client::SendResult::INVALID_REPLY: {
             LogError()(OT_PRETTY_CLASS())("Invalid reply to ")(
-                message.m_strCommand.get())
+                message.command_.get())
                 .Flush();
             ++failure_counter_;
         } break;
         case client::SendResult::Error: {
-            LogError()(OT_PRETTY_CLASS())("Malformed ")(
-                message.m_strCommand.get())
+            LogError()(OT_PRETTY_CLASS())("Malformed ")(message.command_.get())
                 .Flush();
             ++failure_counter_;
         } break;
@@ -1287,12 +1285,12 @@ auto Server::extract_payment_instrument_from_notice(
         // the instrument
         // itself that we need to return.)
 
-        // SENDER:     pMsg->m_strNymID
-        // RECIPIENT:  pMsg->m_strNymID2
-        // INSTRUMENT: pMsg->m_ascPayload (in an OTEnvelope)
+        // SENDER:     pMsg->nym_id_
+        // RECIPIENT:  pMsg->nym_id2_
+        // INSTRUMENT: pMsg->payload_ (in an OTEnvelope)
         //
         try {
-            auto theEnvelope = api_.Factory().Envelope(pMsg->m_ascPayload);
+            auto theEnvelope = api_.Factory().Envelope(pMsg->payload_);
             auto strEnvelopeContents = String::Factory();
 
             // Decrypt the Envelope.
@@ -1986,9 +1984,9 @@ void Server::initialize_server_command(const MessageType type, Message& output)
     OT_ASSERT(nym_);
 
     output.ReleaseSignatures();
-    output.m_strCommand->Set(Message::Command(type).data());
-    output.m_strNymID = String::Factory(nym_->ID());
-    output.m_strNotaryID = String::Factory(server_id_);
+    output.command_->Set(Message::Command(type).data());
+    output.nym_id_ = String::Factory(nym_->ID());
+    output.notary_id_ = String::Factory(server_id_);
 }
 
 auto Server::initialize_server_command(
@@ -2010,14 +2008,14 @@ auto Server::initialize_server_command(
         number = provided;
     }
 
-    output.m_strRequestNum = String::Factory(std::to_string(number).c_str());
+    output.request_num_ = String::Factory(std::to_string(number).c_str());
 
     if (withAcknowledgments) {
         output.SetAcknowledgments(acknowledged_request_numbers_);
     }
 
     if (withNymboxHash) {
-        local_nymbox_hash_.GetString(api_.Crypto(), output.m_strNymboxHash);
+        local_nymbox_hash_.GetString(api_.Crypto(), output.nymbox_hash_);
     }
 
     return number;
@@ -2060,8 +2058,8 @@ auto Server::InitializeServerCommand(
     auto& [requestNumber, message] = output;
     const auto& notUsed [[maybe_unused]] = requestNumber;
 
-    message->m_ascPayload = payload;
-    message->m_strAcctID = String::Factory(accountID);
+    message->payload_ = payload;
+    message->acct_id_ = String::Factory(accountID);
 
     return output;
 }
@@ -2078,7 +2076,7 @@ auto Server::InitializeServerCommand(
     auto output = initialize_server_command(
         lock, type, provided, withAcknowledgments, withNymboxHash);
     [[maybe_unused]] auto& [requestNumber, message] = output;
-    message->m_strNymID2 = String::Factory(recipientNymID);
+    message->nym_id2_ = String::Factory(recipientNymID);
 
     return output;
 }
@@ -2371,9 +2369,9 @@ void Server::need_box_items(
 
         OT_ASSERT(message);
 
-        message->m_strAcctID = String::Factory(nym_->ID());
-        message->m_lDepth = nymbox_box_type_;
-        message->m_lTransactionNum = number;
+        message->acct_id_ = String::Factory(nym_->ID());
+        message->depth_ = nymbox_box_type_;
+        message->transaction_num_ = number;
         const auto finalized = FinalizeServerCommand(*message, reason);
 
         OT_ASSERT(finalized);
@@ -2388,7 +2386,7 @@ void Server::need_box_items(
             case client::SendResult::VALID_REPLY: {
                 OT_ASSERT(result.second);
 
-                if (result.second->m_bSuccess) {
+                if (result.second->success_) {
                     ++have;
 
                     continue;
@@ -2448,7 +2446,7 @@ void Server::need_nymbox(
             OT_ASSERT(result.second);
             auto& reply = *result.second;
 
-            if (reply.m_bSuccess) {
+            if (reply.success_) {
                 if (process_nymbox_.load() && false == bool(pending_message_)) {
                     pending_message_ = result.second;
                 }
@@ -2537,7 +2535,7 @@ void Server::need_process_nymbox(
 
     if (pending_message_) {
         const RequestNumber targetNumber =
-            String::StringToUlong(pending_message_->m_strRequestNum->Get());
+            String::StringToUlong(pending_message_->request_num_->Get());
 
         for (auto& [number, status] : outcomes) {
             if (number == targetNumber) {
@@ -2572,7 +2570,7 @@ void Server::need_process_nymbox(
         return;
     }
 
-    local_nymbox_hash_.GetString(api_.Crypto(), message->m_strNymboxHash);
+    local_nymbox_hash_.GetString(api_.Crypto(), message->nymbox_hash_);
 
     if (false == finalize_server_command(*message, reason)) {
         LogError()(OT_PRETTY_CLASS())("Failed to finalize server message.")
@@ -2593,7 +2591,7 @@ void Server::need_process_nymbox(
 
             OT_ASSERT(pReply);
 
-            if (pReply->m_bSuccess) {
+            if (pReply->success_) {
                 [[maybe_unused]] auto [number, message] =
                     initialize_server_command(
                         contextLock, MessageType::getNymbox, -1, true, true);
@@ -2704,8 +2702,8 @@ void Server::pending_send(
 
     auto result = attempt_delivery(
         contextLock, messageLock, client, *pending_message_, reason);
-    const auto needRequestNumber = need_request_number(
-        Message::Type(pending_message_->m_strCommand->Get()));
+    const auto needRequestNumber =
+        need_request_number(Message::Type(pending_message_->command_->Get()));
 
     switch (result.first) {
         case client::SendResult::SHUTDOWN: {
@@ -2719,7 +2717,7 @@ void Server::pending_send(
             message = result.second;
             const auto& reply = *message;
 
-            if (reply.m_bSuccess) {
+            if (reply.success_) {
                 status = otx::LastReplyStatus::MessageSuccess;
             } else {
                 status = otx::LastReplyStatus::MessageFailed;
@@ -2781,11 +2779,11 @@ auto Server::PingNotary(const PasswordPrompt& reason)
         return {};
     }
 
-    request->m_strRequestNum =
+    request->request_num_ =
         String::Factory(std::to_string(FIRST_REQUEST_NUMBER).c_str());
-    request->m_strNymPublicKey = api_.Factory().InternalSession().Armored(
+    request->nym_public_key_ = api_.Factory().InternalSession().Armored(
         serializedAuthKey, "ASYMMETRIC KEY");
-    request->m_strNymID2 = api_.Factory().InternalSession().Armored(
+    request->nym_id2_ = api_.Factory().InternalSession().Armored(
         serializedEncryptKey, "ASYMMETRIC KEY");
 
     if (false == finalize_server_command(*request, reason)) {
@@ -2892,11 +2890,11 @@ void Server::process_accept_cron_receipt_reply(
 
         // TransID for original offer.
         // (Offer may trade many times.)
-        pData->transaction_id = std::to_string(theTrade->GetTransactionNum());
+        pData->transaction_id_ = std::to_string(theTrade->GetTransactionNum());
         // TransID for BOTH receipts for current trade.
         // (Asset/Currency.)
-        pData->updated_id = std::to_string(pServerItem->GetTransactionNum());
-        pData->completed_count = std::to_string(theTrade->GetCompletedCount());
+        pData->updated_id_ = std::to_string(pServerItem->GetTransactionNum());
+        pData->completed_count_ = std::to_string(theTrade->GetCompletedCount());
         auto account = api_.Wallet().Internal().Account(accountID);
 
         OT_ASSERT(account);
@@ -2913,48 +2911,48 @@ void Server::process_accept_cron_receipt_reply(
         if (bIsAsset) {
             const auto strInstrumentDefinitionID =
                 String::Factory(theTrade->GetInstrumentDefinitionID());
-            pData->instrument_definition_id = strInstrumentDefinitionID->Get();
+            pData->instrument_definition_id_ = strInstrumentDefinitionID->Get();
             // The amount of ASSETS moved, this trade.
-            pData->amount_sold = [&] {
+            pData->amount_sold_ = [&] {
                 auto buf = UnallocatedCString{};
                 pServerItem->GetAmount().Serialize(writer(buf));
                 return buf;
             }();
-            pData->asset_acct_id = strAcctID->Get();
-            pData->asset_receipt = strServerTransaction->Get();
+            pData->asset_acct_id_ = strAcctID->Get();
+            pData->asset_receipt_ = strServerTransaction->Get();
         } else if (bIsCurrency) {
             const auto strCurrencyID =
                 String::Factory(theTrade->GetCurrencyID());
-            pData->currency_id = strCurrencyID->Get();
-            pData->currency_paid = [&] {
+            pData->currency_id_ = strCurrencyID->Get();
+            pData->currency_paid_ = [&] {
                 auto buf = UnallocatedCString{};
                 pServerItem->GetAmount().Serialize(writer(buf));
                 return buf;
             }();
-            pData->currency_acct_id = strAcctID->Get();
-            pData->currency_receipt = strServerTransaction->Get();
+            pData->currency_acct_id_ = strAcctID->Get();
+            pData->currency_receipt_ = strServerTransaction->Get();
         }
 
         const auto tProcessDate = inboxTransaction.GetDateSigned();
-        pData->date = std::to_string(Clock::to_time_t(tProcessDate));
+        pData->date_ = std::to_string(Clock::to_time_t(tProcessDate));
 
         // The original offer price. (Might be 0, if it's a market order.)
-        pData->offer_price = [&] {
+        pData->offer_price_ = [&] {
             auto buf = UnallocatedCString{};
             theOffer->GetPriceLimit().Serialize(writer(buf));
             return buf;
         }();
-        pData->finished_so_far = [&] {
+        pData->finished_so_far_ = [&] {
             auto buf = UnallocatedCString{};
             theOffer->GetFinishedSoFar().Serialize(writer(buf));
             return buf;
         }();
-        pData->scale = [&] {
+        pData->scale_ = [&] {
             auto buf = UnallocatedCString{};
             lScale.Serialize(writer(buf));
             return buf;
         }();
-        pData->is_bid = theOffer->IsBid();
+        pData->is_bid_ = theOffer->IsBid();
 
         // save to local storage...
         auto strNymID = String::Factory(nym_->ID());
@@ -3007,12 +3005,12 @@ void Server::process_accept_cron_receipt_reply(
                 continue;  // Should never happen.
             }
 
-            if (0 == pTradeData->updated_id.compare(pData->updated_id)) {
+            if (0 == pTradeData->updated_id_.compare(pData->updated_id_)) {
                 // It's a repeat of the same one. (Discard.)
-                if ((!pTradeData->instrument_definition_id.empty() &&
-                     !pData->instrument_definition_id.empty()) ||
-                    (!pTradeData->currency_id.empty() &&
-                     !pData->currency_id.empty())) {
+                if ((!pTradeData->instrument_definition_id_.empty() &&
+                     !pData->instrument_definition_id_.empty()) ||
+                    (!pTradeData->currency_id_.empty() &&
+                     !pData->currency_id_.empty())) {
                     break;
                 }
                 // Okay looks like one is the asset receipt,
@@ -3020,32 +3018,32 @@ void Server::process_accept_cron_receipt_reply(
                 // Therefore let's combine them into
                 // pTradeData!
                 //
-                if (pTradeData->instrument_definition_id.empty()) {
-                    pTradeData->instrument_definition_id =
-                        pData->instrument_definition_id;
-                    pTradeData->amount_sold = pData->amount_sold;
-                    pTradeData->asset_acct_id = pData->asset_acct_id;
-                    pTradeData->asset_receipt = pData->asset_receipt;
+                if (pTradeData->instrument_definition_id_.empty()) {
+                    pTradeData->instrument_definition_id_ =
+                        pData->instrument_definition_id_;
+                    pTradeData->amount_sold_ = pData->amount_sold_;
+                    pTradeData->asset_acct_id_ = pData->asset_acct_id_;
+                    pTradeData->asset_receipt_ = pData->asset_receipt_;
                 }
-                if (pTradeData->currency_id.empty()) {
-                    pTradeData->currency_id = pData->currency_id;
-                    pTradeData->currency_paid = pData->currency_paid;
-                    pTradeData->currency_acct_id = pData->currency_acct_id;
-                    pTradeData->currency_receipt = pData->currency_receipt;
+                if (pTradeData->currency_id_.empty()) {
+                    pTradeData->currency_id_ = pData->currency_id_;
+                    pTradeData->currency_paid_ = pData->currency_paid_;
+                    pTradeData->currency_acct_id_ = pData->currency_acct_id_;
+                    pTradeData->currency_receipt_ = pData->currency_receipt_;
                 }
-                if (!pTradeData->amount_sold.empty() &&
-                    !pTradeData->currency_paid.empty()) {
+                if (!pTradeData->amount_sold_.empty() &&
+                    !pTradeData->currency_paid_.empty()) {
 
                     const Amount lAmountSold =
-                        factory::Amount(pTradeData->amount_sold);
+                        factory::Amount(pTradeData->amount_sold_);
                     const Amount lCurrencyPaid =
-                        factory::Amount(pTradeData->currency_paid);
+                        factory::Amount(pTradeData->currency_paid_);
 
                     // just in case (divide by 0.)
                     if ((lAmountSold != 0) && (lScale != 0)) {
                         const Amount lSalePrice =
                             (lCurrencyPaid / (lAmountSold / lScale));
-                        lSalePrice.Serialize(writer(pTradeData->price));
+                        lSalePrice.Serialize(writer(pTradeData->price_));
                     }
                 }
 
@@ -3635,7 +3633,7 @@ auto Server::process_get_nymbox_response(
     OT_ASSERT(nym_);
 
     const auto& nymID = nym_->ID();
-    auto serialized = String::Factory(reply.m_ascPayload);
+    auto serialized = String::Factory(reply.payload_);
     auto nymbox =
         api_.Factory().InternalSession().Ledger(nymID, nymID, server_id_);
 
@@ -3665,15 +3663,15 @@ auto Server::process_check_nym_response(
 {
     update_nymbox_hash(lock, reply);
 
-    if ((false == reply.m_bBool) || (reply.m_ascPayload->empty())) {
+    if ((false == reply.bool_) || (reply.payload_->empty())) {
         LogVerbose()(OT_PRETTY_CLASS())("Server ")(
-            server_id_)(" does not have nym ")(reply.m_strNymID2.get())
+            server_id_)(" does not have nym ")(reply.nym_id2_.get())
             .Flush();
 
         return true;
     }
 
-    auto serialized = proto::Factory<proto::Nym>(ByteArray{reply.m_ascPayload});
+    auto serialized = proto::Factory<proto::Nym>(ByteArray{reply.payload_});
 
     auto nym = client.Wallet().Internal().Nym(serialized);
 
@@ -3695,7 +3693,7 @@ auto Server::process_get_account_data(
     const PasswordPrompt& reason) -> bool
 {
     const auto accountID =
-        api_.Factory().IdentifierFromBase58(reply.m_strAcctID->Bytes());
+        api_.Factory().IdentifierFromBase58(reply.acct_id_->Bytes());
     auto serializedAccount = String::Factory();
     auto serializedInbox = String::Factory();
     auto serializedOutbox = String::Factory();
@@ -3706,19 +3704,19 @@ auto Server::process_get_account_data(
         return false;
     }
 
-    if (false == reply.m_ascPayload->GetString(serializedAccount)) {
+    if (false == reply.payload_->GetString(serializedAccount)) {
         LogError()(OT_PRETTY_CLASS())("Invalid serialized account").Flush();
 
         return false;
     }
 
-    if (false == reply.m_ascPayload2->GetString(serializedInbox)) {
+    if (false == reply.payload2_->GetString(serializedInbox)) {
         LogError()(OT_PRETTY_CLASS())("Invalid serialized inbox").Flush();
 
         return false;
     }
 
-    if (false == reply.m_ascPayload3->GetString(serializedOutbox)) {
+    if (false == reply.payload3_->GetString(serializedOutbox)) {
         LogError()(OT_PRETTY_CLASS())("Invalid serialized outbox").Flush();
 
         return false;
@@ -3728,9 +3726,9 @@ auto Server::process_get_account_data(
         lock,
         accountID,
         serializedAccount,
-        api_.Factory().IdentifierFromBase58(reply.m_strInboxHash->Bytes()),
+        api_.Factory().IdentifierFromBase58(reply.inbox_hash_->Bytes()),
         serializedInbox,
-        api_.Factory().IdentifierFromBase58(reply.m_strOutboxHash->Bytes()),
+        api_.Factory().IdentifierFromBase58(reply.outbox_hash_->Bytes()),
         serializedOutbox,
         reason);
 }
@@ -3748,20 +3746,20 @@ auto Server::process_get_box_receipt_response(
     const auto& nym = *nym_;
     const auto& nymID = nym.ID();
     const auto& serverNym = *remote_nym_;
-    const auto type = get_type(reply.m_lDepth);
+    const auto type = get_type(reply.depth_);
 
     if (BoxType::Invalid == type) { return false; }
 
-    auto serialized = String::Factory(reply.m_ascPayload);
+    auto serialized = String::Factory(reply.payload_);
     auto boxReceipt = extract_box_receipt(
-        serialized, serverNym, nymID, reply.m_lTransactionNum);
+        serialized, serverNym, nymID, reply.transaction_num_);
 
     if (false == bool(boxReceipt)) { return false; }
 
     return process_get_box_receipt_response(
         lock,
         client,
-        api_.Factory().IdentifierFromBase58(reply.m_strAcctID->Bytes()),
+        api_.Factory().IdentifierFromBase58(reply.acct_id_->Bytes()),
         boxReceipt,
         serialized,
         type,
@@ -3893,12 +3891,12 @@ auto Server::process_get_market_list_response(
     // data file. (So when the file is loaded from storage, it will correctly
     // display an empty list on the screen, instead of a list of outdated
     // items.)
-    if (reply.m_lDepth == 0) {
+    if (reply.depth_ == 0) {
         bool success = storage.EraseValueByKey(
             api_,
             api_.DataFolder().string(),
             api_.Internal().Legacy().Market(),  // "markets"
-            reply.m_strNotaryID->Get(),         // "markets/<notaryID>"
+            reply.notary_id_->Get(),            // "markets/<notaryID>"
             data_file,
             "");  // "markets/<notaryID>/market_data.bin"
         if (!success) {
@@ -3913,8 +3911,8 @@ auto Server::process_get_market_list_response(
 
     auto serialized = ByteArray{};
 
-    if ((reply.m_ascPayload->GetLength() <= 2) ||
-        (false == reply.m_ascPayload->GetData(serialized))) {
+    if ((reply.payload_->GetLength() <= 2) ||
+        (false == reply.payload_->GetData(serialized))) {
         LogError()(OT_PRETTY_CLASS())("Unable to decode ascii-armored "
                                       "payload.")
             .Flush();
@@ -3954,7 +3952,7 @@ auto Server::process_get_market_list_response(
         *pMarketList,
         api_.DataFolder().string(),
         api_.Internal().Legacy().Market(),  // "markets"
-        reply.m_strNotaryID->Get(),         // "markets/<notaryID>"
+        reply.notary_id_->Get(),            // "markets/<notaryID>"
         data_file,
         "");  // "markets/<notaryID>/market_data.bin"
     if (!success) {
@@ -3970,7 +3968,7 @@ auto Server::process_get_market_offers_response(
     const Lock& lock,
     const Message& reply) -> bool
 {
-    const String& marketID = reply.m_strNymID2;  // market ID stored here.
+    const String& marketID = reply.nym_id2_;  // market ID stored here.
 
     auto data_file = api::Legacy::GetFilenameBin(marketID.Get());
 
@@ -3984,12 +3982,12 @@ auto Server::process_get_market_offers_response(
     // data file. (So when the file is loaded from storage, it will correctly
     // display an empty list on the screen, instead of a list of outdated
     // items.)
-    if (reply.m_lDepth == 0) {
+    if (reply.depth_ == 0) {
         auto success = storage.EraseValueByKey(
             api_,
             api_.DataFolder().string(),
             api_.Internal().Legacy().Market(),  // "markets"
-            reply.m_strNotaryID->Get(),         // "markets/<notaryID>",
+            reply.notary_id_->Get(),            // "markets/<notaryID>",
             "offers",                           // "markets/<notaryID>/offers"
                                                 // todo stop hardcoding.
             data_file);  // "markets/<notaryID>/offers/<marketID>.bin"
@@ -4005,8 +4003,8 @@ auto Server::process_get_market_offers_response(
 
     auto serialized = ByteArray{};
 
-    if ((reply.m_ascPayload->GetLength() <= 2) ||
-        (false == reply.m_ascPayload->GetData(serialized))) {
+    if ((reply.payload_->GetLength() <= 2) ||
+        (false == reply.payload_->GetData(serialized))) {
         LogError()(OT_PRETTY_CLASS())("Unable to decode asci-armored "
                                       "payload.")
             .Flush();
@@ -4043,7 +4041,7 @@ auto Server::process_get_market_offers_response(
         *pOfferList,
         api_.DataFolder().string(),
         api_.Internal().Legacy().Market(),  // "markets"
-        reply.m_strNotaryID->Get(),         // "markets/<notaryID>",
+        reply.notary_id_->Get(),            // "markets/<notaryID>",
         "offers",                           // "markets/<notaryID>/offers"
                                             // todo stop hardcoding.
         data_file);  // "markets/<notaryID>/offers/<marketID>.bin"
@@ -4060,7 +4058,7 @@ auto Server::process_get_market_recent_trades_response(
     const Lock& lock,
     const Message& reply) -> bool
 {
-    const String& marketID = reply.m_strNymID2;  // market ID stored here.
+    const String& marketID = reply.nym_id2_;  // market ID stored here.
     auto data_file = api::Legacy::GetFilenameBin(marketID.Get());
 
     auto* pStorage = OTDB::GetDefaultStorage();
@@ -4075,12 +4073,12 @@ auto Server::process_get_market_recent_trades_response(
     // display an empty list on the screen, instead of a list of outdated
     // items.)
     //
-    if (reply.m_lDepth == 0) {
+    if (reply.depth_ == 0) {
         bool success = storage.EraseValueByKey(
             api_,
             api_.DataFolder().string(),
             api_.Internal().Legacy().Market(),  // "markets"
-            reply.m_strNotaryID->Get(),         // "markets/<notaryID>recent",
+            reply.notary_id_->Get(),            // "markets/<notaryID>recent",
                                                 // //
                                                 // "markets/<notaryID>/recent"
                                                 // // todo stop
@@ -4099,8 +4097,8 @@ auto Server::process_get_market_recent_trades_response(
 
     auto serialized = ByteArray{};
 
-    if ((reply.m_ascPayload->GetLength() <= 2) ||
-        (false == reply.m_ascPayload->GetData(serialized))) {
+    if ((reply.payload_->GetLength() <= 2) ||
+        (false == reply.payload_->GetData(serialized))) {
         LogError()(OT_PRETTY_CLASS())("Unable to decode asci-armored "
                                       "payload.")
             .Flush();
@@ -4138,7 +4136,7 @@ auto Server::process_get_market_recent_trades_response(
         *pTradeList,
         api_.DataFolder().string(),
         api_.Internal().Legacy().Market(),  // "markets"
-        reply.m_strNotaryID->Get(),         // "markets/<notaryID>"
+        reply.notary_id_->Get(),            // "markets/<notaryID>"
         "recent",                           // "markets/<notaryID>/recent"
                                             // todo stop hardcoding.
         data_file);  // "markets/<notaryID>/recent/<marketID>.bin"
@@ -4154,11 +4152,11 @@ auto Server::process_get_market_recent_trades_response(
 auto Server::process_get_mint_response(const Lock& lock, const Message& reply)
     -> bool
 {
-    auto serialized = String::Factory(reply.m_ascPayload);
+    auto serialized = String::Factory(reply.payload_);
     const auto server =
-        api_.Factory().NotaryIDFromBase58(reply.m_strNotaryID->Bytes());
+        api_.Factory().NotaryIDFromBase58(reply.notary_id_->Bytes());
     const auto unit = api_.Factory().UnitIDFromBase58(
-        reply.m_strInstrumentDefinitionID->Bytes());
+        reply.instrument_definition_id_->Bytes());
 
     auto pMmint = api_.Factory().Mint(server, unit);
 
@@ -4182,7 +4180,7 @@ auto Server::process_get_nym_market_offers_response(
     const Lock& lock,
     const Message& reply) -> bool
 {
-    auto data_file = api::Legacy::GetFilenameBin(reply.m_strNymID->Get());
+    auto data_file = api::Legacy::GetFilenameBin(reply.nym_id_->Get());
 
     auto* pStorage = OTDB::GetDefaultStorage();
     OT_ASSERT(nullptr != pStorage);
@@ -4195,12 +4193,12 @@ auto Server::process_get_nym_market_offers_response(
     // correctly display an empty list on the screen, instead of a list of
     // outdated items.)
     //
-    if (reply.m_lDepth == 0) {
+    if (reply.depth_ == 0) {
         bool success = storage.EraseValueByKey(
             api_,
             api_.DataFolder().string(),
             api_.Internal().Legacy().Nym(),  // "nyms"
-            reply.m_strNotaryID->Get(),      // "nyms/<notaryID>",
+            reply.notary_id_->Get(),         // "nyms/<notaryID>",
             "offers",                        // "nyms/<notaryID>/offers"
                                              // todo stop hardcoding.
             data_file);  // "nyms/<notaryID>/offers/<NymID>.bin"
@@ -4215,8 +4213,8 @@ auto Server::process_get_nym_market_offers_response(
 
     auto serialized = ByteArray{};
 
-    if ((reply.m_ascPayload->GetLength() <= 2) ||
-        (false == reply.m_ascPayload->GetData(serialized))) {
+    if ((reply.payload_->GetLength() <= 2) ||
+        (false == reply.payload_->GetData(serialized))) {
         LogError()(OT_PRETTY_CLASS())("Unable to decode ascii-armored "
                                       "payload.")
             .Flush();
@@ -4253,7 +4251,7 @@ auto Server::process_get_nym_market_offers_response(
         *pOfferList,
         api_.DataFolder().string(),
         api_.Internal().Legacy().Nym(),  // "nyms"
-        reply.m_strNotaryID->Get(),      // "nyms/<notaryID>",
+        reply.notary_id_->Get(),         // "nyms/<notaryID>",
         "offers",                        // "nyms/<notaryID>/offers",
         data_file);                      // "nyms/<notaryID>/offers/<NymID>.bin"
     if (!success) {
@@ -4303,9 +4301,9 @@ void Server::process_incoming_message(
     }
 
     const auto recipientNymId =
-        api_.Factory().NymIDFromBase58(message->m_strNymID2->Bytes());
+        api_.Factory().NymIDFromBase58(message->nym_id2_->Bytes());
     const auto senderNymID =
-        api_.Factory().NymIDFromBase58(message->m_strNymID->Bytes());
+        api_.Factory().NymIDFromBase58(message->nym_id_->Bytes());
 
     if (senderNymID.empty()) {
         LogError()(OT_PRETTY_CLASS())("Missing sender nym ID").Flush();
@@ -4315,7 +4313,7 @@ void Server::process_incoming_message(
 
     if (recipientNymId == nymID) {
         const auto pPeerObject =
-            api_.Factory().PeerObject(nym_, message->m_ascPayload, reason);
+            api_.Factory().PeerObject(nym_, message->payload_, reason);
 
         if (false == bool(pPeerObject)) {
             LogError()(OT_PRETTY_CLASS())("Failed to instantiate object")
@@ -4380,9 +4378,9 @@ auto Server::process_get_unit_definition_response(
 {
     update_nymbox_hash(lock, reply);
     const auto id = api_.Factory().IdentifierFromBase58(
-        reply.m_strInstrumentDefinitionID->Bytes());
+        reply.instrument_definition_id_->Bytes());
 
-    if (reply.m_ascPayload->empty()) {
+    if (reply.payload_->empty()) {
         LogError()(OT_PRETTY_CLASS())(
             "Server reply does not contain contract ")(id)
             .Flush();
@@ -4390,7 +4388,7 @@ auto Server::process_get_unit_definition_response(
         return false;
     }
 
-    const auto raw = ByteArray{reply.m_ascPayload};
+    const auto raw = ByteArray{reply.payload_};
 
     switch (static_cast<contract::Type>(reply.enum_)) {
         case contract::Type::nym: {
@@ -4445,9 +4443,9 @@ auto Server::process_issue_unit_definition_response(
 {
     update_nymbox_hash(lock, reply);
     const auto accountID =
-        api_.Factory().IdentifierFromBase58(reply.m_strAcctID->Bytes());
+        api_.Factory().IdentifierFromBase58(reply.acct_id_->Bytes());
 
-    if (reply.m_ascPayload->empty()) {
+    if (reply.payload_->empty()) {
         LogError()(OT_PRETTY_CLASS())(
             "Server reply does not contain issuer account ")(accountID)
             .Flush();
@@ -4455,7 +4453,7 @@ auto Server::process_issue_unit_definition_response(
         return false;
     }
 
-    auto serialized = String::Factory(reply.m_ascPayload);
+    auto serialized = String::Factory(reply.payload_);
     const auto updated = api_.Wallet().UpdateAccount(
         accountID, *this, serialized, std::get<0>(pending_args_), reason);
 
@@ -4481,7 +4479,7 @@ auto Server::process_notarize_transaction_response(
 
     update_nymbox_hash(lock, reply);
     const auto accountID =
-        api_.Factory().IdentifierFromBase58(reply.m_strAcctID->Bytes());
+        api_.Factory().IdentifierFromBase58(reply.acct_id_->Bytes());
     const auto& nym = *nym_;
     const auto& nymID = nym.ID();
     const auto& serverNym = *remote_nym_;
@@ -4490,8 +4488,8 @@ auto Server::process_notarize_transaction_response(
 
     OT_ASSERT(responseLedger);
 
-    bool loaded = responseLedger->LoadLedgerFromString(
-        String::Factory(reply.m_ascPayload));
+    bool loaded =
+        responseLedger->LoadLedgerFromString(String::Factory(reply.payload_));
 
     if (loaded) { loaded &= responseLedger->VerifyAccount(serverNym); }
 
@@ -4588,19 +4586,18 @@ auto Server::process_process_box_response(
     OT_ASSERT(remote_nym_);
 
     update_nymbox_hash(lock, reply);
-    auto originalMessage = extract_message(reply.m_ascInReferenceTo, *nym_);
+    auto originalMessage = extract_message(reply.in_reference_to_, *nym_);
 
     if (false == bool(originalMessage)) { return false; }
 
     OT_ASSERT(originalMessage);
 
-    auto ledger =
-        extract_ledger(originalMessage->m_ascPayload, accountID, *nym_);
+    auto ledger = extract_ledger(originalMessage->payload_, accountID, *nym_);
 
     if (false == bool(ledger)) { return false; }
 
     auto responseLedger =
-        extract_ledger(reply.m_ascPayload, accountID, *remote_nym_);
+        extract_ledger(reply.payload_, accountID, *remote_nym_);
 
     if (false == bool(responseLedger)) { return false; }
 
@@ -4639,7 +4636,7 @@ auto Server::process_process_box_response(
     auto replyItem = replyTransaction->GetItem(itemType::atBalanceStatement);
 
     if (replyItem) {
-        receiptID = reply.m_strAcctID;
+        receiptID = reply.acct_id_;
     } else {
         replyItem = replyTransaction->GetItem(itemType::atTransactionStatement);
 
@@ -4704,7 +4701,7 @@ auto Server::process_process_inbox_response(
 
     const auto& nym = *nym_;
     const auto accountID =
-        api_.Factory().IdentifierFromBase58(reply.m_strAcctID->Bytes());
+        api_.Factory().IdentifierFromBase58(reply.acct_id_->Bytes());
     transaction = ledger.GetTransaction(transactionType::processInbox);
     replyTransaction =
         responseLedger.GetTransaction(transactionType::atProcessInbox);
@@ -4955,9 +4952,9 @@ auto Server::process_register_account_response(
 {
     update_nymbox_hash(lock, reply);
     const auto accountID =
-        api_.Factory().IdentifierFromBase58(reply.m_strAcctID->Bytes());
+        api_.Factory().IdentifierFromBase58(reply.acct_id_->Bytes());
 
-    if (reply.m_ascPayload->empty()) {
+    if (reply.payload_->empty()) {
         LogError()(OT_PRETTY_CLASS())(
             "Server reply does not contain an account")
             .Flush();
@@ -4965,7 +4962,7 @@ auto Server::process_register_account_response(
         return false;
     }
 
-    auto serialized = String::Factory(reply.m_ascPayload);
+    auto serialized = String::Factory(reply.payload_);
     const auto updated = api_.Wallet().UpdateAccount(
         accountID, *this, serialized, std::get<0>(pending_args_), reason);
 
@@ -4986,9 +4983,9 @@ auto Server::process_request_admin_response(
 {
     update_nymbox_hash(lock, reply);
     admin_attempted_->On();
-    const auto& serverID = reply.m_strNotaryID;
+    const auto& serverID = reply.notary_id_;
 
-    if (reply.m_bBool) {
+    if (reply.bool_) {
         LogDetail()(OT_PRETTY_CLASS())("Became admin on server ")(
             serverID.get())
             .Flush();
@@ -5007,8 +5004,7 @@ auto Server::process_register_nym_response(
     const api::session::Client& client,
     const Message& reply) -> bool
 {
-    auto serialized =
-        proto::Factory<proto::Context>(ByteArray{reply.m_ascPayload});
+    auto serialized = proto::Factory<proto::Context>(ByteArray{reply.payload_});
     auto verified = proto::Validate(serialized, VERBOSE);
 
     if (false == verified) {
@@ -5035,11 +5031,11 @@ auto Server::process_reply(
     const auto& nym = *nym_;
     const auto& nymID = nym.ID();
     const auto accountID =
-        api_.Factory().IdentifierFromBase58(reply.m_strAcctID->Bytes());
+        api_.Factory().IdentifierFromBase58(reply.acct_id_->Bytes());
     const auto& serverNym = *remote_nym_;
 
-    LogVerbose()(OT_PRETTY_CLASS())("Received ")(reply.m_strCommand.get())("(")(
-        reply.m_bSuccess ? "success" : "failure")(")")
+    LogVerbose()(OT_PRETTY_CLASS())("Received ")(reply.command_.get())("(")(
+        reply.success_ ? "success" : "failure")(")")
         .Flush();
 
     if (false == reply.VerifySignature(serverNym)) {
@@ -5050,25 +5046,25 @@ auto Server::process_reply(
         return false;
     }
 
-    const RequestNumber requestNumber = reply.m_strRequestNum->ToLong();
+    const RequestNumber requestNumber = reply.request_num_->ToLong();
     add_acknowledged_number(lock, requestNumber);
     RequestNumbers acknowledgedReplies{};
 
-    if (reply.m_AcknowledgedReplies.Output(acknowledgedReplies)) {
+    if (reply.acknowledged_replies_.Output(acknowledgedReplies)) {
         remove_acknowledged_number(lock, acknowledgedReplies);
     }
 
-    if (reply.m_bSuccess) {
+    if (reply.success_) {
         for (const auto& number : managed) { number.SetSuccess(true); }
     } else {
         LogVerbose()(OT_PRETTY_CLASS())("Message status: failed for ")(
-            reply.m_strCommand.get())
+            reply.command_.get())
             .Flush();
 
         return false;
     }
 
-    switch (Message::Type(reply.m_strCommand->Get())) {
+    switch (Message::Type(reply.command_->Get())) {
         case MessageType::checkNymResponse: {
             return process_check_nym_response(lock, client, reply);
         }
@@ -5110,7 +5106,7 @@ auto Server::process_reply(
                 client,
                 reply,
                 BoxType::Inbox,
-                api_.Factory().IdentifierFromBase58(reply.m_strAcctID->Bytes()),
+                api_.Factory().IdentifierFromBase58(reply.acct_id_->Bytes()),
                 reason);
         }
         case MessageType::processNymboxResponse: {
@@ -5210,7 +5206,7 @@ void Server::process_response_transaction(
     auto pItem = response.GetItem(itemType::atBalanceStatement);
 
     if (pItem) {
-        receiptID->Set(reply.m_strAcctID);
+        receiptID->Set(reply.acct_id_);
     } else {
         pItem = response.GetItem(itemType::atTransactionStatement);
 
@@ -5609,7 +5605,7 @@ void Server::process_response_transaction_cron(
                 "transaction num: ")(openingNumber)(".")
                 .Flush();
         }
-        if (!pMsg->m_ascPayload->GetString(strInstrument)) {
+        if (!pMsg->payload_->GetString(strInstrument)) {
             LogError()(OT_PRETTY_CLASS())(
                 "Unable to find payment instrument in outpayment "
                 "message with transaction num: ")(openingNumber)(".")
@@ -6129,7 +6125,7 @@ void Server::process_response_transaction_exchange_basket(
                     return;
                 }
 
-                const auto closingNumber = requestItem->lClosingTransactionNo;
+                const auto closingNumber = requestItem->closing_transaction_no_;
                 recover_available_number(lock, closingNumber);
             }
 
@@ -6427,8 +6423,8 @@ auto Server::process_unregister_account_response(
 {
     auto serialized = String::Factory();
 
-    if (reply.m_ascInReferenceTo->Exists()) {
-        reply.m_ascInReferenceTo->GetString(serialized);
+    if (reply.in_reference_to_->Exists()) {
+        reply.in_reference_to_->GetString(serialized);
     }
 
     auto originalMessage = api_.Factory().InternalSession().Message();
@@ -6438,12 +6434,12 @@ auto Server::process_unregister_account_response(
     if (serialized->Exists() &&
         originalMessage->LoadContractFromString(serialized) &&
         originalMessage->VerifySignature(*Nym()) &&
-        originalMessage->m_strNymID->Compare(reply.m_strNymID) &&
-        originalMessage->m_strAcctID->Compare(reply.m_strAcctID) &&
-        originalMessage->m_strCommand->Compare("unregisterAccount")) {
+        originalMessage->nym_id_->Compare(reply.nym_id_) &&
+        originalMessage->acct_id_->Compare(reply.acct_id_) &&
+        originalMessage->command_->Compare("unregisterAccount")) {
 
         const auto theAccountID =
-            api_.Factory().IdentifierFromBase58(reply.m_strAcctID->Bytes());
+            api_.Factory().IdentifierFromBase58(reply.acct_id_->Bytes());
         auto account =
             api_.Wallet().Internal().mutable_Account(theAccountID, reason);
 
@@ -6453,12 +6449,12 @@ auto Server::process_unregister_account_response(
         }
 
         LogConsole()(OT_PRETTY_CLASS())("Successfully DELETED Asset Acct ")(
-            reply.m_strAcctID.get())(" from Server: ")(server_id_)(".")
+            reply.acct_id_.get())(" from Server: ")(server_id_)(".")
             .Flush();
     } else {
         LogError()(OT_PRETTY_CLASS())("The server just for some reason tried "
                                       "to trick me into erasing my account ")(
-            reply.m_strAcctID.get())(" on Server ")(server_id_)(".")
+            reply.acct_id_.get())(" on Server ")(server_id_)(".")
             .Flush();
     }
 
@@ -6475,25 +6471,25 @@ auto Server::process_unregister_nym_response(
 
     OT_ASSERT((originalMessage));
 
-    if (reply.m_ascInReferenceTo->Exists()) {
-        reply.m_ascInReferenceTo->GetString(serialized);
+    if (reply.in_reference_to_->Exists()) {
+        reply.in_reference_to_->GetString(serialized);
     }
 
     if (serialized->Exists() &&
         originalMessage->LoadContractFromString(serialized) &&
         originalMessage->VerifySignature(*Nym()) &&
-        originalMessage->m_strNymID->Compare(reply.m_strNymID) &&
-        originalMessage->m_strCommand->Compare("unregisterNym")) {
+        originalMessage->nym_id_->Compare(reply.nym_id_) &&
+        originalMessage->command_->Compare("unregisterNym")) {
         Reset();
         LogConsole()(OT_PRETTY_CLASS())(
             "Successfully DELETED Nym from Server: removed request number, "
             "plus all issued and transaction numbers for Nym ")(
-            reply.m_strNymID.get())(" for Server ")(server_id_)(".")
+            reply.nym_id_.get())(" for Server ")(server_id_)(".")
             .Flush();
     } else {
         LogError()(OT_PRETTY_CLASS())(
             "The server just for some reason tried to trick me into erasing my "
-            "issued and transaction numbers for Nym ")(reply.m_strNymID.get())(
+            "issued and transaction numbers for Nym ")(reply.nym_id_.get())(
             ", Server ")(server_id_)(".")
             .Flush();
     }
@@ -6542,9 +6538,9 @@ void Server::process_unseen_reply(
     ReplyNoticeOutcome outcome{};
     auto& [number, result] = outcome;
     auto& [status, reply] = result;
-    number = String::StringToUlong(message->m_strRequestNum->Get());
-    status = (message->m_bSuccess) ? otx::LastReplyStatus::MessageSuccess
-                                   : otx::LastReplyStatus::MessageFailed;
+    number = String::StringToUlong(message->request_num_->Get());
+    status = (message->success_) ? otx::LastReplyStatus::MessageSuccess
+                                 : otx::LastReplyStatus::MessageFailed;
     reply = message;
     notices.emplace_back(outcome);
     process_reply(lock, client, {}, *reply, reason);
@@ -6626,7 +6622,7 @@ auto Server::remove_acknowledged_number(const Lock& lock, const Message& reply)
 
     UnallocatedSet<RequestNumber> list{};
 
-    if (false == reply.m_AcknowledgedReplies.Output(list)) { return false; }
+    if (false == reply.acknowledged_replies_.Output(list)) { return false; }
 
     return remove_acknowledged_number(lock, list);
 }
@@ -6853,7 +6849,7 @@ auto Server::remove_nymbox_item(
                             .Flush();
                     }
 
-                    if (!pMsg->m_ascPayload->GetString(strSentInstrument)) {
+                    if (!pMsg->payload_->GetString(strSentInstrument)) {
                         LogError()(OT_PRETTY_CLASS())(
                             "Unable to find payment "
                             "instrument in outpayment "
@@ -7317,7 +7313,7 @@ auto Server::SendMessage(
     pending_args_ = {label, resync};
     request_sent_.Send([&] {
         auto out = network::zeromq::Message{};
-        out.AddFrame(message.m_strCommand->Get());
+        out.AddFrame(message.command_->Get());
 
         return out;
     }());
@@ -7327,7 +7323,7 @@ auto Server::SendMessage(
         process_reply(lock, client, pending, *result.second, reason);
         reply_received_.Send([&] {
             auto out = network::zeromq::Message{};
-            out.AddFrame(message.m_strCommand->Get());
+            out.AddFrame(message.command_->Get());
 
             return out;
         }());
@@ -7684,7 +7680,7 @@ auto Server::update_remote_hash(const Lock& lock, const Message& reply)
     OT_ASSERT(verify_write_lock(lock));
 
     auto output = identifier::Generic{};
-    const auto& input = reply.m_strNymboxHash;
+    const auto& input = reply.nymbox_hash_;
 
     if (input->Exists()) {
         output = api_.Factory().IdentifierFromBase58(input->Bytes());
@@ -7699,14 +7695,14 @@ auto Server::update_nymbox_hash(
     const Message& reply,
     const UpdateHash which) -> bool
 {
-    if (false == reply.m_strNymboxHash->Exists()) {
+    if (false == reply.nymbox_hash_->Exists()) {
         LogError()(OT_PRETTY_CLASS())("No hash provided by notary").Flush();
 
         return false;
     }
 
     const auto hash =
-        api_.Factory().IdentifierFromBase58(reply.m_strNymboxHash->Bytes());
+        api_.Factory().IdentifierFromBase58(reply.nymbox_hash_->Bytes());
     set_remote_nymbox_hash(lock, hash);
 
     if (UpdateHash::Both == which) { set_local_nymbox_hash(lock, hash); }
@@ -7731,7 +7727,7 @@ auto Server::update_request_number(
         return {};
     }
 
-    request->m_strRequestNum =
+    request->request_num_ =
         String::Factory(std::to_string(FIRST_REQUEST_NUMBER).c_str());
 
     if (false == finalize_server_command(*request, reason)) {
@@ -7775,7 +7771,7 @@ auto Server::update_request_number(
 
     OT_ASSERT(reply);
 
-    const RequestNumber newNumber = reply->m_lNewRequestNum;
+    const RequestNumber newNumber = reply->new_request_num_;
     add_acknowledged_number(contextLock, newNumber);
     remove_acknowledged_number(contextLock, *reply);
     request_number_.store(newNumber);
@@ -7791,7 +7787,7 @@ auto Server::update_request_number(
 {
     OT_ASSERT(verify_write_lock(lock));
 
-    command.m_strRequestNum =
+    command.request_num_ =
         String::Factory(std::to_string(request_number_++).c_str());
 
     return finalize_server_command(command, reason);

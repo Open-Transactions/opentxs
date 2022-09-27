@@ -510,10 +510,10 @@ auto Shared::retrieve_address_async(
         ThreadPool::Network,
         [job = std::allocate_shared<HTTP>(
              alloc,
-             site.host,
-             site.target,
+             site.host_,
+             site.target_,
              *data.io_context_,
-             [this, promise = std::move(pPromise), type = site.response_type](
+             [this, promise = std::move(pPromise), type = site.response_type_](
                  auto&& future) mutable {
                  process_address_query(
                      type, std::move(promise), std::move(future));
@@ -533,10 +533,10 @@ auto Shared::retrieve_address_async_ssl(
         ThreadPool::Network,
         [job = std::allocate_shared<HTTPS>(
              alloc,
-             site.host,
-             site.target,
+             site.host_,
+             site.target_,
              *data.io_context_,
-             [this, promise = std::move(pPromise), type = site.response_type](
+             [this, promise = std::move(pPromise), type = site.response_type_](
                  auto&& future) mutable {
                  process_address_query(
                      type, std::move(promise), std::move(future));
@@ -686,10 +686,10 @@ auto Shared::StateMachine() noexcept -> bool
         for (const auto& site : sites()) {
             auto promise = std::make_shared<std::promise<ByteArray>>();
 
-            if (IPversion::IPV4 == site.protocol) {
+            if (IPversion::IPV4 == site.protocol_) {
                 futures4.emplace_back(promise->get_future());
 
-                if ("https" == site.service) {
+                if ("https" == site.service_) {
                     retrieve_address_async_ssl(data, site, std::move(promise));
                 } else {
                     retrieve_address_async(data, site, std::move(promise));
@@ -697,7 +697,7 @@ auto Shared::StateMachine() noexcept -> bool
             } else {
                 futures6.emplace_back(promise->get_future());
 
-                if ("https" == site.service) {
+                if ("https" == site.service_) {
                     retrieve_address_async_ssl(data, site, std::move(promise));
                 } else {
                     retrieve_address_async(data, site, std::move(promise));

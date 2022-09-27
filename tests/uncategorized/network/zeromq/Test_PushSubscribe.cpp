@@ -21,7 +21,7 @@ class Test_PushSubscribe : public ::testing::Test
 {
 public:
     const zmq::Context& context_;
-    const ot::UnallocatedCString testMessage_;
+    const ot::UnallocatedCString test_message_;
     const ot::UnallocatedCString endpoint_1_;
     const ot::UnallocatedCString endpoint_2_;
     std::atomic<int> counter_1_;
@@ -30,7 +30,7 @@ public:
 
     Test_PushSubscribe()
         : context_(ot::Context().ZMQ())
-        , testMessage_("zeromq test message")
+        , test_message_("zeromq test message")
         , endpoint_1_("inproc://opentxs/test/push_subscribe_test")
         , endpoint_2_("inproc://opentxs/test/publish_subscribe_test")
         , counter_1_(0)
@@ -51,7 +51,7 @@ TEST_F(Test_PushSubscribe, Push_Subscribe)
             EXPECT_GT(body.size(), 0);
 
             if (0 < body.size()) {
-                const auto compare = testMessage_.compare(
+                const auto compare = test_message_.compare(
                     ot::UnallocatedCString{body.at(0).Bytes()});
 
                 EXPECT_EQ(compare, 0);
@@ -66,7 +66,7 @@ TEST_F(Test_PushSubscribe, Push_Subscribe)
     auto receiver = context_.SubscribeSocket(callback);
     auto message = opentxs::network::zeromq::Message{};
     message.StartBody();
-    message.AddFrame(testMessage_);
+    message.AddFrame(test_message_);
 
     ASSERT_TRUE(sender->Start(endpoint_1_));
     ASSERT_TRUE(receiver->Start(endpoint_1_));

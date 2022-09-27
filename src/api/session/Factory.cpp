@@ -130,13 +130,13 @@ Factory::Factory(const api::Session& api)
     : api::internal::Factory()
     , api_(api)
     , primitives_(opentxs::Context().Factory())  // TODO pass in as argument
-    , pAsymmetric_(factory::AsymmetricAPI(api_))
-    , asymmetric_(*pAsymmetric_)
-    , pSymmetric_(factory::Symmetric(api_))
-    , symmetric_(*pSymmetric_)
+    , p_asymmetric_(factory::AsymmetricAPI(api_))
+    , asymmetric_(*p_asymmetric_)
+    , p_symmetric_(factory::Symmetric(api_))
+    , symmetric_(*p_symmetric_)
 {
-    OT_ASSERT(pAsymmetric_);
-    OT_ASSERT(pSymmetric_);
+    OT_ASSERT(p_asymmetric_);
+    OT_ASSERT(p_symmetric_);
 }
 
 auto Factory::Armored() const -> OTArmored
@@ -2412,7 +2412,7 @@ auto Factory::Transaction(const String& strInput) const
         if (pContract->LoadContractFromString(strContract)) {
             // NOTE: this already happens in OTTransaction::ProcessXMLNode and
             // OTLedger::ProcessXMLNode.
-            // Specifically, it happens when m_bLoadSecurely is set to false.
+            // Specifically, it happens when load_securely_ is set to false.
             //
             //          pContract->SetRealNotaryID(pItem->GetPurportedNotaryID());
             //          pContract->SetRealAccountID(pItem->GetPurportedAccountID());
@@ -2552,7 +2552,7 @@ auto Factory::Transaction(
         theOriginType));
     OT_ASSERT(false != bool(transaction));
 
-    transaction->m_Type = theType;
+    transaction->type_ = theType;
 
     // Since we're actually generating this transaction, then we can go ahead
     // and set the purported account and server IDs (we have already set the

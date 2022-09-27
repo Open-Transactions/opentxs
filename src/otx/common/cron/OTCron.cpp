@@ -60,14 +60,14 @@ Time OTCron::last_executed_{};
 
 OTCron::OTCron(const api::Session& server)
     : Contract(server)
-    , m_mapMarkets()
-    , m_mapCronItems()
-    , m_multimapCronItems()
-    , m_NOTARY_ID()
-    , m_listTransactionNumbers()
-    , m_bIsActivated(false)
-    , m_pServerNym(nullptr)  // just here for convenience, not responsible to
-                             // cleanup this pointer.
+    , markets_()
+    , cron_items_()
+    , cron_items_multi_()
+    , notary_id_()
+    , list_transaction_numbers_()
+    , is_activated_(false)
+    , server_nym_(nullptr)  // just here for convenience, not responsible to
+                            // cleanup this pointer.
 {
     InitCron();
     LogDebug()(OT_PRETTY_CLASS())("Finished calling InitCron 0.").Flush();
@@ -102,7 +102,7 @@ auto OTCron::SaveCron() -> bool
 
     // Sign it, save it internally to string, and then save that out to the
     // file.
-    if (!SignContract(*m_pServerNym, reason) || !SaveContract() ||
+    if (!SignContract(*server_nym_, reason) || !SaveContract() ||
         !SaveContract(szFoldername, szFilename)) {
         LogError()(OT_PRETTY_CLASS())("Error saving main Cronfile: ")(
             szFoldername)('/')(szFilename)(".")
@@ -128,7 +128,7 @@ auto OTCron::GetNym_OfferList(
         dynamic_cast<OTDB::OfferListNym*>(
             OTDB::CreateObject(OTDB::STORED_OBJ_OFFER_LIST_NYM)));
 
-    for (auto& it : m_mapMarkets) {
+    for (auto& it : markets_) {
         auto pMarket = it.second;
         OT_ASSERT(false != bool(pMarket));
 
@@ -211,7 +211,7 @@ auto OTCron::GetMarketList(Armored& ascOutput, std::int32_t& nMarketCount)
         dynamic_cast<OTDB::MarketList*>(
             OTDB::CreateObject(OTDB::STORED_OBJ_MARKET_LIST)));
 
-    for (auto& it : m_mapMarkets) {
+    for (auto& it : markets_) {
         auto pMarket = it.second;
         OT_ASSERT(false != bool(pMarket));
 
@@ -226,14 +226,14 @@ auto OTCron::GetMarketList(Armored& ascOutput, std::int32_t& nMarketCount)
             String::Factory(pMarket->GetInstrumentDefinitionID());
         const auto str_CURRENCY_ID = String::Factory(pMarket->GetCurrencyID());
 
-        pMarketData->notary_id = str_NotaryID->Get();
-        pMarketData->market_id = str_MARKET_ID->Get();
-        pMarketData->instrument_definition_id =
+        pMarketData->notary_id_ = str_NotaryID->Get();
+        pMarketData->market_id_ = str_MARKET_ID->Get();
+        pMarketData->instrument_definition_id_ =
             str_INSTRUMENT_DEFINITION_ID->Get();
-        pMarketData->currency_type_id = str_CURRENCY_ID->Get();
+        pMarketData->currency_type_id_ = str_CURRENCY_ID->Get();
         // --------------------------------------------
         const Amount& lScale = pMarket->GetScale();
-        pMarketData->scale = [&] {
+        pMarketData->scale_ = [&] {
             auto buf = UnallocatedCString{};
             lScale.Serialize(writer(buf));
             return buf;
@@ -242,12 +242,12 @@ auto OTCron::GetMarketList(Armored& ascOutput, std::int32_t& nMarketCount)
         const Amount theCurrentBid = pMarket->GetHighestBidPrice();
         const Amount theCurrentAsk = pMarket->GetLowestAskPrice();
 
-        pMarketData->current_bid = [&] {
+        pMarketData->current_bid_ = [&] {
             auto buf = UnallocatedCString{};
             theCurrentBid.Serialize(writer(buf));
             return buf;
         }();
-        pMarketData->current_ask = [&] {
+        pMarketData->current_ask_ = [&] {
             auto buf = UnallocatedCString{};
             theCurrentAsk.Serialize(writer(buf));
             return buf;
@@ -257,24 +257,24 @@ auto OTCron::GetMarketList(Armored& ascOutput, std::int32_t& nMarketCount)
         const Amount& lTotalAvailableAssets =
             pMarket->GetTotalAvailableAssets();
 
-        pMarketData->total_assets = [&] {
+        pMarketData->total_assets_ = [&] {
             auto buf = UnallocatedCString{};
             lTotalAvailableAssets.Serialize(writer(buf));
             return buf;
         }();
-        pMarketData->last_sale_price = [&] {
+        pMarketData->last_sale_price_ = [&] {
             auto buf = UnallocatedCString{};
             lLastSalePrice.Serialize(writer(buf));
             return buf;
         }();
 
-        pMarketData->last_sale_date = pMarket->GetLastSaleDate();
+        pMarketData->last_sale_date_ = pMarket->GetLastSaleDate();
 
         const mapOfOffers::size_type theBidCount = pMarket->GetBidCount();
         const mapOfOffers::size_type theAskCount = pMarket->GetAskCount();
 
-        pMarketData->number_bids = std::to_string(theBidCount);
-        pMarketData->number_asks = std::to_string(theAskCount);
+        pMarketData->number_bids_ = std::to_string(theBidCount);
+        pMarketData->number_asks_ = std::to_string(theAskCount);
 
         // In the past 24 hours.
         // (I'm not collecting this data yet, (maybe never), so these values
@@ -352,25 +352,25 @@ auto OTCron::GetMarketList(Armored& ascOutput, std::int32_t& nMarketCount)
 
 auto OTCron::GetTransactionCount() const -> std::int32_t
 {
-    if (m_listTransactionNumbers.empty()) { return 0; }
+    if (list_transaction_numbers_.empty()) { return 0; }
 
-    return static_cast<std::int32_t>(m_listTransactionNumbers.size());
+    return static_cast<std::int32_t>(list_transaction_numbers_.size());
 }
 
 void OTCron::AddTransactionNumber(const std::int64_t& lTransactionNum)
 {
-    m_listTransactionNumbers.push_back(lTransactionNum);
+    list_transaction_numbers_.push_back(lTransactionNum);
 }
 
 // Once this starts returning 0, OTCron can no longer process trades and
 // payment plans until the server object replenishes this list.
 auto OTCron::GetNextTransactionNumber() -> std::int64_t
 {
-    if (m_listTransactionNumbers.empty()) { return 0; }
+    if (list_transaction_numbers_.empty()) { return 0; }
 
-    std::int64_t lTransactionNum = m_listTransactionNumbers.front();
+    std::int64_t lTransactionNum = list_transaction_numbers_.front();
 
-    m_listTransactionNumbers.pop_front();
+    list_transaction_numbers_.pop_front();
 
     return lTransactionNum;
 }
@@ -394,12 +394,12 @@ auto OTCron::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
     //    return nReturnVal;
 
     if (!strcmp("cron", xml->getNodeName())) {
-        m_strVersion = String::Factory(xml->getAttributeValue("version"));
+        version_ = String::Factory(xml->getAttributeValue("version"));
 
         const auto strNotaryID =
             String::Factory(xml->getAttributeValue("notaryID"));
 
-        m_NOTARY_ID = api_.Factory().NotaryIDFromBase58(strNotaryID->Bytes());
+        notary_id_ = api_.Factory().NotaryIDFromBase58(strNotaryID->Bytes());
 
         LogConsole()(OT_PRETTY_CLASS())("Loading OTCron for NotaryID: ")(
             strNotaryID.get())(".")
@@ -450,7 +450,7 @@ auto OTCron::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
             // ITERATION of ProcessCron().
             //
             std::shared_ptr<OTCronItem> item{pItem.release()};
-            if (!item->VerifySignature(*m_pServerNym)) {
+            if (!item->VerifySignature(*server_nym_)) {
                 LogError()(OT_PRETTY_CLASS())(
                     "ERROR SECURITY: Server "
                     "signature failed to "
@@ -512,7 +512,7 @@ auto OTCron::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
 
         // LoadMarket() needs this info to do its thing.
         auto pMarket{api_.Factory().InternalSession().Market(
-            m_NOTARY_ID, INSTRUMENT_DEFINITION_ID, CURRENCY_ID, lScale)};
+            notary_id_, INSTRUMENT_DEFINITION_ID, CURRENCY_ID, lScale)};
 
         OT_ASSERT(false != bool(pMarket));
 
@@ -547,18 +547,18 @@ auto OTCron::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
 void OTCron::UpdateContents(const PasswordPrompt& reason)
 {
     // I release this because I'm about to repopulate it.
-    m_xmlUnsigned->Release();
+    xml_unsigned_->Release();
 
-    const auto NOTARY_ID = String::Factory(m_NOTARY_ID);
+    const auto NOTARY_ID = String::Factory(notary_id_);
 
     Tag tag("cron");
 
-    tag.add_attribute("version", m_strVersion->Get());
+    tag.add_attribute("version", version_->Get());
     tag.add_attribute("notaryID", NOTARY_ID->Get());
 
     // Save the Market entries (the markets themselves are saved in a markets
     // folder.)
-    for (auto& it : m_mapMarkets) {
+    for (auto& it : markets_) {
         auto pMarket = it.second;
         OT_ASSERT(false != bool(pMarket));
 
@@ -583,7 +583,7 @@ void OTCron::UpdateContents(const PasswordPrompt& reason)
     }
 
     // Save the Cron Items
-    for (auto& it : m_multimapCronItems) {
+    for (auto& it : cron_items_multi_) {
         auto pItem = it.second;
         OT_ASSERT(false != bool(pItem));
 
@@ -600,7 +600,7 @@ void OTCron::UpdateContents(const PasswordPrompt& reason)
 
     // Save the transaction numbers.
     //
-    for (auto& lTransactionNumber : m_listTransactionNumbers) {
+    for (auto& lTransactionNumber : list_transaction_numbers_) {
         TagPtr tagNumber(new Tag("transactionNum"));
         tagNumber->add_attribute("value", std::to_string(lTransactionNumber));
         tag.add_tag(tagNumber);
@@ -609,7 +609,7 @@ void OTCron::UpdateContents(const PasswordPrompt& reason)
     UnallocatedCString str_result;
     tag.output(str_result);
 
-    m_xmlUnsigned->Concatenate(String::Factory(str_result));
+    xml_unsigned_->Concatenate(String::Factory(str_result));
 }
 
 auto OTCron::computeTimeout() -> std::chrono::milliseconds
@@ -624,7 +624,7 @@ auto OTCron::computeTimeout() -> std::chrono::milliseconds
 void OTCron::ProcessCronItems()
 {
     auto reason = api_.Factory().PasswordPrompt(__func__);
-    if (!m_bIsActivated) {
+    if (!is_activated_) {
         LogError()(OT_PRETTY_CLASS())("Not activated yet. (Skipping).").Flush();
         return;
     }
@@ -653,8 +653,7 @@ void OTCron::ProcessCronItems()
     // loop through the cron items and tell each one to ProcessCron().
     // If the item returns true, that means leave it on the list. Otherwise,
     // if it returns false, that means "it's done: remove it."
-    for (auto it = m_multimapCronItems.begin();
-         it != m_multimapCronItems.end();) {
+    for (auto it = cron_items_multi_.begin(); it != cron_items_multi_.end();) {
         if (GetTransactionCount() <= nTwentyPercent) {
             LogError()(OT_PRETTY_CLASS())(
                 "WARNING: Cron has fewer than 20 percent of its normal "
@@ -686,10 +685,10 @@ void OTCron::ProcessCronItems()
         LogConsole()(OT_PRETTY_CLASS())("Removing cron item: ")(
             pItem->GetTransactionNum())(".")
             .Flush();
-        it = m_multimapCronItems.erase(it);
+        it = cron_items_multi_.erase(it);
         auto it_map = FindItemOnMap(pItem->GetTransactionNum());
-        OT_ASSERT(m_mapCronItems.end() != it_map);
-        m_mapCronItems.erase(it_map);
+        OT_ASSERT(cron_items_.end() != it_map);
+        cron_items_.erase(it_map);
 
         bNeedToSave = true;
     }
@@ -743,19 +742,18 @@ auto OTCron::AddCronItem(
 
         // Insert to the MAP (by Transaction Number)
         //
-        m_mapCronItems.insert(
-            std::pair<std::int64_t, std::shared_ptr<OTCronItem>>(
-                theItem->GetTransactionNum(), theItem));
+        cron_items_.insert(std::pair<std::int64_t, std::shared_ptr<OTCronItem>>(
+            theItem->GetTransactionNum(), theItem));
 
         // Insert to the MULTIMAP (by Date)
         //
-        m_multimapCronItems.insert(
-            m_multimapCronItems.upper_bound(tDateAdded),
+        cron_items_multi_.insert(
+            cron_items_multi_.upper_bound(tDateAdded),
             std::pair<Time, std::shared_ptr<OTCronItem>>(tDateAdded, theItem));
 
         theItem->SetCronPointer(*this);
-        theItem->setServerNym(m_pServerNym);
-        theItem->setNotaryID(m_NOTARY_ID);
+        theItem->setServerNym(server_nym_);
+        theItem->setNotaryID(notary_id_);
 
         bool bSuccess = true;
 
@@ -828,7 +826,7 @@ auto OTCron::RemoveCronItem(
     auto it_map = FindItemOnMap(lTransactionNum);
 
     // If it's not already on the list, then there's nothing to remove.
-    if (m_mapCronItems.end() == it_map) {
+    if (cron_items_.end() == it_map) {
         LogError()(OT_PRETTY_CLASS())(
             "Attempt to remove non-existent CronItem from OTCron. "
             "Transaction #: ")(lTransactionNum)(".")
@@ -842,15 +840,15 @@ auto OTCron::RemoveCronItem(
 
         // We have to remove it from the multimap as well.
         auto it_multimap = FindItemOnMultimap(lTransactionNum);
-        OT_ASSERT(m_multimapCronItems.end() != it_multimap);  // If found on
-                                                              // map, MUST be on
-                                                              // multimap also.
+        OT_ASSERT(cron_items_multi_.end() != it_multimap);  // If found on
+                                                            // map, MUST be on
+                                                            // multimap also.
 
         pItem->HookRemovalFromCron(
             api_.Wallet(), theRemover, GetNextTransactionNumber(), reason);
 
-        m_mapCronItems.erase(it_map);            // Remove from MAP.
-        m_multimapCronItems.erase(it_multimap);  // Remove from MULTIMAP.
+        cron_items_.erase(it_map);             // Remove from MAP.
+        cron_items_multi_.erase(it_multimap);  // Remove from MULTIMAP.
 
         // An item has been removed from Cron. SAVE.
         return SaveCron();
@@ -860,7 +858,7 @@ auto OTCron::RemoveCronItem(
 }
 
 // Look up a transaction by transaction number and see if it is in the map.
-// If it is, return an iterator to it, otherwise return m_mapCronItems.end()
+// If it is, return an iterator to it, otherwise return cron_items_.end()
 //
 // Note: only the "official" transaction number will work here.
 // If the cron item contains multiple opening numbers, the only one
@@ -873,9 +871,9 @@ auto OTCron::FindItemOnMap(std::int64_t lTransactionNum)
     // See if there's something there with lTransactionNum
     // as its "official" number.
     //
-    auto itt = m_mapCronItems.find(lTransactionNum);
+    auto itt = cron_items_.find(lTransactionNum);
 
-    if (itt != m_mapCronItems.end())  // Found it!
+    if (itt != cron_items_.end())  // Found it!
     {
         auto pItem = itt->second;
         OT_ASSERT(false != bool(pItem));
@@ -889,7 +887,7 @@ auto OTCron::FindItemOnMap(std::int64_t lTransactionNum)
 
 // Look up a transaction by transaction number and see if it is in the multimap.
 // If it is, return an iterator to it, otherwise return
-// m_multimapCronItems.end()
+// cron_items_multi_.end()
 //
 // Note: only the "official" transaction number will work here.
 // If the cron item contains multiple opening numbers, the only one
@@ -899,9 +897,9 @@ auto OTCron::FindItemOnMap(std::int64_t lTransactionNum)
 auto OTCron::FindItemOnMultimap(std::int64_t lTransactionNum)
     -> multimapOfCronItems::iterator
 {
-    auto itt = m_multimapCronItems.begin();
+    auto itt = cron_items_multi_.begin();
 
-    while (m_multimapCronItems.end() != itt) {
+    while (cron_items_multi_.end() != itt) {
         auto pItem = itt->second;
         OT_ASSERT(false != bool(pItem));
 
@@ -927,9 +925,9 @@ auto OTCron::GetItemByOfficialNum(std::int64_t lTransactionNum)
     // See if there's something there with lTransactionNum
     // as its "official" number.
     //
-    auto itt = m_mapCronItems.find(lTransactionNum);
+    auto itt = cron_items_.find(lTransactionNum);
 
-    if (itt != m_mapCronItems.end())  // Found it!
+    if (itt != cron_items_.end())  // Found it!
     {
         auto pItem = itt->second;
         OT_ASSERT(false != bool(pItem));
@@ -956,16 +954,16 @@ auto OTCron::GetItemByValidOpeningNum(std::int64_t lOpeningNum)
     -> std::shared_ptr<OTCronItem>
 {
     // See if there's something there with that transaction number.
-    auto itt = m_mapCronItems.find(lOpeningNum);
+    auto itt = cron_items_.find(lOpeningNum);
 
-    if (itt == m_mapCronItems.end()) {
+    if (itt == cron_items_.end()) {
         // We didn't find it as the "official" number, so let's loop
         // through the cron items one-by-one and see if it's a valid
         // opening number. (We searched for the "official" number first,
         // since it will often be the right one, and avoids doing this
         // longer search. Basically for optimization purposes.)
         //
-        for (auto& it : m_mapCronItems) {
+        for (auto& it : cron_items_) {
             auto pItem = it.second;
             OT_ASSERT(false != bool(pItem));
 
@@ -1011,10 +1009,10 @@ auto OTCron::AddMarket(
     UnallocatedCString std_MARKET_ID = str_MARKET_ID->Get();
 
     // See if there's something else already there with the same market ID.
-    auto it = m_mapMarkets.find(std_MARKET_ID);
+    auto it = markets_.find(std_MARKET_ID);
 
     // If it's not already on the list, then add it...
-    if (it == m_mapMarkets.end()) {
+    if (it == markets_.end()) {
         // If I've been instructed to save the market, and Cron did NOT
         // successfully save the market
         //  (to its own file), then return false.  This will happen if
@@ -1027,7 +1025,7 @@ auto OTCron::AddMarket(
             return false;
         }
 
-        m_mapMarkets[std_MARKET_ID] = theMarket;
+        markets_[std_MARKET_ID] = theMarket;
 
         bool bSuccess = true;
 
@@ -1115,9 +1113,9 @@ auto OTCron::GetMarket(const identifier::Generic& MARKET_ID)
     UnallocatedCString std_MARKET_ID = str_MARKET_ID->Get();
 
     // See if there's something there with that transaction number.
-    auto it = m_mapMarkets.find(std_MARKET_ID);
+    auto it = markets_.find(std_MARKET_ID);
 
-    if (it == m_mapMarkets.end()) {
+    if (it == markets_.end()) {
         // nothing found.
         return nullptr;
     }
@@ -1146,12 +1144,12 @@ auto OTCron::GetMarket(const identifier::Generic& MARKET_ID)
 void OTCron::SetServerNym(Nym_p pServerNym)
 {
     OT_ASSERT(nullptr != pServerNym);
-    m_pServerNym = pServerNym;
+    server_nym_ = pServerNym;
 }
 
-void OTCron::InitCron() { m_strContractType = String::Factory("CRON"); }
+void OTCron::InitCron() { contract_type_ = String::Factory("CRON"); }
 
 void OTCron::Release() { Contract::Release(); }
 
-OTCron::~OTCron() { m_pServerNym = nullptr; }
+OTCron::~OTCron() { server_nym_ = nullptr; }
 }  // namespace opentxs

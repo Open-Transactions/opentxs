@@ -30,20 +30,20 @@ public:
         char metaMasterCredID,
         char metaChildCredID) -> bool;
 
-    inline auto HasMetadata() const -> bool { return hasMetadata_; }
+    inline auto HasMetadata() const -> bool { return has_metadata_; }
 
-    inline auto GetKeyType() const -> char { return metaKeyType_; }
+    inline auto GetKeyType() const -> char { return meta_key_type_; }
 
-    inline auto FirstCharNymID() const -> char { return metaNymID_; }
+    inline auto FirstCharNymID() const -> char { return meta_nym_id_; }
 
     inline auto FirstCharMasterCredID() const -> char
     {
-        return metaMasterCredID_;
+        return meta_master_cred_id_;
     }
 
     inline auto FirstCharChildCredID() const -> char
     {
-        return metaChildCredID_;
+        return meta_child_cred_id_;
     }
 
     OTSignatureMetadata(const api::Session& api);
@@ -52,19 +52,19 @@ public:
 private:
     const api::Session& api_;
     // Defaults to false. Is set true by calling SetMetadata
-    bool hasMetadata_{false};
+    bool has_metadata_{false};
     // Can be A, E, or S (authentication, encryption, or signing.
     // Also, E would be unusual.)
-    char metaKeyType_{0x0};
+    char meta_key_type_{0x0};
     // Can be any letter from base62 alphabet. Represents
     // first letter of a Nym's ID.
-    char metaNymID_{0x0};
+    char meta_nym_id_{0x0};
     // Can be any letter from base62 alphabet.
     // Represents first letter of a Master Credential
     // ID (for that Nym.)
-    char metaMasterCredID_{0x0};
+    char meta_master_cred_id_{0x0};
     // Can be any letter from base62 alphabet. Represents
     // first letter of a Credential ID (signed by that Master.)
-    char metaChildCredID_{0x0};
+    char meta_child_cred_id_{0x0};
 };
 }  // namespace opentxs

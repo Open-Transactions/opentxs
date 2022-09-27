@@ -40,7 +40,7 @@ void RPC::evaluate_register_account(
         OT_ASSERT(pReply);
 
         const auto& reply = *pReply;
-        add_output_identifier(reply.m_strAcctID->Get(), output);
+        add_output_identifier(reply.acct_id_->Get(), output);
         add_output_status(output, proto::RPCRESPONSE_SUCCESS);
     }
 }

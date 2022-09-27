@@ -184,8 +184,8 @@ auto DepositPayment::get_account_id(const identifier::UnitDefinition& unit)
     }
 
     const auto& message = *pMessage;
-    const auto accountID = parent_.api().Factory().IdentifierFromBase58(
-        message.m_strAcctID->Bytes());
+    const auto accountID =
+        parent_.api().Factory().IdentifierFromBase58(message.acct_id_->Bytes());
 
     if (accountID.empty()) {
         LogError()(OT_PRETTY_CLASS())("Failed to get account id").Flush();

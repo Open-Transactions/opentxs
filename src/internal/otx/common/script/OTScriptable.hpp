@@ -75,7 +75,7 @@ public:
     auto openingNumsInOrderOfSigning() const
         -> const UnallocatedVector<std::int64_t>&
     {
-        return openingNumsInOrderOfSigning_;
+        return opening_nums_in_order_of_signing_;
     }
 
     void specifyParties(bool bNewState);
@@ -86,11 +86,11 @@ public:
     virtual void SetDisplayLabel(const UnallocatedCString* pstrLabel = nullptr);
     auto GetPartyCount() const -> std::int32_t
     {
-        return static_cast<std::int32_t>(m_mapParties.size());
+        return static_cast<std::int32_t>(parties_.size());
     }
     auto GetBylawCount() const -> std::int32_t
     {
-        return static_cast<std::int32_t>(m_mapBylaws.size());
+        return static_cast<std::int32_t>(bylaws_.size());
     }
     virtual auto AddParty(OTParty& theParty) -> bool;  // Takes
                                                        // ownership.
@@ -302,12 +302,12 @@ public:
 protected:
     // This is how we know the opening numbers for each signer, IN THE ORDER
     // that they signed.
-    UnallocatedVector<std::int64_t> openingNumsInOrderOfSigning_;
+    UnallocatedVector<std::int64_t> opening_nums_in_order_of_signing_;
 
-    mapOfParties m_mapParties;  // The parties to the contract. Could be Nyms,
-                                // or
-                                // other entities. May be rep'd by an Agent.
-    mapOfBylaws m_mapBylaws;    // The Bylaws for this contract.
+    mapOfParties parties_;  // The parties to the contract. Could be Nyms,
+                            // or
+                            // other entities. May be rep'd by an Agent.
+    mapOfBylaws bylaws_;    // The Bylaws for this contract.
 
     // While calculating the ID of smart contracts (and presumably other
     // scriptables)
@@ -315,12 +315,12 @@ protected:
     // IDs,
     // stashes, etc.
     // We override Contract::CalculateContractID(), where we set
-    // m_bCalculatingID to
+    // calculating_id_ to
     // true (it's normally false). Then we call UpdateContents(), which knows to
     // produce
-    // an empty version of the contract if m_bCalculatingID is true. Then we
+    // an empty version of the contract if calculating_id_ is true. Then we
     // hash that
-    // in order to get the contract ID, and then we set m_bCalculatingID back to
+    // in order to get the contract ID, and then we set calculating_id_ back to
     // false
     // again.
     //
@@ -354,9 +354,9 @@ protected:
     //
     // Therefore, there needs to be a variable on the scriptable itself which
     // determines
-    // the template type of the scriptable: m_bSpecifyInstrumentDefinitionID and
-    // m_bSpecifyParties, which
-    // must each be saved individually on OTScriptable.
+    // the template type of the scriptable: specify_instrument_definition_id_
+    // and specify_parties_, which must each be saved individually on
+    // OTScriptable.
     //
     // Agents should be entirely removed during contract ID calculating process,
     // since
@@ -370,10 +370,8 @@ protected:
     // actual account IDs will be left blank and the instrument definition IDs
     // will be left
     // blank
-    // if m_bSpecifyInstrumentDefinitionID is false. (Just as Parties' Owner IDs
-    // will be left
-    // blank
-    // if m_bSpecifyParties is false.)
+    // if specify_instrument_definition_id_ is false. (Just as Parties' Owner
+    // IDs will be left blank if specify_parties_ is false.)
     //
     // Transaction numbers on parties AND accounts should be set to 0 during
     // calculation
@@ -381,24 +379,24 @@ protected:
     //
     // On OTParty, signed copy can be excluded. All agents can be excluded.
     // Authorizing agent
-    // can be excluded and Owner ID is conditional on m_bSpecifyParties. (Party
+    // can be excluded and Owner ID is conditional on specify_parties_. (Party
     // name is kept.)
-    // m_bPartyIsNym is conditional and so is m_lOpeningTransNo.
+    // party_is_nym_ is conditional and so is opening_trans_no_.
     //
-    bool m_bCalculatingID{false};  // NOT serialized. Used during ID
-                                   // calculation.
+    bool calculating_id_{false};  // NOT serialized. Used during ID
+                                  // calculation.
 
-    bool m_bSpecifyInstrumentDefinitionID{false};  // Serialized. See above
-                                                   // note.
-    bool m_bSpecifyParties{false};  // Serialized. See above note.
+    bool specify_instrument_definition_id_{false};  // Serialized. See above
+                                                    // note.
+    bool specify_parties_{false};  // Serialized. See above note.
 
     // return -1 if error, 0 if nothing, and 1 if the node was processed.
     auto ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t override;
 
-    OTString m_strLabel;  // OTSmartContract can put its trans# here. (Allowing
-                          // us to use it in the OTScriptable methods where any
-                          // smart contract would normally want to log its
-                          // transaction #, not just the clause name.)
+    OTString label_;  // OTSmartContract can put its trans# here. (Allowing
+                      // us to use it in the OTScriptable methods where any
+                      // smart contract would normally want to log its
+                      // transaction #, not just the clause name.)
 
     OTScriptable(const api::Session& api);
 

@@ -84,7 +84,7 @@ auto Notary_fixture::IssueUnit(
 
     const auto& accountID =
         registered_accounts_[nymID.asBase58(ot_.Crypto())].emplace_back(
-            message->m_strAcctID->Get());
+            message->acct_id_->Get());
     account_index_.emplace(unitOfAccount, accountIndex++);
 
     if (accountID.empty()) { return {}; }

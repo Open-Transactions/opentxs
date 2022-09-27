@@ -104,19 +104,19 @@ public:
     //
     auto GetLastSenderNymID() const -> const String&
     {
-        return m_strLastSenderUser;
+        return last_sender_user_;
     }
     auto GetLastSenderAcctID() const -> const String&
     {
-        return m_strLastSenderAcct;
+        return last_sender_acct_;
     }
     auto GetLastRecipientNymID() const -> const String&
     {
-        return m_strLastRecipientUser;
+        return last_recipient_user_;
     }
     auto GetLastRecipientAcctID() const -> const String&
     {
-        return m_strLastRecipientAcct;
+        return last_recipient_acct_;
     }
     auto GetCountStashes() const -> std::int32_t;
     auto GetCountStashAccts() const -> std::int32_t;
@@ -397,9 +397,9 @@ protected:
     // (These two are lower level, and used by SetNextProcessTime).
     void SetNextProcessDate(const Time tNEXT_DATE)
     {
-        m_tNextProcessDate = tNEXT_DATE;
+        next_process_date_ = tNEXT_DATE;
     }
-    auto GetNextProcessDate() const -> const Time { return m_tNextProcessDate; }
+    auto GetNextProcessDate() const -> const Time { return next_process_date_; }
 
 private:
     friend api::session::imp::Factory;
@@ -413,13 +413,13 @@ private:
     // Todo: convert existing payment plan and markets to use this system since
     // it is much cleaner.
     //
-    //    identifier::Generic    m_RECIPIENT_ACCT_ID;
-    //    identifier::Generic    m_RECIPIENT_NYM_ID;
+    //    identifier::Generic    recipient_account_id_;
+    //    identifier::Generic    recipient_nym_id_;
     // This is where the scripts inside the smart contract can stash money,
     // after it starts operating.
     //
-    mapOfStashes m_mapStashes;  // The server will NOT allow any smart contract
-                                // to be activated unless these lists are empty.
+    mapOfStashes stashes_;  // The server will NOT allow any smart contract
+                            // to be activated unless these lists are empty.
     // A smart contract may have any number of "stashes" which are stored by
     // name. Each stash can be queried for balance for ANY ASSET TYPE. So stash
     // "alice" might have 5 instrument definitions in it, AND stash "bob" might
@@ -429,25 +429,25 @@ private:
     // there will be 5 stash accounts here, not 10.  That's because, even if you
     // create a thousand stashes, if they use the same 2 instrument definitions
     // then OT is smart enough here to only create 2 stash accounts. The rest of
-    // the information isstored in m_mapStashes, not in the accounts themselves,
+    // the information isstored in stashes_, not in the accounts themselves,
     // which are only reserves for those stashes.
-    std::unique_ptr<otx::internal::AccountList> m_StashAccts;
-    OTString m_strLastSenderUser;  // These four strings are here so that each
-                                   // sender or recipient (of a transfer of
-                                   // funds)
-    OTString m_strLastSenderAcct;  // is clearly saved in each inbox receipt.
-                                   // That way, if the receipt has a monetary
-                                   // value, then
-    OTString m_strLastRecipientUser;  // we know who was sending and who was
-                                      // receiving. Also, if a STASH was the
-                                      // last action, then
-    OTString m_strLastRecipientAcct;  // the sender (or recipient) will be
-                                      // blank, signifying that the source or
-                                      // destination was a stash.
+    std::unique_ptr<otx::internal::AccountList> stash_accounts_;
+    OTString last_sender_user_;     // These four strings are here so that each
+                                    // sender or recipient (of a transfer of
+                                    // funds)
+    OTString last_sender_acct_;     // is clearly saved in each inbox receipt.
+                                    // That way, if the receipt has a monetary
+                                    // value, then
+    OTString last_recipient_user_;  // we know who was sending and who was
+                                    // receiving. Also, if a STASH was the
+                                    // last action, then
+    OTString last_recipient_acct_;  // the sender (or recipient) will be
+                                    // blank, signifying that the source or
+                                    // destination was a stash.
 
     // If onProcess() is on a timer (say, to wake up in a week) then this will
     // contain the
-    Time m_tNextProcessDate;  // date that it WILL be, in a week. (Or
+    Time next_process_date_;  // date that it WILL be, in a week. (Or
                               // zero.)
 
     // For moving money from one nym's account to another.

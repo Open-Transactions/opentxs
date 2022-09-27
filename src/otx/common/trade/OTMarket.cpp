@@ -61,38 +61,38 @@ using namespace std::literals;
 
 OTMarket::OTMarket(const api::Session& api, const char* szFilename)
     : Contract(api)
-    , m_pCron(nullptr)
-    , m_pTradeList(nullptr)
-    , m_mapBids()
-    , m_mapAsks()
-    , m_mapOffers()
-    , m_NOTARY_ID()
-    , m_INSTRUMENT_DEFINITION_ID()
-    , m_CURRENCY_TYPE_ID()
-    , m_lScale(1)
-    , m_lLastSalePrice(0)
-    , m_strLastSaleDate()
+    , cron_(nullptr)
+    , trade_list_(nullptr)
+    , bids_()
+    , asks_()
+    , offers_()
+    , notary_id_()
+    , instrument_definition_id_()
+    , currency_type_id_()
+    , scale_(1)
+    , last_sale_price_(0)
+    , last_sale_date_()
 {
     OT_ASSERT(nullptr != szFilename);
 
     InitMarket();
-    m_strFilename->Set(szFilename);
-    m_strFoldername->Set(api_.Internal().Legacy().Market());
+    filename_->Set(szFilename);
+    foldername_->Set(api_.Internal().Legacy().Market());
 }
 
 OTMarket::OTMarket(const api::Session& api)
     : Contract(api)
-    , m_pCron(nullptr)
-    , m_pTradeList(nullptr)
-    , m_mapBids()
-    , m_mapAsks()
-    , m_mapOffers()
-    , m_NOTARY_ID()
-    , m_INSTRUMENT_DEFINITION_ID()
-    , m_CURRENCY_TYPE_ID()
-    , m_lScale(1)
-    , m_lLastSalePrice(0)
-    , m_strLastSaleDate()
+    , cron_(nullptr)
+    , trade_list_(nullptr)
+    , bids_()
+    , asks_()
+    , offers_()
+    , notary_id_()
+    , instrument_definition_id_()
+    , currency_type_id_()
+    , scale_(1)
+    , last_sale_price_(0)
+    , last_sale_date_()
 {
     InitMarket();
 }
@@ -104,17 +104,17 @@ OTMarket::OTMarket(
     const identifier::UnitDefinition& CURRENCY_TYPE_ID,
     const Amount& lScale)
     : Contract(api)
-    , m_pCron(nullptr)
-    , m_pTradeList(nullptr)
-    , m_mapBids()
-    , m_mapAsks()
-    , m_mapOffers()
-    , m_NOTARY_ID(NOTARY_ID)
-    , m_INSTRUMENT_DEFINITION_ID(INSTRUMENT_DEFINITION_ID)
-    , m_CURRENCY_TYPE_ID(CURRENCY_TYPE_ID)
-    , m_lScale(1)
-    , m_lLastSalePrice(0)
-    , m_strLastSaleDate()
+    , cron_(nullptr)
+    , trade_list_(nullptr)
+    , bids_()
+    , asks_()
+    , offers_()
+    , notary_id_(NOTARY_ID)
+    , instrument_definition_id_(INSTRUMENT_DEFINITION_ID)
+    , currency_type_id_(CURRENCY_TYPE_ID)
+    , scale_(1)
+    , last_sale_price_(0)
+    , last_sale_date_()
 {
     InitMarket();
     SetScale(lScale);
@@ -136,11 +136,11 @@ auto OTMarket::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
     //    return nReturnVal;
 
     if (!strcmp("market", xml->getNodeName())) {
-        m_strVersion = String::Factory(xml->getAttributeValue("version"));
+        version_ = String::Factory(xml->getAttributeValue("version"));
         SetScale(String::StringToLong(xml->getAttributeValue("marketScale")));
-        m_lLastSalePrice =
+        last_sale_price_ =
             String::StringToLong(xml->getAttributeValue("lastSalePrice"));
-        m_strLastSaleDate = xml->getAttributeValue("lastSaleDate");
+        last_sale_date_ = xml->getAttributeValue("lastSaleDate");
 
         const auto strNotaryID =
                        String::Factory(xml->getAttributeValue("notaryID")),
@@ -148,14 +148,13 @@ auto OTMarket::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
                        xml->getAttributeValue("instrumentDefinitionID")),
                    strCurrencyTypeID = String::Factory(
                        xml->getAttributeValue("currencyTypeID"));
-        m_NOTARY_ID = api_.Factory().NotaryIDFromBase58(strNotaryID->Bytes());
-        m_INSTRUMENT_DEFINITION_ID =
+        notary_id_ = api_.Factory().NotaryIDFromBase58(strNotaryID->Bytes());
+        instrument_definition_id_ =
             api_.Factory().UnitIDFromBase58(strInstrumentDefinitionID->Bytes());
-        m_CURRENCY_TYPE_ID =
+        currency_type_id_ =
             api_.Factory().UnitIDFromBase58(strCurrencyTypeID->Bytes());
 
-        LogConsole()(OT_PRETTY_CLASS())("Market. Scale: ")(m_lScale)(".")
-            .Flush();
+        LogConsole()(OT_PRETTY_CLASS())("Market. Scale: ")(scale_)(".").Flush();
 
         LogDetail()(OT_PRETTY_CLASS())("instrumentDefinitionID: ")(
             strInstrumentDefinitionID.get())(" currencyTypeID: ")(
@@ -178,10 +177,10 @@ auto OTMarket::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
             return (-1);  // error condition
         } else {
             auto pOffer{api_.Factory().InternalSession().Offer(
-                m_NOTARY_ID,
-                m_INSTRUMENT_DEFINITION_ID,
-                m_CURRENCY_TYPE_ID,
-                m_lScale)};
+                notary_id_,
+                instrument_definition_id_,
+                currency_type_id_,
+                scale_)};
 
             OT_ASSERT(false != bool(pOffer));
 
@@ -217,34 +216,34 @@ auto OTMarket::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
 void OTMarket::UpdateContents(const PasswordPrompt& reason)
 {
     // I release this because I'm about to repopulate it.
-    m_xmlUnsigned->Release();
+    xml_unsigned_->Release();
 
-    const auto NOTARY_ID = String::Factory(m_NOTARY_ID),
+    const auto NOTARY_ID = String::Factory(notary_id_),
                INSTRUMENT_DEFINITION_ID =
-                   String::Factory(m_INSTRUMENT_DEFINITION_ID),
-               CURRENCY_TYPE_ID = String::Factory(m_CURRENCY_TYPE_ID);
+                   String::Factory(instrument_definition_id_),
+               CURRENCY_TYPE_ID = String::Factory(currency_type_id_);
 
     Tag tag("market");
 
-    tag.add_attribute("version", m_strVersion->Get());
+    tag.add_attribute("version", version_->Get());
     tag.add_attribute("notaryID", NOTARY_ID->Get());
     tag.add_attribute(
         "instrumentDefinitionID", INSTRUMENT_DEFINITION_ID->Get());
     tag.add_attribute("currencyTypeID", CURRENCY_TYPE_ID->Get());
     tag.add_attribute("marketScale", [&] {
         auto buf = UnallocatedCString{};
-        m_lScale.Serialize(writer(buf));
+        scale_.Serialize(writer(buf));
         return buf;
     }());
-    tag.add_attribute("lastSaleDate", m_strLastSaleDate);
+    tag.add_attribute("lastSaleDate", last_sale_date_);
     tag.add_attribute("lastSalePrice", [&] {
         auto buf = UnallocatedCString{};
-        m_lLastSalePrice.Serialize(writer(buf));
+        last_sale_price_.Serialize(writer(buf));
         return buf;
     }());
 
     // Save the offers for sale.
-    for (auto& it : m_mapAsks) {
+    for (auto& it : asks_) {
         OTOffer* pOffer = it.second;
         OT_ASSERT(nullptr != pOffer);
 
@@ -260,7 +259,7 @@ void OTMarket::UpdateContents(const PasswordPrompt& reason)
     }
 
     // Save the bids.
-    for (auto& it : m_mapBids) {
+    for (auto& it : bids_) {
         OTOffer* pOffer = it.second;
         OT_ASSERT(nullptr != pOffer);
 
@@ -278,14 +277,14 @@ void OTMarket::UpdateContents(const PasswordPrompt& reason)
     UnallocatedCString str_result;
     tag.output(str_result);
 
-    m_xmlUnsigned->Concatenate(String::Factory(str_result));
+    xml_unsigned_->Concatenate(String::Factory(str_result));
 }
 
 auto OTMarket::GetTotalAvailableAssets() -> Amount
 {
     Amount lTotal = 0;
 
-    for (auto& it : m_mapAsks) {
+    for (auto& it : asks_) {
         OTOffer* pOffer = it.second;
         OT_ASSERT(nullptr != pOffer);
 
@@ -308,7 +307,7 @@ auto OTMarket::GetNym_OfferList(
     // Loop through the offers, up to some maximum depth, and then add each
     // as a data member to an offer list, then pack it into ascOutput.
     //
-    for (auto& it : m_mapOffers) {
+    for (auto& it : offers_) {
         OTOffer* pOffer = it.second;
         OT_ASSERT(nullptr != pOffer);
 
@@ -358,14 +357,14 @@ auto OTMarket::GetNym_OfferList(
 
         if (pTrade->IsStopOrder()) {
             if (pTrade->IsGreaterThan()) {
-                pOfferData->stop_sign = ">";
+                pOfferData->stop_sign_ = ">";
             } else if (pTrade->IsLessThan()) {
-                pOfferData->stop_sign = "<";
+                pOfferData->stop_sign_ = "<";
             }
 
-            if (!pOfferData->stop_sign.compare(">") ||
-                !pOfferData->stop_sign.compare("<")) {
-                pOfferData->stop_price = [&] {
+            if (!pOfferData->stop_sign_.compare(">") ||
+                !pOfferData->stop_sign_.compare("<")) {
+                pOfferData->stop_price_ = [&] {
                     auto buf = UnallocatedCString{};
                     pTrade->GetStopPrice().Serialize(writer(buf));
                     return buf;
@@ -373,45 +372,47 @@ auto OTMarket::GetNym_OfferList(
             }
         }
 
-        pOfferData->transaction_id = std::to_string(lTransactionNum);
-        pOfferData->price_per_scale = [&] {
+        pOfferData->transaction_id_ = std::to_string(lTransactionNum);
+        pOfferData->price_per_scale_ = [&] {
             auto buf = UnallocatedCString{};
             lPriceLimit.Serialize(writer(buf));
             return buf;
         }();
-        pOfferData->total_assets = [&] {
+        pOfferData->total_assets_ = [&] {
             auto buf = UnallocatedCString{};
             lTotalAssets.Serialize(writer(buf));
             return buf;
         }();
-        pOfferData->finished_so_far = [&] {
+        pOfferData->finished_so_far_ = [&] {
             auto buf = UnallocatedCString{};
             lFinishedSoFar.Serialize(writer(buf));
             return buf;
         }();
-        pOfferData->minimum_increment = [&] {
+        pOfferData->minimum_increment_ = [&] {
             auto buf = UnallocatedCString{};
             lMinimumIncrement.Serialize(writer(buf));
             return buf;
         }();
-        pOfferData->scale = [&] {
+        pOfferData->scale_ = [&] {
             auto buf = UnallocatedCString{};
             lScale.Serialize(writer(buf));
             return buf;
         }();
 
-        pOfferData->valid_from = std::to_string(Clock::to_time_t(tValidFrom));
-        pOfferData->valid_to = std::to_string(Clock::to_time_t(tValidTo));
+        pOfferData->valid_from_ = std::to_string(Clock::to_time_t(tValidFrom));
+        pOfferData->valid_to_ = std::to_string(Clock::to_time_t(tValidTo));
 
-        pOfferData->date = std::to_string(Clock::to_time_t(tDateAddedToMarket));
+        pOfferData->date_ =
+            std::to_string(Clock::to_time_t(tDateAddedToMarket));
 
-        pOfferData->notary_id = strNotaryID->Get();
-        pOfferData->instrument_definition_id = strInstrumentDefinitionID->Get();
-        pOfferData->asset_acct_id = strAssetAcctID->Get();
-        pOfferData->currency_type_id = strCurrencyID->Get();
-        pOfferData->currency_acct_id = strCurrencyAcctID->Get();
+        pOfferData->notary_id_ = strNotaryID->Get();
+        pOfferData->instrument_definition_id_ =
+            strInstrumentDefinitionID->Get();
+        pOfferData->asset_acct_id_ = strAssetAcctID->Get();
+        pOfferData->currency_type_id_ = strCurrencyID->Get();
+        pOfferData->currency_acct_id_ = strCurrencyAcctID->Get();
 
-        pOfferData->selling = bSelling;
+        pOfferData->selling_ = bSelling;
 
         // *pOfferData is CLONED at this time (I'm still responsible to delete.)
         // That's also why I add it here, below: So the data is set right before
@@ -430,8 +431,8 @@ auto OTMarket::GetRecentTradeList(Armored& ascOutput, std::int32_t& nTradeCount)
     nTradeCount = 0;  // Output the count of trades in the list being returned.
                       // (If success..)
 
-    if (nullptr == m_pTradeList) {
-        //      otErr << "OTMarket::GetRecentTradeList: m_pTradeList is nullptr.
+    if (nullptr == trade_list_) {
+        //      otErr << "OTMarket::GetRecentTradeList: trade_list_ is nullptr.
         // \n";
         return true;
         // Returning true, since it's normal for this to be nullptr when the
@@ -442,7 +443,7 @@ auto OTMarket::GetRecentTradeList(Armored& ascOutput, std::int32_t& nTradeCount)
     // The market already keeps a list of recent trades (informational only)
     //
 
-    const std::size_t sizeList = m_pTradeList->GetTradeDataMarketCount();
+    const std::size_t sizeList = trade_list_->GetTradeDataMarketCount();
     nTradeCount = static_cast<std::int32_t>(sizeList);
 
     if (nTradeCount == 0) {
@@ -460,7 +461,7 @@ auto OTMarket::GetRecentTradeList(Armored& ascOutput, std::int32_t& nTradeCount)
                                     // either.
 
         std::unique_ptr<OTDB::PackedBuffer> pBuffer(pPacker->Pack(
-            *m_pTradeList));  // Now we PACK our market's recent trades list.
+            *trade_list_));  // Now we PACK our market's recent trades list.
 
         if (nullptr == pBuffer) {
             LogError()(OT_PRETTY_CLASS())("Failed packing pTradeList.").Flush();
@@ -511,14 +512,14 @@ auto OTMarket::GetOfferList(
         dynamic_cast<OTDB::OfferListMarket*>(
             OTDB::CreateObject(OTDB::STORED_OBJ_OFFER_LIST_MARKET)));
 
-    //    mapOfOffers            m_mapBids;        // The buyers, ordered by
+    //    mapOfOffers            bids_;        // The buyers, ordered by
     // price limit
-    //    mapOfOffers            m_mapAsks;        // The sellers, ordered by
+    //    mapOfOffers            asks_;        // The sellers, ordered by
     // price limit
 
     std::int32_t nTempDepth = 0;
 
-    for (auto& it : m_mapBids) {
+    for (auto& it : bids_) {
         if (nTempDepth++ > lDepth) { break; }
 
         OTOffer* pOffer = it.second;
@@ -539,23 +540,24 @@ auto OTMarket::GetOfferList(
         const Amount& lMinimumIncrement = pOffer->GetMinimumIncrement();
         const auto tDateAddedToMarket = pOffer->GetDateAddedToMarket();
 
-        pOfferData->transaction_id = std::to_string(lTransactionNum);
-        pOfferData->price_per_scale = [&] {
+        pOfferData->transaction_id_ = std::to_string(lTransactionNum);
+        pOfferData->price_per_scale_ = [&] {
             auto buf = UnallocatedCString{};
             lPriceLimit.Serialize(writer(buf));
             return buf;
         }();
-        pOfferData->available_assets = [&] {
+        pOfferData->available_assets_ = [&] {
             auto buf = UnallocatedCString{};
             lAvailableAssets.Serialize(writer(buf));
             return buf;
         }();
-        pOfferData->minimum_increment = [&] {
+        pOfferData->minimum_increment_ = [&] {
             auto buf = UnallocatedCString{};
             lMinimumIncrement.Serialize(writer(buf));
             return buf;
         }();
-        pOfferData->date = std::to_string(Clock::to_time_t(tDateAddedToMarket));
+        pOfferData->date_ =
+            std::to_string(Clock::to_time_t(tDateAddedToMarket));
 
         // *pOfferData is CLONED at this time (I'm still responsible to delete.)
         // That's also why I add it here, below: So the data is set right before
@@ -567,7 +569,7 @@ auto OTMarket::GetOfferList(
 
     nTempDepth = 0;
 
-    for (auto& it : m_mapAsks) {
+    for (auto& it : asks_) {
         if (nTempDepth++ > lDepth) { break; }
 
         OTOffer* pOffer = it.second;
@@ -583,23 +585,24 @@ auto OTMarket::GetOfferList(
         const Amount& lMinimumIncrement = pOffer->GetMinimumIncrement();
         const auto tDateAddedToMarket = pOffer->GetDateAddedToMarket();
 
-        pOfferData->transaction_id = std::to_string(lTransactionNum);
-        pOfferData->price_per_scale = [&] {
+        pOfferData->transaction_id_ = std::to_string(lTransactionNum);
+        pOfferData->price_per_scale_ = [&] {
             auto buf = UnallocatedCString{};
             lPriceLimit.Serialize(writer(buf));
             return buf;
         }();
-        pOfferData->available_assets = [&] {
+        pOfferData->available_assets_ = [&] {
             auto buf = UnallocatedCString{};
             lAvailableAssets.Serialize(writer(buf));
             return buf;
         }();
-        pOfferData->minimum_increment = [&] {
+        pOfferData->minimum_increment_ = [&] {
             auto buf = UnallocatedCString{};
             lMinimumIncrement.Serialize(writer(buf));
             return buf;
         }();
-        pOfferData->date = std::to_string(Clock::to_time_t(tDateAddedToMarket));
+        pOfferData->date_ =
+            std::to_string(Clock::to_time_t(tDateAddedToMarket));
 
         // *pOfferData is CLONED at this time (I'm still responsible to delete.)
         // That's also why I add it here, below: So the data is set right before
@@ -664,15 +667,15 @@ auto OTMarket::GetOfferList(
 // order received for that price.
 //
 // typedef UnallocatedMultimap<std::int64_t, OTOffer *>    mapOfOffers;
-// mapOfOffers    m_mapBids; // The buyers, ordered
-// mapOfOffers    m_mapAsks; // The sellers, ordered
+// mapOfOffers    bids_; // The buyers, ordered
+// mapOfOffers    asks_; // The sellers, ordered
 
 auto OTMarket::GetOffer(const std::int64_t& lTransactionNum) -> OTOffer*
 {
     // See if there's something there with that transaction number.
-    auto it = m_mapOffers.find(lTransactionNum);
+    auto it = offers_.find(lTransactionNum);
 
-    if (it == m_mapOffers.end()) {
+    if (it == offers_.end()) {
         // nothing found.
         return nullptr;
     }
@@ -704,10 +707,10 @@ auto OTMarket::RemoveOffer(
     bool bReturnValue = false;
 
     // See if there's something there with that transaction number.
-    auto it = m_mapOffers.find(lTransactionNum);
+    auto it = offers_.find(lTransactionNum);
 
     // If it's not already on the list, then there's nothing to remove.
-    if (it == m_mapOffers.end()) {
+    if (it == offers_.end()) {
         LogError()(OT_PRETTY_CLASS())(
             "Attempt to remove non-existent Offer from Market. "
             "Transaction #: ")(lTransactionNum)(".")
@@ -723,10 +726,10 @@ auto OTMarket::RemoveOffer(
         // This removes it from one list (the one indexed by transaction
         // number.)
         // But it's still on one of the other lists...
-        m_mapOffers.erase(it);
+        offers_.erase(it);
 
         // The code operates the same whether ask or bid. Just use a pointer.
-        mapOfOffers* pMap = (pOffer->IsBid() ? &m_mapBids : &m_mapAsks);
+        mapOfOffers* pMap = (pOffer->IsBid() ? &bids_ : &asks_);
 
         // Future solution here: instead of looping through all the offers and
         // finding it,
@@ -818,11 +821,11 @@ auto OTMarket::AddOffer(
         // See if there's something else already there with the same transaction
         // number.
         //
-        auto it = m_mapOffers.find(lTransactionNum);
+        auto it = offers_.find(lTransactionNum);
 
         // If it's not already on the list, then add it...
-        if (it == m_mapOffers.end()) {
-            m_mapOffers[lTransactionNum] = &theOffer;
+        if (it == offers_.end()) {
+            offers_[lTransactionNum] = &theOffer;
             LogTrace()(OT_PRETTY_CLASS())(
                 "Offer added as an offer to the market.")
                 .Flush();
@@ -848,18 +851,18 @@ auto OTMarket::AddOffer(
             // No bother checking if the offer is already on this list,
             // since the code above basically already verifies that for us.
 
-            m_mapBids.insert(
-                m_mapBids.lower_bound(lPriceLimit),  // highest bidders go
-                                                     // first, so I am last in
-                                                     // line at lower bound.
+            bids_.insert(
+                bids_.lower_bound(lPriceLimit),  // highest bidders go
+                                                 // first, so I am last in
+                                                 // line at lower bound.
                 std::pair<Amount, OTOffer*>(lPriceLimit, &theOffer));
             LogTrace()(OT_PRETTY_CLASS())("Offer added as a bid to the market.")
                 .Flush();
         } else {
-            m_mapAsks.insert(
-                m_mapAsks.upper_bound(lPriceLimit),  // lowest price sells
-                                                     // first, so I am last in
-                                                     // line at upper bound.
+            asks_.insert(
+                asks_.upper_bound(lPriceLimit),  // lowest price sells
+                                                 // first, so I am last in
+                                                 // line at upper bound.
                 std::pair<Amount, OTOffer*>(lPriceLimit, &theOffer));
             LogTrace()(OT_PRETTY_CLASS())(
                 "Offer added as an ask to the market.")
@@ -909,13 +912,13 @@ auto OTMarket::LoadMarket() -> bool
     // Load the list of recent market trades (informational only.)
     //
     if (bSuccess) {
-        if (nullptr != m_pTradeList) { delete m_pTradeList; }
+        if (nullptr != trade_list_) { delete trade_list_; }
 
         auto trade_files = api::Legacy::GetFilenameBin(str_MARKET_ID->Get());
 
         const char* szSubFolder = "recent";  // todo stop hardcoding.
 
-        m_pTradeList = dynamic_cast<OTDB::TradeListMarket*>(OTDB::QueryObject(
+        trade_list_ = dynamic_cast<OTDB::TradeListMarket*>(OTDB::QueryObject(
             api_,
             OTDB::STORED_OBJ_TRADE_LIST_MARKET,
             api_.DataFolder().string(),
@@ -958,7 +961,7 @@ auto OTMarket::SaveMarket(const PasswordPrompt& reason) -> bool
 
     // Save a copy of recent trades.
 
-    if (nullptr != m_pTradeList) {
+    if (nullptr != trade_list_) {
 
         auto filename = api::Legacy::GetFilenameBin(str_MARKET_ID->Get());
 
@@ -967,7 +970,7 @@ auto OTMarket::SaveMarket(const PasswordPrompt& reason) -> bool
         // If this fails, oh well. It's informational, anyway.
         if (!OTDB::StoreObject(
                 api_,
-                *m_pTradeList,
+                *trade_list_,
                 api_.DataFolder().string(),
                 szFoldername,  // markets
                 szSubFolder,   // markets/recent
@@ -1013,9 +1016,9 @@ auto OTMarket::GetHighestBidPrice() -> Amount
 {
     Amount lPrice = 0;
 
-    auto rr = m_mapBids.rbegin();
+    auto rr = bids_.rbegin();
 
-    if (rr != m_mapBids.rend()) { lPrice = rr->first; }
+    if (rr != bids_.rend()) { lPrice = rr->first; }
 
     return lPrice;
 }
@@ -1026,9 +1029,9 @@ auto OTMarket::GetLowestAskPrice() -> Amount
 {
     Amount lPrice = 0;
 
-    auto it = m_mapAsks.begin();
+    auto it = asks_.begin();
 
-    if (it != m_mapAsks.end()) {
+    if (it != asks_.end()) {
         lPrice = it->first;
 
         // Market orders have a 0 price, so we need to skip any if they are
@@ -1042,7 +1045,7 @@ auto OTMarket::GetLowestAskPrice() -> Amount
         while (0 == lPrice) {
             ++it;
 
-            if (it == m_mapAsks.end()) { break; }
+            if (it == asks_.end()) { break; }
 
             lPrice = it->first;
         }
@@ -1961,14 +1964,14 @@ void OTMarket::ProcessTrade(
                 theOtherOffer.SignContract(*pServerNym, reason);
                 theOtherOffer.SaveContract();
 
-                m_lLastSalePrice =
+                last_sale_price_ =
                     theOtherOffer.GetPriceLimit();  // Priced per scale.
 
                 // Here we save this trade in a list of the most recent
                 // 50 trades.
                 {
-                    if (nullptr == m_pTradeList) {
-                        m_pTradeList = dynamic_cast<OTDB::TradeListMarket*>(
+                    if (nullptr == trade_list_) {
+                        trade_list_ = dynamic_cast<OTDB::TradeListMarket*>(
                             OTDB::CreateObject(
                                 OTDB::STORED_OBJ_TRADE_LIST_MARKET));
                     }
@@ -1981,36 +1984,36 @@ void OTMarket::ProcessTrade(
                         theOffer.GetTransactionNum();
                     const auto theDate = Clock::now();
 
-                    pTradeData->transaction_id =
+                    pTradeData->transaction_id_ =
                         std::to_string(lTransactionNum);
-                    pTradeData->date =
+                    pTradeData->date_ =
                         std::to_string(Clock::to_time_t(theDate));
-                    pTradeData->price = [&] {
+                    pTradeData->price_ = [&] {
                         auto buf = UnallocatedCString{};
                         theOtherOffer.GetPriceLimit().Serialize(writer(buf));
                         return buf;
                     }();  // Priced per scale.
-                    pTradeData->amount_sold = [&] {
+                    pTradeData->amount_sold_ = [&] {
                         auto buf = UnallocatedCString{};
                         lOfferFinished.Serialize(writer(buf));
                         return buf;
                     }();
 
-                    m_strLastSaleDate = pTradeData->date;
+                    last_sale_date_ = pTradeData->date_;
 
                     // *pTradeData is CLONED at this time (I'm still
                     // responsible to delete.) That's also why I add it
                     // here, after all the above: So the data is set
                     // right BEFORE the cloning occurs.
                     //
-                    m_pTradeList->AddTradeDataMarket(*pTradeData);
+                    trade_list_->AddTradeDataMarket(*pTradeData);
 
                     // Here we erase the oldest elements so the list
                     // never exceeds 50 elements total.
                     //
-                    while (m_pTradeList->GetTradeDataMarketCount() >
+                    while (trade_list_->GetTradeDataMarketCount() >
                            MAX_MARKET_QUERY_DEPTH) {
-                        m_pTradeList->RemoveTradeDataMarket(0);
+                        trade_list_->RemoveTradeDataMarket(0);
                     }
                 }
 
@@ -2505,7 +2508,7 @@ auto OTMarket::ProcessTrade(
         // backwards until there are no other bids within my price
         // range.
         // NOLINTBEGIN(modernize-loop-convert)
-        for (auto rr = m_mapBids.rbegin(); rr != m_mapBids.rend(); ++rr) {
+        for (auto rr = bids_.rbegin(); rr != bids_.rend(); ++rr) {
             // then I want to start at the highest bidder and loop DOWN
             // until hitting my price limit.
             OTOffer* pBid = rr->second;
@@ -2613,7 +2616,7 @@ auto OTMarket::ProcessTrade(
         // there, and loop forwards until there are no other asks within
         // my price range.
         //
-        for (auto& it : m_mapAsks) {
+        for (auto& it : asks_) {
             // then I want to start at the lowest seller and loop UP
             // until hitting my price limit.
             OTOffer* pAsk = it.second;
@@ -2789,32 +2792,32 @@ auto OTMarket::ValidateOfferForMarket(OTOffer& theOffer) -> bool
     return bValidOffer;
 }
 
-void OTMarket::InitMarket() { m_strContractType = String::Factory("MARKET"); }
+void OTMarket::InitMarket() { contract_type_ = String::Factory("MARKET"); }
 
 void OTMarket::Release_Market()
 {
-    m_INSTRUMENT_DEFINITION_ID.clear();
-    m_CURRENCY_TYPE_ID.clear();
+    instrument_definition_id_.clear();
+    currency_type_id_.clear();
 
-    m_NOTARY_ID.clear();
+    notary_id_.clear();
 
     // Elements of this list are cleaned up automatically.
-    if (nullptr != m_pTradeList) {
-        delete m_pTradeList;
-        m_pTradeList = nullptr;
+    if (nullptr != trade_list_) {
+        delete trade_list_;
+        trade_list_ = nullptr;
     }
 
     // If there were any dynamically allocated objects, clean them up
     // here.
-    while (!m_mapBids.empty()) {
-        OTOffer* pOffer = m_mapBids.begin()->second;
-        m_mapBids.erase(m_mapBids.begin());
+    while (!bids_.empty()) {
+        OTOffer* pOffer = bids_.begin()->second;
+        bids_.erase(bids_.begin());
         delete pOffer;
         pOffer = nullptr;
     }
-    while (!m_mapAsks.empty()) {
-        OTOffer* pOffer = m_mapAsks.begin()->second;
-        m_mapAsks.erase(m_mapAsks.begin());
+    while (!asks_.empty()) {
+        OTOffer* pOffer = asks_.begin()->second;
+        asks_.erase(asks_.begin());
         delete pOffer;
         pOffer = nullptr;
     }

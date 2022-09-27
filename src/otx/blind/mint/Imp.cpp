@@ -51,25 +51,25 @@ Mint::Mint(
     const identifier::Nym& serverNym,
     const identifier::UnitDefinition& unit)
     : Imp(api)
-    , m_mapPrivate()
-    , m_mapPublic()
-    , m_NotaryID(notary)
-    , m_ServerNymID(serverNym)
-    , m_InstrumentDefinitionID(unit)
-    , m_nDenominationCount(0)
-    , m_bSavePrivateKeys(false)
-    , m_nSeries(0)
-    , m_VALID_FROM(Time::min())
-    , m_VALID_TO(Time::min())
-    , m_EXPIRATION(Time::min())
-    , m_CashAccountID()
+    , private_()
+    , public_()
+    , notary_id_(notary)
+    , server_nym_id_(serverNym)
+    , instrument_definition_id_(unit)
+    , denomination_count_(0)
+    , save_private_keys_(false)
+    , series_(0)
+    , valid_from_(Time::min())
+    , valid_to_(Time::min())
+    , expiration_(Time::min())
+    , cash_account_id_()
 {
-    m_strFoldername->Set(api.Internal().Legacy().Mint());
-    m_strFilename->Set(api_.Internal()
-                           .Legacy()
-                           .MintFileName(m_NotaryID, m_InstrumentDefinitionID)
-                           .string()
-                           .c_str());
+    foldername_->Set(api.Internal().Legacy().Mint());
+    filename_->Set(api_.Internal()
+                       .Legacy()
+                       .MintFileName(notary_id_, instrument_definition_id_)
+                       .string()
+                       .c_str());
     InitMint();
 }
 
@@ -78,42 +78,42 @@ Mint::Mint(
     const identifier::Notary& notary,
     const identifier::UnitDefinition& unit)
     : Imp(api, unit)
-    , m_mapPrivate()
-    , m_mapPublic()
-    , m_NotaryID(notary)
-    , m_ServerNymID()
-    , m_InstrumentDefinitionID(unit)
-    , m_nDenominationCount(0)
-    , m_bSavePrivateKeys(false)
-    , m_nSeries(0)
-    , m_VALID_FROM(Time::min())
-    , m_VALID_TO(Time::min())
-    , m_EXPIRATION(Time::min())
-    , m_CashAccountID()
+    , private_()
+    , public_()
+    , notary_id_(notary)
+    , server_nym_id_()
+    , instrument_definition_id_(unit)
+    , denomination_count_(0)
+    , save_private_keys_(false)
+    , series_(0)
+    , valid_from_(Time::min())
+    , valid_to_(Time::min())
+    , expiration_(Time::min())
+    , cash_account_id_()
 {
-    m_strFoldername->Set(api.Internal().Legacy().Mint());
-    m_strFilename->Set(api_.Internal()
-                           .Legacy()
-                           .MintFileName(m_NotaryID, m_InstrumentDefinitionID)
-                           .string()
-                           .c_str());
+    foldername_->Set(api.Internal().Legacy().Mint());
+    filename_->Set(api_.Internal()
+                       .Legacy()
+                       .MintFileName(notary_id_, instrument_definition_id_)
+                       .string()
+                       .c_str());
     InitMint();
 }
 
 Mint::Mint(const api::Session& api)
     : Imp(api)
-    , m_mapPrivate()
-    , m_mapPublic()
-    , m_NotaryID()
-    , m_ServerNymID()
-    , m_InstrumentDefinitionID()
-    , m_nDenominationCount(0)
-    , m_bSavePrivateKeys(false)
-    , m_nSeries(0)
-    , m_VALID_FROM(Time::min())
-    , m_VALID_TO(Time::min())
-    , m_EXPIRATION(Time::min())
-    , m_CashAccountID()
+    , private_()
+    , public_()
+    , notary_id_()
+    , server_nym_id_()
+    , instrument_definition_id_()
+    , denomination_count_(0)
+    , save_private_keys_(false)
+    , series_(0)
+    , valid_from_(Time::min())
+    , valid_to_(Time::min())
+    , expiration_(Time::min())
+    , cash_account_id_()
 {
     InitMint();
 }
@@ -124,7 +124,7 @@ auto Mint::Expired() const -> bool
 {
     const auto CURRENT_TIME = Clock::now();
 
-    if ((CURRENT_TIME >= m_VALID_FROM) && (CURRENT_TIME <= m_EXPIRATION)) {
+    if ((CURRENT_TIME >= valid_from_) && (CURRENT_TIME <= expiration_)) {
         return false;
     } else {
         return true;
@@ -133,8 +133,8 @@ auto Mint::Expired() const -> bool
 
 void Mint::ReleaseDenominations()
 {
-    m_mapPublic.clear();
-    m_mapPrivate.clear();
+    public_.clear();
+    private_.clear();
 }
 
 // If you want to load a certain Mint from string, then
@@ -147,7 +147,7 @@ void Mint::ReleaseDenominations()
 void Mint::Release_Mint()
 {
     ReleaseDenominations();
-    m_CashAccountID.clear();
+    cash_account_id_.clear();
     Imp::Release_Mint();
 }
 
@@ -161,43 +161,44 @@ void Mint::Release()
 
 void Mint::InitMint()
 {
-    m_strContractType->Set("MINT");
+    contract_type_->Set("MINT");
 
-    m_nDenominationCount = 0;
+    denomination_count_ = 0;
 
-    m_bSavePrivateKeys =
+    save_private_keys_ =
         false;  // Determines whether it serializes private keys (no if false)
 
     // Mints expire and new ones are rotated in.
     // All tokens have the same series, and validity dates,
     // of the mint that created them.
-    m_nSeries = 0;
-    m_VALID_FROM = Time::min();
-    m_VALID_TO = Time::min();
-    m_EXPIRATION = Time::min();
+    series_ = 0;
+    valid_from_ = Time::min();
+    valid_to_ = Time::min();
+    expiration_ = Time::min();
 }
 
 auto Mint::LoadContract() -> bool { return LoadMint({}); }
 
 auto Mint::LoadMint(std::string_view extension) -> bool
 {
-    if (!m_strFoldername->Exists()) {
-        m_strFoldername->Set(api_.Internal().Legacy().Mint());
+    if (!foldername_->Exists()) {
+        foldername_->Set(api_.Internal().Legacy().Mint());
     }
 
-    const auto strNotaryID = String::Factory(m_NotaryID);
+    const auto strNotaryID = String::Factory(notary_id_);
 
-    if (!m_strFilename->Exists()) {
-        m_strFilename->Set(
+    if (!filename_->Exists()) {
+        filename_->Set(
             api_.Internal()
                 .Legacy()
-                .MintFileName(m_NotaryID, m_InstrumentDefinitionID, extension)
+                .MintFileName(notary_id_, instrument_definition_id_, extension)
                 .string()
                 .c_str());
     }
 
     const auto strFilename =
-        fs::path{m_InstrumentDefinitionID.asBase58(api_.Crypto())} += extension;
+        fs::path{instrument_definition_id_.asBase58(api_.Crypto())} +=
+        extension;
     const char* szFolder1name = api_.Internal().Legacy().Mint();
     const char* szFolder2name = strNotaryID->Get();
     const auto pathString = strFilename.string();
@@ -245,23 +246,24 @@ auto Mint::LoadMint(std::string_view extension) -> bool
 
 auto Mint::SaveMint(std::string_view extension) -> bool
 {
-    if (!m_strFoldername->Exists()) {
-        m_strFoldername->Set(api_.Internal().Legacy().Mint());
+    if (!foldername_->Exists()) {
+        foldername_->Set(api_.Internal().Legacy().Mint());
     }
 
-    const auto strNotaryID = String::Factory(m_NotaryID);
+    const auto strNotaryID = String::Factory(notary_id_);
 
-    if (!m_strFilename->Exists()) {
-        m_strFilename->Set(
+    if (!filename_->Exists()) {
+        filename_->Set(
             api_.Internal()
                 .Legacy()
-                .MintFileName(m_NotaryID, m_InstrumentDefinitionID, extension)
+                .MintFileName(notary_id_, instrument_definition_id_, extension)
                 .string()
                 .c_str());
     }
 
     const auto strFilename =
-        fs::path{m_InstrumentDefinitionID.asBase58(api_.Crypto())} += extension;
+        fs::path{instrument_definition_id_.asBase58(api_.Crypto())} +=
+        extension;
     const char* szFolder1name = api_.Internal().Legacy().Mint();
     const char* szFolder2name = strNotaryID->Get();
     const auto pathString = strFilename.string();
@@ -278,8 +280,7 @@ auto Mint::SaveMint(std::string_view extension) -> bool
     auto strFinal = String::Factory();
     auto ascTemp = Armored::Factory(strRawFile);
 
-    if (false ==
-        ascTemp->WriteArmoredString(strFinal, m_strContractType->Get())) {
+    if (false == ascTemp->WriteArmoredString(strFinal, contract_type_->Get())) {
         LogError()(OT_PRETTY_CLASS())(
             " Error saving mint (Failed writing armored string): ")(
             szFolder1name)('/')(szFolder2name)('/')(szFilename)(".")
@@ -341,18 +342,18 @@ auto Mint::VerifyContractID() const -> bool
 {
     // I use the == operator here because there is no != operator at this time.
     // That's why you see the ! outside the parenthesis.
-    if (!(m_ID == m_InstrumentDefinitionID)) {
-        auto str1 = String::Factory(m_ID),
-             str2 = String::Factory(m_InstrumentDefinitionID);
+    if (!(id_ == instrument_definition_id_)) {
+        auto str1 = String::Factory(id_),
+             str2 = String::Factory(instrument_definition_id_);
 
         LogError()(OT_PRETTY_CLASS())(
             " Mint ID does NOT match Instrument Definition. ")(str1.get())(
             " | ")(str2.get())(".")
             .Flush();
-        //                "\nRAW FILE:\n--->" << m_strRawFile << "<---"
+        //                "\nRAW FILE:\n--->" << raw_file_ << "<---"
         return false;
     } else {
-        auto str1 = String::Factory(m_ID);
+        auto str1 = String::Factory(id_);
         LogVerbose()(OT_PRETTY_CLASS())(
             " Mint ID *SUCCESSFUL* match to Asset Contract ID: ")(str1.get())
             .Flush();
@@ -366,7 +367,7 @@ auto Mint::GetPrivate(Armored& theArmor, const Amount& lDenomination) const
     -> bool
 {
     try {
-        theArmor.Set(m_mapPrivate.at(lDenomination));
+        theArmor.Set(private_.at(lDenomination));
 
         return true;
     } catch (...) {
@@ -384,7 +385,7 @@ auto Mint::GetPublic(Armored& theArmor, const Amount& lDenomination) const
     -> bool
 {
     try {
-        theArmor.Set(m_mapPublic.at(lDenomination));
+        theArmor.Set(public_.at(lDenomination));
 
         return true;
     } catch (...) {
@@ -420,11 +421,11 @@ auto Mint::GetLargestDenomination(const Amount& lAmount) const -> Amount
 auto Mint::GetDenomination(std::int32_t nIndex) const -> Amount
 {
     // index out of bounds.
-    if (nIndex > (m_nDenominationCount - 1)) { return 0; }
+    if (nIndex > (denomination_count_ - 1)) { return 0; }
 
     std::int32_t nIterateIndex = 0;
 
-    for (auto it = m_mapPublic.begin(); it != m_mapPublic.end();
+    for (auto it = public_.begin(); it != public_.end();
          ++it, nIterateIndex++) {
 
         if (nIndex == nIterateIndex) { return it->first; }
@@ -439,33 +440,33 @@ auto Mint::GetDenomination(std::int32_t nIndex) const -> Amount
 // first.
 void Mint::UpdateContents(const PasswordPrompt& reason)
 {
-    auto NOTARY_ID = String::Factory(m_NotaryID),
-         NOTARY_NYM_ID = String::Factory(m_ServerNymID),
-         INSTRUMENT_DEFINITION_ID = String::Factory(m_InstrumentDefinitionID),
-         CASH_ACCOUNT_ID = String::Factory(m_CashAccountID);
+    auto NOTARY_ID = String::Factory(notary_id_),
+         NOTARY_NYM_ID = String::Factory(server_nym_id_),
+         INSTRUMENT_DEFINITION_ID = String::Factory(instrument_definition_id_),
+         CASH_ACCOUNT_ID = String::Factory(cash_account_id_);
 
     // I release this because I'm about to repopulate it.
-    m_xmlUnsigned->Release();
+    xml_unsigned_->Release();
 
     Tag tag("mint");
 
-    tag.add_attribute("version", m_strVersion->Get());
+    tag.add_attribute("version", version_->Get());
     tag.add_attribute("notaryID", NOTARY_ID->Get());
     tag.add_attribute("serverNymID", NOTARY_NYM_ID->Get());
     tag.add_attribute(
         "instrumentDefinitionID", INSTRUMENT_DEFINITION_ID->Get());
     tag.add_attribute("cashAcctID", CASH_ACCOUNT_ID->Get());
-    tag.add_attribute("series", std::to_string(m_nSeries));
-    tag.add_attribute("expiration", formatTimestamp(m_EXPIRATION));
-    tag.add_attribute("validFrom", formatTimestamp(m_VALID_FROM));
-    tag.add_attribute("validTo", formatTimestamp(m_VALID_TO));
+    tag.add_attribute("series", std::to_string(series_));
+    tag.add_attribute("expiration", formatTimestamp(expiration_));
+    tag.add_attribute("validFrom", formatTimestamp(valid_from_));
+    tag.add_attribute("validTo", formatTimestamp(valid_to_));
 
-    if (m_nDenominationCount) {
-        if (m_bSavePrivateKeys) {
-            m_bSavePrivateKeys = false;  // reset this back to false again. Use
+    if (denomination_count_) {
+        if (save_private_keys_) {
+            save_private_keys_ = false;  // reset this back to false again. Use
                                          // SetSavePrivateKeys() to set it true.
 
-            for (auto& it : m_mapPrivate) {
+            for (auto& it : private_) {
                 TagPtr tagPrivateInfo(
                     new Tag("mintPrivateInfo", it.second->Get()));
                 tagPrivateInfo->add_attribute("denomination", [&] {
@@ -476,7 +477,7 @@ void Mint::UpdateContents(const PasswordPrompt& reason)
                 tag.add_tag(tagPrivateInfo);
             }
         }
-        for (auto& it : m_mapPublic) {
+        for (auto& it : public_) {
             TagPtr tagPublicInfo(new Tag("mintPublicInfo", it.second->Get()));
             tagPublicInfo->add_attribute("denomination", [&] {
                 auto amount = UnallocatedCString{};
@@ -490,7 +491,7 @@ void Mint::UpdateContents(const PasswordPrompt& reason)
     UnallocatedCString str_result;
     tag.output(str_result);
 
-    m_xmlUnsigned->Concatenate(String::Factory(str_result));
+    xml_unsigned_->Concatenate(String::Factory(str_result));
 }
 
 // return -1 if error, 0 if nothing, and 1 if the node was processed.
@@ -517,37 +518,38 @@ auto Mint::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
              strInstrumentDefinitionID = String::Factory(),
              strCashAcctID = String::Factory();
 
-        m_strVersion = String::Factory(xml->getAttributeValue("version"));
+        version_ = String::Factory(xml->getAttributeValue("version"));
         strNotaryID = String::Factory(xml->getAttributeValue("notaryID"));
         strServerNymID = String::Factory(xml->getAttributeValue("serverNymID"));
         strInstrumentDefinitionID =
             String::Factory(xml->getAttributeValue("instrumentDefinitionID"));
         strCashAcctID = String::Factory(xml->getAttributeValue("cashAcctID"));
 
-        m_nSeries = atoi(xml->getAttributeValue("series"));
-        m_EXPIRATION = parseTimestamp(xml->getAttributeValue("expiration"));
+        series_ = atoi(xml->getAttributeValue("series"));
+        expiration_ = parseTimestamp(xml->getAttributeValue("expiration"));
 
-        m_VALID_FROM = parseTimestamp(xml->getAttributeValue("validFrom"));
-        m_VALID_TO = parseTimestamp(xml->getAttributeValue("validTo"));
+        valid_from_ = parseTimestamp(xml->getAttributeValue("validFrom"));
+        valid_to_ = parseTimestamp(xml->getAttributeValue("validTo"));
 
-        m_NotaryID = api_.Factory().NotaryIDFromBase58(strNotaryID->Bytes());
-        m_ServerNymID = api_.Factory().NymIDFromBase58(strServerNymID->Bytes());
-        m_InstrumentDefinitionID =
+        notary_id_ = api_.Factory().NotaryIDFromBase58(strNotaryID->Bytes());
+        server_nym_id_ =
+            api_.Factory().NymIDFromBase58(strServerNymID->Bytes());
+        instrument_definition_id_ =
             api_.Factory().UnitIDFromBase58(strInstrumentDefinitionID->Bytes());
-        m_CashAccountID =
+        cash_account_id_ =
             api_.Factory().IdentifierFromBase58(strCashAcctID->Bytes());
 
         LogDetail()(OT_PRETTY_CLASS())
             //    "\n===> Loading XML for mint into memory structures..."
-            ("Mint version: ")(m_strVersion.get())(" Notary ID: ")(
+            ("Mint version: ")(version_.get())(" Notary ID: ")(
                 strNotaryID.get())(" Instrument Definition ID: ")(
                 strInstrumentDefinitionID.get())(" Cash Acct ID: ")(
                 strCashAcctID.get())(
-                (m_CashAccountID.empty()) ? "FAILURE" : "SUCCESS")(
+                (cash_account_id_.empty()) ? "FAILURE" : "SUCCESS")(
                 " loading Cash Account into memory for pointer: ")(
-                "Mint::m_pReserveAcct ")(" Series: ")(
-                m_nSeries)(" Expiration: ")(m_EXPIRATION)(" Valid From: ")(
-                m_VALID_FROM)(" Valid To: ")(m_VALID_TO)
+                "Mint::reserve_acct_ ")(" Series: ")(series_)(" Expiration: ")(
+                expiration_)(" Valid From: ")(valid_from_)(" Valid To: ")(
+                valid_to_)
                 .Flush();
 
         nReturnVal = 1;
@@ -566,7 +568,7 @@ auto Mint::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
             LogTrace()(OT_PRETTY_CLASS())(
                 " Loading private key for denomination ")(lDenomination)
                 .Flush();
-            m_mapPrivate.emplace(lDenomination, std::move(pArmor));
+            private_.emplace(lDenomination, std::move(pArmor));
         }
 
         return 1;
@@ -586,10 +588,10 @@ auto Mint::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
             LogTrace()(OT_PRETTY_CLASS())(
                 " Loading public key for denomination ")(lDenomination)
                 .Flush();
-            m_mapPublic.emplace(lDenomination, std::move(pArmor));
+            public_.emplace(lDenomination, std::move(pArmor));
             // Whether client or server, both sides have public. Each public
             // denomination should increment this count.
-            m_nDenominationCount++;
+            denomination_count_++;
         }
 
         return 1;
@@ -601,9 +603,9 @@ auto Mint::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
 /*
  // Just make sure theMessage has these members populated:
  //
- // theMessage.m_strNymID;
- // theMessage.m_strInstrumentDefinitionID;
- // theMessage.m_strNotaryID;
+ // theMessage.nym_id_;
+ // theMessage.instrument_definition_id_;
+ // theMessage.notary_id_;
 
  // static method (call it without an instance, using notation:
  OTAccount::GenerateNewAccount)
@@ -628,7 +630,7 @@ auto Mint::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
 // Lucre step 1: generate new mint
 // Make sure the issuer here has a private key
 // theMint.GenerateNewMint(nSeries, VALID_FROM, VALID_TO,
-// INSTRUMENT_DEFINITION_ID, m_nymServer,
+// INSTRUMENT_DEFINITION_ID, nym_server_,
 // 1, 5, 10, 20, 50, 100, 500, 1000, 10000, 100000);
 void Mint::GenerateNewMint(
     const api::session::Wallet& wallet,
@@ -653,14 +655,14 @@ void Mint::GenerateNewMint(
     const PasswordPrompt& reason)
 {
     Release();
-    m_InstrumentDefinitionID = theInstrumentDefinitionID;
-    m_NotaryID = theNotaryID;
+    instrument_definition_id_ = theInstrumentDefinitionID;
+    notary_id_ = theNotaryID;
     const auto& NOTARY_NYM_ID = theNotary.ID();
-    m_ServerNymID = NOTARY_NYM_ID;
-    m_nSeries = nSeries;
-    m_VALID_FROM = VALID_FROM;
-    m_VALID_TO = VALID_TO;
-    m_EXPIRATION = MINT_EXPIRATION;
+    server_nym_id_ = NOTARY_NYM_ID;
+    series_ = nSeries;
+    valid_from_ = VALID_FROM;
+    valid_to_ = VALID_TO;
+    expiration_ = MINT_EXPIRATION;
     auto account = wallet.Internal().CreateAccount(
         NOTARY_NYM_ID,
         theNotaryID,
@@ -671,7 +673,7 @@ void Mint::GenerateNewMint(
         reason);
 
     if (account) {
-        account.get().GetIdentifier(m_CashAccountID);
+        account.get().GetIdentifier(cash_account_id_);
         LogDetail()(OT_PRETTY_CLASS())(
             " Successfully created cash reserve account for new mint.")
             .Flush();

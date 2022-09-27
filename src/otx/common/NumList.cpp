@@ -22,7 +22,7 @@
 namespace opentxs
 {
 NumList::NumList()
-    : m_setData()
+    : data_()
 {
 }
 
@@ -33,7 +33,7 @@ NumList::NumList(const UnallocatedSet<std::int64_t>& theNumbers)
 }
 
 NumList::NumList(UnallocatedSet<std::int64_t>&& theNumbers)
-    : m_setData(std::move(theNumbers))
+    : data_(std::move(theNumbers))
 {
 }
 
@@ -154,11 +154,11 @@ auto NumList::Add(const std::int64_t& theValue)
              // was
              // already there.
 {
-    auto it = m_setData.find(theValue);
+    auto it = data_.find(theValue);
 
-    if (m_setData.end() == it)  // it's not already there, so add it.
+    if (data_.end() == it)  // it's not already there, so add it.
     {
-        m_setData.insert(theValue);
+        data_.insert(theValue);
         return true;
     }
     return false;  // it was already there.
@@ -166,9 +166,9 @@ auto NumList::Add(const std::int64_t& theValue)
 
 auto NumList::Peek(std::int64_t& lPeek) const -> bool
 {
-    auto it = m_setData.begin();
+    auto it = data_.begin();
 
-    if (m_setData.end() != it)  // it's there.
+    if (data_.end() != it)  // it's there.
     {
         lPeek = *it;
         return true;
@@ -178,11 +178,11 @@ auto NumList::Peek(std::int64_t& lPeek) const -> bool
 
 auto NumList::Pop() -> bool
 {
-    auto it = m_setData.begin();
+    auto it = data_.begin();
 
-    if (m_setData.end() != it)  // it's there.
+    if (data_.end() != it)  // it's there.
     {
-        m_setData.erase(it);
+        data_.erase(it);
         return true;
     }
     return false;
@@ -193,11 +193,11 @@ auto NumList::Remove(const std::int64_t& theValue)
              // was
              // NOT already there.
 {
-    auto it = m_setData.find(theValue);
+    auto it = data_.find(theValue);
 
-    if (m_setData.end() != it)  // it's there.
+    if (data_.end() != it)  // it's there.
     {
-        m_setData.erase(it);
+        data_.erase(it);
         return true;
     }
     return false;  // it wasn't there (so how could you remove it then?)
@@ -208,9 +208,9 @@ auto NumList::Verify(const std::int64_t& theValue) const
              // (whether value is
              // already there.)
 {
-    auto it = m_setData.find(theValue);
+    auto it = data_.find(theValue);
 
-    return (m_setData.end() == it) ? false : true;
+    return (data_.end() == it) ? false : true;
 }
 
 // True/False, based on whether values are already there.
@@ -244,7 +244,7 @@ auto NumList::Verify(const NumList& rhs) const -> bool
         return false;
     }
 
-    for (const auto& it : m_setData) {
+    for (const auto& it : data_) {
         if (false == rhs.Verify(it)) {
             LogError()(OT_PRETTY_CLASS())("Number ")(it)(" missing").Flush();
 
@@ -259,7 +259,7 @@ auto NumList::Verify(const NumList& rhs) const -> bool
 ///
 auto NumList::VerifyAny(const NumList& rhs) const -> bool
 {
-    return rhs.VerifyAny(m_setData);
+    return rhs.VerifyAny(data_);
 }
 
 /// Verify whether ANY of the numbers on *this are found in setData.
@@ -267,7 +267,7 @@ auto NumList::VerifyAny(const NumList& rhs) const -> bool
 auto NumList::VerifyAny(const UnallocatedSet<std::int64_t>& setData) const
     -> bool
 {
-    for (const auto& it : m_setData) {
+    for (const auto& it : data_) {
         auto it_find = setData.find(it);
 
         if (it_find != setData.end()) {  // found a match.
@@ -335,9 +335,9 @@ auto NumList::Output(UnallocatedSet<std::int64_t>& theOutput) const
 // the numlist was
 // empty.
 {
-    theOutput = m_setData;
+    theOutput = data_;
 
-    return !m_setData.empty();
+    return !data_.empty();
 }
 
 // Outputs the numlist as a comma-separated string (for serialization, usually.)
@@ -347,7 +347,7 @@ auto NumList::Output(String& strOutput) const -> bool  // returns false if the
 {
     std::int32_t nIterationCount = 0;
 
-    for (const auto& it : m_setData) {
+    for (const auto& it : data_) {
         nIterationCount++;
         auto sx = String::Factory(
             (1 == nIterationCount ? "" : ",") + std::to_string(it));
@@ -360,14 +360,14 @@ auto NumList::Output(String& strOutput) const -> bool  // returns false if the
                 (1 == nIterationCount ? "" : ",") + std::to_string(it)));
     }
 
-    return !m_setData.empty();
+    return !data_.empty();
 }
 
 auto NumList::Count() const -> std::int32_t
 {
-    return static_cast<std::int32_t>(m_setData.size());
+    return static_cast<std::int32_t>(data_.size());
 }
 
-void NumList::Release() { m_setData.clear(); }
+void NumList::Release() { data_.clear(); }
 
 }  // namespace opentxs

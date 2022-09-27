@@ -33,13 +33,13 @@ namespace opentxs
 {
 Cheque::Cheque(const api::Session& api)
     : ot_super(api)
-    , m_lAmount(0)
-    , m_strMemo(String::Factory())
-    , m_RECIPIENT_NYM_ID()
-    , m_bHasRecipient(false)
-    , m_REMITTER_NYM_ID()
-    , m_REMITTER_ACCT_ID()
-    , m_bHasRemitter(false)
+    , amount_(0)
+    , memo_(String::Factory())
+    , recipient_nym_id_()
+    , has_recipient_(false)
+    , remitter_nym_id_()
+    , remitter_account_id_()
+    , has_remitter_(false)
 {
     InitCheque();
 }
@@ -49,13 +49,13 @@ Cheque::Cheque(
     const identifier::Notary& NOTARY_ID,
     const identifier::UnitDefinition& INSTRUMENT_DEFINITION_ID)
     : ot_super(api, NOTARY_ID, INSTRUMENT_DEFINITION_ID)
-    , m_lAmount(0)
-    , m_strMemo(String::Factory())
-    , m_RECIPIENT_NYM_ID()
-    , m_bHasRecipient(false)
-    , m_REMITTER_NYM_ID()
-    , m_REMITTER_ACCT_ID()
-    , m_bHasRemitter(false)
+    , amount_(0)
+    , memo_(String::Factory())
+    , recipient_nym_id_()
+    , has_recipient_(false)
+    , remitter_nym_id_()
+    , remitter_account_id_()
+    , has_remitter_(false)
 {
     InitCheque();
 }
@@ -75,14 +75,14 @@ void Cheque::UpdateContents([[maybe_unused]] const PasswordPrompt& reason)
     UnallocatedCString to = formatTimestamp(GetValidTo());
 
     // I release this because I'm about to repopulate it.
-    m_xmlUnsigned->Release();
+    xml_unsigned_->Release();
 
     Tag tag("cheque");
 
-    tag.add_attribute("version", m_strVersion->Get());
+    tag.add_attribute("version", version_->Get());
     tag.add_attribute("amount", [&] {
         auto buf = UnallocatedCString{};
-        m_lAmount.Serialize(writer(buf));
+        amount_.Serialize(writer(buf));
         return buf;
     }());
     tag.add_attribute(
@@ -91,27 +91,27 @@ void Cheque::UpdateContents([[maybe_unused]] const PasswordPrompt& reason)
     tag.add_attribute("notaryID", NOTARY_ID->Get());
     tag.add_attribute("senderAcctID", SENDER_ACCT_ID->Get());
     tag.add_attribute("senderNymID", SENDER_NYM_ID->Get());
-    tag.add_attribute("hasRecipient", formatBool(m_bHasRecipient));
+    tag.add_attribute("hasRecipient", formatBool(has_recipient_));
     tag.add_attribute(
-        "recipientNymID", m_bHasRecipient ? RECIPIENT_NYM_ID->Get() : "");
-    tag.add_attribute("hasRemitter", formatBool(m_bHasRemitter));
+        "recipientNymID", has_recipient_ ? RECIPIENT_NYM_ID->Get() : "");
+    tag.add_attribute("hasRemitter", formatBool(has_remitter_));
     tag.add_attribute(
-        "remitterNymID", m_bHasRemitter ? REMITTER_NYM_ID->Get() : "");
+        "remitterNymID", has_remitter_ ? REMITTER_NYM_ID->Get() : "");
     tag.add_attribute(
-        "remitterAcctID", m_bHasRemitter ? REMITTER_ACCT_ID->Get() : "");
+        "remitterAcctID", has_remitter_ ? REMITTER_ACCT_ID->Get() : "");
 
     tag.add_attribute("validFrom", from);
     tag.add_attribute("validTo", to);
 
-    if (m_strMemo->Exists() && m_strMemo->GetLength() > 2) {
-        auto ascMemo = Armored::Factory(m_strMemo);
+    if (memo_->Exists() && memo_->GetLength() > 2) {
+        auto ascMemo = Armored::Factory(memo_);
         tag.add_tag("memo", ascMemo->Get());
     }
 
     UnallocatedCString str_result;
     tag.output(str_result);
 
-    m_xmlUnsigned->Concatenate(String::Factory(str_result));
+    xml_unsigned_->Concatenate(String::Factory(str_result));
 }
 
 // return -1 if error, 0 if nothing, and 1 if the node was processed.
@@ -133,14 +133,14 @@ auto Cheque::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
     if (!strcmp("cheque", xml->getNodeName())) {
         auto strHasRecipient =
             String::Factory(xml->getAttributeValue("hasRecipient"));
-        m_bHasRecipient = strHasRecipient->Compare("true");
+        has_recipient_ = strHasRecipient->Compare("true");
 
         auto strHasRemitter =
             String::Factory(xml->getAttributeValue("hasRemitter"));
-        m_bHasRemitter = strHasRemitter->Compare("true");
+        has_remitter_ = strHasRemitter->Compare("true");
 
-        m_strVersion = String::Factory(xml->getAttributeValue("version"));
-        m_lAmount = factory::Amount(xml->getAttributeValue("amount"));
+        version_ = String::Factory(xml->getAttributeValue("version"));
+        amount_ = factory::Amount(xml->getAttributeValue("amount"));
 
         SetTransactionNum(
             String::StringToLong(xml->getAttributeValue("transactionNum")));
@@ -182,44 +182,44 @@ auto Cheque::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
         SetSenderNymID(SENDER_NYM_ID);
 
         // Recipient ID
-        if (m_bHasRecipient) {
-            m_RECIPIENT_NYM_ID =
+        if (has_recipient_) {
+            recipient_nym_id_ =
                 api_.Factory().NymIDFromBase58(strRecipientNymID->Bytes());
         } else {
-            m_RECIPIENT_NYM_ID.clear();
+            recipient_nym_id_.clear();
         }
 
         // Remitter ID (for vouchers)
-        if (m_bHasRemitter) {
-            m_REMITTER_NYM_ID =
+        if (has_remitter_) {
+            remitter_nym_id_ =
                 api_.Factory().NymIDFromBase58(strRemitterNymID->Bytes());
-            m_REMITTER_ACCT_ID =
+            remitter_account_id_ =
                 api_.Factory().IdentifierFromBase58(strRemitterAcctID->Bytes());
         } else {
-            m_REMITTER_NYM_ID.clear();
-            m_REMITTER_ACCT_ID.clear();
+            remitter_nym_id_.clear();
+            remitter_account_id_.clear();
         }
         {
             const auto unittype = api_.Wallet().CurrencyTypeBasedOnUnitType(
                 INSTRUMENT_DEFINITION_ID);
             LogVerbose()(OT_PRETTY_CLASS())("Cheque Amount: ")(
-                m_lAmount, unittype)(". Transaction Number: ")(
-                m_lTransactionNum)(" Valid From: ")(
+                amount_, unittype)(". Transaction Number: ")(
+                transaction_num_)(" Valid From: ")(
                 str_valid_from)(" Valid To: ")(
                 str_valid_to)(" InstrumentDefinitionID: ")(
                 strInstrumentDefinitionID.get())(" NotaryID: ")(
                 strNotaryID.get())(" senderAcctID: ")(strSenderAcctID.get())(
                 " senderNymID: ")(strSenderNymID.get())(" Has Recipient? ")(
-                m_bHasRecipient ? "Yes" : "No")(
+                has_recipient_ ? "Yes" : "No")(
                 ". If yes, NymID of Recipient: ")(strRecipientNymID.get())(
-                " Has Remitter? ")(m_bHasRemitter ? "Yes" : "No")(
+                " Has Remitter? ")(has_remitter_ ? "Yes" : "No")(
                 ". If yes, NymID/Acct of Remitter: ")(strRemitterNymID.get())(
                 " / ")(strRemitterAcctID.get())
                 .Flush();
         }
         nReturnVal = 1;
     } else if (!strcmp("memo", xml->getNodeName())) {
-        if (!LoadEncodedTextField(xml, m_strMemo)) {
+        if (!LoadEncodedTextField(xml, memo_)) {
             LogError()(OT_PRETTY_CLASS())("Error: Memo field without value.")
                 .Flush();
             return (-1);  // error condition
@@ -234,7 +234,7 @@ auto Cheque::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
 // You still need to re-sign the cheque after doing this.
 void Cheque::CancelCheque()
 {
-    m_lAmount = 0;
+    amount_ = 0;
 
     // When cancelling a cheque, it is basically just deposited back into the
     // account it was originally drawn from. The purpose of this is to "beat the
@@ -275,8 +275,8 @@ auto Cheque::IssueCheque(
                                                        // (Might be a blank
                                                        // cheque.)
 {
-    m_lAmount = lAmount;
-    m_strMemo->Set(strMemo);
+    amount_ = lAmount;
+    memo_->Set(strMemo);
 
     SetValidFrom(VALID_FROM);
     SetValidTo(VALID_TO);
@@ -287,37 +287,37 @@ auto Cheque::IssueCheque(
     SetSenderNymID(SENDER_NYM_ID);
 
     if (pRECIPIENT_NYM_ID.empty()) {
-        m_bHasRecipient = false;
-        m_RECIPIENT_NYM_ID.clear();
+        has_recipient_ = false;
+        recipient_nym_id_.clear();
     } else {
-        m_bHasRecipient = true;
-        m_RECIPIENT_NYM_ID = pRECIPIENT_NYM_ID;
+        has_recipient_ = true;
+        recipient_nym_id_ = pRECIPIENT_NYM_ID;
     }
 
-    m_bHasRemitter = false;  // OTCheque::SetAsVoucher() will set this to true.
+    has_remitter_ = false;  // OTCheque::SetAsVoucher() will set this to true.
 
-    if (m_lAmount < 0) { m_strContractType->Set("INVOICE"); }
+    if (amount_ < 0) { contract_type_->Set("INVOICE"); }
 
     return true;
 }
 
 void Cheque::InitCheque()
 {
-    m_strContractType->Set("CHEQUE");
+    contract_type_->Set("CHEQUE");
 
-    m_lAmount = 0;
-    m_bHasRecipient = false;
-    m_bHasRemitter = false;
+    amount_ = 0;
+    has_recipient_ = false;
+    has_remitter_ = false;
 }
 
 void Cheque::Release_Cheque()
 {
     // If there were any dynamically allocated objects, clean them up here.
-    m_strMemo->Release();
+    memo_->Release();
 
-    //    m_SENDER_ACCT_ID.Release();     // in parent class now.
-    //    m_SENDER_NYM_ID.Release();     // in parent class now.
-    m_RECIPIENT_NYM_ID.clear();
+    //    sender_account_id_.Release();     // in parent class now.
+    //    sender_nym_id_.Release();     // in parent class now.
+    recipient_nym_id_.clear();
 
     ot_super::Release();  // since I've overridden the base class, I call it
                           // now...

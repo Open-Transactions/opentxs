@@ -212,11 +212,11 @@ OT_API::OT_API(
     ContextLockCallback lockCallback)
     : api_(api)
     , workflow_(workflow)
-    , m_bDefaultStore(false)
-    , m_strDataPath(String::Factory())
-    , m_strConfigFilename(String::Factory())
-    , m_strConfigFilePath(String::Factory())
-    , m_pClient(nullptr)
+    , default_store_(false)
+    , data_path_(String::Factory())
+    , config_filename_(String::Factory())
+    , config_file_path_(String::Factory())
+    , client_(nullptr)
     , lock_callback_(std::move(lockCallback))
 {
     // WARNING: do not access api_.Wallet() during construction
@@ -226,7 +226,7 @@ OT_API::OT_API(
         OT_FAIL;
     }
 
-    OT_ASSERT(m_pClient);
+    OT_ASSERT(client_);
 }
 
 void OT_API::AddHashesToTransaction(
@@ -313,16 +313,16 @@ auto OT_API::LoadConfigFile() -> bool
 
     // This way, everywhere else I can use the default storage context (for now)
     // and it will work everywhere I put it. (Because it's now set up...)
-    m_bDefaultStore = OTDB::InitDefaultStorage(
+    default_store_ = OTDB::InitDefaultStorage(
         OTDB_DEFAULT_STORAGE,
         OTDB_DEFAULT_PACKER);  // We only need to do this once now.
 
-    if (m_bDefaultStore) {
+    if (default_store_) {
         LogDetail()(OT_PRETTY_CLASS())(
             "Success invoking OTDB::InitDefaultStorage")
             .Flush();
 
-        m_pClient = std::make_unique<OTClient>(api_);
+        client_ = std::make_unique<OTClient>(api_);
     } else {
         LogError()(OT_PRETTY_CLASS())(
             "Failed invoking OTDB::InitDefaultStorage.")
@@ -1173,10 +1173,10 @@ auto OT_API::SmartContract_ConfirmParty(
 
     const auto strNymID = String::Factory(NYM_ID);
 
-    pMessage->m_strCommand = String::Factory("outpaymentsMessage");
-    pMessage->m_strNymID = strNymID;
-    //  pMessage->m_strNotaryID        = strNotaryID;
-    pMessage->m_ascPayload->SetString(strInstrument);
+    pMessage->command_ = String::Factory("outpaymentsMessage");
+    pMessage->nym_id_ = strNymID;
+    //  pMessage->notary_id_        = strNotaryID;
+    pMessage->payload_->SetString(strInstrument);
 
     auto pNym = api_.Wallet().Nym(nymfile.get().ID());
     OT_ASSERT(nullptr != pNym);
@@ -2197,11 +2197,11 @@ auto OT_API::ProposePaymentPlan(
     const auto strNymID = String::Factory(RECIPIENT_NYM_ID),
                strNymID2 = String::Factory(SENDER_NYM_ID);
 
-    pMessage->m_strCommand = String::Factory("outpaymentsMessage");
-    pMessage->m_strNymID = strNymID;
-    pMessage->m_strNymID2 = strNymID2;
-    pMessage->m_strNotaryID = strNotaryID;
-    pMessage->m_ascPayload->SetString(strInstrument);
+    pMessage->command_ = String::Factory("outpaymentsMessage");
+    pMessage->nym_id_ = strNymID;
+    pMessage->nym_id2_ = strNymID2;
+    pMessage->notary_id_ = strNotaryID;
+    pMessage->payload_->SetString(strInstrument);
 
     pMessage->SignContract(*nym, reason);
     pMessage->SaveContract();
@@ -2304,11 +2304,11 @@ auto OT_API::ConfirmPaymentPlan(
     const auto strNymID = String::Factory(SENDER_NYM_ID),
                strNymID2 = String::Factory(RECIPIENT_NYM_ID);
 
-    pMessage->m_strCommand = String::Factory("outpaymentsMessage");
-    pMessage->m_strNymID = strNymID;
-    pMessage->m_strNymID2 = strNymID2;
-    pMessage->m_strNotaryID = strNotaryID;
-    pMessage->m_ascPayload->SetString(strInstrument);
+    pMessage->command_ = String::Factory("outpaymentsMessage");
+    pMessage->nym_id_ = strNymID;
+    pMessage->nym_id2_ = strNymID2;
+    pMessage->notary_id_ = strNotaryID;
+    pMessage->payload_->SetString(strInstrument);
 
     pMessage->SignContract(*nym, reason);
     pMessage->SaveContract();
@@ -3036,7 +3036,7 @@ auto OT_API::getTransactionNumbers(otx::context::Server& context) const
 {
     auto reason = api_.Factory().PasswordPrompt(__func__);
     auto output{api_.Factory().InternalSession().Message()};
-    auto requestNum = m_pClient->ProcessUserCommand(
+    auto requestNum = client_->ProcessUserCommand(
         MessageType::getTransactionNumbers,
         context,
         *output,
@@ -3704,7 +3704,7 @@ auto OT_API::triggerClause(
     reply.reset();
     auto payload = Armored::Factory();
 
-    // Optional string parameter. Available as "param_string" inside the
+    // Optional string parameter. Available as "parastring_" inside the
     // script.
     if (pStrParam.Exists()) { payload->SetString(pStrParam); }
 
@@ -3718,8 +3718,8 @@ auto OT_API::triggerClause(
 
     if (false == bool(message)) { return output; }
 
-    message->m_lTransactionNum = transactionNumber;
-    message->m_strNymID2 = strClauseName;
+    message->transaction_num_ = transactionNumber;
+    message->nym_id2_ = strClauseName;
 
     if (false == context.FinalizeServerCommand(*message, reason)) {
 
@@ -4655,8 +4655,8 @@ auto OT_API::getMarketOffers(
 
     if (false == bool(message)) { return output; }
 
-    message->m_strNymID2 = String::Factory(MARKET_ID);
-    message->m_lDepth = lDepth;
+    message->nym_id2_ = String::Factory(MARKET_ID);
+    message->depth_ = lDepth;
 
     if (false == context.FinalizeServerCommand(*message, reason)) {
 
@@ -4705,7 +4705,7 @@ auto OT_API::getMarketRecentTrades(
 
     if (false == bool(message)) { return output; }
 
-    message->m_strNymID2 = String::Factory(MARKET_ID);
+    message->nym_id2_ = String::Factory(MARKET_ID);
 
     if (false == context.FinalizeServerCommand(*message, reason)) {
 
@@ -4795,7 +4795,7 @@ auto OT_API::queryInstrumentDefinitions(
 
     if (false == bool(message)) { return output; }
 
-    message->m_ascPayload = ENCODED_MAP;
+    message->payload_ = ENCODED_MAP;
 
     if (false == context.FinalizeServerCommand(*message, reason)) {
 
@@ -4841,7 +4841,7 @@ auto OT_API::deleteAssetAccount(
 
     if (false == bool(message)) { return output; }
 
-    message->m_strAcctID = String::Factory(ACCOUNT_ID);
+    message->acct_id_ = String::Factory(ACCOUNT_ID);
 
     if (false == context.FinalizeServerCommand(*message, reason)) {
 
@@ -4881,7 +4881,7 @@ auto OT_API::usageCredits(
 
     if (false == bool(message)) { return output; }
 
-    message->m_lDepth = lAdjustment;
+    message->depth_ = lAdjustment;
 
     if (false == context.FinalizeServerCommand(*message, reason)) {
 
@@ -4912,7 +4912,7 @@ auto OT_API::unregisterNym(otx::context::Server& context) const -> CommandResult
     status = otx::client::SendResult::Error;
     reply.reset();
     auto message{api_.Factory().InternalSession().Message()};
-    requestNum = m_pClient->ProcessUserCommand(
+    requestNum = client_->ProcessUserCommand(
         MessageType::unregisterNym,
         context,
         *message,
@@ -4929,7 +4929,7 @@ auto OT_API::unregisterNym(otx::context::Server& context) const -> CommandResult
             reason);
     } else {
         LogError()(OT_PRETTY_CLASS())("Error in "
-                                      "m_pClient->ProcessUserCommand().")
+                                      "client_->ProcessUserCommand().")
             .Flush();
     }
 
@@ -5770,7 +5770,7 @@ auto OT_API::get_origin(
 
 OT_API::~OT_API()
 {
-    m_pClient.reset();
+    client_.reset();
     Cleanup();
 }
 }  // namespace opentxs

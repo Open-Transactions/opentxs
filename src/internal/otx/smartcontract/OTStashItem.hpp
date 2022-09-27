@@ -26,17 +26,17 @@ namespace opentxs
 {
 class OTStashItem
 {
-    OTString m_strInstrumentDefinitionID;
-    std::int64_t m_lAmount;
+    OTString instrument_definition_id_;
+    std::int64_t amount_;
 
 public:
-    auto GetAmount() const -> std::int64_t { return m_lAmount; }
-    void SetAmount(std::int64_t lAmount) { m_lAmount = lAmount; }
+    auto GetAmount() const -> std::int64_t { return amount_; }
+    void SetAmount(std::int64_t lAmount) { amount_ = lAmount; }
     auto CreditStash(const std::int64_t& lAmount) -> bool;
     auto DebitStash(const std::int64_t& lAmount) -> bool;
     auto GetInstrumentDefinitionID() -> const String&
     {
-        return m_strInstrumentDefinitionID;
+        return instrument_definition_id_;
     }
     OTStashItem();
     OTStashItem(

@@ -188,7 +188,7 @@ private:
     std::unique_ptr<SettingsPvt> pvt_;
     mutable OTFlag loaded_;
     mutable std::recursive_mutex lock_;
-    mutable OTString m_strConfigurationFileExactPath;
+    mutable OTString configuration_file_exact_path_;
 
     // Core (Load and Save)
     auto Load(const String& strConfigurationFileExactPath) const -> bool;
