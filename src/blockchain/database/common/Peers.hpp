@@ -19,7 +19,6 @@
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Time.hpp"
-#include "util/LMDB.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
@@ -35,7 +34,7 @@ namespace storage
 {
 namespace lmdb
 {
-class LMDB;
+class Database;
 }  // namespace lmdb
 }  // namespace storage
 // }  // namespace v1
@@ -56,7 +55,8 @@ public:
     auto Import(UnallocatedVector<Address_p> peers) noexcept -> bool;
     auto Insert(Address_p address) noexcept -> bool;
 
-    Peers(const api::Session& api, storage::lmdb::LMDB& lmdb) noexcept(false);
+    Peers(const api::Session& api, storage::lmdb::Database& lmdb) noexcept(
+        false);
 
 private:
     using ChainIndexMap =
@@ -70,7 +70,7 @@ private:
     using ConnectedIndexMap = UnallocatedMap<UnallocatedCString, Time>;
 
     const api::Session& api_;
-    storage::lmdb::LMDB& lmdb_;
+    storage::lmdb::Database& lmdb_;
     mutable std::mutex lock_;
     ChainIndexMap chains_;
     ProtocolIndexMap protocols_;

@@ -38,6 +38,9 @@
 #include "internal/network/zeromq/socket/Raw.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
+#include "internal/util/storage/lmdb/Database.hpp"
+#include "internal/util/storage/lmdb/Transaction.hpp"
+#include "internal/util/storage/lmdb/Types.hpp"
 #include "opentxs/api/crypto/Blockchain.hpp"
 #include "opentxs/api/network/Network.hpp"
 #include "opentxs/api/session/Crypto.hpp"
@@ -70,7 +73,6 @@
 #include "opentxs/util/Iterator.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Pimpl.hpp"
-#include "util/LMDB.hpp"
 #include "util/Work.hpp"
 
 namespace opentxs::blockchain::database::wallet
@@ -715,7 +717,9 @@ public:
             return false;
         }
     }
-    auto FinalizeReorg(MDB_txn* tx, const block::Position& pos) noexcept -> bool
+    auto FinalizeReorg(
+        storage::lmdb::Transaction& tx,
+        const block::Position& pos) noexcept -> bool
     {
         auto output{true};
         auto handle = lock();
@@ -910,7 +914,7 @@ public:
         }
     }
     auto StartReorg(
-        MDB_txn* tx,
+        storage::lmdb::Transaction& tx,
         const SubchainID& subchain,
         const block::Position& position) noexcept -> bool
     {
@@ -987,7 +991,7 @@ public:
     }
 
     Imp(const api::Session& api,
-        const storage::lmdb::LMDB& lmdb,
+        const storage::lmdb::Database& lmdb,
         const blockchain::Type chain,
         const wallet::SubchainData& subchains,
         wallet::Proposal& proposals) noexcept
@@ -1024,7 +1028,7 @@ private:
     using Push = libguarded::plain_guarded<socket::Raw>;
 
     const api::Session& api_;
-    const storage::lmdb::LMDB& lmdb_;
+    const storage::lmdb::Database& lmdb_;
     const blockchain::Type chain_;
     const wallet::SubchainData& subchain_;
     wallet::Proposal& proposals_;
@@ -1343,7 +1347,7 @@ private:
         TXOs& txoCreated,
         TXOs& txoConsumed,
         OutputCache& cache,
-        storage::lmdb::LMDB::Transaction& tx) noexcept(false) -> void
+        storage::lmdb::Transaction& tx) noexcept(false) -> void
     {
         auto consumed = Set<block::Outpoint>{txoCreated.get_allocator()};
         auto created = TXOs{txoCreated.get_allocator()};
@@ -1410,7 +1414,7 @@ private:
         const block::Outpoint& outpoint,
         const bitcoin::block::Output& output,
         OutputCache& cache,
-        storage::lmdb::LMDB::Transaction& tx) noexcept(false) -> void
+        storage::lmdb::Transaction& tx) noexcept(false) -> void
     {
         const auto& api = api_.Crypto().Blockchain();
         const auto keys = output.Keys();
@@ -1449,7 +1453,7 @@ private:
     // Only used by CancelProposal
     [[nodiscard]] auto change_state(
         OutputCache& cache,
-        MDB_txn* tx,
+        storage::lmdb::Transaction& tx,
         const block::Outpoint& id,
         const node::TxoState oldState,
         const node::TxoState newState) noexcept -> bool
@@ -1483,7 +1487,7 @@ private:
     }
     [[nodiscard]] auto change_state(
         OutputCache& cache,
-        MDB_txn* tx,
+        storage::lmdb::Transaction& tx,
         const block::Outpoint& id,
         const node::TxoState newState,
         const block::Position newPosition) noexcept -> bool
@@ -1501,7 +1505,7 @@ private:
     }
     [[nodiscard]] auto change_state(
         OutputCache& cache,
-        MDB_txn* tx,
+        storage::lmdb::Transaction& tx,
         const block::Outpoint& id,
         bitcoin::block::internal::Output& output,
         const node::TxoState newState,
@@ -1551,7 +1555,7 @@ private:
     }
     [[nodiscard]] auto check_proposals(
         OutputCache& cache,
-        storage::lmdb::LMDB::Transaction& tx,
+        storage::lmdb::Transaction& tx,
         const block::Outpoint& outpoint,
         const block::Position& block,
         const block::Txid& txid,
@@ -1689,7 +1693,7 @@ private:
     }
     [[nodiscard]] auto create_state(
         OutputCache& cache,
-        storage::lmdb::LMDB::Transaction& tx,
+        storage::lmdb::Transaction& tx,
         bool isGeneration,
         const block::Outpoint& id,
         const node::TxoState state,
@@ -1794,7 +1798,7 @@ private:
         bitcoin::block::internal::Transaction& inputTx,
         Set<block::Outpoint>& out,
         OutputCache& cache,
-        storage::lmdb::LMDB::Transaction& tx) noexcept(false) -> void
+        storage::lmdb::Transaction& tx) noexcept(false) -> void
     {
         auto proposals = UnallocatedSet<identifier::Generic>{};
 
@@ -1884,7 +1888,7 @@ private:
         TXOs& in,
         TXOs& out,
         OutputCache& cache,
-        storage::lmdb::LMDB::Transaction& tx) noexcept(false) -> void
+        storage::lmdb::Transaction& tx) noexcept(false) -> void
     {
         auto stop = in.end();
 
@@ -1935,7 +1939,7 @@ private:
 
 Output::Output(
     const api::Session& api,
-    const storage::lmdb::LMDB& lmdb,
+    const storage::lmdb::Database& lmdb,
     const blockchain::Type chain,
     const wallet::SubchainData& subchains,
     wallet::Proposal& proposals) noexcept
@@ -1984,8 +1988,9 @@ auto Output::CancelProposal(const identifier::Generic& id) noexcept -> bool
     return imp_->CancelProposal(id);
 }
 
-auto Output::FinalizeReorg(MDB_txn* tx, const block::Position& pos) noexcept
-    -> bool
+auto Output::FinalizeReorg(
+    storage::lmdb::Transaction& tx,
+    const block::Position& pos) noexcept -> bool
 {
     return imp_->FinalizeReorg(tx, pos);
 }
@@ -2098,7 +2103,7 @@ auto Output::ReserveUTXO(
 }
 
 auto Output::StartReorg(
-    MDB_txn* tx,
+    storage::lmdb::Transaction& tx,
     const SubchainID& subchain,
     const block::Position& position) noexcept -> bool
 {

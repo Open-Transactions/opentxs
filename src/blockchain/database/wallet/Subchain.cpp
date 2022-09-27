@@ -24,6 +24,8 @@
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/Mutex.hpp"
 #include "internal/util/TSV.hpp"
+#include "internal/util/storage/lmdb/Database.hpp"
+#include "internal/util/storage/lmdb/Transaction.hpp"
 #include "opentxs/api/network/Asio.hpp"
 #include "opentxs/api/network/Network.hpp"
 #include "opentxs/api/session/Factory.hpp"
@@ -36,7 +38,6 @@
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Numbers.hpp"
 #include "opentxs/util/Types.hpp"
-#include "util/LMDB.hpp"
 #include "util/ScopeGuard.hpp"
 
 namespace opentxs::blockchain::database::wallet
@@ -44,8 +45,16 @@ namespace opentxs::blockchain::database::wallet
 struct SubchainData::Imp {
     auto GetSubchainID(
         const NodeID& subaccount,
+        const crypto::Subchain subchain) const noexcept -> SubchainIndex
+    {
+        auto tx = lmdb_.TransactionRW();
+
+        return GetSubchainID(subaccount, subchain, tx);
+    }
+    auto GetSubchainID(
+        const NodeID& subaccount,
         const crypto::Subchain subchain,
-        MDB_txn* tx) const noexcept -> SubchainIndex
+        storage::lmdb::Transaction& tx) const noexcept -> SubchainIndex
     {
         auto lock = sLock{lock_};
         upgrade_future_.get();
@@ -71,7 +80,7 @@ struct SubchainData::Imp {
     }
     auto Reorg(
         const node::internal::HeaderOraclePrivate& data,
-        MDB_txn* tx,
+        storage::lmdb::Transaction& tx,
         const node::HeaderOracle& headers,
         const SubchainIndex& subchain,
         const block::Height lastGoodHeight) const noexcept(false) -> bool
@@ -185,7 +194,7 @@ struct SubchainData::Imp {
         auto lock = eLock{lock_};
         upgrade_future_.get();
 
-        if (cache_.SetLastScanned(subchain, position, nullptr)) {
+        if (cache_.SetLastScanned(subchain, position)) {
 
             return true;
         } else {
@@ -196,7 +205,7 @@ struct SubchainData::Imp {
     }
 
     Imp(const api::Session& api,
-        const storage::lmdb::LMDB& lmdb,
+        const storage::lmdb::Database& lmdb,
         const blockchain::cfilter::Type filter) noexcept
         : api_(api)
         , lmdb_(lmdb)
@@ -241,7 +250,7 @@ struct SubchainData::Imp {
 
 private:
     const api::Session& api_;
-    const storage::lmdb::LMDB& lmdb_;
+    const storage::lmdb::Database& lmdb_;
     const cfilter::Type default_filter_type_;
     const VersionNumber current_version_;
     std::promise<void> upgrade_promise_;
@@ -308,7 +317,7 @@ private:
 
 SubchainData::SubchainData(
     const api::Session& api,
-    const storage::lmdb::LMDB& lmdb,
+    const storage::lmdb::Database& lmdb,
     const blockchain::cfilter::Type filter) noexcept
     : imp_(std::make_unique<Imp>(api, lmdb, filter))
 {
@@ -317,8 +326,15 @@ SubchainData::SubchainData(
 
 auto SubchainData::GetSubchainID(
     const NodeID& subaccount,
+    const crypto::Subchain subchain) const noexcept -> SubchainIndex
+{
+    return imp_->GetSubchainID(subaccount, subchain);
+}
+
+auto SubchainData::GetSubchainID(
+    const NodeID& subaccount,
     const crypto::Subchain subchain,
-    MDB_txn* tx) const noexcept -> SubchainIndex
+    storage::lmdb::Transaction& tx) const noexcept -> SubchainIndex
 {
     return imp_->GetSubchainID(subaccount, subchain, tx);
 }
@@ -332,7 +348,7 @@ auto SubchainData::GetPatterns(
 
 auto SubchainData::Reorg(
     const node::internal::HeaderOraclePrivate& data,
-    MDB_txn* tx,
+    storage::lmdb::Transaction& tx,
     const node::HeaderOracle& headers,
     const SubchainIndex& subchain,
     const block::Height lastGoodHeight) const noexcept(false) -> bool

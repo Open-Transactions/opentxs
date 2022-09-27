@@ -17,14 +17,13 @@
 #include "opentxs/core/Amount.hpp"  // IWYU pragma: keep
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/util/Log.hpp"
-#include "util/LMDB.hpp"
 
 namespace opentxs::blockchain::database::implemenation
 {
 Wallet::Wallet(
     const api::Session& api,
     const common::Database& common,
-    const storage::lmdb::LMDB& lmdb,
+    const storage::lmdb::Database& lmdb,
     const blockchain::Type chain,
     const blockchain::cfilter::Type filter) noexcept
     : api_(api)
@@ -54,7 +53,7 @@ auto Wallet::AddMempoolTransaction(
     const bitcoin::block::Transaction& original,
     TXOs& txoCreated) const noexcept -> bool
 {
-    const auto id = subchains_.GetSubchainID(balanceNode, subchain, nullptr);
+    const auto id = subchains_.GetSubchainID(balanceNode, subchain);
 
     return outputs_.AddMempoolTransaction(
         balanceNode, id, outputIndices, original, txoCreated);
@@ -93,7 +92,7 @@ auto Wallet::CompletedProposals() const noexcept
 }
 
 auto Wallet::FinalizeReorg(
-    storage::lmdb::LMDB::Transaction& tx,
+    storage::lmdb::Transaction& tx,
     const block::Position& pos) const noexcept -> bool
 {
     return outputs_.FinalizeReorg(tx, pos);
@@ -178,7 +177,7 @@ auto Wallet::GetSubchainID(
     const NodeID& balanceNode,
     const crypto::Subchain subchain) const noexcept -> SubchainIndex
 {
-    return subchains_.GetSubchainID(balanceNode, subchain, nullptr);
+    return subchains_.GetSubchainID(balanceNode, subchain);
 }
 
 auto Wallet::GetTransactions() const noexcept -> UnallocatedVector<block::pTxid>
@@ -209,7 +208,7 @@ auto Wallet::GetUnspentOutputs(
     const crypto::Subchain subchain,
     alloc::Default alloc) const noexcept -> Vector<UTXO>
 {
-    const auto id = subchains_.GetSubchainID(balanceNode, subchain, nullptr);
+    const auto id = subchains_.GetSubchainID(balanceNode, subchain);
 
     return outputs_.GetUnspentOutputs(id, alloc);
 }
@@ -244,7 +243,7 @@ auto Wallet::PublishBalance() const noexcept -> void
 
 auto Wallet::ReorgTo(
     const node::internal::HeaderOraclePrivate& data,
-    storage::lmdb::LMDB::Transaction& tx,
+    storage::lmdb::Transaction& tx,
     const node::HeaderOracle& headers,
     const NodeID& balanceNode,
     const crypto::Subchain subchain,

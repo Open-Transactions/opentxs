@@ -16,8 +16,7 @@
 #include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/util/Container.hpp"
-#include "util/LMDB.hpp"
-#include "util/MappedFileStorage.hpp"
+#include "util/storage/MappedFile.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
@@ -39,7 +38,7 @@ namespace storage
 {
 namespace lmdb
 {
-class LMDB;
+class Database;
 }  // namespace lmdb
 }  // namespace storage
 // }  // namespace v1
@@ -58,7 +57,7 @@ public:
     auto Store(const Hash& block, const std::size_t bytes) const noexcept
         -> BlockWriter;
 
-    Blocks(storage::lmdb::LMDB& lmdb, Bulk& bulk) noexcept;
+    Blocks(storage::lmdb::Database& lmdb, Bulk& bulk) noexcept;
 
     ~Blocks();
 

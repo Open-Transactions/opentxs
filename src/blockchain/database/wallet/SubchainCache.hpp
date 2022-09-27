@@ -19,6 +19,7 @@
 #include "internal/blockchain/database/Types.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/TSV.hpp"
+#include "internal/util/storage/lmdb/Types.hpp"
 #include "opentxs/blockchain/bitcoin/cfilter/FilterType.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
@@ -29,7 +30,6 @@
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
-#include "util/LMDB.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
@@ -62,13 +62,22 @@ struct Position;
 }  // namespace wallet
 }  // namespace database
 }  // namespace blockchain
+
+namespace storage
+{
+namespace lmdb
+{
+class Database;
+class Transaction;
+}  // namespace lmdb
+}  // namespace storage
 // }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
 namespace opentxs::blockchain::database::wallet
 {
-using Mode = storage::lmdb::LMDB::Mode;
+using Mode = storage::lmdb::Mode;
 
 constexpr auto id_index_{Table::SubchainID};
 constexpr auto last_indexed_{Table::SubchainLastIndexed};
@@ -88,11 +97,11 @@ public:
         const PatternID& id,
         const Bip32Index index,
         const ReadView data,
-        MDB_txn* tx) noexcept -> bool;
+        storage::lmdb::Transaction& tx) noexcept -> bool;
     auto AddPatternIndex(
         const SubchainIndex& key,
         const PatternID& value,
-        MDB_txn* tx) noexcept -> bool;
+        storage::lmdb::Transaction& tx) noexcept -> bool;
     auto Clear() noexcept -> void;
     auto DecodeIndex(const SubchainIndex& key) noexcept(false)
         -> const db::SubchainID&;
@@ -101,7 +110,7 @@ public:
         const crypto::Subchain subchain,
         const cfilter::Type type,
         const VersionNumber version,
-        MDB_txn* tx) noexcept -> SubchainIndex;
+        storage::lmdb::Transaction& tx) noexcept -> SubchainIndex;
     auto GetLastIndexed(const SubchainIndex& subchain) noexcept
         -> std::optional<Bip32Index>;
     auto GetLastScanned(const SubchainIndex& subchain) noexcept
@@ -112,15 +121,18 @@ public:
     auto SetLastIndexed(
         const SubchainIndex& subchain,
         const Bip32Index value,
-        MDB_txn* tx) noexcept -> bool;
+        storage::lmdb::Transaction& tx) noexcept -> bool;
+    auto SetLastScanned(
+        const SubchainIndex& subchain,
+        const block::Position& value) noexcept -> bool;
     auto SetLastScanned(
         const SubchainIndex& subchain,
         const block::Position& value,
-        MDB_txn* tx) noexcept -> bool;
+        storage::lmdb::Transaction& tx) noexcept -> bool;
 
     SubchainCache(
         const api::Session& api,
-        const storage::lmdb::LMDB& lmdb) noexcept;
+        const storage::lmdb::Database& lmdb) noexcept;
 
     ~SubchainCache();
 
@@ -141,7 +153,7 @@ private:
     using Mutex = boost::upgrade_mutex;
 
     const api::Session& api_;
-    const storage::lmdb::LMDB& lmdb_;
+    const storage::lmdb::Database& lmdb_;
     Mutex subchain_id_lock_;
     SubchainIDMap subchain_id_;
     Mutex last_indexed_lock_;

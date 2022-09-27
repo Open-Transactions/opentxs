@@ -15,16 +15,17 @@
 #include "internal/blockchain/database/Types.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/TSV.hpp"
+#include "internal/util/storage/lmdb/Database.hpp"
+#include "internal/util/storage/lmdb/Types.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Log.hpp"
-#include "util/LMDB.hpp"
 
 namespace opentxs::blockchain::database::implementation
 {
 Sync::Sync(
     const api::Session& api,
     const common::Database& common,
-    const storage::lmdb::LMDB& lmdb,
+    const storage::lmdb::Database& lmdb,
     const blockchain::Type type) noexcept
     : api_(api)
     , common_(common)

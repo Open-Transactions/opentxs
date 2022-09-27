@@ -30,16 +30,13 @@ namespace storage
 {
 namespace lmdb
 {
-class LMDB;
+class Database;
+class Transaction;
 }  // namespace lmdb
 }  // namespace storage
 // }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
-
-extern "C" {
-using MDB_txn = struct MDB_txn;
-}
 
 namespace opentxs::blockchain::database::wallet
 {
@@ -57,14 +54,16 @@ public:
     auto AddProposal(
         const identifier::Generic& id,
         const proto::BlockchainTransactionProposal& tx) noexcept -> bool;
-    auto CancelProposal(MDB_txn* tx, const identifier::Generic& id) noexcept
-        -> bool;
-    auto FinishProposal(MDB_txn* tx, const identifier::Generic& id) noexcept
-        -> bool;
+    auto CancelProposal(
+        storage::lmdb::Transaction& tx,
+        const identifier::Generic& id) noexcept -> bool;
+    auto FinishProposal(
+        storage::lmdb::Transaction& tx,
+        const identifier::Generic& id) noexcept -> bool;
     auto ForgetProposals(
         const UnallocatedSet<identifier::Generic>& ids) noexcept -> bool;
 
-    Proposal(const storage::lmdb::LMDB& lmdb) noexcept;
+    Proposal(const storage::lmdb::Database& lmdb) noexcept;
     Proposal() = delete;
     Proposal(const Proposal&) = delete;
     auto operator=(const Proposal&) -> Proposal& = delete;

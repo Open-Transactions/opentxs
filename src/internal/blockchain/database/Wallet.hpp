@@ -17,7 +17,6 @@
 #include "opentxs/blockchain/node/Types.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
-#include "util/LMDB.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
@@ -62,6 +61,14 @@ namespace proto
 {
 class BlockchainTransactionProposal;
 }  // namespace proto
+
+namespace storage
+{
+namespace lmdb
+{
+class Transaction;
+}  // namespace lmdb
+}  // namespace storage
 // }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
@@ -175,13 +182,13 @@ public:
     virtual auto CancelProposal(const identifier::Generic& id) noexcept
         -> bool = 0;
     virtual auto FinalizeReorg(
-        storage::lmdb::LMDB::Transaction& tx,
+        storage::lmdb::Transaction& tx,
         const block::Position& pos) noexcept -> bool = 0;
     virtual auto ForgetProposals(
         const UnallocatedSet<identifier::Generic>& ids) noexcept -> bool = 0;
     virtual auto ReorgTo(
         const node::internal::HeaderOraclePrivate& data,
-        storage::lmdb::LMDB::Transaction& tx,
+        storage::lmdb::Transaction& tx,
         const node::HeaderOracle& headers,
         const NodeID& account,
         const crypto::Subchain subchain,
@@ -192,7 +199,7 @@ public:
         const identifier::Generic& proposal,
         node::internal::SpendPolicy& policy) noexcept
         -> std::optional<UTXO> = 0;
-    virtual auto StartReorg() noexcept -> storage::lmdb::LMDB::Transaction = 0;
+    virtual auto StartReorg() noexcept -> storage::lmdb::Transaction = 0;
     virtual auto SubchainAddElements(
         const SubchainIndex& index,
         const ElementMap& elements) noexcept -> bool = 0;

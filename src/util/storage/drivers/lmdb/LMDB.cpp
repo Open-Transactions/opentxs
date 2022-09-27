@@ -12,9 +12,9 @@
 
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/storage/drivers/Factory.hpp"
+#include "internal/util/storage/lmdb/Database.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
-#include "util/LMDB.hpp"
 #include "util/storage/Config.hpp"
 
 namespace opentxs::factory

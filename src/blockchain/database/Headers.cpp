@@ -35,6 +35,9 @@
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/TSV.hpp"
+#include "internal/util/storage/lmdb/Database.hpp"
+#include "internal/util/storage/lmdb/Transaction.hpp"
+#include "internal/util/storage/lmdb/Types.hpp"
 #include "opentxs/api/network/Network.hpp"
 #include "opentxs/api/session/Endpoints.hpp"
 #include "opentxs/api/session/Factory.hpp"
@@ -51,7 +54,6 @@
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/WorkType.hpp"
-#include "util/LMDB.hpp"
 #include "util/Work.hpp"
 
 namespace opentxs::blockchain::database
@@ -114,7 +116,7 @@ Headers::Headers(
     const api::Session& api,
     const node::Manager& network,
     const common::Database& common,
-    const storage::lmdb::LMDB& lmdb,
+    const storage::lmdb::Database& lmdb,
     const blockchain::Type type) noexcept
     : api_(api)
     , common_(common)
@@ -471,7 +473,7 @@ auto Headers::DisconnectedHashes() const noexcept -> database::DisconnectedList
 
             return true;
         },
-        storage::lmdb::LMDB::Dir::Forward);
+        storage::lmdb::Dir::Forward);
 
     return output;
 }
@@ -630,7 +632,8 @@ auto Headers::load_header(const block::Hash& hash) const
     return output;
 }
 
-auto Headers::pop_best(block::Height i, MDB_txn* parent) const noexcept -> bool
+auto Headers::pop_best(block::Height i, storage::lmdb::Transaction& parent)
+    const noexcept -> bool
 {
     return lmdb_.Delete(BlockHeaderBest, tsv(i), parent);
 }
@@ -638,10 +641,8 @@ auto Headers::pop_best(block::Height i, MDB_txn* parent) const noexcept -> bool
 auto Headers::push_best(
     const block::Position next,
     const bool setTip,
-    MDB_txn* parent) const noexcept -> bool
+    storage::lmdb::Transaction& parent) const noexcept -> bool
 {
-    OT_ASSERT(nullptr != parent);
-
     auto output = lmdb_.Store(
         BlockHeaderBest,
         tsv(static_cast<std::size_t>(next.height_)),
@@ -678,7 +679,7 @@ auto Headers::recent_hashes(const Lock& lock, alloc::Default alloc)
 
             return 100 > output.size();
         },
-        storage::lmdb::LMDB::Dir::Backward);
+        storage::lmdb::Dir::Backward);
 
     return output;
 }
@@ -730,7 +731,7 @@ auto Headers::SiblingHashes() const noexcept -> database::Hashes
 
             return true;
         },
-        storage::lmdb::LMDB::Dir::Forward);
+        storage::lmdb::Dir::Forward);
 
     return output;
 }

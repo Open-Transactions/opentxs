@@ -22,7 +22,6 @@
 #include "Proto.hpp"
 #include "Proto.tpp"
 #include "blockchain/database/wallet/Position.hpp"
-#include "blockchain/database/wallet/Subchain.hpp"
 #include "internal/blockchain/Blockchain.hpp"
 #include "internal/blockchain/bitcoin/block/Factory.hpp"
 #include "internal/blockchain/bitcoin/block/Output.hpp"
@@ -30,6 +29,8 @@
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/TSV.hpp"
+#include "internal/util/storage/lmdb/Database.hpp"
+#include "internal/util/storage/lmdb/Transaction.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/blockchain/bitcoin/block/Output.hpp"
 #include "opentxs/blockchain/bitcoin/block/Script.hpp"
@@ -44,7 +45,6 @@
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Time.hpp"  // IWYU pragma: keep
-#include "util/LMDB.hpp"
 
 namespace opentxs::blockchain::database::wallet
 {
@@ -95,7 +95,7 @@ const Nyms OutputCache::empty_nyms_{};
 
 OutputCache::OutputCache(
     const api::Session& api,
-    const storage::lmdb::LMDB& lmdb,
+    const storage::lmdb::Database& lmdb,
     const blockchain::Type chain,
     const block::Position& blank) noexcept
     : api_(api)
@@ -120,7 +120,7 @@ OutputCache::OutputCache(
 
 auto OutputCache::AddOutput(
     const block::Outpoint& id,
-    MDB_txn* tx,
+    storage::lmdb::Transaction& tx,
     std::unique_ptr<bitcoin::block::Output> pOutput) noexcept -> bool
 {
     if (write_output(id, *pOutput, tx)) {
@@ -140,7 +140,7 @@ auto OutputCache::AddOutput(
     const block::Position& position,
     const AccountID& account,
     const SubchainID& subchain,
-    MDB_txn* tx,
+    storage::lmdb::Transaction& tx,
     std::unique_ptr<bitcoin::block::Output> output) noexcept -> bool
 {
     OT_ASSERT(false == account.empty());
@@ -161,7 +161,7 @@ auto OutputCache::AddOutput(
 auto OutputCache::AddToAccount(
     const AccountID& id,
     const block::Outpoint& output,
-    MDB_txn* tx) noexcept -> bool
+    storage::lmdb::Transaction& tx) noexcept -> bool
 {
     OT_ASSERT(0 < outputs_.count(output));
 
@@ -187,7 +187,7 @@ auto OutputCache::AddToAccount(
 auto OutputCache::AddToKey(
     const crypto::Key& id,
     const block::Outpoint& output,
-    MDB_txn* tx) noexcept -> bool
+    storage::lmdb::Transaction& tx) noexcept -> bool
 {
     OT_ASSERT(0 < outputs_.count(output));
 
@@ -215,7 +215,7 @@ auto OutputCache::AddToKey(
 auto OutputCache::AddToNym(
     const identifier::Nym& id,
     const block::Outpoint& output,
-    MDB_txn* tx) noexcept -> bool
+    storage::lmdb::Transaction& tx) noexcept -> bool
 {
     OT_ASSERT(0 < outputs_.count(output));
     OT_ASSERT(false == id.empty());
@@ -244,7 +244,7 @@ auto OutputCache::AddToNym(
 auto OutputCache::AddToPosition(
     const block::Position& id,
     const block::Outpoint& output,
-    MDB_txn* tx) noexcept -> bool
+    storage::lmdb::Transaction& tx) noexcept -> bool
 {
     OT_ASSERT(0 < outputs_.count(output));
 
@@ -275,7 +275,7 @@ auto OutputCache::AddToPosition(
 auto OutputCache::AddToState(
     const node::TxoState id,
     const block::Outpoint& output,
-    MDB_txn* tx) noexcept -> bool
+    storage::lmdb::Transaction& tx) noexcept -> bool
 {
     OT_ASSERT(0 < outputs_.count(output));
 
@@ -306,7 +306,7 @@ auto OutputCache::AddToState(
 auto OutputCache::AddToSubchain(
     const SubchainID& id,
     const block::Outpoint& output,
-    MDB_txn* tx) noexcept -> bool
+    storage::lmdb::Transaction& tx) noexcept -> bool
 {
     OT_ASSERT(0 < outputs_.count(output));
 
@@ -334,7 +334,7 @@ auto OutputCache::ChangePosition(
     const block::Position& oldPosition,
     const block::Position& newPosition,
     const block::Outpoint& id,
-    MDB_txn* tx) noexcept -> bool
+    storage::lmdb::Transaction& tx) noexcept -> bool
 {
     try {
         const auto oldP = db::Position{oldPosition};
@@ -380,7 +380,7 @@ auto OutputCache::ChangeState(
     const node::TxoState oldState,
     const node::TxoState newState,
     const block::Outpoint& id,
-    MDB_txn* tx) noexcept -> bool
+    storage::lmdb::Transaction& tx) noexcept -> bool
 {
     try {
         for (const auto state : all_states()) { GetState(state); }
@@ -672,7 +672,7 @@ auto OutputCache::populate() noexcept -> void
         return true;
     };
     auto tx = lmdb_.TransactionRO();
-    static constexpr auto fwd = storage::lmdb::LMDB::Dir::Forward;
+    static constexpr auto fwd = storage::lmdb::Dir::Forward;
     auto rc = lmdb_.Read(wallet::outputs_, outputs, fwd, tx);
 
     OT_ASSERT(rc);
@@ -884,14 +884,14 @@ auto OutputCache::Print() const noexcept -> void
 auto OutputCache::UpdateOutput(
     const block::Outpoint& id,
     const bitcoin::block::Output& output,
-    MDB_txn* tx) noexcept -> bool
+    storage::lmdb::Transaction& tx) noexcept -> bool
 {
     return write_output(id, output, tx);
 }
 
 auto OutputCache::UpdatePosition(
     const block::Position& pos,
-    MDB_txn* tx) noexcept -> bool
+    storage::lmdb::Transaction& tx) noexcept -> bool
 {
     try {
         const auto serialized = db::Position{pos};
@@ -920,7 +920,7 @@ auto OutputCache::UpdatePosition(
 auto OutputCache::write_output(
     const block::Outpoint& id,
     const bitcoin::block::Output& output,
-    MDB_txn* tx) noexcept -> bool
+    storage::lmdb::Transaction& tx) noexcept -> bool
 {
     try {
         for (const auto& key : output.Keys()) {

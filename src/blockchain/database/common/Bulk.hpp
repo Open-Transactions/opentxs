@@ -14,7 +14,6 @@
 #include "internal/util/Mutex.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
-#include "util/LMDB.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
@@ -25,7 +24,8 @@ namespace storage
 {
 namespace lmdb
 {
-class LMDB;
+class Database;
+class Transaction;
 }  // namespace lmdb
 }  // namespace storage
 
@@ -42,8 +42,7 @@ namespace opentxs::blockchain::database::common
 class Bulk
 {
 public:
-    using UpdateCallback =
-        std::function<bool(storage::lmdb::LMDB::Transaction&)>;
+    using UpdateCallback = std::function<bool(storage::lmdb::Transaction&)>;
 
     auto Mutex() const noexcept -> std::mutex&;
     auto ReadView(const util::IndexData& index) const noexcept
@@ -51,19 +50,20 @@ public:
     auto ReadView(const Lock& lock, const util::IndexData& index) const noexcept
         -> opentxs::ReadView;
     auto WriteView(
-        storage::lmdb::LMDB::Transaction& tx,
+        storage::lmdb::Transaction& tx,
         util::IndexData& index,
         UpdateCallback&& cb,
         std::size_t size) const noexcept -> WritableView;
     auto WriteView(
         const Lock& lock,
-        storage::lmdb::LMDB::Transaction& tx,
+        storage::lmdb::Transaction& tx,
         util::IndexData& index,
         UpdateCallback&& cb,
         std::size_t size) const noexcept -> WritableView;
 
-    Bulk(storage::lmdb::LMDB& lmdb, const std::filesystem::path& path) noexcept(
-        false);
+    Bulk(
+        storage::lmdb::Database& lmdb,
+        const std::filesystem::path& path) noexcept(false);
     Bulk() = delete;
     Bulk(const Bulk&) = delete;
     Bulk(Bulk&&) = delete;

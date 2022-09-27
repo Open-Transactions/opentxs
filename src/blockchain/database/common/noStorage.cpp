@@ -13,7 +13,7 @@ namespace opentxs::blockchain::database::common
 struct Blocks::Imp {
 };
 
-Blocks::Blocks(storage::lmdb::LMDB&, Bulk&) noexcept
+Blocks::Blocks(storage::lmdb::Database&, Bulk&) noexcept
     : imp_(std::make_unique<Imp>())
 {
 }
@@ -37,7 +37,7 @@ struct Sync::Imp {
 
 Sync::Sync(
     const api::Session&,
-    storage::lmdb::LMDB&,
+    storage::lmdb::Database&,
     const std::filesystem::path&) noexcept(false)
     : imp_(std::make_unique<Imp>())
 {

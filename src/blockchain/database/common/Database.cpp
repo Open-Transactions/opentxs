@@ -38,12 +38,13 @@ extern "C" {
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/TSV.hpp"
+#include "internal/util/storage/lmdb/Database.hpp"
+#include "internal/util/storage/lmdb/Types.hpp"
 #include "opentxs/blockchain/bitcoin/block/Transaction.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/bitcoin/cfilter/GCS.hpp"  // IWYU pragma: keep
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
-#include "util/LMDB.hpp"
 
 constexpr auto false_byte_ = std::byte{0x0};
 constexpr auto true_byte_ = std::byte{0x1};
@@ -62,7 +63,7 @@ struct Database::Imp {
     const fs::path blockchain_path_;
     const fs::path common_path_;
     const fs::path blocks_path_;
-    storage::lmdb::LMDB lmdb_;
+    storage::lmdb::Database lmdb_;
     Bulk bulk_;
     const SiphashKey siphash_key_;
     BlockHeader headers_;
@@ -149,7 +150,7 @@ struct Database::Imp {
 
         return output;
     }
-    static auto siphash_key(storage::lmdb::LMDB& db) noexcept -> SiphashKey
+    static auto siphash_key(storage::lmdb::Database& db) noexcept -> SiphashKey
     {
         auto configured = siphash_key_configured(db);
 
@@ -165,7 +166,7 @@ struct Database::Imp {
 
         return output;
     }
-    static auto siphash_key_configured(storage::lmdb::LMDB& db) noexcept
+    static auto siphash_key_configured(storage::lmdb::Database& db) noexcept
         -> std::optional<SiphashKey>
     {
         if (false == db.Exists(Table::Config, tsv(Key::SiphashKey))) {
@@ -523,7 +524,7 @@ auto Database::LoadEnabledChains() const noexcept
 
         return true;
     };
-    imp_->lmdb_.Read(Enabled, cb, storage::lmdb::LMDB::Dir::Forward);
+    imp_->lmdb_.Read(Enabled, cb, storage::lmdb::Dir::Forward);
 
     return output;
 }

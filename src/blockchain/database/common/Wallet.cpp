@@ -25,6 +25,8 @@
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/Mutex.hpp"
 #include "internal/util/TSV.hpp"
+#include "internal/util/storage/lmdb/Database.hpp"
+#include "internal/util/storage/lmdb/Transaction.hpp"
 #include "opentxs/api/crypto/Blockchain.hpp"
 #include "opentxs/blockchain/bitcoin/block/Transaction.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
@@ -35,15 +37,14 @@
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "util/Container.hpp"
-#include "util/LMDB.hpp"
-#include "util/MappedFileStorage.hpp"
+#include "util/storage/MappedFile.hpp"
 
 namespace opentxs::blockchain::database::common
 {
 Wallet::Wallet(
     const api::Session& api,
     const api::crypto::Blockchain& blockchain,
-    storage::lmdb::LMDB& lmdb,
+    storage::lmdb::Database& lmdb,
     Bulk& bulk) noexcept(false)
     : api_(api)
     , blockchain_(blockchain)

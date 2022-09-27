@@ -43,7 +43,6 @@
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Pimpl.hpp"
-#include "util/LMDB.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
@@ -106,7 +105,8 @@ namespace storage
 {
 namespace lmdb
 {
-class LMDB;
+class Database;
+class Transaction;
 }  // namespace lmdb
 }  // namespace storage
 
@@ -156,7 +156,7 @@ public:
     auto CompletedProposals() const noexcept
         -> UnallocatedSet<identifier::Generic>;
     auto FinalizeReorg(
-        storage::lmdb::LMDB::Transaction& tx,
+        storage::lmdb::Transaction& tx,
         const block::Position& pos) const noexcept -> bool;
     auto ForgetProposals(
         const UnallocatedSet<identifier::Generic>& ids) const noexcept -> bool;
@@ -208,7 +208,7 @@ public:
     auto PublishBalance() const noexcept -> void;
     auto ReorgTo(
         const node::internal::HeaderOraclePrivate& data,
-        storage::lmdb::LMDB::Transaction& tx,
+        storage::lmdb::Transaction& tx,
         const node::HeaderOracle& headers,
         const NodeID& balanceNode,
         const crypto::Subchain subchain,
@@ -233,7 +233,7 @@ public:
     Wallet(
         const api::Session& api,
         const common::Database& common,
-        const storage::lmdb::LMDB& lmdb,
+        const storage::lmdb::Database& lmdb,
         const blockchain::Type chain,
         const blockchain::cfilter::Type filter) noexcept;
     Wallet() = delete;
@@ -244,7 +244,7 @@ public:
 private:
     const api::Session& api_;
     const common::Database& common_;
-    const storage::lmdb::LMDB& lmdb_;
+    const storage::lmdb::Database& lmdb_;
     mutable wallet::SubchainData subchains_;
     mutable wallet::Proposal proposals_;
     mutable wallet::Output outputs_;

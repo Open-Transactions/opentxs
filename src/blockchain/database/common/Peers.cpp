@@ -24,16 +24,19 @@
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/Time.hpp"
+#include "internal/util/storage/lmdb/Database.hpp"
+#include "internal/util/storage/lmdb/Transaction.hpp"
+#include "internal/util/storage/lmdb/Types.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/blockchain/p2p/Address.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/util/Log.hpp"
-#include "util/LMDB.hpp"
 
 namespace opentxs::blockchain::database::common
 {
-Peers::Peers(const api::Session& api, storage::lmdb::LMDB& lmdb) noexcept(false)
+Peers::Peers(const api::Session& api, storage::lmdb::Database& lmdb) noexcept(
+    false)
     : api_(api)
     , lmdb_(lmdb)
     , lock_()
@@ -43,7 +46,7 @@ Peers::Peers(const api::Session& api, storage::lmdb::LMDB& lmdb) noexcept(false)
     , networks_()
     , connected_()
 {
-    using Dir = storage::lmdb::LMDB::Dir;
+    using Dir = storage::lmdb::Dir;
 
     auto chain = [this](const auto key, const auto value) {
         return read_index<Chain>(key, value, chains_);

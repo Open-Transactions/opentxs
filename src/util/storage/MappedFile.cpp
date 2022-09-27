@@ -3,9 +3,9 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#include "0_stdafx.hpp"                // IWYU pragma: associated
-#include "1_Internal.hpp"              // IWYU pragma: associated
-#include "util/MappedFileStorage.hpp"  // IWYU pragma: associated
+#include "0_stdafx.hpp"                 // IWYU pragma: associated
+#include "1_Internal.hpp"               // IWYU pragma: associated
+#include "util/storage/MappedFile.hpp"  // IWYU pragma: associated
 
 #include <boost/iostreams/device/mapped_file.hpp>
 #include <algorithm>
@@ -19,6 +19,7 @@
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/TSV.hpp"
+#include "internal/util/storage/lmdb/Database.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "util/FileSize.hpp"
@@ -51,7 +52,7 @@ constexpr auto get_start_position(const std::size_t file) noexcept
 struct MappedFileStorage::Imp {
     using FileCounter = std::size_t;
 
-    LMDB& lmdb_;
+    Database& lmdb_;
     const std::filesystem::path path_prefix_;
     const std::filesystem::path filename_prefix_;
     const int table_;
@@ -129,7 +130,7 @@ struct MappedFileStorage::Imp {
         return ReadView{files_.at(file).const_data() + offset, index.size_};
     }
     auto get_write_view(
-        LMDB::Transaction& tx,
+        Transaction& tx,
         IndexData& index,
         UpdateCallback&& cb,
         std::size_t bytes) noexcept -> WritableView
@@ -201,7 +202,7 @@ struct MappedFileStorage::Imp {
 
         return output;
     }
-    auto load_position(opentxs::storage::lmdb::LMDB& db) noexcept
+    auto load_position(opentxs::storage::lmdb::Database& db) noexcept
         -> IndexData::MemoryPosition
     {
         auto output = IndexData::MemoryPosition{0};
@@ -224,7 +225,7 @@ struct MappedFileStorage::Imp {
     }
     auto update_next_position(
         IndexData::MemoryPosition position,
-        LMDB::Transaction& tx) noexcept -> bool
+        Transaction& tx) noexcept -> bool
     {
         auto result = lmdb_.Store(table_, tsv(key_), tsv(position), tx);
 
@@ -240,7 +241,7 @@ struct MappedFileStorage::Imp {
         return true;
     }
 
-    Imp(opentxs::storage::lmdb::LMDB& lmdb,
+    Imp(opentxs::storage::lmdb::Database& lmdb,
         const std::filesystem::path& basePath,
         const std::filesystem::path filenamePrefix,
         int table,
@@ -281,7 +282,7 @@ struct MappedFileStorage::Imp {
 };
 
 MappedFileStorage::MappedFileStorage(
-    opentxs::storage::lmdb::LMDB& lmdb,
+    opentxs::storage::lmdb::Database& lmdb,
     const std::filesystem::path& basePath,
     const std::filesystem::path filenamePrefix,
     int table,
@@ -300,7 +301,7 @@ auto MappedFileStorage::get_read_view(const IndexData& index) const noexcept
 }
 
 auto MappedFileStorage::get_write_view(
-    LMDB::Transaction& tx,
+    Transaction& tx,
     IndexData& existing,
     UpdateCallback&& cb,
     std::size_t size) const noexcept -> WritableView
@@ -309,7 +310,7 @@ auto MappedFileStorage::get_write_view(
 }
 
 auto MappedFileStorage::get_write_view(
-    LMDB::Transaction& tx,
+    Transaction& tx,
     IndexData& index,
     std::size_t size) const noexcept -> WritableView
 {

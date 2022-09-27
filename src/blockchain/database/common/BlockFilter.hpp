@@ -17,8 +17,7 @@
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
-#include "util/LMDB.hpp"
-#include "util/MappedFileStorage.hpp"
+#include "util/storage/MappedFile.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
@@ -52,7 +51,8 @@ namespace storage
 {
 namespace lmdb
 {
-class LMDB;
+class Database;
+class Transaction;
 }  // namespace lmdb
 }  // namespace storage
 
@@ -101,7 +101,7 @@ public:
 
     BlockFilter(
         const api::Session& api,
-        storage::lmdb::LMDB& lmdb,
+        storage::lmdb::Database& lmdb,
         Bulk& bulk) noexcept;
 
 private:
@@ -111,7 +111,7 @@ private:
     static const std::uint32_t blockchain_filters_version_{1};
 
     const api::Session& api_;
-    storage::lmdb::LMDB& lmdb_;
+    storage::lmdb::Database& lmdb_;
     Bulk& bulk_;
 
     static auto translate_filter(const cfilter::Type type) noexcept(false)
@@ -126,11 +126,11 @@ private:
     auto load_filter_index(
         const cfilter::Type type,
         const ReadView blockHash,
-        storage::lmdb::LMDB::Transaction& tx,
+        storage::lmdb::Transaction& tx,
         util::IndexData& out) const noexcept(false) -> void;
     auto store(
         const Lock& lock,
-        storage::lmdb::LMDB::Transaction& tx,
+        storage::lmdb::Transaction& tx,
         const ReadView blockHash,
         const cfilter::Type type,
         const GCS& filter) const noexcept -> bool;
