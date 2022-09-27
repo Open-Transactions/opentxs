@@ -45,16 +45,13 @@ using mapOfStashItems = UnallocatedMap<UnallocatedCString, OTStashItem*>;
 
 class OTStash
 {
-    UnallocatedCString m_str_stash_name;
+    UnallocatedCString stash_name_;
 
-    mapOfStashItems m_mapStashItems;  // map of stash items by instrument
-                                      // definition ID.
-                                      // owned.
+    mapOfStashItems stash_items_;  // map of stash items by instrument
+                                   // definition ID.
+                                   // owned.
 public:
-    auto GetName() const -> const UnallocatedCString
-    {
-        return m_str_stash_name;
-    }
+    auto GetName() const -> const UnallocatedCString { return stash_name_; }
     auto GetStash(const UnallocatedCString& str_instrument_definition_id)
         -> OTStashItem*;
 

@@ -65,7 +65,7 @@ auto OTScriptChai::ExecuteScript(OTVariable* pReturnVar) -> bool
 
     OT_ASSERT(nullptr != chai_);
 
-    if (m_str_script.size() > 0) {
+    if (script_.size() > 0) {
 
         /*
         chai_->add(user_type<OTParty>(), "OTParty");
@@ -86,7 +86,7 @@ auto OTScriptChai::ExecuteScript(OTVariable* pReturnVar) -> bool
         //      chai_->add(m); // Here we add the OTParty class to the
         //      chaiscript engine.
 
-        for (auto& it : m_mapParties) {
+        for (auto& it : parties_) {
             OTParty* pParty = it.second;
             OT_ASSERT(nullptr != pParty);
 
@@ -124,7 +124,7 @@ auto OTScriptChai::ExecuteScript(OTVariable* pReturnVar) -> bool
                                       // just above.
         }
 
-        for (auto& it : m_mapAccounts) {
+        for (auto& it : accounts_) {
             OTPartyAccount* pAcct = it.second;
             OT_ASSERT(nullptr != pAcct);
 
@@ -155,14 +155,14 @@ auto OTScriptChai::ExecuteScript(OTVariable* pReturnVar) -> bool
              Var_Error_Access    // should never happen.
          };
 
-         OTVariable_Access      GetAccess() const { return m_Access; }
+         OTVariable_Access      GetAccess() const { return access_; }
 
-         std::int64_t& GetValueLong() { return m_lValue; }
-         bool& GetValueBool() { return m_bValue; }
-         UnallocatedCString& GetValueString() { return m_str_Value; }
+         std::int64_t& GetValueLong() { return value_; }
+         bool& GetValueBool() { return bool_; }
+         UnallocatedCString& GetValueString() { return string_; }
          */
 
-        for (auto& it : m_mapVariables) {
+        for (auto& it : variables_) {
             const UnallocatedCString var_name = it.first;
             OTVariable* pVar = it.second;
             OT_ASSERT((nullptr != pVar) && (var_name.size() > 0));
@@ -242,39 +242,39 @@ auto OTScriptChai::ExecuteScript(OTVariable* pReturnVar) -> bool
         // engine.
         //      chai_->add(user_type<mapOfParties>(), "mapOfParties");
 
-        // Here we add the m_mapParties member variable itself
-        //      chai_->add_global_const(const_var(m_mapParties),
+        // Here we add the parties_ member variable itself
+        //      chai_->add_global_const(const_var(parties_),
         // "Parties");
 
         try {
             if (nullptr == pReturnVar) {  // Nothing to return.
                 chai_->eval(
-                    m_str_script.c_str(),
+                    script_.c_str(),
                     exception_specification<const std::exception&>(),
-                    m_str_display_filename);
+                    display_filename_);
 
             } else  // There's a return variable.
             {
                 switch (pReturnVar->GetType()) {
                     case OTVariable::Var_Integer: {
                         auto nResult = chai_->eval<int32_t>(
-                            m_str_script.c_str(),
+                            script_.c_str(),
                             exception_specification<const std::exception&>(),
-                            m_str_display_filename);
+                            display_filename_);
                         pReturnVar->SetValue(nResult);
                     } break;
                     case OTVariable::Var_Bool: {
                         bool bResult = chai_->eval<bool>(
-                            m_str_script.c_str(),
+                            script_.c_str(),
                             exception_specification<const std::exception&>(),
-                            m_str_display_filename);
+                            display_filename_);
                         pReturnVar->SetValue(bResult);
                     } break;
                     case OTVariable::Var_String: {
                         auto str_Result = chai_->eval<UnallocatedCString>(
-                            m_str_script.c_str(),
+                            script_.c_str(),
                             exception_specification<const std::exception&>(),
-                            m_str_display_filename);
+                            display_filename_);
                         pReturnVar->SetValue(str_Result);
                     } break;
                     case OTVariable::Var_Error_Type:

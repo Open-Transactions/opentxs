@@ -64,28 +64,28 @@ class Mint : public blind::Mint::Imp
 public:
     auto AccountID() const -> identifier::Generic override
     {
-        return m_CashAccountID;
+        return cash_account_id_;
     }
     auto Expired() const -> bool override;
     auto GetDenomination(std::int32_t nIndex) const -> Amount override;
     auto GetDenominationCount() const -> std::int32_t override
     {
-        return m_nDenominationCount;
+        return denomination_count_;
     }
 
-    auto GetExpiration() const -> Time override { return m_EXPIRATION; }
+    auto GetExpiration() const -> Time override { return expiration_; }
     auto GetLargestDenomination(const Amount& lAmount) const -> Amount override;
     auto GetPrivate(Armored& theArmor, const Amount& lDenomination) const
         -> bool override;
     auto GetPublic(Armored& theArmor, const Amount& lDenomination) const
         -> bool override;
-    auto GetSeries() const -> std::int32_t override { return m_nSeries; }
-    auto GetValidFrom() const -> Time override { return m_VALID_FROM; }
-    auto GetValidTo() const -> Time override { return m_VALID_TO; }
+    auto GetSeries() const -> std::int32_t override { return series_; }
+    auto GetValidFrom() const -> Time override { return valid_from_; }
+    auto GetValidTo() const -> Time override { return valid_to_; }
     auto InstrumentDefinitionID() const
         -> const identifier::UnitDefinition& override
     {
-        return m_InstrumentDefinitionID;
+        return instrument_definition_id_;
     }
     auto isValid() const noexcept -> bool final { return true; }
 
@@ -119,11 +119,11 @@ public:
     void SetInstrumentDefinitionID(
         const identifier::UnitDefinition& newID) override
     {
-        m_InstrumentDefinitionID = newID;
+        instrument_definition_id_ = newID;
     }
     void SetSavePrivateKeys(bool bDoIt = true) override
     {
-        m_bSavePrivateKeys = bDoIt;
+        save_private_keys_ = bDoIt;
     }
     void UpdateContents(const PasswordPrompt& reason) override;
     auto VerifyContractID() const -> bool override;
@@ -140,18 +140,18 @@ protected:
 
     void InitMint();
 
-    mapOfArmor m_mapPrivate;
-    mapOfArmor m_mapPublic;
-    identifier::Notary m_NotaryID;
-    identifier::Nym m_ServerNymID;
-    identifier::UnitDefinition m_InstrumentDefinitionID;
-    std::int32_t m_nDenominationCount;
-    bool m_bSavePrivateKeys;
-    std::int32_t m_nSeries;
-    Time m_VALID_FROM;
-    Time m_VALID_TO;
-    Time m_EXPIRATION;
-    identifier::Generic m_CashAccountID;
+    mapOfArmor private_;
+    mapOfArmor public_;
+    identifier::Notary notary_id_;
+    identifier::Nym server_nym_id_;
+    identifier::UnitDefinition instrument_definition_id_;
+    std::int32_t denomination_count_;
+    bool save_private_keys_;
+    std::int32_t series_;
+    Time valid_from_;
+    Time valid_to_;
+    Time expiration_;
+    identifier::Generic cash_account_id_;
 
     Mint(const api::Session& api);
     Mint(

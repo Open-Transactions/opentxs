@@ -55,30 +55,30 @@ public:
         const identifier::Nym& remitterNymID,
         const identifier::Generic& remitterAcctID)
     {
-        m_REMITTER_NYM_ID = remitterNymID;
-        m_REMITTER_ACCT_ID = remitterAcctID;
-        m_bHasRemitter = true;
-        m_strContractType = String::Factory("VOUCHER");
+        remitter_nym_id_ = remitterNymID;
+        remitter_account_id_ = remitterAcctID;
+        has_remitter_ = true;
+        contract_type_ = String::Factory("VOUCHER");
     }
-    inline auto GetMemo() const -> const String& { return m_strMemo; }
-    inline auto GetAmount() const -> const Amount& { return m_lAmount; }
+    inline auto GetMemo() const -> const String& { return memo_; }
+    inline auto GetAmount() const -> const Amount& { return amount_; }
     inline auto GetRecipientNymID() const -> const identifier::Nym&
     {
-        return m_RECIPIENT_NYM_ID;
+        return recipient_nym_id_;
     }
-    inline auto HasRecipient() const -> bool { return m_bHasRecipient; }
+    inline auto HasRecipient() const -> bool { return has_recipient_; }
     inline auto GetRemitterNymID() const -> const identifier::Nym&
     {
-        return m_REMITTER_NYM_ID;
+        return remitter_nym_id_;
     }
     inline auto GetRemitterAcctID() const -> const identifier::Generic&
     {
-        return m_REMITTER_ACCT_ID;
+        return remitter_account_id_;
     }
-    inline auto HasRemitter() const -> bool { return m_bHasRemitter; }
+    inline auto HasRemitter() const -> bool { return has_remitter_; }
     inline auto SourceAccountID() const -> const identifier::Generic&
     {
-        return ((m_bHasRemitter) ? m_REMITTER_ACCT_ID : m_SENDER_ACCT_ID);
+        return ((has_remitter_) ? remitter_account_id_ : sender_account_id_);
     }
 
     // A cheque HAS NO "Recipient Asset Acct ID", since the recipient's account
@@ -120,15 +120,15 @@ public:
     ~Cheque() override;
 
 protected:
-    Amount m_lAmount{0};
-    OTString m_strMemo;
+    Amount amount_{0};
+    OTString memo_;
     // Optional. If present, must match depositor's user ID.
-    identifier::Nym m_RECIPIENT_NYM_ID;
-    bool m_bHasRecipient{false};
+    identifier::Nym recipient_nym_id_;
+    bool has_recipient_{false};
     // In the case of vouchers (cashier's cheques) we store the Remitter's ID.
-    identifier::Nym m_REMITTER_NYM_ID;
-    identifier::Generic m_REMITTER_ACCT_ID;
-    bool m_bHasRemitter{false};
+    identifier::Nym remitter_nym_id_;
+    identifier::Generic remitter_account_id_;
+    bool has_remitter_{false};
 
     auto ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t override;
 

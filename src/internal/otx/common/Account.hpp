@@ -106,11 +106,11 @@ public:
     auto GetInstrumentDefinitionID() const -> const identifier::UnitDefinition&;
     auto GetStashTransNum() const -> TransactionNumber
     {
-        return stashTransNum_;
+        return stash_trans_num_;
     }
     auto GetTypeString() const -> char const*
     {
-        return GetTypeString(acctType_);
+        return GetTypeString(acct_type_);
     }
     auto IsAllowedToGoNegative() const -> bool;
     auto IsInternalServerAcct() const -> bool;
@@ -118,7 +118,7 @@ public:
     auto IsOwnedByEntity() const -> bool;
     auto IsIssuer() const -> bool;
     // For accounts used by smart contracts, to stash funds while running.
-    auto IsStashAcct() const -> bool { return (acctType_ == stash); }
+    auto IsStashAcct() const -> bool { return (acct_type_ == stash); }
     auto LoadInbox(const identity::Nym& nym) const -> std::unique_ptr<Ledger>;
     auto LoadOutbox(const identity::Nym& nym) const -> std::unique_ptr<Ledger>;
     // Compares the NymID loaded from the account file with whatever Nym the
@@ -147,7 +147,7 @@ public:
     void SetOutboxHash(const identifier::Generic& input);
     void SetStashTransNum(const TransactionNumber transNum)
     {
-        stashTransNum_ = transNum;
+        stash_trans_num_ = transNum;
     }
 
     Account() = delete;
@@ -159,23 +159,23 @@ private:
     friend opentxs::api::session::imp::Wallet;
     friend opentxs::api::session::notary::Wallet;
 
-    AccountType acctType_{err_acct};
+    AccountType acct_type_{err_acct};
     // These are all the variables from the account file itself.
-    identifier::UnitDefinition acctInstrumentDefinitionID_;
-    OTString balanceDate_;
-    OTString balanceAmount_;
+    identifier::UnitDefinition acct_instrument_definition_id_;
+    OTString balance_date_;
+    OTString balance_amount_;
     // the Transaction Number of a smart contract running on cron, if this is a
     // stash account.
-    TransactionNumber stashTransNum_{0};
+    TransactionNumber stash_trans_num_{0};
     // Default FALSE. When set to true, saves a "DELETED" flag with this Account
-    bool markForDeletion_{false};
+    bool mark_for_deletion_{false};
     // for easy cleanup later when the server is doing some maintenance.
     // Hash of this account's Inbox, so we don't download it more often than
     // necessary.
-    identifier::Generic inboxHash_;
+    identifier::Generic inbox_hash_;
     // Hash of this account's Outbox, so we don't download it more often than
     // necessary.
-    identifier::Generic outboxHash_;
+    identifier::Generic outbox_hash_;
     UnallocatedCString alias_;
 
     static auto GenerateNewAccount(

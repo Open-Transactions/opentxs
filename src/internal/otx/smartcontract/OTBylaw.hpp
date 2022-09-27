@@ -43,24 +43,24 @@ using mapOfHooks = UnallocatedMultimap<UnallocatedCString, UnallocatedCString>;
 //
 class OTBylaw
 {
-    OTString m_strName;      // Name of this Bylaw.
-    OTString m_strLanguage;  // Language that the scripts are written in, for
-                             // this bylaw.
+    OTString name_;      // Name of this Bylaw.
+    OTString language_;  // Language that the scripts are written in, for
+                         // this bylaw.
 
-    mapOfVariables m_mapVariables;  // constant, persistant, and important
-                                    // variables (strings and longs)
-    mapOfClauses m_mapClauses;  // map of scripts associated with this bylaw.
+    mapOfVariables variables_;  // constant, persistant, and important
+                                // variables (strings and longs)
+    mapOfClauses clauses_;      // map of scripts associated with this bylaw.
 
-    mapOfHooks m_mapHooks;  // multimap of server hooks associated with clauses.
-                            // string / string
-    mapOfCallbacks m_mapCallbacks;  // map of standard callbacks associated with
-                                    // script clauses. string / string
+    mapOfHooks hooks_;  // multimap of server hooks associated with clauses.
+                        // string / string
+    mapOfCallbacks callbacks_;  // map of standard callbacks associated with
+                                // script clauses. string / string
 
-    OTScriptable* m_pOwnerAgreement;  // This Bylaw is owned by an agreement
-                                      // (OTScriptable-derived.)
+    OTScriptable* owner_agreement_;  // This Bylaw is owned by an agreement
+                                     // (OTScriptable-derived.)
 
 public:
-    auto GetName() const -> const String& { return m_strName; }
+    auto GetName() const -> const String& { return name_; }
     auto GetLanguage() const -> const char*;
     auto AddVariable(OTVariable& theVariable) -> bool;
     auto AddVariable(
@@ -130,19 +130,19 @@ public:
                                             // matching a specific hook.
     auto GetVariableCount() const -> std::int32_t
     {
-        return static_cast<std::int32_t>(m_mapVariables.size());
+        return static_cast<std::int32_t>(variables_.size());
     }
     auto GetClauseCount() const -> std::int32_t
     {
-        return static_cast<std::int32_t>(m_mapClauses.size());
+        return static_cast<std::int32_t>(clauses_.size());
     }
     auto GetCallbackCount() const -> std::int32_t
     {
-        return static_cast<std::int32_t>(m_mapCallbacks.size());
+        return static_cast<std::int32_t>(callbacks_.size());
     }
     auto GetHookCount() const -> std::int32_t
     {
-        return static_cast<std::int32_t>(m_mapHooks.size());
+        return static_cast<std::int32_t>(hooks_.size());
     }
     auto GetVariableByIndex(std::int32_t nIndex) -> OTVariable*;
     auto GetClauseByIndex(std::int32_t nIndex) -> OTClause*;
@@ -166,10 +166,10 @@ public:
     // DIRTY again.)
     // This pointer isn't owned -- just stored for convenience.
     //
-    auto GetOwnerAgreement() -> OTScriptable* { return m_pOwnerAgreement; }
+    auto GetOwnerAgreement() -> OTScriptable* { return owner_agreement_; }
     void SetOwnerAgreement(OTScriptable& theOwner)
     {
-        m_pOwnerAgreement = &theOwner;
+        owner_agreement_ = &theOwner;
     }
 
     auto Compare(OTBylaw& rhs) -> bool;

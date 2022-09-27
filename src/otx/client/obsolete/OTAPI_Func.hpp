@@ -259,22 +259,22 @@ private:
 
     OTAPI_Func_Type type_{NO_FUNC};
     rLock api_lock_;
-    identifier::Generic accountID_;
-    identifier::Generic basketID_;
-    identifier::Generic currencyAccountID_;
-    identifier::Generic instrumentDefinitionID_;
-    identifier::Generic marketID_;
-    identifier::Generic recipientID_;
-    identifier::Generic requestID_;
-    identifier::Generic targetID_;
+    identifier::Generic account_id_;
+    identifier::Generic basket_id_;
+    identifier::Generic currency_account_id_;
+    identifier::Generic instrument_definition_id_;
+    identifier::Generic market_id_;
+    identifier::Generic recipient_id_;
+    identifier::Generic request_id_;
+    identifier::Generic target_id_;
     identifier::Generic message_id_;
     std::unique_ptr<Message> request_;
     std::unique_ptr<OTSmartContract> contract_;
-    std::unique_ptr<OTPaymentPlan> paymentPlan_;
+    std::unique_ptr<OTPaymentPlan> payment_plan_;
     std::unique_ptr<Cheque> cheque_;
     std::unique_ptr<Ledger> ledger_;
     std::unique_ptr<const OTPayment> payment_;
-    UnallocatedCString agentName_;
+    UnallocatedCString agent_name_;
     UnallocatedCString clause_;
     UnallocatedCString key_;
     UnallocatedCString login_;
@@ -283,7 +283,7 @@ private:
     UnallocatedCString password_;
     UnallocatedCString primary_;
     UnallocatedCString secondary_;
-    UnallocatedCString stopSign_;
+    UnallocatedCString stop_sign_;
     UnallocatedCString txid_;
     UnallocatedCString url_;
     UnallocatedCString value_;
@@ -292,14 +292,14 @@ private:
     bool direction_{false};
     bool selling_{false};
     Time lifetime_{};
-    std::int32_t nRequestNum_{-1};
-    std::int32_t nTransNumsNeeded_{0};
+    std::int32_t request_num_{-1};
+    std::int32_t trans_nums_needed_{0};
     const api::session::Client& api_;
     Editor<otx::context::Server> context_editor_;
     otx::context::Server& context_;
     CommandResult last_attempt_;
     const bool is_transaction_{false};
-    Amount activationPrice_{0};
+    Amount activation_price_{0};
     Amount adjustment_{0};
     Amount amount_{0};
     Amount depth_{0};
@@ -307,12 +307,12 @@ private:
     std::int64_t quantity_{0};
     Amount price_{0};
     Amount scale_{0};
-    TransactionNumber transactionNumber_{0};  // This is not what gets returned
-                                              // by GetTransactionNumber.
-    contract::peer::ConnectionInfoType infoType_{
+    TransactionNumber transaction_number_{0};  // This is not what gets returned
+                                               // by GetTransactionNumber.
+    contract::peer::ConnectionInfoType info_type_{
         contract::peer::ConnectionInfoType::Error};
-    contract::peer::SecretType secretType_{contract::peer::SecretType::Error};
-    proto::UnitDefinition unitDefinition_{};
+    contract::peer::SecretType secret_type_{contract::peer::SecretType::Error};
+    proto::UnitDefinition unit_definition_{};
 
     void run();
     auto send_once(

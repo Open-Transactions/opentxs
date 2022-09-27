@@ -23,27 +23,27 @@
 namespace opentxs
 {
 OTBylaw::OTBylaw()
-    : m_strName(String::Factory())
-    , m_strLanguage(String::Factory())
-    , m_mapVariables()
-    , m_mapClauses()
-    , m_mapHooks()
-    , m_mapCallbacks()
-    , m_pOwnerAgreement(nullptr)
+    : name_(String::Factory())
+    , language_(String::Factory())
+    , variables_()
+    , clauses_()
+    , hooks_()
+    , callbacks_()
+    , owner_agreement_(nullptr)
 {
 }
 
 OTBylaw::OTBylaw(const char* szName, const char* szLanguage)
-    : m_strName(String::Factory())
-    , m_strLanguage(String::Factory())
-    , m_mapVariables()
-    , m_mapClauses()
-    , m_mapHooks()
-    , m_mapCallbacks()
-    , m_pOwnerAgreement(nullptr)
+    : name_(String::Factory())
+    , language_(String::Factory())
+    , variables_()
+    , clauses_()
+    , hooks_()
+    , callbacks_()
+    , owner_agreement_(nullptr)
 {
     if (nullptr != szName) {
-        m_strName->Set(szName);
+        name_->Set(szName);
     } else {
         LogError()(OT_PRETTY_CLASS())(
             "nullptr szName passed in to OTBylaw::OTBylaw.")
@@ -51,16 +51,15 @@ OTBylaw::OTBylaw(const char* szName, const char* szLanguage)
     }
 
     if (nullptr != szLanguage) {
-        m_strLanguage =
-            String::Factory(szLanguage);  // "chai", "angelscript" etc.
+        language_ = String::Factory(szLanguage);  // "chai", "angelscript" etc.
     } else {
         LogError()(OT_PRETTY_CLASS())(
             "nullptr szLanguage passed in to OTBylaw::OTBylaw.")
             .Flush();
     }
 
-    const UnallocatedCString str_bylaw_name = m_strName->Get();
-    const UnallocatedCString str_language = m_strLanguage->Get();
+    const UnallocatedCString str_bylaw_name = name_->Get();
+    const UnallocatedCString str_language = language_->Get();
 
     // Let the calling function validate these, if he doesn't want to risk an
     // ASSERT...
@@ -77,20 +76,20 @@ void OTBylaw::Serialize(Tag& parent, bool bCalculatingID) const
 {
     TagPtr pTag(new Tag("bylaw"));
 
-    pTag->add_attribute("name", m_strName->Get());
-    pTag->add_attribute("language", m_strLanguage->Get());
+    pTag->add_attribute("name", name_->Get());
+    pTag->add_attribute("language", language_->Get());
 
-    const std::uint64_t numVariables = m_mapVariables.size();
-    const std::uint64_t numClauses = m_mapClauses.size();
-    const std::uint64_t numHooks = m_mapHooks.size();
-    const std::uint64_t numCallbacks = m_mapCallbacks.size();
+    const std::uint64_t numVariables = variables_.size();
+    const std::uint64_t numClauses = clauses_.size();
+    const std::uint64_t numHooks = hooks_.size();
+    const std::uint64_t numCallbacks = callbacks_.size();
 
     pTag->add_attribute("numVariables", std::to_string(numVariables));
     pTag->add_attribute("numClauses", std::to_string(numClauses));
     pTag->add_attribute("numHooks", std::to_string(numHooks));
     pTag->add_attribute("numCallbacks", std::to_string(numCallbacks));
 
-    for (const auto& it : m_mapVariables) {
+    for (const auto& it : variables_) {
         OTVariable* pVar = it.second;
         OT_ASSERT(nullptr != pVar);
         // Variables save in a specific state during ID calculation (no matter
@@ -98,14 +97,14 @@ void OTBylaw::Serialize(Tag& parent, bool bCalculatingID) const
         pVar->Serialize(*pTag, bCalculatingID);
     }
 
-    for (const auto& it : m_mapClauses) {
+    for (const auto& it : clauses_) {
         OTClause* pClause = it.second;
         OT_ASSERT(nullptr != pClause);
 
         pClause->Serialize(*pTag);
     }
 
-    for (const auto& it : m_mapHooks) {
+    for (const auto& it : hooks_) {
         const UnallocatedCString& str_hook_name = it.first;
         const UnallocatedCString& str_clause_name = it.second;
 
@@ -117,7 +116,7 @@ void OTBylaw::Serialize(Tag& parent, bool bCalculatingID) const
         pTag->add_tag(pTagHook);
     }
 
-    for (const auto& it : m_mapCallbacks) {
+    for (const auto& it : callbacks_) {
         const UnallocatedCString& str_callback_name = it.first;
         const UnallocatedCString& str_clause_name = it.second;
 
@@ -139,7 +138,7 @@ auto OTBylaw::IsDirty() const -> bool
 {
     bool bIsDirty = false;
 
-    for (const auto& it : m_mapVariables) {
+    for (const auto& it : variables_) {
         OTVariable* pVar = it.second;
         OT_ASSERT(nullptr != pVar);
 
@@ -172,7 +171,7 @@ auto OTBylaw::IsDirtyImportant() const -> bool
 {
     bool bIsDirty = false;
 
-    for (const auto& it : m_mapVariables) {
+    for (const auto& it : variables_) {
         OTVariable* pVar = it.second;
         OT_ASSERT(nullptr != pVar);
 
@@ -197,7 +196,7 @@ auto OTBylaw::IsDirtyImportant() const -> bool
 //
 void OTBylaw::SetAsClean()
 {
-    for (auto& it : m_mapVariables) {
+    for (auto& it : variables_) {
         OTVariable* pVar = it.second;
         OT_ASSERT(nullptr != pVar);
 
@@ -211,7 +210,7 @@ void OTBylaw::SetAsClean()
 //
 void OTBylaw::RegisterVariablesForExecution(OTScript& theScript)
 {
-    for (auto& it : m_mapVariables) {
+    for (auto& it : variables_) {
         const UnallocatedCString str_var_name = it.first;
         OTVariable* pVar = it.second;
         OT_ASSERT((nullptr != pVar) && (str_var_name.size() > 0));
@@ -223,39 +222,39 @@ void OTBylaw::RegisterVariablesForExecution(OTScript& theScript)
 // Done:
 auto OTBylaw::Compare(OTBylaw& rhs) -> bool
 {
-    if ((m_strName->Compare(rhs.GetName())) &&
-        (m_strLanguage->Compare(rhs.GetLanguage()))) {
+    if ((name_->Compare(rhs.GetName())) &&
+        (language_->Compare(rhs.GetLanguage()))) {
         if (GetVariableCount() != rhs.GetVariableCount()) {
             LogConsole()(OT_PRETTY_CLASS())(
                 "The variable count doesn't match for "
-                "bylaw: ")(m_strName.get())(".")
+                "bylaw: ")(name_.get())(".")
                 .Flush();
             return false;
         }
         if (GetClauseCount() != rhs.GetClauseCount()) {
             LogConsole()(OT_PRETTY_CLASS())(
                 "The clause count doesn't match for "
-                "bylaw: ")(m_strName.get())(".")
+                "bylaw: ")(name_.get())(".")
                 .Flush();
             return false;
         }
         if (GetHookCount() != rhs.GetHookCount()) {
             LogConsole()(OT_PRETTY_CLASS())("The hook count doesn't match for "
-                                            "bylaw: ")(m_strName.get())(".")
+                                            "bylaw: ")(name_.get())(".")
                 .Flush();
             return false;
         }
         if (GetCallbackCount() != rhs.GetCallbackCount()) {
             LogConsole()(OT_PRETTY_CLASS())(
                 "The callback count doesn't match for "
-                "bylaw: ")(m_strName.get())(".")
+                "bylaw: ")(name_.get())(".")
                 .Flush();
             return false;
         }
         // THE COUNTS MATCH, Now let's look up each one by NAME and verify that
         // they match...
 
-        for (const auto& it : m_mapVariables) {
+        for (const auto& it : variables_) {
             OTVariable* pVar = it.second;
             OT_ASSERT(nullptr != pVar);
 
@@ -276,7 +275,7 @@ auto OTBylaw::Compare(OTBylaw& rhs) -> bool
             }
         }
 
-        for (const auto& it : m_mapClauses) {
+        for (const auto& it : clauses_) {
             OTClause* pClause = it.second;
             OT_ASSERT(nullptr != pClause);
 
@@ -297,7 +296,7 @@ auto OTBylaw::Compare(OTBylaw& rhs) -> bool
             }
         }
 
-        for (const auto& it : m_mapCallbacks) {
+        for (const auto& it : callbacks_) {
             const UnallocatedCString& str_callback_name = it.first;
             const UnallocatedCString& str_clause_name = it.second;
 
@@ -308,7 +307,7 @@ auto OTBylaw::Compare(OTBylaw& rhs) -> bool
                 LogConsole()(OT_PRETTY_CLASS())(" Failed: Callback (")(
                     str_callback_name)(") clause (")(
                     str_clause_name)(") not found on this bylaw: ")(
-                    m_strName.get())(".")
+                    name_.get())(".")
                     .Flush();
                 return false;
             } else if (nullptr == pCallbackClause2) {
@@ -324,7 +323,7 @@ auto OTBylaw::Compare(OTBylaw& rhs) -> bool
                     str_callback_name)(") clause (")(
                     str_clause_name)(") on rhs has a different name (")(
                     pCallbackClause2->GetName())(") than *this bylaw: ")(
-                    m_strName.get())(".")
+                    name_.get())(".")
                     .Flush();
                 return false;
             }
@@ -341,7 +340,7 @@ auto OTBylaw::Compare(OTBylaw& rhs) -> bool
 
         // There might be MANY entries with the SAME HOOK NAME. So we add them
         // all to a SET in order to get unique keys.
-        for (const auto& it : m_mapHooks) {
+        for (const auto& it : hooks_) {
             const UnallocatedCString& str_hook_name = it.first;
             theHookSet.insert(str_hook_name);
         }
@@ -356,7 +355,7 @@ auto OTBylaw::Compare(OTBylaw& rhs) -> bool
                 !rhs.GetHooks(str_hook_name, theHookClauses2)) {
                 LogConsole()(OT_PRETTY_CLASS())("Failed finding hook (")(
                     str_hook_name)(") clauses on this bylaw or rhs bylaw: ")(
-                    m_strName.get())(".")
+                    name_.get())(".")
                     .Flush();
                 return false;
             }
@@ -365,7 +364,7 @@ auto OTBylaw::Compare(OTBylaw& rhs) -> bool
                 LogConsole()(OT_PRETTY_CLASS())("Hook (")(
                     str_hook_name)(") clauses count doesn't match between this "
                                    "bylaw and the rhs bylaw named: ")(
-                    m_strName.get())(".")
+                    name_.get())(".")
                     .Flush();
                 return false;
             }
@@ -381,8 +380,7 @@ auto OTBylaw::Compare(OTBylaw& rhs) -> bool
                     LogConsole()(OT_PRETTY_CLASS())(
                         "Unable to find hook clause (")(
                         str_clause_name)(") on rhs that was definitely present "
-                                         "on *this. Bylaw: ")(m_strName.get())(
-                        ".")
+                                         "on *this. Bylaw: ")(name_.get())(".")
                         .Flush();
                     return false;
                 }
@@ -406,13 +404,13 @@ auto OTBylaw::GetCallbackNameByIndex(std::int32_t nIndex)
     -> const UnallocatedCString
 {
     if ((nIndex < 0) ||
-        (nIndex >= static_cast<std::int64_t>(m_mapCallbacks.size()))) {
+        (nIndex >= static_cast<std::int64_t>(callbacks_.size()))) {
         LogError()(OT_PRETTY_CLASS())("Index out of bounds: ")(nIndex)(".")
             .Flush();
     } else {
         std::int32_t nLoopIndex = -1;
 
-        for (auto& it : m_mapCallbacks) {
+        for (auto& it : callbacks_) {
             const UnallocatedCString& str_callback_name = it.first;
             ++nLoopIndex;  // 0 on first iteration.
             if (nLoopIndex == nIndex) { return str_callback_name; }
@@ -429,9 +427,9 @@ auto OTBylaw::GetCallback(UnallocatedCString str_Name) -> OTClause*
         return nullptr;
     }
     // -----------------------------------------
-    auto it = m_mapCallbacks.find(str_Name);
+    auto it = callbacks_.find(str_Name);
 
-    if (m_mapCallbacks.end() != it)  // Found it!
+    if (callbacks_.end() != it)  // Found it!
     {
         //      const UnallocatedCString& str_callback_name = it->first;
         const UnallocatedCString& str_clause_name = it->second;
@@ -459,14 +457,14 @@ auto OTBylaw::RemoveVariable(UnallocatedCString str_Name) -> bool
         return false;
     }
 
-    auto it = m_mapVariables.find(str_Name);
+    auto it = variables_.find(str_Name);
 
-    if (m_mapVariables.end() != it)  // Found it.
+    if (variables_.end() != it)  // Found it.
     {
         OTVariable* pVar = it->second;
         OT_ASSERT(nullptr != pVar);
 
-        m_mapVariables.erase(it);
+        variables_.erase(it);
         delete pVar;
         pVar = nullptr;
         return true;
@@ -483,9 +481,9 @@ auto OTBylaw::RemoveClause(UnallocatedCString str_Name) -> bool
         return false;
     }
 
-    auto it = m_mapClauses.find(str_Name);
+    auto it = clauses_.find(str_Name);
 
-    if (m_mapClauses.end() == it) { return false; }
+    if (clauses_.end() == it) { return false; }
     // -----------------------------------
     OTClause* pClause = it->second;
     OT_ASSERT(nullptr != pClause);
@@ -494,7 +492,7 @@ auto OTBylaw::RemoveClause(UnallocatedCString str_Name) -> bool
     // so we go ahead and delete the clause itself, and
     // remove it from the map.
     //
-    m_mapClauses.erase(it);
+    clauses_.erase(it);
 
     delete pClause;
     pClause = nullptr;
@@ -506,7 +504,7 @@ auto OTBylaw::RemoveClause(UnallocatedCString str_Name) -> bool
     //
     UnallocatedList<UnallocatedCString> listStrings;
 
-    for (auto& cb : m_mapCallbacks) {
+    for (auto& cb : callbacks_) {
         const UnallocatedCString& str_callback_name = cb.first;
         const UnallocatedCString& str_clause_name = cb.second;
 
@@ -521,7 +519,7 @@ auto OTBylaw::RemoveClause(UnallocatedCString str_Name) -> bool
         RemoveCallback(str_callback_name);
     }
 
-    for (auto& hook : m_mapHooks) {
+    for (auto& hook : hooks_) {
         const UnallocatedCString& str_hook_name = hook.first;
         const UnallocatedCString& str_clause_name = hook.second;
 
@@ -557,13 +555,13 @@ auto OTBylaw::RemoveHook(
     // ----------------------------------------
     bool bReturnVal = false;
 
-    for (auto it = m_mapHooks.begin(); it != m_mapHooks.end();) {
+    for (auto it = hooks_.begin(); it != hooks_.end();) {
         const UnallocatedCString& str_hook_name = it->first;
         const UnallocatedCString& str_clause_name = it->second;
 
         if ((0 == str_hook_name.compare(str_Name)) &&
             (0 == str_clause_name.compare(str_ClauseName))) {
-            it = m_mapHooks.erase(it);
+            it = hooks_.erase(it);
             bReturnVal = true;
         } else {
             ++it;
@@ -581,14 +579,14 @@ auto OTBylaw::RemoveCallback(UnallocatedCString str_Name) -> bool
         return false;
     }
     // -----------------------------------------
-    auto it = m_mapCallbacks.find(str_Name);
+    auto it = callbacks_.find(str_Name);
 
-    if (m_mapCallbacks.end() != it)  // Found it!
+    if (callbacks_.end() != it)  // Found it!
     {
         //      const UnallocatedCString& str_callback_name = it->first;
         const UnallocatedCString& str_clause_name = it->second;
 
-        m_mapCallbacks.erase(it);
+        callbacks_.erase(it);
         // -----------------------------
         // AFTER erasing the callback (above), THEN we call RemoveClause.
         // Why AFTER? Because RemoveClause calls RemoveCallback again (and
@@ -617,14 +615,14 @@ auto OTBylaw::AddCallback(
 {
     // Make sure it's not already there...
     //
-    auto it = m_mapCallbacks.find(str_CallbackName);
+    auto it = callbacks_.find(str_CallbackName);
 
-    if (m_mapCallbacks.end() != it)  // It's already there. (Can't add it
-                                     // twice.)
+    if (callbacks_.end() != it)  // It's already there. (Can't add it
+                                 // twice.)
     {
         const UnallocatedCString str_existing_clause = it->second;
         LogConsole()(OT_PRETTY_CLASS())("Failed to add callback (")(
-            str_CallbackName)(") to bylaw ")(m_strName.get())(
+            str_CallbackName)(") to bylaw ")(name_.get())(
             ", already there as ")(str_existing_clause)(".")
             .Flush();
         return false;
@@ -637,12 +635,12 @@ auto OTBylaw::AddCallback(
             str_CallbackName)(") or clause (")(str_ClauseName)(").")
             .Flush();
     } else if (
-        m_mapCallbacks.end() ==
-        m_mapCallbacks.insert(
-            m_mapCallbacks.begin(),
+        callbacks_.end() ==
+        callbacks_.insert(
+            callbacks_.begin(),
             std::pair<UnallocatedCString, UnallocatedCString>(
                 str_CallbackName.c_str(), str_ClauseName.c_str()))) {
-        LogError()(OT_PRETTY_CLASS())("Failed inserting to m_mapCallbacks: ")(
+        LogError()(OT_PRETTY_CLASS())("Failed inserting to callbacks_: ")(
             str_CallbackName)(" / ")(str_ClauseName)(".")
             .Flush();
     } else {
@@ -669,7 +667,7 @@ auto OTBylaw::AddHook(
     // ----------------------------------------
     // See if it already exists.
     //
-    for (auto& it : m_mapHooks) {
+    for (auto& it : hooks_) {
         const UnallocatedCString& str_hook_name = it.first;
         const UnallocatedCString& str_clause_name = it.second;
 
@@ -684,10 +682,10 @@ auto OTBylaw::AddHook(
     // ------------------------
     // ------------------------
     // ----------------------------------------
-    if (m_mapHooks.end() ==
-        m_mapHooks.insert(std::pair<UnallocatedCString, UnallocatedCString>(
+    if (hooks_.end() ==
+        hooks_.insert(std::pair<UnallocatedCString, UnallocatedCString>(
             str_HookName.c_str(), str_ClauseName.c_str()))) {
-        LogError()(OT_PRETTY_CLASS())("Failed inserting to m_mapHooks: ")(
+        LogError()(OT_PRETTY_CLASS())("Failed inserting to hooks_: ")(
             str_HookName)(" / ")(str_ClauseName)(".")
             .Flush();
     } else {
@@ -704,9 +702,9 @@ auto OTBylaw::GetVariable(UnallocatedCString str_var_name)
                     // pass in char
 // *. Maybe that's bad? todo: research that.
 {
-    auto it = m_mapVariables.find(str_var_name);
+    auto it = variables_.find(str_var_name);
 
-    if (m_mapVariables.end() == it) { return nullptr; }
+    if (variables_.end() == it) { return nullptr; }
 
     if (!OTScriptable::ValidateVariableName(str_var_name)) {
         LogError()(OT_PRETTY_CLASS())("Error: Invalid variable name: ")(
@@ -726,13 +724,13 @@ auto OTBylaw::GetVariable(UnallocatedCString str_var_name)
 auto OTBylaw::GetVariableByIndex(std::int32_t nIndex) -> OTVariable*
 {
     if (!((nIndex >= 0) &&
-          (nIndex < static_cast<std::int64_t>(m_mapVariables.size())))) {
+          (nIndex < static_cast<std::int64_t>(variables_.size())))) {
         LogError()(OT_PRETTY_CLASS())("Index out of bounds: ")(nIndex)(".")
             .Flush();
     } else {
         std::int32_t nLoopIndex = -1;
 
-        for (auto& it : m_mapVariables) {
+        for (auto& it : variables_) {
             OTVariable* pVar = it.second;
             OT_ASSERT(nullptr != pVar);
 
@@ -751,9 +749,9 @@ auto OTBylaw::GetClause(UnallocatedCString str_clause_name) const -> OTClause*
         return nullptr;
     }
 
-    auto it = m_mapClauses.find(str_clause_name);
+    auto it = clauses_.find(str_clause_name);
 
-    if (m_mapClauses.end() == it) { return nullptr; }
+    if (clauses_.end() == it) { return nullptr; }
 
     OTClause* pClause = it->second;
     OT_ASSERT(nullptr != pClause);
@@ -766,13 +764,13 @@ auto OTBylaw::GetClause(UnallocatedCString str_clause_name) const -> OTClause*
 auto OTBylaw::GetClauseByIndex(std::int32_t nIndex) -> OTClause*
 {
     if (!((nIndex >= 0) &&
-          (nIndex < static_cast<std::int64_t>(m_mapClauses.size())))) {
+          (nIndex < static_cast<std::int64_t>(clauses_.size())))) {
         LogError()(OT_PRETTY_CLASS())("Index out of bounds: ")(nIndex)(".")
             .Flush();
     } else {
         std::int32_t nLoopIndex = -1;
 
-        for (auto& it : m_mapClauses) {
+        for (auto& it : clauses_) {
             OTClause* pClause = it.second;
             OT_ASSERT(nullptr != pClause);
 
@@ -787,14 +785,13 @@ auto OTBylaw::GetClauseByIndex(std::int32_t nIndex) -> OTClause*
 auto OTBylaw::GetHookNameByIndex(std::int32_t nIndex)
     -> const UnallocatedCString
 {
-    if ((nIndex < 0) ||
-        (nIndex >= static_cast<std::int64_t>(m_mapHooks.size()))) {
+    if ((nIndex < 0) || (nIndex >= static_cast<std::int64_t>(hooks_.size()))) {
         LogError()(OT_PRETTY_CLASS())("Index out of bounds: ")(nIndex)(".")
             .Flush();
     } else {
         std::int32_t nLoopIndex = -1;
 
-        for (auto& it : m_mapHooks) {
+        for (auto& it : hooks_) {
             const UnallocatedCString& str_hook_name = it.first;
             ++nLoopIndex;  // 0 on first iteration.
 
@@ -820,7 +817,7 @@ auto OTBylaw::GetHooks(
 
     bool bReturnVal = false;
 
-    for (auto& it : m_mapHooks) {
+    for (auto& it : hooks_) {
         const UnallocatedCString& str_hook_name = it.first;
         const UnallocatedCString& str_clause_name = it.second;
 
@@ -868,20 +865,19 @@ auto OTBylaw::AddVariable(OTVariable& theVariable) -> bool
 
     if (!OTScriptable::ValidateVariableName(str_name)) {
         LogError()(OT_PRETTY_CLASS())(
-            "Failed due to invalid variable name. In Bylaw: ")(m_strName.get())(
-            ".")
+            "Failed due to invalid variable name. In Bylaw: ")(name_.get())(".")
             .Flush();
         return false;
     }
 
-    auto it = m_mapVariables.find(str_name);
+    auto it = variables_.find(str_name);
 
     // Make sure it's not already there...
     //
-    if (m_mapVariables.end() == it)  // If it wasn't already there...
+    if (variables_.end() == it)  // If it wasn't already there...
     {
         // Then insert it...
-        m_mapVariables.insert(
+        variables_.insert(
             std::pair<UnallocatedCString, OTVariable*>(str_name, &theVariable));
 
         // Make sure it has a pointer back to me.
@@ -970,15 +966,14 @@ auto OTBylaw::UpdateClause(
 {
     if (!OTScriptable::ValidateClauseName(str_Name)) {
         LogError()(OT_PRETTY_CLASS())(
-            "Failed due to invalid clause name. In Bylaw: ")(m_strName.get())(
-            ".")
+            "Failed due to invalid clause name. In Bylaw: ")(name_.get())(".")
             .Flush();
         return false;
     }
 
-    auto it = m_mapClauses.find(str_Name);
+    auto it = clauses_.find(str_Name);
 
-    if (m_mapClauses.end() == it) {  // Didn't exist.
+    if (clauses_.end() == it) {  // Didn't exist.
         return false;
     }
     // -----------------------------------
@@ -1003,18 +998,17 @@ auto OTBylaw::AddClause(OTClause& theClause) -> bool
 
     if (!OTScriptable::ValidateClauseName(str_clause_name)) {
         LogError()(OT_PRETTY_CLASS())(
-            "Failed due to invalid clause name. In Bylaw: ")(m_strName.get())(
-            ".")
+            "Failed due to invalid clause name. In Bylaw: ")(name_.get())(".")
             .Flush();
         return false;
     }
 
-    auto it = m_mapClauses.find(str_clause_name);
+    auto it = clauses_.find(str_clause_name);
 
-    if (m_mapClauses.end() == it)  // If it wasn't already there...
+    if (clauses_.end() == it)  // If it wasn't already there...
     {
         // Then insert it...
-        m_mapClauses.insert(std::pair<UnallocatedCString, OTClause*>(
+        clauses_.insert(std::pair<UnallocatedCString, OTClause*>(
             str_clause_name, &theClause));
 
         // Make sure it has a pointer back to me.
@@ -1032,36 +1026,36 @@ auto OTBylaw::AddClause(OTClause& theClause) -> bool
 
 auto OTBylaw::GetLanguage() const -> const char*
 {
-    return m_strLanguage->Exists() ? m_strLanguage->Get()
-                                   : "chai";  // todo add default script to
-                                              // config files. no hardcoding.
+    return language_->Exists() ? language_->Get()
+                               : "chai";  // todo add default script to
+                                          // config files. no hardcoding.
 }
 
 OTBylaw::~OTBylaw()
 {
     // A Bylaw owns its clauses and variables.
     //
-    while (!m_mapClauses.empty()) {
-        OTClause* pClause = m_mapClauses.begin()->second;
+    while (!clauses_.empty()) {
+        OTClause* pClause = clauses_.begin()->second;
         OT_ASSERT(nullptr != pClause);
 
-        m_mapClauses.erase(m_mapClauses.begin());
+        clauses_.erase(clauses_.begin());
 
         delete pClause;
         pClause = nullptr;
     }
 
-    while (!m_mapVariables.empty()) {
-        OTVariable* pVar = m_mapVariables.begin()->second;
+    while (!variables_.empty()) {
+        OTVariable* pVar = variables_.begin()->second;
         OT_ASSERT(nullptr != pVar);
 
-        m_mapVariables.erase(m_mapVariables.begin());
+        variables_.erase(variables_.begin());
 
         delete pVar;
         pVar = nullptr;
     }
 
-    m_pOwnerAgreement =
+    owner_agreement_ =
         nullptr;  // This Bylaw is owned by an agreement (OTScriptable-derived.)
 
     // Hooks and Callbacks are maps of UnallocatedCString to UnallocatedCString.

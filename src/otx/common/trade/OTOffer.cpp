@@ -41,16 +41,16 @@ using namespace std::literals;
 
 OTOffer::OTOffer(const api::Session& api)
     : Instrument(api)
-    , m_pTrade(nullptr)
-    , m_CURRENCY_TYPE_ID()
-    , m_bSelling(false)
-    , m_lPriceLimit(0)
-    , m_lTransactionNum(0)
-    , m_lTotalAssetsOffer(0)
-    , m_lFinishedSoFar(0)
-    , m_lScale(1)
-    , m_lMinimumIncrement(1)
-    , m_tDateAddedToMarket()
+    , trade_(nullptr)
+    , currency_type_id_()
+    , selling_(false)
+    , price_limit_(0)
+    , transaction_num_(0)
+    , total_assets_offer_(0)
+    , finished_so_far_(0)
+    , scale_(1)
+    , minimum_increment_(1)
+    , date_added_to_market_()
 {
     InitOffer();
 }
@@ -62,16 +62,16 @@ OTOffer::OTOffer(
     const identifier::UnitDefinition& CURRENCY_ID,
     const Amount& lScale)
     : Instrument(api, NOTARY_ID, INSTRUMENT_DEFINITION_ID)
-    , m_pTrade(nullptr)
-    , m_CURRENCY_TYPE_ID(CURRENCY_ID)
-    , m_bSelling(false)
-    , m_lPriceLimit(0)
-    , m_lTransactionNum(0)
-    , m_lTotalAssetsOffer(0)
-    , m_lFinishedSoFar(0)
-    , m_lScale(1)
-    , m_lMinimumIncrement(1)
-    , m_tDateAddedToMarket()
+    , trade_(nullptr)
+    , currency_type_id_(CURRENCY_ID)
+    , selling_(false)
+    , price_limit_(0)
+    , transaction_num_(0)
+    , total_assets_offer_(0)
+    , finished_so_far_(0)
+    , scale_(1)
+    , minimum_increment_(1)
+    , date_added_to_market_()
 {
     InitOffer();
     SetScale(lScale);
@@ -176,17 +176,17 @@ auto OTOffer::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
     //    return nReturnVal;
 
     if (!strcmp("marketOffer", xml->getNodeName())) {
-        m_strVersion = String::Factory(xml->getAttributeValue("version"));
+        version_ = String::Factory(xml->getAttributeValue("version"));
 
         auto strIsSelling = String::Factory();
         strIsSelling = String::Factory(xml->getAttributeValue("isSelling"));
         if (strIsSelling->Compare("true")) {
-            m_bSelling = true;
+            selling_ = true;
         } else {
-            m_bSelling = false;
+            selling_ = false;
         }
 
-        m_strContractType->Set((m_bSelling ? "ASK" : "BID"));
+        contract_type_->Set((selling_ ? "ASK" : "BID"));
 
         const auto strNotaryID =
                        String::Factory(xml->getAttributeValue("notaryID")),
@@ -331,16 +331,16 @@ auto OTOffer::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
         const auto unittype = api_.Wallet().CurrencyTypeBasedOnUnitType(
             GetInstrumentDefinitionID());
         LogTrace()(OT_PRETTY_CLASS())("Offer Transaction Number: ")(
-            m_lTransactionNum)("\n Valid From: ")(tValidFrom)("\n Valid To: ")(
+            transaction_num_)("\n Valid From: ")(tValidFrom)("\n Valid To: ")(
             tValidTo)("\n InstrumentDefinitionID: ")(
             strInstrumentDefinitionID.get())("\n  CurrencyTypeID: ")(
             strCurrencyTypeID.get())("\n NotaryID: ")(strNotaryID.get())(
             "\n Price Limit: ")(GetPriceLimit(), unittype)(
             ",  Total Assets on Offer: ")(GetTotalAssetsOnOffer(), unittype)(
-            ",  ")((m_bSelling ? "sold" : "bought"))(" so far: ")(
+            ",  ")((selling_ ? "sold" : "bought"))(" so far: ")(
             GetFinishedSoFar(), unittype)("\n  Scale: ")(GetScale())(
             ".   Minimum Increment: ")(GetMinimumIncrement(), unittype)(
-            ".  This offer is a")((m_bSelling ? "n ASK" : " BID"))(".")
+            ".  This offer is a")((selling_ ? "n ASK" : " BID"))(".")
             .Flush();
 
         nReturnVal = 1;
@@ -357,11 +357,11 @@ void OTOffer::UpdateContents(const PasswordPrompt& reason)
                CURRENCY_TYPE_ID = String::Factory(GetCurrencyID());
 
     // I release this because I'm about to repopulate it.
-    m_xmlUnsigned->Release();
+    xml_unsigned_->Release();
 
     Tag tag("marketOffer");
 
-    tag.add_attribute("version", m_strVersion->Get());
+    tag.add_attribute("version", version_->Get());
 
     tag.add_attribute("isSelling", formatBool(!IsBid()));
     tag.add_attribute("notaryID", NOTARY_ID->Get());
@@ -400,7 +400,7 @@ void OTOffer::UpdateContents(const PasswordPrompt& reason)
     UnallocatedCString str_result;
     tag.output(str_result);
 
-    m_xmlUnsigned->Concatenate(String::Factory(str_result));
+    xml_unsigned_->Concatenate(String::Factory(str_result));
 }
 
 auto OTOffer::MakeOffer(
@@ -420,11 +420,11 @@ auto OTOffer::MakeOffer(
     const Time VALID_FROM,                // defaults to RIGHT NOW
     const Time VALID_TO) -> bool  // defaults to 24 hours (a "Day Order")
 {
-    m_bSelling = bBuyingOrSelling;  // Bid or Ask?
+    selling_ = bBuyingOrSelling;  // Bid or Ask?
     SetTransactionNum(lTransactionNum);
     SetTotalAssetsOnOffer(lTotalAssetsOffer);  // 500 bushels for sale.
 
-    m_strContractType->Set((m_bSelling ? "ASK" : "BID"));
+    contract_type_->Set((selling_ ? "ASK" : "BID"));
 
     // Make sure minimum increment isn't bigger than total Assets.
     // (If you pass them into this function as the same value, it's functionally
@@ -464,26 +464,26 @@ auto OTOffer::MakeOffer(
     return true;
 }
 
-// Note: m_tDateAddedToMarket is not saved in the Offer Contract, but OTMarket
+// Note: date_added_to_market_ is not saved in the Offer Contract, but OTMarket
 // sets/saves/loads it.
 //
 auto OTOffer::GetDateAddedToMarket() const -> Time  // Used in
                                                     // OTMarket::GetOfferList
                                                     // and GetNymOfferList.
 {
-    return m_tDateAddedToMarket;
+    return date_added_to_market_;
 }
 
 void OTOffer::SetDateAddedToMarket(const Time tDate)  // Used in OTCron when
                                                       // adding/loading offers.
 {
-    m_tDateAddedToMarket = tDate;
+    date_added_to_market_ = tDate;
 }
 
 void OTOffer::Release_Offer()
 {
     // If there were any dynamically allocated objects, clean them up here.
-    m_CURRENCY_TYPE_ID.clear();
+    currency_type_id_.clear();
 }
 
 void OTOffer::Release()
@@ -500,8 +500,8 @@ void OTOffer::Release()
 
 void OTOffer::InitOffer()
 {
-    m_strContractType->Set("OFFER");  // in practice should never appear.
-                                      // BID/ASK will overwrite.
+    contract_type_->Set("OFFER");  // in practice should never appear.
+                                   // BID/ASK will overwrite.
 
     // This pointer will get wiped anytime Release() is called... which means
     // anytime LoadContractFromString()
@@ -511,17 +511,17 @@ void OTOffer::InitOffer()
     // so this is safe. But in
     // the case of other objects, it's better not to initialize the pointer
     // here, but in the constructor instead.
-    // FYI. For example, OTCron has a pointer to m_pServerNym. LoadCron() and
+    // FYI. For example, OTCron has a pointer to server_nym_. LoadCron() and
     // the pointer is nullptr. Can't have that!
     // So I moved it to the constructor in that case.
 
-    m_bSelling = false;
-    m_lPriceLimit = 0;
-    m_lTransactionNum = 0;
-    m_lTotalAssetsOffer = 0;
-    m_lFinishedSoFar = 0;
-    m_lMinimumIncrement = 1;  // This must be 1 or greater. Enforced.
-    SetScale(1);              // This must be 1 or greater. Enforced.
+    selling_ = false;
+    price_limit_ = 0;
+    transaction_num_ = 0;
+    total_assets_offer_ = 0;
+    finished_so_far_ = 0;
+    minimum_increment_ = 1;  // This must be 1 or greater. Enforced.
+    SetScale(1);             // This must be 1 or greater. Enforced.
 }
 
 OTOffer::~OTOffer() { Release_Offer(); }

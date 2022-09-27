@@ -184,7 +184,7 @@ private:
 
     const api::Session& api_;
     const VersionType version_;
-    const bool hasBitmessage_;
+    const bool has_bitmessage_;
     const ByteArray pubkey_;
     const OTSecret chain_code_;
     const std::uint8_t bitmessage_version_;

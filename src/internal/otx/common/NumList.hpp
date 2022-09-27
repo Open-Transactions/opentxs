@@ -21,7 +21,7 @@ class String;
  * of acknowledged request numbers. */
 class NumList
 {
-    UnallocatedSet<std::int64_t> m_setData;
+    UnallocatedSet<std::int64_t> data_;
 
     /** private for security reasons, used internally only by a function that
      * knows the string length already. if false, means the numbers were already

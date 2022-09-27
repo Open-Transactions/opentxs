@@ -55,7 +55,7 @@ class AccountList
 public:
     auto GetCountAccountIDs() const -> std::int32_t
     {
-        return static_cast<std::int32_t>(mapAcctIDs_.size());
+        return static_cast<std::int32_t>(map_acct_ids_.size());
     }
     void Release();
     void Release_AcctList();
@@ -64,7 +64,7 @@ public:
         irr::io::IrrXMLReader*& xml,
         const String& acctType,
         const String& acctCount) -> std::int32_t;
-    void SetType(Account::AccountType acctType) { acctType_ = acctType; }
+    void SetType(Account::AccountType acctType) { acct_type_ = acctType; }
     auto GetOrRegisterAccount(
         const identity::Nym& serverNym,
         const identifier::Nym& ACCOUNT_OWNER_ID,
@@ -89,9 +89,9 @@ private:
         UnallocatedMap<UnallocatedCString, std::weak_ptr<Account>>;
 
     const api::Session& api_;
-    Account::AccountType acctType_;
+    Account::AccountType acct_type_;
 
     /** AcctIDs as second mapped by ASSET TYPE ID as first. */
-    String::Map mapAcctIDs_;
+    String::Map map_acct_ids_;
 };
 }  // namespace opentxs::otx::internal

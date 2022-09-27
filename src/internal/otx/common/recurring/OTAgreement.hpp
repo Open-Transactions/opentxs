@@ -92,15 +92,15 @@ private:  // Private prevents erroneous use by other classes.
     using ot_super = OTCronItem;
 
 private:
-    identifier::Generic m_RECIPIENT_ACCT_ID;
-    identifier::Nym m_RECIPIENT_NYM_ID;
+    identifier::Generic recipient_account_id_;
+    identifier::Nym recipient_nym_id_;
 
 protected:
-    OTString m_strConsideration;  // Presumably an agreement is in return for
-                                  // some consideration. Memo here.
+    OTString consideration_;  // Presumably an agreement is in return for
+                              // some consideration. Memo here.
 
-    OTString m_strMerchantSignedCopy;  // The merchant sends it over, then the
-                                       // payer confirms it, which adds
+    OTString merchant_signed_copy_;  // The merchant sends it over, then the
+                                     // payer confirms it, which adds
     // his own transaction numbers and signs it. This, unfortunately,
     // invalidates the merchant's version, so we store
     // a copy of the merchant's signed agreement INSIDE our own. The server can
@@ -117,7 +117,7 @@ protected:
     void onRemovalFromCron(const PasswordPrompt& reason) override;
 
     // Numbers used for CLOSING a transaction. (finalReceipt.)
-    UnallocatedDeque<TransactionNumber> m_dequeRecipientClosingNumbers;
+    UnallocatedDeque<TransactionNumber> recipient_closing_numbers_;
 
 public:
     auto GetOriginType() const -> originType override
@@ -127,17 +127,14 @@ public:
 
     void setCustomerNymId(const identifier::Nym& NYM_ID);
 
-    auto GetConsideration() const -> const String&
-    {
-        return m_strConsideration;
-    }
+    auto GetConsideration() const -> const String& { return consideration_; }
     void SetMerchantSignedCopy(const String& strMerchantCopy)
     {
-        m_strMerchantSignedCopy = strMerchantCopy;
+        merchant_signed_copy_ = strMerchantCopy;
     }
     auto GetMerchantSignedCopy() const -> const String&
     {
-        return m_strMerchantSignedCopy;
+        return merchant_signed_copy_;
     }
 
     // SetAgreement replaced with the 2 functions below. See notes even lower.
@@ -281,19 +278,19 @@ public:
 
     inline auto GetRecipientAcctID() const -> const identifier::Generic&
     {
-        return m_RECIPIENT_ACCT_ID;
+        return recipient_account_id_;
     }
     inline auto GetRecipientNymID() const -> const identifier::Nym&
     {
-        return m_RECIPIENT_NYM_ID;
+        return recipient_nym_id_;
     }
     inline void SetRecipientAcctID(const identifier::Generic& ACCT_ID)
     {
-        m_RECIPIENT_ACCT_ID = ACCT_ID;
+        recipient_account_id_ = ACCT_ID;
     }
     inline void SetRecipientNymID(const identifier::Nym& NYM_ID)
     {
-        m_RECIPIENT_NYM_ID = NYM_ID;
+        recipient_nym_id_ = NYM_ID;
     }
 
     // The recipient must also provide an opening and closing transaction
@@ -314,14 +311,14 @@ public:
 
     // From OTCronItem (parent class of this)
     /*
-     inline void SetCronPointer(OTCron& theCron) { m_pCron = &theCron; }
+     inline void SetCronPointer(OTCron& theCron) { cron_ = &theCron; }
 
      inline void SetCreationDate(const Time& CREATION_DATE) {
-     m_CREATION_DATE = CREATION_DATE; }
-     inline const Time& GetCreationDate() const { return m_CREATION_DATE; }
+     creation_date_ = CREATION_DATE; }
+     inline const Time& GetCreationDate() const { return creation_date_; }
 
      // These are for:
-     // UnallocatedDeque<std::int64_t> m_dequeClosingNumbers;
+     // UnallocatedDeque<std::int64_t> closing_numbers_;
      //
      // They are numbers used for CLOSING a transaction. (finalReceipt, someday
      more.)
@@ -348,19 +345,19 @@ public:
 
     // From OTTrackable (parent class of OTCronItem, parent class of this)
     /*
-     inline std::int64_t GetTransactionNum() const { return m_lTransactionNum; }
+     inline std::int64_t GetTransactionNum() const { return transaction_num_; }
      inline void SetTransactionNum(std::int64_t lTransactionNum) {
-     m_lTransactionNum
+     transaction_num_
      = lTransactionNum; }
 
      inline const identifier::Generic&    GetSenderAcctID()        { return
-     m_SENDER_ACCT_ID; }
+     sender_account_id_; }
      inline const identifier::Nym&    GetSenderNymID()        { return
-     m_SENDER_NYM_ID; }
+     sender_nym_id_; }
      inline void            SetSenderAcctID(const identifier::Generic& ACCT_ID)
-     { m_SENDER_ACCT_ID = ACCT_ID; }
+     { sender_account_id_ = ACCT_ID; }
      inline void            SetSenderNymID(const identifier::Nym& NYM_ID)
-     { m_SENDER_NYM_ID = NYM_ID; }
+     { sender_nym_id_ = NYM_ID; }
      */
 
     auto HasTransactionNum(const std::int64_t& lInput) const -> bool override;
@@ -373,22 +370,22 @@ public:
      identifier::Generic& INSTRUMENT_DEFINITION_ID) : Contract()
 
      inline const identifier::Generic& GetInstrumentDefinitionID() const {
-     return m_InstrumentDefinitionID; } inline const identifier::Generic&
-     GetNotaryID() const { return m_NotaryID; }
+     return instrument_definition_id_; } inline const identifier::Generic&
+     GetNotaryID() const { return notary_id_; }
 
      inline void SetInstrumentDefinitionID(const identifier::Generic&
      INSTRUMENT_DEFINITION_ID)  {
-     m_InstrumentDefinitionID    =
+     instrument_definition_id_    =
      INSTRUMENT_DEFINITION_ID; }
-     inline void SetNotaryID(const identifier::Notary& NOTARY_ID) { m_NotaryID =
+     inline void SetNotaryID(const identifier::Notary& NOTARY_ID) { notary_id_ =
      NOTARY_ID; }
 
-     inline Time GetValidFrom()    const { return m_VALID_FROM; }
-     inline Time GetValidTo()        const { return m_VALID_TO; }
+     inline Time GetValidFrom()    const { return valid_from_; }
+     inline Time GetValidTo()        const { return valid_to_; }
 
-     inline void SetValidFrom(Time TIME_FROM)    { m_VALID_FROM    =
+     inline void SetValidFrom(Time TIME_FROM)    { valid_from_    =
      TIME_FROM; }
-     inline void SetValidTo(Time TIME_TO)        { m_VALID_TO    = TIME_TO;
+     inline void SetValidTo(Time TIME_TO)        { valid_to_    = TIME_TO;
      }
 
      bool VerifyCurrentDate(); // Verify the current date against the VALID FROM

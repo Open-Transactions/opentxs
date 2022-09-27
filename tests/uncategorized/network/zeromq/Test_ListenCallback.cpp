@@ -19,13 +19,13 @@ private:
     std::promise<ot::UnallocatedCString> promise_;
 
 protected:
-    const ot::UnallocatedCString testMessage_;
+    const ot::UnallocatedCString test_message_;
     std::future<ot::UnallocatedCString> future_;
     ot::OTZMQListenCallback callback_;
 
     ListenCallback() noexcept
         : promise_()
-        , testMessage_("zeromq test message")
+        , test_message_("zeromq test message")
         , future_(promise_.get_future())
         , callback_(zmq::ListenCallback::Factory([&](auto&& input) -> void {
             promise_.set_value(ot::UnallocatedCString{input.at(0).Bytes()});
@@ -38,12 +38,12 @@ TEST_F(ListenCallback, ListenCallback_Process)
 {
     auto message = [&] {
         auto out = zmq::Message{};
-        out.AddFrame(testMessage_);
+        out.AddFrame(test_message_);
 
         return out;
     }();
     callback_->Process(std::move(message));
 
-    EXPECT_EQ(testMessage_, future_.get());
+    EXPECT_EQ(test_message_, future_.get());
 }
 }  // namespace ottest

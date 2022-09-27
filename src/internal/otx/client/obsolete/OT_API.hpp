@@ -107,7 +107,7 @@ public:
     using ProcessInboxOnly =
         std::pair<std::unique_ptr<Ledger>, TransactionNumber>;
 
-    auto GetClient() const -> OTClient* { return m_pClient.get(); }
+    auto GetClient() const -> OTClient* { return client_.get(); }
 
     // This works by checking to see if the Nym has a request number for the
     // given server.
@@ -628,11 +628,11 @@ private:
 
     const api::Session& api_;
     const api::session::Workflow& workflow_;
-    bool m_bDefaultStore;
-    OTString m_strDataPath;
-    OTString m_strConfigFilename;
-    OTString m_strConfigFilePath;
-    std::unique_ptr<OTClient> m_pClient;
+    bool default_store_;
+    OTString data_path_;
+    OTString config_filename_;
+    OTString config_file_path_;
+    std::unique_ptr<OTClient> client_;
     ContextLockCallback lock_callback_;
 
     void AddHashesToTransaction(

@@ -30,28 +30,28 @@ auto BIO::assertBioNotNull(::BIO* pBIO) -> ::BIO*
 }
 
 BIO::BIO(::BIO* pBIO)
-    : m_refBIO(*assertBioNotNull(pBIO))
-    , bCleanup(true)
-    , bFreeOnly(false)
+    : bio_(*assertBioNotNull(pBIO))
+    , b_cleanup_(true)
+    , b_free_only_(false)
 {
 }
 
 BIO::~BIO()
 {
-    if (bCleanup) {
-        if (bFreeOnly) {
-            BIO_free(&m_refBIO);
+    if (b_cleanup_) {
+        if (b_free_only_) {
+            BIO_free(&bio_);
         } else {
-            BIO_free_all(&m_refBIO);
+            BIO_free_all(&bio_);
         }
     }
 }
 
-BIO::operator ::BIO*() const { return (&m_refBIO); }
+BIO::operator ::BIO*() const { return (&bio_); }
 
-void BIO::release() { bCleanup = false; }
+void BIO::release() { b_cleanup_ = false; }
 
-void BIO::setFreeOnly() { bFreeOnly = true; }
+void BIO::setFreeOnly() { b_free_only_ = true; }
 
 void BIO::read_bio(
     const std::size_t amount,

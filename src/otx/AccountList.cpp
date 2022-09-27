@@ -36,30 +36,30 @@ namespace opentxs::otx::internal
 {
 AccountList::AccountList(const api::Session& api)
     : api_(api)
-    , acctType_(Account::voucher)
-    , mapAcctIDs_{}
+    , acct_type_(Account::voucher)
+    , map_acct_ids_{}
 {
 }
 
 AccountList::AccountList(const api::Session& api, Account::AccountType acctType)
     : api_(api)
-    , acctType_(acctType)
-    , mapAcctIDs_{}
+    , acct_type_(acctType)
+    , map_acct_ids_{}
 {
 }
 
 void AccountList::Serialize(Tag& parent) const
 {
     auto acctType = String::Factory();
-    TranslateAccountTypeToString(acctType_, acctType);
-    const auto sizeMapAcctIDs = mapAcctIDs_.size();
+    TranslateAccountTypeToString(acct_type_, acctType);
+    const auto sizeMapAcctIDs = map_acct_ids_.size();
 
     TagPtr pTag(new Tag("accountList"));
 
     pTag->add_attribute("type", acctType->Get());
     pTag->add_attribute("count", std::to_string(sizeMapAcctIDs));
 
-    for (const auto& it : mapAcctIDs_) {
+    for (const auto& it : map_acct_ids_) {
         UnallocatedCString instrumentDefinitionID = it.first;
         UnallocatedCString accountId = it.second;
         OT_ASSERT(
@@ -89,9 +89,9 @@ auto AccountList::ReadFromXMLNode(
         return -1;
     }
 
-    acctType_ = TranslateAccountTypeStringToEnum(acctType);
+    acct_type_ = TranslateAccountTypeStringToEnum(acctType);
 
-    if (Account::err_acct == acctType_) {
+    if (Account::err_acct == acct_type_) {
         LogError()(OT_PRETTY_CLASS())("Failed: accountList 'type' "
                                       "attribute contains unknown value.")
             .Flush();
@@ -129,7 +129,7 @@ auto AccountList::ReadFromXMLNode(
                     return -1;
                 }
 
-                mapAcctIDs_.insert(std::make_pair(
+                map_acct_ids_.insert(std::make_pair(
                     instrumentDefinitionID->Get(), accountID->Get()));
             } else {
                 LogError()(OT_PRETTY_CLASS())(
@@ -152,7 +152,7 @@ auto AccountList::ReadFromXMLNode(
     return 1;
 }
 
-void AccountList::Release_AcctList() { mapAcctIDs_.clear(); }
+void AccountList::Release_AcctList() { map_acct_ids_.clear(); }
 
 void AccountList::Release() { Release_AcctList(); }
 
@@ -168,7 +168,7 @@ auto AccountList::GetOrRegisterAccount(
     ExclusiveAccount account{};
     wasAcctCreated = false;
 
-    if (Account::stash == acctType_) {
+    if (Account::stash == acct_type_) {
         if (1 > stashTransNum) {
             LogError()(OT_PRETTY_CLASS())(
                 "Failed attempt to "
@@ -182,12 +182,12 @@ auto AccountList::GetOrRegisterAccount(
     // First, we'll see if there's already an account ID available for the
     // requested instrument definition ID.
     auto acctTypeString = String::Factory();
-    TranslateAccountTypeToString(acctType_, acctTypeString);
+    TranslateAccountTypeToString(acct_type_, acctTypeString);
     auto acctIDsIt =
-        mapAcctIDs_.find(instrumentDefinitionID.asBase58(api_.Crypto()));
+        map_acct_ids_.find(instrumentDefinitionID.asBase58(api_.Crypto()));
 
     // Account ID *IS* already there for this instrument definition
-    if (mapAcctIDs_.end() != acctIDsIt) {
+    if (map_acct_ids_.end() != acctIDsIt) {
         const auto& accountID = acctIDsIt->second;
         account = api_.Wallet().Internal().mutable_Account(
             api_.Factory().IdentifierFromBase58(accountID), reason);
@@ -210,7 +210,7 @@ auto AccountList::GetOrRegisterAccount(
         notaryID,
         instrumentDefinitionID,
         serverNym,
-        acctType_,
+        acct_type_,
         stashTransNum,
         reason);
 
@@ -227,7 +227,7 @@ auto AccountList::GetOrRegisterAccount(
             acctTypeString.get())(" account ID: ")(acctIDString.get())(
             " Instrument Definition ID: ")(instrumentDefinitionID)
             .Flush();
-        mapAcctIDs_[instrumentDefinitionID.asBase58(api_.Crypto())] =
+        map_acct_ids_[instrumentDefinitionID.asBase58(api_.Crypto())] =
             acctIDString->Get();
 
         wasAcctCreated = true;

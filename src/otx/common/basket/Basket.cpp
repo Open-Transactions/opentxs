@@ -76,14 +76,14 @@ Basket::Basket(
     std::int32_t nCount,
     const Amount& lMinimumTransferAmount)
     : Contract(api)
-    , m_nSubCount(nCount)
-    , m_lMinimumTransfer(lMinimumTransferAmount)
-    , m_nTransferMultiple(0)
-    , m_RequestAccountID()
-    , m_dequeItems()
-    , m_bHideAccountID(false)
-    , m_bExchangingIn(false)
-    , m_lClosingTransactionNo(0)
+    , sub_count_(nCount)
+    , minimum_transfer_(lMinimumTransferAmount)
+    , transfer_multiple_(0)
+    , request_account_id_()
+    , items_()
+    , hide_account_id_(false)
+    , exchanging_in_(false)
+    , closing_transaction_no_(0)
 {
 }
 
@@ -108,7 +108,7 @@ void Basket::HarvestClosingNumbers(
         OT_ASSERT(nullptr != pRequestItem);
 
         const TransactionNumber lClosingTransNo =
-            pRequestItem->lClosingTransactionNo;
+            pRequestItem->closing_transaction_no_;
 
         // This function will only "add it back" if it was really there in the
         // first place. (Verifies it is on issued list first, before adding to
@@ -130,7 +130,7 @@ void Basket::HarvestClosingNumbers(
 void Basket::AddRequestSubContract(
     const identifier::Generic& SUB_CONTRACT_ID,
     const identifier::Generic& SUB_ACCOUNT_ID,
-    const std::int64_t& lClosingTransactionNo)
+    const std::int64_t& closing_transaction_no_)
 {
     auto* pItem = new BasketItem;
 
@@ -143,16 +143,16 @@ void Basket::AddRequestSubContract(
     // Also there is no multiple on the item, only on the basket as a whole.
     // ALL items are multiplied by the same multiple. Even the basket amount
     // itself is also.
-    m_dequeItems.push_back(pItem);
+    items_.push_back(pItem);
 
-    pItem->SUB_CONTRACT_ID = SUB_CONTRACT_ID;
-    pItem->SUB_ACCOUNT_ID = SUB_ACCOUNT_ID;
+    pItem->sub_contract_id_ = SUB_CONTRACT_ID;
+    pItem->sub_account_id_ = SUB_ACCOUNT_ID;
 
     // When the basketReceipts are accepted in all the asset accounts,
-    // each one will have a transaction number, lClosingTransactionNo,
+    // each one will have a transaction number, closing_transaction_no_,
     // which the user will finally clear from his record by accepting
     // from his inbox.
-    pItem->lClosingTransactionNo = lClosingTransactionNo;
+    pItem->closing_transaction_no_ = closing_transaction_no_;
 }
 
 // For generating a real basket
@@ -166,10 +166,10 @@ void Basket::AddSubContract(
         nullptr != pItem,
         "Error allocating memory in Basket::AddSubContract\n");
 
-    pItem->SUB_CONTRACT_ID = SUB_CONTRACT_ID;
-    pItem->lMinimumTransferAmount = lMinimumTransferAmount;
+    pItem->sub_contract_id_ = SUB_CONTRACT_ID;
+    pItem->minimum_transfer_amount_ = lMinimumTransferAmount;
 
-    m_dequeItems.push_back(pItem);
+    items_.push_back(pItem);
 }
 
 // The closing transaction number is the one that gets closed when the
@@ -181,29 +181,29 @@ void Basket::AddSubContract(
 auto Basket::GetClosingTransactionNoAt(std::uint32_t nIndex) -> std::int64_t
 {
     OT_ASSERT_MSG(
-        (nIndex < m_dequeItems.size()),
+        (nIndex < items_.size()),
         "Basket::GetClosingTransactionNoAt: index out of bounds.");
 
-    BasketItem* pItem = m_dequeItems.at(nIndex);
+    BasketItem* pItem = items_.at(nIndex);
 
     OT_ASSERT_MSG(
         nullptr != pItem,
         "Basket::GetClosingTransactionNoAt: basket "
         "item was nullptr at that index.");
 
-    return pItem->lClosingTransactionNo;
+    return pItem->closing_transaction_no_;
 }
 
 auto Basket::At(std::uint32_t nIndex) -> BasketItem*
 {
-    if (nIndex < m_dequeItems.size()) { return m_dequeItems.at(nIndex); }
+    if (nIndex < items_.size()) { return items_.at(nIndex); }
 
     return nullptr;
 }
 
 auto Basket::Count() const -> std::int32_t
 {
-    return static_cast<std::int32_t>(m_dequeItems.size());
+    return static_cast<std::int32_t>(items_.size());
 }
 
 // return -1 if error, 0 if nothing, and 1 if the node was processed.
@@ -217,8 +217,8 @@ auto Basket::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
         strMinTrans =
             String::Factory(xml->getAttributeValue("minimumTransfer"));
 
-        m_nSubCount = atoi(strSubCount->Get());
-        m_lMinimumTransfer = factory::Amount(strMinTrans->Get());
+        sub_count_ = atoi(strSubCount->Get());
+        minimum_transfer_ = factory::Amount(strMinTrans->Get());
 
         LogDetail()(OT_PRETTY_CLASS())("Loading currency basket...").Flush();
 
@@ -235,21 +235,21 @@ auto Basket::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
                  xml->getAttributeValue("closingTransactionNo"));
 
         if (strTransferMultiple->Exists()) {
-            m_nTransferMultiple = atoi(strTransferMultiple->Get());
+            transfer_multiple_ = atoi(strTransferMultiple->Get());
         }
         if (strRequestAccountID->Exists()) {
-            m_RequestAccountID = api_.Factory().IdentifierFromBase58(
+            request_account_id_ = api_.Factory().IdentifierFromBase58(
                 strRequestAccountID->Bytes());
         }
         if (strDirection->Exists()) {
-            m_bExchangingIn = strDirection->Compare("in");
+            exchanging_in_ = strDirection->Compare("in");
         }
         if (strTemp->Exists()) { SetClosingNum(strTemp->ToLong()); }
 
         LogVerbose()(OT_PRETTY_CLASS())("Basket Transfer multiple is ")(
-            m_nTransferMultiple)(". Direction is ")(strDirection.get())(
+            transfer_multiple_)(". Direction is ")(strDirection.get())(
             ". Closing number is ")(
-            m_lClosingTransactionNo)(". Target account is: ")(
+            closing_transaction_no_)(". Target account is: ")(
             strRequestAccountID.get())
             .Flush();
 
@@ -264,25 +264,25 @@ auto Basket::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
         auto strTemp =
             String::Factory(xml->getAttributeValue("minimumTransfer"));
         if (strTemp->Exists()) {
-            pItem->lMinimumTransferAmount = strTemp->ToLong();
+            pItem->minimum_transfer_amount_ = strTemp->ToLong();
         }
 
         strTemp =
             String::Factory(xml->getAttributeValue("closingTransactionNo"));
         if (strTemp->Exists()) {
-            pItem->lClosingTransactionNo = strTemp->ToLong();
+            pItem->closing_transaction_no_ = strTemp->ToLong();
         }
 
         auto strSubAccountID =
                  String::Factory(xml->getAttributeValue("accountID")),
              strContractID = String::Factory(
                  xml->getAttributeValue("instrumentDefinitionID"));
-        pItem->SUB_ACCOUNT_ID =
+        pItem->sub_account_id_ =
             api_.Factory().IdentifierFromBase58(strSubAccountID->Bytes());
-        pItem->SUB_CONTRACT_ID =
+        pItem->sub_contract_id_ =
             api_.Factory().IdentifierFromBase58(strContractID->Bytes());
 
-        m_dequeItems.push_back(pItem);
+        items_.push_back(pItem);
 
         LogVerbose()(OT_PRETTY_CLASS())("Loaded basket item. ").Flush();
 
@@ -296,7 +296,7 @@ auto Basket::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
 // contents
 void Basket::UpdateContents(const PasswordPrompt& reason)
 {
-    GenerateContents(m_xmlUnsigned, m_bHideAccountID);
+    GenerateContents(xml_unsigned_, hide_account_id_);
 }
 
 void Basket::GenerateContents(StringXML& xmlUnsigned, bool bHideAccountID) const
@@ -306,10 +306,10 @@ void Basket::GenerateContents(StringXML& xmlUnsigned, bool bHideAccountID) const
 
     Tag tag("currencyBasket");
 
-    tag.add_attribute("contractCount", std::to_string(m_nSubCount));
+    tag.add_attribute("contractCount", std::to_string(sub_count_));
     tag.add_attribute("minimumTransfer", [&] {
         auto buf = UnallocatedCString{};
-        m_lMinimumTransfer.Serialize(writer(buf));
+        minimum_transfer_.Serialize(writer(buf));
         return buf;
     }());
 
@@ -318,34 +318,34 @@ void Basket::GenerateContents(StringXML& xmlUnsigned, bool bHideAccountID) const
     // EXCHANGING instead.)
     //
     if (IsExchanging()) {
-        auto strRequestAcctID = String::Factory(m_RequestAccountID);
+        auto strRequestAcctID = String::Factory(request_account_id_);
 
         TagPtr tagRequest(new Tag("requestExchange"));
 
         tagRequest->add_attribute(
-            "transferMultiple", std::to_string(m_nTransferMultiple));
+            "transferMultiple", std::to_string(transfer_multiple_));
         tagRequest->add_attribute("transferAccountID", strRequestAcctID->Get());
         tagRequest->add_attribute(
-            "closingTransactionNo", std::to_string(m_lClosingTransactionNo));
-        tagRequest->add_attribute("direction", m_bExchangingIn ? "in" : "out");
+            "closingTransactionNo", std::to_string(closing_transaction_no_));
+        tagRequest->add_attribute("direction", exchanging_in_ ? "in" : "out");
 
         tag.add_tag(tagRequest);
     }
 
     for (std::int32_t i = 0; i < Count(); i++) {
-        BasketItem* pItem = m_dequeItems[i];
+        BasketItem* pItem = items_[i];
 
         OT_ASSERT_MSG(
             nullptr != pItem,
             "Error allocating memory in Basket::UpdateContents\n");
 
-        auto strAcctID = String::Factory(pItem->SUB_ACCOUNT_ID),
-             strContractID = String::Factory(pItem->SUB_CONTRACT_ID);
+        auto strAcctID = String::Factory(pItem->sub_account_id_),
+             strContractID = String::Factory(pItem->sub_contract_id_);
 
         TagPtr tagItem(new Tag("basketItem"));
 
         tagItem->add_attribute(
-            "minimumTransfer", std::to_string(pItem->lMinimumTransferAmount));
+            "minimumTransfer", std::to_string(pItem->minimum_transfer_amount_));
         tagItem->add_attribute(
             "accountID", bHideAccountID ? "" : strAcctID->Get());
         tagItem->add_attribute("instrumentDefinitionID", strContractID->Get());
@@ -353,7 +353,7 @@ void Basket::GenerateContents(StringXML& xmlUnsigned, bool bHideAccountID) const
         if (IsExchanging()) {
             tagItem->add_attribute(
                 "closingTransactionNo",
-                std::to_string(pItem->lClosingTransactionNo));
+                std::to_string(pItem->closing_transaction_no_));
         }
 
         tag.add_tag(tagItem);
@@ -383,20 +383,20 @@ void Basket::CalculateContractID(identifier::Generic& newID) const
 
 void Basket::Release_Basket()
 {
-    m_RequestAccountID.clear();
+    request_account_id_.clear();
 
-    while (!m_dequeItems.empty()) {
-        BasketItem* pItem = m_dequeItems.front();
-        m_dequeItems.pop_front();
+    while (!items_.empty()) {
+        BasketItem* pItem = items_.front();
+        items_.pop_front();
         delete pItem;
     }
 
-    m_nSubCount = 0;
-    m_lMinimumTransfer = 0;
-    m_nTransferMultiple = 0;
-    m_bHideAccountID = false;
-    m_bExchangingIn = false;
-    m_lClosingTransactionNo = 0;
+    sub_count_ = 0;
+    minimum_transfer_ = 0;
+    transfer_multiple_ = 0;
+    hide_account_id_ = false;
+    exchanging_in_ = false;
+    closing_transaction_no_ = 0;
 }
 
 void Basket::Release()

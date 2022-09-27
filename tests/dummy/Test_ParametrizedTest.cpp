@@ -10,14 +10,14 @@
 // NOLINTBEGIN(modernize-avoid-c-arrays)
 // parametrized test at global namespace
 struct ParametrizedTestAtGlobalNamespaceStruct {
-    ::std::string mName;
-    bool mExpectedValue;
+    ::std::string m_name_;
+    bool m_expected_value_;
 
     friend auto operator<<(
         ::std::ostream& os,
         const ParametrizedTestAtGlobalNamespaceStruct& obj) -> ::std::ostream&
     {
-        return os << "Test name: '" << obj.mName << "'";
+        return os << "Test name: '" << obj.m_name_ << "'";
     }
 };
 
@@ -25,19 +25,19 @@ class ParametrizedTestAtGlobalNamespaceClass
     : public ::testing::TestWithParam<ParametrizedTestAtGlobalNamespaceStruct>
 {
 private:
-    bool mBool;
+    bool m_bool_;
 
 public:
     ParametrizedTestAtGlobalNamespaceClass()
-        : mBool(false)
+        : m_bool_(false)
     {
     }
 
-    auto getBool() const -> bool { return mBool; }
+    auto getBool() const -> bool { return m_bool_; }
 
-    void SetUp() override { mBool = GetParam().mExpectedValue; }
+    void SetUp() override { m_bool_ = GetParam().m_expected_value_; }
 
-    void TearDown() override { mBool = false; }
+    void TearDown() override { m_bool_ = false; }
 };
 
 ParametrizedTestAtGlobalNamespaceStruct
@@ -53,21 +53,21 @@ INSTANTIATE_TEST_CASE_P(
 
 TEST_P(ParametrizedTestAtGlobalNamespaceClass, simpleParametrizedTest)
 {
-    EXPECT_EQ(getBool(), GetParam().mExpectedValue);
+    EXPECT_EQ(getBool(), GetParam().m_expected_value_);
 }
 
 // parametrized test at unnamed namespace
 namespace
 {
 struct ParametrizedTestAtUnnamedNamespaceStruct {
-    ::std::string mName;
-    bool mExpectedValue;
+    ::std::string m_name_;
+    bool m_expected_value_;
 
     friend auto operator<<(
         ::std::ostream& os,
         const ParametrizedTestAtUnnamedNamespaceStruct& obj) -> ::std::ostream&
     {
-        return os << "Test name: '" << obj.mName << "'";
+        return os << "Test name: '" << obj.m_name_ << "'";
     }
 };
 
@@ -75,19 +75,19 @@ class ParametrizedTestAtUnnamedNamespaceClass
     : public ::testing::TestWithParam<ParametrizedTestAtUnnamedNamespaceStruct>
 {
 private:
-    bool mBool;
+    bool m_bool_;
 
 public:
     ParametrizedTestAtUnnamedNamespaceClass()
-        : mBool(false)
+        : m_bool_(false)
     {
     }
 
-    auto getBool() const -> bool { return mBool; }
+    auto getBool() const -> bool { return m_bool_; }
 
-    void SetUp() override { mBool = GetParam().mExpectedValue; }
+    void SetUp() override { m_bool_ = GetParam().m_expected_value_; }
 
-    void TearDown() override { mBool = false; }
+    void TearDown() override { m_bool_ = false; }
 };
 
 ParametrizedTestAtUnnamedNamespaceStruct
@@ -103,7 +103,7 @@ INSTANTIATE_TEST_CASE_P(
 
 TEST_P(ParametrizedTestAtUnnamedNamespaceClass, simpleParametrizedTest)
 {
-    EXPECT_EQ(getBool(), GetParam().mExpectedValue);
+    EXPECT_EQ(getBool(), GetParam().m_expected_value_);
 }
 }  // namespace
 
@@ -111,14 +111,14 @@ TEST_P(ParametrizedTestAtUnnamedNamespaceClass, simpleParametrizedTest)
 namespace ottest::DummyTest
 {
 struct ParametrizedTestAtNamedNamespaceStruct {
-    ::std::string mName;
-    bool mExpectedValue;
+    ::std::string m_name_;
+    bool m_expected_value_;
 
     friend auto operator<<(
         ::std::ostream& os,
         const ParametrizedTestAtNamedNamespaceStruct& obj) -> ::std::ostream&
     {
-        return os << "Test name: '" << obj.mName << "'";
+        return os << "Test name: '" << obj.m_name_ << "'";
     }
 };
 
@@ -126,19 +126,19 @@ class ParametrizedTestAtNamedNamespaceClass
     : public ::testing::TestWithParam<ParametrizedTestAtNamedNamespaceStruct>
 {
 private:
-    bool mBool;
+    bool m_bool_;
 
 public:
     ParametrizedTestAtNamedNamespaceClass()
-        : mBool(false)
+        : m_bool_(false)
     {
     }
 
-    auto getBool() const -> bool { return mBool; }
+    auto getBool() const -> bool { return m_bool_; }
 
-    void SetUp() override { mBool = GetParam().mExpectedValue; }
+    void SetUp() override { m_bool_ = GetParam().m_expected_value_; }
 
-    void TearDown() override { mBool = false; }
+    void TearDown() override { m_bool_ = false; }
 };
 
 ParametrizedTestAtNamedNamespaceStruct
@@ -154,7 +154,7 @@ INSTANTIATE_TEST_CASE_P(
 
 TEST_P(ParametrizedTestAtNamedNamespaceClass, simpleParametrizedTest)
 {
-    EXPECT_EQ(getBool(), GetParam().mExpectedValue);
+    EXPECT_EQ(getBool(), GetParam().m_expected_value_);
 }
 
 }  // namespace ottest::DummyTest

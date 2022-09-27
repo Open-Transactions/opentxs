@@ -23,9 +23,9 @@ class Test_DealerReply : public ::testing::Test
 public:
     const zmq::Context& context_;
 
-    const ot::UnallocatedCString testMessage_{"zeromq test message"};
-    const ot::UnallocatedCString testMessage2_{"zeromq test message 2"};
-    const ot::UnallocatedCString testMessage3_{"zeromq test message 3"};
+    const ot::UnallocatedCString test_message_{"zeromq test message"};
+    const ot::UnallocatedCString test_message2_{"zeromq test message 2"};
+    const ot::UnallocatedCString test_message3_{"zeromq test message 3"};
 
     const ot::UnallocatedCString endpoint_{
         "inproc://opentxs/test/dealer_reply_test"};
@@ -46,7 +46,7 @@ void Test_DealerReply::dealerSocketThread(const ot::UnallocatedCString& msg)
             const auto inputString =
                 ot::UnallocatedCString{input.Body().begin()->Bytes()};
             bool match =
-                inputString == testMessage2_ || inputString == testMessage3_;
+                inputString == test_message2_ || inputString == test_message3_;
             EXPECT_TRUE(match);
 
             replyProcessed = true;
@@ -89,7 +89,7 @@ TEST_F(Test_DealerReply, Dealer_Reply)
             const auto inputString =
                 ot::UnallocatedCString{input.Body().begin()->Bytes()};
 
-            EXPECT_EQ(testMessage_, inputString);
+            EXPECT_EQ(test_message_, inputString);
 
             auto reply = ot::network::zeromq::reply_to_message(input);
 
@@ -132,7 +132,7 @@ TEST_F(Test_DealerReply, Dealer_Reply)
             const auto inputString =
                 ot::UnallocatedCString{input.Body().begin()->Bytes()};
 
-            EXPECT_EQ(testMessage_, inputString);
+            EXPECT_EQ(test_message_, inputString);
 
             replyProcessed = true;
         });
@@ -150,13 +150,14 @@ TEST_F(Test_DealerReply, Dealer_Reply)
 
     auto message = opentxs::network::zeromq::Message{};
     message.StartBody();
-    message.AddFrame(testMessage_);
+    message.AddFrame(test_message_);
 
     ASSERT_TRUE(2 == message.size());
     ASSERT_TRUE(0 == message.Header().size());
     ASSERT_TRUE(1 == message.Body().size());
-    ASSERT_EQ(testMessage_, ot::UnallocatedCString{message.Body_at(0).Bytes()});
-    ASSERT_EQ(testMessage_, ot::UnallocatedCString{message.at(1).Bytes()});
+    ASSERT_EQ(
+        test_message_, ot::UnallocatedCString{message.Body_at(0).Bytes()});
+    ASSERT_EQ(test_message_, ot::UnallocatedCString{message.at(1).Bytes()});
 
     auto sent = dealerSocket->Send(std::move(message));
 
@@ -180,7 +181,7 @@ TEST_F(Test_DealerReply, Dealer_2_Reply_1)
             const auto inputString =
                 ot::UnallocatedCString{input.Body().begin()->Bytes()};
             bool match =
-                inputString == testMessage2_ || inputString == testMessage3_;
+                inputString == test_message2_ || inputString == test_message3_;
             EXPECT_TRUE(match);
 
             auto reply = ot::network::zeromq::reply_to_message(input);
@@ -200,9 +201,9 @@ TEST_F(Test_DealerReply, Dealer_2_Reply_1)
     replySocket->Start(endpoint_);
 
     std::thread dealerSocketThread1(
-        &Test_DealerReply::dealerSocketThread, this, testMessage2_);
+        &Test_DealerReply::dealerSocketThread, this, test_message2_);
     std::thread dealerSocketThread2(
-        &Test_DealerReply::dealerSocketThread, this, testMessage3_);
+        &Test_DealerReply::dealerSocketThread, this, test_message3_);
 
     dealerSocketThread1.join();
     dealerSocketThread2.join();
@@ -220,12 +221,12 @@ TEST_F(Test_DealerReply, Dealer_Reply_Multipart)
             EXPECT_EQ(2, input.Body().size());
 
             for (const auto& frame : input.Header()) {
-                EXPECT_EQ(testMessage_, frame.Bytes());
+                EXPECT_EQ(test_message_, frame.Bytes());
             }
 
             for (const auto& frame : input.Body()) {
-                bool match = frame.Bytes() == testMessage2_ ||
-                             frame.Bytes() == testMessage3_;
+                bool match = frame.Bytes() == test_message2_ ||
+                             frame.Bytes() == test_message3_;
 
                 EXPECT_TRUE(match);
             }
@@ -259,11 +260,11 @@ TEST_F(Test_DealerReply, Dealer_Reply_Multipart)
 
             const auto header = ot::UnallocatedCString{input.at(1).Bytes()};
 
-            ASSERT_EQ(testMessage_, header);
+            ASSERT_EQ(test_message_, header);
 
             for (auto i{3u}; i < input.size(); ++i) {
                 const auto frame = input.at(i).Bytes();
-                bool match = frame == testMessage2_ || frame == testMessage3_;
+                bool match = frame == test_message2_ || frame == test_message3_;
 
                 EXPECT_TRUE(match);
             }
@@ -284,10 +285,10 @@ TEST_F(Test_DealerReply, Dealer_Reply_Multipart)
 
     auto multipartMessage = opentxs::network::zeromq::Message{};
     multipartMessage.StartBody();
-    multipartMessage.AddFrame(testMessage_);
+    multipartMessage.AddFrame(test_message_);
     multipartMessage.StartBody();
-    multipartMessage.AddFrame(testMessage2_);
-    multipartMessage.AddFrame(testMessage3_);
+    multipartMessage.AddFrame(test_message2_);
+    multipartMessage.AddFrame(test_message3_);
 
     auto sent = dealerSocket->Send(std::move(multipartMessage));
 

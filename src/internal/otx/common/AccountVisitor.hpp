@@ -40,7 +40,7 @@ class AccountVisitor
 public:
     using mapOfAccounts = UnallocatedMap<UnallocatedCString, const Account*>;
 
-    auto GetNotaryID() const -> const identifier::Notary& { return notaryID_; }
+    auto GetNotaryID() const -> const identifier::Notary& { return notary_id_; }
 
     virtual auto Trigger(const Account& account, const PasswordPrompt& reason)
         -> bool = 0;
@@ -57,8 +57,8 @@ public:
 
 protected:
     const api::session::Wallet& wallet_;
-    const identifier::Notary notaryID_;
-    mapOfAccounts* loadedAccounts_;
+    const identifier::Notary notary_id_;
+    mapOfAccounts* loaded_accounts_;
 
     AccountVisitor(
         const api::session::Wallet& wallet,

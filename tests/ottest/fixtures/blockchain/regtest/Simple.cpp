@@ -29,8 +29,8 @@ namespace ottest
 using namespace opentxs::literals;
 
 RegtestListener::RegtestListener(const ot::api::session::Client& client)
-    : block_listener(std::make_unique<BlockListener>(client, "client"))
-    , sync_listener(std::make_unique<SyncListener>(client, "client"))
+    : block_listener_(std::make_unique<BlockListener>(client, "client"))
+    , sync_listener_(std::make_unique<SyncListener>(client, "client"))
 {
 }
 
@@ -144,8 +144,10 @@ auto Regtest_fixture_simple::MineBlocks(
     wallets.reserve(users_.size());
 
     for (auto& listeners : user_listeners_) {
-        blocks.emplace_back(listeners.second.block_listener->GetFuture(target));
-        wallets.emplace_back(listeners.second.sync_listener->GetFuture(target));
+        blocks.emplace_back(
+            listeners.second.block_listener_->GetFuture(target));
+        wallets.emplace_back(
+            listeners.second.sync_listener_->GetFuture(target));
     }
 
     auto success = Mine(ancestor, count);
@@ -179,8 +181,10 @@ auto Regtest_fixture_simple::MineBlocks(
     wallets.reserve(users_.size());
 
     for (auto& listeners : user_listeners_) {
-        blocks.emplace_back(listeners.second.block_listener->GetFuture(target));
-        wallets.emplace_back(listeners.second.sync_listener->GetFuture(target));
+        blocks.emplace_back(
+            listeners.second.block_listener_->GetFuture(target));
+        wallets.emplace_back(
+            listeners.second.sync_listener_->GetFuture(target));
     }
 
     Generator gen = [&](Height height) -> Transaction {

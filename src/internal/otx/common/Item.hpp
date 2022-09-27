@@ -110,7 +110,7 @@ public:
     auto GetNumberOfOrigin() -> std::int64_t override;
     void CalculateNumberOfOrigin() override;
     // used for looping through the items in a few places.
-    inline auto GetItemList() -> listOfItems& { return m_listItems; }
+    inline auto GetItemList() -> listOfItems& { return list_items_; }
     auto GetItem(std::int32_t nIndex) const -> std::shared_ptr<const Item>;
     auto GetItem(std::int32_t nIndex) -> std::shared_ptr<Item>;
     auto GetItemByTransactionNum(std::int64_t lTransactionNumber)
@@ -133,7 +133,7 @@ public:
     // some transaction#.
     inline auto GetItemCount() const -> std::int32_t
     {
-        return static_cast<std::int32_t>(m_listItems.size());
+        return static_cast<std::int32_t>(list_items_.size());
     }
     void AddItem(std::shared_ptr<Item> theItem);
 
@@ -145,18 +145,18 @@ public:
 
     inline void SetNewOutboxTransNum(std::int64_t lTransNum)
     {
-        m_lNewOutboxTransNum = lTransNum;
+        new_outbox_trans_num_ = lTransNum;
     }
     inline auto GetNewOutboxTransNum() const -> std::int64_t
     {
-        return m_lNewOutboxTransNum;
-    }                     // See above comment in protected section.
-    OTArmored m_ascNote;  // a text field for the user. Cron may also store
+        return new_outbox_trans_num_;
+    }                 // See above comment in protected section.
+    OTArmored note_;  // a text field for the user. Cron may also store
     // receipt data here. Also inbox reports go here for
     // balance agreement
-    OTArmored m_ascAttachment;  // the digital cash token is sent here,
-                                // signed, and returned here. (or purse of
-                                // tokens.)
+    OTArmored attachment_;  // the digital cash token is sent here,
+                            // signed, and returned here. (or purse of
+                            // tokens.)
     // As well as a cheque, or a voucher, or a server update on a market offer,
     // or a nym full of transactions for balance agreement.
     // Call this on the server side, on a balanceStatement item, to verify
@@ -187,12 +187,12 @@ public:
         const otx::context::Client& THE_NYM,
         const OTTransaction& TARGET_TRANSACTION,
         const bool bIsRealTransaction = true) const -> bool;
-    inline auto GetStatus() const -> Item::itemStatus { return m_Status; }
-    inline void SetStatus(const Item::itemStatus& theVal) { m_Status = theVal; }
-    inline auto GetType() const -> itemType { return m_Type; }
-    inline void SetType(itemType theType) { m_Type = theType; }
-    inline auto GetAmount() const -> Amount { return m_lAmount; }
-    inline void SetAmount(Amount lAmount) { m_lAmount = lAmount; }
+    inline auto GetStatus() const -> Item::itemStatus { return status_; }
+    inline void SetStatus(const Item::itemStatus& theVal) { status_ = theVal; }
+    inline auto GetType() const -> itemType { return type_; }
+    inline void SetType(itemType theType) { type_ = theType; }
+    inline auto GetAmount() const -> Amount { return amount_; }
+    inline void SetAmount(Amount lAmount) { amount_ = lAmount; }
     void GetNote(String& theStr) const;
     void SetNote(const String& theStr);
     void GetAttachment(String& theStr) const;
@@ -201,11 +201,11 @@ public:
     void SetAttachment(const Data& input);
     inline auto GetDestinationAcctID() const -> const identifier::Generic&
     {
-        return m_AcctToID;
+        return account_to_id_;
     }
     inline void SetDestinationAcctID(const identifier::Generic& theID)
     {
-        m_AcctToID = theID;
+        account_to_id_ = theID;
     }
     static void GetStringFromType(itemType theType, String& strType);
     inline void GetTypeString(String& strType) const
@@ -220,19 +220,19 @@ public:
 
 protected:
     // DESTINATION ACCOUNT for transfers. NOT the account holder.
-    identifier::Generic m_AcctToID;
+    identifier::Generic account_to_id_;
     // For balance, or fee, etc. Only an item can actually have an amount. (Or a
     // "TO" account.)
-    Amount m_lAmount{0};
+    Amount amount_{0};
     // Sometimes an item needs to have a list of yet more items. Like balance
     // statements have a list of inbox items. (Just the relevant data, not all
     // the attachments and everything.)
-    listOfItems m_listItems;
+    listOfItems list_items_;
     // the item type. Could be a transfer, a fee, a balance or client
     // accept/rejecting an item
-    itemType m_Type{itemType::error_state};
+    itemType type_{itemType::error_state};
     // request, acknowledgment, or rejection.
-    itemStatus m_Status{error_status};
+    itemStatus status_{error_status};
     // Used for balance agreement. The user puts transaction "1" in his outbox
     // when doing a transfer, since he has no idea what # will actually be
     // issued on the server side after he sends his message. Let's say the
@@ -242,9 +242,9 @@ protected:
     // at a time. In cases where verifying a balance receipt and you come across
     // transaction #1 in the outbox, simply look up this variable on the
     // server's portion of the reply and then look up that number instead.
-    TransactionNumber m_lNewOutboxTransNum{0};
+    TransactionNumber new_outbox_trans_num_{0};
     // Used in balance agreement (to represent an inbox item)
-    TransactionNumber m_lClosingTransactionNo{0};
+    TransactionNumber closing_transaction_no_{0};
 
     // return -1 if error, 0 if nothing, and 1 if the node was processed.
     auto ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t override;

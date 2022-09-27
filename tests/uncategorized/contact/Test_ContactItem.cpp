@@ -19,7 +19,7 @@ class Test_ContactItem : public ::testing::Test
 public:
     Test_ContactItem()
         : api_(ot::Context().StartClientSession(0))
-        , contactItem_(
+        , contact_item_(
               dynamic_cast<const ot::api::session::Client&>(api_),
               ot::UnallocatedCString("testNym"),
               opentxs::CONTACT_CONTACT_DATA_VERSION,
@@ -35,7 +35,7 @@ public:
     }
 
     const ot::api::session::Client& api_;
-    const ot::identity::wot::claim::Item contactItem_;
+    const ot::identity::wot::claim::Item contact_item_;
 };
 
 TEST_F(Test_ContactItem, first_constructor)
@@ -143,24 +143,24 @@ TEST_F(Test_ContactItem, second_constructor)
 
 TEST_F(Test_ContactItem, copy_constructor)
 {
-    ot::identity::wot::claim::Item copiedContactItem(contactItem_);
+    ot::identity::wot::claim::Item copiedContactItem(contact_item_);
 
-    ASSERT_EQ(contactItem_.ID(), copiedContactItem.ID());
-    ASSERT_EQ(contactItem_.Version(), copiedContactItem.Version());
-    ASSERT_EQ(contactItem_.Section(), copiedContactItem.Section());
-    ASSERT_EQ(contactItem_.Type(), copiedContactItem.Type());
-    ASSERT_EQ(contactItem_.Value(), copiedContactItem.Value());
-    ASSERT_EQ(contactItem_.Start(), copiedContactItem.Start());
-    ASSERT_EQ(contactItem_.End(), copiedContactItem.End());
+    ASSERT_EQ(contact_item_.ID(), copiedContactItem.ID());
+    ASSERT_EQ(contact_item_.Version(), copiedContactItem.Version());
+    ASSERT_EQ(contact_item_.Section(), copiedContactItem.Section());
+    ASSERT_EQ(contact_item_.Type(), copiedContactItem.Type());
+    ASSERT_EQ(contact_item_.Value(), copiedContactItem.Value());
+    ASSERT_EQ(contact_item_.Start(), copiedContactItem.Start());
+    ASSERT_EQ(contact_item_.End(), copiedContactItem.End());
 
-    ASSERT_EQ(contactItem_.isActive(), copiedContactItem.isActive());
-    ASSERT_EQ(contactItem_.isLocal(), copiedContactItem.isLocal());
-    ASSERT_EQ(contactItem_.isPrimary(), copiedContactItem.isPrimary());
+    ASSERT_EQ(contact_item_.isActive(), copiedContactItem.isActive());
+    ASSERT_EQ(contact_item_.isLocal(), copiedContactItem.isLocal());
+    ASSERT_EQ(contact_item_.isPrimary(), copiedContactItem.isPrimary());
 }
 
 TEST_F(Test_ContactItem, operator_equal_true)
 {
-    ASSERT_EQ(contactItem_, contactItem_);
+    ASSERT_EQ(contact_item_, contact_item_);
 }
 
 TEST_F(Test_ContactItem, operator_equal_false)
@@ -180,7 +180,7 @@ TEST_F(Test_ContactItem, operator_equal_false)
 
     // Can't use ASSERT_NE because there's no != operator defined for
     // ContactItem.
-    ASSERT_FALSE(contactItem_ == contactItem2);
+    ASSERT_FALSE(contact_item_ == contactItem2);
 }
 
 TEST_F(Test_ContactItem, public_accessors)
@@ -196,58 +196,58 @@ TEST_F(Test_ContactItem, public_accessors)
                 {},
                 "testValue",
                 "")));
-    ASSERT_EQ(identifier, contactItem_.ID());
+    ASSERT_EQ(identifier, contact_item_.ID());
     ASSERT_EQ(
         ot::identity::wot::claim::SectionType::Identifier,
-        contactItem_.Section());
+        contact_item_.Section());
     ASSERT_EQ(
-        ot::identity::wot::claim::ClaimType::Employee, contactItem_.Type());
-    ASSERT_EQ("testValue", contactItem_.Value());
-    ASSERT_EQ(contactItem_.Start(), ot::Time{});
-    ASSERT_EQ(contactItem_.End(), ot::Time{});
-    ASSERT_EQ(opentxs::CONTACT_CONTACT_DATA_VERSION, contactItem_.Version());
+        ot::identity::wot::claim::ClaimType::Employee, contact_item_.Type());
+    ASSERT_EQ("testValue", contact_item_.Value());
+    ASSERT_EQ(contact_item_.Start(), ot::Time{});
+    ASSERT_EQ(contact_item_.End(), ot::Time{});
+    ASSERT_EQ(opentxs::CONTACT_CONTACT_DATA_VERSION, contact_item_.Version());
 
-    ASSERT_TRUE(contactItem_.isActive());
-    ASSERT_FALSE(contactItem_.isLocal());
-    ASSERT_FALSE(contactItem_.isPrimary());
+    ASSERT_TRUE(contact_item_.isActive());
+    ASSERT_FALSE(contact_item_.isLocal());
+    ASSERT_FALSE(contact_item_.isPrimary());
 }
 
 TEST_F(Test_ContactItem, public_setters)
 {
     const auto now = ot::Clock::now();
 
-    const auto& valueItem = contactItem_.SetValue("newTestValue");
-    ASSERT_FALSE(valueItem == contactItem_);
+    const auto& valueItem = contact_item_.SetValue("newTestValue");
+    ASSERT_FALSE(valueItem == contact_item_);
     ASSERT_STREQ(valueItem.Value().c_str(), "newTestValue");
 
-    const auto& startItem = contactItem_.SetStart(now);
-    ASSERT_FALSE(startItem == contactItem_);
+    const auto& startItem = contact_item_.SetStart(now);
+    ASSERT_FALSE(startItem == contact_item_);
     ASSERT_EQ(now, startItem.Start());
     ASSERT_NE(startItem.Start(), ot::Time{});
 
-    const auto& endItem = contactItem_.SetEnd(now);
-    ASSERT_FALSE(endItem == contactItem_);
+    const auto& endItem = contact_item_.SetEnd(now);
+    ASSERT_FALSE(endItem == contact_item_);
     ASSERT_EQ(now, endItem.End());
     ASSERT_NE(ot::Time{}, endItem.End());
 
     // _contactItem is active, so test setting active to false first.
-    const auto& notActiveItem = contactItem_.SetActive(false);
-    ASSERT_FALSE(notActiveItem == contactItem_);
+    const auto& notActiveItem = contact_item_.SetActive(false);
+    ASSERT_FALSE(notActiveItem == contact_item_);
     ASSERT_FALSE(notActiveItem.isActive());
     const auto& activeItem = notActiveItem.SetActive(true);
     ASSERT_FALSE(activeItem == notActiveItem);
     ASSERT_TRUE(activeItem.isActive());
 
-    const auto& localItem = contactItem_.SetLocal(true);
-    ASSERT_FALSE(localItem == contactItem_);
+    const auto& localItem = contact_item_.SetLocal(true);
+    ASSERT_FALSE(localItem == contact_item_);
     ASSERT_TRUE(localItem.isLocal());
     const auto& notLocalItem = localItem.SetLocal(false);
     ASSERT_FALSE(notLocalItem == localItem);
     ASSERT_FALSE(notLocalItem.isLocal());
 
     // First, create an item with no attributes.
-    const auto& notPrimaryItem = contactItem_.SetActive(false);
-    ASSERT_FALSE(notPrimaryItem == contactItem_);
+    const auto& notPrimaryItem = contact_item_.SetActive(false);
+    ASSERT_FALSE(notPrimaryItem == contact_item_);
     ASSERT_FALSE(notPrimaryItem.isPrimary());
     ASSERT_FALSE(notPrimaryItem.isActive());
     ASSERT_FALSE(notPrimaryItem.isLocal());
@@ -262,35 +262,35 @@ TEST_F(Test_ContactItem, Serialize)
 {
     // Test without id.
     auto bytes = ot::Space{};
-    EXPECT_TRUE(contactItem_.Serialize(ot::writer(bytes), false));
+    EXPECT_TRUE(contact_item_.Serialize(ot::writer(bytes), false));
 
     auto restored1 = ot::identity::wot::claim::Item{
         dynamic_cast<const ot::api::session::Client&>(api_),
         "testNym",
-        contactItem_.Version(),
-        contactItem_.Section(),
+        contact_item_.Version(),
+        contact_item_.Section(),
         ot::reader(bytes)};
 
-    ASSERT_EQ(restored1.Value(), contactItem_.Value());
-    ASSERT_EQ(restored1.Version(), contactItem_.Version());
-    ASSERT_EQ(restored1.Type(), contactItem_.Type());
-    ASSERT_EQ(restored1.Start(), contactItem_.Start());
-    ASSERT_EQ(restored1.End(), contactItem_.End());
+    ASSERT_EQ(restored1.Value(), contact_item_.Value());
+    ASSERT_EQ(restored1.Version(), contact_item_.Version());
+    ASSERT_EQ(restored1.Type(), contact_item_.Type());
+    ASSERT_EQ(restored1.Start(), contact_item_.Start());
+    ASSERT_EQ(restored1.End(), contact_item_.End());
 
     // Test with id.
-    EXPECT_TRUE(contactItem_.Serialize(ot::writer(bytes), true));
+    EXPECT_TRUE(contact_item_.Serialize(ot::writer(bytes), true));
 
     auto restored2 = ot::identity::wot::claim::Item{
         dynamic_cast<const ot::api::session::Client&>(api_),
         "testNym",
-        contactItem_.Version(),
-        contactItem_.Section(),
+        contact_item_.Version(),
+        contact_item_.Section(),
         ot::reader(bytes)};
 
-    ASSERT_EQ(restored2.Value(), contactItem_.Value());
-    ASSERT_EQ(restored2.Version(), contactItem_.Version());
-    ASSERT_EQ(restored2.Type(), contactItem_.Type());
-    ASSERT_EQ(restored2.Start(), contactItem_.Start());
-    ASSERT_EQ(restored2.End(), contactItem_.End());
+    ASSERT_EQ(restored2.Value(), contact_item_.Value());
+    ASSERT_EQ(restored2.Version(), contact_item_.Version());
+    ASSERT_EQ(restored2.Type(), contact_item_.Type());
+    ASSERT_EQ(restored2.Start(), contact_item_.Start());
+    ASSERT_EQ(restored2.End(), contact_item_.End());
 }
 }  // namespace ottest

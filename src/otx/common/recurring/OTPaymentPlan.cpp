@@ -52,25 +52,25 @@ namespace opentxs
 {
 OTPaymentPlan::OTPaymentPlan(const api::Session& api)
     : ot_super(api)
-    , m_bInitialPayment(false)
-    , m_tInitialPaymentDate()
-    , m_tInitialPaymentCompletedDate()
-    , m_tFailedInitialPaymentDate()
-    , m_lInitialPaymentAmount(0)
-    , m_bInitialPaymentDone(false)
-    , m_nNumberInitialFailures(0)
-    , m_bPaymentPlan(false)
-    , m_lPaymentPlanAmount(0)
-    , m_tTimeBetweenPayments(0)
-    , m_tPaymentPlanStartDate()
-    , m_tPaymentPlanLength(0)
-    , m_nMaximumNoPayments(0)
-    , m_tDateOfLastPayment()
-    , m_tDateOfLastFailedPayment()
-    , m_nNoPaymentsDone(0)
-    , m_nNoFailedPayments(0)
-    , m_bProcessingInitialPayment(false)
-    , m_bProcessingPaymentPlan(false)
+    , initial_payment_(false)
+    , initial_payment_date_()
+    , initial_payment_completed_date_()
+    , failed_initial_payment_date_()
+    , initial_payment_amount_(0)
+    , initial_payment_done_(false)
+    , number_initial_failures_(0)
+    , payment_plan_(false)
+    , payment_plan_amount_(0)
+    , time_between_payments_(0)
+    , payment_plan_start_date_()
+    , payment_plan_length_(0)
+    , maximum_no_payments_(0)
+    , date_of_last_payment_()
+    , date_of_last_failed_payment_()
+    , no_payments_done_(0)
+    , no_failed_payments_(0)
+    , processing_initial_payment_(false)
+    , processing_payment_plan_(false)
 {
     InitPaymentPlan();
 }
@@ -80,25 +80,25 @@ OTPaymentPlan::OTPaymentPlan(
     const identifier::Notary& NOTARY_ID,
     const identifier::UnitDefinition& INSTRUMENT_DEFINITION_ID)
     : ot_super(api, NOTARY_ID, INSTRUMENT_DEFINITION_ID)
-    , m_bInitialPayment(false)
-    , m_tInitialPaymentDate()
-    , m_tInitialPaymentCompletedDate()
-    , m_tFailedInitialPaymentDate()
-    , m_lInitialPaymentAmount(0)
-    , m_bInitialPaymentDone(false)
-    , m_nNumberInitialFailures(0)
-    , m_bPaymentPlan(false)
-    , m_lPaymentPlanAmount(0)
-    , m_tTimeBetweenPayments(0)
-    , m_tPaymentPlanStartDate()
-    , m_tPaymentPlanLength(0)
-    , m_nMaximumNoPayments(0)
-    , m_tDateOfLastPayment()
-    , m_tDateOfLastFailedPayment()
-    , m_nNoPaymentsDone(0)
-    , m_nNoFailedPayments(0)
-    , m_bProcessingInitialPayment(false)
-    , m_bProcessingPaymentPlan(false)
+    , initial_payment_(false)
+    , initial_payment_date_()
+    , initial_payment_completed_date_()
+    , failed_initial_payment_date_()
+    , initial_payment_amount_(0)
+    , initial_payment_done_(false)
+    , number_initial_failures_(0)
+    , payment_plan_(false)
+    , payment_plan_amount_(0)
+    , time_between_payments_(0)
+    , payment_plan_start_date_()
+    , payment_plan_length_(0)
+    , maximum_no_payments_(0)
+    , date_of_last_payment_()
+    , date_of_last_failed_payment_()
+    , no_payments_done_(0)
+    , no_failed_payments_(0)
+    , processing_initial_payment_(false)
+    , processing_payment_plan_(false)
 {
     InitPaymentPlan();
 }
@@ -119,25 +119,25 @@ OTPaymentPlan::OTPaymentPlan(
           SENDER_NYM_ID,
           RECIPIENT_ACCT_ID,
           RECIPIENT_NYM_ID)
-    , m_bInitialPayment(false)
-    , m_tInitialPaymentDate()
-    , m_tInitialPaymentCompletedDate()
-    , m_tFailedInitialPaymentDate()
-    , m_lInitialPaymentAmount(0)
-    , m_bInitialPaymentDone(false)
-    , m_nNumberInitialFailures(0)
-    , m_bPaymentPlan(false)
-    , m_lPaymentPlanAmount(0)
-    , m_tTimeBetweenPayments(0)
-    , m_tPaymentPlanStartDate()
-    , m_tPaymentPlanLength(0)
-    , m_nMaximumNoPayments(0)
-    , m_tDateOfLastPayment()
-    , m_tDateOfLastFailedPayment()
-    , m_nNoPaymentsDone(0)
-    , m_nNoFailedPayments(0)
-    , m_bProcessingInitialPayment(false)
-    , m_bProcessingPaymentPlan(false)
+    , initial_payment_(false)
+    , initial_payment_date_()
+    , initial_payment_completed_date_()
+    , failed_initial_payment_date_()
+    , initial_payment_amount_(0)
+    , initial_payment_done_(false)
+    , number_initial_failures_(0)
+    , payment_plan_(false)
+    , payment_plan_amount_(0)
+    , time_between_payments_(0)
+    , payment_plan_start_date_()
+    , payment_plan_length_(0)
+    , maximum_no_payments_(0)
+    , date_of_last_payment_()
+    , date_of_last_failed_payment_()
+    , no_payments_done_(0)
+    , no_failed_payments_(0)
+    , processing_initial_payment_(false)
+    , processing_payment_plan_(false)
 {
     InitPaymentPlan();
 }
@@ -166,7 +166,7 @@ auto OTPaymentPlan::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
     if (!strcmp("initialPayment", xml->getNodeName())) {
         // Yes, there IS apparently an initial payment. We can set the bool to
         // true.
-        m_bInitialPayment = true;
+        initial_payment_ = true;
 
         SetInitialPaymentDate(parseTimestamp(xml->getAttributeValue("date")));
         SetInitialPaymentCompletedDate(
@@ -180,23 +180,23 @@ auto OTPaymentPlan::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
 
         auto strCompleted =
             String::Factory(xml->getAttributeValue("completed"));
-        m_bInitialPaymentDone = strCompleted->Compare("true");
+        initial_payment_done_ = strCompleted->Compare("true");
 
         const auto unittype = api_.Wallet().CurrencyTypeBasedOnUnitType(
             GetInstrumentDefinitionID());
         LogDetail()(OT_PRETTY_CLASS())("Initial Payment. Amount: ")(
-            m_lInitialPaymentAmount, unittype)(". Date: ")(
+            initial_payment_amount_, unittype)(". Date: ")(
             GetInitialPaymentDate())(". Completed Date: ")(
             GetInitialPaymentCompletedDate())(". Number of failed attempts: ")(
-            m_nNumberInitialFailures)(". Date of last failed attempt: ")(
+            number_initial_failures_)(". Date of last failed attempt: ")(
             GetLastFailedInitialPaymentDate())(". Payment ")(
-            m_bInitialPaymentDone ? "COMPLETED" : "NOT completed")(".")
+            initial_payment_done_ ? "COMPLETED" : "NOT completed")(".")
             .Flush();
 
         nReturnVal = 1;
     } else if (!strcmp("paymentPlan", xml->getNodeName())) {
         // Yes, there IS apparently a payment plan. We can set the bool to true.
-        m_bPaymentPlan = true;
+        payment_plan_ = true;
 
         SetPaymentPlanAmount(
             String::StringToLong(xml->getAttributeValue("amountPerPayment")));
@@ -228,13 +228,13 @@ auto OTPaymentPlan::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
         SetDateOfLastFailedPayment(tLastAttempt);
 
         LogDetail()(OT_PRETTY_CLASS())("Payment Plan. Amount per payment: ")(
-            m_lPaymentPlanAmount)(". Seconds between payments: ")(
+            payment_plan_amount_)(". Seconds between payments: ")(
             tBetween.count())(". Payment plan Start Date: ")(
             tStart)(". Length: ")(tLength.count())(
             ". Maximum No. of Payments: ")(
-            m_nMaximumNoPayments)(". Completed No. of Payments: ")(
-            m_nNoPaymentsDone)(". Failed No. of Payments: ")(
-            m_nNoFailedPayments)(". Date of last payment: ")(
+            maximum_no_payments_)(". Completed No. of Payments: ")(
+            no_payments_done_)(". Failed No. of Payments: ")(
+            no_failed_payments_)(". Date of last payment: ")(
             tLast)(". Date of last failed payment: ")(tLastAttempt)
             .Flush();
 
@@ -247,7 +247,7 @@ auto OTPaymentPlan::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
 void OTPaymentPlan::UpdateContents(const PasswordPrompt& reason)
 {
     // I release this because I'm about to repopulate it.
-    m_xmlUnsigned->Release();
+    xml_unsigned_->Release();
 
     const auto NOTARY_ID = String::Factory(GetNotaryID()),
                INSTRUMENT_DEFINITION_ID =
@@ -257,16 +257,16 @@ void OTPaymentPlan::UpdateContents(const PasswordPrompt& reason)
                RECIPIENT_ACCT_ID = String::Factory(GetRecipientAcctID()),
                RECIPIENT_NYM_ID = String::Factory(GetRecipientNymID());
 
-    OT_ASSERT(!m_pCancelerNymID.empty());
+    OT_ASSERT(!canceler_nym_id_.empty());
 
     auto strCanceler = String::Factory();
 
-    if (m_bCanceled) { m_pCancelerNymID.GetString(api_.Crypto(), strCanceler); }
+    if (canceled_) { canceler_nym_id_.GetString(api_.Crypto(), strCanceler); }
 
     // OTAgreement
     Tag tag("agreement");
 
-    tag.add_attribute("version", m_strVersion->Get());
+    tag.add_attribute("version", version_->Get());
     tag.add_attribute("notaryID", NOTARY_ID->Get());
     tag.add_attribute(
         "instrumentDefinitionID", INSTRUMENT_DEFINITION_ID->Get());
@@ -274,9 +274,9 @@ void OTPaymentPlan::UpdateContents(const PasswordPrompt& reason)
     tag.add_attribute("senderNymID", SENDER_NYM_ID->Get());
     tag.add_attribute("recipientAcctID", RECIPIENT_ACCT_ID->Get());
     tag.add_attribute("recipientNymID", RECIPIENT_NYM_ID->Get());
-    tag.add_attribute("canceled", formatBool(m_bCanceled));
-    tag.add_attribute("cancelerNymID", m_bCanceled ? strCanceler->Get() : "");
-    tag.add_attribute("transactionNum", std::to_string(m_lTransactionNum));
+    tag.add_attribute("canceled", formatBool(canceled_));
+    tag.add_attribute("cancelerNymID", canceled_ ? strCanceler->Get() : "");
+    tag.add_attribute("transactionNum", std::to_string(transaction_num_));
     tag.add_attribute("creationDate", formatTimestamp(GetCreationDate()));
     tag.add_attribute("validFrom", formatTimestamp(GetValidFrom()));
     tag.add_attribute("validTo", formatTimestamp(GetValidTo()));
@@ -367,21 +367,21 @@ void OTPaymentPlan::UpdateContents(const PasswordPrompt& reason)
     }
 
     // OTAgreement
-    if (m_strConsideration->Exists()) {
-        auto ascTemp = Armored::Factory(m_strConsideration);
+    if (consideration_->Exists()) {
+        auto ascTemp = Armored::Factory(consideration_);
         tag.add_tag("consideration", ascTemp->Get());
     }
 
     // OTAgreement
-    if (m_strMerchantSignedCopy->Exists()) {
-        auto ascTemp = Armored::Factory(m_strMerchantSignedCopy);
+    if (merchant_signed_copy_->Exists()) {
+        auto ascTemp = Armored::Factory(merchant_signed_copy_);
         tag.add_tag("merchantSignedCopy", ascTemp->Get());
     }
 
     UnallocatedCString str_result;
     tag.output(str_result);
 
-    m_xmlUnsigned->Concatenate(String::Factory(str_result));
+    xml_unsigned_->Concatenate(String::Factory(str_result));
 }
 
 // *** Set Initial Payment ***  / Make sure to call SetAgreement() first.
@@ -390,8 +390,8 @@ auto OTPaymentPlan::SetInitialPayment(
     const Amount amount,
     const std::chrono::seconds tTimeUntilInitialPayment) -> bool
 {
-    m_bInitialPayment = true;       // There is now an initial payment.
-    m_bInitialPaymentDone = false;  // It has not yet been paid.
+    initial_payment_ = true;        // There is now an initial payment.
+    initial_payment_done_ = false;  // It has not yet been paid.
 
     // The initial date passed it is measured relative to the creation date.
     // (Assumes SetAgreement() was already called...)
@@ -429,8 +429,8 @@ auto OTPaymentPlan::VerifyMerchantSignature(
 {
     // Load up the merchant's copy.
     OTPaymentPlan theMerchantCopy{api_};
-    if (!m_strMerchantSignedCopy->Exists() ||
-        !theMerchantCopy.LoadContractFromString(m_strMerchantSignedCopy)) {
+    if (!merchant_signed_copy_->Exists() ||
+        !theMerchantCopy.LoadContractFromString(merchant_signed_copy_)) {
         LogError()(OT_PRETTY_CLASS())(
             "Expected Merchant's signed copy to be inside the "
             "payment plan, but unable to load.")
@@ -606,23 +606,23 @@ auto OTPaymentPlan::SetPaymentPlan(
                                          // value will do.
 
     // Set these to zero, they will be incremented later at the right times.
-    m_tDateOfLastPayment = Time{};
-    m_nNoPaymentsDone = 0;
+    date_of_last_payment_ = Time{};
+    no_payments_done_ = 0;
 
     // Okay, we're a payment plan! (Still need to add the object to OTCron...
     // But it's ready...)
-    m_bPaymentPlan = true;
+    payment_plan_ = true;
 
     return true;
 }
 
 auto OTPaymentPlan::SetInitialPaymentDone() -> bool
 {
-    if (m_bInitialPaymentDone) {  // if done already.
+    if (initial_payment_done_) {  // if done already.
         return false;
     }
 
-    m_bInitialPaymentDone = true;
+    initial_payment_done_ = true;
     // We store the bool that it's done (above), and we also store the date when
     // it was done:
     SetInitialPaymentCompletedDate(Clock::now());
@@ -1061,14 +1061,14 @@ auto OTPaymentPlan::ProcessPayment(
                 // I will probably do the same for cheques, since they can be
                 // negative as well (invoices).
 
-                if (m_bProcessingInitialPayment)  // if this is a success for an
+                if (processing_initial_payment_)  // if this is a success for an
                                                   // initial payment
                 {
                     SetInitialPaymentDone();
                     LogConsole()(OT_PRETTY_CLASS())(
                         "Initial payment performed.")
                         .Flush();
-                } else if (m_bProcessingPaymentPlan)  // if this is a success
+                } else if (processing_payment_plan_)  // if this is a success
                                                       // for
                                                       // payment plan payment.
                 {
@@ -1079,7 +1079,7 @@ auto OTPaymentPlan::ProcessPayment(
                         .Flush();
                 }
 
-                // (I do NOT save m_pCron here, since that already occurs after
+                // (I do NOT save cron_ here, since that already occurs after
                 // this function is called.)
             } else  // bSuccess = false.  The payment failed.
             {
@@ -1097,12 +1097,12 @@ auto OTPaymentPlan::ProcessPayment(
                 pItemRecip->SetAmount(0);  // No money changed hands. Just being
                                            // explicit.
 
-                if (m_bProcessingInitialPayment) {
+                if (processing_initial_payment_) {
                     IncrementNoInitialFailures();
                     SetLastFailedInitialPaymentDate(Clock::now());
                     LogConsole()(OT_PRETTY_CLASS())("Initial payment failed.")
                         .Flush();
-                } else if (m_bProcessingPaymentPlan) {
+                } else if (processing_payment_plan_) {
                     IncrementNoFailedPayments();
                     SetDateOfLastFailedPayment(Clock::now());
                     LogConsole()(OT_PRETTY_CLASS())("Recurring payment failed.")
@@ -1138,7 +1138,7 @@ auto OTPaymentPlan::ProcessPayment(
             // No need to save Cron here, since both caller functions call
             // SaveCron() EVERY time anyway,
             // success or failure, rain or shine.
-            // m_pCron->SaveCron(); // Cron is where I am serialized, so if
+            // cron_->SaveCron(); // Cron is where I am serialized, so if
             // Cron's not saved, I'm not saved.
 
             //
@@ -1280,9 +1280,9 @@ void OTPaymentPlan::ProcessInitialPayment(
 {
     OT_ASSERT(nullptr != GetCron());
 
-    m_bProcessingInitialPayment = true;
+    processing_initial_payment_ = true;
     ProcessPayment(wallet, GetInitialPaymentAmount(), reason);
-    m_bProcessingInitialPayment = false;
+    processing_initial_payment_ = false;
 
     // No need to save the Payment Plan itself since it's already
     // saved inside the ProcessPayment() call as part of constructing the
@@ -1378,9 +1378,9 @@ void OTPaymentPlan::ProcessPaymentPlan(
     // Basically there's just one little spot in there where it needs to know.
     // :-(
     // But the member could be useful in the future anyway.
-    m_bProcessingPaymentPlan = true;
+    processing_payment_plan_ = true;
     ProcessPayment(wallet, GetPaymentPlanAmount(), reason);
-    m_bProcessingPaymentPlan = false;
+    processing_payment_plan_ = false;
 
     // No need to save the Payment Plan itself since it's already
     // saved inside the ProcessPayment() call as part of constructing the
@@ -1615,46 +1615,46 @@ auto OTPaymentPlan::ProcessCron(const PasswordPrompt& reason) -> bool
 
 void OTPaymentPlan::InitPaymentPlan()
 {
-    m_strContractType = String::Factory("PAYMENT PLAN");
+    contract_type_ = String::Factory("PAYMENT PLAN");
 
     SetProcessInterval(10s);
 
     // Initial Payment...
-    m_bInitialPayment = false;       // Will there be an initial payment?
-    m_tInitialPaymentDate = Time{};  // Date of the initial payment,
+    initial_payment_ = false;        // Will there be an initial payment?
+    initial_payment_date_ = Time{};  // Date of the initial payment,
                                      // measured seconds after creation
                                      // date.
-    m_tInitialPaymentCompletedDate =
+    initial_payment_completed_date_ =
         Time{};  // Date the initial payment was finally completed.
-    m_lInitialPaymentAmount = 0;    // Amount of the initial payment.
-    m_bInitialPaymentDone = false;  // Has the initial payment been made?
-    m_nNumberInitialFailures = 0;  // Number of times we failed to process this.
-    m_tFailedInitialPaymentDate =
+    initial_payment_amount_ = 0;    // Amount of the initial payment.
+    initial_payment_done_ = false;  // Has the initial payment been made?
+    number_initial_failures_ = 0;  // Number of times we failed to process this.
+    failed_initial_payment_date_ =
         Time{};  // Date of the last failed initial payment.
 
     // Payment Plan...
-    m_bPaymentPlan = false;    // Will there be a payment plan?
-    m_lPaymentPlanAmount = 0;  // Amount of each payment.
-    m_tTimeBetweenPayments = std::chrono::hours{24 * 30};  // How std::int64_t
+    payment_plan_ = false;     // Will there be a payment plan?
+    payment_plan_amount_ = 0;  // Amount of each payment.
+    time_between_payments_ = std::chrono::hours{24 * 30};  // How std::int64_t
                                                            // between each
                                                            // payment? (Default:
     // 30 days) // TODO don't hardcode.
-    m_tPaymentPlanStartDate = Time{};  // Date for the first payment plan
-                                       // payment. Measured seconds after
-                                       // creation.
+    payment_plan_start_date_ = Time{};  // Date for the first payment plan
+                                        // payment. Measured seconds after
+                                        // creation.
 
-    m_tPaymentPlanLength = 0s;  // Optional. Plan length measured in
+    payment_plan_length_ = 0s;  // Optional. Plan length measured in
                                 // seconds since plan start.
-    m_nMaximumNoPayments =
+    maximum_no_payments_ =
         0;  // Optional. The most number of payments that are authorized.
 
-    m_tDateOfLastPayment = Time{};  // Recording of date of the last payment.
-    m_nNoPaymentsDone =
+    date_of_last_payment_ = Time{};  // Recording of date of the last payment.
+    no_payments_done_ =
         0;  // Recording of the number of payments already processed.
 
-    m_tDateOfLastFailedPayment =
+    date_of_last_failed_payment_ =
         Time{};  // Recording of date of the last failed payment.
-    m_nNoFailedPayments =
+    no_failed_payments_ =
         0;  // Every time a payment fails, we record that here.
 }
 

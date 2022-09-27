@@ -26,7 +26,7 @@ void OTVariable::Serialize(Tag& parent, bool bCalculatingID) const
 {
     UnallocatedCString str_access(""), str_type("");
 
-    switch (m_Access) {
+    switch (access_) {
         // This cannot be changed from inside the script.
         case OTVariable::Var_Constant: {
             str_access = "constant";
@@ -48,17 +48,17 @@ void OTVariable::Serialize(Tag& parent, bool bCalculatingID) const
 
     TagPtr pTag(new Tag("variable"));
 
-    pTag->add_attribute("name", m_strName->Get());
+    pTag->add_attribute("name", name_->Get());
     pTag->add_attribute("access", str_access);
 
     // Notice the use of bCalculatingID. Because
     // we don't serialize the variable's value when
     // calculating the smart contract's ID.
-    switch (m_Type) {
+    switch (type_) {
         case OTVariable::Var_String: {
             str_type = "string";
-            if ((false == bCalculatingID) && (m_str_Value.size() > 0)) {
-                auto strVal = String::Factory(m_str_Value.c_str());
+            if ((false == bCalculatingID) && (string_.size() > 0)) {
+                auto strVal = String::Factory(string_.c_str());
                 auto ascVal = Armored::Factory(strVal);
                 pTag->add_attribute("value", "exists");
                 pTag->set_text(ascVal->Get());
@@ -69,12 +69,12 @@ void OTVariable::Serialize(Tag& parent, bool bCalculatingID) const
         case OTVariable::Var_Integer: {
             str_type = "integer";
             pTag->add_attribute(
-                "value", std::to_string(bCalculatingID ? 0 : m_nValue));
+                "value", std::to_string(bCalculatingID ? 0 : number_));
         } break;
         case OTVariable::Var_Bool: {
             str_type = "bool";
             pTag->add_attribute(
-                "value", bCalculatingID ? "false" : formatBool(m_bValue));
+                "value", bCalculatingID ? "false" : formatBool(bool_));
         } break;
         case OTVariable::Var_Error_Type:
         default: {
@@ -89,17 +89,17 @@ void OTVariable::Serialize(Tag& parent, bool bCalculatingID) const
 
 // NO TYPE (YET)
 OTVariable::OTVariable()
-    : m_strName(String::Factory())
-    , m_str_Value()
-    , m_nValue(0)
-    , m_bValue(false)
-    , m_str_ValueBackup()
-    , m_nValueBackup(0)
-    , m_bValueBackup(false)
-    , m_pBylaw(nullptr)
-    , m_Type(OTVariable::Var_Error_Type)
-    , m_Access(Var_Error_Access)
-    , m_pScript(nullptr)
+    : name_(String::Factory())
+    , string_()
+    , number_(0)
+    , bool_(false)
+    , string_backup_()
+    , number_backup_(0)
+    , bool_backup_(false)
+    , bylaw_(nullptr)
+    , type_(OTVariable::Var_Error_Type)
+    , access_(Var_Error_Access)
+    , script_(nullptr)
 {
 }
 
@@ -108,20 +108,20 @@ OTVariable::OTVariable(
     const UnallocatedCString& str_Name,
     const UnallocatedCString& str_Value,
     const OTVariable_Access theAccess)
-    : m_strName(String::Factory(str_Name.c_str()))
-    , m_str_Value(str_Value)
-    , m_nValue(0)
-    , m_bValue(false)
-    , m_str_ValueBackup(str_Value)
-    , m_nValueBackup(0)
-    , m_bValueBackup(false)
-    , m_pBylaw(nullptr)
-    , m_Type(OTVariable::Var_String)
-    , m_Access(theAccess)
-    , m_pScript(nullptr)
+    : name_(String::Factory(str_Name.c_str()))
+    , string_(str_Value)
+    , number_(0)
+    , bool_(false)
+    , string_backup_(str_Value)
+    , number_backup_(0)
+    , bool_backup_(false)
+    , bylaw_(nullptr)
+    , type_(OTVariable::Var_String)
+    , access_(theAccess)
+    , script_(nullptr)
 {
-    if (m_str_Value.empty()) { m_str_Value = ""; }
-    if (m_str_ValueBackup.empty()) { m_str_ValueBackup = ""; }
+    if (string_.empty()) { string_ = ""; }
+    if (string_backup_.empty()) { string_backup_ = ""; }
 }
 
 // INT
@@ -129,17 +129,17 @@ OTVariable::OTVariable(
     const UnallocatedCString& str_Name,
     const std::int32_t nValue,
     const OTVariable_Access theAccess)
-    : m_strName(String::Factory(str_Name.c_str()))
-    , m_str_Value()
-    , m_nValue(nValue)
-    , m_bValue(false)
-    , m_str_ValueBackup()
-    , m_nValueBackup(nValue)
-    , m_bValueBackup(false)
-    , m_pBylaw(nullptr)
-    , m_Type(OTVariable::Var_Integer)
-    , m_Access(theAccess)
-    , m_pScript(nullptr)
+    : name_(String::Factory(str_Name.c_str()))
+    , string_()
+    , number_(nValue)
+    , bool_(false)
+    , string_backup_()
+    , number_backup_(nValue)
+    , bool_backup_(false)
+    , bylaw_(nullptr)
+    , type_(OTVariable::Var_Integer)
+    , access_(theAccess)
+    , script_(nullptr)
 {
 }
 
@@ -148,40 +148,40 @@ OTVariable::OTVariable(
     const UnallocatedCString& str_Name,
     const bool bValue,
     const OTVariable_Access theAccess)
-    : m_strName(String::Factory(str_Name.c_str()))
-    , m_str_Value()
-    , m_nValue(0)
-    , m_bValue(bValue)
-    , m_str_ValueBackup()
-    , m_nValueBackup(0)
-    , m_bValueBackup(bValue)
-    , m_pBylaw(nullptr)
-    , m_Type(OTVariable::Var_Bool)
-    , m_Access(theAccess)
-    , m_pScript(nullptr)
+    : name_(String::Factory(str_Name.c_str()))
+    , string_()
+    , number_(0)
+    , bool_(bValue)
+    , string_backup_()
+    , number_backup_(0)
+    , bool_backup_(bValue)
+    , bylaw_(nullptr)
+    , type_(OTVariable::Var_Bool)
+    , access_(theAccess)
+    , script_(nullptr)
 {
 }
 
 OTVariable::~OTVariable()
 {
-    if (nullptr != m_pScript) { m_pScript->RemoveVariable(*this); }
+    if (nullptr != script_) { script_->RemoveVariable(*this); }
 
-    m_pScript =
+    script_ =
         nullptr;  // I wasn't the owner, it was a pointer for convenience only.
-    m_pBylaw =
+    bylaw_ =
         nullptr;  // I wasn't the owner, it was a pointer for convenience only.
 }
 
 auto OTVariable::SetValue(const std::int32_t& nValue) -> bool
 {
     if (!IsInteger()) {
-        LogError()(OT_PRETTY_CLASS())("Error: This variable (")(
-            m_strName.get())(") is not an integer.")
+        LogError()(OT_PRETTY_CLASS())("Error: This variable (")(name_.get())(
+            ") is not an integer.")
             .Flush();
         return false;
     }
 
-    m_nValue = m_nValueBackup = nValue;
+    number_ = number_backup_ = nValue;
 
     return true;
 }
@@ -189,13 +189,13 @@ auto OTVariable::SetValue(const std::int32_t& nValue) -> bool
 auto OTVariable::SetValue(bool bValue) -> bool
 {
     if (!IsBool()) {
-        LogError()(OT_PRETTY_CLASS())("Error: This variable (")(
-            m_strName.get())(") is not a bool.")
+        LogError()(OT_PRETTY_CLASS())("Error: This variable (")(name_.get())(
+            ") is not a bool.")
             .Flush();
         return false;
     }
 
-    m_bValue = m_bValueBackup = bValue;
+    bool_ = bool_backup_ = bValue;
 
     return true;
 }
@@ -203,16 +203,16 @@ auto OTVariable::SetValue(bool bValue) -> bool
 auto OTVariable::SetValue(const UnallocatedCString& str_Value) -> bool
 {
     if (!IsString()) {
-        LogError()(OT_PRETTY_CLASS())("Error: This variable (")(
-            m_strName.get())(") is not a string.")
+        LogError()(OT_PRETTY_CLASS())("Error: This variable (")(name_.get())(
+            ") is not a string.")
             .Flush();
         return false;
     }
 
-    m_str_Value = m_str_ValueBackup = str_Value;
+    string_ = string_backup_ = str_Value;
 
-    if (m_str_Value.empty()) { m_str_Value = ""; }
-    if (m_str_ValueBackup.empty()) { m_str_ValueBackup = ""; }
+    if (string_.empty()) { string_ = ""; }
+    if (string_backup_.empty()) { string_backup_ = ""; }
 
     return true;
 }
@@ -225,31 +225,31 @@ auto OTVariable::IsDirty() const -> bool
 {
     bool bReturnVal = false;
 
-    switch (m_Type) {
+    switch (type_) {
         case OTVariable::Var_String: {
-            if (0 != m_str_Value.compare(m_str_ValueBackup)) {  // If they do
-                                                                // NOT
+            if (0 != string_.compare(string_backup_)) {  // If they do
+                                                         // NOT
                 // match, then it's
                 // dirty.
                 bReturnVal = true;
             }
         } break;
         case OTVariable::Var_Integer: {
-            if (m_nValue != m_nValueBackup) {  // If they do NOT match, then
-                                               // it's dirty.
+            if (number_ != number_backup_) {  // If they do NOT match, then
+                                              // it's dirty.
                 bReturnVal = true;
             }
         } break;
         case OTVariable::Var_Bool: {
-            if (m_bValue != m_bValueBackup) {  // If they do NOT match, then
-                                               // it's dirty.
+            if (bool_ != bool_backup_) {  // If they do NOT match, then
+                                          // it's dirty.
                 bReturnVal = true;
             }
         } break;
         case OTVariable::Var_Error_Type:
         default: {
             LogError()(OT_PRETTY_CLASS())("Error: Unknown type for variable: ")(
-                m_strName.get())(".")
+                name_.get())(".")
                 .Flush();
         }
     }
@@ -261,30 +261,30 @@ auto OTVariable::IsDirty() const -> bool
 // changed (if it's DIRTY again.)
 void OTVariable::SetAsClean()
 {
-    switch (m_Type) {
+    switch (type_) {
         case OTVariable::Var_String: {
-            m_str_ValueBackup = m_str_Value;  // Save a copy of the current
-                                              // value, so we can check later
-                                              // and see if they're different.
+            string_backup_ = string_;  // Save a copy of the current
+                                       // value, so we can check later
+                                       // and see if they're different.
         } break;
         case OTVariable::Var_Integer: {
-            m_nValueBackup = m_nValue;  // Save a copy of the current value, so
-                                        // we can check later and see if they're
-                                        // different.
+            number_backup_ = number_;  // Save a copy of the current value, so
+                                       // we can check later and see if they're
+                                       // different.
         } break;
         case OTVariable::Var_Bool: {
-            m_bValueBackup = m_bValue;  // Save a copy of the current value, so
-                                        // we can check later and see if they're
-                                        // different.
+            bool_backup_ = bool_;  // Save a copy of the current value, so
+                                   // we can check later and see if they're
+                                   // different.
         } break;
         case OTVariable::Var_Error_Type:
         default: {
             LogError()(OT_PRETTY_CLASS())("Error: Unknown type for variable: ")(
-                m_strName.get())(".")
+                name_.get())(".")
                 .Flush();
-            m_str_ValueBackup = m_str_Value;
-            m_nValueBackup = m_nValue;
-            m_bValueBackup = m_bValue;
+            string_backup_ = string_;
+            number_backup_ = number_;
+            bool_backup_ = bool_;
         }
     }
 }
@@ -292,7 +292,7 @@ void OTVariable::SetAsClean()
 // If the script destructs before the variable does, it unregisters
 // itself here, so the variable isn't stuck with a bad pointer.
 //
-void OTVariable::UnregisterScript() { m_pScript = nullptr; }
+void OTVariable::UnregisterScript() { script_ = nullptr; }
 
 // We keep an internal script pointer here, so if we destruct,
 // we can remove ourselves from the script.
@@ -301,13 +301,13 @@ void OTVariable::RegisterForExecution(OTScript& theScript)
 {
     SetAsClean();  // so we can check for dirtiness after execution.
 
-    const UnallocatedCString str_var_name = m_strName->Get();
+    const UnallocatedCString str_var_name = name_->Get();
 
     theScript.AddVariable(str_var_name, *this);
 
-    m_pScript = &theScript;  // So later, if the variable destructs, and
-                             // this pointer is set, the variable can
-                             // remove itself from the script.
+    script_ = &theScript;  // So later, if the variable destructs, and
+                           // this pointer is set, the variable can
+                           // remove itself from the script.
 }
 
 // Done
@@ -353,7 +353,7 @@ auto OTVariable::Compare(OTVariable& rhs) -> bool
         case OTVariable::Var_Error_Type:
         default: {
             LogError()(OT_PRETTY_CLASS())("Unknown type in variable ")(
-                m_strName.get())(".")
+                name_.get())(".")
                 .Flush();
         }
     }

@@ -125,7 +125,7 @@ BailmentNotice::BailmentNotice(
           PeerRequestType::PendingBailment)
     , unit_(unitID)
     , server_(serverID)
-    , requestID_(requestID)
+    , request_id_(requestID)
     , txid_(txid)
     , amount_(amount)
 {
@@ -142,7 +142,7 @@ BailmentNotice::BailmentNotice(
           serialized.pendingbailment().unitid()))
     , server_(api_.Factory().NotaryIDFromBase58(
           serialized.pendingbailment().serverid()))
-    , requestID_(api.Factory().IdentifierFromBase58(
+    , request_id_(api.Factory().IdentifierFromBase58(
           serialized.pendingbailment().requestid()))
     , txid_(serialized.pendingbailment().txid())
     , amount_(factory::Amount(serialized.pendingbailment().amount()))
@@ -155,7 +155,7 @@ BailmentNotice::BailmentNotice(const BailmentNotice& rhs)
     : Request(rhs)
     , unit_(rhs.unit_)
     , server_(rhs.server_)
-    , requestID_(rhs.requestID_)
+    , request_id_(rhs.request_id_)
     , txid_(rhs.txid_)
     , amount_(rhs.amount_)
 {
@@ -168,7 +168,7 @@ auto BailmentNotice::IDVersion(const Lock& lock) const -> SerializedType
     pendingbailment.set_version(version_);
     pendingbailment.set_unitid(String::Factory(unit_)->Get());
     pendingbailment.set_serverid(String::Factory(server_)->Get());
-    pendingbailment.set_requestid(String::Factory(requestID_)->Get());
+    pendingbailment.set_requestid(String::Factory(request_id_)->Get());
     pendingbailment.set_txid(txid_);
     amount_.Serialize(writer(pendingbailment.mutable_amount()));
 

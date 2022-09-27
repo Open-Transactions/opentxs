@@ -97,11 +97,11 @@ public:
     {
         _cron_max_items_per_nym = nMax;
     }
-    inline auto IsActivated() const -> bool { return m_bIsActivated; }
+    inline auto IsActivated() const -> bool { return is_activated_; }
     inline auto ActivateCron() -> bool
     {
-        if (!m_bIsActivated) {
-            return m_bIsActivated = true;
+        if (!is_activated_) {
+            return is_activated_ = true;
         } else {
             return false;
         }
@@ -165,15 +165,15 @@ public:
 
     inline void SetNotaryID(const identifier::Notary& NOTARY_ID)
     {
-        m_NOTARY_ID = NOTARY_ID;
+        notary_id_ = NOTARY_ID;
     }
     inline auto GetNotaryID() const -> const identifier::Notary&
     {
-        return m_NOTARY_ID;
+        return notary_id_;
     }
 
     void SetServerNym(Nym_p pServerNym);
-    inline auto GetServerNym() const -> Nym_p { return m_pServerNym; }
+    inline auto GetServerNym() const -> Nym_p { return server_nym_; }
 
     auto LoadCron() -> bool;
     auto SaveCron() -> bool;
@@ -208,19 +208,19 @@ private:
     static Time last_executed_;
 
     // A list of all valid markets.
-    mapOfMarkets m_mapMarkets;
+    mapOfMarkets markets_;
     // Cron Items are found on both lists.
-    mapOfCronItems m_mapCronItems;
-    multimapOfCronItems m_multimapCronItems;
+    mapOfCronItems cron_items_;
+    multimapOfCronItems cron_items_multi_;
     // Always store this in any object that's associated with a specific server.
-    identifier::Notary m_NOTARY_ID;
+    identifier::Notary notary_id_;
     // I can't put receipts in people's inboxes without a supply of these.
-    listOfLongNumbers m_listTransactionNumbers;
+    listOfLongNumbers list_transaction_numbers_;
     // I don't want to start Cron processing until everything else is all loaded
     //  up and ready to go.
-    bool m_bIsActivated{false};
+    bool is_activated_{false};
     // I'll need this for later.
-    Nym_p m_pServerNym{nullptr};
+    Nym_p server_nym_{nullptr};
 
     explicit OTCron(const api::Session& server);
 };

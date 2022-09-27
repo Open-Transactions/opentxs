@@ -87,17 +87,17 @@ Server::Server(
     const PasswordPrompt& reason)
     : api_(manager)
     , reason_(reason)
-    , mainFile_(*this, reason_)
+    , main_file_(*this, reason_)
     , notary_(*this, reason_, api_)
     , transactor_(*this, reason_)
-    , userCommandProcessor_(*this, reason_, api_)
-    , m_strWalletFilename(String::Factory())
-    , m_bReadOnly(false)
-    , m_bShutdownFlag(false)
-    , m_notaryID()
-    , m_strServerNymID()
-    , m_nymServer(nullptr)
-    , m_Cron(manager.Factory().InternalSession().Cron())
+    , user_command_processor_(*this, reason_, api_)
+    , wallet_filename_(String::Factory())
+    , read_only_(false)
+    , shutdown_flag_(false)
+    , notary_id_()
+    , server_nym_id_()
+    , nym_server_(nullptr)
+    , cron_(manager.Factory().InternalSession().Cron())
     , notification_socket_(
           api_.Network().ZeroMQ().PushSocket(zmq::socket::Direction::Connect))
 {
@@ -109,7 +109,7 @@ Server::Server(
 
 void Server::ActivateCron()
 {
-    if (m_Cron->ActivateCron()) {
+    if (cron_->ActivateCron()) {
         LogVerbose()(OT_PRETTY_CLASS())("Activate Cron. (STARTED)").Flush();
     } else {
         LogConsole()(OT_PRETTY_CLASS())("Activate Cron. (FAILED)").Flush();
@@ -123,30 +123,30 @@ void Server::ActivateCron()
 ///
 void Server::ProcessCron()
 {
-    if (!m_Cron->IsActivated()) { return; }
+    if (!cron_->IsActivated()) { return; }
 
     bool bAddedNumbers = false;
 
     // Cron requires transaction numbers in order to process.
     // So every time before I call Cron.Process(), I make sure to replenish
     // first.
-    while (m_Cron->GetTransactionCount() < OTCron::GetCronRefillAmount()) {
+    while (cron_->GetTransactionCount() < OTCron::GetCronRefillAmount()) {
         std::int64_t lTransNum = 0;
         bool bSuccess = transactor_.issueNextTransactionNumber(lTransNum);
 
         if (bSuccess) {
-            m_Cron->AddTransactionNumber(lTransNum);
+            cron_->AddTransactionNumber(lTransNum);
             bAddedNumbers = true;
         } else {
             break;
         }
     }
 
-    if (bAddedNumbers) { m_Cron->SaveCron(); }
+    if (bAddedNumbers) { cron_->SaveCron(); }
 
-    m_Cron->ProcessCronItems();  // This needs to be called regularly for
-                                 // trades, markets, payment plans, etc to
-                                 // process.
+    cron_->ProcessCronItems();  // This needs to be called regularly for
+                                // trades, markets, payment plans, etc to
+                                // process.
 
     // NOTE:  TODO:  OTHER RE-OCCURRING SERVER FUNCTIONS CAN GO HERE AS WELL!!
     //
@@ -155,15 +155,15 @@ void Server::ProcessCron()
 
 auto Server::GetServerID() const noexcept -> const identifier::Notary&
 {
-    return m_notaryID.get();
+    return notary_id_.get();
 }
 
 auto Server::GetServerNym() const -> const identity::Nym&
 {
-    return *m_nymServer;
+    return *nym_server_;
 }
 
-auto Server::IsFlaggedForShutdown() const -> bool { return m_bShutdownFlag; }
+auto Server::IsFlaggedForShutdown() const -> bool { return shutdown_flag_; }
 
 auto Server::parse_seed_backup(const UnallocatedCString& input) const
     -> std::pair<UnallocatedCString, UnallocatedCString>
@@ -214,7 +214,7 @@ void Server::CreateMainFile(bool& mainFileExists)
         }
     }
 
-    const UnallocatedCString defaultName = DEFAULT_NAME;
+    const UnallocatedCString defaultName = default_name_;
     const UnallocatedCString& userName = api_.GetUserName();
     UnallocatedCString name = userName;
 
@@ -224,18 +224,18 @@ void Server::CreateMainFile(bool& mainFileExists)
     nymParameters.SetSeed(seed);
     nymParameters.SetNym(0);
     nymParameters.SetDefault(false);
-    m_nymServer =
+    nym_server_ =
         api_.Wallet().Nym(nymParameters, identity::Type::server, reason_, name);
 
-    if (false == bool(m_nymServer)) {
+    if (false == bool(nym_server_)) {
         LogError()(OT_PRETTY_CLASS())("Error: Failed to create server nym.")
             .Flush();
         OT_FAIL;
     }
 
-    if (!m_nymServer->VerifyPseudonym()) { OT_FAIL; }
+    if (!nym_server_->VerifyPseudonym()) { OT_FAIL; }
 
-    const auto& nymID = m_nymServer->ID();
+    const auto& nymID = nym_server_->ID();
     const UnallocatedCString defaultTerms =
         "This is an example server contract.";
     const UnallocatedCString& userTerms = api_.GetUserTerms();
@@ -246,7 +246,7 @@ void Server::CreateMainFile(bool& mainFileExists)
     const auto& args = api_.GetOptions();
     auto bindIP = UnallocatedCString{args.NotaryBindIP()};
 
-    if (5 > bindIP.size()) { bindIP = DEFAULT_BIND_IP; }
+    if (5 > bindIP.size()) { bindIP = default_bind_ip_; }
 
     bool notUsed = false;
     api_.Config().Set_str(
@@ -256,15 +256,15 @@ void Server::CreateMainFile(bool& mainFileExists)
         notUsed);
     const auto publicPort = [&] {
         auto out = args.NotaryPublicPort();
-        out = (MAX_TCP_PORT < out) ? DEFAULT_PORT : out;
-        out = (MIN_TCP_PORT > out) ? DEFAULT_PORT : out;
+        out = (max_tcp_port_ < out) ? default_port_ : out;
+        out = (min_tcp_port_ > out) ? default_port_ : out;
 
         return out;
     }();
     const auto bindPort = [&] {
         auto out = args.NotaryBindPort();
-        out = (MAX_TCP_PORT < out) ? DEFAULT_PORT : out;
-        out = (MIN_TCP_PORT > out) ? DEFAULT_PORT : out;
+        out = (max_tcp_port_ < out) ? default_port_ : out;
+        out = (min_tcp_port_ > out) ? default_port_ : out;
 
         return out;
     }();
@@ -338,12 +338,12 @@ void Server::CreateMainFile(bool& mainFileExists)
         }
 
         if (0 == endpoints.size()) {
-            LogConsole()("* Adding default endpoint: ")(DEFAULT_EXTERNAL_IP)
+            LogConsole()("* Adding default endpoint: ")(default_external_ip_)
                 .Flush();
             endpoints.emplace_back(
                 AddressType::IPV4,
                 contract::ProtocolVersion::Legacy,
-                DEFAULT_EXTERNAL_IP,
+                default_external_ip_,
                 publicPort,
                 1);
         }
@@ -394,7 +394,7 @@ void Server::CreateMainFile(bool& mainFileExists)
 
     strNotaryID = String::Factory(contract->ID())->Get();
 
-    OT_ASSERT(m_nymServer);
+    OT_ASSERT(nym_server_);
 
     {
         auto nymData = api_.Wallet().mutable_Nym(nymID, reason_);
@@ -405,9 +405,9 @@ void Server::CreateMainFile(bool& mainFileExists)
         }
     }
 
-    m_nymServer = api_.Wallet().Nym(nymID);
+    nym_server_ = api_.Wallet().Nym(nymID);
 
-    OT_ASSERT(m_nymServer);
+    OT_ASSERT(nym_server_);
 
     auto proto = proto::ServerContract{};
     if (false == contract->Serialize(proto, true)) {
@@ -446,7 +446,7 @@ void Server::CreateMainFile(bool& mainFileExists)
     OTDB::StorePlainString(
         api_, json, api_.DataFolder().string(), SEED_BACKUP_FILE, "", "", "");
 
-    mainFileExists = mainFile_.CreateMainFile(
+    mainFileExists = main_file_.CreateMainFile(
         strBookended->Get(), strNotaryID, nymID.asBase58(API().Crypto()));
 
     api_.Config().Save();
@@ -454,7 +454,7 @@ void Server::CreateMainFile(bool& mainFileExists)
 
 void Server::Init(bool readOnly)
 {
-    m_bReadOnly = readOnly;
+    read_only_ = readOnly;
 
     if (!ConfigLoader::load(api_, api_.Config(), WalletFilename())) {
         LogError()(OT_PRETTY_CLASS())("Unable to Load Config File!").Flush();
@@ -488,7 +488,7 @@ void Server::Init(bool readOnly)
 
     OT_ASSERT(mainFileExists);
 
-    if (false == mainFile_.LoadMainFile(readOnly)) {
+    if (false == main_file_.LoadMainFile(readOnly)) {
         LogError()(OT_PRETTY_CLASS())(
             "Error in Loading Main File, re-creating.")
             .Flush();
@@ -503,7 +503,7 @@ void Server::Init(bool readOnly)
 
         OT_ASSERT(mainFileExists);
 
-        if (!mainFile_.LoadMainFile(readOnly)) { OT_FAIL; }
+        if (!main_file_.LoadMainFile(readOnly)) { OT_FAIL; }
     }
 
     auto password = api_.Crypto().Encode().Nonce(16);
@@ -532,9 +532,9 @@ auto Server::LoadServerNym(const identifier::Nym& nymID) -> bool
         return false;
     }
 
-    m_nymServer = nym;
+    nym_server_ = nym;
 
-    OT_ASSERT(m_nymServer);
+    OT_ASSERT(nym_server_);
 
     return true;
 }
@@ -670,7 +670,7 @@ auto Server::DropMessageToNymbox(
     const Message* pMsg,
     const String& pstrMessage,
     const char* szCommand) -> bool  // If you pass something here, it will
-{                                   // replace pMsg->m_strCommand below.
+{                                   // replace pMsg->command_ below.
     OT_ASSERT_MSG(
         !((nullptr == pMsg) && (pstrMessage.empty())),
         "pMsg and pstrMessage -- these can't BOTH be nullptr.\n");
@@ -711,29 +711,28 @@ auto Server::DropMessageToNymbox(
         theMsgAngel.reset(api_.Factory().InternalSession().Message().release());
 
         if (nullptr != szCommand) {
-            theMsgAngel->m_strCommand = String::Factory(szCommand);
+            theMsgAngel->command_ = String::Factory(szCommand);
         } else {
             switch (theType) {
                 case transactionType::message:
-                    theMsgAngel->m_strCommand =
-                        String::Factory("sendNymMessage");
+                    theMsgAngel->command_ = String::Factory("sendNymMessage");
                     break;
                 case transactionType::instrumentNotice:
-                    theMsgAngel->m_strCommand =
+                    theMsgAngel->command_ =
                         String::Factory("sendNymInstrument");
                     break;
                 default:
                     break;  // should never happen.
             }
         }
-        theMsgAngel->m_strNotaryID = String::Factory(m_notaryID);
-        theMsgAngel->m_bSuccess = true;
-        SENDER_NYM_ID.GetString(API().Crypto(), theMsgAngel->m_strNymID);
+        theMsgAngel->notary_id_ = String::Factory(notary_id_);
+        theMsgAngel->success_ = true;
+        SENDER_NYM_ID.GetString(API().Crypto(), theMsgAngel->nym_id_);
         RECIPIENT_NYM_ID.GetString(
             API().Crypto(),
-            theMsgAngel->m_strNymID2);  // set the recipient ID
-                                        // in theMsgAngel to match our
-                                        // recipient ID.
+            theMsgAngel->nym_id2_);  // set the recipient ID
+                                     // in theMsgAngel to match our
+                                     // recipient ID.
         // Load up the recipient's public key (so we can encrypt the envelope
         // to him that will contain the payment instrument.)
         //
@@ -741,7 +740,7 @@ auto Server::DropMessageToNymbox(
 
         // Wrap the message up into an envelope and attach it to theMsgAngel.
         auto theEnvelope = api_.Factory().Envelope();
-        theMsgAngel->m_ascPayload->Release();
+        theMsgAngel->payload_->Release();
 
         if ((!pstrMessage.empty()) &&
             theEnvelope->Seal(
@@ -751,13 +750,13 @@ auto Server::DropMessageToNymbox(
                                                                  // theEnvelope,
             // using nymRecipient's
             // public key.
-            theEnvelope->Armored(theMsgAngel->m_ascPayload))  // Grab the
-                                                              // sealed
-                                                              // version as
+            theEnvelope->Armored(theMsgAngel->payload_))  // Grab the
+                                                          // sealed
+                                                          // version as
         // base64-encoded string, into
-        // theMsgAngel->m_ascPayload.
+        // theMsgAngel->payload_.
         {
-            theMsgAngel->SignContract(*m_nymServer, reason_);
+            theMsgAngel->SignContract(*nym_server_, reason_);
             theMsgAngel->SaveContract();
         } else {
             LogError()(OT_PRETTY_CLASS())(
@@ -792,11 +791,11 @@ auto Server::DropMessageToNymbox(
     if ((theLedger->LoadNymbox() &&  // I think this loads the box
                                      // receipts too, since I didn't call
                                      // "LoadNymboxNoVerify"
-         //          theLedger.VerifyAccount(m_nymServer)    &&    // This loads
+         //          theLedger.VerifyAccount(nym_server_)    &&    // This loads
          // all the Box Receipts, which is unnecessary.
          theLedger->VerifyContractID() &&  // Instead, we'll verify the IDs and
                                            // Signature only.
-         theLedger->VerifySignature(*m_nymServer))) {
+         theLedger->VerifySignature(*nym_server_))) {
         // Create the instrumentNotice to put in the Nymbox.
         auto pTransaction{api_.Factory().InternalSession().Transaction(
             *theLedger, theType, originType::not_applicable, lTransNum)};
@@ -823,7 +822,7 @@ auto Server::DropMessageToNymbox(
             // is signed by sender, and envelope is encrypted
             // to recipient.
 
-            pTransaction->SignContract(*m_nymServer, reason_);
+            pTransaction->SignContract(*nym_server_, reason_);
             pTransaction->SaveContract();
             std::shared_ptr<OTTransaction> transaction{pTransaction.release()};
             theLedger->AddTransaction(transaction);  // Add the message
@@ -832,7 +831,7 @@ auto Server::DropMessageToNymbox(
                                                      // cleanup.)
 
             theLedger->ReleaseSignatures();
-            theLedger->SignContract(*m_nymServer, reason_);
+            theLedger->SignContract(*nym_server_, reason_);
             theLedger->SaveContract();
             theLedger->SaveNymbox();  // We don't grab the
                                       // Nymbox hash here,
@@ -876,7 +875,7 @@ auto Server::GetConnectInfo(
     UnallocatedCString& strHostname,
     std::uint32_t& nPort) const -> bool
 {
-    auto contract = api_.Wallet().Server(m_notaryID);
+    auto contract = api_.Wallet().Server(notary_id_);
     UnallocatedCString contractHostname{};
     std::uint32_t contractPort{};
     const auto haveEndpoints =
@@ -889,17 +888,17 @@ auto Server::GetConnectInfo(
     const bool haveIP = api_.Config().CheckSet_str(
         String::Factory(SERVER_CONFIG_LISTEN_SECTION),
         String::Factory("bindip"),
-        String::Factory(DEFAULT_BIND_IP),
+        String::Factory(default_bind_ip_),
         strHostname,
         notUsed);
     const bool havePort = api_.Config().CheckSet_long(
         String::Factory(SERVER_CONFIG_LISTEN_SECTION),
         String::Factory(SERVER_CONFIG_PORT_KEY),
-        DEFAULT_PORT,
+        default_port_,
         port,
         notUsed);
-    port = (MAX_TCP_PORT < port) ? DEFAULT_PORT : port;
-    port = (MIN_TCP_PORT > port) ? DEFAULT_PORT : port;
+    port = (max_tcp_port_ < port) ? default_port_ : port;
+    port = (min_tcp_port_ > port) ? default_port_ : port;
     nPort = static_cast<std::uint32_t>(port);
     api_.Config().Save();
 
@@ -925,12 +924,12 @@ auto Server::SetNotaryID(const identifier::Notary& id) noexcept -> void
 {
     OT_ASSERT(false == id.empty());
 
-    m_notaryID.set_value(id);
+    notary_id_.set_value(id);
 }
 
 auto Server::TransportKey(Data& pubkey) const -> OTSecret
 {
-    return api_.Wallet().Server(m_notaryID)->TransportKey(pubkey, reason_);
+    return api_.Wallet().Server(notary_id_)->TransportKey(pubkey, reason_);
 }
 
 Server::~Server() = default;

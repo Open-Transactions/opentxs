@@ -10,10 +10,10 @@
 namespace opentxs
 {
 BasketItem::BasketItem()
-    : SUB_CONTRACT_ID()
-    , SUB_ACCOUNT_ID()
-    , lMinimumTransferAmount(0)
-    , lClosingTransactionNo(0)
+    : sub_contract_id_()
+    , sub_account_id_()
+    , minimum_transfer_amount_(0)
+    , closing_transaction_no_(0)
 {
 }
 }  // namespace opentxs

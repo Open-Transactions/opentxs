@@ -56,15 +56,15 @@ NymFile::NymFile(const api::Session& api, Nym_p targetNym, Nym_p signerNym)
     : api_{api}
     , target_nym_{targetNym}
     , signer_nym_{signerNym}
-    , m_lUsageCredits(0)
-    , m_bMarkForDeletion(false)
-    , m_strNymFile(String::Factory())
-    , m_strVersion(String::Factory(NYMFILE_VERSION))
-    , m_strDescription(String::Factory())
-    , m_mapInboxHash()
-    , m_mapOutboxHash()
-    , m_dequeOutpayments()
-    , m_setAccounts()
+    , usage_credits_(0)
+    , mark_for_deletion_(false)
+    , nym_file_(String::Factory())
+    , version_(String::Factory(NYMFILE_VERSION))
+    , description_(String::Factory())
+    , inbox_hash_()
+    , outbox_hash_()
+    , outpayments_()
+    , accounts_()
 {
 }
 
@@ -73,17 +73,17 @@ void NymFile::AddOutpayments(std::shared_ptr<Message> theMessage)
 {
     eLock lock(shared_lock_);
 
-    m_dequeOutpayments.push_front(theMessage);
+    outpayments_.push_front(theMessage);
 }
 
 void NymFile::ClearAll()
 {
     eLock lock(shared_lock_);
 
-    m_mapInboxHash.clear();
-    m_mapOutboxHash.clear();
-    m_setAccounts.clear();
-    m_dequeOutpayments.clear();
+    inbox_hash_.clear();
+    outbox_hash_.clear();
+    accounts_.clear();
+    outpayments_.clear();
 }
 
 auto NymFile::CompareID(const identifier::Nym& rhs) const -> bool
@@ -141,7 +141,7 @@ auto NymFile::deserialize_nymfile(
                 const auto strNodeName = String::Factory(xml->getNodeName());
 
                 if (strNodeName->Compare("nymData")) {
-                    m_strVersion =
+                    version_ =
                         String::Factory(xml->getAttributeValue("version"));
                     const auto UserNymID =
                         String::Factory(xml->getAttributeValue("nymID"));
@@ -151,30 +151,30 @@ auto NymFile::deserialize_nymfile(
                         String::Factory(xml->getAttributeValue("usageCredits"));
 
                     if (strCredits->GetLength() > 0) {
-                        m_lUsageCredits = strCredits->ToLong();
+                        usage_credits_ = strCredits->ToLong();
                     } else {
-                        m_lUsageCredits = 0;  // This is the default anyway, but
+                        usage_credits_ = 0;  // This is the default anyway, but
                     }
                     // just being safe...
 
                     if (UserNymID->GetLength()) {
                         LogDebug()(OT_PRETTY_CLASS())(
-                            "Loading user, version: ")(m_strVersion.get())(
+                            "Loading user, version: ")(version_.get())(
                             " NymID: ")(UserNymID.get())
                             .Flush();
                     }
                     bSuccess = true;
-                    convert = (String::Factory("1.0")->Compare(m_strVersion));
+                    convert = (String::Factory("1.0")->Compare(version_));
 
                     if (convert) {
                         LogError()(OT_PRETTY_CLASS())(
-                            "Converting nymfile with version ")(
-                            m_strVersion.get())(".")
+                            "Converting nymfile with version ")(version_.get())(
+                            ".")
                             .Flush();
                     } else {
                         LogDetail()(OT_PRETTY_CLASS())(
                             "Not converting nymfile because version is ")(
-                            m_strVersion.get())
+                            version_.get())
                             .Flush();
                     }
                 } else if (strNodeName->Compare("nymIDSource")) {
@@ -199,7 +199,7 @@ auto NymFile::deserialize_nymfile(
                         auto pID = api_.Factory().IdentifierFromBase58(
                             strHashValue->Bytes());
                         OT_ASSERT(!pID.empty());
-                        m_mapInboxHash.emplace(strAccountID->Get(), pID);
+                        inbox_hash_.emplace(strAccountID->Get(), pID);
                     }
                 } else if (strNodeName->Compare("outboxHashItem")) {
                     const auto strAccountID =
@@ -222,10 +222,10 @@ auto NymFile::deserialize_nymfile(
                             api_.Factory().IdentifierFromBase58(
                                 strHashValue->Bytes());
                         OT_ASSERT(!pID.empty());
-                        m_mapOutboxHash.emplace(strAccountID->Get(), pID);
+                        outbox_hash_.emplace(strAccountID->Get(), pID);
                     }
                 } else if (strNodeName->Compare("MARKED_FOR_DELETION")) {
-                    m_bMarkForDeletion = true;
+                    mark_for_deletion_ = true;
                     LogDebug()(OT_PRETTY_CLASS())(
                         "This nym has been MARKED_FOR_DELETION at some "
                         "point prior.")
@@ -234,7 +234,7 @@ auto NymFile::deserialize_nymfile(
                     auto strID = String::Factory(xml->getAttributeValue("ID"));
 
                     if (strID->Exists()) {
-                        m_setAccounts.insert(strID->Get());
+                        accounts_.insert(strID->Get());
                         LogDebug()(OT_PRETTY_CLASS())(
                             "This nym has an asset account with the ID: ")(
                             strID.get())
@@ -287,7 +287,7 @@ auto NymFile::deserialize_nymfile(
                                             strMessage)) {
                                         std::shared_ptr<Message> message{
                                             pMessage.release()};
-                                        m_dequeOutpayments.push_back(message);
+                                        outpayments_.push_back(message);
                                     }
                                 }
                             }
@@ -312,7 +312,7 @@ auto NymFile::deserialize_nymfile(
         }  // switch
     }      // while
 
-    if (converted) { m_strVersion->Set("1.1"); }
+    if (converted) { version_->Set("1.1"); }
 
     return bSuccess;
 }
@@ -321,7 +321,7 @@ void NymFile::DisplayStatistics(opentxs::String& strOutput) const
 {
     auto lock = sLock{shared_lock_};
     const auto marked_for_deletion = [&]() -> std::string_view {
-        if (m_bMarkForDeletion) {
+        if (mark_for_deletion_) {
 
             return "(MARKED FOR DELETION)"sv;
         } else {
@@ -332,15 +332,15 @@ void NymFile::DisplayStatistics(opentxs::String& strOutput) const
     strOutput.Concatenate("Source for ID:\n"sv)
         .Concatenate(target_nym_->Source().asString())
         .Concatenate("\nDescription: "sv)
-        .Concatenate(m_strDescription)
+        .Concatenate(description_)
         .Concatenate("\n\n\n==>      Name: "sv)
         .Concatenate(target_nym_->Alias())
         .Concatenate("   "sv)
         .Concatenate(marked_for_deletion)
         .Concatenate("\n      Version: "sv)
-        .Concatenate(m_strVersion)
+        .Concatenate(version_)
         .Concatenate("\nOutpayments count: "sv)
-        .Concatenate(std::to_string(m_dequeOutpayments.size()))
+        .Concatenate(std::to_string(outpayments_.size()))
         .Concatenate("\nNym ID: "sv)
         .Concatenate(target_nym_->ID().asBase58(api_.Crypto()))
         .Concatenate("\n"sv);
@@ -384,14 +384,14 @@ auto NymFile::GetInboxHash(
     const UnallocatedCString& acct_id,
     opentxs::identifier::Generic& theOutput) const -> bool  // client-side
 {
-    return GetHash(m_mapInboxHash, acct_id, theOutput);
+    return GetHash(inbox_hash_, acct_id, theOutput);
 }
 
 auto NymFile::GetOutboxHash(
     const UnallocatedCString& acct_id,
     opentxs::identifier::Generic& theOutput) const -> bool  // client-side
 {
-    return GetHash(m_mapOutboxHash, acct_id, theOutput);
+    return GetHash(outbox_hash_, acct_id, theOutput);
 }
 
 // Look up a transaction by transaction number and see if it is in the ledger.
@@ -403,13 +403,13 @@ auto NymFile::GetOutpaymentsByIndex(std::int32_t nIndex) const
     const std::uint32_t uIndex = nIndex;
 
     // Out of bounds.
-    if (m_dequeOutpayments.empty() || (nIndex < 0) ||
-        (uIndex >= m_dequeOutpayments.size())) {
+    if (outpayments_.empty() || (nIndex < 0) ||
+        (uIndex >= outpayments_.size())) {
 
         return nullptr;
     }
 
-    return m_dequeOutpayments.at(nIndex);
+    return outpayments_.at(nIndex);
 }
 
 auto NymFile::GetOutpaymentsByTransNum(
@@ -423,7 +423,7 @@ auto NymFile::GetOutpaymentsByTransNum(
     const std::int32_t nCount = GetOutpaymentsCount();
 
     for (std::int32_t nIndex = 0; nIndex < nCount; ++nIndex) {
-        auto pMsg = m_dequeOutpayments.at(nIndex);
+        auto pMsg = outpayments_.at(nIndex);
         OT_ASSERT(false != bool(pMsg));
         auto strPayment = String::Factory();
         std::unique_ptr<OTPayment> payment;
@@ -433,8 +433,8 @@ auto NymFile::GetOutpaymentsByTransNum(
         // There isn't any encrypted envelope this time, since it's my
         // outPayments box.
         //
-        if (pMsg->m_ascPayload->Exists() &&
-            pMsg->m_ascPayload->GetString(strPayment) && strPayment->Exists()) {
+        if (pMsg->payload_->Exists() && pMsg->payload_->GetString(strPayment) &&
+            strPayment->Exists()) {
             pPayment.reset(
                 api_.Factory().InternalSession().Payment(strPayment).release());
 
@@ -460,7 +460,7 @@ auto NymFile::GetOutpaymentsByTransNum(
 /// return the number of payments items available for this Nym.
 auto NymFile::GetOutpaymentsCount() const -> std::int32_t
 {
-    return static_cast<std::int32_t>(m_dequeOutpayments.size());
+    return static_cast<std::int32_t>(outpayments_.size());
 }
 
 auto NymFile::LoadSignedNymFile(const PasswordPrompt& reason) -> bool
@@ -554,22 +554,22 @@ void NymFile::RemoveAllNumbers(const opentxs::String& pstrNotaryID)
 
     // This is mapped to acct_id, not notary_id.
     // (So we just wipe them all.)
-    for (auto it(m_mapInboxHash.begin()); it != m_mapInboxHash.end(); ++it) {
+    for (auto it(inbox_hash_.begin()); it != inbox_hash_.end(); ++it) {
         listOfInboxHash.push_back(it);
     }
 
     // This is mapped to acct_id, not notary_id.
     // (So we just wipe them all.)
-    for (auto it(m_mapOutboxHash.begin()); it != m_mapOutboxHash.end(); ++it) {
+    for (auto it(outbox_hash_.begin()); it != outbox_hash_.end(); ++it) {
         listOfOutboxHash.push_back(it);
     }
 
     while (!listOfInboxHash.empty()) {
-        m_mapInboxHash.erase(listOfInboxHash.back());
+        inbox_hash_.erase(listOfInboxHash.back());
         listOfInboxHash.pop_back();
     }
     while (!listOfOutboxHash.empty()) {
-        m_mapOutboxHash.erase(listOfOutboxHash.back());
+        outbox_hash_.erase(listOfOutboxHash.back());
         listOfOutboxHash.pop_back();
     }
 }
@@ -580,19 +580,19 @@ auto NymFile::RemoveOutpaymentsByIndex(const std::int32_t nIndex) -> bool
     const std::uint32_t uIndex = nIndex;
 
     // Out of bounds.
-    if (m_dequeOutpayments.empty() || (nIndex < 0) ||
-        (uIndex >= m_dequeOutpayments.size())) {
+    if (outpayments_.empty() || (nIndex < 0) ||
+        (uIndex >= outpayments_.size())) {
         LogError()(OT_PRETTY_CLASS())("Error: Index out of bounds: signed: ")(
             nIndex)(". Unsigned: ")(uIndex)(" (deque size is ")(
-            m_dequeOutpayments.size())(").")
+            outpayments_.size())(").")
             .Flush();
         return false;
     }
 
-    auto pMessage = m_dequeOutpayments.at(nIndex);
+    auto pMessage = outpayments_.at(nIndex);
     OT_ASSERT(false != bool(pMessage));
 
-    m_dequeOutpayments.erase(m_dequeOutpayments.begin() + uIndex);
+    outpayments_.erase(outpayments_.begin() + uIndex);
 
     return true;
 }
@@ -608,8 +608,8 @@ auto NymFile::RemoveOutpaymentsByTransNum(
     const std::uint32_t uIndex = nReturnIndex;
 
     if ((nullptr != pMsg) && (nReturnIndex > (-1)) &&
-        (uIndex < m_dequeOutpayments.size())) {
-        m_dequeOutpayments.erase(m_dequeOutpayments.begin() + uIndex);
+        (uIndex < outpayments_.size())) {
+        outpayments_.erase(outpayments_.begin() + uIndex);
         return true;
     }
     return false;
@@ -633,11 +633,11 @@ auto NymFile::serialize_nymfile(const T& lock, opentxs::String& strNym) const
 
     auto nymID = String::Factory(target_nym_->ID());
 
-    tag.add_attribute("version", m_strVersion->Get());
+    tag.add_attribute("version", version_->Get());
     tag.add_attribute("nymID", nymID->Get());
 
-    if (m_lUsageCredits != 0) {
-        tag.add_attribute("usageCredits", std::to_string(m_lUsageCredits));
+    if (usage_credits_ != 0) {
+        tag.add_attribute("usageCredits", std::to_string(usage_credits_));
     }
 
     target_nym_->SerializeNymIDSource(tag);
@@ -646,15 +646,15 @@ auto NymFile::serialize_nymfile(const T& lock, opentxs::String& strNym) const
     // Actual deletion occurs during maintenance sweep
     // (targeting marked nyms...)
     //
-    if (m_bMarkForDeletion) {
+    if (mark_for_deletion_) {
         tag.add_tag(
             "MARKED_FOR_DELETION",
             "THIS NYM HAS BEEN MARKED "
             "FOR DELETION AT ITS OWN REQUEST");
     }
 
-    if (!(m_dequeOutpayments.empty())) {
-        for (auto pMessage : m_dequeOutpayments) {
+    if (!(outpayments_.empty())) {
+        for (auto pMessage : outpayments_) {
             OT_ASSERT(false != bool(pMessage));
 
             auto strOutpayments = String::Factory(*pMessage);
@@ -674,8 +674,8 @@ auto NymFile::serialize_nymfile(const T& lock, opentxs::String& strNym) const
     // These are used on the server side.
     // (That's why you don't see the server ID saved here.)
     //
-    if (!(m_setAccounts.empty())) {
-        for (const auto& it : m_setAccounts) {
+    if (!(accounts_.empty())) {
+        for (const auto& it : accounts_) {
             UnallocatedCString strID(it);
             TagPtr pTag(new Tag("ownsAssetAcct"));
             pTag->add_attribute("ID", strID);
@@ -684,7 +684,7 @@ auto NymFile::serialize_nymfile(const T& lock, opentxs::String& strNym) const
     }
 
     // client-side
-    for (const auto& it : m_mapInboxHash) {
+    for (const auto& it : inbox_hash_) {
         UnallocatedCString strAcctID = it.first;
         const identifier::Generic& theID = it.second;
 
@@ -698,7 +698,7 @@ auto NymFile::serialize_nymfile(const T& lock, opentxs::String& strNym) const
     }  // for
 
     // client-side
-    for (const auto& it : m_mapOutboxHash) {
+    for (const auto& it : outbox_hash_) {
         UnallocatedCString strAcctID = it.first;
         const identifier::Generic& theID = it.second;
 
@@ -767,10 +767,9 @@ auto NymFile::save_signed_nymfile(const T& lock, const PasswordPrompt& reason)
     // local directory ("nyms")
     auto theNymFile = api_.Factory().InternalSession().SignedFile(
         api_.Internal().Legacy().Nym(), strNymID);
-    theNymFile->GetFilename(m_strNymFile);
+    theNymFile->GetFilename(nym_file_);
 
-    LogVerbose()(OT_PRETTY_CLASS())("Saving nym to: ")(m_strNymFile.get())
-        .Flush();
+    LogVerbose()(OT_PRETTY_CLASS())("Saving nym to: ")(nym_file_.get()).Flush();
 
     // First we save this nym to a string...
     // Specifically, the file payload string on the OTSignedFile object.
@@ -820,7 +819,7 @@ auto NymFile::SetInboxHash(
 {
     eLock lock(shared_lock_);
 
-    return SetHash(m_mapInboxHash, acct_id, theInput);
+    return SetHash(inbox_hash_, acct_id, theInput);
 }
 
 auto NymFile::SetOutboxHash(
@@ -829,7 +828,7 @@ auto NymFile::SetOutboxHash(
 {
     eLock lock(shared_lock_);
 
-    return SetHash(m_mapOutboxHash, acct_id, theInput);
+    return SetHash(outbox_hash_, acct_id, theInput);
 }
 
 NymFile::~NymFile() { ClearAll(); }

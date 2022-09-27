@@ -52,14 +52,14 @@ public:
 
 private:
     const api::Settings& config_;
-    mutable std::int32_t sp_nIterationCount{0};
-    mutable std::int32_t sp_nSymmetricSaltSize{0};
-    mutable std::int32_t sp_nSymmetricKeySize{0};
-    mutable std::int32_t sp_nSymmetricKeySizeMax{0};
-    mutable std::int32_t sp_nSymmetricIvSize{0};
-    mutable std::int32_t sp_nSymmetricBufferSize{0};
-    mutable std::int32_t sp_nPublicKeysize{0};
-    mutable std::int32_t sp_nPublicKeysizeMax{0};
+    mutable std::int32_t sp_n_iteration_count_{0};
+    mutable std::int32_t sp_n_symmetric_salt_size_{0};
+    mutable std::int32_t sp_n_symmetric_key_size_{0};
+    mutable std::int32_t sp_n_symmetric_key_size_max_{0};
+    mutable std::int32_t sp_n_symmetric_iv_size_{0};
+    mutable std::int32_t sp_n_symmetric_buffer_size_{0};
+    mutable std::int32_t sp_n_public_keysize_{0};
+    mutable std::int32_t sp_n_public_keysize_max_{0};
 
     auto GetSetAll() const -> bool;
     auto GetSetValue(

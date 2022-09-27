@@ -417,7 +417,7 @@ auto RPC_fixture::IssueUnit(
 
     const auto& accountID =
         registered_accounts_[nymID.asBase58(ot_.Crypto())].emplace_back(
-            message->m_strAcctID->Get());
+            message->acct_id_->Get());
 
     if (accountID.empty()) { return {}; }
 
@@ -505,7 +505,7 @@ auto RPC_fixture::RegisterAccount(
     RefreshAccount(api, nymID, serverID);
     const auto& accountID =
         registered_accounts_[nymID.asBase58(ot_.Crypto())].emplace_back(
-            message->m_strAcctID->Get());
+            message->acct_id_->Get());
 
     return accountID;
 }

@@ -36,7 +36,7 @@ class Test_Authority : public ::testing::Test
 public:
     const ot::api::session::Client& client_;
     const ot::OTPasswordPrompt reason_;
-    ot::OTPasswordPrompt nonConstReason_;
+    ot::OTPasswordPrompt non_const_reason_;
 
     ot::OTSecret words_;
     const std::uint8_t version_ = 6;
@@ -45,18 +45,18 @@ public:
 
     ot::crypto::Parameters parameters_;
     std::unique_ptr<ot::identity::Source> source_;
-    std::unique_ptr<ot::identity::internal::Nym> internalNym_;
+    std::unique_ptr<ot::identity::internal::Nym> internal_nym_;
     std::unique_ptr<ot::identity::internal::Authority> authority_;
 
     Test_Authority()
         : client_(ot::Context().StartClientSession(0))
         , reason_(client_.Factory().PasswordPrompt(__func__))
-        , nonConstReason_(client_.Factory().PasswordPrompt(__func__))
+        , non_const_reason_(client_.Factory().PasswordPrompt(__func__))
         , words_(client_.Factory().SecretFromText(
               ottest::GetPaymentCodeVector3().alice_.words_))
         , parameters_()
         , source_{nullptr}
-        , internalNym_{nullptr}
+        , internal_nym_{nullptr}
         , authority_{nullptr}
     {
     }
@@ -91,7 +91,7 @@ public:
 
         source_.reset(ot::Factory::NymIDSource(client_, parameters_, reason_));
 
-        internalNym_.reset(ot::Factory::Nym(
+        internal_nym_.reset(ot::Factory::Nym(
             client_,
             parameters_,
             ot::identity::Type::individual,
@@ -99,7 +99,7 @@ public:
             reason_));
 
         const auto& nn =
-            dynamic_cast<const opentxs::identity::Nym&>(*internalNym_);
+            dynamic_cast<const opentxs::identity::Nym&>(*internal_nym_);
 
         authority_.reset(ot::Factory().Authority(
             client_, nn, *source_, parameters_, version_, reason_));
@@ -449,7 +449,7 @@ TEST_F(Test_Authority, Serialize_AddedCredentialsFirst_ShouldReturnProperData)
         serialized.masterid(),
         authority_->GetMasterCredID().asBase58(client_.Crypto()));
     EXPECT_EQ(
-        serialized.nymid(), internalNym_->ID().asBase58(client_.Crypto()));
+        serialized.nymid(), internal_nym_->ID().asBase58(client_.Crypto()));
 }
 
 auto func() -> ot::UnallocatedCString;
@@ -509,7 +509,7 @@ TEST_F(
 TEST_F(Test_Authority, Source_DefaultSetup_ShouldReturnProperData)
 {
     const auto& source = authority_->Source();
-    EXPECT_EQ(std::addressof(source), std::addressof(internalNym_->Source()));
+    EXPECT_EQ(std::addressof(source), std::addressof(internal_nym_->Source()));
 }
 
 TEST_F(Test_Authority, Unlock_DefaultSetup_ShouldReturnProperData)
@@ -534,7 +534,7 @@ TEST_F(Test_Authority, Unlock_DefaultSetup_ShouldReturnProperData)
         testTag,
         ot::crypto::key::asymmetric::Algorithm::Secp256k1,
         symmetricKey,
-        nonConstReason_));
+        non_const_reason_));
 }
 
 TEST_F(Test_Authority, Unlock_DefaultSetup_ShouldReturnProperData2)
@@ -563,7 +563,7 @@ TEST_F(Test_Authority, Unlock_DefaultSetup_ShouldReturnProperData2)
         testTag,
         ot::crypto::key::asymmetric::Algorithm::Secp256k1,
         key,
-        nonConstReason_));
+        non_const_reason_));
 }
 
 TEST_F(Test_Authority, TransportKey_DefaultSetup_ShouldReturnTrue)

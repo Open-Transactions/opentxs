@@ -248,14 +248,14 @@ TEST_F(Test_PaymentCode_v1_v3, blind_alice)
     }
     {
         const auto expect =
-            api_.Factory().DataFromHex(GetPaymentCodeVector3().chris_.F_);
+            api_.Factory().DataFromHex(GetPaymentCodeVector3().chris_.f_);
         const auto got = api_.Factory().DataFromBytes(ot::reader(F));
 
         EXPECT_EQ(expect, got);
     }
     {
         const auto expect =
-            api_.Factory().DataFromHex(GetPaymentCodeVector3().chris_.G_);
+            api_.Factory().DataFromHex(GetPaymentCodeVector3().chris_.g_);
         const auto got = api_.Factory().DataFromBytes(ot::reader(G));
         constexpr auto ignore = 16_uz;
         const auto v1 =

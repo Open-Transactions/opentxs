@@ -564,12 +564,12 @@ auto Operation::construct_add_claim() -> std::shared_ptr<Message>
     PREPARE_CONTEXT();
     CREATE_MESSAGE(addClaim, -1, true, true);
 
-    message.m_strNymID2 = String::Factory(
+    message.nym_id2_ = String::Factory(
         std::to_string(static_cast<std::uint32_t>(claim_section_)));
-    message.m_strInstrumentDefinitionID = String::Factory(
+    message.instrument_definition_id_ = String::Factory(
         std::to_string(static_cast<std::uint32_t>(claim_type_)));
-    message.m_strAcctID = memo_;
-    message.m_bBool = bool_;
+    message.acct_id_ = memo_;
+    message.bool_ = bool_;
 
     FINISH_MESSAGE(addClaim);
 }
@@ -602,7 +602,7 @@ auto Operation::construct_convey_payment() -> std::shared_ptr<Message>
     PREPARE_CONTEXT();
     CREATE_MESSAGE(sendNymInstrument, target_nym_id_, -1, true, true);
 
-    const RequestNumber requestNumber{message.m_strRequestNum->ToLong()};
+    const RequestNumber requestNumber{message.request_num_->ToLong()};
     auto serialized = String::Factory();
     const bool havePayment = payment.GetPaymentContents(serialized);
 
@@ -617,7 +617,7 @@ auto Operation::construct_convey_payment() -> std::shared_ptr<Message>
     auto sealed = envelope->Seal(
         {recipientNym, context.Nym()}, serialized->Bytes(), reason_);
 
-    if (sealed) { sealed &= envelope->Armored(message.m_ascPayload); }
+    if (sealed) { sealed &= envelope->Armored(message.payload_); }
 
     if (false == sealed) {
         LogError()(OT_PRETTY_CLASS())("Failed encrypt payment.").Flush();
@@ -804,7 +804,7 @@ auto Operation::construct_download_contract() -> std::shared_ptr<Message>
     PREPARE_CONTEXT();
     CREATE_MESSAGE(getInstrumentDefinition, -1, true, true);
 
-    message.m_strInstrumentDefinitionID = String::Factory(generic_id_);
+    message.instrument_definition_id_ = String::Factory(generic_id_);
     message.enum_ = static_cast<std::uint8_t>([&] {
         static const auto map =
             robin_hood::unordered_flat_map<identifier::Type, contract::Type>{
@@ -838,7 +838,7 @@ auto Operation::construct_download_mint() -> std::shared_ptr<Message>
     PREPARE_CONTEXT();
     CREATE_MESSAGE(getMint, -1, true, true);
 
-    message.m_strInstrumentDefinitionID = String::Factory(target_unit_id_);
+    message.instrument_definition_id_ = String::Factory(target_unit_id_);
 
     FINISH_MESSAGE(getMint);
 }
@@ -849,7 +849,7 @@ auto Operation::construct_get_account_data(const identifier::Generic& accountID)
     PREPARE_CONTEXT();
     CREATE_MESSAGE(getAccountData, -1, true, true);
 
-    message.m_strAcctID = String::Factory(accountID);
+    message.acct_id_ = String::Factory(accountID);
 
     FINISH_MESSAGE(getAccountData);
 }
@@ -875,7 +875,7 @@ auto Operation::construct_issue_unit_definition() -> std::shared_ptr<Message>
         CREATE_MESSAGE(registerInstrumentDefinition, -1, true, true);
 
         auto id = contract->ID();
-        id.GetString(api_.Crypto(), message.m_strInstrumentDefinitionID);
+        id.GetString(api_.Crypto(), message.instrument_definition_id_);
         auto serialized = proto::UnitDefinition{};
         if (false == contract->Serialize(serialized, true)) {
             LogError()(OT_PRETTY_CLASS())("Failed to serialize unit definition")
@@ -883,8 +883,7 @@ auto Operation::construct_issue_unit_definition() -> std::shared_ptr<Message>
 
             return {};
         }
-        message.m_ascPayload =
-            api_.Factory().InternalSession().Armored(serialized);
+        message.payload_ = api_.Factory().InternalSession().Armored(serialized);
 
         FINISH_MESSAGE(registerInstrumentDefinition);
     } catch (...) {
@@ -916,7 +915,7 @@ auto Operation::construct_publish_nym() -> std::shared_ptr<Message>
             .Flush();
         return {};
     }
-    message.m_ascPayload = api_.Factory().InternalSession().Armored(publicNym);
+    message.payload_ = api_.Factory().InternalSession().Armored(publicNym);
 
     FINISH_MESSAGE(registerContract);
 }
@@ -938,8 +937,7 @@ auto Operation::construct_publish_server() -> std::shared_ptr<Message>
 
             return {};
         }
-        message.m_ascPayload =
-            api_.Factory().InternalSession().Armored(serialized);
+        message.payload_ = api_.Factory().InternalSession().Armored(serialized);
 
         FINISH_MESSAGE(registerContract);
     } catch (...) {
@@ -967,8 +965,7 @@ auto Operation::construct_publish_unit() -> std::shared_ptr<Message>
 
             return {};
         }
-        message.m_ascPayload =
-            api_.Factory().InternalSession().Armored(serialized);
+        message.payload_ = api_.Factory().InternalSession().Armored(serialized);
 
         FINISH_MESSAGE(registerContract);
     } catch (...) {
@@ -1001,7 +998,7 @@ auto Operation::construct_register_account() -> std::shared_ptr<Message>
         PREPARE_CONTEXT();
         CREATE_MESSAGE(registerAccount, -1, true, true);
 
-        message.m_strInstrumentDefinitionID = String::Factory(target_unit_id_);
+        message.instrument_definition_id_ = String::Factory(target_unit_id_);
 
         FINISH_MESSAGE(registerAccount);
     } catch (...) {
@@ -1021,7 +1018,7 @@ auto Operation::construct_register_nym() -> std::shared_ptr<Message>
         LogError()(OT_PRETTY_CLASS())("Failed to serialize nym.");
         return {};
     }
-    message.m_ascPayload = api_.Factory().InternalSession().Armored(publicNym);
+    message.payload_ = api_.Factory().InternalSession().Armored(publicNym);
 
     FINISH_MESSAGE(registerNym);
 }
@@ -1031,7 +1028,7 @@ auto Operation::construct_request_admin() -> std::shared_ptr<Message>
     PREPARE_CONTEXT();
     CREATE_MESSAGE(requestAdmin, -1, true, true);
 
-    message.m_strAcctID = memo_;
+    message.acct_id_ = memo_;
 
     FINISH_MESSAGE(requestAdmin);
 }
@@ -1069,7 +1066,7 @@ auto Operation::construct_send_nym_object(
     auto sealed =
         envelope->Seal({recipient, context.Nym()}, plaintext->Bytes(), reason_);
 
-    if (sealed) { sealed &= envelope->Armored(message.m_ascPayload); }
+    if (sealed) { sealed &= envelope->Armored(message.payload_); }
 
     if (false == sealed) {
         LogError()(OT_PRETTY_CLASS())("Failed encrypt object.").Flush();
@@ -1077,7 +1074,7 @@ auto Operation::construct_send_nym_object(
         return {};
     }
 
-    senderCopy.Set(message.m_ascPayload);
+    senderCopy.Set(message.payload_);
 
     {
         auto copy = api_.Factory().Envelope(senderCopy);
@@ -1165,7 +1162,7 @@ auto Operation::construct_send_message() -> std::shared_ptr<Message>
     if (false == bool(pOutput)) { return {}; }
 
     auto& output = *pOutput;
-    const TransactionNumber number{output.m_strRequestNum->ToLong()};
+    const TransactionNumber number{output.request_num_->ToLong()};
     [[maybe_unused]] auto [notUsed, pOutmail] =
         context.InternalServer().InitializeServerCommand(
             MessageType::outmail, target_nym_id_, number, false, false);
@@ -1177,7 +1174,7 @@ auto Operation::construct_send_message() -> std::shared_ptr<Message>
     }
 
     auto& outmail = *pOutmail;
-    outmail.m_ascPayload->Set(envelope);
+    outmail.payload_->Set(envelope);
     outmail.SignContract(nym, reason_);
     outmail.SaveContract();
     outmail_message_ = std::move(pOutmail);
@@ -1624,9 +1621,9 @@ auto Operation::download_box_receipt(
 
     OT_ASSERT(command);
 
-    command->m_strAcctID = String::Factory(accountID);
-    command->m_lDepth = static_cast<std::int32_t>(box);
-    command->m_lTransactionNum = number;
+    command->acct_id_ = String::Factory(accountID);
+    command->depth_ = static_cast<std::int32_t>(box);
+    command->transaction_num_ = number;
     const auto finalized = context.FinalizeServerCommand(*command, reason_);
 
     if (false == finalized) {
@@ -1674,7 +1671,7 @@ void Operation::evaluate_transaction_reply(
 
     auto& message = *pMessage;
     auto accountID =
-        api_.Factory().IdentifierFromBase58(message.m_strAcctID->Bytes());
+        api_.Factory().IdentifierFromBase58(message.acct_id_->Bytes());
     const auto success = evaluate_transaction_reply(accountID, message);
 
     if (false == success) {
@@ -1690,19 +1687,19 @@ auto Operation::evaluate_transaction_reply(
     const identifier::Generic& accountID,
     const Message& reply) const -> bool
 {
-    if (false == reply.m_bSuccess) {
+    if (false == reply.success_) {
         LogError()(OT_PRETTY_CLASS())("Message failure").Flush();
 
         return false;
     }
 
-    switch (Message::Type(reply.m_strCommand->Get())) {
+    switch (Message::Type(reply.command_->Get())) {
         case MessageType::notarizeTransactionResponse:
         case MessageType::processInboxResponse:
         case MessageType::processNymboxResponse:
             break;
         default: {
-            LogError()(OT_PRETTY_CLASS())(reply.m_strCommand.get())(
+            LogError()(OT_PRETTY_CLASS())(reply.command_.get())(
                 " is not a transaction")
                 .Flush();
 
@@ -1710,7 +1707,7 @@ auto Operation::evaluate_transaction_reply(
         }
     }
 
-    const auto serialized = String::Factory(reply.m_ascPayload);
+    const auto serialized = String::Factory(reply.payload_);
 
     if (false == serialized->Exists()) {
         LogConsole()(OT_PRETTY_CLASS())("No response ledger found on message.")
@@ -1835,7 +1832,7 @@ void Operation::execute()
 
                 auto& reply = finished.second;
                 const auto accountID = api_.Factory().IdentifierFromBase58(
-                    reply->m_strAcctID->Bytes());
+                    reply->acct_id_->Bytes());
                 affected_accounts_.emplace(std::move(accountID));
                 set_result(std::move(finished));
                 state_.store(State::AccountPost);

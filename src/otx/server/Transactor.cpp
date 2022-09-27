@@ -33,10 +33,10 @@ namespace opentxs::server
 Transactor::Transactor(Server& server, const PasswordPrompt& reason)
     : server_(server)
     , reason_(reason)
-    , transactionNumber_(0)
-    , idToBasketMap_()
-    , contractIdToBasketAccountId_()
-    , voucherAccounts_(server.API())
+    , transaction_number_(0)
+    , id_to_basket_map_()
+    , contract_id_to_basket_account_id_()
+    , voucher_accounts_(server.API())
 {
 }
 
@@ -51,22 +51,22 @@ Transactor::Transactor(Server& server, const PasswordPrompt& reason)
 auto Transactor::issueNextTransactionNumber(
     TransactionNumber& lTransactionNumber) -> bool
 {
-    // transactionNumber_ stores the last VALID AND ISSUED transaction number.
+    // transaction_number_ stores the last VALID AND ISSUED transaction number.
     // So first, we increment that, since we don't want to issue the same number
     // twice.
-    transactionNumber_++;
+    transaction_number_++;
 
     // Next, we save it to file.
     if (!server_.GetMainFile().SaveMainFile()) {
         LogError()(OT_PRETTY_CLASS())("Error saving main server file.").Flush();
-        transactionNumber_--;
+        transaction_number_--;
         return false;
     }
 
     // SUCCESS?
     // Now the server main file has saved the latest transaction number,
     // NOW we set it onto the parameter and return true.
-    lTransactionNumber = transactionNumber_;
+    lTransactionNumber = transaction_number_;
     return true;
 }
 
@@ -83,11 +83,11 @@ auto Transactor::issueNextTransactionNumberToNym(
     // it is recorded in his Nym file before being sent to the client (where it
     // is also recorded in his Nym file.)  That way the server always knows
     // which numbers are valid for each Nym.
-    if (!context.IssueNumber(transactionNumber_)) {
+    if (!context.IssueNumber(transaction_number_)) {
         LogError()(OT_PRETTY_CLASS())(
             ": Error adding transaction number to Nym file.")
             .Flush();
-        transactionNumber_--;
+        transaction_number_--;
         // Save it back how it was, since we're not issuing this number after
         // all.
         server_.GetMainFile().SaveMainFile();
@@ -98,7 +98,7 @@ auto Transactor::issueNextTransactionNumberToNym(
     // SUCCESS?
     // Now the server main file has saved the latest transaction number,
     // NOW we set it onto the parameter and return true.
-    lTransactionNumber = transactionNumber_;
+    lTransactionNumber = transaction_number_;
 
     return true;
 }
@@ -125,8 +125,8 @@ auto Transactor::addBasketAccountID(
          strBasketAcctID = String::Factory(BASKET_ACCOUNT_ID),
          strBasketContractID = String::Factory(BASKET_CONTRACT_ID);
 
-    idToBasketMap_[strBasketID->Get()] = strBasketAcctID->Get();
-    contractIdToBasketAccountId_[strBasketContractID->Get()] =
+    id_to_basket_map_[strBasketID->Get()] = strBasketAcctID->Get();
+    contract_id_to_basket_account_id_[strBasketContractID->Get()] =
         strBasketAcctID->Get();
 
     return true;
@@ -142,7 +142,7 @@ auto Transactor::lookupBasketAccountIDByContractID(
 {
     // Server stores a map of BASKET_ID to BASKET_ACCOUNT_ID. Let's iterate
     // through that map...
-    for (auto& it : contractIdToBasketAccountId_) {
+    for (auto& it : contract_id_to_basket_account_id_) {
         auto id_BASKET_CONTRACT =
             server_.API().Factory().IdentifierFromBase58(it.first);
         auto id_BASKET_ACCT =
@@ -169,7 +169,7 @@ auto Transactor::lookupBasketContractIDByAccountID(
 {
     // Server stores a map of BASKET_ID to BASKET_ACCOUNT_ID. Let's iterate
     // through that map...
-    for (auto& it : contractIdToBasketAccountId_) {
+    for (auto& it : contract_id_to_basket_account_id_) {
         auto id_BASKET_CONTRACT =
             server_.API().Factory().IdentifierFromBase58(it.first);
         auto id_BASKET_ACCT =
@@ -196,7 +196,7 @@ auto Transactor::lookupBasketAccountID(
 {
     // Server stores a map of BASKET_ID to BASKET_ACCOUNT_ID. Let's iterate
     // through that map...
-    for (auto& it : idToBasketMap_) {
+    for (auto& it : id_to_basket_map_) {
         auto id_BASKET = server_.API().Factory().IdentifierFromBase58(it.first);
         auto id_BASKET_ACCT =
             server_.API().Factory().IdentifierFromBase58(it.second);
@@ -223,7 +223,7 @@ auto Transactor::getVoucherAccount(
     const auto& NOTARY_NYM_ID = server_.GetServerNym().ID();
     const auto& NOTARY_ID = server_.GetServerID();
     bool bWasAcctCreated = false;
-    auto pAccount = voucherAccounts_.GetOrRegisterAccount(
+    auto pAccount = voucher_accounts_.GetOrRegisterAccount(
         server_.GetServerNym(),
         NOTARY_NYM_ID,
         INSTRUMENT_DEFINITION_ID,

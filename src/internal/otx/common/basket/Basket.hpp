@@ -110,27 +110,27 @@ public:
 
     inline auto GetMinimumTransfer() const -> const Amount&
     {
-        return m_lMinimumTransfer;
+        return minimum_transfer_;
     }
 
     inline auto GetTransferMultiple() const -> std::int32_t
     {
-        return m_nTransferMultiple;
+        return transfer_multiple_;
     }
     inline void SetTransferMultiple(std::int32_t nTransferMultiple)
     {
-        m_nTransferMultiple = nTransferMultiple;
+        transfer_multiple_ = nTransferMultiple;
     }
 
     inline auto IsExchanging() const -> bool
     {
-        return (m_nTransferMultiple > 0);
+        return (transfer_multiple_ > 0);
     }
 
-    inline auto GetExchangingIn() const -> bool { return m_bExchangingIn; }
+    inline auto GetExchangingIn() const -> bool { return exchanging_in_; }
     inline void SetExchangingIn(bool bDirection)
     {
-        m_bExchangingIn = bDirection;
+        exchanging_in_ = bDirection;
     }
 
     auto Count() const -> std::int32_t;
@@ -140,11 +140,11 @@ public:
 
     inline auto GetClosingNum() const -> std::int64_t
     {
-        return m_lClosingTransactionNo;
+        return closing_transaction_no_;
     }
     inline void SetClosingNum(const std::int64_t& lClosingNum)
     {
-        m_lClosingTransactionNo = lClosingNum;
+        closing_transaction_no_ = lClosingNum;
     }
 
     // For generating a real basket.  The user does this part, and the server
@@ -153,7 +153,7 @@ public:
     void AddSubContract(
         const identifier::Generic& SUB_CONTRACT_ID,
         std::int64_t lMinimumTransferAmount);
-    inline void IncrementSubCount() { m_nSubCount++; }
+    inline void IncrementSubCount() { sub_count_++; }
 
     // For generating a user request to exchange in/out of a basket.
     // Assumes that SetTransferMultiple has already been called.
@@ -164,11 +164,11 @@ public:
 
     inline void SetRequestAccountID(const identifier::Generic& theAccountID)
     {
-        m_RequestAccountID = theAccountID;
+        request_account_id_ = theAccountID;
     }
     inline auto GetRequestAccountID() -> const identifier::Generic&
     {
-        return m_RequestAccountID;
+        return request_account_id_;
     }
 
     void Release() final;
@@ -190,24 +190,24 @@ public:
     ~Basket() final;
 
 protected:
-    std::int32_t m_nSubCount{0};
+    std::int32_t sub_count_{0};
     // used in the actual basket
-    Amount m_lMinimumTransfer{0};
+    Amount minimum_transfer_{0};
     // used in a request basket. If non-zero, that means this is a request
     // basket.
-    std::int32_t m_nTransferMultiple{0};
+    std::int32_t transfer_multiple_{0};
     // used in a request basket so the server knows your acct ID.
-    identifier::Generic m_RequestAccountID;
-    dequeOfBasketItems m_dequeItems;
+    identifier::Generic request_account_id_;
+    dequeOfBasketItems items_;
     // When saving, we might wish to produce a version without Account IDs
     // So that the resulting hash will be a consistent ID across different
     // servers.
-    bool m_bHideAccountID{false};
+    bool hide_account_id_{false};
     // True if exchanging INTO the basket, False if exchanging OUT of the
     // basket.
-    bool m_bExchangingIn{false};
+    bool exchanging_in_{false};
     // For the main (basket) account, in a request basket (for exchanges.)
-    TransactionNumber m_lClosingTransactionNo{0};
+    TransactionNumber closing_transaction_no_{0};
     // return -1 if error, 0 if nothing, and 1 if the node was processed.
     auto ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t final;
 

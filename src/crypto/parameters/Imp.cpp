@@ -38,15 +38,15 @@ Parameters::Imp::Imp(
     const identity::CredentialType credential,
     const identity::SourceType source,
     const std::uint8_t pcVersion) noexcept
-    : nymType_(type)
-    , credentialType_(
-          (ParameterType::rsa == nymType_) ? identity::CredentialType::Legacy
-                                           : credential)
-    , sourceType_(
-          (ParameterType::rsa == nymType_) ? identity::SourceType::PubKey
-                                           : source)
-    , sourceProofType_(
-          (identity::SourceType::Bip47 == sourceType_)
+    : nym_type_(type)
+    , credential_type_(
+          (ParameterType::rsa == nym_type_) ? identity::CredentialType::Legacy
+                                            : credential)
+    , source_type_(
+          (ParameterType::rsa == nym_type_) ? identity::SourceType::PubKey
+                                            : source)
+    , source_proof_type_(
+          (identity::SourceType::Bip47 == source_type_)
               ? identity::SourceProofType::Signature
               : identity::SourceProofType::SelfSignature)
     , payment_code_version_(
@@ -61,7 +61,7 @@ Parameters::Imp::Imp(
     , cred_index_(0)
     , default_(true)
     , use_auto_index_(true)
-    , nBits_(1024)
+    , n_bits_(1024)
     , params_()
     , source_keypair_(factory::Keypair())
     , contact_data_(nullptr)
@@ -79,9 +79,9 @@ Parameters::Imp::Imp() noexcept
 }
 
 Parameters::Imp::Imp(const Imp& rhs) noexcept
-    : Imp(rhs.nymType_,
-          rhs.credentialType_,
-          rhs.sourceType_,
+    : Imp(rhs.nym_type_,
+          rhs.credential_type_,
+          rhs.source_type_,
           rhs.payment_code_version_)
 {
     entropy_ = rhs.entropy_;
@@ -91,7 +91,7 @@ Parameters::Imp::Imp(const Imp& rhs) noexcept
     cred_index_ = rhs.cred_index_;
     default_ = rhs.default_;
     use_auto_index_ = rhs.use_auto_index_;
-    nBits_ = rhs.nBits_;
+    n_bits_ = rhs.n_bits_;
     params_ = rhs.params_;
     contact_data_ = rhs.contact_data_;
     verification_set_ = rhs.verification_set_;
@@ -131,10 +131,10 @@ auto Parameters::Imp::Hash() const noexcept -> ByteArray
 {
     if (false == hashed_.has_value()) {
         auto& out = hashed_.emplace(ByteArray{});
-        out.Concatenate(&nymType_, sizeof(nymType_));
-        out.Concatenate(&credentialType_, sizeof(credentialType_));
-        out.Concatenate(&sourceType_, sizeof(sourceType_));
-        out.Concatenate(&sourceProofType_, sizeof(sourceProofType_));
+        out.Concatenate(&nym_type_, sizeof(nym_type_));
+        out.Concatenate(&credential_type_, sizeof(credential_type_));
+        out.Concatenate(&source_type_, sizeof(source_type_));
+        out.Concatenate(&source_proof_type_, sizeof(source_proof_type_));
         out.Concatenate(&payment_code_version_, sizeof(payment_code_version_));
         out.Concatenate(&seed_style_, sizeof(seed_style_));
         out.Concatenate(&seed_language_, sizeof(seed_language_));
@@ -146,7 +146,7 @@ auto Parameters::Imp::Hash() const noexcept -> ByteArray
         out.Concatenate(&cred_index_, sizeof(cred_index_));
         out.Concatenate(&default_, sizeof(default_));
         out.Concatenate(&use_auto_index_, sizeof(use_auto_index_));
-        out.Concatenate(&nBits_, sizeof(nBits_));
+        out.Concatenate(&n_bits_, sizeof(n_bits_));
         out.Concatenate(params_.data(), params_.size());
         const auto keypair = [this] {
             auto out = Space{};

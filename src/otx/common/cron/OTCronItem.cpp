@@ -59,16 +59,15 @@ namespace opentxs
 {
 OTCronItem::OTCronItem(const api::Session& api)
     : ot_super(api)
-    , m_dequeClosingNumbers{}
-    , m_pCancelerNymID()
-    , m_bCanceled(false)
-    , m_bRemovalFlag(false)
-    , m_pCron(nullptr)
-    , serverNym_(nullptr)
-    , notaryID_()
-    , m_CREATION_DATE()
-    , m_LAST_PROCESS_DATE()
-    , m_PROCESS_INTERVAL(1)
+    , closing_numbers_{}
+    , canceler_nym_id_()
+    , canceled_(false)
+    , removal_flag_(false)
+    , cron_(nullptr)
+    , server_nym_(nullptr)
+    , creation_date_()
+    , last_process_date_()
+    , process_interval_(1)
 {
     InitCronItem();
 }
@@ -78,16 +77,15 @@ OTCronItem::OTCronItem(
     const identifier::Notary& NOTARY_ID,
     const identifier::UnitDefinition& INSTRUMENT_DEFINITION_ID)
     : ot_super(api, NOTARY_ID, INSTRUMENT_DEFINITION_ID)
-    , m_dequeClosingNumbers{}
-    , m_pCancelerNymID()
-    , m_bCanceled(false)
-    , m_bRemovalFlag(false)
-    , m_pCron(nullptr)
-    , serverNym_(nullptr)
-    , notaryID_()
-    , m_CREATION_DATE()
-    , m_LAST_PROCESS_DATE()
-    , m_PROCESS_INTERVAL(1)
+    , closing_numbers_{}
+    , canceler_nym_id_()
+    , canceled_(false)
+    , removal_flag_(false)
+    , cron_(nullptr)
+    , server_nym_(nullptr)
+    , creation_date_()
+    , last_process_date_()
+    , process_interval_(1)
 {
     InitCronItem();
 }
@@ -99,16 +97,15 @@ OTCronItem::OTCronItem(
     const identifier::Generic& ACCT_ID,
     const identifier::Nym& NYM_ID)
     : ot_super(api, NOTARY_ID, INSTRUMENT_DEFINITION_ID, ACCT_ID, NYM_ID)
-    , m_dequeClosingNumbers{}
-    , m_pCancelerNymID()
-    , m_bCanceled(false)
-    , m_bRemovalFlag(false)
-    , m_pCron(nullptr)
-    , serverNym_(nullptr)
-    , notaryID_()
-    , m_CREATION_DATE()
-    , m_LAST_PROCESS_DATE()
-    , m_PROCESS_INTERVAL(1)
+    , closing_numbers_{}
+    , canceler_nym_id_()
+    , canceled_(false)
+    , removal_flag_(false)
+    , cron_(nullptr)
+    , server_nym_(nullptr)
+    , creation_date_()
+    , last_process_date_()
+    , process_interval_(1)
 
 {
     InitCronItem();
@@ -490,10 +487,9 @@ auto OTCronItem::SaveActiveCronReceipt(const identifier::Nym& theNymID)
     }
 
     auto strFinal = String::Factory();
-    auto ascTemp = Armored::Factory(m_strRawFile);
+    auto ascTemp = Armored::Factory(raw_file_);
 
-    if (false ==
-        ascTemp->WriteArmoredString(strFinal, m_strContractType->Get())) {
+    if (false == ascTemp->WriteArmoredString(strFinal, contract_type_->Get())) {
         LogError()(OT_PRETTY_CLASS())(
             "Error saving file (failed writing armored string): ")(
             szFoldername)('/')(strNotaryID.get())('/')(filename)("")
@@ -549,10 +545,9 @@ auto OTCronItem::SaveCronReceipt() -> bool
     }
 
     auto strFinal = String::Factory();
-    auto ascTemp = Armored::Factory(m_strRawFile);
+    auto ascTemp = Armored::Factory(raw_file_);
 
-    if (false ==
-        ascTemp->WriteArmoredString(strFinal, m_strContractType->Get())) {
+    if (false == ascTemp->WriteArmoredString(strFinal, contract_type_->Get())) {
         LogError()(OT_PRETTY_CLASS())(
             "Error saving file (failed writing armored string): ")(
             szFoldername)('/')(filename)(".")
@@ -632,27 +627,27 @@ auto OTCronItem::SetDateRange(const Time VALID_FROM, const Time VALID_TO)
 //
 auto OTCronItem::GetCountClosingNumbers() const -> std::int32_t
 {
-    return static_cast<std::int32_t>(m_dequeClosingNumbers.size());
+    return static_cast<std::int32_t>(closing_numbers_.size());
 }
 
 auto OTCronItem::GetClosingTransactionNoAt(std::uint32_t nIndex) const
     -> std::int64_t
 {
-    if (m_dequeClosingNumbers.size() <= nIndex) {
+    if (closing_numbers_.size() <= nIndex) {
         LogError()(OT_PRETTY_CLASS())(
             "nIndex"
-            " is equal or larger than m_dequeClosingNumbers.size()!")
+            " is equal or larger than closing_numbers_.size()!")
             .Flush();
         OT_FAIL;
     }
 
-    return m_dequeClosingNumbers.at(nIndex);
+    return closing_numbers_.at(nIndex);
 }
 
 void OTCronItem::AddClosingTransactionNo(
     const std::int64_t& lClosingTransactionNo)
 {
-    m_dequeClosingNumbers.push_back(lClosingTransactionNo);
+    closing_numbers_.push_back(lClosingTransactionNo);
 }
 
 /// See if theNym has rights to remove this item from Cron.
@@ -729,11 +724,11 @@ auto OTCronItem::CanRemoveItemFromCron(const otx::context::Client& context)
 //
 auto OTCronItem::ProcessCron(const PasswordPrompt& reason) -> bool
 {
-    OT_ASSERT(nullptr != m_pCron);
+    OT_ASSERT(nullptr != cron_);
 
     if (IsFlaggedForRemoval()) {
         LogDebug()(OT_PRETTY_CLASS())("Flagged for removal: ")(
-            m_strContractType.get())
+            contract_type_.get())
             .Flush();
         return false;
     }
@@ -743,8 +738,7 @@ auto OTCronItem::ProcessCron(const PasswordPrompt& reason) -> bool
     // Cron even if it is NOT YET valid. But once it actually expires, this
     // will remove it.
     if (IsExpired()) {
-        LogDebug()(OT_PRETTY_CLASS())("Expired ")(m_strContractType.get())
-            .Flush();
+        LogDebug()(OT_PRETTY_CLASS())("Expired ")(contract_type_.get()).Flush();
         return false;
     }
 
@@ -785,7 +779,7 @@ void OTCronItem::HookRemovalFromCron(
     std::int64_t newTransactionNo,
     const PasswordPrompt& reason)
 {
-    auto pServerNym = serverNym_;
+    auto pServerNym = server_nym_;
     OT_ASSERT(nullptr != pServerNym);
 
     // Generate new transaction number for these new inbox receipts.
@@ -938,7 +932,7 @@ void OTCronItem::onFinalReceipt(
     Nym_p pRemover,
     const PasswordPrompt& reason)
 {
-    OT_ASSERT(nullptr != serverNym_);
+    OT_ASSERT(nullptr != server_nym_);
 
     auto context = api_.Wallet().Internal().mutable_ClientContext(
         theOriginator->ID(), reason);
@@ -1062,9 +1056,9 @@ auto OTCronItem::DropFinalReceiptToInbox(
     OTString pstrNote,
     OTString pstrAttachment) -> bool
 {
-    OT_ASSERT(nullptr != serverNym_);
+    OT_ASSERT(nullptr != server_nym_);
 
-    const identity::Nym& pServerNym = *serverNym_;
+    const identity::Nym& pServerNym = *server_nym_;
     // Load the inbox in case it already exists.
     auto theInbox{api_.Factory().InternalSession().Ledger(
         NYM_ID, ACCOUNT_ID, GetNotaryID())};
@@ -1241,9 +1235,9 @@ auto OTCronItem::DropFinalReceiptToNymbox(
     OTString pstrNote,
     OTString pstrAttachment) -> bool
 {
-    OT_ASSERT(nullptr != serverNym_);
+    OT_ASSERT(nullptr != server_nym_);
 
-    Nym_p pServerNym(serverNym_);
+    Nym_p pServerNym(server_nym_);
 
     auto theLedger{
         api_.Factory().InternalSession().Ledger(NYM_ID, NYM_ID, GetNotaryID())};
@@ -1497,7 +1491,7 @@ auto OTCronItem::GetCancelerID(identifier::Nym& theOutput) const -> bool
         return false;
     }
 
-    theOutput = m_pCancelerNymID;
+    theOutput = canceler_nym_id_;
 
     return true;
 }
@@ -1508,12 +1502,12 @@ auto OTCronItem::CancelBeforeActivation(
     const identity::Nym& theCancelerNym,
     const PasswordPrompt& reason) -> bool
 {
-    OT_ASSERT(!m_pCancelerNymID.empty());
+    OT_ASSERT(!canceler_nym_id_.empty());
 
     if (IsCanceled()) { return false; }
 
-    m_bCanceled = true;
-    m_pCancelerNymID = theCancelerNym.ID();
+    canceled_ = true;
+    canceler_nym_id_ = theCancelerNym.ID();
 
     ReleaseSignatures();
     SignContract(theCancelerNym, reason);
@@ -1524,23 +1518,23 @@ auto OTCronItem::CancelBeforeActivation(
 
 void OTCronItem::InitCronItem()
 {
-    m_strContractType->Set("CRONITEM");  // in practice should never appear.
-                                         // Child classes will overwrite.
+    contract_type_->Set("CRONITEM");  // in practice should never appear.
+                                      // Child classes will overwrite.
 }
 
-void OTCronItem::ClearClosingNumbers() { m_dequeClosingNumbers.clear(); }
+void OTCronItem::ClearClosingNumbers() { closing_numbers_.clear(); }
 
 void OTCronItem::Release_CronItem()
 {
-    m_CREATION_DATE = Time{};
-    m_LAST_PROCESS_DATE = Time{};
-    m_PROCESS_INTERVAL = 1s;
+    creation_date_ = Time{};
+    last_process_date_ = Time{};
+    process_interval_ = 1s;
 
     ClearClosingNumbers();
 
-    m_bRemovalFlag = false;
-    m_bCanceled = false;
-    m_pCancelerNymID.clear();
+    removal_flag_ = false;
+    canceled_ = false;
+    canceler_nym_id_.clear();
 }
 
 void OTCronItem::Release()
@@ -1598,7 +1592,7 @@ auto OTCronItem::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
 
 void OTCronItem::setNotaryID(const identifier::Notary& notaryID)
 {
-    notaryID_ = notaryID;
+    notary_id_ = notaryID;
 }
 
 OTCronItem::~OTCronItem() { Release_CronItem(); }

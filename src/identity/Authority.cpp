@@ -202,7 +202,7 @@ Authority::Authority(
           serialized,
           mode,
           proto::CREDROLE_VERIFY))
-    , m_mapRevokedCredentials()
+    , revoked_credentials_()
     , mode_(mode)
 {
     if (false == bool(master_)) {
@@ -252,7 +252,7 @@ Authority::Authority(
           version_,
           reason))
     , verification_credentials_()
-    , m_mapRevokedCredentials()
+    , revoked_credentials_()
     , mode_(proto::KEYMODE_PRIVATE)
 {
     if (false == bool(master_)) {
@@ -1051,7 +1051,7 @@ auto Authority::Serialize(
         for_each(key_credentials_, add_active_id);
         for_each(contact_credentials_, add_active_id);
         for_each(verification_credentials_, add_active_id);
-        for_each(m_mapRevokedCredentials, add_revoked_id);
+        for_each(revoked_credentials_, add_revoked_id);
     } else {
         credSet.set_mode(proto::AUTHORITYMODE_FULL);
         master_->Serialize(
@@ -1060,7 +1060,7 @@ auto Authority::Serialize(
         for_each(key_credentials_, add_active_child);
         for_each(contact_credentials_, add_active_child);
         for_each(verification_credentials_, add_active_child);
-        for_each(m_mapRevokedCredentials, add_revoked_child);
+        for_each(revoked_credentials_, add_revoked_child);
     }
 
     return true;

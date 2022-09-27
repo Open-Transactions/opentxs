@@ -1297,7 +1297,7 @@ auto Pair::register_account(
 
         const auto& reply = *pReply;
         accountID =
-            client_.Factory().IdentifierFromBase58(reply.m_strAcctID->Bytes());
+            client_.Factory().IdentifierFromBase58(reply.acct_id_->Bytes());
     }
 
     return output;

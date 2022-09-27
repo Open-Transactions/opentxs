@@ -116,28 +116,28 @@ public:
     // This method allows you to grab a copy of it.
     inline auto GetOfferString(String& offer) -> bool
     {
-        offer.Set(marketOffer_);
-        if (marketOffer_->Exists()) { return true; }
+        offer.Set(market_offer_);
+        if (market_offer_->Exists()) { return true; }
         return false;
     }
 
     inline auto IsStopOrder() const -> bool
     {
-        if ((stopSign_ == '<') || (stopSign_ == '>')) { return true; }
+        if ((stop_sign_ == '<') || (stop_sign_ == '>')) { return true; }
         return false;
     }
 
-    inline auto GetStopPrice() const -> const Amount& { return stopPrice_; }
+    inline auto GetStopPrice() const -> const Amount& { return stop_price_; }
 
     inline auto IsGreaterThan() const -> bool
     {
-        if (stopSign_ == '>') { return true; }
+        if (stop_sign_ == '>') { return true; }
         return false;
     }
 
     inline auto IsLessThan() const -> bool
     {
-        if (stopSign_ == '<') { return true; }
+        if (stop_sign_ == '<') { return true; }
         return false;
     }
 
@@ -152,29 +152,29 @@ public:
 
     inline auto GetCurrencyID() const -> const identifier::UnitDefinition&
     {
-        return currencyTypeID_;
+        return currency_type_id_;
     }
 
     inline void SetCurrencyID(const identifier::UnitDefinition& currencyId)
     {
-        currencyTypeID_ = currencyId;
+        currency_type_id_ = currencyId;
     }
 
     inline auto GetCurrencyAcctID() const -> const identifier::Generic&
     {
-        return currencyAcctID_;
+        return currency_acct_id_;
     }
 
     inline void SetCurrencyAcctID(const identifier::Generic& currencyAcctID)
     {
-        currencyAcctID_ = currencyAcctID;
+        currency_acct_id_ = currencyAcctID;
     }
 
-    inline void IncrementTradesAlreadyDone() { tradesAlreadyDone_++; }
+    inline void IncrementTradesAlreadyDone() { trades_already_done_++; }
 
     inline auto GetCompletedCount() -> std::int32_t
     {
-        return tradesAlreadyDone_;
+        return trades_already_done_;
     }
 
     auto GetAssetAcctClosingNum() const -> std::int64_t;
@@ -242,30 +242,30 @@ private:
 
     using ot_super = OTCronItem;
 
-    identifier::UnitDefinition currencyTypeID_;  // GOLD (Asset) is trading for
-                                                 // DOLLARS (Currency).
-    identifier::Generic currencyAcctID_;  // My Dollar account, used for paying
-                                          // for my Gold (say) trades.
+    identifier::UnitDefinition currency_type_id_;  // GOLD (Asset) is trading
+                                                   // for DOLLARS (Currency).
+    identifier::Generic currency_acct_id_;  // My Dollar account, used for
+                                            // paying for my Gold (say) trades.
 
     OTOffer* offer_{nullptr};  // The pointer to the Offer (NOT responsible for
                                // cleaning this up!!!
     // The offer is owned by the market and I only keep a pointer here for
     // convenience.
 
-    bool hasTradeActivated_{false};  // Has the offer yet been first added to a
-                                     // market?
+    bool has_trade_activated_{false};  // Has the offer yet been first added to
+                                       // a market?
 
-    Amount stopPrice_{0};        // The price limit that activates the STOP
-                                 // order.
-    char stopSign_{0x0};         // Value is 0, or '<', or '>'.
-    bool stopActivated_{false};  // If the Stop Order has already activated, I
-                                 // need to know that.
+    Amount stop_price_{0};        // The price limit that activates the STOP
+                                  // order.
+    char stop_sign_{0x0};         // Value is 0, or '<', or '>'.
+    bool stop_activated_{false};  // If the Stop Order has already activated, I
+                                  // need to know that.
 
-    std::int32_t tradesAlreadyDone_{0};  // How many trades have already
-                                         // processed through this order? We
-                                         // keep track.
+    std::int32_t trades_already_done_{0};  // How many trades have already
+                                           // processed through this order? We
+                                           // keep track.
 
-    OTString marketOffer_;  // The market offer associated with this trade.
+    OTString market_offer_;  // The market offer associated with this trade.
 
     OTTrade(const api::Session& api);
     OTTrade(

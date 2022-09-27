@@ -1509,7 +1509,7 @@ void Notary::NotarizeWithdrawal(
                 // remitter, instead of the transaction server.
                 //
                 //                std::int64_t lNewTransactionNumber = 0;
-                //                GetTransactor().issueNextTransactionNumberToNym(server_.m_nymServer,
+                //                GetTransactor().issueNextTransactionNumberToNym(server_.nym_server_,
                 // lNewTransactionNumber);
                 // We save the transaction
                 // number on the server Nym (normally we'd discard it) because
@@ -4685,13 +4685,13 @@ void Notary::NotarizeExchangeBasket(
                                 BasketItem* item = theRequestBasket->At(i);
                                 OT_ASSERT(nullptr != item);
                                 auto it_account =
-                                    setOfAccounts.find(item->SUB_ACCOUNT_ID);
+                                    setOfAccounts.find(item->sub_account_id_);
 
                                 if (setOfAccounts.end() !=
                                     it_account)  // The account appears twice!!
                                 {
                                     const auto strSubID =
-                                        String::Factory(item->SUB_ACCOUNT_ID);
+                                        String::Factory(item->sub_account_id_);
                                     LogError()(OT_PRETTY_CLASS())(
                                         "Failed: Sub-account ID found TWICE "
                                         "on same basket exchange "
@@ -4700,7 +4700,7 @@ void Notary::NotarizeExchangeBasket(
                                     bFoundSameAcctTwice = true;
                                     break;
                                 }
-                                setOfAccounts.insert(item->SUB_ACCOUNT_ID);
+                                setOfAccounts.insert(item->sub_account_id_);
                             }
                             if (!bFoundSameAcctTwice)  // Let's do it!
                             {
@@ -4714,10 +4714,10 @@ void Notary::NotarizeExchangeBasket(
                                         theRequestBasket->At(i);
                                     const auto requestContractID =
                                         String::Factory(
-                                            pRequestItem->SUB_CONTRACT_ID);
+                                            pRequestItem->sub_contract_id_);
                                     const auto requestAccountID =
                                         String::Factory(
-                                            pRequestItem->SUB_ACCOUNT_ID);
+                                            pRequestItem->sub_account_id_);
 
                                     if (basket->Currencies().find(
                                             requestContractID->Get()) ==
@@ -4751,7 +4751,7 @@ void Notary::NotarizeExchangeBasket(
                                     } else if (
                                         !context.VerifyIssuedNumber(
                                             pRequestItem
-                                                ->lClosingTransactionNo)) {
+                                                ->closing_transaction_no_)) {
                                         LogError()(OT_PRETTY_CLASS())(
                                             "Error: Basket sub-currency "
                                             "closing number didn't verify")
@@ -4770,7 +4770,7 @@ void Notary::NotarizeExchangeBasket(
                                                 .Internal()
                                                 .mutable_Account(
                                                     pRequestItem
-                                                        ->SUB_ACCOUNT_ID,
+                                                        ->sub_account_id_,
                                                     reason_);
 
                                         if (false == bool(tempUserAccount)) {
@@ -5064,7 +5064,7 @@ void Notary::NotarizeExchangeBasket(
                                                 // receipt.
                                                 pInboxTransaction->SetClosingNum(
                                                     pRequestItem
-                                                        ->lClosingTransactionNo);
+                                                        ->closing_transaction_no_);
 
                                                 // Now we have created a new
                                                 // transaction from the server
@@ -5376,7 +5376,7 @@ void Notary::NotarizeExchangeBasket(
                                         // RemoveIssuedNumber() is called.
                                         context.ConsumeAvailable(
                                             pRequestItem
-                                                ->lClosingTransactionNo);
+                                                ->closing_transaction_no_);
                                     }
 
                                     context.ConsumeAvailable(

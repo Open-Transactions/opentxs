@@ -76,7 +76,7 @@ public:
     {
         sLock lock(shared_lock_);
 
-        return m_lUsageCredits;
+        return usage_credits_;
     }
     auto ID() const -> const identifier::Nym& final
     {
@@ -93,7 +93,7 @@ public:
     {
         sLock lock(shared_lock_);
 
-        return m_setAccounts;
+        return accounts_;
     }
     auto RemoveOutpaymentsByIndex(const std::int32_t nIndex) -> bool final;
     auto RemoveOutpaymentsByTransNum(
@@ -110,7 +110,7 @@ public:
     {
         eLock lock(shared_lock_);
 
-        m_lUsageCredits = lUsage;
+        usage_credits_ = lUsage;
     }
 
     NymFile() = delete;
@@ -127,27 +127,27 @@ private:
     const api::Session& api_;
     const Nym_p target_nym_{nullptr};
     const Nym_p signer_nym_{nullptr};
-    std::int64_t m_lUsageCredits{-1};
-    bool m_bMarkForDeletion{false};
-    OTString m_strNymFile;
-    OTString m_strVersion;
-    OTString m_strDescription;
+    std::int64_t usage_credits_{-1};
+    bool mark_for_deletion_{false};
+    OTString nym_file_;
+    OTString version_;
+    OTString description_;
 
     // Whenever client downloads Inbox, its hash is stored here. (When
     // downloading account, can compare ITS inbox hash to this one, to see if I
     // already have latest one.)
-    mapOfIdentifiers m_mapInboxHash;
+    mapOfIdentifiers inbox_hash_;
     // Whenever client downloads Outbox, its hash is stored here. (When
     // downloading account, can compare ITS outbox hash to this one, to see if I
     // already have latest one.)
-    mapOfIdentifiers m_mapOutboxHash;
+    mapOfIdentifiers outbox_hash_;
     // Any outoing payments sent by this Nym. (And not yet deleted.) (payments
     // screen.)
-    dequeOfMail m_dequeOutpayments;
+    dequeOfMail outpayments_;
     // (SERVER side)
     // A list of asset account IDs. Server side only (client side uses wallet;
     // has multiple servers.)
-    UnallocatedSet<UnallocatedCString> m_setAccounts;
+    UnallocatedSet<UnallocatedCString> accounts_;
 
     auto GetHash(
         const mapOfIdentifiers& the_map,

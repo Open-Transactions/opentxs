@@ -24,10 +24,10 @@ class Test_PairSocket : public ::testing::Test
 public:
     const zmq::Context& context_;
 
-    const ot::UnallocatedCString testMessage_{"zeromq test message"};
-    const ot::UnallocatedCString testMessage2_{"zeromq test message 2"};
+    const ot::UnallocatedCString test_message_{"zeromq test message"};
+    const ot::UnallocatedCString test_message2_{"zeromq test message 2"};
 
-    ot::OTZMQPairSocket* pairSocket_;
+    ot::OTZMQPairSocket* pair_socket_;
 
     void pairSocketThread(
         const ot::UnallocatedCString& msg,
@@ -35,7 +35,7 @@ public:
 
     Test_PairSocket()
         : context_(ot::Context().ZMQ())
-        , pairSocket_(nullptr)
+        , pair_socket_(nullptr)
     {
     }
     Test_PairSocket(const Test_PairSocket&) = delete;
@@ -81,9 +81,9 @@ void Test_PairSocket::pairSocketThread(
         });
 
     ASSERT_NE(nullptr, &listenCallback.get());
-    ASSERT_NE(nullptr, pairSocket_);
+    ASSERT_NE(nullptr, pair_socket_);
 
-    auto pairSocket = context_.PairSocket(listenCallback, *pairSocket_);
+    auto pairSocket = context_.PairSocket(listenCallback, *pair_socket_);
 
     ASSERT_NE(nullptr, &pairSocket.get());
     ASSERT_EQ(zmq::socket::Type::Pair, pairSocket->Type());
@@ -142,7 +142,7 @@ TEST_F(Test_PairSocket, PairSocket_Send1)
             const auto inputString =
                 ot::UnallocatedCString{msg.Body().begin()->Bytes()};
 
-            EXPECT_EQ(testMessage_, inputString);
+            EXPECT_EQ(test_message_, inputString);
 
             callbackFinished = true;
         });
@@ -162,7 +162,7 @@ TEST_F(Test_PairSocket, PairSocket_Send1)
 
     auto sent = pairSocket->Send([&] {
         auto out = opentxs::network::zeromq::Message{};
-        out.AddFrame(testMessage_);
+        out.AddFrame(test_message_);
 
         return out;
     }());
@@ -185,7 +185,7 @@ TEST_F(Test_PairSocket, PairSocket_Send2)
             const auto inputString =
                 ot::UnallocatedCString{msg.Body().begin()->Bytes()};
 
-            EXPECT_EQ(testMessage_, inputString);
+            EXPECT_EQ(test_message_, inputString);
 
             callbackFinished = true;
         });
@@ -205,7 +205,7 @@ TEST_F(Test_PairSocket, PairSocket_Send2)
 
     auto sent = pairSocket->Send([&] {
         auto out = opentxs::network::zeromq::Message{};
-        out.AddFrame(testMessage_);
+        out.AddFrame(test_message_);
 
         return out;
     }());
@@ -228,7 +228,7 @@ TEST_F(Test_PairSocket, PairSocket_Send3)
             const auto inputString =
                 ot::UnallocatedCString{msg.Body().begin()->Bytes()};
 
-            EXPECT_EQ(testMessage_, inputString);
+            EXPECT_EQ(test_message_, inputString);
 
             callbackFinished = true;
         });
@@ -248,7 +248,7 @@ TEST_F(Test_PairSocket, PairSocket_Send3)
 
     auto sent = pairSocket->Send([&] {
         auto out = opentxs::network::zeromq::Message{};
-        out.AddFrame(testMessage_);
+        out.AddFrame(test_message_);
 
         return out;
     }());
@@ -272,7 +272,7 @@ TEST_F(Test_PairSocket, PairSocket_Send_Two_Way)
             const auto inputString =
                 ot::UnallocatedCString{msg.Body().begin()->Bytes()};
 
-            EXPECT_EQ(testMessage_, inputString);
+            EXPECT_EQ(test_message_, inputString);
 
             peerCallbackFinished = true;
         });
@@ -292,7 +292,7 @@ TEST_F(Test_PairSocket, PairSocket_Send_Two_Way)
             const auto inputString =
                 ot::UnallocatedCString{msg.Body().begin()->Bytes()};
 
-            EXPECT_EQ(testMessage2_, inputString);
+            EXPECT_EQ(test_message2_, inputString);
 
             callbackFinished = true;
         });
@@ -306,7 +306,7 @@ TEST_F(Test_PairSocket, PairSocket_Send_Two_Way)
 
     auto sent = pairSocket->Send([&] {
         auto out = opentxs::network::zeromq::Message{};
-        out.AddFrame(testMessage_);
+        out.AddFrame(test_message_);
 
         return out;
     }());
@@ -315,7 +315,7 @@ TEST_F(Test_PairSocket, PairSocket_Send_Two_Way)
 
     sent = peer->Send([&] {
         auto out = opentxs::network::zeromq::Message{};
-        out.AddFrame(testMessage2_);
+        out.AddFrame(test_message2_);
 
         return out;
     }());
@@ -336,7 +336,7 @@ TEST_F(Test_PairSocket, PairSocket_Send_Separate_Thread)
 {
     auto pairSocket =
         context_.PairSocket(ot::network::zeromq::ListenCallback::Factory());
-    pairSocket_ = &pairSocket;
+    pair_socket_ = &pairSocket;
     auto promise = std::promise<void>{};
     auto future = promise.get_future();
 
@@ -344,11 +344,11 @@ TEST_F(Test_PairSocket, PairSocket_Send_Separate_Thread)
     ASSERT_EQ(zmq::socket::Type::Pair, pairSocket->Type());
 
     std::thread pairSocketThread1(
-        &Test_PairSocket::pairSocketThread, this, testMessage_, &promise);
+        &Test_PairSocket::pairSocketThread, this, test_message_, &promise);
     future.get();
     auto sent = pairSocket->Send([&] {
         auto out = opentxs::network::zeromq::Message{};
-        out.AddFrame(testMessage_);
+        out.AddFrame(test_message_);
 
         return out;
     }());

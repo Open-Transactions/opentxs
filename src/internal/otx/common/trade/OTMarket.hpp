@@ -122,64 +122,64 @@ public:
     auto GetHighestBidPrice() -> Amount;
     auto GetLowestAskPrice() -> Amount;
 
-    auto GetBidCount() -> mapOfOffers::size_type { return m_mapBids.size(); }
-    auto GetAskCount() -> mapOfOffers::size_type { return m_mapAsks.size(); }
+    auto GetBidCount() -> mapOfOffers::size_type { return bids_.size(); }
+    auto GetAskCount() -> mapOfOffers::size_type { return asks_.size(); }
     void SetInstrumentDefinitionID(
         const identifier::UnitDefinition& INSTRUMENT_DEFINITION_ID)
     {
-        m_INSTRUMENT_DEFINITION_ID = INSTRUMENT_DEFINITION_ID;
+        instrument_definition_id_ = INSTRUMENT_DEFINITION_ID;
     }
     void SetCurrencyID(const identifier::UnitDefinition& CURRENCY_ID)
     {
-        m_CURRENCY_TYPE_ID = CURRENCY_ID;
+        currency_type_id_ = CURRENCY_ID;
     }
     void SetNotaryID(const identifier::Notary& NOTARY_ID)
     {
-        m_NOTARY_ID = NOTARY_ID;
+        notary_id_ = NOTARY_ID;
     }
 
     inline auto GetInstrumentDefinitionID() const
         -> const identifier::UnitDefinition&
     {
-        return m_INSTRUMENT_DEFINITION_ID;
+        return instrument_definition_id_;
     }
     inline auto GetCurrencyID() const -> const identifier::UnitDefinition&
     {
-        return m_CURRENCY_TYPE_ID;
+        return currency_type_id_;
     }
     inline auto GetNotaryID() const -> const identifier::Notary&
     {
-        return m_NOTARY_ID;
+        return notary_id_;
     }
 
-    inline auto GetScale() const -> const Amount& { return m_lScale; }
+    inline auto GetScale() const -> const Amount& { return scale_; }
     inline void SetScale(const Amount& lScale)
     {
-        m_lScale = lScale;
-        if (m_lScale < 1) { m_lScale = 1; }
+        scale_ = lScale;
+        if (scale_ < 1) { scale_ = 1; }
     }
 
     inline auto GetLastSalePrice() -> const Amount&
     {
-        if (m_lLastSalePrice < 1) { m_lLastSalePrice = 1; }
-        return m_lLastSalePrice;
+        if (last_sale_price_ < 1) { last_sale_price_ = 1; }
+        return last_sale_price_;
     }
     inline void SetLastSalePrice(const std::int64_t& lLastSalePrice)
     {
-        m_lLastSalePrice = lLastSalePrice;
-        if (m_lLastSalePrice < 1) { m_lLastSalePrice = 1; }
+        last_sale_price_ = lLastSalePrice;
+        if (last_sale_price_ < 1) { last_sale_price_ = 1; }
     }
 
     auto GetLastSaleDate() -> const UnallocatedCString&
     {
-        return m_strLastSaleDate;
+        return last_sale_date_;
     }
     auto GetTotalAvailableAssets() -> Amount;
 
     void GetIdentifier(identifier::Generic& theIdentifier) const override;
 
-    inline void SetCronPointer(OTCron& theCron) { m_pCron = &theCron; }
-    inline auto GetCron() -> OTCron* { return m_pCron; }
+    inline void SetCronPointer(OTCron& theCron) { cron_ = &theCron; }
+    inline auto GetCron() -> OTCron* { return cron_; }
     auto LoadMarket() -> bool;
     auto SaveMarket(const PasswordPrompt& reason) -> bool;
 
@@ -209,37 +209,37 @@ private:
 
     using ot_super = Contract;
 
-    OTCron* m_pCron{nullptr};  // The Cron object that owns this Market.
+    OTCron* cron_{nullptr};  // The Cron object that owns this Market.
 
-    OTDB::TradeListMarket* m_pTradeList{nullptr};
+    OTDB::TradeListMarket* trade_list_{nullptr};
 
-    mapOfOffers m_mapBids;  // The buyers, ordered by price limit
-    mapOfOffers m_mapAsks;  // The sellers, ordered by price limit
+    mapOfOffers bids_;  // The buyers, ordered by price limit
+    mapOfOffers asks_;  // The sellers, ordered by price limit
 
-    mapOfOffersTrnsNum m_mapOffers;  // All of the offers on a single list,
-                                     // ordered by transaction number.
+    mapOfOffersTrnsNum offers_;  // All of the offers on a single list,
+                                 // ordered by transaction number.
 
-    identifier::Notary m_NOTARY_ID;  // Always store this in any object that's
-                                     // associated with a specific server.
+    identifier::Notary notary_id_;  // Always store this in any object that's
+                                    // associated with a specific server.
 
     // Every market involves a certain instrument definition being traded in a
     // certain
     // currency.
-    identifier::UnitDefinition m_INSTRUMENT_DEFINITION_ID;  // This is the GOLD
-                                                            // market. (Say.) |
-                                                            // (GOLD for
-    identifier::UnitDefinition m_CURRENCY_TYPE_ID;  // Gold is trading for
-                                                    // DOLLARS.        |
-                                                    // DOLLARS, for example.)
+    identifier::UnitDefinition instrument_definition_id_;  // This is the GOLD
+                                                           // market. (Say.) |
+                                                           // (GOLD for
+    identifier::UnitDefinition currency_type_id_;  // Gold is trading for
+                                                   // DOLLARS.        |
+                                                   // DOLLARS, for example.)
 
     // Each Offer on the market must have a minimum increment that this divides
     // equally into.
     // (There is a "gold for dollars, minimum 1 oz" market, a "gold for dollars,
     // min 500 oz" market, etc.)
-    Amount m_lScale{0};
+    Amount scale_{0};
 
-    Amount m_lLastSalePrice{0};
-    UnallocatedCString m_strLastSaleDate;
+    Amount last_sale_price_{0};
+    UnallocatedCString last_sale_date_;
 
     // The server stores a map of markets, one for each unique combination of
     // instrument definitions. That's what this market class represents: one

@@ -22,20 +22,20 @@ class Test_PublishSubscribe : public ::testing::Test
 public:
     const zmq::Context& context_;
 
-    const ot::UnallocatedCString testMessage_{"zeromq test message"};
-    const ot::UnallocatedCString testMessage2_{"zeromq test message 2"};
+    const ot::UnallocatedCString test_message_{"zeromq test message"};
+    const ot::UnallocatedCString test_message2_{"zeromq test message 2"};
 
     const ot::UnallocatedCString endpoint_{
         "inproc://opentxs/test/publish_subscribe_test"};
     const ot::UnallocatedCString endpoint2_{
         "inproc://opentxs/test/publish_subscribe_test2"};
 
-    std::atomic_int callbackFinishedCount_{0};
-    std::atomic_int subscribeThreadStartedCount_{0};
-    std::atomic_int publishThreadStartedCount_{0};
+    std::atomic_int callback_finished_count_{0};
+    std::atomic_int subscribe_thread_started_count_{0};
+    std::atomic_int publish_thread_started_count_{0};
 
-    int subscribeThreadCount_{0};
-    int callbackCount_{0};
+    int subscribe_thread_count_{0};
+    int callback_count_{0};
 
     void subscribeSocketThread(
         const ot::UnallocatedSet<ot::UnallocatedCString>& endpoints,
@@ -60,7 +60,7 @@ void Test_PublishSubscribe::subscribeSocketThread(
                 ot::UnallocatedCString{input.Body().begin()->Bytes()};
             bool found = msgs.count(inputString);
             EXPECT_TRUE(found);
-            ++callbackFinishedCount_;
+            ++callback_finished_count_;
         });
 
     ASSERT_NE(nullptr, &listenCallback.get());
@@ -73,15 +73,15 @@ void Test_PublishSubscribe::subscribeSocketThread(
     subscribeSocket->SetTimeouts(0ms, -1ms, 30000ms);
     for (auto endpoint : endpoints) { subscribeSocket->Start(endpoint); }
 
-    ++subscribeThreadStartedCount_;
+    ++subscribe_thread_started_count_;
 
     auto end = std::time(nullptr) + 30;
-    while (callbackFinishedCount_ < callbackCount_ &&
+    while (callback_finished_count_ < callback_count_ &&
            std::time(nullptr) < end) {
         std::this_thread::sleep_for(1s);
     }
 
-    ASSERT_EQ(callbackCount_, callbackFinishedCount_);
+    ASSERT_EQ(callback_count_, callback_finished_count_);
 }
 
 void Test_PublishSubscribe::publishSocketThread(
@@ -96,10 +96,10 @@ void Test_PublishSubscribe::publishSocketThread(
     publishSocket->SetTimeouts(0ms, 30000ms, -1ms);
     publishSocket->Start(endpoint);
 
-    ++publishThreadStartedCount_;
+    ++publish_thread_started_count_;
 
     auto end = std::time(nullptr) + 15;
-    while (subscribeThreadStartedCount_ < subscribeThreadCount_ &&
+    while (subscribe_thread_started_count_ < subscribe_thread_count_ &&
            std::time(nullptr) < end) {
         std::this_thread::sleep_for(1s);
     }
@@ -114,12 +114,12 @@ void Test_PublishSubscribe::publishSocketThread(
     ASSERT_TRUE(sent);
 
     end = std::time(nullptr) + 15;
-    while (callbackFinishedCount_ < callbackCount_ &&
+    while (callback_finished_count_ < callback_count_ &&
            std::time(nullptr) < end) {
         std::this_thread::sleep_for(1s);
     }
 
-    ASSERT_EQ(callbackCount_, callbackFinishedCount_);
+    ASSERT_EQ(callback_count_, callback_finished_count_);
 }
 
 TEST_F(Test_PublishSubscribe, Publish_Subscribe)
@@ -142,9 +142,9 @@ TEST_F(Test_PublishSubscribe, Publish_Subscribe)
             const auto inputString =
                 ot::UnallocatedCString{input.Body().begin()->Bytes()};
 
-            EXPECT_EQ(testMessage_, inputString);
+            EXPECT_EQ(test_message_, inputString);
 
-            ++callbackFinishedCount_;
+            ++callback_finished_count_;
         });
 
     ASSERT_NE(nullptr, &listenCallback.get());
@@ -164,7 +164,7 @@ TEST_F(Test_PublishSubscribe, Publish_Subscribe)
 
     bool sent = publishSocket->Send([&] {
         auto out = opentxs::network::zeromq::Message{};
-        out.AddFrame(testMessage_);
+        out.AddFrame(test_message_);
 
         return out;
     }());
@@ -173,17 +173,17 @@ TEST_F(Test_PublishSubscribe, Publish_Subscribe)
 
     auto end = std::time(nullptr) + 30;
 
-    while ((1 > callbackFinishedCount_) && (std::time(nullptr) < end)) {
+    while ((1 > callback_finished_count_) && (std::time(nullptr) < end)) {
         ot::Sleep(1ms);
     }
 
-    EXPECT_EQ(1, callbackFinishedCount_);
+    EXPECT_EQ(1, callback_finished_count_);
 }
 
 TEST_F(Test_PublishSubscribe, Publish_1_Subscribe_2)
 {
-    subscribeThreadCount_ = 2;
-    callbackCount_ = 2;
+    subscribe_thread_count_ = 2;
+    callback_count_ = 2;
 
     auto publishSocket = context_.PublishSocket();
 
@@ -197,24 +197,24 @@ TEST_F(Test_PublishSubscribe, Publish_1_Subscribe_2)
         &Test_PublishSubscribe::subscribeSocketThread,
         this,
         ot::UnallocatedSet<ot::UnallocatedCString>({endpoint_}),
-        ot::UnallocatedSet<ot::UnallocatedCString>({testMessage_}));
+        ot::UnallocatedSet<ot::UnallocatedCString>({test_message_}));
     std::thread subscribeSocketThread2(
         &Test_PublishSubscribe::subscribeSocketThread,
         this,
         ot::UnallocatedSet<ot::UnallocatedCString>({endpoint_}),
-        ot::UnallocatedSet<ot::UnallocatedCString>({testMessage_}));
+        ot::UnallocatedSet<ot::UnallocatedCString>({test_message_}));
 
     auto end = std::time(nullptr) + 30;
-    while (subscribeThreadStartedCount_ < subscribeThreadCount_ &&
+    while (subscribe_thread_started_count_ < subscribe_thread_count_ &&
            std::time(nullptr) < end) {
         std::this_thread::sleep_for(1s);
     }
 
-    ASSERT_EQ(subscribeThreadCount_, subscribeThreadStartedCount_);
+    ASSERT_EQ(subscribe_thread_count_, subscribe_thread_started_count_);
 
     bool sent = publishSocket->Send([&] {
         auto out = opentxs::network::zeromq::Message{};
-        out.AddFrame(testMessage_);
+        out.AddFrame(test_message_);
 
         return out;
     }());
@@ -227,35 +227,35 @@ TEST_F(Test_PublishSubscribe, Publish_1_Subscribe_2)
 
 TEST_F(Test_PublishSubscribe, Publish_2_Subscribe_1)
 {
-    subscribeThreadCount_ = 1;
-    callbackCount_ = 2;
+    subscribe_thread_count_ = 1;
+    callback_count_ = 2;
 
     std::thread publishSocketThread1(
         &Test_PublishSubscribe::publishSocketThread,
         this,
         endpoint_,
-        testMessage_);
+        test_message_);
     std::thread publishSocketThread2(
         &Test_PublishSubscribe::publishSocketThread,
         this,
         endpoint2_,
-        testMessage2_);
+        test_message2_);
 
     auto end = std::time(nullptr) + 15;
-    while (publishThreadStartedCount_ < 2 && std::time(nullptr) < end) {
+    while (publish_thread_started_count_ < 2 && std::time(nullptr) < end) {
         std::this_thread::sleep_for(1s);
     }
 
-    ASSERT_EQ(2, publishThreadStartedCount_);
+    ASSERT_EQ(2, publish_thread_started_count_);
 
     auto listenCallback = ot::network::zeromq::ListenCallback::Factory(
         [this](ot::network::zeromq::Message&& input) -> void {
             const auto inputString =
                 ot::UnallocatedCString{input.Body().begin()->Bytes()};
             bool match =
-                inputString == testMessage_ || inputString == testMessage2_;
+                inputString == test_message_ || inputString == test_message2_;
             EXPECT_TRUE(match);
-            ++callbackFinishedCount_;
+            ++callback_finished_count_;
         });
 
     ASSERT_NE(nullptr, &listenCallback.get());
@@ -269,15 +269,15 @@ TEST_F(Test_PublishSubscribe, Publish_2_Subscribe_1)
     subscribeSocket->Start(endpoint_);
     subscribeSocket->Start(endpoint2_);
 
-    ++subscribeThreadStartedCount_;
+    ++subscribe_thread_started_count_;
 
     end = std::time(nullptr) + 30;
-    while (callbackFinishedCount_ < callbackCount_ &&
+    while (callback_finished_count_ < callback_count_ &&
            std::time(nullptr) < end) {
         std::this_thread::sleep_for(1s);
     }
 
-    ASSERT_EQ(callbackCount_, callbackFinishedCount_);
+    ASSERT_EQ(callback_count_, callback_finished_count_);
 
     publishSocketThread1.join();
     publishSocketThread2.join();
@@ -285,47 +285,47 @@ TEST_F(Test_PublishSubscribe, Publish_2_Subscribe_1)
 
 TEST_F(Test_PublishSubscribe, Publish_2_Subscribe_2)
 {
-    subscribeThreadCount_ = 2;
-    callbackCount_ = 4;
+    subscribe_thread_count_ = 2;
+    callback_count_ = 4;
 
     std::thread publishSocketThread1(
         &Test_PublishSubscribe::publishSocketThread,
         this,
         endpoint_,
-        testMessage_);
+        test_message_);
     std::thread publishSocketThread2(
         &Test_PublishSubscribe::publishSocketThread,
         this,
         endpoint2_,
-        testMessage2_);
+        test_message2_);
 
     auto end = std::time(nullptr) + 15;
-    while (publishThreadStartedCount_ < 2 && std::time(nullptr) < end) {
+    while (publish_thread_started_count_ < 2 && std::time(nullptr) < end) {
         std::this_thread::sleep_for(1s);
     }
 
-    ASSERT_EQ(2, publishThreadStartedCount_);
+    ASSERT_EQ(2, publish_thread_started_count_);
 
     std::thread subscribeSocketThread1(
         &Test_PublishSubscribe::subscribeSocketThread,
         this,
         ot::UnallocatedSet<ot::UnallocatedCString>({endpoint_, endpoint2_}),
         ot::UnallocatedSet<ot::UnallocatedCString>(
-            {testMessage_, testMessage2_}));
+            {test_message_, test_message2_}));
     std::thread subscribeSocketThread2(
         &Test_PublishSubscribe::subscribeSocketThread,
         this,
         ot::UnallocatedSet<ot::UnallocatedCString>({endpoint_, endpoint2_}),
         ot::UnallocatedSet<ot::UnallocatedCString>(
-            {testMessage_, testMessage2_}));
+            {test_message_, test_message2_}));
 
     end = std::time(nullptr) + 30;
-    while (subscribeThreadStartedCount_ < subscribeThreadCount_ &&
+    while (subscribe_thread_started_count_ < subscribe_thread_count_ &&
            std::time(nullptr) < end) {
         std::this_thread::sleep_for(1s);
     }
 
-    ASSERT_EQ(subscribeThreadCount_, subscribeThreadStartedCount_);
+    ASSERT_EQ(subscribe_thread_count_, subscribe_thread_started_count_);
 
     publishSocketThread1.join();
     publishSocketThread2.join();

@@ -78,7 +78,7 @@ private:
 
     const identifier::UnitDefinition unit_;
     const identifier::Notary server_;
-    const identifier::Generic requestID_;
+    const identifier::Generic request_id_;
     const UnallocatedCString txid_;
     const Amount amount_;
 

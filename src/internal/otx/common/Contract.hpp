@@ -74,10 +74,7 @@ public:
     auto GetIdentifier(String& theIdentifier) const -> void;
     virtual auto GetIdentifier(identifier::Generic& theIdentifier) const
         -> void;
-    auto GetName(String& strName) const -> void
-    {
-        strName.Set(m_strName->Get());
-    }
+    auto GetName(String& strName) const -> void { strName.Set(name_->Get()); }
     auto SaveContractRaw(String& strOutput) const -> bool;
     virtual auto VerifySignature(const identity::Nym& theNym) const -> bool;
     virtual auto VerifyWithKey(const crypto::key::Asymmetric& theKey) const
@@ -105,28 +102,28 @@ protected:
     const api::Session& api_;
 
     /** Contract name as shown in the wallet. */
-    OTString m_strName;
+    OTString name_;
 
     /** Foldername for this contract (nyms, contracts, accounts, etc) */
-    OTString m_strFoldername;
+    OTString foldername_;
 
     /** Filename for this contract (usually an ID.) */
-    OTString m_strFilename;
+    OTString filename_;
 
     /** Hash of the contract, including signatures. (the "raw file") */
-    identifier::Generic m_ID;
+    identifier::Generic id_;
 
     /** The Unsigned Clear Text (XML contents without signatures.) */
-    OTStringXML m_xmlUnsigned;
+    OTStringXML xml_unsigned_;
 
     /** The complete raw file including signatures. */
-    OTString m_strRawFile;
+    OTString raw_file_;
 
     /** The Hash algorithm used for the signature */
-    crypto::HashType m_strSigHashType;
+    crypto::HashType sig_hash_type_;
 
     /** CONTRACT, MESSAGE, TRANSACTION, LEDGER, TRANSACTION ITEM */
-    OTString m_strContractType{String::Factory("CONTRACT")};
+    OTString contract_type_{String::Factory("CONTRACT")};
 
     /** The default behavior for a contract, though occasionally overridden, is
      * to contain its own public keys internally, located on standard XML tags.
@@ -140,30 +137,30 @@ protected:
      * requisite key exchange. ==> THE TRADER HAS ASSURANCE THAT, IF HIS
      * OUT-MESSAGE IS ENCRYPTED, HE KNOWS THE MESSAGE CAN ONLY BE DECRYPTED BY
      * THE SAME PERSON WHO SIGNED THAT CONTRACT. */
-    UnallocatedMap<UnallocatedCString, Nym_p> m_mapNyms;
+    UnallocatedMap<UnallocatedCString, Nym_p> nyms_;
 
     /** The PGP signatures at the bottom of the XML file. */
-    listOfSignatures m_listSignatures;
+    listOfSignatures list_signatures_;
 
     /** The version of this Contract file, in case the format changes in the
     future. */
-    OTString m_strVersion{String::Factory("2.0")};
+    OTString version_{String::Factory("2.0")};
 
     // TODO: perhaps move these to a common ancestor for ServerContract and
     // OTUnitDefinition. Maybe call it OTHardContract (since it should never
     // change.)
-    OTString m_strEntityShortName;
-    OTString m_strEntityLongName;
-    OTString m_strEntityEmail;
+    OTString entity_short_name_;
+    OTString entity_long_name_;
+    OTString entity_email_;
 
     /** The legal conditions, usually human-readable, on a contract. */
-    String::Map m_mapConditions;
+    String::Map conditions_;
 
-    /** The XML file is in m_xmlUnsigned-> Load it from there into members here.
+    /** The XML file is in xml_unsigned_-> Load it from there into members here.
      */
     auto LoadContractXML() -> bool;
 
-    /** parses m_strRawFile into the various member variables. Separating these
+    /** parses raw_file_ into the various member variables. Separating these
      * into two steps allows us to load contracts from other sources besides
      * files. */
     auto ParseRawFile() -> bool;
@@ -181,8 +178,8 @@ protected:
         const identity::Nym& theSigner,
         const PasswordPrompt& reason) -> bool;
 
-    void SetName(const String& strName) { m_strName = strName; }
-    auto GetContractType() const -> const String& { return m_strContractType; }
+    void SetName(const String& strName) { name_ = strName; }
+    auto GetContractType() const -> const String& { return contract_type_; }
     /** This function calls VerifyContractID, and if that checks out, then it
      * looks up the official "contract" key inside the contract by calling
      * GetContractPublicNym, and uses it to verify the signature on the
@@ -190,12 +187,12 @@ protected:
      * are supported, but soon contracts will also support x509 certs. */
     virtual auto VerifyContract() const -> bool;
 
-    /** assumes m_strFilename is already set. Then it reads that file into a
+    /** assumes filename_ is already set. Then it reads that file into a
      * string. Then it parses that string into the object. */
     virtual auto LoadContract() -> bool;
     auto LoadContract(const char* szFoldername, const char* szFilename) -> bool;
 
-    /** fopens m_strFilename and reads it off the disk into m_strRawFile */
+    /** fopens filename_ and reads it off the disk into raw_file_ */
     auto LoadContractRawFile() -> bool;
 
     /** data_folder/contracts/Contract-ID */
@@ -225,7 +222,7 @@ protected:
      * internals. */
     void CreateInnerContents(Tag& parent);
 
-    /** Save the internal contents (m_xmlUnsigned) to an already-open file */
+    /** Save the internal contents (xml_unsigned_) to an already-open file */
     virtual auto SaveContents(std::ofstream& ofs) const -> bool;
 
     /** Saves the entire contract to a file that's already open (like a wallet).
@@ -234,7 +231,7 @@ protected:
 
     virtual auto DisplayStatistics(String& strContents) const -> bool;
 
-    /** Save m_xmlUnsigned to a string that's passed in */
+    /** Save xml_unsigned_ to a string that's passed in */
     virtual auto SaveContents(String& strContents) const -> bool;
     auto SignContractAuthent(
         const identity::Nym& theNym,
@@ -255,8 +252,8 @@ protected:
         const crypto::HashType hashType,
         const PasswordPrompt& reason) -> bool;
 
-    /** Calculates a hash of m_strRawFile (the xml portion of the contract plus
-    the signatures) and compares to m_ID (supposedly the same. The ID is
+    /** Calculates a hash of raw_file_ (the xml portion of the contract plus
+    the signatures) and compares to id_ (supposedly the same. The ID is
     calculated by hashing the file.)
 
     Be careful here--asset contracts and server contracts can have this ID. But

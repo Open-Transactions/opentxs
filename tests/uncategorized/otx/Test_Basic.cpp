@@ -367,7 +367,7 @@ public:
         ASSERT_TRUE(message);
 
         const ot::RequestNumber requestNumber =
-            ot::String::StringToUlong(message->m_strRequestNum->Get());
+            ot::String::StringToUlong(message->request_num_->Get());
         const auto result = translate_result(std::get<0>(finished));
         verify_state_post(
             client_1_,
@@ -492,7 +492,7 @@ public:
         ASSERT_TRUE(message);
 
         const ot::RequestNumber requestNumber =
-            ot::String::StringToUlong(message->m_strRequestNum->Get());
+            ot::String::StringToUlong(message->request_num_->Get());
         const auto result = translate_result(std::get<0>(finished));
         verify_state_post(
             client_2_,
@@ -570,7 +570,7 @@ public:
         ASSERT_TRUE(message);
 
         const ot::RequestNumber requestNumber =
-            ot::String::StringToUlong(message->m_strRequestNum->Get());
+            ot::String::StringToUlong(message->request_num_->Get());
         const auto result = translate_result(std::get<0>(finished));
         verify_state_post(
             client_2_,
@@ -687,7 +687,7 @@ public:
         ASSERT_TRUE(message);
 
         const ot::RequestNumber requestNumber =
-            ot::String::StringToUlong(message->m_strRequestNum->Get());
+            ot::String::StringToUlong(message->request_num_->Get());
         const auto result = translate_result(std::get<0>(finished));
         verify_state_post(
             client_1_,
@@ -1031,7 +1031,7 @@ public:
             serverContext.LocalNymboxHash(), serverContext.RemoteNymboxHash());
         EXPECT_EQ(ot::otx::client::SendResult::VALID_REPLY, messageResult);
         ASSERT_TRUE(message);
-        EXPECT_EQ(messageSuccess, message->m_bSuccess);
+        EXPECT_EQ(messageSuccess, message->success_);
 
         std::unique_ptr<ot::Ledger> nymbox{
             client.InternalClient().OTAPI().LoadNymbox(
@@ -1134,7 +1134,7 @@ TEST_F(Test_Basic, registerNym_first_time)
     ASSERT_TRUE(message);
 
     const ot::RequestNumber requestNumber =
-        ot::String::StringToUlong(message->m_strRequestNum->Get());
+        ot::String::StringToUlong(message->request_num_->Get());
     const auto result = translate_result(std::get<0>(finished));
     clientContext = server_1_.Wallet().ClientContext(alice_nym_id_);
     verify_state_post(
@@ -1182,7 +1182,7 @@ TEST_F(Test_Basic, getTransactionNumbers_Alice)
     ASSERT_TRUE(message);
 
     const ot::RequestNumber requestNumber =
-        ot::String::StringToUlong(message->m_strRequestNum->Get());
+        ot::String::StringToUlong(message->request_num_->Get());
     const auto result = translate_result(std::get<0>(finished));
     verify_state_post(
         client_1_,
@@ -1234,7 +1234,7 @@ TEST_F(Test_Basic, Reregister)
     ASSERT_TRUE(message);
 
     const ot::RequestNumber requestNumber =
-        ot::String::StringToUlong(message->m_strRequestNum->Get());
+        ot::String::StringToUlong(message->request_num_->Get());
     const auto result = translate_result(std::get<0>(finished));
     clientContext = server_1_.Wallet().ClientContext(alice_nym_id_);
     verify_state_post(
@@ -1284,7 +1284,7 @@ TEST_F(Test_Basic, issueAsset)
     ASSERT_TRUE(message);
 
     const ot::RequestNumber requestNumber =
-        ot::String::StringToUlong(message->m_strRequestNum->Get());
+        ot::String::StringToUlong(message->request_num_->Get());
     const auto result = translate_result(std::get<0>(finished));
     verify_state_post(
         client_1_,
@@ -1299,7 +1299,7 @@ TEST_F(Test_Basic, issueAsset)
         0,
         alice_counter_);
     const auto accountID =
-        client_1_.Factory().IdentifierFromBase58(message->m_strAcctID->Bytes());
+        client_1_.Factory().IdentifierFromBase58(message->acct_id_->Bytes());
 
     ASSERT_FALSE(accountID.empty());
 
@@ -1348,7 +1348,7 @@ TEST_F(Test_Basic, checkNym_missing)
     ASSERT_TRUE(message);
 
     const ot::RequestNumber requestNumber =
-        ot::String::StringToUlong(message->m_strRequestNum->Get());
+        ot::String::StringToUlong(message->request_num_->Get());
     const auto result = translate_result(std::get<0>(finished));
     verify_state_post(
         client_1_,
@@ -1363,8 +1363,8 @@ TEST_F(Test_Basic, checkNym_missing)
         0,
         alice_counter_);
 
-    EXPECT_FALSE(message->m_bBool);
-    EXPECT_TRUE(message->m_ascPayload->empty());
+    EXPECT_FALSE(message->bool_);
+    EXPECT_TRUE(message->payload_->empty());
 }
 
 TEST_F(Test_Basic, publishNym)
@@ -1403,7 +1403,7 @@ TEST_F(Test_Basic, publishNym)
     ASSERT_TRUE(message);
 
     const ot::RequestNumber requestNumber =
-        ot::String::StringToUlong(message->m_strRequestNum->Get());
+        ot::String::StringToUlong(message->request_num_->Get());
     const auto result = translate_result(std::get<0>(finished));
     verify_state_post(
         client_1_,
@@ -1449,7 +1449,7 @@ TEST_F(Test_Basic, checkNym)
     ASSERT_TRUE(message);
 
     const ot::RequestNumber requestNumber =
-        ot::String::StringToUlong(message->m_strRequestNum->Get());
+        ot::String::StringToUlong(message->request_num_->Get());
     const auto result = translate_result(std::get<0>(finished));
     verify_state_post(
         client_1_,
@@ -1464,8 +1464,8 @@ TEST_F(Test_Basic, checkNym)
         0,
         alice_counter_);
 
-    EXPECT_TRUE(message->m_bBool);
-    EXPECT_FALSE(message->m_ascPayload->empty());
+    EXPECT_TRUE(message->bool_);
+    EXPECT_FALSE(message->payload_->empty());
 }
 
 TEST_F(Test_Basic, downloadServerContract_missing)
@@ -1498,7 +1498,7 @@ TEST_F(Test_Basic, downloadServerContract_missing)
     ASSERT_TRUE(message);
 
     const ot::RequestNumber requestNumber =
-        ot::String::StringToUlong(message->m_strRequestNum->Get());
+        ot::String::StringToUlong(message->request_num_->Get());
     const auto result = translate_result(std::get<0>(finished));
     verify_state_post(
         client_1_,
@@ -1513,8 +1513,8 @@ TEST_F(Test_Basic, downloadServerContract_missing)
         0,
         alice_counter_);
 
-    EXPECT_FALSE(message->m_bBool);
-    EXPECT_TRUE(message->m_ascPayload->empty());
+    EXPECT_FALSE(message->bool_);
+    EXPECT_TRUE(message->payload_->empty());
 }
 
 TEST_F(Test_Basic, publishServer)
@@ -1550,7 +1550,7 @@ TEST_F(Test_Basic, publishServer)
     ASSERT_TRUE(message);
 
     const ot::RequestNumber requestNumber =
-        ot::String::StringToUlong(message->m_strRequestNum->Get());
+        ot::String::StringToUlong(message->request_num_->Get());
     const auto result = translate_result(std::get<0>(finished));
     verify_state_post(
         client_1_,
@@ -1596,7 +1596,7 @@ TEST_F(Test_Basic, downloadServerContract)
     ASSERT_TRUE(message);
 
     const ot::RequestNumber requestNumber =
-        ot::String::StringToUlong(message->m_strRequestNum->Get());
+        ot::String::StringToUlong(message->request_num_->Get());
     const auto result = translate_result(std::get<0>(finished));
     verify_state_post(
         client_1_,
@@ -1611,8 +1611,8 @@ TEST_F(Test_Basic, downloadServerContract)
         0,
         alice_counter_);
 
-    EXPECT_TRUE(message->m_bBool);
-    EXPECT_FALSE(message->m_ascPayload->empty());
+    EXPECT_TRUE(message->bool_);
+    EXPECT_FALSE(message->payload_->empty());
 }
 
 TEST_F(Test_Basic, registerNym_Bob)
@@ -1644,7 +1644,7 @@ TEST_F(Test_Basic, registerNym_Bob)
     ASSERT_TRUE(message);
 
     const ot::RequestNumber requestNumber =
-        ot::String::StringToUlong(message->m_strRequestNum->Get());
+        ot::String::StringToUlong(message->request_num_->Get());
     const auto result = translate_result(std::get<0>(finished));
     clientContext = server_1_.Wallet().ClientContext(bob_nym_id_);
     verify_state_post(
@@ -1691,7 +1691,7 @@ TEST_F(Test_Basic, getInstrumentDefinition_missing)
     ASSERT_TRUE(message);
 
     const ot::RequestNumber requestNumber =
-        ot::String::StringToUlong(message->m_strRequestNum->Get());
+        ot::String::StringToUlong(message->request_num_->Get());
     const auto result = translate_result(std::get<0>(finished));
     verify_state_post(
         client_2_,
@@ -1706,8 +1706,8 @@ TEST_F(Test_Basic, getInstrumentDefinition_missing)
         0,
         bob_counter_);
 
-    EXPECT_FALSE(message->m_bBool);
-    EXPECT_TRUE(message->m_ascPayload->empty());
+    EXPECT_FALSE(message->bool_);
+    EXPECT_TRUE(message->payload_->empty());
 }
 
 TEST_F(Test_Basic, publishUnitDefinition)
@@ -1739,7 +1739,7 @@ TEST_F(Test_Basic, publishUnitDefinition)
     ASSERT_TRUE(message);
 
     const ot::RequestNumber requestNumber =
-        ot::String::StringToUlong(message->m_strRequestNum->Get());
+        ot::String::StringToUlong(message->request_num_->Get());
     const auto result = translate_result(std::get<0>(finished));
     verify_state_post(
         client_2_,
@@ -1784,7 +1784,7 @@ TEST_F(Test_Basic, getInstrumentDefinition_Alice)
     ASSERT_TRUE(message);
 
     const ot::RequestNumber requestNumber =
-        ot::String::StringToUlong(message->m_strRequestNum->Get());
+        ot::String::StringToUlong(message->request_num_->Get());
     const auto result = translate_result(std::get<0>(finished));
     verify_state_post(
         client_1_,
@@ -1799,8 +1799,8 @@ TEST_F(Test_Basic, getInstrumentDefinition_Alice)
         0,
         alice_counter_);
 
-    EXPECT_TRUE(message->m_bBool);
-    EXPECT_FALSE(message->m_ascPayload->empty());
+    EXPECT_TRUE(message->bool_);
+    EXPECT_FALSE(message->payload_->empty());
 }
 
 TEST_F(Test_Basic, getInstrumentDefinition_Bob)
@@ -1832,7 +1832,7 @@ TEST_F(Test_Basic, getInstrumentDefinition_Bob)
     ASSERT_TRUE(message);
 
     const ot::RequestNumber requestNumber =
-        ot::String::StringToUlong(message->m_strRequestNum->Get());
+        ot::String::StringToUlong(message->request_num_->Get());
     const auto result = translate_result(std::get<0>(finished));
     verify_state_post(
         client_2_,
@@ -1847,8 +1847,8 @@ TEST_F(Test_Basic, getInstrumentDefinition_Bob)
         0,
         bob_counter_);
 
-    EXPECT_TRUE(message->m_bBool);
-    EXPECT_FALSE(message->m_ascPayload->empty());
+    EXPECT_TRUE(message->bool_);
+    EXPECT_FALSE(message->payload_->empty());
 }
 
 TEST_F(Test_Basic, registerAccount)
@@ -1882,7 +1882,7 @@ TEST_F(Test_Basic, registerAccount)
     ASSERT_TRUE(message);
 
     const ot::RequestNumber requestNumber =
-        ot::String::StringToUlong(message->m_strRequestNum->Get());
+        ot::String::StringToUlong(message->request_num_->Get());
     const auto result = translate_result(std::get<0>(finished));
     verify_state_post(
         client_2_,
@@ -1898,7 +1898,7 @@ TEST_F(Test_Basic, registerAccount)
         bob_counter_);
 
     const auto accountID =
-        client_1_.Factory().IdentifierFromBase58(message->m_strAcctID->Bytes());
+        client_1_.Factory().IdentifierFromBase58(message->acct_id_->Bytes());
     const auto clientAccount = client_2_.Wallet().Internal().Account(accountID);
     const auto serverAccount = server_1_.Wallet().Internal().Account(accountID);
 
@@ -1967,7 +1967,7 @@ TEST_F(Test_Basic, send_cheque)
     ASSERT_TRUE(message);
 
     const ot::RequestNumber requestNumber =
-        ot::String::StringToUlong(message->m_strRequestNum->Get());
+        ot::String::StringToUlong(message->request_num_->Get());
     const auto result = translate_result(std::get<0>(finished));
     verify_state_post(
         client_1_,
@@ -2022,7 +2022,7 @@ TEST_F(Test_Basic, getNymbox_receive_cheque)
     ASSERT_TRUE(message);
 
     const ot::RequestNumber requestNumber =
-        ot::String::StringToUlong(message->m_strRequestNum->Get());
+        ot::String::StringToUlong(message->request_num_->Get());
     const auto result = translate_result(std::get<0>(finished));
     verify_state_post(
         client_2_,
@@ -2077,7 +2077,7 @@ TEST_F(Test_Basic, getNymbox_after_clearing_nymbox_2_Bob)
     ASSERT_TRUE(message);
 
     const ot::RequestNumber requestNumber =
-        ot::String::StringToUlong(message->m_strRequestNum->Get());
+        ot::String::StringToUlong(message->request_num_->Get());
     const auto result = translate_result(std::get<0>(finished));
     verify_state_post(
         client_2_,
@@ -2131,7 +2131,7 @@ TEST_F(Test_Basic, depositCheque)
     ASSERT_TRUE(message);
 
     const ot::RequestNumber requestNumber =
-        ot::String::StringToUlong(message->m_strRequestNum->Get());
+        ot::String::StringToUlong(message->request_num_->Get());
     const auto result = translate_result(std::get<0>(finished));
     verify_state_post(
         client_2_,
@@ -2197,7 +2197,7 @@ TEST_F(Test_Basic, getAccountData_after_cheque_deposited)
     ASSERT_TRUE(message);
 
     const ot::RequestNumber requestNumber =
-        ot::String::StringToUlong(message->m_strRequestNum->Get());
+        ot::String::StringToUlong(message->request_num_->Get());
     const auto result = translate_result(std::get<0>(finished));
     verify_state_post(
         client_1_,
@@ -2267,7 +2267,7 @@ TEST_F(Test_Basic, resync)
     ASSERT_TRUE(message);
 
     const ot::RequestNumber requestNumber =
-        ot::String::StringToUlong(message->m_strRequestNum->Get());
+        ot::String::StringToUlong(message->request_num_->Get());
     const auto result = translate_result(std::get<0>(finished));
     clientContext = server_1_.Wallet().ClientContext(alice_nym_id_);
     verify_state_post(
@@ -2324,7 +2324,7 @@ TEST_F(Test_Basic, sendTransfer)
     ASSERT_TRUE(message);
 
     const ot::RequestNumber requestNumber =
-        ot::String::StringToUlong(message->m_strRequestNum->Get());
+        ot::String::StringToUlong(message->request_num_->Get());
     const auto result = translate_result(std::get<0>(finished));
     verify_state_post(
         client_1_,
@@ -2406,7 +2406,7 @@ TEST_F(Test_Basic, getAccountData_after_incomingTransfer)
     ASSERT_TRUE(message);
 
     const ot::RequestNumber requestNumber =
-        ot::String::StringToUlong(message->m_strRequestNum->Get());
+        ot::String::StringToUlong(message->request_num_->Get());
     const auto result = translate_result(std::get<0>(finished));
     verify_state_post(
         client_2_,
@@ -2517,7 +2517,7 @@ TEST_F(Test_Basic, getAccountData_after_transfer_accepted)
     ASSERT_TRUE(message);
 
     const ot::RequestNumber requestNumber =
-        ot::String::StringToUlong(message->m_strRequestNum->Get());
+        ot::String::StringToUlong(message->request_num_->Get());
     const auto result = translate_result(std::get<0>(finished));
     verify_state_post(
         client_1_,
@@ -2592,7 +2592,7 @@ TEST_F(Test_Basic, register_second_account)
     ASSERT_TRUE(message);
 
     const ot::RequestNumber requestNumber =
-        ot::String::StringToUlong(message->m_strRequestNum->Get());
+        ot::String::StringToUlong(message->request_num_->Get());
     const auto result = translate_result(std::get<0>(finished));
     verify_state_post(
         client_2_,
@@ -2607,7 +2607,7 @@ TEST_F(Test_Basic, register_second_account)
         0,
         bob_counter_);
     const auto accountID =
-        client_2_.Factory().IdentifierFromBase58(message->m_strAcctID->Bytes());
+        client_2_.Factory().IdentifierFromBase58(message->acct_id_->Bytes());
     const auto clientAccount = client_2_.Wallet().Internal().Account(accountID);
     const auto serverAccount = server_1_.Wallet().Internal().Account(accountID);
 
@@ -2665,7 +2665,7 @@ TEST_F(Test_Basic, send_internal_transfer)
     ASSERT_TRUE(message);
 
     const ot::RequestNumber requestNumber =
-        ot::String::StringToUlong(message->m_strRequestNum->Get());
+        ot::String::StringToUlong(message->request_num_->Get());
     const auto result = translate_result(std::get<0>(finished));
     verify_state_post(
         client_2_,
@@ -2758,7 +2758,7 @@ TEST_F(Test_Basic, getAccountData_after_incoming_internal_Transfer)
     ASSERT_TRUE(message);
 
     const ot::RequestNumber requestNumber =
-        ot::String::StringToUlong(message->m_strRequestNum->Get());
+        ot::String::StringToUlong(message->request_num_->Get());
     const auto result = translate_result(std::get<0>(finished));
     verify_state_post(
         client_2_,
@@ -2830,7 +2830,7 @@ TEST_F(Test_Basic, getAccountData_after_internal_transfer_accepted)
     ASSERT_TRUE(message);
 
     const ot::RequestNumber requestNumber =
-        ot::String::StringToUlong(message->m_strRequestNum->Get());
+        ot::String::StringToUlong(message->request_num_->Get());
     const auto result = translate_result(std::get<0>(finished));
     verify_state_post(
         client_2_,
@@ -2904,7 +2904,7 @@ TEST_F(Test_Basic, send_message)
     ASSERT_TRUE(message);
 
     const ot::RequestNumber requestNumber =
-        ot::String::StringToUlong(message->m_strRequestNum->Get());
+        ot::String::StringToUlong(message->request_num_->Get());
     const auto result = translate_result(std::get<0>(finished));
     verify_state_post(
         client_1_,
@@ -2948,7 +2948,7 @@ TEST_F(Test_Basic, receive_message)
     ASSERT_TRUE(message);
 
     const ot::RequestNumber requestNumber =
-        ot::String::StringToUlong(message->m_strRequestNum->Get());
+        ot::String::StringToUlong(message->request_num_->Get());
     const auto result = translate_result(std::get<0>(finished));
     verify_state_post(
         client_2_,
@@ -3006,7 +3006,7 @@ TEST_F(Test_Basic, request_admin_wrong_password)
     ASSERT_TRUE(message);
 
     const ot::RequestNumber requestNumber =
-        ot::String::StringToUlong(message->m_strRequestNum->Get());
+        ot::String::StringToUlong(message->request_num_->Get());
     const auto result = translate_result(std::get<0>(finished));
     verify_state_post(
         client_1_,
@@ -3021,7 +3021,7 @@ TEST_F(Test_Basic, request_admin_wrong_password)
         0,
         alice_counter_);
 
-    EXPECT_FALSE(message->m_bBool);
+    EXPECT_FALSE(message->bool_);
     EXPECT_TRUE(context.AdminAttempted());
     EXPECT_FALSE(context.isAdmin());
 }
@@ -3054,7 +3054,7 @@ TEST_F(Test_Basic, request_admin)
     ASSERT_TRUE(message);
 
     const ot::RequestNumber requestNumber =
-        ot::String::StringToUlong(message->m_strRequestNum->Get());
+        ot::String::StringToUlong(message->request_num_->Get());
     const auto result = translate_result(std::get<0>(finished));
     verify_state_post(
         client_1_,
@@ -3069,7 +3069,7 @@ TEST_F(Test_Basic, request_admin)
         0,
         alice_counter_);
 
-    EXPECT_TRUE(message->m_bBool);
+    EXPECT_TRUE(message->bool_);
     EXPECT_TRUE(context.AdminAttempted());
     EXPECT_TRUE(context.isAdmin());
 }
@@ -3102,7 +3102,7 @@ TEST_F(Test_Basic, request_admin_already_admin)
     ASSERT_TRUE(message);
 
     const ot::RequestNumber requestNumber =
-        ot::String::StringToUlong(message->m_strRequestNum->Get());
+        ot::String::StringToUlong(message->request_num_->Get());
     const auto result = translate_result(std::get<0>(finished));
     verify_state_post(
         client_1_,
@@ -3117,7 +3117,7 @@ TEST_F(Test_Basic, request_admin_already_admin)
         0,
         alice_counter_);
 
-    EXPECT_TRUE(message->m_bBool);
+    EXPECT_TRUE(message->bool_);
     EXPECT_TRUE(context.AdminAttempted());
     EXPECT_TRUE(context.isAdmin());
 }
@@ -3150,7 +3150,7 @@ TEST_F(Test_Basic, request_admin_second_nym)
     ASSERT_TRUE(message);
 
     const ot::RequestNumber requestNumber =
-        ot::String::StringToUlong(message->m_strRequestNum->Get());
+        ot::String::StringToUlong(message->request_num_->Get());
     const auto result = translate_result(std::get<0>(finished));
     verify_state_post(
         client_2_,
@@ -3165,7 +3165,7 @@ TEST_F(Test_Basic, request_admin_second_nym)
         0,
         bob_counter_);
 
-    EXPECT_FALSE(message->m_bBool);
+    EXPECT_FALSE(message->bool_);
     EXPECT_TRUE(context.AdminAttempted());
     EXPECT_FALSE(context.isAdmin());
 }
@@ -3201,7 +3201,7 @@ TEST_F(Test_Basic, addClaim)
     ASSERT_TRUE(message);
 
     const ot::RequestNumber requestNumber =
-        ot::String::StringToUlong(message->m_strRequestNum->Get());
+        ot::String::StringToUlong(message->request_num_->Get());
     const auto result = translate_result(std::get<0>(finished));
     verify_state_post(
         client_1_,
@@ -3216,7 +3216,7 @@ TEST_F(Test_Basic, addClaim)
         0,
         alice_counter_);
 
-    EXPECT_TRUE(message->m_bBool);
+    EXPECT_TRUE(message->bool_);
 }
 
 TEST_F(Test_Basic, renameServer)
@@ -3251,7 +3251,7 @@ TEST_F(Test_Basic, renameServer)
     ASSERT_TRUE(message);
 
     const ot::RequestNumber requestNumber =
-        ot::String::StringToUlong(message->m_strRequestNum->Get());
+        ot::String::StringToUlong(message->request_num_->Get());
     const auto result = translate_result(std::get<0>(finished));
     verify_state_post(
         client_1_,
@@ -3266,8 +3266,8 @@ TEST_F(Test_Basic, renameServer)
         0,
         alice_counter_);
 
-    EXPECT_TRUE(message->m_bBool);
-    EXPECT_FALSE(message->m_ascPayload->empty());
+    EXPECT_TRUE(message->bool_);
+    EXPECT_FALSE(message->payload_->empty());
 
     const auto server = client_1_.Wallet().Server(server_1_id_);
 
@@ -3305,7 +3305,7 @@ TEST_F(Test_Basic, addClaim_nclient_1_admin)
     ASSERT_TRUE(message);
 
     const ot::RequestNumber requestNumber =
-        ot::String::StringToUlong(message->m_strRequestNum->Get());
+        ot::String::StringToUlong(message->request_num_->Get());
     const auto result = translate_result(std::get<0>(finished));
     verify_state_post(
         client_2_,
@@ -3320,8 +3320,8 @@ TEST_F(Test_Basic, addClaim_nclient_1_admin)
         0,
         bob_counter_);
 
-    EXPECT_TRUE(message->m_bSuccess);
-    EXPECT_FALSE(message->m_bBool);
+    EXPECT_TRUE(message->success_);
+    EXPECT_FALSE(message->bool_);
 }
 
 TEST_F(Test_Basic, initiate_and_acknowledge_bailment)
@@ -3609,7 +3609,7 @@ TEST_F(Test_Basic, downloadMint)
     ASSERT_TRUE(message);
 
     const ot::RequestNumber requestNumber =
-        ot::String::StringToUlong(message->m_strRequestNum->Get());
+        ot::String::StringToUlong(message->request_num_->Get());
     const auto result = translate_result(std::get<0>(finished));
     verify_state_post(
         client_2_,
@@ -3624,8 +3624,8 @@ TEST_F(Test_Basic, downloadMint)
         0,
         bob_counter_);
 
-    EXPECT_TRUE(message->m_bSuccess);
-    EXPECT_TRUE(message->m_bBool);
+    EXPECT_TRUE(message->success_);
+    EXPECT_TRUE(message->bool_);
 }
 
 TEST_F(Test_Basic, withdrawCash)
@@ -3657,7 +3657,7 @@ TEST_F(Test_Basic, withdrawCash)
     ASSERT_TRUE(message);
 
     const ot::RequestNumber requestNumber =
-        ot::String::StringToUlong(message->m_strRequestNum->Get());
+        ot::String::StringToUlong(message->request_num_->Get());
     const auto result = translate_result(std::get<0>(finished));
     verify_state_post(
         client_2_,
@@ -3757,7 +3757,7 @@ TEST_F(Test_Basic, send_cash)
     ASSERT_TRUE(message);
 
     const ot::RequestNumber requestNumber =
-        ot::String::StringToUlong(message->m_strRequestNum->Get());
+        ot::String::StringToUlong(message->request_num_->Get());
     const auto result = translate_result(std::get<0>(finished));
     verify_state_post(
         client_2_,
@@ -3805,7 +3805,7 @@ TEST_F(Test_Basic, receive_cash)
     ASSERT_TRUE(message);
 
     const ot::RequestNumber requestNumber =
-        ot::String::StringToUlong(message->m_strRequestNum->Get());
+        ot::String::StringToUlong(message->request_num_->Get());
     const auto result = translate_result(std::get<0>(finished));
     verify_state_post(
         client_1_,
@@ -3911,7 +3911,7 @@ TEST_F(Test_Basic, depositCash)
     ASSERT_TRUE(message);
 
     const ot::RequestNumber requestNumber =
-        ot::String::StringToUlong(message->m_strRequestNum->Get());
+        ot::String::StringToUlong(message->request_num_->Get());
     const auto result = translate_result(std::get<0>(finished));
     verify_state_post(
         client_1_,

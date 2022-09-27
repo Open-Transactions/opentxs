@@ -160,7 +160,7 @@ public:
         const PasswordPrompt& reason) const -> bool;
     auto GetPaymentContents(String& strOutput) const -> bool
     {
-        strOutput.Set(m_strPayment->Get());
+        strOutput.Set(payment_->Get());
         return true;
     }
     auto GetRecipientAcctID(identifier::Generic& theOutput) const -> bool;
@@ -174,8 +174,8 @@ public:
     auto GetSenderNymIDForDisplay(identifier::Nym& theOutput) const -> bool;
     auto GetTransactionNum(TransactionNumber& lOutput) const -> bool;
     auto GetTransNumDisplay(TransactionNumber& lOutput) const -> bool;
-    auto GetType() const -> paymentType { return m_Type; }
-    auto GetTypeString() const -> const char* { return GetTypeString(m_Type); }
+    auto GetType() const -> paymentType { return type_; }
+    auto GetTypeString() const -> const char* { return GetTypeString(type_); }
     auto GetValidFrom(Time& tOutput) const -> bool;
     auto GetValidTo(Time& tOutput) const -> bool;
     auto HasTransactionNum(
@@ -184,14 +184,14 @@ public:
     auto Instantiate() const -> OTTrackable*;
     auto Instantiate(const String& strPayment) -> OTTrackable*;
     auto InstantiateNotice() const -> OTTransaction*;
-    auto IsCheque() const -> bool { return (CHEQUE == m_Type); }
-    auto IsVoucher() const -> bool { return (VOUCHER == m_Type); }
-    auto IsInvoice() const -> bool { return (INVOICE == m_Type); }
-    auto IsPaymentPlan() const -> bool { return (PAYMENT_PLAN == m_Type); }
-    auto IsSmartContract() const -> bool { return (SMART_CONTRACT == m_Type); }
-    auto IsNotice() const -> bool { return (NOTICE == m_Type); }
-    auto IsValid() const -> bool { return (ERROR_STATE != m_Type); }
-    auto Payment() const -> const String& { return m_strPayment; }
+    auto IsCheque() const -> bool { return (CHEQUE == type_); }
+    auto IsVoucher() const -> bool { return (VOUCHER == type_); }
+    auto IsInvoice() const -> bool { return (INVOICE == type_); }
+    auto IsPaymentPlan() const -> bool { return (PAYMENT_PLAN == type_); }
+    auto IsSmartContract() const -> bool { return (SMART_CONTRACT == type_); }
+    auto IsNotice() const -> bool { return (NOTICE == type_); }
+    auto IsValid() const -> bool { return (ERROR_STATE != type_); }
+    auto Payment() const -> const String& { return payment_; }
 
     auto IsCancelledCheque(const PasswordPrompt& reason) -> bool;
     // Verify whether the CURRENT date is AFTER the the "VALID TO" date.
@@ -224,49 +224,49 @@ public:
 
 protected:
     // Contains the cheque / payment plan / etc in string form.
-    OTString m_strPayment;
-    paymentType m_Type;
+    OTString payment_;
+    paymentType type_;
     // Once the actual instrument is loaded up, we copy some temp values to
-    // *this object. Until then, this bool (m_bAreTempValuesSet) is set to
+    // *this object. Until then, this bool (are_temp_values_set_) is set to
     // false.
-    bool m_bAreTempValuesSet;
+    bool are_temp_values_set_;
 
     // Here are the TEMP values: (These are not serialized.)
 
     // For cheques mostly, and payment plans too.
-    bool m_bHasRecipient;
+    bool has_recipient_;
     // For vouchers (cashier's cheques), the Nym who bought the voucher is the
     // remitter, whereas the "sender" is the server Nym whose account the
     // voucher is drawn on.
-    bool m_bHasRemitter;
-    Amount m_lAmount;
-    TransactionNumber m_lTransactionNum;
-    TransactionNumber m_lTransNumDisplay;
+    bool has_remitter_;
+    Amount amount_;
+    TransactionNumber transaction_num_;
+    TransactionNumber trans_num_display_;
     // Memo, Consideration, Subject, etc.
-    OTString m_strMemo;
+    OTString memo_;
 
     // These are for convenience only, for caching once they happen to be
     // loaded. These values are NOT serialized other than via the payment
     // instrument itself (where they are captured from, whenever it is
-    // instantiated.) Until m_bAreTempValuesSet is set to true, these values can
-    // NOT be considered available. Use the accessing methods below. These
+    // instantiated.) Until are_temp_values_set_ is set to true, these values
+    // can NOT be considered available. Use the accessing methods below. These
     // values are not ALL always available, depending on the payment instrument
     // type. Different payment instruments support different temp values.
-    identifier::Generic m_InstrumentDefinitionID;
-    identifier::Generic m_NotaryID;
-    identifier::Nym m_SenderNymID;
-    identifier::Generic m_SenderAcctID;
-    identifier::Nym m_RecipientNymID;
-    identifier::Generic m_RecipientAcctID;
+    identifier::Generic instrument_definition_id_;
+    identifier::Generic notary_id_;
+    identifier::Nym sender_nym_id_;
+    identifier::Generic sender_account_id_;
+    identifier::Nym recipient_nym_id_;
+    identifier::Generic recipient_account_id_;
     // A voucher (cashier's cheque) has the "bank" as the sender. Whereas the
     // Nym who actually purchased the voucher is the remitter.
-    identifier::Nym m_RemitterNymID;
+    identifier::Nym remitter_nym_id_;
     // A voucher (cashier's cheque) has the "bank"s account as the sender acct.
     // Whereas the account that was originally used to purchase the voucher is
     // the remitter account.
-    identifier::Generic m_RemitterAcctID;
-    Time m_VALID_FROM;  // Temporary values. Not always available.
-    Time m_VALID_TO;    // Temporary values. Not always available.
+    identifier::Generic remitter_account_id_;
+    Time valid_from_;  // Temporary values. Not always available.
+    Time valid_to_;    // Temporary values. Not always available.
 
     void lowLevelSetTempValuesFromPaymentPlan(const OTPaymentPlan& theInput);
     void lowLevelSetTempValuesFromSmartContract(

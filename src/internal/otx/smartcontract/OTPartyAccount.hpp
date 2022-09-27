@@ -78,7 +78,7 @@ class OTPartyAccount
 public:
     void RegisterForExecution(OTScript& theScript);
 
-    auto GetParty() const -> OTParty* { return m_pForParty; }
+    auto GetParty() const -> OTParty* { return for_party_; }
     void SetParty(OTParty& theOwnerParty);  // This happens when the
                                             // partyaccount
                                             // is added to the party. (so I have
@@ -86,26 +86,26 @@ public:
 
     auto GetName() const -> const String&
     {
-        return m_strName;
+        return name_;
     }  // account's name as used in a script.
     auto GetAgentName() const -> const String&
     {
-        return m_strAgentName;
+        return agent_name_;
     }  // agent's name as used in a script.
     auto GetAcctID() const -> const String&
     {
-        return m_strAcctID;
+        return acct_id_;
     }  // account's ID as used internal to OT.
     auto GetInstrumentDefinitionID() const -> const String&
     {
-        return m_strInstrumentDefinitionID;
+        return instrument_definition_id_;
     }  // instrument definition ID for the account.
 
     void SetAgentName(const String& strAgentName)
     {
-        m_strAgentName = strAgentName;
+        agent_name_ = strAgentName;
     }
-    void SetAcctID(const String& strAccountID) { m_strAcctID = strAccountID; }
+    void SetAcctID(const String& strAccountID) { acct_id_ = strAccountID; }
     auto GetAuthorizedAgent() -> OTAgent*;
     auto LoadAccount() -> SharedAccount;
     auto IsAccount(const Account& theAccount) -> bool;
@@ -121,10 +121,10 @@ public:
                                   // verify whether he
                                   // actually has agency
                                   // over it.
-    auto GetClosingTransNo() const -> std::int64_t { return m_lClosingTransNo; }
+    auto GetClosingTransNo() const -> std::int64_t { return closing_trans_no_; }
     void SetClosingTransNo(std::int64_t lTransNo)
     {
-        m_lClosingTransNo = lTransNo;
+        closing_trans_no_ = lTransNo;
     }
     auto Compare(const OTPartyAccount& rhs) const -> bool;
     auto DropFinalReceiptToInbox(
@@ -169,28 +169,28 @@ public:
 private:
     const api::Session& api_;
     const UnallocatedCString data_folder_{""};
-    OTParty* m_pForParty;  // When being added to a party, this pointer will be
-                           // set.
+    OTParty* for_party_;  // When being added to a party, this pointer will be
+                          // set.
     // NOTE: each party needs to have a list of partyaccounts, AND each account
     // on that list needs to have a CLOSING #!!! Ahh...
-    std::int64_t m_lClosingTransNo;  // Any account that is party to an
+    std::int64_t closing_trans_no_;  // Any account that is party to an
                                      // agreement,
                                      // must have a closing transaction # for
                                      // finalReceipt.
     // account name (inside the script language, "gold_acct_A" could be used to
     // reference this acct.)
     //
-    OTString m_strName;    // Name of the account (for use in scripts.)
-    OTString m_strAcctID;  // The Account ID itself.
-    OTString m_strInstrumentDefinitionID;  // The instrument definition ID for
-                                           // the account. Stored
+    OTString name_;     // Name of the account (for use in scripts.)
+    OTString acct_id_;  // The Account ID itself.
+    OTString instrument_definition_id_;  // The instrument definition ID for
+                                         // the account. Stored
     // because parties agree on this even before the
     // account ID is selected. Compare() uses this
     // even when the account ID is blank, and when
     // acct ID *is* added, its instrument definition must match
     // this.
-    OTString m_strAgentName;  // The name of the agent who has rights to this
-                              // account.
+    OTString agent_name_;  // The name of the agent who has rights to this
+                           // account.
     // Entity, role, and Nym information are not stored here.
     // Entity is already known on the party who owns this account (and I should
     // have a ptr to him.)
@@ -201,7 +201,7 @@ private:
     // "GetOwnerID()" for a partyaccount (if it were to store NymID, EntityIsD,
     // and a bool to choose
     // between them) should be logically the same as
-    // m_pOwnerParty->GetPartyID().
+    // owner_party_->GetPartyID().
     //
 
     auto get_account() const -> SharedAccount;

@@ -23,13 +23,13 @@ class Test_ContactData : public ::testing::Test
 public:
     Test_ContactData()
         : api_(ot::Context().StartClientSession(0))
-        , contactData_(
+        , contact_data_(
               dynamic_cast<const ot::api::session::Client&>(api_),
               ot::UnallocatedCString("contactDataNym"),
               opentxs::CONTACT_CONTACT_DATA_VERSION,
               opentxs::CONTACT_CONTACT_DATA_VERSION,
               {})
-        , activeContactItem_(std::make_shared<claim::Item>(
+        , active_contact_item_(std::make_shared<claim::Item>(
               dynamic_cast<const ot::api::session::Client&>(api_),
               ot::UnallocatedCString("activeContactItem"),
               opentxs::CONTACT_CONTACT_DATA_VERSION,
@@ -45,8 +45,8 @@ public:
     }
 
     const ot::api::session::Client& api_;
-    const claim::Data contactData_;
-    const std::shared_ptr<claim::Item> activeContactItem_;
+    const claim::Data contact_data_;
+    const std::shared_ptr<claim::Item> active_contact_item_;
 
     using CallbackType1 = claim::Data (*)(
         const claim::Data&,
@@ -414,7 +414,7 @@ TEST_F(Test_ContactData, first_constructor)
         opentxs::CONTACT_CONTACT_DATA_VERSION,
         opentxs::CONTACT_CONTACT_DATA_VERSION,
         claim::SectionType::Identifier,
-        activeContactItem_));
+        active_contact_item_));
 
     const claim::Data::SectionMap map{{section1->Type(), section1}};
 
@@ -433,7 +433,7 @@ TEST_F(Test_ContactData, first_constructor)
     ASSERT_TRUE(contactData.HaveClaim(
         claim::SectionType::Identifier,
         claim::ClaimType::Employee,
-        activeContactItem_->Value()));
+        active_contact_item_->Value()));
 }
 
 TEST_F(Test_ContactData, first_constructor_no_sections)
@@ -466,7 +466,7 @@ TEST_F(Test_ContactData, copy_constructor)
         opentxs::CONTACT_CONTACT_DATA_VERSION,
         opentxs::CONTACT_CONTACT_DATA_VERSION,
         claim::SectionType::Identifier,
-        activeContactItem_));
+        active_contact_item_));
 
     const claim::Data::SectionMap map{{section1->Type(), section1}};
 
@@ -490,12 +490,12 @@ TEST_F(Test_ContactData, copy_constructor)
     ASSERT_TRUE(copiedContactData.HaveClaim(
         claim::SectionType::Identifier,
         claim::ClaimType::Employee,
-        activeContactItem_->Value()));
+        active_contact_item_->Value()));
 }
 
 TEST_F(Test_ContactData, operator_plus)
 {
-    const auto data1 = contactData_.AddItem(activeContactItem_);
+    const auto data1 = contact_data_.AddItem(active_contact_item_);
     // Add a ContactData object with a section of the same type.
     const auto contactItem2 = std::make_shared<claim::Item>(
         dynamic_cast<const ot::api::session::Client&>(api_),
@@ -611,26 +611,26 @@ TEST_F(Test_ContactData, operator_plus_different_version)
         opentxs::CONTACT_CONTACT_DATA_VERSION - 1,
         {});
 
-    const auto contactData3 = contactData_ + contactData2;
+    const auto contactData3 = contact_data_ + contactData2;
     // Verify the new contact data has the latest version.
     ASSERT_EQ(opentxs::CONTACT_CONTACT_DATA_VERSION, contactData3.Version());
 
     // lhs version less than rhs
-    const auto contactData4 = contactData2 + contactData_;
+    const auto contactData4 = contactData2 + contact_data_;
     // Verify the new contact data has the latest version.
     ASSERT_EQ(opentxs::CONTACT_CONTACT_DATA_VERSION, contactData4.Version());
 }
 
 TEST_F(Test_ContactData, operator_string)
 {
-    const auto data1 = contactData_.AddItem(activeContactItem_);
+    const auto data1 = contact_data_.AddItem(active_contact_item_);
     const ot::UnallocatedCString dataString = data1;
     ASSERT_EQ(expectedStringOutput, dataString);
 }
 
 TEST_F(Test_ContactData, Serialize)
 {
-    const auto data1 = contactData_.AddItem(activeContactItem_);
+    const auto data1 = contact_data_.AddItem(active_contact_item_);
 
     // Serialize without ids.
     auto bytes = ot::Space{};
@@ -655,11 +655,11 @@ TEST_F(Test_ContactData, Serialize)
     auto item_iterator = group1->begin();
     auto contact_item = item_iterator->second;
     ASSERT_TRUE(contact_item);
-    ASSERT_EQ(activeContactItem_->Value(), contact_item->Value());
-    ASSERT_EQ(activeContactItem_->Version(), contact_item->Version());
-    ASSERT_EQ(activeContactItem_->Type(), contact_item->Type());
-    ASSERT_EQ(activeContactItem_->Start(), contact_item->Start());
-    ASSERT_EQ(activeContactItem_->End(), contact_item->End());
+    ASSERT_EQ(active_contact_item_->Value(), contact_item->Value());
+    ASSERT_EQ(active_contact_item_->Version(), contact_item->Version());
+    ASSERT_EQ(active_contact_item_->Type(), contact_item->Type());
+    ASSERT_EQ(active_contact_item_->Start(), contact_item->Start());
+    ASSERT_EQ(active_contact_item_->End(), contact_item->End());
 
     // Serialize with ids.
     EXPECT_TRUE(data1.Serialize(ot::writer(bytes), true));
@@ -683,11 +683,11 @@ TEST_F(Test_ContactData, Serialize)
     item_iterator = group1->begin();
     contact_item = item_iterator->second;
     ASSERT_TRUE(contact_item);
-    ASSERT_EQ(activeContactItem_->Value(), contact_item->Value());
-    ASSERT_EQ(activeContactItem_->Version(), contact_item->Version());
-    ASSERT_EQ(activeContactItem_->Type(), contact_item->Type());
-    ASSERT_EQ(activeContactItem_->Start(), contact_item->Start());
-    ASSERT_EQ(activeContactItem_->End(), contact_item->End());
+    ASSERT_EQ(active_contact_item_->Value(), contact_item->Value());
+    ASSERT_EQ(active_contact_item_->Version(), contact_item->Version());
+    ASSERT_EQ(active_contact_item_->Type(), contact_item->Type());
+    ASSERT_EQ(active_contact_item_->Start(), contact_item->Start());
+    ASSERT_EQ(active_contact_item_->End(), contact_item->End());
 }
 
 TEST_F(Test_ContactData, AddContract)
@@ -740,7 +740,7 @@ TEST_F(Test_ContactData, AddItem_claim)
         ot::Time{},
         ot::UnallocatedSet<std::uint32_t>{
             static_cast<uint32_t>(claim::Attribute::Active)});
-    const auto data1 = contactData_.AddItem(claim);
+    const auto data1 = contact_data_.AddItem(claim);
     // Verify the section was added.
     ASSERT_NE(nullptr, data1.Section(claim::SectionType::Contract));
     // Verify the group was added.
@@ -796,7 +796,7 @@ TEST_F(Test_ContactData, AddItem_claim_different_versions)
 TEST_F(Test_ContactData, AddItem_item)
 {
     // Add an item to a ContactData with no section.
-    const auto data1 = contactData_.AddItem(activeContactItem_);
+    const auto data1 = contact_data_.AddItem(active_contact_item_);
     // Verify the section was added.
     ASSERT_NE(nullptr, data1.Section(claim::SectionType::Identifier));
     // Verify the group was added.
@@ -806,9 +806,9 @@ TEST_F(Test_ContactData, AddItem_item)
             claim::SectionType::Identifier, claim::ClaimType::Employee));
     // Verify the item was added.
     ASSERT_TRUE(data1.HaveClaim(
-        activeContactItem_->Section(),
-        activeContactItem_->Type(),
-        activeContactItem_->Value()));
+        active_contact_item_->Section(),
+        active_contact_item_->Type(),
+        active_contact_item_->Value()));
 
     // Add an item to a ContactData with a section.
     const auto contactItem2 = std::make_shared<claim::Item>(
@@ -1014,7 +1014,7 @@ TEST_F(Test_ContactData, AddPreferredOTServer)
                 ot::UnallocatedCString("serverID3"),
                 "")));
     const auto data4 =
-        contactData_.AddPreferredOTServer(serverIdentifier3, false);
+        contact_data_.AddPreferredOTServer(serverIdentifier3, false);
 
     // Verify the group was created.
     ASSERT_NE(
@@ -1085,7 +1085,7 @@ TEST_F(Test_ContactData, AddSocialMediaProfile)
     // Add a profile that only resides in the profile section.
 
     // Add a profile to a contact with no primary profile.
-    const auto data2 = contactData_.AddSocialMediaProfile(
+    const auto data2 = contact_data_.AddSocialMediaProfile(
         "profileValue1", claim::ClaimType::Aboutme, false, false);
     // Verify that the item was made primary.
     const ot::identifier::Generic identifier1(
@@ -1143,7 +1143,7 @@ TEST_F(Test_ContactData, AddSocialMediaProfile)
 
     // Add a profile that resides in the profile and communication sections.
 
-    const auto data5 = contactData_.AddSocialMediaProfile(
+    const auto data5 = contact_data_.AddSocialMediaProfile(
         "profileValue4", claim::ClaimType::Linkedin, false, false);
     // Verify that it was added to the profile section.
     const ot::identifier::Generic identifier4(
@@ -1282,12 +1282,12 @@ TEST_F(Test_ContactData, AddSocialMediaProfile)
 TEST_F(Test_ContactData, BestEmail)
 {
     // Add a non-active, non-primary email.
-    const auto data1 = contactData_.AddEmail("emailValue", false, false);
+    const auto data1 = contact_data_.AddEmail("emailValue", false, false);
     // Verify it is the best email.
     ASSERT_STREQ("emailValue", data1.BestEmail().c_str());
 
     // Add an active, non-primary email.
-    const auto data2 = contactData_.AddEmail("activeEmailValue", false, true);
+    const auto data2 = contact_data_.AddEmail("activeEmailValue", false, true);
     // Verify it is the best email.
     ASSERT_STREQ("activeEmailValue", data2.BestEmail().c_str());
 
@@ -1306,13 +1306,13 @@ TEST_F(Test_ContactData, BestPhoneNumber)
 {
     // Add a non-active, non-primary phone number.
     const auto data1 =
-        contactData_.AddPhoneNumber("phoneNumberValue", false, false);
+        contact_data_.AddPhoneNumber("phoneNumberValue", false, false);
     // Verify it is the best phone number.
     ASSERT_STREQ("phoneNumberValue", data1.BestPhoneNumber().c_str());
 
     // Add an active, non-primary phone number.
     const auto data2 =
-        contactData_.AddPhoneNumber("activePhoneNumberValue", false, true);
+        contact_data_.AddPhoneNumber("activePhoneNumberValue", false, true);
     // Verify it is the best phone number.
     ASSERT_STREQ("activePhoneNumberValue", data2.BestPhoneNumber().c_str());
 
@@ -1333,7 +1333,7 @@ TEST_F(Test_ContactData, BestPhoneNumber)
 TEST_F(Test_ContactData, BestSocialMediaProfile)
 {
     // Add a non-active, non-primary profile.
-    const auto data1 = contactData_.AddSocialMediaProfile(
+    const auto data1 = contact_data_.AddSocialMediaProfile(
         "profileValue", claim::ClaimType::Facebook, false, false);
     // Verify it is the best profile.
     ASSERT_STREQ(
@@ -1341,7 +1341,7 @@ TEST_F(Test_ContactData, BestSocialMediaProfile)
         data1.BestSocialMediaProfile(claim::ClaimType::Facebook).c_str());
 
     // Add an active, non-primary profile.
-    const auto data2 = contactData_.AddSocialMediaProfile(
+    const auto data2 = contact_data_.AddSocialMediaProfile(
         "activeProfileValue", claim::ClaimType::Facebook, false, true);
     // Verify it is the best profile.
     ASSERT_STREQ(
@@ -1367,18 +1367,18 @@ TEST_F(Test_ContactData, BestSocialMediaProfile)
 
 TEST_F(Test_ContactData, Claim_found)
 {
-    const auto data1 = contactData_.AddItem(activeContactItem_);
-    ASSERT_NE(nullptr, data1.Claim(activeContactItem_->ID()));
+    const auto data1 = contact_data_.AddItem(active_contact_item_);
+    ASSERT_NE(nullptr, data1.Claim(active_contact_item_->ID()));
 }
 
 TEST_F(Test_ContactData, Claim_not_found)
 {
-    ASSERT_FALSE(contactData_.Claim(activeContactItem_->ID()));
+    ASSERT_FALSE(contact_data_.Claim(active_contact_item_->ID()));
 }
 
 TEST_F(Test_ContactData, Contracts)
 {
-    const auto data1 = contactData_.AddContract(
+    const auto data1 = contact_data_.AddContract(
         "instrumentDefinitionID1", ot::UnitType::Usd, false, false);
     const auto contracts = data1.Contracts(ot::UnitType::Usd, false);
     ASSERT_EQ(1, contracts.size());
@@ -1386,7 +1386,7 @@ TEST_F(Test_ContactData, Contracts)
 
 TEST_F(Test_ContactData, Contracts_onlyactive)
 {
-    const auto data1 = contactData_.AddContract(
+    const auto data1 = contact_data_.AddContract(
         "instrumentDefinitionID1", ot::UnitType::Usd, false, true);
     const auto data2 = data1.AddContract(
         "instrumentDefinitionID2", ot::UnitType::Usd, false, false);
@@ -1396,7 +1396,7 @@ TEST_F(Test_ContactData, Contracts_onlyactive)
 
 TEST_F(Test_ContactData, Delete)
 {
-    const auto data1 = contactData_.AddItem(activeContactItem_);
+    const auto data1 = contact_data_.AddItem(active_contact_item_);
     const auto contactItem2 = std::make_shared<claim::Item>(
         dynamic_cast<const ot::api::session::Client&>(api_),
         ot::UnallocatedCString("contactItem2"),
@@ -1411,12 +1411,12 @@ TEST_F(Test_ContactData, Delete)
         "");
     const auto data2 = data1.AddItem(contactItem2);
 
-    const auto data3 = data2.Delete(activeContactItem_->ID());
+    const auto data3 = data2.Delete(active_contact_item_->ID());
     // Verify the item was deleted.
     ASSERT_EQ(1, data3.Section(claim::SectionType::Identifier)->Size());
-    ASSERT_FALSE(data3.Claim(activeContactItem_->ID()));
+    ASSERT_FALSE(data3.Claim(active_contact_item_->ID()));
 
-    const auto data4 = data3.Delete(activeContactItem_->ID());
+    const auto data4 = data3.Delete(active_contact_item_->ID());
     // Verify trying to delete the item again didn't change anything.
     ASSERT_EQ(1, data4.Section(claim::SectionType::Identifier)->Size());
 
@@ -1427,7 +1427,7 @@ TEST_F(Test_ContactData, Delete)
 
 TEST_F(Test_ContactData, EmailAddresses)
 {
-    const auto data2 = contactData_.AddEmail("email1", true, false);
+    const auto data2 = contact_data_.AddEmail("email1", true, false);
     const auto data3 = data2.AddEmail("email2", false, true);
     const auto data4 = data3.AddEmail("email3", false, false);
 
@@ -1446,7 +1446,7 @@ TEST_F(Test_ContactData, EmailAddresses)
 
 TEST_F(Test_ContactData, Group_found)
 {
-    const auto data1 = contactData_.AddItem(activeContactItem_);
+    const auto data1 = contact_data_.AddItem(active_contact_item_);
     ASSERT_NE(
         nullptr,
         data1.Group(
@@ -1455,28 +1455,28 @@ TEST_F(Test_ContactData, Group_found)
 
 TEST_F(Test_ContactData, Group_notfound)
 {
-    ASSERT_FALSE(contactData_.Group(
+    ASSERT_FALSE(contact_data_.Group(
         claim::SectionType::Identifier, claim::ClaimType::Employee));
 }
 
 TEST_F(Test_ContactData, HaveClaim_1)
 {
-    ASSERT_FALSE(contactData_.HaveClaim(activeContactItem_->ID()));
+    ASSERT_FALSE(contact_data_.HaveClaim(active_contact_item_->ID()));
 
-    const auto data1 = contactData_.AddItem(activeContactItem_);
-    ASSERT_TRUE(data1.HaveClaim(activeContactItem_->ID()));
+    const auto data1 = contact_data_.AddItem(active_contact_item_);
+    ASSERT_TRUE(data1.HaveClaim(active_contact_item_->ID()));
 }
 
 TEST_F(Test_ContactData, HaveClaim_2)
 {
     // Test for an item in group that doesn't exist.
-    ASSERT_FALSE(contactData_.HaveClaim(
+    ASSERT_FALSE(contact_data_.HaveClaim(
         claim::SectionType::Identifier,
         claim::ClaimType::Employee,
         "activeContactItemValue"));
 
     // Test for an item that does exist.
-    const auto data1 = contactData_.AddItem(activeContactItem_);
+    const auto data1 = contact_data_.AddItem(active_contact_item_);
     ASSERT_TRUE(data1.HaveClaim(
         claim::SectionType::Identifier,
         claim::ClaimType::Employee,
@@ -1492,7 +1492,7 @@ TEST_F(Test_ContactData, HaveClaim_2)
 TEST_F(Test_ContactData, Name)
 {
     // Verify that Name returns an empty string if there is no scope group.
-    ASSERT_STREQ("", contactData_.Name().c_str());
+    ASSERT_STREQ("", contact_data_.Name().c_str());
 
     // Test when the scope group is emtpy.
     const auto group1 = std::make_shared<claim::Group>(
@@ -1519,14 +1519,15 @@ TEST_F(Test_ContactData, Name)
     ASSERT_STREQ("", data1.Name().c_str());
 
     // Test when the scope is set.
-    const auto data2 = contactData_.SetScope(
+    const auto data2 = contact_data_.SetScope(
         claim::ClaimType::Individual, "activeContactItemValue");
     ASSERT_STREQ("activeContactItemValue", data2.Name().c_str());
 }
 
 TEST_F(Test_ContactData, PhoneNumbers)
 {
-    const auto data2 = contactData_.AddPhoneNumber("phonenumber1", true, false);
+    const auto data2 =
+        contact_data_.AddPhoneNumber("phonenumber1", true, false);
     const auto data3 = data2.AddPhoneNumber("phonenumber2", false, true);
     const auto data4 = data3.AddPhoneNumber("phonenumber3", false, false);
 
@@ -1547,7 +1548,7 @@ TEST_F(Test_ContactData, PhoneNumbers)
 TEST_F(Test_ContactData, PreferredOTServer)
 {
     // Test getting the preferred server with no group.
-    const auto identifier = contactData_.PreferredOTServer();
+    const auto identifier = contact_data_.PreferredOTServer();
     ASSERT_TRUE(identifier.empty());
 
     // Test getting the preferred server with an empty group.
@@ -1588,7 +1589,7 @@ TEST_F(Test_ContactData, PreferredOTServer)
                 ot::UnallocatedCString("serverID2"),
                 "")));
     const auto data2 =
-        contactData_.AddPreferredOTServer(serverIdentifier2, true);
+        contact_data_.AddPreferredOTServer(serverIdentifier2, true);
     const auto preferredServer = data2.PreferredOTServer();
     ASSERT_FALSE(preferredServer.empty());
     ASSERT_EQ(serverIdentifier2, preferredServer);
@@ -1596,15 +1597,15 @@ TEST_F(Test_ContactData, PreferredOTServer)
 
 TEST_F(Test_ContactData, Section)
 {
-    ASSERT_FALSE(contactData_.Section(claim::SectionType::Identifier));
+    ASSERT_FALSE(contact_data_.Section(claim::SectionType::Identifier));
 
-    const auto data1 = contactData_.AddItem(activeContactItem_);
+    const auto data1 = contact_data_.AddItem(active_contact_item_);
     ASSERT_NE(nullptr, data1.Section(claim::SectionType::Identifier));
 }
 
 TEST_F(Test_ContactData, SetCommonName)
 {
-    const auto data1 = contactData_.SetCommonName("commonName");
+    const auto data1 = contact_data_.SetCommonName("commonName");
     const ot::identifier::Generic identifier(
         api_.Factory().IdentifierFromBase58(
             ot::identity::credential::Contact::ClaimID(
@@ -1625,7 +1626,7 @@ TEST_F(Test_ContactData, SetCommonName)
 TEST_F(Test_ContactData, SetName)
 {
     const auto data1 =
-        contactData_.SetScope(claim::ClaimType::Individual, "firstName");
+        contact_data_.SetScope(claim::ClaimType::Individual, "firstName");
 
     // Test that SetName creates a scope item.
     const auto data2 = data1.SetName("secondName");
@@ -1668,7 +1669,7 @@ TEST_F(Test_ContactData, SetName)
 
 TEST_F(Test_ContactData, SetScope)
 {
-    const auto data1 = contactData_.SetScope(
+    const auto data1 = contact_data_.SetScope(
         claim::ClaimType::Organization, "organizationScope");
     // Verify the scope item was created.
     const ot::identifier::Generic identifier1(
@@ -1727,7 +1728,7 @@ TEST_F(Test_ContactData, SetScope_different_versions)
 
 TEST_F(Test_ContactData, SocialMediaProfiles)
 {
-    const auto data2 = contactData_.AddSocialMediaProfile(
+    const auto data2 = contact_data_.AddSocialMediaProfile(
         "facebook1", claim::ClaimType::Facebook, true, false);
     const auto data3 = data2.AddSocialMediaProfile(
         "linkedin1", claim::ClaimType::Linkedin, false, true);
@@ -1751,15 +1752,15 @@ TEST_F(Test_ContactData, SocialMediaProfiles)
 
 TEST_F(Test_ContactData, Type)
 {
-    ASSERT_EQ(claim::ClaimType::Unknown, contactData_.Type());
+    ASSERT_EQ(claim::ClaimType::Unknown, contact_data_.Type());
 
     const auto data1 =
-        contactData_.SetScope(claim::ClaimType::Individual, "scopeName");
+        contact_data_.SetScope(claim::ClaimType::Individual, "scopeName");
     ASSERT_EQ(claim::ClaimType::Individual, data1.Type());
 }
 
 TEST_F(Test_ContactData, Version)
 {
-    ASSERT_EQ(opentxs::CONTACT_CONTACT_DATA_VERSION, contactData_.Version());
+    ASSERT_EQ(opentxs::CONTACT_CONTACT_DATA_VERSION, contact_data_.Version());
 }
 }  // namespace ottest

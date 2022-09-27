@@ -24,7 +24,7 @@ class Test_NymData : public ::testing::Test
 public:
     const ot::api::session::Client& client_;
     ot::OTPasswordPrompt reason_;
-    ot::NymData nymData_;
+    ot::NymData nym_data_;
 
     static auto ExpectedStringOutput(const std::uint32_t version)
         -> ot::UnallocatedCString
@@ -45,7 +45,7 @@ public:
     Test_NymData()
         : client_(ot::Context().StartClientSession(0))
         , reason_(client_.Factory().PasswordPrompt(__func__))
-        , nymData_(client_.Wallet().mutable_Nym(
+        , nym_data_(client_.Wallet().mutable_Nym(
               client_.Wallet().Nym(reason_, "testNym")->ID(),
               reason_))
     {
@@ -68,14 +68,14 @@ TEST_F(Test_NymData, AddClaim)
         ot::UnallocatedSet<std::uint32_t>{static_cast<uint32_t>(
             ot::identity::wot::claim::Attribute::Active)});
 
-    auto added = nymData_.AddClaim(claim, reason_);
+    auto added = nym_data_.AddClaim(claim, reason_);
     EXPECT_TRUE(added);
 }
 
 TEST_F(Test_NymData, AddContract)
 {
     auto added =
-        nymData_.AddContract("", ot::UnitType::Usd, false, false, reason_);
+        nym_data_.AddContract("", ot::UnitType::Usd, false, false, reason_);
     EXPECT_FALSE(added);
 
     const auto identifier1(client_.Factory().UnitIDFromBase58(
@@ -89,7 +89,7 @@ TEST_F(Test_NymData, AddContract)
             "instrumentDefinitionID1",
             "")));
 
-    added = nymData_.AddContract(
+    added = nym_data_.AddContract(
         identifier1.asBase58(client_.Crypto()),
         ot::UnitType::Usd,
         false,
@@ -100,30 +100,30 @@ TEST_F(Test_NymData, AddContract)
 
 TEST_F(Test_NymData, AddEmail)
 {
-    auto added = nymData_.AddEmail("email1", false, false, reason_);
+    auto added = nym_data_.AddEmail("email1", false, false, reason_);
     EXPECT_TRUE(added);
 
-    added = nymData_.AddEmail("", false, false, reason_);
+    added = nym_data_.AddEmail("", false, false, reason_);
     EXPECT_FALSE(added);
 }
 
 TEST_F(Test_NymData, AddPaymentCode)
 {
     auto added =
-        nymData_.AddPaymentCode("", ot::UnitType::Usd, false, false, reason_);
+        nym_data_.AddPaymentCode("", ot::UnitType::Usd, false, false, reason_);
     EXPECT_FALSE(added);
 
-    added = nymData_.AddPaymentCode(
+    added = nym_data_.AddPaymentCode(
         paymentCode, ot::UnitType::Usd, false, false, reason_);
     EXPECT_TRUE(added);
 }
 
 TEST_F(Test_NymData, AddPhoneNumber)
 {
-    auto added = nymData_.AddPhoneNumber("phone1", false, false, reason_);
+    auto added = nym_data_.AddPhoneNumber("phone1", false, false, reason_);
     EXPECT_TRUE(added);
 
-    added = nymData_.AddPhoneNumber("", false, false, reason_);
+    added = nym_data_.AddPhoneNumber("", false, false, reason_);
     EXPECT_FALSE(added);
 }
 
@@ -140,17 +140,17 @@ TEST_F(Test_NymData, AddPreferredOTServer)
             "localhost",
             "")));
 
-    auto added = nymData_.AddPreferredOTServer(
+    auto added = nym_data_.AddPreferredOTServer(
         identifier.asBase58(client_.Crypto()), false, reason_);
     EXPECT_TRUE(added);
 
-    added = nymData_.AddPreferredOTServer("", false, reason_);
+    added = nym_data_.AddPreferredOTServer("", false, reason_);
     EXPECT_FALSE(added);
 }
 
 TEST_F(Test_NymData, AddSocialMediaProfile)
 {
-    auto added = nymData_.AddSocialMediaProfile(
+    auto added = nym_data_.AddSocialMediaProfile(
         "profile1",
         ot::identity::wot::claim::ClaimType::Twitter,
         false,
@@ -158,7 +158,7 @@ TEST_F(Test_NymData, AddSocialMediaProfile)
         reason_);
     EXPECT_TRUE(added);
 
-    added = nymData_.AddSocialMediaProfile(
+    added = nym_data_.AddSocialMediaProfile(
         "",
         ot::identity::wot::claim::ClaimType::Twitter,
         false,
@@ -169,33 +169,33 @@ TEST_F(Test_NymData, AddSocialMediaProfile)
 
 TEST_F(Test_NymData, BestEmail)
 {
-    auto added = nymData_.AddEmail("email1", false, false, reason_);
+    auto added = nym_data_.AddEmail("email1", false, false, reason_);
     EXPECT_TRUE(added);
 
-    added = nymData_.AddEmail("email2", false, true, reason_);
+    added = nym_data_.AddEmail("email2", false, true, reason_);
     EXPECT_TRUE(added);
 
-    ot::UnallocatedCString email = nymData_.BestEmail();
+    ot::UnallocatedCString email = nym_data_.BestEmail();
     // First email added is made primary.
     EXPECT_STREQ("email1", email.c_str());
 }
 
 TEST_F(Test_NymData, BestPhoneNumber)
 {
-    auto added = nymData_.AddPhoneNumber("phone1", false, false, reason_);
+    auto added = nym_data_.AddPhoneNumber("phone1", false, false, reason_);
     EXPECT_TRUE(added);
 
-    added = nymData_.AddPhoneNumber("phone2", false, true, reason_);
+    added = nym_data_.AddPhoneNumber("phone2", false, true, reason_);
     EXPECT_TRUE(added);
 
-    ot::UnallocatedCString phone = nymData_.BestPhoneNumber();
+    ot::UnallocatedCString phone = nym_data_.BestPhoneNumber();
     // First phone number added is made primary.
     EXPECT_STREQ("phone1", phone.c_str());
 }
 
 TEST_F(Test_NymData, BestSocialMediaProfile)
 {
-    auto added = nymData_.AddSocialMediaProfile(
+    auto added = nym_data_.AddSocialMediaProfile(
         "profile1",
         ot::identity::wot::claim::ClaimType::Yahoo,
         false,
@@ -203,7 +203,7 @@ TEST_F(Test_NymData, BestSocialMediaProfile)
         reason_);
     EXPECT_TRUE(added);
 
-    added = nymData_.AddSocialMediaProfile(
+    added = nym_data_.AddSocialMediaProfile(
         "profile2",
         ot::identity::wot::claim::ClaimType::Yahoo,
         false,
@@ -211,7 +211,7 @@ TEST_F(Test_NymData, BestSocialMediaProfile)
         reason_);
     EXPECT_TRUE(added);
 
-    ot::UnallocatedCString profile = nymData_.BestSocialMediaProfile(
+    ot::UnallocatedCString profile = nym_data_.BestSocialMediaProfile(
         ot::identity::wot::claim::ClaimType::Yahoo);
     // First profile added is made primary.
     EXPECT_STREQ("profile1", profile.c_str());
@@ -219,9 +219,9 @@ TEST_F(Test_NymData, BestSocialMediaProfile)
 
 TEST_F(Test_NymData, Claims)
 {
-    auto contactData = nymData_.Claims();
+    auto contactData = nym_data_.Claims();
     const auto expected =
-        ExpectedStringOutput(nymData_.Nym().ContactDataVersion());
+        ExpectedStringOutput(nym_data_.Nym().ContactDataVersion());
 
     ot::UnallocatedCString output = contactData;
     EXPECT_TRUE(!output.empty());
@@ -240,7 +240,7 @@ TEST_F(Test_NymData, DeleteClaim)
         ot::UnallocatedSet<std::uint32_t>{static_cast<uint32_t>(
             ot::identity::wot::claim::Attribute::Active)});
 
-    auto added = nymData_.AddClaim(claim, reason_);
+    auto added = nym_data_.AddClaim(claim, reason_);
     ASSERT_TRUE(added);
 
     const auto identifier(client_.Factory().UnitIDFromBase58(
@@ -253,28 +253,28 @@ TEST_F(Test_NymData, DeleteClaim)
             {},
             "claimValue",
             "")));
-    auto deleted = nymData_.DeleteClaim(identifier, reason_);
+    auto deleted = nym_data_.DeleteClaim(identifier, reason_);
     EXPECT_TRUE(deleted);
 }
 
 TEST_F(Test_NymData, EmailAddresses)
 {
-    auto added = nymData_.AddEmail("email1", false, false, reason_);
+    auto added = nym_data_.AddEmail("email1", false, false, reason_);
     EXPECT_TRUE(added);
 
-    added = nymData_.AddEmail("email2", false, false, reason_);
+    added = nym_data_.AddEmail("email2", false, false, reason_);
     EXPECT_TRUE(added);
 
-    added = nymData_.AddEmail("email3", true, false, reason_);
+    added = nym_data_.AddEmail("email3", true, false, reason_);
     EXPECT_TRUE(added);
 
-    auto emails = nymData_.EmailAddresses(false);
+    auto emails = nym_data_.EmailAddresses(false);
     EXPECT_TRUE(
         emails.find("email1") != ot::UnallocatedCString::npos &&
         emails.find("email2") != ot::UnallocatedCString::npos &&
         emails.find("email3") != ot::UnallocatedCString::npos);
 
-    emails = nymData_.EmailAddresses();
+    emails = nym_data_.EmailAddresses();
     // First email added is made primary and active.
     EXPECT_TRUE(
         emails.find("email1") != ot::UnallocatedCString::npos &&
@@ -295,7 +295,7 @@ TEST_F(Test_NymData, HaveContract)
             "instrumentDefinitionID1",
             "")));
 
-    auto added = nymData_.AddContract(
+    auto added = nym_data_.AddContract(
         identifier1.asBase58(client_.Crypto()),
         ot::UnitType::Usd,
         false,
@@ -304,19 +304,19 @@ TEST_F(Test_NymData, HaveContract)
     ASSERT_TRUE(added);
 
     auto haveContract =
-        nymData_.HaveContract(identifier1, ot::UnitType::Usd, true, true);
+        nym_data_.HaveContract(identifier1, ot::UnitType::Usd, true, true);
     EXPECT_TRUE(haveContract);
 
     haveContract =
-        nymData_.HaveContract(identifier1, ot::UnitType::Usd, true, false);
+        nym_data_.HaveContract(identifier1, ot::UnitType::Usd, true, false);
     EXPECT_TRUE(haveContract);
 
     haveContract =
-        nymData_.HaveContract(identifier1, ot::UnitType::Usd, false, true);
+        nym_data_.HaveContract(identifier1, ot::UnitType::Usd, false, true);
     EXPECT_TRUE(haveContract);
 
     haveContract =
-        nymData_.HaveContract(identifier1, ot::UnitType::Usd, false, false);
+        nym_data_.HaveContract(identifier1, ot::UnitType::Usd, false, false);
     EXPECT_TRUE(haveContract);
 
     const auto identifier2(client_.Factory().UnitIDFromBase58(
@@ -330,7 +330,7 @@ TEST_F(Test_NymData, HaveContract)
             "instrumentDefinitionID2",
             "")));
 
-    added = nymData_.AddContract(
+    added = nym_data_.AddContract(
         identifier2.asBase58(client_.Crypto()),
         ot::UnitType::Usd,
         false,
@@ -339,61 +339,64 @@ TEST_F(Test_NymData, HaveContract)
     ASSERT_TRUE(added);
 
     haveContract =
-        nymData_.HaveContract(identifier2, ot::UnitType::Usd, false, false);
+        nym_data_.HaveContract(identifier2, ot::UnitType::Usd, false, false);
     EXPECT_TRUE(haveContract);
 
     haveContract =
-        nymData_.HaveContract(identifier2, ot::UnitType::Usd, true, false);
+        nym_data_.HaveContract(identifier2, ot::UnitType::Usd, true, false);
     EXPECT_FALSE(haveContract);
 
     haveContract =
-        nymData_.HaveContract(identifier2, ot::UnitType::Usd, false, true);
+        nym_data_.HaveContract(identifier2, ot::UnitType::Usd, false, true);
     EXPECT_FALSE(haveContract);
 
     haveContract =
-        nymData_.HaveContract(identifier2, ot::UnitType::Usd, true, true);
+        nym_data_.HaveContract(identifier2, ot::UnitType::Usd, true, true);
     EXPECT_FALSE(haveContract);
 }
 
-TEST_F(Test_NymData, Name) { EXPECT_STREQ("testNym", nymData_.Name().c_str()); }
+TEST_F(Test_NymData, Name)
+{
+    EXPECT_STREQ("testNym", nym_data_.Name().c_str());
+}
 
 TEST_F(Test_NymData, Nym)
 {
-    EXPECT_STREQ("testNym", nymData_.Nym().Name().c_str());
+    EXPECT_STREQ("testNym", nym_data_.Nym().Name().c_str());
 }
 
 TEST_F(Test_NymData, PaymentCode)
 {
-    auto added = nymData_.AddPaymentCode(
+    auto added = nym_data_.AddPaymentCode(
         paymentCode, ot::UnitType::Btc, true, true, reason_);
     ASSERT_TRUE(added);
 
-    auto paymentcode = nymData_.PaymentCode(ot::UnitType::Btc);
+    auto paymentcode = nym_data_.PaymentCode(ot::UnitType::Btc);
     EXPECT_TRUE(!paymentcode.empty());
     EXPECT_STREQ(paymentCode.c_str(), paymentcode.c_str());
 
-    paymentcode = nymData_.PaymentCode(ot::UnitType::Usd);
+    paymentcode = nym_data_.PaymentCode(ot::UnitType::Usd);
     EXPECT_TRUE(paymentcode.empty());
 }
 
 TEST_F(Test_NymData, PhoneNumbers)
 {
-    auto added = nymData_.AddPhoneNumber("phone1", false, false, reason_);
+    auto added = nym_data_.AddPhoneNumber("phone1", false, false, reason_);
     ASSERT_TRUE(added);
 
-    added = nymData_.AddPhoneNumber("phone2", false, false, reason_);
+    added = nym_data_.AddPhoneNumber("phone2", false, false, reason_);
     ASSERT_TRUE(added);
 
-    added = nymData_.AddPhoneNumber("phone3", true, false, reason_);
+    added = nym_data_.AddPhoneNumber("phone3", true, false, reason_);
     ASSERT_TRUE(added);
 
-    auto phones = nymData_.PhoneNumbers(false);
+    auto phones = nym_data_.PhoneNumbers(false);
     EXPECT_TRUE(
         phones.find("phone1") != ot::UnallocatedCString::npos &&
         phones.find("phone2") != ot::UnallocatedCString::npos &&
         phones.find("phone3") != ot::UnallocatedCString::npos);
 
-    phones = nymData_.PhoneNumbers();
+    phones = nym_data_.PhoneNumbers();
     // First phone number added is made primary and active.
     EXPECT_TRUE(
         phones.find("phone1") != ot::UnallocatedCString::npos &&
@@ -403,7 +406,7 @@ TEST_F(Test_NymData, PhoneNumbers)
 
 TEST_F(Test_NymData, PreferredOTServer)
 {
-    auto preferred = nymData_.PreferredOTServer();
+    auto preferred = nym_data_.PreferredOTServer();
     EXPECT_TRUE(preferred.empty());
 
     const auto identifier(client_.Factory().NotaryIDFromBase58(
@@ -416,11 +419,11 @@ TEST_F(Test_NymData, PreferredOTServer)
             {},
             "localhost",
             "")));
-    auto added = nymData_.AddPreferredOTServer(
+    auto added = nym_data_.AddPreferredOTServer(
         identifier.asBase58(client_.Crypto()), true, reason_);
     EXPECT_TRUE(added);
 
-    preferred = nymData_.PreferredOTServer();
+    preferred = nym_data_.PreferredOTServer();
     EXPECT_TRUE(!preferred.empty());
     EXPECT_STREQ(
         identifier.asBase58(client_.Crypto()).c_str(), preferred.c_str());
@@ -428,9 +431,9 @@ TEST_F(Test_NymData, PreferredOTServer)
 
 TEST_F(Test_NymData, PrintContactData)
 {
-    const auto& text = nymData_.PrintContactData();
+    const auto& text = nym_data_.PrintContactData();
     const auto expected =
-        ExpectedStringOutput(nymData_.Nym().ContactDataVersion());
+        ExpectedStringOutput(nym_data_.Nym().ContactDataVersion());
 
     EXPECT_STREQ(expected.c_str(), text.c_str());
 }
@@ -440,26 +443,26 @@ TEST_F(Test_NymData, SetContactData)
     const ot::identity::wot::claim::Data contactData(
         dynamic_cast<const ot::api::session::Client&>(client_),
         ot::UnallocatedCString("contactData"),
-        nymData_.Nym().ContactDataVersion(),
-        nymData_.Nym().ContactDataVersion(),
+        nym_data_.Nym().ContactDataVersion(),
+        nym_data_.Nym().ContactDataVersion(),
         {});
 
     auto bytes = ot::Space{};
     EXPECT_TRUE(contactData.Serialize(ot::writer(bytes)));
-    auto set = nymData_.SetContactData(ot::reader(bytes), reason_);
+    auto set = nym_data_.SetContactData(ot::reader(bytes), reason_);
     EXPECT_TRUE(set);
 }
 
 TEST_F(Test_NymData, SetScope)
 {
-    auto set = nymData_.SetScope(
+    auto set = nym_data_.SetScope(
         ot::identity::wot::claim::ClaimType::Organization,
         "organizationScope",
         true,
         reason_);
     EXPECT_TRUE(set);
 
-    set = nymData_.SetScope(
+    set = nym_data_.SetScope(
         ot::identity::wot::claim::ClaimType::Business,
         "businessScope",
         false,
@@ -469,7 +472,7 @@ TEST_F(Test_NymData, SetScope)
 
 TEST_F(Test_NymData, SocialMediaProfiles)
 {
-    auto added = nymData_.AddSocialMediaProfile(
+    auto added = nym_data_.AddSocialMediaProfile(
         "profile1",
         ot::identity::wot::claim::ClaimType::Facebook,
         false,
@@ -477,7 +480,7 @@ TEST_F(Test_NymData, SocialMediaProfiles)
         reason_);
     EXPECT_TRUE(added);
 
-    added = nymData_.AddSocialMediaProfile(
+    added = nym_data_.AddSocialMediaProfile(
         "profile2",
         ot::identity::wot::claim::ClaimType::Facebook,
         false,
@@ -485,7 +488,7 @@ TEST_F(Test_NymData, SocialMediaProfiles)
         reason_);
     EXPECT_TRUE(added);
 
-    added = nymData_.AddSocialMediaProfile(
+    added = nym_data_.AddSocialMediaProfile(
         "profile3",
         ot::identity::wot::claim::ClaimType::Facebook,
         true,
@@ -493,14 +496,14 @@ TEST_F(Test_NymData, SocialMediaProfiles)
         reason_);
     EXPECT_TRUE(added);
 
-    auto profiles = nymData_.SocialMediaProfiles(
+    auto profiles = nym_data_.SocialMediaProfiles(
         ot::identity::wot::claim::ClaimType::Facebook, false);
     EXPECT_TRUE(
         profiles.find("profile1") != ot::UnallocatedCString::npos &&
         profiles.find("profile2") != ot::UnallocatedCString::npos &&
         profiles.find("profile3") != ot::UnallocatedCString::npos);
 
-    profiles = nymData_.SocialMediaProfiles(
+    profiles = nym_data_.SocialMediaProfiles(
         ot::identity::wot::claim::ClaimType::Facebook);
     // First profile added is made primary and active.
     EXPECT_TRUE(
@@ -526,13 +529,14 @@ TEST_F(Test_NymData, SocialMediaProfileTypes)
             return ot::translate(itemtype);
         });
 
-    EXPECT_EQ(output, nymData_.SocialMediaProfileTypes());
+    EXPECT_EQ(output, nym_data_.SocialMediaProfileTypes());
 }
 
 TEST_F(Test_NymData, Type)
 {
-    EXPECT_EQ(ot::identity::wot::claim::ClaimType::Individual, nymData_.Type());
+    EXPECT_EQ(
+        ot::identity::wot::claim::ClaimType::Individual, nym_data_.Type());
 }
 
-TEST_F(Test_NymData, Valid) { EXPECT_TRUE(nymData_.Valid()); }
+TEST_F(Test_NymData, Valid) { EXPECT_TRUE(nym_data_.Valid()); }
 }  // namespace ottest

@@ -80,14 +80,14 @@ using mapOfTransactions =
 class Ledger : public OTTransactionType
 {
 public:
-    ledgerType m_Type;
+    ledgerType type_;
     // So the server can tell if it just loaded a legacy box or a hashed box.
     // (Legacy boxes stored ALL of the receipts IN the box. No more.)
-    bool m_bLoadedLegacyData;
+    bool loaded_legacy_data_;
 
-    inline auto GetType() const -> ledgerType { return m_Type; }
+    inline auto GetType() const -> ledgerType { return type_; }
 
-    auto LoadedLegacyData() const -> bool { return m_bLoadedLegacyData; }
+    auto LoadedLegacyData() const -> bool { return loaded_legacy_data_; }
 
     // This function assumes that this is an INBOX.
     // If you don't use an INBOX to call this method, then it will return
@@ -215,7 +215,7 @@ public:
     // inline for the top one only.
     inline auto GetTransactionCount() const -> std::int32_t
     {
-        return static_cast<std::int32_t>(m_mapTransactions.size());
+        return static_cast<std::int32_t>(transactions_.size());
     }
     auto GetTransactionCountInRefTo(std::int64_t lReferenceNum) const
         -> std::int32_t;
@@ -253,7 +253,7 @@ public:
         bool bCreateFile = false) -> bool;
 
     static auto GetTypeString(ledgerType theType) -> char const*;
-    auto GetTypeString() const -> char const* { return GetTypeString(m_Type); }
+    auto GetTypeString() const -> char const* { return GetTypeString(type_); }
 
     Ledger() = delete;
 
@@ -276,8 +276,8 @@ private:  // Private prevents erroneous use by other classes.
 
     using ot_super = OTTransactionType;
 
-    mapOfTransactions m_mapTransactions;  // a ledger contains a map of
-                                          // transactions.
+    mapOfTransactions transactions_;  // a ledger contains a map of
+                                      // transactions.
 
     auto make_filename(const ledgerType theType) -> std::
         tuple<bool, UnallocatedCString, UnallocatedCString, UnallocatedCString>;

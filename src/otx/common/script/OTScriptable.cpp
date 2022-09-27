@@ -63,21 +63,20 @@ namespace opentxs
 {
 OTScriptable::OTScriptable(const api::Session& api)
     : Contract(api)
-    , openingNumsInOrderOfSigning_()
-    , m_mapParties()
-    , m_mapBylaws()
-    , m_bCalculatingID(false)
-    , m_bSpecifyInstrumentDefinitionID(false)
-    , m_bSpecifyParties(false)  // These are.
-    , m_strLabel(String::Factory())
+    , opening_nums_in_order_of_signing_()
+    , parties_()
+    , bylaws_()
+    , calculating_id_(false)
+    , specify_instrument_definition_id_(false)
+    , specify_parties_(false)  // These are.
+    , label_(String::Factory())
 {
 }
 
 // virtual
 void OTScriptable::SetDisplayLabel(const UnallocatedCString* pstrLabel)
 {
-    m_strLabel =
-        String::Factory((nullptr != pstrLabel) ? pstrLabel->c_str() : "");
+    label_ = String::Factory((nullptr != pstrLabel) ? pstrLabel->c_str() : "");
 }
 
 // VALIDATING IDENTIFIERS IN OTSCRIPTABLE.
@@ -461,9 +460,9 @@ auto OTScriptable::CanExecuteClause(
 //
 auto OTScriptable::AllPartiesHaveSupposedlyConfirmed() -> bool
 {
-    bool bReturnVal = !m_mapParties.empty();
+    bool bReturnVal = !parties_.empty();
 
-    for (auto& it : m_mapParties) {
+    for (auto& it : parties_) {
         OTParty* pParty = it.second;
         OT_ASSERT(nullptr != pParty);
 
@@ -475,7 +474,7 @@ auto OTScriptable::AllPartiesHaveSupposedlyConfirmed() -> bool
 
 void OTScriptable::ClearTemporaryPointers()
 {
-    for (auto& it : m_mapParties) {
+    for (auto& it : parties_) {
         OTParty* pParty = it.second;
         OT_ASSERT(nullptr != pParty);
 
@@ -517,7 +516,7 @@ auto OTScriptable::ExecuteCallback(
         RegisterOTNativeCallsWithScript(*pScript);
 
         // Register all the parties with the script.
-        for (auto& it : m_mapParties) {
+        for (auto& it : parties_) {
             const UnallocatedCString str_party_name = it.first;
             OTParty* pParty = it.second;
             OT_ASSERT((nullptr != pParty) && (str_party_name.size() > 0));
@@ -546,17 +545,17 @@ auto OTScriptable::ExecuteCallback(
 
         SetDisplayLabel(&str_clause_name);
 
-        pScript->SetDisplayFilename(m_strLabel->Get());
+        pScript->SetDisplayFilename(label_->Get());
 
         if (!pScript->ExecuteScript(&varReturnVal)) {
             LogError()(OT_PRETTY_CLASS())(
                 "Error while running "
-                "callback on scriptable: ")(m_strLabel.get())(".")
+                "callback on scriptable: ")(label_.get())(".")
                 .Flush();
         } else {
             LogConsole()(OT_PRETTY_CLASS())(
                 "Successfully executed "
-                "callback on scriptable: ")(m_strLabel.get())(".")
+                "callback on scriptable: ")(label_.get())(".")
                 .Flush();
             return true;
         }
@@ -634,7 +633,7 @@ auto OTScriptable::SendNoticeToAllParties(
     bool bSuccess =
         true;  // Success is defined as ALL parties receiving a notice
 
-    for (const auto& it : m_mapParties) {
+    for (const auto& it : parties_) {
         OTParty* pParty = it.second;
         OT_ASSERT(nullptr != pParty);
 
@@ -683,7 +682,7 @@ auto OTScriptable::IsDirty() const -> bool
 {
     bool bIsDirty = false;
 
-    for (const auto& it : m_mapBylaws) {
+    for (const auto& it : bylaws_) {
         OTBylaw* pBylaw = it.second;
         OT_ASSERT(nullptr != pBylaw);
 
@@ -703,7 +702,7 @@ auto OTScriptable::IsDirtyImportant() const -> bool
 {
     bool bIsDirty = false;
 
-    for (const auto& it : m_mapBylaws) {
+    for (const auto& it : bylaws_) {
         OTBylaw* pBylaw = it.second;
         OT_ASSERT(nullptr != pBylaw);
 
@@ -721,7 +720,7 @@ auto OTScriptable::IsDirtyImportant() const -> bool
 //
 void OTScriptable::SetAsClean()
 {
-    for (auto& it : m_mapBylaws) {
+    for (auto& it : bylaws_) {
         OTBylaw* pBylaw = it.second;
         OT_ASSERT(nullptr != pBylaw);
         // so we can check for dirtiness later, if it's changed.
@@ -781,7 +780,7 @@ auto OTScriptable::GetPartyAccount(UnallocatedCString str_acct_name) const
         return nullptr;
     }
 
-    for (const auto& it : m_mapParties) {
+    for (const auto& it : parties_) {
         OTParty* pParty = it.second;
         OT_ASSERT(nullptr != pParty);
         OTPartyAccount* pAcct = pParty->GetAccount(str_acct_name);
@@ -795,7 +794,7 @@ auto OTScriptable::GetPartyAccount(UnallocatedCString str_acct_name) const
 auto OTScriptable::GetPartyAccountByID(
     const identifier::Generic& theAcctID) const -> OTPartyAccount*
 {
-    for (const auto& it : m_mapParties) {
+    for (const auto& it : parties_) {
         OTParty* pParty = it.second;
         OT_ASSERT(nullptr != pParty);
 
@@ -813,7 +812,7 @@ auto OTScriptable::FindPartyBasedOnNymIDAsAgent(
     const identifier::Nym& theNymID,
     OTAgent** ppAgent) const -> OTParty*
 {
-    for (const auto& it : m_mapParties) {
+    for (const auto& it : parties_) {
         OTParty* pParty = it.second;
         OT_ASSERT(nullptr != pParty);
 
@@ -826,7 +825,7 @@ auto OTScriptable::FindPartyBasedOnNymIDAsAuthAgent(
     const identifier::Nym& theNymID,
     OTAgent** ppAgent) const -> OTParty*
 {
-    for (const auto& it : m_mapParties) {
+    for (const auto& it : parties_) {
         OTParty* pParty = it.second;
         OT_ASSERT(nullptr != pParty);
 
@@ -841,7 +840,7 @@ auto OTScriptable::FindPartyBasedOnAccountID(
     const identifier::Generic& theAcctID,
     OTPartyAccount** ppPartyAccount) const -> OTParty*
 {
-    for (const auto& it : m_mapParties) {
+    for (const auto& it : parties_) {
         OTParty* pParty = it.second;
         OT_ASSERT(nullptr != pParty);
 
@@ -856,7 +855,7 @@ auto OTScriptable::FindPartyBasedOnNymAsAgent(
     const identity::Nym& theNym,
     OTAgent** ppAgent) const -> OTParty*
 {
-    for (const auto& it : m_mapParties) {
+    for (const auto& it : parties_) {
         OTParty* pParty = it.second;
         OT_ASSERT(nullptr != pParty);
 
@@ -869,7 +868,7 @@ auto OTScriptable::FindPartyBasedOnNymAsAuthAgent(
     const identity::Nym& theNym,
     OTAgent** ppAgent) const -> OTParty*
 {
-    for (const auto& it : m_mapParties) {
+    for (const auto& it : parties_) {
         OTParty* pParty = it.second;
         OT_ASSERT(nullptr != pParty);
 
@@ -882,7 +881,7 @@ auto OTScriptable::FindPartyBasedOnAccount(
     const Account& theAccount,
     OTPartyAccount** ppPartyAccount) const -> OTParty*
 {
-    for (const auto& it : m_mapParties) {
+    for (const auto& it : parties_) {
         OTParty* pParty = it.second;
         OT_ASSERT(nullptr != pParty);
 
@@ -1715,7 +1714,7 @@ auto OTScriptable::GetClause(UnallocatedCString str_clause_name) const
         return nullptr;
     }
 
-    for (const auto& it : m_mapBylaws) {
+    for (const auto& it : bylaws_) {
         OTBylaw* pBylaw = it.second;
         OT_ASSERT(nullptr != pBylaw);
 
@@ -1737,7 +1736,7 @@ auto OTScriptable::GetAgent(UnallocatedCString str_agent_name) const -> OTAgent*
         return nullptr;
     }
 
-    for (const auto& it : m_mapParties) {
+    for (const auto& it : parties_) {
         OTParty* pParty = it.second;
         OT_ASSERT(nullptr != pParty);
 
@@ -1759,9 +1758,9 @@ auto OTScriptable::GetBylaw(UnallocatedCString str_bylaw_name) const -> OTBylaw*
         return nullptr;
     }
 
-    auto it = m_mapBylaws.find(str_bylaw_name);
+    auto it = bylaws_.find(str_bylaw_name);
 
-    if (m_mapBylaws.end() == it)  // Did NOT find it.
+    if (bylaws_.end() == it)  // Did NOT find it.
     {
         return nullptr;
     }
@@ -1780,9 +1779,9 @@ auto OTScriptable::GetParty(UnallocatedCString str_party_name) const -> OTParty*
         return nullptr;
     }
 
-    auto it = m_mapParties.find(str_party_name);
+    auto it = parties_.find(str_party_name);
 
-    if (m_mapParties.end() == it)  // Did NOT find it.
+    if (parties_.end() == it)  // Did NOT find it.
     {
         return nullptr;
     }
@@ -1796,14 +1795,14 @@ auto OTScriptable::GetParty(UnallocatedCString str_party_name) const -> OTParty*
 auto OTScriptable::GetPartyByIndex(std::int32_t nIndex) const -> OTParty*
 {
     if ((nIndex < 0) ||
-        (nIndex >= static_cast<std::int64_t>(m_mapParties.size()))) {
+        (nIndex >= static_cast<std::int64_t>(parties_.size()))) {
         LogError()(OT_PRETTY_CLASS())("Index out of bounds: ")(nIndex)(".")
             .Flush();
     } else {
 
         std::int32_t nLoopIndex = -1;  // will be 0 on first iteration.
 
-        for (const auto& it : m_mapParties) {
+        for (const auto& it : parties_) {
             OTParty* pParty = it.second;
             OT_ASSERT(nullptr != pParty);
 
@@ -1817,15 +1816,14 @@ auto OTScriptable::GetPartyByIndex(std::int32_t nIndex) const -> OTParty*
 
 auto OTScriptable::GetBylawByIndex(std::int32_t nIndex) const -> OTBylaw*
 {
-    if ((nIndex < 0) ||
-        (nIndex >= static_cast<std::int64_t>(m_mapBylaws.size()))) {
+    if ((nIndex < 0) || (nIndex >= static_cast<std::int64_t>(bylaws_.size()))) {
         LogError()(OT_PRETTY_CLASS())("Index out of bounds: ")(nIndex)(".")
             .Flush();
     } else {
 
         std::int32_t nLoopIndex = -1;  // will be 0 on first iteration.
 
-        for (const auto& it : m_mapBylaws) {
+        for (const auto& it : bylaws_) {
             OTBylaw* pBylaw = it.second;
             OT_ASSERT(nullptr != pBylaw);
 
@@ -1842,7 +1840,7 @@ auto OTScriptable::GetBylawByIndex(std::int32_t nIndex) const -> OTBylaw*
 //
 auto OTScriptable::VerifyThisAgainstAllPartiesSignedCopies() -> bool
 {
-    bool bReturnVal = !m_mapParties.empty();
+    bool bReturnVal = !parties_.empty();
 
     // MAKE SURE ALL SIGNED COPIES ARE OF THE SAME CONTRACT.
     // Loop through ALL the parties. For whichever ones are already signed,
@@ -1850,7 +1848,7 @@ auto OTScriptable::VerifyThisAgainstAllPartiesSignedCopies() -> bool
     // This is in order to make sure that I am signing the same thing that
     // everyone else signed, before I actually sign it.
     //
-    for (auto& it : m_mapParties) {
+    for (auto& it : parties_) {
         const UnallocatedCString current_party_name = it.first;
         OTParty* pParty = it.second;
         OT_ASSERT(nullptr != pParty);
@@ -1936,9 +1934,9 @@ auto OTScriptable::ConfirmParty(
     // If NOT found, then we failed. (For trying to confirm a non-existent
     // party.)
     //
-    auto it_delete = m_mapParties.find(str_party_name);
+    auto it_delete = parties_.find(str_party_name);
 
-    if (it_delete != m_mapParties.end())  // It was already there. (Good.)
+    if (it_delete != parties_.end())  // It was already there. (Good.)
     {
         OTParty* pParty = it_delete->second;
         OT_ASSERT(nullptr != pParty);
@@ -1952,19 +1950,20 @@ auto OTScriptable::ConfirmParty(
             return false;
         }
         // else...
-        m_mapParties.erase(it_delete);  // Remove the theoretical party from the
-                                        // map, so we can replace it with the
-                                        // real one.
+        parties_.erase(it_delete);  // Remove the theoretical party from the
+                                    // map, so we can replace it with the
+                                    // real one.
         delete pParty;
         pParty = nullptr;  // Delete it, since I own it.
 
         // Careful:  This ** DOES ** TAKE OWNERSHIP!  theParty will get deleted
         // when this OTScriptable instance is.
         //
-        m_mapParties.insert(
+        parties_.insert(
             std::pair<UnallocatedCString, OTParty*>(str_party_name, &theParty));
 
-        openingNumsInOrderOfSigning_.push_back(theParty.GetOpeningTransNo());
+        opening_nums_in_order_of_signing_.push_back(
+            theParty.GetOpeningTransNo());
 
         theParty.SetOwnerAgreement(*this);  // Now the actual party is in place,
                                             // instead of a placekeeper version
@@ -2019,10 +2018,10 @@ auto OTScriptable::AddParty(OTParty& theParty) -> bool
         return false;
     }
 
-    if (m_mapParties.find(str_party_name) == m_mapParties.end()) {
+    if (parties_.find(str_party_name) == parties_.end()) {
         // Careful:  This ** DOES ** TAKE OWNERSHIP!  theParty will get deleted
         // when this OTScriptable is.
-        m_mapParties.insert(
+        parties_.insert(
             std::pair<UnallocatedCString, OTParty*>(str_party_name, &theParty));
 
         theParty.SetOwnerAgreement(*this);
@@ -2045,14 +2044,14 @@ auto OTScriptable::RemoveParty(UnallocatedCString str_Name) -> bool
         return false;
     }
 
-    auto it = m_mapParties.find(str_Name);
+    auto it = parties_.find(str_Name);
 
-    if (m_mapParties.end() != it)  // Found it.
+    if (parties_.end() != it)  // Found it.
     {
         OTParty* pParty = it->second;
         OT_ASSERT(nullptr != pParty);
 
-        m_mapParties.erase(it);
+        parties_.erase(it);
         delete pParty;
         pParty = nullptr;
         return true;
@@ -2073,14 +2072,14 @@ auto OTScriptable::RemoveBylaw(UnallocatedCString str_Name) -> bool
         return false;
     }
 
-    auto it = m_mapBylaws.find(str_Name);
+    auto it = bylaws_.find(str_Name);
 
-    if (m_mapBylaws.end() != it)  // Found it.
+    if (bylaws_.end() != it)  // Found it.
     {
         OTBylaw* pBylaw = it->second;
         OT_ASSERT(nullptr != pBylaw);
 
-        m_mapBylaws.erase(it);
+        bylaws_.erase(it);
         delete pBylaw;
         pBylaw = nullptr;
         return true;
@@ -2103,10 +2102,10 @@ auto OTScriptable::AddBylaw(OTBylaw& theBylaw) -> bool
         return false;
     }
 
-    if (m_mapBylaws.find(str_name) == m_mapBylaws.end()) {
+    if (bylaws_.find(str_name) == bylaws_.end()) {
         // Careful:  This ** DOES ** TAKE OWNERSHIP!  theBylaw will get deleted
         // when this OTScriptable is.
-        m_mapBylaws.insert(
+        bylaws_.insert(
             std::pair<UnallocatedCString, OTBylaw*>(str_name, &theBylaw));
 
         theBylaw.SetOwnerAgreement(*this);
@@ -2158,7 +2157,7 @@ auto OTScriptable::Compare(OTScriptable& rhs) const -> bool
         return false;
     }
 
-    for (const auto& it : m_mapBylaws) {
+    for (const auto& it : bylaws_) {
         const UnallocatedCString str_bylaw_name = it.first;
         OTBylaw* pBylaw = it.second;
         OT_ASSERT(nullptr != pBylaw);
@@ -2178,7 +2177,7 @@ auto OTScriptable::Compare(OTScriptable& rhs) const -> bool
         }
     }
 
-    for (const auto& it : m_mapParties) {
+    for (const auto& it : parties_) {
         const UnallocatedCString str_party_name = it.first;
         OTParty* pParty = it.second;
         OT_ASSERT(nullptr != pParty);
@@ -2245,25 +2244,25 @@ auto stringToVector(const UnallocatedCString& s)
 
 void OTScriptable::UpdateContentsToTag(Tag& parent, bool bCalculatingID) const
 {
-    //    if ((!m_mapParties.empty()) || (!m_mapBylaws.empty())) {
+    //    if ((!parties_.empty()) || (!bylaws_.empty())) {
 
     TagPtr pTag(new Tag("scriptableContract"));
 
-    const auto sizePartyMap = m_mapParties.size();
-    const auto sizeBylawMap = m_mapBylaws.size();
+    const auto sizePartyMap = parties_.size();
+    const auto sizeBylawMap = bylaws_.size();
 
     pTag->add_attribute(
         "specifyInstrumentDefinitionID",
-        formatBool(m_bSpecifyInstrumentDefinitionID));
-    pTag->add_attribute("specifyParties", formatBool(m_bSpecifyParties));
+        formatBool(specify_instrument_definition_id_));
+    pTag->add_attribute("specifyParties", formatBool(specify_parties_));
     pTag->add_attribute("numParties", std::to_string(sizePartyMap));
     pTag->add_attribute("numBylaws", std::to_string(sizeBylawMap));
 
     const UnallocatedCString str_vector =
-        vectorToString(openingNumsInOrderOfSigning_);
+        vectorToString(opening_nums_in_order_of_signing_);
     pTag->add_attribute("openingNumsInOrderOfSigning", str_vector);
 
-    for (const auto& it : m_mapParties) {
+    for (const auto& it : parties_) {
         OTParty* pParty = it.second;
         OT_ASSERT(nullptr != pParty);
 
@@ -2274,11 +2273,11 @@ void OTScriptable::UpdateContentsToTag(Tag& parent, bool bCalculatingID) const
         pParty->Serialize(
             *pTag,
             bCalculatingID,
-            m_bSpecifyInstrumentDefinitionID,
-            m_bSpecifyParties);
+            specify_instrument_definition_id_,
+            specify_parties_);
     }
 
-    for (const auto& it : m_mapBylaws) {
+    for (const auto& it : bylaws_) {
         OTBylaw* pBylaw = it.second;
         OT_ASSERT(nullptr != pBylaw);
 
@@ -2295,16 +2294,16 @@ void OTScriptable::UpdateContents(
                                    // contents
 {
     // I release this because I'm about to repopulate it.
-    m_xmlUnsigned->Release();
+    xml_unsigned_->Release();
 
     Tag tag("scriptable");
 
-    UpdateContentsToTag(tag, m_bCalculatingID);
+    UpdateContentsToTag(tag, calculating_id_);
 
     UnallocatedCString str_result;
     tag.output(str_result);
 
-    m_xmlUnsigned->Concatenate(String::Factory(str_result));
+    xml_unsigned_->Concatenate(String::Factory(str_result));
 }
 
 // return -1 if error, 0 if nothing, and 1 if the node was processed.
@@ -2352,9 +2351,10 @@ auto OTScriptable::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
         if (strOpeningNumsOrderSigning->Exists()) {
             const UnallocatedCString str_opening_nums(
                 strOpeningNumsOrderSigning->Get());
-            openingNumsInOrderOfSigning_ = stringToVector(str_opening_nums);
+            opening_nums_in_order_of_signing_ =
+                stringToVector(str_opening_nums);
         } else {
-            openingNumsInOrderOfSigning_.clear();
+            opening_nums_in_order_of_signing_.clear();
         }
 
         // These determine whether instrument definition ids and/or party owner
@@ -2366,9 +2366,9 @@ auto OTScriptable::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
         // until the confirmation phase.)
         //
         if (strSpecify1->Compare("true")) {
-            m_bSpecifyInstrumentDefinitionID = true;
+            specify_instrument_definition_id_ = true;
         }
-        if (strSpecify2->Compare("true")) { m_bSpecifyParties = true; }
+        if (strSpecify2->Compare("true")) { specify_parties_ = true; }
 
         // Load up the Parties.
         //
@@ -2675,7 +2675,7 @@ auto OTScriptable::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
                                 // decided yet.
                                 //
                                 if (!strAcctName->Exists() ||
-                                    (m_bSpecifyInstrumentDefinitionID &&
+                                    (specify_instrument_definition_id_ &&
                                      !strInstrumentDefinitionID->Exists())) {
                                     LogError()(OT_PRETTY_CLASS())(
                                         "Expected missing "
@@ -3390,7 +3390,7 @@ auto OTScriptable::GetVariable(UnallocatedCString str_VarName) -> OTVariable*
         return nullptr;
     }
 
-    for (auto& it : m_mapBylaws) {
+    for (auto& it : bylaws_) {
         OTBylaw* pBylaw = it.second;
         OT_ASSERT(nullptr != pBylaw);
 
@@ -3418,7 +3418,7 @@ auto OTScriptable::GetCallback(UnallocatedCString str_CallbackName) -> OTClause*
         return nullptr;
     }
 
-    for (auto& it : m_mapBylaws) {
+    for (auto& it : bylaws_) {
         OTBylaw* pBylaw = it.second;
         OT_ASSERT(nullptr != pBylaw);
 
@@ -3447,7 +3447,7 @@ auto OTScriptable::GetHooks(
 
     bool bReturnVal = false;
 
-    for (auto& it : m_mapBylaws) {
+    for (auto& it : bylaws_) {
         OTBylaw* pBylaw = it.second;
         OT_ASSERT(nullptr != pBylaw);
 
@@ -3461,21 +3461,21 @@ auto OTScriptable::GetHooks(
 
 auto OTScriptable::arePartiesSpecified() const -> bool
 {
-    return m_bSpecifyParties;
+    return specify_parties_;
 }
 auto OTScriptable::areAssetTypesSpecified() const -> bool
 {
-    return m_bSpecifyInstrumentDefinitionID;
+    return specify_instrument_definition_id_;
 }
 
 void OTScriptable::specifyParties(bool bNewState)
 {
-    m_bSpecifyParties = bNewState;
+    specify_parties_ = bNewState;
 }
 
 void OTScriptable::specifyAssetTypes(bool bNewState)
 {
-    m_bSpecifyInstrumentDefinitionID = bNewState;
+    specify_instrument_definition_id_ = bNewState;
 }
 
 void OTScriptable::Release_Scriptable()
@@ -3484,20 +3484,20 @@ void OTScriptable::Release_Scriptable()
     // delete them all.
     // (After all, I own them.)
     //
-    while (!m_mapParties.empty()) {
-        OTParty* pParty = m_mapParties.begin()->second;
+    while (!parties_.empty()) {
+        OTParty* pParty = parties_.begin()->second;
         OT_ASSERT(nullptr != pParty);
 
-        m_mapParties.erase(m_mapParties.begin());
+        parties_.erase(parties_.begin());
 
         delete pParty;
         pParty = nullptr;
     }
-    while (!m_mapBylaws.empty()) {
-        OTBylaw* pBylaw = m_mapBylaws.begin()->second;
+    while (!bylaws_.empty()) {
+        OTBylaw* pBylaw = bylaws_.begin()->second;
         OT_ASSERT(nullptr != pBylaw);
 
-        m_mapBylaws.erase(m_mapBylaws.begin());
+        bylaws_.erase(bylaws_.begin());
 
         delete pBylaw;
         pBylaw = nullptr;

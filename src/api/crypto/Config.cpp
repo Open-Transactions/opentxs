@@ -84,49 +84,49 @@ auto Config::GetSetAll() const -> bool
     if (!GetSetValue(
             OT_KEY_ITERATION_COUNT,
             OT_DEFAULT_ITERATION_COUNT,
-            sp_nIterationCount)) {
+            sp_n_iteration_count_)) {
         return false;
     }
     if (!GetSetValue(
             OT_KEY_SYMMETRIC_SALT_SIZE,
             OT_DEFAULT_SYMMETRIC_SALT_SIZE,
-            sp_nSymmetricSaltSize)) {
+            sp_n_symmetric_salt_size_)) {
         return false;
     }
     if (!GetSetValue(
             OT_KEY_SYMMETRIC_KEY_SIZE,
             OT_DEFAULT_SYMMETRIC_KEY_SIZE,
-            sp_nSymmetricKeySize)) {
+            sp_n_symmetric_key_size_)) {
         return false;
     }
     if (!GetSetValue(
             OT_KEY_SYMMETRIC_KEY_SIZE_MAX,
             OT_DEFAULT_SYMMETRIC_KEY_SIZE_MAX,
-            sp_nSymmetricKeySizeMax)) {
+            sp_n_symmetric_key_size_max_)) {
         return false;
     }
     if (!GetSetValue(
             OT_KEY_SYMMETRIC_IV_SIZE,
             OT_DEFAULT_SYMMETRIC_IV_SIZE,
-            sp_nSymmetricIvSize)) {
+            sp_n_symmetric_iv_size_)) {
         return false;
     }
     if (!GetSetValue(
             OT_KEY_SYMMETRIC_BUFFER_SIZE,
             OT_DEFAULT_SYMMETRIC_BUFFER_SIZE,
-            sp_nSymmetricBufferSize)) {
+            sp_n_symmetric_buffer_size_)) {
         return false;
     }
     if (!GetSetValue(
             OT_KEY_PUBLIC_KEYSIZE,
             OT_DEFAULT_PUBLIC_KEYSIZE,
-            sp_nPublicKeysize)) {
+            sp_n_public_keysize_)) {
         return false;
     }
     if (!GetSetValue(
             OT_KEY_PUBLIC_KEYSIZE_MAX,
             OT_DEFAULT_PUBLIC_KEYSIZE_MAX,
-            sp_nPublicKeysizeMax)) {
+            sp_n_public_keysize_max_)) {
         return false;
     }
 
@@ -157,34 +157,34 @@ auto Config::GetSetValue(
 
 auto Config::IterationCount() const -> std::uint32_t
 {
-    return sp_nIterationCount;
+    return sp_n_iteration_count_;
 }
 auto Config::SymmetricSaltSize() const -> std::uint32_t
 {
-    return sp_nSymmetricSaltSize;
+    return sp_n_symmetric_salt_size_;
 }
 auto Config::SymmetricKeySize() const -> std::uint32_t
 {
-    return sp_nSymmetricKeySize;
+    return sp_n_symmetric_key_size_;
 }
 auto Config::SymmetricKeySizeMax() const -> std::uint32_t
 {
-    return sp_nSymmetricKeySizeMax;
+    return sp_n_symmetric_key_size_max_;
 }
 auto Config::SymmetricIvSize() const -> std::uint32_t
 {
-    return sp_nSymmetricIvSize;
+    return sp_n_symmetric_iv_size_;
 }
 auto Config::SymmetricBufferSize() const -> std::uint32_t
 {
-    return sp_nSymmetricBufferSize;
+    return sp_n_symmetric_buffer_size_;
 }
 auto Config::PublicKeysize() const -> std::uint32_t
 {
-    return sp_nPublicKeysize;
+    return sp_n_public_keysize_;
 }
 auto Config::PublicKeysizeMax() const -> std::uint32_t
 {
-    return sp_nPublicKeysizeMax;
+    return sp_n_public_keysize_max_;
 }
 }  // namespace opentxs::api::crypto::imp

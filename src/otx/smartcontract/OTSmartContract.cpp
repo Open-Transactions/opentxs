@@ -716,14 +716,14 @@ DONE cron_activate        (Triggers when the smart contract is first activated.)
 
 OTSmartContract::OTSmartContract(const api::Session& api)
     : ot_super(api)
-    , m_mapStashes()
-    , m_StashAccts(
+    , stashes_()
+    , stash_accounts_(
           std::make_unique<otx::internal::AccountList>(api, Account::stash))
-    , m_strLastSenderUser(String::Factory())
-    , m_strLastSenderAcct(String::Factory())
-    , m_strLastRecipientUser(String::Factory())
-    , m_strLastRecipientAcct(String::Factory())
-    , m_tNextProcessDate()
+    , last_sender_user_(String::Factory())
+    , last_sender_acct_(String::Factory())
+    , last_recipient_user_(String::Factory())
+    , last_recipient_acct_(String::Factory())
+    , next_process_date_()
 {
     InitSmartContract();
 }
@@ -732,14 +732,14 @@ OTSmartContract::OTSmartContract(
     const api::Session& api,
     const identifier::Notary& NOTARY_ID)
     : ot_super(api)
-    , m_mapStashes()
-    , m_StashAccts(
+    , stashes_()
+    , stash_accounts_(
           std::make_unique<otx::internal::AccountList>(api, Account::stash))
-    , m_strLastSenderUser(String::Factory())
-    , m_strLastSenderAcct(String::Factory())
-    , m_strLastRecipientUser(String::Factory())
-    , m_strLastRecipientAcct(String::Factory())
-    , m_tNextProcessDate()
+    , last_sender_user_(String::Factory())
+    , last_sender_acct_(String::Factory())
+    , last_recipient_user_(String::Factory())
+    , last_recipient_acct_(String::Factory())
+    , next_process_date_()
 {
     Instrument::SetNotaryID(NOTARY_ID);
     InitSmartContract();
@@ -811,7 +811,7 @@ auto OTSmartContract::SetNotaryIDIfEmpty(const identifier::Notary& theID)
 auto OTSmartContract::IsValidOpeningNumber(
     const std::int64_t& lOpeningNum) const -> bool
 {
-    for (const auto& it : m_mapParties) {
+    for (const auto& it : parties_) {
         OTParty* pParty = it.second;
         OT_ASSERT(nullptr != pParty);
 
@@ -828,7 +828,7 @@ auto OTSmartContract::IsValidOpeningNumber(
 auto OTSmartContract::HasTransactionNum(const std::int64_t& lInput) const
     -> bool
 {
-    for (const auto& it : m_mapParties) {
+    for (const auto& it : parties_) {
         const OTParty* pParty = it.second;
         OT_ASSERT(nullptr != pParty);
 
@@ -840,7 +840,7 @@ auto OTSmartContract::HasTransactionNum(const std::int64_t& lInput) const
 
 void OTSmartContract::GetAllTransactionNumbers(NumList& numlistOutput) const
 {
-    for (const auto& it : m_mapParties) {
+    for (const auto& it : parties_) {
         const OTParty* pParty = it.second;
         OT_ASSERT(nullptr != pParty);
 
@@ -1825,17 +1825,17 @@ auto OTSmartContract::StashAcctFunds(
     //
     ReleaseLastSenderRecipientIDs();
 
-    theFromAgentID.GetString(
-        api_.Crypto(), m_strLastSenderUser);  // This is the last Nym ID
+    theFromAgentID.GetString(api_.Crypto(), last_sender_user_);  // This is the
+                                                                 // last Nym ID
     // of a party who SENT money.
     theFromAcctID.GetString(
-        api_.Crypto(), m_strLastSenderAcct);  // This is the last Acct ID
-                                              // of a party who SENT
-                                              // money.
-    //    theToAgentID.GetString(api_.Crypto(), m_strLastRecipientUser);    //
+        api_.Crypto(), last_sender_acct_);  // This is the last Acct ID
+                                            // of a party who SENT
+                                            // money.
+    //    theToAgentID.GetString(api_.Crypto(), last_recipient_user_);    //
     //    This is the last
     // Nym ID of a party who RECEIVED money.
-    //    theToAcctID.GetString(api_.Crypto(), m_strLastRecipientAcct);    //
+    //    theToAcctID.GetString(api_.Crypto(), last_recipient_acct_);    //
     //    This is the last
     // Acct ID of a party who RECEIVED money.
     // Above: the ToAgent and ToAcct are commented out,
@@ -2073,13 +2073,13 @@ auto OTSmartContract::UnstashAcctFunds(
     ReleaseLastSenderRecipientIDs();
 
     theToAgentID.GetString(
-        api_.Crypto(), m_strLastRecipientUser);  // This is the last Nym ID
-                                                 // of a party who RECEIVED
-                                                 // money.
+        api_.Crypto(), last_recipient_user_);  // This is the last Nym ID
+                                               // of a party who RECEIVED
+                                               // money.
     theToAcctID.GetString(
-        api_.Crypto(), m_strLastRecipientAcct);  // This is the last Acct ID
-                                                 // of a party who RECEIVED
-                                                 // money.
+        api_.Crypto(), last_recipient_acct_);  // This is the last Acct ID
+                                               // of a party who RECEIVED
+                                               // money.
     // Above: the FromAgent and FromAcct are commented out,
     // since the funds are coming from a stash.
 
@@ -2210,7 +2210,7 @@ auto OTSmartContract::StashFunds(
     bool bWasAcctCreated = false;  // GetOrRegisterAccount() will
                                    // verifyContractID and verifySignature on
                                    // the account internally.
-    auto stashAccount = m_StashAccts->GetOrRegisterAccount(
+    auto stashAccount = stash_accounts_->GetOrRegisterAccount(
         *pServerNym,
         NOTARY_NYM_ID,
         account.get().GetInstrumentDefinitionID(),
@@ -2701,7 +2701,7 @@ auto OTSmartContract::StashFunds(
 
                 LogConsole()(OT_PRETTY_CLASS())("Move performed.").Flush();
 
-                // (I do NOT save m_pCron here, since that already occurs after
+                // (I do NOT save cron_ here, since that already occurs after
                 // this function is called.)
             } else  // bSuccess = false.  The payment failed.
             {
@@ -2943,14 +2943,14 @@ auto OTSmartContract::MoveAcctFundsStr(
     if (nullptr == pFromAcct) {
         LogConsole()(OT_PRETTY_CLASS())("Error: from_acct (")(
             from_acct_name)(") not found on any party.")(": FULL CONTRACT: ")(
-            m_xmlUnsigned.get())(".")
+            xml_unsigned_.get())(".")
             .Flush();
         return false;
     }
     if (nullptr == pToAcct) {
         LogConsole()(OT_PRETTY_CLASS())("Error: to_acct (")(
             to_acct_name)(") not found on any party.")(": FULL CONTRACT: ")(
-            m_xmlUnsigned.get())(".")
+            xml_unsigned_.get())(".")
             .Flush();
 
         return false;
@@ -3136,21 +3136,21 @@ auto OTSmartContract::MoveAcctFundsStr(
     //
     ReleaseLastSenderRecipientIDs();
 
-    theFromAgentID.GetString(
-        api_.Crypto(), m_strLastSenderUser);  // This is the last Nym ID
+    theFromAgentID.GetString(api_.Crypto(), last_sender_user_);  // This is the
+                                                                 // last Nym ID
     // of a party who SENT money.
     theFromAcctID.GetString(
-        api_.Crypto(), m_strLastSenderAcct);  // This is the last Acct ID
-                                              // of a party who SENT
-                                              // money.
+        api_.Crypto(), last_sender_acct_);  // This is the last Acct ID
+                                            // of a party who SENT
+                                            // money.
     theToAgentID.GetString(
-        api_.Crypto(), m_strLastRecipientUser);  // This is the last Nym ID
-                                                 // of a party who RECEIVED
-                                                 // money.
+        api_.Crypto(), last_recipient_user_);  // This is the last Nym ID
+                                               // of a party who RECEIVED
+                                               // money.
     theToAcctID.GetString(
-        api_.Crypto(), m_strLastRecipientAcct);  // This is the last Acct ID
-                                                 // of a party who RECEIVED
-                                                 // money.
+        api_.Crypto(), last_recipient_acct_);  // This is the last Acct ID
+                                               // of a party who RECEIVED
+                                               // money.
 
     bool bMoved = MoveFunds(
         lAmount,
@@ -3235,7 +3235,7 @@ void OTSmartContract::onFinalReceipt(
     //
     // Just like here:
 
-    for (auto& it : m_mapParties) {
+    for (auto& it : parties_) {
         OTParty* pParty = it.second;
 
         OT_ASSERT_MSG(
@@ -3485,8 +3485,8 @@ void OTSmartContract::SetDisplayLabel(const UnallocatedCString* pstrLabel)
             return *pstrLabel;
         }
     }();
-    m_strLabel->Release();
-    m_strLabel->Concatenate("smartcontract trans# "sv)
+    label_->Release();
+    label_->Concatenate("smartcontract trans# "sv)
         .Concatenate(std::to_string(GetTransactionNum()))
         .Concatenate(", clause: "sv)
         .Concatenate(clause);
@@ -3535,7 +3535,7 @@ void OTSmartContract::ExecuteClauses(
 
             // Register all the parties with the script.
             //
-            for (auto& it : m_mapParties) {
+            for (auto& it : parties_) {
                 const UnallocatedCString str_party_name = it.first;
                 OTParty* pParty = it.second;
                 OT_ASSERT((nullptr != pParty) && (str_party_name.size() > 0));
@@ -3559,10 +3559,10 @@ void OTSmartContract::ExecuteClauses(
             // and passing
             // a string parameter to that clause as input.)
             //
-            const UnallocatedCString str_Name("param_string");
+            const UnallocatedCString str_Name("parastring_");
             UnallocatedCString str_Value("");
 
-            // See if param_string variable is already found on the bylaw...
+            // See if parastring_ variable is already found on the bylaw...
             //
             if (nullptr != pBylaw->GetVariable(str_Name))  // disallow duplicate
                                                            // names.
@@ -3575,7 +3575,7 @@ void OTSmartContract::ExecuteClauses(
                               "actually "
                               "passed in).")
                     .Flush();
-            } else  // The param_string variable isn't already there. (So we add
+            } else  // The parastring_ variable isn't already there. (So we add
                     // it as blank, if a value wasn't passed in.)
             {
                 if (!pParam->empty()) {  // if a param was passed in...
@@ -3599,7 +3599,7 @@ void OTSmartContract::ExecuteClauses(
 
             SetDisplayLabel(&str_clause_name);
 
-            pScript->SetDisplayFilename(m_strLabel->Get());
+            pScript->SetDisplayFilename(label_->Get());
 
             if (!pScript->ExecuteScript())  // If I passed theReturnVal
                                             // in here, then it'd be
@@ -4172,7 +4172,7 @@ auto OTSmartContract::VerifySmartContract(
                                                 // who failed verification.
 
     // LOOP THROUGH ALL PARTIES AND VERIFY THEM.
-    for (auto& it_party : m_mapParties) {
+    for (auto& it_party : parties_) {
         const UnallocatedCString str_party_name = it_party.first;
         OTParty* pParty = it_party.second;
         OT_ASSERT_MSG(
@@ -4469,7 +4469,7 @@ auto OTSmartContract::VerifySmartContract(
 
      */
 
-    for (auto& it_party : m_mapParties) {
+    for (auto& it_party : parties_) {
         const UnallocatedCString str_party_name = it_party.first;
         OTParty* pParty = it_party.second;
         OT_ASSERT_MSG(
@@ -4649,7 +4649,7 @@ void OTSmartContract::CloseoutOpeningNumbers(const PasswordPrompt& reason)
 {
     const auto strNotaryID = String::Factory(GetNotaryID());
 
-    for (auto& it : m_mapParties) {
+    for (auto& it : parties_) {
         OTParty* pParty = it.second;
         OT_ASSERT_MSG(
             nullptr != pParty,
@@ -4684,7 +4684,7 @@ void OTSmartContract::HarvestClosingNumbers(
 {
     const auto strNotaryID = String::Factory(GetNotaryID());
 
-    for (auto& it : m_mapParties) {
+    for (auto& it : parties_) {
         const UnallocatedCString str_party_name = it.first;
         OTParty* pParty = it.second;
         OT_ASSERT_MSG(
@@ -4750,7 +4750,7 @@ void OTSmartContract::HarvestClosingNumbers(otx::context::Server& context)
     // #s if activation failed. In fact, done: might as well send them all a
     // notification if it fails, so they can all AUTOMATICALLY remove said
     // numbers from their future balance agreements.
-    for (auto& it : m_mapParties) {
+    for (auto& it : parties_) {
         OTParty* pParty = it.second;
         OT_ASSERT_MSG(
             nullptr != pParty, "Unexpected nullptr pointer in party map.");
@@ -4776,7 +4776,7 @@ void OTSmartContract::HarvestOpeningNumber(otx::context::Server& context)
     // notification if it fails, so they can all AUTOMATICALLY remove said
     // numbers from their future balance agreements.
 
-    for (auto& it : m_mapParties) {
+    for (auto& it : parties_) {
         OTParty* pParty = it.second;
         OT_ASSERT_MSG(
             nullptr != pParty, "Unexpected nullptr pointer in party map.");
@@ -4931,14 +4931,14 @@ auto OTSmartContract::ConfirmParty(
 //
 auto OTSmartContract::GetStash(UnallocatedCString str_stash_name) -> OTStash*
 {
-    auto it = m_mapStashes.find(str_stash_name);
+    auto it = stashes_.find(str_stash_name);
 
-    if (m_mapStashes.end() == it)  // It's not there. Create it.
+    if (stashes_.end() == it)  // It's not there. Create it.
     {
         auto* pStash = new OTStash(str_stash_name);
         OT_ASSERT(nullptr != pStash);
 
-        m_mapStashes.insert(
+        stashes_.insert(
             std::pair<UnallocatedCString, OTStash*>(str_stash_name, pStash));
         return pStash;
     }
@@ -4951,9 +4951,9 @@ auto OTSmartContract::GetStash(UnallocatedCString str_stash_name) -> OTStash*
 
 void OTSmartContract::InitSmartContract()
 {
-    OT_ASSERT(m_StashAccts);
+    OT_ASSERT(stash_accounts_);
 
-    m_strContractType = String::Factory("SMARTCONTRACT");
+    contract_type_ = String::Factory("SMARTCONTRACT");
     SetProcessInterval(std::chrono::seconds{
         SMART_CONTRACT_PROCESS_INTERVAL});  // Smart contracts current default
                                             // is 30 seconds. Actual default
@@ -4965,17 +4965,17 @@ void OTSmartContract::InitSmartContract()
 void OTSmartContract::ReleaseStashes()
 {
 
-    while (!m_mapStashes.empty()) {
-        OTStash* pStash = m_mapStashes.begin()->second;
+    while (!stashes_.empty()) {
+        OTStash* pStash = stashes_.begin()->second;
         OT_ASSERT(nullptr != pStash);
 
         delete pStash;
         pStash = nullptr;
 
-        m_mapStashes.erase(m_mapStashes.begin());
+        stashes_.erase(stashes_.begin());
     }
 
-    m_StashAccts->Release();
+    stash_accounts_->Release();
 }
 
 void OTSmartContract::Release_SmartContract() { ReleaseStashes(); }
@@ -4993,12 +4993,12 @@ void OTSmartContract::Release()
 
 auto OTSmartContract::GetCountStashes() const -> std::int32_t
 {
-    return static_cast<std::int32_t>(m_mapStashes.size());
+    return static_cast<std::int32_t>(stashes_.size());
 }
 
 auto OTSmartContract::GetCountStashAccts() const -> std::int32_t
 {
-    return m_StashAccts->GetCountAccountIDs();
+    return stash_accounts_->GetCountAccountIDs();
 }
 
 // Done.
@@ -5064,58 +5064,58 @@ auto OTSmartContract::Compare(OTScriptable& rhs) const -> bool
 void OTSmartContract::UpdateContents(const PasswordPrompt& reason)
 {
     // I release this because I'm about to repopulate it.
-    m_xmlUnsigned->Release();
+    xml_unsigned_->Release();
 
     const auto NOTARY_ID = String::Factory(GetNotaryID()),
                ACTIVATOR_NYM_ID = String::Factory(GetSenderNymID()),
                ACTIVATOR_ACCT_ID = String::Factory(GetSenderAcctID());
 
-    OT_ASSERT(!m_pCancelerNymID.empty());
+    OT_ASSERT(!canceler_nym_id_.empty());
 
     auto strCanceler = String::Factory();
 
-    if (m_bCanceled) { m_pCancelerNymID.GetString(api_.Crypto(), strCanceler); }
+    if (canceled_) { canceler_nym_id_.GetString(api_.Crypto(), strCanceler); }
 
     const auto tCreation =
-        formatTimestamp(m_bCalculatingID ? Time{} : GetCreationDate());
+        formatTimestamp(calculating_id_ ? Time{} : GetCreationDate());
     const auto tValidFrom =
-        formatTimestamp(m_bCalculatingID ? Time{} : GetValidFrom());
+        formatTimestamp(calculating_id_ ? Time{} : GetValidFrom());
     const auto tValidTo =
-        formatTimestamp(m_bCalculatingID ? Time{} : GetValidTo());
+        formatTimestamp(calculating_id_ ? Time{} : GetValidTo());
     const auto tNextProcess =
-        formatTimestamp(m_bCalculatingID ? Time{} : GetNextProcessDate());
+        formatTimestamp(calculating_id_ ? Time{} : GetNextProcessDate());
 
     // OTSmartContract
     Tag tag("smartContract");
 
-    tag.add_attribute("version", m_strVersion->Get());
-    tag.add_attribute("notaryID", m_bCalculatingID ? "" : NOTARY_ID->Get());
+    tag.add_attribute("version", version_->Get());
+    tag.add_attribute("notaryID", calculating_id_ ? "" : NOTARY_ID->Get());
     tag.add_attribute(
-        "activatorNymID", m_bCalculatingID ? "" : ACTIVATOR_NYM_ID->Get());
+        "activatorNymID", calculating_id_ ? "" : ACTIVATOR_NYM_ID->Get());
     tag.add_attribute(
-        "activatorAcctID", m_bCalculatingID ? "" : ACTIVATOR_ACCT_ID->Get());
+        "activatorAcctID", calculating_id_ ? "" : ACTIVATOR_ACCT_ID->Get());
     tag.add_attribute(
-        "lastSenderNymID", m_bCalculatingID ? "" : m_strLastSenderUser->Get());
+        "lastSenderNymID", calculating_id_ ? "" : last_sender_user_->Get());
     tag.add_attribute(
-        "lastSenderAcctID", m_bCalculatingID ? "" : m_strLastSenderAcct->Get());
+        "lastSenderAcctID", calculating_id_ ? "" : last_sender_acct_->Get());
     tag.add_attribute(
         "lastRecipientNymID",
-        m_bCalculatingID ? "" : m_strLastRecipientUser->Get());
+        calculating_id_ ? "" : last_recipient_user_->Get());
     tag.add_attribute(
         "lastRecipientAcctID",
-        m_bCalculatingID ? "" : m_strLastRecipientAcct->Get());
-    tag.add_attribute("canceled", formatBool(m_bCanceled));
-    tag.add_attribute("cancelerNymID", m_bCanceled ? strCanceler->Get() : "");
+        calculating_id_ ? "" : last_recipient_acct_->Get());
+    tag.add_attribute("canceled", formatBool(canceled_));
+    tag.add_attribute("cancelerNymID", canceled_ ? strCanceler->Get() : "");
     tag.add_attribute(
         "transactionNum",
-        std::to_string(m_bCalculatingID ? 0 : m_lTransactionNum));
+        std::to_string(calculating_id_ ? 0 : transaction_num_));
     tag.add_attribute("creationDate", tCreation);
     tag.add_attribute("validFrom", tValidFrom);
     tag.add_attribute("validTo", tValidTo);
     tag.add_attribute("nextProcessDate", tNextProcess);
 
     // OTCronItem
-    if (!m_bCalculatingID) {
+    if (!calculating_id_) {
         for (std::int32_t i = 0; i < GetCountClosingNumbers(); i++) {
             std::int64_t lClosingNumber = GetClosingTransactionNoAt(i);
             OT_ASSERT(lClosingNumber > 0);
@@ -5143,23 +5143,23 @@ void OTSmartContract::UpdateContents(const PasswordPrompt& reason)
 
     // *** OT SCRIPTABLE ***
     // FYI: this is: void
-    UpdateContentsToTag(tag, m_bCalculatingID);
+    UpdateContentsToTag(tag, calculating_id_);
 
-    if (!m_bCalculatingID) {
+    if (!calculating_id_) {
 
-        // Save m_StashAccts->
+        // Save stash_accounts_->
         //
         // (This is an object that contains a map of OTAccountIDs, by
         // instrument_definition_id)
         //
-        m_StashAccts->Serialize(tag);
+        stash_accounts_->Serialize(tag);
 
         // This is a map of OTStash's, by stash_name.
         // EACH ONE contains a map of OTStashItems, by instrument_definition_id
 
         // These stashes are what the scripts interact with. They have names.
         // Whereas the stash accts (above) are the actual accountIDs
-        for (auto& it : m_mapStashes) {
+        for (auto& it : stashes_) {
             // where the actual funds are stored for each instrument definition.
             OTStash* pStash = it.second;
             OT_ASSERT(nullptr != pStash);
@@ -5170,20 +5170,20 @@ void OTSmartContract::UpdateContents(const PasswordPrompt& reason)
     UnallocatedCString str_result;
     tag.output(str_result);
 
-    m_xmlUnsigned->Concatenate(String::Factory(str_result));
+    xml_unsigned_->Concatenate(String::Factory(str_result));
 }
 
 // Used internally here.
 void OTSmartContract::ReleaseLastSenderRecipientIDs()
 {
-    m_strLastSenderUser->Release();  // This is the last Nym ID of a party who
-                                     // SENT money.
-    m_strLastSenderAcct->Release();  // This is the last Acct ID of a party who
-                                     // SENT money.
-    m_strLastRecipientUser->Release();  // This is the last Nym ID of a party
-                                        // who RECEIVED money.
-    m_strLastRecipientAcct->Release();  // This is the last Acct ID of a party
-                                        // who RECEIVED money.
+    last_sender_user_->Release();     // This is the last Nym ID of a party who
+                                      // SENT money.
+    last_sender_acct_->Release();     // This is the last Acct ID of a party who
+                                      // SENT money.
+    last_recipient_user_->Release();  // This is the last Nym ID of a party
+                                      // who RECEIVED money.
+    last_recipient_acct_->Release();  // This is the last Acct ID of a party
+                                      // who RECEIVED money.
 }
 
 // We call this just before activation (in OT_API::activateSmartContract) in
@@ -5243,7 +5243,7 @@ auto OTSmartContract::ProcessXMLNode(irr::io::IrrXMLReader*& xml)
     if (0 != (nReturnVal)) { return nReturnVal; }
 
     if (strNodeName->Compare("smartContract")) {
-        m_strVersion = String::Factory(xml->getAttributeValue("version"));
+        version_ = String::Factory(xml->getAttributeValue("version"));
 
         const auto strNotaryID =
             String::Factory(xml->getAttributeValue("notaryID"));
@@ -5273,16 +5273,16 @@ auto OTSmartContract::ProcessXMLNode(irr::io::IrrXMLReader*& xml)
         }
 
         if (strCanceled->Exists() && strCanceled->Compare("true")) {
-            m_bCanceled = true;
+            canceled_ = true;
 
             if (strCancelerNymID->Exists()) {
-                m_pCancelerNymID =
+                canceler_nym_id_ =
                     api_.Factory().NymIDFromBase58(strCancelerNymID->Bytes());
             }
             // else log
         } else {
-            m_bCanceled = false;
-            m_pCancelerNymID.clear();
+            canceled_ = false;
+            canceler_nym_id_.clear();
         }
 
         const auto strTransNum =
@@ -5309,22 +5309,22 @@ auto OTSmartContract::ProcessXMLNode(irr::io::IrrXMLReader*& xml)
         // blank, that
         // means the source/destination was a STASH instead of an account. FYI.
         //
-        m_strLastSenderUser = String::Factory(xml->getAttributeValue(
+        last_sender_user_ = String::Factory(xml->getAttributeValue(
             "lastSenderNymID"));  // Last Nym ID of a party who SENT money.
-        m_strLastSenderAcct = String::Factory(xml->getAttributeValue(
+        last_sender_acct_ = String::Factory(xml->getAttributeValue(
             "lastSenderAcctID"));  // Last Acct ID of a party who SENT
                                    // money.
-        m_strLastRecipientUser = String::Factory(
+        last_recipient_user_ = String::Factory(
             xml->getAttributeValue("lastRecipientNymID"));  // Last Nym ID of a
                                                             // party who
                                                             // RECEIVED money.
-        m_strLastRecipientAcct = String::Factory(xml->getAttributeValue(
+        last_recipient_acct_ = String::Factory(xml->getAttributeValue(
             "lastRecipientAcctID"));  // Last Acct ID of a
         // party who RECEIVED
         // money.
 
         LogDetail()(OT_PRETTY_CLASS())("Smartcontract. Transaction Number: ")(
-            m_lTransactionNum)
+            transaction_num_)
             .Flush();
 
         LogVerbose()(OT_PRETTY_CLASS())("Creation Date: ")(
@@ -5343,7 +5343,7 @@ auto OTSmartContract::ProcessXMLNode(irr::io::IrrXMLReader*& xml)
             String::Factory(xml->getAttributeValue("count"));
 
         if ((-1) ==
-            m_StashAccts->ReadFromXMLNode(xml, strAcctType, strAcctCount)) {
+            stash_accounts_->ReadFromXMLNode(xml, strAcctType, strAcctCount)) {
             LogError()(OT_PRETTY_CLASS())("Error loading stash "
                                           "accountList.")
                 .Flush();
@@ -5371,7 +5371,7 @@ auto OTSmartContract::ProcessXMLNode(irr::io::IrrXMLReader*& xml)
         } else {
             // Success
             //
-            m_mapStashes.insert(std::pair<UnallocatedCString, OTStash*>(
+            stashes_.insert(std::pair<UnallocatedCString, OTStash*>(
                 strStashName->Get(), pStash));
 
             nReturnVal = 1;
@@ -5944,7 +5944,7 @@ auto OTSmartContract::MoveFunds(
 
                 LogDebug()(OT_PRETTY_CLASS())("Move performed.").Flush();
 
-                // (I do NOT save m_pCron here, since that already occurs after
+                // (I do NOT save cron_ here, since that already occurs after
                 // this function is called.)
             } else  // bSuccess = false.  The payment failed.
             {
@@ -5996,7 +5996,7 @@ auto OTSmartContract::MoveFunds(
 
             // This is now at the bottom of this function.
             //
-            // m_pCron->SaveCron(); // Cron is where I am serialized, so if
+            // cron_->SaveCron(); // Cron is where I am serialized, so if
             // Cron's not saved, I'm not saved.
 
             //

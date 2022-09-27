@@ -46,34 +46,34 @@ namespace opentxs
 class PayDividendVisitor final : public AccountVisitor
 {
     server::Server& server_;
-    const identifier::Nym nymId_;
-    const identifier::UnitDefinition payoutUnitTypeId_;
-    const identifier::Generic voucherAcctId_;
-    OTString m_pstrMemo;  // contains the original payDividend item from
-                          // the payDividend transaction request.
-                          // (Stored in the memo field for each
-                          // voucher.)
-    Amount m_lPayoutPerShare{0};
-    Amount m_lAmountPaidOut{0};   // as we pay each voucher out, we keep a
-                                  // running count.
-    Amount m_lAmountReturned{0};  // as we pay each voucher out, we keep a
-                                  // running count.
+    const identifier::Nym nym_id_;
+    const identifier::UnitDefinition payout_unit_type_id_;
+    const identifier::Generic voucher_acct_id_;
+    OTString memo_;  // contains the original payDividend item from
+                     // the payDividend transaction request.
+                     // (Stored in the memo field for each
+                     // voucher.)
+    Amount payout_per_share_{0};
+    Amount amount_paid_out_{0};  // as we pay each voucher out, we keep a
+                                 // running count.
+    Amount amount_returned_{0};  // as we pay each voucher out, we keep a
+                                 // running count.
 
 public:
-    auto GetNymID() -> const identifier::Nym& { return nymId_; }
+    auto GetNymID() -> const identifier::Nym& { return nym_id_; }
     auto GetPayoutUnitTypeId() -> const identifier::UnitDefinition&
     {
-        return payoutUnitTypeId_;
+        return payout_unit_type_id_;
     }
     auto GetVoucherAcctID() -> const identifier::Generic&
     {
-        return voucherAcctId_;
+        return voucher_acct_id_;
     }
-    auto GetMemo() -> OTString { return m_pstrMemo; }
+    auto GetMemo() -> OTString { return memo_; }
     auto GetServer() -> server::Server& { return server_; }
-    auto GetPayoutPerShare() -> const Amount& { return m_lPayoutPerShare; }
-    auto GetAmountPaidOut() -> const Amount& { return m_lAmountPaidOut; }
-    auto GetAmountReturned() -> const Amount& { return m_lAmountReturned; }
+    auto GetPayoutPerShare() -> const Amount& { return payout_per_share_; }
+    auto GetAmountPaidOut() -> const Amount& { return amount_paid_out_; }
+    auto GetAmountReturned() -> const Amount& { return amount_returned_; }
 
     auto Trigger(const Account& theAccount, const PasswordPrompt& reason)
         -> bool final;

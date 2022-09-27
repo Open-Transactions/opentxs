@@ -180,7 +180,7 @@ struct MailCache::Imp {
         }
 
         const auto object =
-            api_.Factory().PeerObject(nym, mail->m_ascPayload, task.reason_);
+            api_.Factory().PeerObject(nym, mail->payload_, task.reason_);
 
         if (!object) {
             message = "Error: Unable to decrypt message";

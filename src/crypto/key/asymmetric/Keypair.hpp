@@ -76,8 +76,8 @@ private:
     friend key::Keypair;
 
     const api::Session& api_;
-    OTAsymmetricKey m_pkeyPrivate;
-    OTAsymmetricKey m_pkeyPublic;
+    OTAsymmetricKey key_private_;
+    OTAsymmetricKey key_public_;
     const opentxs::crypto::key::asymmetric::Role role_;
 
     auto clone() const -> Keypair* final { return new Keypair(*this); }

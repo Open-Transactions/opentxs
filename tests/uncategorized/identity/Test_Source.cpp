@@ -46,7 +46,7 @@ public:
 
     crypto::Parameters parameters_;
     std::unique_ptr<identity::Source> source_;
-    std::unique_ptr<ot::identity::internal::Nym> internalNym_;
+    std::unique_ptr<ot::identity::internal::Nym> internal_nym_;
     std::unique_ptr<identity::internal::Authority> authority_;
 
     Test_Source()
@@ -58,7 +58,7 @@ public:
               ottest::GetPaymentCodeVector3().alice_.words_))
         , parameters_()
         , source_{nullptr}
-        , internalNym_{nullptr}
+        , internal_nym_{nullptr}
         , authority_{nullptr}
     {
     }
@@ -93,7 +93,7 @@ public:
 
         source_.reset(Factory::NymIDSource(client_, parameters_, reason_));
 
-        internalNym_.reset(ot::Factory::Nym(
+        internal_nym_.reset(ot::Factory::Nym(
             client_,
             parameters_,
             ot::identity::Type::individual,
@@ -101,7 +101,7 @@ public:
             reason_));
 
         const auto& nn =
-            dynamic_cast<const opentxs::identity::Nym&>(*internalNym_);
+            dynamic_cast<const opentxs::identity::Nym&>(*internal_nym_);
 
         authority_.reset(Factory().Authority(
             client_, nn, *source_, parameters_, 6, reason_));

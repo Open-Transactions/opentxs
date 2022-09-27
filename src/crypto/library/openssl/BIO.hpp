@@ -28,9 +28,9 @@ class BIO
 private:
     static constexpr auto read_amount_ = 256_uz;
 
-    ::BIO& m_refBIO;
-    bool bCleanup;
-    bool bFreeOnly;
+    ::BIO& bio_;
+    bool b_cleanup_;
+    bool b_free_only_;
 
     static auto assertBioNotNull(::BIO* pBIO) -> ::BIO*;
 

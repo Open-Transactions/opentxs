@@ -33,17 +33,17 @@ public:
                                        // dates.
     auto IsExpired() -> bool;          // Verify whether the CURRENT date is
                                        // AFTER the the "VALID TO" date.
-    inline auto GetValidFrom() const -> Time { return m_VALID_FROM; }
-    inline auto GetValidTo() const -> Time { return m_VALID_TO; }
+    inline auto GetValidFrom() const -> Time { return valid_from_; }
+    inline auto GetValidTo() const -> Time { return valid_to_; }
 
     inline auto GetInstrumentDefinitionID() const
         -> const identifier::UnitDefinition&
     {
-        return m_InstrumentDefinitionID;
+        return instrument_definition_id_;
     }
     inline auto GetNotaryID() const -> const identifier::Notary&
     {
-        return m_NotaryID;
+        return notary_id_;
     }
     void InitInstrument();
 
@@ -52,26 +52,26 @@ public:
     ~Instrument() override;
 
 protected:
-    identifier::UnitDefinition m_InstrumentDefinitionID;
-    identifier::Notary m_NotaryID;
+    identifier::UnitDefinition instrument_definition_id_;
+    identifier::Notary notary_id_;
     // Expiration Date (valid from/to date)
     // The date, in seconds, when the instrument is valid FROM.
-    Time m_VALID_FROM;
+    Time valid_from_;
     // The date, in seconds, when the instrument expires.
-    Time m_VALID_TO;
+    Time valid_to_;
 
     auto ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t override;
 
-    inline void SetValidFrom(const Time TIME_FROM) { m_VALID_FROM = TIME_FROM; }
-    inline void SetValidTo(const Time TIME_TO) { m_VALID_TO = TIME_TO; }
+    inline void SetValidFrom(const Time TIME_FROM) { valid_from_ = TIME_FROM; }
+    inline void SetValidTo(const Time TIME_TO) { valid_to_ = TIME_TO; }
     inline void SetInstrumentDefinitionID(
         const identifier::UnitDefinition& INSTRUMENT_DEFINITION_ID)
     {
-        m_InstrumentDefinitionID = INSTRUMENT_DEFINITION_ID;
+        instrument_definition_id_ = INSTRUMENT_DEFINITION_ID;
     }
     inline void SetNotaryID(const identifier::Notary& NOTARY_ID)
     {
-        m_NotaryID = NOTARY_ID;
+        notary_id_ = NOTARY_ID;
     }
 
     Instrument(const api::Session& api);

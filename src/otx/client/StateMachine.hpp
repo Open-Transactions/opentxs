@@ -156,7 +156,7 @@ private:
     const UniqueQueue<identifier::Notary>& missing_servers_;
     const UniqueQueue<identifier::UnitDefinition>& missing_unit_definitions_;
     const OTPasswordPrompt reason_;
-    std::unique_ptr<otx::client::internal::Operation> pOp_;
+    std::unique_ptr<otx::client::internal::Operation> p_op_;
     otx::client::internal::Operation& op_;
     UniqueQueue<CheckNymTask> check_nym_;
     UniqueQueue<DepositPaymentTask> deposit_payment_;

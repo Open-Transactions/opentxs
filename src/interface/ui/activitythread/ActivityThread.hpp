@@ -178,7 +178,7 @@ private:
         statemachine = OT_ZMQ_STATE_MACHINE_SIGNAL,
     };
 
-    const identifier::Generic threadID_;
+    const identifier::Generic thread_id_;
     const identifier::Generic self_contact_;
     const UnallocatedSet<identifier::Generic> contacts_;
     const UnallocatedCString participants_;

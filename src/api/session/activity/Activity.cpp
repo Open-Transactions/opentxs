@@ -449,16 +449,16 @@ auto Activity::Mail(
         [&]() -> auto& {
             const auto localName = String::Factory(nym);
 
-            if (localName->Compare(mail.m_strNymID2)) {
+            if (localName->Compare(mail.nym_id2_)) {
                 // This is an incoming message. The contact id is the sender's
                 // id.
 
-                return mail.m_strNymID;
+                return mail.nym_id_;
             } else {
                 // This is an outgoing message. The contact id is the
                 // recipient's id.
 
-                return mail.m_strNymID2;
+                return mail.nym_id2_;
             }
         }()
                      ->Bytes());
@@ -474,7 +474,7 @@ auto Activity::Mail(
     if (false == verify_thread_exists(nym, threadID)) { return {}; }
 
     const bool saved = api_.Storage().Store(
-        nym, threadID, itemID, mail.m_lTime, alias, data, box);
+        nym, threadID, itemID, mail.time_, alias, data, box);
 
     if (saved) {
         publish(nym, contactID);

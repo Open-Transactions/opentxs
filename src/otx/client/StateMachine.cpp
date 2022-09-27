@@ -170,8 +170,8 @@ StateMachine::StateMachine(
     , missing_servers_(missingservers)
     , missing_unit_definitions_(missingUnitDefinitions)
     , reason_(reason)
-    , pOp_(opentxs::Factory::Operation(api, id.first, id.second, reason_))
-    , op_(*pOp_)
+    , p_op_(opentxs::Factory::Operation(api, id.first, id.second, reason_))
+    , op_(*p_op_)
 
     , check_nym_()
     , deposit_payment_()
@@ -204,7 +204,7 @@ StateMachine::StateMachine(
     , unknown_servers_()
     , unknown_units_()
 {
-    OT_ASSERT(pOp_);
+    OT_ASSERT(p_op_);
 }
 
 auto StateMachine::bump_task(const bool bump) const -> bool
@@ -509,7 +509,7 @@ auto StateMachine::download_server(
 
     DO_OPERATION(DownloadContract, contractID);
 
-    const bool found = success && std::get<1>(result)->m_bBool;
+    const bool found = success && std::get<1>(result)->bool_;
 
     resolve_unknown(contractID, found, unknown_servers_);
 
@@ -524,7 +524,7 @@ auto StateMachine::download_unit_definition(
 
     DO_OPERATION(DownloadContract, id);
 
-    const bool found = success && std::get<1>(result)->m_bBool;
+    const bool found = success && std::get<1>(result)->bool_;
 
     resolve_unknown(id, found, unknown_units_);
 
@@ -659,8 +659,8 @@ auto StateMachine::issue_unit_definition(
             OT_ASSERT(result.second);
 
             const auto& reply = *result.second;
-            const auto accountID = client_.Factory().IdentifierFromBase58(
-                reply.m_strAcctID->Bytes());
+            const auto accountID =
+                client_.Factory().IdentifierFromBase58(reply.acct_id_->Bytes());
             {
                 auto nym = client_.Wallet().mutable_Nym(op_.NymID(), reason_);
                 nym.AddContract(

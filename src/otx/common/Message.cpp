@@ -225,32 +225,32 @@ const Message::ReverseTypeMap Message::message_types_ = make_reverse_map();
 
 Message::Message(const api::Session& api)
     : Contract(api)
-    , m_bIsSigned(false)
-    , m_strCommand(String::Factory())
-    , m_strNotaryID(String::Factory())
-    , m_strNymID(String::Factory())
-    , m_strNymboxHash(String::Factory())
-    , m_strInboxHash(String::Factory())
-    , m_strOutboxHash(String::Factory())
-    , m_strNymID2(String::Factory())
-    , m_strNymPublicKey(String::Factory())
-    , m_strInstrumentDefinitionID(String::Factory())
-    , m_strAcctID(String::Factory())
-    , m_strType(String::Factory())
-    , m_strRequestNum(String::Factory())
-    , m_ascInReferenceTo(Armored::Factory())
-    , m_ascPayload(Armored::Factory())
-    , m_ascPayload2(Armored::Factory())
-    , m_ascPayload3(Armored::Factory())
-    , m_AcknowledgedReplies()
-    , m_lNewRequestNum(0)
-    , m_lDepth(0)
-    , m_lTransactionNum(0)
-    , m_bSuccess(false)
-    , m_bBool(false)
-    , m_lTime(0)
+    , is_signed_(false)
+    , command_(String::Factory())
+    , notary_id_(String::Factory())
+    , nym_id_(String::Factory())
+    , nymbox_hash_(String::Factory())
+    , inbox_hash_(String::Factory())
+    , outbox_hash_(String::Factory())
+    , nym_id2_(String::Factory())
+    , nym_public_key_(String::Factory())
+    , instrument_definition_id_(String::Factory())
+    , acct_id_(String::Factory())
+    , type_(String::Factory())
+    , request_num_(String::Factory())
+    , in_reference_to_(Armored::Factory())
+    , payload_(Armored::Factory())
+    , payload2_(Armored::Factory())
+    , payload3_(Armored::Factory())
+    , acknowledged_replies_()
+    , new_request_num_(0)
+    , depth_(0)
+    , transaction_num_(0)
+    , success_(false)
+    , bool_(false)
+    , time_(0)
 {
-    Contract::m_strContractType->Set("MESSAGE");
+    Contract::contract_type_->Set("MESSAGE");
 }
 
 auto Message::make_reverse_map() -> Message::ReverseTypeMap
@@ -314,16 +314,16 @@ auto Message::HarvestTransactionNumbers(
     -> bool  // false until positively asserted.
 {
 
-    const auto MSG_NYM_ID = api_.Factory().NymIDFromBase58(m_strNymID->Bytes());
+    const auto MSG_NYM_ID = api_.Factory().NymIDFromBase58(nym_id_->Bytes());
     const auto NOTARY_ID =
-        api_.Factory().NotaryIDFromBase58(m_strNotaryID->Bytes());
+        api_.Factory().NotaryIDFromBase58(notary_id_->Bytes());
     const auto ACCOUNT_ID = api_.Factory().IdentifierFromBase58(
-        (m_strAcctID->Exists() ? m_strAcctID : m_strNymID)->Bytes());  // This
-                                                                       // may be
+        (acct_id_->Exists() ? acct_id_ : nym_id_)->Bytes());  // This
+                                                              // may be
     // unnecessary, but just
     // in case.
 
-    const auto strLedger = String::Factory(m_ascPayload);
+    const auto strLedger = String::Factory(payload_);
     auto theLedger = api_.Factory().InternalSession().Ledger(
         MSG_NYM_ID,
         ACCOUNT_ID,
@@ -421,9 +421,9 @@ void Message::SetAcknowledgments(const otx::context::Base& context)
 
 void Message::SetAcknowledgments(const UnallocatedSet<RequestNumber>& numbers)
 {
-    m_AcknowledgedReplies.Release();
+    acknowledged_replies_.Release();
 
-    for (const auto& it : numbers) { m_AcknowledgedReplies.Add(it); }
+    for (const auto& it : numbers) { acknowledged_replies_.Add(it); }
 }
 
 // The framework (Contract) will call this function at the appropriate time.
@@ -434,22 +434,22 @@ void Message::SetAcknowledgments(const UnallocatedSet<RequestNumber>& numbers)
 void Message::UpdateContents(const PasswordPrompt& reason)
 {
     // I release this because I'm about to repopulate it.
-    m_xmlUnsigned->Release();
+    xml_unsigned_->Release();
 
-    m_lTime = Clock::to_time_t(Clock::now());
+    time_ = Clock::to_time_t(Clock::now());
 
     Tag tag("notaryMessage");
 
-    tag.add_attribute("version", m_strVersion->Get());
-    tag.add_attribute("dateSigned", formatTimestamp(convert_stime(m_lTime)));
+    tag.add_attribute("version", version_->Get());
+    tag.add_attribute("dateSigned", formatTimestamp(convert_stime(time_)));
 
     if (!updateContentsByType(tag)) {
-        TagPtr pTag(new Tag(m_strCommand->Get()));
-        pTag->add_attribute("requestNum", m_strRequestNum->Get());
+        TagPtr pTag(new Tag(command_->Get()));
+        pTag->add_attribute("requestNum", request_num_->Get());
         pTag->add_attribute("success", formatBool(false));
-        pTag->add_attribute("acctID", m_strAcctID->Get());
-        pTag->add_attribute("nymID", m_strNymID->Get());
-        pTag->add_attribute("notaryID", m_strNotaryID->Get());
+        pTag->add_attribute("acctID", acct_id_->Get());
+        pTag->add_attribute("nymID", nym_id_->Get());
+        pTag->add_attribute("notaryID", notary_id_->Get());
         // The below was an XML comment in the previous version
         // of this code. It's unused.
         pTag->add_attribute("infoInvalid", "THIS IS AN INVALID MESSAGE");
@@ -470,9 +470,9 @@ void Message::UpdateContents(const PasswordPrompt& reason)
     // Client removes any number he sees on the server's list.
     // Server removes any number he sees the client has also removed.
     //
-    if (m_AcknowledgedReplies.Count() > 0) {
+    if (acknowledged_replies_.Count() > 0) {
         auto strAck = String::Factory();
-        if (m_AcknowledgedReplies.Output(strAck) && strAck->Exists()) {
+        if (acknowledged_replies_.Output(strAck) && strAck->Exists()) {
             const auto ascTemp = Armored::Factory(strAck);
             if (ascTemp->Exists()) {
                 tag.add_tag("ackReplies", ascTemp->Get());
@@ -483,13 +483,13 @@ void Message::UpdateContents(const PasswordPrompt& reason)
     UnallocatedCString str_result;
     tag.output(str_result);
 
-    m_xmlUnsigned->Concatenate(String::Factory(str_result));
+    xml_unsigned_->Concatenate(String::Factory(str_result));
 }
 
 auto Message::updateContentsByType(Tag& parent) -> bool
 {
     OTMessageStrategy* strategy =
-        messageStrategyManager.findStrategy(m_strCommand->Get());
+        messageStrategyManager.findStrategy(command_->Get());
     if (!strategy) { return false; }
     strategy->writeXml(*this, parent);
     return true;
@@ -537,9 +537,9 @@ auto Message::processXmlNodeAckReplies(
         return (-1);  // error condition
     }
 
-    m_AcknowledgedReplies.Release();
+    acknowledged_replies_.Release();
 
-    if (strDepth->Exists()) { m_AcknowledgedReplies.Add(strDepth); }
+    if (strDepth->Exists()) { acknowledged_replies_.Add(strDepth); }
 
     return 1;
 }
@@ -561,12 +561,12 @@ auto Message::processXmlNodeNotaryMessage(
     [[maybe_unused]] Message& m,
     irr::io::IrrXMLReader*& xml) -> std::int32_t
 {
-    m_strVersion = String::Factory(xml->getAttributeValue("version"));
+    version_ = String::Factory(xml->getAttributeValue("version"));
 
     auto strDateSigned = String::Factory(xml->getAttributeValue("dateSigned"));
 
     if (strDateSigned->Exists()) {
-        m_lTime = Clock::to_time_t(parseTimestamp(strDateSigned->Get()));
+        time_ = Clock::to_time_t(parseTimestamp(strDateSigned->Get()));
     }
 
     LogVerbose()(OT_PRETTY_CLASS())(
@@ -588,12 +588,12 @@ auto Message::processXmlNodeNotaryMessage(
 // most
 // contracts, (that always stay the same after they are signed.)
 //
-// We need to update the m_xmlUnsigned member with the message members before
+// We need to update the xml_unsigned_ member with the message members before
 // the
 // actual signing occurs. (Presumably this is the whole reason why the account
 // is being re-signed.)
 //
-// Normally, in other Contract and derived classes, m_xmlUnsigned is read
+// Normally, in other Contract and derived classes, xml_unsigned_ is read
 // from the file and then kept read-only, since contracts do not normally
 // change.
 // But as new messages are sent, they must be signed. This function insures that
@@ -620,15 +620,15 @@ auto Message::SignContract(
 
     // Use the authentication key instead of the signing key.
     //
-    m_bIsSigned = Contract::SignContractAuthent(theNym, reason);
+    is_signed_ = Contract::SignContractAuthent(theNym, reason);
 
-    if (false == m_bIsSigned) {
+    if (false == is_signed_) {
         LogError()(OT_PRETTY_CLASS())("Failure signing message: ")(
-            m_xmlUnsigned.get())
+            xml_unsigned_.get())
             .Flush();
     }
 
-    return m_bIsSigned;
+    return is_signed_;
 }
 
 // (Contract)
@@ -669,7 +669,7 @@ void OTMessageStrategy::processXmlSuccess(
     Message& m,
     irr::io::IrrXMLReader*& xml)
 {
-    m.m_bSuccess =
+    m.success_ =
         String::Factory(xml->getAttributeValue("success"))->Compare("true");
 }
 
@@ -687,13 +687,13 @@ class StrategyGetMarketOffers final : public OTMessageStrategy
 public:
     void writeXml(Message& m, Tag& parent) final
     {
-        TagPtr pTag(new Tag(m.m_strCommand->Get()));
+        TagPtr pTag(new Tag(m.command_->Get()));
 
-        pTag->add_attribute("requestNum", m.m_strRequestNum->Get());
-        pTag->add_attribute("nymID", m.m_strNymID->Get());
-        pTag->add_attribute("notaryID", m.m_strNotaryID->Get());
-        pTag->add_attribute("marketID", m.m_strNymID2->Get());
-        pTag->add_attribute("depth", std::to_string(m.m_lDepth));
+        pTag->add_attribute("requestNum", m.request_num_->Get());
+        pTag->add_attribute("nymID", m.nym_id_->Get());
+        pTag->add_attribute("notaryID", m.notary_id_->Get());
+        pTag->add_attribute("marketID", m.nym_id2_->Get());
+        pTag->add_attribute("depth", std::to_string(m.depth_));
 
         parent.add_tag(pTag);
     }
@@ -701,21 +701,20 @@ public:
     auto processXml(Message& m, irr::io::IrrXMLReader*& xml)
         -> std::int32_t final
     {
-        m.m_strCommand = String::Factory(xml->getNodeName());  // Command
-        m.m_strNymID = String::Factory(xml->getAttributeValue("nymID"));
-        m.m_strNotaryID = String::Factory(xml->getAttributeValue("notaryID"));
-        m.m_strRequestNum =
-            String::Factory(xml->getAttributeValue("requestNum"));
-        m.m_strNymID2 = String::Factory(xml->getAttributeValue("marketID"));
+        m.command_ = String::Factory(xml->getNodeName());  // Command
+        m.nym_id_ = String::Factory(xml->getAttributeValue("nymID"));
+        m.notary_id_ = String::Factory(xml->getAttributeValue("notaryID"));
+        m.request_num_ = String::Factory(xml->getAttributeValue("requestNum"));
+        m.nym_id2_ = String::Factory(xml->getAttributeValue("marketID"));
 
         auto strDepth = String::Factory(xml->getAttributeValue("depth"));
 
-        if (strDepth->GetLength() > 0) { m.m_lDepth = strDepth->ToLong(); }
+        if (strDepth->GetLength() > 0) { m.depth_ = strDepth->ToLong(); }
 
-        LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.m_strCommand.get())(
-            " NymID:    ")(m.m_strNymID.get())(" NotaryID: ")(
-            m.m_strNotaryID.get())(" Market ID: ")(m.m_strNymID2.get())(
-            " Request #: ")(m.m_strRequestNum.get())
+        LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.command_.get())(
+            " NymID:    ")(m.nym_id_.get())(" NotaryID: ")(m.notary_id_.get())(
+            " Market ID: ")(m.nym_id2_.get())(" Request #: ")(
+            m.request_num_.get())
             .Flush();
 
         return 1;
@@ -731,20 +730,19 @@ class StrategyGetMarketOffersResponse final : public OTMessageStrategy
 public:
     void writeXml(Message& m, Tag& parent) final
     {
-        TagPtr pTag(new Tag(m.m_strCommand->Get()));
+        TagPtr pTag(new Tag(m.command_->Get()));
 
-        pTag->add_attribute("success", formatBool(m.m_bSuccess));
-        pTag->add_attribute("requestNum", m.m_strRequestNum->Get());
-        pTag->add_attribute("nymID", m.m_strNymID->Get());
-        pTag->add_attribute("notaryID", m.m_strNotaryID->Get());
-        pTag->add_attribute("depth", std::to_string(m.m_lDepth));
-        pTag->add_attribute("marketID", m.m_strNymID2->Get());
+        pTag->add_attribute("success", formatBool(m.success_));
+        pTag->add_attribute("requestNum", m.request_num_->Get());
+        pTag->add_attribute("nymID", m.nym_id_->Get());
+        pTag->add_attribute("notaryID", m.notary_id_->Get());
+        pTag->add_attribute("depth", std::to_string(m.depth_));
+        pTag->add_attribute("marketID", m.nym_id2_->Get());
 
-        if (m.m_bSuccess && (m.m_ascPayload->GetLength() > 2) &&
-            (m.m_lDepth > 0)) {
-            pTag->add_tag("messagePayload", m.m_ascPayload->Get());
-        } else if (!m.m_bSuccess && (m.m_ascInReferenceTo->GetLength() > 2)) {
-            pTag->add_tag("inReferenceTo", m.m_ascInReferenceTo->Get());
+        if (m.success_ && (m.payload_->GetLength() > 2) && (m.depth_ > 0)) {
+            pTag->add_tag("messagePayload", m.payload_->Get());
+        } else if (!m.success_ && (m.in_reference_to_->GetLength() > 2)) {
+            pTag->add_tag("inReferenceTo", m.in_reference_to_->Get());
         }
 
         parent.add_tag(pTag);
@@ -755,21 +753,20 @@ public:
     {
         processXmlSuccess(m, xml);
 
-        m.m_strCommand = String::Factory(xml->getNodeName());  // Command
-        m.m_strRequestNum =
-            String::Factory(xml->getAttributeValue("requestNum"));
-        m.m_strNymID = String::Factory(xml->getAttributeValue("nymID"));
-        m.m_strNotaryID = String::Factory(xml->getAttributeValue("notaryID"));
-        m.m_strNymID2 = String::Factory(xml->getAttributeValue("marketID"));
+        m.command_ = String::Factory(xml->getNodeName());  // Command
+        m.request_num_ = String::Factory(xml->getAttributeValue("requestNum"));
+        m.nym_id_ = String::Factory(xml->getAttributeValue("nymID"));
+        m.notary_id_ = String::Factory(xml->getAttributeValue("notaryID"));
+        m.nym_id2_ = String::Factory(xml->getAttributeValue("marketID"));
 
         auto strDepth = String::Factory(xml->getAttributeValue("depth"));
 
-        if (strDepth->GetLength() > 0) { m.m_lDepth = strDepth->ToLong(); }
+        if (strDepth->GetLength() > 0) { m.depth_ = strDepth->ToLong(); }
 
         const char* pElementExpected = nullptr;
-        if (m.m_bSuccess && (m.m_lDepth > 0)) {
+        if (m.success_ && (m.depth_ > 0)) {
             pElementExpected = "messagePayload";
-        } else if (!m.m_bSuccess) {
+        } else if (!m.success_) {
             pElementExpected = "inReferenceTo";
         }
 
@@ -780,30 +777,30 @@ public:
                     xml, ascTextExpected, pElementExpected)) {
                 LogError()(OT_PRETTY_CLASS())("Error: Expected ")(
                     pElementExpected)(" element with text field, for ")(
-                    m.m_strCommand.get())(".")
+                    m.command_.get())(".")
                     .Flush();
                 return (-1);  // error condition
             }
 
-            if (m.m_bSuccess) {
-                m.m_ascPayload->Set(ascTextExpected);
+            if (m.success_) {
+                m.payload_->Set(ascTextExpected);
             } else {
-                m.m_ascInReferenceTo = ascTextExpected;
+                m.in_reference_to_ = ascTextExpected;
             }
         }
 
-        if (m.m_bSuccess) {
-            LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.m_strCommand.get())(
-                "   ")(m.m_bSuccess ? "SUCCESS" : "FAILURE")(" NymID:    ")(
-                m.m_strNymID.get())(" NotaryID: ")(m.m_strNotaryID.get())(
-                " MarketID: ")(m.m_strNymID2.get())
-                .Flush();  // m_ascPayload.Get()
+        if (m.success_) {
+            LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.command_.get())(
+                "   ")(m.success_ ? "SUCCESS" : "FAILURE")(" NymID:    ")(
+                m.nym_id_.get())(" NotaryID: ")(m.notary_id_.get())(
+                " MarketID: ")(m.nym_id2_.get())
+                .Flush();  // payload_.Get()
         } else {
-            LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.m_strCommand.get())(
-                "   ")(m.m_bSuccess ? "SUCCESS" : "FAILURE")(" NymID:    ")(
-                m.m_strNymID.get())(" NotaryID: ")(m.m_strNotaryID.get())(
-                " MarketID: ")(m.m_strNymID2.get())
-                .Flush();  // m_ascInReferenceTo.Get()
+            LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.command_.get())(
+                "   ")(m.success_ ? "SUCCESS" : "FAILURE")(" NymID:    ")(
+                m.nym_id_.get())(" NotaryID: ")(m.notary_id_.get())(
+                " MarketID: ")(m.nym_id2_.get())
+                .Flush();  // in_reference_to_.Get()
         }
 
         return 1;
@@ -819,12 +816,12 @@ class StrategyGetMarketRecentTrades final : public OTMessageStrategy
 public:
     void writeXml(Message& m, Tag& parent) final
     {
-        TagPtr pTag(new Tag(m.m_strCommand->Get()));
+        TagPtr pTag(new Tag(m.command_->Get()));
 
-        pTag->add_attribute("requestNum", m.m_strRequestNum->Get());
-        pTag->add_attribute("nymID", m.m_strNymID->Get());
-        pTag->add_attribute("notaryID", m.m_strNotaryID->Get());
-        pTag->add_attribute("marketID", m.m_strNymID2->Get());
+        pTag->add_attribute("requestNum", m.request_num_->Get());
+        pTag->add_attribute("nymID", m.nym_id_->Get());
+        pTag->add_attribute("notaryID", m.notary_id_->Get());
+        pTag->add_attribute("marketID", m.nym_id2_->Get());
 
         parent.add_tag(pTag);
     }
@@ -832,17 +829,16 @@ public:
     auto processXml(Message& m, irr::io::IrrXMLReader*& xml)
         -> std::int32_t final
     {
-        m.m_strCommand = String::Factory(xml->getNodeName());  // Command
-        m.m_strNymID = String::Factory(xml->getAttributeValue("nymID"));
-        m.m_strNotaryID = String::Factory(xml->getAttributeValue("notaryID"));
-        m.m_strRequestNum =
-            String::Factory(xml->getAttributeValue("requestNum"));
-        m.m_strNymID2 = String::Factory(xml->getAttributeValue("marketID"));
+        m.command_ = String::Factory(xml->getNodeName());  // Command
+        m.nym_id_ = String::Factory(xml->getAttributeValue("nymID"));
+        m.notary_id_ = String::Factory(xml->getAttributeValue("notaryID"));
+        m.request_num_ = String::Factory(xml->getAttributeValue("requestNum"));
+        m.nym_id2_ = String::Factory(xml->getAttributeValue("marketID"));
 
-        LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.m_strCommand.get())(
-            " NymID:    ")(m.m_strNymID.get())(" NotaryID: ")(
-            m.m_strNotaryID.get())(" Market ID: ")(m.m_strNymID2.get())(
-            " Request #: ")(m.m_strRequestNum.get())
+        LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.command_.get())(
+            " NymID:    ")(m.nym_id_.get())(" NotaryID: ")(m.notary_id_.get())(
+            " Market ID: ")(m.nym_id2_.get())(" Request #: ")(
+            m.request_num_.get())
             .Flush();
 
         return 1;
@@ -858,20 +854,19 @@ class StrategyGetMarketRecentTradesResponse final : public OTMessageStrategy
 public:
     void writeXml(Message& m, Tag& parent) final
     {
-        TagPtr pTag(new Tag(m.m_strCommand->Get()));
+        TagPtr pTag(new Tag(m.command_->Get()));
 
-        pTag->add_attribute("success", formatBool(m.m_bSuccess));
-        pTag->add_attribute("requestNum", m.m_strRequestNum->Get());
-        pTag->add_attribute("nymID", m.m_strNymID->Get());
-        pTag->add_attribute("notaryID", m.m_strNotaryID->Get());
-        pTag->add_attribute("depth", std::to_string(m.m_lDepth));
-        pTag->add_attribute("marketID", m.m_strNymID2->Get());
+        pTag->add_attribute("success", formatBool(m.success_));
+        pTag->add_attribute("requestNum", m.request_num_->Get());
+        pTag->add_attribute("nymID", m.nym_id_->Get());
+        pTag->add_attribute("notaryID", m.notary_id_->Get());
+        pTag->add_attribute("depth", std::to_string(m.depth_));
+        pTag->add_attribute("marketID", m.nym_id2_->Get());
 
-        if (m.m_bSuccess && (m.m_ascPayload->GetLength() > 2) &&
-            (m.m_lDepth > 0)) {
-            pTag->add_tag("messagePayload", m.m_ascPayload->Get());
-        } else if (!m.m_bSuccess && (m.m_ascInReferenceTo->GetLength() > 2)) {
-            pTag->add_tag("inReferenceTo", m.m_ascInReferenceTo->Get());
+        if (m.success_ && (m.payload_->GetLength() > 2) && (m.depth_ > 0)) {
+            pTag->add_tag("messagePayload", m.payload_->Get());
+        } else if (!m.success_ && (m.in_reference_to_->GetLength() > 2)) {
+            pTag->add_tag("inReferenceTo", m.in_reference_to_->Get());
         }
 
         parent.add_tag(pTag);
@@ -882,21 +877,20 @@ public:
     {
         processXmlSuccess(m, xml);
 
-        m.m_strCommand = String::Factory(xml->getNodeName());  // Command
-        m.m_strRequestNum =
-            String::Factory(xml->getAttributeValue("requestNum"));
-        m.m_strNymID = String::Factory(xml->getAttributeValue("nymID"));
-        m.m_strNotaryID = String::Factory(xml->getAttributeValue("notaryID"));
-        m.m_strNymID2 = String::Factory(xml->getAttributeValue("marketID"));
+        m.command_ = String::Factory(xml->getNodeName());  // Command
+        m.request_num_ = String::Factory(xml->getAttributeValue("requestNum"));
+        m.nym_id_ = String::Factory(xml->getAttributeValue("nymID"));
+        m.notary_id_ = String::Factory(xml->getAttributeValue("notaryID"));
+        m.nym_id2_ = String::Factory(xml->getAttributeValue("marketID"));
 
         auto strDepth = String::Factory(xml->getAttributeValue("depth"));
 
-        if (strDepth->GetLength() > 0) { m.m_lDepth = strDepth->ToLong(); }
+        if (strDepth->GetLength() > 0) { m.depth_ = strDepth->ToLong(); }
 
         const char* pElementExpected = nullptr;
-        if (m.m_bSuccess && (m.m_lDepth > 0)) {
+        if (m.success_ && (m.depth_ > 0)) {
             pElementExpected = "messagePayload";
-        } else if (!m.m_bSuccess) {
+        } else if (!m.success_) {
             pElementExpected = "inReferenceTo";
         }
 
@@ -907,30 +901,30 @@ public:
                     xml, ascTextExpected, pElementExpected)) {
                 LogError()(OT_PRETTY_CLASS())("Error: Expected ")(
                     pElementExpected)(" element with text field, for ")(
-                    m.m_strCommand.get())(".")
+                    m.command_.get())(".")
                     .Flush();
                 return (-1);  // error condition
             }
 
-            if (m.m_bSuccess) {
-                m.m_ascPayload->Set(ascTextExpected);
+            if (m.success_) {
+                m.payload_->Set(ascTextExpected);
             } else {
-                m.m_ascInReferenceTo = ascTextExpected;
+                m.in_reference_to_ = ascTextExpected;
             }
         }
 
-        if (m.m_bSuccess) {
-            LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.m_strCommand.get())(
-                "   ")(m.m_bSuccess ? "SUCCESS" : "FAILURE")(" NymID:    ")(
-                m.m_strNymID.get())(" NotaryID: ")(m.m_strNotaryID.get())(
-                " MarketID: ")(m.m_strNymID2.get())
-                .Flush();  // m_ascPayload.Get()
+        if (m.success_) {
+            LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.command_.get())(
+                "   ")(m.success_ ? "SUCCESS" : "FAILURE")(" NymID:    ")(
+                m.nym_id_.get())(" NotaryID: ")(m.notary_id_.get())(
+                " MarketID: ")(m.nym_id2_.get())
+                .Flush();  // payload_.Get()
         } else {
-            LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.m_strCommand.get())(
-                "   ")(m.m_bSuccess ? "SUCCESS" : "FAILURE")(" NymID:    ")(
-                m.m_strNymID.get())(" NotaryID: ")(m.m_strNotaryID.get())(
-                " MarketID: ")(m.m_strNymID2.get())
-                .Flush();  // m_ascInReferenceTo.Get()
+            LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.command_.get())(
+                "   ")(m.success_ ? "SUCCESS" : "FAILURE")(" NymID:    ")(
+                m.nym_id_.get())(" NotaryID: ")(m.notary_id_.get())(
+                " MarketID: ")(m.nym_id2_.get())
+                .Flush();  // in_reference_to_.Get()
         }
 
         return 1;
@@ -946,11 +940,11 @@ class StrategyGetNymMarketOffers final : public OTMessageStrategy
 public:
     void writeXml(Message& m, Tag& parent) final
     {
-        TagPtr pTag(new Tag(m.m_strCommand->Get()));
+        TagPtr pTag(new Tag(m.command_->Get()));
 
-        pTag->add_attribute("requestNum", m.m_strRequestNum->Get());
-        pTag->add_attribute("nymID", m.m_strNymID->Get());
-        pTag->add_attribute("notaryID", m.m_strNotaryID->Get());
+        pTag->add_attribute("requestNum", m.request_num_->Get());
+        pTag->add_attribute("nymID", m.nym_id_->Get());
+        pTag->add_attribute("notaryID", m.notary_id_->Get());
 
         parent.add_tag(pTag);
     }
@@ -958,15 +952,14 @@ public:
     auto processXml(Message& m, irr::io::IrrXMLReader*& xml)
         -> std::int32_t final
     {
-        m.m_strCommand = String::Factory(xml->getNodeName());  // Command
-        m.m_strNymID = String::Factory(xml->getAttributeValue("nymID"));
-        m.m_strNotaryID = String::Factory(xml->getAttributeValue("notaryID"));
-        m.m_strRequestNum =
-            String::Factory(xml->getAttributeValue("requestNum"));
+        m.command_ = String::Factory(xml->getNodeName());  // Command
+        m.nym_id_ = String::Factory(xml->getAttributeValue("nymID"));
+        m.notary_id_ = String::Factory(xml->getAttributeValue("notaryID"));
+        m.request_num_ = String::Factory(xml->getAttributeValue("requestNum"));
 
-        LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.m_strCommand.get())(
-            " NymID:    ")(m.m_strNymID.get())(" NotaryID: ")(
-            m.m_strNotaryID.get())(" Request #: ")(m.m_strRequestNum.get())
+        LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.command_.get())(
+            " NymID:    ")(m.nym_id_.get())(" NotaryID: ")(m.notary_id_.get())(
+            " Request #: ")(m.request_num_.get())
             .Flush();
 
         return 1;
@@ -982,19 +975,18 @@ class StrategyGetNymMarketOffersResponse final : public OTMessageStrategy
 public:
     void writeXml(Message& m, Tag& parent) final
     {
-        TagPtr pTag(new Tag(m.m_strCommand->Get()));
+        TagPtr pTag(new Tag(m.command_->Get()));
 
-        pTag->add_attribute("success", formatBool(m.m_bSuccess));
-        pTag->add_attribute("requestNum", m.m_strRequestNum->Get());
-        pTag->add_attribute("nymID", m.m_strNymID->Get());
-        pTag->add_attribute("notaryID", m.m_strNotaryID->Get());
-        pTag->add_attribute("depth", std::to_string(m.m_lDepth));
+        pTag->add_attribute("success", formatBool(m.success_));
+        pTag->add_attribute("requestNum", m.request_num_->Get());
+        pTag->add_attribute("nymID", m.nym_id_->Get());
+        pTag->add_attribute("notaryID", m.notary_id_->Get());
+        pTag->add_attribute("depth", std::to_string(m.depth_));
 
-        if (m.m_bSuccess && (m.m_ascPayload->GetLength() > 2) &&
-            (m.m_lDepth > 0)) {
-            pTag->add_tag("messagePayload", m.m_ascPayload->Get());
-        } else if (!m.m_bSuccess && (m.m_ascInReferenceTo->GetLength() > 2)) {
-            pTag->add_tag("inReferenceTo", m.m_ascInReferenceTo->Get());
+        if (m.success_ && (m.payload_->GetLength() > 2) && (m.depth_ > 0)) {
+            pTag->add_tag("messagePayload", m.payload_->Get());
+        } else if (!m.success_ && (m.in_reference_to_->GetLength() > 2)) {
+            pTag->add_tag("inReferenceTo", m.in_reference_to_->Get());
         }
 
         parent.add_tag(pTag);
@@ -1005,20 +997,19 @@ public:
     {
         processXmlSuccess(m, xml);
 
-        m.m_strCommand = String::Factory(xml->getNodeName());  // Command
-        m.m_strRequestNum =
-            String::Factory(xml->getAttributeValue("requestNum"));
-        m.m_strNymID = String::Factory(xml->getAttributeValue("nymID"));
-        m.m_strNotaryID = String::Factory(xml->getAttributeValue("notaryID"));
+        m.command_ = String::Factory(xml->getNodeName());  // Command
+        m.request_num_ = String::Factory(xml->getAttributeValue("requestNum"));
+        m.nym_id_ = String::Factory(xml->getAttributeValue("nymID"));
+        m.notary_id_ = String::Factory(xml->getAttributeValue("notaryID"));
 
         auto strDepth = String::Factory(xml->getAttributeValue("depth"));
 
-        if (strDepth->GetLength() > 0) { m.m_lDepth = strDepth->ToLong(); }
+        if (strDepth->GetLength() > 0) { m.depth_ = strDepth->ToLong(); }
 
         const char* pElementExpected = nullptr;
-        if (m.m_bSuccess && (m.m_lDepth > 0)) {
+        if (m.success_ && (m.depth_ > 0)) {
             pElementExpected = "messagePayload";
-        } else if (!m.m_bSuccess) {
+        } else if (!m.success_) {
             pElementExpected = "inReferenceTo";
         }
 
@@ -1029,28 +1020,28 @@ public:
                     xml, ascTextExpected, pElementExpected)) {
                 LogError()(OT_PRETTY_CLASS())("Error: Expected ")(
                     pElementExpected)(" element with text field, for ")(
-                    m.m_strCommand.get())(".")
+                    m.command_.get())(".")
                     .Flush();
                 return (-1);  // error condition
             }
 
-            if (m.m_bSuccess) {
-                m.m_ascPayload->Set(ascTextExpected);
+            if (m.success_) {
+                m.payload_->Set(ascTextExpected);
             } else {
-                m.m_ascInReferenceTo = ascTextExpected;
+                m.in_reference_to_ = ascTextExpected;
             }
         }
 
-        if (m.m_bSuccess) {
-            LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.m_strCommand.get())(
-                "   ")(m.m_bSuccess ? "SUCCESS" : "FAILURE")(" NymID:    ")(
-                m.m_strNymID.get())(" NotaryID: ")(m.m_strNotaryID.get())
-                .Flush();  // m_ascPayload.Get()
+        if (m.success_) {
+            LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.command_.get())(
+                "   ")(m.success_ ? "SUCCESS" : "FAILURE")(" NymID:    ")(
+                m.nym_id_.get())(" NotaryID: ")(m.notary_id_.get())
+                .Flush();  // payload_.Get()
         } else {
-            LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.m_strCommand.get())(
-                "   ")(m.m_bSuccess ? "SUCCESS" : "FAILURE")(" NymID:    ")(
-                m.m_strNymID.get())(" NotaryID: ")(m.m_strNotaryID.get())
-                .Flush();  // m_ascInReferenceTo.Get()
+            LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.command_.get())(
+                "   ")(m.success_ ? "SUCCESS" : "FAILURE")(" NymID:    ")(
+                m.nym_id_.get())(" NotaryID: ")(m.notary_id_.get())
+                .Flush();  // in_reference_to_.Get()
         }
 
         return 1;
@@ -1066,16 +1057,16 @@ class StrategyPingNotary final : public OTMessageStrategy
 public:
     void writeXml(Message& m, Tag& parent) final
     {
-        TagPtr pTag(new Tag(m.m_strCommand->Get()));
+        TagPtr pTag(new Tag(m.command_->Get()));
 
-        pTag->add_attribute("requestNum", m.m_strRequestNum->Get());
-        pTag->add_attribute("nymID", m.m_strNymID->Get());
-        pTag->add_attribute("notaryID", m.m_strNotaryID->Get());
+        pTag->add_attribute("requestNum", m.request_num_->Get());
+        pTag->add_attribute("nymID", m.nym_id_->Get());
+        pTag->add_attribute("notaryID", m.notary_id_->Get());
 
         TagPtr pAuthentKeyTag(
-            new Tag("publicAuthentKey", m.m_strNymPublicKey->Get()));
+            new Tag("publicAuthentKey", m.nym_public_key_->Get()));
         TagPtr pEncryptKeyTag(
-            new Tag("publicEncryptionKey", m.m_strNymID2->Get()));
+            new Tag("publicEncryptionKey", m.nym_id2_->Get()));
 
         pAuthentKeyTag->add_attribute("type", "notused");
         pEncryptKeyTag->add_attribute("type", "notused");
@@ -1089,11 +1080,10 @@ public:
     auto processXml(Message& m, irr::io::IrrXMLReader*& xml)
         -> std::int32_t final
     {
-        m.m_strCommand = String::Factory(xml->getNodeName());  // Command
-        m.m_strRequestNum =
-            String::Factory(xml->getAttributeValue("requestNum"));
-        m.m_strNymID = String::Factory(xml->getAttributeValue("nymID"));
-        m.m_strNotaryID = String::Factory(xml->getAttributeValue("notaryID"));
+        m.command_ = String::Factory(xml->getNodeName());  // Command
+        m.request_num_ = String::Factory(xml->getAttributeValue("requestNum"));
+        m.nym_id_ = String::Factory(xml->getAttributeValue("nymID"));
+        m.notary_id_ = String::Factory(xml->getAttributeValue("notaryID"));
         // -------------------------------------------------
         const char* pElementExpected = "publicAuthentKey";
         auto ascTextExpected = Armored::Factory();
@@ -1111,12 +1101,12 @@ public:
                 &temp_MapAttributesAuthent)) {
             LogError()(OT_PRETTY_CLASS())("Error: Expected ")(
                 pElementExpected)(" element with text field, for ")(
-                m.m_strCommand.get())(".")
+                m.command_.get())(".")
                 .Flush();
             return (-1);  // error condition
         }
 
-        m.m_strNymPublicKey->Set(ascTextExpected);
+        m.nym_public_key_->Set(ascTextExpected);
 
         pElementExpected = "publicEncryptionKey";
         ascTextExpected->Release();
@@ -1134,18 +1124,17 @@ public:
                 &temp_MapAttributesEncrypt)) {
             LogError()(OT_PRETTY_CLASS())("Error: Expected ")(
                 pElementExpected)(" element with text field, for ")(
-                m.m_strCommand.get())(".")
+                m.command_.get())(".")
                 .Flush();
             return (-1);  // error condition
         }
 
-        m.m_strNymID2->Set(ascTextExpected);
+        m.nym_id2_->Set(ascTextExpected);
 
-        LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.m_strCommand.get())(
-            " NymID:    ")(m.m_strNymID.get())(" NotaryID: ")(
-            m.m_strNotaryID.get())(" Public signing key: ")(
-            m.m_strNymPublicKey.get())(" Public encryption key: ")(
-            m.m_strNymID2.get())
+        LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.command_.get())(
+            " NymID:    ")(m.nym_id_.get())(" NotaryID: ")(m.notary_id_.get())(
+            " Public signing key: ")(m.nym_public_key_.get())(
+            " Public encryption key: ")(m.nym_id2_.get())
             .Flush();
 
         return 1;
@@ -1159,12 +1148,12 @@ class StrategyPingNotaryResponse final : public OTMessageStrategy
 public:
     void writeXml(Message& m, Tag& parent) final
     {
-        TagPtr pTag(new Tag(m.m_strCommand->Get()));
+        TagPtr pTag(new Tag(m.command_->Get()));
 
-        pTag->add_attribute("success", formatBool(m.m_bSuccess));
-        pTag->add_attribute("requestNum", m.m_strRequestNum->Get());
-        pTag->add_attribute("nymID", m.m_strNymID->Get());
-        pTag->add_attribute("notaryID", m.m_strNotaryID->Get());
+        pTag->add_attribute("success", formatBool(m.success_));
+        pTag->add_attribute("requestNum", m.request_num_->Get());
+        pTag->add_attribute("nymID", m.nym_id_->Get());
+        pTag->add_attribute("notaryID", m.notary_id_->Get());
 
         parent.add_tag(pTag);
     }
@@ -1174,15 +1163,14 @@ public:
     {
         processXmlSuccess(m, xml);
 
-        m.m_strCommand = String::Factory(xml->getNodeName());  // Command
-        m.m_strRequestNum =
-            String::Factory(xml->getAttributeValue("requestNum"));
-        m.m_strNymID = String::Factory(xml->getAttributeValue("nymID"));
-        m.m_strNotaryID = String::Factory(xml->getAttributeValue("notaryID"));
+        m.command_ = String::Factory(xml->getNodeName());  // Command
+        m.request_num_ = String::Factory(xml->getAttributeValue("requestNum"));
+        m.nym_id_ = String::Factory(xml->getAttributeValue("nymID"));
+        m.notary_id_ = String::Factory(xml->getAttributeValue("notaryID"));
 
-        LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.m_strCommand.get())(
-            " Success: ")(m.m_bSuccess ? "true" : "false")(" NymID:    ")(
-            m.m_strNymID.get())(" NotaryID: ")(m.m_strNotaryID.get())
+        LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.command_.get())(
+            " Success: ")(m.success_ ? "true" : "false")(" NymID:    ")(
+            m.nym_id_.get())(" NotaryID: ")(m.notary_id_.get())
             .Flush();
 
         return 1;
@@ -1198,14 +1186,14 @@ class StrategyRegisterContract final : public OTMessageStrategy
 public:
     void writeXml(Message& m, Tag& parent) final
     {
-        TagPtr pTag(new Tag(m.m_strCommand->Get()));
+        TagPtr pTag(new Tag(m.command_->Get()));
 
-        pTag->add_attribute("requestNum", m.m_strRequestNum->Get());
-        pTag->add_attribute("nymID", m.m_strNymID->Get());
-        pTag->add_attribute("notaryID", m.m_strNotaryID->Get());
-        pTag->add_attribute("contract", m.m_ascPayload->Get());
+        pTag->add_attribute("requestNum", m.request_num_->Get());
+        pTag->add_attribute("nymID", m.nym_id_->Get());
+        pTag->add_attribute("notaryID", m.notary_id_->Get());
+        pTag->add_attribute("contract", m.payload_->Get());
         pTag->add_attribute("type", std::to_string(m.enum_));
-        pTag->add_attribute("nymboxHash", m.m_strNymboxHash->Get());
+        pTag->add_attribute("nymboxHash", m.nymbox_hash_->Get());
 
         parent.add_tag(pTag);
     }
@@ -1213,14 +1201,12 @@ public:
     auto processXml(Message& m, irr::io::IrrXMLReader*& xml)
         -> std::int32_t final
     {
-        m.m_strCommand = String::Factory(xml->getNodeName());  // Command
-        m.m_strRequestNum =
-            String::Factory(xml->getAttributeValue("requestNum"));
-        m.m_strNymID = String::Factory(xml->getAttributeValue("nymID"));
-        m.m_strNotaryID = String::Factory(xml->getAttributeValue("notaryID"));
-        m.m_ascPayload->Set(xml->getAttributeValue("contract"));
-        m.m_strNymboxHash =
-            String::Factory(xml->getAttributeValue("nymboxHash"));
+        m.command_ = String::Factory(xml->getNodeName());  // Command
+        m.request_num_ = String::Factory(xml->getAttributeValue("requestNum"));
+        m.nym_id_ = String::Factory(xml->getAttributeValue("nymID"));
+        m.notary_id_ = String::Factory(xml->getAttributeValue("notaryID"));
+        m.payload_->Set(xml->getAttributeValue("contract"));
+        m.nymbox_hash_ = String::Factory(xml->getAttributeValue("nymboxHash"));
 
         try {
             m.enum_ = static_cast<std::uint8_t>(
@@ -1229,9 +1215,8 @@ public:
             m.enum_ = 0;
         }
 
-        LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.m_strCommand.get())(
-            " NymID:    ")(m.m_strNymID.get())(" NotaryID: ")(
-            m.m_strNotaryID.get())
+        LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.command_.get())(
+            " NymID:    ")(m.nym_id_.get())(" NotaryID: ")(m.notary_id_.get())
             .Flush();
 
         return 1;
@@ -1247,16 +1232,16 @@ class StrategyRegisterContractResponse final : public OTMessageStrategy
 public:
     void writeXml(Message& m, Tag& parent) final
     {
-        TagPtr pTag(new Tag(m.m_strCommand->Get()));
+        TagPtr pTag(new Tag(m.command_->Get()));
 
-        pTag->add_attribute("success", formatBool(m.m_bSuccess));
-        pTag->add_attribute("requestNum", m.m_strRequestNum->Get());
-        pTag->add_attribute("nymID", m.m_strNymID->Get());
-        pTag->add_attribute("notaryID", m.m_strNotaryID->Get());
-        pTag->add_attribute("nymboxHash", m.m_strNymboxHash->Get());
+        pTag->add_attribute("success", formatBool(m.success_));
+        pTag->add_attribute("requestNum", m.request_num_->Get());
+        pTag->add_attribute("nymID", m.nym_id_->Get());
+        pTag->add_attribute("notaryID", m.notary_id_->Get());
+        pTag->add_attribute("nymboxHash", m.nymbox_hash_->Get());
 
-        if (m.m_ascInReferenceTo->GetLength() > 2) {
-            pTag->add_tag("inReferenceTo", m.m_ascInReferenceTo->Get());
+        if (m.in_reference_to_->GetLength() > 2) {
+            pTag->add_tag("inReferenceTo", m.in_reference_to_->Get());
         }
 
         parent.add_tag(pTag);
@@ -1267,29 +1252,27 @@ public:
     {
         processXmlSuccess(m, xml);
 
-        m.m_strCommand = String::Factory(xml->getNodeName());  // Command
-        m.m_strRequestNum =
-            String::Factory(xml->getAttributeValue("requestNum"));
-        m.m_strNymID = String::Factory(xml->getAttributeValue("nymID"));
-        m.m_strNotaryID = String::Factory(xml->getAttributeValue("notaryID"));
-        m.m_strNymboxHash =
-            String::Factory(xml->getAttributeValue("nymboxHash"));
+        m.command_ = String::Factory(xml->getNodeName());  // Command
+        m.request_num_ = String::Factory(xml->getAttributeValue("requestNum"));
+        m.nym_id_ = String::Factory(xml->getAttributeValue("nymID"));
+        m.notary_id_ = String::Factory(xml->getAttributeValue("notaryID"));
+        m.nymbox_hash_ = String::Factory(xml->getAttributeValue("nymboxHash"));
 
         const char* pElementExpected = "inReferenceTo";
-        Armored& ascTextExpected = m.m_ascInReferenceTo;
+        Armored& ascTextExpected = m.in_reference_to_;
 
         if (!LoadEncodedTextFieldByName(
                 xml, ascTextExpected, pElementExpected)) {
             LogError()(OT_PRETTY_CLASS())("Error: Expected ")(
                 pElementExpected)(" element with text field, for ")(
-                m.m_strCommand.get())(".")
+                m.command_.get())(".")
                 .Flush();
             return (-1);  // error condition
         }
 
-        LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.m_strCommand.get())("  ")(
-            m.m_bSuccess ? "SUCCESS" : "FAILURE")(" NymID:    ")(
-            m.m_strNymID.get())(" NotaryID: ")(m.m_strNotaryID.get())
+        LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.command_.get())("  ")(
+            m.success_ ? "SUCCESS" : "FAILURE")(" NymID:    ")(m.nym_id_.get())(
+            " NotaryID: ")(m.notary_id_.get())
             .Flush();
 
         return 1;
@@ -1305,13 +1288,13 @@ class StrategyRegisterNym final : public OTMessageStrategy
 public:
     void writeXml(Message& m, Tag& parent) final
     {
-        TagPtr pTag(new Tag(m.m_strCommand->Get()));
+        TagPtr pTag(new Tag(m.command_->Get()));
 
-        pTag->add_attribute("requestNum", m.m_strRequestNum->Get());
-        pTag->add_attribute("nymID", m.m_strNymID->Get());
-        pTag->add_attribute("notaryID", m.m_strNotaryID->Get());
-        pTag->add_attribute("publicnym", m.m_ascPayload->Get());
-        pTag->add_attribute("nymboxHash", m.m_strNymboxHash->Get());
+        pTag->add_attribute("requestNum", m.request_num_->Get());
+        pTag->add_attribute("nymID", m.nym_id_->Get());
+        pTag->add_attribute("notaryID", m.notary_id_->Get());
+        pTag->add_attribute("publicnym", m.payload_->Get());
+        pTag->add_attribute("nymboxHash", m.nymbox_hash_->Get());
 
         parent.add_tag(pTag);
     }
@@ -1319,18 +1302,15 @@ public:
     auto processXml(Message& m, irr::io::IrrXMLReader*& xml)
         -> std::int32_t final
     {
-        m.m_strCommand = String::Factory(xml->getNodeName());  // Command
-        m.m_strRequestNum =
-            String::Factory(xml->getAttributeValue("requestNum"));
-        m.m_strNymID = String::Factory(xml->getAttributeValue("nymID"));
-        m.m_strNotaryID = String::Factory(xml->getAttributeValue("notaryID"));
-        m.m_ascPayload->Set(xml->getAttributeValue("publicnym"));
-        m.m_strNymboxHash =
-            String::Factory(xml->getAttributeValue("nymboxHash"));
+        m.command_ = String::Factory(xml->getNodeName());  // Command
+        m.request_num_ = String::Factory(xml->getAttributeValue("requestNum"));
+        m.nym_id_ = String::Factory(xml->getAttributeValue("nymID"));
+        m.notary_id_ = String::Factory(xml->getAttributeValue("notaryID"));
+        m.payload_->Set(xml->getAttributeValue("publicnym"));
+        m.nymbox_hash_ = String::Factory(xml->getAttributeValue("nymboxHash"));
 
-        LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.m_strCommand.get())(
-            " NymID:    ")(m.m_strNymID.get())(" NotaryID: ")(
-            m.m_strNotaryID.get())
+        LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.command_.get())(
+            " NymID:    ")(m.nym_id_.get())(" NotaryID: ")(m.notary_id_.get())
             .Flush();
 
         return 1;
@@ -1346,20 +1326,20 @@ class StrategyRegisterNymResponse final : public OTMessageStrategy
 public:
     void writeXml(Message& m, Tag& parent) final
     {
-        TagPtr pTag(new Tag(m.m_strCommand->Get()));
+        TagPtr pTag(new Tag(m.command_->Get()));
 
-        pTag->add_attribute("success", formatBool(m.m_bSuccess));
-        pTag->add_attribute("requestNum", m.m_strRequestNum->Get());
-        pTag->add_attribute("nymID", m.m_strNymID->Get());
-        pTag->add_attribute("notaryID", m.m_strNotaryID->Get());
-        pTag->add_attribute("nymboxHash", m.m_strNymboxHash->Get());
+        pTag->add_attribute("success", formatBool(m.success_));
+        pTag->add_attribute("requestNum", m.request_num_->Get());
+        pTag->add_attribute("nymID", m.nym_id_->Get());
+        pTag->add_attribute("notaryID", m.notary_id_->Get());
+        pTag->add_attribute("nymboxHash", m.nymbox_hash_->Get());
 
-        if (m.m_bSuccess && (m.m_ascPayload->GetLength() > 2)) {
-            pTag->add_tag("nymfile", m.m_ascPayload->Get());
+        if (m.success_ && (m.payload_->GetLength() > 2)) {
+            pTag->add_tag("nymfile", m.payload_->Get());
         }
 
-        if (m.m_ascInReferenceTo->GetLength() > 2) {
-            pTag->add_tag("inReferenceTo", m.m_ascInReferenceTo->Get());
+        if (m.in_reference_to_->GetLength() > 2) {
+            pTag->add_tag("inReferenceTo", m.in_reference_to_->Get());
         }
 
         parent.add_tag(pTag);
@@ -1370,43 +1350,41 @@ public:
     {
         processXmlSuccess(m, xml);
 
-        m.m_strCommand = String::Factory(xml->getNodeName());  // Command
-        m.m_strRequestNum =
-            String::Factory(xml->getAttributeValue("requestNum"));
-        m.m_strNymID = String::Factory(xml->getAttributeValue("nymID"));
-        m.m_strNotaryID = String::Factory(xml->getAttributeValue("notaryID"));
-        m.m_strNymboxHash =
-            String::Factory(xml->getAttributeValue("nymboxHash"));
+        m.command_ = String::Factory(xml->getNodeName());  // Command
+        m.request_num_ = String::Factory(xml->getAttributeValue("requestNum"));
+        m.nym_id_ = String::Factory(xml->getAttributeValue("nymID"));
+        m.notary_id_ = String::Factory(xml->getAttributeValue("notaryID"));
+        m.nymbox_hash_ = String::Factory(xml->getAttributeValue("nymboxHash"));
 
-        if (m.m_bSuccess) {
+        if (m.success_) {
             const char* pElementExpected = "nymfile";
-            Armored& ascTextExpected = m.m_ascPayload;
+            Armored& ascTextExpected = m.payload_;
 
             if (!LoadEncodedTextFieldByName(
                     xml, ascTextExpected, pElementExpected)) {
                 LogError()(OT_PRETTY_CLASS())("Error: Expected ")(
                     pElementExpected)(" element with text field, for ")(
-                    m.m_strCommand.get())(".")
+                    m.command_.get())(".")
                     .Flush();
                 return (-1);  // error condition
             }
         }
 
         const char* pElementExpected = "inReferenceTo";
-        Armored& ascTextExpected = m.m_ascInReferenceTo;
+        Armored& ascTextExpected = m.in_reference_to_;
 
         if (!LoadEncodedTextFieldByName(
                 xml, ascTextExpected, pElementExpected)) {
             LogError()(OT_PRETTY_CLASS())("Error: Expected ")(
                 pElementExpected)(" element with text field, for ")(
-                m.m_strCommand.get())(".")
+                m.command_.get())(".")
                 .Flush();
             return (-1);  // error condition
         }
 
-        LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.m_strCommand.get())("  ")(
-            m.m_bSuccess ? "SUCCESS" : "FAILURE")(" NymID:    ")(
-            m.m_strNymID.get())(" NotaryID: ")(m.m_strNotaryID.get())
+        LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.command_.get())("  ")(
+            m.success_ ? "SUCCESS" : "FAILURE")(" NymID:    ")(m.nym_id_.get())(
+            " NotaryID: ")(m.notary_id_.get())
             .Flush();
 
         return 1;
@@ -1422,11 +1400,11 @@ class StrategyUnregisterNym final : public OTMessageStrategy
 public:
     void writeXml(Message& m, Tag& parent) final
     {
-        TagPtr pTag(new Tag(m.m_strCommand->Get()));
+        TagPtr pTag(new Tag(m.command_->Get()));
 
-        pTag->add_attribute("requestNum", m.m_strRequestNum->Get());
-        pTag->add_attribute("nymID", m.m_strNymID->Get());
-        pTag->add_attribute("notaryID", m.m_strNotaryID->Get());
+        pTag->add_attribute("requestNum", m.request_num_->Get());
+        pTag->add_attribute("nymID", m.nym_id_->Get());
+        pTag->add_attribute("notaryID", m.notary_id_->Get());
 
         parent.add_tag(pTag);
     }
@@ -1434,15 +1412,13 @@ public:
     auto processXml(Message& m, irr::io::IrrXMLReader*& xml)
         -> std::int32_t final
     {
-        m.m_strCommand = String::Factory(xml->getNodeName());  // Command
-        m.m_strNymID = String::Factory(xml->getAttributeValue("nymID"));
-        m.m_strNotaryID = String::Factory(xml->getAttributeValue("notaryID"));
-        m.m_strRequestNum =
-            String::Factory(xml->getAttributeValue("requestNum"));
+        m.command_ = String::Factory(xml->getNodeName());  // Command
+        m.nym_id_ = String::Factory(xml->getAttributeValue("nymID"));
+        m.notary_id_ = String::Factory(xml->getAttributeValue("notaryID"));
+        m.request_num_ = String::Factory(xml->getAttributeValue("requestNum"));
 
-        LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.m_strCommand.get())(
-            " NymID:    ")(m.m_strNymID.get())(" NotaryID: ")(
-            m.m_strNotaryID.get())
+        LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.command_.get())(
+            " NymID:    ")(m.nym_id_.get())(" NotaryID: ")(m.notary_id_.get())
             .Flush();
 
         return 1;
@@ -1458,15 +1434,15 @@ class StrategyUnregisterNymResponse final : public OTMessageStrategy
 public:
     void writeXml(Message& m, Tag& parent) final
     {
-        TagPtr pTag(new Tag(m.m_strCommand->Get()));
+        TagPtr pTag(new Tag(m.command_->Get()));
 
-        pTag->add_attribute("success", formatBool(m.m_bSuccess));
-        pTag->add_attribute("requestNum", m.m_strRequestNum->Get());
-        pTag->add_attribute("nymID", m.m_strNymID->Get());
-        pTag->add_attribute("notaryID", m.m_strNotaryID->Get());
+        pTag->add_attribute("success", formatBool(m.success_));
+        pTag->add_attribute("requestNum", m.request_num_->Get());
+        pTag->add_attribute("nymID", m.nym_id_->Get());
+        pTag->add_attribute("notaryID", m.notary_id_->Get());
 
-        if (m.m_ascInReferenceTo->GetLength() > 2) {
-            pTag->add_tag("inReferenceTo", m.m_ascInReferenceTo->Get());
+        if (m.in_reference_to_->GetLength() > 2) {
+            pTag->add_tag("inReferenceTo", m.in_reference_to_->Get());
         }
 
         parent.add_tag(pTag);
@@ -1477,27 +1453,26 @@ public:
     {
         processXmlSuccess(m, xml);
 
-        m.m_strCommand = String::Factory(xml->getNodeName());  // Command
-        m.m_strRequestNum =
-            String::Factory(xml->getAttributeValue("requestNum"));
-        m.m_strNymID = String::Factory(xml->getAttributeValue("nymID"));
-        m.m_strNotaryID = String::Factory(xml->getAttributeValue("notaryID"));
+        m.command_ = String::Factory(xml->getNodeName());  // Command
+        m.request_num_ = String::Factory(xml->getAttributeValue("requestNum"));
+        m.nym_id_ = String::Factory(xml->getAttributeValue("nymID"));
+        m.notary_id_ = String::Factory(xml->getAttributeValue("notaryID"));
 
         const char* pElementExpected = "inReferenceTo";
-        Armored& ascTextExpected = m.m_ascInReferenceTo;
+        Armored& ascTextExpected = m.in_reference_to_;
 
         if (!LoadEncodedTextFieldByName(
                 xml, ascTextExpected, pElementExpected)) {
             LogError()(OT_PRETTY_CLASS())("Error: Expected ")(
                 pElementExpected)(" element with text field, for ")(
-                m.m_strCommand.get())(".")
+                m.command_.get())(".")
                 .Flush();
             return (-1);  // error condition
         }
 
-        LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.m_strCommand.get())("  ")(
-            m.m_bSuccess ? "SUCCESS" : "FAILURE")(" NymID:    ")(
-            m.m_strNymID.get())(" NotaryID: ")(m.m_strNotaryID.get())
+        LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.command_.get())("  ")(
+            m.success_ ? "SUCCESS" : "FAILURE")(" NymID:    ")(m.nym_id_.get())(
+            " NotaryID: ")(m.notary_id_.get())
             .Flush();
 
         return 1;
@@ -1513,13 +1488,13 @@ class StrategyCheckNym final : public OTMessageStrategy
 public:
     void writeXml(Message& m, Tag& parent) final
     {
-        TagPtr pTag(new Tag(m.m_strCommand->Get()));
+        TagPtr pTag(new Tag(m.command_->Get()));
 
-        pTag->add_attribute("requestNum", m.m_strRequestNum->Get());
-        pTag->add_attribute("nymID", m.m_strNymID->Get());
-        pTag->add_attribute("nymID2", m.m_strNymID2->Get());
-        pTag->add_attribute("notaryID", m.m_strNotaryID->Get());
-        pTag->add_attribute("nymboxHash", m.m_strNymboxHash->Get());
+        pTag->add_attribute("requestNum", m.request_num_->Get());
+        pTag->add_attribute("nymID", m.nym_id_->Get());
+        pTag->add_attribute("nymID2", m.nym_id2_->Get());
+        pTag->add_attribute("notaryID", m.notary_id_->Get());
+        pTag->add_attribute("nymboxHash", m.nymbox_hash_->Get());
 
         parent.add_tag(pTag);
     }
@@ -1527,19 +1502,17 @@ public:
     auto processXml(Message& m, irr::io::IrrXMLReader*& xml)
         -> std::int32_t final
     {
-        m.m_strCommand = String::Factory(xml->getNodeName());  // Command
-        m.m_strNymID = String::Factory(xml->getAttributeValue("nymID"));
-        m.m_strNymID2 = String::Factory(xml->getAttributeValue("nymID2"));
-        m.m_strNotaryID = String::Factory(xml->getAttributeValue("notaryID"));
-        m.m_strRequestNum =
-            String::Factory(xml->getAttributeValue("requestNum"));
-        m.m_strNymboxHash =
-            String::Factory(xml->getAttributeValue("nymboxHash"));
+        m.command_ = String::Factory(xml->getNodeName());  // Command
+        m.nym_id_ = String::Factory(xml->getAttributeValue("nymID"));
+        m.nym_id2_ = String::Factory(xml->getAttributeValue("nymID2"));
+        m.notary_id_ = String::Factory(xml->getAttributeValue("notaryID"));
+        m.request_num_ = String::Factory(xml->getAttributeValue("requestNum"));
+        m.nymbox_hash_ = String::Factory(xml->getAttributeValue("nymboxHash"));
 
-        LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.m_strCommand.get())(
-            " NymID:    ")(m.m_strNymID.get())(" NymID2:    ")(
-            m.m_strNymID2.get())(" NotaryID: ")(m.m_strNotaryID.get())(
-            " Request #: ")(m.m_strRequestNum.get())
+        LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.command_.get())(
+            " NymID:    ")(m.nym_id_.get())(" NymID2:    ")(m.nym_id2_.get())(
+            " NotaryID: ")(m.notary_id_.get())(" Request #: ")(
+            m.request_num_.get())
             .Flush();
 
         return 1;
@@ -1555,25 +1528,25 @@ public:
     {
         // This means new-style credentials are being sent, not just the public
         // key as before.
-        const bool bCredentials = (m.m_ascPayload->Exists());
-        OT_ASSERT(!m.m_bBool || bCredentials);
+        const bool bCredentials = (m.payload_->Exists());
+        OT_ASSERT(!m.bool_ || bCredentials);
 
-        TagPtr pTag(new Tag(m.m_strCommand->Get()));
+        TagPtr pTag(new Tag(m.command_->Get()));
 
-        pTag->add_attribute("success", formatBool(m.m_bSuccess));
-        pTag->add_attribute("requestNum", m.m_strRequestNum->Get());
-        pTag->add_attribute("nymID", m.m_strNymID->Get());
-        pTag->add_attribute("nymID2", m.m_strNymID2->Get());
-        pTag->add_attribute("notaryID", m.m_strNotaryID->Get());
-        pTag->add_attribute("nymboxHash", m.m_strNymboxHash->Get());
-        pTag->add_attribute("found", formatBool(m.m_bBool));
+        pTag->add_attribute("success", formatBool(m.success_));
+        pTag->add_attribute("requestNum", m.request_num_->Get());
+        pTag->add_attribute("nymID", m.nym_id_->Get());
+        pTag->add_attribute("nymID2", m.nym_id2_->Get());
+        pTag->add_attribute("notaryID", m.notary_id_->Get());
+        pTag->add_attribute("nymboxHash", m.nymbox_hash_->Get());
+        pTag->add_attribute("found", formatBool(m.bool_));
 
-        if (m.m_bBool && bCredentials) {
-            pTag->add_tag("publicnym", m.m_ascPayload->Get());
+        if (m.bool_ && bCredentials) {
+            pTag->add_tag("publicnym", m.payload_->Get());
         }
 
-        if (false == m.m_bSuccess) {
-            pTag->add_tag("inReferenceTo", m.m_ascInReferenceTo->Get());
+        if (false == m.success_) {
+            pTag->add_tag("inReferenceTo", m.in_reference_to_->Get());
         }
 
         parent.add_tag(pTag);
@@ -1584,32 +1557,30 @@ public:
     {
         processXmlSuccess(m, xml);
 
-        m.m_strCommand = String::Factory(xml->getNodeName());  // Command
-        m.m_strRequestNum =
-            String::Factory(xml->getAttributeValue("requestNum"));
-        m.m_strNymID = String::Factory(xml->getAttributeValue("nymID"));
-        m.m_strNymID2 = String::Factory(xml->getAttributeValue("nymID2"));
-        m.m_strNotaryID = String::Factory(xml->getAttributeValue("notaryID"));
-        m.m_strNymboxHash =
-            String::Factory(xml->getAttributeValue("nymboxHash"));
+        m.command_ = String::Factory(xml->getNodeName());  // Command
+        m.request_num_ = String::Factory(xml->getAttributeValue("requestNum"));
+        m.nym_id_ = String::Factory(xml->getAttributeValue("nymID"));
+        m.nym_id2_ = String::Factory(xml->getAttributeValue("nymID2"));
+        m.notary_id_ = String::Factory(xml->getAttributeValue("notaryID"));
+        m.nymbox_hash_ = String::Factory(xml->getAttributeValue("nymboxHash"));
         const auto found = String::Factory(xml->getAttributeValue("found"));
-        m.m_bBool = found->Compare("true");
+        m.bool_ = found->Compare("true");
 
         auto ascTextExpected = Armored::Factory();
         const char* pElementExpected = nullptr;
 
-        if (!m.m_bSuccess) {
+        if (!m.success_) {
             pElementExpected = "inReferenceTo";
-            m.m_ascInReferenceTo = ascTextExpected;
+            m.in_reference_to_ = ascTextExpected;
             if (!LoadEncodedTextFieldByName(
                     xml, ascTextExpected, pElementExpected)) {
                 LogError()(OT_PRETTY_CLASS())("Error: Expected ")(
                     pElementExpected)(" element with text field, for ")(
-                    m.m_strCommand.get())(".")
+                    m.command_.get())(".")
                     .Flush();
                 return (-1);  // error condition
             }
-        } else if (m.m_bBool) {  // Success.
+        } else if (m.bool_) {  // Success.
             pElementExpected = "publicnym";
             ascTextExpected->Release();
 
@@ -1617,28 +1588,28 @@ public:
                     xml, ascTextExpected, pElementExpected)) {
                 LogError()(OT_PRETTY_CLASS())("Error: Expected ")(
                     pElementExpected)(" element with text field, for ")(
-                    m.m_strCommand.get())(".")
+                    m.command_.get())(".")
                     .Flush();
                 return (-1);  // error condition
             }
-            m.m_ascPayload = ascTextExpected;
+            m.payload_ = ascTextExpected;
         }
 
-        if (m.m_bBool) {
-            LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.m_strCommand.get())(
-                "   ")(m.m_bSuccess ? "SUCCESS" : "FAILURE")(" NymID:    ")(
-                m.m_strNymID.get())(" NymID2:    ")(m.m_strNymID2.get())(
-                " NotaryID: ")(m.m_strNotaryID.get())(" Nym2 Public Key: ")(
-                m.m_strNymPublicKey.get())
+        if (m.bool_) {
+            LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.command_.get())(
+                "   ")(m.success_ ? "SUCCESS" : "FAILURE")(" NymID:    ")(
+                m.nym_id_.get())(" NymID2:    ")(m.nym_id2_.get())(
+                " NotaryID: ")(m.notary_id_.get())(" Nym2 Public Key: ")(
+                m.nym_public_key_.get())
                 .Flush();
         } else {
-            LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.m_strCommand.get())(
-                "   ")(m.m_bSuccess ? "SUCCESS" : "FAILURE")(" NymID:    ")(
-                m.m_strNymID.get())(" NymID2:    ")(m.m_strNymID2.get())(
-                " NotaryID: ")(m.m_strNotaryID.get())
+            LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.command_.get())(
+                "   ")(m.success_ ? "SUCCESS" : "FAILURE")(" NymID:    ")(
+                m.nym_id_.get())(" NymID2:    ")(m.nym_id2_.get())(
+                " NotaryID: ")(m.notary_id_.get())
                 .Flush();
         }
-        // m.m_ascInReferenceTo.Get()
+        // m.in_reference_to_.Get()
 
         return 1;
     }
@@ -1653,13 +1624,13 @@ class StrategyUsageCredits final : public OTMessageStrategy
 public:
     void writeXml(Message& m, Tag& parent) final
     {
-        TagPtr pTag(new Tag(m.m_strCommand->Get()));
+        TagPtr pTag(new Tag(m.command_->Get()));
 
-        pTag->add_attribute("requestNum", m.m_strRequestNum->Get());
-        pTag->add_attribute("nymID", m.m_strNymID->Get());
-        pTag->add_attribute("nymID2", m.m_strNymID2->Get());
-        pTag->add_attribute("notaryID", m.m_strNotaryID->Get());
-        pTag->add_attribute("adjustment", std::to_string(m.m_lDepth));
+        pTag->add_attribute("requestNum", m.request_num_->Get());
+        pTag->add_attribute("nymID", m.nym_id_->Get());
+        pTag->add_attribute("nymID2", m.nym_id2_->Get());
+        pTag->add_attribute("notaryID", m.notary_id_->Get());
+        pTag->add_attribute("adjustment", std::to_string(m.depth_));
 
         parent.add_tag(pTag);
     }
@@ -1667,25 +1638,23 @@ public:
     auto processXml(Message& m, irr::io::IrrXMLReader*& xml)
         -> std::int32_t final
     {
-        m.m_strCommand = String::Factory(xml->getNodeName());  // Command
-        m.m_strNymID = String::Factory(xml->getAttributeValue("nymID"));
-        m.m_strNymID2 = String::Factory(xml->getAttributeValue("nymID2"));
-        m.m_strNotaryID = String::Factory(xml->getAttributeValue("notaryID"));
-        m.m_strRequestNum =
-            String::Factory(xml->getAttributeValue("requestNum"));
+        m.command_ = String::Factory(xml->getNodeName());  // Command
+        m.nym_id_ = String::Factory(xml->getAttributeValue("nymID"));
+        m.nym_id2_ = String::Factory(xml->getAttributeValue("nymID2"));
+        m.notary_id_ = String::Factory(xml->getAttributeValue("notaryID"));
+        m.request_num_ = String::Factory(xml->getAttributeValue("requestNum"));
 
         auto strAdjustment =
             String::Factory(xml->getAttributeValue("adjustment"));
 
         if (strAdjustment->GetLength() > 0) {
-            m.m_lDepth = strAdjustment->ToLong();
+            m.depth_ = strAdjustment->ToLong();
         }
 
-        LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.m_strCommand.get())(
-            " NymID:    ")(m.m_strNymID.get())(" NymID2:    ")(
-            m.m_strNymID2.get())(" NotaryID: ")(m.m_strNotaryID.get())(
-            " Request #: ")(m.m_strRequestNum.get())(" Adjustment: ")(
-            m.m_lDepth)
+        LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.command_.get())(
+            " NymID:    ")(m.nym_id_.get())(" NymID2:    ")(m.nym_id2_.get())(
+            " NotaryID: ")(m.notary_id_.get())(" Request #: ")(
+            m.request_num_.get())(" Adjustment: ")(m.depth_)
             .Flush();
 
         return 1;
@@ -1701,14 +1670,14 @@ class StrategyUsageCreditsResponse final : public OTMessageStrategy
 public:
     void writeXml(Message& m, Tag& parent) final
     {
-        TagPtr pTag(new Tag(m.m_strCommand->Get()));
+        TagPtr pTag(new Tag(m.command_->Get()));
 
-        pTag->add_attribute("success", formatBool(m.m_bSuccess));
-        pTag->add_attribute("requestNum", m.m_strRequestNum->Get());
-        pTag->add_attribute("nymID", m.m_strNymID->Get());
-        pTag->add_attribute("nymID2", m.m_strNymID2->Get());
-        pTag->add_attribute("notaryID", m.m_strNotaryID->Get());
-        pTag->add_attribute("totalCredits", std::to_string(m.m_lDepth));
+        pTag->add_attribute("success", formatBool(m.success_));
+        pTag->add_attribute("requestNum", m.request_num_->Get());
+        pTag->add_attribute("nymID", m.nym_id_->Get());
+        pTag->add_attribute("nymID2", m.nym_id2_->Get());
+        pTag->add_attribute("notaryID", m.notary_id_->Get());
+        pTag->add_attribute("totalCredits", std::to_string(m.depth_));
 
         parent.add_tag(pTag);
     }
@@ -1718,25 +1687,23 @@ public:
     {
         processXmlSuccess(m, xml);
 
-        m.m_strCommand = String::Factory(xml->getNodeName());  // Command
-        m.m_strRequestNum =
-            String::Factory(xml->getAttributeValue("requestNum"));
-        m.m_strNymID = String::Factory(xml->getAttributeValue("nymID"));
-        m.m_strNymID2 = String::Factory(xml->getAttributeValue("nymID2"));
-        m.m_strNotaryID = String::Factory(xml->getAttributeValue("notaryID"));
+        m.command_ = String::Factory(xml->getNodeName());  // Command
+        m.request_num_ = String::Factory(xml->getAttributeValue("requestNum"));
+        m.nym_id_ = String::Factory(xml->getAttributeValue("nymID"));
+        m.nym_id2_ = String::Factory(xml->getAttributeValue("nymID2"));
+        m.notary_id_ = String::Factory(xml->getAttributeValue("notaryID"));
 
         auto strTotalCredits =
             String::Factory(xml->getAttributeValue("totalCredits"));
 
         if (strTotalCredits->GetLength() > 0) {
-            m.m_lDepth = strTotalCredits->ToLong();
+            m.depth_ = strTotalCredits->ToLong();
         }
 
-        LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.m_strCommand.get())(
-            "   ")(m.m_bSuccess ? "SUCCESS" : "FAILURE")(" NymID:    ")(
-            m.m_strNymID.get())(" NymID2:    ")(m.m_strNymID2.get())(
-            " NotaryID: ")(m.m_strNotaryID.get())(" Total Credits: ")(
-            m.m_lDepth)
+        LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.command_.get())("   ")(
+            m.success_ ? "SUCCESS" : "FAILURE")(" NymID:    ")(m.nym_id_.get())(
+            " NymID2:    ")(m.nym_id2_.get())(" NotaryID: ")(
+            m.notary_id_.get())(" Total Credits: ")(m.depth_)
             .Flush();
         return 1;
     }
@@ -1758,15 +1725,15 @@ class StrategyOutpaymentsMessageOrOutmailMessage final
 public:
     void writeXml(Message& m, Tag& parent) final
     {
-        TagPtr pTag(new Tag(m.m_strCommand->Get()));
+        TagPtr pTag(new Tag(m.command_->Get()));
 
-        pTag->add_attribute("requestNum", m.m_strRequestNum->Get());
-        pTag->add_attribute("nymID", m.m_strNymID->Get());
-        pTag->add_attribute("nymID2", m.m_strNymID2->Get());
-        pTag->add_attribute("notaryID", m.m_strNotaryID->Get());
+        pTag->add_attribute("requestNum", m.request_num_->Get());
+        pTag->add_attribute("nymID", m.nym_id_->Get());
+        pTag->add_attribute("nymID2", m.nym_id2_->Get());
+        pTag->add_attribute("notaryID", m.notary_id_->Get());
 
-        if (m.m_ascPayload->GetLength() > 2) {
-            pTag->add_tag("messagePayload", m.m_ascPayload->Get());
+        if (m.payload_->GetLength() > 2) {
+            pTag->add_tag("messagePayload", m.payload_->Get());
         }
 
         parent.add_tag(pTag);
@@ -1775,29 +1742,28 @@ public:
     auto processXml(Message& m, irr::io::IrrXMLReader*& xml)
         -> std::int32_t final
     {
-        m.m_strCommand = String::Factory(xml->getNodeName());  // Command
-        m.m_strNymID = String::Factory(xml->getAttributeValue("nymID"));
-        m.m_strNymID2 = String::Factory(xml->getAttributeValue("nymID2"));
-        m.m_strNotaryID = String::Factory(xml->getAttributeValue("notaryID"));
-        m.m_strRequestNum =
-            String::Factory(xml->getAttributeValue("requestNum"));
+        m.command_ = String::Factory(xml->getNodeName());  // Command
+        m.nym_id_ = String::Factory(xml->getAttributeValue("nymID"));
+        m.nym_id2_ = String::Factory(xml->getAttributeValue("nymID2"));
+        m.notary_id_ = String::Factory(xml->getAttributeValue("notaryID"));
+        m.request_num_ = String::Factory(xml->getAttributeValue("requestNum"));
 
         const char* pElementExpected = "messagePayload";
-        Armored& ascTextExpected = m.m_ascPayload;
+        Armored& ascTextExpected = m.payload_;
 
         if (!LoadEncodedTextFieldByName(
                 xml, ascTextExpected, pElementExpected)) {
             LogError()(OT_PRETTY_CLASS())("Error: Expected ")(
                 pElementExpected)(" element with text field, for ")(
-                m.m_strCommand.get())(".")
+                m.command_.get())(".")
                 .Flush();
             return (-1);  // error condition
         }
 
-        LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.m_strCommand.get())(
-            " NymID:    ")(m.m_strNymID.get())(" NymID2:    ")(
-            m.m_strNymID2.get())(" NotaryID: ")(m.m_strNotaryID.get())(
-            " Request #: ")(m.m_strRequestNum.get())
+        LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.command_.get())(
+            " NymID:    ")(m.nym_id_.get())(" NymID2:    ")(m.nym_id2_.get())(
+            " NotaryID: ")(m.notary_id_.get())(" Request #: ")(
+            m.request_num_.get())
             .Flush();
 
         return 1;
@@ -1817,16 +1783,16 @@ class StrategySendNymMessage final : public OTMessageStrategy
 public:
     void writeXml(Message& m, Tag& parent) final
     {
-        TagPtr pTag(new Tag(m.m_strCommand->Get()));
+        TagPtr pTag(new Tag(m.command_->Get()));
 
-        pTag->add_attribute("requestNum", m.m_strRequestNum->Get());
-        pTag->add_attribute("nymID", m.m_strNymID->Get());
-        pTag->add_attribute("nymID2", m.m_strNymID2->Get());
-        pTag->add_attribute("notaryID", m.m_strNotaryID->Get());
-        pTag->add_attribute("nymboxHash", m.m_strNymboxHash->Get());
+        pTag->add_attribute("requestNum", m.request_num_->Get());
+        pTag->add_attribute("nymID", m.nym_id_->Get());
+        pTag->add_attribute("nymID2", m.nym_id2_->Get());
+        pTag->add_attribute("notaryID", m.notary_id_->Get());
+        pTag->add_attribute("nymboxHash", m.nymbox_hash_->Get());
 
-        if (m.m_ascPayload->GetLength() > 2) {
-            pTag->add_tag("messagePayload", m.m_ascPayload->Get());
+        if (m.payload_->GetLength() > 2) {
+            pTag->add_tag("messagePayload", m.payload_->Get());
         }
 
         parent.add_tag(pTag);
@@ -1835,31 +1801,29 @@ public:
     auto processXml(Message& m, irr::io::IrrXMLReader*& xml)
         -> std::int32_t final
     {
-        m.m_strCommand = String::Factory(xml->getNodeName());  // Command
-        m.m_strNymID = String::Factory(xml->getAttributeValue("nymID"));
-        m.m_strNymID2 = String::Factory(xml->getAttributeValue("nymID2"));
-        m.m_strNotaryID = String::Factory(xml->getAttributeValue("notaryID"));
-        m.m_strRequestNum =
-            String::Factory(xml->getAttributeValue("requestNum"));
-        m.m_strNymboxHash =
-            String::Factory(xml->getAttributeValue("nymboxHash"));
+        m.command_ = String::Factory(xml->getNodeName());  // Command
+        m.nym_id_ = String::Factory(xml->getAttributeValue("nymID"));
+        m.nym_id2_ = String::Factory(xml->getAttributeValue("nymID2"));
+        m.notary_id_ = String::Factory(xml->getAttributeValue("notaryID"));
+        m.request_num_ = String::Factory(xml->getAttributeValue("requestNum"));
+        m.nymbox_hash_ = String::Factory(xml->getAttributeValue("nymboxHash"));
 
         const char* pElementExpected = "messagePayload";
-        Armored& ascTextExpected = m.m_ascPayload;
+        Armored& ascTextExpected = m.payload_;
 
         if (!LoadEncodedTextFieldByName(
                 xml, ascTextExpected, pElementExpected)) {
             LogError()(OT_PRETTY_CLASS())("Error: Expected ")(
                 pElementExpected)(" element with text field, for ")(
-                m.m_strCommand.get())(".")
+                m.command_.get())(".")
                 .Flush();
             return (-1);  // error condition
         }
 
-        LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.m_strCommand.get())(
-            " NymID:    ")(m.m_strNymID.get())(" NymID2:    ")(
-            m.m_strNymID2.get())(" NotaryID: ")(m.m_strNotaryID.get())(
-            " Request #: ")(m.m_strRequestNum.get())
+        LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.command_.get())(
+            " NymID:    ")(m.nym_id_.get())(" NymID2:    ")(m.nym_id2_.get())(
+            " NotaryID: ")(m.notary_id_.get())(" Request #: ")(
+            m.request_num_.get())
             .Flush();
 
         return 1;
@@ -1875,14 +1839,14 @@ class StrategySendNymMessageResponse final : public OTMessageStrategy
 public:
     void writeXml(Message& m, Tag& parent) final
     {
-        TagPtr pTag(new Tag(m.m_strCommand->Get()));
+        TagPtr pTag(new Tag(m.command_->Get()));
 
-        pTag->add_attribute("success", formatBool(m.m_bSuccess));
-        pTag->add_attribute("requestNum", m.m_strRequestNum->Get());
-        pTag->add_attribute("nymID", m.m_strNymID->Get());
-        pTag->add_attribute("nymID2", m.m_strNymID2->Get());
-        pTag->add_attribute("notaryID", m.m_strNotaryID->Get());
-        pTag->add_attribute("nymboxHash", m.m_strNymboxHash->Get());
+        pTag->add_attribute("success", formatBool(m.success_));
+        pTag->add_attribute("requestNum", m.request_num_->Get());
+        pTag->add_attribute("nymID", m.nym_id_->Get());
+        pTag->add_attribute("nymID2", m.nym_id2_->Get());
+        pTag->add_attribute("notaryID", m.notary_id_->Get());
+        pTag->add_attribute("nymboxHash", m.nymbox_hash_->Get());
 
         parent.add_tag(pTag);
     }
@@ -1892,19 +1856,16 @@ public:
     {
         processXmlSuccess(m, xml);
 
-        m.m_strCommand = String::Factory(xml->getNodeName());  // Command
-        m.m_strRequestNum =
-            String::Factory(xml->getAttributeValue("requestNum"));
-        m.m_strNymID = String::Factory(xml->getAttributeValue("nymID"));
-        m.m_strNymID2 = String::Factory(xml->getAttributeValue("nymID2"));
-        m.m_strNotaryID = String::Factory(xml->getAttributeValue("notaryID"));
-        m.m_strNymboxHash =
-            String::Factory(xml->getAttributeValue("nymboxHash"));
+        m.command_ = String::Factory(xml->getNodeName());  // Command
+        m.request_num_ = String::Factory(xml->getAttributeValue("requestNum"));
+        m.nym_id_ = String::Factory(xml->getAttributeValue("nymID"));
+        m.nym_id2_ = String::Factory(xml->getAttributeValue("nymID2"));
+        m.notary_id_ = String::Factory(xml->getAttributeValue("notaryID"));
+        m.nymbox_hash_ = String::Factory(xml->getAttributeValue("nymboxHash"));
 
-        LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.m_strCommand.get())(
-            "   ")(m.m_bSuccess ? "SUCCESS" : "FAILURE")(" NymID:    ")(
-            m.m_strNymID.get())(" NymID2:    ")(m.m_strNymID2.get())(
-            " NotaryID: ")(m.m_strNotaryID.get())
+        LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.command_.get())("   ")(
+            m.success_ ? "SUCCESS" : "FAILURE")(" NymID:    ")(m.nym_id_.get())(
+            " NymID2:    ")(m.nym_id2_.get())(" NotaryID: ")(m.notary_id_.get())
             .Flush();
 
         return 1;
@@ -1937,15 +1898,15 @@ class StrategySendNymInstrumentOrPayDividend final : public OTMessageStrategy
 public:
     void writeXml(Message& m, Tag& parent) final
     {
-        TagPtr pTag(new Tag(m.m_strCommand->Get()));
+        TagPtr pTag(new Tag(m.command_->Get()));
 
-        pTag->add_attribute("requestNum", m.m_strRequestNum->Get());
-        pTag->add_attribute("nymID", m.m_strNymID->Get());
-        pTag->add_attribute("nymID2", m.m_strNymID2->Get());
-        pTag->add_attribute("notaryID", m.m_strNotaryID->Get());
+        pTag->add_attribute("requestNum", m.request_num_->Get());
+        pTag->add_attribute("nymID", m.nym_id_->Get());
+        pTag->add_attribute("nymID2", m.nym_id2_->Get());
+        pTag->add_attribute("notaryID", m.notary_id_->Get());
 
-        if (m.m_ascPayload->GetLength() > 2) {
-            pTag->add_tag("messagePayload", m.m_ascPayload->Get());
+        if (m.payload_->GetLength() > 2) {
+            pTag->add_tag("messagePayload", m.payload_->Get());
         }
 
         parent.add_tag(pTag);
@@ -1954,29 +1915,28 @@ public:
     auto processXml(Message& m, irr::io::IrrXMLReader*& xml)
         -> std::int32_t final
     {
-        m.m_strCommand = String::Factory(xml->getNodeName());  // Command
-        m.m_strNymID = String::Factory(xml->getAttributeValue("nymID"));
-        m.m_strNymID2 = String::Factory(xml->getAttributeValue("nymID2"));
-        m.m_strNotaryID = String::Factory(xml->getAttributeValue("notaryID"));
-        m.m_strRequestNum =
-            String::Factory(xml->getAttributeValue("requestNum"));
+        m.command_ = String::Factory(xml->getNodeName());  // Command
+        m.nym_id_ = String::Factory(xml->getAttributeValue("nymID"));
+        m.nym_id2_ = String::Factory(xml->getAttributeValue("nymID2"));
+        m.notary_id_ = String::Factory(xml->getAttributeValue("notaryID"));
+        m.request_num_ = String::Factory(xml->getAttributeValue("requestNum"));
 
         const char* pElementExpected = "messagePayload";
-        Armored& ascTextExpected = m.m_ascPayload;
+        Armored& ascTextExpected = m.payload_;
 
         if (!LoadEncodedTextFieldByName(
                 xml, ascTextExpected, pElementExpected)) {
             LogError()(OT_PRETTY_CLASS())("Error: Expected ")(
                 pElementExpected)(" element with text field, for ")(
-                m.m_strCommand.get())(".")
+                m.command_.get())(".")
                 .Flush();
             return (-1);  // error condition
         }
 
-        LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.m_strCommand.get())(
-            " NymID:    ")(m.m_strNymID.get())(" NymID2:    ")(
-            m.m_strNymID2.get())(" NotaryID: ")(m.m_strNotaryID.get())(
-            " Request #: ")(m.m_strRequestNum.get())
+        LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.command_.get())(
+            " NymID:    ")(m.nym_id_.get())(" NymID2:    ")(m.nym_id2_.get())(
+            " NotaryID: ")(m.notary_id_.get())(" Request #: ")(
+            m.request_num_.get())
             .Flush();
 
         return 1;
@@ -1996,11 +1956,11 @@ class StrategyGetRequestNumber final : public OTMessageStrategy
 public:
     void writeXml(Message& m, Tag& parent) final
     {
-        TagPtr pTag(new Tag(m.m_strCommand->Get()));
+        TagPtr pTag(new Tag(m.command_->Get()));
 
-        pTag->add_attribute("requestNum", m.m_strRequestNum->Get());
-        pTag->add_attribute("nymID", m.m_strNymID->Get());
-        pTag->add_attribute("notaryID", m.m_strNotaryID->Get());
+        pTag->add_attribute("requestNum", m.request_num_->Get());
+        pTag->add_attribute("nymID", m.nym_id_->Get());
+        pTag->add_attribute("notaryID", m.notary_id_->Get());
 
         parent.add_tag(pTag);
     }
@@ -2008,15 +1968,13 @@ public:
     auto processXml(Message& m, irr::io::IrrXMLReader*& xml)
         -> std::int32_t final
     {
-        m.m_strCommand = String::Factory(xml->getNodeName());  // Command
-        m.m_strRequestNum =
-            String::Factory(xml->getAttributeValue("requestNum"));
-        m.m_strNymID = String::Factory(xml->getAttributeValue("nymID"));
-        m.m_strNotaryID = String::Factory(xml->getAttributeValue("notaryID"));
+        m.command_ = String::Factory(xml->getNodeName());  // Command
+        m.request_num_ = String::Factory(xml->getAttributeValue("requestNum"));
+        m.nym_id_ = String::Factory(xml->getAttributeValue("nymID"));
+        m.notary_id_ = String::Factory(xml->getAttributeValue("notaryID"));
 
-        LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.m_strCommand.get())(
-            " NymID:    ")(m.m_strNymID.get())(" NotaryID: ")(
-            m.m_strNotaryID.get())
+        LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.command_.get())(
+            " NymID:    ")(m.nym_id_.get())(" NotaryID: ")(m.notary_id_.get())
             .Flush();
 
         return 1;
@@ -2036,15 +1994,15 @@ class StrategyGetRequestResponse final : public OTMessageStrategy
 public:
     void writeXml(Message& m, Tag& parent) final
     {
-        TagPtr pTag(new Tag(m.m_strCommand->Get()));
+        TagPtr pTag(new Tag(m.command_->Get()));
 
-        pTag->add_attribute("success", formatBool(m.m_bSuccess));
-        pTag->add_attribute("requestNum", m.m_strRequestNum->Get());
-        pTag->add_attribute("nymID", m.m_strNymID->Get());
-        pTag->add_attribute("notaryID", m.m_strNotaryID->Get());
+        pTag->add_attribute("success", formatBool(m.success_));
+        pTag->add_attribute("requestNum", m.request_num_->Get());
+        pTag->add_attribute("nymID", m.nym_id_->Get());
+        pTag->add_attribute("notaryID", m.notary_id_->Get());
         pTag->add_attribute(
-            "newRequestNum", std::to_string(m.m_lNewRequestNum));
-        pTag->add_attribute("nymboxHash", m.m_strNymboxHash->Get());
+            "newRequestNum", std::to_string(m.new_request_num_));
+        pTag->add_attribute("nymboxHash", m.nymbox_hash_->Get());
 
         parent.add_tag(pTag);
     }
@@ -2054,24 +2012,21 @@ public:
     {
         processXmlSuccess(m, xml);
 
-        m.m_strCommand = String::Factory(xml->getNodeName());  // Command
-        m.m_strRequestNum =
-            String::Factory(xml->getAttributeValue("requestNum"));
-        m.m_strNymID = String::Factory(xml->getAttributeValue("nymID"));
-        m.m_strNymboxHash =
-            String::Factory(xml->getAttributeValue("nymboxHash"));
-        m.m_strNotaryID = String::Factory(xml->getAttributeValue("notaryID"));
+        m.command_ = String::Factory(xml->getNodeName());  // Command
+        m.request_num_ = String::Factory(xml->getAttributeValue("requestNum"));
+        m.nym_id_ = String::Factory(xml->getAttributeValue("nymID"));
+        m.nymbox_hash_ = String::Factory(xml->getAttributeValue("nymboxHash"));
+        m.notary_id_ = String::Factory(xml->getAttributeValue("notaryID"));
 
         const auto strNewRequestNum =
             String::Factory(xml->getAttributeValue("newRequestNum"));
-        m.m_lNewRequestNum =
+        m.new_request_num_ =
             strNewRequestNum->Exists() ? strNewRequestNum->ToLong() : 0;
 
-        LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.m_strCommand.get())(
-            "   ")(m.m_bSuccess ? "SUCCESS" : "FAILURE")(" NymID:    ")(
-            m.m_strNymID.get())(" NotaryID: ")(m.m_strNotaryID.get())(
-            " Request Number:    ")(m.m_strRequestNum.get())(" New Number: ")(
-            m.m_lNewRequestNum)
+        LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.command_.get())("   ")(
+            m.success_ ? "SUCCESS" : "FAILURE")(" NymID:    ")(m.nym_id_.get())(
+            " NotaryID: ")(m.notary_id_.get())(" Request Number:    ")(
+            m.request_num_.get())(" New Number: ")(m.new_request_num_)
             .Flush();
 
         return 1;
@@ -2087,16 +2042,16 @@ class StrategyRegisterInstrumentDefinition final : public OTMessageStrategy
 public:
     void writeXml(Message& m, Tag& parent) final
     {
-        TagPtr pTag(new Tag(m.m_strCommand->Get()));
+        TagPtr pTag(new Tag(m.command_->Get()));
 
-        pTag->add_attribute("requestNum", m.m_strRequestNum->Get());
-        pTag->add_attribute("nymID", m.m_strNymID->Get());
-        pTag->add_attribute("notaryID", m.m_strNotaryID->Get());
+        pTag->add_attribute("requestNum", m.request_num_->Get());
+        pTag->add_attribute("nymID", m.nym_id_->Get());
+        pTag->add_attribute("notaryID", m.notary_id_->Get());
         pTag->add_attribute(
-            "instrumentDefinitionID", m.m_strInstrumentDefinitionID->Get());
+            "instrumentDefinitionID", m.instrument_definition_id_->Get());
 
-        if (m.m_ascPayload->GetLength()) {
-            pTag->add_tag("instrumentDefinition", m.m_ascPayload->Get());
+        if (m.payload_->GetLength()) {
+            pTag->add_tag("instrumentDefinition", m.payload_->Get());
         }
 
         parent.add_tag(pTag);
@@ -2105,30 +2060,29 @@ public:
     auto processXml(Message& m, irr::io::IrrXMLReader*& xml)
         -> std::int32_t final
     {
-        m.m_strCommand = String::Factory(xml->getNodeName());  // Command
-        m.m_strNymID = String::Factory(xml->getAttributeValue("nymID"));
-        m.m_strNotaryID = String::Factory(xml->getAttributeValue("notaryID"));
-        m.m_strInstrumentDefinitionID =
+        m.command_ = String::Factory(xml->getNodeName());  // Command
+        m.nym_id_ = String::Factory(xml->getAttributeValue("nymID"));
+        m.notary_id_ = String::Factory(xml->getAttributeValue("notaryID"));
+        m.instrument_definition_id_ =
             String::Factory(xml->getAttributeValue("instrumentDefinitionID"));
-        m.m_strRequestNum =
-            String::Factory(xml->getAttributeValue("requestNum"));
+        m.request_num_ = String::Factory(xml->getAttributeValue("requestNum"));
 
         const char* pElementExpected = "instrumentDefinition";
-        Armored& ascTextExpected = m.m_ascPayload;
+        Armored& ascTextExpected = m.payload_;
 
         if (!LoadEncodedTextFieldByName(
                 xml, ascTextExpected, pElementExpected)) {
             LogError()(OT_PRETTY_CLASS())("Error: Expected ")(
                 pElementExpected)(" element with text field, for ")(
-                m.m_strCommand.get())(".")
+                m.command_.get())(".")
                 .Flush();
             return (-1);  // error condition
         }
 
-        LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.m_strCommand.get())(
-            " NymID:    ")(m.m_strNymID.get())(" NotaryID: ")(
-            m.m_strNotaryID.get())(" Request#: ")(m.m_strRequestNum.get())(
-            " Asset Type: ")(m.m_strInstrumentDefinitionID.get())
+        LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.command_.get())(
+            " NymID:    ")(m.nym_id_.get())(" NotaryID: ")(m.notary_id_.get())(
+            " Request#: ")(m.request_num_.get())(" Asset Type: ")(
+            m.instrument_definition_id_.get())
             .Flush();
 
         return 1;
@@ -2145,24 +2099,24 @@ class StrategyRegisterInstrumentDefinitionResponse final
 public:
     void writeXml(Message& m, Tag& parent) final
     {
-        TagPtr pTag(new Tag(m.m_strCommand->Get()));
+        TagPtr pTag(new Tag(m.command_->Get()));
 
-        pTag->add_attribute("success", formatBool(m.m_bSuccess));
-        pTag->add_attribute("requestNum", m.m_strRequestNum->Get());
-        pTag->add_attribute("nymID", m.m_strNymID->Get());
-        pTag->add_attribute("notaryID", m.m_strNotaryID->Get());
-        pTag->add_attribute("nymboxHash", m.m_strNymboxHash->Get());
+        pTag->add_attribute("success", formatBool(m.success_));
+        pTag->add_attribute("requestNum", m.request_num_->Get());
+        pTag->add_attribute("nymID", m.nym_id_->Get());
+        pTag->add_attribute("notaryID", m.notary_id_->Get());
+        pTag->add_attribute("nymboxHash", m.nymbox_hash_->Get());
         pTag->add_attribute(
-            "instrumentDefinitionID", m.m_strInstrumentDefinitionID->Get());
+            "instrumentDefinitionID", m.instrument_definition_id_->Get());
         // the new issuer account ID
-        pTag->add_attribute("accountID", m.m_strAcctID->Get());
+        pTag->add_attribute("accountID", m.acct_id_->Get());
 
-        if (m.m_ascInReferenceTo->GetLength()) {
-            pTag->add_tag("inReferenceTo", m.m_ascInReferenceTo->Get());
+        if (m.in_reference_to_->GetLength()) {
+            pTag->add_tag("inReferenceTo", m.in_reference_to_->Get());
         }
 
-        if (m.m_bSuccess && m.m_ascPayload->GetLength()) {
-            pTag->add_tag("issuerAccount", m.m_ascPayload->Get());
+        if (m.success_ && m.payload_->GetLength()) {
+            pTag->add_tag("issuerAccount", m.payload_->Get());
         }
 
         parent.add_tag(pTag);
@@ -2173,16 +2127,14 @@ public:
     {
         processXmlSuccess(m, xml);
 
-        m.m_strCommand = String::Factory(xml->getNodeName());  // Command
-        m.m_strNymID = String::Factory(xml->getAttributeValue("nymID"));
-        m.m_strRequestNum =
-            String::Factory(xml->getAttributeValue("requestNum"));
-        m.m_strNotaryID = String::Factory(xml->getAttributeValue("notaryID"));
-        m.m_strNymboxHash =
-            String::Factory(xml->getAttributeValue("nymboxHash"));
-        m.m_strInstrumentDefinitionID =
+        m.command_ = String::Factory(xml->getNodeName());  // Command
+        m.nym_id_ = String::Factory(xml->getAttributeValue("nymID"));
+        m.request_num_ = String::Factory(xml->getAttributeValue("requestNum"));
+        m.notary_id_ = String::Factory(xml->getAttributeValue("notaryID"));
+        m.nymbox_hash_ = String::Factory(xml->getAttributeValue("nymboxHash"));
+        m.instrument_definition_id_ =
             String::Factory(xml->getAttributeValue("instrumentDefinitionID"));
-        m.m_strAcctID = String::Factory(xml->getAttributeValue("accountID"));
+        m.acct_id_ = String::Factory(xml->getAttributeValue("accountID"));
 
         // If successful, we need to read 2 more things: inReferenceTo and
         // issuerAccount payload.
@@ -2191,27 +2143,27 @@ public:
 
         {
             const char* pElementExpected = "inReferenceTo";
-            Armored& ascTextExpected = m.m_ascInReferenceTo;
+            Armored& ascTextExpected = m.in_reference_to_;
 
             if (!LoadEncodedTextFieldByName(
                     xml, ascTextExpected, pElementExpected)) {
                 LogError()(OT_PRETTY_CLASS())("Error: Expected ")(
                     pElementExpected)(" element with text field, for ")(
-                    m.m_strCommand.get())(".")
+                    m.command_.get())(".")
                     .Flush();
                 return (-1);  // error condition
             }
         }
 
-        if (m.m_bSuccess) {
+        if (m.success_) {
             const char* pElementExpected = "issuerAccount";
-            Armored& ascTextExpected = m.m_ascPayload;
+            Armored& ascTextExpected = m.payload_;
 
             if (!LoadEncodedTextFieldByName(
                     xml, ascTextExpected, pElementExpected)) {
                 LogError()(OT_PRETTY_CLASS())("Error: Expected ")(
                     pElementExpected)(" element with text field, for ")(
-                    m.m_strCommand.get())(".")
+                    m.command_.get())(".")
                     .Flush();
                 return (-1);  // error condition
             }
@@ -2220,8 +2172,8 @@ public:
         // Did we find everything we were looking for?
         // If the "command responding to" isn't there,
         // OR if it was successful but the Payload isn't there, then failure.
-        if (!m.m_ascInReferenceTo->GetLength() ||
-            (m.m_bSuccess && !m.m_ascPayload->GetLength())) {
+        if (!m.in_reference_to_->GetLength() ||
+            (m.success_ && !m.payload_->GetLength())) {
             LogError()(OT_PRETTY_CLASS())(
                 "Error: "
                 "Expected issuerAccount and/or inReferenceTo elements "
@@ -2231,15 +2183,15 @@ public:
             return (-1);  // error condition
         }
 
-        auto acctContents = String::Factory(m.m_ascPayload);
-        LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.m_strCommand.get())(
-            "   ")(m.m_bSuccess ? "SUCCESS" : "FAILURE")(" NymID:    ")(
-            m.m_strNymID.get())(" AccountID: ")(m.m_strAcctID.get())(
-            " Instrument Definition ID: ")(m.m_strInstrumentDefinitionID.get())(
-            " NotaryID: ")(m.m_strNotaryID.get())
+        auto acctContents = String::Factory(m.payload_);
+        LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.command_.get())("   ")(
+            m.success_ ? "SUCCESS" : "FAILURE")(" NymID:    ")(m.nym_id_.get())(
+            " AccountID: ")(m.acct_id_.get())(" Instrument Definition ID: ")(
+            m.instrument_definition_id_.get())(" NotaryID: ")(
+            m.notary_id_.get())
             .Flush();
         //    "****New Account****:\n%s\n",
-        //    m.m_ascInReferenceTo.Get(),
+        //    m.in_reference_to_.Get(),
         // acctContents.Get()
 
         return 1;
@@ -2255,14 +2207,14 @@ class StrategyQueryInstrumentDefinitions final : public OTMessageStrategy
 public:
     void writeXml(Message& m, Tag& parent) final
     {
-        TagPtr pTag(new Tag(m.m_strCommand->Get()));
+        TagPtr pTag(new Tag(m.command_->Get()));
 
-        pTag->add_attribute("requestNum", m.m_strRequestNum->Get());
-        pTag->add_attribute("nymID", m.m_strNymID->Get());
-        pTag->add_attribute("notaryID", m.m_strNotaryID->Get());
+        pTag->add_attribute("requestNum", m.request_num_->Get());
+        pTag->add_attribute("nymID", m.nym_id_->Get());
+        pTag->add_attribute("notaryID", m.notary_id_->Get());
 
-        if (m.m_ascPayload->GetLength()) {
-            pTag->add_tag("stringMap", m.m_ascPayload->Get());
+        if (m.payload_->GetLength()) {
+            pTag->add_tag("stringMap", m.payload_->Get());
         }
 
         parent.add_tag(pTag);
@@ -2271,27 +2223,26 @@ public:
     auto processXml(Message& m, irr::io::IrrXMLReader*& xml)
         -> std::int32_t final
     {
-        m.m_strCommand = String::Factory(xml->getNodeName());  // Command
-        m.m_strNymID = String::Factory(xml->getAttributeValue("nymID"));
-        m.m_strNotaryID = String::Factory(xml->getAttributeValue("notaryID"));
-        m.m_strRequestNum =
-            String::Factory(xml->getAttributeValue("requestNum"));
+        m.command_ = String::Factory(xml->getNodeName());  // Command
+        m.nym_id_ = String::Factory(xml->getAttributeValue("nymID"));
+        m.notary_id_ = String::Factory(xml->getAttributeValue("notaryID"));
+        m.request_num_ = String::Factory(xml->getAttributeValue("requestNum"));
 
         const char* pElementExpected = "stringMap";
-        Armored& ascTextExpected = m.m_ascPayload;
+        Armored& ascTextExpected = m.payload_;
 
         if (!LoadEncodedTextFieldByName(
                 xml, ascTextExpected, pElementExpected)) {
             LogError()(OT_PRETTY_CLASS())("Error: Expected ")(
                 pElementExpected)(" element with text field, for ")(
-                m.m_strCommand.get())(".")
+                m.command_.get())(".")
                 .Flush();
             return (-1);  // error condition
         }
 
-        LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.m_strCommand.get())(
-            " NymID:    ")(m.m_strNymID.get())(" NotaryID: ")(
-            m.m_strNotaryID.get())(" Request#: ")(m.m_strRequestNum.get())
+        LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.command_.get())(
+            " NymID:    ")(m.nym_id_.get())(" NotaryID: ")(m.notary_id_.get())(
+            " Request#: ")(m.request_num_.get())
             .Flush();
 
         return 1;
@@ -2308,19 +2259,19 @@ class StrategyQueryInstrumentDefinitionsResponse final
 public:
     void writeXml(Message& m, Tag& parent) final
     {
-        TagPtr pTag(new Tag(m.m_strCommand->Get()));
+        TagPtr pTag(new Tag(m.command_->Get()));
 
-        pTag->add_attribute("success", formatBool(m.m_bSuccess));
-        pTag->add_attribute("requestNum", m.m_strRequestNum->Get());
-        pTag->add_attribute("nymID", m.m_strNymID->Get());
-        pTag->add_attribute("notaryID", m.m_strNotaryID->Get());
+        pTag->add_attribute("success", formatBool(m.success_));
+        pTag->add_attribute("requestNum", m.request_num_->Get());
+        pTag->add_attribute("nymID", m.nym_id_->Get());
+        pTag->add_attribute("notaryID", m.notary_id_->Get());
 
-        if (m.m_ascInReferenceTo->GetLength()) {
-            pTag->add_tag("inReferenceTo", m.m_ascInReferenceTo->Get());
+        if (m.in_reference_to_->GetLength()) {
+            pTag->add_tag("inReferenceTo", m.in_reference_to_->Get());
         }
 
-        if (m.m_bSuccess && m.m_ascPayload->GetLength()) {
-            pTag->add_tag("stringMap", m.m_ascPayload->Get());
+        if (m.success_ && m.payload_->GetLength()) {
+            pTag->add_tag("stringMap", m.payload_->Get());
         }
 
         parent.add_tag(pTag);
@@ -2331,11 +2282,10 @@ public:
     {
         processXmlSuccess(m, xml);
 
-        m.m_strCommand = String::Factory(xml->getNodeName());  // Command
-        m.m_strNymID = String::Factory(xml->getAttributeValue("nymID"));
-        m.m_strRequestNum =
-            String::Factory(xml->getAttributeValue("requestNum"));
-        m.m_strNotaryID = String::Factory(xml->getAttributeValue("notaryID"));
+        m.command_ = String::Factory(xml->getNodeName());  // Command
+        m.nym_id_ = String::Factory(xml->getAttributeValue("nymID"));
+        m.request_num_ = String::Factory(xml->getAttributeValue("requestNum"));
+        m.notary_id_ = String::Factory(xml->getAttributeValue("notaryID"));
 
         // If successful, we need to read 2 more things: inReferenceTo and
         // issuerAccount payload.
@@ -2344,27 +2294,27 @@ public:
 
         {
             const char* pElementExpected = "inReferenceTo";
-            Armored& ascTextExpected = m.m_ascInReferenceTo;
+            Armored& ascTextExpected = m.in_reference_to_;
 
             if (!LoadEncodedTextFieldByName(
                     xml, ascTextExpected, pElementExpected)) {
                 LogError()(OT_PRETTY_CLASS())("Error: Expected ")(
                     pElementExpected)(" element with text field, for ")(
-                    m.m_strCommand.get())(".")
+                    m.command_.get())(".")
                     .Flush();
                 return (-1);  // error condition
             }
         }
 
-        if (m.m_bSuccess) {
+        if (m.success_) {
             const char* pElementExpected = "stringMap";
-            Armored& ascTextExpected = m.m_ascPayload;
+            Armored& ascTextExpected = m.payload_;
 
             if (!LoadEncodedTextFieldByName(
                     xml, ascTextExpected, pElementExpected)) {
                 LogError()(OT_PRETTY_CLASS())("Error: Expected ")(
                     pElementExpected)(" element with text field, for ")(
-                    m.m_strCommand.get())(".")
+                    m.command_.get())(".")
                     .Flush();
                 return (-1);  // error condition
             }
@@ -2373,8 +2323,8 @@ public:
         // Did we find everything we were looking for?
         // If the "command responding to" isn't there,
         // OR if it was successful but the Payload isn't there, then failure.
-        if (!m.m_ascInReferenceTo->GetLength() ||
-            (m.m_bSuccess && !m.m_ascPayload->GetLength())) {
+        if (!m.in_reference_to_->GetLength() ||
+            (m.success_ && !m.payload_->GetLength())) {
             LogError()(OT_PRETTY_CLASS())(
                 "Error: Expected stringMap and/or inReferenceTo elements "
                 "with text fields in "
@@ -2383,9 +2333,9 @@ public:
             return (-1);  // error condition
         }
 
-        LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.m_strCommand.get())(
-            "   ")(m.m_bSuccess ? "SUCCESS" : "FAILURE")(" NymID:    ")(
-            m.m_strNymID.get())(" NotaryID: ")(m.m_strNotaryID.get())
+        LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.command_.get())("   ")(
+            m.success_ ? "SUCCESS" : "FAILURE")(" NymID:    ")(m.nym_id_.get())(
+            " NotaryID: ")(m.notary_id_.get())
             .Flush();
 
         return 1;
@@ -2401,14 +2351,14 @@ class StrategyIssueBasket final : public OTMessageStrategy
 public:
     void writeXml(Message& m, Tag& parent) final
     {
-        TagPtr pTag(new Tag(m.m_strCommand->Get()));
+        TagPtr pTag(new Tag(m.command_->Get()));
 
-        pTag->add_attribute("requestNum", m.m_strRequestNum->Get());
-        pTag->add_attribute("nymID", m.m_strNymID->Get());
-        pTag->add_attribute("notaryID", m.m_strNotaryID->Get());
+        pTag->add_attribute("requestNum", m.request_num_->Get());
+        pTag->add_attribute("nymID", m.nym_id_->Get());
+        pTag->add_attribute("notaryID", m.notary_id_->Get());
 
-        if (m.m_ascPayload->GetLength()) {
-            pTag->add_tag("currencyBasket", m.m_ascPayload->Get());
+        if (m.payload_->GetLength()) {
+            pTag->add_tag("currencyBasket", m.payload_->Get());
         }
 
         parent.add_tag(pTag);
@@ -2417,21 +2367,20 @@ public:
     auto processXml(Message& m, irr::io::IrrXMLReader*& xml)
         -> std::int32_t final
     {
-        m.m_strCommand = String::Factory(xml->getNodeName());  // Command
-        m.m_strNymID = String::Factory(xml->getAttributeValue("nymID"));
-        m.m_strNotaryID = String::Factory(xml->getAttributeValue("notaryID"));
-        m.m_strRequestNum =
-            String::Factory(xml->getAttributeValue("requestNum"));
+        m.command_ = String::Factory(xml->getNodeName());  // Command
+        m.nym_id_ = String::Factory(xml->getAttributeValue("nymID"));
+        m.notary_id_ = String::Factory(xml->getAttributeValue("notaryID"));
+        m.request_num_ = String::Factory(xml->getAttributeValue("requestNum"));
 
         {
             const char* pElementExpected = "currencyBasket";
-            Armored& ascTextExpected = m.m_ascPayload;
+            Armored& ascTextExpected = m.payload_;
 
             if (!LoadEncodedTextFieldByName(
                     xml, ascTextExpected, pElementExpected)) {
                 LogError()(OT_PRETTY_CLASS())("Error: Expected ")(
                     pElementExpected)(" element with text field, for ")(
-                    m.m_strCommand.get())(".")
+                    m.command_.get())(".")
                     .Flush();
                 return (-1);  // error condition
             }
@@ -2439,7 +2388,7 @@ public:
 
         // Did we find everything we were looking for?
         // If the Payload isn't there, then failure.
-        if (!m.m_ascPayload->GetLength()) {
+        if (!m.payload_->GetLength()) {
             LogError()(OT_PRETTY_CLASS())(
                 "Error: Expected currencyBasket element with text fields in "
                 "issueBasket message.")
@@ -2447,9 +2396,9 @@ public:
             return (-1);  // error condition
         }
 
-        LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.m_strCommand.get())(
-            " NymID:    ")(m.m_strNymID.get())(" NotaryID: ")(
-            m.m_strNotaryID.get())(" Request#: ")(m.m_strRequestNum.get())
+        LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.command_.get())(
+            " NymID:    ")(m.nym_id_.get())(" NotaryID: ")(m.notary_id_.get())(
+            " Request#: ")(m.request_num_.get())
             .Flush();
 
         return 1;
@@ -2465,18 +2414,18 @@ class StrategyIssueBasketResponse final : public OTMessageStrategy
 public:
     void writeXml(Message& m, Tag& parent) final
     {
-        TagPtr pTag(new Tag(m.m_strCommand->Get()));
+        TagPtr pTag(new Tag(m.command_->Get()));
 
-        pTag->add_attribute("success", formatBool(m.m_bSuccess));
-        pTag->add_attribute("requestNum", m.m_strRequestNum->Get());
-        pTag->add_attribute("nymID", m.m_strNymID->Get());
-        pTag->add_attribute("notaryID", m.m_strNotaryID->Get());
+        pTag->add_attribute("success", formatBool(m.success_));
+        pTag->add_attribute("requestNum", m.request_num_->Get());
+        pTag->add_attribute("nymID", m.nym_id_->Get());
+        pTag->add_attribute("notaryID", m.notary_id_->Get());
         pTag->add_attribute(
-            "instrumentDefinitionID", m.m_strInstrumentDefinitionID->Get());
-        pTag->add_attribute("accountID", m.m_strAcctID->Get());
+            "instrumentDefinitionID", m.instrument_definition_id_->Get());
+        pTag->add_attribute("accountID", m.acct_id_->Get());
 
-        if (m.m_ascInReferenceTo->GetLength()) {
-            pTag->add_tag("inReferenceTo", m.m_ascInReferenceTo->Get());
+        if (m.in_reference_to_->GetLength()) {
+            pTag->add_tag("inReferenceTo", m.in_reference_to_->Get());
         }
 
         parent.add_tag(pTag);
@@ -2487,24 +2436,23 @@ public:
     {
         processXmlSuccess(m, xml);
 
-        m.m_strCommand = String::Factory(xml->getNodeName());  // Command
-        m.m_strRequestNum =
-            String::Factory(xml->getAttributeValue("requestNum"));
-        m.m_strNymID = String::Factory(xml->getAttributeValue("nymID"));
-        m.m_strInstrumentDefinitionID =
+        m.command_ = String::Factory(xml->getNodeName());  // Command
+        m.request_num_ = String::Factory(xml->getAttributeValue("requestNum"));
+        m.nym_id_ = String::Factory(xml->getAttributeValue("nymID"));
+        m.instrument_definition_id_ =
             String::Factory(xml->getAttributeValue("instrumentDefinitionID"));
-        m.m_strNotaryID = String::Factory(xml->getAttributeValue("notaryID"));
-        m.m_strAcctID = String::Factory(xml->getAttributeValue("accountID"));
+        m.notary_id_ = String::Factory(xml->getAttributeValue("notaryID"));
+        m.acct_id_ = String::Factory(xml->getAttributeValue("accountID"));
 
         {
             const char* pElementExpected = "inReferenceTo";
-            Armored& ascTextExpected = m.m_ascInReferenceTo;
+            Armored& ascTextExpected = m.in_reference_to_;
 
             if (!LoadEncodedTextFieldByName(
                     xml, ascTextExpected, pElementExpected)) {
                 LogError()(OT_PRETTY_CLASS())("Error: Expected ")(
                     pElementExpected)(" element with text field, for ")(
-                    m.m_strCommand.get())(".")
+                    m.command_.get())(".")
                     .Flush();
                 return (-1);  // error condition
             }
@@ -2513,7 +2461,7 @@ public:
         // Did we find everything we were looking for?
         // If the "command responding to" isn't there,
         // OR if it was successful but the Payload isn't there, then failure.
-        if (!m.m_ascInReferenceTo->GetLength()) {
+        if (!m.in_reference_to_->GetLength()) {
             LogError()(OT_PRETTY_CLASS())(
                 "Error: Expected inReferenceTo element with text fields in "
                 "issueBasketResponse reply.")
@@ -2521,11 +2469,11 @@ public:
             return (-1);  // error condition
         }
 
-        LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.m_strCommand.get())(
-            "   ")(m.m_bSuccess ? "SUCCESS" : "FAILURE")(" NymID:    ")(
-            m.m_strNymID.get())(" AccountID: ")(m.m_strAcctID.get())(
-            " InstrumentDefinitionID: ")(m.m_strInstrumentDefinitionID.get())(
-            " NotaryID: ")(m.m_strNotaryID.get())
+        LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.command_.get())("   ")(
+            m.success_ ? "SUCCESS" : "FAILURE")(" NymID:    ")(m.nym_id_.get())(
+            " AccountID: ")(m.acct_id_.get())(" InstrumentDefinitionID: ")(
+            m.instrument_definition_id_.get())(" NotaryID: ")(
+            m.notary_id_.get())
             .Flush();
 
         return 1;
@@ -2541,13 +2489,13 @@ class StrategyRegisterAccount final : public OTMessageStrategy
 public:
     void writeXml(Message& m, Tag& parent) final
     {
-        TagPtr pTag(new Tag(m.m_strCommand->Get()));
+        TagPtr pTag(new Tag(m.command_->Get()));
 
-        pTag->add_attribute("requestNum", m.m_strRequestNum->Get());
-        pTag->add_attribute("nymID", m.m_strNymID->Get());
-        pTag->add_attribute("notaryID", m.m_strNotaryID->Get());
+        pTag->add_attribute("requestNum", m.request_num_->Get());
+        pTag->add_attribute("nymID", m.nym_id_->Get());
+        pTag->add_attribute("notaryID", m.notary_id_->Get());
         pTag->add_attribute(
-            "instrumentDefinitionID", m.m_strInstrumentDefinitionID->Get());
+            "instrumentDefinitionID", m.instrument_definition_id_->Get());
 
         parent.add_tag(pTag);
     }
@@ -2555,18 +2503,17 @@ public:
     auto processXml(Message& m, irr::io::IrrXMLReader*& xml)
         -> std::int32_t final
     {
-        m.m_strCommand = String::Factory(xml->getNodeName());  // Command
-        m.m_strNymID = String::Factory(xml->getAttributeValue("nymID"));
-        m.m_strNotaryID = String::Factory(xml->getAttributeValue("notaryID"));
-        m.m_strInstrumentDefinitionID =
+        m.command_ = String::Factory(xml->getNodeName());  // Command
+        m.nym_id_ = String::Factory(xml->getAttributeValue("nymID"));
+        m.notary_id_ = String::Factory(xml->getAttributeValue("notaryID"));
+        m.instrument_definition_id_ =
             String::Factory(xml->getAttributeValue("instrumentDefinitionID"));
-        m.m_strRequestNum =
-            String::Factory(xml->getAttributeValue("requestNum"));
+        m.request_num_ = String::Factory(xml->getAttributeValue("requestNum"));
 
-        LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.m_strCommand.get())(
-            " NymID:    ")(m.m_strNymID.get())(" NotaryID: ")(
-            m.m_strNotaryID.get())(" Request#: ")(m.m_strRequestNum.get())(
-            " Asset Type: ")(m.m_strInstrumentDefinitionID.get())
+        LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.command_.get())(
+            " NymID:    ")(m.nym_id_.get())(" NotaryID: ")(m.notary_id_.get())(
+            " Request#: ")(m.request_num_.get())(" Asset Type: ")(
+            m.instrument_definition_id_.get())
             .Flush();
 
         return 1;
@@ -2582,21 +2529,21 @@ class StrategyRegisterAccountResponse final : public OTMessageStrategy
 public:
     void writeXml(Message& m, Tag& parent) final
     {
-        TagPtr pTag(new Tag(m.m_strCommand->Get()));
+        TagPtr pTag(new Tag(m.command_->Get()));
 
-        pTag->add_attribute("success", formatBool(m.m_bSuccess));
-        pTag->add_attribute("requestNum", m.m_strRequestNum->Get());
-        pTag->add_attribute("nymID", m.m_strNymID->Get());
-        pTag->add_attribute("notaryID", m.m_strNotaryID->Get());
-        pTag->add_attribute("nymboxHash", m.m_strNymboxHash->Get());
-        pTag->add_attribute("accountID", m.m_strAcctID->Get());
+        pTag->add_attribute("success", formatBool(m.success_));
+        pTag->add_attribute("requestNum", m.request_num_->Get());
+        pTag->add_attribute("nymID", m.nym_id_->Get());
+        pTag->add_attribute("notaryID", m.notary_id_->Get());
+        pTag->add_attribute("nymboxHash", m.nymbox_hash_->Get());
+        pTag->add_attribute("accountID", m.acct_id_->Get());
 
-        if (m.m_ascInReferenceTo->Exists()) {
-            pTag->add_tag("inReferenceTo", m.m_ascInReferenceTo->Get());
+        if (m.in_reference_to_->Exists()) {
+            pTag->add_tag("inReferenceTo", m.in_reference_to_->Get());
         }
 
-        if (m.m_bSuccess && m.m_ascPayload->Exists()) {
-            pTag->add_tag("newAccount", m.m_ascPayload->Get());
+        if (m.success_ && m.payload_->Exists()) {
+            pTag->add_tag("newAccount", m.payload_->Get());
         }
 
         parent.add_tag(pTag);
@@ -2607,14 +2554,12 @@ public:
     {
         processXmlSuccess(m, xml);
 
-        m.m_strCommand = String::Factory(xml->getNodeName());  // Command
-        m.m_strRequestNum =
-            String::Factory(xml->getAttributeValue("requestNum"));
-        m.m_strNymID = String::Factory(xml->getAttributeValue("nymID"));
-        m.m_strNotaryID = String::Factory(xml->getAttributeValue("notaryID"));
-        m.m_strNymboxHash =
-            String::Factory(xml->getAttributeValue("nymboxHash"));
-        m.m_strAcctID = String::Factory(xml->getAttributeValue("accountID"));
+        m.command_ = String::Factory(xml->getNodeName());  // Command
+        m.request_num_ = String::Factory(xml->getAttributeValue("requestNum"));
+        m.nym_id_ = String::Factory(xml->getAttributeValue("nymID"));
+        m.notary_id_ = String::Factory(xml->getAttributeValue("notaryID"));
+        m.nymbox_hash_ = String::Factory(xml->getAttributeValue("nymboxHash"));
+        m.acct_id_ = String::Factory(xml->getAttributeValue("accountID"));
 
         // If successful, we need to read 2 more things: inReferenceTo and
         // issuerAccount payload.
@@ -2623,27 +2568,27 @@ public:
 
         {
             const char* pElementExpected = "inReferenceTo";
-            Armored& ascTextExpected = m.m_ascInReferenceTo;
+            Armored& ascTextExpected = m.in_reference_to_;
 
             if (!LoadEncodedTextFieldByName(
                     xml, ascTextExpected, pElementExpected)) {
                 LogError()(OT_PRETTY_CLASS())("Error: Expected ")(
                     pElementExpected)(" element with text field, for ")(
-                    m.m_strCommand.get())(".")
+                    m.command_.get())(".")
                     .Flush();
                 //                return (-1); // error condition
             }
         }
 
-        if (m.m_bSuccess) {
+        if (m.success_) {
             const char* pElementExpected = "newAccount";
-            Armored& ascTextExpected = m.m_ascPayload;
+            Armored& ascTextExpected = m.payload_;
 
             if (!LoadEncodedTextFieldByName(
                     xml, ascTextExpected, pElementExpected)) {
                 LogError()(OT_PRETTY_CLASS())("Error: Expected ")(
                     pElementExpected)(" element with text field, for ")(
-                    m.m_strCommand.get())(".")
+                    m.command_.get())(".")
                     .Flush();
                 return (-1);  // error condition
             }
@@ -2653,7 +2598,7 @@ public:
         // If the "command responding to" isn't there,
         // OR if it was successful but the Payload isn't there, then failure.
         //
-        if (m.m_bSuccess && !m.m_ascPayload->GetLength()) {
+        if (m.success_ && !m.payload_->GetLength()) {
             LogError()(OT_PRETTY_CLASS())(
                 "Error: Expected newAccount element with text field, in "
                 "registerAccountResponse reply.")
@@ -2661,13 +2606,12 @@ public:
             return (-1);  // error condition
         }
 
-        LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.m_strCommand.get())(
-            "   ")(m.m_bSuccess ? "SUCCESS" : "FAILURE")(" NymID:    ")(
-            m.m_strNymID.get())(" AccountID: ")(m.m_strAcctID.get())(
-            " NotaryID: ")(m.m_strNotaryID.get())
+        LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.command_.get())("   ")(
+            m.success_ ? "SUCCESS" : "FAILURE")(" NymID:    ")(m.nym_id_.get())(
+            " AccountID: ")(m.acct_id_.get())(" NotaryID: ")(m.notary_id_.get())
             .Flush();
         //    "****New Account****:\n%s\n",
-        //    m.m_ascInReferenceTo.Get(),
+        //    m.in_reference_to_.Get(),
         // acctContents.Get()
 
         return 1;
@@ -2683,20 +2627,20 @@ class StrategyGetBoxReceipt final : public OTMessageStrategy
 public:
     void writeXml(Message& m, Tag& parent) final
     {
-        TagPtr pTag(new Tag(m.m_strCommand->Get()));
+        TagPtr pTag(new Tag(m.command_->Get()));
 
-        pTag->add_attribute("requestNum", m.m_strRequestNum->Get());
-        pTag->add_attribute("nymID", m.m_strNymID->Get());
-        pTag->add_attribute("notaryID", m.m_strNotaryID->Get());
+        pTag->add_attribute("requestNum", m.request_num_->Get());
+        pTag->add_attribute("nymID", m.nym_id_->Get());
+        pTag->add_attribute("notaryID", m.notary_id_->Get());
         // If retrieving box receipt for Nymbox, NymID
         // will appear in this variable.
-        pTag->add_attribute("accountID", m.m_strAcctID->Get());
+        pTag->add_attribute("accountID", m.acct_id_->Get());
         pTag->add_attribute(
             "boxType",  // outbox is 2.
-            (m.m_lDepth == 0) ? "nymbox"
-                              : ((m.m_lDepth == 1) ? "inbox" : "outbox"));
+            (m.depth_ == 0) ? "nymbox"
+                            : ((m.depth_ == 1) ? "inbox" : "outbox"));
         pTag->add_attribute(
-            "transactionNum", std::to_string(m.m_lTransactionNum));
+            "transactionNum", std::to_string(m.transaction_num_));
 
         parent.add_tag(pTag);
     }
@@ -2704,29 +2648,28 @@ public:
     auto processXml(Message& m, irr::io::IrrXMLReader*& xml)
         -> std::int32_t final
     {
-        m.m_strCommand = String::Factory(xml->getNodeName());  // Command
-        m.m_strNymID = String::Factory(xml->getAttributeValue("nymID"));
-        m.m_strNotaryID = String::Factory(xml->getAttributeValue("notaryID"));
-        m.m_strAcctID = String::Factory(xml->getAttributeValue("accountID"));
-        m.m_strRequestNum =
-            String::Factory(xml->getAttributeValue("requestNum"));
+        m.command_ = String::Factory(xml->getNodeName());  // Command
+        m.nym_id_ = String::Factory(xml->getAttributeValue("nymID"));
+        m.notary_id_ = String::Factory(xml->getAttributeValue("notaryID"));
+        m.acct_id_ = String::Factory(xml->getAttributeValue("accountID"));
+        m.request_num_ = String::Factory(xml->getAttributeValue("requestNum"));
 
         auto strTransactionNum =
             String::Factory(xml->getAttributeValue("transactionNum"));
-        m.m_lTransactionNum =
+        m.transaction_num_ =
             strTransactionNum->Exists() ? strTransactionNum->ToLong() : 0;
 
         const auto strBoxType =
             String::Factory(xml->getAttributeValue("boxType"));
 
         if (strBoxType->Compare("nymbox")) {
-            m.m_lDepth = 0;
+            m.depth_ = 0;
         } else if (strBoxType->Compare("inbox")) {
-            m.m_lDepth = 1;
+            m.depth_ = 1;
         } else if (strBoxType->Compare("outbox")) {
-            m.m_lDepth = 2;
+            m.depth_ = 2;
         } else {
-            m.m_lDepth = 0;
+            m.depth_ = 0;
             LogError()(OT_PRETTY_CLASS())(
                 "Error: Expected boxType to be inbox, outbox, or nymbox, in "
                 "getBoxReceipt.")
@@ -2734,13 +2677,13 @@ public:
             return (-1);
         }
 
-        LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.m_strCommand.get())(
-            " NymID:    ")(m.m_strNymID.get())(" AccountID:    ")(
-            m.m_strAcctID.get())(" NotaryID: ")(m.m_strNotaryID.get())(
-            " Request#: ")(m.m_strRequestNum.get())(" Transaction#: ")(
-            m.m_lTransactionNum)(" boxType: ")(((m.m_lDepth == 0)   ? "nymbox"
-                                                : (m.m_lDepth == 1) ? "inbox"
-                                                                    : "outbox"))
+        LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.command_.get())(
+            " NymID:    ")(m.nym_id_.get())(" AccountID:    ")(
+            m.acct_id_.get())(" NotaryID: ")(m.notary_id_.get())(" Request#: ")(
+            m.request_num_.get())(" Transaction#: ")(m.transaction_num_)(
+            " boxType: ")(((m.depth_ == 0)   ? "nymbox"
+                           : (m.depth_ == 1) ? "inbox"
+                                             : "outbox"))
             .Flush();  // outbox is 2.);
 
         return 1;
@@ -2756,27 +2699,27 @@ class StrategyGetBoxReceiptResponse final : public OTMessageStrategy
 public:
     void writeXml(Message& m, Tag& parent) final
     {
-        TagPtr pTag(new Tag(m.m_strCommand->Get()));
+        TagPtr pTag(new Tag(m.command_->Get()));
 
-        pTag->add_attribute("success", formatBool(m.m_bSuccess));
-        pTag->add_attribute("requestNum", m.m_strRequestNum->Get());
-        pTag->add_attribute("nymID", m.m_strNymID->Get());
-        pTag->add_attribute("notaryID", m.m_strNotaryID->Get());
-        pTag->add_attribute("nymboxHash", m.m_strNymboxHash->Get());
-        pTag->add_attribute("accountID", m.m_strAcctID->Get());
+        pTag->add_attribute("success", formatBool(m.success_));
+        pTag->add_attribute("requestNum", m.request_num_->Get());
+        pTag->add_attribute("nymID", m.nym_id_->Get());
+        pTag->add_attribute("notaryID", m.notary_id_->Get());
+        pTag->add_attribute("nymboxHash", m.nymbox_hash_->Get());
+        pTag->add_attribute("accountID", m.acct_id_->Get());
         pTag->add_attribute(
             "boxType",  // outbox is 2.
-            (m.m_lDepth == 0) ? "nymbox"
-                              : ((m.m_lDepth == 1) ? "inbox" : "outbox"));
+            (m.depth_ == 0) ? "nymbox"
+                            : ((m.depth_ == 1) ? "inbox" : "outbox"));
         pTag->add_attribute(
-            "transactionNum", std::to_string(m.m_lTransactionNum));
+            "transactionNum", std::to_string(m.transaction_num_));
 
-        if (m.m_ascInReferenceTo->GetLength()) {
-            pTag->add_tag("inReferenceTo", m.m_ascInReferenceTo->Get());
+        if (m.in_reference_to_->GetLength()) {
+            pTag->add_tag("inReferenceTo", m.in_reference_to_->Get());
         }
 
-        if (m.m_bSuccess && m.m_ascPayload->GetLength()) {
-            pTag->add_tag("boxReceipt", m.m_ascPayload->Get());
+        if (m.success_ && m.payload_->GetLength()) {
+            pTag->add_tag("boxReceipt", m.payload_->Get());
         }
 
         parent.add_tag(pTag);
@@ -2787,31 +2730,29 @@ public:
     {
         processXmlSuccess(m, xml);
 
-        m.m_strCommand = String::Factory(xml->getNodeName());  // Command
-        m.m_strRequestNum =
-            String::Factory(xml->getAttributeValue("requestNum"));
-        m.m_strNymID = String::Factory(xml->getAttributeValue("nymID"));
-        m.m_strNotaryID = String::Factory(xml->getAttributeValue("notaryID"));
-        m.m_strNymboxHash =
-            String::Factory(xml->getAttributeValue("nymboxHash"));
-        m.m_strAcctID = String::Factory(xml->getAttributeValue("accountID"));
+        m.command_ = String::Factory(xml->getNodeName());  // Command
+        m.request_num_ = String::Factory(xml->getAttributeValue("requestNum"));
+        m.nym_id_ = String::Factory(xml->getAttributeValue("nymID"));
+        m.notary_id_ = String::Factory(xml->getAttributeValue("notaryID"));
+        m.nymbox_hash_ = String::Factory(xml->getAttributeValue("nymboxHash"));
+        m.acct_id_ = String::Factory(xml->getAttributeValue("accountID"));
 
         auto strTransactionNum =
             String::Factory(xml->getAttributeValue("transactionNum"));
-        m.m_lTransactionNum =
+        m.transaction_num_ =
             strTransactionNum->Exists() ? strTransactionNum->ToLong() : 0;
 
         const auto strBoxType =
             String::Factory(xml->getAttributeValue("boxType"));
 
         if (strBoxType->Compare("nymbox")) {
-            m.m_lDepth = 0;
+            m.depth_ = 0;
         } else if (strBoxType->Compare("inbox")) {
-            m.m_lDepth = 1;
+            m.depth_ = 1;
         } else if (strBoxType->Compare("outbox")) {
-            m.m_lDepth = 2;
+            m.depth_ = 2;
         } else {
-            m.m_lDepth = 0;
+            m.depth_ = 0;
             LogError()(OT_PRETTY_CLASS())(
                 "Error: Expected boxType to be inbox, outbox, or nymbox, in "
                 "getBoxReceiptResponse reply.")
@@ -2824,27 +2765,27 @@ public:
 
         {
             const char* pElementExpected = "inReferenceTo";
-            Armored& ascTextExpected = m.m_ascInReferenceTo;
+            Armored& ascTextExpected = m.in_reference_to_;
 
             if (!LoadEncodedTextFieldByName(
                     xml, ascTextExpected, pElementExpected)) {
                 LogError()(OT_PRETTY_CLASS())("Error: Expected ")(
                     pElementExpected)(" element with text field, for ")(
-                    m.m_strCommand.get())(".")
+                    m.command_.get())(".")
                     .Flush();
                 return (-1);  // error condition
             }
         }
 
-        if (m.m_bSuccess) {
+        if (m.success_) {
             const char* pElementExpected = "boxReceipt";
-            Armored& ascTextExpected = m.m_ascPayload;
+            Armored& ascTextExpected = m.payload_;
 
             if (!LoadEncodedTextFieldByName(
                     xml, ascTextExpected, pElementExpected)) {
                 LogError()(OT_PRETTY_CLASS())("Error: Expected ")(
                     pElementExpected)(" element with text field, for ")(
-                    m.m_strCommand.get())(".")
+                    m.command_.get())(".")
                     .Flush();
                 return (-1);  // error condition
             }
@@ -2853,8 +2794,8 @@ public:
         // Did we find everything we were looking for?
         // If the "command responding to" isn't there,
         // OR if it was successful but the Payload isn't there, then failure.
-        if (!m.m_ascInReferenceTo->GetLength() ||
-            (m.m_bSuccess && !m.m_ascPayload->GetLength())) {
+        if (!m.in_reference_to_->GetLength() ||
+            (m.success_ && !m.payload_->GetLength())) {
             LogError()(OT_PRETTY_CLASS())(
                 "Error: Expected boxReceipt and/or inReferenceTo elements "
                 "with text fields in getBoxReceiptResponse reply.")
@@ -2862,10 +2803,9 @@ public:
             return (-1);  // error condition
         }
 
-        LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.m_strCommand.get())(
-            "   ")(m.m_bSuccess ? "SUCCESS" : "FAILURE")(" NymID:    ")(
-            m.m_strNymID.get())(" AccountID: ")(m.m_strAcctID.get())(
-            " NotaryID: ")(m.m_strNotaryID.get())
+        LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.command_.get())("   ")(
+            m.success_ ? "SUCCESS" : "FAILURE")(" NymID:    ")(m.nym_id_.get())(
+            " AccountID: ")(m.acct_id_.get())(" NotaryID: ")(m.notary_id_.get())
             .Flush();
         //    "****New Account****:\n%s\n",
 
@@ -2882,12 +2822,12 @@ class StrategyUnregisterAccount final : public OTMessageStrategy
 public:
     void writeXml(Message& m, Tag& parent) final
     {
-        TagPtr pTag(new Tag(m.m_strCommand->Get()));
+        TagPtr pTag(new Tag(m.command_->Get()));
 
-        pTag->add_attribute("requestNum", m.m_strRequestNum->Get());
-        pTag->add_attribute("nymID", m.m_strNymID->Get());
-        pTag->add_attribute("notaryID", m.m_strNotaryID->Get());
-        pTag->add_attribute("accountID", m.m_strAcctID->Get());
+        pTag->add_attribute("requestNum", m.request_num_->Get());
+        pTag->add_attribute("nymID", m.nym_id_->Get());
+        pTag->add_attribute("notaryID", m.notary_id_->Get());
+        pTag->add_attribute("accountID", m.acct_id_->Get());
 
         parent.add_tag(pTag);
     }
@@ -2895,17 +2835,16 @@ public:
     auto processXml(Message& m, irr::io::IrrXMLReader*& xml)
         -> std::int32_t final
     {
-        m.m_strCommand = String::Factory(xml->getNodeName());  // Command
-        m.m_strNymID = String::Factory(xml->getAttributeValue("nymID"));
-        m.m_strNotaryID = String::Factory(xml->getAttributeValue("notaryID"));
-        m.m_strAcctID = String::Factory(xml->getAttributeValue("accountID"));
-        m.m_strRequestNum =
-            String::Factory(xml->getAttributeValue("requestNum"));
+        m.command_ = String::Factory(xml->getNodeName());  // Command
+        m.nym_id_ = String::Factory(xml->getAttributeValue("nymID"));
+        m.notary_id_ = String::Factory(xml->getAttributeValue("notaryID"));
+        m.acct_id_ = String::Factory(xml->getAttributeValue("accountID"));
+        m.request_num_ = String::Factory(xml->getAttributeValue("requestNum"));
 
-        LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.m_strCommand.get())(
-            " NymID:    ")(m.m_strNymID.get())(" AccountID:    ")(
-            m.m_strAcctID.get())(" NotaryID: ")(m.m_strNotaryID.get())(
-            " Request#: ")(m.m_strRequestNum.get())
+        LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.command_.get())(
+            " NymID:    ")(m.nym_id_.get())(" AccountID:    ")(
+            m.acct_id_.get())(" NotaryID: ")(m.notary_id_.get())(" Request#: ")(
+            m.request_num_.get())
             .Flush();
 
         return 1;
@@ -2921,16 +2860,16 @@ class StrategyUnregisterAccountResponse final : public OTMessageStrategy
 public:
     void writeXml(Message& m, Tag& parent) final
     {
-        TagPtr pTag(new Tag(m.m_strCommand->Get()));
+        TagPtr pTag(new Tag(m.command_->Get()));
 
-        pTag->add_attribute("success", formatBool(m.m_bSuccess));
-        pTag->add_attribute("requestNum", m.m_strRequestNum->Get());
-        pTag->add_attribute("nymID", m.m_strNymID->Get());
-        pTag->add_attribute("notaryID", m.m_strNotaryID->Get());
-        pTag->add_attribute("accountID", m.m_strAcctID->Get());
+        pTag->add_attribute("success", formatBool(m.success_));
+        pTag->add_attribute("requestNum", m.request_num_->Get());
+        pTag->add_attribute("nymID", m.nym_id_->Get());
+        pTag->add_attribute("notaryID", m.notary_id_->Get());
+        pTag->add_attribute("accountID", m.acct_id_->Get());
 
-        if (m.m_ascInReferenceTo->GetLength()) {
-            pTag->add_tag("inReferenceTo", m.m_ascInReferenceTo->Get());
+        if (m.in_reference_to_->GetLength()) {
+            pTag->add_tag("inReferenceTo", m.in_reference_to_->Get());
         }
 
         parent.add_tag(pTag);
@@ -2941,25 +2880,24 @@ public:
     {
         processXmlSuccess(m, xml);
 
-        m.m_strCommand = String::Factory(xml->getNodeName());  // Command
-        m.m_strRequestNum =
-            String::Factory(xml->getAttributeValue("requestNum"));
-        m.m_strNymID = String::Factory(xml->getAttributeValue("nymID"));
-        m.m_strNotaryID = String::Factory(xml->getAttributeValue("notaryID"));
-        m.m_strAcctID = String::Factory(xml->getAttributeValue("accountID"));
+        m.command_ = String::Factory(xml->getNodeName());  // Command
+        m.request_num_ = String::Factory(xml->getAttributeValue("requestNum"));
+        m.nym_id_ = String::Factory(xml->getAttributeValue("nymID"));
+        m.notary_id_ = String::Factory(xml->getAttributeValue("notaryID"));
+        m.acct_id_ = String::Factory(xml->getAttributeValue("accountID"));
 
         // inReferenceTo contains the unregisterAccount (original request)
         // At this point, we do not send the REASON WHY if it failed.
 
         {
             const char* pElementExpected = "inReferenceTo";
-            Armored& ascTextExpected = m.m_ascInReferenceTo;
+            Armored& ascTextExpected = m.in_reference_to_;
 
             if (!LoadEncodedTextFieldByName(
                     xml, ascTextExpected, pElementExpected)) {
                 LogError()(OT_PRETTY_CLASS())("Error: Expected ")(
                     pElementExpected)(" element with text field, for ")(
-                    m.m_strCommand.get())(".")
+                    m.command_.get())(".")
                     .Flush();
                 return (-1);  // error condition
             }
@@ -2967,7 +2905,7 @@ public:
 
         // Did we find everything we were looking for?
         // If the "command responding to" isn't there, then failure.
-        if (!m.m_ascInReferenceTo->GetLength()) {
+        if (!m.in_reference_to_->GetLength()) {
             LogError()(OT_PRETTY_CLASS())(
                 "Error: Expected inReferenceTo element with text fields in "
                 "unregisterAccountResponse reply.")
@@ -2975,13 +2913,12 @@ public:
             return (-1);  // error condition
         }
 
-        LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.m_strCommand.get())(
-            "   ")(m.m_bSuccess ? "SUCCESS" : "FAILURE")(" NymID:    ")(
-            m.m_strNymID.get())(" AccountID: ")(m.m_strAcctID.get())(
-            " NotaryID: ")(m.m_strNotaryID.get())
+        LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.command_.get())("   ")(
+            m.success_ ? "SUCCESS" : "FAILURE")(" NymID:    ")(m.nym_id_.get())(
+            " AccountID: ")(m.acct_id_.get())(" NotaryID: ")(m.notary_id_.get())
             .Flush();
         //    "****New Account****:\n%s\n",
-        //    m.m_ascInReferenceTo.Get(),
+        //    m.in_reference_to_.Get(),
         // acctContents.Get()
 
         return 1;
@@ -2997,16 +2934,16 @@ class StrategyNotarizeTransaction final : public OTMessageStrategy
 public:
     void writeXml(Message& m, Tag& parent) final
     {
-        TagPtr pTag(new Tag(m.m_strCommand->Get()));
+        TagPtr pTag(new Tag(m.command_->Get()));
 
-        pTag->add_attribute("requestNum", m.m_strRequestNum->Get());
-        pTag->add_attribute("nymID", m.m_strNymID->Get());
-        pTag->add_attribute("notaryID", m.m_strNotaryID->Get());
-        pTag->add_attribute("nymboxHash", m.m_strNymboxHash->Get());
-        pTag->add_attribute("accountID", m.m_strAcctID->Get());
+        pTag->add_attribute("requestNum", m.request_num_->Get());
+        pTag->add_attribute("nymID", m.nym_id_->Get());
+        pTag->add_attribute("notaryID", m.notary_id_->Get());
+        pTag->add_attribute("nymboxHash", m.nymbox_hash_->Get());
+        pTag->add_attribute("accountID", m.acct_id_->Get());
 
-        if (m.m_ascPayload->GetLength()) {
-            pTag->add_tag("accountLedger", m.m_ascPayload->Get());
+        if (m.payload_->GetLength()) {
+            pTag->add_tag("accountLedger", m.payload_->Get());
         }
 
         parent.add_tag(pTag);
@@ -3015,33 +2952,31 @@ public:
     auto processXml(Message& m, irr::io::IrrXMLReader*& xml)
         -> std::int32_t final
     {
-        m.m_strCommand = String::Factory(xml->getNodeName());  // Command
-        m.m_strNymID = String::Factory(xml->getAttributeValue("nymID"));
-        m.m_strNymboxHash =
-            String::Factory(xml->getAttributeValue("nymboxHash"));
-        m.m_strNotaryID = String::Factory(xml->getAttributeValue("notaryID"));
-        m.m_strAcctID = String::Factory(xml->getAttributeValue("accountID"));
-        m.m_strRequestNum =
-            String::Factory(xml->getAttributeValue("requestNum"));
+        m.command_ = String::Factory(xml->getNodeName());  // Command
+        m.nym_id_ = String::Factory(xml->getAttributeValue("nymID"));
+        m.nymbox_hash_ = String::Factory(xml->getAttributeValue("nymboxHash"));
+        m.notary_id_ = String::Factory(xml->getAttributeValue("notaryID"));
+        m.acct_id_ = String::Factory(xml->getAttributeValue("accountID"));
+        m.request_num_ = String::Factory(xml->getAttributeValue("requestNum"));
 
         {
             const char* pElementExpected = "accountLedger";
-            Armored& ascTextExpected = m.m_ascPayload;
+            Armored& ascTextExpected = m.payload_;
 
             if (!LoadEncodedTextFieldByName(
                     xml, ascTextExpected, pElementExpected)) {
                 LogError()(OT_PRETTY_CLASS())("Error: Expected ")(
                     pElementExpected)(" element with text field, for ")(
-                    m.m_strCommand.get())(".")
+                    m.command_.get())(".")
                     .Flush();
                 return (-1);  // error condition
             }
         }
 
-        LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.m_strCommand.get())(
-            " NymID:    ")(m.m_strNymID.get())(" AccountID:    ")(
-            m.m_strAcctID.get())(" NotaryID: ")(m.m_strNotaryID.get())(
-            " Request#: ")(m.m_strRequestNum.get())
+        LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.command_.get())(
+            " NymID:    ")(m.nym_id_.get())(" AccountID:    ")(
+            m.acct_id_.get())(" NotaryID: ")(m.notary_id_.get())(" Request#: ")(
+            m.request_num_.get())
             .Flush();
 
         return 1;
@@ -3057,20 +2992,20 @@ class StrategyNotarizeTransactionResponse final : public OTMessageStrategy
 public:
     void writeXml(Message& m, Tag& parent) final
     {
-        TagPtr pTag(new Tag(m.m_strCommand->Get()));
+        TagPtr pTag(new Tag(m.command_->Get()));
 
-        pTag->add_attribute("success", formatBool(m.m_bSuccess));
-        pTag->add_attribute("requestNum", m.m_strRequestNum->Get());
-        pTag->add_attribute("nymID", m.m_strNymID->Get());
-        pTag->add_attribute("notaryID", m.m_strNotaryID->Get());
-        pTag->add_attribute("nymboxHash", m.m_strNymboxHash->Get());
-        pTag->add_attribute("accountID", m.m_strAcctID->Get());
+        pTag->add_attribute("success", formatBool(m.success_));
+        pTag->add_attribute("requestNum", m.request_num_->Get());
+        pTag->add_attribute("nymID", m.nym_id_->Get());
+        pTag->add_attribute("notaryID", m.notary_id_->Get());
+        pTag->add_attribute("nymboxHash", m.nymbox_hash_->Get());
+        pTag->add_attribute("accountID", m.acct_id_->Get());
 
-        if (m.m_ascInReferenceTo->GetLength()) {
-            pTag->add_tag("inReferenceTo", m.m_ascInReferenceTo->Get());
+        if (m.in_reference_to_->GetLength()) {
+            pTag->add_tag("inReferenceTo", m.in_reference_to_->Get());
         }
-        if (m.m_bSuccess && m.m_ascPayload->GetLength()) {
-            pTag->add_tag("responseLedger", m.m_ascPayload->Get());
+        if (m.success_ && m.payload_->GetLength()) {
+            pTag->add_tag("responseLedger", m.payload_->Get());
         }
 
         parent.add_tag(pTag);
@@ -3081,41 +3016,39 @@ public:
     {
         processXmlSuccess(m, xml);
 
-        m.m_strCommand = String::Factory(xml->getNodeName());  // Command
-        m.m_strRequestNum =
-            String::Factory(xml->getAttributeValue("requestNum"));
-        m.m_strNymID = String::Factory(xml->getAttributeValue("nymID"));
-        m.m_strNotaryID = String::Factory(xml->getAttributeValue("notaryID"));
-        m.m_strNymboxHash =
-            String::Factory(xml->getAttributeValue("nymboxHash"));
-        m.m_strAcctID = String::Factory(xml->getAttributeValue("accountID"));
+        m.command_ = String::Factory(xml->getNodeName());  // Command
+        m.request_num_ = String::Factory(xml->getAttributeValue("requestNum"));
+        m.nym_id_ = String::Factory(xml->getAttributeValue("nymID"));
+        m.notary_id_ = String::Factory(xml->getAttributeValue("notaryID"));
+        m.nymbox_hash_ = String::Factory(xml->getAttributeValue("nymboxHash"));
+        m.acct_id_ = String::Factory(xml->getAttributeValue("accountID"));
 
         // If successful or failure, we need to read 2 more things:
         // inReferenceTo and the responseLedger payload.
         // At this point, we do not send the REASON WHY if it failed.
         {
             const char* pElementExpected = "inReferenceTo";
-            Armored& ascTextExpected = m.m_ascInReferenceTo;
+            Armored& ascTextExpected = m.in_reference_to_;
 
             if (!LoadEncodedTextFieldByName(
                     xml, ascTextExpected, pElementExpected)) {
                 LogError()(OT_PRETTY_CLASS())("Error: Expected ")(
                     pElementExpected)(" element with text field, for ")(
-                    m.m_strCommand.get())(".")
+                    m.command_.get())(".")
                     .Flush();
                 return (-1);  // error condition
             }
         }
-        if (m.m_bSuccess) {  // Successful message (should contain
-                             // responseLedger).
+        if (m.success_) {  // Successful message (should contain
+                           // responseLedger).
             const char* pElementExpected = "responseLedger";
-            Armored& ascTextExpected = m.m_ascPayload;
+            Armored& ascTextExpected = m.payload_;
 
             if (!LoadEncodedTextFieldByName(
                     xml, ascTextExpected, pElementExpected)) {
                 LogError()(OT_PRETTY_CLASS())("Error: Expected ")(
                     pElementExpected)(" element with text field, for ")(
-                    m.m_strCommand.get())(".")
+                    m.command_.get())(".")
                     .Flush();
                 return (-1);  // error condition
             }
@@ -3124,8 +3057,8 @@ public:
         // Did we find everything we were looking for?
         // If the "command responding to" isn't there, or the Payload isn't
         // there, then failure.
-        if (!m.m_ascInReferenceTo->GetLength() ||
-            (!m.m_ascPayload->GetLength() && m.m_bSuccess)) {
+        if (!m.in_reference_to_->GetLength() ||
+            (!m.payload_->GetLength() && m.success_)) {
             LogError()(OT_PRETTY_CLASS())(
                 "Error: Expected responseLedger and/or inReferenceTo "
                 "elements "
@@ -3135,14 +3068,13 @@ public:
             return (-1);  // error condition
         }
 
-        //      OTString acctContents(m.m_ascPayload);
-        LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.m_strCommand.get())(
-            "   ")(m.m_bSuccess ? "SUCCESS" : "FAILURE")(" NymID:    ")(
-            m.m_strNymID.get())(" AccountID: ")(m.m_strAcctID.get())(
-            " NotaryID: ")(m.m_strNotaryID.get())
+        //      OTString acctContents(m.payload_);
+        LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.command_.get())("   ")(
+            m.success_ ? "SUCCESS" : "FAILURE")(" NymID:    ")(m.nym_id_.get())(
+            " AccountID: ")(m.acct_id_.get())(" NotaryID: ")(m.notary_id_.get())
             .Flush();
         //    "****New Account****:\n%s\n",
-        //    m.m_ascInReferenceTo.Get(),
+        //    m.in_reference_to_.Get(),
         // acctContents.Get()
 
         return 1;
@@ -3158,12 +3090,12 @@ class StrategyGetTransactionNumbers final : public OTMessageStrategy
 public:
     void writeXml(Message& m, Tag& parent) final
     {
-        TagPtr pTag(new Tag(m.m_strCommand->Get()));
+        TagPtr pTag(new Tag(m.command_->Get()));
 
-        pTag->add_attribute("requestNum", m.m_strRequestNum->Get());
-        pTag->add_attribute("nymID", m.m_strNymID->Get());
-        pTag->add_attribute("notaryID", m.m_strNotaryID->Get());
-        pTag->add_attribute("nymboxHash", m.m_strNymboxHash->Get());
+        pTag->add_attribute("requestNum", m.request_num_->Get());
+        pTag->add_attribute("nymID", m.nym_id_->Get());
+        pTag->add_attribute("notaryID", m.notary_id_->Get());
+        pTag->add_attribute("nymboxHash", m.nymbox_hash_->Get());
 
         parent.add_tag(pTag);
     }
@@ -3171,17 +3103,15 @@ public:
     auto processXml(Message& m, irr::io::IrrXMLReader*& xml)
         -> std::int32_t final
     {
-        m.m_strCommand = String::Factory(xml->getNodeName());  // Command
-        m.m_strNymID = String::Factory(xml->getAttributeValue("nymID"));
-        m.m_strNymboxHash =
-            String::Factory(xml->getAttributeValue("nymboxHash"));
-        m.m_strNotaryID = String::Factory(xml->getAttributeValue("notaryID"));
-        m.m_strRequestNum =
-            String::Factory(xml->getAttributeValue("requestNum"));
+        m.command_ = String::Factory(xml->getNodeName());  // Command
+        m.nym_id_ = String::Factory(xml->getAttributeValue("nymID"));
+        m.nymbox_hash_ = String::Factory(xml->getAttributeValue("nymboxHash"));
+        m.notary_id_ = String::Factory(xml->getAttributeValue("notaryID"));
+        m.request_num_ = String::Factory(xml->getAttributeValue("requestNum"));
 
-        LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.m_strCommand.get())(
-            " NymID:    ")(m.m_strNymID.get())(" NotaryID: ")(
-            m.m_strNotaryID.get())(" Request#: ")(m.m_strRequestNum.get())
+        LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.command_.get())(
+            " NymID:    ")(m.nym_id_.get())(" NotaryID: ")(m.notary_id_.get())(
+            " Request#: ")(m.request_num_.get())
             .Flush();
 
         return 1;
@@ -3197,13 +3127,13 @@ class StrategyGetTransactionNumbersResponse final : public OTMessageStrategy
 public:
     void writeXml(Message& m, Tag& parent) final
     {
-        TagPtr pTag(new Tag(m.m_strCommand->Get()));
+        TagPtr pTag(new Tag(m.command_->Get()));
 
-        pTag->add_attribute("success", formatBool(m.m_bSuccess));
-        pTag->add_attribute("requestNum", m.m_strRequestNum->Get());
-        pTag->add_attribute("nymID", m.m_strNymID->Get());
-        pTag->add_attribute("notaryID", m.m_strNotaryID->Get());
-        pTag->add_attribute("nymboxHash", m.m_strNymboxHash->Get());
+        pTag->add_attribute("success", formatBool(m.success_));
+        pTag->add_attribute("requestNum", m.request_num_->Get());
+        pTag->add_attribute("nymID", m.nym_id_->Get());
+        pTag->add_attribute("notaryID", m.notary_id_->Get());
+        pTag->add_attribute("nymboxHash", m.nymbox_hash_->Get());
 
         parent.add_tag(pTag);
     }
@@ -3213,17 +3143,15 @@ public:
     {
         processXmlSuccess(m, xml);
 
-        m.m_strCommand = String::Factory(xml->getNodeName());  // Command
-        m.m_strRequestNum =
-            String::Factory(xml->getAttributeValue("requestNum"));
-        m.m_strNymID = String::Factory(xml->getAttributeValue("nymID"));
-        m.m_strNymboxHash =
-            String::Factory(xml->getAttributeValue("nymboxHash"));
-        m.m_strNotaryID = String::Factory(xml->getAttributeValue("notaryID"));
+        m.command_ = String::Factory(xml->getNodeName());  // Command
+        m.request_num_ = String::Factory(xml->getAttributeValue("requestNum"));
+        m.nym_id_ = String::Factory(xml->getAttributeValue("nymID"));
+        m.nymbox_hash_ = String::Factory(xml->getAttributeValue("nymboxHash"));
+        m.notary_id_ = String::Factory(xml->getAttributeValue("notaryID"));
 
-        LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.m_strCommand.get())(
-            "   ")(m.m_bSuccess ? "SUCCESS" : "FAILURE")(" NymID:    ")(
-            m.m_strNymID.get())(" NotaryID: ")(m.m_strNotaryID.get())
+        LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.command_.get())("   ")(
+            m.success_ ? "SUCCESS" : "FAILURE")(" NymID:    ")(m.nym_id_.get())(
+            " NotaryID: ")(m.notary_id_.get())
             .Flush();
 
         return 1;
@@ -3239,12 +3167,12 @@ class StrategyGetNymbox final : public OTMessageStrategy
 public:
     void writeXml(Message& m, Tag& parent) final
     {
-        TagPtr pTag(new Tag(m.m_strCommand->Get()));
+        TagPtr pTag(new Tag(m.command_->Get()));
 
-        pTag->add_attribute("requestNum", m.m_strRequestNum->Get());
-        pTag->add_attribute("nymID", m.m_strNymID->Get());
-        pTag->add_attribute("notaryID", m.m_strNotaryID->Get());
-        pTag->add_attribute("nymboxHash", m.m_strNymboxHash->Get());
+        pTag->add_attribute("requestNum", m.request_num_->Get());
+        pTag->add_attribute("nymID", m.nym_id_->Get());
+        pTag->add_attribute("notaryID", m.notary_id_->Get());
+        pTag->add_attribute("nymboxHash", m.nymbox_hash_->Get());
 
         parent.add_tag(pTag);
     }
@@ -3252,17 +3180,15 @@ public:
     auto processXml(Message& m, irr::io::IrrXMLReader*& xml)
         -> std::int32_t final
     {
-        m.m_strCommand = String::Factory(xml->getNodeName());  // Command
-        m.m_strNymID = String::Factory(xml->getAttributeValue("nymID"));
-        m.m_strNotaryID = String::Factory(xml->getAttributeValue("notaryID"));
-        m.m_strRequestNum =
-            String::Factory(xml->getAttributeValue("requestNum"));
-        m.m_strNymboxHash =
-            String::Factory(xml->getAttributeValue("nymboxHash"));
+        m.command_ = String::Factory(xml->getNodeName());  // Command
+        m.nym_id_ = String::Factory(xml->getAttributeValue("nymID"));
+        m.notary_id_ = String::Factory(xml->getAttributeValue("notaryID"));
+        m.request_num_ = String::Factory(xml->getAttributeValue("requestNum"));
+        m.nymbox_hash_ = String::Factory(xml->getAttributeValue("nymboxHash"));
 
-        LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.m_strCommand.get())(
-            " NymID:    ")(m.m_strNymID.get())(" NotaryID: ")(
-            m.m_strNotaryID.get())(" Request #: ")(m.m_strRequestNum.get())
+        LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.command_.get())(
+            " NymID:    ")(m.nym_id_.get())(" NotaryID: ")(m.notary_id_.get())(
+            " Request #: ")(m.request_num_.get())
             .Flush();
 
         return 1;
@@ -3276,20 +3202,20 @@ class StrategyGetNymboxResponse final : public OTMessageStrategy
 public:
     void writeXml(Message& m, Tag& parent) final
     {
-        TagPtr pTag(new Tag(m.m_strCommand->Get()));
+        TagPtr pTag(new Tag(m.command_->Get()));
 
-        pTag->add_attribute("success", formatBool(m.m_bSuccess));
-        pTag->add_attribute("requestNum", m.m_strRequestNum->Get());
-        pTag->add_attribute("nymID", m.m_strNymID->Get());
-        pTag->add_attribute("notaryID", m.m_strNotaryID->Get());
-        pTag->add_attribute("nymboxHash", m.m_strNymboxHash->Get());
+        pTag->add_attribute("success", formatBool(m.success_));
+        pTag->add_attribute("requestNum", m.request_num_->Get());
+        pTag->add_attribute("nymID", m.nym_id_->Get());
+        pTag->add_attribute("notaryID", m.notary_id_->Get());
+        pTag->add_attribute("nymboxHash", m.nymbox_hash_->Get());
 
-        if (m.m_ascInReferenceTo->GetLength()) {
-            pTag->add_tag("inReferenceTo", m.m_ascInReferenceTo->Get());
+        if (m.in_reference_to_->GetLength()) {
+            pTag->add_tag("inReferenceTo", m.in_reference_to_->Get());
         }
 
-        if (m.m_bSuccess && m.m_ascPayload->GetLength()) {
-            pTag->add_tag("nymboxLedger", m.m_ascPayload->Get());
+        if (m.success_ && m.payload_->GetLength()) {
+            pTag->add_tag("nymboxLedger", m.payload_->Get());
         }
 
         parent.add_tag(pTag);
@@ -3300,16 +3226,14 @@ public:
     {
         processXmlSuccess(m, xml);
 
-        m.m_strCommand = String::Factory(xml->getNodeName());  // Command
-        m.m_strRequestNum =
-            String::Factory(xml->getAttributeValue("requestNum"));
-        m.m_strNymID = String::Factory(xml->getAttributeValue("nymID"));
-        m.m_strNymboxHash =
-            String::Factory(xml->getAttributeValue("nymboxHash"));
-        m.m_strNotaryID = String::Factory(xml->getAttributeValue("notaryID"));
+        m.command_ = String::Factory(xml->getNodeName());  // Command
+        m.request_num_ = String::Factory(xml->getAttributeValue("requestNum"));
+        m.nym_id_ = String::Factory(xml->getAttributeValue("nymID"));
+        m.nymbox_hash_ = String::Factory(xml->getAttributeValue("nymboxHash"));
+        m.notary_id_ = String::Factory(xml->getAttributeValue("notaryID"));
 
         const char* pElementExpected;
-        if (m.m_bSuccess) {
+        if (m.success_) {
             pElementExpected = "nymboxLedger";
         } else {
             pElementExpected = "inReferenceTo";
@@ -3321,20 +3245,20 @@ public:
                 xml, ascTextExpected, pElementExpected)) {
             LogError()(OT_PRETTY_CLASS())("Error: Expected ")(
                 pElementExpected)(" element with text field, for ")(
-                m.m_strCommand.get())(".")
+                m.command_.get())(".")
                 .Flush();
             return (-1);  // error condition
         }
 
-        if (m.m_bSuccess) {
-            m.m_ascPayload = ascTextExpected;
+        if (m.success_) {
+            m.payload_ = ascTextExpected;
         } else {
-            m.m_ascInReferenceTo = ascTextExpected;
+            m.in_reference_to_ = ascTextExpected;
         }
 
-        LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.m_strCommand.get())(
-            "   ")(m.m_bSuccess ? "SUCCESS" : "FAILURE")(" NymID:    ")(
-            m.m_strNymID.get())(" NotaryID: ")(m.m_strNotaryID.get())
+        LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.command_.get())("   ")(
+            m.success_ ? "SUCCESS" : "FAILURE")(" NymID:    ")(m.nym_id_.get())(
+            " NotaryID: ")(m.notary_id_.get())
             .Flush();
 
         return 1;
@@ -3350,12 +3274,12 @@ class StrategyGetAccountData final : public OTMessageStrategy
 public:
     void writeXml(Message& m, Tag& parent) final
     {
-        TagPtr pTag(new Tag(m.m_strCommand->Get()));
+        TagPtr pTag(new Tag(m.command_->Get()));
 
-        pTag->add_attribute("requestNum", m.m_strRequestNum->Get());
-        pTag->add_attribute("nymID", m.m_strNymID->Get());
-        pTag->add_attribute("notaryID", m.m_strNotaryID->Get());
-        pTag->add_attribute("accountID", m.m_strAcctID->Get());
+        pTag->add_attribute("requestNum", m.request_num_->Get());
+        pTag->add_attribute("nymID", m.nym_id_->Get());
+        pTag->add_attribute("notaryID", m.notary_id_->Get());
+        pTag->add_attribute("accountID", m.acct_id_->Get());
 
         parent.add_tag(pTag);
     }
@@ -3363,17 +3287,16 @@ public:
     auto processXml(Message& m, irr::io::IrrXMLReader*& xml)
         -> std::int32_t final
     {
-        m.m_strCommand = String::Factory(xml->getNodeName());  // Command
-        m.m_strNymID = String::Factory(xml->getAttributeValue("nymID"));
-        m.m_strNotaryID = String::Factory(xml->getAttributeValue("notaryID"));
-        m.m_strAcctID = String::Factory(xml->getAttributeValue("accountID"));
-        m.m_strRequestNum =
-            String::Factory(xml->getAttributeValue("requestNum"));
+        m.command_ = String::Factory(xml->getNodeName());  // Command
+        m.nym_id_ = String::Factory(xml->getAttributeValue("nymID"));
+        m.notary_id_ = String::Factory(xml->getAttributeValue("notaryID"));
+        m.acct_id_ = String::Factory(xml->getAttributeValue("accountID"));
+        m.request_num_ = String::Factory(xml->getAttributeValue("requestNum"));
 
-        LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.m_strCommand.get())(
-            " NymID:    ")(m.m_strNymID.get())(" NotaryID: ")(
-            m.m_strNotaryID.get())(" AccountID:    ")(m.m_strAcctID.get())(
-            " Request #: ")(m.m_strRequestNum.get())
+        LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.command_.get())(
+            " NymID:    ")(m.nym_id_.get())(" NotaryID: ")(m.notary_id_.get())(
+            " AccountID:    ")(m.acct_id_.get())(" Request #: ")(
+            m.request_num_.get())
             .Flush();
 
         return 1;
@@ -3389,29 +3312,29 @@ class StrategyGetAccountDataResponse final : public OTMessageStrategy
 public:
     void writeXml(Message& m, Tag& parent) final
     {
-        TagPtr pTag(new Tag(m.m_strCommand->Get()));
+        TagPtr pTag(new Tag(m.command_->Get()));
 
-        pTag->add_attribute("success", formatBool(m.m_bSuccess));
-        pTag->add_attribute("requestNum", m.m_strRequestNum->Get());
-        pTag->add_attribute("nymID", m.m_strNymID->Get());
-        pTag->add_attribute("notaryID", m.m_strNotaryID->Get());
-        pTag->add_attribute("accountID", m.m_strAcctID->Get());
-        pTag->add_attribute("inboxHash", m.m_strInboxHash->Get());
-        pTag->add_attribute("outboxHash", m.m_strOutboxHash->Get());
+        pTag->add_attribute("success", formatBool(m.success_));
+        pTag->add_attribute("requestNum", m.request_num_->Get());
+        pTag->add_attribute("nymID", m.nym_id_->Get());
+        pTag->add_attribute("notaryID", m.notary_id_->Get());
+        pTag->add_attribute("accountID", m.acct_id_->Get());
+        pTag->add_attribute("inboxHash", m.inbox_hash_->Get());
+        pTag->add_attribute("outboxHash", m.outbox_hash_->Get());
 
-        if (m.m_ascInReferenceTo->GetLength()) {
-            pTag->add_tag("inReferenceTo", m.m_ascInReferenceTo->Get());
+        if (m.in_reference_to_->GetLength()) {
+            pTag->add_tag("inReferenceTo", m.in_reference_to_->Get());
         }
 
-        if (m.m_bSuccess) {
-            if (m.m_ascPayload->GetLength()) {
-                pTag->add_tag("account", m.m_ascPayload->Get());
+        if (m.success_) {
+            if (m.payload_->GetLength()) {
+                pTag->add_tag("account", m.payload_->Get());
             }
-            if (m.m_ascPayload2->GetLength()) {
-                pTag->add_tag("inbox", m.m_ascPayload2->Get());
+            if (m.payload2_->GetLength()) {
+                pTag->add_tag("inbox", m.payload2_->Get());
             }
-            if (m.m_ascPayload3->GetLength()) {
-                pTag->add_tag("outbox", m.m_ascPayload3->Get());
+            if (m.payload3_->GetLength()) {
+                pTag->add_tag("outbox", m.payload3_->Get());
             }
         }
 
@@ -3423,56 +3346,54 @@ public:
     {
         processXmlSuccess(m, xml);
 
-        m.m_strCommand = String::Factory(xml->getNodeName());  // Command
-        m.m_strRequestNum =
-            String::Factory(xml->getAttributeValue("requestNum"));
-        m.m_strNymID = String::Factory(xml->getAttributeValue("nymID"));
-        m.m_strNotaryID = String::Factory(xml->getAttributeValue("notaryID"));
-        m.m_strAcctID = String::Factory(xml->getAttributeValue("accountID"));
-        m.m_strInboxHash = String::Factory(xml->getAttributeValue("inboxHash"));
-        m.m_strOutboxHash =
-            String::Factory(xml->getAttributeValue("outboxHash"));
+        m.command_ = String::Factory(xml->getNodeName());  // Command
+        m.request_num_ = String::Factory(xml->getAttributeValue("requestNum"));
+        m.nym_id_ = String::Factory(xml->getAttributeValue("nymID"));
+        m.notary_id_ = String::Factory(xml->getAttributeValue("notaryID"));
+        m.acct_id_ = String::Factory(xml->getAttributeValue("accountID"));
+        m.inbox_hash_ = String::Factory(xml->getAttributeValue("inboxHash"));
+        m.outbox_hash_ = String::Factory(xml->getAttributeValue("outboxHash"));
 
-        if (m.m_bSuccess) {
-            if (!LoadEncodedTextFieldByName(xml, m.m_ascPayload, "account")) {
+        if (m.success_) {
+            if (!LoadEncodedTextFieldByName(xml, m.payload_, "account")) {
                 LogError()(OT_PRETTY_CLASS())(
                     "Error: Expected account "
-                    "element with text field, for ")(m.m_strCommand.get())(".")
+                    "element with text field, for ")(m.command_.get())(".")
                     .Flush();
                 return (-1);  // error condition
             }
 
-            if (!LoadEncodedTextFieldByName(xml, m.m_ascPayload2, "inbox")) {
+            if (!LoadEncodedTextFieldByName(xml, m.payload2_, "inbox")) {
                 LogError()(OT_PRETTY_CLASS())(
                     "Error: Expected inbox"
-                    " element with text field, for ")(m.m_strCommand.get())(".")
+                    " element with text field, for ")(m.command_.get())(".")
                     .Flush();
                 return (-1);  // error condition
             }
 
-            if (!LoadEncodedTextFieldByName(xml, m.m_ascPayload3, "outbox")) {
+            if (!LoadEncodedTextFieldByName(xml, m.payload3_, "outbox")) {
                 LogError()(OT_PRETTY_CLASS())(
                     "Error: Expected outbox"
-                    " element with text field, for ")(m.m_strCommand.get())(".")
+                    " element with text field, for ")(m.command_.get())(".")
                     .Flush();
                 return (-1);  // error condition
             }
         } else {  // Message success=false
             if (!LoadEncodedTextFieldByName(
-                    xml, m.m_ascInReferenceTo, "inReferenceTo")) {
+                    xml, m.in_reference_to_, "inReferenceTo")) {
                 LogError()(OT_PRETTY_CLASS())(
                     "Error: Expected "
                     "inReferenceTo element with text field, for ")(
-                    m.m_strCommand.get())(".")
+                    m.command_.get())(".")
                     .Flush();
                 return (-1);  // error condition
             }
         }
 
-        LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.m_strCommand.get())(
-            "   ")(m.m_bSuccess ? "SUCCESS" : "FAILURE")(" NymID:    ")(
-            m.m_strNymID.get())(" AccountID:    ")(m.m_strAcctID.get())(
-            " NotaryID: ")(m.m_strNotaryID.get())
+        LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.command_.get())("   ")(
+            m.success_ ? "SUCCESS" : "FAILURE")(" NymID:    ")(m.nym_id_.get())(
+            " AccountID:    ")(m.acct_id_.get())(" NotaryID: ")(
+            m.notary_id_.get())
             .Flush();
 
         return 1;
@@ -3488,14 +3409,14 @@ class StrategyGetInstrumentDefinition final : public OTMessageStrategy
 public:
     void writeXml(Message& m, Tag& parent) final
     {
-        TagPtr pTag(new Tag(m.m_strCommand->Get()));
+        TagPtr pTag(new Tag(m.command_->Get()));
 
-        pTag->add_attribute("requestNum", m.m_strRequestNum->Get());
-        pTag->add_attribute("nymID", m.m_strNymID->Get());
-        pTag->add_attribute("notaryID", m.m_strNotaryID->Get());
+        pTag->add_attribute("requestNum", m.request_num_->Get());
+        pTag->add_attribute("nymID", m.nym_id_->Get());
+        pTag->add_attribute("notaryID", m.notary_id_->Get());
         pTag->add_attribute(
-            "instrumentDefinitionID", m.m_strInstrumentDefinitionID->Get());
-        pTag->add_attribute("nymboxHash", m.m_strNymboxHash->Get());
+            "instrumentDefinitionID", m.instrument_definition_id_->Get());
+        pTag->add_attribute("nymboxHash", m.nymbox_hash_->Get());
         pTag->add_attribute("type", std::to_string(m.enum_));
 
         parent.add_tag(pTag);
@@ -3504,15 +3425,13 @@ public:
     auto processXml(Message& m, irr::io::IrrXMLReader*& xml)
         -> std::int32_t final
     {
-        m.m_strCommand = String::Factory(xml->getNodeName());  // Command
-        m.m_strNymID = String::Factory(xml->getAttributeValue("nymID"));
-        m.m_strNotaryID = String::Factory(xml->getAttributeValue("notaryID"));
-        m.m_strInstrumentDefinitionID =
+        m.command_ = String::Factory(xml->getNodeName());  // Command
+        m.nym_id_ = String::Factory(xml->getAttributeValue("nymID"));
+        m.notary_id_ = String::Factory(xml->getAttributeValue("notaryID"));
+        m.instrument_definition_id_ =
             String::Factory(xml->getAttributeValue("instrumentDefinitionID"));
-        m.m_strRequestNum =
-            String::Factory(xml->getAttributeValue("requestNum"));
-        m.m_strNymboxHash =
-            String::Factory(xml->getAttributeValue("nymboxHash"));
+        m.request_num_ = String::Factory(xml->getAttributeValue("requestNum"));
+        m.nymbox_hash_ = String::Factory(xml->getAttributeValue("nymboxHash"));
 
         try {
             m.enum_ = static_cast<std::uint8_t>(
@@ -3521,11 +3440,10 @@ public:
             m.enum_ = 0;
         }
 
-        LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.m_strCommand.get())(
-            " NymID:    ")(m.m_strNymID.get())(" NotaryID: ")(
-            m.m_strNotaryID.get())(" Asset Type:    ")(
-            m.m_strInstrumentDefinitionID.get())(" Request #: ")(
-            m.m_strRequestNum.get())
+        LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.command_.get())(
+            " NymID:    ")(m.nym_id_.get())(" NotaryID: ")(m.notary_id_.get())(
+            " Asset Type:    ")(m.instrument_definition_id_.get())(
+            " Request #: ")(m.request_num_.get())
             .Flush();
 
         return 1;
@@ -3541,24 +3459,24 @@ class StrategyGetInstrumentDefinitionResponse final : public OTMessageStrategy
 public:
     void writeXml(Message& m, Tag& parent) final
     {
-        TagPtr pTag(new Tag(m.m_strCommand->Get()));
+        TagPtr pTag(new Tag(m.command_->Get()));
 
-        pTag->add_attribute("success", formatBool(m.m_bSuccess));
-        pTag->add_attribute("requestNum", m.m_strRequestNum->Get());
-        pTag->add_attribute("nymID", m.m_strNymID->Get());
-        pTag->add_attribute("notaryID", m.m_strNotaryID->Get());
+        pTag->add_attribute("success", formatBool(m.success_));
+        pTag->add_attribute("requestNum", m.request_num_->Get());
+        pTag->add_attribute("nymID", m.nym_id_->Get());
+        pTag->add_attribute("notaryID", m.notary_id_->Get());
         pTag->add_attribute(
-            "instrumentDefinitionID", m.m_strInstrumentDefinitionID->Get());
-        pTag->add_attribute("nymboxHash", m.m_strNymboxHash->Get());
-        pTag->add_attribute("found", formatBool(m.m_bBool));
+            "instrumentDefinitionID", m.instrument_definition_id_->Get());
+        pTag->add_attribute("nymboxHash", m.nymbox_hash_->Get());
+        pTag->add_attribute("found", formatBool(m.bool_));
         pTag->add_attribute("type", std::to_string(m.enum_));
 
-        if (m.m_ascInReferenceTo->GetLength()) {
-            pTag->add_tag("inReferenceTo", m.m_ascInReferenceTo->Get());
+        if (m.in_reference_to_->GetLength()) {
+            pTag->add_tag("inReferenceTo", m.in_reference_to_->Get());
         }
 
-        if (m.m_bSuccess && m.m_ascPayload->GetLength()) {
-            pTag->add_tag("instrumentDefinition", m.m_ascPayload->Get());
+        if (m.success_ && m.payload_->GetLength()) {
+            pTag->add_tag("instrumentDefinition", m.payload_->Get());
         }
 
         parent.add_tag(pTag);
@@ -3569,17 +3487,15 @@ public:
     {
         processXmlSuccess(m, xml);
 
-        m.m_strCommand = String::Factory(xml->getNodeName());  // Command
-        m.m_strRequestNum =
-            String::Factory(xml->getAttributeValue("requestNum"));
-        m.m_strNymID = String::Factory(xml->getAttributeValue("nymID"));
-        m.m_strNotaryID = String::Factory(xml->getAttributeValue("notaryID"));
-        m.m_strInstrumentDefinitionID =
+        m.command_ = String::Factory(xml->getNodeName());  // Command
+        m.request_num_ = String::Factory(xml->getAttributeValue("requestNum"));
+        m.nym_id_ = String::Factory(xml->getAttributeValue("nymID"));
+        m.notary_id_ = String::Factory(xml->getAttributeValue("notaryID"));
+        m.instrument_definition_id_ =
             String::Factory(xml->getAttributeValue("instrumentDefinitionID"));
-        m.m_strNymboxHash =
-            String::Factory(xml->getAttributeValue("nymboxHash"));
+        m.nymbox_hash_ = String::Factory(xml->getAttributeValue("nymboxHash"));
         const auto found = String::Factory(xml->getAttributeValue("found"));
-        m.m_bBool = found->Compare("true");
+        m.bool_ = found->Compare("true");
 
         try {
             m.enum_ = static_cast<std::uint8_t>(
@@ -3590,41 +3506,41 @@ public:
 
         auto ascTextExpected = Armored::Factory();
 
-        if (false == m.m_bSuccess) {
+        if (false == m.success_) {
             const char* pElementExpected = "inReferenceTo";
 
             if (!LoadEncodedTextFieldByName(
                     xml, ascTextExpected, pElementExpected)) {
                 LogError()(OT_PRETTY_CLASS())("Error: Expected ")(
                     pElementExpected)(" element with text field, for ")(
-                    m.m_strCommand.get())(".")
+                    m.command_.get())(".")
                     .Flush();
                 return (-1);  // error condition
             }
         }
 
-        if (m.m_bBool) {
+        if (m.bool_) {
             const char* pElementExpected = "instrumentDefinition";
 
             if (!LoadEncodedTextFieldByName(
                     xml, ascTextExpected, pElementExpected)) {
                 LogError()(OT_PRETTY_CLASS())("Error: Expected ")(
                     pElementExpected)(" element with text field, for ")(
-                    m.m_strCommand.get())(".")
+                    m.command_.get())(".")
                     .Flush();
                 return (-1);  // error condition
             }
         }
 
-        if (m.m_bBool) { m.m_ascPayload = ascTextExpected; }
+        if (m.bool_) { m.payload_ = ascTextExpected; }
 
-        if (false == m.m_bSuccess) { m.m_ascInReferenceTo = ascTextExpected; }
+        if (false == m.success_) { m.in_reference_to_ = ascTextExpected; }
 
-        LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.m_strCommand.get())(
-            "   ")(m.m_bSuccess ? "SUCCESS" : "FAILURE")(" NymID:    ")(
-            m.m_strNymID.get())(" Instrument Definition ID:    ")(
-            m.m_strInstrumentDefinitionID.get())(" NotaryID: ")(
-            m.m_strNotaryID.get())
+        LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.command_.get())("   ")(
+            m.success_ ? "SUCCESS" : "FAILURE")(" NymID:    ")(m.nym_id_.get())(
+            " Instrument Definition ID:    ")(
+            m.instrument_definition_id_.get())(" NotaryID: ")(
+            m.notary_id_.get())
             .Flush();
 
         return 1;
@@ -3640,14 +3556,14 @@ class StrategyGetMint final : public OTMessageStrategy
 public:
     void writeXml(Message& m, Tag& parent) final
     {
-        TagPtr pTag(new Tag(m.m_strCommand->Get()));
+        TagPtr pTag(new Tag(m.command_->Get()));
 
-        pTag->add_attribute("requestNum", m.m_strRequestNum->Get());
-        pTag->add_attribute("nymID", m.m_strNymID->Get());
-        pTag->add_attribute("notaryID", m.m_strNotaryID->Get());
+        pTag->add_attribute("requestNum", m.request_num_->Get());
+        pTag->add_attribute("nymID", m.nym_id_->Get());
+        pTag->add_attribute("notaryID", m.notary_id_->Get());
         pTag->add_attribute(
-            "instrumentDefinitionID", m.m_strInstrumentDefinitionID->Get());
-        pTag->add_attribute("nymboxHash", m.m_strNymboxHash->Get());
+            "instrumentDefinitionID", m.instrument_definition_id_->Get());
+        pTag->add_attribute("nymboxHash", m.nymbox_hash_->Get());
 
         parent.add_tag(pTag);
     }
@@ -3655,21 +3571,18 @@ public:
     auto processXml(Message& m, irr::io::IrrXMLReader*& xml)
         -> std::int32_t final
     {
-        m.m_strCommand = String::Factory(xml->getNodeName());  // Command
-        m.m_strNymID = String::Factory(xml->getAttributeValue("nymID"));
-        m.m_strNotaryID = String::Factory(xml->getAttributeValue("notaryID"));
-        m.m_strInstrumentDefinitionID =
+        m.command_ = String::Factory(xml->getNodeName());  // Command
+        m.nym_id_ = String::Factory(xml->getAttributeValue("nymID"));
+        m.notary_id_ = String::Factory(xml->getAttributeValue("notaryID"));
+        m.instrument_definition_id_ =
             String::Factory(xml->getAttributeValue("instrumentDefinitionID"));
-        m.m_strRequestNum =
-            String::Factory(xml->getAttributeValue("requestNum"));
-        m.m_strNymboxHash =
-            String::Factory(xml->getAttributeValue("nymboxHash"));
+        m.request_num_ = String::Factory(xml->getAttributeValue("requestNum"));
+        m.nymbox_hash_ = String::Factory(xml->getAttributeValue("nymboxHash"));
 
-        LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.m_strCommand.get())(
-            " NymID:    ")(m.m_strNymID.get())(" NotaryID: ")(
-            m.m_strNotaryID.get())(" Asset Type:    ")(
-            m.m_strInstrumentDefinitionID.get())(" Request #: ")(
-            m.m_strRequestNum.get())
+        LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.command_.get())(
+            " NymID:    ")(m.nym_id_.get())(" NotaryID: ")(m.notary_id_.get())(
+            " Asset Type:    ")(m.instrument_definition_id_.get())(
+            " Request #: ")(m.request_num_.get())
             .Flush();
 
         return 1;
@@ -3683,23 +3596,23 @@ class StrategyGetMintResponse final : public OTMessageStrategy
 public:
     void writeXml(Message& m, Tag& parent) final
     {
-        TagPtr pTag(new Tag(m.m_strCommand->Get()));
+        TagPtr pTag(new Tag(m.command_->Get()));
 
-        pTag->add_attribute("success", formatBool(m.m_bSuccess));
-        pTag->add_attribute("requestNum", m.m_strRequestNum->Get());
-        pTag->add_attribute("nymID", m.m_strNymID->Get());
-        pTag->add_attribute("notaryID", m.m_strNotaryID->Get());
+        pTag->add_attribute("success", formatBool(m.success_));
+        pTag->add_attribute("requestNum", m.request_num_->Get());
+        pTag->add_attribute("nymID", m.nym_id_->Get());
+        pTag->add_attribute("notaryID", m.notary_id_->Get());
         pTag->add_attribute(
-            "instrumentDefinitionID", m.m_strInstrumentDefinitionID->Get());
-        pTag->add_attribute("nymboxHash", m.m_strNymboxHash->Get());
-        pTag->add_attribute("found", formatBool(m.m_bBool));
+            "instrumentDefinitionID", m.instrument_definition_id_->Get());
+        pTag->add_attribute("nymboxHash", m.nymbox_hash_->Get());
+        pTag->add_attribute("found", formatBool(m.bool_));
 
-        if (m.m_ascInReferenceTo->GetLength()) {
-            pTag->add_tag("inReferenceTo", m.m_ascInReferenceTo->Get());
+        if (m.in_reference_to_->GetLength()) {
+            pTag->add_tag("inReferenceTo", m.in_reference_to_->Get());
         }
 
-        if (m.m_bSuccess && m.m_ascPayload->GetLength()) {
-            pTag->add_tag("mint", m.m_ascPayload->Get());
+        if (m.success_ && m.payload_->GetLength()) {
+            pTag->add_tag("mint", m.payload_->Get());
         }
 
         parent.add_tag(pTag);
@@ -3710,55 +3623,53 @@ public:
     {
         processXmlSuccess(m, xml);
 
-        m.m_strCommand = String::Factory(xml->getNodeName());  // Command
-        m.m_strRequestNum =
-            String::Factory(xml->getAttributeValue("requestNum"));
-        m.m_strNymID = String::Factory(xml->getAttributeValue("nymID"));
-        m.m_strNotaryID = String::Factory(xml->getAttributeValue("notaryID"));
-        m.m_strInstrumentDefinitionID =
+        m.command_ = String::Factory(xml->getNodeName());  // Command
+        m.request_num_ = String::Factory(xml->getAttributeValue("requestNum"));
+        m.nym_id_ = String::Factory(xml->getAttributeValue("nymID"));
+        m.notary_id_ = String::Factory(xml->getAttributeValue("notaryID"));
+        m.instrument_definition_id_ =
             String::Factory(xml->getAttributeValue("instrumentDefinitionID"));
-        m.m_strNymboxHash =
-            String::Factory(xml->getAttributeValue("nymboxHash"));
+        m.nymbox_hash_ = String::Factory(xml->getAttributeValue("nymboxHash"));
         const auto found = String::Factory(xml->getAttributeValue("found"));
-        m.m_bBool = found->Compare("true");
+        m.bool_ = found->Compare("true");
 
         auto ascTextExpected = Armored::Factory();
 
-        if (false == m.m_bSuccess) {
+        if (false == m.success_) {
             const char* pElementExpected = "inReferenceTo";
 
             if (!LoadEncodedTextFieldByName(
                     xml, ascTextExpected, pElementExpected)) {
                 LogError()(OT_PRETTY_CLASS())("Error: Expected ")(
                     pElementExpected)(" element with text field, for ")(
-                    m.m_strCommand.get())(".")
+                    m.command_.get())(".")
                     .Flush();
                 return (-1);  // error condition
             }
 
-            m.m_ascInReferenceTo = ascTextExpected;
+            m.in_reference_to_ = ascTextExpected;
         }
 
-        if (m.m_bBool) {
+        if (m.bool_) {
             const char* pElementExpected = "mint";
 
             if (!LoadEncodedTextFieldByName(
                     xml, ascTextExpected, pElementExpected)) {
                 LogError()(OT_PRETTY_CLASS())("Error: Expected ")(
                     pElementExpected)(" element with text field, for ")(
-                    m.m_strCommand.get())(".")
+                    m.command_.get())(".")
                     .Flush();
                 return (-1);  // error condition
             }
 
-            m.m_ascPayload = ascTextExpected;
+            m.payload_ = ascTextExpected;
         }
 
-        LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.m_strCommand.get())(
-            "   ")(m.m_bSuccess ? "SUCCESS" : "FAILURE")(" NymID:    ")(
-            m.m_strNymID.get())(" Instrument Definition ID:    ")(
-            m.m_strInstrumentDefinitionID.get())(" NotaryID: ")(
-            m.m_strNotaryID.get())
+        LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.command_.get())("   ")(
+            m.success_ ? "SUCCESS" : "FAILURE")(" NymID:    ")(m.nym_id_.get())(
+            " Instrument Definition ID:    ")(
+            m.instrument_definition_id_.get())(" NotaryID: ")(
+            m.notary_id_.get())
             .Flush();
 
         return 1;
@@ -3774,16 +3685,16 @@ class StrategyProcessInbox final : public OTMessageStrategy
 public:
     void writeXml(Message& m, Tag& parent) final
     {
-        TagPtr pTag(new Tag(m.m_strCommand->Get()));
+        TagPtr pTag(new Tag(m.command_->Get()));
 
-        pTag->add_attribute("requestNum", m.m_strRequestNum->Get());
-        pTag->add_attribute("nymID", m.m_strNymID->Get());
-        pTag->add_attribute("notaryID", m.m_strNotaryID->Get());
-        pTag->add_attribute("nymboxHash", m.m_strNymboxHash->Get());
-        pTag->add_attribute("accountID", m.m_strAcctID->Get());
+        pTag->add_attribute("requestNum", m.request_num_->Get());
+        pTag->add_attribute("nymID", m.nym_id_->Get());
+        pTag->add_attribute("notaryID", m.notary_id_->Get());
+        pTag->add_attribute("nymboxHash", m.nymbox_hash_->Get());
+        pTag->add_attribute("accountID", m.acct_id_->Get());
 
-        if (m.m_ascPayload->GetLength()) {
-            pTag->add_tag("processLedger", m.m_ascPayload->Get());
+        if (m.payload_->GetLength()) {
+            pTag->add_tag("processLedger", m.payload_->Get());
         }
 
         parent.add_tag(pTag);
@@ -3792,33 +3703,31 @@ public:
     auto processXml(Message& m, irr::io::IrrXMLReader*& xml)
         -> std::int32_t final
     {
-        m.m_strCommand = String::Factory(xml->getNodeName());  // Command
-        m.m_strNymID = String::Factory(xml->getAttributeValue("nymID"));
-        m.m_strNymboxHash =
-            String::Factory(xml->getAttributeValue("nymboxHash"));
-        m.m_strNotaryID = String::Factory(xml->getAttributeValue("notaryID"));
-        m.m_strAcctID = String::Factory(xml->getAttributeValue("accountID"));
-        m.m_strRequestNum =
-            String::Factory(xml->getAttributeValue("requestNum"));
+        m.command_ = String::Factory(xml->getNodeName());  // Command
+        m.nym_id_ = String::Factory(xml->getAttributeValue("nymID"));
+        m.nymbox_hash_ = String::Factory(xml->getAttributeValue("nymboxHash"));
+        m.notary_id_ = String::Factory(xml->getAttributeValue("notaryID"));
+        m.acct_id_ = String::Factory(xml->getAttributeValue("accountID"));
+        m.request_num_ = String::Factory(xml->getAttributeValue("requestNum"));
 
         {
             const char* pElementExpected = "processLedger";
-            Armored& ascTextExpected = m.m_ascPayload;
+            Armored& ascTextExpected = m.payload_;
 
             if (!LoadEncodedTextFieldByName(
                     xml, ascTextExpected, pElementExpected)) {
                 LogError()(OT_PRETTY_CLASS())("Error: Expected ")(
                     pElementExpected)(" element with text field, for ")(
-                    m.m_strCommand.get())(".")
+                    m.command_.get())(".")
                     .Flush();
                 return (-1);  // error condition
             }
         }
 
-        LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.m_strCommand.get())(
-            " NymID:    ")(m.m_strNymID.get())(" AccountID:    ")(
-            m.m_strAcctID.get())(" NotaryID: ")(m.m_strNotaryID.get())(
-            " Request#: ")(m.m_strRequestNum.get())
+        LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.command_.get())(
+            " NymID:    ")(m.nym_id_.get())(" AccountID:    ")(
+            m.acct_id_.get())(" NotaryID: ")(m.notary_id_.get())(" Request#: ")(
+            m.request_num_.get())
             .Flush();
 
         return 1;
@@ -3834,20 +3743,20 @@ class StrategyProcessInboxResponse final : public OTMessageStrategy
 public:
     void writeXml(Message& m, Tag& parent) final
     {
-        TagPtr pTag(new Tag(m.m_strCommand->Get()));
+        TagPtr pTag(new Tag(m.command_->Get()));
 
-        pTag->add_attribute("success", formatBool(m.m_bSuccess));
-        pTag->add_attribute("requestNum", m.m_strRequestNum->Get());
-        pTag->add_attribute("nymID", m.m_strNymID->Get());
-        pTag->add_attribute("notaryID", m.m_strNotaryID->Get());
-        pTag->add_attribute("nymboxHash", m.m_strNymboxHash->Get());
-        pTag->add_attribute("accountID", m.m_strAcctID->Get());
+        pTag->add_attribute("success", formatBool(m.success_));
+        pTag->add_attribute("requestNum", m.request_num_->Get());
+        pTag->add_attribute("nymID", m.nym_id_->Get());
+        pTag->add_attribute("notaryID", m.notary_id_->Get());
+        pTag->add_attribute("nymboxHash", m.nymbox_hash_->Get());
+        pTag->add_attribute("accountID", m.acct_id_->Get());
 
-        if (m.m_ascInReferenceTo->GetLength()) {
-            pTag->add_tag("inReferenceTo", m.m_ascInReferenceTo->Get());
+        if (m.in_reference_to_->GetLength()) {
+            pTag->add_tag("inReferenceTo", m.in_reference_to_->Get());
         }
-        if (m.m_bSuccess && m.m_ascPayload->GetLength()) {
-            pTag->add_tag("responseLedger", m.m_ascPayload->Get());
+        if (m.success_ && m.payload_->GetLength()) {
+            pTag->add_tag("responseLedger", m.payload_->Get());
         }
 
         parent.add_tag(pTag);
@@ -3858,41 +3767,39 @@ public:
     {
         processXmlSuccess(m, xml);
 
-        m.m_strCommand = String::Factory(xml->getNodeName());  // Command
-        m.m_strRequestNum =
-            String::Factory(xml->getAttributeValue("requestNum"));
-        m.m_strNymID = String::Factory(xml->getAttributeValue("nymID"));
-        m.m_strNotaryID = String::Factory(xml->getAttributeValue("notaryID"));
-        m.m_strNymboxHash =
-            String::Factory(xml->getAttributeValue("nymboxHash"));
-        m.m_strAcctID = String::Factory(xml->getAttributeValue("accountID"));
+        m.command_ = String::Factory(xml->getNodeName());  // Command
+        m.request_num_ = String::Factory(xml->getAttributeValue("requestNum"));
+        m.nym_id_ = String::Factory(xml->getAttributeValue("nymID"));
+        m.notary_id_ = String::Factory(xml->getAttributeValue("notaryID"));
+        m.nymbox_hash_ = String::Factory(xml->getAttributeValue("nymboxHash"));
+        m.acct_id_ = String::Factory(xml->getAttributeValue("accountID"));
 
         // If successful or failure, we need to read 2 more things:
         // inReferenceTo and the responseLedger payload.
         // At this point, we do not send the REASON WHY if it failed.
         {
             const char* pElementExpected = "inReferenceTo";
-            Armored& ascTextExpected = m.m_ascInReferenceTo;
+            Armored& ascTextExpected = m.in_reference_to_;
 
             if (!LoadEncodedTextFieldByName(
                     xml, ascTextExpected, pElementExpected)) {
                 LogError()(OT_PRETTY_CLASS())("Error: Expected ")(
                     pElementExpected)(" element with text field, for ")(
-                    m.m_strCommand.get())(".")
+                    m.command_.get())(".")
                     .Flush();
                 return (-1);  // error condition
             }
         }
 
-        if (m.m_bSuccess) {  // Success.
+        if (m.success_) {  // Success.
             const char* pElementExpected = "responseLedger";
-            Armored& ascTextExpected = m.m_ascPayload;
+            Armored& ascTextExpected = m.payload_;
 
             if (!LoadEncodedTextFieldByName(
                     xml, ascTextExpected, pElementExpected)) {
                 LogError()(OT_PRETTY_CLASS())("Error: Expected ")(
                     pElementExpected)(" element with text field, for ")(
-                    m.m_strCommand.get())(".")
+                    m.command_.get())(".")
                     .Flush();
                 return (-1);  // error condition
             }
@@ -3901,8 +3808,8 @@ public:
         // Did we find everything we were looking for?
         // If the "command responding to" isn't there, or the Payload isn't
         // there, then failure.
-        if (!m.m_ascInReferenceTo->GetLength() ||
-            (!m.m_ascPayload->GetLength() && m.m_bSuccess)) {
+        if (!m.in_reference_to_->GetLength() ||
+            (!m.payload_->GetLength() && m.success_)) {
             LogError()(OT_PRETTY_CLASS())(
                 "Error: Expected responseLedger and/or inReferenceTo "
                 "elements "
@@ -3912,10 +3819,9 @@ public:
             return (-1);  // error condition
         }
 
-        LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.m_strCommand.get())(
-            "   ")(m.m_bSuccess ? "SUCCESS" : "FAILURE")(" NymID:    ")(
-            m.m_strNymID.get())(" AccountID: ")(m.m_strAcctID.get())(
-            " NotaryID: ")(m.m_strNotaryID.get())
+        LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.command_.get())("   ")(
+            m.success_ ? "SUCCESS" : "FAILURE")(" NymID:    ")(m.nym_id_.get())(
+            " AccountID: ")(m.acct_id_.get())(" NotaryID: ")(m.notary_id_.get())
             .Flush();
         //    "****New Account****:\n%s\n",
 
@@ -3932,15 +3838,15 @@ class StrategyProcessNymbox final : public OTMessageStrategy
 public:
     void writeXml(Message& m, Tag& parent) final
     {
-        TagPtr pTag(new Tag(m.m_strCommand->Get()));
+        TagPtr pTag(new Tag(m.command_->Get()));
 
-        pTag->add_attribute("requestNum", m.m_strRequestNum->Get());
-        pTag->add_attribute("nymID", m.m_strNymID->Get());
-        pTag->add_attribute("notaryID", m.m_strNotaryID->Get());
-        pTag->add_attribute("nymboxHash", m.m_strNymboxHash->Get());
+        pTag->add_attribute("requestNum", m.request_num_->Get());
+        pTag->add_attribute("nymID", m.nym_id_->Get());
+        pTag->add_attribute("notaryID", m.notary_id_->Get());
+        pTag->add_attribute("nymboxHash", m.nymbox_hash_->Get());
 
-        if (m.m_ascPayload->GetLength()) {
-            pTag->add_tag("processLedger", m.m_ascPayload->Get());
+        if (m.payload_->GetLength()) {
+            pTag->add_tag("processLedger", m.payload_->Get());
         }
 
         parent.add_tag(pTag);
@@ -3949,31 +3855,29 @@ public:
     auto processXml(Message& m, irr::io::IrrXMLReader*& xml)
         -> std::int32_t final
     {
-        m.m_strCommand = String::Factory(xml->getNodeName());  // Command
-        m.m_strNymID = String::Factory(xml->getAttributeValue("nymID"));
-        m.m_strNymboxHash =
-            String::Factory(xml->getAttributeValue("nymboxHash"));
-        m.m_strNotaryID = String::Factory(xml->getAttributeValue("notaryID"));
-        m.m_strRequestNum =
-            String::Factory(xml->getAttributeValue("requestNum"));
+        m.command_ = String::Factory(xml->getNodeName());  // Command
+        m.nym_id_ = String::Factory(xml->getAttributeValue("nymID"));
+        m.nymbox_hash_ = String::Factory(xml->getAttributeValue("nymboxHash"));
+        m.notary_id_ = String::Factory(xml->getAttributeValue("notaryID"));
+        m.request_num_ = String::Factory(xml->getAttributeValue("requestNum"));
 
         {
             const char* pElementExpected = "processLedger";
-            Armored& ascTextExpected = m.m_ascPayload;
+            Armored& ascTextExpected = m.payload_;
 
             if (!LoadEncodedTextFieldByName(
                     xml, ascTextExpected, pElementExpected)) {
                 LogError()(OT_PRETTY_CLASS())("Error: Expected ")(
                     pElementExpected)(" element with text field, for ")(
-                    m.m_strCommand.get())(".")
+                    m.command_.get())(".")
                     .Flush();
                 return (-1);  // error condition
             }
         }
 
-        LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.m_strCommand.get())(
-            " NymID:    ")(m.m_strNymID.get())(" NotaryID: ")(
-            m.m_strNotaryID.get())(" Request#: ")(m.m_strRequestNum.get())
+        LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.command_.get())(
+            " NymID:    ")(m.nym_id_.get())(" NotaryID: ")(m.notary_id_.get())(
+            " Request#: ")(m.request_num_.get())
             .Flush();
 
         return 1;
@@ -3989,19 +3893,19 @@ class StrategyProcessNymboxResponse final : public OTMessageStrategy
 public:
     void writeXml(Message& m, Tag& parent) final
     {
-        TagPtr pTag(new Tag(m.m_strCommand->Get()));
+        TagPtr pTag(new Tag(m.command_->Get()));
 
-        pTag->add_attribute("success", formatBool(m.m_bSuccess));
-        pTag->add_attribute("requestNum", m.m_strRequestNum->Get());
-        pTag->add_attribute("nymID", m.m_strNymID->Get());
-        pTag->add_attribute("notaryID", m.m_strNotaryID->Get());
-        pTag->add_attribute("nymboxHash", m.m_strNymboxHash->Get());
+        pTag->add_attribute("success", formatBool(m.success_));
+        pTag->add_attribute("requestNum", m.request_num_->Get());
+        pTag->add_attribute("nymID", m.nym_id_->Get());
+        pTag->add_attribute("notaryID", m.notary_id_->Get());
+        pTag->add_attribute("nymboxHash", m.nymbox_hash_->Get());
 
-        if (m.m_ascInReferenceTo->GetLength()) {
-            pTag->add_tag("inReferenceTo", m.m_ascInReferenceTo->Get());
+        if (m.in_reference_to_->GetLength()) {
+            pTag->add_tag("inReferenceTo", m.in_reference_to_->Get());
         }
-        if (m.m_bSuccess && m.m_ascPayload->GetLength()) {
-            pTag->add_tag("responseLedger", m.m_ascPayload->Get());
+        if (m.success_ && m.payload_->GetLength()) {
+            pTag->add_tag("responseLedger", m.payload_->Get());
         }
 
         parent.add_tag(pTag);
@@ -4012,40 +3916,38 @@ public:
     {
         processXmlSuccess(m, xml);
 
-        m.m_strCommand = String::Factory(xml->getNodeName());  // Command
-        m.m_strRequestNum =
-            String::Factory(xml->getAttributeValue("requestNum"));
-        m.m_strNymID = String::Factory(xml->getAttributeValue("nymID"));
-        m.m_strNotaryID = String::Factory(xml->getAttributeValue("notaryID"));
-        m.m_strNymboxHash =
-            String::Factory(xml->getAttributeValue("nymboxHash"));
+        m.command_ = String::Factory(xml->getNodeName());  // Command
+        m.request_num_ = String::Factory(xml->getAttributeValue("requestNum"));
+        m.nym_id_ = String::Factory(xml->getAttributeValue("nymID"));
+        m.notary_id_ = String::Factory(xml->getAttributeValue("notaryID"));
+        m.nymbox_hash_ = String::Factory(xml->getAttributeValue("nymboxHash"));
 
         // If successful or failure, we need to read 2 more things:
         // inReferenceTo and the responseLedger payload.
         // At this point, we do not send the REASON WHY if it failed.
         {
             const char* pElementExpected = "inReferenceTo";
-            Armored& ascTextExpected = m.m_ascInReferenceTo;
+            Armored& ascTextExpected = m.in_reference_to_;
 
             if (!LoadEncodedTextFieldByName(
                     xml, ascTextExpected, pElementExpected)) {
                 LogError()(OT_PRETTY_CLASS())("Error: Expected ")(
                     pElementExpected)(" element with text field, for ")(
-                    m.m_strCommand.get())(".")
+                    m.command_.get())(".")
                     .Flush();
                 return (-1);  // error condition
             }
         }
 
-        if (m.m_bSuccess) {  // Success
+        if (m.success_) {  // Success
             const char* pElementExpected = "responseLedger";
-            Armored& ascTextExpected = m.m_ascPayload;
+            Armored& ascTextExpected = m.payload_;
 
             if (!LoadEncodedTextFieldByName(
                     xml, ascTextExpected, pElementExpected)) {
                 LogError()(OT_PRETTY_CLASS())("Error: Expected ")(
                     pElementExpected)(" element with text field, for ")(
-                    m.m_strCommand.get())(".")
+                    m.command_.get())(".")
                     .Flush();
                 return (-1);  // error condition
             }
@@ -4054,8 +3956,8 @@ public:
         // Did we find everything we were looking for?
         // If the "command responding to" isn't there, or the Payload isn't
         // there, then failure.
-        if (!m.m_ascInReferenceTo->GetLength() ||
-            (!m.m_ascPayload->GetLength() && m.m_bSuccess)) {
+        if (!m.in_reference_to_->GetLength() ||
+            (!m.payload_->GetLength() && m.success_)) {
             LogError()(OT_PRETTY_CLASS())(
                 "Error: Expected responseLedger and/or inReferenceTo "
                 "elements "
@@ -4065,9 +3967,9 @@ public:
             return (-1);  // error condition
         }
 
-        LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.m_strCommand.get())(
-            "   ")(m.m_bSuccess ? "SUCCESS" : "FAILURE")(" NymID:    ")(
-            m.m_strNymID.get())(" NotaryID: ")(m.m_strNotaryID.get())
+        LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.command_.get())("   ")(
+            m.success_ ? "SUCCESS" : "FAILURE")(" NymID:    ")(m.nym_id_.get())(
+            " NotaryID: ")(m.notary_id_.get())
             .Flush();
         //    "****New Account****:\n%s\n",
 
@@ -4084,19 +3986,19 @@ class StrategyTriggerClause final : public OTMessageStrategy
 public:
     void writeXml(Message& m, Tag& parent) final
     {
-        TagPtr pTag(new Tag(m.m_strCommand->Get()));
+        TagPtr pTag(new Tag(m.command_->Get()));
 
-        pTag->add_attribute("requestNum", m.m_strRequestNum->Get());
-        pTag->add_attribute("nymID", m.m_strNymID->Get());
-        pTag->add_attribute("notaryID", m.m_strNotaryID->Get());
-        pTag->add_attribute("nymboxHash", m.m_strNymboxHash->Get());
+        pTag->add_attribute("requestNum", m.request_num_->Get());
+        pTag->add_attribute("nymID", m.nym_id_->Get());
+        pTag->add_attribute("notaryID", m.notary_id_->Get());
+        pTag->add_attribute("nymboxHash", m.nymbox_hash_->Get());
         pTag->add_attribute(
-            "smartContractID", std::to_string(m.m_lTransactionNum));
-        pTag->add_attribute("clauseName", m.m_strNymID2->Get());
-        pTag->add_attribute("hasParam", formatBool(m.m_ascPayload->Exists()));
+            "smartContractID", std::to_string(m.transaction_num_));
+        pTag->add_attribute("clauseName", m.nym_id2_->Get());
+        pTag->add_attribute("hasParam", formatBool(m.payload_->Exists()));
 
-        if (m.m_ascPayload->Exists()) {
-            pTag->add_tag("parameter", m.m_ascPayload->Get());
+        if (m.payload_->Exists()) {
+            pTag->add_tag("parameter", m.payload_->Get());
         }
 
         parent.add_tag(pTag);
@@ -4105,21 +4007,19 @@ public:
     auto processXml(Message& m, irr::io::IrrXMLReader*& xml)
         -> std::int32_t final
     {
-        m.m_strCommand = String::Factory(xml->getNodeName());  // Command
-        m.m_strNymID = String::Factory(xml->getAttributeValue("nymID"));
-        m.m_strNymboxHash =
-            String::Factory(xml->getAttributeValue("nymboxHash"));
-        m.m_strNotaryID = String::Factory(xml->getAttributeValue("notaryID"));
-        m.m_strNymID2 = String::Factory(xml->getAttributeValue("clauseName"));
-        m.m_strRequestNum =
-            String::Factory(xml->getAttributeValue("requestNum"));
+        m.command_ = String::Factory(xml->getNodeName());  // Command
+        m.nym_id_ = String::Factory(xml->getAttributeValue("nymID"));
+        m.nymbox_hash_ = String::Factory(xml->getAttributeValue("nymboxHash"));
+        m.notary_id_ = String::Factory(xml->getAttributeValue("notaryID"));
+        m.nym_id2_ = String::Factory(xml->getAttributeValue("clauseName"));
+        m.request_num_ = String::Factory(xml->getAttributeValue("requestNum"));
         const auto strHasParam =
             String::Factory(xml->getAttributeValue("hasParam"));
 
         auto strTransactionNum =
             String::Factory(xml->getAttributeValue("smartContractID"));
         if (strTransactionNum->Exists()) {
-            m.m_lTransactionNum = strTransactionNum->ToLong();
+            m.transaction_num_ = strTransactionNum->ToLong();
         }
 
         if (strHasParam->Compare("true")) {
@@ -4130,19 +4030,18 @@ public:
                     xml, ascTextExpected, pElementExpected)) {
                 LogError()(OT_PRETTY_CLASS())("Error: Expected ")(
                     pElementExpected)(" element with text field, for ")(
-                    m.m_strCommand.get())(".")
+                    m.command_.get())(".")
                     .Flush();
                 return (-1);  // error condition
             } else {
-                m.m_ascPayload = ascTextExpected;
+                m.payload_ = ascTextExpected;
             }
         }
 
-        LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.m_strCommand.get())(
-            " NymID:    ")(m.m_strNymID.get())(" NotaryID: ")(
-            m.m_strNotaryID.get())(" Clause TransNum and Name:  ")(
-            m.m_lTransactionNum)("  /  ")(m.m_strNymID2.get())(" Request #: ")(
-            m.m_strRequestNum.get())
+        LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.command_.get())(
+            " NymID:    ")(m.nym_id_.get())(" NotaryID: ")(m.notary_id_.get())(
+            " Clause TransNum and Name:  ")(m.transaction_num_)("  /  ")(
+            m.nym_id2_.get())(" Request #: ")(m.request_num_.get())
             .Flush();
 
         return 1;
@@ -4158,15 +4057,15 @@ class StrategyTriggerClauseResponse final : public OTMessageStrategy
 public:
     void writeXml(Message& m, Tag& parent) final
     {
-        TagPtr pTag(new Tag(m.m_strCommand->Get()));
+        TagPtr pTag(new Tag(m.command_->Get()));
 
-        pTag->add_attribute("success", formatBool(m.m_bSuccess));
-        pTag->add_attribute("requestNum", m.m_strRequestNum->Get());
-        pTag->add_attribute("nymID", m.m_strNymID->Get());
-        pTag->add_attribute("notaryID", m.m_strNotaryID->Get());
+        pTag->add_attribute("success", formatBool(m.success_));
+        pTag->add_attribute("requestNum", m.request_num_->Get());
+        pTag->add_attribute("nymID", m.nym_id_->Get());
+        pTag->add_attribute("notaryID", m.notary_id_->Get());
 
-        if (m.m_ascInReferenceTo->GetLength()) {
-            pTag->add_tag("inReferenceTo", m.m_ascInReferenceTo->Get());
+        if (m.in_reference_to_->GetLength()) {
+            pTag->add_tag("inReferenceTo", m.in_reference_to_->Get());
         }
 
         parent.add_tag(pTag);
@@ -4177,11 +4076,10 @@ public:
     {
         processXmlSuccess(m, xml);
 
-        m.m_strCommand = String::Factory(xml->getNodeName());  // Command
-        m.m_strRequestNum =
-            String::Factory(xml->getAttributeValue("requestNum"));
-        m.m_strNymID = String::Factory(xml->getAttributeValue("nymID"));
-        m.m_strNotaryID = String::Factory(xml->getAttributeValue("notaryID"));
+        m.command_ = String::Factory(xml->getNodeName());  // Command
+        m.request_num_ = String::Factory(xml->getAttributeValue("requestNum"));
+        m.nym_id_ = String::Factory(xml->getAttributeValue("nymID"));
+        m.notary_id_ = String::Factory(xml->getAttributeValue("notaryID"));
 
         const char* pElementExpected = "inReferenceTo";
 
@@ -4191,16 +4089,16 @@ public:
                 xml, ascTextExpected, pElementExpected)) {
             LogError()(OT_PRETTY_CLASS())("Error: Expected ")(
                 pElementExpected)(" element with text field, for ")(
-                m.m_strCommand.get())(".")
+                m.command_.get())(".")
                 .Flush();
             return (-1);  // error condition
         }
 
-        m.m_ascInReferenceTo = ascTextExpected;
+        m.in_reference_to_ = ascTextExpected;
 
-        LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.m_strCommand.get())(
-            "   ")(m.m_bSuccess ? "SUCCESS" : "FAILURE")(" NymID:    ")(
-            m.m_strNymID.get())(" NotaryID: ")(m.m_strNotaryID.get())
+        LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.command_.get())("   ")(
+            m.success_ ? "SUCCESS" : "FAILURE")(" NymID:    ")(m.nym_id_.get())(
+            " NotaryID: ")(m.notary_id_.get())
             .Flush();
 
         return 1;
@@ -4216,11 +4114,11 @@ class StrategyGetMarketList final : public OTMessageStrategy
 public:
     void writeXml(Message& m, Tag& parent) final
     {
-        TagPtr pTag(new Tag(m.m_strCommand->Get()));
+        TagPtr pTag(new Tag(m.command_->Get()));
 
-        pTag->add_attribute("requestNum", m.m_strRequestNum->Get());
-        pTag->add_attribute("nymID", m.m_strNymID->Get());
-        pTag->add_attribute("notaryID", m.m_strNotaryID->Get());
+        pTag->add_attribute("requestNum", m.request_num_->Get());
+        pTag->add_attribute("nymID", m.nym_id_->Get());
+        pTag->add_attribute("notaryID", m.notary_id_->Get());
 
         parent.add_tag(pTag);
     }
@@ -4228,15 +4126,14 @@ public:
     auto processXml(Message& m, irr::io::IrrXMLReader*& xml)
         -> std::int32_t final
     {
-        m.m_strCommand = String::Factory(xml->getNodeName());  // Command
-        m.m_strNymID = String::Factory(xml->getAttributeValue("nymID"));
-        m.m_strNotaryID = String::Factory(xml->getAttributeValue("notaryID"));
-        m.m_strRequestNum =
-            String::Factory(xml->getAttributeValue("requestNum"));
+        m.command_ = String::Factory(xml->getNodeName());  // Command
+        m.nym_id_ = String::Factory(xml->getAttributeValue("nymID"));
+        m.notary_id_ = String::Factory(xml->getAttributeValue("notaryID"));
+        m.request_num_ = String::Factory(xml->getAttributeValue("requestNum"));
 
-        LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.m_strCommand.get())(
-            " NymID:    ")(m.m_strNymID.get())(" NotaryID: ")(
-            m.m_strNotaryID.get())(" Request #: ")(m.m_strRequestNum.get())
+        LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.command_.get())(
+            " NymID:    ")(m.nym_id_.get())(" NotaryID: ")(m.notary_id_.get())(
+            " Request #: ")(m.request_num_.get())
             .Flush();
 
         return 1;
@@ -4255,20 +4152,19 @@ public:
     {
         processXmlSuccess(m, xml);
 
-        m.m_strCommand = String::Factory(xml->getNodeName());  // Command
-        m.m_strRequestNum =
-            String::Factory(xml->getAttributeValue("requestNum"));
-        m.m_strNymID = String::Factory(xml->getAttributeValue("nymID"));
-        m.m_strNotaryID = String::Factory(xml->getAttributeValue("notaryID"));
+        m.command_ = String::Factory(xml->getNodeName());  // Command
+        m.request_num_ = String::Factory(xml->getAttributeValue("requestNum"));
+        m.nym_id_ = String::Factory(xml->getAttributeValue("nymID"));
+        m.notary_id_ = String::Factory(xml->getAttributeValue("notaryID"));
 
         auto strDepth = String::Factory(xml->getAttributeValue("depth"));
 
-        if (strDepth->GetLength() > 0) { m.m_lDepth = strDepth->ToLong(); }
+        if (strDepth->GetLength() > 0) { m.depth_ = strDepth->ToLong(); }
 
         const char* pElementExpected = nullptr;
-        if (m.m_bSuccess && (m.m_lDepth > 0)) {
+        if (m.success_ && (m.depth_ > 0)) {
             pElementExpected = "messagePayload";
-        } else if (!m.m_bSuccess) {
+        } else if (!m.success_) {
             pElementExpected = "inReferenceTo";
         }
 
@@ -4279,28 +4175,28 @@ public:
                     xml, ascTextExpected, pElementExpected)) {
                 LogError()(OT_PRETTY_CLASS())("Error: Expected ")(
                     pElementExpected)(" element with text field, for ")(
-                    m.m_strCommand.get())(".")
+                    m.command_.get())(".")
                     .Flush();
                 return (-1);  // error condition
             }
 
-            if (m.m_bSuccess) {
-                m.m_ascPayload->Set(ascTextExpected);
+            if (m.success_) {
+                m.payload_->Set(ascTextExpected);
             } else {
-                m.m_ascInReferenceTo->Set(ascTextExpected);
+                m.in_reference_to_->Set(ascTextExpected);
             }
         }
 
-        if (m.m_bSuccess) {
-            LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.m_strCommand.get())(
-                "   ")(m.m_bSuccess ? "SUCCESS" : "FAILURE")(" NymID:    ")(
-                m.m_strNymID.get())(" NotaryID: ")(m.m_strNotaryID.get())
-                .Flush();  // m_ascPayload.Get()
+        if (m.success_) {
+            LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.command_.get())(
+                "   ")(m.success_ ? "SUCCESS" : "FAILURE")(" NymID:    ")(
+                m.nym_id_.get())(" NotaryID: ")(m.notary_id_.get())
+                .Flush();  // payload_.Get()
         } else {
-            LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.m_strCommand.get())(
-                "   ")(m.m_bSuccess ? "SUCCESS" : "FAILURE")(" NymID:    ")(
-                m.m_strNymID.get())(" NotaryID: ")(m.m_strNotaryID.get())
-                .Flush();  // m_ascInReferenceTo.Get()
+            LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.command_.get())(
+                "   ")(m.success_ ? "SUCCESS" : "FAILURE")(" NymID:    ")(
+                m.nym_id_.get())(" NotaryID: ")(m.notary_id_.get())
+                .Flush();  // in_reference_to_.Get()
         }
 
         return 1;
@@ -4308,19 +4204,18 @@ public:
 
     void writeXml(Message& m, Tag& parent) final
     {
-        TagPtr pTag(new Tag(m.m_strCommand->Get()));
+        TagPtr pTag(new Tag(m.command_->Get()));
 
-        pTag->add_attribute("success", formatBool(m.m_bSuccess));
-        pTag->add_attribute("requestNum", m.m_strRequestNum->Get());
-        pTag->add_attribute("nymID", m.m_strNymID->Get());
-        pTag->add_attribute("notaryID", m.m_strNotaryID->Get());
-        pTag->add_attribute("depth", std::to_string(m.m_lDepth));
+        pTag->add_attribute("success", formatBool(m.success_));
+        pTag->add_attribute("requestNum", m.request_num_->Get());
+        pTag->add_attribute("nymID", m.nym_id_->Get());
+        pTag->add_attribute("notaryID", m.notary_id_->Get());
+        pTag->add_attribute("depth", std::to_string(m.depth_));
 
-        if (m.m_bSuccess && (m.m_ascPayload->GetLength() > 2) &&
-            (m.m_lDepth > 0)) {
-            pTag->add_tag("messagePayload", m.m_ascPayload->Get());
-        } else if (!m.m_bSuccess && (m.m_ascInReferenceTo->GetLength() > 2)) {
-            pTag->add_tag("inReferenceTo", m.m_ascInReferenceTo->Get());
+        if (m.success_ && (m.payload_->GetLength() > 2) && (m.depth_ > 0)) {
+            pTag->add_tag("messagePayload", m.payload_->Get());
+        } else if (!m.success_ && (m.in_reference_to_->GetLength() > 2)) {
+            pTag->add_tag("inReferenceTo", m.in_reference_to_->Get());
         }
 
         parent.add_tag(pTag);
@@ -4337,13 +4232,13 @@ class StrategyRequestAdmin final : public OTMessageStrategy
 public:
     void writeXml(Message& m, Tag& parent) final
     {
-        TagPtr pTag(new Tag(m.m_strCommand->Get()));
+        TagPtr pTag(new Tag(m.command_->Get()));
 
-        pTag->add_attribute("requestNum", m.m_strRequestNum->Get());
-        pTag->add_attribute("nymID", m.m_strNymID->Get());
-        pTag->add_attribute("notaryID", m.m_strNotaryID->Get());
-        pTag->add_attribute("password", m.m_strAcctID->Get());
-        pTag->add_attribute("nymboxHash", m.m_strNymboxHash->Get());
+        pTag->add_attribute("requestNum", m.request_num_->Get());
+        pTag->add_attribute("nymID", m.nym_id_->Get());
+        pTag->add_attribute("notaryID", m.notary_id_->Get());
+        pTag->add_attribute("password", m.acct_id_->Get());
+        pTag->add_attribute("nymboxHash", m.nymbox_hash_->Get());
 
         parent.add_tag(pTag);
     }
@@ -4351,18 +4246,15 @@ public:
     auto processXml(Message& m, irr::io::IrrXMLReader*& xml)
         -> std::int32_t final
     {
-        m.m_strCommand = String::Factory(xml->getNodeName());  // Command
-        m.m_strRequestNum =
-            String::Factory(xml->getAttributeValue("requestNum"));
-        m.m_strNymID = String::Factory(xml->getAttributeValue("nymID"));
-        m.m_strNotaryID = String::Factory(xml->getAttributeValue("notaryID"));
-        m.m_strAcctID->Set(xml->getAttributeValue("password"));
-        m.m_strNymboxHash =
-            String::Factory(xml->getAttributeValue("nymboxHash"));
+        m.command_ = String::Factory(xml->getNodeName());  // Command
+        m.request_num_ = String::Factory(xml->getAttributeValue("requestNum"));
+        m.nym_id_ = String::Factory(xml->getAttributeValue("nymID"));
+        m.notary_id_ = String::Factory(xml->getAttributeValue("notaryID"));
+        m.acct_id_->Set(xml->getAttributeValue("password"));
+        m.nymbox_hash_ = String::Factory(xml->getAttributeValue("nymboxHash"));
 
-        LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.m_strCommand.get())(
-            " NymID:    ")(m.m_strNymID.get())(" NotaryID: ")(
-            m.m_strNotaryID.get())
+        LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.command_.get())(
+            " NymID:    ")(m.nym_id_.get())(" NotaryID: ")(m.notary_id_.get())
             .Flush();
 
         return 1;
@@ -4379,17 +4271,17 @@ class StrategyRequestAdminResponse final : public OTMessageStrategy
 public:
     void writeXml(Message& m, Tag& parent) final
     {
-        TagPtr pTag(new Tag(m.m_strCommand->Get()));
+        TagPtr pTag(new Tag(m.command_->Get()));
 
-        pTag->add_attribute("success", formatBool(m.m_bSuccess));
-        pTag->add_attribute("requestNum", m.m_strRequestNum->Get());
-        pTag->add_attribute("nymID", m.m_strNymID->Get());
-        pTag->add_attribute("notaryID", m.m_strNotaryID->Get());
-        pTag->add_attribute("admin", formatBool(m.m_bBool));
-        pTag->add_attribute("nymboxHash", m.m_strNymboxHash->Get());
+        pTag->add_attribute("success", formatBool(m.success_));
+        pTag->add_attribute("requestNum", m.request_num_->Get());
+        pTag->add_attribute("nymID", m.nym_id_->Get());
+        pTag->add_attribute("notaryID", m.notary_id_->Get());
+        pTag->add_attribute("admin", formatBool(m.bool_));
+        pTag->add_attribute("nymboxHash", m.nymbox_hash_->Get());
 
-        if (m.m_ascInReferenceTo->GetLength() > 2) {
-            pTag->add_tag("inReferenceTo", m.m_ascInReferenceTo->Get());
+        if (m.in_reference_to_->GetLength() > 2) {
+            pTag->add_tag("inReferenceTo", m.in_reference_to_->Get());
         }
 
         parent.add_tag(pTag);
@@ -4400,31 +4292,29 @@ public:
     {
         processXmlSuccess(m, xml);
 
-        m.m_strCommand = String::Factory(xml->getNodeName());  // Command
-        m.m_strRequestNum =
-            String::Factory(xml->getAttributeValue("requestNum"));
-        m.m_strNymID = String::Factory(xml->getAttributeValue("nymID"));
-        m.m_strNotaryID = String::Factory(xml->getAttributeValue("notaryID"));
+        m.command_ = String::Factory(xml->getNodeName());  // Command
+        m.request_num_ = String::Factory(xml->getAttributeValue("requestNum"));
+        m.nym_id_ = String::Factory(xml->getAttributeValue("nymID"));
+        m.notary_id_ = String::Factory(xml->getAttributeValue("notaryID"));
         const auto admin = String::Factory(xml->getAttributeValue("admin"));
-        m.m_bBool = admin->Compare("true");
-        m.m_strNymboxHash =
-            String::Factory(xml->getAttributeValue("nymboxHash"));
+        m.bool_ = admin->Compare("true");
+        m.nymbox_hash_ = String::Factory(xml->getAttributeValue("nymboxHash"));
 
         const char* pElementExpected = "inReferenceTo";
-        Armored& ascTextExpected = m.m_ascInReferenceTo;
+        Armored& ascTextExpected = m.in_reference_to_;
 
         if (!LoadEncodedTextFieldByName(
                 xml, ascTextExpected, pElementExpected)) {
             LogError()(OT_PRETTY_CLASS())("Error: Expected ")(
                 pElementExpected)(" element with text field, for ")(
-                m.m_strCommand.get())(".")
+                m.command_.get())(".")
                 .Flush();
             return (-1);  // error condition
         }
 
-        LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.m_strCommand.get())("  ")(
-            m.m_bSuccess ? "SUCCESS" : "FAILURE")(" NymID:    ")(
-            m.m_strNymID.get())(" NotaryID: ")(m.m_strNotaryID.get())
+        LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.command_.get())("  ")(
+            m.success_ ? "SUCCESS" : "FAILURE")(" NymID:    ")(m.nym_id_.get())(
+            " NotaryID: ")(m.notary_id_.get())
             .Flush();
 
         return 1;
@@ -4440,15 +4330,15 @@ class StrategyAddClaim final : public OTMessageStrategy
 public:
     void writeXml(Message& m, Tag& parent) final
     {
-        TagPtr pTag(new Tag(m.m_strCommand->Get()));
+        TagPtr pTag(new Tag(m.command_->Get()));
 
-        pTag->add_attribute("requestNum", m.m_strRequestNum->Get());
-        pTag->add_attribute("nymID", m.m_strNymID->Get());
-        pTag->add_attribute("notaryID", m.m_strNotaryID->Get());
-        pTag->add_attribute("section", m.m_strNymID2->Get());
-        pTag->add_attribute("type", m.m_strInstrumentDefinitionID->Get());
-        pTag->add_attribute("value", m.m_strAcctID->Get());
-        pTag->add_attribute("primary", formatBool(m.m_bBool));
+        pTag->add_attribute("requestNum", m.request_num_->Get());
+        pTag->add_attribute("nymID", m.nym_id_->Get());
+        pTag->add_attribute("notaryID", m.notary_id_->Get());
+        pTag->add_attribute("section", m.nym_id2_->Get());
+        pTag->add_attribute("type", m.instrument_definition_id_->Get());
+        pTag->add_attribute("value", m.acct_id_->Get());
+        pTag->add_attribute("primary", formatBool(m.bool_));
 
         parent.add_tag(pTag);
     }
@@ -4456,20 +4346,18 @@ public:
     auto processXml(Message& m, irr::io::IrrXMLReader*& xml)
         -> std::int32_t final
     {
-        m.m_strCommand = String::Factory(xml->getNodeName());  // Command
-        m.m_strRequestNum =
-            String::Factory(xml->getAttributeValue("requestNum"));
-        m.m_strNymID = String::Factory(xml->getAttributeValue("nymID"));
-        m.m_strNotaryID = String::Factory(xml->getAttributeValue("notaryID"));
-        m.m_strNymID2->Set(xml->getAttributeValue("section"));
-        m.m_strInstrumentDefinitionID->Set(xml->getAttributeValue("type"));
-        m.m_strAcctID->Set(xml->getAttributeValue("value"));
+        m.command_ = String::Factory(xml->getNodeName());  // Command
+        m.request_num_ = String::Factory(xml->getAttributeValue("requestNum"));
+        m.nym_id_ = String::Factory(xml->getAttributeValue("nymID"));
+        m.notary_id_ = String::Factory(xml->getAttributeValue("notaryID"));
+        m.nym_id2_->Set(xml->getAttributeValue("section"));
+        m.instrument_definition_id_->Set(xml->getAttributeValue("type"));
+        m.acct_id_->Set(xml->getAttributeValue("value"));
         const auto primary = String::Factory(xml->getAttributeValue("primary"));
-        m.m_bBool = primary->Compare("true");
+        m.bool_ = primary->Compare("true");
 
-        LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.m_strCommand.get())(
-            " NymID:    ")(m.m_strNymID.get())(" NotaryID: ")(
-            m.m_strNotaryID.get())
+        LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.command_.get())(
+            " NymID:    ")(m.nym_id_.get())(" NotaryID: ")(m.notary_id_.get())
             .Flush();
 
         return 1;
@@ -4484,18 +4372,18 @@ class StrategyAddClaimResponse final : public OTMessageStrategy
 public:
     void writeXml(Message& m, Tag& parent) final
     {
-        TagPtr pTag(new Tag(m.m_strCommand->Get()));
+        TagPtr pTag(new Tag(m.command_->Get()));
 
-        pTag->add_attribute("success", formatBool(m.m_bSuccess));
-        pTag->add_attribute("requestNum", m.m_strRequestNum->Get());
-        pTag->add_attribute("nymID", m.m_strNymID->Get());
-        pTag->add_attribute("notaryID", m.m_strNotaryID->Get());
-        pTag->add_attribute("nymboxHash", m.m_strNymboxHash->Get());
-        pTag->add_attribute("added", formatBool(m.m_bBool));
+        pTag->add_attribute("success", formatBool(m.success_));
+        pTag->add_attribute("requestNum", m.request_num_->Get());
+        pTag->add_attribute("nymID", m.nym_id_->Get());
+        pTag->add_attribute("notaryID", m.notary_id_->Get());
+        pTag->add_attribute("nymboxHash", m.nymbox_hash_->Get());
+        pTag->add_attribute("added", formatBool(m.bool_));
 
-        if (false == m.m_bSuccess) {
-            if (m.m_ascInReferenceTo->GetLength() > 2) {
-                pTag->add_tag("inReferenceTo", m.m_ascInReferenceTo->Get());
+        if (false == m.success_) {
+            if (m.in_reference_to_->GetLength() > 2) {
+                pTag->add_tag("inReferenceTo", m.in_reference_to_->Get());
             }
         }
 
@@ -4507,33 +4395,31 @@ public:
     {
         processXmlSuccess(m, xml);
 
-        m.m_strCommand = String::Factory(xml->getNodeName());  // Command
-        m.m_strRequestNum =
-            String::Factory(xml->getAttributeValue("requestNum"));
-        m.m_strNymID = String::Factory(xml->getAttributeValue("nymID"));
-        m.m_strNotaryID = String::Factory(xml->getAttributeValue("notaryID"));
-        m.m_strNymboxHash =
-            String::Factory(xml->getAttributeValue("nymboxHash"));
+        m.command_ = String::Factory(xml->getNodeName());  // Command
+        m.request_num_ = String::Factory(xml->getAttributeValue("requestNum"));
+        m.nym_id_ = String::Factory(xml->getAttributeValue("nymID"));
+        m.notary_id_ = String::Factory(xml->getAttributeValue("notaryID"));
+        m.nymbox_hash_ = String::Factory(xml->getAttributeValue("nymboxHash"));
         const auto added = String::Factory(xml->getAttributeValue("added"));
-        m.m_bBool = added->Compare("true");
+        m.bool_ = added->Compare("true");
 
         const char* pElementExpected = "inReferenceTo";
-        Armored& ascTextExpected = m.m_ascInReferenceTo;
+        Armored& ascTextExpected = m.in_reference_to_;
 
-        if (false == m.m_bSuccess) {
+        if (false == m.success_) {
             if (!LoadEncodedTextFieldByName(
                     xml, ascTextExpected, pElementExpected)) {
                 LogError()(OT_PRETTY_CLASS())("Error: Expected ")(
                     pElementExpected)(" element with text field, for ")(
-                    m.m_strCommand.get())(".")
+                    m.command_.get())(".")
                     .Flush();
                 return (-1);  // error condition
             }
         }
 
-        LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.m_strCommand.get())("  ")(
-            m.m_bSuccess ? "SUCCESS" : "FAILURE")(" NymID:    ")(
-            m.m_strNymID.get())(" NotaryID: ")(m.m_strNotaryID.get())
+        LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.command_.get())("  ")(
+            m.success_ ? "SUCCESS" : "FAILURE")(" NymID:    ")(m.nym_id_.get())(
+            " NotaryID: ")(m.notary_id_.get())
             .Flush();
 
         return 1;

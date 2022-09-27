@@ -24,18 +24,18 @@ class Test_DealerRouter : public ::testing::Test
 public:
     const zmq::Context& context_;
 
-    const ot::UnallocatedCString testMessage_{"zeromq test message"};
-    const ot::UnallocatedCString testMessage2_{"zeromq test message 2"};
-    const ot::UnallocatedCString testMessage3_{"zeromq test message 3"};
+    const ot::UnallocatedCString test_message_{"zeromq test message"};
+    const ot::UnallocatedCString test_message2_{"zeromq test message 2"};
+    const ot::UnallocatedCString test_message3_{"zeromq test message 3"};
 
     const ot::UnallocatedCString endpoint_{
         "inproc://opentxs/test/dealer_router_test"};
     const ot::UnallocatedCString endpoint2_{
         "inproc://opentxs/test/dealer_router_test2"};
 
-    std::atomic_int callbackFinishedCount_{0};
+    std::atomic_int callback_finished_count_{0};
 
-    int callbackCount_{0};
+    int callback_count_{0};
 
     void dealerSocketThread(const ot::UnallocatedCString& msg);
     void routerSocketThread(const ot::UnallocatedCString& endpoint);
@@ -57,7 +57,7 @@ void Test_DealerRouter::dealerSocketThread(const ot::UnallocatedCString& msg)
             const auto inputString =
                 ot::UnallocatedCString{input.Body().begin()->Bytes()};
             bool match =
-                inputString == testMessage2_ || inputString == testMessage3_;
+                inputString == test_message2_ || inputString == test_message3_;
             EXPECT_TRUE(match);
 
             replyProcessed = true;
@@ -103,7 +103,7 @@ void Test_DealerRouter::routerSocketThread(
             const auto inputString =
                 ot::UnallocatedCString{input.Body().begin()->Bytes()};
             bool match =
-                inputString == testMessage2_ || inputString == testMessage3_;
+                inputString == test_message2_ || inputString == test_message3_;
             EXPECT_TRUE(match);
 
             replyMessage = ot::network::zeromq::reply_to_message(input);
@@ -146,7 +146,7 @@ TEST_F(Test_DealerRouter, Dealer_Router)
             const auto inputString =
                 ot::UnallocatedCString{input.Body().begin()->Bytes()};
 
-            EXPECT_EQ(testMessage_, inputString);
+            EXPECT_EQ(test_message_, inputString);
 
             replyMessage = ot::network::zeromq::reply_to_message(input);
             for (auto& frame : input.Body()) { replyMessage.AddFrame(frame); }
@@ -171,7 +171,7 @@ TEST_F(Test_DealerRouter, Dealer_Router)
             const auto inputString =
                 ot::UnallocatedCString{input.Body().begin()->Bytes()};
 
-            EXPECT_EQ(testMessage_, inputString);
+            EXPECT_EQ(test_message_, inputString);
 
             replyProcessed = true;
         });
@@ -189,7 +189,7 @@ TEST_F(Test_DealerRouter, Dealer_Router)
 
     auto sent = dealerSocket->Send([&] {
         auto out = opentxs::network::zeromq::Message{};
-        out.AddFrame(testMessage_);
+        out.AddFrame(test_message_);
 
         return out;
     }());
@@ -215,14 +215,14 @@ TEST_F(Test_DealerRouter, Dealer_Router)
 
 TEST_F(Test_DealerRouter, Dealer_2_Router_1)
 {
-    callbackCount_ = 2;
+    callback_count_ = 2;
 
     ot::UnallocatedMap<ot::UnallocatedCString, ot::network::zeromq::Message>
         replyMessages{
             std::pair<ot::UnallocatedCString, ot::network::zeromq::Message>(
-                testMessage2_, {}),
+                test_message2_, {}),
             std::pair<ot::UnallocatedCString, ot::network::zeromq::Message>(
-                testMessage3_, {})};
+                test_message3_, {})};
 
     auto routerCallback = zmq::ListenCallback::Factory(
         [this, &replyMessages](auto&& input) -> void {
@@ -231,7 +231,7 @@ TEST_F(Test_DealerRouter, Dealer_2_Router_1)
             const auto inputString =
                 ot::UnallocatedCString{input.Body().begin()->Bytes()};
             bool match =
-                inputString == testMessage2_ || inputString == testMessage3_;
+                inputString == test_message2_ || inputString == test_message3_;
             EXPECT_TRUE(match);
 
             auto& replyMessage = replyMessages.at(inputString);
@@ -240,7 +240,7 @@ TEST_F(Test_DealerRouter, Dealer_2_Router_1)
                 replyMessage.AddFrame(frame);
             }
 
-            ++callbackFinishedCount_;
+            ++callback_finished_count_;
         });
 
     ASSERT_NE(nullptr, &routerCallback.get());
@@ -255,15 +255,15 @@ TEST_F(Test_DealerRouter, Dealer_2_Router_1)
     routerSocket->Start(endpoint_);
 
     std::thread dealerSocketThread1(
-        &Test_DealerRouter::dealerSocketThread, this, testMessage2_);
+        &Test_DealerRouter::dealerSocketThread, this, test_message2_);
     std::thread dealerSocketThread2(
-        &Test_DealerRouter::dealerSocketThread, this, testMessage3_);
+        &Test_DealerRouter::dealerSocketThread, this, test_message3_);
 
-    const auto& replyMessage1 = replyMessages.at(testMessage2_);
-    const auto& replyMessage2 = replyMessages.at(testMessage3_);
+    const auto& replyMessage1 = replyMessages.at(test_message2_);
+    const auto& replyMessage2 = replyMessages.at(test_message3_);
 
     auto end = std::time(nullptr) + 15;
-    while (!callbackFinishedCount_ && std::time(nullptr) < end) {
+    while (!callback_finished_count_ && std::time(nullptr) < end) {
         std::this_thread::sleep_for(100ms);
     }
 
@@ -276,7 +276,7 @@ TEST_F(Test_DealerRouter, Dealer_2_Router_1)
     }
 
     end = std::time(nullptr) + 15;
-    while (callbackFinishedCount_ < callbackCount_ &&
+    while (callback_finished_count_ < callback_count_ &&
            std::time(nullptr) < end) {
         std::this_thread::sleep_for(100ms);
     }
@@ -287,7 +287,7 @@ TEST_F(Test_DealerRouter, Dealer_2_Router_1)
         routerSocket->Send(ot::network::zeromq::Message{replyMessage2});
     }
 
-    ASSERT_EQ(callbackCount_, callbackFinishedCount_);
+    ASSERT_EQ(callback_count_, callback_finished_count_);
 
     dealerSocketThread1.join();
     dealerSocketThread2.join();
@@ -295,7 +295,7 @@ TEST_F(Test_DealerRouter, Dealer_2_Router_1)
 
 TEST_F(Test_DealerRouter, Dealer_1_Router_2)
 {
-    callbackCount_ = 2;
+    callback_count_ = 2;
 
     std::thread routerSocketThread1(
         &Test_DealerRouter::routerSocketThread, this, endpoint_);
@@ -308,10 +308,10 @@ TEST_F(Test_DealerRouter, Dealer_1_Router_2)
             const auto inputString =
                 ot::UnallocatedCString{input.Body().begin()->Bytes()};
             bool match =
-                inputString == testMessage2_ || inputString == testMessage3_;
+                inputString == test_message2_ || inputString == test_message3_;
             EXPECT_TRUE(match);
 
-            ++callbackFinishedCount_;
+            ++callback_finished_count_;
         });
 
     ASSERT_NE(nullptr, &dealerCallback.get());
@@ -328,7 +328,7 @@ TEST_F(Test_DealerRouter, Dealer_1_Router_2)
 
     auto sent = dealerSocket->Send([&] {
         auto out = opentxs::network::zeromq::Message{};
-        out.AddFrame(testMessage2_);
+        out.AddFrame(test_message2_);
 
         return out;
     }());
@@ -337,7 +337,7 @@ TEST_F(Test_DealerRouter, Dealer_1_Router_2)
 
     sent = dealerSocket->Send([&] {
         auto out = opentxs::network::zeromq::Message{};
-        out.AddFrame(testMessage3_);
+        out.AddFrame(test_message3_);
 
         return out;
     }());
@@ -345,12 +345,12 @@ TEST_F(Test_DealerRouter, Dealer_1_Router_2)
     ASSERT_TRUE(sent);
 
     auto end = std::time(nullptr) + 15;
-    while (callbackFinishedCount_ < callbackCount_ &&
+    while (callback_finished_count_ < callback_count_ &&
            std::time(nullptr) < end) {
         std::this_thread::sleep_for(100ms);
     }
 
-    ASSERT_EQ(callbackCount_, callbackFinishedCount_);
+    ASSERT_EQ(callback_count_, callback_finished_count_);
 
     routerSocketThread1.join();
     routerSocketThread2.join();
@@ -369,14 +369,14 @@ TEST_F(Test_DealerRouter, Dealer_Router_Multipart)
 
             auto originalFound{false};
             for (const auto& frame : input.Header()) {
-                if (testMessage_ == frame.Bytes()) { originalFound = true; }
+                if (test_message_ == frame.Bytes()) { originalFound = true; }
             }
 
             EXPECT_TRUE(originalFound);
 
             for (const auto& frame : input.Body()) {
-                bool match = frame.Bytes() == testMessage2_ ||
-                             frame.Bytes() == testMessage3_;
+                bool match = frame.Bytes() == test_message2_ ||
+                             frame.Bytes() == test_message3_;
                 EXPECT_TRUE(match);
             }
 
@@ -403,11 +403,11 @@ TEST_F(Test_DealerRouter, Dealer_Router_Multipart)
             EXPECT_EQ(1, input.Header().size());
             EXPECT_EQ(2, input.Body().size());
             for (const auto& frame : input.Header()) {
-                EXPECT_EQ(testMessage_, frame.Bytes());
+                EXPECT_EQ(test_message_, frame.Bytes());
             }
             for (const auto& frame : input.Body()) {
-                bool match = frame.Bytes() == testMessage2_ ||
-                             frame.Bytes() == testMessage3_;
+                bool match = frame.Bytes() == test_message2_ ||
+                             frame.Bytes() == test_message3_;
                 EXPECT_TRUE(match);
             }
 
@@ -426,10 +426,10 @@ TEST_F(Test_DealerRouter, Dealer_Router_Multipart)
     dealerSocket->Start(endpoint_);
 
     auto multipartMessage = opentxs::network::zeromq::Message{};
-    multipartMessage.AddFrame(testMessage_);
+    multipartMessage.AddFrame(test_message_);
     multipartMessage.StartBody();
-    multipartMessage.AddFrame(testMessage2_);
-    multipartMessage.AddFrame(testMessage3_);
+    multipartMessage.AddFrame(test_message2_);
+    multipartMessage.AddFrame(test_message3_);
 
     auto sent = dealerSocket->Send(std::move(multipartMessage));
 

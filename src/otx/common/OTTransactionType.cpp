@@ -26,17 +26,17 @@ namespace opentxs
 // constructors and therefore provide the requisite IDs.
 OTTransactionType::OTTransactionType(const api::Session& api)
     : Contract(api)
-    , m_AcctID()
-    , m_NotaryID()
-    , m_AcctNotaryID()
-    , m_AcctNymID()
-    , m_lTransactionNum(0)
-    , m_lInReferenceToTransaction(0)
-    , m_lNumberOfOrigin(0)
-    , m_originType(originType::not_applicable)
-    , m_ascInReferenceTo(Armored::Factory())
-    , m_bLoadSecurely(true)
-    , m_Numlist()
+    , account_id_()
+    , notary_id_()
+    , account_notary_id_()
+    , account_nym_id_()
+    , transaction_num_(0)
+    , in_reference_to_transaction_(0)
+    , number_of_origin_(0)
+    , origin_type_(originType::not_applicable)
+    , in_reference_to_(Armored::Factory())
+    , load_securely_(true)
+    , numlist_()
 {
     // this function is private to prevent people from using it.
     // Should never actually get called.
@@ -51,20 +51,20 @@ OTTransactionType::OTTransactionType(
     const identifier::Notary& theNotaryID,
     originType theOriginType)
     : Contract(api, theAccountID)
-    , m_AcctID()
-    , m_NotaryID(theNotaryID)
-    , m_AcctNotaryID()
-    , m_AcctNymID(theNymID)
-    , m_lTransactionNum(0)
-    , m_lInReferenceToTransaction(0)
-    , m_lNumberOfOrigin(0)
-    , m_originType(theOriginType)
-    , m_ascInReferenceTo(Armored::Factory())
-    , m_bLoadSecurely(true)
-    , m_Numlist()
+    , account_id_()
+    , notary_id_(theNotaryID)
+    , account_notary_id_()
+    , account_nym_id_(theNymID)
+    , transaction_num_(0)
+    , in_reference_to_transaction_(0)
+    , number_of_origin_(0)
+    , origin_type_(theOriginType)
+    , in_reference_to_(Armored::Factory())
+    , load_securely_(true)
+    , numlist_()
 {
-    // do NOT set m_AcctID and m_AcctNotaryID here.  Let the child classes
-    // LOAD them or GENERATE them.
+    // do NOT set account_id_ and account_notary_id_ here.  Let the child
+    // classes LOAD them or GENERATE them.
 }
 
 OTTransactionType::OTTransactionType(
@@ -75,20 +75,20 @@ OTTransactionType::OTTransactionType(
     std::int64_t lTransactionNum,
     originType theOriginType)
     : Contract(api, theAccountID)
-    , m_AcctID()
-    , m_NotaryID(theNotaryID)
-    , m_AcctNotaryID()
-    , m_AcctNymID(theNymID)
-    , m_lTransactionNum(lTransactionNum)
-    , m_lInReferenceToTransaction(0)
-    , m_lNumberOfOrigin(0)
-    , m_originType(theOriginType)
-    , m_ascInReferenceTo(Armored::Factory())
-    , m_bLoadSecurely(true)
-    , m_Numlist()
+    , account_id_()
+    , notary_id_(theNotaryID)
+    , account_notary_id_()
+    , account_nym_id_(theNymID)
+    , transaction_num_(lTransactionNum)
+    , in_reference_to_transaction_(0)
+    , number_of_origin_(0)
+    , origin_type_(theOriginType)
+    , in_reference_to_(Armored::Factory())
+    , load_securely_(true)
+    , numlist_()
 {
-    // do NOT set m_AcctID and m_AcctNotaryID here.  Let the child classes
-    // LOAD them or GENERATE them.
+    // do NOT set account_id_ and account_notary_id_ here.  Let the child
+    // classes LOAD them or GENERATE them.
 }
 
 auto OTTransactionType::GetOriginTypeFromString(const String& strType)
@@ -118,20 +118,20 @@ auto OTTransactionType::GetOriginTypeFromString(const String& strType)
 // Used in finalReceipt and paymentReceipt
 auto OTTransactionType::GetOriginType() const -> originType
 {
-    return m_originType;
+    return origin_type_;
 }
 
 // Used in finalReceipt and paymentReceipt
 void OTTransactionType::SetOriginType(originType theOriginType)
 {
-    m_originType = theOriginType;
+    origin_type_ = theOriginType;
 }
 
 // -----------------------------------
 
 auto OTTransactionType::GetOriginTypeString() const -> const char*
 {
-    return GetOriginTypeToString(static_cast<int>(m_originType));
+    return GetOriginTypeToString(static_cast<int>(origin_type_));
 }
 
 // -----------------------------------
@@ -139,19 +139,19 @@ auto OTTransactionType::GetOriginTypeString() const -> const char*
 void OTTransactionType::GetNumList(NumList& theOutput)
 {
     theOutput.Release();
-    theOutput.Add(m_Numlist);
+    theOutput.Add(numlist_);
 }
 
 // Allows you to string-search the raw contract.
 auto OTTransactionType::Contains(const String& strContains) -> bool
 {
-    return m_strRawFile->Contains(strContains);
+    return raw_file_->Contains(strContains);
 }
 
 // Allows you to string-search the raw contract.
 auto OTTransactionType::Contains(const char* szContains) -> bool
 {
-    return m_strRawFile->Contains(szContains);
+    return raw_file_->Contains(szContains);
 }
 
 // We'll see if any new bugs pop up after adding this...
@@ -160,25 +160,25 @@ void OTTransactionType::Release_TransactionType()
 {
     // If there were any dynamically allocated objects, clean them up here.
 
-    //  m_ID.Release();
-    m_AcctID.clear();  // Compare m_AcctID to m_ID after loading it from
-                       // string
-                       // or file. They should match, and signature should
-                       // verify.
+    //  id_.Release();
+    account_id_.clear();  // Compare account_id_ to id_ after loading it from
+                          // string
+                          // or file. They should match, and signature should
+                          // verify.
 
-    //  m_NotaryID->Release(); // Notary ID as used to instantiate the
+    //  notary_id_->Release(); // Notary ID as used to instantiate the
     //  transaction, based on expected NotaryID.
-    m_AcctNotaryID.clear();  // Actual NotaryID within the signed portion.
-                             // (Compare to m_NotaryID upon loading.)
+    account_notary_id_.clear();  // Actual NotaryID within the signed portion.
+                                 // (Compare to notary_id_ upon loading.)
 
-    //  m_AcctNymID->Release();
+    //  account_nym_id_->Release();
 
-    m_lTransactionNum = 0;
-    m_lInReferenceToTransaction = 0;
-    m_lNumberOfOrigin = 0;
+    transaction_num_ = 0;
+    in_reference_to_transaction_ = 0;
+    number_of_origin_ = 0;
 
-    m_ascInReferenceTo->Release();  // This item may be in reference to a
-                                    // different item
+    in_reference_to_->Release();  // This item may be in reference to a
+                                  // different item
 
     // This was causing OTLedger to fail loading. Can't set this to true until
     // the END
@@ -186,9 +186,9 @@ void OTTransactionType::Release_TransactionType()
     // the OTLedger
     // END TAG could set this back to true...
     //
-    //  m_bLoadSecurely = true; // defaults to true.
+    //  load_securely_ = true; // defaults to true.
 
-    m_Numlist.Release();
+    numlist_.Release();
 }
 
 void OTTransactionType::Release()
@@ -218,12 +218,12 @@ auto OTTransactionType::IsSameAccount(const OTTransactionType& rhs) const
 
 void OTTransactionType::GetReferenceString(String& theStr) const
 {
-    m_ascInReferenceTo->GetString(theStr);
+    in_reference_to_->GetString(theStr);
 }
 
 void OTTransactionType::SetReferenceString(const String& theStr)
 {
-    m_ascInReferenceTo->SetString(theStr);
+    in_reference_to_->SetString(theStr);
 }
 
 // Make sure this contract checks out. Very high level.
@@ -256,24 +256,25 @@ auto OTTransactionType::VerifyAccount(const identity::Nym& theNym) -> bool
 
 auto OTTransactionType::VerifyContractID() const -> bool
 {
-    // m_AcctID contains the number we read from the xml file
+    // account_id_ contains the number we read from the xml file
     // we can compare it to the existing and actual identifier.
-    // m_AcctID  contains the "IDENTIFIER" of the object, according to the xml
-    // file.
+    // account_id_  contains the "IDENTIFIER" of the object, according to the
+    // xml file.
     //
-    // Meanwhile m_ID contains the same identifier, except it was generated.
+    // Meanwhile id_ contains the same identifier, except it was generated.
     //
     // Now let's compare the two and make sure they match...
     // Also, for this class, we compare NotaryID as well.  They go hand in hand.
 
-    if ((m_ID != m_AcctID) || (m_NotaryID != m_AcctNotaryID)) {
-        auto str1 = String::Factory(m_ID), str2 = String::Factory(m_AcctID),
-             str3 = String::Factory(m_NotaryID),
-             str4 = String::Factory(m_AcctNotaryID);
+    if ((id_ != account_id_) || (notary_id_ != account_notary_id_)) {
+        auto str1 = String::Factory(id_), str2 = String::Factory(account_id_),
+             str3 = String::Factory(notary_id_),
+             str4 = String::Factory(account_notary_id_);
         LogError()(OT_PRETTY_CLASS())("Identifiers mismatch").Flush();
-        LogError()("m_AcctID actual: ")(m_AcctID)(" expected: ")(m_ID).Flush();
-        LogError()("m_NotaryID actual: ")(m_AcctNotaryID)(" expected: ")(
-            m_NotaryID)
+        LogError()("account_id_ actual: ")(account_id_)(" expected: ")(id_)
+            .Flush();
+        LogError()("notary_id_ actual: ")(account_notary_id_)(" expected: ")(
+            notary_id_)
             .Flush();
 
         return false;
@@ -286,43 +287,43 @@ auto OTTransactionType::VerifyContractID() const -> bool
 // Need to know the transaction number of this transaction? Call this.
 auto OTTransactionType::GetTransactionNum() const -> std::int64_t
 {
-    return m_lTransactionNum;
+    return transaction_num_;
 }
 
 void OTTransactionType::SetTransactionNum(std::int64_t lTransactionNum)
 {
-    m_lTransactionNum = lTransactionNum;
+    transaction_num_ = lTransactionNum;
 }
 
 // virtual
 void OTTransactionType::CalculateNumberOfOrigin()
 {
-    m_lNumberOfOrigin = m_lTransactionNum;
+    number_of_origin_ = transaction_num_;
 }
 
 // Need to know the transaction number of the ORIGINAL transaction? Call this.
 // virtual
 auto OTTransactionType::GetNumberOfOrigin() -> std::int64_t
 {
-    if (0 == m_lNumberOfOrigin) { CalculateNumberOfOrigin(); }
+    if (0 == number_of_origin_) { CalculateNumberOfOrigin(); }
 
-    return m_lNumberOfOrigin;
+    return number_of_origin_;
 }
 
 // Gets WITHOUT calculating.
 auto OTTransactionType::GetRawNumberOfOrigin() const -> std::int64_t
 {
-    return m_lNumberOfOrigin;
+    return number_of_origin_;
 }
 
 void OTTransactionType::SetNumberOfOrigin(std::int64_t lTransactionNum)
 {
-    m_lNumberOfOrigin = lTransactionNum;
+    number_of_origin_ = lTransactionNum;
 }
 
 void OTTransactionType::SetNumberOfOrigin(OTTransactionType& setFrom)
 {
-    m_lNumberOfOrigin = setFrom.GetNumberOfOrigin();
+    number_of_origin_ = setFrom.GetNumberOfOrigin();
 }
 
 // Allows you to compare any OTTransaction or Item to any other OTTransaction
@@ -353,12 +354,12 @@ auto OTTransactionType::VerifyNumberOfOrigin(OTTransactionType& compareTo)
 // Need to know the transaction number that this is in reference to? Call this.
 auto OTTransactionType::GetReferenceToNum() const -> std::int64_t
 {
-    return m_lInReferenceToTransaction;
+    return in_reference_to_transaction_;
 }
 
 void OTTransactionType::SetReferenceToNum(std::int64_t lTransactionNum)
 {
-    m_lInReferenceToTransaction = lTransactionNum;
+    in_reference_to_transaction_ = lTransactionNum;
 }
 
 OTTransactionType::~OTTransactionType() { Release_TransactionType(); }

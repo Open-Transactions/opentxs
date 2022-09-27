@@ -59,17 +59,17 @@ Keypair::Keypair(
     std::unique_ptr<crypto::key::Asymmetric> publicKey,
     std::unique_ptr<crypto::key::Asymmetric> privateKey) noexcept
     : api_(api)
-    , m_pkeyPrivate(privateKey.release())
-    , m_pkeyPublic(publicKey.release())
+    , key_private_(privateKey.release())
+    , key_public_(publicKey.release())
     , role_(role)
 {
-    OT_ASSERT(m_pkeyPublic.get());
+    OT_ASSERT(key_public_.get());
 }
 
 Keypair::Keypair(const Keypair& rhs) noexcept
     : api_(rhs.api_)
-    , m_pkeyPrivate(rhs.m_pkeyPrivate)
-    , m_pkeyPublic(rhs.m_pkeyPublic)
+    , key_private_(rhs.key_private_)
+    , key_public_(rhs.key_public_)
     , role_(rhs.role_)
 {
 }
@@ -79,10 +79,10 @@ auto Keypair::CheckCapability(
 {
     bool output{false};
 
-    if (m_pkeyPrivate.get()) {
-        output |= m_pkeyPrivate->hasCapability(capability);
-    } else if (m_pkeyPublic.get()) {
-        output |= m_pkeyPublic->hasCapability(capability);
+    if (key_private_.get()) {
+        output |= key_private_->hasCapability(capability);
+    } else if (key_public_.get()) {
+        output |= key_public_->hasCapability(capability);
     }
 
     return output;
@@ -91,7 +91,7 @@ auto Keypair::CheckCapability(
 // Return the private key as an Asymmetric object
 auto Keypair::GetPrivateKey() const -> const key::Asymmetric&
 {
-    if (m_pkeyPrivate.get()) { return m_pkeyPrivate; }
+    if (key_private_.get()) { return key_private_; }
 
     throw std::runtime_error("private key missing");
 }
@@ -99,7 +99,7 @@ auto Keypair::GetPrivateKey() const -> const key::Asymmetric&
 // Return the public key as an Asymmetric object
 auto Keypair::GetPublicKey() const -> const key::Asymmetric&
 {
-    if (m_pkeyPublic.get()) { return m_pkeyPublic; }
+    if (key_public_.get()) { return key_public_; }
 
     throw std::runtime_error("public key missing");
 }
@@ -110,9 +110,9 @@ auto Keypair::GetPublicKeyBySignature(
     const Signature& theSignature,
     bool bInclusive) const noexcept -> std::int32_t
 {
-    OT_ASSERT(m_pkeyPublic.get());
+    OT_ASSERT(key_public_.get());
 
-    const auto* metadata = m_pkeyPublic->GetMetadata();
+    const auto* metadata = key_public_->GetMetadata();
 
     OT_ASSERT(nullptr != metadata);
 
@@ -134,14 +134,14 @@ auto Keypair::GetPublicKeyBySignature(
     // (But if it IS available, then it must match, or the key won't be
     // returned.)
     //
-    // If the signature has no metadata, or if m_pkeyPublic has no metadata, or
+    // If the signature has no metadata, or if key_public_ has no metadata, or
     // if they BOTH have metadata, and their metadata is a MATCH...
     if (!theSignature.getMetaData().HasMetadata() || !metadata->HasMetadata() ||
         (metadata->HasMetadata() && theSignature.getMetaData().HasMetadata() &&
          (theSignature.getMetaData() == *(metadata)))) {
-        // ...Then add m_pkeyPublic as a possible match, to listOutput.
+        // ...Then add key_public_ as a possible match, to listOutput.
         //
-        listOutput.push_back(&m_pkeyPublic.get());
+        listOutput.push_back(&key_public_.get());
         return 1;
     }
     return 0;
@@ -150,14 +150,14 @@ auto Keypair::GetPublicKeyBySignature(
 auto Keypair::Serialize(proto::AsymmetricKey& serialized, bool privateKey)
     const noexcept -> bool
 {
-    OT_ASSERT(m_pkeyPublic.get());
+    OT_ASSERT(key_public_.get());
 
     if (privateKey) {
-        OT_ASSERT(m_pkeyPrivate.get());
+        OT_ASSERT(key_private_.get());
 
-        if (false == m_pkeyPrivate->Serialize(serialized)) { return false; }
+        if (false == key_private_->Serialize(serialized)) { return false; }
     } else {
-        if (false == m_pkeyPublic->Serialize(serialized)) { return false; }
+        if (false == key_public_->Serialize(serialized)) { return false; }
     }
     return true;
 }
@@ -167,6 +167,6 @@ auto Keypair::GetTransportKey(
     Secret& privateKey,
     const opentxs::PasswordPrompt& reason) const noexcept -> bool
 {
-    return m_pkeyPrivate->TransportKey(publicKey, privateKey, reason);
+    return key_private_->TransportKey(publicKey, privateKey, reason);
 }
 }  // namespace opentxs::crypto::key::implementation

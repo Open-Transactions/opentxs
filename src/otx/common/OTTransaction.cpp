@@ -63,23 +63,23 @@ namespace opentxs
 // private and hopefully not needed
 OTTransaction::OTTransaction(const api::Session& api)
     : OTTransactionType(api)
-    , m_pParent(nullptr)
-    , m_bIsAbbreviated(false)
-    , m_lAbbrevAmount(0)
-    , m_lDisplayAmount(0)
-    , m_lInRefDisplay(0)
-    , m_Hash()
-    , m_DATE_SIGNED()
-    , m_Type(transactionType::error_state)
-    , m_listItems()
-    , m_lClosingTransactionNo(0)
-    , m_ascCancellationRequest(Armored::Factory())
-    , m_lRequestNumber(0)
-    , m_bReplyTransSuccess(false)
-    , m_bCancelled(false)
-    , m_inboxhash{}
-    , m_outboxhash{}
-    , m_accounthash{}
+    , parent_(nullptr)
+    , is_abbreviated_(false)
+    , abbrev_amount_(0)
+    , display_amount_(0)
+    , in_ref_display_(0)
+    , hash_()
+    , date_signed_()
+    , type_(transactionType::error_state)
+    , list_items_()
+    , closing_transaction_no_(0)
+    , cancellation_request_(Armored::Factory())
+    , request_number_(0)
+    , reply_trans_success_(false)
+    , cancelled_(false)
+    , inbox_hash_{}
+    , outbox_hash_{}
+    , account_hash_{}
 {
     InitTransaction();
 }
@@ -97,23 +97,23 @@ OTTransaction::OTTransaction(const api::Session& api, const Ledger& theOwner)
           theOwner.GetNymID(),
           theOwner.GetPurportedAccountID(),
           theOwner.GetPurportedNotaryID())
-    , m_pParent(&theOwner)
-    , m_bIsAbbreviated(false)
-    , m_lAbbrevAmount(0)
-    , m_lDisplayAmount(0)
-    , m_lInRefDisplay(0)
-    , m_Hash()
-    , m_DATE_SIGNED()
-    , m_Type(transactionType::error_state)
-    , m_listItems()
-    , m_lClosingTransactionNo(0)
-    , m_ascCancellationRequest(Armored::Factory())
-    , m_lRequestNumber(0)
-    , m_bReplyTransSuccess(false)
-    , m_bCancelled(false)
-    , m_inboxhash{}
-    , m_outboxhash{}
-    , m_accounthash{}
+    , parent_(&theOwner)
+    , is_abbreviated_(false)
+    , abbrev_amount_(0)
+    , display_amount_(0)
+    , in_ref_display_(0)
+    , hash_()
+    , date_signed_()
+    , type_(transactionType::error_state)
+    , list_items_()
+    , closing_transaction_no_(0)
+    , cancellation_request_(Armored::Factory())
+    , request_number_(0)
+    , reply_trans_success_(false)
+    , cancelled_(false)
+    , inbox_hash_{}
+    , outbox_hash_{}
+    , account_hash_{}
 {
     InitTransaction();
 }
@@ -135,28 +135,28 @@ OTTransaction::OTTransaction(
     const identifier::Notary& theNotaryID,
     const originType theOriginType /*=originType::not_applicable*/)
     : OTTransactionType(api, theNymID, theAccountID, theNotaryID, theOriginType)
-    , m_pParent(nullptr)
-    , m_bIsAbbreviated(false)
-    , m_lAbbrevAmount(0)
-    , m_lDisplayAmount(0)
-    , m_lInRefDisplay(0)
-    , m_Hash()
-    , m_DATE_SIGNED()
-    , m_Type(transactionType::error_state)
-    , m_listItems()
-    , m_lClosingTransactionNo(0)
-    , m_ascCancellationRequest(Armored::Factory())
-    , m_lRequestNumber(0)
-    , m_bReplyTransSuccess(false)
-    , m_bCancelled(false)
-    , m_inboxhash{}
-    , m_outboxhash{}
-    , m_accounthash{}
+    , parent_(nullptr)
+    , is_abbreviated_(false)
+    , abbrev_amount_(0)
+    , display_amount_(0)
+    , in_ref_display_(0)
+    , hash_()
+    , date_signed_()
+    , type_(transactionType::error_state)
+    , list_items_()
+    , closing_transaction_no_(0)
+    , cancellation_request_(Armored::Factory())
+    , request_number_(0)
+    , reply_trans_success_(false)
+    , cancelled_(false)
+    , inbox_hash_{}
+    , outbox_hash_{}
+    , account_hash_{}
 {
     InitTransaction();
 
-    //  m_AcctID    = theID; // these must be loaded or generated. NOT set in
-    //  constructor, for security reasons. m_NotaryID    = theNotaryID; // There
+    //  account_id_    = theID; // these must be loaded or generated. NOT set in
+    //  constructor, for security reasons. notary_id_    = theNotaryID; // There
     //  are only here in ghostly form as a WARNING to you!
 }
 
@@ -174,31 +174,31 @@ OTTransaction::OTTransaction(
           theNotaryID,
           lTransactionNum,
           theOriginType)
-    , m_pParent(nullptr)
-    , m_bIsAbbreviated(false)
-    , m_lAbbrevAmount(0)
-    , m_lDisplayAmount(0)
-    , m_lInRefDisplay(0)
-    , m_Hash()
-    , m_DATE_SIGNED()
-    , m_Type(transactionType::error_state)
-    , m_listItems()
-    , m_lClosingTransactionNo(0)
-    , m_ascCancellationRequest(Armored::Factory())
-    , m_lRequestNumber(0)
-    , m_bReplyTransSuccess(false)
-    , m_bCancelled(false)
-    , m_inboxhash{}
-    , m_outboxhash{}
-    , m_accounthash{}
+    , parent_(nullptr)
+    , is_abbreviated_(false)
+    , abbrev_amount_(0)
+    , display_amount_(0)
+    , in_ref_display_(0)
+    , hash_()
+    , date_signed_()
+    , type_(transactionType::error_state)
+    , list_items_()
+    , closing_transaction_no_(0)
+    , cancellation_request_(Armored::Factory())
+    , request_number_(0)
+    , reply_trans_success_(false)
+    , cancelled_(false)
+    , inbox_hash_{}
+    , outbox_hash_{}
+    , account_hash_{}
 {
     InitTransaction();
 
-    //  m_lTransactionNum = lTransactionNum; // This is set in the constructor,
-    //  as are m_ID and m_NotaryID m_AcctID    = theID; // these must be loaded
-    //  or generated. NOT set in constructor, for security reasons. m_NotaryID
-    //  = theNotaryID; // There are only here in ghostly form as a WARNING to
-    //  you!
+    //  transaction_num_ = lTransactionNum; // This is set in the constructor,
+    //  as are id_ and notary_id_ account_id_    = theID; // these must be
+    //  loaded or generated. NOT set in constructor, for security reasons.
+    //  notary_id_ = theNotaryID; // There are only here in ghostly form as a
+    //  WARNING to you!
 }
 
 // This CONSTRUCTOR is used for instantiating "abbreviated" transactions,
@@ -232,23 +232,23 @@ OTTransaction::OTTransaction(
           theNotaryID,
           lTransactionNum,
           theOriginType)
-    , m_pParent(nullptr)
-    , m_bIsAbbreviated(true)
-    , m_lAbbrevAmount(lAdjustment)
-    , m_lDisplayAmount(lDisplayValue)
-    , m_lInRefDisplay(lInRefDisplay)
-    , m_Hash(api_.Factory().IdentifierFromBase58(strHash.Bytes()))
-    , m_DATE_SIGNED()
-    , m_Type(theType)
-    , m_listItems()
-    , m_lClosingTransactionNo(lClosingNum)
-    , m_ascCancellationRequest(Armored::Factory())
-    , m_lRequestNumber(lRequestNum)
-    , m_bReplyTransSuccess(bReplyTransSuccess)
-    , m_bCancelled(false)
-    , m_inboxhash{}
-    , m_outboxhash{}
-    , m_accounthash{}
+    , parent_(nullptr)
+    , is_abbreviated_(true)
+    , abbrev_amount_(lAdjustment)
+    , display_amount_(lDisplayValue)
+    , in_ref_display_(lInRefDisplay)
+    , hash_(api_.Factory().IdentifierFromBase58(strHash.Bytes()))
+    , date_signed_()
+    , type_(theType)
+    , list_items_()
+    , closing_transaction_no_(lClosingNum)
+    , cancellation_request_(Armored::Factory())
+    , request_number_(lRequestNum)
+    , reply_trans_success_(bReplyTransSuccess)
+    , cancelled_(false)
+    , inbox_hash_{}
+    , outbox_hash_{}
+    , account_hash_{}
 {
     InitTransaction();
 
@@ -258,20 +258,19 @@ OTTransaction::OTTransaction(
     // Then why call it? I don't know, convention? For the sake of future
     // subclasses?
     //
-    m_bIsAbbreviated = true;
-    m_DATE_SIGNED = the_DATE_SIGNED;
-    m_Type =
-        theType;  // This one is same story as date signed. Setting it back.
-    m_lClosingTransactionNo = lClosingNum;
-    m_lAbbrevAmount = lAdjustment;
-    m_lDisplayAmount = lDisplayValue;
-    m_lInRefDisplay = lInRefDisplay;
+    is_abbreviated_ = true;
+    date_signed_ = the_DATE_SIGNED;
+    type_ = theType;  // This one is same story as date signed. Setting it back.
+    closing_transaction_no_ = lClosingNum;
+    abbrev_amount_ = lAdjustment;
+    display_amount_ = lDisplayValue;
+    in_ref_display_ = lInRefDisplay;
 
-    m_lRequestNumber = lRequestNum;             // for replyNotice
-    m_bReplyTransSuccess = bReplyTransSuccess;  // for replyNotice
+    request_number_ = lRequestNum;              // for replyNotice
+    reply_trans_success_ = bReplyTransSuccess;  // for replyNotice
 
-    m_lTransactionNum = lTransactionNum;  // This is set in OTTransactionType's
-    // constructor, as are m_ID and m_NotaryID
+    transaction_num_ = lTransactionNum;  // This is set in OTTransactionType's
+    // constructor, as are id_ and notary_id_
 
     SetReferenceToNum(lInRefTo);
     SetNumberOfOrigin(lNumberOfOrigin);
@@ -318,7 +317,7 @@ OTTransaction::OTTransaction(
 
     SetNymID(theNymID);
 
-    if (nullptr != pNumList) { m_Numlist = *pNumList; }
+    if (nullptr != pNumList) { numlist_ = *pNumList; }
 }
 
 // Todo: eliminate this function since there is already a list of strings at
@@ -420,12 +419,12 @@ auto OTTransaction::GetTypeFromString(const String& strType) -> transactionType
 // Used in balance agreement, part of the inbox report.
 auto OTTransaction::GetClosingNum() const -> std::int64_t
 {
-    return m_lClosingTransactionNo;
+    return closing_transaction_no_;
 }
 
 void OTTransaction::SetClosingNum(std::int64_t lClosingNum)
 {
-    m_lClosingTransactionNo = lClosingNum;
+    closing_transaction_no_ = lClosingNum;
 }
 
 // Make sure this contract checks out. Very high level.
@@ -439,7 +438,7 @@ void OTTransaction::SetClosingNum(std::int64_t lClosingNum)
 //
 auto OTTransaction::VerifyAccount(const identity::Nym& theNym) -> bool
 {
-    auto* pParent = const_cast<Ledger*>(m_pParent);
+    auto* pParent = const_cast<Ledger*>(parent_);
 
     // Make sure that the supposed AcctID matches the one read from the file.
     //
@@ -571,7 +570,7 @@ auto OTTransaction::HarvestOpeningNumber(
 {
     bool bSuccess = false;
 
-    switch (m_Type) {
+    switch (type_) {
         // Note: the below remarks about "success or fail" are specific to
         // TRANSACTION success, not message success.
         //      case OTTransaction::processNymbox:  // NOTE: why was this here?
@@ -1175,8 +1174,8 @@ auto OTTransaction::HarvestClosingNumbers(
 {
     bool bSuccess = false;
 
-    switch (m_Type) {  // Note: the below remarks about "success or fail" are
-                       // specific to TRANSACTION success, not message success.
+    switch (type_) {  // Note: the below remarks about "success or fail" are
+                      // specific to TRANSACTION success, not message success.
 
         //      case OTTransaction::processNymbox:  // Why is this even here?
         // processNymbox uses NO trans#s--that's the purpose of processNymbox.
@@ -3009,11 +3008,11 @@ auto OTTransaction::DeleteBoxReceipt(Ledger& theLedger) -> bool
     auto strFinal = String::Factory();
     auto ascTemp = Armored::Factory();
 
-    if (m_strRawFile->Exists()) {
-        ascTemp->SetString(m_strRawFile);
+    if (raw_file_->Exists()) {
+        ascTemp->SetString(raw_file_);
 
         if (false ==
-            ascTemp->WriteArmoredString(strFinal, m_strContractType->Get())) {
+            ascTemp->WriteArmoredString(strFinal, contract_type_->Get())) {
             LogError()(OT_PRETTY_CLASS())(
                 "Error deleting (writing over) box receipt (failed "
                 "writing armored string): ")(strFolder1name.get())('/')(
@@ -3046,7 +3045,7 @@ auto OTTransaction::DeleteBoxReceipt(Ledger& theLedger) -> bool
     };
 
     static UnallocatedCString marked_for_deletion{"MARKED_FOR_DELETION"};
-    if (m_strRawFile->Exists()) {
+    if (raw_file_->Exists()) {
         strOutput->Set(
             concatenation_lambda(strFinal->Get(), marked_for_deletion).c_str());
     } else {
@@ -3068,7 +3067,7 @@ auto OTTransaction::DeleteBoxReceipt(Ledger& theLedger) -> bool
         LogError()(OT_PRETTY_CLASS())("Error deleting (writing over) file: ")(
             strFolder1name.get())('/')(strFolder2name.get())('/')(
             strFolder3name.get())('/')(strFilename.get())(". Contents: ")(
-            m_strRawFile.get())(".")
+            raw_file_.get())(".")
             .Flush();
     }
 
@@ -3124,10 +3123,9 @@ auto OTTransaction::SaveBoxReceipt(std::int64_t lLedgerType) -> bool
     // Try to save the box receipt to local storage.
     //
     auto strFinal = String::Factory();
-    auto ascTemp = Armored::Factory(m_strRawFile);
+    auto ascTemp = Armored::Factory(raw_file_);
 
-    if (false ==
-        ascTemp->WriteArmoredString(strFinal, m_strContractType->Get())) {
+    if (false == ascTemp->WriteArmoredString(strFinal, contract_type_->Get())) {
         LogError()(OT_PRETTY_CLASS())(
             "Error saving box receipt (failed writing armored string): ")(
             strFolder1name.get())('/')(strFolder2name.get())('/')(
@@ -3149,7 +3147,7 @@ auto OTTransaction::SaveBoxReceipt(std::int64_t lLedgerType) -> bool
         LogError()(OT_PRETTY_CLASS())("Error writing file: ")(
             strFolder1name.get())('/')(strFolder2name.get())('/')(
             strFolder3name.get())('/')(strFilename.get())(". Contents: ")(
-            m_strRawFile.get())(".")
+            raw_file_.get())(".")
             .Flush();
     }
 
@@ -3196,10 +3194,10 @@ auto OTTransaction::SaveBoxReceipt(Ledger& theLedger) -> bool
 
 auto OTTransaction::VerifyBoxReceipt(OTTransaction& theFullVersion) -> bool
 {
-    if (!m_bIsAbbreviated || theFullVersion.IsAbbreviated()) {
+    if (!is_abbreviated_ || theFullVersion.IsAbbreviated()) {
         LogError()(OT_PRETTY_CLASS())(
             "Failure: This transaction "
-            "isn't abbreviated (val: ")(m_bIsAbbreviated ? "IS" : "IS NOT")(
+            "isn't abbreviated (val: ")(is_abbreviated_ ? "IS" : "IS NOT")(
             "), or the purported full version erroneously is (val: ")(
             theFullVersion.IsAbbreviated() ? "IS" : "IS NOT")(
             "). "
@@ -3219,7 +3217,7 @@ auto OTTransaction::VerifyBoxReceipt(OTTransaction& theFullVersion) -> bool
     // Sooo... let's hash the purported "full version" that was passed in, and
     // compare it to the stored one.
     //
-    if (m_Hash != idFullVersion) {
+    if (hash_ != idFullVersion) {
         LogError()(OT_PRETTY_CLASS())(
             "Failure: The purported 'full version' of the transaction, "
             "passed in for verification fails to match the stored hash "
@@ -3310,22 +3308,22 @@ auto OTTransaction::VerifyItems(
 // call.)
 void OTTransaction::InitTransaction()
 {
-    m_strContractType =
+    contract_type_ =
         String::Factory("TRANSACTION");  // CONTRACT, MESSAGE, TRANSACTION,
                                          // LEDGER, TRANSACTION ITEM
-    m_DATE_SIGNED = Time{};  // Make sure to set this to the current time
-                             // whenever contract is signed.
-    m_Type = transactionType::error_state;
-    m_lClosingTransactionNo = 0;
-    m_lRequestNumber = 0;
-    m_bReplyTransSuccess = false;
+    date_signed_ = Time{};  // Make sure to set this to the current time
+                            // whenever contract is signed.
+    type_ = transactionType::error_state;
+    closing_transaction_no_ = 0;
+    request_number_ = 0;
+    reply_trans_success_ = false;
 }
 
-OTTransaction::~OTTransaction() { m_listItems.clear(); }
+OTTransaction::~OTTransaction() { list_items_.clear(); }
 
 void OTTransaction::Release()
 {
-    m_listItems.clear();
+    list_items_.clear();
 
     OTTransactionType::Release();
 }
@@ -3335,14 +3333,14 @@ void OTTransaction::Release()
 // destructor.
 void OTTransaction::AddItem(std::shared_ptr<Item> theItem)
 {
-    m_listItems.push_back(theItem);
+    list_items_.push_back(theItem);
 }
 
 // While processing a transaction, you may wish to query it for items of a
 // certain type.
 auto OTTransaction::GetItem(itemType theType) -> std::shared_ptr<Item>
 {
-    for (auto& it : m_listItems) {
+    for (auto& it : list_items_) {
         const auto pItem = it;
         OT_ASSERT(false != bool(pItem));
 
@@ -3364,7 +3362,7 @@ auto OTTransaction::GetItemInRefTo(std::int64_t lReference)
                     "NumberOfOrigin?");
     }
 
-    for (auto& it : m_listItems) {
+    for (auto& it : list_items_) {
         auto pItem = it;
         OT_ASSERT(false != bool(pItem));
 
@@ -3382,7 +3380,7 @@ auto OTTransaction::GetItemCountInRefTo(std::int64_t lReference) -> std::int32_t
 {
     std::int32_t nCount = 0;
 
-    for (auto& it : m_listItems) {
+    for (auto& it : list_items_) {
         const auto pItem = it;
         OT_ASSERT(false != bool(pItem));
 
@@ -3478,7 +3476,7 @@ auto OTTransaction::GetSuccess(
 
     if ((transactionType::atProcessInbox == GetType()) ||
         (transactionType::atProcessNymbox == GetType())) {
-        for (auto& it : m_listItems) {
+        for (auto& it : list_items_) {
             const auto pItem = it;
             OT_ASSERT(false != bool(pItem));
 
@@ -3679,7 +3677,7 @@ auto OTTransaction::GetSuccess(
     // Okay, it's not a processNymbox or processInbox.
     //
     // Maybe it's one of these other transaction types...
-    for (auto& it : m_listItems) {
+    for (auto& it : list_items_) {
         const auto pItem = it;
         OT_ASSERT(nullptr != pItem);
 
@@ -3916,13 +3914,13 @@ auto OTTransaction::GetSuccess(
     return bReturnValue;
 }
 
-auto OTTransaction::GetType() const -> transactionType { return m_Type; }
+auto OTTransaction::GetType() const -> transactionType { return type_; }
 
-void OTTransaction::SetType(transactionType theType) { m_Type = theType; }
+void OTTransaction::SetType(transactionType theType) { type_ = theType; }
 
 auto OTTransaction::GetTypeString() const -> const char*
 {
-    return GetTransactionTypeString(static_cast<int>(m_Type));
+    return GetTransactionTypeString(static_cast<int>(type_));
 }
 
 // return -1 if error, 0 if nothing, and 1 if the node was processed.
@@ -3931,7 +3929,7 @@ auto OTTransaction::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
     const auto strNodeName = String::Factory(xml->getNodeName());
 
     NumList* pNumList = nullptr;
-    if (strNodeName->Compare("nymboxRecord")) { pNumList = &m_Numlist; }
+    if (strNodeName->Compare("nymboxRecord")) { pNumList = &numlist_; }
 
     if (strNodeName->Compare("nymboxRecord") ||
         strNodeName->Compare("inboxRecord") ||
@@ -3976,7 +3974,7 @@ auto OTTransaction::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
             return (-1);  // The function already logs appropriately.
         }
 
-        m_bIsAbbreviated = true;
+        is_abbreviated_ = true;
 
         SetNumberOfOrigin(lNumberOfOrigin);
         SetOriginType(static_cast<originType>(theOriginType));
@@ -3987,14 +3985,14 @@ auto OTTransaction::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
 
         SetReplyTransSuccess(bReplyTransSuccess);
 
-        m_lInRefDisplay = lInRefDisplay;
-        m_lAbbrevAmount = lAdjustment;
-        m_lDisplayAmount = lDisplayValue;
-        m_DATE_SIGNED = the_DATE_SIGNED;
-        m_Type = static_cast<transactionType>(theType);
+        in_ref_display_ = lInRefDisplay;
+        abbrev_amount_ = lAdjustment;
+        display_amount_ = lDisplayValue;
+        date_signed_ = the_DATE_SIGNED;
+        type_ = static_cast<transactionType>(theType);
 
         if (strHash->Exists()) {
-            m_Hash = api_.Factory().IdentifierFromBase58(strHash->Bytes());
+            hash_ = api_.Factory().IdentifierFromBase58(strHash->Bytes());
         } else {
             LogError()(OT_PRETTY_CLASS())(
                 "Missing receiptHash on abbreviated record.")
@@ -4019,7 +4017,7 @@ auto OTTransaction::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
         const auto strType = String::Factory(xml->getAttributeValue("type"));
 
         if (strType->Exists()) {
-            m_Type = OTTransaction::GetTypeFromString(strType);
+            type_ = OTTransaction::GetTypeFromString(strType);
         } else {
             LogConsole()(OT_PRETTY_CLASS())(
                 "Failure: unknown transaction type: ")(strType.get())(".")
@@ -4030,9 +4028,9 @@ auto OTTransaction::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
         auto strCancelled =
             String::Factory(xml->getAttributeValue("cancelled"));
         if (strCancelled->Exists() && strCancelled->Compare("true")) {
-            m_bCancelled = true;
+            cancelled_ = true;
         } else {
-            m_bCancelled = false;
+            cancelled_ = false;
         }
 
         auto strDateSigned =
@@ -4040,7 +4038,7 @@ auto OTTransaction::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
         const auto lDateSigned = strDateSigned->Exists()
                                      ? parseTimestamp(strDateSigned->Get())
                                      : Time{};
-        m_DATE_SIGNED = lDateSigned;
+        date_signed_ = lDateSigned;
 
         const auto strAcctID =
             String::Factory(xml->getAttributeValue("accountID"));
@@ -4079,28 +4077,28 @@ auto OTTransaction::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
         // have a REQUEST NUMBER on them, so I can quickly tell WHICH MESSAGE
         // it is in reply to.
         //
-        if (transactionType::replyNotice == m_Type) {
+        if (transactionType::replyNotice == type_) {
             const auto strRequestNum =
                 String::Factory(xml->getAttributeValue("requestNumber"));
 
             if (strRequestNum->Exists()) {
-                m_lRequestNumber = strRequestNum->ToLong();
+                request_number_ = strRequestNum->ToLong();
             }
 
             const auto strTransSuccess =
                 String::Factory(xml->getAttributeValue("transSuccess"));
 
-            m_bReplyTransSuccess = strTransSuccess->Compare("true");
+            reply_trans_success_ = strTransSuccess->Compare("true");
         }
 
-        if ((transactionType::blank == m_Type) ||
-            (transactionType::successNotice == m_Type)) {
+        if ((transactionType::blank == type_) ||
+            (transactionType::successNotice == type_)) {
             const auto strTotalList =
                 String::Factory(xml->getAttributeValue("totalListOfNumbers"));
-            m_Numlist.Release();
+            numlist_.Release();
 
             if (strTotalList->Exists()) {
-                m_Numlist.Add(strTotalList);  // (Comma-separated list of
+                numlist_.Add(strTotalList);  // (Comma-separated list of
             }
             // numbers now becomes
             // UnallocatedSet<std::int64_t>.)
@@ -4117,17 +4115,17 @@ auto OTTransaction::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
         const auto NYM_ID = api_.Factory().NymIDFromBase58(strNymID->Bytes());
 
         SetPurportedAccountID(ACCOUNT_ID);  // GetPurportedAccountID() const {
-                                            // return m_AcctID; }
+                                            // return account_id_; }
         SetPurportedNotaryID(NOTARY_ID);    // GetPurportedNotaryID() const {
-                                            // return m_AcctNotaryID; }
+                                            // return account_notary_id_; }
         SetNymID(NYM_ID);
 
-        //  m_bLoadSecurely defaults to true.
+        //  load_securely_ defaults to true.
         // Normally the RealAccountID and RealNotaryID are set from above,
         // before
         // loading. That way, I can compare them to whatever is actually loaded.
         // (So people don't swap files on us!!)
-        // But if the coder SPECIALLY sets  m_bLoadSecurely to FALSE, that means
+        // But if the coder SPECIALLY sets  load_securely_ to FALSE, that means
         // he
         // honestly doesn't know those IDs, and he is loading the file, and he
         // wants it
@@ -4145,7 +4143,7 @@ auto OTTransaction::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
         // sub-items will still
         // be expected to be correct with their parent items.)
         //
-        if (!m_bLoadSecurely) {
+        if (!load_securely_) {
             SetRealAccountID(ACCOUNT_ID);
             SetRealNotaryID(NOTARY_ID);
         }
@@ -4173,9 +4171,9 @@ auto OTTransaction::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
             String::Factory(xml->getAttributeValue("value"));
 
         if (strClosingNumber->Exists() &&
-            ((transactionType::finalReceipt == m_Type) ||
-             (transactionType::basketReceipt == m_Type))) {
-            m_lClosingTransactionNo = strClosingNumber->ToLong();
+            ((transactionType::finalReceipt == type_) ||
+             (transactionType::basketReceipt == type_))) {
+            closing_transaction_no_ = strClosingNumber->ToLong();
         } else {
             LogError()(OT_PRETTY_CLASS())(
                 "Error: closingTransactionNumber field without value, or in "
@@ -4186,7 +4184,7 @@ auto OTTransaction::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
 
         return 1;
     } else if (!strcmp("cancelRequest", xml->getNodeName())) {
-        if (false == LoadEncodedTextField(xml, m_ascCancellationRequest)) {
+        if (false == LoadEncodedTextField(xml, cancellation_request_)) {
             LogError()(OT_PRETTY_CLASS())("Error: cancelRequest "
                                           "field without value.")
                 .Flush();
@@ -4195,7 +4193,7 @@ auto OTTransaction::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
 
         return 1;
     } else if (!strcmp("inReferenceTo", xml->getNodeName())) {
-        if (false == LoadEncodedTextField(xml, m_ascInReferenceTo)) {
+        if (false == LoadEncodedTextField(xml, in_reference_to_)) {
             LogError()(OT_PRETTY_CLASS())("Error: inReferenceTo "
                                           "field without value.")
                 .Flush();
@@ -4216,7 +4214,7 @@ auto OTTransaction::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
                 api_.Factory().InternalSession().Item(GetNymID(), *this)};
             OT_ASSERT(false != bool(pItem));
 
-            if (!m_bLoadSecurely) { pItem->SetLoadInsecure(); }
+            if (!load_securely_) { pItem->SetLoadInsecure(); }
 
             // If we're able to successfully base64-decode the string and load
             // it up as
@@ -4234,7 +4232,7 @@ auto OTTransaction::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
                     .Flush();
                 return (-1);
             } else {
-                m_listItems.push_back(std::shared_ptr<Item>(pItem.release()));
+                list_items_.push_back(std::shared_ptr<Item>(pItem.release()));
             }
         }
 
@@ -4249,7 +4247,7 @@ auto OTTransaction::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
 //
 auto OTTransaction::AddNumbersToTransaction(const NumList& theAddition) -> bool
 {
-    return m_Numlist.Add(theAddition);
+    return numlist_.Add(theAddition);
 }
 
 // This is called automatically by SignContract to make sure what's being signed
@@ -4268,7 +4266,7 @@ void OTTransaction::UpdateContents(const PasswordPrompt& reason)
                strNymID = String::Factory(GetNymID());
 
     // I release this because I'm about to repopulate it.
-    m_xmlUnsigned->Release();
+    xml_unsigned_->Release();
 
     Tag tag("transaction");
 
@@ -4290,13 +4288,11 @@ void OTTransaction::UpdateContents(const PasswordPrompt& reason)
     tag.add_attribute("transactionNum", std::to_string(GetTransactionNum()));
     tag.add_attribute("inReferenceTo", std::to_string(GetReferenceToNum()));
 
-    if (m_bCancelled) {
-        tag.add_attribute("cancelled", formatBool(m_bCancelled));
-    }
+    if (cancelled_) { tag.add_attribute("cancelled", formatBool(cancelled_)); }
 
-    if (transactionType::replyNotice == m_Type) {
-        tag.add_attribute("requestNumber", std::to_string(m_lRequestNumber));
-        tag.add_attribute("transSuccess", formatBool(m_bReplyTransSuccess));
+    if (transactionType::replyNotice == type_) {
+        tag.add_attribute("requestNumber", std::to_string(request_number_));
+        tag.add_attribute("transSuccess", formatBool(reply_trans_success_));
     }
 
     // IF this transaction is "blank" or
@@ -4308,21 +4304,21 @@ void OTTransaction::UpdateContents(const PasswordPrompt& reason)
     // not accepted by the user (yet.)
     // Whereas successNotice means a transaction #
     // has successfully been signed out.
-    if ((transactionType::blank == m_Type) ||
-        (transactionType::successNotice == m_Type)) {
+    if ((transactionType::blank == type_) ||
+        (transactionType::successNotice == type_)) {
         // Count is always 0, except for blanks
         // and successNotices.
-        if (m_Numlist.Count() > 0) {
+        if (numlist_.Count() > 0) {
             auto strNumbers = String::Factory();
-            if (m_Numlist.Output(strNumbers)) {
+            if (numlist_.Output(strNumbers)) {
                 tag.add_attribute("totalListOfNumbers", strNumbers->Get());
             }
         }
     }
 
     if (IsAbbreviated()) {
-        if (nullptr != m_pParent) {
-            switch (m_pParent->GetType()) {
+        if (nullptr != parent_) {
+            switch (parent_->GetType()) {
                 case ledgerType::nymbox: {
                     SaveAbbreviatedNymboxRecord(tag, reason);
                 } break;
@@ -4358,32 +4354,32 @@ void OTTransaction::UpdateContents(const PasswordPrompt& reason)
         } else {
             LogError()(OT_PRETTY_CLASS())(
                 "Error: Unable to save abbreviated receipt here, since "
-                "m_pParent is nullptr.")
+                "parent_ is nullptr.")
                 .Flush();
         }
     } else {
-        if ((transactionType::finalReceipt == m_Type) ||
-            (transactionType::basketReceipt == m_Type)) {
+        if ((transactionType::finalReceipt == type_) ||
+            (transactionType::basketReceipt == type_)) {
             TagPtr tagClosingNo(new Tag("closingTransactionNumber"));
             tagClosingNo->add_attribute(
-                "value", std::to_string(m_lClosingTransactionNo));
+                "value", std::to_string(closing_transaction_no_));
             tag.add_tag(tagClosingNo);
         }
 
         // a transaction contains a list of items, but it is also in reference
         // to some item, from someone else
         // We include a full copy of that item here.
-        if (m_ascInReferenceTo->GetLength()) {
-            tag.add_tag("inReferenceTo", m_ascInReferenceTo->Get());
+        if (in_reference_to_->GetLength()) {
+            tag.add_tag("inReferenceTo", in_reference_to_->Get());
         }
 
-        if (m_ascCancellationRequest->GetLength()) {
-            tag.add_tag("cancelRequest", m_ascCancellationRequest->Get());
+        if (cancellation_request_->GetLength()) {
+            tag.add_tag("cancelRequest", cancellation_request_->Get());
         }
 
         // loop through the items that make up this transaction and print them
         // out here, base64-encoded, of course.
-        for (auto& it : m_listItems) {
+        for (auto& it : list_items_) {
             auto pItem = it;
             OT_ASSERT(nullptr != pItem);
 
@@ -4399,7 +4395,7 @@ void OTTransaction::UpdateContents(const PasswordPrompt& reason)
 
     UnallocatedCString str_result;
     tag.output(str_result);
-    m_xmlUnsigned->Concatenate(String::Factory(str_result));
+    xml_unsigned_->Concatenate(String::Factory(str_result));
 }
 
 /*
@@ -4479,7 +4475,7 @@ void OTTransaction::SaveAbbrevPaymentInboxRecord(
 {
     Amount lDisplayValue = 0;
 
-    switch (m_Type) {
+    switch (type_) {
         case transactionType::incomingCash:
         case transactionType::instrumentNotice:
             if (IsAbbreviated()) {
@@ -4523,7 +4519,7 @@ void OTTransaction::SaveAbbrevPaymentInboxRecord(
 
     // If this is already an abbreviated record, then save the existing hash.
     if (IsAbbreviated()) {
-        m_Hash.GetString(api_.Crypto(), strHash);
+        hash_.GetString(api_.Crypto(), strHash);
         // Otherwise if it's a full record, then calculate the hash and save it.
     } else {
         auto idReceiptHash =
@@ -4538,7 +4534,7 @@ void OTTransaction::SaveAbbrevPaymentInboxRecord(
     TagPtr pTag(new Tag("paymentInboxRecord"));
 
     pTag->add_attribute("type", strType->Get());
-    pTag->add_attribute("dateSigned", formatTimestamp(m_DATE_SIGNED));
+    pTag->add_attribute("dateSigned", formatTimestamp(date_signed_));
     pTag->add_attribute("receiptHash", strHash->Get());
     pTag->add_attribute("displayValue", [&] {
         auto buf = UnallocatedCString{};
@@ -4564,7 +4560,7 @@ void OTTransaction::SaveAbbrevExpiredBoxRecord(
 {
     Amount lDisplayValue = 0;
 
-    switch (m_Type) {
+    switch (type_) {
         // PAYMENT INBOX / PAYMENT OUTBOX
         case transactionType::incomingCash:
         case transactionType::instrumentNotice:
@@ -4622,7 +4618,7 @@ void OTTransaction::SaveAbbrevExpiredBoxRecord(
 
     // If this is already an abbreviated record, then save the existing hash.
     if (IsAbbreviated()) {
-        m_Hash.GetString(api_.Crypto(), strHash);
+        hash_.GetString(api_.Crypto(), strHash);
         // Otherwise if it's a full record, then calculate the hash and save it.
     } else {
         auto idReceiptHash =
@@ -4637,7 +4633,7 @@ void OTTransaction::SaveAbbrevExpiredBoxRecord(
     TagPtr pTag(new Tag("expiredBoxRecord"));
 
     pTag->add_attribute("type", strType->Get());
-    pTag->add_attribute("dateSigned", formatTimestamp(m_DATE_SIGNED));
+    pTag->add_attribute("dateSigned", formatTimestamp(date_signed_));
     pTag->add_attribute("receiptHash", strHash->Get());
     pTag->add_attribute("displayValue", [&] {
         auto buf = UnallocatedCString{};
@@ -4708,7 +4704,7 @@ void OTTransaction::SaveAbbrevRecordBoxRecord(
 
     Amount lAdjustment = 0, lDisplayValue = 0;
 
-    switch (m_Type) {
+    switch (type_) {
         // ASSET ACCOUNT INBOX
         // -- In inbox, pending hasn't been accepted yet. In outbox, it's
         // already gone. Either way, it will have a 0 adjustment amount, even
@@ -4839,7 +4835,7 @@ void OTTransaction::SaveAbbrevRecordBoxRecord(
 
     // If this is already an abbreviated record, then save the existing hash.
     if (IsAbbreviated()) {
-        m_Hash.GetString(api_.Crypto(), strHash);
+        hash_.GetString(api_.Crypto(), strHash);
         // Otherwise if it's a full record, then calculate the hash and save it.
     } else {
         auto idReceiptHash =
@@ -4854,7 +4850,7 @@ void OTTransaction::SaveAbbrevRecordBoxRecord(
     TagPtr pTag(new Tag("recordBoxRecord"));
 
     pTag->add_attribute("type", strType->Get());
-    pTag->add_attribute("dateSigned", formatTimestamp(m_DATE_SIGNED));
+    pTag->add_attribute("dateSigned", formatTimestamp(date_signed_));
     pTag->add_attribute("receiptHash", strHash->Get());
     pTag->add_attribute("adjustment", [&] {
         auto buf = UnallocatedCString{};
@@ -4879,8 +4875,8 @@ void OTTransaction::SaveAbbrevRecordBoxRecord(
         "inRefDisplay", std::to_string(GetReferenceNumForDisplay()));
     pTag->add_attribute("inReferenceTo", std::to_string(GetReferenceToNum()));
 
-    if ((transactionType::finalReceipt == m_Type) ||
-        (transactionType::basketReceipt == m_Type)) {
+    if ((transactionType::finalReceipt == type_) ||
+        (transactionType::basketReceipt == type_)) {
         pTag->add_attribute("closingNum", std::to_string(GetClosingNum()));
     }
 
@@ -4905,14 +4901,14 @@ void OTTransaction::SaveAbbreviatedNymboxRecord(
                             // "successNotice" this will serialize the list of
                             // transaction numbers for it. (They now support
                             // multiple numbers.)
-    switch (m_Type) {
+    switch (type_) {
         case transactionType::blank:  // freshly issued transaction number, not
                                       // accepted by the user (yet).
         case transactionType::successNotice:  // A transaction # has
                                               // successfully been signed out.
         {
             // This is always 0, except for blanks and successNotices.
-            if (m_Numlist.Count() > 0) { m_Numlist.Output(strListOfBlanks); }
+            if (numlist_.Count() > 0) { numlist_.Output(strListOfBlanks); }
         }
             [[fallthrough]];
         case transactionType::replyNotice: {  // A copy of a server reply to a
@@ -4982,7 +4978,7 @@ void OTTransaction::SaveAbbreviatedNymboxRecord(
 
     // If this is already an abbreviated record, then save the existing hash.
     if (IsAbbreviated()) {
-        m_Hash.GetString(api_.Crypto(), strHash);
+        hash_.GetString(api_.Crypto(), strHash);
         // Otherwise if it's a full record, then calculate the hash and save it.
     } else {
         auto idReceiptHash =
@@ -4997,7 +4993,7 @@ void OTTransaction::SaveAbbreviatedNymboxRecord(
     TagPtr pTag(new Tag("nymboxRecord"));
 
     pTag->add_attribute("type", strType->Get());
-    pTag->add_attribute("dateSigned", formatTimestamp(m_DATE_SIGNED));
+    pTag->add_attribute("dateSigned", formatTimestamp(date_signed_));
     pTag->add_attribute("receiptHash", strHash->Get());
     pTag->add_attribute("transactionNum", std::to_string(GetTransactionNum()));
     pTag->add_attribute(
@@ -5012,8 +5008,8 @@ void OTTransaction::SaveAbbreviatedNymboxRecord(
     // I actually don't think you can put a basket receipt
     // notice in a nymbox, the way you can with a final
     // receipt notice. Probably can remove that line.
-    if ((transactionType::finalReceipt == m_Type) ||
-        (transactionType::basketReceipt == m_Type)) {
+    if ((transactionType::finalReceipt == type_) ||
+        (transactionType::basketReceipt == type_)) {
         pTag->add_attribute("closingNum", std::to_string(GetClosingNum()));
     } else {
         if (strListOfBlanks->Exists()) {
@@ -5021,9 +5017,9 @@ void OTTransaction::SaveAbbreviatedNymboxRecord(
         }
         if (bAddRequestNumber) {
             pTag->add_attribute(
-                "requestNumber", std::to_string(m_lRequestNumber));
+                "requestNumber", std::to_string(request_number_));
             pTag->add_attribute(
-                "transSuccess", formatBool(m_bReplyTransSuccess));
+                "transSuccess", formatBool(reply_trans_success_));
         }
         if (lDisplayValue > 0) {
             // IF this transaction is passing through on its
@@ -5046,7 +5042,7 @@ void OTTransaction::SaveAbbreviatedOutboxRecord(
 {
     Amount lAdjustment = 0, lDisplayValue = 0;
 
-    switch (m_Type) {
+    switch (type_) {
         case transactionType::pending:
             if (IsAbbreviated()) {
                 lAdjustment = GetAbbrevAdjustment();
@@ -5094,7 +5090,7 @@ void OTTransaction::SaveAbbreviatedOutboxRecord(
 
     // If this is already an abbreviated record, then save the existing hash.
     if (IsAbbreviated()) {
-        m_Hash.GetString(api_.Crypto(), strHash);
+        hash_.GetString(api_.Crypto(), strHash);
         // Otherwise if it's a full record, then calculate the hash and save it.
     } else {
         auto idReceiptHash =
@@ -5109,7 +5105,7 @@ void OTTransaction::SaveAbbreviatedOutboxRecord(
     TagPtr pTag(new Tag("outboxRecord"));
 
     pTag->add_attribute("type", strType->Get());
-    pTag->add_attribute("dateSigned", formatTimestamp(m_DATE_SIGNED));
+    pTag->add_attribute("dateSigned", formatTimestamp(date_signed_));
     pTag->add_attribute("receiptHash", strHash->Get());
     pTag->add_attribute("adjustment", [&] {
         auto buf = UnallocatedCString{};
@@ -5164,7 +5160,7 @@ void OTTransaction::SaveAbbreviatedInboxRecord(
     //
     Amount lAdjustment = 0, lDisplayValue = 0;
 
-    switch (m_Type) {
+    switch (type_) {
         // -- In inbox, pending hasn't been accepted yet. In outbox, it's
         // already gone. Either way, it will have a 0 adjustment amount, even
         // though perhaps 500 clams display amount. Here I use the 500 for
@@ -5260,7 +5256,7 @@ void OTTransaction::SaveAbbreviatedInboxRecord(
 
     // If this is already an abbreviated record, then save the existing hash.
     if (IsAbbreviated()) {
-        m_Hash.GetString(api_.Crypto(), strHash);
+        hash_.GetString(api_.Crypto(), strHash);
         // Otherwise if it's a full record, then calculate the hash and save it.
     } else {
         auto idReceiptHash =
@@ -5275,7 +5271,7 @@ void OTTransaction::SaveAbbreviatedInboxRecord(
     TagPtr pTag(new Tag("inboxRecord"));
 
     pTag->add_attribute("type", strType->Get());
-    pTag->add_attribute("dateSigned", formatTimestamp(m_DATE_SIGNED));
+    pTag->add_attribute("dateSigned", formatTimestamp(date_signed_));
     pTag->add_attribute("receiptHash", strHash->Get());
     pTag->add_attribute("adjustment", [&] {
         auto buf = UnallocatedCString{};
@@ -5300,8 +5296,8 @@ void OTTransaction::SaveAbbreviatedInboxRecord(
         "inRefDisplay", std::to_string(GetReferenceNumForDisplay()));
     pTag->add_attribute("inReferenceTo", std::to_string(GetReferenceToNum()));
 
-    if ((transactionType::finalReceipt == m_Type) ||
-        (transactionType::basketReceipt == m_Type)) {
+    if ((transactionType::finalReceipt == type_) ||
+        (transactionType::basketReceipt == type_)) {
         pTag->add_attribute("closingNum", std::to_string(GetClosingNum()));
     }
 
@@ -5327,7 +5323,7 @@ void OTTransaction::ProduceInboxReportItem(
         GetTypeString())(".")
         .Flush();  // temp remove.
 
-    switch (m_Type) {  // These are the types that have an amount (somehow)
+    switch (type_) {  // These are the types that have an amount (somehow)
         case transactionType::pending:  // the amount is stored on the transfer
                                         // item in my list.
             theItemType = itemType::transfer;
@@ -5431,8 +5427,8 @@ void OTTransaction::ProduceInboxReportItem(
         // receipt itself is present, then ALL of the cron receipts that it
         // corresponds to must be closed!
         //
-        if ((transactionType::finalReceipt == m_Type) ||
-            (transactionType::basketReceipt == m_Type)) {
+        if ((transactionType::finalReceipt == type_) ||
+            (transactionType::basketReceipt == type_)) {
             pReportItem->SetClosingNum(GetClosingNum());
         }
 
@@ -5465,7 +5461,7 @@ void OTTransaction::ProduceOutboxReportItem(
 {
     itemType theItemType = itemType::error_state;
 
-    switch (m_Type) {
+    switch (type_) {
         case transactionType::pending:
             theItemType = itemType::transfer;
             break;
@@ -5747,7 +5743,7 @@ auto OTTransaction::GetReceiptAmount(const PasswordPrompt& reason) -> Amount
 auto OTTransaction::GetNumberOfOrigin() -> std::int64_t
 {
 
-    if (0 == m_lNumberOfOrigin) {
+    if (0 == number_of_origin_) {
         switch (GetType()) {
             case transactionType::transferReceipt:  // the server drops this
                                                     // into your inbox, when
@@ -5785,7 +5781,7 @@ auto OTTransaction::GetNumberOfOrigin() -> std::int64_t
         CalculateNumberOfOrigin();
     }
 
-    return m_lNumberOfOrigin;
+    return number_of_origin_;
 }
 
 void OTTransaction::CalculateNumberOfOrigin()
@@ -6250,7 +6246,7 @@ auto OTTransaction::GetSenderNymIDForDisplay(identifier::Nym& theReturnID)
              -------------------------------------------------------------------
              2. and I should expect the PAYLOAD of that message to contain an
              encrypted OTEnvelope,
-             3. which can be decrypted by Msg.m_strNymID2's private key,
+             3. which can be decrypted by Msg.nym_id2_'s private key,
              4. And the resulting plaintext can be loaded into memory as an
              OTPayment object,
              5. ...which contains an instrument of ambiguous type.
@@ -6282,9 +6278,9 @@ auto OTTransaction::GetSenderNymIDForDisplay(identifier::Nym& theReturnID)
                 // security implications of that and maybe improve it a bit.
                 // (But I do NOT want to get into the messaging business.)
 
-                if (theSentMsg->m_strNymID->Exists()) {
+                if (theSentMsg->nym_id_->Exists()) {
                     theReturnID = api_.Factory().NymIDFromBase58(
-                        theSentMsg->m_strNymID->Bytes());
+                        theSentMsg->nym_id_->Bytes());
 
                     return true;
                 }
@@ -6510,7 +6506,7 @@ auto OTTransaction::GetRecipientNymIDForDisplay(identifier::Nym& theReturnID)
              -------------------------------------------------------------------
              2. and I should expect the PAYLOAD of that message to contain an
                 encrypted OTEnvelope,
-             3. which can be decrypted by Msg.m_strNymID2's private key,
+             3. which can be decrypted by Msg.nym_id2_'s private key,
              4. And the resulting plaintext can be loaded into memory as an
                 OTPayment object,
              5. ...which contains an instrument of ambiguous type.
@@ -6541,9 +6537,9 @@ auto OTTransaction::GetRecipientNymIDForDisplay(identifier::Nym& theReturnID)
                 // security implications of that and maybe improve it a bit.
                 // (But I do NOT want to get into the messaging business.)
 
-                if (theSentMsg->m_strNymID2->Exists()) {
+                if (theSentMsg->nym_id2_->Exists()) {
                     theReturnID = api_.Factory().NymIDFromBase58(
-                        theSentMsg->m_strNymID2->Bytes());
+                        theSentMsg->nym_id2_->Bytes());
 
                     return true;
                 }

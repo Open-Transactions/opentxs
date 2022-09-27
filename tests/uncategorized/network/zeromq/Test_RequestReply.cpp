@@ -23,9 +23,9 @@ class Test_RequestReply : public ::testing::Test
 public:
     const zmq::Context& context_;
 
-    const ot::UnallocatedCString testMessage_{"zeromq test message"};
-    const ot::UnallocatedCString testMessage2_{"zeromq test message 2"};
-    const ot::UnallocatedCString testMessage3_{"zeromq test message 3"};
+    const ot::UnallocatedCString test_message_{"zeromq test message"};
+    const ot::UnallocatedCString test_message2_{"zeromq test message 2"};
+    const ot::UnallocatedCString test_message3_{"zeromq test message 3"};
 
     const ot::UnallocatedCString endpoint_{
         "inproc://opentxs/test/request_reply_test"};
@@ -76,7 +76,7 @@ void Test_RequestReply::replySocketThread(
             const auto inputString =
                 ot::UnallocatedCString{input.Body().begin()->Bytes()};
             bool match =
-                inputString == testMessage2_ || inputString == testMessage3_;
+                inputString == test_message2_ || inputString == test_message3_;
             EXPECT_TRUE(match);
 
             auto reply = ot::network::zeromq::reply_to_message(input);
@@ -108,7 +108,7 @@ TEST_F(Test_RequestReply, Request_Reply)
         [this](zmq::Message&& input) -> ot::network::zeromq::Message {
             const auto inputString =
                 ot::UnallocatedCString{input.Body().begin()->Bytes()};
-            EXPECT_EQ(testMessage_, inputString);
+            EXPECT_EQ(test_message_, inputString);
 
             auto reply = ot::network::zeromq::reply_to_message(input);
             reply.AddFrame(inputString);
@@ -136,7 +136,7 @@ TEST_F(Test_RequestReply, Request_Reply)
 
     auto [result, message] = requestSocket->Send([&] {
         auto out = opentxs::network::zeromq::Message{};
-        out.AddFrame(testMessage_);
+        out.AddFrame(test_message_);
 
         return out;
     }());
@@ -145,7 +145,7 @@ TEST_F(Test_RequestReply, Request_Reply)
 
     const auto messageString =
         ot::UnallocatedCString{message.Body().begin()->Bytes()};
-    ASSERT_EQ(testMessage_, messageString);
+    ASSERT_EQ(test_message_, messageString);
 }
 
 TEST_F(Test_RequestReply, Request_2_Reply_1)
@@ -155,7 +155,7 @@ TEST_F(Test_RequestReply, Request_2_Reply_1)
             const auto inputString =
                 ot::UnallocatedCString{input.Body().begin()->Bytes()};
             bool match =
-                inputString == testMessage2_ || inputString == testMessage3_;
+                inputString == test_message2_ || inputString == test_message3_;
             EXPECT_TRUE(match);
 
             auto reply = ot::network::zeromq::reply_to_message(input);
@@ -175,9 +175,9 @@ TEST_F(Test_RequestReply, Request_2_Reply_1)
     replySocket->Start(endpoint_);
 
     std::thread requestSocketThread1(
-        &Test_RequestReply::requestSocketThread, this, testMessage2_);
+        &Test_RequestReply::requestSocketThread, this, test_message2_);
     std::thread requestSocketThread2(
-        &Test_RequestReply::requestSocketThread, this, testMessage3_);
+        &Test_RequestReply::requestSocketThread, this, test_message3_);
 
     requestSocketThread1.join();
     requestSocketThread2.join();
@@ -201,7 +201,7 @@ TEST_F(Test_RequestReply, Request_1_Reply_2)
 
     auto [result, message] = requestSocket->Send([&] {
         auto out = opentxs::network::zeromq::Message{};
-        out.AddFrame(testMessage2_);
+        out.AddFrame(test_message2_);
 
         return out;
     }());
@@ -210,11 +210,11 @@ TEST_F(Test_RequestReply, Request_1_Reply_2)
 
     auto messageString =
         ot::UnallocatedCString{message.Body().begin()->Bytes()};
-    ASSERT_EQ(testMessage2_, messageString);
+    ASSERT_EQ(test_message2_, messageString);
 
     auto [result2, message2] = requestSocket->Send([&] {
         auto out = opentxs::network::zeromq::Message{};
-        out.AddFrame(testMessage3_);
+        out.AddFrame(test_message3_);
 
         return out;
     }());
@@ -222,7 +222,7 @@ TEST_F(Test_RequestReply, Request_1_Reply_2)
     ASSERT_EQ(result2, ot::otx::client::SendResult::VALID_REPLY);
 
     messageString = message2.Body().begin()->Bytes();
-    ASSERT_EQ(testMessage3_, messageString);
+    ASSERT_EQ(test_message3_, messageString);
 
     replySocketThread1.join();
     replySocketThread2.join();
@@ -237,12 +237,12 @@ TEST_F(Test_RequestReply, Request_Reply_Multipart)
             EXPECT_EQ(2, input.Body().size());
 
             for (const auto& frame : input.Header()) {
-                EXPECT_EQ(testMessage_, ot::UnallocatedCString{frame.Bytes()});
+                EXPECT_EQ(test_message_, ot::UnallocatedCString{frame.Bytes()});
             }
 
             for (const auto& frame : input.Body()) {
                 const auto str = ot::UnallocatedCString{frame.Bytes()};
-                bool match = (str == testMessage2_) || (str == testMessage3_);
+                bool match = (str == test_message2_) || (str == test_message3_);
 
                 EXPECT_TRUE(match);
             }
@@ -272,10 +272,10 @@ TEST_F(Test_RequestReply, Request_Reply_Multipart)
     requestSocket->Start(endpoint_);
 
     auto multipartMessage = opentxs::network::zeromq::Message{};
-    multipartMessage.AddFrame(testMessage_);
+    multipartMessage.AddFrame(test_message_);
     multipartMessage.StartBody();
-    multipartMessage.AddFrame(testMessage2_);
-    multipartMessage.AddFrame(testMessage3_);
+    multipartMessage.AddFrame(test_message2_);
+    multipartMessage.AddFrame(test_message3_);
 
     auto [result, message] = requestSocket->Send(std::move(multipartMessage));
 
@@ -284,11 +284,11 @@ TEST_F(Test_RequestReply, Request_Reply_Multipart)
     const auto messageHeader =
         ot::UnallocatedCString{message.Header().begin()->Bytes()};
 
-    ASSERT_EQ(testMessage_, messageHeader);
+    ASSERT_EQ(test_message_, messageHeader);
 
     for (const auto& frame : message.Body()) {
-        bool match = (frame.Bytes() == testMessage2_) ||
-                     (frame.Bytes() == testMessage3_);
+        bool match = (frame.Bytes() == test_message2_) ||
+                     (frame.Bytes() == test_message3_);
         ASSERT_TRUE(match);
     }
 }

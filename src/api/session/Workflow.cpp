@@ -705,7 +705,7 @@ auto Workflow::add_cheque_event(
     event.set_type(newEventType);
     event.add_item(String::Factory(request)->Get());
     event.set_method(proto::TRANSPORTMETHOD_OT);
-    event.set_transport(request.m_strNotaryID->Get());
+    event.set_transport(request.notary_id_->Get());
 
     switch (newEventType) {
         case proto::PAYMENTEVENTTYPE_CANCEL:
@@ -713,7 +713,7 @@ auto Workflow::add_cheque_event(
         } break;
         case proto::PAYMENTEVENTTYPE_CONVEY:
         case proto::PAYMENTEVENTTYPE_ACCEPT: {
-            event.set_nym(request.m_strNymID2->Get());
+            event.set_nym(request.nym_id2_->Get());
         } break;
         case proto::PAYMENTEVENTTYPE_ERROR:
         case proto::PAYMENTEVENTTYPE_CREATE:
@@ -730,9 +730,9 @@ auto Workflow::add_cheque_event(
 
     if (haveReply) {
         event.add_item(String::Factory(*reply)->Get());
-        event.set_time(reply->m_lTime);
+        event.set_time(reply->time_);
     } else {
-        event.set_time(request.m_lTime);
+        event.set_time(request.time_);
     }
 
     if (false == account.empty()) {
@@ -795,7 +795,7 @@ auto Workflow::add_transfer_event(
     event.set_type(newEventType);
     event.add_item(String::Factory(message)->Get());
     event.set_method(proto::TRANSPORTMETHOD_OT);
-    event.set_transport(message.m_strNotaryID->Get());
+    event.set_transport(message.notary_id_->Get());
 
     switch (newEventType) {
         case proto::PAYMENTEVENTTYPE_CONVEY:
@@ -816,7 +816,7 @@ auto Workflow::add_transfer_event(
     }
 
     event.set_success(success);
-    event.set_time(message.m_lTime);
+    event.set_time(message.time_);
 
     if (0 == workflow.party_size() && (false == eventNym.empty())) {
         workflow.add_party(eventNym.asBase58(api_.Crypto()));
@@ -1197,7 +1197,7 @@ auto Workflow::cheque_deposit_success(const Message* message) -> bool
 
     // TODO this might not be sufficient
 
-    return message->m_bSuccess;
+    return message->success_;
 }
 
 auto Workflow::ClearCheque(
@@ -1644,9 +1644,9 @@ auto Workflow::create_cheque(
     if (nullptr != message) {
         event.set_type(proto::PAYMENTEVENTTYPE_CONVEY);
         event.add_item(String::Factory(*message)->Get());
-        event.set_time(message->m_lTime);
+        event.set_time(message->time_);
         event.set_method(proto::TRANSPORTMETHOD_OT);
-        event.set_transport(message->m_strNotaryID->Get());
+        event.set_transport(message->notary_id_->Get());
     } else {
         event.set_time(Clock::to_time_t(Clock::now()));
 
@@ -1680,7 +1680,7 @@ auto Workflow::create_cheque(
     }
 
     if (workflow.notary().empty() && (nullptr != message)) {
-        workflow.set_notary(message->m_strNotaryID->Get());
+        workflow.set_notary(message->notary_id_->Get());
     }
 
     return save_workflow(std::move(output), nymID, account, workflow);
@@ -1786,7 +1786,7 @@ auto Workflow::CreateTransfer(const Item& transfer, const Message& request)
     }
 
     const auto senderNymID =
-        api_.Factory().NymIDFromBase58(request.m_strNymID->Bytes());
+        api_.Factory().NymIDFromBase58(request.nym_id_->Bytes());
     const auto& accountID = transfer.GetRealAccountID();
     const bool isInternal =
         isInternalTransfer(accountID, transfer.GetDestinationAcctID());
@@ -1824,7 +1824,7 @@ auto Workflow::CreateTransfer(const Item& transfer, const Message& request)
              : versions_.at(PaymentWorkflowType::OutgoingTransfer).event_),
         {},
         accountID,
-        request.m_strNotaryID->Get(),
+        request.notary_id_->Get(),
         (isInternal ? transfer.GetDestinationAcctID().asBase58(api_.Crypto())
                     : ""));
 
@@ -1893,7 +1893,7 @@ auto Workflow::DepositCheque(
             workflow->id(),
             cheque.GetAmount(),
             0,
-            convert_stime(reply->m_lTime),
+            convert_stime(reply->time_),
             cheque.GetMemo().Get());
     }
 
@@ -2545,7 +2545,7 @@ auto Workflow::ReceiveCash(
 {
     Lock global(lock_);
     const auto serialized = String::Factory(message);
-    const auto* party = message.m_strNymID->Get();
+    const auto* party = message.nym_id_->Get();
     auto workflowID = api_.Factory().IdentifierFromRandom();
     proto::PaymentWorkflow workflow{};
     workflow.set_version(
@@ -2566,10 +2566,10 @@ auto Workflow::ReceiveCash(
     workflow.set_notary(purse.Notary().asBase58(api_.Crypto()));
     auto& event = *workflow.add_event();
     event.set_version(versions_.at(PaymentWorkflowType::IncomingCash).event_);
-    event.set_time(message.m_lTime);
+    event.set_time(message.time_);
     event.set_type(proto::PAYMENTEVENTTYPE_CONVEY);
     event.set_method(proto::TRANSPORTMETHOD_OT);
-    event.set_transport(message.m_strNotaryID->Get());
+    event.set_transport(message.notary_id_->Get());
     event.add_item(serialized->Get());
     event.set_nym(party);
     event.set_success(true);
@@ -2744,15 +2744,15 @@ auto Workflow::SendCash(
     event.set_type(proto::PAYMENTEVENTTYPE_CONVEY);
     event.add_item(String::Factory(request)->Get());
     event.set_method(proto::TRANSPORTMETHOD_OT);
-    event.set_transport(request.m_strNotaryID->Get());
-    event.set_nym(request.m_strNymID2->Get());
+    event.set_transport(request.notary_id_->Get());
+    event.set_nym(request.nym_id2_->Get());
 
     if (haveReply) {
         event.add_item(String::Factory(*reply)->Get());
-        event.set_time(reply->m_lTime);
-        event.set_success(reply->m_bSuccess);
+        event.set_time(reply->time_);
+        event.set_success(reply->success_);
     } else {
-        event.set_time(request.m_lTime);
+        event.set_time(request.time_);
         event.set_success(false);
     }
 
@@ -2792,7 +2792,7 @@ auto Workflow::SendCheque(
     return add_cheque_event(
         lock,
         nymID,
-        api_.Factory().NymIDFromBase58(request.m_strNymID2->Bytes()),
+        api_.Factory().NymIDFromBase58(request.nym_id2_->Bytes()),
         *workflow,
         PaymentWorkflowState::Conveyed,
         proto::PAYMENTEVENTTYPE_CONVEY,

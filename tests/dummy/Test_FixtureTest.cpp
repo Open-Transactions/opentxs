@@ -10,20 +10,20 @@
 class FixtureClassAtGlobalNameSpace : public ::testing::Test
 {
 private:
-    bool mBool;
+    bool m_bool_;
 
 public:
     FixtureClassAtGlobalNameSpace()
-        : mBool(false)
+        : m_bool_(false)
     {
     }
     ~FixtureClassAtGlobalNameSpace() override = default;
 
-    virtual auto getBool() const -> bool { return mBool; }
+    virtual auto getBool() const -> bool { return m_bool_; }
 
-    void SetUp() override { mBool = true; }
+    void SetUp() override { m_bool_ = true; }
 
-    void TearDown() override { mBool = false; }
+    void TearDown() override { m_bool_ = false; }
 };
 
 TEST_F(FixtureClassAtGlobalNameSpace, simpleFixture) { EXPECT_TRUE(getBool()); }
@@ -35,20 +35,20 @@ namespace
 class FixtureClassAtUnnamedNamespace : public ::testing::Test
 {
 private:
-    bool mBool;
+    bool m_bool_;
 
 public:
     FixtureClassAtUnnamedNamespace()
-        : mBool(false)
+        : m_bool_(false)
     {
     }
     ~FixtureClassAtUnnamedNamespace() override = default;
 
-    virtual auto getBool() const -> bool { return mBool; }
+    virtual auto getBool() const -> bool { return m_bool_; }
 
-    void SetUp() override { mBool = true; }
+    void SetUp() override { m_bool_ = true; }
 
-    void TearDown() override { mBool = false; }
+    void TearDown() override { m_bool_ = false; }
 };
 
 TEST_F(FixtureClassAtUnnamedNamespace, simpleFixture)
@@ -63,20 +63,20 @@ namespace ottest::DummyTest
 class FixtureClassInsideNamedNamespace : public ::testing::Test
 {
 private:
-    bool mBool;
+    bool m_bool_;
 
 public:
     FixtureClassInsideNamedNamespace()
-        : mBool(false)
+        : m_bool_(false)
     {
     }
     ~FixtureClassInsideNamedNamespace() override = default;
 
-    virtual auto getBool() const -> bool { return mBool; }
+    virtual auto getBool() const -> bool { return m_bool_; }
 
-    void SetUp() override { mBool = true; }
+    void SetUp() override { m_bool_ = true; }
 
-    void TearDown() override { mBool = false; }
+    void TearDown() override { m_bool_ = false; }
 };
 
 TEST_F(FixtureClassInsideNamedNamespace, simpleFixture)
