@@ -7,125 +7,113 @@
 #include "1_Internal.hpp"                         // IWYU pragma: associated
 #include "blockchain/database/common/Blocks.hpp"  // IWYU pragma: associated
 
-#include <cstring>
-#include <mutex>
-#include <shared_mutex>
-#include <type_traits>
+#include <stdexcept>
 #include <utility>
 
 #include "blockchain/database/common/Bulk.hpp"
+#include "internal/blockchain/block/Block.hpp"
 #include "internal/blockchain/database/common/Common.hpp"
 #include "internal/util/LogMacros.hpp"
-#include "internal/util/Mutex.hpp"
-#include "internal/util/TSV.hpp"
+#include "internal/util/storage/file/Index.hpp"
 #include "internal/util/storage/lmdb/Database.hpp"
 #include "internal/util/storage/lmdb/Transaction.hpp"
-#include "opentxs/core/Data.hpp"
+#include "opentxs/blockchain/block/Block.hpp"
+#include "opentxs/core/FixedByteArray.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
-#include "util/storage/MappedFile.hpp"
 
 namespace opentxs::blockchain::database::common
 {
 struct Blocks::Imp {
+    const int table_;
     storage::lmdb::Database& lmdb_;
     Bulk& bulk_;
-    const int table_;
-    mutable std::mutex lock_;
-    mutable UnallocatedMap<Hash, std::shared_mutex> block_locks_;
 
-    auto Exists(const Hash& block) const noexcept -> bool
+    auto Exists(const block::Hash& block) const noexcept -> bool
     {
         return lmdb_.Exists(table_, block.Bytes());
     }
-
-    auto Load(const Hash& block) const noexcept -> BlockReader
+    auto Forget(const block::Hash& block) const noexcept -> bool
     {
-        auto lock = Lock{lock_};
-        auto index = util::IndexData{};
-        auto cb = [&index](const auto in) {
-            if (sizeof(index) != in.size()) { return; }
-
-            std::memcpy(static_cast<void*>(&index), in.data(), in.size());
-        };
-        lmdb_.Load(table_, block.Bytes(), cb);
-
-        if (0 == index.size_) {
-            LogTrace()(OT_PRETTY_CLASS())("Block ")(block.asHex())(
-                " not found in index")
-                .Flush();
-
-            return {};
-        }
-
-        return BlockReader{bulk_.ReadView(index), block_locks_[block]};
+        return lmdb_.Delete(table_, block.Bytes());
     }
-
-    auto Store(const Hash& block, const std::size_t bytes) const noexcept
-        -> BlockWriter
+    auto Load(const block::Hash& block) const noexcept -> ReadView
     {
-        auto lock = Lock{lock_};
-
-        if (0 == bytes) {
-            LogError()(OT_PRETTY_CLASS())("Block ")(block.asHex())(
-                " invalid block size")
-                .Flush();
-
-            return {};
-        }
-
-        auto index = [&] {
-            auto output = util::IndexData{};
-            auto cb = [&output](const auto in) {
-                if (sizeof(output) != in.size()) { return; }
-
-                std::memcpy(static_cast<void*>(&output), in.data(), in.size());
+        try {
+            auto indices = Vector<storage::file::Index>{};
+            auto cb = [&indices](const auto in) {
+                auto& index = indices.emplace_back();
+                index.Deserialize(in);
             };
             lmdb_.Load(table_, block.Bytes(), cb);
 
-            return output;
-        }();
-        auto cb = [&](auto& tx) -> bool {
+            if (indices.empty() || indices.front().empty()) {
+                throw std::runtime_error{"block not found in index"};
+            }
+
+            auto views = bulk_.Read(indices);
+
+            OT_ASSERT(false == views.empty());
+
+            auto view = views.front();
+
+            if (false == valid(view)) { Forget(block); }
+
+            return view;
+        } catch (const std::exception& e) {
+            LogTrace()(OT_PRETTY_CLASS())(e.what()).Flush();
+
+            return {};
+        }
+    }
+
+    auto Store(const block::Block& block) const noexcept -> bool
+    {
+        try {
+            const auto size = block.Internal().CalculateSize();
+            auto tx = lmdb_.TransactionRW();
+            auto data = bulk_.Write(tx, {size});
+
+            OT_ASSERT(false == data.empty());
+
+            auto& [index, view] = data.front();
+
+            if (false == block.Serialize(preallocated(size, view.data()))) {
+                throw std::runtime_error{"failed to serialize block"};
+            }
+
+            const auto& id = block::Hash();
+            const auto sIndex = index.Serialize();
             const auto result =
-                lmdb_.Store(table_, block.Bytes(), tsv(index), tx);
+                lmdb_.Store(table_, id.Bytes(), sIndex.Bytes(), tx);
 
-            if (false == result.first) {
-                LogError()(OT_PRETTY_CLASS())(
-                    "Failed to update index for block ")(block.asHex())
+            if (result.first) {
+                LogTrace()(OT_PRETTY_CLASS())("saved ")(index.ItemSize())(
+                    " bytes at position ")(index.MemoryPosition())(
+                    " for block ")
+                    .asHex(id)
                     .Flush();
+            } else {
+                throw std::runtime_error{"Failed to update index for block"};
+            }
 
-                return false;
+            if (false == tx.Finalize(true)) {
+                throw std::runtime_error{"database error"};
             }
 
             return true;
-        };
-        auto tx = lmdb_.TransactionRW();
-        auto view = bulk_.WriteView(tx, index, std::move(cb), bytes);
+        } catch (const std::exception& e) {
+            LogTrace()(OT_PRETTY_CLASS())(e.what()).Flush();
 
-        if (false == view.valid()) {
-            LogError()(OT_PRETTY_CLASS())(
-                "Failed to get write position for block ")(block.asHex())
-                .Flush();
-
-            return {};
+            return false;
         }
-
-        if (false == tx.Finalize(true)) {
-            LogError()(OT_PRETTY_CLASS())("Database error").Flush();
-
-            return {};
-        }
-
-        return BlockWriter{std::move(view), block_locks_[block]};
     }
 
     Imp(storage::lmdb::Database& lmdb, Bulk& bulk) noexcept
-        : lmdb_(lmdb)
+        : table_(Table::BlockIndex)
+        , lmdb_(lmdb)
         , bulk_(bulk)
-        , table_(Table::BlockIndex)
-        , lock_()
-        , block_locks_()
     {
     }
 };
@@ -135,20 +123,24 @@ Blocks::Blocks(storage::lmdb::Database& lmdb, Bulk& bulk) noexcept
 {
 }
 
-auto Blocks::Exists(const Hash& block) const noexcept -> bool
+auto Blocks::Exists(const block::Hash& block) const noexcept -> bool
 {
     return imp_->Exists(block);
 }
 
-auto Blocks::Load(const Hash& block) const noexcept -> BlockReader
+auto Blocks::Forget(const block::Hash& block) const noexcept -> bool
+{
+    return imp_->Forget(block);
+}
+
+auto Blocks::Load(const block::Hash& block) const noexcept -> ReadView
 {
     return imp_->Load(block);
 }
 
-auto Blocks::Store(const Hash& block, const std::size_t bytes) const noexcept
-    -> BlockWriter
+auto Blocks::Store(const block::Block& block) const noexcept -> bool
 {
-    return imp_->Store(block, bytes);
+    return imp_->Store(block);
 }
 
 Blocks::~Blocks() = default;

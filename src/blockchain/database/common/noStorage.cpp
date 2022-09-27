@@ -18,11 +18,22 @@ Blocks::Blocks(storage::lmdb::Database&, Bulk&) noexcept
 {
 }
 
-auto Blocks::Exists(const Hash&) const noexcept -> bool { return {}; }
+auto Blocks::Exists(const block::Hash& block) const noexcept -> bool
+{
+    return {};
+}
 
-auto Blocks::Load(const Hash&) const noexcept -> BlockReader { return {}; }
+auto Blocks::Forget(const block::Hash& block) const noexcept -> bool
+{
+    return {};
+}
 
-auto Blocks::Store(const Hash&, const std::size_t) const noexcept -> BlockWriter
+auto Blocks::Load(const block::Hash& block) const noexcept -> ReadView
+{
+    return {};
+}
+
+auto Blocks::Store(const block::Block& block) const noexcept -> bool
 {
     return {};
 }
@@ -32,14 +43,15 @@ Blocks::~Blocks() = default;
 
 namespace opentxs::blockchain::database::common
 {
-struct Sync::Imp {
+class SyncPrivate
+{
 };
 
 Sync::Sync(
     const api::Session&,
     storage::lmdb::Database&,
     const std::filesystem::path&) noexcept(false)
-    : imp_(std::make_unique<Imp>())
+    : imp_(std::make_unique<SyncPrivate>())
 {
 }
 
@@ -53,8 +65,7 @@ auto Sync::Reorg(const Chain, const Height) const noexcept -> bool
     return {};
 }
 
-auto Sync::Store(const Chain, const network::otdht::SyncData&) const noexcept
-    -> bool
+auto Sync::Store(const network::otdht::SyncData&, Chain) const noexcept -> bool
 {
     return {};
 }

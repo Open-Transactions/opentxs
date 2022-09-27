@@ -88,6 +88,7 @@ public:
     auto AssociateTransaction(
         const Txid& txid,
         const UnallocatedVector<PatternID>& patterns) const noexcept -> bool;
+    auto ForgetTransaction(const ReadView txid) const noexcept -> bool;
     auto LoadTransaction(const ReadView txid) const noexcept
         -> std::unique_ptr<bitcoin::block::Transaction>;
     auto LoadTransaction(const ReadView txid, proto::BlockchainTransaction& out)

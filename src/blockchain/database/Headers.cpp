@@ -455,6 +455,16 @@ auto Headers::checkpoint(const Lock& lock) const noexcept -> block::Position
     return output;
 }
 
+auto Headers::CurrentBest() const noexcept -> std::unique_ptr<block::Header>
+{
+    try {
+
+        return load_header(best().hash_);
+    } catch (const std::exception& e) {
+        LogAbort()(OT_PRETTY_CLASS())(e.what()).Abort();
+    }
+}
+
 auto Headers::CurrentCheckpoint() const noexcept -> block::Position
 {
     Lock lock(lock_);
@@ -538,7 +548,12 @@ auto Headers::import_genesis(const blockchain::Type type) const noexcept -> void
         OT_ASSERT(genesis);
         OT_ASSERT(hash == genesis->Hash());
 
-        success = common_.StoreBlockHeader(*genesis);
+        success = common_.StoreBlockHeaders([&] {
+            auto out = UpdatedHeader{};
+            out.try_emplace(genesis->Hash(), genesis->clone(), true);
+
+            return out;
+        }());
 
         OT_ASSERT(success);
 

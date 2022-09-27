@@ -9,11 +9,10 @@
 
 #include <BlockchainTransaction.pb.h>
 #include <algorithm>
-#include <cstring>
 #include <iterator>
 #include <optional>
 #include <stdexcept>
-#include <type_traits>
+#include <string_view>
 #include <utility>
 
 #include "Proto.hpp"
@@ -24,20 +23,19 @@
 #include "internal/blockchain/database/common/Common.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/Mutex.hpp"
-#include "internal/util/TSV.hpp"
+#include "internal/util/storage/file/Index.hpp"
 #include "internal/util/storage/lmdb/Database.hpp"
 #include "internal/util/storage/lmdb/Transaction.hpp"
 #include "opentxs/api/crypto/Blockchain.hpp"
 #include "opentxs/blockchain/bitcoin/block/Transaction.hpp"
-#include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Contact.hpp"
 #include "opentxs/core/Data.hpp"
+#include "opentxs/core/FixedByteArray.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "util/Container.hpp"
-#include "util/storage/MappedFile.hpp"
 
 namespace opentxs::blockchain::database::common
 {
@@ -118,37 +116,17 @@ auto Wallet::AssociateTransaction(
     return true;
 }
 
+auto Wallet::ForgetTransaction(const ReadView txid) const noexcept -> bool
+{
+    return lmdb_.Delete(transaction_table_, txid);
+}
+
 auto Wallet::LoadTransaction(const ReadView txid) const noexcept
     -> std::unique_ptr<bitcoin::block::Transaction>
 {
-    try {
-        const auto proto = [&] {
-            const auto index = [&] {
-                auto out = util::IndexData{};
-                auto cb = [&out](const ReadView in) {
-                    if (sizeof(out) != in.size()) { return; }
+    auto proto = proto::BlockchainTransaction{};
 
-                    std::memcpy(static_cast<void*>(&out), in.data(), in.size());
-                };
-                lmdb_.Load(transaction_table_, txid, cb);
-
-                if (0 == out.size_) {
-                    throw std::out_of_range("Transaction not found");
-                }
-
-                return out;
-            }();
-
-            return proto::Factory<proto::BlockchainTransaction>(
-                bulk_.ReadView(index));
-        }();
-
-        return factory::BitcoinTransaction(api_, proto);
-    } catch (const std::exception& e) {
-        LogTrace()(OT_PRETTY_CLASS())(e.what()).Flush();
-
-        return {};
-    }
+    return LoadTransaction(txid, proto);
 }
 
 auto Wallet::LoadTransaction(
@@ -158,24 +136,34 @@ auto Wallet::LoadTransaction(
 {
     try {
         proto = [&] {
-            const auto index = [&] {
-                auto out = util::IndexData{};
-                auto cb = [&out](const ReadView in) {
-                    if (sizeof(out) != in.size()) { return; }
-
-                    std::memcpy(static_cast<void*>(&out), in.data(), in.size());
+            const auto indices = [&] {
+                auto out = Vector<storage::file::Index>{};
+                auto cb = [&out](const auto in) {
+                    auto& index = out.emplace_back();
+                    index.Deserialize(in);
                 };
                 lmdb_.Load(transaction_table_, txid, cb);
 
-                if (0 == out.size_) {
+                if (out.empty() || out.front().empty()) {
                     throw std::out_of_range("Transaction not found");
                 }
 
                 return out;
             }();
+            const auto views = bulk_.Read(indices);
 
-            return proto::Factory<proto::BlockchainTransaction>(
-                bulk_.ReadView(index));
+            OT_ASSERT(false == views.empty());
+
+            const auto& bytes = views.front();
+
+            if (false == valid(bytes)) {
+                ForgetTransaction(txid);
+
+                throw std::out_of_range(
+                    "failed to load serialized transaction");
+            }
+
+            return proto::Factory<proto::BlockchainTransaction>(bytes);
         }();
 
         return factory::BitcoinTransaction(api_, proto);
@@ -235,39 +223,11 @@ auto Wallet::StoreTransaction(
         }();
         const auto& hash = proto.txid();
         const auto bytes = proto.ByteSizeLong();
-        auto index = [&] {
-            auto output = util::IndexData{};
-            auto cb = [&output](const ReadView in) {
-                if (sizeof(output) != in.size()) { return; }
+        auto tx = lmdb_.TransactionRW();
+        auto write = bulk_.Write(tx, {bytes});
+        auto& [index, view] = write.at(0);
 
-                std::memcpy(static_cast<void*>(&output), in.data(), in.size());
-            };
-            lmdb_.Load(transaction_table_, hash, cb);
-
-            return output;
-        }();
-        auto cb = [&](auto& tx) -> bool {
-            const auto result =
-                lmdb_.Store(transaction_table_, hash, tsv(index), tx);
-
-            if (false == result.first) {
-                LogError()(OT_PRETTY_CLASS())(
-                    "Failed to update index for transaction ")(in.ID().asHex())
-                    .Flush();
-
-                return false;
-            }
-
-            return true;
-        };
-        auto dLock = lmdb_.TransactionRW();
-        auto view = [&] {
-            auto bLock = Lock{bulk_.Mutex()};
-
-            return bulk_.WriteView(bLock, dLock, index, std::move(cb), bytes);
-        }();
-
-        if (false == view.valid(bytes)) {
+        if ((false == view.valid(bytes)) || (index.empty())) {
             throw std::runtime_error{
                 "Failed to get write position for transaction"};
         }
@@ -276,7 +236,21 @@ auto Wallet::StoreTransaction(
             throw std::runtime_error{"Failed to write transaction to storage"};
         }
 
-        if (false == dLock.Finalize(true)) {
+        const auto sIndex = index.Serialize();
+        const auto result =
+            lmdb_.Store(transaction_table_, hash, sIndex.Bytes(), tx);
+
+        if (result.first) {
+            LogTrace()(OT_PRETTY_CLASS())("saved ")(
+                bytes)(" bytes at position ")(index.MemoryPosition())(
+                " for transaction ")
+                .asHex(hash)
+                .Flush();
+        } else {
+            throw std::runtime_error{"Failed to update index for transaction"};
+        }
+
+        if (false == tx.Finalize(true)) {
             throw std::runtime_error{"Database update error"};
         }
 

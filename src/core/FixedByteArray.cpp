@@ -7,9 +7,15 @@
 #include "1_Internal.hpp"           // IWYU pragma: associated
 #include "core/FixedByteArray.tpp"  // IWYU pragma: associated
 
+#include <cstdint>
+
+#include "internal/util/P0330.hpp"
+
 namespace opentxs
 {
 #ifndef _MSC_VER
-template class FixedByteArray<32>;
+template class FixedByteArray<2_uz * sizeof(std::uint64_t)>;  // 16
+template class FixedByteArray<3_uz * sizeof(std::uint64_t)>;  // 24
+template class FixedByteArray<4_uz * sizeof(std::uint64_t)>;  // 32
 #endif
 }  // namespace opentxs

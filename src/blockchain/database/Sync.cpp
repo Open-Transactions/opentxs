@@ -88,7 +88,7 @@ auto Sync::Store(
     const block::Position& tip,
     const network::otdht::SyncData& items) const noexcept -> bool
 {
-    if (false == common_.StoreSync(chain_, items)) {
+    if (false == common_.StoreSync(items, chain_)) {
         LogError()(OT_PRETTY_CLASS())("Failed to store sync data").Flush();
 
         return false;

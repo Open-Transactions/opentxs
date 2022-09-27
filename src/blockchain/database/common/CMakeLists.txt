@@ -28,7 +28,14 @@ target_sources(
 )
 
 if(OPENTXS_BLOCK_STORAGE_ENABLED)
-  target_sources(opentxs-common PRIVATE "Blocks.cpp" "Sync.cpp")
+  target_sources(
+    opentxs-common
+    PRIVATE
+      "Blocks.cpp"
+      "Sync.cpp"
+      "SyncPrivate.cpp"
+      "SyncPrivate.hpp"
+  )
 else()
   target_sources(opentxs-common PRIVATE "noStorage.cpp")
 endif()

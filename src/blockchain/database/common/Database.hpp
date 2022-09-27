@@ -60,6 +60,7 @@ class Transaction;
 
 namespace block
 {
+class Block;
 class Header;
 }  // namespace block
 
@@ -109,13 +110,13 @@ public:
         SyncServerEndpoint = 4,
     };
 
-    using BlockHash = opentxs::blockchain::block::Hash;
-    using PatternID = opentxs::blockchain::PatternID;
-    using Txid = opentxs::blockchain::block::Txid;
-    using pTxid = opentxs::blockchain::block::pTxid;
-    using Chain = opentxs::blockchain::Type;
+    using BlockHash = block::Hash;
+    using PatternID = blockchain::PatternID;
+    using Txid = block::Txid;
+    using pTxid = block::pTxid;
+    using Chain = blockchain::Type;
     using EnabledChain = std::pair<Chain, UnallocatedCString>;
-    using Height = opentxs::blockchain::block::Height;
+    using Height = block::Height;
     using Endpoints = Vector<CString>;
 
     auto AddOrUpdate(Address_p address) const noexcept -> bool;
@@ -127,9 +128,9 @@ public:
         const UnallocatedVector<PatternID>& patterns) const noexcept -> bool;
     auto BlockHeaderExists(const BlockHash& hash) const noexcept -> bool;
     auto BlockExists(const BlockHash& block) const noexcept -> bool;
-    auto BlockLoad(const BlockHash& block) const noexcept -> BlockReader;
-    auto BlockStore(const BlockHash& block, const std::size_t bytes)
-        const noexcept -> BlockWriter;
+    auto BlockForget(const BlockHash& block) const noexcept -> bool;
+    auto BlockLoad(const BlockHash& block) const noexcept -> ReadView;
+    auto BlockStore(const block::Block& block) const noexcept -> bool;
     auto DeleteSyncServer(std::string_view endpoint) const noexcept -> bool;
     auto Disable(const Chain type) const noexcept -> bool;
     auto Enable(const Chain type, std::string_view seednode) const noexcept
@@ -152,7 +153,7 @@ public:
     auto LoadFilter(
         const cfilter::Type type,
         const ReadView blockHash,
-        alloc::Default alloc) const noexcept -> opentxs::blockchain::GCS;
+        alloc::Default alloc) const noexcept -> GCS;
     auto LoadFilters(
         const cfilter::Type type,
         const Vector<block::Hash>& blocks) const noexcept -> Vector<GCS>;
@@ -178,8 +179,6 @@ public:
         -> UnallocatedVector<pTxid>;
     auto ReorgSync(const Chain chain, const Height height) const noexcept
         -> bool;
-    auto StoreBlockHeader(const opentxs::blockchain::block::Header& header)
-        const noexcept -> bool;
     auto StoreBlockHeaders(const UpdatedHeader& headers) const noexcept -> bool;
     auto StoreFilterHeaders(
         const cfilter::Type type,
@@ -190,9 +189,8 @@ public:
         const cfilter::Type type,
         const Vector<CFHeaderParams>& headers,
         const Vector<CFilterParams>& filters) const noexcept -> bool;
-    auto StoreSync(
-        const Chain chain,
-        const opentxs::network::otdht::SyncData& items) const noexcept -> bool;
+    auto StoreSync(const opentxs::network::otdht::SyncData& items, Chain chain)
+        const noexcept -> bool;
     auto StoreTransaction(const bitcoin::block::Transaction& tx) const noexcept
         -> bool;
     auto StoreTransaction(

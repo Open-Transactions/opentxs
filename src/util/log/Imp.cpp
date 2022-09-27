@@ -41,6 +41,8 @@
 
 namespace opentxs
 {
+using namespace std::literals;
+
 Log::Imp::Imp(const int logLevel) noexcept
     : level_(logLevel)
     , logger_(GetLogger())
@@ -49,6 +51,7 @@ Log::Imp::Imp(const int logLevel) noexcept
 
 auto Log::Imp::Abort() const noexcept -> void
 {
+    buffer("\n"sv);
     buffer(PrintStackTrace());
     send(LogAction::terminate, Console::err);
     wait_for_terminate();

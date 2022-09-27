@@ -93,10 +93,7 @@ struct Headers {
 public:
     auto BestBlock(const block::Height position) const noexcept(false)
         -> block::Hash;
-    auto CurrentBest() const noexcept -> std::unique_ptr<block::Header>
-    {
-        return load_header(best().hash_);
-    }
+    auto CurrentBest() const noexcept -> std::unique_ptr<block::Header>;
     auto CurrentCheckpoint() const noexcept -> block::Position;
     auto DisconnectedHashes() const noexcept -> database::DisconnectedList;
     auto HasDisconnectedChildren(const block::Hash& hash) const noexcept
