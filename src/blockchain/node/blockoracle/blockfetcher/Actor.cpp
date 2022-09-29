@@ -223,7 +223,7 @@ auto BlockFetcher::Actor::do_startup() noexcept -> bool
 
         if (data.ReviseTip(tip)) { broadcast_tip(data, tip); }
 
-        log_(OT_PRETTY_CLASS())(": best downloaded full block is ")(tip)
+        log_(OT_PRETTY_CLASS())(name_)(": best downloaded full block is ")(tip)
             .Flush();
     }
 

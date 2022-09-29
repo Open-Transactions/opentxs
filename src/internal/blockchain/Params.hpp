@@ -25,9 +25,7 @@
 #include <tuple>
 #include <utility>
 
-#if OT_BLOCKCHAIN
 #include "internal/blockchain/p2p/bitcoin/Bitcoin.hpp"
-#endif  // OT_BLOCKCHAIN
 #include "opentxs/Version.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/bitcoin/cfilter/Types.hpp"
@@ -94,7 +92,6 @@ using ChainData = boost::container::flat_map<blockchain::Type, Data>;
 
 auto Chains() noexcept -> const ChainData&;
 
-#if OT_BLOCKCHAIN
 using FilterData = boost::container::flat_map<
     blockchain::Type,
     boost::container::
@@ -108,5 +105,4 @@ using ServiceBits = std::map<
 auto Bip158() noexcept -> const FilterTypes&;
 auto Filters() noexcept -> const FilterData&;
 auto Services() noexcept -> const ServiceBits&;
-#endif  // OT_BLOCKCHAIN
 }  // namespace opentxs::blockchain::params

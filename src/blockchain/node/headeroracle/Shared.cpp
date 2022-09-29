@@ -885,6 +885,7 @@ auto HeaderOracle::Shared::GetJob(alloc::Default alloc) const noexcept
     auto& data = *handle;
 
     if (data.JobIsAvailable()) {
+        data.have_outstanding_job_ = true;
 
         return std::make_unique<HeaderJob::Imp>(
             true,
