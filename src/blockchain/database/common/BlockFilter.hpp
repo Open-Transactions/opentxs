@@ -5,8 +5,10 @@
 
 #pragma once
 
+#include <cstddef>
 #include <cstdint>
 #include <memory>
+#include <tuple>
 
 #include "internal/blockchain/crypto/Crypto.hpp"
 #include "internal/blockchain/database/common/Common.hpp"
@@ -17,9 +19,16 @@
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
-#include "util/storage/MappedFile.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
+namespace google
+{
+namespace protobuf
+{
+class Arena;
+}  // namespace protobuf
+}  // namespace google
+
 namespace opentxs  // NOLINT
 {
 // inline namespace v1
@@ -47,19 +56,24 @@ class Bulk;
 class GCS;
 }  // namespace blockchain
 
+namespace proto
+{
+class GCS;
+}  // namespace proto
+
 namespace storage
 {
+namespace file
+{
+class Index;
+}  // namespace file
+
 namespace lmdb
 {
 class Database;
 class Transaction;
 }  // namespace lmdb
 }  // namespace storage
-
-namespace util
-{
-struct IndexData;
-}  // namespace util
 // }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
@@ -69,32 +83,34 @@ namespace opentxs::blockchain::database::common
 class BlockFilter
 {
 public:
-    auto HaveFilter(const cfilter::Type type, const ReadView blockHash)
+    auto ForgetCfilter(const cfilter::Type type, const ReadView blockHash)
         const noexcept -> bool;
-    auto HaveFilterHeader(const cfilter::Type type, const ReadView blockHash)
+    auto HaveCfilter(const cfilter::Type type, const ReadView blockHash)
         const noexcept -> bool;
-    auto LoadFilter(
+    auto HaveCfheader(const cfilter::Type type, const ReadView blockHash)
+        const noexcept -> bool;
+    auto LoadCfilter(
         const cfilter::Type type,
         const ReadView blockHash,
         alloc::Default alloc) const noexcept -> opentxs::blockchain::GCS;
-    auto LoadFilters(
+    auto LoadCfilters(
         const cfilter::Type type,
         const Vector<block::Hash>& blocks) const noexcept -> Vector<GCS>;
-    auto LoadFilterHash(
+    auto LoadCfilterHash(
         const cfilter::Type type,
         const ReadView blockHash,
         const AllocateOutput filterHash) const noexcept -> bool;
-    auto LoadFilterHeader(
+    auto LoadCfheader(
         const cfilter::Type type,
         const ReadView blockHash,
         const AllocateOutput header) const noexcept -> bool;
-    auto StoreFilterHeaders(
+    auto StoreCfheaders(
         const cfilter::Type type,
         const Vector<CFHeaderParams>& headers) const noexcept -> bool;
-    auto StoreFilters(
+    auto StoreCfilters(
         const cfilter::Type type,
         const Vector<CFilterParams>& filters) const noexcept -> bool;
-    auto StoreFilters(
+    auto StoreCfilters(
         const cfilter::Type type,
         const Vector<CFHeaderParams>& headers,
         const Vector<CFilterParams>& filters) const noexcept -> bool;
@@ -105,6 +121,11 @@ public:
         Bulk& bulk) noexcept;
 
 private:
+    using Hashes = Vector<ReadView>;
+    using Protos = Vector<proto::GCS*>;
+    using Sizes = Vector<std::size_t>;
+    using Parsed = std::tuple<Hashes, Protos, Sizes>;
+
     static const std::uint32_t blockchain_filter_header_version_{1};
     static const std::uint32_t blockchain_filter_headers_version_{1};
     static const std::uint32_t blockchain_filter_version_{1};
@@ -114,25 +135,33 @@ private:
     storage::lmdb::Database& lmdb_;
     Bulk& bulk_;
 
+    static auto make_arena(unsigned long long capacity) noexcept
+        -> google::protobuf::Arena;
+    static auto parse(
+        const Vector<CFilterParams>& filters,
+        google::protobuf::Arena& arena,
+        alloc::Default alloc) noexcept(false) -> Parsed;
     static auto translate_filter(const cfilter::Type type) noexcept(false)
         -> Table;
     static auto translate_header(const cfilter::Type type) noexcept(false)
         -> Table;
 
-    auto load_filter_index(
+    auto load_cfilter_index(
         const cfilter::Type type,
         const ReadView blockHash,
-        util::IndexData& out) const noexcept(false) -> void;
-    auto load_filter_index(
+        storage::file::Index& out) const noexcept(false) -> void;
+    auto load_cfilter_index(
         const cfilter::Type type,
         const ReadView blockHash,
         storage::lmdb::Transaction& tx,
-        util::IndexData& out) const noexcept(false) -> void;
+        storage::file::Index& out) const noexcept(false) -> void;
     auto store(
-        const Lock& lock,
-        storage::lmdb::Transaction& tx,
-        const ReadView blockHash,
+        const Parsed& parsed,
+        cfilter::Type type,
+        storage::lmdb::Transaction& tx) const noexcept -> bool;
+    auto store_cfheaders(
         const cfilter::Type type,
-        const GCS& filter) const noexcept -> bool;
+        const Vector<CFHeaderParams>& headers,
+        storage::lmdb::Transaction& tx) const noexcept -> bool;
 };
 }  // namespace opentxs::blockchain::database::common

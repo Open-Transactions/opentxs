@@ -45,8 +45,6 @@ using HashVector = Vector<block::Hash>;
 using Segments = UnallocatedSet<ChainSegment>;
 // parent block hash, disconnected block hash
 using DisconnectedList = UnallocatedMultimap<block::Hash, block::Hash>;
-using BlockReader = ProtectedView<ReadView, std::shared_mutex, sLock>;
-using BlockWriter = ProtectedView<WritableView, std::shared_mutex, eLock>;
 
 enum Table {
     Config = 0,

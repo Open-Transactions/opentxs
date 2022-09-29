@@ -37,6 +37,17 @@ namespace api
 class Session;
 }  // namespace api
 
+namespace blockchain
+{
+namespace database
+{
+namespace common
+{
+class SyncPrivate;
+}  // namespace common
+}  // namespace database
+}  // namespace blockchain
+
 namespace network
 {
 namespace otdht
@@ -62,15 +73,15 @@ namespace opentxs::blockchain::database::common
 class Sync
 {
 public:
-    using Chain = opentxs::blockchain::Type;
-    using Height = opentxs::blockchain::block::Height;
-    using Message = opentxs::network::otdht::Data;
+    using Chain = blockchain::Type;
+    using Height = block::Height;
+    using Message = network::otdht::Data;
 
     auto Load(const Chain chain, const Height height, Message& output)
         const noexcept -> bool;
     // Delete all entries with a height greater than specified
     auto Reorg(const Chain chain, const Height height) const noexcept -> bool;
-    auto Store(const Chain chain, const network::otdht::SyncData& items)
+    auto Store(const network::otdht::SyncData& items, Chain chain)
         const noexcept -> bool;
     auto Tip(const Chain chain) const noexcept -> Height;
 
@@ -82,8 +93,6 @@ public:
     ~Sync();
 
 private:
-    struct Imp;
-
-    std::unique_ptr<Imp> imp_;
+    std::unique_ptr<SyncPrivate> imp_;
 };
 }  // namespace opentxs::blockchain::database::common

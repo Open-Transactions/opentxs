@@ -13,7 +13,6 @@
 #include "blockchain/database/common/Database.hpp"
 #include "internal/blockchain/Blockchain.hpp"
 #include "internal/blockchain/Params.hpp"
-#include "internal/blockchain/block/Block.hpp"
 #include "internal/blockchain/database/Types.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/TSV.hpp"
@@ -21,7 +20,6 @@
 #include "internal/util/storage/lmdb/Types.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
-#include "opentxs/blockchain/block/Block.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/util/Bytes.hpp"
@@ -71,7 +69,7 @@ auto Blocks::LoadBitcoin(const block::Hash& block) const noexcept
     } else {
         const auto bytes = common_.BlockLoad(block);
 
-        if (false == bytes.valid()) {
+        if (false == valid(bytes)) {
             LogDebug()(OT_PRETTY_CLASS())("block ")(block.asHex())(
                 " not found.")
                 .Flush();
@@ -79,7 +77,17 @@ auto Blocks::LoadBitcoin(const block::Hash& block) const noexcept
             return {};
         }
 
-        return api_.Factory().BitcoinBlock(chain_, bytes.get());
+        if (auto pBlock = api_.Factory().BitcoinBlock(chain_, bytes); pBlock) {
+
+            return pBlock;
+        } else {
+            LogError()(OT_PRETTY_CLASS())("error parsing block ")
+                .asHex(block)
+                .Flush();
+            common_.BlockForget(block);
+
+            return {};
+        }
     }
 }
 
@@ -95,24 +103,7 @@ auto Blocks::SetTip(const block::Position& position) const noexcept -> bool
 
 auto Blocks::Store(const block::Block& block) const noexcept -> bool
 {
-    const auto size = block.Internal().CalculateSize();
-    auto writer = common_.BlockStore(block.ID(), size);
-
-    if (false == writer.get().valid(size)) {
-        LogError()(OT_PRETTY_CLASS())("Failed to allocate storage for block")
-            .Flush();
-
-        return false;
-    }
-
-    if (false ==
-        block.Serialize(preallocated(writer.size(), writer.get().data()))) {
-        LogError()(OT_PRETTY_CLASS())("Failed to serialize block").Flush();
-
-        return false;
-    }
-
-    return true;
+    return common_.BlockStore(block);
 }
 
 auto Blocks::Tip() const noexcept -> block::Position

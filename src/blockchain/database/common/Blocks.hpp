@@ -11,12 +11,11 @@
 #include <mutex>
 #include <shared_mutex>
 
-#include "internal/blockchain/database/Types.hpp"
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
+#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
-#include "util/storage/MappedFile.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs  // NOLINT
@@ -25,6 +24,11 @@ namespace opentxs  // NOLINT
 // {
 namespace blockchain
 {
+namespace block
+{
+class Block;
+}  // namespace block
+
 namespace database
 {
 namespace common
@@ -50,12 +54,10 @@ namespace opentxs::blockchain::database::common
 class Blocks
 {
 public:
-    using Hash = opentxs::blockchain::block::Hash;
-
-    auto Exists(const Hash& block) const noexcept -> bool;
-    auto Load(const Hash& block) const noexcept -> BlockReader;
-    auto Store(const Hash& block, const std::size_t bytes) const noexcept
-        -> BlockWriter;
+    auto Exists(const block::Hash& block) const noexcept -> bool;
+    auto Forget(const block::Hash& block) const noexcept -> bool;
+    auto Load(const block::Hash& block) const noexcept -> ReadView;
+    auto Store(const block::Block& block) const noexcept -> bool;
 
     Blocks(storage::lmdb::Database& lmdb, Bulk& bulk) noexcept;
 

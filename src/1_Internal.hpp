@@ -605,10 +605,6 @@ namespace internal
 }  // namespace internal
 }  // namespace qt
 }  // namespace ui
-
-namespace util
-{
-}  // namespace util
 // }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)

@@ -22,70 +22,6 @@
 
 namespace opentxs
 {
-template <typename ViewType>
-class ViewWrapper
-{
-public:
-    operator bool() const noexcept { return valid(); }
-
-    auto bytes() const noexcept -> const std::byte*
-    {
-        return static_cast<const std::byte*>(data());
-    }
-    auto data() const noexcept -> const void* { return view_.data(); }
-    auto get() const noexcept -> const ViewType& { return view_; }
-    auto size() const noexcept { return view_.size(); }
-    auto valid() const noexcept { return (nullptr != data()) && (0 != size()); }
-
-    auto get() noexcept -> ViewType& { return view_; }
-
-    ViewWrapper(ViewType&& view) noexcept
-        : view_(std::move(view))
-    {
-    }
-    ViewWrapper() noexcept = default;
-    ViewWrapper(const ViewWrapper&) = delete;
-    ViewWrapper(ViewWrapper&&) = default;
-    auto operator=(const ViewWrapper&) -> ViewWrapper& = delete;
-    auto operator=(ViewWrapper&&) -> ViewWrapper& = default;
-    virtual ~ViewWrapper() = default;
-
-private:
-    ViewType view_{};
-};
-
-template <typename ViewType, typename MutexType, typename LockType>
-class ProtectedView : virtual public ViewWrapper<ViewType>
-{
-public:
-    using DestructCallback = std::function<void()>;
-
-    ProtectedView(
-        ViewType&& view,
-        MutexType& mutex,
-        DestructCallback cb = {}) noexcept
-        : ViewWrapper<ViewType>(std::move(view))
-        , lock_(std::make_unique<LockType>(mutex))
-        , cb_(cb)
-    {
-    }
-    ProtectedView() noexcept = default;
-    ProtectedView(const ProtectedView&) = delete;
-    ProtectedView(ProtectedView&&) = default;
-    auto operator=(const ProtectedView&) -> ProtectedView& = delete;
-    auto operator=(ProtectedView&&) -> ProtectedView& = default;
-    ~ProtectedView() override
-    {
-        lock_.reset();
-
-        if (cb_) { cb_(); }
-    }
-
-private:
-    std::unique_ptr<const LockType> lock_{};
-    DestructCallback cb_{};
-};
-
 using ReadView = std::string_view;
 
 class OPENTXS_EXPORT WritableView
@@ -125,13 +61,21 @@ public:
         : WritableView(nullptr, 0)
     {
     }
+    WritableView(const WritableView&) = delete;
     WritableView(WritableView&& rhs) noexcept
         : data_(std::move(rhs.data_))
         , size_(std::move(rhs.size_))
     {
     }
-    WritableView(const WritableView&) = delete;
-    auto operator=(WritableView&&) -> WritableView& = delete;
+    auto operator=(const WritableView&) -> WritableView& = delete;
+    auto operator=(WritableView&& rhs) noexcept -> WritableView&
+    {
+        using std::swap;
+        swap(data_, rhs.data_);
+        swap(size_, rhs.size_);
+
+        return *this;
+    }
 
     ~WritableView() = default;
 

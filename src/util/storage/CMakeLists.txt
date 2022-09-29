@@ -4,6 +4,7 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 add_subdirectory(drivers)
+add_subdirectory(file)
 if(LMDB_EXPORT)
   add_subdirectory(lmdb)
 endif()
@@ -24,15 +25,7 @@ set(cxx-install-headers
 target_sources(opentxs-common PRIVATE ${cxx-install-headers})
 
 if(LMDB_EXPORT)
-  target_sources(
-    opentxs-common
-    PRIVATE
-      "config/DefaultLMDB.cpp"
-      "MappedFile.cpp"
-      "MappedFile.hpp"
-  )
-  target_link_libraries(opentxs-common PRIVATE Boost::headers)
-  target_link_libraries(opentxs PUBLIC Boost::iostreams)
+  target_sources(opentxs-common PRIVATE "config/DefaultLMDB.cpp")
 elseif(SQLITE_EXPORT)
   target_sources(opentxs-common PRIVATE "config/DefaultSqlite.cpp")
 elseif(FS_EXPORT)

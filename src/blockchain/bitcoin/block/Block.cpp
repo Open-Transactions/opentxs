@@ -31,6 +31,7 @@
 #include "internal/util/P0330.hpp"
 #include "opentxs/blockchain/Blockchain.hpp"
 #include "opentxs/blockchain/BlockchainType.hpp"
+#include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/bitcoin/block/Block.hpp"
 #include "opentxs/blockchain/bitcoin/block/Header.hpp"
 #include "opentxs/blockchain/bitcoin/block/Transaction.hpp"
@@ -151,7 +152,9 @@ auto BitcoinBlock(
             }
         }
     } catch (const std::exception& e) {
-        LogError()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
+        LogError()("opentxs::factory::")(__func__)(
+            ": failed to construct new block: ")(e.what())
+            .Flush();
 
         return {};
     }
@@ -194,7 +197,9 @@ auto BitcoinBlock(
             }
         }
     } catch (const std::exception& e) {
-        LogError()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
+        LogError()("opentxs::factory::")(__func__)(": failed to deserialize ")(
+            print(chain))(" block: ")(e.what())
+            .Flush();
 
         return {};
     }

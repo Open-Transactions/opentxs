@@ -7,90 +7,26 @@
 #include "1_Internal.hpp"                       // IWYU pragma: associated
 #include "blockchain/database/common/Bulk.hpp"  // IWYU pragma: associated
 
-#include <mutex>
-#include <utility>
+#include <cstddef>
+#include <string_view>
 
 #include "blockchain/database/common/Database.hpp"
 #include "internal/blockchain/database/common/Common.hpp"
-#include "util/storage/MappedFile.hpp"
+#include "internal/util/storage/file/Mapped.hpp"
 
 namespace opentxs::blockchain::database::common
 {
-struct Bulk::Imp final : private util::MappedFileStorage {
-    auto Mutex() const noexcept -> std::mutex& { return lock_; }
-    auto ReadView(const Lock&, const util::IndexData& index) const noexcept
-        -> opentxs::ReadView
-    {
-        return get_read_view(index);
-    }
-    auto WriteView(
-        const Lock&,
-        storage::lmdb::Transaction& tx,
-        util::IndexData& index,
-        UpdateCallback&& cb,
-        std::size_t size) const noexcept -> WritableView
-    {
-        return get_write_view(tx, index, std::move(cb), size);
-    }
-
-    Imp(storage::lmdb::Database& lmdb,
-        const std::filesystem::path& path) noexcept(false)
-        : MappedFileStorage(
-              lmdb,
-              path,
-              "blk",
-              Table::Config,
-              static_cast<std::size_t>(common::Database::Key::NextBlockAddress))
-        , lock_()
-    {
-    }
-
-private:
-    mutable std::mutex lock_;
-};
-
 Bulk::Bulk(
     storage::lmdb::Database& lmdb,
     const std::filesystem::path& path) noexcept(false)
-    : imp_(std::make_unique<Imp>(lmdb, path))
+    : Mapped(
+          path,
+          "blk",
+          lmdb,
+          Table::Config,
+          static_cast<std::size_t>(common::Database::Key::NextBlockAddress),
+          {})  // TODO allocator
 {
-}
-
-auto Bulk::Mutex() const noexcept -> std::mutex& { return imp_->Mutex(); }
-
-auto Bulk::ReadView(const util::IndexData& index) const noexcept
-    -> opentxs::ReadView
-{
-    auto lock = Lock{imp_->Mutex()};
-
-    return ReadView(lock, index);
-}
-
-auto Bulk::ReadView(const Lock& lock, const util::IndexData& index)
-    const noexcept -> opentxs::ReadView
-{
-    return imp_->ReadView(lock, index);
-}
-
-auto Bulk::WriteView(
-    storage::lmdb::Transaction& tx,
-    util::IndexData& index,
-    UpdateCallback&& cb,
-    std::size_t size) const noexcept -> WritableView
-{
-    auto lock = Lock{imp_->Mutex()};
-
-    return imp_->WriteView(lock, tx, index, std::move(cb), size);
-}
-
-auto Bulk::WriteView(
-    const Lock& lock,
-    storage::lmdb::Transaction& tx,
-    util::IndexData& index,
-    UpdateCallback&& cb,
-    std::size_t size) const noexcept -> WritableView
-{
-    return imp_->WriteView(lock, tx, index, std::move(cb), size);
 }
 
 Bulk::~Bulk() = default;

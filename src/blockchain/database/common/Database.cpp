@@ -345,15 +345,19 @@ auto Database::BlockExists(const BlockHash& block) const noexcept -> bool
     return imp_->blocks_.Exists(block);
 }
 
-auto Database::BlockLoad(const BlockHash& block) const noexcept -> BlockReader
+auto Database::BlockForget(const BlockHash& block) const noexcept -> bool
+{
+    return imp_->blocks_.Forget(block);
+}
+
+auto Database::BlockLoad(const BlockHash& block) const noexcept -> ReadView
 {
     return imp_->blocks_.Load(block);
 }
 
-auto Database::BlockStore(const BlockHash& block, const std::size_t bytes)
-    const noexcept -> BlockWriter
+auto Database::BlockStore(const block::Block& block) const noexcept -> bool
 {
-    return imp_->blocks_.Store(block, bytes);
+    return imp_->blocks_.Store(block);
 }
 
 auto Database::DeleteSyncServer(std::string_view endpoint) const noexcept
@@ -410,14 +414,14 @@ auto Database::HashKey() const noexcept -> ReadView
 auto Database::HaveFilter(const cfilter::Type type, const ReadView blockHash)
     const noexcept -> bool
 {
-    return imp_->filters_.HaveFilter(type, blockHash);
+    return imp_->filters_.HaveCfilter(type, blockHash);
 }
 
 auto Database::HaveFilterHeader(
     const cfilter::Type type,
     const ReadView blockHash) const noexcept -> bool
 {
-    return imp_->filters_.HaveFilterHeader(type, blockHash);
+    return imp_->filters_.HaveCfheader(type, blockHash);
 }
 
 auto Database::Import(UnallocatedVector<Address_p> peers) const noexcept -> bool
@@ -436,14 +440,14 @@ auto Database::LoadFilter(
     const ReadView blockHash,
     alloc::Default alloc) const noexcept -> opentxs::blockchain::GCS
 {
-    return imp_->filters_.LoadFilter(type, blockHash, alloc);
+    return imp_->filters_.LoadCfilter(type, blockHash, alloc);
 }
 
 auto Database::LoadFilters(
     const cfilter::Type type,
     const Vector<block::Hash>& blocks) const noexcept -> Vector<GCS>
 {
-    return imp_->filters_.LoadFilters(type, blocks);
+    return imp_->filters_.LoadCfilters(type, blocks);
 }
 
 auto Database::LoadFilterHash(
@@ -451,7 +455,7 @@ auto Database::LoadFilterHash(
     const ReadView blockHash,
     const AllocateOutput filterHash) const noexcept -> bool
 {
-    return imp_->filters_.LoadFilterHash(type, blockHash, filterHash);
+    return imp_->filters_.LoadCfilterHash(type, blockHash, filterHash);
 }
 
 auto Database::LoadFilterHeader(
@@ -459,7 +463,7 @@ auto Database::LoadFilterHeader(
     const ReadView blockHash,
     const AllocateOutput header) const noexcept -> bool
 {
-    return imp_->filters_.LoadFilterHeader(type, blockHash, header);
+    return imp_->filters_.LoadCfheader(type, blockHash, header);
 }
 
 auto Database::LoadTransaction(const ReadView txid) const noexcept
@@ -535,12 +539,6 @@ auto Database::ReorgSync(const Chain chain, const Height height) const noexcept
     return imp_->sync_.Reorg(chain, height);
 }
 
-auto Database::StoreBlockHeader(
-    const opentxs::blockchain::block::Header& header) const noexcept -> bool
-{
-    return imp_->headers_.Store(header);
-}
-
 auto Database::StoreBlockHeaders(const UpdatedHeader& headers) const noexcept
     -> bool
 {
@@ -551,14 +549,14 @@ auto Database::StoreFilterHeaders(
     const cfilter::Type type,
     const Vector<CFHeaderParams>& headers) const noexcept -> bool
 {
-    return imp_->filters_.StoreFilterHeaders(type, headers);
+    return imp_->filters_.StoreCfheaders(type, headers);
 }
 
 auto Database::StoreFilters(
     const cfilter::Type type,
     Vector<CFilterParams>& filters) const noexcept -> bool
 {
-    return imp_->filters_.StoreFilters(type, filters);
+    return imp_->filters_.StoreCfilters(type, filters);
 }
 
 auto Database::StoreFilters(
@@ -566,14 +564,14 @@ auto Database::StoreFilters(
     const Vector<CFHeaderParams>& headers,
     const Vector<CFilterParams>& filters) const noexcept -> bool
 {
-    return imp_->filters_.StoreFilters(type, headers, filters);
+    return imp_->filters_.StoreCfilters(type, headers, filters);
 }
 
 auto Database::StoreSync(
-    const Chain chain,
-    const network::otdht::SyncData& items) const noexcept -> bool
+    const opentxs::network::otdht::SyncData& items,
+    Chain chain) const noexcept -> bool
 {
-    return imp_->sync_.Store(chain, items);
+    return imp_->sync_.Store(items, chain);
 }
 
 auto Database::StoreTransaction(

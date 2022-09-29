@@ -25,6 +25,7 @@
 #include "blockchain/database/common/Database.hpp"
 #include "blockchain/database/common/Database.hpp"
 #include "internal/api/network/Blockchain.hpp"
+#include "internal/blockchain/Blockchain.hpp"
 #include "internal/blockchain/node/Config.hpp"
 #include "internal/blockchain/node/Manager.hpp"
 #include "internal/util/AsyncConst.hpp"
