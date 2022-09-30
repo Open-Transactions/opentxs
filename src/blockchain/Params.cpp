@@ -1135,7 +1135,6 @@ auto Chains() noexcept -> const ChainData&
     return data;
 }
 
-#if OT_BLOCKCHAIN
 auto Filters() noexcept -> const FilterData&
 {
     using namespace std::literals;
@@ -1463,5 +1462,4 @@ auto Services() noexcept -> const ServiceBits&
 
     return data;
 }
-#endif  // OT_BLOCKCHAIN
 }  // namespace opentxs::blockchain::params

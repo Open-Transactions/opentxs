@@ -319,6 +319,7 @@ auto Peer::Imp::check_jobs() noexcept -> void
     const auto& log = log_;
 
     if (has_job()) {
+        log(OT_PRETTY_CLASS())(name_)(": already have ")(job_name()).Flush();
 
         return;
     } else if (auto bhJob = header.GetJob(alloc); bhJob) {
