@@ -4,13 +4,13 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 #include "0_stdafx.hpp"                        // IWYU pragma: associated
-#include "1_Internal.hpp"                      // IWYU pragma: associated
 #include "blockchain/crypto/Notification.hpp"  // IWYU pragma: associated
 
 #include <HDPath.pb.h>
 #include <memory>
 #include <utility>
 
+#include "internal/blockchain/Params.hpp"
 #include "internal/blockchain/crypto/Factory.hpp"
 #include "internal/identity/Nym.hpp"
 #include "internal/util/LogMacros.hpp"
@@ -19,7 +19,6 @@
 #include "opentxs/blockchain/crypto/Account.hpp"
 #include "opentxs/blockchain/crypto/SubaccountType.hpp"
 #include "opentxs/blockchain/crypto/Subchain.hpp"
-#include "opentxs/blockchain/node/HeaderOracle.hpp"
 #include "opentxs/core/Amount.hpp"  // IWYU pragma: keep
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
@@ -97,7 +96,7 @@ auto Notification::init() noexcept -> void
 {
     Subaccount::init();
     auto handle = progress_.lock();
-    const auto& hash = node::HeaderOracle::GenesisBlockHash(chain_);
+    const auto& hash = params::get(chain_).GenesisHash();
 
     for (const auto& subchain : AllowedSubchains()) {
         handle->emplace(subchain, block::Position{0, hash});

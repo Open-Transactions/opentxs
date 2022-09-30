@@ -4,7 +4,6 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 #include "0_stdafx.hpp"                          // IWYU pragma: associated
-#include "1_Internal.hpp"                        // IWYU pragma: associated
 #include "api/crypto/blockchain/Blockchain.hpp"  // IWYU pragma: associated
 
 #include <HDPath.pb.h>
@@ -18,6 +17,7 @@
 #include "internal/blockchain/Params.hpp"
 #include "opentxs/blockchain/bitcoin/block/Transaction.hpp"  // IWYU pragma: keep
 #include "opentxs/core/ByteArray.hpp"
+#include "opentxs/core/Data.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/crypto/Bip32Child.hpp"
 #include "opentxs/crypto/Bip43Purpose.hpp"
@@ -29,7 +29,7 @@ namespace zmq = opentxs::network::zeromq;
 namespace opentxs::factory
 {
 auto BlockchainAPI(
-    const api::Session& api,
+    const api::session::Client& api,
     const api::session::Activity& activity,
     const api::session::Contacts& contacts,
     const api::Legacy& legacy,
@@ -55,7 +55,7 @@ namespace opentxs::api::crypto
 {
 auto Blockchain::Bip44(Chain chain) noexcept(false) -> Bip44Type
 {
-    return opentxs::blockchain::params::Chains().at(chain).bip44_;
+    return opentxs::blockchain::params::get(chain).Bip44Code();
 }
 
 auto Blockchain::Bip44Path(

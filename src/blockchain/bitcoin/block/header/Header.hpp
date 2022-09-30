@@ -17,8 +17,6 @@
 #include "internal/blockchain/block/Block.hpp"
 #include "opentxs/blockchain/BlockchainType.hpp"
 #include "opentxs/blockchain/Types.hpp"
-#include "opentxs/blockchain/bitcoin/NumericHash.hpp"
-#include "opentxs/blockchain/bitcoin/Work.hpp"
 #include "opentxs/blockchain/bitcoin/block/Header.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
@@ -30,10 +28,8 @@
 #include "opentxs/util/Time.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
 namespace api
 {
 class Session;
@@ -56,7 +52,6 @@ class Hash;
 }  // namespace blockchain
 
 class ByteArray;
-// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -64,12 +59,14 @@ namespace be = boost::endian;
 
 namespace opentxs::blockchain::bitcoin::block
 {
-class Header::Imp : virtual public blockchain::block::Header::Imp
+class Header::Imp : virtual public blockchain::block::Header::Imp,
+                    virtual public blockchain::bitcoin::block::internal::Header
 {
 public:
-    virtual auto clone_bitcoin() const noexcept -> std::unique_ptr<Imp>
+    auto clone_bitcoin() const noexcept
+        -> std::unique_ptr<block::Header> override
     {
-        return std::make_unique<Imp>();
+        return std::make_unique<block::Header>();
     }
 
     virtual auto MerkleRoot() const noexcept -> const blockchain::block::Hash&;

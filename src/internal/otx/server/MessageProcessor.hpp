@@ -6,10 +6,8 @@
 #pragma once
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
 namespace server
 {
 class Server;
@@ -17,7 +15,6 @@ class Server;
 
 class PasswordPrompt;
 class Secret;
-// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

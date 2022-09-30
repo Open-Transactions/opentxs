@@ -7,6 +7,7 @@
 #include <opentxs/opentxs.hpp>
 #include <memory>
 
+#include "internal/blockchain/Params.hpp"
 #include "ottest/fixtures/blockchain/HeaderOracle.hpp"
 
 namespace ottest
@@ -16,7 +17,7 @@ TEST_F(Test_HeaderOracle, basic_sequence)
     const auto [heightBefore, hashBefore] = header_oracle_.BestChain();
 
     EXPECT_EQ(heightBefore, 0);
-    EXPECT_EQ(hashBefore, bc::HeaderOracle::GenesisBlockHash(type_));
+    EXPECT_EQ(hashBefore, b::params::get(type_).GenesisHash());
 
     EXPECT_TRUE(create_blocks(create_1_));
     EXPECT_TRUE(apply_blocks(sequence_1_));

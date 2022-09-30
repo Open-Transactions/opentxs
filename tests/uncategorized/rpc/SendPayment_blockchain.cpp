@@ -69,7 +69,7 @@ protected:
                        .GetHD()
                        .at(0))
         , mine_to_alex_([&](Height height) -> Transaction {
-            using OutputBuilder = ot::api::session::Factory::OutputBuilder;
+            using OutputBuilder = ot::blockchain::OutputBuilder;
             static const auto baseAmount = ot::blockchain::Amount{10000000000};
             auto output = miner_.Factory().BitcoinGenerationTransaction(
                 test_chain_,

@@ -5,6 +5,7 @@
 
 // IWYU pragma: no_include "opentxs/blockchain/BlockchainType.hpp"
 // IWYU pragma: no_include "opentxs/blockchain/crypto/SubaccountType.hpp"
+// IWYU pragma: no_include "opentxs/core/Data.hpp"
 // IWYU pragma: no_include "opentxs/core/UnitType.hpp"
 
 #pragma once
@@ -19,7 +20,6 @@
 #include "api/crypto/blockchain/Wallets.hpp"
 #include "internal/api/crypto/Blockchain.hpp"
 #include "internal/util/Mutex.hpp"
-#include "opentxs/Version.hpp"
 #include "opentxs/api/Context.hpp"
 #include "opentxs/api/crypto/Blockchain.hpp"
 #include "opentxs/blockchain/Types.hpp"
@@ -29,7 +29,6 @@
 #include "opentxs/blockchain/crypto/Subaccount.hpp"
 #include "opentxs/blockchain/crypto/Subchain.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
-#include "opentxs/core/Amount.hpp"
 #include "opentxs/core/Types.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/crypto/Bip44Type.hpp"
@@ -42,10 +41,8 @@
 #include "opentxs/util/Time.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
 namespace api
 {
 namespace crypto
@@ -125,7 +122,6 @@ class Contact;
 class Data;
 class PasswordPrompt;
 class PaymentCode;
-// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -309,6 +305,7 @@ protected:
     const api::session::Contacts& contacts_;
     const DecodedAddress blank_;
     const CString balance_oracle_endpoint_;
+    const api::crypto::Blockchain& parent_;
     mutable std::mutex lock_;
     mutable IDLock nym_lock_;
     mutable blockchain::AccountCache accounts_;

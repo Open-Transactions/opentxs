@@ -4,7 +4,6 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 #include "0_stdafx.hpp"                        // IWYU pragma: associated
-#include "1_Internal.hpp"                      // IWYU pragma: associated
 #include "blockchain/bitcoin/block/Input.hpp"  // IWYU pragma: associated
 
 #include <boost/container/vector.hpp>
@@ -18,8 +17,6 @@
 #include "internal/blockchain/bitcoin/block/Output.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/api/crypto/Blockchain.hpp"
-#include "opentxs/api/session/Crypto.hpp"
-#include "opentxs/api/session/Session.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
@@ -29,12 +26,10 @@
 namespace opentxs::blockchain::bitcoin::block::implementation
 {
 Input::Cache::Cache(
-    const api::Session& api,
     std::unique_ptr<internal::Output>&& output,
     std::optional<std::size_t>&& size,
     boost::container::flat_set<crypto::Key>&& keys) noexcept
-    : api_(api)
-    , lock_()
+    : lock_()
     , previous_output_(std::move(output))
     , size_(std::move(size))
     , normalized_size_()
@@ -44,8 +39,7 @@ Input::Cache::Cache(
 }
 
 Input::Cache::Cache(const Cache& rhs) noexcept
-    : api_(rhs.api_)
-    , lock_()
+    : lock_()
     , previous_output_()
     , size_()
     , normalized_size_()
@@ -142,6 +136,7 @@ auto Input::Cache::merge(
 }
 
 auto Input::Cache::net_balance_change(
+    const api::crypto::Blockchain& crypto,
     const identifier::Nym& nym,
     const std::size_t index,
     const Log& log) const noexcept -> opentxs::Amount
@@ -158,7 +153,7 @@ auto Input::Cache::net_balance_change(
     }
 
     for (const auto& key : keys_) {
-        if (api_.Crypto().Blockchain().Owner(key) == nym) {
+        if (crypto.Owner(key) == nym) {
             const auto value = -1 * previous_output_->Value();
             log(OT_PRETTY_CLASS())("input ")(index)(" contributes ")(value)
                 .Flush();

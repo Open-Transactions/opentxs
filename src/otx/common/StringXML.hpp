@@ -20,12 +20,9 @@ class IFileReadCallBack;
 }  // namespace io
 }  // namespace irr
 
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
 class String;
-// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

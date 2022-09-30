@@ -5,10 +5,9 @@
 
 #pragma once
 
-#include "opentxs/Version.hpp"  // IWYU pragma: associated
-
 #include <type_traits>
 
+#include "opentxs/Export.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 
 namespace opentxs::network::zeromq

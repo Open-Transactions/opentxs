@@ -4,7 +4,6 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 #include "0_stdafx.hpp"                   // IWYU pragma: associated
-#include "1_Internal.hpp"                 // IWYU pragma: associated
 #include "api/session/client/Client.hpp"  // IWYU pragma: associated
 
 #include <exception>
@@ -185,9 +184,7 @@ auto Client::Cleanup() -> void
     ot_api_.reset();
     workflow_.reset();
     network_->Internal().Shutdown();
-#if OT_BLOCKCHAIN
     contacts_->Internal().prepare_shutdown();
-#endif  // OT_BLOCKCHAIN
     crypto_.InternalSession().PrepareShutdown();
     blockchain_.reset();
     activity_.reset();
@@ -219,11 +216,8 @@ auto Client::Exec(const UnallocatedCString&) const -> const OTAPI_Exec&
 
 auto Client::Init() -> void
 {
-#if OT_BLOCKCHAIN
     contacts_->Internal().init(blockchain_);
     crypto_.InternalSession().Init(blockchain_);
-#endif  // OT_BLOCKCHAIN
-
     Storage::init(factory_, crypto_.Seed());
     StartContacts();
     StartActivity();
@@ -284,13 +278,11 @@ auto Client::StartActivity() -> void { Scheduler::Start(storage_.get()); }
 
 auto Client::StartBlockchain() noexcept -> void
 {
-#if OT_BLOCKCHAIN
     for (const auto chain : args_.DisabledBlockchains()) {
         network_->Blockchain().Disable(chain);
     }
 
     network_->Blockchain().Internal().RestoreNetworks();
-#endif  // OT_BLOCKCHAIN
 }
 
 auto Client::StartContacts() -> void

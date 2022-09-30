@@ -8,7 +8,6 @@
 #include <memory>
 #include <utility>
 
-#include "1_Internal.hpp"  // IWYU pragma: keep
 #include "blockchain/bitcoin/p2p/Header.hpp"
 #include "blockchain/bitcoin/p2p/message/Getblocks.hpp"
 #include "internal/blockchain/p2p/bitcoin/Bitcoin.hpp"

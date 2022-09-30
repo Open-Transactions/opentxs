@@ -4,7 +4,6 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 #include "0_stdafx.hpp"                        // IWYU pragma: associated
-#include "1_Internal.hpp"                      // IWYU pragma: associated
 #include "blockchain/bitcoin/block/Block.hpp"  // IWYU pragma: associated
 
 #include <boost/endian/buffers.hpp>
@@ -26,7 +25,9 @@
 #include "blockchain/bitcoin/block/BlockParser.hpp"
 #include "blockchain/block/Block.hpp"
 #include "internal/blockchain/bitcoin/block/Factory.hpp"
+#include "internal/blockchain/bitcoin/block/Header.hpp"
 #include "internal/blockchain/bitcoin/block/Transaction.hpp"
+#include "internal/blockchain/block/Header.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "opentxs/blockchain/Blockchain.hpp"
@@ -50,7 +51,7 @@ namespace be = boost::endian;
 namespace opentxs::factory
 {
 auto BitcoinBlock(
-    const api::Session& api,
+    const api::Crypto& crypto,
     const opentxs::blockchain::block::Header& previous,
     const Transaction_p pGen,
     const std::uint32_t nBits,
@@ -103,11 +104,11 @@ auto BitcoinBlock(
 
         const auto chain = previous.Type();
         auto header = BitcoinBlockHeader(
-            api,
+            crypto,
             previous,
             nBits,
             version,
-            Block::calculate_merkle_value(api, chain, index),
+            Block::calculate_merkle_value(crypto, chain, index),
             abort);
 
         if (false == bool(header)) {
@@ -128,11 +129,7 @@ auto BitcoinBlock(
             case blockchain::Type::UnitTest: {
 
                 return std::make_shared<Block>(
-                    api,
-                    chain,
-                    std::move(header),
-                    std::move(index),
-                    std::move(map));
+                    chain, std::move(header), std::move(index), std::move(map));
             }
             case blockchain::Type::PKT:
             case blockchain::Type::PKT_testnet: {
@@ -160,7 +157,7 @@ auto BitcoinBlock(
     }
 }
 auto BitcoinBlock(
-    const api::Session& api,
+    const api::Crypto& crypto,
     const blockchain::Type chain,
     const ReadView in) noexcept
     -> std::shared_ptr<blockchain::bitcoin::block::Block>
@@ -178,11 +175,11 @@ auto BitcoinBlock(
             case blockchain::Type::eCash:
             case blockchain::Type::eCash_testnet3:
             case blockchain::Type::UnitTest: {
-                return parse_normal_block(api, chain, in);
+                return parse_normal_block(crypto, chain, in);
             }
             case blockchain::Type::PKT:
             case blockchain::Type::PKT_testnet: {
-                return parse_pkt_block(api, chain, in);
+                return parse_pkt_block(crypto, chain, in);
             }
             case blockchain::Type::Unknown:
             case blockchain::Type::Ethereum_frontier:
@@ -206,7 +203,7 @@ auto BitcoinBlock(
 }
 
 auto parse_normal_block(
-    const api::Session& api,
+    const api::Crypto& crypto,
     const blockchain::Type chain,
     const ReadView in) noexcept(false)
     -> std::shared_ptr<blockchain::bitcoin::block::Block>
@@ -217,18 +214,17 @@ auto parse_normal_block(
 
     const auto* it = ByteIterator{};
     auto expectedSize = 0_uz;
-    auto pHeader = parse_header(api, chain, in, it, expectedSize);
+    auto pHeader = parse_header(crypto, chain, in, it, expectedSize);
 
     OT_ASSERT(pHeader);
 
     const auto& header = *pHeader;
     auto sizeData = BlockReturnType::CalculatedSize{
         in.size(), network::blockchain::bitcoin::CompactSize{}};
-    auto [index, transactions] =
-        parse_transactions(api, chain, in, header, sizeData, it, expectedSize);
+    auto [index, transactions] = parse_transactions(
+        crypto, chain, in, header, sizeData, it, expectedSize);
 
     return std::make_shared<BlockReturnType>(
-        api,
         chain,
         std::move(pHeader),
         std::move(index),
@@ -243,13 +239,12 @@ const std::size_t Block::header_bytes_{80};
 const Block::value_type Block::null_tx_{};
 
 Block::Block(
-    const api::Session& api,
     const blockchain::Type chain,
     std::unique_ptr<const blockchain::bitcoin::block::Header> header,
     TxidIndex&& index,
     TransactionMap&& transactions,
     std::optional<CalculatedSize>&& size) noexcept(false)
-    : blockchain::block::implementation::Block(api, *header)
+    : blockchain::block::implementation::Block(*header)
     , header_p_(std::move(header))
     , header_(*header_p_)
     , index_(std::move(index))
@@ -269,6 +264,16 @@ Block::Block(
             throw std::runtime_error("Invalid transaction");
         }
     }
+}
+
+Block::Block(const Block& rhs) noexcept
+    : Block(
+          rhs.header_.Type(),
+          rhs.header_.Internal().as_Bitcoin().clone_bitcoin(),
+          TxidIndex{rhs.index_},
+          TransactionMap{rhs.transactions_},
+          std::optional<CalculatedSize>{rhs.size_})
+{
 }
 
 auto Block::at(const std::size_t index) const noexcept -> const value_type&
@@ -303,7 +308,7 @@ auto Block::at(const ReadView txid) const noexcept -> const value_type&
 
 template <typename HashType>
 auto Block::calculate_merkle_hash(
-    const api::Session& api,
+    const api::Crypto& crypto,
     const Type chain,
     const HashType& lhs,
     const HashType& rhs,
@@ -325,7 +330,7 @@ auto Block::calculate_merkle_hash(
     std::memcpy(it, rhs.data(), chunk);
 
     return MerkleHash(
-        api,
+        crypto,
         chain,
         {reinterpret_cast<const char*>(preimage.data()), preimage.size()},
         out);
@@ -333,7 +338,7 @@ auto Block::calculate_merkle_hash(
 
 template <typename InputContainer, typename OutputContainer>
 auto Block::calculate_merkle_row(
-    const api::Session& api,
+    const api::Crypto& crypto,
     const Type chain,
     const InputContainer& in,
     OutputContainer& out) -> bool
@@ -345,7 +350,7 @@ auto Block::calculate_merkle_row(
         const auto offset = (1_uz == (count - i)) ? 0_uz : 1_uz;
         auto& next = out.emplace_back();
         const auto hashed = calculate_merkle_hash(
-            api,
+            crypto,
             chain,
             in.at(i),
             in.at(i + offset),
@@ -358,7 +363,7 @@ auto Block::calculate_merkle_row(
 }
 
 auto Block::calculate_merkle_value(
-    const api::Session& api,
+    const api::Crypto& crypto,
     const Type chain,
     const TxidIndex& txids) -> blockchain::block::Hash
 {
@@ -373,14 +378,14 @@ auto Block::calculate_merkle_value(
     a.reserve(txids.size());
     b.reserve(txids.size());
     auto counter{0};
-    calculate_merkle_row(api, chain, txids, a);
+    calculate_merkle_row(crypto, chain, txids, a);
 
     if (1u == a.size()) { return reader(a.at(0)); }
 
     while (true) {
         const auto& src = (1 == (++counter % 2)) ? a : b;
         auto& dst = (0 == (counter % 2)) ? a : b;
-        calculate_merkle_row(api, chain, src, dst);
+        calculate_merkle_row(crypto, chain, src, dst);
 
         if (1u == dst.size()) { return reader(dst.at(0)); }
     }
@@ -401,6 +406,11 @@ auto Block::calculate_size() const noexcept -> CalculatedSize
         cb);
 
     return output;
+}
+
+auto Block::clone_bitcoin() const noexcept -> std::unique_ptr<internal::Block>
+{
+    return std::make_unique<Block>(*this);
 }
 
 auto Block::ExtractElements(const cfilter::Type style) const noexcept
@@ -427,6 +437,7 @@ auto Block::ExtractElements(const cfilter::Type style) const noexcept
 }
 
 auto Block::FindMatches(
+    const api::Session& api,
     const cfilter::Type style,
     const blockchain::block::Patterns& outpoints,
     const blockchain::block::Patterns& patterns,
@@ -445,7 +456,8 @@ auto Block::FindMatches(
     const auto parsed = blockchain::block::ParsedPatterns{patterns, {}};
 
     for (const auto& [txid, tx] : transactions_) {
-        auto temp = tx->Internal().FindMatches(style, outpoints, parsed, log);
+        auto temp =
+            tx->Internal().FindMatches(api, style, outpoints, parsed, log);
         inputs.insert(
             inputs.end(),
             std::make_move_iterator(temp.first.begin()),

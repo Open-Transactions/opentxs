@@ -3,8 +3,7 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#include "0_stdafx.hpp"    // IWYU pragma: associated
-#include "1_Internal.hpp"  // IWYU pragma: associated
+#include "0_stdafx.hpp"  // IWYU pragma: associated
 #include "blockchain/node/headeroracle/HeaderOraclePrivate.hpp"  // IWYU pragma: associated
 
 #include <algorithm>
@@ -16,7 +15,6 @@
 #include "internal/blockchain/database/Header.hpp"
 #include "internal/blockchain/node/Endpoints.hpp"
 #include "internal/blockchain/node/Manager.hpp"
-#include "internal/blockchain/node/headeroracle/HeaderOracle.hpp"
 #include "internal/network/zeromq/Context.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/api/network/Network.hpp"
@@ -41,7 +39,7 @@ HeaderOraclePrivate::HeaderOraclePrivate(
     : api_(api)
     , chain_(node.Internal().Chain())
     , endpoint_(node.Internal().Endpoints().header_oracle_pull_)
-    , checkpoint_height_(params::Chains().at(chain_).checkpoint_.height_)
+    , checkpoint_height_(params::get(chain_).Checkpoints().height_)
     , database_(node.Internal().DB())
     , to_parent_([&] {
         using Type = network::zeromq::socket::Type;
@@ -91,7 +89,7 @@ auto HeaderOraclePrivate::Genesis(blockchain::Type chain) noexcept
         auto out = Map<blockchain::Type, block::Position>{};
 
         for (const auto chain : SupportedChains()) {
-            out.try_emplace(chain, 0, HeaderOracle::GenesisBlockHash(chain));
+            out.try_emplace(chain, 0, params::get(chain).GenesisHash());
         }
 
         return out;

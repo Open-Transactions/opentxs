@@ -19,7 +19,6 @@
 #include "internal/otx/common/Message.hpp"
 #include "internal/util/Lockable.hpp"
 #include "internal/util/Mutex.hpp"
-#include "opentxs/Version.hpp"
 #include "opentxs/api/session/Activity.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/network/zeromq/socket/Publish.hpp"
@@ -31,10 +30,8 @@
 #include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
 namespace api
 {
 namespace crypto
@@ -45,6 +42,7 @@ class Blockchain;
 namespace session
 {
 class Activity;
+class Client;
 class Contacts;
 }  // namespace session
 
@@ -74,7 +72,6 @@ class StorageThread;
 
 class Contact;
 class PeerObject;
-// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -83,8 +80,10 @@ namespace opentxs::api::session::imp
 class Activity final : virtual public internal::Activity, Lockable
 {
 public:
-    auto AddBlockchainTransaction(const blockchain::bitcoin::block::Transaction&
-                                      transaction) const noexcept -> bool final;
+    auto AddBlockchainTransaction(
+        const api::crypto::Blockchain& crypto,
+        const blockchain::bitcoin::block::Transaction& transaction)
+        const noexcept -> bool final;
     auto AddPaymentEvent(
         const identifier::Nym& nymID,
         const identifier::Generic& threadID,
@@ -174,7 +173,7 @@ public:
         -> UnallocatedCString final;
 
     Activity(
-        const api::Session& api,
+        const api::session::Client& api,
         const session::Contacts& contact) noexcept;
     Activity() = delete;
     Activity(const Activity&) = delete;
@@ -185,7 +184,7 @@ public:
     ~Activity() final;
 
 private:
-    const api::Session& api_;
+    const api::session::Client& api_;
     const session::Contacts& contact_;
     const OTZMQPublishSocket message_loaded_;
     mutable activity::MailCache mail_;
@@ -206,19 +205,15 @@ private:
         const std::size_t start,
         const std::size_t count) const noexcept -> void;
 
-#if OT_BLOCKCHAIN
     auto add_blockchain_transaction(
         const eLock& lock,
         const identifier::Nym& nym,
         const blockchain::bitcoin::block::Transaction& transaction)
         const noexcept -> bool;
-#endif  // OT_BLOCKCHAIN
     auto nym_to_contact(const identifier::Nym& nymID) const noexcept
         -> std::shared_ptr<const Contact>;
-#if OT_BLOCKCHAIN
     auto get_blockchain(const eLock&, const identifier::Nym& nymID)
         const noexcept -> const opentxs::network::zeromq::socket::Publish&;
-#endif  // OT_BLOCKCHAIN
     auto get_publisher(const identifier::Nym& nymID) const noexcept
         -> const opentxs::network::zeromq::socket::Publish&;
     auto get_publisher(

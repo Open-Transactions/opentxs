@@ -5,19 +5,16 @@
 
 #pragma once
 
-#include "opentxs/Version.hpp"  // IWYU pragma: associated
-
 #include <string_view>
 
+#include "opentxs/Export.hpp"
 #include "opentxs/network/zeromq/socket/Sender.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Pimpl.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
 namespace network
 {
 namespace zeromq
@@ -30,7 +27,6 @@ class Pair;
 }  // namespace network
 
 using OTZMQPairSocket = Pimpl<network::zeromq::socket::Pair>;
-// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

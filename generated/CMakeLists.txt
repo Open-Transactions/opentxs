@@ -62,8 +62,8 @@ else()
 endif()
 
 configure_file(
-  "Version.hpp.in"
-  "${opentxs_BINARY_DIR}/include/opentxs/Version.hpp"
+  "Platform.hpp.in"
+  "${opentxs_BINARY_DIR}/include/opentxs/util/Platform.hpp"
   @ONLY
 )
 
@@ -109,9 +109,13 @@ configure_file(
 
 if(OPENTXS_STANDALONE)
   install(
-    FILES "${opentxs_BINARY_DIR}/include/opentxs/Version.hpp"
-          "${opentxs_BINARY_DIR}/include/opentxs/opentxs.hpp"
+    FILES "${opentxs_BINARY_DIR}/include/opentxs/opentxs.hpp"
     DESTINATION include/opentxs/
+    COMPONENT dev
+  )
+  install(
+    FILES "${opentxs_BINARY_DIR}/include/opentxs/util/Platform.hpp"
+    DESTINATION include/opentxs/util
     COMPONENT dev
   )
 endif()

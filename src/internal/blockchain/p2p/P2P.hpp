@@ -15,15 +15,25 @@
 #include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
 namespace api
 {
 class Session;
 }  // namespace api
-// }  // namespace v1
+
+namespace blockchain
+{
+namespace p2p
+{
+class Address;
+}  // namespace p2p
+}  // namespace blockchain
+
+namespace proto
+{
+class BlockchainPeerAddress;
+}  // namespace proto
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -33,15 +43,24 @@ using tcp = ip::tcp;
 
 namespace opentxs::blockchain::p2p::internal
 {
-struct Address : virtual public p2p::Address {
-    virtual auto clone_internal() const noexcept
-        -> std::unique_ptr<Address> = 0;
+class Address
+{
+public:
     virtual auto Incoming() const noexcept -> bool = 0;
     virtual auto PreviousLastConnected() const noexcept -> Time = 0;
     virtual auto PreviousServices() const noexcept
         -> UnallocatedSet<Service> = 0;
+    virtual auto Serialize(proto::BlockchainPeerAddress& out) const noexcept
+        -> bool = 0;
 
-    ~Address() override = default;
+    virtual auto AddService(const Service service) noexcept -> void = 0;
+    virtual auto RemoveService(const Service service) noexcept -> void = 0;
+    virtual auto SetIncoming(bool value) noexcept -> void = 0;
+    virtual auto SetLastConnected(const Time& time) noexcept -> void = 0;
+    virtual auto SetServices(const UnallocatedSet<Service>& services) noexcept
+        -> void = 0;
+
+    virtual ~Address() = default;
 };
 }  // namespace opentxs::blockchain::p2p::internal
 
@@ -56,10 +75,9 @@ auto BlockchainAddress(
     const blockchain::Type chain,
     const Time lastConnected,
     const UnallocatedSet<blockchain::p2p::Service>& services,
-    const bool incoming) noexcept
-    -> std::unique_ptr<blockchain::p2p::internal::Address>;
+    const bool incoming) noexcept -> blockchain::p2p::Address;
 auto BlockchainAddress(
     const api::Session& api,
-    const proto::BlockchainPeerAddress serialized) noexcept
-    -> std::unique_ptr<blockchain::p2p::internal::Address>;
+    const proto::BlockchainPeerAddress& serialized) noexcept
+    -> blockchain::p2p::Address;
 }  // namespace opentxs::factory

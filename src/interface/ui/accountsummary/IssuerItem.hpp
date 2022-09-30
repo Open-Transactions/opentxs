@@ -10,7 +10,6 @@
 #include <memory>
 #include <utility>
 
-#include "1_Internal.hpp"
 #include "Proto.hpp"
 #include "interface/ui/base/Combined.hpp"
 #include "interface/ui/base/List.hpp"
@@ -18,7 +17,6 @@
 #include "interface/ui/base/Widget.hpp"
 #include "internal/interface/ui/UI.hpp"
 #include "internal/otx/client/Issuer.hpp"
-#include "opentxs/Version.hpp"
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
@@ -32,10 +30,8 @@
 class QVariant;
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
 namespace api
 {
 namespace session
@@ -61,7 +57,6 @@ namespace ui
 {
 class IssuerItem;
 }  // namespace ui
-// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

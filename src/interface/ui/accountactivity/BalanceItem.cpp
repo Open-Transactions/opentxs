@@ -3,8 +3,7 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#include "0_stdafx.hpp"    // IWYU pragma: associated
-#include "1_Internal.hpp"  // IWYU pragma: associated
+#include "0_stdafx.hpp"  // IWYU pragma: associated
 #include "interface/ui/accountactivity/BalanceItem.hpp"  // IWYU pragma: associated
 
 #include <PaymentWorkflow.pb.h>
@@ -12,24 +11,16 @@
 #include <memory>
 
 #include "Proto.hpp"
-#if OT_BLOCKCHAIN
-#include "interface/ui/accountactivity/BlockchainBalanceItem.hpp"
-#endif  // OT_BLOCKCHAIN
 #include "interface/ui/accountactivity/ChequeBalanceItem.hpp"
 #include "interface/ui/accountactivity/TransferBalanceItem.hpp"
-#include "interface/ui/base/Widget.hpp"
 #include "internal/api/session/Types.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/Mutex.hpp"
+#include "internal/util/P0330.hpp"
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/Contacts.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
-#include "opentxs/blockchain/BlockchainType.hpp"
-#if OT_BLOCKCHAIN
-#include "opentxs/blockchain/bitcoin/block/Transaction.hpp"
-#endif  // OT_BLOCKCHAIN
-#include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/contract/Unit.hpp"
 #include "opentxs/core/display/Definition.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
@@ -50,33 +41,27 @@ auto BalanceItem(
     const identifier::Generic& accountID) noexcept
     -> std::shared_ptr<ui::implementation::AccountActivityRowInternal>
 {
-#if OT_BLOCKCHAIN
-    if (2 < custom.size()) {
-        using Transaction = opentxs::blockchain::bitcoin::block::Transaction;
+    if (2_uz < custom.size()) {
 
-        auto pTx =
-            ui::implementation::extract_custom_ptr<Transaction>(custom, 2);
+        return BalanceItemBlockchain(
+            parent, api, rowID, sortKey, custom, nymID, accountID);
+    } else {
 
-        OT_ASSERT(pTx);
-
-        const auto& tx = *pTx;
-
-        return std::make_shared<ui::implementation::BlockchainBalanceItem>(
-            parent,
-            api,
-            rowID,
-            sortKey,
-            custom,
-            nymID,
-            accountID,
-            ui::implementation::extract_custom<blockchain::Type>(custom, 3),
-            ui::implementation::extract_custom<ByteArray>(custom, 5),
-            tx.NetBalanceChange(nymID),
-            tx.Memo(),
-            ui::implementation::extract_custom<UnallocatedCString>(custom, 4));
+        return BalanceItemCustodial(
+            parent, api, rowID, sortKey, custom, nymID, accountID);
     }
-#endif  // OT_BLOCKCHAIN
+}
 
+auto BalanceItemCustodial(
+    const ui::implementation::AccountActivityInternalInterface& parent,
+    const api::session::Client& api,
+    const ui::implementation::AccountActivityRowID& rowID,
+    const ui::implementation::AccountActivitySortKey& sortKey,
+    ui::implementation::CustomData& custom,
+    const identifier::Nym& nymID,
+    const identifier::Generic& accountID) noexcept
+    -> std::shared_ptr<ui::implementation::AccountActivityRowInternal>
+{
     const auto type =
         ui::implementation::BalanceItem::recover_workflow(custom).type();
 
@@ -98,13 +83,11 @@ auto BalanceItem(
         case otx::client::PaymentWorkflowType::OutgoingCash:
         case otx::client::PaymentWorkflowType::IncomingCash:
         default: {
-            LogError()("opentxs::factory::")(__func__)(
+            LogAbort()("opentxs::factory::")(__func__)(
                 "Unhandled workflow type (")(type)(")")
-                .Flush();
+                .Abort();
         }
     }
-
-    return nullptr;
 }
 }  // namespace opentxs::factory
 

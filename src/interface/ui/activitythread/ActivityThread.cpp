@@ -3,8 +3,7 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#include "0_stdafx.hpp"    // IWYU pragma: associated
-#include "1_Internal.hpp"  // IWYU pragma: associated
+#include "0_stdafx.hpp"  // IWYU pragma: associated
 #include "interface/ui/activitythread/ActivityThread.hpp"  // IWYU pragma: associated
 
 #include <StorageThread.pb.h>
@@ -25,7 +24,6 @@
 #include "internal/blockchain/Blockchain.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/Mutex.hpp"
-#include "opentxs/Version.hpp"
 #include "opentxs/api/crypto/Blockchain.hpp"
 #include "opentxs/api/session/Activity.hpp"
 #include "opentxs/api/session/Client.hpp"
@@ -49,6 +47,7 @@
 #include "opentxs/network/zeromq/Pipeline.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
 #include "opentxs/network/zeromq/message/FrameSection.hpp"
+#include "opentxs/network/zeromq/socket/Types.hpp"
 #include "opentxs/otx/LastReplyStatus.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
@@ -202,14 +201,10 @@ auto ActivityThread::construct_row(
             return factory::PendingSend(
                 *this, api_, primary_id_, id, index, custom);
         }
-#if OT_BLOCKCHAIN
         case otx::client::StorageBox::BLOCKCHAIN: {
             return factory::BlockchainActivityThreadItem(
                 *this, api_, primary_id_, id, index, custom);
         }
-#else
-        case otx::client::StorageBox::BLOCKCHAIN:
-#endif  // OT_BLOCKCHAIN
         case otx::client::StorageBox::SENTPEERREQUEST:
         case otx::client::StorageBox::INCOMINGPEERREQUEST:
         case otx::client::StorageBox::SENTPEERREPLY:
@@ -533,12 +528,14 @@ auto ActivityThread::process_item(
             const auto& tx = *pTx;
             text = api_.Crypto().Blockchain().ActivityDescription(
                 primary_id_, chain, tx);
-            const auto amount = tx.NetBalanceChange(primary_id_);
+            const auto amount =
+                tx.NetBalanceChange(api_.Crypto().Blockchain(), primary_id_);
             custom.emplace_back(new UnallocatedCString{item.txid()});
             custom.emplace_back(new opentxs::Amount{amount});
             custom.emplace_back(new UnallocatedCString{
                 blockchain::internal::Format(chain, amount)});
-            custom.emplace_back(new UnallocatedCString{tx.Memo()});
+            custom.emplace_back(
+                new UnallocatedCString{tx.Memo(api_.Crypto().Blockchain())});
 
             outgoing = (0 > amount);
         } break;

@@ -17,10 +17,8 @@
 #include "otx/client/DepositPayment.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
 namespace otx
 {
 namespace client
@@ -31,7 +29,6 @@ class DepositPayment;
 }  // namespace implementation
 }  // namespace client
 }  // namespace otx
-// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

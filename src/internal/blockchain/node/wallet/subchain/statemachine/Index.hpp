@@ -10,10 +10,8 @@
 #include "internal/blockchain/node/wallet/subchain/statemachine/Job.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
 namespace blockchain
 {
 namespace node
@@ -27,7 +25,6 @@ class SubchainStateData;
 }  // namespace blockchain
 
 class PaymentCode;
-// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

@@ -5,10 +5,9 @@
 
 #pragma once
 
-#include "opentxs/Version.hpp"  // IWYU pragma: associated
-
 #include <tuple>
 
+#include "opentxs/Export.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/Outpoint.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
@@ -17,12 +16,18 @@
 #include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
 namespace blockchain
 {
+namespace bitcoin
+{
+namespace block
+{
+class Block;
+}  // namespace block
+}  // namespace bitcoin
+
 namespace block
 {
 namespace internal
@@ -34,7 +39,6 @@ class Hash;
 class Header;
 }  // namespace block
 }  // namespace blockchain
-// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -43,6 +47,7 @@ namespace opentxs::blockchain::block
 class OPENTXS_EXPORT Block
 {
 public:
+    virtual auto asBitcoin() const noexcept -> const bitcoin::block::Block& = 0;
     virtual auto Header() const noexcept -> const block::Header& = 0;
     virtual auto ID() const noexcept -> const block::Hash& = 0;
     OPENTXS_NO_EXPORT virtual auto Internal() const noexcept
@@ -50,6 +55,7 @@ public:
     virtual auto Print() const noexcept -> UnallocatedCString = 0;
     virtual auto Serialize(AllocateOutput bytes) const noexcept -> bool = 0;
 
+    virtual auto asBitcoin() noexcept -> bitcoin::block::Block& = 0;
     OPENTXS_NO_EXPORT virtual auto Internal() noexcept -> internal::Block& = 0;
 
     Block(const Block&) = delete;

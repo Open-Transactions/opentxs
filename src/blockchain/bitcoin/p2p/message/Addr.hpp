@@ -22,10 +22,8 @@
 #include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
 namespace api
 {
 class Session;
@@ -40,15 +38,11 @@ namespace bitcoin
 class Header;
 }  // namespace bitcoin
 
-namespace internal
-{
-struct Address;
-}  // namespace internal
+class Address;
 }  // namespace p2p
 }  // namespace blockchain
 
 class ByteArray;
-// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -64,12 +58,11 @@ public:
         BitcoinFormat_31402(
             const blockchain::Type chain,
             const ProtocolVersion version,
-            const p2p::internal::Address& address);
+            const p2p::Address& address);
         BitcoinFormat_31402();
     };
 
-    using pAddress = std::unique_ptr<blockchain::p2p::internal::Address>;
-    using AddressVector = UnallocatedVector<pAddress>;
+    using AddressVector = UnallocatedVector<blockchain::p2p::Address>;
 
     static auto ExtractAddress(AddressByteField in) noexcept
         -> std::pair<p2p::Network, ByteArray>;
@@ -79,7 +72,7 @@ public:
     auto at(const std::size_t position) const noexcept(false)
         -> const value_type& final
     {
-        return *payload_.at(position);
+        return payload_.at(position);
     }
     auto begin() const noexcept -> const_iterator final { return {this, 0}; }
     auto end() const noexcept -> const_iterator final

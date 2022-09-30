@@ -16,19 +16,17 @@
 
 #include "Proto.hpp"
 #include "api/session/Factory.hpp"
-#include "opentxs/Version.hpp"
+#include "internal/otx/common/Item.hpp"
+#include "internal/otx/common/Ledger.hpp"
+#include "internal/otx/common/OTTransaction.hpp"
 #include "opentxs/api/Factory.hpp"
 #include "opentxs/api/crypto/Symmetric.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/blockchain/BlockchainType.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
-#if OT_BLOCKCHAIN
+#include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/blockchain/p2p/Address.hpp"
-#endif  // OT_BLOCKCHAIN
-#include "internal/otx/common/Item.hpp"
-#include "internal/otx/common/Ledger.hpp"
-#include "internal/otx/common/OTTransaction.hpp"
 #include "opentxs/core/Armored.hpp"
 #include "opentxs/core/PaymentCode.hpp"
 #include "opentxs/core/Secret.hpp"
@@ -62,10 +60,8 @@
 #include "opentxs/util/Time.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
 namespace api
 {
 namespace session
@@ -117,7 +113,6 @@ class Armored;
 class Data;
 class PasswordPrompt;
 class PeerObject;
-// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -126,7 +121,6 @@ namespace opentxs::api::session::client
 class Factory final : public session::imp::Factory
 {
 public:
-#if OT_BLOCKCHAIN
     auto BitcoinBlock(
         const opentxs::blockchain::Type chain,
         const ReadView bytes) const noexcept
@@ -144,7 +138,7 @@ public:
     auto BitcoinGenerationTransaction(
         const opentxs::blockchain::Type chain,
         const opentxs::blockchain::block::Height height,
-        UnallocatedVector<OutputBuilder>&& outputs,
+        UnallocatedVector<blockchain::OutputBuilder>&& outputs,
         const UnallocatedCString& coinbase,
         const std::int32_t version) const noexcept -> Transaction_p final;
     auto BitcoinTransaction(
@@ -167,7 +161,6 @@ public:
         const opentxs::blockchain::block::Hash& parent,
         const opentxs::blockchain::block::Height height) const
         -> BlockHeaderP final;
-#endif  // OT_BLOCKCHAIN
     auto PeerObject(const Nym_p& senderNym, const UnallocatedCString& message)
         const -> std::unique_ptr<opentxs::PeerObject> final;
     auto PeerObject(

@@ -13,12 +13,14 @@
 #include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
+namespace api
+{
+class Session;
+}  // namespace api
+
 class Log;
-// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -29,10 +31,17 @@ struct Block : virtual public block::Block {
     virtual auto ExtractElements(const cfilter::Type style) const noexcept
         -> Vector<Vector<std::byte>> = 0;
     virtual auto FindMatches(
+        const api::Session& api,
         const cfilter::Type type,
         const Patterns& txos,
         const Patterns& elements,
         const Log& log) const noexcept -> Matches = 0;
+    auto Internal() const noexcept -> const internal::Block& final
+    {
+        return *this;
+    }
+
+    auto Internal() noexcept -> internal::Block& final { return *this; }
 
     ~Block() override = default;
 };

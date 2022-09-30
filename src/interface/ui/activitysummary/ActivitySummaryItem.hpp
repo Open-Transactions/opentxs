@@ -12,11 +12,9 @@
 #include <thread>
 #include <tuple>
 
-#include "1_Internal.hpp"
 #include "interface/ui/base/Row.hpp"
 #include "internal/interface/ui/UI.hpp"
 #include "internal/util/UniqueQueue.hpp"
-#include "opentxs/Version.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/interface/ui/ActivitySummaryItem.hpp"
 #include "opentxs/otx/client/Types.hpp"
@@ -27,10 +25,8 @@
 class QVariant;
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
 namespace api
 {
 namespace session
@@ -67,7 +63,6 @@ class ActivitySummaryItem;
 
 class Flag;
 class PasswordPrompt;
-// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

@@ -124,7 +124,7 @@ private:
     using SyncListen = ot::Map<int, std::unique_ptr<SyncListener>>;
 
     static const ot::UnallocatedSet<ot::blockchain::node::TxoState> states_;
-    static std::unique_ptr<const ot::OTBlockchainAddress> listen_address_;
+    static ot::blockchain::p2p::Address listen_address_;
     static std::unique_ptr<const PeerListener> peer_listener_;
     static std::unique_ptr<MinedBlocks> mined_block_cache_;
     static BlockListen block_listener_;

@@ -20,10 +20,8 @@ class error_code;
 }  // namespace system
 }  // namespace boost
 
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
 namespace api
 {
 namespace network
@@ -36,7 +34,6 @@ class Context;
 }  // namespace api
 
 class Timer;
-// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

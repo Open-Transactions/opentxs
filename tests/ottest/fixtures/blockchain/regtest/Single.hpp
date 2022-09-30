@@ -10,8 +10,6 @@
 #include "ottest/fixtures/blockchain/regtest/Normal.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-// inline namespace v1
-// {
 namespace opentxs
 {
 namespace api
@@ -21,7 +19,6 @@ class Context;
 
 class Options;
 }  // namespace opentxs
-// }  // namespace v1
 // NOLINTEND(modernize-concat-nested-namespaces)
 
 namespace ottest

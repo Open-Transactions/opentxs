@@ -16,6 +16,7 @@
 #include <utility>
 
 #include "internal/blockchain/Blockchain.hpp"
+#include "internal/blockchain/Params.hpp"
 #include "internal/blockchain/bitcoin/Bitcoin.hpp"
 #include "internal/blockchain/block/Block.hpp"
 #include "internal/util/P0330.hpp"
@@ -74,12 +75,11 @@ struct Test_BitcoinBlock : public ::testing::Test {
         if (false == handle.IsValid()) { return false; }
 
         const auto& network = handle.get();
-        const auto& hOracle = network.HeaderOracle();
         const auto& fOracle = network.FilterOracle();
-        const auto genesisFilter =
-            fOracle.LoadFilter(filterType, hOracle.GenesisBlockHash(chain), {});
-        const auto genesisHeader = fOracle.LoadFilterHeader(
-            filterType, hOracle.GenesisBlockHash(chain));
+        const auto& genesis = ot::blockchain::params::get(chain).GenesisHash();
+        const auto genesisFilter = fOracle.LoadFilter(filterType, genesis, {});
+        const auto genesisHeader =
+            fOracle.LoadFilterHeader(filterType, genesis);
 
         EXPECT_TRUE(genesisFilter.IsValid());
 

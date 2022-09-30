@@ -11,7 +11,6 @@
 #include <mutex>
 #include <utility>
 
-#include "1_Internal.hpp"
 #include "Proto.hpp"
 #include "core/Worker.hpp"
 #include "interface/qt/SendMonitor.hpp"
@@ -19,7 +18,6 @@
 #include "interface/ui/base/Widget.hpp"
 #include "internal/interface/ui/UI.hpp"
 #include "internal/util/Mutex.hpp"
-#include "opentxs/Version.hpp"
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
@@ -41,10 +39,8 @@
 #include "util/Work.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
 namespace api
 {
 class Session;
@@ -85,7 +81,6 @@ class AmountValidator;
 class DestinationValidator;
 class DisplayScaleQt;
 }  // namespace ui
-// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

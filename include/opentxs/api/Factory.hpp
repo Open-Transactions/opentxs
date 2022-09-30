@@ -5,20 +5,17 @@
 
 #pragma once
 
-#include "opentxs/Version.hpp"  // IWYU pragma: associated
-
 #include <string_view>
 
+#include "opentxs/Export.hpp"
 #include "opentxs/core/Secret.hpp"
 #include "opentxs/core/identifier/Types.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Bytes.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
 namespace api
 {
 namespace internal
@@ -34,7 +31,6 @@ class Notary;
 class Nym;
 class UnitDefinition;
 }  // namespace identifier
-// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

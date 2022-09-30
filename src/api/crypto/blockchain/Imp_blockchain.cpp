@@ -4,7 +4,6 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 #include "0_stdafx.hpp"                              // IWYU pragma: associated
-#include "1_Internal.hpp"                            // IWYU pragma: associated
 #include "api/crypto/blockchain/Imp_blockchain.hpp"  // IWYU pragma: associated
 
 #include <BlockchainTransaction.pb.h>
@@ -29,6 +28,7 @@
 #include "opentxs/api/network/Blockchain.hpp"
 #include "opentxs/api/network/Network.hpp"
 #include "opentxs/api/session/Activity.hpp"
+#include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/Contacts.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Endpoints.hpp"
@@ -60,7 +60,7 @@
 namespace opentxs::api::crypto::imp
 {
 BlockchainImp::BlockchainImp(
-    const api::Session& api,
+    const api::session::Client& api,
     const api::session::Activity& activity,
     const api::session::Contacts& contacts,
     const api::Legacy& legacy,
@@ -68,6 +68,7 @@ BlockchainImp::BlockchainImp(
     const Options& args,
     api::crypto::Blockchain& parent) noexcept
     : Imp(api, contacts, parent)
+    , client_(api)
     , activity_(activity)
     , key_generated_endpoint_(opentxs::network::zeromq::MakeArbitraryInproc())
     , transaction_updates_([&] {
@@ -156,11 +157,11 @@ auto BlockchainImp::ActivityDescription(
     -> UnallocatedCString
 {
     auto output = std::stringstream{};
-    const auto amount = tx.NetBalanceChange(nym);
-    const auto memo = tx.Memo();
+    const auto amount = tx.NetBalanceChange(parent_, nym);
+    const auto memo = tx.Memo(parent_);
     const auto names = [&] {
         auto out = UnallocatedSet<UnallocatedCString>{};
-        const auto contacts = tx.AssociatedRemoteContacts(contacts_, nym);
+        const auto contacts = tx.AssociatedRemoteContacts(client_, nym);
 
         for (const auto& id : contacts) {
             out.emplace(contacts_.ContactName(id, BlockchainToUnit(chain)));
@@ -431,7 +432,7 @@ auto BlockchainImp::ProcessTransactions(
         auto proto = proto::BlockchainTransaction{};
 
         if (old) {
-            old->Internal().MergeMetadata(chain, tx.Internal(), log);
+            old->Internal().MergeMetadata(parent_, chain, tx.Internal(), log);
 
             if (false == db.StoreTransaction(*old, proto)) {
                 LogError()(OT_PRETTY_CLASS())(
@@ -450,7 +451,8 @@ auto BlockchainImp::ProcessTransactions(
             }
         }
 
-        if (false == db.AssociateTransaction(id, tx.Internal().GetPatterns())) {
+        if (false ==
+            db.AssociateTransaction(id, tx.Internal().GetPatterns(api_))) {
             LogError()(OT_PRETTY_CLASS())(
                 "associate patterns for transaction ")(id.asHex())
                 .Flush();
@@ -485,7 +487,7 @@ auto BlockchainImp::reconcile_activity_threads(
     const opentxs::blockchain::bitcoin::block::Transaction& tx) const noexcept
     -> bool
 {
-    if (!activity_.AddBlockchainTransaction(tx)) { return false; }
+    if (!activity_.AddBlockchainTransaction(parent_, tx)) { return false; }
 
     broadcast_update_signal(proto, tx);
 

@@ -5,8 +5,7 @@
 
 #pragma once
 
-#include "opentxs/Version.hpp"  // IWYU pragma: associated
-
+#include "opentxs/Export.hpp"
 #include "opentxs/identity/credential/Key.hpp"
 
 namespace opentxs::identity::credential

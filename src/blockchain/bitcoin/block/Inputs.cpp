@@ -4,7 +4,6 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 #include "0_stdafx.hpp"                         // IWYU pragma: associated
-#include "1_Internal.hpp"                       // IWYU pragma: associated
 #include "blockchain/bitcoin/block/Inputs.hpp"  // IWYU pragma: associated
 
 #include <BlockchainTransaction.pb.h>
@@ -90,20 +89,22 @@ auto Inputs::AnyoneCanPay(const std::size_t index) noexcept -> bool
 }
 
 auto Inputs::AssociatedLocalNyms(
+    const api::crypto::Blockchain& crypto,
     UnallocatedVector<identifier::Nym>& output) const noexcept -> void
 {
     std::for_each(
         std::begin(inputs_), std::end(inputs_), [&](const auto& item) {
-            item->AssociatedLocalNyms(output);
+            item->AssociatedLocalNyms(crypto, output);
         });
 }
 
 auto Inputs::AssociatedRemoteContacts(
+    const api::session::Client& api,
     UnallocatedVector<identifier::Generic>& output) const noexcept -> void
 {
     std::for_each(
         std::begin(inputs_), std::end(inputs_), [&](const auto& item) {
-            item->AssociatedRemoteContacts(output);
+            item->AssociatedRemoteContacts(api, output);
         });
 }
 
@@ -170,6 +171,7 @@ auto Inputs::ExtractElements(const cfilter::Type style) const noexcept
 }
 
 auto Inputs::FindMatches(
+    const api::Session& api,
     const blockchain::block::Txid& txid,
     const cfilter::Type type,
     const blockchain::block::Patterns& txos,
@@ -181,8 +183,8 @@ auto Inputs::FindMatches(
     auto index = 0_uz;
 
     for (const auto& txin : *this) {
-        auto temp =
-            txin.Internal().FindMatches(txid, type, txos, patterns, index, log);
+        auto temp = txin.Internal().FindMatches(
+            api, txid, type, txos, patterns, index, log);
         inputs.insert(
             inputs.end(),
             std::make_move_iterator(temp.first.begin()),
@@ -197,12 +199,13 @@ auto Inputs::FindMatches(
     return output;
 }
 
-auto Inputs::GetPatterns() const noexcept -> UnallocatedVector<PatternID>
+auto Inputs::GetPatterns(const api::Session& api) const noexcept
+    -> UnallocatedVector<PatternID>
 {
     auto output = UnallocatedVector<PatternID>{};
     std::for_each(
         std::begin(inputs_), std::end(inputs_), [&](const auto& txin) {
-            const auto patterns = txin->GetPatterns();
+            const auto patterns = txin->GetPatterns(api);
             output.insert(output.end(), patterns.begin(), patterns.end());
         });
 
@@ -249,8 +252,10 @@ auto Inputs::MergeMetadata(const internal::Inputs& rhs, const Log& log) noexcept
     return true;
 }
 
-auto Inputs::NetBalanceChange(const identifier::Nym& nym, const Log& log)
-    const noexcept -> opentxs::Amount
+auto Inputs::NetBalanceChange(
+    const api::crypto::Blockchain& crypto,
+    const identifier::Nym& nym,
+    const Log& log) const noexcept -> opentxs::Amount
 {
     auto index = 0_uz;
 
@@ -259,7 +264,7 @@ auto Inputs::NetBalanceChange(const identifier::Nym& nym, const Log& log)
         std::end(inputs_),
         opentxs::Amount{0},
         [&](const auto prev, const auto& input) -> auto{
-            return prev + input->NetBalanceChange(nym, index++, log);
+            return prev + input->NetBalanceChange(crypto, nym, index++, log);
         });
 }
 
@@ -328,8 +333,9 @@ auto Inputs::Serialize(const AllocateOutput destination) const noexcept
     return serialize(destination, false);
 }
 
-auto Inputs::Serialize(proto::BlockchainTransaction& destination) const noexcept
-    -> bool
+auto Inputs::Serialize(
+    const api::Session& api,
+    proto::BlockchainTransaction& destination) const noexcept -> bool
 {
     auto index = std::uint32_t{0};
 
@@ -338,7 +344,7 @@ auto Inputs::Serialize(proto::BlockchainTransaction& destination) const noexcept
 
         auto& out = *destination.add_input();
 
-        if (false == input->Serialize(index, out)) { return false; }
+        if (false == input->Serialize(api, index, out)) { return false; }
 
         ++index;
     }

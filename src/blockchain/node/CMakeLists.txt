@@ -4,19 +4,20 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 add_subdirectory(blockoracle)
+add_subdirectory(filteroracle)
 add_subdirectory(headeroracle)
+add_subdirectory(manager)
 add_subdirectory(stats)
+add_subdirectory(wallet)
 
 if(OT_BLOCKCHAIN_EXPORT)
-  add_subdirectory(filteroracle)
-  add_subdirectory(manager)
   add_subdirectory(peermanager)
-  add_subdirectory(wallet)
 endif()
 
-target_sources(opentxs-common PRIVATE "Genesis.cpp")
 set(cxx-install-headers
     "${opentxs_SOURCE_DIR}/include/opentxs/blockchain/node/SendResult.hpp"
+    "${opentxs_SOURCE_DIR}/include/opentxs/blockchain/node/TxoState.hpp"
+    "${opentxs_SOURCE_DIR}/include/opentxs/blockchain/node/TxoTag.hpp"
     "${opentxs_SOURCE_DIR}/include/opentxs/blockchain/node/Types.hpp"
 )
 
@@ -40,15 +41,6 @@ if(OT_BLOCKCHAIN_EXPORT)
       "UpdateTransaction.cpp"
       "UpdateTransaction.hpp"
   )
-  list(
-    APPEND
-    cxx-install-headers
-    "${opentxs_SOURCE_DIR}/include/opentxs/blockchain/node/Manager.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/blockchain/node/TxoState.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/blockchain/node/TxoTag.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/blockchain/node/Wallet.hpp"
-  )
-
   target_link_libraries(opentxs PUBLIC Boost::system)
   target_include_directories(
     opentxs-common SYSTEM

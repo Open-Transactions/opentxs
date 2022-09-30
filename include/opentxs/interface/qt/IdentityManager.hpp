@@ -5,16 +5,14 @@
 
 #pragma once
 
-#include "opentxs/Version.hpp"  // IWYU pragma: associated
-
 #include <QObject>
 #include <QString>
 
+#include "opentxs/Export.hpp"
+
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
 namespace ui
 {
 class AccountActivityQt;
@@ -27,7 +25,6 @@ class IdentityManagerQt;
 class NymListQt;
 class ProfileQt;
 }  // namespace ui
-// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

@@ -4,7 +4,6 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 #include "0_stdafx.hpp"                        // IWYU pragma: associated
-#include "1_Internal.hpp"                      // IWYU pragma: associated
 #include "internal/blockchain/Blockchain.hpp"  // IWYU pragma: associated
 
 #include <boost/container/flat_map.hpp>
@@ -21,6 +20,7 @@
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/Size.hpp"
+#include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/blockchain/Blockchain.hpp"
@@ -31,7 +31,6 @@
 #include "opentxs/blockchain/bitcoin/cfilter/Header.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
-#include "opentxs/blockchain/p2p/Types.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/display/Definition.hpp"
 #include "opentxs/network/blockchain/bitcoin/CompactSize.hpp"
@@ -315,7 +314,7 @@ auto DefaultFilter(const Type type) noexcept -> cfilter::Type
 {
     try {
 
-        return params::Chains().at(type).default_filter_type_;
+        return params::get(type).DefaultCfilterType();
     } catch (...) {
         return cfilter::Type::Unknown;
     }
@@ -377,7 +376,8 @@ auto FilterHashToHeader(
         preimage.Concatenate(previous.data(), previous.size());
     }
 
-    FilterHash(api, Type::Bitcoin, preimage.Bytes(), output.WriteInto());
+    FilterHash(
+        api.Crypto(), Type::Bitcoin, preimage.Bytes(), output.WriteInto());
 
     return output;
 }
@@ -386,7 +386,7 @@ auto FilterToHash(const api::Session& api, const ReadView filter) noexcept
     -> cfilter::Hash
 {
     auto output = cfilter::Hash{};
-    FilterHash(api, Type::Bitcoin, filter, output.WriteInto());
+    FilterHash(api.Crypto(), Type::Bitcoin, filter, output.WriteInto());
 
     return output;
 }
@@ -438,35 +438,3 @@ auto Ticker(const Type chain) noexcept -> UnallocatedCString
     return TickerSymbol(chain);
 }
 }  // namespace opentxs::blockchain::internal
-
-namespace opentxs::blockchain::p2p
-{
-const UnallocatedMap<Service, UnallocatedCString> service_name_map_{
-    {Service::None, "none"},
-    {Service::Avalanche, "Avalanche"},
-    {Service::BitcoinCash, "Bitcoin Cash"},
-    {Service::Bloom, "Bloom"},
-    {Service::CompactFilters, "Compact Filters"},
-    {Service::Graphene, "Graphene"},
-    {Service::Limited, "Limited"},
-    {Service::Network, "Network"},
-    {Service::Segwit2X, "Segwit2X"},
-    {Service::UTXO, "GetUTXO"},
-    {Service::WeakBlocks, "Weak blocks"},
-    {Service::Witness, "Witness"},
-    {Service::XThin, "XThin"},
-    {Service::XThinner, "XThinner"},
-};
-
-auto DisplayService(const Service service) noexcept -> UnallocatedCString
-{
-    try {
-
-        return service_name_map_.at(service);
-    } catch (...) {
-
-        return {};
-    }
-}
-}  // namespace opentxs::blockchain::p2p
-#undef BITMASK

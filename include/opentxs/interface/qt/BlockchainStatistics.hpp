@@ -5,23 +5,20 @@
 
 #pragma once
 
-#include "opentxs/Version.hpp"  // IWYU pragma: associated
-
 #include <QMetaObject>
 #include <QObject>
 #include <QString>
 #include <QVariant>
 
+#include "opentxs/Export.hpp"
 #include "opentxs/interface/qt/Model.hpp"
 
 class QModelIndex;
 class QObject;
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
 namespace ui
 {
 namespace internal
@@ -31,7 +28,6 @@ struct BlockchainStatistics;
 
 class BlockchainStatisticsQt;
 }  // namespace ui
-// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

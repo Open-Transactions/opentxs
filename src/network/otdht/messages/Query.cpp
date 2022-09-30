@@ -6,7 +6,6 @@
 // IWYU pragma: no_forward_declare opentxs::zeromq::Message
 
 #include "0_stdafx.hpp"                     // IWYU pragma: associated
-#include "1_Internal.hpp"                   // IWYU pragma: associated
 #include "opentxs/network/otdht/Query.hpp"  // IWYU pragma: associated
 
 #include <memory>

@@ -4,7 +4,6 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 #include "0_stdafx.hpp"                             // IWYU pragma: associated
-#include "1_Internal.hpp"                           // IWYU pragma: associated
 #include "blockchain/node/filteroracle/Shared.hpp"  // IWYU pragma: associated
 
 #include <algorithm>
@@ -19,6 +18,7 @@
 #include "blockchain/node/filteroracle/CfilterDownloader.hpp"
 #include "blockchain/node/filteroracle/FilterOracle.hpp"
 #include "internal/blockchain/Blockchain.hpp"
+#include "internal/blockchain/Params.hpp"
 #include "internal/blockchain/block/Block.hpp"
 #include "internal/blockchain/database/Cfilter.hpp"
 #include "internal/blockchain/database/Database.hpp"
@@ -198,10 +198,9 @@ auto Shared::cfilter_tip_needs_broadcast(
     const block::Position& tip,
     Data& data) const noexcept -> bool
 {
-    auto& last =
-        data.last_broadcast_
-            .try_emplace(type, 0, HeaderOracle::GenesisBlockHash(chain_))
-            .first->second;
+    auto& last = data.last_broadcast_
+                     .try_emplace(type, 0, params::get(chain_).GenesisHash())
+                     .first->second;
 
     if (tip == last) {
 

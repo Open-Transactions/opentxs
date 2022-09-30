@@ -5,8 +5,6 @@
 
 #pragma once
 
-#include "opentxs/Version.hpp"
-
 namespace opentxs
 {
 namespace api

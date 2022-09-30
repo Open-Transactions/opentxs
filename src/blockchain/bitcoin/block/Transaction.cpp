@@ -4,7 +4,6 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 #include "0_stdafx.hpp"                              // IWYU pragma: associated
-#include "1_Internal.hpp"                            // IWYU pragma: associated
 #include "blockchain/bitcoin/block/Transaction.hpp"  // IWYU pragma: associated
 
 #include <BlockchainTransaction.pb.h>
@@ -29,15 +28,16 @@
 #include "internal/blockchain/bitcoin/block/Factory.hpp"
 #include "internal/blockchain/bitcoin/block/Input.hpp"   // IWYU pragma: keep
 #include "internal/blockchain/bitcoin/block/Output.hpp"  // IWYU pragma: keep
-#include "internal/blockchain/block/Block.hpp"           // IWYU pragma: keep
+#include "internal/blockchain/bitcoin/block/Types.hpp"
+#include "internal/blockchain/block/Block.hpp"  // IWYU pragma: keep
 #include "internal/core/Amount.hpp"
 #include "internal/identity/wot/claim/Types.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/Time.hpp"
+#include "opentxs/api/Factory.hpp"
+#include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/Contacts.hpp"
-#include "opentxs/api/session/Factory.hpp"
-#include "opentxs/api/session/Session.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/bitcoin/block/Input.hpp"
 #include "opentxs/blockchain/bitcoin/block/Output.hpp"
@@ -62,7 +62,7 @@ namespace be = boost::endian;
 namespace opentxs::factory
 {
 auto BitcoinTransaction(
-    const api::Session& api,
+    const api::Crypto& crypto,
     const blockchain::Type chain,
     const Time& time,
     const boost::endian::little_int32_buf_t& version,
@@ -125,18 +125,17 @@ auto BitcoinTransaction(
     }
 
     raw.lock_time_ = lockTime;
-    raw.CalculateIDs(api, chain);
+    raw.CalculateIDs(crypto, chain);
 
     try {
         return std::make_unique<ReturnType>(
-            api,
             ReturnType::default_version_,
             false,
             raw.version_.value(),
             raw.segwit_flag_.value(),
             raw.lock_time_.value(),
-            api.Factory().DataFromBytes(reader(raw.txid_)),
-            api.Factory().DataFromBytes(reader(raw.wtxid_)),
+            ByteArray{reader(raw.txid_)},
+            ByteArray{reader(raw.wtxid_)},
             time,
             UnallocatedCString{},
             std::move(inputs),
@@ -151,7 +150,28 @@ auto BitcoinTransaction(
 }
 
 auto BitcoinTransaction(
-    const api::Session& api,
+    const api::Crypto& crypto,
+    const blockchain::Type chain,
+    const std::size_t position,
+    const Time& time,
+    ReadView native) noexcept
+    -> std::unique_ptr<blockchain::bitcoin::block::internal::Transaction>
+{
+    try {
+        return BitcoinTransaction(
+            chain,
+            position,
+            time,
+            blockchain::bitcoin::EncodedTransaction::Deserialize(
+                crypto, chain, native));
+    } catch (const std::exception& e) {
+        LogError()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
+
+        return {};
+    }
+}
+
+auto BitcoinTransaction(
     const blockchain::Type chain,
     const std::size_t position,
     const Time& time,
@@ -185,7 +205,6 @@ auto BitcoinTransaction(
 
                 instantiatedInputs.emplace_back(
                     factory::BitcoinTransactionInput(
-                        api,
                         chain,
                         ReadView{
                             reinterpret_cast<const char*>(&op), sizeof(op)},
@@ -214,7 +233,6 @@ auto BitcoinTransaction(
             for (const auto& output : parsed.outputs_) {
                 instantiatedOutputs.emplace_back(
                     factory::BitcoinTransactionOutput(
-                        api,
                         chain,
                         counter++,
                         opentxs::Amount{output.value_.value()},
@@ -233,14 +251,13 @@ auto BitcoinTransaction(
             std::unique_ptr<const blockchain::bitcoin::block::Outputs>{};
 
         return std::make_unique<ReturnType>(
-            api,
             ReturnType::default_version_,
             0 == position,
             parsed.version_.value(),
             parsed.segwit_flag_.value_or(std::byte{0x0}),
             parsed.lock_time_.value(),
-            api.Factory().Data(parsed.txid_),
-            api.Factory().Data(parsed.wtxid_),
+            ByteArray{reader(parsed.txid_)},
+            ByteArray{reader(parsed.wtxid_)},
             time,
             UnallocatedCString{},
             factory::BitcoinTransactionInputs(
@@ -266,7 +283,8 @@ auto BitcoinTransaction(
 }
 
 auto BitcoinTransaction(
-    const api::Session& api,
+    const api::crypto::Blockchain& crypto,
+    const api::Factory& factory,
     const proto::BlockchainTransaction& in) noexcept
     -> std::unique_ptr<blockchain::bitcoin::block::internal::Transaction>
 {
@@ -303,7 +321,8 @@ auto BitcoinTransaction(
                 map.emplace(
                     index,
                     factory::BitcoinTransactionInput(
-                        api,
+                        crypto,
+                        factory,
                         chain,
                         input,
                         (0u == index) && in.is_generation()));
@@ -327,7 +346,8 @@ auto BitcoinTransaction(
                 const auto index = output.index();
                 map.emplace(
                     index,
-                    factory::BitcoinTransactionOutput(api, chain, output));
+                    factory::BitcoinTransactionOutput(
+                        crypto, factory, chain, output));
             }
 
             std::transform(
@@ -336,14 +356,13 @@ auto BitcoinTransaction(
         }
 
         return std::make_unique<ReturnType>(
-            api,
             in.version(),
             in.is_generation(),
             static_cast<std::int32_t>(in.txversion()),
             std::byte{static_cast<std::uint8_t>(in.segwit_flag())},
             in.locktime(),
-            api.Factory().DataFromBytes(in.txid()),
-            api.Factory().DataFromBytes(in.wtxid()),
+            ByteArray{(in.txid())},
+            ByteArray{(in.wtxid())},
             convert_stime(in.time()),
             in.memo(),
             factory::BitcoinTransactionInputs(std::move(inputs)),
@@ -378,6 +397,73 @@ auto BitcoinTransaction(
         return {};
     }
 }
+
+auto BitcoinTransaction(
+    const api::Crypto& crypto,
+    const blockchain::Type chain,
+    const blockchain::block::Height height,
+    UnallocatedVector<blockchain::OutputBuilder>&& scripts,
+    const UnallocatedCString& coinbase,
+    const std::int32_t version) noexcept
+    -> std::unique_ptr<blockchain::bitcoin::block::internal::Transaction>
+{
+    static const auto outpoint = opentxs::blockchain::block::Outpoint{};
+
+    const auto serializedVersion = boost::endian::little_int32_buf_t{version};
+    const auto locktime = boost::endian::little_uint32_buf_t{0};
+    const auto sequence = boost::endian::little_uint32_buf_t{0xffffffff};
+    const auto cb = [&] {
+        const auto bip34 =
+            opentxs::blockchain::bitcoin::block::internal::EncodeBip34(height);
+        auto output = space(bip34.size() + coinbase.size());
+        auto* it = output.data();
+        std::memcpy(it, bip34.data(), bip34.size());
+        std::advance(it, bip34.size());
+        std::memcpy(it, coinbase.data(), coinbase.size());
+        output.resize(std::min(output.size(), 100_uz));
+
+        return output;
+    }();
+    const auto cs = opentxs::blockchain::bitcoin::CompactSize{cb.size()};
+    auto inputs = UnallocatedVector<std::unique_ptr<
+        opentxs::blockchain::bitcoin::block::internal::Input>>{};
+    inputs.emplace_back(factory::BitcoinTransactionInput(
+        chain,
+        outpoint.Bytes(),
+        cs,
+        reader(cb),
+        ReadView{reinterpret_cast<const char*>(&sequence), sizeof(sequence)},
+        true,
+        {}));
+    auto outputs = UnallocatedVector<std::unique_ptr<
+        opentxs::blockchain::bitcoin::block::internal::Output>>{};
+    auto index{-1};
+    using Position = opentxs::blockchain::bitcoin::block::Script::Position;
+
+    for (auto& [amount, pScript, keys] : scripts) {
+        if (false == bool(pScript)) { return {}; }
+
+        const auto& script = *pScript;
+        auto bytes = Space{};
+        script.Serialize(writer(bytes));
+        outputs.emplace_back(factory::BitcoinTransactionOutput(
+            chain,
+            static_cast<std::uint32_t>(++index),
+            opentxs::Amount{amount},
+            factory::BitcoinScript(chain, reader(bytes), Position::Output),
+            std::move(keys)));
+    }
+
+    return factory::BitcoinTransaction(
+        crypto,
+        chain,
+        Clock::now(),
+        serializedVersion,
+        locktime,
+        false,  // TODO segwit
+        factory::BitcoinTransactionInputs(std::move(inputs)),
+        factory::BitcoinTransactionOutputs(std::move(outputs)));
+}
 }  // namespace opentxs::factory
 
 namespace opentxs::blockchain::bitcoin::block::implementation
@@ -385,7 +471,6 @@ namespace opentxs::blockchain::bitcoin::block::implementation
 const VersionNumber Transaction::default_version_{1};
 
 Transaction::Transaction(
-    const api::Session& api,
     const VersionNumber serializeVersion,
     const bool isGeneration,
     const std::int32_t version,
@@ -400,8 +485,7 @@ Transaction::Transaction(
     UnallocatedVector<blockchain::Type>&& chains,
     blockchain::block::Position&& minedPosition,
     std::optional<std::size_t>&& position) noexcept(false)
-    : api_(api)
-    , position_(std::move(position))
+    : position_(std::move(position))
     , serialize_version_(serializeVersion)
     , is_generation_(isGeneration)
     , version_(version)
@@ -422,8 +506,7 @@ Transaction::Transaction(
 }
 
 Transaction::Transaction(const Transaction& rhs) noexcept
-    : api_(rhs.api_)
-    , position_(rhs.position_)
+    : position_(rhs.position_)
     , serialize_version_(rhs.serialize_version_)
     , is_generation_(rhs.is_generation_)
     , version_(rhs.version_)
@@ -438,27 +521,27 @@ Transaction::Transaction(const Transaction& rhs) noexcept
 {
 }
 
-auto Transaction::AssociatedLocalNyms() const noexcept
-    -> UnallocatedVector<identifier::Nym>
+auto Transaction::AssociatedLocalNyms(const api::crypto::Blockchain& crypto)
+    const noexcept -> UnallocatedVector<identifier::Nym>
 {
     auto output = UnallocatedVector<identifier::Nym>{};
-    inputs_->AssociatedLocalNyms(output);
-    outputs_->AssociatedLocalNyms(output);
+    inputs_->AssociatedLocalNyms(crypto, output);
+    outputs_->AssociatedLocalNyms(crypto, output);
     dedup(output);
 
     return output;
 }
 
 auto Transaction::AssociatedRemoteContacts(
-    const api::session::Contacts& contacts,
+    const api::session::Client& api,
     const identifier::Nym& nym) const noexcept
     -> UnallocatedVector<identifier::Generic>
 {
     auto output = UnallocatedVector<identifier::Generic>{};
-    inputs_->AssociatedRemoteContacts(output);
-    outputs_->AssociatedRemoteContacts(output);
+    inputs_->AssociatedRemoteContacts(api, output);
+    outputs_->AssociatedRemoteContacts(api, output);
     dedup(output);
-    const auto mask = contacts.ContactID(nym);
+    const auto mask = api.Contacts().ContactID(nym);
     output.erase(std::remove(output.begin(), output.end(), mask), output.end());
 
     return output;
@@ -516,7 +599,8 @@ auto Transaction::calculate_witness_size() const noexcept -> std::size_t
         });
 }
 
-auto Transaction::IDNormalized() const noexcept -> const identifier::Generic&
+auto Transaction::IDNormalized(const api::Factory& factory) const noexcept
+    -> const identifier::Generic&
 {
     return cache_.normalized([&] {
         auto preimage = Space{};
@@ -524,7 +608,7 @@ auto Transaction::IDNormalized() const noexcept -> const identifier::Generic&
 
         OT_ASSERT(serialized);
 
-        return api_.Factory().IdentifierFromPreimage(
+        return factory.IdentifierFromPreimage(
             reader(preimage), identifier::Algorithm::sha256);
     });
 }
@@ -558,15 +642,16 @@ auto Transaction::ExtractElements(const cfilter::Type style) const noexcept
 }
 
 auto Transaction::FindMatches(
+    const api::Session& api,
     const cfilter::Type style,
     const blockchain::block::Patterns& txos,
     const blockchain::block::ParsedPatterns& elements,
     const Log& log) const noexcept -> blockchain::block::Matches
 {
     log(OT_PRETTY_CLASS())("processing transaction ").asHex(ID()).Flush();
-    auto output = inputs_->FindMatches(txid_, style, txos, elements, log);
+    auto output = inputs_->FindMatches(api, txid_, style, txos, elements, log);
     auto& [inputs, outputs] = output;
-    auto temp = outputs_->FindMatches(txid_, style, elements, log);
+    auto temp = outputs_->FindMatches(api, txid_, style, elements, log);
     inputs.insert(
         inputs.end(),
         std::make_move_iterator(temp.first.begin()),
@@ -579,10 +664,11 @@ auto Transaction::FindMatches(
     return output;
 }
 
-auto Transaction::GetPatterns() const noexcept -> UnallocatedVector<PatternID>
+auto Transaction::GetPatterns(const api::Session& api) const noexcept
+    -> UnallocatedVector<PatternID>
 {
-    auto output = inputs_->GetPatterns();
-    const auto oPatterns = outputs_->GetPatterns();
+    auto output = inputs_->GetPatterns(api);
+    const auto oPatterns = outputs_->GetPatterns(api);
     output.reserve(output.size() + oPatterns.size());
     output.insert(output.end(), oPatterns.begin(), oPatterns.end());
     dedup(output);
@@ -634,12 +720,13 @@ auto Transaction::Keys() const noexcept -> UnallocatedVector<crypto::Key>
     return out;
 }
 
-auto Transaction::Memo() const noexcept -> UnallocatedCString
+auto Transaction::Memo(const api::crypto::Blockchain& crypto) const noexcept
+    -> UnallocatedCString
 {
     if (auto memo = cache_.memo(); false == memo.empty()) { return memo; }
 
     for (const auto& output : *outputs_) {
-        auto note = output.Note();
+        auto note = output.Note(crypto);
 
         if (false == note.empty()) { return note; }
     }
@@ -648,6 +735,7 @@ auto Transaction::Memo() const noexcept -> UnallocatedCString
 }
 
 auto Transaction::MergeMetadata(
+    const api::crypto::Blockchain& crypto,
     const blockchain::Type chain,
     const internal::Transaction& rhs,
     const Log& log) noexcept -> void
@@ -672,16 +760,17 @@ auto Transaction::MergeMetadata(
         return;
     }
 
-    cache_.merge(rhs, log);
+    cache_.merge(crypto, rhs, log);
 }
 
-auto Transaction::NetBalanceChange(const identifier::Nym& nym) const noexcept
-    -> opentxs::Amount
+auto Transaction::NetBalanceChange(
+    const api::crypto::Blockchain& crypto,
+    const identifier::Nym& nym) const noexcept -> opentxs::Amount
 {
     const auto& log = LogTrace();
     log(OT_PRETTY_CLASS())("parsing transaction ").asHex(ID()).Flush();
-    const auto spent = inputs_->NetBalanceChange(nym, log);
-    const auto created = outputs_->NetBalanceChange(nym, log);
+    const auto spent = inputs_->NetBalanceChange(crypto, nym, log);
+    const auto created = outputs_->NetBalanceChange(crypto, nym, log);
     const auto total = spent + created;
     log(OT_PRETTY_CLASS())
         .asHex(ID())(" total input contribution is ")(
@@ -884,7 +973,8 @@ auto Transaction::Serialize(const AllocateOutput destination) const noexcept
     return serialize(destination, false);
 }
 
-auto Transaction::Serialize() const noexcept -> std::optional<SerializeType>
+auto Transaction::Serialize(const api::Session& api) const noexcept
+    -> std::optional<SerializeType>
 {
     auto output = SerializeType{};
     output.set_version(std::max(default_version_, serialize_version_));
@@ -901,9 +991,9 @@ auto Transaction::Serialize() const noexcept -> std::optional<SerializeType>
         return {};
     }
 
-    if (false == inputs_->Serialize(output)) { return {}; }
+    if (false == inputs_->Serialize(api, output)) { return {}; }
 
-    if (false == outputs_->Serialize(output)) { return {}; }
+    if (false == outputs_->Serialize(api, output)) { return {}; }
 
     // TODO optional uint32 confirmations = 9;
     // TODO optional string blockhash = 10;
@@ -934,11 +1024,11 @@ auto Transaction::SetKeyData(const blockchain::block::KeyData& data) noexcept
 
 auto Transaction::vBytes(blockchain::Type chain) const noexcept -> std::size_t
 {
-    const auto& data = params::Chains().at(chain);
+    const auto& data = params::get(chain);
     const auto total = CalculateSize();
 
-    if (data.segwit_) {
-        const auto& scale = data.segwit_scale_factor_;
+    if (data.SupportsSegwit()) {
+        const auto& scale = data.SegwitScaleFactor();
 
         OT_ASSERT(0 < scale);
 

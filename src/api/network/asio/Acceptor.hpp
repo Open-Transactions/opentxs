@@ -18,10 +18,8 @@ class io_context;
 }  // namespace asio
 }  // namespace boost
 
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
 namespace api
 {
 namespace network
@@ -41,7 +39,6 @@ class Endpoint;
 class Socket;
 }  // namespace asio
 }  // namespace network
-// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

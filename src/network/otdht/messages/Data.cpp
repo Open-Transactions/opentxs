@@ -4,7 +4,6 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 #include "0_stdafx.hpp"                    // IWYU pragma: associated
-#include "1_Internal.hpp"                  // IWYU pragma: associated
 #include "opentxs/network/otdht/Data.hpp"  // IWYU pragma: associated
 
 #include <P2PBlockchainSync.pb.h>
@@ -170,44 +169,32 @@ auto Data::Blocks() const noexcept -> const SyncData& { return imp_->blocks_; }
 auto Data::FirstPosition(const api::Session& api) const noexcept
     -> opentxs::blockchain::block::Position
 {
-    static const auto blank = opentxs::blockchain::block::Position{};
-#if OT_BLOCKCHAIN
     const auto& blocks = imp_->blocks_;
 
-    if (blocks.empty()) { return blank; }
+    if (blocks.empty()) { return {}; }
 
     const auto& first = blocks.front();
     const auto header =
         api.Factory().BlockHeader(first.Chain(), first.Header());
 
-    if (!header) { return blank; }
+    if (!header) { return {}; }
 
     return {first.Height(), header->Hash()};
-#else
-
-    return blank;
-#endif  // OT_BLOCKCHAIN
 }
 
 auto Data::LastPosition(const api::Session& api) const noexcept
     -> opentxs::blockchain::block::Position
 {
-    static const auto blank = opentxs::blockchain::block::Position{};
-#if OT_BLOCKCHAIN
     const auto& blocks = imp_->blocks_;
 
-    if (blocks.empty()) { return blank; }
+    if (blocks.empty()) { return {}; }
 
     const auto& last = blocks.back();
     const auto header = api.Factory().BlockHeader(last.Chain(), last.Header());
 
-    if (!header) { return blank; }
+    if (!header) { return {}; }
 
     return {last.Height(), header->Hash()};
-#else
-
-    return blank;
-#endif  // OT_BLOCKCHAIN
 }
 
 auto Data::PreviousCfheader() const noexcept -> ReadView

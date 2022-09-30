@@ -5,14 +5,13 @@
 
 #pragma once
 
-#include "opentxs/Version.hpp"  // IWYU pragma: associated
-
 #include <chrono>
 #include <cstdint>
 #include <future>
 #include <memory>
 #include <tuple>
 
+#include "opentxs/Export.hpp"
 #include "opentxs/core/UnitType.hpp"
 #include "opentxs/core/contract/peer/Types.hpp"
 #include "opentxs/otx/Types.hpp"
@@ -25,10 +24,8 @@
 #define DEFAULT_PROCESS_INBOX_ITEMS 5
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
 namespace api
 {
 namespace session
@@ -55,7 +52,6 @@ class UnitDefinition;
 
 class Amount;
 class OTPayment;
-// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

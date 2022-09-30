@@ -7,7 +7,6 @@
 
 #include <cstdint>
 
-#include "opentxs/Version.hpp"
 #include "opentxs/util/Container.hpp"
 
 namespace opentxs

@@ -5,10 +5,10 @@
 
 #pragma once
 
-#include "opentxs/Version.hpp"  // IWYU pragma: associated
-
 #include <cstddef>
 #include <cstdint>
+
+#include "opentxs/Export.hpp"
 
 namespace opentxs::contract::peer
 {

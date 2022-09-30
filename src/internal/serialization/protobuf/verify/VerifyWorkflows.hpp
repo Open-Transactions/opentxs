@@ -11,7 +11,6 @@
 #include <utility>
 
 #include "internal/serialization/protobuf/Basic.hpp"
-#include "opentxs/Version.hpp"
 #include "opentxs/util/Container.hpp"
 
 namespace opentxs::proto

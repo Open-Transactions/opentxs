@@ -13,10 +13,8 @@
 #include "internal/network/blockchain/Peer.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
 namespace api
 {
 class Session;
@@ -32,13 +30,9 @@ struct Endpoints;
 
 namespace p2p
 {
-namespace internal
-{
-struct Address;
-}  // namespace internal
+class Address;
 }  // namespace p2p
 }  // namespace blockchain
-// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -48,7 +42,7 @@ auto BlockchainPeerBitcoin(
     std::shared_ptr<const api::Session> api,
     std::shared_ptr<const opentxs::blockchain::node::Manager> network,
     int peerID,
-    std::unique_ptr<blockchain::p2p::internal::Address> address,
+    blockchain::p2p::Address address,
     const blockchain::node::Endpoints& endpoints,
     std::string_view fromParent)
     -> boost::shared_ptr<network::blockchain::internal::Peer::Imp>;

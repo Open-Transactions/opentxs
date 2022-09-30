@@ -8,6 +8,8 @@
 #include "StateMachine.hpp"  // IWYU pragma: associated
 
 #include "opentxs/api/session/Wallet.hpp"
+#include "opentxs/core/identifier/UnitDefinition.hpp"
+#include "opentxs/identity/Types.hpp"
 
 namespace opentxs::otx::client::implementation
 {

@@ -17,15 +17,12 @@
 
 #include "internal/util/Mutex.hpp"
 #include "internal/util/storage/lmdb/Types.hpp"
-#include "opentxs/Version.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
 namespace storage
 {
 namespace lmdb
@@ -34,7 +31,6 @@ class DatabasePrivate;
 class Transaction;
 }  // namespace lmdb
 }  // namespace storage
-// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

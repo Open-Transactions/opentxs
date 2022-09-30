@@ -4,7 +4,6 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 #include "0_stdafx.hpp"           // IWYU pragma: associated
-#include "1_Internal.hpp"         // IWYU pragma: associated
 #include "otx/server/Server.hpp"  // IWYU pragma: associated
 
 #include <OTXEnums.pb.h>
@@ -43,6 +42,7 @@
 #include "opentxs/core/AddressType.hpp"
 #include "opentxs/core/Armored.hpp"
 #include "opentxs/core/ByteArray.hpp"
+#include "opentxs/core/Data.hpp"
 #include "opentxs/core/Secret.hpp"
 #include "opentxs/core/String.hpp"
 #include "opentxs/core/contract/ProtocolVersion.hpp"

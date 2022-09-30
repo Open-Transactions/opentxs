@@ -4,28 +4,27 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 #include "0_stdafx.hpp"                     // IWYU pragma: associated
-#include "1_Internal.hpp"                   // IWYU pragma: associated
 #include "blockchain/block/header/Imp.hpp"  // IWYU pragma: associated
 
 #include <BlockchainBlockHeader.pb.h>  // IWYU pragma: keep
 #include <BlockchainBlockLocalData.pb.h>
+#include <compare>
 #include <cstdint>
 #include <stdexcept>
 #include <type_traits>
 #include <utility>
 
-#include "internal/blockchain/Blockchain.hpp"
+#include "internal/blockchain/Params.hpp"
 #include "opentxs/blockchain/BlockchainType.hpp"
-#include "opentxs/blockchain/bitcoin/NumericHash.hpp"
-#include "opentxs/blockchain/bitcoin/Work.hpp"
+#include "opentxs/blockchain/Work.hpp"
 #include "opentxs/blockchain/block/Header.hpp"
+#include "opentxs/blockchain/block/NumericHash.hpp"
 #include "opentxs/core/Data.hpp"
-#include "opentxs/util/Pimpl.hpp"
+#include "opentxs/util/Container.hpp"
 
 namespace opentxs::blockchain::block::implementation
 {
 Header::Header(
-    const api::Session& api,
     const VersionNumber version,
     const blockchain::Type type,
     block::Hash&& hash,
@@ -36,8 +35,7 @@ Header::Header(
     const Status inheritStatus,
     const blockchain::Work& work,
     const blockchain::Work& inheritWork) noexcept
-    : api_(api)
-    , hash_(std::move(hash))
+    : hash_(std::move(hash))
     , pow_(std::move(pow))
     , parent_hash_(std::move(parentHash))
     , type_(type)
@@ -51,8 +49,7 @@ Header::Header(
 }
 
 Header::Header(const Header& rhs) noexcept
-    : api_(rhs.api_)
-    , hash_(rhs.hash_)
+    : hash_(rhs.hash_)
     , pow_(rhs.pow_)
     , parent_hash_(rhs.parent_hash_)
     , type_(rhs.type_)
@@ -136,17 +133,16 @@ auto Header::IsBlacklisted() const noexcept -> bool
 
 auto Header::LocalState() const noexcept -> Header::Status { return status_; }
 
-auto Header::minimum_work(const blockchain::Type chain) -> OTWork
+auto Header::minimum_work(const blockchain::Type chain) -> blockchain::Work
 {
-    const auto maxTarget =
-        OTNumericHash{factory::NumericHashNBits(NumericHash::MaxTarget(chain))};
+    const auto maxTarget = block::NumericHash{params::get(chain).Difficulty()};
 
-    return OTWork{factory::Work(chain, maxTarget)};
+    return {maxTarget, chain};
 }
 
-auto Header::NumericHash() const noexcept -> OTNumericHash
+auto Header::NumericHash() const noexcept -> block::NumericHash
 {
-    return OTNumericHash{factory::NumericHash(pow_)};
+    return {pow_};
 }
 
 auto Header::ParentHash() const noexcept -> const block::Hash&
@@ -179,8 +175,8 @@ auto Header::Serialize(SerializedType& output) const noexcept -> bool
     local.set_height(height_);
     local.set_status(static_cast<std::uint32_t>(status_));
     local.set_inherit_status(static_cast<std::uint32_t>(inherit_status_));
-    local.set_work(work_->asHex());
-    local.set_inherit_work(inherit_work_->asHex());
+    local.set_work(work_.asHex());
+    local.set_inherit_work(inherit_work_.asHex());
 
     return true;
 }
@@ -193,7 +189,7 @@ auto Header::SetDisconnectedState() noexcept -> void
 
 auto Header::Valid() const noexcept -> bool { return NumericHash() < Target(); }
 
-auto Header::Work() const noexcept -> OTWork
+auto Header::Work() const noexcept -> blockchain::Work
 {
     if (parent_hash_.IsNull()) {
         return work_;

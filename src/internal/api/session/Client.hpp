@@ -9,10 +9,8 @@
 #include "opentxs/api/session/Client.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
 namespace identifier
 {
 class Nym;
@@ -30,7 +28,6 @@ class ServerAction;
 
 class OT_API;
 class OTAPI_Exec;
-// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

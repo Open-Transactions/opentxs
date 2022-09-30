@@ -22,13 +22,11 @@
 #include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
 namespace api
 {
-class Session;
+class Crypto;
 }  // namespace api
 
 namespace blockchain
@@ -44,7 +42,6 @@ class Input;
 }  // namespace block
 }  // namespace bitcoin
 }  // namespace blockchain
-// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -122,14 +119,14 @@ struct EncodedTransaction {
         -> std::uint32_t;
 
     auto CalculateIDs(
-        const api::Session& api,
+        const api::Crypto& crypto,
         const blockchain::Type chain) noexcept -> bool;
     auto CalculateIDs(
-        const api::Session& api,
+        const api::Crypto& crypto,
         const blockchain::Type chain,
         ReadView bytes) noexcept -> bool;
     static auto Deserialize(
-        const api::Session& api,
+        const api::Crypto& crypto,
         const blockchain::Type chain,
         const ReadView bytes) noexcept(false) -> EncodedTransaction;
 

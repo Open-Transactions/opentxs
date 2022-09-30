@@ -5,11 +5,10 @@
 
 #pragma once
 
-#include "opentxs/Version.hpp"  // IWYU pragma: associated
-
 #include <cstdint>
+#include <string_view>
 
-#include "opentxs/util/Container.hpp"
+#include "opentxs/Export.hpp"
 
 namespace opentxs::blockchain::p2p
 {
@@ -51,6 +50,7 @@ enum class Service : std::uint8_t {
     XThinner = 13,
 };
 
-OPENTXS_EXPORT auto DisplayService(const Service service) noexcept
-    -> UnallocatedCString;
+OPENTXS_EXPORT auto print(Network) noexcept -> std::string_view;
+OPENTXS_EXPORT auto print(Protocol) noexcept -> std::string_view;
+OPENTXS_EXPORT auto print(Service) noexcept -> std::string_view;
 }  // namespace opentxs::blockchain::p2p

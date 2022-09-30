@@ -4,7 +4,6 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 #include "0_stdafx.hpp"                             // IWYU pragma: associated
-#include "1_Internal.hpp"                           // IWYU pragma: associated
 #include "internal/blockchain/bitcoin/Bitcoin.hpp"  // IWYU pragma: associated
 
 #include <boost/endian/buffers.hpp>
@@ -220,11 +219,11 @@ auto EncodedOutput::size() const noexcept -> std::size_t
 }
 
 auto EncodedTransaction::CalculateIDs(
-    const api::Session& api,
+    const api::Crypto& crypto,
     const blockchain::Type chain,
     ReadView bytes) noexcept -> bool
 {
-    auto output = TransactionHash(api, chain, bytes, writer(wtxid_));
+    auto output = TransactionHash(crypto, chain, bytes, writer(wtxid_));
 
     if (false == output) {
         LogError()(OT_PRETTY_CLASS())("Failed to calculate wtxid").Flush();
@@ -234,7 +233,8 @@ auto EncodedTransaction::CalculateIDs(
 
     if (segwit_flag_.has_value()) {
         const auto preimage = txid_preimage();
-        output = TransactionHash(api, chain, reader(preimage), writer(txid_));
+        output =
+            TransactionHash(crypto, chain, reader(preimage), writer(txid_));
     } else {
         txid_ = wtxid_;
     }
@@ -249,12 +249,12 @@ auto EncodedTransaction::CalculateIDs(
 }
 
 auto EncodedTransaction::CalculateIDs(
-    const api::Session& api,
+    const api::Crypto& crypto,
     const blockchain::Type chain) noexcept -> bool
 {
     const auto preimage = wtxid_preimage();
 
-    return CalculateIDs(api, chain, reader(preimage));
+    return CalculateIDs(crypto, chain, reader(preimage));
 }
 
 auto EncodedTransaction::DefaultVersion(const blockchain::Type) noexcept
@@ -264,7 +264,7 @@ auto EncodedTransaction::DefaultVersion(const blockchain::Type) noexcept
 }
 
 auto EncodedTransaction::Deserialize(
-    const api::Session& api,
+    const api::Crypto& crypto,
     const blockchain::Type chain,
     const ReadView in) noexcept(false) -> EncodedTransaction
 {
@@ -469,7 +469,7 @@ auto EncodedTransaction::Deserialize(
         locktime.value())
         .Flush();
 
-    if (false == output.CalculateIDs(api, chain, view)) {
+    if (false == output.CalculateIDs(crypto, chain, view)) {
         throw std::runtime_error("Failed to calculate txid / wtxid");
     }
 

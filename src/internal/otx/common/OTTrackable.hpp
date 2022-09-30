@@ -6,7 +6,6 @@
 #pragma once
 
 #include "internal/otx/common/Instrument.hpp"
-#include "opentxs/Version.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/util/Numbers.hpp"

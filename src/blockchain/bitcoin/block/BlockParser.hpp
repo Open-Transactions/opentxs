@@ -27,8 +27,6 @@
 #include "blockchain/block/Block.hpp"
 #include "internal/blockchain/bitcoin/Bitcoin.hpp"
 #include "internal/blockchain/block/Block.hpp"
-#include "opentxs/api/session/Factory.hpp"
-#include "opentxs/api/session/Session.hpp"
 #include "opentxs/blockchain/BlockchainType.hpp"
 #include "opentxs/blockchain/bitcoin/block/Block.hpp"
 #include "opentxs/blockchain/bitcoin/block/Transaction.hpp"
@@ -40,13 +38,11 @@
 #include "util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
 namespace api
 {
-class Session;
+class Crypto;
 }  // namespace api
 
 namespace blockchain
@@ -72,7 +68,6 @@ auto reader(const ArrayType& in) noexcept -> ReadView
 {
     return {reinterpret_cast<const char*>(in.data()), in.size()};
 }
-// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -84,24 +79,24 @@ using ParsedTransactions =
     std::pair<BlockReturnType::TxidIndex, BlockReturnType::TransactionMap>;
 
 auto parse_header(
-    const api::Session& api,
+    const api::Crypto& crypto,
     const blockchain::Type chain,
     const ReadView in,
     ByteIterator& it,
     std::size_t& expectedSize)
     -> std::unique_ptr<blockchain::bitcoin::block::Header>;
 auto parse_normal_block(
-    const api::Session& api,
+    const api::Crypto& crypto,
     const blockchain::Type chain,
     const ReadView in) noexcept(false)
     -> std::shared_ptr<blockchain::bitcoin::block::Block>;
 auto parse_pkt_block(
-    const api::Session& api,
+    const api::Crypto& crypto,
     const blockchain::Type chain,
     const ReadView in) noexcept(false)
     -> std::shared_ptr<blockchain::bitcoin::block::Block>;
 auto parse_transactions(
-    const api::Session& api,
+    const api::Crypto& crypto,
     const blockchain::Type chain,
     const ReadView in,
     const blockchain::bitcoin::block::Header& header,

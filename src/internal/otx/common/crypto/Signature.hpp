@@ -5,15 +5,12 @@
 
 #pragma once
 
-#include "opentxs/Version.hpp"
 #include "opentxs/core/Armored.hpp"
 #include "opentxs/util/Pimpl.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
 namespace api
 {
 class Session;
@@ -23,7 +20,6 @@ class OTSignatureMetadata;
 class Signature;
 
 using OTSignature = Pimpl<Signature>;
-// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

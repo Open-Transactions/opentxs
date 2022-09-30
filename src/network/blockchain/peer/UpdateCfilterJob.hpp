@@ -5,7 +5,31 @@
 
 #pragma once
 
-#include "network/blockchain/peer/Imp.hpp"  // IWYU pragma: associated
+#include <variant>
+
+#include "internal/blockchain/node/Types.hpp"
+#include "internal/network/blockchain/Peer.hpp"
+#include "network/blockchain/peer/Imp.hpp"
+#include "opentxs/blockchain/bitcoin/cfilter/GCS.hpp"
+#include "opentxs/blockchain/bitcoin/cfilter/Types.hpp"
+#include "opentxs/blockchain/block/Position.hpp"
+
+// NOLINTBEGIN(modernize-concat-nested-namespaces)
+namespace opentxs
+{
+namespace blockchain
+{
+namespace node
+{
+namespace internal
+{
+class BlockBatch;
+class HeaderJob;
+}  // namespace internal
+}  // namespace node
+}  // namespace blockchain
+}  // namespace opentxs
+// NOLINTEND(modernize-concat-nested-namespaces)
 
 namespace opentxs::network::blockchain::internal
 {

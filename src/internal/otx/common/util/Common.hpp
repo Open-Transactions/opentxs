@@ -5,7 +5,6 @@
 
 #pragma once
 
-#include "opentxs/Version.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Time.hpp"
 

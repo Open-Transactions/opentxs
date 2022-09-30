@@ -4,7 +4,6 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 #include "0_stdafx.hpp"                          // IWYU pragma: associated
-#include "1_Internal.hpp"                        // IWYU pragma: associated
 #include "blockchain/bitcoin/block/Outputs.hpp"  // IWYU pragma: associated
 
 #include <BlockchainTransaction.pb.h>
@@ -76,20 +75,22 @@ Outputs::Outputs(const Outputs& rhs) noexcept
 }
 
 auto Outputs::AssociatedLocalNyms(
+    const api::crypto::Blockchain& crypto,
     UnallocatedVector<identifier::Nym>& output) const noexcept -> void
 {
     std::for_each(
         std::begin(outputs_), std::end(outputs_), [&](const auto& item) {
-            item->AssociatedLocalNyms(output);
+            item->AssociatedLocalNyms(crypto, output);
         });
 }
 
 auto Outputs::AssociatedRemoteContacts(
+    const api::session::Client& api,
     UnallocatedVector<identifier::Generic>& output) const noexcept -> void
 {
     std::for_each(
         std::begin(outputs_), std::end(outputs_), [&](const auto& item) {
-            item->AssociatedRemoteContacts(output);
+            item->AssociatedRemoteContacts(api, output);
         });
 }
 
@@ -142,6 +143,7 @@ auto Outputs::ExtractElements(const cfilter::Type style) const noexcept
 }
 
 auto Outputs::FindMatches(
+    const api::Session& api,
     const blockchain::block::Txid& txid,
     const cfilter::Type type,
     const blockchain::block::ParsedPatterns& patterns,
@@ -150,7 +152,8 @@ auto Outputs::FindMatches(
     auto output = blockchain::block::Matches{};
 
     for (const auto& txout : *this) {
-        auto temp = txout.Internal().FindMatches(txid, type, patterns, log);
+        auto temp =
+            txout.Internal().FindMatches(api, txid, type, patterns, log);
         output.second.insert(
             output.second.end(),
             std::make_move_iterator(temp.second.begin()),
@@ -174,12 +177,13 @@ auto Outputs::ForTestingOnlyAddKey(
     }
 }
 
-auto Outputs::GetPatterns() const noexcept -> UnallocatedVector<PatternID>
+auto Outputs::GetPatterns(const api::Session& api) const noexcept
+    -> UnallocatedVector<PatternID>
 {
     auto output = UnallocatedVector<PatternID>{};
     std::for_each(
         std::begin(outputs_), std::end(outputs_), [&](const auto& txout) {
-            const auto patterns = txout->GetPatterns();
+            const auto patterns = txout->GetPatterns(api);
             output.insert(output.end(), patterns.begin(), patterns.end());
         });
 
@@ -227,15 +231,17 @@ auto Outputs::MergeMetadata(
     return true;
 }
 
-auto Outputs::NetBalanceChange(const identifier::Nym& nym, const Log& log)
-    const noexcept -> opentxs::Amount
+auto Outputs::NetBalanceChange(
+    const api::crypto::Blockchain& crypto,
+    const identifier::Nym& nym,
+    const Log& log) const noexcept -> opentxs::Amount
 {
     return std::accumulate(
         std::begin(outputs_),
         std::end(outputs_),
         opentxs::Amount{0},
         [&](const auto prev, const auto& output) -> auto{
-            return prev + output->NetBalanceChange(nym, log);
+            return prev + output->NetBalanceChange(crypto, nym, log);
         });
 }
 
@@ -284,6 +290,7 @@ auto Outputs::Serialize(const AllocateOutput destination) const noexcept
 }
 
 auto Outputs::Serialize(
+    const api::Session& api,
     proto::BlockchainTransaction& destination) const noexcept -> bool
 {
     for (const auto& output : outputs_) {
@@ -291,7 +298,7 @@ auto Outputs::Serialize(
 
         auto& out = *destination.add_output();
 
-        if (false == output->Serialize(out)) { return false; }
+        if (false == output->Serialize(api, out)) { return false; }
     }
 
     return true;

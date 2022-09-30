@@ -10,10 +10,8 @@
 #include "opentxs/util/Container.hpp"  // IWYU pragma: keep
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
 namespace api
 {
 namespace network
@@ -54,7 +52,6 @@ class Plugin;
 
 class Flag;
 class String;
-// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

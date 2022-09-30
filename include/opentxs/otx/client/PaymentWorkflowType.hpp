@@ -5,10 +5,11 @@
 
 #pragma once
 
-#include "opentxs/Version.hpp"       // IWYU pragma: associated
 #include "opentxs/crypto/Types.hpp"  // IWYU pragma: associated
 
 #include <cstdint>
+
+#include "opentxs/Export.hpp"
 
 namespace opentxs::otx::client
 {

@@ -3,9 +3,10 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#include "0_stdafx.hpp"    // IWYU pragma: associated
-#include "1_Internal.hpp"  // IWYU pragma: associated
+#include "0_stdafx.hpp"  // IWYU pragma: associated
 #include "opentxs/blockchain/bitcoin/cfilter/Header.hpp"  // IWYU pragma: associated
+
+#include <stdexcept>
 
 #include "core/FixedByteArray.tpp"
 
@@ -20,6 +21,14 @@ Header::Header() noexcept
 Header::Header(const ReadView bytes) noexcept(false)
     : FixedByteArray(bytes)
 {
+}
+
+Header::Header(const HexType&, const ReadView bytes) noexcept(false)
+    : FixedByteArray()
+{
+    if (false == DecodeHex(bytes)) {
+        throw std::runtime_error{"invalid cfheader"};
+    }
 }
 
 Header::Header(const Header& rhs) noexcept

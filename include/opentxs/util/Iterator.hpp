@@ -5,12 +5,12 @@
 
 #pragma once
 
-#include "opentxs/Version.hpp"  // IWYU pragma: associated
-
 #include <cstddef>
 #include <iterator>
 #include <limits>
 #include <stdexcept>
+
+#include "opentxs/Export.hpp"
 
 namespace opentxs::iterator
 {

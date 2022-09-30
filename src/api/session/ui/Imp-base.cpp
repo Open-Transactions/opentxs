@@ -4,7 +4,6 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 #include "0_stdafx.hpp"                 // IWYU pragma: associated
-#include "1_Internal.hpp"               // IWYU pragma: associated
 #include "api/session/ui/Imp-base.hpp"  // IWYU pragma: associated
 
 #include <memory>
@@ -61,24 +60,18 @@ auto UI::Imp::account_activity(
 {
     auto key = AccountActivityKey{nymID, accountID};
     auto it = accounts_.find(key);
-#if OT_BLOCKCHAIN
     const auto chain = is_blockchain_account(accountID);
-#endif  // OT_BLOCKCHAIN
 
     if (accounts_.end() == it) {
         it = accounts_
                  .emplace(
                      std::piecewise_construct,
                      std::forward_as_tuple(std::move(key)),
-                     std::forward_as_tuple(
-#if OT_BLOCKCHAIN
-                         (chain.has_value()
-                              ? opentxs::factory::BlockchainAccountActivityModel
-                              : opentxs::factory::CustodialAccountActivityModel)
-#else   // OT_BLOCKCHAIN
-                         (opentxs::factory::CustodialAccountActivityModel)
-#endif  // OT_BLOCKCHAIN
-                             (api_, nymID, accountID, cb)))
+                     std::forward_as_tuple((
+                         chain.has_value()
+                             ? opentxs::factory::BlockchainAccountActivityModel
+                             : opentxs::factory::CustodialAccountActivityModel)(
+                         api_, nymID, accountID, cb)))
                  .first;
 
         OT_ASSERT(it->second);

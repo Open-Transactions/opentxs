@@ -10,7 +10,6 @@
 #include <memory>
 #include <mutex>
 
-#include "opentxs/Version.hpp"
 #include "opentxs/util/Log.hpp"
 
 namespace opentxs

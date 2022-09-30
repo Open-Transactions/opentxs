@@ -7,29 +7,32 @@
 
 #include "internal/blockchain/block/Block.hpp"
 
+#include <memory>
+
+#include "opentxs/blockchain/bitcoin/block/Block.hpp"
 #include "opentxs/blockchain/block/Block.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/blockchain/block/Header.hpp"
-#include "opentxs/blockchain/block/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
-namespace api
-{
-class Session;
-}  // namespace api
-
 namespace blockchain
+{
+namespace bitcoin
 {
 namespace block
 {
+class Block;
+}  // namespace block
+}  // namespace bitcoin
+
+namespace block
+{
 class Hash;
+class Header;
 }  // namespace block
 }  // namespace blockchain
-// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -38,33 +41,24 @@ namespace opentxs::blockchain::block::implementation
 class Block : virtual public internal::Block
 {
 public:
-    auto Header() const noexcept -> const block::Header& override
-    {
-        return base_header_;
-    }
-    auto ID() const noexcept -> const block::Hash& final
-    {
-        return base_header_.Hash();
-    }
-    auto Internal() const noexcept -> const internal::Block& final
-    {
-        return *this;
-    }
+    auto asBitcoin() const noexcept -> const bitcoin::block::Block& override;
+    auto Header() const noexcept -> const block::Header& override;
+    auto ID() const noexcept -> const block::Hash& final;
 
-    auto Internal() noexcept -> internal::Block& final { return *this; }
+    auto asBitcoin() noexcept -> bitcoin::block::Block& override;
 
     Block() = delete;
-    Block(const Block&) = delete;
     Block(Block&&) = delete;
     auto operator=(const Block&) -> Block& = delete;
     auto operator=(Block&&) -> Block& = delete;
 
-protected:
-    const api::Session& api_;
+    ~Block() override;
 
-    Block(const api::Session& api, const block::Header& header) noexcept;
+protected:
+    Block(const block::Header& header) noexcept;
 
 private:
     const block::Header& base_header_;
+    const std::shared_ptr<bitcoin::block::Block> blank_bitcoin_;
 };
 }  // namespace opentxs::blockchain::block::implementation

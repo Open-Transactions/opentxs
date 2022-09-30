@@ -5,6 +5,7 @@
 
 set(cxx-install-headers
     "${opentxs_SOURCE_DIR}/include/opentxs/blockchain/bitcoin/cfilter/FilterType.hpp"
+    "${opentxs_SOURCE_DIR}/include/opentxs/blockchain/bitcoin/cfilter/GCS.hpp"
     "${opentxs_SOURCE_DIR}/include/opentxs/blockchain/bitcoin/cfilter/Hash.hpp"
     "${opentxs_SOURCE_DIR}/include/opentxs/blockchain/bitcoin/cfilter/Header.hpp"
     "${opentxs_SOURCE_DIR}/include/opentxs/blockchain/bitcoin/cfilter/Types.hpp"
@@ -22,11 +23,6 @@ target_sources(
 if(OT_BLOCKCHAIN_EXPORT)
   target_sources(opentxs-common PRIVATE "GCS.cpp" "GCS.hpp")
   target_link_libraries(opentxs-common PRIVATE Boost::headers)
-  list(
-    APPEND
-    cxx-install-headers
-    "${opentxs_SOURCE_DIR}/include/opentxs/blockchain/bitcoin/cfilter/GCS.hpp"
-  )
 endif()
 
 target_sources(opentxs-common PRIVATE ${cxx-install-headers})

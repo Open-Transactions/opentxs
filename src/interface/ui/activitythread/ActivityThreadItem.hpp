@@ -8,11 +8,9 @@
 #include <chrono>
 #include <iosfwd>
 
-#include "1_Internal.hpp"
 #include "interface/ui/base/Row.hpp"
 #include "internal/interface/ui/UI.hpp"
 #include "internal/util/Flag.hpp"
-#include "opentxs/Version.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/interface/ui/ActivityThreadItem.hpp"
 #include "opentxs/otx/client/Types.hpp"
@@ -23,10 +21,8 @@
 class QVariant;
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
 namespace api
 {
 namespace session
@@ -56,7 +52,6 @@ namespace ui
 {
 class ActivityThreadItem;
 }  // namespace ui
-// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

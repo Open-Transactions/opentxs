@@ -5,9 +5,9 @@
 
 #pragma once
 
-#include "opentxs/Version.hpp"  // IWYU pragma: associated
-
 #include <cstddef>
+
+#include "opentxs/Export.hpp"
 
 #if __has_include(<memory_resource>)
 #include <memory_resource>  // IWYU pragma: export

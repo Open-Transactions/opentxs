@@ -21,14 +21,16 @@
 #include <cstdint>
 #include <functional>
 #include <iosfwd>
+#include <optional>
 #include <string_view>
 #include <tuple>
 #include <utility>
 
 #include "internal/blockchain/p2p/bitcoin/Bitcoin.hpp"
-#include "opentxs/Version.hpp"
 #include "opentxs/blockchain/Types.hpp"
+#include "opentxs/blockchain/bitcoin/cfilter/Header.hpp"
 #include "opentxs/blockchain/bitcoin/cfilter/Types.hpp"
+#include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/blockchain/p2p/Types.hpp"
@@ -37,60 +39,85 @@
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/util/Container.hpp"
 
+// NOLINTBEGIN(modernize-concat-nested-namespaces)
+namespace opentxs
+{
+namespace blockchain
+{
+namespace block
+{
+class Block;
+}  // namespace block
+
+namespace params
+{
+class ChainDataPrivate;
+struct Data;
+}  // namespace params
+}  // namespace blockchain
+}  // namespace opentxs
+// NOLINTEND(modernize-concat-nested-namespaces)
+
 namespace opentxs::blockchain::params
 {
-struct Checkpoint {
-    block::Height height_{};
-    std::string_view block_hash_{};
-    std::string_view previous_block_hash_{};
-    std::string_view filter_header_{};
+class ChainData
+{
+public:
+    struct Checkpoint {
+        const block::Height height_;
+        const block::Hash block_;
+        const block::Hash previous_block_;
+        const cfilter::Header cfheader_;
+
+        Checkpoint(const Data& data) noexcept;
+        Checkpoint() = delete;
+        Checkpoint(const Checkpoint&) = delete;
+        Checkpoint(Checkpoint&&) = delete;
+        auto operator=(const Checkpoint&) -> Checkpoint& = delete;
+        auto operator=(Checkpoint&&) -> Checkpoint& = delete;
+    };
+
+    auto Bip44Code() const noexcept -> Bip44Type;
+    auto BlockDownloadBatch() const noexcept -> std::size_t;
+    auto CfilterBatchEstimate() const noexcept -> std::size_t;
+    auto Checkpoints() const noexcept -> const Checkpoint&;
+    auto CurrencyType() const noexcept -> UnitType;
+    auto DefaultAddressStyle() const noexcept
+        -> std::optional<blockchain::crypto::AddressStyle>;
+    auto DefaultCfilterType() const noexcept -> cfilter::Type;
+    auto Difficulty() const noexcept -> std::uint32_t;
+    auto FallbackTxFeeRate() const noexcept -> const Amount&;
+    auto GenesisBlock() const noexcept -> const block::Block&;
+    auto GenesisHash() const noexcept -> const block::Hash&;
+    auto IsAllowed(blockchain::crypto::AddressStyle) const noexcept -> bool;
+    auto IsSupported() const noexcept -> bool;
+    auto IsTestnet() const noexcept -> bool;
+    auto MaturationInterval() const noexcept -> block::Height;
+    auto P2PDefaultPort() const noexcept -> std::uint16_t;
+    auto P2PDefaultProtocol() const noexcept -> p2p::Protocol;
+    auto P2PMagicBits() const noexcept -> std::uint32_t;
+    auto P2PSeeds() const noexcept -> const Vector<std::string_view>&;
+    auto P2PVersion() const noexcept -> p2p::bitcoin::ProtocolVersion;
+    auto SegwitScaleFactor() const noexcept -> unsigned int;
+    auto SupportsSegwit() const noexcept -> bool;
+
+    ChainData(blockchain::Type chain) noexcept;
+    ChainData() = delete;
+    ChainData(const ChainData&) = delete;
+    ChainData(ChainData&&) = delete;
+    auto operator=(const ChainData&) -> ChainData& = delete;
+    auto operator=(ChainData&&) -> ChainData& = delete;
+
+    ~ChainData();
+
+private:
+    ChainDataPrivate* imp_;
+
+    ChainData(const Data& data) noexcept;
 };
 
-struct Data {
-    using Style = blockchain::crypto::AddressStyle;
-    using ScriptMap = boost::container::flat_map<Style, bool>;
-    using StylePref = UnallocatedVector<std::pair<Style, std::string_view>>;
-
-    bool supported_{};
-    bool testnet_{};
-    bool segwit_{};
-    unsigned segwit_scale_factor_{};
-    UnitType itemtype_{};
-    Bip44Type bip44_{};
-    std::int32_t n_bits_{};
-    std::string_view genesis_header_hex_{};
-    std::string_view genesis_hash_hex_{};
-    std::string_view genesis_block_hex_{};
-    Checkpoint checkpoint_{};
-    cfilter::Type default_filter_type_{};
-    p2p::Protocol p2p_protocol_{};
-    p2p::bitcoin::ProtocolVersion p2p_protocol_version_{};
-    std::uint32_t p2p_magic_bits_{};
-    std::uint16_t default_port_{};
-    UnallocatedVector<std::string_view> dns_seeds_{};
-    // Satoshis per 1000 bytes. Something we have to check the reference node
-    // implementation for, to see what fee rates will be relayed by default. It
-    // can change from time to time though so it needs to be periodically
-    // re-checked.
-    Amount default_fee_rate_{};
-    // A safety feature we use to ensure that we don't try to load too many
-    // blocks in memory as we download them.
-    std::size_t block_download_batch_{};
-    ScriptMap scripts_{};
-    StylePref styles_{};
-    // Justus: it is always 100 for every blockchain that I know about, and it's
-    // part of a blockchain's consensus definition.
-    block::Height maturation_interval_{};
-    // Used to seed the adaptive scan interval algorithm. It's something we have
-    // to derive ourselves and its purpose is to keep the algorithm from
-    // attempting to scan too many cfilters on its first run, before it has
-    // collected any data regarding the average cfilter size.
-    std::size_t cfilter_element_count_estimate_{};
-};
-
-using ChainData = boost::container::flat_map<blockchain::Type, Data>;
-
-auto Chains() noexcept -> const ChainData&;
+auto chains() noexcept -> const Set<blockchain::Type>;
+auto get(blockchain::Type chain) noexcept(false) -> const ChainData&;
 
 using FilterData = boost::container::flat_map<
     blockchain::Type,

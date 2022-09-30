@@ -34,8 +34,6 @@ class error_code;
 
 namespace opentxs
 {
-// inline namespace v1
-// {
 namespace blockchain
 {
 namespace block
@@ -62,7 +60,6 @@ class LogBuffer;
 
 class Amount;
 class Data;
-// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

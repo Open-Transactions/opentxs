@@ -11,10 +11,8 @@
 #include "opentxs/blockchain/node/HeaderOracle.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
 namespace blockchain
 {
 namespace bitcoin
@@ -30,7 +28,6 @@ namespace node
 class HeaderOracle;
 }  // namespace node
 }  // namespace blockchain
-// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

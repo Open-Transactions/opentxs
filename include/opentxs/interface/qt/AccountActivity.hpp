@@ -5,14 +5,13 @@
 
 #pragma once
 
-#include "opentxs/Version.hpp"  // IWYU pragma: associated
-
 #include <QMetaObject>
 #include <QObject>
 #include <QString>
 #include <QStringList>
 #include <QVariant>
 
+#include "opentxs/Export.hpp"
 #include "opentxs/interface/qt/AmountValidator.hpp"       // IWYU pragma: keep
 #include "opentxs/interface/qt/DestinationValidator.hpp"  // IWYU pragma: keep
 #include "opentxs/interface/qt/DisplayScale.hpp"          // IWYU pragma: keep
@@ -21,10 +20,8 @@
 class QObject;
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
 namespace ui
 {
 namespace internal
@@ -35,7 +32,6 @@ struct AccountActivity;
 class AccountActivityQt;
 class DisplayScaleQt;
 }  // namespace ui
-// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

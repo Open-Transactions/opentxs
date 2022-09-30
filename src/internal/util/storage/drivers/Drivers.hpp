@@ -9,10 +9,8 @@
 #include "opentxs/util/storage/Driver.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
 namespace crypto
 {
 namespace key
@@ -25,7 +23,6 @@ namespace storage
 {
 class Root;
 }  // namespace storage
-// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

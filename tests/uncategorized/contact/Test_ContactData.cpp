@@ -10,7 +10,6 @@
 #include <tuple>
 #include <utility>
 
-#include "1_Internal.hpp"
 #include "internal/identity/wot/claim/Types.hpp"
 
 namespace ot = opentxs;

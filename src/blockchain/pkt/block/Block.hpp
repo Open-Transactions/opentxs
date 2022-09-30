@@ -11,25 +11,17 @@
 #include <tuple>
 #include <utility>
 
-#include "1_Internal.hpp"
 #include "blockchain/bitcoin/block/Block.hpp"
 #include "opentxs/blockchain/BlockchainType.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
 namespace api
 {
-namespace crypto
-{
-class Blockchain;
-}  // namespace crypto
-
-class Session;
+class Crypto;
 }  // namespace api
 
 namespace blockchain
@@ -40,6 +32,7 @@ namespace block
 {
 namespace internal
 {
+class Block;
 class Header;
 }  // namespace internal
 
@@ -48,7 +41,6 @@ class Header;
 }  // namespace block
 }  // namespace bitcoin
 }  // namespace blockchain
-// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -60,10 +52,11 @@ public:
     using Proof = std::pair<std::byte, Space>;
     using Proofs = UnallocatedVector<Proof>;
 
+    auto clone_bitcoin() const noexcept
+        -> std::unique_ptr<bitcoin::block::internal::Block> final;
     auto GetProofs() const noexcept -> const Proofs& { return proofs_; }
 
     Block(
-        const api::Session& api,
         const blockchain::Type chain,
         std::unique_ptr<const blockchain::bitcoin::block::Header> header,
         Proofs&& proofs,
@@ -72,7 +65,7 @@ public:
         std::optional<std::size_t>&& proofBytes = {},
         std::optional<CalculatedSize>&& size = {}) noexcept(false);
     Block() = delete;
-    Block(const Block&) = delete;
+    Block(const Block& rhs) noexcept;
     Block(Block&&) = delete;
     auto operator=(const Block&) -> Block& = delete;
     auto operator=(Block&&) -> Block& = delete;

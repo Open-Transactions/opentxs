@@ -13,7 +13,7 @@
 #include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs  // NOLINT
+namespace opentxs
 {
 constexpr auto OT_STORAGE_PRIMARY_PLUGIN_SQLITE = "sqlite";
 constexpr auto OT_STORAGE_PRIMARY_PLUGIN_LMDB = "lmdb";
@@ -24,8 +24,6 @@ constexpr auto STORAGE_CONFIG_FS_BACKUP_DIRECTORY_KEY = "fs_backup_directory";
 constexpr auto STORAGE_CONFIG_FS_ENCRYPTED_BACKUP_DIRECTORY_KEY =
     "fs_encrypted_backup";
 
-// inline namespace v1
-// {
 namespace api
 {
 class Legacy;
@@ -34,7 +32,6 @@ class Settings;
 
 class Options;
 class String;
-// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

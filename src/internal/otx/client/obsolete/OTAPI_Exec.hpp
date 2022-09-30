@@ -12,7 +12,6 @@
 #include "internal/otx/client/obsolete/OT_API.hpp"
 #include "internal/util/Lockable.hpp"
 #include "internal/util/Types.hpp"
-#include "opentxs/Version.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/core/contract/Unit.hpp"
 #include "opentxs/util/Container.hpp"
@@ -20,10 +19,8 @@
 #include "opentxs/util/Time.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
 namespace api
 {
 namespace network
@@ -51,7 +48,6 @@ class Definition;
 }  // namespace display
 
 class OT_API;
-// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

@@ -4,7 +4,6 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 #include "0_stdafx.hpp"                           // IWYU pragma: associated
-#include "1_Internal.hpp"                         // IWYU pragma: associated
 #include "blockchain/database/wallet/Output.hpp"  // IWYU pragma: associated
 
 #include <BlockchainTransactionOutput.pb.h>  // IWYU pragma: keep
@@ -68,6 +67,7 @@
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/network/zeromq/socket/SocketType.hpp"
+#include "opentxs/network/zeromq/socket/Types.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Iterator.hpp"
@@ -544,8 +544,7 @@ public:
             OT_ASSERT(pos.height_ > start);
 
             const auto stop = std::max<block::Height>(
-                0,
-                start - params::Chains().at(chain_).maturation_interval_ - 1);
+                0, start - params::get(chain_).MaturationInterval() - 1);
             const auto matured = [&] {
                 auto m = UnallocatedSet<block::Outpoint>{};
                 lmdb_.Read(
@@ -1001,7 +1000,7 @@ public:
         , subchain_(subchains)
         , proposals_(proposals)
         , blank_(-1, block::Hash{})
-        , maturation_target_(params::Chains().at(chain_).maturation_interval_)
+        , maturation_target_(params::get(chain_).MaturationInterval())
         , cache_(api_, lmdb_, chain_, blank_)
         , to_balance_oracle_([&] {
             auto out = api_.Network().ZeroMQ().Internal().RawSocket(

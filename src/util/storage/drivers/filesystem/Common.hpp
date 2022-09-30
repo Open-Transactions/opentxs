@@ -15,7 +15,6 @@
 #include <string_view>
 
 #include "internal/util/Flag.hpp"
-#include "opentxs/Version.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "util/storage/Plugin.hpp"
@@ -29,10 +28,8 @@ class file_descriptor_sink;
 }  // namespace iostreams
 }  // namespace boost
 
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
 namespace api
 {
 namespace network
@@ -52,7 +49,6 @@ namespace storage
 {
 class Config;
 }  // namespace storage
-// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

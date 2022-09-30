@@ -7,6 +7,7 @@
 
 #include <memory>
 
+#include "opentxs/blockchain/BlockchainType.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/bitcoin/block/Script.hpp"
 #include "opentxs/core/ByteArray.hpp"
@@ -14,15 +15,14 @@
 #include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
 namespace api
 {
-class Session;
+class Crypto;
 }  // namespace api
-// }  // namespace v1
+
+class ByteArray;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -38,10 +38,16 @@ public:
         const bool compressed = true) noexcept -> const Space&;
 
     virtual auto clone() const noexcept -> std::unique_ptr<Script> = 0;
-    virtual auto LikelyPubkeyHashes(const api::Session& api) const noexcept
+    auto Internal() const noexcept -> const internal::Script& final
+    {
+        return *this;
+    }
+    virtual auto LikelyPubkeyHashes(const api::Crypto& crypto) const noexcept
         -> UnallocatedVector<ByteArray> = 0;
     virtual auto SigningSubscript(const blockchain::Type chain) const noexcept
         -> std::unique_ptr<Script> = 0;
+
+    auto Internal() noexcept -> internal::Script& final { return *this; }
 
     ~Script() override = default;
 };

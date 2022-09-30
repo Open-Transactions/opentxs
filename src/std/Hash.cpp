@@ -3,8 +3,7 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#include "0_stdafx.hpp"    // IWYU pragma: associated
-#include "1_Internal.hpp"  // IWYU pragma: associated
+#include "0_stdafx.hpp"  // IWYU pragma: associated
 
 #include <algorithm>
 #include <cstring>
@@ -59,7 +58,6 @@ auto hash<opentxs::blockchain::block::Hash>::operator()(
     return out;
 }
 
-#if OT_BLOCKCHAIN
 auto hash<opentxs::blockchain::block::Outpoint>::operator()(
     const opentxs::blockchain::block::Outpoint& data) const noexcept
     -> std::size_t
@@ -71,7 +69,6 @@ auto hash<opentxs::blockchain::block::Outpoint>::operator()(
             {reinterpret_cast<const char*>(&key), sizeof(key)}),
         data.Txid());
 }
-#endif  // OT_BLOCKCHAIN
 
 auto hash<opentxs::blockchain::block::Position>::operator()(
     const opentxs::blockchain::block::Position& data) const noexcept
@@ -118,7 +115,6 @@ auto hash<opentxs::blockchain::cfilter::Header>::operator()(
     return out;
 }
 
-#if OT_BLOCKCHAIN
 auto hash<opentxs::blockchain::crypto::Key>::operator()(
     const opentxs::blockchain::crypto::Key& data) const noexcept -> std::size_t
 {
@@ -127,7 +123,6 @@ auto hash<opentxs::blockchain::crypto::Key>::operator()(
 
     return opentxs::crypto::sodium::Siphash(key, opentxs::reader(preimage));
 }
-#endif  // OT_BLOCKCHAIN
 
 auto hash<opentxs::blockchain::database::wallet::db::Pattern>::operator()(
     const opentxs::blockchain::database::wallet::db::Pattern& data)

@@ -10,12 +10,10 @@
 #include <atomic>
 #include <iosfwd>
 
-#include "1_Internal.hpp"
 #include "Proto.hpp"
 #include "interface/ui/base/Row.hpp"
 #include "internal/interface/ui/UI.hpp"
 #include "internal/util/Mutex.hpp"
-#include "opentxs/Version.hpp"
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Crypto.hpp"
@@ -29,10 +27,8 @@
 #include "opentxs/util/SharedPimpl.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
 namespace api
 {
 namespace session
@@ -58,7 +54,6 @@ namespace ui
 {
 class AccountSummaryItem;
 }  // namespace ui
-// }  // namespace v1
 }  // namespace opentxs
 
 class QVariant;

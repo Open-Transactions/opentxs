@@ -5,9 +5,9 @@
 
 #pragma once
 
-#include "opentxs/Version.hpp"  // IWYU pragma: associated
-
 #include <chrono>
+
+#include "opentxs/Export.hpp"
 
 namespace opentxs
 {

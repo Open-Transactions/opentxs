@@ -31,6 +31,8 @@ if(OT_BLOCKCHAIN_EXPORT)
       "BlockchainBalanceItem.cpp"
       "BlockchainBalanceItem.hpp"
   )
+else()
+  target_sources(opentxs-common PRIVATE "no-blockchain.cpp")
 endif()
 
 target_sources(opentxs-common PRIVATE ${cxx-install-headers})

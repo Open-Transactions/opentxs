@@ -4,7 +4,6 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 #include "0_stdafx.hpp"                             // IWYU pragma: associated
-#include "1_Internal.hpp"                           // IWYU pragma: associated
 #include "blockchain/database/common/Database.hpp"  // IWYU pragma: associated
 
 extern "C" {
@@ -42,6 +41,7 @@ extern "C" {
 #include "internal/util/storage/lmdb/Types.hpp"
 #include "opentxs/blockchain/bitcoin/block/Transaction.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/bitcoin/cfilter/GCS.hpp"  // IWYU pragma: keep
+#include "opentxs/blockchain/p2p/Address.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
@@ -312,7 +312,7 @@ Database::Database(Database&& rhs) noexcept
     OT_ASSERT(imp_);
 }
 
-auto Database::AddOrUpdate(Address_p address) const noexcept -> bool
+auto Database::AddOrUpdate(p2p::Address address) const noexcept -> bool
 {
     return imp_->peers_.Insert(std::move(address));
 }
@@ -396,7 +396,7 @@ auto Database::Find(
     const Chain chain,
     const Protocol protocol,
     const UnallocatedSet<Type> onNetworks,
-    const UnallocatedSet<Service> withServices) const noexcept -> Address_p
+    const UnallocatedSet<Service> withServices) const noexcept -> p2p::Address
 {
     return imp_->peers_.Find(chain, protocol, onNetworks, withServices);
 }
@@ -424,7 +424,8 @@ auto Database::HaveFilterHeader(
     return imp_->filters_.HaveCfheader(type, blockHash);
 }
 
-auto Database::Import(UnallocatedVector<Address_p> peers) const noexcept -> bool
+auto Database::Import(UnallocatedVector<p2p::Address> peers) const noexcept
+    -> bool
 {
     return imp_->peers_.Import(std::move(peers));
 }

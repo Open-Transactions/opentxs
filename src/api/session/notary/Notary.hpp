@@ -21,7 +21,6 @@
 #include "internal/api/session/Session.hpp"
 #include "internal/api/session/notary/Notary.hpp"
 #include "internal/api/session/notary/Types.hpp"
-#include "opentxs/Version.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/otx/blind/Mint.hpp"
@@ -30,10 +29,8 @@
 #include "otx/server/Server.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
 namespace api
 {
 namespace session
@@ -83,7 +80,6 @@ class MessageProcessor;
 class Factory;
 class Flag;
 class Options;
-// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

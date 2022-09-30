@@ -21,6 +21,7 @@ extern "C" {
 
 #include "internal/core/Core.hpp"
 #include "internal/util/LogMacros.hpp"
+#include "internal/util/P0330.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Log.hpp"
 
@@ -174,6 +175,8 @@ auto FixedByteArray<N>::DecodeHex(const std::string_view hex) -> bool
                               ? hex.substr(2, hex.size() - 2)
                               : hex;
     const auto ssize = stripped.size();
+
+    if (0_uz == ssize) { return true; }
 
     if ((ssize != (2 * N)) && (ssize != ((2 * N) - 1))) {
         LogError()(OT_PRETTY_CLASS())("invalid size for input hex ")(hex.size())

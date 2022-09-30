@@ -20,10 +20,8 @@
 #include "ottest/fixtures/common/User.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
 namespace api
 {
 namespace session
@@ -40,7 +38,6 @@ namespace zeromq
 class Message;
 }  // namespace zeromq
 }  // namespace network
-// }  // namespace v1
 }  // namespace opentxs
 
 namespace ottest

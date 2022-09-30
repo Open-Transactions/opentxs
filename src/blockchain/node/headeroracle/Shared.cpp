@@ -4,11 +4,11 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 #include "0_stdafx.hpp"                             // IWYU pragma: associated
-#include "1_Internal.hpp"                           // IWYU pragma: associated
 #include "blockchain/node/headeroracle/Shared.hpp"  // IWYU pragma: associated
 
 #include <algorithm>
 #include <atomic>
+#include <compare>
 #include <cstddef>
 #include <functional>
 #include <iterator>
@@ -30,13 +30,13 @@
 #include "internal/network/zeromq/socket/Raw.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
+#include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/blockchain/BlockchainType.hpp"
 #include "opentxs/blockchain/Types.hpp"
-#include "opentxs/blockchain/bitcoin/Work.hpp"
+#include "opentxs/blockchain/Work.hpp"
 #include "opentxs/blockchain/bitcoin/block/Header.hpp"  // IWYU pragma: keep
-#include "opentxs/blockchain/bitcoin/cfilter/Header.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/blockchain/block/Header.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
@@ -102,8 +102,8 @@ auto HeaderOracle::Shared::Ancestors(
         sibling = data.database_.TryLoadHeader(sibling->ParentHash());
 
         if (false == bool(sibling)) {
-            sibling =
-                data.database_.TryLoadHeader(GenesisBlockHash(data.chain_));
+            sibling = data.database_.TryLoadHeader(
+                params::get(data.chain_).GenesisHash());
 
             OT_ASSERT(sibling);
 
@@ -122,8 +122,8 @@ auto HeaderOracle::Shared::Ancestors(
             sibling = data.database_.TryLoadHeader(sibling->ParentHash());
 
             if (false == bool(sibling)) {
-                sibling =
-                    data.database_.TryLoadHeader(GenesisBlockHash(data.chain_));
+                sibling = data.database_.TryLoadHeader(
+                    params::get(data.chain_).GenesisHash());
 
                 OT_ASSERT(sibling);
             }
@@ -686,7 +686,7 @@ auto HeaderOracle::Shared::common_parent(
 {
     const auto& database = data.database_;
     auto output = std::pair<block::Position, block::Position>{
-        {0, GenesisBlockHash(data.chain_)}, best_chain(data)};
+        {0, params::get(data.chain_).GenesisHash()}, best_chain(data)};
     auto& [parent, best] = output;
     auto test{position};
     auto pHeader = database.TryLoadHeader(test.hash_);
@@ -848,34 +848,13 @@ auto HeaderOracle::Shared::get_default_checkpoint(
 auto HeaderOracle::Shared::get_default_checkpoint(
     const blockchain::Type chain) const noexcept -> CheckpointData
 {
-    const auto& checkpoint = params::Chains().at(chain).checkpoint_;
+    const auto& checkpoint = params::get(chain).Checkpoints();
 
     return CheckpointData{
         checkpoint.height_,
-        [&] {
-            auto out = block::Hash{};
-            const auto rc = out.DecodeHex(checkpoint.block_hash_);
-
-            OT_ASSERT(rc);
-
-            return out;
-        }(),
-        [&] {
-            auto out = block::Hash{};
-            const auto rc = out.DecodeHex(checkpoint.previous_block_hash_);
-
-            OT_ASSERT(rc);
-
-            return out;
-        }(),
-        [&] {
-            auto out = cfilter::Header{};
-            const auto rc = out.DecodeHex(checkpoint.filter_header_);
-
-            OT_ASSERT(rc);
-
-            return out;
-        }()};
+        checkpoint.block_,
+        checkpoint.previous_block_,
+        checkpoint.cfheader_};
 }
 
 auto HeaderOracle::Shared::GetJob(alloc::Default alloc) const noexcept
@@ -1149,7 +1128,7 @@ auto HeaderOracle::Shared::ProcessSyncData(
 
         for (const auto& block : blocks) {
             auto pHeader = factory::BitcoinBlockHeader(
-                data.api_, block.Chain(), block.Header());
+                data.api_.Crypto(), block.Chain(), block.Header());
 
             if (false == bool(pHeader)) {
                 throw std::runtime_error{"Invalid header"};

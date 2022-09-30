@@ -3,19 +3,21 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_include "opentxs/blockchain/BlockchainType.hpp"
+
 #pragma once
 
 #include <memory>
 
 #include "opentxs/blockchain/Types.hpp"
+#include "opentxs/util/Bytes.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
 namespace api
 {
+class Crypto;
 class Session;
 }  // namespace api
 
@@ -23,17 +25,17 @@ namespace blockchain
 {
 namespace block
 {
+class Block;
 class Header;
 }  // namespace block
 }  // namespace blockchain
-// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
 namespace opentxs::factory
 {
-auto GenesisBlockHeader(
-    const api::Session& api,
-    const blockchain::Type type) noexcept
-    -> std::unique_ptr<blockchain::block::Header>;
+auto BlockchainBlock(
+    const api::Crypto& crypto,
+    const blockchain::Type chain,
+    const ReadView in) noexcept -> std::shared_ptr<blockchain::block::Block>;
 }  // namespace opentxs::factory

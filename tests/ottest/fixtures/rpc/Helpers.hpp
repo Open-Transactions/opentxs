@@ -17,10 +17,8 @@
 #include "ottest/fixtures/integration/Helpers.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
 namespace api
 {
 namespace session
@@ -54,7 +52,6 @@ class Message;
 }  // namespace network
 
 class Amount;
-// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

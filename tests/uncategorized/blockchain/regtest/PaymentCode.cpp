@@ -515,7 +515,7 @@ TEST_F(Regtest_payment_code, first_outgoing_transaction)
     const auto& tx = *pTX;
 
     {
-        const auto nyms = tx.AssociatedLocalNyms();
+        const auto nyms = tx.AssociatedLocalNyms(api.Crypto().Blockchain());
 
         EXPECT_GT(nyms.size(), 0);
 
@@ -525,7 +525,7 @@ TEST_F(Regtest_payment_code, first_outgoing_transaction)
         }
     }
     {
-        const auto contacts = tx.AssociatedRemoteContacts(contact, me);
+        const auto contacts = tx.AssociatedRemoteContacts(api, me);
 
         EXPECT_GT(contacts.size(), 0);
 
@@ -1337,7 +1337,7 @@ TEST_F(Regtest_payment_code, bob_first_incoming_transaction)
     const auto& tx = *pTX;
 
     {
-        const auto nyms = tx.AssociatedLocalNyms();
+        const auto nyms = tx.AssociatedLocalNyms(api.Crypto().Blockchain());
 
         EXPECT_GT(nyms.size(), 0);
 
@@ -1347,7 +1347,7 @@ TEST_F(Regtest_payment_code, bob_first_incoming_transaction)
         }
     }
     {
-        const auto contacts = tx.AssociatedRemoteContacts(contact, me);
+        const auto contacts = tx.AssociatedRemoteContacts(api, me);
 
         EXPECT_GT(contacts.size(), 0);
 
@@ -1674,7 +1674,7 @@ TEST_F(Regtest_payment_code, alice_second_outgoing_transaction)
     const auto& tx = *pTX;
 
     {
-        const auto nyms = tx.AssociatedLocalNyms();
+        const auto nyms = tx.AssociatedLocalNyms(api.Crypto().Blockchain());
 
         EXPECT_GT(nyms.size(), 0);
 
@@ -1684,7 +1684,7 @@ TEST_F(Regtest_payment_code, alice_second_outgoing_transaction)
         }
     }
     {
-        const auto contacts = tx.AssociatedRemoteContacts(contact, me);
+        const auto contacts = tx.AssociatedRemoteContacts(api, me);
 
         EXPECT_GT(contacts.size(), 0);
 

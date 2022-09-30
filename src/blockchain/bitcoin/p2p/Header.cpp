@@ -4,15 +4,12 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 #include "0_stdafx.hpp"                       // IWYU pragma: associated
-#include "1_Internal.hpp"                     // IWYU pragma: associated
 #include "blockchain/bitcoin/p2p/Header.hpp"  // IWYU pragma: associated
 
-#include <boost/container/vector.hpp>
 #include <cstdint>
 #include <cstring>
 #include <limits>
 #include <stdexcept>
-#include <type_traits>
 #include <utility>
 
 #include "internal/blockchain/Params.hpp"
@@ -21,7 +18,6 @@
 #include "opentxs/blockchain/BlockchainType.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
-#include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 
 namespace opentxs::factory
@@ -84,7 +80,7 @@ Header::BitcoinFormat::BitcoinFormat(
     const bitcoin::Command command,
     const std::size_t payload,
     const ByteArray checksum) noexcept(false)
-    : magic_(params::Chains().at(network).p2p_magic_bits_)
+    : magic_(params::get(network).P2PMagicBits())
     , command_(SerializeCommand(command))
     , length_(static_cast<std::uint32_t>(payload))
     , checksum_()
@@ -123,24 +119,11 @@ auto Header::BitcoinFormat::Command() const noexcept -> bitcoin::Command
 auto Header::BitcoinFormat::CheckNetwork(
     const blockchain::Type& chain) const noexcept -> bool
 {
-    static const auto build = []() -> auto
-    {
-        auto output = UnallocatedMultimap<blockchain::Type, std::uint32_t>{};
-        for (const auto& [chain, data] : params::Chains()) {
-            if (0 != data.p2p_magic_bits_) {
-                output.emplace(chain, data.p2p_magic_bits_);
-            }
-        }
-
-        return output;
-    };
-    static const auto map{build()};
-
     try {
-        auto search = map.find(chain);
-        if (map.end() != search) { return search->second == magic_.value(); }
-        return false;
+
+        return params::get(chain).P2PMagicBits() == magic_.value();
     } catch (...) {
+
         return false;
     }
 }

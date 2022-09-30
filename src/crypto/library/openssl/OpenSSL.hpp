@@ -33,7 +33,6 @@ extern "C" {
 #include "Proto.hpp"
 #include "crypto/library/AsymmetricProvider.hpp"
 #include "internal/crypto/library/OpenSSL.hpp"
-#include "opentxs/Version.hpp"
 #include "opentxs/core/Secret.hpp"
 #include "opentxs/crypto/HashType.hpp"
 #include "opentxs/crypto/SecretStyle.hpp"
@@ -41,10 +40,8 @@ extern "C" {
 #include "opentxs/util/Bytes.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
 namespace api
 {
 class Crypto;
@@ -64,7 +61,6 @@ class Parameters;
 class Data;
 class PasswordPrompt;
 class Secret;
-// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

@@ -3,19 +3,22 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#include "0_stdafx.hpp"    // IWYU pragma: associated
-#include "1_Internal.hpp"  // IWYU pragma: associated
+#include "0_stdafx.hpp"  // IWYU pragma: associated
 #include "blockchain/node/peermanager/PeerManager.hpp"  // IWYU pragma: associated
 
+#include <BlockchainPeerAddress.pb.h>
 #include <boost/asio.hpp>
 #include <atomic>
 #include <chrono>
 #include <iterator>
 #include <memory>
 #include <optional>
+#include <stdexcept>
 #include <string_view>
 #include <utility>
 
+#include "Proto.hpp"
+#include "Proto.tpp"
 #include "core/Worker.hpp"
 #include "internal/api/session/Endpoints.hpp"
 #include "internal/blockchain/Params.hpp"
@@ -47,7 +50,6 @@
 #include "opentxs/network/zeromq/socket/Types.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Log.hpp"
-#include "opentxs/util/Pimpl.hpp"
 #include "opentxs/util/Time.hpp"
 
 namespace opentxs::factory
@@ -138,33 +140,57 @@ PeerManager::PeerManager(
          endpoints.shutdown_publish_.c_str()});
 }
 
-auto PeerManager::AddIncomingPeer(const int id, std::uintptr_t endpoint)
+auto PeerManager::AddIncomingPeer(const int id, const p2p::Address& endpoint)
     const noexcept -> void
 {
-    auto work = MakeWork(Work::IncomingPeer);
-    work.AddFrame(id);
-    work.AddFrame(endpoint);
-    pipeline_.Push(std::move(work));
+    try {
+        const auto proto = [&] {
+            auto out = proto::BlockchainPeerAddress{};
+
+            if (false == endpoint.Internal().Serialize(out)) {
+                throw std::runtime_error{
+                    "failed to serialize address to protobuf"};
+            }
+
+            return out;
+        }();
+        auto work = MakeWork(Work::IncomingPeer);
+        work.AddFrame(id);
+
+        if (false == proto::write(proto, work.AppendBytes())) {
+            throw std::runtime_error{"failed to serialize protobuf to bytes"};
+        }
+
+        pipeline_.Push(std::move(work));
+    } catch (const std::exception& e) {
+        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+    }
 }
 
-auto PeerManager::AddPeer(
-    const blockchain::p2p::Address& address) const noexcept -> bool
+auto PeerManager::AddPeer(const p2p::Address& address) const noexcept -> bool
 {
     if (false == running_.load()) { return false; }
 
-    auto address_p = std::make_unique<OTBlockchainAddress>(address);
-    auto promise = std::make_unique<std::promise<bool>>();
-    auto future = promise->get_future();
-    auto work = MakeWork(Work::AddPeer);
-    work.AddFrame(reinterpret_cast<std::uintptr_t>(address_p.release()));
-    work.AddFrame(reinterpret_cast<std::uintptr_t>(promise.release()));
-    pipeline_.Push(std::move(work));
+    try {
+        const auto proto = [&] {
+            auto out = proto::BlockchainPeerAddress{};
 
-    while (running_.load()) {
-        if (std::future_status::ready == future.wait_for(5s)) {
+            if (false == address.Internal().Serialize(out)) {
+                throw std::runtime_error{
+                    "failed to serialize address to protobuf"};
+            }
 
-            return future.get();
+            return out;
+        }();
+        auto work = MakeWork(Work::AddPeer);
+
+        if (false == proto::write(proto, work.AppendBytes())) {
+            throw std::runtime_error{"failed to serialize protobuf to bytes"};
         }
+
+        return pipeline_.Push(std::move(work));
+    } catch (const std::exception& e) {
+        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
     }
 
     return false;
@@ -230,27 +256,30 @@ auto PeerManager::JobReady(const PeerManagerJobs type) const noexcept -> void
     }
 }
 
-auto PeerManager::Listen(const blockchain::p2p::Address& address) const noexcept
-    -> bool
+auto PeerManager::Listen(const p2p::Address& address) const noexcept -> bool
 {
     if (false == running_.load()) { return false; }
 
-    auto address_p = std::make_unique<OTBlockchainAddress>(address);
-    auto promise = std::make_unique<std::promise<bool>>();
-    auto future = promise->get_future();
-    auto work = MakeWork(Work::AddListener);
-    work.AddFrame(reinterpret_cast<std::uintptr_t>(address_p.release()));
-    work.AddFrame(reinterpret_cast<std::uintptr_t>(promise.release()));
-    pipeline_.Push(std::move(work));
+    try {
+        const auto proto = [&] {
+            auto out = proto::BlockchainPeerAddress{};
 
-    while (running_.load()) {
-        if (std::future_status::ready == future.wait_for(10s)) {
+            if (false == address.Internal().Serialize(out)) {
+                throw std::runtime_error{
+                    "failed to serialize address to protobuf"};
+            }
 
-            return future.get();
-        } else {
+            return out;
+        }();
+        auto work = MakeWork(Work::AddListener);
 
-            return false;
+        if (false == proto::write(proto, work.AppendBytes())) {
+            throw std::runtime_error{"failed to serialize protobuf to bytes"};
         }
+
+        return pipeline_.Push(std::move(work));
+    } catch (const std::exception& e) {
+        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
     }
 
     return false;
@@ -290,14 +319,12 @@ auto PeerManager::pipeline(zmq::Message&& message) noexcept -> void
                 sizeof(boost::asio::ip::address_v4::bytes_type);
             static constexpr auto ipv6 =
                 sizeof(boost::asio::ip::address_v6::bytes_type);
-            const auto& data = params::Chains().at(chain_);
 
             OT_ASSERT(2 < body.size());
 
             if (body.at(1).as<std::byte>() == success) {
                 const auto port = body.at(2).as<std::uint16_t>();
-                auto addresses = Vector<
-                    std::unique_ptr<blockchain::p2p::internal::Address>>{};
+                auto addresses = Vector<p2p::Address>{};
 
                 for (auto i = std::next(body.begin(), 3), end = body.end();
                      i != end;
@@ -307,11 +334,11 @@ auto PeerManager::pipeline(zmq::Message&& message) noexcept -> void
                         switch (frame.size()) {
                             case ipv4: {
 
-                                return blockchain::p2p::Network::ipv4;
+                                return p2p::Network::ipv4;
                             }
                             case ipv6: {
 
-                                return blockchain::p2p::Network::ipv6;
+                                return p2p::Network::ipv6;
                             }
                             default: {
                                 LogAbort()(OT_PRETTY_CLASS())(
@@ -322,7 +349,7 @@ auto PeerManager::pipeline(zmq::Message&& message) noexcept -> void
                     }();
                     addresses.emplace_back(factory::BlockchainAddress(
                         api_,
-                        data.p2p_protocol_,
+                        params::get(chain_).P2PDefaultProtocol(),
                         network,
                         api_.Factory().DataFromBytes(frame.Bytes()),
                         port,
@@ -353,57 +380,55 @@ auto PeerManager::pipeline(zmq::Message&& message) noexcept -> void
             do_work();
         } break;
         case Work::AddPeer: {
-            OT_ASSERT(2 < body.size());
+            OT_ASSERT(1 < body.size());
 
-            using Promise = std::promise<bool>;
+            const auto& bytes = body.at(1);
+            auto address = api_.Factory().BlockchainAddress(
+                proto::Factory<proto::BlockchainPeerAddress>(
+                    bytes.data(), bytes.size()));
 
-            auto address_p = std::unique_ptr<OTBlockchainAddress>{
-                reinterpret_cast<OTBlockchainAddress*>(
-                    body.at(1).as<std::uintptr_t>())};
-            auto promise_p = std::unique_ptr<Promise>{
-                reinterpret_cast<Promise*>(body.at(2).as<std::uintptr_t>())};
+            if (address.IsValid()) {
+                peers_.AddPeer(std::move(address));
+            } else {
+                LogError()(OT_PRETTY_CLASS())("invalid address").Flush();
+            }
 
-            OT_ASSERT(address_p);
-            OT_ASSERT(promise_p);
-
-            const auto& address = address_p->get();
-            auto& promise = *promise_p;
-
-            peers_.AddPeer(address, promise);
             do_work();
         } break;
         case Work::AddListener: {
-            OT_ASSERT(2 < body.size());
+            OT_ASSERT(1 < body.size());
 
-            using Promise = std::promise<bool>;
+            const auto& bytes = body.at(1);
+            auto address = api_.Factory().BlockchainAddress(
+                proto::Factory<proto::BlockchainPeerAddress>(
+                    bytes.data(), bytes.size()));
 
-            auto address_p = std::unique_ptr<OTBlockchainAddress>{
-                reinterpret_cast<OTBlockchainAddress*>(
-                    body.at(1).as<std::uintptr_t>())};
-            auto promise_p = std::unique_ptr<Promise>{
-                reinterpret_cast<Promise*>(body.at(2).as<std::uintptr_t>())};
+            if (address.IsValid()) {
+                peers_.AddListener(std::move(address));
+            } else {
+                LogError()(OT_PRETTY_CLASS())("invalid address").Flush();
+            }
 
-            OT_ASSERT(address_p);
-            OT_ASSERT(promise_p);
-
-            const auto& address = address_p->get();
-            auto& promise = *promise_p;
-
-            peers_.AddListener(address, promise);
             do_work();
         } break;
         case Work::IncomingPeer: {
             OT_ASSERT(2 < body.size());
 
             const auto id = body.at(1).as<int>();
-            auto endpoint = peermanager::Peers::Endpoint{
-                reinterpret_cast<blockchain::p2p::internal::Address*>(
-                    body.at(2).as<std::uintptr_t>())};
 
             OT_ASSERT(0 <= id);
-            OT_ASSERT(endpoint);
 
-            peers_.AddIncoming(id, std::move(endpoint));
+            const auto& bytes = body.at(2);
+            auto address = api_.Factory().BlockchainAddress(
+                proto::Factory<proto::BlockchainPeerAddress>(
+                    bytes.data(), bytes.size()));
+
+            if (address.IsValid()) {
+                peers_.AddIncoming(id, std::move(address));
+            } else {
+                LogError()(OT_PRETTY_CLASS())("invalid address").Flush();
+            }
+
             do_work();
         } break;
         case Work::Report: {

@@ -6,7 +6,6 @@
 // IWYU pragma: no_include <cxxabi.h>
 
 #include "0_stdafx.hpp"                             // IWYU pragma: associated
-#include "1_Internal.hpp"                           // IWYU pragma: associated
 #include "blockchain/bitcoin/block/header/Imp.hpp"  // IWYU pragma: associated
 
 #include <BitcoinBlockHeaderFields.pb.h>
@@ -14,6 +13,7 @@
 #include <BlockchainBlockLocalData.pb.h>
 #include <boost/endian/buffers.hpp>
 #include <array>
+#include <compare>
 #include <cstring>
 #include <ctime>
 #include <iomanip>
@@ -24,31 +24,27 @@
 #include <utility>
 
 #include "Proto.hpp"
-#include "internal/blockchain/Blockchain.hpp"
+#include "blockchain/block/header/Header.hpp"
+#include "internal/blockchain/Params.hpp"
 #include "internal/blockchain/bitcoin/block/Factory.hpp"
 #include "internal/util/LogMacros.hpp"
-#include "internal/util/Time.hpp"
-#include "opentxs/api/session/Factory.hpp"
-#include "opentxs/api/session/Session.hpp"
+#include "internal/util/P0330.hpp"
+#include "internal/util/Time.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/Blockchain.hpp"
 #include "opentxs/blockchain/BlockchainType.hpp"
-#include "opentxs/blockchain/bitcoin/NumericHash.hpp"
-#include "opentxs/blockchain/bitcoin/Work.hpp"
+#include "opentxs/blockchain/Work.hpp"
 #include "opentxs/blockchain/bitcoin/block/Header.hpp"
 #include "opentxs/blockchain/block/Header.hpp"
-#include "opentxs/blockchain/node/HeaderOracle.hpp"
+#include "opentxs/blockchain/block/NumericHash.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Data.hpp"
+#include "opentxs/core/Types.hpp"
 #include "opentxs/util/Log.hpp"
-#include "opentxs/util/Pimpl.hpp"
-#include "util/Blank.hpp"
-
-#define OT_BITCOIN_BLOCK_HEADER_SIZE 80
 
 namespace opentxs::factory
 {
 auto BitcoinBlockHeader(
-    const api::Session& api,
+    const api::Crypto& crypto,
     const opentxs::blockchain::block::Header& previous,
     const std::uint32_t nBits,
     const std::int32_t version,
@@ -61,7 +57,7 @@ auto BitcoinBlockHeader(
         return static_cast<std::uint32_t>(Clock::to_time_t(Clock::now()));
     };
     static const auto checkPoW = [](const auto& pow, const auto& target) {
-        return OTNumericHash{factory::NumericHash(pow)} < target;
+        return blockchain::block::NumericHash{pow} < target;
     };
     static const auto highest = [](const std::uint32_t& nonce) {
         return std::numeric_limits<std::uint32_t>::max() == nonce;
@@ -75,7 +71,7 @@ auto BitcoinBlockHeader(
         0};
     const auto chain = previous.Type();
     const auto target = serialized.Target();
-    auto pow = ReturnType::calculate_pow(api, chain, serialized);
+    auto pow = ReturnType::calculate_pow(crypto, chain, serialized);
 
     try {
         while (true) {
@@ -92,14 +88,13 @@ auto BitcoinBlockHeader(
                 serialized.nonce_ = nonce + 1;
             }
 
-            pow = ReturnType::calculate_pow(api, chain, serialized);
+            pow = ReturnType::calculate_pow(crypto, chain, serialized);
         }
 
         auto imp = std::make_unique<ReturnType>(
-            api,
             chain,
             ReturnType::subversion_default_,
-            ReturnType::calculate_hash(api, chain, serialized),
+            ReturnType::calculate_hash(crypto, chain, serialized),
             std::move(pow),
             serialized.version_.value(),
             blockchain::block::Hash{previous.Hash()},
@@ -119,14 +114,14 @@ auto BitcoinBlockHeader(
 }
 
 auto BitcoinBlockHeader(
-    const api::Session& api,
+    const api::Crypto& crypto,
     const proto::BlockchainBlockHeader& serialized) noexcept
     -> std::unique_ptr<blockchain::bitcoin::block::Header>
 {
     using ReturnType = blockchain::bitcoin::block::implementation::Header;
 
     try {
-        auto imp = std::make_unique<ReturnType>(api, serialized);
+        auto imp = std::make_unique<ReturnType>(crypto, serialized);
 
         return std::make_unique<blockchain::bitcoin::block::Header>(
             imp.release());
@@ -138,7 +133,7 @@ auto BitcoinBlockHeader(
 }
 
 auto BitcoinBlockHeader(
-    const api::Session& api,
+    const api::Crypto& crypto,
     const blockchain::Type chain,
     const ReadView raw) noexcept
     -> std::unique_ptr<blockchain::bitcoin::block::Header>
@@ -146,19 +141,17 @@ auto BitcoinBlockHeader(
     using ReturnType = blockchain::bitcoin::block::implementation::Header;
 
     try {
-        if (OT_BITCOIN_BLOCK_HEADER_SIZE > raw.size()) {
+        if (sizeof(ReturnType::BitcoinFormat) > raw.size()) {
             const auto error =
                 CString{"Invalid serialized block header size. Got: "}
                     .append(std::to_string(raw.size()))
                     .append(" expected at least ")
-                    .append(std::to_string(OT_BITCOIN_BLOCK_HEADER_SIZE));
+                    .append(std::to_string(sizeof(ReturnType::BitcoinFormat)));
             throw std::runtime_error{error.c_str()};
         }
 
-        const auto header = ReadView{raw.data(), OT_BITCOIN_BLOCK_HEADER_SIZE};
-        static_assert(
-            OT_BITCOIN_BLOCK_HEADER_SIZE == sizeof(ReturnType::BitcoinFormat));
-
+        const auto header =
+            ReadView{raw.data(), sizeof(ReturnType::BitcoinFormat)};
         auto serialized = ReturnType::BitcoinFormat{};
 
         OT_ASSERT(sizeof(serialized) <= header.size());
@@ -170,15 +163,14 @@ auto BitcoinBlockHeader(
             throw std::runtime_error{"failed to deserialize header"};
         }
 
-        auto hash = ReturnType::calculate_hash(api, chain, header);
+        auto hash = ReturnType::calculate_hash(crypto, chain, header);
         const auto isGenesis =
-            blockchain::node::HeaderOracle::GenesisBlockHash(chain) == hash;
+            blockchain::params::get(chain).GenesisHash() == hash;
         auto imp = std::make_unique<ReturnType>(
-            api,
             chain,
             ReturnType::subversion_default_,
             std::move(hash),
-            ReturnType::calculate_pow(api, chain, header),
+            ReturnType::calculate_pow(crypto, chain, header),
             serialized.version_.value(),
             ReadView{serialized.previous_.data(), serialized.previous_.size()},
             ReadView{serialized.merkle_.data(), serialized.merkle_.size()},
@@ -197,7 +189,7 @@ auto BitcoinBlockHeader(
 }
 
 auto BitcoinBlockHeader(
-    const api::Session& api,
+    const api::Crypto& crypto,
     const blockchain::Type chain,
     const blockchain::block::Hash& merkle,
     const blockchain::block::Hash& parent,
@@ -208,7 +200,7 @@ auto BitcoinBlockHeader(
 
     try {
         auto imp =
-            std::make_unique<ReturnType>(api, chain, merkle, parent, height);
+            std::make_unique<ReturnType>(crypto, chain, merkle, parent, height);
 
         return std::make_unique<blockchain::bitcoin::block::Header>(
             imp.release());
@@ -226,7 +218,6 @@ const VersionNumber Header::local_data_version_{1};
 const VersionNumber Header::subversion_default_{1};
 
 Header::Header(
-    const api::Session& api,
     const VersionNumber version,
     const blockchain::Type chain,
     blockchain::block::Hash&& hash,
@@ -245,7 +236,6 @@ Header::Header(
     const std::uint32_t nonce,
     const bool validate) noexcept(false)
     : ot_super(
-          api,
           version,
           chain,
           std::move(hash),
@@ -274,7 +264,6 @@ Header::Header(
 }
 
 Header::Header(
-    const api::Session& api,
     const blockchain::Type chain,
     const VersionNumber subversion,
     blockchain::block::Hash&& hash,
@@ -287,13 +276,12 @@ Header::Header(
     const std::uint32_t nonce,
     const bool isGenesis) noexcept(false)
     : Header(
-          api,
           default_version_,
           chain,
           std::move(hash),
           std::move(pow),
           std::move(previous),
-          (isGenesis ? 0 : make_blank<blockchain::block::Height>::value(api)),
+          (isGenesis ? 0 : -1),
           (isGenesis ? Status::Checkpoint : Status::Normal),
           Status::Normal,
           calculate_work(chain, nbits),
@@ -309,13 +297,12 @@ Header::Header(
 }
 
 Header::Header(
-    const api::Session& api,
+    const api::Crypto& crypto,
     const blockchain::Type chain,
     const blockchain::block::Hash& merkle,
     const blockchain::block::Hash& parent,
     const blockchain::block::Height height) noexcept(false)
     : Header(
-          api,
           default_version_,
           chain,
           blockchain::block::Hash{},
@@ -329,29 +316,28 @@ Header::Header(
           subversion_default_,
           0,
           blockchain::block::Hash{merkle},
-          make_blank<Time>::value(api),
-          NumericHash::MaxTarget(chain),
+          Time{},
+          params::get(chain).Difficulty(),
           0,
           false)
 {
-    find_nonce();
+    find_nonce(crypto);
 }
 
 Header::Header(
-    const api::Session& api,
+    const api::Crypto& crypto,
     const SerializedType& serialized) noexcept(false)
     : Header(
-          api,
           serialized.version(),
           static_cast<blockchain::Type>(serialized.type()),
-          calculate_hash(api, serialized),
-          calculate_pow(api, serialized),
+          calculate_hash(crypto, serialized),
+          calculate_pow(crypto, serialized),
           blockchain::block::Hash{serialized.bitcoin().previous_header()},
           serialized.local().height(),
           static_cast<Status>(serialized.local().status()),
           static_cast<Status>(serialized.local().inherit_status()),
-          OTWork{factory::Work(serialized.local().work())},
-          OTWork{factory::Work(serialized.local().inherit_work())},
+          blockchain::Work{IsHex, serialized.local().work()},
+          blockchain::Work{IsHex, serialized.local().inherit_work()},
           serialized.bitcoin().version(),
           serialized.bitcoin().block_version(),
           blockchain::block::Hash{serialized.bitcoin().merkle_hash()},
@@ -381,7 +367,7 @@ Header::BitcoinFormat::BitcoinFormat() noexcept
     , nbits_()
     , nonce_()
 {
-    static_assert(80 == sizeof(BitcoinFormat));
+    static_assert(80_uz == sizeof(BitcoinFormat));
 }
 
 Header::BitcoinFormat::BitcoinFormat(
@@ -412,60 +398,65 @@ Header::BitcoinFormat::BitcoinFormat(
     std::memcpy(merkle_.data(), merkle.data(), merkle.size());
 }
 
-auto Header::BitcoinFormat::Target() const noexcept -> OTNumericHash
+auto Header::BitcoinFormat::Target() const noexcept
+    -> blockchain::block::NumericHash
 {
-    return OTNumericHash{factory::NumericHashNBits(nbits_.value())};
+    return {nbits_.value()};
 }
 
 auto Header::calculate_hash(
-    const api::Session& api,
+    const api::Crypto& crypto,
     const blockchain::Type chain,
     const ReadView serialized) -> blockchain::block::Hash
 {
     auto output = blockchain::block::Hash{};
-    BlockHash(api, chain, serialized, output.WriteInto());
+    BlockHash(crypto, chain, serialized, output.WriteInto());
 
     return output;
 }
 
 auto Header::calculate_hash(
-    const api::Session& api,
+    const api::Crypto& crypto,
     const blockchain::Type chain,
     const BitcoinFormat& in) -> blockchain::block::Hash
 {
     return calculate_hash(
-        api, chain, ReadView{reinterpret_cast<const char*>(&in), sizeof(in)});
+        crypto,
+        chain,
+        ReadView{reinterpret_cast<const char*>(&in), sizeof(in)});
 }
 
 auto Header::calculate_pow(
-    const api::Session& api,
+    const api::Crypto& crypto,
     const blockchain::Type chain,
     const ReadView serialized) -> blockchain::block::Hash
 {
     auto output = blockchain::block::Hash{};
-    ProofOfWorkHash(api, chain, serialized, output.WriteInto());
+    ProofOfWorkHash(crypto, chain, serialized, output.WriteInto());  // FIXME
 
     return output;
 }
 
 auto Header::calculate_pow(
-    const api::Session& api,
+    const api::Crypto& crypto,
     const blockchain::Type chain,
     const BitcoinFormat& in) -> blockchain::block::Hash
 {
     return calculate_pow(
-        api, chain, ReadView{reinterpret_cast<const char*>(&in), sizeof(in)});
+        crypto,
+        chain,
+        ReadView{reinterpret_cast<const char*>(&in), sizeof(in)});
 }
 
 auto Header::calculate_hash(
-    const api::Session& api,
+    const api::Crypto& crypto,
     const SerializedType& serialized) -> blockchain::block::Hash
 {
     try {
         const auto bytes = preimage(serialized);
 
         return calculate_hash(
-            api,
+            crypto,
             static_cast<blockchain::Type>(serialized.type()),
             ReadView(reinterpret_cast<const char*>(&bytes), sizeof(bytes)));
     } catch (const std::invalid_argument& e) {
@@ -476,14 +467,14 @@ auto Header::calculate_hash(
 }
 
 auto Header::calculate_pow(
-    const api::Session& api,
+    const api::Crypto& crypto,
     const SerializedType& serialized) -> blockchain::block::Hash
 {
     try {
         const auto bytes = preimage(serialized);
 
         return calculate_pow(
-            api,
+            crypto,
             static_cast<blockchain::Type>(serialized.type()),
             ReadView(reinterpret_cast<const char*>(&bytes), sizeof(bytes)));
     } catch (const std::invalid_argument& e) {
@@ -495,11 +486,11 @@ auto Header::calculate_pow(
 
 auto Header::calculate_work(
     const blockchain::Type chain,
-    const std::uint32_t nbits) -> OTWork
+    const std::uint32_t nbits) -> blockchain::Work
 {
-    const auto hash = OTNumericHash{factory::NumericHashNBits(nbits)};
+    const auto hash = blockchain::block::NumericHash{nbits};
 
-    return OTWork{factory::Work(chain, hash)};
+    return {hash, chain};
 }
 
 auto Header::check_pow() const noexcept -> bool
@@ -507,15 +498,27 @@ auto Header::check_pow() const noexcept -> bool
     return NumericHash() < Target();
 }
 
+auto Header::clone() const noexcept
+    -> std::unique_ptr<blockchain::block::Header::Imp>
+{
+    return std::make_unique<Header>(*this);
+}
+
+auto Header::clone_bitcoin() const noexcept -> std::unique_ptr<block::Header>
+{
+    return std::make_unique<block::Header>(
+        std::make_unique<Header>(*this).release());
+}
+
 auto Header::Encode() const noexcept -> ByteArray
 {
-    auto output = api_.Factory().Data();
+    auto output = ByteArray{};
     Serialize(output.WriteInto());
 
     return output;
 }
 
-auto Header::find_nonce() noexcept(false) -> void
+auto Header::find_nonce(const api::Crypto& crypto) noexcept(false) -> void
 {
     auto& hash = const_cast<blockchain::block::Hash&>(hash_);
     auto& pow = const_cast<ByteArray&>(pow_);
@@ -531,7 +534,7 @@ auto Header::find_nonce() noexcept(false) -> void
             return out;
         }());
         view = ReadView{reinterpret_cast<const char*>(&bytes), sizeof(bytes)};
-        pow = calculate_pow(api_, type_, view);
+        pow = calculate_pow(crypto, type_, view);
 
         if (check_pow()) {
             break;
@@ -542,7 +545,7 @@ auto Header::find_nonce() noexcept(false) -> void
         }
     }
 
-    hash = calculate_hash(api_, type_, view);
+    hash = calculate_hash(crypto, type_, view);
 }
 
 auto Header::preimage(const SerializedType& in) -> BitcoinFormat
@@ -633,8 +636,8 @@ auto Header::Serialize(
     }
 }
 
-auto Header::Target() const noexcept -> OTNumericHash
+auto Header::Target() const noexcept -> blockchain::block::NumericHash
 {
-    return OTNumericHash{factory::NumericHashNBits(nbits_)};
+    return blockchain::block::NumericHash{nbits_};
 }
 }  // namespace opentxs::blockchain::bitcoin::block::implementation

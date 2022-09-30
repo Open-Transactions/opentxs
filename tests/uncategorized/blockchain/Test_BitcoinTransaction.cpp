@@ -10,7 +10,6 @@
 #include <memory>
 #include <optional>
 
-#include "1_Internal.hpp"  // IWYU pragma: keep
 #include "internal/blockchain/bitcoin/Bitcoin.hpp"
 #include "internal/blockchain/bitcoin/block/Factory.hpp"
 #include "internal/blockchain/bitcoin/block/Transaction.hpp"
@@ -204,12 +203,11 @@ const ot::Vector<ot::UnallocatedCString> Test_BitcoinTransaction::bip143_{
 TEST_F(Test_BitcoinTransaction, serialization)
 {
     const auto transaction = ot::factory::BitcoinTransaction(
-        api_,
         ot::blockchain::Type::Bitcoin,
         std::numeric_limits<std::size_t>::max(),
         ot::Clock::now(),
         ot::blockchain::bitcoin::EncodedTransaction::Deserialize(
-            api_, ot::blockchain::Type::Bitcoin, tx_bytes_.Bytes()));
+            api_.Crypto(), ot::blockchain::Type::Bitcoin, tx_bytes_.Bytes()));
 
     ASSERT_TRUE(transaction);
     EXPECT_EQ(tx_id_, transaction->ID());
@@ -473,23 +471,25 @@ TEST_F(Test_BitcoinTransaction, serialization)
 TEST_F(Test_BitcoinTransaction, normalized_id)
 {
     const auto transaction1 = ot::factory::BitcoinTransaction(
-        api_,
         ot::blockchain::Type::Bitcoin,
         std::numeric_limits<std::size_t>::max(),
         ot::Clock::now(),
         ot::blockchain::bitcoin::EncodedTransaction::Deserialize(
-            api_, ot::blockchain::Type::Bitcoin, tx_bytes_.Bytes()));
+            api_.Crypto(), ot::blockchain::Type::Bitcoin, tx_bytes_.Bytes()));
     const auto transaction2 = ot::factory::BitcoinTransaction(
-        api_,
         ot::blockchain::Type::Bitcoin,
         std::numeric_limits<std::size_t>::max(),
         ot::Clock::now(),
         ot::blockchain::bitcoin::EncodedTransaction::Deserialize(
-            api_, ot::blockchain::Type::Bitcoin, mutated_bytes_.Bytes()));
+            api_.Crypto(),
+            ot::blockchain::Type::Bitcoin,
+            mutated_bytes_.Bytes()));
 
     ASSERT_TRUE(transaction1);
     ASSERT_TRUE(transaction2);
-    EXPECT_EQ(transaction1->IDNormalized(), transaction2->IDNormalized());
+    EXPECT_EQ(
+        transaction1->IDNormalized(api_.Factory()),
+        transaction2->IDNormalized(api_.Factory()));
 
     auto id1 = api_.Factory().Data();
     auto id2 = api_.Factory().Data();

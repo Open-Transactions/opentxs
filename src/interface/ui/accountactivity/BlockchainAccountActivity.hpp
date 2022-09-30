@@ -16,7 +16,6 @@
 #include <tuple>
 #include <utility>
 
-#include "1_Internal.hpp"
 #include "Proto.hpp"
 #include "interface/qt/SendMonitor.hpp"
 #include "interface/ui/accountactivity/AccountActivity.hpp"
@@ -26,7 +25,6 @@
 #include "internal/core/Core.hpp"
 #include "internal/interface/ui/UI.hpp"
 #include "internal/util/Mutex.hpp"
-#include "opentxs/Version.hpp"
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Session.hpp"
@@ -50,10 +48,8 @@
 #include "util/Work.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
 namespace api
 {
 namespace session
@@ -99,7 +95,6 @@ class PaymentWorkflow;
 }  // namespace proto
 
 class Data;
-// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

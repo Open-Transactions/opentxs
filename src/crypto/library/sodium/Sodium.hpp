@@ -14,7 +14,6 @@
 #include "crypto/library/EcdsaProvider.hpp"
 #include "internal/api/crypto/Util.hpp"
 #include "internal/crypto/library/Sodium.hpp"
-#include "opentxs/Version.hpp"
 #include "opentxs/core/Secret.hpp"
 #include "opentxs/crypto/HashType.hpp"
 #include "opentxs/crypto/SecretStyle.hpp"
@@ -26,10 +25,8 @@
 #include "opentxs/util/Bytes.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
 namespace api
 {
 class Crypto;
@@ -55,7 +52,6 @@ class Ciphertext;
 class Data;
 class PasswordPrompt;
 class Secret;
-// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

@@ -3,7 +3,9 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-set(cxx-install-headers "")
+set(cxx-install-headers
+    "${opentxs_SOURCE_DIR}/include/opentxs/blockchain/node/HeaderOracle.hpp"
+)
 
 if(OT_BLOCKCHAIN_EXPORT)
   target_sources(
@@ -21,12 +23,6 @@ if(OT_BLOCKCHAIN_EXPORT)
       "Shared.cpp"
       "Shared.hpp"
   )
-  list(
-    APPEND
-    cxx-install-headers
-    "${opentxs_SOURCE_DIR}/include/opentxs/blockchain/node/HeaderOracle.hpp"
-  )
-
   target_link_libraries(opentxs-common PUBLIC Boost::headers)
   target_link_libraries(opentxs PUBLIC Boost::system)
   target_include_directories(

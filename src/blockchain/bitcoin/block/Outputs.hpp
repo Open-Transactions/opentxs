@@ -28,10 +28,23 @@
 #include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
+namespace api
+{
+namespace crypto
+{
+class Blockchain;
+}  // namespace crypto
+
+namespace session
+{
+class Client;
+}  // namespace session
+
+class Session;
+}  // namespace api
+
 namespace identifier
 {
 class Generic;
@@ -44,7 +57,6 @@ class BlockchainTransaction;
 }  // namespace proto
 
 class Log;
-// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -55,9 +67,12 @@ class Outputs final : public internal::Outputs
 public:
     using OutputList = UnallocatedVector<std::unique_ptr<internal::Output>>;
 
-    auto AssociatedLocalNyms(UnallocatedVector<identifier::Nym>& output)
-        const noexcept -> void final;
+    auto AssociatedLocalNyms(
+        const api::crypto::Blockchain& crypto,
+        UnallocatedVector<identifier::Nym>& output) const noexcept
+        -> void final;
     auto AssociatedRemoteContacts(
+        const api::session::Client& api,
         UnallocatedVector<identifier::Generic>& output) const noexcept
         -> void final;
     auto at(const std::size_t position) const noexcept(false)
@@ -80,22 +95,23 @@ public:
     auto ExtractElements(const cfilter::Type style) const noexcept
         -> Vector<Vector<std::byte>> final;
     auto FindMatches(
+        const api::Session& api,
         const blockchain::block::Txid& txid,
         const cfilter::Type type,
         const blockchain::block::ParsedPatterns& elements,
         const Log& log) const noexcept -> blockchain::block::Matches final;
-    auto GetPatterns() const noexcept -> UnallocatedVector<PatternID> final;
+    auto GetPatterns(const api::Session& api) const noexcept
+        -> UnallocatedVector<PatternID> final;
     auto Keys() const noexcept -> UnallocatedVector<crypto::Key> final;
-    auto Internal() const noexcept -> const internal::Outputs& final
-    {
-        return *this;
-    }
-    auto NetBalanceChange(const identifier::Nym& nym, const Log& log)
-        const noexcept -> opentxs::Amount final;
+    auto NetBalanceChange(
+        const api::crypto::Blockchain& crypto,
+        const identifier::Nym& nym,
+        const Log& log) const noexcept -> opentxs::Amount final;
     auto Serialize(const AllocateOutput destination) const noexcept
         -> std::optional<std::size_t> final;
-    auto Serialize(proto::BlockchainTransaction& destination) const noexcept
-        -> bool final;
+    auto Serialize(
+        const api::Session& api,
+        proto::BlockchainTransaction& destination) const noexcept -> bool final;
     auto SetKeyData(const blockchain::block::KeyData& data) noexcept
         -> void final;
     auto size() const noexcept -> std::size_t final { return outputs_.size(); }
@@ -107,7 +123,6 @@ public:
     auto ForTestingOnlyAddKey(
         const std::size_t index,
         const blockchain::crypto::Key& key) noexcept -> bool final;
-    auto Internal() noexcept -> internal::Outputs& final { return *this; }
     auto MergeMetadata(const internal::Outputs& rhs, const Log& log) noexcept
         -> bool final;
 

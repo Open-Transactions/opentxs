@@ -18,10 +18,8 @@ class MessageLite;
 }  // namespace protobuf
 }  // namespace google
 
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
 namespace proto
 {
 class ContactData;
@@ -29,7 +27,6 @@ class HDPath;
 class Nym;
 class Signature;
 }  // namespace proto
-// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

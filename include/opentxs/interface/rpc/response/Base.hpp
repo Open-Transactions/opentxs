@@ -8,23 +8,20 @@
 
 #pragma once
 
-#include "opentxs/Version.hpp"  // IWYU pragma: associated
-
 #include <cstdint>
 #include <memory>
 #include <tuple>
 #include <utility>
 
+#include "opentxs/Export.hpp"
 #include "opentxs/interface/rpc/Types.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
 namespace proto
 {
 class RPCResponse;
@@ -42,7 +39,6 @@ class ListNyms;
 class SendPayment;
 }  // namespace response
 }  // namespace rpc
-// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

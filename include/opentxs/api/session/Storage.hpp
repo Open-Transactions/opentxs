@@ -5,14 +5,13 @@
 
 #pragma once
 
-#include "opentxs/Version.hpp"  // IWYU pragma: associated
-
 #include <chrono>
 #include <cstdint>
 #include <ctime>
 #include <functional>
 #include <memory>
 
+#include "opentxs/Export.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Types.hpp"
@@ -24,10 +23,8 @@
 #include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
 namespace api
 {
 namespace session
@@ -70,7 +67,6 @@ class UnitDefinition;
 using NymLambda = std::function<void(const proto::Nym&)>;
 using ServerLambda = std::function<void(const proto::ServerContract&)>;
 using UnitLambda = std::function<void(const proto::UnitDefinition&)>;
-// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

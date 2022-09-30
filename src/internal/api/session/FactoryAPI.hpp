@@ -20,10 +20,8 @@ class MessageLite;
 }  // namespace protobuf
 }  // namespace google
 
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
 namespace api
 {
 namespace crypto
@@ -77,7 +75,6 @@ class OTTrade;
 class OTTransaction;
 class OTTransactionType;
 class String;
-// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -122,11 +119,9 @@ public:
         const Nym_p& nym,
         const proto::UnitDefinition serialized) const noexcept(false)
         -> OTBasketContract = 0;
-#if OT_BLOCKCHAIN
     using session::Factory::BlockHeader;
     virtual auto BlockHeader(const proto::BlockchainBlockHeader& serialized)
         const -> BlockHeaderP = 0;
-#endif  // OT_BLOCKCHAIN
     virtual auto Cheque(const OTTransaction& receipt) const
         -> std::unique_ptr<opentxs::Cheque> = 0;
     virtual auto Cheque() const -> std::unique_ptr<opentxs::Cheque> = 0;

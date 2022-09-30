@@ -5,8 +5,7 @@
 
 // IWYU pragma: no_include <cxxabi.h>
 
-#include "0_stdafx.hpp"    // IWYU pragma: associated
-#include "1_Internal.hpp"  // IWYU pragma: associated
+#include "0_stdafx.hpp"  // IWYU pragma: associated
 #include "blockchain/node/wallet/subchain/SubchainStateData.hpp"  // IWYU pragma: associated
 
 #include <boost/container/container_fwd.hpp>
@@ -906,7 +905,7 @@ auto SubchainStateData::ProcessBlock(
         keyMatches = key.size();
         txoMatches = outpoint.size();
 
-        return block.Internal().FindMatches(type, outpoint, key, log);
+        return block.Internal().FindMatches(api_, type, outpoint, key, log);
     }();
     const auto haveMatches = Clock::now();
     const auto& [utxo, general] = confirmed;
@@ -972,7 +971,7 @@ auto SubchainStateData::ProcessTransaction(
         const auto outpoints = translate(elements.txos_, alloc);
 
         return copy->Internal().FindMatches(
-            filter_type_, outpoints, parsed, log);
+            api_, filter_type_, outpoints, parsed, log);
     }();
     handle_mempool_matches(matches, std::move(copy));
 }
@@ -1042,9 +1041,7 @@ auto SubchainStateData::scan(
 
                 if (0_uz == cached) {
                     const auto chainDefault =
-                        params::Chains()
-                            .at(chain_)
-                            .cfilter_element_count_estimate_;
+                        params::get(chain_).CfilterBatchEstimate();
 
                     return std::max<std::size_t>(1_uz, chainDefault);
                 } else {

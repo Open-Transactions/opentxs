@@ -16,10 +16,8 @@
 #include "opentxs/core/identifier/UnitDefinition.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
 namespace identifier
 {
 class Notary;
@@ -31,7 +29,6 @@ class Server;
 }  // namespace server
 
 class PasswordPrompt;
-// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

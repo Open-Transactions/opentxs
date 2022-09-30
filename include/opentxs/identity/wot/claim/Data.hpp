@@ -9,12 +9,11 @@
 // IWYU pragma: no_include "opentxs/identity/wot/claim/SectionType.hpp"
 // IWYU pragma: no_include "opentxs/core/UnitType.hpp"
 
-#include "opentxs/Version.hpp"  // IWYU pragma: associated
-
 #include <memory>
 #include <tuple>
 #include <utility>
 
+#include "opentxs/Export.hpp"
 #include "opentxs/core/Types.hpp"
 #include "opentxs/identity/wot/claim/Types.hpp"
 #include "opentxs/util/Bytes.hpp"
@@ -22,10 +21,8 @@
 #include "opentxs/util/Numbers.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
 namespace api
 {
 class Session;
@@ -54,7 +51,6 @@ namespace proto
 {
 class ContactData;
 }  // namespace proto
-// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

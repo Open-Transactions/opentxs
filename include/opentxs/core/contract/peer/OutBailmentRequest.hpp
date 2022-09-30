@@ -5,16 +5,13 @@
 
 #pragma once
 
-#include "opentxs/Version.hpp"  // IWYU pragma: associated
-
+#include "opentxs/Export.hpp"
 #include "opentxs/core/contract/peer/PeerRequest.hpp"
 #include "opentxs/util/SharedPimpl.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
 namespace contract
 {
 namespace peer
@@ -27,7 +24,6 @@ class Outbailment;
 }  // namespace contract
 
 using OTOutbailmentRequest = SharedPimpl<contract::peer::request::Outbailment>;
-// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

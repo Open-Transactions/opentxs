@@ -8,6 +8,7 @@
 #include <opentxs/opentxs.hpp>
 #include <type_traits>
 
+#include "internal/blockchain/Params.hpp"
 #include "internal/blockchain/block/Header.hpp"
 #include "internal/blockchain/node/headeroracle/HeaderOracle.hpp"
 #include "internal/util/LogMacros.hpp"
@@ -2655,7 +2656,7 @@ auto Test_HeaderOracle_base::create_blocks(
 {
     for (const auto& [parent, child] : vector) {
         const bb::Hash previous{
-            parent.empty() ? bc::HeaderOracle::GenesisBlockHash(type_)
+            parent.empty() ? b::params::get(type_).GenesisHash()
                            : get_block_hash(parent)};
 
         if (false == make_test_block(child, previous)) { return false; }
@@ -2721,7 +2722,7 @@ auto Test_HeaderOracle_base::verify_best_chain(const BestChainVector& vector)
 
     for (const auto& expectedHash : vector) {
         const bb::Hash compareHash{
-            expectedHash.empty() ? bc::HeaderOracle::GenesisBlockHash(type_)
+            expectedHash.empty() ? b::params::get(type_).GenesisHash()
                                  : get_block_hash(expectedHash)};
         const auto hash = header_oracle_.BestHash(i);
 
@@ -2763,7 +2764,7 @@ auto Test_HeaderOracle_base::verify_post_state(const PostStateVector& vector)
     for (const auto& [sHash, spHash, height, status, pStatus] : vector) {
         const auto hash = get_block_hash(sHash);
         const bb::Hash pHash{
-            spHash.empty() ? bc::HeaderOracle::GenesisBlockHash(type_)
+            spHash.empty() ? b::params::get(type_).GenesisHash()
                            : get_block_hash(spHash)};
         const auto pBlock = header_oracle_.LoadHeader(hash);
 

@@ -7,7 +7,6 @@
 
 #include <cstdint>
 
-#include "opentxs/Version.hpp"
 #include "opentxs/core/String.hpp"
 #include "opentxs/util/Pimpl.hpp"
 
@@ -20,14 +19,11 @@ class IFileReadCallBack;
 }  // namespace io
 }  // namespace irr
 
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
 class StringXML;
 
 using OTStringXML = Pimpl<StringXML>;
-// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

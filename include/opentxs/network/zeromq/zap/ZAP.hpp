@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include "opentxs/Version.hpp"  // IWYU pragma: associated
+#include "opentxs/Export.hpp"
 
 namespace opentxs::network::zeromq::zap
 {

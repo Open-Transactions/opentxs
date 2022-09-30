@@ -3,19 +3,23 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-if(OT_BLOCKCHAIN_EXPORT)
-  add_subdirectory(header)
-endif()
+add_subdirectory(header)
 
 target_sources(
   opentxs-common
   PRIVATE
     "Hash.cpp"
+    "NumericHash.cpp"
+    "NumericHashPrivate.cpp"
+    "NumericHashPrivate.hpp"
     "Outpoint.cpp"
     "Position.cpp"
 )
+target_link_libraries(opentxs-common PRIVATE Boost::headers)
 set(cxx-install-headers
+    "${opentxs_SOURCE_DIR}/include/opentxs/blockchain/block/Block.hpp"
     "${opentxs_SOURCE_DIR}/include/opentxs/blockchain/block/Hash.hpp"
+    "${opentxs_SOURCE_DIR}/include/opentxs/blockchain/block/NumericHash.hpp"
     "${opentxs_SOURCE_DIR}/include/opentxs/blockchain/block/Outpoint.hpp"
     "${opentxs_SOURCE_DIR}/include/opentxs/blockchain/block/Position.hpp"
     "${opentxs_SOURCE_DIR}/include/opentxs/blockchain/block/Types.hpp"
@@ -34,12 +38,8 @@ if(OT_BLOCKCHAIN_EXPORT)
       "Common.cpp"
       "Hash.cpp"
   )
-  list(
-    APPEND
-    cxx-install-headers
-    "${opentxs_SOURCE_DIR}/include/opentxs/blockchain/block/Block.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/blockchain/block/Hash.hpp"
-  )
+else()
+  target_sources(opentxs-common PRIVATE "Disabled.cpp")
 endif()
 
 target_sources(opentxs-common PRIVATE ${cxx-install-headers})

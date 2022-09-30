@@ -4,7 +4,6 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 #include "0_stdafx.hpp"              // IWYU pragma: associated
-#include "1_Internal.hpp"            // IWYU pragma: associated
 #include "otx/consensus/Server.hpp"  // IWYU pragma: associated
 
 #include <AsymmetricKey.pb.h>
@@ -133,6 +132,11 @@
         return {};                                                             \
     }                                                                          \
     static_assert(0 < sizeof(char))  // NOTE silence -Wextra-semi-stmt
+
+namespace opentxs
+{
+constexpr auto FIRST_REQUEST_NUMBER = 1;
+}  // namespace opentxs
 
 namespace opentxs::factory
 {

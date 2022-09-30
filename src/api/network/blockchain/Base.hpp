@@ -13,7 +13,6 @@
 #include "api/network/blockchain/Blockchain.hpp"
 #include "internal/api/network/Blockchain.hpp"
 #include "internal/util/LogMacros.hpp"
-#include "opentxs/Version.hpp"
 #include "opentxs/api/network/Blockchain.hpp"
 #include "opentxs/api/network/BlockchainHandle.hpp"
 #include "opentxs/blockchain/Types.hpp"
@@ -26,10 +25,8 @@
 #include "opentxs/util/Log.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
 namespace api
 {
 namespace crypto
@@ -63,11 +60,8 @@ class Nym;
 }  // namespace identifier
 
 class Options;
-// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
-
-namespace zmq = opentxs::network::zeromq;
 
 namespace opentxs::api::network::implementation
 {

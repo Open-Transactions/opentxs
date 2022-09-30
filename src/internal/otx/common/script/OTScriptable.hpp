@@ -10,15 +10,12 @@
 
 #include "internal/otx/common/Account.hpp"
 #include "internal/otx/common/Contract.hpp"
-#include "opentxs/Version.hpp"
 #include "opentxs/core/String.hpp"
 #include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
 namespace api
 {
 class Session;
@@ -53,7 +50,6 @@ class OTScript;
 class OTVariable;
 class PasswordPrompt;
 class Tag;
-// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

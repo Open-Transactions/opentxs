@@ -4,7 +4,6 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 #include "0_stdafx.hpp"                          // IWYU pragma: associated
-#include "1_Internal.hpp"                        // IWYU pragma: associated
 #include "api/crypto/blockchain/Blockchain.hpp"  // IWYU pragma: associated
 
 #include "api/crypto/blockchain/Imp_blockchain.hpp"
@@ -12,7 +11,7 @@
 namespace opentxs::api::crypto::imp
 {
 Blockchain::Blockchain(
-    const api::Session& api,
+    const api::session::Client& api,
     const api::session::Activity& activity,
     const api::session::Contacts& contacts,
     const api::Legacy& legacy,

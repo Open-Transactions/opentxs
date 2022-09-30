@@ -47,10 +47,8 @@
 class QAbstractItemModel;
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
 namespace api
 {
 namespace crypto
@@ -76,7 +74,6 @@ struct BlankModel;
 }  // namespace ui
 
 class Flag;
-// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

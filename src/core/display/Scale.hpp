@@ -6,7 +6,6 @@
 #pragma once
 
 #include "0_stdafx.hpp"                    // IWYU pragma: associated
-#include "1_Internal.hpp"                  // IWYU pragma: associated
 #include "opentxs/core/display/Scale.hpp"  // IWYU pragma: associated
 
 #include <boost/lexical_cast/bad_lexical_cast.hpp>

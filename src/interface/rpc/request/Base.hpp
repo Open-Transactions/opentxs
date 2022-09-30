@@ -10,10 +10,8 @@
 #include <memory>
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
 namespace proto
 {
 class RPCCommand;
@@ -31,7 +29,6 @@ class ListNyms;
 class SendPayment;
 }  // namespace request
 }  // namespace rpc
-// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

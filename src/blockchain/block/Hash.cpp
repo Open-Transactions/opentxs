@@ -4,8 +4,9 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 #include "0_stdafx.hpp"                       // IWYU pragma: associated
-#include "1_Internal.hpp"                     // IWYU pragma: associated
 #include "opentxs/blockchain/block/Hash.hpp"  // IWYU pragma: associated
+
+#include <stdexcept>
 
 #include "core/FixedByteArray.tpp"
 
@@ -20,6 +21,12 @@ Hash::Hash() noexcept
 Hash::Hash(const ReadView bytes) noexcept(false)
     : FixedByteArray(bytes)
 {
+}
+
+Hash::Hash(const HexType&, const ReadView bytes) noexcept(false)
+    : FixedByteArray()
+{
+    if (false == DecodeHex(bytes)) { throw std::runtime_error{"invalid hash"}; }
 }
 
 Hash::Hash(const Hash& rhs) noexcept

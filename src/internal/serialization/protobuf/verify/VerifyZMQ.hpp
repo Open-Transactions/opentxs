@@ -6,7 +6,6 @@
 #pragma once
 
 #include "internal/serialization/protobuf/Basic.hpp"
-#include "opentxs/Version.hpp"
 
 namespace opentxs::proto
 {

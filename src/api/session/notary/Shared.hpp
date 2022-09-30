@@ -19,15 +19,12 @@
 #include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
 namespace identifier
 {
 class UnitDefinition;
 }  // namespace identifier
-// }  // namespace v1
 
 namespace network
 {
