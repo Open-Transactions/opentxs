@@ -5,21 +5,15 @@
 
 #pragma once
 
-#include "opentxs/Version.hpp"  // IWYU pragma: associated
-
+#include "opentxs/Export.hpp"
 #include "opentxs/blockchain/Types.hpp"
-#include "opentxs/blockchain/bitcoin/NumericHash.hpp"
-#include "opentxs/blockchain/bitcoin/Work.hpp"
-#include "opentxs/blockchain/block/Position.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
 namespace blockchain
 {
 namespace bitcoin
@@ -27,6 +21,7 @@ namespace bitcoin
 namespace block
 {
 class Header;
+class NumericHash;
 }  // namespace block
 }  // namespace bitcoin
 
@@ -38,9 +33,12 @@ class Header;
 }  // namespace internal
 
 class Hash;
+class NumericHash;
+class Position;
 }  // namespace block
+
+class Work;
 }  // namespace blockchain
-// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -54,23 +52,23 @@ public:
     virtual auto as_Bitcoin() const noexcept
         -> const blockchain::bitcoin::block::Header&;
     auto clone() const noexcept -> std::unique_ptr<Header>;
-    auto Difficulty() const noexcept -> OTWork;
+    auto Difficulty() const noexcept -> blockchain::Work;
     auto Hash() const noexcept -> const block::Hash&;
     auto Height() const noexcept -> block::Height;
-    auto IncrementalWork() const noexcept -> OTWork;
+    auto IncrementalWork() const noexcept -> blockchain::Work;
     auto Internal() const noexcept -> const internal::Header&;
-    auto NumericHash() const noexcept -> OTNumericHash;
+    auto NumericHash() const noexcept -> block::NumericHash;
     auto ParentHash() const noexcept -> const block::Hash&;
-    auto ParentWork() const noexcept -> OTWork;
+    auto ParentWork() const noexcept -> blockchain::Work;
     auto Position() const noexcept -> block::Position;
     auto Print() const noexcept -> UnallocatedCString;
     auto Serialize(
         const AllocateOutput destination,
         const bool bitcoinformat = true) const noexcept -> bool;
-    auto Target() const noexcept -> OTNumericHash;
+    auto Target() const noexcept -> block::NumericHash;
     auto Type() const noexcept -> blockchain::Type;
     auto Valid() const noexcept -> bool;
-    auto Work() const noexcept -> OTWork;
+    auto Work() const noexcept -> blockchain::Work;
 
     auto Internal() noexcept -> internal::Header&;
 

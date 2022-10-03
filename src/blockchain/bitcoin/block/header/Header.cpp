@@ -5,8 +5,7 @@
 
 // IWYU pragma: no_include <cxxabi.h>
 
-#include "0_stdafx.hpp"    // IWYU pragma: associated
-#include "1_Internal.hpp"  // IWYU pragma: associated
+#include "0_stdafx.hpp"  // IWYU pragma: associated
 #include "blockchain/bitcoin/block/header/Header.hpp"  // IWYU pragma: associated
 
 #include <memory>
@@ -49,7 +48,14 @@ Header::Header() noexcept
 }
 
 Header::Header(const Header& rhs) noexcept
-    : Header(rhs.imp_bitcoin_->clone_bitcoin().release())
+    : Header([&] {
+        auto copy = rhs.imp_bitcoin_->clone_bitcoin();
+        auto* out = copy->imp_bitcoin_;
+        copy->imp_bitcoin_ = nullptr;
+        copy->imp_ = nullptr;
+
+        return out;
+    }())
 {
 }
 
@@ -62,8 +68,11 @@ Header::Header(Header&& rhs) noexcept
 auto Header::operator=(const Header& rhs) noexcept -> Header&
 {
     auto old = std::unique_ptr<Imp>(imp_bitcoin_);
-    imp_bitcoin_ = rhs.imp_bitcoin_->clone_bitcoin().release();
+    auto copy = rhs.imp_bitcoin_->clone_bitcoin();
+    imp_bitcoin_ = copy->imp_bitcoin_;
     imp_ = imp_bitcoin_;
+    copy->imp_bitcoin_ = nullptr;
+    copy->imp_ = nullptr;
 
     return *this;
 }

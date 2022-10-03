@@ -4,7 +4,6 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 #include "0_stdafx.hpp"                     // IWYU pragma: associated
-#include "1_Internal.hpp"                   // IWYU pragma: associated
 #include "network/zeromq/zap/Callback.hpp"  // IWYU pragma: associated
 
 #include <atomic>

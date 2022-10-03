@@ -5,11 +5,10 @@
 
 #pragma once
 
-#include "opentxs/Version.hpp"  // IWYU pragma: associated
-
 #include <cstdint>
 #include <memory>
 
+#include "opentxs/Export.hpp"
 #include "opentxs/core/String.hpp"
 #include "opentxs/crypto/HashType.hpp"
 #include "opentxs/crypto/Types.hpp"
@@ -21,10 +20,8 @@
 #include "opentxs/util/Numbers.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
 namespace crypto
 {
 namespace key
@@ -51,7 +48,6 @@ class PasswordPrompt;
 class Secret;
 
 using OTAsymmetricKey = Pimpl<crypto::key::Asymmetric>;
-// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

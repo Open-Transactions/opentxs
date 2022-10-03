@@ -3,8 +3,7 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#include "0_stdafx.hpp"    // IWYU pragma: associated
-#include "1_Internal.hpp"  // IWYU pragma: associated
+#include "0_stdafx.hpp"  // IWYU pragma: associated
 #include "internal/network/blockchain/ConnectionManager.hpp"  // IWYU pragma: associated
 
 #include <boost/asio.hpp>
@@ -13,13 +12,13 @@
 #include <type_traits>
 
 #include "internal/api/network/Asio.hpp"
-#include "internal/blockchain/p2p/P2P.hpp"
 #include "internal/network/blockchain/Types.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/api/network/Asio.hpp"
 #include "opentxs/api/network/Network.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
+#include "opentxs/blockchain/p2p/Address.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/network/asio/Endpoint.hpp"
 #include "opentxs/network/asio/Socket.hpp"

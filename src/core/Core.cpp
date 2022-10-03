@@ -3,7 +3,6 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 #include "0_stdafx.hpp"            // IWYU pragma: associated
-#include "1_Internal.hpp"          // IWYU pragma: associated
 #include "internal/core/Core.hpp"  // IWYU pragma: associated
 
 #include <ContractEnums.pb.h>
@@ -23,9 +22,9 @@
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/blockchain/Blockchain.hpp"
 #include "opentxs/blockchain/BlockchainType.hpp"
+#include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/core/AccountType.hpp"
 #include "opentxs/core/AddressType.hpp"
-#include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/Types.hpp"
 #include "opentxs/core/UnitType.hpp"
@@ -134,9 +133,7 @@ auto IssuerID(const api::Session& api, const blockchain::Type chain) noexcept
     auto& output = it->second;
 
     try {
-        const auto& hex =
-            blockchain::params::Chains().at(chain).genesis_hash_hex_;
-        const auto genesis = api.Factory().DataFromHex(hex);
+        const auto& genesis = params::get(chain).GenesisHash();
         output = api.Factory().NymIDFromPreimage(genesis.Bytes());
     } catch (...) {
     }

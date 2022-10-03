@@ -7,16 +7,13 @@
 
 #include <chrono>
 
-#include "opentxs/Version.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
 #include "otx/client/obsolete/OTAPI_Func.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
 namespace client
 {
 class ServerAction;
@@ -38,7 +35,6 @@ class Amount;
 class OTPaymentPlan;
 class OTSmartContract;
 class PasswordPrompt;
-// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

@@ -11,10 +11,8 @@
 #include "opentxs/api/network/Network.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
 namespace api
 {
 namespace crypto
@@ -27,7 +25,6 @@ class Session;
 }  // namespace api
 
 class Options;
-// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

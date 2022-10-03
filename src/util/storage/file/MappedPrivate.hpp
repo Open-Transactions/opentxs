@@ -27,10 +27,8 @@ class mapped_file;
 }  // namespace iostreams
 }  // namespace boost
 
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
 namespace storage
 {
 namespace file
@@ -44,7 +42,6 @@ class Database;
 class Transaction;
 }  // namespace lmdb
 }  // namespace storage
-// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

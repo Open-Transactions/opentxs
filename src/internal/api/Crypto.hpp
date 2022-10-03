@@ -15,10 +15,8 @@
 #include "opentxs/crypto/key/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
 namespace api
 {
 class Factory;
@@ -33,7 +31,6 @@ class Secp256k1;
 class Sodium;
 class SymmetricProvider;
 }  // namespace crypto
-// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

@@ -4,7 +4,6 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 #include "0_stdafx.hpp"                         // IWYU pragma: associated
-#include "1_Internal.hpp"                       // IWYU pragma: associated
 #include "blockchain/bitcoin/block/Output.hpp"  // IWYU pragma: associated
 
 #include <boost/container/vector.hpp>
@@ -23,7 +22,6 @@
 namespace opentxs::blockchain::bitcoin::block::implementation
 {
 Output::Cache::Cache(
-    const api::Session& api,
     std::optional<std::size_t>&& size,
     boost::container::flat_set<crypto::Key>&& keys,
     blockchain::block::Position&& minedPosition,

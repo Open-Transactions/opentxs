@@ -21,7 +21,6 @@
 #include "internal/otx/common/OTTransaction.hpp"
 #include "internal/util/Lockable.hpp"
 #include "internal/util/Mutex.hpp"
-#include "opentxs/Version.hpp"
 #include "opentxs/api/session/Workflow.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
@@ -35,10 +34,8 @@
 #include "opentxs/util/Time.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
 namespace api
 {
 namespace session
@@ -68,7 +65,6 @@ namespace proto
 {
 class PaymentWorkflow;
 }  // namespace proto
-// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

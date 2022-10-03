@@ -23,23 +23,16 @@
 #include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
 namespace api
 {
-namespace crypto
-{
-class Blockchain;
-}  // namespace crypto
-
+class Crypto;
 class Session;
 }  // namespace api
 
 class ByteArray;
 class PaymentCode;
-// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -61,8 +54,9 @@ public:
         return elements_.at(position);
     }
     auto begin() const noexcept -> const_iterator final { return cbegin(); }
-    auto CalculateHash160(const api::Session& api, const AllocateOutput output)
-        const noexcept -> bool final;
+    auto CalculateHash160(
+        const api::Crypto& crypto,
+        const AllocateOutput output) const noexcept -> bool final;
     auto CalculateSize() const noexcept -> std::size_t final;
     auto cbegin() const noexcept -> const_iterator final { return {this, 0}; }
     auto cend() const noexcept -> const_iterator final
@@ -77,7 +71,7 @@ public:
     auto IsNotification(
         const std::uint8_t version,
         const PaymentCode& recipient) const noexcept -> bool final;
-    auto LikelyPubkeyHashes(const api::Session& api) const noexcept
+    auto LikelyPubkeyHashes(const api::Crypto& crypto) const noexcept
         -> UnallocatedVector<ByteArray> final;
     auto M() const noexcept -> std::optional<std::uint8_t> final;
     auto MultisigPubkey(const std::size_t position) const noexcept

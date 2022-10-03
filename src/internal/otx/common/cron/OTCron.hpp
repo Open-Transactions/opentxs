@@ -11,7 +11,6 @@
 #include <memory>
 
 #include "internal/otx/common/Contract.hpp"
-#include "opentxs/Version.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
 #include "opentxs/identity/Types.hpp"
 #include "opentxs/util/Container.hpp"
@@ -19,10 +18,8 @@
 #include "opentxs/util/Time.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
 namespace api
 {
 namespace session
@@ -48,7 +45,6 @@ class Armored;
 class OTCronItem;
 class OTMarket;
 class PasswordPrompt;
-// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

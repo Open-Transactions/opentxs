@@ -14,10 +14,8 @@
 #include "opentxs/otx/client/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
 namespace identifier
 {
 class Nym;
@@ -27,7 +25,6 @@ class Cheque;
 class Item;
 class Message;
 class PeerObject;
-// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

@@ -5,12 +5,11 @@
 
 #pragma once
 
-#include "opentxs/Version.hpp"  // IWYU pragma: associated
-
 #include <cstdint>
 #include <optional>
 #include <tuple>
 
+#include "opentxs/Export.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
@@ -19,16 +18,21 @@
 #include "opentxs/util/Time.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
 namespace api
 {
+namespace crypto
+{
+class Blockchain;
+}  // namespace crypto
+
 namespace session
 {
-class Contacts;
+class Client;
 }  // namespace session
+
+class Session;
 }  // namespace api
 
 namespace blockchain
@@ -59,7 +63,6 @@ namespace proto
 class BlockchainTransaction;
 class BlockchainTransactionOutput;
 }  // namespace proto
-// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -68,10 +71,10 @@ namespace opentxs::blockchain::bitcoin::block
 class OPENTXS_EXPORT Transaction
 {
 public:
-    virtual auto AssociatedLocalNyms() const noexcept
-        -> UnallocatedVector<identifier::Nym> = 0;
+    virtual auto AssociatedLocalNyms(const api::crypto::Blockchain& crypto)
+        const noexcept -> UnallocatedVector<identifier::Nym> = 0;
     virtual auto AssociatedRemoteContacts(
-        const api::session::Contacts& contacts,
+        const api::session::Client& api,
         const identifier::Nym& nym) const noexcept
         -> UnallocatedVector<identifier::Generic> = 0;
     virtual auto BlockPosition() const noexcept
@@ -86,9 +89,11 @@ public:
     virtual auto IsGeneration() const noexcept -> bool = 0;
     virtual auto Keys() const noexcept -> UnallocatedVector<crypto::Key> = 0;
     virtual auto Locktime() const noexcept -> std::uint32_t = 0;
-    virtual auto Memo() const noexcept -> UnallocatedCString = 0;
-    virtual auto NetBalanceChange(const identifier::Nym& nym) const noexcept
-        -> opentxs::Amount = 0;
+    virtual auto Memo(const api::crypto::Blockchain& crypto) const noexcept
+        -> UnallocatedCString = 0;
+    virtual auto NetBalanceChange(
+        const api::crypto::Blockchain& crypto,
+        const identifier::Nym& nym) const noexcept -> opentxs::Amount = 0;
     virtual auto Outputs() const noexcept -> const block::Outputs& = 0;
     virtual auto Print() const noexcept -> UnallocatedCString = 0;
     virtual auto SegwitFlag() const noexcept -> std::byte = 0;

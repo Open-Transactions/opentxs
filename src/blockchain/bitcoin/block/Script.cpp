@@ -4,7 +4,6 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 #include "0_stdafx.hpp"                         // IWYU pragma: associated
-#include "1_Internal.hpp"                       // IWYU pragma: associated
 #include "blockchain/bitcoin/block/Script.hpp"  // IWYU pragma: associated
 
 #include <boost/endian/buffers.hpp>
@@ -26,7 +25,6 @@
 #include "internal/util/P0330.hpp"
 #include "opentxs/api/crypto/Blockchain.hpp"
 #include "opentxs/api/session/Crypto.hpp"
-#include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/blockchain/Blockchain.hpp"
 #include "opentxs/blockchain/bitcoin/block/Opcodes.hpp"
@@ -35,6 +33,7 @@
 #include "opentxs/blockchain/block/Hash.hpp"  // IWYU pragma: keep
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/PaymentCode.hpp"
+#include "opentxs/crypto/key/EllipticCurve.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Iterator.hpp"
 #include "opentxs/util/Log.hpp"
@@ -43,13 +42,223 @@ namespace be = boost::endian;
 
 namespace opentxs::factory
 {
+auto BitcoinScriptNullData(
+    const blockchain::Type chain,
+    const UnallocatedVector<ReadView>& data) noexcept
+    -> std::unique_ptr<blockchain::bitcoin::block::Script>
+{
+    namespace b = opentxs::blockchain;
+    namespace bb = opentxs::blockchain::bitcoin::block;
+
+    auto elements = bb::ScriptElements{};
+    elements.emplace_back(bb::internal::Opcode(bb::OP::RETURN));
+
+    for (const auto& element : data) {
+        elements.emplace_back(bb::internal::PushData(element));
+    }
+
+    using Position = opentxs::blockchain::bitcoin::block::Script::Position;
+
+    return factory::BitcoinScript(chain, std::move(elements), Position::Output);
+}
+
+auto BitcoinScriptP2MS(
+    const blockchain::Type chain,
+    const std::uint8_t M,
+    const std::uint8_t N,
+    const UnallocatedVector<const opentxs::crypto::key::EllipticCurve*>&
+        publicKeys) noexcept
+    -> std::unique_ptr<blockchain::bitcoin::block::Script>
+{
+    namespace b = opentxs::blockchain;
+    namespace bb = opentxs::blockchain::bitcoin::block;
+
+    if ((0u == M) || (16u < M)) {
+        LogError()("opentxs::factory::")(__func__)(": Invalid M").Flush();
+
+        return {};
+    }
+
+    if ((0u == N) || (16u < N)) {
+        LogError()("opentxs::factory::")(__func__)(": Invalid N").Flush();
+
+        return {};
+    }
+
+    auto elements = bb::ScriptElements{};
+    elements.emplace_back(bb::internal::Opcode(static_cast<bb::OP>(M + 80)));
+
+    for (const auto& pKey : publicKeys) {
+        if (nullptr == pKey) {
+            LogError()("opentxs::factory::")(__func__)(": Invalid key").Flush();
+
+            return {};
+        }
+
+        const auto& key = *pKey;
+        elements.emplace_back(bb::internal::PushData(key.PublicKey()));
+    }
+
+    elements.emplace_back(bb::internal::Opcode(static_cast<bb::OP>(N + 80)));
+    elements.emplace_back(bb::internal::Opcode(bb::OP::CHECKMULTISIG));
+    using Position = opentxs::blockchain::bitcoin::block::Script::Position;
+
+    return factory::BitcoinScript(chain, std::move(elements), Position::Output);
+}
+
+auto BitcoinScriptP2PK(
+    const blockchain::Type chain,
+    const opentxs::crypto::key::EllipticCurve& key) noexcept
+    -> std::unique_ptr<blockchain::bitcoin::block::Script>
+{
+    namespace bb = opentxs::blockchain::bitcoin::block;
+
+    auto elements = bb::ScriptElements{};
+    elements.emplace_back(bb::internal::PushData(key.PublicKey()));
+    elements.emplace_back(bb::internal::Opcode(bb::OP::CHECKSIG));
+    using Position = opentxs::blockchain::bitcoin::block::Script::Position;
+
+    return factory::BitcoinScript(chain, std::move(elements), Position::Output);
+}
+
+auto BitcoinScriptP2PKH(
+    const api::Crypto& crypto,
+    const blockchain::Type chain,
+    const opentxs::crypto::key::EllipticCurve& key) noexcept
+    -> std::unique_ptr<blockchain::bitcoin::block::Script>
+{
+    namespace b = opentxs::blockchain;
+    namespace bb = opentxs::blockchain::bitcoin::block;
+
+    auto hash = Space{};
+
+    if (false == b::PubkeyHash(crypto, chain, key.PublicKey(), writer(hash))) {
+        LogError()("opentxs::factory::")(__func__)(
+            ": Failed to calculate pubkey hash")
+            .Flush();
+
+        return {};
+    }
+
+    auto elements = bb::ScriptElements{};
+    elements.emplace_back(bb::internal::Opcode(bb::OP::DUP));
+    elements.emplace_back(bb::internal::Opcode(bb::OP::HASH160));
+    elements.emplace_back(bb::internal::PushData(reader(hash)));
+    elements.emplace_back(bb::internal::Opcode(bb::OP::EQUALVERIFY));
+    elements.emplace_back(bb::internal::Opcode(bb::OP::CHECKSIG));
+    using Position = opentxs::blockchain::bitcoin::block::Script::Position;
+
+    return factory::BitcoinScript(chain, std::move(elements), Position::Output);
+}
+
+auto BitcoinScriptP2SH(
+    const api::Crypto& crypto,
+    const blockchain::Type chain,
+    const blockchain::bitcoin::block::Script& script) noexcept
+    -> std::unique_ptr<blockchain::bitcoin::block::Script>
+{
+    namespace b = opentxs::blockchain;
+    namespace bb = opentxs::blockchain::bitcoin::block;
+
+    auto bytes = Space{};
+    auto hash = Space{};
+
+    if (false == script.Serialize(writer(bytes))) {
+        LogError()("opentxs::factory::")(__func__)(
+            ": Failed to serialize script")
+            .Flush();
+
+        return {};
+    }
+
+    if (false == b::ScriptHash(crypto, chain, reader(bytes), writer(hash))) {
+        LogError()("opentxs::factory::")(__func__)(
+            ": Failed to calculate script hash")
+            .Flush();
+
+        return {};
+    }
+
+    auto elements = bb::ScriptElements{};
+    elements.emplace_back(bb::internal::Opcode(bb::OP::HASH160));
+    elements.emplace_back(bb::internal::PushData(reader(hash)));
+    elements.emplace_back(bb::internal::Opcode(bb::OP::EQUAL));
+    using Position = opentxs::blockchain::bitcoin::block::Script::Position;
+
+    return factory::BitcoinScript(chain, std::move(elements), Position::Output);
+}
+
+auto BitcoinScriptP2WPKH(
+    const api::Crypto& crypto,
+    const blockchain::Type chain,
+    const opentxs::crypto::key::EllipticCurve& key) noexcept
+    -> std::unique_ptr<blockchain::bitcoin::block::Script>
+{
+    namespace b = opentxs::blockchain;
+    namespace bb = opentxs::blockchain::bitcoin::block;
+
+    auto hash = Space{};
+
+    if (false == b::PubkeyHash(crypto, chain, key.PublicKey(), writer(hash))) {
+        LogError()("opentxs::factory::")(__func__)(
+            ": Failed to calculate pubkey hash")
+            .Flush();
+
+        return {};
+    }
+
+    auto elements = bb::ScriptElements{};
+    elements.emplace_back(bb::internal::Opcode(bb::OP::ZERO));
+    elements.emplace_back(bb::internal::PushData(reader(hash)));
+    using Position = opentxs::blockchain::bitcoin::block::Script::Position;
+
+    return factory::BitcoinScript(chain, std::move(elements), Position::Output);
+}
+
+auto BitcoinScriptP2WSH(
+    const api::Crypto& crypto,
+    const blockchain::Type chain,
+    const blockchain::bitcoin::block::Script& script) noexcept
+    -> std::unique_ptr<blockchain::bitcoin::block::Script>
+{
+    namespace b = opentxs::blockchain;
+    namespace bb = opentxs::blockchain::bitcoin::block;
+
+    auto bytes = Space{};
+    auto hash = Space{};
+
+    if (false == script.Serialize(writer(bytes))) {
+        LogError()("opentxs::factory::")(__func__)(
+            ": Failed to serialize script")
+            .Flush();
+
+        return {};
+    }
+
+    if (false ==
+        b::ScriptHashSegwit(crypto, chain, reader(bytes), writer(hash))) {
+        LogError()("opentxs::factory::")(__func__)(
+            ": Failed to calculate script hash")
+            .Flush();
+
+        return {};
+    }
+
+    auto elements = bb::ScriptElements{};
+    elements.emplace_back(bb::internal::Opcode(bb::OP::ZERO));
+    elements.emplace_back(bb::internal::PushData(reader(hash)));
+    using Position = opentxs::blockchain::bitcoin::block::Script::Position;
+
+    return factory::BitcoinScript(chain, std::move(elements), Position::Output);
+}
+
 auto BitcoinScript(
     const blockchain::Type chain,
     const ReadView bytes,
     const blockchain::bitcoin::block::Script::Position role,
     const bool allowInvalidOpcodes,
     const bool mute) noexcept
-    -> std::unique_ptr<blockchain::bitcoin::block::internal::Script>
+    -> std::unique_ptr<blockchain::bitcoin::block::Script>
 {
     using ReturnType = blockchain::bitcoin::block::implementation::Script;
     auto elements = blockchain::bitcoin::block::ScriptElements{};
@@ -198,7 +407,7 @@ auto BitcoinScript(
     const blockchain::Type chain,
     blockchain::bitcoin::block::ScriptElements&& elements,
     const blockchain::bitcoin::block::Script::Position role) noexcept
-    -> std::unique_ptr<blockchain::bitcoin::block::internal::Script>
+    -> std::unique_ptr<blockchain::bitcoin::block::Script>
 {
     using ReturnType = blockchain::bitcoin::block::implementation::Script;
 
@@ -287,7 +496,7 @@ auto Script::bytes(const ScriptElements& script) noexcept -> std::size_t
 }
 
 auto Script::CalculateHash160(
-    const api::Session& api,
+    const api::Crypto& crypto,
     const AllocateOutput output) const noexcept -> bool
 {
     auto preimage = Space{};
@@ -298,7 +507,7 @@ auto Script::CalculateHash160(
         return false;
     }
 
-    return blockchain::ScriptHash(api, chain_, reader(preimage), output);
+    return blockchain::ScriptHash(crypto, chain_, reader(preimage), output);
 }
 
 auto Script::CalculateSize() const noexcept -> std::size_t
@@ -710,7 +919,7 @@ auto Script::ExtractPatterns(const api::Session& api) const noexcept
     -> UnallocatedVector<PatternID>
 {
     auto output = UnallocatedVector<PatternID>{};
-    const auto hashes = LikelyPubkeyHashes(api);
+    const auto hashes = LikelyPubkeyHashes(api.Crypto());
     std::transform(
         std::begin(hashes),
         std::end(hashes),
@@ -862,7 +1071,7 @@ auto Script::last_opcode(const ScriptElements& script) noexcept -> OP
     return script.crbegin()->opcode_;
 }
 
-auto Script::LikelyPubkeyHashes(const api::Session& api) const noexcept
+auto Script::LikelyPubkeyHashes(const api::Crypto& crypto) const noexcept
     -> UnallocatedVector<ByteArray>
 {
     auto output = UnallocatedVector<ByteArray>{};
@@ -873,27 +1082,28 @@ auto Script::LikelyPubkeyHashes(const api::Session& api) const noexcept
 
             OT_ASSERT(hash.has_value());
 
-            output.emplace_back(api.Factory().DataFromBytes(hash.value()));
+            output.emplace_back(hash.value());
         } break;
         case Pattern::PayToMultisig: {
             for (auto i = std::uint8_t{0}; i < N().value(); ++i) {
-                auto hash = api.Factory().Data();
+                auto hash = ByteArray{};
                 const auto key = MultisigPubkey(i);
 
                 OT_ASSERT(key.has_value());
 
                 blockchain::PubkeyHash(
-                    api, chain_, key.value(), hash.WriteInto());
+                    crypto, chain_, key.value(), hash.WriteInto());
                 output.emplace_back(std::move(hash));
             }
         } break;
         case Pattern::PayToPubkey: {
-            auto hash = api.Factory().Data();
+            auto hash = ByteArray{};
             const auto key = Pubkey();
 
             OT_ASSERT(key.has_value());
 
-            blockchain::PubkeyHash(api, chain_, key.value(), hash.WriteInto());
+            blockchain::PubkeyHash(
+                crypto, chain_, key.value(), hash.WriteInto());
             output.emplace_back(std::move(hash));
         } break;
         case Pattern::Coinbase:
@@ -913,14 +1123,13 @@ auto Script::LikelyPubkeyHashes(const api::Session& api) const noexcept
                 if (is_hash160(element)) {
                     OT_ASSERT(element.data_.has_value());
 
-                    output.emplace_back(api.Factory().DataFromBytes(
-                        reader(element.data_.value())));
+                    output.emplace_back(reader(element.data_.value()));
                 } else if (is_public_key(element)) {
                     OT_ASSERT(element.data_.has_value());
 
-                    auto hash = api.Factory().Data();
+                    auto hash = ByteArray{};
                     blockchain::PubkeyHash(
-                        api,
+                        crypto,
                         chain_,
                         reader(element.data_.value()),
                         hash.WriteInto());

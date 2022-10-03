@@ -17,10 +17,8 @@
 #include "otx/client/obsolete/OTAPI_Func.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
 namespace api
 {
 namespace session
@@ -45,7 +43,6 @@ class UnitDefinition;
 class OTPaymentPlan;
 class OTSmartContract;
 class PasswordPrompt;
-// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

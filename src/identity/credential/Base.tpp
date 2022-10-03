@@ -10,15 +10,14 @@
 #include <cstdint>
 
 #include "2_Factory.hpp"
+#include "Proto.hpp"
 #include "internal/serialization/protobuf/Check.hpp"
 #include "internal/serialization/protobuf/verify/Credential.hpp"
 #include "opentxs/util/Log.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
 namespace api
 {
 class Session;
@@ -40,7 +39,6 @@ class Source;
 }  // namespace identity
 
 class PasswordPrompt;
-// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

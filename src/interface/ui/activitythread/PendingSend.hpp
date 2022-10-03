@@ -7,17 +7,14 @@
 
 #include <tuple>
 
-#include "1_Internal.hpp"
 #include "interface/ui/activitythread/ActivityThreadItem.hpp"
 #include "internal/interface/ui/UI.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
 namespace api
 {
 namespace session
@@ -41,7 +38,6 @@ class Publish;
 }  // namespace socket
 }  // namespace zeromq
 }  // namespace network
-// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

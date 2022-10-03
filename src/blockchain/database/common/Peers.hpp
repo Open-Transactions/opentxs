@@ -21,14 +21,20 @@
 #include "opentxs/util/Time.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
 namespace api
 {
 class Session;
 }  // namespace api
+
+namespace blockchain
+{
+namespace p2p
+{
+class Address;
+}  // namespace p2p
+}  // namespace blockchain
 
 namespace storage
 {
@@ -37,7 +43,6 @@ namespace lmdb
 class Database;
 }  // namespace lmdb
 }  // namespace storage
-// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -50,10 +55,11 @@ public:
         const Chain chain,
         const Protocol protocol,
         const UnallocatedSet<Type> onNetworks,
-        const UnallocatedSet<Service> withServices) const noexcept -> Address_p;
+        const UnallocatedSet<Service> withServices) const noexcept
+        -> p2p::Address;
 
-    auto Import(UnallocatedVector<Address_p> peers) noexcept -> bool;
-    auto Insert(Address_p address) noexcept -> bool;
+    auto Import(UnallocatedVector<p2p::Address>&& peers) noexcept -> bool;
+    auto Insert(p2p::Address address) noexcept -> bool;
 
     Peers(const api::Session& api, storage::lmdb::Database& lmdb) noexcept(
         false);
@@ -78,10 +84,10 @@ private:
     TypeIndexMap networks_;
     ConnectedIndexMap connected_;
 
-    auto insert(const Lock& lock, UnallocatedVector<Address_p> peers) noexcept
+    auto insert(const Lock& lock, const Vector<p2p::Address>& peers) noexcept
         -> bool;
     auto load_address(const UnallocatedCString& id) const noexcept(false)
-        -> Address_p;
+        -> p2p::Address;
     template <typename Index, typename Map>
     auto read_index(
         const ReadView key,

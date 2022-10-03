@@ -14,17 +14,14 @@
 #include "crypto/HDNode.hpp"
 #include "internal/crypto/Crypto.hpp"
 #include "internal/util/AsyncConst.hpp"
-#include "opentxs/Version.hpp"
 #include "opentxs/crypto/Bip32.hpp"
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
 namespace api
 {
 class Crypto;
@@ -50,7 +47,6 @@ class ByteArray;
 class Data;
 class PasswordPrompt;
 class Secret;
-// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

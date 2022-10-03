@@ -32,10 +32,8 @@
 #include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
 namespace api
 {
 namespace crypto
@@ -64,6 +62,11 @@ class Block;
 class Header;
 }  // namespace block
 
+namespace p2p
+{
+class Address;
+}  // namespace p2p
+
 class GCS;
 }  // namespace blockchain
 
@@ -90,7 +93,6 @@ class BlockchainTransaction;
 class Contact;
 class Data;
 class Options;
-// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -119,7 +121,7 @@ public:
     using Height = block::Height;
     using Endpoints = Vector<CString>;
 
-    auto AddOrUpdate(Address_p address) const noexcept -> bool;
+    auto AddOrUpdate(p2p::Address address) const noexcept -> bool;
     auto AddSyncServer(std::string_view endpoint) const noexcept -> bool;
     auto AllocateStorageFolder(const UnallocatedCString& dir) const noexcept
         -> UnallocatedCString;
@@ -139,14 +141,15 @@ public:
         const Chain chain,
         const Protocol protocol,
         const UnallocatedSet<Type> onNetworks,
-        const UnallocatedSet<Service> withServices) const noexcept -> Address_p;
+        const UnallocatedSet<Service> withServices) const noexcept
+        -> p2p::Address;
     auto GetSyncServers(alloc::Default alloc) const noexcept -> Endpoints;
     auto HashKey() const noexcept -> ReadView;
     auto HaveFilter(const cfilter::Type type, const ReadView blockHash)
         const noexcept -> bool;
     auto HaveFilterHeader(const cfilter::Type type, const ReadView blockHash)
         const noexcept -> bool;
-    auto Import(UnallocatedVector<Address_p> peers) const noexcept -> bool;
+    auto Import(UnallocatedVector<p2p::Address> peers) const noexcept -> bool;
     auto LoadBlockHeader(const BlockHash& hash) const noexcept(false)
         -> proto::BlockchainBlockHeader;
     auto LoadEnabledChains() const noexcept -> UnallocatedVector<EnabledChain>;

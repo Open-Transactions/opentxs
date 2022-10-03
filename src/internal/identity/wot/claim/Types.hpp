@@ -17,6 +17,11 @@
 
 namespace opentxs
 {
+constexpr auto CONTACT_CONTACT_DATA_VERSION = 6;
+}  // namespace opentxs
+
+namespace opentxs
+{
 auto translate(const identity::wot::claim::Attribute in) noexcept
     -> proto::ContactItemAttribute;
 auto translate(const identity::wot::claim::ClaimType in) noexcept

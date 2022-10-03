@@ -20,10 +20,8 @@
 #include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
 namespace blockchain
 {
 namespace block
@@ -33,7 +31,6 @@ class Hash;
 }  // namespace blockchain
 
 class ScopeGuard;
-// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

@@ -7,7 +7,7 @@
 #include <opentxs/opentxs.hpp>
 #include <memory>
 
-#include "internal/blockchain/block/Factory.hpp"
+#include "internal/blockchain/Params.hpp"
 #include "internal/blockchain/block/Header.hpp"
 #include "ottest/fixtures/blockchain/Basic.hpp"
 
@@ -37,8 +37,7 @@ TEST_F(Test_BlockHeader, btc_genesis_block_hash_oracle)
         out.DecodeHex(hex);
         return out;
     }(btc_genesis_hash_);
-    const auto& genesisHash =
-        bc::HeaderOracle::GenesisBlockHash(b::Type::Bitcoin);
+    const auto& genesisHash = b::params::get(b::Type::Bitcoin).GenesisHash();
 
     EXPECT_EQ(expectedHash, genesisHash);
 }
@@ -50,8 +49,7 @@ TEST_F(Test_BlockHeader, ltc_genesis_block_hash_oracle)
         out.DecodeHex(hex);
         return out;
     }(ltc_genesis_hash_);
-    const auto& genesisHash =
-        bc::HeaderOracle::GenesisBlockHash(b::Type::Litecoin);
+    const auto& genesisHash = b::params::get(b::Type::Litecoin).GenesisHash();
 
     EXPECT_EQ(expectedHash, genesisHash);
 }
@@ -69,12 +67,8 @@ TEST_F(Test_BlockHeader, btc_genesis_block_header)
         return out;
     }(btc_genesis_hash_);
     const ot::UnallocatedCString numericHash{btc_genesis_hash_numeric_};
-    std::unique_ptr<const bb::Header> pHeader{
-        ot::factory::GenesisBlockHeader(api_, b::Type::Bitcoin)};
-
-    ASSERT_TRUE(pHeader);
-
-    const auto& header = *pHeader;
+    const auto& header =
+        ot::blockchain::params::get(b::Type::Bitcoin).GenesisBlock().Header();
 
     EXPECT_EQ(
         header.Internal().EffectiveState(),
@@ -89,7 +83,7 @@ TEST_F(Test_BlockHeader, btc_genesis_block_header)
     EXPECT_EQ(
         header.Internal().LocalState(),
         bb::internal::Header::Status::Checkpoint);
-    EXPECT_EQ(numericHash, header.NumericHash()->asHex());
+    EXPECT_EQ(numericHash, header.NumericHash().asHex());
     EXPECT_EQ(header.ParentHash(), blankHash);
 
     const auto [height, hash] = header.Position();
@@ -111,12 +105,8 @@ TEST_F(Test_BlockHeader, ltc_genesis_block_header)
         return out;
     }(ltc_genesis_hash_);
     const ot::UnallocatedCString numericHash{ltc_genesis_hash_numeric_};
-    std::unique_ptr<const bb::Header> pHeader{
-        ot::factory::GenesisBlockHeader(api_, b::Type::Litecoin)};
-
-    ASSERT_TRUE(pHeader);
-
-    const auto& header = *pHeader;
+    const auto& header =
+        ot::blockchain::params::get(b::Type::Litecoin).GenesisBlock().Header();
 
     EXPECT_EQ(
         header.Internal().EffectiveState(),
@@ -131,7 +121,7 @@ TEST_F(Test_BlockHeader, ltc_genesis_block_header)
     EXPECT_EQ(
         header.Internal().LocalState(),
         bb::internal::Header::Status::Checkpoint);
-    EXPECT_EQ(numericHash, header.NumericHash()->asHex());
+    EXPECT_EQ(numericHash, header.NumericHash().asHex());
     EXPECT_EQ(header.ParentHash(), blankHash);
 
     const auto [height, hash] = header.Position();
@@ -147,12 +137,8 @@ TEST_F(Test_BlockHeader, serialize_deserialize)
         out.DecodeHex(hex);
         return out;
     }(btc_genesis_hash_);
-    std::unique_ptr<const bb::Header> pHeader{
-        ot::factory::GenesisBlockHeader(api_, b::Type::Bitcoin)};
-
-    ASSERT_TRUE(pHeader);
-
-    const auto& header = *pHeader;
+    const auto& header =
+        ot::blockchain::params::get(b::Type::Bitcoin).GenesisBlock().Header();
 
     auto bytes = ot::Space{};
     EXPECT_TRUE(header.Serialize(ot::writer(bytes), false));

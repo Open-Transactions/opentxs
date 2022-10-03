@@ -8,8 +8,7 @@
 
 #pragma once
 
-#include "opentxs/Version.hpp"  // IWYU pragma: associated
-
+#include "opentxs/Export.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/crypto/Subaccount.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
@@ -17,10 +16,8 @@
 #include "opentxs/util/Iterator.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
 namespace blockchain
 {
 namespace crypto
@@ -47,7 +44,6 @@ class Nym;
 
 class PasswordPrompt;
 class PaymentCode;
-// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

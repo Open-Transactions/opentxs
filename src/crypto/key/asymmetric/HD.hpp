@@ -13,7 +13,6 @@
 #include "Proto.hpp"
 #include "crypto/key/asymmetric/EllipticCurve.hpp"
 #include "internal/util/Mutex.hpp"
-#include "opentxs/Version.hpp"
 #include "opentxs/core/Secret.hpp"
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/crypto/key/Asymmetric.hpp"
@@ -25,10 +24,8 @@
 #include "opentxs/util/Numbers.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
 namespace api
 {
 class Session;
@@ -53,7 +50,6 @@ class HDPath;
 
 class Data;
 class PasswordPrompt;
-// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

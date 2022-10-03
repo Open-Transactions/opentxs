@@ -5,11 +5,10 @@
 
 #pragma once
 
-#include "opentxs/Version.hpp"  // IWYU pragma: associated
-
 #include <memory>
 #include <string_view>
 
+#include "opentxs/Export.hpp"
 #include "opentxs/network/zeromq/socket/Dealer.hpp"
 #include "opentxs/network/zeromq/socket/Pair.hpp"
 #include "opentxs/network/zeromq/socket/Publish.hpp"
@@ -33,10 +32,8 @@ class MessageLite;
 }  // namespace protobuf
 }  // namespace google
 
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
 namespace api
 {
 class Session;
@@ -60,7 +57,6 @@ class Proxy;
 class ReplyCallback;
 }  // namespace zeromq
 }  // namespace network
-// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

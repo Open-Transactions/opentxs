@@ -5,21 +5,19 @@
 
 #pragma once
 
-#include "opentxs/Version.hpp"  // IWYU pragma: associated
-
 #include <QMetaObject>
 #include <QObject>
 #include <QString>
 #include <QValidator>
 #include <memory>
 
+#include "opentxs/Export.hpp"
+
 class QObject;
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
 namespace ui
 {
 namespace implementation
@@ -29,7 +27,6 @@ class AccountActivity;
 
 class AmountValidator;
 }  // namespace ui
-// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

@@ -4,7 +4,6 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 #include "0_stdafx.hpp"                        // IWYU pragma: associated
-#include "1_Internal.hpp"                      // IWYU pragma: associated
 #include "interface/ui/unitlist/UnitList.hpp"  // IWYU pragma: associated
 
 #include <memory>
@@ -26,6 +25,7 @@
 #include "opentxs/blockchain/Blockchain.hpp"
 #include "opentxs/blockchain/BlockchainType.hpp"
 #include "opentxs/blockchain/Types.hpp"
+#include "opentxs/core/Data.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/identity/wot/claim/Types.hpp"

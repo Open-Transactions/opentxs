@@ -12,8 +12,8 @@
 #include <string_view>
 #include <utility>
 
-#include "1_Internal.hpp"
 #include "blockchain/block/Block.hpp"
+#include "internal/blockchain/bitcoin/block/Block.hpp"
 #include "internal/blockchain/block/Block.hpp"
 #include "internal/blockchain/block/Types.hpp"
 #include "opentxs/blockchain/BlockchainType.hpp"
@@ -28,17 +28,11 @@
 #include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
 namespace api
 {
-namespace crypto
-{
-class Blockchain;
-}  // namespace crypto
-
+class Crypto;
 class Session;
 }  // namespace api
 
@@ -60,14 +54,13 @@ class Transaction;
 }  // namespace blockchain
 
 class Log;
-// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
 namespace opentxs::blockchain::bitcoin::block::implementation
 {
-class Block : public block::Block,
-              public blockchain::block::implementation::Block
+class Block : public blockchain::block::implementation::Block,
+              virtual public bitcoin::block::internal::Block
 {
 public:
     using CalculatedSize =
@@ -79,22 +72,26 @@ public:
 
     template <typename HashType>
     static auto calculate_merkle_hash(
-        const api::Session& api,
+        const api::Crypto& crypto,
         const Type chain,
         const HashType& lhs,
         const HashType& rhs,
         AllocateOutput out) -> bool;
     template <typename InputContainer, typename OutputContainer>
     static auto calculate_merkle_row(
-        const api::Session& api,
+        const api::Crypto& crypto,
         const Type chain,
         const InputContainer& in,
         OutputContainer& out) -> bool;
     static auto calculate_merkle_value(
-        const api::Session& api,
+        const api::Crypto& crypto,
         const Type chain,
         const TxidIndex& txids) -> blockchain::block::Hash;
 
+    auto asBitcoin() const noexcept -> const bitcoin::block::Block& final
+    {
+        return *this;
+    }
     auto at(const std::size_t index) const noexcept -> const value_type& final;
     auto at(const ReadView txid) const noexcept -> const value_type& final;
     auto begin() const noexcept -> const_iterator final { return cbegin(); }
@@ -107,10 +104,13 @@ public:
     {
         return {this, index_.size()};
     }
+    auto clone_bitcoin() const noexcept
+        -> std::unique_ptr<internal::Block> override;
     auto end() const noexcept -> const_iterator final { return cend(); }
     auto ExtractElements(const cfilter::Type style) const noexcept
         -> Vector<Vector<std::byte>> final;
     auto FindMatches(
+        const api::Session& api,
         const cfilter::Type type,
         const blockchain::block::Patterns& outpoints,
         const blockchain::block::Patterns& scripts,
@@ -119,15 +119,16 @@ public:
     auto Serialize(AllocateOutput bytes) const noexcept -> bool final;
     auto size() const noexcept -> std::size_t final { return index_.size(); }
 
+    auto asBitcoin() noexcept -> bitcoin::block::Block& final { return *this; }
+
     Block(
-        const api::Session& api,
         const blockchain::Type chain,
         std::unique_ptr<const blockchain::bitcoin::block::Header> header,
         TxidIndex&& index,
         TransactionMap&& transactions,
         std::optional<CalculatedSize>&& size = {}) noexcept(false);
     Block() = delete;
-    Block(const Block&) = delete;
+    Block(const Block& rhs) noexcept;
     Block(Block&&) = delete;
     auto operator=(const Block&) -> Block& = delete;
     auto operator=(Block&&) -> Block& = delete;

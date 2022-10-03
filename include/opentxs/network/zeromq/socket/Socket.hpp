@@ -5,8 +5,6 @@
 
 #pragma once
 
-#include "opentxs/Version.hpp"  // IWYU pragma: associated
-
 #include <chrono>
 #include <cstdint>
 #include <functional>
@@ -14,15 +12,14 @@
 #include <string_view>
 #include <tuple>
 
+#include "opentxs/Export.hpp"
 #include "opentxs/network/zeromq/socket/Types.hpp"
 #include "opentxs/otx/client/Types.hpp"
 #include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
 namespace network
 {
 namespace zeromq
@@ -39,7 +36,6 @@ class Context;
 class Message;
 }  // namespace zeromq
 }  // namespace network
-// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

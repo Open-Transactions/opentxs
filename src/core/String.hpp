@@ -15,10 +15,8 @@
 #include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
 namespace identifier
 {
 class Generic;
@@ -28,7 +26,6 @@ class Armored;
 class Contract;
 class NymFile;
 class Signature;
-// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

@@ -3,8 +3,7 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#include "0_stdafx.hpp"    // IWYU pragma: associated
-#include "1_Internal.hpp"  // IWYU pragma: associated
+#include "0_stdafx.hpp"  // IWYU pragma: associated
 #include "blockchain/node/wallet/subchain/statemachine/Process.hpp"  // IWYU pragma: associated
 
 #include <boost/smart_ptr/make_shared.hpp>
@@ -83,8 +82,7 @@ Process::Imp::Imp(
                    {parent->to_index_endpoint_, Direction::Connect},
                }},
           })
-    , download_limit_(
-          2u * params::Chains().at(parent_.chain_).block_download_batch_)
+    , download_limit_(2u * params::get(parent_.chain_).BlockDownloadBatch())
     , to_index_(pipeline_.Internal().ExtraSocket(1))
     , waiting_(alloc)
     , downloading_(alloc)

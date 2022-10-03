@@ -3,8 +3,7 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#include "0_stdafx.hpp"    // IWYU pragma: associated
-#include "1_Internal.hpp"  // IWYU pragma: associated
+#include "0_stdafx.hpp"  // IWYU pragma: associated
 #include "internal/blockchain/p2p/bitcoin/Bitcoin.hpp"  // IWYU pragma: associated
 
 #include <boost/container/flat_map.hpp>
@@ -108,7 +107,7 @@ AddressVersion::AddressVersion(
 AddressVersion::AddressVersion(
     const blockchain::Type chain,
     const ProtocolVersion version,
-    const internal::Address& address) noexcept
+    const p2p::Address& address) noexcept
     : services_(GetServiceBytes(
           TranslateServices(chain, version, address.Services())))
     , address_(Encode(address.Type(), address.Bytes()))

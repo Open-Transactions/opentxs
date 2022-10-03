@@ -7,8 +7,7 @@
 
 #pragma once
 
-#include "opentxs/Version.hpp"  // IWYU pragma: associated
-
+#include "opentxs/Export.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/interface/ui/ListRow.hpp"
 #include "opentxs/util/Container.hpp"

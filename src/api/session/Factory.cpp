@@ -4,7 +4,6 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 #include "0_stdafx.hpp"             // IWYU pragma: associated
-#include "1_Internal.hpp"           // IWYU pragma: associated
 #include "api/session/Factory.hpp"  // IWYU pragma: associated
 
 #include <AsymmetricKey.pb.h>
@@ -28,11 +27,7 @@
 #include "internal/api/crypto/Asymmetric.hpp"
 #include "internal/api/crypto/Factory.hpp"
 #include "internal/blockchain/bitcoin/block/Factory.hpp"
-#include "internal/blockchain/bitcoin/block/Script.hpp"
-#include "internal/blockchain/bitcoin/block/Types.hpp"
-#if OT_BLOCKCHAIN
 #include "internal/blockchain/p2p/P2P.hpp"
-#endif  // OT_BLOCKCHAIN
 #include "internal/core/Factory.hpp"
 #include "internal/core/contract/peer/Factory.hpp"
 #include "internal/core/contract/peer/Peer.hpp"
@@ -65,22 +60,15 @@
 #include "internal/serialization/protobuf/verify/Envelope.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/OT.hpp"  // TODO remove
-#include "opentxs/Version.hpp"
 #include "opentxs/api/Context.hpp"
 #include "opentxs/api/crypto/Asymmetric.hpp"
 #include "opentxs/api/crypto/Config.hpp"
 #include "opentxs/api/crypto/Seed.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Session.hpp"
-#include "opentxs/blockchain/Blockchain.hpp"
-#if OT_BLOCKCHAIN
-#include "opentxs/blockchain/bitcoin/block/Opcodes.hpp"
 #include "opentxs/blockchain/bitcoin/block/Script.hpp"
-#include "opentxs/blockchain/bitcoin/block/Types.hpp"
 #include "opentxs/blockchain/p2p/Address.hpp"
-#endif  // OT_BLOCKCHAIN
 #include "opentxs/core/ByteArray.hpp"
-#include "opentxs/core/Data.hpp"
 #include "opentxs/core/PaymentCode.hpp"
 #include "opentxs/core/contract/BasketContract.hpp"
 #include "opentxs/core/contract/CurrencyContract.hpp"
@@ -379,25 +367,12 @@ auto Factory::BasketContract(
     }
 }
 
-#if OT_BLOCKCHAIN
 auto Factory::BitcoinScriptNullData(
     const opentxs::blockchain::Type chain,
     const UnallocatedVector<ReadView>& data) const noexcept
     -> std::unique_ptr<const opentxs::blockchain::bitcoin::block::Script>
 {
-    namespace b = opentxs::blockchain;
-    namespace bb = opentxs::blockchain::bitcoin::block;
-
-    auto elements = bb::ScriptElements{};
-    elements.emplace_back(bb::internal::Opcode(bb::OP::RETURN));
-
-    for (const auto& element : data) {
-        elements.emplace_back(bb::internal::PushData(element));
-    }
-
-    using Position = opentxs::blockchain::bitcoin::block::Script::Position;
-
-    return factory::BitcoinScript(chain, std::move(elements), Position::Output);
+    return factory::BitcoinScriptNullData(chain, data);
 }
 
 auto Factory::BitcoinScriptP2MS(
@@ -408,40 +383,7 @@ auto Factory::BitcoinScriptP2MS(
         publicKeys) const noexcept
     -> std::unique_ptr<const opentxs::blockchain::bitcoin::block::Script>
 {
-    namespace b = opentxs::blockchain;
-    namespace bb = opentxs::blockchain::bitcoin::block;
-
-    if ((0u == M) || (16u < M)) {
-        LogError()(OT_PRETTY_CLASS())("Invalid M").Flush();
-
-        return {};
-    }
-
-    if ((0u == N) || (16u < N)) {
-        LogError()(OT_PRETTY_CLASS())("Invalid N").Flush();
-
-        return {};
-    }
-
-    auto elements = bb::ScriptElements{};
-    elements.emplace_back(bb::internal::Opcode(static_cast<bb::OP>(M + 80)));
-
-    for (const auto& pKey : publicKeys) {
-        if (nullptr == pKey) {
-            LogError()(OT_PRETTY_CLASS())("Invalid key").Flush();
-
-            return {};
-        }
-
-        const auto& key = *pKey;
-        elements.emplace_back(bb::internal::PushData(key.PublicKey()));
-    }
-
-    elements.emplace_back(bb::internal::Opcode(static_cast<bb::OP>(N + 80)));
-    elements.emplace_back(bb::internal::Opcode(bb::OP::CHECKMULTISIG));
-    using Position = opentxs::blockchain::bitcoin::block::Script::Position;
-
-    return factory::BitcoinScript(chain, std::move(elements), Position::Output);
+    return factory::BitcoinScriptP2MS(chain, M, N, publicKeys);
 }
 
 auto Factory::BitcoinScriptP2PK(
@@ -449,14 +391,7 @@ auto Factory::BitcoinScriptP2PK(
     const opentxs::crypto::key::EllipticCurve& key) const noexcept
     -> std::unique_ptr<const opentxs::blockchain::bitcoin::block::Script>
 {
-    namespace bb = opentxs::blockchain::bitcoin::block;
-
-    auto elements = bb::ScriptElements{};
-    elements.emplace_back(bb::internal::PushData(key.PublicKey()));
-    elements.emplace_back(bb::internal::Opcode(bb::OP::CHECKSIG));
-    using Position = opentxs::blockchain::bitcoin::block::Script::Position;
-
-    return factory::BitcoinScript(chain, std::move(elements), Position::Output);
+    return factory::BitcoinScriptP2PK(chain, key);
 }
 
 auto Factory::BitcoinScriptP2PKH(
@@ -464,27 +399,7 @@ auto Factory::BitcoinScriptP2PKH(
     const opentxs::crypto::key::EllipticCurve& key) const noexcept
     -> std::unique_ptr<const opentxs::blockchain::bitcoin::block::Script>
 {
-    namespace b = opentxs::blockchain;
-    namespace bb = opentxs::blockchain::bitcoin::block;
-
-    auto hash = Space{};
-
-    if (false == b::PubkeyHash(api_, chain, key.PublicKey(), writer(hash))) {
-        LogError()(OT_PRETTY_CLASS())("Failed to calculate pubkey hash")
-            .Flush();
-
-        return {};
-    }
-
-    auto elements = bb::ScriptElements{};
-    elements.emplace_back(bb::internal::Opcode(bb::OP::DUP));
-    elements.emplace_back(bb::internal::Opcode(bb::OP::HASH160));
-    elements.emplace_back(bb::internal::PushData(reader(hash)));
-    elements.emplace_back(bb::internal::Opcode(bb::OP::EQUALVERIFY));
-    elements.emplace_back(bb::internal::Opcode(bb::OP::CHECKSIG));
-    using Position = opentxs::blockchain::bitcoin::block::Script::Position;
-
-    return factory::BitcoinScript(chain, std::move(elements), Position::Output);
+    return factory::BitcoinScriptP2PKH(api_.Crypto(), chain, key);
 }
 
 auto Factory::BitcoinScriptP2SH(
@@ -492,32 +407,7 @@ auto Factory::BitcoinScriptP2SH(
     const opentxs::blockchain::bitcoin::block::Script& script) const noexcept
     -> std::unique_ptr<const opentxs::blockchain::bitcoin::block::Script>
 {
-    namespace b = opentxs::blockchain;
-    namespace bb = opentxs::blockchain::bitcoin::block;
-
-    auto bytes = Space{};
-    auto hash = Space{};
-
-    if (false == script.Serialize(writer(bytes))) {
-        LogError()(OT_PRETTY_CLASS())("Failed to serialize script").Flush();
-
-        return {};
-    }
-
-    if (false == b::ScriptHash(api_, chain, reader(bytes), writer(hash))) {
-        LogError()(OT_PRETTY_CLASS())("Failed to calculate script hash")
-            .Flush();
-
-        return {};
-    }
-
-    auto elements = bb::ScriptElements{};
-    elements.emplace_back(bb::internal::Opcode(bb::OP::HASH160));
-    elements.emplace_back(bb::internal::PushData(reader(hash)));
-    elements.emplace_back(bb::internal::Opcode(bb::OP::EQUAL));
-    using Position = opentxs::blockchain::bitcoin::block::Script::Position;
-
-    return factory::BitcoinScript(chain, std::move(elements), Position::Output);
+    return factory::BitcoinScriptP2SH(api_.Crypto(), chain, script);
 }
 
 auto Factory::BitcoinScriptP2WPKH(
@@ -525,24 +415,7 @@ auto Factory::BitcoinScriptP2WPKH(
     const opentxs::crypto::key::EllipticCurve& key) const noexcept
     -> std::unique_ptr<const opentxs::blockchain::bitcoin::block::Script>
 {
-    namespace b = opentxs::blockchain;
-    namespace bb = opentxs::blockchain::bitcoin::block;
-
-    auto hash = Space{};
-
-    if (false == b::PubkeyHash(api_, chain, key.PublicKey(), writer(hash))) {
-        LogError()(OT_PRETTY_CLASS())("Failed to calculate pubkey hash")
-            .Flush();
-
-        return {};
-    }
-
-    auto elements = bb::ScriptElements{};
-    elements.emplace_back(bb::internal::Opcode(bb::OP::ZERO));
-    elements.emplace_back(bb::internal::PushData(reader(hash)));
-    using Position = opentxs::blockchain::bitcoin::block::Script::Position;
-
-    return factory::BitcoinScript(chain, std::move(elements), Position::Output);
+    return factory::BitcoinScriptP2WPKH(api_.Crypto(), chain, key);
 }
 
 auto Factory::BitcoinScriptP2WSH(
@@ -550,32 +423,7 @@ auto Factory::BitcoinScriptP2WSH(
     const opentxs::blockchain::bitcoin::block::Script& script) const noexcept
     -> std::unique_ptr<const opentxs::blockchain::bitcoin::block::Script>
 {
-    namespace b = opentxs::blockchain;
-    namespace bb = opentxs::blockchain::bitcoin::block;
-
-    auto bytes = Space{};
-    auto hash = Space{};
-
-    if (false == script.Serialize(writer(bytes))) {
-        LogError()(OT_PRETTY_CLASS())("Failed to serialize script").Flush();
-
-        return {};
-    }
-
-    if (false ==
-        b::ScriptHashSegwit(api_, chain, reader(bytes), writer(hash))) {
-        LogError()(OT_PRETTY_CLASS())("Failed to calculate script hash")
-            .Flush();
-
-        return {};
-    }
-
-    auto elements = bb::ScriptElements{};
-    elements.emplace_back(bb::internal::Opcode(bb::OP::ZERO));
-    elements.emplace_back(bb::internal::PushData(reader(hash)));
-    using Position = opentxs::blockchain::bitcoin::block::Script::Position;
-
-    return factory::BitcoinScript(chain, std::move(elements), Position::Output);
+    return factory::BitcoinScriptP2WSH(api_.Crypto(), chain, script);
 }
 
 auto Factory::BlockchainAddress(
@@ -586,29 +434,25 @@ auto Factory::BlockchainAddress(
     const opentxs::blockchain::Type chain,
     const Time lastConnected,
     const UnallocatedSet<opentxs::blockchain::p2p::Service>& services,
-    const bool incoming) const -> OTBlockchainAddress
+    const bool incoming) const -> blockchain::p2p::Address
 {
-    return OTBlockchainAddress{factory::BlockchainAddress(
-                                   api_,
-                                   protocol,
-                                   network,
-                                   bytes,
-                                   port,
-                                   chain,
-                                   lastConnected,
-                                   services,
-                                   incoming)
-                                   .release()};
+    return factory::BlockchainAddress(
+        api_,
+        protocol,
+        network,
+        bytes,
+        port,
+        chain,
+        lastConnected,
+        services,
+        incoming);
 }
 
-auto Factory::BlockchainAddress(
-    const opentxs::blockchain::p2p::Address::SerializedType& serialized) const
-    -> OTBlockchainAddress
+auto Factory::BlockchainAddress(const proto::BlockchainPeerAddress& serialized)
+    const -> blockchain::p2p::Address
 {
-    return OTBlockchainAddress{
-        factory::BlockchainAddress(api_, serialized).release()};
+    return factory::BlockchainAddress(api_, serialized);
 }
-#endif  // OT_BLOCKCHAIN
 
 auto Factory::BlockchainSyncMessage(const opentxs::network::zeromq::Message& in)
     const noexcept -> std::unique_ptr<opentxs::network::otdht::Base>

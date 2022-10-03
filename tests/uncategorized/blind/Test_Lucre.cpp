@@ -11,7 +11,6 @@
 #include <optional>
 #include <utility>
 
-#include "1_Internal.hpp"  // IWYU pragma: keep
 #include "internal/api/session/Client.hpp"
 #include "internal/api/session/Wallet.hpp"
 #include "internal/otx/blind/Factory.hpp"

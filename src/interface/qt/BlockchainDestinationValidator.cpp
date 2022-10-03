@@ -4,7 +4,6 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 #include "0_stdafx.hpp"                           // IWYU pragma: associated
-#include "1_Internal.hpp"                         // IWYU pragma: associated
 #include "interface/qt/DestinationValidator.hpp"  // IWYU pragma: associated
 
 #include <QMetaObject>
@@ -28,7 +27,6 @@
 
 namespace opentxs::ui
 {
-#if OT_BLOCKCHAIN
 using Super = DestinationValidator::Imp;
 
 struct BlockchainDestinationValidator final : public Super {
@@ -156,7 +154,6 @@ private:
         emit parent_.detailsChanged(details_.c_str());
     }
 };
-#endif  // OT_BLOCKCHAIN
 
 auto DestinationValidator::Imp::Blockchain(
     const api::session::Client& api,
@@ -164,7 +161,6 @@ auto DestinationValidator::Imp::Blockchain(
     const identifier::Generic& account,
     Parent& parent) noexcept -> std::unique_ptr<Imp>
 {
-#if OT_BLOCKCHAIN
     const auto [chain, owner] =
         api.Crypto().Blockchain().LookupAccount(account);
 
@@ -172,8 +168,5 @@ auto DestinationValidator::Imp::Blockchain(
 
     return std::make_unique<BlockchainDestinationValidator>(
         api, main, chain, parent);
-#else
-    return nullptr;
-#endif  // OT_BLOCKCHAIN
 }
 }  // namespace opentxs::ui

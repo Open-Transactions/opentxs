@@ -5,20 +5,18 @@
 
 #pragma once
 
-#include "opentxs/Version.hpp"  // IWYU pragma: associated
-
 #include <cstddef>
 #include <functional>
 #include <string_view>
 
+#include "opentxs/Export.hpp"
 #include "opentxs/core/FixedByteArray.hpp"
 #include "opentxs/util/Bytes.hpp"
+#include "opentxs/util/Platform.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
 namespace blockchain
 {
 namespace cfilter
@@ -26,7 +24,8 @@ namespace cfilter
 class Header;
 }  // namespace cfilter
 }  // namespace blockchain
-// }  // namespace v1
+
+struct HexType;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -47,6 +46,7 @@ class OPENTXS_EXPORT_TEMPLATE Header : virtual public FixedByteArray<32>
 public:
     Header() noexcept;
     Header(const ReadView bytes) noexcept(false);
+    Header(const HexType&, const ReadView bytes) noexcept(false);
     Header(const Header& rhs) noexcept;
     auto operator=(const Header& rhs) noexcept -> Header&;
 

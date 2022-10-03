@@ -19,7 +19,6 @@
 #include <string_view>
 #include <utility>
 
-#include "1_Internal.hpp"
 #include "blockchain/node/peermanager/Peers.hpp"
 #include "core/Worker.hpp"
 #include "internal/blockchain/node/PeerManager.hpp"
@@ -29,7 +28,6 @@
 #include "internal/network/zeromq/Types.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
 #include "internal/util/Mutex.hpp"
-#include "opentxs/Version.hpp"
 #include "opentxs/api/network/Network.hpp"
 #include "opentxs/blockchain/BlockchainType.hpp"
 #include "opentxs/blockchain/Types.hpp"
@@ -53,10 +51,8 @@
 #include "util/Work.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
 namespace api
 {
 class Session;
@@ -120,7 +116,6 @@ class Sender;
 class Context;
 }  // namespace zeromq
 }  // namespace network
-// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -143,10 +138,9 @@ public:
         StateMachine = OT_ZMQ_STATE_MACHINE_SIGNAL,
     };
 
-    auto AddIncomingPeer(const int id, std::uintptr_t endpoint) const noexcept
-        -> void final;
-    auto AddPeer(const blockchain::p2p::Address& address) const noexcept
-        -> bool final;
+    auto AddIncomingPeer(const int id, const p2p::Address& endpoint)
+        const noexcept -> void final;
+    auto AddPeer(const p2p::Address& address) const noexcept -> bool final;
     auto BroadcastTransaction(
         const bitcoin::block::Transaction& tx) const noexcept -> bool final;
     auto Connect() noexcept -> bool final;
@@ -166,11 +160,10 @@ public:
         jobs_.Dispatch(PeerManagerJobs::Heartbeat);
     }
     auto JobReady(const PeerManagerJobs type) const noexcept -> void final;
-    auto Listen(const blockchain::p2p::Address& address) const noexcept
-        -> bool final;
+    auto Listen(const p2p::Address& address) const noexcept -> bool final;
     auto LookupIncomingSocket(const int id) const noexcept(false)
         -> opentxs::network::asio::Socket final;
-    auto Nonce() const noexcept -> const blockchain::p2p::bitcoin::Nonce& final
+    auto Nonce() const noexcept -> const p2p::bitcoin::Nonce& final
     {
         return peers_.Nonce();
     }

@@ -5,11 +5,10 @@
 
 #pragma once
 
-#include "opentxs/Version.hpp"  // IWYU pragma: associated
-
 #include <cstdint>
 #include <memory>
 
+#include "opentxs/Export.hpp"
 #include "opentxs/core/String.hpp"
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/crypto/key/Keypair.hpp"
@@ -18,10 +17,8 @@
 #include "opentxs/util/Bytes.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
 namespace identity
 {
 namespace credential
@@ -36,7 +33,6 @@ class Authority;
 }  // namespace identity
 
 class Secret;
-// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

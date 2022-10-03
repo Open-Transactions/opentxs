@@ -4,14 +4,12 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 #include "0_stdafx.hpp"                          // IWYU pragma: associated
-#include "1_Internal.hpp"                        // IWYU pragma: associated
 #include "blockchain/database/common/Peers.hpp"  // IWYU pragma: associated
 
 #include <BlockchainPeerAddress.pb.h>
 #include <algorithm>
 #include <chrono>
 #include <iterator>
-#include <memory>
 #include <optional>
 #include <random>
 #include <utility>
@@ -84,7 +82,7 @@ auto Peers::Find(
     const Chain chain,
     const Protocol protocol,
     const UnallocatedSet<Type> onNetworks,
-    const UnallocatedSet<Service> withServices) const noexcept -> Address_p
+    const UnallocatedSet<Service> withServices) const noexcept -> p2p::Address
 {
     Lock lock(lock_);
 
@@ -194,48 +192,46 @@ auto Peers::Find(
     }
 }
 
-auto Peers::Import(UnallocatedVector<Address_p> peers) noexcept -> bool
+auto Peers::Import(UnallocatedVector<p2p::Address>&& peers) noexcept -> bool
 {
-    auto newPeers = UnallocatedVector<Address_p>{};
+    auto newPeers = Vector<p2p::Address>{};
 
     for (auto& peer : peers) {
+        if (false == peer.IsValid()) { continue; }
+
         if (false ==
             lmdb_.Exists(
-                Table::PeerDetails, peer->ID().asBase58(api_.Crypto()))) {
+                Table::PeerDetails, peer.ID().asBase58(api_.Crypto()))) {
             newPeers.emplace_back(std::move(peer));
         }
     }
 
     Lock lock(lock_);
 
-    return insert(lock, std::move(newPeers));
+    return insert(lock, newPeers);
 }
 
-auto Peers::Insert(Address_p pAddress) noexcept -> bool
+auto Peers::Insert(p2p::Address address) noexcept -> bool
 {
-    auto peers = UnallocatedVector<Address_p>{};
-    peers.emplace_back(std::move(pAddress));
+    if (false == address.IsValid()) { return false; }
+
+    auto peers = Vector<p2p::Address>{};
+    peers.emplace_back(std::move(address));
     Lock lock(lock_);
 
-    return insert(lock, std::move(peers));
+    return insert(lock, peers);
 }
 
-auto Peers::insert(
-    const Lock& lock,
-    UnallocatedVector<Address_p> peers) noexcept -> bool
+auto Peers::insert(const Lock& lock, const Vector<p2p::Address>& peers) noexcept
+    -> bool
 {
     auto parentTxn = lmdb_.TransactionRW();
 
-    for (auto& pAddress : peers) {
-        if (false == bool(pAddress)) {
-            LogError()(OT_PRETTY_CLASS())("Invalid peer").Flush();
+    for (const auto& address : peers) {
+        OT_ASSERT(address.IsValid());
 
-            return false;
-        }
-
-        auto& address = *pAddress;
         const auto id = address.ID().asBase58(api_.Crypto());
-        auto deleteServices = address.PreviousServices();
+        auto deleteServices = address.Internal().PreviousServices();
 
         for (const auto& service : address.Services()) {
             deleteServices.erase(service);
@@ -247,9 +243,8 @@ auto Peers::insert(
                 Table::PeerDetails,
                 id,
                 [&] {
-                    auto proto =
-                        opentxs::blockchain::p2p::Address::SerializedType{};
-                    address.Serialize(proto);
+                    auto proto = proto::BlockchainPeerAddress{};
+                    address.Internal().Serialize(proto);
 
                     return proto::ToString(proto);
                 }(),
@@ -344,8 +339,8 @@ auto Peers::insert(
 
             lmdb_.Delete(
                 Table::PeerConnectedIndex,
-                static_cast<std::size_t>(
-                    Clock::to_time_t(address.PreviousLastConnected())),
+                static_cast<std::size_t>(Clock::to_time_t(
+                    address.Internal().PreviousLastConnected())),
                 id,
                 parentTxn);
         }
@@ -378,12 +373,12 @@ auto Peers::insert(
 }
 
 auto Peers::load_address(const UnallocatedCString& id) const noexcept(false)
-    -> Address_p
+    -> p2p::Address
 {
-    auto output = std::optional<Address::SerializedType>{};
+    auto output = std::optional<proto::BlockchainPeerAddress>{};
     lmdb_.Load(Table::PeerDetails, id, [&](const auto data) -> void {
-        output =
-            proto::Factory<Address::SerializedType>(data.data(), data.size());
+        output = proto::Factory<proto::BlockchainPeerAddress>(
+            data.data(), data.size());
     });
 
     if (false == output.has_value()) {

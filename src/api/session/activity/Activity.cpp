@@ -4,7 +4,6 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 #include "0_stdafx.hpp"                       // IWYU pragma: associated
-#include "1_Internal.hpp"                     // IWYU pragma: associated
 #include "api/session/activity/Activity.hpp"  // IWYU pragma: associated
 
 #include <BlockchainTransaction.pb.h>
@@ -30,11 +29,11 @@
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "opentxs/api/network/Network.hpp"
+#include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/Contacts.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Endpoints.hpp"
 #include "opentxs/api/session/Factory.hpp"
-#include "opentxs/api/session/Session.hpp"
 #include "opentxs/api/session/Storage.hpp"
 #include "opentxs/api/session/Wallet.hpp"
 #include "opentxs/api/session/Workflow.hpp"
@@ -62,7 +61,7 @@
 namespace opentxs::factory
 {
 auto ActivityAPI(
-    const api::Session& api,
+    const api::session::Client& api,
     const api::session::Contacts& contact) noexcept
     -> std::unique_ptr<api::session::Activity>
 {
@@ -75,7 +74,7 @@ auto ActivityAPI(
 namespace opentxs::api::session::imp
 {
 Activity::Activity(
-    const api::Session& api,
+    const api::session::Client& api,
     const session::Contacts& contact) noexcept
     : api_(api)
     , contact_(contact)
@@ -108,14 +107,13 @@ auto Activity::activity_preload_thread(
     }
 }
 
-#if OT_BLOCKCHAIN
 auto Activity::add_blockchain_transaction(
     const eLock& lock,
     const identifier::Nym& nym,
     const blockchain::bitcoin::block::Transaction& transaction) const noexcept
     -> bool
 {
-    const auto incoming = transaction.AssociatedRemoteContacts(contact_, nym);
+    const auto incoming = transaction.AssociatedRemoteContacts(api_, nym);
     LogTrace()(OT_PRETTY_CLASS())("transaction ")(transaction.ID().asHex())(
         " is associated with ")(incoming.size())(" contacts")
         .Flush();
@@ -180,7 +178,7 @@ auto Activity::add_blockchain_transaction(
         api_.Storage().UnaffiliatedBlockchainTransaction(nym, txid);
     }
 
-    const auto proto = transaction.Internal().Serialize();
+    const auto proto = transaction.Internal().Serialize(api_);
 
     if (false == proto.has_value()) {
         LogError()(OT_PRETTY_CLASS())("failed to serialize transaction ")(
@@ -204,16 +202,15 @@ auto Activity::add_blockchain_transaction(
 
     return output;
 }
-#endif  // OT_BLOCKCHAIN
 
 auto Activity::AddBlockchainTransaction(
+    const api::crypto::Blockchain& crypto,
     const blockchain::bitcoin::block::Transaction& transaction) const noexcept
     -> bool
 {
-#if OT_BLOCKCHAIN
     auto lock = eLock(shared_lock_);
 
-    for (const auto& nym : transaction.AssociatedLocalNyms()) {
+    for (const auto& nym : transaction.AssociatedLocalNyms(crypto)) {
         LogTrace()(OT_PRETTY_CLASS())("blockchain transaction ")(
             transaction.ID().asHex())(" is relevant to local nym ")(nym)
             .Flush();
@@ -226,9 +223,6 @@ auto Activity::AddBlockchainTransaction(
     }
 
     return true;
-#else
-    return false;
-#endif  // OT_BLOCKCHAIN
 }
 
 auto Activity::AddPaymentEvent(
@@ -397,7 +391,6 @@ auto Activity::get_publisher(const identifier::Nym& nymID) const noexcept
     return get_publisher(nymID, endpoint);
 }
 
-#if OT_BLOCKCHAIN
 auto Activity::get_blockchain(const eLock&, const identifier::Nym& nymID)
     const noexcept -> const opentxs::network::zeromq::socket::Publish&
 {
@@ -413,7 +406,6 @@ auto Activity::get_blockchain(const eLock&, const identifier::Nym& nymID)
 
     return publisher->second.get();
 }
-#endif  // OT_BLOCKCHAIN
 
 auto Activity::get_publisher(
     const identifier::Nym& nymID,

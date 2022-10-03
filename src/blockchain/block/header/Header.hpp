@@ -7,11 +7,10 @@
 
 #include <memory>
 
+#include "internal/blockchain/bitcoin/block/Header.hpp"
 #include "internal/blockchain/block/Header.hpp"
 #include "opentxs/blockchain/BlockchainType.hpp"
 #include "opentxs/blockchain/Types.hpp"
-#include "opentxs/blockchain/bitcoin/NumericHash.hpp"
-#include "opentxs/blockchain/bitcoin/Work.hpp"
 #include "opentxs/blockchain/bitcoin/block/Header.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/blockchain/block/Header.hpp"
@@ -22,10 +21,8 @@
 #include "opentxs/util/Numbers.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
 namespace api
 {
 class Session;
@@ -44,10 +41,12 @@ class Header;
 namespace block
 {
 class Hash;
+class NumericHash;
 class Position;
 }  // namespace block
+
+class Work;
 }  // namespace blockchain
-// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -56,22 +55,27 @@ namespace opentxs::blockchain::block
 class Header::Imp : virtual public internal::Header
 {
 public:
+    auto as_Bitcoin() const noexcept
+        -> const blockchain::bitcoin::block::internal::Header& override
+    {
+        return blockchain::bitcoin::block::internal::Header::Blank();
+    }
     virtual auto clone() const noexcept -> std::unique_ptr<Imp>
     {
         return std::make_unique<Imp>();
     }
-    virtual auto Difficulty() const noexcept -> OTWork;
+    virtual auto Difficulty() const noexcept -> blockchain::Work;
     auto EffectiveState() const noexcept -> Status override { return {}; }
     virtual auto Hash() const noexcept -> const block::Hash&;
     virtual auto Height() const noexcept -> block::Height { return {}; }
-    virtual auto IncrementalWork() const noexcept -> OTWork;
+    virtual auto IncrementalWork() const noexcept -> blockchain::Work;
     auto InheritedState() const noexcept -> Status override { return {}; }
     auto IsBlacklisted() const noexcept -> bool override { return {}; }
     auto IsDisconnected() const noexcept -> bool override { return {}; }
     auto LocalState() const noexcept -> Status override { return {}; }
-    virtual auto NumericHash() const noexcept -> OTNumericHash;
+    virtual auto NumericHash() const noexcept -> block::NumericHash;
     virtual auto ParentHash() const noexcept -> const block::Hash&;
-    virtual auto ParentWork() const noexcept -> OTWork;
+    virtual auto ParentWork() const noexcept -> blockchain::Work;
     virtual auto Position() const noexcept -> block::Position { return {}; }
     virtual auto Print() const noexcept -> UnallocatedCString { return {}; }
     using internal::Header::Serialize;
@@ -85,11 +89,16 @@ public:
     {
         return {};
     }
-    virtual auto Target() const noexcept -> OTNumericHash;
+    virtual auto Target() const noexcept -> block::NumericHash;
     virtual auto Type() const noexcept -> blockchain::Type { return {}; }
     virtual auto Valid() const noexcept -> bool { return {}; }
-    virtual auto Work() const noexcept -> OTWork;
+    virtual auto Work() const noexcept -> blockchain::Work;
 
+    auto as_Bitcoin() noexcept
+        -> blockchain::bitcoin::block::internal::Header& override
+    {
+        return blockchain::bitcoin::block::internal::Header::Blank();
+    }
     auto CompareToCheckpoint(const block::Position& checkpoint) noexcept
         -> void override
     {

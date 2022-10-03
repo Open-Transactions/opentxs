@@ -4,7 +4,6 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 #include "0_stdafx.hpp"                         // IWYU pragma: associated
-#include "1_Internal.hpp"                       // IWYU pragma: associated
 #include "network/blockchain/otdht/Server.hpp"  // IWYU pragma: associated
 
 #include <algorithm>
@@ -30,7 +29,6 @@
 #include "opentxs/blockchain/bitcoin/block/Header.hpp"
 #include "opentxs/blockchain/bitcoin/cfilter/GCS.hpp"
 #include "opentxs/blockchain/bitcoin/cfilter/Header.hpp"
-#include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/blockchain/node/FilterOracle.hpp"
@@ -86,14 +84,9 @@ Server::Server(
     : Actor(api, node, batchID, alloc)
     , checkpoint_([&]() -> opentxs::blockchain::block::Position {
         const auto& checkpoint =
-            opentxs::blockchain::params::Chains().at(chain_).checkpoint_;
-        auto out = opentxs::blockchain::block::Position{};
-        out.height_ = checkpoint.height_;
-        const auto rc = out.hash_.DecodeHex(checkpoint.block_hash_);
+            opentxs::blockchain::params::get(chain_).Checkpoints();
 
-        OT_ASSERT(rc);
-
-        return out;
+        return {checkpoint.height_, checkpoint.block_};
     }())
     , shared_(node_, alloc)
     , counter_()

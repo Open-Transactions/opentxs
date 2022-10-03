@@ -5,10 +5,11 @@
 
 #pragma once
 
-#include "opentxs/Version.hpp"              // IWYU pragma: associated
 #include "opentxs/interface/rpc/Types.hpp"  // IWYU pragma: associated
 
 #include <limits>
+
+#include "opentxs/Export.hpp"
 
 namespace opentxs::rpc
 {

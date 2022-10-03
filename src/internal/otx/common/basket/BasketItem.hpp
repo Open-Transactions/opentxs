@@ -5,7 +5,6 @@
 
 #pragma once
 
-#include "opentxs/Version.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"

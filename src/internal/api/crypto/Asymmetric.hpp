@@ -8,10 +8,8 @@
 #include "opentxs/api/crypto/Asymmetric.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
 namespace api
 {
 class Session;
@@ -31,7 +29,6 @@ namespace proto
 {
 class AsymmetricKey;
 }  // namespace proto
-// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

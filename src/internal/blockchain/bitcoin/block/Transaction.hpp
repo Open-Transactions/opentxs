@@ -3,6 +3,8 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_include "opentxs/blockchain/BlockchainType.hpp"
+
 #pragma once
 
 #include <cstddef>
@@ -10,18 +12,30 @@
 
 #include "internal/blockchain/bitcoin/Bitcoin.hpp"
 #include "internal/blockchain/block/Block.hpp"
+#include "internal/blockchain/block/Types.hpp"
+#include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/bitcoin/block/Transaction.hpp"
 #include "opentxs/blockchain/bitcoin/cfilter/Types.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
+#include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
+namespace api
+{
+namespace crypto
+{
+class Blockchain;
+}  // namespace crypto
+
+class Factory;
+class Session;
+}  // namespace api
+
 namespace blockchain
 {
 namespace bitcoin
@@ -47,7 +61,6 @@ class BlockchainTransaction;
 }  // namespace proto
 
 class Log;
-// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -65,6 +78,10 @@ public:
         const std::size_t index,
         const blockchain::bitcoin::SigHash& hashType) const noexcept
         -> Space = 0;
+    auto Internal() const noexcept -> const internal::Transaction& final
+    {
+        return *this;
+    }
     // WARNING do not call this function if another thread has a non-const
     // reference to this object
     virtual auto MinedPosition() const noexcept
@@ -77,24 +94,28 @@ public:
     virtual auto ExtractElements(const cfilter::Type style) const noexcept
         -> Vector<Vector<std::byte>> = 0;
     virtual auto FindMatches(
+        const api::Session& api,
         const cfilter::Type type,
         const blockchain::block::Patterns& txos,
         const blockchain::block::ParsedPatterns& elements,
         const Log& log) const noexcept -> blockchain::block::Matches = 0;
-    virtual auto GetPatterns() const noexcept
+    virtual auto GetPatterns(const api::Session& api) const noexcept
         -> UnallocatedVector<PatternID> = 0;
     virtual auto ForTestingOnlyAddKey(
         const std::size_t index,
         const blockchain::crypto::Key& key) noexcept -> bool = 0;
-    virtual auto IDNormalized() const noexcept
+    virtual auto IDNormalized(const api::Factory& factory) const noexcept
         -> const identifier::Generic& = 0;
+    auto Internal() noexcept -> internal::Transaction& final { return *this; }
     virtual auto MergeMetadata(
+        const api::crypto::Blockchain& crypto,
         const blockchain::Type chain,
         const Transaction& rhs,
         const Log& log) noexcept -> void = 0;
     virtual auto Serialize(const AllocateOutput destination) const noexcept
         -> std::optional<std::size_t> = 0;
-    virtual auto Serialize() const noexcept -> std::optional<SerializeType> = 0;
+    virtual auto Serialize(const api::Session& api) const noexcept
+        -> std::optional<SerializeType> = 0;
     virtual auto SetKeyData(const blockchain::block::KeyData& data) noexcept
         -> void = 0;
     virtual auto SetMemo(const UnallocatedCString& memo) noexcept -> void = 0;

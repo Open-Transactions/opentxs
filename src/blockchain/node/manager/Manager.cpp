@@ -4,7 +4,6 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 #include "0_stdafx.hpp"                         // IWYU pragma: associated
-#include "1_Internal.hpp"                       // IWYU pragma: associated
 #include "blockchain/node/manager/Manager.hpp"  // IWYU pragma: associated
 
 #include <BlockchainTransactionProposal.pb.h>
@@ -77,6 +76,7 @@
 #include "opentxs/blockchain/node/FilterOracle.hpp"
 #include "opentxs/blockchain/node/SendResult.hpp"
 #include "opentxs/blockchain/node/Types.hpp"
+#include "opentxs/blockchain/p2p/Address.hpp"
 #include "opentxs/blockchain/p2p/Types.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/core/ByteArray.hpp"
@@ -251,15 +251,12 @@ Base::Base(
 
                     return out;
                 }(),
-                params::Chains().at(chain_).default_port_,
+                params::get(chain_).P2PDefaultPort(),
                 chain_,
                 {},
                 {},
                 false);
-
-            if (!address) { continue; }
-
-            peer_.Listen(*address);
+            peer_.Listen(address);
         } catch (const std::exception& e) {
             LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
 
@@ -287,15 +284,12 @@ Base::Base(
 
                     return out;
                 }(),
-                params::Chains().at(chain_).default_port_,
+                params::get(chain_).P2PDefaultPort(),
                 chain_,
                 {},
                 {},
                 false);
-
-            if (!address) { continue; }
-
-            peer_.Listen(*address);
+            peer_.Listen(address);
         } catch (const std::exception& e) {
             LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
 
@@ -427,7 +421,7 @@ auto Base::FeeRate() const noexcept -> Amount
     // recent blocks
     // TODO on networks that support it, query the fee rate from network peers
     const auto http = wallet_.Internal().FeeEstimate();
-    const auto fallback = params::Chains().at(chain_).default_fee_rate_;
+    const auto fallback = params::get(chain_).FallbackTxFeeRate();
     const auto chain = print(chain_);
     LogConsole()(chain)(" defined minimum fee rate is: ")(fallback).Flush();
 

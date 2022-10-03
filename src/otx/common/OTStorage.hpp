@@ -12,7 +12,6 @@
 #include <utility>
 
 #include "internal/util/LogMacros.hpp"
-#include "opentxs/Version.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 

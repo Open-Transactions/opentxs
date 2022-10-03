@@ -5,8 +5,7 @@
 
 #pragma once
 
-#include "opentxs/Version.hpp"  // IWYU pragma: associated
-
+#include "opentxs/Export.hpp"
 #include "opentxs/network/zeromq/zap/Callback.hpp"
 #include "opentxs/util/Container.hpp"
 

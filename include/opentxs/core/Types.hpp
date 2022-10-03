@@ -5,14 +5,19 @@
 
 #pragma once
 
-#include "opentxs/Version.hpp"  // IWYU pragma: associated
-
 #include <cstddef>
 #include <cstdint>
 #include <string_view>
 
+#include "opentxs/Export.hpp"
+
 namespace opentxs
 {
+struct OPENTXS_EXPORT HexType {
+};
+
+static constexpr auto IsHex = HexType{};
+
 enum class AccountType : std::int8_t;   // IWYU pragma: export
 enum class AddressType : std::uint8_t;  // IWYU pragma: export
 enum class UnitType : std::uint32_t;    // IWYU pragma: export

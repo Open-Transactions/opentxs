@@ -3,8 +3,7 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#include "0_stdafx.hpp"    // IWYU pragma: associated
-#include "1_Internal.hpp"  // IWYU pragma: associated
+#include "0_stdafx.hpp"  // IWYU pragma: associated
 #include "interface/ui/accountactivity/BlockchainBalanceItem.hpp"  // IWYU pragma: associated
 
 #include <PaymentEvent.pb.h>
@@ -24,6 +23,42 @@
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/util/Container.hpp"
+
+namespace opentxs::factory
+{
+auto BalanceItemBlockchain(
+    const ui::implementation::AccountActivityInternalInterface& parent,
+    const api::session::Client& api,
+    const ui::implementation::AccountActivityRowID& rowID,
+    const ui::implementation::AccountActivitySortKey& sortKey,
+    ui::implementation::CustomData& custom,
+    const identifier::Nym& nymID,
+    const identifier::Generic& accountID) noexcept
+    -> std::shared_ptr<ui::implementation::AccountActivityRowInternal>
+{
+    using Transaction = opentxs::blockchain::bitcoin::block::Transaction;
+
+    auto pTx = ui::implementation::extract_custom_ptr<Transaction>(custom, 2);
+
+    OT_ASSERT(pTx);
+
+    const auto& tx = *pTx;
+
+    return std::make_shared<ui::implementation::BlockchainBalanceItem>(
+        parent,
+        api,
+        rowID,
+        sortKey,
+        custom,
+        nymID,
+        accountID,
+        ui::implementation::extract_custom<blockchain::Type>(custom, 3),
+        ui::implementation::extract_custom<ByteArray>(custom, 5),
+        tx.NetBalanceChange(api.Crypto().Blockchain(), nymID),
+        tx.Memo(api.Crypto().Blockchain()),
+        ui::implementation::extract_custom<UnallocatedCString>(custom, 4));
+}
+}  // namespace opentxs::factory
 
 namespace opentxs::ui::implementation
 {
@@ -94,8 +129,9 @@ auto BlockchainBalanceItem::reindex(
     auto output = BalanceItem::reindex(key, custom);
     const auto chain = extract_custom<blockchain::Type>(custom, 3);
     const auto txid = extract_custom<ByteArray>(custom, 5);
-    const auto amount = tx.NetBalanceChange(nym_id_);
-    const auto memo = tx.Memo();
+    const auto amount =
+        tx.NetBalanceChange(api_.Crypto().Blockchain(), nym_id_);
+    const auto memo = tx.Memo(api_.Crypto().Blockchain());
     const auto text = extract_custom<UnallocatedCString>(custom, 4);
     const auto conf = extract_custom<int>(custom, 6);
 

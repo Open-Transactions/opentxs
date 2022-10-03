@@ -62,7 +62,7 @@ TEST_F(Test_HeaderOracle_btc, receive_btc)
 
     const auto expectedWork = std::to_string(bitcoin_.size() + 1);
 
-    EXPECT_EQ(expectedWork, header->Work()->Decimal());
+    EXPECT_EQ(expectedWork, header->Work().Decimal());
 }
 
 TEST_F(Test_HeaderOracle_btc, receive_bch)
@@ -85,7 +85,7 @@ TEST_F(Test_HeaderOracle_btc, receive_bch)
 
     const auto expectedWork = std::to_string(bitcoin_.size() + 1);
 
-    EXPECT_EQ(expectedWork, header->Work()->Decimal());
+    EXPECT_EQ(expectedWork, header->Work().Decimal());
 }
 
 TEST_F(Test_HeaderOracle_btc, shutdown) { Shutdown(); }

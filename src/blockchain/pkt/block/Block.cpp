@@ -4,7 +4,6 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 #include "0_stdafx.hpp"                    // IWYU pragma: associated
-#include "1_Internal.hpp"                  // IWYU pragma: associated
 #include "blockchain/pkt/block/Block.hpp"  // IWYU pragma: associated
 
 #include <cstring>
@@ -24,7 +23,7 @@
 namespace opentxs::factory
 {
 auto parse_pkt_block(
-    const api::Session& api,
+    const api::Crypto& crypto,
     const blockchain::Type chain,
     const ReadView in) noexcept(false)
     -> std::shared_ptr<blockchain::bitcoin::block::Block>
@@ -37,7 +36,7 @@ auto parse_pkt_block(
 
     const auto* it = ByteIterator{};
     auto expectedSize = 0_uz;
-    auto pHeader = parse_header(api, chain, in, it, expectedSize);
+    auto pHeader = parse_header(crypto, chain, in, it, expectedSize);
 
     OT_ASSERT(pHeader);
 
@@ -87,11 +86,10 @@ auto parse_pkt_block(
     const auto* const proofEnd{it};
     auto sizeData = ReturnType::CalculatedSize{
         in.size(), network::blockchain::bitcoin::CompactSize{}};
-    auto [index, transactions] =
-        parse_transactions(api, chain, in, header, sizeData, it, expectedSize);
+    auto [index, transactions] = parse_transactions(
+        crypto, chain, in, header, sizeData, it, expectedSize);
 
     return std::make_shared<ReturnType>(
-        api,
         chain,
         std::move(pHeader),
         std::move(proofs),
@@ -105,7 +103,6 @@ auto parse_pkt_block(
 namespace opentxs::blockchain::pkt::block
 {
 Block::Block(
-    const api::Session& api,
     const blockchain::Type chain,
     std::unique_ptr<const blockchain::bitcoin::block::Header> header,
     Proofs&& proofs,
@@ -114,7 +111,6 @@ Block::Block(
     std::optional<std::size_t>&& proofBytes,
     std::optional<CalculatedSize>&& size) noexcept(false)
     : ot_super(
-          api,
           chain,
           std::move(header),
           std::move(index),
@@ -123,6 +119,19 @@ Block::Block(
     , proofs_(std::move(proofs))
     , proof_bytes_(std::move(proofBytes))
 {
+}
+
+Block::Block(const Block& rhs) noexcept
+    : ot_super(rhs)
+    , proofs_(rhs.proofs_)
+    , proof_bytes_(rhs.proof_bytes_)
+{
+}
+
+auto Block::clone_bitcoin() const noexcept
+    -> std::unique_ptr<bitcoin::block::internal::Block>
+{
+    return std::make_unique<Block>(*this);
 }
 
 auto Block::extra_bytes() const noexcept -> std::size_t

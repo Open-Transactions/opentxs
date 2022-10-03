@@ -4,46 +4,36 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 #include "0_stdafx.hpp"                    // IWYU pragma: associated
-#include "1_Internal.hpp"                  // IWYU pragma: associated
 #include "api/session/client/Factory.hpp"  // IWYU pragma: associated
 
 #include <BlockchainBlockHeader.pb.h>
-#include <boost/endian/buffers.hpp>
-#include <algorithm>
 #include <cstddef>
-#include <cstring>
 #include <exception>
-#include <iterator>
 #include <limits>
-#include <tuple>
 #include <utility>
 
 #include "Proto.hpp"
 #include "Proto.tpp"
 #include "internal/api/session/Factory.hpp"
-#include "internal/blockchain/bitcoin/Bitcoin.hpp"
 #include "internal/blockchain/bitcoin/block/Factory.hpp"
 #include "internal/blockchain/bitcoin/block/Input.hpp"    // IWYU pragma: keep
 #include "internal/blockchain/bitcoin/block/Inputs.hpp"   // IWYU pragma: keep
 #include "internal/blockchain/bitcoin/block/Output.hpp"   // IWYU pragma: keep
 #include "internal/blockchain/bitcoin/block/Outputs.hpp"  // IWYU pragma: keep
-#include "internal/blockchain/bitcoin/block/Script.hpp"
 #include "internal/blockchain/bitcoin/block/Transaction.hpp"
-#include "internal/blockchain/bitcoin/block/Types.hpp"
 #include "internal/core/contract/peer/Factory.hpp"
 #include "internal/serialization/protobuf/Check.hpp"
 #include "internal/serialization/protobuf/verify/BlockchainBlockHeader.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "opentxs/api/session/Client.hpp"
+#include "opentxs/api/session/Crypto.hpp"
+#include "opentxs/api/session/Session.hpp"
 #include "opentxs/blockchain/BlockchainType.hpp"
 #include "opentxs/blockchain/bitcoin/block/Header.hpp"
-#include "opentxs/blockchain/bitcoin/block/Script.hpp"
 #include "opentxs/blockchain/block/Block.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/blockchain/block/Header.hpp"
-#include "opentxs/blockchain/block/Outpoint.hpp"
-#include "opentxs/core/Amount.hpp"
 #include "opentxs/core/contract/peer/PeerReply.hpp"
 #include "opentxs/core/contract/peer/PeerRequest.hpp"
 #include "opentxs/otx/blind/Purse.hpp"
@@ -75,13 +65,12 @@ Factory::Factory(const api::session::Client& parent)
 {
 }
 
-#if OT_BLOCKCHAIN
 auto Factory::BitcoinBlock(
     const opentxs::blockchain::Type chain,
     const ReadView bytes) const noexcept
     -> std::shared_ptr<const opentxs::blockchain::bitcoin::block::Block>
 {
-    return factory::BitcoinBlock(client_, chain, bytes);
+    return factory::BitcoinBlock(client_.Crypto(), chain, bytes);
 }
 
 auto Factory::BitcoinBlock(
@@ -94,7 +83,7 @@ auto Factory::BitcoinBlock(
     -> std::shared_ptr<const opentxs::blockchain::bitcoin::block::Block>
 {
     return factory::BitcoinBlock(
-        api_,
+        api_.Crypto(),
         previous,
         generationTransaction,
         nBits,
@@ -106,68 +95,12 @@ auto Factory::BitcoinBlock(
 auto Factory::BitcoinGenerationTransaction(
     const opentxs::blockchain::Type chain,
     const opentxs::blockchain::block::Height height,
-    UnallocatedVector<OutputBuilder>&& scripts,
+    UnallocatedVector<blockchain::OutputBuilder>&& scripts,
     const UnallocatedCString& coinbase,
     const std::int32_t version) const noexcept -> Transaction_p
 {
-    static const auto outpoint = opentxs::blockchain::block::Outpoint{};
-
-    const auto serializedVersion = boost::endian::little_int32_buf_t{version};
-    const auto locktime = boost::endian::little_uint32_buf_t{0};
-    const auto sequence = boost::endian::little_uint32_buf_t{0xffffffff};
-    const auto cb = [&] {
-        const auto bip34 =
-            opentxs::blockchain::bitcoin::block::internal::EncodeBip34(height);
-        auto output = space(bip34.size() + coinbase.size());
-        auto* it = output.data();
-        std::memcpy(it, bip34.data(), bip34.size());
-        std::advance(it, bip34.size());
-        std::memcpy(it, coinbase.data(), coinbase.size());
-        output.resize(std::min(output.size(), 100_uz));
-
-        return output;
-    }();
-    const auto cs = opentxs::blockchain::bitcoin::CompactSize{cb.size()};
-    auto inputs = UnallocatedVector<std::unique_ptr<
-        opentxs::blockchain::bitcoin::block::internal::Input>>{};
-    inputs.emplace_back(factory::BitcoinTransactionInput(
-        api_,
-        chain,
-        outpoint.Bytes(),
-        cs,
-        reader(cb),
-        ReadView{reinterpret_cast<const char*>(&sequence), sizeof(sequence)},
-        true,
-        {}));
-    auto outputs = UnallocatedVector<std::unique_ptr<
-        opentxs::blockchain::bitcoin::block::internal::Output>>{};
-    auto index{-1};
-    using Position = opentxs::blockchain::bitcoin::block::Script::Position;
-
-    for (auto& [amount, pScript, keys] : scripts) {
-        if (false == bool(pScript)) { return {}; }
-
-        const auto& script = *pScript;
-        auto bytes = Space{};
-        script.Serialize(writer(bytes));
-        outputs.emplace_back(factory::BitcoinTransactionOutput(
-            api_,
-            chain,
-            static_cast<std::uint32_t>(++index),
-            Amount{amount},
-            factory::BitcoinScript(chain, reader(bytes), Position::Output),
-            std::move(keys)));
-    }
-
     return factory::BitcoinTransaction(
-        api_,
-        chain,
-        Clock::now(),
-        serializedVersion,
-        locktime,
-        false,  // TODO segwit
-        factory::BitcoinTransactionInputs(std::move(inputs)),
-        factory::BitcoinTransactionOutputs(std::move(outputs)));
+        api_.Crypto(), chain, height, std::move(scripts), coinbase, version);
 }
 
 auto Factory::BitcoinTransaction(
@@ -177,14 +110,12 @@ auto Factory::BitcoinTransaction(
     const Time& time) const noexcept
     -> std::unique_ptr<const opentxs::blockchain::bitcoin::block::Transaction>
 {
-    using Encoded = opentxs::blockchain::bitcoin::EncodedTransaction;
-
     return factory::BitcoinTransaction(
-        api_,
+        api_.Crypto(),
         chain,
         isGeneration ? 0_uz : std::numeric_limits<std::size_t>::max(),
         time,
-        Encoded::Deserialize(api_, chain, bytes));
+        bytes);
 }
 
 auto Factory::BlockHeader(const proto::BlockchainBlockHeader& serialized) const
@@ -208,7 +139,7 @@ auto Factory::BlockHeader(const proto::BlockchainBlockHeader& serialized) const
         case opentxs::blockchain::Type::eCash:
         case opentxs::blockchain::Type::eCash_testnet3:
         case opentxs::blockchain::Type::UnitTest: {
-            return factory::BitcoinBlockHeader(client_, serialized);
+            return factory::BitcoinBlockHeader(client_.Crypto(), serialized);
         }
         case opentxs::blockchain::Type::Unknown:
         case opentxs::blockchain::Type::Ethereum_frontier:
@@ -246,7 +177,7 @@ auto Factory::BlockHeader(
         case opentxs::blockchain::Type::eCash:
         case opentxs::blockchain::Type::eCash_testnet3:
         case opentxs::blockchain::Type::UnitTest: {
-            return factory::BitcoinBlockHeader(client_, type, raw);
+            return factory::BitcoinBlockHeader(client_.Crypto(), type, raw);
         }
         case opentxs::blockchain::Type::Unknown:
         case opentxs::blockchain::Type::Ethereum_frontier:
@@ -273,9 +204,12 @@ auto Factory::BlockHeaderForUnitTests(
     const opentxs::blockchain::block::Height height) const -> BlockHeaderP
 {
     return factory::BitcoinBlockHeader(
-        client_, opentxs::blockchain::Type::UnitTest, hash, parent, height);
+        client_.Crypto(),
+        opentxs::blockchain::Type::UnitTest,
+        hash,
+        parent,
+        height);
 }
-#endif  // OT_BLOCKCHAIN
 
 auto Factory::PeerObject(
     const Nym_p& senderNym,

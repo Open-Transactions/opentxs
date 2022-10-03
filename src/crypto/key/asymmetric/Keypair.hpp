@@ -15,10 +15,8 @@
 #include "opentxs/identity/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
 namespace api
 {
 class Session;
@@ -33,7 +31,6 @@ class Data;
 class PasswordPrompt;
 class Secret;
 class Signature;
-// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

@@ -3,8 +3,7 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#include "0_stdafx.hpp"    // IWYU pragma: associated
-#include "1_Internal.hpp"  // IWYU pragma: associated
+#include "0_stdafx.hpp"  // IWYU pragma: associated
 #include "blockchain/node/wallet/spend/BitcoinTransactionBuilder.hpp"  // IWYU pragma: associated
 
 #include <BlockchainOutputMultisigDetails.pb.h>
@@ -37,9 +36,9 @@
 #include "internal/blockchain/bitcoin/block/Inputs.hpp"
 #include "internal/blockchain/bitcoin/block/Output.hpp"
 #include "internal/blockchain/bitcoin/block/Outputs.hpp"
-#include "internal/blockchain/bitcoin/block/Script.hpp"
 #include "internal/blockchain/bitcoin/block/Transaction.hpp"
 #include "internal/blockchain/bitcoin/block/Types.hpp"
+#include "internal/blockchain/node/Types.hpp"
 #include "internal/core/Amount.hpp"
 #include "internal/core/Factory.hpp"
 #include "internal/core/PaymentCode.hpp"
@@ -188,7 +187,6 @@ struct BitcoinTransactionBuilder::Imp {
                 }
 
                 return factory::BitcoinTransactionOutput(
-                    api_,
                     chain_,
                     shorten(outputs_.size()),
                     Amount{0},
@@ -228,7 +226,7 @@ struct BitcoinTransactionBuilder::Imp {
     }
     auto AddInput(const UTXO& utxo) noexcept -> bool
     {
-        auto pInput = factory::BitcoinTransactionInput(api_, chain_, utxo);
+        auto pInput = factory::BitcoinTransactionInput(chain_, utxo);
 
         if (false == bool(pInput)) {
             LogError()(OT_PRETTY_CLASS())("Failed to construct input").Flush();
@@ -256,7 +254,7 @@ struct BitcoinTransactionBuilder::Imp {
         auto index = std::int32_t{-1};
 
         for (const auto& output : proposal.output()) {
-            auto pScript = std::unique_ptr<bi::Script>{};
+            auto pScript = std::unique_ptr<bb::Script>{};
             using Position = bitcoin::block::Script::Position;
 
             if (output.has_raw()) {
@@ -330,7 +328,6 @@ struct BitcoinTransactionBuilder::Imp {
             }
 
             auto pOutput = factory::BitcoinTransactionOutput(
-                api_,
                 chain_,
                 static_cast<std::uint32_t>(++index),
                 factory::Amount(output.amount()),
@@ -417,7 +414,7 @@ struct BitcoinTransactionBuilder::Imp {
         }
 
         return factory::BitcoinTransaction(
-            api_,
+            api_.Crypto(),
             chain_,
             Clock::now(),
             version_,
@@ -845,7 +842,7 @@ private:
         static constexpr auto markerBytes = 2_uz;
         const auto segwit = markerBytes + witness_total_;
         const auto total = base + segwit;
-        const auto scale = params::Chains().at(chain_).segwit_scale_factor_;
+        const auto scale = params::get(chain_).SegwitScaleFactor();
 
         OT_ASSERT(0 < scale);
 
@@ -1037,7 +1034,7 @@ private:
         }
 
         txcopy = factory::BitcoinTransaction(
-            api_,
+            api_.Crypto(),
             chain_,
             Clock::now(),
             version_,

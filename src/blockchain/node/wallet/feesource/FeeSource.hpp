@@ -38,10 +38,8 @@ class value;
 }  // namespace json
 }  // namespace boost
 
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
 namespace api
 {
 class Session;
@@ -75,7 +73,6 @@ class Message;
 
 class Amount;
 class Timer;
-// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

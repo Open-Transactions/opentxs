@@ -5,19 +5,17 @@
 
 #pragma once
 
-#include "opentxs/Version.hpp"  // IWYU pragma: associated
-
 #include <cstddef>
 #include <functional>
 #include <iosfwd>
 #include <iterator>
 #include <string_view>
 
+#include "opentxs/Export.hpp"
+
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
 namespace network
 {
 namespace zeromq
@@ -31,7 +29,6 @@ class Frame;
 class FrameIterator;
 }  // namespace zeromq
 }  // namespace network
-// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

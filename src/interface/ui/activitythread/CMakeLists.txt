@@ -26,6 +26,8 @@ if(OT_BLOCKCHAIN_EXPORT)
     opentxs-common PRIVATE "BlockchainActivityThreadItem.cpp"
                            "BlockchainActivityThreadItem.hpp"
   )
+else()
+  target_sources(opentxs-common PRIVATE "no-blockchain.cpp")
 endif()
 
 target_sources(opentxs-common PRIVATE ${cxx-install-headers})

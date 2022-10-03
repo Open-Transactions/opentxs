@@ -7,15 +7,14 @@
 
 #pragma once
 
-#include "opentxs/Version.hpp"  // IWYU pragma: associated
-
 #include <cstdint>
 
+#include "opentxs/Export.hpp"
 #include "opentxs/api/Factory.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
-#include "opentxs/blockchain/p2p/Address.hpp"
+#include "opentxs/blockchain/p2p/Types.hpp"
 #include "opentxs/core/Armored.hpp"
 #include "opentxs/core/String.hpp"
 #include "opentxs/core/Types.hpp"
@@ -52,10 +51,8 @@
 #include "opentxs/util/PasswordPrompt.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
 namespace api
 {
 namespace session
@@ -87,6 +84,11 @@ class Block;
 class Hash;
 class Header;
 }  // namespace block
+
+namespace p2p
+{
+class Address;
+}  // namespace p2p
 }  // namespace blockchain
 
 namespace crypto
@@ -135,11 +137,15 @@ class Server;
 }  // namespace context
 }  // namespace otx
 
+namespace proto
+{
+class BlockchainPeerAddress;
+}  // namespace proto
+
 class ByteArray;
 class Item;
 class Secret;
 class PaymentCode;
-// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -204,109 +210,89 @@ public:
         const display::Definition& displayDefinition,
         const Amount& redemptionIncrement) const noexcept(false)
         -> OTBasketContract = 0;
-#if OT_BLOCKCHAIN
     virtual auto BitcoinBlock(
-        const opentxs::blockchain::Type chain,
+        const blockchain::Type chain,
         const ReadView bytes) const noexcept
-        -> std::shared_ptr<
-            const opentxs::blockchain::bitcoin::block::Block> = 0;
+        -> std::shared_ptr<const blockchain::bitcoin::block::Block> = 0;
     using Transaction_p =
-        std::shared_ptr<const opentxs::blockchain::bitcoin::block::Transaction>;
+        std::shared_ptr<const blockchain::bitcoin::block::Transaction>;
     using AbortFunction = std::function<bool()>;
     virtual auto BitcoinBlock(
-        const opentxs::blockchain::block::Header& previous,
+        const blockchain::block::Header& previous,
         const Transaction_p generationTransaction,
         const std::uint32_t nBits,
         const UnallocatedVector<Transaction_p>& extraTransactions = {},
         const std::int32_t version = 2,
         const AbortFunction abort = {}) const noexcept
-        -> std::shared_ptr<
-            const opentxs::blockchain::bitcoin::block::Block> = 0;
-    using OutputBuilder = std::tuple<
-        opentxs::blockchain::Amount,
-        std::unique_ptr<const opentxs::blockchain::bitcoin::block::Script>,
-        UnallocatedSet<opentxs::blockchain::crypto::Key>>;
+        -> std::shared_ptr<const blockchain::bitcoin::block::Block> = 0;
     virtual auto BitcoinGenerationTransaction(
-        const opentxs::blockchain::Type chain,
-        const opentxs::blockchain::block::Height height,
-        UnallocatedVector<OutputBuilder>&& outputs,
+        const blockchain::Type chain,
+        const blockchain::block::Height height,
+        UnallocatedVector<blockchain::OutputBuilder>&& outputs,
         const UnallocatedCString& coinbase = {},
         const std::int32_t version = 1) const noexcept -> Transaction_p = 0;
     virtual auto BitcoinScriptNullData(
-        const opentxs::blockchain::Type chain,
+        const blockchain::Type chain,
         const UnallocatedVector<ReadView>& data) const noexcept
-        -> std::unique_ptr<
-            const opentxs::blockchain::bitcoin::block::Script> = 0;
+        -> std::unique_ptr<const blockchain::bitcoin::block::Script> = 0;
     virtual auto BitcoinScriptP2MS(
-        const opentxs::blockchain::Type chain,
+        const blockchain::Type chain,
         const std::uint8_t M,
         const std::uint8_t N,
         const UnallocatedVector<const opentxs::crypto::key::EllipticCurve*>&
             publicKeys) const noexcept
-        -> std::unique_ptr<
-            const opentxs::blockchain::bitcoin::block::Script> = 0;
+        -> std::unique_ptr<const blockchain::bitcoin::block::Script> = 0;
     virtual auto BitcoinScriptP2PK(
-        const opentxs::blockchain::Type chain,
+        const blockchain::Type chain,
         const opentxs::crypto::key::EllipticCurve& publicKey) const noexcept
-        -> std::unique_ptr<
-            const opentxs::blockchain::bitcoin::block::Script> = 0;
+        -> std::unique_ptr<const blockchain::bitcoin::block::Script> = 0;
     virtual auto BitcoinScriptP2PKH(
-        const opentxs::blockchain::Type chain,
+        const blockchain::Type chain,
         const opentxs::crypto::key::EllipticCurve& publicKey) const noexcept
-        -> std::unique_ptr<
-            const opentxs::blockchain::bitcoin::block::Script> = 0;
+        -> std::unique_ptr<const blockchain::bitcoin::block::Script> = 0;
     virtual auto BitcoinScriptP2SH(
-        const opentxs::blockchain::Type chain,
-        const opentxs::blockchain::bitcoin::block::Script& script)
-        const noexcept -> std::unique_ptr<
-            const opentxs::blockchain::bitcoin::block::Script> = 0;
+        const blockchain::Type chain,
+        const blockchain::bitcoin::block::Script& script) const noexcept
+        -> std::unique_ptr<const blockchain::bitcoin::block::Script> = 0;
     virtual auto BitcoinScriptP2WPKH(
-        const opentxs::blockchain::Type chain,
+        const blockchain::Type chain,
         const opentxs::crypto::key::EllipticCurve& publicKey) const noexcept
-        -> std::unique_ptr<
-            const opentxs::blockchain::bitcoin::block::Script> = 0;
+        -> std::unique_ptr<const blockchain::bitcoin::block::Script> = 0;
     virtual auto BitcoinScriptP2WSH(
-        const opentxs::blockchain::Type chain,
-        const opentxs::blockchain::bitcoin::block::Script& script)
-        const noexcept -> std::unique_ptr<
-            const opentxs::blockchain::bitcoin::block::Script> = 0;
+        const blockchain::Type chain,
+        const blockchain::bitcoin::block::Script& script) const noexcept
+        -> std::unique_ptr<const blockchain::bitcoin::block::Script> = 0;
     virtual auto BitcoinTransaction(
-        const opentxs::blockchain::Type chain,
+        const blockchain::Type chain,
         const ReadView bytes,
         const bool isGeneration,
         const Time& time = Clock::now()) const noexcept
-        -> std::unique_ptr<
-            const opentxs::blockchain::bitcoin::block::Transaction> = 0;
+        -> std::unique_ptr<const blockchain::bitcoin::block::Transaction> = 0;
     virtual auto BlockchainAddress(
-        const opentxs::blockchain::p2p::Protocol protocol,
-        const opentxs::blockchain::p2p::Network network,
+        const blockchain::p2p::Protocol protocol,
+        const blockchain::p2p::Network network,
         const opentxs::Data& bytes,
         const std::uint16_t port,
-        const opentxs::blockchain::Type chain,
+        const blockchain::Type chain,
         const Time lastConnected,
-        const UnallocatedSet<opentxs::blockchain::p2p::Service>& services,
-        const bool incoming = false) const -> OTBlockchainAddress = 0;
+        const UnallocatedSet<blockchain::p2p::Service>& services,
+        const bool incoming = false) const -> blockchain::p2p::Address = 0;
     virtual auto BlockchainAddress(
-        const opentxs::blockchain::p2p::Address::SerializedType& serialized)
-        const -> OTBlockchainAddress = 0;
-#endif  // OT_BLOCKCHAIN
+        const proto::BlockchainPeerAddress& serialized) const
+        -> blockchain::p2p::Address = 0;
     virtual auto BlockchainSyncMessage(
         const opentxs::network::zeromq::Message& in) const noexcept
         -> std::unique_ptr<opentxs::network::otdht::Base> = 0;
-#if OT_BLOCKCHAIN
-    using BlockHeaderP = std::unique_ptr<opentxs::blockchain::block::Header>;
+    using BlockHeaderP = std::unique_ptr<blockchain::block::Header>;
     virtual auto BlockHeader(const ReadView protobuf) const -> BlockHeaderP = 0;
-    virtual auto BlockHeader(
-        const opentxs::blockchain::Type type,
-        const ReadView native) const -> BlockHeaderP = 0;
-    virtual auto BlockHeader(const opentxs::blockchain::block::Block& block)
+    virtual auto BlockHeader(const blockchain::Type type, const ReadView native)
         const -> BlockHeaderP = 0;
-    virtual auto BlockHeaderForUnitTests(
-        const opentxs::blockchain::block::Hash& hash,
-        const opentxs::blockchain::block::Hash& parent,
-        const opentxs::blockchain::block::Height height) const
+    virtual auto BlockHeader(const blockchain::block::Block& block) const
         -> BlockHeaderP = 0;
-#endif  // OT_BLOCKCHAIN
+    virtual auto BlockHeaderForUnitTests(
+        const blockchain::block::Hash& hash,
+        const blockchain::block::Hash& parent,
+        const blockchain::block::Height height) const -> BlockHeaderP = 0;
     virtual auto ConnectionReply(
         const Nym_p& nym,
         const identifier::Nym& initiator,

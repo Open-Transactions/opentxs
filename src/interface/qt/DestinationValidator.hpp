@@ -9,17 +9,14 @@
 #include <QValidator>
 #include <memory>
 
-#include "1_Internal.hpp"
 #include "interface/ui/accountactivity/AccountActivity.hpp"
 #include "opentxs/blockchain/BlockchainType.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/interface/qt/DestinationValidator.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
 namespace api
 {
 namespace session
@@ -40,7 +37,6 @@ namespace implementation
 class AccountActivity;
 }  // namespace implementation
 }  // namespace ui
-// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

@@ -20,8 +20,6 @@
 #include "internal/otx/client/Pair.hpp"
 #include "internal/util/Lockable.hpp"
 #include "internal/util/Mutex.hpp"
-#include "opentxs/Version.hpp"
-#include "opentxs/Version.hpp"
 #include "opentxs/api/Context.hpp"
 #include "opentxs/api/session/OTX.hpp"
 #include "opentxs/core/contract/peer/ConnectionInfoType.hpp"
@@ -36,10 +34,8 @@
 #include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
 namespace api
 {
 namespace session
@@ -91,7 +87,6 @@ class PeerRequest;
 
 class Flag;
 class PasswordPrompt;
-// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

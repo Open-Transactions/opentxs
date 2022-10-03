@@ -16,7 +16,6 @@
 #include <stdexcept>
 #include <string_view>
 
-#include "opentxs/Version.hpp"
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/blockchain/BlockchainType.hpp"
 #include "opentxs/network/otdht/Block.hpp"
@@ -27,10 +26,8 @@
 #include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
 namespace api
 {
 class Session;
@@ -52,7 +49,6 @@ namespace lmdb
 class Database;
 }  // namespace lmdb
 }  // namespace storage
-// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

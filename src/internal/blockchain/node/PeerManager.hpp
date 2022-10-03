@@ -14,10 +14,8 @@
 #include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
 namespace blockchain
 {
 namespace bitcoin
@@ -47,7 +45,6 @@ namespace asio
 class Socket;
 }  // namespace asio
 }  // namespace network
-// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -56,9 +53,9 @@ namespace opentxs::blockchain::node::internal
 class PeerManager
 {
 public:
-    virtual auto AddIncomingPeer(const int id, std::uintptr_t endpoint)
+    virtual auto AddIncomingPeer(const int id, const p2p::Address& endpoint)
         const noexcept -> void = 0;
-    virtual auto AddPeer(const blockchain::p2p::Address& address) const noexcept
+    virtual auto AddPeer(const p2p::Address& address) const noexcept
         -> bool = 0;
     virtual auto BroadcastTransaction(
         const bitcoin::block::Transaction& tx) const noexcept -> bool = 0;
@@ -71,12 +68,10 @@ public:
     virtual auto Heartbeat() const noexcept -> void = 0;
     virtual auto JobReady(const PeerManagerJobs type) const noexcept
         -> void = 0;
-    virtual auto Listen(const blockchain::p2p::Address& address) const noexcept
-        -> bool = 0;
+    virtual auto Listen(const p2p::Address& address) const noexcept -> bool = 0;
     virtual auto LookupIncomingSocket(const int id) const noexcept(false)
         -> opentxs::network::asio::Socket = 0;
-    virtual auto Nonce() const noexcept
-        -> const blockchain::p2p::bitcoin::Nonce& = 0;
+    virtual auto Nonce() const noexcept -> const p2p::bitcoin::Nonce& = 0;
     virtual auto VerifyPeer(const int id, const UnallocatedCString& address)
         const noexcept -> void = 0;
 

@@ -5,20 +5,25 @@
 
 #pragma once
 
-#include "opentxs/Version.hpp"  // IWYU pragma: associated
-
 #include <cstdint>
 #include <optional>
 
+#include "opentxs/Export.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
+namespace api
+{
+namespace crypto
+{
+class Blockchain;
+}  // namespace crypto
+}  // namespace api
+
 namespace blockchain
 {
 namespace bitcoin
@@ -44,7 +49,6 @@ namespace proto
 {
 class BlockchainTransactionOutput;
 }  // namespace proto
-// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -57,7 +61,8 @@ public:
 
     OPENTXS_NO_EXPORT virtual auto Internal() const noexcept
         -> const internal::Output& = 0;
-    virtual auto Note() const noexcept -> UnallocatedCString = 0;
+    virtual auto Note(const api::crypto::Blockchain& crypto) const noexcept
+        -> UnallocatedCString = 0;
     virtual auto Keys() const noexcept -> UnallocatedVector<crypto::Key> = 0;
     virtual auto Payee() const noexcept -> ContactID = 0;
     virtual auto Payer() const noexcept -> ContactID = 0;

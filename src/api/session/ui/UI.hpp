@@ -40,10 +40,8 @@
 class QAbstractItemModel;
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
 namespace identifier
 {
 class Generic;
@@ -90,7 +88,6 @@ class SeedValidator;
 class UnitList;
 class UnitListQt;
 }  // namespace ui
-// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

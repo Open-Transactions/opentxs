@@ -5,20 +5,18 @@
 
 #pragma once
 
-#include "opentxs/Version.hpp"  // IWYU pragma: associated
-
 #include <cstddef>
 #include <functional>
 #include <string_view>
 
+#include "opentxs/Export.hpp"
 #include "opentxs/core/FixedByteArray.hpp"
 #include "opentxs/util/Bytes.hpp"
+#include "opentxs/util/Platform.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
 namespace blockchain
 {
 namespace block
@@ -26,7 +24,9 @@ namespace block
 class Hash;
 }  // namespace block
 }  // namespace blockchain
-// }  // namespace v1
+
+class Amount;
+struct HexType;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -45,8 +45,11 @@ namespace opentxs::blockchain::block
 class OPENTXS_EXPORT_TEMPLATE Hash : virtual public FixedByteArray<32>
 {
 public:
+    auto asAmount() const noexcept -> Amount;
+
     Hash() noexcept;
     Hash(const ReadView bytes) noexcept(false);
+    Hash(const HexType&, const ReadView bytes) noexcept(false);
     Hash(const Hash& rhs) noexcept;
     auto operator=(const Hash& rhs) noexcept -> Hash&;
 

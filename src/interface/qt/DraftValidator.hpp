@@ -15,10 +15,8 @@ class QObject;
 class QString;
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
 namespace ui
 {
 namespace implementation
@@ -31,7 +29,6 @@ namespace internal
 struct ActivityThread;
 }  // namespace internal
 }  // namespace ui
-// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

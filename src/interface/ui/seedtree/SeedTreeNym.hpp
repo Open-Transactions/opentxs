@@ -18,10 +18,8 @@
 #include "opentxs/util/Pimpl.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
 namespace api
 {
 namespace session
@@ -34,7 +32,6 @@ namespace ui
 {
 class SeedTreeNym;
 }  // namespace ui
-// }  // namespace v1
 }  // namespace opentxs
 
 class QVariant;

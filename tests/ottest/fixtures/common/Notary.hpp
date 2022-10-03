@@ -13,10 +13,8 @@
 #include "ottest/fixtures/integration/Helpers.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
 namespace api
 {
 namespace session
@@ -37,7 +35,6 @@ namespace identifier
 class Notary;
 class Nym;
 }  // namespace identifier
-// }  // namespace v1
 }  // namespace opentxs
 
 namespace ottest

@@ -6,7 +6,6 @@
 // IWYU pragma: no_forward_declare opentxs::api::Crypto
 
 #include "0_stdafx.hpp"              // IWYU pragma: associated
-#include "1_Internal.hpp"            // IWYU pragma: associated
 #include "opentxs/crypto/Bip32.hpp"  // IWYU pragma: associated
 
 #include <HDPath.pb.h>

@@ -21,7 +21,6 @@
 #include "blockchain/crypto/Subaccount.hpp"
 #include "internal/blockchain/crypto/Crypto.hpp"
 #include "internal/util/Mutex.hpp"
-#include "opentxs/Version.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/blockchain/crypto/Deterministic.hpp"
@@ -36,10 +35,8 @@
 #include "opentxs/util/Time.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
 namespace api
 {
 class Session;
@@ -65,7 +62,6 @@ class BlockchainDeterministicAccountData;
 }  // namespace proto
 
 class PasswordPrompt;
-// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

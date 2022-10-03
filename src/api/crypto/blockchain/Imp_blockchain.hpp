@@ -4,6 +4,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 // IWYU pragma: no_include "opentxs/blockchain/crypto/SubaccountType.hpp"
+// IWYU pragma: no_include "opentxs/core/Data.hpp"
 
 #pragma once
 
@@ -25,7 +26,6 @@
 #include "blockchain/database/common/Database.hpp"
 #include "internal/blockchain/database/common/Common.hpp"
 #include "internal/util/Mutex.hpp"
-#include "opentxs/Version.hpp"
 #include "opentxs/api/Context.hpp"
 #include "opentxs/api/crypto/Blockchain.hpp"
 #include "opentxs/blockchain/BlockchainType.hpp"
@@ -35,7 +35,6 @@
 #include "opentxs/blockchain/crypto/Subchain.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/blockchain/node/Manager.hpp"
-#include "opentxs/core/Amount.hpp"
 #include "opentxs/network/zeromq/ListenCallback.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/network/zeromq/socket/Publish.hpp"
@@ -45,10 +44,8 @@
 #include "opentxs/util/Time.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
 namespace api
 {
 namespace crypto
@@ -59,6 +56,7 @@ class Blockchain;
 namespace session
 {
 class Activity;
+class Client;
 class Contacts;
 }  // namespace session
 
@@ -111,7 +109,6 @@ class Contact;
 class Data;
 class Options;
 class PasswordPrompt;
-// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -182,7 +179,7 @@ struct BlockchainImp final : public Blockchain::Imp {
         -> void final;
 
     BlockchainImp(
-        const api::Session& api,
+        const api::session::Client& api,
         const api::session::Activity& activity,
         const api::session::Contacts& contacts,
         const api::Legacy& legacy,
@@ -193,6 +190,7 @@ struct BlockchainImp final : public Blockchain::Imp {
     ~BlockchainImp() final = default;
 
 private:
+    const api::session::Client& client_;
     const api::session::Activity& activity_;
     const CString key_generated_endpoint_;
     OTZMQPublishSocket transaction_updates_;

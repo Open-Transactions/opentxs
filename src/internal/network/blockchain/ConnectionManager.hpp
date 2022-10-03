@@ -16,15 +16,12 @@
 #include <tuple>
 #include <utility>
 
-#include "opentxs/Version.hpp"
 #include "opentxs/blockchain/p2p/Types.hpp"
 #include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
 namespace api
 {
 class Session;
@@ -34,10 +31,7 @@ namespace blockchain
 {
 namespace p2p
 {
-namespace internal
-{
-struct Address;
-}  // namespace internal
+class Address;
 }  // namespace p2p
 }  // namespace blockchain
 
@@ -56,7 +50,6 @@ class Message;
 }  // namespace network
 
 class Log;
-// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -68,7 +61,7 @@ public:
     using EndpointData = std::pair<UnallocatedCString, std::uint16_t>;
     using SendPromise = std::promise<bool>;
     using BodySize = std::function<std::size_t(const zeromq::Frame& header)>;
-    using Address = opentxs::blockchain::p2p::internal::Address;
+    using Address = opentxs::blockchain::p2p::Address;
 
     static auto TCP(
         const api::Session& api,

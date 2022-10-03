@@ -4,7 +4,6 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 #include "0_stdafx.hpp"                     // IWYU pragma: associated
-#include "1_Internal.hpp"                   // IWYU pragma: associated
 #include "blockchain/database/Headers.hpp"  // IWYU pragma: associated
 
 #include <BlockchainBlockHeader.pb.h>
@@ -24,9 +23,9 @@
 #include "blockchain/node/UpdateTransaction.hpp"
 #include "internal/api/session/Endpoints.hpp"
 #include "internal/api/session/FactoryAPI.hpp"
+#include "internal/blockchain/Params.hpp"
 #include "internal/blockchain/bitcoin/block/Factory.hpp"
 #include "internal/blockchain/bitcoin/block/Header.hpp"  // IWYU pragma: keep
-#include "internal/blockchain/block/Factory.hpp"
 #include "internal/blockchain/block/Header.hpp"
 #include "internal/blockchain/database/Types.hpp"
 #include "internal/blockchain/node/Endpoints.hpp"
@@ -39,13 +38,14 @@
 #include "internal/util/storage/lmdb/Transaction.hpp"
 #include "internal/util/storage/lmdb/Types.hpp"
 #include "opentxs/api/network/Network.hpp"
+#include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Endpoints.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/bitcoin/block/Header.hpp"
+#include "opentxs/blockchain/block/Block.hpp"
 #include "opentxs/blockchain/block/Header.hpp"
-#include "opentxs/blockchain/node/HeaderOracle.hpp"
 #include "opentxs/blockchain/node/Manager.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
@@ -520,7 +520,8 @@ auto Headers::HeaderExists(const block::Hash& hash) const noexcept -> bool
 auto Headers::import_genesis(const blockchain::Type type) const noexcept -> void
 {
     auto success{false};
-    const auto& hash = node::HeaderOracle::GenesisBlockHash(type);
+    const auto& genesis = params::get(type).GenesisBlock().Header();
+    const auto& hash = genesis.Hash();
 
     try {
         const auto serialized = common_.LoadBlockHeader(hash);
@@ -542,15 +543,9 @@ auto Headers::import_genesis(const blockchain::Type type) const noexcept -> void
             OT_ASSERT(result.first);
         }
     } catch (...) {
-        auto genesis = std::unique_ptr<blockchain::block::Header>{
-            factory::GenesisBlockHeader(api_, type)};
-
-        OT_ASSERT(genesis);
-        OT_ASSERT(hash == genesis->Hash());
-
         success = common_.StoreBlockHeaders([&] {
             auto out = UpdatedHeader{};
-            out.try_emplace(genesis->Hash(), genesis->clone(), true);
+            out.try_emplace(genesis.Hash(), genesis.clone(), true);
 
             return out;
         }());
@@ -564,7 +559,7 @@ auto Headers::import_genesis(const blockchain::Type type) const noexcept -> void
                           [&] {
                               auto proto =
                                   block::internal::Header::SerializedType{};
-                              genesis->Internal().Serialize(proto);
+                              genesis.Internal().Serialize(proto);
 
                               return proto::ToString(proto.local());
                           }())
@@ -616,7 +611,7 @@ auto Headers::load_bitcoin_header(const block::Hash& hash) const
         throw std::out_of_range("Block header metadata not found");
     }
 
-    auto output = factory::BitcoinBlockHeader(api_, proto);
+    auto output = factory::BitcoinBlockHeader(api_.Crypto(), proto);
 
     if (false == bool(output)) {
         throw std::out_of_range("Wrong header format");

@@ -7,14 +7,13 @@
 
 #pragma once
 
-#include "opentxs/Version.hpp"  // IWYU pragma: associated
-
 #include <chrono>
 #include <cstddef>
 #include <filesystem>
 #include <string_view>
 #include <utility>
 
+#include "opentxs/Export.hpp"
 #include "opentxs/core/Armored.hpp"
 #include "opentxs/core/String.hpp"
 #include "opentxs/core/Types.hpp"
@@ -32,8 +31,6 @@ class error_code;
 
 namespace opentxs
 {
-// inline namespace v1
-// {
 namespace blockchain
 {
 namespace block
@@ -66,7 +63,6 @@ class Armored;
 class Data;
 class String;
 class StringXML;
-// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

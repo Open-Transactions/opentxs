@@ -18,13 +18,10 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
-// inline namespace v1
-// {
 namespace internal
 {
 class Logger;
 }  // namespace internal
-// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

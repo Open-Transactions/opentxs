@@ -5,11 +5,10 @@
 
 #pragma once
 
-#include "opentxs/Version.hpp"  // IWYU pragma: associated
-
 #include <future>
 #include <memory>
 
+#include "opentxs/Export.hpp"
 #include "opentxs/util/Container.hpp"
 
 namespace opentxs::storage

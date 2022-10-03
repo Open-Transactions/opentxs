@@ -8,10 +8,8 @@
 #include "opentxs/otx/blind/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
 namespace crypto
 {
 namespace key
@@ -45,7 +43,6 @@ class Purse;
 }  // namespace proto
 
 class PasswordPrompt;
-// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

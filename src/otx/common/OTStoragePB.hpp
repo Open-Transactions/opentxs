@@ -13,7 +13,6 @@
 #include <Moneychanger.pb.h>
 #include <iostream>
 
-#include "opentxs/Version.hpp"
 #include "opentxs/util/Container.hpp"
 
 namespace opentxs::OTDB

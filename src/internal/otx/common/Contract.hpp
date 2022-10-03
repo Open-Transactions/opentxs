@@ -13,7 +13,6 @@
 
 #include "internal/otx/common/StringXML.hpp"
 #include "internal/otx/common/crypto/Signature.hpp"
-#include "opentxs/Version.hpp"
 #include "opentxs/core/String.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/crypto/Types.hpp"
@@ -35,10 +34,8 @@ using IrrXMLReader = IIrrXMLReader<char, IXMLBase>;
 }  // namespace io
 }  // namespace irr
 
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
 namespace api
 {
 class Session;
@@ -60,7 +57,6 @@ class Nym;
 class Armored;
 class PasswordPrompt;
 class Tag;
-// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

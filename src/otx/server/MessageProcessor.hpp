@@ -19,7 +19,6 @@
 #include "internal/otx/server/MessageProcessor.hpp"
 #include "internal/otx/server/Types.hpp"
 #include "internal/util/Lockable.hpp"
-#include "opentxs/Version.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/network/zeromq/ListenCallback.hpp"
 #include "opentxs/network/zeromq/ReplyCallback.hpp"
@@ -34,10 +33,8 @@
 #include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
 namespace api
 {
 namespace session
@@ -78,7 +75,6 @@ class Server;
 class Data;
 class PasswordPrompt;
 class Secret;
-// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

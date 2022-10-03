@@ -7,13 +7,36 @@
 
 #include "opentxs/blockchain/bitcoin/block/Header.hpp"
 
+#include <memory>
+
 #include "internal/blockchain/block/Header.hpp"
+
+// NOLINTBEGIN(modernize-concat-nested-namespaces)
+namespace opentxs
+{
+namespace blockchain
+{
+namespace bitcoin
+{
+namespace block
+{
+class Header;
+}  // namespace block
+}  // namespace bitcoin
+}  // namespace blockchain
+}  // namespace opentxs
+// NOLINTEND(modernize-concat-nested-namespaces)
 
 namespace opentxs::blockchain::bitcoin::block::internal
 {
 class Header : virtual public blockchain::block::internal::Header
 {
 public:
+    static auto Blank() noexcept -> Header&;
+
+    virtual auto clone_bitcoin() const noexcept
+        -> std::unique_ptr<block::Header> = 0;
+
     ~Header() override = default;
 };
 }  // namespace opentxs::blockchain::bitcoin::block::internal

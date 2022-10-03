@@ -5,10 +5,9 @@
 
 #pragma once
 
-#include "opentxs/Version.hpp"  // IWYU pragma: associated
-
 #include <cstdint>
 
+#include "opentxs/Export.hpp"
 #include "opentxs/blockchain/bitcoin/block/Types.hpp"
 
 namespace opentxs::blockchain::bitcoin::block

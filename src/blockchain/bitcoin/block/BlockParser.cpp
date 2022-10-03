@@ -4,7 +4,6 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 #include "0_stdafx.hpp"                              // IWYU pragma: associated
-#include "1_Internal.hpp"                            // IWYU pragma: associated
 #include "blockchain/bitcoin/block/BlockParser.hpp"  // IWYU pragma: associated
 
 #include <iterator>
@@ -23,7 +22,7 @@
 namespace opentxs::factory
 {
 auto parse_header(
-    const api::Session& api,
+    const api::Crypto& crypto,
     const blockchain::Type chain,
     const ReadView in,
     ByteIterator& it,
@@ -42,7 +41,7 @@ auto parse_header(
     }
 
     auto pHeader = BitcoinBlockHeader(
-        api,
+        crypto,
         chain,
         {reinterpret_cast<const char*>(it), BlockReturnType::header_bytes_});
 
@@ -56,7 +55,7 @@ auto parse_header(
 }
 
 auto parse_transactions(
-    const api::Session& api,
+    const api::Crypto& crypto,
     const blockchain::Type chain,
     const ReadView in,
     const blockchain::bitcoin::block::Header& header,
@@ -91,7 +90,7 @@ auto parse_transactions(
 
     while (transactions.size() < transactionCount) {
         auto data = blockchain::bitcoin::EncodedTransaction::Deserialize(
-            api,
+            crypto,
             chain,
             ReadView{
                 reinterpret_cast<const char*>(it), in.size() - expectedSize});
@@ -102,11 +101,11 @@ auto parse_transactions(
         transactions.emplace(
             reader(txid),
             BitcoinTransaction(
-                api, chain, ++counter, header.Timestamp(), std::move(data)));
+                chain, ++counter, header.Timestamp(), std::move(data)));
     }
 
     const auto merkle =
-        BlockReturnType::calculate_merkle_value(api, chain, index);
+        BlockReturnType::calculate_merkle_value(crypto, chain, index);
 
     if (header.MerkleRoot() != merkle) {
         throw std::runtime_error("Invalid merkle hash");

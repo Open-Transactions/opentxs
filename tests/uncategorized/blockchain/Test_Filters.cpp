@@ -14,6 +14,7 @@
 #include <utility>
 
 #include "internal/blockchain/Blockchain.hpp"
+#include "internal/blockchain/Params.hpp"
 #include "internal/blockchain/bitcoin/cfilter/GCS.hpp"
 #include "internal/util/P0330.hpp"
 
@@ -480,8 +481,9 @@ TEST_F(Test_Filters, hash)
 {
     namespace bc = ot::blockchain::internal;
 
-    const auto& block_0 = ot::blockchain::node::HeaderOracle::GenesisBlockHash(
-        ot::blockchain::Type::Bitcoin_testnet3);
+    const auto& block_0 =
+        ot::blockchain::params::get(ot::blockchain::Type::Bitcoin_testnet3)
+            .GenesisHash();
     const auto preimage = api_.Factory().DataFromHex("0x019dfca8");
     const auto filter_0 = api_.Factory().DataFromHex("0x9dfca8");
     const auto gcs = ot::factory::GCS(

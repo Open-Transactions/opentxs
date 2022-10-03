@@ -5,7 +5,14 @@
 
 #pragma once
 
-#include "network/blockchain/peer/Imp.hpp"  // IWYU pragma: associated
+#include <string_view>
+#include <variant>
+
+#include "internal/blockchain/node/Types.hpp"
+#include "internal/blockchain/node/blockoracle/BlockBatch.hpp"
+#include "internal/blockchain/node/headeroracle/HeaderJob.hpp"
+#include "internal/network/blockchain/Peer.hpp"
+#include "network/blockchain/peer/Imp.hpp"
 
 namespace opentxs::network::blockchain::internal
 {

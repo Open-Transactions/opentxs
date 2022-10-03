@@ -10,11 +10,10 @@
 // IWYU pragma: no_include "opentxs/core/UnitType.hpp"
 // IWYU pragma: no_include "opentxs/interface/ui/Blockchains.hpp"
 
-#include "opentxs/Version.hpp"  // IWYU pragma: associated
-
 #include <cstddef>
 #include <iosfwd>
 
+#include "opentxs/Export.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/core/Types.hpp"
 #include "opentxs/crypto/Types.hpp"
@@ -24,10 +23,8 @@
 class QAbstractItemModel;
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
 namespace api
 {
 namespace session
@@ -86,7 +83,6 @@ class SeedValidator;
 class UnitList;
 class UnitListQt;
 }  // namespace ui
-// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

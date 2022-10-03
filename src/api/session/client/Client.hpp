@@ -17,7 +17,6 @@
 #include "internal/otx/client/Pair.hpp"
 #include "internal/otx/client/ServerAction.hpp"
 #include "internal/util/Types.hpp"
-#include "opentxs/Version.hpp"
 #include "opentxs/api/crypto/Blockchain.hpp"
 #include "opentxs/api/network/ZMQ.hpp"
 #include "opentxs/api/session/Activity.hpp"
@@ -28,10 +27,8 @@
 #include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
 namespace api
 {
 namespace session
@@ -80,7 +77,6 @@ class Flag;
 class OTAPI_Exec;
 class OT_API;
 class Options;
-// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

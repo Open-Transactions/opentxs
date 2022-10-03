@@ -4,7 +4,6 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 #include "0_stdafx.hpp"                             // IWYU pragma: associated
-#include "1_Internal.hpp"                           // IWYU pragma: associated
 #include "blockchain/bitcoin/p2p/message/Addr.hpp"  // IWYU pragma: associated
 
 #include <cstddef>
@@ -19,6 +18,7 @@
 #include "internal/blockchain/p2p/P2P.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/Time.hpp"
+#include "opentxs/blockchain/p2p/Address.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/network/blockchain/bitcoin/CompactSize.hpp"
@@ -138,8 +138,8 @@ auto BitcoinP2PAddr(
     const api::Session& api,
     const blockchain::Type network,
     const blockchain::p2p::bitcoin::ProtocolVersion version,
-    UnallocatedVector<std::unique_ptr<blockchain::p2p::internal::Address>>&&
-        addresses) -> blockchain::p2p::bitcoin::message::internal::Addr*
+    UnallocatedVector<blockchain::p2p::Address>&& addresses)
+    -> blockchain::p2p::bitcoin::message::internal::Addr*
 {
     namespace bitcoin = blockchain::p2p::bitcoin;
     using ReturnType = bitcoin::message::implementation::Addr;
@@ -176,7 +176,7 @@ Addr::Addr(
 Addr::BitcoinFormat_31402::BitcoinFormat_31402(
     const blockchain::Type chain,
     const ProtocolVersion version,
-    const p2p::internal::Address& address)
+    const p2p::Address& address)
     : time_(
           static_cast<std::uint32_t>(Clock::to_time_t(address.LastConnected())))
     , data_(chain, version, address)
@@ -256,11 +256,7 @@ auto Addr::payload(AllocateOutput out) const noexcept -> bool
         std::memcpy(i, cs.data(), cs.size());
         std::advance(i, cs.size());
 
-        for (const auto& pAddress : payload_) {
-            OT_ASSERT(pAddress);
-
-            const auto& address = *pAddress;
-
+        for (const auto& address : payload_) {
             if (SerializeTimestamp()) {
                 const auto raw =
                     BitcoinFormat_31402{header_->Network(), version_, address};

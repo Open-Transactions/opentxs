@@ -7,9 +7,6 @@
 #include <gtest/gtest.h>
 #include <opentxs/opentxs.hpp>
 #include <cstdint>
-#include <memory>
-
-#include "internal/blockchain/Blockchain.hpp"
 
 namespace be = boost::endian;
 namespace ot = opentxs;
@@ -32,62 +29,49 @@ TEST_F(Test_NumericHash, init_opentxs) {}
 TEST_F(Test_NumericHash, number_low_1)
 {
     // Little endian
-    const auto raw = []() {
-        auto out = ot::ByteArray{};
-        out.DecodeHex("0x01");
-        return out;
-    }();
+    const auto raw = ot::ByteArray{ot::IsHex, "0x01"};
     const ot::UnallocatedCString decimal{"1"};
     // Big endian
     const ot::UnallocatedCString hex{
         "0000000000000000000000000000000000000000000000000000000000000001"};
+    const auto number = ot::blockchain::block::NumericHash{raw};
 
-    const ot::OTNumericHash number{ot::factory::NumericHash(raw)};
-
-    EXPECT_EQ(decimal, number->Decimal());
-    EXPECT_EQ(hex, number->asHex());
+    EXPECT_EQ(decimal, number.Decimal());
+    EXPECT_EQ(hex, number.asHex());
 }
 
 TEST_F(Test_NumericHash, number_low_32)
 {
     // Little endian
-    const auto raw = []() {
-        auto out = ot::ByteArray{};
-        out.DecodeHex("0x01000000000000000000000000000000000000000000000000000"
-                      "00000000000");
-        return out;
-    }();
+    const auto raw = ot::ByteArray{
+        ot::IsHex,
+        "0x0100000000000000000000000000000000000000000000000000000000000000"};
     const ot::UnallocatedCString decimal{"1"};
     // Big endian
     const ot::UnallocatedCString hex{
         "0000000000000000000000000000000000000000000000000000000000000001"};
+    const auto number = ot::blockchain::block::NumericHash{raw};
 
-    const ot::OTNumericHash number{ot::factory::NumericHash(raw)};
-
-    EXPECT_EQ(decimal, number->Decimal());
-    EXPECT_EQ(hex, number->asHex());
+    EXPECT_EQ(decimal, number.Decimal());
+    EXPECT_EQ(hex, number.asHex());
 }
 
 TEST_F(Test_NumericHash, number_high)
 {
     // Little endian
-    const auto raw = []() {
-        auto out = ot::ByteArray{};
-        out.DecodeHex("0xf1fffffffffffffffffffffffffffffffffffffffffffffffffff"
-                      "fffffffffff");
-        return out;
-    }();
+    const auto raw = ot::ByteArray{
+        ot::IsHex,
+        "0xf1ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"};
     const ot::UnallocatedCString decimal{
-        "115792089237316195423570985008687907853269984665"
-        "640564039457584007913129639921"};
+        "1157920892373161954235709850086879078532699846656405640394575840079131"
+        "29639921"};
     // Big endian
     const ot::UnallocatedCString hex{
         "fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff1"};
+    const auto number = ot::blockchain::block::NumericHash{raw};
 
-    const ot::OTNumericHash number{ot::factory::NumericHash(raw)};
-
-    EXPECT_EQ(decimal, number->Decimal());
-    EXPECT_EQ(hex, number->asHex());
+    EXPECT_EQ(decimal, number.Decimal());
+    EXPECT_EQ(hex, number.asHex());
 }
 
 TEST_F(Test_NumericHash, nBits_1)
@@ -96,11 +80,10 @@ TEST_F(Test_NumericHash, nBits_1)
     const ot::UnallocatedCString decimal{"2452881408"};
     const ot::UnallocatedCString hex{
         "0000000000000000000000000000000000000000000000000000000092340000"};
+    const auto number = ot::blockchain::block::NumericHash{nBits};
 
-    const ot::OTNumericHash number{ot::factory::NumericHashNBits(nBits)};
-
-    EXPECT_EQ(decimal, number->Decimal());
-    EXPECT_EQ(hex, number->asHex());
+    EXPECT_EQ(decimal, number.Decimal());
+    EXPECT_EQ(hex, number.asHex());
 }
 
 TEST_F(Test_NumericHash, nBits_2)
@@ -109,11 +92,10 @@ TEST_F(Test_NumericHash, nBits_2)
     const ot::UnallocatedCString decimal{"305419776"};
     const ot::UnallocatedCString hex{
         "0000000000000000000000000000000000000000000000000000000012345600"};
+    const auto number = ot::blockchain::block::NumericHash{nBits};
 
-    const ot::OTNumericHash number{ot::factory::NumericHashNBits(nBits)};
-
-    EXPECT_EQ(decimal, number->Decimal());
-    EXPECT_EQ(hex, number->asHex());
+    EXPECT_EQ(decimal, number.Decimal());
+    EXPECT_EQ(hex, number.asHex());
 }
 
 TEST_F(Test_NumericHash, nBits_3)
@@ -123,11 +105,10 @@ TEST_F(Test_NumericHash, nBits_3)
         "680733321990486529407107157001552378184394215934016880640"};
     const ot::UnallocatedCString hex{
         "00000000000000001bc330000000000000000000000000000000000000000000"};
+    const auto number = ot::blockchain::block::NumericHash{nBits};
 
-    const ot::OTNumericHash number{ot::factory::NumericHashNBits(nBits)};
-
-    EXPECT_EQ(decimal, number->Decimal());
-    EXPECT_EQ(hex, number->asHex());
+    EXPECT_EQ(decimal, number.Decimal());
+    EXPECT_EQ(hex, number.asHex());
 }
 
 TEST_F(Test_NumericHash, nBits_4)
@@ -137,11 +118,10 @@ TEST_F(Test_NumericHash, nBits_4)
         "1653206561150525499452195696179626311675293455763937233695932416"};
     const ot::UnallocatedCString hex{
         "00000000000404cb000000000000000000000000000000000000000000000000"};
+    const auto number = ot::blockchain::block::NumericHash{nBits};
 
-    const ot::OTNumericHash number{ot::factory::NumericHashNBits(nBits)};
-
-    EXPECT_EQ(decimal, number->Decimal());
-    EXPECT_EQ(hex, number->asHex());
+    EXPECT_EQ(decimal, number.Decimal());
+    EXPECT_EQ(hex, number.asHex());
 }
 
 TEST_F(Test_NumericHash, nBits_5)
@@ -151,14 +131,12 @@ TEST_F(Test_NumericHash, nBits_5)
         "26959535291011309493156476344723991336010898738574164086137773096960"};
     const ot::UnallocatedCString hex{
         "00000000ffff0000000000000000000000000000000000000000000000000000"};
+    const auto number = ot::blockchain::block::NumericHash{nBits};
+    const auto work =
+        ot::blockchain::Work{number, ot::blockchain::Type::Bitcoin};
 
-    const ot::OTNumericHash number{ot::factory::NumericHashNBits(nBits)};
-    const auto work = std::unique_ptr<opentxs::blockchain::Work>(
-        ot::factory::Work(ot::blockchain::Type::Bitcoin, number));
-
-    ASSERT_TRUE(work);
-    EXPECT_EQ(decimal, number->Decimal());
-    EXPECT_EQ(hex, number->asHex());
-    EXPECT_STREQ("1", work->Decimal().c_str());
+    EXPECT_EQ(decimal, number.Decimal());
+    EXPECT_EQ(hex, number.asHex());
+    EXPECT_STREQ("1", work.Decimal().c_str());
 }
 }  // namespace ottest

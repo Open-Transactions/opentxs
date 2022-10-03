@@ -18,10 +18,8 @@ using MDB_txn = struct MDB_txn;
 }
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
 namespace storage
 {
 namespace lmdb
@@ -29,7 +27,6 @@ namespace lmdb
 class Transaction;
 }  // namespace lmdb
 }  // namespace storage
-// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

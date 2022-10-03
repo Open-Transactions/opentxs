@@ -8,12 +8,11 @@
 
 #pragma once
 
-#include "opentxs/Version.hpp"  // IWYU pragma: associated
-
 #include <cstddef>
 #include <cstdint>
 #include <tuple>
 
+#include "opentxs/Export.hpp"
 #include "opentxs/core/Types.hpp"
 #include "opentxs/identity/Types.hpp"
 #include "opentxs/util/Container.hpp"

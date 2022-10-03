@@ -8,10 +8,8 @@
 #include <boost/smart_ptr/shared_ptr.hpp>
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
 namespace blockchain
 {
 namespace bitcoin
@@ -35,7 +33,6 @@ namespace identifier
 {
 class Generic;
 }  // namespace identifier
-// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

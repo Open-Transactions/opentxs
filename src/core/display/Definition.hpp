@@ -5,8 +5,7 @@
 
 #pragma once
 
-#include "0_stdafx.hpp"    // IWYU pragma: associated
-#include "1_Internal.hpp"  // IWYU pragma: associated
+#include "0_stdafx.hpp"  // IWYU pragma: associated
 
 #include <cstddef>
 #include <mutex>

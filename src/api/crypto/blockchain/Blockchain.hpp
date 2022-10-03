@@ -51,15 +51,14 @@
 #include "opentxs/util/Time.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
 namespace api
 {
 namespace session
 {
 class Activity;
+class Client;
 class Contacts;
 class Factory;
 }  // namespace session
@@ -116,7 +115,6 @@ class Data;
 class Options;
 class PasswordPrompt;
 class PaymentCode;
-// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -282,7 +280,7 @@ public:
     auto Init() noexcept -> void final;
 
     Blockchain(
-        const api::Session& api,
+        const api::session::Client& api,
         const api::session::Activity& activity,
         const api::session::Contacts& contacts,
         const api::Legacy& legacy,

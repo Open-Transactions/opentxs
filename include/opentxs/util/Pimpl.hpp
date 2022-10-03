@@ -5,10 +5,10 @@
 
 #pragma once
 
-#include "opentxs/Version.hpp"  // IWYU pragma: associated
-
 #include <cassert>
 #include <memory>
+
+#include "opentxs/Export.hpp"
 
 namespace opentxs
 {

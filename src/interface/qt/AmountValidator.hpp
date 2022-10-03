@@ -21,7 +21,6 @@
 #include <string_view>
 #include <tuple>
 
-#include "1_Internal.hpp"
 #include "interface/ui/accountactivity/AccountActivity.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/core/Amount.hpp"
@@ -37,10 +36,8 @@
 #include "opentxs/util/Log.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
 namespace implementation
 {
 namespace implementation
@@ -48,7 +45,6 @@ namespace implementation
 class AccountActivity;
 }  // namespace implementation
 }  // namespace implementation
-// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

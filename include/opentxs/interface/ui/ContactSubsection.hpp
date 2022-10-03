@@ -5,18 +5,15 @@
 
 #pragma once
 
-#include "opentxs/Version.hpp"  // IWYU pragma: associated
-
+#include "opentxs/Export.hpp"
 #include "opentxs/interface/ui/List.hpp"
 #include "opentxs/interface/ui/ListRow.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/SharedPimpl.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
 namespace ui
 {
 class ContactItem;
@@ -24,7 +21,6 @@ class ContactSubsection;
 }  // namespace ui
 
 using OTUIContactSubsection = SharedPimpl<ui::ContactSubsection>;
-// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

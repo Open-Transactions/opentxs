@@ -13,7 +13,6 @@
 #include <limits>
 #include <memory>
 
-#include "opentxs/Version.hpp"
 #include "opentxs/core/Armored.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/String.hpp"

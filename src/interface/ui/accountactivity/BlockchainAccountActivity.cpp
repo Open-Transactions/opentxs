@@ -3,8 +3,7 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#include "0_stdafx.hpp"    // IWYU pragma: associated
-#include "1_Internal.hpp"  // IWYU pragma: associated
+#include "0_stdafx.hpp"  // IWYU pragma: associated
 #include "interface/ui/accountactivity/BlockchainAccountActivity.hpp"  // IWYU pragma: associated
 
 #include <BlockchainTransaction.pb.h>
@@ -138,11 +137,14 @@ auto BlockchainAccountActivity::DepositAddress(
         api_.Crypto().Blockchain().Account(primary_id_, chain_);
     const auto reason =
         api_.Factory().PasswordPrompt("Calculating next deposit address");
-    const auto& styles = blockchain::params::Chains().at(chain_).styles_;
 
-    if (0u == styles.size()) { return {}; }
+    if (auto s = blockchain::params::get(chain_).DefaultAddressStyle(); s) {
 
-    return wallet.GetDepositAddress(styles.front().first, reason);
+        return wallet.GetDepositAddress(*s, reason);
+    } else {
+
+        return {};
+    }
 }
 
 auto BlockchainAccountActivity::display_balance(
@@ -334,7 +336,7 @@ auto BlockchainAccountActivity::process_contact(const Message& in) noexcept
         for_each_row([&](const auto& row) {
             for (const auto& id : row.Contacts()) {
                 if (contactID == id) {
-                    out.emplace(blockchain::NumberToHash(api_, row.UUID()));
+                    out.emplace(blockchain::NumberToHash(row.UUID()));
 
                     break;
                 }
@@ -445,7 +447,10 @@ auto BlockchainAccountActivity::process_txid(const Message& in) noexcept -> void
     if (chain != chain_) { return; }
 
     const auto proto = proto::Factory<proto::BlockchainTransaction>(body.at(3));
-    process_txid(txid, factory::BitcoinTransaction(api, proto));
+    process_txid(
+        txid,
+        factory::BitcoinTransaction(
+            api.Crypto().Blockchain(), api.Factory(), proto));
 }
 
 auto BlockchainAccountActivity::process_txid(const Data& txid) noexcept

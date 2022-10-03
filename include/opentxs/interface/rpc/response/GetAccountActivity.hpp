@@ -5,17 +5,14 @@
 
 #pragma once
 
-#include "opentxs/Version.hpp"  // IWYU pragma: associated
-
+#include "opentxs/Export.hpp"
 #include "opentxs/interface/rpc/AccountEvent.hpp"
 #include "opentxs/interface/rpc/response/Base.hpp"
 #include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
 namespace proto
 {
 class RPCResponse;
@@ -30,7 +27,6 @@ class GetAccountActivity;
 
 class AccountEvent;
 }  // namespace rpc
-// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

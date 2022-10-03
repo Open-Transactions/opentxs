@@ -10,6 +10,7 @@
 #include <functional>
 #include <memory>
 #include <stdexcept>
+#include <string_view>
 
 #include "ottest/Basic.hpp"
 #include "ottest/mocks/util/PasswordCallback.hpp"

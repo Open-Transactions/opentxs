@@ -193,7 +193,7 @@ protected:
         , expected_account_type_(ot::AccountType::Blockchain)
         , expected_unit_type_(ot::UnitType::Regtest)
         , mine_to_alice_([&](Height height) -> Transaction {
-            using OutputBuilder = ot::api::session::Factory::OutputBuilder;
+            using OutputBuilder = ot::blockchain::OutputBuilder;
 
             auto output = miner_.Factory().BitcoinGenerationTransaction(
                 test_chain_,

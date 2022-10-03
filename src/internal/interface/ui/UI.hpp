@@ -23,7 +23,6 @@
 
 #include "interface/qt/SendMonitor.hpp"
 #include "internal/util/Mutex.hpp"
-#include "opentxs/Version.hpp"
 #include "opentxs/blockchain/BlockchainType.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
@@ -89,10 +88,8 @@
 #include "util/Blank.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
 namespace api
 {
 namespace session
@@ -242,7 +239,6 @@ class UnitListQt;
 }  // namespace ui
 
 class Flag;
-// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -1897,6 +1893,24 @@ auto BlockchainSubchainWidget(
     ui::implementation::CustomData& custom) noexcept
     -> std::shared_ptr<ui::implementation::BlockchainSubaccountRowInternal>;
 auto BalanceItem(
+    const ui::implementation::AccountActivityInternalInterface& parent,
+    const api::session::Client& api,
+    const ui::implementation::AccountActivityRowID& rowID,
+    const ui::implementation::AccountActivitySortKey& sortKey,
+    ui::implementation::CustomData& custom,
+    const identifier::Nym& nymID,
+    const identifier::Generic& accountID) noexcept
+    -> std::shared_ptr<ui::implementation::AccountActivityRowInternal>;
+auto BalanceItemBlockchain(
+    const ui::implementation::AccountActivityInternalInterface& parent,
+    const api::session::Client& api,
+    const ui::implementation::AccountActivityRowID& rowID,
+    const ui::implementation::AccountActivitySortKey& sortKey,
+    ui::implementation::CustomData& custom,
+    const identifier::Nym& nymID,
+    const identifier::Generic& accountID) noexcept
+    -> std::shared_ptr<ui::implementation::AccountActivityRowInternal>;
+auto BalanceItemCustodial(
     const ui::implementation::AccountActivityInternalInterface& parent,
     const api::session::Client& api,
     const ui::implementation::AccountActivityRowID& rowID,

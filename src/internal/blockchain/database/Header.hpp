@@ -13,10 +13,8 @@
 #include "opentxs/util/Allocator.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
 namespace blockchain
 {
 namespace bitcoin
@@ -38,7 +36,6 @@ namespace node
 class UpdateTransaction;
 }  // namespace node
 }  // namespace blockchain
-// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

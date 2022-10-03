@@ -33,6 +33,7 @@
 #include "opentxs/blockchain/bitcoin/cfilter/Types.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
+#include "opentxs/blockchain/p2p/Address.hpp"
 #include "opentxs/blockchain/p2p/Types.hpp"
 #include "opentxs/core/FixedByteArray.hpp"
 #include "opentxs/util/Allocated.hpp"
@@ -43,10 +44,8 @@
 #include "util/Actor.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
 namespace api
 {
 class Session;
@@ -88,10 +87,7 @@ struct Endpoints;
 
 namespace p2p
 {
-namespace internal
-{
-struct Address;
-}  // namespace internal
+class Address;
 }  // namespace p2p
 
 class GCS;
@@ -122,7 +118,6 @@ class Message;
 }  // namespace network
 
 class Log;
-// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -176,8 +171,7 @@ protected:
 
     static auto print_state(State) noexcept -> std::string_view;
 
-    auto address() const noexcept
-        -> const opentxs::blockchain::p2p::internal::Address&
+    auto address() const noexcept -> const opentxs::blockchain::p2p::Address&
     {
         return address_;
     }
@@ -229,7 +223,7 @@ protected:
         std::shared_ptr<const opentxs::blockchain::node::Manager> network,
         opentxs::blockchain::Type chain,
         int peerID,
-        std::unique_ptr<opentxs::blockchain::p2p::internal::Address> address,
+        opentxs::blockchain::p2p::Address address,
         std::chrono::milliseconds pingInterval,
         std::chrono::milliseconds inactivityInterval,
         std::chrono::milliseconds peersInterval,
@@ -275,8 +269,7 @@ private:
     const std::chrono::milliseconds ping_interval_;
     const std::chrono::milliseconds inactivity_interval_;
     const std::chrono::milliseconds peers_interval_;
-    std::unique_ptr<opentxs::blockchain::p2p::internal::Address> address_p_;
-    opentxs::blockchain::p2p::internal::Address& address_;
+    opentxs::blockchain::p2p::Address address_;
     std::unique_ptr<ConnectionManager> connection_p_;
     ConnectionManager& connection_;
     State state_;
@@ -299,7 +292,7 @@ private:
         const api::Session& api,
         const Imp& parent,
         const opentxs::blockchain::node::internal::PeerManager& manager,
-        const opentxs::blockchain::p2p::internal::Address& address,
+        const opentxs::blockchain::p2p::Address& address,
         const Log& log,
         int id,
         std::size_t headerBytes) noexcept -> std::unique_ptr<ConnectionManager>;

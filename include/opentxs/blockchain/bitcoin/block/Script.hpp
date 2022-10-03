@@ -5,12 +5,11 @@
 
 #pragma once
 
-#include "opentxs/Version.hpp"  // IWYU pragma: associated
-
 #include <cstdint>
 #include <optional>
 #include <tuple>
 
+#include "opentxs/Export.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/bitcoin/block/Types.hpp"
 #include "opentxs/blockchain/bitcoin/cfilter/Types.hpp"
@@ -19,17 +18,29 @@
 #include "opentxs/util/Iterator.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
 namespace api
 {
+class Crypto;
 class Session;
 }  // namespace api
 
+namespace blockchain
+{
+namespace bitcoin
+{
+namespace block
+{
+namespace internal
+{
+class Script;
+}  // namespace internal
+}  // namespace block
+}  // namespace bitcoin
+}  // namespace blockchain
+
 class PaymentCode;
-// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -70,7 +81,7 @@ public:
         -> const value_type& = 0;
     virtual auto begin() const noexcept -> const_iterator = 0;
     virtual auto CalculateHash160(
-        const api::Session& api,
+        const api::Crypto& crypto,
         const AllocateOutput output) const noexcept -> bool = 0;
     virtual auto CalculateSize() const noexcept -> std::size_t = 0;
     virtual auto cbegin() const noexcept -> const_iterator = 0;
@@ -80,6 +91,8 @@ public:
         -> Vector<Vector<std::byte>> = 0;
     virtual auto ExtractPatterns(const api::Session& api) const noexcept
         -> UnallocatedVector<PatternID> = 0;
+    OPENTXS_NO_EXPORT virtual auto Internal() const noexcept
+        -> const internal::Script& = 0;
     virtual auto IsNotification(
         const std::uint8_t version,
         const PaymentCode& recipient) const noexcept -> bool = 0;
@@ -109,6 +122,8 @@ public:
     /// Value only present for NullData patterns, 0 indexed
     virtual auto Value(const std::size_t position) const noexcept
         -> std::optional<ReadView> = 0;
+
+    OPENTXS_NO_EXPORT virtual auto Internal() noexcept -> internal::Script& = 0;
 
     Script(const Script&) = delete;
     Script(Script&&) = delete;

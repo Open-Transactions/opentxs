@@ -4,7 +4,6 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 #include "0_stdafx.hpp"              // IWYU pragma: associated
-#include "1_Internal.hpp"            // IWYU pragma: associated
 #include "opentxs/core/Contact.hpp"  // IWYU pragma: associated
 
 #include <Contact.pb.h>
@@ -60,6 +59,11 @@
 #include "util/Container.hpp"
 
 #define ID_BYTES 32
+
+namespace opentxs
+{
+constexpr auto OT_CONTACT_VERSION = 3;
+}  // namespace opentxs
 
 namespace opentxs
 {

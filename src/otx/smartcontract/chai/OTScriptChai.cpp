@@ -12,7 +12,6 @@
 #endif
 
 #include "0_stdafx.hpp"                             // IWYU pragma: associated
-#include "1_Internal.hpp"                           // IWYU pragma: associated
 #include "otx/smartcontract/chai/OTScriptChai.hpp"  // IWYU pragma: associated
 
 #pragma GCC diagnostic push

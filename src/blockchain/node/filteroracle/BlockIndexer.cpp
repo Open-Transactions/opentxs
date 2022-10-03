@@ -3,8 +3,7 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#include "0_stdafx.hpp"    // IWYU pragma: associated
-#include "1_Internal.hpp"  // IWYU pragma: associated
+#include "0_stdafx.hpp"  // IWYU pragma: associated
 #include "blockchain/node/filteroracle/BlockIndexer.hpp"  // IWYU pragma: associated
 
 #include <boost/smart_ptr/make_shared.hpp>
@@ -397,8 +396,7 @@ auto BlockIndexer::Imp::do_startup() noexcept -> bool
 
 auto BlockIndexer::Imp::drain_queue() noexcept -> std::size_t
 {
-    const auto limit =
-        params::Chains().at(shared_.chain_).block_download_batch_;
+    const auto limit = params::get(shared_.chain_).BlockDownloadBatch();
     const auto& oracle = node_.BlockOracle();
     auto handle = blocks_.lock();
     auto& blocks = *handle;

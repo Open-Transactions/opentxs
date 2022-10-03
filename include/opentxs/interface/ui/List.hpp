@@ -5,11 +5,10 @@
 
 #pragma once
 
-#include "opentxs/Version.hpp"  // IWYU pragma: associated
-
 #include <cassert>
 #include <limits>
 
+#include "opentxs/Export.hpp"
 #include "opentxs/interface/ui/Widget.hpp"
 
 namespace opentxs::ui

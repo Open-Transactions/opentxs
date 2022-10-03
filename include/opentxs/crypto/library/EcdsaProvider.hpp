@@ -5,8 +5,7 @@
 
 #pragma once
 
-#include "opentxs/Version.hpp"  // IWYU pragma: associated
-
+#include "opentxs/Export.hpp"
 #include "opentxs/crypto/library/AsymmetricProvider.hpp"
 
 namespace opentxs::crypto

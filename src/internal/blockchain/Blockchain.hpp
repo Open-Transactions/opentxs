@@ -3,6 +3,8 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_include "opentxs/blockchain/BlockchainType.hpp"
+
 #pragma once
 
 #include <GCS.pb.h>
@@ -19,8 +21,7 @@
 
 #include "Proto.hpp"
 #include "internal/util/P0330.hpp"
-#include "opentxs/Version.hpp"
-#include "opentxs/blockchain/BlockchainType.hpp"
+#include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/bitcoin/bloom/Types.hpp"
 #include "opentxs/blockchain/bitcoin/cfilter/FilterType.hpp"
 #include "opentxs/blockchain/bitcoin/cfilter/Hash.hpp"
@@ -35,10 +36,8 @@
 #include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
 namespace api
 {
 class Session;
@@ -76,7 +75,6 @@ class GCS;
 class Amount;
 class ByteArray;
 class Data;
-// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -183,7 +181,6 @@ namespace opentxs::blockchain::script
 
 namespace opentxs::factory
 {
-#if OT_BLOCKCHAIN
 auto BloomFilter(
     const api::Session& api,
     const std::uint32_t tweak,
@@ -226,14 +223,4 @@ auto GCS(
     const ReadView key,
     const ReadView encoded,
     alloc::Default alloc) noexcept -> blockchain::GCS;
-#endif  // OT_BLOCKCHAIN
-auto NumericHash(const Data& hash) noexcept
-    -> std::unique_ptr<blockchain::NumericHash>;
-auto NumericHashNBits(const std::uint32_t nBits) noexcept
-    -> std::unique_ptr<blockchain::NumericHash>;
-#if OT_BLOCKCHAIN
-auto Work(const UnallocatedCString& hex) -> blockchain::Work*;
-auto Work(const blockchain::Type chain, const blockchain::NumericHash& target)
-    -> blockchain::Work*;
-#endif  // OT_BLOCKCHAIN
 }  // namespace opentxs::factory

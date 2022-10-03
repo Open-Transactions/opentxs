@@ -15,10 +15,8 @@
 #include "opentxs/util/Allocated.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
 namespace blockchain
 {
 namespace crypto
@@ -35,7 +33,6 @@ class SubchainStateData;
 }  // namespace wallet
 }  // namespace node
 }  // namespace blockchain
-// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

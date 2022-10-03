@@ -14,7 +14,6 @@
 #include "internal/otx/common/Contract.hpp"
 #include "internal/otx/common/OTTransaction.hpp"
 #include "internal/otx/common/OTTransactionType.hpp"
-#include "opentxs/Version.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/core/String.hpp"
 #include "opentxs/util/Container.hpp"
@@ -22,10 +21,8 @@
 #include "opentxs/util/Pimpl.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
 namespace api
 {
 namespace session
@@ -62,7 +59,6 @@ class Server;
 class Account;
 class Item;
 class PasswordPrompt;
-// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

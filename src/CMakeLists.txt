@@ -153,14 +153,6 @@ if(OT_QT_EXPORT)
       CXX_CLANG_TIDY ""
   )
   target_sources(opentxs PRIVATE $<TARGET_OBJECTS:opentxs-moc>)
-
-  if(OPENTXS_STANDALONE)
-    install(
-      FILES ${OPENTXS_QT_PUBLIC_HEADERS}
-      DESTINATION include/opentxs/interface/qt
-      COMPONENT dev
-    )
-  endif()
 endif()
 
 include(GenerateExportHeader)
@@ -180,7 +172,6 @@ target_sources(
   PRIVATE
     "${opentxs_BINARY_DIR}/src/Version.cpp"
     "0_stdafx.hpp"
-    "1_Internal.hpp"
     "2_Factory.hpp"
     "OT.cpp"
     "Proto.cpp"
@@ -221,6 +212,11 @@ if(OPENTXS_STANDALONE)
   install(
     FILES ${cxx-install-headers}
     DESTINATION include/opentxs
+    COMPONENT dev
+  )
+  install(
+    FILES ${OPENTXS_QT_PUBLIC_HEADERS}
+    DESTINATION include/opentxs/interface/qt
     COMPONENT dev
   )
 endif()

@@ -12,7 +12,6 @@
 #include <string_view>
 #include <utility>
 
-#include "opentxs/Version.hpp"
 #include "opentxs/util/Container.hpp"
 
 namespace opentxs::proto

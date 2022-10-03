@@ -3,8 +3,7 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#include "0_stdafx.hpp"    // IWYU pragma: associated
-#include "1_Internal.hpp"  // IWYU pragma: associated
+#include "0_stdafx.hpp"  // IWYU pragma: associated
 #include "blockchain/database/wallet/OutputCache.hpp"  // IWYU pragma: associated
 
 #include <BlockchainTransactionOutput.pb.h>  // IWYU pragma: keep
@@ -31,6 +30,8 @@
 #include "internal/util/TSV.hpp"
 #include "internal/util/storage/lmdb/Database.hpp"
 #include "internal/util/storage/lmdb/Transaction.hpp"
+#include "opentxs/api/session/Crypto.hpp"
+#include "opentxs/api/session/Factory.hpp"  // IWYU pragma: keep
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/blockchain/bitcoin/block/Output.hpp"
 #include "opentxs/blockchain/bitcoin/block/Script.hpp"
@@ -598,7 +599,8 @@ auto OutputCache::populate() noexcept -> void
         outputs_.try_emplace(
             key,
             factory::BitcoinTransactionOutput(
-                api_,
+                api_.Crypto().Blockchain(),
+                api_.Factory(),
                 chain_,
                 proto::Factory<proto::BlockchainTransactionOutput>(value)));
 
@@ -950,7 +952,7 @@ auto OutputCache::write_output(
             auto out = Space{};
             const auto data = [&] {
                 auto proto = bitcoin::block::internal::Output::SerializeType{};
-                const auto rc = output.Internal().Serialize(proto);
+                const auto rc = output.Internal().Serialize(api_, proto);
 
                 if (false == rc) {
                     throw std::runtime_error{"failed to serialize as protobuf"};

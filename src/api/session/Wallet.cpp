@@ -6,7 +6,6 @@
 // IWYU pragma: no_include <cxxabi.h>
 
 #include "0_stdafx.hpp"            // IWYU pragma: associated
-#include "1_Internal.hpp"          // IWYU pragma: associated
 #include "api/session/Wallet.hpp"  // IWYU pragma: associated
 
 #include <Context.pb.h>
@@ -2041,7 +2040,6 @@ auto Wallet::process_p2p(opentxs::network::zeromq::Message&& msg) const noexcept
 auto Wallet::process_p2p_publish_contract(
     opentxs::network::zeromq::Message&& msg) const noexcept -> void
 {
-#if OT_BLOCKCHAIN
     try {
         const auto base = api_.Factory().BlockchainSyncMessage(msg);
 
@@ -2105,13 +2103,11 @@ auto Wallet::process_p2p_publish_contract(
     } catch (const std::exception& e) {
         LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
     }
-#endif  // OT_BLOCKCHAIN
 }
 
 auto Wallet::process_p2p_query_contract(
     opentxs::network::zeromq::Message&& msg) const noexcept -> void
 {
-#if OT_BLOCKCHAIN
     try {
         const auto base = api_.Factory().BlockchainSyncMessage(msg);
 
@@ -2190,13 +2186,11 @@ auto Wallet::process_p2p_query_contract(
     } catch (const std::exception& e) {
         LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
     }
-#endif  // OT_BLOCKCHAIN
 }
 
 auto Wallet::process_p2p_response(
     opentxs::network::zeromq::Message&& msg) const noexcept -> void
 {
-#if OT_BLOCKCHAIN
     try {
         const auto base = api_.Factory().BlockchainSyncMessage(msg);
 
@@ -2287,7 +2281,6 @@ auto Wallet::process_p2p_response(
     } catch (const std::exception& e) {
         LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
     }
-#endif  // OT_BLOCKCHAIN
 }
 
 auto Wallet::PublishNotary(const identifier::Notary& id) const noexcept -> bool

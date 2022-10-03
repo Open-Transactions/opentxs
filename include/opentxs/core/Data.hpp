@@ -5,24 +5,22 @@
 
 #pragma once
 
-#include "opentxs/Version.hpp"  // IWYU pragma: associated
-
 #include <compare>
 #include <cstddef>
 #include <cstdint>
 #include <functional>
 #include <string_view>
 
+#include "opentxs/Export.hpp"
+#include "opentxs/core/Types.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Iterator.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
 namespace network
 {
 namespace zeromq
@@ -33,17 +31,11 @@ class Frame;
 
 class Armored;
 class Data;
-// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
 namespace opentxs
 {
-struct OPENTXS_EXPORT HexType {
-};
-
-static constexpr auto IsHex = HexType{};
-
 OPENTXS_EXPORT auto operator==(const Data&, const Data&) noexcept -> bool;
 OPENTXS_EXPORT auto operator<=>(const Data&, const Data&) noexcept
     -> std::strong_ordering;

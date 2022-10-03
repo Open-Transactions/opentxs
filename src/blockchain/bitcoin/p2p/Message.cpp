@@ -4,7 +4,6 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 #include "0_stdafx.hpp"                        // IWYU pragma: associated
-#include "1_Internal.hpp"                      // IWYU pragma: associated
 #include "blockchain/bitcoin/p2p/Message.hpp"  // IWYU pragma: associated
 
 #include <cstddef>
@@ -25,6 +24,7 @@
 #include "internal/blockchain/p2p/bitcoin/Factory.hpp"
 #include "internal/blockchain/p2p/bitcoin/message/Message.hpp"
 #include "internal/util/LogMacros.hpp"
+#include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/blockchain/Blockchain.hpp"
@@ -244,7 +244,7 @@ auto Message::calculate_checksum(const Data& payload) const noexcept
 {
     auto output = ByteArray{};
     P2PMessageHash(
-        api_, header().Network(), payload.Bytes(), output.WriteInto());
+        api_.Crypto(), header().Network(), payload.Bytes(), output.WriteInto());
 
     return output;
 }

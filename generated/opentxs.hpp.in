@@ -6,8 +6,8 @@
 #pragma once
 
 // IWYU pragma: begin_exports
+#include "opentxs/Export.hpp"
 #include "opentxs/OT.hpp"
-#include "opentxs/Version.hpp"
 #include "opentxs/api/Context.hpp"
 #include "opentxs/api/Factory.hpp"
 #include "opentxs/api/Periodic.hpp"
@@ -44,9 +44,7 @@
 #include "opentxs/blockchain/Blockchain.hpp"
 #include "opentxs/blockchain/BlockchainType.hpp"
 #include "opentxs/blockchain/Types.hpp"
-#if OT_BLOCKCHAIN
-#include "opentxs/blockchain/bitcoin/NumericHash.hpp"
-#include "opentxs/blockchain/bitcoin/Work.hpp"
+#include "opentxs/blockchain/Work.hpp"
 #include "opentxs/blockchain/bitcoin/block/Block.hpp"
 #include "opentxs/blockchain/bitcoin/block/Header.hpp"
 #include "opentxs/blockchain/bitcoin/block/Input.hpp"
@@ -60,21 +58,15 @@
 #include "opentxs/blockchain/bitcoin/bloom/BloomFilter.hpp"
 #include "opentxs/blockchain/bitcoin/bloom/BloomUpdateFlag.hpp"
 #include "opentxs/blockchain/bitcoin/bloom/Types.hpp"
-#endif  // OT_BLOCKCHAIN
 #include "opentxs/blockchain/bitcoin/cfilter/FilterType.hpp"
-#if OT_BLOCKCHAIN
 #include "opentxs/blockchain/bitcoin/cfilter/GCS.hpp"
-#endif  // OT_BLOCKCHAIN
 #include "opentxs/blockchain/bitcoin/cfilter/Hash.hpp"
 #include "opentxs/blockchain/bitcoin/cfilter/Header.hpp"
 #include "opentxs/blockchain/bitcoin/cfilter/Types.hpp"
-#if OT_BLOCKCHAIN
 #include "opentxs/blockchain/block/Block.hpp"
-#endif  // OT_BLOCKCHAIN
 #include "opentxs/blockchain/block/Hash.hpp"
-#if OT_BLOCKCHAIN
 #include "opentxs/blockchain/block/Header.hpp"
-#endif  // OT_BLOCKCHAIN
+#include "opentxs/blockchain/block/NumericHash.hpp"
 #include "opentxs/blockchain/block/Outpoint.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
@@ -94,24 +86,18 @@
 #include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/blockchain/crypto/Wallet.hpp"
 #include "opentxs/blockchain/node/BlockOracle.hpp"
-#if OT_BLOCKCHAIN
 #include "opentxs/blockchain/node/FilterOracle.hpp"
 #include "opentxs/blockchain/node/HeaderOracle.hpp"
 #include "opentxs/blockchain/node/Manager.hpp"
-#endif  // OT_BLOCKCHAIN
 #include "opentxs/blockchain/node/SendResult.hpp"
 #include "opentxs/blockchain/node/Stats.hpp"
-#if OT_BLOCKCHAIN
 #include "opentxs/blockchain/node/TxoState.hpp"
 #include "opentxs/blockchain/node/TxoTag.hpp"
-#endif  // OT_BLOCKCHAIN
 #include "opentxs/blockchain/node/Types.hpp"
-#if OT_BLOCKCHAIN
 #include "opentxs/blockchain/node/Wallet.hpp"
 #include "opentxs/blockchain/p2p/Address.hpp"
 #include "opentxs/blockchain/p2p/Peer.hpp"
 #include "opentxs/blockchain/p2p/Types.hpp"
-#endif  // OT_BLOCKCHAIN
 #include "opentxs/core/AccountType.hpp"
 #include "opentxs/core/AddressType.hpp"
 #include "opentxs/core/Amount.hpp"

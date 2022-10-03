@@ -5,8 +5,6 @@
 
 #pragma once
 
-#include "opentxs/Version.hpp"  // IWYU pragma: associated
-
 #include <cstddef>
 #include <cstdint>
 #include <functional>
@@ -18,6 +16,7 @@
 #include <utility>
 #include <variant>
 
+#include "opentxs/Export.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/crypto/Types.hpp"
@@ -25,10 +24,19 @@
 #include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
+namespace blockchain
+{
+namespace bitcoin
+{
+namespace block
+{
+class Script;
+}  // namespace block
+}  // namespace bitcoin
+}  // namespace blockchain
+
 namespace crypto
 {
 namespace key
@@ -42,7 +50,6 @@ namespace identifier
 {
 class Generic;
 }  // namespace identifier
-// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -67,6 +74,14 @@ OPENTXS_EXPORT auto print(SubaccountType) noexcept -> std::string_view;
 OPENTXS_EXPORT auto print(Subchain) noexcept -> std::string_view;
 OPENTXS_EXPORT auto print(const Key& key) noexcept -> UnallocatedCString;
 }  // namespace opentxs::blockchain::crypto
+
+namespace opentxs::blockchain
+{
+using OutputBuilder = std::tuple<
+    Amount,
+    std::unique_ptr<const bitcoin::block::Script>,
+    UnallocatedSet<crypto::Key>>;
+}  // namespace opentxs::blockchain
 
 namespace std
 {

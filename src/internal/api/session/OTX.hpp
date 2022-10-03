@@ -10,10 +10,8 @@
 #include "internal/util/UniqueQueue.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
 namespace identifier
 {
 class Generic;
@@ -25,7 +23,6 @@ class UnitDefinition;
 class OTPayment;
 template <class T>
 class UniqueQueue;
-// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

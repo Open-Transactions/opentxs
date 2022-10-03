@@ -4,7 +4,6 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 #include "0_stdafx.hpp"       // IWYU pragma: associated
-#include "1_Internal.hpp"     // IWYU pragma: associated
 #include "core/Shutdown.hpp"  // IWYU pragma: associated
 
 #include <boost/system/error_code.hpp>  // IWYU pragma: keep
@@ -15,6 +14,7 @@
 #include "opentxs/api/network/Asio.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
+#include "opentxs/network/zeromq/socket/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/WorkType.hpp"

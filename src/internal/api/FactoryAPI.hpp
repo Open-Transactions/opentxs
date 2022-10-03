@@ -13,10 +13,8 @@
 #include "opentxs/identity/wot/claim/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
 namespace identifier
 {
 class Generic;
@@ -31,7 +29,6 @@ class Identifier;
 class Cheque;
 class Contract;
 class Item;
-// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

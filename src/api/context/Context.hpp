@@ -32,7 +32,6 @@
 #include "internal/util/AsyncConst.hpp"
 #include "internal/util/Mutex.hpp"
 #include "internal/util/Signals.hpp"
-#include "opentxs/Version.hpp"
 #include "opentxs/api/Context.hpp"
 #include "opentxs/api/Factory.hpp"
 #include "opentxs/api/Periodic.hpp"
@@ -51,10 +50,8 @@
 class QObject;
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
 namespace api
 {
 namespace network
@@ -108,7 +105,6 @@ class Flag;
 class PasswordCallback;
 class PasswordCaller;
 class Signals;
-// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

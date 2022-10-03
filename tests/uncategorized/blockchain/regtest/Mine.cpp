@@ -9,6 +9,7 @@
 #include <compare>
 #include <memory>
 
+#include "internal/blockchain/Params.hpp"
 #include "internal/blockchain/bitcoin/block/Transaction.hpp"
 #include "ottest/fixtures/blockchain/Common.hpp"
 #include "ottest/fixtures/blockchain/regtest/Single.hpp"
@@ -29,11 +30,11 @@ TEST_F(Regtest_fixture_single, generate_block)
     const auto& headerOracle = network.HeaderOracle();
     auto previousHeader = [&] {
         const auto genesis = headerOracle.LoadHeader(
-            ot::blockchain::node::HeaderOracle::GenesisBlockHash(test_chain_));
+            ot::blockchain::params::get(test_chain_).GenesisHash());
 
         return genesis->as_Bitcoin();
     }();
-    using OutputBuilder = ot::api::session::Factory::OutputBuilder;
+    using OutputBuilder = ot::blockchain::OutputBuilder;
     auto tx = miner_.Factory().BitcoinGenerationTransaction(
         test_chain_,
         previousHeader.Height() + 1,

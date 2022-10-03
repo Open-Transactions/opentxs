@@ -9,12 +9,9 @@
 #include <filesystem>
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
 class Options;
-// }  // namespace v1
 }  // namespace opentxs
 
 class QObject;

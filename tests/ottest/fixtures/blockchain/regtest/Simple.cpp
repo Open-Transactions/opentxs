@@ -87,7 +87,7 @@ auto Regtest_fixture_simple::TransactionGenerator(
     unsigned count,
     unsigned amount) -> Transaction
 {
-    using OutputBuilder = ot::api::session::Factory::OutputBuilder;
+    using OutputBuilder = ot::blockchain::OutputBuilder;
     using Index = ot::Bip32Index;
     using Subchain = ot::blockchain::crypto::Subchain;
 

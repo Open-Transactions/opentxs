@@ -5,14 +5,13 @@
 
 #pragma once
 
-#include "opentxs/Version.hpp"  // IWYU pragma: associated
-
 #include <cstddef>
 #include <functional>
 #include <string_view>
 #include <tuple>
 #include <utility>
 
+#include "opentxs/Export.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/util/Allocator.hpp"
@@ -20,10 +19,8 @@
 #include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
 namespace blockchain
 {
 namespace block
@@ -31,7 +28,6 @@ namespace block
 class Position;
 }  // namespace block
 }  // namespace blockchain
-// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

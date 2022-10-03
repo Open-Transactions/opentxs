@@ -5,18 +5,18 @@
 
 #pragma once
 
-#include "opentxs/Version.hpp"  // IWYU pragma: associated
-
 #include <array>
 #include <cstddef>
 #include <cstdint>
 #include <functional>
 #include <string_view>
 
+#include "opentxs/Export.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
+#include "opentxs/util/Platform.hpp"
 
 namespace opentxs
 {

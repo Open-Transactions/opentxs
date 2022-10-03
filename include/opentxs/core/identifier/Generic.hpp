@@ -8,13 +8,12 @@
 
 #pragma once
 
-#include "opentxs/Version.hpp"  // IWYU pragma: associated
-
 #include <cstddef>
 #include <cstdint>
 #include <functional>
 #include <string_view>
 
+#include "opentxs/Export.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/identifier/Types.hpp"
 #include "opentxs/util/Allocated.hpp"
@@ -23,10 +22,8 @@
 #include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
 namespace api
 {
 class Crypto;
@@ -43,7 +40,6 @@ class Generic;
 }  // namespace identifier
 
 class String;
-// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

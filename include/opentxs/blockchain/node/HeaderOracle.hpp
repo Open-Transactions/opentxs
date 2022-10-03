@@ -7,14 +7,13 @@
 
 #pragma once
 
-#include "opentxs/Version.hpp"  // IWYU pragma: associated
-
 #include <cstddef>
 #include <cstdint>
 #include <memory>
 #include <tuple>
 #include <utility>
 
+#include "opentxs/Export.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
@@ -23,10 +22,8 @@
 #include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
 namespace blockchain
 {
 namespace block
@@ -42,7 +39,6 @@ class HeaderOracle;
 }  // namespace internal
 }  // namespace node
 }  // namespace blockchain
-// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -53,10 +49,6 @@ class OPENTXS_EXPORT HeaderOracle
 public:
     using Hashes = Vector<block::Hash>;
     using Positions = UnallocatedVector<block::Position>;
-
-    /// Throws std::out_of_range for invalid type
-    static auto GenesisBlockHash(const blockchain::Type type)
-        -> const block::Hash&;
 
     /** Query a partial set of ancestors of a target block
      *

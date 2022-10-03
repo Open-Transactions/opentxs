@@ -4,7 +4,6 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 #include "0_stdafx.hpp"                   // IWYU pragma: associated
-#include "1_Internal.hpp"                 // IWYU pragma: associated
 #include "IncomingConnectionManager.hpp"  // IWYU pragma: associated
 
 #include <mutex>
@@ -36,8 +35,7 @@ public:
         auto lock = Lock{lock_};
         sockets_.erase(id);
     }
-    auto Listen(const blockchain::p2p::Address& address) const noexcept
-        -> bool final
+    auto Listen(p2p::Address&& address) const noexcept -> bool final
     {
         const auto type = address.Type();
         const auto port = address.Port();
@@ -57,10 +55,10 @@ public:
                 auto network = EndpointType::Type{};
 
                 switch (type) {
-                    case blockchain::p2p::Network::ipv4: {
+                    case p2p::Network::ipv4: {
                         network = EndpointType::Type::ipv4;
                     } break;
-                    case blockchain::p2p::Network::ipv6: {
+                    case p2p::Network::ipv6: {
                         network = EndpointType::Type::ipv6;
                     } break;
                     default: {
@@ -140,7 +138,7 @@ private:
     mutable UnallocatedMap<int, opentxs::network::asio::Socket> sockets_;
 
     auto accept(
-        blockchain::p2p::Network type,
+        p2p::Network type,
         std::uint16_t port,
         Space bytes,
         opentxs::network::asio::Socket&& socket) const noexcept -> void
@@ -148,7 +146,7 @@ private:
         auto lock = Lock{lock_};
         auto address = factory::BlockchainAddress(
             api_,
-            blockchain::p2p::Protocol::bitcoin,
+            p2p::Protocol::bitcoin,
             type,
             api_.Factory().DataFromBytes(reader(bytes)),
             port,

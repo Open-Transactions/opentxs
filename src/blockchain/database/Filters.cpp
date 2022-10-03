@@ -4,20 +4,17 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 #include "0_stdafx.hpp"                     // IWYU pragma: associated
-#include "1_Internal.hpp"                   // IWYU pragma: associated
 #include "blockchain/database/Filters.hpp"  // IWYU pragma: associated
 
 #include <boost/container/flat_map.hpp>
 #include <boost/container/vector.hpp>
 #include <cstddef>
-#include <memory>
 #include <type_traits>
 #include <utility>
 
 #include "blockchain/database/common/Database.hpp"
 #include "internal/blockchain/Blockchain.hpp"
 #include "internal/blockchain/Params.hpp"
-#include "internal/blockchain/block/Factory.hpp"
 #include "internal/blockchain/database/Types.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/storage/lmdb/Database.hpp"
@@ -29,7 +26,6 @@
 #include "opentxs/blockchain/bitcoin/cfilter/Hash.hpp"
 #include "opentxs/blockchain/bitcoin/cfilter/Header.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
-#include "opentxs/blockchain/block/Header.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/util/Log.hpp"
 
@@ -98,12 +94,7 @@ auto Filters::import_genesis(const blockchain::Type chain) const noexcept
 
         if (false == (needHeader || needFilter)) { return; }
 
-        const auto pBlock = factory::GenesisBlockHeader(api_, chain);
-
-        OT_ASSERT(pBlock);
-
-        const auto& block = *pBlock;
-        const auto& blockHash = block.Hash();
+        const auto& blockHash = params::get(chain).GenesisHash();
         const auto bytes = api_.Factory().DataFromHex(genesis.second);
         auto gcs = factory::GCS(
             api_,
@@ -132,7 +123,7 @@ auto Filters::import_genesis(const blockchain::Type chain) const noexcept
 
             OT_ASSERT(success);
 
-            success = SetHeaderTip(style, block.Position());
+            success = SetHeaderTip(style, {0, blockHash});
 
             OT_ASSERT(success);
         }
@@ -144,7 +135,7 @@ auto Filters::import_genesis(const blockchain::Type chain) const noexcept
 
             OT_ASSERT(success);
 
-            success = SetTip(style, block.Position());
+            success = SetTip(style, {0, blockHash});
 
             OT_ASSERT(success);
         }

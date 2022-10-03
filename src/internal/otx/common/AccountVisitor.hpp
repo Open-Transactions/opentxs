@@ -5,15 +5,12 @@
 
 #pragma once
 
-#include "opentxs/Version.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
 #include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
 namespace api
 {
 namespace session
@@ -29,7 +26,6 @@ class Notary;
 
 class Account;
 class PasswordPrompt;
-// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

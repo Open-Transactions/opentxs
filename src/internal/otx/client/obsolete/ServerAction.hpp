@@ -7,7 +7,6 @@
 
 #include <memory>
 
-#include "opentxs/Version.hpp"
 #include "opentxs/otx/client/Types.hpp"
 #include "opentxs/util/Container.hpp"
 

@@ -3,6 +3,8 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_include "opentxs/blockchain/block/NumericHash.hpp"
+
 #pragma once
 
 #include <boost/endian/buffers.hpp>
@@ -19,8 +21,6 @@
 #include "internal/blockchain/block/Header.hpp"
 #include "opentxs/blockchain/BlockchainType.hpp"
 #include "opentxs/blockchain/Types.hpp"
-#include "opentxs/blockchain/bitcoin/NumericHash.hpp"
-#include "opentxs/blockchain/bitcoin/Work.hpp"
 #include "opentxs/blockchain/bitcoin/block/Header.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
@@ -32,13 +32,11 @@
 #include "opentxs/util/Time.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
 namespace api
 {
-class Session;
+class Crypto;
 }  // namespace api
 
 namespace blockchain
@@ -54,11 +52,13 @@ class Header;
 namespace block
 {
 class Header;
+class NumericHash;
 }  // namespace block
+
+class Work;
 }  // namespace blockchain
 
 class ByteArray;
-// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -78,7 +78,7 @@ public:
         be::little_uint32_buf_t nbits_;
         be::little_uint32_buf_t nonce_;
 
-        auto Target() const noexcept -> OTNumericHash;
+        auto Target() const noexcept -> blockchain::block::NumericHash;
 
         BitcoinFormat(
             const std::int32_t version,
@@ -94,31 +94,30 @@ public:
     static const VersionNumber subversion_default_;
 
     static auto calculate_hash(
-        const api::Session& api,
+        const api::Crypto& crypto,
         const blockchain::Type chain,
         const ReadView serialized) -> blockchain::block::Hash;
     static auto calculate_hash(
-        const api::Session& api,
+        const api::Crypto& crypto,
         const blockchain::Type chain,
         const BitcoinFormat& serialized) -> blockchain::block::Hash;
     static auto calculate_pow(
-        const api::Session& api,
+        const api::Crypto& crypto,
         const blockchain::Type chain,
         const ReadView serialized) -> blockchain::block::Hash;
     static auto calculate_pow(
-        const api::Session& api,
+        const api::Crypto& crypto,
         const blockchain::Type chain,
         const BitcoinFormat& serialized) -> blockchain::block::Hash;
 
+    auto as_Bitcoin() const noexcept
+        -> const blockchain::bitcoin::block::internal::Header& final
+    {
+        return *this;
+    }
     auto clone() const noexcept
-        -> std::unique_ptr<blockchain::block::Header::Imp> final
-    {
-        return clone_bitcoin();
-    }
-    auto clone_bitcoin() const noexcept -> std::unique_ptr<Imp> final
-    {
-        return std::make_unique<Header>(*this);
-    }
+        -> std::unique_ptr<blockchain::block::Header::Imp> final;
+    auto clone_bitcoin() const noexcept -> std::unique_ptr<block::Header> final;
     auto Encode() const noexcept -> ByteArray final;
     auto MerkleRoot() const noexcept -> const blockchain::block::Hash& final
     {
@@ -131,15 +130,20 @@ public:
     auto Serialize(
         const AllocateOutput destination,
         const bool bitcoinformat = true) const noexcept -> bool final;
-    auto Target() const noexcept -> OTNumericHash final;
+    auto Target() const noexcept -> blockchain::block::NumericHash final;
     auto Timestamp() const noexcept -> Time final { return timestamp_; }
     auto Version() const noexcept -> std::uint32_t final
     {
         return block_version_;
     }
 
+    auto as_Bitcoin() noexcept
+        -> blockchain::bitcoin::block::internal::Header& final
+    {
+        return *this;
+    }
+
     Header(
-        const api::Session& api,
         const blockchain::Type chain,
         const VersionNumber subversion,
         blockchain::block::Hash&& hash,
@@ -152,13 +156,14 @@ public:
         const std::uint32_t nonce,
         const bool isGenesis) noexcept(false);
     Header(
-        const api::Session& api,
+        const api::Crypto& crypto,
         const blockchain::Type chain,
         const blockchain::block::Hash& merkle,
         const blockchain::block::Hash& parent,
         const blockchain::block::Height height) noexcept(false);
-    Header(const api::Session& api, const SerializedType& serialized) noexcept(
-        false);
+    Header(
+        const api::Crypto& crypto,
+        const SerializedType& serialized) noexcept(false);
     Header() = delete;
     Header(const Header& rhs) noexcept;
     Header(Header&&) = delete;
@@ -178,22 +183,21 @@ private:
     const std::uint32_t nonce_;
 
     static auto calculate_hash(
-        const api::Session& api,
+        const api::Crypto& crypto,
         const SerializedType& serialized) -> blockchain::block::Hash;
     static auto calculate_pow(
-        const api::Session& api,
+        const api::Crypto& crypto,
         const SerializedType& serialized) -> blockchain::block::Hash;
     static auto calculate_work(
         const blockchain::Type chain,
-        const std::uint32_t nbits) -> OTWork;
+        const std::uint32_t nbits) -> blockchain::Work;
     static auto preimage(const SerializedType& in) -> BitcoinFormat;
 
     auto check_pow() const noexcept -> bool;
 
-    auto find_nonce() noexcept(false) -> void;
+    auto find_nonce(const api::Crypto& crypto) noexcept(false) -> void;
 
     Header(
-        const api::Session& api,
         const VersionNumber version,
         const blockchain::Type chain,
         blockchain::block::Hash&& hash,

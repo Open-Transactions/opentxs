@@ -37,7 +37,6 @@
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/Mutex.hpp"
 #include "internal/util/Timer.hpp"
-#include "opentxs/Version.hpp"
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/blockchain/BlockchainType.hpp"
 #include "opentxs/blockchain/Types.hpp"
@@ -67,10 +66,8 @@
 #include "util/Work.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
 namespace api
 {
 class Session;
@@ -109,11 +106,6 @@ class PeerManager;
 struct Config;
 }  // namespace internal
 
-namespace p2p
-{
-class Requestor;
-}  // namespace p2p
-
 class Wallet;
 }  // namespace node
 
@@ -143,7 +135,6 @@ class Message;
 }  // namespace network
 
 class PaymentCode;
-// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

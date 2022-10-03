@@ -18,10 +18,8 @@
 #include "opentxs/util/Pimpl.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
 namespace network
 {
 namespace zeromq
@@ -39,7 +37,6 @@ class ReplyCallback;
 
 using OTZMQListenCallback = Pimpl<network::zeromq::ListenCallback>;
 using OTZMQReplyCallback = Pimpl<network::zeromq::ReplyCallback>;
-// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

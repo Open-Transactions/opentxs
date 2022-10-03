@@ -5,8 +5,6 @@
 
 #pragma once
 
-#include "opentxs/Version.hpp"  // IWYU pragma: associated
-
 #include <chrono>
 #include <cstddef>
 #include <future>
@@ -14,6 +12,7 @@
 #include <tuple>
 #include <utility>
 
+#include "opentxs/Export.hpp"
 #include "opentxs/core/contract/Unit.hpp"
 #include "opentxs/otx/client/Types.hpp"
 #include "opentxs/util/Bytes.hpp"
@@ -22,12 +21,15 @@
 #include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
 namespace api
 {
+namespace crypto
+{
+class Blockchain;
+}  // namespace crypto
+
 namespace session
 {
 namespace internal
@@ -64,7 +66,6 @@ class StorageThread;
 
 class PasswordPrompt;
 class PeerObject;
-// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -74,6 +75,7 @@ class OPENTXS_EXPORT Activity
 {
 public:
     virtual auto AddBlockchainTransaction(
+        const api::crypto::Blockchain& crypto,
         const blockchain::bitcoin::block::Transaction& transaction)
         const noexcept -> bool = 0;
     virtual auto AddPaymentEvent(

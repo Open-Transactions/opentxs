@@ -18,10 +18,8 @@
 #include "opentxs/api/network/OTDHT.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
 namespace api
 {
 namespace crypto
@@ -54,7 +52,6 @@ class Context;
 }  // namespace network
 
 class Options;
-// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

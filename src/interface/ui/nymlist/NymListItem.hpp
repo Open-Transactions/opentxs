@@ -10,10 +10,8 @@
 #include <mutex>
 #include <shared_mutex>
 
-#include "1_Internal.hpp"
 #include "interface/ui/base/Row.hpp"
 #include "internal/interface/ui/UI.hpp"
-#include "opentxs/Version.hpp"
 #include "opentxs/interface/ui/NymListItem.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/SharedPimpl.hpp"
@@ -21,10 +19,8 @@
 class QVariant;
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
 namespace api
 {
 namespace session
@@ -48,7 +44,6 @@ namespace ui
 {
 class NymListItem;
 }  // namespace ui
-// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

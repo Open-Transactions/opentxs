@@ -4,7 +4,6 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 #include "0_stdafx.hpp"                   // IWYU pragma: associated
-#include "1_Internal.hpp"                 // IWYU pragma: associated
 #include "IncomingConnectionManager.hpp"  // IWYU pragma: associated
 
 #include <cstddef>
@@ -63,10 +62,9 @@ public:
         internal_index_.erase(internalID);
         peers_.erase(it);
     }
-    auto Listen(const blockchain::p2p::Address& address) const noexcept
-        -> bool final
+    auto Listen(p2p::Address&& address) const noexcept -> bool final
     {
-        if (blockchain::p2p::Network::zmq != address.Type()) {
+        if (p2p::Network::zmq != address.Type()) {
             LogError()(OT_PRETTY_CLASS())("Invalid address").Flush();
 
             return false;
@@ -176,12 +174,12 @@ private:
             }
         } else {
             const auto inproc = network::zeromq::MakeArbitraryInproc();
-            const auto port = params::Chains().at(parent_.chain_).default_port_;
+            const auto port = params::get(parent_.chain_).P2PDefaultPort();
             const auto zmq = inproc + ':' + std::to_string(port);
             auto address = factory::BlockchainAddress(
                 api_,
-                blockchain::p2p::Protocol::bitcoin,
-                blockchain::p2p::Network::zmq,
+                p2p::Protocol::bitcoin,
+                p2p::Network::zmq,
                 api_.Factory().DataFromBytes(inproc),
                 port,
                 parent_.chain_,

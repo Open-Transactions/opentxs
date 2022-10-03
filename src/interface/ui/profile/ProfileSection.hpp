@@ -8,13 +8,11 @@
 #include <iosfwd>
 #include <utility>
 
-#include "1_Internal.hpp"
 #include "Proto.hpp"
 #include "interface/ui/base/Combined.hpp"
 #include "interface/ui/base/List.hpp"
 #include "interface/ui/base/RowType.hpp"
 #include "internal/interface/ui/UI.hpp"
-#include "opentxs/Version.hpp"
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
@@ -27,10 +25,8 @@
 #include "opentxs/util/SharedPimpl.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
 namespace api
 {
 namespace session
@@ -65,7 +61,6 @@ class Publish;
 }  // namespace socket
 }  // namespace zeromq
 }  // namespace network
-// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

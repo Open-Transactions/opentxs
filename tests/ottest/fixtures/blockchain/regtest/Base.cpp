@@ -45,8 +45,7 @@ const ot::UnallocatedSet<TxoState> Regtest_fixture_base::states_{
     TxoState::ConfirmedSpend,
     TxoState::All,
 };
-std::unique_ptr<const ot::OTBlockchainAddress>
-    Regtest_fixture_base::listen_address_{};
+ot::blockchain::p2p::Address Regtest_fixture_base::listen_address_{};
 std::unique_ptr<const PeerListener> Regtest_fixture_base::peer_listener_{};
 std::unique_ptr<MinedBlocks> Regtest_fixture_base::mined_block_cache_{};
 Regtest_fixture_base::BlockListen Regtest_fixture_base::block_listener_{};
@@ -117,7 +116,7 @@ Regtest_fixture_base::Regtest_fixture_base(
           client_1_,
           client_2_))
     , default_([&](Height height) -> Transaction {
-        using OutputBuilder = ot::api::session::Factory::OutputBuilder;
+        using OutputBuilder = ot::blockchain::OutputBuilder;
 
         return miner_.Factory().BitcoinGenerationTransaction(
             test_chain_,
@@ -398,22 +397,20 @@ auto Regtest_fixture_base::init_address(const ot::api::Session& api) noexcept
     constexpr auto test_endpoint{"inproc://test_endpoint"};
     constexpr auto test_port = std::uint16_t{18444};
 
-    if (false == bool(listen_address_)) {
-        listen_address_ = std::make_unique<ot::OTBlockchainAddress>(
-            api.Factory().BlockchainAddress(
-                ot::blockchain::p2p::Protocol::bitcoin,
-                ot::blockchain::p2p::Network::zmq,
-                api.Factory().DataFromBytes(
-                    ot::UnallocatedCString{test_endpoint}),
-                test_port,
-                test_chain_,
-                {},
-                {}));
+    if (false == listen_address_.IsValid()) {
+        listen_address_ = api.Factory().BlockchainAddress(
+            ot::blockchain::p2p::Protocol::bitcoin,
+            ot::blockchain::p2p::Network::zmq,
+            api.Factory().DataFromBytes(ot::UnallocatedCString{test_endpoint}),
+            test_port,
+            test_chain_,
+            {},
+            {});
     }
 
-    OT_ASSERT(listen_address_);
+    OT_ASSERT(listen_address_.IsValid());
 
-    return *listen_address_;
+    return listen_address_;
 }
 
 auto Regtest_fixture_base::init_block(
@@ -491,7 +488,7 @@ auto Regtest_fixture_base::MaturationInterval() noexcept
     -> ot::blockchain::block::Height
 {
     static const auto interval =
-        ot::blockchain::params::Chains().at(test_chain_).maturation_interval_;
+        ot::blockchain::params::get(test_chain_).MaturationInterval();
 
     return interval;
 }
@@ -662,7 +659,7 @@ auto Regtest_fixture_base::Shutdown() noexcept -> void
     block_listener_.clear();
     mined_block_cache_.reset();
     peer_listener_.reset();
-    listen_address_.reset();
+    listen_address_ = {};
 }
 
 auto Regtest_fixture_base::Start() noexcept -> bool

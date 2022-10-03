@@ -9,7 +9,6 @@
 #include <shared_mutex>
 
 #include "internal/util/Mutex.hpp"
-#include "opentxs/Version.hpp"
 #include "opentxs/util/Log.hpp"
 
 namespace opentxs

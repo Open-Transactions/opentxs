@@ -11,7 +11,6 @@
 #include <memory>
 #include <tuple>
 
-#include "1_Internal.hpp"
 #include "internal/identity/wot/claim/Types.hpp"
 #include "internal/serialization/protobuf/Contact.hpp"
 

@@ -4,7 +4,6 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 #include "0_stdafx.hpp"                    // IWYU pragma: associated
-#include "1_Internal.hpp"                  // IWYU pragma: associated
 #include "api/network/blockchain/Imp.hpp"  // IWYU pragma: associated
 
 #include <boost/smart_ptr/make_shared.hpp>
@@ -308,7 +307,7 @@ auto BlockchainImp::start(
 
     namespace p2p = opentxs::blockchain::p2p;
 
-    switch (opentxs::blockchain::params::Chains().at(type).p2p_protocol_) {
+    switch (opentxs::blockchain::params::get(type).P2PDefaultProtocol()) {
         case p2p::Protocol::bitcoin: {
             const auto& config = [&]() -> const Config& {
                 {

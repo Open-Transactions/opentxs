@@ -4,7 +4,6 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 #include "0_stdafx.hpp"                         // IWYU pragma: associated
-#include "1_Internal.hpp"                       // IWYU pragma: associated
 #include "network/blockchain/bitcoin/Peer.hpp"  // IWYU pragma: associated
 
 #include <boost/smart_ptr/make_shared.hpp>
@@ -72,6 +71,7 @@
 #include "opentxs/blockchain/node/HeaderOracle.hpp"
 #include "opentxs/blockchain/node/Manager.hpp"
 #include "opentxs/blockchain/node/Types.hpp"
+#include "opentxs/blockchain/p2p/Address.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/FixedByteArray.hpp"
@@ -95,19 +95,18 @@ auto BlockchainPeerBitcoin(
     std::shared_ptr<const api::Session> api,
     std::shared_ptr<const opentxs::blockchain::node::Manager> network,
     int peerID,
-    std::unique_ptr<blockchain::p2p::internal::Address> address,
+    blockchain::p2p::Address address,
     const blockchain::node::Endpoints& endpoints,
     std::string_view fromParent)
     -> boost::shared_ptr<network::blockchain::internal::Peer::Imp>
 {
     OT_ASSERT(api);
     OT_ASSERT(network);
-    OT_ASSERT(address);
 
     using Network = opentxs::blockchain::p2p::Network;
     using ReturnType = opentxs::network::blockchain::bitcoin::Peer;
 
-    switch (address->Type()) {
+    switch (address.Type()) {
         case Network::ipv6:
         case Network::ipv4:
         case Network::zmq: {
@@ -121,7 +120,7 @@ auto BlockchainPeerBitcoin(
         }
     }
 
-    const auto chain = address->Chain();
+    const auto chain = address.Chain();
     const auto& zmq = api->Network().ZeroMQ().Internal();
     const auto batchID = zmq.PreallocateBatch();
     // TODO the version of libc++ present in android ndk 23.0.7599858
@@ -135,7 +134,7 @@ auto BlockchainPeerBitcoin(
         chain,
         peerID,
         std::move(address),
-        blockchain::params::Chains().at(chain).p2p_protocol_version_,
+        blockchain::params::get(chain).P2PVersion(),
         endpoints,
         fromParent,
         batchID);
@@ -151,7 +150,7 @@ Peer::Peer(
     std::shared_ptr<const opentxs::blockchain::node::Manager> network,
     opentxs::blockchain::Type chain,
     int peerID,
-    std::unique_ptr<opentxs::blockchain::p2p::internal::Address> address,
+    opentxs::blockchain::p2p::Address address,
     opentxs::blockchain::p2p::bitcoin::ProtocolVersion protocol,
     const opentxs::blockchain::node::Endpoints& endpoints,
     std::string_view fromParent,
@@ -205,10 +204,8 @@ Peer::Peer(
     }())
     , inv_tx_([&] {
         using Type = opentxs::blockchain::bitcoin::Inventory::Type;
-        const auto& segwit =
-            opentxs::blockchain::params::Chains().at(chain_).segwit_;
 
-        if (segwit) {
+        if (opentxs::blockchain::params::get(chain_).SupportsSegwit()) {
 
             return Type::MsgWitnessTx;
         } else {
@@ -487,12 +484,9 @@ auto Peer::process_protocol_addr(
         auto peers = UnallocatedVector<DB::Address>{};
 
         for (const auto& address : message) {
-            auto pAddress = address.clone_internal();
-
-            OT_ASSERT(pAddress);
-
-            pAddress->SetLastConnected({});
-            peers.emplace_back(std::move(pAddress));
+            auto copy{address};
+            copy.Internal().SetLastConnected({});
+            peers.emplace_back(std::move(copy));
         }
 
         return peers;

@@ -33,10 +33,8 @@
 #include "util/Actor.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
 namespace api
 {
 class Session;
@@ -98,15 +96,11 @@ class Header;
 struct Message;
 }  // namespace bitcoin
 
-namespace internal
-{
-struct Address;
-}  // namespace internal
+class Address;
 }  // namespace p2p
 }  // namespace blockchain
 
 class Data;
-// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -120,7 +114,7 @@ public:
         std::shared_ptr<const opentxs::blockchain::node::Manager> network,
         opentxs::blockchain::Type chain,
         int peerID,
-        std::unique_ptr<opentxs::blockchain::p2p::internal::Address> address,
+        opentxs::blockchain::p2p::Address address,
         opentxs::blockchain::p2p::bitcoin::ProtocolVersion protocol,
         const opentxs::blockchain::node::Endpoints& endpoints,
         std::string_view fromParent,

@@ -3,8 +3,7 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#include "0_stdafx.hpp"    // IWYU pragma: associated
-#include "1_Internal.hpp"  // IWYU pragma: associated
+#include "0_stdafx.hpp"  // IWYU pragma: associated
 #include "internal/blockchain/p2p/bitcoin/message/Message.hpp"  // IWYU pragma: associated
 
 #include <cstring>
@@ -15,6 +14,7 @@
 #include "internal/blockchain/Blockchain.hpp"
 #include "internal/blockchain/Params.hpp"
 #include "internal/util/LogMacros.hpp"
+#include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/blockchain/Blockchain.hpp"
@@ -159,13 +159,13 @@ auto VerifyChecksum(
 {
     auto checksum = ByteArray{};
 
-    switch (params::Chains().at(header.Network()).p2p_protocol_) {
+    switch (params::get(header.Network()).P2PDefaultProtocol()) {
         case p2p::Protocol::bitcoin: {
             if (0 == payload.size()) {
                 checksum = api.Factory().DataFromHex("0x5df6e0e2");
             } else {
                 P2PMessageHash(
-                    api,
+                    api.Crypto(),
                     header.Network(),
                     payload.Bytes(),
                     checksum.WriteInto());

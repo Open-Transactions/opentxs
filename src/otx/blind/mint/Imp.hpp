@@ -25,10 +25,8 @@
 #include "otx/blind/mint/Mint.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
 namespace api
 {
 namespace session
@@ -53,7 +51,6 @@ class Nym;
 
 class PasswordPrompt;
 class String;
-// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

@@ -4,12 +4,10 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 #include "0_stdafx.hpp"                   // IWYU pragma: associated
-#include "1_Internal.hpp"                 // IWYU pragma: associated
 #include "api/crypto/blockchain/Imp.hpp"  // IWYU pragma: associated
 
 #include <HDPath.pb.h>
 #include <bech32.h>
-#include <boost/container/flat_map.hpp>
 #include <segwit_addr.h>
 #include <algorithm>
 #include <cstddef>
@@ -196,6 +194,7 @@ Blockchain::Imp::Imp(
     , contacts_(contacts)
     , blank_(api_.Factory().Data(), Style::Unknown, {}, false)
     , balance_oracle_endpoint_(opentxs::network::zeromq::MakeArbitraryInproc())
+    , parent_(parent)
     , lock_()
     , nym_lock_()
     , accounts_(api_)
@@ -743,21 +742,16 @@ auto Blockchain::Imp::DecodeAddress(
         if (Style::Unknown == style) { return output; }
         if (0 == chains.size()) { return output; }
 
-        const auto& params = opentxs::blockchain::params::Chains();
-
         for (const auto& chain : chains) {
             try {
-                if (false == params.at(chain).scripts_.at(style)) {
+                if (opentxs::blockchain::params::get(chain).IsAllowed(style)) {
+                    supported = true;
 
-                    return output;
+                    break;
                 }
             } catch (...) {
-
-                return output;
             }
         }
-
-        supported = true;
 
         return output;
     };

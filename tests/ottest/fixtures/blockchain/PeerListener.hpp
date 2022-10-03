@@ -13,8 +13,6 @@
 #include "ottest/Basic.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-// inline namespace v1
-// {
 namespace opentxs
 {
 namespace api
@@ -25,7 +23,6 @@ class Client;
 }  // namespace session
 }  // namespace api
 }  // namespace opentxs
-// }  // namespace v1
 // NOLINTEND(modernize-concat-nested-namespaces)
 
 namespace ottest

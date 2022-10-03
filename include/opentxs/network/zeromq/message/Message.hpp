@@ -5,19 +5,16 @@
 
 #pragma once
 
-#include "opentxs/Version.hpp"  // IWYU pragma: associated
-
 #include <functional>
 #include <type_traits>
 
+#include "opentxs/Export.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Pimpl.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
 namespace network
 {
 namespace zeromq
@@ -35,7 +32,6 @@ class Message;
 }  // namespace network
 
 class Amount;
-// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

@@ -21,8 +21,6 @@
 #include "internal/interface/ui/UI.hpp"
 #include "internal/util/Lockable.hpp"
 #include "internal/util/Mutex.hpp"
-#include "opentxs/Version.hpp"
-#include "opentxs/Version.hpp"
 #include "opentxs/api/Context.hpp"
 #include "opentxs/api/session/UI.hpp"
 #include "opentxs/blockchain/Types.hpp"
@@ -53,10 +51,8 @@
 class QAbstractItemModel;
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
 namespace api
 {
 namespace crypto
@@ -146,7 +142,6 @@ class UnitListQt;
 }  // namespace ui
 
 class Flag;
-// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

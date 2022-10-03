@@ -14,10 +14,8 @@
 #include <tuple>
 #include <utility>
 
-#include "1_Internal.hpp"
 #include "internal/blockchain/p2p/P2P.hpp"
 #include "internal/blockchain/p2p/bitcoin/Bitcoin.hpp"
-#include "opentxs/Version.hpp"
 #include "opentxs/blockchain/BlockchainType.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/bitcoin/bloom/BloomFilter.hpp"
@@ -35,10 +33,8 @@
 #include "opentxs/util/Iterator.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
 namespace api
 {
 class Session;
@@ -75,6 +71,8 @@ class Tx;
 
 class Header;
 }  // namespace bitcoin
+
+class Address;
 }  // namespace p2p
 
 class GCS;
@@ -89,7 +87,6 @@ class Frame;
 }  // namespace network
 
 class Data;
-// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -172,7 +169,7 @@ auto VerifyChecksum(
 namespace opentxs::blockchain::p2p::bitcoin::message::internal
 {
 struct Addr : virtual public bitcoin::Message {
-    using value_type = p2p::internal::Address;
+    using value_type = p2p::Address;
     using const_iterator =
         iterator::Bidirectional<const Addr, const value_type>;
 
@@ -387,7 +384,6 @@ struct Version : virtual public bitcoin::Message {
 
 namespace opentxs::factory
 {
-#if OT_BLOCKCHAIN
 auto BitcoinP2PAddr(
     const api::Session& api,
     std::unique_ptr<blockchain::p2p::bitcoin::Header> pHeader,
@@ -399,8 +395,8 @@ auto BitcoinP2PAddr(
     const api::Session& api,
     const blockchain::Type network,
     const blockchain::p2p::bitcoin::ProtocolVersion version,
-    UnallocatedVector<std::unique_ptr<blockchain::p2p::internal::Address>>&&
-        addresses) -> blockchain::p2p::bitcoin::message::internal::Addr*;
+    UnallocatedVector<blockchain::p2p::Address>&& addresses)
+    -> blockchain::p2p::bitcoin::message::internal::Addr*;
 auto BitcoinP2PBlock(
     const api::Session& api,
     std::unique_ptr<blockchain::p2p::bitcoin::Header> header,
@@ -772,7 +768,6 @@ auto BitcoinP2PVersion(
     const std::string_view userAgent,
     const blockchain::block::Height height,
     const bool relay) -> blockchain::p2p::bitcoin::message::internal::Version*;
-#endif  // OT_BLOCKCHAIN
 }  // namespace opentxs::factory
 
 namespace opentxs::factory
@@ -781,7 +776,6 @@ namespace opentxs::factory
 // version of these functions but eventually we want all these factories to
 // return unique_ptr. Once that conversion is complete and Peer.tpp is updated
 // to use the updated versions then these temporary functions can be removed
-#if OT_BLOCKCHAIN
 auto BitcoinP2PInvTemp(
     const api::Session& api,
     std::unique_ptr<blockchain::p2p::bitcoin::Header> pHeader,
@@ -796,5 +790,4 @@ auto BitcoinP2PTxTemp(
     const void* payload,
     const std::size_t size) noexcept
     -> blockchain::p2p::bitcoin::message::internal::Tx*;
-#endif  // OT_BLOCKCHAIN
 }  // namespace opentxs::factory

@@ -4,7 +4,6 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 #include "0_stdafx.hpp"                       // IWYU pragma: associated
-#include "1_Internal.hpp"                     // IWYU pragma: associated
 #include "core/contract/peer/PeerObject.hpp"  // IWYU pragma: associated
 
 #include <Nym.pb.h>
@@ -40,6 +39,13 @@
 #include "opentxs/otx/blind/Purse.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Pimpl.hpp"
+
+namespace opentxs
+{
+constexpr auto PEER_MESSAGE_VERSION = 2;
+constexpr auto PEER_PAYMENT_VERSION = 5;
+constexpr auto PEER_CASH_VERSION = 7;
+}  // namespace opentxs
 
 namespace opentxs::factory
 {

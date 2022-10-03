@@ -8,7 +8,6 @@
 #include <cstddef>
 
 #include "internal/otx/smartcontract/OTScript.hpp"
-#include "opentxs/Version.hpp"
 #include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -17,15 +16,12 @@ namespace chaiscript
 class ChaiScript;
 }  // namespace chaiscript
 
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
 class OTScriptable;
 class OTSmartContract;
 class OTVariable;
 class String;
-// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

@@ -9,8 +9,6 @@
 // IWYU pragma: no_include "opentxs/core/PaymentCode.hpp"
 // IWYU pragma: no_include "opentxs/identity/wot/claim/ClaimType.hpp"
 
-#include "opentxs/Version.hpp"  // IWYU pragma: associated
-
 #include <atomic>
 #include <cstdint>
 #include <ctime>
@@ -18,6 +16,7 @@
 #include <mutex>
 #include <tuple>
 
+#include "opentxs/Export.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/crypto/AddressStyle.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
@@ -31,10 +30,8 @@
 #include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
 namespace api
 {
 namespace session
@@ -80,7 +77,6 @@ class Nym;
 class ByteArray;
 class Data;
 class PaymentCode;
-// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

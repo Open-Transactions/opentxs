@@ -5,20 +5,17 @@
 
 #pragma once
 
-#include "opentxs/Version.hpp"  // IWYU pragma: associated
-
 #include <cstdint>
 #include <functional>
 #include <future>
 
+#include "opentxs/Export.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
 namespace api
 {
 namespace network
@@ -40,7 +37,6 @@ class Socket;
 }  // namespace network
 
 class ByteArray;
-// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

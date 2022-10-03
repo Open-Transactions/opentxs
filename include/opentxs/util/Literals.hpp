@@ -5,10 +5,10 @@
 
 #pragma once
 
-#include "opentxs/Version.hpp"  // IWYU pragma: associated
-
 #include <cstddef>
 #include <string_view>
+
+#include "opentxs/Export.hpp"
 
 namespace opentxs
 {

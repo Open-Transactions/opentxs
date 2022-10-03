@@ -4,7 +4,6 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 #include "0_stdafx.hpp"                           // IWYU pragma: associated
-#include "1_Internal.hpp"                         // IWYU pragma: associated
 #include "blockchain/node/peermanager/Peers.hpp"  // IWYU pragma: associated
 
 #include <boost/asio.hpp>
@@ -14,7 +13,7 @@
 #include <atomic>
 #include <chrono>
 #include <compare>
-#include <cstdint>
+#include <future>
 #include <iterator>
 #include <memory>
 #include <random>
@@ -127,20 +126,20 @@ Peers::Peers(
     , resolved_dns_()  // TODO allocator
     , gatekeeper_()
 {
-    const auto& data = params::Chains().at(chain_);
-    database_.AddOrUpdate(Endpoint{factory::BlockchainAddress(
+    const auto& data = params::get(chain_);
+    database_.AddOrUpdate(p2p::Address{factory::BlockchainAddress(
         api_,
-        data.p2p_protocol_,
-        blockchain::p2p::Network::ipv4,
+        data.P2PDefaultProtocol(),
+        p2p::Network::ipv4,
         default_peer_,
-        data.default_port_,
+        data.P2PDefaultPort(),
         chain_,
         Time{},
         {},
         false)});
 }
 
-auto Peers::add_peer(Endpoint endpoint) noexcept -> int
+auto Peers::add_peer(p2p::Address&& endpoint) noexcept -> int
 {
     auto ticket = gatekeeper_.get();
 
@@ -149,11 +148,9 @@ auto Peers::add_peer(Endpoint endpoint) noexcept -> int
     return add_peer(++next_id_, std::move(endpoint));
 }
 
-auto Peers::add_peer(const int id, Endpoint endpoint) noexcept -> int
+auto Peers::add_peer(const int id, p2p::Address&& endpoint) noexcept -> int
 {
-    OT_ASSERT(endpoint);
-
-    auto addressID{endpoint->ID()};
+    auto addressID{endpoint.ID()};
     auto& count = active_[addressID];
 
     if (0_uz != count) { return -1; }
@@ -214,12 +211,16 @@ auto Peers::adjust_count(int adjustment) noexcept -> void
         __LINE__);
 }
 
-auto Peers::AddListener(
-    const blockchain::p2p::Address& address,
-    std::promise<bool>& promise) noexcept -> void
+auto Peers::AddIncoming(const int id, p2p::Address&& endpoint) noexcept -> void
+{
+    endpoint.Internal().SetIncoming(true);
+    add_peer(id, std::move(endpoint));
+}
+
+auto Peers::AddListener(p2p::Address&& address) noexcept -> void
 {
     switch (address.Type()) {
-        case blockchain::p2p::Network::zmq: {
+        case p2p::Network::zmq: {
             auto& manager = incoming_zmq_;
 
             if (false == bool(manager)) {
@@ -228,10 +229,10 @@ auto Peers::AddListener(
 
             OT_ASSERT(manager);
 
-            promise.set_value(manager->Listen(address));
+            manager->Listen(std::move(address));
         } break;
-        case blockchain::p2p::Network::ipv6:
-        case blockchain::p2p::Network::ipv4: {
+        case p2p::Network::ipv6:
+        case p2p::Network::ipv4: {
             auto& manager = incoming_tcp_;
 
             if (false == bool(manager)) {
@@ -240,65 +241,46 @@ auto Peers::AddListener(
 
             OT_ASSERT(manager);
 
-            promise.set_value(manager->Listen(address));
+            manager->Listen(std::move(address));
         } break;
-        case blockchain::p2p::Network::onion2:
-        case blockchain::p2p::Network::onion3:
-        case blockchain::p2p::Network::eep:
-        case blockchain::p2p::Network::cjdns:
+        case p2p::Network::onion2:
+        case p2p::Network::onion3:
+        case p2p::Network::eep:
+        case p2p::Network::cjdns:
         default: {
-            promise.set_value(false);
+            LogError()(OT_PRETTY_CLASS())("unsupported network type ")(
+                print(address.Type()))
+                .Flush();
         }
     }
 }
 
-auto Peers::AddPeer(
-    const blockchain::p2p::Address& address,
-    std::promise<bool>& promise) noexcept -> void
+auto Peers::AddPeer(p2p::Address&& address) noexcept -> void
 {
     auto ticket = gatekeeper_.get();
 
-    if (ticket) {
-        promise.set_value(false);
-        return;
-    }
+    if (ticket) { return; }
 
-    if (address.Chain() != chain_) {
-        promise.set_value(false);
+    if (auto chain = address.Chain(); chain != chain_) {
+        LogError()(OT_PRETTY_CLASS())("wrong chain: ")(print(chain)).Flush();
 
         return;
     }
 
-    auto endpoint = Endpoint{factory::BlockchainAddress(
-        api_,
-        address.Style(),
-        address.Type(),
-        address.Bytes(),
-        address.Port(),
-        address.Chain(),
-        address.LastConnected(),
-        address.Services(),
-        false)};
-
-    OT_ASSERT(endpoint);
-
-    add_peer(std::move(endpoint));
-    promise.set_value(true);
+    address.Internal().SetIncoming(false);
+    add_peer(std::move(address));
 }
 
-auto Peers::AddResolvedDNS(
-    Vector<std::unique_ptr<blockchain::p2p::internal::Address>>
-        address) noexcept -> void
+auto Peers::AddResolvedDNS(Vector<p2p::Address> address) noexcept -> void
 {
     std::move(
         address.begin(), address.end(), std::back_inserter(resolved_dns_));
 }
 
-auto Peers::ConstructPeer(Endpoint endpoint) noexcept -> int
+auto Peers::ConstructPeer(const p2p::Address& endpoint) noexcept -> int
 {
     auto id = ++next_id_;
-    parent_.AddIncomingPeer(
-        id, reinterpret_cast<std::uintptr_t>(endpoint.release()));
+    parent_.AddIncomingPeer(id, endpoint);
 
     return id;
 }
@@ -325,25 +307,25 @@ auto Peers::Disconnect(const int id) noexcept -> void
     }
 }
 
-auto Peers::get_default_peer() const noexcept -> Endpoint
+auto Peers::get_default_peer() const noexcept -> p2p::Address
 {
     if (localhost_peer_ == default_peer_) { return {}; }
 
-    const auto& data = params::Chains().at(chain_);
+    const auto& data = params::get(chain_);
 
-    return Endpoint{factory::BlockchainAddress(
+    return p2p::Address{factory::BlockchainAddress(
         api_,
-        data.p2p_protocol_,
-        blockchain::p2p::Network::ipv4,
+        data.P2PDefaultProtocol(),
+        p2p::Network::ipv4,
         default_peer_,
-        data.default_port_,
+        data.P2PDefaultPort(),
         chain_,
         Time{},
         {},
         false)};
 }
 
-auto Peers::get_dns_peer() noexcept -> Endpoint
+auto Peers::get_dns_peer() noexcept -> p2p::Address
 {
     if (api_.GetOptions().TestMode()) { return {}; }
 
@@ -352,12 +334,12 @@ auto Peers::get_dns_peer() noexcept -> Endpoint
             auto post = ScopeGuard{[&] { resolved_dns_.pop_front(); }};
             auto out = std::move(resolved_dns_.front());
 
-            if (out) {
-                database_.AddOrUpdate(out->clone_internal());
+            if (out.IsValid()) {
+                database_.AddOrUpdate({out});
 
-                if (previous_failure_timeout(out->ID())) {
+                if (previous_failure_timeout(out.ID())) {
                     LogVerbose()(OT_PRETTY_CLASS())("Skipping ")(print(chain_))(
-                        " peer ")(out->Display())(" due to retry timeout")
+                        " peer ")(out.Display())(" due to retry timeout")
                         .Flush();
 
                     continue;
@@ -368,8 +350,8 @@ auto Peers::get_dns_peer() noexcept -> Endpoint
             }
         }
 
-        const auto& data = params::Chains().at(chain_);
-        const auto& dns = data.dns_seeds_;
+        const auto& data = params::get(chain_);
+        const auto& dns = data.P2PSeeds();
 
         if (0 == dns.size()) {
             LogVerbose()(OT_PRETTY_CLASS())("No dns seeds available").Flush();
@@ -401,7 +383,7 @@ auto Peers::get_dns_peer() noexcept -> Endpoint
             return {};
         }
 
-        const auto port = data.default_port_;
+        const auto port = data.P2PDefaultPort();
         LogVerbose()(OT_PRETTY_CLASS())("Resolving dns seed: ")(seed).Flush();
         parent_.Resolve(seed, port);
 
@@ -417,84 +399,83 @@ auto Peers::get_dns_peer() noexcept -> Endpoint
     }
 }
 
-auto Peers::get_fallback_peer(
-    const blockchain::p2p::Protocol protocol) const noexcept -> Endpoint
+auto Peers::get_fallback_peer(const p2p::Protocol protocol) const noexcept
+    -> p2p::Address
 {
     return database_.Get(protocol, get_types(), {});
 }
 
-auto Peers::get_peer() noexcept -> Endpoint
+auto Peers::get_peer() noexcept -> p2p::Address
 {
-    const auto protocol = params::Chains().at(chain_).p2p_protocol_;
-    auto pAddress = get_default_peer();
+    const auto protocol = params::get(chain_).P2PDefaultProtocol();
+    auto address = get_default_peer();
 
-    if (pAddress) {
-        LogVerbose()(OT_PRETTY_CLASS())("Default peer is: ")(
-            pAddress->Display())
+    if (address.IsValid()) {
+        LogVerbose()(OT_PRETTY_CLASS())("Default peer is: ")(address.Display())
             .Flush();
 
-        if (is_not_connected(*pAddress)) {
+        if (is_not_connected(address)) {
             LogVerbose()(OT_PRETTY_CLASS())(
-                "Attempting to connect to default peer ")(pAddress->Display())
+                "Attempting to connect to default peer ")(address.Display())
                 .Flush();
 
-            return pAddress;
+            return address;
         } else {
             LogVerbose()(OT_PRETTY_CLASS())(
                 "Already connected / connecting to default "
-                "peer ")(pAddress->Display())
+                "peer ")(address.Display())
                 .Flush();
         }
     } else {
         LogVerbose()(OT_PRETTY_CLASS())("No default peer").Flush();
     }
 
-    pAddress = get_preferred_peer(protocol);
+    address = get_preferred_peer(protocol);
 
-    if (pAddress && is_not_connected(*pAddress)) {
+    if (address.IsValid() && is_not_connected(address)) {
         LogVerbose()(OT_PRETTY_CLASS())(
-            "Attempting to connect to preferred peer: ")(pAddress->Display())
+            "Attempting to connect to preferred peer: ")(address.Display())
             .Flush();
 
-        return pAddress;
+        return address;
     }
 
-    pAddress = get_dns_peer();
+    address = get_dns_peer();
 
-    if (pAddress && is_not_connected(*pAddress)) {
+    if (address.IsValid() && is_not_connected(address)) {
         LogVerbose()(OT_PRETTY_CLASS())("Attempting to connect to dns peer: ")(
-            pAddress->Display())
+            address.Display())
             .Flush();
 
-        return pAddress;
+        return address;
     }
 
-    pAddress = get_fallback_peer(protocol);
+    address = get_fallback_peer(protocol);
 
-    if (pAddress) {
+    if (address.IsValid()) {
         LogVerbose()(OT_PRETTY_CLASS())(
-            "Attempting to connect to fallback peer: ")(pAddress->Display())
+            "Attempting to connect to fallback peer: ")(address.Display())
             .Flush();
     }
 
-    return pAddress;
+    return address;
 }
 
-auto Peers::get_preferred_peer(
-    const blockchain::p2p::Protocol protocol) const noexcept -> Endpoint
+auto Peers::get_preferred_peer(const p2p::Protocol protocol) const noexcept
+    -> p2p::Address
 {
     auto output = database_.Get(protocol, get_types(), preferred_services_);
 
-    if (output && (output->Bytes() == localhost_peer_)) {
+    if (output.IsValid() && (output.Bytes() == localhost_peer_)) {
         LogVerbose()(OT_PRETTY_CLASS())("Skipping localhost as preferred peer")
             .Flush();
 
         return {};
     }
 
-    if (output && previous_failure_timeout(output->ID())) {
+    if (output.IsValid() && previous_failure_timeout(output.ID())) {
         LogVerbose()(OT_PRETTY_CLASS())("Skipping ")(print(chain_))(" peer ")(
-            output->Display())(" due to retry timeout")
+            output.Display())(" due to retry timeout")
             .Flush();
 
         return {};
@@ -504,13 +485,13 @@ auto Peers::get_preferred_peer(
 }
 
 auto Peers::get_preferred_services(const internal::Config& config) noexcept
-    -> UnallocatedSet<blockchain::p2p::Service>
+    -> UnallocatedSet<p2p::Service>
 {
-    auto out = UnallocatedSet<blockchain::p2p::Service>{};
+    auto out = UnallocatedSet<p2p::Service>{};
 
     switch (config.profile_) {
         case BlockchainProfile::desktop_native: {
-            out.emplace(blockchain::p2p::Service::CompactFilters);
+            out.emplace(p2p::Service::CompactFilters);
         } break;
         case BlockchainProfile::mobile:
         case BlockchainProfile::desktop:
@@ -524,12 +505,11 @@ auto Peers::get_preferred_services(const internal::Config& config) noexcept
     return out;
 }
 
-auto Peers::get_types() const noexcept
-    -> UnallocatedSet<blockchain::p2p::Network>
+auto Peers::get_types() const noexcept -> UnallocatedSet<p2p::Network>
 {
-    using Type = blockchain::p2p::Network;
+    using Type = p2p::Network;
     using Mode = ConnectionMode;
-    auto output = UnallocatedSet<blockchain::p2p::Network>{};
+    auto output = UnallocatedSet<p2p::Network>{};
 
     switch (api_.GetOptions().Ipv4ConnectionMode()) {
         case Mode::off: {
@@ -573,8 +553,8 @@ auto Peers::get_types() const noexcept
     return output;
 }
 
-auto Peers::is_not_connected(
-    const blockchain::p2p::Address& endpoint) const noexcept -> bool
+auto Peers::is_not_connected(const p2p::Address& endpoint) const noexcept
+    -> bool
 {
     return 0 == connected_.count(endpoint.ID());
 }
@@ -594,10 +574,10 @@ auto Peers::peer_factory(
     std::shared_ptr<const opentxs::blockchain::node::Manager> network,
     const int id,
     std::string_view inproc,
-    Endpoint endpoint) noexcept -> Peer
+    p2p::Address endpoint) noexcept -> Peer
 {
-    switch (params::Chains().at(chain_).p2p_protocol_) {
-        case blockchain::p2p::Protocol::bitcoin: {
+    switch (params::get(chain_).P2PDefaultProtocol()) {
+        case p2p::Protocol::bitcoin: {
             return factory::BlockchainPeerBitcoin(
                 std::move(api),
                 std::move(network),
@@ -606,8 +586,8 @@ auto Peers::peer_factory(
                 endpoints_,
                 inproc);
         }
-        case blockchain::p2p::Protocol::opentxs:
-        case blockchain::p2p::Protocol::ethereum:
+        case p2p::Protocol::opentxs:
+        case p2p::Protocol::ethereum:
         default: {
             OT_FAIL;
         }
@@ -661,7 +641,7 @@ auto Peers::Run() noexcept -> bool
             .Flush();
         auto peer = get_peer();
 
-        if (peer) { add_peer(std::move(peer)); }
+        if (peer.IsValid()) { add_peer(std::move(peer)); }
     }
 
     return target > peers_.size();

@@ -13,7 +13,6 @@
 #include "internal/otx/common/Contract.hpp"
 #include "internal/otx/common/Ledger.hpp"
 #include "internal/otx/common/OTTransactionType.hpp"
-#include "opentxs/Version.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/core/String.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
@@ -22,10 +21,8 @@
 #include "opentxs/util/Numbers.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
 namespace api
 {
 namespace session
@@ -68,7 +65,6 @@ class Ledger;
 class OTWallet;
 class PasswordPrompt;
 class Tag;
-// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

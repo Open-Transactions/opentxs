@@ -10,7 +10,6 @@
 #include <string_view>
 #include <utility>
 
-#include "1_Internal.hpp"
 #include "Proto.hpp"
 #include "interface/ui/base/Combined.hpp"
 #include "interface/ui/base/List.hpp"
@@ -18,7 +17,6 @@
 #include "internal/identity/wot/claim/Types.hpp"
 #include "internal/interface/ui/UI.hpp"
 #include "internal/serialization/protobuf/verify/VerifyContacts.hpp"
-#include "opentxs/Version.hpp"
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Session.hpp"
@@ -29,10 +27,8 @@
 #include "opentxs/util/SharedPimpl.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
 namespace api
 {
 namespace session
@@ -68,7 +64,6 @@ namespace ui
 {
 class ContactSection;
 }  // namespace ui
-// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

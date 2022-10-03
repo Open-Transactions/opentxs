@@ -5,12 +5,11 @@
 
 #pragma once
 
-#include "opentxs/Version.hpp"  // IWYU pragma: associated
-
 #include <cstddef>
 #include <cstdint>
 #include <functional>
 
+#include "opentxs/Export.hpp"
 #include "opentxs/util/Container.hpp"
 
 namespace opentxs::crypto

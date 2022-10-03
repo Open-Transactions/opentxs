@@ -3,6 +3,8 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_include "opentxs/blockchain/block/NumericHash.hpp"
+
 #pragma once
 
 #include <memory>
@@ -11,8 +13,7 @@
 #include "internal/blockchain/block/Header.hpp"
 #include "opentxs/blockchain/BlockchainType.hpp"
 #include "opentxs/blockchain/Types.hpp"
-#include "opentxs/blockchain/bitcoin/NumericHash.hpp"
-#include "opentxs/blockchain/bitcoin/Work.hpp"
+#include "opentxs/blockchain/Work.hpp"
 #include "opentxs/blockchain/bitcoin/block/Header.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/blockchain/block/Header.hpp"
@@ -23,31 +24,29 @@
 #include "opentxs/util/Numbers.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
-namespace api
-{
-class Session;
-}  // namespace api
-
 namespace blockchain
 {
 namespace bitcoin
 {
 namespace block
 {
+namespace internal
+{
+class Header;
+}  // namespace internal
+
 class Header;
 }  // namespace block
 }  // namespace bitcoin
 
 namespace block
 {
+class NumericHash;
 class Position;
 }  // namespace block
 }  // namespace blockchain
-// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -60,24 +59,30 @@ public:
     {
         return std::unique_ptr<Imp>(new Header(*this));
     }
-    auto Difficulty() const noexcept -> OTWork final { return work_; }
+    auto Difficulty() const noexcept -> blockchain::Work final { return work_; }
     auto EffectiveState() const noexcept -> Status final;
     auto Hash() const noexcept -> const block::Hash& final;
     auto Height() const noexcept -> block::Height final;
-    auto IncrementalWork() const noexcept -> OTWork final { return work_; }
+    auto IncrementalWork() const noexcept -> blockchain::Work final
+    {
+        return work_;
+    }
     auto InheritedState() const noexcept -> Status final;
     auto IsBlacklisted() const noexcept -> bool final;
     auto IsDisconnected() const noexcept -> bool final;
     auto LocalState() const noexcept -> Status final;
-    auto NumericHash() const noexcept -> OTNumericHash final;
+    auto NumericHash() const noexcept -> block::NumericHash final;
     auto ParentHash() const noexcept -> const block::Hash& final;
-    auto ParentWork() const noexcept -> OTWork final { return inherit_work_; }
+    auto ParentWork() const noexcept -> blockchain::Work final
+    {
+        return inherit_work_;
+    }
     auto Position() const noexcept -> block::Position final;
     using block::Header::Imp::Serialize;
     auto Serialize(SerializedType& out) const noexcept -> bool override;
     auto Type() const noexcept -> blockchain::Type final { return type_; }
     auto Valid() const noexcept -> bool final;
-    auto Work() const noexcept -> OTWork final;
+    auto Work() const noexcept -> blockchain::Work final;
 
     auto CompareToCheckpoint(const block::Position& checkpoint) noexcept
         -> void final;
@@ -96,16 +101,14 @@ public:
 protected:
     static const VersionNumber default_version_{1};
 
-    const api::Session& api_;
     const block::Hash hash_;
     const ByteArray pow_;
     const block::Hash parent_hash_;
     const blockchain::Type type_;
 
-    static auto minimum_work(const blockchain::Type chain) -> OTWork;
+    static auto minimum_work(const blockchain::Type chain) -> blockchain::Work;
 
     Header(
-        const api::Session& api,
         const VersionNumber version,
         const blockchain::Type type,
         block::Hash&& hash,
@@ -122,10 +125,10 @@ private:
     static const VersionNumber local_data_version_{1};
 
     const VersionNumber version_;
-    const OTWork work_;
+    const blockchain::Work work_;
     block::Height height_;
     Status status_;
     Status inherit_status_;
-    OTWork inherit_work_;
+    blockchain::Work inherit_work_;
 };
 }  // namespace opentxs::blockchain::block::implementation

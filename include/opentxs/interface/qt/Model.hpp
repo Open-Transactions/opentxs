@@ -5,8 +5,6 @@
 
 #pragma once
 
-#include "opentxs/Version.hpp"  // IWYU pragma: associated
-
 #include <QAbstractItemModel>
 #include <QHash>
 #include <QMetaObject>
@@ -16,14 +14,14 @@
 #include <QVariant>
 #include <memory>
 
+#include "opentxs/Export.hpp"
+
 class QByteArray;
 class QObject;
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
 namespace ui
 {
 namespace internal
@@ -44,7 +42,6 @@ class ModelHelper;
 class RowWrapper;
 }  // namespace qt
 }  // namespace ui
-// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

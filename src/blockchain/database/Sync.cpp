@@ -4,7 +4,6 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 #include "0_stdafx.hpp"                  // IWYU pragma: associated
-#include "1_Internal.hpp"                // IWYU pragma: associated
 #include "blockchain/database/Sync.hpp"  // IWYU pragma: associated
 
 #include <cstddef>
@@ -32,15 +31,7 @@ Sync::Sync(
     , lmdb_(lmdb)
     , blank_position_()
     , chain_(type)
-    , genesis_([&] {
-        const auto& hex = params::Chains().at(chain_).genesis_hash_hex_;
-        auto out = block::Hash{};
-        const auto rc = out.DecodeHex(hex);
-
-        OT_ASSERT(rc);
-
-        return out;
-    }())
+    , genesis_(params::get(chain_).GenesisHash())
 {
     auto tip = Tip();
 

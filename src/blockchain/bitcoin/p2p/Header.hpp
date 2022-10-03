@@ -13,7 +13,6 @@
 
 #include "internal/blockchain/p2p/bitcoin/Bitcoin.hpp"
 #include "internal/util/P0330.hpp"
-#include "opentxs/Version.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/blockchain/BlockchainType.hpp"
@@ -25,10 +24,8 @@
 #include "opentxs/util/Numbers.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
 namespace api
 {
 class Session;
@@ -43,7 +40,6 @@ class Frame;
 }  // namespace network
 
 class Data;
-// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

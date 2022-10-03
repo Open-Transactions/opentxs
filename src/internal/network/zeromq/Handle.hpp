@@ -8,7 +8,7 @@
 #include <memory>
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs  // NOLINT
+namespace opentxs
 {
 namespace network
 {

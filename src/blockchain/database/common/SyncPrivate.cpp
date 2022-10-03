@@ -3,8 +3,7 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#include "0_stdafx.hpp"    // IWYU pragma: associated
-#include "1_Internal.hpp"  // IWYU pragma: associated
+#include "0_stdafx.hpp"  // IWYU pragma: associated
 #include "blockchain/database/common/SyncPrivate.hpp"  // IWYU pragma: associated
 
 #include <boost/container/flat_map.hpp>
@@ -45,6 +44,9 @@ extern "C" {
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/bitcoin/cfilter/FilterType.hpp"
 #include "opentxs/blockchain/bitcoin/cfilter/GCS.hpp"
+#include "opentxs/blockchain/block/Block.hpp"
+#include "opentxs/blockchain/block/Hash.hpp"
+#include "opentxs/blockchain/block/Header.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/FixedByteArray.hpp"
 #include "opentxs/network/otdht/Block.hpp"
@@ -183,18 +185,16 @@ auto SyncPrivate::import_genesis(const blockchain::Type chain) noexcept -> void
 
     const auto items = [&] {
         namespace params = opentxs::blockchain::params;
-        const auto& data = params::Chains().at(chain);
         constexpr auto filterType = opentxs::blockchain::cfilter::Type::ES;
+        const auto& genesis = params::get(chain).GenesisBlock().Header();
         auto gcs = [&] {
             const auto& filter = params::Filters().at(chain).at(filterType);
             const auto bytes = api_.Factory().DataFromHex(filter.second);
-            const auto blockHash =
-                api_.Factory().DataFromHex(data.genesis_hash_hex_);
             auto output = factory::GCS(
                 api_,
                 filterType,
                 opentxs::blockchain::internal::BlockHashToFilterKey(
-                    blockHash.Bytes()),
+                    genesis.Hash().Bytes()),
                 bytes.Bytes(),
                 {});  // TODO allocator
 
@@ -204,8 +204,12 @@ auto SyncPrivate::import_genesis(const blockchain::Type chain) noexcept -> void
         }();
         // TODO allocator
         auto output = network::otdht::SyncData{};
-        const auto header =
-            api_.Factory().DataFromHex(data.genesis_header_hex_);
+        const auto header = [&] {
+            auto out = ByteArray{};
+            genesis.Serialize(out.WriteInto());
+
+            return out;
+        }();
         const auto filter = [&] {
             auto out = Space{};
             gcs.Compressed(writer(out));

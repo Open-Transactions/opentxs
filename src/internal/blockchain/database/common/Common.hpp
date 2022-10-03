@@ -20,30 +20,9 @@
 #include "opentxs/blockchain/p2p/Types.hpp"
 #include "opentxs/util/Container.hpp"
 
-// NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs  // NOLINT
-{
-// inline namespace v1
-// {
-namespace blockchain
-{
-namespace p2p
-{
-namespace internal
-{
-struct Address;
-}  // namespace internal
-}  // namespace p2p
-}  // namespace blockchain
-// }  // namespace v1
-}  // namespace opentxs
-// NOLINTEND(modernize-concat-nested-namespaces)
-
 namespace opentxs::blockchain::database::common
 {
 using Chain = Type;
-using Address = p2p::internal::Address;
-using Address_p = std::unique_ptr<Address>;
 using CFilterParams = database::Cfilter::CFilterParams;
 using CFHeaderParams = database::Cfilter::CFHeaderParams;
 using Position = block::Position;

@@ -4,7 +4,6 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 #include "0_stdafx.hpp"                     // IWYU pragma: associated
-#include "1_Internal.hpp"                   // IWYU pragma: associated
 #include "network/blockchain/peer/Imp.hpp"  // IWYU pragma: associated
 
 #include <algorithm>
@@ -147,7 +146,7 @@ Peer::Imp::Imp(
     std::shared_ptr<const opentxs::blockchain::node::Manager> network,
     opentxs::blockchain::Type chain,
     int peerID,
-    std::unique_ptr<opentxs::blockchain::p2p::internal::Address> address,
+    opentxs::blockchain::p2p::Address address,
     std::chrono::milliseconds pingInterval,
     std::chrono::milliseconds inactivityInterval,
     std::chrono::milliseconds peersInterval,
@@ -163,16 +162,16 @@ Peer::Imp::Imp(
               using opentxs::blockchain::print;
               auto out = CString{print(chain), alloc};
 
-              OT_ASSERT(address);
+              OT_ASSERT(address.IsValid());
 
-              if (address->Incoming()) {
+              if (address.Internal().Incoming()) {
                   out.append(" incoming"sv);
               } else {
                   out.append(" outgoing"sv);
               }
 
               out.append(" peer "sv);
-              out.append(address->Display());
+              out.append(address.Display());
               out.append(" ("sv);
               out.append(std::to_string(peerID));
               out.append(")"sv);
@@ -232,7 +231,7 @@ Peer::Imp::Imp(
     , filter_oracle_(network_.FilterOracle())
     , chain_(chain)
     , dir_([&] {
-        if (address->Incoming()) {
+        if (address.Internal().Incoming()) {
 
             return Dir::incoming;
         } else {
@@ -248,8 +247,7 @@ Peer::Imp::Imp(
     , ping_interval_(std::move(pingInterval))
     , inactivity_interval_(std::move(inactivityInterval))
     , peers_interval_(std::move(peersInterval))
-    , address_p_(std::move(address))
-    , address_(*address_p_)
+    , address_(std::move(address))
     , connection_p_(init_connection_manager(
           api_,
           *this,
@@ -278,7 +276,6 @@ Peer::Imp::Imp(
     OT_ASSERT(api_p_);
     OT_ASSERT(network_p_);
     OT_ASSERT(connection_p_);
-    OT_ASSERT(address_p_);
 }
 
 auto Peer::Imp::add_known_block(opentxs::blockchain::block::Hash hash) noexcept
@@ -484,13 +481,13 @@ auto Peer::Imp::init_connection_manager(
     const api::Session& api,
     const Imp& parent,
     const opentxs::blockchain::node::internal::PeerManager& manager,
-    const opentxs::blockchain::p2p::internal::Address& address,
+    const opentxs::blockchain::p2p::Address& address,
     const Log& log,
     int id,
     std::size_t headerBytes) noexcept -> std::unique_ptr<ConnectionManager>
 {
     if (opentxs::blockchain::p2p::Network::zmq == address.Type()) {
-        if (address.Incoming()) {
+        if (address.Internal().Incoming()) {
 
             return network::blockchain::ConnectionManager::ZMQIncoming(
                 api, log, id, address, headerBytes);
@@ -500,7 +497,7 @@ auto Peer::Imp::init_connection_manager(
                 api, log, id, address, headerBytes);
         }
     } else {
-        if (address.Incoming()) {
+        if (address.Internal().Incoming()) {
 
             return network::blockchain::ConnectionManager::TCPIncoming(
                 api,
@@ -1361,16 +1358,16 @@ auto Peer::Imp::update_activity() noexcept -> void
 
 auto Peer::Imp::update_address() noexcept -> void
 {
-    address_.SetLastConnected(last_activity_);
-    database_.AddOrUpdate(address_.clone_internal());
+    address_.Internal().SetLastConnected(last_activity_);
+    database_.AddOrUpdate({address_});
 }
 
 auto Peer::Imp::update_address(
     const UnallocatedSet<opentxs::blockchain::p2p::Service>& services) noexcept
     -> void
 {
-    address_.SetServices(services);
-    database_.AddOrUpdate(address_.clone_internal());
+    address_.Internal().SetServices(services);
+    database_.AddOrUpdate({address_});
 }
 
 auto Peer::Imp::update_block_job(const ReadView block) noexcept -> bool

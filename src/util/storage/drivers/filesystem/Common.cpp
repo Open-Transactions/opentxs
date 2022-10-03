@@ -5,8 +5,7 @@
 
 // IWYU pragma: no_include <boost/iostreams/detail/wrap_unwrap.hpp>
 
-#include "0_stdafx.hpp"    // IWYU pragma: associated
-#include "1_Internal.hpp"  // IWYU pragma: associated
+#include "0_stdafx.hpp"  // IWYU pragma: associated
 #include "util/storage/drivers/filesystem/Common.hpp"  // IWYU pragma: associated
 
 #include <boost/iostreams/device/file_descriptor.hpp>

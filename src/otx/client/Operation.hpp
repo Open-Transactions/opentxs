@@ -23,7 +23,6 @@
 #include "internal/otx/common/Message.hpp"
 #include "internal/util/Editor.hpp"
 #include "internal/util/Mutex.hpp"
-#include "opentxs/Version.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/core/String.hpp"
 #include "opentxs/core/contract/Types.hpp"
@@ -47,10 +46,8 @@
 #include "opentxs/util/PasswordPrompt.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
 namespace api
 {
 namespace session
@@ -87,7 +84,6 @@ class Factory;
 class OTPayment;
 class OTTransaction;
 class PeerObject;
-// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

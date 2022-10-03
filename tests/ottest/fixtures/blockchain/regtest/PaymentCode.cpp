@@ -53,7 +53,7 @@ Regtest_payment_code::Regtest_payment_code()
     , expected_account_type_(ot::AccountType::Blockchain)
     , expected_unit_type_(ot::UnitType::Regtest)
     , mine_to_alice_([&](Height height) -> Transaction {
-        using OutputBuilder = ot::api::session::Factory::OutputBuilder;
+        using OutputBuilder = ot::blockchain::OutputBuilder;
         static const auto baseAmmount = ot::blockchain::Amount{10000000000};
         auto meta = ot::UnallocatedVector<OutpointMetadata>{};
         const auto& account = SendHD();

@@ -5,8 +5,7 @@
 
 #pragma once
 
-#include "opentxs/Version.hpp"  // IWYU pragma: associated
-
+#include "opentxs/Export.hpp"
 #include "opentxs/crypto/key/HD.hpp"
 
 namespace opentxs::crypto::key

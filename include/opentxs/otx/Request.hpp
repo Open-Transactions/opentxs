@@ -5,18 +5,15 @@
 
 #pragma once
 
-#include "opentxs/Version.hpp"  // IWYU pragma: associated
-
 #include <memory>
 
+#include "opentxs/Export.hpp"
 #include "opentxs/core/contract/Signable.hpp"
 #include "opentxs/otx/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
 namespace api
 {
 class Session;
@@ -40,7 +37,6 @@ class ServerRequest;
 
 class ByteArray;
 class PasswordPrompt;
-// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

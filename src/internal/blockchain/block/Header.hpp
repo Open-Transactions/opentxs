@@ -3,6 +3,8 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_include "opentxs/blockchain/block/Position.hpp"
+
 #pragma once
 
 #include <cstdint>
@@ -10,15 +12,30 @@
 #include "opentxs/blockchain/block/Header.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
+namespace blockchain
+{
+namespace bitcoin
+{
+namespace block
+{
+namespace internal
+{
+class Header;
+}  // namespace internal
+
+class Position;
+}  // namespace block
+}  // namespace bitcoin
+
+class Work;
+}  // namespace blockchain
+
 namespace proto
 {
 class BlockchainBlockHeader;
 }  // namespace proto
-// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -37,6 +54,8 @@ public:
         Checkpoint
     };
 
+    virtual auto as_Bitcoin() const noexcept
+        -> const blockchain::bitcoin::block::internal::Header& = 0;
     virtual auto EffectiveState() const noexcept -> Status = 0;
     virtual auto InheritedState() const noexcept -> Status = 0;
     virtual auto IsBlacklisted() const noexcept -> bool = 0;
@@ -44,6 +63,8 @@ public:
     virtual auto LocalState() const noexcept -> Status = 0;
     virtual auto Serialize(SerializedType& out) const noexcept -> bool = 0;
 
+    virtual auto as_Bitcoin() noexcept
+        -> blockchain::bitcoin::block::internal::Header& = 0;
     virtual auto CompareToCheckpoint(const block::Position& checkpoint) noexcept
         -> void = 0;
     /// Throws std::runtime_error if parent hash incorrect

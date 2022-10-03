@@ -4,7 +4,6 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 #include "0_stdafx.hpp"              // IWYU pragma: associated
-#include "1_Internal.hpp"            // IWYU pragma: associated
 #include "otx/client/Operation.hpp"  // IWYU pragma: associated
 
 #include <Nym.pb.h>
@@ -298,6 +297,12 @@
     FINISH_MESSAGE(notarizeTransaction)
 
 namespace zmq = opentxs::network::zeromq;
+
+namespace opentxs
+{
+constexpr auto PEER_OBJECT_PEER_REQUEST = 7;
+constexpr auto PEER_OBJECT_PEER_REPLY = 7;
+}  // namespace opentxs
 
 namespace opentxs
 {

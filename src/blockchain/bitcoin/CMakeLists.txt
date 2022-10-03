@@ -4,17 +4,14 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 add_subdirectory(block)
+add_subdirectory(bloom)
 
 if(OT_BLOCKCHAIN_EXPORT)
-  add_subdirectory(bloom)
   add_subdirectory(node)
   add_subdirectory(p2p)
 endif()
 
 add_subdirectory(cfilter)
-
-target_sources(opentxs-common PRIVATE "NumericHash.cpp" "NumericHash.hpp")
-set(cxx-install-headers "")
 
 if(OT_BLOCKCHAIN_EXPORT)
   target_sources(
@@ -24,24 +21,6 @@ if(OT_BLOCKCHAIN_EXPORT)
       "Bitcoin.cpp"
       "Inventory.cpp"
       "Inventory.hpp"
-      "Work.cpp"
-      "Work.hpp"
   )
   target_link_libraries(opentxs-common PRIVATE Boost::headers)
-  list(
-    APPEND
-    cxx-install-headers
-    "${opentxs_SOURCE_DIR}/include/opentxs/blockchain/bitcoin/NumericHash.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/blockchain/bitcoin/Work.hpp"
-  )
-endif()
-
-target_sources(opentxs-common PRIVATE ${cxx-install-headers})
-
-if(OPENTXS_STANDALONE)
-  install(
-    FILES ${cxx-install-headers}
-    DESTINATION include/opentxs/blockchain/bitcoin
-    COMPONENT dev
-  )
 endif()

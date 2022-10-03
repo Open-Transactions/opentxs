@@ -19,15 +19,14 @@
 #include "internal/blockchain/p2p/P2P.hpp"
 #include "opentxs/blockchain/BlockchainType.hpp"
 #include "opentxs/blockchain/Types.hpp"
+#include "opentxs/blockchain/p2p/Address.hpp"
 #include "opentxs/blockchain/p2p/Types.hpp"
 #include "opentxs/network/blockchain/bitcoin/CompactSize.hpp"
 #include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
 namespace blockchain
 {
 namespace p2p
@@ -50,7 +49,6 @@ class Frame;
 
 class ByteArray;
 class Data;
-// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -221,7 +219,7 @@ struct AddressVersion {
     AddressVersion(
         const blockchain::Type chain,
         const ProtocolVersion version,
-        const internal::Address& address) noexcept;
+        const p2p::Address& address) noexcept;
     AddressVersion() noexcept;
 };
 

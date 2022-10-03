@@ -4,7 +4,6 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 #include "0_stdafx.hpp"              // IWYU pragma: associated
-#include "1_Internal.hpp"            // IWYU pragma: associated
 #include "core/paymentcode/Imp.hpp"  // IWYU pragma: associated
 
 #include <Credential.pb.h>
@@ -928,8 +927,8 @@ auto PaymentCode::shared_secret_payment_v3(
 {
     auto secret = shared_secret_mask_v1(local, remote, reason);
     auto hmac = api_.Factory().Secret({});
-    const auto bip44 = be::big_uint32_buf_t{static_cast<std::uint32_t>(
-        blockchain::params::Chains().at(chain).bip44_)};
+    const auto bip44 = be::big_uint32_buf_t{
+        static_cast<std::uint32_t>(blockchain::params::get(chain).Bip44Code())};
 
     static_assert(sizeof(bip44) == sizeof(std::uint32_t));
 

@@ -8,14 +8,13 @@
 // IWYU pragma: no_include "opentxs/identity/wot/claim/ClaimType.hpp"
 // IWYU pragma: no_include "opentxs/core/UnitType.hpp"
 
-#include "opentxs/Version.hpp"  // IWYU pragma: associated
-
 #include <algorithm>
 #include <cstdint>
 #include <functional>
 #include <memory>
 #include <mutex>
 
+#include "opentxs/Export.hpp"
 #include "opentxs/core/Types.hpp"
 #include "opentxs/identity/Nym.hpp"
 #include "opentxs/identity/wot/claim/Types.hpp"
@@ -23,10 +22,8 @@
 #include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
 namespace api
 {
 namespace session
@@ -71,7 +68,6 @@ class Nym;
 }  // namespace proto
 
 class PasswordPrompt;
-// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

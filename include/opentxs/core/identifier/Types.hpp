@@ -8,11 +8,10 @@
 
 #pragma once
 
-#include "opentxs/Version.hpp"  // IWYU pragma: associated
-
 #include <cstdint>
 #include <string_view>
 
+#include "opentxs/Export.hpp"
 #include "opentxs/core/contract/Types.hpp"
 
 namespace opentxs::identifier

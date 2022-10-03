@@ -15,10 +15,8 @@
 #include "opentxs/otx/blind/CashType.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
 namespace otx
 {
 namespace client
@@ -41,7 +39,6 @@ class Account;
 
 using ExclusiveAccount = Exclusive<Account>;
 using SharedAccount = Shared<Account>;
-// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

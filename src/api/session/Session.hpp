@@ -22,7 +22,6 @@
 #include "core/Shutdown.hpp"
 #include "internal/api/session/Session.hpp"
 #include "internal/util/Mutex.hpp"
-#include "opentxs/Version.hpp"
 #include "opentxs/api/Context.hpp"
 #include "opentxs/api/crypto/Asymmetric.hpp"
 #include "opentxs/api/crypto/Crypto.hpp"
@@ -46,10 +45,8 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 class QObject;
 
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
 namespace api
 {
 namespace crypto
@@ -92,7 +89,6 @@ class Ciphertext;
 class Flag;
 class Options;
 class PasswordPrompt;
-// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

@@ -8,7 +8,6 @@
 #include <cstdint>
 #include <string_view>
 
-#include "opentxs/Version.hpp"
 #include "opentxs/util/Container.hpp"
 
 namespace opentxs::proto

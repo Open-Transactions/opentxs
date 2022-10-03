@@ -5,21 +5,17 @@
 
 #pragma once
 
-#include "1_Internal.hpp"
 #include "interface/ui/accounttree/AccountTreeItem.hpp"
 #include "interface/ui/base/Row.hpp"
 #include "internal/interface/ui/UI.hpp"
-#include "opentxs/Version.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/interface/ui/AccountTreeItem.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/SharedPimpl.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
 namespace api
 {
 namespace session
@@ -27,7 +23,6 @@ namespace session
 class Client;
 }  // namespace session
 }  // namespace api
-// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

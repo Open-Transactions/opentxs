@@ -5,8 +5,6 @@
 
 #pragma once
 
-#include "opentxs/Version.hpp"  // IWYU pragma: associated
-
 #include <array>
 #include <cstddef>
 #include <cstdint>
@@ -14,6 +12,7 @@
 #include <string_view>
 #include <type_traits>
 
+#include "opentxs/Export.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/util/Allocated.hpp"
 #include "opentxs/util/Allocator.hpp"
@@ -21,13 +20,11 @@
 #include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
 class Armored;
 class ByteArray;
-// }  // namespace v1
+struct HexType;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

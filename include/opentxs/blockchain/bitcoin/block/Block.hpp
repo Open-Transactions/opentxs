@@ -5,30 +5,31 @@
 
 #pragma once
 
-#include "opentxs/Version.hpp"  // IWYU pragma: associated
-
 #include <cstdint>
 #include <memory>
 
+#include "opentxs/Export.hpp"
 #include "opentxs/blockchain/block/Block.hpp"
 #include "opentxs/util/Iterator.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
 namespace blockchain
 {
 namespace bitcoin
 {
 namespace block
 {
+namespace internal
+{
+class Block;
+}  // namespace internal
+
 class Transaction;
 }  // namespace block
 }  // namespace bitcoin
 }  // namespace blockchain
-// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -49,7 +50,12 @@ public:
     virtual auto cbegin() const noexcept -> const_iterator = 0;
     virtual auto cend() const noexcept -> const_iterator = 0;
     virtual auto end() const noexcept -> const_iterator = 0;
+    OPENTXS_NO_EXPORT virtual auto InternalBitcoin() const noexcept
+        -> const internal::Block& = 0;
     virtual auto size() const noexcept -> std::size_t = 0;
+
+    OPENTXS_NO_EXPORT virtual auto InternalBitcoin() noexcept
+        -> internal::Block& = 0;
 
     Block(const Block&) = delete;
     Block(Block&&) = delete;

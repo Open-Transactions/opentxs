@@ -15,7 +15,6 @@
 #include "internal/otx/common/cron/OTCronItem.hpp"
 #include "internal/otx/common/trade/OTMarket.hpp"
 #include "internal/otx/common/trade/OTOffer.hpp"
-#include "opentxs/Version.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/core/String.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
@@ -23,10 +22,8 @@
 #include "opentxs/identity/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
 namespace api
 {
 namespace session
@@ -62,7 +59,6 @@ class Client;
 class OTMarket;
 class OTOffer;
 class PasswordPrompt;
-// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

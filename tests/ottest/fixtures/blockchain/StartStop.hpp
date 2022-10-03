@@ -7,14 +7,11 @@
 
 #include <opentxs/opentxs.hpp>
 
-#include "1_Internal.hpp"
 #include "ottest/Basic.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
 namespace blockchain
 {
 namespace session
@@ -22,7 +19,6 @@ namespace session
 class Client;
 }  // namespace session
 }  // namespace blockchain
-// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

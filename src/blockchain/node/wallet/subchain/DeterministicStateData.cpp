@@ -3,8 +3,7 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#include "0_stdafx.hpp"    // IWYU pragma: associated
-#include "1_Internal.hpp"  // IWYU pragma: associated
+#include "0_stdafx.hpp"  // IWYU pragma: associated
 #include "blockchain/node/wallet/subchain/DeterministicStateData.hpp"  // IWYU pragma: associated
 
 #include <algorithm>
@@ -198,7 +197,11 @@ auto DeterministicStateData::handle_confirmed_matches(
                     OT_ASSERT(nTX);
                     OT_ASSERT(eTX);
 
-                    eTX->Internal().MergeMetadata(chain_, nTX->Internal(), log);
+                    eTX->Internal().MergeMetadata(
+                        api_.Crypto().Blockchain(),
+                        chain_,
+                        nTX->Internal(),
+                        log);
                 }
             }
         }

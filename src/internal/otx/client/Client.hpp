@@ -33,10 +33,8 @@
 #include "util/Blank.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
 namespace otx
 {
 namespace blind
@@ -49,7 +47,6 @@ namespace proto
 {
 class UnitDefinition;
 }  // namespace proto
-// }  // namespace v1
 
 class Cheque;
 class OTPayment;

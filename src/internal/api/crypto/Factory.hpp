@@ -10,10 +10,8 @@
 #include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
 namespace api
 {
 namespace crypto
@@ -30,6 +28,7 @@ class Symmetric;
 namespace session
 {
 class Activity;
+class Client;
 class Contacts;
 class Endpoints;
 class Factory;
@@ -61,7 +60,6 @@ class Context;
 }  // namespace network
 
 class Options;
-// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -70,7 +68,7 @@ namespace opentxs::factory
 auto AsymmetricAPI(const api::Session& api) noexcept
     -> std::unique_ptr<api::crypto::Asymmetric>;
 auto BlockchainAPI(
-    const api::Session& api,
+    const api::session::Client& api,
     const api::session::Activity& activity,
     const api::session::Contacts& contacts,
     const api::Legacy& legacy,

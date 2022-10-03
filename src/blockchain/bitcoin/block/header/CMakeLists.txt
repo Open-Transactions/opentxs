@@ -16,15 +16,15 @@ set(cxx-install-headers
 
 if(OT_BLOCKCHAIN_EXPORT)
   target_sources(opentxs-common PRIVATE "Imp.cpp" "Imp.hpp")
+  target_include_directories(
+    opentxs-common SYSTEM
+    PRIVATE "${opentxs_SOURCE_DIR}/deps/robin-hood/src/include"
+  )
 else()
-  # TODO target_sources(opentxs-common PRIVATE "Null.cpp")
+  target_sources(opentxs-common PRIVATE "Null.cpp")
 endif()
 
 target_sources(opentxs-common PRIVATE ${cxx-install-headers})
-target_include_directories(
-  opentxs-common SYSTEM
-  PRIVATE "${opentxs_SOURCE_DIR}/deps/robin-hood/src/include"
-)
 
 if(OPENTXS_STANDALONE)
   install(

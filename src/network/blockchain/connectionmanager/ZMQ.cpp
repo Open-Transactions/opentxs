@@ -3,16 +3,15 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#include "0_stdafx.hpp"    // IWYU pragma: associated
-#include "1_Internal.hpp"  // IWYU pragma: associated
+#include "0_stdafx.hpp"  // IWYU pragma: associated
 #include "internal/network/blockchain/ConnectionManager.hpp"  // IWYU pragma: associated
 
 #include <chrono>
 #include <type_traits>
 
-#include "internal/blockchain/p2p/P2P.hpp"
 #include "internal/network/blockchain/Types.hpp"
 #include "internal/util/LogMacros.hpp"
+#include "opentxs/blockchain/p2p/Address.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"

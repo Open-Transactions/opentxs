@@ -11,21 +11,15 @@
 #include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
 namespace blockchain
 {
 namespace p2p
 {
-namespace internal
-{
-struct Address;
-}  // namespace internal
+class Address;
 }  // namespace p2p
 }  // namespace blockchain
-// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -34,7 +28,7 @@ namespace opentxs::blockchain::database
 class Peer
 {
 public:
-    using Address = std::unique_ptr<blockchain::p2p::internal::Address>;
+    using Address = blockchain::p2p::Address;
     using Protocol = blockchain::p2p::Protocol;
     using Service = blockchain::p2p::Service;
     using Type = blockchain::p2p::Network;

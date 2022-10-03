@@ -5,8 +5,7 @@
 
 // IWYU pragma: no_include <cxxabi.h>
 
-#include "0_stdafx.hpp"    // IWYU pragma: associated
-#include "1_Internal.hpp"  // IWYU pragma: associated
+#include "0_stdafx.hpp"  // IWYU pragma: associated
 #include "internal/blockchain/node/wallet/FeeOracle.hpp"  // IWYU pragma: associated
 
 #include <boost/smart_ptr/make_shared.hpp>

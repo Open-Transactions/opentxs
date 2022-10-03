@@ -5,17 +5,24 @@
 
 target_sources(
   opentxs-common
-  PRIVATE
-    "${opentxs_SOURCE_DIR}/src/internal/blockchain/p2p/P2P.hpp"
-    "Address.cpp"
-    "Address.hpp"
+  PRIVATE "${opentxs_SOURCE_DIR}/src/internal/blockchain/p2p/P2P.hpp"
+          "Address.cpp"
 )
 set(cxx-install-headers
     "${opentxs_SOURCE_DIR}/include/opentxs/blockchain/p2p/Address.hpp"
     "${opentxs_SOURCE_DIR}/include/opentxs/blockchain/p2p/Peer.hpp"
     "${opentxs_SOURCE_DIR}/include/opentxs/blockchain/p2p/Types.hpp"
 )
-target_link_libraries(opentxs PUBLIC Boost::system)
+
+if(OT_BLOCKCHAIN_EXPORT)
+  target_sources(
+    opentxs-common PRIVATE "AddressPrivate.cpp" "AddressPrivate.hpp"
+  )
+  target_link_libraries(opentxs PUBLIC Boost::system)
+else()
+  target_sources(opentxs-common PRIVATE "Disabled.cpp")
+endif()
+
 target_sources(opentxs-common PRIVATE ${cxx-install-headers})
 
 if(OPENTXS_STANDALONE)

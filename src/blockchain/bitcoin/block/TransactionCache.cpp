@@ -4,7 +4,6 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 #include "0_stdafx.hpp"                              // IWYU pragma: associated
-#include "1_Internal.hpp"                            // IWYU pragma: associated
 #include "blockchain/bitcoin/block/Transaction.hpp"  // IWYU pragma: associated
 
 #include <algorithm>
@@ -83,12 +82,14 @@ auto Transaction::Cache::memo() const noexcept -> UnallocatedCString
 }
 
 auto Transaction::Cache::merge(
+    const api::crypto::Blockchain& crypto,
     const internal::Transaction& rhs,
     const Log& log) noexcept -> void
 {
     auto lock = rLock{lock_};
 
-    if (auto memo = rhs.Memo(); memo_.empty() || (false == memo.empty())) {
+    if (auto memo = rhs.Memo(crypto);
+        memo_.empty() || (false == memo.empty())) {
         memo_.swap(memo);
         log(OT_PRETTY_CLASS())("memo set to: \"")(memo_)("\"").Flush();
     }

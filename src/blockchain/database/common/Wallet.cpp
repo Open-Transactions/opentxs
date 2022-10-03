@@ -4,7 +4,6 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 #include "0_stdafx.hpp"                           // IWYU pragma: associated
-#include "1_Internal.hpp"                         // IWYU pragma: associated
 #include "blockchain/database/common/Wallet.hpp"  // IWYU pragma: associated
 
 #include <BlockchainTransaction.pb.h>
@@ -27,6 +26,9 @@
 #include "internal/util/storage/lmdb/Database.hpp"
 #include "internal/util/storage/lmdb/Transaction.hpp"
 #include "opentxs/api/crypto/Blockchain.hpp"
+#include "opentxs/api/session/Crypto.hpp"
+#include "opentxs/api/session/Factory.hpp"
+#include "opentxs/api/session/Session.hpp"
 #include "opentxs/blockchain/bitcoin/block/Transaction.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Contact.hpp"
@@ -166,7 +168,8 @@ auto Wallet::LoadTransaction(
             return proto::Factory<proto::BlockchainTransaction>(bytes);
         }();
 
-        return factory::BitcoinTransaction(api_, proto);
+        return factory::BitcoinTransaction(
+            api_.Crypto().Blockchain(), api_.Factory(), proto);
     } catch (const std::exception& e) {
         LogTrace()(OT_PRETTY_CLASS())(e.what()).Flush();
 
@@ -213,7 +216,7 @@ auto Wallet::StoreTransaction(
 {
     try {
         proto = [&] {
-            auto out = in.Internal().Serialize();
+            auto out = in.Internal().Serialize(api_);
 
             if (false == out.has_value()) {
                 throw std::runtime_error{"Failed to serialize transaction"};

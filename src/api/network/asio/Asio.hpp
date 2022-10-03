@@ -33,10 +33,8 @@ class value;
 }  // namespace json
 }  // namespace boost
 
-namespace opentxs  // NOLINT
+namespace opentxs
 {
-// inline namespace v1
-// {
 namespace api
 {
 namespace network
@@ -65,7 +63,6 @@ class Context;
 
 class ByteArray;
 class Timer;
-// }  // namespace v1
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
