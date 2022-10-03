@@ -59,6 +59,8 @@ namespace ssl = boost::asio::ssl;
 
 namespace opentxs::api::network::asio
 {
+using namespace std::literals;
+
 Shared::Shared(
     const opentxs::network::zeromq::Context& zmq,
     opentxs::network::zeromq::BatchID batchID,
@@ -66,6 +68,7 @@ Shared::Shared(
     : zmq_(zmq)
     , batch_id_(std::move(batchID))
     , endpoint_(opentxs::network::zeromq::MakeArbitraryInproc(alloc))
+    , running_(false)
     , data_(zmq_, endpoint_, alloc)
 {
 }
@@ -83,11 +86,9 @@ auto Shared::Connect(
         if (0 == id.size()) { throw std::runtime_error{"invalid id"}; }
 
         const auto handle = data_.lock_shared();
-        const auto& data = *handle;
+        [[maybe_unused]] const auto& data = *handle;
 
-        if (false == data.running_) {
-            throw std::runtime_error{"shutting down"};
-        }
+        if (false == running_) { throw std::runtime_error{"shutting down"}; }
 
         const auto& endpoint = socket->endpoint_;
         const auto& internal = endpoint.GetInternal().data_;
@@ -158,7 +159,7 @@ auto Shared::Init() noexcept -> void
         .Init(std::max(threads / 4u, 2u), ThreadPriority::Highest);
     data.thread_pools_.at(ThreadPool::Blockchain)
         .Init(std::max(threads, 1u), ThreadPriority::Lowest);
-    data.running_ = true;
+    running_ = true;
 }
 
 auto Shared::IOContext() const noexcept -> boost::asio::io_context&
@@ -186,7 +187,7 @@ auto Shared::post(
 {
     OT_ASSERT(cb);
 
-    if (false == data.running_) { return false; }
+    if (false == running_) { return false; }
 
     auto& pool = [&]() -> auto&
     {
@@ -279,7 +280,15 @@ auto Shared::process_connect(
     ReadView address,
     ReadView connection) const noexcept -> void
 {
-    data_.lock()->to_actor_.SendDeferred(
+    auto handle = data_.try_lock_for(10ms);
+
+    while (false == handle.operator bool()) {
+        if (false == running_) { return; }
+
+        handle = data_.try_lock_for(10ms);
+    }
+
+    handle->to_actor_.SendDeferred(
         [&] {
             if (e) {
                 LogVerbose()(OT_PRETTY_STATIC(Shared))("asio connect error: ")(
@@ -337,7 +346,14 @@ auto Shared::process_receive(
     // TODO c++20 const auto& [index, buffer] = buf;
     const auto& index = buf.first;
     const auto& buffer = buf.second;
-    auto handle = data_.lock();
+    auto handle = data_.try_lock_for(10ms);
+
+    while (false == handle.operator bool()) {
+        if (false == running_) { return; }
+
+        handle = data_.try_lock_for(10ms);
+    }
+
     auto& data = *handle;
     data.to_actor_.SendDeferred(
         [&]() {
@@ -367,7 +383,15 @@ auto Shared::process_resolve(
     std::uint16_t port,
     ReadView connection) const noexcept -> void
 {
-    data_.lock()->to_actor_.SendDeferred(
+    auto handle = data_.try_lock_for(10ms);
+
+    while (false == handle.operator bool()) {
+        if (false == running_) { return; }
+
+        handle = data_.try_lock_for(10ms);
+    }
+
+    handle->to_actor_.SendDeferred(
         [&] {
             static constexpr auto trueValue = std::byte{0x01};
             static constexpr auto falseValue = std::byte{0x00};
@@ -406,7 +430,15 @@ auto Shared::process_transmit(
     std::size_t bytes,
     ReadView connection) const noexcept -> void
 {
-    data_.lock()->to_actor_.SendDeferred(
+    auto handle = data_.try_lock_for(10ms);
+
+    while (false == handle.operator bool()) {
+        if (false == running_) { return; }
+
+        handle = data_.try_lock_for(10ms);
+    }
+
+    handle->to_actor_.SendDeferred(
         [&] {
             auto work = opentxs::network::zeromq::tagged_reply_to_connection(
                 connection, value(WorkType::AsioSendResult));
@@ -444,9 +476,7 @@ auto Shared::Receive(
         const auto handle = data_.lock_shared();
         const auto& data = *handle;
 
-        if (false == data.running_) {
-            throw std::runtime_error{"shutting down"};
-        }
+        if (false == running_) { throw std::runtime_error{"shutting down"}; }
 
         auto bufData = data.buffers_.get(bytes);
         const auto& endpoint = socket->endpoint_;
@@ -480,7 +510,7 @@ auto Shared::Resolve(
     auto handle = data_.lock();
     auto& data = *handle;
 
-    if (false == data.running_) { return; }
+    if (false == running_) { return; }
 
     try {
         auto alloc = data.get_allocator();
@@ -565,7 +595,14 @@ auto Shared::retrieve_json_http(
              [me,
               promise = std::move(pPromise),
               socket = CString{notify, alloc}](auto&& future) mutable {
-                 const auto handle = me->data_.lock_shared();
+                 auto handle = me->data_.try_lock_shared_for(10ms);
+
+                 while (false == handle.operator bool()) {
+                     if (false == me->running_) { return; }
+
+                     handle = me->data_.try_lock_shared_for(10ms);
+                 }
+
                  me->process_json(
                      *handle, socket, std::move(promise), std::move(future));
              })] { job->Start(); },
@@ -594,7 +631,13 @@ auto Shared::retrieve_json_https(
              [me,
               promise = std::move(pPromise),
               socket = CString{notify, alloc}](auto&& future) mutable {
-                 const auto handle = me->data_.lock_shared();
+                 auto handle = me->data_.try_lock_shared_for(10ms);
+
+                 while (false == handle.operator bool()) {
+                     if (false == me->running_) { return; }
+
+                     handle = me->data_.try_lock_shared_for(10ms);
+                 }
                  me->process_json(
                      *handle, socket, std::move(promise), std::move(future));
              })] { job->Start(); },
@@ -650,9 +693,9 @@ auto Shared::send_notification(const Data& data, const ReadView notify)
 
 auto Shared::Shutdown() noexcept -> void
 {
+    running_ = false;
     auto handle = data_.lock();
     auto& data = *handle;
-    data.running_ = false;
     data.resolver_.reset();
     data.io_context_->Stop();
 
@@ -679,7 +722,14 @@ auto Shared::StateMachine() noexcept -> bool
     auto futures6 = Vector<std::future<ByteArray>>{alloc};
 
     {
-        const auto handle = data_.lock_shared();
+        auto handle = data_.try_lock_shared_for(10ms);
+
+        while (false == handle.operator bool()) {
+            if (false == running_) { return false; }
+
+            handle = data_.try_lock_shared_for(10ms);
+        }
+
         const auto& data = *handle;
 
         for (const auto& site : sites()) {
@@ -782,7 +832,7 @@ auto Shared::Transmit(
         const auto handle = data_.lock_shared();
         const auto& data = *handle;
 
-        if (false == data.running_) { return false; }
+        if (false == running_) { return false; }
 
         const auto connection = std::make_shared<Space>(space(id));
         const auto buf = std::make_shared<Space>(space(bytes));

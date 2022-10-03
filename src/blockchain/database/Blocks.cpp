@@ -48,7 +48,10 @@ Blocks::Blocks(
 auto Blocks::LoadBitcoin(const block::Hash& block) const noexcept
     -> std::shared_ptr<const bitcoin::block::Block>
 {
+    const auto& log = LogDebug();
+
     if (block == genesis_) {
+        log(OT_PRETTY_CLASS())("loading genesis block").Flush();
 
         return params::get(chain_)
             .GenesisBlock()
@@ -59,8 +62,7 @@ auto Blocks::LoadBitcoin(const block::Hash& block) const noexcept
         const auto bytes = common_.BlockLoad(block);
 
         if (false == valid(bytes)) {
-            LogDebug()(OT_PRETTY_CLASS())("block ")(block.asHex())(
-                " not found.")
+            log(OT_PRETTY_CLASS())("block ")(block.asHex())(" not found.")
                 .Flush();
 
             return {};

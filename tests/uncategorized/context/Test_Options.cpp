@@ -33,6 +33,8 @@ constexpr auto log_endpoint_1_{"inproc://send_logs_here_plz"};
 constexpr auto log_endpoint_2_{"inproc://actually_send_them_here"};
 constexpr auto log_level_1_{2};
 constexpr auto log_level_2_{4};
+constexpr auto loopback_dht_1_{true};
+constexpr auto loopback_dht_2_{false};
 constexpr auto max_jobs_1_{0};
 constexpr auto max_jobs_2_{9000};
 constexpr auto mint_key_bytes_1_{288};
@@ -84,6 +86,7 @@ TEST(Options, default_values)
         opentxs::ConnectionMode::automatic,
         "",
         0,
+        false,
         0,
         1536,
         false,
@@ -124,6 +127,7 @@ TEST(Options, setters)
             .SetIpv6ConnectionMode(ipv6_connection_mode_1_)
             .SetLogEndpoint(log_endpoint_1_)
             .SetLogLevel(log_level_1_)
+            .SetLoopbackDHT(loopback_dht_1_)
             .SetMaxJobs(max_jobs_1_)
             .SetNotaryBindIP(notary_bind_ip_1_)
             .SetNotaryBindPort(notary_bind_port_1_)
@@ -154,6 +158,7 @@ TEST(Options, setters)
             .SetIpv6ConnectionMode(ipv6_connection_mode_2_)
             .SetLogEndpoint(log_endpoint_2_)
             .SetLogLevel(log_level_2_)
+            .SetLoopbackDHT(loopback_dht_2_)
             .SetMaxJobs(max_jobs_2_)
             .SetNotaryBindIP(notary_bind_ip_2_)
             .SetNotaryBindPort(notary_bind_port_2_)
@@ -178,6 +183,7 @@ TEST(Options, setters)
         ipv6_connection_mode_1_,
         log_endpoint_1_,
         log_level_1_,
+        loopback_dht_1_,
         max_jobs_1_,
         mint_key_bytes_1_,
         notary_bind_inproc_1_,
@@ -206,6 +212,7 @@ TEST(Options, setters)
         ipv6_connection_mode_2_,
         log_endpoint_2_,
         log_level_2_,
+        loopback_dht_2_,
         max_jobs_2_,
         mint_key_bytes_2_,
         notary_bind_inproc_2_,
@@ -247,6 +254,7 @@ TEST(Options, merge)
             .SetIpv6ConnectionMode(ipv6_connection_mode_1_)
             .SetLogEndpoint(log_endpoint_1_)
             .SetLogLevel(log_level_1_)
+            .SetLoopbackDHT(loopback_dht_1_)
             .SetMaxJobs(max_jobs_1_)
             .SetNotaryBindIP(notary_bind_ip_1_)
             .SetNotaryBindPort(notary_bind_port_1_)
@@ -276,6 +284,7 @@ TEST(Options, merge)
             .SetIpv6ConnectionMode(ipv6_connection_mode_2_)
             .SetLogEndpoint(log_endpoint_2_)
             .SetLogLevel(log_level_2_)
+            .SetLoopbackDHT(loopback_dht_2_)
             .SetMaxJobs(max_jobs_2_)
             .SetNotaryBindIP(notary_bind_ip_2_)
             .SetNotaryBindPort(notary_bind_port_2_)
@@ -301,6 +310,7 @@ TEST(Options, merge)
         ipv6_connection_mode_1_,
         log_endpoint_1_,
         log_level_1_,
+        loopback_dht_1_,
         max_jobs_1_,
         mint_key_bytes_1_,
         notary_bind_inproc_1_,
@@ -329,6 +339,7 @@ TEST(Options, merge)
         ipv6_connection_mode_2_,
         log_endpoint_2_,
         log_level_2_,
+        loopback_dht_2_,
         max_jobs_2_,
         mint_key_bytes_2_,
         notary_bind_inproc_2_,
@@ -357,6 +368,7 @@ TEST(Options, merge)
         ipv6_connection_mode_2_,
         log_endpoint_2_,
         log_level_2_,
+        loopback_dht_2_,
         max_jobs_2_,
         mint_key_bytes_2_,
         notary_bind_inproc_2_,

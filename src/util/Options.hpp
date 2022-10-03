@@ -38,6 +38,7 @@ struct Options::Imp final {
     std::optional<ConnectionMode> ipv6_connection_mode_;
     std::optional<CString> log_endpoint_;
     std::optional<int> log_level_;
+    std::optional<bool> loopback_dht_;
     std::optional<unsigned int> max_jobs_;
     std::optional<bool> notary_bind_inproc_;
     std::optional<CString> notary_bind_ip_;
