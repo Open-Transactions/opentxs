@@ -6,7 +6,6 @@
 #include "0_stdafx.hpp"  // IWYU pragma: associated
 #include "blockchain/database/common/SyncPrivate.hpp"  // IWYU pragma: associated
 
-#include <boost/container/flat_map.hpp>
 #include <boost/endian/buffers.hpp>
 #include <algorithm>
 #include <array>
@@ -27,7 +26,6 @@ extern "C" {
 }
 
 #include "blockchain/database/common/Database.hpp"
-#include "internal/blockchain/Blockchain.hpp"
 #include "internal/blockchain/Params.hpp"
 #include "internal/blockchain/database/common/Common.hpp"
 #include "internal/util/LogMacros.hpp"
@@ -38,14 +36,11 @@ extern "C" {
 #include "internal/util/storage/lmdb/Database.hpp"
 #include "internal/util/storage/lmdb/Transaction.hpp"
 #include "internal/util/storage/lmdb/Types.hpp"
-#include "opentxs/api/session/Factory.hpp"
-#include "opentxs/api/session/Session.hpp"
 #include "opentxs/blockchain/Blockchain.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/bitcoin/cfilter/FilterType.hpp"
 #include "opentxs/blockchain/bitcoin/cfilter/GCS.hpp"
 #include "opentxs/blockchain/block/Block.hpp"
-#include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/blockchain/block/Header.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/FixedByteArray.hpp"
@@ -186,27 +181,12 @@ auto SyncPrivate::import_genesis(const blockchain::Type chain) noexcept -> void
     const auto items = [&] {
         namespace params = opentxs::blockchain::params;
         constexpr auto filterType = opentxs::blockchain::cfilter::Type::ES;
-        const auto& genesis = params::get(chain).GenesisBlock().Header();
-        auto gcs = [&] {
-            const auto& filter = params::Filters().at(chain).at(filterType);
-            const auto bytes = api_.Factory().DataFromHex(filter.second);
-            auto output = factory::GCS(
-                api_,
-                filterType,
-                opentxs::blockchain::internal::BlockHashToFilterKey(
-                    genesis.Hash().Bytes()),
-                bytes.Bytes(),
-                {});  // TODO allocator
-
-            OT_ASSERT(output.IsValid());
-
-            return output;
-        }();
-        // TODO allocator
+        const auto& data = params::get(chain);
+        const auto& gcs = data.GenesisCfilter(api_, filterType);
         auto output = network::otdht::SyncData{};
         const auto header = [&] {
             auto out = ByteArray{};
-            genesis.Serialize(out.WriteInto());
+            data.GenesisBlock().Header().Serialize(out.WriteInto());
 
             return out;
         }();

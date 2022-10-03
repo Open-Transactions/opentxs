@@ -16,13 +16,16 @@ target_sources(
   PRIVATE
     "${opentxs_SOURCE_DIR}/src/internal/blockchain/bitcoin/cfilter/GCS.hpp"
     "Common.cpp"
+    "GCS.cpp"
     "Hash.cpp"
     "Header.cpp"
 )
 
 if(OT_BLOCKCHAIN_EXPORT)
-  target_sources(opentxs-common PRIVATE "GCS.cpp" "GCS.hpp")
+  target_sources(opentxs-common PRIVATE "GCSPrivate.cpp" "GCSPrivate.hpp")
   target_link_libraries(opentxs-common PRIVATE Boost::headers)
+else(OT_BLOCKCHAIN_EXPORT)
+  target_sources(opentxs-common PRIVATE "Disabled.cpp")
 endif()
 
 target_sources(opentxs-common PRIVATE ${cxx-install-headers})

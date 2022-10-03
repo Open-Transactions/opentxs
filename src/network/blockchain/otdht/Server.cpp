@@ -82,12 +82,7 @@ Server::Server(
     network::zeromq::BatchID batchID,
     allocator_type alloc) noexcept
     : Actor(api, node, batchID, alloc)
-    , checkpoint_([&]() -> opentxs::blockchain::block::Position {
-        const auto& checkpoint =
-            opentxs::blockchain::params::get(chain_).Checkpoints();
-
-        return {checkpoint.height_, checkpoint.block_};
-    }())
+    , checkpoint_(opentxs::blockchain::params::get(chain_).CheckpointPosition())
     , shared_(node_, alloc)
     , counter_()
     , running_(counter_.Allocate(1))
