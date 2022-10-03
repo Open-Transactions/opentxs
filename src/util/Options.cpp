@@ -48,6 +48,7 @@ struct Options::Imp::Parser {
     static constexpr auto ipv6_connection_mode_{"ipv6_connection_mode"};
     static constexpr auto log_endpoint_{"log_endpoint"};
     static constexpr auto log_level_{"log_level"};
+    static constexpr auto loopback_dht_{"loopback_dht"};
     static constexpr auto max_jobs_{"thread_pool_cap"};
     static constexpr auto notary_inproc_{"notary_inproc"};
     static constexpr auto notary_bind_ip_{"notary_bind_ip"};
@@ -124,6 +125,10 @@ struct Options::Imp::Parser {
                 log_endpoint_,
                 po::value<UnallocatedCString>(),
                 "ZeroMQ endpoint to which to copy log data");
+            out.add_options()(
+                loopback_dht_,
+                po::value<bool>()->implicit_value(true),
+                "Only connect to localhost dht peers");
             out.add_options()(
                 max_jobs_,
                 po::value<int>(),
@@ -221,6 +226,7 @@ Options::Imp::Imp() noexcept
     , ipv6_connection_mode_(std::nullopt)
     , log_endpoint_(std::nullopt)
     , log_level_(std::nullopt)
+    , loopback_dht_(std::nullopt)
     , max_jobs_(std::nullopt)
     , notary_bind_inproc_(std::nullopt)
     , notary_bind_ip_(std::nullopt)
@@ -238,9 +244,7 @@ Options::Imp::Imp() noexcept
 {
 }
 
-Options::Imp::Imp(const Imp& rhs) noexcept
-
-    = default;
+Options::Imp::Imp(const Imp& rhs) noexcept = default;
 
 auto Options::Imp::convert(std::string_view value) const noexcept(false)
     -> blockchain::Type
@@ -357,6 +361,8 @@ auto Options::Imp::import_value(
             log_endpoint_ = value;
         } else if (0 == key.compare(Parser::log_level_)) {
             log_level_ = std::stoi(sValue);
+        } else if (0 == key.compare(Parser::loopback_dht_)) {
+            loopback_dht_ = to_bool(value);
         } else if (0 == key.compare(Parser::max_jobs_)) {
             max_jobs_ = std::max(std::stoi(sValue), 0);
         } else if (0 == key.compare(Parser::notary_inproc_)) {
@@ -521,6 +527,11 @@ auto Options::Imp::parse(int argc, char** argv) noexcept(false) -> void
         } else if (name == Parser::log_level_) {
             try {
                 log_level_ = value.as<int>();
+            } catch (...) {
+            }
+        } else if (name == Parser::loopback_dht_) {
+            try {
+                loopback_dht_ = value.as<bool>();
             } catch (...) {
             }
         } else if (name == Parser::max_jobs_) {
@@ -697,6 +708,10 @@ auto operator+(const Options& lhs, const Options& rhs) noexcept -> Options
 
     if (const auto& v = r.log_level_; v.has_value()) {
         l.log_level_ = v.value();
+    }
+
+    if (const auto& v = r.loopback_dht_; v.has_value()) {
+        l.loopback_dht_ = v.value();
     }
 
     if (const auto& v = r.max_jobs_; v.has_value()) { l.max_jobs_ = v.value(); }
@@ -915,6 +930,11 @@ auto Options::LogLevel() const noexcept -> int
     return Imp::get(imp_->log_level_);
 }
 
+auto Options::LoopbackDHT() const noexcept -> bool
+{
+    return Imp::get(imp_->loopback_dht_, false);
+}
+
 auto Options::MaxJobs() const noexcept -> unsigned int
 {
     return Imp::get(imp_->max_jobs_);
@@ -1070,6 +1090,13 @@ auto Options::SetLogEndpoint(std::string_view endpoint) noexcept -> Options&
 auto Options::SetLogLevel(int level) noexcept -> Options&
 {
     imp_->log_level_ = level;
+
+    return *this;
+}
+
+auto Options::SetLoopbackDHT(bool value) noexcept -> Options&
+{
+    imp_->loopback_dht_ = value;
 
     return *this;
 }

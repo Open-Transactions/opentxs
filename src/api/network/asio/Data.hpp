@@ -64,7 +64,6 @@ public:
     std::promise<ByteArray> ipv6_promise_;
     std::shared_future<ByteArray> ipv4_future_;
     std::shared_future<ByteArray> ipv6_future_;
-    bool running_;
     mutable std::shared_ptr<asio::Context> io_context_;
     mutable Map<ThreadPool, asio::Context> thread_pools_;
     mutable Buffers buffers_;

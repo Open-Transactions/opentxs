@@ -34,7 +34,6 @@ Data::Data(
     , ipv6_promise_()
     , ipv4_future_(ipv4_promise_.get_future())
     , ipv6_future_(ipv6_promise_.get_future())
-    , running_(false)
     , io_context_(std::make_shared<asio::Context>())
     , thread_pools_([&] {
         auto out = Map<ThreadPool, asio::Context>{get_allocator()};

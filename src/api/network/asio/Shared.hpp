@@ -12,6 +12,7 @@
 #include <boost/beast/http.hpp>
 #include <boost/smart_ptr/shared_ptr.hpp>
 #include <cs_shared_guarded.h>
+#include <atomic>
 #include <cstddef>
 #include <cstdint>
 #include <future>
@@ -71,11 +72,13 @@ namespace opentxs::api::network::asio
 class Shared final : public Allocated
 {
 public:
-    using GuardedData = libguarded::shared_guarded<Data, std::shared_mutex>;
+    using GuardedData =
+        libguarded::shared_guarded<Data, std::shared_timed_mutex>;
 
     const opentxs::network::zeromq::Context& zmq_;
     const opentxs::network::zeromq::BatchID batch_id_;
     const CString endpoint_;
+    std::atomic_bool running_;
     mutable GuardedData data_;
 
     auto Connect(

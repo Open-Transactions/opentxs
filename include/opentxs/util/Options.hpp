@@ -35,6 +35,7 @@ public:
     auto Ipv4ConnectionMode() const noexcept -> ConnectionMode;
     auto Ipv6ConnectionMode() const noexcept -> ConnectionMode;
     auto LogLevel() const noexcept -> int;
+    auto LoopbackDHT() const noexcept -> bool;
     auto MaxJobs() const noexcept -> unsigned int;
     auto NotaryBindIP() const noexcept -> std::string_view;
     auto NotaryBindPort() const noexcept -> std::uint16_t;
@@ -77,6 +78,7 @@ public:
     auto SetIpv6ConnectionMode(ConnectionMode mode) noexcept -> Options&;
     auto SetLogEndpoint(std::string_view endpoint) noexcept -> Options&;
     auto SetLogLevel(int level) noexcept -> Options&;
+    auto SetLoopbackDHT(bool value) noexcept -> Options&;
     auto SetMaxJobs(unsigned int value) noexcept -> Options&;
     auto SetNotaryBindIP(std::string_view value) noexcept -> Options&;
     auto SetNotaryBindPort(std::uint16_t port) noexcept -> Options&;

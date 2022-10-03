@@ -432,7 +432,7 @@ auto Header::calculate_pow(
     const ReadView serialized) -> blockchain::block::Hash
 {
     auto output = blockchain::block::Hash{};
-    ProofOfWorkHash(crypto, chain, serialized, output.WriteInto());  // FIXME
+    ProofOfWorkHash(crypto, chain, serialized, output.WriteInto());
 
     return output;
 }

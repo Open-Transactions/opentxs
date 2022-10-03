@@ -191,12 +191,17 @@ auto BlockFetcher::Actor::do_startup() noexcept -> bool
         return true;
     }
 
+    const auto& log = log_;
+
     {
         auto handle = data_.lock();
         auto& data = *handle;
         auto tip = data.db_.BlockTip();
 
         OT_ASSERT(0 <= tip.height_);
+
+        log(OT_PRETTY_CLASS())(name_)(": block tip from database is ")(tip)
+            .Flush();
 
         if (auto r = header_oracle_.CalculateReorg(tip); false == r.empty()) {
             const auto& last = r.back();
@@ -208,6 +213,9 @@ auto BlockFetcher::Actor::do_startup() noexcept -> bool
             OT_ASSERT(header);
 
             tip = {last.height_ - 1, header->ParentHash()};
+            log(OT_PRETTY_CLASS())(name_)(": block tip adjusted to ")(
+                tip)(" due to unprocessed reorg")
+                .Flush();
         }
 
         while (tip.height_ > 0) {
@@ -215,15 +223,17 @@ auto BlockFetcher::Actor::do_startup() noexcept -> bool
 
                 break;
             } else {
-
+                log(OT_PRETTY_CLASS())(name_)(": unable to load block ")(tip)
+                    .Flush();
                 tip = header_oracle_.GetPosition(tip.height_ - 1);
+                log(OT_PRETTY_CLASS())(name_)(": tip reverted to ")(tip)
+                    .Flush();
             }
         }
 
         if (data.ReviseTip(tip)) { broadcast_tip(data, tip); }
 
-        log_(OT_PRETTY_CLASS())(name_)(": best downloaded full block is ")(tip)
-            .Flush();
+        LogConsole()(print(chain_))(" block tip is ")(tip).Flush();
     }
 
     do_work();

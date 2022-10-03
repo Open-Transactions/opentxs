@@ -48,7 +48,11 @@ struct Blocks::Imp {
             lmdb_.Load(table_, block.Bytes(), cb);
 
             if (indices.empty() || indices.front().empty()) {
-                throw std::runtime_error{"block not found in index"};
+                const auto error = CString{"block "}
+                                       .append(block.asHex())
+                                       .append(" not found in index");
+
+                throw std::runtime_error{error.c_str()};
             }
 
             auto views = bulk_.Read(indices);
@@ -57,7 +61,14 @@ struct Blocks::Imp {
 
             auto view = views.front();
 
-            if (false == valid(view)) { Forget(block); }
+            if (false == valid(view)) {
+                Forget(block);
+                const auto error = CString{"data for block "}
+                                       .append(block.asHex())
+                                       .append(" is invalid");
+
+                throw std::runtime_error{error.c_str()};
+            }
 
             return view;
         } catch (const std::exception& e) {
@@ -82,13 +93,13 @@ struct Blocks::Imp {
                 throw std::runtime_error{"failed to serialize block"};
             }
 
-            const auto& id = block::Hash();
+            const auto& id = block.ID();
             const auto sIndex = index.Serialize();
             const auto result =
                 lmdb_.Store(table_, id.Bytes(), sIndex.Bytes(), tx);
 
             if (result.first) {
-                LogTrace()(OT_PRETTY_CLASS())("saved ")(index.ItemSize())(
+                LogDebug()(OT_PRETTY_CLASS())("saved ")(index.ItemSize())(
                     " bytes at position ")(index.MemoryPosition())(
                     " for block ")
                     .asHex(id)
@@ -103,7 +114,7 @@ struct Blocks::Imp {
 
             return true;
         } catch (const std::exception& e) {
-            LogTrace()(OT_PRETTY_CLASS())(e.what()).Flush();
+            LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
 
             return false;
         }
