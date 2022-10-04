@@ -22,6 +22,7 @@
 #include "opentxs/api/Factory.hpp"
 #include "opentxs/api/crypto/Crypto.hpp"
 #include "opentxs/api/crypto/Hash.hpp"
+#include "opentxs/blockchain/crypto/AddressStyle.hpp"
 #include "opentxs/blockchain/crypto/HDProtocol.hpp"
 #include "opentxs/blockchain/crypto/SubaccountType.hpp"
 #include "opentxs/blockchain/crypto/Subchain.hpp"
@@ -32,6 +33,8 @@
 
 namespace opentxs::blockchain::crypto
 {
+using namespace std::literals;
+
 auto is_notification(Subchain in) noexcept -> bool
 {
     switch (in) {
@@ -49,9 +52,30 @@ auto is_notification(Subchain in) noexcept -> bool
     }
 }
 
+auto print(AddressStyle value) noexcept -> std::string_view
+{
+    using Type = AddressStyle;
+    static const auto map =
+        robin_hood::unordered_flat_map<Type, std::string_view>{
+            {Type::Unknown, "Unknown"sv},
+            {Type::P2PKH, "P2PKH"sv},
+            {Type::P2SH, "P2SH"sv},
+            {Type::P2WPKH, "P2WPKH"sv},
+            {Type::P2WSH, "P2WSH"sv},
+            {Type::P2TR, "P2TR"sv},
+        };
+
+    try {
+
+        return map.at(value);
+    } catch (...) {
+
+        return map.at(Type::Unknown);
+    }
+}
+
 auto print(HDProtocol value) noexcept -> std::string_view
 {
-    using namespace std::literals;
     using Type = HDProtocol;
     static const auto map =
         robin_hood::unordered_flat_map<Type, std::string_view>{
@@ -73,7 +97,6 @@ auto print(HDProtocol value) noexcept -> std::string_view
 
 auto print(SubaccountType type) noexcept -> std::string_view
 {
-    using namespace std::literals;
     using Type = SubaccountType;
     static const auto map =
         robin_hood::unordered_flat_map<Type, std::string_view>{
@@ -94,7 +117,6 @@ auto print(SubaccountType type) noexcept -> std::string_view
 }
 auto print(Subchain value) noexcept -> std::string_view
 {
-    using namespace std::literals;
     using Type = Subchain;
     static const auto map =
         robin_hood::unordered_flat_map<Type, std::string_view>{

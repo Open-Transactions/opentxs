@@ -69,6 +69,7 @@ using Key = std::tuple<identifier::Generic, Subchain, Bip32Index>;
 using Activity = std::tuple<Coin, Key, Amount>;
 
 OPENTXS_EXPORT auto is_notification(Subchain) noexcept -> bool;
+OPENTXS_EXPORT auto print(AddressStyle) noexcept -> std::string_view;
 OPENTXS_EXPORT auto print(HDProtocol) noexcept -> std::string_view;
 OPENTXS_EXPORT auto print(SubaccountType) noexcept -> std::string_view;
 OPENTXS_EXPORT auto print(Subchain) noexcept -> std::string_view;

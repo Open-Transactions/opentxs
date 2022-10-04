@@ -6,35 +6,22 @@
 // IWYU pragma: no_include "opentxs/blockchain/BlockchainType.hpp"
 // IWYU pragma: no_include "opentxs/blockchain/bitcoin/cfilter/FilterType.hpp"
 // IWYU pragma: no_include "opentxs/blockchain/crypto/AddressStyle.hpp"
-// IWYU pragma: no_include "opentxs/identity/wot/claim/ClaimType.hpp"
 // IWYU pragma: no_include "opentxs/core/UnitType.hpp"
 // IWYU pragma: no_include "opentxs/crypto/Bip44Type.hpp"
-// IWYU pragma: no_include <boost/intrusive/detail/iterator.hpp>
 
 #pragma once
 
-#include <boost/container/flat_map.hpp>
-#include <boost/container/vector.hpp>
-#include <boost/cstdint.hpp>
-#include <boost/move/algo/move.hpp>
 #include <cstddef>
 #include <cstdint>
-#include <functional>
-#include <iosfwd>
 #include <optional>
 #include <string_view>
-#include <tuple>
-#include <utility>
 
 #include "internal/blockchain/p2p/bitcoin/Bitcoin.hpp"
 #include "opentxs/blockchain/Types.hpp"
-#include "opentxs/blockchain/bitcoin/cfilter/Header.hpp"
 #include "opentxs/blockchain/bitcoin/cfilter/Types.hpp"
-#include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/blockchain/p2p/Types.hpp"
-#include "opentxs/core/Amount.hpp"
 #include "opentxs/core/Types.hpp"
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/util/Container.hpp"
@@ -42,19 +29,35 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
+namespace api
+{
+class Session;
+}  // namespace api
+
 namespace blockchain
 {
 namespace block
 {
 class Block;
+class Hash;
+class Position;
 }  // namespace block
+
+namespace cfilter
+{
+class Header;
+}  // namespace cfilter
 
 namespace params
 {
 class ChainDataPrivate;
 struct Data;
 }  // namespace params
+
+class GCS;
 }  // namespace blockchain
+
+class Amount;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -63,24 +66,12 @@ namespace opentxs::blockchain::params
 class ChainData
 {
 public:
-    struct Checkpoint {
-        const block::Height height_;
-        const block::Hash block_;
-        const block::Hash previous_block_;
-        const cfilter::Header cfheader_;
-
-        Checkpoint(const Data& data) noexcept;
-        Checkpoint() = delete;
-        Checkpoint(const Checkpoint&) = delete;
-        Checkpoint(Checkpoint&&) = delete;
-        auto operator=(const Checkpoint&) -> Checkpoint& = delete;
-        auto operator=(Checkpoint&&) -> Checkpoint& = delete;
-    };
-
     auto Bip44Code() const noexcept -> Bip44Type;
     auto BlockDownloadBatch() const noexcept -> std::size_t;
     auto CfilterBatchEstimate() const noexcept -> std::size_t;
-    auto Checkpoints() const noexcept -> const Checkpoint&;
+    auto CheckpointCfheader() const noexcept -> const cfilter::Header&;
+    auto CheckpointPosition() const noexcept -> const block::Position&;
+    auto CheckpointPrevious() const noexcept -> const block::Position&;
     auto CurrencyType() const noexcept -> UnitType;
     auto DefaultAddressStyle() const noexcept
         -> std::optional<blockchain::crypto::AddressStyle>;
@@ -88,10 +79,15 @@ public:
     auto Difficulty() const noexcept -> std::uint32_t;
     auto FallbackTxFeeRate() const noexcept -> const Amount&;
     auto GenesisBlock() const noexcept -> const block::Block&;
+    auto GenesisCfilter(const api::Session& api, cfilter::Type) const noexcept
+        -> const GCS&;
+    auto GenesisCfheader(cfilter::Type) const noexcept
+        -> const cfilter::Header&;
     auto GenesisHash() const noexcept -> const block::Hash&;
     auto IsAllowed(blockchain::crypto::AddressStyle) const noexcept -> bool;
     auto IsSupported() const noexcept -> bool;
     auto IsTestnet() const noexcept -> bool;
+    auto KnownCfilterTypes() const noexcept -> Set<cfilter::Type>;
     auto MaturationInterval() const noexcept -> block::Height;
     auto P2PDefaultPort() const noexcept -> std::uint16_t;
     auto P2PDefaultProtocol() const noexcept -> p2p::Protocol;
@@ -100,6 +96,14 @@ public:
     auto P2PVersion() const noexcept -> p2p::bitcoin::ProtocolVersion;
     auto SegwitScaleFactor() const noexcept -> unsigned int;
     auto SupportsSegwit() const noexcept -> bool;
+    auto TranslateBip158(cfilter::Type) const noexcept
+        -> std::optional<std::uint8_t>;
+    auto TranslateBip158(std::uint8_t) const noexcept
+        -> std::optional<cfilter::Type>;
+    auto TranslateService(p2p::bitcoin::Service) const noexcept
+        -> std::optional<p2p::Service>;
+    auto TranslateService(p2p::Service) const noexcept
+        -> std::optional<p2p::bitcoin::Service>;
 
     ChainData(blockchain::Type chain) noexcept;
     ChainData() = delete;
@@ -118,18 +122,4 @@ private:
 
 auto chains() noexcept -> const Set<blockchain::Type>;
 auto get(blockchain::Type chain) noexcept(false) -> const ChainData&;
-
-using FilterData = boost::container::flat_map<
-    blockchain::Type,
-    boost::container::
-        flat_map<cfilter::Type, std::pair<std::string_view, std::string_view>>>;
-using FilterTypes = boost::container::
-    flat_map<Type, boost::container::flat_map<cfilter::Type, std::uint8_t>>;
-using ServiceBits = std::map<
-    blockchain::Type,
-    boost::container::flat_map<p2p::bitcoin::Service, p2p::Service>>;
-
-auto Bip158() noexcept -> const FilterTypes&;
-auto Filters() noexcept -> const FilterData&;
-auto Services() noexcept -> const ServiceBits&;
 }  // namespace opentxs::blockchain::params

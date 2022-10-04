@@ -28,8 +28,11 @@ namespace internal
 {
 class GCS;
 }  // namespace internal
+
+class GCSPrivate;
 }  // namespace blockchain
 
+class ByteArray;
 class Data;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
@@ -39,8 +42,6 @@ namespace opentxs::blockchain
 class OPENTXS_EXPORT GCS : virtual public Allocated
 {
 public:
-    class Imp;
-
     using Targets = Vector<ReadView>;
     using Matches = Vector<Targets::const_iterator>;
 
@@ -65,7 +66,7 @@ public:
 
     auto swap(GCS& rhs) noexcept -> void;
 
-    OPENTXS_NO_EXPORT GCS(Imp* imp) noexcept;
+    OPENTXS_NO_EXPORT GCS(GCSPrivate* imp) noexcept;
     GCS(allocator_type alloc = {}) noexcept;
     GCS(const GCS& rhs, allocator_type alloc = {}) noexcept;
     GCS(GCS&& rhs) noexcept;
@@ -76,6 +77,6 @@ public:
     ~GCS() override;
 
 private:
-    Imp* imp_;
+    GCSPrivate* imp_;
 };
 }  // namespace opentxs::blockchain

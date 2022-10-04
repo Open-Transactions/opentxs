@@ -6,12 +6,12 @@
 #include "0_stdafx.hpp"                        // IWYU pragma: associated
 #include "internal/blockchain/Blockchain.hpp"  // IWYU pragma: associated
 
-#include <boost/container/flat_map.hpp>
 #include <boost/multiprecision/cpp_int.hpp>
 #include <algorithm>
 #include <cstddef>
 #include <cstring>
 #include <iterator>
+#include <optional>
 #include <stdexcept>
 #include <string_view>
 #include <utility>
@@ -276,13 +276,6 @@ SerializedBloomFilter::SerializedBloomFilter() noexcept
     static_assert(9u == sizeof(SerializedBloomFilter));
 }
 
-auto BlockHashToFilterKey(const ReadView hash) noexcept(false) -> ReadView
-{
-    if (16u > hash.size()) { throw std::runtime_error("Hash too short"); }
-
-    return ReadView{hash.data(), 16u};
-}
-
 auto DecodeSerializedCfilter(const ReadView bytes) noexcept(false)
     -> std::pair<std::uint32_t, ReadView>
 {
@@ -419,7 +412,13 @@ auto GetFilterParams(const cfilter::Type type) noexcept(false) -> FilterParams
 auto Serialize(const Type chain, const cfilter::Type type) noexcept(false)
     -> std::uint8_t
 {
-    return params::Bip158().at(chain).at(type);
+    if (auto out = params::get(chain).TranslateBip158(type); out) {
+
+        return *out;
+    } else {
+
+        throw std::runtime_error{"invalid chain or filter type"};
+    }
 }
 
 auto Serialize(const block::Position& in) noexcept -> Space

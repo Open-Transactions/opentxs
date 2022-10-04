@@ -6,10 +6,7 @@
 #include "0_stdafx.hpp"                     // IWYU pragma: associated
 #include "blockchain/database/Filters.hpp"  // IWYU pragma: associated
 
-#include <boost/container/flat_map.hpp>
-#include <boost/container/vector.hpp>
 #include <cstddef>
-#include <type_traits>
 #include <utility>
 
 #include "blockchain/database/common/Database.hpp"
@@ -20,13 +17,10 @@
 #include "internal/util/storage/lmdb/Database.hpp"
 #include "internal/util/storage/lmdb/Transaction.hpp"
 #include "internal/util/storage/lmdb/Types.hpp"
-#include "opentxs/api/session/Factory.hpp"
-#include "opentxs/api/session/Session.hpp"
 #include "opentxs/blockchain/bitcoin/cfilter/GCS.hpp"
 #include "opentxs/blockchain/bitcoin/cfilter/Hash.hpp"
 #include "opentxs/blockchain/bitcoin/cfilter/Header.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
-#include "opentxs/core/ByteArray.hpp"
 #include "opentxs/util/Log.hpp"
 
 namespace opentxs::blockchain::database
@@ -86,7 +80,9 @@ auto Filters::HaveFilterHeader(
 auto Filters::import_genesis(const blockchain::Type chain) const noexcept
     -> void
 {
-    for (const auto& [style, genesis] : params::Filters().at(chain)) {
+    const auto& data = params::get(chain);
+
+    for (const auto& style : data.KnownCfilterTypes()) {
         const auto needHeader =
             blank_position_.height_ == CurrentHeaderTip(style).height_;
         const auto needFilter =
@@ -94,31 +90,13 @@ auto Filters::import_genesis(const blockchain::Type chain) const noexcept
 
         if (false == (needHeader || needFilter)) { return; }
 
-        const auto& blockHash = params::get(chain).GenesisHash();
-        const auto bytes = api_.Factory().DataFromHex(genesis.second);
-        auto gcs = factory::GCS(
-            api_,
-            style,
-            blockchain::internal::BlockHashToFilterKey(blockHash.Bytes()),
-            bytes.Bytes(),
-            {});  // TODO allocator
-
-        OT_ASSERT(gcs.IsValid());
-
+        const auto& blockHash = data.GenesisHash();
+        const auto& gcs = data.GenesisCfilter(api_, style);
         auto success{false};
 
         if (needHeader) {
             auto headers = Vector<CFHeaderParams>{
-                {blockHash,
-                 [&](const auto& hex) {
-                     auto out = cfilter::Header{};
-                     const auto rc = out.DecodeHex(hex);
-
-                     OT_ASSERT(rc);
-
-                     return out;
-                 }(genesis.first),
-                 gcs.Hash()}};
+                {blockHash, data.GenesisCfheader(style), gcs.Hash()}};
             success = common_.StoreFilterHeaders(style, headers);
 
             OT_ASSERT(success);

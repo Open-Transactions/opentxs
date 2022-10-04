@@ -39,7 +39,7 @@ HeaderOraclePrivate::HeaderOraclePrivate(
     : api_(api)
     , chain_(node.Internal().Chain())
     , endpoint_(node.Internal().Endpoints().header_oracle_pull_)
-    , checkpoint_height_(params::get(chain_).Checkpoints().height_)
+    , checkpoint_height_(params::get(chain_).CheckpointPosition().height_)
     , database_(node.Internal().DB())
     , to_parent_([&] {
         using Type = network::zeromq::socket::Type;

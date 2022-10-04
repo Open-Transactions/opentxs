@@ -36,7 +36,8 @@
 #include "opentxs/blockchain/BlockchainType.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/Work.hpp"
-#include "opentxs/blockchain/bitcoin/block/Header.hpp"  // IWYU pragma: keep
+#include "opentxs/blockchain/bitcoin/block/Header.hpp"    // IWYU pragma: keep
+#include "opentxs/blockchain/bitcoin/cfilter/Header.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/blockchain/block/Header.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
@@ -848,13 +849,14 @@ auto HeaderOracle::Shared::get_default_checkpoint(
 auto HeaderOracle::Shared::get_default_checkpoint(
     const blockchain::Type chain) const noexcept -> CheckpointData
 {
-    const auto& checkpoint = params::get(chain).Checkpoints();
+    const auto& data = params::get(chain);
+    const auto& position = data.CheckpointPosition();
 
     return CheckpointData{
-        checkpoint.height_,
-        checkpoint.block_,
-        checkpoint.previous_block_,
-        checkpoint.cfheader_};
+        position.height_,
+        position.hash_,
+        data.CheckpointPrevious().hash_,
+        data.CheckpointCfheader()};
 }
 
 auto HeaderOracle::Shared::GetJob(alloc::Default alloc) const noexcept

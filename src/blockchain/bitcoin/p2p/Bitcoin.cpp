@@ -6,19 +6,14 @@
 #include "0_stdafx.hpp"  // IWYU pragma: associated
 #include "internal/blockchain/p2p/bitcoin/Bitcoin.hpp"  // IWYU pragma: associated
 
-#include <boost/container/flat_map.hpp>
-#include <boost/container/vector.hpp>
 #include <algorithm>
 #include <cstdint>
 #include <cstring>
 #include <iterator>
 #include <memory>
-#include <mutex>
-#include <utility>
 
 #include "internal/blockchain/Params.hpp"
 #include "internal/util/LogMacros.hpp"
-#include "internal/util/Mutex.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/util/Container.hpp"
@@ -282,41 +277,12 @@ auto TranslateServices(
     const UnallocatedSet<p2p::Service>& input) noexcept
     -> UnallocatedSet<bitcoin::Service>
 {
-    using InnerMap = UnallocatedMap<p2p::Service, bitcoin::Service>;
-    using Map = UnallocatedMap<blockchain::Type, InnerMap>;
-
-    static std::mutex lock_{};
-    static auto cache = Map{};
-    auto it{cache.end()};
-
-    {
-        Lock lock(lock_);
-        it = cache.find(chain);
-
-        if (cache.end() == it) {
-            const auto& bits = params::Services().at(chain);
-            auto [it2, added] = cache.emplace(chain, InnerMap{});
-
-            OT_ASSERT(added);
-
-            for (const auto& [s, b] : bits) { it2->second.emplace(b, s); }
-
-            it = it2;
-        }
-    }
-
-    OT_ASSERT(cache.end() != it);
-
     auto output = UnallocatedSet<bitcoin::Service>{};
-    const auto& map = it->second;
-
+    const auto& data = params::get(chain);
     std::for_each(
-        std::begin(input),
-        std::end(input),
-        [&output, &map](const auto& in) -> void {
-            try {
-                output.emplace(map.at(in));
-            } catch (...) {
+        std::begin(input), std::end(input), [&](const auto& in) -> void {
+            if (auto value = data.TranslateService(in); value) {
+                output.emplace(*value);
             }
         });
 
@@ -330,13 +296,11 @@ auto TranslateServices(
     -> UnallocatedSet<p2p::Service>
 {
     UnallocatedSet<p2p::Service> output{};
+    const auto& data = params::get(chain);
     std::for_each(
-        std::begin(input),
-        std::end(input),
-        [&output, chain](const auto& in) -> void {
-            try {
-                output.emplace(params::Services().at(chain).at(in));
-            } catch (...) {
+        std::begin(input), std::end(input), [&](const auto& in) -> void {
+            if (auto value = data.TranslateService(in); value) {
+                output.emplace(*value);
             }
         });
 
