@@ -6,10 +6,9 @@
 #include "0_stdafx.hpp"  // IWYU pragma: associated
 #include "blockchain/database/wallet/SubchainCache.hpp"  // IWYU pragma: associated
 
-#include <boost/exception/exception.hpp>
 #include <chrono>  // IWYU pragma: keep
 #include <cstring>
-#include <mutex>
+#include <memory>
 #include <stdexcept>
 #include <utility>
 
@@ -19,7 +18,6 @@
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/TSV.hpp"
 #include "internal/util/storage/lmdb/Database.hpp"
-#include "internal/util/storage/lmdb/Transaction.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/blockchain/bitcoin/cfilter/FilterType.hpp"
@@ -38,22 +36,17 @@ SubchainCache::SubchainCache(
     const storage::lmdb::Database& lmdb) noexcept
     : api_(api)
     , lmdb_(lmdb)
-    , subchain_id_lock_()
     , subchain_id_()
-    , last_indexed_lock_()
     , last_indexed_()
-    , last_scanned_lock_()
     , last_scanned_()
-    , patterns_lock_()
     , patterns_()
-    , pattern_index_lock_()
     , pattern_index_()
 {
-    subchain_id_.reserve(reserve_);
-    last_indexed_.reserve(reserve_);
-    last_scanned_.reserve(reserve_);
-    pattern_index_.reserve(reserve_);
-    patterns_.reserve(reserve_ * reserve_);
+    subchain_id_.lock()->reserve(reserve_);
+    last_indexed_.lock()->reserve(reserve_);
+    last_scanned_.lock()->reserve(reserve_);
+    patterns_.lock()->reserve(reserve_ * reserve_);
+    pattern_index_.lock()->reserve(reserve_);
 }
 
 auto SubchainCache::AddPattern(
@@ -63,8 +56,9 @@ auto SubchainCache::AddPattern(
     storage::lmdb::Transaction& tx) noexcept -> bool
 {
     try {
-        auto lock = boost::unique_lock<Mutex>{patterns_lock_};
-        auto& patterns = patterns_[id];
+        auto handle = patterns_.lock();
+        auto& map = *handle;
+        auto& patterns = map[id];
         auto [it, added] = patterns.emplace(index, data);
 
         if (false == added) {
@@ -97,8 +91,9 @@ auto SubchainCache::AddPatternIndex(
     storage::lmdb::Transaction& tx) noexcept -> bool
 {
     try {
-        auto lock = boost::unique_lock<Mutex>{pattern_index_lock_};
-        auto& index = pattern_index_[key];
+        auto handle = pattern_index_.lock();
+        auto& map = *handle;
+        auto& index = map[key];
         auto [it, added] = index.emplace(value);
 
         if (false == added) {
@@ -128,19 +123,17 @@ auto SubchainCache::AddPatternIndex(
 
 auto SubchainCache::Clear() noexcept -> void
 {
-    auto iLock =
-        boost::unique_lock<Mutex>{last_indexed_lock_, boost::defer_lock};
-    auto sLock =
-        boost::unique_lock<Mutex>{last_scanned_lock_, boost::defer_lock};
-    std::lock(iLock, sLock);
-    last_indexed_.clear();
-    last_scanned_.clear();
+    last_indexed_.lock()->clear();
+    last_scanned_.lock()->clear();
 }
 
-auto SubchainCache::DecodeIndex(const SubchainIndex& key) noexcept(false)
+auto SubchainCache::DecodeIndex(const SubchainIndex& key) const noexcept(false)
     -> const db::SubchainID&
 {
-    return load_index(key);
+    auto handle = subchain_id_.lock();
+    auto& map = *handle;
+
+    return load_index(key, map);
 }
 
 auto SubchainCache::GetIndex(
@@ -148,21 +141,22 @@ auto SubchainCache::GetIndex(
     const crypto::Subchain subchain,
     const cfilter::Type type,
     const VersionNumber version,
-    storage::lmdb::Transaction& tx) noexcept -> SubchainIndex
+    storage::lmdb::Transaction& tx) const noexcept -> SubchainIndex
 {
     const auto index = subchain_index(subaccount, subchain, type, version);
+    auto handle = subchain_id_.lock();
+    auto& map = *handle;
 
     try {
-        load_index(index);
+        load_index(index, map);
 
         return index;
     } catch (...) {
     }
 
     try {
-        auto lock = boost::unique_lock<Mutex>{subchain_id_lock_};
-        auto [it, added] = subchain_id_.try_emplace(
-            index, subchain, type, version, subaccount);
+        auto [it, added] =
+            map.try_emplace(index, subchain, type, version, subaccount);
 
         if (false == added) {
             throw std::runtime_error{"failed to update cache"};
@@ -189,12 +183,14 @@ auto SubchainCache::GetIndex(
     return index;
 }
 
-auto SubchainCache::GetLastIndexed(const SubchainIndex& subchain) noexcept
+auto SubchainCache::GetLastIndexed(const SubchainIndex& subchain) const noexcept
     -> std::optional<Bip32Index>
 {
     try {
+        auto handle = last_indexed_.lock();
+        auto& map = *handle;
 
-        return load_last_indexed(subchain);
+        return load_last_indexed(subchain, map);
     } catch (const std::exception& e) {
         LogTrace()(OT_PRETTY_CLASS())(e.what()).Flush();
 
@@ -202,43 +198,47 @@ auto SubchainCache::GetLastIndexed(const SubchainIndex& subchain) noexcept
     }
 }
 
-auto SubchainCache::GetLastScanned(const SubchainIndex& subchain) noexcept
+auto SubchainCache::GetLastScanned(const SubchainIndex& subchain) const noexcept
     -> block::Position
 {
     try {
-        const auto& serialized = load_last_scanned(subchain);
+        auto handle = last_scanned_.lock();
+        auto& map = *handle;
+        const auto& serialized = load_last_scanned(subchain, map);
 
         return serialized.Decode(api_);
     } catch (const std::exception& e) {
         LogVerbose()(OT_PRETTY_CLASS())(e.what()).Flush();
-        static const auto null = block::Position{};
 
-        return null;
+        return {};
     }
 }
 
-auto SubchainCache::GetPattern(const PatternID& id) noexcept
+auto SubchainCache::GetPattern(const PatternID& id) const noexcept
     -> const dbPatterns&
 {
-    return load_pattern(id);
+    auto handle = patterns_.lock();
+    auto& map = *handle;
+
+    return load_pattern(id, map);
 }
 
-auto SubchainCache::GetPatternIndex(const SubchainIndex& id) noexcept
+auto SubchainCache::GetPatternIndex(const SubchainIndex& id) const noexcept
     -> const dbPatternIndex&
 {
-    return load_pattern_index(id);
+    auto handle = pattern_index_.lock();
+    auto& map = *handle;
+
+    return load_pattern_index(id, map);
 }
 
-auto SubchainCache::load_index(const SubchainIndex& key) noexcept(false)
-    -> const db::SubchainID&
+auto SubchainCache::load_index(const SubchainIndex& key, SubchainIDMap& map)
+    const noexcept(false) -> const db::SubchainID&
 {
-    auto lock = boost::upgrade_lock<Mutex>{subchain_id_lock_};
-    auto& map = subchain_id_;
     auto it = map.find(key);
 
     if (map.end() != it) { return it->second; }
 
-    auto write = boost::upgrade_to_unique_lock<Mutex>{lock};
     lmdb_.Load(wallet::id_index_, key.Bytes(), [&](const auto bytes) {
         const auto [i, added] = map.try_emplace(key, bytes);
 
@@ -257,16 +257,14 @@ auto SubchainCache::load_index(const SubchainIndex& key) noexcept(false)
     throw std::out_of_range{error};
 }
 
-auto SubchainCache::load_last_indexed(const SubchainIndex& key) noexcept(false)
-    -> const Bip32Index&
+auto SubchainCache::load_last_indexed(
+    const SubchainIndex& key,
+    LastIndexedMap& map) const noexcept(false) -> const Bip32Index&
 {
-    auto lock = boost::upgrade_lock<Mutex>{last_indexed_lock_};
-    auto& map = last_indexed_;
     auto it = map.find(key);
 
     if (map.end() != it) { return it->second; }
 
-    auto write = boost::upgrade_to_unique_lock<Mutex>{lock};
     lmdb_.Load(wallet::last_indexed_, key.Bytes(), [&](const auto bytes) {
         if (sizeof(Bip32Index) == bytes.size()) {
             auto value = Bip32Index{};
@@ -290,16 +288,14 @@ auto SubchainCache::load_last_indexed(const SubchainIndex& key) noexcept(false)
     throw std::out_of_range{error};
 }
 
-auto SubchainCache::load_last_scanned(const SubchainIndex& key) noexcept(false)
-    -> const db::Position&
+auto SubchainCache::load_last_scanned(
+    const SubchainIndex& key,
+    LastScannedMap& map) const noexcept(false) -> const db::Position&
 {
-    auto lock = boost::upgrade_lock<Mutex>{last_scanned_lock_};
-    auto& map = last_scanned_;
     auto it = map.find(key);
 
     if (map.end() != it) { return it->second; }
 
-    auto write = boost::upgrade_to_unique_lock<Mutex>{lock};
     lmdb_.Load(wallet::last_scanned_, key.Bytes(), [&](const auto bytes) {
         auto [i, added] = map.try_emplace(key, bytes);
 
@@ -318,15 +314,11 @@ auto SubchainCache::load_last_scanned(const SubchainIndex& key) noexcept(false)
     throw std::out_of_range{error};
 }
 
-auto SubchainCache::load_pattern(const PatternID& key) noexcept
-    -> const dbPatterns&
+auto SubchainCache::load_pattern(const PatternID& key, PatternsMap& map)
+    const noexcept -> const dbPatterns&
 {
-    auto lock = boost::upgrade_lock<Mutex>{patterns_lock_};
-    auto& map = patterns_;
-
     if (auto it = map.find(key); map.end() != it) { return it->second; }
 
-    auto write = boost::upgrade_to_unique_lock<Mutex>{lock};
     auto& patterns = map[key];
     lmdb_.Load(
         wallet::patterns_,
@@ -337,15 +329,12 @@ auto SubchainCache::load_pattern(const PatternID& key) noexcept
     return patterns;
 }
 
-auto SubchainCache::load_pattern_index(const SubchainIndex& key) noexcept
-    -> const dbPatternIndex&
+auto SubchainCache::load_pattern_index(
+    const SubchainIndex& key,
+    PatternIndexMap& map) const noexcept -> const dbPatternIndex&
 {
-    auto lock = boost::upgrade_lock<Mutex>{pattern_index_lock_};
-    auto& map = pattern_index_;
-
     if (auto it = map.find(key); map.end() != it) { return it->second; }
 
-    auto write = boost::upgrade_to_unique_lock<Mutex>{lock};
     auto& index = map[key];
     lmdb_.Load(
         wallet::pattern_index_,
@@ -369,8 +358,9 @@ auto SubchainCache::SetLastIndexed(
     storage::lmdb::Transaction& tx) noexcept -> bool
 {
     try {
-        auto lock = boost::unique_lock<Mutex>{last_indexed_lock_};
-        auto& indexed = last_indexed_[subchain];
+        auto handle = last_indexed_.lock();
+        auto& map = *handle;
+        auto& indexed = map[subchain];
         indexed = value;
         const auto output =
             lmdb_.Store(wallet::last_indexed_, subchain.Bytes(), tsv(value), tx)
@@ -390,24 +380,16 @@ auto SubchainCache::SetLastIndexed(
 
 auto SubchainCache::SetLastScanned(
     const SubchainIndex& subchain,
-    const block::Position& value) noexcept -> bool
-{
-    auto tx = lmdb_.TransactionRW();
-
-    return SetLastScanned(subchain, value, tx);
-}
-
-auto SubchainCache::SetLastScanned(
-    const SubchainIndex& subchain,
     const block::Position& value,
     storage::lmdb::Transaction& tx) noexcept -> bool
 {
     try {
+        auto handle = last_scanned_.lock();
+        auto& map = *handle;
         const auto& scanned = [&]() -> auto&
         {
-            auto lock = boost::unique_lock<Mutex>{last_scanned_lock_};
-            last_scanned_.erase(subchain);
-            const auto [it, added] = last_scanned_.try_emplace(subchain, value);
+            map.erase(subchain);
+            const auto [it, added] = map.try_emplace(subchain, value);
 
             if (false == added) {
                 throw std::runtime_error{"failed to update cache"};

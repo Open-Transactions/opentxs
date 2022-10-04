@@ -36,6 +36,14 @@ namespace block
 class Position;
 }  // namespace block
 
+namespace database
+{
+namespace wallet
+{
+class SubchainPrivate;
+}  // namespace wallet
+}  // namespace database
+
 namespace node
 {
 namespace internal
@@ -101,8 +109,6 @@ public:
     ~SubchainData();
 
 private:
-    struct Imp;
-
-    std::unique_ptr<Imp> imp_;
+    std::unique_ptr<SubchainPrivate> imp_;
 };
 }  // namespace opentxs::blockchain::database::wallet
