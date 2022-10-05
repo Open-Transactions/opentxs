@@ -5,8 +5,7 @@
 
 #pragma once
 
-#include <boost/thread/shared_mutex.hpp>
-#include <boost/thread/thread.hpp>
+#include <cs_plain_guarded.h>
 #include <robin_hood.h>
 #include <cstddef>
 #include <mutex>
@@ -90,6 +89,22 @@ public:
     using dbPatterns = robin_hood::unordered_node_set<db::Pattern>;
     using dbPatternIndex = Set<PatternID>;
 
+    auto DecodeIndex(const SubchainIndex& key) const noexcept(false)
+        -> const db::SubchainID&;
+    auto GetIndex(
+        const NodeID& subaccount,
+        const crypto::Subchain subchain,
+        const cfilter::Type type,
+        const VersionNumber version,
+        storage::lmdb::Transaction& tx) const noexcept -> SubchainIndex;
+    auto GetLastIndexed(const SubchainIndex& subchain) const noexcept
+        -> std::optional<Bip32Index>;
+    auto GetLastScanned(const SubchainIndex& subchain) const noexcept
+        -> block::Position;
+    auto GetPattern(const PatternID& id) const noexcept -> const dbPatterns&;
+    auto GetPatternIndex(const SubchainIndex& id) const noexcept
+        -> const dbPatternIndex&;
+
     auto AddPattern(
         const PatternID& id,
         const Bip32Index index,
@@ -100,28 +115,10 @@ public:
         const PatternID& value,
         storage::lmdb::Transaction& tx) noexcept -> bool;
     auto Clear() noexcept -> void;
-    auto DecodeIndex(const SubchainIndex& key) noexcept(false)
-        -> const db::SubchainID&;
-    auto GetIndex(
-        const NodeID& subaccount,
-        const crypto::Subchain subchain,
-        const cfilter::Type type,
-        const VersionNumber version,
-        storage::lmdb::Transaction& tx) noexcept -> SubchainIndex;
-    auto GetLastIndexed(const SubchainIndex& subchain) noexcept
-        -> std::optional<Bip32Index>;
-    auto GetLastScanned(const SubchainIndex& subchain) noexcept
-        -> block::Position;
-    auto GetPattern(const PatternID& id) noexcept -> const dbPatterns&;
-    auto GetPatternIndex(const SubchainIndex& id) noexcept
-        -> const dbPatternIndex&;
     auto SetLastIndexed(
         const SubchainIndex& subchain,
         const Bip32Index value,
         storage::lmdb::Transaction& tx) noexcept -> bool;
-    auto SetLastScanned(
-        const SubchainIndex& subchain,
-        const block::Position& value) noexcept -> bool;
     auto SetLastScanned(
         const SubchainIndex& subchain,
         const block::Position& value,
@@ -145,37 +142,34 @@ private:
     using PatternsMap = robin_hood::unordered_node_map<PatternID, dbPatterns>;
     using PatternIndexMap =
         robin_hood::unordered_node_map<SubchainIndex, dbPatternIndex>;
-    using MatchIndexMap =
-        robin_hood::unordered_node_map<block::Hash, dbPatternIndex>;
-    using Mutex = boost::upgrade_mutex;
+    using GuardedSubchainID = libguarded::plain_guarded<SubchainIDMap>;
+    using GuardedLastIndexed = libguarded::plain_guarded<LastIndexedMap>;
+    using GuardedLastScanned = libguarded::plain_guarded<LastScannedMap>;
+    using GuardedPatterns = libguarded::plain_guarded<PatternsMap>;
+    using GuardedPatternIndex = libguarded::plain_guarded<PatternIndexMap>;
 
     const api::Session& api_;
     const storage::lmdb::Database& lmdb_;
-    Mutex subchain_id_lock_;
-    SubchainIDMap subchain_id_;
-    Mutex last_indexed_lock_;
-    LastIndexedMap last_indexed_;
-    Mutex last_scanned_lock_;
-    LastScannedMap last_scanned_;
-    Mutex patterns_lock_;
-    PatternsMap patterns_;
-    Mutex pattern_index_lock_;
-    PatternIndexMap pattern_index_;
+    mutable GuardedSubchainID subchain_id_;
+    mutable GuardedLastIndexed last_indexed_;
+    mutable GuardedLastScanned last_scanned_;
+    mutable GuardedPatterns patterns_;
+    mutable GuardedPatternIndex pattern_index_;
 
+    auto load_index(const SubchainIndex& key, SubchainIDMap& map) const
+        noexcept(false) -> const db::SubchainID&;
+    auto load_last_indexed(const SubchainIndex& key, LastIndexedMap& map) const
+        noexcept(false) -> const Bip32Index&;
+    auto load_last_scanned(const SubchainIndex& key, LastScannedMap& map) const
+        noexcept(false) -> const db::Position&;
+    auto load_pattern(const PatternID& key, PatternsMap& map) const noexcept
+        -> const dbPatterns&;
+    auto load_pattern_index(const SubchainIndex& key, PatternIndexMap& map)
+        const noexcept -> const dbPatternIndex&;
     auto subchain_index(
         const NodeID& subaccount,
         const crypto::Subchain subchain,
         const cfilter::Type type,
         const VersionNumber version) const noexcept -> SubchainIndex;
-
-    auto load_index(const SubchainIndex& key) noexcept(false)
-        -> const db::SubchainID&;
-    auto load_last_indexed(const SubchainIndex& key) noexcept(false)
-        -> const Bip32Index&;
-    auto load_last_scanned(const SubchainIndex& key) noexcept(false)
-        -> const db::Position&;
-    auto load_pattern(const PatternID& key) noexcept -> const dbPatterns&;
-    auto load_pattern_index(const SubchainIndex& key) noexcept
-        -> const dbPatternIndex&;
 };
 }  // namespace opentxs::blockchain::database::wallet

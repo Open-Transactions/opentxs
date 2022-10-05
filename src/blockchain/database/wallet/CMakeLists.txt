@@ -22,6 +22,8 @@ target_sources(
     "SubchainCache.hpp"
     "SubchainID.cpp"
     "SubchainID.hpp"
+    "SubchainPrivate.cpp"
+    "SubchainPrivate.hpp"
     "Types.hpp"
 )
 target_link_libraries(opentxs-common PRIVATE Boost::headers)

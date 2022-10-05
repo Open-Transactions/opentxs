@@ -7,12 +7,15 @@
 #include "api/network/otdht/OTDHT.hpp"       // IWYU pragma: associated
 #include "internal/api/network/Factory.hpp"  // IWYU pragma: associated
 
+#include <type_traits>
+
 #include "internal/api/network/Blockchain.hpp"
 #include "internal/api/session/Endpoints.hpp"
 #include "internal/network/otdht/Node.hpp"
 #include "internal/network/otdht/Types.hpp"
 #include "internal/network/zeromq/Context.hpp"
 #include "internal/util/LogMacros.hpp"
+#include "internal/util/P0330.hpp"
 #include "opentxs/api/network/Blockchain.hpp"
 #include "opentxs/api/session/Endpoints.hpp"
 #include "opentxs/api/session/Session.hpp"
@@ -62,52 +65,79 @@ OTDHT::OTDHT(
 
 auto OTDHT::AddPeer(std::string_view endpoint) const noexcept -> bool
 {
-    return blockchain_.Internal().AddSyncServer(endpoint);
+    if (api_.GetOptions().LoopbackDHT()) {
+
+        return true;
+    } else {
+
+        return blockchain_.Internal().AddSyncServer(endpoint);
+    }
 }
 
 auto OTDHT::DeletePeer(std::string_view endpoint) const noexcept -> bool
 {
-    return blockchain_.Internal().DeleteSyncServer(endpoint);
+    if (api_.GetOptions().LoopbackDHT()) {
+
+        return true;
+    } else {
+
+        return blockchain_.Internal().DeleteSyncServer(endpoint);
+    }
 }
 
 auto OTDHT::KnownPeers(alloc::Default alloc) const noexcept -> Endpoints
 {
-    return blockchain_.Internal().GetSyncServers(alloc);
+    static const auto loopback = Endpoints{
+        "tcp://127.0.0.1:8814",
+    };
+
+    if (api_.GetOptions().LoopbackDHT()) {
+
+        return Endpoints{loopback, alloc};
+    } else {
+
+        return blockchain_.Internal().GetSyncServers(alloc);
+    }
 }
 
 auto OTDHT::Start(std::shared_ptr<const api::Session> api) noexcept -> void
 {
-    static const auto defaultServers = Vector<CString>{
-        "tcp://metier1.opentransactions.org:8814",
-        "tcp://metier2.opentransactions.org:8814",
-        "tcp://ot01.matterfi.net:8814",
-    };
     const auto& options = api_.GetOptions();
-    const auto existing = [&] {
-        auto out = Set<CString>{};
 
-        // TODO allocator
-        for (const auto& server : KnownPeers({})) {
-            // TODO GetSyncServers should return pmr strings
-            out.emplace(server.c_str());
-        }
+    if (false == options.LoopbackDHT()) {
+        static const auto defaultServers = Endpoints{
+            "tcp://metier1.opentransactions.org:8814",
+            "tcp://metier2.opentransactions.org:8814",
+            "tcp://ot01.matterfi.net:8814",
+        };
+        const auto existing = [&] {
+            auto out = Set<CString>{};
 
-        for (const auto& server : defaultServers) {
-            if (0 == out.count(server)) {
-                if (false == options.TestMode()) { AddPeer(server); }
-
-                out.emplace(server);
+            // TODO allocator
+            for (const auto& server : KnownPeers({})) {
+                // TODO GetSyncServers should return pmr strings
+                out.emplace(server.c_str());
             }
-        }
 
-        return out;
-    }();
+            for (const auto& server : defaultServers) {
+                // TODO c++20 use contains
+                if (0 == out.count(server)) {
+                    if (false == options.TestMode()) { AddPeer(server); }
 
-    try {
-        for (const auto& endpoint : options.RemoteBlockchainSyncServers()) {
-            if (0 == existing.count(endpoint)) { AddPeer(endpoint); }
+                    out.emplace(server);
+                }
+            }
+
+            return out;
+        }();
+
+        try {
+            for (const auto& endpoint : options.RemoteBlockchainSyncServers()) {
+                // TODO c++20 use contains
+                if (0_uz == existing.count(endpoint)) { AddPeer(endpoint); }
+            }
+        } catch (...) {
         }
-    } catch (...) {
     }
 
     opentxs::network::otdht::Node{api_}.Init(api);

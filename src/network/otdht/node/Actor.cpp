@@ -169,10 +169,11 @@ auto Node::Actor::get_peers(Message& out) const noexcept -> void
 
 auto Node::Actor::load_peers() noexcept -> void
 {
-    for (const auto& peer :
-         api_.Network().OTDHT().KnownPeers(get_allocator())) {
-        process_peer(peer);
-    }
+    const auto peers = api_.Network().OTDHT().KnownPeers(get_allocator());
+    log_(OT_PRETTY_CLASS())(name_)(": loading ")(peers.size())(" peers")
+        .Flush();
+
+    for (const auto& peer : peers) { process_peer(peer); }
 }
 
 auto Node::Actor::load_positions() noexcept -> void
@@ -405,7 +406,14 @@ auto Node::Actor::process_new_peer(Message&& msg) noexcept -> void
 auto Node::Actor::process_peer(std::string_view endpoint) noexcept -> void
 {
     // TODO c++20 use contains
-    if (0_uz < peers_.count(endpoint)) { return; }
+    if (0_uz < peers_.count(endpoint)) {
+        log_(OT_PRETTY_CLASS())(name_)("already connected to ")(endpoint)
+            .Flush();
+
+        return;
+    } else {
+        log_(OT_PRETTY_CLASS())(name_)("connecting to ")(endpoint).Flush();
+    }
 
     auto alloc = get_allocator();
     using Socket = zeromq::socket::Type;
