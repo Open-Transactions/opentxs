@@ -23,8 +23,6 @@
 #include <string_view>
 #include <type_traits>
 
-#include "Proto.hpp"
-#include "Proto.tpp"
 #include "internal/api/FactoryAPI.hpp"
 #include "internal/api/session/Factory.hpp"
 #include "internal/api/session/FactoryAPI.hpp"
@@ -36,6 +34,8 @@
 #include "internal/otx/common/Message.hpp"
 #include "internal/otx/common/OTTransaction.hpp"
 #include "internal/serialization/protobuf/Check.hpp"
+#include "internal/serialization/protobuf/Proto.hpp"
+#include "internal/serialization/protobuf/Proto.tpp"
 #include "internal/serialization/protobuf/verify/PaymentWorkflow.hpp"
 #include "internal/serialization/protobuf/verify/RPCPush.hpp"
 #include "internal/util/LogMacros.hpp"

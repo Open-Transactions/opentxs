@@ -22,7 +22,6 @@
 #include <type_traits>  // IWYU pragma: keep
 #include <utility>
 
-#include "Proto.hpp"
 #include "internal/blockchain/Params.hpp"
 #include "internal/blockchain/bitcoin/Bitcoin.hpp"
 #include "internal/blockchain/bitcoin/block/Factory.hpp"
@@ -32,6 +31,7 @@
 #include "internal/blockchain/block/Block.hpp"  // IWYU pragma: keep
 #include "internal/core/Amount.hpp"
 #include "internal/identity/wot/claim/Types.hpp"
+#include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/Time.hpp"

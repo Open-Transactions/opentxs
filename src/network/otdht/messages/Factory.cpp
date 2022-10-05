@@ -16,9 +16,9 @@
 #include <stdexcept>
 #include <utility>
 
-#include "Proto.hpp"
-#include "Proto.tpp"
 #include "internal/serialization/protobuf/Check.hpp"
+#include "internal/serialization/protobuf/Proto.hpp"
+#include "internal/serialization/protobuf/Proto.tpp"
 #include "internal/serialization/protobuf/verify/P2PBlockchainHello.hpp"
 #include "internal/serialization/protobuf/verify/P2PBlockchainSync.hpp"
 #include "internal/util/LogMacros.hpp"

@@ -10,10 +10,10 @@
 #include <chrono>
 #include <memory>
 
-#include "Proto.hpp"
 #include "interface/ui/accountactivity/ChequeBalanceItem.hpp"
 #include "interface/ui/accountactivity/TransferBalanceItem.hpp"
 #include "internal/api/session/Types.hpp"
+#include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/Mutex.hpp"
 #include "internal/util/P0330.hpp"

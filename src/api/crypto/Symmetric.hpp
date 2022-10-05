@@ -9,8 +9,8 @@
 #include <cstdint>
 #include <iosfwd>
 
-#include "Proto.hpp"
 #include "internal/api/crypto/Symmetric.hpp"
+#include "internal/serialization/protobuf/Proto.hpp"
 #include "opentxs/api/crypto/Symmetric.hpp"
 #include "opentxs/crypto/key/Symmetric.hpp"
 #include "opentxs/crypto/key/symmetric/Algorithm.hpp"

@@ -22,13 +22,13 @@
 #include <utility>
 
 #include "2_Factory.hpp"
-#include "Proto.hpp"
 #include "internal/api/session/FactoryAPI.hpp"
 #include "internal/api/session/Wallet.hpp"
 #include "internal/crypto/Parameters.hpp"
 #include "internal/crypto/key/Key.hpp"
 #include "internal/identity/Authority.hpp"
 #include "internal/serialization/protobuf/Check.hpp"
+#include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/serialization/protobuf/verify/Credential.hpp"
 #include "internal/serialization/protobuf/verify/VerifyContacts.hpp"
 #include "internal/util/LogMacros.hpp"

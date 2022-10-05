@@ -18,9 +18,9 @@
 #include <type_traits>
 #include <utility>
 
-#include "Proto.hpp"
 #include "internal/identity/wot/claim/Types.hpp"
 #include "internal/serialization/protobuf/Check.hpp"
+#include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/serialization/protobuf/verify/Bip47Channel.hpp"
 #include "internal/serialization/protobuf/verify/StorageBip47Contexts.hpp"
 #include "internal/util/LogMacros.hpp"

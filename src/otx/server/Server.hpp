@@ -12,12 +12,12 @@
 #include <tuple>
 #include <utility>
 
-#include "Proto.hpp"
 #include "internal/otx/Types.hpp"
 #include "internal/otx/client/OTPayment.hpp"
 #include "internal/otx/common/Message.hpp"
 #include "internal/otx/common/OTTransaction.hpp"
 #include "internal/otx/common/cron/OTCron.hpp"
+#include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/AsyncConst.hpp"
 #include "opentxs/core/AddressType.hpp"
 #include "opentxs/core/Secret.hpp"

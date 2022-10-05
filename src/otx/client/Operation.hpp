@@ -15,12 +15,12 @@
 #include <memory>
 #include <optional>
 
-#include "Proto.hpp"
 #include "core/StateMachine.hpp"
 #include "internal/otx/client/Client.hpp"
 #include "internal/otx/common/Account.hpp"
 #include "internal/otx/common/Ledger.hpp"
 #include "internal/otx/common/Message.hpp"
+#include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/Editor.hpp"
 #include "internal/util/Mutex.hpp"
 #include "opentxs/core/Amount.hpp"

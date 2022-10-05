@@ -17,8 +17,6 @@
 #include <string_view>
 #include <utility>
 
-#include "Proto.hpp"
-#include "Proto.tpp"
 #include "core/Worker.hpp"
 #include "internal/api/session/Endpoints.hpp"
 #include "internal/blockchain/Params.hpp"
@@ -29,6 +27,8 @@
 #include "internal/network/zeromq/Context.hpp"
 #include "internal/network/zeromq/Types.hpp"
 #include "internal/network/zeromq/socket/Pipeline.hpp"
+#include "internal/serialization/protobuf/Proto.hpp"
+#include "internal/serialization/protobuf/Proto.tpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/Mutex.hpp"
 #include "opentxs/api/network/Network.hpp"

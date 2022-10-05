@@ -23,7 +23,6 @@
 #include <type_traits>
 #include <utility>
 
-#include "Proto.hpp"
 #include "internal/api/session/Wallet.hpp"
 #include "internal/identity/Authority.hpp"
 #include "internal/identity/Nym.hpp"
@@ -31,6 +30,7 @@
 #include "internal/network/zeromq/socket/Raw.hpp"
 #include "internal/otx/common/Account.hpp"
 #include "internal/otx/consensus/Consensus.hpp"
+#include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/Editor.hpp"
 #include "internal/util/Lockable.hpp"
 #include "internal/util/Mutex.hpp"

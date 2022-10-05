@@ -10,7 +10,7 @@
 #include <functional>
 #include <mutex>
 
-#include "Proto.hpp"
+#include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/Mutex.hpp"
 #include "opentxs/api/network/ZMQ.hpp"
 #include "opentxs/core/AddressType.hpp"

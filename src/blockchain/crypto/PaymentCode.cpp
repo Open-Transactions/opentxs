@@ -19,13 +19,13 @@
 #include <type_traits>
 #include <utility>
 
-#include "Proto.hpp"
 #include "blockchain/crypto/Deterministic.hpp"
 #include "blockchain/crypto/Element.hpp"
 #include "blockchain/crypto/Subaccount.hpp"
 #include "internal/api/session/FactoryAPI.hpp"
 #include "internal/blockchain/crypto/Factory.hpp"
 #include "internal/core/PaymentCode.hpp"
+#include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/api/session/Contacts.hpp"
 #include "opentxs/api/session/Factory.hpp"

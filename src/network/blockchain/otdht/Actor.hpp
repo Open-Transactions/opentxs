@@ -221,6 +221,7 @@ private:
     auto pipeline_other(const Work work, Message&& msg) noexcept -> void;
     auto pipeline_router(const Work work, Message&& msg) noexcept -> void;
     auto process_cfilter(Message&& msg) noexcept -> void;
+    virtual auto process_checksum_failure(Message&& msg) noexcept -> void;
     virtual auto process_job_processed(Message&& msg) noexcept -> void;
     auto process_peer_list(Message&& msg) noexcept -> void;
     auto process_pushtx_external(Message&& msg) noexcept -> void;

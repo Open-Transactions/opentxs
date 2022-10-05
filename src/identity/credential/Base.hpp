@@ -8,11 +8,11 @@
 #include <Credential.pb.h>
 #include <memory>
 
-#include "Proto.hpp"
 #include "core/contract/Signable.hpp"
 #include "internal/identity/Types.hpp"
 #include "internal/identity/credential/Credential.hpp"
 #include "internal/identity/credential/Types.hpp"
+#include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/Mutex.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Session.hpp"

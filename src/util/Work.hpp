@@ -65,7 +65,9 @@ constexpr auto OT_ZMQ_REORG_SIGNAL =                            OTZMQWorkType{OT
 constexpr auto OT_ZMQ_HEADER_ORACLE_JOB_READY =                 OTZMQWorkType{OT_ZMQ_HIGHEST_SIGNAL - 45};
 constexpr auto OT_ZMQ_OTDHT_PEER_LIST =                         OTZMQWorkType{OT_ZMQ_HIGHEST_SIGNAL - 46};
 constexpr auto OT_ZMQ_BLOCKCHAIN_REPORT_STATUS =                OTZMQWorkType{OT_ZMQ_HIGHEST_SIGNAL - 47};
+constexpr auto OT_ZMQ_BLOCKCHAIN_SYNC_CHECKSUM_FAILURE =        OTZMQWorkType{OT_ZMQ_HIGHEST_SIGNAL - 48};
 // clang-format on
+// NOTE update print function if new values are defined
 
 template <typename Enum>
 auto MakeWork(const Enum type) noexcept -> network::zeromq::Message

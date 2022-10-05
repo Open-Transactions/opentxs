@@ -8,7 +8,7 @@
 #include <cstdint>
 #include <memory>
 
-#include "Proto.hpp"
+#include "internal/serialization/protobuf/Proto.hpp"
 #include "opentxs/crypto/key/Asymmetric.hpp"
 #include "opentxs/crypto/key/Keypair.hpp"
 #include "opentxs/crypto/key/asymmetric/Role.hpp"

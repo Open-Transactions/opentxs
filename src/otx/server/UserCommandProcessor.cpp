@@ -18,8 +18,6 @@
 #include <stdexcept>
 #include <utility>
 
-#include "Proto.hpp"
-#include "Proto.tpp"
 #include "internal/api/FactoryAPI.hpp"
 #include "internal/api/session/FactoryAPI.hpp"
 #include "internal/api/session/Wallet.hpp"
@@ -42,6 +40,8 @@
 #include "internal/otx/smartcontract/OTParty.hpp"
 #include "internal/otx/smartcontract/OTSmartContract.hpp"
 #include "internal/serialization/protobuf/Check.hpp"
+#include "internal/serialization/protobuf/Proto.hpp"
+#include "internal/serialization/protobuf/Proto.tpp"
 #include "internal/serialization/protobuf/verify/UnitDefinition.hpp"
 #include "internal/util/Editor.hpp"
 #include "internal/util/Exclusive.hpp"

@@ -16,13 +16,13 @@
 #include <thread>
 #include <tuple>
 
-#include "Proto.hpp"
 #include "internal/network/zeromq/Batch.hpp"
 #include "internal/network/zeromq/Context.hpp"
 #include "internal/network/zeromq/Handle.hpp"
 #include "internal/network/zeromq/Thread.hpp"
 #include "internal/network/zeromq/Types.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
+#include "internal/serialization/protobuf/Proto.hpp"
 #include "network/zeromq/context/Pool.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/network/zeromq/Pipeline.hpp"

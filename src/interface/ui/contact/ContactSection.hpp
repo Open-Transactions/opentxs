@@ -10,12 +10,12 @@
 #include <string_view>
 #include <utility>
 
-#include "Proto.hpp"
 #include "interface/ui/base/Combined.hpp"
 #include "interface/ui/base/List.hpp"
 #include "interface/ui/base/RowType.hpp"
 #include "internal/identity/wot/claim/Types.hpp"
 #include "internal/interface/ui/UI.hpp"
+#include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/serialization/protobuf/verify/VerifyContacts.hpp"
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/Crypto.hpp"

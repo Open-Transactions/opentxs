@@ -58,6 +58,7 @@ enum class DHTJob : OTZMQWorkType {
     response = value(WorkType::P2PResponse),
     push_tx = value(WorkType::P2PPushTransaction),
     job_processed = OT_ZMQ_INTERNAL_SIGNAL + 0,
+    checksum_failure = OT_ZMQ_BLOCKCHAIN_SYNC_CHECKSUM_FAILURE,
     report = OT_ZMQ_BLOCKCHAIN_REPORT_STATUS,
     peer_list = OT_ZMQ_OTDHT_PEER_LIST,
     registration = OT_ZMQ_REGISTER_SIGNAL,

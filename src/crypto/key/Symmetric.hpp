@@ -13,8 +13,8 @@
 #include <mutex>
 #include <optional>
 
-#include "Proto.hpp"
 #include "internal/crypto/key/Factory.hpp"
+#include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/Mutex.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/core/Secret.hpp"

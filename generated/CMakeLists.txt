@@ -91,31 +91,11 @@ configure_file(
   @ONLY
 )
 
-if(OT_QT_EXPORT)
-  file(
-    READ
-    "opentxs.hpp.qt.in"
-    OT_INCLUDE_QT
-  )
-else()
-  set(OT_INCLUDE_QT "")
-endif()
-
-configure_file(
-  "opentxs.hpp.in"
-  "${opentxs_BINARY_DIR}/include/opentxs/opentxs.hpp"
-  @ONLY
+include(GenerateExportHeader)
+generate_export_header(
+  opentxs
+  EXPORT_FILE_NAME
+  "${opentxs_BINARY_DIR}/include/opentxs/Export.hpp"
+  EXPORT_MACRO_NAME
+  OPENTXS_EXPORT
 )
-
-if(OPENTXS_STANDALONE)
-  install(
-    FILES "${opentxs_BINARY_DIR}/include/opentxs/opentxs.hpp"
-    DESTINATION include/opentxs/
-    COMPONENT dev
-  )
-  install(
-    FILES "${opentxs_BINARY_DIR}/include/opentxs/util/Platform.hpp"
-    DESTINATION include/opentxs/util
-    COMPONENT dev
-  )
-endif()

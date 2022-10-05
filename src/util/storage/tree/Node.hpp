@@ -15,7 +15,7 @@
 #include <tuple>
 #include <utility>
 
-#include "Proto.hpp"
+#include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/Mutex.hpp"
 #include "opentxs/util/Container.hpp"

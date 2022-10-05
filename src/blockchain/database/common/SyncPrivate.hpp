@@ -11,6 +11,7 @@
 #include <filesystem>
 
 #include "blockchain/database/common/Sync.hpp"
+#include "internal/network/zeromq/socket/Raw.hpp"
 #include "internal/util/storage/file/Mapped.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
@@ -31,6 +32,14 @@ namespace otdht
 {
 class Data;
 }  // namespace otdht
+
+namespace zeromq
+{
+namespace socket
+{
+class Raw;
+}  // namespace socket
+}  // namespace zeromq
 }  // namespace network
 
 namespace storage
@@ -69,12 +78,15 @@ public:
 private:
     using Tips = Map<blockchain::Type, block::Height>;
     using GuardedTips = libguarded::plain_guarded<Tips>;
+    using GuardedSocket =
+        libguarded::plain_guarded<network::zeromq::socket::Raw>;
 
     struct Data;
 
     const api::Session& api_;
     const int tip_table_;
     mutable GuardedTips tips_;
+    mutable GuardedSocket checksum_failure_;
 
     static auto checksum_key() noexcept -> const unsigned char*;
 

@@ -12,10 +12,10 @@
 #include <stdexcept>
 
 #include "2_Factory.hpp"
-#include "Proto.hpp"
 #include "core/contract/peer/PeerRequest.hpp"
 #include "internal/core/Factory.hpp"
 #include "internal/serialization/protobuf/Check.hpp"
+#include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/serialization/protobuf/verify/PeerRequest.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/api/session/Factory.hpp"

@@ -14,8 +14,8 @@
 #include <thread>
 #include <utility>
 
-#include "Proto.hpp"
 #include "interface/ui/base/List.hpp"
+#include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/Time.hpp"
 #include "opentxs/api/session/Activity.hpp"

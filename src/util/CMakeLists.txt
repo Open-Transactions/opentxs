@@ -8,6 +8,28 @@ add_subdirectory(log)
 add_subdirectory(platform)
 add_subdirectory(storage)
 
+set(cxx-install-headers
+    "${opentxs_BINARY_DIR}/include/opentxs/util/Platform.hpp"
+    "${opentxs_SOURCE_DIR}/include/opentxs/util/Allocated.hpp"
+    "${opentxs_SOURCE_DIR}/include/opentxs/util/Allocator.hpp"
+    "${opentxs_SOURCE_DIR}/include/opentxs/util/BlockchainProfile.hpp"
+    "${opentxs_SOURCE_DIR}/include/opentxs/util/Bytes.hpp"
+    "${opentxs_SOURCE_DIR}/include/opentxs/util/ConnectionMode.hpp"
+    "${opentxs_SOURCE_DIR}/include/opentxs/util/Container.hpp"
+    "${opentxs_SOURCE_DIR}/include/opentxs/util/Iterator.hpp"
+    "${opentxs_SOURCE_DIR}/include/opentxs/util/Literals.hpp"
+    "${opentxs_SOURCE_DIR}/include/opentxs/util/Numbers.hpp"
+    "${opentxs_SOURCE_DIR}/include/opentxs/util/NymEditor.hpp"
+    "${opentxs_SOURCE_DIR}/include/opentxs/util/Options.hpp"
+    "${opentxs_SOURCE_DIR}/include/opentxs/util/PasswordCallback.hpp"
+    "${opentxs_SOURCE_DIR}/include/opentxs/util/PasswordCaller.hpp"
+    "${opentxs_SOURCE_DIR}/include/opentxs/util/PasswordPrompt.hpp"
+    "${opentxs_SOURCE_DIR}/include/opentxs/util/Pimpl.hpp"
+    "${opentxs_SOURCE_DIR}/include/opentxs/util/SharedPimpl.hpp"
+    "${opentxs_SOURCE_DIR}/include/opentxs/util/Time.hpp"
+    "${opentxs_SOURCE_DIR}/include/opentxs/util/Types.hpp"
+    "${opentxs_SOURCE_DIR}/include/opentxs/util/WorkType.hpp"
+)
 target_sources(
   opentxs-common
   PRIVATE
@@ -75,28 +97,6 @@ target_include_directories(
   PRIVATE "${opentxs_SOURCE_DIR}/deps/cs_libguarded/src"
           "${opentxs_SOURCE_DIR}/deps/robin-hood/src/include"
 )
-set(cxx-install-headers
-    "${opentxs_SOURCE_DIR}/include/opentxs/util/Allocated.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/util/Allocator.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/util/BlockchainProfile.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/util/Bytes.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/util/ConnectionMode.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/util/Container.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/util/Iterator.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/util/Literals.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/util/Numbers.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/util/NymEditor.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/util/Options.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/util/PasswordCallback.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/util/PasswordCaller.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/util/PasswordPrompt.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/util/Pimpl.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/util/SharedPimpl.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/util/Time.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/util/Types.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/util/WorkType.hpp"
-)
-
 target_link_libraries(
   opentxs-common
   PRIVATE

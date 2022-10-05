@@ -19,9 +19,9 @@
 #include <functional>
 #include <type_traits>
 
-#include "Proto.hpp"
 #include "internal/identity/wot/claim/Types.hpp"
 #include "internal/serialization/protobuf/Check.hpp"
+#include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/serialization/protobuf/verify/HDAccount.hpp"
 #include "internal/serialization/protobuf/verify/Nym.hpp"
 #include "internal/serialization/protobuf/verify/Purse.hpp"

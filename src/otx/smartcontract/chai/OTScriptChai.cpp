@@ -20,6 +20,7 @@
 #endif
 #include <chaiscript/chaiscript.hpp>
 #include <chaiscript/chaiscript_stdlib.hpp>  // IWYU pragma: keep
+
 #pragma GCC diagnostic pop
 #include <cstddef>
 #include <cstdint>

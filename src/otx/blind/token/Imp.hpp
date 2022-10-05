@@ -9,8 +9,8 @@
 #include <Token.pb.h>
 #include <cstdint>
 
-#include "Proto.hpp"
 #include "internal/otx/blind/Purse.hpp"
+#include "internal/serialization/protobuf/Proto.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
 #include "opentxs/core/identifier/UnitDefinition.hpp"

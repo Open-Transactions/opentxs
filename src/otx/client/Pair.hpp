@@ -15,9 +15,9 @@
 #include <tuple>
 #include <utility>
 
-#include "Proto.hpp"
 #include "core/StateMachine.hpp"
 #include "internal/otx/client/Pair.hpp"
+#include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/Lockable.hpp"
 #include "internal/util/Mutex.hpp"
 #include "opentxs/api/Context.hpp"

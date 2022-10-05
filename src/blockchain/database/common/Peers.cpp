@@ -14,10 +14,10 @@
 #include <random>
 #include <utility>
 
-#include "Proto.hpp"
-#include "Proto.tpp"
 #include "internal/blockchain/p2p/P2P.hpp"
 #include "internal/serialization/protobuf/Check.hpp"
+#include "internal/serialization/protobuf/Proto.hpp"
+#include "internal/serialization/protobuf/Proto.tpp"
 #include "internal/serialization/protobuf/verify/BlockchainPeerAddress.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"

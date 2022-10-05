@@ -12,9 +12,9 @@
 #include <iosfwd>
 #include <memory>
 
-#include "Proto.hpp"
 #include "internal/identity/Authority.hpp"
 #include "internal/identity/Nym.hpp"
+#include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/Lockable.hpp"
 #include "internal/util/Mutex.hpp"
 #include "internal/util/Types.hpp"

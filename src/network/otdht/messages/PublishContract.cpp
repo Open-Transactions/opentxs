@@ -13,10 +13,10 @@
 #include <stdexcept>
 #include <utility>
 
-#include "Proto.tpp"
 #include "internal/api/session/FactoryAPI.hpp"
 #include "internal/network/otdht/Factory.hpp"
 #include "internal/network/zeromq/message/Message.hpp"
+#include "internal/serialization/protobuf/Proto.tpp"
 #include "network/otdht/messages/Base.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"

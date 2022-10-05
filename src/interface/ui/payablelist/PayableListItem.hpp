@@ -8,9 +8,9 @@
 
 #pragma once
 
-#include "Proto.hpp"
 #include "interface/ui/contactlist/ContactListItem.hpp"
 #include "internal/interface/ui/UI.hpp"
+#include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/Mutex.hpp"
 #include "opentxs/core/Types.hpp"
 #include "opentxs/identity/wot/claim/Types.hpp"

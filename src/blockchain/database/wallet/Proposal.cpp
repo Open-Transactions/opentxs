@@ -10,9 +10,9 @@
 #include <mutex>
 #include <stdexcept>
 
-#include "Proto.hpp"
-#include "Proto.tpp"
 #include "internal/blockchain/database/Types.hpp"
+#include "internal/serialization/protobuf/Proto.hpp"
+#include "internal/serialization/protobuf/Proto.tpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/Mutex.hpp"
 #include "internal/util/storage/lmdb/Database.hpp"

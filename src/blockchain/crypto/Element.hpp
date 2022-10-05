@@ -16,8 +16,8 @@
 #include <optional>
 #include <string_view>
 
-#include "Proto.hpp"
 #include "internal/blockchain/crypto/Crypto.hpp"
+#include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/Mutex.hpp"
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/Crypto.hpp"

@@ -19,11 +19,11 @@
 #include <utility>
 
 #include "2_Factory.hpp"
-#include "Proto.hpp"
-#include "Proto.tpp"
 #include "internal/api/crypto/Symmetric.hpp"
 #include "internal/api/session/FactoryAPI.hpp"
 #include "internal/crypto/key/Key.hpp"
+#include "internal/serialization/protobuf/Proto.hpp"
+#include "internal/serialization/protobuf/Proto.tpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "opentxs/api/crypto/Config.hpp"

@@ -10,7 +10,7 @@
 #include <cstdint>
 #include <memory>
 
-#include "Proto.hpp"
+#include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/Editor.hpp"
 #include "internal/util/Mutex.hpp"
 #include "opentxs/api/session/Storage.hpp"

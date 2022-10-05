@@ -25,13 +25,13 @@
 #include <string_view>
 #include <utility>
 
-#include "Proto.hpp"
 #include "internal/blockchain/bitcoin/Bitcoin.hpp"
 #include "internal/blockchain/bitcoin/block/Factory.hpp"
 #include "internal/blockchain/bitcoin/block/Output.hpp"
 #include "internal/blockchain/bitcoin/block/Script.hpp"
 #include "internal/blockchain/bitcoin/block/Types.hpp"
 #include "internal/identity/wot/claim/Types.hpp"
+#include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/Size.hpp"
 #include "opentxs/api/Factory.hpp"

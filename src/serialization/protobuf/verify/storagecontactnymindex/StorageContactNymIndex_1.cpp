@@ -7,7 +7,7 @@
 
 #include <StorageContactNymIndex.pb.h>
 
-#include "Proto.hpp"
+#include "internal/serialization/protobuf/Proto.hpp"
 #include "opentxs/util/Container.hpp"
 #include "serialization/protobuf/verify/Check.hpp"
 

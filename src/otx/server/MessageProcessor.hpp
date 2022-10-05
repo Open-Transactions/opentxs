@@ -14,10 +14,10 @@
 #include <thread>
 #include <utility>
 
-#include "Proto.hpp"
 #include "internal/network/zeromq/Handle.hpp"
 #include "internal/otx/server/MessageProcessor.hpp"
 #include "internal/otx/server/Types.hpp"
+#include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/Lockable.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/network/zeromq/ListenCallback.hpp"

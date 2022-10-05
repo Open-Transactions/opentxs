@@ -15,14 +15,14 @@
 #include <type_traits>
 #include <utility>
 
-#include "Proto.hpp"
-#include "Proto.tpp"
 #include "internal/api/Crypto.hpp"
 #include "internal/api/crypto/Asymmetric.hpp"
 #include "internal/api/crypto/Factory.hpp"
 #include "internal/crypto/Factory.hpp"
 #include "internal/crypto/Seed.hpp"
 #include "internal/crypto/key/Factory.hpp"
+#include "internal/serialization/protobuf/Proto.hpp"
+#include "internal/serialization/protobuf/Proto.tpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "opentxs/OT.hpp"

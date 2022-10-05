@@ -12,7 +12,7 @@
 #include <shared_mutex>
 #include <tuple>
 
-#include "Proto.hpp"
+#include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/Mutex.hpp"
 #include "opentxs/core/Types.hpp"
 #include "opentxs/identity/wot/claim/ClaimType.hpp"

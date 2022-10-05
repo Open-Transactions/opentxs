@@ -11,7 +11,7 @@
 #include <stdexcept>
 #include <string_view>
 
-#include "Proto.hpp"
+#include "internal/serialization/protobuf/Proto.hpp"
 #include "opentxs/blockchain/Blockchain.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"

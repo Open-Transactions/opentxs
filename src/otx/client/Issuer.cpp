@@ -22,7 +22,6 @@
 #include <string_view>
 #include <type_traits>
 
-#include "Proto.hpp"
 #include "internal/api/session/FactoryAPI.hpp"
 #include "internal/api/session/Wallet.hpp"
 #include "internal/core/contract/peer/Peer.hpp"
@@ -30,6 +29,7 @@
 #include "internal/otx/client/Factory.hpp"
 #include "internal/otx/client/Issuer.hpp"
 #include "internal/serialization/protobuf/Check.hpp"
+#include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/serialization/protobuf/verify/Issuer.hpp"
 #include "internal/serialization/protobuf/verify/VerifyContacts.hpp"
 #include "internal/util/Flag.hpp"

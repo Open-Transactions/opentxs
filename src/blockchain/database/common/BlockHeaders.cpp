@@ -14,11 +14,11 @@
 #include <type_traits>
 #include <utility>
 
-#include "Proto.hpp"
-#include "Proto.tpp"
 #include "blockchain/database/common/Bulk.hpp"
 #include "internal/blockchain/block/Header.hpp"
 #include "internal/blockchain/database/common/Common.hpp"
+#include "internal/serialization/protobuf/Proto.hpp"
+#include "internal/serialization/protobuf/Proto.tpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/storage/file/Index.hpp"

@@ -12,9 +12,9 @@
 #include <algorithm>
 #include <utility>
 
-#include "Proto.hpp"
-#include "Proto.tpp"
 #include "internal/identity/wot/claim/Types.hpp"
+#include "internal/serialization/protobuf/Proto.hpp"
+#include "internal/serialization/protobuf/Proto.tpp"
 #include "internal/serialization/protobuf/verify/VerifyContacts.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/core/Data.hpp"

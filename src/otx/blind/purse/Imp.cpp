@@ -16,14 +16,14 @@
 #include <type_traits>  // IWYU pragma: keep
 #include <utility>
 
-#include "Proto.hpp"
-#include "Proto.tpp"
 #include "internal/api/crypto/Symmetric.hpp"
 #include "internal/core/Factory.hpp"
 #include "internal/otx/blind/Factory.hpp"
 #include "internal/otx/blind/Purse.hpp"
 #include "internal/otx/blind/Token.hpp"
 #include "internal/otx/blind/Types.hpp"
+#include "internal/serialization/protobuf/Proto.hpp"
+#include "internal/serialization/protobuf/Proto.tpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/Time.hpp"
 #include "opentxs/api/crypto/Symmetric.hpp"

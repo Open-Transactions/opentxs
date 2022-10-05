@@ -14,7 +14,7 @@
 #include <memory>
 #include <mutex>
 
-#include "Proto.hpp"
+#include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/Mutex.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Secret.hpp"

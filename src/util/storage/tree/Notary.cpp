@@ -15,8 +15,8 @@
 #include <type_traits>
 #include <utility>
 
-#include "Proto.hpp"
 #include "internal/serialization/protobuf/Check.hpp"
+#include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/serialization/protobuf/verify/SpentTokenList.hpp"
 #include "internal/serialization/protobuf/verify/StorageNotary.hpp"
 #include "internal/util/LogMacros.hpp"

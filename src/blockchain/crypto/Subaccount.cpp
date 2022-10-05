@@ -16,10 +16,10 @@
 #include <type_traits>
 #include <utility>
 
-#include "Proto.hpp"
 #include "internal/api/crypto/Blockchain.hpp"
 #include "internal/core/Factory.hpp"
 #include "internal/identity/wot/claim/Types.hpp"
+#include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/Size.hpp"
 #include "opentxs/api/crypto/Blockchain.hpp"

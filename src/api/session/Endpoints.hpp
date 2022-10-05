@@ -64,6 +64,8 @@ public:
     auto BlockchainStartupPublish() const noexcept -> std::string_view final;
     auto BlockchainStartupPull() const noexcept -> std::string_view final;
     auto BlockchainStateChange() const noexcept -> std::string_view final;
+    auto BlockchainSyncChecksumFailure() const noexcept
+        -> std::string_view final;
     auto BlockchainSyncProgress() const noexcept -> std::string_view final;
     auto BlockchainSyncServerProgress() const noexcept
         -> std::string_view final;
@@ -140,6 +142,7 @@ private:
     const CString blockchain_startup_publish_;
     const CString blockchain_startup_pull_;
     const CString blockchain_state_change_;
+    const CString blockchain_sync_checksum_failure_;
     const CString blockchain_sync_progress_;
     const CString blockchain_sync_server_progress_;
     const CString blockchain_server_updated_;

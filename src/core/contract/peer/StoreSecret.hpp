@@ -7,8 +7,8 @@
 
 #include <PeerEnums.pb.h>
 
-#include "Proto.hpp"
 #include "core/contract/peer/PeerRequest.hpp"
+#include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/Mutex.hpp"
 #include "opentxs/core/contract/peer/PeerRequest.hpp"
 #include "opentxs/core/contract/peer/StoreSecret.hpp"

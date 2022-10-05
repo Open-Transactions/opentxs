@@ -8,8 +8,8 @@
 #include <UnitDefinition.pb.h>
 #include <cstdint>
 
-#include "Proto.hpp"
 #include "core/contract/Unit.hpp"
+#include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/Mutex.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/core/Types.hpp"

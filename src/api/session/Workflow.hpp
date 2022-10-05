@@ -13,12 +13,12 @@
 #include <shared_mutex>
 #include <utility>
 
-#include "Proto.hpp"
 #include "internal/api/session/Workflow.hpp"
 #include "internal/otx/common/Cheque.hpp"
 #include "internal/otx/common/Item.hpp"
 #include "internal/otx/common/Message.hpp"
 #include "internal/otx/common/OTTransaction.hpp"
+#include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/Lockable.hpp"
 #include "internal/util/Mutex.hpp"
 #include "opentxs/api/session/Workflow.hpp"

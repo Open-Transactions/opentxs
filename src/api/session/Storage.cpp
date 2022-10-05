@@ -30,11 +30,11 @@
 #include <stdexcept>
 #include <utility>
 
-#include "Proto.hpp"
-#include "Proto.tpp"
 #include "internal/api/network/Asio.hpp"
 #include "internal/api/session/Factory.hpp"
 #include "internal/blockchain/crypto/Crypto.hpp"
+#include "internal/serialization/protobuf/Proto.hpp"
+#include "internal/serialization/protobuf/Proto.tpp"
 #include "internal/util/Editor.hpp"
 #include "internal/util/Flag.hpp"
 #include "internal/util/LogMacros.hpp"

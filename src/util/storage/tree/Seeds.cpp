@@ -14,8 +14,8 @@
 #include <tuple>
 #include <utility>
 
-#include "Proto.hpp"
 #include "internal/serialization/protobuf/Check.hpp"
+#include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/serialization/protobuf/verify/Seed.hpp"
 #include "internal/serialization/protobuf/verify/StorageSeeds.hpp"
 #include "internal/util/LogMacros.hpp"

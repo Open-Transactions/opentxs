@@ -18,13 +18,13 @@
 #include <shared_mutex>
 #include <utility>
 
-#include "Proto.hpp"
 #include "core/StateMachine.hpp"
 #include "internal/otx/Types.hpp"
 #include "internal/otx/common/Item.hpp"
 #include "internal/otx/common/Message.hpp"
 #include "internal/otx/common/OTTransaction.hpp"
 #include "internal/otx/consensus/Consensus.hpp"
+#include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/Editor.hpp"
 #include "internal/util/Flag.hpp"
 #include "internal/util/Mutex.hpp"

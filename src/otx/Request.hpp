@@ -8,8 +8,8 @@
 #include <OTXEnums.pb.h>
 #include <ServerRequest.pb.h>
 
-#include "Proto.hpp"
 #include "core/contract/Signable.hpp"
+#include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/Flag.hpp"
 #include "internal/util/Mutex.hpp"
 #include "opentxs/core/identifier/Generic.hpp"

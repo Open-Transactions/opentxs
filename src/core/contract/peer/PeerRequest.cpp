@@ -11,13 +11,13 @@
 #include <compare>
 #include <memory>
 
-#include "Proto.hpp"
 #include "internal/api/session/FactoryAPI.hpp"
 #include "internal/core/contract/Contract.hpp"
 #include "internal/core/contract/peer/Factory.hpp"
 #include "internal/core/contract/peer/Peer.hpp"
 #include "internal/identity/Nym.hpp"
 #include "internal/serialization/protobuf/Check.hpp"
+#include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/serialization/protobuf/verify/PeerRequest.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/api/session/Crypto.hpp"

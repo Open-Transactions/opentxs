@@ -10,8 +10,8 @@
 #include <memory>
 #include <tuple>
 
-#include "Proto.hpp"
 #include "crypto/key/asymmetric/EllipticCurve.hpp"
+#include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/Mutex.hpp"
 #include "opentxs/core/Secret.hpp"
 #include "opentxs/crypto/Types.hpp"

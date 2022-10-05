@@ -28,8 +28,6 @@
 #include <utility>
 
 #include "2_Factory.hpp"
-#include "Proto.hpp"
-#include "Proto.tpp"
 #include "core/StateMachine.hpp"
 #include "internal/api/Legacy.hpp"
 #include "internal/api/session/Activity.hpp"
@@ -53,6 +51,8 @@
 #include "internal/otx/common/transaction/Helpers.hpp"
 #include "internal/otx/consensus/Consensus.hpp"
 #include "internal/serialization/protobuf/Check.hpp"
+#include "internal/serialization/protobuf/Proto.hpp"
+#include "internal/serialization/protobuf/Proto.tpp"
 #include "internal/serialization/protobuf/verify/UnitDefinition.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/Shared.hpp"

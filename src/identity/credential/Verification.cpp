@@ -16,12 +16,12 @@
 #include <stdexcept>
 
 #include "2_Factory.hpp"
-#include "Proto.hpp"
 #include "identity/credential/Base.hpp"
 #include "internal/api/session/FactoryAPI.hpp"
 #include "internal/crypto/Parameters.hpp"
 #include "internal/crypto/key/Key.hpp"
 #include "internal/identity/Authority.hpp"
+#include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"

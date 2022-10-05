@@ -17,10 +17,10 @@
 #include <tuple>
 #include <utility>
 
-#include "Proto.hpp"
 #include "blockchain/crypto/Element.hpp"
 #include "blockchain/crypto/Subaccount.hpp"
 #include "internal/api/crypto/Blockchain.hpp"
+#include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "opentxs/api/crypto/Blockchain.hpp"

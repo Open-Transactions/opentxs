@@ -19,7 +19,6 @@
 #include <tuple>
 #include <type_traits>
 
-#include "Proto.tpp"
 #include "core/StateMachine.hpp"
 #include "internal/api/FactoryAPI.hpp"
 #include "internal/api/session/Client.hpp"
@@ -32,6 +31,7 @@
 #include "internal/otx/client/obsolete/OT_API.hpp"
 #include "internal/otx/common/Account.hpp"
 #include "internal/otx/common/Cheque.hpp"
+#include "internal/serialization/protobuf/Proto.tpp"
 #include "internal/util/Editor.hpp"
 #include "internal/util/Flag.hpp"
 #include "internal/util/Lockable.hpp"

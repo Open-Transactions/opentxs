@@ -12,7 +12,7 @@
 #include <memory>
 #include <tuple>
 
-#include "Proto.hpp"
+#include "internal/serialization/protobuf/Proto.hpp"
 #include "opentxs/crypto/Envelope.hpp"
 #include "opentxs/crypto/key/Asymmetric.hpp"
 #include "opentxs/crypto/key/Symmetric.hpp"

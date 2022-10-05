@@ -25,6 +25,8 @@ public:
     virtual auto BlockchainStartupPublish() const noexcept
         -> std::string_view = 0;
     virtual auto BlockchainStartupPull() const noexcept -> std::string_view = 0;
+    virtual auto BlockchainSyncChecksumFailure() const noexcept
+        -> std::string_view = 0;
     auto Internal() const noexcept -> const Endpoints& final { return *this; }
     virtual auto OTDHTBlockchain(opentxs::blockchain::Type chain) const noexcept
         -> std::string_view = 0;

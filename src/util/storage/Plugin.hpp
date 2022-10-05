@@ -9,9 +9,9 @@
 #include <future>
 #include <memory>
 
-#include "Proto.hpp"
-#include "Proto.tpp"
 #include "internal/serialization/protobuf/Check.hpp"
+#include "internal/serialization/protobuf/Proto.hpp"
+#include "internal/serialization/protobuf/Proto.tpp"
 #include "internal/util/Flag.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/util/Bytes.hpp"

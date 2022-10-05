@@ -8,11 +8,11 @@
 #include <iosfwd>
 #include <utility>
 
-#include "Proto.hpp"
 #include "interface/ui/base/Combined.hpp"
 #include "interface/ui/base/List.hpp"
 #include "interface/ui/base/RowType.hpp"
 #include "internal/interface/ui/UI.hpp"
+#include "internal/serialization/protobuf/Proto.hpp"
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/core/identifier/Generic.hpp"

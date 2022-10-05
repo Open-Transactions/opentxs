@@ -13,7 +13,7 @@
 #include <memory>
 #include <utility>
 
-#include "Proto.hpp"
+#include "internal/serialization/protobuf/Proto.hpp"
 #include "opentxs/interface/rpc/AccountEvent.hpp"
 #include "opentxs/interface/rpc/request/GetAccountActivity.hpp"
 

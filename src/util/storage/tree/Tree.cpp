@@ -11,8 +11,8 @@
 #include <functional>
 #include <stdexcept>
 
-#include "Proto.hpp"
 #include "internal/serialization/protobuf/Check.hpp"
+#include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/serialization/protobuf/verify/StorageItems.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/core/identifier/Notary.hpp"          // IWYU pragma: keep

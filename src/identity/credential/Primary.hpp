@@ -10,11 +10,11 @@
 #include <robin_hood.h>
 #include <memory>
 
-#include "Proto.hpp"
 #include "identity/credential/Base.hpp"
 #include "identity/credential/Key.hpp"
 #include "internal/identity/Types.hpp"
 #include "internal/identity/credential/Credential.hpp"
+#include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/Mutex.hpp"
 #include "internal/util/Types.hpp"
 #include "opentxs/identity/CredentialRole.hpp"

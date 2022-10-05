@@ -23,8 +23,6 @@
 #include <string_view>
 #include <utility>
 
-#include "Proto.hpp"
-#include "Proto.tpp"
 #include "core/paymentcode/Preimage.hpp"
 #include "internal/api/session/FactoryAPI.hpp"
 #include "internal/blockchain/Params.hpp"
@@ -32,6 +30,8 @@
 #include "internal/identity/Types.hpp"
 #include "internal/identity/credential/Credential.hpp"
 #include "internal/serialization/protobuf/Check.hpp"
+#include "internal/serialization/protobuf/Proto.hpp"
+#include "internal/serialization/protobuf/Proto.tpp"
 #include "internal/serialization/protobuf/verify/Credential.hpp"
 #include "internal/serialization/protobuf/verify/PaymentCode.hpp"
 #include "internal/util/LogMacros.hpp"

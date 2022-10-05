@@ -129,6 +129,13 @@ OTDHT::Actor::Actor(
                       api->Endpoints().Internal().BlockchainReportStatus(),
                       alloc},
                   Dir::Connect);
+              sub.emplace_back(
+                  CString{
+                      api->Endpoints()
+                          .Internal()
+                          .BlockchainSyncChecksumFailure(),
+                      alloc},
+                  Dir::Connect);
 
               return sub;
           }(),
@@ -502,6 +509,9 @@ auto OTDHT::Actor::pipeline_other(const Work work, Message&& msg) noexcept
         case Work::job_processed: {
             process_job_processed(std::move(msg));
         } break;
+        case Work::checksum_failure: {
+            process_checksum_failure(std::move(msg));
+        } break;
         case Work::peer_list: {
             process_peer_list(std::move(msg));
         } break;
@@ -557,6 +567,7 @@ auto OTDHT::Actor::pipeline_router(const Work work, Message&& msg) noexcept
         } break;
         case Work::shutdown:
         case Work::job_processed:
+        case Work::checksum_failure:
         case Work::report:
         case Work::peer_list:
         case Work::init:
@@ -605,6 +616,8 @@ auto OTDHT::Actor::process_job_processed(Message&& msg) noexcept -> void
 {
     LogAbort()(OT_PRETTY_CLASS())(name_)(": invalid message").Abort();
 }
+
+auto OTDHT::Actor::process_checksum_failure(Message&& msg) noexcept -> void {}
 
 auto OTDHT::Actor::process_peer_list(Message&& msg) noexcept -> void
 {

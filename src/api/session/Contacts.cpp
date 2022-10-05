@@ -20,12 +20,12 @@
 #include <string_view>
 #include <type_traits>
 
-#include "Proto.hpp"
 #include "internal/api/crypto/Blockchain.hpp"
 #include "internal/api/network/Asio.hpp"
 #include "internal/api/session/Factory.hpp"
 #include "internal/identity/Nym.hpp"
 #include "internal/network/zeromq/Context.hpp"
+#include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/BoostPMR.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/api/crypto/Blockchain.hpp"

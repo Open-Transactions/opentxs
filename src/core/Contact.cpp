@@ -18,11 +18,11 @@
 #include <stdexcept>
 #include <utility>
 
-#include "Proto.hpp"
 #include "internal/api/FactoryAPI.hpp"
 #include "internal/api/session/Wallet.hpp"
 #include "internal/identity/wot/claim/Types.hpp"
 #include "internal/serialization/protobuf/Check.hpp"
+#include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/serialization/protobuf/verify/ContactItem.hpp"
 #include "internal/serialization/protobuf/verify/VerifyContacts.hpp"
 #include "internal/util/LogMacros.hpp"

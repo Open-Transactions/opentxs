@@ -21,7 +21,6 @@
 #include <utility>
 
 #include "2_Factory.hpp"
-#include "Proto.tpp"
 #include "internal/api/Crypto.hpp"
 #include "internal/api/FactoryAPI.hpp"
 #include "internal/api/crypto/Asymmetric.hpp"
@@ -57,6 +56,7 @@
 #include "internal/otx/common/trade/OTTrade.hpp"
 #include "internal/otx/smartcontract/OTSmartContract.hpp"
 #include "internal/serialization/protobuf/Check.hpp"
+#include "internal/serialization/protobuf/Proto.tpp"
 #include "internal/serialization/protobuf/verify/Envelope.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/OT.hpp"  // TODO remove

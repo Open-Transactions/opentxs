@@ -81,6 +81,8 @@ Endpoints::Endpoints(const int instance) noexcept
           build_inproc_path("blockchain/startup/pull", version_1_))
     , blockchain_state_change_(
           build_inproc_path("blockchain/state", version_1_))
+    , blockchain_sync_checksum_failure_(
+          opentxs::network::zeromq::MakeArbitraryInproc({}))
     , blockchain_sync_progress_(
           build_inproc_path("blockchain/sync", version_1_))
     , blockchain_sync_server_progress_(
@@ -247,6 +249,12 @@ auto Endpoints::BlockchainStartupPull() const noexcept -> std::string_view
 auto Endpoints::BlockchainStateChange() const noexcept -> std::string_view
 {
     return blockchain_state_change_;
+}
+
+auto Endpoints::BlockchainSyncChecksumFailure() const noexcept
+    -> std::string_view
+{
+    return blockchain_sync_checksum_failure_;
 }
 
 auto Endpoints::BlockchainSyncProgress() const noexcept -> std::string_view

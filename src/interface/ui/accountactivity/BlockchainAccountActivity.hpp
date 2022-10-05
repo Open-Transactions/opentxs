@@ -16,7 +16,6 @@
 #include <tuple>
 #include <utility>
 
-#include "Proto.hpp"
 #include "interface/qt/SendMonitor.hpp"
 #include "interface/ui/accountactivity/AccountActivity.hpp"
 #include "interface/ui/base/List.hpp"
@@ -24,6 +23,7 @@
 #include "internal/blockchain/Blockchain.hpp"
 #include "internal/core/Core.hpp"
 #include "internal/interface/ui/UI.hpp"
+#include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/Mutex.hpp"
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/Crypto.hpp"

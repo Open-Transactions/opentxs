@@ -18,13 +18,13 @@
 #include <tuple>
 #include <utility>
 
-#include "Proto.hpp"
-#include "Proto.tpp"
 #include "blockchain/database/wallet/Position.hpp"
 #include "internal/blockchain/Blockchain.hpp"
 #include "internal/blockchain/bitcoin/block/Factory.hpp"
 #include "internal/blockchain/bitcoin/block/Output.hpp"
 #include "internal/blockchain/database/Types.hpp"
+#include "internal/serialization/protobuf/Proto.hpp"
+#include "internal/serialization/protobuf/Proto.tpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/TSV.hpp"
