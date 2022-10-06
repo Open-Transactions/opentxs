@@ -16,13 +16,13 @@
 #include <stdexcept>
 #include <utility>
 
-#include "Proto.hpp"
 #include "internal/api/Factory.hpp"
 #include "internal/core/Core.hpp"
 #include "internal/core/identifier/Factory.hpp"
 #include "internal/core/identifier/Identifier.hpp"
 #include "internal/otx/common/Cheque.hpp"
 #include "internal/otx/common/Item.hpp"
+#include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "opentxs/api/crypto/Crypto.hpp"

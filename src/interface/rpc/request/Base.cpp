@@ -13,9 +13,9 @@
 #include <stdexcept>
 #include <utility>
 
-#include "Proto.hpp"
 #include "interface/rpc/request/Base.hpp"
 #include "internal/interface/rpc/RPC.hpp"
+#include "internal/serialization/protobuf/Proto.hpp"
 #include "opentxs/interface/rpc/CommandType.hpp"
 #include "opentxs/interface/rpc/request/GetAccountActivity.hpp"
 #include "opentxs/interface/rpc/request/GetAccountBalance.hpp"

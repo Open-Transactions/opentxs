@@ -11,7 +11,7 @@
 #include <ZMQEnums.pb.h>
 #include <robin_hood.h>
 
-#include "Proto.tpp"
+#include "internal/serialization/protobuf/Proto.tpp"
 #include "opentxs/core/contract/peer/ConnectionInfoType.hpp"
 #include "opentxs/core/contract/peer/PeerObjectType.hpp"
 #include "opentxs/core/contract/peer/PeerRequestType.hpp"

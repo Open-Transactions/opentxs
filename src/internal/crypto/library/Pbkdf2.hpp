@@ -7,7 +7,7 @@
 
 #include <cstdint>
 
-#include "Proto.hpp"
+#include "internal/serialization/protobuf/Proto.hpp"
 #include "opentxs/crypto/Types.hpp"
 
 namespace opentxs::crypto

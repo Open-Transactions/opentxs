@@ -18,7 +18,6 @@
 #include <stdexcept>
 #include <utility>
 
-#include "Proto.hpp"
 #include "blockchain/node/wallet/spend/BitcoinTransactionBuilder.hpp"
 #include "internal/api/session/FactoryAPI.hpp"
 #include "internal/blockchain/bitcoin/block/Factory.hpp"
@@ -27,6 +26,7 @@
 #include "internal/blockchain/database/Wallet.hpp"
 #include "internal/blockchain/node/Manager.hpp"
 #include "internal/blockchain/node/SpendPolicy.hpp"
+#include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/Mutex.hpp"
 #include "internal/util/Time.hpp"

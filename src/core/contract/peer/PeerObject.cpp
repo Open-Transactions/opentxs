@@ -13,8 +13,6 @@
 #include <stdexcept>
 #include <utility>
 
-#include "Proto.hpp"
-#include "Proto.tpp"
 #include "internal/api/session/FactoryAPI.hpp"
 #include "internal/api/session/Wallet.hpp"
 #include "internal/core/contract/peer/Factory.hpp"
@@ -23,6 +21,8 @@
 #include "internal/otx/blind/Factory.hpp"
 #include "internal/otx/blind/Purse.hpp"
 #include "internal/serialization/protobuf/Check.hpp"
+#include "internal/serialization/protobuf/Proto.hpp"
+#include "internal/serialization/protobuf/Proto.tpp"
 #include "internal/serialization/protobuf/verify/PeerObject.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/api/session/Client.hpp"

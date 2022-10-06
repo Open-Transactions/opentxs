@@ -10,11 +10,11 @@
 #include <memory>
 #include <optional>
 
-#include "Proto.hpp"
 #include "identity/credential/Base.hpp"
 #include "internal/identity/Types.hpp"
 #include "internal/identity/credential/Credential.hpp"
 #include "internal/identity/credential/Types.hpp"
+#include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/Mutex.hpp"
 #include "internal/util/Types.hpp"
 #include "opentxs/core/Secret.hpp"

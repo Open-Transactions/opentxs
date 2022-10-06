@@ -14,11 +14,11 @@
 #include <optional>
 #include <utility>
 
-#include "Proto.hpp"
 #include "internal/blockchain/Blockchain.hpp"
 #include "internal/blockchain/crypto/Crypto.hpp"
 #include "internal/blockchain/database/Cfilter.hpp"
 #include "internal/blockchain/database/Types.hpp"
+#include "internal/serialization/protobuf/Proto.hpp"
 #include "opentxs/blockchain/BlockchainType.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/bitcoin/block/Input.hpp"

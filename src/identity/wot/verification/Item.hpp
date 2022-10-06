@@ -7,8 +7,8 @@
 
 #include <Signature.pb.h>
 
-#include "Proto.hpp"
 #include "internal/identity/wot/verification/Verification.hpp"
+#include "internal/serialization/protobuf/Proto.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/identity/wot/verification/Item.hpp"
 #include "opentxs/util/Numbers.hpp"

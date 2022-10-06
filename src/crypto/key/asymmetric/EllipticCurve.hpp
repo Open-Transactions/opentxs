@@ -7,8 +7,8 @@
 
 #include <memory>
 
-#include "Proto.hpp"
 #include "crypto/key/asymmetric/Asymmetric.hpp"
+#include "internal/serialization/protobuf/Proto.hpp"
 #include "opentxs/core/Secret.hpp"
 #include "opentxs/crypto/HashType.hpp"
 #include "opentxs/crypto/Types.hpp"

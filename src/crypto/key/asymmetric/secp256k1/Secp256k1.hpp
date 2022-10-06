@@ -9,9 +9,9 @@
 #include <memory>
 #include <utility>
 
-#include "Proto.hpp"
 #include "crypto/key/asymmetric/EllipticCurve.hpp"
 #include "crypto/key/asymmetric/HD.hpp"
+#include "internal/serialization/protobuf/Proto.hpp"
 #include "opentxs/core/Secret.hpp"
 #include "opentxs/crypto/ParameterType.hpp"
 #include "opentxs/crypto/Types.hpp"

@@ -12,8 +12,8 @@
 #include <type_traits>
 #include <utility>
 
-#include "Proto.hpp"
 #include "internal/api/session/Contacts.hpp"
+#include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/Editor.hpp"
 #include "internal/util/Mutex.hpp"
 #include "internal/util/Timer.hpp"

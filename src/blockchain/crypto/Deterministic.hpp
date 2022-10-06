@@ -17,9 +17,9 @@
 #include <string_view>
 #include <utility>
 
-#include "Proto.hpp"
 #include "blockchain/crypto/Subaccount.hpp"
 #include "internal/blockchain/crypto/Crypto.hpp"
+#include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/Mutex.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
 #include "opentxs/blockchain/block/Types.hpp"

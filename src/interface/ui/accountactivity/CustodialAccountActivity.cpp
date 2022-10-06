@@ -15,12 +15,12 @@
 #include <future>
 #include <memory>
 
-#include "Proto.hpp"
 #include "interface/ui/base/Widget.hpp"
 #include "internal/api/session/Types.hpp"
 #include "internal/api/session/Wallet.hpp"
 #include "internal/core/Factory.hpp"
 #include "internal/otx/common/Account.hpp"
+#include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/Mutex.hpp"
 #include "internal/util/Shared.hpp"

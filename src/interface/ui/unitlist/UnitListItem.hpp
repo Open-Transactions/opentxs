@@ -9,9 +9,9 @@
 
 #include <iosfwd>
 
-#include "Proto.hpp"
 #include "interface/ui/base/Row.hpp"
 #include "internal/interface/ui/UI.hpp"
+#include "internal/serialization/protobuf/Proto.hpp"
 #include "opentxs/core/Types.hpp"
 #include "opentxs/core/contract/ServerContract.hpp"
 #include "opentxs/core/contract/Unit.hpp"

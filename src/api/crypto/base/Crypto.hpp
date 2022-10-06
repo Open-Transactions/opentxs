@@ -13,12 +13,12 @@
 #include <memory>
 #include <mutex>
 
-#include "Proto.hpp"
 #include "internal/api/Crypto.hpp"
 #include "internal/crypto/library/Null.hpp"
 #include "internal/crypto/library/OpenSSL.hpp"
 #include "internal/crypto/library/Secp256k1.hpp"
 #include "internal/crypto/library/Sodium.hpp"
+#include "internal/serialization/protobuf/Proto.hpp"
 #include "opentxs/api/crypto/Config.hpp"
 #include "opentxs/api/crypto/Crypto.hpp"
 #include "opentxs/api/crypto/Encode.hpp"

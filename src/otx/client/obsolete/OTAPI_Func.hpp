@@ -13,7 +13,6 @@
 #include <memory>
 #include <mutex>
 
-#include "Proto.hpp"
 #include "internal/otx/client/OTPayment.hpp"
 #include "internal/otx/client/Types.hpp"
 #include "internal/otx/client/obsolete/ServerAction.hpp"
@@ -21,6 +20,7 @@
 #include "internal/otx/common/Ledger.hpp"
 #include "internal/otx/common/recurring/OTPaymentPlan.hpp"
 #include "internal/otx/smartcontract/OTSmartContract.hpp"
+#include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/Editor.hpp"
 #include "internal/util/Lockable.hpp"
 #include "internal/util/Mutex.hpp"

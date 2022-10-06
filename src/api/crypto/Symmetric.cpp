@@ -9,10 +9,10 @@
 #include <Ciphertext.pb.h>
 #include <memory>
 
-#include "Proto.tpp"
 #include "internal/api/Crypto.hpp"
 #include "internal/api/crypto/Factory.hpp"
 #include "internal/api/session/FactoryAPI.hpp"
+#include "internal/serialization/protobuf/Proto.tpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"

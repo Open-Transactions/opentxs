@@ -120,6 +120,12 @@ add_subdirectory(serialization)
 add_subdirectory(std)
 add_subdirectory(util)
 
+set(cxx-install-headers
+    "${opentxs_BINARY_DIR}/include/opentxs/Export.hpp"
+    "${opentxs_SOURCE_DIR}/include/opentxs/OT.hpp"
+    "${opentxs_SOURCE_DIR}/include/opentxs/opentxs.hpp"
+)
+
 if(OT_QT_EXPORT)
   qt_wrap_cpp(
     OPENTXS_MOC_SOURCES
@@ -132,6 +138,11 @@ if(OT_QT_EXPORT)
       ${OPENTXS_QT_PUBLIC_HEADERS}
       ${OPENTXS_QT_PRIVATE_HEADERS}
       ${OPENTXS_MOC_SOURCES}
+  )
+  list(
+    APPEND
+    cxx-install-headers
+    "${opentxs_SOURCE_DIR}/include/opentxs/Qt.hpp"
   )
 
   if(NOT MSVC)
@@ -155,18 +166,6 @@ if(OT_QT_EXPORT)
   target_sources(opentxs PRIVATE $<TARGET_OBJECTS:opentxs-moc>)
 endif()
 
-include(GenerateExportHeader)
-generate_export_header(
-  opentxs
-  EXPORT_FILE_NAME
-  "${opentxs_BINARY_DIR}/src/opentxs/Export.hpp"
-  EXPORT_MACRO_NAME
-  OPENTXS_EXPORT
-)
-
-set(cxx-install-headers "${opentxs_BINARY_DIR}/src/opentxs/Export.hpp"
-                        "${opentxs_SOURCE_DIR}/include/opentxs/OT.hpp"
-)
 target_sources(
   opentxs-common
   PRIVATE
@@ -174,10 +173,8 @@ target_sources(
     "0_stdafx.hpp"
     "2_Factory.hpp"
     "OT.cpp"
-    "Proto.cpp"
-    "Proto.hpp"
-    "Proto.tpp"
 )
+
 target_sources(opentxs PRIVATE $<TARGET_OBJECTS:opentxs-common>)
 set_target_properties(
   opentxs
@@ -207,6 +204,8 @@ endif()
 if(Boost_stacktrace_basic_FOUND)
   target_link_libraries(opentxs PUBLIC Boost::stacktrace_basic)
 endif()
+
+target_sources(opentxs-common PRIVATE ${cxx-install-headers})
 
 if(OPENTXS_STANDALONE)
   install(

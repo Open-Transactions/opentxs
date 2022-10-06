@@ -9,11 +9,11 @@
 
 #include <utility>
 
-#include "Proto.hpp"
 #include "core/Worker.hpp"
 #include "interface/ui/base/List.hpp"
 #include "interface/ui/base/Widget.hpp"
 #include "internal/interface/ui/UI.hpp"
+#include "internal/serialization/protobuf/Proto.hpp"
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/core/Data.hpp"

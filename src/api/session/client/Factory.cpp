@@ -12,8 +12,6 @@
 #include <limits>
 #include <utility>
 
-#include "Proto.hpp"
-#include "Proto.tpp"
 #include "internal/api/session/Factory.hpp"
 #include "internal/blockchain/bitcoin/block/Factory.hpp"
 #include "internal/blockchain/bitcoin/block/Input.hpp"    // IWYU pragma: keep
@@ -23,6 +21,8 @@
 #include "internal/blockchain/bitcoin/block/Transaction.hpp"
 #include "internal/core/contract/peer/Factory.hpp"
 #include "internal/serialization/protobuf/Check.hpp"
+#include "internal/serialization/protobuf/Proto.hpp"
+#include "internal/serialization/protobuf/Proto.tpp"
 #include "internal/serialization/protobuf/verify/BlockchainBlockHeader.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"

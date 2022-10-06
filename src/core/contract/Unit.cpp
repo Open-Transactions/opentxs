@@ -20,7 +20,6 @@
 #include <utility>
 
 #include "2_Factory.hpp"
-#include "Proto.hpp"
 #include "internal/api/FactoryAPI.hpp"
 #include "internal/api/Legacy.hpp"
 #include "internal/api/session/FactoryAPI.hpp"
@@ -33,6 +32,7 @@
 #include "internal/otx/common/Account.hpp"
 #include "internal/otx/common/AccountVisitor.hpp"
 #include "internal/serialization/protobuf/Check.hpp"
+#include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/serialization/protobuf/verify/UnitDefinition.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/Shared.hpp"

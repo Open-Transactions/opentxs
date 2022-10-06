@@ -19,7 +19,6 @@
 #include <string_view>
 #include <type_traits>
 
-#include "Proto.tpp"
 #include "interface/ui/base/List.hpp"
 #include "interface/ui/base/Widget.hpp"
 #include "internal/api/crypto/blockchain/Types.hpp"
@@ -30,6 +29,7 @@
 #include "internal/blockchain/crypto/Crypto.hpp"
 #include "internal/blockchain/node/Manager.hpp"
 #include "internal/core/Factory.hpp"
+#include "internal/serialization/protobuf/Proto.tpp"
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/api/crypto/Blockchain.hpp"
 #include "opentxs/api/network/Blockchain.hpp"

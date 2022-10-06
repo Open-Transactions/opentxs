@@ -17,8 +17,8 @@
 #include <tuple>
 #include <utility>
 
-#include "Proto.hpp"
 #include "internal/api/crypto/Seed.hpp"
+#include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/Mutex.hpp"
 #include "opentxs/api/crypto/Seed.hpp"
 #include "opentxs/core/Secret.hpp"

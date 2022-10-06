@@ -18,7 +18,6 @@
 #include <type_traits>
 #include <utility>
 
-#include "Proto.tpp"
 #include "blockchain/database/common/Database.hpp"
 #include "blockchain/node/UpdateTransaction.hpp"
 #include "internal/api/session/Endpoints.hpp"
@@ -31,6 +30,7 @@
 #include "internal/blockchain/node/Endpoints.hpp"
 #include "internal/blockchain/node/Manager.hpp"
 #include "internal/network/zeromq/Context.hpp"
+#include "internal/serialization/protobuf/Proto.tpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/TSV.hpp"

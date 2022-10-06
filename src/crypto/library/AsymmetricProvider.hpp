@@ -8,7 +8,7 @@
 
 #pragma once
 
-#include "Proto.hpp"
+#include "internal/serialization/protobuf/Proto.hpp"
 #include "opentxs/crypto/Parameters.hpp"
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/crypto/library/AsymmetricProvider.hpp"

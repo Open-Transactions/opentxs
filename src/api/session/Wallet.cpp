@@ -28,8 +28,6 @@
 #include <type_traits>
 
 #include "2_Factory.hpp"
-#include "Proto.hpp"
-#include "Proto.tpp"
 #include "internal/api/FactoryAPI.hpp"
 #include "internal/api/session/Endpoints.hpp"
 #include "internal/api/session/Session.hpp"
@@ -53,6 +51,8 @@
 #include "internal/otx/common/XML.hpp"
 #include "internal/otx/consensus/Consensus.hpp"
 #include "internal/serialization/protobuf/Check.hpp"
+#include "internal/serialization/protobuf/Proto.hpp"
+#include "internal/serialization/protobuf/Proto.tpp"
 #include "internal/serialization/protobuf/verify/Nym.hpp"
 #include "internal/serialization/protobuf/verify/Purse.hpp"
 #include "internal/serialization/protobuf/verify/ServerContract.hpp"

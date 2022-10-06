@@ -14,12 +14,12 @@
 #include <string_view>
 #include <utility>
 
-#include "Proto.hpp"
-#include "Proto.tpp"
 #include "blockchain/database/common/Bulk.hpp"
 #include "internal/blockchain/bitcoin/block/Factory.hpp"
 #include "internal/blockchain/bitcoin/block/Transaction.hpp"
 #include "internal/blockchain/database/common/Common.hpp"
+#include "internal/serialization/protobuf/Proto.hpp"
+#include "internal/serialization/protobuf/Proto.tpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/Mutex.hpp"
 #include "internal/util/storage/file/Index.hpp"

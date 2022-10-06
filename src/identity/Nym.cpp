@@ -21,7 +21,6 @@
 #include <utility>
 
 #include "2_Factory.hpp"
-#include "Proto.tpp"
 #include "internal/api/crypto/Seed.hpp"
 #include "internal/api/session/FactoryAPI.hpp"
 #include "internal/crypto/Parameters.hpp"
@@ -29,6 +28,7 @@
 #include "internal/identity/Nym.hpp"
 #include "internal/otx/common/util/Tag.hpp"
 #include "internal/serialization/protobuf/Check.hpp"
+#include "internal/serialization/protobuf/Proto.tpp"
 #include "internal/serialization/protobuf/verify/ContactData.hpp"
 #include "internal/serialization/protobuf/verify/Nym.hpp"
 #include "internal/serialization/protobuf/verify/VerifyContacts.hpp"

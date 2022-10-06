@@ -20,13 +20,13 @@
 #include <thread>
 #include <utility>
 
-#include "Proto.hpp"
-#include "Proto.tpp"
 #include "internal/api/session/Endpoints.hpp"
 #include "internal/api/session/FactoryAPI.hpp"
 #include "internal/network/zeromq/message/Message.hpp"
 #include "internal/otx/common/Message.hpp"
 #include "internal/serialization/protobuf/Check.hpp"
+#include "internal/serialization/protobuf/Proto.hpp"
+#include "internal/serialization/protobuf/Proto.tpp"
 #include "internal/serialization/protobuf/verify/ServerReply.hpp"
 #include "internal/util/Flag.hpp"
 #include "internal/util/LogMacros.hpp"

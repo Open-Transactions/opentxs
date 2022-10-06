@@ -30,9 +30,9 @@ extern "C" {
 #include <memory>
 #include <optional>
 
-#include "Proto.hpp"
 #include "crypto/library/AsymmetricProvider.hpp"
 #include "internal/crypto/library/OpenSSL.hpp"
+#include "internal/serialization/protobuf/Proto.hpp"
 #include "opentxs/core/Secret.hpp"
 #include "opentxs/crypto/HashType.hpp"
 #include "opentxs/crypto/SecretStyle.hpp"

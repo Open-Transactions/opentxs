@@ -19,13 +19,13 @@
 #include <type_traits>
 #include <utility>
 
-#include "Proto.hpp"
 #include "internal/api/session/Factory.hpp"
 #include "internal/blockchain/bitcoin/block/Transaction.hpp"
 #include "internal/network/zeromq/message/Message.hpp"
 #include "internal/otx/common/Cheque.hpp"  // IWYU pragma: keep
 #include "internal/otx/common/Item.hpp"    // IWYU pragma: keep
 #include "internal/otx/common/Message.hpp"
+#include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "opentxs/api/network/Network.hpp"

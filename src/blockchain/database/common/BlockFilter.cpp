@@ -18,11 +18,11 @@
 #include <type_traits>
 #include <utility>
 
-#include "Proto.hpp"
-#include "Proto.tpp"
 #include "blockchain/database/common/Bulk.hpp"
 #include "internal/blockchain/Blockchain.hpp"
 #include "internal/blockchain/bitcoin/cfilter/GCS.hpp"
+#include "internal/serialization/protobuf/Proto.hpp"
+#include "internal/serialization/protobuf/Proto.tpp"
 #include "internal/util/BoostPMR.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"

@@ -19,9 +19,9 @@
 #include <string_view>
 #include <tuple>
 
-#include "Proto.hpp"
 #include "interface/ui/base/List.hpp"
 #include "internal/blockchain/Blockchain.hpp"
+#include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/Mutex.hpp"
 #include "opentxs/api/crypto/Blockchain.hpp"

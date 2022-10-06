@@ -9,7 +9,7 @@
 #include <PairEvent.pb.h>
 #include <functional>
 
-#include "Proto.tpp"
+#include "internal/serialization/protobuf/Proto.tpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/Mutex.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"  // IWYU pragma: keep

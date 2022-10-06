@@ -16,8 +16,8 @@
 #include <UnitDefinition.pb.h>
 #include <cstdint>
 
-#include "Proto.hpp"
-#include "Proto.tpp"
+#include "internal/serialization/protobuf/Proto.hpp"
+#include "internal/serialization/protobuf/Proto.tpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/core/Amount.hpp"

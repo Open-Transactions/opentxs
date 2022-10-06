@@ -18,9 +18,9 @@
 #include <mutex>
 #include <tuple>
 
-#include "Proto.hpp"
 #include "internal/interface/rpc/RPC.hpp"
 #include "internal/otx/common/Message.hpp"
+#include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/Lockable.hpp"
 #include "opentxs/api/session/OTX.hpp"
 #include "opentxs/core/Amount.hpp"

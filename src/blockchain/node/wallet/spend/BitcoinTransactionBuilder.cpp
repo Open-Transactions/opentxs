@@ -25,7 +25,6 @@
 #include <string_view>
 #include <tuple>
 
-#include "Proto.hpp"
 #include "internal/api/crypto/Blockchain.hpp"
 #include "internal/api/session/FactoryAPI.hpp"
 #include "internal/blockchain/Blockchain.hpp"
@@ -42,6 +41,7 @@
 #include "internal/core/Amount.hpp"
 #include "internal/core/Factory.hpp"
 #include "internal/core/PaymentCode.hpp"
+#include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/Size.hpp"

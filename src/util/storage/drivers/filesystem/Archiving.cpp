@@ -10,7 +10,7 @@
 #include <memory>
 #include <system_error>
 
-#include "Proto.tpp"
+#include "internal/serialization/protobuf/Proto.tpp"
 #include "internal/util/Flag.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/storage/drivers/Factory.hpp"

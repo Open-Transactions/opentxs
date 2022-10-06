@@ -15,7 +15,6 @@
 #include <regex>
 #include <string_view>
 
-#include "Proto.tpp"
 #include "internal/api/session/Endpoints.hpp"
 #include "internal/api/session/FactoryAPI.hpp"
 #include "internal/api/session/Wallet.hpp"
@@ -27,6 +26,7 @@
 #include "internal/otx/common/Message.hpp"
 #include "internal/otx/common/OTTransaction.hpp"
 #include "internal/otx/common/cron/OTCron.hpp"
+#include "internal/serialization/protobuf/Proto.tpp"
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/api/Settings.hpp"
 #include "opentxs/api/crypto/Config.hpp"

@@ -10,7 +10,7 @@
 #include <cstdint>
 #include <memory>
 
-#include "Proto.hpp"
+#include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/Types.hpp"
 #include "opentxs/core/PaymentCode.hpp"
 #include "opentxs/core/String.hpp"

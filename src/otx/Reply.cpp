@@ -11,13 +11,13 @@
 #include <Signature.pb.h>
 #include <utility>
 
-#include "Proto.hpp"
-#include "Proto.tpp"
 #include "core/contract/Signable.hpp"
 #include "internal/api/session/FactoryAPI.hpp"
 #include "internal/identity/Nym.hpp"
 #include "internal/otx/OTX.hpp"
 #include "internal/serialization/protobuf/Check.hpp"
+#include "internal/serialization/protobuf/Proto.hpp"
+#include "internal/serialization/protobuf/Proto.tpp"
 #include "internal/serialization/protobuf/verify/ServerReply.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/api/session/Crypto.hpp"

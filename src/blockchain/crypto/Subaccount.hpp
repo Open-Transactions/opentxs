@@ -14,8 +14,8 @@
 #include <mutex>
 #include <string_view>
 
-#include "Proto.hpp"
 #include "internal/blockchain/crypto/Crypto.hpp"
+#include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/Mutex.hpp"
 #include "opentxs/blockchain/BlockchainType.hpp"
 #include "opentxs/blockchain/Types.hpp"

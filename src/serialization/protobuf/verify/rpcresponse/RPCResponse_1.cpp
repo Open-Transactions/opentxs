@@ -10,8 +10,8 @@
 #include <RPCStatus.pb.h>
 #include <string>
 
-#include "Proto.hpp"
 #include "internal/serialization/protobuf/Basic.hpp"
+#include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/serialization/protobuf/verify/AccountData.hpp"  // IWYU pragma: keep
 #include "internal/serialization/protobuf/verify/AccountEvent.hpp"  // IWYU pragma: keep
 #include "internal/serialization/protobuf/verify/Contact.hpp"  // IWYU pragma: keep

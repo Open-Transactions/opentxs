@@ -15,13 +15,13 @@
 #include <memory>
 #include <stdexcept>
 
-#include "Proto.tpp"
 #include "core/contract/Signable.hpp"
 #include "identity/credential/Base.hpp"
 #include "internal/api/session/FactoryAPI.hpp"
 #include "internal/crypto/key/Key.hpp"
 #include "internal/otx/common/crypto/OTSignatureMetadata.hpp"
 #include "internal/otx/common/crypto/Signature.hpp"
+#include "internal/serialization/protobuf/Proto.tpp"
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/api/crypto/Config.hpp"
 #include "opentxs/api/session/Factory.hpp"

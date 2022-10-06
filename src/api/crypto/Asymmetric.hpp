@@ -9,8 +9,8 @@
 #include <functional>
 #include <memory>
 
-#include "Proto.hpp"
 #include "internal/api/crypto/Asymmetric.hpp"
+#include "internal/serialization/protobuf/Proto.hpp"
 #include "opentxs/api/crypto/Asymmetric.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/crypto/Bip32.hpp"

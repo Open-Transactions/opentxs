@@ -14,8 +14,8 @@
 #include <tuple>
 #include <utility>
 
-#include "Proto.hpp"
 #include "internal/serialization/protobuf/Check.hpp"
+#include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/serialization/protobuf/verify/Issuer.hpp"
 #include "internal/serialization/protobuf/verify/StorageIssuers.hpp"
 #include "opentxs/util/Container.hpp"

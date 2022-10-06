@@ -22,10 +22,12 @@
 #include "internal/network/zeromq/Types.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
 #include "internal/util/LogMacros.hpp"
+#include "internal/util/P0330.hpp"
 #include "opentxs/api/network/Asio.hpp"
 #include "opentxs/api/network/Network.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
+#include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/bitcoin/block/Header.hpp"
 #include "opentxs/blockchain/bitcoin/cfilter/GCS.hpp"
 #include "opentxs/blockchain/bitcoin/cfilter/Header.hpp"
@@ -41,6 +43,8 @@
 #include "opentxs/network/otdht/State.hpp"
 #include "opentxs/network/otdht/Types.hpp"
 #include "opentxs/network/zeromq/Pipeline.hpp"
+#include "opentxs/network/zeromq/message/Frame.hpp"
+#include "opentxs/network/zeromq/message/FrameSection.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
@@ -311,6 +315,33 @@ auto Server::local_position() const noexcept
     -> opentxs::blockchain::block::Position
 {
     return shared_.lock_shared()->sync_tip_;
+}
+
+auto Server::process_checksum_failure(Message&& msg) noexcept -> void
+{
+    try {
+        const auto body = msg.Body();
+
+        if (3_uz >= body.size()) {
+            throw std::runtime_error{"invalid message"};
+        }
+
+        if (body.at(1).as<decltype(chain_)>() != chain_) { return; }
+
+        using Height = opentxs::blockchain::block::Height;
+        const auto height = body.at(2).as<Height>();
+        // TODO const auto version = body.at(3).as<VersionNumber>();
+        auto handle = shared_.lock();
+        auto& shared = *handle;
+        const auto local = shared.sync_tip_.height_;
+        const auto target = std::max<Height>(0, std::min(height, local - 100));
+        LogConsole()("Resetting ")(print(chain_))(" sync database to height ")(
+            target)(" due to checksum failure");
+        update_tip(
+            shared, true, {target, node_.HeaderOracle().BestHash(target)});
+    } catch (const std::exception& e) {
+        LogError()(OT_PRETTY_CLASS())(name_)(": ")(e.what()).Flush();
+    }
 }
 
 auto Server::process_report(Message&& msg) noexcept -> void { report(); }

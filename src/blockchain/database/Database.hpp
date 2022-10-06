@@ -20,7 +20,6 @@
 #include <optional>
 #include <utility>
 
-#include "Proto.hpp"
 #include "blockchain/database/Blocks.hpp"
 #include "blockchain/database/Filters.hpp"
 #include "blockchain/database/Headers.hpp"
@@ -36,6 +35,7 @@
 #include "internal/blockchain/database/Types.hpp"
 #include "internal/blockchain/database/Wallet.hpp"
 #include "internal/blockchain/database/common/Common.hpp"
+#include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/Mutex.hpp"
 #include "internal/util/storage/lmdb/Database.hpp"
 #include "internal/util/storage/lmdb/Types.hpp"

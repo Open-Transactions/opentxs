@@ -14,9 +14,9 @@
 #include <tuple>
 #include <utility>
 
-#include "Proto.hpp"
 #include "internal/api/session/FactoryAPI.hpp"
 #include "internal/serialization/protobuf/Check.hpp"
+#include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/serialization/protobuf/verify/Nym.hpp"
 #include "internal/serialization/protobuf/verify/StorageNymList.hpp"
 #include "internal/util/Flag.hpp"

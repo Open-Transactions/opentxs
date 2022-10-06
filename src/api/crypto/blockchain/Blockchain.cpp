@@ -9,12 +9,12 @@
 #include <HDPath.pb.h>
 #include <utility>
 
-#include "Proto.hpp"
-#include "Proto.tpp"
 #include "api/crypto/blockchain/Imp.hpp"
 #include "internal/api/crypto/Factory.hpp"
 #include "internal/api/crypto/Null.hpp"
 #include "internal/blockchain/Params.hpp"
+#include "internal/serialization/protobuf/Proto.hpp"
+#include "internal/serialization/protobuf/Proto.tpp"
 #include "opentxs/blockchain/bitcoin/block/Transaction.hpp"  // IWYU pragma: keep
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Data.hpp"

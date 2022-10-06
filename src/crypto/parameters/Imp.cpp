@@ -13,8 +13,8 @@
 #include <cstdint>
 #include <memory>
 
-#include "Proto.hpp"
 #include "internal/crypto/key/Factory.hpp"
+#include "internal/serialization/protobuf/Proto.hpp"
 #include "opentxs/OT.hpp"
 #include "opentxs/api/Context.hpp"
 #include "opentxs/api/Factory.hpp"

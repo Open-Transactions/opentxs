@@ -10,8 +10,8 @@
 #include <Nym.pb.h>  // IWYU pragma: keep
 #include <utility>
 
-#include "Proto.tpp"
 #include "internal/identity/Nym.hpp"
+#include "internal/serialization/protobuf/Proto.tpp"
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/OT.hpp"
 #include "opentxs/api/Context.hpp"

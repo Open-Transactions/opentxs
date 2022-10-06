@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include "Proto.hpp"
+#include "internal/serialization/protobuf/Proto.hpp"
 #include "opentxs/api/Factory.hpp"
 #include "opentxs/core/identifier/Types.hpp"
 #include "opentxs/identity/wot/claim/Types.hpp"

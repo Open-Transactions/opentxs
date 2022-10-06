@@ -15,9 +15,9 @@
 #include <stdexcept>
 #include <utility>
 
-#include "Proto.hpp"
 #include "crypto/key/asymmetric/EllipticCurve.hpp"
 #include "internal/api/crypto/Symmetric.hpp"
+#include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/api/crypto/Hash.hpp"
 #include "opentxs/api/crypto/Symmetric.hpp"

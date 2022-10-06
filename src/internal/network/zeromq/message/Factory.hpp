@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include "Proto.hpp"
+#include "internal/serialization/protobuf/Proto.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs

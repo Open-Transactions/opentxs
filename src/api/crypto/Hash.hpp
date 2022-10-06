@@ -9,8 +9,8 @@
 #include <cstdint>
 #include <iosfwd>
 
-#include "Proto.hpp"
 #include "internal/api/crypto/Hash.hpp"
+#include "internal/serialization/protobuf/Proto.hpp"
 #include "opentxs/api/crypto/Hash.hpp"
 #include "opentxs/crypto/HashType.hpp"
 #include "opentxs/util/Bytes.hpp"

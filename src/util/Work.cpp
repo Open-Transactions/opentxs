@@ -6,6 +6,11 @@
 #include "0_stdafx.hpp"               // IWYU pragma: associated
 #include "opentxs/util/WorkType.hpp"  // IWYU pragma: associated
 
+#include <cs_plain_guarded.h>
+#include <memory>
+#include <sstream>
+#include <utility>
+
 #include "opentxs/util/Container.hpp"
 #include "util/Work.hpp"
 
@@ -100,6 +105,10 @@ auto print(OTZMQWorkType in) noexcept -> std::string_view
             {value(WorkType::OTXResponse), "WorkType::OTXResponse"sv},
             {value(WorkType::OTXPush), "WorkType::OTXPush"sv},
             {value(WorkType::OTXLegacyXML), "WorkType::OTXLegacyXML"sv},
+            {OT_ZMQ_BLOCKCHAIN_SYNC_CHECKSUM_FAILURE,
+             "OT_ZMQ_BLOCKCHAIN_SYNC_CHECKSUM_FAILURE"sv},
+            {OT_ZMQ_BLOCKCHAIN_REPORT_STATUS,
+             "OT_ZMQ_BLOCKCHAIN_REPORT_STATUS"sv},
             {OT_ZMQ_OTDHT_PEER_LIST, "OT_ZMQ_OTDHT_PEER_LIST"sv},
             {OT_ZMQ_HEADER_ORACLE_JOB_READY,
              "OT_ZMQ_HEADER_ORACLE_JOB_READY"sv},
@@ -177,8 +186,38 @@ auto print(OTZMQWorkType in) noexcept -> std::string_view
 
         return map.at(in);
     } catch (...) {
+        using CustomMap = UnallocatedMap<OTZMQWorkType, UnallocatedCString>;
+        using GuardedMap = libguarded::plain_guarded<CustomMap>;
+        static auto custom = GuardedMap{};
+        auto handle = custom.lock();
+        auto& map = *handle;
 
-        return "unknown"sv;
+        if (auto i = map.find(in); map.end() != i) {
+
+            return i->second;
+        } else {
+
+            return map
+                .try_emplace(
+                    in,
+                    [&] {
+                        auto out = std::stringstream{};
+                        out << "unknown ";
+
+                        if (in < 16384u) {
+                            out << "public";
+                        } else if (in < OT_ZMQ_INTERNAL_SIGNAL) {
+                            out << "reserved";
+                        } else {
+                            out << "internal";
+                        }
+
+                        out << " value: " << std::to_string(in);
+
+                        return out.str();
+                    }())
+                .first->second;
+        }
     }
 }
 }  // namespace opentxs

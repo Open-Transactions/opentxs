@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include "Proto.hpp"  // IWYU pragma: associated
+#include "internal/serialization/protobuf/Proto.hpp"  // IWYU pragma: associated
 
 #include <cassert>
 #include <cstddef>

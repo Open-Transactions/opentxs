@@ -98,6 +98,7 @@ private:
     auto do_work() noexcept -> bool final;
     auto drain_queue(Shared& shared) noexcept -> void;
     auto fill_queue(Shared& shared) noexcept -> void;
+    auto process_checksum_failure(Message&& msg) noexcept -> void final;
     auto process_report(Message&& msg) noexcept -> void final;
     auto process_sync_request(Message&& msg) noexcept -> void final;
     auto report() noexcept -> void;

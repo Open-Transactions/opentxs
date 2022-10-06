@@ -13,7 +13,6 @@
 #include <stdexcept>
 #include <utility>
 
-#include "Proto.hpp"
 #include "internal/api/session/FactoryAPI.hpp"
 #include "internal/api/session/Wallet.hpp"
 #include "internal/identity/Nym.hpp"
@@ -21,6 +20,7 @@
 #include "internal/otx/Types.hpp"
 #include "internal/otx/common/Ledger.hpp"
 #include "internal/otx/common/NymFile.hpp"  // IWYU pragma: keep
+#include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "opentxs/api/session/Crypto.hpp"

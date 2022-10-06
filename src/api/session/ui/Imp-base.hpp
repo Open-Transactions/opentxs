@@ -15,10 +15,10 @@
 #include <optional>
 #include <utility>
 
-#include "Proto.hpp"
 #include "api/session/ui/UI.hpp"
 #include "api/session/ui/UpdateManager.hpp"
 #include "internal/interface/ui/UI.hpp"
+#include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/Lockable.hpp"
 #include "internal/util/Mutex.hpp"
 #include "opentxs/api/Context.hpp"

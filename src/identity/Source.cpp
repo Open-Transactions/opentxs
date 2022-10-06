@@ -17,9 +17,9 @@
 #include <stdexcept>
 
 #include "2_Factory.hpp"
-#include "Proto.hpp"
 #include "internal/api/session/FactoryAPI.hpp"
 #include "internal/core/PaymentCode.hpp"
+#include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/api/crypto/Config.hpp"
 #include "opentxs/api/session/Factory.hpp"

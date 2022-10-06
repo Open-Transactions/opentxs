@@ -17,9 +17,9 @@
 #include <cstdlib>
 #include <tuple>
 
-#include "Proto.hpp"
 #include "internal/identity/wot/claim/Types.hpp"
 #include "internal/serialization/protobuf/Check.hpp"
+#include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/serialization/protobuf/verify/Contact.hpp"
 #include "internal/serialization/protobuf/verify/StorageContacts.hpp"
 #include "internal/util/LogMacros.hpp"

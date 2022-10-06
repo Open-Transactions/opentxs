@@ -13,8 +13,8 @@
 #include <thread>
 #include <utility>
 
-#include "Proto.hpp"
 #include "internal/otx/common/Message.hpp"
+#include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/Flag.hpp"
 #include "internal/util/Lockable.hpp"
 #include "internal/util/Mutex.hpp"

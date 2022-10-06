@@ -14,11 +14,11 @@
 #include <memory>
 #include <string_view>
 
-#include "Proto.hpp"
 #include "api/session/Factory.hpp"
 #include "internal/otx/common/Item.hpp"
 #include "internal/otx/common/Ledger.hpp"
 #include "internal/otx/common/OTTransaction.hpp"
+#include "internal/serialization/protobuf/Proto.hpp"
 #include "opentxs/api/Factory.hpp"
 #include "opentxs/api/crypto/Symmetric.hpp"
 #include "opentxs/api/session/Factory.hpp"

@@ -8,10 +8,10 @@
 #include <BlockchainBlockHeader.pb.h>
 #include <mutex>
 
-#include "Proto.hpp"
 #include "internal/blockchain/crypto/Crypto.hpp"
 #include "internal/blockchain/database/Types.hpp"
 #include "internal/blockchain/database/common/Common.hpp"
+#include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/Mutex.hpp"
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"

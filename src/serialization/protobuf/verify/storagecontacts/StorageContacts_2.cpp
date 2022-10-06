@@ -13,9 +13,9 @@
 #include <stdexcept>
 #include <utility>
 
-#include "Proto.hpp"
 #include "internal/serialization/protobuf/Basic.hpp"
 #include "internal/serialization/protobuf/Check.hpp"
+#include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/serialization/protobuf/verify/StorageContactAddressIndex.hpp"  // IWYU pragma: keep
 #include "internal/serialization/protobuf/verify/StorageContactNymIndex.hpp"  // IWYU pragma: keep
 #include "internal/serialization/protobuf/verify/StorageIDList.hpp"  // IWYU pragma: keep

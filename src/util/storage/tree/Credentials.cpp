@@ -15,9 +15,9 @@
 #include <tuple>
 #include <utility>
 
-#include "Proto.hpp"
 #include "internal/crypto/key/Key.hpp"
 #include "internal/serialization/protobuf/Check.hpp"
+#include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/serialization/protobuf/verify/Credential.hpp"
 #include "internal/serialization/protobuf/verify/StorageCredentials.hpp"
 #include "opentxs/crypto/key/asymmetric/Mode.hpp"

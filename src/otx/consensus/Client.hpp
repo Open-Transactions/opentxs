@@ -11,8 +11,8 @@
 #include <iosfwd>
 #include <mutex>
 
-#include "Proto.hpp"
 #include "internal/otx/consensus/Consensus.hpp"
+#include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/Mutex.hpp"
 #include "opentxs/identity/Types.hpp"
 #include "opentxs/otx/ConsensusType.hpp"

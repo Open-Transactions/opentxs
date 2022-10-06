@@ -17,8 +17,6 @@
 #include <string_view>
 #include <utility>
 
-#include "Proto.hpp"
-#include "Proto.tpp"
 #include "internal/api/FactoryAPI.hpp"
 #include "internal/api/Legacy.hpp"
 #include "internal/api/session/Endpoints.hpp"
@@ -46,6 +44,8 @@
 #include "internal/otx/common/trade/OTTrade.hpp"
 #include "internal/otx/smartcontract/OTSmartContract.hpp"
 #include "internal/serialization/protobuf/Check.hpp"
+#include "internal/serialization/protobuf/Proto.hpp"
+#include "internal/serialization/protobuf/Proto.tpp"
 #include "internal/serialization/protobuf/verify/OTXPush.hpp"
 #include "internal/serialization/protobuf/verify/Purse.hpp"
 #include "internal/util/Editor.hpp"

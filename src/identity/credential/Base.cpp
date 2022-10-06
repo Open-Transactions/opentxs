@@ -13,7 +13,6 @@
 #include <memory>
 #include <stdexcept>
 
-#include "Proto.tpp"
 #include "core/contract/Signable.hpp"
 #include "identity/credential/Base.hpp"
 #include "internal/api/session/FactoryAPI.hpp"
@@ -21,6 +20,7 @@
 #include "internal/crypto/key/Key.hpp"
 #include "internal/identity/Authority.hpp"
 #include "internal/identity/credential/Credential.hpp"
+#include "internal/serialization/protobuf/Proto.tpp"
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"

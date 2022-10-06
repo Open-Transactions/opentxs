@@ -16,12 +16,12 @@
 #include <string_view>
 #include <utility>
 
-#include "Proto.hpp"
 #include "blockchain/database/common/Database.hpp"
 #include "internal/api/crypto/blockchain/BalanceOracle.hpp"
 #include "internal/api/network/Blockchain.hpp"
 #include "internal/blockchain/bitcoin/block/Transaction.hpp"
 #include "internal/network/zeromq/message/Message.hpp"
+#include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "opentxs/api/crypto/Hash.hpp"

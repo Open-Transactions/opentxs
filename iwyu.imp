@@ -1,6 +1,6 @@
 [
-{ "include": ["@<google/protobuf/.*>", "private", "\"Proto.hpp\"", "public"] },
-{ "include": ["<google/protobuf/repeated_field.h>", "private", "\"Proto.hpp\"", "public"] },
+{ "include": ["@<google/protobuf/.*>", "private", "\"internal/serialization/protobuf/Proto.hpp\"", "public"] },
+{ "include": ["<google/protobuf/repeated_field.h>", "private", "\"internal/serialization/protobuf/Proto.hpp\"", "public"] },
 { "include": ["@<boost/algorithm/string/.*>", "private", "<boost/algorithm/string.hpp>", "public"] },
 { "include": ["@<boost/asio/.*>", "private", "<boost/asio.hpp>", "public"] },
 { "include": ["@<boost/beast/core/.*>", "private", "<boost/beast/core.hpp>", "public"] },

@@ -16,9 +16,9 @@
 #include <sstream>  // IWYU pragma: keep
 #include <typeinfo>
 
-#include "Proto.hpp"
 #include "internal/api/Legacy.hpp"
 #include "internal/api/session/Session.hpp"
+#include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/P0330.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"

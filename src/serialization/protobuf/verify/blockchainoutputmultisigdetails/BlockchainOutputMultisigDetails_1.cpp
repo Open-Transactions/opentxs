@@ -8,7 +8,7 @@
 #include <BlockchainOutputMultisigDetails.pb.h>
 #include <cstddef>
 
-#include "Proto.hpp"
+#include "internal/serialization/protobuf/Proto.hpp"
 #include "serialization/protobuf/verify/Check.hpp"
 
 namespace opentxs::proto

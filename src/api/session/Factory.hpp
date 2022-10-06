@@ -16,13 +16,13 @@
 #include <type_traits>
 #include <utility>
 
-#include "Proto.hpp"
 #include "internal/api/FactoryAPI.hpp"
 #include "internal/api/session/FactoryAPI.hpp"
 #include "internal/otx/Types.hpp"
 #include "internal/otx/common/Item.hpp"
 #include "internal/otx/common/Ledger.hpp"
 #include "internal/otx/common/OTTransaction.hpp"
+#include "internal/serialization/protobuf/Proto.hpp"
 #include "opentxs/api/Factory.hpp"
 #include "opentxs/api/crypto/Asymmetric.hpp"
 #include "opentxs/api/crypto/Symmetric.hpp"

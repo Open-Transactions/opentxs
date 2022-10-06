@@ -11,9 +11,9 @@
 #include <locale>
 #include <optional>
 
-#include "Proto.hpp"
 #include "core/contract/Signable.hpp"
 #include "internal/otx/common/Account.hpp"
+#include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/Mutex.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/core/Types.hpp"

@@ -19,7 +19,6 @@
 #include <utility>
 
 #include "2_Factory.hpp"
-#include "Proto.hpp"
 #include "core/contract/Signable.hpp"
 #include "internal/api/FactoryAPI.hpp"
 #include "internal/api/session/FactoryAPI.hpp"
@@ -28,6 +27,7 @@
 #include "internal/core/contract/Types.hpp"
 #include "internal/identity/Nym.hpp"
 #include "internal/serialization/protobuf/Check.hpp"
+#include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/serialization/protobuf/verify/ServerContract.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/api/session/Crypto.hpp"

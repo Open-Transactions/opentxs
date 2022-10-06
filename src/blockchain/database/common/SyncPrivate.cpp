@@ -26,8 +26,10 @@ extern "C" {
 }
 
 #include "blockchain/database/common/Database.hpp"
+#include "internal/api/session/Endpoints.hpp"
 #include "internal/blockchain/Params.hpp"
 #include "internal/blockchain/database/common/Common.hpp"
+#include "internal/network/zeromq/Context.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/Size.hpp"
@@ -36,6 +38,9 @@ extern "C" {
 #include "internal/util/storage/lmdb/Database.hpp"
 #include "internal/util/storage/lmdb/Transaction.hpp"
 #include "internal/util/storage/lmdb/Types.hpp"
+#include "opentxs/api/network/Network.hpp"
+#include "opentxs/api/session/Endpoints.hpp"
+#include "opentxs/api/session/Session.hpp"
 #include "opentxs/blockchain/Blockchain.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/bitcoin/cfilter/FilterType.hpp"
@@ -46,12 +51,16 @@ extern "C" {
 #include "opentxs/core/FixedByteArray.hpp"
 #include "opentxs/network/otdht/Block.hpp"
 #include "opentxs/network/otdht/Data.hpp"
+#include "opentxs/network/zeromq/Context.hpp"
+#include "opentxs/network/zeromq/message/Message.hpp"
+#include "opentxs/network/zeromq/socket/SocketType.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Types.hpp"
 #include "util/ByteLiterals.hpp"
 #include "util/ScopeGuard.hpp"
+#include "util/Work.hpp"
 
 namespace opentxs::blockchain::database::common
 {
@@ -158,6 +167,16 @@ SyncPrivate::SyncPrivate(
 
         return output;
     }())
+    , checksum_failure_([&] {
+        using Type = network::zeromq::socket::Type;
+        auto out = api_.Network().ZeroMQ().Internal().RawSocket(Type::Publish);
+        const auto rc = out.Bind(
+            api_.Endpoints().Internal().BlockchainSyncChecksumFailure().data());
+
+        OT_ASSERT(rc);
+
+        return out;
+    }())
 {
     for (const auto chain : opentxs::blockchain::SupportedChains()) {
         import_genesis(chain);
@@ -256,7 +275,7 @@ auto SyncPrivate::Load(
         auto n = 0_uz;
         auto total = 0_uz;
 
-        while (total < maxBytes) {
+        while ((total < maxBytes) && (n < views.size())) {
             const auto post = ScopeGuard{[&] { ++n; }};
             const auto& view = views.at(n);
             const auto& expected = checksums.at(n);
@@ -279,8 +298,19 @@ auto SyncPrivate::Load(
             }
 
             if (expected != checksum) {
-                // TODO send a message to network::blockchain::otdht::Server so
-                // that it knows to recalculate the data.
+                checksum_failure_.lock()->SendDeferred(
+                    [&] {
+                        auto out =
+                            MakeWork(OT_ZMQ_BLOCKCHAIN_SYNC_CHECKSUM_FAILURE);
+                        out.AddFrame(chain);
+                        out.AddFrame(height);
+                        out.AddFrame(output.Version());
+
+                        return out;
+                    }(),
+                    __FILE__,
+                    __LINE__);
+
                 throw std::runtime_error("checksum failure");
             }
 

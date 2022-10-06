@@ -10,8 +10,8 @@
 #include <cstddef>
 #include <cstdint>
 
-#include "Proto.hpp"
 #include "internal/serialization/protobuf/Basic.hpp"
+#include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/serialization/protobuf/verify/P2PBlockchainChainState.hpp"  // IWYU pragma: keep
 #include "internal/serialization/protobuf/verify/VerifyP2P.hpp"
 #include "opentxs/util/Container.hpp"

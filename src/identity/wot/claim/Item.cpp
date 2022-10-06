@@ -12,9 +12,9 @@
 #include <tuple>
 #include <utility>
 
-#include "Proto.hpp"
-#include "Proto.tpp"
 #include "internal/identity/wot/claim/Types.hpp"
+#include "internal/serialization/protobuf/Proto.hpp"
+#include "internal/serialization/protobuf/Proto.tpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/Time.hpp"
 #include "opentxs/api/session/Factory.hpp"

@@ -13,7 +13,7 @@
 #include <memory>
 #include <utility>
 
-#include "Proto.hpp"
+#include "internal/serialization/protobuf/Proto.hpp"
 #include "opentxs/interface/rpc/AccountData.hpp"
 #include "opentxs/interface/rpc/request/GetAccountBalance.hpp"
 

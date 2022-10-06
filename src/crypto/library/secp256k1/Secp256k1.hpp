@@ -12,10 +12,10 @@ extern "C" {
 #include <iosfwd>
 #include <optional>
 
-#include "Proto.hpp"
 #include "crypto/library/AsymmetricProvider.hpp"
 #include "crypto/library/EcdsaProvider.hpp"
 #include "internal/crypto/library/Secp256k1.hpp"
+#include "internal/serialization/protobuf/Proto.hpp"
 #include "opentxs/core/Secret.hpp"
 #include "opentxs/crypto/HashType.hpp"
 #include "opentxs/crypto/SecretStyle.hpp"

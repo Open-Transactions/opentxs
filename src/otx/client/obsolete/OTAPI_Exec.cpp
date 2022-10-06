@@ -12,7 +12,6 @@
 #include <memory>
 #include <utility>
 
-#include "Proto.tpp"
 #include "internal/api/session/FactoryAPI.hpp"
 #include "internal/otx/client/obsolete/OT_API.hpp"
 #include "internal/otx/common/NumList.hpp"
@@ -25,6 +24,7 @@
 #include "internal/otx/smartcontract/OTParty.hpp"
 #include "internal/otx/smartcontract/OTPartyAccount.hpp"
 #include "internal/otx/smartcontract/OTVariable.hpp"
+#include "internal/serialization/protobuf/Proto.tpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/Time.hpp"
 #include "opentxs/api/crypto/Seed.hpp"

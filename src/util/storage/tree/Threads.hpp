@@ -10,7 +10,7 @@
 #include <mutex>
 #include <tuple>
 
-#include "Proto.hpp"
+#include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/Editor.hpp"
 #include "internal/util/Mutex.hpp"
 #include "opentxs/core/ByteArray.hpp"

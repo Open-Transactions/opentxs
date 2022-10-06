@@ -9,8 +9,8 @@
 #include <iosfwd>
 #include <string_view>
 
-#include "Proto.hpp"
 #include "internal/api/FactoryAPI.hpp"
+#include "internal/serialization/protobuf/Proto.hpp"
 #include "opentxs/api/Factory.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/core/Secret.hpp"

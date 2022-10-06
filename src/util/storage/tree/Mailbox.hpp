@@ -8,7 +8,7 @@
 #include <StorageNymList.pb.h>
 #include <mutex>
 
-#include "Proto.hpp"
+#include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/Editor.hpp"
 #include "opentxs/util/Container.hpp"
 #include "util/storage/tree/Node.hpp"

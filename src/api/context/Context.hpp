@@ -25,10 +25,10 @@
 #include <shared_mutex>
 #include <string_view>
 
-#include "Proto.hpp"
 #include "api/Periodic.hpp"
 #include "internal/api/Context.hpp"
 #include "internal/api/Legacy.hpp"
+#include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/AsyncConst.hpp"
 #include "internal/util/Mutex.hpp"
 #include "internal/util/Signals.hpp"

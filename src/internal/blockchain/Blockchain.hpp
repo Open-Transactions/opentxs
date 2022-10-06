@@ -19,7 +19,7 @@
 #include <tuple>
 #include <utility>
 
-#include "Proto.hpp"
+#include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/P0330.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/bitcoin/bloom/Types.hpp"

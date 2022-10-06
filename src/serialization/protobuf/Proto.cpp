@@ -3,13 +3,13 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#include "0_stdafx.hpp"  // IWYU pragma: associated
-#include "Proto.tpp"     // IWYU pragma: associated
+#include "0_stdafx.hpp"                               // IWYU pragma: associated
+#include "internal/serialization/protobuf/Proto.tpp"  // IWYU pragma: associated
 
 #include <google/protobuf/repeated_field.h>  // IWYU pragma: keep
 #include <limits>
 
-#include "Proto.hpp"
+#include "internal/serialization/protobuf/Proto.hpp"
 #include "opentxs/util/Bytes.hpp"
 
 template class google::protobuf::RepeatedField<unsigned int>;
