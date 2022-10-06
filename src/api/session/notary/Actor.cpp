@@ -91,7 +91,7 @@ Actor::Actor(
 
 auto Actor::do_shutdown() noexcept -> void { queue_.clear(); }
 
-auto Actor::do_startup() noexcept -> bool
+auto Actor::do_startup(allocator_type) noexcept -> bool
 {
     if ((api_.Internal().ShuttingDown())) { return true; }
 
@@ -102,11 +102,14 @@ auto Actor::do_startup() noexcept -> bool
     return false;
 }
 
-auto Actor::pipeline(const Work work, Message&& msg) noexcept -> void
+auto Actor::pipeline(
+    const Work work,
+    Message&& msg,
+    allocator_type monotonic) noexcept -> void
 {
     switch (work) {
         case Work::queue_unitid: {
-            process_queue_unitid(std::move(msg));
+            process_queue_unitid(std::move(msg), monotonic);
         } break;
         case Work::shutdown:
         case Work::init:
@@ -123,7 +126,9 @@ auto Actor::pipeline(const Work work, Message&& msg) noexcept -> void
     }
 }
 
-auto Actor::process_queue_unitid(Message&& msg) noexcept -> void
+auto Actor::process_queue_unitid(
+    Message&& msg,
+    allocator_type monotonic) noexcept -> void
 {
     const auto body = msg.Body();
 
@@ -131,10 +136,10 @@ auto Actor::process_queue_unitid(Message&& msg) noexcept -> void
 
     auto& id = queue_.emplace_back();
     id.Assign(body.at(1).Bytes());
-    do_work();
+    do_work(monotonic);
 }
 
-auto Actor::work() noexcept -> bool
+auto Actor::work(allocator_type monotonic) noexcept -> bool
 {
     if (false == queue_.empty()) {
         auto out = ScopeGuard{[&] { queue_.pop_front(); }};

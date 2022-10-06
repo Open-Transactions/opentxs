@@ -97,7 +97,7 @@ protected:
         const node::HeaderOracle& oracle,
         const node::internal::HeaderOraclePrivate& data,
         Reorg::Params& params) noexcept -> bool;
-    virtual auto work() noexcept -> bool;
+    virtual auto work(allocator_type monotonic) noexcept -> bool;
 
     Job(const Log& logger,
         const boost::shared_ptr<const SubchainStateData>& parent,
@@ -123,32 +123,55 @@ private:
     Timer watchdog_;
 
     auto do_shutdown() noexcept -> void;
-    auto do_startup() noexcept -> bool;
-    auto pipeline(const Work work, Message&& msg) noexcept -> void;
-    auto process_block(Message&& in) noexcept -> void;
-    auto process_filter(Message&& in) noexcept -> void;
+    auto do_startup(allocator_type monotonic) noexcept -> bool;
+    auto pipeline(const Work work, Message&& msg, allocator_type) noexcept
+        -> void;
+    auto process_block(Message&& in, allocator_type monotonic) noexcept -> void;
+    auto process_filter(Message&& in, allocator_type monotonic) noexcept
+        -> void;
     auto process_prepare_reorg(Message&& in) noexcept -> void;
-    auto process_process(Message&& in) noexcept -> void;
-    auto process_update(Message&& msg) noexcept -> void;
+    auto process_process(Message&& in, allocator_type monotonic) noexcept
+        -> void;
+    auto process_update(Message&& msg, allocator_type monotonic) noexcept
+        -> void;
     auto process_watchdog() noexcept -> void;
-    auto state_normal(const Work work, Message&& msg) noexcept -> void;
+    auto state_normal(
+        const Work work,
+        Message&& msg,
+        allocator_type monotonic) noexcept -> void;
     auto state_pre_shutdown(const Work work, Message&& msg) noexcept -> void;
     auto state_reorg(const Work work, Message&& msg) noexcept -> void;
     auto transition_state_normal() noexcept -> void;
     auto transition_state_pre_shutdown() noexcept -> void;
     auto transition_state_reorg(StateSequence id) noexcept -> void;
 
-    virtual auto do_process_update(Message&& msg) noexcept -> void;
-    virtual auto do_startup_internal() noexcept -> void = 0;
+    virtual auto do_process_update(
+        Message&& msg,
+        allocator_type monotonic) noexcept -> void;
+    virtual auto do_startup_internal(allocator_type monotonic) noexcept
+        -> void = 0;
     virtual auto forward_to_next(Message&& msg) noexcept -> void = 0;
-    virtual auto process_block(block::Hash&& block) noexcept -> void;
+    virtual auto process_block(
+        block::Hash&& block,
+        allocator_type monotonic) noexcept -> void;
     virtual auto process_do_rescan(Message&& in) noexcept -> void = 0;
-    virtual auto process_filter(Message&& in, block::Position&& tip) noexcept
+    virtual auto process_filter(
+        Message&& in,
+        block::Position&& tip,
+        allocator_type monotonic) noexcept -> void;
+    virtual auto process_key(Message&& in, allocator_type monotonic) noexcept
         -> void;
-    virtual auto process_key(Message&& in) noexcept -> void;
-    virtual auto process_mempool(Message&& in) noexcept -> void;
-    virtual auto process_process(block::Position&& position) noexcept -> void;
-    virtual auto process_reprocess(Message&& msg) noexcept -> void;
-    virtual auto process_start_scan(Message&& in) noexcept -> void;
+    virtual auto process_mempool(
+        Message&& in,
+        allocator_type monotonic) noexcept -> void;
+    virtual auto process_process(
+        block::Position&& position,
+        allocator_type monotonic) noexcept -> void;
+    virtual auto process_reprocess(
+        Message&& msg,
+        allocator_type monotonic) noexcept -> void;
+    virtual auto process_start_scan(
+        Message&& in,
+        allocator_type monotonic) noexcept -> void;
 };
 }  // namespace opentxs::blockchain::node::wallet::statemachine

@@ -118,7 +118,7 @@ BalanceOracle::Imp::Imp(
 
 auto BalanceOracle::Imp::do_shutdown() noexcept -> void { api_.reset(); }
 
-auto BalanceOracle::Imp::do_startup() noexcept -> bool
+auto BalanceOracle::Imp::do_startup(allocator_type) noexcept -> bool
 {
     return api_->Internal().ShuttingDown();
 }
@@ -201,8 +201,10 @@ auto BalanceOracle::Imp::notify_subscribers(
     }
 }
 
-auto BalanceOracle::Imp::pipeline(const Work work, Message&& msg) noexcept
-    -> void
+auto BalanceOracle::Imp::pipeline(
+    const Work work,
+    Message&& msg,
+    allocator_type) noexcept -> void
 {
     switch (work) {
         case Work::update_balance: {
@@ -391,7 +393,10 @@ auto BalanceOracle::Imp::process_update_balance(
     if (changed) { notify_subscribers(subscribers, owner, balance, chain); }
 }
 
-auto BalanceOracle::Imp::work() noexcept -> bool { return false; }
+auto BalanceOracle::Imp::work(allocator_type monotonic) noexcept -> bool
+{
+    return false;
+}
 
 BalanceOracle::Imp::~Imp() = default;
 }  // namespace opentxs::api::crypto::blockchain

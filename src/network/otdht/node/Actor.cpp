@@ -135,7 +135,7 @@ auto Node::Actor::do_shutdown() noexcept -> void
     api_p_.reset();
 }
 
-auto Node::Actor::do_startup() noexcept -> bool
+auto Node::Actor::do_startup(allocator_type) noexcept -> bool
 {
     if (api_.Internal().ShuttingDown()) { return true; }
 
@@ -191,7 +191,10 @@ auto Node::Actor::load_positions() noexcept -> void
     }
 }
 
-auto Node::Actor::pipeline(const Work work, Message&& msg) noexcept -> void
+auto Node::Actor::pipeline(
+    const Work work,
+    Message&& msg,
+    allocator_type) noexcept -> void
 {
     const auto id = msg.Internal().ExtractFront().as<zeromq::SocketID>();
 
@@ -503,7 +506,10 @@ auto Node::Actor::send_to_peers(Message&& msg) noexcept -> void
     }
 }
 
-auto Node::Actor::work() noexcept -> bool { return false; }
+auto Node::Actor::work(allocator_type monotonic) noexcept -> bool
+{
+    return false;
+}
 
 Node::Actor::~Actor() = default;
 }  // namespace opentxs::network::otdht

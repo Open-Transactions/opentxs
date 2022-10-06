@@ -13,6 +13,7 @@
 #include "blockchain/node/wallet/subchain/SubchainStateData.hpp"
 #include "blockchain/node/wallet/subchain/statemachine/ElementCache.hpp"
 #include "internal/api/crypto/Blockchain.hpp"
+#include "internal/blockchain/database/Wallet.hpp"
 #include "internal/blockchain/node/wallet/Types.hpp"
 #include "internal/blockchain/node/wallet/subchain/statemachine/Types.hpp"
 #include "internal/network/zeromq/socket/Pipeline.hpp"
@@ -75,7 +76,9 @@ Index::Imp::Imp(
 {
 }
 
-auto Index::Imp::do_process_update(Message&& msg) noexcept -> void
+auto Index::Imp::do_process_update(
+    Message&& msg,
+    allocator_type monotonic) noexcept -> void
 {
     auto clean = Set<ScanStatus>{get_allocator()};
     auto dirty = Set<block::Position>{get_allocator()};
@@ -89,20 +92,20 @@ auto Index::Imp::do_process_update(Message&& msg) noexcept -> void
         }
     }
 
-    do_work();
+    do_work(monotonic);
     to_rescan_.SendDeferred(std::move(msg), __FILE__, __LINE__);
 }
 
-auto Index::Imp::do_startup_internal() noexcept -> void
+auto Index::Imp::do_startup_internal(allocator_type monotonic) noexcept -> void
 {
     last_indexed_ = parent_.db_.SubchainLastIndexed(parent_.db_key_);
-    do_work();
+    do_work(monotonic);
     log_(OT_PRETTY_CLASS())(name_)(" notifying scan task to begin work")
         .Flush();
     to_scan_.SendDeferred(MakeWork(Work::start_scan), __FILE__, __LINE__);
 }
 
-auto Index::Imp::done(database::Wallet::ElementMap&& elements) noexcept -> void
+auto Index::Imp::done(database::ElementMap&& elements) noexcept -> void
 {
     auto& db = parent_.db_;
     const auto& index = parent_.db_key_;
@@ -121,13 +124,16 @@ auto Index::Imp::process_do_rescan(Message&& in) noexcept -> void
     to_rescan_.Send(std::move(in), __FILE__, __LINE__);
 }
 
-auto Index::Imp::process_filter(Message&& in, block::Position&&) noexcept
-    -> void
+auto Index::Imp::process_filter(
+    Message&& in,
+    block::Position&&,
+    allocator_type) noexcept -> void
 {
     to_rescan_.Send(std::move(in), __FILE__, __LINE__);
 }
 
-auto Index::Imp::process_key(Message&& in) noexcept -> void
+auto Index::Imp::process_key(Message&& in, allocator_type monotonic) noexcept
+    -> void
 {
     const auto body = in.Body();
 
@@ -150,18 +156,18 @@ auto Index::Imp::process_key(Message&& in) noexcept -> void
 
     if (subchain != parent_.subchain_) { return; }
 
-    do_work();
+    do_work(monotonic);
 }
 
-auto Index::Imp::work() noexcept -> bool
+auto Index::Imp::work(allocator_type monotonic) noexcept -> bool
 {
     if (State::reorg == state()) { return false; }
 
     const auto need = need_index(last_indexed_);
 
-    if (need.has_value()) { process(last_indexed_, need.value()); }
+    if (need.has_value()) { process(last_indexed_, need.value(), monotonic); }
 
-    return Job::work();
+    return Job::work(monotonic);
 }
 }  // namespace opentxs::blockchain::node::wallet
 

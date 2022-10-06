@@ -9,11 +9,8 @@
 #include <algorithm>
 #include <iterator>
 
-#include "internal/util/BoostPMR.hpp"
-#include "opentxs/api/session/Factory.hpp"
-#include "opentxs/api/session/Session.hpp"
 #include "opentxs/blockchain/block/Outpoint.hpp"  // IWYU pragma: keep
-#include "opentxs/core/ByteArray.hpp"
+#include "opentxs/core/ByteArray.hpp"             // IWYU pragma: keep
 
 namespace opentxs::blockchain::block
 {
@@ -45,31 +42,52 @@ auto ParsedPatterns::get_allocator() const noexcept -> allocator_type
 namespace opentxs::blockchain::block::internal
 {
 auto SetIntersection(
-    const api::Session& api,
     const ReadView txid,
     const ParsedPatterns& parsed,
-    const Vector<Vector<std::byte>>& compare) noexcept -> Matches
+    const Elements& compare,
+    alloc::Default alloc,
+    alloc::Default monotonic) noexcept -> Matches
 {
-    auto alloc = alloc::BoostMonotonic{4096};
-    auto matches = Vector<Vector<std::byte>>{&alloc};
-    auto output = Matches{};
-    std::set_intersection(
-        std::begin(parsed.data_),
-        std::end(parsed.data_),
-        std::begin(compare),
-        std::end(compare),
-        std::back_inserter(matches));
-    output.second.reserve(matches.size());
+    auto output = std::make_pair(InputMatches{alloc}, OutputMatches{alloc});
+    SetIntersection(txid, parsed, compare, {}, output, monotonic);
+
+    return output;
+}
+
+auto SetIntersection(
+    const ReadView txid,
+    const ParsedPatterns& patterns,
+    const Elements& compare,
+    std::function<void(const Match&)> cb,
+    Matches& out,
+    alloc::Default monotonic) noexcept -> void
+{
+    const auto matches = [&] {
+        auto intersection = Elements{monotonic};
+        intersection.reserve(std::min(patterns.data_.size(), compare.size()));
+        intersection.clear();
+        std::set_intersection(
+            std::begin(patterns.data_),
+            std::end(patterns.data_),
+            std::begin(compare),
+            std::end(compare),
+            std::back_inserter(intersection));
+
+        return intersection;
+    }();
+
+    auto alloc = out.second.get_allocator();
     std::transform(
         std::begin(matches),
         std::end(matches),
-        std::back_inserter(output.second),
-        [&](const auto& match) -> Match {
-            return {
-                api.Factory().DataFromBytes(txid),
-                parsed.map_.at(reader(match))->first};
-        });
+        std::back_inserter(out.second),
+        [&](const auto& match) {
+            auto out =
+                Match{{txid, alloc}, patterns.map_.at(reader(match))->first};
 
-    return output;
+            if (cb) { std::invoke(cb, out); }
+
+            return out;
+        });
 }
 }  // namespace opentxs::blockchain::block::internal

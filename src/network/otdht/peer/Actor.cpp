@@ -232,7 +232,7 @@ auto Peer::Actor::do_shutdown() noexcept -> void
     api_p_.reset();
 }
 
-auto Peer::Actor::do_startup() noexcept -> bool
+auto Peer::Actor::do_startup(allocator_type monotonic) noexcept -> bool
 {
     if (api_.Internal().ShuttingDown()) { return true; }
 
@@ -247,7 +247,7 @@ auto Peer::Actor::do_startup() noexcept -> bool
             [](const auto& in) { return in.first; });
     }
 
-    do_work();
+    do_work(monotonic);
 
     return false;
 }
@@ -315,7 +315,10 @@ auto Peer::Actor::ping() noexcept -> void
         __LINE__);
 }
 
-auto Peer::Actor::pipeline(const Work work, Message&& msg) noexcept -> void
+auto Peer::Actor::pipeline(
+    const Work work,
+    Message&& msg,
+    allocator_type monotonic) noexcept -> void
 {
     const auto id = msg.Internal().ExtractFront().as<zeromq::SocketID>();
 
@@ -325,7 +328,7 @@ auto Peer::Actor::pipeline(const Work work, Message&& msg) noexcept -> void
         pipeline_internal(work, std::move(msg));
     }
 
-    do_work();
+    do_work(monotonic);
 }
 
 auto Peer::Actor::pipeline_external(const Work work, Message&& msg) noexcept
@@ -611,7 +614,7 @@ auto Peer::Actor::subscribe(const Acknowledgement& ack) noexcept -> void
     subscriptions_.emplace(endpoint);
 }
 
-auto Peer::Actor::work() noexcept -> bool
+auto Peer::Actor::work(allocator_type monotonic) noexcept -> bool
 {
     check_ping();
     check_registration();

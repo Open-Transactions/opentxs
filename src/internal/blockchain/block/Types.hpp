@@ -6,6 +6,8 @@
 #pragma once
 
 #include <cstddef>
+#include <cstdint>
+#include <functional>
 #include <tuple>
 #include <utility>
 
@@ -14,17 +16,13 @@
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/util/Allocated.hpp"
+#include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
-namespace api
-{
-class Session;
-}  // namespace api
-
 namespace blockchain
 {
 namespace block
@@ -42,22 +40,28 @@ class Generic;
 
 namespace opentxs::blockchain::block
 {
-using Subchain = blockchain::crypto::Subchain;
-using SubchainID = std::pair<Subchain, identifier::Generic>;
-using ElementID = std::pair<Bip32Index, SubchainID>;
-using Pattern = std::pair<ElementID, Vector<std::byte>>;
-using Patterns = Vector<Pattern>;
-using Match = std::pair<pTxid, ElementID>;
-using InputMatch = std::tuple<pTxid, Outpoint, ElementID>;
-using InputMatches = UnallocatedVector<InputMatch>;
-using OutputMatches = UnallocatedVector<Match>;
-using Matches = std::pair<InputMatches, OutputMatches>;
-using KeyID = blockchain::crypto::Key;
+using AccountID = identifier::Generic;
 using ContactID = identifier::Generic;
-using KeyData = UnallocatedMap<KeyID, std::pair<ContactID, ContactID>>;
+using ElementID = identifier::Generic;
+using SubaccountID = identifier::Generic;
+using SubchainID = identifier::Generic;
+using SubchainIndex = std::pair<crypto::Subchain, SubaccountID>;
+using Element = Vector<std::byte>;
+using Elements = Vector<Element>;
+using ElementIndex = std::pair<Bip32Index, SubchainIndex>;
+using ElementHash = std::uint64_t;
+using ElementHashes = Set<ElementHash>;
+using Pattern = std::pair<ElementIndex, Element>;
+using Patterns = Vector<Pattern>;
+using Match = std::pair<pTxid, ElementIndex>;
+using InputMatch = std::tuple<pTxid, Outpoint, ElementIndex>;
+using InputMatches = Vector<InputMatch>;
+using OutputMatches = Vector<Match>;
+using Matches = std::pair<InputMatches, OutputMatches>;
+using KeyData = UnallocatedMap<crypto::Key, std::pair<ContactID, ContactID>>;
 
 struct ParsedPatterns final : Allocated {
-    Vector<Vector<std::byte>> data_;
+    Elements data_;
     Map<ReadView, Patterns::const_iterator> map_;
 
     auto get_allocator() const noexcept -> allocator_type final;
@@ -77,8 +81,16 @@ struct ParsedPatterns final : Allocated {
 namespace opentxs::blockchain::block::internal
 {
 auto SetIntersection(
-    const api::Session& api,
     const ReadView txid,
     const ParsedPatterns& patterns,
-    const Vector<Vector<std::byte>>& compare) noexcept -> Matches;
+    const Elements& compare,
+    alloc::Default alloc,
+    alloc::Default monotonic) noexcept -> Matches;
+auto SetIntersection(
+    const ReadView txid,
+    const ParsedPatterns& patterns,
+    const Elements& compare,
+    std::function<void(const Match&)> cb,
+    Matches& out,
+    alloc::Default monotonic) noexcept -> void;
 }  // namespace opentxs::blockchain::block::internal

@@ -17,6 +17,7 @@
 #include "blockchain/block/header/Header.hpp"
 #include "blockchain/block/header/Imp.hpp"
 #include "internal/blockchain/bitcoin/block/Header.hpp"
+#include "internal/blockchain/bitcoin/block/Types.hpp"
 #include "internal/blockchain/block/Block.hpp"
 #include "internal/blockchain/block/Header.hpp"
 #include "opentxs/blockchain/BlockchainType.hpp"
@@ -96,19 +97,19 @@ public:
     static auto calculate_hash(
         const api::Crypto& crypto,
         const blockchain::Type chain,
-        const ReadView serialized) -> blockchain::block::Hash;
+        const ReadView serialized) -> block::Hash;
     static auto calculate_hash(
         const api::Crypto& crypto,
         const blockchain::Type chain,
-        const BitcoinFormat& serialized) -> blockchain::block::Hash;
+        const BitcoinFormat& serialized) -> block::Hash;
     static auto calculate_pow(
         const api::Crypto& crypto,
         const blockchain::Type chain,
-        const ReadView serialized) -> blockchain::block::Hash;
+        const ReadView serialized) -> block::Hash;
     static auto calculate_pow(
         const api::Crypto& crypto,
         const blockchain::Type chain,
-        const BitcoinFormat& serialized) -> blockchain::block::Hash;
+        const BitcoinFormat& serialized) -> block::Hash;
 
     auto as_Bitcoin() const noexcept
         -> const blockchain::bitcoin::block::internal::Header& final
@@ -119,7 +120,7 @@ public:
         -> std::unique_ptr<blockchain::block::Header::Imp> final;
     auto clone_bitcoin() const noexcept -> std::unique_ptr<block::Header> final;
     auto Encode() const noexcept -> ByteArray final;
-    auto MerkleRoot() const noexcept -> const blockchain::block::Hash& final
+    auto MerkleRoot() const noexcept -> const block::Hash& final
     {
         return merkle_root_;
     }
@@ -146,11 +147,11 @@ public:
     Header(
         const blockchain::Type chain,
         const VersionNumber subversion,
-        blockchain::block::Hash&& hash,
-        blockchain::block::Hash&& pow,
+        block::Hash&& hash,
+        block::Hash&& pow,
         const std::int32_t version,
-        blockchain::block::Hash&& previous,
-        blockchain::block::Hash&& merkle,
+        block::Hash&& previous,
+        block::Hash&& merkle,
         const Time timestamp,
         const std::uint32_t nbits,
         const std::uint32_t nonce,
@@ -158,9 +159,9 @@ public:
     Header(
         const api::Crypto& crypto,
         const blockchain::Type chain,
-        const blockchain::block::Hash& merkle,
-        const blockchain::block::Hash& parent,
-        const blockchain::block::Height height) noexcept(false);
+        const block::Hash& merkle,
+        const block::Hash& parent,
+        const block::Height height) noexcept(false);
     Header(
         const api::Crypto& crypto,
         const SerializedType& serialized) noexcept(false);
@@ -177,17 +178,17 @@ private:
 
     const VersionNumber subversion_;
     const std::int32_t block_version_;
-    const blockchain::block::Hash merkle_root_;
+    const block::Hash merkle_root_;
     const Time timestamp_;
     const std::uint32_t nbits_;
     const std::uint32_t nonce_;
 
     static auto calculate_hash(
         const api::Crypto& crypto,
-        const SerializedType& serialized) -> blockchain::block::Hash;
+        const SerializedType& serialized) -> block::Hash;
     static auto calculate_pow(
         const api::Crypto& crypto,
-        const SerializedType& serialized) -> blockchain::block::Hash;
+        const SerializedType& serialized) -> block::Hash;
     static auto calculate_work(
         const blockchain::Type chain,
         const std::uint32_t nbits) -> blockchain::Work;
@@ -200,17 +201,17 @@ private:
     Header(
         const VersionNumber version,
         const blockchain::Type chain,
-        blockchain::block::Hash&& hash,
-        blockchain::block::Hash&& pow,
-        blockchain::block::Hash&& previous,
-        const blockchain::block::Height height,
+        block::Hash&& hash,
+        block::Hash&& pow,
+        block::Hash&& previous,
+        const block::Height height,
         const Status status,
         const Status inheritStatus,
         const blockchain::Work& work,
         const blockchain::Work& inheritWork,
         const VersionNumber subversion,
         const std::int32_t blockVersion,
-        blockchain::block::Hash&& merkle,
+        block::Hash&& merkle,
         const Time timestamp,
         const std::uint32_t nbits,
         const std::uint32_t nonce,

@@ -14,6 +14,7 @@
 #include "blockchain/block/header/Header.hpp"
 #include "blockchain/block/header/Imp.hpp"
 #include "internal/blockchain/bitcoin/block/Header.hpp"
+#include "internal/blockchain/bitcoin/block/Types.hpp"
 #include "internal/blockchain/block/Block.hpp"
 #include "opentxs/blockchain/BlockchainType.hpp"
 #include "opentxs/blockchain/Types.hpp"
@@ -69,7 +70,7 @@ public:
         return std::make_unique<block::Header>();
     }
 
-    virtual auto MerkleRoot() const noexcept -> const blockchain::block::Hash&;
+    virtual auto MerkleRoot() const noexcept -> const block::Hash&;
     virtual auto Encode() const noexcept -> ByteArray;
     virtual auto Nonce() const noexcept -> std::uint32_t { return {}; }
     virtual auto nBits() const noexcept -> std::uint32_t { return {}; }

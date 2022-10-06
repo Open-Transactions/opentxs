@@ -150,7 +150,7 @@ auto Job::add_last_reorg(Message& out) const noexcept -> void
     }
 }
 
-auto Job::do_process_update(Message&& msg) noexcept -> void
+auto Job::do_process_update(Message&& msg, allocator_type) noexcept -> void
 {
     LogAbort()(OT_PRETTY_CLASS())(name_)(" unhandled message type").Abort();
 }
@@ -170,11 +170,11 @@ auto Job::do_shutdown() noexcept -> void
     parent_p_.reset();
 }
 
-auto Job::do_startup() noexcept -> bool
+auto Job::do_startup(allocator_type monotonic) noexcept -> bool
 {
     if (Reorg::State::shutdown == reorg_.Start()) { return true; }
 
-    do_startup_internal();
+    do_startup_internal(monotonic);
 
     return false;
 }
@@ -190,11 +190,14 @@ auto Job::last_reorg() const noexcept -> std::optional<StateSequence>
     }
 }
 
-auto Job::pipeline(const Work work, Message&& msg) noexcept -> void
+auto Job::pipeline(
+    const Work work,
+    Message&& msg,
+    allocator_type monotonic) noexcept -> void
 {
     switch (state_) {
         case State::normal: {
-            state_normal(work, std::move(msg));
+            state_normal(work, std::move(msg), monotonic);
         } break;
         case State::reorg: {
             state_reorg(work, std::move(msg));
@@ -213,7 +216,7 @@ auto Job::pipeline(const Work work, Message&& msg) noexcept -> void
     process_watchdog();
 }
 
-auto Job::process_block(Message&& in) noexcept -> void
+auto Job::process_block(Message&& in, allocator_type monotonic) noexcept -> void
 {
     const auto body = in.Body();
 
@@ -223,15 +226,16 @@ auto Job::process_block(Message&& in) noexcept -> void
 
     if (parent_.chain_ != chain) { return; }
 
-    process_block(block::Hash{body.at(2).Bytes()});
+    process_block(block::Hash{body.at(2).Bytes()}, monotonic);
 }
 
-auto Job::process_block(block::Hash&&) noexcept -> void
+auto Job::process_block(block::Hash&&, allocator_type) noexcept -> void
 {
     LogAbort()(OT_PRETTY_CLASS())(name_)(" unhandled message type").Abort();
 }
 
-auto Job::process_filter(Message&& in) noexcept -> void
+auto Job::process_filter(Message&& in, allocator_type monotonic) noexcept
+    -> void
 {
     const auto body = in.Body();
 
@@ -243,15 +247,16 @@ auto Job::process_filter(Message&& in) noexcept -> void
 
     auto position =
         block::Position{body.at(2).as<block::Height>(), body.at(3).Bytes()};
-    process_filter(std::move(in), std::move(position));
+    process_filter(std::move(in), std::move(position), monotonic);
 }
 
-auto Job::process_filter(Message&&, block::Position&&) noexcept -> void
+auto Job::process_filter(Message&&, block::Position&&, allocator_type) noexcept
+    -> void
 {
     LogAbort()(OT_PRETTY_CLASS())(name_)(" unhandled message type").Abort();
 }
 
-auto Job::process_key(Message&& in) noexcept -> void
+auto Job::process_key(Message&& in, allocator_type) noexcept -> void
 {
     LogAbort()(OT_PRETTY_CLASS())(name_)(" unhandled message type").Abort();
 }
@@ -265,37 +270,40 @@ auto Job::process_prepare_reorg(Message&& in) noexcept -> void
     transition_state_reorg(body.at(1).as<StateSequence>());
 }
 
-auto Job::process_process(Message&& in) noexcept -> void
+auto Job::process_process(Message&& in, allocator_type monotonic) noexcept
+    -> void
 {
     const auto body = in.Body();
 
     OT_ASSERT(2_uz < body.size());
 
     process_process(
-        block::Position{body.at(1).as<block::Height>(), body.at(2).Bytes()});
+        block::Position{body.at(1).as<block::Height>(), body.at(2).Bytes()},
+        monotonic);
 }
 
-auto Job::process_process(block::Position&&) noexcept -> void
+auto Job::process_process(block::Position&&, allocator_type) noexcept -> void
 {
     LogAbort()(OT_PRETTY_CLASS())(name_)("unhandled message type").Abort();
 }
 
-auto Job::process_reprocess(Message&&) noexcept -> void
+auto Job::process_reprocess(Message&&, allocator_type) noexcept -> void
 {
     LogAbort()(OT_PRETTY_CLASS())(name_)(" unhandled message type").Abort();
 }
 
-auto Job::process_start_scan(Message&&) noexcept -> void
+auto Job::process_start_scan(Message&&, allocator_type) noexcept -> void
 {
     LogAbort()(OT_PRETTY_CLASS())(name_)(" unhandled message type").Abort();
 }
 
-auto Job::process_mempool(Message&&) noexcept -> void
+auto Job::process_mempool(Message&&, allocator_type) noexcept -> void
 {
     LogAbort()(OT_PRETTY_CLASS())(name_)(" unhandled message type").Abort();
 }
 
-auto Job::process_update(Message&& msg) noexcept -> void
+auto Job::process_update(Message&& msg, allocator_type monotonic) noexcept
+    -> void
 {
     const auto body = msg.Body();
 
@@ -327,7 +335,7 @@ auto Job::process_update(Message&& msg) noexcept -> void
         }
     }
 
-    do_process_update(std::move(msg));
+    do_process_update(std::move(msg), monotonic);
 }
 
 auto Job::process_watchdog() noexcept -> void
@@ -345,29 +353,32 @@ auto Job::process_watchdog() noexcept -> void
     reset_timer(10s, watchdog_, Work::watchdog);
 }
 
-auto Job::state_normal(const Work work, Message&& msg) noexcept -> void
+auto Job::state_normal(
+    const Work work,
+    Message&& msg,
+    allocator_type monotonic) noexcept -> void
 {
     switch (work) {
         case Work::filter: {
-            process_filter(std::move(msg));
+            process_filter(std::move(msg), monotonic);
         } break;
         case Work::mempool: {
-            process_mempool(std::move(msg));
+            process_mempool(std::move(msg), monotonic);
         } break;
         case Work::block: {
-            process_block(std::move(msg));
+            process_block(std::move(msg), monotonic);
         } break;
         case Work::start_scan: {
-            process_start_scan(std::move(msg));
+            process_start_scan(std::move(msg), monotonic);
         } break;
         case Work::prepare_reorg: {
             process_prepare_reorg(std::move(msg));
         } break;
         case Work::update: {
-            process_update(std::move(msg));
+            process_update(std::move(msg), monotonic);
         } break;
         case Work::process: {
-            process_process(std::move(msg));
+            process_process(std::move(msg), monotonic);
         } break;
         case Work::rescan: {
             // NOTE ignore message
@@ -379,27 +390,27 @@ auto Job::state_normal(const Work work, Message&& msg) noexcept -> void
             process_watchdog();
         } break;
         case Work::reprocess: {
-            process_reprocess(std::move(msg));
-        } break;
-        case Work::init: {
-            do_init();
+            process_reprocess(std::move(msg), monotonic);
         } break;
         case Work::key: {
-            process_key(std::move(msg));
+            process_key(std::move(msg), monotonic);
         } break;
         case Work::prepare_shutdown: {
             transition_state_pre_shutdown();
         } break;
-        case Work::statemachine: {
-            do_work();
-        } break;
-        case Work::shutdown:
         case Work::finish_reorg: {
             LogAbort()(OT_PRETTY_CLASS())(name_)(" wrong state for ")(
                 print(work))(" message")
                 .Abort();
         }
+        case Work::shutdown:
         case Work::watchdog_ack:
+        case Work::init:
+        case Work::statemachine: {
+            LogAbort()(OT_PRETTY_CLASS())(name_)(": unhandled message type ")(
+                print(work))
+                .Abort();
+        }
         default: {
             LogAbort()(OT_PRETTY_CLASS())(name_)(" unhandled message type ")(
                 static_cast<OTZMQWorkType>(work))
@@ -411,9 +422,6 @@ auto Job::state_normal(const Work work, Message&& msg) noexcept -> void
 auto Job::state_pre_shutdown(const Work work, Message&& msg) noexcept -> void
 {
     switch (work) {
-        case Work::shutdown: {
-            shutdown_actor();
-        } break;
         case Work::filter:
         case Work::mempool:
         case Work::block:
@@ -424,19 +432,24 @@ auto Job::state_pre_shutdown(const Work work, Message&& msg) noexcept -> void
         case Work::do_rescan:
         case Work::watchdog:
         case Work::reprocess:
-        case Work::key:
-        case Work::statemachine: {
+        case Work::key: {
             // NOTE ignore message
         } break;
         case Work::prepare_reorg:
         case Work::finish_reorg:
-        case Work::init:
         case Work::prepare_shutdown: {
             LogAbort()(OT_PRETTY_CLASS())(name_)(" wrong state for ")(
                 print(work))(" message")
                 .Abort();
         }
+        case Work::shutdown:
         case Work::watchdog_ack:
+        case Work::init:
+        case Work::statemachine: {
+            LogAbort()(OT_PRETTY_CLASS())(name_)(": unhandled message type ")(
+                print(work))
+                .Abort();
+        }
         default: {
             LogAbort()(OT_PRETTY_CLASS())(name_)(" unhandled message type ")(
                 static_cast<OTZMQWorkType>(work))
@@ -460,8 +473,7 @@ auto Job::state_reorg(const Work work, Message&& msg) noexcept -> void
         case Work::reprocess:
         case Work::rescan:
         case Work::do_rescan:
-        case Work::key:
-        case Work::statemachine: {
+        case Work::key: {
             log_(OT_PRETTY_CLASS())(name_)(" deferring ")(print(work))(
                 " message processing until reorg is complete")
                 .Flush();
@@ -470,8 +482,6 @@ auto Job::state_reorg(const Work work, Message&& msg) noexcept -> void
         case Work::finish_reorg: {
             transition_state_normal();
         } break;
-        case Work::shutdown:
-        case Work::init:
         case Work::prepare_shutdown: {
             LogAbort()(OT_PRETTY_CLASS())(name_)(" wrong state for ")(
                 print(work))(" message")
@@ -480,7 +490,14 @@ auto Job::state_reorg(const Work work, Message&& msg) noexcept -> void
         case Work::watchdog: {
             process_watchdog();
         } break;
+        case Work::shutdown:
         case Work::watchdog_ack:
+        case Work::init:
+        case Work::statemachine: {
+            LogAbort()(OT_PRETTY_CLASS())(name_)(": unhandled message type ")(
+                print(work))
+                .Abort();
+        }
         default: {
             LogAbort()(OT_PRETTY_CLASS())(name_)(" unhandled message type ")(
                 static_cast<OTZMQWorkType>(work))
@@ -523,7 +540,7 @@ auto Job::transition_state_reorg(StateSequence id) noexcept -> void
     }
 }
 
-auto Job::work() noexcept -> bool
+auto Job::work(allocator_type monotonic) noexcept -> bool
 {
     process_watchdog();
 

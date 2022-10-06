@@ -92,7 +92,7 @@ private:
         const WorkType type) const noexcept -> Message;
 
     auto do_shutdown() noexcept -> void;
-    auto do_startup() noexcept -> bool;
+    auto do_startup(allocator_type monotonic) noexcept -> bool;
     auto notify_subscribers(
         const Subscribers& recipients,
         const Balance& balance,
@@ -102,7 +102,8 @@ private:
         const identifier::Nym& owner,
         const Balance& balance,
         const Chain chain) noexcept -> void;
-    auto pipeline(const Work work, Message&& msg) noexcept -> void;
+    auto pipeline(const Work work, Message&& msg, allocator_type) noexcept
+        -> void;
     auto process_registration(Message&& in) noexcept -> void;
     auto process_update_balance(Message&& in) noexcept -> void;
     auto process_update_balance(const Chain chain, Balance balance) noexcept
@@ -111,6 +112,6 @@ private:
         const identifier::Nym& owner,
         const Chain chain,
         Balance balance) noexcept -> void;
-    auto work() noexcept -> bool;
+    auto work(allocator_type monotonic) noexcept -> bool;
 };
 }  // namespace opentxs::api::crypto::blockchain

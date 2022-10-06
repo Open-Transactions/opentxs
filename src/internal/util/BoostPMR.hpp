@@ -9,6 +9,7 @@
 #include <boost/container/pmr/monotonic_buffer_resource.hpp>  // IWYU pragma: export
 #include <boost/container/pmr/synchronized_pool_resource.hpp>  // IWYU pragma: export
 #include <boost/container/pmr/unsynchronized_pool_resource.hpp>  // IWYU pragma: export
+#include <cs_plain_guarded.h>
 #include <utility>
 
 #include "opentxs/util/Allocator.hpp"
@@ -36,7 +37,7 @@ public:
     }
     auto do_is_equal(const Resource& other) const noexcept -> bool final
     {
-        return &other == this;
+        return std::addressof(other) == this;
     }
 
     BoostWrap(boost::container::pmr::memory_resource* boost) noexcept
@@ -77,7 +78,7 @@ public:
     }
     auto do_is_equal(const Resource& other) const noexcept -> bool final
     {
-        return &other == this;
+        return std::addressof(other) == this;
     }
 
     template <typename... Args>
@@ -114,7 +115,7 @@ public:
     auto do_is_equal(const boost::container::pmr::memory_resource& other)
         const noexcept -> bool final
     {
-        return &other == this;
+        return std::addressof(other) == this;
     }
 
     StandardToBoost(Resource* std) noexcept
@@ -132,7 +133,50 @@ private:
     Resource* std_;
 };
 
+/// This class adapts a non-thread safe resource to a thread safe resource by
+/// protecting it with a mutex
+class ThreadSafe final : public Resource
+{
+public:
+    auto do_allocate(std::size_t bytes, std::size_t alignment) -> void* final
+    {
+        auto handle = upstream_.lock();
+        auto* resource = *handle;
+
+        return resource->allocate(bytes, alignment);
+    }
+
+    auto do_deallocate(void* p, std::size_t size, std::size_t alignment)
+        -> void final
+    {
+        auto handle = upstream_.lock();
+        auto* resource = *handle;
+
+        return resource->deallocate(p, size, alignment);
+    }
+    auto do_is_equal(const Resource& other) const noexcept -> bool final
+    {
+        auto handle = upstream_.lock();
+        auto* resource = *handle;
+
+        return std::addressof(other) == resource;
+    }
+
+    ThreadSafe(Resource* upstream)
+        : upstream_((nullptr == upstream) ? System() : upstream)
+    {
+    }
+    ThreadSafe(const ThreadSafe&) = delete;
+    ThreadSafe(ThreadSafe&&) = delete;
+    auto operator=(const ThreadSafe&) -> ThreadSafe& = delete;
+    auto operator=(ThreadSafe&&) -> ThreadSafe& = delete;
+
+    ~ThreadSafe() final = default;
+
+private:
+    mutable libguarded::plain_guarded<Resource*> upstream_;
+};
+
 using BoostMonotonic = Boost<boost::container::pmr::monotonic_buffer_resource>;
-using BoostPool = Boost<boost::container::pmr::unsynchronized_pool_resource>;
 using BoostPoolSync = Boost<boost::container::pmr::synchronized_pool_resource>;
 }  // namespace opentxs::alloc

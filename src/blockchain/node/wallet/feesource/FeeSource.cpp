@@ -176,7 +176,7 @@ auto FeeSource::Imp::do_shutdown() noexcept -> void
     api_p_.reset();
 }
 
-auto FeeSource::Imp::do_startup() noexcept -> bool
+auto FeeSource::Imp::do_startup(allocator_type) noexcept -> bool
 {
     if (api_.Internal().ShuttingDown() || node_.Internal().ShuttingDown()) {
 
@@ -194,21 +194,22 @@ auto FeeSource::Imp::jitter() noexcept -> std::chrono::seconds
     return std::chrono::seconds{dist_(eng_)};
 }
 
-auto FeeSource::Imp::pipeline(const Work work, Message&& msg) noexcept -> void
+auto FeeSource::Imp::pipeline(
+    const Work work,
+    Message&& msg,
+    allocator_type) noexcept -> void
 {
     switch (work) {
-        case Work::shutdown: {
-            shutdown_actor();
-        } break;
         case Work::query: {
             query();
         } break;
-        case Work::init: {
-            do_startup();
-        } break;
+        case Work::shutdown:
+        case Work::init:
         case Work::statemachine: {
-            do_work();
-        } break;
+            LogAbort()(OT_PRETTY_CLASS())(name_)(" unhandled message type ")(
+                print(work))
+                .Abort();
+        }
         default: {
             LogAbort()(OT_PRETTY_CLASS())(name_)(": unhandled type: ")(
                 static_cast<OTZMQWorkType>(work))
@@ -280,7 +281,7 @@ auto FeeSource::Imp::reset_timer() noexcept -> void
     });
 }
 
-auto FeeSource::Imp::work() noexcept -> bool
+auto FeeSource::Imp::work(allocator_type monotonic) noexcept -> bool
 {
     auto& future = future_.value();
     static constexpr auto limit = 25ms;

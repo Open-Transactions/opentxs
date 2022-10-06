@@ -24,6 +24,7 @@
 #include "api/crypto/blockchain/Blockchain.hpp"
 #include "api/crypto/blockchain/Imp.hpp"
 #include "blockchain/database/common/Database.hpp"
+#include "internal/blockchain/block/Types.hpp"
 #include "internal/blockchain/database/common/Common.hpp"
 #include "internal/util/Mutex.hpp"
 #include "opentxs/api/Context.hpp"
@@ -120,7 +121,6 @@ struct BlockchainImp final : public Blockchain::Imp {
     using Txid = opentxs::blockchain::block::Txid;
     using pTxid = opentxs::blockchain::block::pTxid;
     using TxidHex = Blockchain::TxidHex;
-    using PatternID = Blockchain::PatternID;
     using ContactList = Blockchain::ContactList;
 
     auto ActivityDescription(
@@ -136,7 +136,8 @@ struct BlockchainImp final : public Blockchain::Imp {
     auto AssignTransactionMemo(
         const TxidHex& id,
         const UnallocatedCString& label) const noexcept -> bool final;
-    auto IndexItem(const ReadView bytes) const noexcept -> PatternID final;
+    auto IndexItem(const ReadView bytes) const noexcept
+        -> opentxs::blockchain::block::ElementHash final;
     auto KeyEndpoint() const noexcept -> std::string_view final;
     auto KeyGenerated(
         const opentxs::blockchain::Type chain,

@@ -81,8 +81,9 @@ private:
     friend SyncListenerActor;
 
     auto do_shutdown() noexcept -> void {}
-    auto do_startup() noexcept -> bool { return false; }
-    auto pipeline(const Work work, Message&& msg) noexcept -> void
+    auto do_startup(allocator_type) noexcept -> bool { return false; }
+    auto pipeline(const Work work, Message&& msg, allocator_type) noexcept
+        -> void
     {
         switch (work) {
             case Work::sync: {
@@ -126,7 +127,7 @@ private:
                 .Flush();
         }
     }
-    auto work() noexcept -> bool { return false; }
+    auto work(allocator_type) noexcept -> bool { return false; }
 
     Imp(const ot::api::Session& api,
         std::string_view name,

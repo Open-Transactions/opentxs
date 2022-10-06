@@ -20,12 +20,14 @@
 
 #include <BlockchainTransaction.pb.h>
 
+#include "internal/blockchain/bitcoin/block/Types.hpp"
 #include "opentxs/blockchain/bitcoin/block/Header.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/blockchain/block/Header.hpp"
 #include "opentxs/blockchain/block/Outpoint.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/core/ByteArray.hpp"
+#include "opentxs/core/Data.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 
@@ -54,15 +56,13 @@ public:
         return std::make_unique<blank::Script>();
     }
     auto end() const noexcept -> const_iterator final { return {this}; }
-    auto ExtractElements(const cfilter::Type) const noexcept
-        -> Vector<Vector<std::byte>> final
+    auto ExtractElements(const cfilter::Type, Elements&) const noexcept
+        -> void final
     {
-        return {};
     }
-    auto ExtractPatterns(const api::Session&) const noexcept
-        -> UnallocatedVector<PatternID> final
+    auto IndexElements(const api::Session&, ElementHashes&) const noexcept
+        -> void final
     {
-        return {};
     }
     auto IsNotification(const std::uint8_t, const PaymentCode&) const noexcept
         -> bool final
@@ -134,29 +134,27 @@ public:
     {
         return std::make_unique<blank::Output>();
     }
-    auto ExtractElements(const cfilter::Type) const noexcept
-        -> Vector<Vector<std::byte>> final
+    auto ExtractElements(const cfilter::Type, Elements&) const noexcept
+        -> void final
     {
-        return {};
     }
     auto FindMatches(
         const api::Session&,
-        const blockchain::block::Txid&,
+        const Txid&,
         const cfilter::Type,
-        const blockchain::block::ParsedPatterns&,
-        const Log&) const noexcept -> blockchain::block::Matches final
+        const ParsedPatterns&,
+        const Log&,
+        Matches&,
+        alloc::Default) const noexcept -> void final
     {
-        return {};
     }
-    auto GetPatterns(const api::Session&) const noexcept
-        -> UnallocatedVector<PatternID> final
+    auto IndexElements(const api::Session&, ElementHashes&) const noexcept
+        -> void final
     {
-        return {};
     }
-    auto MinedPosition() const noexcept
-        -> const blockchain::block::Position& final
+    auto MinedPosition() const noexcept -> const block::Position& final
     {
-        static const auto blank = blockchain::block::Position{};
+        static const auto blank = block::Position{};
 
         return blank;
     }
@@ -215,11 +213,8 @@ public:
         return {};
     }
     auto SetIndex(const std::uint32_t) noexcept -> void final {}
-    auto SetKeyData(const blockchain::block::KeyData&) noexcept -> void final {}
-    auto SetMinedPosition(const blockchain::block::Position&) noexcept
-        -> void final
-    {
-    }
+    auto SetKeyData(const KeyData&) noexcept -> void final {}
+    auto SetMinedPosition(const block::Position&) noexcept -> void final {}
     auto SetPayee(const identifier::Generic&) noexcept -> void final {}
     auto SetPayer(const identifier::Generic&) noexcept -> void final {}
     auto SetState(node::TxoState) noexcept -> void final {}
@@ -250,27 +245,26 @@ public:
         return std::make_unique<blank::Input>();
     }
     auto Coinbase() const noexcept -> Space final { return {}; }
-    auto ExtractElements(const cfilter::Type) const noexcept
-        -> Vector<Vector<std::byte>> final
+    auto ExtractElements(const cfilter::Type, Elements&) const noexcept
+        -> void final
     {
-        return {};
     }
     auto FindMatches(
         const api::Session&,
-        const blockchain::block::Txid&,
+        const Txid&,
         const cfilter::Type,
-        const blockchain::block::Patterns&,
-        const blockchain::block::ParsedPatterns&,
+        const Patterns&,
+        const ParsedPatterns&,
         const std::size_t,
-        const Log&) const noexcept -> blockchain::block::Matches final
+        const Log&,
+        Matches&,
+        alloc::Default) const noexcept -> void final
     {
-        return {};
     }
     auto GetBytes(std::size_t&, std::size_t&) const noexcept -> void final {}
-    auto GetPatterns(const api::Session&) const noexcept
-        -> UnallocatedVector<PatternID> final
+    auto IndexElements(const api::Session&, ElementHashes&) const noexcept
+        -> void final
     {
-        return {};
     }
     auto Keys() const noexcept -> UnallocatedVector<crypto::Key> final
     {
@@ -284,10 +278,9 @@ public:
     {
         return {};
     }
-    auto PreviousOutput() const noexcept
-        -> const blockchain::block::Outpoint& final
+    auto PreviousOutput() const noexcept -> const Outpoint& final
     {
-        static const auto blank = blockchain::block::Outpoint{};
+        static const auto blank = Outpoint{};
 
         return blank;
     }
@@ -354,7 +347,7 @@ public:
         return {};
     }
     auto ReplaceScript() noexcept -> bool final { return {}; }
-    auto SetKeyData(const blockchain::block::KeyData&) noexcept -> void final {}
+    auto SetKeyData(const KeyData&) noexcept -> void final {}
 
     ~Input() final = default;
 };
@@ -387,26 +380,25 @@ public:
         return std::make_unique<blank::Outputs>();
     }
     auto end() const noexcept -> const_iterator final { return {this}; }
-    auto ExtractElements(const cfilter::Type) const noexcept
-        -> Vector<Vector<std::byte>> final
+    auto ExtractElements(const cfilter::Type, Elements&) const noexcept
+        -> void final
     {
-        return {};
     }
     auto FindMatches(
         const api::Session&,
-        const blockchain::block::Txid&,
+        const Txid&,
         const cfilter::Type,
-        const blockchain::block::ParsedPatterns&,
-        const Log&) const noexcept -> blockchain::block::Matches final
+        const ParsedPatterns&,
+        const Log&,
+        Matches&,
+        alloc::Default) const noexcept -> void final
     {
-        return {};
+    }
+    auto IndexElements(const api::Session&, ElementHashes&) const noexcept
+        -> void final
+    {
     }
     auto Keys() const noexcept -> UnallocatedVector<crypto::Key> final
-    {
-        return {};
-    }
-    auto GetPatterns(const api::Session&) const noexcept
-        -> UnallocatedVector<PatternID> final
     {
         return {};
     }
@@ -446,7 +438,7 @@ public:
     {
         return {};
     }
-    auto SetKeyData(const blockchain::block::KeyData&) noexcept -> void final {}
+    auto SetKeyData(const KeyData&) noexcept -> void final {}
 
     ~Outputs() final = default;
 };
@@ -482,27 +474,26 @@ public:
         return std::make_unique<blank::Inputs>();
     }
     auto end() const noexcept -> const_iterator final { return {this}; }
-    auto ExtractElements(const cfilter::Type) const noexcept
-        -> Vector<Vector<std::byte>> final
+    auto ExtractElements(const cfilter::Type, Elements&) const noexcept
+        -> void final
     {
-        return {};
     }
     auto FindMatches(
         const api::Session&,
-        const blockchain::block::Txid&,
+        const Txid&,
         const cfilter::Type,
-        const blockchain::block::Patterns&,
-        const blockchain::block::ParsedPatterns&,
-        const Log&) const noexcept -> blockchain::block::Matches final
+        const Patterns&,
+        const ParsedPatterns&,
+        const Log&,
+        Matches&,
+        alloc::Default) const noexcept -> void final
     {
-        return {};
+    }
+    auto IndexElements(const api::Session&, ElementHashes&) const noexcept
+        -> void final
+    {
     }
     auto Keys() const noexcept -> UnallocatedVector<crypto::Key> final
-    {
-        return {};
-    }
-    auto GetPatterns(const api::Session&) const noexcept
-        -> UnallocatedVector<PatternID> final
     {
         return {};
     }
@@ -549,7 +540,7 @@ public:
         return {};
     }
     auto ReplaceScript(const std::size_t) noexcept -> bool final { return {}; }
-    auto SetKeyData(const blockchain::block::KeyData&) noexcept -> void final {}
+    auto SetKeyData(const KeyData&) noexcept -> void final {}
 
     ~Inputs() final = default;
 };
@@ -581,7 +572,7 @@ public:
     {
         return std::make_unique<blank::Transaction>();
     }
-    auto ConfirmationHeight() const noexcept -> blockchain::block::Height final
+    auto ConfirmationHeight() const noexcept -> block::Height final
     {
         return {};
     }
@@ -590,7 +581,7 @@ public:
     {
         return {};
     }
-    auto ID() const noexcept -> const blockchain::block::Txid& final
+    auto ID() const noexcept -> const Txid& final
     {
         static const auto blank = ByteArray{};
 
@@ -613,10 +604,9 @@ public:
     {
         return {};
     }
-    auto MinedPosition() const noexcept
-        -> const blockchain::block::Position& final
+    auto MinedPosition() const noexcept -> const block::Position& final
     {
-        static const auto blank = blockchain::block::Position{};
+        static const auto blank = block::Position{};
 
         return blank;
     }
@@ -640,10 +630,7 @@ public:
     {
         return {};
     }
-    auto WTXID() const noexcept -> const blockchain::block::Txid& final
-    {
-        return ID();
-    }
+    auto WTXID() const noexcept -> const Txid& final { return ID(); }
 
     auto AssociatePreviousOutput(
         const std::size_t,
@@ -652,24 +639,30 @@ public:
         return {};
     }
     auto CalculateSize() const noexcept -> std::size_t final { return {}; }
-    auto ExtractElements(const cfilter::Type) const noexcept
-        -> Vector<Vector<std::byte>> final
+    auto ExtractElements(const cfilter::Type, Elements&) const noexcept
+        -> void final
+    {
+    }
+    auto FindMatches(
+        const api::Session&,
+        const cfilter::Type,
+        const Patterns&,
+        const ParsedPatterns&,
+        const Log&,
+        alloc::Default,
+        alloc::Default) const noexcept -> Matches final
     {
         return {};
     }
     auto FindMatches(
         const api::Session&,
         const cfilter::Type,
-        const blockchain::block::Patterns&,
-        const blockchain::block::ParsedPatterns&,
-        const Log&) const noexcept -> blockchain::block::Matches final
+        const Patterns&,
+        const ParsedPatterns&,
+        const Log&,
+        Matches&,
+        alloc::Default) const noexcept -> void final
     {
-        return {};
-    }
-    auto GetPatterns(const api::Session&) const noexcept
-        -> UnallocatedVector<PatternID> final
-    {
-        return {};
     }
     auto ForTestingOnlyAddKey(
         const std::size_t,
@@ -683,6 +676,11 @@ public:
         static const auto blank = identifier::Generic{};
 
         return blank;
+    }
+    auto IndexElements(const api::Session&, alloc::Default) const noexcept
+        -> ElementHashes final
+    {
+        return {};
     }
     auto MergeMetadata(
         const api::crypto::Blockchain&,
@@ -701,12 +699,9 @@ public:
     {
         return {};
     }
-    auto SetKeyData(const blockchain::block::KeyData&) noexcept -> void final {}
+    auto SetKeyData(const KeyData&) noexcept -> void final {}
     auto SetMemo(const UnallocatedCString&) noexcept -> void final {}
-    auto SetMinedPosition(const blockchain::block::Position&) noexcept
-        -> void final
-    {
-    }
+    auto SetMinedPosition(const block::Position&) noexcept -> void final {}
     auto SetPosition(std::size_t) noexcept -> void final {}
 
     ~Transaction() final = default;
@@ -742,17 +737,19 @@ public:
         return std::make_unique<Block>();
     }
     auto end() const noexcept -> const_iterator final { return {this}; }
-    auto ExtractElements(const cfilter::Type) const noexcept
-        -> Vector<Vector<std::byte>> final
+    auto ExtractElements(const cfilter::Type, alloc::Default) const noexcept
+        -> Elements final
     {
         return {};
     }
     auto FindMatches(
         const api::Session&,
         const cfilter::Type,
-        const blockchain::block::Patterns&,
-        const blockchain::block::Patterns&,
-        const Log&) const noexcept -> blockchain::block::Matches final
+        const Patterns&,
+        const Patterns&,
+        const Log&,
+        alloc::Default,
+        alloc::Default) const noexcept -> Matches final
     {
         return {};
     }
@@ -762,9 +759,9 @@ public:
 
         return blank;
     }
-    auto ID() const noexcept -> const blockchain::block::Hash& final
+    auto ID() const noexcept -> const block::Hash& final
     {
-        static const auto blank = blockchain::block::Hash{};
+        static const auto blank = block::Hash{};
 
         return blank;
     }
@@ -801,10 +798,7 @@ public:
     {
         return *this;
     }
-    auto CompareToCheckpoint(const blockchain::block::Position&) noexcept
-        -> void final
-    {
-    }
+    auto CompareToCheckpoint(const block::Position&) noexcept -> void final {}
     auto InheritHeight(const blockchain::block::Header&) -> void final {}
     auto InheritState(const blockchain::block::Header&) -> void final {}
     auto InheritWork(const blockchain::Work&) noexcept -> void final {}

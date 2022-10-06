@@ -14,6 +14,7 @@
 #include "internal/blockchain/bitcoin/block/Inputs.hpp"
 #include "internal/blockchain/bitcoin/block/Outputs.hpp"
 #include "internal/blockchain/bitcoin/block/Transaction.hpp"
+#include "internal/blockchain/bitcoin/block/Types.hpp"
 #include "internal/blockchain/block/Block.hpp"
 #include "internal/blockchain/block/Types.hpp"
 #include "internal/util/Mutex.hpp"
@@ -30,7 +31,9 @@
 #include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/core/ByteArray.hpp"
+#include "opentxs/core/Data.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
+#include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
@@ -69,15 +72,16 @@ class Input;
 class Output;
 }  // namespace internal
 
-class Position;
 class Transaction;
 }  // namespace block
-}  // namespace bitcoin
 
-namespace bitcoin
-{
 struct SigHash;
 }  // namespace bitcoin
+
+namespace block
+{
+class Position;
+}  // namespace block
 }  // namespace blockchain
 
 namespace identifier
@@ -123,30 +127,37 @@ public:
     {
         return std::make_unique<Transaction>(*this);
     }
-    auto ConfirmationHeight() const noexcept -> blockchain::block::Height final
+    auto ConfirmationHeight() const noexcept -> block::Height final
     {
         return cache_.height();
     }
-    auto ExtractElements(const cfilter::Type style) const noexcept
-        -> Vector<Vector<std::byte>> final;
+    auto ExtractElements(const cfilter::Type style, Elements& out)
+        const noexcept -> void final;
     auto FindMatches(
         const api::Session& api,
         const cfilter::Type type,
-        const blockchain::block::Patterns& txos,
-        const blockchain::block::ParsedPatterns& elements,
-        const Log& log) const noexcept -> blockchain::block::Matches final;
-    auto GetPatterns(const api::Session& api) const noexcept
-        -> UnallocatedVector<PatternID> final;
+        const Patterns& txos,
+        const ParsedPatterns& elements,
+        const Log& log,
+        alloc::Default alloc,
+        alloc::Default monotonic) const noexcept -> Matches final;
+    auto FindMatches(
+        const api::Session& api,
+        const cfilter::Type type,
+        const Patterns& txos,
+        const ParsedPatterns& elements,
+        const Log& log,
+        Matches& out,
+        alloc::Default monotonic) const noexcept -> void final;
     auto GetPreimageBTC(
         const std::size_t index,
         const blockchain::bitcoin::SigHash& hashType) const noexcept
         -> Space final;
-    auto ID() const noexcept -> const blockchain::block::Txid& final
-    {
-        return txid_;
-    }
+    auto ID() const noexcept -> const Txid& final { return txid_; }
     auto IDNormalized(const api::Factory& factory) const noexcept
         -> const identifier::Generic& final;
+    auto IndexElements(const api::Session& api, alloc::Default alloc)
+        const noexcept -> ElementHashes final;
     auto Inputs() const noexcept -> const block::Inputs& final
     {
         return *inputs_;
@@ -156,8 +167,7 @@ public:
     auto Locktime() const noexcept -> std::uint32_t final { return lock_time_; }
     auto Memo(const api::crypto::Blockchain& crypto) const noexcept
         -> UnallocatedCString final;
-    auto MinedPosition() const noexcept
-        -> const blockchain::block::Position& final
+    auto MinedPosition() const noexcept -> const block::Position& final
     {
         return cache_.position();
     }
@@ -176,10 +186,7 @@ public:
     auto Timestamp() const noexcept -> Time final { return time_; }
     auto Version() const noexcept -> std::int32_t final { return version_; }
     auto vBytes(blockchain::Type chain) const noexcept -> std::size_t final;
-    auto WTXID() const noexcept -> const blockchain::block::Txid& final
-    {
-        return wtxid_;
-    }
+    auto WTXID() const noexcept -> const Txid& final { return wtxid_; }
 
     auto AssociatePreviousOutput(
         const std::size_t index,
@@ -199,14 +206,12 @@ public:
         const internal::Transaction& rhs,
         const Log& log) noexcept -> void final;
     auto Print() const noexcept -> UnallocatedCString final;
-    auto SetKeyData(const blockchain::block::KeyData& data) noexcept
-        -> void final;
+    auto SetKeyData(const KeyData& data) noexcept -> void final;
     auto SetMemo(const UnallocatedCString& memo) noexcept -> void final
     {
         cache_.set_memo(memo);
     }
-    auto SetMinedPosition(const blockchain::block::Position& pos) noexcept
-        -> void final
+    auto SetMinedPosition(const block::Position& pos) noexcept -> void final
     {
         return cache_.set_position(pos);
     }
@@ -221,14 +226,14 @@ public:
         const std::int32_t version,
         const std::byte segwit,
         const std::uint32_t lockTime,
-        const blockchain::block::pTxid&& txid,
-        const blockchain::block::pTxid&& wtxid,
+        const pTxid&& txid,
+        const pTxid&& wtxid,
         const Time& time,
         const UnallocatedCString& memo,
         std::unique_ptr<internal::Inputs> inputs,
         std::unique_ptr<internal::Outputs> outputs,
         UnallocatedVector<blockchain::Type>&& chains,
-        blockchain::block::Position&& minedPosition,
+        block::Position&& minedPosition,
         std::optional<std::size_t>&& position = std::nullopt) noexcept(false);
     Transaction() = delete;
     Transaction(const Transaction&) noexcept;
@@ -243,9 +248,9 @@ private:
     {
     public:
         auto chains() const noexcept -> UnallocatedVector<blockchain::Type>;
-        auto height() const noexcept -> blockchain::block::Height;
+        auto height() const noexcept -> block::Height;
         auto memo() const noexcept -> UnallocatedCString;
-        auto position() const noexcept -> const blockchain::block::Position&;
+        auto position() const noexcept -> const block::Position&;
 
         auto add(blockchain::Type chain) noexcept -> void;
         auto merge(
@@ -265,8 +270,7 @@ private:
         auto reset_size() noexcept -> void;
         auto set_memo(const UnallocatedCString& memo) noexcept -> void;
         auto set_memo(UnallocatedCString&& memo) noexcept -> void;
-        auto set_position(const blockchain::block::Position& pos) noexcept
-            -> void;
+        auto set_position(const block::Position& pos) noexcept -> void;
         template <typename F>
         auto size(const bool normalize, F cb) noexcept -> std::size_t
         {
@@ -282,7 +286,7 @@ private:
         Cache(
             const UnallocatedCString& memo,
             UnallocatedVector<blockchain::Type>&& chains,
-            blockchain::block::Position&& minedPosition) noexcept(false);
+            block::Position&& minedPosition) noexcept(false);
         Cache() = delete;
         Cache(const Cache& rhs) noexcept;
         Cache(Cache&&) = delete;
@@ -294,7 +298,7 @@ private:
         std::optional<std::size_t> normalized_size_;
         UnallocatedCString memo_;
         UnallocatedVector<blockchain::Type> chains_;
-        blockchain::block::Position mined_position_;
+        block::Position mined_position_;
     };
 
     const std::optional<std::size_t> position_;
@@ -303,8 +307,8 @@ private:
     const std::int32_t version_;
     const std::byte segwit_flag_;
     const std::uint32_t lock_time_;
-    const blockchain::block::pTxid txid_;
-    const blockchain::block::pTxid wtxid_;
+    const pTxid txid_;
+    const pTxid wtxid_;
     const Time time_;
     const std::unique_ptr<internal::Inputs> inputs_;
     const std::unique_ptr<internal::Outputs> outputs_;

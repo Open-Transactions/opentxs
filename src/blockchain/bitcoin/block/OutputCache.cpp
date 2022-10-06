@@ -24,7 +24,7 @@ namespace opentxs::blockchain::bitcoin::block::implementation
 Output::Cache::Cache(
     std::optional<std::size_t>&& size,
     boost::container::flat_set<crypto::Key>&& keys,
-    blockchain::block::Position&& minedPosition,
+    block::Position&& minedPosition,
     node::TxoState state,
     UnallocatedSet<node::TxoTag>&& tags) noexcept
     : lock_()
@@ -145,8 +145,7 @@ auto Output::Cache::payer() const noexcept -> identifier::Generic
     return payer_;
 }
 
-auto Output::Cache::position() const noexcept
-    -> const blockchain::block::Position&
+auto Output::Cache::position() const noexcept -> const block::Position&
 {
     auto lock = Lock{lock_};
 
@@ -159,7 +158,7 @@ auto Output::Cache::reset_size() noexcept -> void
     size_ = std::nullopt;
 }
 
-auto Output::Cache::set(const blockchain::block::KeyData& data) noexcept -> void
+auto Output::Cache::set(const KeyData& data) noexcept -> void
 {
     auto lock = Lock{lock_};
     const auto havePayee = [&] { return !payee_.empty(); };
@@ -207,8 +206,7 @@ auto Output::Cache::set_payer(identifier::Generic&& contact) noexcept -> void
     payer_.Assign(contact);
 }
 
-auto Output::Cache::set_position(
-    const blockchain::block::Position& pos) noexcept -> void
+auto Output::Cache::set_position(const block::Position& pos) noexcept -> void
 {
     auto lock = Lock{lock_};
     mined_position_ = pos;

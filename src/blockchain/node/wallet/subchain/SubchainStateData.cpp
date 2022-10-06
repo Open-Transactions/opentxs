@@ -10,7 +10,6 @@
 
 #include <boost/container/container_fwd.hpp>
 #include <algorithm>
-#include <array>
 #include <chrono>
 #include <compare>
 #include <cstdint>
@@ -33,6 +32,7 @@
 #include "internal/blockchain/block/Block.hpp"
 #include "internal/blockchain/crypto/Crypto.hpp"
 #include "internal/blockchain/database/Database.hpp"
+#include "internal/blockchain/database/Wallet.hpp"
 #include "internal/blockchain/node/Manager.hpp"
 #include "internal/blockchain/node/blockoracle/BlockOracle.hpp"
 #include "internal/blockchain/node/blockoracle/Types.hpp"
@@ -81,7 +81,6 @@
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Time.hpp"
 #include "opentxs/util/WorkType.hpp"
-#include "util/ByteLiterals.hpp"
 #include "util/Container.hpp"
 #include "util/ScopeGuard.hpp"
 #include "util/Work.hpp"
@@ -153,28 +152,19 @@ class SubchainStateData::PrehashData
 public:
     const std::size_t job_count_;
 
-    auto operator()(const std::size_t job) noexcept -> void
-    {
-        const auto end = targets_.size();
-
-        for (auto i = job; i < end; i += job_count_) {
-            hash(targets_.at(i), data_.at(i));
-        }
-    }
-
-    auto operator()(
+    auto Match(
         const std::string_view procedure,
         const Log& log,
         const Vector<GCS>& cfilters,
         std::atomic_bool& atLeastOnce,
         const std::size_t job,
         wallet::MatchCache::Results& results,
-        MatchResults& data) noexcept -> void
+        MatchResults& data,
+        alloc::Default monotonic) noexcept -> void
     {
         const auto end = std::min(targets_.size(), cfilters.size());
-        auto alloc = results.get_allocator();
-        auto cache = std::make_shared<AsyncResults>(std::make_tuple(
-            Positions{alloc}, Positions{alloc}, FilterMap{alloc}));
+        auto cache = std::make_tuple(
+            Positions{monotonic}, Positions{monotonic}, FilterMap{monotonic});
 
         for (auto i = job; i < end; i += job_count_) {
             atLeastOnce.store(true);
@@ -191,11 +181,12 @@ public:
                 cfilter,
                 selected,
                 data,
-                *cache,
-                result);
+                cache,
+                result,
+                monotonic);
         }
-        data.modify_detach([cached = std::move(cache)](auto& out) {
-            const auto& [iClean, iDirty, iSizes] = *cached;
+        data.modify([&](auto& out) {
+            const auto& [iClean, iDirty, iSizes] = cache;
             auto& [oClean, oDirty, oSizes] = out;
             std::copy(
                 iClean.begin(),
@@ -210,6 +201,14 @@ public:
                 iSizes.end(),
                 std::inserter(oSizes, oSizes.end()));
         });
+    }
+    auto Prepare(const std::size_t job) noexcept -> void
+    {
+        const auto end = targets_.size();
+
+        for (auto i = job; i < end; i += job_count_) {
+            hash(targets_.at(i), data_.at(i));
+        }
     }
 
     PrehashData(
@@ -228,9 +227,9 @@ public:
     {
         OT_ASSERT(0 < job_count_);
 
-        data_.reserve(targets.size());
+        data_.reserve(targets_.size());
 
-        for (const auto& [block, elements] : targets) {
+        for (const auto& [block, elements] : targets_) {
             const auto& [e20, e32, e33, e64, e65, eTxo] = elements;
             auto& [height, data20, data32, data33, data64, data65, dataTxo] =
                 data_.emplace_back();
@@ -310,15 +309,16 @@ private:
         const BlockTarget& targets,
         const BlockData& prehashed,
         AsyncResults& cache,
-        wallet::MatchCache::Index& results) const noexcept -> void
+        wallet::MatchCache::Index& results,
+        alloc::Default monotonic) const noexcept -> void
     {
-        const auto alloc = results.get_allocator();
         const auto GetKeys = [&](const auto& data) {
-            auto out = Set<Bip32Index>{alloc};
+            auto out = Set<Bip32Index>{monotonic};
             const auto& [hashes, map] = data;
             const auto start = hashes.cbegin();
+            const auto matches = cfilter.Internal().Match(hashes, monotonic);
 
-            for (const auto& match : cfilter.Internal().Match(hashes)) {
+            for (const auto& match : matches) {
                 const auto dist = std::distance(start, match);
 
                 OT_ASSERT(0 <= dist);
@@ -331,11 +331,12 @@ private:
             return out;
         };
         const auto GetOutpoints = [&](const auto& data) {
-            auto out = Set<block::Outpoint>{alloc};
+            auto out = Set<block::Outpoint>{monotonic};
             const auto& [hashes, map] = data;
             const auto start = hashes.cbegin();
+            const auto matches = cfilter.Internal().Match(hashes, monotonic);
 
-            for (const auto& match : cfilter.Internal().Match(hashes)) {
+            for (const auto& match : matches) {
                 const auto dist = std::distance(start, match);
 
                 OT_ASSERT(0 <= dist);
@@ -491,19 +492,17 @@ SubchainStateData::SubchainStateData(
     , genesis_(node_.HeaderOracle().GetPosition(0))
     , from_ssd_endpoint_(std::move(toChildren))
     , to_ssd_endpoint_(std::move(fromChildren))
-    , to_index_endpoint_(network::zeromq::MakeArbitraryInproc(alloc.resource()))
+    , to_index_endpoint_(network::zeromq::MakeArbitraryInproc(alloc))
     , to_scan_endpoint_(std::move(toScan))
-    , to_rescan_endpoint_(
-          network::zeromq::MakeArbitraryInproc(alloc.resource()))
-    , to_process_endpoint_(
-          network::zeromq::MakeArbitraryInproc(alloc.resource()))
+    , to_rescan_endpoint_(network::zeromq::MakeArbitraryInproc(alloc))
+    , to_process_endpoint_(network::zeromq::MakeArbitraryInproc(alloc))
     , to_progress_endpoint_(std::move(toProgress))
     , from_parent_(std::move(fromParent))
     , scan_threshold_(1000)
     , maximum_scan_(2000_uz)
     , element_cache_(
-          db_.GetPatterns(db_key_, alloc.resource()),
-          db_.GetUnspentOutputs(id_, subchain_, alloc.resource()),
+          db_.GetPatterns(db_key_, alloc),
+          db_.GetUnspentOutputs(id_, subchain_, alloc),
           alloc)
     , match_cache_(alloc)
     , scan_dirty_(false)
@@ -661,7 +660,7 @@ auto SubchainStateData::do_shutdown() noexcept -> void
     api_p_.reset();
 }
 
-auto SubchainStateData::do_startup() noexcept -> bool
+auto SubchainStateData::do_startup(allocator_type monotonic) noexcept -> bool
 {
     if (Reorg::State::shutdown == reorg_.Start()) { return true; }
 
@@ -675,7 +674,7 @@ auto SubchainStateData::do_startup() noexcept -> bool
 
     for (auto& [type, time] : child_activity_) { time = now; }
 
-    do_work();
+    do_work(monotonic);
 
     return false;
 }
@@ -780,7 +779,7 @@ auto SubchainStateData::IndexElement(
     const cfilter::Type type,
     const blockchain::crypto::Element& input,
     const Bip32Index index,
-    database::Wallet::ElementMap& output) const noexcept -> void
+    database::ElementMap& output) const noexcept -> void
 {
     log_(OT_PRETTY_CLASS())(name_)(" element ")(
         index)(" extracting filter matching patterns")
@@ -817,8 +816,10 @@ auto SubchainStateData::Init(boost::shared_ptr<SubchainStateData> me) noexcept
     signal_startup(me);
 }
 
-auto SubchainStateData::pipeline(const Work work, Message&& msg) noexcept
-    -> void
+auto SubchainStateData::pipeline(
+    const Work work,
+    Message&& msg,
+    allocator_type) noexcept -> void
 {
     switch (state_) {
         case State::normal: {
@@ -864,7 +865,8 @@ auto SubchainStateData::process_watchdog_ack(Message&& in) noexcept -> void
 
 auto SubchainStateData::ProcessBlock(
     const block::Position& position,
-    const bitcoin::block::Block& block) const noexcept -> bool
+    const bitcoin::block::Block& block,
+    allocator_type monotonic) const noexcept -> bool
 {
     const auto start = Clock::now();
     const auto& name = name_;
@@ -872,9 +874,6 @@ auto SubchainStateData::ProcessBlock(
     const auto& node = node_;
     const auto& filters = node.FilterOracle();
     const auto& blockHash = position.hash_;
-    auto buf = std::array<std::byte, 16_kib>{};
-    auto upstream = alloc::StandardToBoost{get_allocator().resource()};
-    auto alloc = alloc::BoostMonotonic{buf.data(), buf.size(), &upstream};
     auto haveTargets = Time{};
     auto haveFilter = Time{};
     auto keyMatches = 0_uz;
@@ -884,7 +883,11 @@ auto SubchainStateData::ProcessBlock(
         const auto handle = element_cache_.lock_shared();
         const auto matches = match_cache_.lock_shared()->GetMatches(position);
         const auto& elements = handle->GetElements();
-        auto patterns = std::make_pair(Patterns{&alloc}, Patterns{&alloc});
+        auto patterns =
+            std::make_pair(Patterns{monotonic}, Patterns{monotonic});
+        auto& [outpoint, key] = patterns;
+        outpoint.clear();
+        key.clear();
 
         if (false == select_matches(matches, position, elements, patterns)) {
             // TODO blocks should only be queued for processing if they have
@@ -896,16 +899,16 @@ auto SubchainStateData::ProcessBlock(
 
         haveTargets = Clock::now();
         const auto cfilter =
-            filters.LoadFilter(type, blockHash, get_allocator());
+            filters.LoadFilter(type, blockHash, get_allocator(), monotonic);
 
         OT_ASSERT(cfilter.IsValid());
 
         haveFilter = Clock::now();
-        const auto& [outpoint, key] = patterns;
         keyMatches = key.size();
         txoMatches = outpoint.size();
 
-        return block.Internal().FindMatches(api_, type, outpoint, key, log);
+        return block.Internal().FindMatches(
+            api_, type, outpoint, key, log, monotonic, monotonic);
     }();
     const auto haveMatches = Clock::now();
     const auto& [utxo, general] = confirmed;
@@ -951,13 +954,9 @@ auto SubchainStateData::ProcessBlock(
 
 auto SubchainStateData::ProcessTransaction(
     const bitcoin::block::Transaction& tx,
-    const Log& log) const noexcept -> void
+    const Log& log,
+    allocator_type monotonic) const noexcept -> void
 {
-    // NOLINTNEXTLINE(modernize-avoid-c-arrays)
-    std::byte buf[thread_pool_stack_size_ / 2];
-    auto upstream = alloc::StandardToBoost{get_allocator().resource()};
-    auto mr = alloc::BoostMonotonic{buf, sizeof(buf), &upstream};
-    auto alloc = allocator_type{std::addressof(mr)};
     auto copy = tx.clone();
 
     OT_ASSERT(copy);
@@ -965,13 +964,13 @@ auto SubchainStateData::ProcessTransaction(
     const auto matches = [&] {
         auto handle = element_cache_.lock_shared();
         const auto& elements = handle->GetElements();
-        const auto targets = get_account_targets(elements, alloc);
-        const auto patterns = to_patterns(elements, alloc);
-        const auto parsed = block::ParsedPatterns{patterns, alloc};
-        const auto outpoints = translate(elements.txos_, alloc);
+        const auto targets = get_account_targets(elements, monotonic);
+        const auto patterns = to_patterns(elements, monotonic);
+        const auto parsed = block::ParsedPatterns{patterns, monotonic};
+        const auto outpoints = translate(elements.txos_, monotonic);
 
         return copy->Internal().FindMatches(
-            api_, filter_type_, outpoints, parsed, log);
+            api_, filter_type_, outpoints, parsed, log, monotonic, monotonic);
     }();
     handle_mempool_matches(matches, std::move(copy));
 }
@@ -1001,18 +1000,20 @@ auto SubchainStateData::Rescan(
     const block::Position best,
     const block::Height stop,
     block::Position& highestTested,
-    Vector<ScanStatus>& out) const noexcept -> std::optional<block::Position>
+    Vector<ScanStatus>& out,
+    allocator_type monotonic) const noexcept -> std::optional<block::Position>
 {
-    return scan(true, best, stop, highestTested, out);
+    return scan(true, best, stop, highestTested, out, monotonic);
 }
 
 auto SubchainStateData::Scan(
     const block::Position best,
     const block::Height stop,
     block::Position& highestTested,
-    Vector<ScanStatus>& out) const noexcept -> std::optional<block::Position>
+    Vector<ScanStatus>& out,
+    allocator_type monotonic) const noexcept -> std::optional<block::Position>
 {
-    return scan(false, best, stop, highestTested, out);
+    return scan(false, best, stop, highestTested, out, monotonic);
 }
 
 auto SubchainStateData::scan(
@@ -1020,7 +1021,8 @@ auto SubchainStateData::scan(
     const block::Position best,
     const block::Height stop,
     block::Position& highestTested,
-    Vector<ScanStatus>& out) const noexcept -> std::optional<block::Position>
+    Vector<ScanStatus>& out,
+    allocator_type unsafe) const noexcept -> std::optional<block::Position>
 {
     try {
         using namespace std::literals;
@@ -1035,6 +1037,8 @@ auto SubchainStateData::scan(
         const auto startHeight = highestTested.height_ + 1;
         auto atLeastOnce = std::atomic_bool{false};
         auto highestClean = std::optional<block::Position>{std::nullopt};
+        auto safe = alloc::ThreadSafe{unsafe.resource()};
+        auto monotonic = allocator_type{std::addressof(safe)};
         auto resultMap = [&] {
             const auto elementsPerFilter = [this] {
                 const auto cached = elements_per_cfilter_.load();
@@ -1117,10 +1121,10 @@ auto SubchainStateData::scan(
             log(OT_PRETTY_CLASS())(name)(" ")(procedure)("ning filters from ")(
                 startHeight)(" to ")(stopHeight)
                 .Flush();
-            auto alloc = get_allocator();
             const auto target =
                 static_cast<std::size_t>(stopHeight - startHeight + 1);
-            const auto blocks = headers.BestHashes(startHeight, target, alloc);
+            const auto blocks =
+                headers.BestHashes(startHeight, target, monotonic);
 
             if (blocks.empty()) { throw std::runtime_error{""}; }
 
@@ -1129,19 +1133,26 @@ auto SubchainStateData::scan(
             auto tp = api_.Network().Asio().Internal().Post(
                 ThreadPool::General,
                 [&] {
+                    // NOLINTNEXTLINE(modernize-avoid-c-arrays)
+                    std::byte buf[thread_pool_monotonic_];
+                    auto upstream =
+                        alloc::StandardToBoost(get_allocator().resource());
+                    auto resource = alloc::BoostMonotonic(
+                        buf, sizeof(buf), std::addressof(upstream));
+                    auto temp = allocator_type{std::addressof(resource)};
                     filterPromise.set_value(
-                        filters.LoadFilters(type, blocks, alloc));
+                        filters.LoadFilters(type, blocks, monotonic, temp));
                 },
                 "SubchainStateData filter");
 
             if (false == tp) { throw std::runtime_error{""}; }
 
-            auto selected = BlockTargets{alloc};
+            auto selected = BlockTargets{monotonic};
             select_targets(*handle, blocks, elements, startHeight, selected);
 
             OT_ASSERT(false == selected.empty());
 
-            auto results = wallet::MatchCache::Results{alloc};
+            auto results = wallet::MatchCache::Results{get_allocator()};
             auto prehash = PrehashData{
                 api_,
                 selected,
@@ -1149,7 +1160,7 @@ auto SubchainStateData::scan(
                 results,
                 startHeight,
                 std::min(threads, selected.size()),
-                alloc};
+                monotonic};
 
             if (1_uz < prehash.job_count_) {
                 auto count = job_counter_.Allocate();
@@ -1160,13 +1171,13 @@ auto SubchainStateData::scan(
                         [post = std::make_shared<ScopeGuard>(
                              [&count] { ++count; }, [&] { --count; }),
                          n,
-                         &prehash] { prehash(n); },
+                         &prehash] { prehash.Prepare(n); },
                         "SubchainStateData prehash 1");
 
                     if (false == tp) { throw std::runtime_error{""}; }
                 }
             } else {
-                prehash(0_uz);
+                prehash.Prepare(0_uz);
             }
 
             const auto havePrehash = Clock::now();
@@ -1197,7 +1208,9 @@ auto SubchainStateData::scan(
             OT_ASSERT(cfilterCount <= blocks.size());
 
             auto data = MatchResults{std::make_tuple(
-                Positions{alloc}, Positions{alloc}, FilterMap{alloc})};
+                Positions{monotonic},
+                Positions{monotonic},
+                FilterMap{monotonic})};
 
             OT_ASSERT(0_uz < selected.size());
 
@@ -1211,22 +1224,38 @@ auto SubchainStateData::scan(
                          n,
                          post = std::make_shared<ScopeGuard>(
                              [&count] { ++count; }, [&] { --count; })] {
-                            prehash(
+                            // NOLINTNEXTLINE(modernize-avoid-c-arrays)
+                            std::byte buf[thread_pool_monotonic_];
+                            auto upstream = alloc::StandardToBoost(
+                                get_allocator().resource());
+                            auto resource = alloc::BoostMonotonic(
+                                buf, sizeof(buf), std::addressof(upstream));
+                            auto temp =
+                                allocator_type{std::addressof(resource)};
+                            prehash.Match(
                                 procedure,
                                 log,
                                 cfilters,
                                 atLeastOnce,
                                 n,
                                 results,
-                                data);
+                                data,
+                                temp);
                         },
                         "SubchainStateData prehash 2");
 
                     if (false == tp) { throw std::runtime_error{""}; }
                 }
             } else {
-                prehash(
-                    procedure, log, cfilters, atLeastOnce, 0_uz, results, data);
+                prehash.Match(
+                    procedure,
+                    log,
+                    cfilters,
+                    atLeastOnce,
+                    0_uz,
+                    results,
+                    data,
+                    monotonic);
             }
 
             {
@@ -1282,7 +1311,7 @@ auto SubchainStateData::scan(
         }();
 
         if (atLeastOnce.load()) {
-            if (0_uz < resultMap.size()) {
+            if (false == resultMap.empty()) {
                 match_cache_.lock()->Add(std::move(resultMap));
             }
 
@@ -1309,14 +1338,13 @@ auto SubchainStateData::select_all(
     const Elements& in,
     MatchesToTest& out) const noexcept -> void
 {
-    const auto subchainID = database::Wallet::SubchainID{subchain_, id_};
+    const auto subchainID = block::SubchainIndex{subchain_, id_};
     auto& [outpoint, key] = out;
     auto alloc = outpoint.get_allocator();
     const auto SelectKey = [&](const auto& all, auto& out) {
         for (const auto& [index, data] : all) {
             out.emplace_back(std::make_pair(
-                std::make_pair(index, subchainID),
-                space(reader(data), alloc.resource())));
+                std::make_pair(index, subchainID), space(reader(data), alloc)));
         }
     };
     const auto SelectTxo = [&](const auto& all, auto& out) {
@@ -1331,7 +1359,7 @@ auto SubchainStateData::select_all(
 
                 out.emplace_back(std::make_pair(
                     std::make_pair(index, subchainID),
-                    space(outpoint.Bytes(), alloc.resource())));
+                    space(outpoint.Bytes(), alloc)));
             }
         }
     };
@@ -1350,7 +1378,7 @@ auto SubchainStateData::select_matches(
     const Elements& in,
     MatchesToTest& out) const noexcept -> bool
 {
-    const auto subchainID = database::Wallet::SubchainID{subchain_, id_};
+    const auto subchainID = block::SubchainIndex{subchain_, id_};
     auto& [outpoint, key] = out;
     auto alloc = outpoint.get_allocator();
     const auto SelectKey =
@@ -1361,7 +1389,7 @@ auto SubchainStateData::select_matches(
                 if (0_uz < selected.count(index)) {
                     out.emplace_back(std::make_pair(
                         std::make_pair(index, subchainID),
-                        space(reader(data), alloc.resource())));
+                        space(reader(data), alloc)));
                 }
             }
         };
@@ -1381,7 +1409,7 @@ auto SubchainStateData::select_matches(
 
                         out.emplace_back(std::make_pair(
                             std::make_pair(index, subchainID),
-                            space(outpoint.Bytes(), alloc.resource())));
+                            space(outpoint.Bytes(), alloc)));
                     }
                 }
             }
@@ -1431,6 +1459,23 @@ auto SubchainStateData::select_targets(
     const Elements& in,
     BlockTargets& out) const noexcept -> void
 {
+    constexpr auto Prepare = [](auto& pair, auto size) {
+        constexpr auto Reserve = [](auto& vector, auto size) {
+            vector.reserve(size);
+            vector.clear();
+        };
+        Reserve(pair.first, size);
+        Reserve(pair.second, size);
+    };
+    constexpr auto ChooseKey =
+        [](const auto& index, const auto& data, auto& out) {
+            out.first.emplace_back(index);
+            out.second.emplace_back(reader(data));
+        };
+    constexpr auto ChooseTxo = [](const auto& outpoint, auto& out) {
+        out.first.emplace_back(outpoint);
+        out.second.emplace_back(outpoint.Bytes());
+    };
     auto alloc = out.get_allocator();
     auto& [hash, selected] = out.emplace_back(std::make_pair(
         block.hash_,
@@ -1442,26 +1487,12 @@ auto SubchainStateData::select_targets(
             std::make_pair(Vector<Bip32Index>{alloc}, Targets{alloc}),
             std::make_pair(Vector<block::Outpoint>{alloc}, Targets{alloc}))));
     auto& [s20, s32, s33, s64, s65, stxo] = selected;
-    s20.first.reserve(in.elements_20_.size());
-    s20.second.reserve(in.elements_20_.size());
-    s32.first.reserve(in.elements_32_.size());
-    s32.second.reserve(in.elements_32_.size());
-    s33.first.reserve(in.elements_33_.size());
-    s33.second.reserve(in.elements_33_.size());
-    s64.first.reserve(in.elements_64_.size());
-    s64.second.reserve(in.elements_64_.size());
-    s65.first.reserve(in.elements_65_.size());
-    s65.second.reserve(in.elements_65_.size());
-    stxo.first.reserve(in.txos_.size());
-    stxo.second.reserve(in.txos_.size());
-    const auto ChooseKey = [](const auto& index, const auto& data, auto& out) {
-        out.first.emplace_back(index);
-        out.second.emplace_back(reader(data));
-    };
-    const auto ChooseTxo = [](const auto& outpoint, auto& out) {
-        out.first.emplace_back(outpoint);
-        out.second.emplace_back(outpoint.Bytes());
-    };
+    Prepare(s20, in.elements_20_.size());
+    Prepare(s32, in.elements_32_.size());
+    Prepare(s33, in.elements_33_.size());
+    Prepare(s64, in.elements_64_.size());
+    Prepare(s65, in.elements_65_.size());
+    Prepare(stxo, in.txos_.size());
     const auto matches = match_cache_.lock_shared()->GetMatches(block);
 
     for (const auto& [index, data] : in.elements_20_) {
@@ -1693,11 +1724,11 @@ auto SubchainStateData::to_patterns(const Elements& in, allocator_type alloc)
     const noexcept -> Patterns
 {
     auto out = Patterns{alloc};
-    const auto subchainID = database::Wallet::SubchainID{subchain_, id_};
+    const auto subchainID = block::SubchainIndex{subchain_, id_};
     auto cb = [&](const auto& vector) {
         for (const auto& [index, data] : vector) {
             out.emplace_back(std::make_pair(
-                database::Wallet::ElementID{index, subchainID},
+                block::ElementIndex{index, subchainID},
                 [&](const auto& source) {
                     auto pattern = Vector<std::byte>{alloc};
                     copy(reader(source), writer(pattern));
@@ -1776,7 +1807,7 @@ auto SubchainStateData::translate(const TXOs& utxos, allocator_type alloc)
             OT_ASSERT(account == id_);
 
             outpoints.emplace_back(
-                database::Wallet::ElementID{
+                block::ElementIndex{
                     static_cast<Bip32Index>(index),
                     {static_cast<crypto::Subchain>(subchain),
                      std::move(account)}},
@@ -1787,7 +1818,7 @@ auto SubchainStateData::translate(const TXOs& utxos, allocator_type alloc)
     return outpoints;
 }
 
-auto SubchainStateData::work() noexcept -> bool
+auto SubchainStateData::work(allocator_type monotonic) noexcept -> bool
 {
     const auto now = Clock::now();
     using namespace std::literals;

@@ -318,7 +318,7 @@ auto OTDHT::Actor::do_shutdown() noexcept -> void
     api_p_.reset();
 }
 
-auto OTDHT::Actor::do_startup() noexcept -> bool
+auto OTDHT::Actor::do_startup(allocator_type) noexcept -> bool
 {
     if ((api_.Internal().ShuttingDown()) || (node_.Internal().ShuttingDown())) {
 
@@ -486,7 +486,10 @@ auto OTDHT::Actor::have_outstanding_request() const noexcept -> bool
     return last_request_.has_value();
 }
 
-auto OTDHT::Actor::pipeline(const Work work, Message&& msg) noexcept -> void
+auto OTDHT::Actor::pipeline(
+    const Work work,
+    Message&& msg,
+    allocator_type) noexcept -> void
 {
     const auto id = msg.Internal().ExtractFront().as<zeromq::SocketID>();
 
@@ -916,7 +919,7 @@ auto OTDHT::Actor::update_position(
     existing = std::max(existing, incoming);
 }
 
-auto OTDHT::Actor::work() noexcept -> bool
+auto OTDHT::Actor::work(allocator_type monotonic) noexcept -> bool
 {
     if (check_registration() || check_peers()) { reset_registration_timer(); }
 

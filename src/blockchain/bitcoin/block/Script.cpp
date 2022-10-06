@@ -19,6 +19,7 @@
 #include <string_view>
 #include <utility>
 
+#include "internal/api/crypto/Blockchain.hpp"
 #include "internal/blockchain/bitcoin/block/Factory.hpp"
 #include "internal/blockchain/bitcoin/block/Types.hpp"
 #include "internal/util/LogMacros.hpp"
@@ -27,10 +28,12 @@
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/blockchain/Blockchain.hpp"
+#include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/bitcoin/block/Opcodes.hpp"
 #include "opentxs/blockchain/bitcoin/block/Script.hpp"
 #include "opentxs/blockchain/bitcoin/cfilter/FilterType.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"  // IWYU pragma: keep
+#include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/PaymentCode.hpp"
 #include "opentxs/crypto/key/EllipticCurve.hpp"
@@ -48,7 +51,7 @@ auto BitcoinScriptNullData(
     -> std::unique_ptr<blockchain::bitcoin::block::Script>
 {
     namespace b = opentxs::blockchain;
-    namespace bb = opentxs::blockchain::bitcoin::block;
+    namespace bb = blockchain::bitcoin::block;
 
     auto elements = bb::ScriptElements{};
     elements.emplace_back(bb::internal::Opcode(bb::OP::RETURN));
@@ -57,7 +60,7 @@ auto BitcoinScriptNullData(
         elements.emplace_back(bb::internal::PushData(element));
     }
 
-    using Position = opentxs::blockchain::bitcoin::block::Script::Position;
+    using Position = blockchain::bitcoin::block::Script::Position;
 
     return factory::BitcoinScript(chain, std::move(elements), Position::Output);
 }
@@ -71,7 +74,7 @@ auto BitcoinScriptP2MS(
     -> std::unique_ptr<blockchain::bitcoin::block::Script>
 {
     namespace b = opentxs::blockchain;
-    namespace bb = opentxs::blockchain::bitcoin::block;
+    namespace bb = blockchain::bitcoin::block;
 
     if ((0u == M) || (16u < M)) {
         LogError()("opentxs::factory::")(__func__)(": Invalid M").Flush();
@@ -101,7 +104,7 @@ auto BitcoinScriptP2MS(
 
     elements.emplace_back(bb::internal::Opcode(static_cast<bb::OP>(N + 80)));
     elements.emplace_back(bb::internal::Opcode(bb::OP::CHECKMULTISIG));
-    using Position = opentxs::blockchain::bitcoin::block::Script::Position;
+    using Position = blockchain::bitcoin::block::Script::Position;
 
     return factory::BitcoinScript(chain, std::move(elements), Position::Output);
 }
@@ -111,12 +114,12 @@ auto BitcoinScriptP2PK(
     const opentxs::crypto::key::EllipticCurve& key) noexcept
     -> std::unique_ptr<blockchain::bitcoin::block::Script>
 {
-    namespace bb = opentxs::blockchain::bitcoin::block;
+    namespace bb = blockchain::bitcoin::block;
 
     auto elements = bb::ScriptElements{};
     elements.emplace_back(bb::internal::PushData(key.PublicKey()));
     elements.emplace_back(bb::internal::Opcode(bb::OP::CHECKSIG));
-    using Position = opentxs::blockchain::bitcoin::block::Script::Position;
+    using Position = blockchain::bitcoin::block::Script::Position;
 
     return factory::BitcoinScript(chain, std::move(elements), Position::Output);
 }
@@ -128,7 +131,7 @@ auto BitcoinScriptP2PKH(
     -> std::unique_ptr<blockchain::bitcoin::block::Script>
 {
     namespace b = opentxs::blockchain;
-    namespace bb = opentxs::blockchain::bitcoin::block;
+    namespace bb = blockchain::bitcoin::block;
 
     auto hash = Space{};
 
@@ -146,7 +149,7 @@ auto BitcoinScriptP2PKH(
     elements.emplace_back(bb::internal::PushData(reader(hash)));
     elements.emplace_back(bb::internal::Opcode(bb::OP::EQUALVERIFY));
     elements.emplace_back(bb::internal::Opcode(bb::OP::CHECKSIG));
-    using Position = opentxs::blockchain::bitcoin::block::Script::Position;
+    using Position = blockchain::bitcoin::block::Script::Position;
 
     return factory::BitcoinScript(chain, std::move(elements), Position::Output);
 }
@@ -158,7 +161,7 @@ auto BitcoinScriptP2SH(
     -> std::unique_ptr<blockchain::bitcoin::block::Script>
 {
     namespace b = opentxs::blockchain;
-    namespace bb = opentxs::blockchain::bitcoin::block;
+    namespace bb = blockchain::bitcoin::block;
 
     auto bytes = Space{};
     auto hash = Space{};
@@ -183,7 +186,7 @@ auto BitcoinScriptP2SH(
     elements.emplace_back(bb::internal::Opcode(bb::OP::HASH160));
     elements.emplace_back(bb::internal::PushData(reader(hash)));
     elements.emplace_back(bb::internal::Opcode(bb::OP::EQUAL));
-    using Position = opentxs::blockchain::bitcoin::block::Script::Position;
+    using Position = blockchain::bitcoin::block::Script::Position;
 
     return factory::BitcoinScript(chain, std::move(elements), Position::Output);
 }
@@ -195,7 +198,7 @@ auto BitcoinScriptP2WPKH(
     -> std::unique_ptr<blockchain::bitcoin::block::Script>
 {
     namespace b = opentxs::blockchain;
-    namespace bb = opentxs::blockchain::bitcoin::block;
+    namespace bb = blockchain::bitcoin::block;
 
     auto hash = Space{};
 
@@ -210,7 +213,7 @@ auto BitcoinScriptP2WPKH(
     auto elements = bb::ScriptElements{};
     elements.emplace_back(bb::internal::Opcode(bb::OP::ZERO));
     elements.emplace_back(bb::internal::PushData(reader(hash)));
-    using Position = opentxs::blockchain::bitcoin::block::Script::Position;
+    using Position = blockchain::bitcoin::block::Script::Position;
 
     return factory::BitcoinScript(chain, std::move(elements), Position::Output);
 }
@@ -222,7 +225,7 @@ auto BitcoinScriptP2WSH(
     -> std::unique_ptr<blockchain::bitcoin::block::Script>
 {
     namespace b = opentxs::blockchain;
-    namespace bb = opentxs::blockchain::bitcoin::block;
+    namespace bb = blockchain::bitcoin::block;
 
     auto bytes = Space{};
     auto hash = Space{};
@@ -247,7 +250,7 @@ auto BitcoinScriptP2WSH(
     auto elements = bb::ScriptElements{};
     elements.emplace_back(bb::internal::Opcode(bb::OP::ZERO));
     elements.emplace_back(bb::internal::PushData(reader(hash)));
-    using Position = opentxs::blockchain::bitcoin::block::Script::Position;
+    using Position = blockchain::bitcoin::block::Script::Position;
 
     return factory::BitcoinScript(chain, std::move(elements), Position::Output);
 }
@@ -840,16 +843,14 @@ auto Script::evaluate_segwit(const ScriptElements& script) noexcept -> Pattern
     return Pattern::Custom;
 }
 
-auto Script::ExtractElements(const cfilter::Type style) const noexcept
-    -> Vector<Vector<std::byte>>
+auto Script::ExtractElements(const cfilter::Type style, Elements& out)
+    const noexcept -> void
 {
-    if (0 == elements_.size()) {
+    if (elements_.empty()) {
         LogTrace()(OT_PRETTY_CLASS())("skipping empty script").Flush();
 
-        return {};
+        return;
     }
-
-    auto output = Vector<Vector<std::byte>>{};
 
     switch (style) {
         case cfilter::Type::ES: {
@@ -866,15 +867,15 @@ auto Script::ExtractElements(const cfilter::Type style) const noexcept
                             [[fallthrough]];
                         }
                         case 64: {
-                            output.emplace_back(it, it + 32);
+                            out.emplace_back(it, it + 32);
                             std::advance(it, 32);
-                            output.emplace_back(it, it + 32);
+                            out.emplace_back(it, it + 32);
                             [[fallthrough]];
                         }
                         case 33:
                         case 32:
                         case 20: {
-                            output.emplace_back(data.cbegin(), data.cend());
+                            out.emplace_back(data.cbegin(), data.cend());
                         } break;
                         default: {
                         }
@@ -883,11 +884,7 @@ auto Script::ExtractElements(const cfilter::Type style) const noexcept
             }
 
             if (const auto subscript = RedeemScript(); subscript) {
-                auto temp = subscript->ExtractElements(style);
-                output.insert(
-                    output.end(),
-                    std::make_move_iterator(temp.begin()),
-                    std::make_move_iterator(temp.end()));
+                subscript->Internal().ExtractElements(style, out);
             }
         } break;
         case cfilter::Type::Basic_BIP158:
@@ -898,37 +895,15 @@ auto Script::ExtractElements(const cfilter::Type style) const noexcept
                 LogTrace()(OT_PRETTY_CLASS())("skipping null data script")
                     .Flush();
 
-                return {};
+                return;
             }
 
             LogTrace()(OT_PRETTY_CLASS())("processing serialized script")
                 .Flush();
-            auto& script = output.emplace_back();
+            auto& script = out.emplace_back();
             Serialize(writer(script));
         }
     }
-
-    LogTrace()(OT_PRETTY_CLASS())("extracted ")(output.size())(" elements")
-        .Flush();
-    std::sort(output.begin(), output.end());
-
-    return output;
-}
-
-auto Script::ExtractPatterns(const api::Session& api) const noexcept
-    -> UnallocatedVector<PatternID>
-{
-    auto output = UnallocatedVector<PatternID>{};
-    const auto hashes = LikelyPubkeyHashes(api.Crypto());
-    std::transform(
-        std::begin(hashes),
-        std::end(hashes),
-        std::back_inserter(output),
-        [&](const auto& hash) -> auto{
-            return api.Crypto().Blockchain().IndexItem(hash.Bytes());
-        });
-
-    return output;
 }
 
 auto Script::first_opcode(const ScriptElements& script) noexcept -> OP
@@ -990,6 +965,19 @@ auto Script::get_type(
             OT_FAIL;
         }
     }
+}
+
+auto Script::IndexElements(const api::Session& api, ElementHashes& out)
+    const noexcept -> void
+{
+    const auto hashes = LikelyPubkeyHashes(api.Crypto());
+    std::transform(
+        std::begin(hashes),
+        std::end(hashes),
+        std::inserter(out, out.end()),
+        [&](const auto& hash) -> auto{
+            return api.Crypto().Blockchain().Internal().IndexItem(hash.Bytes());
+        });
 }
 
 auto Script::IsNotification(

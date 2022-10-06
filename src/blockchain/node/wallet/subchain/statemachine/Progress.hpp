@@ -81,12 +81,13 @@ private:
 
     auto notify(const block::Position& pos) const noexcept -> void;
 
-    auto do_process_update(Message&& msg) noexcept -> void final;
+    auto do_process_update(Message&& msg, allocator_type monotonic) noexcept
+        -> void final;
     auto do_reorg(
         const node::HeaderOracle& oracle,
         const node::internal::HeaderOraclePrivate& data,
         Reorg::Params& params) noexcept -> bool final;
-    auto do_startup_internal() noexcept -> void final {}
+    auto do_startup_internal(allocator_type monotonic) noexcept -> void final {}
     auto forward_to_next(Message&& msg) noexcept -> void final {}
     auto process_do_rescan(Message&& in) noexcept -> void final;
 };

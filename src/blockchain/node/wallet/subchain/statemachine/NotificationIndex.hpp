@@ -61,6 +61,7 @@ private:
 
     auto process(
         const std::optional<Bip32Index>& current,
-        Bip32Index target) noexcept -> void final;
+        Bip32Index target,
+        allocator_type monotonic) noexcept -> void final;
 };
 }  // namespace opentxs::blockchain::node::wallet

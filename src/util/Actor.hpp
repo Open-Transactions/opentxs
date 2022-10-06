@@ -23,9 +23,11 @@
 #include "internal/network/zeromq/Context.hpp"
 #include "internal/network/zeromq/Types.hpp"
 #include "internal/network/zeromq/socket/Pipeline.hpp"
+#include "internal/util/BoostPMR.hpp"
 #include "internal/util/Future.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
+#include "internal/util/Thread.hpp"
 #include "internal/util/Timer.hpp"
 #include "opentxs/api/Context.hpp"
 #include "opentxs/api/network/Asio.hpp"
@@ -111,7 +113,7 @@ protected:
     {
         cache_.emplace(std::move(message));
     }
-    auto do_init() noexcept -> void
+    auto do_init(allocator_type monotonic) noexcept -> void
     {
         if (init_complete_) {
             LogAbort()(OT_PRETTY_CLASS())(
@@ -121,17 +123,17 @@ protected:
             log_(OT_PRETTY_CLASS())(name_)(": initializing").Flush();
         }
 
-        const auto shutdown = downcast().do_startup();
+        const auto shutdown = downcast().do_startup(monotonic);
         init_complete_ = true;
         log_(OT_PRETTY_CLASS())(name_)(": initialization complete").Flush();
 
         if (shutdown) {
             shutdown_actor();
         } else {
-            flush_cache();
+            flush_cache(monotonic);
         }
     }
-    auto do_work() noexcept -> void
+    auto do_work(allocator_type monotonic) noexcept -> void
     {
         const auto now = sClock::now();
 
@@ -146,7 +148,7 @@ protected:
                 state_machine_signal_);
         } else {
             state_machine_queued_.store(false);
-            repeat(downcast().work());
+            repeat(downcast().work(monotonic));
             next_state_machine_ = now + rate_limit_;
         }
     }
@@ -332,7 +334,7 @@ private:
     {
         return static_cast<CRTP&>(*this);
     }
-    auto flush_cache() noexcept -> void
+    auto flush_cache(allocator_type monotonic) noexcept -> void
     {
         if (false == cache_.empty()) {
             log_(OT_PRETTY_CLASS())(name_)(": flushing ")(cache_.size())(
@@ -343,17 +345,20 @@ private:
         for (auto n{0_uz}, stop = cache_.size(); n < stop; ++n) {
             auto message = Message{std::move(cache_.front())};
             cache_.pop();
-            handle_message(std::move(message));
+            handle_message(std::move(message), monotonic);
         }
     }
-    auto handle_message(network::zeromq::Message&& in) noexcept -> void
+    auto handle_message(
+        network::zeromq::Message&& in,
+        allocator_type monotonic) noexcept -> void
     {
         try {
             const auto [work, type, isInit, canDrop] = decode_message_type(in);
 
             OT_ASSERT(init_complete_);
 
-            handle_message(false, isInit, canDrop, type, work, std::move(in));
+            handle_message(
+                false, isInit, canDrop, type, work, std::move(in), monotonic);
         } catch (const std::exception& e) {
             log_(OT_PRETTY_CLASS())(name_)(": ")(e.what()).Flush();
         }
@@ -364,12 +369,13 @@ private:
         const bool canDrop,
         const std::string_view type,
         const Work work,
-        network::zeromq::Message&& in) noexcept -> void
+        network::zeromq::Message&& in,
+        allocator_type monotonic) noexcept -> void
     {
         if (false == init_complete_) {
             if (isInit) {
-                do_init();
-                flush_cache();
+                do_init(monotonic);
+                flush_cache(monotonic);
             } else if (canDrop) {
                 log_(OT_PRETTY_CLASS())(name_)(": dropping message of type ")(
                     type)(" until init is processed")
@@ -381,33 +387,36 @@ private:
                 defer(std::move(in));
             }
         } else {
-            if (topLevel) { flush_cache(); }
+            if (topLevel) { flush_cache(monotonic); }
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wswitch-enum"
             switch (work) {
                 case terminate_signal_: {
                     log_(OT_PRETTY_CLASS())(name_)(": shutting down").Flush();
-                    this->shutdown_actor();
+                    shutdown_actor();
                 } break;
                 case state_machine_signal_: {
                     log_(OT_PRETTY_CLASS())(name_)(": executing state machine")
                         .Flush();
-                    do_work();
+                    do_work(monotonic);
                 } break;
                 default: {
                     log_(OT_PRETTY_CLASS())(name_)(": processing ")(type)
                         .Flush();
-                    handle_message(work, std::move(in));
+                    handle_message(work, std::move(in), monotonic);
                 }
             }
         }
 #pragma GCC diagnostic pop
     }
-    auto handle_message(const Work work, Message&& msg) noexcept -> void
+    auto handle_message(
+        const Work work,
+        Message&& msg,
+        allocator_type monotonic) noexcept -> void
     {
         try {
-            downcast().pipeline(work, std::move(msg));
+            downcast().pipeline(work, std::move(msg), monotonic);
         } catch (const std::exception& e) {
             log_(OT_PRETTY_CLASS())(name_)(": error processing ")(print(work))(
                 " message: ")(e.what())
@@ -433,10 +442,22 @@ private:
     auto worker(network::zeromq::Message&& in) noexcept -> void
     {
         log_(OT_PRETTY_CLASS())(name_)(": Message received").Flush();
+        // NOLINTNEXTLINE(modernize-avoid-c-arrays)
+        std::byte buf[thread_pool_monotonic_];
 
         try {
+            auto upstream = alloc::StandardToBoost(get_allocator().resource());
+            auto alloc = alloc::BoostMonotonic(
+                buf, sizeof(buf), std::addressof(upstream));
             const auto [work, type, isInit, canDrop] = decode_message_type(in);
-            handle_message(true, isInit, canDrop, type, work, std::move(in));
+            handle_message(
+                true,
+                isInit,
+                canDrop,
+                type,
+                work,
+                std::move(in),
+                std::addressof(alloc));
         } catch (const std::exception& e) {
             log_(OT_PRETTY_CLASS())(name_)(": ")(e.what()).Flush();
         }

@@ -27,11 +27,11 @@
 #include "blockchain/database/wallet/Position.hpp"
 #include "blockchain/database/wallet/Proposal.hpp"
 #include "blockchain/database/wallet/Subchain.hpp"
-#include "blockchain/database/wallet/Types.hpp"
 #include "internal/api/crypto/Blockchain.hpp"
 #include "internal/blockchain/Params.hpp"
 #include "internal/blockchain/bitcoin/block/Output.hpp"
 #include "internal/blockchain/bitcoin/block/Transaction.hpp"
+#include "internal/blockchain/database/Types.hpp"
 #include "internal/blockchain/node/SpendPolicy.hpp"
 #include "internal/network/zeromq/Context.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
@@ -108,7 +108,7 @@ public:
 
         return get_balance(*lock_shared(), owner);
     }
-    auto GetBalance(const identifier::Nym& owner, const NodeID& node)
+    auto GetBalance(const identifier::Nym& owner, const SubaccountID& node)
         const noexcept -> Balance
     {
         if (owner.empty() || node.empty()) { return {}; }
@@ -230,7 +230,7 @@ public:
 
         return GetUnspentOutputs(blank, alloc);
     }
-    auto GetUnspentOutputs(const NodeID& id, alloc::Default alloc)
+    auto GetUnspentOutputs(const SubaccountID& id, alloc::Default alloc)
         const noexcept -> Vector<UTXO>
     {
         return get_unspent_outputs(*lock_shared(), id, alloc);
@@ -308,8 +308,8 @@ public:
         }
     }
     auto AddConfirmedTransactions(
-        const NodeID& account,
-        const SubchainIndex& subchain,
+        const SubaccountID& account,
+        const SubchainID& subchain,
         BatchedMatches&& transactions,
         TXOs& txoCreated,
         TXOs& txoConsumed) noexcept -> bool
@@ -1174,7 +1174,7 @@ private:
         const States states,
         const identifier::Nym* owner,
         const AccountID* account,
-        const NodeID* subchain,
+        const SubaccountID* subchain,
         const crypto::Key* key,
         alloc::Default alloc) const noexcept -> Vector<UTXO>
     {
@@ -1191,7 +1191,7 @@ private:
     }
     [[nodiscard]] auto get_unspent_outputs(
         const OutputCache& cache,
-        const NodeID& id,
+        const SubaccountID& id,
         alloc::Default alloc) const noexcept -> Vector<UTXO>
     {
         const auto* pSub = id.empty() ? nullptr : &id;
@@ -1230,7 +1230,7 @@ private:
     }
     [[nodiscard]] auto has_subchain(
         const OutputCache& cache,
-        const NodeID& id,
+        const SubaccountID& id,
         const block::Outpoint& outpoint) const noexcept -> bool
     {
         return 0 < cache.GetSubchain(id).count(outpoint);
@@ -1255,7 +1255,7 @@ private:
         const States states,
         const identifier::Nym* owner,
         const AccountID* account,
-        const NodeID* subchain,
+        const SubaccountID* subchain,
         const crypto::Key* key) const noexcept -> Matches
     {
         auto output = Matches{};
@@ -1339,7 +1339,7 @@ private:
         const AccountID& account,
         const SubchainID& subchain,
         const block::Position& block,
-        const Parent::BlockMatches& blockMatches,
+        const BlockMatches& blockMatches,
         const node::TxoState consumeState,
         const node::TxoState createState,
         Set<std::shared_ptr<bitcoin::block::Transaction>>& processed,
@@ -2004,7 +2004,7 @@ auto Output::GetBalance(const identifier::Nym& owner) const noexcept -> Balance
     return imp_->GetBalance(owner);
 }
 
-auto Output::GetBalance(const identifier::Nym& owner, const NodeID& node)
+auto Output::GetBalance(const identifier::Nym& owner, const SubaccountID& node)
     const noexcept -> Balance
 {
     return imp_->GetBalance(owner, node);
@@ -2031,7 +2031,7 @@ auto Output::GetOutputs(
 
 auto Output::GetOutputs(
     const identifier::Nym& owner,
-    const NodeID& node,
+    const SubaccountID& node,
     node::TxoState type,
     alloc::Default alloc) const noexcept -> Vector<UTXO>
 {
@@ -2080,8 +2080,9 @@ auto Output::GetUnspentOutputs(alloc::Default alloc) const noexcept
     return imp_->GetUnspentOutputs(alloc);
 }
 
-auto Output::GetUnspentOutputs(const NodeID& balanceNode, alloc::Default alloc)
-    const noexcept -> Vector<UTXO>
+auto Output::GetUnspentOutputs(
+    const SubaccountID& balanceNode,
+    alloc::Default alloc) const noexcept -> Vector<UTXO>
 {
     return imp_->GetUnspentOutputs(balanceNode, alloc);
 }

@@ -73,8 +73,9 @@ private:
     Timer heartbeat_;
 
     auto do_shutdown() noexcept -> void;
-    auto do_startup() noexcept -> bool;
-    auto pipeline(const Work work, Message&& msg) noexcept -> void;
-    auto work() noexcept -> bool;
+    auto do_startup(allocator_type monotonic) noexcept -> bool;
+    auto pipeline(const Work work, Message&& msg, allocator_type) noexcept
+        -> void;
+    auto work(allocator_type monotonic) noexcept -> bool;
 };
 }  // namespace opentxs::blockchain::node::blockoracle

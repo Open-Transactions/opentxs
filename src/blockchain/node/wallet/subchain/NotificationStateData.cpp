@@ -8,7 +8,6 @@
 
 #include <HDPath.pb.h>
 #include <algorithm>
-#include <array>
 #include <cstddef>
 #include <cstdint>
 #include <iosfwd>
@@ -25,7 +24,6 @@
 #include "internal/blockchain/crypto/Crypto.hpp"
 #include "internal/blockchain/node/wallet/subchain/statemachine/Index.hpp"
 #include "internal/core/PaymentCode.hpp"
-#include "internal/util/BoostPMR.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/api/crypto/Blockchain.hpp"
 #include "opentxs/api/session/Contacts.hpp"
@@ -91,9 +89,10 @@ auto NotificationStateData::CheckCache(const std::size_t, FinishedCallback cb)
     }
 }
 
-auto NotificationStateData::do_startup() noexcept -> bool
+auto NotificationStateData::do_startup(allocator_type monotonic) noexcept
+    -> bool
 {
-    if (SubchainStateData::do_startup()) { return true; }
+    if (SubchainStateData::do_startup(monotonic)) { return true; }
 
     auto reason =
         api_.Factory().PasswordPrompt("Verifying / updating contact data");
@@ -169,14 +168,15 @@ auto NotificationStateData::handle_mempool_matches(
     }
 }
 
-auto NotificationStateData::init_contacts() noexcept -> void
+auto NotificationStateData::init_contacts(allocator_type monotonic) noexcept
+    -> void
 {
-    auto buf = std::array<std::byte, 4096>{};
-    auto alloc = alloc::BoostMonotonic{buf.data(), buf.size()};
     const auto& api = api_.Internal().Contacts();
     const auto contacts = [&] {
-        auto out = Vector<identifier::Generic>{&alloc};
         const auto data = api.ContactList();
+        auto out = Vector<identifier::Generic>{monotonic};
+        out.reserve(data.size());
+        out.clear();
         std::transform(
             data.begin(),
             data.end(),
@@ -193,7 +193,7 @@ auto NotificationStateData::init_contacts() noexcept -> void
 
         OT_ASSERT(contact);
 
-        for (const auto& remote : contact->PaymentCodes(&alloc)) {
+        for (const auto& remote : contact->PaymentCodes(monotonic)) {
             const auto prompt = [&] {
                 // TODO use allocator when we upgrade to c++20
                 auto out = std::stringstream{};
@@ -290,10 +290,10 @@ auto NotificationStateData::process(
         .Flush();
 }
 
-auto NotificationStateData::work() noexcept -> bool
+auto NotificationStateData::work(allocator_type monotonic) noexcept -> bool
 {
-    auto again = SubchainStateData::work();
-    init_contacts();
+    auto again = SubchainStateData::work(monotonic);
+    init_contacts(monotonic);
 
     return again;
 }

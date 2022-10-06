@@ -28,6 +28,7 @@
 #include "internal/blockchain/bitcoin/block/Input.hpp"
 #include "internal/blockchain/bitcoin/block/Output.hpp"
 #include "internal/blockchain/bitcoin/block/Script.hpp"
+#include "internal/blockchain/bitcoin/block/Types.hpp"
 #include "internal/blockchain/block/Block.hpp"
 #include "internal/blockchain/block/Types.hpp"
 #include "internal/util/Mutex.hpp"
@@ -46,6 +47,7 @@
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
+#include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
@@ -98,7 +100,7 @@ namespace opentxs::blockchain::bitcoin::block::implementation
 class Input final : public internal::Input
 {
 public:
-    using PubkeyHashes = boost::container::flat_set<PatternID>;
+    using PubkeyHashes = boost::container::flat_set<ElementHash>;
 
     static const VersionNumber default_version_;
 
@@ -117,24 +119,28 @@ public:
     {
         return std::make_unique<Input>(*this);
     }
-    auto ExtractElements(const cfilter::Type style) const noexcept
-        -> Vector<Vector<std::byte>> final;
+    auto ExtractElements(const cfilter::Type style, Elements& out)
+        const noexcept -> void final;
+    auto ExtractElements(const cfilter::Type style, alloc::Default alloc)
+        const noexcept -> Elements;
     auto FindMatches(
         const api::Session& api,
-        const blockchain::block::Txid& txid,
+        const Txid& txid,
         const cfilter::Type type,
-        const blockchain::block::Patterns& txos,
-        const blockchain::block::ParsedPatterns& elements,
+        const Patterns& txos,
+        const ParsedPatterns& elements,
         const std::size_t position,
-        const Log& log) const noexcept -> blockchain::block::Matches final;
+        const Log& log,
+        Matches& out,
+        alloc::Default monotonic) const noexcept -> void final;
     auto GetBytes(std::size_t& base, std::size_t& witness) const noexcept
         -> void final;
-    auto GetPatterns(const api::Session& api) const noexcept
-        -> UnallocatedVector<PatternID> final;
     auto Keys() const noexcept -> UnallocatedVector<crypto::Key> final
     {
         return cache_.keys();
     }
+    auto IndexElements(const api::Session& api, ElementHashes& out)
+        const noexcept -> void final;
     auto NetBalanceChange(
         const api::crypto::Blockchain& crypto,
         const identifier::Nym& nym,
@@ -144,8 +150,7 @@ public:
     {
         return cache_.payer();
     }
-    auto PreviousOutput() const noexcept
-        -> const blockchain::block::Outpoint& final
+    auto PreviousOutput() const noexcept -> const Outpoint& final
     {
         return previous_;
     }
@@ -158,8 +163,7 @@ public:
         const api::Session& api,
         const std::uint32_t index,
         SerializeType& destination) const noexcept -> bool final;
-    auto SetKeyData(const blockchain::block::KeyData& data) noexcept
-        -> void final
+    auto SetKeyData(const KeyData& data) noexcept -> void final
     {
         return cache_.set(data);
     }
@@ -195,7 +199,7 @@ public:
     Input(
         const blockchain::Type chain,
         const std::uint32_t sequence,
-        blockchain::block::Outpoint&& previous,
+        Outpoint&& previous,
         UnallocatedVector<Space>&& witness,
         std::unique_ptr<const block::Script> script,
         const VersionNumber version,
@@ -203,7 +207,7 @@ public:
     Input(
         const blockchain::Type chain,
         const std::uint32_t sequence,
-        blockchain::block::Outpoint&& previous,
+        Outpoint&& previous,
         UnallocatedVector<Space>&& witness,
         std::unique_ptr<const block::Script> script,
         const VersionNumber version,
@@ -212,7 +216,7 @@ public:
     Input(
         const blockchain::Type chain,
         const std::uint32_t sequence,
-        blockchain::block::Outpoint&& previous,
+        Outpoint&& previous,
         UnallocatedVector<Space>&& witness,
         const ReadView coinbase,
         const VersionNumber version,
@@ -221,7 +225,7 @@ public:
     Input(
         const blockchain::Type chain,
         const std::uint32_t sequence,
-        blockchain::block::Outpoint&& previous,
+        Outpoint&& previous,
         UnallocatedVector<Space>&& witness,
         std::unique_ptr<const block::Script> script,
         Space&& coinbase,
@@ -266,7 +270,7 @@ private:
             const std::size_t index,
             const Log& log) noexcept -> bool;
         auto reset_size() noexcept -> void;
-        auto set(const blockchain::block::KeyData& data) noexcept -> void;
+        auto set(const KeyData& data) noexcept -> void;
         template <typename F>
         auto size(const bool normalize, F cb) noexcept -> std::size_t
         {
@@ -295,7 +299,7 @@ private:
     };
 
     using PubkeyMap =
-        Map<int, std::pair<PubkeyHashes, std::optional<PatternID>>>;
+        Map<int, std::pair<PubkeyHashes, std::optional<ElementHash>>>;
     using GuardedData = libguarded::plain_guarded<PubkeyMap>;
 
     static const VersionNumber outpoint_version_;
@@ -310,7 +314,7 @@ private:
 
     const blockchain::Type chain_;
     const VersionNumber serialize_version_;
-    const blockchain::block::Outpoint previous_;
+    const Outpoint previous_;
     const UnallocatedVector<Space> witness_;
     const std::unique_ptr<const block::Script> script_;
     const Space coinbase_;
@@ -320,12 +324,14 @@ private:
 
     auto classify() const noexcept -> Redeem;
     auto decode_coinbase() const noexcept -> UnallocatedCString;
-    auto get_pubkeys(const api::Session& api) const noexcept
-        -> const PubkeyHashes&;
+    auto get_pubkeys(const api::Session& api, alloc::Default monotonic)
+        const noexcept -> const PubkeyHashes&;
     auto get_script_hash(const api::Session& api) const noexcept
-        -> const std::optional<PatternID>&;
-    auto index_elements(const api::Session& api, PubkeyHashes& hashes)
-        const noexcept -> void;
+        -> const std::optional<ElementHash>&;
+    auto index_elements(
+        const api::Session& api,
+        PubkeyHashes& hashes,
+        alloc::Default monotonic) const noexcept -> void;
     auto is_bip16() const noexcept;
     auto payload_bytes() const noexcept -> std::size_t;
     auto serialize(const AllocateOutput destination, const bool normalized)

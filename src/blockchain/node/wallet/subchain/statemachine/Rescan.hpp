@@ -99,24 +99,27 @@ private:
 
     auto adjust_last_scanned(
         const std::optional<block::Position>& highestClean) noexcept -> void;
-    auto do_process_update(Message&& msg) noexcept -> void final;
+    auto do_process_update(Message&& msg, allocator_type monotonic) noexcept
+        -> void final;
     auto do_reorg(
         const node::HeaderOracle& oracle,
         const node::internal::HeaderOraclePrivate& data,
         Reorg::Params& params) noexcept -> bool final;
-    auto do_startup_internal() noexcept -> void final;
+    auto do_startup_internal(allocator_type monotonic) noexcept -> void final;
     auto forward_to_next(Message&& msg) noexcept -> void final;
     auto process_clean(const Set<ScanStatus>& clean) noexcept -> void;
     auto process_dirty(const Set<block::Position>& dirty) noexcept -> void;
     auto process_do_rescan(Message&& in) noexcept -> void final;
-    auto process_filter(Message&& in, block::Position&& tip) noexcept
-        -> void final;
+    auto process_filter(
+        Message&& in,
+        block::Position&& tip,
+        allocator_type monotonic) noexcept -> void final;
     auto prune() noexcept -> void;
     auto set_last_scanned(const block::Position& value) noexcept -> void;
     auto set_last_scanned(const std::optional<block::Position>& value) noexcept
         -> void;
     auto set_last_scanned(std::optional<block::Position>&& value) noexcept
         -> void;
-    auto work() noexcept -> bool final;
+    auto work(allocator_type monotonic) noexcept -> bool final;
 };
 }  // namespace opentxs::blockchain::node::wallet

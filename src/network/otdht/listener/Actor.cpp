@@ -218,7 +218,7 @@ auto Listener::Actor::do_shutdown() noexcept -> void
     api_p_.reset();
 }
 
-auto Listener::Actor::do_startup() noexcept -> bool
+auto Listener::Actor::do_startup(allocator_type monotonic) noexcept -> bool
 {
     if (api_.Internal().ShuttingDown()) { return true; }
 
@@ -233,7 +233,7 @@ auto Listener::Actor::do_startup() noexcept -> bool
             [](const auto& in) { return in.first; });
     }
 
-    do_work();
+    do_work(monotonic);
 
     return false;
 }
@@ -273,7 +273,10 @@ auto Listener::Actor::forward_to_chain(
     }
 }
 
-auto Listener::Actor::pipeline(const Work work, Message&& msg) noexcept -> void
+auto Listener::Actor::pipeline(
+    const Work work,
+    Message&& msg,
+    allocator_type monotonic) noexcept -> void
 {
     const auto id = msg.Internal().ExtractFront().as<zeromq::SocketID>();
 
@@ -283,7 +286,7 @@ auto Listener::Actor::pipeline(const Work work, Message&& msg) noexcept -> void
         pipeline_internal(work, std::move(msg));
     }
 
-    do_work();
+    do_work(monotonic);
 }
 
 auto Listener::Actor::pipeline_external(const Work work, Message&& msg) noexcept
@@ -546,7 +549,7 @@ auto Listener::Actor::reset_registration_timer(
     reset_timer(interval, registration_timer_, Work::statemachine);
 }
 
-auto Listener::Actor::work() noexcept -> bool
+auto Listener::Actor::work(allocator_type monotonic) noexcept -> bool
 {
     check_registration();
 

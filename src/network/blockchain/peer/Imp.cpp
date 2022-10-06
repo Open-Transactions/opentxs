@@ -427,7 +427,7 @@ auto Peer::Imp::do_shutdown() noexcept -> void
     api_p_.reset();
 }
 
-auto Peer::Imp::do_startup() noexcept -> bool
+auto Peer::Imp::do_startup(allocator_type) noexcept -> bool
 {
     if (api_.Internal().ShuttingDown() || network_.Internal().ShuttingDown()) {
 
@@ -637,8 +637,10 @@ auto Peer::Imp::job_name() const noexcept -> std::string_view
     return std::visit(JobType::get(), job_);
 }
 
-auto Peer::Imp::pipeline(const Work work, zeromq::Message&& msg) noexcept
-    -> void
+auto Peer::Imp::pipeline(
+    const Work work,
+    zeromq::Message&& msg,
+    allocator_type monotonic) noexcept -> void
 {
     if (State::shutdown == state_) { return; }
 
@@ -659,20 +661,18 @@ auto Peer::Imp::pipeline(const Work work, zeromq::Message&& msg) noexcept
     }
 
     if (connectionID == untrusted_connection_id_) {
-        pipeline_untrusted(work, std::move(msg));
+        pipeline_untrusted(work, std::move(msg), monotonic);
     } else {
-        pipeline_trusted(work, std::move(msg));
+        pipeline_trusted(work, std::move(msg), monotonic);
     }
 }
 
 auto Peer::Imp::pipeline_trusted(
     const Work work,
-    zeromq::Message&& msg) noexcept -> void
+    zeromq::Message&& msg,
+    allocator_type monotonic) noexcept -> void
 {
     switch (work) {
-        case Work::shutdown: {
-            shutdown_actor();
-        } break;
         case Work::blockheader: {
             process_blockheader(std::move(msg));
         } break;
@@ -727,32 +727,34 @@ auto Peer::Imp::pipeline_trusted(
         case Work::jobavailableblockbatch: {
             process_jobavailableblockbatch(std::move(msg));
         } break;
-        case Work::init: {
-            do_init();
+        case Work::heartbeat: {
+            do_work(monotonic);
         } break;
-        case Work::heartbeat:
-        case Work::statemachine: {
-            do_work();
-        } break;
+        case Work::shutdown:
         case Work::registration:
         case Work::disconnect:
         case Work::sendresult:
         case Work::p2p:
         case Work::body:
         case Work::header:
+        case Work::init:
+        case Work::statemachine: {
+            LogAbort()(OT_PRETTY_CLASS())(name_)(": unhandled message type ")(
+                print(work))
+                .Abort();
+        }
         default: {
-            LogError()(OT_PRETTY_CLASS())(name_)(": unhandled message type ")(
+            LogAbort()(OT_PRETTY_CLASS())(name_)(": unhandled message type ")(
                 static_cast<OTZMQWorkType>(work))
-                .Flush();
-
-            OT_FAIL;
+                .Abort();
         }
     }
 }
 
 auto Peer::Imp::pipeline_untrusted(
     const Work work,
-    zeromq::Message&& msg) noexcept -> void
+    zeromq::Message&& msg,
+    allocator_type monotonic) noexcept -> void
 {
     if (State::shutdown == state_) {
         shutdown_actor();
@@ -774,14 +776,21 @@ auto Peer::Imp::pipeline_untrusted(
             process_sendresult(std::move(msg));
         } break;
         case Work::p2p: {
-            process_p2p(std::move(msg));
+            process_p2p(std::move(msg), monotonic);
         } break;
         case Work::body: {
-            process_body(std::move(msg));
+            process_body(std::move(msg), monotonic);
         } break;
         case Work::header: {
-            process_header(std::move(msg));
+            process_header(std::move(msg), monotonic);
         } break;
+        case Work::shutdown:
+        case Work::init:
+        case Work::statemachine: {
+            LogAbort()(OT_PRETTY_CLASS())(name_)(": unhandled message type ")(
+                print(work))
+                .Abort();
+        }
         default: {
             const auto why =
                 CString{name_, get_allocator()}
@@ -891,12 +900,13 @@ auto Peer::Imp::process_blockheader(Message&& msg) noexcept -> void
     process_block(std::move(hash));
 }
 
-auto Peer::Imp::process_body(Message&& msg) noexcept -> void
+auto Peer::Imp::process_body(Message&& msg, allocator_type monotonic) noexcept
+    -> void
 {
     update_activity();
     auto m = connection_.on_body(std::move(msg));
 
-    if (m.has_value()) { process_protocol(std::move(m.value())); }
+    if (m.has_value()) { process_protocol(std::move(m.value()), monotonic); }
 }
 
 auto Peer::Imp::process_connect() noexcept -> void
@@ -936,12 +946,13 @@ auto Peer::Imp::process_disconnect(Message&& msg) noexcept -> void
     disconnect(why);
 }
 
-auto Peer::Imp::process_header(Message&& msg) noexcept -> void
+auto Peer::Imp::process_header(Message&& msg, allocator_type monotonic) noexcept
+    -> void
 {
     update_activity();
     auto m = connection_.on_header(std::move(msg));
 
-    if (m.has_value()) { process_protocol(std::move(m.value())); }
+    if (m.has_value()) { process_protocol(std::move(m.value()), monotonic); }
 }
 
 auto Peer::Imp::process_jobavailableblock(Message&& msg) noexcept -> void
@@ -1093,10 +1104,11 @@ auto Peer::Imp::process_needping(Message&& msg) noexcept -> void
     transmit_ping();
 }
 
-auto Peer::Imp::process_p2p(Message&& msg) noexcept -> void
+auto Peer::Imp::process_p2p(Message&& msg, allocator_type monotonic) noexcept
+    -> void
 {
     update_activity();
-    process_protocol(std::move(msg));
+    process_protocol(std::move(msg), monotonic);
 }
 
 auto Peer::Imp::process_registration(Message&& msg) noexcept -> void
@@ -1426,7 +1438,7 @@ auto Peer::Imp::update_remote_position(
     update_position(remote_position_, std::move(pos));
 }
 
-auto Peer::Imp::work() noexcept -> bool
+auto Peer::Imp::work(allocator_type monotonic) noexcept -> bool
 {
     check_jobs();
 

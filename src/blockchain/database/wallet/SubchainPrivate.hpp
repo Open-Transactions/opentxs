@@ -13,11 +13,13 @@
 #include <shared_mutex>
 
 #include "blockchain/database/wallet/SubchainCache.hpp"
-#include "blockchain/database/wallet/Types.hpp"
+#include "internal/blockchain/block/Types.hpp"
+#include "internal/blockchain/database/Types.hpp"
 #include "internal/blockchain/database/Wallet.hpp"
 #include "opentxs/blockchain/bitcoin/cfilter/Types.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
+#include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Numbers.hpp"
@@ -75,32 +77,30 @@ namespace opentxs::blockchain::database::wallet
 class SubchainPrivate
 {
 public:
+    auto GetID(const SubaccountID& subaccount, const crypto::Subchain subchain)
+        const noexcept -> SubchainID;
     auto GetID(
-        const Wallet::NodeID& subaccount,
-        const crypto::Subchain subchain) const noexcept
-        -> Wallet::SubchainIndex;
-    auto GetID(
-        const Wallet::NodeID& subaccount,
+        const SubaccountID& subaccount,
         const crypto::Subchain subchain,
-        storage::lmdb::Transaction& tx) const noexcept -> Wallet::SubchainIndex;
-    auto GetLastIndexed(const Wallet::SubchainIndex& subchain) const noexcept
+        storage::lmdb::Transaction& tx) const noexcept -> SubchainID;
+    auto GetLastIndexed(const SubchainID& subchain) const noexcept
         -> std::optional<Bip32Index>;
-    auto GetLastScanned(const Wallet::SubchainIndex& subchain) const noexcept
+    auto GetLastScanned(const SubchainID& subchain) const noexcept
         -> block::Position;
-    auto GetPatterns(const Wallet::SubchainIndex& id, alloc::Default alloc)
-        const noexcept -> Wallet::Patterns;
+    auto GetPatterns(const SubchainID& id, alloc::Default alloc) const noexcept
+        -> Patterns;
 
     auto AddElements(
-        const Wallet::SubchainIndex& subchain,
-        const Wallet::ElementMap& elements) noexcept -> bool;
+        const SubchainID& subchain,
+        const ElementMap& elements) noexcept -> bool;
     auto Reorg(
         const node::internal::HeaderOraclePrivate& data,
         const node::HeaderOracle& headers,
-        const Wallet::SubchainIndex& subchain,
+        const SubchainID& subchain,
         const block::Height lastGoodHeight,
         storage::lmdb::Transaction& tx) noexcept(false) -> bool;
     auto SetLastScanned(
-        const Wallet::SubchainIndex& subchain,
+        const SubchainID& subchain,
         const block::Position& position) noexcept -> bool;
 
     SubchainPrivate(
@@ -127,37 +127,36 @@ private:
     GuardedCache cache_;
 
     auto get_patterns(
-        const SubchainIndex& id,
+        const SubchainID& id,
         const SubchainCache& cache,
-        alloc::Default alloc) const noexcept(false) -> Wallet::Patterns;
+        alloc::Default alloc) const noexcept(false) -> Patterns;
     auto get_id(
-        const Wallet::NodeID& subaccount,
+        const SubaccountID& subaccount,
         const crypto::Subchain subchain,
         const SubchainCache& cache,
-        storage::lmdb::Transaction& tx) const noexcept -> Wallet::SubchainIndex;
-    auto pattern_id(
-        const Wallet::SubchainIndex& subchain,
-        const Bip32Index index) const noexcept -> PatternID;
+        storage::lmdb::Transaction& tx) const noexcept -> SubchainID;
+    auto pattern_id(const SubchainID& subchain, const Bip32Index index)
+        const noexcept -> ElementID;
     auto subchain_index(
-        const Wallet::NodeID& subaccount,
+        const SubaccountID& subaccount,
         const crypto::Subchain subchain,
         const cfilter::Type type,
-        const VersionNumber version) const noexcept -> Wallet::SubchainIndex;
+        const VersionNumber version) const noexcept -> SubchainID;
 
     auto add_elements(
-        const Wallet::SubchainIndex& subchain,
-        const Wallet::ElementMap& elements,
+        const SubchainID& subchain,
+        const ElementMap& elements,
         SubchainCache& cache,
         storage::lmdb::Transaction& tx) noexcept -> bool;
     auto reorg(
         const node::internal::HeaderOraclePrivate& data,
         const node::HeaderOracle& headers,
-        const Wallet::SubchainIndex& subchain,
+        const SubchainID& subchain,
         const block::Height lastGoodHeight,
         SubchainCache& cache,
         storage::lmdb::Transaction& tx) noexcept(false) -> bool;
     auto set_last_scanned(
-        const Wallet::SubchainIndex& subchain,
+        const SubchainID& subchain,
         const block::Position& position,
         SubchainCache& cache,
         storage::lmdb::Transaction& tx) noexcept -> bool;

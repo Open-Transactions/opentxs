@@ -102,7 +102,7 @@ auto BlockOracle::Actor::do_shutdown() noexcept -> void
     api_p_.reset();
 }
 
-auto BlockOracle::Actor::do_startup() noexcept -> bool
+auto BlockOracle::Actor::do_startup(allocator_type) noexcept -> bool
 {
     if ((api_.Internal().ShuttingDown()) || (node_.Internal().ShuttingDown())) {
         return true;
@@ -116,25 +116,25 @@ auto BlockOracle::Actor::Init(boost::shared_ptr<Actor> me) noexcept -> void
     signal_startup(me);
 }
 
-auto BlockOracle::Actor::pipeline(const Work work, Message&& msg) noexcept
-    -> void
+auto BlockOracle::Actor::pipeline(
+    const Work work,
+    Message&& msg,
+    allocator_type monotonic) noexcept -> void
 {
     switch (work) {
-        case Work::shutdown: {
-            shutdown_actor();
-        } break;
         case Work::request_blocks: {
             to_cache_.SendDeferred(std::move(msg), __FILE__, __LINE__);
         } break;
         case Work::process_block: {
             to_cache_.SendDeferred(std::move(msg), __FILE__, __LINE__);
         } break;
-        case Work::init: {
-            do_init();
-        } break;
+        case Work::shutdown:
+        case Work::init:
         case Work::statemachine: {
-            do_work();
-        } break;
+            LogAbort()(OT_PRETTY_CLASS())(name_)(" unhandled message type ")(
+                print(work))
+                .Abort();
+        }
         default: {
             LogAbort()(OT_PRETTY_CLASS())(name_)(" unhandled message type ")(
                 static_cast<OTZMQWorkType>(work))
@@ -143,7 +143,10 @@ auto BlockOracle::Actor::pipeline(const Work work, Message&& msg) noexcept
     }
 }
 
-auto BlockOracle::Actor::work() noexcept -> bool { return false; }
+auto BlockOracle::Actor::work(allocator_type monotonic) noexcept -> bool
+{
+    return false;
+}
 
 BlockOracle::Actor::~Actor() = default;
 }  // namespace opentxs::blockchain::node::internal

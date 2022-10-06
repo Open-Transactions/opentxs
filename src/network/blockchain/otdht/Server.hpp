@@ -96,7 +96,7 @@ private:
     auto background() noexcept -> void;
     auto check_caught_up(Shared& shared) noexcept -> void;
     auto do_work() noexcept -> bool final;
-    auto drain_queue(Shared& shared) noexcept -> void;
+    auto drain_queue(Shared& shared, allocator_type monotonic) noexcept -> void;
     auto fill_queue(Shared& shared) noexcept -> void;
     auto process_checksum_failure(Message&& msg) noexcept -> void final;
     auto process_report(Message&& msg) noexcept -> void final;

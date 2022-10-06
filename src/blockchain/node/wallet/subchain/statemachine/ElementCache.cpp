@@ -22,8 +22,8 @@
 namespace opentxs::blockchain::node::wallet
 {
 ElementCache::ElementCache(
-    Patterns&& data,
-    Vector<database::Wallet::UTXO>&& txos,
+    block::Patterns&& data,
+    Vector<database::UTXO>&& txos,
     allocator_type alloc) noexcept
     : log_(LogTrace())
     , data_(alloc)
@@ -47,7 +47,7 @@ ElementCache::ElementCache(
     log_("  * ")(elements_.txos_.size())(" txo elements").Flush();
 }
 
-auto ElementCache::Add(database::Wallet::ElementMap&& data) noexcept -> void
+auto ElementCache::Add(database::ElementMap&& data) noexcept -> void
 {
     for (auto& i : data) {
         auto& [incomingKey, incomingValues] = i;
@@ -76,7 +76,9 @@ auto ElementCache::Add(database::Wallet::ElementMap&& data) noexcept -> void
     }
 }
 
-auto ElementCache::Add(TXOs&& created, TXOs&& consumed) noexcept -> void
+auto ElementCache::Add(
+    database::TXOs&& created,
+    database::TXOs&& consumed) noexcept -> void
 {
     for (auto& [outpoint, output] : created) {
         auto& map = elements_.txos_;
@@ -93,9 +95,10 @@ auto ElementCache::Add(TXOs&& created, TXOs&& consumed) noexcept -> void
     }
 }
 
-auto ElementCache::convert(Patterns&& in, allocator_type alloc) noexcept -> Map
+auto ElementCache::convert(block::Patterns&& in, allocator_type alloc) noexcept
+    -> database::ElementMap
 {
-    auto out = Map{alloc};
+    auto out = database::ElementMap{alloc};
 
     for (auto& [id, item] : in) {
         const auto& [index, subchain] = id;
@@ -115,7 +118,8 @@ auto ElementCache::get_allocator() const noexcept -> allocator_type
     return data_.get_allocator();
 }
 
-auto ElementCache::index(const Map::value_type& data) noexcept -> void
+auto ElementCache::index(const database::ElementMap::value_type& data) noexcept
+    -> void
 {
     const auto& [key, values] = data;
 
@@ -124,7 +128,7 @@ auto ElementCache::index(const Map::value_type& data) noexcept -> void
 
 auto ElementCache::index(
     const Bip32Index index,
-    const Vector<std::byte>& element) noexcept -> void
+    const block::Element& element) noexcept -> void
 {
     switch (element.size()) {
         case 20: {

@@ -13,12 +13,14 @@
 #include <utility>
 
 #include "internal/blockchain/bitcoin/block/Factory.hpp"
+#include "internal/blockchain/bitcoin/block/Types.hpp"
 #include "internal/blockchain/block/Block.hpp"
 #include "internal/blockchain/block/Types.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/bitcoin/block/Input.hpp"
 #include "opentxs/blockchain/bitcoin/cfilter/Types.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
+#include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 
@@ -90,20 +92,22 @@ public:
     virtual auto CalculateSize(const bool normalized = false) const noexcept
         -> std::size_t = 0;
     virtual auto clone() const noexcept -> std::unique_ptr<Input> = 0;
-    virtual auto ExtractElements(const cfilter::Type style) const noexcept
-        -> Vector<Vector<std::byte>> = 0;
+    virtual auto ExtractElements(const cfilter::Type style, Elements& out)
+        const noexcept -> void = 0;
     virtual auto FindMatches(
         const api::Session& api,
-        const blockchain::block::Txid& txid,
+        const Txid& txid,
         const cfilter::Type type,
-        const blockchain::block::Patterns& txos,
-        const blockchain::block::ParsedPatterns& elements,
+        const Patterns& txos,
+        const ParsedPatterns& elements,
         const std::size_t position,
-        const Log& log) const noexcept -> blockchain::block::Matches = 0;
+        const Log& log,
+        Matches& out,
+        alloc::Default monotonic) const noexcept -> void = 0;
     virtual auto GetBytes(std::size_t& base, std::size_t& witness)
         const noexcept -> void = 0;
-    virtual auto GetPatterns(const api::Session& api) const noexcept
-        -> UnallocatedVector<PatternID> = 0;
+    virtual auto IndexElements(const api::Session& api, ElementHashes& out)
+        const noexcept -> void = 0;
     auto Internal() const noexcept -> const internal::Input& final
     {
         return *this;
@@ -139,8 +143,7 @@ public:
         const std::size_t index,
         const Log& log) noexcept -> bool = 0;
     virtual auto ReplaceScript() noexcept -> bool = 0;
-    virtual auto SetKeyData(const blockchain::block::KeyData& data) noexcept
-        -> void = 0;
+    virtual auto SetKeyData(const KeyData& data) noexcept -> void = 0;
 
     ~Input() override = default;
 };

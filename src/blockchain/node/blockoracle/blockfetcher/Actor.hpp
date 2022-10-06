@@ -100,13 +100,17 @@ private:
         -> void;
     auto broadcast_tip(const block::Position& tip) noexcept -> void;
     auto do_shutdown() noexcept -> void;
-    auto do_startup() noexcept -> bool;
-    auto pipeline(const Work work, Message&& msg) noexcept -> void;
+    auto do_startup(allocator_type monotonic) noexcept -> bool;
+    auto pipeline(
+        const Work work,
+        Message&& msg,
+        allocator_type monotonic) noexcept -> void;
     auto process_heartbeat(Message&& msg) noexcept -> void;
-    auto process_reorg(Message&& msg) noexcept -> void;
+    auto process_reorg(Message&& msg, allocator_type monotonic) noexcept
+        -> void;
     auto process_report(Message&& msg) noexcept -> void;
     auto publish_job_ready() noexcept -> void;
     auto update_tip(Shared::Data& data) noexcept -> void;
-    auto work() noexcept -> bool;
+    auto work(allocator_type monotonic) noexcept -> bool;
 };
 }  // namespace opentxs::blockchain::node::blockoracle

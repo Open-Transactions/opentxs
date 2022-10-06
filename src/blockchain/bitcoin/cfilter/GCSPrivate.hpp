@@ -13,6 +13,7 @@
 #include "opentxs/blockchain/bitcoin/cfilter/Hash.hpp"
 #include "opentxs/blockchain/bitcoin/cfilter/Header.hpp"
 #include "opentxs/util/Allocated.hpp"
+#include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 
@@ -64,38 +65,39 @@ public:
         return {};
     }
     virtual auto IsValid() const noexcept -> bool { return false; }
-    virtual auto Match(const Targets&, allocator_type) const noexcept -> Matches
+    virtual auto Match(const Targets&, allocator_type, allocator_type)
+        const noexcept -> Matches
     {
         return {};
     }
-    auto Match(const gcs::Hashes& prehashed) const noexcept
+    auto Match(const gcs::Hashes& prehashed, alloc::Default) const noexcept
         -> PrehashedMatches override
     {
         return {};
     }
     auto Range() const noexcept -> gcs::Range override { return {}; }
-    auto Serialize(proto::GCS& out) const noexcept -> bool override
+    auto Serialize(proto::GCS&) const noexcept -> bool override { return {}; }
+    virtual auto Serialize(AllocateOutput) const noexcept -> bool { return {}; }
+    virtual auto Test(const Data&, allocator_type) const noexcept -> bool
     {
         return {};
     }
-    virtual auto Serialize(AllocateOutput out) const noexcept -> bool
+    virtual auto Test(const ReadView, allocator_type) const noexcept -> bool
     {
         return {};
     }
-    virtual auto Test(const Data& target) const noexcept -> bool { return {}; }
-    virtual auto Test(const ReadView target) const noexcept -> bool
+    virtual auto Test(const Vector<ByteArray>&, allocator_type) const noexcept
+        -> bool
     {
         return {};
     }
-    virtual auto Test(const Vector<ByteArray>& targets) const noexcept -> bool
+    virtual auto Test(const Vector<Space>&, allocator_type) const noexcept
+        -> bool
     {
         return {};
     }
-    virtual auto Test(const Vector<Space>& targets) const noexcept -> bool
-    {
-        return {};
-    }
-    auto Test(const gcs::Hashes& targets) const noexcept -> bool override
+    auto Test(const gcs::Hashes&, alloc::Default) const noexcept
+        -> bool override
     {
         return {};
     }

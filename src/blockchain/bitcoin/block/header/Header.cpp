@@ -18,9 +18,9 @@
 
 namespace opentxs::blockchain::bitcoin::block
 {
-auto Header::Imp::MerkleRoot() const noexcept -> const blockchain::block::Hash&
+auto Header::Imp::MerkleRoot() const noexcept -> const block::Hash&
 {
-    static const auto blank = blockchain::block::Hash{};
+    static const auto blank = block::Hash{};
 
     return blank;
 }
@@ -86,7 +86,7 @@ auto Header::operator=(Header&& rhs) noexcept -> Header&
 
 auto Header::as_Bitcoin() const noexcept -> const Header& { return *this; }
 
-auto Header::MerkleRoot() const noexcept -> const blockchain::block::Hash&
+auto Header::MerkleRoot() const noexcept -> const block::Hash&
 {
     return imp_bitcoin_->MerkleRoot();
 }

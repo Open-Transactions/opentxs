@@ -100,8 +100,13 @@ private:
     Shared::Estimate& output_;
 
     auto do_shutdown() noexcept -> void;
-    auto do_startup() noexcept -> bool;
-    auto pipeline(const Work work, Message&& msg) noexcept -> void;
-    auto process_update(network::zeromq::Message&&) noexcept -> void;
-    auto work() noexcept -> bool;
+    auto do_startup(allocator_type monotonic) noexcept -> bool;
+    auto pipeline(
+        const Work work,
+        Message&& msg,
+        allocator_type monotonic) noexcept -> void;
+    auto process_update(
+        network::zeromq::Message&&,
+        allocator_type monotonic) noexcept -> void;
+    auto work(allocator_type monotonic) noexcept -> bool;
 };

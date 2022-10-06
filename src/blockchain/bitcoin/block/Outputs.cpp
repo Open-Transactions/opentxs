@@ -121,46 +121,29 @@ auto Outputs::clone(const OutputList& rhs) noexcept -> OutputList
     return output;
 }
 
-auto Outputs::ExtractElements(const cfilter::Type style) const noexcept
-    -> Vector<Vector<std::byte>>
+auto Outputs::ExtractElements(const cfilter::Type style, Elements& out)
+    const noexcept -> void
 {
-    auto output = Vector<Vector<std::byte>>{};
     LogTrace()(OT_PRETTY_CLASS())("processing ")(size())(" outputs").Flush();
 
     for (const auto& txout : *this) {
-        auto temp = txout.Internal().ExtractElements(style);
-        output.insert(
-            output.end(),
-            std::make_move_iterator(temp.begin()),
-            std::make_move_iterator(temp.end()));
+        txout.Internal().ExtractElements(style, out);
     }
-
-    LogTrace()(OT_PRETTY_CLASS())("extracted ")(output.size())(" elements")
-        .Flush();
-    std::sort(output.begin(), output.end());
-
-    return output;
 }
 
 auto Outputs::FindMatches(
     const api::Session& api,
-    const blockchain::block::Txid& txid,
+    const Txid& txid,
     const cfilter::Type type,
-    const blockchain::block::ParsedPatterns& patterns,
-    const Log& log) const noexcept -> blockchain::block::Matches
+    const ParsedPatterns& patterns,
+    const Log& log,
+    Matches& out,
+    alloc::Default monotonic) const noexcept -> void
 {
-    auto output = blockchain::block::Matches{};
-
     for (const auto& txout : *this) {
-        auto temp =
-            txout.Internal().FindMatches(api, txid, type, patterns, log);
-        output.second.insert(
-            output.second.end(),
-            std::make_move_iterator(temp.second.begin()),
-            std::make_move_iterator(temp.second.end()));
+        txout.Internal().FindMatches(
+            api, txid, type, patterns, log, out, monotonic);
     }
-
-    return output;
 }
 
 auto Outputs::ForTestingOnlyAddKey(
@@ -177,19 +160,13 @@ auto Outputs::ForTestingOnlyAddKey(
     }
 }
 
-auto Outputs::GetPatterns(const api::Session& api) const noexcept
-    -> UnallocatedVector<PatternID>
+auto Outputs::IndexElements(const api::Session& api, ElementHashes& out)
+    const noexcept -> void
 {
-    auto output = UnallocatedVector<PatternID>{};
     std::for_each(
         std::begin(outputs_), std::end(outputs_), [&](const auto& txout) {
-            const auto patterns = txout->GetPatterns(api);
-            output.insert(output.end(), patterns.begin(), patterns.end());
+            txout->IndexElements(api, out);
         });
-
-    dedup(output);
-
-    return output;
 }
 
 auto Outputs::Keys() const noexcept -> UnallocatedVector<crypto::Key>
@@ -304,8 +281,7 @@ auto Outputs::Serialize(
     return true;
 }
 
-auto Outputs::SetKeyData(const blockchain::block::KeyData& data) noexcept
-    -> void
+auto Outputs::SetKeyData(const KeyData& data) noexcept -> void
 {
     for (const auto& output : outputs_) { output->SetKeyData(data); }
 }

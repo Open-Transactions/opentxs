@@ -90,7 +90,6 @@ public:
     using ContactList = UnallocatedSet<identifier::Generic>;
     using Txid = opentxs::blockchain::block::Txid;
     using TxidHex = UnallocatedCString;
-    using PatternID = opentxs::blockchain::PatternID;
     using AccountData = std::pair<Chain, identifier::Nym>;
 
     // Throws std::out_of_range for invalid chains
@@ -155,8 +154,6 @@ public:
         const identifier::Nym& nymID,
         const identifier::Generic& accountID) const noexcept(false)
         -> const opentxs::blockchain::crypto::HD& = 0;
-    virtual auto IndexItem(const ReadView bytes) const noexcept
-        -> PatternID = 0;
     OPENTXS_NO_EXPORT virtual auto Internal() const noexcept
         -> const crypto::internal::Blockchain& = 0;
     virtual auto LoadTransactionBitcoin(const Txid& id) const noexcept

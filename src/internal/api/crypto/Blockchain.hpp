@@ -8,6 +8,7 @@
 #include <memory>
 #include <string_view>
 
+#include "internal/blockchain/block/Types.hpp"
 #include "opentxs/api/crypto/Blockchain.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
@@ -57,6 +58,8 @@ public:
         const opentxs::blockchain::crypto::SubaccountType type,
         const opentxs::blockchain::crypto::Subchain subchain) const noexcept
         -> void = 0;
+    virtual auto IndexItem(const ReadView bytes) const noexcept
+        -> opentxs::blockchain::block::ElementHash = 0;
     auto Internal() const noexcept -> const Blockchain& final { return *this; }
     virtual auto NewNym(const identifier::Nym& id) const noexcept -> void = 0;
     using crypto::Blockchain::NewPaymentCodeSubaccount;

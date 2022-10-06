@@ -9,8 +9,6 @@
 #include <BlockchainFilterHeader.pb.h>
 #include <GCS.pb.h>
 #include <google/protobuf/arena.h>  // IWYU pragma: keep
-#include <array>
-#include <cstddef>
 #include <cstring>
 #include <stdexcept>
 #include <string_view>
@@ -23,7 +21,6 @@
 #include "internal/blockchain/bitcoin/cfilter/GCS.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/serialization/protobuf/Proto.tpp"
-#include "internal/util/BoostPMR.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/Size.hpp"
@@ -107,15 +104,19 @@ auto BlockFilter::load_cfilter_index(
 auto BlockFilter::LoadCfilter(
     const cfilter::Type type,
     const ReadView blockHash,
-    alloc::Default alloc) const noexcept -> opentxs::blockchain::GCS
+    alloc::Default alloc,
+    alloc::Default monotonic) const noexcept -> opentxs::blockchain::GCS
 {
     try {
-        const auto results = LoadCfilters(type, [&] {
-            auto out = Vector<block::Hash>{alloc};
-            out.emplace_back(blockHash);
+        const auto results = LoadCfilters(
+            type,
+            [&] {
+                auto out = Vector<block::Hash>{alloc};
+                out.emplace_back(blockHash);
 
-            return out;
-        }());
+                return out;
+            }(),
+            monotonic);
 
         if (results.empty()) {
             throw std::out_of_range("failed to load cfilter");
@@ -131,19 +132,18 @@ auto BlockFilter::LoadCfilter(
 
 auto BlockFilter::LoadCfilters(
     const cfilter::Type type,
-    const Vector<block::Hash>& blocks) const noexcept -> Vector<GCS>
+    const Vector<block::Hash>& blocks,
+    alloc::Default monotonic) const noexcept -> Vector<GCS>
 {
     auto alloc = blocks.get_allocator();
     auto output = Vector<GCS>{alloc};
     output.reserve(blocks.size());
-    // TODO use a named constant for the cfilter scan batch size.
-    constexpr auto allocBytes = (1000_uz * sizeof(storage::file::Index)) +
-                                sizeof(Vector<storage::file::Index>);
-    auto buf = std::array<std::byte, allocBytes>{};
-    auto mr = alloc::BoostMonotonic{buf.data(), buf.size()};
+    output.clear();
     const auto indices = [&] {
-        auto out = Vector<storage::file::Index>{&mr};
+        auto out = Vector<storage::file::Index>{monotonic};
+        // TODO use a named constant for the cfilter scan batch size.
         out.reserve(1000_uz);
+        out.clear();
         auto tx = lmdb_.TransactionRO();
 
         for (const auto& hash : blocks) {
@@ -398,15 +398,12 @@ auto BlockFilter::store_cfheaders(
 
 auto BlockFilter::StoreCfilters(
     const cfilter::Type type,
-    const Vector<CFilterParams>& filters) const noexcept -> bool
+    const Vector<CFilterParams>& filters,
+    alloc::Default monotonic) const noexcept -> bool
 {
     try {
         auto arena = make_arena(8_mib);
-        auto upstream = alloc::StandardToBoost(alloc::System());
-        auto mr =
-            alloc::BoostMonotonic{static_cast<std::size_t>(4_mib), &upstream};
-        auto alloc = alloc::Default{std::addressof(mr)};
-        const auto parsed = parse(filters, arena, alloc);
+        const auto parsed = parse(filters, arena, monotonic);
         auto tx = lmdb_.TransactionRW();
         const auto result = store(parsed, type, tx);
 
@@ -421,7 +418,8 @@ auto BlockFilter::StoreCfilters(
 auto BlockFilter::StoreCfilters(
     const cfilter::Type type,
     const Vector<CFHeaderParams>& headers,
-    const Vector<CFilterParams>& filters) const noexcept -> bool
+    const Vector<CFilterParams>& filters,
+    alloc::Default monotonic) const noexcept -> bool
 {
     try {
         if (headers.size() != filters.size()) {
@@ -430,11 +428,7 @@ auto BlockFilter::StoreCfilters(
         }
 
         auto arena = make_arena(8_mib);
-        auto upstream = alloc::StandardToBoost(alloc::System());
-        auto mr =
-            alloc::BoostMonotonic{static_cast<std::size_t>(4_mib), &upstream};
-        auto alloc = alloc::Default{std::addressof(mr)};
-        const auto parsed = parse(filters, arena, alloc);
+        const auto parsed = parse(filters, arena, monotonic);
         auto tx = lmdb_.TransactionRW();
 
         if (false == store_cfheaders(type, headers, tx)) {

@@ -128,11 +128,12 @@ private:
         -> std::optional<Amount> = 0;
 
     auto do_shutdown() noexcept -> void;
-    auto do_startup() noexcept -> bool;
-    auto pipeline(const Work work, Message&& msg) noexcept -> void;
+    auto do_startup(allocator_type monotonic) noexcept -> bool;
+    auto pipeline(const Work work, Message&& msg, allocator_type) noexcept
+        -> void;
     auto query() noexcept -> void;
     auto reset_timer() noexcept -> void;
-    auto work() noexcept -> bool;
+    auto work(allocator_type monotonic) noexcept -> bool;
 
     Imp(std::shared_ptr<const api::Session> api,
         std::shared_ptr<const node::Manager> node,

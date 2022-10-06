@@ -204,7 +204,8 @@ auto Blockchain::HDSubaccount(
     return imp_->HDSubaccount(nymID, accountID);
 }
 
-auto Blockchain::IndexItem(const ReadView bytes) const noexcept -> PatternID
+auto Blockchain::IndexItem(const ReadView bytes) const noexcept
+    -> opentxs::blockchain::block::ElementHash
 {
     return imp_->IndexItem(bytes);
 }

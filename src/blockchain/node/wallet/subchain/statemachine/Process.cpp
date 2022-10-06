@@ -27,6 +27,7 @@
 #include "internal/network/zeromq/Context.hpp"
 #include "internal/network/zeromq/socket/Pipeline.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
+#include "internal/util/BoostPMR.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/Thread.hpp"
 #include "opentxs/api/network/Asio.hpp"
@@ -130,18 +131,25 @@ auto Process::Imp::check_cache() noexcept -> void
 
 auto Process::Imp::check_process() noexcept -> bool { return queue_process(); }
 
-auto Process::Imp::do_process(const Ready::value_type& data) noexcept -> void
+auto Process::Imp::do_process(
+    const Ready::value_type& data,
+    allocator_type monotonic) noexcept -> void
 {
     const auto& [position, block] = data;
-    do_process_common(position, block);
+    do_process_common(position, block, monotonic);
 }
 
 auto Process::Imp::do_process(
     const block::Position position,
     const std::shared_ptr<const bitcoin::block::Block> block) noexcept -> void
 {
-    do_process_common(position, block);
-
+    // WARNING this function must be called from an asio thread and not a zmq
+    // thread
+    std::byte buf[thread_pool_monotonic_];  // NOLINT(modernize-avoid-c-arrays)
+    auto upstream = alloc::StandardToBoost(get_allocator().resource());
+    auto monotonic =
+        alloc::BoostMonotonic(buf, sizeof(buf), std::addressof(upstream));
+    do_process_common(position, block, std::addressof(monotonic));
     pipeline_.Push([&] {
         auto out = MakeWork(Work::process);
         out.AddFrame(position.height_);
@@ -153,14 +161,17 @@ auto Process::Imp::do_process(
 
 auto Process::Imp::do_process_common(
     const block::Position position,
-    const std::shared_ptr<const bitcoin::block::Block>& block) noexcept -> void
+    const std::shared_ptr<const bitcoin::block::Block>& block,
+    allocator_type monotonic) noexcept -> void
 {
     OT_ASSERT(block);
 
-    if (false == parent_.ProcessBlock(position, *block)) { OT_FAIL; }
+    if (false == parent_.ProcessBlock(position, *block, monotonic)) { OT_FAIL; }
 }
 
-auto Process::Imp::do_process_update(Message&& msg) noexcept -> void
+auto Process::Imp::do_process_update(
+    Message&& msg,
+    allocator_type monotonic) noexcept -> void
 {
     auto dirty = Vector<ScanStatus>{get_allocator()};
     extract_dirty(parent_.api_, msg, dirty);
@@ -171,7 +182,7 @@ auto Process::Imp::do_process_update(Message&& msg) noexcept -> void
     }
 
     to_index_.SendDeferred(std::move(msg), __FILE__, __LINE__);
-    do_work();
+    do_work(monotonic);
 }
 
 auto Process::Imp::do_reorg(
@@ -238,17 +249,18 @@ auto Process::Imp::do_reorg(
     return Job::do_reorg(oracle, data, params);
 }
 
-auto Process::Imp::do_startup_internal() noexcept -> void
+auto Process::Imp::do_startup_internal(allocator_type monotonic) noexcept
+    -> void
 {
     const auto& oracle = parent_.mempool_oracle_;
 
     for (const auto& txid : oracle.Dump()) {
         if (auto tx = oracle.Query(txid); tx) {
-            parent_.ProcessTransaction(*tx, log_);
+            parent_.ProcessTransaction(*tx, log_, monotonic);
         }
     }
 
-    do_work();
+    do_work(monotonic);
 }
 
 auto Process::Imp::download(
@@ -276,7 +288,9 @@ auto Process::Imp::have_items() const noexcept -> bool
     return 0u < ready_.size();
 }
 
-auto Process::Imp::process_block(block::Hash&& hash) noexcept -> void
+auto Process::Imp::process_block(
+    block::Hash&& hash,
+    allocator_type monotonic) noexcept -> void
 {
     if (auto index = downloading_index_.find(hash);
         downloading_index_.end() != index) {
@@ -294,7 +308,7 @@ auto Process::Imp::process_block(block::Hash&& hash) noexcept -> void
         txid_cache_.emplace(std::move(hash));
     }
 
-    do_work();
+    do_work(monotonic);
 }
 
 auto Process::Imp::process_do_rescan(Message&& in) noexcept -> void
@@ -309,13 +323,17 @@ auto Process::Imp::process_do_rescan(Message&& in) noexcept -> void
     to_index_.Send(std::move(in), __FILE__, __LINE__);
 }
 
-auto Process::Imp::process_filter(Message&& in, block::Position&&) noexcept
-    -> void
+auto Process::Imp::process_filter(
+    Message&& in,
+    block::Position&&,
+    allocator_type) noexcept -> void
 {
     to_index_.Send(std::move(in), __FILE__, __LINE__);
 }
 
-auto Process::Imp::process_mempool(Message&& in) noexcept -> void
+auto Process::Imp::process_mempool(
+    Message&& in,
+    allocator_type monotonic) noexcept -> void
 {
     const auto body = in.Body();
     const auto chain = body.at(1).as<blockchain::Type>();
@@ -336,11 +354,13 @@ auto Process::Imp::process_mempool(Message&& in) noexcept -> void
     }
 
     if (auto tx = parent_.mempool_oracle_.Query(txid.Bytes()); tx) {
-        parent_.ProcessTransaction(*tx, log_);
+        parent_.ProcessTransaction(*tx, log_, monotonic);
     }
 }
 
-auto Process::Imp::process_process(block::Position&& pos) noexcept -> void
+auto Process::Imp::process_process(
+    block::Position&& pos,
+    allocator_type monotonic) noexcept -> void
 {
     if (const auto i = processing_.find(pos); i == processing_.end()) {
         log_(OT_PRETTY_CLASS())(name_)(" block ")(
@@ -353,10 +373,12 @@ auto Process::Imp::process_process(block::Position&& pos) noexcept -> void
             .Flush();
     }
 
-    do_work();
+    do_work(monotonic);
 }
 
-auto Process::Imp::process_reprocess(Message&& msg) noexcept -> void
+auto Process::Imp::process_reprocess(
+    Message&& msg,
+    allocator_type monotonic) noexcept -> void
 {
     log_(OT_PRETTY_CLASS())(name_)(" received re-process request").Flush();
     auto dirty = Vector<ScanStatus>{get_allocator()};
@@ -388,7 +410,7 @@ auto Process::Imp::process_reprocess(Message&& msg) noexcept -> void
         }
     }
 
-    do_work();
+    do_work(monotonic);
 }
 
 auto Process::Imp::queue_downloads() noexcept -> void
@@ -437,14 +459,14 @@ auto Process::Imp::queue_process() noexcept -> bool
     return have_items();
 }
 
-auto Process::Imp::work() noexcept -> bool
+auto Process::Imp::work(allocator_type monotonic) noexcept -> bool
 {
     if (State::reorg == state()) { return false; }
 
     check_cache();
     queue_downloads();
 
-    return Job::work() || check_process();
+    return Job::work(monotonic) || check_process();
 }
 }  // namespace opentxs::blockchain::node::wallet
 

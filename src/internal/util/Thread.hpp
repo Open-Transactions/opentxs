@@ -21,7 +21,10 @@ enum class ThreadPriority {
     TimeCritical,
 };
 
-constexpr auto thread_pool_stack_size_ = 2_mib;
+constexpr auto thread_pool_stack_size_ = 8_mib;
+constexpr auto thread_pool_reserve_ = 256_kib;
+constexpr auto thread_pool_monotonic_ =
+    thread_pool_stack_size_ - thread_pool_reserve_;
 
 auto print(ThreadPriority priority) noexcept -> const char*;
 auto MaxJobs() noexcept -> unsigned int;

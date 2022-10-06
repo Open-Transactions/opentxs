@@ -7,9 +7,12 @@
 
 #include <memory>
 
+#include "internal/blockchain/bitcoin/block/Types.hpp"
+#include "internal/blockchain/block/Types.hpp"
 #include "opentxs/blockchain/BlockchainType.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/bitcoin/block/Script.hpp"
+#include "opentxs/blockchain/bitcoin/cfilter/Types.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
@@ -20,6 +23,7 @@ namespace opentxs
 namespace api
 {
 class Crypto;
+class Session;
 }  // namespace api
 
 class ByteArray;
@@ -38,6 +42,10 @@ public:
         const bool compressed = true) noexcept -> const Space&;
 
     virtual auto clone() const noexcept -> std::unique_ptr<Script> = 0;
+    virtual auto ExtractElements(const cfilter::Type style, Elements& out)
+        const noexcept -> void = 0;
+    virtual auto IndexElements(const api::Session& api, ElementHashes& out)
+        const noexcept -> void = 0;
     auto Internal() const noexcept -> const internal::Script& final
     {
         return *this;

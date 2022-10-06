@@ -56,13 +56,19 @@ public:
         -> cfilter::Header;
     OPENTXS_NO_EXPORT auto Internal() const noexcept -> const internal::GCS&;
     auto IsValid() const noexcept -> bool;
-    auto Match(const Targets& targets, allocator_type alloc = {}) const noexcept
-        -> Matches;
+    auto Match(
+        const Targets& targets,
+        allocator_type alloc,
+        allocator_type monotonic) const noexcept -> Matches;
     auto Serialize(AllocateOutput out) const noexcept -> bool;
-    auto Test(const Data& target) const noexcept -> bool;
-    auto Test(const ReadView target) const noexcept -> bool;
-    auto Test(const Vector<ByteArray>& targets) const noexcept -> bool;
-    auto Test(const Vector<Space>& targets) const noexcept -> bool;
+    auto Test(const Data& target, allocator_type monotonic) const noexcept
+        -> bool;
+    auto Test(const ReadView target, allocator_type monotonic) const noexcept
+        -> bool;
+    auto Test(const Vector<ByteArray>& targets, allocator_type monotonic)
+        const noexcept -> bool;
+    auto Test(const Vector<Space>& targets, allocator_type monotonic)
+        const noexcept -> bool;
 
     auto swap(GCS& rhs) noexcept -> void;
 

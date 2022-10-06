@@ -63,12 +63,14 @@ public:
     {
         return *this;
     }
-    virtual auto ProcessBlock(const bitcoin::block::Block& block) const noexcept
-        -> bool = 0;
+    virtual auto ProcessBlock(
+        const bitcoin::block::Block& block,
+        alloc::Default monotonic) const noexcept -> bool = 0;
     virtual auto ProcessSyncData(
         const block::Hash& prior,
         const Vector<block::Hash>& hashes,
-        const network::otdht::Data& data) const noexcept -> void = 0;
+        const network::otdht::Data& data,
+        alloc::Default monotonic) const noexcept -> void = 0;
     virtual auto Tip(const cfilter::Type type) const noexcept
         -> block::Position = 0;
 

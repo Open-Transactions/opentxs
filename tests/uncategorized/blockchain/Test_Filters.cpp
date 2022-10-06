@@ -367,18 +367,18 @@ TEST_F(Test_Filters, gcs)
         api_, params_.first, params_.second, key, includedElements, {});
 
     ASSERT_TRUE(gcs.IsValid());
-    EXPECT_TRUE(gcs.Test(object1));
-    EXPECT_TRUE(gcs.Test(object2));
-    EXPECT_TRUE(gcs.Test(object3));
-    EXPECT_TRUE(gcs.Test(object4));
-    EXPECT_FALSE(gcs.Test(object5));
-    EXPECT_FALSE(gcs.Test(object6));
-    EXPECT_TRUE(gcs.Test(includedElements));
-    EXPECT_FALSE(gcs.Test(excludedElements));
+    EXPECT_TRUE(gcs.Test(object1, {}));
+    EXPECT_TRUE(gcs.Test(object2, {}));
+    EXPECT_TRUE(gcs.Test(object3, {}));
+    EXPECT_TRUE(gcs.Test(object4, {}));
+    EXPECT_FALSE(gcs.Test(object5, {}));
+    EXPECT_FALSE(gcs.Test(object6, {}));
+    EXPECT_TRUE(gcs.Test(includedElements, {}));
+    EXPECT_FALSE(gcs.Test(excludedElements, {}));
 
     const auto partial = ot::Vector<ot::ReadView>{
         object1.Bytes(), object4.Bytes(), object5.Bytes(), object6.Bytes()};
-    const auto matches = gcs.Match(partial);
+    const auto matches = gcs.Match(partial, {}, {});
 
     EXPECT_TRUE(2 == matches.size());
 
@@ -423,7 +423,7 @@ TEST_F(Test_Filters, bip158_case_1665877)
         api_, params_.first, params_.second, key, 154, encodedGCS.Bytes(), {});
 
     ASSERT_TRUE(gcs.IsValid());
-    EXPECT_TRUE(gcs.Test(script));
+    EXPECT_TRUE(gcs.Test(script, {}));
 }
 
 TEST_F(Test_Filters, bip158_headers)
@@ -581,7 +581,7 @@ TEST_F(Test_Filters, test_set_intersection)
 
         return out;
     }();
-    const auto matches = gcs.Match(targets);
+    const auto matches = gcs.Match(targets, {}, {});
 
     EXPECT_EQ(matches.size(), targets.size());
 }

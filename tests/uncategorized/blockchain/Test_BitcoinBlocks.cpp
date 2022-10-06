@@ -19,6 +19,7 @@
 #include "internal/blockchain/Params.hpp"
 #include "internal/blockchain/bitcoin/Bitcoin.hpp"
 #include "internal/blockchain/block/Block.hpp"
+#include "internal/blockchain/block/Types.hpp"
 #include "internal/util/P0330.hpp"
 #include "ottest/data/blockchain/Bip158.hpp"
 #include "ottest/fixtures/blockchain/Basic.hpp"
@@ -77,7 +78,8 @@ struct Test_BitcoinBlock : public ::testing::Test {
         const auto& network = handle.get();
         const auto& fOracle = network.FilterOracle();
         const auto& genesis = ot::blockchain::params::get(chain).GenesisHash();
-        const auto genesisFilter = fOracle.LoadFilter(filterType, genesis, {});
+        const auto genesisFilter =
+            fOracle.LoadFilter(filterType, genesis, {}, {});
         const auto genesisHeader =
             fOracle.LoadFilterHeader(filterType, genesis);
 
@@ -107,7 +109,7 @@ struct Test_BitcoinBlock : public ::testing::Test {
         auto output = ot::Vector<ot::ByteArray>{};
 
         for (const auto& bytes : block.Internal().ExtractElements(
-                 ot::blockchain::cfilter::Type::Basic_BIP158)) {
+                 ot::blockchain::cfilter::Type::Basic_BIP158, {})) {
             output.emplace_back(
                 api_.Factory().DataFromBytes(ot::reader(bytes)));
         }
@@ -150,7 +152,11 @@ struct Test_BitcoinBlock : public ::testing::Test {
         constexpr auto replace{ot::blockchain::cfilter::Type::Basic_BCHVariant};
 
         const auto cfilter = ot::factory::GCS(
-            api_, (filterType == masked) ? replace : filterType, *block, {});
+            api_,
+            (filterType == masked) ? replace : filterType,
+            *block,
+            {},
+            {});
 
         EXPECT_TRUE(cfilter.IsValid());
 

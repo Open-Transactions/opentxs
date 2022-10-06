@@ -7,7 +7,7 @@
 #include "blockchain/database/wallet/Subchain.hpp"  // IWYU pragma: associated
 
 #include "blockchain/database/wallet/SubchainPrivate.hpp"
-#include "blockchain/database/wallet/Types.hpp"
+#include "internal/blockchain/database/Types.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
 
@@ -23,23 +23,22 @@ SubchainData::SubchainData(
 }
 
 auto SubchainData::GetSubchainID(
-    const NodeID& subaccount,
-    const crypto::Subchain subchain) const noexcept -> SubchainIndex
+    const SubaccountID& subaccount,
+    const crypto::Subchain subchain) const noexcept -> SubchainID
 {
     return imp_->GetID(subaccount, subchain);
 }
 
 auto SubchainData::GetSubchainID(
-    const NodeID& subaccount,
+    const SubaccountID& subaccount,
     const crypto::Subchain subchain,
-    storage::lmdb::Transaction& tx) const noexcept -> SubchainIndex
+    storage::lmdb::Transaction& tx) const noexcept -> SubchainID
 {
     return imp_->GetID(subaccount, subchain, tx);
 }
 
-auto SubchainData::GetPatterns(
-    const SubchainIndex& subchain,
-    alloc::Default alloc) const noexcept -> Patterns
+auto SubchainData::GetPatterns(const SubchainID& subchain, alloc::Default alloc)
+    const noexcept -> Patterns
 {
     return imp_->GetPatterns(subchain, alloc);
 }
@@ -48,33 +47,33 @@ auto SubchainData::Reorg(
     const node::internal::HeaderOraclePrivate& data,
     storage::lmdb::Transaction& tx,
     const node::HeaderOracle& headers,
-    const SubchainIndex& subchain,
+    const SubchainID& subchain,
     const block::Height lastGoodHeight) const noexcept(false) -> bool
 {
     return imp_->Reorg(data, headers, subchain, lastGoodHeight, tx);
 }
 
 auto SubchainData::SubchainAddElements(
-    const SubchainIndex& subchain,
+    const SubchainID& subchain,
     const ElementMap& elements) const noexcept -> bool
 {
     return imp_->AddElements(subchain, elements);
 }
 
 auto SubchainData::SubchainLastIndexed(
-    const SubchainIndex& subchain) const noexcept -> std::optional<Bip32Index>
+    const SubchainID& subchain) const noexcept -> std::optional<Bip32Index>
 {
     return imp_->GetLastIndexed(subchain);
 }
 
 auto SubchainData::SubchainLastScanned(
-    const SubchainIndex& subchain) const noexcept -> block::Position
+    const SubchainID& subchain) const noexcept -> block::Position
 {
     return imp_->GetLastScanned(subchain);
 }
 
 auto SubchainData::SubchainSetLastScanned(
-    const SubchainIndex& subchain,
+    const SubchainID& subchain,
     const block::Position& position) const noexcept -> bool
 {
     return imp_->SetLastScanned(subchain, position);

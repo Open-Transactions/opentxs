@@ -149,69 +149,42 @@ auto Inputs::clone(const InputList& rhs) noexcept -> InputList
     return output;
 }
 
-auto Inputs::ExtractElements(const cfilter::Type style) const noexcept
-    -> Vector<Vector<std::byte>>
+auto Inputs::ExtractElements(const cfilter::Type style, Elements& out)
+    const noexcept -> void
 {
-    auto output = Vector<Vector<std::byte>>{};
     LogTrace()(OT_PRETTY_CLASS())("processing ")(size())(" inputs").Flush();
 
     for (const auto& txin : *this) {
-        auto temp = txin.Internal().ExtractElements(style);
-        output.insert(
-            output.end(),
-            std::make_move_iterator(temp.begin()),
-            std::make_move_iterator(temp.end()));
+        txin.Internal().ExtractElements(style, out);
     }
-
-    LogTrace()(OT_PRETTY_CLASS())("extracted ")(output.size())(" elements")
-        .Flush();
-    std::sort(output.begin(), output.end());
-
-    return output;
 }
 
 auto Inputs::FindMatches(
     const api::Session& api,
-    const blockchain::block::Txid& txid,
+    const Txid& txid,
     const cfilter::Type type,
-    const blockchain::block::Patterns& txos,
-    const blockchain::block::ParsedPatterns& patterns,
-    const Log& log) const noexcept -> blockchain::block::Matches
+    const Patterns& txos,
+    const ParsedPatterns& patterns,
+    const Log& log,
+    Matches& out,
+    alloc::Default monotonic) const noexcept -> void
 {
-    auto output = blockchain::block::Matches{};
-    auto& [inputs, outputs] = output;
     auto index = 0_uz;
 
     for (const auto& txin : *this) {
-        auto temp = txin.Internal().FindMatches(
-            api, txid, type, txos, patterns, index, log);
-        inputs.insert(
-            inputs.end(),
-            std::make_move_iterator(temp.first.begin()),
-            std::make_move_iterator(temp.first.end()));
-        outputs.insert(
-            outputs.end(),
-            std::make_move_iterator(temp.second.begin()),
-            std::make_move_iterator(temp.second.end()));
+        txin.Internal().FindMatches(
+            api, txid, type, txos, patterns, index, log, out, monotonic);
         ++index;
     }
-
-    return output;
 }
 
-auto Inputs::GetPatterns(const api::Session& api) const noexcept
-    -> UnallocatedVector<PatternID>
+auto Inputs::IndexElements(const api::Session& api, ElementHashes& out)
+    const noexcept -> void
 {
-    auto output = UnallocatedVector<PatternID>{};
     std::for_each(
         std::begin(inputs_), std::end(inputs_), [&](const auto& txin) {
-            const auto patterns = txin->GetPatterns(api);
-            output.insert(output.end(), patterns.begin(), patterns.end());
+            txin->IndexElements(api, out);
         });
-
-    dedup(output);
-
-    return output;
 }
 
 auto Inputs::Keys() const noexcept -> UnallocatedVector<crypto::Key>
@@ -358,7 +331,7 @@ auto Inputs::SerializeNormalized(const AllocateOutput destination)
     return serialize(destination, true);
 }
 
-auto Inputs::SetKeyData(const blockchain::block::KeyData& data) noexcept -> void
+auto Inputs::SetKeyData(const KeyData& data) noexcept -> void
 {
     for (const auto& input : inputs_) { input->SetKeyData(data); }
 }

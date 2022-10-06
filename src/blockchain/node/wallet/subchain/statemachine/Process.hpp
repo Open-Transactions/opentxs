@@ -115,35 +115,45 @@ private:
 
     auto check_cache() noexcept -> void;
     auto check_process() noexcept -> bool;
-    auto do_process(const Ready::value_type& data) noexcept -> void;
+    auto do_process(
+        const Ready::value_type& data,
+        allocator_type monotonic) noexcept -> void;
     auto do_process(
         const block::Position position,
         const std::shared_ptr<const bitcoin::block::Block> block) noexcept
         -> void;
     auto do_process_common(
         const block::Position position,
-        const std::shared_ptr<const bitcoin::block::Block>& block) noexcept
-        -> void;
-    auto do_process_update(Message&& msg) noexcept -> void final;
+        const std::shared_ptr<const bitcoin::block::Block>& block,
+        allocator_type monotonic) noexcept -> void;
+    auto do_process_update(Message&& msg, allocator_type monotonic) noexcept
+        -> void final;
     auto do_reorg(
         const node::HeaderOracle& oracle,
         const node::internal::HeaderOraclePrivate& data,
         Reorg::Params& params) noexcept -> bool final;
-    auto do_startup_internal() noexcept -> void final;
+    auto do_startup_internal(allocator_type monotonic) noexcept -> void final;
     auto download(block::Position&& position) noexcept -> void;
     auto download(
         block::Position&& position,
         BitcoinBlockResult&& future) noexcept -> void;
     auto forward_to_next(Message&& msg) noexcept -> void final;
-    auto process_block(block::Hash&& block) noexcept -> void final;
-    auto process_do_rescan(Message&& in) noexcept -> void final;
-    auto process_filter(Message&& in, block::Position&& tip) noexcept
+    auto process_block(block::Hash&& block, allocator_type monotonic) noexcept
         -> void final;
-    auto process_mempool(Message&& in) noexcept -> void final;
-    auto process_process(block::Position&& position) noexcept -> void final;
-    auto process_reprocess(Message&& msg) noexcept -> void final;
+    auto process_do_rescan(Message&& in) noexcept -> void final;
+    auto process_filter(
+        Message&& in,
+        block::Position&& tip,
+        allocator_type monotonic) noexcept -> void final;
+    auto process_mempool(Message&& in, allocator_type monotonic) noexcept
+        -> void final;
+    auto process_process(
+        block::Position&& position,
+        allocator_type monotonic) noexcept -> void final;
+    auto process_reprocess(Message&& msg, allocator_type monotonic) noexcept
+        -> void final;
     auto queue_downloads() noexcept -> void;
     auto queue_process() noexcept -> bool;
-    auto work() noexcept -> bool final;
+    auto work(allocator_type monotonic) noexcept -> bool final;
 };
 }  // namespace opentxs::blockchain::node::wallet

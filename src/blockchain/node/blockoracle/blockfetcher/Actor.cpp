@@ -185,7 +185,7 @@ auto BlockFetcher::Actor::do_shutdown() noexcept -> void
     api_p_.reset();
 }
 
-auto BlockFetcher::Actor::do_startup() noexcept -> bool
+auto BlockFetcher::Actor::do_startup(allocator_type monotonic) noexcept -> bool
 {
     if ((api_.Internal().ShuttingDown()) || (node_.Internal().ShuttingDown())) {
         return true;
@@ -236,23 +236,25 @@ auto BlockFetcher::Actor::do_startup() noexcept -> bool
         LogConsole()(print(chain_))(" block tip is ")(tip).Flush();
     }
 
-    do_work();
+    do_work(monotonic);
 
     return false;
 }
 
-auto BlockFetcher::Actor::pipeline(const Work work, Message&& msg) noexcept
-    -> void
+auto BlockFetcher::Actor::pipeline(
+    const Work work,
+    Message&& msg,
+    allocator_type monotonic) noexcept -> void
 {
     switch (work) {
         case Work::heartbeat: {
             process_heartbeat(std::move(msg));
         } break;
         case Work::reorg: {
-            process_reorg(std::move(msg));
+            process_reorg(std::move(msg), monotonic);
         } break;
         case Work::header: {
-            do_work();
+            do_work(monotonic);
         } break;
         case Work::report: {
             process_report(std::move(msg));
@@ -280,7 +282,9 @@ auto BlockFetcher::Actor::process_heartbeat(Message&& msg) noexcept -> void
     if (data.JobAvailable()) { publish_job_ready(); }
 }
 
-auto BlockFetcher::Actor::process_reorg(Message&& msg) noexcept -> void
+auto BlockFetcher::Actor::process_reorg(
+    Message&& msg,
+    allocator_type monotonic) noexcept -> void
 {
     const auto body = msg.Body();
 
@@ -314,7 +318,7 @@ auto BlockFetcher::Actor::process_reorg(Message&& msg) noexcept -> void
         }
     }
 
-    do_work();
+    do_work(monotonic);
 }
 
 auto BlockFetcher::Actor::process_report(Message&& msg) noexcept -> void
@@ -339,7 +343,7 @@ auto BlockFetcher::Actor::update_tip(Shared::Data& data) noexcept -> void
     }
 }
 
-auto BlockFetcher::Actor::work() noexcept -> bool
+auto BlockFetcher::Actor::work(allocator_type monotonic) noexcept -> bool
 {
     log_(OT_PRETTY_CLASS())(name_)(": checking for new blocks").Flush();
     auto handle = data_.lock();

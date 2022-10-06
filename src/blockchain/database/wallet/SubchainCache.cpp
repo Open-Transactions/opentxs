@@ -50,7 +50,7 @@ SubchainCache::SubchainCache(
 }
 
 auto SubchainCache::AddPattern(
-    const PatternID& id,
+    const ElementID& id,
     const Bip32Index index,
     const ReadView data,
     storage::lmdb::Transaction& tx) noexcept -> bool
@@ -86,8 +86,8 @@ auto SubchainCache::AddPattern(
 }
 
 auto SubchainCache::AddPatternIndex(
-    const SubchainIndex& key,
-    const PatternID& value,
+    const SubchainID& key,
+    const ElementID& value,
     storage::lmdb::Transaction& tx) noexcept -> bool
 {
     try {
@@ -127,7 +127,7 @@ auto SubchainCache::Clear() noexcept -> void
     last_scanned_.lock()->clear();
 }
 
-auto SubchainCache::DecodeIndex(const SubchainIndex& key) const noexcept(false)
+auto SubchainCache::DecodeIndex(const SubchainID& key) const noexcept(false)
     -> const db::SubchainID&
 {
     auto handle = subchain_id_.lock();
@@ -137,11 +137,11 @@ auto SubchainCache::DecodeIndex(const SubchainIndex& key) const noexcept(false)
 }
 
 auto SubchainCache::GetIndex(
-    const NodeID& subaccount,
+    const SubaccountID& subaccount,
     const crypto::Subchain subchain,
     const cfilter::Type type,
     const VersionNumber version,
-    storage::lmdb::Transaction& tx) const noexcept -> SubchainIndex
+    storage::lmdb::Transaction& tx) const noexcept -> SubchainID
 {
     const auto index = subchain_index(subaccount, subchain, type, version);
     auto handle = subchain_id_.lock();
@@ -183,7 +183,7 @@ auto SubchainCache::GetIndex(
     return index;
 }
 
-auto SubchainCache::GetLastIndexed(const SubchainIndex& subchain) const noexcept
+auto SubchainCache::GetLastIndexed(const SubchainID& subchain) const noexcept
     -> std::optional<Bip32Index>
 {
     try {
@@ -198,7 +198,7 @@ auto SubchainCache::GetLastIndexed(const SubchainIndex& subchain) const noexcept
     }
 }
 
-auto SubchainCache::GetLastScanned(const SubchainIndex& subchain) const noexcept
+auto SubchainCache::GetLastScanned(const SubchainID& subchain) const noexcept
     -> block::Position
 {
     try {
@@ -214,7 +214,7 @@ auto SubchainCache::GetLastScanned(const SubchainIndex& subchain) const noexcept
     }
 }
 
-auto SubchainCache::GetPattern(const PatternID& id) const noexcept
+auto SubchainCache::GetPattern(const ElementID& id) const noexcept
     -> const dbPatterns&
 {
     auto handle = patterns_.lock();
@@ -223,7 +223,7 @@ auto SubchainCache::GetPattern(const PatternID& id) const noexcept
     return load_pattern(id, map);
 }
 
-auto SubchainCache::GetPatternIndex(const SubchainIndex& id) const noexcept
+auto SubchainCache::GetPatternIndex(const SubchainID& id) const noexcept
     -> const dbPatternIndex&
 {
     auto handle = pattern_index_.lock();
@@ -232,8 +232,8 @@ auto SubchainCache::GetPatternIndex(const SubchainIndex& id) const noexcept
     return load_pattern_index(id, map);
 }
 
-auto SubchainCache::load_index(const SubchainIndex& key, SubchainIDMap& map)
-    const noexcept(false) -> const db::SubchainID&
+auto SubchainCache::load_index(const SubchainID& key, SubchainIDMap& map) const
+    noexcept(false) -> const db::SubchainID&
 {
     auto it = map.find(key);
 
@@ -258,7 +258,7 @@ auto SubchainCache::load_index(const SubchainIndex& key, SubchainIDMap& map)
 }
 
 auto SubchainCache::load_last_indexed(
-    const SubchainIndex& key,
+    const SubchainID& key,
     LastIndexedMap& map) const noexcept(false) -> const Bip32Index&
 {
     auto it = map.find(key);
@@ -289,7 +289,7 @@ auto SubchainCache::load_last_indexed(
 }
 
 auto SubchainCache::load_last_scanned(
-    const SubchainIndex& key,
+    const SubchainID& key,
     LastScannedMap& map) const noexcept(false) -> const db::Position&
 {
     auto it = map.find(key);
@@ -314,7 +314,7 @@ auto SubchainCache::load_last_scanned(
     throw std::out_of_range{error};
 }
 
-auto SubchainCache::load_pattern(const PatternID& key, PatternsMap& map)
+auto SubchainCache::load_pattern(const ElementID& key, PatternsMap& map)
     const noexcept -> const dbPatterns&
 {
     if (auto it = map.find(key); map.end() != it) { return it->second; }
@@ -330,7 +330,7 @@ auto SubchainCache::load_pattern(const PatternID& key, PatternsMap& map)
 }
 
 auto SubchainCache::load_pattern_index(
-    const SubchainIndex& key,
+    const SubchainID& key,
     PatternIndexMap& map) const noexcept -> const dbPatternIndex&
 {
     if (auto it = map.find(key); map.end() != it) { return it->second; }
@@ -353,7 +353,7 @@ auto SubchainCache::load_pattern_index(
 }
 
 auto SubchainCache::SetLastIndexed(
-    const SubchainIndex& subchain,
+    const SubchainID& subchain,
     const Bip32Index value,
     storage::lmdb::Transaction& tx) noexcept -> bool
 {
@@ -379,7 +379,7 @@ auto SubchainCache::SetLastIndexed(
 }
 
 auto SubchainCache::SetLastScanned(
-    const SubchainIndex& subchain,
+    const SubchainID& subchain,
     const block::Position& value,
     storage::lmdb::Transaction& tx) noexcept -> bool
 {
@@ -419,10 +419,10 @@ auto SubchainCache::SetLastScanned(
 }
 
 auto SubchainCache::subchain_index(
-    const NodeID& subaccount,
+    const SubaccountID& subaccount,
     const crypto::Subchain subchain,
     const cfilter::Type type,
-    const VersionNumber version) const noexcept -> SubchainIndex
+    const VersionNumber version) const noexcept -> SubchainID
 {
     auto preimage = api_.Factory().Data();
     preimage.Assign(subaccount);

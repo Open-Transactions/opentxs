@@ -11,7 +11,7 @@
 #include <boost/enable_shared_from_this.hpp>
 #include <boost/smart_ptr/enable_shared_from_this.hpp>
 #include <boost/smart_ptr/shared_ptr.hpp>
-#include <cs_deferred_guarded.h>
+#include <cs_ordered_guarded.h>
 #include <cs_plain_guarded.h>
 #include <cs_shared_guarded.h>
 #include <atomic>
@@ -32,6 +32,7 @@
 #include "internal/blockchain/Blockchain.hpp"
 #include "internal/blockchain/block/Block.hpp"
 #include "internal/blockchain/block/Types.hpp"
+#include "internal/blockchain/database/Types.hpp"
 #include "internal/blockchain/database/Wallet.hpp"
 #include "internal/blockchain/node/Wallet.hpp"
 #include "internal/blockchain/node/wallet/Reorg.hpp"
@@ -160,7 +161,6 @@ private:
     std::shared_ptr<const node::Manager> node_p_;
 
 public:
-    using SubchainIndex = database::Wallet::SubchainIndex;
     using ElementCache =
         libguarded::shared_guarded<wallet::ElementCache, std::shared_mutex>;
     using MatchCache =
@@ -182,7 +182,7 @@ public:
     const crypto::Subchain subchain_;
     const Type chain_;
     const cfilter::Type filter_type_;
-    const SubchainIndex db_key_;
+    const block::SubchainID db_key_;
     const block::Position null_position_;
     const block::Position genesis_;
     const CString from_ssd_endpoint_;
@@ -213,13 +213,15 @@ public:
         const cfilter::Type type,
         const blockchain::crypto::Element& input,
         const Bip32Index index,
-        database::Wallet::ElementMap& output) const noexcept -> void;
+        database::ElementMap& output) const noexcept -> void;
     auto ProcessBlock(
         const block::Position& position,
-        const bitcoin::block::Block& block) const noexcept -> bool;
+        const bitcoin::block::Block& block,
+        allocator_type monotonic) const noexcept -> bool;
     auto ProcessTransaction(
         const bitcoin::block::Transaction& tx,
-        const Log& log) const noexcept -> void;
+        const Log& log,
+        allocator_type monotonic) const noexcept -> void;
     auto ReorgTarget(
         const block::Position& reorg,
         const block::Position& current) const noexcept -> block::Position;
@@ -228,13 +230,15 @@ public:
         const block::Position best,
         const block::Height stop,
         block::Position& highestTested,
-        Vector<ScanStatus>& out) const noexcept
+        Vector<ScanStatus>& out,
+        allocator_type monotonic) const noexcept
         -> std::optional<block::Position>;
     auto Scan(
         const block::Position best,
         const block::Height stop,
         block::Position& highestTested,
-        Vector<ScanStatus>& out) const noexcept
+        Vector<ScanStatus>& out,
+        allocator_type monotonic) const noexcept
         -> std::optional<block::Position>;
 
     auto Init(boost::shared_ptr<SubchainStateData> me) noexcept -> void final;
@@ -248,11 +252,11 @@ public:
     ~SubchainStateData() override;
 
 protected:
-    using TXOs = database::Wallet::TXOs;
+    using TXOs = database::TXOs;
     auto set_key_data(bitcoin::block::Transaction& tx) const noexcept -> void;
 
-    virtual auto do_startup() noexcept -> bool;
-    virtual auto work() noexcept -> bool;
+    virtual auto do_startup(allocator_type monotonic) noexcept -> bool;
+    virtual auto work(allocator_type monotonic) noexcept -> bool;
 
     SubchainStateData(
         Reorg& reorg,
@@ -269,9 +273,9 @@ private:
 
     using Transactions =
         Vector<std::shared_ptr<const bitcoin::block::Transaction>>;
-    using Patterns = database::Wallet::Patterns;
+    using Patterns = block::Patterns;
     using Targets = GCS::Targets;
-    using Tested = database::Wallet::MatchingIndices;
+    using Tested = database::MatchingIndices;
     using Elements = wallet::ElementCache::Elements;
     using HandledReorgs = Set<StateSequence>;
     using SelectedKeyElement = std::pair<Vector<Bip32Index>, Targets>;
@@ -291,7 +295,7 @@ private:
     using FilterMap = Map<block::Height, std::uint32_t>;
     using AsyncResults = std::tuple<Positions, Positions, FilterMap>;
     using MatchResults =
-        libguarded::deferred_guarded<AsyncResults, std::shared_mutex>;
+        libguarded::ordered_guarded<AsyncResults, std::shared_mutex>;
 
     class PrehashData;
 
@@ -346,7 +350,8 @@ private:
         const block::Position best,
         const block::Height stop,
         block::Position& highestTested,
-        Vector<ScanStatus>& out) const noexcept
+        Vector<ScanStatus>& out,
+        allocator_type monotonic) const noexcept
         -> std::optional<block::Position>;
     auto select_all(
         const block::Position& block,
@@ -378,7 +383,8 @@ private:
         const node::internal::HeaderOraclePrivate& data,
         Reorg::Params& params) noexcept -> bool;
     auto do_shutdown() noexcept -> void;
-    auto pipeline(const Work work, Message&& msg) noexcept -> void;
+    auto pipeline(const Work work, Message&& msg, allocator_type) noexcept
+        -> void;
     auto process_prepare_reorg(Message&& in) noexcept -> void;
     auto process_rescan(Message&& in) noexcept -> void;
     auto process_watchdog_ack(Message&& in) noexcept -> void;

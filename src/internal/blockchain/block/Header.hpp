@@ -24,10 +24,13 @@ namespace internal
 {
 class Header;
 }  // namespace internal
-
-class Position;
 }  // namespace block
 }  // namespace bitcoin
+
+namespace block
+{
+class Position;
+}  // namespace block
 
 class Work;
 }  // namespace blockchain

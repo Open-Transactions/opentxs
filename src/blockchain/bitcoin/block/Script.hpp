@@ -13,6 +13,8 @@
 #include <optional>
 
 #include "internal/blockchain/bitcoin/block/Script.hpp"
+#include "internal/blockchain/bitcoin/block/Types.hpp"
+#include "internal/blockchain/block/Types.hpp"
 #include "opentxs/blockchain/BlockchainType.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/bitcoin/block/Script.hpp"
@@ -64,10 +66,10 @@ public:
         return {this, elements_.size()};
     }
     auto end() const noexcept -> const_iterator final { return cend(); }
-    auto ExtractElements(const cfilter::Type style) const noexcept
-        -> Vector<Vector<std::byte>> final;
-    auto ExtractPatterns(const api::Session& api) const noexcept
-        -> UnallocatedVector<PatternID> final;
+    auto ExtractElements(const cfilter::Type style, Elements& out)
+        const noexcept -> void final;
+    auto IndexElements(const api::Session& api, ElementHashes& out)
+        const noexcept -> void final;
     auto IsNotification(
         const std::uint8_t version,
         const PaymentCode& recipient) const noexcept -> bool final;

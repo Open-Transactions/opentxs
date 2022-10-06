@@ -17,7 +17,7 @@
 
 #include "blockchain/database/wallet/Output.hpp"
 #include "blockchain/database/wallet/Position.hpp"
-#include "blockchain/database/wallet/Types.hpp"
+#include "internal/blockchain/block/Types.hpp"
 #include "internal/blockchain/database/Types.hpp"
 #include "internal/util/TSV.hpp"
 #include "internal/util/storage/lmdb/Types.hpp"
@@ -91,7 +91,6 @@ constexpr auto subchains_{Table::SubchainOutputs};
 
 using Dir = storage::lmdb::Dir;
 using Mode = storage::lmdb::Mode;
-using SubchainID = identifier::Generic;
 using States = UnallocatedVector<node::TxoState>;
 using Matches = UnallocatedVector<block::Outpoint>;
 using Outpoints = robin_hood::unordered_node_set<block::Outpoint>;

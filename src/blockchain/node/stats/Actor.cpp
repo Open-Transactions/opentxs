@@ -139,10 +139,10 @@ Actor::Actor(
 
 auto Actor::do_shutdown() noexcept -> void {}
 
-auto Actor::do_startup() noexcept -> bool
+auto Actor::do_startup(allocator_type monotonic) noexcept -> bool
 {
     if (api_.Internal().ShuttingDown()) {
-        do_work();
+        do_work(monotonic);
 
         return true;
     } else {
@@ -151,7 +151,8 @@ auto Actor::do_startup() noexcept -> bool
     }
 }
 
-auto Actor::pipeline(const Work work, Message&& msg) noexcept -> void
+auto Actor::pipeline(const Work work, Message&& msg, allocator_type) noexcept
+    -> void
 {
     switch (work) {
         case Work::block_header: {
@@ -263,7 +264,7 @@ auto Actor::process_sync_server(Message&& msg) noexcept -> void
         {body.at(2).as<block::Height>(), body.at(3).Bytes()});
 }
 
-auto Actor::work() noexcept -> bool
+auto Actor::work(allocator_type monotonic) noexcept -> bool
 {
     using Job = api::network::BlockchainJob;
     to_blockchain_api_.SendDeferred(

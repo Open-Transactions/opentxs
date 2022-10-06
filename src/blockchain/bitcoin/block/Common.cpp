@@ -23,9 +23,9 @@ namespace be = boost::endian;
 
 namespace opentxs::blockchain::bitcoin::block::internal
 {
-auto DecodeBip34(const ReadView coinbase) noexcept -> blockchain::block::Height
+auto DecodeBip34(const ReadView coinbase) noexcept -> block::Height
 {
-    static constexpr auto null = blockchain::block::Height{-1};
+    static constexpr auto null = block::Height{-1};
 
     if (false == valid(coinbase)) { return null; }
 
@@ -42,7 +42,7 @@ auto DecodeBip34(const ReadView coinbase) noexcept -> blockchain::block::Height
     return buf.value();
 }
 
-auto EncodeBip34(blockchain::block::Height height) noexcept -> Space
+auto EncodeBip34(block::Height height) noexcept -> Space
 {
     if (std::numeric_limits<std::int8_t>::max() >= height) {
         auto buf = be::little_int8_buf_t(static_cast<std::int8_t>(height));

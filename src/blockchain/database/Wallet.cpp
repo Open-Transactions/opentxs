@@ -17,7 +17,7 @@
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/util/Log.hpp"
 
-namespace opentxs::blockchain::database::implemenation
+namespace opentxs::blockchain::database::implementation
 {
 Wallet::Wallet(
     const api::Session& api,
@@ -35,8 +35,8 @@ Wallet::Wallet(
 }
 
 auto Wallet::AddConfirmedTransactions(
-    const NodeID& account,
-    const SubchainIndex& index,
+    const SubaccountID& account,
+    const SubchainID& index,
     BatchedMatches&& transactions,
     TXOs& txoCreated,
     TXOs& txoConsumed) noexcept -> bool
@@ -46,7 +46,7 @@ auto Wallet::AddConfirmedTransactions(
 }
 
 auto Wallet::AddMempoolTransaction(
-    const NodeID& balanceNode,
+    const SubaccountID& balanceNode,
     const crypto::Subchain subchain,
     const Vector<std::uint32_t> outputIndices,
     const bitcoin::block::Transaction& original,
@@ -113,7 +113,7 @@ auto Wallet::GetBalance(const identifier::Nym& owner) const noexcept -> Balance
     return outputs_.GetBalance(owner);
 }
 
-auto Wallet::GetBalance(const identifier::Nym& owner, const NodeID& node)
+auto Wallet::GetBalance(const identifier::Nym& owner, const SubaccountID& node)
     const noexcept -> Balance
 {
     return outputs_.GetBalance(owner, node);
@@ -161,7 +161,7 @@ auto Wallet::GetOutputTags(const block::Outpoint& output) const noexcept
     return outputs_.GetOutputTags(output);
 }
 
-auto Wallet::GetPatterns(const SubchainIndex& index, alloc::Default alloc)
+auto Wallet::GetPatterns(const SubchainID& index, alloc::Default alloc)
     const noexcept -> Patterns
 {
     return subchains_.GetPatterns(index, alloc);
@@ -173,8 +173,8 @@ auto Wallet::GetPosition() const noexcept -> block::Position
 }
 
 auto Wallet::GetSubchainID(
-    const NodeID& balanceNode,
-    const crypto::Subchain subchain) const noexcept -> SubchainIndex
+    const SubaccountID& balanceNode,
+    const crypto::Subchain subchain) const noexcept -> SubchainID
 {
     return subchains_.GetSubchainID(balanceNode, subchain);
 }
@@ -203,7 +203,7 @@ auto Wallet::GetUnspentOutputs(alloc::Default alloc) const noexcept
 }
 
 auto Wallet::GetUnspentOutputs(
-    const NodeID& balanceNode,
+    const SubaccountID& balanceNode,
     const crypto::Subchain subchain,
     alloc::Default alloc) const noexcept -> Vector<UTXO>
 {
@@ -244,9 +244,9 @@ auto Wallet::ReorgTo(
     const node::internal::HeaderOraclePrivate& data,
     storage::lmdb::Transaction& tx,
     const node::HeaderOracle& headers,
-    const NodeID& balanceNode,
+    const SubaccountID& balanceNode,
     const crypto::Subchain subchain,
-    const SubchainIndex& index,
+    const SubchainID& index,
     const UnallocatedVector<block::Position>& reorg) const noexcept -> bool
 {
     if (reorg.empty()) { return true; }
@@ -291,28 +291,28 @@ auto Wallet::ReserveUTXO(
 }
 
 auto Wallet::SubchainAddElements(
-    const SubchainIndex& index,
+    const SubchainID& index,
     const ElementMap& elements) const noexcept -> bool
 {
     return subchains_.SubchainAddElements(index, elements);
 }
 
-auto Wallet::SubchainLastIndexed(const SubchainIndex& index) const noexcept
+auto Wallet::SubchainLastIndexed(const SubchainID& index) const noexcept
     -> std::optional<Bip32Index>
 {
     return subchains_.SubchainLastIndexed(index);
 }
 
-auto Wallet::SubchainLastScanned(const SubchainIndex& index) const noexcept
+auto Wallet::SubchainLastScanned(const SubchainID& index) const noexcept
     -> block::Position
 {
     return subchains_.SubchainLastScanned(index);
 }
 
 auto Wallet::SubchainSetLastScanned(
-    const SubchainIndex& index,
+    const SubchainID& index,
     const block::Position& position) const noexcept -> bool
 {
     return subchains_.SubchainSetLastScanned(index, position);
 }
-}  // namespace opentxs::blockchain::database::implemenation
+}  // namespace opentxs::blockchain::database::implementation

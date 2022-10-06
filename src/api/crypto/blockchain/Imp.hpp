@@ -19,6 +19,7 @@
 #include "api/crypto/blockchain/Blockchain.hpp"
 #include "api/crypto/blockchain/Wallets.hpp"
 #include "internal/api/crypto/Blockchain.hpp"
+#include "internal/blockchain/block/Types.hpp"
 #include "internal/util/Mutex.hpp"
 #include "opentxs/api/Context.hpp"
 #include "opentxs/api/crypto/Blockchain.hpp"
@@ -200,7 +201,8 @@ struct Blockchain::Imp {
         const identifier::Generic& accountID) const noexcept(false)
         -> const opentxs::blockchain::crypto::HD&;
     using SyncState = UnallocatedVector<opentxs::network::otdht::State>;
-    virtual auto IndexItem(const ReadView bytes) const noexcept -> PatternID;
+    virtual auto IndexItem(const ReadView bytes) const noexcept
+        -> opentxs::blockchain::block::ElementHash;
     virtual auto KeyEndpoint() const noexcept -> std::string_view;
     virtual auto KeyGenerated(
         const opentxs::blockchain::Type chain,

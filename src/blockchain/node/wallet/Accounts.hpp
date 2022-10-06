@@ -144,8 +144,9 @@ private:
 
     auto do_reorg() noexcept -> void;
     auto do_shutdown() noexcept -> void;
-    auto do_startup() noexcept -> bool;
-    auto pipeline(const Work work, Message&& msg) noexcept -> void;
+    auto do_startup(allocator_type monotonic) noexcept -> bool;
+    auto pipeline(const Work work, Message&& msg, allocator_type) noexcept
+        -> void;
     auto process_block_header(Message&& in) noexcept -> void;
     auto process_nym(Message&& in) noexcept -> void;
     auto process_nym(const identifier::Nym& nym) noexcept -> void;
@@ -161,7 +162,7 @@ private:
     auto transition_state_normal() noexcept -> void;
     auto transition_state_pre_reorg() noexcept -> void;
     auto transition_state_pre_shutdown() noexcept -> void;
-    auto work() noexcept -> bool;
+    auto work(allocator_type monotonic) noexcept -> bool;
 
     Imp(std::shared_ptr<const api::Session> api,
         std::shared_ptr<const node::Manager> node,

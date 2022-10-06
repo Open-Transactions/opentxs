@@ -168,7 +168,7 @@ private:
 
     auto CheckCache(const std::size_t outstanding, FinishedCallback cb)
         const noexcept -> void final;
-    auto do_startup() noexcept -> bool final;
+    auto do_startup(allocator_type monotonic) noexcept -> bool final;
     auto get_index(const boost::shared_ptr<const SubchainStateData>& me)
         const noexcept -> void final;
     auto handle_confirmed_matches(
@@ -189,7 +189,7 @@ private:
         const opentxs::PaymentCode& remote,
         const PasswordPrompt& reason) const noexcept -> void;
 
-    auto init_contacts() noexcept -> void;
-    auto work() noexcept -> bool final;
+    auto init_contacts(allocator_type monotonic) noexcept -> void;
+    auto work(allocator_type monotonic) noexcept -> bool final;
 };
 }  // namespace opentxs::blockchain::node::wallet

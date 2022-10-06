@@ -108,7 +108,7 @@ private:
     auto check_ping() noexcept -> void;
     auto check_registration() noexcept -> void;
     auto do_shutdown() noexcept -> void;
-    auto do_startup() noexcept -> bool;
+    auto do_startup(allocator_type monotonic) noexcept -> bool;
     auto forward_to_chain(
         opentxs::blockchain::Type chain,
         const Message& msg) noexcept -> void;
@@ -119,7 +119,8 @@ private:
         const Acknowledgement& ack,
         const Message& msg) noexcept -> void;
     auto ping() noexcept -> void;
-    auto pipeline(const Work work, Message&& msg) noexcept -> void;
+    auto pipeline(const Work work, Message&& msg, allocator_type) noexcept
+        -> void;
     auto pipeline_external(const Work work, Message&& msg) noexcept -> void;
     auto pipeline_internal(const Work work, Message&& msg) noexcept -> void;
     auto process_chain_state(Message&& msg) noexcept -> void;
@@ -132,6 +133,6 @@ private:
     auto reset_registration_timer(std::chrono::microseconds interval) noexcept
         -> void;
     auto subscribe(const Acknowledgement& ack) noexcept -> void;
-    auto work() noexcept -> bool;
+    auto work(allocator_type monotonic) noexcept -> bool;
 };
 }  // namespace opentxs::network::otdht

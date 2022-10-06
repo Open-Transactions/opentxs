@@ -21,7 +21,7 @@ namespace opentxs::blockchain::bitcoin::block::implementation
 Transaction::Cache::Cache(
     const UnallocatedCString& memo,
     UnallocatedVector<blockchain::Type>&& chains,
-    blockchain::block::Position&& minedPosition) noexcept(false)
+    block::Position&& minedPosition) noexcept(false)
     : lock_()
     , normalized_id_()
     , size_()
@@ -67,7 +67,7 @@ auto Transaction::Cache::chains() const noexcept
     return chains_;
 }
 
-auto Transaction::Cache::height() const noexcept -> blockchain::block::Height
+auto Transaction::Cache::height() const noexcept -> block::Height
 {
     auto lock = rLock{lock_};
 
@@ -102,8 +102,7 @@ auto Transaction::Cache::merge(
     mined_position_ = rhs.MinedPosition();
 }
 
-auto Transaction::Cache::position() const noexcept
-    -> const blockchain::block::Position&
+auto Transaction::Cache::position() const noexcept -> const block::Position&
 {
     auto lock = rLock{lock_};
 
@@ -129,8 +128,8 @@ auto Transaction::Cache::set_memo(UnallocatedCString&& memo) noexcept -> void
     memo_ = std::move(memo);
 }
 
-auto Transaction::Cache::set_position(
-    const blockchain::block::Position& pos) noexcept -> void
+auto Transaction::Cache::set_position(const block::Position& pos) noexcept
+    -> void
 {
     auto lock = rLock{lock_};
     mined_position_ = pos;

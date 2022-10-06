@@ -89,10 +89,12 @@ public:
     auto LoadCfilter(
         const cfilter::Type type,
         const ReadView blockHash,
-        alloc::Default alloc) const noexcept -> opentxs::blockchain::GCS;
+        alloc::Default alloc,
+        alloc::Default monotonic) const noexcept -> opentxs::blockchain::GCS;
     auto LoadCfilters(
         const cfilter::Type type,
-        const Vector<block::Hash>& blocks) const noexcept -> Vector<GCS>;
+        const Vector<block::Hash>& blocks,
+        alloc::Default monotonic) const noexcept -> Vector<GCS>;
     auto LoadCfilterHash(
         const cfilter::Type type,
         const ReadView blockHash,
@@ -106,11 +108,13 @@ public:
         const Vector<CFHeaderParams>& headers) const noexcept -> bool;
     auto StoreCfilters(
         const cfilter::Type type,
-        const Vector<CFilterParams>& filters) const noexcept -> bool;
+        const Vector<CFilterParams>& filters,
+        alloc::Default monotonic) const noexcept -> bool;
     auto StoreCfilters(
         const cfilter::Type type,
         const Vector<CFHeaderParams>& headers,
-        const Vector<CFilterParams>& filters) const noexcept -> bool;
+        const Vector<CFilterParams>& filters,
+        alloc::Default monotonic) const noexcept -> bool;
 
     BlockFilter(
         const api::Session& api,

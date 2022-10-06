@@ -76,13 +76,14 @@ private:
     opentxs::network::zeromq::socket::Raw& router_;
 
     auto do_shutdown() noexcept -> void;
-    auto do_startup() noexcept -> bool;
-    auto pipeline(const Work work, Message&& msg) noexcept -> void;
+    auto do_startup(allocator_type monotonic) noexcept -> bool;
+    auto pipeline(const Work work, Message&& msg, allocator_type) noexcept
+        -> void;
     auto pipeline_internal(const Work work, Message&& msg) noexcept -> void;
     auto pipeline_external(const Work work, Message&& msg) noexcept -> void;
     auto process_registration(Message&& msg) noexcept -> void;
     auto process_resolve(Message&& msg) noexcept -> void;
     auto process_sent(Message&& msg) noexcept -> void;
-    auto work() noexcept -> bool;
+    auto work(allocator_type monotonic) noexcept -> bool;
 };
 }  // namespace opentxs::api::network::asio

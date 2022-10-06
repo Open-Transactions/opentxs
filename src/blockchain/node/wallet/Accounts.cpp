@@ -203,7 +203,7 @@ auto Accounts::Imp::do_shutdown() noexcept -> void
     api_p_.reset();
 }
 
-auto Accounts::Imp::do_startup() noexcept -> bool
+auto Accounts::Imp::do_startup(allocator_type) noexcept -> bool
 {
     if (api_.Internal().ShuttingDown() || node_.Internal().ShuttingDown()) {
 
@@ -242,7 +242,10 @@ auto Accounts::Imp::do_startup() noexcept -> bool
     return false;
 }
 
-auto Accounts::Imp::pipeline(const Work work, Message&& msg) noexcept -> void
+auto Accounts::Imp::pipeline(
+    const Work work,
+    Message&& msg,
+    allocator_type) noexcept -> void
 {
     switch (state_) {
         case State::normal: {
@@ -365,20 +368,20 @@ auto Accounts::Imp::state_normal(const Work work, Message&& msg) noexcept
         case Work::rescan: {
             process_rescan(std::move(msg));
         } break;
-        case Work::init: {
-            do_init();
-        } break;
         case Work::shutdown:
         case Work::prepare_shutdown: {
             transition_state_pre_shutdown();
         } break;
-        case Work::statemachine: {
-            do_work();
-        } break;
-        case Work::reorg_ready:
-        case Work::shutdown_ready: {
+        case Work::reorg_ready: {
             LogAbort()(OT_PRETTY_CLASS())(name_)(" wrong state for ")(
                 print(work))(" message")
+                .Abort();
+        }
+        case Work::shutdown_ready:
+        case Work::init:
+        case Work::statemachine: {
+            LogAbort()(OT_PRETTY_CLASS())(name_)(": unhandled message type ")(
+                print(work))
                 .Abort();
         }
         default: {
@@ -393,22 +396,22 @@ auto Accounts::Imp::state_pre_reorg(const Work work, Message&& msg) noexcept
     -> void
 {
     switch (work) {
+        case Work::shutdown:
         case Work::nym:
         case Work::header:
         case Work::reorg:
         case Work::rescan:
-        case Work::shutdown:
-        case Work::prepare_shutdown:
-        case Work::statemachine: {
+        case Work::prepare_shutdown: {
             defer(std::move(msg));
         } break;
         case Work::reorg_ready: {
             do_reorg();
         } break;
         case Work::shutdown_ready:
-        case Work::init: {
-            LogAbort()(OT_PRETTY_CLASS())(name_)(" wrong state for ")(
-                print(work))(" message")
+        case Work::init:
+        case Work::statemachine: {
+            LogAbort()(OT_PRETTY_CLASS())(name_)(": unhandled message type ")(
+                print(work))
                 .Abort();
         }
         default: {
@@ -427,20 +430,22 @@ auto Accounts::Imp::state_pre_shutdown(const Work work, Message&& msg) noexcept
         case Work::prepare_shutdown: {
             if (reorg_.CheckShutdown()) { shutdown_actor(); }
         } break;
-        case Work::shutdown_ready: {
-            shutdown_actor();
-        } break;
         case Work::nym:
         case Work::header:
         case Work::reorg:
-        case Work::rescan:
-        case Work::statemachine: {
+        case Work::rescan: {
             // NOTE ignore message
         } break;
-        case Work::reorg_ready:
-        case Work::init: {
+        case Work::reorg_ready: {
             LogAbort()(OT_PRETTY_CLASS())(name_)(" wrong state for ")(
                 print(work))(" message")
+                .Abort();
+        }
+        case Work::shutdown_ready:
+        case Work::init:
+        case Work::statemachine: {
+            LogAbort()(OT_PRETTY_CLASS())(name_)(": unhandled message type ")(
+                print(work))
                 .Abort();
         }
         default: {
@@ -492,7 +497,10 @@ auto Accounts::Imp::transition_state_pre_shutdown() noexcept -> void
     if (reorg_.PrepareShutdown()) { shutdown_actor(); }
 }
 
-auto Accounts::Imp::work() noexcept -> bool { return false; }
+auto Accounts::Imp::work(allocator_type monotonic) noexcept -> bool
+{
+    return false;
+}
 
 Accounts::Imp::~Imp() = default;
 }  // namespace opentxs::blockchain::node::wallet

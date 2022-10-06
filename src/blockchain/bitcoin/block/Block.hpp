@@ -14,6 +14,7 @@
 
 #include "blockchain/block/Block.hpp"
 #include "internal/blockchain/bitcoin/block/Block.hpp"
+#include "internal/blockchain/bitcoin/block/Types.hpp"
 #include "internal/blockchain/block/Block.hpp"
 #include "internal/blockchain/block/Types.hpp"
 #include "opentxs/blockchain/BlockchainType.hpp"
@@ -24,6 +25,7 @@
 #include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/network/blockchain/bitcoin/CompactSize.hpp"
+#include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 
@@ -51,6 +53,11 @@ class Header;
 class Transaction;
 }  // namespace block
 }  // namespace bitcoin
+
+namespace block
+{
+class Hash;
+}  // namespace block
 }  // namespace blockchain
 
 class Log;
@@ -86,7 +93,7 @@ public:
     static auto calculate_merkle_value(
         const api::Crypto& crypto,
         const Type chain,
-        const TxidIndex& txids) -> blockchain::block::Hash;
+        const TxidIndex& txids) -> block::Hash;
 
     auto asBitcoin() const noexcept -> const bitcoin::block::Block& final
     {
@@ -107,14 +114,16 @@ public:
     auto clone_bitcoin() const noexcept
         -> std::unique_ptr<internal::Block> override;
     auto end() const noexcept -> const_iterator final { return cend(); }
-    auto ExtractElements(const cfilter::Type style) const noexcept
-        -> Vector<Vector<std::byte>> final;
+    auto ExtractElements(const cfilter::Type style, alloc::Default alloc)
+        const noexcept -> Elements final;
     auto FindMatches(
         const api::Session& api,
         const cfilter::Type type,
-        const blockchain::block::Patterns& outpoints,
-        const blockchain::block::Patterns& scripts,
-        const Log& log) const noexcept -> blockchain::block::Matches final;
+        const Patterns& outpoints,
+        const Patterns& scripts,
+        const Log& log,
+        alloc::Default alloc,
+        alloc::Default monotonic) const noexcept -> Matches final;
     auto Print() const noexcept -> UnallocatedCString override;
     auto Serialize(AllocateOutput bytes) const noexcept -> bool final;
     auto size() const noexcept -> std::size_t final { return index_.size(); }
@@ -123,7 +132,7 @@ public:
 
     Block(
         const blockchain::Type chain,
-        std::unique_ptr<const blockchain::bitcoin::block::Header> header,
+        std::unique_ptr<const bitcoin::block::Header> header,
         TxidIndex&& index,
         TransactionMap&& transactions,
         std::optional<CalculatedSize>&& size = {}) noexcept(false);
@@ -141,8 +150,8 @@ protected:
 private:
     static const value_type null_tx_;
 
-    const std::unique_ptr<const blockchain::bitcoin::block::Header> header_p_;
-    const blockchain::bitcoin::block::Header& header_;
+    const std::unique_ptr<const bitcoin::block::Header> header_p_;
+    const bitcoin::block::Header& header_;
     const TxidIndex index_;
     const TransactionMap transactions_;
     mutable std::optional<CalculatedSize> size_;

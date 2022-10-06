@@ -89,23 +89,23 @@ auto Cache::Actor::do_shutdown() noexcept -> void
     api_p_.reset();
 }
 
-auto Cache::Actor::do_startup() noexcept -> bool
+auto Cache::Actor::do_startup(allocator_type monotonic) noexcept -> bool
 {
     if ((api_.Internal().ShuttingDown()) || (node_.Internal().ShuttingDown())) {
         return true;
     }
 
-    do_work();
+    do_work(monotonic);
 
     return false;
 }
 
-auto Cache::Actor::pipeline(const Work work, Message&& msg) noexcept -> void
+auto Cache::Actor::pipeline(
+    const Work work,
+    Message&& msg,
+    allocator_type) noexcept -> void
 {
     switch (work) {
-        case Work::shutdown: {
-            shutdown_actor();
-        } break;
         case Work::request_blocks: {
             data_.lock()->ProcessBlockRequests(std::move(msg));
         } break;
@@ -116,23 +116,22 @@ auto Cache::Actor::pipeline(const Work work, Message&& msg) noexcept -> void
 
             data_.lock()->ReceiveBlock(body.at(1).Bytes());
         } break;
-        case Work::init: {
-            do_init();
-        } break;
+        case Work::shutdown:
+        case Work::init:
         case Work::statemachine: {
-            do_work();
-        } break;
+            LogAbort()(OT_PRETTY_CLASS())(name_)(" unhandled message type ")(
+                print(work))
+                .Abort();
+        }
         default: {
-            LogError()(OT_PRETTY_CLASS())(name_)(" unhandled message type ")(
+            LogAbort()(OT_PRETTY_CLASS())(name_)(" unhandled message type ")(
                 static_cast<OTZMQWorkType>(work))
-                .Flush();
-
-            OT_FAIL;
+                .Abort();
         }
     }
 }
 
-auto Cache::Actor::work() noexcept -> bool
+auto Cache::Actor::work(allocator_type monotonic) noexcept -> bool
 {
     if (data_.lock()->StateMachine()) {
         reset_timer(heartbeat_interval_, heartbeat_, Work::statemachine);

@@ -92,16 +92,17 @@ auto Actor::do_shutdown() noexcept -> void
     context_p_.reset();
 }
 
-auto Actor::do_startup() noexcept -> bool
+auto Actor::do_startup(allocator_type monotonic) noexcept -> bool
 {
     if ((context_.Internal().ShuttingDown())) { return true; }
 
-    do_work();
+    do_work(monotonic);
 
     return false;
 }
 
-auto Actor::pipeline(const Work work, Message&& msg) noexcept -> void
+auto Actor::pipeline(const Work work, Message&& msg, allocator_type) noexcept
+    -> void
 {
     const auto id =
         msg.Internal().ExtractFront().as<opentxs::network::zeromq::SocketID>();
@@ -198,7 +199,10 @@ auto Actor::process_resolve(Message&& in) noexcept -> void
         body.at(2).as<std::uint16_t>());
 }
 
-auto Actor::work() noexcept -> bool { return shared_.StateMachine(); }
+auto Actor::work(allocator_type monotonic) noexcept -> bool
+{
+    return shared_.StateMachine();
+}
 
 Actor::~Actor() = default;
 }  // namespace opentxs::api::network::asio

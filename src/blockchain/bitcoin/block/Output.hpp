@@ -25,6 +25,7 @@
 
 #include "internal/blockchain/bitcoin/block/Output.hpp"
 #include "internal/blockchain/bitcoin/block/Script.hpp"
+#include "internal/blockchain/bitcoin/block/Types.hpp"
 #include "internal/blockchain/block/Block.hpp"
 #include "internal/blockchain/block/Types.hpp"
 #include "internal/util/Mutex.hpp"
@@ -43,6 +44,7 @@
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
+#include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
@@ -98,7 +100,7 @@ namespace opentxs::blockchain::bitcoin::block::implementation
 class Output final : public internal::Output
 {
 public:
-    using PubkeyHashes = boost::container::flat_set<PatternID>;
+    using PubkeyHashes = boost::container::flat_set<ElementHash>;
 
     auto AssociatedLocalNyms(
         const api::crypto::Blockchain& crypto,
@@ -113,22 +115,25 @@ public:
     {
         return std::make_unique<Output>(*this);
     }
-    auto ExtractElements(const cfilter::Type style) const noexcept
-        -> Vector<Vector<std::byte>> final;
+    auto ExtractElements(const cfilter::Type style, Elements& out)
+        const noexcept -> void final;
+    auto ExtractElements(const cfilter::Type style, alloc::Default alloc)
+        const noexcept -> Elements;
     auto FindMatches(
         const api::Session& api,
-        const blockchain::block::Txid& txid,
+        const Txid& txid,
         const cfilter::Type type,
-        const blockchain::block::ParsedPatterns& patterns,
-        const Log& log) const noexcept -> blockchain::block::Matches final;
-    auto GetPatterns(const api::Session& api) const noexcept
-        -> UnallocatedVector<PatternID> final;
+        const ParsedPatterns& patterns,
+        const Log& log,
+        Matches& out,
+        alloc::Default monotonic) const noexcept -> void final;
+    auto IndexElements(const api::Session& api, ElementHashes& out)
+        const noexcept -> void final;
     auto Keys() const noexcept -> UnallocatedVector<crypto::Key> final
     {
         return cache_.keys();
     }
-    auto MinedPosition() const noexcept
-        -> const blockchain::block::Position& final
+    auto MinedPosition() const noexcept -> const block::Position& final
     {
         return cache_.position();
     }
@@ -169,13 +174,11 @@ public:
     {
         const_cast<std::uint32_t&>(index_) = index;
     }
-    auto SetKeyData(const blockchain::block::KeyData& data) noexcept
-        -> void final
+    auto SetKeyData(const KeyData& data) noexcept -> void final
     {
         cache_.set(data);
     }
-    auto SetMinedPosition(const blockchain::block::Position& pos) noexcept
-        -> void final
+    auto SetMinedPosition(const block::Position& pos) noexcept -> void final
     {
         cache_.set_position(pos);
     }
@@ -218,7 +221,7 @@ public:
         std::unique_ptr<const block::Script> script,
         std::optional<std::size_t> size,
         boost::container::flat_set<crypto::Key>&& keys,
-        blockchain::block::Position minedPosition,
+        block::Position minedPosition,
         node::TxoState state,
         UnallocatedSet<node::TxoTag> tags) noexcept(false);
     Output() = delete;
@@ -240,7 +243,7 @@ private:
         auto keys() const noexcept -> UnallocatedVector<crypto::Key>;
         auto payee() const noexcept -> identifier::Generic;
         auto payer() const noexcept -> identifier::Generic;
-        auto position() const noexcept -> const blockchain::block::Position&;
+        auto position() const noexcept -> const block::Position&;
         auto state() const noexcept -> node::TxoState;
         auto tags() const noexcept -> UnallocatedSet<node::TxoTag>;
 
@@ -251,11 +254,10 @@ private:
             const std::size_t index,
             const Log& log) noexcept -> bool;
         auto reset_size() noexcept -> void;
-        auto set(const blockchain::block::KeyData& data) noexcept -> void;
+        auto set(const KeyData& data) noexcept -> void;
         auto set_payee(const identifier::Generic& contact) noexcept -> void;
         auto set_payer(const identifier::Generic& contact) noexcept -> void;
-        auto set_position(const blockchain::block::Position& pos) noexcept
-            -> void;
+        auto set_position(const block::Position& pos) noexcept -> void;
         auto set_state(node::TxoState state) noexcept -> void;
         template <typename F>
         auto size(F cb) noexcept -> std::size_t
@@ -272,7 +274,7 @@ private:
         Cache(
             std::optional<std::size_t>&& size,
             boost::container::flat_set<crypto::Key>&& keys,
-            blockchain::block::Position&& minedPosition,
+            block::Position&& minedPosition,
             node::TxoState state,
             UnallocatedSet<node::TxoTag>&& tags) noexcept;
         Cache() noexcept = delete;
@@ -284,7 +286,7 @@ private:
         identifier::Generic payee_;
         identifier::Generic payer_;
         boost::container::flat_set<crypto::Key> keys_;
-        blockchain::block::Position mined_position_;
+        block::Position mined_position_;
         node::TxoState state_;
         UnallocatedSet<node::TxoTag> tags_;
 
@@ -293,7 +295,7 @@ private:
     };
 
     using PubkeyMap =
-        Map<int, std::pair<PubkeyHashes, std::optional<PatternID>>>;
+        Map<int, std::pair<PubkeyHashes, std::optional<ElementHash>>>;
     using GuardedData = libguarded::plain_guarded<PubkeyMap>;
 
     static const VersionNumber default_version_;
@@ -307,11 +309,13 @@ private:
     mutable Cache cache_;
     mutable GuardedData guarded_;
 
-    auto get_pubkeys(const api::Session& api) const noexcept
-        -> const PubkeyHashes&;
+    auto get_pubkeys(const api::Session& api, alloc::Default monotonic)
+        const noexcept -> const PubkeyHashes&;
     auto get_script_hash(const api::Session& api) const noexcept
-        -> const std::optional<PatternID>&;
-    auto index_elements(const api::Session& api, PubkeyHashes& hashes)
-        const noexcept -> void;
+        -> const std::optional<ElementHash>&;
+    auto index_elements(
+        const api::Session& api,
+        PubkeyHashes& hashes,
+        alloc::Default monotonic) const noexcept -> void;
 };
 }  // namespace opentxs::blockchain::bitcoin::block::implementation

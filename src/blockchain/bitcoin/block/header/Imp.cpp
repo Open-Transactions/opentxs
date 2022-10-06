@@ -45,10 +45,10 @@ namespace opentxs::factory
 {
 auto BitcoinBlockHeader(
     const api::Crypto& crypto,
-    const opentxs::blockchain::block::Header& previous,
+    const blockchain::block::Header& previous,
     const std::uint32_t nBits,
     const std::int32_t version,
-    opentxs::blockchain::block::Hash&& merkle,
+    blockchain::block::Hash&& merkle,
     const AbortFunction abort) noexcept
     -> std::unique_ptr<blockchain::bitcoin::block::Header>
 {
@@ -220,17 +220,17 @@ const VersionNumber Header::subversion_default_{1};
 Header::Header(
     const VersionNumber version,
     const blockchain::Type chain,
-    blockchain::block::Hash&& hash,
-    blockchain::block::Hash&& pow,
-    blockchain::block::Hash&& previous,
-    const blockchain::block::Height height,
+    block::Hash&& hash,
+    block::Hash&& pow,
+    block::Hash&& previous,
+    const block::Height height,
     const Status status,
     const Status inheritStatus,
     const blockchain::Work& work,
     const blockchain::Work& inheritWork,
     const VersionNumber subversion,
     const std::int32_t blockVersion,
-    blockchain::block::Hash&& merkle,
+    block::Hash&& merkle,
     const Time timestamp,
     const std::uint32_t nbits,
     const std::uint32_t nonce,
@@ -266,11 +266,11 @@ Header::Header(
 Header::Header(
     const blockchain::Type chain,
     const VersionNumber subversion,
-    blockchain::block::Hash&& hash,
-    blockchain::block::Hash&& pow,
+    block::Hash&& hash,
+    block::Hash&& pow,
     const std::int32_t version,
-    blockchain::block::Hash&& previous,
-    blockchain::block::Hash&& merkle,
+    block::Hash&& previous,
+    block::Hash&& merkle,
     const Time timestamp,
     const std::uint32_t nbits,
     const std::uint32_t nonce,
@@ -299,15 +299,15 @@ Header::Header(
 Header::Header(
     const api::Crypto& crypto,
     const blockchain::Type chain,
-    const blockchain::block::Hash& merkle,
-    const blockchain::block::Hash& parent,
-    const blockchain::block::Height height) noexcept(false)
+    const block::Hash& merkle,
+    const block::Hash& parent,
+    const block::Height height) noexcept(false)
     : Header(
           default_version_,
           chain,
-          blockchain::block::Hash{},
-          blockchain::block::Hash{},
-          blockchain::block::Hash{parent},
+          block::Hash{},
+          block::Hash{},
+          block::Hash{parent},
           height,
           (0 == height) ? Status::Checkpoint : Status::Normal,
           Status::Normal,
@@ -315,7 +315,7 @@ Header::Header(
           minimum_work(chain),
           subversion_default_,
           0,
-          blockchain::block::Hash{merkle},
+          block::Hash{merkle},
           Time{},
           params::get(chain).Difficulty(),
           0,
@@ -332,7 +332,7 @@ Header::Header(
           static_cast<blockchain::Type>(serialized.type()),
           calculate_hash(crypto, serialized),
           calculate_pow(crypto, serialized),
-          blockchain::block::Hash{serialized.bitcoin().previous_header()},
+          block::Hash{serialized.bitcoin().previous_header()},
           serialized.local().height(),
           static_cast<Status>(serialized.local().status()),
           static_cast<Status>(serialized.local().inherit_status()),
@@ -340,7 +340,7 @@ Header::Header(
           blockchain::Work{IsHex, serialized.local().inherit_work()},
           serialized.bitcoin().version(),
           serialized.bitcoin().block_version(),
-          blockchain::block::Hash{serialized.bitcoin().merkle_hash()},
+          block::Hash{serialized.bitcoin().merkle_hash()},
           convert_stime(serialized.bitcoin().timestamp()),
           serialized.bitcoin().nbits(),
           serialized.bitcoin().nonce(),
@@ -407,9 +407,9 @@ auto Header::BitcoinFormat::Target() const noexcept
 auto Header::calculate_hash(
     const api::Crypto& crypto,
     const blockchain::Type chain,
-    const ReadView serialized) -> blockchain::block::Hash
+    const ReadView serialized) -> block::Hash
 {
-    auto output = blockchain::block::Hash{};
+    auto output = block::Hash{};
     BlockHash(crypto, chain, serialized, output.WriteInto());
 
     return output;
@@ -418,7 +418,7 @@ auto Header::calculate_hash(
 auto Header::calculate_hash(
     const api::Crypto& crypto,
     const blockchain::Type chain,
-    const BitcoinFormat& in) -> blockchain::block::Hash
+    const BitcoinFormat& in) -> block::Hash
 {
     return calculate_hash(
         crypto,
@@ -429,9 +429,9 @@ auto Header::calculate_hash(
 auto Header::calculate_pow(
     const api::Crypto& crypto,
     const blockchain::Type chain,
-    const ReadView serialized) -> blockchain::block::Hash
+    const ReadView serialized) -> block::Hash
 {
-    auto output = blockchain::block::Hash{};
+    auto output = block::Hash{};
     ProofOfWorkHash(crypto, chain, serialized, output.WriteInto());
 
     return output;
@@ -440,7 +440,7 @@ auto Header::calculate_pow(
 auto Header::calculate_pow(
     const api::Crypto& crypto,
     const blockchain::Type chain,
-    const BitcoinFormat& in) -> blockchain::block::Hash
+    const BitcoinFormat& in) -> block::Hash
 {
     return calculate_pow(
         crypto,
@@ -450,7 +450,7 @@ auto Header::calculate_pow(
 
 auto Header::calculate_hash(
     const api::Crypto& crypto,
-    const SerializedType& serialized) -> blockchain::block::Hash
+    const SerializedType& serialized) -> block::Hash
 {
     try {
         const auto bytes = preimage(serialized);
@@ -468,7 +468,7 @@ auto Header::calculate_hash(
 
 auto Header::calculate_pow(
     const api::Crypto& crypto,
-    const SerializedType& serialized) -> blockchain::block::Hash
+    const SerializedType& serialized) -> block::Hash
 {
     try {
         const auto bytes = preimage(serialized);
@@ -520,7 +520,7 @@ auto Header::Encode() const noexcept -> ByteArray
 
 auto Header::find_nonce(const api::Crypto& crypto) noexcept(false) -> void
 {
-    auto& hash = const_cast<blockchain::block::Hash&>(hash_);
+    auto& hash = const_cast<block::Hash&>(hash_);
     auto& pow = const_cast<ByteArray&>(pow_);
     auto& nonce = const_cast<std::uint32_t&>(nonce_);
     auto bytes = BitcoinFormat{};

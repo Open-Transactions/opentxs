@@ -200,7 +200,8 @@ auto GCS(
     const api::Session& api,
     const blockchain::cfilter::Type type,
     const blockchain::block::Block& block,
-    alloc::Default alloc) noexcept -> blockchain::GCS;
+    alloc::Default alloc,
+    alloc::Default monotonic) noexcept -> blockchain::GCS;
 auto GCS(
     const api::Session& api,
     const proto::GCS& serialized,

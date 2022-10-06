@@ -40,3 +40,6 @@ target_sources(
     "TXOs.cpp"
     "TXOs.hpp"
 )
+target_include_directories(
+  ottest SYSTEM PRIVATE "${opentxs_SOURCE_DIR}/deps/cs_libguarded/src"
+)

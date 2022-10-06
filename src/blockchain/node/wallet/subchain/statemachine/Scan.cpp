@@ -8,9 +8,7 @@
 
 #include <boost/smart_ptr/make_shared.hpp>
 #include <boost/smart_ptr/shared_ptr.hpp>
-#include <array>
 #include <atomic>
-#include <cstddef>
 #include <limits>
 #include <memory>
 #include <utility>
@@ -26,8 +24,8 @@
 #include "internal/network/zeromq/Context.hpp"
 #include "internal/network/zeromq/socket/Pipeline.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
-#include "internal/util/BoostPMR.hpp"
 #include "internal/util/LogMacros.hpp"
+#include "internal/util/P0330.hpp"
 #include "opentxs/api/network/Network.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/blockchain/bitcoin/block/Output.hpp"  // IWYU pragma: keep
@@ -121,7 +119,7 @@ auto Scan::Imp::do_reorg(
     return Job::do_reorg(oracle, data, params);
 }
 
-auto Scan::Imp::do_startup_internal() noexcept -> void
+auto Scan::Imp::do_startup_internal(allocator_type monotonic) noexcept -> void
 {
     const auto& node = parent_.node_;
     const auto& filters = node.FilterOracle();
@@ -171,8 +169,10 @@ auto Scan::Imp::process_do_rescan(Message&& in) noexcept -> void
     to_process_.Send(std::move(in), __FILE__, __LINE__);
 }
 
-auto Scan::Imp::process_filter(Message&& in, block::Position&& tip) noexcept
-    -> void
+auto Scan::Imp::process_filter(
+    Message&& in,
+    block::Position&& tip,
+    allocator_type monotonic) noexcept -> void
 {
     if (tip < this->tip()) {
         log_(OT_PRETTY_CLASS())(name_)(" ignoring stale filter tip ")(tip)
@@ -189,16 +189,17 @@ auto Scan::Imp::process_filter(Message&& in, block::Position&& tip) noexcept
     }
 
     to_process_.Send(std::move(in), __FILE__, __LINE__);
-    do_work();
+    do_work(monotonic);
 }
 
-auto Scan::Imp::process_start_scan(Message&&) noexcept -> void
+auto Scan::Imp::process_start_scan(Message&&, allocator_type monotonic) noexcept
+    -> void
 {
     index_ready_ = true;
     log_(OT_PRETTY_CLASS())(name_)(
         " ready to begin scan now that initial index operation is complete")
         .Flush();
-    do_work();
+    do_work(monotonic);
 }
 
 auto Scan::Imp::tip() const noexcept -> const block::Position&
@@ -212,11 +213,11 @@ auto Scan::Imp::tip() const noexcept -> const block::Position&
     }
 }
 
-auto Scan::Imp::work() noexcept -> bool
+auto Scan::Imp::work(allocator_type monotonic) noexcept -> bool
 {
     if ((false == index_ready_) || (State::reorg == state())) { return false; }
 
-    auto post = ScopeGuard{[&] { Job::work(); }};
+    auto post = ScopeGuard{[&] { Job::work(monotonic); }};
 
     if (false == filter_tip_.has_value()) {
         log_(OT_PRETTY_CLASS())(name_)(
@@ -257,21 +258,22 @@ auto Scan::Imp::work() noexcept -> bool
         return false;
     }
 
-    auto buf = std::array<std::byte, scan_status_bytes_ * 1000u>{};
-    auto alloc = alloc::BoostMonotonic{buf.data(), buf.size()};
-    auto clean = Vector<ScanStatus>{&alloc};
-    auto dirty = Vector<ScanStatus>{&alloc};
+    auto clean = Vector<ScanStatus>{monotonic};
+    clean.clear();
+    auto dirty = Vector<ScanStatus>{monotonic};
+    dirty.clear();
     auto highestTested = current();
     const auto highestClean = parent_.Scan(
         filter_tip_.value(),
         std::numeric_limits<block::Height>::max(),
         highestTested,
-        dirty);
+        dirty,
+        monotonic);
     last_scanned_ = std::move(highestTested);
     log_(OT_PRETTY_CLASS())(name_)(" last scanned updated to ")(current())
         .Flush();
 
-    if (auto count = dirty.size(); 0u < count) {
+    if (auto count = dirty.size(); 0_uz < count) {
         log_(OT_PRETTY_CLASS())(name_)(" ")(
             count)(" blocks queued for processing ")
             .Flush();
