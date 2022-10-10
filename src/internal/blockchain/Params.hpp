@@ -13,6 +13,7 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <filesystem>
 #include <optional>
 #include <string_view>
 
@@ -68,6 +69,10 @@ class ChainData
 public:
     auto Bip44Code() const noexcept -> Bip44Type;
     auto BlockDownloadBatch() const noexcept -> std::size_t;
+    auto CfheaderAt(cfilter::Type, block::Height) const noexcept
+        -> std::optional<cfilter::Header>;
+    auto CfheaderBefore(cfilter::Type, block::Height) const noexcept
+        -> block::Height;
     auto CfilterBatchEstimate() const noexcept -> std::size_t;
     auto CheckpointCfheader() const noexcept -> const cfilter::Header&;
     auto CheckpointPosition() const noexcept -> const block::Position&;
@@ -122,4 +127,6 @@ private:
 
 auto chains() noexcept -> const Set<blockchain::Type>;
 auto get(blockchain::Type chain) noexcept(false) -> const ChainData&;
+auto WriteCheckpoints(const std::filesystem::path& outputDirectory) noexcept
+    -> bool;
 }  // namespace opentxs::blockchain::params

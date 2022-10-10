@@ -16,7 +16,6 @@
 
 #include "blockchain/node/filteroracle/CfheaderDownloader.hpp"
 #include "blockchain/node/filteroracle/CfilterDownloader.hpp"
-#include "blockchain/node/filteroracle/FilterOracle.hpp"
 #include "internal/blockchain/Blockchain.hpp"
 #include "internal/blockchain/Params.hpp"
 #include "internal/blockchain/block/Block.hpp"
@@ -216,39 +215,40 @@ auto Shared::compare_cfheader_tip_to_checkpoint(
     Data& data,
     block::Position& tip) const noexcept -> void
 {
-    const auto& cp =
-        implementation::FilterOracle::filter_checkpoints_.at(chain_);
+    const auto& params = blockchain::params::get(chain_);
+    auto height{tip.height_};
+    auto check = block::Position{height, header_.BestHash(height)};
     auto changed{false};
-    auto check = block::Position{};
 
-    for (auto i{cp.crbegin()}; i != cp.crend(); ++i) {
-        const auto& cpHeight = i->first;
+    while (0 < height) {
+        auto checkpoint = params.CfheaderAt(default_type_, height);
 
-        if (cpHeight > tip.height_) { continue; }
+        if (false == checkpoint.has_value()) {
+            height = params.CfheaderBefore(default_type_, height);
+            check = {height, header_.BestHash(height)};
+            checkpoint = params.CfheaderAt(default_type_, height);
+        }
 
-        check = {cpHeight, header_.BestHash(cpHeight)};
-        const auto existingHeader =
+        OT_ASSERT(checkpoint.has_value());
+
+        const auto& required = *checkpoint;
+        const auto existing =
             load_cfheader(default_type_, check.hash_.Bytes(), data);
 
-        try {
-            const auto& cpHeader = i->second.at(default_type_);
-            const auto cpBytes = api_.Factory().DataFromHex(cpHeader);
+        if (existing == required) {
 
-            if (existingHeader == cpBytes) {
-
-                break;
-            } else {
-                changed = true;
-            }
-        } catch (...) {
             break;
+        } else {
+            changed = true;
+            height = params.CfheaderBefore(default_type_, height);
+            check = {height, header_.BestHash(height)};
         }
     }
 
     if (changed) {
         LogConsole()(print(chain_))(
             " cfheader tip not consistent with checkpoint. Resetting to last "
-            "known good position")
+            "known good position ")(check)
             .Flush();
         tip = std::move(check);
     } else {
@@ -1148,27 +1148,22 @@ auto Shared::ValidateAgainstCheckpoint(
     const block::Position& block,
     const cfilter::Header& receivedHeader) noexcept -> block::Position
 {
-    const auto& cp =
-        implementation::FilterOracle::filter_checkpoints_.at(chain_);
-    const auto height = block.height_;
+    const auto& height = block.height_;
+    const auto& chain = params::get(chain_);
 
-    if (auto it = cp.find(height); cp.end() != it) {
-        const auto& bytes = it->second.at(default_type_);
-        const auto expectedHeader =
-            api_.Factory().DataFromBytes(ReadView{bytes.data(), bytes.size()});
+    if (auto cp = chain.CfheaderAt(default_type_, height); cp) {
+        const auto& checkpoint = *cp;
 
-        if (expectedHeader == receivedHeader) {
+        if (receivedHeader == checkpoint) {
             LogConsole()(print(chain_))(" filter header at height ")(
                 height)(" verified against checkpoint")
                 .Flush();
 
             return block;
         } else {
-            OT_ASSERT(cp.begin() != it);
-
-            std::advance(it, -1);
+            const auto previous = chain.CfheaderBefore(default_type_, height);
             const auto rollback =
-                block::Position{it->first, header_.BestHash(it->first)};
+                block::Position{previous, header_.BestHash(previous)};
             LogConsole()(print(chain_))(" filter header at height ")(
                 height)(" does not match checkpoint. Resetting to previous "
                         "checkpoint at height ")(rollback.height_)
@@ -1176,9 +1171,10 @@ auto Shared::ValidateAgainstCheckpoint(
 
             return rollback;
         }
-    }
+    } else {
 
-    return block;
+        return block;
+    }
 }
 
 Shared::~Shared() = default;

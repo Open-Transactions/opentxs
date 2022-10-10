@@ -20,10 +20,13 @@ target_sources(
   opentxs-common
   PRIVATE
     "${opentxs_SOURCE_DIR}/src/internal/blockchain/Params.hpp"
+    "${CMAKE_CURRENT_BINARY_DIR}/Json.cpp"
     "DownloadManager.hpp"
     "DownloadTask.hpp"
+    "Json.hpp"
     "Params.cpp"
 )
+target_link_libraries(opentxs-common PUBLIC Boost::headers)
 target_include_directories(
   opentxs-common SYSTEM
   PRIVATE "${opentxs_SOURCE_DIR}/deps/robin-hood/src/include"

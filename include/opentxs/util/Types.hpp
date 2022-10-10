@@ -7,12 +7,24 @@
 
 #include <cstdint>
 #include <functional>
+#include <iosfwd>
+#include <string>
 #include <string_view>
 #include <tuple>
 #include <utility>
 
 #include "opentxs/Export.hpp"
 #include "opentxs/util/Container.hpp"
+
+// NOLINTBEGIN(modernize-concat-nested-namespaces)
+namespace boost
+{
+namespace json
+{
+class value;
+}  // namespace json
+}  // namespace boost
+// NOLINTEND(modernize-concat-nested-namespaces)
 
 namespace opentxs
 {
@@ -27,5 +39,9 @@ using ObjectList =
     UnallocatedList<std::pair<UnallocatedCString, UnallocatedCString>>;
 using SimpleCallback = std::function<void()>;
 
-auto print(BlockchainProfile) noexcept -> std::string_view;
+auto OPENTXS_EXPORT print(BlockchainProfile) noexcept -> std::string_view;
+auto OPENTXS_EXPORT print(
+    const boost::json::value& jv,
+    std::ostream& os,
+    std::string* indent = nullptr) noexcept -> bool;
 }  // namespace opentxs

@@ -1,0 +1,18 @@
+{
+    "3": {
+        "checkpoint": {
+            "position": {
+                "height": 693000,
+                "hash":
+                    "ce0acf276d39e75741808afdde9c95b75c2fef935bc254010000000000000000"
+            },
+            "previous": {
+                "height": 692999,
+                "hash":
+                    "c83139029d4efddeda60ede13474276cdf1267fff61269000000000000000000"
+            },
+            "cfheader":
+                "fb2e542d6e1aa15d763a3a1add8262fa7cb609063d8047372deae34118f8836a"
+        }
+    }
+}
