@@ -92,13 +92,16 @@ private:
         const node::HeaderOracle& oracle,
         const node::internal::HeaderOraclePrivate& data,
         Reorg::Params& params) noexcept -> bool final;
-    auto do_startup_internal() noexcept -> void final;
+    auto do_startup_internal(allocator_type monotonic) noexcept -> void final;
     auto forward_to_next(Message&& msg) noexcept -> void final;
     auto process_do_rescan(Message&& in) noexcept -> void final;
-    auto process_filter(Message&& in, block::Position&& tip) noexcept
+    auto process_filter(
+        Message&& in,
+        block::Position&& tip,
+        allocator_type monotonic) noexcept -> void final;
+    auto process_start_scan(Message&& in, allocator_type monotonic) noexcept
         -> void final;
-    auto process_start_scan(Message&& in) noexcept -> void final;
     auto scan(Vector<ScanStatus>& out) noexcept -> void;
-    auto work() noexcept -> bool final;
+    auto work(allocator_type monotonic) noexcept -> bool final;
 };
 }  // namespace opentxs::blockchain::node::wallet

@@ -29,13 +29,13 @@ auto BlockchainDatabase(
     const blockchain::cfilter::Type filter) noexcept
     -> std::shared_ptr<blockchain::database::Database>
 {
-    using ReturnType = blockchain::implementation::Database;
+    using ReturnType = blockchain::database::implementation::Database;
 
     return std::make_shared<ReturnType>(api, network, common, chain, filter);
 }
 }  // namespace opentxs::factory
 
-namespace opentxs::blockchain::implementation
+namespace opentxs::blockchain::database::implementation
 {
 const VersionNumber Database::db_version_{1};
 const storage::lmdb::TableNames Database::table_names_{
@@ -50,7 +50,7 @@ const storage::lmdb::TableNames Database::table_names_{
     {database::Proposals, "proposals"},
     {database::SubchainLastIndexed, "subchain_last_indexed"},
     {database::SubchainLastScanned, "subchain_last_scanned"},
-    {database::SubchainID, "subchain_id"},
+    {database::SubchainIDTable, "subchain_id"},
     {database::WalletPatterns, "wallet_patterns"},
     {database::SubchainPatterns, "subchain_patterns"},
     {database::SubchainMatches, "subchain_matches"},
@@ -93,7 +93,7 @@ Database::Database(
                 {database::Proposals, 0},
                 {database::SubchainLastIndexed, 0},
                 {database::SubchainLastScanned, 0},
-                {database::SubchainID, 0},
+                {database::SubchainIDTable, 0},
                 {database::WalletPatterns, MDB_DUPSORT},
                 {database::SubchainPatterns, MDB_DUPSORT},
                 {database::SubchainMatches, MDB_DUPSORT},
@@ -136,4 +136,4 @@ auto Database::StartReorg() noexcept -> storage::lmdb::Transaction
 {
     return lmdb_.TransactionRW();
 }
-}  // namespace opentxs::blockchain::implementation
+}  // namespace opentxs::blockchain::database::implementation

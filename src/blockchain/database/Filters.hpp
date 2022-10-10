@@ -88,10 +88,12 @@ public:
     auto LoadFilter(
         const cfilter::Type type,
         const ReadView block,
-        alloc::Default alloc) const noexcept -> blockchain::GCS;
+        alloc::Default alloc,
+        alloc::Default monotonic) const noexcept -> blockchain::GCS;
     auto LoadFilters(
         const cfilter::Type type,
-        const Vector<block::Hash>& blocks) const noexcept -> Vector<GCS>;
+        const Vector<block::Hash>& blocks,
+        alloc::Default monotonic) const noexcept -> Vector<GCS>;
     auto LoadFilterHash(const cfilter::Type type, const ReadView block)
         const noexcept -> cfilter::Hash;
     auto LoadFilterHeader(const cfilter::Type type, const ReadView block)
@@ -104,9 +106,12 @@ public:
         const cfilter::Type type,
         const Vector<CFHeaderParams>& headers,
         const Vector<CFilterParams>& filters,
-        const block::Position& tip) const noexcept -> bool;
-    auto StoreFilters(const cfilter::Type type, Vector<CFilterParams> filters)
-        const noexcept -> bool;
+        const block::Position& tip,
+        alloc::Default monotonic) const noexcept -> bool;
+    auto StoreFilters(
+        const cfilter::Type type,
+        Vector<CFilterParams> filters,
+        alloc::Default monotonic) const noexcept -> bool;
     auto StoreHeaders(
         const cfilter::Type type,
         const ReadView previous,

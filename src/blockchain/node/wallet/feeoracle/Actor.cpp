@@ -99,7 +99,7 @@ auto FeeOracle::Actor::do_shutdown() noexcept -> void
     api_p_.reset();
 }
 
-auto FeeOracle::Actor::do_startup() noexcept -> bool
+auto FeeOracle::Actor::do_startup(allocator_type monotonic) noexcept -> bool
 {
     if (api_.Internal().ShuttingDown() || node_.Internal().ShuttingDown()) {
 
@@ -107,28 +107,27 @@ auto FeeOracle::Actor::do_startup() noexcept -> bool
     }
 
     factory::FeeSources(api_p_, node_p_);
-    do_work();
+    do_work(monotonic);
 
     return false;
 }
 
 auto FeeOracle::Actor::pipeline(
     const Work work,
-    network::zeromq::Message&& in) noexcept -> void
+    network::zeromq::Message&& in,
+    allocator_type monotonic) noexcept -> void
 {
     switch (work) {
-        case Work::shutdown: {
-            shutdown_actor();
-        } break;
         case Work::update_estimate: {
-            process_update(std::move(in));
+            process_update(std::move(in), monotonic);
         } break;
-        case Work::init: {
-            do_startup();
-        } break;
+        case Work::shutdown:
+        case Work::init:
         case Work::statemachine: {
-            do_work();
-        } break;
+            LogAbort()(OT_PRETTY_CLASS())(name_)(" unhandled message type ")(
+                print(work))
+                .Abort();
+        }
         default: {
             LogAbort()(OT_PRETTY_CLASS())("unhandled type: ")(
                 static_cast<OTZMQWorkType>(work))
@@ -137,8 +136,9 @@ auto FeeOracle::Actor::pipeline(
     }
 }
 
-auto FeeOracle::Actor::process_update(network::zeromq::Message&& in) noexcept
-    -> void
+auto FeeOracle::Actor::process_update(
+    network::zeromq::Message&& in,
+    allocator_type monotonic) noexcept -> void
 {
     const auto body = in.Body();
 
@@ -150,10 +150,10 @@ auto FeeOracle::Actor::process_update(network::zeromq::Message&& in) noexcept
         LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
     }
 
-    do_work();
+    do_work(monotonic);
 }
 
-auto FeeOracle::Actor::work() noexcept -> bool
+auto FeeOracle::Actor::work(allocator_type monotonic) noexcept -> bool
 {
     const auto sum = [this] {
         static constexpr auto validity = std::chrono::minutes{20};

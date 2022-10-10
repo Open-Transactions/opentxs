@@ -19,6 +19,7 @@
 
 #include "blockchain/node/wallet/subchain/statemachine/ElementCache.hpp"
 #include "internal/blockchain/bitcoin/block/Transaction.hpp"
+#include "internal/blockchain/database/Wallet.hpp"
 #include "internal/blockchain/node/wallet/subchain/statemachine/Index.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/api/crypto/Blockchain.hpp"
@@ -92,7 +93,7 @@ auto DeterministicStateData::CheckCache(
 }
 
 auto DeterministicStateData::flush_cache(
-    database::Wallet::BatchedMatches& matches,
+    database::BatchedMatches& matches,
     FinishedCallback cb) const noexcept -> void
 {
     const auto start = Clock::now();
@@ -141,7 +142,7 @@ auto DeterministicStateData::handle_confirmed_matches(
 {
     const auto start = Clock::now();
     const auto& [utxo, general] = confirmed;
-    auto transactions = database::Wallet::BlockMatches{get_allocator()};
+    auto transactions = database::BlockMatches{get_allocator()};
 
     for (const auto& match : general) {
         const auto& [txid, elementID] = match;
@@ -227,7 +228,7 @@ auto DeterministicStateData::handle_mempool_matches(
 
     if (0u == general.size()) { return; }
 
-    auto data = database::Wallet::MatchedTransaction{};
+    auto data = database::MatchedTransaction{};
     auto& [outputs, pTX] = data;
 
     for (const auto& match : general) { process(match, *in, data); }
@@ -250,7 +251,7 @@ auto DeterministicStateData::handle_mempool_matches(
 auto DeterministicStateData::process(
     const block::Match match,
     const bitcoin::block::Transaction& transaction,
-    database::Wallet::MatchedTransaction& output) const noexcept -> void
+    database::MatchedTransaction& output) const noexcept -> void
 {
     auto& [outputs, pTX] = output;
     const auto& [txid, elementID] = match;

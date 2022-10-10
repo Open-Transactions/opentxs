@@ -309,25 +309,33 @@ private:
     auto connect_dealer(std::string_view endpoint, Work work) noexcept -> void;
     auto do_disconnect() noexcept -> void;
     auto do_shutdown() noexcept -> void;
-    auto do_startup() noexcept -> bool;
+    auto do_startup(allocator_type monotonic) noexcept -> bool;
     virtual auto extract_body_size(const zeromq::Frame& header) const noexcept
         -> std::size_t = 0;
-    auto pipeline(const Work work, Message&& msg) noexcept -> void;
-    auto pipeline_trusted(const Work work, Message&& msg) noexcept -> void;
-    auto pipeline_untrusted(const Work work, Message&& msg) noexcept -> void;
+    auto pipeline(const Work work, Message&& msg, allocator_type) noexcept
+        -> void;
+    auto pipeline_trusted(
+        const Work work,
+        Message&& msg,
+        allocator_type monotonic) noexcept -> void;
+    auto pipeline_untrusted(
+        const Work work,
+        Message&& msg,
+        allocator_type monotonic) noexcept -> void;
     auto process_activitytimeout(Message&& msg) noexcept -> void;
     auto process_block(Message&& msg) noexcept -> void;
     auto process_block(opentxs::blockchain::block::Hash&& hash) noexcept
         -> void;
     auto process_blockbatch(Message&& msg) noexcept -> void;
     auto process_blockheader(Message&& msg) noexcept -> void;
-    auto process_body(Message&& msg) noexcept -> void;
+    auto process_body(Message&& msg, allocator_type monotonic) noexcept -> void;
     virtual auto process_broadcasttx(Message&& msg) noexcept -> void = 0;
     auto process_connect() noexcept -> void;
     auto process_connect(bool) noexcept -> void;
     auto process_dealerconnected(Message&& msg) noexcept -> void;
     auto process_disconnect(Message&& msg) noexcept -> void;
-    auto process_header(Message&& msg) noexcept -> void;
+    auto process_header(Message&& msg, allocator_type monotonic) noexcept
+        -> void;
     auto process_jobavailableblock(Message&& msg) noexcept -> void;
     auto process_jobavailableblockbatch(Message&& msg) noexcept -> void;
     auto process_jobavailablecfheaders(Message&& msg) noexcept -> void;
@@ -337,8 +345,10 @@ private:
     auto process_mempool(Message&& msg) noexcept -> void;
     auto process_needpeers(Message&& msg) noexcept -> void;
     auto process_needping(Message&& msg) noexcept -> void;
-    auto process_p2p(Message&& msg) noexcept -> void;
-    virtual auto process_protocol(Message&& message) noexcept -> void = 0;
+    auto process_p2p(Message&& msg, allocator_type monotonic) noexcept -> void;
+    virtual auto process_protocol(
+        Message&& message,
+        allocator_type monotonic) noexcept -> void = 0;
     auto process_registration(Message&& msg) noexcept -> void;
     auto process_reorg(Message&& msg) noexcept -> void;
     auto process_sendresult(Message&& msg) noexcept -> void;
@@ -375,6 +385,6 @@ private:
     auto update_job(Visitor& visitor) noexcept -> bool;
     auto update_local_position(
         opentxs::blockchain::block::Position pos) noexcept -> void;
-    auto work() noexcept -> bool;
+    auto work(allocator_type monotonic) noexcept -> bool;
 };
 }  // namespace opentxs::network::blockchain::internal

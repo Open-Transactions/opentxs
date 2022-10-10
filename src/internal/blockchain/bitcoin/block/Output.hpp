@@ -13,6 +13,7 @@
 #include <memory>
 #include <optional>
 
+#include "internal/blockchain/bitcoin/block/Types.hpp"
 #include "internal/blockchain/block/Block.hpp"
 #include "internal/blockchain/block/Types.hpp"
 #include "opentxs/blockchain/Types.hpp"
@@ -22,6 +23,7 @@
 #include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/blockchain/node/Types.hpp"
+#include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 
@@ -89,24 +91,25 @@ public:
         -> void = 0;
     virtual auto CalculateSize() const noexcept -> std::size_t = 0;
     virtual auto clone() const noexcept -> std::unique_ptr<Output> = 0;
-    virtual auto ExtractElements(const cfilter::Type style) const noexcept
-        -> Vector<Vector<std::byte>> = 0;
+    virtual auto ExtractElements(const cfilter::Type style, Elements& out)
+        const noexcept -> void = 0;
     virtual auto FindMatches(
         const api::Session& api,
-        const blockchain::block::Txid& txid,
+        const Txid& txid,
         const cfilter::Type type,
-        const blockchain::block::ParsedPatterns& elements,
-        const Log& log) const noexcept -> blockchain::block::Matches = 0;
-    virtual auto GetPatterns(const api::Session& api) const noexcept
-        -> UnallocatedVector<PatternID> = 0;
+        const ParsedPatterns& elements,
+        const Log& log,
+        Matches& out,
+        alloc::Default monotonic) const noexcept -> void = 0;
+    virtual auto IndexElements(const api::Session& api, ElementHashes& out)
+        const noexcept -> void = 0;
     auto Internal() const noexcept -> const internal::Output& final
     {
         return *this;
     }
     // WARNING do not call this function if another thread has a non-const
     // reference to this object
-    virtual auto MinedPosition() const noexcept
-        -> const blockchain::block::Position& = 0;
+    virtual auto MinedPosition() const noexcept -> const block::Position& = 0;
     virtual auto NetBalanceChange(
         const api::crypto::Blockchain& crypto,
         const identifier::Nym& nym,
@@ -128,10 +131,9 @@ public:
     virtual auto MergeMetadata(const Output& rhs, const Log& log) noexcept
         -> bool = 0;
     virtual auto SetIndex(const std::uint32_t index) noexcept -> void = 0;
-    virtual auto SetKeyData(const blockchain::block::KeyData& data) noexcept
+    virtual auto SetKeyData(const KeyData& data) noexcept -> void = 0;
+    virtual auto SetMinedPosition(const block::Position& pos) noexcept
         -> void = 0;
-    virtual auto SetMinedPosition(
-        const blockchain::block::Position& pos) noexcept -> void = 0;
     virtual auto SetPayee(const identifier::Generic& contact) noexcept
         -> void = 0;
     virtual auto SetPayer(const identifier::Generic& contact) noexcept

@@ -64,7 +64,9 @@ Progress::Imp::Imp(
 {
 }
 
-auto Progress::Imp::do_process_update(Message&& msg) noexcept -> void
+auto Progress::Imp::do_process_update(
+    Message&& msg,
+    allocator_type monotonic) noexcept -> void
 {
     const auto start = Clock::now();
     auto clean = Set<ScanStatus>{get_allocator()};

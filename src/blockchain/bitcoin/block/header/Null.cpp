@@ -12,10 +12,10 @@ namespace opentxs::factory
 {
 auto BitcoinBlockHeader(
     const api::Crypto&,
-    const opentxs::blockchain::block::Header&,
+    const blockchain::block::Header&,
     const std::uint32_t,
     const std::int32_t,
-    opentxs::blockchain::block::Hash&&,
+    blockchain::block::Hash&&,
     const AbortFunction) noexcept
     -> std::unique_ptr<blockchain::bitcoin::block::Header>
 {

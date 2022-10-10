@@ -10,6 +10,7 @@
 #include "internal/blockchain/block/Types.hpp"
 #include "opentxs/blockchain/bitcoin/cfilter/Types.hpp"
 #include "opentxs/blockchain/block/Block.hpp"
+#include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -28,14 +29,17 @@ namespace opentxs::blockchain::block::internal
 {
 struct Block : virtual public block::Block {
     virtual auto CalculateSize() const noexcept -> std::size_t = 0;
-    virtual auto ExtractElements(const cfilter::Type style) const noexcept
-        -> Vector<Vector<std::byte>> = 0;
+    virtual auto ExtractElements(
+        const cfilter::Type style,
+        alloc::Default alloc) const noexcept -> Elements = 0;
     virtual auto FindMatches(
         const api::Session& api,
         const cfilter::Type type,
         const Patterns& txos,
         const Patterns& elements,
-        const Log& log) const noexcept -> Matches = 0;
+        const Log& log,
+        alloc::Default alloc,
+        alloc::Default monotonic) const noexcept -> Matches = 0;
     auto Internal() const noexcept -> const internal::Block& final
     {
         return *this;

@@ -14,6 +14,7 @@
 
 #include "internal/blockchain/bitcoin/block/Input.hpp"
 #include "internal/blockchain/bitcoin/block/Inputs.hpp"
+#include "internal/blockchain/bitcoin/block/Types.hpp"
 #include "internal/blockchain/block/Block.hpp"
 #include "internal/blockchain/block/Types.hpp"
 #include "internal/util/Mutex.hpp"
@@ -24,6 +25,7 @@
 #include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/core/Amount.hpp"
+#include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 
@@ -108,18 +110,20 @@ public:
         return std::make_unique<Inputs>(*this);
     }
     auto end() const noexcept -> const_iterator final { return cend(); }
-    auto ExtractElements(const cfilter::Type style) const noexcept
-        -> Vector<Vector<std::byte>> final;
+    auto ExtractElements(const cfilter::Type style, Elements& out)
+        const noexcept -> void final;
     auto FindMatches(
         const api::Session& api,
-        const blockchain::block::Txid& txid,
+        const Txid& txid,
         const cfilter::Type type,
-        const blockchain::block::Patterns& txos,
-        const blockchain::block::ParsedPatterns& elements,
-        const Log& log) const noexcept -> blockchain::block::Matches final;
-    auto GetPatterns(const api::Session& api) const noexcept
-        -> UnallocatedVector<PatternID> final;
+        const Patterns& txos,
+        const ParsedPatterns& elements,
+        const Log& log,
+        Matches& out,
+        alloc::Default monotonic) const noexcept -> void final;
     auto Keys() const noexcept -> UnallocatedVector<crypto::Key> final;
+    auto IndexElements(const api::Session& api, ElementHashes& out)
+        const noexcept -> void final;
     auto NetBalanceChange(
         const api::crypto::Blockchain& crypto,
         const identifier::Nym& nym,
@@ -144,8 +148,7 @@ public:
     auto MergeMetadata(const internal::Inputs& rhs, const Log& log) noexcept
         -> bool final;
     auto ReplaceScript(const std::size_t index) noexcept -> bool final;
-    auto SetKeyData(const blockchain::block::KeyData& data) noexcept
-        -> void final;
+    auto SetKeyData(const KeyData& data) noexcept -> void final;
 
     Inputs(InputList&& inputs, std::optional<std::size_t> size = {}) noexcept(
         false);

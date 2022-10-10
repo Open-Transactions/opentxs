@@ -81,14 +81,15 @@ private:
     network::zeromq::socket::Raw& to_blockchain_api_;
 
     auto do_shutdown() noexcept -> void;
-    auto do_startup() noexcept -> bool;
-    auto pipeline(const Work work, Message&& msg) noexcept -> void;
+    auto do_startup(allocator_type monotonic) noexcept -> bool;
+    auto pipeline(const Work work, Message&& msg, allocator_type) noexcept
+        -> void;
     auto process_block(Message&& msg) noexcept -> void;
     auto process_block_header(Message&& msg) noexcept -> void;
     auto process_cfilter(Message&& msg) noexcept -> void;
     auto process_peer(Message&& msg) noexcept -> void;
     auto process_reorg(Message&& msg) noexcept -> void;
     auto process_sync_server(Message&& msg) noexcept -> void;
-    auto work() noexcept -> bool;
+    auto work(allocator_type monotonic) noexcept -> bool;
 };
 }  // namespace opentxs::blockchain::node::stats

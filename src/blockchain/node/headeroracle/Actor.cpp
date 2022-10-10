@@ -125,7 +125,7 @@ auto HeaderOracle::Actor::do_shutdown() noexcept -> void
     api_p_.reset();
 }
 
-auto HeaderOracle::Actor::do_startup() noexcept -> bool
+auto HeaderOracle::Actor::do_startup(allocator_type) noexcept -> bool
 {
     if ((api_.Internal().ShuttingDown()) || (node_.Internal().ShuttingDown())) {
 
@@ -147,12 +147,14 @@ auto HeaderOracle::Actor::Init(boost::shared_ptr<Actor> me) noexcept -> void
     signal_startup(me);
 }
 
-auto HeaderOracle::Actor::pipeline(const Work work, Message&& msg) noexcept
-    -> void
+auto HeaderOracle::Actor::pipeline(
+    const Work work,
+    Message&& msg,
+    allocator_type monotonic) noexcept -> void
 {
     switch (work) {
         case Work::update_remote_height: {
-            process_update_remote_height(std::move(msg));
+            process_update_remote_height(std::move(msg), monotonic);
         } break;
         case Work::job_finished: {
             process_job_finished(std::move(msg));
@@ -161,7 +163,7 @@ auto HeaderOracle::Actor::pipeline(const Work work, Message&& msg) noexcept
             process_submit_block_header(std::move(msg));
         } break;
         case Work::submit_block_hash: {
-            process_submit_submit_block_hash(std::move(msg));
+            process_submit_submit_block_hash(std::move(msg), monotonic);
         } break;
         case Work::report: {
             process_report(std::move(msg));
@@ -195,7 +197,8 @@ auto HeaderOracle::Actor::process_report(Message&& msg) noexcept -> void
 }
 
 auto HeaderOracle::Actor::process_submit_submit_block_hash(
-    Message&& in) noexcept -> void
+    Message&& in,
+    allocator_type monotonic) noexcept -> void
 {
     const auto body = in.Body();
 
@@ -217,7 +220,7 @@ auto HeaderOracle::Actor::process_submit_submit_block_hash(
         }
     }
 
-    do_work();
+    do_work(monotonic);
 }
 
 auto HeaderOracle::Actor::process_submit_block_header(Message&& in) noexcept
@@ -243,8 +246,9 @@ auto HeaderOracle::Actor::process_submit_block_header(Message&& in) noexcept
     if (false == headers.empty()) { shared_.AddHeaders(headers); }
 }
 
-auto HeaderOracle::Actor::process_update_remote_height(Message&& in) noexcept
-    -> void
+auto HeaderOracle::Actor::process_update_remote_height(
+    Message&& in,
+    allocator_type monotonic) noexcept -> void
 {
     const auto body = in.Body();
 
@@ -269,7 +273,7 @@ auto HeaderOracle::Actor::process_update_remote_height(Message&& in) noexcept
         }
     }
 
-    do_work();
+    do_work(monotonic);
 }
 
 auto HeaderOracle::Actor::reset_job_timer() noexcept -> void
@@ -277,7 +281,7 @@ auto HeaderOracle::Actor::reset_job_timer() noexcept -> void
     reset_timer(10s, job_timer_, Work::statemachine);
 }
 
-auto HeaderOracle::Actor::work() noexcept -> bool
+auto HeaderOracle::Actor::work(allocator_type monotonic) noexcept -> bool
 {
     auto handle = shared_.data_.lock_shared();
     const auto& data = *handle;

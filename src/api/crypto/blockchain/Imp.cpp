@@ -1017,7 +1017,7 @@ auto Blockchain::Imp::HDSubaccount(
 }
 
 auto Blockchain::Imp::IndexItem(const ReadView bytes) const noexcept
-    -> PatternID
+    -> opentxs::blockchain::block::ElementHash
 {
     return {};
 }

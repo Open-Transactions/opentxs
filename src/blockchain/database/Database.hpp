@@ -27,6 +27,7 @@
 #include "blockchain/database/Wallet.hpp"
 #include "blockchain/database/common/Database.hpp"
 #include "internal/blockchain/Blockchain.hpp"
+#include "internal/blockchain/block/Types.hpp"
 #include "internal/blockchain/crypto/Crypto.hpp"
 #include "internal/blockchain/database/Cfilter.hpp"
 #include "internal/blockchain/database/Database.hpp"
@@ -146,14 +147,14 @@ class Data;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::blockchain::implementation
+namespace opentxs::blockchain::database::implementation
 {
 class Database final : public database::Database
 {
 public:
     auto AddConfirmedTransactions(
-        const NodeID& account,
-        const SubchainIndex& index,
+        const SubaccountID& account,
+        const SubchainID& index,
         BatchedMatches&& transactions,
         TXOs& txoCreated,
         TXOs& txoConsumed) noexcept -> bool final
@@ -162,7 +163,7 @@ public:
             account, index, std::move(transactions), txoCreated, txoConsumed);
     }
     auto AddMempoolTransaction(
-        const NodeID& account,
+        const SubaccountID& account,
         const crypto::Subchain subchain,
         const Vector<std::uint32_t> outputIndices,
         const bitcoin::block::Transaction& transaction,
@@ -280,7 +281,7 @@ public:
     {
         return wallet_.GetBalance(owner);
     }
-    auto GetBalance(const identifier::Nym& owner, const NodeID& node)
+    auto GetBalance(const identifier::Nym& owner, const SubaccountID& node)
         const noexcept -> Balance final
     {
         return wallet_.GetBalance(owner, node);
@@ -321,7 +322,7 @@ public:
     {
         return wallet_.GetOutputTags(output);
     }
-    auto GetPatterns(const SubchainIndex& index, alloc::Default alloc)
+    auto GetPatterns(const SubchainID& index, alloc::Default alloc)
         const noexcept -> Patterns final
     {
         return wallet_.GetPatterns(index, alloc);
@@ -330,8 +331,9 @@ public:
     {
         return wallet_.GetPosition();
     }
-    auto GetSubchainID(const NodeID& account, const crypto::Subchain subchain)
-        const noexcept -> SubchainIndex final
+    auto GetSubchainID(
+        const SubaccountID& account,
+        const crypto::Subchain subchain) const noexcept -> SubchainID final
     {
         return wallet_.GetSubchainID(account, subchain);
     }
@@ -356,7 +358,7 @@ public:
         return wallet_.GetUnspentOutputs(alloc);
     }
     auto GetUnspentOutputs(
-        const NodeID& account,
+        const SubaccountID& account,
         const crypto::Subchain subchain,
         alloc::Default alloc) const noexcept -> Vector<UTXO> final
     {
@@ -400,16 +402,18 @@ public:
     auto LoadFilter(
         const cfilter::Type type,
         const ReadView block,
-        alloc::Default alloc) const noexcept -> blockchain::GCS final
+        alloc::Default alloc,
+        alloc::Default monotonic) const noexcept -> blockchain::GCS final
     {
-        return filters_.LoadFilter(type, block, alloc);
+        return filters_.LoadFilter(type, block, alloc, monotonic);
     }
     auto LoadFilters(
         const cfilter::Type type,
-        const Vector<block::Hash>& blocks) const noexcept
+        const Vector<block::Hash>& blocks,
+        alloc::Default monotonic) const noexcept
         -> Vector<blockchain::GCS> final
     {
-        return filters_.LoadFilters(type, blocks);
+        return filters_.LoadFilters(type, blocks, monotonic);
     }
     auto LoadFilterHash(const cfilter::Type type, const ReadView block)
         const noexcept -> cfilter::Hash final
@@ -463,9 +467,9 @@ public:
         const node::internal::HeaderOraclePrivate& data,
         storage::lmdb::Transaction& tx,
         const node::HeaderOracle& headers,
-        const NodeID& account,
+        const SubaccountID& account,
         const crypto::Subchain subchain,
-        const SubchainIndex& index,
+        const SubchainID& index,
         const UnallocatedVector<block::Position>& reorg) noexcept -> bool final
     {
         return wallet_.ReorgTo(
@@ -507,17 +511,19 @@ public:
     auto StartReorg() noexcept -> storage::lmdb::Transaction final;
     auto StoreFilters(
         const cfilter::Type type,
-        Vector<CFilterParams> filters) noexcept -> bool final
+        Vector<CFilterParams> filters,
+        alloc::Default monotonic) noexcept -> bool final
     {
-        return filters_.StoreFilters(type, std::move(filters));
+        return filters_.StoreFilters(type, std::move(filters), monotonic);
     }
     auto StoreFilters(
         const cfilter::Type type,
         const Vector<CFHeaderParams>& headers,
         const Vector<CFilterParams>& filters,
-        const block::Position& tip) noexcept -> bool final
+        const block::Position& tip,
+        alloc::Default monotonic) noexcept -> bool final
     {
-        return filters_.StoreFilters(type, headers, filters, tip);
+        return filters_.StoreFilters(type, headers, filters, tip, monotonic);
     }
     auto StoreFilterHeaders(
         const cfilter::Type type,
@@ -533,23 +539,23 @@ public:
         return sync_.Store(tip, items);
     }
     auto SubchainAddElements(
-        const SubchainIndex& index,
+        const SubchainID& index,
         const ElementMap& elements) noexcept -> bool final
     {
         return wallet_.SubchainAddElements(index, elements);
     }
-    auto SubchainLastIndexed(const SubchainIndex& index) const noexcept
+    auto SubchainLastIndexed(const SubchainID& index) const noexcept
         -> std::optional<Bip32Index> final
     {
         return wallet_.SubchainLastIndexed(index);
     }
-    auto SubchainLastScanned(const SubchainIndex& index) const noexcept
+    auto SubchainLastScanned(const SubchainID& index) const noexcept
         -> block::Position final
     {
         return wallet_.SubchainLastScanned(index);
     }
     auto SubchainSetLastScanned(
-        const SubchainIndex& index,
+        const SubchainID& index,
         const block::Position& position) const noexcept -> bool final
     {
         return wallet_.SubchainSetLastScanned(index, position);
@@ -596,9 +602,9 @@ private:
     mutable database::Blocks blocks_;
     mutable database::Filters filters_;
     mutable database::Headers headers_;
-    mutable database::implemenation::Wallet wallet_;
+    mutable database::implementation::Wallet wallet_;
     mutable database::implementation::Sync sync_;
 
     static auto init_db(storage::lmdb::Database& db) noexcept -> void;
 };
-}  // namespace opentxs::blockchain::implementation
+}  // namespace opentxs::blockchain::database::implementation

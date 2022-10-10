@@ -189,7 +189,7 @@ auto Input::Cache::reset_size() noexcept -> void
     normalized_size_ = std::nullopt;
 }
 
-auto Input::Cache::set(const blockchain::block::KeyData& data) noexcept -> void
+auto Input::Cache::set(const KeyData& data) noexcept -> void
 {
     auto lock = rLock{lock_};
 

@@ -14,9 +14,8 @@
 #include <utility>
 
 #include "blockchain/node/wallet/subchain/SubchainStateData.hpp"
-#include "internal/blockchain/database/Wallet.hpp"
+#include "internal/blockchain/database/Types.hpp"
 #include "internal/network/zeromq/Context.hpp"
-#include "internal/util/BoostPMR.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/api/network/Network.hpp"
 #include "opentxs/api/session/Session.hpp"
@@ -27,7 +26,6 @@
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Numbers.hpp"  // IWYU pragma: keep
 #include "opentxs/util/Types.hpp"
-#include "util/ByteLiterals.hpp"
 #include "util/ScopeGuard.hpp"
 
 namespace opentxs::blockchain::node::wallet
@@ -86,12 +84,10 @@ auto NotificationIndex::need_index(const std::optional<Bip32Index>& current)
 
 auto NotificationIndex::process(
     const std::optional<Bip32Index>& current,
-    Bip32Index target) noexcept -> void
+    Bip32Index target,
+    allocator_type monotonic) noexcept -> void
 {
-    constexpr auto allocBytes = 1_kib;
-    auto buf = std::array<std::byte, allocBytes>{};
-    auto alloc = alloc::BoostMonotonic{buf.data(), buf.size()};
-    auto elements = database::Wallet::ElementMap{&alloc};
+    auto elements = database::ElementMap{monotonic};
     auto postcondition = ScopeGuard{[&] { done(std::move(elements)); }};
 
     for (auto i{code_.Version()}; i > 0; --i) {

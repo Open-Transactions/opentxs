@@ -7,6 +7,7 @@
 #include "network/blockchain/otdht/Server.hpp"  // IWYU pragma: associated
 
 #include <algorithm>
+#include <cstddef>
 #include <iterator>
 #include <stdexcept>
 #include <utility>
@@ -21,8 +22,10 @@
 #include "internal/network/otdht/Factory.hpp"
 #include "internal/network/zeromq/Types.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
+#include "internal/util/BoostPMR.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
+#include "internal/util/Thread.hpp"
 #include "opentxs/api/network/Asio.hpp"
 #include "opentxs/api/network/Network.hpp"
 #include "opentxs/api/session/Factory.hpp"
@@ -95,10 +98,16 @@ Server::Server(
 
 auto Server::background() noexcept -> void
 {
+    // WARNING this function must be called from an asio thread and not a zmq
+    // thread
+    std::byte buf[thread_pool_monotonic_];  // NOLINT(modernize-avoid-c-arrays)
+    auto upstream = alloc::StandardToBoost(get_allocator().resource());
+    auto monotonic =
+        alloc::BoostMonotonic(buf, sizeof(buf), std::addressof(upstream));
     auto handle = shared_.lock();
     auto& shared = *handle;
     fill_queue(shared);
-    drain_queue(shared);
+    drain_queue(shared, std::addressof(monotonic));
     check_caught_up(shared);
 
     if (false == shared.queue_.empty()) {
@@ -131,7 +140,8 @@ auto Server::do_work() noexcept -> bool
     return false;
 }
 
-auto Server::drain_queue(Shared& shared) noexcept -> void
+auto Server::drain_queue(Shared& shared, allocator_type monotonic) noexcept
+    -> void
 {
     if (shared.queue_.empty()) { return; }
 
@@ -176,8 +186,8 @@ auto Server::drain_queue(Shared& shared) noexcept -> void
                         .c_str());
             }
 
-            const auto cfilter =
-                fOracle.LoadFilter(filter_type_, position.hash_, alloc);
+            const auto cfilter = fOracle.LoadFilter(
+                filter_type_, position.hash_, alloc, monotonic);
 
             if (false == cfilter.IsValid()) {
                 throw std::runtime_error(

@@ -8,15 +8,13 @@
 
 #include <boost/smart_ptr/make_shared.hpp>
 #include <boost/smart_ptr/shared_ptr.hpp>
-#include <array>
-#include <cstddef>
+#include <map>
 #include <utility>
 
 #include "blockchain/node/wallet/subchain/DeterministicStateData.hpp"
 #include "blockchain/node/wallet/subchain/SubchainStateData.hpp"
-#include "internal/blockchain/database/Wallet.hpp"
+#include "internal/blockchain/database/Types.hpp"
 #include "internal/network/zeromq/Context.hpp"
-#include "internal/util/BoostPMR.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/api/network/Network.hpp"
 #include "opentxs/api/session/Session.hpp"
@@ -25,7 +23,6 @@
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Types.hpp"
-#include "util/ByteLiterals.hpp"
 #include "util/ScopeGuard.hpp"
 
 namespace opentxs::blockchain::node::wallet
@@ -89,12 +86,10 @@ auto DeterministicIndex::need_index(const std::optional<Bip32Index>& current)
 
 auto DeterministicIndex::process(
     const std::optional<Bip32Index>& current,
-    Bip32Index target) noexcept -> void
+    Bip32Index target,
+    allocator_type monotonic) noexcept -> void
 {
-    constexpr auto allocBytes = 1_kib;
-    auto buf = std::array<std::byte, allocBytes>{};
-    auto alloc = alloc::BoostMonotonic{buf.data(), buf.size()};
-    auto elements = database::Wallet::ElementMap{&alloc};
+    auto elements = database::ElementMap{monotonic};
     auto postcondition = ScopeGuard{[&] { done(std::move(elements)); }};
     const auto& subchain = parent_.subchain_;
     const auto first =

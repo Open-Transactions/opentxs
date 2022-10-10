@@ -276,9 +276,10 @@ auto BlockchainImp::broadcast_update_signal(
     });
 }
 
-auto BlockchainImp::IndexItem(const ReadView bytes) const noexcept -> PatternID
+auto BlockchainImp::IndexItem(const ReadView bytes) const noexcept
+    -> opentxs::blockchain::block::ElementHash
 {
-    auto output = PatternID{};
+    auto output = opentxs::blockchain::block::ElementHash{};
     const auto hashed = api_.Crypto().Hash().HMAC(
         opentxs::crypto::HashType::SipHash24,
         api_.Network().Blockchain().Internal().Database().HashKey(),
@@ -451,8 +452,9 @@ auto BlockchainImp::ProcessTransactions(
             }
         }
 
-        if (false ==
-            db.AssociateTransaction(id, tx.Internal().GetPatterns(api_))) {
+        // TODO allocator
+        if (false == db.AssociateTransaction(
+                         id, tx.Internal().IndexElements(api_, {}))) {
             LogError()(OT_PRETTY_CLASS())(
                 "associate patterns for transaction ")(id.asHex())
                 .Flush();
@@ -556,7 +558,8 @@ auto BlockchainImp::Unconfirm(
 auto BlockchainImp::UpdateElement(
     UnallocatedVector<ReadView>& hashes) const noexcept -> void
 {
-    auto patterns = UnallocatedVector<PatternID>{};
+    auto patterns =
+        UnallocatedVector<opentxs::blockchain::block::ElementHash>{};
     std::for_each(std::begin(hashes), std::end(hashes), [&](const auto& bytes) {
         patterns.emplace_back(IndexItem(bytes));
     });

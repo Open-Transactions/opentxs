@@ -24,7 +24,6 @@ target_sources(
     "SubchainID.hpp"
     "SubchainPrivate.cpp"
     "SubchainPrivate.hpp"
-    "Types.hpp"
 )
 target_link_libraries(opentxs-common PRIVATE Boost::headers)
 target_include_directories(

@@ -33,6 +33,7 @@
 #include <utility>
 
 #include "internal/api/crypto/Blockchain.hpp"
+#include "internal/blockchain/block/Types.hpp"
 #include "internal/blockchain/crypto/Crypto.hpp"
 #include "opentxs/api/crypto/Blockchain.hpp"
 #include "opentxs/blockchain/Types.hpp"
@@ -176,7 +177,8 @@ public:
         const identifier::Nym& nymID,
         const identifier::Generic& accountID) const noexcept(false)
         -> const opentxs::blockchain::crypto::HD& final;
-    auto IndexItem(const ReadView bytes) const noexcept -> PatternID final;
+    auto IndexItem(const ReadView bytes) const noexcept
+        -> opentxs::blockchain::block::ElementHash final;
     auto KeyEndpoint() const noexcept -> std::string_view final;
     auto KeyGenerated(
         const Chain chain,

@@ -10,6 +10,7 @@
 #include <optional>
 #include <tuple>
 
+#include "internal/blockchain/database/Types.hpp"
 #include "internal/blockchain/node/Types.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
@@ -75,33 +76,14 @@ namespace opentxs::blockchain::database
 class Wallet
 {
 public:
-    using NodeID = identifier::Generic;
-    using SubchainIndex = identifier::Generic;
-    using SubchainID = std::pair<crypto::Subchain, NodeID>;
-    using ElementID = std::pair<Bip32Index, SubchainID>;
-    using ElementMap = Map<Bip32Index, Vector<Vector<std::byte>>>;
-    using Pattern = std::pair<ElementID, Vector<std::byte>>;
-    using Patterns = Vector<Pattern>;
-    using MatchingIndices = Vector<Bip32Index>;
-    using MatchedTransaction = std::
-        pair<MatchingIndices, std::shared_ptr<bitcoin::block::Transaction>>;
-    using BlockMatches = Map<block::pTxid, MatchedTransaction>;
-    using BatchedMatches = Map<block::Position, BlockMatches>;
-    using UTXO = std::pair<
-        blockchain::block::Outpoint,
-        std::unique_ptr<bitcoin::block::Output>>;
-    using KeyID = blockchain::crypto::Key;
-    using TXOs =
-        Map<blockchain::block::Outpoint,
-            std::shared_ptr<const bitcoin::block::Output>>;
-
     virtual auto CompletedProposals() const noexcept
         -> UnallocatedSet<identifier::Generic> = 0;
     virtual auto GetBalance() const noexcept -> Balance = 0;
     virtual auto GetBalance(const identifier::Nym& owner) const noexcept
         -> Balance = 0;
-    virtual auto GetBalance(const identifier::Nym& owner, const NodeID& node)
-        const noexcept -> Balance = 0;
+    virtual auto GetBalance(
+        const identifier::Nym& owner,
+        const SubaccountID& node) const noexcept -> Balance = 0;
     virtual auto GetBalance(const crypto::Key& key) const noexcept
         -> Balance = 0;
     virtual auto GetOutputs(node::TxoState type, alloc::Default alloc = {})
@@ -121,13 +103,12 @@ public:
         alloc::Default alloc = {}) const noexcept -> Vector<UTXO> = 0;
     virtual auto GetOutputTags(const block::Outpoint& output) const noexcept
         -> UnallocatedSet<node::TxoTag> = 0;
-    virtual auto GetPatterns(
-        const SubchainIndex& index,
-        alloc::Default alloc = {}) const noexcept -> Patterns = 0;
+    virtual auto GetPatterns(const SubchainID& index, alloc::Default alloc = {})
+        const noexcept -> Patterns = 0;
     virtual auto GetPosition() const noexcept -> block::Position = 0;
     virtual auto GetSubchainID(
-        const NodeID& account,
-        const crypto::Subchain subchain) const noexcept -> SubchainIndex = 0;
+        const SubaccountID& account,
+        const crypto::Subchain subchain) const noexcept -> SubchainID = 0;
     virtual auto GetTransactions() const noexcept
         -> UnallocatedVector<block::pTxid> = 0;
     virtual auto GetTransactions(const identifier::Nym& account) const noexcept
@@ -137,7 +118,7 @@ public:
     virtual auto GetUnspentOutputs(alloc::Default alloc = {}) const noexcept
         -> Vector<UTXO> = 0;
     virtual auto GetUnspentOutputs(
-        const NodeID& account,
+        const SubaccountID& account,
         const crypto::Subchain subchain,
         alloc::Default alloc = {}) const noexcept -> Vector<UTXO> = 0;
     virtual auto GetWalletHeight() const noexcept -> block::Height = 0;
@@ -148,22 +129,22 @@ public:
     virtual auto LookupContact(const Data& pubkeyHash) const noexcept
         -> UnallocatedSet<identifier::Generic> = 0;
     virtual auto PublishBalance() const noexcept -> void = 0;
-    virtual auto SubchainLastIndexed(const SubchainIndex& index) const noexcept
+    virtual auto SubchainLastIndexed(const SubchainID& index) const noexcept
         -> std::optional<Bip32Index> = 0;
-    virtual auto SubchainLastScanned(const SubchainIndex& index) const noexcept
+    virtual auto SubchainLastScanned(const SubchainID& index) const noexcept
         -> block::Position = 0;
     virtual auto SubchainSetLastScanned(
-        const SubchainIndex& index,
+        const SubchainID& index,
         const block::Position& position) const noexcept -> bool = 0;
 
     virtual auto AddConfirmedTransactions(
-        const NodeID& account,
-        const SubchainIndex& index,
+        const SubaccountID& account,
+        const SubchainID& index,
         BatchedMatches&& transactions,
         TXOs& txoCreated,
         TXOs& txoConsumed) noexcept -> bool = 0;
     virtual auto AddMempoolTransaction(
-        const NodeID& account,
+        const SubaccountID& account,
         const crypto::Subchain subchain,
         const Vector<std::uint32_t> outputIndices,
         const bitcoin::block::Transaction& transaction,
@@ -187,9 +168,9 @@ public:
         const node::internal::HeaderOraclePrivate& data,
         storage::lmdb::Transaction& tx,
         const node::HeaderOracle& headers,
-        const NodeID& account,
+        const SubaccountID& account,
         const crypto::Subchain subchain,
-        const SubchainIndex& index,
+        const SubchainID& index,
         const UnallocatedVector<block::Position>& reorg) noexcept -> bool = 0;
     virtual auto ReserveUTXO(
         const identifier::Nym& spender,
@@ -198,7 +179,7 @@ public:
         -> std::optional<UTXO> = 0;
     virtual auto StartReorg() noexcept -> storage::lmdb::Transaction = 0;
     virtual auto SubchainAddElements(
-        const SubchainIndex& index,
+        const SubchainID& index,
         const ElementMap& elements) noexcept -> bool = 0;
 
     virtual ~Wallet() = default;

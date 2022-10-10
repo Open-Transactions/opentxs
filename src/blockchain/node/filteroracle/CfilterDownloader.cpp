@@ -176,7 +176,8 @@ auto CfilterDownloader::queue_processing(DownloadedData&& data) noexcept -> void
         }
     }
 
-    const auto saved = shared_.StoreCfilters(std::move(filters), d);
+    // TODO monotonic allocator
+    const auto saved = shared_.StoreCfilters(std::move(filters), d, {});
 
     OT_ASSERT(saved);
 }

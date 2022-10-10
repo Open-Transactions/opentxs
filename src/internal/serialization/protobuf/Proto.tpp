@@ -13,6 +13,7 @@
 #include <limits>
 #include <memory>
 
+#include "internal/util/LogMacros.hpp"
 #include "opentxs/core/Armored.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/String.hpp"
@@ -34,7 +35,14 @@ template <typename Output>
 auto Factory(const void* input, const std::size_t size) -> Output
 {
     static_assert(sizeof(int) <= sizeof(std::size_t));
-    assert(size <= static_cast<std::size_t>(std::numeric_limits<int>::max()));
+    static constexpr auto max =
+        static_cast<std::size_t>(std::numeric_limits<int>::max());
+
+    if (size > max) {
+        LogAbort()("opentxs::proto::")(__func__)(
+            ": attempted to construct protobuf from ")(size)(" byte array")
+            .Abort();
+    }
 
     auto serialized = Output{};
     serialized.ParseFromArray(input, static_cast<int>(size));

@@ -21,6 +21,7 @@
 #include "opentxs/blockchain/bitcoin/cfilter/GCS.hpp"
 #include "opentxs/blockchain/bitcoin/cfilter/Hash.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/bitcoin/cfilter/Header.hpp"
+#include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/blockchain/node/Manager.hpp"
 #include "opentxs/network/otdht/Data.hpp"
 #include "opentxs/util/Container.hpp"
@@ -91,17 +92,19 @@ auto FilterOracle::Init(
 auto FilterOracle::LoadFilter(
     const cfilter::Type type,
     const block::Hash& block,
-    alloc::Default alloc) const noexcept -> GCS
+    alloc::Default alloc,
+    alloc::Default monotonic) const noexcept -> GCS
 {
-    return shared_.LoadCfilter(type, block.Bytes(), alloc);
+    return shared_.LoadCfilter(type, block.Bytes(), alloc, monotonic);
 }
 
 auto FilterOracle::LoadFilters(
     const cfilter::Type type,
     const Vector<block::Hash>& blocks,
-    alloc::Default alloc) const noexcept -> Vector<GCS>
+    alloc::Default alloc,
+    alloc::Default monotonic) const noexcept -> Vector<GCS>
 {
-    return shared_.LoadCfilters(type, blocks, alloc);
+    return shared_.LoadCfilters(type, blocks, alloc, monotonic);
 }
 
 auto FilterOracle::LoadFilterHeader(
@@ -112,17 +115,19 @@ auto FilterOracle::LoadFilterHeader(
 }
 
 auto FilterOracle::ProcessBlock(
-    const bitcoin::block::Block& block) const noexcept -> bool
+    const bitcoin::block::Block& block,
+    alloc::Default monotonic) const noexcept -> bool
 {
-    return shared_.ProcessBlock(block);
+    return shared_.ProcessBlock(block, monotonic);
 }
 
 auto FilterOracle::ProcessSyncData(
     const block::Hash& prior,
     const Vector<block::Hash>& hashes,
-    const network::otdht::Data& data) const noexcept -> void
+    const network::otdht::Data& data,
+    alloc::Default monotonic) const noexcept -> void
 {
-    shared_.ProcessSyncData(prior, hashes, data);
+    shared_.ProcessSyncData(prior, hashes, data, monotonic);
 }
 
 auto FilterOracle::Shutdown() noexcept -> void { shared_.Shutdown(); }

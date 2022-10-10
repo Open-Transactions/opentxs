@@ -36,12 +36,12 @@ namespace bitcoin
 namespace block
 {
 class Block;
-class Hash;
 }  // namespace block
 }  // namespace bitcoin
 
 namespace block
 {
+class Hash;
 class Position;
 }  // namespace block
 
@@ -87,19 +87,23 @@ public:
     auto LoadFilter(
         const cfilter::Type type,
         const block::Hash& block,
-        alloc::Default alloc) const noexcept -> GCS final;
+        alloc::Default alloc,
+        alloc::Default monotonic) const noexcept -> GCS final;
     auto LoadFilters(
         const cfilter::Type type,
         const Vector<block::Hash>& blocks,
-        alloc::Default alloc) const noexcept -> Vector<GCS> final;
+        alloc::Default alloc,
+        alloc::Default monotonic) const noexcept -> Vector<GCS> final;
     auto LoadFilterHeader(const cfilter::Type type, const block::Hash& block)
         const noexcept -> cfilter::Header final;
-    auto ProcessBlock(const bitcoin::block::Block& block) const noexcept
-        -> bool final;
+    auto ProcessBlock(
+        const bitcoin::block::Block& block,
+        alloc::Default monotonic) const noexcept -> bool final;
     auto ProcessSyncData(
         const block::Hash& prior,
         const Vector<block::Hash>& hashes,
-        const network::otdht::Data& data) const noexcept -> void final;
+        const network::otdht::Data& data,
+        alloc::Default monotonic) const noexcept -> void final;
     auto Tip(const cfilter::Type type) const noexcept -> block::Position final;
 
     auto Heartbeat() noexcept -> void final;

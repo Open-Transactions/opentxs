@@ -80,7 +80,7 @@ Wallet::Actor::Actor(
 {
 }
 
-auto Wallet::Actor::do_startup() noexcept -> bool
+auto Wallet::Actor::do_startup(allocator_type) noexcept -> bool
 {
     if (api_.Internal().ShuttingDown() || node_.Internal().ShuttingDown()) {
 
@@ -99,7 +99,10 @@ auto Wallet::Actor::do_shutdown() noexcept -> void
     api_p_.reset();
 }
 
-auto Wallet::Actor::pipeline(const Work work, Message&& msg) noexcept -> void
+auto Wallet::Actor::pipeline(
+    const Work work,
+    Message&& msg,
+    allocator_type) noexcept -> void
 {
     switch (work) {
         case Work::start_wallet: {
@@ -123,7 +126,7 @@ auto Wallet::Actor::pipeline(const Work work, Message&& msg) noexcept -> void
     }
 }
 
-auto Wallet::Actor::work() noexcept -> bool
+auto Wallet::Actor::work(allocator_type monotonic) noexcept -> bool
 {
     if (running_) {
 

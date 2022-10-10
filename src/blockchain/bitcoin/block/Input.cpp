@@ -25,6 +25,7 @@
 #include <string_view>
 #include <utility>
 
+#include "internal/api/crypto/Blockchain.hpp"
 #include "internal/blockchain/bitcoin/Bitcoin.hpp"
 #include "internal/blockchain/bitcoin/block/Factory.hpp"
 #include "internal/blockchain/bitcoin/block/Output.hpp"
@@ -287,7 +288,7 @@ const VersionNumber Input::key_version_{1};
 Input::Input(
     const blockchain::Type chain,
     const std::uint32_t sequence,
-    blockchain::block::Outpoint&& previous,
+    Outpoint&& previous,
     UnallocatedVector<Space>&& witness,
     std::unique_ptr<const block::Script> script,
     Space&& coinbase,
@@ -317,7 +318,7 @@ Input::Input(
 Input::Input(
     const blockchain::Type chain,
     const std::uint32_t sequence,
-    blockchain::block::Outpoint&& previous,
+    Outpoint&& previous,
     UnallocatedVector<Space>&& witness,
     std::unique_ptr<const block::Script> script,
     const VersionNumber version,
@@ -339,7 +340,7 @@ Input::Input(
 Input::Input(
     const blockchain::Type chain,
     const std::uint32_t sequence,
-    blockchain::block::Outpoint&& previous,
+    Outpoint&& previous,
     UnallocatedVector<Space>&& witness,
     std::unique_ptr<const block::Script> script,
     const VersionNumber version,
@@ -362,7 +363,7 @@ Input::Input(
 Input::Input(
     const blockchain::Type chain,
     const std::uint32_t sequence,
-    blockchain::block::Outpoint&& previous,
+    Outpoint&& previous,
     UnallocatedVector<Space>&& witness,
     const ReadView coinbase,
     const VersionNumber version,
@@ -620,24 +621,22 @@ auto Input::decode_coinbase() const noexcept -> UnallocatedCString
     return out.str();
 }
 
-auto Input::ExtractElements(const cfilter::Type style) const noexcept
-    -> Vector<Vector<std::byte>>
+auto Input::ExtractElements(const cfilter::Type style, Elements& out)
+    const noexcept -> void
 {
-    auto output = Vector<Vector<std::byte>>{};
-
-    if (Script::Position::Coinbase == script_->Role()) { return output; }
+    if (Script::Position::Coinbase == script_->Role()) { return; }
 
     switch (style) {
         case cfilter::Type::ES: {
             LogTrace()(OT_PRETTY_CLASS())("processing input script").Flush();
-            output = script_->ExtractElements(style);
+            script_->Internal().ExtractElements(style, out);
 
             for (const auto& data : witness_) {
                 switch (data.size()) {
                     case 33:
                     case 32:
                     case 20: {
-                        output.emplace_back(data.cbegin(), data.cend());
+                        out.emplace_back(data.cbegin(), data.cend());
                     } break;
                     default: {
                     }
@@ -657,11 +656,7 @@ auto Input::ExtractElements(const cfilter::Type style) const noexcept
 
                 if (pSub) {
                     const auto& sub = *pSub;
-                    auto temp = sub.ExtractElements(style);
-                    output.insert(
-                        output.end(),
-                        std::make_move_iterator(temp.begin()),
-                        std::make_move_iterator(temp.end()));
+                    sub.Internal().ExtractElements(style, out);
                 } else if (Redeem::MaybeP2WSH != type) {
                     LogError()(OT_PRETTY_CLASS())("Invalid redeem script")
                         .Flush();
@@ -674,7 +669,7 @@ auto Input::ExtractElements(const cfilter::Type style) const noexcept
             LogTrace()(OT_PRETTY_CLASS())("processing consumed outpoint")
                 .Flush();
             const auto* it = reinterpret_cast<const std::byte*>(&previous_);
-            output.emplace_back(it, it + sizeof(previous_));
+            out.emplace_back(it, it + sizeof(previous_));
         } break;
         case cfilter::Type::Basic_BIP158:
         case cfilter::Type::Unknown:
@@ -682,25 +677,30 @@ auto Input::ExtractElements(const cfilter::Type style) const noexcept
             LogTrace()(OT_PRETTY_CLASS())("skipping input").Flush();
         }
     }
+}
 
-    LogTrace()(OT_PRETTY_CLASS())("extracted ")(output.size())(" elements")
-        .Flush();
-    std::sort(output.begin(), output.end());
+auto Input::ExtractElements(const cfilter::Type style, alloc::Default alloc)
+    const noexcept -> Elements
+{
+    auto out = Elements{alloc};
+    ExtractElements(style, out);
+    std::sort(out.begin(), out.end());
 
-    return output;
+    return out;
 }
 
 auto Input::FindMatches(
     const api::Session& api,
-    const blockchain::block::Txid& txid,
+    const Txid& txid,
     const cfilter::Type type,
-    const blockchain::block::Patterns& txos,
-    const blockchain::block::ParsedPatterns& patterns,
+    const Patterns& txos,
+    const ParsedPatterns& patterns,
     const std::size_t position,
-    const Log& log) const noexcept -> blockchain::block::Matches
+    const Log& log,
+    Matches& out,
+    alloc::Default monotonic) const noexcept -> void
 {
-    auto matches = blockchain::block::Matches{};
-    auto& [inputs, outputs] = matches;
+    auto& [inputs, outputs] = out;
 
     for (const auto& [element, outpoint] : txos) {
         if (reader(outpoint) != previous_.Bytes()) { continue; }
@@ -710,19 +710,20 @@ auto Input::FindMatches(
         const auto& [subchain, account] = subchainID;
         cache_.add({account, subchain, index});
         log(OT_PRETTY_CLASS())("input ")(position)(" of transaction ")
-            .asHex(txid)(" spends ")(
-                blockchain::block::Outpoint{reader(outpoint)})
+            .asHex(txid)(" spends ")(Outpoint{reader(outpoint)})
             .Flush();
     }
 
     const auto keyMatches = blockchain::block::internal::SetIntersection(
-        api, txid.Bytes(), patterns, ExtractElements(type));
+        txid.Bytes(),
+        patterns,
+        ExtractElements(type, monotonic),
+        monotonic,
+        monotonic);
 
     for (const auto& [t, element] : keyMatches.second) {
         inputs.emplace_back(txid, previous_.Bytes(), element);
     }
-
-    return matches;
 }
 
 auto Input::GetBytes(std::size_t& base, std::size_t& witness) const noexcept
@@ -750,16 +751,8 @@ auto Input::GetBytes(std::size_t& base, std::size_t& witness) const noexcept
     }
 }
 
-auto Input::GetPatterns(const api::Session& api) const noexcept
-    -> UnallocatedVector<PatternID>
-{
-    const auto pubkeys = get_pubkeys(api);
-
-    return {std::begin(pubkeys), std::end(pubkeys)};
-}
-
-auto Input::get_pubkeys(const api::Session& api) const noexcept
-    -> const PubkeyHashes&
+auto Input::get_pubkeys(const api::Session& api, alloc::Default monotonic)
+    const noexcept -> const PubkeyHashes&
 {
     const auto instance = api.Instance();
     auto handle = guarded_.lock();
@@ -770,14 +763,14 @@ auto Input::get_pubkeys(const api::Session& api) const noexcept
         return i->second.first;
     } else {
         auto& [pubkeys, _] = map[instance];
-        index_elements(api, pubkeys);
+        index_elements(api, pubkeys, monotonic);
 
         return pubkeys;
     }
 }
 
 auto Input::get_script_hash(const api::Session& api) const noexcept
-    -> const std::optional<PatternID>&
+    -> const std::optional<ElementHash>&
 {
     const auto instance = api.Instance();
     auto handle = guarded_.lock();
@@ -792,17 +785,34 @@ auto Input::get_script_hash(const api::Session& api) const noexcept
         if (const auto script = script_->RedeemScript(); script) {
             auto scriptHash = Space{};
             script->CalculateHash160(api.Crypto(), writer(scriptHash));
-            sh.emplace(api.Crypto().Blockchain().IndexItem(reader(scriptHash)));
+            sh.emplace(api.Crypto().Blockchain().Internal().IndexItem(
+                reader(scriptHash)));
         }
 
         return sh;
     }
 }
 
-auto Input::index_elements(const api::Session& api, PubkeyHashes& hashes)
+auto Input::IndexElements(const api::Session& api, ElementHashes& out)
     const noexcept -> void
 {
-    const auto patterns = script_->ExtractPatterns(api);
+    // TODO monotonic allocator
+    const auto& keys = get_pubkeys(api, {});
+    std::copy(keys.begin(), keys.end(), std::inserter(out, out.end()));
+}
+
+auto Input::index_elements(
+    const api::Session& api,
+    PubkeyHashes& hashes,
+    alloc::Default monotonic) const noexcept -> void
+{
+    const auto patterns = [&] {
+        auto out = ElementHashes{monotonic};
+        out.clear();
+        script_->Internal().IndexElements(api, out);
+
+        return out;
+    }();
     LogTrace()(OT_PRETTY_CLASS())(patterns.size())(" pubkey hashes found:")
         .Flush();
     std::for_each(
@@ -980,7 +990,8 @@ auto Input::Serialize(
         serializedKey.set_index(index);
     });
 
-    for (const auto& id : get_pubkeys(api)) { out.add_pubkey_hash(id); }
+    // TODO monotonic allocator
+    for (const auto& id : get_pubkeys(api, {})) { out.add_pubkey_hash(id); }
 
     if (const auto& sh = get_script_hash(api); sh.has_value()) {
         out.set_script_hash(sh.value());

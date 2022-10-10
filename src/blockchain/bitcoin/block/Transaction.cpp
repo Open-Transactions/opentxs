@@ -407,14 +407,14 @@ auto BitcoinTransaction(
     const std::int32_t version) noexcept
     -> std::unique_ptr<blockchain::bitcoin::block::internal::Transaction>
 {
-    static const auto outpoint = opentxs::blockchain::block::Outpoint{};
+    static const auto outpoint = blockchain::block::Outpoint{};
 
     const auto serializedVersion = boost::endian::little_int32_buf_t{version};
     const auto locktime = boost::endian::little_uint32_buf_t{0};
     const auto sequence = boost::endian::little_uint32_buf_t{0xffffffff};
     const auto cb = [&] {
         const auto bip34 =
-            opentxs::blockchain::bitcoin::block::internal::EncodeBip34(height);
+            blockchain::bitcoin::block::internal::EncodeBip34(height);
         auto output = space(bip34.size() + coinbase.size());
         auto* it = output.data();
         std::memcpy(it, bip34.data(), bip34.size());
@@ -424,9 +424,9 @@ auto BitcoinTransaction(
 
         return output;
     }();
-    const auto cs = opentxs::blockchain::bitcoin::CompactSize{cb.size()};
-    auto inputs = UnallocatedVector<std::unique_ptr<
-        opentxs::blockchain::bitcoin::block::internal::Input>>{};
+    const auto cs = blockchain::bitcoin::CompactSize{cb.size()};
+    auto inputs = UnallocatedVector<
+        std::unique_ptr<blockchain::bitcoin::block::internal::Input>>{};
     inputs.emplace_back(factory::BitcoinTransactionInput(
         chain,
         outpoint.Bytes(),
@@ -435,10 +435,10 @@ auto BitcoinTransaction(
         ReadView{reinterpret_cast<const char*>(&sequence), sizeof(sequence)},
         true,
         {}));
-    auto outputs = UnallocatedVector<std::unique_ptr<
-        opentxs::blockchain::bitcoin::block::internal::Output>>{};
+    auto outputs = UnallocatedVector<
+        std::unique_ptr<blockchain::bitcoin::block::internal::Output>>{};
     auto index{-1};
-    using Position = opentxs::blockchain::bitcoin::block::Script::Position;
+    using Position = blockchain::bitcoin::block::Script::Position;
 
     for (auto& [amount, pScript, keys] : scripts) {
         if (false == bool(pScript)) { return {}; }
@@ -476,14 +476,14 @@ Transaction::Transaction(
     const std::int32_t version,
     const std::byte segwit,
     const std::uint32_t lockTime,
-    const blockchain::block::pTxid&& txid,
-    const blockchain::block::pTxid&& wtxid,
+    const pTxid&& txid,
+    const pTxid&& wtxid,
     const Time& time,
     const UnallocatedCString& memo,
     std::unique_ptr<internal::Inputs> inputs,
     std::unique_ptr<internal::Outputs> outputs,
     UnallocatedVector<blockchain::Type>&& chains,
-    blockchain::block::Position&& minedPosition,
+    block::Position&& minedPosition,
     std::optional<std::size_t>&& position) noexcept(false)
     : position_(std::move(position))
     , serialize_version_(serializeVersion)
@@ -613,67 +613,48 @@ auto Transaction::IDNormalized(const api::Factory& factory) const noexcept
     });
 }
 
-auto Transaction::ExtractElements(const cfilter::Type style) const noexcept
-    -> Vector<Vector<std::byte>>
+auto Transaction::ExtractElements(const cfilter::Type style, Elements& out)
+    const noexcept -> void
 {
-    auto output = inputs_->ExtractElements(style);
-    LogTrace()(OT_PRETTY_CLASS())("extracted ")(output.size())(
-        " input elements")
-        .Flush();
-    auto temp = outputs_->ExtractElements(style);
-    LogTrace()(OT_PRETTY_CLASS())("extracted ")(temp.size())(" output elements")
-        .Flush();
-    output.insert(
-        output.end(),
-        std::make_move_iterator(temp.begin()),
-        std::make_move_iterator(temp.end()));
+    inputs_->ExtractElements(style, out);
+    outputs_->ExtractElements(style, out);
 
     if (cfilter::Type::ES == style) {
         const auto* data = static_cast<const std::byte*>(txid_.data());
-        output.emplace_back(data, data + txid_.size());
+        out.emplace_back(data, data + txid_.size());
     }
+}
 
-    LogTrace()(OT_PRETTY_CLASS())("extracted ")(output.size())(
-        " total elements")
-        .Flush();
-    std::sort(output.begin(), output.end());
+auto Transaction::FindMatches(
+    const api::Session& api,
+    const cfilter::Type style,
+    const Patterns& txos,
+    const ParsedPatterns& elements,
+    const Log& log,
+    alloc::Default alloc,
+    alloc::Default monotonic) const noexcept -> Matches
+{
+    auto output = std::make_pair(InputMatches{alloc}, OutputMatches{alloc});
+    FindMatches(api, style, txos, elements, log, output, monotonic);
+    auto& [inputs, outputs] = output;
+    dedup(inputs);
+    dedup(outputs);
 
     return output;
 }
 
 auto Transaction::FindMatches(
     const api::Session& api,
-    const cfilter::Type style,
-    const blockchain::block::Patterns& txos,
-    const blockchain::block::ParsedPatterns& elements,
-    const Log& log) const noexcept -> blockchain::block::Matches
+    const cfilter::Type type,
+    const Patterns& txos,
+    const ParsedPatterns& elements,
+    const Log& log,
+    Matches& out,
+    alloc::Default monotonic) const noexcept -> void
 {
     log(OT_PRETTY_CLASS())("processing transaction ").asHex(ID()).Flush();
-    auto output = inputs_->FindMatches(api, txid_, style, txos, elements, log);
-    auto& [inputs, outputs] = output;
-    auto temp = outputs_->FindMatches(api, txid_, style, elements, log);
-    inputs.insert(
-        inputs.end(),
-        std::make_move_iterator(temp.first.begin()),
-        std::make_move_iterator(temp.first.end()));
-    outputs.insert(
-        outputs.end(),
-        std::make_move_iterator(temp.second.begin()),
-        std::make_move_iterator(temp.second.end()));
-
-    return output;
-}
-
-auto Transaction::GetPatterns(const api::Session& api) const noexcept
-    -> UnallocatedVector<PatternID>
-{
-    auto output = inputs_->GetPatterns(api);
-    const auto oPatterns = outputs_->GetPatterns(api);
-    output.reserve(output.size() + oPatterns.size());
-    output.insert(output.end(), oPatterns.begin(), oPatterns.end());
-    dedup(output);
-
-    return output;
+    inputs_->FindMatches(api, txid_, type, txos, elements, log, out, monotonic);
+    outputs_->FindMatches(api, txid_, type, elements, log, out, monotonic);
 }
 
 auto Transaction::GetPreimageBTC(
@@ -706,6 +687,16 @@ auto Transaction::GetPreimageBTC(
 
     auto output = Space{};
     copy.Serialize(writer(output));
+
+    return output;
+}
+
+auto Transaction::IndexElements(const api::Session& api, alloc::Default alloc)
+    const noexcept -> ElementHashes
+{
+    auto output = ElementHashes{alloc};
+    inputs_->IndexElements(api, output);
+    outputs_->IndexElements(api, output);
 
     return output;
 }
@@ -1015,8 +1006,7 @@ auto Transaction::Serialize(const api::Session& api) const noexcept
     return output;
 }
 
-auto Transaction::SetKeyData(const blockchain::block::KeyData& data) noexcept
-    -> void
+auto Transaction::SetKeyData(const KeyData& data) noexcept -> void
 {
     inputs_->SetKeyData(data);
     outputs_->SetKeyData(data);

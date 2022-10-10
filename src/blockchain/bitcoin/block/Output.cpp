@@ -18,6 +18,7 @@
 #include <stdexcept>
 #include <utility>
 
+#include "internal/api/crypto/Blockchain.hpp"
 #include "internal/blockchain/Blockchain.hpp"
 #include "internal/blockchain/bitcoin/Bitcoin.hpp"
 #include "internal/blockchain/bitcoin/block/Factory.hpp"
@@ -103,7 +104,7 @@ auto BitcoinTransactionOutput(
     -> std::unique_ptr<blockchain::bitcoin::block::internal::Output>
 {
     using ReturnType = blockchain::bitcoin::block::implementation::Output;
-    using Position = opentxs::blockchain::bitcoin::block::Script::Position;
+    using Position = blockchain::bitcoin::block::Script::Position;
 
     try {
         auto value = factory::Amount(in.value());
@@ -223,7 +224,7 @@ Output::Output(
     std::unique_ptr<const block::Script> script,
     std::optional<std::size_t> size,
     boost::container::flat_set<crypto::Key>&& keys,
-    blockchain::block::Position minedPosition,
+    block::Position minedPosition,
     node::TxoState state,
     UnallocatedSet<node::TxoTag> tags) noexcept(false)
     : chain_(chain)
@@ -259,7 +260,7 @@ Output::Output(
           factory::BitcoinScript(chain, in, Script::Position::Output),
           size,
           {},
-          blockchain::block::Position{},
+          block::Position{},
           node::TxoState::Error,
           {})
 {
@@ -280,7 +281,7 @@ Output::Output(
           std::move(script),
           {},
           std::move(keys),
-          blockchain::block::Position{},
+          block::Position{},
           node::TxoState::Error,
           {})
 {
@@ -339,26 +340,37 @@ auto Output::CalculateSize() const noexcept -> std::size_t
     });
 }
 
-auto Output::ExtractElements(const cfilter::Type style) const noexcept
-    -> Vector<Vector<std::byte>>
+auto Output::ExtractElements(const cfilter::Type style, Elements& out)
+    const noexcept -> void
 {
-    return script_->ExtractElements(style);
+    script_->Internal().ExtractElements(style, out);
+}
+
+auto Output::ExtractElements(const cfilter::Type style, alloc::Default alloc)
+    const noexcept -> Elements
+{
+    auto out = Elements{alloc};
+    ExtractElements(style, out);
+    std::sort(out.begin(), out.end());
+
+    return out;
 }
 
 auto Output::FindMatches(
     const api::Session& api,
-    const blockchain::block::Txid& tx,
+    const Txid& tx,
     const cfilter::Type type,
-    const blockchain::block::ParsedPatterns& patterns,
-    const Log& log) const noexcept -> blockchain::block::Matches
+    const ParsedPatterns& patterns,
+    const Log& log,
+    Matches& out,
+    alloc::Default monotonic) const noexcept -> void
 {
-    const auto output = blockchain::block::internal::SetIntersection(
-        api, tx.Bytes(), patterns, ExtractElements(type));
-    const auto& crypto = api.Crypto().Blockchain();
-    std::for_each(
-        std::begin(output.second),
-        std::end(output.second),
+    blockchain::block::internal::SetIntersection(
+        tx.Bytes(),
+        patterns,
+        ExtractElements(type, monotonic),
         [&](const auto& match) {
+            const auto& crypto = api.Crypto().Blockchain();
             const auto& [txid, element] = match;
             const auto& [index, subchainID] = element;
             const auto& [subchain, account] = subchainID;
@@ -379,21 +391,13 @@ auto Output::FindMatches(
             } else {
                 cache_.add(std::move(keyid));
             }
-        });
-
-    return output;
+        },
+        out,
+        monotonic);
 }
 
-auto Output::GetPatterns(const api::Session& api) const noexcept
-    -> UnallocatedVector<PatternID>
-{
-    const auto pubkeys = get_pubkeys(api);
-
-    return {std::begin(pubkeys), std::end(pubkeys)};
-}
-
-auto Output::get_pubkeys(const api::Session& api) const noexcept
-    -> const PubkeyHashes&
+auto Output::get_pubkeys(const api::Session& api, alloc::Default monotonic)
+    const noexcept -> const PubkeyHashes&
 {
     const auto instance = api.Instance();
     auto handle = guarded_.lock();
@@ -404,14 +408,14 @@ auto Output::get_pubkeys(const api::Session& api) const noexcept
         return i->second.first;
     } else {
         auto& [pubkeys, _] = map[instance];
-        index_elements(api, pubkeys);
+        index_elements(api, pubkeys, monotonic);
 
         return pubkeys;
     }
 }
 
 auto Output::get_script_hash(const api::Session& api) const noexcept
-    -> const std::optional<PatternID>&
+    -> const std::optional<ElementHash>&
 {
     const auto instance = api.Instance();
     auto handle = guarded_.lock();
@@ -426,17 +430,34 @@ auto Output::get_script_hash(const api::Session& api) const noexcept
         const auto scriptHash = script_->ScriptHash();
 
         if (scriptHash.has_value()) {
-            sh.emplace(api.Crypto().Blockchain().IndexItem(scriptHash.value()));
+            sh.emplace(api.Crypto().Blockchain().Internal().IndexItem(
+                scriptHash.value()));
         }
 
         return sh;
     }
 }
 
-auto Output::index_elements(const api::Session& api, PubkeyHashes& hashes)
+auto Output::IndexElements(const api::Session& api, ElementHashes& out)
     const noexcept -> void
 {
-    const auto patterns = script_->ExtractPatterns(api);
+    // TODO monotonic allocator
+    const auto& keys = get_pubkeys(api, {});
+    std::copy(keys.begin(), keys.end(), std::inserter(out, out.end()));
+}
+
+auto Output::index_elements(
+    const api::Session& api,
+    PubkeyHashes& hashes,
+    alloc::Default monotonic) const noexcept -> void
+{
+    const auto patterns = [&] {
+        auto out = ElementHashes{monotonic};
+        out.clear();
+        script_->Internal().IndexElements(api, out);
+
+        return out;
+    }();
     LogTrace()(OT_PRETTY_CLASS())(patterns.size())(" pubkey hashes found:")
         .Flush();
     std::for_each(
@@ -584,7 +605,8 @@ auto Output::Serialize(const api::Session& api, SerializeType& out)
         serializedKey.set_index(index);
     });
 
-    for (const auto& id : get_pubkeys(api)) { out.add_pubkey_hash(id); }
+    // TODO monotonic allocator
+    for (const auto& id : get_pubkeys(api, {})) { out.add_pubkey_hash(id); }
 
     if (const auto& sh = get_script_hash(api); sh.has_value()) {
         out.set_script_hash(sh.value());

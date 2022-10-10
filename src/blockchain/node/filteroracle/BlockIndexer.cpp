@@ -28,9 +28,11 @@
 #include "internal/blockchain/node/filteroracle/Types.hpp"
 #include "internal/network/zeromq/Context.hpp"
 #include "internal/network/zeromq/Types.hpp"
+#include "internal/util/BoostPMR.hpp"
 #include "internal/util/Future.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
+#include "internal/util/Thread.hpp"
 #include "internal/util/Timer.hpp"
 #include "opentxs/api/network/Asio.hpp"
 #include "opentxs/api/network/Network.hpp"
@@ -243,7 +245,13 @@ auto BlockIndexer::Imp::background() noexcept -> void
     // WARNING preserve lock order to avoid deadlocks
     auto wHandle = work_.lock();
     auto& work = *wHandle;
-    auto alloc = get_allocator();
+    // WARNING this function must be called from an asio thread and not a zmq
+    // thread
+    std::byte buf[thread_pool_monotonic_];  // NOLINT(modernize-avoid-c-arrays)
+    auto upstream = alloc::StandardToBoost(get_allocator().resource());
+    auto monotonic =
+        alloc::BoostMonotonic(buf, sizeof(buf), std::addressof(upstream));
+    auto alloc = allocator_type{std::addressof(monotonic)};
     auto filters = Vector<database::Cfilter::CFilterParams>{alloc};
     auto headers = Vector<database::Cfilter::CFHeaderParams>{alloc};
 
@@ -277,7 +285,8 @@ auto BlockIndexer::Imp::background() noexcept -> void
         }
 
         const auto& [ignore1, cfilter] = filters.emplace_back(
-            hash, shared_.ProcessBlock(shared_.default_type_, block, alloc));
+            hash,
+            shared_.ProcessBlock(shared_.default_type_, block, alloc, alloc));
 
         if (false == cfilter.IsValid()) {
             LogAbort()(OT_PRETTY_CLASS())(
@@ -304,7 +313,8 @@ auto BlockIndexer::Imp::background() noexcept -> void
         shared_.default_type_,
         work.position_,
         std::move(headers),
-        std::move(filters));
+        std::move(filters),
+        alloc);
 
     if (false == rc) {
         LogAbort()(OT_PRETTY_CLASS())(name_)(": failed to update database")
@@ -325,11 +335,10 @@ auto BlockIndexer::Imp::background() noexcept -> void
     pipeline_.Push(MakeWork(Work::statemachine));
 }
 
-auto BlockIndexer::Imp::check_blocks() noexcept -> void
+auto BlockIndexer::Imp::check_blocks(allocator_type monotonic) noexcept -> void
 {
     const auto& log = log_;
-    auto ready = Vector<BlockQueue::Map::iterator>{get_allocator()};
-    // TODO use monotonic allocator for ready
+    auto ready = Vector<BlockQueue::Map::iterator>{monotonic};
     auto handle = blocks_.lock();
     auto& blocks = *handle;
     auto& from = blocks.requested_;
@@ -359,7 +368,7 @@ auto BlockIndexer::Imp::do_shutdown() noexcept -> void
     api_p_.reset();
 }
 
-auto BlockIndexer::Imp::do_startup() noexcept -> bool
+auto BlockIndexer::Imp::do_startup(allocator_type monotonic) noexcept -> bool
 {
     if ((api_.Internal().ShuttingDown()) || (node_.Internal().ShuttingDown())) {
         return true;
@@ -389,7 +398,7 @@ auto BlockIndexer::Imp::do_startup() noexcept -> bool
         tip = work.position_;
     }
 
-    do_work();
+    do_work(monotonic);
 
     return false;
 }
@@ -484,8 +493,10 @@ auto BlockIndexer::Imp::Init(boost::shared_ptr<Imp> me) noexcept -> void
     signal_startup(me);
 }
 
-auto BlockIndexer::Imp::pipeline(const Work work, Message&& msg) noexcept
-    -> void
+auto BlockIndexer::Imp::pipeline(
+    const Work work,
+    Message&& msg,
+    allocator_type monotonic) noexcept -> void
 {
     switch (work) {
         case Work::block_ready: {
@@ -520,7 +531,7 @@ auto BlockIndexer::Imp::pipeline(const Work work, Message&& msg) noexcept
         }
     }
 
-    do_work();
+    do_work(monotonic);
 }
 
 auto BlockIndexer::Imp::process_block(Message&& in) noexcept -> void
@@ -601,10 +612,10 @@ auto BlockIndexer::Imp::update_best_position(
         .Flush();
 }
 
-auto BlockIndexer::Imp::work() noexcept -> bool
+auto BlockIndexer::Imp::work(allocator_type monotonic) noexcept -> bool
 {
     const auto& log = log_;
-    check_blocks();
+    check_blocks(monotonic);
     fill_queue();
     const auto count = drain_queue();
 

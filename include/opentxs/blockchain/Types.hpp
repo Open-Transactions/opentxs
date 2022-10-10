@@ -45,7 +45,6 @@ using HDIndex = std::uint32_t;
 using ConfirmedBalance = Amount;
 using UnconfirmedBalance = Amount;
 using Balance = std::pair<ConfirmedBalance, UnconfirmedBalance>;
-using PatternID = std::uint64_t;
 using Hash = Data;
 using pHash = ByteArray;
 

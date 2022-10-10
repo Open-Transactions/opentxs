@@ -335,7 +335,8 @@ auto Base::AddBlock(const std::shared_ptr<const bitcoin::block::Block> pBlock)
         return false;
     }
 
-    if (false == filters_.Internal().ProcessBlock(block)) {
+    // TODO monotonic allocator
+    if (false == filters_.Internal().ProcessBlock(block, {})) {
         LogError()(OT_PRETTY_CLASS())("failed to index ")(print(chain_))(
             " block")
             .Flush();
@@ -915,7 +916,8 @@ auto Base::process_sync_data(network::zeromq::Message&& in) noexcept -> void
         LogVerbose()("Accepted ")(accepted)(" of ")(blocks.size())(" ")(
             print(chain_))(" headers")
             .Flush();
-        filters_.Internal().ProcessSyncData(prior, hashes, data);
+        // TODO monotonic allocator
+        filters_.Internal().ProcessSyncData(prior, hashes, data, {});
         const auto elapsed =
             std::chrono::duration_cast<std::chrono::nanoseconds>(
                 Clock::now() - start);

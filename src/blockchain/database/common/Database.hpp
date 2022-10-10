@@ -15,6 +15,7 @@
 #include <utility>
 
 #include "internal/blockchain/Blockchain.hpp"
+#include "internal/blockchain/block/Types.hpp"
 #include "internal/blockchain/crypto/Crypto.hpp"
 #include "internal/blockchain/database/Types.hpp"
 #include "internal/blockchain/database/common/Common.hpp"
@@ -112,13 +113,7 @@ public:
         SyncServerEndpoint = 4,
     };
 
-    using BlockHash = block::Hash;
-    using PatternID = blockchain::PatternID;
-    using Txid = block::Txid;
-    using pTxid = block::pTxid;
-    using Chain = blockchain::Type;
-    using EnabledChain = std::pair<Chain, UnallocatedCString>;
-    using Height = block::Height;
+    using EnabledChain = std::pair<blockchain::Type, UnallocatedCString>;
     using Endpoints = Vector<CString>;
 
     auto AddOrUpdate(p2p::Address address) const noexcept -> bool;
@@ -126,19 +121,19 @@ public:
     auto AllocateStorageFolder(const UnallocatedCString& dir) const noexcept
         -> UnallocatedCString;
     auto AssociateTransaction(
-        const Txid& txid,
-        const UnallocatedVector<PatternID>& patterns) const noexcept -> bool;
-    auto BlockHeaderExists(const BlockHash& hash) const noexcept -> bool;
-    auto BlockExists(const BlockHash& block) const noexcept -> bool;
-    auto BlockForget(const BlockHash& block) const noexcept -> bool;
-    auto BlockLoad(const BlockHash& block) const noexcept -> ReadView;
+        const block::Txid& txid,
+        const ElementHashes& patterns) const noexcept -> bool;
+    auto BlockHeaderExists(const block::Hash& hash) const noexcept -> bool;
+    auto BlockExists(const block::Hash& block) const noexcept -> bool;
+    auto BlockForget(const block::Hash& block) const noexcept -> bool;
+    auto BlockLoad(const block::Hash& block) const noexcept -> ReadView;
     auto BlockStore(const block::Block& block) const noexcept -> bool;
     auto DeleteSyncServer(std::string_view endpoint) const noexcept -> bool;
-    auto Disable(const Chain type) const noexcept -> bool;
-    auto Enable(const Chain type, std::string_view seednode) const noexcept
-        -> bool;
+    auto Disable(const blockchain::Type type) const noexcept -> bool;
+    auto Enable(const blockchain::Type type, std::string_view seednode)
+        const noexcept -> bool;
     auto Find(
-        const Chain chain,
+        const blockchain::Type chain,
         const Protocol protocol,
         const UnallocatedSet<Type> onNetworks,
         const UnallocatedSet<Service> withServices) const noexcept
@@ -150,16 +145,18 @@ public:
     auto HaveFilterHeader(const cfilter::Type type, const ReadView blockHash)
         const noexcept -> bool;
     auto Import(UnallocatedVector<p2p::Address> peers) const noexcept -> bool;
-    auto LoadBlockHeader(const BlockHash& hash) const noexcept(false)
+    auto LoadBlockHeader(const block::Hash& hash) const noexcept(false)
         -> proto::BlockchainBlockHeader;
     auto LoadEnabledChains() const noexcept -> UnallocatedVector<EnabledChain>;
     auto LoadFilter(
         const cfilter::Type type,
         const ReadView blockHash,
-        alloc::Default alloc) const noexcept -> GCS;
+        alloc::Default alloc,
+        alloc::Default monotonic) const noexcept -> GCS;
     auto LoadFilters(
         const cfilter::Type type,
-        const Vector<block::Hash>& blocks) const noexcept -> Vector<GCS>;
+        const Vector<block::Hash>& blocks,
+        alloc::Default monotonic) const noexcept -> Vector<GCS>;
     auto LoadFilterHash(
         const cfilter::Type type,
         const ReadView blockHash,
@@ -169,8 +166,8 @@ public:
         const ReadView blockHash,
         const AllocateOutput header) const noexcept -> bool;
     auto LoadSync(
-        const Chain chain,
-        const Height height,
+        const blockchain::Type chain,
+        const block::Height height,
         opentxs::network::otdht::Data& output) const noexcept -> bool;
     auto LoadTransaction(const ReadView txid) const noexcept
         -> std::unique_ptr<bitcoin::block::Transaction>;
@@ -178,20 +175,23 @@ public:
         const noexcept -> std::unique_ptr<bitcoin::block::Transaction>;
     auto LookupContact(const Data& pubkeyHash) const noexcept
         -> UnallocatedSet<identifier::Generic>;
-    auto LookupTransactions(const PatternID pattern) const noexcept
-        -> UnallocatedVector<pTxid>;
-    auto ReorgSync(const Chain chain, const Height height) const noexcept
-        -> bool;
+    auto LookupTransactions(const ElementHash pattern) const noexcept
+        -> UnallocatedVector<block::pTxid>;
+    auto ReorgSync(const blockchain::Type chain, const block::Height height)
+        const noexcept -> bool;
     auto StoreBlockHeaders(const UpdatedHeader& headers) const noexcept -> bool;
     auto StoreFilterHeaders(
         const cfilter::Type type,
         const Vector<CFHeaderParams>& headers) const noexcept -> bool;
-    auto StoreFilters(const cfilter::Type type, Vector<CFilterParams>& filters)
-        const noexcept -> bool;
+    auto StoreFilters(
+        const cfilter::Type type,
+        Vector<CFilterParams>& filters,
+        alloc::Default monotonic) const noexcept -> bool;
     auto StoreFilters(
         const cfilter::Type type,
         const Vector<CFHeaderParams>& headers,
-        const Vector<CFilterParams>& filters) const noexcept -> bool;
+        const Vector<CFilterParams>& filters,
+        alloc::Default monotonic) const noexcept -> bool;
     auto StoreSync(const opentxs::network::otdht::SyncData& items, Chain chain)
         const noexcept -> bool;
     auto StoreTransaction(const bitcoin::block::Transaction& tx) const noexcept
@@ -199,11 +199,11 @@ public:
     auto StoreTransaction(
         const bitcoin::block::Transaction& tx,
         proto::BlockchainTransaction& out) const noexcept -> bool;
-    auto SyncTip(const Chain chain) const noexcept -> Height;
+    auto SyncTip(const blockchain::Type chain) const noexcept -> block::Height;
     auto UpdateContact(const Contact& contact) const noexcept
-        -> UnallocatedVector<pTxid>;
+        -> UnallocatedVector<block::pTxid>;
     auto UpdateMergedContact(const Contact& parent, const Contact& child)
-        const noexcept -> UnallocatedVector<pTxid>;
+        const noexcept -> UnallocatedVector<block::pTxid>;
 
     Database(
         const api::Session& api,

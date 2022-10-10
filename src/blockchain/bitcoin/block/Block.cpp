@@ -52,13 +52,13 @@ namespace opentxs::factory
 {
 auto BitcoinBlock(
     const api::Crypto& crypto,
-    const opentxs::blockchain::block::Header& previous,
+    const blockchain::block::Header& previous,
     const Transaction_p pGen,
     const std::uint32_t nBits,
     const UnallocatedVector<Transaction_p>& extra,
     const std::int32_t version,
     const AbortFunction abort) noexcept
-    -> std::shared_ptr<const opentxs::blockchain::bitcoin::block::Block>
+    -> std::shared_ptr<const blockchain::bitcoin::block::Block>
 {
     try {
         using Block = blockchain::bitcoin::block::implementation::Block;
@@ -365,7 +365,7 @@ auto Block::calculate_merkle_row(
 auto Block::calculate_merkle_value(
     const api::Crypto& crypto,
     const Type chain,
-    const TxidIndex& txids) -> blockchain::block::Hash
+    const TxidIndex& txids) -> block::Hash
 {
     using Hash = std::array<std::byte, 32>;
 
@@ -413,20 +413,16 @@ auto Block::clone_bitcoin() const noexcept -> std::unique_ptr<internal::Block>
     return std::make_unique<Block>(*this);
 }
 
-auto Block::ExtractElements(const cfilter::Type style) const noexcept
-    -> Vector<Vector<std::byte>>
+auto Block::ExtractElements(const cfilter::Type style, alloc::Default alloc)
+    const noexcept -> Elements
 {
-    auto output = Vector<Vector<std::byte>>{};
+    auto output = Elements{alloc};
     LogTrace()(OT_PRETTY_CLASS())("processing ")(transactions_.size())(
         " transactions")
         .Flush();
 
     for (const auto& [txid, tx] : transactions_) {
-        auto temp = tx->Internal().ExtractElements(style);
-        output.insert(
-            output.end(),
-            std::make_move_iterator(temp.begin()),
-            std::make_move_iterator(temp.end()));
+        tx->Internal().ExtractElements(style, output);
     }
 
     LogTrace()(OT_PRETTY_CLASS())("extracted ")(output.size())(" elements")
@@ -439,9 +435,11 @@ auto Block::ExtractElements(const cfilter::Type style) const noexcept
 auto Block::FindMatches(
     const api::Session& api,
     const cfilter::Type style,
-    const blockchain::block::Patterns& outpoints,
-    const blockchain::block::Patterns& patterns,
-    const Log& log) const noexcept -> blockchain::block::Matches
+    const Patterns& outpoints,
+    const Patterns& patterns,
+    const Log& log,
+    alloc::Default alloc,
+    alloc::Default monotonic) const noexcept -> Matches
 {
     if (0 == (outpoints.size() + patterns.size())) { return {}; }
 
@@ -450,24 +448,15 @@ auto Block::FindMatches(
         " transactions of block ")
         .asHex(ID())
         .Flush();
-    auto output = blockchain::block::Matches{};
-    auto& [inputs, outputs] = output;
-    // TODO allocator
-    const auto parsed = blockchain::block::ParsedPatterns{patterns, {}};
+    auto output = std::make_pair(InputMatches{alloc}, OutputMatches{alloc});
+    const auto parsed = ParsedPatterns{patterns, monotonic};
 
     for (const auto& [txid, tx] : transactions_) {
-        auto temp =
-            tx->Internal().FindMatches(api, style, outpoints, parsed, log);
-        inputs.insert(
-            inputs.end(),
-            std::make_move_iterator(temp.first.begin()),
-            std::make_move_iterator(temp.first.end()));
-        outputs.insert(
-            outputs.end(),
-            std::make_move_iterator(temp.second.begin()),
-            std::make_move_iterator(temp.second.end()));
+        tx->Internal().FindMatches(
+            api, style, outpoints, parsed, log, output, monotonic);
     }
 
+    auto& [inputs, outputs] = output;
     dedup(inputs);
     dedup(outputs);
 

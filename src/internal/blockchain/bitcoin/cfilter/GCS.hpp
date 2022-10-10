@@ -70,11 +70,12 @@ class GCS
 public:
     using PrehashedMatches = Vector<gcs::Hashes::const_iterator>;
 
-    virtual auto Match(const gcs::Hashes& prehashed) const noexcept
-        -> PrehashedMatches = 0;
+    virtual auto Match(const gcs::Hashes& prehashed, alloc::Default monotonic)
+        const noexcept -> PrehashedMatches = 0;
     virtual auto Range() const noexcept -> gcs::Range = 0;
     virtual auto Serialize(proto::GCS& out) const noexcept -> bool = 0;
-    virtual auto Test(const gcs::Hashes& targets) const noexcept -> bool = 0;
+    virtual auto Test(const gcs::Hashes& targets, alloc::Default monotonic)
+        const noexcept -> bool = 0;
 
     virtual ~GCS() = default;
 };

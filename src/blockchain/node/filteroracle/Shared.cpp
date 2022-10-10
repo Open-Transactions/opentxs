@@ -539,41 +539,45 @@ auto Shared::load_cfheader(
 auto Shared::LoadCfilter(
     const cfilter::Type type,
     const block::Hash& block,
-    alloc::Default alloc) const noexcept -> GCS
+    alloc::Default alloc,
+    alloc::Default monotonic) const noexcept -> GCS
 {
     auto handle = data_.lock_shared();
     const auto& data = *handle;
 
-    return load_cfilter(type, block, data, alloc);
+    return load_cfilter(type, block, data, alloc, monotonic);
 }
 
 auto Shared::load_cfilter(
     const cfilter::Type type,
     const block::Hash& block,
     const Data& data,
-    alloc::Default alloc) const noexcept -> GCS
+    alloc::Default alloc,
+    alloc::Default monotonic) const noexcept -> GCS
 {
-    return data.db_.get()->LoadFilter(type, block.Bytes(), alloc);
+    return data.db_.get()->LoadFilter(type, block.Bytes(), alloc, monotonic);
 }
 
 auto Shared::LoadCfilters(
     const cfilter::Type type,
     const Vector<block::Hash>& blocks,
-    alloc::Default alloc) const noexcept -> Vector<GCS>
+    alloc::Default alloc,
+    alloc::Default monotonic) const noexcept -> Vector<GCS>
 {
     auto handle = data_.lock_shared();
     const auto& data = *handle;
 
-    return load_cfilters(type, blocks, data, alloc);
+    return load_cfilters(type, blocks, data, alloc, monotonic);
 }
 
 auto Shared::load_cfilters(
     const cfilter::Type type,
     const Vector<block::Hash>& blocks,
     const Data& data,
-    alloc::Default alloc) const noexcept -> Vector<GCS>
+    alloc::Default alloc,
+    alloc::Default monotonic) const noexcept -> Vector<GCS>
 {
-    return data.db_.get()->LoadFilters(type, blocks);  // TODO allocator
+    return data.db_.get()->LoadFilters(type, blocks, monotonic);
 }
 
 auto Shared::LoadCfilterHash(const block::Hash& block, const Data& data)
@@ -592,14 +596,21 @@ auto Shared::load_cfilter_hash(
 
 auto Shared::Lock() noexcept -> GuardedData::handle { return data_.lock(); }
 
-auto Shared::ProcessBlock(const bitcoin::block::Block& block) noexcept -> bool
+auto Shared::ProcessBlock(
+    const bitcoin::block::Block& block,
+    alloc::Default monotonic) noexcept -> bool
 {
     const auto& id = block.ID();
     const auto& header = block.Header();
-    auto filters = Vector<database::Cfilter::CFilterParams>{};
-    auto headers = Vector<database::Cfilter::CFHeaderParams>{};
+    auto filters = Vector<database::Cfilter::CFilterParams>{monotonic};
+    auto headers = Vector<database::Cfilter::CFHeaderParams>{monotonic};
+    filters.clear();
+    headers.clear();
     const auto& cfilter =
-        filters.emplace_back(id, process_block(api_, default_type_, block, {}))
+        filters
+            .emplace_back(
+                id,
+                process_block(api_, default_type_, block, monotonic, monotonic))
             .second;
 
     if (false == cfilter.IsValid()) {
@@ -637,7 +648,12 @@ auto Shared::ProcessBlock(const bitcoin::block::Block& block) noexcept -> bool
 
     const auto position = block::Position{};
     const auto stored = store_cfilters(
-        default_type_, position, std::move(headers), std::move(filters), data);
+        default_type_,
+        position,
+        std::move(headers),
+        std::move(filters),
+        data,
+        monotonic);
 
     if (stored) {
 
@@ -652,22 +668,26 @@ auto Shared::ProcessBlock(const bitcoin::block::Block& block) noexcept -> bool
 auto Shared::ProcessBlock(
     const cfilter::Type filterType,
     const bitcoin::block::Block& block,
-    alloc::Default alloc) const noexcept -> GCS
+    alloc::Default alloc,
+    alloc::Default monotonic) const noexcept -> GCS
 {
-    return process_block(api_, filterType, block, alloc);
+    return process_block(api_, filterType, block, alloc, monotonic);
 }
 
 auto Shared::process_block(
     const api::Session& api,
     const cfilter::Type filterType,
     const bitcoin::block::Block& block,
-    alloc::Default alloc) noexcept -> GCS
+    alloc::Default alloc,
+    alloc::Default monotonic) noexcept -> GCS
 {
     const auto& id = block.ID();
     const auto params = blockchain::internal::GetFilterParams(filterType);
     const auto elements = [&] {
-        const auto input = block.Internal().ExtractElements(filterType);
-        auto output = Vector<ByteArray>{};
+        const auto input = block.Internal().ExtractElements(filterType, alloc);
+        auto output = Vector<ByteArray>{monotonic};
+        output.reserve(input.size());
+        output.clear();
         std::transform(
             input.begin(),
             input.end(),
@@ -691,22 +711,28 @@ auto Shared::process_block(
 auto Shared::ProcessSyncData(
     const block::Hash& prior,
     const Vector<block::Hash>& hashes,
-    const network::otdht::Data& in) noexcept -> void
+    const network::otdht::Data& in,
+    alloc::Default monotonic) noexcept -> void
 {
     auto handle = data_.lock();
     auto& data = *handle;
-    process_sync_data(prior, hashes, in, data);
+    process_sync_data(prior, hashes, in, data, monotonic);
 }
 
 auto Shared::process_sync_data(
     const block::Hash& prior,
     const Vector<block::Hash>& hashes,
     const network::otdht::Data& in,
-    Data& data) const noexcept -> void
+    Data& data,
+    alloc::Default monotonic) const noexcept -> void
 {
-    auto filters = Vector<database::Cfilter::CFilterParams>{};
-    auto headers = Vector<database::Cfilter::CFHeaderParams>{};
+    auto filters = Vector<database::Cfilter::CFilterParams>{monotonic};
+    auto headers = Vector<database::Cfilter::CFHeaderParams>{monotonic};
     const auto& blocks = in.Blocks();
+    filters.reserve(blocks.size());
+    filters.clear();
+    headers.reserve(blocks.size());
+    headers.clear();
     const auto incoming = blocks.front().Height();
     const auto finalFilter = in.LastPosition(api_);
     const auto filterType = blocks.front().FilterType();
@@ -794,7 +820,7 @@ auto Shared::process_sync_data(
                         blockHash.Bytes()),
                     syncData.FilterElements(),
                     syncData.Filter(),
-                    {}));  // TODO allocator
+                    monotonic));
 
             if (false == cfilter.IsValid()) {
                 LogError()(OT_PRETTY_CLASS())("Failed to instantiate ")(
@@ -815,7 +841,12 @@ auto Shared::process_sync_data(
             return block::Position{blocks.at(last).Height(), hashes.at(last)};
         }();
         const auto stored = store_cfilters(
-            default_type_, tip, std::move(headers), std::move(filters), data);
+            default_type_,
+            tip,
+            std::move(headers),
+            std::move(filters),
+            data,
+            monotonic);
 
         if (stored) {
             log_(print(chain_))(
@@ -1048,22 +1079,24 @@ auto Shared::store_cfheaders(
 
 auto Shared::StoreCfilters(
     Vector<database::Cfilter::CFilterParams>&& filters,
-    Data& data) noexcept -> bool
+    Data& data,
+    alloc::Default monotonic) noexcept -> bool
 {
-    return store_cfilters(default_type_, std::move(filters), data);
+    return store_cfilters(default_type_, std::move(filters), data, monotonic);
 }
 
 auto Shared::StoreCfilters(
     const cfilter::Type type,
     const block::Position& tip,
     Vector<database::Cfilter::CFHeaderParams>&& headers,
-    Vector<database::Cfilter::CFilterParams>&& filters) noexcept -> bool
+    Vector<database::Cfilter::CFilterParams>&& filters,
+    alloc::Default monotonic) noexcept -> bool
 {
     auto handle = data_.lock();
     auto& data = *handle;
 
     return store_cfilters(
-        type, tip, std::move(headers), std::move(filters), data);
+        type, tip, std::move(headers), std::move(filters), data, monotonic);
 }
 
 auto Shared::store_cfilters(
@@ -1071,18 +1104,20 @@ auto Shared::store_cfilters(
     const block::Position& tip,
     Vector<database::Cfilter::CFHeaderParams>&& headers,
     Vector<database::Cfilter::CFilterParams>&& filters,
-    Data& data) const noexcept -> bool
+    Data& data,
+    alloc::Default monotonic) const noexcept -> bool
 {
     return data.db_.get()->StoreFilters(
-        type, std::move(headers), std::move(filters), tip);
+        type, std::move(headers), std::move(filters), tip, monotonic);
 }
 
 auto Shared::store_cfilters(
     const cfilter::Type type,
     Vector<database::Cfilter::CFilterParams>&& filters,
-    Data& data) const noexcept -> bool
+    Data& data,
+    alloc::Default monotonic) const noexcept -> bool
 {
-    return data.db_.get()->StoreFilters(type, std::move(filters));
+    return data.db_.get()->StoreFilters(type, std::move(filters), monotonic);
 }
 
 auto Shared::UpdateCfilterTip(const block::Position& tip) noexcept -> void

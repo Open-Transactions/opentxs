@@ -18,7 +18,6 @@
 #include "blockchain/database/wallet/Pattern.hpp"
 #include "blockchain/database/wallet/SubchainCache.hpp"
 #include "blockchain/database/wallet/SubchainID.hpp"
-#include "blockchain/database/wallet/Types.hpp"
 #include "internal/api/network/Asio.hpp"
 #include "internal/blockchain/database/Types.hpp"
 #include "internal/blockchain/node/headeroracle/HeaderOracle.hpp"
@@ -85,7 +84,7 @@ SubchainPrivate::SubchainPrivate(
 }
 
 auto SubchainPrivate::AddElements(
-    const SubchainIndex& subchain,
+    const SubchainID& subchain,
     const ElementMap& elements) noexcept -> bool
 {
     upgrade_future_.get();
@@ -95,14 +94,14 @@ auto SubchainPrivate::AddElements(
 }
 
 auto SubchainPrivate::add_elements(
-    const Wallet::SubchainIndex& subchain,
-    const Wallet::ElementMap& elements,
+    const SubchainID& subchain,
+    const ElementMap& elements,
     SubchainCache& cache,
     storage::lmdb::Transaction& tx) noexcept -> bool
 {
     try {
         auto output{false};
-        auto newIndices = UnallocatedVector<PatternID>{};
+        auto newIndices = UnallocatedVector<ElementID>{};
         auto highest = Bip32Index{};
 
         for (const auto& [index, patterns] : elements) {
@@ -150,8 +149,8 @@ auto SubchainPrivate::add_elements(
 }
 
 auto SubchainPrivate::GetID(
-    const NodeID& subaccount,
-    const crypto::Subchain subchain) const noexcept -> SubchainIndex
+    const SubaccountID& subaccount,
+    const crypto::Subchain subchain) const noexcept -> SubchainID
 {
     upgrade_future_.get();
     auto tx = lmdb_.TransactionRW();
@@ -160,9 +159,9 @@ auto SubchainPrivate::GetID(
 }
 
 auto SubchainPrivate::GetID(
-    const NodeID& subaccount,
+    const SubaccountID& subaccount,
     const crypto::Subchain subchain,
-    storage::lmdb::Transaction& tx) const noexcept -> SubchainIndex
+    storage::lmdb::Transaction& tx) const noexcept -> SubchainID
 {
     upgrade_future_.get();
 
@@ -170,32 +169,32 @@ auto SubchainPrivate::GetID(
 }
 
 auto SubchainPrivate::get_id(
-    const Wallet::NodeID& subaccount,
+    const SubaccountID& subaccount,
     const crypto::Subchain subchain,
     const SubchainCache& cache,
-    storage::lmdb::Transaction& tx) const noexcept -> Wallet::SubchainIndex
+    storage::lmdb::Transaction& tx) const noexcept -> SubchainID
 {
     return cache.GetIndex(
         subaccount, subchain, default_filter_type_, current_version_, tx);
 }
 
-auto SubchainPrivate::GetLastIndexed(
-    const SubchainIndex& subchain) const noexcept -> std::optional<Bip32Index>
+auto SubchainPrivate::GetLastIndexed(const SubchainID& subchain) const noexcept
+    -> std::optional<Bip32Index>
 {
     upgrade_future_.get();
 
     return cache_.lock_shared()->GetLastIndexed(subchain);
 }
 
-auto SubchainPrivate::GetLastScanned(
-    const SubchainIndex& subchain) const noexcept -> block::Position
+auto SubchainPrivate::GetLastScanned(const SubchainID& subchain) const noexcept
+    -> block::Position
 {
     upgrade_future_.get();
 
     return cache_.lock_shared()->GetLastScanned(subchain);
 }
 
-auto SubchainPrivate::GetPatterns(const SubchainIndex& id, alloc::Default alloc)
+auto SubchainPrivate::GetPatterns(const SubchainID& id, alloc::Default alloc)
     const noexcept -> Patterns
 {
     upgrade_future_.get();
@@ -211,18 +210,18 @@ auto SubchainPrivate::GetPatterns(const SubchainIndex& id, alloc::Default alloc)
 }
 
 auto SubchainPrivate::get_patterns(
-    const SubchainIndex& id,
+    const SubchainID& id,
     const SubchainCache& cache,
-    alloc::Default alloc) const noexcept(false) -> Wallet::Patterns
+    alloc::Default alloc) const noexcept(false) -> Patterns
 {
-    auto output = Wallet::Patterns{alloc};
+    auto output = Patterns{alloc};
     const auto& key = cache.DecodeIndex(id);
     const auto& subaccount = key.SubaccountID(api_);
     const auto subchain = key.Type();
 
     for (const auto& id : cache.GetPatternIndex(id)) {
         for (const auto& data : cache.GetPattern(id)) {
-            output.emplace_back(Parent::Pattern{
+            output.emplace_back(Pattern{
                 {data.Index(), {subchain, subaccount}},
                 space(data.Data(), alloc)});
         }
@@ -232,8 +231,8 @@ auto SubchainPrivate::get_patterns(
 }
 
 auto SubchainPrivate::pattern_id(
-    const SubchainIndex& subchain,
-    const Bip32Index index) const noexcept -> PatternID
+    const SubchainID& subchain,
+    const Bip32Index index) const noexcept -> ElementID
 {
 
     auto preimage = api_.Factory().Data();
@@ -246,7 +245,7 @@ auto SubchainPrivate::pattern_id(
 auto SubchainPrivate::Reorg(
     const node::internal::HeaderOraclePrivate& data,
     const node::HeaderOracle& headers,
-    const SubchainIndex& subchain,
+    const SubchainID& subchain,
     const block::Height lastGoodHeight,
     storage::lmdb::Transaction& tx) noexcept(false) -> bool
 {
@@ -258,7 +257,7 @@ auto SubchainPrivate::Reorg(
 auto SubchainPrivate::reorg(
     const node::internal::HeaderOraclePrivate& data,
     const node::HeaderOracle& headers,
-    const Wallet::SubchainIndex& subchain,
+    const SubchainID& subchain,
     const block::Height lastGoodHeight,
     SubchainCache& cache,
     storage::lmdb::Transaction& tx) noexcept(false) -> bool
@@ -293,7 +292,7 @@ auto SubchainPrivate::reorg(
 }
 
 auto SubchainPrivate::SetLastScanned(
-    const SubchainIndex& subchain,
+    const SubchainID& subchain,
     const block::Position& position) noexcept -> bool
 {
     upgrade_future_.get();
@@ -303,7 +302,7 @@ auto SubchainPrivate::SetLastScanned(
 }
 
 auto SubchainPrivate::set_last_scanned(
-    const Wallet::SubchainIndex& subchain,
+    const SubchainID& subchain,
     const block::Position& position,
     SubchainCache& cache,
     storage::lmdb::Transaction& tx) noexcept -> bool
@@ -319,10 +318,10 @@ auto SubchainPrivate::set_last_scanned(
 }
 
 auto SubchainPrivate::subchain_index(
-    const NodeID& subaccount,
+    const SubaccountID& subaccount,
     const crypto::Subchain subchain,
     const cfilter::Type type,
-    const VersionNumber version) const noexcept -> SubchainIndex
+    const VersionNumber version) const noexcept -> SubchainID
 {
     auto preimage = api_.Factory().Data();
     preimage.Assign(subaccount);

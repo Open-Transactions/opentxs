@@ -140,12 +140,13 @@ private:
     Outstanding running_;
 
     auto background() noexcept -> void;
-    auto check_blocks() noexcept -> void;
+    auto check_blocks(allocator_type monotonic) noexcept -> void;
     auto do_shutdown() noexcept -> void;
-    auto do_startup() noexcept -> bool;
+    auto do_startup(allocator_type monotonic) noexcept -> bool;
     auto drain_queue() noexcept -> std::size_t;
     auto fill_queue() noexcept -> void;
-    auto pipeline(const Work work, Message&& msg) noexcept -> void;
+    auto pipeline(const Work work, Message&& msg, allocator_type) noexcept
+        -> void;
     auto process_block(Message&& in) noexcept -> void;
     auto process_block(block::Position&& position) noexcept -> void;
     auto process_block_ready(Message&& in) noexcept -> void;
@@ -154,6 +155,6 @@ private:
     auto process_reorg(block::Position&& parent) noexcept -> void;
     auto process_report(Message&& in) noexcept -> void;
     auto update_best_position(block::Position&& position) noexcept -> void;
-    auto work() noexcept -> bool;
+    auto work(allocator_type monotonic) noexcept -> bool;
 };
 }  // namespace opentxs::blockchain::node::filteroracle

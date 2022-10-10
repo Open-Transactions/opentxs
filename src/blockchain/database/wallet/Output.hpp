@@ -16,6 +16,8 @@
 #include <mutex>
 #include <optional>
 
+#include "internal/blockchain/block/Types.hpp"
+#include "internal/blockchain/database/Types.hpp"
 #include "internal/blockchain/database/Wallet.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/Outpoint.hpp"
@@ -90,20 +92,12 @@ class Transaction;
 
 namespace opentxs::blockchain::database::wallet
 {
-using AccountID = identifier::Generic;
-using SubchainID = identifier::Generic;
-using Parent = database::Wallet;
-using NodeID = Parent::NodeID;
-using BatchedMatches = Parent::BatchedMatches;
-using UTXO = Parent::UTXO;
-using TXOs = Parent::TXOs;
-
 class Output
 {
 public:
     auto GetBalance() const noexcept -> Balance;
     auto GetBalance(const identifier::Nym& owner) const noexcept -> Balance;
-    auto GetBalance(const identifier::Nym& owner, const NodeID& node)
+    auto GetBalance(const identifier::Nym& owner, const SubaccountID& node)
         const noexcept -> Balance;
     auto GetBalance(const crypto::Key& key) const noexcept -> Balance;
     auto GetOutputs(node::TxoState type, alloc::Default alloc) const noexcept
@@ -130,13 +124,14 @@ public:
     auto GetUnconfirmedTransactions() const noexcept
         -> UnallocatedSet<block::pTxid>;
     auto GetUnspentOutputs(alloc::Default alloc) const noexcept -> Vector<UTXO>;
-    auto GetUnspentOutputs(const NodeID& balanceNode, alloc::Default alloc)
-        const noexcept -> Vector<UTXO>;
+    auto GetUnspentOutputs(
+        const SubaccountID& balanceNode,
+        alloc::Default alloc) const noexcept -> Vector<UTXO>;
     auto GetWalletHeight() const noexcept -> block::Height;
     auto PublishBalance() const noexcept -> void;
 
     auto AddConfirmedTransactions(
-        const NodeID& account,
+        const SubaccountID& account,
         const SubchainID& index,
         BatchedMatches&& transactions,
         TXOs& txoCreated,

@@ -95,14 +95,19 @@ private:
     Timer job_timer_;
 
     auto do_shutdown() noexcept -> void;
-    auto do_startup() noexcept -> bool;
-    auto pipeline(const Work work, Message&& msg) noexcept -> void;
+    auto do_startup(allocator_type monotonic) noexcept -> bool;
+    auto pipeline(const Work work, Message&& msg, allocator_type) noexcept
+        -> void;
     auto process_job_finished(Message&& in) noexcept -> void;
     auto process_report(Message&& msg) noexcept -> void;
-    auto process_submit_submit_block_hash(Message&& in) noexcept -> void;
+    auto process_submit_submit_block_hash(
+        Message&& in,
+        allocator_type monotonic) noexcept -> void;
     auto process_submit_block_header(Message&& in) noexcept -> void;
-    auto process_update_remote_height(Message&& in) noexcept -> void;
+    auto process_update_remote_height(
+        Message&& in,
+        allocator_type monotonic) noexcept -> void;
     auto reset_job_timer() noexcept -> void;
-    auto work() noexcept -> bool;
+    auto work(allocator_type monotonic) noexcept -> bool;
 };
 }  // namespace opentxs::blockchain::node::internal

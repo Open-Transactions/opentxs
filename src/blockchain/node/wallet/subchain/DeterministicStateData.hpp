@@ -24,6 +24,7 @@
 #include "internal/blockchain/Blockchain.hpp"
 #include "internal/blockchain/block/Block.hpp"
 #include "internal/blockchain/block/Types.hpp"
+#include "internal/blockchain/database/Types.hpp"
 #include "internal/blockchain/database/Wallet.hpp"
 #include "internal/blockchain/node/wallet/subchain/statemachine/Index.hpp"
 #include "internal/network/zeromq/Types.hpp"
@@ -148,16 +149,15 @@ public:
     ~DeterministicStateData() final;
 
 private:
-    using CacheData = std::pair<Time, database::Wallet::BatchedMatches>;
+    using CacheData = std::pair<Time, database::BatchedMatches>;
     using Cache = libguarded::ordered_guarded<CacheData, std::shared_mutex>;
 
     mutable Cache cache_;
 
     auto CheckCache(const std::size_t outstanding, FinishedCallback cb)
         const noexcept -> void final;
-    auto flush_cache(
-        database::Wallet::BatchedMatches& matches,
-        FinishedCallback cb) const noexcept -> void;
+    auto flush_cache(database::BatchedMatches& matches, FinishedCallback cb)
+        const noexcept -> void;
 
     auto get_index(const boost::shared_ptr<const SubchainStateData>& me)
         const noexcept -> void final;
@@ -173,6 +173,6 @@ private:
     auto process(
         const block::Match match,
         const bitcoin::block::Transaction& tx,
-        database::Wallet::MatchedTransaction& output) const noexcept -> void;
+        database::MatchedTransaction& output) const noexcept -> void;
 };
 }  // namespace opentxs::blockchain::node::wallet

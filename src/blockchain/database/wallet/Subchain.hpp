@@ -10,12 +10,13 @@
 #include <optional>
 #include <utility>
 
-#include "blockchain/database/wallet/Types.hpp"
+#include "internal/blockchain/block/Types.hpp"
 #include "internal/blockchain/database/Types.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/bitcoin/cfilter/FilterType.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
+#include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Bytes.hpp"
@@ -72,29 +73,29 @@ class SubchainData
 {
 public:
     auto GetSubchainID(
-        const NodeID& subaccount,
-        const crypto::Subchain subchain) const noexcept -> SubchainIndex;
+        const SubaccountID& subaccount,
+        const crypto::Subchain subchain) const noexcept -> SubchainID;
     auto GetSubchainID(
-        const NodeID& subaccount,
+        const SubaccountID& subaccount,
         const crypto::Subchain subchain,
-        storage::lmdb::Transaction& tx) const noexcept -> SubchainIndex;
-    auto GetPatterns(const SubchainIndex& subchain, alloc::Default alloc)
+        storage::lmdb::Transaction& tx) const noexcept -> SubchainID;
+    auto GetPatterns(const SubchainID& subchain, alloc::Default alloc)
         const noexcept -> Patterns;
     auto Reorg(
         const node::internal::HeaderOraclePrivate& data,
         storage::lmdb::Transaction& tx,
         const node::HeaderOracle& headers,
-        const SubchainIndex& subchain,
+        const SubchainID& subchain,
         const block::Height lastGoodHeight) const noexcept(false) -> bool;
     auto SubchainAddElements(
-        const SubchainIndex& subchain,
+        const SubchainID& subchain,
         const ElementMap& elements) const noexcept -> bool;
-    auto SubchainLastIndexed(const SubchainIndex& subchain) const noexcept
+    auto SubchainLastIndexed(const SubchainID& subchain) const noexcept
         -> std::optional<Bip32Index>;
-    auto SubchainLastScanned(const SubchainIndex& subchain) const noexcept
+    auto SubchainLastScanned(const SubchainID& subchain) const noexcept
         -> block::Position;
     auto SubchainSetLastScanned(
-        const SubchainIndex& subchain,
+        const SubchainID& subchain,
         const block::Position& position) const noexcept -> bool;
 
     SubchainData(

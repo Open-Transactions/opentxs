@@ -11,6 +11,8 @@
 #include <tuple>
 #include <utility>
 
+#include "internal/blockchain/block/Types.hpp"
+#include "internal/blockchain/database/Types.hpp"
 #include "internal/blockchain/database/Wallet.hpp"
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/util/Allocated.hpp"
@@ -37,17 +39,13 @@ namespace opentxs::blockchain::node::wallet
 class ElementCache final : public Allocated
 {
 public:
-    using Map = database::Wallet::ElementMap;
-    using Patterns = database::Wallet::Patterns;
-    using TXOs = database::Wallet::TXOs;
-
     struct Elements final : public Allocated {
         Vector<std::pair<Bip32Index, std::array<std::byte, 20>>> elements_20_;
         Vector<std::pair<Bip32Index, std::array<std::byte, 32>>> elements_32_;
         Vector<std::pair<Bip32Index, std::array<std::byte, 33>>> elements_33_;
         Vector<std::pair<Bip32Index, std::array<std::byte, 64>>> elements_64_;
         Vector<std::pair<Bip32Index, std::array<std::byte, 65>>> elements_65_;
-        TXOs txos_;
+        database::TXOs txos_;
 
         auto get_allocator() const noexcept -> allocator_type final;
         auto size() const noexcept -> std::size_t;
@@ -65,28 +63,29 @@ public:
     auto GetElements() const noexcept -> const Elements&;
     auto get_allocator() const noexcept -> allocator_type final;
 
-    auto Add(Map&& data) noexcept -> void;
-    auto Add(TXOs&& created, TXOs&& consumed) noexcept -> void;
+    auto Add(database::ElementMap&& data) noexcept -> void;
+    auto Add(database::TXOs&& created, database::TXOs&& consumed) noexcept
+        -> void;
 
     ElementCache(
-        Patterns&& data,
-        Vector<database::Wallet::UTXO>&& txos,
+        block::Patterns&& data,
+        Vector<database::UTXO>&& txos,
         allocator_type alloc) noexcept;
 
     ~ElementCache() final;
 
 private:
     const Log& log_;
-    Map data_;
+    database::ElementMap data_;
     Elements elements_;
 
-    static auto convert(Patterns&& in, allocator_type alloc = {}) noexcept
-        -> Map;
+    static auto convert(
+        block::Patterns&& in,
+        allocator_type alloc = {}) noexcept -> database::ElementMap;
 
-    auto index(const Map::value_type& data) noexcept -> void;
-    auto index(
-        const Bip32Index index,
-        const Vector<std::byte>& element) noexcept -> void;
+    auto index(const database::ElementMap::value_type& data) noexcept -> void;
+    auto index(const Bip32Index index, const block::Element& element) noexcept
+        -> void;
 };
 
 class MatchCache final : public Allocated

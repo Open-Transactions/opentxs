@@ -7,7 +7,6 @@
 #include <opentxs/opentxs.hpp>
 #include <algorithm>
 #include <atomic>
-#include <cstddef>
 #include <future>
 #include <memory>
 #include <optional>
@@ -15,6 +14,7 @@
 #include <utility>
 
 #include "internal/blockchain/block/Block.hpp"
+#include "internal/blockchain/block/Types.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "ottest/data/crypto/PaymentCodeV3.hpp"
 #include "ottest/fixtures/blockchain/Common.hpp"
@@ -934,7 +934,7 @@ TEST_F(Regtest_payment_code, second_block)
 
     const auto& blockchain = handle.get();
     const auto blockHash = blockchain.HeaderOracle().BestHash(height_);
-    auto expected = ot::Vector<ot::Vector<std::byte>>{};
+    auto expected = ot::blockchain::block::Elements{};
 
     ASSERT_FALSE(blockHash.IsNull());
 
@@ -1010,7 +1010,7 @@ TEST_F(Regtest_payment_code, second_block)
     }
 
     {
-        auto elements = block.Internal().ExtractElements(FilterType::ES);
+        auto elements = block.Internal().ExtractElements(FilterType::ES, {});
         std::sort(elements.begin(), elements.end());
         std::sort(expected.begin(), expected.end());
 
@@ -1020,12 +1020,12 @@ TEST_F(Regtest_payment_code, second_block)
     }
 
     const auto cfilter =
-        blockchain.FilterOracle().LoadFilter(FilterType::ES, blockHash, {});
+        blockchain.FilterOracle().LoadFilter(FilterType::ES, blockHash, {}, {});
 
     ASSERT_TRUE(cfilter.IsValid());
 
     for (const auto& element : expected) {
-        EXPECT_TRUE(cfilter.Test(ot::reader(element)));
+        EXPECT_TRUE(cfilter.Test(ot::reader(element), {}));
     }
 }
 

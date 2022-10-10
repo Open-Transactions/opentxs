@@ -355,7 +355,8 @@ auto Peer::get_local_services(
 
 auto Peer::not_implemented(
     std::unique_ptr<HeaderType> pHeader,
-    zeromq::Frame&&) noexcept(false) -> void
+    zeromq::Frame&&,
+    allocator_type) noexcept(false) -> void
 {
     OT_ASSERT(pHeader);
 
@@ -374,7 +375,9 @@ auto Peer::process_broadcasttx(Message&& msg) noexcept -> void
     transmit_protocol_tx(body.at(1).Bytes());
 }
 
-auto Peer::process_protocol(Message&& message) noexcept -> void
+auto Peer::process_protocol(
+    Message&& message,
+    allocator_type monotonic) noexcept -> void
 {
     auto body = message.Body();
 
@@ -459,7 +462,8 @@ auto Peer::process_protocol(Message&& message) noexcept -> void
         const auto& handler = commands().at(command);
 
         try {
-            (this->*handler)(std::move(pHeader), std::move(payloadBytes));
+            (this->*handler)(
+                std::move(pHeader), std::move(payloadBytes), monotonic);
         } catch (const std::exception& e) {
             log_(OT_PRETTY_CLASS())(name_)(": ")(e.what()).Flush();
 
@@ -472,7 +476,8 @@ auto Peer::process_protocol(Message&& message) noexcept -> void
 
 auto Peer::process_protocol_addr(
     std::unique_ptr<HeaderType> header,
-    zeromq::Frame&& payload) noexcept(false) -> void
+    zeromq::Frame&& payload,
+    allocator_type) noexcept(false) -> void
 {
     using Type = opentxs::blockchain::p2p::bitcoin::message::internal::Addr;
     const auto pMessage = instantiate<Type>(
@@ -495,7 +500,8 @@ auto Peer::process_protocol_addr(
 
 auto Peer::process_protocol_block(
     std::unique_ptr<HeaderType> header,
-    zeromq::Frame&& payload) noexcept(false) -> void
+    zeromq::Frame&& payload,
+    allocator_type) noexcept(false) -> void
 {
     update_block_job(payload.Bytes());
     to_block_cache_.SendDeferred(
@@ -513,7 +519,8 @@ auto Peer::process_protocol_block(
 
 auto Peer::process_protocol_blocktxn(
     std::unique_ptr<HeaderType> header,
-    zeromq::Frame&& payload) noexcept(false) -> void
+    zeromq::Frame&& payload,
+    allocator_type) noexcept(false) -> void
 {
     using Type = opentxs::blockchain::p2p::bitcoin::message::internal::Blocktxn;
     const auto pMessage = instantiate<Type>(
@@ -524,7 +531,8 @@ auto Peer::process_protocol_blocktxn(
 
 auto Peer::process_protocol_cfcheckpt(
     std::unique_ptr<HeaderType> header,
-    zeromq::Frame&& payload) noexcept(false) -> void
+    zeromq::Frame&& payload,
+    allocator_type) noexcept(false) -> void
 {
     using Type =
         opentxs::blockchain::p2p::bitcoin::message::internal::Cfcheckpt;
@@ -536,7 +544,8 @@ auto Peer::process_protocol_cfcheckpt(
 
 auto Peer::process_protocol_cfheaders(
     std::unique_ptr<HeaderType> header,
-    zeromq::Frame&& payload) noexcept(false) -> void
+    zeromq::Frame&& payload,
+    allocator_type) noexcept(false) -> void
 {
     OT_ASSERT(header);
 
@@ -668,7 +677,8 @@ auto Peer::process_protocol_cfheaders_run(
 
 auto Peer::process_protocol_cfilter(
     std::unique_ptr<HeaderType> header,
-    zeromq::Frame&& payload) noexcept(false) -> void
+    zeromq::Frame&& payload,
+    allocator_type) noexcept(false) -> void
 {
     using Type = opentxs::blockchain::p2p::bitcoin::message::internal::Cfilter;
     const auto pMessage = instantiate<Type>(
@@ -707,7 +717,8 @@ auto Peer::process_protocol_cfilter(
 
 auto Peer::process_protocol_cmpctblock(
     std::unique_ptr<HeaderType> header,
-    zeromq::Frame&& payload) noexcept(false) -> void
+    zeromq::Frame&& payload,
+    allocator_type) noexcept(false) -> void
 {
     using Type = opentxs::blockchain::p2p::bitcoin::message::Cmpctblock;
     const auto pMessage = instantiate<Type>(
@@ -718,7 +729,8 @@ auto Peer::process_protocol_cmpctblock(
 
 auto Peer::process_protocol_feefilter(
     std::unique_ptr<HeaderType> header,
-    zeromq::Frame&& payload) noexcept(false) -> void
+    zeromq::Frame&& payload,
+    allocator_type) noexcept(false) -> void
 {
     using Type = opentxs::blockchain::p2p::bitcoin::message::Feefilter;
     const auto pMessage = instantiate<Type>(
@@ -729,7 +741,8 @@ auto Peer::process_protocol_feefilter(
 
 auto Peer::process_protocol_filteradd(
     std::unique_ptr<HeaderType> header,
-    zeromq::Frame&& payload) noexcept(false) -> void
+    zeromq::Frame&& payload,
+    allocator_type) noexcept(false) -> void
 {
     using Type =
         opentxs::blockchain::p2p::bitcoin::message::internal::Filteradd;
@@ -741,7 +754,8 @@ auto Peer::process_protocol_filteradd(
 
 auto Peer::process_protocol_filterclear(
     std::unique_ptr<HeaderType> header,
-    zeromq::Frame&& payload) noexcept(false) -> void
+    zeromq::Frame&& payload,
+    allocator_type) noexcept(false) -> void
 {
     using Type =
         opentxs::blockchain::p2p::bitcoin::message::internal::Filterclear;
@@ -752,7 +766,8 @@ auto Peer::process_protocol_filterclear(
 
 auto Peer::process_protocol_filterload(
     std::unique_ptr<HeaderType> header,
-    zeromq::Frame&& payload) noexcept(false) -> void
+    zeromq::Frame&& payload,
+    allocator_type) noexcept(false) -> void
 {
     using Type =
         opentxs::blockchain::p2p::bitcoin::message::internal::Filterload;
@@ -764,7 +779,8 @@ auto Peer::process_protocol_filterload(
 
 auto Peer::process_protocol_getaddr(
     std::unique_ptr<HeaderType> header,
-    zeromq::Frame&& payload) noexcept(false) -> void
+    zeromq::Frame&& payload,
+    allocator_type) noexcept(false) -> void
 {
     using Type = opentxs::blockchain::p2p::bitcoin::message::internal::Getaddr;
     const auto pMessage = instantiate<Type>(std::move(header));
@@ -774,7 +790,8 @@ auto Peer::process_protocol_getaddr(
 
 auto Peer::process_protocol_getblocks(
     std::unique_ptr<HeaderType> header,
-    zeromq::Frame&& payload) noexcept(false) -> void
+    zeromq::Frame&& payload,
+    allocator_type) noexcept(false) -> void
 {
     using Type = opentxs::blockchain::p2p::bitcoin::message::Getblocks;
     const auto pMessage = instantiate<Type>(
@@ -785,7 +802,8 @@ auto Peer::process_protocol_getblocks(
 
 auto Peer::process_protocol_getblocktxn(
     std::unique_ptr<HeaderType> header,
-    zeromq::Frame&& payload) noexcept(false) -> void
+    zeromq::Frame&& payload,
+    allocator_type) noexcept(false) -> void
 {
     using Type = opentxs::blockchain::p2p::bitcoin::message::Getblocktxn;
     const auto pMessage = instantiate<Type>(
@@ -796,7 +814,8 @@ auto Peer::process_protocol_getblocktxn(
 
 auto Peer::process_protocol_getcfcheckpt(
     std::unique_ptr<HeaderType> header,
-    zeromq::Frame&& payload) noexcept(false) -> void
+    zeromq::Frame&& payload,
+    allocator_type) noexcept(false) -> void
 {
     using Type =
         opentxs::blockchain::p2p::bitcoin::message::internal::Getcfcheckpt;
@@ -808,7 +827,8 @@ auto Peer::process_protocol_getcfcheckpt(
 
 auto Peer::process_protocol_getcfheaders(
     std::unique_ptr<HeaderType> header,
-    zeromq::Frame&& payload) noexcept(false) -> void
+    zeromq::Frame&& payload,
+    allocator_type monotonic) noexcept(false) -> void
 {
     using Type =
         opentxs::blockchain::p2p::bitcoin::message::internal::Getcfheaders;
@@ -839,8 +859,8 @@ auto Peer::process_protocol_getcfheaders(
 
     for (auto i{start}; i < blocks.size(); ++i) {
         const auto& blockHash = blocks.at(i);
-        const auto cfilter =
-            filter_oracle_.LoadFilter(filterType, blockHash, get_allocator());
+        const auto cfilter = filter_oracle_.LoadFilter(
+            filterType, blockHash, get_allocator(), monotonic);
 
         if (false == cfilter.IsValid()) { break; }
 
@@ -855,7 +875,8 @@ auto Peer::process_protocol_getcfheaders(
 
 auto Peer::process_protocol_getcfilters(
     std::unique_ptr<HeaderType> header,
-    zeromq::Frame&& payload) noexcept(false) -> void
+    zeromq::Frame&& payload,
+    allocator_type monotonic) noexcept(false) -> void
 {
     using Type =
         opentxs::blockchain::p2p::bitcoin::message::internal::Getcfilters;
@@ -929,7 +950,7 @@ auto Peer::process_protocol_getcfilters(
                 .asHex(stopHeader.Hash())
                 .Flush();
             const auto& cfilter = out.emplace_back(
-                filters.LoadFilter(type, hash, out.get_allocator()));
+                filters.LoadFilter(type, hash, out.get_allocator(), monotonic));
 
             if (false == cfilter.IsValid()) { break; }
         }
@@ -957,7 +978,8 @@ auto Peer::process_protocol_getcfilters(
 
 auto Peer::process_protocol_getdata(
     std::unique_ptr<HeaderType> header,
-    zeromq::Frame&& payload) noexcept(false) -> void
+    zeromq::Frame&& payload,
+    allocator_type) noexcept(false) -> void
 {
     using Type = opentxs::blockchain::p2p::bitcoin::message::internal::Getdata;
     const auto pMessage = instantiate<Type>(
@@ -1026,7 +1048,8 @@ auto Peer::process_protocol_getdata(
 
 auto Peer::process_protocol_getheaders(
     std::unique_ptr<HeaderType> header,
-    zeromq::Frame&& payload) noexcept(false) -> void
+    zeromq::Frame&& payload,
+    allocator_type) noexcept(false) -> void
 {
     using Type =
         opentxs::blockchain::p2p::bitcoin::message::internal::Getheaders;
@@ -1054,7 +1077,8 @@ auto Peer::process_protocol_getheaders(
 
 auto Peer::process_protocol_headers(
     std::unique_ptr<HeaderType> header,
-    zeromq::Frame&& payload) noexcept(false) -> void
+    zeromq::Frame&& payload,
+    allocator_type) noexcept(false) -> void
 {
     using Type = opentxs::blockchain::p2p::bitcoin::message::internal::Headers;
     auto pMessage = instantiate<Type>(
@@ -1163,7 +1187,8 @@ auto Peer::process_protocol_headers_run(
 
 auto Peer::process_protocol_inv(
     std::unique_ptr<HeaderType> header,
-    zeromq::Frame&& payload) noexcept(false) -> void
+    zeromq::Frame&& payload,
+    allocator_type) noexcept(false) -> void
 {
     using Type = opentxs::blockchain::p2p::bitcoin::message::internal::Inv;
     const auto pMessage = instantiate<Type>(
@@ -1242,7 +1267,8 @@ auto Peer::process_protocol_inv(
 
 auto Peer::process_protocol_mempool(
     std::unique_ptr<HeaderType> header,
-    zeromq::Frame&& payload) noexcept(false) -> void
+    zeromq::Frame&& payload,
+    allocator_type) noexcept(false) -> void
 {
     using Type = opentxs::blockchain::p2p::bitcoin::message::internal::Mempool;
     const auto pMessage = instantiate<Type>(std::move(header));
@@ -1252,7 +1278,8 @@ auto Peer::process_protocol_mempool(
 
 auto Peer::process_protocol_merkleblock(
     std::unique_ptr<HeaderType> header,
-    zeromq::Frame&& payload) noexcept(false) -> void
+    zeromq::Frame&& payload,
+    allocator_type) noexcept(false) -> void
 {
     using Type = opentxs::blockchain::p2p::bitcoin::message::Merkleblock;
     const auto pMessage = instantiate<Type>(
@@ -1263,7 +1290,8 @@ auto Peer::process_protocol_merkleblock(
 
 auto Peer::process_protocol_notfound(
     std::unique_ptr<HeaderType> header,
-    zeromq::Frame&& payload) noexcept(false) -> void
+    zeromq::Frame&& payload,
+    allocator_type) noexcept(false) -> void
 {
     using Type = opentxs::blockchain::p2p::bitcoin::message::internal::Notfound;
     const auto pMessage = instantiate<Type>(
@@ -1274,7 +1302,8 @@ auto Peer::process_protocol_notfound(
 
 auto Peer::process_protocol_ping(
     std::unique_ptr<HeaderType> header,
-    zeromq::Frame&& payload) noexcept(false) -> void
+    zeromq::Frame&& payload,
+    allocator_type) noexcept(false) -> void
 {
     using Type = opentxs::blockchain::p2p::bitcoin::message::internal::Ping;
     const auto pMessage = instantiate<Type>(
@@ -1291,7 +1320,8 @@ auto Peer::process_protocol_ping(
 
 auto Peer::process_protocol_pong(
     std::unique_ptr<HeaderType> header,
-    zeromq::Frame&& payload) noexcept(false) -> void
+    zeromq::Frame&& payload,
+    allocator_type) noexcept(false) -> void
 {
     using Type = opentxs::blockchain::p2p::bitcoin::message::internal::Pong;
     const auto pMessage = instantiate<Type>(
@@ -1304,7 +1334,8 @@ auto Peer::process_protocol_pong(
 
 auto Peer::process_protocol_reject(
     std::unique_ptr<HeaderType> header,
-    zeromq::Frame&& payload) noexcept(false) -> void
+    zeromq::Frame&& payload,
+    allocator_type) noexcept(false) -> void
 {
     using Type = opentxs::blockchain::p2p::bitcoin::message::Reject;
     const auto pMessage = instantiate<Type>(
@@ -1315,7 +1346,8 @@ auto Peer::process_protocol_reject(
 
 auto Peer::process_protocol_sendcmpct(
     std::unique_ptr<HeaderType> header,
-    zeromq::Frame&& payload) noexcept(false) -> void
+    zeromq::Frame&& payload,
+    allocator_type) noexcept(false) -> void
 {
     using Type = opentxs::blockchain::p2p::bitcoin::message::Sendcmpct;
     const auto pMessage = instantiate<Type>(
@@ -1326,7 +1358,8 @@ auto Peer::process_protocol_sendcmpct(
 
 auto Peer::process_protocol_sendheaders(
     std::unique_ptr<HeaderType> header,
-    zeromq::Frame&& payload) noexcept(false) -> void
+    zeromq::Frame&& payload,
+    allocator_type) noexcept(false) -> void
 {
     using Type =
         opentxs::blockchain::p2p::bitcoin::message::internal::Sendheaders;
@@ -1337,7 +1370,8 @@ auto Peer::process_protocol_sendheaders(
 
 auto Peer::process_protocol_tx(
     std::unique_ptr<HeaderType> header,
-    zeromq::Frame&& payload) noexcept(false) -> void
+    zeromq::Frame&& payload,
+    allocator_type) noexcept(false) -> void
 {
     using Type = opentxs::blockchain::p2p::bitcoin::message::internal::Tx;
     const auto pMessage = instantiate<Type>(
@@ -1352,7 +1386,8 @@ auto Peer::process_protocol_tx(
 
 auto Peer::process_protocol_verack(
     std::unique_ptr<HeaderType> header,
-    zeromq::Frame&& payload) noexcept(false) -> void
+    zeromq::Frame&& payload,
+    allocator_type) noexcept(false) -> void
 {
     if (const auto state = this->state(); State::handshake != state) {
         auto error = CString{get_allocator()};
@@ -1373,7 +1408,8 @@ auto Peer::process_protocol_verack(
 
 auto Peer::process_protocol_version(
     std::unique_ptr<HeaderType> header,
-    zeromq::Frame&& payload) noexcept(false) -> void
+    zeromq::Frame&& payload,
+    allocator_type) noexcept(false) -> void
 {
     if (const auto state = this->state(); State::handshake != state) {
         auto error = CString{get_allocator()};

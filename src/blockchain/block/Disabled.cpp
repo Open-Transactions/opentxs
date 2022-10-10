@@ -25,17 +25,19 @@ public:
         return *blank;
     }
     auto CalculateSize() const noexcept -> std::size_t final { return {}; }
-    auto ExtractElements(const cfilter::Type) const noexcept
-        -> Vector<Vector<std::byte>> final
+    auto ExtractElements(const cfilter::Type, alloc::Default) const noexcept
+        -> Elements final
     {
         return {};
     }
     auto FindMatches(
         const api::Session&,
         const cfilter::Type,
-        const blockchain::block::Patterns&,
-        const blockchain::block::Patterns&,
-        const Log&) const noexcept -> blockchain::block::Matches final
+        const Patterns&,
+        const Patterns&,
+        const Log&,
+        alloc::Default,
+        alloc::Default) const noexcept -> Matches final
     {
         return {};
     }

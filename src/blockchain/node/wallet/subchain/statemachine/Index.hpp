@@ -12,6 +12,7 @@
 #include <optional>
 
 #include "blockchain/node/wallet/subchain/statemachine/Job.hpp"
+#include "internal/blockchain/database/Types.hpp"
 #include "internal/blockchain/database/Wallet.hpp"
 #include "internal/blockchain/node/wallet/Types.hpp"
 #include "internal/network/zeromq/Types.hpp"
@@ -70,7 +71,7 @@ public:
     ~Imp() override = default;
 
 protected:
-    auto done(database::Wallet::ElementMap&& elements) noexcept -> void;
+    auto done(database::ElementMap&& elements) noexcept -> void;
 
 private:
     network::zeromq::socket::Raw& to_rescan_;
@@ -80,16 +81,21 @@ private:
     virtual auto need_index(const std::optional<Bip32Index>& current)
         const noexcept -> std::optional<Bip32Index> = 0;
 
-    auto do_process_update(Message&& msg) noexcept -> void final;
-    auto do_startup_internal() noexcept -> void final;
+    auto do_process_update(Message&& msg, allocator_type monotonic) noexcept
+        -> void final;
+    auto do_startup_internal(allocator_type monotonic) noexcept -> void final;
     auto forward_to_next(Message&& msg) noexcept -> void final;
     virtual auto process(
         const std::optional<Bip32Index>& current,
-        Bip32Index target) noexcept -> void = 0;
+        Bip32Index target,
+        allocator_type monotonic) noexcept -> void = 0;
     auto process_do_rescan(Message&& in) noexcept -> void final;
-    auto process_filter(Message&& in, block::Position&& tip) noexcept
+    auto process_filter(
+        Message&& in,
+        block::Position&& tip,
+        allocator_type monotonic) noexcept -> void final;
+    auto process_key(Message&& in, allocator_type monotonic) noexcept
         -> void final;
-    auto process_key(Message&& in) noexcept -> void final;
-    auto work() noexcept -> bool final;
+    auto work(allocator_type monotonic) noexcept -> bool final;
 };
 }  // namespace opentxs::blockchain::node::wallet

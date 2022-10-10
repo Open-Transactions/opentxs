@@ -148,7 +148,9 @@ auto Rescan::Imp::current() const noexcept -> const block::Position&
     }
 }
 
-auto Rescan::Imp::do_process_update(Message&& msg) noexcept -> void
+auto Rescan::Imp::do_process_update(
+    Message&& msg,
+    allocator_type monotonic) noexcept -> void
 {
     auto clean = Set<ScanStatus>{get_allocator()};
     auto dirty = Set<block::Position>{get_allocator()};
@@ -172,7 +174,7 @@ auto Rescan::Imp::do_process_update(Message&& msg) noexcept -> void
     process_clean(clean);
 
     if (parent_.scan_dirty_) {
-        do_work();
+        do_work(monotonic);
     } else if (0u < clean.size()) {
         to_progress_.SendDeferred(std::move(msg), __FILE__, __LINE__);
     }
@@ -206,7 +208,7 @@ auto Rescan::Imp::do_reorg(
     return Job::do_reorg(oracle, data, params);
 }
 
-auto Rescan::Imp::do_startup_internal() noexcept -> void
+auto Rescan::Imp::do_startup_internal(allocator_type monotonic) noexcept -> void
 {
     const auto& node = parent_.node_;
     const auto& filters = node.FilterOracle();
@@ -307,8 +309,10 @@ auto Rescan::Imp::process_do_rescan(Message&& in) noexcept -> void
     to_progress_.Send(std::move(in), __FILE__, __LINE__);
 }
 
-auto Rescan::Imp::process_filter(Message&& in, block::Position&& tip) noexcept
-    -> void
+auto Rescan::Imp::process_filter(
+    Message&& in,
+    block::Position&& tip,
+    allocator_type monotonic) noexcept -> void
 {
     if (const auto last = last_reorg(); last.has_value()) {
         const auto body = in.Body();
@@ -332,7 +336,7 @@ auto Rescan::Imp::process_filter(Message&& in, block::Position&& tip) noexcept
 
     log_(OT_PRETTY_CLASS())(name_)(" filter tip updated to ")(tip).Flush();
     filter_tip_ = std::move(tip);
-    do_work();
+    do_work(monotonic);
 }
 
 auto Rescan::Imp::prune() noexcept -> void
@@ -418,7 +422,7 @@ auto Rescan::Imp::stop() const noexcept -> block::Height
     return stopHeight;
 }
 
-auto Rescan::Imp::work() noexcept -> bool
+auto Rescan::Imp::work(allocator_type monotonic) noexcept -> bool
 {
     if (State::reorg == state()) { return false; }
 
@@ -442,7 +446,7 @@ auto Rescan::Imp::work() noexcept -> bool
                 __LINE__);
         }
 
-        Job::work();
+        Job::work(monotonic);
     }};
 
     if (false == parent_.scan_dirty_) {
@@ -473,8 +477,8 @@ auto Rescan::Imp::work() noexcept -> bool
     }
 
     auto dirty = Vector<ScanStatus>{get_allocator()};
-    auto highestClean =
-        parent_.Rescan(filter_tip_.value(), stop(), highestTested, dirty);
+    auto highestClean = parent_.Rescan(
+        filter_tip_.value(), stop(), highestTested, dirty, monotonic);
 
     if (highestClean.has_value()) {
         log_(OT_PRETTY_CLASS())(name_)(" last scanned updated to ")(

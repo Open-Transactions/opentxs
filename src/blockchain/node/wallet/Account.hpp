@@ -170,9 +170,10 @@ private:
         const node::HeaderOracle& oracle,
         const node::internal::HeaderOraclePrivate& data,
         Reorg::Params& params) noexcept -> bool;
-    auto do_startup() noexcept -> bool;
+    auto do_startup(allocator_type monotonic) noexcept -> bool;
     auto index_nym(const identifier::Nym& id) noexcept -> void;
-    auto pipeline(const Work work, Message&& msg) noexcept -> void;
+    auto pipeline(const Work work, Message&& msg, allocator_type) noexcept
+        -> void;
     auto process_key(Message&& in) noexcept -> void;
     auto process_prepare_reorg(Message&& in) noexcept -> void;
     auto process_rescan(Message&& in) noexcept -> void;
@@ -187,7 +188,7 @@ private:
     auto transition_state_normal() noexcept -> void;
     auto transition_state_pre_shutdown() noexcept -> void;
     auto transition_state_reorg(StateSequence id) noexcept -> void;
-    auto work() noexcept -> bool;
+    auto work(allocator_type monotonic) noexcept -> bool;
 
     Imp(Reorg& reorg,
         const crypto::Account& account,

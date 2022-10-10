@@ -132,7 +132,8 @@ public:
     {
         throw std::out_of_range{""};
     }
-    auto IndexItem(const ReadView) const noexcept -> PatternID final
+    auto IndexItem(const ReadView) const noexcept
+        -> opentxs::blockchain::block::ElementHash final
     {
         return {};
     }

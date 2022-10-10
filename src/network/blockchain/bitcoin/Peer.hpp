@@ -132,8 +132,8 @@ private:
     using MessageType = opentxs::blockchain::p2p::bitcoin::Message;
     using HeaderType = opentxs::blockchain::p2p::bitcoin::Header;
     using Command = opentxs::blockchain::p2p::bitcoin::Command;
-    using CommandFunction =
-        void (Peer::*)(std::unique_ptr<HeaderType>, zeromq::Frame&&);
+    using CommandFunction = void (
+        Peer::*)(std::unique_ptr<HeaderType>, zeromq::Frame&&, allocator_type);
     using CommandMap = robin_hood::unordered_flat_map<Command, CommandFunction>;
 
     struct Handshake {
@@ -198,24 +198,31 @@ private:
         -> std::size_t final;
     auto not_implemented(
         std::unique_ptr<HeaderType> header,
-        zeromq::Frame&&) noexcept(false) -> void;
+        zeromq::Frame&&,
+        allocator_type monotonic) noexcept(false) -> void;
     auto process_broadcasttx(Message&& msg) noexcept -> void final;
-    auto process_protocol(Message&& message) noexcept -> void final;
+    auto process_protocol(Message&& message, allocator_type monotonic) noexcept
+        -> void final;
     auto process_protocol_addr(
         std::unique_ptr<HeaderType> header,
-        zeromq::Frame&& payload) noexcept(false) -> void;
+        zeromq::Frame&& payload,
+        allocator_type monotonic) noexcept(false) -> void;
     auto process_protocol_block(
         std::unique_ptr<HeaderType> header,
-        zeromq::Frame&& payload) noexcept(false) -> void;
+        zeromq::Frame&& payload,
+        allocator_type monotonic) noexcept(false) -> void;
     auto process_protocol_blocktxn(
         std::unique_ptr<HeaderType> header,
-        zeromq::Frame&& payload) noexcept(false) -> void;
+        zeromq::Frame&& payload,
+        allocator_type monotonic) noexcept(false) -> void;
     auto process_protocol_cfcheckpt(
         std::unique_ptr<HeaderType> header,
-        zeromq::Frame&& payload) noexcept(false) -> void;
+        zeromq::Frame&& payload,
+        allocator_type monotonic) noexcept(false) -> void;
     auto process_protocol_cfheaders(
         std::unique_ptr<HeaderType> header,
-        zeromq::Frame&& payload) noexcept(false) -> void;
+        zeromq::Frame&& payload,
+        allocator_type monotonic) noexcept(false) -> void;
     auto process_protocol_cfheaders_verify(
         opentxs::blockchain::p2p::bitcoin::message::internal::Cfheaders&
             message) noexcept(false) -> void;
@@ -224,49 +231,64 @@ private:
             message) noexcept(false) -> void;
     auto process_protocol_cfilter(
         std::unique_ptr<HeaderType> header,
-        zeromq::Frame&& payload) noexcept(false) -> void;
+        zeromq::Frame&& payload,
+        allocator_type monotonic) noexcept(false) -> void;
     auto process_protocol_cmpctblock(
         std::unique_ptr<HeaderType> header,
-        zeromq::Frame&& payload) noexcept(false) -> void;
+        zeromq::Frame&& payload,
+        allocator_type monotonic) noexcept(false) -> void;
     auto process_protocol_feefilter(
         std::unique_ptr<HeaderType> header,
-        zeromq::Frame&& payload) noexcept(false) -> void;
+        zeromq::Frame&& payload,
+        allocator_type monotonic) noexcept(false) -> void;
     auto process_protocol_filteradd(
         std::unique_ptr<HeaderType> header,
-        zeromq::Frame&& payload) noexcept(false) -> void;
+        zeromq::Frame&& payload,
+        allocator_type monotonic) noexcept(false) -> void;
     auto process_protocol_filterclear(
         std::unique_ptr<HeaderType> header,
-        zeromq::Frame&& payload) noexcept(false) -> void;
+        zeromq::Frame&& payload,
+        allocator_type monotonic) noexcept(false) -> void;
     auto process_protocol_filterload(
         std::unique_ptr<HeaderType> header,
-        zeromq::Frame&& payload) noexcept(false) -> void;
+        zeromq::Frame&& payload,
+        allocator_type monotonic) noexcept(false) -> void;
     auto process_protocol_getaddr(
         std::unique_ptr<HeaderType> header,
-        zeromq::Frame&& payload) noexcept(false) -> void;
+        zeromq::Frame&& payload,
+        allocator_type monotonic) noexcept(false) -> void;
     auto process_protocol_getblocks(
         std::unique_ptr<HeaderType> header,
-        zeromq::Frame&& payload) noexcept(false) -> void;
+        zeromq::Frame&& payload,
+        allocator_type monotonic) noexcept(false) -> void;
     auto process_protocol_getblocktxn(
         std::unique_ptr<HeaderType> header,
-        zeromq::Frame&& payload) noexcept(false) -> void;
+        zeromq::Frame&& payload,
+        allocator_type monotonic) noexcept(false) -> void;
     auto process_protocol_getcfcheckpt(
         std::unique_ptr<HeaderType> header,
-        zeromq::Frame&& payload) noexcept(false) -> void;
+        zeromq::Frame&& payload,
+        allocator_type monotonic) noexcept(false) -> void;
     auto process_protocol_getcfheaders(
         std::unique_ptr<HeaderType> header,
-        zeromq::Frame&& payload) noexcept(false) -> void;
+        zeromq::Frame&& payload,
+        allocator_type monotonic) noexcept(false) -> void;
     auto process_protocol_getcfilters(
         std::unique_ptr<HeaderType> header,
-        zeromq::Frame&& payload) noexcept(false) -> void;
+        zeromq::Frame&& payload,
+        allocator_type monotonic) noexcept(false) -> void;
     auto process_protocol_getdata(
         std::unique_ptr<HeaderType> header,
-        zeromq::Frame&& payload) noexcept(false) -> void;
+        zeromq::Frame&& payload,
+        allocator_type monotonic) noexcept(false) -> void;
     auto process_protocol_getheaders(
         std::unique_ptr<HeaderType> header,
-        zeromq::Frame&& payload) noexcept(false) -> void;
+        zeromq::Frame&& payload,
+        allocator_type monotonic) noexcept(false) -> void;
     auto process_protocol_headers(
         std::unique_ptr<HeaderType> header,
-        zeromq::Frame&& payload) noexcept(false) -> void;
+        zeromq::Frame&& payload,
+        allocator_type monotonic) noexcept(false) -> void;
     auto process_protocol_headers_verify(
         opentxs::blockchain::p2p::bitcoin::message::internal::Headers&
             message) noexcept(false) -> void;
@@ -275,40 +297,52 @@ private:
             message) noexcept(false) -> void;
     auto process_protocol_inv(
         std::unique_ptr<HeaderType> header,
-        zeromq::Frame&& payload) noexcept(false) -> void;
+        zeromq::Frame&& payload,
+        allocator_type monotonic) noexcept(false) -> void;
     auto process_protocol_mempool(
         std::unique_ptr<HeaderType> header,
-        zeromq::Frame&& payload) noexcept(false) -> void;
+        zeromq::Frame&& payload,
+        allocator_type monotonic) noexcept(false) -> void;
     auto process_protocol_merkleblock(
         std::unique_ptr<HeaderType> header,
-        zeromq::Frame&& payload) noexcept(false) -> void;
+        zeromq::Frame&& payload,
+        allocator_type monotonic) noexcept(false) -> void;
     auto process_protocol_notfound(
         std::unique_ptr<HeaderType> header,
-        zeromq::Frame&& payload) noexcept(false) -> void;
+        zeromq::Frame&& payload,
+        allocator_type monotonic) noexcept(false) -> void;
     auto process_protocol_ping(
         std::unique_ptr<HeaderType> header,
-        zeromq::Frame&& payload) noexcept(false) -> void;
+        zeromq::Frame&& payload,
+        allocator_type monotonic) noexcept(false) -> void;
     auto process_protocol_pong(
         std::unique_ptr<HeaderType> header,
-        zeromq::Frame&& payload) noexcept(false) -> void;
+        zeromq::Frame&& payload,
+        allocator_type monotonic) noexcept(false) -> void;
     auto process_protocol_reject(
         std::unique_ptr<HeaderType> header,
-        zeromq::Frame&& payload) noexcept(false) -> void;
+        zeromq::Frame&& payload,
+        allocator_type monotonic) noexcept(false) -> void;
     auto process_protocol_sendcmpct(
         std::unique_ptr<HeaderType> header,
-        zeromq::Frame&& payload) noexcept(false) -> void;
+        zeromq::Frame&& payload,
+        allocator_type monotonic) noexcept(false) -> void;
     auto process_protocol_sendheaders(
         std::unique_ptr<HeaderType> header,
-        zeromq::Frame&& payload) noexcept(false) -> void;
+        zeromq::Frame&& payload,
+        allocator_type monotonic) noexcept(false) -> void;
     auto process_protocol_tx(
         std::unique_ptr<HeaderType> header,
-        zeromq::Frame&& payload) noexcept(false) -> void;
+        zeromq::Frame&& payload,
+        allocator_type monotonic) noexcept(false) -> void;
     auto process_protocol_verack(
         std::unique_ptr<HeaderType> header,
-        zeromq::Frame&& payload) noexcept(false) -> void;
+        zeromq::Frame&& payload,
+        allocator_type monotonic) noexcept(false) -> void;
     auto process_protocol_version(
         std::unique_ptr<HeaderType> header,
-        zeromq::Frame&& payload) noexcept(false) -> void;
+        zeromq::Frame&& payload,
+        allocator_type monotonic) noexcept(false) -> void;
     auto reconcile_mempool() noexcept -> void;
     auto request_checkpoint_block_header() noexcept -> void;
     auto request_checkpoint_cfheader() noexcept -> void;

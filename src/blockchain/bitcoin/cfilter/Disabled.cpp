@@ -59,6 +59,7 @@ auto GCS(
     const api::Session&,
     const blockchain::cfilter::Type type,
     const blockchain::block::Block& block,
+    alloc::Default,
     alloc::Default) noexcept -> blockchain::GCS
 {
     return {};

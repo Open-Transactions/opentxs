@@ -97,10 +97,11 @@ private:
     auto get_peers(Message& out) const noexcept -> void;
 
     auto do_shutdown() noexcept -> void;
-    auto do_startup() noexcept -> bool;
+    auto do_startup(allocator_type monotonic) noexcept -> bool;
     auto load_peers() noexcept -> void;
     auto load_positions() noexcept -> void;
-    auto pipeline(const Work work, Message&& msg) noexcept -> void;
+    auto pipeline(const Work work, Message&& msg, allocator_type) noexcept
+        -> void;
     auto pipeline_other(const Work work, Message&& msg) noexcept -> void;
     auto pipeline_router(const Work work, Message&& msg) noexcept -> void;
     auto process_add_listener(Message&& msg) noexcept -> void;
@@ -114,6 +115,6 @@ private:
     auto process_peer(std::string_view endpoint) noexcept -> void;
     auto publish_peers() noexcept -> void;
     auto send_to_peers(Message&& msg) noexcept -> void;
-    auto work() noexcept -> bool;
+    auto work(allocator_type monotonic) noexcept -> bool;
 };
 }  // namespace opentxs::network::otdht

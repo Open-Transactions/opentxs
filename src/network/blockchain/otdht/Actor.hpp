@@ -215,9 +215,10 @@ private:
         const opentxs::blockchain::block::Position& target) noexcept
         -> std::optional<PeerID>;
     auto do_shutdown() noexcept -> void;
-    auto do_startup() noexcept -> bool;
+    auto do_startup(allocator_type monotonic) noexcept -> bool;
     auto finish_request(bool success) noexcept -> void;
-    auto pipeline(const Work work, Message&& msg) noexcept -> void;
+    auto pipeline(const Work work, Message&& msg, allocator_type) noexcept
+        -> void;
     auto pipeline_other(const Work work, Message&& msg) noexcept -> void;
     auto pipeline_router(const Work work, Message&& msg) noexcept -> void;
     auto process_cfilter(Message&& msg) noexcept -> void;
@@ -236,6 +237,6 @@ private:
     auto reset_registration_timer() noexcept -> void;
     auto reset_request_timer() noexcept -> void;
     auto send_registration() noexcept -> void;
-    auto work() noexcept -> bool;
+    auto work(allocator_type monotonic) noexcept -> bool;
 };
 }  // namespace opentxs::network::blockchain

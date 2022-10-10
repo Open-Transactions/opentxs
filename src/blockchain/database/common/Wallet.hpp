@@ -9,6 +9,8 @@
 #include <mutex>
 #include <optional>
 
+#include "internal/blockchain/block/Types.hpp"
+#include "internal/blockchain/database/Types.hpp"
 #include "internal/util/Mutex.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
@@ -78,13 +80,9 @@ namespace opentxs::blockchain::database::common
 class Wallet
 {
 public:
-    using PatternID = opentxs::blockchain::PatternID;
-    using Txid = opentxs::blockchain::block::Txid;
-    using pTxid = opentxs::blockchain::block::pTxid;
-
     auto AssociateTransaction(
-        const Txid& txid,
-        const UnallocatedVector<PatternID>& patterns) const noexcept -> bool;
+        const block::Txid& txid,
+        const ElementHashes& patterns) const noexcept -> bool;
     auto ForgetTransaction(const ReadView txid) const noexcept -> bool;
     auto LoadTransaction(const ReadView txid) const noexcept
         -> std::unique_ptr<bitcoin::block::Transaction>;
@@ -92,17 +90,17 @@ public:
         const noexcept -> std::unique_ptr<bitcoin::block::Transaction>;
     auto LookupContact(const Data& pubkeyHash) const noexcept
         -> UnallocatedSet<identifier::Generic>;
-    auto LookupTransactions(const PatternID pattern) const noexcept
-        -> UnallocatedVector<pTxid>;
+    auto LookupTransactions(const ElementHash pattern) const noexcept
+        -> UnallocatedVector<block::pTxid>;
     auto StoreTransaction(const bitcoin::block::Transaction& tx) const noexcept
         -> bool;
     auto StoreTransaction(
         const bitcoin::block::Transaction& tx,
         proto::BlockchainTransaction& out) const noexcept -> bool;
     auto UpdateContact(const Contact& contact) const noexcept
-        -> UnallocatedVector<pTxid>;
+        -> UnallocatedVector<block::pTxid>;
     auto UpdateMergedContact(const Contact& parent, const Contact& child)
-        const noexcept -> UnallocatedVector<pTxid>;
+        const noexcept -> UnallocatedVector<block::pTxid>;
 
     Wallet(
         const api::Session& api,
@@ -118,9 +116,9 @@ private:
     using ElementToContact =
         UnallocatedMap<ByteArray, UnallocatedSet<identifier::Generic>>;
     using TransactionToPattern =
-        UnallocatedMap<pTxid, UnallocatedSet<PatternID>>;
+        UnallocatedMap<block::pTxid, UnallocatedSet<ElementHash>>;
     using PatternToTransaction =
-        UnallocatedMap<PatternID, UnallocatedSet<pTxid>>;
+        UnallocatedMap<ElementHash, UnallocatedSet<block::pTxid>>;
 
     const api::Session& api_;
     const api::crypto::Blockchain& blockchain_;
@@ -138,6 +136,6 @@ private:
         const UnallocatedSet<ByteArray>& existing,
         const UnallocatedSet<ByteArray>& incoming,
         const identifier::Generic& contactID) const noexcept
-        -> UnallocatedVector<pTxid>;
+        -> UnallocatedVector<block::pTxid>;
 };
 }  // namespace opentxs::blockchain::database::common

@@ -258,7 +258,7 @@ auto Account::Imp::do_shutdown() noexcept -> void
     api_p_.reset();
 }
 
-auto Account::Imp::do_startup() noexcept -> bool
+auto Account::Imp::do_startup(allocator_type) noexcept -> bool
 {
     if (Reorg::State::shutdown == reorg_.Start()) { return true; }
 
@@ -281,7 +281,10 @@ auto Account::Imp::Init(boost::shared_ptr<Imp> me) noexcept -> void
     signal_startup(me);
 }
 
-auto Account::Imp::pipeline(const Work work, Message&& msg) noexcept -> void
+auto Account::Imp::pipeline(
+    const Work work,
+    Message&& msg,
+    allocator_type) noexcept -> void
 {
     switch (state_) {
         case State::normal: {
@@ -396,22 +399,22 @@ auto Account::Imp::state_normal(const Work work, Message&& msg) noexcept -> void
         case Work::rescan: {
             process_rescan(std::move(msg));
         } break;
-        case Work::init: {
-            do_init();
-        } break;
         case Work::key: {
             process_key(std::move(msg));
         } break;
         case Work::prepare_shutdown: {
             transition_state_pre_shutdown();
         } break;
-        case Work::statemachine: {
-            do_work();
-        } break;
-        case Work::shutdown:
         case Work::finish_reorg: {
             LogAbort()(OT_PRETTY_CLASS())(name_)(" wrong state for ")(
                 print(work))(" message")
+                .Abort();
+        }
+        case Work::shutdown:
+        case Work::init:
+        case Work::statemachine: {
+            LogAbort()(OT_PRETTY_CLASS())(name_)(" unhandled message type ")(
+                print(work))
                 .Abort();
         }
         default: {
@@ -426,21 +429,23 @@ auto Account::Imp::state_pre_shutdown(const Work work, Message&& msg) noexcept
     -> void
 {
     switch (work) {
-        case Work::shutdown: {
-            shutdown_actor();
-        } break;
         case Work::subaccount:
         case Work::rescan:
-        case Work::key:
-        case Work::statemachine: {
+        case Work::key: {
             // NOTE ignore message
         } break;
         case Work::prepare_reorg:
         case Work::finish_reorg:
-        case Work::init:
         case Work::prepare_shutdown: {
             LogAbort()(OT_PRETTY_CLASS())(name_)(" wrong state for ")(
                 print(work))(" message")
+                .Abort();
+        }
+        case Work::shutdown:
+        case Work::init:
+        case Work::statemachine: {
+            LogAbort()(OT_PRETTY_CLASS())(name_)(" unhandled message type ")(
+                print(work))
                 .Abort();
         }
         default: {
@@ -457,18 +462,22 @@ auto Account::Imp::state_reorg(const Work work, Message&& msg) noexcept -> void
         case Work::subaccount:
         case Work::prepare_reorg:
         case Work::rescan:
-        case Work::key:
-        case Work::statemachine: {
+        case Work::key: {
             defer(std::move(msg));
         } break;
         case Work::finish_reorg: {
             transition_state_normal();
         } break;
-        case Work::shutdown:
-        case Work::prepare_shutdown:
-        case Work::init: {
+        case Work::prepare_shutdown: {
             LogAbort()(OT_PRETTY_CLASS())(name_)(" wrong state for ")(
                 print(work))(" message")
+                .Abort();
+        }
+        case Work::shutdown:
+        case Work::init:
+        case Work::statemachine: {
+            LogAbort()(OT_PRETTY_CLASS())(name_)(" unhandled message type ")(
+                print(work))
                 .Abort();
         }
         default: {
@@ -512,7 +521,10 @@ auto Account::Imp::transition_state_reorg(StateSequence id) noexcept -> void
     }
 }
 
-auto Account::Imp::work() noexcept -> bool { return false; }
+auto Account::Imp::work(allocator_type monotonic) noexcept -> bool
+{
+    return false;
+}
 
 Account::Imp::~Imp() = default;
 }  // namespace opentxs::blockchain::node::wallet

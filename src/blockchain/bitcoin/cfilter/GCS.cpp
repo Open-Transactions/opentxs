@@ -92,10 +92,12 @@ auto GCS::Internal() const noexcept -> const internal::GCS& { return *imp_; }
 
 auto GCS::IsValid() const noexcept -> bool { return imp_->IsValid(); }
 
-auto GCS::Match(const Targets& in, allocator_type alloc) const noexcept
-    -> Matches
+auto GCS::Match(
+    const Targets& in,
+    allocator_type alloc,
+    allocator_type monotonic) const noexcept -> Matches
 {
-    return imp_->Match(in, alloc);
+    return imp_->Match(in, alloc, monotonic);
 }
 
 auto GCS::Serialize(AllocateOutput out) const noexcept -> bool
@@ -115,24 +117,28 @@ auto GCS::swap(GCS& rhs) noexcept -> void
     }
 }
 
-auto GCS::Test(const Data& target) const noexcept -> bool
+auto GCS::Test(const Data& target, allocator_type monotonic) const noexcept
+    -> bool
 {
-    return imp_->Test(target);
+    return imp_->Test(target, monotonic);
 }
 
-auto GCS::Test(const ReadView target) const noexcept -> bool
+auto GCS::Test(const ReadView target, allocator_type monotonic) const noexcept
+    -> bool
 {
-    return imp_->Test(target);
+    return imp_->Test(target, monotonic);
 }
 
-auto GCS::Test(const Vector<ByteArray>& targets) const noexcept -> bool
+auto GCS::Test(const Vector<ByteArray>& targets, allocator_type monotonic)
+    const noexcept -> bool
 {
-    return imp_->Test(targets);
+    return imp_->Test(targets, monotonic);
 }
 
-auto GCS::Test(const Vector<Space>& targets) const noexcept -> bool
+auto GCS::Test(const Vector<Space>& targets, allocator_type monotonic)
+    const noexcept -> bool
 {
-    return imp_->Test(targets);
+    return imp_->Test(targets, monotonic);
 }
 
 GCS::~GCS()
