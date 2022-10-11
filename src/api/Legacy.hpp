@@ -41,6 +41,7 @@ public:
         fs::path& out,
         const fs::path& base,
         const fs::path& folder) const noexcept -> bool final;
+    auto BlockchainCheckpoints() const noexcept -> fs::path final;
     auto BuildFolderPath(const fs::path& path) const noexcept -> bool final;
     auto BuildFilePath(const fs::path& path) const noexcept -> bool final;
     auto ClientConfigFilePath(const int instance) const noexcept

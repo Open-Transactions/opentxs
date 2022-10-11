@@ -66,6 +66,7 @@ public:
         fs::path& out,
         const fs::path& base,
         const fs::path& folder) const noexcept -> bool = 0;
+    virtual auto BlockchainCheckpoints() const noexcept -> fs::path = 0;
     virtual auto BuildFolderPath(const fs::path& path) const noexcept
         -> bool = 0;
     virtual auto BuildFilePath(const fs::path& path) const noexcept -> bool = 0;

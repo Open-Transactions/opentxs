@@ -235,6 +235,11 @@ auto Legacy::AppendFolder(
     }
 }
 
+auto Legacy::BlockchainCheckpoints() const noexcept -> fs::path
+{
+    return fs::path{"blockchain"} / fs::path{"checkpoints"};
+}
+
 auto Legacy::BuildFolderPath(const fs::path& path) const noexcept -> bool
 {
     return ConfirmCreateFolder(path);

@@ -18,6 +18,7 @@
 #include <utility>
 
 #include "blockchain/node/filteroracle/Shared.hpp"
+#include "internal/api/Legacy.hpp"
 #include "internal/api/network/Asio.hpp"
 #include "internal/api/session/Endpoints.hpp"
 #include "internal/api/session/Session.hpp"
@@ -213,6 +214,20 @@ BlockIndexer::Imp::Imp(
     , shared_p_(std::move(shared))
     , api_(*api_p_)
     , node_(*node_p_)
+    , checkpoints_([&] {
+        auto out = std::filesystem::path{};
+        const auto& legacy = api_.Internal().Legacy();
+        auto rc = legacy.AppendFolder(
+            out, api_.DataFolder(), legacy.BlockchainCheckpoints());
+
+        OT_ASSERT(rc);
+
+        rc = legacy.BuildFolderPath(out);
+
+        OT_ASSERT(rc);
+
+        return out;
+    }())
     , shared_(*shared_p_)
     , best_position_()
     , queue_(alloc)
@@ -388,16 +403,20 @@ auto BlockIndexer::Imp::do_startup(allocator_type monotonic) noexcept -> bool
         OT_ASSERT(rc);
     }
 
-    {
+    // TODO c++20 lambda capture structured binding
+    const auto tip = [&](auto&& cfilter) {
         // WARNING preserve lock order to avoid deadlocks
         auto wHandle = work_.lock();
         auto tHandle = tip_.lock();
         auto& work = *wHandle;
         auto& tip = *tHandle;
-        work.Reset(shared_, std::move(cfilterTip));
+        work.Reset(shared_, std::move(cfilter));
         tip = work.position_;
-    }
 
+        return tip;
+    }(std::move(cfilterTip));
+
+    write_last_checkpoint(tip);
     do_work(monotonic);
 
     return false;
@@ -612,9 +631,20 @@ auto BlockIndexer::Imp::update_best_position(
         .Flush();
 }
 
+auto BlockIndexer::Imp::update_checkpoint() noexcept -> void
+{
+    const auto tip = block::Position{*tip_.lock_shared()};
+    const auto target = block::Height{tip.height_ - 1000};
+
+    if (0 != target % 2000) { return; }
+
+    write_checkpoint(target);
+}
+
 auto BlockIndexer::Imp::work(allocator_type monotonic) noexcept -> bool
 {
     const auto& log = log_;
+    update_checkpoint();
     check_blocks(monotonic);
     fill_queue();
     const auto count = drain_queue();
@@ -641,6 +671,39 @@ auto BlockIndexer::Imp::work(allocator_type monotonic) noexcept -> bool
     }
 
     return false;
+}
+
+auto BlockIndexer::Imp::write_checkpoint(block::Height target) noexcept -> void
+{
+    if (0 == target) { return; }
+
+    const auto prior = target - 1;
+    const auto& header = node_.HeaderOracle();
+    const auto position = block::Position{target, header.BestHash(target)};
+    const auto previous = block::Position{prior, header.BestHash(prior)};
+    const auto cfheader =
+        shared_.LoadCfheader(shared_.default_type_, position.hash_);
+    params::WriteCheckpoint(
+        checkpoints_, position, previous, cfheader, shared_.chain_);
+}
+
+auto BlockIndexer::Imp::write_last_checkpoint(
+    const block::Position& tip) noexcept -> void
+{
+    static constexpr auto get_target = [](const auto height) {
+        auto target = height - 1000;
+        target -= target % 2000;
+
+        return std::max<block::Height>(target, 0);
+    };
+    static_assert(get_target(2999) == 0);
+    static_assert(get_target(3000) == 2000);
+    static_assert(get_target(3001) == 2000);
+    static_assert(get_target(4999) == 2000);
+    static_assert(get_target(5000) == 4000);
+    static_assert(get_target(5001) == 4000);
+
+    write_checkpoint(get_target(tip.height_));
 }
 
 BlockIndexer::Imp::~Imp() = default;

@@ -2173,50 +2173,80 @@ auto get(blockchain::Type chain) noexcept(false) -> const ChainData&
 auto WriteCheckpoints(const std::filesystem::path& outputDirectory) noexcept
     -> bool
 {
+    auto output{true};
+
+    for (const auto chain : chains()) {
+        if (false == WriteCheckpoint(outputDirectory, chain)) {
+            output = false;
+        }
+    }
+
+    return output;
+}
+
+auto WriteCheckpoint(
+    const std::filesystem::path& outputDirectory,
+    blockchain::Type chain) noexcept -> bool
+{
+    try {
+        const auto& data = get(chain);
+
+        return WriteCheckpoint(
+            outputDirectory,
+            data.CheckpointPosition(),
+            data.CheckpointPrevious(),
+            data.CheckpointCfheader(),
+            chain);
+    } catch (const std::exception& e) {
+        LogError()(__func__)(": ")(e.what()).Flush();
+
+        return false;
+    }
+}
+
+auto WriteCheckpoint(
+    const std::filesystem::path& outputDirectory,
+    const block::Position& current,
+    const block::Position& prior,
+    const cfilter::Header& cfheader,
+    blockchain::Type chain) noexcept -> bool
+{
     try {
         std::filesystem::create_directories(outputDirectory);
-
-        for (const auto chain : chains()) {
-            const auto& data = get(chain);
-            const auto id = std::to_string(static_cast<std::uint32_t>(chain));
-            auto json = boost::json::object{};
-            auto& out =
-                json[id].emplace_object()["checkpoint"].emplace_object();
-            {
-                const auto& cp = data.CheckpointPosition();
-                auto& position = out["position"].emplace_object();
-                position["height"] = cp.height_;
-                position["hash"] = cp.hash_.asHex();
-            }
-            {
-                const auto& cp = data.CheckpointPrevious();
-                auto& position = out["previous"].emplace_object();
-                position["height"] = cp.height_;
-                position["hash"] = cp.hash_.asHex();
-            }
-            {
-                const auto& cp = data.CheckpointCfheader();
-                out["cfheader"] = cp.asHex();
-            }
-
-            const auto filename =
-                std::filesystem::path{outputDirectory / TickerSymbol(chain)}
-                    .replace_extension("json");
-            auto file = std::filebuf{};
-            constexpr auto mode =
-                std::ios::binary | std::ios::out | std::ios::trunc;
-
-            if (nullptr == file.open(filename.c_str(), mode)) {
-                throw std::runtime_error{"failed to open output file"};
-            }
-
-            {
-                auto stream = std::ostream{std::addressof(file)};
-                opentxs::print(json, stream);
-            }
-
-            file.close();
+        const auto id = std::to_string(static_cast<std::uint32_t>(chain));
+        auto json = boost::json::object{};
+        auto& out = json[id].emplace_object()["checkpoint"].emplace_object();
+        {
+            auto& position = out["position"].emplace_object();
+            position["height"] = current.height_;
+            position["hash"] = current.hash_.asHex();
         }
+        {
+            auto& position = out["previous"].emplace_object();
+            position["height"] = prior.height_;
+            position["hash"] = prior.hash_.asHex();
+        }
+        {
+            out["cfheader"] = cfheader.asHex();
+        }
+
+        const auto filename =
+            std::filesystem::path{outputDirectory / TickerSymbol(chain)}
+                .replace_extension("json");
+        auto file = std::filebuf{};
+        constexpr auto mode =
+            std::ios::binary | std::ios::out | std::ios::trunc;
+
+        if (nullptr == file.open(filename.c_str(), mode)) {
+            throw std::runtime_error{"failed to open output file"};
+        }
+
+        {
+            auto stream = std::ostream{std::addressof(file)};
+            opentxs::print(json, stream);
+        }
+
+        file.close();
 
         return true;
     } catch (const std::exception& e) {
