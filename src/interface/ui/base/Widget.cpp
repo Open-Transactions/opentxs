@@ -9,6 +9,7 @@
 #include <type_traits>
 
 #include "internal/api/session/UI.hpp"
+#include "internal/network/zeromq/Context.hpp"
 #include "internal/util/P0330.hpp"
 #include "opentxs/api/network/Network.hpp"
 #include "opentxs/api/session/Client.hpp"
@@ -73,8 +74,8 @@ auto Widget::setup_listeners(
                 [=, this](const Message& message) -> void {
                     (*copy)(this, message);
                 }));
-        auto& socket =
-            listeners_.emplace_back(api.Network().ZeroMQ().SubscribeSocket(
+        auto& socket = listeners_.emplace_back(
+            api.Network().ZeroMQ().Internal().SubscribeSocket(
                 nextCallback.get(), "Widget"));
         const auto listening = socket->Start(endpoint);
 

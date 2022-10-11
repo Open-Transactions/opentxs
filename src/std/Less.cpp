@@ -9,14 +9,13 @@
 #include <memory>
 #include <utility>
 
+#include "internal/core/contract/peer/PeerReply.hpp"
+#include "internal/core/contract/peer/PeerRequest.hpp"
 #include "internal/interface/ui/UI.hpp"
 #include "internal/otx/client/Client.hpp"
 #include "internal/otx/client/OTPayment.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
 #include "opentxs/core/Data.hpp"
-#include "opentxs/core/Secret.hpp"
-#include "opentxs/core/contract/peer/PeerReply.hpp"
-#include "opentxs/core/contract/peer/PeerRequest.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/crypto/Seed.hpp"
 #include "opentxs/util/Container.hpp"
@@ -181,13 +180,6 @@ auto less<opentxs::OTPeerRequest>::operator()(
     const opentxs::OTPeerRequest& rhs) const -> bool
 {
     return lhs < rhs;
-}
-
-auto less<opentxs::OTSecret>::operator()(
-    const opentxs::OTSecret& lhs,
-    const opentxs::OTSecret& rhs) const -> bool
-{
-    return lhs.get().operator<(rhs.get());
 }
 
 auto less<opentxs::OT_DownloadNymboxType>::operator()(

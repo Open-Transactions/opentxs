@@ -10,8 +10,8 @@
 #include <tuple>
 
 #include "internal/otx/Types.hpp"
+#include "internal/otx/consensus/Server.hpp"
 #include "opentxs/core/Amount.hpp"
-#include "opentxs/otx/consensus/Server.hpp"
 #include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)

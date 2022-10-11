@@ -18,6 +18,7 @@
 #include <utility>
 
 #include "internal/api/crypto/Seed.hpp"
+#include "internal/network/zeromq/socket/Publish.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/Mutex.hpp"
 #include "opentxs/api/crypto/Seed.hpp"
@@ -30,7 +31,6 @@
 #include "opentxs/crypto/key/EllipticCurve.hpp"
 #include "opentxs/crypto/key/Symmetric.hpp"
 #include "opentxs/crypto/key/asymmetric/Role.hpp"
-#include "opentxs/network/zeromq/socket/Publish.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
@@ -163,7 +163,7 @@ public:
         opentxs::crypto::Language& lang,
         Bip32Index& index,
         const opentxs::crypto::SeedStrength strength,
-        const PasswordPrompt& reason) const -> OTSecret final;
+        const PasswordPrompt& reason) const -> Secret final;
     auto GetPaymentCode(
         const UnallocatedCString& seedID,
         const Bip32Index nym,
@@ -173,7 +173,7 @@ public:
     auto GetSeed(
         const UnallocatedCString& seedID,
         Bip32Index& index,
-        const PasswordPrompt& reason) const -> OTSecret final;
+        const PasswordPrompt& reason) const -> Secret final;
     auto GetSeed(const identifier::Generic& id, const PasswordPrompt& reason)
         const noexcept -> opentxs::crypto::Seed final;
     auto GetStorageKey(

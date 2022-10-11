@@ -107,7 +107,7 @@ public:
         const crypto::key::asymmetric::Role role,
         const VersionNumber version) noexcept(false);
     Secp256k1(const Secp256k1& rhs, const ReadView newPublic) noexcept;
-    Secp256k1(const Secp256k1& rhs, OTSecret&& newSecretKey) noexcept;
+    Secp256k1(const Secp256k1& rhs, Secret&& newSecretKey) noexcept;
     Secp256k1() = delete;
     Secp256k1(const Secp256k1&) noexcept;
     Secp256k1(Secp256k1&&) = delete;
@@ -134,7 +134,7 @@ private:
     {
         return std::make_unique<Secp256k1>(*this, newPubkey);
     }
-    auto replace_secret_key(OTSecret&& newSecretKey) const noexcept
+    auto replace_secret_key(Secret&& newSecretKey) const noexcept
         -> std::unique_ptr<EllipticCurve> final
     {
         return std::make_unique<Secp256k1>(*this, std::move(newSecretKey));

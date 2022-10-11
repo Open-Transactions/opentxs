@@ -12,6 +12,12 @@
 #include <sstream>
 #include <string_view>
 
+#include "internal/api/session/UI.hpp"
+#include "internal/interface/ui/BlockchainAccountStatus.hpp"
+#include "internal/interface/ui/BlockchainSubaccount.hpp"
+#include "internal/interface/ui/BlockchainSubaccountSource.hpp"
+#include "internal/interface/ui/BlockchainSubchain.hpp"
+#include "internal/util/SharedPimpl.hpp"
 #include "ottest/fixtures/common/Counter.hpp"
 #include "ottest/fixtures/common/User.hpp"
 
@@ -36,7 +42,8 @@ auto check_blockchain_account_status(
     const BlockchainAccountStatusData& expected) noexcept -> bool
 {
     const auto& ot = *user.api_;
-    const auto& widget = ot.UI().BlockchainAccountStatus(user.nym_id_, chain);
+    const auto& widget =
+        ot.UI().Internal().BlockchainAccountStatus(user.nym_id_, chain);
     auto output{true};
     output &= (widget.Chain() == expected.chain_);
     output &= (widget.Owner().asBase58(ot.Crypto()) == expected.owner_);
@@ -176,7 +183,7 @@ auto init_blockchain_account_status(
     const ot::blockchain::Type chain,
     Counter& counter) noexcept -> void
 {
-    user.api_->UI().BlockchainAccountStatus(
+    user.api_->UI().Internal().BlockchainAccountStatus(
         user.nym_id_, chain, make_cb(counter, [&] {
             auto out = std::stringstream{};
             out << u8"blockchain_account_status_"_sv;

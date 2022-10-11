@@ -22,7 +22,7 @@ class Test_NymData : public ::testing::Test
 {
 public:
     const ot::api::session::Client& client_;
-    ot::OTPasswordPrompt reason_;
+    ot::PasswordPrompt reason_;
     ot::NymData nym_data_;
 
     static auto ExpectedStringOutput(const std::uint32_t version)

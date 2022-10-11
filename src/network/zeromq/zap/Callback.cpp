@@ -11,11 +11,11 @@
 #include <utility>
 
 #include "internal/network/zeromq/zap/Factory.hpp"
+#include "internal/network/zeromq/zap/Reply.hpp"
+#include "internal/network/zeromq/zap/Request.hpp"
+#include "internal/network/zeromq/zap/ZAP.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/Mutex.hpp"
-#include "opentxs/network/zeromq/zap/Reply.hpp"
-#include "opentxs/network/zeromq/zap/Request.hpp"
-#include "opentxs/network/zeromq/zap/ZAP.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Pimpl.hpp"
@@ -63,8 +63,7 @@ auto Callback::default_callback(const zap::Request& in) const -> Reply
     }
 }
 
-auto Callback::get_domain(const ReadView domain) const
-    -> const Callback::Lambda&
+auto Callback::get_domain(const ReadView domain) const -> const ReceiveCallback&
 {
     const auto key = UnallocatedCString{domain};
     auto lock = Lock{domain_lock_};

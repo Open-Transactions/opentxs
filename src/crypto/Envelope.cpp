@@ -21,23 +21,23 @@
 #include "2_Factory.hpp"
 #include "internal/api/crypto/Symmetric.hpp"
 #include "internal/api/session/FactoryAPI.hpp"
+#include "internal/core/Armored.hpp"
+#include "internal/crypto/Envelope.hpp"
 #include "internal/crypto/key/Key.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/serialization/protobuf/Proto.tpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
+#include "internal/util/PasswordPrompt.hpp"
 #include "opentxs/api/crypto/Config.hpp"
 #include "opentxs/api/crypto/Symmetric.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
-#include "opentxs/core/Armored.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Data.hpp"
-#include "opentxs/core/Secret.hpp"
 #include "opentxs/core/identifier/Generic.hpp"  // IWYU pragma: keep
 #include "opentxs/core/identifier/Nym.hpp"      // IWYU pragma: keep
-#include "opentxs/crypto/Envelope.hpp"
 #include "opentxs/crypto/Parameters.hpp"
 #include "opentxs/crypto/key/Asymmetric.hpp"
 #include "opentxs/crypto/key/Symmetric.hpp"
@@ -495,7 +495,7 @@ auto Envelope::seal(
         }
     }
 
-    auto password = OTPasswordPrompt{reason};
+    auto password = api_.Factory().PasswordPrompt(reason);
     set_default_password(api_, password);
     auto masterKey = api_.Crypto().Symmetric().Key(password);
     ciphertext_ = std::make_unique<proto::Ciphertext>();
@@ -527,7 +527,8 @@ auto Envelope::set_default_password(
     const api::Session& api,
     PasswordPrompt& password) noexcept -> bool
 {
-    return password.SetPassword(api.Factory().SecretFromText("opentxs"));
+    return password.Internal().SetPassword(
+        api.Factory().SecretFromText("opentxs"));
 }
 
 auto Envelope::Serialize(AllocateOutput destination) const noexcept -> bool

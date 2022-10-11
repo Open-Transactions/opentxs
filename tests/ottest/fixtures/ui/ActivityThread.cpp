@@ -13,6 +13,10 @@
 #include <sstream>
 #include <string_view>
 
+#include "internal/api/session/UI.hpp"
+#include "internal/interface/ui/ActivityThread.hpp"
+#include "internal/interface/ui/ActivityThreadItem.hpp"
+#include "internal/util/SharedPimpl.hpp"
 #include "ottest/fixtures/common/Counter.hpp"
 #include "ottest/fixtures/common/User.hpp"
 
@@ -23,7 +27,7 @@ using namespace opentxs::literals;
 auto activity_thread_send_message(const User& user, const User& remote) noexcept
     -> bool
 {
-    const auto& widget = user.api_->UI().ActivityThread(
+    const auto& widget = user.api_->UI().Internal().ActivityThread(
         user.nym_id_, user.Contact(remote.name_));
 
     return widget.SendDraft();
@@ -34,7 +38,7 @@ auto activity_thread_send_message(
     const User& remote,
     const ot::UnallocatedCString& messasge) noexcept -> bool
 {
-    const auto& widget = user.api_->UI().ActivityThread(
+    const auto& widget = user.api_->UI().Internal().ActivityThread(
         user.nym_id_, user.Contact(remote.name_));
     const auto set = widget.SetDraft(messasge);
     const auto sent = widget.SendDraft();
@@ -50,7 +54,8 @@ auto check_activity_thread(
     const ot::identifier::Generic& contact,
     const ActivityThreadData& expected) noexcept -> bool
 {
-    const auto& widget = user.api_->UI().ActivityThread(user.nym_id_, contact);
+    const auto& widget =
+        user.api_->UI().Internal().ActivityThread(user.nym_id_, contact);
     auto output{true};
     output &= (widget.CanMessage() == expected.can_message_);
     output &= (widget.DisplayName() == expected.display_name_);
@@ -143,7 +148,7 @@ auto init_activity_thread(
     const User& remote,
     Counter& counter) noexcept -> void
 {
-    user.api_->UI().ActivityThread(
+    user.api_->UI().Internal().ActivityThread(
         user.nym_id_, user.Contact(remote.name_), make_cb(counter, [&] {
             auto out = std::stringstream{};
             out << u8"activity_thread_"_sv;

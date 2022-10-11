@@ -13,11 +13,11 @@
 #include <memory>
 #include <utility>
 
+#include "internal/core/String.hpp"
 #include "internal/otx/common/XML.hpp"
 #include "internal/otx/common/util/Tag.hpp"
 #include "internal/otx/smartcontract/OTStashItem.hpp"
 #include "internal/util/LogMacros.hpp"
-#include "opentxs/core/String.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Pimpl.hpp"

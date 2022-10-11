@@ -19,6 +19,10 @@
 #include <tuple>
 
 #include "internal/interface/rpc/RPC.hpp"
+#include "internal/network/zeromq/ListenCallback.hpp"
+#include "internal/network/zeromq/socket/Publish.hpp"
+#include "internal/network/zeromq/socket/Pull.hpp"
+#include "internal/network/zeromq/socket/Subscribe.hpp"
 #include "internal/otx/common/Message.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/Lockable.hpp"
@@ -29,10 +33,6 @@
 #include "opentxs/interface/rpc/Types.hpp"
 #include "opentxs/interface/rpc/request/Base.hpp"
 #include "opentxs/interface/rpc/response/Base.hpp"
-#include "opentxs/network/zeromq/ListenCallback.hpp"
-#include "opentxs/network/zeromq/socket/Publish.hpp"
-#include "opentxs/network/zeromq/socket/Pull.hpp"
-#include "opentxs/network/zeromq/socket/Subscribe.hpp"
 #include "opentxs/otx/client/Types.hpp"
 #include "opentxs/util/Container.hpp"
 

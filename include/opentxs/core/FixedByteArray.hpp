@@ -70,18 +70,6 @@ public:
     auto data() -> void* final;
     [[nodiscard]] auto DecodeHex(const ReadView hex) -> bool final;
     auto end() -> iterator final;
-    [[nodiscard]] auto operator+=(const Data& rhs) noexcept(false)
-        -> FixedByteArray& final;
-    [[nodiscard]] auto operator+=(const ReadView rhs) noexcept(false)
-        -> FixedByteArray& final;
-    [[nodiscard]] auto operator+=(const std::uint8_t rhs) noexcept(false)
-        -> FixedByteArray& final;
-    [[nodiscard]] auto operator+=(const std::uint16_t rhs) noexcept(false)
-        -> FixedByteArray& final;
-    [[nodiscard]] auto operator+=(const std::uint32_t rhs) noexcept(false)
-        -> FixedByteArray& final;
-    [[nodiscard]] auto operator+=(const std::uint64_t rhs) noexcept(false)
-        -> FixedByteArray& final;
     [[nodiscard]] auto Randomize(const std::size_t size) -> bool final;
     [[nodiscard]] auto resize(const std::size_t) -> bool final { return false; }
     [[nodiscard]] auto SetSize(const std::size_t) -> bool final

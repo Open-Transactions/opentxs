@@ -9,7 +9,7 @@
 #include <filesystem>
 #include <memory>
 
-#include "opentxs/core/String.hpp"
+#include "internal/core/String.hpp"
 #include "opentxs/crypto/key/Symmetric.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Options.hpp"

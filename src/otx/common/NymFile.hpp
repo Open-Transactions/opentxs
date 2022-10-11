@@ -10,9 +10,9 @@
 #include <memory>
 
 #include "internal/core/Core.hpp"
+#include "internal/core/String.hpp"
 #include "internal/util/Lockable.hpp"
 #include "internal/util/Mutex.hpp"
-#include "opentxs/core/String.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/identity/Nym.hpp"
@@ -64,7 +64,7 @@ public:
         -> std::shared_ptr<Message> final;
     auto GetOutpaymentsByTransNum(
         const std::int64_t lTransNum,
-        const PasswordPrompt& reason,
+        const opentxs::PasswordPrompt& reason,
         std::unique_ptr<OTPayment>* pReturnPayment = nullptr,
         std::int32_t* pnReturnIndex = nullptr) const
         -> std::shared_ptr<Message> final;
@@ -95,7 +95,7 @@ public:
     auto RemoveOutpaymentsByIndex(const std::int32_t nIndex) -> bool final;
     auto RemoveOutpaymentsByTransNum(
         const std::int64_t lTransNum,
-        const PasswordPrompt& reason) -> bool final;
+        const opentxs::PasswordPrompt& reason) -> bool final;
     auto SaveSignedNymFile(const identity::Nym& SIGNER_NYM) -> bool;
     auto SetInboxHash(
         const UnallocatedCString& acct_id,
@@ -164,16 +164,18 @@ private:
         bool& converted,
         opentxs::String::Map* pMapCredentials,
         const OTPassword* pImportPassword = nullptr) -> bool;
-    auto LoadSignedNymFile(const PasswordPrompt& reason) -> bool final;
+    auto LoadSignedNymFile(const opentxs::PasswordPrompt& reason) -> bool final;
     template <typename T>
-    auto load_signed_nymfile(const T& lock, const PasswordPrompt& reason)
-        -> bool;
+    auto load_signed_nymfile(
+        const T& lock,
+        const opentxs::PasswordPrompt& reason) -> bool;
     void RemoveAllNumbers(
         const opentxs::String& pstrNotaryID = String::Factory());
-    auto SaveSignedNymFile(const PasswordPrompt& reason) -> bool final;
+    auto SaveSignedNymFile(const opentxs::PasswordPrompt& reason) -> bool final;
     template <typename T>
-    auto save_signed_nymfile(const T& lock, const PasswordPrompt& reason)
-        -> bool;
+    auto save_signed_nymfile(
+        const T& lock,
+        const opentxs::PasswordPrompt& reason) -> bool;
     template <typename T>
     auto serialize_nymfile(const T& lock, opentxs::String& strNym) const
         -> bool;

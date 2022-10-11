@@ -3,21 +3,22 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#include "0_stdafx.hpp"      // IWYU pragma: associated
-#include "api/Settings.hpp"  // IWYU pragma: associated
+#include "0_stdafx.hpp"              // IWYU pragma: associated
+#include "api/Settings.hpp"          // IWYU pragma: associated
+#include "internal/api/Factory.hpp"  // IWYU pragma: associated
 
 #include <simpleini/SimpleIni.h>
 #include <cstdint>
 #include <cstdlib>  // IWYU pragma: keep
 #include <memory>
 
-#include "internal/api/Factory.hpp"
 #include "internal/api/Legacy.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/Mutex.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/Size.hpp"
 #include "opentxs/util/Log.hpp"
+#include "opentxs/util/Pimpl.hpp"
 
 namespace opentxs::factory
 {
@@ -236,7 +237,7 @@ auto Settings::Load() const -> bool
     }
 }
 
-auto Settings::Save() const -> bool
+auto Settings::Save() const noexcept -> bool
 {
     rLock lock(lock_);
 
@@ -863,10 +864,106 @@ auto Settings::SetOption_bool(
         strSection, strKey, bVariableName, bVariableName, bNewOrUpdate);
 }
 
+auto Settings::ReadBool(
+    const std::string_view section,
+    const std::string_view key,
+    bool& out) const noexcept -> bool
+{
+    auto notUsed{false};
+
+    return Check_bool(
+        String::Factory(section.data(), section.size()),
+        String::Factory(key.data(), key.size()),
+        out,
+        notUsed);
+}
+
+auto Settings::ReadNumber(
+    const std::string_view section,
+    const std::string_view key,
+    std::int64_t& out) const noexcept -> bool
+{
+    auto notUsed{false};
+
+    return Check_long(
+        String::Factory(section.data(), section.size()),
+        String::Factory(key.data(), key.size()),
+        out,
+        notUsed);
+}
+
+auto Settings::ReadString(
+    const std::string_view section,
+    const std::string_view key,
+    const AllocateOutput out) const noexcept -> bool
+{
+    auto notUsed{false};
+    auto value = String::Factory();
+    const auto rc = Check_str(
+        String::Factory(section.data(), section.size()),
+        String::Factory(key.data(), key.size()),
+        value,
+        notUsed);
+
+    if (rc) {
+
+        return copy(value->Bytes(), out);
+    } else {
+
+        return false;
+    }
+}
+
+auto Settings::WriteBool(
+    const std::string_view section,
+    const std::string_view key,
+    const bool value) const noexcept -> bool
+{
+    auto notUsed{false};
+
+    return Set_bool(
+        String::Factory(section.data(), section.size()),
+        String::Factory(key.data(), key.size()),
+        value,
+        notUsed);
+}
+
+auto Settings::WriteNumber(
+    const std::string_view section,
+    const std::string_view key,
+    const std::int64_t value) const noexcept -> bool
+{
+    auto notUsed{false};
+
+    return Set_long(
+        String::Factory(section.data(), section.size()),
+        String::Factory(key.data(), key.size()),
+        value,
+        notUsed);
+}
+
+auto Settings::WriteString(
+    const std::string_view section,
+    const std::string_view key,
+    const std::string_view value) const noexcept -> bool
+{
+    auto notUsed{false};
+
+    return Set_str(
+        String::Factory(section.data(), section.size()),
+        String::Factory(key.data(), key.size()),
+        String::Factory(value.data(), value.size()),
+        notUsed);
+}
+
 Settings::~Settings()
 {
     rLock lock(lock_);
-    Save();
+
+    if (false == Save()) {
+        LogAbort()(OT_PRETTY_CLASS())("failed to save config file").Abort();
+    }
+
     Reset();
 }
 }  // namespace opentxs::api::imp

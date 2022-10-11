@@ -5,9 +5,9 @@
 
 #pragma once
 
-#include "opentxs/crypto/library/AsymmetricProvider.hpp"
-#include "opentxs/crypto/library/EcdsaProvider.hpp"
-#include "opentxs/crypto/library/SymmetricProvider.hpp"
+#include "internal/crypto/library/AsymmetricProvider.hpp"
+#include "internal/crypto/library/EcdsaProvider.hpp"
+#include "internal/crypto/library/SymmetricProvider.hpp"
 
 namespace opentxs::crypto::blank
 {

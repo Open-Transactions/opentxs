@@ -7,9 +7,9 @@
 
 #include <tuple>
 
+#include "internal/core/contract/peer/BailmentReply.hpp"
+#include "internal/core/contract/peer/ConnectionReply.hpp"
 #include "opentxs/core/Types.hpp"
-#include "opentxs/core/contract/peer/BailmentReply.hpp"
-#include "opentxs/core/contract/peer/ConnectionReply.hpp"
 #include "opentxs/core/contract/peer/Types.hpp"
 #include "opentxs/util/Container.hpp"
 

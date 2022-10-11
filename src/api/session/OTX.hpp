@@ -20,6 +20,10 @@
 #include <utility>
 
 #include "internal/api/session/OTX.hpp"
+#include "internal/network/zeromq/ListenCallback.hpp"
+#include "internal/network/zeromq/socket/Publish.hpp"
+#include "internal/network/zeromq/socket/Pull.hpp"
+#include "internal/network/zeromq/socket/Subscribe.hpp"
 #include "internal/otx/client/Client.hpp"
 #include "internal/otx/client/OTPayment.hpp"
 #include "internal/otx/common/Cheque.hpp"
@@ -39,10 +43,6 @@
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/core/identifier/UnitDefinition.hpp"
 #include "opentxs/identity/wot/claim/ClaimType.hpp"
-#include "opentxs/network/zeromq/ListenCallback.hpp"
-#include "opentxs/network/zeromq/socket/Publish.hpp"
-#include "opentxs/network/zeromq/socket/Pull.hpp"
-#include "opentxs/network/zeromq/socket/Subscribe.hpp"
 #include "opentxs/otx/LastReplyStatus.hpp"
 #include "opentxs/otx/client/Types.hpp"
 #include "opentxs/util/Container.hpp"
@@ -366,7 +366,7 @@ private:
     mutable std::atomic<TaskID> next_task_id_;
     mutable std::atomic<bool> shutdown_;
     mutable std::mutex shutdown_lock_;
-    mutable OTPasswordPrompt reason_;
+    mutable PasswordPrompt reason_;
 
     static auto error_task() -> BackgroundTask;
     static auto error_result() -> Result

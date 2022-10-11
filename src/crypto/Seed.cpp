@@ -299,7 +299,7 @@ Seed::Imp::Imp(
                       throw std::runtime_error{"Invalid seed strength"};
                   }
 
-                  out->Randomize(
+                  out.Randomize(
                       static_cast<std::size_t>(strength) / bitsPerByte);
 
                   return out;
@@ -315,7 +315,7 @@ Seed::Imp::Imp(
           }(),
           [&] {
               auto out = factory.Secret(0);
-              out->AssignText(no_passphrase_);
+              out.AssignText(no_passphrase_);
 
               return out;
           }(),
@@ -349,7 +349,7 @@ Seed::Imp::Imp(
 
         return out;
     }())
-    , id_(bip32.SeedID(entropy_->Bytes()))
+    , id_(bip32.SeedID(entropy_.Bytes()))
     , storage_(&storage)
     , encrypted_words_()
     , encrypted_phrase_()
@@ -364,13 +364,11 @@ Seed::Imp::Imp(
           reason))
     , data_()
 {
-    if (16u > entropy_->size()) {
+    if (16u > entropy_.size()) {
         throw std::runtime_error{"Entropy too short"};
     }
 
-    if (64u < entropy_->size()) {
-        throw std::runtime_error{"Entropy too long"};
-    }
+    if (64u < entropy_.size()) { throw std::runtime_error{"Entropy too long"}; }
 
     if (false == save()) { throw std::runtime_error{"Failed to save seed"}; }
 }
@@ -388,7 +386,7 @@ Seed::Imp::Imp(
     , words_(factory.Secret(0))
     , phrase_(factory.Secret(0))
     , entropy_(entropy)
-    , id_(bip32.SeedID(entropy_->Bytes()))
+    , id_(bip32.SeedID(entropy_.Bytes()))
     , storage_(&storage)
     , encrypted_words_()
     , encrypted_phrase_()
@@ -403,13 +401,11 @@ Seed::Imp::Imp(
           reason))
     , data_()
 {
-    if (16u > entropy_->size()) {
+    if (16u > entropy_.size()) {
         throw std::runtime_error{"Entropy too short"};
     }
 
-    if (64u < entropy_->size()) {
-        throw std::runtime_error{"Entropy too long"};
-    }
+    if (64u < entropy_.size()) { throw std::runtime_error{"Entropy too long"}; }
 
     if (false == save()) { throw std::runtime_error{"Failed to save seed"}; }
 }
@@ -445,7 +441,7 @@ Seed::Imp::Imp(
     }
 
     if (proto.has_words()) {
-        auto& words = const_cast<Secret&>(words_.get());
+        auto& words = const_cast<Secret&>(words_);
         const auto rc = key->Decrypt(
             encrypted_words_, reason, words.WriteInto(Secret::Mode::Text));
 
@@ -455,7 +451,7 @@ Seed::Imp::Imp(
     }
 
     if (proto.has_passphrase()) {
-        auto& phrase = const_cast<Secret&>(phrase_.get());
+        auto& phrase = const_cast<Secret&>(phrase_);
         const auto rc = key->Decrypt(
             encrypted_phrase_, reason, phrase.WriteInto(Secret::Mode::Text));
 
@@ -465,7 +461,7 @@ Seed::Imp::Imp(
     }
 
     if (proto.has_raw()) {
-        auto& entropy = const_cast<Secret&>(entropy_.get());
+        auto& entropy = const_cast<Secret&>(entropy_);
         const auto rc = key->Decrypt(
             encrypted_entropy_, reason, entropy.WriteInto(Secret::Mode::Text));
 
@@ -475,7 +471,7 @@ Seed::Imp::Imp(
     } else {
         OT_ASSERT(proto.has_words());
 
-        auto& entropy = const_cast<Secret&>(entropy_.get());
+        auto& entropy = const_cast<Secret&>(entropy_);
 
         if (false ==
             bip39.WordsToSeed(api, type_, lang_, words_, entropy, phrase_)) {
@@ -485,11 +481,11 @@ Seed::Imp::Imp(
         auto ctext = const_cast<proto::Ciphertext&>(encrypted_entropy_);
         auto cwords = const_cast<proto::Ciphertext&>(encrypted_words_);
 
-        if (!key->Encrypt(entropy_->Bytes(), reason, ctext, true)) {
+        if (!key->Encrypt(entropy_.Bytes(), reason, ctext, true)) {
             throw std::runtime_error{"Failed to encrypt entropy"};
         }
 
-        if (!key->Encrypt(words_->Bytes(), reason, cwords, false)) {
+        if (!key->Encrypt(words_.Bytes(), reason, cwords, false)) {
             throw std::runtime_error{"Failed to encrypt words"};
         }
 
@@ -571,9 +567,9 @@ auto Seed::Imp::save(const MutableData& data) const noexcept -> bool
     proto.set_type(internal::translate(type_));
     proto.set_lang(internal::translate(lang_));
 
-    if (0u < words_->size()) { *proto.mutable_words() = encrypted_words_; }
+    if (0u < words_.size()) { *proto.mutable_words() = encrypted_words_; }
 
-    if (0u < phrase_->size()) {
+    if (0u < phrase_.size()) {
         *proto.mutable_passphrase() = encrypted_phrase_;
     }
 

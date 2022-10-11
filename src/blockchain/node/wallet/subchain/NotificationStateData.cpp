@@ -48,7 +48,7 @@
 #include "opentxs/util/Iterator.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/NymEditor.hpp"
-#include "opentxs/util/Pimpl.hpp"
+#include "opentxs/util/PasswordPrompt.hpp"
 
 namespace opentxs::blockchain::node::wallet
 {
@@ -210,9 +210,9 @@ auto NotificationStateData::init_contacts(allocator_type monotonic) noexcept
     }
 }
 
-auto NotificationStateData::init_keys() const noexcept -> OTPasswordPrompt
+auto NotificationStateData::init_keys() const noexcept -> PasswordPrompt
 {
-    const auto reason = api_.Factory().PasswordPrompt(
+    auto reason = api_.Factory().PasswordPrompt(
         "Decoding payment code notification transaction");
     auto handle = code_.lock();
 

@@ -29,7 +29,7 @@ protected:
         "ot2xkvDhg67hCe4xvgz3KHj89JhEJp3UbLxFy2CunoZoKGCxhPYVkR9"};
 
     const ot::api::session::Client& api_;
-    const ot::OTPasswordPrompt reason_;
+    const ot::PasswordPrompt reason_;
     const ot::identifier::Nym& nym_id_;
     const ot::blockchain::crypto::HD& account_;
 

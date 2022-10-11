@@ -13,6 +13,8 @@
 
 #include "core/contract/Signable.hpp"
 #include "internal/api/session/FactoryAPI.hpp"
+#include "internal/api/session/Wallet.hpp"
+#include "internal/core/contract/ServerContract.hpp"
 #include "internal/identity/Nym.hpp"
 #include "internal/otx/OTX.hpp"
 #include "internal/serialization/protobuf/Check.hpp"
@@ -20,12 +22,12 @@
 #include "internal/serialization/protobuf/Proto.tpp"
 #include "internal/serialization/protobuf/verify/ServerReply.hpp"
 #include "internal/util/LogMacros.hpp"
+#include "internal/util/SharedPimpl.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/api/session/Wallet.hpp"
 #include "opentxs/core/ByteArray.hpp"
-#include "opentxs/core/contract/ServerContract.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/crypto/SignatureRole.hpp"
@@ -34,7 +36,6 @@
 #include "opentxs/otx/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
-#include "opentxs/util/SharedPimpl.hpp"
 
 namespace opentxs::otx
 {
@@ -294,7 +295,7 @@ auto Reply::Imp::extract_nym(
     const auto serverID = api.Factory().NotaryIDFromBase58(serialized.server());
 
     try {
-        return api.Wallet().Server(serverID)->Nym();
+        return api.Wallet().Internal().Server(serverID)->Nym();
     } catch (...) {
         LogError()(OT_PRETTY_STATIC(Reply))("Invalid server id.").Flush();
 

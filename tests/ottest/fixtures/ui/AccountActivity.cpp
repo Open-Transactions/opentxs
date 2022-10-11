@@ -13,6 +13,10 @@
 #include <sstream>
 #include <string_view>
 
+#include "internal/api/session/UI.hpp"
+#include "internal/interface/ui/AccountActivity.hpp"
+#include "internal/interface/ui/BalanceItem.hpp"
+#include "internal/util/SharedPimpl.hpp"
 #include "ottest/fixtures/common/Counter.hpp"
 #include "ottest/fixtures/common/User.hpp"
 
@@ -25,7 +29,8 @@ auto check_account_activity(
     const ot::identifier::Generic& account,
     const AccountActivityData& expected) noexcept -> bool
 {
-    const auto& widget = user.api_->UI().AccountActivity(user.nym_id_, account);
+    const auto& widget =
+        user.api_->UI().Internal().AccountActivity(user.nym_id_, account);
     auto output{true};
     output &= (widget.AccountID() == expected.id_);
     output &= (widget.Balance() == expected.balance_);
@@ -150,7 +155,7 @@ auto init_account_activity(
     const ot::identifier::Generic& account,
     Counter& counter) noexcept -> void
 {
-    user.api_->UI().AccountActivity(
+    user.api_->UI().Internal().AccountActivity(
         user.nym_id_, account, make_cb(counter, [&] {
             auto out = std::stringstream{};
             out << u8"account_activity_"_sv;

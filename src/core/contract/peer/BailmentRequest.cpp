@@ -14,6 +14,7 @@
 
 #include "2_Factory.hpp"
 #include "core/contract/peer/PeerRequest.hpp"
+#include "internal/api/session/Wallet.hpp"
 #include "internal/serialization/protobuf/Check.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/serialization/protobuf/verify/PeerRequest.hpp"
@@ -44,7 +45,7 @@ auto Factory::BailmentRequest(
     using ReturnType = contract::peer::request::implementation::Bailment;
 
     try {
-        api.Wallet().UnitDefinition(unit);
+        api.Wallet().Internal().UnitDefinition(unit);
 
         auto output =
             std::make_shared<ReturnType>(api, nym, recipient, unit, server);

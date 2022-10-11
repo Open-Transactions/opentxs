@@ -12,10 +12,10 @@
 #include "internal/interface/ui/UI.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/Mutex.hpp"
+#include "internal/util/SharedPimpl.hpp"
 #include "opentxs/core/Types.hpp"
 #include "opentxs/identity/wot/claim/Types.hpp"
 #include "opentxs/util/Container.hpp"
-#include "opentxs/util/SharedPimpl.hpp"
 
 class QVariant;
 

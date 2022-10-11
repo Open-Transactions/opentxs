@@ -9,6 +9,7 @@
 #include <future>
 #include <memory>
 
+#include "internal/network/zeromq/ListenCallback.hpp"
 #include "ottest/Basic.hpp"
 
 namespace ottest

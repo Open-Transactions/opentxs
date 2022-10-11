@@ -12,8 +12,8 @@
 #include <string_view>
 
 #include "interface/ui/base/List.hpp"
+#include "internal/interface/ui/AccountTreeItem.hpp"
 #include "opentxs/core/Types.hpp"
-#include "opentxs/interface/ui/AccountTreeItem.hpp"
 
 namespace opentxs::factory
 {

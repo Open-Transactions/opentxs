@@ -8,6 +8,7 @@
 #include <opentxs/opentxs.hpp>
 #include <type_traits>
 
+#include "internal/api/session/FactoryAPI.hpp"
 #include "internal/blockchain/Params.hpp"
 #include "internal/blockchain/block/Header.hpp"
 #include "internal/blockchain/node/headeroracle/HeaderOracle.hpp"
@@ -2701,7 +2702,8 @@ auto Test_HeaderOracle_base::make_test_block(
     const bb::Hash& parent) -> bool
 {
     const auto child = ot::blockchain::block::Hash{hash};
-    auto pHeader = api_.Factory().BlockHeaderForUnitTests(child, parent, -1);
+    auto pHeader = api_.Factory().InternalSession().BlockHeaderForUnitTests(
+        child, parent, -1);
 
     if (false == bool(pHeader)) { return false; }
 

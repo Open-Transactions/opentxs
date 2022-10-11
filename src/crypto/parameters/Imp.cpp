@@ -138,7 +138,7 @@ auto Parameters::Imp::Hash() const noexcept -> ByteArray
         out.Concatenate(&seed_style_, sizeof(seed_style_));
         out.Concatenate(&seed_language_, sizeof(seed_language_));
         out.Concatenate(&seed_strength_, sizeof(seed_strength_));
-        out.Concatenate(entropy_->data(), entropy_->size());  // TODO hash this
+        out.Concatenate(entropy_.data(), entropy_.size());  // TODO hash this
         out.Concatenate(seed_.data(), seed_.size());
         out.Concatenate(&nym_, sizeof(nym_));
         out.Concatenate(&credset_, sizeof(credset_));

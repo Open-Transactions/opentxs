@@ -23,17 +23,18 @@ extern "C" {
 #include <utility>
 
 #include "crypto/library/openssl/BIO.hpp"
+#include "internal/api/session/FactoryAPI.hpp"
+#include "internal/core/Armored.hpp"
+#include "internal/core/String.hpp"
+#include "internal/crypto/Envelope.hpp"
 #include "internal/otx/blind/Factory.hpp"
 #include "internal/otx/blind/Token.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
-#include "opentxs/core/Armored.hpp"
-#include "opentxs/core/String.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/core/identifier/UnitDefinition.hpp"
-#include "opentxs/crypto/Envelope.hpp"
 #include "opentxs/identity/Nym.hpp"
 #include "opentxs/otx/blind/CashType.hpp"
 #include "opentxs/otx/blind/Mint.hpp"
@@ -178,7 +179,7 @@ auto Lucre::AddDenomination(
 
     // Seal the private bank info up into an encrypted Envelope
     // and set it onto pPrivate
-    auto envelope = api_.Factory().Envelope();
+    auto envelope = api_.Factory().InternalSession().Envelope();
     envelope->Seal(theNotary, strPrivateBank->Bytes(), reason);
     // TODO check the return values on these twofunctions
     envelope->Armored(pPrivate);
@@ -242,7 +243,8 @@ auto Lucre::SignToken(
     auto privateKey = String::Factory();
 
     try {
-        auto envelope = api_.Factory().Envelope(armoredPrivate);
+        auto envelope =
+            api_.Factory().InternalSession().Envelope(armoredPrivate);
 
         if (false == envelope->Open(notary, privateKey->WriteInto(), reason)) {
             LogError()(OT_PRETTY_CLASS())("Failed to decrypt private key")
@@ -351,7 +353,8 @@ auto Lucre::VerifyToken(
     auto privateKey = String::Factory();
 
     try {
-        auto envelope = api_.Factory().Envelope(armoredPrivate);
+        auto envelope =
+            api_.Factory().InternalSession().Envelope(armoredPrivate);
 
         if (false == envelope->Open(notary, privateKey->WriteInto(), reason)) {
             LogError()(OT_PRETTY_CLASS())(

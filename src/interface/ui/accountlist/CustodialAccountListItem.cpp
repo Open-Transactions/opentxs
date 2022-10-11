@@ -8,10 +8,11 @@
 
 #include <memory>
 
+#include "internal/api/session/Wallet.hpp"
+#include "internal/core/contract/ServerContract.hpp"
+#include "internal/util/SharedPimpl.hpp"
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/Wallet.hpp"
-#include "opentxs/core/contract/ServerContract.hpp"
-#include "opentxs/util/SharedPimpl.hpp"
 
 namespace opentxs::factory
 {
@@ -45,7 +46,7 @@ auto CustodialAccountListItem::NotaryName() const noexcept -> UnallocatedCString
 {
     try {
 
-        return api_.Wallet().Server(notary_id_)->EffectiveName();
+        return api_.Wallet().Internal().Server(notary_id_)->EffectiveName();
     } catch (...) {
 
         return NotaryID();

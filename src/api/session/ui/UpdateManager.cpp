@@ -13,6 +13,9 @@
 #include <utility>
 
 #include "internal/network/zeromq/Context.hpp"
+#include "internal/network/zeromq/Pipeline.hpp"
+#include "internal/network/zeromq/socket/Publish.hpp"
+#include "internal/network/zeromq/socket/Types.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/Mutex.hpp"
 #include "internal/util/P0330.hpp"
@@ -23,13 +26,10 @@
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
-#include "opentxs/network/zeromq/Pipeline.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
 #include "opentxs/network/zeromq/message/FrameSection.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/network/zeromq/message/Message.tpp"
-#include "opentxs/network/zeromq/socket/Publish.hpp"
-#include "opentxs/network/zeromq/socket/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Types.hpp"
@@ -91,7 +91,7 @@ struct UpdateManager::Imp {
         : api_(api)
         , lock_()
         , map_()
-        , publisher_(api.Network().ZeroMQ().PublishSocket())
+        , publisher_(api.Network().ZeroMQ().Internal().PublishSocket())
         , pipeline_(api.Network().ZeroMQ().Internal().Pipeline(
               [this](auto&& in) { pipeline(std::move(in)); },
               "UpdateManager"))

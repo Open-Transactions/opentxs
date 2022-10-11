@@ -22,6 +22,9 @@
 
 #include "interface/ui/base/List.hpp"
 #include "internal/identity/Nym.hpp"
+#include "internal/interface/ui/SeedTreeItem.hpp"
+#include "internal/network/zeromq/Pipeline.hpp"
+#include "internal/network/zeromq/socket/Types.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/api/crypto/Seed.hpp"
 #include "opentxs/api/session/Client.hpp"
@@ -35,13 +38,10 @@
 #include "opentxs/crypto/SeedStyle.hpp"
 #include "opentxs/identity/Nym.hpp"
 #include "opentxs/identity/Types.hpp"
-#include "opentxs/interface/ui/SeedTreeItem.hpp"
-#include "opentxs/network/zeromq/Pipeline.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
 #include "opentxs/network/zeromq/message/FrameSection.hpp"
-#include "opentxs/network/zeromq/socket/Types.hpp"
 #include "opentxs/util/Log.hpp"
-#include "opentxs/util/Pimpl.hpp"
+#include "opentxs/util/PasswordPrompt.hpp"  // IWYU pragma: keep
 
 namespace zmq = opentxs::network::zeromq;
 

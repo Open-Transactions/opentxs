@@ -16,6 +16,10 @@
 #include <utility>
 
 #include "internal/network/otdht/Factory.hpp"
+#include "internal/network/zeromq/Context.hpp"
+#include "internal/network/zeromq/ListenCallback.hpp"
+#include "internal/network/zeromq/socket/Dealer.hpp"
+#include "internal/network/zeromq/socket/Types.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/Mutex.hpp"
 #include "ottest/fixtures/blockchain/Common.hpp"
@@ -54,7 +58,8 @@ struct SyncRequestor::Imp {
         , buffer_()
         , cb_(ot::network::zeromq::ListenCallback::Factory(
               [&](auto&& msg) { cb(std::move(msg)); }))
-        , socket_(api.Network().ZeroMQ().DealerSocket(cb_, Dir::Connect))
+        , socket_(
+              api.Network().ZeroMQ().Internal().DealerSocket(cb_, Dir::Connect))
     {
         socket_->Start(sync_server_main_endpoint_);
     }

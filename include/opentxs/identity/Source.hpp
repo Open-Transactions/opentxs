@@ -8,7 +8,6 @@
 #include <memory>
 
 #include "opentxs/Export.hpp"
-#include "opentxs/core/String.hpp"
 #include "opentxs/identity/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -21,20 +20,11 @@ class Nym;
 
 namespace identity
 {
-namespace credential
+namespace internal
 {
-class Primary;
-}  // namespace credential
+class Source;
+}  // namespace internal
 }  // namespace identity
-
-namespace proto
-{
-class Credential;
-class NymIDSource;
-class Signature;
-}  // namespace proto
-
-class PasswordPrompt;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -43,19 +33,11 @@ namespace opentxs::identity
 class OPENTXS_EXPORT Source
 {
 public:
-    virtual auto asString() const noexcept -> OTString = 0;
-    virtual auto Description() const noexcept -> OTString = 0;
+    virtual auto Internal() const noexcept -> const internal::Source& = 0;
     virtual auto Type() const noexcept -> identity::SourceType = 0;
     virtual auto NymID() const noexcept -> identifier::Nym = 0;
-    OPENTXS_NO_EXPORT virtual auto Serialize(
-        proto::NymIDSource& serialized) const noexcept -> bool = 0;
-    OPENTXS_NO_EXPORT virtual auto Verify(
-        const proto::Credential& master,
-        const proto::Signature& sourceSignature) const noexcept -> bool = 0;
-    OPENTXS_NO_EXPORT virtual auto Sign(
-        const identity::credential::Primary& credential,
-        proto::Signature& sig,
-        const PasswordPrompt& reason) const noexcept -> bool = 0;
+
+    virtual auto Internal() noexcept -> internal::Source& = 0;
 
     Source(const Source&) = delete;
     Source(Source&&) = delete;

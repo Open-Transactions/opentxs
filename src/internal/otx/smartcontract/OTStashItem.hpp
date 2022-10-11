@@ -7,7 +7,7 @@
 
 #include <cstdint>
 
-#include "opentxs/core/String.hpp"
+#include "internal/core/String.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs

@@ -14,6 +14,7 @@
 #include "internal/network/otdht/Node.hpp"
 #include "internal/network/otdht/Types.hpp"
 #include "internal/network/zeromq/Context.hpp"
+#include "internal/network/zeromq/socket/SocketType.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "opentxs/api/network/Blockchain.hpp"
@@ -21,7 +22,6 @@
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
-#include "opentxs/network/zeromq/socket/SocketType.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Options.hpp"
 #include "util/Work.hpp"
@@ -108,7 +108,6 @@ auto OTDHT::Start(std::shared_ptr<const api::Session> api) noexcept -> void
         static const auto defaultServers = Endpoints{
             "tcp://metier1.opentransactions.org:8814",
             "tcp://metier2.opentransactions.org:8814",
-            "tcp://ot01.matterfi.net:8814",
         };
         const auto existing = [&] {
             auto out = Set<CString>{};

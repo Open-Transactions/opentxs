@@ -12,6 +12,8 @@
 #include <cstring>
 #include <string_view>
 
+#include "internal/api/session/Wallet.hpp"
+#include "internal/core/String.hpp"
 #include "internal/otx/common/Instrument.hpp"
 #include "internal/otx/common/StringXML.hpp"
 #include "internal/otx/common/util/Common.hpp"
@@ -20,7 +22,6 @@
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/api/session/Wallet.hpp"
-#include "opentxs/core/String.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
 #include "opentxs/util/Bytes.hpp"
@@ -327,8 +328,9 @@ auto OTOffer::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
         SetValidFrom(tValidFrom);
         SetValidTo(tValidTo);
 
-        const auto unittype = api_.Wallet().CurrencyTypeBasedOnUnitType(
-            GetInstrumentDefinitionID());
+        const auto unittype =
+            api_.Wallet().Internal().CurrencyTypeBasedOnUnitType(
+                GetInstrumentDefinitionID());
         LogTrace()(OT_PRETTY_CLASS())("Offer Transaction Number: ")(
             transaction_num_)("\n Valid From: ")(tValidFrom)("\n Valid To: ")(
             tValidTo)("\n InstrumentDefinitionID: ")(

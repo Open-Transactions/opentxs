@@ -6,6 +6,10 @@
 target_sources(
   opentxs-common
   PRIVATE
+    "${opentxs_SOURCE_DIR}/src/internal/interface/ui/Contact.hpp"
+    "${opentxs_SOURCE_DIR}/src/internal/interface/ui/ContactItem.hpp"
+    "${opentxs_SOURCE_DIR}/src/internal/interface/ui/ContactSection.hpp"
+    "${opentxs_SOURCE_DIR}/src/internal/interface/ui/ContactSubsection.hpp"
     "Contact.cpp"
     "Contact.hpp"
     "ContactItem.cpp"
@@ -15,18 +19,3 @@ target_sources(
     "ContactSubsection.cpp"
     "ContactSubsection.hpp"
 )
-set(cxx-install-headers
-    "${opentxs_SOURCE_DIR}/include/opentxs/interface/ui/Contact.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/interface/ui/ContactItem.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/interface/ui/ContactSection.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/interface/ui/ContactSubsection.hpp"
-)
-target_sources(opentxs-common PRIVATE ${cxx-install-headers})
-
-if(OPENTXS_STANDALONE)
-  install(
-    FILES ${cxx-install-headers}
-    DESTINATION include/opentxs/interface/ui
-    COMPONENT dev
-  )
-endif()

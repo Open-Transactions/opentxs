@@ -28,7 +28,7 @@ public:
         "ot2xuVYn8io5LpjK7itnUT7ujx8n5Rt3GKs5xXeh9nfZja2SwB5jEq6"};
 
     const ot::api::session::Client& api_;
-    ot::OTPasswordPrompt reason_;
+    ot::PasswordPrompt reason_;
     ot::UnallocatedCString seed_a_;
     ot::UnallocatedCString seed_b_;
     ot::UnallocatedCString seed_c_;

@@ -6,15 +6,21 @@
 #pragma once
 
 #include <Enums.pb.h>
+#include <cstdint>
+#include <memory>
 
 #include "internal/core/contract/Types.hpp"
+#include "internal/core/contract/peer/PeerReply.hpp"
+#include "internal/core/contract/peer/PeerRequest.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/core/Types.hpp"
-#include "opentxs/core/contract/peer/PeerReply.hpp"
-#include "opentxs/core/contract/peer/PeerRequest.hpp"
 #include "opentxs/core/contract/peer/Types.hpp"
+#include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/identity/Types.hpp"
+#include "opentxs/util/Bytes.hpp"
+#include "opentxs/util/Container.hpp"
+#include "opentxs/util/Numbers.hpp"
 #include "opentxs/util/Time.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -63,9 +69,9 @@ class Wallet;
 }  // namespace session
 
 class Context;
-class Session;
 class Crypto;
 class Legacy;
+class Session;
 class Settings;
 }  // namespace api
 
@@ -214,13 +220,14 @@ class Server;
 
 namespace identifier
 {
-class Nym;
 class Notary;
+class Nym;
 class UnitDefinition;
 }  // namespace identifier
 
 namespace identity
 {
+class Nym;
 class Source;
 }  // namespace identity
 
@@ -235,6 +242,8 @@ class Issuer;
 class Nym;
 class NymIDSource;
 class PeerObject;
+class PeerReply;
+class PeerRequest;
 class Purse;
 class ServerContract;
 class SymmetricKey;
@@ -287,9 +296,9 @@ class Units;
 class Flag;
 class Libsecp256k1;
 class Libsodium;
-class PasswordCallback;
 class OpenSSL;
 class Options;
+class PasswordCallback;
 class PasswordPrompt;
 class PeerObject;
 class Secret;
@@ -298,6 +307,10 @@ class Secret;
 
 namespace opentxs
 {
+class Armored;
+class Data;
+class String;
+
 class Factory
 {
 public:
@@ -550,9 +563,6 @@ public:
         const Nym_p& nym,
         const proto::PeerRequest& serialized) noexcept
         -> std::shared_ptr<contract::peer::request::Outbailment>;
-    static auto PasswordPrompt(
-        const api::Session& api,
-        const UnallocatedCString& text) -> opentxs::PasswordPrompt*;
     static auto PrimaryCredential(
         const api::Session& api,
         identity::internal::Authority& parent,

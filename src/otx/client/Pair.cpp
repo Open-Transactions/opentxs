@@ -22,12 +22,20 @@
 #include "core/StateMachine.hpp"
 #include "internal/api/session/Wallet.hpp"
 #include "internal/core/Core.hpp"
+#include "internal/core/String.hpp"
+#include "internal/core/contract/ServerContract.hpp"
+#include "internal/core/contract/Unit.hpp"
 #include "internal/core/contract/peer/Peer.hpp"
+#include "internal/network/zeromq/Context.hpp"
+#include "internal/network/zeromq/ListenCallback.hpp"
 #include "internal/network/zeromq/message/Message.hpp"
+#include "internal/network/zeromq/socket/Publish.hpp"
+#include "internal/network/zeromq/socket/Subscribe.hpp"
 #include "internal/otx/client/Factory.hpp"
 #include "internal/otx/client/Issuer.hpp"
 #include "internal/otx/client/Pair.hpp"
 #include "internal/otx/common/Message.hpp"
+#include "internal/otx/consensus/Server.hpp"
 #include "internal/serialization/protobuf/Check.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/serialization/protobuf/Proto.tpp"
@@ -37,6 +45,7 @@
 #include "internal/util/Flag.hpp"
 #include "internal/util/Lockable.hpp"
 #include "internal/util/LogMacros.hpp"
+#include "internal/util/SharedPimpl.hpp"
 #include "opentxs/api/crypto/Config.hpp"
 #include "opentxs/api/crypto/Seed.hpp"
 #include "opentxs/api/network/Network.hpp"
@@ -48,9 +57,6 @@
 #include "opentxs/api/session/Wallet.hpp"
 #include "opentxs/blockchain/BlockchainType.hpp"
 #include "opentxs/core/Data.hpp"
-#include "opentxs/core/String.hpp"
-#include "opentxs/core/contract/ServerContract.hpp"
-#include "opentxs/core/contract/Unit.hpp"
 #include "opentxs/core/contract/peer/ConnectionInfoType.hpp"
 #include "opentxs/core/contract/peer/PeerRequestType.hpp"
 #include "opentxs/core/contract/peer/SecretType.hpp"
@@ -63,19 +69,14 @@
 #include "opentxs/identity/wot/claim/SectionType.hpp"
 #include "opentxs/identity/wot/claim/Types.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
-#include "opentxs/network/zeromq/ListenCallback.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
 #include "opentxs/network/zeromq/message/FrameSection.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
-#include "opentxs/network/zeromq/socket/Publish.hpp"
-#include "opentxs/network/zeromq/socket/Subscribe.hpp"
 #include "opentxs/otx/LastReplyStatus.hpp"
 #include "opentxs/otx/client/Types.hpp"
-#include "opentxs/otx/consensus/Server.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
-#include "opentxs/util/Pimpl.hpp"
-#include "opentxs/util/SharedPimpl.hpp"
+#include "opentxs/util/PasswordPrompt.hpp"
 #include "opentxs/util/Time.hpp"
 
 #define MINIMUM_UNUSED_BAILMENTS 3
@@ -116,16 +117,19 @@ Pair::Pair(const Flag& running, const api::session::Client& client)
           [this](const auto& in) -> void { callback_peer_reply(in); }))
     , peer_request_callback_(zmq::ListenCallback::Factory(
           [this](const auto& in) -> void { callback_peer_request(in); }))
-    , pair_event_(client_.Network().ZeroMQ().PublishSocket())
-    , pending_bailment_(client_.Network().ZeroMQ().PublishSocket())
-    , nym_subscriber_(
-          client_.Network().ZeroMQ().SubscribeSocket(nym_callback_, "Pair nym"))
-    , peer_reply_subscriber_(client_.Network().ZeroMQ().SubscribeSocket(
-          peer_reply_callback_,
-          "Pair reply"))
-    , peer_request_subscriber_(client_.Network().ZeroMQ().SubscribeSocket(
-          peer_request_callback_,
-          "Pair request"))
+    , pair_event_(client_.Network().ZeroMQ().Internal().PublishSocket())
+    , pending_bailment_(client_.Network().ZeroMQ().Internal().PublishSocket())
+    , nym_subscriber_(client_.Network().ZeroMQ().Internal().SubscribeSocket(
+          nym_callback_,
+          "Pair nym"))
+    , peer_reply_subscriber_(
+          client_.Network().ZeroMQ().Internal().SubscribeSocket(
+              peer_reply_callback_,
+              "Pair reply"))
+    , peer_request_subscriber_(
+          client_.Network().ZeroMQ().Internal().SubscribeSocket(
+              peer_request_callback_,
+              "Pair request"))
 {
     // WARNING: do not access client_.Wallet() during construction
     pair_event_->Start(client_.Endpoints().PairEvent().data());
@@ -743,7 +747,8 @@ auto Pair::CheckIssuer(
     const identifier::UnitDefinition& unitDefinitionID) const noexcept -> bool
 {
     try {
-        const auto contract = client_.Wallet().UnitDefinition(unitDefinitionID);
+        const auto contract =
+            client_.Wallet().Internal().UnitDefinition(unitDefinitionID);
 
         return AddIssuer(localNymID, contract->Nym()->ID(), "");
     } catch (...) {
@@ -823,7 +828,7 @@ auto Pair::initiate_bailment(
     auto& success = std::get<0>(output);
 
     try {
-        client_.Wallet().UnitDefinition(unitID);
+        client_.Wallet().Internal().UnitDefinition(unitID);
     } catch (...) {
         queue_unit_definition(nymID, serverID, unitID);
 
@@ -859,7 +864,8 @@ auto Pair::need_registration(
     const identifier::Nym& localNymID,
     const identifier::Notary& serverID) const -> bool
 {
-    auto context = client_.Wallet().ServerContext(localNymID, serverID);
+    auto context =
+        client_.Wallet().Internal().ServerContext(localNymID, serverID);
 
     if (context) { return (0 == context->Request()); }
 
@@ -1274,7 +1280,7 @@ auto Pair::register_account(
     auto& [success, accountID] = output;
 
     try {
-        client_.Wallet().UnitDefinition(unitID);
+        client_.Wallet().Internal().UnitDefinition(unitID);
     } catch (...) {
         LogTrace()(OT_PRETTY_CLASS())("Waiting for unit definition ")(unitID)
             .Flush();
@@ -1395,7 +1401,8 @@ void Pair::state_machine(const IssuerID& id) const
                     .Flush();
 
                 try {
-                    const auto contract = client_.Wallet().Server(serverID);
+                    const auto contract =
+                        client_.Wallet().Internal().Server(serverID);
 
                     PAIR_SHUTDOWN();
 
@@ -1427,8 +1434,11 @@ void Pair::state_machine(const IssuerID& id) const
 
             if (serverNymID.empty()) {
                 try {
-                    serverNymID =
-                        client_.Wallet().Server(serverID)->Nym()->ID();
+                    serverNymID = client_.Wallet()
+                                      .Internal()
+                                      .Server(serverID)
+                                      ->Nym()
+                                      ->ID();
                 } catch (...) {
 
                     return;

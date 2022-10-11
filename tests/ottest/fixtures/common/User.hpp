@@ -40,7 +40,7 @@ public:
     auto Contact(std::string_view contact) const noexcept
         -> const ot::identifier::Generic&;
     auto PaymentCode() const -> ot::PaymentCode;
-    auto Reason() const noexcept -> ot::OTPasswordPrompt;
+    auto Reason() const noexcept -> ot::PasswordPrompt;
     auto SetAccount(std::string_view type, std::string_view id) const noexcept
         -> bool;
     auto SetAccount(std::string_view type, const ot::identifier::Generic& id)

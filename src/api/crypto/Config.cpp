@@ -8,11 +8,12 @@
 
 #include <memory>
 
+#include "internal/api/Settings.hpp"
 #include "internal/api/crypto/Factory.hpp"
+#include "internal/core/String.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/api/Settings.hpp"
 #include "opentxs/api/crypto/Config.hpp"
-#include "opentxs/core/String.hpp"
 #include "opentxs/crypto/key/symmetric/Algorithm.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Pimpl.hpp"
@@ -129,7 +130,7 @@ auto Config::GetSetAll() const -> bool
         return false;
     }
 
-    return config_.Save();
+    return config_.Internal().Save();
 }
 
 auto Config::GetSetValue(
@@ -143,7 +144,7 @@ auto Config::GetSetValue(
 
     bool bIsNew{false};
     std::int64_t nValue{0};
-    config_.CheckSet_long(
+    config_.Internal().CheckSet_long(
         String::Factory("crypto"),
         String::Factory(strKeyName),
         nDefaultValue,

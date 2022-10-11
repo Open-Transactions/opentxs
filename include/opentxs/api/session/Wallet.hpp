@@ -14,9 +14,6 @@
 #include <tuple>
 
 #include "opentxs/Export.hpp"
-#include "opentxs/core/contract/BasketContract.hpp"
-#include "opentxs/core/contract/ServerContract.hpp"
-#include "opentxs/core/contract/Unit.hpp"
 #include "opentxs/identity/Nym.hpp"
 #include "opentxs/identity/Types.hpp"
 #include "opentxs/identity/wot/claim/Types.hpp"
@@ -43,42 +40,18 @@ class Wallet;
 }  // namespace session
 }  // namespace api
 
-namespace display
-{
-class Definition;
-}  // namespace display
-
 namespace otx
 {
 namespace blind
 {
 class Purse;
 }  // namespace blind
-
-namespace context
-{
-class Base;
-class Client;
-class Server;
-}  // namespace context
 }  // namespace otx
 
-class Account;
 class NymData;
-class NymFile;
 class PeerObject;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
-
-namespace opentxs
-{
-/** AccountInfo: accountID, nymID, serverID, unitID*/
-using AccountInfo = std::tuple<
-    identifier::Generic,
-    identifier::Nym,
-    identifier::Notary,
-    identifier::UnitDefinition>;
-}  // namespace opentxs
 
 namespace opentxs::api::session
 {
@@ -95,79 +68,21 @@ namespace opentxs::api::session
 class OPENTXS_EXPORT Wallet
 {
 public:
-    using AccountCallback = std::function<void(const Account&)>;
-
     virtual auto AccountPartialMatch(const UnallocatedCString& hint) const
         -> identifier::Generic = 0;
     virtual auto DeleteAccount(const identifier::Generic& accountID) const
         -> bool = 0;
-    virtual auto UpdateAccount(
-        const identifier::Generic& accountID,
-        const otx::context::Server&,
-        const String& serialized,
-        const PasswordPrompt& reason) const -> bool = 0;
-    virtual auto UpdateAccount(
-        const identifier::Generic& accountID,
-        const otx::context::Server&,
-        const String& serialized,
-        const UnallocatedCString& label,
-        const PasswordPrompt& reason) const -> bool = 0;
-    [[deprecated]] virtual auto ImportAccount(
-        std::unique_ptr<opentxs::Account>& imported) const -> bool = 0;
-
-    /**   Load a read-only copy of a Context object
-     *
-     *    This method should only be called if the specific client or server
-     *    version is not available (such as by classes common to client and
-     *    server).
-     *
-     *    \param[in] notaryID     remote notary
-     *    \param[in] clientNymID  local nym
-     *    \returns A smart pointer to the object. The smart pointer will not be
-     *             instantiated if the object does not exist or is invalid.
-     */
-    virtual auto Context(
-        const identifier::Notary& notaryID,
-        const identifier::Nym& clientNymID) const
-        -> std::shared_ptr<const otx::context::Base> = 0;
-
-    /**   Load a read-only copy of a ClientContext object
-     *
-     *    \param[in] remoteNymID context identifier (usually the other party's
-     *                           nym id)
-     *    \returns A smart pointer to the object. The smart pointer will not be
-     *             instantiated if the object does not exist or is invalid.
-     */
-    virtual auto ClientContext(const identifier::Nym& remoteNymID) const
-        -> std::shared_ptr<const otx::context::Client> = 0;
-
     virtual auto DefaultNym() const noexcept
         -> std::pair<identifier::Nym, std::size_t> = 0;
-
-    /**   Load a read-only copy of a ServerContext object
-     *
-     *    \param[in] localNymID the identifier of the nym who owns the context
-     *    \param[in] remoteID context identifier (usually the other party's nym
-     *                       id)
-     *    \returns A smart pointer to the object. The smart pointer will not be
-     *             instantiated if the object does not exist or is invalid.
-     */
-    virtual auto ServerContext(
-        const identifier::Nym& localNymID,
-        const identifier::Generic& remoteID) const
-        -> std::shared_ptr<const otx::context::Server> = 0;
-
+    virtual auto Internal() const noexcept
+        -> const session::internal::Wallet& = 0;
     /**   Returns a list of all issuers associated with a local nym */
     virtual auto IssuerList(const identifier::Nym& nymID) const
         -> UnallocatedSet<identifier::Nym> = 0;
-
     virtual auto IsLocalNym(const std::string_view id) const -> bool = 0;
     virtual auto IsLocalNym(const identifier::Nym& id) const -> bool = 0;
-
     virtual auto LocalNymCount() const -> std::size_t = 0;
-
     virtual auto LocalNyms() const -> Set<identifier::Nym> = 0;
-
     /**   Obtain a smart pointer to an instantiated nym.
      *
      *    The smart pointer will not be initialized if the object does not
@@ -190,7 +105,6 @@ public:
     virtual auto Nym(
         const identifier::Nym& id,
         const std::chrono::milliseconds& timeout = 0ms) const -> Nym_p = 0;
-
     /**   Instantiate a nym from serialized form
      *
      *    The smart pointer will not be initialized if the provided serialized
@@ -199,7 +113,6 @@ public:
      *    \param[in] bytes the serialized version of the contract
      */
     virtual auto Nym(const ReadView& bytes) const -> Nym_p = 0;
-
     virtual auto Nym(
         const identity::Type type,
         const PasswordPrompt& reason,
@@ -216,26 +129,16 @@ public:
         const identity::Type type,
         const PasswordPrompt& reason,
         const UnallocatedCString& name = {}) const -> Nym_p = 0;
-
     virtual auto mutable_Nym(
         const identifier::Nym& id,
         const PasswordPrompt& reason) const -> NymData = 0;
-
-    virtual auto Nymfile(
-        const identifier::Nym& id,
-        const PasswordPrompt& reason) const
-        -> std::unique_ptr<const opentxs::NymFile> = 0;
-
     virtual auto NymByIDPartialMatch(const UnallocatedCString& partialId) const
         -> Nym_p = 0;
-
     /**   Returns a list of all known nyms and their aliases
      */
     virtual auto NymList() const -> ObjectList = 0;
-
     virtual auto NymNameByIndex(const std::size_t index, String& name) const
         -> bool = 0;
-
     /**   Load a peer reply object
      *
      *    \param[in] nym    the identifier of the nym who owns the object
@@ -249,7 +152,6 @@ public:
         const identifier::Generic& reply,
         const otx::client::StorageBox& box,
         AllocateOutput destination) const -> bool = 0;
-
     /**   Clean up the recipient's copy of a peer reply
      *
      *    The peer reply is moved from the nym's SentPeerReply
@@ -263,7 +165,6 @@ public:
     virtual auto PeerReplyComplete(
         const identifier::Nym& nym,
         const identifier::Generic& replyOrRequest) const -> bool = 0;
-
     /**   Rollback a PeerReplyCreate call
      *
      *    The original request is returned to IncomingPeerRequest box
@@ -277,35 +178,30 @@ public:
         const identifier::Nym& nym,
         const identifier::Generic& request,
         const identifier::Generic& reply) const -> bool = 0;
-
     /**   Obtain a list of sent peer replies
      *
      *    \param[in] nym the identifier of the nym whose box is returned
      */
     virtual auto PeerReplySent(const identifier::Nym& nym) const
         -> ObjectList = 0;
-
     /**   Obtain a list of incoming peer replies
      *
      *    \param[in] nym the identifier of the nym whose box is returned
      */
     virtual auto PeerReplyIncoming(const identifier::Nym& nym) const
         -> ObjectList = 0;
-
     /**   Obtain a list of finished peer replies
      *
      *    \param[in] nym the identifier of the nym whose box is returned
      */
     virtual auto PeerReplyFinished(const identifier::Nym& nym) const
         -> ObjectList = 0;
-
     /**   Obtain a list of processed peer replies
      *
      *    \param[in] nym the identifier of the nym whose box is returned
      */
     virtual auto PeerReplyProcessed(const identifier::Nym& nym) const
         -> ObjectList = 0;
-
     /**   Store the senders's copy of a peer reply
      *
      *    The peer reply is stored in the IncomingPeerReply box for the
@@ -321,7 +217,6 @@ public:
     virtual auto PeerReplyReceive(
         const identifier::Nym& nym,
         const PeerObject& reply) const -> bool = 0;
-
     /**   Load a peer reply object
      *
      *    \param[in] nym the identifier of the nym who owns the object
@@ -336,7 +231,6 @@ public:
         const otx::client::StorageBox& box,
         std::time_t& time,
         AllocateOutput destination) const -> bool = 0;
-
     /**   Clean up the sender's copy of a peer reply
      *
      *    The peer reply is moved from the nym's IncomingPeerReply
@@ -349,7 +243,6 @@ public:
     virtual auto PeerRequestComplete(
         const identifier::Nym& nym,
         const identifier::Generic& reply) const -> bool = 0;
-
     /**   Rollback a PeerRequestCreate call
      *
      *    The request is deleted from to SentPeerRequest box
@@ -361,7 +254,6 @@ public:
     virtual auto PeerRequestCreateRollback(
         const identifier::Nym& nym,
         const identifier::Generic& request) const -> bool = 0;
-
     /**   Delete a peer reply object
      *
      *    \param[in] nym the identifier of the nym who owns the object
@@ -372,35 +264,30 @@ public:
         const identifier::Nym& nym,
         const identifier::Generic& request,
         const otx::client::StorageBox& box) const -> bool = 0;
-
     /**   Obtain a list of sent peer requests
      *
      *    \param[in] nym the identifier of the nym whose box is returned
      */
     virtual auto PeerRequestSent(const identifier::Nym& nym) const
         -> ObjectList = 0;
-
     /**   Obtain a list of incoming peer requests
      *
      *    \param[in] nym the identifier of the nym whose box is returned
      */
     virtual auto PeerRequestIncoming(const identifier::Nym& nym) const
         -> ObjectList = 0;
-
     /**   Obtain a list of finished peer requests
      *
      *    \param[in] nym the identifier of the nym whose box is returned
      */
     virtual auto PeerRequestFinished(const identifier::Nym& nym) const
         -> ObjectList = 0;
-
     /**   Obtain a list of processed peer requests
      *
      *    \param[in] nym the identifier of the nym whose box is returned
      */
     virtual auto PeerRequestProcessed(const identifier::Nym& nym) const
         -> ObjectList = 0;
-
     /**   Store the recipient's copy of a peer request
      *
      *    The peer request is stored in the IncomingPeerRequest box for the
@@ -413,7 +300,6 @@ public:
     virtual auto PeerRequestReceive(
         const identifier::Nym& nym,
         const PeerObject& request) const -> bool = 0;
-
     /**   Update the timestamp of a peer request object
      *
      *    \param[in] nym the identifier of the nym who owns the object
@@ -424,13 +310,11 @@ public:
         const identifier::Nym& nym,
         const identifier::Generic& request,
         const otx::client::StorageBox& box) const -> bool = 0;
-
     virtual auto Purse(
         const identifier::Nym& nym,
         const identifier::Notary& server,
         const identifier::UnitDefinition& unit,
         const bool checking = false) const -> const otx::blind::Purse& = 0;
-
     /**   Unload and delete a server contract
      *
      *    This method destroys the contract object, removes it from the
@@ -440,7 +324,6 @@ public:
      *
      */
     virtual auto RemoveServer(const identifier::Notary& id) const -> bool = 0;
-
     /**   Unload and delete a unit definition contract
      *
      *    This method destroys the contract object, removes it from the
@@ -451,63 +334,9 @@ public:
      */
     virtual auto RemoveUnitDefinition(
         const identifier::UnitDefinition& id) const -> bool = 0;
-
-    /**   Obtain an instantiated server contract.
-     *
-     *    If the caller is willing to accept a network lookup delay, it can
-     *    specify a timeout to be used in the event that the contract can not
-     *    be located in local storage and must be queried from a remote
-     *    location.
-     *
-     *    If no timeout is specified, the remote query will still happen in the
-     *    background, but this method will return immediately with a null
-     *    result.
-     *
-     *    \param[in] id the identifier of the contract to be returned
-     *    \param[in] timeout The caller can set a non-zero value here if it's
-     *                       willing to wait for a network lookup. The default
-     *                       value of 0 will return immediately.
-     *    \throw std::runtime_error the specified contract does not exist in the
-     *                              wallet
-     */
-    virtual auto Server(
-        const identifier::Notary& id,
-        const std::chrono::milliseconds& timeout = std::chrono::milliseconds(
-            0)) const noexcept(false) -> OTServerContract = 0;
-
-    /**   Instantiate a server contract from serialized form
-     *
-     *    \param[in] contract the serialized version of the contract
-     *    \throw std::runtime_error the provided contract is not valid
-     */
-    virtual auto Server(const ReadView& contract) const noexcept(false)
-        -> OTServerContract = 0;
-
-    /**   Create a new server contract
-     *
-     *    \param[in] nymid      the identifier of nym which will create the
-     *                          contract
-     *    \param[in] name       the official name of the server
-     *    \param[in] terms      human-readable server description & terms of use
-     *    \param[in] endpoints  list of notary endpoints to include in the
-     *                          contract
-     *    \param[in] reason     password prompt data
-     *    \param[in] version    contract version to create
-     *    \throw std::runtime_error the contract can not be created
-     */
-    virtual auto Server(
-        const UnallocatedCString& nymid,
-        const UnallocatedCString& name,
-        const UnallocatedCString& terms,
-        const UnallocatedList<contract::Server::Endpoint>& endpoints,
-        const PasswordPrompt& reason,
-        const VersionNumber version) const noexcept(false)
-        -> OTServerContract = 0;
-
     /**   Returns a list of all available server contracts and their aliases
      */
     virtual auto ServerList() const -> ObjectList = 0;
-
     virtual auto SetDefaultNym(const identifier::Nym& id) const noexcept
         -> bool = 0;
     /**   Updates the alias for the specified nym.
@@ -522,7 +351,6 @@ public:
     virtual auto SetNymAlias(
         const identifier::Nym& id,
         const UnallocatedCString& alias) const -> bool = 0;
-
     /**   Updates the alias for the specified server contract.
      *
      *    An alias is a local label which is not part of the server contract
@@ -535,7 +363,6 @@ public:
     virtual auto SetServerAlias(
         const identifier::Notary& id,
         const UnallocatedCString& alias) const -> bool = 0;
-
     /**   Updates the alias for the specified unit definition contract.
      *
      *    An alias is a local label which is not part of the unit definition
@@ -554,109 +381,6 @@ public:
      */
     virtual auto UnitDefinitionList() const -> ObjectList = 0;
 
-    /**   Obtain an instantiated unit definition contract.
-     *
-     *    If the caller is willing to accept a network lookup delay, it can
-     *    specify a timeout to be used in the event that the contract can not
-     *    be located in local storage and must be queried from a remote
-     *    location.
-     *
-     *    If no timeout is specified, the remote query will still happen in the
-     *    background, but this method will return immediately with a null
-     *    result.
-     *
-     *    \param[in] id the identifier of the contract to be returned
-     *    \param[in] timeout The caller can set a non-zero value here if it's
-     *                     willing to wait for a network lookup. The default
-     *                     value of 0 will return immediately.
-     *    \throw std::runtime_error the specified contract does not exist in the
-     *                              wallet
-     */
-    virtual auto UnitDefinition(
-        const identifier::UnitDefinition& id,
-        const std::chrono::milliseconds& timeout = std::chrono::milliseconds(
-            0)) const noexcept(false) -> OTUnitDefinition = 0;
-    /**   Instantiate a unit definition contract from serialized form
-     *
-     *    \param[in] contract the protobuf serialized version of the contract
-     *    \throw std::runtime_error the provided contract is invalid
-     */
-    virtual auto UnitDefinition(const ReadView contract) const noexcept(false)
-        -> OTUnitDefinition = 0;
-    virtual auto BasketContract(
-        const identifier::UnitDefinition& id,
-        const std::chrono::milliseconds& timeout = std::chrono::milliseconds(
-            0)) const noexcept(false) -> OTBasketContract = 0;
-
-    /**   Create a new currency contract
-     *
-     *    \param[in] nymid the identifier of nym which will create the contract
-     *    \param[in] shortname a short human-readable identifier for the
-     *                         contract
-     *    \param[in] terms human-readable terms and conditions
-     *    \throw std::runtime_error the contract can not be created
-     */
-    virtual auto CurrencyContract(
-        const UnallocatedCString& nymid,
-        const UnallocatedCString& shortname,
-        const UnallocatedCString& terms,
-        const UnitType unitOfAccount,
-        const Amount& redemptionIncrement,
-        const PasswordPrompt& reason) const noexcept(false)
-        -> OTUnitDefinition = 0;
-    virtual auto CurrencyContract(
-        const UnallocatedCString& nymid,
-        const UnallocatedCString& shortname,
-        const UnallocatedCString& terms,
-        const UnitType unitOfAccount,
-        const Amount& redemptionIncrement,
-        const display::Definition& displayDefinition,
-        const PasswordPrompt& reason) const noexcept(false)
-        -> OTUnitDefinition = 0;
-    virtual auto CurrencyContract(
-        const UnallocatedCString& nymid,
-        const UnallocatedCString& shortname,
-        const UnallocatedCString& terms,
-        const UnitType unitOfAccount,
-        const Amount& redemptionIncrement,
-        const VersionNumber version,
-        const PasswordPrompt& reason) const noexcept(false)
-        -> OTUnitDefinition = 0;
-    virtual auto CurrencyContract(
-        const UnallocatedCString& nymid,
-        const UnallocatedCString& shortname,
-        const UnallocatedCString& terms,
-        const UnitType unitOfAccount,
-        const Amount& redemptionIncrement,
-        const display::Definition& displayDefinition,
-        const VersionNumber version,
-        const PasswordPrompt& reason) const noexcept(false)
-        -> OTUnitDefinition = 0;
-
-    /**   Create a new security contract
-     *
-     *    \param[in] nymid the identifier of nym which will create the contract
-     *    \param[in] shortname a short human-readable identifier for the
-     *                         contract
-     *    \param[in] terms human-readable terms and conditions
-     *    \throw std::runtime_error the contract can not be created
-     */
-    virtual auto SecurityContract(
-        const UnallocatedCString& nymid,
-        const UnallocatedCString& shortname,
-        const UnallocatedCString& terms,
-        const UnitType unitOfAccount,
-        const PasswordPrompt& reason,
-        const display::Definition& displayDefinition,
-        const Amount& redemptionIncrement,
-        const VersionNumber version = contract::Unit::DefaultVersion) const
-        noexcept(false) -> OTUnitDefinition = 0;
-
-    virtual auto CurrencyTypeBasedOnUnitType(
-        const identifier::UnitDefinition& contractID) const -> UnitType = 0;
-
-    OPENTXS_NO_EXPORT virtual auto Internal() const noexcept
-        -> const session::internal::Wallet& = 0;
     OPENTXS_NO_EXPORT virtual auto Internal() noexcept
         -> session::internal::Wallet& = 0;
 

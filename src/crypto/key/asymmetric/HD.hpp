@@ -127,12 +127,12 @@ protected:
     noexcept(false);
     HD(const HD&) noexcept;
     HD(const HD& rhs, const ReadView newPublic) noexcept;
-    HD(const HD& rhs, OTSecret&& newSecretKey) noexcept;
+    HD(const HD& rhs, Secret&& newSecretKey) noexcept;
 
 private:
     const std::shared_ptr<const proto::HDPath> path_;
     const std::unique_ptr<const proto::Ciphertext> chain_code_;
-    mutable OTSecret plaintext_chain_code_;
+    mutable Secret plaintext_chain_code_;
     const Bip32Fingerprint parent_;
 
     auto chaincode(const Lock& lock, const PasswordPrompt& reason)

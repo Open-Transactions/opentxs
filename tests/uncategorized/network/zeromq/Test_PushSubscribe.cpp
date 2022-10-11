@@ -10,6 +10,13 @@
 #include <future>
 #include <utility>
 
+#include "internal/network/zeromq/Context.hpp"
+#include "internal/network/zeromq/ListenCallback.hpp"
+#include "internal/network/zeromq/socket/Publish.hpp"
+#include "internal/network/zeromq/socket/Push.hpp"
+#include "internal/network/zeromq/socket/Subscribe.hpp"
+#include "internal/network/zeromq/socket/Types.hpp"
+
 namespace ot = opentxs;
 namespace zmq = ot::network::zeromq;
 
@@ -62,8 +69,8 @@ TEST_F(Test_PushSubscribe, Push_Subscribe)
             }
         });
 
-    auto sender = context_.PushSocket(zmq::socket::Direction::Bind);
-    auto receiver = context_.SubscribeSocket(callback);
+    auto sender = context_.Internal().PushSocket(zmq::socket::Direction::Bind);
+    auto receiver = context_.Internal().SubscribeSocket(callback);
     auto message = opentxs::network::zeromq::Message{};
     message.StartBody();
     message.AddFrame(test_message_);
@@ -120,11 +127,11 @@ TEST_F(Test_PushSubscribe, Push_Publish_Subscribe)
             promise4.set_value();
         }
     });
-    auto sender1 = context_.PublishSocket();
-    auto sender2 = context_.PushSocket(zmq::socket::Direction::Bind);
-    auto receiver1 = context_.SubscribeSocket(callback1);
-    auto receiver2 = context_.SubscribeSocket(callback2);
-    auto receiver3 = context_.SubscribeSocket(callback3);
+    auto sender1 = context_.Internal().PublishSocket();
+    auto sender2 = context_.Internal().PushSocket(zmq::socket::Direction::Bind);
+    auto receiver1 = context_.Internal().SubscribeSocket(callback1);
+    auto receiver2 = context_.Internal().SubscribeSocket(callback2);
+    auto receiver3 = context_.Internal().SubscribeSocket(callback3);
 
     ASSERT_TRUE(sender1->Start(endpoint_2_));
     ASSERT_TRUE(sender2->Start(endpoint_1_));

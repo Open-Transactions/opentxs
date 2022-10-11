@@ -9,10 +9,13 @@ add_subdirectory(otdht)
 add_subdirectory(zeromq)
 
 target_sources(
-  opentxs-common PRIVATE "ServerConnection.cpp" "ServerConnection.hpp"
+  opentxs-common
+  PRIVATE
+    "${opentxs_SOURCE_DIR}/src/internal/network/ServerConnection.hpp"
+    "ServerConnection.cpp"
+    "ServerConnection.hpp"
 )
 set(cxx-install-headers
-    "${opentxs_SOURCE_DIR}/include/opentxs/network/ServerConnection.hpp"
     "${opentxs_SOURCE_DIR}/include/opentxs/network/Types.hpp"
 )
 

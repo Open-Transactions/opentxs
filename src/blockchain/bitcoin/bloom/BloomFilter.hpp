@@ -13,8 +13,8 @@
 #include <iosfwd>
 #include <memory>
 
-#include "opentxs/blockchain/bitcoin/bloom/BloomFilter.hpp"
-#include "opentxs/blockchain/bitcoin/bloom/Types.hpp"
+#include "internal/blockchain/bitcoin/bloom/BloomFilter.hpp"
+#include "internal/blockchain/bitcoin/bloom/Types.hpp"
 #include "opentxs/util/Bytes.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)

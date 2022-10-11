@@ -10,13 +10,13 @@
 #include <memory>
 #include <optional>
 
+#include "internal/crypto/Envelope.hpp"
 #include "internal/otx/blind/Purse.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/core/Secret.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
 #include "opentxs/core/identifier/UnitDefinition.hpp"
-#include "opentxs/crypto/Envelope.hpp"
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/crypto/key/Symmetric.hpp"
 #include "opentxs/crypto/key/symmetric/Algorithm.hpp"

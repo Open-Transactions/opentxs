@@ -9,7 +9,6 @@
 
 #include "opentxs/Export.hpp"
 #include "opentxs/crypto/key/Asymmetric.hpp"
-#include "opentxs/crypto/key/Keypair.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs

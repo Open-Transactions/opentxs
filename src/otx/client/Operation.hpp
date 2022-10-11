@@ -16,18 +16,20 @@
 #include <optional>
 
 #include "core/StateMachine.hpp"
+#include "internal/core/String.hpp"
+#include "internal/core/contract/peer/PeerReply.hpp"
+#include "internal/core/contract/peer/PeerRequest.hpp"
 #include "internal/otx/client/Client.hpp"
 #include "internal/otx/common/Account.hpp"
 #include "internal/otx/common/Ledger.hpp"
 #include "internal/otx/common/Message.hpp"
+#include "internal/otx/consensus/ManagedNumber.hpp"
+#include "internal/otx/consensus/Server.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/Editor.hpp"
 #include "internal/util/Mutex.hpp"
 #include "opentxs/core/Amount.hpp"
-#include "opentxs/core/String.hpp"
 #include "opentxs/core/contract/Types.hpp"
-#include "opentxs/core/contract/peer/PeerReply.hpp"
-#include "opentxs/core/contract/peer/PeerRequest.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
@@ -38,8 +40,6 @@
 #include "opentxs/otx/OperationType.hpp"
 #include "opentxs/otx/blind/Purse.hpp"
 #include "opentxs/otx/client/Types.hpp"
-#include "opentxs/otx/consensus/ManagedNumber.hpp"
-#include "opentxs/otx/consensus/Server.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
@@ -207,7 +207,7 @@ private:
         transaction_numbers_;
 
     const api::session::Client& api_;
-    const OTPasswordPrompt reason_;
+    const PasswordPrompt reason_;
     const identifier::Nym nym_id_;
     const identifier::Notary server_id_;
     std::atomic<otx::OperationType> type_;

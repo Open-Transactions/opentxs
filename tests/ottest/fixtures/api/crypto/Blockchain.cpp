@@ -386,7 +386,7 @@ const ot::UnallocatedVector<ot::UnallocatedCString>
         "LMoZuWNnoTEJ1FjxQ4NXTcNbMK3croGpaF",
     };
 bool ApiCryptoBlockchain::init_{false};
-ot::AsyncConst<ot::OTPasswordPrompt> ApiCryptoBlockchain::reason_p_{};
+ot::AsyncConst<ot::PasswordPrompt> ApiCryptoBlockchain::reason_p_{};
 ot::AsyncConst<ot::identifier::Nym> ApiCryptoBlockchain::invalid_nym_p_{};
 ot::AsyncConst<ot::identifier::Nym> ApiCryptoBlockchain::nym_not_in_wallet_p_{};
 ot::AsyncConst<ot::identifier::Nym> ApiCryptoBlockchain::alex_p_{};

@@ -6,8 +6,8 @@
 #include "0_stdafx.hpp"                     // IWYU pragma: associated
 #include "internal/otx/common/Helpers.hpp"  // IWYU pragma: associated
 
+#include "internal/core/String.hpp"
 #include "internal/otx/common/Account.hpp"
-#include "opentxs/core/String.hpp"
 #include "opentxs/util/Log.hpp"
 
 namespace opentxs

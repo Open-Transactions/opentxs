@@ -8,8 +8,13 @@ add_subdirectory(peer)
 target_sources(
   opentxs-common
   PRIVATE
+    "${opentxs_SOURCE_DIR}/src/internal/core/contract/BasketContract.hpp"
     "${opentxs_SOURCE_DIR}/src/internal/core/contract/Contract.hpp"
+    "${opentxs_SOURCE_DIR}/src/internal/core/contract/CurrencyContract.hpp"
+    "${opentxs_SOURCE_DIR}/src/internal/core/contract/SecurityContract.hpp"
+    "${opentxs_SOURCE_DIR}/src/internal/core/contract/ServerContract.hpp"
     "${opentxs_SOURCE_DIR}/src/internal/core/contract/Types.hpp"
+    "${opentxs_SOURCE_DIR}/src/internal/core/contract/Unit.hpp"
     "BasketContract.cpp"
     "BasketContract.hpp"
     "Common.cpp"
@@ -30,15 +35,10 @@ target_include_directories(
   PRIVATE "${opentxs_SOURCE_DIR}/deps/robin-hood/src/include"
 )
 set(cxx-install-headers
-    "${opentxs_SOURCE_DIR}/include/opentxs/core/contract/BasketContract.hpp"
     "${opentxs_SOURCE_DIR}/include/opentxs/core/contract/ContractType.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/core/contract/CurrencyContract.hpp"
     "${opentxs_SOURCE_DIR}/include/opentxs/core/contract/ProtocolVersion.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/core/contract/SecurityContract.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/core/contract/ServerContract.hpp"
     "${opentxs_SOURCE_DIR}/include/opentxs/core/contract/Signable.hpp"
     "${opentxs_SOURCE_DIR}/include/opentxs/core/contract/Types.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/core/contract/Unit.hpp"
     "${opentxs_SOURCE_DIR}/include/opentxs/core/contract/UnitType.hpp"
 )
 target_sources(opentxs-common PRIVATE ${cxx-install-headers})

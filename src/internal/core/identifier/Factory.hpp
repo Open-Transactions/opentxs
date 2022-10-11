@@ -15,18 +15,28 @@
 #include "opentxs/util/Allocated.hpp"
 #include "opentxs/util/Bytes.hpp"
 
+// NOLINTBEGIN(modernize-concat-nested-namespaces)
+namespace opentxs
+{
+namespace identifier
+{
+class IdentifierPrivate;
+}  // namespace identifier
+}  // namespace opentxs
+// NOLINTEND(modernize-concat-nested-namespaces)
+
 namespace opentxs::factory
 {
 auto Identifier(
     const identifier::Type type,
     identifier::Generic::allocator_type alloc) noexcept
-    -> identifier::Generic::Imp*;
+    -> identifier::IdentifierPrivate*;
 auto Identifier(
     const identifier::Type type,
     const identifier::Algorithm algorithm,
     const ReadView hash,
     identifier::Generic::allocator_type alloc) noexcept
-    -> identifier::Generic::Imp*;
+    -> identifier::IdentifierPrivate*;
 auto IdentifierInvalid(identifier::Generic::allocator_type alloc) noexcept
-    -> identifier::Generic::Imp*;
+    -> identifier::IdentifierPrivate*;
 }  // namespace opentxs::factory

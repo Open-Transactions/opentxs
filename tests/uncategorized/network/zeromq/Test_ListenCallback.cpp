@@ -8,6 +8,8 @@
 #include <future>
 #include <utility>
 
+#include "internal/network/zeromq/ListenCallback.hpp"
+
 namespace ot = opentxs;
 namespace zmq = opentxs::network::zeromq;
 

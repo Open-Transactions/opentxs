@@ -35,10 +35,10 @@ class Test_Authority : public ::testing::Test
 {
 public:
     const ot::api::session::Client& client_;
-    const ot::OTPasswordPrompt reason_;
-    ot::OTPasswordPrompt non_const_reason_;
+    const ot::PasswordPrompt reason_;
+    ot::PasswordPrompt non_const_reason_;
 
-    ot::OTSecret words_;
+    ot::Secret words_;
     const std::uint8_t version_ = 6;
     const int nym_ = 1;
     const ot::UnallocatedCString alias_ = ot::UnallocatedCString{"alias"};

@@ -10,6 +10,12 @@
 #include <ctime>
 #include <thread>
 
+#include "internal/network/zeromq/Context.hpp"
+#include "internal/network/zeromq/ListenCallback.hpp"
+#include "internal/network/zeromq/socket/Publish.hpp"
+#include "internal/network/zeromq/socket/SocketType.hpp"
+#include "internal/network/zeromq/socket/Subscribe.hpp"
+
 namespace ot = opentxs;
 namespace zmq = ot::network::zeromq;
 
@@ -65,7 +71,7 @@ void Test_PublishSubscribe::subscribeSocketThread(
 
     ASSERT_NE(nullptr, &listenCallback.get());
 
-    auto subscribeSocket = context_.SubscribeSocket(listenCallback);
+    auto subscribeSocket = context_.Internal().SubscribeSocket(listenCallback);
 
     ASSERT_NE(nullptr, &subscribeSocket.get());
     ASSERT_EQ(zmq::socket::Type::Subscribe, subscribeSocket->Type());
@@ -88,7 +94,7 @@ void Test_PublishSubscribe::publishSocketThread(
     const ot::UnallocatedCString& endpoint,
     const ot::UnallocatedCString& msg)
 {
-    auto publishSocket = context_.PublishSocket();
+    auto publishSocket = context_.Internal().PublishSocket();
 
     ASSERT_NE(nullptr, &publishSocket.get());
     ASSERT_EQ(zmq::socket::Type::Publish, publishSocket->Type());
@@ -124,7 +130,7 @@ void Test_PublishSubscribe::publishSocketThread(
 
 TEST_F(Test_PublishSubscribe, Publish_Subscribe)
 {
-    auto publishSocket = context_.PublishSocket();
+    auto publishSocket = context_.Internal().PublishSocket();
 
     ASSERT_NE(nullptr, &publishSocket.get());
     ASSERT_EQ(zmq::socket::Type::Publish, publishSocket->Type());
@@ -149,7 +155,7 @@ TEST_F(Test_PublishSubscribe, Publish_Subscribe)
 
     ASSERT_NE(nullptr, &listenCallback.get());
 
-    auto subscribeSocket = context_.SubscribeSocket(listenCallback);
+    auto subscribeSocket = context_.Internal().SubscribeSocket(listenCallback);
 
     ASSERT_NE(nullptr, &subscribeSocket.get());
     ASSERT_EQ(zmq::socket::Type::Subscribe, subscribeSocket->Type());
@@ -185,7 +191,7 @@ TEST_F(Test_PublishSubscribe, Publish_1_Subscribe_2)
     subscribe_thread_count_ = 2;
     callback_count_ = 2;
 
-    auto publishSocket = context_.PublishSocket();
+    auto publishSocket = context_.Internal().PublishSocket();
 
     ASSERT_NE(nullptr, &publishSocket.get());
     ASSERT_EQ(zmq::socket::Type::Publish, publishSocket->Type());
@@ -260,7 +266,7 @@ TEST_F(Test_PublishSubscribe, Publish_2_Subscribe_1)
 
     ASSERT_NE(nullptr, &listenCallback.get());
 
-    auto subscribeSocket = context_.SubscribeSocket(listenCallback);
+    auto subscribeSocket = context_.Internal().SubscribeSocket(listenCallback);
 
     ASSERT_NE(nullptr, &subscribeSocket.get());
     ASSERT_EQ(zmq::socket::Type::Subscribe, subscribeSocket->Type());

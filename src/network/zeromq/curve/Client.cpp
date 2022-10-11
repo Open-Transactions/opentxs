@@ -12,11 +12,11 @@
 #include <type_traits>
 #include <utility>
 
+#include "internal/core/contract/ServerContract.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/Mutex.hpp"
 #include "network/zeromq/socket/Socket.hpp"
 #include "opentxs/core/Data.hpp"
-#include "opentxs/core/contract/ServerContract.hpp"
 #include "opentxs/util/Log.hpp"
 
 namespace opentxs::network::zeromq

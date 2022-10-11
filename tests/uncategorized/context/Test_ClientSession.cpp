@@ -10,6 +10,8 @@
 #include <memory>
 #include <utility>
 
+#include "internal/api/session/Wallet.hpp"
+#include "internal/util/SharedPimpl.hpp"
 #include "ottest/Basic.hpp"
 
 namespace ottest
@@ -61,7 +63,7 @@ TEST(ClientSession, introduction_server)
     EXPECT_FALSE(server_id_.empty());
 
     {
-        const auto contract = server.Wallet().Server(serverID);
+        const auto contract = server.Wallet().Internal().Server(serverID);
         const auto id = client.OTX().SetIntroductionServer(contract);
 
         EXPECT_EQ(serverID, id);

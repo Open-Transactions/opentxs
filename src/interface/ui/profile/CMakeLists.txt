@@ -6,6 +6,10 @@
 target_sources(
   opentxs-common
   PRIVATE
+    "${opentxs_SOURCE_DIR}/src/internal/interface/ui/Profile.hpp"
+    "${opentxs_SOURCE_DIR}/src/internal/interface/ui/ProfileItem.hpp"
+    "${opentxs_SOURCE_DIR}/src/internal/interface/ui/ProfileSection.hpp"
+    "${opentxs_SOURCE_DIR}/src/internal/interface/ui/ProfileSubsection.hpp"
     "Profile.cpp"
     "Profile.hpp"
     "ProfileItem.cpp"
@@ -15,18 +19,3 @@ target_sources(
     "ProfileSubsection.cpp"
     "ProfileSubsection.hpp"
 )
-set(cxx-install-headers
-    "${opentxs_SOURCE_DIR}/include/opentxs/interface/ui/Profile.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/interface/ui/ProfileItem.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/interface/ui/ProfileSection.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/interface/ui/ProfileSubsection.hpp"
-)
-target_sources(opentxs-common PRIVATE ${cxx-install-headers})
-
-if(OPENTXS_STANDALONE)
-  install(
-    FILES ${cxx-install-headers}
-    DESTINATION include/opentxs/interface/ui
-    COMPONENT dev
-  )
-endif()

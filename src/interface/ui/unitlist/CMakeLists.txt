@@ -6,21 +6,10 @@
 target_sources(
   opentxs-common
   PRIVATE
+    "${opentxs_SOURCE_DIR}/src/internal/interface/ui/UnitList.hpp"
+    "${opentxs_SOURCE_DIR}/src/internal/interface/ui/UnitListItem.hpp"
     "UnitList.cpp"
     "UnitList.hpp"
     "UnitListItem.cpp"
     "UnitListItem.hpp"
 )
-set(cxx-install-headers
-    "${opentxs_SOURCE_DIR}/include/opentxs/interface/ui/UnitList.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/interface/ui/UnitListItem.hpp"
-)
-target_sources(opentxs-common PRIVATE ${cxx-install-headers})
-
-if(OPENTXS_STANDALONE)
-  install(
-    FILES ${cxx-install-headers}
-    DESTINATION include/opentxs/interface/ui
-    COMPONENT dev
-  )
-endif()

@@ -10,16 +10,16 @@
 #include <functional>
 #include <mutex>
 
+#include "internal/core/contract/ServerContract.hpp"
+#include "internal/network/ServerConnection.hpp"
+#include "internal/network/zeromq/socket/Publish.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/Mutex.hpp"
 #include "opentxs/api/network/ZMQ.hpp"
 #include "opentxs/core/AddressType.hpp"
 #include "opentxs/core/Types.hpp"
-#include "opentxs/core/contract/ServerContract.hpp"
-#include "opentxs/network/ServerConnection.hpp"
 #include "opentxs/network/Types.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
-#include "opentxs/network/zeromq/socket/Publish.hpp"
 #include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)

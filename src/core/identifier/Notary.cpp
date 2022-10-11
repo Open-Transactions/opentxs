@@ -14,7 +14,7 @@
 
 namespace opentxs::identifier
 {
-Notary::Notary(Imp* imp) noexcept
+Notary::Notary(IdentifierPrivate* imp) noexcept
     : Generic(std::move(imp))
 {
 }

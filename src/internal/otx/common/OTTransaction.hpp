@@ -9,12 +9,12 @@
 #include <cstdint>
 #include <memory>
 
+#include "internal/core/Armored.hpp"
 #include "internal/otx/Types.hpp"
 #include "internal/otx/common/Contract.hpp"
 #include "internal/otx/common/Item.hpp"
 #include "internal/otx/common/OTTransactionType.hpp"
 #include "opentxs/core/Amount.hpp"
-#include "opentxs/core/Armored.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/util/Numbers.hpp"
 #include "opentxs/util/Time.hpp"

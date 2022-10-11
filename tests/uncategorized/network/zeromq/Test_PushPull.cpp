@@ -8,6 +8,13 @@
 #include <chrono>
 #include <ctime>
 
+#include "internal/network/zeromq/Context.hpp"
+#include "internal/network/zeromq/ListenCallback.hpp"
+#include "internal/network/zeromq/socket/Pull.hpp"
+#include "internal/network/zeromq/socket/Push.hpp"
+#include "internal/network/zeromq/socket/SocketType.hpp"
+#include "internal/network/zeromq/socket/Types.hpp"
+
 namespace ot = opentxs;
 namespace zmq = ot::network::zeromq;
 
@@ -50,8 +57,8 @@ TEST_F(Test_PushPull, Push_Pull)
 
     ASSERT_NE(nullptr, &pullCallback.get());
 
-    auto pullSocket =
-        context_.PullSocket(pullCallback, zmq::socket::Direction::Bind);
+    auto pullSocket = context_.Internal().PullSocket(
+        pullCallback, zmq::socket::Direction::Bind);
 
     ASSERT_NE(nullptr, &pullSocket.get());
     ASSERT_EQ(zmq::socket::Type::Pull, pullSocket->Type());
@@ -59,7 +66,8 @@ TEST_F(Test_PushPull, Push_Pull)
     pullSocket->SetTimeouts(0ms, 30000ms, -1ms);
     pullSocket->Start(endpoint_);
 
-    auto pushSocket = context_.PushSocket(zmq::socket::Direction::Connect);
+    auto pushSocket =
+        context_.Internal().PushSocket(zmq::socket::Direction::Connect);
 
     ASSERT_NE(nullptr, &pushSocket.get());
     ASSERT_EQ(zmq::socket::Type::Push, pushSocket->Type());

@@ -83,7 +83,7 @@ public:
     static PaymentCodeFixture user_2_;
 
     const ot::api::session::Client& api_;
-    const ot::OTPasswordPrompt reason_;
+    const ot::PasswordPrompt reason_;
     const ot::UnallocatedCString& alice_seed_;
     const ot::UnallocatedCString& bob_seed_;
     const ot::PaymentCode& alice_pc_secret_;

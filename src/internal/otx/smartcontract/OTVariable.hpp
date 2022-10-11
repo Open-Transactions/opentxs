@@ -7,7 +7,7 @@
 
 #include <cstdint>
 
-#include "opentxs/core/String.hpp"
+#include "internal/core/String.hpp"
 #include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)

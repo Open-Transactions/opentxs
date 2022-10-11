@@ -8,8 +8,11 @@
 #include <memory>
 
 #include "internal/api/session/Client.hpp"
+#include "internal/api/session/Wallet.hpp"
+#include "internal/core/contract/ServerContract.hpp"
 #include "internal/otx/client/obsolete/OTAPI_Exec.hpp"
 #include "internal/util/LogMacros.hpp"
+#include "internal/util/SharedPimpl.hpp"
 
 namespace ot = opentxs;
 
@@ -26,8 +29,8 @@ public:
 
     const ot::api::session::Client& client_;
     const ot::api::session::Notary& server_;
-    ot::OTPasswordPrompt reason_c_;
-    ot::OTPasswordPrompt reason_s_;
+    ot::PasswordPrompt reason_c_;
+    ot::PasswordPrompt reason_s_;
     const ot::identifier::Notary& server_id_;
     const ot::OTServerContract server_contract_;
 
@@ -39,7 +42,7 @@ public:
         , reason_c_(client_.Factory().PasswordPrompt(__func__))
         , reason_s_(server_.Factory().PasswordPrompt(__func__))
         , server_id_(server_.ID())
-        , server_contract_(server_.Wallet().Server(server_id_))
+        , server_contract_(server_.Wallet().Internal().Server(server_id_))
     {
         if (false == init_) { init(); }
     }
@@ -50,7 +53,8 @@ public:
     {
         auto bytes = ot::Space{};
         server_contract_->Serialize(ot::writer(bytes), true);
-        auto clientVersion = client.Wallet().Server(ot::reader(bytes));
+        auto clientVersion =
+            client.Wallet().Internal().Server(ot::reader(bytes));
         client.OTX().SetIntroductionServer(clientVersion);
     }
 

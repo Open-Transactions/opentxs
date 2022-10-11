@@ -3,7 +3,7 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-// IWYU pragma: no_include "opentxs/network/zeromq/socket/SocketType.hpp"
+// IWYU pragma: no_include "internal/network/zeromq/socket/SocketType.hpp"
 
 #pragma once
 
@@ -21,8 +21,10 @@
 
 #include "internal/api/network/Asio.hpp"
 #include "internal/network/zeromq/Context.hpp"
+#include "internal/network/zeromq/Pipeline.hpp"
 #include "internal/network/zeromq/Types.hpp"
 #include "internal/network/zeromq/socket/Pipeline.hpp"
+#include "internal/network/zeromq/socket/Types.hpp"
 #include "internal/util/BoostPMR.hpp"
 #include "internal/util/Future.hpp"
 #include "internal/util/LogMacros.hpp"
@@ -37,12 +39,10 @@
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
-#include "opentxs/network/zeromq/Pipeline.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
 #include "opentxs/network/zeromq/message/FrameSection.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/network/zeromq/message/Message.tpp"
-#include "opentxs/network/zeromq/socket/Types.hpp"
 #include "opentxs/util/Allocated.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"

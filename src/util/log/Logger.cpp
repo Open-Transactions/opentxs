@@ -13,9 +13,9 @@
 #include "internal/api/Context.hpp"
 #include "internal/network/zeromq/Context.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
+#include "internal/network/zeromq/socket/SocketType.hpp"
 #include "internal/util/Log.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
-#include "opentxs/network/zeromq/socket/SocketType.hpp"
 #include "util/log/LogBuffer.hpp"
 
 namespace opentxs

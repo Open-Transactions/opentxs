@@ -11,9 +11,9 @@
 #include <cstdint>
 #include <iosfwd>
 
+#include "internal/core/String.hpp"
 #include "internal/otx/common/StringXML.hpp"
 #include "internal/otx/common/crypto/Signature.hpp"
-#include "opentxs/core/String.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/identity/Nym.hpp"

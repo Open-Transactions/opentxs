@@ -19,6 +19,8 @@
 #include "internal/api/session/FactoryAPI.hpp"
 #include "internal/api/session/Session.hpp"
 #include "internal/api/session/Wallet.hpp"
+#include "internal/core/Armored.hpp"
+#include "internal/core/String.hpp"
 #include "internal/otx/Types.hpp"
 #include "internal/otx/common/Account.hpp"
 #include "internal/otx/common/Contract.hpp"
@@ -38,10 +40,8 @@
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/api/session/Wallet.hpp"
-#include "opentxs/core/Armored.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Data.hpp"
-#include "opentxs/core/String.hpp"
 #include "opentxs/core/display/Definition.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
@@ -50,6 +50,7 @@
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
+#include "opentxs/util/PasswordPrompt.hpp"
 #include "opentxs/util/Pimpl.hpp"
 #include "otx/common/OTStorage.hpp"
 
@@ -2589,8 +2590,9 @@ auto OTMarket::ProcessTrade(
                 (theOffer.GetMinimumIncrement() >
                  theOffer.GetAmountAvailable())) {
 
-                const auto unittype = wallet.CurrencyTypeBasedOnUnitType(
-                    GetInstrumentDefinitionID());
+                const auto unittype =
+                    wallet.Internal().CurrencyTypeBasedOnUnitType(
+                        GetInstrumentDefinitionID());
                 LogVerbose()(OT_PRETTY_CLASS())("Removing market order: ")(
                     theTrade.GetOpeningNum())(". IsFlaggedForRemoval: ")(
                     theTrade.IsFlaggedForRemoval())(". Minimum increment: ")(
@@ -2681,8 +2683,9 @@ auto OTMarket::ProcessTrade(
                 (theOffer.GetMinimumIncrement() >
                  theOffer.GetAmountAvailable())) {
 
-                const auto unittype = wallet.CurrencyTypeBasedOnUnitType(
-                    GetInstrumentDefinitionID());
+                const auto unittype =
+                    wallet.Internal().CurrencyTypeBasedOnUnitType(
+                        GetInstrumentDefinitionID());
                 LogVerbose()(OT_PRETTY_CLASS())("Removing market order: ")(
                     theTrade.GetOpeningNum())(". IsFlaggedForRemoval: ")(
                     theTrade.IsFlaggedForRemoval())(". Minimum increment: ")(
@@ -2715,9 +2718,10 @@ auto OTMarket::ValidateOfferForMarket(OTOffer& theOffer) -> bool
     bool bValidOffer = true;
 
     const auto& definition = display::GetDefinition(
-        api_.Wallet().CurrencyTypeBasedOnUnitType(GetInstrumentDefinitionID()));
-    const auto& offerDefinition =
-        display::GetDefinition(api_.Wallet().CurrencyTypeBasedOnUnitType(
+        api_.Wallet().Internal().CurrencyTypeBasedOnUnitType(
+            GetInstrumentDefinitionID()));
+    const auto& offerDefinition = display::GetDefinition(
+        api_.Wallet().Internal().CurrencyTypeBasedOnUnitType(
             theOffer.GetInstrumentDefinitionID()));
 
     UnallocatedVector<char> buf;

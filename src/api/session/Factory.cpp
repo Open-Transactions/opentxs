@@ -28,8 +28,24 @@
 #include "internal/blockchain/bitcoin/block/Factory.hpp"
 #include "internal/blockchain/p2p/P2P.hpp"
 #include "internal/core/Factory.hpp"
+#include "internal/core/contract/BasketContract.hpp"
+#include "internal/core/contract/CurrencyContract.hpp"
+#include "internal/core/contract/SecurityContract.hpp"
+#include "internal/core/contract/ServerContract.hpp"
+#include "internal/core/contract/Unit.hpp"
+#include "internal/core/contract/peer/BailmentNotice.hpp"
+#include "internal/core/contract/peer/BailmentReply.hpp"
+#include "internal/core/contract/peer/BailmentRequest.hpp"
+#include "internal/core/contract/peer/ConnectionReply.hpp"
+#include "internal/core/contract/peer/ConnectionRequest.hpp"
 #include "internal/core/contract/peer/Factory.hpp"
+#include "internal/core/contract/peer/NoticeAcknowledgement.hpp"
+#include "internal/core/contract/peer/OutBailmentReply.hpp"
+#include "internal/core/contract/peer/OutBailmentRequest.hpp"
 #include "internal/core/contract/peer/Peer.hpp"
+#include "internal/core/contract/peer/PeerReply.hpp"
+#include "internal/core/contract/peer/PeerRequest.hpp"
+#include "internal/core/contract/peer/StoreSecret.hpp"
 #include "internal/crypto/key/Factory.hpp"
 #include "internal/crypto/key/Key.hpp"
 #include "internal/crypto/key/Null.hpp"
@@ -59,6 +75,7 @@
 #include "internal/serialization/protobuf/Proto.tpp"
 #include "internal/serialization/protobuf/verify/Envelope.hpp"
 #include "internal/util/LogMacros.hpp"
+#include "internal/util/P0330.hpp"
 #include "opentxs/OT.hpp"  // TODO remove
 #include "opentxs/api/Context.hpp"
 #include "opentxs/api/crypto/Asymmetric.hpp"
@@ -70,23 +87,7 @@
 #include "opentxs/blockchain/p2p/Address.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/PaymentCode.hpp"
-#include "opentxs/core/contract/BasketContract.hpp"
-#include "opentxs/core/contract/CurrencyContract.hpp"
-#include "opentxs/core/contract/SecurityContract.hpp"
-#include "opentxs/core/contract/ServerContract.hpp"
-#include "opentxs/core/contract/Unit.hpp"
-#include "opentxs/core/contract/peer/BailmentNotice.hpp"
-#include "opentxs/core/contract/peer/BailmentReply.hpp"
-#include "opentxs/core/contract/peer/BailmentRequest.hpp"
-#include "opentxs/core/contract/peer/ConnectionReply.hpp"
-#include "opentxs/core/contract/peer/ConnectionRequest.hpp"
-#include "opentxs/core/contract/peer/NoticeAcknowledgement.hpp"
-#include "opentxs/core/contract/peer/OutBailmentReply.hpp"
-#include "opentxs/core/contract/peer/OutBailmentRequest.hpp"
-#include "opentxs/core/contract/peer/PeerReply.hpp"
-#include "opentxs/core/contract/peer/PeerRequest.hpp"
 #include "opentxs/core/contract/peer/PeerRequestType.hpp"
-#include "opentxs/core/contract/peer/StoreSecret.hpp"
 #include "opentxs/core/contract/peer/Types.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
@@ -107,10 +108,12 @@
 #include "opentxs/otx/blind/Mint.hpp"
 #include "opentxs/otx/blind/Purse.hpp"
 #include "opentxs/otx/blind/Types.hpp"
+#include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/PasswordPrompt.hpp"
 #include "opentxs/util/Pimpl.hpp"
 #include "util/HDIndex.hpp"
+#include "util/PasswordPromptPrivate.hpp"
 
 namespace opentxs::api::session::imp
 {
@@ -1536,10 +1539,23 @@ auto Factory::OutbailmentRequest(
     }
 }
 
-auto Factory::PasswordPrompt(const UnallocatedCString& text) const
-    -> OTPasswordPrompt
+auto Factory::PasswordPrompt(std::string_view text) const
+    -> opentxs::PasswordPrompt
 {
-    return OTPasswordPrompt{opentxs::Factory::PasswordPrompt(api_, text)};
+    auto alloc = alloc::PMR<PasswordPromptPrivate>{};
+    auto* out = alloc.allocate(1_uz);
+
+    OT_ASSERT(nullptr != out);
+
+    alloc.construct(out, api_, text);
+
+    return out;
+}
+
+auto Factory::PasswordPrompt(const opentxs::PasswordPrompt& rhs) const
+    -> opentxs::PasswordPrompt
+{
+    return PasswordPrompt(rhs.GetDisplayString());
 }
 
 auto Factory::Payment() const -> std::unique_ptr<OTPayment>

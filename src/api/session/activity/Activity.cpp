@@ -20,8 +20,15 @@
 #include <utility>
 
 #include "internal/api/session/Factory.hpp"
+#include "internal/api/session/FactoryAPI.hpp"
+#include "internal/api/session/Wallet.hpp"
 #include "internal/blockchain/bitcoin/block/Transaction.hpp"
+#include "internal/core/String.hpp"
+#include "internal/core/contract/Unit.hpp"
+#include "internal/core/contract/peer/PeerObject.hpp"
+#include "internal/network/zeromq/Context.hpp"
 #include "internal/network/zeromq/message/Message.hpp"
+#include "internal/network/zeromq/socket/Publish.hpp"
 #include "internal/otx/common/Cheque.hpp"  // IWYU pragma: keep
 #include "internal/otx/common/Item.hpp"    // IWYU pragma: keep
 #include "internal/otx/common/Message.hpp"
@@ -41,16 +48,12 @@
 #include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/core/Contact.hpp"
 #include "opentxs/core/Data.hpp"
-#include "opentxs/core/String.hpp"
-#include "opentxs/core/contract/Unit.hpp"
-#include "opentxs/core/contract/peer/PeerObject.hpp"
 #include "opentxs/core/display/Definition.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/core/identifier/UnitDefinition.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/network/zeromq/message/Message.tpp"
-#include "opentxs/network/zeromq/socket/Publish.hpp"
 #include "opentxs/otx/client/PaymentWorkflowType.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
@@ -79,7 +82,7 @@ Activity::Activity(
     : api_(api)
     , contact_(contact)
     , message_loaded_([&] {
-        auto out = api_.Network().ZeroMQ().PublishSocket();
+        auto out = api_.Network().ZeroMQ().Internal().PublishSocket();
         const auto rc = out->Start(api_.Endpoints().MessageLoaded().data());
 
         OT_ASSERT(rc);
@@ -95,7 +98,7 @@ Activity::Activity(
 }
 
 auto Activity::activity_preload_thread(
-    OTPasswordPrompt reason,
+    PasswordPrompt reason,
     const identifier::Nym nymID,
     const std::size_t count) const noexcept -> void
 {
@@ -103,7 +106,8 @@ auto Activity::activity_preload_thread(
 
     for (const auto& it : threads) {
         const auto& threadID = it.first;
-        thread_preload_thread(reason, nymID, threadID, 0, count);
+        thread_preload_thread(
+            api_.Factory().PasswordPrompt(reason), nymID, threadID, 0, count);
     }
 }
 
@@ -258,7 +262,8 @@ auto Activity::Cheque(
     [[maybe_unused]] const UnallocatedCString& id,
     const UnallocatedCString& workflowID) const noexcept -> Activity::ChequeData
 {
-    auto output = ChequeData{nullptr, api_.Factory().UnitDefinition()};
+    auto output =
+        ChequeData{nullptr, api_.Factory().InternalSession().UnitDefinition()};
     auto& [cheque, contract] = output;
     auto [type, state] = api_.Storage().PaymentWorkflowState(nym, workflowID);
     [[maybe_unused]] const auto& notUsed = state;
@@ -300,7 +305,7 @@ auto Activity::Cheque(
     const auto& unit = cheque->GetInstrumentDefinitionID();
 
     try {
-        contract = api_.Wallet().UnitDefinition(unit);
+        contract = api_.Wallet().Internal().UnitDefinition(unit);
     } catch (...) {
         LogError()(OT_PRETTY_CLASS())(
             "Unable to load unit definition contract.")
@@ -316,7 +321,8 @@ auto Activity::Transfer(
     const UnallocatedCString& workflowID) const noexcept
     -> Activity::TransferData
 {
-    auto output = TransferData{nullptr, api_.Factory().UnitDefinition()};
+    auto output = TransferData{
+        nullptr, api_.Factory().InternalSession().UnitDefinition()};
     auto& [transfer, contract] = output;
     auto [type, state] = api_.Storage().PaymentWorkflowState(nym, workflowID);
 
@@ -373,7 +379,7 @@ auto Activity::Transfer(
     }
 
     try {
-        contract = api_.Wallet().UnitDefinition(unit);
+        contract = api_.Wallet().Internal().UnitDefinition(unit);
     } catch (...) {
         LogError()(OT_PRETTY_CLASS())(
             "Unable to load unit definition contract.")
@@ -652,7 +658,7 @@ auto Activity::PreloadActivity(
     std::thread preload(
         &Activity::activity_preload_thread,
         this,
-        OTPasswordPrompt{reason},
+        api_.Factory().PasswordPrompt(reason),
         nymID,
         count);
     preload.detach();
@@ -669,7 +675,7 @@ auto Activity::PreloadThread(
     std::thread preload(
         &Activity::thread_preload_thread,
         this,
-        OTPasswordPrompt{reason},
+        api_.Factory().PasswordPrompt(reason),
         nymID,
         thread,
         start,
@@ -694,7 +700,7 @@ auto Activity::publish(
 auto Activity::start_publisher(
     const UnallocatedCString& endpoint) const noexcept -> OTZMQPublishSocket
 {
-    auto output = api_.Network().ZeroMQ().PublishSocket();
+    auto output = api_.Network().ZeroMQ().Internal().PublishSocket();
     const auto started = output->Start(endpoint);
 
     OT_ASSERT(started);
@@ -736,7 +742,7 @@ auto Activity::Thread(
 }
 
 auto Activity::thread_preload_thread(
-    OTPasswordPrompt reason,
+    PasswordPrompt reason,
     const identifier::Nym nymID,
     const UnallocatedCString threadID,
     const std::size_t start,

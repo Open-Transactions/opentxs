@@ -13,6 +13,7 @@
 
 #include "interface/ui/base/List.hpp"
 #include "internal/api/session/Wallet.hpp"
+#include "internal/core/contract/ServerContract.hpp"
 #include "internal/otx/client/Issuer.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/Mutex.hpp"
@@ -22,7 +23,6 @@
 #include "opentxs/api/session/Endpoints.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Wallet.hpp"
-#include "opentxs/core/contract/ServerContract.hpp"
 #include "opentxs/identity/Nym.hpp"
 #include "opentxs/identity/Types.hpp"
 #include "opentxs/network/Types.hpp"
@@ -103,7 +103,7 @@ auto AccountSummary::extract_key(
     if (serverID.empty()) { return output; }
 
     try {
-        const auto server = api_.Wallet().Server(serverID);
+        const auto server = api_.Wallet().Internal().Server(serverID);
         name = server->Alias();
         const auto& serverNymID = server->Nym()->ID();
         eLock lock(shared_lock_);

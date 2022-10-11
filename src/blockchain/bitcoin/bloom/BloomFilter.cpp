@@ -19,11 +19,11 @@
 #include <type_traits>
 
 #include "internal/blockchain/Blockchain.hpp"
+#include "internal/blockchain/bitcoin/bloom/BloomFilter.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/api/crypto/Hash.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Session.hpp"
-#include "opentxs/blockchain/bitcoin/bloom/BloomFilter.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/util/Container.hpp"

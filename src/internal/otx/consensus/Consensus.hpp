@@ -6,11 +6,11 @@
 #pragma once
 
 #include "internal/otx/Types.hpp"
+#include "internal/otx/consensus/Base.hpp"
+#include "internal/otx/consensus/Client.hpp"
+#include "internal/otx/consensus/Server.hpp"
 #include "internal/util/Editor.hpp"
 #include "internal/util/Mutex.hpp"
-#include "opentxs/otx/consensus/Base.hpp"
-#include "opentxs/otx/consensus/Client.hpp"
-#include "opentxs/otx/consensus/Server.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs

@@ -12,6 +12,11 @@
 #include <sstream>
 #include <string_view>
 
+#include "internal/api/session/UI.hpp"
+#include "internal/interface/ui/AccountCurrency.hpp"
+#include "internal/interface/ui/AccountTree.hpp"
+#include "internal/interface/ui/AccountTreeItem.hpp"
+#include "internal/util/SharedPimpl.hpp"
 #include "ottest/fixtures/common/Counter.hpp"
 #include "ottest/fixtures/common/User.hpp"
 
@@ -30,7 +35,7 @@ auto check_account_tree(
     const User& user,
     const AccountTreeData& expected) noexcept -> bool
 {
-    const auto& widget = user.api_->UI().AccountTree(user.nym_id_);
+    const auto& widget = user.api_->UI().Internal().AccountTree(user.nym_id_);
     auto output{true};
     const auto& v = expected.rows_;
     auto row = widget.First();
@@ -131,19 +136,19 @@ auto check_account_tree_items(
 
 auto init_account_tree(const User& user, Counter& counter) noexcept -> void
 {
-    user.api_->UI().AccountTree(user.nym_id_, make_cb(counter, [&] {
-                                    auto out = std::stringstream{};
-                                    out << u8"account_tree_"_sv;
-                                    out << user.name_lower_;
+    user.api_->UI().Internal().AccountTree(user.nym_id_, make_cb(counter, [&] {
+                                               auto out = std::stringstream{};
+                                               out << u8"account_tree_"_sv;
+                                               out << user.name_lower_;
 
-                                    return out.str();
-                                }()));
+                                               return out.str();
+                                           }()));
     wait_for_counter(counter);
 }
 
 auto print_account_tree(const User& user) noexcept -> ot::UnallocatedCString
 {
-    const auto& widget = user.api_->UI().AccountTree(user.nym_id_);
+    const auto& widget = user.api_->UI().Internal().AccountTree(user.nym_id_);
 
     return widget.Debug();
 }

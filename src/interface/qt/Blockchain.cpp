@@ -11,6 +11,7 @@
 #include <utility>
 
 #include "interface/qt/SendMonitor.hpp"
+#include "internal/interface/ui/AccountActivity.hpp"
 #include "opentxs/api/network/Blockchain.hpp"
 #include "opentxs/api/network/BlockchainHandle.hpp"
 #include "opentxs/api/network/Network.hpp"
@@ -18,7 +19,6 @@
 #include "opentxs/blockchain/node/Manager.hpp"
 #include "opentxs/core/PaymentCode.hpp"
 #include "opentxs/core/display/Definition.hpp"
-#include "opentxs/interface/ui/AccountActivity.hpp"
 #include "opentxs/util/Container.hpp"
 
 namespace opentxs::ui::implementation

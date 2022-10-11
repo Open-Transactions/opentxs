@@ -12,12 +12,12 @@
 #include <optional>
 
 #include "core/contract/Signable.hpp"
+#include "internal/core/contract/Unit.hpp"
 #include "internal/otx/common/Account.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/Mutex.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/core/Types.hpp"
-#include "opentxs/core/contract/Unit.hpp"
 #include "opentxs/core/contract/UnitType.hpp"
 #include "opentxs/core/display/Definition.hpp"
 #include "opentxs/core/identifier/Generic.hpp"

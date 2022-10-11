@@ -18,6 +18,7 @@
 #include "base58/base58.h"
 #include "base64/base64.h"
 #include "internal/api/crypto/Factory.hpp"
+#include "internal/core/String.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "opentxs/OT.hpp"
@@ -28,13 +29,11 @@
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/Secret.hpp"
-#include "opentxs/core/String.hpp"
 #include "opentxs/crypto/HashType.hpp"
 #include "opentxs/network/zeromq/ZeroMQ.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
-#include "opentxs/util/Pimpl.hpp"
 
 namespace opentxs::factory
 {
@@ -261,9 +260,9 @@ auto Encode::Nonce(const std::uint32_t size, Data& rawOutput) const -> OTString
     rawOutput.zeroMemory();
     rawOutput.SetSize(size);
     auto source = opentxs::Context().Factory().Secret(0);
-    source->Randomize(size);
+    source.Randomize(size);
     auto nonce = String::Factory(IdentifierEncode(source));
-    rawOutput.Assign(source->Bytes());
+    rawOutput.Assign(source.Bytes());
 
     return nonce;
 }

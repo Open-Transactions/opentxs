@@ -11,6 +11,7 @@
 
 #include "opentxs/api/session/Activity.hpp"
 
+#include "internal/core/contract/Unit.hpp"
 #include "opentxs/otx/client/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)

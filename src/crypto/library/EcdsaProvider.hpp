@@ -5,8 +5,9 @@
 
 #pragma once
 
+#include "internal/crypto/library/EcdsaProvider.hpp"
+
 #include "opentxs/crypto/Types.hpp"
-#include "opentxs/crypto/library/EcdsaProvider.hpp"
 #include "opentxs/util/Bytes.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)

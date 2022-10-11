@@ -12,10 +12,10 @@
 
 #include "2_Factory.hpp"
 #include "core/contract/Unit.hpp"
+#include "internal/core/contract/Unit.hpp"
 #include "internal/serialization/protobuf/Check.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/serialization/protobuf/verify/UnitDefinition.hpp"
-#include "opentxs/core/contract/Unit.hpp"
 
 namespace opentxs
 {

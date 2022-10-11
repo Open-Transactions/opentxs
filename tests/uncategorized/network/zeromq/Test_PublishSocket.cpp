@@ -6,6 +6,10 @@
 #include <gtest/gtest.h>
 #include <opentxs/opentxs.hpp>
 
+#include "internal/network/zeromq/Context.hpp"
+#include "internal/network/zeromq/socket/Publish.hpp"
+#include "internal/network/zeromq/socket/SocketType.hpp"
+
 namespace ot = opentxs;
 namespace zmq = ot::network::zeromq;
 
@@ -24,7 +28,7 @@ public:
 
 TEST_F(Test_PublishSocket, PublishSocket_Factory)
 {
-    auto publishSocket = context_.PublishSocket();
+    auto publishSocket = context_.Internal().PublishSocket();
 
     ASSERT_NE(nullptr, &publishSocket.get());
     ASSERT_EQ(zmq::socket::Type::Publish, publishSocket->Type());

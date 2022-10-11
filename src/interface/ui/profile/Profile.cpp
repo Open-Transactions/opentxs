@@ -15,6 +15,8 @@
 
 #include "interface/ui/base/List.hpp"
 #include "internal/identity/wot/claim/Types.hpp"
+#include "internal/interface/ui/Profile.hpp"
+#include "internal/interface/ui/ProfileSection.hpp"
 #include "internal/interface/ui/UI.hpp"
 #include "internal/serialization/protobuf/verify/VerifyContacts.hpp"
 #include "internal/util/LogMacros.hpp"
@@ -31,14 +33,12 @@
 #include "opentxs/identity/wot/claim/Section.hpp"
 #include "opentxs/identity/wot/claim/SectionType.hpp"
 #include "opentxs/identity/wot/claim/Types.hpp"
-#include "opentxs/interface/ui/Profile.hpp"
-#include "opentxs/interface/ui/ProfileSection.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
 #include "opentxs/network/zeromq/message/FrameSection.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/NymEditor.hpp"
-#include "opentxs/util/Pimpl.hpp"
+#include "opentxs/util/PasswordPrompt.hpp"  // IWYU pragma: keep
 
 // NOLINTBEGIN(cert-dcl58-cpp)
 template struct std::pair<int, opentxs::UnallocatedCString>;

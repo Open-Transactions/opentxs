@@ -9,7 +9,11 @@
 #include <memory>
 #include <optional>
 
+#include "internal/api/session/Wallet.hpp"
+#include "internal/core/contract/ServerContract.hpp"
+#include "internal/core/contract/Unit.hpp"
 #include "internal/network/otdht/Factory.hpp"
+#include "internal/util/SharedPimpl.hpp"
 #include "ottest/fixtures/blockchain/Common.hpp"
 #include "ottest/fixtures/blockchain/MinedBlocks.hpp"
 #include "ottest/fixtures/blockchain/SyncRequestor.hpp"
@@ -324,7 +328,7 @@ TEST_F(Regtest_fixture_sync_server, make_contracts)
     ASSERT_FALSE(unit_.has_value());
 
     const auto reason = miner_.Factory().PasswordPrompt(__func__);
-    notary_.emplace(miner_.Wallet().Server(
+    notary_.emplace(miner_.Wallet().Internal().Server(
         alex_.nym_id_.asBase58(ot_.Crypto()),
         "Example notary",
         "Don't use",
@@ -339,7 +343,7 @@ TEST_F(Regtest_fixture_sync_server, make_contracts)
     ASSERT_TRUE(notary_.has_value());
     ASSERT_FALSE(notary_.value()->ID().empty());
 
-    unit_.emplace(miner_.Wallet().CurrencyContract(
+    unit_.emplace(miner_.Wallet().Internal().CurrencyContract(
         alex_.nym_id_.asBase58(ot_.Crypto()),
         "My Dollars",
         "Example only",

@@ -10,12 +10,12 @@
 #include <memory>
 
 #include "core/contract/Signable.hpp"
+#include "internal/core/contract/ServerContract.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/Mutex.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Secret.hpp"
 #include "opentxs/core/Types.hpp"
-#include "opentxs/core/contract/ServerContract.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/identity/Types.hpp"
 #include "opentxs/util/Bytes.hpp"
@@ -68,7 +68,7 @@ public:
     auto Statistics(String& strContents) const -> bool final;
     auto TransportKey() const -> const Data& final;
     auto TransportKey(Data& pubkey, const PasswordPrompt& reason) const
-        -> OTSecret final;
+        -> Secret final;
 
     void InitAlias(const UnallocatedCString& alias) final
     {

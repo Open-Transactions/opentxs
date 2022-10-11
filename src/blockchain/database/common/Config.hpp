@@ -16,11 +16,11 @@
 #include <stdexcept>
 #include <string_view>
 
+#include "internal/network/zeromq/socket/Publish.hpp"
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/blockchain/BlockchainType.hpp"
 #include "opentxs/network/otdht/Block.hpp"
 #include "opentxs/network/otdht/Data.hpp"
-#include "opentxs/network/zeromq/socket/Publish.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"

@@ -10,9 +10,9 @@
 
 #include "api/network/asio/Context.hpp"
 #include "internal/network/zeromq/Context.hpp"
+#include "internal/network/zeromq/socket/SocketType.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
-#include "opentxs/network/zeromq/socket/SocketType.hpp"
 
 namespace opentxs::api::network::asio
 {

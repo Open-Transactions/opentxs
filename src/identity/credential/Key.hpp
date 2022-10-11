@@ -105,7 +105,7 @@ public:
 
     auto SelfSign(
         const PasswordPrompt& reason,
-        const std::optional<OTSecret> exportPassword = {},
+        const std::optional<Secret> exportPassword = {},
         const bool onlyPrivate = false) -> bool final;
 
     Key() = delete;

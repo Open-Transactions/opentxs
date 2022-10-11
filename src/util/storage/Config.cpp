@@ -9,9 +9,10 @@
 #include <chrono>
 
 #include "internal/api/Legacy.hpp"
+#include "internal/api/Settings.hpp"
+#include "internal/core/String.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/api/Settings.hpp"
-#include "opentxs/core/String.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Options.hpp"
 #include "opentxs/util/Pimpl.hpp"
@@ -30,7 +31,7 @@ Config::Config(
     : previous_primary_plugin_([&]() -> UnallocatedCString {
         auto exists{false};
         auto value = String::Factory();
-        config.Check_str(
+        config.Internal().Check_str(
             String::Factory(STORAGE_CONFIG_KEY),
             String::Factory(STORAGE_CONFIG_PRIMARY_PLUGIN_KEY),
             value,
@@ -77,7 +78,7 @@ Config::Config(
 
         if (previous != current) {
             auto notUsed{false};
-            config.Set_str(
+            config.Internal().Set_str(
                 String::Factory(STORAGE_CONFIG_KEY),
                 String::Factory(STORAGE_CONFIG_PRIMARY_PLUGIN_KEY),
                 String::Factory(current),
@@ -100,7 +101,7 @@ Config::Config(
     , gc_interval_([&] {
         auto output = std::int64_t{};
         auto notUsed{false};
-        config.CheckSet_long(
+        config.Internal().CheckSet_long(
             String::Factory(STORAGE_CONFIG_KEY),
             String::Factory("gc_interval"),
             0,
@@ -152,7 +153,7 @@ Config::Config(
         }
 
         auto strPath = String::Factory(output.string().c_str());
-        config.CheckSet_str(
+        config.Internal().CheckSet_str(
             String::Factory(STORAGE_CONFIG_KEY),
             String::Factory("path"),
             strPath,
@@ -164,7 +165,7 @@ Config::Config(
     , fs_primary_bucket_([&] {
         auto output = UnallocatedCString{};
         auto notUsed{false};
-        config.CheckSet_str(
+        config.Internal().CheckSet_str(
             String::Factory(STORAGE_CONFIG_KEY),
             String::Factory("fs_primary"),
             String::Factory("a"),
@@ -176,7 +177,7 @@ Config::Config(
     , fs_secondary_bucket_([&] {
         auto output = UnallocatedCString{};
         auto notUsed{false};
-        config.CheckSet_str(
+        config.Internal().CheckSet_str(
             String::Factory(STORAGE_CONFIG_KEY),
             String::Factory("fs_secondary"),
             String::Factory("b"),
@@ -188,7 +189,7 @@ Config::Config(
     , fs_root_file_([&] {
         auto output = UnallocatedCString{};
         auto notUsed{false};
-        config.CheckSet_str(
+        config.Internal().CheckSet_str(
             String::Factory(STORAGE_CONFIG_KEY),
             String::Factory("fs_root_file"),
             String::Factory("root"),
@@ -200,7 +201,7 @@ Config::Config(
     , fs_backup_directory_([&] {
         auto output = UnallocatedCString{};
         auto notUsed{false};
-        config.CheckSet_str(
+        config.Internal().CheckSet_str(
             String::Factory(STORAGE_CONFIG_KEY),
             String::Factory(STORAGE_CONFIG_FS_BACKUP_DIRECTORY_KEY),
             String::Factory(""),
@@ -212,7 +213,7 @@ Config::Config(
     , fs_encrypted_backup_directory_([&] {
         auto output = UnallocatedCString{};
         auto notUsed{false};
-        config.CheckSet_str(
+        config.Internal().CheckSet_str(
             String::Factory(STORAGE_CONFIG_KEY),
             String::Factory(STORAGE_CONFIG_FS_ENCRYPTED_BACKUP_DIRECTORY_KEY),
             String::Factory(""),
@@ -224,7 +225,7 @@ Config::Config(
     , sqlite3_primary_bucket_([&] {
         auto output = UnallocatedCString{};
         auto notUsed{false};
-        config.CheckSet_str(
+        config.Internal().CheckSet_str(
             String::Factory(STORAGE_CONFIG_KEY),
             String::Factory("sqlite3_primary"),
             String::Factory("a"),
@@ -236,7 +237,7 @@ Config::Config(
     , sqlite3_secondary_bucket_([&] {
         auto output = UnallocatedCString{};
         auto notUsed{false};
-        config.CheckSet_str(
+        config.Internal().CheckSet_str(
             String::Factory(STORAGE_CONFIG_KEY),
             String::Factory("sqlite3_secondary"),
             String::Factory("b"),
@@ -248,7 +249,7 @@ Config::Config(
     , sqlite3_control_table_([&] {
         auto output = UnallocatedCString{};
         auto notUsed{false};
-        config.CheckSet_str(
+        config.Internal().CheckSet_str(
             String::Factory(STORAGE_CONFIG_KEY),
             String::Factory("sqlite3_control"),
             String::Factory("control"),
@@ -260,7 +261,7 @@ Config::Config(
     , sqlite3_root_key_([&] {
         auto output = UnallocatedCString{};
         auto notUsed{false};
-        config.CheckSet_str(
+        config.Internal().CheckSet_str(
             String::Factory(STORAGE_CONFIG_KEY),
             String::Factory("sqlite3_root_key"),
             String::Factory("root"),
@@ -272,7 +273,7 @@ Config::Config(
     , sqlite3_db_file_([&] {
         auto output = UnallocatedCString{};
         auto notUsed{false};
-        config.CheckSet_str(
+        config.Internal().CheckSet_str(
             String::Factory(STORAGE_CONFIG_KEY),
             String::Factory("sqlite3_db_file"),
             String::Factory("opentxs.sqlite3"),
@@ -284,7 +285,7 @@ Config::Config(
     , lmdb_primary_bucket_([&] {
         auto output = UnallocatedCString{};
         auto notUsed{false};
-        config.CheckSet_str(
+        config.Internal().CheckSet_str(
             String::Factory(STORAGE_CONFIG_KEY),
             String::Factory("lmdb_primary"),
             String::Factory("a"),
@@ -296,7 +297,7 @@ Config::Config(
     , lmdb_secondary_bucket_([&] {
         auto output = UnallocatedCString{};
         auto notUsed{false};
-        config.CheckSet_str(
+        config.Internal().CheckSet_str(
             String::Factory(STORAGE_CONFIG_KEY),
             String::Factory("lmdb_secondary"),
             String::Factory("b"),
@@ -308,7 +309,7 @@ Config::Config(
     , lmdb_control_table_([&] {
         auto output = UnallocatedCString{};
         auto notUsed{false};
-        config.CheckSet_str(
+        config.Internal().CheckSet_str(
             String::Factory(STORAGE_CONFIG_KEY),
             String::Factory("lmdb_control"),
             String::Factory("control"),
@@ -320,7 +321,7 @@ Config::Config(
     , lmdb_root_key_([&] {
         auto output = UnallocatedCString{};
         auto notUsed{false};
-        config.CheckSet_str(
+        config.Internal().CheckSet_str(
             String::Factory(STORAGE_CONFIG_KEY),
             String::Factory("lmdb_root_key"),
             String::Factory("root"),
@@ -332,6 +333,8 @@ Config::Config(
 {
     OT_ASSERT(false == dataFolder.empty());
 
-    config.Save();
+    if (false == config.Save()) {
+        LogAbort()(OT_PRETTY_CLASS())("failed to save config file").Abort();
+    }
 }
 }  // namespace opentxs::storage

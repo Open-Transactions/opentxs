@@ -5,9 +5,10 @@
 
 #pragma once
 
+#include <string_view>
+
 #include "opentxs/Export.hpp"
-#include "opentxs/network/zeromq/zap/Callback.hpp"
-#include "opentxs/util/Container.hpp"
+#include "opentxs/network/zeromq/zap/Types.hpp"
 
 namespace opentxs::api::network
 {
@@ -17,9 +18,6 @@ namespace opentxs::api::network
 class OPENTXS_EXPORT ZAP
 {
 public:
-    using Callback = opentxs::network::zeromq::zap::Callback::ReceiveCallback;
-    using Policy = opentxs::network::zeromq::zap::Callback::Policy;
-
     /** Set a callback that will be triggered for any ZAP requests in a
      *  specified domain
      *
@@ -31,8 +29,9 @@ public:
      *   \return True if the domain is valid and not already registered
      */
     virtual auto RegisterDomain(
-        const UnallocatedCString& domain,
-        const Callback& callback) const -> bool = 0;
+        const std::string_view domain,
+        const opentxs::network::zeromq::zap::ReceiveCallback& callback) const
+        -> bool = 0;
 
     /** Configure ZAP policy for unhandled domains
      *
@@ -41,7 +40,8 @@ public:
      *  \param[in]  policy  Accept or reject ZAP requests for a domain which has
      *                      no registered callback
      */
-    virtual auto SetDefaultPolicy(const Policy policy) const -> bool = 0;
+    virtual auto SetDefaultPolicy(
+        const opentxs::network::zeromq::zap::Policy policy) const -> bool = 0;
 
     ZAP(const ZAP&) = delete;
     ZAP(ZAP&&) = delete;

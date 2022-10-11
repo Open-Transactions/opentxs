@@ -6,9 +6,9 @@
 #pragma once
 
 #include "core/contract/peer/PeerReply.hpp"
+#include "internal/core/contract/peer/ConnectionReply.hpp"
+#include "internal/core/contract/peer/PeerReply.hpp"
 #include "internal/util/Mutex.hpp"
-#include "opentxs/core/contract/peer/ConnectionReply.hpp"
-#include "opentxs/core/contract/peer/PeerReply.hpp"
 #include "opentxs/identity/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"

@@ -18,22 +18,22 @@
 #include "core/StateMachine.hpp"
 #include "internal/api/session/OTX.hpp"
 #include "internal/api/session/OTX.hpp"
+#include "internal/core/contract/peer/PeerReply.hpp"
+#include "internal/core/contract/peer/PeerRequest.hpp"
 #include "internal/otx/client/Client.hpp"
 #include "internal/otx/client/OTPayment.hpp"
+#include "internal/util/SharedPimpl.hpp"
 #include "internal/util/UniqueQueue.hpp"
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/OTX.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/core/Data.hpp"
-#include "opentxs/core/contract/peer/PeerReply.hpp"
-#include "opentxs/core/contract/peer/PeerRequest.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/PasswordPrompt.hpp"
 #include "opentxs/util/Pimpl.hpp"
-#include "opentxs/util/SharedPimpl.hpp"
 #include "otx/client/PaymentTasks.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -160,7 +160,7 @@ private:
     const UniqueQueue<CheckNymTask>& outdated_nyms_;
     const UniqueQueue<identifier::Notary>& missing_servers_;
     const UniqueQueue<identifier::UnitDefinition>& missing_unit_definitions_;
-    const OTPasswordPrompt reason_;
+    const PasswordPrompt reason_;
     std::unique_ptr<otx::client::internal::Operation> p_op_;
     otx::client::internal::Operation& op_;
     UniqueQueue<CheckNymTask> check_nym_;

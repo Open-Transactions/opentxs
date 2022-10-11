@@ -176,7 +176,7 @@ auto User::PaymentCode() const -> ot::PaymentCode
     return api_->Factory().PaymentCode(payment_code_);
 }
 
-auto User::Reason() const noexcept -> ot::OTPasswordPrompt
+auto User::Reason() const noexcept -> ot::PasswordPrompt
 {
     OT_ASSERT(nullptr != api_);
 

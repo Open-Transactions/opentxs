@@ -17,9 +17,14 @@
 
 #include "internal/api/network/Asio.hpp"
 #include "internal/api/session/FactoryAPI.hpp"
+#include "internal/core/Armored.hpp"
+#include "internal/core/String.hpp"
+#include "internal/core/contract/peer/PeerObject.hpp"
+#include "internal/network/zeromq/socket/Publish.hpp"
 #include "internal/otx/common/Message.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/Mutex.hpp"
+#include "internal/util/PasswordPrompt.hpp"
 #include "opentxs/api/network/Asio.hpp"
 #include "opentxs/api/network/Network.hpp"
 #include "opentxs/api/session/Crypto.hpp"
@@ -27,14 +32,10 @@
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/api/session/Storage.hpp"
 #include "opentxs/api/session/Wallet.hpp"
-#include "opentxs/core/Armored.hpp"
 #include "opentxs/core/Data.hpp"
-#include "opentxs/core/String.hpp"
-#include "opentxs/core/contract/peer/PeerObject.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
-#include "opentxs/network/zeromq/socket/Publish.hpp"
 #include "opentxs/otx/client/Types.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
@@ -55,7 +56,7 @@ namespace opentxs::api::session::activity
 struct MailCache::Imp {
     struct Task {
         Outstanding counter_;
-        const OTPasswordPrompt reason_;
+        const PasswordPrompt reason_;
         const identifier::Nym nym_;
         const identifier::Generic item_;
         const otx::client::StorageBox box_;
@@ -74,7 +75,7 @@ struct MailCache::Imp {
             , reason_([&] {
                 auto out =
                     api.Factory().PasswordPrompt(reason.GetDisplayString());
-                out->SetPassword(reason.Password());
+                out.Internal().SetPassword(reason.Internal().Password());
 
                 return out;
             }())
@@ -178,8 +179,8 @@ struct MailCache::Imp {
             return;
         }
 
-        const auto object =
-            api_.Factory().PeerObject(nym, mail->payload_, task.reason_);
+        const auto object = api_.Factory().InternalSession().PeerObject(
+            nym, mail->payload_, task.reason_);
 
         if (!object) {
             message = "Error: Unable to decrypt message";

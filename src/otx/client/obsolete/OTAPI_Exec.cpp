@@ -13,6 +13,10 @@
 #include <utility>
 
 #include "internal/api/session/FactoryAPI.hpp"
+#include "internal/api/session/Wallet.hpp"
+#include "internal/core/String.hpp"
+#include "internal/core/contract/BasketContract.hpp"
+#include "internal/core/contract/ServerContract.hpp"
 #include "internal/otx/client/obsolete/OT_API.hpp"
 #include "internal/otx/common/NumList.hpp"
 #include "internal/otx/common/basket/Basket.hpp"
@@ -26,16 +30,14 @@
 #include "internal/otx/smartcontract/OTVariable.hpp"
 #include "internal/serialization/protobuf/Proto.tpp"
 #include "internal/util/LogMacros.hpp"
+#include "internal/util/SharedPimpl.hpp"
 #include "internal/util/Time.hpp"
 #include "opentxs/api/crypto/Seed.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/api/session/Wallet.hpp"
-#include "opentxs/core/String.hpp"
 #include "opentxs/core/UnitType.hpp"
-#include "opentxs/core/contract/BasketContract.hpp"
-#include "opentxs/core/contract/ServerContract.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/core/identifier/UnitDefinition.hpp"
@@ -43,8 +45,8 @@
 #include "opentxs/crypto/SeedStyle.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
+#include "opentxs/util/PasswordPrompt.hpp"  // IWYU pragma: keep
 #include "opentxs/util/Pimpl.hpp"
-#include "opentxs/util/SharedPimpl.hpp"
 
 #define OT_ERROR_AMOUNT INT64_MIN
 
@@ -2672,17 +2674,18 @@ auto OTAPI_Exec::GenerateBasketCreation(
     const VersionNumber version) const -> UnallocatedCString
 {
     try {
-        const auto serverContract =
-            api_.Wallet().Server(api_.Factory().NotaryIDFromBase58(serverID));
-        const auto basketTemplate = api_.Factory().BasketContract(
-            serverContract->Nym(),
-            shortname,
-            terms,
-            weight,
-            UnitType::Unknown,
-            version,
-            displayDefinition,
-            redemptionIncrement);
+        const auto serverContract = api_.Wallet().Internal().Server(
+            api_.Factory().NotaryIDFromBase58(serverID));
+        const auto basketTemplate =
+            api_.Factory().InternalSession().BasketContract(
+                serverContract->Nym(),
+                shortname,
+                terms,
+                weight,
+                UnitType::Unknown,
+                version,
+                displayDefinition,
+                redemptionIncrement);
 
         auto serialized = proto::UnitDefinition{};
         if (false == basketTemplate->Serialize(serialized, true)) {

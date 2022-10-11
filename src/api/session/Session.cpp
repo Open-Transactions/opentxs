@@ -20,6 +20,7 @@
 #include "internal/api/crypto/Symmetric.hpp"
 #include "internal/api/network/Network.hpp"
 #include "internal/util/LogMacros.hpp"
+#include "internal/util/PasswordPrompt.hpp"
 #include "opentxs/api/crypto/Symmetric.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
@@ -62,14 +63,14 @@ extern "C" auto internal_password_cb(
         return 0;
     }
 
-    if (static_cast<std::uint64_t>(secret->size()) >
+    if (static_cast<std::uint64_t>(secret.size()) >
         static_cast<std::uint64_t>(std::numeric_limits<std::int32_t>::max())) {
         opentxs::LogError()(__func__)(": Secret too big").Flush();
 
         return 0;
     }
 
-    const auto len = std::min(static_cast<std::int32_t>(secret->size()), size);
+    const auto len = std::min(static_cast<std::int32_t>(secret.size()), size);
 
     if (len <= 0) {
         opentxs::LogError()(__func__)(": Callback error").Flush();
@@ -77,7 +78,7 @@ extern "C" auto internal_password_cb(
         return 0;
     }
 
-    std::memcpy(output, secret->data(), len);
+    std::memcpy(output, secret.data(), len);
 
     return len;
 }
@@ -157,7 +158,7 @@ auto Session::cleanup() noexcept -> void
 auto Session::get_api(const PasswordPrompt& reason) noexcept
     -> const api::Session&
 {
-    return reason.api_;
+    return reason.Internal().API();
 }
 
 auto Session::GetInternalPasswordCallback() const -> INTERNAL_PASSWORD_CALLBACK*
@@ -193,7 +194,7 @@ auto Session::GetSecret(
     static const auto defaultPassword =
         factory_.SecretFromText(DefaultPassword());
     auto prompt = factory_.PasswordPrompt(reason.GetDisplayString());
-    prompt->SetPassword(defaultPassword);
+    prompt.Internal().SetPassword(defaultPassword);
     auto unlocked = master_key_->Unlock(prompt);
     auto tries{0};
 
@@ -208,7 +209,7 @@ auto Session::GetSecret(
             callback.AskOnce(reason, masterPassword, password_key);
         }
 
-        prompt->SetPassword(masterPassword);
+        prompt.Internal().SetPassword(masterPassword);
         unlocked = master_key_->Unlock(prompt);
 
         if (false == unlocked) { ++tries; }
@@ -224,7 +225,7 @@ auto Session::GetSecret(
     const auto decrypted = master_key_->Decrypt(
         encrypted_secret_,
         prompt,
-        master_secret_.value()->WriteInto(Secret::Mode::Mem));
+        master_secret_.value().WriteInto(Secret::Mode::Mem));
 
     if (false == decrypted) {
         opentxs::LogError()(OT_PRETTY_CLASS())(
@@ -259,7 +260,7 @@ auto Session::make_master_key(
     const api::Context& parent,
     const api::session::Factory& factory,
     proto::Ciphertext& encrypted,
-    std::optional<OTSecret>& master_secret,
+    std::optional<Secret>& master_secret,
     const api::crypto::Symmetric& symmetric,
     const api::session::Storage& storage) -> OTSymmetricKey
 {
@@ -281,16 +282,16 @@ auto Session::make_master_key(
 
     OT_ASSERT(master_secret.has_value());
 
-    master_secret.value()->Randomize(32);
+    master_secret.value().Randomize(32);
 
     auto reason = factory.PasswordPrompt("Choose a master password");
     auto masterPassword = factory.Secret(0);
     caller.AskTwice(reason, masterPassword, parent.ProfileId());
-    reason->SetPassword(masterPassword);
+    reason.Internal().SetPassword(masterPassword);
     auto output = symmetric.Key(
         reason, opentxs::crypto::key::symmetric::Algorithm::ChaCha20Poly1305);
     auto saved = output->Encrypt(
-        master_secret.value()->Bytes(),
+        master_secret.value().Bytes(),
         reason,
         encrypted,
         true,

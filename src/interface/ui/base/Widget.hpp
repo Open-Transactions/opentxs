@@ -12,13 +12,13 @@
 #include <utility>
 
 #include "internal/interface/ui/UI.hpp"
+#include "internal/interface/ui/Widget.hpp"
+#include "internal/network/zeromq/ListenCallback.hpp"
+#include "internal/network/zeromq/socket/Request.hpp"
+#include "internal/network/zeromq/socket/Subscribe.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
-#include "opentxs/interface/ui/Widget.hpp"
-#include "opentxs/network/zeromq/ListenCallback.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
-#include "opentxs/network/zeromq/socket/Request.hpp"
-#include "opentxs/network/zeromq/socket/Subscribe.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Types.hpp"

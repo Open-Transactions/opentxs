@@ -47,12 +47,22 @@
 #include "internal/api/session/FactoryAPI.hpp"
 #include "internal/api/session/Types.hpp"
 #include "internal/api/session/Wallet.hpp"
+#include "internal/core/Armored.hpp"
 #include "internal/core/Core.hpp"
 #include "internal/core/Factory.hpp"
+#include "internal/core/contract/ServerContract.hpp"
+#include "internal/core/contract/Unit.hpp"
 #include "internal/identity/Nym.hpp"
 #include "internal/identity/credential/Credential.hpp"
 #include "internal/identity/wot/claim/Types.hpp"
+#include "internal/network/zeromq/Context.hpp"
+#include "internal/network/zeromq/ListenCallback.hpp"
 #include "internal/network/zeromq/message/Message.hpp"
+#include "internal/network/zeromq/socket/Publish.hpp"
+#include "internal/network/zeromq/socket/Pull.hpp"
+#include "internal/network/zeromq/socket/Sender.hpp"
+#include "internal/network/zeromq/socket/Socket.hpp"
+#include "internal/network/zeromq/socket/Subscribe.hpp"
 #include "internal/otx/client/OTPayment.hpp"  // IWYU pragma: keep
 #include "internal/otx/client/obsolete/OT_API.hpp"
 #include "internal/otx/common/Account.hpp"
@@ -64,6 +74,7 @@
 #include "internal/util/Exclusive.hpp"
 #include "internal/util/Lockable.hpp"
 #include "internal/util/Shared.hpp"
+#include "internal/util/SharedPimpl.hpp"
 #include "internal/util/Time.hpp"
 #include "opentxs/api/Context.hpp"
 #include "opentxs/api/Factory.hpp"
@@ -82,11 +93,8 @@
 #include "opentxs/api/session/Wallet.hpp"
 #include "opentxs/api/session/Workflow.hpp"
 #include "opentxs/blockchain/BlockchainType.hpp"
-#include "opentxs/core/Armored.hpp"
 #include "opentxs/core/Contact.hpp"
 #include "opentxs/core/PaymentCode.hpp"
-#include "opentxs/core/contract/ServerContract.hpp"
-#include "opentxs/core/contract/Unit.hpp"
 #include "opentxs/core/display/Definition.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
@@ -103,24 +111,18 @@
 #include "opentxs/interface/rpc/request/Base.hpp"
 #include "opentxs/interface/rpc/response/Base.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
-#include "opentxs/network/zeromq/ListenCallback.hpp"
 #include "opentxs/network/zeromq/ZeroMQ.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
 #include "opentxs/network/zeromq/message/FrameSection.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
-#include "opentxs/network/zeromq/socket/Publish.hpp"
-#include "opentxs/network/zeromq/socket/Pull.hpp"
-#include "opentxs/network/zeromq/socket/Sender.hpp"
-#include "opentxs/network/zeromq/socket/Socket.hpp"
-#include "opentxs/network/zeromq/socket/Subscribe.hpp"
 #include "opentxs/otx/client/PaymentWorkflowState.hpp"
 #include "opentxs/otx/client/PaymentWorkflowType.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/NymEditor.hpp"
 #include "opentxs/util/Options.hpp"
+#include "opentxs/util/PasswordPrompt.hpp"
 #include "opentxs/util/Pimpl.hpp"
-#include "opentxs/util/SharedPimpl.hpp"
 
 namespace opentxs
 {
@@ -226,12 +228,13 @@ RPC::RPC(const api::Context& native)
     , push_callback_(zmq::ListenCallback::Factory([&](const zmq::Message& in) {
         rpc_publisher_->Send(network::zeromq::Message{in});
     }))
-    , push_receiver_(ot_.ZMQ().PullSocket(
+    , push_receiver_(ot_.ZMQ().Internal().PullSocket(
           push_callback_,
           zmq::socket::Direction::Bind,
           "RPC push receiver"))
-    , rpc_publisher_(ot_.ZMQ().PublishSocket())
-    , task_subscriber_(ot_.ZMQ().SubscribeSocket(task_callback_, "RPC task"))
+    , rpc_publisher_(ot_.ZMQ().Internal().PublishSocket())
+    , task_subscriber_(
+          ot_.ZMQ().Internal().SubscribeSocket(task_callback_, "RPC task"))
 {
     auto bound = push_receiver_->Start(
         network::zeromq::MakeDeterministicInproc("rpc/push/internal", -1, 1));
@@ -593,7 +596,8 @@ auto RPC::create_issuer_account(const proto::RPCCommand& command) const
     if (0 < command.identifier_size()) { label = command.identifier(0); }
 
     try {
-        const auto unitdefinition = client.Wallet().UnitDefinition(unitID);
+        const auto unitdefinition =
+            client.Wallet().Internal().UnitDefinition(unitID);
 
         if (ownerID != unitdefinition->Nym()->ID()) {
             add_output_status(
@@ -694,13 +698,14 @@ auto RPC::create_unit_definition(const proto::RPCCommand& command) const
     const auto& createunit = command.createunit();
 
     try {
-        const auto unitdefinition = session.Wallet().CurrencyContract(
-            command.owner(),
-            createunit.name(),
-            createunit.terms(),
-            ClaimToUnit(translate(createunit.unitofaccount())),
-            factory::Amount(createunit.redemptionincrement()),
-            reason);
+        const auto unitdefinition =
+            session.Wallet().Internal().CurrencyContract(
+                command.owner(),
+                createunit.name(),
+                createunit.terms(),
+                ClaimToUnit(translate(createunit.unitofaccount())),
+                factory::Amount(createunit.redemptionincrement()),
+                reason);
 
         output.add_identifier(unitdefinition->ID().asBase58(ot_.Crypto()));
         add_output_status(output, proto::RPCRESPONSE_SUCCESS);
@@ -1169,8 +1174,8 @@ auto RPC::get_server_contracts(const proto::RPCCommand& command) const
 
     for (const auto& id : command.identifier()) {
         try {
-            const auto contract =
-                session.Wallet().Server(ot_.Factory().NotaryIDFromBase58(id));
+            const auto contract = session.Wallet().Internal().Server(
+                ot_.Factory().NotaryIDFromBase58(id));
             auto serialized = proto::ServerContract{};
             if (false == contract->Serialize(serialized, true)) {
                 add_output_status(output, proto::RPCRESPONSE_NONE);
@@ -1233,7 +1238,7 @@ auto RPC::get_unit_definitions(const proto::RPCCommand& command) const
 
     for (const auto& id : command.identifier()) {
         try {
-            const auto contract = session.Wallet().UnitDefinition(
+            const auto contract = session.Wallet().Internal().UnitDefinition(
                 ot_.Factory().UnitIDFromBase58(id));
 
             if (contract->Version() > 1 && command.version() < 3) {
@@ -1300,7 +1305,7 @@ auto RPC::immediate_create_account(
         client.InternalClient().OTAPI().IsNym_RegisteredAtServer(owner, notary);
 
     try {
-        client.Wallet().UnitDefinition(unit);
+        client.Wallet().Internal().UnitDefinition(unit);
     } catch (...) {
 
         return false;
@@ -1323,7 +1328,7 @@ auto RPC::immediate_register_nym(
     const identifier::Notary& notary) const -> bool
 {
     try {
-        client.Wallet().Server(notary);
+        client.Wallet().Internal().Server(notary);
 
         return true;
     } catch (...) {

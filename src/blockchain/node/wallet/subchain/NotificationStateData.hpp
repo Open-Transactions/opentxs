@@ -42,7 +42,6 @@
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/util/Allocated.hpp"
 #include "opentxs/util/Container.hpp"
-#include "opentxs/util/PasswordPrompt.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace boost
@@ -127,6 +126,7 @@ class Push;
 }  // namespace network
 
 class Log;
+class PasswordPrompt;
 class PaymentCode;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
@@ -180,7 +180,7 @@ private:
         const block::Matches& matches,
         std::unique_ptr<const bitcoin::block::Transaction> tx) const noexcept
         -> void final;
-    auto init_keys() const noexcept -> OTPasswordPrompt;
+    auto init_keys() const noexcept -> PasswordPrompt;
     auto process(
         const block::Match match,
         const bitcoin::block::Transaction& tx,

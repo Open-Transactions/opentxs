@@ -17,13 +17,13 @@ extern "C" {
 #include <sstream>
 #include <utility>
 
+#include "internal/core/Armored.hpp"
 #include "internal/otx/common/Contract.hpp"
 #include "internal/otx/common/NymFile.hpp"
 #include "internal/otx/common/crypto/Signature.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/OT.hpp"
 #include "opentxs/api/Context.hpp"
-#include "opentxs/core/Armored.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"

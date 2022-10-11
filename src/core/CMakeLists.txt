@@ -3,7 +3,6 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-add_subdirectory(bytearray)
 add_subdirectory(contract)
 add_subdirectory(display)
 add_subdirectory(identifier)
@@ -13,19 +12,25 @@ target_sources(
   opentxs-common
   PRIVATE
     "${opentxs_SOURCE_DIR}/src/internal/core/Amount.hpp"
+    "${opentxs_SOURCE_DIR}/src/internal/core/Armored.hpp"
     "${opentxs_SOURCE_DIR}/src/internal/core/Core.hpp"
     "${opentxs_SOURCE_DIR}/src/internal/core/Factory.hpp"
     "${opentxs_SOURCE_DIR}/src/internal/core/Null.hpp"
+    "${opentxs_SOURCE_DIR}/src/internal/core/String.hpp"
     "Amount.cpp"
     "Armored.cpp"
     "Armored.hpp"
+    "ByteArray.cpp"
+    "ByteArrayPrivate.cpp"
+    "ByteArrayPrivate.hpp"
     "Contact.cpp"
     "Core.cpp"
     "Data.cpp"
     "FixedByteArray.cpp"
     "FixedByteArray.tpp"
     "Secret.cpp"
-    "Secret.hpp"
+    "SecretPrivate.cpp"
+    "SecretPrivate.hpp"
     "Shutdown.cpp"
     "Shutdown.hpp"
     "StateMachine.cpp"
@@ -43,12 +48,11 @@ set(cxx-install-headers
     "${opentxs_SOURCE_DIR}/include/opentxs/core/AccountType.hpp"
     "${opentxs_SOURCE_DIR}/include/opentxs/core/AddressType.hpp"
     "${opentxs_SOURCE_DIR}/include/opentxs/core/Amount.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/core/Armored.hpp"
+    "${opentxs_SOURCE_DIR}/include/opentxs/core/ByteArray.hpp"
     "${opentxs_SOURCE_DIR}/include/opentxs/core/Contact.hpp"
     "${opentxs_SOURCE_DIR}/include/opentxs/core/Data.hpp"
     "${opentxs_SOURCE_DIR}/include/opentxs/core/FixedByteArray.hpp"
     "${opentxs_SOURCE_DIR}/include/opentxs/core/Secret.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/core/String.hpp"
     "${opentxs_SOURCE_DIR}/include/opentxs/core/Types.hpp"
     "${opentxs_SOURCE_DIR}/include/opentxs/core/UnitType.hpp"
 )

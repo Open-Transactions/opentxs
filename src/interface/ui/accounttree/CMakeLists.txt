@@ -6,6 +6,9 @@
 target_sources(
   opentxs-common
   PRIVATE
+    "${opentxs_SOURCE_DIR}/src/internal/interface/ui/AccountCurrency.hpp"
+    "${opentxs_SOURCE_DIR}/src/internal/interface/ui/AccountTree.hpp"
+    "${opentxs_SOURCE_DIR}/src/internal/interface/ui/AccountTreeItem.hpp"
     "AccountCurrency.cpp"
     "AccountCurrency.hpp"
     "AccountTree.cpp"
@@ -17,17 +20,3 @@ target_sources(
     "CustodialAccountTreeItem.cpp"
     "CustodialAccountTreeItem.hpp"
 )
-set(cxx-install-headers
-    "${opentxs_SOURCE_DIR}/include/opentxs/interface/ui/AccountCurrency.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/interface/ui/AccountTree.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/interface/ui/AccountTreeItem.hpp"
-)
-target_sources(opentxs-common PRIVATE ${cxx-install-headers})
-
-if(OPENTXS_STANDALONE)
-  install(
-    FILES ${cxx-install-headers}
-    DESTINATION include/opentxs/interface/ui
-    COMPONENT dev
-  )
-endif()

@@ -11,10 +11,14 @@
 
 #include "internal/api/session/Client.hpp"
 #include "internal/api/session/Wallet.hpp"
+#include "internal/core/String.hpp"
+#include "internal/core/contract/ServerContract.hpp"
+#include "internal/core/contract/Unit.hpp"
 #include "internal/otx/client/obsolete/OTAPI_Exec.hpp"
 #include "internal/otx/common/Account.hpp"
 #include "internal/otx/common/Message.hpp"
 #include "internal/util/Shared.hpp"
+#include "internal/util/SharedPimpl.hpp"
 
 #define ALEX "Alice"
 #define BOB "Bob"
@@ -71,7 +75,7 @@ public:
         , bob_client_(ot::Context().StartClientSession(1))
         , server_1_(ot::Context().StartNotarySession(0))
         , issuer_client_(ot::Context().StartClientSession(2))
-        , server_contract_(server_1_.Wallet().Server(server_1_.ID()))
+        , server_contract_(server_1_.Wallet().Internal().Server(server_1_.ID()))
     {
         if (false == init_) { init(); }
     }
@@ -83,7 +87,8 @@ public:
         auto reason = client.Factory().PasswordPrompt(__func__);
         auto bytes = ot::Space{};
         EXPECT_TRUE(server_contract_->Serialize(ot::writer(bytes), true));
-        auto clientVersion = client.Wallet().Server(ot::reader(bytes));
+        auto clientVersion =
+            client.Wallet().Internal().Server(ot::reader(bytes));
 
         client.OTX().SetIntroductionServer(clientVersion);
     }
@@ -302,7 +307,7 @@ TEST_F(Test_DepositCheques, add_contacts)
 TEST_F(Test_DepositCheques, issue_dollars)
 {
     auto reasonI = issuer_client_.Factory().PasswordPrompt(__func__);
-    const auto contract = issuer_client_.Wallet().CurrencyContract(
+    const auto contract = issuer_client_.Wallet().Internal().CurrencyContract(
         issuer_nym_id_.asBase58(alice_client_.Crypto()),
         UNIT_DEFINITION_CONTRACT_NAME,
         UNIT_DEFINITION_TERMS,

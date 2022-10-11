@@ -6,6 +6,12 @@
 #include <gtest/gtest.h>
 #include <opentxs/opentxs.hpp>
 
+#include "internal/network/zeromq/Context.hpp"
+#include "internal/network/zeromq/ListenCallback.hpp"
+#include "internal/network/zeromq/socket/Router.hpp"
+#include "internal/network/zeromq/socket/SocketType.hpp"
+#include "internal/network/zeromq/socket/Types.hpp"
+
 namespace ot = opentxs;
 namespace zmq = ot::network::zeromq;
 
@@ -24,7 +30,7 @@ public:
 
 TEST_F(Test_RouterSocket, RouterSocket_Factory)
 {
-    auto dealerSocket = context_.RouterSocket(
+    auto dealerSocket = context_.Internal().RouterSocket(
         zmq::ListenCallback::Factory(), zmq::socket::Direction::Connect);
 
     ASSERT_NE(nullptr, &dealerSocket.get());

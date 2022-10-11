@@ -24,8 +24,8 @@ namespace opentxs::crypto::implementation
 {
 class HDNode
 {
-    OTSecret data_space_;
-    OTSecret hash_space_;
+    Secret data_space_;
+    Secret hash_space_;
 
 public:
     WritableView data_;
@@ -55,8 +55,8 @@ public:
 private:
     const api::Crypto& crypto_;
     int switch_;
-    OTSecret a_;
-    OTSecret b_;
+    Secret a_;
+    Secret b_;
 
     auto parent() const noexcept -> const Secret&;
 

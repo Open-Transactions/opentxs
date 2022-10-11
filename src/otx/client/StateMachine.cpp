@@ -24,6 +24,11 @@
 #include "internal/api/session/Client.hpp"
 #include "internal/api/session/FactoryAPI.hpp"
 #include "internal/api/session/Wallet.hpp"
+#include "internal/core/String.hpp"
+#include "internal/core/contract/ServerContract.hpp"
+#include "internal/core/contract/Unit.hpp"
+#include "internal/core/contract/peer/PeerReply.hpp"
+#include "internal/core/contract/peer/PeerRequest.hpp"
 #include "internal/otx/Types.hpp"
 #include "internal/otx/client/Client.hpp"
 #include "internal/otx/client/OTPayment.hpp"
@@ -31,22 +36,19 @@
 #include "internal/otx/common/Cheque.hpp"
 #include "internal/otx/common/Message.hpp"
 #include "internal/otx/consensus/Consensus.hpp"
+#include "internal/otx/consensus/Server.hpp"
 #include "internal/util/Editor.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/Mutex.hpp"
+#include "internal/util/SharedPimpl.hpp"
 #include "internal/util/UniqueQueue.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Wallet.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/core/Secret.hpp"
-#include "opentxs/core/String.hpp"
 #include "opentxs/core/UnitType.hpp"
 #include "opentxs/core/contract/ContractType.hpp"
-#include "opentxs/core/contract/ServerContract.hpp"
-#include "opentxs/core/contract/Unit.hpp"
-#include "opentxs/core/contract/peer/PeerReply.hpp"
-#include "opentxs/core/contract/peer/PeerRequest.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
@@ -56,14 +58,12 @@
 #include "opentxs/identity/wot/claim/SectionType.hpp"
 #include "opentxs/otx/LastReplyStatus.hpp"
 #include "opentxs/otx/OperationType.hpp"
-#include "opentxs/otx/consensus/Server.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Numbers.hpp"
 #include "opentxs/util/NymEditor.hpp"
 #include "opentxs/util/PasswordPrompt.hpp"
 #include "opentxs/util/Pimpl.hpp"
-#include "opentxs/util/SharedPimpl.hpp"
 #include "opentxs/util/Time.hpp"
 #include "otx/client/StateMachine.hpp"
 #include "util/Blank.hpp"
@@ -174,7 +174,7 @@ StateMachine::StateMachine(
     , outdated_nyms_(outdatednyms)
     , missing_servers_(missingservers)
     , missing_unit_definitions_(missingUnitDefinitions)
-    , reason_(reason)
+    , reason_(api.Factory().PasswordPrompt(reason))
     , p_op_(opentxs::Factory::Operation(api, id.first, id.second, reason_))
     , op_(*p_op_)
 
@@ -279,7 +279,7 @@ auto StateMachine::check_registration(
     OT_ASSERT(false == nymID.empty());
     OT_ASSERT(false == serverID.empty());
 
-    auto context = client_.Wallet().ServerContext(nymID, serverID);
+    auto context = client_.Wallet().Internal().ServerContext(nymID, serverID);
     RequestNumber request{0};
 
     if (context) {
@@ -308,7 +308,7 @@ auto StateMachine::check_registration(
             nymID)(" is now registered on server ")(serverID)
             .Flush();
         state_ = State::ready;
-        context = client_.Wallet().ServerContext(nymID, serverID);
+        context = client_.Wallet().Internal().ServerContext(nymID, serverID);
 
         OT_ASSERT(context);
 
@@ -326,7 +326,7 @@ auto StateMachine::check_server_contract(
     OT_ASSERT(false == serverID.empty());
 
     try {
-        client_.Wallet().Server(serverID);
+        client_.Wallet().Internal().Server(serverID);
         LogVerbose()(OT_PRETTY_CLASS())("Server contract ")(
             serverID)(" exists.")
             .Flush();
@@ -350,7 +350,7 @@ auto StateMachine::check_server_name(const otx::context::Server& context) const
     -> bool
 {
     try {
-        const auto server = client_.Wallet().Server(op_.ServerID());
+        const auto server = client_.Wallet().Internal().Server(op_.ServerID());
         const auto myName = server->Alias();
         const auto hisName = server->EffectiveName();
 
@@ -644,7 +644,8 @@ auto StateMachine::issue_unit_definition(
 {
     try {
         const auto& [unitID, label, advertise] = task;
-        auto unitDefinition = client_.Wallet().UnitDefinition(unitID);
+        auto unitDefinition =
+            client_.Wallet().Internal().UnitDefinition(unitID);
         auto serialized = std::make_shared<proto::UnitDefinition>();
 
         OT_ASSERT(serialized);
@@ -704,7 +705,7 @@ auto StateMachine::main_loop() noexcept -> bool
     UniqueQueue<DepositPaymentTask> retryDepositPayment{};
     UniqueQueue<RegisterNymTask> retryRegisterNym{};
     UniqueQueue<SendChequeTask> retrySendCheque{};
-    auto pContext = client_.Wallet().ServerContext(nymID, serverID);
+    auto pContext = client_.Wallet().Internal().ServerContext(nymID, serverID);
 
     OT_ASSERT(pContext);
 
@@ -900,7 +901,7 @@ auto StateMachine::register_account(
     OT_ASSERT(false == unitID.empty());
 
     try {
-        client_.Wallet().UnitDefinition(unitID);
+        client_.Wallet().Internal().UnitDefinition(unitID);
     } catch (...) {
         DO_OPERATION(DownloadContract, unitID, contract::Type::unit);
 
@@ -1154,7 +1155,8 @@ auto StateMachine::write_and_send_cheque(
         return task_done(finish_task(taskID, false, error_result()));
     }
 
-    auto context = client_.Wallet().ServerContext(op_.NymID(), op_.ServerID());
+    auto context =
+        client_.Wallet().Internal().ServerContext(op_.NymID(), op_.ServerID());
 
     OT_ASSERT(context);
 

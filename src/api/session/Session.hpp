@@ -183,7 +183,7 @@ protected:
         const api::Context& parent,
         const api::session::Factory& factory,
         proto::Ciphertext& encrypted_secret_,
-        std::optional<OTSecret>& master_secret_,
+        std::optional<Secret>& master_secret_,
         const api::crypto::Symmetric& symmetric,
         const api::session::Storage& storage) -> OTSymmetricKey;
 
@@ -205,7 +205,7 @@ protected:
 
 private:
     mutable std::mutex master_key_lock_;
-    mutable std::optional<OTSecret> master_secret_;
+    mutable std::optional<Secret> master_secret_;
     mutable OTSymmetricKey master_key_;
     mutable std::chrono::seconds password_duration_;
     mutable Time last_activity_;

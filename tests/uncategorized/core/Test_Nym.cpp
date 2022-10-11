@@ -10,6 +10,7 @@
 
 #include "internal/api/session/Client.hpp"
 #include "internal/otx/client/obsolete/OTAPI_Exec.hpp"
+#include "internal/util/PasswordPrompt.hpp"
 
 #define TEST_MASTER_PASSWORD "test password"
 #define TEST_PLAINTEXT "The quick brown fox jumped over the lazy dog."
@@ -26,12 +27,12 @@ struct Test_Symmetric : public ::testing::Test {
     static ot::identifier::Nym bob_nym_id_;
     static ot::OTSymmetricKey key_;
     static ot::OTSymmetricKey second_key_;
-    static std::optional<ot::OTSecret> key_password_;
+    static std::optional<ot::Secret> key_password_;
     static ot::Space ciphertext_;
     static ot::Space second_ciphertext_;
 
     const ot::api::session::Client& api_;
-    ot::OTPasswordPrompt reason_;
+    ot::PasswordPrompt reason_;
     ot::Nym_p alice_;
     ot::Nym_p bob_;
 
@@ -72,7 +73,7 @@ ot::identifier::Nym Test_Symmetric::bob_nym_id_{};
 ot::OTSymmetricKey Test_Symmetric::key_{ot::crypto::key::Symmetric::Factory()};
 ot::OTSymmetricKey Test_Symmetric::second_key_{
     ot::crypto::key::Symmetric::Factory()};
-std::optional<ot::OTSecret> Test_Symmetric::key_password_{};
+std::optional<ot::Secret> Test_Symmetric::key_password_{};
 ot::Space Test_Symmetric::ciphertext_{};
 ot::Space Test_Symmetric::second_ciphertext_{};
 
@@ -83,7 +84,7 @@ TEST_F(Test_Symmetric, create_key)
 
     auto password = api_.Factory().PasswordPrompt("");
 
-    ASSERT_TRUE(password->SetPassword(key_password_.value()));
+    ASSERT_TRUE(password.Internal().SetPassword(key_password_.value()));
 
     key_ = api_.Crypto().Symmetric().Key(password, mode_);
 
@@ -94,7 +95,7 @@ TEST_F(Test_Symmetric, key_functionality)
 {
     auto password = api_.Factory().PasswordPrompt("");
 
-    ASSERT_TRUE(password->SetPassword(key_password_.value()));
+    ASSERT_TRUE(password.Internal().SetPassword(key_password_.value()));
 
     const auto encrypted = key_->Encrypt(
         TEST_PLAINTEXT, password, ot::writer(ciphertext_), true, mode_);
@@ -119,7 +120,7 @@ TEST_F(Test_Symmetric, key_functionality)
 
     auto wrongPassword = api_.Factory().SecretFromText("not the password");
 
-    ASSERT_TRUE(password->SetPassword(wrongPassword));
+    ASSERT_TRUE(password.Internal().SetPassword(wrongPassword));
 
     recoveredKey =
         api_.Crypto().Symmetric().Key(ot::reader(ciphertext_), mode_);
@@ -143,7 +144,7 @@ TEST_F(Test_Symmetric, create_second_key)
 
     auto password = api_.Factory().PasswordPrompt("");
 
-    ASSERT_TRUE(password->SetPassword(key_password_.value()));
+    ASSERT_TRUE(password.Internal().SetPassword(key_password_.value()));
 
     second_key_ = api_.Crypto().Symmetric().Key(password, mode_);
 

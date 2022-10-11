@@ -150,7 +150,7 @@ private:
     mutable Space salt_;
     /// The unencrypted, fully-derived version of the key which is provided to
     /// encryption functions.
-    mutable std::optional<OTSecret> plaintext_key_;
+    mutable std::optional<Secret> plaintext_key_;
     /// The encrypted form of the plaintext key
     mutable std::unique_ptr<proto::Ciphertext> encrypted_key_;
     mutable std::mutex lock_;
@@ -194,7 +194,7 @@ private:
         const Lock& lock,
         const PasswordPrompt& keyPassword,
         Secret& password) const -> bool;
-    auto get_plaintext(const Lock& lock) const -> std::optional<OTSecret>&;
+    auto get_plaintext(const Lock& lock) const -> std::optional<Secret>&;
     auto serialize(const Lock& lock, proto::SymmetricKey& output) const -> bool;
     auto unlock(const Lock& lock, const PasswordPrompt& reason) const -> bool;
 
@@ -208,7 +208,7 @@ private:
         const std::uint64_t operations,
         const std::uint64_t difficulty,
         const std::uint64_t parallel,
-        std::optional<OTSecret> plaintextKey,
+        std::optional<Secret> plaintextKey,
         proto::Ciphertext* encryptedKey);
     Symmetric(const Symmetric&);
 };

@@ -8,6 +8,7 @@
 #include <opentxs/opentxs.hpp>
 
 #include "internal/api/FactoryAPI.hpp"
+#include "internal/core/identifier/Identifier.hpp"
 #include "internal/util/P0330.hpp"
 #include "ottest/fixtures/core/Identifier.hpp"
 
@@ -183,7 +184,7 @@ TEST_F(GenericID, generic_serialize_protobuf_non_empty)
 {
     auto proto = ot::proto::Identifier{};
 
-    EXPECT_TRUE(id_.Serialize(proto));
+    EXPECT_TRUE(id_.Internal().Serialize(proto));
 
     const auto recovered = ot_.Factory().Internal().Identifier(proto);
 
@@ -195,7 +196,7 @@ TEST_F(NotaryID, notary_serialize_protobuf_non_empty)
 {
     auto proto = ot::proto::Identifier{};
 
-    EXPECT_TRUE(id_.Serialize(proto));
+    EXPECT_TRUE(id_.Internal().Serialize(proto));
 
     const auto recovered = ot_.Factory().Internal().NotaryID(proto);
 
@@ -207,7 +208,7 @@ TEST_F(NymID, nym_serialize_protobuf_non_empty)
 {
     auto proto = ot::proto::Identifier{};
 
-    EXPECT_TRUE(id_.Serialize(proto));
+    EXPECT_TRUE(id_.Internal().Serialize(proto));
 
     const auto recovered = ot_.Factory().Internal().NymID(proto);
 
@@ -219,7 +220,7 @@ TEST_F(UnitID, unit_serialize_protobuf_non_empty)
 {
     auto proto = ot::proto::Identifier{};
 
-    EXPECT_TRUE(id_.Serialize(proto));
+    EXPECT_TRUE(id_.Internal().Serialize(proto));
 
     const auto recovered = ot_.Factory().Internal().UnitID(proto);
 

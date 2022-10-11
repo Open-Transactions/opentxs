@@ -20,7 +20,11 @@
 #include <tuple>
 
 #include "interface/ui/base/List.hpp"
+#include "internal/api/session/Wallet.hpp"
 #include "internal/blockchain/Blockchain.hpp"
+#include "internal/core/contract/Unit.hpp"
+#include "internal/network/zeromq/Pipeline.hpp"
+#include "internal/network/zeromq/socket/Types.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/Mutex.hpp"
@@ -39,19 +43,16 @@
 #include "opentxs/blockchain/bitcoin/block/Transaction.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Contact.hpp"
-#include "opentxs/core/contract/Unit.hpp"
 #include "opentxs/core/display/Definition.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/core/identifier/UnitDefinition.hpp"
-#include "opentxs/network/zeromq/Pipeline.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
 #include "opentxs/network/zeromq/message/FrameSection.hpp"
-#include "opentxs/network/zeromq/socket/Types.hpp"
 #include "opentxs/otx/LastReplyStatus.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
-#include "opentxs/util/Pimpl.hpp"
+#include "opentxs/util/PasswordPrompt.hpp"  // IWYU pragma: keep
 #include "opentxs/util/Time.hpp"
 
 // NOLINTBEGIN(cert-dcl58-cpp)
@@ -301,7 +302,7 @@ auto ActivityThread::Pay(
     }
 
     try {
-        const auto contract = api_.Wallet().UnitDefinition(unitID);
+        const auto contract = api_.Wallet().Internal().UnitDefinition(unitID);
         const auto& definition =
             display::GetDefinition(contract->UnitOfAccount());
         try {
@@ -331,7 +332,7 @@ auto ActivityThread::Pay(
     wait_for_startup();
 
     if (0 >= amount) {
-        const auto contract = api_.Wallet().UnitDefinition(
+        const auto contract = api_.Wallet().Internal().UnitDefinition(
             api_.Storage().AccountContract(sourceAccount));
         LogError()(OT_PRETTY_CLASS())("Invalid amount: (")(
             amount, contract->UnitOfAccount())(")")
@@ -709,7 +710,7 @@ auto ActivityThread::send_cheque(
     auto displayAmount = UnallocatedCString{};
 
     try {
-        const auto contract = api_.Wallet().UnitDefinition(
+        const auto contract = api_.Wallet().Internal().UnitDefinition(
             api_.Storage().AccountContract(sourceAccount));
         const auto& definition =
             display::GetDefinition(contract->UnitOfAccount());

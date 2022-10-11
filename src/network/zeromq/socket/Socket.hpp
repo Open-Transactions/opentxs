@@ -3,7 +3,7 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-// IWYU pragma: no_include "opentxs/network/zeromq/socket/SocketType.hpp"
+// IWYU pragma: no_include "internal/network/zeromq/socket/SocketType.hpp"
 
 #pragma once
 
@@ -16,12 +16,12 @@
 #include <string_view>
 
 #include "internal/network/zeromq/socket/Socket.hpp"
+#include "internal/network/zeromq/socket/SocketInternal.hpp"
+#include "internal/network/zeromq/socket/Types.hpp"
 #include "internal/util/Flag.hpp"
 #include "internal/util/Lockable.hpp"
 #include "internal/util/Mutex.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
-#include "opentxs/network/zeromq/socket/Socket.hpp"
-#include "opentxs/network/zeromq/socket/Types.hpp"
 #include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)

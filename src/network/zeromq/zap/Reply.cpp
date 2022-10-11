@@ -13,6 +13,8 @@
 #include <utility>
 
 #include "internal/network/zeromq/zap/Factory.hpp"
+#include "internal/network/zeromq/zap/Reply.hpp"
+#include "internal/network/zeromq/zap/Request.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "network/zeromq/message/Message.hpp"
 #include "opentxs/core/Data.hpp"
@@ -20,8 +22,6 @@
 #include "opentxs/network/zeromq/message/FrameIterator.hpp"
 #include "opentxs/network/zeromq/message/FrameSection.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
-#include "opentxs/network/zeromq/zap/Reply.hpp"
-#include "opentxs/network/zeromq/zap/Request.hpp"
 #include "opentxs/util/Container.hpp"
 #include "util/Container.hpp"
 

@@ -17,6 +17,11 @@
 #include <string_view>
 #include <tuple>
 
+#include "internal/api/session/UI.hpp"
+#include "internal/interface/ui/AccountActivity.hpp"
+#include "internal/network/zeromq/Context.hpp"
+#include "internal/network/zeromq/ListenCallback.hpp"
+#include "internal/network/zeromq/socket/Subscribe.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "ottest/fixtures/blockchain/BlockListener.hpp"
@@ -287,9 +292,9 @@ auto Regtest_fixture_simple::CreateClient(
     auto& user_no_const = const_cast<User&>(user);
     user_no_const.init_custom(client, cb);
 
-    client.UI().AccountActivity(
+    client.UI().Internal().AccountActivity(
         user.nym_id_, GetHDAccount(user).Parent().AccountID(), []() {});
-    client.UI().AccountList(user.nym_id_, []() {});
+    client.UI().Internal().AccountList(user.nym_id_, []() {});
 
     const auto [it, listener_added] = user_listeners_.emplace(name, client);
 
@@ -301,7 +306,7 @@ auto Regtest_fixture_simple::CreateClient(
         ot::network::zeromq::ListenCallback::Factory(
             [&](auto&& msg) { cb_connected(std::move(msg), client_peers); }));
     ot::OTZMQSubscribeSocket client_socket(
-        user.api_->Network().ZeroMQ().SubscribeSocket(client_cb_));
+        user.api_->Network().ZeroMQ().Internal().SubscribeSocket(client_cb_));
     if (!client_socket->Start(
             (wait_for_handshake_
                  ? user.api_->Endpoints().BlockchainPeer()
@@ -328,7 +333,8 @@ auto Regtest_fixture_simple::GetBalance(const User& user) -> const Amount
 {
     const auto& account = GetHDAccount(user);
     const auto& id = account.Parent().AccountID();
-    const auto& widget = user.api_->UI().AccountActivity(user.nym_id_, id);
+    const auto& widget =
+        user.api_->UI().Internal().AccountActivity(user.nym_id_, id);
     return widget.Balance();
 }
 
@@ -337,7 +343,8 @@ auto Regtest_fixture_simple::GetDisplayBalance(const User& user)
 {
     const auto& account = GetHDAccount(user);
     const auto& id = account.Parent().AccountID();
-    const auto& widget = user.api_->UI().AccountActivity(user.nym_id_, id);
+    const auto& widget =
+        user.api_->UI().Internal().AccountActivity(user.nym_id_, id);
     return widget.DisplayBalance();
 }
 
@@ -346,7 +353,8 @@ auto Regtest_fixture_simple::GetSyncProgress(const User& user)
 {
     const auto& account = GetHDAccount(user);
     const auto& id = account.Parent().AccountID();
-    const auto& widget = user.api_->UI().AccountActivity(user.nym_id_, id);
+    const auto& widget =
+        user.api_->UI().Internal().AccountActivity(user.nym_id_, id);
     return widget.SyncProgress();
 }
 
@@ -354,7 +362,8 @@ auto Regtest_fixture_simple::GetSyncPercentage(const User& user) -> double
 {
     const auto& account = GetHDAccount(user);
     const auto& id = account.Parent().AccountID();
-    const auto& widget = user.api_->UI().AccountActivity(user.nym_id_, id);
+    const auto& widget =
+        user.api_->UI().Internal().AccountActivity(user.nym_id_, id);
     return widget.SyncPercentage();
 }
 

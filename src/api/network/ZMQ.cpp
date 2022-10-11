@@ -12,6 +12,12 @@
 #include <utility>
 
 #include "2_Factory.hpp"
+#include "internal/api/Settings.hpp"
+#include "internal/api/session/Wallet.hpp"
+#include "internal/core/String.hpp"
+#include "internal/network/ServerConnection.hpp"
+#include "internal/network/zeromq/Context.hpp"
+#include "internal/network/zeromq/socket/Publish.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/Mutex.hpp"
 #include "opentxs/api/Settings.hpp"
@@ -21,11 +27,8 @@
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/api/session/Wallet.hpp"
 #include "opentxs/core/AddressType.hpp"
-#include "opentxs/core/String.hpp"
 #include "opentxs/core/identifier/Notary.hpp"  // IWYU pragma: keep
-#include "opentxs/network/ServerConnection.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
-#include "opentxs/network/zeromq/socket/Publish.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Pimpl.hpp"
@@ -62,7 +65,7 @@ ZMQ::ZMQ(const api::Session& api, const Flag& running)
     , lock_()
     , socks_proxy_()
     , server_connections_()
-    , status_publisher_(api_.Network().ZeroMQ().PublishSocket())
+    , status_publisher_(api_.Network().ZeroMQ().Internal().PublishSocket())
 {
     // WARNING: do not access api_.Wallet() during construction
     status_publisher_->Start(api_.Endpoints().ConnectionStatus().data());
@@ -83,14 +86,16 @@ auto ZMQ::DefaultAddressType() const -> AddressType
     const std::int64_t defaultType{
         static_cast<std::int64_t>(AddressType::IPV4)};
     std::int64_t configuredType{static_cast<std::int64_t>(AddressType::Error)};
-    api_.Config().CheckSet_long(
+    api_.Config().Internal().CheckSet_long(
         String::Factory("Connection"),
         String::Factory("preferred_address_type"),
         defaultType,
         configuredType,
         changed);
 
-    if (changed) { api_.Config().Save(); }
+    if (changed && (false == api_.Config().Internal().Save())) {
+        LogAbort()(OT_PRETTY_CLASS())("failed to save config file").Abort();
+    }
 
     return static_cast<AddressType>(configuredType);
 }
@@ -99,9 +104,10 @@ void ZMQ::init(const Lock& lock) const
 {
     OT_ASSERT(verify_lock(lock));
 
+    const auto& config = api_.Config().Internal();
     bool notUsed{false};
     std::int64_t linger{0};
-    api_.Config().CheckSet_long(
+    config.CheckSet_long(
         String::Factory("latency"),
         String::Factory("linger"),
         CLIENT_SOCKET_LINGER_SECONDS,
@@ -109,7 +115,7 @@ void ZMQ::init(const Lock& lock) const
         notUsed);
     linger_.store(std::chrono::seconds(linger));
     std::int64_t send{0};
-    api_.Config().CheckSet_long(
+    config.CheckSet_long(
         String::Factory("latency"),
         String::Factory("send_timeout"),
         CLIENT_SEND_TIMEOUT,
@@ -117,7 +123,7 @@ void ZMQ::init(const Lock& lock) const
         notUsed);
     send_timeout_.store(std::chrono::seconds(send));
     std::int64_t receive{0};
-    api_.Config().CheckSet_long(
+    config.CheckSet_long(
         String::Factory("latency"),
         String::Factory("recv_timeout"),
         CLIENT_RECV_TIMEOUT,
@@ -126,13 +132,13 @@ void ZMQ::init(const Lock& lock) const
     receive_timeout_.store(std::chrono::seconds(receive));
     auto socks = String::Factory();
     bool haveSocksConfig{false};
-    const bool configChecked = api_.Config().Check_str(
+    const bool configChecked = config.Check_str(
         String::Factory("Connection"),
         String::Factory("socks_proxy"),
         socks,
         haveSocksConfig);
     std::int64_t keepAlive{0};
-    api_.Config().CheckSet_long(
+    config.CheckSet_long(
         String::Factory("Connection"),
         String::Factory("keep_alive"),
         KEEP_ALIVE_SECONDS,
@@ -144,7 +150,9 @@ void ZMQ::init(const Lock& lock) const
         socks_proxy_ = socks->Get();
     }
 
-    api_.Config().Save();
+    if (false == config.Save()) {
+        LogAbort()(OT_PRETTY_CLASS())("failed to save config file").Abort();
+    }
 }
 
 auto ZMQ::KeepAlive() const -> std::chrono::seconds
@@ -186,7 +194,8 @@ auto ZMQ::Server(const UnallocatedCString& id) const noexcept(false)
 
     if (server_connections_.end() != existing) { return existing->second; }
 
-    auto contract = api_.Wallet().Server(api_.Factory().NotaryIDFromBase58(id));
+    auto contract =
+        api_.Wallet().Internal().Server(api_.Factory().NotaryIDFromBase58(id));
     auto [it, created] = server_connections_.emplace(
         id,
         opentxs::network::ServerConnection::Factory(
@@ -203,7 +212,7 @@ auto ZMQ::Server(const UnallocatedCString& id) const noexcept(false)
 auto ZMQ::SetSocksProxy(const UnallocatedCString& proxy) const -> bool
 {
     bool notUsed{false};
-    bool set = api_.Config().Set_str(
+    bool set = api_.Config().Internal().Set_str(
         String::Factory("Connection"),
         String::Factory("socks_proxy"),
         String::Factory(proxy),
@@ -215,7 +224,7 @@ auto ZMQ::SetSocksProxy(const UnallocatedCString& proxy) const -> bool
         return false;
     }
 
-    if (false == api_.Config().Save()) {
+    if (false == api_.Config().Internal().Save()) {
         LogError()(OT_PRETTY_CLASS())("Unable to set save config.").Flush();
 
         return false;

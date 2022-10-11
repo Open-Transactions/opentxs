@@ -15,7 +15,11 @@
 #include "api/session/Wallet.hpp"
 #include "internal/api/FactoryAPI.hpp"
 #include "internal/api/session/Factory.hpp"
+#include "internal/network/zeromq/Context.hpp"
+#include "internal/network/zeromq/socket/Publish.hpp"
+#include "internal/otx/consensus/Base.hpp"
 #include "internal/otx/consensus/Consensus.hpp"
+#include "internal/otx/consensus/Server.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/Mutex.hpp"
 #include "opentxs/api/network/Network.hpp"
@@ -32,10 +36,7 @@
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/identity/Nym.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
-#include "opentxs/network/zeromq/socket/Publish.hpp"
 #include "opentxs/otx/ConsensusType.hpp"
-#include "opentxs/otx/consensus/Base.hpp"
-#include "opentxs/otx/consensus/Server.hpp"
 #include "opentxs/util/Log.hpp"
 
 namespace opentxs::factory
@@ -61,8 +62,8 @@ namespace opentxs::api::session::client
 Wallet::Wallet(const api::session::Client& parent)
     : ot_super(parent)
     , client_(parent)
-    , request_sent_(client_.Network().ZeroMQ().PublishSocket())
-    , reply_received_(client_.Network().ZeroMQ().PublishSocket())
+    , request_sent_(client_.Network().ZeroMQ().Internal().PublishSocket())
+    , reply_received_(client_.Network().ZeroMQ().Internal().PublishSocket())
 {
     auto bound =
         request_sent_->Start(api_.Endpoints().ServerRequestSent().data());

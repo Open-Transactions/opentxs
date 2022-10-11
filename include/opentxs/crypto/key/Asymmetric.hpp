@@ -9,15 +9,15 @@
 #include <memory>
 
 #include "opentxs/Export.hpp"
-#include "opentxs/core/String.hpp"
 #include "opentxs/crypto/HashType.hpp"
 #include "opentxs/crypto/Types.hpp"
-#include "opentxs/crypto/library/AsymmetricProvider.hpp"
+#include "opentxs/crypto/key/Types.hpp"
 #include "opentxs/identity/Types.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Numbers.hpp"
+#include "opentxs/util/Pimpl.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -28,6 +28,9 @@ namespace key
 {
 class Asymmetric;
 }  // namespace key
+
+class AsymmetricProvider;
+class Parameters;
 }  // namespace crypto
 
 namespace identity

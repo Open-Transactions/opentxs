@@ -15,11 +15,20 @@
 #include <regex>
 #include <string_view>
 
+#include "internal/api/Settings.hpp"
+#include "internal/api/crypto/Encode.hpp"
 #include "internal/api/session/Endpoints.hpp"
 #include "internal/api/session/FactoryAPI.hpp"
 #include "internal/api/session/Wallet.hpp"
 #include "internal/api/session/notary/Notary.hpp"
+#include "internal/core/Armored.hpp"
+#include "internal/core/String.hpp"
+#include "internal/core/contract/ServerContract.hpp"
+#include "internal/crypto/Envelope.hpp"
+#include "internal/network/zeromq/Context.hpp"
 #include "internal/network/zeromq/message/Message.hpp"
+#include "internal/network/zeromq/socket/Push.hpp"
+#include "internal/network/zeromq/socket/Types.hpp"
 #include "internal/otx/Types.hpp"
 #include "internal/otx/client/OTPayment.hpp"
 #include "internal/otx/common/Ledger.hpp"
@@ -28,6 +37,7 @@
 #include "internal/otx/common/cron/OTCron.hpp"
 #include "internal/serialization/protobuf/Proto.tpp"
 #include "internal/util/LogMacros.hpp"
+#include "internal/util/SharedPimpl.hpp"
 #include "opentxs/api/Settings.hpp"
 #include "opentxs/api/crypto/Config.hpp"
 #include "opentxs/api/crypto/Encode.hpp"
@@ -40,16 +50,11 @@
 #include "opentxs/api/session/Storage.hpp"
 #include "opentxs/api/session/Wallet.hpp"
 #include "opentxs/core/AddressType.hpp"
-#include "opentxs/core/Armored.hpp"
 #include "opentxs/core/ByteArray.hpp"
-#include "opentxs/core/Data.hpp"
 #include "opentxs/core/Secret.hpp"
-#include "opentxs/core/String.hpp"
 #include "opentxs/core/contract/ProtocolVersion.hpp"
-#include "opentxs/core/contract/ServerContract.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
-#include "opentxs/crypto/Envelope.hpp"
 #include "opentxs/crypto/Language.hpp"
 #include "opentxs/crypto/Parameters.hpp"
 #include "opentxs/crypto/SeedStyle.hpp"
@@ -57,13 +62,10 @@
 #include "opentxs/identity/Nym.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
-#include "opentxs/network/zeromq/socket/Push.hpp"
-#include "opentxs/network/zeromq/socket/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/NymEditor.hpp"
 #include "opentxs/util/Options.hpp"
-#include "opentxs/util/SharedPimpl.hpp"
 #include "otx/common/OTStorage.hpp"
 #include "otx/server/ConfigLoader.hpp"
 #include "otx/server/MainFile.hpp"
@@ -98,8 +100,8 @@ Server::Server(
     , server_nym_id_()
     , nym_server_(nullptr)
     , cron_(manager.Factory().InternalSession().Cron())
-    , notification_socket_(
-          api_.Network().ZeroMQ().PushSocket(zmq::socket::Direction::Connect))
+    , notification_socket_(api_.Network().ZeroMQ().Internal().PushSocket(
+          zmq::socket::Direction::Connect))
 {
     const auto bound = notification_socket_->Start(
         api_.Endpoints().Internal().PushNotification().data());
@@ -249,7 +251,8 @@ void Server::CreateMainFile(bool& mainFileExists)
     if (5 > bindIP.size()) { bindIP = default_bind_ip_; }
 
     bool notUsed = false;
-    api_.Config().Set_str(
+    const auto& config = api_.Config().Internal();
+    config.Set_str(
         String::Factory(SERVER_CONFIG_LISTEN_SECTION),
         String::Factory(SERVER_CONFIG_BIND_KEY),
         String::Factory(bindIP),
@@ -268,7 +271,7 @@ void Server::CreateMainFile(bool& mainFileExists)
 
         return out;
     }();
-    api_.Config().Set_str(
+    config.Set_str(
         String::Factory(SERVER_CONFIG_LISTEN_SECTION),
         String::Factory(SERVER_CONFIG_PORT_KEY),
         String::Factory(std::to_string(bindPort)),
@@ -362,7 +365,7 @@ void Server::CreateMainFile(bool& mainFileExists)
 
         if (existing->empty()) {
 
-            return wallet.Server(
+            return wallet.Internal().Server(
                 nymID.asBase58(API().Crypto()),
                 name,
                 terms,
@@ -417,7 +420,7 @@ void Server::CreateMainFile(bool& mainFileExists)
         OT_FAIL;
     }
     const auto signedContract = api_.Factory().InternalSession().Data(proto);
-    auto ascContract = api_.Factory().Armored(signedContract);
+    auto ascContract = api_.Factory().InternalSession().Armored(signedContract);
     auto strBookended = String::Factory();
     ascContract->WriteArmoredString(strBookended, "SERVER CONTRACT");
     OTDB::StorePlainString(
@@ -449,14 +452,17 @@ void Server::CreateMainFile(bool& mainFileExists)
     mainFileExists = main_file_.CreateMainFile(
         strBookended->Get(), strNotaryID, nymID.asBase58(API().Crypto()));
 
-    api_.Config().Save();
+    if (false == config.Save()) {
+        LogAbort()(OT_PRETTY_CLASS())("failed to save config file").Abort();
+    }
 }
 
 void Server::Init(bool readOnly)
 {
     read_only_ = readOnly;
+    const auto& config = api_.Config().Internal();
 
-    if (!ConfigLoader::load(api_, api_.Config(), WalletFilename())) {
+    if (!ConfigLoader::load(api_, config, WalletFilename())) {
         LogError()(OT_PRETTY_CLASS())("Unable to Load Config File!").Flush();
         OT_FAIL;
     }
@@ -506,16 +512,19 @@ void Server::Init(bool readOnly)
         if (!main_file_.LoadMainFile(readOnly)) { OT_FAIL; }
     }
 
-    auto password = api_.Crypto().Encode().Nonce(16);
+    auto password = api_.Crypto().Encode().InternalEncode().Nonce(16);
     auto notUsed = String::Factory();
     bool ignored;
-    api_.Config().CheckSet_str(
+    config.CheckSet_str(
         String::Factory("permissions"),
         String::Factory("admin_password"),
         password,
         notUsed,
         ignored);
-    api_.Config().Save();
+
+    if (false == config.Save()) {
+        LogAbort()(OT_PRETTY_CLASS())("failed to save config file").Abort();
+    }
 
     // With the Server's private key loaded, and the latest transaction number
     // loaded, and all the various other data (contracts, etc) the server is now
@@ -739,7 +748,7 @@ auto Server::DropMessageToNymbox(
         auto nymRecipient = api_.Wallet().Nym(RECIPIENT_NYM_ID);
 
         // Wrap the message up into an envelope and attach it to theMsgAngel.
-        auto theEnvelope = api_.Factory().Envelope();
+        auto theEnvelope = api_.Factory().InternalSession().Envelope();
         theMsgAngel->payload_->Release();
 
         if ((!pstrMessage.empty()) &&
@@ -875,7 +884,7 @@ auto Server::GetConnectInfo(
     UnallocatedCString& strHostname,
     std::uint32_t& nPort) const -> bool
 {
-    auto contract = api_.Wallet().Server(notary_id_);
+    auto contract = api_.Wallet().Internal().Server(notary_id_);
     UnallocatedCString contractHostname{};
     std::uint32_t contractPort{};
     const auto haveEndpoints =
@@ -885,13 +894,14 @@ auto Server::GetConnectInfo(
 
     bool notUsed = false;
     std::int64_t port = 0;
-    const bool haveIP = api_.Config().CheckSet_str(
+    const auto& config = api_.Config().Internal();
+    const bool haveIP = config.CheckSet_str(
         String::Factory(SERVER_CONFIG_LISTEN_SECTION),
         String::Factory("bindip"),
         String::Factory(default_bind_ip_),
         strHostname,
         notUsed);
-    const bool havePort = api_.Config().CheckSet_long(
+    const bool havePort = config.CheckSet_long(
         String::Factory(SERVER_CONFIG_LISTEN_SECTION),
         String::Factory(SERVER_CONFIG_PORT_KEY),
         default_port_,
@@ -900,9 +910,15 @@ auto Server::GetConnectInfo(
     port = (max_tcp_port_ < port) ? default_port_ : port;
     port = (min_tcp_port_ > port) ? default_port_ : port;
     nPort = static_cast<std::uint32_t>(port);
-    api_.Config().Save();
 
-    return (haveIP && havePort);
+    if (config.Save()) {
+
+        return (haveIP && havePort);
+    } else {
+        LogError()(OT_PRETTY_CLASS())("failed to save config file").Flush();
+
+        return false;
+    }
 }
 
 auto Server::nymbox_push(
@@ -927,9 +943,12 @@ auto Server::SetNotaryID(const identifier::Notary& id) noexcept -> void
     notary_id_.set_value(id);
 }
 
-auto Server::TransportKey(Data& pubkey) const -> OTSecret
+auto Server::TransportKey(Data& pubkey) const -> Secret
 {
-    return api_.Wallet().Server(notary_id_)->TransportKey(pubkey, reason_);
+    return api_.Wallet()
+        .Internal()
+        .Server(notary_id_)
+        ->TransportKey(pubkey, reason_);
 }
 
 Server::~Server() = default;

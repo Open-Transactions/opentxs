@@ -11,10 +11,10 @@
 #include <shared_mutex>
 
 #include "interface/ui/base/Row.hpp"
+#include "internal/interface/ui/NymListItem.hpp"
 #include "internal/interface/ui/UI.hpp"
-#include "opentxs/interface/ui/NymListItem.hpp"
+#include "internal/util/SharedPimpl.hpp"
 #include "opentxs/util/Container.hpp"
-#include "opentxs/util/SharedPimpl.hpp"
 
 class QVariant;
 

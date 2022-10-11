@@ -10,6 +10,7 @@
 #include <tuple>
 #include <utility>
 
+#include "internal/core/String.hpp"
 #include "internal/identity/wot/claim/Types.hpp"
 
 namespace ot = opentxs;

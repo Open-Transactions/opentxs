@@ -8,13 +8,13 @@
 #include <ostream>
 #include <string_view>
 
+#include "internal/network/zeromq/socket/Reply.hpp"
+#include "internal/network/zeromq/socket/Socket.hpp"
+#include "internal/network/zeromq/socket/Types.hpp"
 #include "internal/util/Mutex.hpp"
 #include "network/zeromq/curve/Server.hpp"
 #include "network/zeromq/socket/Receiver.hpp"
 #include "network/zeromq/socket/Socket.hpp"
-#include "opentxs/network/zeromq/socket/Reply.hpp"
-#include "opentxs/network/zeromq/socket/Socket.hpp"
-#include "opentxs/network/zeromq/socket/Types.hpp"
 #include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)

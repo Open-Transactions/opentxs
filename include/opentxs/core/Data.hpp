@@ -97,19 +97,6 @@ public:
     virtual auto data() -> void* = 0;
     virtual auto DecodeHex(const std::string_view hex) -> bool = 0;
     virtual auto end() -> iterator = 0;
-    virtual auto operator+=(const Data& rhs) noexcept(false) -> Data& = 0;
-    virtual auto operator+=(const ReadView rhs) noexcept(false) -> Data& = 0;
-    virtual auto operator+=(const std::uint8_t rhs) noexcept(false)
-        -> Data& = 0;
-    /// Bytes are stored in big endian order
-    virtual auto operator+=(const std::uint16_t rhs) noexcept(false)
-        -> Data& = 0;
-    /// Bytes are stored in big endian order
-    virtual auto operator+=(const std::uint32_t rhs) noexcept(false)
-        -> Data& = 0;
-    /// Bytes are stored in big endian order
-    virtual auto operator+=(const std::uint64_t rhs) noexcept(false)
-        -> Data& = 0;
     virtual auto Randomize(const std::size_t size) -> bool = 0;
     virtual auto resize(const std::size_t size) -> bool = 0;
     virtual auto SetSize(const std::size_t size) -> bool = 0;

@@ -17,14 +17,17 @@
 #include <utility>
 
 #include "internal/api/crypto/Symmetric.hpp"
+#include "internal/api/session/FactoryAPI.hpp"
 #include "internal/core/Factory.hpp"
 #include "internal/otx/blind/Factory.hpp"
 #include "internal/otx/blind/Purse.hpp"
 #include "internal/otx/blind/Token.hpp"
 #include "internal/otx/blind/Types.hpp"
+#include "internal/otx/consensus/Server.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/serialization/protobuf/Proto.tpp"
 #include "internal/util/LogMacros.hpp"
+#include "internal/util/PasswordPrompt.hpp"
 #include "internal/util/Time.hpp"
 #include "opentxs/api/crypto/Symmetric.hpp"
 #include "opentxs/api/session/Crypto.hpp"
@@ -44,7 +47,6 @@
 #include "opentxs/otx/blind/PurseType.hpp"
 #include "opentxs/otx/blind/Token.hpp"
 #include "opentxs/otx/blind/TokenState.hpp"
-#include "opentxs/otx/consensus/Server.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/PasswordPrompt.hpp"
@@ -85,16 +87,17 @@ auto Purse(
 {
     using ReturnType = otx::blind::Purse;
     using Imp = otx::blind::purse::Purse;
-    auto pEnvelope = std::make_unique<OTEnvelope>(api.Factory().Envelope());
+    auto pEnvelope = std::make_unique<OTEnvelope>(
+        api.Factory().InternalSession().Envelope());
 
     OT_ASSERT(pEnvelope);
 
     auto& envelope = pEnvelope->get();
     auto pSecondaryPassword = api.Factory().Secret(0);
-    auto& secondaryPassword = pSecondaryPassword.get();
+    auto& secondaryPassword = pSecondaryPassword;
     secondaryPassword.Randomize(32);
     auto password = api.Factory().PasswordPrompt(reason);
-    password->SetPassword(secondaryPassword);
+    password.Internal().SetPassword(secondaryPassword);
     auto pSecondaryKey = std::make_unique<OTSymmetricKey>(
         api.Crypto().Symmetric().Key(password));
 
@@ -230,7 +233,7 @@ Purse::Purse(
     const UnallocatedVector<proto::Envelope>& primaryPasswords,
     const std::shared_ptr<const OTSymmetricKey> secondaryKey,
     const std::shared_ptr<const OTEnvelope> secondaryEncrypted,
-    std::optional<OTSecret> secondaryKeyPassword) noexcept
+    std::optional<Secret> secondaryKeyPassword) noexcept
     : api_(api)
     , version_(version)
     , type_(type)
@@ -280,7 +283,7 @@ Purse::Purse(
     const identifier::Notary& server,
     const blind::CashType type,
     const Mint& mint,
-    OTSecret&& secondaryKeyPassword,
+    Secret&& secondaryKeyPassword,
     std::unique_ptr<const OTSymmetricKey> secondaryKey,
     std::unique_ptr<const OTEnvelope> secondaryEncrypted) noexcept
     : Purse(
@@ -407,9 +410,9 @@ auto Purse::AddNym(const identity::Nym& nym, const PasswordPrompt& reason)
         return false;
     }
 
-    auto envelope = api_.Factory().Envelope();
+    auto envelope = api_.Factory().InternalSession().Envelope();
 
-    if (envelope->Seal(nym, primary_key_password_->Bytes(), reason)) {
+    if (envelope->Seal(nym, primary_key_password_.Bytes(), reason)) {
         if (false == envelope->Serialize(sessionKey)) { return false; }
     } else {
         LogError()(OT_PRETTY_CLASS())("Failed to add nym").Flush();
@@ -500,7 +503,8 @@ auto Purse::deserialize_secondary_password(
         case blind::PurseType::Request:
         case blind::PurseType::Issue: {
             auto output = std::make_unique<OTEnvelope>(
-                api.Factory().Envelope(in.secondarypassword()));
+                api.Factory().InternalSession().Envelope(
+                    in.secondarypassword()));
 
             if (false == bool(output)) {
                 LogError()(OT_PRETTY_STATIC(Imp))(
@@ -537,7 +541,7 @@ auto Purse::generate_key(Secret& password) const -> OTSymmetricKey
 {
     password.Randomize(32);
     auto keyPassword = api_.Factory().PasswordPrompt("");
-    keyPassword->SetPassword(password);
+    keyPassword.Internal().SetPassword(password);
 
     return api_.Crypto().Symmetric().Key(keyPassword, mode_);
 }
@@ -602,7 +606,7 @@ auto Purse::PrimaryKey(PasswordPrompt& password) -> crypto::key::Symmetric&
 
     if (false == unlocked_) { throw std::out_of_range("Purse is locked"); }
 
-    password.SetPassword(primary_key_password_);
+    password.Internal().SetPassword(primary_key_password_);
 
     return primary_->get();
 }
@@ -729,14 +733,14 @@ auto Purse::SecondaryKey(
     const auto& envelope = secondary_password_->get();
     const auto decrypted = envelope.Open(
         owner,
-        secondary_key_password_->WriteInto(Secret::Mode::Mem),
+        secondary_key_password_.WriteInto(Secret::Mode::Mem),
         passwordOut);
 
     if (false == decrypted) {
         throw std::out_of_range("Failed to decrypt key password");
     }
 
-    passwordOut.SetPassword(secondary_key_password_);
+    passwordOut.Internal().SetPassword(secondary_key_password_);
     const auto unlocked = secondaryKey.Unlock(passwordOut);
 
     if (false == unlocked) {
@@ -843,14 +847,15 @@ auto Purse::Unlock(
 
     for (const auto& sessionKey : primary_passwords_) {
         try {
-            const auto envelope = api_.Factory().Envelope(sessionKey);
+            const auto envelope =
+                api_.Factory().InternalSession().Envelope(sessionKey);
             const auto opened = envelope->Open(
-                nym, password->WriteInto(Secret::Mode::Mem), reason);
+                nym, password.WriteInto(Secret::Mode::Mem), reason);
 
             if (opened) {
                 auto unlocker =
                     api_.Factory().PasswordPrompt(reason.GetDisplayString());
-                unlocker->SetPassword(password);
+                unlocker.Internal().SetPassword(password);
                 unlocked_ = primary->Unlock(unlocker);
 
                 if (unlocked_) {

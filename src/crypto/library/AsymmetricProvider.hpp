@@ -8,10 +8,11 @@
 
 #pragma once
 
+#include "internal/crypto/library/AsymmetricProvider.hpp"
+
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "opentxs/crypto/Parameters.hpp"
 #include "opentxs/crypto/Types.hpp"
-#include "opentxs/crypto/library/AsymmetricProvider.hpp"
 #include "opentxs/util/Bytes.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)

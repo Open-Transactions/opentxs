@@ -4,6 +4,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 #include "0_stdafx.hpp"         // IWYU pragma: associated
+#include "2_Factory.hpp"        // IWYU pragma: associated
 #include "identity/Source.hpp"  // IWYU pragma: associated
 
 #include <AsymmetricKey.pb.h>
@@ -16,18 +17,18 @@
 #include <memory>
 #include <stdexcept>
 
-#include "2_Factory.hpp"
 #include "internal/api/session/FactoryAPI.hpp"
+#include "internal/core/Armored.hpp"
 #include "internal/core/PaymentCode.hpp"
+#include "internal/core/String.hpp"
+#include "internal/crypto/library/AsymmetricProvider.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/api/crypto/Config.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
-#include "opentxs/core/Armored.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/PaymentCode.hpp"
-#include "opentxs/core/String.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/crypto/Parameters.hpp"
@@ -36,7 +37,6 @@
 #include "opentxs/crypto/key/Keypair.hpp"
 #include "opentxs/crypto/key/asymmetric/Algorithm.hpp"
 #include "opentxs/crypto/key/asymmetric/Role.hpp"
-#include "opentxs/crypto/library/AsymmetricProvider.hpp"
 #include "opentxs/identity/CredentialType.hpp"
 #include "opentxs/identity/SourceType.hpp"
 #include "opentxs/identity/credential/Primary.hpp"
@@ -73,7 +73,7 @@ auto Factory::NymIDSource(
         case identity::SourceType::PubKey:
             switch (params.credentialType()) {
                 case identity::CredentialType::Legacy: {
-                    params.Keypair() = api.Factory().Keypair(
+                    params.Keypair() = api.Factory().InternalSession().Keypair(
                         params,
                         crypto::key::Asymmetric::DefaultVersion,
                         opentxs::crypto::key::asymmetric::Role::Sign,
@@ -92,7 +92,7 @@ auto Factory::NymIDSource(
                         throw std::runtime_error("Invalid curve type");
                     }
 
-                    params.Keypair() = api.Factory().Keypair(
+                    params.Keypair() = api.Factory().InternalSession().Keypair(
                         params.Seed(),
                         params.Nym(),
                         params.Credset(),
@@ -428,7 +428,7 @@ auto Source::Sign(
 
 auto Source::asString() const noexcept -> OTString
 {
-    return {factory_.Armored(asData())};
+    return {factory_.InternalSession().Armored(asData())};
 }
 
 auto Source::Description() const noexcept -> OTString

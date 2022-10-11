@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include "opentxs/core/Armored.hpp"
+#include "internal/core/Armored.hpp"
 #include "opentxs/util/Pimpl.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)

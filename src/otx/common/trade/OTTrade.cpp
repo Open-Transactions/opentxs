@@ -15,6 +15,8 @@
 #include "internal/api/FactoryAPI.hpp"
 #include "internal/api/session/FactoryAPI.hpp"
 #include "internal/api/session/Wallet.hpp"
+#include "internal/core/Armored.hpp"
+#include "internal/core/String.hpp"
 #include "internal/otx/common/Account.hpp"
 #include "internal/otx/common/StringXML.hpp"
 #include "internal/otx/common/XML.hpp"
@@ -24,19 +26,17 @@
 #include "internal/otx/common/trade/OTOffer.hpp"
 #include "internal/otx/common/util/Common.hpp"
 #include "internal/otx/common/util/Tag.hpp"
+#include "internal/otx/consensus/Client.hpp"
 #include "internal/util/Editor.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/api/session/Wallet.hpp"
-#include "opentxs/core/Armored.hpp"
 #include "opentxs/core/Data.hpp"
-#include "opentxs/core/String.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/identity/Nym.hpp"
-#include "opentxs/otx/consensus/Client.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
@@ -246,8 +246,9 @@ auto OTTrade::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
             stop_activated_ = false;
         }
 
-        const auto unittype = api_.Wallet().CurrencyTypeBasedOnUnitType(
-            GetInstrumentDefinitionID());
+        const auto unittype =
+            api_.Wallet().Internal().CurrencyTypeBasedOnUnitType(
+                GetInstrumentDefinitionID());
         LogDebug()(OT_PRETTY_CLASS())("Stop order --")(
             stop_activated_ ? "Already activated" : "Will activate")(
             " when price ")(stop_activated_ ? "was" : "reaches")(

@@ -12,8 +12,8 @@
 
 #include "interface/ui/base/List.hpp"
 #include "interface/ui/base/Widget.hpp"
+#include "internal/interface/ui/SeedTreeNym.hpp"
 #include "internal/util/LogMacros.hpp"
-#include "opentxs/interface/ui/SeedTreeNym.hpp"
 
 namespace opentxs::factory
 {

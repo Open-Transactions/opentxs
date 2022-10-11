@@ -23,7 +23,7 @@ public:
     static const bool have_hd_;
 
     const ot::api::session::Client& client_;
-    ot::OTPasswordPrompt reason_;
+    ot::PasswordPrompt reason_;
     ot::UnallocatedCString seed_, fingerprint_, nym_id_0_, paycode_0_,
         nym_id_1_, paycode_1_, nym_id_2_, paycode_2_, nym_id_3_, paycode_3_;
     ot::NymData nym_data_0_, nym_data_1_, nym_data_2_, nym_data_3_;

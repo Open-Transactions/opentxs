@@ -10,8 +10,8 @@
 #include <future>
 #include <string_view>
 
+#include "internal/network/zeromq/socket/Publish.hpp"
 #include "internal/util/Timer.hpp"
-#include "opentxs/network/zeromq/socket/Publish.hpp"
 #include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)

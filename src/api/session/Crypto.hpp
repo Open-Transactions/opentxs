@@ -18,13 +18,13 @@
 #include "internal/api/Crypto.hpp"
 #include "internal/api/crypto/Null.hpp"
 #include "internal/api/session/Crypto.hpp"
+#include "internal/crypto/library/AsymmetricProvider.hpp"
 #include "opentxs/api/crypto/Asymmetric.hpp"
 #include "opentxs/api/crypto/Blockchain.hpp"
 #include "opentxs/api/crypto/Crypto.hpp"
 #include "opentxs/api/crypto/Seed.hpp"
 #include "opentxs/crypto/Bip32.hpp"
 #include "opentxs/crypto/key/Types.hpp"
-#include "opentxs/crypto/library/AsymmetricProvider.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs

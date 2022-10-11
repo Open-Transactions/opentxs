@@ -11,14 +11,15 @@
 #include <iosfwd>
 #include <mutex>
 
+#include "internal/otx/consensus/Client.hpp"
 #include "internal/otx/consensus/Consensus.hpp"
+#include "internal/otx/consensus/Server.hpp"
+#include "internal/otx/consensus/TransactionStatement.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/Mutex.hpp"
 #include "opentxs/identity/Types.hpp"
 #include "opentxs/otx/ConsensusType.hpp"
 #include "opentxs/otx/Types.hpp"
-#include "opentxs/otx/consensus/Client.hpp"
-#include "opentxs/otx/consensus/TransactionStatement.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Numbers.hpp"

@@ -8,11 +8,11 @@
 #include <iosfwd>
 
 #include "interface/ui/base/Row.hpp"
+#include "internal/interface/ui/ContactListItem.hpp"
 #include "internal/interface/ui/UI.hpp"
 #include "internal/util/Mutex.hpp"
-#include "opentxs/interface/ui/ContactListItem.hpp"
+#include "internal/util/SharedPimpl.hpp"
 #include "opentxs/util/Container.hpp"
-#include "opentxs/util/SharedPimpl.hpp"
 
 class QVariant;
 

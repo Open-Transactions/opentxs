@@ -17,6 +17,7 @@
 #include <utility>
 
 #include "internal/blockchain/crypto/Crypto.hpp"
+#include "internal/network/zeromq/socket/Push.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/Mutex.hpp"
 #include "opentxs/blockchain/BlockchainType.hpp"
@@ -37,7 +38,6 @@
 #include "opentxs/core/PaymentCode.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
-#include "opentxs/network/zeromq/socket/Push.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 

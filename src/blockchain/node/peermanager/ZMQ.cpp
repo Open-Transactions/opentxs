@@ -15,7 +15,12 @@
 
 #include "internal/blockchain/Params.hpp"
 #include "internal/blockchain/p2p/P2P.hpp"
+#include "internal/core/String.hpp"
 #include "internal/network/blockchain/Types.hpp"
+#include "internal/network/zeromq/Context.hpp"
+#include "internal/network/zeromq/ListenCallback.hpp"
+#include "internal/network/zeromq/socket/Router.hpp"
+#include "internal/network/zeromq/socket/Socket.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/api/crypto/Encode.hpp"
 #include "opentxs/api/network/Network.hpp"
@@ -25,18 +30,14 @@
 #include "opentxs/blockchain/p2p/Address.hpp"
 #include "opentxs/blockchain/p2p/Types.hpp"
 #include "opentxs/core/Data.hpp"
-#include "opentxs/core/String.hpp"
 #include "opentxs/network/asio/Socket.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
-#include "opentxs/network/zeromq/ListenCallback.hpp"
 #include "opentxs/network/zeromq/ZeroMQ.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
 #include "opentxs/network/zeromq/message/FrameIterator.hpp"
 #include "opentxs/network/zeromq/message/FrameSection.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/network/zeromq/message/Message.tpp"
-#include "opentxs/network/zeromq/socket/Router.hpp"
-#include "opentxs/network/zeromq/socket/Socket.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Pimpl.hpp"
@@ -95,11 +96,11 @@ public:
               [this](auto&& in) { this->external(std::move(in)); }))
         , cb_int_(zmq::ListenCallback::Factory(
               [this](auto&& in) { this->internal(std::move(in)); }))
-        , external_(api_.Network().ZeroMQ().RouterSocket(
+        , external_(api_.Network().ZeroMQ().Internal().RouterSocket(
               cb_ex_,
               zmq::socket::Direction::Bind,
               "ZMQ Incoming external"))
-        , internal_(api_.Network().ZeroMQ().RouterSocket(
+        , internal_(api_.Network().ZeroMQ().Internal().RouterSocket(
               cb_int_,
               zmq::socket::Direction::Bind,
               "ZMQ Incoming internal"))

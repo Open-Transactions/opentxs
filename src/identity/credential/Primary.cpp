@@ -20,6 +20,7 @@
 #include "identity/credential/Key.hpp"
 #include "internal/api/session/FactoryAPI.hpp"
 #include "internal/crypto/key/Key.hpp"
+#include "internal/identity/Source.hpp"
 #include "internal/identity/credential/Credential.hpp"
 #include "internal/serialization/protobuf/Check.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
@@ -190,7 +191,7 @@ auto Primary::serialize(
         opentxs::translate(identity::CredentialRole::MasterKey));
     auto& masterData = *serialized.mutable_masterdata();
     masterData.set_version(credential_to_master_params_.at(version_));
-    if (false == source_.Serialize(*masterData.mutable_source())) {
+    if (false == source_.Internal().Serialize(*masterData.mutable_source())) {
         throw std::runtime_error("Failed to serialize source.");
     }
     *masterData.mutable_sourceproof() = source_proof_;
@@ -209,7 +210,7 @@ void Primary::sign(
 
         OT_ASSERT(sig);
 
-        if (false == source_.Sign(*this, *sig, reason)) {
+        if (false == source_.Internal().Sign(*this, *sig, reason)) {
             throw std::runtime_error("Failed to obtain source signature");
         }
 
@@ -341,7 +342,7 @@ auto Primary::verify_against_source(const Lock& lock) const -> bool
 
     const auto& sig = *pSig;
 
-    return source_.Verify(serialized, sig);
+    return source_.Internal().Verify(serialized, sig);
 }
 
 auto Primary::verify_internally(const Lock& lock) const -> bool

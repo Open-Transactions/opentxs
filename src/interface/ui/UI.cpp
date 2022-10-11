@@ -11,14 +11,17 @@
 #include <iosfwd>
 #include <sstream>
 
+#include "internal/api/session/Wallet.hpp"
 #include "internal/core/Core.hpp"
+#include "internal/core/contract/ServerContract.hpp"
+#include "internal/core/contract/Unit.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/api/session/Wallet.hpp"
 #include "opentxs/blockchain/crypto/SubaccountType.hpp"
 #include "opentxs/blockchain/crypto/Subchain.hpp"
-#include "opentxs/core/contract/ServerContract.hpp"
-#include "opentxs/core/contract/Unit.hpp"
+#include "opentxs/core/identifier/Notary.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
+#include "opentxs/core/identifier/UnitDefinition.hpp"
 
 namespace opentxs::ui::internal
 {
@@ -107,11 +110,11 @@ auto account_name_custodial(
 
         out << alias;
     } else {
-        const auto unit = api.Wallet().UnitDefinition(contract);
+        const auto unit = api.Wallet().Internal().UnitDefinition(contract);
         out << unit->Name();
     }
 
-    const auto server = api.Wallet().Server(notary);
+    const auto server = api.Wallet().Internal().Server(notary);
     out << " at " << server->EffectiveName();
 
     return out.str();

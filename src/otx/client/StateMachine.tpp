@@ -7,6 +7,7 @@
 
 #include "StateMachine.hpp"  // IWYU pragma: associated
 
+#include "internal/api/session/Wallet.hpp"
 #include "opentxs/api/session/Wallet.hpp"
 #include "opentxs/core/identifier/UnitDefinition.hpp"
 #include "opentxs/identity/Types.hpp"
@@ -230,7 +231,7 @@ auto StateMachine::load_contract<DownloadContractTask>(
     const identifier::Notary& id) const -> bool
 {
     try {
-        client_.Wallet().Server(id);
+        client_.Wallet().Internal().Server(id);
 
         return true;
     } catch (...) {
@@ -244,7 +245,7 @@ auto StateMachine::load_contract<DownloadUnitDefinitionTask>(
     const identifier::UnitDefinition& id) const -> bool
 {
     try {
-        client_.Wallet().UnitDefinition(id);
+        client_.Wallet().Internal().UnitDefinition(id);
 
         return true;
     } catch (...) {

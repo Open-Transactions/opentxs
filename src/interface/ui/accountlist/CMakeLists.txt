@@ -6,6 +6,8 @@
 target_sources(
   opentxs-common
   PRIVATE
+    "${opentxs_SOURCE_DIR}/src/internal/interface/ui/AccountList.hpp"
+    "${opentxs_SOURCE_DIR}/src/internal/interface/ui/AccountListItem.hpp"
     "AccountList.cpp"
     "AccountList.hpp"
     "AccountListItem.cpp"
@@ -15,16 +17,3 @@ target_sources(
     "CustodialAccountListItem.cpp"
     "CustodialAccountListItem.hpp"
 )
-set(cxx-install-headers
-    "${opentxs_SOURCE_DIR}/include/opentxs/interface/ui/AccountList.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/interface/ui/AccountListItem.hpp"
-)
-target_sources(opentxs-common PRIVATE ${cxx-install-headers})
-
-if(OPENTXS_STANDALONE)
-  install(
-    FILES ${cxx-install-headers}
-    DESTINATION include/opentxs/interface/ui
-    COMPONENT dev
-  )
-endif()

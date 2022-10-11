@@ -9,7 +9,10 @@
 #include <cstdint>
 #include <cstring>
 
+#include "internal/api/session/Wallet.hpp"
+#include "internal/core/Armored.hpp"
 #include "internal/core/Factory.hpp"
+#include "internal/core/String.hpp"
 #include "internal/otx/common/StringXML.hpp"
 #include "internal/otx/common/XML.hpp"
 #include "internal/otx/common/util/Common.hpp"
@@ -18,8 +21,6 @@
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/api/session/Wallet.hpp"
-#include "opentxs/core/Armored.hpp"
-#include "opentxs/core/String.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
 #include "opentxs/core/identifier/UnitDefinition.hpp"
@@ -199,8 +200,9 @@ auto Cheque::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
             remitter_account_id_.clear();
         }
         {
-            const auto unittype = api_.Wallet().CurrencyTypeBasedOnUnitType(
-                INSTRUMENT_DEFINITION_ID);
+            const auto unittype =
+                api_.Wallet().Internal().CurrencyTypeBasedOnUnitType(
+                    INSTRUMENT_DEFINITION_ID);
             LogVerbose()(OT_PRETTY_CLASS())("Cheque Amount: ")(
                 amount_, unittype)(". Transaction Number: ")(
                 transaction_num_)(" Valid From: ")(

@@ -5,12 +5,12 @@
 
 #pragma once
 
+#include "internal/crypto/library/AsymmetricProvider.hpp"
+#include "internal/crypto/library/EcdsaProvider.hpp"
+#include "internal/crypto/library/HashingProvider.hpp"
 #include "internal/crypto/library/Scrypt.hpp"
+#include "internal/crypto/library/SymmetricProvider.hpp"
 #include "opentxs/api/crypto/Util.hpp"
-#include "opentxs/crypto/library/AsymmetricProvider.hpp"
-#include "opentxs/crypto/library/EcdsaProvider.hpp"
-#include "opentxs/crypto/library/HashingProvider.hpp"
-#include "opentxs/crypto/library/SymmetricProvider.hpp"
 
 namespace opentxs::crypto
 {

@@ -23,9 +23,12 @@
 #include "2_Factory.hpp"
 #include "internal/api/crypto/Seed.hpp"
 #include "internal/api/session/FactoryAPI.hpp"
+#include "internal/core/Armored.hpp"
+#include "internal/core/String.hpp"
 #include "internal/crypto/Parameters.hpp"
 #include "internal/identity/Authority.hpp"
 #include "internal/identity/Nym.hpp"
+#include "internal/identity/Source.hpp"
 #include "internal/otx/common/util/Tag.hpp"
 #include "internal/serialization/protobuf/Check.hpp"
 #include "internal/serialization/protobuf/Proto.tpp"
@@ -38,12 +41,10 @@
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
-#include "opentxs/core/Armored.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/PaymentCode.hpp"
 #include "opentxs/core/Secret.hpp"
-#include "opentxs/core/String.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/core/identifier/Type.hpp"
 #include "opentxs/core/identifier/UnitDefinition.hpp"
@@ -728,7 +729,7 @@ auto Nym::get_private_auth_key(
     }
     if (nullptr == pCredential) { OT_FAIL; }
 
-    return pCredential->GetPrivateAuthKey(
+    return pCredential->Internal().GetPrivateAuthKey(
         keytype, &list_revoked_ids_);  // success
 }
 
@@ -763,7 +764,7 @@ auto Nym::GetPrivateEncrKey(crypto::key::asymmetric::Algorithm keytype) const
     }
     if (nullptr == pCredential) { OT_FAIL; }
 
-    return pCredential->GetPrivateEncrKey(
+    return pCredential->Internal().GetPrivateEncrKey(
         keytype,
         &list_revoked_ids_);  // success
 }
@@ -802,7 +803,7 @@ auto Nym::get_private_sign_key(
     }
     if (nullptr == pCredential) { OT_FAIL; }
 
-    return pCredential->GetPrivateSignKey(
+    return pCredential->Internal().GetPrivateSignKey(
         keytype,
         &list_revoked_ids_);  // success
 }
@@ -833,7 +834,7 @@ auto Nym::get_public_sign_key(
     }
     if (nullptr == pCredential) { OT_FAIL; }
 
-    return pCredential->GetPublicSignKey(
+    return pCredential->Internal().GetPublicSignKey(
         keytype,
         &list_revoked_ids_);  // success
 }
@@ -861,7 +862,7 @@ auto Nym::GetPublicAuthKey(crypto::key::asymmetric::Algorithm keytype) const
     }
     if (nullptr == pCredential) { OT_FAIL; }
 
-    return pCredential->GetPublicAuthKey(
+    return pCredential->Internal().GetPublicAuthKey(
         keytype,
         &list_revoked_ids_);  // success
 }
@@ -888,7 +889,7 @@ auto Nym::GetPublicEncrKey(crypto::key::asymmetric::Algorithm keytype) const
     }
     if (nullptr == pCredential) { OT_FAIL; }
 
-    return pCredential->GetPublicEncrKey(
+    return pCredential->Internal().GetPublicEncrKey(
         keytype,
         &list_revoked_ids_);  // success
 }
@@ -919,8 +920,9 @@ auto Nym::GetPublicKeysBySignature(
         const identity::Authority* pCredential = it.second.get();
         OT_ASSERT(nullptr != pCredential);
 
-        const std::int32_t nTempCount = pCredential->GetPublicKeysBySignature(
-            listOutput, theSignature, cKeyType);
+        const std::int32_t nTempCount =
+            pCredential->Internal().GetPublicKeysBySignature(
+                listOutput, theSignature, cKeyType);
         nCount += nTempCount;
     }
 
@@ -1189,7 +1191,7 @@ auto Nym::PaymentCode() const -> UnallocatedCString
     if (identity::SourceType::Bip47 != source_.Type()) { return ""; }
 
     auto serialized = proto::NymIDSource{};
-    if (false == source_.Serialize(serialized)) { return ""; }
+    if (false == source_.Internal().Serialize(serialized)) { return ""; }
 
     auto paymentCode =
         api_.Factory().InternalSession().PaymentCode(serialized.paymentcode());
@@ -1304,7 +1306,9 @@ auto Nym::SerializeCredentialIndex(Serialized& index, const Mode mode) const
 
     index.set_revision(revision_.load());
 
-    if (false == source_.Serialize(*(index.mutable_source()))) { return false; }
+    if (false == source_.Internal().Serialize(*(index.mutable_source()))) {
+        return false;
+    }
 
     for (const auto& it : active_) {
         if (nullptr != it.second) {
@@ -1338,8 +1342,8 @@ auto Nym::SerializeCredentialIndex(Serialized& index, const Mode mode) const
 void Nym::SerializeNymIDSource(Tag& parent) const
 {
     // We encode these before storing.
-    TagPtr pTag(new Tag("nymIDSource", source_.asString()->Get()));
-    const auto description = source_.Description();
+    TagPtr pTag(new Tag("nymIDSource", source_.Internal().asString()->Get()));
+    const auto description = source_.Internal().Description();
 
     if (description->Exists()) {
         auto ascDescription = Armored::Factory();
@@ -1542,7 +1546,7 @@ auto Nym::SocialMediaProfileTypes() const
 }
 
 auto Nym::TransportKey(Data& pubkey, const opentxs::PasswordPrompt& reason)
-    const -> OTSecret
+    const -> Secret
 {
     bool found{false};
     auto privateKey = api_.Factory().Secret(0);
@@ -1632,11 +1636,10 @@ auto Nym::verify_pseudonym(const eLock& lock) const -> bool
 
             // Verify all Credentials in the Authority, including source
             // verification for the master credential.
-            if (!pCredential->VerifyInternally()) {
+            if (!pCredential->Internal().VerifyInternally()) {
                 LogConsole()(OT_PRETTY_CLASS())("Credential (")(
-                    pCredential->GetMasterCredID())(") failed its "
-                                                    "own internal "
-                                                    "verification.")
+                    pCredential->GetMasterCredID())(
+                    ") failed its own internal verification.")
                     .Flush();
                 return false;
             }

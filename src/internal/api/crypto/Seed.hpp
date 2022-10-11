@@ -40,7 +40,7 @@ public:
         opentxs::crypto::Language& lang,
         Bip32Index& index,
         const opentxs::crypto::SeedStrength strength,
-        const PasswordPrompt& reason) const -> OTSecret = 0;
+        const PasswordPrompt& reason) const -> Secret = 0;
     auto Internal() const noexcept -> const Seed& final { return *this; }
     virtual auto UpdateIndex(
         const UnallocatedCString& seedID,

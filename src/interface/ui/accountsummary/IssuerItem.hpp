@@ -17,6 +17,7 @@
 #include "internal/interface/ui/UI.hpp"
 #include "internal/otx/client/Issuer.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
+#include "internal/util/SharedPimpl.hpp"
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
@@ -25,7 +26,6 @@
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/identity/wot/claim/ClaimType.hpp"
 #include "opentxs/util/Container.hpp"
-#include "opentxs/util/SharedPimpl.hpp"
 
 class QVariant;
 

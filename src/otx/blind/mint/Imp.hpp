@@ -11,10 +11,10 @@
 #include <iosfwd>
 #include <string_view>
 
+#include "internal/core/Armored.hpp"
 #include "internal/otx/blind/Mint.hpp"
 #include "internal/otx/common/Contract.hpp"
 #include "opentxs/core/Amount.hpp"
-#include "opentxs/core/Armored.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
 #include "opentxs/core/identifier/Nym.hpp"

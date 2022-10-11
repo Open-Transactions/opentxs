@@ -6,6 +6,18 @@
 target_sources(
   opentxs-common
   PRIVATE
+    "${opentxs_SOURCE_DIR}/src/internal/core/contract/peer/BailmentNotice.hpp"
+    "${opentxs_SOURCE_DIR}/src/internal/core/contract/peer/BailmentReply.hpp"
+    "${opentxs_SOURCE_DIR}/src/internal/core/contract/peer/BailmentRequest.hpp"
+    "${opentxs_SOURCE_DIR}/src/internal/core/contract/peer/ConnectionReply.hpp"
+    "${opentxs_SOURCE_DIR}/src/internal/core/contract/peer/ConnectionRequest.hpp"
+    "${opentxs_SOURCE_DIR}/src/internal/core/contract/peer/NoticeAcknowledgement.hpp"
+    "${opentxs_SOURCE_DIR}/src/internal/core/contract/peer/OutBailmentReply.hpp"
+    "${opentxs_SOURCE_DIR}/src/internal/core/contract/peer/OutBailmentRequest.hpp"
+    "${opentxs_SOURCE_DIR}/src/internal/core/contract/peer/PeerObject.hpp"
+    "${opentxs_SOURCE_DIR}/src/internal/core/contract/peer/PeerReply.hpp"
+    "${opentxs_SOURCE_DIR}/src/internal/core/contract/peer/PeerRequest.hpp"
+    "${opentxs_SOURCE_DIR}/src/internal/core/contract/peer/StoreSecret.hpp"
     "BailmentNotice.cpp"
     "BailmentNotice.cpp"
     "BailmentReply.cpp"
@@ -37,22 +49,10 @@ target_include_directories(
   PRIVATE "${opentxs_SOURCE_DIR}/deps/robin-hood/src/include"
 )
 set(cxx-install-headers
-    "${opentxs_SOURCE_DIR}/include/opentxs/core/contract/peer/BailmentNotice.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/core/contract/peer/BailmentReply.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/core/contract/peer/BailmentRequest.hpp"
     "${opentxs_SOURCE_DIR}/include/opentxs/core/contract/peer/ConnectionInfoType.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/core/contract/peer/ConnectionReply.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/core/contract/peer/ConnectionRequest.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/core/contract/peer/NoticeAcknowledgement.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/core/contract/peer/OutBailmentReply.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/core/contract/peer/OutBailmentRequest.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/core/contract/peer/PeerObject.hpp"
     "${opentxs_SOURCE_DIR}/include/opentxs/core/contract/peer/PeerObjectType.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/core/contract/peer/PeerReply.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/core/contract/peer/PeerRequest.hpp"
     "${opentxs_SOURCE_DIR}/include/opentxs/core/contract/peer/PeerRequestType.hpp"
     "${opentxs_SOURCE_DIR}/include/opentxs/core/contract/peer/SecretType.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/core/contract/peer/StoreSecret.hpp"
     "${opentxs_SOURCE_DIR}/include/opentxs/core/contract/peer/Types.hpp"
 )
 target_sources(opentxs-common PRIVATE ${cxx-install-headers})

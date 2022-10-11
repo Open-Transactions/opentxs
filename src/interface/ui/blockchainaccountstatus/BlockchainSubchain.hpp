@@ -8,11 +8,11 @@
 #include <iosfwd>
 
 #include "interface/ui/base/Row.hpp"
+#include "internal/interface/ui/BlockchainSubchain.hpp"
 #include "internal/interface/ui/UI.hpp"
+#include "internal/util/SharedPimpl.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
-#include "opentxs/interface/ui/BlockchainSubchain.hpp"
 #include "opentxs/util/Container.hpp"
-#include "opentxs/util/SharedPimpl.hpp"
 
 class QVariant;
 

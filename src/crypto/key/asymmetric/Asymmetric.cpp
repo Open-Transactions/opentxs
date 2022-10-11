@@ -20,6 +20,7 @@
 #include "internal/api/session/FactoryAPI.hpp"
 #include "internal/crypto/key/Key.hpp"
 #include "internal/crypto/key/Null.hpp"
+#include "internal/crypto/library/AsymmetricProvider.hpp"
 #include "internal/otx/common/crypto/OTSignatureMetadata.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/api/crypto/Hash.hpp"
@@ -37,7 +38,6 @@
 #include "opentxs/crypto/key/Keypair.hpp"
 #include "opentxs/crypto/key/Symmetric.hpp"
 #include "opentxs/crypto/key/symmetric/Algorithm.hpp"
-#include "opentxs/crypto/library/AsymmetricProvider.hpp"
 #include "opentxs/identity/Authority.hpp"
 #include "opentxs/identity/credential/Key.hpp"
 #include "opentxs/util/Container.hpp"
@@ -120,7 +120,7 @@ Asymmetric::Asymmetric(
     OT_ASSERT(nullptr != metadata_);
 
     if (has_private_) {
-        OT_ASSERT(encrypted_key_ || (0 < plaintext_key_->size()));
+        OT_ASSERT(encrypted_key_ || (0 < plaintext_key_.size()));
     }
 }
 
@@ -203,7 +203,7 @@ Asymmetric::Asymmetric(const Asymmetric& rhs, const ReadView newPublic) noexcept
 Asymmetric::Asymmetric(
     const Asymmetric& rhs,
     ByteArray&& newPublicKey,
-    OTSecret&& newSecretKey) noexcept
+    Secret&& newSecretKey) noexcept
     : api_(rhs.api_)
     , version_(rhs.version_)
     , type_(rhs.type_)
@@ -215,13 +215,13 @@ Asymmetric::Asymmetric(
     , provider_(rhs.provider_)
     , has_public_(false == key_.empty())
     , metadata_(std::make_unique<OTSignatureMetadata>(api_))
-    , has_private_(false == plaintext_key_->empty())
+    , has_private_(false == plaintext_key_.empty())
 {
     OT_ASSERT(0 < version_);
     OT_ASSERT(nullptr != metadata_);
 
     if (has_private_) {
-        OT_ASSERT(encrypted_key_ || (0 < plaintext_key_->size()));
+        OT_ASSERT(encrypted_key_ || (0 < plaintext_key_.size()));
     }
 }
 
@@ -441,7 +441,7 @@ auto Asymmetric::encrypt_key(
 
 auto Asymmetric::erase_private_data(const Lock&) -> void
 {
-    plaintext_key_->clear();
+    plaintext_key_.clear();
     encrypted_key_.reset();
     has_private_ = false;
 }
@@ -478,7 +478,7 @@ auto Asymmetric::get_password(
 auto Asymmetric::get_private_key(const Lock&, const PasswordPrompt& reason)
     const noexcept(false) -> Secret&
 {
-    if (0 == plaintext_key_->size()) {
+    if (0 == plaintext_key_.size()) {
         if (false == bool(encrypted_key_)) {
             throw std::runtime_error{"Missing encrypted private key"};
         }
@@ -492,7 +492,7 @@ auto Asymmetric::get_private_key(const Lock&, const PasswordPrompt& reason)
             throw std::runtime_error{"Failed to extract session key"};
         }
 
-        auto allocator = plaintext_key_->WriteInto(Secret::Mode::Mem);
+        auto allocator = plaintext_key_.WriteInto(Secret::Mode::Mem);
 
         if (false == sessionKey->Decrypt(privateKey, reason, allocator)) {
             throw std::runtime_error{"Failed to decrypt private key"};
@@ -525,17 +525,17 @@ auto Asymmetric::get_tag(
 
     if (false == api_.Crypto().Hash().HMAC(
                      crypto::HashType::Sha256,
-                     password->Bytes(),
+                     password.Bytes(),
                      credential.Bytes(),
-                     hashed->WriteInto(Secret::Mode::Mem))) {
+                     hashed.WriteInto(Secret::Mode::Mem))) {
         LogError()(OT_PRETTY_CLASS())("Failed to hash shared secret").Flush();
 
         return false;
     }
 
-    OT_ASSERT(hashed->size() >= sizeof(tag));
+    OT_ASSERT(hashed.size() >= sizeof(tag));
 
-    return nullptr != std::memcpy(&tag, hashed->data(), sizeof(tag));
+    return nullptr != std::memcpy(&tag, hashed.data(), sizeof(tag));
 }
 
 auto Asymmetric::hasCapability(

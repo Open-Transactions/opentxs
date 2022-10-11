@@ -5,10 +5,20 @@
 
 #include "0_stdafx.hpp"                // IWYU pragma: associated
 #include "opentxs/util/Allocator.hpp"  // IWYU pragma: associated
+#include "util/Allocator.hpp"          // IWYU pragma: associated
+
+extern "C" {
+#include <sodium.h>
+}
 
 #include <boost/container/pmr/global_resource.hpp>
+#include <cstddef>
+#include <new>
+#include <utility>
 
 #include "internal/util/BoostPMR.hpp"
+#include "internal/util/LogMacros.hpp"
+#include "opentxs/util/Log.hpp"
 
 namespace opentxs::alloc
 {
@@ -30,5 +40,56 @@ auto Null() noexcept -> Resource*
         BoostWrap{boost::container::pmr::null_memory_resource()};
 
     return &resource;
+}
+}  // namespace opentxs::alloc
+
+namespace opentxs::alloc
+{
+Secure::Secure(Resource* upstream) noexcept
+    : upstream_((nullptr == upstream) ? System() : upstream)
+{
+    OT_ASSERT(nullptr != upstream_);
+}
+
+auto Secure::do_allocate(std::size_t bytes, std::size_t alignment) -> void*
+{
+    auto* output = upstream_->allocate(bytes, alignment);
+
+    if (nullptr == output) { throw std::bad_alloc(); }
+
+    static auto warn{false};
+
+    if (0 > ::sodium_mlock(output, bytes)) {
+        if (false == warn) {
+            LogVerbose()("Unable to lock memory. Passwords and/or secret keys "
+                         "may be swapped to disk")
+                .Flush();
+        }
+
+        warn = true;
+    } else {
+        warn = false;
+    }
+
+    return output;
+}
+
+auto Secure::do_deallocate(void* p, std::size_t size, std::size_t alignment)
+    -> void
+{
+    ::sodium_munlock(p, size);
+    upstream_->deallocate(p, size, alignment);
+}
+
+auto Secure::do_is_equal(const Resource& other) const noexcept -> bool
+{
+    return std::addressof(other) == this;
+}
+
+auto Secure::get() noexcept -> Resource*
+{
+    static auto output = Secure{System()};
+
+    return std::addressof(output);
 }
 }  // namespace opentxs::alloc

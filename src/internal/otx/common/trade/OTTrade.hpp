@@ -8,6 +8,7 @@
 #include <irrxml/irrXML.hpp>
 #include <cstdint>
 
+#include "internal/core/String.hpp"
 #include "internal/otx/Types.hpp"
 #include "internal/otx/common/Account.hpp"
 #include "internal/otx/common/Contract.hpp"
@@ -16,7 +17,6 @@
 #include "internal/otx/common/trade/OTMarket.hpp"
 #include "internal/otx/common/trade/OTOffer.hpp"
 #include "opentxs/core/Amount.hpp"
-#include "opentxs/core/String.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/UnitDefinition.hpp"
 #include "opentxs/identity/Types.hpp"

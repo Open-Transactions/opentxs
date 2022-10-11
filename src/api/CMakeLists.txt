@@ -16,6 +16,7 @@ target_sources(
     "${opentxs_SOURCE_DIR}/src/internal/api/FactoryAPI.hpp"
     "${opentxs_SOURCE_DIR}/src/internal/api/Legacy.hpp"
     "${opentxs_SOURCE_DIR}/src/internal/api/Log.hpp"
+    "${opentxs_SOURCE_DIR}/src/internal/api/Settings.hpp"
     "Factory.cpp"
     "Factory.hpp"
     "Legacy.cpp"

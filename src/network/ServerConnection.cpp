@@ -22,8 +22,22 @@
 
 #include "internal/api/session/Endpoints.hpp"
 #include "internal/api/session/FactoryAPI.hpp"
+#include "internal/core/Armored.hpp"
+#include "internal/core/String.hpp"
+#include "internal/core/contract/ServerContract.hpp"
+#include "internal/network/ServerConnection.hpp"
+#include "internal/network/zeromq/Context.hpp"
+#include "internal/network/zeromq/ListenCallback.hpp"
+#include "internal/network/zeromq/curve/Client.hpp"
 #include "internal/network/zeromq/message/Message.hpp"
+#include "internal/network/zeromq/socket/Dealer.hpp"
+#include "internal/network/zeromq/socket/Publish.hpp"
+#include "internal/network/zeromq/socket/Push.hpp"
+#include "internal/network/zeromq/socket/Request.hpp"
+#include "internal/network/zeromq/socket/Socket.hpp"
+#include "internal/network/zeromq/socket/Types.hpp"
 #include "internal/otx/common/Message.hpp"
+#include "internal/otx/consensus/Server.hpp"
 #include "internal/serialization/protobuf/Check.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/serialization/protobuf/Proto.tpp"
@@ -35,32 +49,19 @@
 #include "opentxs/api/session/Endpoints.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
-#include "opentxs/core/Armored.hpp"
 #include "opentxs/core/Data.hpp"
-#include "opentxs/core/String.hpp"
-#include "opentxs/core/contract/ServerContract.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/identity/Nym.hpp"
 #include "opentxs/identity/Types.hpp"
-#include "opentxs/network/ServerConnection.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
-#include "opentxs/network/zeromq/ListenCallback.hpp"
-#include "opentxs/network/zeromq/curve/Client.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
 #include "opentxs/network/zeromq/message/FrameSection.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/network/zeromq/message/Message.tpp"
-#include "opentxs/network/zeromq/socket/Dealer.hpp"
-#include "opentxs/network/zeromq/socket/Publish.hpp"
-#include "opentxs/network/zeromq/socket/Push.hpp"
-#include "opentxs/network/zeromq/socket/Request.hpp"
-#include "opentxs/network/zeromq/socket/Socket.hpp"
-#include "opentxs/network/zeromq/socket/Types.hpp"
 #include "opentxs/otx/Reply.hpp"
 #include "opentxs/otx/Request.hpp"
 #include "opentxs/otx/ServerRequestType.hpp"
-#include "opentxs/otx/consensus/Server.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Pimpl.hpp"
@@ -146,13 +147,13 @@ ServerConnection::Imp::Imp(
     , thread_()
     , callback_(zeromq::ListenCallback::Factory(
           [this](const auto& in) { process_incoming(in); }))
-    , registration_socket_(zmq.Context().DealerSocket(
+    , registration_socket_(zmq.Context().Internal().DealerSocket(
           callback_,
           zmq::socket::Direction::Connect,
           "ServerConnection registration"))
-    , socket_(zmq.Context().RequestSocket())
+    , socket_(zmq.Context().Internal().RequestSocket())
     , notification_socket_(
-          zmq.Context().PushSocket(zmq::socket::Direction::Connect))
+          zmq.Context().Internal().PushSocket(zmq::socket::Direction::Connect))
     , last_activity_(std::time(nullptr))
     , sockets_ready_(Flag::Factory(false))
     , status_(Flag::Factory(false))
@@ -201,7 +202,7 @@ auto ServerConnection::Imp::activity_timer() -> void
 auto ServerConnection::Imp::async_socket(const Lock& lock) const
     -> OTZMQDealerSocket
 {
-    auto output = zmq_.Context().DealerSocket(
+    auto output = zmq_.Context().Internal().DealerSocket(
         callback_, zmq::socket::Direction::Connect, "ServerConnection async");
     set_proxy(lock, output);
     set_timeouts(lock, output);
@@ -648,7 +649,7 @@ auto ServerConnection::Imp::set_timeouts(
 auto ServerConnection::Imp::sync_socket(const Lock& lock) const
     -> OTZMQRequestSocket
 {
-    auto output = zmq_.Context().RequestSocket();
+    auto output = zmq_.Context().Internal().RequestSocket();
     set_timeouts(lock, output);
     set_curve(lock, output);
     output->Start(endpoint());

@@ -35,6 +35,13 @@
 #include "internal/api/session/FactoryAPI.hpp"
 #include "internal/api/session/Session.hpp"
 #include "internal/api/session/Wallet.hpp"
+#include "internal/core/Armored.hpp"
+#include "internal/core/contract/ServerContract.hpp"
+#include "internal/core/contract/Unit.hpp"
+#include "internal/core/contract/peer/PeerObject.hpp"
+#include "internal/core/contract/peer/PeerReply.hpp"
+#include "internal/core/contract/peer/PeerRequest.hpp"
+#include "internal/crypto/Envelope.hpp"
 #include "internal/identity/Nym.hpp"
 #include "internal/otx/Types.hpp"
 #include "internal/otx/blind/Mint.hpp"
@@ -49,13 +56,17 @@
 #include "internal/otx/common/NymFile.hpp"
 #include "internal/otx/common/OTTransaction.hpp"
 #include "internal/otx/common/transaction/Helpers.hpp"
+#include "internal/otx/consensus/Base.hpp"
 #include "internal/otx/consensus/Consensus.hpp"
+#include "internal/otx/consensus/ManagedNumber.hpp"
+#include "internal/otx/consensus/Server.hpp"
 #include "internal/serialization/protobuf/Check.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/serialization/protobuf/Proto.tpp"
 #include "internal/serialization/protobuf/verify/UnitDefinition.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/Shared.hpp"
+#include "internal/util/SharedPimpl.hpp"
 #include "opentxs/api/session/Activity.hpp"
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/Crypto.hpp"
@@ -63,22 +74,15 @@
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/api/session/Wallet.hpp"
 #include "opentxs/api/session/Workflow.hpp"
-#include "opentxs/core/Armored.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/contract/ContractType.hpp"
-#include "opentxs/core/contract/ServerContract.hpp"
-#include "opentxs/core/contract/Unit.hpp"
-#include "opentxs/core/contract/peer/PeerObject.hpp"
 #include "opentxs/core/contract/peer/PeerObjectType.hpp"
-#include "opentxs/core/contract/peer/PeerReply.hpp"
-#include "opentxs/core/contract/peer/PeerRequest.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/core/identifier/Type.hpp"
 #include "opentxs/core/identifier/UnitDefinition.hpp"
-#include "opentxs/crypto/Envelope.hpp"
 #include "opentxs/identity/Nym.hpp"
 #include "opentxs/identity/wot/claim/SectionType.hpp"
 #include "opentxs/otx/LastReplyStatus.hpp"
@@ -87,15 +91,11 @@
 #include "opentxs/otx/blind/Mint.hpp"
 #include "opentxs/otx/blind/Purse.hpp"
 #include "opentxs/otx/client/PaymentWorkflowState.hpp"
-#include "opentxs/otx/consensus/Base.hpp"
-#include "opentxs/otx/consensus/ManagedNumber.hpp"
-#include "opentxs/otx/consensus/Server.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/PasswordPrompt.hpp"
 #include "opentxs/util/Pimpl.hpp"
-#include "opentxs/util/SharedPimpl.hpp"
 #include "opentxs/util/Time.hpp"
 #include "otx/common/OTStorage.hpp"
 
@@ -377,7 +377,7 @@ Operation::Operation(
     const opentxs::PasswordPrompt& reason)
     : StateMachine([this] { return state_machine(); })
     , api_(api)
-    , reason_(reason)
+    , reason_(api_.Factory().PasswordPrompt(reason))
     , nym_id_(nym)
     , server_id_(server)
     , type_(otx::OperationType::Invalid)
@@ -410,8 +410,8 @@ Operation::Operation(
     , redownload_accounts_()
     , numbers_()
     , error_count_(0)
-    , peer_reply_(api_.Factory().PeerReply())
-    , peer_request_(api_.Factory().PeerRequest())
+    , peer_reply_(api_.Factory().InternalSession().PeerReply())
+    , peer_request_(api_.Factory().InternalSession().PeerRequest())
     , set_id_()
 {
 }
@@ -618,7 +618,7 @@ auto Operation::construct_convey_payment() -> std::shared_ptr<Message>
         return {};
     }
 
-    auto envelope = api_.Factory().Envelope();
+    auto envelope = api_.Factory().InternalSession().Envelope();
     auto sealed = envelope->Seal(
         {recipientNym, context.Nym()}, serialized->Bytes(), reason_);
 
@@ -638,7 +638,7 @@ auto Operation::construct_convey_payment() -> std::shared_ptr<Message>
         return {};
     }
 
-    const auto pObject = api_.Factory().PeerObject(
+    const auto pObject = api_.Factory().InternalSession().PeerObject(
         context.Nym(), String::Factory(message)->Get(), true);
 
     if (false == bool(pObject)) {
@@ -833,7 +833,7 @@ auto Operation::construct_download_contract() -> std::shared_ptr<Message>
 auto Operation::construct_download_mint() -> std::shared_ptr<Message>
 {
     try {
-        api_.Wallet().UnitDefinition(target_unit_id_);
+        api_.Wallet().Internal().UnitDefinition(target_unit_id_);
     } catch (...) {
         LogError()(OT_PRETTY_CLASS())("Invalid unit definition id");
 
@@ -928,7 +928,8 @@ auto Operation::construct_publish_nym() -> std::shared_ptr<Message>
 auto Operation::construct_publish_server() -> std::shared_ptr<Message>
 {
     try {
-        const auto contract = api_.Wallet().Server(target_server_id_);
+        const auto contract =
+            api_.Wallet().Internal().Server(target_server_id_);
 
         PREPARE_CONTEXT();
         CREATE_MESSAGE(registerContract, -1, true, true);
@@ -956,7 +957,8 @@ auto Operation::construct_publish_server() -> std::shared_ptr<Message>
 auto Operation::construct_publish_unit() -> std::shared_ptr<Message>
 {
     try {
-        const auto contract = api_.Wallet().UnitDefinition(target_unit_id_);
+        const auto contract =
+            api_.Wallet().Internal().UnitDefinition(target_unit_id_);
 
         PREPARE_CONTEXT();
         CREATE_MESSAGE(registerContract, -1, true, true);
@@ -998,7 +1000,7 @@ auto Operation::construct_process_inbox(
 auto Operation::construct_register_account() -> std::shared_ptr<Message>
 {
     try {
-        api_.Wallet().UnitDefinition(target_unit_id_);
+        api_.Wallet().Internal().UnitDefinition(target_unit_id_);
 
         PREPARE_CONTEXT();
         CREATE_MESSAGE(registerAccount, -1, true, true);
@@ -1044,7 +1046,7 @@ auto Operation::construct_send_nym_object(
     otx::context::Server& context,
     const RequestNumber number) -> std::shared_ptr<Message>
 {
-    auto envelope = api_.Factory().Armored();
+    auto envelope = api_.Factory().InternalSession().Armored();
 
     return construct_send_nym_object(
         object, recipient, context, envelope, number);
@@ -1059,7 +1061,7 @@ auto Operation::construct_send_nym_object(
 {
     CREATE_MESSAGE(sendNymMessage, recipient->ID(), number, true, true);
 
-    auto envelope = api_.Factory().Envelope();
+    auto envelope = api_.Factory().InternalSession().Envelope();
     auto output = proto::PeerObject{};
     if (false == object.Serialize(output)) {
         LogError()(OT_PRETTY_CLASS())("Failed to serialize object.").Flush();
@@ -1082,7 +1084,7 @@ auto Operation::construct_send_nym_object(
     senderCopy.Set(message.payload_);
 
     {
-        auto copy = api_.Factory().Envelope(senderCopy);
+        auto copy = api_.Factory().InternalSession().Envelope(senderCopy);
         auto plaintext = UnallocatedCString{};
 
         // FIXME removing this line causes the sender to be unable to decrypt
@@ -1112,8 +1114,8 @@ auto Operation::construct_send_cash() -> std::shared_ptr<Message>
 
     PREPARE_CONTEXT();
 
-    const auto pObject =
-        api_.Factory().PeerObject(context.Nym(), std::move(purse_.value()));
+    const auto pObject = api_.Factory().InternalSession().PeerObject(
+        context.Nym(), std::move(purse_.value()));
 
     if (false == bool(pObject)) {
         LogError()(OT_PRETTY_CLASS())("Failed to create peer object");
@@ -1147,9 +1149,9 @@ auto Operation::construct_send_message() -> std::shared_ptr<Message>
     auto& context = contextEditor.get();
     const auto& nym = *context.Nym();
     context.SetPush(enable_otx_push_.load());
-    auto envelope = api_.Factory().Armored();
-    const auto pObject =
-        api_.Factory().PeerObject(context.Nym(), memo_->Get(), false);
+    auto envelope = api_.Factory().InternalSession().Armored();
+    const auto pObject = api_.Factory().InternalSession().PeerObject(
+        context.Nym(), memo_->Get(), false);
 
     if (false == bool(pObject)) {
         LogError()(OT_PRETTY_CLASS())("Failed to create peer object").Flush();
@@ -1235,7 +1237,7 @@ auto Operation::construct_send_peer_reply() -> std::shared_ptr<Message>
         return {};
     }
 
-    const auto pObject = api_.Factory().PeerObject(
+    const auto pObject = api_.Factory().InternalSession().PeerObject(
         peer_request_, peer_reply_, PEER_OBJECT_PEER_REPLY);
 
     if (false == bool(pObject)) {
@@ -1293,8 +1295,8 @@ auto Operation::construct_send_peer_request() -> std::shared_ptr<Message>
     }
 
     const auto itemID = peer_request_->ID();
-    const auto pObject =
-        api_.Factory().PeerObject(peer_request_, PEER_OBJECT_PEER_REQUEST);
+    const auto pObject = api_.Factory().InternalSession().PeerObject(
+        peer_request_, PEER_OBJECT_PEER_REQUEST);
 
     if (false == bool(pObject)) {
         LogError()(OT_PRETTY_CLASS())("Failed to create peer object").Flush();
@@ -1471,7 +1473,7 @@ auto Operation::DepositCash(
         return false;
     }
 
-    auto pContext = api_.Wallet().ServerContext(nym_id_, server_id_);
+    auto pContext = api_.Wallet().Internal().ServerContext(nym_id_, server_id_);
 
     if (false == bool(pContext)) {
         LogError()(OT_PRETTY_CLASS())("Failed to load context").Flush();
@@ -1984,7 +1986,8 @@ auto Operation::get_receipts(
 
 auto Operation::hasContext() const -> bool
 {
-    const auto context = api_.Wallet().ServerContext(nym_id_, server_id_);
+    const auto context =
+        api_.Wallet().Internal().ServerContext(nym_id_, server_id_);
 
     return bool(context);
 }
@@ -2389,8 +2392,8 @@ void Operation::reset()
     redownload_accounts_.clear();
     numbers_.clear();
     error_count_ = 0;
-    peer_reply_ = api_.Factory().PeerReply();
-    peer_request_ = api_.Factory().PeerRequest();
+    peer_reply_ = api_.Factory().InternalSession().PeerReply();
+    peer_request_ = api_.Factory().InternalSession().PeerRequest();
     set_id_ = {};
 }
 

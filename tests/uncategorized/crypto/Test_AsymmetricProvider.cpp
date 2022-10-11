@@ -11,6 +11,7 @@
 
 #include "internal/api/Crypto.hpp"
 #include "internal/api/session/Client.hpp"
+#include "internal/crypto/library/AsymmetricProvider.hpp"
 #include "internal/otx/client/obsolete/OTAPI_Exec.hpp"
 #include "internal/util/LogMacros.hpp"  // IWYU pragma: keep
 #include "util/HDIndex.hpp"             // IWYU pragma: keep
@@ -189,9 +190,9 @@ public:
         EXPECT_EQ(secret1, secret2);
 
         if (0 < expected.size()) {
-            EXPECT_EQ(secret1->Bytes(), expected.Bytes());
+            EXPECT_EQ(secret1.Bytes(), expected.Bytes());
 
-            output &= (secret1->Bytes() == expected.Bytes());
+            output &= (secret1.Bytes() == expected.Bytes());
         }
 
         return output;

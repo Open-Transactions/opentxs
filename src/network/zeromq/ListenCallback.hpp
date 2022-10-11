@@ -9,7 +9,7 @@
 #include <mutex>
 #include <shared_mutex>
 
-#include "opentxs/network/zeromq/ListenCallback.hpp"
+#include "internal/network/zeromq/ListenCallback.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)

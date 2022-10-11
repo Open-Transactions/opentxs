@@ -11,6 +11,9 @@
 #include <string_view>
 #include <utility>
 
+#include "internal/network/zeromq/Context.hpp"
+#include "internal/network/zeromq/ListenCallback.hpp"
+#include "internal/network/zeromq/socket/Subscribe.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/Mutex.hpp"
 
@@ -114,7 +117,7 @@ struct ScanListener::Imp {
         : api_(api)
         , cb_(Callback::Factory([&](auto&& msg) { cb(std::move(msg)); }))
         , socket_([&] {
-            auto out = api_.Network().ZeroMQ().SubscribeSocket(cb_);
+            auto out = api_.Network().ZeroMQ().Internal().SubscribeSocket(cb_);
             const auto rc =
                 out->Start(api_.Endpoints().BlockchainScanProgress().data());
 

@@ -19,6 +19,7 @@
 #include "identity/credential/Base.hpp"
 #include "internal/api/session/FactoryAPI.hpp"
 #include "internal/crypto/key/Key.hpp"
+#include "internal/crypto/library/AsymmetricProvider.hpp"
 #include "internal/otx/common/crypto/OTSignatureMetadata.hpp"
 #include "internal/otx/common/crypto/Signature.hpp"
 #include "internal/serialization/protobuf/Proto.tpp"
@@ -33,7 +34,6 @@
 #include "opentxs/crypto/key/Keypair.hpp"
 #include "opentxs/crypto/key/asymmetric/Algorithm.hpp"
 #include "opentxs/crypto/key/asymmetric/Mode.hpp"
-#include "opentxs/crypto/library/AsymmetricProvider.hpp"
 #include "opentxs/identity/CredentialType.hpp"
 #include "opentxs/util/Log.hpp"
 
@@ -366,7 +366,7 @@ auto Key::new_key(
             auto revised{params};
             revised.SetDHParams(dh);
 
-            return api.Factory().Keypair(
+            return api.Factory().InternalSession().Keypair(
                 revised, version, translate(role), reason);
         }
         case identity::CredentialType::HD: {
@@ -381,7 +381,7 @@ auto Key::new_key(
                 throw std::runtime_error("Invalid curve type");
             }
 
-            return api.Factory().Keypair(
+            return api.Factory().InternalSession().Keypair(
                 params.Seed(),
                 params.Nym(),
                 params.Credset(),
@@ -399,7 +399,7 @@ auto Key::new_key(
 
 auto Key::SelfSign(
     const PasswordPrompt& reason,
-    const std::optional<OTSecret>,
+    const std::optional<Secret>,
     const bool onlyPrivate) -> bool
 {
     Lock lock(lock_);

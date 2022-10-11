@@ -10,12 +10,12 @@
 #include <tuple>
 
 #include "opentxs/Export.hpp"
-#include "opentxs/core/Secret.hpp"
 #include "opentxs/core/Types.hpp"
 #include "opentxs/crypto/HashType.hpp"
 #include "opentxs/crypto/key/Keypair.hpp"
 #include "opentxs/crypto/key/asymmetric/Algorithm.hpp"
 #include "opentxs/identity/wot/claim/Types.hpp"
+#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Iterator.hpp"
 #include "opentxs/util/Numbers.hpp"
@@ -69,6 +69,7 @@ class Signature;
 
 class PasswordPrompt;
 class PaymentCode;
+class Secret;
 class Signature;
 class String;
 class Tag;
@@ -177,7 +178,7 @@ public:
         -> const UnallocatedSet<wot::claim::ClaimType> = 0;
     virtual auto Source() const -> const identity::Source& = 0;
     virtual auto TransportKey(Data& pubkey, const PasswordPrompt& reason) const
-        -> OTSecret = 0;
+        -> Secret = 0;
     virtual auto Unlock(
         const crypto::key::Asymmetric& dhKey,
         const std::uint32_t tag,

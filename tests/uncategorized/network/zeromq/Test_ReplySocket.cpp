@@ -6,6 +6,12 @@
 #include <gtest/gtest.h>
 #include <opentxs/opentxs.hpp>
 
+#include "internal/network/zeromq/Context.hpp"
+#include "internal/network/zeromq/ReplyCallback.hpp"
+#include "internal/network/zeromq/socket/Reply.hpp"
+#include "internal/network/zeromq/socket/SocketType.hpp"
+#include "internal/network/zeromq/socket/Types.hpp"
+
 namespace ot = opentxs;
 namespace zmq = ot::network::zeromq;
 
@@ -31,8 +37,8 @@ TEST_F(Test_ReplySocket, ReplySocket_Factory)
 
     ASSERT_NE(nullptr, &replyCallback.get());
 
-    auto replySocket =
-        context_.ReplySocket(replyCallback, zmq::socket::Direction::Bind);
+    auto replySocket = context_.Internal().ReplySocket(
+        replyCallback, zmq::socket::Direction::Bind);
 
     ASSERT_NE(nullptr, &replySocket.get());
     ASSERT_EQ(zmq::socket::Type::Reply, replySocket->Type());

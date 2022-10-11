@@ -17,6 +17,8 @@
 #include "identity/credential/Base.hpp"
 #include "internal/api/session/FactoryAPI.hpp"
 #include "internal/api/session/Wallet.hpp"
+#include "internal/core/Armored.hpp"
+#include "internal/core/String.hpp"
 #include "internal/crypto/key/Key.hpp"
 #include "internal/identity/Authority.hpp"
 #include "internal/identity/credential/Credential.hpp"
@@ -25,9 +27,7 @@
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/api/session/Wallet.hpp"
-#include "opentxs/core/Armored.hpp"
 #include "opentxs/core/ByteArray.hpp"
-#include "opentxs/core/String.hpp"
 #include "opentxs/core/contract/Signable.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
@@ -123,7 +123,8 @@ auto Base::asString(const bool asPrivate) const -> UnallocatedCString
         return {};
     }
     dataCredential = api_.Factory().InternalSession().Data(credential);
-    auto armoredCredential = api_.Factory().Armored(dataCredential);
+    auto armoredCredential =
+        api_.Factory().InternalSession().Armored(dataCredential);
     armoredCredential->WriteArmoredString(stringCredential, "Credential");
 
     return stringCredential->Get();

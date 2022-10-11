@@ -10,6 +10,10 @@
 #include <compare>
 #include <iterator>
 
+#include "internal/api/session/UI.hpp"
+#include "internal/interface/ui/NymList.hpp"
+#include "internal/interface/ui/NymListItem.hpp"
+#include "internal/util/SharedPimpl.hpp"
 #include "ottest/fixtures/common/Counter.hpp"
 
 namespace ottest
@@ -18,7 +22,7 @@ auto check_nym_list(
     const ot::api::session::Client& api,
     const NymListData& expected) noexcept -> bool
 {
-    const auto& widget = api.UI().NymList();
+    const auto& widget = api.UI().Internal().NymList();
     auto output{true};
     const auto& v = expected.rows_;
     auto row = widget.First();
@@ -62,6 +66,6 @@ auto init_nym_list(
     const ot::api::session::Client& api,
     Counter& counter) noexcept -> void
 {
-    api.UI().NymList(make_cb(counter, "nym_list"));
+    api.UI().Internal().NymList(make_cb(counter, "nym_list"));
 }
 }  // namespace ottest

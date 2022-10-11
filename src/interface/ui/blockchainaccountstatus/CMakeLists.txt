@@ -6,6 +6,10 @@
 target_sources(
   opentxs-common
   PRIVATE
+    "${opentxs_SOURCE_DIR}/src/internal/interface/ui/BlockchainAccountStatus.hpp"
+    "${opentxs_SOURCE_DIR}/src/internal/interface/ui/BlockchainSubaccount.hpp"
+    "${opentxs_SOURCE_DIR}/src/internal/interface/ui/BlockchainSubaccountSource.hpp"
+    "${opentxs_SOURCE_DIR}/src/internal/interface/ui/BlockchainSubchain.hpp"
     "BlockchainAccountStatus.cpp"
     "BlockchainAccountStatus.hpp"
     "BlockchainSubaccount.cpp"
@@ -15,18 +19,3 @@ target_sources(
     "BlockchainSubchain.cpp"
     "BlockchainSubchain.hpp"
 )
-set(cxx-install-headers
-    "${opentxs_SOURCE_DIR}/include/opentxs/interface/ui/BlockchainAccountStatus.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/interface/ui/BlockchainSubaccount.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/interface/ui/BlockchainSubaccountSource.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/interface/ui/BlockchainSubchain.hpp"
-)
-target_sources(opentxs-common PRIVATE ${cxx-install-headers})
-
-if(OPENTXS_STANDALONE)
-  install(
-    FILES ${cxx-install-headers}
-    DESTINATION include/opentxs/interface/ui
-    COMPONENT dev
-  )
-endif()

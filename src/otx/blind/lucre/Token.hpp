@@ -10,9 +10,9 @@
 #include <memory>
 #include <stdexcept>
 
+#include "internal/core/String.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
-#include "opentxs/core/String.hpp"
 #include "opentxs/otx/blind/Token.hpp"
 #include "opentxs/otx/blind/TokenState.hpp"
 #include "opentxs/otx/blind/Types.hpp"

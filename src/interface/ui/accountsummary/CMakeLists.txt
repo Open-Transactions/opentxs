@@ -6,6 +6,9 @@
 target_sources(
   opentxs-common
   PRIVATE
+    "${opentxs_SOURCE_DIR}/src/internal/interface/ui/AccountSummary.hpp"
+    "${opentxs_SOURCE_DIR}/src/internal/interface/ui/AccountSummaryItem.hpp"
+    "${opentxs_SOURCE_DIR}/src/internal/interface/ui/IssuerItem.hpp"
     "AccountSummary.cpp"
     "AccountSummary.hpp"
     "AccountSummaryItem.cpp"
@@ -13,17 +16,3 @@ target_sources(
     "IssuerItem.cpp"
     "IssuerItem.hpp"
 )
-set(cxx-install-headers
-    "${opentxs_SOURCE_DIR}/include/opentxs/interface/ui/AccountSummary.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/interface/ui/AccountSummaryItem.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/interface/ui/IssuerItem.hpp"
-)
-target_sources(opentxs-common PRIVATE ${cxx-install-headers})
-
-if(OPENTXS_STANDALONE)
-  install(
-    FILES ${cxx-install-headers}
-    DESTINATION include/opentxs/interface/ui
-    COMPONENT dev
-  )
-endif()

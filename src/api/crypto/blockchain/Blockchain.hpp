@@ -15,7 +15,7 @@
 // IWYU pragma: no_include "opentxs/blockchain/crypto/SubaccountType.hpp"
 // IWYU pragma: no_include "opentxs/blockchain/crypto/Subchain.hpp"
 // IWYU pragma: no_include "opentxs/blockchain/node/Manager.hpp"
-// IWYU pragma: no_include "opentxs/network/zeromq/socket/Publish.hpp"
+// IWYU pragma: no_include "internal/network/zeromq/socket/Publish.hpp"
 
 #pragma once
 

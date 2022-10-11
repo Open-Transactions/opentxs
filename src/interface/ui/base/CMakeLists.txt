@@ -6,7 +6,10 @@
 target_sources(
   opentxs-common
   PRIVATE
+    "${opentxs_SOURCE_DIR}/src/internal/interface/ui/List.hpp"
+    "${opentxs_SOURCE_DIR}/src/internal/interface/ui/ListRow.hpp"
     "${opentxs_SOURCE_DIR}/src/internal/interface/ui/UI.hpp"
+    "${opentxs_SOURCE_DIR}/src/internal/interface/ui/Widget.hpp"
     "Combined.hpp"
     "Items.hpp"
     "List.hpp"
@@ -16,17 +19,3 @@ target_sources(
     "Widget.cpp"
     "Widget.hpp"
 )
-set(cxx-install-headers
-    "${opentxs_SOURCE_DIR}/include/opentxs/interface/ui/List.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/interface/ui/ListRow.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/interface/ui/Widget.hpp"
-)
-target_sources(opentxs-common PRIVATE ${cxx-install-headers})
-
-if(OPENTXS_STANDALONE)
-  install(
-    FILES ${cxx-install-headers}
-    DESTINATION include/opentxs/interface/ui
-    COMPONENT dev
-  )
-endif()

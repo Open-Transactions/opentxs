@@ -14,6 +14,9 @@
 #include <stdexcept>
 #include <utility>
 
+#include "internal/network/zeromq/Context.hpp"
+#include "internal/network/zeromq/ListenCallback.hpp"
+#include "internal/network/zeromq/socket/Subscribe.hpp"
 #include "internal/util/Mutex.hpp"
 
 namespace zmq = ot::network::zeromq;
@@ -41,7 +44,7 @@ struct Listener::Imp {
         , cb_(ot::network::zeromq::ListenCallback::Factory(
               [this](auto&& in) { cb(std::move(in)); }))
         , socket_([&] {
-            auto out = api.Network().ZeroMQ().SubscribeSocket(cb_);
+            auto out = api.Network().ZeroMQ().Internal().SubscribeSocket(cb_);
 
             if (false == out->Start(endpoint)) {
                 throw std::runtime_error{"failed to connect to endpoint"};

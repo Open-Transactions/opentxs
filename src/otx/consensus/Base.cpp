@@ -15,6 +15,7 @@
 
 #include "internal/api/session/FactoryAPI.hpp"
 #include "internal/api/session/Wallet.hpp"
+#include "internal/core/String.hpp"
 #include "internal/identity/Nym.hpp"
 #include "internal/otx/OTX.hpp"
 #include "internal/otx/Types.hpp"
@@ -30,7 +31,6 @@
 #include "opentxs/api/session/Wallet.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Data.hpp"
-#include "opentxs/core/String.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/crypto/SignatureRole.hpp"
@@ -484,7 +484,7 @@ auto Base::Nymfile(const PasswordPrompt& reason) const
 {
     OT_ASSERT(nym_);
 
-    return api_.Wallet().Nymfile(nym_->ID(), reason);
+    return api_.Wallet().Internal().Nymfile(nym_->ID(), reason);
 }
 
 auto Base::recover_available_number(

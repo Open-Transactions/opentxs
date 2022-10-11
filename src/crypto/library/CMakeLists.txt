@@ -15,23 +15,21 @@ add_subdirectory(sodium)
 target_sources(
   opentxs-common
   PRIVATE
+    "${opentxs_SOURCE_DIR}/src/internal/crypto/library/AsymmetricProvider.hpp"
+    "${opentxs_SOURCE_DIR}/src/internal/crypto/library/EcdsaProvider.hpp"
+    "${opentxs_SOURCE_DIR}/src/internal/crypto/library/EncodingProvider.hpp"
     "${opentxs_SOURCE_DIR}/src/internal/crypto/library/Factory.hpp"
+    "${opentxs_SOURCE_DIR}/src/internal/crypto/library/HashingProvider.hpp"
     "${opentxs_SOURCE_DIR}/src/internal/crypto/library/Null.hpp"
     "${opentxs_SOURCE_DIR}/src/internal/crypto/library/Pbkdf2.hpp"
     "${opentxs_SOURCE_DIR}/src/internal/crypto/library/Ripemd160.hpp"
     "${opentxs_SOURCE_DIR}/src/internal/crypto/library/Scrypt.hpp"
+    "${opentxs_SOURCE_DIR}/src/internal/crypto/library/SymmetricProvider.hpp"
     "AsymmetricProvider.cpp"
     "AsymmetricProvider.hpp"
     "EcdsaProvider.cpp"
     "EcdsaProvider.hpp"
     "HashingProvider.cpp"
-)
-set(cxx-install-headers
-    "${opentxs_SOURCE_DIR}/include/opentxs/crypto/library/AsymmetricProvider.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/crypto/library/EcdsaProvider.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/crypto/library/EncodingProvider.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/crypto/library/HashingProvider.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/crypto/library/SymmetricProvider.hpp"
 )
 target_include_directories(
   opentxs-common SYSTEM
@@ -45,12 +43,3 @@ target_link_libraries(
     unofficial-sodium::sodium
 )
 target_link_libraries(opentxs PUBLIC unofficial-sodium::sodium)
-target_sources(opentxs-common PRIVATE ${cxx-install-headers})
-
-if(OPENTXS_STANDALONE)
-  install(
-    FILES ${cxx-install-headers}
-    DESTINATION include/opentxs/crypto/library
-    COMPONENT dev
-  )
-endif()

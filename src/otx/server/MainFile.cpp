@@ -14,6 +14,9 @@
 
 #include "internal/api/Legacy.hpp"
 #include "internal/api/session/Session.hpp"
+#include "internal/api/session/Wallet.hpp"
+#include "internal/core/Armored.hpp"
+#include "internal/core/String.hpp"
 #include "internal/otx/AccountList.hpp"
 #include "internal/otx/common/StringXML.hpp"
 #include "internal/otx/common/cron/OTCron.hpp"
@@ -23,8 +26,6 @@
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Notary.hpp"
 #include "opentxs/api/session/Wallet.hpp"
-#include "opentxs/core/Armored.hpp"
-#include "opentxs/core/String.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/core/identifier/UnitDefinition.hpp"
@@ -451,7 +452,7 @@ auto MainFile::LoadServerUserAndContract() -> bool
     LogDetail()(OT_PRETTY_CLASS())("Loading the server contract...").Flush();
 
     try {
-        server_.API().Wallet().Server(NOTARY_ID);
+        server_.API().Wallet().Internal().Server(NOTARY_ID);
         bSuccess = true;
         LogDetail()(OT_PRETTY_CLASS())("** Main Server Contract Verified **")
             .Flush();

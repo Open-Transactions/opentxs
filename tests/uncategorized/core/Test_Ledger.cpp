@@ -9,8 +9,11 @@
 
 #include "internal/api/FactoryAPI.hpp"
 #include "internal/api/session/FactoryAPI.hpp"
+#include "internal/api/session/Wallet.hpp"
+#include "internal/core/contract/ServerContract.hpp"
 #include "internal/otx/Types.hpp"
 #include "internal/otx/common/Ledger.hpp"
+#include "internal/util/SharedPimpl.hpp"
 
 namespace ot = opentxs;
 
@@ -22,8 +25,8 @@ ot::identifier::Notary server_id_{};
 struct Ledger : public ::testing::Test {
     const ot::api::session::Client& client_;
     const ot::api::session::Notary& server_;
-    ot::OTPasswordPrompt reason_c_;
-    ot::OTPasswordPrompt reason_s_;
+    ot::PasswordPrompt reason_c_;
+    ot::PasswordPrompt reason_s_;
 
     Ledger()
         : client_(ot::Context().StartClientSession(0))
@@ -40,10 +43,11 @@ TEST_F(Ledger, init)
 
     ASSERT_FALSE(nym_id_.empty());
 
-    const auto serverContract = server_.Wallet().Server(server_.ID());
+    const auto serverContract =
+        server_.Wallet().Internal().Server(server_.ID());
     auto bytes = ot::Space{};
     serverContract->Serialize(ot::writer(bytes), true);
-    client_.Wallet().Server(ot::reader(bytes));
+    client_.Wallet().Internal().Server(ot::reader(bytes));
     server_id_ =
         client_.Factory().Internal().NotaryIDConvertSafe(serverContract->ID());
 

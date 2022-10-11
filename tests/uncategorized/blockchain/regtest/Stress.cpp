@@ -16,7 +16,11 @@
 #include <string_view>
 #include <utility>
 
+#include "internal/api/session/UI.hpp"
+#include "internal/interface/ui/AccountActivity.hpp"
+#include "internal/interface/ui/BalanceItem.hpp"
 #include "internal/util/LogMacros.hpp"
+#include "internal/util/SharedPimpl.hpp"
 #include "ottest/data/crypto/PaymentCodeV3.hpp"
 #include "ottest/fixtures/blockchain/Common.hpp"
 #include "ottest/fixtures/blockchain/ScanListener.hpp"
@@ -500,7 +504,7 @@ TEST_F(Regtest_stress, generate_transactions)
 TEST_F(Regtest_stress, bob_after_receive)
 {
     account_activity_.expected_ += transaction_count_ + 1u;
-    const auto& widget = client_2_.UI().AccountActivity(
+    const auto& widget = client_2_.UI().Internal().AccountActivity(
         bob_.ID(),
         expected_account_bob_,
         make_cb(account_activity_, u8"account_activity_"_sv));

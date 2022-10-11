@@ -36,7 +36,13 @@ class Identifier;
 
 namespace identifier
 {
+namespace internal
+{
+class Identifier;
+}  // namespace internal
+
 class Generic;
+class IdentifierPrivate;
 }  // namespace identifier
 
 class String;
@@ -67,8 +73,6 @@ namespace opentxs::identifier
 class OPENTXS_EXPORT Generic : virtual public Allocated, virtual public Data
 {
 public:
-    class Imp;
-
     auto Algorithm() const noexcept -> identifier::Algorithm;
     auto asBase58(const api::Crypto& api) const -> UnallocatedCString;
     auto asBase58(const api::Crypto& api, alloc::Default alloc) const
@@ -98,6 +102,7 @@ public:
     auto get_allocator() const noexcept -> allocator_type final;
     auto GetString(const api::Crypto& api, String& theStr) const noexcept
         -> void;
+    auto Internal() const noexcept -> const internal::Identifier&;
     auto IsNull() const -> bool final;
     auto size() const -> std::size_t final;
     auto Type() const noexcept -> identifier::Type;
@@ -114,21 +119,16 @@ public:
     auto data() -> void* final;
     auto DecodeHex(const ReadView hex) -> bool final;
     auto end() -> iterator final;
-    auto operator+=(const Data& rhs) noexcept -> Generic& final;
-    auto operator+=(const ReadView rhs) noexcept -> Generic& final;
-    auto operator+=(const std::uint8_t rhs) noexcept -> Generic& final;
-    auto operator+=(const std::uint16_t rhs) noexcept -> Generic& final;
-    auto operator+=(const std::uint32_t rhs) noexcept -> Generic& final;
-    auto operator+=(const std::uint64_t rhs) noexcept -> Generic& final;
     auto Randomize(const std::size_t size) -> bool final;
     auto resize(const std::size_t) -> bool final;
-    auto Serialize(proto::Identifier& out) const noexcept -> bool;
     auto SetSize(const std::size_t) -> bool final;
     auto swap(Generic& rhs) noexcept -> void;
     auto WriteInto() noexcept -> AllocateOutput final;
     auto zeroMemory() -> void final;
 
-    OPENTXS_NO_EXPORT Generic(Imp* imp) noexcept;
+    auto Internal() noexcept -> internal::Identifier&;
+
+    OPENTXS_NO_EXPORT Generic(IdentifierPrivate* imp) noexcept;
     Generic(allocator_type alloc = {}) noexcept;
     Generic(const Generic& rhs, allocator_type alloc = {}) noexcept;
     Generic(Generic&& rhs) noexcept;
@@ -139,6 +139,6 @@ public:
     ~Generic() override;
 
 private:
-    Imp* imp_;
+    IdentifierPrivate* imp_;
 };
 }  // namespace opentxs::identifier

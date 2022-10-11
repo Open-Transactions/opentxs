@@ -5,9 +5,10 @@
 
 #pragma once
 
+#include "internal/network/zeromq/socket/Publish.hpp"
+
 #include "network/zeromq/curve/Server.hpp"
 #include "network/zeromq/socket/Sender.hpp"
-#include "opentxs/network/zeromq/socket/Publish.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs

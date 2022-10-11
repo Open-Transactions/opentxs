@@ -5,21 +5,73 @@
 
 #pragma once
 
-#include "opentxs/network/zeromq/Context.hpp"
+#include <chrono>
+#include <cstdint>
+#include <functional>
+#include <memory>
+#include <string_view>
+#include <tuple>
 
-namespace opentxs::network::zeromq::socket::internal
+#include "internal/network/zeromq/socket/Types.hpp"
+#include "opentxs/otx/client/Types.hpp"
+#include "opentxs/util/Container.hpp"
+
+// NOLINTBEGIN(modernize-concat-nested-namespaces)
+namespace opentxs
 {
-class Socket : virtual public socket::Socket
+namespace network
+{
+namespace zeromq
+{
+namespace socket
+{
+namespace internal
+{
+class Socket;
+}  // namespace internal
+}  // namespace socket
+
+class Context;
+class Message;
+}  // namespace zeromq
+}  // namespace network
+}  // namespace opentxs
+// NOLINTEND(modernize-concat-nested-namespaces)
+
+namespace opentxs::network::zeromq::socket
+{
+class Socket
 {
 public:
-    virtual auto ID() const noexcept -> std::size_t = 0;
-    auto Internal() const noexcept -> const internal::Socket& final
-    {
-        return *this;
-    }
+    using SendResult = std::pair<otx::client::SendResult, Message>;
 
-    auto Internal() noexcept -> internal::Socket& final { return *this; }
+    virtual operator void*() const noexcept = 0;
 
-    ~Socket() override = default;
+    virtual auto Close() const noexcept -> bool = 0;
+    virtual auto Context() const noexcept -> const zeromq::Context& = 0;
+    virtual auto Internal() const noexcept -> const internal::Socket& = 0;
+    virtual auto SetTimeouts(
+        const std::chrono::milliseconds& linger,
+        const std::chrono::milliseconds& send,
+        const std::chrono::milliseconds& receive) const noexcept -> bool = 0;
+    // Do not call Start during callback execution
+    virtual auto Start(const std::string_view endpoint) const noexcept
+        -> bool = 0;
+    // StartAsync version may be called during callback execution
+    virtual auto StartAsync(const std::string_view endpoint) const noexcept
+        -> void = 0;
+    virtual auto Type() const noexcept -> socket::Type = 0;
+
+    virtual auto Internal() noexcept -> internal::Socket& = 0;
+
+    Socket(const Socket&) = delete;
+    Socket(Socket&&) = default;
+    auto operator=(const Socket&) -> Socket& = delete;
+    auto operator=(Socket&&) -> Socket& = default;
+
+    virtual ~Socket() = default;
+
+protected:
+    Socket() noexcept = default;
 };
-}  // namespace opentxs::network::zeromq::socket::internal
+}  // namespace opentxs::network::zeromq::socket

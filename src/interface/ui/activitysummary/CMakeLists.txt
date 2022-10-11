@@ -6,21 +6,10 @@
 target_sources(
   opentxs-common
   PRIVATE
+    "${opentxs_SOURCE_DIR}/src/internal/interface/ui/ActivitySummary.hpp"
+    "${opentxs_SOURCE_DIR}/src/internal/interface/ui/ActivitySummaryItem.hpp"
     "ActivitySummary.cpp"
     "ActivitySummary.hpp"
     "ActivitySummaryItem.cpp"
     "ActivitySummaryItem.hpp"
 )
-set(cxx-install-headers
-    "${opentxs_SOURCE_DIR}/include/opentxs/interface/ui/ActivitySummary.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/interface/ui/ActivitySummaryItem.hpp"
-)
-target_sources(opentxs-common PRIVATE ${cxx-install-headers})
-
-if(OPENTXS_STANDALONE)
-  install(
-    FILES ${cxx-install-headers}
-    DESTINATION include/opentxs/interface/ui
-    COMPONENT dev
-  )
-endif()

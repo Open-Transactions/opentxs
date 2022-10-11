@@ -33,6 +33,8 @@ namespace session
 class Storage;
 }  // namespace session
 
+class Crypto;
+class Factory;
 class Legacy;
 class Settings;
 }  // namespace api

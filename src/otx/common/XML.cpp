@@ -11,11 +11,11 @@
 #include <string_view>
 #include <utility>
 
+#include "internal/core/Armored.hpp"
+#include "internal/crypto/library/HashingProvider.hpp"
 #include "internal/otx/common/crypto/OTSignatureMetadata.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/OT.hpp"
-#include "opentxs/core/Armored.hpp"
-#include "opentxs/crypto/library/HashingProvider.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Pimpl.hpp"

@@ -19,9 +19,15 @@
 #include <utility>
 
 #include "internal/api/FactoryAPI.hpp"
+#include "internal/api/Settings.hpp"
 #include "internal/api/session/FactoryAPI.hpp"
 #include "internal/api/session/Wallet.hpp"
+#include "internal/core/Armored.hpp"
+#include "internal/core/String.hpp"
+#include "internal/core/contract/BasketContract.hpp"
 #include "internal/core/contract/Contract.hpp"
+#include "internal/core/contract/ServerContract.hpp"
+#include "internal/core/contract/Unit.hpp"
 #include "internal/identity/Nym.hpp"
 #include "internal/identity/wot/claim/Types.hpp"
 #include "internal/otx/Types.hpp"
@@ -36,6 +42,7 @@
 #include "internal/otx/common/cron/OTCron.hpp"
 #include "internal/otx/common/script/OTScriptable.hpp"
 #include "internal/otx/common/trade/OTMarket.hpp"
+#include "internal/otx/consensus/Client.hpp"
 #include "internal/otx/consensus/Consensus.hpp"
 #include "internal/otx/smartcontract/OTParty.hpp"
 #include "internal/otx/smartcontract/OTSmartContract.hpp"
@@ -46,6 +53,7 @@
 #include "internal/util/Editor.hpp"
 #include "internal/util/Exclusive.hpp"
 #include "internal/util/LogMacros.hpp"
+#include "internal/util/SharedPimpl.hpp"
 #include "opentxs/api/Settings.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
@@ -54,14 +62,9 @@
 #include "opentxs/api/session/Storage.hpp"
 #include "opentxs/api/session/Wallet.hpp"
 #include "opentxs/core/Amount.hpp"
-#include "opentxs/core/Armored.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Data.hpp"
-#include "opentxs/core/String.hpp"
-#include "opentxs/core/contract/BasketContract.hpp"
 #include "opentxs/core/contract/ContractType.hpp"
-#include "opentxs/core/contract/ServerContract.hpp"
-#include "opentxs/core/contract/Unit.hpp"
 #include "opentxs/core/contract/UnitType.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
@@ -73,12 +76,11 @@
 #include "opentxs/identity/wot/claim/Attribute.hpp"
 #include "opentxs/identity/wot/claim/Types.hpp"
 #include "opentxs/otx/blind/Mint.hpp"  // IWYU pragma: keep
-#include "opentxs/otx/consensus/Client.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/NymEditor.hpp"
+#include "opentxs/util/PasswordPrompt.hpp"
 #include "opentxs/util/Pimpl.hpp"
-#include "opentxs/util/SharedPimpl.hpp"
 #include "otx/common/OTStorage.hpp"
 #include "otx/server/Macros.hpp"
 #include "otx/server/MainFile.hpp"
@@ -531,7 +533,7 @@ auto UserCommandProcessor::cmd_add_claim(ReplyMessage& reply) const -> bool
 
     auto overrideNym = String::Factory();
     bool keyExists = false;
-    server_.API().Config().Check_str(
+    server_.API().Config().Internal().Check_str(
         String::Factory("permissions"),
         String::Factory("override_nym_id"),
         overrideNym,
@@ -661,7 +663,8 @@ auto UserCommandProcessor::cmd_delete_asset_account(ReplyMessage& reply) const
     const auto& contractID = account.get().GetInstrumentDefinitionID();
 
     try {
-        const auto contract = server_.API().Wallet().UnitDefinition(contractID);
+        const auto contract =
+            server_.API().Wallet().Internal().UnitDefinition(contractID);
 
         if (contract->Type() == contract::UnitType::Security) {
             if (false == contract->EraseAccountRecord(
@@ -971,7 +974,7 @@ auto UserCommandProcessor::cmd_get_instrument_definition(
                 msgIn.instrument_definition_id_->Bytes());
 
             try {
-                const auto contract = api.Wallet().Server(id);
+                const auto contract = api.Wallet().Internal().Server(id);
                 auto proto = proto::ServerContract{};
 
                 if (false == contract->Serialize(proto, true)) {
@@ -994,7 +997,8 @@ auto UserCommandProcessor::cmd_get_instrument_definition(
                 msgIn.instrument_definition_id_->Bytes());
 
             try {
-                const auto contract = api.Wallet().UnitDefinition(id);
+                const auto contract =
+                    api.Wallet().Internal().UnitDefinition(id);
                 auto proto = proto::UnitDefinition{};
 
                 if (false == contract->Serialize(proto, true)) {
@@ -1379,7 +1383,7 @@ auto UserCommandProcessor::cmd_issue_basket(ReplyMessage& reply) const -> bool
         const auto& subcontractID = it.unit();
 
         try {
-            server_.API().Wallet().UnitDefinition(
+            server_.API().Wallet().Internal().UnitDefinition(
                 server_.API().Factory().UnitIDFromBase58(subcontractID));
         } catch (...) {
             LogError()(OT_PRETTY_CLASS())("Missing subcurrency ")(
@@ -1902,7 +1906,7 @@ auto UserCommandProcessor::cmd_query_instrument_definitions(
         // might include "issue", "audit", "contract", etc.
         if (0 == status.compare("exists")) {
             try {
-                server_.API().Wallet().UnitDefinition(
+                server_.API().Wallet().Internal().UnitDefinition(
                     server_.API().Factory().UnitIDFromBase58(unitID));
 
                 newMap[unitID] = "true";
@@ -1949,7 +1953,7 @@ auto UserCommandProcessor::cmd_register_account(ReplyMessage& reply) const
     }
 
     try {
-        const auto contract = server_.API().Wallet().UnitDefinition(
+        const auto contract = server_.API().Wallet().Internal().UnitDefinition(
             account.get().GetInstrumentDefinitionID());
 
         if (contract->Type() == contract::UnitType::Security) {
@@ -2108,7 +2112,7 @@ auto UserCommandProcessor::cmd_register_instrument_definition(
 
     // Make sure the contract isn't already available on this server.
     try {
-        server_.API().Wallet().UnitDefinition(contractID);
+        server_.API().Wallet().Internal().UnitDefinition(contractID);
         LogError()(OT_PRETTY_CLASS())("Instrument definition ")(
             contractID)(" already exists.")
             .Flush();
@@ -2251,16 +2255,16 @@ auto UserCommandProcessor::cmd_request_admin(ReplyMessage& reply) const -> bool
     const String& requestingNym = msgIn.nym_id_;
     const UnallocatedCString candidate = requestingNym.Get();
     const UnallocatedCString providedPassword = msgIn.acct_id_->Get();
-
     UnallocatedCString overrideNym, password;
     bool notUsed = false;
-    server_.API().Config().CheckSet_str(
+    const auto& config = server_.API().Config().Internal();
+    config.CheckSet_str(
         String::Factory("permissions"),
         String::Factory("override_nym_id"),
         String::Factory(),
         overrideNym,
         notUsed);
-    server_.API().Config().CheckSet_str(
+    config.CheckSet_str(
         String::Factory("permissions"),
         String::Factory("admin_password"),
         String::Factory(),
@@ -2282,16 +2286,20 @@ auto UserCommandProcessor::cmd_request_admin(ReplyMessage& reply) const -> bool
     }
 
     if (readyForAdmin) {
-        const auto set = server_.API().Config().Set_str(
+        const auto set = config.Set_str(
             String::Factory("permissions"),
             String::Factory("override_nym_id"),
             requestingNym,
             notUsed);
 
         if (set) {
-            LogConsole()("    Override nym set to ")(requestingNym).Flush();
-            server_.API().Config().Save();
-            reply.SetBool(true);
+            if (config.Save()) {
+                LogConsole()("    Override nym set to ")(requestingNym).Flush();
+                reply.SetBool(true);
+            } else {
+                LogError()(OT_PRETTY_CLASS())("failed to save config file")
+                    .Flush();
+            }
         }
     } else {
         if (duplicateRequest) {

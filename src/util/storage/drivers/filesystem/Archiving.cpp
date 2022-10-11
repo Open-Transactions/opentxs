@@ -19,7 +19,7 @@
 #include "opentxs/crypto/key/Symmetric.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Log.hpp"
-#include "opentxs/util/Pimpl.hpp"
+#include "opentxs/util/PasswordPrompt.hpp"  // IWYU pragma: keep
 #include "util/storage/Config.hpp"
 
 namespace opentxs::factory

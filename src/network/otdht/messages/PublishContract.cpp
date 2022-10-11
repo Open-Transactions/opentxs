@@ -14,6 +14,9 @@
 #include <utility>
 
 #include "internal/api/session/FactoryAPI.hpp"
+#include "internal/core/contract/ServerContract.hpp"
+#include "internal/core/contract/Unit.hpp"
+#include "internal/core/identifier/Identifier.hpp"
 #include "internal/network/otdht/Factory.hpp"
 #include "internal/network/zeromq/message/Message.hpp"
 #include "internal/serialization/protobuf/Proto.tpp"
@@ -21,8 +24,6 @@
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/core/contract/ContractType.hpp"
-#include "opentxs/core/contract/ServerContract.hpp"
-#include "opentxs/core/contract/Unit.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Nym.hpp"  // IWYU pragma: keep
 #include "opentxs/identity/Nym.hpp"
@@ -175,7 +176,7 @@ public:
         out.AddFrame(Buffer{static_cast<std::uint32_t>(contract_type_)});
         out.Internal().AddFrame([&] {
             auto out = proto::Identifier{};
-            contract_id_.Serialize(out);
+            contract_id_.Internal().Serialize(out);
 
             return out;
         }());

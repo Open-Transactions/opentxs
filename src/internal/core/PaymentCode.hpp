@@ -42,7 +42,7 @@ public:
     virtual auto Sign(
         const identity::credential::Base& credential,
         proto::Signature& sig,
-        const PasswordPrompt& reason) const noexcept -> bool = 0;
+        const opentxs::PasswordPrompt& reason) const noexcept -> bool = 0;
     virtual auto Verify(
         const proto::Credential& master,
         const proto::Signature& sourceSignature) const noexcept -> bool = 0;
@@ -50,7 +50,7 @@ public:
     virtual auto AddPrivateKeys(
         UnallocatedCString& seed,
         const Bip32Index index,
-        const PasswordPrompt& reason) noexcept -> bool = 0;
+        const opentxs::PasswordPrompt& reason) noexcept -> bool = 0;
 
     virtual ~PaymentCode() = default;
 };

@@ -12,6 +12,10 @@
 #include <sstream>
 #include <string_view>
 
+#include "internal/api/session/UI.hpp"
+#include "internal/interface/ui/AccountList.hpp"
+#include "internal/interface/ui/AccountListItem.hpp"
+#include "internal/util/SharedPimpl.hpp"
 #include "ottest/fixtures/common/Counter.hpp"
 #include "ottest/fixtures/common/User.hpp"
 
@@ -23,7 +27,7 @@ auto check_account_list(
     const User& user,
     const AccountListData& expected) noexcept -> bool
 {
-    const auto& widget = user.api_->UI().AccountList(user.nym_id_);
+    const auto& widget = user.api_->UI().Internal().AccountList(user.nym_id_);
     auto output{true};
     const auto& v = expected.rows_;
     auto row = widget.First();
@@ -81,13 +85,13 @@ auto check_account_list(
 
 auto init_account_list(const User& user, Counter& counter) noexcept -> void
 {
-    user.api_->UI().AccountList(user.nym_id_, make_cb(counter, [&] {
-                                    auto out = std::stringstream{};
-                                    out << u8"account_list_"_sv;
-                                    out << user.name_lower_;
+    user.api_->UI().Internal().AccountList(user.nym_id_, make_cb(counter, [&] {
+                                               auto out = std::stringstream{};
+                                               out << u8"account_list_"_sv;
+                                               out << user.name_lower_;
 
-                                    return out.str();
-                                }()));
+                                               return out.str();
+                                           }()));
     wait_for_counter(counter);
 }
 }  // namespace ottest

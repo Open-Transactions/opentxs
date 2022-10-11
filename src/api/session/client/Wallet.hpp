@@ -8,9 +8,9 @@
 #include <memory>
 
 #include "api/session/Wallet.hpp"
+#include "internal/network/zeromq/socket/Publish.hpp"
 #include "internal/util/Editor.hpp"
 #include "opentxs/identity/Types.hpp"
-#include "opentxs/network/zeromq/socket/Publish.hpp"
 #include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)

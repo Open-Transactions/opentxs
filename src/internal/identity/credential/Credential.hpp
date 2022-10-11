@@ -82,7 +82,7 @@ struct Contact : virtual public Base,
 struct Key : virtual public Base, virtual public identity::credential::Key {
     virtual auto SelfSign(
         const PasswordPrompt& reason,
-        const std::optional<OTSecret> exportPassword = {},
+        const std::optional<Secret> exportPassword = {},
         const bool onlyPrivate = false) -> bool = 0;
 
 #ifdef _MSC_VER

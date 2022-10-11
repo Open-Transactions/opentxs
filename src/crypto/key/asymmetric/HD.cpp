@@ -17,6 +17,7 @@
 
 #include "crypto/key/asymmetric/EllipticCurve.hpp"
 #include "internal/api/crypto/Symmetric.hpp"
+#include "internal/core/String.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/api/crypto/Hash.hpp"
@@ -26,7 +27,6 @@
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Secret.hpp"
-#include "opentxs/core/String.hpp"
 #include "opentxs/core/identifier/Generic.hpp"  // IWYU pragma: keep
 #include "opentxs/crypto/Bip32.hpp"
 #include "opentxs/crypto/Bip32Child.hpp"
@@ -208,7 +208,7 @@ HD::HD(const HD& rhs, const ReadView newPublic) noexcept
 {
 }
 
-HD::HD(const HD& rhs, OTSecret&& newSecretKey) noexcept
+HD::HD(const HD& rhs, Secret&& newSecretKey) noexcept
     : EllipticCurve(rhs, std::move(newSecretKey))
     , path_()
     , chain_code_()
@@ -259,7 +259,7 @@ auto HD::Fingerprint() const noexcept -> Bip32Fingerprint
 auto HD::get_chain_code(const Lock& lock, const PasswordPrompt& reason) const
     noexcept(false) -> Secret&
 {
-    if (0 == plaintext_chain_code_->size()) {
+    if (0 == plaintext_chain_code_.size()) {
         if (false == bool(encrypted_key_)) {
             throw std::runtime_error{"Missing encrypted private key"};
         }
@@ -280,7 +280,7 @@ auto HD::get_chain_code(const Lock& lock, const PasswordPrompt& reason) const
             throw std::runtime_error{"Failed to extract session key"};
         }
 
-        auto allocator = plaintext_chain_code_->WriteInto(Secret::Mode::Mem);
+        auto allocator = plaintext_chain_code_.WriteInto(Secret::Mode::Mem);
 
         if (false == sessionKey->Decrypt(chaincode, reason, allocator)) {
             throw std::runtime_error{"Failed to decrypt chain code"};

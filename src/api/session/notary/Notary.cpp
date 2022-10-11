@@ -23,8 +23,10 @@
 #include "api/session/notary/Shared.hpp"
 #include "internal/api/Context.hpp"
 #include "internal/api/Legacy.hpp"
+#include "internal/api/Settings.hpp"
 #include "internal/api/network/Factory.hpp"
 #include "internal/api/session/Factory.hpp"
+#include "internal/core/String.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
 #include "internal/otx/blind/Mint.hpp"
 #include "internal/otx/server/MessageProcessor.hpp"
@@ -40,7 +42,6 @@
 #include "opentxs/core/AddressType.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Secret.hpp"  // IWYU pragma: keep
-#include "opentxs/core/String.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/core/identifier/UnitDefinition.hpp"
@@ -52,7 +53,6 @@
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Options.hpp"
-#include "opentxs/util/PasswordPrompt.hpp"
 #include "opentxs/util/Pimpl.hpp"
 #include "opentxs/util/Time.hpp"
 #include "otx/common/OTStorage.hpp"
@@ -320,7 +320,7 @@ auto Notary::GetAdminNym() const -> UnallocatedCString
 {
     auto output = String::Factory();
     bool exists{false};
-    const auto success = config_.Check_str(
+    const auto success = config_.Internal().Check_str(
         String::Factory("permissions"),
         String::Factory("override_nym_id"),
         output,
@@ -335,7 +335,7 @@ auto Notary::GetAdminPassword() const -> UnallocatedCString
 {
     auto output = String::Factory();
     bool exists{false};
-    const auto success = config_.Check_str(
+    const auto success = config_.Internal().Check_str(
         String::Factory("permissions"),
         String::Factory("admin_password"),
         output,

@@ -12,6 +12,16 @@
 
 #include "opentxs/core/identifier/Types.hpp"
 
+// NOLINTBEGIN(modernize-concat-nested-namespaces)
+namespace opentxs
+{
+namespace proto
+{
+class Identifier;
+}  // namespace proto
+}  // namespace opentxs
+// NOLINTEND(modernize-concat-nested-namespaces)
+
 namespace opentxs
 {
 using namespace std::literals;
@@ -20,3 +30,22 @@ static constexpr auto identifier_header_ =
     sizeof(identifier::Algorithm) + sizeof(identifier::Type);
 static constexpr auto identifier_prefix_ = "ot"sv;
 }  // namespace opentxs
+
+namespace opentxs::identifier::internal
+{
+class Identifier
+{
+public:
+    virtual auto Serialize(proto::Identifier& out) const noexcept -> bool = 0;
+
+    Identifier(const Identifier&) = delete;
+    Identifier(Identifier&&) = delete;
+    auto operator=(const Identifier&) noexcept -> Identifier& = delete;
+    auto operator=(Identifier&&) noexcept -> Identifier& = delete;
+
+    virtual ~Identifier() = default;
+
+protected:
+    Identifier() = default;
+};
+}  // namespace opentxs::identifier::internal

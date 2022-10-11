@@ -29,6 +29,9 @@
 #include "internal/blockchain/crypto/Crypto.hpp"
 #include "internal/blockchain/node/Manager.hpp"
 #include "internal/core/Factory.hpp"
+#include "internal/network/zeromq/Context.hpp"
+#include "internal/network/zeromq/Pipeline.hpp"
+#include "internal/network/zeromq/socket/Types.hpp"
 #include "internal/serialization/protobuf/Proto.tpp"
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/api/crypto/Blockchain.hpp"
@@ -53,15 +56,13 @@
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
-#include "opentxs/network/zeromq/Pipeline.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
 #include "opentxs/network/zeromq/message/FrameSection.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/network/zeromq/message/Message.tpp"
-#include "opentxs/network/zeromq/socket/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
-#include "opentxs/util/Pimpl.hpp"
+#include "opentxs/util/PasswordPrompt.hpp"  // IWYU pragma: keep
 #include "util/Container.hpp"
 
 namespace opentxs::factory
@@ -96,7 +97,7 @@ BlockchainAccountActivity::BlockchainAccountActivity(
     , confirmed_(0)
     , balance_cb_(network::zeromq::ListenCallback::Factory(
           [this](auto&& in) { pipeline_.Push(std::move(in)); }))
-    , balance_socket_(api_.Network().ZeroMQ().DealerSocket(
+    , balance_socket_(api_.Network().ZeroMQ().Internal().DealerSocket(
           balance_cb_,
           network::zeromq::socket::Direction::Connect,
           "BlockchainAccountActivity"))

@@ -10,7 +10,9 @@
 #include <iosfwd>
 
 #include "interface/ui/base/Row.hpp"
+#include "internal/interface/ui/AccountListItem.hpp"
 #include "internal/interface/ui/UI.hpp"
+#include "internal/util/SharedPimpl.hpp"
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
@@ -19,10 +21,8 @@
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
 #include "opentxs/core/identifier/UnitDefinition.hpp"
-#include "opentxs/interface/ui/AccountListItem.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Pimpl.hpp"
-#include "opentxs/util/SharedPimpl.hpp"
 
 class QVariant;
 
