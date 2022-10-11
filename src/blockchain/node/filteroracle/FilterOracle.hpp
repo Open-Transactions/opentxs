@@ -12,6 +12,7 @@
 #pragma once
 
 #include <memory>
+#include <string_view>
 
 #include "internal/blockchain/node/Types.hpp"
 #include "internal/blockchain/node/filteroracle/FilterOracle.hpp"
@@ -126,15 +127,6 @@ public:
     ~FilterOracle() final;
 
 private:
-    friend filteroracle::Shared;
-
-    using FilterHeaderHex = UnallocatedCString;
-    using FilterHeaderMap = UnallocatedMap<cfilter::Type, FilterHeaderHex>;
-    using ChainMap = UnallocatedMap<block::Height, FilterHeaderMap>;
-    using CheckpointMap = UnallocatedMap<blockchain::Type, ChainMap>;
-
-    static const CheckpointMap filter_checkpoints_;
-
     mutable std::shared_ptr<filteroracle::Shared> shared_p_;
     filteroracle::Shared& shared_;
 };

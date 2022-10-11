@@ -22,7 +22,6 @@ if(OT_BLOCKCHAIN_EXPORT)
       "CfilterDownloader.hpp"
       "Data.cpp"
       "Data.hpp"
-      "FilterCheckpoints.cpp"
       "FilterOracle.cpp"
       "FilterOracle.hpp"
       "Shared.cpp"
