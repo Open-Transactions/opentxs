@@ -129,4 +129,13 @@ auto chains() noexcept -> const Set<blockchain::Type>;
 auto get(blockchain::Type chain) noexcept(false) -> const ChainData&;
 auto WriteCheckpoints(const std::filesystem::path& outputDirectory) noexcept
     -> bool;
+auto WriteCheckpoint(
+    const std::filesystem::path& outputDirectory,
+    blockchain::Type chain) noexcept -> bool;
+auto WriteCheckpoint(
+    const std::filesystem::path& outputDirectory,
+    const block::Position& current,
+    const block::Position& prior,
+    const cfilter::Header& cfheader,
+    blockchain::Type chain) noexcept -> bool;
 }  // namespace opentxs::blockchain::params

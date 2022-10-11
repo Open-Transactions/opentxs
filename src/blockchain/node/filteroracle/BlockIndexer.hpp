@@ -10,6 +10,7 @@
 #include <boost/smart_ptr/shared_ptr.hpp>
 #include <cs_shared_guarded.h>
 #include <cstddef>
+#include <filesystem>
 #include <memory>
 #include <shared_mutex>
 #include <string_view>
@@ -21,6 +22,7 @@
 #include "opentxs/blockchain/bitcoin/cfilter/Header.hpp"
 #include "opentxs/blockchain/bitcoin/cfilter/Types.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
+#include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/blockchain/node/Types.hpp"
 #include "opentxs/util/Allocated.hpp"
 #include "opentxs/util/Container.hpp"
@@ -130,6 +132,7 @@ private:
     std::shared_ptr<Shared> shared_p_;
     const api::Session& api_;
     const node::Manager& node_;
+    const std::filesystem::path checkpoints_;
     Shared& shared_;
     block::Position best_position_;
     Deque<block::Position> queue_;
@@ -155,6 +158,9 @@ private:
     auto process_reorg(block::Position&& parent) noexcept -> void;
     auto process_report(Message&& in) noexcept -> void;
     auto update_best_position(block::Position&& position) noexcept -> void;
+    auto update_checkpoint() noexcept -> void;
     auto work(allocator_type monotonic) noexcept -> bool;
+    auto write_checkpoint(block::Height target) noexcept -> void;
+    auto write_last_checkpoint(const block::Position& tip) noexcept -> void;
 };
 }  // namespace opentxs::blockchain::node::filteroracle
