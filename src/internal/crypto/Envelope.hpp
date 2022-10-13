@@ -42,7 +42,7 @@ public:
         -> bool = 0;
     virtual auto Open(
         const identity::Nym& recipient,
-        const AllocateOutput plaintext,
+        AllocateOutput&& plaintext,
         const PasswordPrompt& reason) const noexcept -> bool = 0;
     virtual auto Serialize(AllocateOutput destination) const noexcept
         -> bool = 0;

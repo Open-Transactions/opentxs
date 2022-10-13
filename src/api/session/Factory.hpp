@@ -4,6 +4,9 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 // IWYU pragma: no_include "opentxs/core/UnitType.hpp"
+// IWYU pragma: no_include "opentxs/crypto/symmetric/Algorithm.hpp"
+// IWYU pragma: no_include "opentxs/crypto/symmetric/Key.hpp"
+// IWYU pragma: no_include "opentxs/crypto/symmetric/Source.hpp"
 
 #pragma once
 
@@ -71,15 +74,14 @@
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/crypto/key/Asymmetric.hpp"
 #include "opentxs/crypto/key/Keypair.hpp"
-#include "opentxs/crypto/key/Symmetric.hpp"
 #include "opentxs/crypto/key/asymmetric/Role.hpp"
-#include "opentxs/crypto/key/symmetric/Algorithm.hpp"
-#include "opentxs/crypto/key/symmetric/Source.hpp"
+#include "opentxs/crypto/symmetric/Types.hpp"
 #include "opentxs/identity/Types.hpp"
 #include "opentxs/identity/wot/claim/Types.hpp"
 #include "opentxs/otx/blind/CashType.hpp"
 #include "opentxs/otx/blind/Mint.hpp"
 #include "opentxs/otx/blind/Purse.hpp"
+#include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
@@ -128,6 +130,11 @@ namespace key
 class EllipticCurve;
 class Secp256k1;
 }  // namespace key
+
+namespace symmetric
+{
+class Key;
+}  // namespace symmetric
 
 class Parameters;
 class SymmetricProvider;
@@ -917,23 +924,26 @@ public:
     {
         return symmetric_;
     }
-    auto SymmetricKey() const -> OTSymmetricKey final;
+    auto SymmetricKey(
+        const opentxs::crypto::SymmetricProvider& engine,
+        const opentxs::crypto::symmetric::Algorithm mode,
+        const opentxs::PasswordPrompt& password,
+        alloc::Default alloc) const noexcept
+        -> opentxs::crypto::symmetric::Key final;
     auto SymmetricKey(
         const opentxs::crypto::SymmetricProvider& engine,
         const opentxs::PasswordPrompt& password,
-        const opentxs::crypto::key::symmetric::Algorithm mode) const
-        -> OTSymmetricKey final;
-    auto SymmetricKey(
-        const opentxs::crypto::SymmetricProvider& engine,
-        const proto::SymmetricKey serialized) const -> OTSymmetricKey final;
+        alloc::Default alloc) const noexcept
+        -> opentxs::crypto::symmetric::Key final;
     auto SymmetricKey(
         const opentxs::crypto::SymmetricProvider& engine,
         const opentxs::Secret& seed,
         const std::uint64_t operations,
         const std::uint64_t difficulty,
         const std::size_t size,
-        const opentxs::crypto::key::symmetric::Source type) const
-        -> OTSymmetricKey final;
+        const opentxs::crypto::symmetric::Source type,
+        alloc::Default alloc) const noexcept
+        -> opentxs::crypto::symmetric::Key final;
     auto SymmetricKey(
         const opentxs::crypto::SymmetricProvider& engine,
         const opentxs::Secret& seed,
@@ -942,12 +952,20 @@ public:
         const std::uint64_t difficulty,
         const std::uint64_t parallel,
         const std::size_t size,
-        const opentxs::crypto::key::symmetric::Source type) const
-        -> OTSymmetricKey final;
+        const opentxs::crypto::symmetric::Source type,
+        alloc::Default alloc) const noexcept
+        -> opentxs::crypto::symmetric::Key final;
     auto SymmetricKey(
         const opentxs::crypto::SymmetricProvider& engine,
         const opentxs::Secret& raw,
-        const opentxs::PasswordPrompt& reason) const -> OTSymmetricKey final;
+        const opentxs::PasswordPrompt& reason,
+        alloc::Default alloc) const noexcept
+        -> opentxs::crypto::symmetric::Key final;
+    auto SymmetricKey(
+        const opentxs::crypto::SymmetricProvider& engine,
+        const proto::SymmetricKey serialized,
+        alloc::Default alloc) const noexcept
+        -> opentxs::crypto::symmetric::Key final;
     auto Trade() const -> std::unique_ptr<OTTrade> final;
     auto Trade(
         const identifier::Notary& notaryID,

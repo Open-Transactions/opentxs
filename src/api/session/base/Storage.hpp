@@ -10,7 +10,7 @@
 #include <memory>
 
 #include "internal/core/String.hpp"
-#include "opentxs/crypto/key/Symmetric.hpp"
+#include "opentxs/crypto/symmetric/Key.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Options.hpp"
 #include "util/storage/Config.hpp"
@@ -93,7 +93,7 @@ private:
 protected:
     const api::session::Factory& factory_;
     session::Crypto& crypto_;
-    OTSymmetricKey storage_encryption_key_;
+    opentxs::crypto::symmetric::Key storage_encryption_key_;
 
     virtual auto cleanup() noexcept -> void;
     auto init(

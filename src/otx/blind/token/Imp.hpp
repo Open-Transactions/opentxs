@@ -15,7 +15,7 @@
 #include "opentxs/core/identifier/Notary.hpp"
 #include "opentxs/core/identifier/UnitDefinition.hpp"
 #include "opentxs/crypto/Types.hpp"
-#include "opentxs/crypto/key/symmetric/Algorithm.hpp"
+#include "opentxs/crypto/symmetric/Algorithm.hpp"
 #include "opentxs/otx/blind/CashType.hpp"
 #include "opentxs/otx/blind/Purse.hpp"
 #include "opentxs/otx/blind/Token.hpp"
@@ -35,10 +35,10 @@ class Session;
 
 namespace crypto
 {
-namespace key
+namespace symmetric
 {
-class Symmetric;
-}  // namespace key
+class Key;
+}  // namespace symmetric
 }  // namespace crypto
 
 namespace identity
@@ -110,7 +110,7 @@ public:
     ~Token() override = default;
 
 protected:
-    static const opentxs::crypto::key::symmetric::Algorithm mode_;
+    static const opentxs::crypto::symmetric::Algorithm mode_;
 
     const api::Session& api_;
     blind::internal::Purse& purse_;
@@ -123,9 +123,9 @@ protected:
     const Time valid_to_;
 
     auto reencrypt(
-        const crypto::key::Symmetric& oldKey,
+        const crypto::symmetric::Key& oldKey,
         const PasswordPrompt& oldPassword,
-        const crypto::key::Symmetric& newKey,
+        const crypto::symmetric::Key& newKey,
         const PasswordPrompt& newPassword,
         proto::Ciphertext& ciphertext) -> bool;
 

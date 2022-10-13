@@ -3,6 +3,9 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_include "opentxs/crypto/symmetric/Algorithm.hpp"
+// IWYU pragma: no_include "opentxs/crypto/symmetric/Source.hpp"
+
 #pragma once
 
 #include <cstddef>
@@ -19,8 +22,7 @@
 #include "opentxs/crypto/SecretStyle.hpp"
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/crypto/key/asymmetric/Role.hpp"
-#include "opentxs/crypto/key/symmetric/Algorithm.hpp"
-#include "opentxs/crypto/key/symmetric/Source.hpp"
+#include "opentxs/crypto/symmetric/Types.hpp"
 #include "opentxs/identity/Types.hpp"
 #include "opentxs/util/Bytes.hpp"
 
@@ -125,9 +127,6 @@ public:
     ~Sodium() final = default;
 
 private:
-    static const opentxs::crypto::key::symmetric::Algorithm DEFAULT_MODE{
-        opentxs::crypto::key::symmetric::Algorithm::ChaCha20Poly1305};
-
     static auto blank_private() noexcept -> ReadView;
 
     auto Decrypt(
@@ -135,10 +134,7 @@ private:
         const std::uint8_t* key,
         const std::size_t keySize,
         std::uint8_t* plaintext) const -> bool final;
-    auto DefaultMode() const -> opentxs::crypto::key::symmetric::Algorithm final
-    {
-        return DEFAULT_MODE;
-    }
+    auto DefaultMode() const -> opentxs::crypto::symmetric::Algorithm final;
     auto Derive(
         const std::uint8_t* input,
         const std::size_t inputSize,
@@ -147,7 +143,7 @@ private:
         const std::uint64_t operations,
         const std::uint64_t difficulty,
         const std::uint64_t parallel,
-        const crypto::key::symmetric::Source type,
+        const crypto::symmetric::Source type,
         std::uint8_t* output,
         std::size_t outputSize) const -> bool final;
     auto Encrypt(
@@ -156,14 +152,14 @@ private:
         const std::uint8_t* key,
         const std::size_t keySize,
         proto::Ciphertext& ciphertext) const -> bool final;
-    auto IvSize(const opentxs::crypto::key::symmetric::Algorithm mode) const
+    auto IvSize(const opentxs::crypto::symmetric::Algorithm mode) const
         -> std::size_t final;
-    auto KeySize(const opentxs::crypto::key::symmetric::Algorithm mode) const
+    auto KeySize(const opentxs::crypto::symmetric::Algorithm mode) const
         -> std::size_t final;
-    auto SaltSize(const crypto::key::symmetric::Source type) const
+    auto SaltSize(const crypto::symmetric::Source type) const
         -> std::size_t final;
     auto sha1(const ReadView data, WritableView& output) const -> bool;
-    auto TagSize(const opentxs::crypto::key::symmetric::Algorithm mode) const
+    auto TagSize(const opentxs::crypto::symmetric::Algorithm mode) const
         -> std::size_t final;
 };
 }  // namespace opentxs::crypto::implementation

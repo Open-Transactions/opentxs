@@ -24,10 +24,10 @@
 #include "opentxs/api/crypto/Util.hpp"
 #include "opentxs/crypto/Bip32.hpp"
 #include "opentxs/crypto/Bip39.hpp"
-#include "opentxs/crypto/key/Symmetric.hpp"  // IWYU pragma: keep
 #include "opentxs/crypto/key/asymmetric/Algorithm.hpp"
-#include "opentxs/crypto/key/symmetric/Algorithm.hpp"
-#include "opentxs/crypto/key/symmetric/Source.hpp"
+#include "opentxs/crypto/symmetric/Algorithm.hpp"
+#include "opentxs/crypto/symmetric/Key.hpp"  // IWYU pragma: keep
+#include "opentxs/crypto/symmetric/Source.hpp"
 #include "opentxs/util/Log.hpp"
 
 namespace opentxs::factory
@@ -192,7 +192,7 @@ auto Crypto::Libsodium() const noexcept -> const opentxs::crypto::Sodium&
     return *sodium_;
 }
 
-auto Crypto::SymmetricProvider(opentxs::crypto::key::symmetric::Algorithm type)
+auto Crypto::SymmetricProvider(opentxs::crypto::symmetric::Algorithm type)
     const noexcept -> const opentxs::crypto::SymmetricProvider&
 {
     try {
@@ -205,7 +205,7 @@ auto Crypto::SymmetricProvider(opentxs::crypto::key::symmetric::Algorithm type)
     }
 }
 
-auto Crypto::SymmetricProvider(opentxs::crypto::key::symmetric::Source type)
+auto Crypto::SymmetricProvider(opentxs::crypto::symmetric::Source type)
     const noexcept -> const opentxs::crypto::SymmetricProvider&
 {
     try {

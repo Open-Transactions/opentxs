@@ -21,6 +21,7 @@
 #include "internal/crypto/key/Key.hpp"
 #include "internal/crypto/key/Null.hpp"
 #include "internal/crypto/library/AsymmetricProvider.hpp"
+#include "internal/crypto/symmetric/Key.hpp"
 #include "internal/otx/common/crypto/OTSignatureMetadata.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/api/crypto/Hash.hpp"
@@ -36,8 +37,8 @@
 #include "opentxs/crypto/SignatureRole.hpp"
 #include "opentxs/crypto/key/Asymmetric.hpp"
 #include "opentxs/crypto/key/Keypair.hpp"
-#include "opentxs/crypto/key/Symmetric.hpp"
-#include "opentxs/crypto/key/symmetric/Algorithm.hpp"
+#include "opentxs/crypto/symmetric/Algorithm.hpp"
+#include "opentxs/crypto/symmetric/Key.hpp"
 #include "opentxs/identity/Authority.hpp"
 #include "opentxs/identity/credential/Key.hpp"
 #include "opentxs/util/Container.hpp"
@@ -383,7 +384,7 @@ auto Asymmetric::create_key(
 }
 
 auto Asymmetric::encrypt_key(
-    key::Symmetric& sessionKey,
+    symmetric::Key& sessionKey,
     const PasswordPrompt& reason,
     const bool attach,
     const ReadView plaintext) noexcept -> std::unique_ptr<proto::Ciphertext>
@@ -420,14 +421,14 @@ auto Asymmetric::encrypt_key(
 }
 
 auto Asymmetric::encrypt_key(
-    key::Symmetric& sessionKey,
+    symmetric::Key& sessionKey,
     const PasswordPrompt& reason,
     const bool attach,
     const ReadView plaintext,
     proto::Ciphertext& ciphertext) noexcept -> bool
 {
     const auto encrypted =
-        sessionKey.Encrypt(plaintext, reason, ciphertext, attach);
+        sessionKey.Internal().Encrypt(plaintext, ciphertext, reason, attach);
 
     if (false == encrypted) {
         LogError()(OT_PRETTY_STATIC(Asymmetric))("Failed to encrypt key")
@@ -486,15 +487,16 @@ auto Asymmetric::get_private_key(const Lock&, const PasswordPrompt& reason)
         const auto& privateKey = *encrypted_key_;
         auto sessionKey = api_.Crypto().Symmetric().InternalSymmetric().Key(
             privateKey.key(),
-            opentxs::crypto::key::symmetric::Algorithm::ChaCha20Poly1305);
+            opentxs::crypto::symmetric::Algorithm::ChaCha20Poly1305);
 
-        if (false == sessionKey.get()) {
+        if (false == sessionKey) {
             throw std::runtime_error{"Failed to extract session key"};
         }
 
-        auto allocator = plaintext_key_.WriteInto(Secret::Mode::Mem);
+        const auto decrypted = sessionKey.Internal().Decrypt(
+            privateKey, plaintext_key_.WriteInto(Secret::Mode::Mem), reason);
 
-        if (false == sessionKey->Decrypt(privateKey, reason, allocator)) {
+        if (false == decrypted) {
             throw std::runtime_error{"Failed to decrypt private key"};
         }
     }

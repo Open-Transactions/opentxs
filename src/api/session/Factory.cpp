@@ -49,6 +49,7 @@
 #include "internal/crypto/key/Factory.hpp"
 #include "internal/crypto/key/Key.hpp"
 #include "internal/crypto/key/Null.hpp"
+#include "internal/crypto/symmetric/Factory.hpp"
 #include "internal/network/otdht/Factory.hpp"
 #include "internal/otx/Types.hpp"
 #include "internal/otx/blind/Factory.hpp"
@@ -99,9 +100,11 @@
 #include "opentxs/crypto/key/EllipticCurve.hpp"
 #include "opentxs/crypto/key/HD.hpp"
 #include "opentxs/crypto/key/Secp256k1.hpp"
-#include "opentxs/crypto/key/Symmetric.hpp"
 #include "opentxs/crypto/key/asymmetric/Algorithm.hpp"
 #include "opentxs/crypto/key/asymmetric/Role.hpp"
+#include "opentxs/crypto/symmetric/Algorithm.hpp"
+#include "opentxs/crypto/symmetric/Key.hpp"
+#include "opentxs/crypto/symmetric/Source.hpp"
 #include "opentxs/network/otdht/Base.hpp"  // IWYU pragma: keep
 #include "opentxs/network/zeromq/message/Frame.hpp"
 #include "opentxs/otx/blind/CashType.hpp"
@@ -2115,25 +2118,22 @@ auto Factory::StoreSecret(
     }
 }
 
-auto Factory::SymmetricKey() const -> OTSymmetricKey
+auto Factory::SymmetricKey(
+    const opentxs::crypto::SymmetricProvider& engine,
+    const opentxs::crypto::symmetric::Algorithm mode,
+    const opentxs::PasswordPrompt& password,
+    alloc::Default alloc) const noexcept -> opentxs::crypto::symmetric::Key
 {
-    return OTSymmetricKey{factory::SymmetricKey()};
+    return {factory::SymmetricKey(api_, engine, mode, password, alloc)};
 }
 
 auto Factory::SymmetricKey(
     const opentxs::crypto::SymmetricProvider& engine,
     const opentxs::PasswordPrompt& password,
-    const opentxs::crypto::key::symmetric::Algorithm mode) const
-    -> OTSymmetricKey
+    alloc::Default alloc) const noexcept -> opentxs::crypto::symmetric::Key
 {
-    return OTSymmetricKey{factory::SymmetricKey(api_, engine, password, mode)};
-}
-
-auto Factory::SymmetricKey(
-    const opentxs::crypto::SymmetricProvider& engine,
-    const proto::SymmetricKey serialized) const -> OTSymmetricKey
-{
-    return OTSymmetricKey{factory::SymmetricKey(api_, engine, serialized)};
+    return SymmetricKey(
+        engine, opentxs::crypto::symmetric::Algorithm::Error, password, alloc);
 }
 
 auto Factory::SymmetricKey(
@@ -2142,10 +2142,11 @@ auto Factory::SymmetricKey(
     const std::uint64_t operations,
     const std::uint64_t difficulty,
     const std::size_t size,
-    const opentxs::crypto::key::symmetric::Source type) const -> OTSymmetricKey
+    const opentxs::crypto::symmetric::Source type,
+    alloc::Default alloc) const noexcept -> opentxs::crypto::symmetric::Key
 {
-    return OTSymmetricKey{factory::SymmetricKey(
-        api_, engine, seed, operations, difficulty, size, type)};
+    return {factory::SymmetricKey(
+        api_, engine, seed, operations, difficulty, size, type, alloc)};
 }
 
 auto Factory::SymmetricKey(
@@ -2156,9 +2157,10 @@ auto Factory::SymmetricKey(
     const std::uint64_t difficulty,
     const std::uint64_t parallel,
     const std::size_t size,
-    const opentxs::crypto::key::symmetric::Source type) const -> OTSymmetricKey
+    const opentxs::crypto::symmetric::Source type,
+    alloc::Default alloc) const noexcept -> opentxs::crypto::symmetric::Key
 {
-    return OTSymmetricKey{factory::SymmetricKey(
+    return {factory::SymmetricKey(
         api_,
         engine,
         seed,
@@ -2167,15 +2169,25 @@ auto Factory::SymmetricKey(
         difficulty,
         parallel,
         size,
-        type)};
+        type,
+        alloc)};
 }
 
 auto Factory::SymmetricKey(
     const opentxs::crypto::SymmetricProvider& engine,
     const opentxs::Secret& raw,
-    const opentxs::PasswordPrompt& reason) const -> OTSymmetricKey
+    const opentxs::PasswordPrompt& reason,
+    alloc::Default alloc) const noexcept -> opentxs::crypto::symmetric::Key
 {
-    return OTSymmetricKey{factory::SymmetricKey(api_, engine, raw, reason)};
+    return {factory::SymmetricKey(api_, engine, raw, reason, alloc)};
+}
+
+auto Factory::SymmetricKey(
+    const opentxs::crypto::SymmetricProvider& engine,
+    const proto::SymmetricKey serialized,
+    alloc::Default alloc) const noexcept -> opentxs::crypto::symmetric::Key
+{
+    return {factory::SymmetricKey(api_, engine, serialized, alloc)};
 }
 
 auto Factory::Trade() const -> std::unique_ptr<OTTrade>

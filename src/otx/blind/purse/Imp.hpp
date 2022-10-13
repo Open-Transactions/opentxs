@@ -3,6 +3,9 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_include "opentxs/crypto/symmetric/Algorithm.hpp"
+// IWYU pragma: no_include "opentxs/crypto/symmetric/Key.hpp"
+
 #pragma once
 
 #include <Envelope.pb.h>
@@ -15,8 +18,7 @@
 #include "opentxs/core/Secret.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
 #include "opentxs/core/identifier/UnitDefinition.hpp"
-#include "opentxs/crypto/key/Symmetric.hpp"
-#include "opentxs/crypto/key/symmetric/Algorithm.hpp"
+#include "opentxs/crypto/symmetric/Types.hpp"
 #include "opentxs/otx/blind/CashType.hpp"
 #include "opentxs/otx/blind/Purse.hpp"
 #include "opentxs/otx/blind/PurseType.hpp"
@@ -39,6 +41,14 @@ class Notary;
 
 class Session;
 }  // namespace api
+
+namespace crypto
+{
+namespace symmetric
+{
+class Key;
+}  // namespace symmetric
+}  // namespace crypto
 
 namespace identifier
 {
@@ -123,11 +133,11 @@ public:
         const Mint& mint,
         const Amount& amount,
         const PasswordPrompt& reason) -> bool final;
-    auto PrimaryKey(PasswordPrompt& password) -> crypto::key::Symmetric& final;
+    auto PrimaryKey(PasswordPrompt& password) -> crypto::symmetric::Key& final;
     auto Pop() -> Token final;
     auto Push(Token&& token, const PasswordPrompt& reason) -> bool final;
     auto SecondaryKey(const identity::Nym& owner, PasswordPrompt& password)
-        -> const crypto::key::Symmetric& final;
+        -> const crypto::symmetric::Key& final;
 
     Purse(
         const api::Session& api,
@@ -136,7 +146,7 @@ public:
         const blind::CashType type,
         const Mint& mint,
         Secret&& secondaryKeyPassword,
-        std::unique_ptr<const OTSymmetricKey> secondaryKey,
+        std::unique_ptr<const crypto::symmetric::Key> secondaryKey,
         std::unique_ptr<const OTEnvelope> secondaryEncrypted) noexcept;
     Purse(
         const api::Session& api,
@@ -154,9 +164,9 @@ public:
         const Time validFrom,
         const Time validTo,
         const UnallocatedVector<blind::Token>& tokens,
-        const std::shared_ptr<OTSymmetricKey> primary,
+        const std::shared_ptr<crypto::symmetric::Key> primary,
         const UnallocatedVector<proto::Envelope>& primaryPasswords,
-        const std::shared_ptr<const OTSymmetricKey> secondaryKey,
+        const std::shared_ptr<const crypto::symmetric::Key> secondaryKey,
         const std::shared_ptr<const OTEnvelope> secondaryEncrypted,
         std::optional<Secret> secondaryKeyPassword) noexcept;
     Purse(const api::Session& api, const Purse& owner) noexcept;
@@ -167,10 +177,10 @@ public:
     auto operator=(const Purse&) -> Purse& = delete;
     auto operator=(Purse&&) -> Purse& = delete;
 
-    ~Purse() final = default;
+    ~Purse() final;
 
 private:
-    static const opentxs::crypto::key::symmetric::Algorithm mode_;
+    static const opentxs::crypto::symmetric::Algorithm mode_;
 
     const api::Session& api_;
     const VersionNumber version_;
@@ -184,16 +194,16 @@ private:
     UnallocatedVector<blind::Token> tokens_;
     mutable bool unlocked_;
     mutable Secret primary_key_password_;
-    std::shared_ptr<OTSymmetricKey> primary_;
+    std::shared_ptr<crypto::symmetric::Key> primary_;
     UnallocatedVector<proto::Envelope> primary_passwords_;
     Secret secondary_key_password_;
-    const std::shared_ptr<const OTSymmetricKey> secondary_;
+    const std::shared_ptr<const crypto::symmetric::Key> secondary_;
     const std::shared_ptr<const OTEnvelope> secondary_password_;
 
     static auto deserialize_secondary_key(
         const api::Session& api,
         const proto::Purse& serialized) noexcept(false)
-        -> std::unique_ptr<const OTSymmetricKey>;
+        -> std::unique_ptr<const crypto::symmetric::Key>;
     static auto deserialize_secondary_password(
         const api::Session& api,
         const proto::Purse& serialized) noexcept(false)
@@ -201,7 +211,7 @@ private:
     static auto get_passwords(const proto::Purse& in)
         -> UnallocatedVector<proto::Envelope>;
 
-    auto generate_key(Secret& password) const -> OTSymmetricKey;
+    auto generate_key(Secret& password) const -> crypto::symmetric::Key;
 
     auto apply_times(const Token& token) -> void;
     auto recalculate_times() -> void;

@@ -35,8 +35,12 @@ namespace crypto
 namespace key
 {
 class Asymmetric;
-class Symmetric;
 }  // namespace key
+
+namespace symmetric
+{
+class Key;
+}  // namespace symmetric
 
 class EcdsaProvider;
 }  // namespace crypto
@@ -130,7 +134,7 @@ protected:
         const Data& publicKey,
         const crypto::key::asymmetric::Role role,
         const VersionNumber version,
-        key::Symmetric& sessionKey,
+        symmetric::Key& sessionKey,
         const PasswordPrompt& reason) noexcept(false);
     EllipticCurve(
         const api::Session& api,

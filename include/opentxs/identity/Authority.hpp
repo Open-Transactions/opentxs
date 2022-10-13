@@ -22,8 +22,12 @@ namespace crypto
 namespace key
 {
 class Asymmetric;
-class Symmetric;
 }  // namespace key
+
+namespace symmetric
+{
+class Key;
+}  // namespace symmetric
 
 class Parameters;
 }  // namespace crypto
@@ -78,7 +82,7 @@ public:
         const crypto::key::Asymmetric& dhKey,
         const std::uint32_t tag,
         const crypto::key::asymmetric::Algorithm type,
-        const crypto::key::Symmetric& key,
+        const crypto::symmetric::Key& key,
         PasswordPrompt& reason) const noexcept -> bool = 0;
     virtual auto VerificationCredentialVersion() const -> VersionNumber = 0;
 

@@ -40,10 +40,10 @@ class Session;
 
 namespace crypto
 {
-namespace key
+namespace symmetric
 {
-class Symmetric;
-}  // namespace key
+class Key;
+}  // namespace symmetric
 
 class Parameters;
 }  // namespace crypto
@@ -189,7 +189,7 @@ protected:
         const PasswordPrompt& reason) noexcept(false)
         -> std::unique_ptr<proto::Ciphertext>;
     static auto encrypt_key(
-        key::Symmetric& sessionKey,
+        symmetric::Key& sessionKey,
         const PasswordPrompt& reason,
         const bool attach,
         const ReadView plaintext) noexcept
@@ -200,7 +200,7 @@ protected:
         const ReadView plaintext,
         proto::Ciphertext& ciphertext) noexcept -> bool;
     static auto encrypt_key(
-        key::Symmetric& sessionKey,
+        symmetric::Key& sessionKey,
         const PasswordPrompt& reason,
         const bool attach,
         const ReadView plaintext,

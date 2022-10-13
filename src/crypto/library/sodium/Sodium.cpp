@@ -30,8 +30,8 @@ extern "C" {
 #include "internal/util/Size.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/crypto/HashType.hpp"
-#include "opentxs/crypto/key/symmetric/Algorithm.hpp"
-#include "opentxs/crypto/key/symmetric/Source.hpp"
+#include "opentxs/crypto/symmetric/Algorithm.hpp"
+#include "opentxs/crypto/symmetric/Source.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 
@@ -112,6 +112,11 @@ auto Sodium::Decrypt(
     return false;
 }
 
+auto Sodium::DefaultMode() const -> opentxs::crypto::symmetric::Algorithm
+{
+    return opentxs::crypto::symmetric::Algorithm::ChaCha20Poly1305;
+}
+
 auto Sodium::Derive(
     const std::uint8_t* input,
     const std::size_t inputSize,
@@ -120,13 +125,13 @@ auto Sodium::Derive(
     const std::uint64_t operations,
     const std::uint64_t difficulty,
     const std::uint64_t parallel,
-    const key::symmetric::Source type,
+    const symmetric::Source type,
     std::uint8_t* output,
     std::size_t outputSize) const -> bool
 {
     try {
         const auto minOps = [&] {
-            using Type = key::symmetric::Source;
+            using Type = symmetric::Source;
 
             switch (type) {
                 case Type::Argon2i: {
@@ -198,7 +203,7 @@ auto Sodium::Derive(
         if (1u < parallel) {
             const auto rc = [&] {
                 switch (type) {
-                    case key::symmetric::Source::Argon2i: {
+                    case symmetric::Source::Argon2i: {
 
                         return ::argon2i_hash_raw_fucklibsodium(
                             static_cast<std::uint32_t>(operations),
@@ -211,7 +216,7 @@ auto Sodium::Derive(
                             output,
                             outputSize);
                     }
-                    case key::symmetric::Source::Argon2id: {
+                    case symmetric::Source::Argon2id: {
 
                         return ::argon2id_hash_raw_fucklibsodium(
                             static_cast<std::uint32_t>(operations),
@@ -224,9 +229,9 @@ auto Sodium::Derive(
                             output,
                             outputSize);
                     }
-                    case crypto::key::symmetric::Source::Error:
-                    case crypto::key::symmetric::Source::Raw:
-                    case crypto::key::symmetric::Source::ECDH:
+                    case crypto::symmetric::Source::Error:
+                    case crypto::symmetric::Source::Raw:
+                    case crypto::symmetric::Source::ECDH:
                     default: {
 
                         throw std::runtime_error{"unsupported algorithm"};
@@ -241,7 +246,7 @@ auto Sodium::Derive(
         } else {
             const auto rc = [&] {
                 switch (type) {
-                    case key::symmetric::Source::Argon2i: {
+                    case symmetric::Source::Argon2i: {
 
                         return ::crypto_pwhash(
                             output,
@@ -253,7 +258,7 @@ auto Sodium::Derive(
                             static_cast<std::size_t>(difficulty),
                             crypto_pwhash_ALG_ARGON2I13);
                     }
-                    case key::symmetric::Source::Argon2id: {
+                    case symmetric::Source::Argon2id: {
 
                         return ::crypto_pwhash(
                             output,
@@ -265,9 +270,9 @@ auto Sodium::Derive(
                             static_cast<std::size_t>(difficulty),
                             crypto_pwhash_ALG_ARGON2ID13);
                     }
-                    case crypto::key::symmetric::Source::Error:
-                    case crypto::key::symmetric::Source::Raw:
-                    case crypto::key::symmetric::Source::ECDH:
+                    case crypto::symmetric::Source::Error:
+                    case crypto::symmetric::Source::Raw:
+                    case crypto::symmetric::Source::ECDH:
                     default: {
 
                         throw std::runtime_error{"unsupported algorithm"};
@@ -368,7 +373,7 @@ auto Sodium::Encrypt(
 
     bool result = false;
 
-    if (mode == opentxs::crypto::key::symmetric::Algorithm::Error) {
+    if (mode == opentxs::crypto::symmetric::Algorithm::Error) {
         LogError()(OT_PRETTY_CLASS())("Incorrect mode.").Flush();
 
         return result;
@@ -393,7 +398,7 @@ auto Sodium::Encrypt(
     OT_ASSERT(false == nonce.empty());
     OT_ASSERT(false == tag.empty());
 
-    using Type = opentxs::crypto::key::symmetric::Algorithm;
+    using Type = opentxs::crypto::symmetric::Algorithm;
 
     switch (mode) {
         case Type::ChaCha20Poly1305: {
@@ -615,10 +620,10 @@ auto Sodium::HMAC(
     }
 }
 
-auto Sodium::IvSize(const opentxs::crypto::key::symmetric::Algorithm mode) const
+auto Sodium::IvSize(const opentxs::crypto::symmetric::Algorithm mode) const
     -> std::size_t
 {
-    using Type = opentxs::crypto::key::symmetric::Algorithm;
+    using Type = opentxs::crypto::symmetric::Algorithm;
 
     switch (mode) {
         case Type::ChaCha20Poly1305: {
@@ -634,10 +639,10 @@ auto Sodium::IvSize(const opentxs::crypto::key::symmetric::Algorithm mode) const
     return 0;
 }
 
-auto Sodium::KeySize(
-    const opentxs::crypto::key::symmetric::Algorithm mode) const -> std::size_t
+auto Sodium::KeySize(const opentxs::crypto::symmetric::Algorithm mode) const
+    -> std::size_t
 {
-    using Type = opentxs::crypto::key::symmetric::Algorithm;
+    using Type = opentxs::crypto::symmetric::Algorithm;
 
     switch (mode) {
         case Type::ChaCha20Poly1305: {
@@ -661,18 +666,17 @@ auto Sodium::RandomizeMemory(void* destination, const std::size_t size) const
     return true;
 }
 
-auto Sodium::SaltSize(const crypto::key::symmetric::Source type) const
-    -> std::size_t
+auto Sodium::SaltSize(const crypto::symmetric::Source type) const -> std::size_t
 {
     switch (type) {
-        case crypto::key::symmetric::Source::Argon2i:
-        case crypto::key::symmetric::Source::Argon2id: {
+        case crypto::symmetric::Source::Argon2i:
+        case crypto::symmetric::Source::Argon2id: {
 
             return crypto_pwhash_SALTBYTES;
         }
-        case crypto::key::symmetric::Source::Error:
-        case crypto::key::symmetric::Source::Raw:
-        case crypto::key::symmetric::Source::ECDH:
+        case crypto::symmetric::Source::Error:
+        case crypto::symmetric::Source::Raw:
+        case crypto::symmetric::Source::ECDH:
         default: {
             LogError()(OT_PRETTY_CLASS())("Unsupported key type (")(
                 value(type))(").")
@@ -706,10 +710,10 @@ auto Sodium::sha1(const ReadView data, WritableView& output) const -> bool
     }
 }
 
-auto Sodium::TagSize(
-    const opentxs::crypto::key::symmetric::Algorithm mode) const -> std::size_t
+auto Sodium::TagSize(const opentxs::crypto::symmetric::Algorithm mode) const
+    -> std::size_t
 {
-    using Type = opentxs::crypto::key::symmetric::Algorithm;
+    using Type = opentxs::crypto::symmetric::Algorithm;
 
     switch (mode) {
         case Type::ChaCha20Poly1305: {

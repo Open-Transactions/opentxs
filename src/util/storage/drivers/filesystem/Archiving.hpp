@@ -34,10 +34,10 @@ class Crypto;
 
 namespace crypto
 {
-namespace key
+namespace symmetric
 {
-class Symmetric;
-}  // namespace key
+class Key;
+}  // namespace symmetric
 }  // namespace crypto
 
 namespace storage
@@ -72,7 +72,7 @@ public:
         const storage::Config& config,
         const Flag& bucket,
         const UnallocatedCString& folder,
-        crypto::key::Symmetric& key);
+        crypto::symmetric::Key& key);
     Archiving() = delete;
     Archiving(const Archiving&) = delete;
     Archiving(Archiving&&) = delete;
@@ -84,7 +84,7 @@ public:
 private:
     static constexpr auto root_file_extension_ = "hash"sv;
 
-    crypto::key::Symmetric& encryption_key_;
+    crypto::symmetric::Key& encryption_key_;
     const bool encrypted_;
 
     auto calculate_path(std::string_view key, bool bucket, fs::path& directory)

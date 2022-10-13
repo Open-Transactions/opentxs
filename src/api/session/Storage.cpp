@@ -422,7 +422,7 @@ auto Storage::HashType() const -> std::uint32_t { return HASH_TYPE; }
 
 void Storage::InitBackup() { multiplex_.InitBackup(); }
 
-void Storage::InitEncryptedBackup(opentxs::crypto::key::Symmetric& key)
+void Storage::InitEncryptedBackup(opentxs::crypto::symmetric::Key& key)
 {
     multiplex_.InitEncryptedBackup(key);
 }

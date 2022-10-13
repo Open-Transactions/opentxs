@@ -15,7 +15,6 @@
 #include "internal/crypto/Envelope.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "opentxs/crypto/key/Asymmetric.hpp"
-#include "opentxs/crypto/key/Symmetric.hpp"
 #include "opentxs/crypto/key/asymmetric/Algorithm.hpp"
 #include "opentxs/identity/Nym.hpp"
 #include "opentxs/util/Bytes.hpp"
@@ -29,6 +28,14 @@ namespace api
 {
 class Session;
 }  // namespace api
+
+namespace crypto
+{
+namespace symmetric
+{
+class Key;
+}  // namespace symmetric
+}  // namespace crypto
 
 namespace identifier
 {
@@ -59,7 +66,7 @@ public:
     auto Armored(opentxs::Armored& ciphertext) const noexcept -> bool final;
     auto Open(
         const identity::Nym& recipient,
-        const AllocateOutput plaintext,
+        AllocateOutput&& plaintext,
         const PasswordPrompt& reason) const noexcept -> bool final;
     auto Serialize(AllocateOutput destination) const noexcept -> bool final;
     auto Serialize(SerializedType& serialized) const noexcept -> bool final;
@@ -97,7 +104,7 @@ private:
     using Nyms = UnallocatedVector<const identity::Nym*>;
     using Tag = std::uint32_t;
     using SessionKey =
-        std::tuple<Tag, crypto::key::asymmetric::Algorithm, OTSymmetricKey>;
+        std::tuple<Tag, crypto::key::asymmetric::Algorithm, symmetric::Key>;
     using SessionKeys = UnallocatedVector<SessionKey>;
     using SupportedKeys = UnallocatedVector<crypto::key::asymmetric::Algorithm>;
     using Weight = unsigned int;
@@ -152,13 +159,13 @@ private:
     }
     auto unlock_session_key(
         const identity::Nym& recipient,
-        PasswordPrompt& reason) const noexcept(false) -> const key::Symmetric&;
+        PasswordPrompt& reason) const noexcept(false) -> const symmetric::Key&;
 
     auto attach_session_keys(
         const identity::Nym& nym,
         const Solution& solution,
         const PasswordPrompt& previousPassword,
-        const key::Symmetric& masterKey,
+        const symmetric::Key& masterKey,
         const PasswordPrompt& reason) noexcept -> bool;
     auto get_dh_key(
         const crypto::key::asymmetric::Algorithm type,

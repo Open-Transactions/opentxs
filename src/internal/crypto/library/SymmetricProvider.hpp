@@ -8,7 +8,7 @@
 #include <cstdint>
 
 #include "opentxs/crypto/Types.hpp"
-#include "opentxs/crypto/key/Types.hpp"
+#include "opentxs/crypto/symmetric/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -31,7 +31,7 @@ public:
         const std::size_t keySize,
         std::uint8_t* plaintext) const -> bool = 0;
     virtual auto DefaultMode() const
-        -> opentxs::crypto::key::symmetric::Algorithm = 0;
+        -> opentxs::crypto::symmetric::Algorithm = 0;
     virtual auto Derive(
         const std::uint8_t* input,
         const std::size_t inputSize,
@@ -40,7 +40,7 @@ public:
         const std::uint64_t operations,
         const std::uint64_t difficulty,
         const std::uint64_t parallel,
-        const crypto::key::symmetric::Source type,
+        const crypto::symmetric::Source type,
         std::uint8_t* output,
         std::size_t outputSize) const -> bool = 0;
     virtual auto Encrypt(
@@ -49,14 +49,14 @@ public:
         const std::uint8_t* key,
         const std::size_t keySize,
         proto::Ciphertext& ciphertext) const -> bool = 0;
-    virtual auto IvSize(const opentxs::crypto::key::symmetric::Algorithm mode)
-        const -> std::size_t = 0;
-    virtual auto KeySize(const opentxs::crypto::key::symmetric::Algorithm mode)
-        const -> std::size_t = 0;
-    virtual auto SaltSize(const crypto::key::symmetric::Source type) const
+    virtual auto IvSize(const opentxs::crypto::symmetric::Algorithm mode) const
         -> std::size_t = 0;
-    virtual auto TagSize(const opentxs::crypto::key::symmetric::Algorithm mode)
-        const -> std::size_t = 0;
+    virtual auto KeySize(const opentxs::crypto::symmetric::Algorithm mode) const
+        -> std::size_t = 0;
+    virtual auto SaltSize(const crypto::symmetric::Source type) const
+        -> std::size_t = 0;
+    virtual auto TagSize(const opentxs::crypto::symmetric::Algorithm mode) const
+        -> std::size_t = 0;
 
     SymmetricProvider(const SymmetricProvider&) = delete;
     SymmetricProvider(SymmetricProvider&&) = delete;

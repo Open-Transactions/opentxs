@@ -13,6 +13,7 @@
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/core/Secret.hpp"
+#include "opentxs/crypto/symmetric/Key.hpp"  // IWYU pragma: keep
 #include "opentxs/util/Log.hpp"
 
 namespace opentxs::factory

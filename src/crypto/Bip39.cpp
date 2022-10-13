@@ -23,6 +23,7 @@
 #include <utility>
 
 #include "2_Factory.hpp"
+#include "internal/crypto/symmetric/Key.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "opentxs/api/crypto/Crypto.hpp"
@@ -35,13 +36,12 @@
 #include "opentxs/core/Secret.hpp"
 #include "opentxs/crypto/HashType.hpp"
 #include "opentxs/crypto/SeedStyle.hpp"
-#include "opentxs/crypto/key/Symmetric.hpp"
-#include "opentxs/crypto/key/symmetric/Source.hpp"
+#include "opentxs/crypto/symmetric/Key.hpp"
+#include "opentxs/crypto/symmetric/Source.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/PasswordPrompt.hpp"  // IWYU pragma: keep
-#include "opentxs/util/Pimpl.hpp"
 #include "util/Allocator.hpp"
 #include "util/ByteLiterals.hpp"
 #include "util/Container.hpp"
@@ -442,10 +442,12 @@ auto Bip39::words_to_root_pkt(
                 256_mib,
                 8,
                 keyBytes,
-                key::symmetric::Source::Argon2id);
+                symmetric::Source::Argon2id);
             auto output = api.Factory().Secret(0u);
             const auto reason = api.Factory().PasswordPrompt(__func__);
-            sKey->RawKey(reason, output);
+            const auto rc = sKey.Internal().RawKey(output, reason);
+
+            OT_ASSERT(rc);
 
             return output;
         }();

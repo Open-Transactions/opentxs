@@ -25,14 +25,6 @@ class Notary;
 }  // namespace session
 }  // namespace api
 
-namespace crypto
-{
-namespace key
-{
-class Symmetric;
-}  // namespace key
-}  // namespace crypto
-
 namespace identifier
 {
 class Notary;

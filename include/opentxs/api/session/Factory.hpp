@@ -19,9 +19,9 @@
 #include "opentxs/core/Types.hpp"
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/crypto/key/Asymmetric.hpp"
-#include "opentxs/crypto/key/Symmetric.hpp"
-#include "opentxs/crypto/key/asymmetric/Role.hpp"      // TODO remove
-#include "opentxs/crypto/key/symmetric/Algorithm.hpp"  // TODO remove
+#include "opentxs/crypto/key/Types.hpp"
+#include "opentxs/crypto/key/asymmetric/Role.hpp"  // TODO remove
+#include "opentxs/crypto/symmetric/Types.hpp"
 #include "opentxs/identity/wot/claim/Types.hpp"
 #include "opentxs/otx/blind/Types.hpp"
 #include "opentxs/util/Bytes.hpp"
@@ -71,7 +71,12 @@ class Address;
 
 namespace crypto
 {
-class SymmetricProvider;
+namespace key
+{
+class EllipticCurve;
+}  // namespace key
+
+class Parameters;
 }  // namespace crypto
 
 namespace display
@@ -300,81 +305,6 @@ public:
         const otx::blind::CashType type,
         const opentxs::PasswordPrompt& reason) const noexcept
         -> otx::blind::Purse = 0;
-    /** Generate a blank, invalid key */
-    virtual auto SymmetricKey() const -> OTSymmetricKey = 0;
-    /** Derive a new, random symmetric key
-     *
-     *  \param[in] engine A reference to the crypto library to be bound to the
-     *                    instance
-     *  \param[in] password Optional key password information.
-     *  \param[in] mode The symmetric algorithm for which to generate an
-     *                  appropriate key
-     */
-    virtual auto SymmetricKey(
-        const opentxs::crypto::SymmetricProvider& engine,
-        const opentxs::PasswordPrompt& password,
-        const opentxs::crypto::key::symmetric::Algorithm mode =
-            opentxs::crypto::key::symmetric::Algorithm::Error) const
-        -> OTSymmetricKey = 0;
-    /** Derive a symmetric key from a seed
-     *
-     *  \param[in] engine     Symmetric provider compatible with the specified
-     *                        key type
-     *  \param[in] seed       A binary or text seed to be expanded into a secret
-     *                        key
-     *  \param[in] operations The number of iterations/operations the KDF should
-     *                        perform
-     *  \param[in] difficulty A type-specific difficulty parameter used by the
-     *                        KDF
-     *  \param[in] size       The target number of bytes for the derived secret
-     *                        key
-     *  \param[in] type       The KDF to be used for the derivation process
-     */
-    virtual auto SymmetricKey(
-        const opentxs::crypto::SymmetricProvider& engine,
-        const opentxs::Secret& seed,
-        const std::uint64_t operations,
-        const std::uint64_t difficulty,
-        const std::size_t size,
-        const opentxs::crypto::key::symmetric::Source type) const
-        -> OTSymmetricKey = 0;
-    /** Derive a symmetric key from a seed
-     *
-     *  \param[in] engine     Symmetric provider compatible with the specified
-     *                        key type
-     *  \param[in] seed       A binary or text seed to be expanded into a secret
-     *                        key
-     *  \param[in] salt       Extra data to pass to the KDF
-     *  \param[in] operations The number of iterations/operations the KDF should
-     *                        perform
-     *  \param[in] difficulty A type-specific difficulty parameter used by the
-     *                        KDF
-     *  \param[in] parallel   A type-specific difficulty parameter used by some
-     *                        KDFs
-     *  \param[in] size       The target number of bytes for the derived secret
-     *                        key
-     *  \param[in] type       The KDF to be used for the derivation process
-     */
-    virtual auto SymmetricKey(
-        const opentxs::crypto::SymmetricProvider& engine,
-        const opentxs::Secret& seed,
-        const ReadView salt,
-        const std::uint64_t operations,
-        const std::uint64_t difficulty,
-        const std::uint64_t parallel,
-        const std::size_t size,
-        const opentxs::crypto::key::symmetric::Source type) const
-        -> OTSymmetricKey = 0;
-    /** Construct a symmetric key from an existing Secret
-     *
-     *  \param[in] engine A reference to the crypto library to be bound to the
-     *                    instance
-     *  \param[in] raw An existing, unencrypted binary or text secret
-     */
-    virtual auto SymmetricKey(
-        const opentxs::crypto::SymmetricProvider& engine,
-        const opentxs::Secret& raw,
-        const opentxs::PasswordPrompt& reason) const -> OTSymmetricKey = 0;
 
     OPENTXS_NO_EXPORT virtual auto InternalSession() noexcept
         -> internal::Factory& = 0;

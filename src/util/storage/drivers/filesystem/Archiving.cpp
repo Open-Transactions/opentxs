@@ -10,13 +10,14 @@
 #include <memory>
 #include <system_error>
 
+#include "internal/crypto/symmetric/Key.hpp"
 #include "internal/serialization/protobuf/Proto.tpp"
 #include "internal/util/Flag.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/storage/drivers/Factory.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
-#include "opentxs/crypto/key/Symmetric.hpp"
+#include "opentxs/crypto/symmetric/Key.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/PasswordPrompt.hpp"  // IWYU pragma: keep
@@ -31,7 +32,7 @@ auto StorageFSArchive(
     const storage::Config& config,
     const Flag& bucket,
     const UnallocatedCString& folder,
-    crypto::key::Symmetric& key) noexcept -> std::unique_ptr<storage::Plugin>
+    crypto::symmetric::Key& key) noexcept -> std::unique_ptr<storage::Plugin>
 {
     using ReturnType = storage::driver::filesystem::Archiving;
 
@@ -49,7 +50,7 @@ Archiving::Archiving(
     const storage::Config& config,
     const Flag& bucket,
     const UnallocatedCString& folder,
-    crypto::key::Symmetric& key)
+    crypto::symmetric::Key& key)
     : ot_super(crypto, asio, storage, config, folder, bucket)
     , encryption_key_(key)
     , encrypted_(bool(encryption_key_))
@@ -124,10 +125,11 @@ auto Archiving::prepare_read(const UnallocatedCString& input) const
     OT_ASSERT(encryption_key_);
 
     UnallocatedCString output{};
-    auto reason =
-        encryption_key_.api().Factory().PasswordPrompt("Storage read");
+    auto reason = encryption_key_.Internal().API().Factory().PasswordPrompt(
+        "Storage read");
 
-    if (false == encryption_key_.Decrypt(ciphertext, reason, writer(output))) {
+    if (false == encryption_key_.Internal().Decrypt(
+                     ciphertext, writer(output), reason)) {
         LogError()(OT_PRETTY_CLASS())("Failed to decrypt value.").Flush();
     }
 
@@ -142,10 +144,10 @@ auto Archiving::prepare_write(const UnallocatedCString& plaintext) const
     OT_ASSERT(encryption_key_);
 
     proto::Ciphertext ciphertext{};
-    auto reason =
-        encryption_key_.api().Factory().PasswordPrompt("Storage write");
-    const bool encrypted =
-        encryption_key_.Encrypt(plaintext, reason, ciphertext, false);
+    auto reason = encryption_key_.Internal().API().Factory().PasswordPrompt(
+        "Storage write");
+    const bool encrypted = encryption_key_.Internal().Encrypt(
+        plaintext, ciphertext, reason, false);
 
     if (false == encrypted) {
         LogError()(OT_PRETTY_CLASS())("Failed to encrypt value.").Flush();

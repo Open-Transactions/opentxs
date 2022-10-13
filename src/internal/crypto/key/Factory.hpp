@@ -36,20 +36,17 @@ class Ed25519;
 class Keypair;
 class RSA;
 class Secp256k1;
-class Symmetric;
 }  // namespace key
 
 class AsymmetricProvider;
 class EcdsaProvider;
 class Parameters;
-class SymmetricProvider;
 }  // namespace crypto
 
 namespace proto
 {
 class AsymmetricKey;
 class HDPath;
-class SymmetricKey;
 }  // namespace proto
 
 class Data;
@@ -153,42 +150,4 @@ auto Secp256k1Key(
     const ReadView key,
     const ReadView chaincode) noexcept
     -> std::unique_ptr<crypto::key::Secp256k1>;
-auto SymmetricKey() noexcept -> std::unique_ptr<crypto::key::Symmetric>;
-auto SymmetricKey(
-    const api::Session& api,
-    const crypto::SymmetricProvider& engine,
-    const opentxs::PasswordPrompt& reason,
-    const opentxs::crypto::key::symmetric::Algorithm mode) noexcept
-    -> std::unique_ptr<crypto::key::Symmetric>;
-auto SymmetricKey(
-    const api::Session& api,
-    const crypto::SymmetricProvider& engine,
-    const proto::SymmetricKey serialized) noexcept
-    -> std::unique_ptr<crypto::key::Symmetric>;
-auto SymmetricKey(
-    const api::Session& api,
-    const crypto::SymmetricProvider& engine,
-    const opentxs::Secret& seed,
-    const std::uint64_t operations,
-    const std::uint64_t difficulty,
-    const std::size_t size,
-    const crypto::key::symmetric::Source type) noexcept
-    -> std::unique_ptr<crypto::key::Symmetric>;
-auto SymmetricKey(
-    const api::Session& api,
-    const crypto::SymmetricProvider& engine,
-    const opentxs::Secret& seed,
-    const ReadView salt,
-    const std::uint64_t operations,
-    const std::uint64_t difficulty,
-    const std::uint64_t parallel,
-    const std::size_t size,
-    const crypto::key::symmetric::Source type) noexcept
-    -> std::unique_ptr<crypto::key::Symmetric>;
-auto SymmetricKey(
-    const api::Session& api,
-    const crypto::SymmetricProvider& engine,
-    const opentxs::Secret& raw,
-    const opentxs::PasswordPrompt& reason) noexcept
-    -> std::unique_ptr<crypto::key::Symmetric>;
 }  // namespace opentxs::factory

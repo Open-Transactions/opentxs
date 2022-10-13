@@ -90,7 +90,7 @@ EllipticCurve::EllipticCurve(
     const Data& publicKey,
     const crypto::key::asymmetric::Role role,
     const VersionNumber version,
-    key::Symmetric& sessionKey,
+    symmetric::Key& sessionKey,
     const PasswordPrompt& reason) noexcept(false)
     : Asymmetric(
           api,

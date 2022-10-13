@@ -53,7 +53,7 @@ Ed25519::Ed25519(
     const Bip32Fingerprint parent,
     const crypto::key::asymmetric::Role role,
     const VersionNumber version,
-    key::Symmetric& sessionKey,
+    symmetric::Key& sessionKey,
     const PasswordPrompt& reason) noexcept(false)
     : ot_super(
           api,

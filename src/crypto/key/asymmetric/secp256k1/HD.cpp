@@ -20,6 +20,7 @@
 #include "opentxs/crypto/key/EllipticCurve.hpp"
 #include "opentxs/crypto/key/Secp256k1.hpp"
 #include "opentxs/crypto/key/asymmetric/Algorithm.hpp"
+#include "opentxs/crypto/symmetric/Key.hpp"  // IWYU pragma: keep
 #include "opentxs/util/Log.hpp"
 
 namespace opentxs::factory

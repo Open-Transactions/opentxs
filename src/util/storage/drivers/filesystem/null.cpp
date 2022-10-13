@@ -18,7 +18,7 @@ auto StorageFSArchive(
     const storage::Config& config,
     const Flag& bucket,
     const UnallocatedCString& folder,
-    crypto::key::Symmetric& key) noexcept -> std::unique_ptr<storage::Plugin>
+    crypto::symmetric::Key& key) noexcept -> std::unique_ptr<storage::Plugin>
 {
     return {};
 }

@@ -18,6 +18,7 @@
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/util/Container.hpp"
+#include "opentxs/util/Log.hpp"
 #include "opentxs/util/Pimpl.hpp"
 
 namespace opentxs::proto

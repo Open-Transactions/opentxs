@@ -10,7 +10,6 @@
 
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/storage/drivers/Factory.hpp"
-#include "opentxs/crypto/key/Symmetric.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/storage/Plugin.hpp"

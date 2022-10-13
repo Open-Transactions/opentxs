@@ -21,6 +21,7 @@
 
 #include "internal/api/crypto/Symmetric.hpp"
 #include "internal/crypto/key/Key.hpp"
+#include "internal/crypto/symmetric/Key.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/OT.hpp"
 #include "opentxs/api/Context.hpp"
@@ -36,10 +37,9 @@
 #include "opentxs/crypto/Language.hpp"
 #include "opentxs/crypto/SeedStrength.hpp"
 #include "opentxs/crypto/SeedStyle.hpp"
-#include "opentxs/crypto/key/Symmetric.hpp"
-#include "opentxs/crypto/key/symmetric/Algorithm.hpp"
+#include "opentxs/crypto/symmetric/Algorithm.hpp"
+#include "opentxs/crypto/symmetric/Key.hpp"
 #include "opentxs/util/Log.hpp"
-#include "opentxs/util/Pimpl.hpp"
 #include "util/Container.hpp"
 
 namespace opentxs::factory
@@ -436,14 +436,14 @@ Seed::Imp::Imp(
     const auto key = symmetric.InternalSymmetric().Key(
         session.key(), opentxs::translate(session.mode()));
 
-    if (false == key.get()) {
+    if (false == key) {
         throw std::runtime_error{"Failed to get decryption key"};
     }
 
     if (proto.has_words()) {
         auto& words = const_cast<Secret&>(words_);
-        const auto rc = key->Decrypt(
-            encrypted_words_, reason, words.WriteInto(Secret::Mode::Text));
+        const auto rc = key.Internal().Decrypt(
+            encrypted_words_, words.WriteInto(Secret::Mode::Text), reason);
 
         if (false == rc) {
             throw std::runtime_error{"Failed to decrypt words"};
@@ -452,8 +452,8 @@ Seed::Imp::Imp(
 
     if (proto.has_passphrase()) {
         auto& phrase = const_cast<Secret&>(phrase_);
-        const auto rc = key->Decrypt(
-            encrypted_phrase_, reason, phrase.WriteInto(Secret::Mode::Text));
+        const auto rc = key.Internal().Decrypt(
+            encrypted_phrase_, phrase.WriteInto(Secret::Mode::Text), reason);
 
         if (false == rc) {
             throw std::runtime_error{"Failed to decrypt passphrase"};
@@ -462,8 +462,8 @@ Seed::Imp::Imp(
 
     if (proto.has_raw()) {
         auto& entropy = const_cast<Secret&>(entropy_);
-        const auto rc = key->Decrypt(
-            encrypted_entropy_, reason, entropy.WriteInto(Secret::Mode::Text));
+        const auto rc = key.Internal().Decrypt(
+            encrypted_entropy_, entropy.WriteInto(Secret::Mode::Text), reason);
 
         if (false == rc) {
             throw std::runtime_error{"Failed to decrypt entropy"};
@@ -481,11 +481,11 @@ Seed::Imp::Imp(
         auto ctext = const_cast<proto::Ciphertext&>(encrypted_entropy_);
         auto cwords = const_cast<proto::Ciphertext&>(encrypted_words_);
 
-        if (!key->Encrypt(entropy_.Bytes(), reason, ctext, true)) {
+        if (!key.Internal().Encrypt(entropy_.Bytes(), ctext, reason, true)) {
             throw std::runtime_error{"Failed to encrypt entropy"};
         }
 
-        if (!key->Encrypt(words_.Bytes(), reason, cwords, false)) {
+        if (!key.Internal().Encrypt(words_.Bytes(), cwords, reason, false)) {
             throw std::runtime_error{"Failed to encrypt words"};
         }
 
@@ -503,28 +503,28 @@ auto Seed::Imp::encrypt(
     proto::Ciphertext& cphrase,
     const PasswordPrompt& reason) noexcept(false) -> proto::Ciphertext
 {
-    auto key = symmetric.Key(
-        reason, crypto::key::symmetric::Algorithm::ChaCha20Poly1305);
+    auto key =
+        symmetric.Key(crypto::symmetric::Algorithm::ChaCha20Poly1305, reason);
 
-    if (false == key.get()) {
+    if (false == key) {
         throw std::runtime_error{"Failed to get encryption key"};
     }
 
     if (0u < words.size()) {
-        if (!key->Encrypt(words.Bytes(), reason, cwords, false)) {
+        if (!key.Internal().Encrypt(words.Bytes(), cwords, reason, false)) {
             throw std::runtime_error{"Failed to encrypt words"};
         }
     }
 
     if (0u < phrase.size()) {
-        if (!key->Encrypt(phrase.Bytes(), reason, cphrase, false)) {
+        if (!key.Internal().Encrypt(phrase.Bytes(), cphrase, reason, false)) {
             throw std::runtime_error{"Failed to encrypt phrase"};
         }
     }
 
     auto out = proto::Ciphertext{};
 
-    if (!key->Encrypt(entropy.Bytes(), reason, out, true)) {
+    if (!key.Internal().Encrypt(entropy.Bytes(), out, reason, true)) {
         throw std::runtime_error{"Failed to encrypt entropy"};
     }
 

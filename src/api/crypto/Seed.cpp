@@ -55,9 +55,9 @@
 #include "opentxs/crypto/key/EllipticCurve.hpp"
 #include "opentxs/crypto/key/HD.hpp"
 #include "opentxs/crypto/key/Secp256k1.hpp"
-#include "opentxs/crypto/key/Symmetric.hpp"
 #include "opentxs/crypto/key/asymmetric/Algorithm.hpp"
 #include "opentxs/crypto/key/asymmetric/Role.hpp"
+#include "opentxs/crypto/symmetric/Key.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/util/Container.hpp"
@@ -434,7 +434,7 @@ auto Seed::GetPaymentCode(
 
 auto Seed::GetStorageKey(
     const UnallocatedCString& fingerprint,
-    const PasswordPrompt& reason) const -> OTSymmetricKey
+    const PasswordPrompt& reason) const -> opentxs::crypto::symmetric::Key
 {
     auto pKey = GetHDKey(
         fingerprint,
@@ -446,7 +446,7 @@ auto Seed::GetStorageKey(
     if (false == bool(pKey)) {
         LogError()(OT_PRETTY_CLASS())("Failed to derive storage key.").Flush();
 
-        return OTSymmetricKey{opentxs::factory::SymmetricKey()};
+        return {};
     }
 
     const auto& key = *pKey;

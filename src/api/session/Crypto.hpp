@@ -25,6 +25,7 @@
 #include "opentxs/api/crypto/Seed.hpp"
 #include "opentxs/crypto/Bip32.hpp"
 #include "opentxs/crypto/key/Types.hpp"
+#include "opentxs/crypto/symmetric/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -136,12 +137,12 @@ public:
     {
         return symmetric_;
     }
-    auto SymmetricProvider(opentxs::crypto::key::symmetric::Algorithm type)
+    auto SymmetricProvider(opentxs::crypto::symmetric::Algorithm type)
         const noexcept -> const opentxs::crypto::SymmetricProvider& final
     {
         return parent_.SymmetricProvider(type);
     }
-    auto SymmetricProvider(opentxs::crypto::key::symmetric::Source type)
+    auto SymmetricProvider(opentxs::crypto::symmetric::Source type)
         const noexcept -> const opentxs::crypto::SymmetricProvider& final
     {
         return parent_.SymmetricProvider(type);

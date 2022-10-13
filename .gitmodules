@@ -55,3 +55,7 @@
 	shallow = true
 [submodule "deps/bech32"]
 	shallow = true
+[submodule "deps/frozen"]
+	path = deps/frozen
+	url = https://github.com/serge-sans-paille/frozen
+	shallow = true

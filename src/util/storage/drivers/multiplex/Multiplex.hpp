@@ -9,7 +9,7 @@
 #include <memory>
 
 #include "internal/util/storage/drivers/Drivers.hpp"
-#include "opentxs/crypto/key/Symmetric.hpp"
+#include "opentxs/crypto/symmetric/Key.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/storage/Driver.hpp"
@@ -32,6 +32,14 @@ class Storage;
 
 class Crypto;
 }  // namespace api
+
+namespace crypto
+{
+namespace symmetric
+{
+class Key;
+}  // namespace symmetric
+}  // namespace crypto
 
 namespace storage
 {
@@ -82,7 +90,7 @@ public:
 
     auto BestRoot(bool& primaryOutOfSync) -> UnallocatedCString final;
     void InitBackup() final;
-    void InitEncryptedBackup(crypto::key::Symmetric& key) final;
+    void InitEncryptedBackup(crypto::symmetric::Key& key) final;
     auto Primary() -> storage::Driver& final;
     void SynchronizePlugins(
         const UnallocatedCString& hash,
@@ -113,7 +121,7 @@ private:
     const storage::Config& config_;
     std::unique_ptr<storage::Plugin> primary_plugin_;
     UnallocatedVector<std::unique_ptr<storage::Plugin>> backup_plugins_;
-    OTSymmetricKey null_;
+    crypto::symmetric::Key null_;
 
     auto Cleanup() -> void;
     auto Cleanup_Multiplex() -> void;

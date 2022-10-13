@@ -123,7 +123,6 @@ class HD;
 class Keypair;
 class RSA;
 class Secp256k1;
-class Symmetric;
 }  // namespace key
 
 namespace implementation

@@ -8,9 +8,9 @@
 #include <cstdint>
 
 #include "opentxs/Export.hpp"
-#include "opentxs/crypto/key/Symmetric.hpp"
-#include "opentxs/crypto/key/symmetric/Algorithm.hpp"
-#include "opentxs/crypto/key/symmetric/Source.hpp"
+#include "opentxs/crypto/symmetric/Types.hpp"
+#include "opentxs/util/Allocator.hpp"
+#include "opentxs/util/Bytes.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -26,6 +26,15 @@ class Symmetric;
 }  // namespace crypto
 }  // namespace api
 
+namespace crypto
+{
+namespace symmetric
+{
+class Key;
+}  // namespace symmetric
+}  // namespace crypto
+
+class PasswordPrompt;
 class Secret;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
@@ -41,35 +50,58 @@ class OPENTXS_EXPORT Symmetric
 public:
     OPENTXS_NO_EXPORT virtual auto InternalSymmetric() const noexcept
         -> const internal::Symmetric& = 0;
-    virtual auto IvSize(const opentxs::crypto::key::symmetric::Algorithm mode)
-        const -> std::size_t = 0;
+    virtual auto IvSize(const opentxs::crypto::symmetric::Algorithm mode)
+        const noexcept -> std::size_t = 0;
     virtual auto Key(
+        opentxs::crypto::symmetric::Algorithm mode,
         const PasswordPrompt& password,
-        const opentxs::crypto::key::symmetric::Algorithm mode =
-            opentxs::crypto::key::symmetric::Algorithm::ChaCha20Poly1305) const
-        -> OTSymmetricKey = 0;
+        alloc::Default alloc = {}) const noexcept
+        -> opentxs::crypto::symmetric::Key = 0;
+    virtual auto Key(const PasswordPrompt& password, alloc::Default alloc = {})
+        const noexcept -> opentxs::crypto::symmetric::Key = 0;
     virtual auto Key(
-        const ReadView& serializedCiphertext,
-        const opentxs::crypto::key::symmetric::Algorithm mode) const
-        -> OTSymmetricKey = 0;
-    virtual auto Key(
-        const Secret& seed,
-        const std::uint64_t operations = 0,
-        const std::uint64_t difficulty = 0,
-        const opentxs::crypto::key::symmetric::Algorithm mode =
-            opentxs::crypto::key::symmetric::Algorithm::ChaCha20Poly1305,
-        const opentxs::crypto::key::symmetric::Source type =
-            opentxs::crypto::key::symmetric::Source::Argon2i) const
-        -> OTSymmetricKey = 0;
+        ReadView serializedCiphertext,
+        opentxs::crypto::symmetric::Algorithm mode,
+        alloc::Default alloc = {}) const noexcept
+        -> opentxs::crypto::symmetric::Key = 0;
     virtual auto Key(
         const Secret& seed,
-        const ReadView salt,
-        const std::uint64_t operations,
-        const std::uint64_t difficulty,
-        const std::uint64_t parallel,
-        const std::size_t bytes,
-        const opentxs::crypto::key::symmetric::Source type) const
-        -> OTSymmetricKey = 0;
+        const opentxs::crypto::symmetric::Algorithm mode,
+        const opentxs::crypto::symmetric::Source type,
+        const std::uint64_t operations = 0u,
+        const std::uint64_t difficulty = 0u,
+        alloc::Default alloc = {}) const noexcept
+        -> opentxs::crypto::symmetric::Key = 0;
+    virtual auto Key(
+        const Secret& seed,
+        const opentxs::crypto::symmetric::Source type,
+        const std::uint64_t operations = 0u,
+        const std::uint64_t difficulty = 0u,
+        alloc::Default alloc = {}) const noexcept
+        -> opentxs::crypto::symmetric::Key = 0;
+    virtual auto Key(
+        const Secret& seed,
+        const opentxs::crypto::symmetric::Algorithm mode,
+        const std::uint64_t operations = 0u,
+        const std::uint64_t difficulty = 0u,
+        alloc::Default alloc = {}) const noexcept
+        -> opentxs::crypto::symmetric::Key = 0;
+    virtual auto Key(
+        const Secret& seed,
+        const std::uint64_t operations = 0u,
+        const std::uint64_t difficulty = 0u,
+        alloc::Default alloc = {}) const noexcept
+        -> opentxs::crypto::symmetric::Key = 0;
+    virtual auto Key(
+        const Secret& seed,
+        ReadView salt,
+        std::uint64_t operations,
+        std::uint64_t difficulty,
+        std::uint64_t parallel,
+        std::size_t bytes,
+        opentxs::crypto::symmetric::Source type,
+        alloc::Default alloc = {}) const noexcept
+        -> opentxs::crypto::symmetric::Key = 0;
 
     OPENTXS_NO_EXPORT virtual auto InternalSymmetric() noexcept
         -> internal::Symmetric& = 0;

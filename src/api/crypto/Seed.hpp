@@ -4,6 +4,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 // IWYU pragma: no_include "opentxs/crypto/key/asymmetric/Role.hpp"
+// IWYU pragma: no_include "opentxs/crypto/symmetric/Key.hpp"
 
 #pragma once
 
@@ -29,8 +30,6 @@
 #include "opentxs/crypto/SeedStyle.hpp"
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/crypto/key/EllipticCurve.hpp"
-#include "opentxs/crypto/key/Symmetric.hpp"
-#include "opentxs/crypto/key/asymmetric/Role.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
@@ -64,6 +63,11 @@ namespace key
 class HD;
 class Secp256k1;
 }  // namespace key
+
+namespace symmetric
+{
+class Key;
+}  // namespace symmetric
 
 class Bip32;
 class Bip39;
@@ -178,7 +182,8 @@ public:
         const noexcept -> opentxs::crypto::Seed final;
     auto GetStorageKey(
         const UnallocatedCString& seedID,
-        const PasswordPrompt& reason) const -> OTSymmetricKey final;
+        const PasswordPrompt& reason) const
+        -> opentxs::crypto::symmetric::Key final;
     auto ImportRaw(const Secret& entropy, const PasswordPrompt& reason) const
         -> UnallocatedCString final;
     auto ImportSeed(

@@ -25,6 +25,7 @@ extern "C" {
 #include "internal/core/Armored.hpp"
 #include "internal/core/Factory.hpp"
 #include "internal/core/String.hpp"
+#include "internal/crypto/symmetric/Key.hpp"
 #include "internal/otx/blind/Factory.hpp"
 #include "internal/otx/blind/Purse.hpp"
 #include "internal/otx/blind/Token.hpp"
@@ -35,7 +36,7 @@ extern "C" {
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/api/session/Storage.hpp"
 #include "opentxs/core/Amount.hpp"
-#include "opentxs/crypto/key/Symmetric.hpp"
+#include "opentxs/crypto/symmetric/Key.hpp"
 #include "opentxs/otx/blind/Mint.hpp"
 #include "opentxs/otx/blind/Token.hpp"
 #include "opentxs/otx/blind/TokenState.hpp"
@@ -369,8 +370,9 @@ auto Lucre::GenerateTokenRequest(
         auto password = api_.Factory().PasswordPrompt(reason);
         const auto encryptedPrivate =
             purse_.SecondaryKey(owner, password)
+                .Internal()
                 .Encrypt(
-                    strPrivateCoin->Bytes(), password, *private_, false, mode_);
+                    strPrivateCoin->Bytes(), mode_, *private_, password, false);
 
         if (false == bool(encryptedPrivate)) {
             LogError()(OT_PRETTY_CLASS())(
@@ -383,8 +385,9 @@ auto Lucre::GenerateTokenRequest(
 
     {
         auto password = api_.Factory().PasswordPrompt(reason);
-        const auto encryptedPublic = purse_.PrimaryKey(password).Encrypt(
-            strPublicCoin->Bytes(), password, *public_, false, mode_);
+        const auto encryptedPublic =
+            purse_.PrimaryKey(password).Internal().Encrypt(
+                strPublicCoin->Bytes(), mode_, *public_, password, false);
 
         if (false == bool(encryptedPublic)) {
             LogError()(OT_PRETTY_CLASS())("Failed to encrypt public prototoken")
@@ -411,8 +414,8 @@ auto Lucre::GetPublicPrototoken(String& output, const PasswordPrompt& reason)
 
     try {
         auto password = api_.Factory().PasswordPrompt(reason);
-        decrypted = purse_.PrimaryKey(password).Decrypt(
-            ciphertext, password, output.WriteInto());
+        decrypted = purse_.PrimaryKey(password).Internal().Decrypt(
+            ciphertext, output.WriteInto(), password);
     } catch (...) {
         LogError()(OT_PRETTY_CLASS())("Missing primary key").Flush();
 
@@ -440,8 +443,8 @@ auto Lucre::GetSpendable(String& output, const PasswordPrompt& reason) const
 
     try {
         auto password = api_.Factory().PasswordPrompt(reason);
-        decrypted = purse_.PrimaryKey(password).Decrypt(
-            ciphertext, password, output.WriteInto());
+        decrypted = purse_.PrimaryKey(password).Internal().Decrypt(
+            ciphertext, output.WriteInto(), password);
     } catch (...) {
         LogError()(OT_PRETTY_CLASS())("Missing primary key").Flush();
 
@@ -592,8 +595,8 @@ auto Lucre::Process(
     try {
         auto password = api_.Factory().PasswordPrompt(reason);
         const auto& key = purse_.SecondaryKey(owner, password);
-        const auto decrypted =
-            key.Decrypt(*private_, password, prototoken->WriteInto());
+        const auto decrypted = key.Internal().Decrypt(
+            *private_, prototoken->WriteInto(), password);
 
         if (false == decrypted) {
             LogError()(OT_PRETTY_CLASS())("Failed to decrypt prototoken")
@@ -652,8 +655,8 @@ auto Lucre::Process(
     try {
         auto password = api_.Factory().PasswordPrompt(reason);
         auto& key = purse_.PrimaryKey(password);
-        const auto encrypted =
-            key.Encrypt(spend->Bytes(), password, *spend_, false, mode_);
+        const auto encrypted = key.Internal().Encrypt(
+            spend->Bytes(), mode_, *spend_, password, false);
 
         if (false == encrypted) {
             LogError()(OT_PRETTY_CLASS())("Failed to encrypt spendable token")

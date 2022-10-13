@@ -22,11 +22,11 @@ namespace ottest
 bool init_{false};
 
 struct Test_Symmetric : public ::testing::Test {
-    static const ot::crypto::key::symmetric::Algorithm mode_;
+    static const ot::crypto::symmetric::Algorithm mode_;
     static ot::identifier::Nym alice_nym_id_;
     static ot::identifier::Nym bob_nym_id_;
-    static ot::OTSymmetricKey key_;
-    static ot::OTSymmetricKey second_key_;
+    static ot::crypto::symmetric::Key key_;
+    static ot::crypto::symmetric::Key second_key_;
     static std::optional<ot::Secret> key_password_;
     static ot::Space ciphertext_;
     static ot::Space second_ciphertext_;
@@ -66,13 +66,12 @@ struct Test_Symmetric : public ::testing::Test {
     }
 };
 
-const ot::crypto::key::symmetric::Algorithm Test_Symmetric::mode_{
-    ot::crypto::key::symmetric::Algorithm::ChaCha20Poly1305};
+const ot::crypto::symmetric::Algorithm Test_Symmetric::mode_{
+    ot::crypto::symmetric::Algorithm::ChaCha20Poly1305};
 ot::identifier::Nym Test_Symmetric::alice_nym_id_{};
 ot::identifier::Nym Test_Symmetric::bob_nym_id_{};
-ot::OTSymmetricKey Test_Symmetric::key_{ot::crypto::key::Symmetric::Factory()};
-ot::OTSymmetricKey Test_Symmetric::second_key_{
-    ot::crypto::key::Symmetric::Factory()};
+ot::crypto::symmetric::Key Test_Symmetric::key_{};
+ot::crypto::symmetric::Key Test_Symmetric::second_key_{};
 std::optional<ot::Secret> Test_Symmetric::key_password_{};
 ot::Space Test_Symmetric::ciphertext_{};
 ot::Space Test_Symmetric::second_ciphertext_{};
@@ -86,9 +85,9 @@ TEST_F(Test_Symmetric, create_key)
 
     ASSERT_TRUE(password.Internal().SetPassword(key_password_.value()));
 
-    key_ = api_.Crypto().Symmetric().Key(password, mode_);
+    key_ = api_.Crypto().Symmetric().Key(mode_, password);
 
-    EXPECT_TRUE(key_.get());
+    EXPECT_TRUE(key_);
 }
 
 TEST_F(Test_Symmetric, key_functionality)
@@ -97,23 +96,25 @@ TEST_F(Test_Symmetric, key_functionality)
 
     ASSERT_TRUE(password.Internal().SetPassword(key_password_.value()));
 
-    const auto encrypted = key_->Encrypt(
-        TEST_PLAINTEXT, password, ot::writer(ciphertext_), true, mode_);
+    const auto encrypted = key_.Encrypt(
+        TEST_PLAINTEXT, ot::writer(ciphertext_), mode_, password, true);
 
     ASSERT_TRUE(encrypted);
 
     auto recoveredKey =
         api_.Crypto().Symmetric().Key(ot::reader(ciphertext_), mode_);
 
-    ASSERT_TRUE(recoveredKey.get());
+    ASSERT_TRUE(recoveredKey);
 
     ot::UnallocatedCString plaintext{};
-    auto decrypted = recoveredKey->Decrypt(
-        ot::reader(ciphertext_), password, [&](const auto size) {
+    auto decrypted = recoveredKey.Decrypt(
+        ot::reader(ciphertext_),
+        [&](const auto size) {
             plaintext.resize(size);
 
             return ot::WritableView{plaintext.data(), plaintext.size()};
-        });
+        },
+        password);
 
     ASSERT_TRUE(decrypted);
     EXPECT_STREQ(TEST_PLAINTEXT, plaintext.c_str());
@@ -125,14 +126,16 @@ TEST_F(Test_Symmetric, key_functionality)
     recoveredKey =
         api_.Crypto().Symmetric().Key(ot::reader(ciphertext_), mode_);
 
-    ASSERT_TRUE(recoveredKey.get());
+    ASSERT_TRUE(recoveredKey);
 
-    decrypted = recoveredKey->Decrypt(
-        ot::reader(ciphertext_), password, [&](const auto size) {
+    decrypted = recoveredKey.Decrypt(
+        ot::reader(ciphertext_),
+        [&](const auto size) {
             plaintext.resize(size);
 
             return ot::WritableView{plaintext.data(), plaintext.size()};
-        });
+        },
+        password);
 
     EXPECT_FALSE(decrypted);
 }
@@ -146,12 +149,12 @@ TEST_F(Test_Symmetric, create_second_key)
 
     ASSERT_TRUE(password.Internal().SetPassword(key_password_.value()));
 
-    second_key_ = api_.Crypto().Symmetric().Key(password, mode_);
+    second_key_ = api_.Crypto().Symmetric().Key(mode_, password);
 
-    EXPECT_TRUE(second_key_.get());
+    EXPECT_TRUE(second_key_);
 
-    const auto encrypted = second_key_->Encrypt(
-        TEST_PLAINTEXT, password, ot::writer(second_ciphertext_), true, mode_);
+    const auto encrypted = second_key_.Encrypt(
+        TEST_PLAINTEXT, ot::writer(second_ciphertext_), mode_, password, true);
 
     ASSERT_TRUE(encrypted);
 }
