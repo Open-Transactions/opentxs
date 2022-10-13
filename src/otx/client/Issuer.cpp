@@ -24,6 +24,7 @@
 
 #include "internal/api/session/FactoryAPI.hpp"
 #include "internal/api/session/Wallet.hpp"
+#include "internal/core/String.hpp"
 #include "internal/core/contract/peer/Peer.hpp"
 #include "internal/identity/wot/claim/Types.hpp"
 #include "internal/otx/client/Factory.hpp"
@@ -40,7 +41,6 @@
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/api/session/Wallet.hpp"
 #include "opentxs/core/Data.hpp"
-#include "opentxs/core/String.hpp"
 #include "opentxs/core/contract/peer/PeerRequestType.hpp"
 #include "opentxs/core/contract/peer/Types.hpp"
 #include "opentxs/core/identifier/Generic.hpp"

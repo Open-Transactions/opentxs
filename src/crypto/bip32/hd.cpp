@@ -16,6 +16,7 @@
 #include <utility>
 
 #include "crypto/HDNode.hpp"
+#include "internal/crypto/library/EcdsaProvider.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/api/crypto/Crypto.hpp"
 #include "opentxs/api/crypto/Hash.hpp"
@@ -23,7 +24,6 @@
 #include "opentxs/crypto/HashType.hpp"
 #include "opentxs/crypto/key/HD.hpp"
 #include "opentxs/crypto/key/asymmetric/Algorithm.hpp"
-#include "opentxs/crypto/library/EcdsaProvider.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 

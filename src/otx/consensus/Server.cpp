@@ -33,7 +33,18 @@
 #include "internal/api/session/Session.hpp"
 #include "internal/api/session/Types.hpp"
 #include "internal/api/session/Wallet.hpp"
+#include "internal/core/Armored.hpp"
 #include "internal/core/Factory.hpp"
+#include "internal/core/String.hpp"
+#include "internal/core/contract/ServerContract.hpp"
+#include "internal/core/contract/Unit.hpp"
+#include "internal/core/contract/peer/PeerObject.hpp"
+#include "internal/crypto/Envelope.hpp"
+#include "internal/network/ServerConnection.hpp"
+#include "internal/network/zeromq/Context.hpp"
+#include "internal/network/zeromq/socket/Publish.hpp"
+#include "internal/network/zeromq/socket/Push.hpp"
+#include "internal/network/zeromq/socket/Types.hpp"
 #include "internal/otx/OTX.hpp"
 #include "internal/otx/Types.hpp"
 #include "internal/otx/blind/Mint.hpp"
@@ -54,6 +65,9 @@
 #include "internal/otx/common/trade/OTOffer.hpp"
 #include "internal/otx/common/trade/OTTrade.hpp"
 #include "internal/otx/common/transaction/Helpers.hpp"
+#include "internal/otx/consensus/ManagedNumber.hpp"
+#include "internal/otx/consensus/Server.hpp"
+#include "internal/otx/consensus/TransactionStatement.hpp"
 #include "internal/serialization/protobuf/Check.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/serialization/protobuf/Proto.tpp"
@@ -64,6 +78,7 @@
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/Shared.hpp"
+#include "internal/util/SharedPimpl.hpp"
 #include "opentxs/api/network/Network.hpp"
 #include "opentxs/api/session/Activity.hpp"
 #include "opentxs/api/session/Client.hpp"
@@ -77,29 +92,19 @@
 #include "opentxs/api/session/Wallet.hpp"
 #include "opentxs/api/session/Workflow.hpp"
 #include "opentxs/core/Amount.hpp"
-#include "opentxs/core/Armored.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Data.hpp"
-#include "opentxs/core/String.hpp"
 #include "opentxs/core/contract/ContractType.hpp"
-#include "opentxs/core/contract/ServerContract.hpp"
-#include "opentxs/core/contract/Unit.hpp"
-#include "opentxs/core/contract/peer/PeerObject.hpp"
 #include "opentxs/core/contract/peer/PeerObjectType.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/core/identifier/UnitDefinition.hpp"
-#include "opentxs/crypto/Envelope.hpp"
 #include "opentxs/crypto/key/Asymmetric.hpp"
 #include "opentxs/identity/Nym.hpp"
-#include "opentxs/network/ServerConnection.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/network/zeromq/message/Message.tpp"
-#include "opentxs/network/zeromq/socket/Publish.hpp"
-#include "opentxs/network/zeromq/socket/Push.hpp"
-#include "opentxs/network/zeromq/socket/Types.hpp"
 #include "opentxs/otx/ConsensusType.hpp"
 #include "opentxs/otx/LastReplyStatus.hpp"
 #include "opentxs/otx/Reply.hpp"
@@ -108,15 +113,12 @@
 #include "opentxs/otx/blind/Token.hpp"
 #include "opentxs/otx/client/PaymentWorkflowState.hpp"
 #include "opentxs/otx/client/PaymentWorkflowType.hpp"
-#include "opentxs/otx/consensus/ManagedNumber.hpp"
-#include "opentxs/otx/consensus/Server.hpp"
-#include "opentxs/otx/consensus/TransactionStatement.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Iterator.hpp"
 #include "opentxs/util/Log.hpp"
+#include "opentxs/util/PasswordPrompt.hpp"
 #include "opentxs/util/Pimpl.hpp"
-#include "opentxs/util/SharedPimpl.hpp"
 #include "opentxs/util/Time.hpp"
 #include "opentxs/util/WorkType.hpp"
 #include "otx/common/OTStorage.hpp"
@@ -211,12 +213,12 @@ Server::Server(
     , inbox_()
     , outbox_()
     , numbers_(nullptr)
-    , find_nym_(
-          api.Network().ZeroMQ().PushSocket(zmq::socket::Direction::Connect))
-    , find_server_(
-          api.Network().ZeroMQ().PushSocket(zmq::socket::Direction::Connect))
-    , find_unit_definition_(
-          api.Network().ZeroMQ().PushSocket(zmq::socket::Direction::Connect))
+    , find_nym_(api.Network().ZeroMQ().Internal().PushSocket(
+          zmq::socket::Direction::Connect))
+    , find_server_(api.Network().ZeroMQ().Internal().PushSocket(
+          zmq::socket::Direction::Connect))
+    , find_unit_definition_(api.Network().ZeroMQ().Internal().PushSocket(
+          zmq::socket::Direction::Connect))
 
 {
     {
@@ -272,12 +274,12 @@ Server::Server(
     , inbox_()
     , outbox_()
     , numbers_(nullptr)
-    , find_nym_(
-          api.Network().ZeroMQ().PushSocket(zmq::socket::Direction::Connect))
-    , find_server_(
-          api.Network().ZeroMQ().PushSocket(zmq::socket::Direction::Connect))
-    , find_unit_definition_(
-          api.Network().ZeroMQ().PushSocket(zmq::socket::Direction::Connect))
+    , find_nym_(api.Network().ZeroMQ().Internal().PushSocket(
+          zmq::socket::Direction::Connect))
+    , find_server_(api.Network().ZeroMQ().Internal().PushSocket(
+          zmq::socket::Direction::Connect))
+    , find_unit_definition_(api.Network().ZeroMQ().Internal().PushSocket(
+          zmq::socket::Direction::Connect))
 {
     for (const auto& it : serialized.servercontext().tentativerequestnumber()) {
         tentative_transaction_numbers_.insert(it);
@@ -718,7 +720,8 @@ auto Server::add_item_to_workflow(
     auto plaintext = String::Factory();
 
     try {
-        auto envelope = api_.Factory().Envelope(message->payload_);
+        auto envelope =
+            api_.Factory().InternalSession().Envelope(message->payload_);
         const auto decrypted =
             envelope->Open(nym, plaintext->WriteInto(), reason);
 
@@ -1294,7 +1297,8 @@ auto Server::extract_payment_instrument_from_notice(
         // INSTRUMENT: pMsg->payload_ (in an OTEnvelope)
         //
         try {
-            auto theEnvelope = api_.Factory().Envelope(pMsg->payload_);
+            auto theEnvelope =
+                api_.Factory().InternalSession().Envelope(pMsg->payload_);
             auto strEnvelopeContents = String::Factory();
 
             // Decrypt the Envelope.
@@ -3354,8 +3358,8 @@ auto Server::process_account_data(
     OT_ASSERT(remote_nym_);
 
     const auto& nymID = nym_->ID();
-    const auto updated =
-        api_.Wallet().UpdateAccount(accountID, *this, account, reason);
+    const auto updated = api_.Wallet().Internal().UpdateAccount(
+        accountID, *this, account, reason);
 
     if (updated) {
         LogDetail()(OT_PRETTY_CLASS())("Saved updated account file.").Flush();
@@ -4316,8 +4320,8 @@ void Server::process_incoming_message(
     }
 
     if (recipientNymId == nymID) {
-        const auto pPeerObject =
-            api_.Factory().PeerObject(nym_, message->payload_, reason);
+        const auto pPeerObject = api_.Factory().InternalSession().PeerObject(
+            nym_, message->payload_, reason);
 
         if (false == bool(pPeerObject)) {
             LogError()(OT_PRETTY_CLASS())("Failed to instantiate object")
@@ -4458,7 +4462,7 @@ auto Server::process_issue_unit_definition_response(
     }
 
     auto serialized = String::Factory(reply.payload_);
-    const auto updated = api_.Wallet().UpdateAccount(
+    const auto updated = api_.Wallet().Internal().UpdateAccount(
         accountID, *this, serialized, std::get<0>(pending_args_), reason);
 
     if (updated) {
@@ -4967,7 +4971,7 @@ auto Server::process_register_account_response(
     }
 
     auto serialized = String::Factory(reply.payload_);
-    const auto updated = api_.Wallet().UpdateAccount(
+    const auto updated = api_.Wallet().Internal().UpdateAccount(
         accountID, *this, serialized, std::get<0>(pending_args_), reason);
 
     if (updated) {
@@ -7521,7 +7525,7 @@ auto Server::Statement(
 auto Server::ShouldRename(const UnallocatedCString& defaultName) const -> bool
 {
     try {
-        const auto contract = api_.Wallet().Server(server_id_);
+        const auto contract = api_.Wallet().Internal().Server(server_id_);
 
         if (contract->Alias() != contract->EffectiveName()) { return true; }
 

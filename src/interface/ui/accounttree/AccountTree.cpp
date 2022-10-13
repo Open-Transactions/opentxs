@@ -21,6 +21,10 @@
 #include "internal/api/session/Wallet.hpp"
 #include "internal/core/Core.hpp"
 #include "internal/core/Factory.hpp"  // IWYU pragma: keep
+#include "internal/core/contract/Unit.hpp"
+#include "internal/interface/ui/AccountCurrency.hpp"
+#include "internal/network/zeromq/Pipeline.hpp"
+#include "internal/network/zeromq/socket/Types.hpp"
 #include "internal/otx/common/Account.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/Shared.hpp"
@@ -36,16 +40,12 @@
 #include "opentxs/core/AccountType.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/core/Data.hpp"
-#include "opentxs/core/contract/Unit.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
 #include "opentxs/core/identifier/UnitDefinition.hpp"
-#include "opentxs/interface/ui/AccountCurrency.hpp"
-#include "opentxs/network/zeromq/Pipeline.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
 #include "opentxs/network/zeromq/message/FrameSection.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/network/zeromq/message/Message.tpp"
-#include "opentxs/network/zeromq/socket/Types.hpp"
 #include "opentxs/util/Log.hpp"
 
 namespace zmq = opentxs::network::zeromq;
@@ -307,7 +307,7 @@ auto AccountTree::load_custodial_account(
     const auto& wallet = api_.Wallet();
     auto account = wallet.Internal().Account(id);
     const auto& contractID = account.get().GetInstrumentDefinitionID();
-    const auto contract = wallet.UnitDefinition(contractID);
+    const auto contract = wallet.Internal().UnitDefinition(contractID);
     load_custodial_account(
         std::move(id),
         identifier::UnitDefinition{contractID},
@@ -325,7 +325,7 @@ auto AccountTree::load_custodial_account(
     const auto& wallet = api_.Wallet();
     auto account = wallet.Internal().Account(id);
     const auto& contractID = account.get().GetInstrumentDefinitionID();
-    const auto contract = wallet.UnitDefinition(contractID);
+    const auto contract = wallet.Internal().UnitDefinition(contractID);
     load_custodial_account(
         std::move(id),
         identifier::UnitDefinition{contractID},

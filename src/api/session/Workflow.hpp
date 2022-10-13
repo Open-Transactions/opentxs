@@ -14,6 +14,8 @@
 #include <utility>
 
 #include "internal/api/session/Workflow.hpp"
+#include "internal/network/zeromq/socket/Publish.hpp"
+#include "internal/network/zeromq/socket/Push.hpp"
 #include "internal/otx/common/Cheque.hpp"
 #include "internal/otx/common/Item.hpp"
 #include "internal/otx/common/Message.hpp"
@@ -24,8 +26,6 @@
 #include "opentxs/api/session/Workflow.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
-#include "opentxs/network/zeromq/socket/Publish.hpp"
-#include "opentxs/network/zeromq/socket/Push.hpp"
 #include "opentxs/otx/client/PaymentWorkflowState.hpp"
 #include "opentxs/otx/client/PaymentWorkflowType.hpp"
 #include "opentxs/otx/client/Types.hpp"

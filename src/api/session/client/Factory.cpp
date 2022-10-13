@@ -20,6 +20,8 @@
 #include "internal/blockchain/bitcoin/block/Outputs.hpp"  // IWYU pragma: keep
 #include "internal/blockchain/bitcoin/block/Transaction.hpp"
 #include "internal/core/contract/peer/Factory.hpp"
+#include "internal/core/contract/peer/PeerReply.hpp"
+#include "internal/core/contract/peer/PeerRequest.hpp"
 #include "internal/serialization/protobuf/Check.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/serialization/protobuf/Proto.tpp"
@@ -34,10 +36,9 @@
 #include "opentxs/blockchain/block/Block.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/blockchain/block/Header.hpp"
-#include "opentxs/core/contract/peer/PeerReply.hpp"
-#include "opentxs/core/contract/peer/PeerRequest.hpp"
 #include "opentxs/otx/blind/Purse.hpp"
 #include "opentxs/util/Log.hpp"
+#include "opentxs/util/PasswordPrompt.hpp"
 
 namespace opentxs::factory
 {

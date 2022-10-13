@@ -8,10 +8,10 @@
 #include <PeerEnums.pb.h>
 
 #include "core/contract/peer/PeerRequest.hpp"
+#include "internal/core/contract/peer/PeerRequest.hpp"
+#include "internal/core/contract/peer/StoreSecret.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/Mutex.hpp"
-#include "opentxs/core/contract/peer/PeerRequest.hpp"
-#include "opentxs/core/contract/peer/StoreSecret.hpp"
 #include "opentxs/core/contract/peer/Types.hpp"
 #include "opentxs/identity/Types.hpp"
 #include "opentxs/util/Container.hpp"

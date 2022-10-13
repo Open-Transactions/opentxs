@@ -29,6 +29,7 @@
 #include <stdexcept>
 #include <utility>
 
+#include "internal/core/String.hpp"
 #include "internal/otx/common/script/OTScriptable.hpp"
 #include "internal/otx/smartcontract/Factory.hpp"
 #include "internal/otx/smartcontract/OTParty.hpp"
@@ -38,7 +39,6 @@
 #include "internal/otx/smartcontract/OTVariable.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
-#include "opentxs/core/String.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/PasswordPrompt.hpp"  // IWYU pragma: keep

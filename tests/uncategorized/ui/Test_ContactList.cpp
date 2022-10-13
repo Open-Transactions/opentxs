@@ -38,7 +38,7 @@ public:
     static const User alice_;
 
     const ot::api::session::Client& api_;
-    ot::OTPasswordPrompt reason_;
+    ot::PasswordPrompt reason_;
     const ot::PaymentCode bob_payment_code_;
     const ot::PaymentCode chris_payment_code_;
 

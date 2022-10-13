@@ -12,8 +12,8 @@
 #include <memory>
 #include <tuple>
 
+#include "internal/crypto/Envelope.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
-#include "opentxs/crypto/Envelope.hpp"
 #include "opentxs/crypto/key/Asymmetric.hpp"
 #include "opentxs/crypto/key/Symmetric.hpp"
 #include "opentxs/crypto/key/asymmetric/Algorithm.hpp"

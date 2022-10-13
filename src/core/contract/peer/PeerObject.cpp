@@ -15,8 +15,13 @@
 
 #include "internal/api/session/FactoryAPI.hpp"
 #include "internal/api/session/Wallet.hpp"
+#include "internal/core/String.hpp"
 #include "internal/core/contract/peer/Factory.hpp"
 #include "internal/core/contract/peer/Peer.hpp"
+#include "internal/core/contract/peer/PeerObject.hpp"
+#include "internal/core/contract/peer/PeerReply.hpp"
+#include "internal/core/contract/peer/PeerRequest.hpp"
+#include "internal/crypto/Envelope.hpp"
 #include "internal/identity/Nym.hpp"
 #include "internal/otx/blind/Factory.hpp"
 #include "internal/otx/blind/Purse.hpp"
@@ -29,12 +34,7 @@
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/api/session/Wallet.hpp"
-#include "opentxs/core/String.hpp"
-#include "opentxs/core/contract/peer/PeerObject.hpp"
 #include "opentxs/core/contract/peer/PeerObjectType.hpp"
-#include "opentxs/core/contract/peer/PeerReply.hpp"
-#include "opentxs/core/contract/peer/PeerRequest.hpp"
-#include "opentxs/crypto/Envelope.hpp"
 #include "opentxs/identity/Nym.hpp"
 #include "opentxs/otx/blind/Purse.hpp"
 #include "opentxs/util/Log.hpp"
@@ -188,7 +188,7 @@ auto PeerObject(
     try {
         auto notUsed = Nym_p{};
         auto output = std::unique_ptr<opentxs::PeerObject>{};
-        auto input = api.Factory().Envelope(encrypted);
+        auto input = api.Factory().InternalSession().Envelope(encrypted);
         auto contents = String::Factory();
 
         if (false ==
@@ -244,8 +244,8 @@ Object::Object(
           {},
           {},
           {},
-          api.Factory().PeerReply(),
-          api.Factory().PeerRequest(),
+          api.Factory().InternalSession().PeerReply(),
+          api.Factory().InternalSession().PeerRequest(),
           {},
           translate(serialized.type()),
           serialized.version())
@@ -307,8 +307,8 @@ Object::Object(
           senderNym,
           message,
           {},
-          api.Factory().PeerReply(),
-          api.Factory().PeerRequest(),
+          api.Factory().InternalSession().PeerReply(),
+          api.Factory().InternalSession().PeerRequest(),
           {},
           contract::peer::PeerObjectType::Message,
           PEER_MESSAGE_VERSION)
@@ -324,8 +324,8 @@ Object::Object(
           senderNym,
           {},
           {},
-          api.Factory().PeerReply(),
-          api.Factory().PeerRequest(),
+          api.Factory().InternalSession().PeerReply(),
+          api.Factory().InternalSession().PeerRequest(),
           std::move(purse),
           contract::peer::PeerObjectType::Cash,
           PEER_CASH_VERSION)
@@ -341,8 +341,8 @@ Object::Object(
           senderNym,
           {},
           payment,
-          api.Factory().PeerReply(),
-          api.Factory().PeerRequest(),
+          api.Factory().InternalSession().PeerReply(),
+          api.Factory().InternalSession().PeerRequest(),
           {},
           contract::peer::PeerObjectType::Payment,
           PEER_PAYMENT_VERSION)
@@ -376,7 +376,7 @@ Object::Object(
           {},
           {},
           {},
-          api.Factory().PeerReply(),
+          api.Factory().InternalSession().PeerReply(),
           request,
           {},
           contract::peer::PeerObjectType::Request,

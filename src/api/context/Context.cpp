@@ -22,11 +22,14 @@
 #include "core/Shutdown.hpp"
 #include "internal/api/Crypto.hpp"
 #include "internal/api/Factory.hpp"
+#include "internal/api/Settings.hpp"
+#include "internal/api/crypto/Encode.hpp"
 #include "internal/api/crypto/Factory.hpp"
 #include "internal/api/session/Client.hpp"
 #include "internal/api/session/Factory.hpp"
 #include "internal/api/session/Session.hpp"
 #include "internal/api/session/notary/Notary.hpp"
+#include "internal/core/String.hpp"
 #include "internal/interface/rpc/RPC.hpp"
 #include "internal/network/zeromq/Context.hpp"
 #include "internal/util/Flag.hpp"
@@ -42,7 +45,6 @@
 #include "opentxs/api/crypto/Seed.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
-#include "opentxs/core/String.hpp"
 #include "opentxs/crypto/Language.hpp"
 #include "opentxs/crypto/SeedStyle.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
@@ -51,6 +53,7 @@
 #include "opentxs/util/Options.hpp"
 #include "opentxs/util/PasswordCallback.hpp"
 #include "opentxs/util/PasswordCaller.hpp"
+#include "opentxs/util/PasswordPrompt.hpp"  // IWYU pragma: keep
 #include "opentxs/util/Pimpl.hpp"
 
 namespace opentxs::factory
@@ -309,14 +312,14 @@ auto Context::Init_Log() -> void
     const auto value = args_.LogLevel();
 
     if (-1 > value) {
-        config.CheckSet_long(
+        config.Internal().CheckSet_long(
             String::Factory("logging"),
             String::Factory("log_level"),
             0,
             level,
             notUsed);
     } else {
-        config.Set_long(
+        config.Internal().Set_long(
             String::Factory("logging"),
             String::Factory("log_level"),
             value,
@@ -362,7 +365,7 @@ auto Context::Init_Profile() -> void
     const auto& config = Config(legacy_->OpentxsConfigFilePath().string());
     auto profile_id_exists{false};
     auto existing_profile_id{String::Factory()};
-    config.Check_str(
+    config.Internal().Check_str(
         String::Factory("profile"),
         String::Factory("profile_id"),
         existing_profile_id,
@@ -371,9 +374,9 @@ auto Context::Init_Profile() -> void
     if (profile_id_exists) {
         profile_id_.set_value(existing_profile_id->Get());
     } else {
-        const auto new_profile_id(crypto_->Encode().Nonce(20));
+        const auto new_profile_id(crypto_->Encode().InternalEncode().Nonce(20));
         auto new_or_update{true};
-        config.Set_str(
+        config.Internal().Set_str(
             String::Factory("profile"),
             String::Factory("profile_id"),
             new_profile_id,

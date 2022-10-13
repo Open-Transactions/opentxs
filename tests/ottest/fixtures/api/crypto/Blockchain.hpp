@@ -77,7 +77,7 @@ public:
         chris_ltc_internal_;
 
     static bool init_;
-    static ot::AsyncConst<ot::OTPasswordPrompt> reason_p_;
+    static ot::AsyncConst<ot::PasswordPrompt> reason_p_;
     static ot::AsyncConst<ot::identifier::Nym> invalid_nym_p_;
     static ot::AsyncConst<ot::identifier::Nym> nym_not_in_wallet_p_;
     static ot::AsyncConst<ot::identifier::Nym> alex_p_;

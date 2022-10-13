@@ -290,47 +290,6 @@ auto FixedByteArray<N>::IsNull() const -> bool
 }
 
 template <std::size_t N>
-auto FixedByteArray<N>::operator+=(const Data& rhs) -> FixedByteArray&
-{
-    return operator+=(rhs.Bytes());
-}
-
-template <std::size_t N>
-auto FixedByteArray<N>::operator+=(const ReadView rhs) noexcept(false)
-    -> FixedByteArray&
-{
-    throw std::runtime_error{"fixed size container"};
-}
-
-template <std::size_t N>
-auto FixedByteArray<N>::operator+=(const std::uint8_t rhs) noexcept(false)
-    -> FixedByteArray&
-{
-    throw std::runtime_error{"fixed size container"};
-}
-
-template <std::size_t N>
-auto FixedByteArray<N>::operator+=(const std::uint16_t rhs) noexcept(false)
-    -> FixedByteArray&
-{
-    throw std::runtime_error{"fixed size container"};
-}
-
-template <std::size_t N>
-auto FixedByteArray<N>::operator+=(const std::uint32_t rhs) noexcept(false)
-    -> FixedByteArray&
-{
-    throw std::runtime_error{"fixed size container"};
-}
-
-template <std::size_t N>
-auto FixedByteArray<N>::operator+=(const std::uint64_t rhs) noexcept(false)
-    -> FixedByteArray&
-{
-    throw std::runtime_error{"fixed size container"};
-}
-
-template <std::size_t N>
 auto FixedByteArray<N>::Randomize(const std::size_t size) -> bool
 {
     if (N != size) {

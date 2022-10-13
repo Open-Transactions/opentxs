@@ -33,7 +33,7 @@ public:
 #if OT_STORAGE_LMDB
     const ot::api::session::Client& client_lmdb_;
 #endif  // OT_STORAGE_LMDB
-    const ot::OTPasswordPrompt reason_;
+    const ot::PasswordPrompt reason_;
 
     auto test_nym(
         const ot::crypto::ParameterType type,

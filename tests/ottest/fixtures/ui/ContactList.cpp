@@ -12,6 +12,11 @@
 #include <sstream>
 #include <string_view>
 
+#include "internal/api/session/UI.hpp"
+#include "internal/interface/ui/ContactList.hpp"
+#include "internal/interface/ui/ContactListItem.hpp"
+#include "internal/interface/ui/MessagableList.hpp"
+#include "internal/util/SharedPimpl.hpp"
 #include "ottest/fixtures/common/Counter.hpp"
 #include "ottest/fixtures/common/User.hpp"
 
@@ -23,7 +28,7 @@ auto check_contact_list(
     const User& user,
     const ContactListData& expected) noexcept -> bool
 {
-    const auto& widget = user.api_->UI().ContactList(user.nym_id_);
+    const auto& widget = user.api_->UI().Internal().ContactList(user.nym_id_);
     auto output{true};
     const auto& v = expected.rows_;
     auto row = widget.First();
@@ -92,7 +97,8 @@ auto check_messagable_list(
     const User& user,
     const ContactListData& expected) noexcept -> bool
 {
-    const auto& widget = user.api_->UI().MessagableList(user.nym_id_);
+    const auto& widget =
+        user.api_->UI().Internal().MessagableList(user.nym_id_);
     auto output{true};
     const auto& v = expected.rows_;
     auto row = widget.First();
@@ -163,32 +169,33 @@ auto contact_list_add_contact(
     const ot::UnallocatedCString& paymentCode,
     const ot::UnallocatedCString& nymID) noexcept -> ot::UnallocatedCString
 {
-    const auto& widget = user.api_->UI().ContactList(user.nym_id_);
+    const auto& widget = user.api_->UI().Internal().ContactList(user.nym_id_);
 
     return widget.AddContact(label, paymentCode, nymID);
 }
 
 auto init_contact_list(const User& user, Counter& counter) noexcept -> void
 {
-    user.api_->UI().ContactList(user.nym_id_, make_cb(counter, [&] {
-                                    auto out = std::stringstream{};
-                                    out << u8"contact_list_"_sv;
-                                    out << user.name_lower_;
+    user.api_->UI().Internal().ContactList(user.nym_id_, make_cb(counter, [&] {
+                                               auto out = std::stringstream{};
+                                               out << u8"contact_list_"_sv;
+                                               out << user.name_lower_;
 
-                                    return out.str();
-                                }()));
+                                               return out.str();
+                                           }()));
     wait_for_counter(counter);
 }
 
 auto init_messagable_list(const User& user, Counter& counter) noexcept -> void
 {
-    user.api_->UI().MessagableList(user.nym_id_, make_cb(counter, [&] {
-                                       auto out = std::stringstream{};
-                                       out << u8"messagable_list_"_sv;
-                                       out << user.name_lower_;
+    user.api_->UI().Internal().MessagableList(
+        user.nym_id_, make_cb(counter, [&] {
+            auto out = std::stringstream{};
+            out << u8"messagable_list_"_sv;
+            out << user.name_lower_;
 
-                                       return out.str();
-                                   }()));
+            return out.str();
+        }()));
     wait_for_counter(counter);
 }
 }  // namespace ottest

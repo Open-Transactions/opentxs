@@ -12,6 +12,7 @@
 #include "opentxs/api/crypto/Symmetric.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Session.hpp"
+#include "opentxs/core/Secret.hpp"
 #include "opentxs/util/Log.hpp"
 
 namespace opentxs::factory

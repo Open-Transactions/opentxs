@@ -11,14 +11,16 @@
 #include <tuple>
 #include <utility>
 
+#include "internal/api/session/FactoryAPI.hpp"
+#include "internal/core/contract/peer/PeerReply.hpp"
+#include "internal/core/contract/peer/PeerRequest.hpp"
+#include "internal/otx/consensus/Server.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/OTX.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/core/UnitType.hpp"
 #include "opentxs/core/contract/ContractType.hpp"
-#include "opentxs/core/contract/peer/PeerReply.hpp"
-#include "opentxs/core/contract/peer/PeerRequest.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
@@ -26,7 +28,6 @@
 #include "opentxs/identity/wot/claim/Types.hpp"
 #include "opentxs/otx/Types.hpp"
 #include "opentxs/otx/client/Types.hpp"
-#include "opentxs/otx/consensus/Server.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Time.hpp"
@@ -228,8 +229,16 @@ struct make_blank<otx::client::PeerReplyTask> {
     {
         return {
             make_blank<identifier::Nym>::value(api),
-            api.Factory().PeerReply(),
-            api.Factory().PeerRequest()};
+            api.Factory()
+                .InternalSession()
+                .InternalSession()
+                .InternalSession()
+                .PeerReply(),
+            api.Factory()
+                .InternalSession()
+                .InternalSession()
+                .InternalSession()
+                .PeerRequest()};
     }
 };
 template <>
@@ -238,7 +247,11 @@ struct make_blank<otx::client::PeerRequestTask> {
     {
         return {
             make_blank<identifier::Nym>::value(api),
-            api.Factory().PeerRequest()};
+            api.Factory()
+                .InternalSession()
+                .InternalSession()
+                .InternalSession()
+                .PeerRequest()};
     }
 };
 template <>

@@ -11,6 +11,13 @@
 #include <thread>
 #include <utility>
 
+#include "internal/network/zeromq/Context.hpp"
+#include "internal/network/zeromq/ReplyCallback.hpp"
+#include "internal/network/zeromq/socket/Reply.hpp"
+#include "internal/network/zeromq/socket/Request.hpp"
+#include "internal/network/zeromq/socket/SocketType.hpp"
+#include "internal/network/zeromq/socket/Types.hpp"
+
 namespace ot = opentxs;
 namespace zmq = ot::network::zeromq;
 
@@ -43,7 +50,7 @@ public:
 
 void Test_RequestReply::requestSocketThread(const ot::UnallocatedCString& msg)
 {
-    auto requestSocket = context_.RequestSocket();
+    auto requestSocket = context_.Internal().RequestSocket();
 
     ASSERT_NE(nullptr, &requestSocket.get());
     ASSERT_EQ(zmq::socket::Type::Request, requestSocket->Type());
@@ -87,8 +94,8 @@ void Test_RequestReply::replySocketThread(
 
     ASSERT_NE(nullptr, &replyCallback.get());
 
-    auto replySocket =
-        context_.ReplySocket(replyCallback, zmq::socket::Direction::Bind);
+    auto replySocket = context_.Internal().ReplySocket(
+        replyCallback, zmq::socket::Direction::Bind);
 
     ASSERT_NE(nullptr, &replySocket.get());
     ASSERT_EQ(zmq::socket::Type::Reply, replySocket->Type());
@@ -117,8 +124,8 @@ TEST_F(Test_RequestReply, Request_Reply)
 
     ASSERT_NE(nullptr, &replyCallback.get());
 
-    auto replySocket =
-        context_.ReplySocket(replyCallback, zmq::socket::Direction::Bind);
+    auto replySocket = context_.Internal().ReplySocket(
+        replyCallback, zmq::socket::Direction::Bind);
 
     ASSERT_NE(nullptr, &replySocket.get());
     ASSERT_EQ(zmq::socket::Type::Reply, replySocket->Type());
@@ -126,7 +133,7 @@ TEST_F(Test_RequestReply, Request_Reply)
     replySocket->SetTimeouts(0ms, 30000ms, -1ms);
     replySocket->Start(endpoint_);
 
-    auto requestSocket = context_.RequestSocket();
+    auto requestSocket = context_.Internal().RequestSocket();
 
     ASSERT_NE(nullptr, &requestSocket.get());
     ASSERT_EQ(zmq::socket::Type::Request, requestSocket->Type());
@@ -165,8 +172,8 @@ TEST_F(Test_RequestReply, Request_2_Reply_1)
 
     ASSERT_NE(nullptr, &replyCallback.get());
 
-    auto replySocket =
-        context_.ReplySocket(replyCallback, zmq::socket::Direction::Bind);
+    auto replySocket = context_.Internal().ReplySocket(
+        replyCallback, zmq::socket::Direction::Bind);
 
     ASSERT_NE(nullptr, &replySocket.get());
     ASSERT_EQ(zmq::socket::Type::Reply, replySocket->Type());
@@ -190,7 +197,7 @@ TEST_F(Test_RequestReply, Request_1_Reply_2)
     std::thread replySocketThread2(
         &Test_RequestReply::replySocketThread, this, endpoint2_);
 
-    auto requestSocket = context_.RequestSocket();
+    auto requestSocket = context_.Internal().RequestSocket();
 
     ASSERT_NE(nullptr, &requestSocket.get());
     ASSERT_EQ(zmq::socket::Type::Request, requestSocket->Type());
@@ -254,8 +261,8 @@ TEST_F(Test_RequestReply, Request_Reply_Multipart)
 
     ASSERT_NE(nullptr, &replyCallback.get());
 
-    auto replySocket =
-        context_.ReplySocket(replyCallback, zmq::socket::Direction::Bind);
+    auto replySocket = context_.Internal().ReplySocket(
+        replyCallback, zmq::socket::Direction::Bind);
 
     ASSERT_NE(nullptr, &replySocket.get());
     ASSERT_EQ(zmq::socket::Type::Reply, replySocket->Type());
@@ -263,7 +270,7 @@ TEST_F(Test_RequestReply, Request_Reply_Multipart)
     replySocket->SetTimeouts(0ms, 30000ms, -1ms);
     replySocket->Start(endpoint_);
 
-    auto requestSocket = context_.RequestSocket();
+    auto requestSocket = context_.Internal().RequestSocket();
 
     ASSERT_NE(nullptr, &requestSocket.get());
     ASSERT_EQ(zmq::socket::Type::Request, requestSocket->Type());

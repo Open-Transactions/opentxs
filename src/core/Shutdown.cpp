@@ -10,11 +10,12 @@
 #include <chrono>
 
 #include "internal/api/network/Asio.hpp"
+#include "internal/network/zeromq/Context.hpp"
+#include "internal/network/zeromq/socket/Types.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/api/network/Asio.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
-#include "opentxs/network/zeromq/socket/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/WorkType.hpp"
@@ -34,7 +35,7 @@ ShutdownSender::ShutdownSender(
     : endpoint_(endpoint)
     , name_(name)
     , activated_(false)
-    , socket_(zmq.PublishSocket())
+    , socket_(zmq.Internal().PublishSocket())
     , repeat_(asio.Internal().GetTimer())
 {
     auto init = socket_->SetTimeouts(1s, 10s, 0s);

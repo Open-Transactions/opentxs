@@ -17,14 +17,15 @@
 #include <typeinfo>
 
 #include "internal/api/Legacy.hpp"
+#include "internal/api/session/FactoryAPI.hpp"
 #include "internal/api/session/Session.hpp"
+#include "internal/core/Armored.hpp"
+#include "internal/core/String.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/P0330.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
-#include "opentxs/core/Armored.hpp"
 #include "opentxs/core/ByteArray.hpp"
-#include "opentxs/core/String.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Pimpl.hpp"
 #include "otx/common/OTStoragePB.hpp"
@@ -2491,7 +2492,7 @@ auto Storage::EncodeObject(const api::Session& api, Storable& theContents)
     }
 
     const auto theData = ByteArray{pNewData, nNewSize};
-    const auto theArmor = api.Factory().Armored(theData);
+    const auto theArmor = api.Factory().InternalSession().Armored(theData);
 
     strReturnValue.assign(theArmor->Get(), theArmor->GetLength());
 

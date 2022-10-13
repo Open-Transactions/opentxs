@@ -19,14 +19,18 @@
 
 #include "core/Worker.hpp"
 #include "internal/api/session/Endpoints.hpp"
+#include "internal/api/session/FactoryAPI.hpp"
 #include "internal/blockchain/Params.hpp"
 #include "internal/blockchain/bitcoin/block/Transaction.hpp"
 #include "internal/blockchain/node/Endpoints.hpp"
 #include "internal/blockchain/node/Factory.hpp"
 #include "internal/blockchain/p2p/P2P.hpp"  // IWYU pragma: keep
 #include "internal/network/zeromq/Context.hpp"
+#include "internal/network/zeromq/Pipeline.hpp"
 #include "internal/network/zeromq/Types.hpp"
 #include "internal/network/zeromq/socket/Pipeline.hpp"
+#include "internal/network/zeromq/socket/SocketType.hpp"
+#include "internal/network/zeromq/socket/Types.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/serialization/protobuf/Proto.tpp"
 #include "internal/util/LogMacros.hpp"
@@ -41,13 +45,10 @@
 #include "opentxs/blockchain/p2p/Types.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
-#include "opentxs/network/zeromq/Pipeline.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
 #include "opentxs/network/zeromq/message/FrameIterator.hpp"
 #include "opentxs/network/zeromq/message/FrameSection.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
-#include "opentxs/network/zeromq/socket/SocketType.hpp"
-#include "opentxs/network/zeromq/socket/Types.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Time.hpp"
@@ -383,7 +384,7 @@ auto PeerManager::pipeline(zmq::Message&& message) noexcept -> void
             OT_ASSERT(1 < body.size());
 
             const auto& bytes = body.at(1);
-            auto address = api_.Factory().BlockchainAddress(
+            auto address = api_.Factory().InternalSession().BlockchainAddress(
                 proto::Factory<proto::BlockchainPeerAddress>(
                     bytes.data(), bytes.size()));
 
@@ -399,7 +400,7 @@ auto PeerManager::pipeline(zmq::Message&& message) noexcept -> void
             OT_ASSERT(1 < body.size());
 
             const auto& bytes = body.at(1);
-            auto address = api_.Factory().BlockchainAddress(
+            auto address = api_.Factory().InternalSession().BlockchainAddress(
                 proto::Factory<proto::BlockchainPeerAddress>(
                     bytes.data(), bytes.size()));
 
@@ -419,7 +420,7 @@ auto PeerManager::pipeline(zmq::Message&& message) noexcept -> void
             OT_ASSERT(0 <= id);
 
             const auto& bytes = body.at(2);
-            auto address = api_.Factory().BlockchainAddress(
+            auto address = api_.Factory().InternalSession().BlockchainAddress(
                 proto::Factory<proto::BlockchainPeerAddress>(
                     bytes.data(), bytes.size()));
 

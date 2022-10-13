@@ -18,6 +18,7 @@
 #include <utility>
 
 #include "internal/api/session/FactoryAPI.hpp"
+#include "internal/core/String.hpp"
 #include "internal/otx/common/Contract.hpp"
 #include "internal/otx/common/StringXML.hpp"
 #include "internal/otx/common/XML.hpp"
@@ -35,7 +36,6 @@
 #include "internal/util/P0330.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
-#include "opentxs/core/String.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
 #include "opentxs/core/identifier/Nym.hpp"

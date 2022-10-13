@@ -6,21 +6,10 @@
 target_sources(
   opentxs-common
   PRIVATE
+    "${opentxs_SOURCE_DIR}/src/internal/interface/ui/BlockchainSelection.hpp"
+    "${opentxs_SOURCE_DIR}/src/internal/interface/ui/BlockchainSelectionItem.hpp"
     "BlockchainSelection.cpp"
     "BlockchainSelection.hpp"
     "BlockchainSelectionItem.cpp"
     "BlockchainSelectionItem.hpp"
 )
-set(cxx-install-headers
-    "${opentxs_SOURCE_DIR}/include/opentxs/interface/ui/BlockchainSelection.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/interface/ui/BlockchainSelectionItem.hpp"
-)
-target_sources(opentxs-common PRIVATE ${cxx-install-headers})
-
-if(OPENTXS_STANDALONE)
-  install(
-    FILES ${cxx-install-headers}
-    DESTINATION include/opentxs/interface/ui
-    COMPONENT dev
-  )
-endif()

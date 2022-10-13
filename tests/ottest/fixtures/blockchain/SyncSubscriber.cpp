@@ -12,6 +12,9 @@
 #include <stdexcept>
 #include <utility>
 
+#include "internal/network/zeromq/Context.hpp"
+#include "internal/network/zeromq/ListenCallback.hpp"
+#include "internal/network/zeromq/socket/Subscribe.hpp"
 #include "ottest/fixtures/blockchain/Common.hpp"
 #include "ottest/fixtures/blockchain/MinedBlocks.hpp"
 
@@ -98,7 +101,7 @@ struct SyncSubscriber::Imp {
         , errors_(0)
         , cb_(ot::network::zeromq::ListenCallback::Factory(
               [&](auto&& in) { check_update(std::move(in)); }))
-        , socket_(api_.Network().ZeroMQ().SubscribeSocket(cb_))
+        , socket_(api_.Network().ZeroMQ().Internal().SubscribeSocket(cb_))
     {
         if (false == socket_->Start(sync_server_push_endpoint_)) {
             throw std::runtime_error("Failed to subscribe to updates");

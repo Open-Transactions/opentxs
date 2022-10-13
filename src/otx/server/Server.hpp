@@ -12,6 +12,8 @@
 #include <tuple>
 #include <utility>
 
+#include "internal/core/String.hpp"
+#include "internal/network/zeromq/socket/Push.hpp"
 #include "internal/otx/Types.hpp"
 #include "internal/otx/client/OTPayment.hpp"
 #include "internal/otx/common/Message.hpp"
@@ -21,13 +23,11 @@
 #include "internal/util/AsyncConst.hpp"
 #include "opentxs/core/AddressType.hpp"
 #include "opentxs/core/Secret.hpp"
-#include "opentxs/core/String.hpp"
 #include "opentxs/core/Types.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
 #include "opentxs/identity/Nym.hpp"
 #include "opentxs/identity/Types.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
-#include "opentxs/network/zeromq/socket/Push.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Pimpl.hpp"
 #include "otx/server/MainFile.hpp"
@@ -73,7 +73,7 @@ public:
         std::uint32_t& port) const -> bool;
     auto GetServerID() const noexcept -> const identifier::Notary&;
     auto GetServerNym() const -> const identity::Nym&;
-    auto TransportKey(Data& pubkey) const -> OTSecret;
+    auto TransportKey(Data& pubkey) const -> Secret;
     auto IsFlaggedForShutdown() const -> bool;
 
     void ActivateCron();

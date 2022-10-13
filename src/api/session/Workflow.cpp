@@ -27,7 +27,12 @@
 #include "internal/api/session/Factory.hpp"
 #include "internal/api/session/FactoryAPI.hpp"
 #include "internal/api/session/Types.hpp"
+#include "internal/core/String.hpp"
+#include "internal/network/zeromq/Context.hpp"
 #include "internal/network/zeromq/message/Message.hpp"
+#include "internal/network/zeromq/socket/Publish.hpp"
+#include "internal/network/zeromq/socket/Push.hpp"
+#include "internal/network/zeromq/socket/Types.hpp"
 #include "internal/otx/Types.hpp"
 #include "internal/otx/blind/Purse.hpp"
 #include "internal/otx/common/Cheque.hpp"
@@ -51,7 +56,6 @@
 #include "opentxs/api/session/Workflow.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Data.hpp"
-#include "opentxs/core/String.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
@@ -60,9 +64,6 @@
 #include "opentxs/network/zeromq/ZeroMQ.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/network/zeromq/message/Message.tpp"
-#include "opentxs/network/zeromq/socket/Publish.hpp"
-#include "opentxs/network/zeromq/socket/Push.hpp"
-#include "opentxs/network/zeromq/socket/Types.hpp"
 #include "opentxs/otx/blind/Purse.hpp"
 #include "opentxs/otx/client/PaymentWorkflowState.hpp"
 #include "opentxs/otx/client/PaymentWorkflowType.hpp"
@@ -462,9 +463,9 @@ Workflow::Workflow(
     : api_(api)
     , activity_(activity)
     , contact_(contact)
-    , account_publisher_(api_.Network().ZeroMQ().PublishSocket())
-    , rpc_publisher_(
-          api_.Network().ZeroMQ().PushSocket(zmq::socket::Direction::Connect))
+    , account_publisher_(api_.Network().ZeroMQ().Internal().PublishSocket())
+    , rpc_publisher_(api_.Network().ZeroMQ().Internal().PushSocket(
+          zmq::socket::Direction::Connect))
     , workflow_locks_()
 {
     // WARNING: do not access api_.Wallet() during construction

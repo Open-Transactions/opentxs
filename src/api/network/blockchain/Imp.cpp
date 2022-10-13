@@ -49,7 +49,7 @@ BlockchainImp::BlockchainImp(
     : api_(api)
     , crypto_(nullptr)
     , chain_state_publisher_([&] {
-        auto out = zmq.PublishSocket();
+        auto out = zmq.Internal().PublishSocket();
         auto rc = out->Start(endpoints.BlockchainStateChange().data());
 
         OT_ASSERT(rc);

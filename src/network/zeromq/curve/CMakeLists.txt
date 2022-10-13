@@ -6,23 +6,12 @@
 target_sources(
   opentxs-common
   PRIVATE
+    "${opentxs_SOURCE_DIR}/src/internal/network/zeromq/curve/Client.hpp"
+    "${opentxs_SOURCE_DIR}/src/internal/network/zeromq/curve/Server.hpp"
     "Client.cpp"
     "Client.hpp"
     "Server.cpp"
     "Server.hpp"
 )
-set(cxx-install-headers
-    "${opentxs_SOURCE_DIR}/include/opentxs/network/zeromq/curve/Client.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/network/zeromq/curve/Server.hpp"
-)
 target_link_libraries(opentxs-common PRIVATE "${OT_ZMQ_TARGET}")
 target_link_libraries(opentxs PUBLIC "${OT_ZMQ_TARGET}")
-target_sources(opentxs-common PRIVATE ${cxx-install-headers})
-
-if(OPENTXS_STANDALONE)
-  install(
-    FILES ${cxx-install-headers}
-    DESTINATION include/opentxs/network/zeromq/curve
-    COMPONENT dev
-  )
-endif()

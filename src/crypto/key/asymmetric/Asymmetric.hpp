@@ -14,6 +14,7 @@
 #include <memory>
 #include <mutex>
 
+#include "internal/crypto/library/AsymmetricProvider.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/Mutex.hpp"
 #include "opentxs/core/ByteArray.hpp"
@@ -24,7 +25,6 @@
 #include "opentxs/crypto/key/Asymmetric.hpp"
 #include "opentxs/crypto/key/asymmetric/Algorithm.hpp"
 #include "opentxs/crypto/key/asymmetric/Role.hpp"
-#include "opentxs/crypto/library/AsymmetricProvider.hpp"
 #include "opentxs/identity/Types.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
@@ -166,14 +166,14 @@ protected:
 
     using EncryptedKey = std::unique_ptr<proto::Ciphertext>;
     using EncryptedExtractor = std::function<EncryptedKey(Data&, Secret&)>;
-    using PlaintextExtractor = std::function<OTSecret()>;
+    using PlaintextExtractor = std::function<Secret()>;
 
     const api::Session& api_;
     const VersionNumber version_;
     const crypto::key::asymmetric::Algorithm type_;
     const opentxs::crypto::key::asymmetric::Role role_;
     const ByteArray key_;
-    mutable OTSecret plaintext_key_;
+    mutable Secret plaintext_key_;
     mutable std::mutex lock_;
     std::unique_ptr<const proto::Ciphertext> encrypted_key_;
 
@@ -251,7 +251,7 @@ protected:
     Asymmetric(
         const Asymmetric& rhs,
         ByteArray&& newPublicKey,
-        OTSecret&& newSecretKey) noexcept;
+        Secret&& newSecretKey) noexcept;
 
 private:
     using HashTypeMap =

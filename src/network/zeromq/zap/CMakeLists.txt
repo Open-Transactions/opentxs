@@ -6,7 +6,12 @@
 target_sources(
   opentxs-common
   PRIVATE
+    "${opentxs_SOURCE_DIR}/src/internal/network/zeromq/zap/Callback.hpp"
     "${opentxs_SOURCE_DIR}/src/internal/network/zeromq/zap/Factory.hpp"
+    "${opentxs_SOURCE_DIR}/src/internal/network/zeromq/zap/Handler.hpp"
+    "${opentxs_SOURCE_DIR}/src/internal/network/zeromq/zap/Reply.hpp"
+    "${opentxs_SOURCE_DIR}/src/internal/network/zeromq/zap/Request.hpp"
+    "${opentxs_SOURCE_DIR}/src/internal/network/zeromq/zap/ZAP.hpp"
     "Callback.cpp"
     "Callback.hpp"
     "Handler.cpp"
@@ -17,11 +22,7 @@ target_sources(
     "Request.hpp"
 )
 set(cxx-install-headers
-    "${opentxs_SOURCE_DIR}/include/opentxs/network/zeromq/zap/Callback.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/network/zeromq/zap/Handler.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/network/zeromq/zap/Reply.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/network/zeromq/zap/Request.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/network/zeromq/zap/ZAP.hpp"
+    "${opentxs_SOURCE_DIR}/include/opentxs/network/zeromq/zap/Types.hpp"
 )
 target_link_libraries(opentxs-common PRIVATE "${OT_ZMQ_TARGET}")
 target_link_libraries(opentxs PUBLIC "${OT_ZMQ_TARGET}")

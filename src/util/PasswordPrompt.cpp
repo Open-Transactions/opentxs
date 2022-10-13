@@ -6,58 +6,49 @@
 #include "0_stdafx.hpp"                     // IWYU pragma: associated
 #include "opentxs/util/PasswordPrompt.hpp"  // IWYU pragma: associated
 
-#include <memory>
-
-#include "2_Factory.hpp"
-#include "opentxs/api/session/Factory.hpp"
-#include "opentxs/api/session/Session.hpp"
-#include "opentxs/core/Secret.hpp"
+#include "internal/util/LogMacros.hpp"
+#include "internal/util/P0330.hpp"
+#include "opentxs/util/Allocator.hpp"
+#include "util/PasswordPromptPrivate.hpp"
 
 namespace opentxs
 {
-auto Factory::PasswordPrompt(
-    const api::Session& api,
-    const UnallocatedCString& text) -> opentxs::PasswordPrompt*
+PasswordPrompt::PasswordPrompt(PasswordPromptPrivate* imp) noexcept
+    : imp_(imp)
 {
-    return new opentxs::PasswordPrompt(api, text);
+    OT_ASSERT(nullptr != imp_);
 }
 
-PasswordPrompt::PasswordPrompt(
-    const api::Session& api,
-    const UnallocatedCString& display) noexcept
-    : api_(api)
-    , display_(display)
-    , password_(api.Factory().Secret(0))
+PasswordPrompt::PasswordPrompt(PasswordPrompt&& rhs) noexcept
+    : PasswordPrompt(rhs.imp_)
 {
+    rhs.imp_ = nullptr;
 }
 
-PasswordPrompt::PasswordPrompt(const PasswordPrompt& rhs) noexcept
-    : api_(rhs.api_)
-    , display_(rhs.GetDisplayString())
-    , password_(rhs.password_)
+auto PasswordPrompt::GetDisplayString() const noexcept -> std::string_view
 {
+    return imp_->GetDisplayString();
 }
 
-auto PasswordPrompt::ClearPassword() -> bool
+auto PasswordPrompt::Internal() const noexcept
+    -> const internal::PasswordPrompt&
 {
-    password_->clear();
-
-    return true;
+    return *imp_;
 }
 
-auto PasswordPrompt::GetDisplayString() const -> const char*
+auto PasswordPrompt::Internal() noexcept -> internal::PasswordPrompt&
 {
-    return display_.c_str();
+    return *imp_;
 }
 
-auto PasswordPrompt::SetPassword(const Secret& password) -> bool
+PasswordPrompt::~PasswordPrompt()
 {
-    password_ = password;
-
-    return true;
+    if (nullptr != imp_) {
+        // TODO c++20
+        auto alloc = alloc::PMR<PasswordPromptPrivate>{imp_->get_allocator()};
+        alloc.destroy(imp_);
+        alloc.deallocate(imp_, 1_uz);
+        imp_ = nullptr;
+    }
 }
-
-auto PasswordPrompt::Password() const -> const Secret& { return password_; }
-
-PasswordPrompt::~PasswordPrompt() = default;
 }  // namespace opentxs

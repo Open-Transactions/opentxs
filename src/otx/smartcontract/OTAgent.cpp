@@ -10,13 +10,18 @@
 #include <memory>
 
 #include "internal/api/session/Wallet.hpp"
+#include "internal/core/String.hpp"
 #include "internal/otx/Types.hpp"
 #include "internal/otx/common/Account.hpp"
 #include "internal/otx/common/Contract.hpp"
 #include "internal/otx/common/recurring/OTAgreement.hpp"
 #include "internal/otx/common/util/Common.hpp"
 #include "internal/otx/common/util/Tag.hpp"
+#include "internal/otx/consensus/Base.hpp"
+#include "internal/otx/consensus/Client.hpp"
 #include "internal/otx/consensus/Consensus.hpp"
+#include "internal/otx/consensus/ManagedNumber.hpp"
+#include "internal/otx/consensus/Server.hpp"
 #include "internal/otx/smartcontract/OTParty.hpp"
 #include "internal/otx/smartcontract/OTPartyAccount.hpp"
 #include "internal/otx/smartcontract/OTSmartContract.hpp"
@@ -27,15 +32,10 @@
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/api/session/Wallet.hpp"
 #include "opentxs/core/Data.hpp"
-#include "opentxs/core/String.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/identity/Nym.hpp"
-#include "opentxs/otx/consensus/Base.hpp"
-#include "opentxs/otx/consensus/Client.hpp"
-#include "opentxs/otx/consensus/ManagedNumber.hpp"
-#include "opentxs/otx/consensus/Server.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Pimpl.hpp"
@@ -586,7 +586,7 @@ auto OTAgent::DropFinalReceiptToInbox(
     if (bNymID) {
         // IsAnIndividual() is definitely true.
 
-        auto context = api_.Wallet().ClientContext(theAgentNymID);
+        auto context = api_.Wallet().Internal().ClientContext(theAgentNymID);
 
         OT_ASSERT(context);
 
@@ -728,7 +728,7 @@ auto OTAgent::VerifyIssuedNumber(
     }
 
     if (nullptr != nym_) {
-        auto context = api_.Wallet().Context(
+        auto context = api_.Wallet().Internal().Context(
             api_.Factory().NotaryIDFromBase58(strNotaryID.Bytes()), nym_->ID());
 
         OT_ASSERT(context);
@@ -757,7 +757,7 @@ auto OTAgent::VerifyTransactionNumber(
     }
 
     if (nullptr != nym_) {
-        auto context = api_.Wallet().Context(
+        auto context = api_.Wallet().Internal().Context(
             api_.Factory().NotaryIDFromBase58(strNotaryID.Bytes()), nym_->ID());
 
         OT_ASSERT(context);

@@ -6,6 +6,10 @@
 #include <gtest/gtest.h>
 #include <opentxs/opentxs.hpp>
 
+#include "internal/network/zeromq/Context.hpp"
+#include "internal/network/zeromq/socket/Request.hpp"
+#include "internal/network/zeromq/socket/SocketType.hpp"
+
 namespace ot = opentxs;
 namespace zmq = ot::network::zeromq;
 
@@ -26,7 +30,7 @@ public:
 
 TEST_F(Test_RequestSocket, RequestSocket_Factory)
 {
-    auto requestSocket = context_.RequestSocket();
+    auto requestSocket = context_.Internal().RequestSocket();
 
     ASSERT_NE(nullptr, &requestSocket.get());
     ASSERT_EQ(zmq::socket::Type::Request, requestSocket->Type());

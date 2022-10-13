@@ -14,6 +14,7 @@
 
 #include "internal/api/session/FactoryAPI.hpp"
 #include "internal/api/session/Wallet.hpp"
+#include "internal/core/String.hpp"
 #include "internal/otx/AccountList.hpp"
 #include "internal/otx/Types.hpp"
 #include "internal/otx/common/Account.hpp"
@@ -27,6 +28,7 @@
 #include "internal/otx/common/script/OTScriptable.hpp"
 #include "internal/otx/common/util/Common.hpp"
 #include "internal/otx/common/util/Tag.hpp"
+#include "internal/otx/consensus/Client.hpp"
 #include "internal/otx/smartcontract/Factory.hpp"
 #include "internal/otx/smartcontract/OTAgent.hpp"
 #include "internal/otx/smartcontract/OTBylaw.hpp"
@@ -47,15 +49,14 @@
 #include "opentxs/api/session/Wallet.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/core/Data.hpp"
-#include "opentxs/core/String.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/core/identifier/UnitDefinition.hpp"
 #include "opentxs/identity/Nym.hpp"
-#include "opentxs/otx/consensus/Client.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Log.hpp"
+#include "opentxs/util/PasswordPrompt.hpp"
 #include "opentxs/util/Pimpl.hpp"
 
 #ifndef SMART_CONTRACT_PROCESS_INTERVAL

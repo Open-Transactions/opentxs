@@ -16,16 +16,15 @@
 
 #include "api/session/activity/MailCache.hpp"
 #include "internal/api/session/Activity.hpp"
+#include "internal/network/zeromq/socket/Publish.hpp"
 #include "internal/otx/common/Message.hpp"
 #include "internal/util/Lockable.hpp"
 #include "internal/util/Mutex.hpp"
 #include "opentxs/api/session/Activity.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
-#include "opentxs/network/zeromq/socket/Publish.hpp"
 #include "opentxs/otx/client/Types.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
-#include "opentxs/util/PasswordPrompt.hpp"
 #include "opentxs/util/Time.hpp"
 #include "opentxs/util/Types.hpp"
 
@@ -71,6 +70,7 @@ class StorageThread;
 }  // namespace proto
 
 class Contact;
+class PasswordPrompt;
 class PeerObject;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
@@ -195,11 +195,11 @@ private:
         blockchain_publishers_;
 
     auto activity_preload_thread(
-        OTPasswordPrompt reason,
+        PasswordPrompt reason,
         const identifier::Nym nymID,
         const std::size_t count) const noexcept -> void;
     auto thread_preload_thread(
-        OTPasswordPrompt reason,
+        PasswordPrompt reason,
         const identifier::Nym nymID,
         const UnallocatedCString threadID,
         const std::size_t start,

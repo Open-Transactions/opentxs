@@ -10,6 +10,11 @@
 #include <compare>
 #include <iterator>
 
+#include "internal/api/session/UI.hpp"
+#include "internal/interface/ui/BlockchainSelection.hpp"
+#include "internal/interface/ui/BlockchainSelectionItem.hpp"
+#include "internal/util/SharedPimpl.hpp"
+
 namespace ottest
 {
 auto check_blockchain_selection(
@@ -17,7 +22,7 @@ auto check_blockchain_selection(
     const ot::ui::Blockchains type,
     const BlockchainSelectionData& expected) noexcept -> bool
 {
-    const auto& widget = api.UI().BlockchainSelection(type);
+    const auto& widget = api.UI().Internal().BlockchainSelection(type);
     auto output{true};
     const auto& v = expected.rows_;
     auto row = widget.First();

@@ -6,6 +6,11 @@
 #include <gtest/gtest.h>
 #include <opentxs/opentxs.hpp>
 
+#include "internal/network/zeromq/Context.hpp"
+#include "internal/network/zeromq/ListenCallback.hpp"
+#include "internal/network/zeromq/socket/SocketType.hpp"
+#include "internal/network/zeromq/socket/Subscribe.hpp"
+
 namespace ot = opentxs;
 namespace zmq = ot::network::zeromq;
 
@@ -26,7 +31,7 @@ public:
 
 TEST_F(Test_SubscribeSocket, SubscribeSocket_Factory)
 {
-    auto subscribeSocket = context_.SubscribeSocket(
+    auto subscribeSocket = context_.Internal().SubscribeSocket(
         ot::network::zeromq::ListenCallback::Factory());
 
     ASSERT_NE(nullptr, &subscribeSocket.get());

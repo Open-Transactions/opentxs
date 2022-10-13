@@ -7,6 +7,8 @@
 #include <opentxs/opentxs.hpp>
 #include <atomic>
 
+#include "internal/api/session/UI.hpp"
+#include "internal/interface/ui/BlockchainSelection.hpp"
 #include "ottest/fixtures/common/Counter.hpp"
 #include "ottest/fixtures/ui/BlockchainSelection.hpp"
 
@@ -40,7 +42,7 @@ public:
                 init = false;
             }
 
-            return client_.UI().BlockchainSelection(
+            return client_.UI().Internal().BlockchainSelection(
                 ot::ui::Blockchains::All, cb);
         }())
         , main_([&]() -> auto& {
@@ -53,7 +55,7 @@ public:
                 init = false;
             }
 
-            return client_.UI().BlockchainSelection(
+            return client_.UI().Internal().BlockchainSelection(
                 ot::ui::Blockchains::Main, cb);
         }())
         , test_([&]() -> auto& {
@@ -66,7 +68,7 @@ public:
                 init = false;
             }
 
-            return client_.UI().BlockchainSelection(
+            return client_.UI().Internal().BlockchainSelection(
                 ot::ui::Blockchains::Test, cb);
         }())
     {

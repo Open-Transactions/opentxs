@@ -7,8 +7,30 @@
 
 #include "internal/api/FactoryAPI.hpp"
 
+#include "internal/core/Armored.hpp"
+#include "internal/core/String.hpp"
+#include "internal/core/contract/BasketContract.hpp"
+#include "internal/core/contract/CurrencyContract.hpp"
+#include "internal/core/contract/SecurityContract.hpp"
+#include "internal/core/contract/ServerContract.hpp"
+#include "internal/core/contract/Unit.hpp"
+#include "internal/core/contract/peer/BailmentNotice.hpp"
+#include "internal/core/contract/peer/BailmentReply.hpp"
+#include "internal/core/contract/peer/BailmentRequest.hpp"
+#include "internal/core/contract/peer/ConnectionReply.hpp"
+#include "internal/core/contract/peer/ConnectionRequest.hpp"
+#include "internal/core/contract/peer/NoticeAcknowledgement.hpp"
+#include "internal/core/contract/peer/OutBailmentReply.hpp"
+#include "internal/core/contract/peer/OutBailmentRequest.hpp"
+#include "internal/core/contract/peer/PeerObject.hpp"
+#include "internal/core/contract/peer/PeerReply.hpp"
+#include "internal/core/contract/peer/PeerRequest.hpp"
+#include "internal/core/contract/peer/StoreSecret.hpp"
+#include "internal/crypto/Envelope.hpp"
 #include "internal/otx/Types.hpp"
 #include "opentxs/api/session/Factory.hpp"
+#include "opentxs/core/contract/peer/Types.hpp"
+#include "opentxs/crypto/key/Keypair.hpp"
 #include "opentxs/identity/wot/claim/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -43,6 +65,7 @@ namespace proto
 {
 class AsymmetricKey;
 class BlockchainBlockHeader;
+class BlockchainPeerAddress;
 class HDPath;
 class PaymentCode;
 class PeerObject;
@@ -84,7 +107,13 @@ class Factory : virtual public api::session::Factory,
                 virtual public api::internal::Factory
 {
 public:
-    using session::Factory::Armored;
+    virtual auto Armored() const -> OTArmored = 0;
+    virtual auto Armored(const UnallocatedCString& input) const
+        -> OTArmored = 0;
+    virtual auto Armored(const opentxs::Data& input) const -> OTArmored = 0;
+    virtual auto Armored(const opentxs::String& input) const -> OTArmored = 0;
+    virtual auto Armored(const opentxs::crypto::Envelope& input) const
+        -> OTArmored = 0;
     virtual auto Armored(const google::protobuf::MessageLite& input) const
         -> OTArmored = 0;
     virtual auto Armored(
@@ -94,17 +123,41 @@ public:
     using session::Factory::AsymmetricKey;
     virtual auto AsymmetricKey(const proto::AsymmetricKey& serialized) const
         -> OTAsymmetricKey = 0;
-    using session::Factory::BailmentNotice;
+    virtual auto BailmentNotice(
+        const Nym_p& nym,
+        const identifier::Nym& recipientID,
+        const identifier::UnitDefinition& unitID,
+        const identifier::Notary& serverID,
+        const identifier::Generic& requestID,
+        const UnallocatedCString& txid,
+        const Amount& amount,
+        const opentxs::PasswordPrompt& reason) const noexcept(false)
+        -> OTBailmentNotice = 0;
     virtual auto BailmentNotice(
         const Nym_p& nym,
         const proto::PeerRequest& serialized) const noexcept(false)
         -> OTBailmentNotice = 0;
-    using session::Factory::BailmentReply;
+    virtual auto BailmentReply(
+        const Nym_p& nym,
+        const identifier::Nym& initiator,
+        const identifier::Generic& request,
+        const identifier::Notary& server,
+        const UnallocatedCString& terms,
+        const opentxs::PasswordPrompt& reason) const noexcept(false)
+        -> OTBailmentReply = 0;
     virtual auto BailmentReply(
         const Nym_p& nym,
         const proto::PeerReply& serialized) const noexcept(false)
         -> OTBailmentReply = 0;
-    using session::Factory::BailmentRequest;
+    virtual auto BailmentRequest(
+        const Nym_p& nym,
+        const identifier::Nym& recipient,
+        const identifier::UnitDefinition& unit,
+        const identifier::Notary& server,
+        const opentxs::PasswordPrompt& reason) const noexcept(false)
+        -> OTBailmentRequest = 0;
+    virtual auto BailmentRequest(const Nym_p& nym, const ReadView& view) const
+        noexcept(false) -> OTBailmentRequest = 0;
     virtual auto BailmentRequest(
         const Nym_p& nym,
         const proto::PeerRequest& serialized) const noexcept(false)
@@ -114,14 +167,31 @@ public:
         std::int32_t nCount,
         const Amount& lMinimumTransferAmount) const
         -> std::unique_ptr<opentxs::Basket> = 0;
-    using session::Factory::BasketContract;
+    virtual auto BasketContract(
+        const Nym_p& nym,
+        const UnallocatedCString& shortname,
+        const UnallocatedCString& terms,
+        const std::uint64_t weight,
+        const UnitType unitOfAccount,
+        const VersionNumber version,
+        const display::Definition& displayDefinition,
+        const Amount& redemptionIncrement) const noexcept(false)
+        -> OTBasketContract = 0;
     virtual auto BasketContract(
         const Nym_p& nym,
         const proto::UnitDefinition serialized) const noexcept(false)
         -> OTBasketContract = 0;
+    using session::Factory::BlockchainAddress;
+    virtual auto BlockchainAddress(
+        const proto::BlockchainPeerAddress& serialized) const
+        -> blockchain::p2p::Address = 0;
     using session::Factory::BlockHeader;
     virtual auto BlockHeader(const proto::BlockchainBlockHeader& serialized)
         const -> BlockHeaderP = 0;
+    virtual auto BlockHeaderForUnitTests(
+        const blockchain::block::Hash& hash,
+        const blockchain::block::Hash& parent,
+        const blockchain::block::Height height) const -> BlockHeaderP = 0;
     virtual auto Cheque(const OTTransaction& receipt) const
         -> std::unique_ptr<opentxs::Cheque> = 0;
     virtual auto Cheque() const -> std::unique_ptr<opentxs::Cheque> = 0;
@@ -129,12 +199,29 @@ public:
         const identifier::Notary& NOTARY_ID,
         const identifier::UnitDefinition& INSTRUMENT_DEFINITION_ID) const
         -> std::unique_ptr<opentxs::Cheque> = 0;
-    using session::Factory::ConnectionReply;
+    virtual auto ConnectionReply(
+        const Nym_p& nym,
+        const identifier::Nym& initiator,
+        const identifier::Generic& request,
+        const identifier::Notary& server,
+        const bool ack,
+        const UnallocatedCString& url,
+        const UnallocatedCString& login,
+        const UnallocatedCString& password,
+        const UnallocatedCString& key,
+        const opentxs::PasswordPrompt& reason) const noexcept(false)
+        -> OTConnectionReply = 0;
     virtual auto ConnectionReply(
         const Nym_p& nym,
         const proto::PeerReply& serialized) const noexcept(false)
         -> OTConnectionReply = 0;
-    using session::Factory::ConnectionRequest;
+    virtual auto ConnectionRequest(
+        const Nym_p& nym,
+        const identifier::Nym& recipient,
+        const contract::peer::ConnectionInfoType type,
+        const identifier::Notary& server,
+        const opentxs::PasswordPrompt& reason) const noexcept(false)
+        -> OTConnectionRequest = 0;
     virtual auto ConnectionRequest(
         const Nym_p& nym,
         const proto::PeerRequest& serialized) const noexcept(false)
@@ -144,7 +231,16 @@ public:
     virtual auto Cron() const -> std::unique_ptr<OTCron> = 0;
     virtual auto CronItem(const String& strCronItem) const
         -> std::unique_ptr<OTCronItem> = 0;
-    using session::Factory::CurrencyContract;
+    virtual auto CurrencyContract(
+        const Nym_p& nym,
+        const UnallocatedCString& shortname,
+        const UnallocatedCString& terms,
+        const UnitType unitOfAccount,
+        const VersionNumber version,
+        const opentxs::PasswordPrompt& reason,
+        const display::Definition& displayDefinition,
+        const Amount& redemptionIncrement) const noexcept(false)
+        -> OTCurrencyContract = 0;
     virtual auto CurrencyContract(
         const Nym_p& nym,
         const proto::UnitDefinition serialized) const noexcept(false)
@@ -152,6 +248,14 @@ public:
     using session::Factory::Data;
     virtual auto Data(const google::protobuf::MessageLite& input) const
         -> ByteArray = 0;
+    virtual auto Envelope() const noexcept -> OTEnvelope = 0;
+    virtual auto Envelope(const opentxs::Armored& ciphertext) const
+        noexcept(false) -> OTEnvelope = 0;
+    virtual auto Envelope(
+        const opentxs::crypto::Envelope::SerializedType& serialized) const
+        noexcept(false) -> OTEnvelope = 0;
+    virtual auto Envelope(const opentxs::ReadView& serialized) const
+        noexcept(false) -> OTEnvelope = 0;
     auto InternalSession() const noexcept -> const Factory& final
     {
         return *this;
@@ -184,7 +288,19 @@ public:
         itemType theType,
         const identifier::Generic& pDestinationAcctID) const
         -> std::unique_ptr<opentxs::Item> = 0;
-    using session::Factory::Keypair;
+    virtual auto Keypair(
+        const opentxs::crypto::Parameters& nymParameters,
+        const VersionNumber version,
+        const opentxs::crypto::key::asymmetric::Role role,
+        const opentxs::PasswordPrompt& reason) const -> OTKeypair = 0;
+    virtual auto Keypair(
+        const UnallocatedCString& fingerprint,
+        const Bip32Index nym,
+        const Bip32Index credset,
+        const Bip32Index credindex,
+        const opentxs::crypto::EcdsaCurve& curve,
+        const opentxs::crypto::key::asymmetric::Role role,
+        const opentxs::PasswordPrompt& reason) const -> OTKeypair = 0;
     virtual auto Keypair(
         const proto::AsymmetricKey& serializedPubkey,
         const proto::AsymmetricKey& serializedPrivkey) const -> OTKeypair = 0;
@@ -214,12 +330,27 @@ public:
         const identifier::UnitDefinition& CURRENCY_TYPE_ID,
         const Amount& lScale) const -> std::unique_ptr<OTMarket> = 0;
     virtual auto Message() const -> std::unique_ptr<opentxs::Message> = 0;
-    using session::Factory::OutbailmentReply;
+    virtual auto OutbailmentReply(
+        const Nym_p& nym,
+        const identifier::Nym& initiator,
+        const identifier::Generic& request,
+        const identifier::Notary& server,
+        const UnallocatedCString& terms,
+        const opentxs::PasswordPrompt& reason) const noexcept(false)
+        -> OTOutbailmentReply = 0;
     virtual auto OutbailmentReply(
         const Nym_p& nym,
         const proto::PeerReply& serialized) const noexcept(false)
         -> OTOutbailmentReply = 0;
-    using session::Factory::OutbailmentRequest;
+    virtual auto OutbailmentRequest(
+        const Nym_p& nym,
+        const identifier::Nym& recipientID,
+        const identifier::UnitDefinition& unitID,
+        const identifier::Notary& serverID,
+        const Amount& amount,
+        const UnallocatedCString& terms,
+        const opentxs::PasswordPrompt& reason) const noexcept(false)
+        -> OTOutbailmentRequest = 0;
     virtual auto OutbailmentRequest(
         const Nym_p& nym,
         const proto::PeerRequest& serialized) const noexcept(false)
@@ -257,15 +388,42 @@ public:
         const identifier::Generic& RECIPIENT_ACCT_ID,
         const identifier::Nym& RECIPIENT_NYM_ID) const
         -> std::unique_ptr<OTPaymentPlan> = 0;
-    using session::Factory::PeerObject;
+    virtual auto PeerObject(
+        const Nym_p& senderNym,
+        const UnallocatedCString& message) const
+        -> std::unique_ptr<opentxs::PeerObject> = 0;
+    virtual auto PeerObject(
+        const Nym_p& senderNym,
+        const UnallocatedCString& payment,
+        const bool isPayment) const -> std::unique_ptr<opentxs::PeerObject> = 0;
+    virtual auto PeerObject(const Nym_p& senderNym, otx::blind::Purse&& purse)
+        const -> std::unique_ptr<opentxs::PeerObject> = 0;
+    virtual auto PeerObject(
+        const OTPeerRequest request,
+        const OTPeerReply reply,
+        const VersionNumber version) const
+        -> std::unique_ptr<opentxs::PeerObject> = 0;
+    virtual auto PeerObject(
+        const OTPeerRequest request,
+        const VersionNumber version) const
+        -> std::unique_ptr<opentxs::PeerObject> = 0;
+    virtual auto PeerObject(
+        const Nym_p& recipientNym,
+        const opentxs::Armored& encrypted,
+        const opentxs::PasswordPrompt& reason) const
+        -> std::unique_ptr<opentxs::PeerObject> = 0;
     virtual auto PeerObject(
         const Nym_p& signerNym,
         const proto::PeerObject& serialized) const
         -> std::unique_ptr<opentxs::PeerObject> = 0;
-    using session::Factory::PeerReply;
+    virtual auto PeerReply() const noexcept -> OTPeerReply = 0;
+    virtual auto PeerReply(const Nym_p& nym, const ReadView& view) const
+        noexcept(false) -> OTPeerReply = 0;
     virtual auto PeerReply(const Nym_p& nym, const proto::PeerReply& serialized)
         const noexcept(false) -> OTPeerReply = 0;
-    using session::Factory::PeerRequest;
+    virtual auto PeerRequest() const noexcept -> OTPeerRequest = 0;
+    virtual auto PeerRequest(const Nym_p& nym, const ReadView& view) const
+        noexcept(false) -> OTPeerRequest = 0;
     virtual auto PeerRequest(
         const Nym_p& nym,
         const proto::PeerRequest& serialized) const noexcept(false)
@@ -273,16 +431,34 @@ public:
     using session::Factory::Purse;
     virtual auto Purse(const proto::Purse& serialized) const noexcept
         -> otx::blind::Purse = 0;
-    using session::Factory::ReplyAcknowledgement;
+    virtual auto ReplyAcknowledgement(
+        const Nym_p& nym,
+        const identifier::Nym& initiator,
+        const identifier::Generic& request,
+        const identifier::Notary& server,
+        const contract::peer::PeerRequestType type,
+        const bool& ack,
+        const opentxs::PasswordPrompt& reason) const noexcept(false)
+        -> OTReplyAcknowledgement = 0;
     virtual auto ReplyAcknowledgement(
         const Nym_p& nym,
         const proto::PeerReply& serialized) const noexcept(false)
         -> OTReplyAcknowledgement = 0;
-    using session::Factory::SecurityContract;
+    virtual auto SecurityContract(
+        const Nym_p& nym,
+        const UnallocatedCString& shortname,
+        const UnallocatedCString& terms,
+        const UnitType unitOfAccount,
+        const VersionNumber version,
+        const opentxs::PasswordPrompt& reason,
+        const display::Definition& displayDefinition,
+        const Amount& redemptionIncrement) const noexcept(false)
+        -> OTSecurityContract = 0;
     virtual auto SecurityContract(
         const Nym_p& nym,
         const proto::UnitDefinition serialized) const noexcept(false)
         -> OTSecurityContract = 0;
+    virtual auto ServerContract() const noexcept(false) -> OTServerContract = 0;
     virtual auto Scriptable(const String& strCronItem) const
         -> std::unique_ptr<OTScriptable> = 0;
     virtual auto SignedFile() const -> std::unique_ptr<OTSignedFile> = 0;
@@ -295,7 +471,15 @@ public:
     virtual auto SmartContract() const -> std::unique_ptr<OTSmartContract> = 0;
     virtual auto SmartContract(const identifier::Notary& NOTARY_ID) const
         -> std::unique_ptr<OTSmartContract> = 0;
-    using session::Factory::StoreSecret;
+    virtual auto StoreSecret(
+        const Nym_p& nym,
+        const identifier::Nym& recipientID,
+        const contract::peer::SecretType type,
+        const UnallocatedCString& primary,
+        const UnallocatedCString& secondary,
+        const identifier::Notary& server,
+        const opentxs::PasswordPrompt& reason) const noexcept(false)
+        -> OTStoreSecret = 0;
     virtual auto StoreSecret(
         const Nym_p& nym,
         const proto::PeerRequest& serialized) const noexcept(false)
@@ -373,7 +557,7 @@ public:
         originType theOriginType = originType::not_applicable,
         std::int64_t lTransactionNum = 0) const
         -> std::unique_ptr<OTTransaction> = 0;
-    using session::Factory::UnitDefinition;
+    virtual auto UnitDefinition() const noexcept -> OTUnitDefinition = 0;
     virtual auto UnitDefinition(
         const Nym_p& nym,
         const proto::UnitDefinition serialized) const noexcept(false)

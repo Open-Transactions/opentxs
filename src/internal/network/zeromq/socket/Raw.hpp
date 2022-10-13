@@ -8,7 +8,7 @@
 #include <chrono>
 
 #include "internal/network/zeromq/Types.hpp"
-#include "opentxs/network/zeromq/socket/Types.hpp"
+#include "internal/network/zeromq/socket/Types.hpp"
 #include "opentxs/util/Bytes.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)

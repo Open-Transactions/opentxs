@@ -6,24 +6,13 @@
 target_sources(
   opentxs-common
   PRIVATE
+    "${opentxs_SOURCE_DIR}/src/internal/interface/ui/NymList.hpp"
+    "${opentxs_SOURCE_DIR}/src/internal/interface/ui/NymListItem.hpp"
     "NymList.cpp"
     "NymList.hpp"
     "NymListItem.cpp"
     "NymListItem.hpp"
 )
-set(cxx-install-headers
-    "${opentxs_SOURCE_DIR}/include/opentxs/interface/ui/NymList.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/interface/ui/NymListItem.hpp"
-)
-target_sources(opentxs-common PRIVATE ${cxx-install-headers})
 target_include_directories(
   opentxs-common SYSTEM PRIVATE "${opentxs_SOURCE_DIR}/deps/cs_libguarded/src"
 )
-
-if(OPENTXS_STANDALONE)
-  install(
-    FILES ${cxx-install-headers}
-    DESTINATION include/opentxs/interface/ui
-    COMPONENT dev
-  )
-endif()

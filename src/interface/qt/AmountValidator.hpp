@@ -22,14 +22,14 @@
 #include <tuple>
 
 #include "interface/ui/accountactivity/AccountActivity.hpp"
+#include "internal/core/contract/Unit.hpp"
+#include "internal/interface/ui/AccountActivity.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/core/Types.hpp"
-#include "opentxs/core/contract/Unit.hpp"
 #include "opentxs/core/display/Definition.hpp"
 #include "opentxs/core/display/Scale.hpp"
 #include "opentxs/interface/qt/AmountValidator.hpp"
-#include "opentxs/interface/ui/AccountActivity.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Literals.hpp"

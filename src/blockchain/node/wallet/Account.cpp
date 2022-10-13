@@ -19,6 +19,8 @@
 #include "internal/blockchain/node/Manager.hpp"
 #include "internal/blockchain/node/wallet/Reorg.hpp"
 #include "internal/network/zeromq/Context.hpp"
+#include "internal/network/zeromq/socket/SocketType.hpp"  // IWYU pragma: keep
+#include "internal/network/zeromq/socket/Types.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/Timer.hpp"
@@ -47,8 +49,6 @@
 #include "opentxs/network/zeromq/message/Frame.hpp"
 #include "opentxs/network/zeromq/message/FrameSection.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
-#include "opentxs/network/zeromq/socket/SocketType.hpp"  // IWYU pragma: keep
-#include "opentxs/network/zeromq/socket/Types.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Iterator.hpp"

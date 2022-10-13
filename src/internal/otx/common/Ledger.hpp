@@ -10,12 +10,12 @@
 #include <memory>
 #include <tuple>
 
+#include "internal/core/String.hpp"
 #include "internal/otx/Types.hpp"
 #include "internal/otx/common/Contract.hpp"
 #include "internal/otx/common/OTTransaction.hpp"
 #include "internal/otx/common/OTTransactionType.hpp"
 #include "opentxs/core/Amount.hpp"
-#include "opentxs/core/String.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
 #include "opentxs/util/Pimpl.hpp"

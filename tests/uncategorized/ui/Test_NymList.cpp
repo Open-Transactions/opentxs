@@ -25,7 +25,7 @@ public:
     static NymListData expected_;
 
     const ot::api::session::Client& api_;
-    ot::OTPasswordPrompt reason_;
+    ot::PasswordPrompt reason_;
 
     Test_NymList()
         : api_(ot::Context().StartClientSession(0))

@@ -13,6 +13,8 @@
 
 #include "internal/api/session/FactoryAPI.hpp"
 #include "internal/api/session/Wallet.hpp"
+#include "internal/core/Armored.hpp"
+#include "internal/core/String.hpp"
 #include "internal/otx/Types.hpp"
 #include "internal/otx/common/Account.hpp"
 #include "internal/otx/common/Item.hpp"
@@ -24,22 +26,20 @@
 #include "internal/otx/common/recurring/OTAgreement.hpp"
 #include "internal/otx/common/util/Common.hpp"
 #include "internal/otx/common/util/Tag.hpp"
+#include "internal/otx/consensus/Client.hpp"
 #include "internal/util/Exclusive.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/api/session/Wallet.hpp"
-#include "opentxs/core/Armored.hpp"
 #include "opentxs/core/Data.hpp"
-#include "opentxs/core/String.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/core/identifier/UnitDefinition.hpp"
 #include "opentxs/identity/Nym.hpp"
 #include "opentxs/identity/Types.hpp"
-#include "opentxs/otx/consensus/Client.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
@@ -181,8 +181,9 @@ auto OTPaymentPlan::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
             String::Factory(xml->getAttributeValue("completed"));
         initial_payment_done_ = strCompleted->Compare("true");
 
-        const auto unittype = api_.Wallet().CurrencyTypeBasedOnUnitType(
-            GetInstrumentDefinitionID());
+        const auto unittype =
+            api_.Wallet().Internal().CurrencyTypeBasedOnUnitType(
+                GetInstrumentDefinitionID());
         LogDetail()(OT_PRETTY_CLASS())("Initial Payment. Amount: ")(
             initial_payment_amount_, unittype)(". Date: ")(
             GetInitialPaymentDate())(". Completed Date: ")(

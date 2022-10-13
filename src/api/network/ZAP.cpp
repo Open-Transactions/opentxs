@@ -7,9 +7,9 @@
 #include "api/network/ZAP.hpp"  // IWYU pragma: associated
 
 #include "2_Factory.hpp"
-#include "opentxs/api/network/ZAP.hpp"
-#include "opentxs/network/zeromq/zap/Callback.hpp"
-#include "opentxs/network/zeromq/zap/Handler.hpp"
+#include "internal/network/zeromq/zap/Callback.hpp"
+#include "internal/network/zeromq/zap/Handler.hpp"
+#include "opentxs/util/Container.hpp"
 
 namespace opentxs
 {
@@ -32,13 +32,15 @@ ZAP::ZAP(const opentxs::network::zeromq::Context& context)
 }
 
 auto ZAP::RegisterDomain(
-    const UnallocatedCString& domain,
-    const Callback& callback) const -> bool
+    const std::string_view domain,
+    const opentxs::network::zeromq::zap::ReceiveCallback& callback) const
+    -> bool
 {
-    return callback_->SetDomain(domain, callback);
+    return callback_->SetDomain(UnallocatedCString{domain}, callback);
 }
 
-auto ZAP::SetDefaultPolicy(const Policy policy) const -> bool
+auto ZAP::SetDefaultPolicy(
+    const opentxs::network::zeromq::zap::Policy policy) const -> bool
 {
     return callback_->SetPolicy(policy);
 }

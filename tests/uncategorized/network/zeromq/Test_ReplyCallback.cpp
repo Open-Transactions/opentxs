@@ -7,6 +7,8 @@
 #include <opentxs/opentxs.hpp>
 #include <utility>
 
+#include "internal/network/zeromq/ReplyCallback.hpp"
+
 namespace ot = opentxs;
 
 namespace ottest

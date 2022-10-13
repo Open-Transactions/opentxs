@@ -708,7 +708,7 @@ TEST_F(Test_Hash, argon2i)
             auto secret = api.Factory().Secret(bytes);
             key->RawKey(reason, secret);
 
-            return api.Factory().DataFromBytes(secret->Bytes());
+            return api.Factory().DataFromBytes(secret.Bytes());
         }();
 
         EXPECT_EQ(hash.asHex(), hex);
@@ -736,7 +736,7 @@ TEST_F(Test_Hash, argon2id)
             auto secret = api.Factory().Secret(bytes);
             key->RawKey(reason, secret);
 
-            return api.Factory().DataFromBytes(secret->Bytes());
+            return api.Factory().DataFromBytes(secret.Bytes());
         }();
 
         EXPECT_EQ(hash.asHex(), hex);

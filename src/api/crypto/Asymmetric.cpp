@@ -9,7 +9,6 @@
 #include <AsymmetricKey.pb.h>
 #include <Enums.pb.h>
 #include <HDPath.pb.h>
-#include <type_traits>
 #include <utility>
 
 #include "internal/api/Crypto.hpp"
@@ -17,6 +16,7 @@
 #include "internal/crypto/key/Factory.hpp"
 #include "internal/crypto/key/Key.hpp"
 #include "internal/crypto/key/Null.hpp"
+#include "internal/crypto/library/EcdsaProvider.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
@@ -31,10 +31,8 @@
 #include "opentxs/crypto/key/RSA.hpp"
 #include "opentxs/crypto/key/Secp256k1.hpp"
 #include "opentxs/crypto/key/asymmetric/Algorithm.hpp"
-#include "opentxs/crypto/library/EcdsaProvider.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
-#include "opentxs/util/Pimpl.hpp"
 
 namespace opentxs::factory
 {

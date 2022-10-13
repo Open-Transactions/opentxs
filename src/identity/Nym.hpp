@@ -12,6 +12,7 @@
 #include <iosfwd>
 #include <memory>
 
+#include "internal/core/String.hpp"
 #include "internal/identity/Authority.hpp"
 #include "internal/identity/Nym.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
@@ -19,7 +20,6 @@
 #include "internal/util/Mutex.hpp"
 #include "internal/util/Types.hpp"
 #include "opentxs/core/Secret.hpp"
-#include "opentxs/core/String.hpp"
 #include "opentxs/core/Types.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
@@ -169,7 +169,7 @@ public:
         -> const UnallocatedSet<wot::claim::ClaimType> final;
     auto Source() const -> const identity::Source& final { return source_; }
     auto TransportKey(Data& pubkey, const PasswordPrompt& reason) const
-        -> OTSecret final;
+        -> Secret final;
     auto Unlock(
         const crypto::key::Asymmetric& dhKey,
         const std::uint32_t tag,

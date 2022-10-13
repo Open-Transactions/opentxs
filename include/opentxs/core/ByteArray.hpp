@@ -24,6 +24,7 @@ namespace opentxs
 {
 class Armored;
 class ByteArray;
+class ByteArrayPrivate;
 struct HexType;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
@@ -48,8 +49,6 @@ class OPENTXS_EXPORT ByteArray final : virtual public Data,
                                        virtual public Allocated
 {
 public:
-    class Imp;
-
     auto asHex() const -> UnallocatedCString final;
     auto asHex(alloc::Default alloc) const -> CString final;
     auto at(const std::size_t position) const -> const std::byte& final;
@@ -88,15 +87,15 @@ public:
     auto data() -> void* final;
     auto DecodeHex(const ReadView hex) -> bool final;
     auto end() -> iterator final;
-    auto operator+=(const Data& rhs) noexcept(false) -> ByteArray& final;
-    auto operator+=(const ReadView rhs) noexcept(false) -> ByteArray& final;
-    auto operator+=(const std::uint8_t rhs) noexcept(false) -> ByteArray& final;
-    auto operator+=(const std::uint16_t rhs) noexcept(false)
-        -> ByteArray& final;
-    auto operator+=(const std::uint32_t rhs) noexcept(false)
-        -> ByteArray& final;
-    auto operator+=(const std::uint64_t rhs) noexcept(false)
-        -> ByteArray& final;
+    auto operator+=(const Data& rhs) noexcept -> ByteArray&;
+    auto operator+=(const ReadView rhs) noexcept -> ByteArray&;
+    auto operator+=(const std::uint8_t rhs) noexcept -> ByteArray&;
+    /// Bytes are stored in big endian order
+    auto operator+=(const std::uint16_t rhs) noexcept -> ByteArray&;
+    /// Bytes are stored in big endian order
+    auto operator+=(const std::uint32_t rhs) noexcept -> ByteArray&;
+    /// Bytes are stored in big endian order
+    auto operator+=(const std::uint64_t rhs) noexcept -> ByteArray&;
     auto Randomize(const std::size_t size) -> bool final;
     auto resize(const std::size_t) -> bool final;
     auto SetSize(const std::size_t) -> bool final;
@@ -104,7 +103,7 @@ public:
     auto WriteInto() noexcept -> AllocateOutput final;
     auto zeroMemory() -> void final;
 
-    OPENTXS_NO_EXPORT ByteArray(Imp* imp) noexcept;
+    OPENTXS_NO_EXPORT ByteArray(ByteArrayPrivate* imp) noexcept;
     ByteArray(allocator_type alloc = {}) noexcept;
     ByteArray(std::uint8_t in, allocator_type alloc = {}) noexcept;
     /// Bytes are stored in big endian order
@@ -141,7 +140,7 @@ public:
     ~ByteArray() final;
 
 private:
-    Imp* imp_;
+    ByteArrayPrivate* imp_;
 
     ByteArray(
         std::size_t size,

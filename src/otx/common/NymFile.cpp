@@ -17,6 +17,9 @@
 #include "internal/api/Legacy.hpp"
 #include "internal/api/session/FactoryAPI.hpp"
 #include "internal/api/session/Session.hpp"
+#include "internal/core/Armored.hpp"
+#include "internal/core/String.hpp"
+#include "internal/identity/Source.hpp"
 #include "internal/otx/client/OTPayment.hpp"
 #include "internal/otx/common/Message.hpp"
 #include "internal/otx/common/StringXML.hpp"
@@ -26,9 +29,7 @@
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
-#include "opentxs/core/Armored.hpp"
 #include "opentxs/core/Data.hpp"
-#include "opentxs/core/String.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/identity/Source.hpp"
@@ -329,7 +330,7 @@ void NymFile::DisplayStatistics(opentxs::String& strOutput) const
         }
     }();
     strOutput.Concatenate("Source for ID:\n"sv)
-        .Concatenate(target_nym_->Source().asString())
+        .Concatenate(target_nym_->Source().Internal().asString())
         .Concatenate("\nDescription: "sv)
         .Concatenate(description_)
         .Concatenate("\n\n\n==>      Name: "sv)
@@ -413,7 +414,7 @@ auto NymFile::GetOutpaymentsByIndex(std::int32_t nIndex) const
 
 auto NymFile::GetOutpaymentsByTransNum(
     const std::int64_t lTransNum,
-    const PasswordPrompt& reason,
+    const opentxs::PasswordPrompt& reason,
     std::unique_ptr<OTPayment>* pReturnPayment /*=nullptr*/,
     std::int32_t* pnReturnIndex /*=nullptr*/) const -> std::shared_ptr<Message>
 {
@@ -462,7 +463,7 @@ auto NymFile::GetOutpaymentsCount() const -> std::int32_t
     return static_cast<std::int32_t>(outpayments_.size());
 }
 
-auto NymFile::LoadSignedNymFile(const PasswordPrompt& reason) -> bool
+auto NymFile::LoadSignedNymFile(const opentxs::PasswordPrompt& reason) -> bool
 {
     auto lock = sLock{shared_lock_};
 
@@ -470,8 +471,9 @@ auto NymFile::LoadSignedNymFile(const PasswordPrompt& reason) -> bool
 }
 
 template <typename T>
-auto NymFile::load_signed_nymfile(const T& lock, const PasswordPrompt& reason)
-    -> bool
+auto NymFile::load_signed_nymfile(
+    const T& lock,
+    const opentxs::PasswordPrompt& reason) -> bool
 {
     OT_ASSERT(verify_lock(lock));
 
@@ -598,7 +600,7 @@ auto NymFile::RemoveOutpaymentsByIndex(const std::int32_t nIndex) -> bool
 
 auto NymFile::RemoveOutpaymentsByTransNum(
     const std::int64_t lTransNum,
-    const PasswordPrompt& reason) -> bool
+    const opentxs::PasswordPrompt& reason) -> bool
 {
     std::int32_t nReturnIndex = -1;
 
@@ -746,7 +748,7 @@ auto NymFile::SerializeNymFile(const char* szFoldername, const char* szFilename)
     return bSaved;
 }
 
-auto NymFile::SaveSignedNymFile(const PasswordPrompt& reason) -> bool
+auto NymFile::SaveSignedNymFile(const opentxs::PasswordPrompt& reason) -> bool
 {
     eLock lock(shared_lock_);
 
@@ -754,8 +756,9 @@ auto NymFile::SaveSignedNymFile(const PasswordPrompt& reason) -> bool
 }
 
 template <typename T>
-auto NymFile::save_signed_nymfile(const T& lock, const PasswordPrompt& reason)
-    -> bool
+auto NymFile::save_signed_nymfile(
+    const T& lock,
+    const opentxs::PasswordPrompt& reason) -> bool
 {
     OT_ASSERT(verify_lock(lock));
 

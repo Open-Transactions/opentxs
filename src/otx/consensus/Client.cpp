@@ -12,12 +12,12 @@
 #include <memory>
 #include <utility>
 
+#include "internal/otx/consensus/TransactionStatement.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
 #include "opentxs/identity/Nym.hpp"
 #include "opentxs/otx/ConsensusType.hpp"
-#include "opentxs/otx/consensus/TransactionStatement.hpp"
 #include "opentxs/util/Log.hpp"
 #include "otx/consensus/Base.hpp"
 

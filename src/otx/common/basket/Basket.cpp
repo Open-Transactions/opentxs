@@ -11,16 +11,16 @@
 #include <memory>
 
 #include "internal/core/Factory.hpp"
+#include "internal/core/String.hpp"
 #include "internal/otx/common/Contract.hpp"
 #include "internal/otx/common/StringXML.hpp"
 #include "internal/otx/common/basket/BasketItem.hpp"
 #include "internal/otx/common/util/Tag.hpp"
+#include "internal/otx/consensus/Server.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
-#include "opentxs/core/String.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
-#include "opentxs/otx/consensus/Server.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"

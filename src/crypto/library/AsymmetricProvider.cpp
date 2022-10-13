@@ -13,6 +13,7 @@ extern "C" {
 #include <cstddef>
 #include <cstring>
 
+#include "internal/core/String.hpp"
 #include "internal/otx/common/crypto/Signature.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/OT.hpp"
@@ -22,7 +23,6 @@ extern "C" {
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Secret.hpp"
-#include "opentxs/core/String.hpp"
 #include "opentxs/crypto/HashType.hpp"
 #include "opentxs/crypto/Parameters.hpp"
 #include "opentxs/crypto/Types.hpp"
@@ -30,7 +30,6 @@ extern "C" {
 #include "opentxs/crypto/key/asymmetric/Role.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
-#include "opentxs/util/Pimpl.hpp"
 #include "util/Sodium.hpp"
 
 namespace opentxs::crypto
@@ -136,7 +135,7 @@ auto AsymmetricProvider::SeedToCurveKey(
 
     if (false == sodium::ExpandSeed(
                      seed,
-                     edPrivate->WriteInto(Secret::Mode::Mem),
+                     edPrivate.WriteInto(Secret::Mode::Mem),
                      edPublic.WriteInto())) {
         LogError()(OT_PRETTY_CLASS())("Failed to expand seed.").Flush();
 
@@ -150,7 +149,7 @@ auto AsymmetricProvider::SeedToCurveKey(
     }
 
     return sodium::ToCurveKeypair(
-        edPrivate->Bytes(), edPublic.Bytes(), privateKey, publicKey);
+        edPrivate.Bytes(), edPublic.Bytes(), privateKey, publicKey);
 }
 
 auto AsymmetricProvider::SignContract(

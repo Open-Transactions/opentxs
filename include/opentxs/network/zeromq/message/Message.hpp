@@ -10,7 +10,6 @@
 
 #include "opentxs/Export.hpp"
 #include "opentxs/util/Bytes.hpp"
-#include "opentxs/util/Pimpl.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -107,11 +106,6 @@ public:
     auto AddFrame(const Input& input) noexcept -> Frame&
     {
         return AddFrame(&input, sizeof(input));
-    }
-    template <typename Input>
-    auto AddFrame(const Pimpl<Input>& input) -> Frame&
-    {
-        return AddFrame(input.get());
     }
     auto AddFrame(const void* input, const std::size_t size) noexcept -> Frame&;
     auto AppendBytes() noexcept -> AllocateOutput;

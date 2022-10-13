@@ -6,6 +6,9 @@
 target_sources(
   opentxs-common
   PRIVATE
+    "${opentxs_SOURCE_DIR}/src/internal/interface/ui/SeedTreeNym.hpp"
+    "${opentxs_SOURCE_DIR}/src/internal/interface/ui/SeedTree.hpp"
+    "${opentxs_SOURCE_DIR}/src/internal/interface/ui/SeedTreeItem.hpp"
     "SeedTreeNym.cpp"
     "SeedTreeNym.hpp"
     "SeedTree.cpp"
@@ -13,20 +16,6 @@ target_sources(
     "SeedTreeItem.cpp"
     "SeedTreeItem.hpp"
 )
-set(cxx-install-headers
-    "${opentxs_SOURCE_DIR}/include/opentxs/interface/ui/SeedTreeNym.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/interface/ui/SeedTree.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/interface/ui/SeedTreeItem.hpp"
-)
 target_include_directories(
   opentxs-common SYSTEM PRIVATE "${opentxs_SOURCE_DIR}/deps/cs_libguarded/src"
 )
-target_sources(opentxs-common PRIVATE ${cxx-install-headers})
-
-if(OPENTXS_STANDALONE)
-  install(
-    FILES ${cxx-install-headers}
-    DESTINATION include/opentxs/interface/ui
-    COMPONENT dev
-  )
-endif()

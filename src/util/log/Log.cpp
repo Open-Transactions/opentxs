@@ -13,12 +13,12 @@
 #include <memory>
 #include <sstream>
 
+#include "internal/core/Armored.hpp"
+#include "internal/core/String.hpp"
 #include "internal/otx/common/StringXML.hpp"
 #include "opentxs/blockchain/block/Outpoint.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
 #include "opentxs/core/Amount.hpp"
-#include "opentxs/core/Armored.hpp"
-#include "opentxs/core/String.hpp"
 #include "opentxs/core/UnitType.hpp"
 #include "opentxs/core/display/Scale.hpp"
 #include "opentxs/core/identifier/Generic.hpp"

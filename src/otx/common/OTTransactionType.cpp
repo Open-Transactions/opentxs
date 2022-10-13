@@ -8,14 +8,14 @@
 
 #include <cstdint>
 
+#include "internal/core/Armored.hpp"
+#include "internal/core/String.hpp"
 #include "internal/otx/Types.hpp"
 #include "internal/otx/common/Contract.hpp"
 #include "internal/otx/common/NumList.hpp"
 #include "internal/otx/common/transaction/Helpers.hpp"
 #include "internal/util/LogMacros.hpp"
-#include "opentxs/core/Armored.hpp"
 #include "opentxs/core/Data.hpp"
-#include "opentxs/core/String.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/util/Log.hpp"
 

@@ -9,7 +9,7 @@
 #include <irrxml/irrXML.hpp>
 
 #include "core/String.hpp"
-#include "opentxs/core/String.hpp"
+#include "internal/core/String.hpp"
 
 namespace opentxs
 {

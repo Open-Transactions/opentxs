@@ -10,11 +10,13 @@
 #include "internal/api/crypto/Factory.hpp"
 #include "internal/crypto/Crypto.hpp"
 #include "internal/crypto/Factory.hpp"
+#include "internal/crypto/library/AsymmetricProvider.hpp"
 #include "internal/crypto/library/Factory.hpp"
 #include "internal/crypto/library/Null.hpp"
 #include "internal/crypto/library/OpenSSL.hpp"
 #include "internal/crypto/library/Secp256k1.hpp"
 #include "internal/crypto/library/Sodium.hpp"
+#include "internal/crypto/library/SymmetricProvider.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/api/crypto/Config.hpp"
 #include "opentxs/api/crypto/Encode.hpp"
@@ -26,8 +28,6 @@
 #include "opentxs/crypto/key/asymmetric/Algorithm.hpp"
 #include "opentxs/crypto/key/symmetric/Algorithm.hpp"
 #include "opentxs/crypto/key/symmetric/Source.hpp"
-#include "opentxs/crypto/library/AsymmetricProvider.hpp"
-#include "opentxs/crypto/library/SymmetricProvider.hpp"
 #include "opentxs/util/Log.hpp"
 
 namespace opentxs::factory

@@ -23,7 +23,13 @@
 #include "internal/api/session/FactoryAPI.hpp"
 #include "internal/api/session/Session.hpp"
 #include "internal/api/session/Wallet.hpp"
+#include "internal/core/String.hpp"
+#include "internal/core/contract/BasketContract.hpp"
+#include "internal/core/contract/Unit.hpp"
+#include "internal/network/zeromq/Context.hpp"
 #include "internal/network/zeromq/message/Message.hpp"
+#include "internal/network/zeromq/socket/Push.hpp"
+#include "internal/network/zeromq/socket/Types.hpp"
 #include "internal/otx/Types.hpp"
 #include "internal/otx/blind/Factory.hpp"
 #include "internal/otx/blind/Mint.hpp"
@@ -42,6 +48,7 @@
 #include "internal/otx/common/recurring/OTPaymentPlan.hpp"
 #include "internal/otx/common/trade/OTOffer.hpp"
 #include "internal/otx/common/trade/OTTrade.hpp"
+#include "internal/otx/consensus/Client.hpp"
 #include "internal/otx/smartcontract/OTSmartContract.hpp"
 #include "internal/serialization/protobuf/Check.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
@@ -51,6 +58,7 @@
 #include "internal/util/Editor.hpp"
 #include "internal/util/Exclusive.hpp"
 #include "internal/util/LogMacros.hpp"
+#include "internal/util/SharedPimpl.hpp"
 #include "opentxs/api/network/Network.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Endpoints.hpp"
@@ -60,9 +68,6 @@
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Data.hpp"
-#include "opentxs/core/String.hpp"
-#include "opentxs/core/contract/BasketContract.hpp"
-#include "opentxs/core/contract/Unit.hpp"
 #include "opentxs/core/contract/UnitType.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
@@ -72,17 +77,13 @@
 #include "opentxs/identity/Types.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
-#include "opentxs/network/zeromq/socket/Push.hpp"
-#include "opentxs/network/zeromq/socket/Types.hpp"
 #include "opentxs/otx/blind/Mint.hpp"
 #include "opentxs/otx/blind/Purse.hpp"
 #include "opentxs/otx/blind/Token.hpp"
-#include "opentxs/otx/consensus/Client.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Numbers.hpp"
 #include "opentxs/util/Pimpl.hpp"
-#include "opentxs/util/SharedPimpl.hpp"
 #include "opentxs/util/Time.hpp"
 #include "otx/server/Macros.hpp"
 #include "otx/server/PayDividendVisitor.hpp"
@@ -103,7 +104,7 @@ Notary::Notary(
     : server_(server)
     , reason_(reason)
     , manager_(manager)
-    , notification_socket_(manager_.Network().ZeroMQ().PushSocket(
+    , notification_socket_(manager_.Network().ZeroMQ().Internal().PushSocket(
           zmq::socket::Direction::Connect))
 {
     const auto bound = notification_socket_->Start(
@@ -177,8 +178,9 @@ void Notary::cancel_cheque(
     }
 
     if (cheque.GetAmount() != 0) {
-        const auto unittype = manager_.Wallet().CurrencyTypeBasedOnUnitType(
-            cheque.GetInstrumentDefinitionID());
+        const auto unittype =
+            manager_.Wallet().Internal().CurrencyTypeBasedOnUnitType(
+                cheque.GetInstrumentDefinitionID());
         LogError()(OT_PRETTY_CLASS())("Invalid amount (")(
             cheque.GetAmount(), unittype)(").")
             .Flush();
@@ -288,12 +290,12 @@ void Notary::deposit_cheque(
     std::shared_ptr<Ledger> senderInbox{nullptr};
     std::shared_ptr<Ledger> senderOutbox{nullptr};
     std::shared_ptr<OTTransaction> inboxItem{nullptr};
-    const api::session::Wallet::AccountCallback push{
+    const api::session::internal::Wallet::AccountCallback push{
         [&](const Account& account) {
             this->send_push_notification(
                 account, senderInbox, senderOutbox, inboxItem);
         }};
-    const api::session::Wallet::AccountCallback noPush{};
+    const api::session::internal::Wallet::AccountCallback noPush{};
     ExclusiveAccount voucherAccount{};
 
     if (isVoucher) {
@@ -1186,9 +1188,11 @@ void Notary::NotarizeTransfer(
                         theFromAccount.Abort();
                         destinationAccount.Abort();
                         const auto unittype =
-                            manager_.Wallet().CurrencyTypeBasedOnUnitType(
-                                destinationAccount.get()
-                                    .GetInstrumentDefinitionID());
+                            manager_.Wallet()
+                                .Internal()
+                                .CurrencyTypeBasedOnUnitType(
+                                    destinationAccount.get()
+                                        .GetInstrumentDefinitionID());
                         LogError()(OT_PRETTY_CLASS())(
                             "Unable to debit account ")(strAccountID.get())(
                             " in the amount of: ")(pItem->GetAmount(), unittype)
@@ -1913,8 +1917,9 @@ void Notary::NotarizePayDividend(
                 // instrument definition as theSourceAccount.get().)
                 const identifier::Generic& SHARES_INSTRUMENT_DEFINITION_ID =
                     theVoucherRequest->GetInstrumentDefinitionID();
-                auto pSharesContract = manager_.Wallet().UnitDefinition(
-                    theVoucherRequest->GetInstrumentDefinitionID());
+                auto pSharesContract =
+                    manager_.Wallet().Internal().UnitDefinition(
+                        theVoucherRequest->GetInstrumentDefinitionID());
                 auto sharesIssuerAccount =
                     manager_.Wallet().Internal().mutable_Account(
                         SHARES_ISSUER_ACCT_ID, reason_);
@@ -1994,9 +1999,11 @@ void Notary::NotarizePayDividend(
                     const auto strIssuerAcctID =
                         String::Factory(SHARES_ISSUER_ACCT_ID);
                     const auto unittype =
-                        manager_.Wallet().CurrencyTypeBasedOnUnitType(
-                            sharesIssuerAccount.get()
-                                .GetInstrumentDefinitionID());
+                        manager_.Wallet()
+                            .Internal()
+                            .CurrencyTypeBasedOnUnitType(
+                                sharesIssuerAccount.get()
+                                    .GetInstrumentDefinitionID());
                     LogError()(OT_PRETTY_CLASS())(
                         "ERROR: total payout of dividend as calculated (")(
                         (sharesIssuerAccount.get().GetBalance() * (-1) *
@@ -2011,9 +2018,11 @@ void Notary::NotarizePayDividend(
                     const auto strIssuerAcctID =
                         String::Factory(SHARES_ISSUER_ACCT_ID);
                     const auto unittype =
-                        manager_.Wallet().CurrencyTypeBasedOnUnitType(
-                            sharesIssuerAccount.get()
-                                .GetInstrumentDefinitionID());
+                        manager_.Wallet()
+                            .Internal()
+                            .CurrencyTypeBasedOnUnitType(
+                                sharesIssuerAccount.get()
+                                    .GetInstrumentDefinitionID());
                     LogError()(OT_PRETTY_CLASS())(
                         "FAILURE: not enough funds (")(
                         theSourceAccount.get().GetBalance(),
@@ -2136,6 +2145,7 @@ void Notary::NotarizePayDividend(
                                 {
                                     const auto unittype =
                                         manager_.Wallet()
+                                            .Internal()
                                             .CurrencyTypeBasedOnUnitType(
                                                 voucherReserveAccount.get()
                                                     .GetInstrumentDefinitionID());
@@ -2302,6 +2312,7 @@ void Notary::NotarizePayDividend(
                                         //
                                         const auto unittype =
                                             manager_.Wallet()
+                                                .Internal()
                                                 .CurrencyTypeBasedOnUnitType(
                                                     PAYOUT_INSTRUMENT_DEFINITION_ID);
                                         LogError()(OT_PRETTY_CLASS())(
@@ -2468,6 +2479,7 @@ void Notary::NotarizePayDividend(
                                                         String::Factory(NYM_ID);
                                                 const auto unittype =
                                                     manager_.Wallet()
+                                                        .Internal()
                                                         .CurrencyTypeBasedOnUnitType(
                                                             PAYOUT_INSTRUMENT_DEFINITION_ID);
                                                 LogError()(OT_PRETTY_CLASS())(
@@ -2496,6 +2508,7 @@ void Notary::NotarizePayDividend(
                                                     String::Factory(NYM_ID);
                                             const auto unittype =
                                                 manager_.Wallet()
+                                                    .Internal()
                                                     .CurrencyTypeBasedOnUnitType(
                                                         PAYOUT_INSTRUMENT_DEFINITION_ID);
                                             LogError()(OT_PRETTY_CLASS())(
@@ -4660,8 +4673,9 @@ void Notary::NotarizeExchangeBasket(
                 } else {
                     try {
                         // Now we get a pointer to its asset contract...
-                        const auto basket = manager_.Wallet().BasketContract(
-                            BASKET_CONTRACT_ID);
+                        const auto basket =
+                            manager_.Wallet().Internal().BasketContract(
+                                BASKET_CONTRACT_ID);
                         // Now let's load up the actual basket, from the actual
                         // asset contract.
                         std::int64_t currencies = basket->Currencies().size();
@@ -7151,8 +7165,9 @@ void Notary::NotarizeProcessInbox(
             pServerTransaction->GetReceiptAmount(reason_) != item.GetAmount()) {
             const auto& INSTRUMENT_DEFINITION_ID =
                 theAccount.get().GetInstrumentDefinitionID();
-            const auto unittype = manager_.Wallet().CurrencyTypeBasedOnUnitType(
-                INSTRUMENT_DEFINITION_ID);
+            const auto unittype =
+                manager_.Wallet().Internal().CurrencyTypeBasedOnUnitType(
+                    INSTRUMENT_DEFINITION_ID);
             LogError()(OT_PRETTY_CLASS())("Receipt amounts don't "
                                           "match: ")(
                 pServerTransaction->GetReceiptAmount(reason_), unittype)(
@@ -9030,8 +9045,9 @@ auto Notary::process_token_withdrawal(
     } else {
         const auto& INSTRUMENT_DEFINITION_ID =
             account.GetInstrumentDefinitionID();
-        const auto unittype = manager_.Wallet().CurrencyTypeBasedOnUnitType(
-            INSTRUMENT_DEFINITION_ID);
+        const auto unittype =
+            manager_.Wallet().Internal().CurrencyTypeBasedOnUnitType(
+                INSTRUMENT_DEFINITION_ID);
         LogError()(OT_PRETTY_CLASS())("Unable to debit account ")(
             account.GetPurportedAccountID())(" in the amount of: ")(
             value, unittype)

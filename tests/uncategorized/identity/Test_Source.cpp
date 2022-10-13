@@ -26,6 +26,7 @@
 #include "internal/api/crypto/Seed.hpp"
 #include "internal/identity/Authority.hpp"
 #include "internal/identity/Nym.hpp"
+#include "internal/identity/Source.hpp"
 #include "ottest/data/crypto/PaymentCodeV3.hpp"
 #include "ottest/mocks/identity/credential/Primary.hpp"
 #include "util/HDIndex.hpp"
@@ -38,9 +39,9 @@ class Test_Source : public ::testing::Test
 {
 public:
     const api::session::Client& client_;
-    const OTPasswordPrompt reason_;
-    OTSecret words_;
-    OTSecret phrase_;
+    const PasswordPrompt reason_;
+    Secret words_;
+    Secret phrase_;
     const std::uint8_t version_ = 1;
     const int nym_ = 1;
     const ot::UnallocatedCString alias_ = ot::UnallocatedCString{"alias"};
@@ -233,7 +234,7 @@ TEST_F(Test_Source, Serialize_seedBIP39SourceBip47_ShouldSetProperFields)
     setupSourceForBip47(ot::crypto::SeedStyle::BIP39);
     opentxs::proto::NymIDSource nymIdProto;
 
-    EXPECT_TRUE(source_->Serialize(nymIdProto));
+    EXPECT_TRUE(source_->Internal().Serialize(nymIdProto));
     EXPECT_EQ(nymIdProto.version(), version_);
     EXPECT_EQ(nymIdProto.type(), proto::SourceType::SOURCETYPE_BIP47);
     EXPECT_FALSE(nymIdProto.paymentcode().key().empty());
@@ -245,7 +246,7 @@ TEST_F(Test_Source, Serialize_seedBIP39SourcePubKey_ShouldSetProperFields)
 {
     setupSourceForPubKey(ot::crypto::SeedStyle::BIP39);
     opentxs::proto::NymIDSource nymIdProto;
-    EXPECT_TRUE(source_->Serialize(nymIdProto));
+    EXPECT_TRUE(source_->Internal().Serialize(nymIdProto));
     EXPECT_EQ(
         nymIdProto.version(), opentxs::crypto::key::Asymmetric::DefaultVersion);
 
@@ -264,7 +265,7 @@ TEST_F(Test_Source, Sign_ShouldReturnTrue)
     Authority();
     EXPECT_CALL(credentialMock, Internal())
         .WillOnce(ReturnRef(authority_->GetMasterCredential().Internal()));
-    EXPECT_TRUE(source_->Sign(credentialMock, sig, reason_));
+    EXPECT_TRUE(source_->Internal().Sign(credentialMock, sig, reason_));
 }
 
 /////////////// VERIFY ////////////////
@@ -345,21 +346,21 @@ TEST_F(Test_Source, Verify_seedPubKeySourceBip47_ShouldReturnTrue)
     opentxs::proto::Signature sourceSignature;
     sourceSignature.set_version(version_);
 
-    source_->Verify(credential, sourceSignature);
+    source_->Internal().Verify(credential, sourceSignature);
 }
 
 /////////////// NO THROW METHODS ////////////////
 TEST_F(Test_Source, seedBIP39SourceBip47_NoThrowMethodChecks)
 {
     setupSourceForBip47(ot::crypto::SeedStyle::BIP39);
-    EXPECT_NO_THROW(source_->asString());
-    EXPECT_NO_THROW(source_->Description());
+    EXPECT_NO_THROW(source_->Internal().asString());
+    EXPECT_NO_THROW(source_->Internal().Description());
     EXPECT_NO_THROW(source_->NymID());
     EXPECT_EQ(source_->Type(), identity::SourceType::Bip47);
 
     setupSourceForPubKey(ot::crypto::SeedStyle::BIP39);
-    EXPECT_NO_THROW(source_->asString());
-    EXPECT_NO_THROW(source_->Description());
+    EXPECT_NO_THROW(source_->Internal().asString());
+    EXPECT_NO_THROW(source_->Internal().Description());
     EXPECT_NO_THROW(source_->NymID());
     EXPECT_EQ(source_->Type(), identity::SourceType::PubKey);
 }

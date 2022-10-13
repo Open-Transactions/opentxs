@@ -21,16 +21,35 @@
 
 #include "core/StateMachine.hpp"
 #include "internal/api/FactoryAPI.hpp"
+#include "internal/api/Settings.hpp"
 #include "internal/api/session/Client.hpp"
 #include "internal/api/session/Endpoints.hpp"
 #include "internal/api/session/Factory.hpp"
 #include "internal/api/session/FactoryAPI.hpp"
 #include "internal/api/session/Wallet.hpp"
 #include "internal/core/Factory.hpp"
+#include "internal/core/String.hpp"
+#include "internal/core/contract/ServerContract.hpp"
+#include "internal/core/contract/peer/BailmentNotice.hpp"
+#include "internal/core/contract/peer/BailmentReply.hpp"
+#include "internal/core/contract/peer/BailmentRequest.hpp"
+#include "internal/core/contract/peer/ConnectionReply.hpp"
+#include "internal/core/contract/peer/ConnectionRequest.hpp"
+#include "internal/core/contract/peer/NoticeAcknowledgement.hpp"
+#include "internal/core/contract/peer/OutBailmentReply.hpp"
+#include "internal/core/contract/peer/OutBailmentRequest.hpp"
+#include "internal/core/contract/peer/StoreSecret.hpp"
+#include "internal/network/zeromq/Context.hpp"
+#include "internal/network/zeromq/ListenCallback.hpp"
+#include "internal/network/zeromq/socket/Publish.hpp"
+#include "internal/network/zeromq/socket/Pull.hpp"
+#include "internal/network/zeromq/socket/Subscribe.hpp"
+#include "internal/network/zeromq/socket/Types.hpp"
 #include "internal/otx/client/OTPayment.hpp"
 #include "internal/otx/client/obsolete/OT_API.hpp"
 #include "internal/otx/common/Account.hpp"
 #include "internal/otx/common/Cheque.hpp"
+#include "internal/otx/consensus/Server.hpp"
 #include "internal/serialization/protobuf/Proto.tpp"
 #include "internal/util/Editor.hpp"
 #include "internal/util/Flag.hpp"
@@ -38,6 +57,7 @@
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/Shared.hpp"
+#include "internal/util/SharedPimpl.hpp"
 #include "opentxs/api/Settings.hpp"
 #include "opentxs/api/network/Network.hpp"
 #include "opentxs/api/session/Client.hpp"
@@ -50,18 +70,7 @@
 #include "opentxs/api/session/Workflow.hpp"
 #include "opentxs/core/Contact.hpp"
 #include "opentxs/core/Data.hpp"
-#include "opentxs/core/String.hpp"
-#include "opentxs/core/contract/ServerContract.hpp"
-#include "opentxs/core/contract/peer/BailmentNotice.hpp"
-#include "opentxs/core/contract/peer/BailmentReply.hpp"
-#include "opentxs/core/contract/peer/BailmentRequest.hpp"
 #include "opentxs/core/contract/peer/ConnectionInfoType.hpp"
-#include "opentxs/core/contract/peer/ConnectionReply.hpp"
-#include "opentxs/core/contract/peer/ConnectionRequest.hpp"
-#include "opentxs/core/contract/peer/NoticeAcknowledgement.hpp"
-#include "opentxs/core/contract/peer/OutBailmentReply.hpp"
-#include "opentxs/core/contract/peer/OutBailmentRequest.hpp"
-#include "opentxs/core/contract/peer/StoreSecret.hpp"
 #include "opentxs/core/contract/peer/Types.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
@@ -75,28 +84,20 @@
 #include "opentxs/identity/wot/claim/Item.hpp"
 #include "opentxs/identity/wot/claim/SectionType.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
-#include "opentxs/network/zeromq/ListenCallback.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
 #include "opentxs/network/zeromq/message/FrameSection.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/network/zeromq/message/Message.tpp"
-#include "opentxs/network/zeromq/socket/Publish.hpp"
-#include "opentxs/network/zeromq/socket/Pull.hpp"
-#include "opentxs/network/zeromq/socket/Subscribe.hpp"
-#include "opentxs/network/zeromq/socket/Types.hpp"
 #include "opentxs/otx/LastReplyStatus.hpp"
 #include "opentxs/otx/Reply.hpp"
 #include "opentxs/otx/ServerReplyType.hpp"
 #include "opentxs/otx/Types.hpp"
 #include "opentxs/otx/client/PaymentWorkflowState.hpp"
 #include "opentxs/otx/client/PaymentWorkflowType.hpp"
-#include "opentxs/otx/consensus/Server.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/NymEditor.hpp"
-#include "opentxs/util/PasswordPrompt.hpp"
 #include "opentxs/util/Pimpl.hpp"
-#include "opentxs/util/SharedPimpl.hpp"
 #include "opentxs/util/Types.hpp"
 #include "opentxs/util/WorkType.hpp"
 #include "otx/client/PaymentTasks.hpp"
@@ -191,7 +192,7 @@ OTX::OTX(
         const auto endpoint = api_.Endpoints().AccountUpdate();
         LogDetail()(OT_PRETTY_CLASS())("Connecting to ")(endpoint.data())
             .Flush();
-        auto out = api_.Network().ZeroMQ().SubscribeSocket(
+        auto out = api_.Network().ZeroMQ().Internal().SubscribeSocket(
             account_subscriber_callback_.get(), "OTX account");
         const auto start = out->Start(endpoint.data());
 
@@ -204,7 +205,7 @@ OTX::OTX(
               this->process_notification(message);
           }))
     , notification_listener_([&] {
-        auto out = api_.Network().ZeroMQ().PullSocket(
+        auto out = api_.Network().ZeroMQ().Internal().PullSocket(
             notification_listener_callback_,
             zmq::socket::Direction::Bind,
             "OTX notification listener");
@@ -220,7 +221,7 @@ OTX::OTX(
               this->find_nym(message);
           }))
     , find_nym_listener_([&] {
-        auto out = api_.Network().ZeroMQ().PullSocket(
+        auto out = api_.Network().ZeroMQ().Internal().PullSocket(
             find_nym_callback_,
             zmq::socket::Direction::Bind,
             "OTX nym listener");
@@ -235,7 +236,7 @@ OTX::OTX(
               this->find_server(message);
           }))
     , find_server_listener_([&] {
-        auto out = api_.Network().ZeroMQ().PullSocket(
+        auto out = api_.Network().ZeroMQ().Internal().PullSocket(
             find_server_callback_,
             zmq::socket::Direction::Bind,
             "OTX server listener");
@@ -250,7 +251,7 @@ OTX::OTX(
               this->find_unit(message);
           }))
     , find_unit_listener_([&] {
-        auto out = api_.Network().ZeroMQ().PullSocket(
+        auto out = api_.Network().ZeroMQ().Internal().PullSocket(
             find_unit_callback_,
             zmq::socket::Direction::Bind,
             "OTX unit listener");
@@ -262,7 +263,7 @@ OTX::OTX(
         return out;
     }())
     , task_finished_([&] {
-        auto out = api_.Network().ZeroMQ().PublishSocket();
+        auto out = api_.Network().ZeroMQ().Internal().PublishSocket();
         const auto start = out->Start(api_.Endpoints().TaskComplete().data());
 
         OT_ASSERT(start);
@@ -270,7 +271,7 @@ OTX::OTX(
         return out;
     }())
     , messagability_([&] {
-        auto out = api_.Network().ZeroMQ().PublishSocket();
+        auto out = api_.Network().ZeroMQ().Internal().PublishSocket();
         const auto start = out->Start(api_.Endpoints().Messagability().data());
 
         OT_ASSERT(start);
@@ -318,7 +319,7 @@ auto OTX::AcknowledgeBailment(
         auto instantiatedRequest =
             api_.Factory().InternalSession().BailmentRequest(
                 recipientNym, serializedRequest);
-        auto peerreply = api_.Factory().BailmentReply(
+        auto peerreply = api_.Factory().InternalSession().BailmentReply(
             nym,
             instantiatedRequest->Initiator(),
             requestID,
@@ -397,7 +398,7 @@ auto OTX::AcknowledgeConnection(
         auto instantiatedRequest =
             api_.Factory().InternalSession().BailmentRequest(
                 recipientNym, serializedRequest);
-        auto peerreply = api_.Factory().ConnectionReply(
+        auto peerreply = api_.Factory().InternalSession().ConnectionReply(
             nym,
             instantiatedRequest->Initiator(),
             requestID,
@@ -456,7 +457,7 @@ auto OTX::AcknowledgeNotice(
         auto instantiatedRequest =
             api_.Factory().InternalSession().BailmentRequest(
                 recipientNym, serializedRequest);
-        auto peerreply = api_.Factory().ReplyAcknowledgement(
+        auto peerreply = api_.Factory().InternalSession().ReplyAcknowledgement(
             nym,
             instantiatedRequest->Initiator(),
             requestID,
@@ -512,7 +513,7 @@ auto OTX::AcknowledgeOutbailment(
         auto instantiatedRequest =
             api_.Factory().InternalSession().BailmentRequest(
                 recipientNym, serializedRequest);
-        auto peerreply = api_.Factory().OutbailmentReply(
+        auto peerreply = api_.Factory().InternalSession().OutbailmentReply(
             nym,
             instantiatedRequest->Initiator(),
             requestID,
@@ -806,7 +807,7 @@ auto OTX::CheckTransactionNumbers(
     const identifier::Notary& serverID,
     const std::size_t quantity) const -> bool
 {
-    auto context = api_.Wallet().ServerContext(nym, serverID);
+    auto context = api_.Wallet().Internal().ServerContext(nym, serverID);
 
     if (false == bool(context)) {
         LogError()(OT_PRETTY_CLASS())("Nym is not registered").Flush();
@@ -1130,7 +1131,7 @@ void OTX::find_server(const opentxs::network::zeromq::Message& message) const
     }
 
     try {
-        api_.Wallet().Server(id);
+        api_.Wallet().Internal().Server(id);
     } catch (...) {
         const auto taskID{next_task_id()};
         missing_servers_.Push(taskID, id);
@@ -1157,7 +1158,7 @@ void OTX::find_unit(const opentxs::network::zeromq::Message& message) const
     }
 
     try {
-        api_.Wallet().UnitDefinition(id);
+        api_.Wallet().Internal().UnitDefinition(id);
 
         return;
     } catch (...) {
@@ -1238,7 +1239,7 @@ auto OTX::get_introduction_server(const Lock& lock) const -> identifier::Notary
 
     auto keyFound{false};
     auto serverID = String::Factory();
-    api_.Config().Check_str(
+    api_.Config().Internal().Check_str(
         String::Factory(MASTER_SECTION),
         String::Factory(INTRODUCTION_SERVER_KEY),
         serverID,
@@ -1313,7 +1314,7 @@ auto OTX::InitiateBailment(
     const auto nym = api_.Wallet().Nym(localNymID);
 
     try {
-        auto peerrequest = api_.Factory().BailmentRequest(
+        auto peerrequest = api_.Factory().InternalSession().BailmentRequest(
             nym, targetNymID, instrumentDefinitionID, serverID, reason_);
 
         if (setID) { setID(peerrequest->ID()); }
@@ -1345,7 +1346,7 @@ auto OTX::InitiateOutbailment(
     const auto nym = api_.Wallet().Nym(localNymID);
 
     try {
-        auto peerrequest = api_.Factory().OutbailmentRequest(
+        auto peerrequest = api_.Factory().InternalSession().OutbailmentRequest(
             nym,
             targetNymID,
             instrumentDefinitionID,
@@ -1381,7 +1382,7 @@ auto OTX::InitiateRequestConnection(
     const auto nym = api_.Wallet().Nym(localNymID);
 
     try {
-        auto peerrequest = api_.Factory().ConnectionRequest(
+        auto peerrequest = api_.Factory().InternalSession().ConnectionRequest(
             nym, targetNymID, type, serverID, reason_);
 
         if (setID) { setID(peerrequest->ID()); }
@@ -1420,7 +1421,7 @@ auto OTX::InitiateStoreSecret(
     }
 
     try {
-        auto peerrequest = api_.Factory().StoreSecret(
+        auto peerrequest = api_.Factory().InternalSession().StoreSecret(
             nym, targetNymID, type, primary, secondary, serverID, reason_);
 
         if (setID) { setID(peerrequest->ID()); }
@@ -1548,7 +1549,7 @@ auto OTX::NotifyBailment(
     const auto nym = api_.Wallet().Nym(localNymID);
 
     try {
-        auto peerrequest = api_.Factory().BailmentNotice(
+        auto peerrequest = api_.Factory().InternalSession().BailmentNotice(
             nym,
             targetNymID,
             instrumentDefinitionID,
@@ -2207,12 +2208,15 @@ auto OTX::set_introduction_server(
     OT_ASSERT(CheckLock(lock, introduction_server_lock_));
 
     try {
+        const auto& config = api_.Config().Internal();
         auto serialized = proto::ServerContract{};
+
         if (false == contract.Serialize(serialized, true)) {
             LogError()(OT_PRETTY_CLASS())(
                 "Failed to serialize server contract.")
                 .Flush();
         }
+
         const auto instantiated = api_.Wallet().Internal().Server(serialized);
         const auto id =
             api_.Factory().Internal().NotaryIDConvertSafe(instantiated->ID());
@@ -2221,7 +2225,7 @@ auto OTX::set_introduction_server(
         OT_ASSERT(introduction_server_id_);
 
         bool dontCare = false;
-        const bool set = api_.Config().Set_str(
+        const bool set = config.Set_str(
             String::Factory(MASTER_SECTION),
             String::Factory(INTRODUCTION_SERVER_KEY),
             String::Factory(id),
@@ -2229,7 +2233,9 @@ auto OTX::set_introduction_server(
 
         OT_ASSERT(set);
 
-        api_.Config().Save();
+        if (false == config.Save()) {
+            LogAbort()(OT_PRETTY_CLASS())("failed to save config file").Abort();
+        }
 
         return id;
     } catch (...) {
@@ -2441,7 +2447,8 @@ auto OTX::valid_context(
         return false;
     }
 
-    const auto context = api_.Wallet().ServerContext(nymID, serverID);
+    const auto context =
+        api_.Wallet().Internal().ServerContext(nymID, serverID);
 
     if (false == bool(context)) {
         LogError()(OT_PRETTY_CLASS())("Context does not exist.").Flush();

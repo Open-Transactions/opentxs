@@ -12,6 +12,13 @@
 #include <thread>
 #include <utility>
 
+#include "internal/network/zeromq/Context.hpp"
+#include "internal/network/zeromq/ListenCallback.hpp"
+#include "internal/network/zeromq/socket/Request.hpp"
+#include "internal/network/zeromq/socket/Router.hpp"
+#include "internal/network/zeromq/socket/SocketType.hpp"
+#include "internal/network/zeromq/socket/Types.hpp"
+
 namespace ot = opentxs;
 namespace zmq = ot::network::zeromq;
 
@@ -46,7 +53,7 @@ public:
 
 void Test_RequestRouter::requestSocketThread(const ot::UnallocatedCString& msg)
 {
-    auto requestSocket = context_.RequestSocket();
+    auto requestSocket = context_.Internal().RequestSocket();
 
     ASSERT_NE(nullptr, &requestSocket.get());
     ASSERT_EQ(zmq::socket::Type::Request, requestSocket->Type());
@@ -73,7 +80,7 @@ void Test_RequestRouter::requestSocketThread(const ot::UnallocatedCString& msg)
 
 void Test_RequestRouter::requestSocketThreadMultipart()
 {
-    auto requestSocket = context_.RequestSocket();
+    auto requestSocket = context_.Internal().RequestSocket();
 
     ASSERT_NE(nullptr, &requestSocket.get());
     ASSERT_EQ(zmq::socket::Type::Request, requestSocket->Type());
@@ -133,8 +140,8 @@ TEST_F(Test_RequestRouter, Request_Router)
 
     ASSERT_NE(nullptr, &routerCallback.get());
 
-    auto routerSocket =
-        context_.RouterSocket(routerCallback, zmq::socket::Direction::Bind);
+    auto routerSocket = context_.Internal().RouterSocket(
+        routerCallback, zmq::socket::Direction::Bind);
 
     ASSERT_NE(nullptr, &routerSocket.get());
     ASSERT_EQ(zmq::socket::Type::Router, routerSocket->Type());
@@ -195,8 +202,8 @@ TEST_F(Test_RequestRouter, Request_2_Router_1)
 
     ASSERT_NE(nullptr, &routerCallback.get());
 
-    auto routerSocket =
-        context_.RouterSocket(routerCallback, zmq::socket::Direction::Bind);
+    auto routerSocket = context_.Internal().RouterSocket(
+        routerCallback, zmq::socket::Direction::Bind);
 
     ASSERT_NE(nullptr, &routerSocket.get());
     ASSERT_EQ(zmq::socket::Type::Router, routerSocket->Type());
@@ -270,8 +277,8 @@ TEST_F(Test_RequestRouter, Request_Router_Multipart)
 
     ASSERT_NE(nullptr, &routerCallback.get());
 
-    auto routerSocket =
-        context_.RouterSocket(routerCallback, zmq::socket::Direction::Bind);
+    auto routerSocket = context_.Internal().RouterSocket(
+        routerCallback, zmq::socket::Direction::Bind);
 
     ASSERT_NE(nullptr, &routerSocket.get());
     ASSERT_EQ(zmq::socket::Type::Router, routerSocket->Type());

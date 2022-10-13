@@ -27,6 +27,7 @@
 #include "internal/api/session/FactoryAPI.hpp"
 #include "internal/blockchain/Params.hpp"
 #include "internal/crypto/key/Factory.hpp"
+#include "internal/crypto/library/AsymmetricProvider.hpp"
 #include "internal/identity/Types.hpp"
 #include "internal/identity/credential/Credential.hpp"
 #include "internal/serialization/protobuf/Check.hpp"
@@ -57,11 +58,9 @@
 #include "opentxs/crypto/key/HD.hpp"             // IWYU pragma: keep
 #include "opentxs/crypto/key/Secp256k1.hpp"
 #include "opentxs/crypto/key/asymmetric/Role.hpp"
-#include "opentxs/crypto/library/AsymmetricProvider.hpp"
 #include "opentxs/identity/credential/Base.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
-#include "opentxs/util/Pimpl.hpp"
 
 namespace be = boost::endian;
 
@@ -128,7 +127,7 @@ auto PaymentCode::operator==(const proto::PaymentCode& rhs) const noexcept
 auto PaymentCode::AddPrivateKeys(
     UnallocatedCString& seed,
     const Bip32Index index,
-    const PasswordPrompt& reason) noexcept -> bool
+    const opentxs::PasswordPrompt& reason) noexcept -> bool
 {
     auto pCandidate =
         api_.Crypto().Seed().GetPaymentCode(seed, index, version_, reason);
@@ -149,7 +148,7 @@ auto PaymentCode::AddPrivateKeys(
         return false;
     }
 
-    if (0 != chain_code_->Bytes().compare(candidate.Chaincode(reason))) {
+    if (0 != chain_code_.Bytes().compare(candidate.Chaincode(reason))) {
         LogError()(OT_PRETTY_CLASS())(
             "Derived chain code does not match this payment code")
             .Flush();
@@ -233,7 +232,7 @@ auto PaymentCode::binary_preimage() const noexcept
         version_,
         has_bitmessage_,
         pubkey_.Bytes(),
-        chain_code_->Bytes(),
+        chain_code_.Bytes(),
         bitmessage_version_,
         bitmessage_stream_};
 }
@@ -249,7 +248,7 @@ auto PaymentCode::Blind(
     const crypto::key::EllipticCurve& privateKey,
     const ReadView outpoint,
     const AllocateOutput dest,
-    const PasswordPrompt& reason) const noexcept -> bool
+    const opentxs::PasswordPrompt& reason) const noexcept -> bool
 {
     try {
         if (2 < recipient.Version()) {
@@ -300,7 +299,7 @@ auto PaymentCode::BlindV3(
     const opentxs::PaymentCode& recipient,
     const crypto::key::EllipticCurve& privateKey,
     const AllocateOutput dest,
-    const PasswordPrompt& reason) const noexcept -> bool
+    const opentxs::PasswordPrompt& reason) const noexcept -> bool
 {
     try {
         if (3 > recipient.Version()) {
@@ -389,14 +388,14 @@ auto PaymentCode::calculate_mask_v1(
     const crypto::key::EllipticCurve& local,
     const crypto::key::EllipticCurve& remote,
     const ReadView outpoint,
-    const PasswordPrompt& reason) const noexcept(false) -> Mask
+    const opentxs::PasswordPrompt& reason) const noexcept(false) -> Mask
 {
     auto mask = Mask{};
     const auto secret = shared_secret_mask_v1(local, remote, reason);
     const auto hashed = api_.Crypto().Hash().HMAC(
         crypto::HashType::Sha512,
         outpoint,
-        secret->Bytes(),
+        secret.Bytes(),
         preallocated(mask.size(), mask.data()));
 
     if (false == hashed) { throw std::runtime_error{"Failed to derive mask"}; }
@@ -408,13 +407,13 @@ auto PaymentCode::calculate_mask_v3(
     const crypto::key::EllipticCurve& local,
     const crypto::key::EllipticCurve& remote,
     const ReadView pubkey,
-    const PasswordPrompt& reason) const noexcept(false) -> Mask
+    const opentxs::PasswordPrompt& reason) const noexcept(false) -> Mask
 {
     auto mask = Mask{};
     const auto secret = shared_secret_mask_v1(local, remote, reason);
     const auto hashed = api_.Crypto().Hash().HMAC(
         crypto::HashType::Sha512,
-        secret->Bytes(),
+        secret.Bytes(),
         pubkey,
         preallocated(mask.size(), mask.data()));
 
@@ -426,7 +425,8 @@ auto PaymentCode::calculate_mask_v3(
 auto PaymentCode::DecodeNotificationElements(
     const std::uint8_t version,
     const UnallocatedVector<Space>& in,
-    const PasswordPrompt& reason) const noexcept -> opentxs::PaymentCode
+    const opentxs::PasswordPrompt& reason) const noexcept
+    -> opentxs::PaymentCode
 {
     try {
         if (3 > version_) {
@@ -511,7 +511,7 @@ auto PaymentCode::derive_keys(
     const opentxs::PaymentCode& other,
     const Bip32Index local,
     const Bip32Index remote,
-    const PasswordPrompt& reason) const noexcept(false)
+    const opentxs::PasswordPrompt& reason) const noexcept(false)
     -> std::pair<ECKey, ECKey>
 {
     auto output = std::pair<ECKey, ECKey>{};
@@ -565,7 +565,8 @@ auto PaymentCode::effective_version(
 auto PaymentCode::GenerateNotificationElements(
     const opentxs::PaymentCode& recipient,
     const crypto::key::EllipticCurve& privateKey,
-    const PasswordPrompt& reason) const noexcept -> UnallocatedVector<Space>
+    const opentxs::PasswordPrompt& reason) const noexcept
+    -> UnallocatedVector<Space>
 {
     try {
         if (3 > recipient.Version()) {
@@ -675,7 +676,7 @@ auto PaymentCode::Incoming(
     const opentxs::PaymentCode& sender,
     const Bip32Index index,
     const blockchain::Type chain,
-    const PasswordPrompt& reason,
+    const opentxs::PasswordPrompt& reason,
     const std::uint8_t version) const noexcept -> ECKey
 {
     try {
@@ -762,7 +763,7 @@ auto PaymentCode::Locator(const AllocateOutput dest, const std::uint8_t version)
                 auto hash = space(64);
                 auto rc = api_.Crypto().Hash().HMAC(
                     crypto::HashType::Sha512,
-                    chain_code_->Bytes(),
+                    chain_code_.Bytes(),
                     ReadView{
                         reinterpret_cast<const char*>(&effective),
                         sizeof(effective)},
@@ -813,7 +814,7 @@ auto PaymentCode::Outgoing(
     const opentxs::PaymentCode& recipient,
     const Bip32Index index,
     const blockchain::Type chain,
-    const PasswordPrompt& reason,
+    const opentxs::PasswordPrompt& reason,
     const std::uint8_t version) const noexcept -> ECKey
 {
     try {
@@ -855,12 +856,11 @@ auto PaymentCode::Outgoing(
     }
 }
 
-auto PaymentCode::postprocess(const Secret& in) const noexcept(false)
-    -> OTSecret
+auto PaymentCode::postprocess(const Secret& in) const noexcept(false) -> Secret
 {
     auto output = api_.Factory().Secret({});
     auto rc = api_.Crypto().Hash().Digest(
-        crypto::HashType::Sha256, in.Bytes(), output->WriteInto());
+        crypto::HashType::Sha256, in.Bytes(), output.WriteInto());
 
     if (false == rc) {
         throw std::runtime_error{"Failed to hash shared secret"};
@@ -880,7 +880,7 @@ auto PaymentCode::Serialize(AllocateOutput destination) const noexcept -> bool
 auto PaymentCode::Serialize(Serialized& output) const noexcept -> bool
 {
     const auto key = pubkey_.Bytes();
-    const auto code = chain_code_->Bytes();
+    const auto code = chain_code_.Bytes();
     output.set_version(version_);
     output.set_key(key.data(), key.size());
     output.set_chaincode(code.data(), code.size());
@@ -893,7 +893,7 @@ auto PaymentCode::Serialize(Serialized& output) const noexcept -> bool
 auto PaymentCode::shared_secret_mask_v1(
     const crypto::key::EllipticCurve& local,
     const crypto::key::EllipticCurve& remote,
-    const PasswordPrompt& reason) const noexcept(false) -> OTSecret
+    const opentxs::PasswordPrompt& reason) const noexcept(false) -> Secret
 {
     auto output = api_.Factory().Secret(0);
     auto rc = local.engine().SharedSecret(
@@ -912,7 +912,7 @@ auto PaymentCode::shared_secret_mask_v1(
 auto PaymentCode::shared_secret_payment_v1(
     const crypto::key::EllipticCurve& local,
     const crypto::key::EllipticCurve& remote,
-    const PasswordPrompt& reason) const noexcept(false) -> OTSecret
+    const opentxs::PasswordPrompt& reason) const noexcept(false) -> Secret
 {
     auto secret = shared_secret_mask_v1(local, remote, reason);
 
@@ -923,7 +923,7 @@ auto PaymentCode::shared_secret_payment_v3(
     const crypto::key::EllipticCurve& local,
     const crypto::key::EllipticCurve& remote,
     const blockchain::Type chain,
-    const PasswordPrompt& reason) const noexcept(false) -> OTSecret
+    const opentxs::PasswordPrompt& reason) const noexcept(false) -> Secret
 {
     auto secret = shared_secret_mask_v1(local, remote, reason);
     auto hmac = api_.Factory().Secret({});
@@ -934,9 +934,9 @@ auto PaymentCode::shared_secret_payment_v3(
 
     auto rc = api_.Crypto().Hash().HMAC(
         crypto::HashType::Sha512,
-        secret->Bytes(),
+        secret.Bytes(),
         ReadView{reinterpret_cast<const char*>(&bip44), sizeof(bip44)},
-        hmac->WriteInto());
+        hmac.WriteInto());
 
     if (false == rc) {
         throw std::runtime_error{"Failed to calculate shared secret hmac"};
@@ -948,7 +948,7 @@ auto PaymentCode::shared_secret_payment_v3(
 auto PaymentCode::Sign(
     const identity::credential::Base& credential,
     proto::Signature& sig,
-    const PasswordPrompt& reason) const noexcept -> bool
+    const opentxs::PasswordPrompt& reason) const noexcept -> bool
 {
     auto serialized = proto::Credential{};
 
@@ -973,7 +973,7 @@ auto PaymentCode::Sign(
 auto PaymentCode::Sign(
     const opentxs::Data& data,
     opentxs::Data& output,
-    const PasswordPrompt& reason) const noexcept -> bool
+    const opentxs::PasswordPrompt& reason) const noexcept -> bool
 {
     const auto& key = *key_;
 
@@ -988,7 +988,8 @@ auto PaymentCode::Unblind(
     const ReadView in,
     const crypto::key::EllipticCurve& remote,
     const ReadView outpoint,
-    const PasswordPrompt& reason) const noexcept -> opentxs::PaymentCode
+    const opentxs::PasswordPrompt& reason) const noexcept
+    -> opentxs::PaymentCode
 {
     try {
         if (2 < version_) {
@@ -1049,7 +1050,8 @@ auto PaymentCode::UnblindV3(
     const std::uint8_t version,
     const ReadView in,
     const crypto::key::EllipticCurve& remote,
-    const PasswordPrompt& reason) const noexcept -> opentxs::PaymentCode
+    const opentxs::PasswordPrompt& reason) const noexcept
+    -> opentxs::PaymentCode
 {
     try {
         if (3 > version_) {
@@ -1089,7 +1091,7 @@ auto PaymentCode::unblind_v1(
     const ReadView in,
     const Mask& mask,
     const crypto::EcdsaProvider& ecdsa,
-    const PasswordPrompt& reason) const -> opentxs::PaymentCode
+    const opentxs::PasswordPrompt& reason) const -> opentxs::PaymentCode
 {
     const auto pre = [&] {
         auto out = paymentcode::BinaryPreimage{};
@@ -1132,7 +1134,7 @@ auto PaymentCode::unblind_v3(
     const ReadView in,
     const Mask& mask,
     const crypto::EcdsaProvider& ecdsa,
-    const PasswordPrompt& reason) const -> opentxs::PaymentCode
+    const opentxs::PasswordPrompt& reason) const -> opentxs::PaymentCode
 {
     const auto pre = [&] {
         auto out = paymentcode::BinaryPreimage_3{};
@@ -1151,7 +1153,7 @@ auto PaymentCode::unblind_v3(
     const auto code = [&] {
         auto out = api_.Factory().Secret(0);
         const auto rc = api_.Crypto().Hash().Digest(
-            crypto::HashType::Sha256D, pre.Key(), out->WriteInto());
+            crypto::HashType::Sha256D, pre.Key(), out.WriteInto());
 
         if (false == rc) {
             throw std::runtime_error{"Failed to calculate chain code"};
@@ -1165,7 +1167,7 @@ auto PaymentCode::unblind_v3(
                pre.version_,
                false,
                pre.Key(),
-               code->Bytes(),
+               code.Bytes(),
                0,
                0,
                factory::Secp256k1Key(
@@ -1188,7 +1190,7 @@ auto PaymentCode::Valid() const noexcept -> bool
 
     if (pubkey_size_ != pubkey_.size()) { return false; }
 
-    if (chain_code_size_ != chain_code_->size()) { return false; }
+    if (chain_code_size_ != chain_code_.size()) { return false; }
 
     auto serialized = proto::PaymentCode{};
 

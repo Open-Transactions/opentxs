@@ -11,6 +11,10 @@
 #include <type_traits>
 #include <utility>
 
+#include "internal/api/session/UI.hpp"
+#include "internal/interface/ui/AccountActivity.hpp"
+#include "internal/interface/ui/BalanceItem.hpp"
+#include "internal/util/SharedPimpl.hpp"
 #include "opentxs/api/crypto/Blockchain.hpp"
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/Contacts.hpp"
@@ -28,10 +32,7 @@
 #include "opentxs/interface/rpc/request/GetAccountActivity.hpp"
 #include "opentxs/interface/rpc/response/Base.hpp"
 #include "opentxs/interface/rpc/response/GetAccountActivity.hpp"
-#include "opentxs/interface/ui/AccountActivity.hpp"
-#include "opentxs/interface/ui/BalanceItem.hpp"
 #include "opentxs/util/Container.hpp"
-#include "opentxs/util/SharedPimpl.hpp"
 
 namespace opentxs::rpc::implementation
 {
@@ -72,7 +73,8 @@ auto RPC::get_account_activity(const request::Base& base) const
                 }
             }();
             // TODO check for empty owner and return appropriate error
-            const auto& widget = api.UI().AccountActivity(owner, accountID);
+            const auto& widget =
+                api.UI().Internal().AccountActivity(owner, accountID);
             const auto copy = [&](const auto& row) {
                 const auto contact = [&]() -> UnallocatedCString {
                     const auto& contacts = row.Contacts();

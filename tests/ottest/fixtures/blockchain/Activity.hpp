@@ -74,7 +74,7 @@ struct Test_BlockchainActivity : public ::testing::Test {
     static const ot::UnallocatedCString contact_7_name_;
 
     const ot::api::session::Client& api_;
-    const ot::OTPasswordPrompt reason_;
+    const ot::PasswordPrompt reason_;
 
     auto account_1_id() const noexcept -> const ot::identifier::Generic&;
     auto account_2_id() const noexcept -> const ot::identifier::Generic&;

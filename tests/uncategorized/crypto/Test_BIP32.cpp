@@ -19,7 +19,7 @@ protected:
     using Path = ot::UnallocatedVector<ot::Bip32Index>;
 
     const ot::api::session::Client& api_;
-    const ot::OTPasswordPrompt reason_;
+    const ot::PasswordPrompt reason_;
 
     auto make_path(const Child::Path& path) const noexcept -> Path
     {

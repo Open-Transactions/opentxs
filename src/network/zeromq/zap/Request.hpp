@@ -8,13 +8,13 @@
 #include <cstddef>
 #include <utility>
 
+#include "internal/network/zeromq/zap/Request.hpp"
+#include "internal/network/zeromq/zap/ZAP.hpp"
 #include "internal/util/P0330.hpp"
 #include "network/zeromq/message/Message.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
 #include "opentxs/network/zeromq/message/FrameSection.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
-#include "opentxs/network/zeromq/zap/Request.hpp"
-#include "opentxs/network/zeromq/zap/ZAP.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 

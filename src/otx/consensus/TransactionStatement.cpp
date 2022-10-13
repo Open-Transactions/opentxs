@@ -4,17 +4,17 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 #include "0_stdafx.hpp"  // IWYU pragma: associated
-#include "opentxs/otx/consensus/TransactionStatement.hpp"  // IWYU pragma: associated
+#include "internal/otx/consensus/TransactionStatement.hpp"  // IWYU pragma: associated
 
 #include <irrxml/irrXML.hpp>
 #include <memory>
 
+#include "internal/core/Armored.hpp"
 #include "internal/otx/common/NumList.hpp"
 #include "internal/otx/common/StringXML.hpp"
 #include "internal/otx/common/XML.hpp"
 #include "internal/otx/common/util/Tag.hpp"
 #include "internal/util/LogMacros.hpp"
-#include "opentxs/core/Armored.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Pimpl.hpp"
 

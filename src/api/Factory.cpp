@@ -18,6 +18,7 @@
 
 #include "internal/api/Factory.hpp"
 #include "internal/core/Core.hpp"
+#include "internal/core/String.hpp"
 #include "internal/core/identifier/Factory.hpp"
 #include "internal/core/identifier/Identifier.hpp"
 #include "internal/otx/common/Cheque.hpp"
@@ -30,7 +31,6 @@
 #include "opentxs/api/crypto/Hash.hpp"  // IWYU pragma: keep
 #include "opentxs/api/crypto/Util.hpp"
 #include "opentxs/core/ByteArray.hpp"
-#include "opentxs/core/String.hpp"
 #include "opentxs/core/identifier/Algorithm.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
@@ -732,20 +732,21 @@ auto Factory::NymIDFromRandom(
     return id_from_random<identifier::Nym>(type, std::move(alloc));
 }
 
-auto Factory::Secret(const std::size_t bytes) const noexcept -> OTSecret
+auto Factory::Secret(const std::size_t bytes) const noexcept -> opentxs::Secret
 {
-    return OTSecret{factory::Secret(bytes).release()};
+    return factory::Secret(bytes);
 }
 
-auto Factory::SecretFromBytes(const ReadView bytes) const noexcept -> OTSecret
+auto Factory::SecretFromBytes(const ReadView bytes) const noexcept
+    -> opentxs::Secret
 {
-    return OTSecret{factory::Secret(bytes, true).release()};
+    return factory::Secret(bytes, true);
 }
 
 auto Factory::SecretFromText(const std::string_view text) const noexcept
-    -> OTSecret
+    -> opentxs::Secret
 {
-    return OTSecret{factory::Secret(text, false).release()};
+    return factory::Secret(text, false);
 }
 
 auto Factory::UnitID(const proto::Identifier& in, allocator_type alloc)

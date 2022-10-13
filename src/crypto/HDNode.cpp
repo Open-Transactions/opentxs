@@ -11,7 +11,6 @@
 #include <iterator>
 #include <stdexcept>
 #include <string_view>
-#include <tuple>
 #include <utility>
 
 #include "internal/util/LogMacros.hpp"
@@ -28,8 +27,8 @@ namespace opentxs::crypto::implementation
 HDNode::HDNode(const api::Crypto& crypto) noexcept
     : data_space_(Context().Factory().Secret(0))
     , hash_space_(Context().Factory().Secret(0))
-    , data_(data_space_->WriteInto()(33 + 4))
-    , hash_(hash_space_->WriteInto()(64))
+    , data_(data_space_.WriteInto()(33 + 4))
+    , hash_(hash_space_.WriteInto()(64))
     , crypto_(crypto)
     , switch_(0)
     , a_(Context().Factory().Secret(0))
@@ -39,11 +38,11 @@ HDNode::HDNode(const api::Crypto& crypto) noexcept
 
     {
         static const auto size = 32_uz + 32_uz + 33_uz;
-        a_->WriteInto()(size);
-        b_->WriteInto()(size);
+        a_.WriteInto()(size);
+        b_.WriteInto()(size);
 
-        OT_ASSERT(size == a_->size());
-        OT_ASSERT(size == b_->size());
+        OT_ASSERT(size == a_.size());
+        OT_ASSERT(size == b_.size());
     }
 }
 
@@ -56,13 +55,13 @@ auto HDNode::Assign(const EcdsaCurve& curve, Bip32::Key& output) const
     const auto publicOut = ParentPublic();
 
     if (EcdsaCurve::secp256k1 == curve) {
-        privateKey->Assign(privateOut);
+        privateKey.Assign(privateOut);
         publicKey.Assign(publicOut);
     } else {
         const auto expanded = sodium::ExpandSeed(
             {reinterpret_cast<const char*>(privateOut.data()),
              privateOut.size()},
-            privateKey->WriteInto(Secret::Mode::Mem),
+            privateKey.WriteInto(Secret::Mode::Mem),
             publicKey.WriteInto());
 
         if (false == expanded) {
@@ -70,7 +69,7 @@ auto HDNode::Assign(const EcdsaCurve& curve, Bip32::Key& output) const
         }
     }
 
-    chainCode->Assign(chainOut);
+    chainCode.Assign(chainOut);
 }
 
 auto HDNode::check() const noexcept(false) -> void
@@ -91,7 +90,7 @@ auto HDNode::child() noexcept -> Secret&
 
 auto HDNode::ChildCode() noexcept -> WritableView
 {
-    auto* start = child().data();
+    auto* start = static_cast<std::byte*>(child().data());
     std::advance(start, 32);
 
     return WritableView{start, 32};
@@ -99,14 +98,14 @@ auto HDNode::ChildCode() noexcept -> WritableView
 
 auto HDNode::ChildPrivate() noexcept -> AllocateOutput
 {
-    auto* start = child().data();
+    auto* start = static_cast<std::byte*>(child().data());
 
     return [start](const auto) { return WritableView{start, 32}; };
 }
 
 auto HDNode::ChildPublic() noexcept -> AllocateOutput
 {
-    auto* start = child().data();
+    auto* start = static_cast<std::byte*>(child().data());
     std::advance(start, 32 + 32);
 
     return [start](const auto) { return WritableView{start, 33}; };
@@ -119,7 +118,7 @@ auto HDNode::Fingerprint() const noexcept -> Bip32Fingerprint
 
 auto HDNode::InitCode() noexcept -> AllocateOutput
 {
-    auto* start = parent().data();
+    auto* start = static_cast<std::byte*>(parent().data());
     std::advance(start, 32);
 
     return [start](const auto) { return WritableView{start, 32}; };
@@ -127,14 +126,14 @@ auto HDNode::InitCode() noexcept -> AllocateOutput
 
 auto HDNode::InitPrivate() noexcept -> AllocateOutput
 {
-    auto* start = parent().data();
+    auto* start = static_cast<std::byte*>(parent().data());
 
     return [start](const auto) { return WritableView{start, 32}; };
 }
 
 auto HDNode::InitPublic() noexcept -> AllocateOutput
 {
-    auto* start = parent().data();
+    auto* start = static_cast<std::byte*>(parent().data());
     std::advance(start, 32 + 32);
 
     return [start](const auto) { return WritableView{start, 33}; };

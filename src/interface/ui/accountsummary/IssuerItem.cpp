@@ -15,6 +15,7 @@
 
 #include "interface/ui/base/Combined.hpp"
 #include "internal/api/session/Wallet.hpp"
+#include "internal/core/String.hpp"
 #include "internal/otx/client/Issuer.hpp"
 #include "internal/otx/common/Account.hpp"
 #include "internal/util/LogMacros.hpp"
@@ -26,7 +27,6 @@
 #include "opentxs/api/session/Storage.hpp"
 #include "opentxs/api/session/Wallet.hpp"
 #include "opentxs/core/Amount.hpp"
-#include "opentxs/core/String.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/core/identifier/UnitDefinition.hpp"

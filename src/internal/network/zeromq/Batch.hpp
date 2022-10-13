@@ -9,11 +9,11 @@
 #include <mutex>
 #include <string_view>
 
+#include "internal/network/zeromq/ListenCallback.hpp"
+#include "internal/network/zeromq/ReplyCallback.hpp"
 #include "internal/network/zeromq/Types.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
-#include "opentxs/network/zeromq/ListenCallback.hpp"
-#include "opentxs/network/zeromq/ReplyCallback.hpp"
-#include "opentxs/network/zeromq/socket/Types.hpp"
+#include "internal/network/zeromq/socket/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Pimpl.hpp"
 

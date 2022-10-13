@@ -14,7 +14,7 @@
 
 namespace opentxs::identifier
 {
-UnitDefinition::UnitDefinition(Imp* imp) noexcept
+UnitDefinition::UnitDefinition(IdentifierPrivate* imp) noexcept
     : Generic(std::move(imp))
 {
 }

@@ -11,6 +11,7 @@
 
 #include "internal/api/session/FactoryAPI.hpp"
 #include "internal/api/session/Wallet.hpp"
+#include "internal/core/String.hpp"
 #include "internal/otx/common/Account.hpp"
 #include "internal/otx/common/AccountVisitor.hpp"
 #include "internal/otx/common/Cheque.hpp"
@@ -19,7 +20,6 @@
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Notary.hpp"
 #include "opentxs/api/session/Wallet.hpp"
-#include "opentxs/core/String.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/core/identifier/UnitDefinition.hpp"
@@ -193,7 +193,8 @@ auto PayDividendVisitor::Trigger(
             const auto strPayoutUnitTypeId = String::Factory(payoutUnitTypeId),
                        strRecipientNymID = String::Factory(RECIPIENT_ID);
             const auto unittype =
-                Wallet().CurrencyTypeBasedOnUnitType(payoutUnitTypeId);
+                Wallet().Internal().CurrencyTypeBasedOnUnitType(
+                    payoutUnitTypeId);
             LogError()(OT_PRETTY_CLASS())(
                 "ERROR failed issuing "
                 "voucher (to send to dividend payout recipient). WAS "
@@ -268,7 +269,8 @@ auto PayDividendVisitor::Trigger(
                                String::Factory(payoutUnitTypeId),
                            strSenderNymID = String::Factory(theSenderNymID);
                 const auto unittype =
-                    Wallet().CurrencyTypeBasedOnUnitType(payoutUnitTypeId);
+                    Wallet().Internal().CurrencyTypeBasedOnUnitType(
+                        payoutUnitTypeId);
                 LogError()(OT_PRETTY_CLASS())(
                     "ERROR! Failed issuing voucher (to return back to the "
                     "dividend payout initiator, after a failed payment attempt "
@@ -284,7 +286,7 @@ auto PayDividendVisitor::Trigger(
         const auto strPayoutUnitTypeId = String::Factory(payoutUnitTypeId),
                    strRecipientNymID = String::Factory(RECIPIENT_ID);
         const auto unittype =
-            Wallet().CurrencyTypeBasedOnUnitType(payoutUnitTypeId);
+            Wallet().Internal().CurrencyTypeBasedOnUnitType(payoutUnitTypeId);
         LogError()(OT_PRETTY_CLASS())(
             "ERROR! Failed issuing next transaction number while trying to "
             "send a voucher (while paying dividends). WAS TRYING TO PAY ")(

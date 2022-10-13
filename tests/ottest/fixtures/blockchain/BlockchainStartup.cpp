@@ -9,6 +9,9 @@
 #include <cstdlib>
 
 #include "internal/api/session/Endpoints.hpp"
+#include "internal/network/zeromq/Context.hpp"
+#include "internal/network/zeromq/ListenCallback.hpp"
+#include "internal/network/zeromq/socket/Subscribe.hpp"
 #include "util/Work.hpp"
 
 namespace ottest
@@ -109,7 +112,7 @@ public:
         , cb_(ot::network::zeromq::ListenCallback::Factory(
               [this](auto&& in) { cb(std::move(in)); }))
         , socket_([&] {
-            auto out = api.Network().ZeroMQ().SubscribeSocket(cb_);
+            auto out = api.Network().ZeroMQ().Internal().SubscribeSocket(cb_);
             out->Start(ot::UnallocatedCString{
                 api.Endpoints().Internal().BlockchainStartupPublish()});
 

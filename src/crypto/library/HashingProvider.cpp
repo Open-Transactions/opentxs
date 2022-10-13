@@ -4,9 +4,9 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 #include "0_stdafx.hpp"  // IWYU pragma: associated
-#include "opentxs/crypto/library/HashingProvider.hpp"  // IWYU pragma: associated
+#include "internal/crypto/library/HashingProvider.hpp"  // IWYU pragma: associated
 
-#include "opentxs/core/String.hpp"
+#include "internal/core/String.hpp"
 #include "opentxs/crypto/HashType.hpp"
 #include "opentxs/util/Pimpl.hpp"
 

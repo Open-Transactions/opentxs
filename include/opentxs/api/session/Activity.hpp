@@ -13,7 +13,6 @@
 #include <utility>
 
 #include "opentxs/Export.hpp"
-#include "opentxs/core/contract/Unit.hpp"
 #include "opentxs/otx/client/Types.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"

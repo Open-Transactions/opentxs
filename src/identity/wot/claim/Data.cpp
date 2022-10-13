@@ -16,6 +16,7 @@
 #include <tuple>
 #include <utility>
 
+#include "internal/core/String.hpp"
 #include "internal/identity/wot/claim/Types.hpp"
 #include "internal/serialization/protobuf/Contact.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
@@ -25,7 +26,6 @@
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/core/Data.hpp"
-#include "opentxs/core/String.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
 #include "opentxs/identity/wot/claim/Attribute.hpp"

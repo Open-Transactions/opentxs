@@ -14,7 +14,7 @@
 
 namespace opentxs::identifier
 {
-Nym::Nym(Imp* imp) noexcept
+Nym::Nym(IdentifierPrivate* imp) noexcept
     : Generic(std::move(imp))
 {
 }

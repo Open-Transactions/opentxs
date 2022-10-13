@@ -10,12 +10,14 @@
 #include <utility>
 
 #include "interface/ui/base/Widget.hpp"
+#include "internal/api/session/FactoryAPI.hpp"
+#include "internal/api/session/Wallet.hpp"
+#include "internal/core/contract/Unit.hpp"
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/api/session/Storage.hpp"
 #include "opentxs/api/session/Wallet.hpp"
-#include "opentxs/core/contract/Unit.hpp"
 #include "opentxs/core/display/Definition.hpp"
 #include "opentxs/core/identifier/UnitDefinition.hpp"  // IWYU pragma: keep
 #include "opentxs/util/Bytes.hpp"
@@ -60,7 +62,7 @@ auto AccountSummaryItem::DisplayBalance() const noexcept -> UnallocatedCString
         eLock lock(shared_lock_);
 
         try {
-            contract_ = api_.Wallet().UnitDefinition(
+            contract_ = api_.Wallet().Internal().UnitDefinition(
                 api_.Storage().AccountContract(account_id_));
         } catch (...) {
         }
@@ -86,10 +88,11 @@ auto AccountSummaryItem::load_unit(
     const identifier::Generic& id) -> OTUnitDefinition
 {
     try {
-        return api.Wallet().UnitDefinition(api.Storage().AccountContract(id));
+        return api.Wallet().Internal().UnitDefinition(
+            api.Storage().AccountContract(id));
     } catch (...) {
 
-        return api.Factory().UnitDefinition();
+        return api.Factory().InternalSession().UnitDefinition();
     }
 }
 

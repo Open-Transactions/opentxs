@@ -10,6 +10,11 @@
 #include <future>
 #include <thread>
 
+#include "internal/network/zeromq/Context.hpp"
+#include "internal/network/zeromq/ListenCallback.hpp"
+#include "internal/network/zeromq/socket/Pair.hpp"
+#include "internal/network/zeromq/socket/SocketType.hpp"
+
 #define TEST_ENDPOINT "inproc://opentxs/pairsocket_endpoint"
 
 namespace ot = opentxs;
@@ -83,7 +88,8 @@ void Test_PairSocket::pairSocketThread(
     ASSERT_NE(nullptr, &listenCallback.get());
     ASSERT_NE(nullptr, pair_socket_);
 
-    auto pairSocket = context_.PairSocket(listenCallback, *pair_socket_);
+    auto pairSocket =
+        context_.Internal().PairSocket(listenCallback, *pair_socket_);
 
     ASSERT_NE(nullptr, &pairSocket.get());
     ASSERT_EQ(zmq::socket::Type::Pair, pairSocket->Type());
@@ -97,8 +103,8 @@ void Test_PairSocket::pairSocketThread(
 
 TEST_F(Test_PairSocket, PairSocket_Factory1)
 {
-    auto pairSocket =
-        context_.PairSocket(ot::network::zeromq::ListenCallback::Factory());
+    auto pairSocket = context_.Internal().PairSocket(
+        ot::network::zeromq::ListenCallback::Factory());
 
     ASSERT_NE(nullptr, &pairSocket.get());
     ASSERT_EQ(zmq::socket::Type::Pair, pairSocket->Type());
@@ -106,13 +112,13 @@ TEST_F(Test_PairSocket, PairSocket_Factory1)
 
 TEST_F(Test_PairSocket, PairSocket_Factory2)
 {
-    auto peer =
-        context_.PairSocket(ot::network::zeromq::ListenCallback::Factory());
+    auto peer = context_.Internal().PairSocket(
+        ot::network::zeromq::ListenCallback::Factory());
 
     ASSERT_NE(nullptr, &peer.get());
     ASSERT_EQ(zmq::socket::Type::Pair, peer->Type());
 
-    auto pairSocket = context_.PairSocket(
+    auto pairSocket = context_.Internal().PairSocket(
         ot::network::zeromq::ListenCallback::Factory(), peer);
 
     ASSERT_NE(nullptr, &pairSocket.get());
@@ -122,7 +128,7 @@ TEST_F(Test_PairSocket, PairSocket_Factory2)
 
 TEST_F(Test_PairSocket, PairSocket_Factory3)
 {
-    auto pairSocket = context_.PairSocket(
+    auto pairSocket = context_.Internal().PairSocket(
         ot::network::zeromq::ListenCallback::Factory(),
         TEST_ENDPOINT,
         "Test_PairSocket");
@@ -149,12 +155,12 @@ TEST_F(Test_PairSocket, PairSocket_Send1)
 
     ASSERT_NE(nullptr, &listenCallback.get());
 
-    auto peer = context_.PairSocket(listenCallback);
+    auto peer = context_.Internal().PairSocket(listenCallback);
 
     ASSERT_NE(nullptr, &peer.get());
     ASSERT_EQ(zmq::socket::Type::Pair, peer->Type());
 
-    auto pairSocket = context_.PairSocket(
+    auto pairSocket = context_.Internal().PairSocket(
         ot::network::zeromq::ListenCallback::Factory(), peer);
 
     ASSERT_NE(nullptr, &pairSocket.get());
@@ -192,12 +198,12 @@ TEST_F(Test_PairSocket, PairSocket_Send2)
 
     ASSERT_NE(nullptr, &listenCallback.get());
 
-    auto peer = context_.PairSocket(listenCallback);
+    auto peer = context_.Internal().PairSocket(listenCallback);
 
     ASSERT_NE(nullptr, &peer.get());
     ASSERT_EQ(zmq::socket::Type::Pair, peer->Type());
 
-    auto pairSocket = context_.PairSocket(
+    auto pairSocket = context_.Internal().PairSocket(
         ot::network::zeromq::ListenCallback::Factory(), peer);
 
     ASSERT_NE(nullptr, &pairSocket.get());
@@ -235,12 +241,12 @@ TEST_F(Test_PairSocket, PairSocket_Send3)
 
     ASSERT_NE(nullptr, &listenCallback.get());
 
-    auto peer = context_.PairSocket(listenCallback);
+    auto peer = context_.Internal().PairSocket(listenCallback);
 
     ASSERT_NE(nullptr, &peer.get());
     ASSERT_EQ(zmq::socket::Type::Pair, peer->Type());
 
-    auto pairSocket = context_.PairSocket(
+    auto pairSocket = context_.Internal().PairSocket(
         ot::network::zeromq::ListenCallback::Factory(), peer);
 
     ASSERT_NE(nullptr, &pairSocket.get());
@@ -279,7 +285,7 @@ TEST_F(Test_PairSocket, PairSocket_Send_Two_Way)
 
     ASSERT_NE(nullptr, &peerCallback.get());
 
-    auto peer = context_.PairSocket(peerCallback);
+    auto peer = context_.Internal().PairSocket(peerCallback);
 
     ASSERT_NE(nullptr, &peer.get());
     ASSERT_EQ(zmq::socket::Type::Pair, peer->Type());
@@ -299,7 +305,7 @@ TEST_F(Test_PairSocket, PairSocket_Send_Two_Way)
 
     ASSERT_NE(nullptr, &listenCallback.get());
 
-    auto pairSocket = context_.PairSocket(listenCallback, peer);
+    auto pairSocket = context_.Internal().PairSocket(listenCallback, peer);
 
     ASSERT_NE(nullptr, &pairSocket.get());
     ASSERT_EQ(zmq::socket::Type::Pair, pairSocket->Type());
@@ -334,8 +340,8 @@ TEST_F(Test_PairSocket, PairSocket_Send_Two_Way)
 
 TEST_F(Test_PairSocket, PairSocket_Send_Separate_Thread)
 {
-    auto pairSocket =
-        context_.PairSocket(ot::network::zeromq::ListenCallback::Factory());
+    auto pairSocket = context_.Internal().PairSocket(
+        ot::network::zeromq::ListenCallback::Factory());
     pair_socket_ = &pairSocket;
     auto promise = std::promise<void>{};
     auto future = promise.get_future();

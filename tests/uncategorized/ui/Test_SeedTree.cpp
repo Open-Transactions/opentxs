@@ -39,7 +39,7 @@ public:
     static std::optional<User> chris_;
 
     const ot::api::session::Client& api_;
-    ot::OTPasswordPrompt reason_;
+    ot::PasswordPrompt reason_;
 
     Test_SeedTree()
         : api_(ot::Context().StartClientSession(0))

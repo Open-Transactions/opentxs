@@ -36,6 +36,7 @@
 #include "internal/network/asio/HTTPS.hpp"
 #include "internal/network/zeromq/socket/Factory.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
+#include "internal/network/zeromq/socket/SocketType.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/Thread.hpp"
 #include "internal/util/Timer.hpp"
@@ -47,7 +48,6 @@
 #include "opentxs/network/zeromq/message/FrameSection.hpp"  // IWYU pragma: keep
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/network/zeromq/message/Message.tpp"
-#include "opentxs/network/zeromq/socket/SocketType.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"

@@ -13,11 +13,11 @@
 #include <cstdint>
 #include <memory>
 
+#include "internal/core/String.hpp"
 #include "internal/otx/Types.hpp"
 #include "internal/otx/common/Contract.hpp"
 #include "internal/otx/common/OTTrackable.hpp"
 #include "internal/otx/common/OTTransactionType.hpp"
-#include "opentxs/core/String.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/identity/Types.hpp"

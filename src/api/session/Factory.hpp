@@ -18,6 +18,25 @@
 
 #include "internal/api/FactoryAPI.hpp"
 #include "internal/api/session/FactoryAPI.hpp"
+#include "internal/core/Armored.hpp"
+#include "internal/core/String.hpp"
+#include "internal/core/contract/BasketContract.hpp"
+#include "internal/core/contract/CurrencyContract.hpp"
+#include "internal/core/contract/SecurityContract.hpp"
+#include "internal/core/contract/ServerContract.hpp"
+#include "internal/core/contract/Unit.hpp"
+#include "internal/core/contract/peer/BailmentNotice.hpp"
+#include "internal/core/contract/peer/BailmentReply.hpp"
+#include "internal/core/contract/peer/BailmentRequest.hpp"
+#include "internal/core/contract/peer/ConnectionReply.hpp"
+#include "internal/core/contract/peer/ConnectionRequest.hpp"
+#include "internal/core/contract/peer/NoticeAcknowledgement.hpp"
+#include "internal/core/contract/peer/OutBailmentReply.hpp"
+#include "internal/core/contract/peer/OutBailmentRequest.hpp"
+#include "internal/core/contract/peer/PeerReply.hpp"
+#include "internal/core/contract/peer/PeerRequest.hpp"
+#include "internal/core/contract/peer/StoreSecret.hpp"
+#include "internal/crypto/Envelope.hpp"
 #include "internal/otx/Types.hpp"
 #include "internal/otx/common/Item.hpp"
 #include "internal/otx/common/Ledger.hpp"
@@ -38,36 +57,17 @@
 #include "opentxs/blockchain/p2p/Address.hpp"
 #include "opentxs/blockchain/p2p/Types.hpp"
 #include "opentxs/core/Amount.hpp"
-#include "opentxs/core/Armored.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/PaymentCode.hpp"
 #include "opentxs/core/Secret.hpp"
-#include "opentxs/core/String.hpp"
 #include "opentxs/core/Types.hpp"
-#include "opentxs/core/contract/BasketContract.hpp"
-#include "opentxs/core/contract/CurrencyContract.hpp"
-#include "opentxs/core/contract/SecurityContract.hpp"
-#include "opentxs/core/contract/ServerContract.hpp"
-#include "opentxs/core/contract/Unit.hpp"
-#include "opentxs/core/contract/peer/BailmentNotice.hpp"
-#include "opentxs/core/contract/peer/BailmentReply.hpp"
-#include "opentxs/core/contract/peer/BailmentRequest.hpp"
-#include "opentxs/core/contract/peer/ConnectionReply.hpp"
-#include "opentxs/core/contract/peer/ConnectionRequest.hpp"
-#include "opentxs/core/contract/peer/NoticeAcknowledgement.hpp"
-#include "opentxs/core/contract/peer/OutBailmentReply.hpp"
-#include "opentxs/core/contract/peer/OutBailmentRequest.hpp"
-#include "opentxs/core/contract/peer/PeerReply.hpp"
-#include "opentxs/core/contract/peer/PeerRequest.hpp"
 #include "opentxs/core/contract/peer/PeerRequestType.hpp"
-#include "opentxs/core/contract/peer/StoreSecret.hpp"
 #include "opentxs/core/contract/peer/Types.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/core/identifier/Types.hpp"
 #include "opentxs/core/identifier/UnitDefinition.hpp"
-#include "opentxs/crypto/Envelope.hpp"
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/crypto/key/Asymmetric.hpp"
 #include "opentxs/crypto/key/Keypair.hpp"
@@ -211,6 +211,7 @@ class OTSignedFile;
 class OTSmartContract;
 class OTTrade;
 class OTTransactionType;
+class PasswordPrompt;
 class PeerObject;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
@@ -745,13 +746,10 @@ public:
         const Nym_p& nym,
         const proto::PeerRequest& serialized) const noexcept(false)
         -> OTOutbailmentRequest final;
-    auto PasswordPrompt(const UnallocatedCString& text) const
-        -> OTPasswordPrompt final;
+    auto PasswordPrompt(std::string_view text) const
+        -> opentxs::PasswordPrompt final;
     auto PasswordPrompt(const opentxs::PasswordPrompt& rhs) const
-        -> OTPasswordPrompt final
-    {
-        return PasswordPrompt(rhs.GetDisplayString());
-    }
+        -> opentxs::PasswordPrompt final;
     auto Payment() const -> std::unique_ptr<OTPayment> final;
     auto Payment(const String& strPayment) const
         -> std::unique_ptr<OTPayment> final;
@@ -865,15 +863,17 @@ public:
         -> OTReplyAcknowledgement final;
     auto Scriptable(const String& strCronItem) const
         -> std::unique_ptr<OTScriptable> final;
-    auto Secret(const std::size_t bytes) const noexcept -> OTSecret final
+    auto Secret(const std::size_t bytes) const noexcept -> opentxs::Secret final
     {
         return primitives_.Secret(bytes);
     }
-    auto SecretFromBytes(const ReadView bytes) const noexcept -> OTSecret final
+    auto SecretFromBytes(const ReadView bytes) const noexcept
+        -> opentxs::Secret final
     {
         return primitives_.SecretFromBytes(bytes);
     }
-    auto SecretFromText(std::string_view text) const noexcept -> OTSecret final
+    auto SecretFromText(std::string_view text) const noexcept
+        -> opentxs::Secret final
     {
         return primitives_.SecretFromText(text);
     }

@@ -24,6 +24,7 @@
 #include "2_Factory.hpp"
 #include "internal/api/session/FactoryAPI.hpp"
 #include "internal/api/session/Wallet.hpp"
+#include "internal/core/String.hpp"
 #include "internal/crypto/Parameters.hpp"
 #include "internal/crypto/key/Key.hpp"
 #include "internal/identity/Authority.hpp"
@@ -32,6 +33,7 @@
 #include "internal/serialization/protobuf/verify/Credential.hpp"
 #include "internal/serialization/protobuf/verify/VerifyContacts.hpp"
 #include "internal/util/LogMacros.hpp"
+#include "internal/util/PasswordPrompt.hpp"
 #include "opentxs/api/crypto/Config.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
@@ -39,7 +41,6 @@
 #include "opentxs/api/session/Wallet.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Data.hpp"
-#include "opentxs/core/String.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/crypto/ParameterType.hpp"
@@ -56,7 +57,6 @@
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/PasswordPrompt.hpp"
-#include "opentxs/util/Pimpl.hpp"
 
 namespace opentxs
 {
@@ -1195,7 +1195,7 @@ auto Authority::Unlock(
                 continue;
             }
 
-            reason.SetPassword(password);
+            reason.Internal().SetPassword(password);
 
             if (key.Unlock(reason)) { return true; }
         } catch (...) {

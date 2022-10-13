@@ -8,11 +8,14 @@
 #include <cstdint>
 #include <memory>
 #include <mutex>
+#include <string_view>
 #include <tuple>
 
+#include "internal/api/Settings.hpp"
+#include "internal/core/String.hpp"
 #include "internal/util/Flag.hpp"
 #include "opentxs/api/Settings.hpp"
-#include "opentxs/core/String.hpp"
+#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Pimpl.hpp"
 
@@ -28,145 +31,147 @@ class Legacy;
 
 namespace opentxs::api::imp
 {
-class Settings final : public api::Settings
+class Settings final : public internal::Settings
 {
 public:
-    void SetConfigFilePath(const String& strConfigFilePath) const final;
-    auto HasConfigFilePath() const -> bool final;
-
-    // Core (Public Load and Save)
-    auto Load() const -> bool final;
-    auto Save() const -> bool final;
-
-    auto IsLoaded() const -> const Flag& final;
-
-    // Configuration Helpers
-    //
-
-    // Core (Reset Config, and Check if Config is empty)
-    auto IsEmpty() const -> bool final;
-
-    // Check Only (get value of key from configuration, if the key exists, then
-    // out_bKeyExist will be true.)
-    auto Check_str(
+    auto CheckSetSection(
+        const String& strSection,
+        const String& strComment,
+        bool& out_bIsNewSection) const -> bool final;
+    auto CheckSet_bool(
         const String& strSection,
         const String& strKey,
+        const bool& bDefault,
+        bool& out_bResult,
+        bool& out_bIsNew) const -> bool final;
+    auto CheckSet_bool(
+        const String& strSection,
+        const String& strKey,
+        const bool& bDefault,
+        bool& out_bResult,
+        bool& out_bIsNew,
+        const String& strComment) const -> bool final;
+    auto CheckSet_long(
+        const String& strSection,
+        const String& strKey,
+        const std::int64_t& lDefault,
+        std::int64_t& out_lResult,
+        bool& out_bIsNew) const -> bool final;
+    auto CheckSet_long(
+        const String& strSection,
+        const String& strKey,
+        const std::int64_t& lDefault,
+        std::int64_t& out_lResult,
+        bool& out_bIsNew,
+        const String& strComment) const -> bool final;
+    auto CheckSet_str(
+        const String& strSection,
+        const String& strKey,
+        const String& strDefault,
         String& out_strResult,
+        bool& out_bIsNew) const -> bool final;
+    auto CheckSet_str(
+        const String& strSection,
+        const String& strKey,
+        const String& strDefault,
+        String& out_strResult,
+        bool& out_bIsNew,
+        const String& strComment) const -> bool final;
+    auto CheckSet_str(
+        const String& strSection,
+        const String& strKey,
+        const String& strDefault,
+        UnallocatedCString& out_strResult,
+        bool& out_bIsNew) const -> bool final;
+    auto CheckSet_str(
+        const String& strSection,
+        const String& strKey,
+        const String& strDefault,
+        UnallocatedCString& out_strResult,
+        bool& out_bIsNew,
+        const String& strComment) const -> bool final;
+    auto Check_bool(
+        const String& strSection,
+        const String& strKey,
+        bool& out_bResult,
         bool& out_bKeyExist) const -> bool final;
     auto Check_long(
         const String& strSection,
         const String& strKey,
         std::int64_t& out_lResult,
         bool& out_bKeyExist) const -> bool final;
-    auto Check_bool(
+    auto Check_str(
         const String& strSection,
         const String& strKey,
-        bool& out_bResult,
+        String& out_strResult,
         bool& out_bKeyExist) const -> bool final;
-
-    // Set Only (set new or update value, out_bNewOrUpdate will be true if the
-    // value changes.)
-    auto Set_str(
-        const String& strSection,
-        const String& strKey,
-        const String& strValue,
-        bool& out_bNewOrUpdate) const -> bool final;
-    auto Set_str(
-        const String& strSection,
-        const String& strKey,
-        const String& strValue,
-        bool& out_bNewOrUpdate,
-        const String& strComment) const -> bool final;
-    auto Set_long(
-        const String& strSection,
-        const String& strKey,
-        const std::int64_t& lValue,
-        bool& out_bNewOrUpdate) const -> bool final;
-    auto Set_long(
-        const String& strSection,
-        const String& strKey,
-        const std::int64_t& lValue,
-        bool& out_bNewOrUpdate,
-        const String& strComment) const -> bool final;
-    auto Set_bool(
-        const String& strSection,
-        const String& strKey,
-        const bool& bValue,
-        bool& out_bNewOrUpdate,
-        const String& strComment = String::Factory()) const -> bool final;
-    auto Set_bool(
-        const String& strSection,
-        const String& strKey,
-        const bool& bValue,
-        bool& out_bNewOrUpdate) const -> bool final;
-
-    // Check for a Section, if the section dosn't exist, it will be made and
-    // out_bIsNewSection will be true.)
-    auto CheckSetSection(
-        const String& strSection,
-        const String& strComment,
-        bool& out_bIsNewSection) const -> bool final;
-
-    // Check for Key, and returns if the key exists, otherwise will set the
-    // default key. If the default key is set, then out_bIsNew will be true.)
-    auto CheckSet_str(
-        const String& strSection,
-        const String& strKey,
-        const String& strDefault,
-        UnallocatedCString& out_strResult,
-        bool& out_bIsNew) const -> bool final;
-    auto CheckSet_str(
-        const String& strSection,
-        const String& strKey,
-        const String& strDefault,
-        UnallocatedCString& out_strResult,
-        bool& out_bIsNew,
-        const String& strComment) const -> bool final;
-    auto CheckSet_str(
-        const String& strSection,
-        const String& strKey,
-        const String& strDefault,
-        String& out_strResult,
-        bool& out_bIsNew) const -> bool final;
-    auto CheckSet_str(
-        const String& strSection,
-        const String& strKey,
-        const String& strDefault,
-        String& out_strResult,
-        bool& out_bIsNew,
-        const String& strComment) const -> bool final;
-    auto CheckSet_long(
-        const String& strSection,
-        const String& strKey,
-        const std::int64_t& lDefault,
-        std::int64_t& out_lResult,
-        bool& out_bIsNew) const -> bool final;
-    auto CheckSet_long(
-        const String& strSection,
-        const String& strKey,
-        const std::int64_t& lDefault,
-        std::int64_t& out_lResult,
-        bool& out_bIsNew,
-        const String& strComment) const -> bool final;
-    auto CheckSet_bool(
-        const String& strSection,
-        const String& strKey,
-        const bool& bDefault,
-        bool& out_bResult,
-        bool& out_bIsNew) const -> bool final;
-    auto CheckSet_bool(
-        const String& strSection,
-        const String& strKey,
-        const bool& bDefault,
-        bool& out_bResult,
-        bool& out_bIsNew,
-        const String& strComment) const -> bool final;
-
-    // Set Option helper function for setting bool's
+    auto HasConfigFilePath() const -> bool final;
+    auto IsEmpty() const -> bool final;
+    auto IsLoaded() const -> const Flag& final;
+    auto Load() const -> bool final;
+    [[nodiscard]] auto ReadBool(
+        const std::string_view section,
+        const std::string_view key,
+        bool& out) const noexcept -> bool final;
+    [[nodiscard]] auto ReadNumber(
+        const std::string_view section,
+        const std::string_view key,
+        std::int64_t& out) const noexcept -> bool final;
+    [[nodiscard]] auto ReadString(
+        const std::string_view section,
+        const std::string_view key,
+        const AllocateOutput out) const noexcept -> bool final;
+    [[nodiscard]] auto Save() const noexcept -> bool final;
+    auto SetConfigFilePath(const String& strConfigFilePath) const -> void final;
     auto SetOption_bool(
         const String& strSection,
         const String& strKey,
         bool& bVariableName) const -> bool final;
+    auto Set_bool(
+        const String& strSection,
+        const String& strKey,
+        const bool& bValue,
+        bool& out_bNewOrUpdate) const -> bool final;
+    auto Set_bool(
+        const String& strSection,
+        const String& strKey,
+        const bool& bValue,
+        bool& out_bNewOrUpdate,
+        const String& strComment) const -> bool final;
+    auto Set_long(
+        const String& strSection,
+        const String& strKey,
+        const std::int64_t& lValue,
+        bool& out_bNewOrUpdate) const -> bool final;
+    auto Set_long(
+        const String& strSection,
+        const String& strKey,
+        const std::int64_t& lValue,
+        bool& out_bNewOrUpdate,
+        const String& strComment) const -> bool final;
+    auto Set_str(
+        const String& strSection,
+        const String& strKey,
+        const String& strValue,
+        bool& out_bNewOrUpdate) const -> bool final;
+    auto Set_str(
+        const String& strSection,
+        const String& strKey,
+        const String& strValue,
+        bool& out_bNewOrUpdate,
+        const String& strComment) const -> bool final;
+    [[nodiscard]] auto WriteBool(
+        const std::string_view section,
+        const std::string_view key,
+        const bool value) const noexcept -> bool final;
+    [[nodiscard]] auto WriteNumber(
+        const std::string_view section,
+        const std::string_view key,
+        const std::int64_t value) const noexcept -> bool final;
+    [[nodiscard]] auto WriteString(
+        const std::string_view section,
+        const std::string_view key,
+        const std::string_view value) const noexcept -> bool final;
 
     auto Reset() -> bool final;
 

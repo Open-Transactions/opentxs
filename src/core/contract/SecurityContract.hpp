@@ -8,12 +8,12 @@
 #include <UnitDefinition.pb.h>
 
 #include "core/contract/Unit.hpp"
+#include "internal/core/contract/SecurityContract.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/Mutex.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/core/Types.hpp"
 #include "opentxs/core/UnitType.hpp"
-#include "opentxs/core/contract/SecurityContract.hpp"
 #include "opentxs/core/contract/UnitType.hpp"
 #include "opentxs/identity/Types.hpp"
 #include "opentxs/identity/wot/claim/ClaimType.hpp"

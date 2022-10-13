@@ -8,7 +8,6 @@
 #include <string_view>
 
 #include "opentxs/Export.hpp"
-#include "opentxs/core/Secret.hpp"
 #include "opentxs/core/identifier/Types.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Bytes.hpp"
@@ -31,6 +30,8 @@ class Notary;
 class Nym;
 class UnitDefinition;
 }  // namespace identifier
+
+class Secret;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -116,11 +117,12 @@ public:
     virtual auto NymIDFromRandom(
         const identifier::Algorithm type,
         allocator_type alloc = {}) const noexcept -> identifier::Nym = 0;
-    virtual auto Secret(const std::size_t bytes) const noexcept -> OTSecret = 0;
+    virtual auto Secret(const std::size_t bytes) const noexcept
+        -> opentxs::Secret = 0;
     virtual auto SecretFromBytes(const ReadView bytes) const noexcept
-        -> OTSecret = 0;
+        -> opentxs::Secret = 0;
     virtual auto SecretFromText(const std::string_view text) const noexcept
-        -> OTSecret = 0;
+        -> opentxs::Secret = 0;
     virtual auto UnitIDFromBase58(
         const std::string_view base58,
         allocator_type alloc = {}) const noexcept

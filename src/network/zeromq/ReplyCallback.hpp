@@ -7,7 +7,7 @@
 
 #include <mutex>
 
-#include "opentxs/network/zeromq/ReplyCallback.hpp"
+#include "internal/network/zeromq/ReplyCallback.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 
 namespace opentxs::network::zeromq::implementation

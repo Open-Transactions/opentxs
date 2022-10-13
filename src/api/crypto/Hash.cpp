@@ -13,6 +13,7 @@
 #include <string_view>
 
 #include "internal/api/crypto/Factory.hpp"
+#include "internal/crypto/library/HashingProvider.hpp"
 #include "internal/crypto/library/Pbkdf2.hpp"
 #include "internal/crypto/library/Ripemd160.hpp"
 #include "internal/crypto/library/Scrypt.hpp"
@@ -23,7 +24,6 @@
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/Secret.hpp"
 #include "opentxs/crypto/HashType.hpp"
-#include "opentxs/crypto/library/HashingProvider.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"

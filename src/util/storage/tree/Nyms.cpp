@@ -15,6 +15,7 @@
 #include <utility>
 
 #include "internal/api/session/FactoryAPI.hpp"
+#include "internal/core/identifier/Identifier.hpp"
 #include "internal/serialization/protobuf/Check.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/serialization/protobuf/verify/Nym.hpp"
@@ -293,7 +294,7 @@ auto Nyms::serialize() const -> proto::StorageNymList
         output.add_localnymid(nymID.asBase58(crypto_));
     }
 
-    default_local_nym_.Serialize(*output.mutable_defaultlocalnym());
+    default_local_nym_.Internal().Serialize(*output.mutable_defaultlocalnym());
 
     return output;
 }

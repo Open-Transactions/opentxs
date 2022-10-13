@@ -10,8 +10,8 @@
 #include <compare>
 #include <cstdint>
 
+#include "internal/core/String.hpp"
 #include "internal/otx/common/script/OTScriptable.hpp"
-#include "opentxs/core/String.hpp"
 
 namespace opentxs
 {

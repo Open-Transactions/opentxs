@@ -40,7 +40,7 @@ Ed25519::Ed25519(
           version,
           reason)
 {
-    OT_ASSERT(blank_private() != plaintext_key_->Bytes());
+    OT_ASSERT(blank_private() != plaintext_key_.Bytes());
 }
 
 Ed25519::Ed25519(
@@ -83,7 +83,7 @@ Ed25519::Ed25519(const Ed25519& rhs, const ReadView newPublic) noexcept
 {
 }
 
-Ed25519::Ed25519(const Ed25519& rhs, OTSecret&& newSecretKey) noexcept
+Ed25519::Ed25519(const Ed25519& rhs, Secret&& newSecretKey) noexcept
     : key::Ed25519()
     , ot_super(rhs, std::move(newSecretKey))
 {

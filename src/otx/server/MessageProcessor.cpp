@@ -20,11 +20,15 @@
 #include "internal/api/session/Endpoints.hpp"
 #include "internal/api/session/FactoryAPI.hpp"
 #include "internal/api/session/notary/Notary.hpp"
+#include "internal/core/Armored.hpp"
+#include "internal/core/String.hpp"
 #include "internal/network/zeromq/Batch.hpp"
 #include "internal/network/zeromq/Context.hpp"
+#include "internal/network/zeromq/ListenCallback.hpp"
 #include "internal/network/zeromq/Types.hpp"
 #include "internal/network/zeromq/message/Message.hpp"  // IWYU pragma: keep
 #include "internal/network/zeromq/socket/Raw.hpp"
+#include "internal/network/zeromq/socket/SocketType.hpp"
 #include "internal/otx/common/Message.hpp"
 #include "internal/otx/server/Types.hpp"
 #include "internal/serialization/protobuf/Check.hpp"
@@ -40,19 +44,15 @@
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Notary.hpp"
 #include "opentxs/api/session/Wallet.hpp"
-#include "opentxs/core/Armored.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/Secret.hpp"
-#include "opentxs/core/String.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/identity/Nym.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
-#include "opentxs/network/zeromq/ListenCallback.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
 #include "opentxs/network/zeromq/message/FrameSection.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
-#include "opentxs/network/zeromq/socket/SocketType.hpp"
 #include "opentxs/otx/Reply.hpp"
 #include "opentxs/otx/Request.hpp"
 #include "opentxs/otx/ServerReplyType.hpp"
@@ -239,8 +239,8 @@ auto MessageProcessor::Imp::init(
 
     api_.Network().ZeroMQ().Internal().Modify(
         frontend_id_,
-        [this, inproc, port, key = OTSecret{privkey}](auto& socket) {
-            auto set = socket.SetPrivateKey(key->Bytes());
+        [this, inproc, port, key = Secret{privkey}](auto& socket) {
+            auto set = socket.SetPrivateKey(key.Bytes());
 
             OT_ASSERT(set);
 

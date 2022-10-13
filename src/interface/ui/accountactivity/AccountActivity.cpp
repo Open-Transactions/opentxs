@@ -10,6 +10,9 @@
 #include <string_view>
 #include <utility>
 
+#include "internal/api/session/FactoryAPI.hpp"
+#include "internal/api/session/Wallet.hpp"
+#include "internal/network/zeromq/Pipeline.hpp"
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Storage.hpp"
@@ -17,7 +20,6 @@
 #include "opentxs/core/identifier/Notary.hpp"  // IWYU pragma: keep
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/core/identifier/UnitDefinition.hpp"  // IWYU pragma: keep
-#include "opentxs/network/zeromq/Pipeline.hpp"
 #include "util/Work.hpp"
 
 namespace opentxs::ui::implementation
@@ -37,21 +39,21 @@ AccountActivity::AccountActivity(
     , contract_([&] {
         try {
 
-            return api.Wallet().UnitDefinition(
+            return api.Wallet().Internal().UnitDefinition(
                 api.Storage().AccountContract(account_id_));
         } catch (...) {
 
-            return api.Factory().UnitDefinition();
+            return api.Factory().InternalSession().UnitDefinition();
         }
     }())
     , notary_([&] {
         try {
 
-            return api.Wallet().Server(
+            return api.Wallet().Internal().Server(
                 api.Storage().AccountServer(account_id_));
         } catch (...) {
 
-            return api.Factory().ServerContract();
+            return api.Factory().InternalSession().ServerContract();
         }
     }())
     , qt_(nullptr)

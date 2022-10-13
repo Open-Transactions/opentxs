@@ -68,9 +68,9 @@ class opentxs::crypto::Seed::Imp final : public internal::Seed
 public:
     const SeedStyle type_;
     const Language lang_;
-    const OTSecret words_;
-    const OTSecret phrase_;
-    const OTSecret entropy_;
+    const Secret words_;
+    const Secret phrase_;
+    const Secret entropy_;
     const identifier::Generic id_;
     const api::session::Storage* const storage_;
     const proto::Ciphertext encrypted_words_;

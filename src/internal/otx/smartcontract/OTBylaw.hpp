@@ -7,8 +7,8 @@
 
 #include <cstdint>
 
+#include "internal/core/String.hpp"
 #include "internal/otx/smartcontract/OTVariable.hpp"
-#include "opentxs/core/String.hpp"
 #include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)

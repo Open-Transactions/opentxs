@@ -32,15 +32,27 @@
 #include "internal/api/session/Endpoints.hpp"
 #include "internal/api/session/Session.hpp"
 #include "internal/core/Core.hpp"
+#include "internal/core/String.hpp"
+#include "internal/core/contract/BasketContract.hpp"
+#include "internal/core/contract/CurrencyContract.hpp"  // IWYU pragma: keep
+#include "internal/core/contract/SecurityContract.hpp"  // IWYU pragma: keep
 #include "internal/core/contract/Types.hpp"
+#include "internal/core/contract/Unit.hpp"
+#include "internal/core/contract/peer/PeerObject.hpp"
+#include "internal/core/contract/peer/PeerReply.hpp"
+#include "internal/core/contract/peer/PeerRequest.hpp"
 #include "internal/identity/Nym.hpp"
 #include "internal/network/otdht/Factory.hpp"
 #include "internal/network/otdht/Types.hpp"
 #include "internal/network/zeromq/Batch.hpp"
 #include "internal/network/zeromq/Context.hpp"
+#include "internal/network/zeromq/ListenCallback.hpp"
 #include "internal/network/zeromq/Types.hpp"
 #include "internal/network/zeromq/message/Message.hpp"
 #include "internal/network/zeromq/socket/Factory.hpp"
+#include "internal/network/zeromq/socket/Push.hpp"
+#include "internal/network/zeromq/socket/SocketType.hpp"  // IWYU pragma: keep
+#include "internal/network/zeromq/socket/Types.hpp"
 #include "internal/otx/OTX.hpp"
 #include "internal/otx/blind/Factory.hpp"
 #include "internal/otx/blind/Purse.hpp"
@@ -50,6 +62,7 @@
 #include "internal/otx/common/NymFile.hpp"
 #include "internal/otx/common/XML.hpp"
 #include "internal/otx/consensus/Consensus.hpp"
+#include "internal/otx/consensus/Server.hpp"
 #include "internal/serialization/protobuf/Check.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/serialization/protobuf/Proto.tpp"
@@ -60,6 +73,7 @@
 #include "internal/util/Exclusive.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/Shared.hpp"
+#include "internal/util/SharedPimpl.hpp"
 #include "opentxs/api/network/Network.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Endpoints.hpp"
@@ -70,16 +84,10 @@
 #include "opentxs/blockchain/block/Hash.hpp"  // IWYU pragma: keep
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/core/Data.hpp"
-#include "opentxs/core/String.hpp"
 #include "opentxs/core/UnitType.hpp"
-#include "opentxs/core/contract/BasketContract.hpp"
 #include "opentxs/core/contract/ContractType.hpp"
 #include "opentxs/core/contract/Types.hpp"
-#include "opentxs/core/contract/Unit.hpp"
-#include "opentxs/core/contract/peer/PeerObject.hpp"
 #include "opentxs/core/contract/peer/PeerObjectType.hpp"
-#include "opentxs/core/contract/peer/PeerReply.hpp"
-#include "opentxs/core/contract/peer/PeerRequest.hpp"
 #include "opentxs/core/display/Definition.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
@@ -96,22 +104,16 @@
 #include "opentxs/network/otdht/QueryContractReply.hpp"
 #include "opentxs/network/otdht/Types.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
-#include "opentxs/network/zeromq/ListenCallback.hpp"
 #include "opentxs/network/zeromq/ZeroMQ.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
 #include "opentxs/network/zeromq/message/FrameSection.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/network/zeromq/message/Message.tpp"
-#include "opentxs/network/zeromq/socket/Push.hpp"
-#include "opentxs/network/zeromq/socket/SocketType.hpp"  // IWYU pragma: keep
-#include "opentxs/network/zeromq/socket/Types.hpp"
 #include "opentxs/otx/ConsensusType.hpp"
 #include "opentxs/otx/blind/Purse.hpp"
-#include "opentxs/otx/consensus/Server.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/NymEditor.hpp"
 #include "opentxs/util/Pimpl.hpp"
-#include "opentxs/util/SharedPimpl.hpp"
 #include "opentxs/util/WorkType.hpp"
 #include "util/Exclusive.tpp"
 
@@ -141,15 +143,16 @@ Wallet::Wallet(const api::Session& api)
     , nymfile_lock_()
     , purse_lock_()
     , purse_map_()
-    , account_publisher_(api_.Network().ZeroMQ().PublishSocket())
-    , issuer_publisher_(api_.Network().ZeroMQ().PublishSocket())
-    , nym_publisher_(api_.Network().ZeroMQ().PublishSocket())
-    , nym_created_publisher_(api_.Network().ZeroMQ().PublishSocket())
-    , server_publisher_(api_.Network().ZeroMQ().PublishSocket())
-    , unit_publisher_(api_.Network().ZeroMQ().PublishSocket())
-    , peer_reply_publisher_(api_.Network().ZeroMQ().PublishSocket())
-    , peer_request_publisher_(api_.Network().ZeroMQ().PublishSocket())
-    , find_nym_(api_.Network().ZeroMQ().PushSocket(
+    , account_publisher_(api_.Network().ZeroMQ().Internal().PublishSocket())
+    , issuer_publisher_(api_.Network().ZeroMQ().Internal().PublishSocket())
+    , nym_publisher_(api_.Network().ZeroMQ().Internal().PublishSocket())
+    , nym_created_publisher_(api_.Network().ZeroMQ().Internal().PublishSocket())
+    , server_publisher_(api_.Network().ZeroMQ().Internal().PublishSocket())
+    , unit_publisher_(api_.Network().ZeroMQ().Internal().PublishSocket())
+    , peer_reply_publisher_(api_.Network().ZeroMQ().Internal().PublishSocket())
+    , peer_request_publisher_(
+          api_.Network().ZeroMQ().Internal().PublishSocket())
+    , find_nym_(api_.Network().ZeroMQ().Internal().PushSocket(
           opentxs::network::zeromq::socket::Direction::Connect))
     , handle_([&] {
         using Type = opentxs::network::zeromq::socket::Type;

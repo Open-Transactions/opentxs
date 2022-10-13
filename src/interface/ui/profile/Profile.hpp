@@ -10,8 +10,10 @@
 
 #include "interface/ui/base/List.hpp"
 #include "interface/ui/base/Widget.hpp"
+#include "internal/interface/ui/Profile.hpp"
 #include "internal/interface/ui/UI.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
+#include "internal/util/SharedPimpl.hpp"
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Session.hpp"
@@ -19,10 +21,8 @@
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/identity/wot/claim/ClaimType.hpp"
 #include "opentxs/identity/wot/claim/SectionType.hpp"
-#include "opentxs/interface/ui/Profile.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Pimpl.hpp"
-#include "opentxs/util/SharedPimpl.hpp"
 #include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)

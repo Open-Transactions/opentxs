@@ -8,10 +8,10 @@
 #include <irrxml/irrXML.hpp>
 #include <cstdint>
 
+#include "internal/core/String.hpp"
 #include "internal/otx/common/Contract.hpp"
 #include "internal/otx/common/OTTrackable.hpp"
 #include "opentxs/core/Amount.hpp"
-#include "opentxs/core/String.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/util/Time.hpp"

@@ -11,8 +11,8 @@
 #include <string_view>
 
 #include "internal/api/crypto/Encode.hpp"
+#include "internal/core/String.hpp"
 #include "opentxs/api/crypto/Encode.hpp"
-#include "opentxs/core/String.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 

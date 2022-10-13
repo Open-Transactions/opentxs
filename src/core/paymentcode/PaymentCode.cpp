@@ -89,7 +89,7 @@ auto PaymentCode::Blind(
     const crypto::key::EllipticCurve& privateKey,
     const ReadView outpoint,
     const AllocateOutput destination,
-    const PasswordPrompt& reason) const noexcept -> bool
+    const opentxs::PasswordPrompt& reason) const noexcept -> bool
 {
     return imp_->Blind(recipient, privateKey, outpoint, destination, reason);
 }
@@ -98,7 +98,7 @@ auto PaymentCode::BlindV3(
     const PaymentCode& recipient,
     const crypto::key::EllipticCurve& privateKey,
     const AllocateOutput destination,
-    const PasswordPrompt& reason) const noexcept -> bool
+    const opentxs::PasswordPrompt& reason) const noexcept -> bool
 {
     return imp_->BlindV3(recipient, privateKey, destination, reason);
 }
@@ -106,7 +106,8 @@ auto PaymentCode::BlindV3(
 auto PaymentCode::DecodeNotificationElements(
     const std::uint8_t version,
     const UnallocatedVector<Space>& elements,
-    const PasswordPrompt& reason) const noexcept -> opentxs::PaymentCode
+    const opentxs::PasswordPrompt& reason) const noexcept
+    -> opentxs::PaymentCode
 {
     return imp_->DecodeNotificationElements(version, elements, reason);
 }
@@ -116,7 +117,8 @@ auto PaymentCode::DefaultVersion() noexcept -> VersionNumber { return 3; }
 auto PaymentCode::GenerateNotificationElements(
     const PaymentCode& recipient,
     const crypto::key::EllipticCurve& privateKey,
-    const PasswordPrompt& reason) const noexcept -> UnallocatedVector<Space>
+    const opentxs::PasswordPrompt& reason) const noexcept
+    -> UnallocatedVector<Space>
 {
     return imp_->GenerateNotificationElements(recipient, privateKey, reason);
 }
@@ -145,7 +147,7 @@ auto PaymentCode::Incoming(
     const PaymentCode& sender,
     const Bip32Index index,
     const blockchain::Type chain,
-    const PasswordPrompt& reason,
+    const opentxs::PasswordPrompt& reason,
     const std::uint8_t version) const noexcept
     -> std::unique_ptr<crypto::key::EllipticCurve>
 {
@@ -163,7 +165,7 @@ auto PaymentCode::Outgoing(
     const PaymentCode& recipient,
     const Bip32Index index,
     const blockchain::Type chain,
-    const PasswordPrompt& reason,
+    const opentxs::PasswordPrompt& reason,
     const std::uint8_t version) const noexcept
     -> std::unique_ptr<crypto::key::EllipticCurve>
 {
@@ -178,7 +180,7 @@ auto PaymentCode::Serialize(AllocateOutput destination) const noexcept -> bool
 auto PaymentCode::Sign(
     const Data& data,
     Data& output,
-    const PasswordPrompt& reason) const noexcept -> bool
+    const opentxs::PasswordPrompt& reason) const noexcept -> bool
 {
     return imp_->Sign(data, output, reason);
 }
@@ -192,7 +194,8 @@ auto PaymentCode::Unblind(
     const ReadView blinded,
     const crypto::key::EllipticCurve& publicKey,
     const ReadView outpoint,
-    const PasswordPrompt& reason) const noexcept -> opentxs::PaymentCode
+    const opentxs::PasswordPrompt& reason) const noexcept
+    -> opentxs::PaymentCode
 {
     return imp_->Unblind(blinded, publicKey, outpoint, reason);
 }
@@ -201,7 +204,8 @@ auto PaymentCode::UnblindV3(
     const std::uint8_t version,
     const ReadView blinded,
     const crypto::key::EllipticCurve& publicKey,
-    const PasswordPrompt& reason) const noexcept -> opentxs::PaymentCode
+    const opentxs::PasswordPrompt& reason) const noexcept
+    -> opentxs::PaymentCode
 {
     return imp_->UnblindV3(version, blinded, publicKey, reason);
 }

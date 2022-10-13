@@ -9,6 +9,8 @@
 #include <future>
 #include <utility>
 
+#include "internal/api/session/UI.hpp"
+#include "internal/interface/ui/ContactList.hpp"
 #include "ottest/fixtures/common/Counter.hpp"
 #include "ottest/fixtures/common/User.hpp"
 #include "ottest/fixtures/integration/Helpers.hpp"
@@ -175,7 +177,7 @@ TEST_F(Test_AddContact, nymid)
 
     contact_list_alex_.expected_ += 1;
     messagable_list_alex_.expected_ += 1;
-    const auto& widget = alex_.api_->UI().ContactList(alex_.nym_id_);
+    const auto& widget = alex_.api_->UI().Internal().ContactList(alex_.nym_id_);
     const auto id = widget.AddContact(
         bob_.name_, bob_.nym_id_.asBase58(api_alex_.Crypto()), "");
     api_alex_.OTX().ContextIdle(alex_.nym_id_, server_1_.id_).get();
@@ -218,7 +220,8 @@ TEST_F(Test_AddContact, paymentcode)
 
         contact_list_alex_.expected_ += 1;
         messagable_list_alex_.expected_ += 1;
-        const auto& widget = alex_.api_->UI().ContactList(alex_.nym_id_);
+        const auto& widget =
+            alex_.api_->UI().Internal().ContactList(alex_.nym_id_);
         const auto id =
             widget.AddContact(chris_.name_, "", chris_.payment_code_);
         api_alex_.OTX().ContextIdle(alex_.nym_id_, server_1_.id_).get();
@@ -279,7 +282,7 @@ TEST_F(Test_AddContact, both)
 
     contact_list_bob_.expected_ += 1;
     messagable_list_bob_.expected_ += 1;
-    const auto& widget = bob_.api_->UI().ContactList(bob_.nym_id_);
+    const auto& widget = bob_.api_->UI().Internal().ContactList(bob_.nym_id_);
     const auto id = widget.AddContact(
         alex_.name_,
         alex_.nym_id_.asBase58(api_alex_.Crypto()),
@@ -329,7 +332,7 @@ TEST_F(Test_AddContact, backwards)
 
     contact_list_bob_.expected_ += 1;
     messagable_list_bob_.expected_ += 1;
-    const auto& widget = bob_.api_->UI().ContactList(bob_.nym_id_);
+    const auto& widget = bob_.api_->UI().Internal().ContactList(bob_.nym_id_);
     const auto id = widget.AddContact(
         chris_.name_,
         chris_.payment_code_,
@@ -376,7 +379,8 @@ TEST_F(Test_AddContact, paymentcode_as_nymid)
 
         contact_list_chris_.expected_ += 1;
         messagable_list_chris_.expected_ += 1;
-        const auto& widget = chris_.api_->UI().ContactList(chris_.nym_id_);
+        const auto& widget =
+            chris_.api_->UI().Internal().ContactList(chris_.nym_id_);
         const auto id = widget.AddContact(alex_.name_, alex_.payment_code_, "");
         api_chris_.OTX().ContextIdle(chris_.nym_id_, server_1_.id_).get();
 
@@ -428,7 +432,8 @@ TEST_F(Test_AddContact, nymid_as_paymentcode)
 
     contact_list_chris_.expected_ += 1;
     messagable_list_chris_.expected_ += 1;
-    const auto& widget = chris_.api_->UI().ContactList(chris_.nym_id_);
+    const auto& widget =
+        chris_.api_->UI().Internal().ContactList(chris_.nym_id_);
     const auto id = widget.AddContact(
         bob_.name_, "", bob_.nym_id_.asBase58(api_alex_.Crypto()));
     api_chris_.OTX().ContextIdle(chris_.nym_id_, server_1_.id_).get();

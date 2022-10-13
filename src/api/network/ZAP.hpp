@@ -7,8 +7,11 @@
 
 #include "opentxs/api/network/ZAP.hpp"
 
-#include "opentxs/network/zeromq/zap/Callback.hpp"
-#include "opentxs/network/zeromq/zap/Handler.hpp"
+#include <string_view>
+
+#include "internal/network/zeromq/zap/Callback.hpp"
+#include "internal/network/zeromq/zap/Handler.hpp"
+#include "opentxs/network/zeromq/zap/Types.hpp"
 #include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -32,9 +35,11 @@ class ZAP final : virtual public api::network::ZAP
 {
 public:
     auto RegisterDomain(
-        const UnallocatedCString& domain,
-        const Callback& callback) const -> bool final;
-    auto SetDefaultPolicy(const Policy policy) const -> bool final;
+        const std::string_view domain,
+        const opentxs::network::zeromq::zap::ReceiveCallback& callback) const
+        -> bool final;
+    auto SetDefaultPolicy(
+        const opentxs::network::zeromq::zap::Policy policy) const -> bool final;
 
     ZAP() = delete;
     ZAP(const ZAP&) = delete;

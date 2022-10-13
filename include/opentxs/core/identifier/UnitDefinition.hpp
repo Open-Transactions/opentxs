@@ -18,6 +18,7 @@ namespace opentxs
 {
 namespace identifier
 {
+class IdentifierPrivate;
 class UnitDefinition;
 }  // namespace identifier
 }  // namespace opentxs
@@ -37,7 +38,7 @@ namespace opentxs::identifier
 class OPENTXS_EXPORT UnitDefinition : virtual public identifier::Generic
 {
 public:
-    OPENTXS_NO_EXPORT UnitDefinition(Imp* imp) noexcept;
+    OPENTXS_NO_EXPORT UnitDefinition(IdentifierPrivate* imp) noexcept;
     UnitDefinition(allocator_type alloc = {}) noexcept;
     UnitDefinition(
         const UnitDefinition& rhs,

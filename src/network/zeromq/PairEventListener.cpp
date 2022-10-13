@@ -8,9 +8,9 @@
 
 #include <sstream>
 
+#include "internal/network/zeromq/ListenCallback.hpp"
+#include "internal/network/zeromq/PairEventCallback.hpp"
 #include "internal/util/LogMacros.hpp"
-#include "opentxs/network/zeromq/ListenCallback.hpp"
-#include "opentxs/network/zeromq/PairEventCallback.hpp"
 #include "opentxs/network/zeromq/ZeroMQ.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"

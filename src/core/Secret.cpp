@@ -3,257 +3,232 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#include "0_stdafx.hpp"     // IWYU pragma: associated
-#include "core/Secret.hpp"  // IWYU pragma: associated
-
-extern "C" {
-#include <sodium.h>
-}
+#include "0_stdafx.hpp"             // IWYU pragma: associated
+#include "opentxs/core/Secret.hpp"  // IWYU pragma: associated
 
 #include <cstdint>
-#include <cstring>
-#include <iterator>
-#include <memory>
+#include <utility>
 
-#include "internal/core/Core.hpp"
+#include "core/SecretPrivate.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
-#include "opentxs/util/Pimpl.hpp"
-
-template class opentxs::Pimpl<opentxs::Secret>;
-
-namespace opentxs::factory
-{
-auto Secret(const std::size_t bytes) noexcept
-    -> std::unique_ptr<opentxs::Secret>
-{
-    using ReturnType = implementation::Secret;
-
-    return std::make_unique<ReturnType>(bytes);
-}
-auto Secret(const ReadView bytes, const bool mode) noexcept
-    -> std::unique_ptr<opentxs::Secret>
-{
-    using ReturnType = implementation::Secret;
-
-    return std::make_unique<ReturnType>(
-        bytes, static_cast<ReturnType::Mode>(mode));
-}
-}  // namespace opentxs::factory
+#include "util/Allocator.hpp"
 
 namespace opentxs
 {
-auto operator==(const OTSecret& lhs, const Secret& rhs) noexcept -> bool
+Secret::Secret(SecretPrivate* imp) noexcept
+    : imp_(imp)
 {
-    return lhs->operator==(rhs);
+    OT_ASSERT(imp_);
+
+    imp_->parent_ = this;
 }
-auto operator==(const OTSecret& lhs, const ReadView& rhs) noexcept -> bool
+
+Secret::Secret(const Secret& rhs) noexcept
+    : Secret([&] {
+        auto alloc = alloc::PMR<SecretPrivate>{alloc::Secure::get()};
+        // TODO c++20
+        auto* out = alloc.allocate(1_uz);
+
+        OT_ASSERT(nullptr != out);
+
+        alloc.construct(out, rhs.data(), rhs.size(), rhs.imp_->Mode());
+
+        return out;
+    }())
 {
-    return lhs->operator==(rhs);
 }
-auto operator!=(const OTSecret& lhs, const Secret& rhs) noexcept -> bool
+
+Secret::Secret(Secret&& rhs) noexcept
+    : Secret(rhs.imp_)
 {
-    return lhs->operator!=(rhs);
+    rhs.imp_ = nullptr;
 }
-auto operator!=(const OTSecret& lhs, const ReadView& rhs) noexcept -> bool
+
+auto Secret::asHex() const -> UnallocatedCString { return imp_->asHex(); }
+
+auto Secret::asHex(alloc::Default alloc) const -> CString
 {
-    return lhs->operator!=(rhs);
+    return imp_->asHex(alloc);
 }
-auto operator<(const OTSecret& lhs, const Secret& rhs) noexcept -> bool
+
+auto Secret::Assign(const Data& source) noexcept -> bool
 {
-    return lhs->operator<(rhs);
+    return imp_->Assign(source.data(), source.size());
 }
-auto operator<(const OTSecret& lhs, const ReadView& rhs) noexcept -> bool
+
+auto Secret::Assign(const ReadView source) noexcept -> bool
 {
-    return lhs->operator<(rhs);
+    return imp_->Assign(source.data(), source.size());
 }
-auto operator>(const OTSecret& lhs, const Secret& rhs) noexcept -> bool
+
+auto Secret::Assign(const void* data, const std::size_t size) noexcept -> bool
 {
-    return lhs->operator>(rhs);
+    return imp_->Assign(data, size);
 }
-auto operator>(const OTSecret& lhs, const ReadView& rhs) noexcept -> bool
+
+auto Secret::AssignText(const ReadView source) noexcept -> bool
 {
-    return lhs->operator>(rhs);
+    return imp_->AssignText(source);
 }
-auto operator<=(const OTSecret& lhs, const Secret& rhs) noexcept -> bool
+
+auto Secret::at(const std::size_t position) -> std::byte&
 {
-    return lhs->operator<=(rhs);
+    return imp_->at(position);
 }
-auto operator<=(const OTSecret& lhs, const ReadView& rhs) noexcept -> bool
+
+auto Secret::at(const std::size_t position) const -> const std::byte&
 {
-    return lhs->operator<=(rhs);
+    return imp_->at(position);
 }
-auto operator>=(const OTSecret& lhs, const Secret& rhs) noexcept -> bool
+
+auto Secret::begin() -> iterator { return imp_->begin(); }
+
+auto Secret::begin() const -> const_iterator { return cbegin(); }
+
+auto Secret::Bytes() const noexcept -> ReadView { return imp_->Bytes(); }
+
+auto Secret::cbegin() const -> const_iterator { return imp_->cbegin(); }
+
+auto Secret::cend() const -> const_iterator { return imp_->cend(); }
+
+auto Secret::clear() noexcept -> void { imp_->clear(); }
+
+auto Secret::Concatenate(const ReadView in) noexcept -> bool
 {
-    return lhs->operator>=(rhs);
+    return imp_->Concatenate(in);
 }
-auto operator>=(const OTSecret& lhs, const ReadView& rhs) noexcept -> bool
+
+auto Secret::Concatenate(const void* data, const std::size_t size) noexcept
+    -> bool
 {
-    return lhs->operator>=(rhs);
+    return imp_->Concatenate(data, size);
 }
-auto operator+=(OTSecret& lhs, const Secret& rhs) noexcept -> Secret&
+
+auto Secret::data() -> void* { return imp_->data(); }
+
+auto Secret::data() const -> const void* { return imp_->data(); }
+
+auto Secret::DecodeHex(const ReadView hex) -> bool
 {
-    return lhs->operator+=(rhs);
+    return imp_->DecodeHex(hex);
 }
-auto operator+=(OTSecret& lhs, const ReadView rhs) noexcept -> Secret&
+
+auto Secret::empty() const -> bool { return imp_->empty(); }
+
+auto Secret::end() -> iterator { return imp_->end(); }
+
+auto Secret::end() const -> const_iterator { return cend(); }
+
+auto Secret::Extract(
+    const std::size_t amount,
+    Data& output,
+    const std::size_t pos) const -> bool
 {
-    return lhs->operator+=(rhs);
+    return imp_->Extract(amount, output, pos);
+}
+
+auto Secret::Extract(std::uint16_t& output, const std::size_t pos) const -> bool
+{
+    return imp_->Extract(output, pos);
+}
+
+auto Secret::Extract(std::uint32_t& output, const std::size_t pos) const -> bool
+{
+    return imp_->Extract(output, pos);
+}
+
+auto Secret::Extract(std::uint64_t& output, const std::size_t pos) const -> bool
+{
+    return imp_->Extract(output, pos);
+}
+
+auto Secret::Extract(std::uint8_t& output, const std::size_t pos) const -> bool
+{
+    return imp_->Extract(output, pos);
+}
+
+auto Secret::get_allocator() const noexcept -> allocator_type
+{
+    return imp_->get_allocator();
+}
+
+auto Secret::operator=(const Secret& rhs) noexcept -> Secret&
+{
+    auto* old{imp_};
+    {
+        auto alloc = alloc::PMR<SecretPrivate>{alloc::Secure::get()};
+        // TODO c++20
+        imp_ = alloc.allocate(1_uz);
+
+        OT_ASSERT(nullptr != imp_);
+
+        alloc.construct(imp_, rhs.data(), rhs.size(), rhs.imp_->Mode());
+    }
+    {
+        auto alloc = alloc::PMR<SecretPrivate>{old->get_allocator()};
+        // TODO c++20
+        alloc.destroy(old);
+        alloc.deallocate(old, 1_uz);
+    }
+
+    return *this;
+}
+
+auto Secret::operator=(Secret&& rhs) noexcept -> Secret&
+{
+    swap(rhs);
+
+    return *this;
+}
+
+auto Secret::IsNull() const -> bool { return imp_->IsNull(); }
+
+auto Secret::Randomize(const std::size_t size) -> bool
+{
+    return imp_->Randomize(size);
+}
+
+auto Secret::resize(const std::size_t size) -> bool
+{
+    return imp_->resize(size);
+}
+
+auto Secret::SetSize(const std::size_t size) -> bool
+{
+    return imp_->SetSize(size);
+}
+
+auto Secret::size() const -> std::size_t { return imp_->size(); }
+
+auto Secret::swap(Secret& rhs) noexcept -> void
+{
+    OT_ASSERT(get_allocator() == rhs.get_allocator());
+
+    std::swap(imp_, rhs.imp_);
+    std::swap(imp_->parent_, rhs.imp_->parent_);
+}
+
+auto Secret::WriteInto() noexcept -> AllocateOutput
+{
+    return imp_->WriteInto();
+}
+
+auto Secret::WriteInto(Mode mode) noexcept -> AllocateOutput
+{
+    return imp_->WriteInto(mode);
+}
+
+auto Secret::zeroMemory() -> void { imp_->zeroMemory(); }
+
+Secret::~Secret()
+{
+    if (nullptr != imp_) {
+        // TODO c++20
+        auto alloc = alloc::PMR<SecretPrivate>{get_allocator()};
+        alloc.destroy(imp_);
+        alloc.deallocate(imp_, 1_uz);
+        imp_ = nullptr;
+    }
 }
 }  // namespace opentxs
-
-namespace opentxs::implementation
-{
-constexpr auto effective_size(const std::size_t size, const Secret::Mode mode)
-{
-    return (Secret::Mode::Mem == mode) ? size : size + 1u;
-}
-
-const SecureAllocator<std::byte> Secret::allocator_{};
-
-Secret::Secret(const std::size_t bytes) noexcept
-    : mode_(Mode::Mem)
-    , data_(bytes, std::byte{}, allocator_)
-{
-}
-Secret::Secret(const ReadView bytes, const Mode mode) noexcept
-    : mode_(mode)
-    , data_(effective_size(bytes.size(), mode), std::byte{}, allocator_)
-{
-    std::memcpy(data_.data(), bytes.data(), bytes.size());
-}
-Secret::Secret(const Secret& rhs) noexcept
-    : mode_(rhs.mode_)
-    , data_(rhs.data_)
-{
-}
-auto Secret::operator==(const ReadView rhs) const noexcept -> bool
-{
-    return 0 == spaceship(rhs);
-}
-auto Secret::operator!=(const ReadView rhs) const noexcept -> bool
-{
-    return 0 != spaceship(rhs);
-}
-auto Secret::operator<(const ReadView rhs) const noexcept -> bool
-{
-    return 0 > spaceship(rhs);
-}
-auto Secret::operator>(const ReadView rhs) const noexcept -> bool
-{
-    return 0 < spaceship(rhs);
-}
-auto Secret::operator<=(const ReadView& rhs) const noexcept -> bool
-{
-    return 0 >= spaceship(rhs);
-}
-auto Secret::operator>=(const ReadView& rhs) const noexcept -> bool
-{
-    return 0 <= spaceship(rhs);
-}
-auto Secret::operator+=(const opentxs::Secret& rhs) noexcept -> Secret&
-{
-    if (data() != rhs.data()) { Concatenate(rhs.data(), rhs.size()); }
-
-    return *this;
-}
-auto Secret::operator+=(const ReadView rhs) noexcept -> Secret&
-{
-    if (data() != reinterpret_cast<const std::byte*>(rhs.data())) {
-        Concatenate(rhs.data(), rhs.size());
-    }
-
-    return *this;
-}
-auto Secret::Assign(const void* data, const std::size_t& size) noexcept -> void
-{
-    mode_ = Mode::Mem;
-    data_.clear();
-    data_.reserve(size);
-    data_.resize(size, {});
-    std::memcpy(data_.data(), data, size);
-}
-auto Secret::AssignText(const ReadView rhs) noexcept -> void
-{
-    mode_ = Mode::Text;
-    data_.clear();
-    const auto targetSize = rhs.size() + 1_uz;
-    data_.reserve(targetSize);
-    data_.resize(targetSize, {});
-    std::memcpy(data_.data(), rhs.data(), rhs.size());
-}
-auto Secret::Bytes() const noexcept -> ReadView
-{
-    return ReadView{reinterpret_cast<const char*>(data()), size()};
-}
-auto Secret::Concatenate(const void* in, const std::size_t bytes) noexcept
-    -> void
-{
-    // Test for self-assignment
-    const auto a = reinterpret_cast<std::uintptr_t>(data_.data());
-    const auto b =
-        reinterpret_cast<std::uintptr_t>(data_.data() + data_.size());
-    const auto x = reinterpret_cast<std::uintptr_t>(in);
-    const auto y = reinterpret_cast<std::uintptr_t>(
-        static_cast<const std::byte*>(in) + bytes);
-
-    if ((y < a) || (x > b)) {
-        const auto targetSize = size() + bytes;
-        Resize(targetSize);
-        auto* it = data();
-        std::advance(it, size());
-        std::memcpy(it, in, bytes);
-    } else {
-        OT_FAIL;
-    }
-}
-auto Secret::Randomize(const std::size_t bytes) noexcept -> std::size_t
-{
-    if (size() != bytes) { Resize(bytes); }
-
-    ::randombytes_buf(data(), size());
-
-    return bytes;
-}
-auto Secret::Resize(const std::size_t bytes) noexcept -> std::size_t
-{
-    const auto target = mem() ? bytes : bytes + 1u;
-    data_.resize(target);
-
-    return size();
-}
-
-auto Secret::size() const noexcept -> std::size_t
-{
-    return data_.size() - (mem() ? 0u : 1u);
-}
-
-auto Secret::spaceship(const ReadView rhs) const noexcept -> int
-{
-    const auto bytes = size();
-    const auto rBytes = rhs.size();
-
-    if (bytes < rBytes) { return -1; }
-
-    if (bytes > rBytes) { return 1; }
-
-    return std::memcmp(data(), rhs.data(), bytes);
-}
-auto Secret::WriteInto(const std::optional<Mode> mode) noexcept
-    -> AllocateOutput
-{
-    const auto binary{mode.has_value() ? (Mode::Mem == mode.value()) : mem()};
-
-    return [binary, this](const auto size) {
-        auto blank = space(size);
-
-        if (binary) {
-            Assign(blank.data(), blank.size());
-        } else {
-            AssignText(ReadView{
-                reinterpret_cast<const char*>(blank.data()), blank.size()});
-        }
-
-        return WritableView{data(), this->size()};
-    };
-}
-}  // namespace opentxs::implementation

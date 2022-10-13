@@ -18,6 +18,7 @@ namespace opentxs
 {
 namespace identifier
 {
+class IdentifierPrivate;
 class Notary;
 }  // namespace identifier
 }  // namespace opentxs
@@ -37,7 +38,7 @@ namespace opentxs::identifier
 class OPENTXS_EXPORT Notary : virtual public identifier::Generic
 {
 public:
-    OPENTXS_NO_EXPORT Notary(Imp* imp) noexcept;
+    OPENTXS_NO_EXPORT Notary(IdentifierPrivate* imp) noexcept;
     Notary(allocator_type alloc = {}) noexcept;
     Notary(const Notary& rhs, allocator_type alloc = {}) noexcept;
     Notary(Notary&& rhs) noexcept;

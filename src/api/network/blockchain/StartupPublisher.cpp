@@ -13,13 +13,13 @@
 #include "internal/api/session/Endpoints.hpp"
 #include "internal/network/zeromq/Batch.hpp"
 #include "internal/network/zeromq/Context.hpp"
+#include "internal/network/zeromq/ListenCallback.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
+#include "internal/network/zeromq/socket/SocketType.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/api/session/Endpoints.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
-#include "opentxs/network/zeromq/ListenCallback.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"  // IWYU pragma: keep
-#include "opentxs/network/zeromq/socket/SocketType.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 

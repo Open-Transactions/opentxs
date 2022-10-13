@@ -7,7 +7,11 @@
 
 #include "opentxs/identity/Authority.hpp"
 
+#include "internal/core/String.hpp"
 #include "internal/identity/Types.hpp"
+#include "opentxs/crypto/key/Keypair.hpp"
+#include "opentxs/crypto/key/asymmetric/Role.hpp"
+#include "opentxs/identity/Nym.hpp"
 #include "opentxs/util/Numbers.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -38,11 +42,13 @@ namespace opentxs::identity::internal
 class Authority : virtual public identity::Authority
 {
 public:
+    using AuthorityKeys = identity::Nym::AuthorityKeys;
     using Serialized = proto::Authority;
 
     static auto NymToContactCredential(const VersionNumber nym) noexcept(false)
         -> VersionNumber;
 
+    virtual auto EncryptionTargets() const noexcept -> AuthorityKeys = 0;
     virtual auto GetContactData(proto::ContactData& contactData) const
         -> bool = 0;
     virtual auto GetMasterCredential() const -> const credential::Primary& = 0;
@@ -50,6 +56,46 @@ public:
     {
         return *this;
     }
+    virtual auto GetPublicAuthKey(
+        crypto::key::asymmetric::Algorithm keytype,
+        const String::List* plistRevokedIDs = nullptr) const
+        -> const crypto::key::Asymmetric& = 0;
+    virtual auto GetPublicEncrKey(
+        crypto::key::asymmetric::Algorithm keytype,
+        const String::List* plistRevokedIDs = nullptr) const
+        -> const crypto::key::Asymmetric& = 0;
+    virtual auto GetPublicKeysBySignature(
+        crypto::key::Keypair::Keys& listOutput,
+        const Signature& theSignature,
+        char cKeyType = '0') const -> std::int32_t = 0;
+    virtual auto GetPublicSignKey(
+        crypto::key::asymmetric::Algorithm keytype,
+        const String::List* plistRevokedIDs = nullptr) const
+        -> const crypto::key::Asymmetric& = 0;
+    virtual auto GetPrivateSignKey(
+        crypto::key::asymmetric::Algorithm keytype,
+        const String::List* plistRevokedIDs = nullptr) const
+        -> const crypto::key::Asymmetric& = 0;
+    virtual auto GetPrivateEncrKey(
+        crypto::key::asymmetric::Algorithm keytype,
+        const String::List* plistRevokedIDs = nullptr) const
+        -> const crypto::key::Asymmetric& = 0;
+    virtual auto GetPrivateAuthKey(
+        crypto::key::asymmetric::Algorithm keytype,
+        const String::List* plistRevokedIDs = nullptr) const
+        -> const crypto::key::Asymmetric& = 0;
+    virtual auto GetAuthKeypair(
+        crypto::key::asymmetric::Algorithm keytype,
+        const String::List* plistRevokedIDs = nullptr) const
+        -> const crypto::key::Keypair& = 0;
+    virtual auto GetEncrKeypair(
+        crypto::key::asymmetric::Algorithm keytype,
+        const String::List* plistRevokedIDs = nullptr) const
+        -> const crypto::key::Keypair& = 0;
+    virtual auto GetSignKeypair(
+        crypto::key::asymmetric::Algorithm keytype,
+        const String::List* plistRevokedIDs = nullptr) const
+        -> const crypto::key::Keypair& = 0;
     virtual auto GetVerificationSet(
         proto::VerificationSet& verificationSet) const -> bool = 0;
     virtual auto Path(proto::HDPath& output) const -> bool = 0;
@@ -71,8 +117,12 @@ public:
         const opentxs::crypto::key::asymmetric::Role key =
             opentxs::crypto::key::asymmetric::Role::Sign) const -> bool = 0;
     virtual auto Verify(const proto::Verification& item) const -> bool = 0;
+    virtual auto VerifyInternally() const -> bool = 0;
     virtual auto WriteCredentials() const -> bool = 0;
 
+    virtual auto AddChildKeyCredential(
+        const crypto::Parameters& nymParameters,
+        const PasswordPrompt& reason) -> UnallocatedCString = 0;
     virtual auto AddVerificationCredential(
         const proto::VerificationSet& verificationSet,
         const PasswordPrompt& reason) -> bool = 0;
@@ -80,6 +130,10 @@ public:
         const proto::ContactData& contactData,
         const PasswordPrompt& reason) -> bool = 0;
     auto Internal() noexcept -> internal::Authority& final { return *this; }
+    virtual void RevokeContactCredentials(
+        UnallocatedList<UnallocatedCString>& contactCredentialIDs) = 0;
+    virtual void RevokeVerificationCredentials(
+        UnallocatedList<UnallocatedCString>& verificationCredentialIDs) = 0;
 
     ~Authority() override = default;
 };

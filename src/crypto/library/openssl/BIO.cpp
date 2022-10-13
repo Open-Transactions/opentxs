@@ -14,8 +14,8 @@ extern "C" {
 #include <cstdint>
 #include <limits>
 
+#include "internal/core/String.hpp"
 #include "internal/util/LogMacros.hpp"
-#include "opentxs/core/String.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Pimpl.hpp"

@@ -10,6 +10,9 @@
 #include <memory>
 #include <utility>
 
+#include "internal/api/session/FactoryAPI.hpp"
+#include "internal/core/String.hpp"
+#include "internal/crypto/Envelope.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 
@@ -36,8 +39,8 @@ public:
 
     const ot::api::Session& sender_;
     const ot::api::Session& recipient_;
-    const ot::OTPasswordPrompt reason_s_;
-    const ot::OTPasswordPrompt reason_r_;
+    const ot::PasswordPrompt reason_s_;
+    const ot::PasswordPrompt reason_r_;
     const ot::OTString plaintext_;
 
     static auto can_seal(const std::size_t row) -> bool
@@ -183,8 +186,8 @@ TEST_F(Test_Envelope, one_recipient)
     for (const auto& pNym : nyms_) {
         const auto& nym = *pNym;
         auto plaintext = ot::String::Factory();
-        auto armored = sender_.Factory().Armored();
-        auto sender = sender_.Factory().Envelope();
+        auto armored = sender_.Factory().InternalSession().Armored();
+        auto sender = sender_.Factory().InternalSession().Envelope();
         const auto sealed = sender->Seal(nym, plaintext_->Bytes(), reason_s_);
 
         EXPECT_TRUE(sealed);
@@ -194,7 +197,8 @@ TEST_F(Test_Envelope, one_recipient)
         EXPECT_TRUE(sender->Armored(armored));
 
         try {
-            auto recipient = recipient_.Factory().Envelope(armored);
+            auto recipient =
+                recipient_.Factory().InternalSession().Envelope(armored);
             auto opened =
                 recipient->Open(nym, plaintext->WriteInto(), reason_r_);
 
@@ -221,7 +225,7 @@ TEST_F(Test_Envelope, multiple_recipients)
 
     for (auto row = 0_uz; row < (one << nyms_.size()); ++row) {
         auto recipients = ot::crypto::Envelope::Recipients{};
-        auto sender = sender_.Factory().Envelope();
+        auto sender = sender_.Factory().InternalSession().Envelope();
 
         for (auto nym = nyms_.cbegin(); nym != nyms_.cend(); ++nym) {
             const auto column =
@@ -246,7 +250,8 @@ TEST_F(Test_Envelope, multiple_recipients)
             auto plaintext = ot::String::Factory();
 
             try {
-                auto recipient = sender_.Factory().Envelope(ot::reader(bytes));
+                auto recipient = sender_.Factory().InternalSession().Envelope(
+                    ot::reader(bytes));
                 auto rNym = recipient_.Wallet().Nym((*nym)->ID());
 
                 OT_ASSERT(rNym);

@@ -11,20 +11,20 @@
 #include <iosfwd>
 
 #include "interface/ui/base/Row.hpp"
+#include "internal/core/contract/Unit.hpp"
+#include "internal/interface/ui/AccountSummaryItem.hpp"
 #include "internal/interface/ui/UI.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/Mutex.hpp"
+#include "internal/util/SharedPimpl.hpp"
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/core/Types.hpp"
-#include "opentxs/core/contract/Unit.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/identity/wot/claim/ClaimType.hpp"
-#include "opentxs/interface/ui/AccountSummaryItem.hpp"
 #include "opentxs/util/Container.hpp"
-#include "opentxs/util/SharedPimpl.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs

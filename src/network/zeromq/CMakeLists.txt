@@ -13,6 +13,11 @@ target_sources(
   opentxs-common
   PRIVATE
     "${opentxs_SOURCE_DIR}/src/internal/network/zeromq/Factory.hpp"
+    "${opentxs_SOURCE_DIR}/src/internal/network/zeromq/ListenCallback.hpp"
+    "${opentxs_SOURCE_DIR}/src/internal/network/zeromq/PairEventCallback.hpp"
+    "${opentxs_SOURCE_DIR}/src/internal/network/zeromq/Pipeline.hpp"
+    "${opentxs_SOURCE_DIR}/src/internal/network/zeromq/Proxy.hpp"
+    "${opentxs_SOURCE_DIR}/src/internal/network/zeromq/ReplyCallback.hpp"
     "ListenCallback.cpp"
     "ListenCallback.hpp"
     "PairEventCallback.cpp"
@@ -26,11 +31,6 @@ target_sources(
     "ZeroMQ.cpp"
 )
 set(cxx-install-headers
-    "${opentxs_SOURCE_DIR}/include/opentxs/network/zeromq/ListenCallback.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/network/zeromq/PairEventCallback.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/network/zeromq/Pipeline.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/network/zeromq/Proxy.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/network/zeromq/ReplyCallback.hpp"
     "${opentxs_SOURCE_DIR}/include/opentxs/network/zeromq/ZeroMQ.hpp"
 )
 target_include_directories(

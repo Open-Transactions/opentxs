@@ -9,6 +9,11 @@
 #include <cstddef>
 #include <memory>
 
+#include "internal/network/zeromq/Context.hpp"
+#include "internal/network/zeromq/ListenCallback.hpp"
+#include "internal/network/zeromq/socket/Publish.hpp"
+#include "internal/network/zeromq/socket/Subscribe.hpp"
+
 namespace ot = opentxs;
 namespace zmq = ot::network::zeromq;
 
@@ -21,7 +26,8 @@ TEST(Test_Stress, Pub_10000)
     auto pub = ot::UnallocatedVector<ot::OTZMQPublishSocket>{};
 
     for (auto i{0}; i < 10000; ++i) {
-        auto& socket = pub.emplace_back(ot.ZMQ().PublishSocket()).get();
+        auto& socket =
+            pub.emplace_back(ot.ZMQ().Internal().PublishSocket()).get();
         auto& endpoint = endpoints.emplace_back(
             ot::UnallocatedCString{"inproc://Pub_10000/"} + std::to_string(i));
 
@@ -36,7 +42,8 @@ TEST(Test_Stress, PubSub_100)
     auto pub = ot::UnallocatedVector<ot::OTZMQPublishSocket>{};
 
     for (auto i{0}; i < 100; ++i) {
-        auto& socket = pub.emplace_back(ot.ZMQ().PublishSocket()).get();
+        auto& socket =
+            pub.emplace_back(ot.ZMQ().Internal().PublishSocket()).get();
         auto& endpoint = endpoints.emplace_back(
             ot::UnallocatedCString{"inproc://PubSub_100/"} + std::to_string(i));
 
@@ -46,7 +53,7 @@ TEST(Test_Stress, PubSub_100)
     auto results = std::atomic<std::size_t>{};
     auto callback =
         zmq::ListenCallback::Factory([&results](auto&&) { ++results; });
-    auto sub = ot.ZMQ().SubscribeSocket(callback);
+    auto sub = ot.ZMQ().Internal().SubscribeSocket(callback);
 
     for (const auto& endpoint : endpoints) {
         EXPECT_TRUE(sub->Start(endpoint));

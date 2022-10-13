@@ -10,7 +10,7 @@
 #include <iosfwd>
 #include <string_view>
 
-#include "opentxs/core/String.hpp"
+#include "internal/core/String.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 

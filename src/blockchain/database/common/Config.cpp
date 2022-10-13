@@ -13,6 +13,7 @@ extern "C" {
 
 #include "blockchain/database/common/Database.hpp"
 #include "internal/blockchain/database/common/Common.hpp"
+#include "internal/network/zeromq/Context.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/TSV.hpp"
 #include "internal/util/storage/lmdb/Database.hpp"
@@ -36,7 +37,7 @@ Configuration::Configuration(
     , lmdb_(lmdb)
     , config_table_(Table::ConfigMulti)
     , socket_([&] {
-        auto out = api_.Network().ZeroMQ().PublishSocket();
+        auto out = api_.Network().ZeroMQ().Internal().PublishSocket();
         const auto rc =
             out->Start(api_.Endpoints().BlockchainSyncServerUpdated().data());
 

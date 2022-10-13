@@ -10,13 +10,13 @@
 #include "interface/ui/base/List.hpp"
 #include "interface/ui/base/Widget.hpp"
 #include "internal/interface/ui/UI.hpp"
+#include "internal/interface/ui/UnitList.hpp"
+#include "internal/network/zeromq/ListenCallback.hpp"
+#include "internal/network/zeromq/socket/Dealer.hpp"
+#include "internal/util/SharedPimpl.hpp"
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/Session.hpp"
-#include "opentxs/interface/ui/UnitList.hpp"
-#include "opentxs/network/zeromq/ListenCallback.hpp"
-#include "opentxs/network/zeromq/socket/Dealer.hpp"
 #include "opentxs/util/Container.hpp"
-#include "opentxs/util/SharedPimpl.hpp"
 #include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)

@@ -17,6 +17,9 @@
 #include "internal/api/session/Wallet.hpp"
 #include "internal/core/Core.hpp"
 #include "internal/core/Factory.hpp"
+#include "internal/core/contract/Unit.hpp"
+#include "internal/network/zeromq/Pipeline.hpp"
+#include "internal/network/zeromq/socket/Types.hpp"
 #include "internal/otx/common/Account.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/Shared.hpp"
@@ -31,17 +34,14 @@
 #include "opentxs/blockchain/crypto/Account.hpp"
 #include "opentxs/core/AccountType.hpp"
 #include "opentxs/core/Amount.hpp"
-#include "opentxs/core/contract/Unit.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/core/identifier/UnitDefinition.hpp"
-#include "opentxs/network/zeromq/Pipeline.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
 #include "opentxs/network/zeromq/message/FrameSection.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/network/zeromq/message/Message.tpp"
-#include "opentxs/network/zeromq/socket/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 
@@ -177,7 +177,7 @@ auto AccountList::load_custodial_account(identifier::Generic&& id) noexcept
     const auto& wallet = api_.Wallet();
     auto account = wallet.Internal().Account(id);
     const auto& contractID = account.get().GetInstrumentDefinitionID();
-    const auto contract = wallet.UnitDefinition(contractID);
+    const auto contract = wallet.Internal().UnitDefinition(contractID);
     load_custodial_account(
         std::move(id),
         identifier::UnitDefinition{contractID},
@@ -193,7 +193,7 @@ auto AccountList::load_custodial_account(
     const auto& wallet = api_.Wallet();
     auto account = wallet.Internal().Account(id);
     const auto& contractID = account.get().GetInstrumentDefinitionID();
-    const auto contract = wallet.UnitDefinition(contractID);
+    const auto contract = wallet.Internal().UnitDefinition(contractID);
     load_custodial_account(
         std::move(id),
         identifier::UnitDefinition{contractID},

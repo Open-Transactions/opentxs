@@ -9,6 +9,8 @@
 #include <memory>
 #include <optional>
 
+#include "internal/core/contract/ServerContract.hpp"
+#include "internal/core/contract/Unit.hpp"
 #include "ottest/fixtures/blockchain/regtest/Normal.hpp"
 #include "ottest/fixtures/common/User.hpp"
 

@@ -21,6 +21,7 @@
 #include "internal/crypto/Factory.hpp"
 #include "internal/crypto/Seed.hpp"
 #include "internal/crypto/key/Factory.hpp"
+#include "internal/network/zeromq/Context.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/serialization/protobuf/Proto.tpp"
 #include "internal/util/LogMacros.hpp"
@@ -116,7 +117,7 @@ Seed::Seed(
     , bip32_(bip32)
     , bip39_(bip39)
     , socket_([&] {
-        auto out = zmq.PublishSocket();
+        auto out = zmq.Internal().PublishSocket();
         const auto rc = out->Start(endpoints.SeedUpdated().data());
 
         OT_ASSERT(rc);
@@ -330,7 +331,7 @@ auto Seed::GetHDKey(
     Bip32Index notUsed{0};
     auto seed = GetSeed(fingerprint, notUsed, reason);
 
-    if (seed->empty()) { return {}; }
+    if (seed.empty()) { return {}; }
 
     return asymmetric_.NewHDKey(
         fingerprint, seed, curve, path, role, version, reason);
@@ -342,7 +343,7 @@ auto Seed::GetOrCreateDefaultSeed(
     opentxs::crypto::Language& lang,
     Bip32Index& index,
     const opentxs::crypto::SeedStrength strength,
-    const PasswordPrompt& reason) const -> OTSecret
+    const PasswordPrompt& reason) const -> Secret
 {
     auto lock = Lock{seed_lock_};
     seedID = storage_.DefaultSeed();
@@ -376,7 +377,7 @@ auto Seed::GetPaymentCode(
     Bip32Index notUsed{0};
     auto seed = GetSeed(fingerprint, notUsed, reason);
 
-    if (seed->empty()) { return {}; }
+    if (seed.empty()) { return {}; }
 
     auto pKey = asymmetric_.NewSecp256k1Key(
         fingerprint,
@@ -406,7 +407,7 @@ auto Seed::GetPaymentCode(
         api.Crypto().Hash().Digest(
             opentxs::crypto::HashType::Sha256D,
             key.PublicKey(),
-            out->WriteInto());
+            out.WriteInto());
 
         return out;
     }();
@@ -457,7 +458,7 @@ auto Seed::GetStorageKey(
 auto Seed::GetSeed(
     const UnallocatedCString& seedID,
     Bip32Index& index,
-    const PasswordPrompt& reason) const -> OTSecret
+    const PasswordPrompt& reason) const -> Secret
 {
     auto lock = Lock{seed_lock_};
 

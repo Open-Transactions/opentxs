@@ -9,8 +9,8 @@
 
 #include <irrxml/irrXML.hpp>
 
+#include "internal/core/String.hpp"
 #include "internal/otx/common/crypto/Signature.hpp"
-#include "opentxs/core/String.hpp"
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/util/Container.hpp"
 

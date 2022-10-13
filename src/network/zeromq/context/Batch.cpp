@@ -9,9 +9,9 @@
 #include <algorithm>
 #include <iterator>
 
+#include "internal/network/zeromq/ListenCallback.hpp"
+#include "internal/network/zeromq/ReplyCallback.hpp"
 #include "internal/network/zeromq/socket/Factory.hpp"
-#include "opentxs/network/zeromq/ListenCallback.hpp"
-#include "opentxs/network/zeromq/ReplyCallback.hpp"
 
 namespace opentxs::network::zeromq::internal
 {

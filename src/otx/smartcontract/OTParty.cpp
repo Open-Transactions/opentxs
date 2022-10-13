@@ -10,11 +10,14 @@
 #include <memory>
 #include <utility>
 
+#include "internal/core/Armored.hpp"
+#include "internal/core/String.hpp"
 #include "internal/otx/common/Account.hpp"
 #include "internal/otx/common/NumList.hpp"
 #include "internal/otx/common/script/OTScriptable.hpp"
 #include "internal/otx/common/util/Common.hpp"
 #include "internal/otx/common/util/Tag.hpp"
+#include "internal/otx/consensus/Server.hpp"
 #include "internal/otx/smartcontract/OTAgent.hpp"
 #include "internal/otx/smartcontract/OTPartyAccount.hpp"
 #include "internal/otx/smartcontract/OTSmartContract.hpp"
@@ -22,12 +25,9 @@
 #include "internal/util/Shared.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
-#include "opentxs/core/Armored.hpp"
-#include "opentxs/core/String.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
 #include "opentxs/identity/Nym.hpp"
-#include "opentxs/otx/consensus/Server.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Pimpl.hpp"

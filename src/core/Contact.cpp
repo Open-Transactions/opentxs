@@ -19,7 +19,9 @@
 #include <utility>
 
 #include "internal/api/FactoryAPI.hpp"
+#include "internal/api/crypto/Encode.hpp"
 #include "internal/api/session/Wallet.hpp"
+#include "internal/core/String.hpp"
 #include "internal/identity/wot/claim/Types.hpp"
 #include "internal/serialization/protobuf/Check.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
@@ -40,7 +42,6 @@
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/PaymentCode.hpp"
-#include "opentxs/core/String.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/identity/Nym.hpp"
@@ -139,7 +140,7 @@ struct Contact::Imp {
 
     static auto generate_id(const api::Session& api) -> identifier::Generic
     {
-        const auto& encode = api.Crypto().Encode();
+        const auto& encode = api.Crypto().Encode().InternalEncode();
         auto random = ByteArray{};
         encode.Nonce(ID_BYTES, random);
 

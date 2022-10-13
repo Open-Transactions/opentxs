@@ -17,6 +17,7 @@
 #include "crypto/HDNode.hpp"
 #include "crypto/bip32/Imp.hpp"
 #include "internal/crypto/Factory.hpp"
+#include "opentxs/core/Secret.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/crypto/Bip32Child.hpp"
 #include "opentxs/util/Container.hpp"

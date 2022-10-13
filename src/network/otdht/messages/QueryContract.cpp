@@ -11,6 +11,7 @@
 #include <utility>
 
 #include "internal/api/session/FactoryAPI.hpp"
+#include "internal/core/identifier/Identifier.hpp"
 #include "internal/network/otdht/Factory.hpp"
 #include "internal/network/zeromq/message/Message.hpp"
 #include "internal/serialization/protobuf/Proto.tpp"
@@ -88,7 +89,7 @@ public:
 
         out.Internal().AddFrame([&] {
             auto out = proto::Identifier{};
-            contract_id_.Serialize(out);
+            contract_id_.Internal().Serialize(out);
 
             return out;
         }());

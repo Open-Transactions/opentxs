@@ -7,6 +7,8 @@
 
 #include "opentxs/api/crypto/Encode.hpp"
 
+#include "internal/core/String.hpp"
+
 namespace opentxs::api::crypto::internal
 {
 class Encode : virtual public api::crypto::Encode
@@ -16,6 +18,9 @@ public:
     {
         return *this;
     }
+    virtual auto Nonce(const std::uint32_t size) const -> OTString = 0;
+    virtual auto Nonce(const std::uint32_t size, Data& rawOutput) const
+        -> OTString = 0;
 
     auto InternalEncode() noexcept -> Encode& final { return *this; }
 

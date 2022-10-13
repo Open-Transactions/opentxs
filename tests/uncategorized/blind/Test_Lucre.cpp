@@ -45,7 +45,7 @@ public:
     static ot::Time valid_to_;
 
     const ot::api::session::Client& api_;
-    ot::OTPasswordPrompt reason_;
+    ot::PasswordPrompt reason_;
     ot::Nym_p alice_;
     ot::Nym_p bob_;
 

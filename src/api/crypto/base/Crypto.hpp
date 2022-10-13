@@ -14,10 +14,13 @@
 #include <mutex>
 
 #include "internal/api/Crypto.hpp"
+#include "internal/crypto/library/AsymmetricProvider.hpp"
+#include "internal/crypto/library/EcdsaProvider.hpp"
 #include "internal/crypto/library/Null.hpp"
 #include "internal/crypto/library/OpenSSL.hpp"
 #include "internal/crypto/library/Secp256k1.hpp"
 #include "internal/crypto/library/Sodium.hpp"
+#include "internal/crypto/library/SymmetricProvider.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "opentxs/api/crypto/Config.hpp"
 #include "opentxs/api/crypto/Crypto.hpp"
@@ -27,9 +30,6 @@
 #include "opentxs/crypto/Bip32.hpp"
 #include "opentxs/crypto/Bip39.hpp"
 #include "opentxs/crypto/key/Types.hpp"
-#include "opentxs/crypto/library/AsymmetricProvider.hpp"
-#include "opentxs/crypto/library/EcdsaProvider.hpp"
-#include "opentxs/crypto/library/SymmetricProvider.hpp"
 #include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)

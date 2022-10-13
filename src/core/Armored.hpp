@@ -10,7 +10,7 @@
 #include <memory>
 
 #include "String.hpp"
-#include "opentxs/core/Armored.hpp"
+#include "internal/core/Armored.hpp"
 #include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)

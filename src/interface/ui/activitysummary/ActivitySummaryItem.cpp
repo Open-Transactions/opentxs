@@ -30,7 +30,7 @@
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
-#include "opentxs/util/Pimpl.hpp"
+#include "opentxs/util/PasswordPrompt.hpp"
 
 #define GET_TEXT_MILLISECONDS 10
 

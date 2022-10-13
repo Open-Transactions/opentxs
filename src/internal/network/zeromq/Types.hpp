@@ -11,7 +11,7 @@
 #include <tuple>
 #include <utility>
 
-#include "opentxs/network/zeromq/socket/Types.hpp"
+#include "internal/network/zeromq/socket/Types.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/WorkType.hpp"

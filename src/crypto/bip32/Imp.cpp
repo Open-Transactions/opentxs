@@ -13,6 +13,7 @@
 #include <stdexcept>
 
 #include "internal/api/Crypto.hpp"
+#include "internal/crypto/library/EcdsaProvider.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/api/Factory.hpp"
 #include "opentxs/api/crypto/Crypto.hpp"
@@ -25,7 +26,6 @@
 #include "opentxs/crypto/Bip32Child.hpp"
 #include "opentxs/crypto/HashType.hpp"
 #include "opentxs/crypto/key/asymmetric/Algorithm.hpp"
-#include "opentxs/crypto/library/EcdsaProvider.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "util/HDIndex.hpp"

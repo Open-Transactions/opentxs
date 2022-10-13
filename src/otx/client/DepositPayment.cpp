@@ -12,6 +12,8 @@
 #include <type_traits>
 #include <utility>
 
+#include "internal/api/session/Wallet.hpp"
+#include "internal/core/String.hpp"
 #include "internal/otx/common/Message.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/Mutex.hpp"
@@ -19,7 +21,6 @@
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/api/session/Storage.hpp"
 #include "opentxs/api/session/Wallet.hpp"
-#include "opentxs/core/String.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/UnitDefinition.hpp"
 #include "opentxs/otx/LastReplyStatus.hpp"
@@ -147,7 +148,7 @@ auto DepositPayment::get_account_id(const identifier::UnitDefinition& unit)
     if (1 == accounts.size()) { return *accounts.begin(); }
 
     try {
-        parent_.api().Wallet().UnitDefinition(unit);
+        parent_.api().Wallet().Internal().UnitDefinition(unit);
     } catch (...) {
         LogTrace()(OT_PRETTY_CLASS())("Downloading unit definition").Flush();
         parent_.DownloadUnitDefinition(unit);

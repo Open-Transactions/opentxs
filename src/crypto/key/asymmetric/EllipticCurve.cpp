@@ -13,6 +13,7 @@
 #include <utility>
 
 #include "crypto/key/asymmetric/Asymmetric.hpp"
+#include "internal/crypto/library/EcdsaProvider.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/Mutex.hpp"
 #include "opentxs/api/session/Factory.hpp"
@@ -22,9 +23,7 @@
 #include "opentxs/core/Secret.hpp"
 #include "opentxs/crypto/Parameters.hpp"  // IWYU pragma: keep
 #include "opentxs/crypto/key/EllipticCurve.hpp"
-#include "opentxs/crypto/library/EcdsaProvider.hpp"
 #include "opentxs/util/Log.hpp"
-#include "opentxs/util/Pimpl.hpp"
 
 namespace opentxs::crypto::key
 {
@@ -80,7 +79,7 @@ EllipticCurve::EllipticCurve(
         throw std::runtime_error("Failed to instantiate encrypted_key_");
     }
 
-    OT_ASSERT(0 < plaintext_key_->size());
+    OT_ASSERT(0 < plaintext_key_.size());
 }
 
 EllipticCurve::EllipticCurve(
@@ -152,13 +151,13 @@ EllipticCurve::EllipticCurve(
 
 EllipticCurve::EllipticCurve(
     const EllipticCurve& rhs,
-    OTSecret&& newSecretKey) noexcept
+    Secret&& newSecretKey) noexcept
     : Asymmetric(
           rhs,
           [&] {
               auto pubkey = rhs.api_.Factory().Data();
               const auto rc = rhs.ecdsa_.ScalarMultiplyBase(
-                  newSecretKey->Bytes(), pubkey.WriteInto());
+                  newSecretKey.Bytes(), pubkey.WriteInto());
 
               if (rc) {
 
@@ -223,7 +222,7 @@ auto EllipticCurve::IncrementPrivate(
         const auto& lhs = get_private_key(lock, reason);
         auto newKey = api_.Factory().Secret(0);
         auto rc =
-            ecdsa_.ScalarAdd(lhs.Bytes(), rhs.Bytes(), newKey->WriteInto());
+            ecdsa_.ScalarAdd(lhs.Bytes(), rhs.Bytes(), newKey.WriteInto());
 
         if (false == rc) {
             throw std::runtime_error("Failed to increment private key");

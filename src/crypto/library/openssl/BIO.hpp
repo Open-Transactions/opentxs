@@ -17,8 +17,8 @@ extern "C" {
 
 #include <cstddef>
 
+#include "internal/core/String.hpp"
 #include "internal/util/P0330.hpp"
-#include "opentxs/core/String.hpp"
 #include "opentxs/util/Container.hpp"
 
 namespace opentxs::crypto::openssl

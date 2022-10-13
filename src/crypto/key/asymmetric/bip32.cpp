@@ -11,7 +11,6 @@
 #include <cstdint>
 #include <iterator>
 #include <stdexcept>
-#include <type_traits>
 #include <utility>
 
 #include "internal/api/Crypto.hpp"

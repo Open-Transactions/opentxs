@@ -5,8 +5,9 @@
 
 #pragma once
 
+#include "internal/otx/consensus/ManagedNumber.hpp"
+
 #include "internal/util/Flag.hpp"
-#include "opentxs/otx/consensus/ManagedNumber.hpp"
 #include "opentxs/util/Numbers.hpp"
 
 namespace opentxs::otx::context

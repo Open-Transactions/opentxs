@@ -18,6 +18,7 @@ namespace opentxs
 {
 namespace identifier
 {
+class IdentifierPrivate;
 class Nym;
 }  // namespace identifier
 }  // namespace opentxs
@@ -37,7 +38,7 @@ namespace opentxs::identifier
 class OPENTXS_EXPORT Nym : virtual public identifier::Generic
 {
 public:
-    OPENTXS_NO_EXPORT Nym(Imp* imp) noexcept;
+    OPENTXS_NO_EXPORT Nym(IdentifierPrivate* imp) noexcept;
     Nym(allocator_type alloc = {}) noexcept;
     Nym(const Nym& rhs, allocator_type alloc = {}) noexcept;
     Nym(Nym&& rhs) noexcept;

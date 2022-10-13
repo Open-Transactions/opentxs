@@ -13,10 +13,34 @@
 #include <sstream>
 #include <utility>
 
+#include "internal/api/session/UI.hpp"
 #include "internal/api/session/Wallet.hpp"
+#include "internal/core/String.hpp"
+#include "internal/core/contract/ServerContract.hpp"
+#include "internal/core/contract/Unit.hpp"
+#include "internal/interface/ui/AccountActivity.hpp"
+#include "internal/interface/ui/AccountList.hpp"
+#include "internal/interface/ui/AccountListItem.hpp"
+#include "internal/interface/ui/AccountSummary.hpp"
+#include "internal/interface/ui/ActivitySummary.hpp"
+#include "internal/interface/ui/ActivitySummaryItem.hpp"
+#include "internal/interface/ui/ActivityThread.hpp"
+#include "internal/interface/ui/ActivityThreadItem.hpp"
+#include "internal/interface/ui/BalanceItem.hpp"
+#include "internal/interface/ui/Contact.hpp"
+#include "internal/interface/ui/ContactList.hpp"
+#include "internal/interface/ui/ContactListItem.hpp"
+#include "internal/interface/ui/ContactSection.hpp"
+#include "internal/interface/ui/IssuerItem.hpp"
+#include "internal/interface/ui/MessagableList.hpp"
+#include "internal/interface/ui/PayableList.hpp"
+#include "internal/interface/ui/PayableListItem.hpp"
+#include "internal/interface/ui/Profile.hpp"
+#include "internal/interface/ui/ProfileSection.hpp"
 #include "internal/otx/common/Account.hpp"
 #include "internal/otx/common/Message.hpp"
 #include "internal/util/Shared.hpp"
+#include "internal/util/SharedPimpl.hpp"
 #include "ottest/fixtures/common/Counter.hpp"
 #include "ottest/fixtures/common/User.hpp"
 #include "ottest/fixtures/integration/Helpers.hpp"
@@ -143,74 +167,75 @@ TEST_F(Integration, instantiate_ui_objects)
     }
     profile_bob_.expected_ = 1;
 
-    api_alex_.UI().AccountList(
+    api_alex_.UI().Internal().AccountList(
         alex_.nym_id_, make_cb(account_list_alex_, "alex account list"));
-    api_alex_.UI().AccountSummary(
+    api_alex_.UI().Internal().AccountSummary(
         alex_.nym_id_,
         ot::UnitType::Bch,
         make_cb(account_summary_bch_alex_, "alex account summary (BCH)"));
-    api_alex_.UI().AccountSummary(
+    api_alex_.UI().Internal().AccountSummary(
         alex_.nym_id_,
         ot::UnitType::Btc,
         make_cb(account_summary_btc_alex_, "alex account summary (BTC)"));
-    api_alex_.UI().AccountSummary(
+    api_alex_.UI().Internal().AccountSummary(
         alex_.nym_id_,
         ot::UnitType::Usd,
         make_cb(account_summary_usd_alex_, "alex account summary (USD)"));
-    api_alex_.UI().ActivitySummary(
+    api_alex_.UI().Internal().ActivitySummary(
         alex_.nym_id_,
         make_cb(activity_summary_alex_, "alex activity summary"));
-    api_alex_.UI().ContactList(
+    api_alex_.UI().Internal().ContactList(
         alex_.nym_id_, make_cb(contact_list_alex_, "alex contact list"));
-    api_alex_.UI().MessagableList(
+    api_alex_.UI().Internal().MessagableList(
         alex_.nym_id_, make_cb(messagable_list_alex_, "alex messagable list"));
-    api_alex_.UI().PayableList(
+    api_alex_.UI().Internal().PayableList(
         alex_.nym_id_,
         ot::UnitType::Bch,
         make_cb(payable_list_bch_alex_, "alex payable list (BCH)"));
-    api_alex_.UI().PayableList(
+    api_alex_.UI().Internal().PayableList(
         alex_.nym_id_,
         ot::UnitType::Btc,
         make_cb(payable_list_btc_alex_, "alex payable list (BTC)"));
-    api_alex_.UI().Profile(
+    api_alex_.UI().Internal().Profile(
         alex_.nym_id_, make_cb(profile_alex_, "alex profile"));
 
-    api_bob_.UI().AccountList(
+    api_bob_.UI().Internal().AccountList(
         bob_.nym_id_, make_cb(account_list_bob_, "bob account list"));
-    api_bob_.UI().AccountSummary(
+    api_bob_.UI().Internal().AccountSummary(
         bob_.nym_id_,
         ot::UnitType::Bch,
         make_cb(account_summary_bch_bob_, "bob account summary (BCH)"));
-    api_bob_.UI().AccountSummary(
+    api_bob_.UI().Internal().AccountSummary(
         bob_.nym_id_,
         ot::UnitType::Btc,
         make_cb(account_summary_btc_bob_, "bob account summary (BTC)"));
-    api_bob_.UI().AccountSummary(
+    api_bob_.UI().Internal().AccountSummary(
         bob_.nym_id_,
         ot::UnitType::Usd,
         make_cb(account_summary_usd_bob_, "bob account summary (USD)"));
-    api_bob_.UI().ActivitySummary(
+    api_bob_.UI().Internal().ActivitySummary(
         bob_.nym_id_, make_cb(activity_summary_bob_, "bob activity summary"));
-    api_bob_.UI().ContactList(
+    api_bob_.UI().Internal().ContactList(
         bob_.nym_id_, make_cb(contact_list_bob_, "bob contact list"));
-    api_bob_.UI().MessagableList(
+    api_bob_.UI().Internal().MessagableList(
         bob_.nym_id_, make_cb(messagable_list_bob_, "bob messagable list"));
-    api_bob_.UI().PayableList(
+    api_bob_.UI().Internal().PayableList(
         bob_.nym_id_,
         ot::UnitType::Bch,
         make_cb(payable_list_bch_bob_, "bob payable list (BCH)"));
-    api_bob_.UI().PayableList(
+    api_bob_.UI().Internal().PayableList(
         bob_.nym_id_,
         ot::UnitType::Btc,
         make_cb(payable_list_btc_bob_, "bob payable list (BTC)"));
-    api_bob_.UI().Profile(bob_.nym_id_, make_cb(profile_bob_, "bob profile"));
+    api_bob_.UI().Internal().Profile(
+        bob_.nym_id_, make_cb(profile_bob_, "bob profile"));
 }
 
 TEST_F(Integration, account_list_alex_0)
 {
     ASSERT_TRUE(wait_for_counter(account_list_alex_));
 
-    const auto& widget = alex_.api_->UI().AccountList(alex_.nym_id_);
+    const auto& widget = alex_.api_->UI().Internal().AccountList(alex_.nym_id_);
     auto row = widget.First();
 
     EXPECT_FALSE(row->Valid());
@@ -220,8 +245,8 @@ TEST_F(Integration, account_summary_bch_alex_0)
 {
     ASSERT_TRUE(wait_for_counter(account_summary_bch_alex_));
 
-    const auto& widget =
-        alex_.api_->UI().AccountSummary(alex_.nym_id_, ot::UnitType::Bch);
+    const auto& widget = alex_.api_->UI().Internal().AccountSummary(
+        alex_.nym_id_, ot::UnitType::Bch);
     auto row = widget.First();
 
     EXPECT_FALSE(row->Valid());
@@ -231,8 +256,8 @@ TEST_F(Integration, account_summary_btc_alex_0)
 {
     ASSERT_TRUE(wait_for_counter(account_summary_btc_alex_));
 
-    const auto& widget =
-        alex_.api_->UI().AccountSummary(alex_.nym_id_, ot::UnitType::Btc);
+    const auto& widget = alex_.api_->UI().Internal().AccountSummary(
+        alex_.nym_id_, ot::UnitType::Btc);
     auto row = widget.First();
 
     EXPECT_FALSE(row->Valid());
@@ -242,8 +267,8 @@ TEST_F(Integration, account_summary_usd_alex_0)
 {
     ASSERT_TRUE(wait_for_counter(account_summary_usd_alex_));
 
-    const auto& widget =
-        alex_.api_->UI().AccountSummary(alex_.nym_id_, ot::UnitType::Usd);
+    const auto& widget = alex_.api_->UI().Internal().AccountSummary(
+        alex_.nym_id_, ot::UnitType::Usd);
     auto row = widget.First();
 
     EXPECT_FALSE(row->Valid());
@@ -253,7 +278,8 @@ TEST_F(Integration, activity_summary_alex_0)
 {
     ASSERT_TRUE(wait_for_counter(activity_summary_alex_));
 
-    const auto& widget = alex_.api_->UI().ActivitySummary(alex_.nym_id_);
+    const auto& widget =
+        alex_.api_->UI().Internal().ActivitySummary(alex_.nym_id_);
     auto row = widget.First();
 
     EXPECT_FALSE(row->Valid());
@@ -263,7 +289,7 @@ TEST_F(Integration, contact_list_alex_0)
 {
     ASSERT_TRUE(wait_for_counter(contact_list_alex_));
 
-    const auto& widget = alex_.api_->UI().ContactList(alex_.nym_id_);
+    const auto& widget = alex_.api_->UI().Internal().ContactList(alex_.nym_id_);
     const auto row = widget.First();
 
     ASSERT_TRUE(row->Valid());
@@ -282,7 +308,8 @@ TEST_F(Integration, messagable_list_alex_0)
 {
     ASSERT_TRUE(wait_for_counter(messagable_list_alex_));
 
-    const auto& widget = alex_.api_->UI().MessagableList(alex_.nym_id_);
+    const auto& widget =
+        alex_.api_->UI().Internal().MessagableList(alex_.nym_id_);
     auto row = widget.First();
 
     EXPECT_FALSE(row->Valid());
@@ -292,8 +319,8 @@ TEST_F(Integration, payable_list_bch_alex_0)
 {
     ASSERT_TRUE(wait_for_counter(payable_list_bch_alex_));
 
-    const auto& widget =
-        alex_.api_->UI().PayableList(alex_.nym_id_, ot::UnitType::Bch);
+    const auto& widget = alex_.api_->UI().Internal().PayableList(
+        alex_.nym_id_, ot::UnitType::Bch);
     auto row = widget.First();
 
     EXPECT_FALSE(row->Valid());
@@ -303,8 +330,8 @@ TEST_F(Integration, payable_list_btc_alex_0)
 {
     ASSERT_TRUE(wait_for_counter(payable_list_btc_alex_));
 
-    const auto& widget =
-        alex_.api_->UI().PayableList(alex_.nym_id_, ot::UnitType::Btc);
+    const auto& widget = alex_.api_->UI().Internal().PayableList(
+        alex_.nym_id_, ot::UnitType::Btc);
     auto row = widget.First();
 
     if (have_hd_) {
@@ -320,7 +347,7 @@ TEST_F(Integration, profile_alex_0)
 {
     ASSERT_TRUE(wait_for_counter(profile_alex_));
 
-    const auto& widget = alex_.api_->UI().Profile(alex_.nym_id_);
+    const auto& widget = alex_.api_->UI().Internal().Profile(alex_.nym_id_);
 
     if (have_hd_) {
         EXPECT_EQ(widget.PaymentCode(), alex_.PaymentCode().asBase58());
@@ -337,7 +364,7 @@ TEST_F(Integration, account_list_bob_0)
 {
     ASSERT_TRUE(wait_for_counter(account_list_bob_));
 
-    const auto& widget = bob_.api_->UI().AccountList(bob_.nym_id_);
+    const auto& widget = bob_.api_->UI().Internal().AccountList(bob_.nym_id_);
     auto row = widget.First();
 
     EXPECT_FALSE(row->Valid());
@@ -347,8 +374,8 @@ TEST_F(Integration, account_summary_bch_bob_0)
 {
     ASSERT_TRUE(wait_for_counter(account_summary_bch_bob_));
 
-    const auto& widget =
-        bob_.api_->UI().AccountSummary(bob_.nym_id_, ot::UnitType::Bch);
+    const auto& widget = bob_.api_->UI().Internal().AccountSummary(
+        bob_.nym_id_, ot::UnitType::Bch);
     auto row = widget.First();
 
     EXPECT_FALSE(row->Valid());
@@ -358,8 +385,8 @@ TEST_F(Integration, account_summary_btc_bob_0)
 {
     ASSERT_TRUE(wait_for_counter(account_summary_btc_bob_));
 
-    const auto& widget =
-        bob_.api_->UI().AccountSummary(bob_.nym_id_, ot::UnitType::Btc);
+    const auto& widget = bob_.api_->UI().Internal().AccountSummary(
+        bob_.nym_id_, ot::UnitType::Btc);
     auto row = widget.First();
 
     EXPECT_FALSE(row->Valid());
@@ -369,8 +396,8 @@ TEST_F(Integration, account_summary_usd_bob_0)
 {
     ASSERT_TRUE(wait_for_counter(account_summary_usd_bob_));
 
-    const auto& widget =
-        bob_.api_->UI().AccountSummary(bob_.nym_id_, ot::UnitType::Usd);
+    const auto& widget = bob_.api_->UI().Internal().AccountSummary(
+        bob_.nym_id_, ot::UnitType::Usd);
     auto row = widget.First();
 
     EXPECT_FALSE(row->Valid());
@@ -380,7 +407,8 @@ TEST_F(Integration, activity_summary_bob_0)
 {
     ASSERT_TRUE(wait_for_counter(activity_summary_bob_));
 
-    const auto& widget = bob_.api_->UI().ActivitySummary(bob_.nym_id_);
+    const auto& widget =
+        bob_.api_->UI().Internal().ActivitySummary(bob_.nym_id_);
     auto row = widget.First();
 
     EXPECT_FALSE(row->Valid());
@@ -390,7 +418,7 @@ TEST_F(Integration, contact_list_bob_0)
 {
     ASSERT_TRUE(wait_for_counter(contact_list_bob_));
 
-    const auto& widget = bob_.api_->UI().ContactList(bob_.nym_id_);
+    const auto& widget = bob_.api_->UI().Internal().ContactList(bob_.nym_id_);
     const auto row = widget.First();
 
     ASSERT_TRUE(row->Valid());
@@ -409,7 +437,8 @@ TEST_F(Integration, messagable_list_bob_0)
 {
     ASSERT_TRUE(wait_for_counter(messagable_list_bob_));
 
-    const auto& widget = bob_.api_->UI().MessagableList(bob_.nym_id_);
+    const auto& widget =
+        bob_.api_->UI().Internal().MessagableList(bob_.nym_id_);
     auto row = widget.First();
 
     EXPECT_FALSE(row->Valid());
@@ -420,7 +449,7 @@ TEST_F(Integration, payable_list_bch_bob_0)
     ASSERT_TRUE(wait_for_counter(payable_list_bch_bob_));
 
     const auto& widget =
-        bob_.api_->UI().PayableList(bob_.nym_id_, ot::UnitType::Bch);
+        bob_.api_->UI().Internal().PayableList(bob_.nym_id_, ot::UnitType::Bch);
     auto row = widget.First();
 
     EXPECT_FALSE(row->Valid());
@@ -431,7 +460,7 @@ TEST_F(Integration, payable_list_btc_bob_0)
     ASSERT_TRUE(wait_for_counter(payable_list_btc_bob_));
 
     const auto& widget =
-        bob_.api_->UI().PayableList(bob_.nym_id_, ot::UnitType::Btc);
+        bob_.api_->UI().Internal().PayableList(bob_.nym_id_, ot::UnitType::Btc);
     auto row = widget.First();
 
     if (have_hd_) {
@@ -447,7 +476,7 @@ TEST_F(Integration, profile_bob_0)
 {
     ASSERT_TRUE(wait_for_counter(profile_bob_));
 
-    const auto& widget = bob_.api_->UI().Profile(bob_.nym_id_);
+    const auto& widget = bob_.api_->UI().Internal().Profile(bob_.nym_id_);
 
     if (have_hd_) {
         EXPECT_EQ(widget.PaymentCode(), bob_.PaymentCode().asBase58());
@@ -570,6 +599,7 @@ TEST_F(Integration, add_contact_Bob_To_Alex)
     }
 
     alex_.api_->UI()
+        .Internal()
         .ContactList(alex_.nym_id_)
         .AddContact(
             bob_.name_,
@@ -581,7 +611,7 @@ TEST_F(Integration, contact_list_alex_1)
 {
     ASSERT_TRUE(wait_for_counter(contact_list_alex_));
 
-    const auto& widget = alex_.api_->UI().ContactList(alex_.nym_id_);
+    const auto& widget = alex_.api_->UI().Internal().ContactList(alex_.nym_id_);
     auto row = widget.First();
 
     ASSERT_TRUE(row->Valid());
@@ -607,7 +637,8 @@ TEST_F(Integration, messagable_list_alex_1)
 {
     ASSERT_TRUE(wait_for_counter(messagable_list_alex_));
 
-    const auto& widget = alex_.api_->UI().MessagableList(alex_.nym_id_);
+    const auto& widget =
+        alex_.api_->UI().Internal().MessagableList(alex_.nym_id_);
     auto row = widget.First();
 
     ASSERT_TRUE(row->Valid());
@@ -623,8 +654,8 @@ TEST_F(Integration, payable_list_bch_alex_1)
     if (have_hd_) {
         ASSERT_TRUE(wait_for_counter(payable_list_bch_alex_));
 
-        const auto& widget =
-            alex_.api_->UI().PayableList(alex_.nym_id_, ot::UnitType::Bch);
+        const auto& widget = alex_.api_->UI().Internal().PayableList(
+            alex_.nym_id_, ot::UnitType::Bch);
         auto row = widget.First();
 
         ASSERT_TRUE(row->Valid());
@@ -638,8 +669,8 @@ TEST_F(Integration, payable_list_btc_alex_1)
     if (have_hd_) {
         ASSERT_TRUE(wait_for_counter(payable_list_btc_alex_));
 
-        const auto& widget =
-            alex_.api_->UI().PayableList(alex_.nym_id_, ot::UnitType::Btc);
+        const auto& widget = alex_.api_->UI().Internal().PayableList(
+            alex_.nym_id_, ot::UnitType::Btc);
         auto row = widget.First();
 
         ASSERT_TRUE(row->Valid());
@@ -657,7 +688,7 @@ TEST_F(Integration, activity_thread_bob_alex_0)
 {
     activity_thread_bob_alex_.expected_ += 2;
 
-    const auto& widget = api_alex_.UI().ActivityThread(
+    const auto& widget = api_alex_.UI().Internal().ActivityThread(
         alex_.nym_id_,
         alex_.Contact(bob_.name_),
         make_cb(activity_thread_bob_alex_, "Alex's activity thread with Bob"));
@@ -691,7 +722,7 @@ TEST_F(Integration, send_message_from_Alex_to_Bob_1)
          << std::to_string(messageID);
     auto& firstMessage = message_[messageID];
     firstMessage = text.str();
-    const auto& conversation = from_client.UI().ActivityThread(
+    const auto& conversation = from_client.UI().Internal().ActivityThread(
         alex_.nym_id_, alex_.Contact(bob_.name_));
     conversation.SetDraft(firstMessage);
 
@@ -708,7 +739,8 @@ TEST_F(Integration, activity_summary_alex_1)
     ASSERT_TRUE(wait_for_counter(activity_summary_alex_));
 
     const auto& firstMessage = message_[msg_count_];
-    const auto& widget = alex_.api_->UI().ActivitySummary(alex_.nym_id_);
+    const auto& widget =
+        alex_.api_->UI().Internal().ActivitySummary(alex_.nym_id_);
     auto row = widget.First();
 
     ASSERT_TRUE(row->Valid());
@@ -726,7 +758,7 @@ TEST_F(Integration, activity_thread_bob_alex_1)
     ASSERT_TRUE(wait_for_counter(activity_thread_bob_alex_));
 
     const auto& firstMessage = message_[msg_count_];
-    const auto& widget = alex_.api_->UI().ActivityThread(
+    const auto& widget = alex_.api_->UI().Internal().ActivityThread(
         alex_.nym_id_, alex_.Contact(bob_.name_));
     auto row = widget.First();
 
@@ -746,7 +778,7 @@ TEST_F(Integration, contact_list_alex_2)
 {
     ASSERT_TRUE(wait_for_counter(contact_list_alex_));
 
-    const auto& widget = alex_.api_->UI().ContactList(alex_.nym_id_);
+    const auto& widget = alex_.api_->UI().Internal().ContactList(alex_.nym_id_);
     auto row = widget.First();
 
     ASSERT_TRUE(row->Valid());
@@ -770,7 +802,8 @@ TEST_F(Integration, activity_summary_bob_1)
     ASSERT_TRUE(wait_for_counter(activity_summary_bob_));
 
     const auto& firstMessage = message_[msg_count_];
-    const auto& widget = bob_.api_->UI().ActivitySummary(bob_.nym_id_);
+    const auto& widget =
+        bob_.api_->UI().Internal().ActivitySummary(bob_.nym_id_);
     auto row = widget.First();
 
     ASSERT_TRUE(row->Valid());
@@ -787,7 +820,7 @@ TEST_F(Integration, contact_list_bob_1)
 {
     ASSERT_TRUE(wait_for_counter(contact_list_bob_));
 
-    const auto& widget = bob_.api_->UI().ContactList(bob_.nym_id_);
+    const auto& widget = bob_.api_->UI().Internal().ContactList(bob_.nym_id_);
     auto row = widget.First();
 
     ASSERT_TRUE(row->Valid());
@@ -812,7 +845,8 @@ TEST_F(Integration, messagable_list_bob_1)
 {
     ASSERT_TRUE(wait_for_counter(messagable_list_bob_));
 
-    const auto& widget = bob_.api_->UI().MessagableList(bob_.nym_id_);
+    const auto& widget =
+        bob_.api_->UI().Internal().MessagableList(bob_.nym_id_);
     auto row = widget.First();
 
     ASSERT_TRUE(row->Valid());
@@ -827,8 +861,8 @@ TEST_F(Integration, payable_list_bch_alex_2)
     if (have_hd_) {
         ASSERT_TRUE(wait_for_counter(payable_list_bch_alex_));
 
-        const auto& widget =
-            alex_.api_->UI().PayableList(alex_.nym_id_, ot::UnitType::Bch);
+        const auto& widget = alex_.api_->UI().Internal().PayableList(
+            alex_.nym_id_, ot::UnitType::Bch);
         auto row = widget.First();
 
         ASSERT_TRUE(row->Valid());
@@ -847,8 +881,8 @@ TEST_F(Integration, payable_list_bch_bob_1)
     if (have_hd_) {
         ASSERT_TRUE(wait_for_counter(payable_list_bch_bob_));
 
-        const auto& widget =
-            bob_.api_->UI().PayableList(bob_.nym_id_, ot::UnitType::Btc);
+        const auto& widget = bob_.api_->UI().Internal().PayableList(
+            bob_.nym_id_, ot::UnitType::Btc);
         auto row = widget.First();
 
         ASSERT_TRUE(row->Valid());
@@ -867,8 +901,8 @@ TEST_F(Integration, payable_list_btc_bob_1)
     if (have_hd_) {
         ASSERT_TRUE(wait_for_counter(payable_list_btc_bob_));
 
-        const auto& widget =
-            bob_.api_->UI().PayableList(bob_.nym_id_, ot::UnitType::Bch);
+        const auto& widget = bob_.api_->UI().Internal().PayableList(
+            bob_.nym_id_, ot::UnitType::Bch);
         auto row = widget.First();
 
         ASSERT_TRUE(row->Valid());
@@ -883,7 +917,7 @@ TEST_F(Integration, activity_thread_alex_bob_0)
 {
     activity_thread_alex_bob_.expected_ += 3;
 
-    const auto& widget = api_bob_.UI().ActivityThread(
+    const auto& widget = api_bob_.UI().Internal().ActivityThread(
         bob_.nym_id_,
         bob_.Contact(alex_.name_),
         make_cb(activity_thread_alex_bob_, "Bob's activity thread with Alex"));
@@ -919,7 +953,7 @@ TEST_F(Integration, send_message_from_Bob_to_Alex_2)
          << std::to_string(messageID);
     auto& secondMessage = message_[messageID];
     secondMessage = text.str();
-    const auto& conversation = from_client.UI().ActivityThread(
+    const auto& conversation = from_client.UI().Internal().ActivityThread(
         bob_.nym_id_, bob_.Contact(alex_.name_));
     conversation.SetDraft(secondMessage);
 
@@ -936,7 +970,8 @@ TEST_F(Integration, activity_summary_alex_2)
     ASSERT_TRUE(wait_for_counter(activity_summary_alex_));
 
     const auto& secondMessage = message_[msg_count_];
-    const auto& widget = alex_.api_->UI().ActivitySummary(alex_.nym_id_);
+    const auto& widget =
+        alex_.api_->UI().Internal().ActivitySummary(alex_.nym_id_);
     auto row = widget.First();
 
     ASSERT_TRUE(row->Valid());
@@ -955,7 +990,7 @@ TEST_F(Integration, activity_thread_bob_alex_2)
 
     const auto& firstMessage = message_[msg_count_ - 1];
     const auto& secondMessage = message_[msg_count_];
-    const auto& widget = alex_.api_->UI().ActivityThread(
+    const auto& widget = alex_.api_->UI().Internal().ActivityThread(
         alex_.nym_id_, alex_.Contact(bob_.name_));
     auto row = widget.First();
 
@@ -988,7 +1023,8 @@ TEST_F(Integration, activity_summary_bob_2)
     ASSERT_TRUE(wait_for_counter(activity_summary_bob_));
 
     const auto& secondMessage = message_[msg_count_];
-    const auto& widget = bob_.api_->UI().ActivitySummary(bob_.nym_id_);
+    const auto& widget =
+        bob_.api_->UI().Internal().ActivitySummary(bob_.nym_id_);
     auto row = widget.First();
 
     ASSERT_TRUE(row->Valid());
@@ -1007,8 +1043,8 @@ TEST_F(Integration, activity_thread_alex_bob_1)
 
     const auto& firstMessage = message_[msg_count_ - 1];
     const auto& secondMessage = message_[msg_count_];
-    const auto& widget =
-        bob_.api_->UI().ActivityThread(bob_.nym_id_, bob_.Contact(alex_.name_));
+    const auto& widget = bob_.api_->UI().Internal().ActivityThread(
+        bob_.nym_id_, bob_.Contact(alex_.name_));
     auto row = widget.First();
 
     ASSERT_TRUE(row->Valid());
@@ -1048,7 +1084,7 @@ TEST_F(Integration, contact_list_bob_2)
 {
     ASSERT_TRUE(wait_for_counter(contact_list_bob_));
 
-    const auto& widget = bob_.api_->UI().ContactList(bob_.nym_id_);
+    const auto& widget = bob_.api_->UI().Internal().ContactList(bob_.nym_id_);
     auto row = widget.First();
 
     ASSERT_TRUE(row->Valid());
@@ -1072,8 +1108,8 @@ TEST_F(Integration, payable_list_bch_bob_2)
     if (have_hd_) {
         ASSERT_TRUE(wait_for_counter(payable_list_bch_bob_));
 
-        const auto& widget =
-            bob_.api_->UI().PayableList(bob_.nym_id_, ot::UnitType::Btc);
+        const auto& widget = bob_.api_->UI().Internal().PayableList(
+            bob_.nym_id_, ot::UnitType::Btc);
         auto row = widget.First();
 
         ASSERT_TRUE(row->Valid());
@@ -1089,7 +1125,7 @@ TEST_F(Integration, payable_list_bch_bob_2)
 
 TEST_F(Integration, issue_dollars)
 {
-    const auto contract = api_issuer_.Wallet().CurrencyContract(
+    const auto contract = api_issuer_.Wallet().Internal().CurrencyContract(
         issuer_.nym_id_.asBase58(api_alex_.Crypto()),
         UNIT_DEFINITION_CONTRACT_NAME,
         UNIT_DEFINITION_TERMS,
@@ -1200,7 +1236,8 @@ TEST_F(Integration, activity_summary_alex_3)
     ASSERT_TRUE(wait_for_counter(activity_summary_alex_));
 
     const auto& secondMessage = message_[msg_count_];
-    const auto& widget = alex_.api_->UI().ActivitySummary(alex_.nym_id_);
+    const auto& widget =
+        alex_.api_->UI().Internal().ActivitySummary(alex_.nym_id_);
     auto row = widget.First();
 
     ASSERT_TRUE(row->Valid());
@@ -1227,7 +1264,7 @@ TEST_F(Integration, contact_list_alex_3)
 {
     ASSERT_TRUE(wait_for_counter(contact_list_alex_));
 
-    const auto& widget = alex_.api_->UI().ContactList(alex_.nym_id_);
+    const auto& widget = alex_.api_->UI().Internal().ContactList(alex_.nym_id_);
     auto row = widget.First();
 
     ASSERT_TRUE(row->Valid());
@@ -1261,7 +1298,8 @@ TEST_F(Integration, messagable_list_alex_2)
 {
     ASSERT_TRUE(wait_for_counter(messagable_list_alex_));
 
-    const auto& widget = alex_.api_->UI().MessagableList(alex_.nym_id_);
+    const auto& widget =
+        alex_.api_->UI().Internal().MessagableList(alex_.nym_id_);
     auto row = widget.First();
 
     ASSERT_TRUE(row->Valid());
@@ -1285,8 +1323,8 @@ TEST_F(Integration, payable_list_bch_alex_3)
     if (have_hd_) {
         ASSERT_TRUE(wait_for_counter(payable_list_bch_alex_));
 
-        const auto& widget =
-            alex_.api_->UI().PayableList(alex_.nym_id_, ot::UnitType::Bch);
+        const auto& widget = alex_.api_->UI().Internal().PayableList(
+            alex_.nym_id_, ot::UnitType::Bch);
         auto row = widget.First();
 
         ASSERT_TRUE(row->Valid());
@@ -1310,8 +1348,8 @@ TEST_F(Integration, payable_list_btc_alex_2)
     if (have_hd_) {
         ASSERT_TRUE(wait_for_counter(payable_list_bch_alex_));
 
-        const auto& widget =
-            alex_.api_->UI().PayableList(alex_.nym_id_, ot::UnitType::Btc);
+        const auto& widget = alex_.api_->UI().Internal().PayableList(
+            alex_.nym_id_, ot::UnitType::Btc);
         auto row = widget.First();
 
         ASSERT_TRUE(row->Valid());
@@ -1365,10 +1403,10 @@ TEST_F(Integration, deposit_cheque_alex)
     activity_thread_issuer_alex_.expected_ += 3;
     account_list_alex_.expected_ += 2;
 
-    api_alex_.UI().Contact(
+    api_alex_.UI().Internal().Contact(
         alex_.Contact(issuer_.name_),
         make_cb(contact_issuer_alex_, "alex's contact for issuer"));
-    const auto& thread = alex_.api_->UI().ActivityThread(
+    const auto& thread = alex_.api_->UI().Internal().ActivityThread(
         alex_.nym_id_,
         alex_.Contact(issuer_.name_),
         make_cb(
@@ -1392,7 +1430,7 @@ TEST_F(Integration, account_list_alex_1)
 {
     ASSERT_TRUE(wait_for_counter(account_list_alex_));
 
-    const auto& widget = alex_.api_->UI().AccountList(alex_.nym_id_);
+    const auto& widget = alex_.api_->UI().Internal().AccountList(alex_.nym_id_);
     auto row = widget.First();
 
     ASSERT_TRUE(row->Valid());
@@ -1413,7 +1451,7 @@ TEST_F(Integration, activity_thread_issuer_alex_0)
 {
     ASSERT_TRUE(wait_for_counter(activity_thread_issuer_alex_));
 
-    const auto& widget = alex_.api_->UI().ActivityThread(
+    const auto& widget = alex_.api_->UI().Internal().ActivityThread(
         alex_.nym_id_, alex_.Contact(issuer_.name_));
     auto row = widget.First();
 
@@ -1442,7 +1480,8 @@ TEST_F(Integration, contact_issuer_alex_0)
 {
     ASSERT_TRUE(wait_for_counter(contact_issuer_alex_));
 
-    const auto& widget = api_alex_.UI().Contact(alex_.Contact(issuer_.name_));
+    const auto& widget =
+        api_alex_.UI().Internal().Contact(alex_.Contact(issuer_.name_));
 
     EXPECT_EQ(
         alex_.Contact(issuer_.name_).asBase58(api_alex_.Crypto()),
@@ -1462,7 +1501,7 @@ TEST_F(Integration, account_activity_usd_alex_0)
 {
     account_activity_usd_alex_.expected_ += 1;
 
-    const auto& widget = api_alex_.UI().AccountActivity(
+    const auto& widget = api_alex_.UI().Internal().AccountActivity(
         alex_.nym_id_,
         alex_.Account(UNIT_DEFINITION_TLA),
         make_cb(account_activity_usd_alex_, "alex account activity (USD)"));
@@ -1518,8 +1557,8 @@ TEST_F(Integration, pay_bob)
     activity_thread_alex_bob_.expected_ += 4;
     activity_summary_bob_.expected_ += 2;
 
-    const auto& thread =
-        api_alex_.UI().ActivityThread(alex_.nym_id_, alex_.Contact(bob_.name_));
+    const auto& thread = api_alex_.UI().Internal().ActivityThread(
+        alex_.nym_id_, alex_.Contact(bob_.name_));
     idle();
     const auto sent = thread.Pay(
         CHEQUE_AMOUNT_2,
@@ -1536,7 +1575,7 @@ TEST_F(Integration, account_activity_usd_alex_1)
 {
     ASSERT_TRUE(wait_for_counter(account_activity_usd_alex_));
 
-    const auto& widget = alex_.api_->UI().AccountActivity(
+    const auto& widget = alex_.api_->UI().Internal().AccountActivity(
         alex_.nym_id_, alex_.Account(UNIT_DEFINITION_TLA));
     auto row = widget.First();
 
@@ -1582,7 +1621,8 @@ TEST_F(Integration, activity_summary_alex_4)
 {
     ASSERT_TRUE(wait_for_counter(activity_summary_alex_));
 
-    const auto& widget = alex_.api_->UI().ActivitySummary(alex_.nym_id_);
+    const auto& widget =
+        alex_.api_->UI().Internal().ActivitySummary(alex_.nym_id_);
     auto row = widget.First();
 
     ASSERT_TRUE(row->Valid());
@@ -1610,7 +1650,7 @@ TEST_F(Integration, activity_thread_bob_alex_3)
 
     const auto& firstMessage = message_[msg_count_ - 1];
     const auto& secondMessage = message_[msg_count_];
-    const auto& widget = alex_.api_->UI().ActivityThread(
+    const auto& widget = alex_.api_->UI().Internal().ActivityThread(
         alex_.nym_id_, alex_.Contact(bob_.name_));
     auto row = widget.First();
 
@@ -1654,7 +1694,8 @@ TEST_F(Integration, contact_issuer_alex_1)
 {
     ASSERT_TRUE(wait_for_counter(contact_issuer_alex_));
 
-    const auto& widget = api_alex_.UI().Contact(alex_.Contact(issuer_.name_));
+    const auto& widget =
+        api_alex_.UI().Internal().Contact(alex_.Contact(issuer_.name_));
 
     EXPECT_EQ(
         alex_.Contact(issuer_.name_).asBase58(api_alex_.Crypto()),
@@ -1676,8 +1717,8 @@ TEST_F(Integration, activity_thread_alex_bob_2)
 
     const auto& firstMessage = message_[msg_count_ - 1];
     const auto& secondMessage = message_[msg_count_];
-    const auto& widget =
-        bob_.api_->UI().ActivityThread(bob_.nym_id_, bob_.Contact(alex_.name_));
+    const auto& widget = bob_.api_->UI().Internal().ActivityThread(
+        bob_.nym_id_, bob_.Contact(alex_.name_));
     auto row = widget.First();
 
     ASSERT_TRUE(row->Valid());
@@ -1728,7 +1769,8 @@ TEST_F(Integration, activity_summary_bob_3)
 {
     ASSERT_TRUE(wait_for_counter(activity_summary_bob_));
 
-    const auto& widget = bob_.api_->UI().ActivitySummary(bob_.nym_id_);
+    const auto& widget =
+        bob_.api_->UI().Internal().ActivitySummary(bob_.nym_id_);
     auto row = widget.First();
 
     ASSERT_TRUE(row->Valid());

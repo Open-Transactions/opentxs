@@ -11,13 +11,13 @@
 #include "interface/ui/base/List.hpp"
 #include "interface/ui/base/RowType.hpp"
 #include "internal/interface/ui/UI.hpp"
+#include "internal/util/SharedPimpl.hpp"
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Pimpl.hpp"
-#include "opentxs/util/SharedPimpl.hpp"
 
 class QVariant;
 

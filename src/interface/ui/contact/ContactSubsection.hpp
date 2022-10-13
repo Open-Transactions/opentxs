@@ -13,12 +13,12 @@
 #include "interface/ui/base/RowType.hpp"
 #include "internal/interface/ui/UI.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
+#include "internal/util/SharedPimpl.hpp"
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/identity/wot/claim/ClaimType.hpp"
 #include "opentxs/util/Container.hpp"
-#include "opentxs/util/SharedPimpl.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs

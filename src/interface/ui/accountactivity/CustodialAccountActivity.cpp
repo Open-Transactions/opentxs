@@ -19,6 +19,8 @@
 #include "internal/api/session/Types.hpp"
 #include "internal/api/session/Wallet.hpp"
 #include "internal/core/Factory.hpp"
+#include "internal/core/contract/ServerContract.hpp"
+#include "internal/core/contract/Unit.hpp"
 #include "internal/otx/common/Account.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/LogMacros.hpp"
@@ -34,8 +36,6 @@
 #include "opentxs/api/session/Workflow.hpp"
 #include "opentxs/core/AccountType.hpp"
 #include "opentxs/core/Data.hpp"
-#include "opentxs/core/contract/ServerContract.hpp"
-#include "opentxs/core/contract/Unit.hpp"
 #include "opentxs/core/display/Definition.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
@@ -510,8 +510,8 @@ auto CustodialAccountActivity::process_notary(const Message& message) noexcept
     const auto newName = [&] {
         {
             eLock lock{shared_lock_};
-            notary_ =
-                api_.Wallet().Server(api_.Storage().AccountServer(account_id_));
+            notary_ = api_.Wallet().Internal().Server(
+                api_.Storage().AccountServer(account_id_));
         }
 
         return NotaryName();
@@ -569,7 +569,7 @@ auto CustodialAccountActivity::process_unit(const Message& message) noexcept
     // TODO currently it doesn't matter if the unit definition alias changes
     // since we don't use it
     eLock lock{shared_lock_};
-    contract_ = api_.Wallet().UnitDefinition(
+    contract_ = api_.Wallet().Internal().UnitDefinition(
         api_.Storage().AccountContract(account_id_));
 }
 

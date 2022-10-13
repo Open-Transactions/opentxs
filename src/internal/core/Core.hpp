@@ -13,7 +13,6 @@
 #include <PeerEnums.pb.h>
 #include <cstddef>
 #include <iosfwd>
-#include <memory>
 
 #include "internal/otx/common/NymFile.hpp"
 #include "opentxs/blockchain/Types.hpp"
@@ -45,8 +44,10 @@ class Secret;
 namespace opentxs::internal
 {
 struct NymFile : virtual public opentxs::NymFile {
-    virtual auto LoadSignedNymFile(const PasswordPrompt& reason) -> bool = 0;
-    virtual auto SaveSignedNymFile(const PasswordPrompt& reason) -> bool = 0;
+    virtual auto LoadSignedNymFile(const opentxs::PasswordPrompt& reason)
+        -> bool = 0;
+    virtual auto SaveSignedNymFile(const opentxs::PasswordPrompt& reason)
+        -> bool = 0;
 };
 }  // namespace opentxs::internal
 
@@ -69,10 +70,8 @@ auto UnitID(const api::Session& api, const Type chain) noexcept
 
 namespace opentxs::factory
 {
-auto Secret(const std::size_t bytes) noexcept
-    -> std::unique_ptr<opentxs::Secret>;
-auto Secret(const ReadView bytes, const bool mode) noexcept
-    -> std::unique_ptr<opentxs::Secret>;
+auto Secret(const std::size_t bytes) noexcept -> opentxs::Secret;
+auto Secret(const ReadView bytes, const bool mode) noexcept -> opentxs::Secret;
 }  // namespace opentxs::factory
 
 namespace opentxs

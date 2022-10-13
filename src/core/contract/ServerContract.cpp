@@ -23,6 +23,7 @@
 #include "internal/api/FactoryAPI.hpp"
 #include "internal/api/session/FactoryAPI.hpp"
 #include "internal/core/Core.hpp"
+#include "internal/core/String.hpp"
 #include "internal/core/contract/Contract.hpp"
 #include "internal/core/contract/Types.hpp"
 #include "internal/identity/Nym.hpp"
@@ -34,7 +35,6 @@
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/api/session/Wallet.hpp"
-#include "opentxs/core/String.hpp"
 #include "opentxs/core/Types.hpp"
 #include "opentxs/core/contract/Types.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
@@ -400,7 +400,7 @@ auto Server::Statistics(String& strContents) const -> bool
 auto Server::TransportKey() const -> const Data& { return transport_key_; }
 
 auto Server::TransportKey(Data& pubkey, const PasswordPrompt& reason) const
-    -> OTSecret
+    -> Secret
 {
     OT_ASSERT(nym_);
 

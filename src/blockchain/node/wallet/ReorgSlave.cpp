@@ -11,8 +11,8 @@
 
 #include "blockchain/node/wallet/ReorgMaster.hpp"
 #include "internal/blockchain/node/wallet/Types.hpp"
+#include "internal/network/zeromq/Pipeline.hpp"
 #include "internal/util/LogMacros.hpp"
-#include "opentxs/network/zeromq/Pipeline.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/util/Log.hpp"
 #include "util/Work.hpp"

@@ -10,10 +10,10 @@
 #include <robin_hood.h>
 #include <utility>
 
-#include "core/identifier/Imp.hpp"
+#include "core/identifier/IdentifierPrivate.hpp"
+#include "internal/core/String.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
-#include "opentxs/core/String.hpp"
 #include "opentxs/core/contract/ContractType.hpp"
 #include "opentxs/core/identifier/Algorithm.hpp"
 #include "opentxs/core/identifier/Type.hpp"
@@ -24,7 +24,7 @@ namespace opentxs::factory
 auto Identifier(
     const identifier::Type type,
     identifier::Generic::allocator_type alloc) noexcept
-    -> identifier::Generic::Imp*
+    -> identifier::IdentifierPrivate*
 {
     return Identifier(
         type, default_identifier_algorithm(), {}, std::move(alloc));
@@ -34,10 +34,11 @@ auto Identifier(
     const identifier::Type type,
     const identifier::Algorithm algorithm,
     const ReadView hash,
-    identifier::Generic::allocator_type a) noexcept -> identifier::Generic::Imp*
+    identifier::Generic::allocator_type a) noexcept
+    -> identifier::IdentifierPrivate*
 {
     // TODO c++20
-    auto alloc = alloc::PMR<identifier::Generic::Imp>{a};
+    auto alloc = alloc::PMR<identifier::IdentifierPrivate>{a};
     auto* imp = alloc.allocate(1_uz);
     alloc.construct(imp, algorithm, type, hash);
 
@@ -45,7 +46,7 @@ auto Identifier(
 }
 
 auto IdentifierInvalid(identifier::Generic::allocator_type alloc) noexcept
-    -> identifier::Generic::Imp*
+    -> identifier::IdentifierPrivate*
 {
     return Identifier(
         identifier::Type::invalid,
@@ -150,7 +151,7 @@ auto translate(Type in) noexcept -> contract::Type
 
 namespace opentxs::identifier
 {
-Generic::Generic(Imp* imp) noexcept
+Generic::Generic(IdentifierPrivate* imp) noexcept
     : imp_(imp)
 {
     OT_ASSERT(nullptr != imp_);
@@ -183,7 +184,7 @@ Generic::Generic(Generic&& rhs, allocator_type alloc) noexcept
 
 auto Generic::operator=(const Generic& rhs) noexcept -> Generic&
 {
-    auto alloc = alloc::PMR<Imp>{get_allocator()};
+    auto alloc = alloc::PMR<IdentifierPrivate>{get_allocator()};
     auto* old = imp_;
     imp_ = factory::Identifier(rhs.Type(), rhs.Algorithm(), rhs.Bytes(), alloc);
 
@@ -338,37 +339,14 @@ auto Generic::GetString(const api::Crypto& api, String& out) const noexcept
     out.Concatenate(asBase58(api));
 }
 
+auto Generic::Internal() const noexcept -> const internal::Identifier&
+{
+    return *imp_;
+}
+
+auto Generic::Internal() noexcept -> internal::Identifier& { return *imp_; }
+
 auto Generic::IsNull() const -> bool { return imp_->IsNull(); }
-
-auto Generic::operator+=(const Data& rhs) noexcept -> Generic&
-{
-    return imp_->operator+=(rhs);
-}
-
-auto Generic::operator+=(const ReadView rhs) noexcept -> Generic&
-{
-    return imp_->operator+=(rhs);
-}
-
-auto Generic::operator+=(const std::uint16_t rhs) noexcept -> Generic&
-{
-    return imp_->operator+=(rhs);
-}
-
-auto Generic::operator+=(const std::uint32_t rhs) noexcept -> Generic&
-{
-    return imp_->operator+=(rhs);
-}
-
-auto Generic::operator+=(const std::uint64_t rhs) noexcept -> Generic&
-{
-    return imp_->operator+=(rhs);
-}
-
-auto Generic::operator+=(const std::uint8_t rhs) noexcept -> Generic&
-{
-    return imp_->operator+=(rhs);
-}
 
 auto Generic::Randomize(const std::size_t size) -> bool
 {
@@ -378,11 +356,6 @@ auto Generic::Randomize(const std::size_t size) -> bool
 auto Generic::resize(const std::size_t size) -> bool
 {
     return imp_->resize(size);
-}
-
-auto Generic::Serialize(proto::Identifier& out) const noexcept -> bool
-{
-    return imp_->Serialize(out);
 }
 
 auto Generic::SetSize(const std::size_t size) -> bool
@@ -413,7 +386,7 @@ Generic::~Generic()
 {
     if (nullptr != imp_) {
         // TODO c++20
-        auto alloc = alloc::PMR<Imp>{get_allocator()};
+        auto alloc = alloc::PMR<IdentifierPrivate>{get_allocator()};
         alloc.destroy(imp_);
         alloc.deallocate(imp_, 1);
         imp_ = nullptr;

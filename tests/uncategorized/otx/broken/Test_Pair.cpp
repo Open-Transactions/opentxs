@@ -13,12 +13,25 @@
 #include <utility>
 
 #include "internal/api/session/Client.hpp"
+#include "internal/api/session/FactoryAPI.hpp"
+#include "internal/api/session/UI.hpp"
 #include "internal/api/session/Wallet.hpp"
+#include "internal/core/String.hpp"
+#include "internal/core/contract/Unit.hpp"
+#include "internal/core/contract/peer/BailmentRequest.hpp"
 #include "internal/core/contract/peer/Peer.hpp"
+#include "internal/core/contract/peer/PeerRequest.hpp"
+#include "internal/interface/ui/AccountSummary.hpp"
+#include "internal/interface/ui/AccountSummaryItem.hpp"
+#include "internal/interface/ui/IssuerItem.hpp"
+#include "internal/network/zeromq/Context.hpp"
+#include "internal/network/zeromq/ListenCallback.hpp"
+#include "internal/network/zeromq/socket/Subscribe.hpp"
 #include "internal/otx/client/Issuer.hpp"
 #include "internal/otx/client/Pair.hpp"
 #include "internal/otx/common/Message.hpp"
 #include "internal/util/LogMacros.hpp"
+#include "internal/util/SharedPimpl.hpp"
 #include "ottest/fixtures/common/Counter.hpp"
 #include "ottest/fixtures/common/User.hpp"
 #include "ottest/fixtures/integration/Helpers.hpp"
@@ -57,10 +70,10 @@ public:
         , chris_rename_notary_cb_(ot::network::zeromq::ListenCallback::Factory(
               [this](auto&& in) { chris_rename_notary(std::move(in)); }))
         , issuer_peer_request_listener_(
-              api_issuer_.Network().ZeroMQ().SubscribeSocket(
+              api_issuer_.Network().ZeroMQ().Internal().SubscribeSocket(
                   issuer_peer_request_cb_))
         , chris_rename_notary_listener_(
-              api_chris_.Network().ZeroMQ().SubscribeSocket(
+              api_chris_.Network().ZeroMQ().Internal().SubscribeSocket(
                   chris_rename_notary_cb_))
     {
         subscribe_sockets();
@@ -116,8 +129,8 @@ public:
             issuer_.nym_id_.asBase58(api_issuer_.Crypto()), body.at(0).Bytes());
 
         const auto nym_p = api_chris_.Wallet().Nym(chris_.nym_id_);
-        const auto request =
-            api_chris_.Factory().PeerRequest(nym_p, body.at(1).Bytes());
+        const auto request = api_chris_.Factory().InternalSession().PeerRequest(
+            nym_p, body.at(1).Bytes());
 
         EXPECT_EQ(
             body.at(0).Bytes(),
@@ -126,8 +139,9 @@ public:
 
         switch (request->Type()) {
             case ot::contract::peer::PeerRequestType::Bailment: {
-                const auto bailment = api_issuer_.Factory().BailmentRequest(
-                    nym_p, body.at(1).Bytes());
+                const auto bailment =
+                    api_issuer_.Factory().InternalSession().BailmentRequest(
+                        nym_p, body.at(1).Bytes());
                 EXPECT_EQ(bailment->ServerID(), request->Server());
                 EXPECT_EQ(bailment->UnitID(), unit_id_);
 
@@ -166,7 +180,7 @@ TEST_F(Test_Pair, init_ot) {}
 TEST_F(Test_Pair, init_ui)
 {
     account_summary_.expected_ = 0;
-    api_chris_.UI().AccountSummary(
+    api_chris_.UI().Internal().AccountSummary(
         chris_.nym_id_,
         ot::UnitType::Usd,
         make_cb(account_summary_, "account summary USD"));
@@ -176,8 +190,8 @@ TEST_F(Test_Pair, initial_state)
 {
     ASSERT_TRUE(wait_for_counter(account_summary_));
 
-    const auto& widget =
-        chris_.api_->UI().AccountSummary(chris_.nym_id_, ot::UnitType::Usd);
+    const auto& widget = chris_.api_->UI().Internal().AccountSummary(
+        chris_.nym_id_, ot::UnitType::Usd);
     auto row = widget.First();
 
     EXPECT_FALSE(row->Valid());
@@ -185,7 +199,7 @@ TEST_F(Test_Pair, initial_state)
 
 TEST_F(Test_Pair, issue_dollars)
 {
-    const auto contract = api_issuer_.Wallet().CurrencyContract(
+    const auto contract = api_issuer_.Wallet().Internal().CurrencyContract(
         issuer_.nym_id_.asBase58(api_issuer_.Crypto()),
         UNIT_DEFINITION_CONTRACT_NAME,
         UNIT_DEFINITION_TERMS,
@@ -343,8 +357,8 @@ TEST_F(Test_Pair, pair_untrusted_state)
 {
     ASSERT_TRUE(wait_for_counter(account_summary_));
 
-    const auto& widget =
-        chris_.api_->UI().AccountSummary(chris_.nym_id_, ot::UnitType::Usd);
+    const auto& widget = chris_.api_->UI().Internal().AccountSummary(
+        chris_.nym_id_, ot::UnitType::Usd);
     auto row = widget.First();
 
     ASSERT_TRUE(row->Valid());
@@ -459,8 +473,8 @@ TEST_F(Test_Pair, pair_trusted_state)
 {
     ASSERT_TRUE(wait_for_counter(account_summary_));
 
-    const auto& widget =
-        chris_.api_->UI().AccountSummary(chris_.nym_id_, ot::UnitType::Usd);
+    const auto& widget = chris_.api_->UI().Internal().AccountSummary(
+        chris_.nym_id_, ot::UnitType::Usd);
     auto row = widget.First();
 
     ASSERT_TRUE(row->Valid());

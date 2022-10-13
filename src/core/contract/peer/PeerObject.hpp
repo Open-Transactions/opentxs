@@ -10,10 +10,10 @@
 #include <memory>
 #include <optional>
 
-#include "opentxs/core/contract/peer/PeerObject.hpp"
+#include "internal/core/contract/peer/PeerObject.hpp"
+#include "internal/core/contract/peer/PeerReply.hpp"
+#include "internal/core/contract/peer/PeerRequest.hpp"
 #include "opentxs/core/contract/peer/PeerObjectType.hpp"
-#include "opentxs/core/contract/peer/PeerReply.hpp"
-#include "opentxs/core/contract/peer/PeerRequest.hpp"
 #include "opentxs/identity/Types.hpp"
 #include "opentxs/otx/blind/Purse.hpp"
 #include "opentxs/util/Container.hpp"

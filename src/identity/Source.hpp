@@ -10,10 +10,11 @@
 #include <cstdint>
 #include <memory>
 
+#include "internal/core/String.hpp"
+#include "internal/identity/Source.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/Types.hpp"
 #include "opentxs/core/PaymentCode.hpp"
-#include "opentxs/core/String.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/crypto/key/Asymmetric.hpp"
 #include "opentxs/identity/Source.hpp"
@@ -60,7 +61,7 @@ class PasswordPrompt;
 
 namespace opentxs::identity::implementation
 {
-class Source final : virtual public identity::Source
+class Source final : public internal::Source
 {
 public:
     auto asString() const noexcept -> OTString final;

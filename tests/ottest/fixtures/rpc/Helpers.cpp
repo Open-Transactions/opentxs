@@ -15,9 +15,18 @@
 #include <string_view>
 #include <utility>
 
+#include "internal/api/session/UI.hpp"
+#include "internal/api/session/Wallet.hpp"
+#include "internal/core/String.hpp"
+#include "internal/core/contract/ServerContract.hpp"
+#include "internal/core/contract/Unit.hpp"
+#include "internal/network/zeromq/Context.hpp"
+#include "internal/network/zeromq/ListenCallback.hpp"
+#include "internal/network/zeromq/socket/Subscribe.hpp"
 #include "internal/otx/common/Message.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/Mutex.hpp"
+#include "internal/util/SharedPimpl.hpp"
 #include "ottest/fixtures/common/Counter.hpp"
 #include "ottest/fixtures/common/User.hpp"
 
@@ -66,7 +75,7 @@ struct RPCPushCounter::Imp {
         : ot_(ot)
         , cb_(zmq::ListenCallback::Factory(
               [&](auto&& in) { cb(std::move(in)); }))
-        , socket_(ot_.ZMQ().SubscribeSocket(cb_))
+        , socket_(ot_.ZMQ().Internal().SubscribeSocket(cb_))
         , lock_()
         , received_()
     {
@@ -218,13 +227,13 @@ auto RPC_fixture::ImportServerContract(
     const ot::api::session::Client& to) const noexcept -> bool
 {
     const auto& id = from.ID();
-    const auto server = from.Wallet().Server(id);
+    const auto server = from.Wallet().Internal().Server(id);
 
     if (0u == server->Version()) { return false; }
 
     auto bytes = ot::Space{};
     if (false == server->Serialize(ot::writer(bytes), true)) { return false; }
-    const auto client = to.Wallet().Server(ot::reader(bytes));
+    const auto client = to.Wallet().Internal().Server(ot::reader(bytes));
 
     if (0u == client->Version()) { return false; }
 
@@ -261,7 +270,7 @@ auto RPC_fixture::InitAccountActivityCounter(
     const ot::UnallocatedCString& account,
     Counter& counter) const noexcept -> void
 {
-    api.UI().AccountActivity(
+    api.UI().Internal().AccountActivity(
         nym,
         api.Factory().IdentifierFromBase58(account),
         make_cb(
@@ -280,7 +289,7 @@ auto RPC_fixture::InitAccountTreeCounter(
     const ot::identifier::Nym& nym,
     Counter& counter) const noexcept -> void
 {
-    api.UI().AccountTree(
+    api.UI().Internal().AccountTree(
         nym,
         make_cb(
             counter,
@@ -392,7 +401,7 @@ auto RPC_fixture::IssueUnit(
 {
     const auto& serverID = server.ID();
     const auto reason = api.Factory().PasswordPrompt(__func__);
-    const auto contract = api.Wallet().CurrencyContract(
+    const auto contract = api.Wallet().Internal().CurrencyContract(
         nymID.asBase58(ot_.Crypto()),
         shortname,
         terms,
@@ -673,7 +682,7 @@ auto RPC_fixture::SetIntroductionServer(
     if (false == ImportServerContract(to, on)) { return false; }
 
     const auto clientID =
-        on.OTX().SetIntroductionServer(on.Wallet().Server(id));
+        on.OTX().SetIntroductionServer(on.Wallet().Internal().Server(id));
 
     return id == clientID;
 }

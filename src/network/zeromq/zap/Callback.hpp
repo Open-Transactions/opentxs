@@ -8,8 +8,9 @@
 #include <atomic>
 #include <mutex>
 
-#include "opentxs/network/zeromq/zap/Callback.hpp"
-#include "opentxs/network/zeromq/zap/Reply.hpp"
+#include "internal/network/zeromq/zap/Callback.hpp"
+#include "internal/network/zeromq/zap/Reply.hpp"
+#include "opentxs/network/zeromq/zap/Types.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 
@@ -35,8 +36,6 @@ namespace opentxs::network::zeromq::zap::implementation
 class Callback final : virtual zap::Callback
 {
 public:
-    using Lambda = zap::Callback::ReceiveCallback;
-
     auto Process(const zap::Request& request) const -> Reply final;
     auto SetDomain(
         const UnallocatedCString& domain,
@@ -53,14 +52,14 @@ public:
 private:
     friend zap::Callback;
 
-    const Lambda default_callback_;
-    mutable UnallocatedMap<UnallocatedCString, Lambda> domains_;
+    const ReceiveCallback default_callback_;
+    mutable UnallocatedMap<UnallocatedCString, ReceiveCallback> domains_;
     mutable std::mutex domain_lock_;
     mutable std::atomic<Policy> policy_;
 
     auto clone() const -> Callback* final { return new Callback(); }
     auto default_callback(const zap::Request& in) const -> Reply;
-    auto get_domain(const ReadView domain) const -> const Lambda&;
+    auto get_domain(const ReadView domain) const -> const ReceiveCallback&;
 
     Callback();
 };

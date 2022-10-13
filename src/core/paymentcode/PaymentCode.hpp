@@ -82,29 +82,29 @@ public:
         const crypto::key::EllipticCurve& privateKey,
         const ReadView outpoint,
         const AllocateOutput destination,
-        const PasswordPrompt& reason) const noexcept -> bool = 0;
+        const opentxs::PasswordPrompt& reason) const noexcept -> bool = 0;
     virtual auto BlindV3(
         const opentxs::PaymentCode& recipient,
         const crypto::key::EllipticCurve& privateKey,
         const AllocateOutput destination,
-        const PasswordPrompt& reason) const noexcept -> bool = 0;
+        const opentxs::PasswordPrompt& reason) const noexcept -> bool = 0;
     virtual auto clone() const noexcept -> Imp* = 0;
     virtual auto DecodeNotificationElements(
         const std::uint8_t version,
         const UnallocatedVector<Space>& elements,
-        const PasswordPrompt& reason) const noexcept
+        const opentxs::PasswordPrompt& reason) const noexcept
         -> opentxs::PaymentCode = 0;
     virtual auto GenerateNotificationElements(
         const opentxs::PaymentCode& recipient,
         const crypto::key::EllipticCurve& privateKey,
-        const PasswordPrompt& reason) const noexcept
+        const opentxs::PasswordPrompt& reason) const noexcept
         -> UnallocatedVector<Space> = 0;
     virtual auto ID() const noexcept -> const identifier::Nym& = 0;
     virtual auto Incoming(
         const opentxs::PaymentCode& sender,
         const Bip32Index index,
         const blockchain::Type chain,
-        const PasswordPrompt& reason,
+        const opentxs::PasswordPrompt& reason,
         const std::uint8_t version) const noexcept
         -> std::unique_ptr<crypto::key::EllipticCurve> = 0;
     virtual auto Key() const noexcept -> std::shared_ptr<crypto::key::HD> = 0;
@@ -115,7 +115,7 @@ public:
         const opentxs::PaymentCode& recipient,
         const Bip32Index index,
         const blockchain::Type chain,
-        const PasswordPrompt& reason,
+        const opentxs::PasswordPrompt& reason,
         const std::uint8_t version) const noexcept
         -> std::unique_ptr<crypto::key::EllipticCurve> = 0;
     using internal::PaymentCode::Serialize;
@@ -125,18 +125,18 @@ public:
     virtual auto Sign(
         const Data& data,
         Data& output,
-        const PasswordPrompt& reason) const noexcept -> bool = 0;
+        const opentxs::PasswordPrompt& reason) const noexcept -> bool = 0;
     virtual auto Unblind(
         const ReadView blinded,
         const crypto::key::EllipticCurve& publicKey,
         const ReadView outpoint,
-        const PasswordPrompt& reason) const noexcept
+        const opentxs::PasswordPrompt& reason) const noexcept
         -> opentxs::PaymentCode = 0;
     virtual auto UnblindV3(
         const std::uint8_t version,
         const ReadView blinded,
         const crypto::key::EllipticCurve& publicKey,
-        const PasswordPrompt& reason) const noexcept
+        const opentxs::PasswordPrompt& reason) const noexcept
         -> opentxs::PaymentCode = 0;
     virtual auto Valid() const noexcept -> bool = 0;
     virtual auto Version() const noexcept -> VersionNumber = 0;
@@ -175,7 +175,7 @@ public:
         const crypto::key::EllipticCurve&,
         const ReadView,
         const AllocateOutput,
-        const PasswordPrompt&) const noexcept -> bool final
+        const opentxs::PasswordPrompt&) const noexcept -> bool final
     {
         return {};
     }
@@ -183,7 +183,7 @@ public:
         const opentxs::PaymentCode&,
         const crypto::key::EllipticCurve&,
         const AllocateOutput,
-        const PasswordPrompt&) const noexcept -> bool final
+        const opentxs::PasswordPrompt&) const noexcept -> bool final
     {
         return {};
     }
@@ -191,14 +191,16 @@ public:
     auto DecodeNotificationElements(
         const std::uint8_t,
         const UnallocatedVector<Space>&,
-        const PasswordPrompt&) const noexcept -> opentxs::PaymentCode final
+        const opentxs::PasswordPrompt&) const noexcept
+        -> opentxs::PaymentCode final
     {
         return std::make_unique<PaymentCode>().release();
     }
     auto GenerateNotificationElements(
         const opentxs::PaymentCode&,
         const crypto::key::EllipticCurve&,
-        const PasswordPrompt&) const noexcept -> UnallocatedVector<Space> final
+        const opentxs::PasswordPrompt&) const noexcept
+        -> UnallocatedVector<Space> final
     {
         return {};
     }
@@ -212,7 +214,7 @@ public:
         const opentxs::PaymentCode&,
         const Bip32Index,
         const blockchain::Type,
-        const PasswordPrompt&,
+        const opentxs::PasswordPrompt&,
         const std::uint8_t) const noexcept
         -> std::unique_ptr<crypto::key::EllipticCurve> final
     {
@@ -231,7 +233,7 @@ public:
         const opentxs::PaymentCode&,
         const Bip32Index,
         const blockchain::Type,
-        const PasswordPrompt&,
+        const opentxs::PasswordPrompt&,
         const std::uint8_t) const noexcept
         -> std::unique_ptr<crypto::key::EllipticCurve> final
     {
@@ -246,11 +248,11 @@ public:
     auto Sign(
         const identity::credential::Base&,
         proto::Signature&,
-        const PasswordPrompt&) const noexcept -> bool final
+        const opentxs::PasswordPrompt&) const noexcept -> bool final
     {
         return {};
     }
-    auto Sign(const Data&, Data&, const PasswordPrompt&) const noexcept
+    auto Sign(const Data&, Data&, const opentxs::PasswordPrompt&) const noexcept
         -> bool final
     {
         return {};
@@ -259,7 +261,8 @@ public:
         const ReadView,
         const crypto::key::EllipticCurve&,
         const ReadView,
-        const PasswordPrompt&) const noexcept -> opentxs::PaymentCode final
+        const opentxs::PasswordPrompt&) const noexcept
+        -> opentxs::PaymentCode final
     {
         return std::make_unique<PaymentCode>().release();
     }
@@ -267,7 +270,8 @@ public:
         const std::uint8_t,
         const ReadView,
         const crypto::key::EllipticCurve&,
-        const PasswordPrompt&) const noexcept -> opentxs::PaymentCode final
+        const opentxs::PasswordPrompt&) const noexcept
+        -> opentxs::PaymentCode final
     {
         return std::make_unique<PaymentCode>().release();
     }
@@ -283,7 +287,7 @@ public:
     auto AddPrivateKeys(
         UnallocatedCString&,
         const Bip32Index,
-        const PasswordPrompt&) noexcept -> bool final
+        const opentxs::PasswordPrompt&) noexcept -> bool final
     {
         return {};
     }

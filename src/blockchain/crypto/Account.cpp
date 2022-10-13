@@ -19,6 +19,8 @@
 #include "blockchain/crypto/AccountIndex.hpp"
 #include "internal/blockchain/crypto/Crypto.hpp"
 #include "internal/blockchain/crypto/Factory.hpp"
+#include "internal/network/zeromq/Context.hpp"
+#include "internal/network/zeromq/socket/Types.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/api/network/Network.hpp"
 #include "opentxs/api/session/Crypto.hpp"
@@ -41,7 +43,6 @@
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/network/zeromq/message/Message.tpp"
-#include "opentxs/network/zeromq/socket/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Iterator.hpp"
 #include "opentxs/util/Pimpl.hpp"
@@ -105,7 +106,7 @@ Account::Account(
     , spent_()
     , find_nym_([&] {
         using Dir = network::zeromq::socket::Direction;
-        auto out = api_.Network().ZeroMQ().PushSocket(Dir::Connect);
+        auto out = api_.Network().ZeroMQ().Internal().PushSocket(Dir::Connect);
         const auto started = out->Start(api_.Endpoints().FindNym().data());
 
         OT_ASSERT(started);

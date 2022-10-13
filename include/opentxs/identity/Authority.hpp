@@ -9,16 +9,30 @@
 #include <memory>
 
 #include "opentxs/Export.hpp"
-#include "opentxs/core/String.hpp"
-#include "opentxs/crypto/Types.hpp"
-#include "opentxs/crypto/key/Keypair.hpp"
-#include "opentxs/crypto/key/asymmetric/Role.hpp"
-#include "opentxs/identity/Nym.hpp"
+#include "opentxs/crypto/key/Types.hpp"
+#include "opentxs/identity/Types.hpp"
 #include "opentxs/util/Bytes.hpp"
+#include "opentxs/util/Numbers.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
+namespace crypto
+{
+namespace key
+{
+class Asymmetric;
+class Symmetric;
+}  // namespace key
+
+class Parameters;
+}  // namespace crypto
+
+namespace identifier
+{
+class Generic;
+}  // namespace identifier
+
 namespace identity
 {
 namespace credential
@@ -30,8 +44,12 @@ namespace internal
 {
 class Authority;
 }  // namespace internal
+
+class Source;
 }  // namespace identity
 
+class Data;
+class PasswordPrompt;
 class Secret;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
@@ -41,51 +59,8 @@ namespace opentxs::identity
 class OPENTXS_EXPORT Authority
 {
 public:
-    using AuthorityKeys = Nym::AuthorityKeys;
-
     virtual auto ContactCredentialVersion() const -> VersionNumber = 0;
-    virtual auto EncryptionTargets() const noexcept -> AuthorityKeys = 0;
     virtual auto GetMasterCredID() const -> identifier::Generic = 0;
-    virtual auto GetPublicAuthKey(
-        crypto::key::asymmetric::Algorithm keytype,
-        const String::List* plistRevokedIDs = nullptr) const
-        -> const crypto::key::Asymmetric& = 0;
-    virtual auto GetPublicEncrKey(
-        crypto::key::asymmetric::Algorithm keytype,
-        const String::List* plistRevokedIDs = nullptr) const
-        -> const crypto::key::Asymmetric& = 0;
-    virtual auto GetPublicKeysBySignature(
-        crypto::key::Keypair::Keys& listOutput,
-        const Signature& theSignature,
-        char cKeyType = '0') const -> std::int32_t = 0;
-    virtual auto GetPublicSignKey(
-        crypto::key::asymmetric::Algorithm keytype,
-        const String::List* plistRevokedIDs = nullptr) const
-        -> const crypto::key::Asymmetric& = 0;
-    virtual auto GetPrivateSignKey(
-        crypto::key::asymmetric::Algorithm keytype,
-        const String::List* plistRevokedIDs = nullptr) const
-        -> const crypto::key::Asymmetric& = 0;
-    virtual auto GetPrivateEncrKey(
-        crypto::key::asymmetric::Algorithm keytype,
-        const String::List* plistRevokedIDs = nullptr) const
-        -> const crypto::key::Asymmetric& = 0;
-    virtual auto GetPrivateAuthKey(
-        crypto::key::asymmetric::Algorithm keytype,
-        const String::List* plistRevokedIDs = nullptr) const
-        -> const crypto::key::Asymmetric& = 0;
-    virtual auto GetAuthKeypair(
-        crypto::key::asymmetric::Algorithm keytype,
-        const String::List* plistRevokedIDs = nullptr) const
-        -> const crypto::key::Keypair& = 0;
-    virtual auto GetEncrKeypair(
-        crypto::key::asymmetric::Algorithm keytype,
-        const String::List* plistRevokedIDs = nullptr) const
-        -> const crypto::key::Keypair& = 0;
-    virtual auto GetSignKeypair(
-        crypto::key::asymmetric::Algorithm keytype,
-        const String::List* plistRevokedIDs = nullptr) const
-        -> const crypto::key::Keypair& = 0;
     virtual auto GetTagCredential(crypto::key::asymmetric::Algorithm keytype)
         const noexcept(false) -> const credential::Key& = 0;
     virtual auto hasCapability(const NymCapability& capability) const
@@ -106,17 +81,9 @@ public:
         const crypto::key::Symmetric& key,
         PasswordPrompt& reason) const noexcept -> bool = 0;
     virtual auto VerificationCredentialVersion() const -> VersionNumber = 0;
-    virtual auto VerifyInternally() const -> bool = 0;
 
-    virtual auto AddChildKeyCredential(
-        const crypto::Parameters& nymParameters,
-        const PasswordPrompt& reason) -> UnallocatedCString = 0;
     OPENTXS_NO_EXPORT virtual auto Internal() noexcept
         -> internal::Authority& = 0;
-    virtual void RevokeContactCredentials(
-        UnallocatedList<UnallocatedCString>& contactCredentialIDs) = 0;
-    virtual void RevokeVerificationCredentials(
-        UnallocatedList<UnallocatedCString>& verificationCredentialIDs) = 0;
 
     Authority(const Authority&) = delete;
     Authority(Authority&&) = delete;

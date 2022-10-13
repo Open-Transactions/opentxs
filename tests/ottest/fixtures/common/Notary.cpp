@@ -10,7 +10,11 @@
 #include <memory>
 #include <utility>
 
+#include "internal/api/session/Wallet.hpp"
+#include "internal/core/String.hpp"
+#include "internal/core/contract/Unit.hpp"
 #include "internal/otx/common/Message.hpp"
+#include "internal/util/SharedPimpl.hpp"
 #include "ottest/fixtures/common/User.hpp"
 
 namespace ottest
@@ -59,7 +63,7 @@ auto Notary_fixture::IssueUnit(
 
     const auto& serverID = server.ID();
     const auto reason = api.Factory().PasswordPrompt(__func__);
-    const auto contract = api.Wallet().CurrencyContract(
+    const auto contract = api.Wallet().Internal().CurrencyContract(
         nymID.asBase58(ot_.Crypto()),
         shortname,
         terms,

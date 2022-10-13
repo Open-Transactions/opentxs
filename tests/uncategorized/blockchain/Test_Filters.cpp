@@ -15,6 +15,8 @@
 
 #include "internal/blockchain/Blockchain.hpp"
 #include "internal/blockchain/Params.hpp"
+#include "internal/blockchain/bitcoin/bloom/BloomFilter.hpp"
+#include "internal/blockchain/bitcoin/bloom/BloomUpdateFlag.hpp"
 #include "internal/blockchain/bitcoin/cfilter/GCS.hpp"
 #include "internal/util/P0330.hpp"
 

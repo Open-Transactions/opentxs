@@ -9,9 +9,9 @@
 #include <utility>
 
 #include "internal/otx/consensus/Consensus.hpp"
+#include "internal/otx/consensus/ManagedNumber.hpp"
+#include "internal/otx/consensus/Server.hpp"
 #include "internal/util/Flag.hpp"
-#include "opentxs/otx/consensus/ManagedNumber.hpp"
-#include "opentxs/otx/consensus/Server.hpp"
 
 namespace opentxs::otx::context
 {

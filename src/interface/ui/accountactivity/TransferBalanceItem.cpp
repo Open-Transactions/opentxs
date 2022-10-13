@@ -14,6 +14,7 @@
 
 #include "interface/ui/accountactivity/BalanceItem.hpp"
 #include "interface/ui/base/Widget.hpp"
+#include "internal/core/String.hpp"
 #include "internal/interface/ui/UI.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/Mutex.hpp"
@@ -21,7 +22,6 @@
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Workflow.hpp"
-#include "opentxs/core/String.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
 #include "opentxs/core/identifier/Nym.hpp"

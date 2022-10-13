@@ -5,122 +5,88 @@
 
 #pragma once
 
-#include <optional>
+#include <cstddef>
+#include <cstdint>
 
 #include "opentxs/Export.hpp"
+#include "opentxs/core/Data.hpp"
+#include "opentxs/util/Allocated.hpp"
+#include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Bytes.hpp"
-#include "opentxs/util/Pimpl.hpp"
+#include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
-class Secret;
-
-using OTSecret = Pimpl<Secret>;
+class SecretPrivate;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
 namespace opentxs
 {
-OPENTXS_EXPORT auto operator==(const OTSecret& lhs, const Secret& rhs) noexcept
-    -> bool;
-OPENTXS_EXPORT auto operator==(
-    const OTSecret& lhs,
-    const ReadView& rhs) noexcept -> bool;
-OPENTXS_EXPORT auto operator!=(const OTSecret& lhs, const Secret& rhs) noexcept
-    -> bool;
-OPENTXS_EXPORT auto operator!=(
-    const OTSecret& lhs,
-    const ReadView& rhs) noexcept -> bool;
-OPENTXS_EXPORT auto operator<(const OTSecret& lhs, const Secret& rhs) noexcept
-    -> bool;
-OPENTXS_EXPORT auto operator<(const OTSecret& lhs, const ReadView& rhs) noexcept
-    -> bool;
-OPENTXS_EXPORT auto operator>(const OTSecret& lhs, const Secret& rhs) noexcept
-    -> bool;
-OPENTXS_EXPORT auto operator>(const OTSecret& lhs, const ReadView& rhs) noexcept
-    -> bool;
-OPENTXS_EXPORT auto operator<=(const OTSecret& lhs, const Secret& rhs) noexcept
-    -> bool;
-OPENTXS_EXPORT auto operator<=(
-    const OTSecret& lhs,
-    const ReadView& rhs) noexcept -> bool;
-OPENTXS_EXPORT auto operator>=(const OTSecret& lhs, const Secret& rhs) noexcept
-    -> bool;
-OPENTXS_EXPORT auto operator>=(
-    const OTSecret& lhs,
-    const ReadView& rhs) noexcept -> bool;
-OPENTXS_EXPORT auto operator+=(OTSecret& lhs, const Secret& rhs) noexcept
-    -> Secret&;
-OPENTXS_EXPORT auto operator+=(OTSecret& lhs, const ReadView rhs) noexcept
-    -> Secret&;
-
-class OPENTXS_EXPORT Secret
+class OPENTXS_EXPORT Secret final : virtual public Data,
+                                    virtual public Allocated
 {
 public:
     enum class Mode : bool { Mem = true, Text = false };
 
-    virtual auto operator==(const Secret& rhs) const noexcept -> bool = 0;
-    virtual auto operator==(const ReadView rhs) const noexcept -> bool = 0;
-    virtual auto operator!=(const Secret& rhs) const noexcept -> bool = 0;
-    virtual auto operator!=(const ReadView rhs) const noexcept -> bool = 0;
-    virtual auto operator<(const Secret& rhs) const noexcept -> bool = 0;
-    virtual auto operator<(const ReadView rhs) const noexcept -> bool = 0;
-    virtual auto operator>(const Secret& rhs) const noexcept -> bool = 0;
-    virtual auto operator>(const ReadView rhs) const noexcept -> bool = 0;
-    virtual auto operator<=(const Secret& rhs) const noexcept -> bool = 0;
-    virtual auto operator<=(const ReadView& rhs) const noexcept -> bool = 0;
-    virtual auto operator>=(const Secret& rhs) const noexcept -> bool = 0;
-    virtual auto operator>=(const ReadView& rhs) const noexcept -> bool = 0;
-    virtual auto Bytes() const noexcept -> ReadView = 0;
-    virtual auto data() const noexcept -> const std::byte* = 0;
-    virtual auto empty() const noexcept -> bool = 0;
-    virtual auto size() const noexcept -> std::size_t = 0;
+    auto asHex() const -> UnallocatedCString final;
+    auto asHex(alloc::Default alloc) const -> CString final;
+    auto at(const std::size_t position) const -> const std::byte& final;
+    auto begin() const -> const_iterator final;
+    auto Bytes() const noexcept -> ReadView final;
+    auto cbegin() const -> const_iterator final;
+    auto cend() const -> const_iterator final;
+    auto data() const -> const void* final;
+    auto empty() const -> bool final;
+    auto end() const -> const_iterator final;
+    auto Extract(
+        const std::size_t amount,
+        Data& output,
+        const std::size_t pos = 0) const -> bool final;
+    auto Extract(std::uint8_t& output, const std::size_t pos = 0) const
+        -> bool final;
+    auto Extract(std::uint16_t& output, const std::size_t pos = 0) const
+        -> bool final;
+    auto Extract(std::uint32_t& output, const std::size_t pos = 0) const
+        -> bool final;
+    auto Extract(std::uint64_t& output, const std::size_t pos = 0) const
+        -> bool final;
+    auto get_allocator() const noexcept -> allocator_type final;
+    auto IsNull() const -> bool final;
+    auto size() const -> std::size_t final;
 
-    virtual auto operator+=(const Secret& rhs) noexcept -> Secret& = 0;
-    virtual auto operator+=(const ReadView rhs) noexcept -> Secret& = 0;
+    auto Assign(const Data& source) noexcept -> bool final;
+    auto Assign(const ReadView source) noexcept -> bool final;
+    auto Assign(const void* data, const std::size_t size) noexcept
+        -> bool final;
+    auto AssignText(const ReadView source) noexcept -> bool;
+    auto at(const std::size_t position) -> std::byte& final;
+    auto begin() -> iterator final;
+    auto clear() noexcept -> void final;
+    auto Concatenate(const ReadView) noexcept -> bool final;
+    auto Concatenate(const void*, const std::size_t) noexcept -> bool final;
+    auto data() -> void* final;
+    auto DecodeHex(const ReadView hex) -> bool final;
+    auto end() -> iterator final;
+    auto Randomize(const std::size_t size) -> bool final;
+    auto resize(const std::size_t) -> bool final;
+    auto SetSize(const std::size_t) -> bool final;
+    auto swap(Secret& rhs) noexcept -> void;
+    auto WriteInto() noexcept -> AllocateOutput final;
+    auto WriteInto(Mode mode) noexcept -> AllocateOutput;
+    auto zeroMemory() -> void final;
 
-    virtual void Assign(const Secret& source) noexcept = 0;
-    virtual void Assign(const ReadView source) noexcept = 0;
-    virtual void Assign(const void* data, const std::size_t& size) noexcept = 0;
-    virtual void AssignText(const ReadView source) noexcept = 0;
-    virtual void clear() noexcept = 0;
-    virtual void Concatenate(const Secret& source) noexcept = 0;
-    virtual void Concatenate(const ReadView data) noexcept = 0;
-    virtual void Concatenate(
-        const void* data,
-        const std::size_t size) noexcept = 0;
-    virtual auto data() noexcept -> std::byte* = 0;
-    virtual auto Randomize(const std::size_t bytes) noexcept -> std::size_t = 0;
-    virtual auto Resize(const std::size_t size) noexcept -> std::size_t = 0;
-    virtual auto WriteInto(const std::optional<Mode> = {}) noexcept
-        -> AllocateOutput = 0;
+    OPENTXS_NO_EXPORT Secret(SecretPrivate* imp) noexcept;
+    Secret() = delete;
+    Secret(const Secret&) noexcept;
+    Secret(Secret&& rhs) noexcept;
+    auto operator=(const Secret&) noexcept -> Secret&;
+    auto operator=(Secret&&) noexcept -> Secret&;
 
-    Secret(const Secret& rhs) = delete;
-    Secret(Secret&& rhs) = delete;
-    auto operator=(const Secret& rhs) -> Secret& = delete;
-    auto operator=(Secret&& rhs) -> Secret& = delete;
-
-    virtual ~Secret() = default;
-
-protected:
-    Secret() = default;
+    ~Secret() final;
 
 private:
-    friend OTSecret;
-
-#ifdef _WIN32
-public:
-#endif
-    virtual auto clone() const noexcept -> Secret* = 0;
+    SecretPrivate* imp_;
 };
 }  // namespace opentxs
-
-namespace std
-{
-template <>
-struct OPENTXS_EXPORT less<opentxs::OTSecret> {
-    auto operator()(const opentxs::OTSecret& lhs, const opentxs::OTSecret& rhs)
-        const -> bool;
-};
-}  // namespace std

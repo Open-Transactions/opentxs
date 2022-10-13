@@ -43,7 +43,7 @@ public:
         -> std::shared_ptr<Message> = 0;
     virtual auto GetOutpaymentsByTransNum(
         const std::int64_t lTransNum,
-        const PasswordPrompt& reason,
+        const opentxs::PasswordPrompt& reason,
         std::unique_ptr<OTPayment>* pReturnPayment = nullptr,
         std::int32_t* pnReturnIndex = nullptr) const
         -> std::shared_ptr<Message> = 0;
@@ -69,7 +69,7 @@ public:
         -> bool = 0;
     virtual auto RemoveOutpaymentsByTransNum(
         const std::int64_t lTransNum,
-        const PasswordPrompt& reason) -> bool = 0;
+        const opentxs::PasswordPrompt& reason) -> bool = 0;
     virtual auto SetInboxHash(
         const UnallocatedCString& acct_id,
         const identifier::Generic& theInput) -> bool = 0;  // client-side

@@ -9,10 +9,10 @@
 
 #include <robin_hood.h>
 
+#include "internal/network/zeromq/socket/Sender.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/node/SendResult.hpp"
 #include "opentxs/blockchain/node/TxoState.hpp"
 #include "opentxs/blockchain/node/TxoTag.hpp"
-#include "opentxs/network/zeromq/socket/Sender.hpp"  // IWYU pragma: keep
 
 namespace opentxs::blockchain::node
 {

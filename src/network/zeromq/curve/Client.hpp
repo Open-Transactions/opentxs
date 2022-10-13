@@ -9,8 +9,8 @@
 #include <iosfwd>
 #include <mutex>
 
+#include "internal/network/zeromq/curve/Client.hpp"
 #include "network/zeromq/socket/Socket.hpp"
-#include "opentxs/network/zeromq/curve/Client.hpp"
 #include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)

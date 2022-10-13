@@ -8,6 +8,8 @@
 
 #include <boost/algorithm/string.hpp>
 #include <boost/multiprecision/cpp_int.hpp>
+#include <boost/smart_ptr/make_shared.hpp>
+#include <boost/smart_ptr/shared_ptr.hpp>
 #include <algorithm>
 #include <compare>
 #include <cstddef>
@@ -35,8 +37,10 @@
 #include "opentxs/crypto/SeedStyle.hpp"
 #include "opentxs/crypto/key/Symmetric.hpp"
 #include "opentxs/crypto/key/symmetric/Source.hpp"
+#include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
+#include "opentxs/util/PasswordPrompt.hpp"  // IWYU pragma: keep
 #include "opentxs/util/Pimpl.hpp"
 #include "util/Allocator.hpp"
 #include "util/ByteLiterals.hpp"
@@ -348,8 +352,8 @@ auto Bip39::words_to_root_pkt(
         return false;
     }
 
-    using Allocator = SecureAllocator<std::uint8_t>;
-    using Vector = std::vector<std::uint8_t, Allocator>;
+    auto allocV = alloc::PMR<std::uint8_t>{alloc::Secure::get()};
+    using Vector = opentxs::Vector<std::uint8_t>;
     auto ent = [&] {
         namespace mp = boost::multiprecision;
         using BigInt = mp::number<mp::cpp_int_backend<
@@ -358,13 +362,13 @@ auto Bip39::words_to_root_pkt(
             mp::unsigned_magnitude,
             mp::unchecked,
             void>>;
-        auto alloc = SecureAllocator<BigInt>{};
-        auto pSeed = std::allocate_shared<BigInt>(alloc);
+        auto allocM = alloc::PMR<BigInt>{alloc::Secure::get()};
+        auto pSeed = boost::allocate_shared<BigInt>(allocM);
 
         OT_ASSERT(pSeed);
 
         auto& seed = *pSeed;
-        auto out = Vector{};
+        auto out = Vector{allocV};
 
         for (auto i{indices.crbegin()}; i != indices.crend(); ++i) {
             seed <<= 11;
@@ -446,9 +450,9 @@ auto Bip39::words_to_root_pkt(
             return output;
         }();
 
-        OT_ASSERT(keyBytes == key->size());
+        OT_ASSERT(keyBytes == key.size());
 
-        auto v = key->Bytes();
+        auto v = key.Bytes();
         const auto* k{v.data()};
 
         for (auto b = std::next(ent.begin(), 2); b < ent.end(); ++b, ++k) {

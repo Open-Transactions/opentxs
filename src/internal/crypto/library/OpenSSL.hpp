@@ -5,10 +5,10 @@
 
 #pragma once
 
+#include "internal/crypto/library/AsymmetricProvider.hpp"
+#include "internal/crypto/library/HashingProvider.hpp"
 #include "internal/crypto/library/Pbkdf2.hpp"
 #include "internal/crypto/library/Ripemd160.hpp"
-#include "opentxs/crypto/library/AsymmetricProvider.hpp"
-#include "opentxs/crypto/library/HashingProvider.hpp"
 
 namespace opentxs::crypto
 {

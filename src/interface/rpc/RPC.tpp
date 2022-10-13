@@ -11,12 +11,12 @@
 #include <type_traits>
 #include <utility>
 
+#include "internal/core/Armored.hpp"
+#include "internal/core/String.hpp"
 #include "internal/otx/common/Ledger.hpp"
 #include "internal/otx/common/OTTransaction.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/api/session/Factory.hpp"
-#include "opentxs/core/Armored.hpp"
-#include "opentxs/core/String.hpp"
 #include "opentxs/otx/LastReplyStatus.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Pimpl.hpp"

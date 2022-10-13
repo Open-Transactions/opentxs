@@ -20,10 +20,10 @@ extern "C" {
 #include <memory>
 #include <stdexcept>
 
+#include "internal/core/String.hpp"
 #include "internal/crypto/library/Factory.hpp"
+#include "internal/crypto/library/HashingProvider.hpp"
 #include "internal/util/LogMacros.hpp"
-#include "opentxs/core/String.hpp"
-#include "opentxs/crypto/library/HashingProvider.hpp"
 #include "opentxs/util/Log.hpp"
 
 namespace opentxs::factory

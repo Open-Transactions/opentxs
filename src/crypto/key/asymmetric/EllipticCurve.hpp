@@ -8,6 +8,7 @@
 #include <memory>
 
 #include "crypto/key/asymmetric/Asymmetric.hpp"
+#include "internal/crypto/library/EcdsaProvider.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "opentxs/core/Secret.hpp"
 #include "opentxs/crypto/HashType.hpp"
@@ -17,7 +18,6 @@
 #include "opentxs/crypto/key/Types.hpp"
 #include "opentxs/crypto/key/asymmetric/Algorithm.hpp"
 #include "opentxs/crypto/key/asymmetric/Role.hpp"
-#include "opentxs/crypto/library/EcdsaProvider.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
@@ -142,7 +142,7 @@ protected:
         const VersionNumber version) noexcept(false);
     EllipticCurve(const EllipticCurve&) noexcept;
     EllipticCurve(const EllipticCurve& rhs, const ReadView newPublic) noexcept;
-    EllipticCurve(const EllipticCurve& rhs, OTSecret&& newSecretKey) noexcept;
+    EllipticCurve(const EllipticCurve& rhs, Secret&& newSecretKey) noexcept;
 
 private:
     friend crypto::EcdsaProvider;
@@ -155,7 +155,7 @@ private:
 
     virtual auto replace_public_key(const ReadView newPubkey) const noexcept
         -> std::unique_ptr<EllipticCurve> = 0;
-    virtual auto replace_secret_key(OTSecret&& newSecretKey) const noexcept
+    virtual auto replace_secret_key(Secret&& newSecretKey) const noexcept
         -> std::unique_ptr<EllipticCurve> = 0;
 };
 }  // namespace opentxs::crypto::key::implementation

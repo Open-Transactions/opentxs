@@ -24,7 +24,6 @@ extern "C" {
 #include "opentxs/crypto/SecretStyle.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
-#include "opentxs/util/Pimpl.hpp"
 #include "util/Sodium.hpp"
 
 namespace opentxs::crypto::implementation
@@ -47,9 +46,9 @@ auto Sodium::RandomKeypair(
     const AllocateOutput) const noexcept -> bool
 {
     auto seed = Context().Factory().Secret(0);
-    seed->Randomize(crypto_sign_SEEDBYTES);
+    seed.Randomize(crypto_sign_SEEDBYTES);
 
-    return sodium::ExpandSeed(seed->Bytes(), privateKey, publicKey);
+    return sodium::ExpandSeed(seed.Bytes(), privateKey, publicKey);
 }
 
 auto Sodium::ScalarAdd(
@@ -153,7 +152,7 @@ auto Sodium::SharedSecret(
     }
 
     auto privateEd = Context().Factory().Secret(0);
-    auto privateBytes = privateEd->WriteInto(Secret::Mode::Mem)(
+    auto privateBytes = privateEd.WriteInto(Secret::Mode::Mem)(
         crypto_scalarmult_curve25519_BYTES);
     auto secretBytes =
         secret.WriteInto(Secret::Mode::Mem)(crypto_scalarmult_curve25519_BYTES);
@@ -183,7 +182,7 @@ auto Sodium::SharedSecret(
         return false;
     }
 
-    OT_ASSERT(crypto_scalarmult_SCALARBYTES == privateEd->size());
+    OT_ASSERT(crypto_scalarmult_SCALARBYTES == privateEd.size());
     OT_ASSERT(crypto_scalarmult_BYTES == publicEd.size());
     OT_ASSERT(crypto_scalarmult_BYTES == secret.size());
 

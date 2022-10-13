@@ -13,7 +13,6 @@
 #include <tuple>
 
 #include "opentxs/Export.hpp"
-#include "opentxs/core/Secret.hpp"
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/crypto/key/Symmetric.hpp"
 #include "opentxs/crypto/key/Types.hpp"
@@ -122,7 +121,7 @@ public:
     virtual auto GetSeed(
         const UnallocatedCString& seedID,
         Bip32Index& index,
-        const PasswordPrompt& reason) const -> OTSecret = 0;
+        const PasswordPrompt& reason) const -> Secret = 0;
     virtual auto GetSeed(
         const identifier::Generic& id,
         const PasswordPrompt& reason) const noexcept

@@ -37,7 +37,7 @@
 #include "opentxs/crypto/key/EllipticCurve.hpp"
 #include "opentxs/crypto/key/asymmetric/Role.hpp"
 #include "opentxs/util/Log.hpp"
-#include "opentxs/util/Pimpl.hpp"
+#include "opentxs/util/PasswordPrompt.hpp"
 
 namespace opentxs::blockchain::crypto::implementation
 {

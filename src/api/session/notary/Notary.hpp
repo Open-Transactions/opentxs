@@ -133,7 +133,7 @@ public:
     ~Notary() final;
 
 private:
-    const OTPasswordPrompt reason_;
+    const PasswordPrompt reason_;
     boost::shared_ptr<notary::Shared> shared_p_;
     std::unique_ptr<opentxs::server::Server> server_p_;
     std::unique_ptr<opentxs::server::MessageProcessor> message_processor_p_;

@@ -10,14 +10,14 @@
 #include <cstring>
 #include <filesystem>
 
+#include "internal/core/Armored.hpp"
+#include "internal/core/String.hpp"
 #include "internal/otx/common/Contract.hpp"
 #include "internal/otx/common/StringXML.hpp"
 #include "internal/otx/common/XML.hpp"
 #include "internal/otx/common/util/Tag.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/api/session/Session.hpp"
-#include "opentxs/core/Armored.hpp"
-#include "opentxs/core/String.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Pimpl.hpp"

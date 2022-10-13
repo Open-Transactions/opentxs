@@ -10,12 +10,12 @@
 #include <memory>
 #include <utility>
 
+#include "internal/core/String.hpp"
 #include "internal/identity/Authority.hpp"
 #include "internal/identity/Types.hpp"
 #include "internal/identity/credential/Credential.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/Types.hpp"
-#include "opentxs/core/String.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/crypto/HashType.hpp"
 #include "opentxs/crypto/Parameters.hpp"

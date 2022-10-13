@@ -9,7 +9,6 @@
 #include <string_view>
 
 #include "opentxs/Export.hpp"
-#include "opentxs/core/String.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 
@@ -53,9 +52,6 @@ public:
     OPENTXS_NO_EXPORT virtual auto InternalEncode() const noexcept
         -> const internal::Encode& = 0;
     virtual auto IsBase62(const UnallocatedCString& str) const -> bool = 0;
-    virtual auto Nonce(const std::uint32_t size) const -> OTString = 0;
-    virtual auto Nonce(const std::uint32_t size, Data& rawOutput) const
-        -> OTString = 0;
     virtual auto RandomFilename() const -> UnallocatedCString = 0;
     virtual auto SanatizeBase58(std::string_view input) const
         -> UnallocatedCString = 0;

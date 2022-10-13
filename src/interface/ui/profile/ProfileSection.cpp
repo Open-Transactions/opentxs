@@ -17,6 +17,7 @@
 #include "interface/ui/base/Combined.hpp"
 #include "interface/ui/base/Widget.hpp"
 #include "internal/identity/wot/claim/Types.hpp"
+#include "internal/interface/ui/ProfileSection.hpp"
 #include "internal/interface/ui/UI.hpp"
 #include "internal/serialization/protobuf/verify/VerifyContacts.hpp"
 #include "internal/util/LogMacros.hpp"
@@ -25,7 +26,6 @@
 #include "opentxs/identity/wot/claim/Group.hpp"
 #include "opentxs/identity/wot/claim/Section.hpp"
 #include "opentxs/identity/wot/claim/SectionType.hpp"
-#include "opentxs/interface/ui/ProfileSection.hpp"
 #include "opentxs/util/Container.hpp"
 
 template class opentxs::SharedPimpl<opentxs::ui::ProfileSection>;

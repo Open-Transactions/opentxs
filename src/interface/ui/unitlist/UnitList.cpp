@@ -13,6 +13,8 @@
 
 #include "internal/api/crypto/blockchain/Types.hpp"
 #include "internal/identity/wot/claim/Types.hpp"
+#include "internal/network/zeromq/Context.hpp"
+#include "internal/network/zeromq/socket/Types.hpp"
 #include "internal/serialization/protobuf/verify/VerifyContacts.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/api/crypto/Blockchain.hpp"
@@ -34,7 +36,6 @@
 #include "opentxs/network/zeromq/message/FrameSection.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/network/zeromq/message/Message.tpp"
-#include "opentxs/network/zeromq/socket/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 
@@ -64,7 +65,7 @@ UnitList::UnitList(
     , api_(api)
     , blockchain_balance_cb_(zmq::ListenCallback::Factory(
           [this](const auto& in) { process_blockchain_balance(in); }))
-    , blockchain_balance_(api.Network().ZeroMQ().DealerSocket(
+    , blockchain_balance_(api.Network().ZeroMQ().Internal().DealerSocket(
           blockchain_balance_cb_,
           zmq::socket::Direction::Connect,
           "UnitList"))

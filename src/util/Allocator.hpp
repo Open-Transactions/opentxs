@@ -5,80 +5,33 @@
 
 #pragma once
 
-extern "C" {
-#include <sodium.h>
-}
+#include "opentxs/util/Allocator.hpp"
 
 #include <cstddef>
-#include <cstdlib>
-#include <limits>
 
-#include "opentxs/util/Log.hpp"
-
-namespace opentxs
+namespace opentxs::alloc
 {
-template <typename T>
-struct SecureAllocator {
-    using value_type = T;
+class Secure final : public Resource
+{
+public:
+    static auto get() noexcept -> Resource*;
 
-    SecureAllocator()
-    {
-        if (0 > ::sodium_init()) { throw std::bad_alloc(); }
-    }
+    auto do_allocate(std::size_t bytes, std::size_t alignment) -> void* final;
+    auto do_deallocate(void* p, std::size_t size, std::size_t alignment)
+        -> void final;
+    auto do_is_equal(const Resource& other) const noexcept -> bool final;
 
-    template <class U>
-    SecureAllocator(const SecureAllocator<U>&)
-    {
-        if (0 > ::sodium_init()) { throw std::bad_alloc(); }
-    }
+    Secure() = delete;
+    Secure(const Secure&) = delete;
+    Secure(Secure&&) = delete;
+    auto operator=(const Secure&) -> Secure& = delete;
+    auto operator=(Secure&&) -> Secure& = delete;
 
-    auto allocate(const std::size_t items) -> value_type*
-    {
-        constexpr auto limit =
-            std::numeric_limits<std::size_t>::max() / sizeof(value_type);
+    ~Secure() final = default;
 
-        if (items > limit) { throw std::bad_alloc(); }
+private:
+    Resource* upstream_;
 
-        const auto bytes = items * sizeof(value_type);
-        auto* output = std::malloc(bytes);
-
-        if (nullptr == output) { throw std::bad_alloc(); }
-
-        static auto warn{false};
-
-        if (0 > ::sodium_mlock(output, bytes)) {
-            if (false == warn) {
-                LogVerbose()("Unable to lock memory. Passwords and/or secret "
-                             "keys may be swapped to disk")
-                    .Flush();
-            }
-
-            warn = true;
-        } else {
-            warn = false;
-        }
-
-        return static_cast<value_type*>(output);
-    }
-    auto deallocate(value_type* in, const std::size_t bytes) -> void
-    {
-        ::sodium_munlock(in, bytes);
-        std::free(in);
-    }
+    Secure(Resource* upstream) noexcept;
 };
-
-template <typename T, typename U>
-auto operator==(const SecureAllocator<T>&, const SecureAllocator<U>&) noexcept
-    -> bool
-{
-    return true;
-}
-
-template <typename T, typename U>
-auto operator!=(
-    const SecureAllocator<T>& lhs,
-    const SecureAllocator<U>& rhs) noexcept -> bool
-{
-    return !(lhs == rhs);
-}
-}  // namespace opentxs
+}  // namespace opentxs::alloc

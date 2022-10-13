@@ -10,13 +10,13 @@
 #include <memory>
 
 #include "internal/api/session/Wallet.hpp"
+#include "internal/core/String.hpp"
 #include "internal/otx/Types.hpp"
 #include "internal/otx/common/Account.hpp"
 #include "internal/otx/common/Contract.hpp"
 #include "internal/otx/common/OTTransactionType.hpp"
 #include "internal/otx/common/cron/OTCronItem.hpp"
 #include "internal/otx/common/script/OTScriptable.hpp"
-#include "opentxs/core/String.hpp"
 #include "opentxs/identity/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Time.hpp"

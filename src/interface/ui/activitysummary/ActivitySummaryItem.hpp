@@ -13,13 +13,13 @@
 #include <tuple>
 
 #include "interface/ui/base/Row.hpp"
+#include "internal/interface/ui/ActivitySummaryItem.hpp"
 #include "internal/interface/ui/UI.hpp"
+#include "internal/util/SharedPimpl.hpp"
 #include "internal/util/UniqueQueue.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
-#include "opentxs/interface/ui/ActivitySummaryItem.hpp"
 #include "opentxs/otx/client/Types.hpp"
 #include "opentxs/util/Container.hpp"
-#include "opentxs/util/SharedPimpl.hpp"
 #include "opentxs/util/Time.hpp"
 
 class QVariant;

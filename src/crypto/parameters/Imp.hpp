@@ -49,7 +49,7 @@ public:
     crypto::SeedStyle seed_style_;
     crypto::Language seed_language_;
     crypto::SeedStrength seed_strength_;
-    OTSecret entropy_;
+    Secret entropy_;
     UnallocatedCString seed_;
     Bip32Index nym_;
     Bip32Index credset_;

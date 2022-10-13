@@ -10,10 +10,11 @@
 #include <cstdint>
 #include <exception>
 
+#include "internal/api/Settings.hpp"
+#include "internal/core/String.hpp"
 #include "internal/otx/common/cron/OTCron.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/api/Settings.hpp"
-#include "opentxs/core/String.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Pimpl.hpp"
@@ -40,7 +41,7 @@ auto ConfigLoader::load(
         {
             bool bIsNewKey = false;
             auto strValue = String::Factory();
-            config.CheckSet_str(
+            config.Internal().CheckSet_str(
                 String::Factory("wallet"),
                 String::Factory("wallet_filename"),
                 String::Factory(SERVER_WALLET_FILENAME),
@@ -59,7 +60,7 @@ auto ConfigLoader::load(
                                     "trades and smart contract clauses)\n";
 
             bool b_SectionExist = false;
-            config.CheckSetSection(
+            config.Internal().CheckSetSection(
                 String::Factory("cron"),
                 String::Factory(szComment),
                 b_SectionExist);
@@ -74,7 +75,7 @@ auto ConfigLoader::load(
 
             bool bIsNewKey = false;
             std::int64_t lValue = 0;
-            config.CheckSet_long(
+            config.Internal().CheckSet_long(
                 String::Factory("cron"),
                 String::Factory("refill_trans_number"),
                 500,
@@ -91,7 +92,7 @@ auto ConfigLoader::load(
 
             bool bIsNewKey = false;
             std::int64_t lValue = 0;
-            config.CheckSet_long(
+            config.Internal().CheckSet_long(
                 String::Factory("cron"),
                 String::Factory("ms_between_cron_beats"),
                 10000,
@@ -108,7 +109,7 @@ auto ConfigLoader::load(
 
             bool bIsNewKey = false;
             std::int64_t lValue = 0;
-            config.CheckSet_long(
+            config.Internal().CheckSet_long(
                 String::Factory("cron"),
                 String::Factory("max_items_per_nym"),
                 10,
@@ -123,7 +124,7 @@ auto ConfigLoader::load(
             const char* szComment = ";; HEARTBEAT\n";
 
             bool bSectionExist = false;
-            config.CheckSetSection(
+            config.Internal().CheckSetSection(
                 String::Factory("heartbeat"),
                 String::Factory(szComment),
                 bSectionExist);
@@ -135,7 +136,7 @@ auto ConfigLoader::load(
 
             bool bIsNewKey = false;
             std::int64_t lValue = 0;
-            config.CheckSet_long(
+            config.Internal().CheckSet_long(
                 String::Factory("heartbeat"),
                 String::Factory("no_requests"),
                 10,
@@ -151,7 +152,7 @@ auto ConfigLoader::load(
 
             bool bIsNewKey = false;
             std::int64_t lValue = 0;
-            config.CheckSet_long(
+            config.Internal().CheckSet_long(
                 String::Factory("heartbeat"),
                 String::Factory("ms_between_beats"),
                 100,
@@ -170,7 +171,7 @@ auto ConfigLoader::load(
                 "override_nym_id will STILL be able to do those functions.)\n";
 
             bool bSectionExists = false;
-            config.CheckSetSection(
+            config.Internal().CheckSetSection(
                 String::Factory("permissions"),
                 String::Factory(szComment),
                 bSectionExists);
@@ -186,14 +187,14 @@ auto ConfigLoader::load(
             bool bIsNewKey = false;
 
             if (nullptr == szValue) {
-                config.CheckSet_str(
+                config.Internal().CheckSet_str(
                     String::Factory("permissions"),
                     String::Factory("override_nym_id"),
                     String::Factory(),
                     strValue,
                     bIsNewKey);
             } else {
-                config.CheckSet_str(
+                config.Internal().CheckSet_str(
                     String::Factory("permissions"),
                     String::Factory("override_nym_id"),
                     String::Factory(szValue),
@@ -212,7 +213,7 @@ auto ConfigLoader::load(
 
             bool bIsNewKey = false;
             std::int64_t lValue = 0;
-            config.CheckSet_long(
+            config.Internal().CheckSet_long(
                 String::Factory("markets"),
                 String::Factory("minimum_scale"),
                 ServerSettings::GetMinMarketScale(),
@@ -224,184 +225,184 @@ auto ConfigLoader::load(
 
         // (#defined right above this function.)
         //
-        config.SetOption_bool(
+        config.Internal().SetOption_bool(
             String::Factory("permissions"),
             String::Factory("admin_usage_credits"),
             ServerSettings::_admin_usage_credits);
-        config.SetOption_bool(
+        config.Internal().SetOption_bool(
             String::Factory("permissions"),
             String::Factory("admin_server_locked"),
             ServerSettings::_admin_server_locked);
-        config.SetOption_bool(
+        config.Internal().SetOption_bool(
             String::Factory("permissions"),
             String::Factory("cmd_usage_credits"),
             ServerSettings::_cmd_usage_credits);
-        config.SetOption_bool(
+        config.Internal().SetOption_bool(
             String::Factory("permissions"),
             String::Factory("cmd_issue_asset"),
             ServerSettings::_cmd_issue_asset);
-        config.SetOption_bool(
+        config.Internal().SetOption_bool(
             String::Factory("permissions"),
             String::Factory("cmd_get_contract"),
             ServerSettings::_cmd_get_contract);
-        config.SetOption_bool(
+        config.Internal().SetOption_bool(
             String::Factory("permissions"),
             String::Factory("cmd_check_notary_id"),
             ServerSettings::_cmd_check_notary_id);
-        config.SetOption_bool(
+        config.Internal().SetOption_bool(
             String::Factory("permissions"),
             String::Factory("cmd_create_user_acct"),
             ServerSettings::_cmd_create_user_acct);
-        config.SetOption_bool(
+        config.Internal().SetOption_bool(
             String::Factory("permissions"),
             String::Factory("cmd_del_user_acct"),
             ServerSettings::_cmd_del_user_acct);
-        config.SetOption_bool(
+        config.Internal().SetOption_bool(
             String::Factory("permissions"),
             String::Factory("cmd_check_nym"),
             ServerSettings::_cmd_check_nym);
-        config.SetOption_bool(
+        config.Internal().SetOption_bool(
             String::Factory("permissions"),
             String::Factory("cmd_get_requestnumber"),
             ServerSettings::_cmd_get_requestnumber);
-        config.SetOption_bool(
+        config.Internal().SetOption_bool(
             String::Factory("permissions"),
             String::Factory("cmd_get_trans_nums"),
             ServerSettings::_cmd_get_trans_nums);
-        config.SetOption_bool(
+        config.Internal().SetOption_bool(
             String::Factory("permissions"),
             String::Factory("cmd_send_message"),
             ServerSettings::_cmd_send_message);
-        config.SetOption_bool(
+        config.Internal().SetOption_bool(
             String::Factory("permissions"),
             String::Factory("cmd_get_nymbox"),
             ServerSettings::_cmd_get_nymbox);
-        config.SetOption_bool(
+        config.Internal().SetOption_bool(
             String::Factory("permissions"),
             String::Factory("cmd_process_nymbox"),
             ServerSettings::_cmd_process_nymbox);
-        config.SetOption_bool(
+        config.Internal().SetOption_bool(
             String::Factory("permissions"),
             String::Factory("cmd_create_asset_acct"),
             ServerSettings::_cmd_create_asset_acct);
-        config.SetOption_bool(
+        config.Internal().SetOption_bool(
             String::Factory("permissions"),
             String::Factory("cmd_del_asset_acct"),
             ServerSettings::_cmd_del_asset_acct);
-        config.SetOption_bool(
+        config.Internal().SetOption_bool(
             String::Factory("permissions"),
             String::Factory("cmd_get_acct"),
             ServerSettings::_cmd_get_acct);
-        config.SetOption_bool(
+        config.Internal().SetOption_bool(
             String::Factory("permissions"),
             String::Factory("cmd_get_inbox"),
             ServerSettings::_cmd_get_inbox);
-        config.SetOption_bool(
+        config.Internal().SetOption_bool(
             String::Factory("permissions"),
             String::Factory("cmd_get_outbox"),
             ServerSettings::_cmd_get_outbox);
-        config.SetOption_bool(
+        config.Internal().SetOption_bool(
             String::Factory("permissions"),
             String::Factory("cmd_process_inbox"),
             ServerSettings::_cmd_process_inbox);
-        config.SetOption_bool(
+        config.Internal().SetOption_bool(
             String::Factory("permissions"),
             String::Factory("cmd_issue_basket"),
             ServerSettings::_cmd_issue_basket);
-        config.SetOption_bool(
+        config.Internal().SetOption_bool(
             String::Factory("permissions"),
             String::Factory("transact_exchange_basket"),
             ServerSettings::_transact_exchange_basket);
-        config.SetOption_bool(
+        config.Internal().SetOption_bool(
             String::Factory("permissions"),
             String::Factory("cmd_notarize_transaction"),
             ServerSettings::_cmd_notarize_transaction);
-        config.SetOption_bool(
+        config.Internal().SetOption_bool(
             String::Factory("permissions"),
             String::Factory("transact_process_inbox"),
             ServerSettings::_transact_process_inbox);
-        config.SetOption_bool(
+        config.Internal().SetOption_bool(
             String::Factory("permissions"),
             String::Factory("transact_transfer"),
             ServerSettings::_transact_transfer);
-        config.SetOption_bool(
+        config.Internal().SetOption_bool(
             String::Factory("permissions"),
             String::Factory("transact_withdrawal"),
             ServerSettings::_transact_withdrawal);
-        config.SetOption_bool(
+        config.Internal().SetOption_bool(
             String::Factory("permissions"),
             String::Factory("transact_deposit"),
             ServerSettings::_transact_deposit);
-        config.SetOption_bool(
+        config.Internal().SetOption_bool(
             String::Factory("permissions"),
             String::Factory("transact_withdraw_voucher"),
             ServerSettings::_transact_withdraw_voucher);
-        config.SetOption_bool(
+        config.Internal().SetOption_bool(
             String::Factory("permissions"),
             String::Factory("transact_pay_dividend"),
             ServerSettings::_transact_pay_dividend);
-        config.SetOption_bool(
+        config.Internal().SetOption_bool(
             String::Factory("permissions"),
             String::Factory("transact_deposit_cheque"),
             ServerSettings::_transact_deposit_cheque);
-        config.SetOption_bool(
+        config.Internal().SetOption_bool(
             String::Factory("permissions"),
             String::Factory("cmd_get_mint"),
             ServerSettings::_cmd_get_mint);
-        config.SetOption_bool(
+        config.Internal().SetOption_bool(
             String::Factory("permissions"),
             String::Factory("transact_withdraw_cash"),
             ServerSettings::_transact_withdraw_cash);
-        config.SetOption_bool(
+        config.Internal().SetOption_bool(
             String::Factory("permissions"),
             String::Factory("transact_deposit_cash"),
             ServerSettings::_transact_deposit_cash);
-        config.SetOption_bool(
+        config.Internal().SetOption_bool(
             String::Factory("permissions"),
             String::Factory("cmd_get_market_list"),
             ServerSettings::_cmd_get_market_list);
-        config.SetOption_bool(
+        config.Internal().SetOption_bool(
             String::Factory("permissions"),
             String::Factory("cmd_get_market_offers"),
             ServerSettings::_cmd_get_market_offers);
-        config.SetOption_bool(
+        config.Internal().SetOption_bool(
             String::Factory("permissions"),
             String::Factory("cmd_get_market_recent_trades"),
             ServerSettings::_cmd_get_market_recent_trades);
-        config.SetOption_bool(
+        config.Internal().SetOption_bool(
             String::Factory("permissions"),
             String::Factory("cmd_get_nym_market_offers"),
             ServerSettings::_cmd_get_nym_market_offers);
-        config.SetOption_bool(
+        config.Internal().SetOption_bool(
             String::Factory("permissions"),
             String::Factory("transact_market_offer"),
             ServerSettings::_transact_market_offer);
-        config.SetOption_bool(
+        config.Internal().SetOption_bool(
             String::Factory("permissions"),
             String::Factory("transact_payment_plan"),
             ServerSettings::_transact_payment_plan);
-        config.SetOption_bool(
+        config.Internal().SetOption_bool(
             String::Factory("permissions"),
             String::Factory("transact_cancel_cron_item"),
             ServerSettings::_transact_cancel_cron_item);
-        config.SetOption_bool(
+        config.Internal().SetOption_bool(
             String::Factory("permissions"),
             String::Factory("transact_smart_contract"),
             ServerSettings::_transact_smart_contract);
-        config.SetOption_bool(
+        config.Internal().SetOption_bool(
             String::Factory("permissions"),
             String::Factory("cmd_trigger_clause"),
             ServerSettings::_cmd_trigger_clause);
-        config.SetOption_bool(
+        config.Internal().SetOption_bool(
             String::Factory("permissions"),
             String::Factory("cmd_register_contract"),
             ServerSettings::_cmd_register_contract);
-        config.SetOption_bool(
+        config.Internal().SetOption_bool(
             String::Factory("permissions"),
             String::Factory("cmd_request_admin"),
             ServerSettings::_cmd_request_admin);
         // Done Loading... Lets save any changes...
-        if (!config.Save()) {
+        if (!config.Internal().Save()) {
             LogError()(OT_PRETTY_STATIC(ConfigLoader))(
                 "Error! Unable to save updated Config!!!")
                 .Flush();

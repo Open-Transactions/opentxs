@@ -27,7 +27,7 @@ public:
     static ot::UnallocatedSet<ot::UnallocatedCString> generated_seeds_;
 
     const ot::api::session::Client& api_;
-    const ot::OTPasswordPrompt reason_;
+    const ot::PasswordPrompt reason_;
     using Languages =
         ot::UnallocatedMap<ot::crypto::Language, ot::UnallocatedCString>;
     using Strengths =

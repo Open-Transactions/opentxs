@@ -92,7 +92,7 @@ public:
         const crypto::EcdsaProvider& ecdsa,
         const proto::AsymmetricKey& serializedKey) noexcept(false);
     Ed25519(const Ed25519& rhs, const ReadView newPublic) noexcept;
-    Ed25519(const Ed25519& rhs, OTSecret&& newSecretKey) noexcept;
+    Ed25519(const Ed25519& rhs, Secret&& newSecretKey) noexcept;
     Ed25519() = delete;
     Ed25519(const Ed25519&) noexcept;
     Ed25519(Ed25519&&) = delete;
@@ -116,7 +116,7 @@ private:
     {
         return std::make_unique<Ed25519>(*this, newPubkey);
     }
-    auto replace_secret_key(OTSecret&& newSecretKey) const noexcept
+    auto replace_secret_key(Secret&& newSecretKey) const noexcept
         -> std::unique_ptr<EllipticCurve> final
     {
         return std::make_unique<Ed25519>(*this, std::move(newSecretKey));

@@ -8,8 +8,8 @@
 #include <irrxml/irrXML.hpp>
 #include <cstdint>
 
+#include "internal/core/String.hpp"
 #include "internal/otx/common/Contract.hpp"
-#include "opentxs/core/String.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs

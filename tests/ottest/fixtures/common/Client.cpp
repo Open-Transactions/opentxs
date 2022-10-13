@@ -9,7 +9,10 @@
 #include <memory>
 #include <utility>
 
+#include "internal/api/session/Wallet.hpp"
+#include "internal/core/contract/ServerContract.hpp"
 #include "internal/util/LogMacros.hpp"
+#include "internal/util/SharedPimpl.hpp"
 #include "ottest/fixtures/common/User.hpp"
 
 namespace ottest
@@ -66,13 +69,13 @@ auto Client_fixture::ImportServerContract(
     const ot::api::session::Client& to) const noexcept -> bool
 {
     const auto& id = from.ID();
-    const auto server = from.Wallet().Server(id);
+    const auto server = from.Wallet().Internal().Server(id);
 
     if (0u == server->Version()) { return false; }
 
     auto bytes = ot::Space{};
     if (false == server->Serialize(ot::writer(bytes), true)) { return false; }
-    const auto client = to.Wallet().Server(ot::reader(bytes));
+    const auto client = to.Wallet().Internal().Server(ot::reader(bytes));
 
     if (0u == client->Version()) { return false; }
 
@@ -88,7 +91,7 @@ auto Client_fixture::SetIntroductionServer(
     if (false == ImportServerContract(to, on)) { return false; }
 
     const auto clientID =
-        on.OTX().SetIntroductionServer(on.Wallet().Server(id));
+        on.OTX().SetIntroductionServer(on.Wallet().Internal().Server(id));
 
     return id == clientID;
 }

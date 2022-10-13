@@ -8,12 +8,12 @@
 #include <memory>
 
 #include "internal/api/session/Wallet.hpp"
+#include "internal/network/zeromq/socket/Push.hpp"
 #include "internal/otx/common/Account.hpp"
 #include "internal/otx/common/Cheque.hpp"
 #include "internal/otx/common/Item.hpp"
 #include "internal/otx/common/Ledger.hpp"
 #include "internal/otx/common/OTTransaction.hpp"
-#include "opentxs/network/zeromq/socket/Push.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs

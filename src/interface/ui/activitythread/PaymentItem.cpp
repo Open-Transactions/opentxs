@@ -13,6 +13,8 @@
 #include "interface/ui/activitythread/ActivityThreadItem.hpp"
 #include "internal/api/session/Activity.hpp"
 #include "internal/api/session/FactoryAPI.hpp"
+#include "internal/core/String.hpp"
+#include "internal/core/contract/Unit.hpp"
 #include "internal/otx/client/OTPayment.hpp"
 #include "internal/otx/common/Cheque.hpp"
 #include "internal/util/LogMacros.hpp"
@@ -22,13 +24,12 @@
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/OTX.hpp"
-#include "opentxs/core/String.hpp"
-#include "opentxs/core/contract/Unit.hpp"
 #include "opentxs/core/display/Definition.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/otx/client/Types.hpp"
 #include "opentxs/util/Log.hpp"
+#include "opentxs/util/PasswordPrompt.hpp"  // IWYU pragma: keep
 #include "opentxs/util/Pimpl.hpp"
 
 namespace opentxs::factory

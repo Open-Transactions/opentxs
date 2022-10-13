@@ -13,15 +13,16 @@
 #include <utility>
 
 #include "internal/api/Factory.hpp"
+#include "internal/network/zeromq/Context.hpp"
+#include "internal/network/zeromq/ListenCallback.hpp"
+#include "internal/network/zeromq/socket/Publish.hpp"
+#include "internal/network/zeromq/socket/Pull.hpp"
+#include "internal/network/zeromq/socket/Types.hpp"
 #include "internal/util/Log.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
-#include "opentxs/network/zeromq/ListenCallback.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
 #include "opentxs/network/zeromq/message/FrameSection.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
-#include "opentxs/network/zeromq/socket/Publish.hpp"
-#include "opentxs/network/zeromq/socket/Pull.hpp"
-#include "opentxs/network/zeromq/socket/Types.hpp"
 #include "opentxs/util/Time.hpp"
 
 namespace zmq = opentxs::network::zeromq;
@@ -42,8 +43,11 @@ namespace opentxs::api::imp
 Log::Log(const zmq::Context& zmq, const UnallocatedCString endpoint)
     : callback_(opentxs::network::zeromq::ListenCallback::Factory(
           [&](auto&& msg) -> void { callback(std::move(msg)); }))
-    , socket_(zmq.PullSocket(callback_, zmq::socket::Direction::Bind, "Logger"))
-    , publish_socket_(zmq.PublishSocket())
+    , socket_(zmq.Internal().PullSocket(
+          callback_,
+          zmq::socket::Direction::Bind,
+          "Logger"))
+    , publish_socket_(zmq.Internal().PublishSocket())
     , publish_{!endpoint.empty()}
 {
     auto rc = socket_->Start(opentxs::internal::Log::Endpoint());

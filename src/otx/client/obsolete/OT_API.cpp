@@ -20,9 +20,13 @@
 
 #include "internal/api/FactoryAPI.hpp"
 #include "internal/api/Legacy.hpp"
+#include "internal/api/Settings.hpp"
 #include "internal/api/session/FactoryAPI.hpp"
 #include "internal/api/session/Session.hpp"
 #include "internal/api/session/Wallet.hpp"
+#include "internal/core/Armored.hpp"
+#include "internal/core/String.hpp"
+#include "internal/core/contract/BasketContract.hpp"
 #include "internal/core/contract/Contract.hpp"
 #include "internal/otx/Types.hpp"
 #include "internal/otx/client/obsolete/OTClient.hpp"
@@ -38,7 +42,10 @@
 #include "internal/otx/common/trade/OTOffer.hpp"
 #include "internal/otx/common/trade/OTTrade.hpp"
 #include "internal/otx/common/transaction/Helpers.hpp"
+#include "internal/otx/consensus/Base.hpp"
 #include "internal/otx/consensus/Consensus.hpp"
+#include "internal/otx/consensus/ManagedNumber.hpp"
+#include "internal/otx/consensus/Server.hpp"
 #include "internal/otx/smartcontract/OTAgent.hpp"
 #include "internal/otx/smartcontract/OTBylaw.hpp"
 #include "internal/otx/smartcontract/OTParty.hpp"
@@ -49,6 +56,7 @@
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/Mutex.hpp"
 #include "internal/util/Shared.hpp"
+#include "internal/util/SharedPimpl.hpp"
 #include "opentxs/api/Settings.hpp"
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/Crypto.hpp"
@@ -57,11 +65,8 @@
 #include "opentxs/api/session/Storage.hpp"
 #include "opentxs/api/session/Wallet.hpp"
 #include "opentxs/api/session/Workflow.hpp"
-#include "opentxs/core/Armored.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Data.hpp"
-#include "opentxs/core/String.hpp"
-#include "opentxs/core/contract/BasketContract.hpp"
 #include "opentxs/core/contract/UnitType.hpp"
 #include "opentxs/core/display/Definition.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
@@ -71,12 +76,9 @@
 #include "opentxs/identity/Nym.hpp"
 #include "opentxs/identity/Types.hpp"
 #include "opentxs/otx/client/Types.hpp"
-#include "opentxs/otx/consensus/Base.hpp"
-#include "opentxs/otx/consensus/ManagedNumber.hpp"
-#include "opentxs/otx/consensus/Server.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
-#include "opentxs/util/SharedPimpl.hpp"
+#include "opentxs/util/PasswordPrompt.hpp"
 #include "otx/common/OTStorage.hpp"
 
 #define CLIENT_MASTER_KEY_TIMEOUT_DEFAULT 300
@@ -342,7 +344,7 @@ auto OT_API::LoadConfigFile() -> bool
             "while receiving a reply, before it gives up.\n";
 
         bool b_SectionExist = false;
-        api_.Config().CheckSetSection(
+        api_.Config().Internal().CheckSetSection(
             String::Factory("latency"),
             String::Factory(szComment),
             b_SectionExist);
@@ -364,7 +366,7 @@ auto OT_API::LoadConfigFile() -> bool
 
         bool bIsNewKey = false;
         std::int64_t lValue = 0;
-        api_.Config().CheckSet_long(
+        api_.Config().Internal().CheckSet_long(
             String::Factory("security"),
             String::Factory("master_key_timeout"),
             CLIENT_MASTER_KEY_TIMEOUT_DEFAULT,
@@ -375,7 +377,7 @@ auto OT_API::LoadConfigFile() -> bool
     }
 
     // Done Loading... Lets save any changes...
-    if (!api_.Config().Save()) {
+    if (!api_.Config().Internal().Save()) {
         LogError()(OT_PRETTY_CLASS())("Error! Unable to save updated Config!!!")
             .Flush();
         OT_FAIL;
@@ -393,7 +395,7 @@ auto OT_API::IsNym_RegisteredAtServer(
         OT_FAIL;
     }
 
-    auto context = api_.Wallet().ServerContext(NYM_ID, NOTARY_ID);
+    auto context = api_.Wallet().Internal().ServerContext(NYM_ID, NOTARY_ID);
 
     if (context) { return (0 != context->Request()); }
 
@@ -422,7 +424,7 @@ auto OT_API::VerifyAccountReceipt(
     const identifier::Generic& ACCOUNT_ID) const -> bool
 {
     auto reason = api_.Factory().PasswordPrompt(__func__);
-    auto context = api_.Wallet().ServerContext(NYM_ID, NOTARY_ID);
+    auto context = api_.Wallet().Internal().ServerContext(NYM_ID, NOTARY_ID);
 
     if (false == bool(context)) {
         LogError()(OT_PRETTY_CLASS())("Nym ")(NYM_ID)(" is not registered on ")(
@@ -2327,7 +2329,7 @@ auto OT_API::LoadNymbox(
 {
     rLock lock(lock_callback_(
         {NYM_ID.asBase58(api_.Crypto()), NOTARY_ID.asBase58(api_.Crypto())}));
-    auto context = api_.Wallet().ServerContext(NYM_ID, NOTARY_ID);
+    auto context = api_.Wallet().Internal().ServerContext(NYM_ID, NOTARY_ID);
 
     if (false == bool(context)) {
         LogError()(OT_PRETTY_CLASS())("Nym ")(NYM_ID)(" is not registered on ")(
@@ -2520,7 +2522,7 @@ auto OT_API::issueBasket(
     auto [newRequestNumber, message] =
         context.InternalServer().InitializeServerCommand(
             MessageType::issueBasket,
-            api_.Factory().Armored(
+            api_.Factory().InternalSession().Armored(
                 api_.Factory().InternalSession().Data(basket)),
             identifier::Generic{},
             requestNum);
@@ -2566,8 +2568,8 @@ auto OT_API::GenerateBasketExchange(
     auto nym = context.get().Nym();
 
     try {
-        auto contract =
-            api_.Wallet().BasketContract(BASKET_INSTRUMENT_DEFINITION_ID);
+        auto contract = api_.Wallet().Internal().BasketContract(
+            BASKET_INSTRUMENT_DEFINITION_ID);
         // By this point, contract is a good pointer, and is on the wallet. (No
         // need to cleanup.)
         auto account = api_.Wallet().Internal().Account(accountID);
@@ -2666,7 +2668,7 @@ auto OT_API::AddBasketExchangeItem(
     auto nym = context.get().Nym();
 
     try {
-        api_.Wallet().UnitDefinition(INSTRUMENT_DEFINITION_ID);
+        api_.Wallet().Internal().UnitDefinition(INSTRUMENT_DEFINITION_ID);
     } catch (...) {
         return false;
     }
@@ -2865,7 +2867,8 @@ auto OT_API::exchangeBasket(
     const auto& serverID = context.Notary();
 
     try {
-        api_.Wallet().BasketContract(BASKET_INSTRUMENT_DEFINITION_ID);
+        api_.Wallet().Internal().BasketContract(
+            BASKET_INSTRUMENT_DEFINITION_ID);
     } catch (...) {
 
         return output;
@@ -3104,7 +3107,8 @@ auto OT_API::payDividend(
     }
 
     try {
-        api_.Wallet().UnitDefinition(SHARES_INSTRUMENT_DEFINITION_ID);
+        api_.Wallet().Internal().UnitDefinition(
+            SHARES_INSTRUMENT_DEFINITION_ID);
     } catch (...) {
 
         return output;
@@ -3175,7 +3179,8 @@ auto OT_API::payDividend(
         const auto& dividenddefinitionid =
             dividendAccount.get().GetInstrumentDefinitionID();
         const auto unittype =
-            api_.Wallet().CurrencyTypeBasedOnUnitType(dividenddefinitionid);
+            api_.Wallet().Internal().CurrencyTypeBasedOnUnitType(
+                dividenddefinitionid);
         LogError()(OT_PRETTY_CLASS())("Failure: There's not enough (")(
             dividendAccount.get().GetBalance(), unittype)(
             ") in the source account, to cover the total cost of the dividend "
@@ -4389,8 +4394,8 @@ auto OT_API::issueMarketOffer(
     UnallocatedCString offer_type =
         lPriceLimit > 0 ? "limit order" : "market order";
 
-    const auto unittype =
-        api_.Wallet().CurrencyTypeBasedOnUnitType(currencyContractID);
+    const auto unittype = api_.Wallet().Internal().CurrencyTypeBasedOnUnitType(
+        currencyContractID);
     const auto& displaydefinition = display::GetDefinition(unittype);
     if (0 != cStopSign) {
         const auto price = displaydefinition.Format(lActivationPrice);

@@ -21,7 +21,7 @@ public:
     static const bool have_hd_;
 
     const ot::api::session::Client& client_;
-    ot::OTPasswordPrompt reason_;
+    ot::PasswordPrompt reason_;
     const ot::api::Crypto& crypto_;
     const ot::UnallocatedMap<ot::UnallocatedCString, ot::UnallocatedCString>
         base_58_{
@@ -422,7 +422,7 @@ public:
         return true;
     }
 
-    auto get_seed(const ot::UnallocatedCString& hex) const -> ot::OTSecret
+    auto get_seed(const ot::UnallocatedCString& hex) const -> ot::Secret
     {
         auto data = client_.Factory().Data();
         data.DecodeHex(hex);
@@ -441,7 +441,7 @@ public:
 
             const auto seed = client_.Factory().SecretFromBytes(data.Bytes());
             const auto seedID =
-                library.SeedID(seed->Bytes()).asBase58(client_.Crypto());
+                library.SeedID(seed.Bytes()).asBase58(client_.Crypto());
             const auto serialized =
                 library.DeriveKey(ot::crypto::EcdsaCurve::secp256k1, seed, {});
             auto pKey = client_.Crypto().Asymmetric().InstantiateKey(
@@ -490,8 +490,8 @@ public:
 
         output &= library.DeserializePrivate(
             rhs, rNetwork, rDepth, rParent, rIndex, rChainCode, rKey);
-        auto lKeyData = client_.Factory().DataFromBytes(lKey->Bytes());
-        auto rKeyData = client_.Factory().DataFromBytes(rKey->Bytes());
+        auto lKeyData = client_.Factory().DataFromBytes(lKey.Bytes());
+        auto rKeyData = client_.Factory().DataFromBytes(rKey.Bytes());
 
         EXPECT_TRUE(output);
         EXPECT_EQ(lNetwork, rNetwork);
@@ -560,7 +560,7 @@ public:
             for (const auto& testCase : cases) {
                 const auto& [rawPath, expectPub, expectPrv] = testCase;
                 const auto pSeed = get_seed(hex);
-                const auto& seed = pSeed.get();
+                const auto& seed = pSeed;
                 const auto seedID =
                     library.SeedID(seed.Bytes()).asBase58(client_.Crypto());
                 const auto serialized = library.DeriveKey(

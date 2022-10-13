@@ -12,6 +12,7 @@ target_sources(
   opentxs-common
   PRIVATE
     "${opentxs_SOURCE_DIR}/src/internal/crypto/Crypto.hpp"
+    "${opentxs_SOURCE_DIR}/src/internal/crypto/Envelope.hpp"
     "${opentxs_SOURCE_DIR}/src/internal/crypto/Factory.hpp"
     "${opentxs_SOURCE_DIR}/src/internal/crypto/Seed.hpp"
     "Bip39.cpp"
@@ -36,7 +37,6 @@ set(cxx-install-headers
     "${opentxs_SOURCE_DIR}/include/opentxs/crypto/Bip39.hpp"
     "${opentxs_SOURCE_DIR}/include/opentxs/crypto/Bip43Purpose.hpp"
     "${opentxs_SOURCE_DIR}/include/opentxs/crypto/Bip44Type.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/crypto/Envelope.hpp"
     "${opentxs_SOURCE_DIR}/include/opentxs/crypto/HashType.hpp"
     "${opentxs_SOURCE_DIR}/include/opentxs/crypto/Language.hpp"
     "${opentxs_SOURCE_DIR}/include/opentxs/crypto/SecretStyle.hpp"

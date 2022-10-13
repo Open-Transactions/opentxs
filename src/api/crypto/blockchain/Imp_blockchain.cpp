@@ -20,7 +20,9 @@
 #include "internal/api/crypto/blockchain/BalanceOracle.hpp"
 #include "internal/api/network/Blockchain.hpp"
 #include "internal/blockchain/bitcoin/block/Transaction.hpp"
+#include "internal/network/zeromq/Context.hpp"
 #include "internal/network/zeromq/message/Message.hpp"
+#include "internal/network/zeromq/socket/Sender.hpp"  // IWYU pragma: keep
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
@@ -49,7 +51,6 @@
 #include "opentxs/network/zeromq/ZeroMQ.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/network/zeromq/message/Message.tpp"
-#include "opentxs/network/zeromq/socket/Sender.hpp"  // IWYU pragma: keep
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Pimpl.hpp"
@@ -72,7 +73,7 @@ BlockchainImp::BlockchainImp(
     , activity_(activity)
     , key_generated_endpoint_(opentxs::network::zeromq::MakeArbitraryInproc())
     , transaction_updates_([&] {
-        auto out = api_.Network().ZeroMQ().PublishSocket();
+        auto out = api_.Network().ZeroMQ().Internal().PublishSocket();
         const auto listen =
             out->Start(api_.Endpoints().BlockchainTransactions().data());
 
@@ -81,7 +82,7 @@ BlockchainImp::BlockchainImp(
         return out;
     }())
     , key_updates_([&] {
-        auto out = api_.Network().ZeroMQ().PublishSocket();
+        auto out = api_.Network().ZeroMQ().Internal().PublishSocket();
         const auto listen = out->Start(key_generated_endpoint_);
 
         OT_ASSERT(listen);
@@ -89,7 +90,7 @@ BlockchainImp::BlockchainImp(
         return out;
     }())
     , scan_updates_([&] {
-        auto out = api_.Network().ZeroMQ().PublishSocket();
+        auto out = api_.Network().ZeroMQ().Internal().PublishSocket();
         const auto listen =
             out->Start(api_.Endpoints().BlockchainScanProgress().data());
 
@@ -98,7 +99,7 @@ BlockchainImp::BlockchainImp(
         return out;
     }())
     , new_blockchain_accounts_([&] {
-        auto out = api_.Network().ZeroMQ().PublishSocket();
+        auto out = api_.Network().ZeroMQ().Internal().PublishSocket();
         const auto listen =
             out->Start(api_.Endpoints().BlockchainAccountCreated().data());
 

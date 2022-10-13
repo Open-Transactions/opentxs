@@ -16,6 +16,19 @@
 #include <UnitDefinition.pb.h>
 #include <cstdint>
 
+#include "internal/core/contract/ServerContract.hpp"
+#include "internal/core/contract/Unit.hpp"
+#include "internal/core/contract/peer/BailmentNotice.hpp"
+#include "internal/core/contract/peer/BailmentReply.hpp"
+#include "internal/core/contract/peer/BailmentRequest.hpp"
+#include "internal/core/contract/peer/ConnectionReply.hpp"
+#include "internal/core/contract/peer/ConnectionRequest.hpp"
+#include "internal/core/contract/peer/NoticeAcknowledgement.hpp"
+#include "internal/core/contract/peer/OutBailmentReply.hpp"
+#include "internal/core/contract/peer/OutBailmentRequest.hpp"
+#include "internal/core/contract/peer/PeerReply.hpp"
+#include "internal/core/contract/peer/PeerRequest.hpp"
+#include "internal/core/contract/peer/StoreSecret.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/serialization/protobuf/Proto.tpp"
 #include "opentxs/api/session/Factory.hpp"
@@ -24,22 +37,9 @@
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Secret.hpp"
 #include "opentxs/core/Types.hpp"
-#include "opentxs/core/contract/ServerContract.hpp"
 #include "opentxs/core/contract/Signable.hpp"
 #include "opentxs/core/contract/Types.hpp"
-#include "opentxs/core/contract/Unit.hpp"
-#include "opentxs/core/contract/peer/BailmentNotice.hpp"
-#include "opentxs/core/contract/peer/BailmentReply.hpp"
-#include "opentxs/core/contract/peer/BailmentRequest.hpp"
-#include "opentxs/core/contract/peer/ConnectionReply.hpp"
-#include "opentxs/core/contract/peer/ConnectionRequest.hpp"
-#include "opentxs/core/contract/peer/NoticeAcknowledgement.hpp"
-#include "opentxs/core/contract/peer/OutBailmentReply.hpp"
-#include "opentxs/core/contract/peer/OutBailmentRequest.hpp"
-#include "opentxs/core/contract/peer/PeerReply.hpp"
-#include "opentxs/core/contract/peer/PeerRequest.hpp"
 #include "opentxs/core/contract/peer/PeerRequestType.hpp"
-#include "opentxs/core/contract/peer/StoreSecret.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
@@ -205,7 +205,7 @@ struct Server final : virtual public opentxs::contract::Server,
         -> bool final;
     auto Statistics(String&) const -> bool final { return {}; }
     auto TransportKey() const -> const Data& final { return id_; }
-    auto TransportKey(Data&, const PasswordPrompt&) const -> OTSecret final
+    auto TransportKey(Data&, const PasswordPrompt&) const -> Secret final
     {
         return api_.Factory().Secret(0);
     }

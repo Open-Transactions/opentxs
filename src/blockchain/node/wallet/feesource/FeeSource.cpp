@@ -15,8 +15,10 @@
 #include "internal/api/session/Session.hpp"
 #include "internal/blockchain/node/Endpoints.hpp"
 #include "internal/blockchain/node/Manager.hpp"
+#include "internal/network/zeromq/Pipeline.hpp"
 #include "internal/network/zeromq/socket/Pipeline.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
+#include "internal/network/zeromq/socket/SocketType.hpp"  // IWYU pragma: keep
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/api/network/Asio.hpp"
 #include "opentxs/api/network/Network.hpp"
@@ -26,10 +28,8 @@
 #include "opentxs/blockchain/node/Manager.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/core/display/Scale.hpp"
-#include "opentxs/network/zeromq/Pipeline.hpp"
 #include "opentxs/network/zeromq/ZeroMQ.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
-#include "opentxs/network/zeromq/socket/SocketType.hpp"  // IWYU pragma: keep
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Options.hpp"
 #include "opentxs/util/WorkType.hpp"

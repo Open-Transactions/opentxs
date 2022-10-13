@@ -14,6 +14,8 @@
 #include <tuple>
 #include <utility>
 
+#include "internal/api/session/UI.hpp"
+#include "internal/interface/ui/AccountActivity.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "ottest/fixtures/blockchain/Common.hpp"
 #include "ottest/fixtures/blockchain/ScanListener.hpp"
@@ -740,7 +742,7 @@ TEST_F(Regtest_fixture_hd, spend)
     ASSERT_TRUE(handle);
 
     const auto& network = handle.get();
-    const auto& widget = client_1_.UI().AccountActivity(
+    const auto& widget = client_1_.UI().Internal().AccountActivity(
         alice_.nym_id_, SendHD().Parent().AccountID());
     constexpr auto sendAmount{"14 units"};
     constexpr auto address{"mipcBbFg9gMiCh81Kj8tqqdgoZub1ZJRfn"};

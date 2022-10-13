@@ -10,11 +10,11 @@
 #include <memory>
 #include <optional>
 
+#include "internal/crypto/Envelope.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/core/Secret.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
 #include "opentxs/core/identifier/UnitDefinition.hpp"
-#include "opentxs/crypto/Envelope.hpp"
 #include "opentxs/crypto/key/Symmetric.hpp"
 #include "opentxs/crypto/key/symmetric/Algorithm.hpp"
 #include "opentxs/otx/blind/CashType.hpp"
@@ -135,7 +135,7 @@ public:
         const identifier::Notary& server,
         const blind::CashType type,
         const Mint& mint,
-        OTSecret&& secondaryKeyPassword,
+        Secret&& secondaryKeyPassword,
         std::unique_ptr<const OTSymmetricKey> secondaryKey,
         std::unique_ptr<const OTEnvelope> secondaryEncrypted) noexcept;
     Purse(
@@ -158,7 +158,7 @@ public:
         const UnallocatedVector<proto::Envelope>& primaryPasswords,
         const std::shared_ptr<const OTSymmetricKey> secondaryKey,
         const std::shared_ptr<const OTEnvelope> secondaryEncrypted,
-        std::optional<OTSecret> secondaryKeyPassword) noexcept;
+        std::optional<Secret> secondaryKeyPassword) noexcept;
     Purse(const api::Session& api, const Purse& owner) noexcept;
     Purse(const api::Session& api, const proto::Purse& serialized) noexcept;
     Purse() = delete;
@@ -183,10 +183,10 @@ private:
     Time earliest_valid_to_;
     UnallocatedVector<blind::Token> tokens_;
     mutable bool unlocked_;
-    mutable OTSecret primary_key_password_;
+    mutable Secret primary_key_password_;
     std::shared_ptr<OTSymmetricKey> primary_;
     UnallocatedVector<proto::Envelope> primary_passwords_;
-    OTSecret secondary_key_password_;
+    Secret secondary_key_password_;
     const std::shared_ptr<const OTSymmetricKey> secondary_;
     const std::shared_ptr<const OTEnvelope> secondary_password_;
 

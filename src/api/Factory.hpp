@@ -149,10 +149,12 @@ public:
         -> identifier::Nym final;
     auto NymIDFromRandom(const identifier::Algorithm type, allocator_type alloc)
         const noexcept -> identifier::Nym final;
-    auto Secret(const std::size_t bytes) const noexcept -> OTSecret final;
-    auto SecretFromBytes(const ReadView bytes) const noexcept -> OTSecret final;
+    auto Secret(const std::size_t bytes) const noexcept
+        -> opentxs::Secret final;
+    auto SecretFromBytes(const ReadView bytes) const noexcept
+        -> opentxs::Secret final;
     auto SecretFromText(const std::string_view text) const noexcept
-        -> OTSecret final;
+        -> opentxs::Secret final;
     auto UnitID(const proto::Identifier& in, allocator_type alloc)
         const noexcept -> identifier::UnitDefinition final;
     auto UnitIDConvertSafe(const identifier::Generic& in, allocator_type alloc)

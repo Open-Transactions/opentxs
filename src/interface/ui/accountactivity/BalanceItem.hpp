@@ -12,15 +12,15 @@
 #include <thread>
 
 #include "interface/ui/base/Row.hpp"
+#include "internal/core/contract/Unit.hpp"
+#include "internal/interface/ui/BalanceItem.hpp"
 #include "internal/interface/ui/UI.hpp"
+#include "internal/util/SharedPimpl.hpp"
 #include "opentxs/core/Amount.hpp"
-#include "opentxs/core/contract/Unit.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
-#include "opentxs/interface/ui/BalanceItem.hpp"
 #include "opentxs/otx/client/Types.hpp"
 #include "opentxs/util/Container.hpp"
-#include "opentxs/util/SharedPimpl.hpp"
 #include "opentxs/util/Time.hpp"
 
 class QVariant;

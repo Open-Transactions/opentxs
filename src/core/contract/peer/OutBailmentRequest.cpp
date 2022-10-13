@@ -13,7 +13,9 @@
 
 #include "2_Factory.hpp"
 #include "core/contract/peer/PeerRequest.hpp"
+#include "internal/api/session/Wallet.hpp"
 #include "internal/core/Factory.hpp"
+#include "internal/core/String.hpp"
 #include "internal/serialization/protobuf/Check.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/serialization/protobuf/verify/PeerRequest.hpp"
@@ -21,7 +23,6 @@
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/api/session/Wallet.hpp"
-#include "opentxs/core/String.hpp"
 #include "opentxs/core/contract/Signable.hpp"
 #include "opentxs/core/contract/peer/PeerRequestType.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
@@ -48,7 +49,7 @@ auto Factory::OutbailmentRequest(
     using ReturnType = contract::peer::request::implementation::Outbailment;
 
     try {
-        api.Wallet().UnitDefinition(unitID);
+        api.Wallet().Internal().UnitDefinition(unitID);
         auto output = std::make_shared<ReturnType>(
             api, nym, recipientID, unitID, serverID, amount, terms);
 

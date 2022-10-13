@@ -25,6 +25,8 @@
 #include "internal/api/session/Factory.hpp"
 #include "internal/identity/Nym.hpp"
 #include "internal/network/zeromq/Context.hpp"
+#include "internal/network/zeromq/socket/Publish.hpp"
+#include "internal/network/zeromq/socket/Types.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/BoostPMR.hpp"
 #include "internal/util/LogMacros.hpp"
@@ -55,8 +57,6 @@
 #include "opentxs/network/zeromq/message/FrameSection.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/network/zeromq/message/Message.tpp"
-#include "opentxs/network/zeromq/socket/Publish.hpp"
-#include "opentxs/network/zeromq/socket/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/WorkType.hpp"
@@ -88,7 +88,7 @@ Contacts::Contacts(const api::session::Client& api)
 
         return output;
     }())
-    , publisher_(api_.Network().ZeroMQ().PublishSocket())
+    , publisher_(api_.Network().ZeroMQ().Internal().PublishSocket())
     , pipeline_(api_.Network().ZeroMQ().Internal().Pipeline(
           [this](auto&& in) { pipeline(std::move(in)); },
           "api::session::Contacts",

@@ -8,16 +8,16 @@
 
 #include <utility>
 
+#include "internal/network/zeromq/socket/SocketType.hpp"
+#include "internal/network/zeromq/socket/Types.hpp"
+#include "internal/network/zeromq/zap/Callback.hpp"
+#include "internal/network/zeromq/zap/Handler.hpp"
+#include "internal/network/zeromq/zap/Reply.hpp"
+#include "internal/network/zeromq/zap/Request.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "network/zeromq/curve/Server.hpp"
 #include "network/zeromq/socket/Receiver.tpp"
 #include "network/zeromq/socket/Socket.hpp"
-#include "opentxs/network/zeromq/socket/SocketType.hpp"
-#include "opentxs/network/zeromq/socket/Types.hpp"
-#include "opentxs/network/zeromq/zap/Callback.hpp"
-#include "opentxs/network/zeromq/zap/Handler.hpp"
-#include "opentxs/network/zeromq/zap/Reply.hpp"
-#include "opentxs/network/zeromq/zap/Request.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Pimpl.hpp"
 

@@ -10,7 +10,12 @@
 #include <string_view>
 #include <utility>
 
+#include "internal/api/Settings.hpp"
+#include "internal/api/session/Wallet.hpp"
+#include "internal/core/String.hpp"
+#include "internal/network/zeromq/ListenCallback.hpp"
 #include "internal/util/LogMacros.hpp"
+#include "internal/util/SharedPimpl.hpp"
 #include "ottest/fixtures/common/User.hpp"
 
 namespace ottest
@@ -40,7 +45,7 @@ auto set_introduction_server(
 {
     auto bytes = ot::Space{};
     server.Contract()->Serialize(ot::writer(bytes), true);
-    auto clientVersion = api.Wallet().Server(ot::reader(bytes));
+    auto clientVersion = api.Wallet().Internal().Server(ot::reader(bytes));
     api.OTX().SetIntroductionServer(clientVersion);
 }
 
@@ -157,10 +162,10 @@ Issuer::Issuer() noexcept
 
 auto Server::Contract() const noexcept -> ot::OTServerContract
 {
-    return api_->Wallet().Server(id_);
+    return api_->Wallet().Internal().Server(id_);
 }
 
-auto Server::Reason() const noexcept -> ot::OTPasswordPrompt
+auto Server::Reason() const noexcept -> ot::PasswordPrompt
 {
     OT_ASSERT(nullptr != api_);
 
@@ -179,7 +184,7 @@ auto Server::init(const ot::api::session::Notary& api) noexcept -> void
         const auto key = ot::String::Factory("admin_password");
         auto value = ot::String::Factory();
         auto exists{false};
-        api.Config().Check_str(section, key, value, exists);
+        api.Config().Internal().Check_str(section, key, value, exists);
 
         OT_ASSERT(exists);
 

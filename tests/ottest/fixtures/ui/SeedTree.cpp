@@ -10,6 +10,11 @@
 #include <compare>
 #include <iterator>
 
+#include "internal/api/session/UI.hpp"
+#include "internal/interface/ui/SeedTree.hpp"
+#include "internal/interface/ui/SeedTreeItem.hpp"
+#include "internal/interface/ui/SeedTreeNym.hpp"
+#include "internal/util/SharedPimpl.hpp"
 #include "ottest/fixtures/common/Counter.hpp"
 
 namespace ottest
@@ -25,7 +30,7 @@ auto check_seed_tree(
     const ot::api::session::Client& api,
     const SeedTreeData& expected) noexcept -> bool
 {
-    const auto& widget = api.UI().SeedTree();
+    const auto& widget = api.UI().Internal().SeedTree();
     auto output{true};
     const auto& v = expected.rows_;
     auto row = widget.First();
@@ -116,13 +121,13 @@ auto init_seed_tree(
     const ot::api::session::Client& api,
     Counter& counter) noexcept -> void
 {
-    api.UI().SeedTree(make_cb(counter, "seed_tree"));
+    api.UI().Internal().SeedTree(make_cb(counter, "seed_tree"));
 }
 
 auto print_seed_tree(const ot::api::session::Client& api) noexcept
     -> ot::UnallocatedCString
 {
-    const auto& widget = api.UI().SeedTree();
+    const auto& widget = api.UI().Internal().SeedTree();
 
     return widget.Debug();
 }

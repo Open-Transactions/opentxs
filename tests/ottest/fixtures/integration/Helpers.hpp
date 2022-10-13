@@ -14,6 +14,8 @@
 #include <mutex>
 #include <tuple>
 
+#include "internal/core/contract/ServerContract.hpp"
+#include "internal/network/zeromq/ListenCallback.hpp"
 #include "internal/otx/client/obsolete/OTAPI_Exec.hpp"
 #include "internal/util/Mutex.hpp"
 #include "ottest/Basic.hpp"
@@ -85,7 +87,7 @@ struct Server {
     const ot::UnallocatedCString password_;
 
     auto Contract() const noexcept -> ot::OTServerContract;
-    auto Reason() const noexcept -> ot::OTPasswordPrompt;
+    auto Reason() const noexcept -> ot::PasswordPrompt;
 
     auto init(const ot::api::session::Notary& api) noexcept -> void;
 };

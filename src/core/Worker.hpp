@@ -12,6 +12,7 @@
 #include <string_view>
 
 #include "internal/network/zeromq/Context.hpp"
+#include "internal/network/zeromq/Pipeline.hpp"
 #include "internal/network/zeromq/Types.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/api/network/Network.hpp"
@@ -20,7 +21,6 @@
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
-#include "opentxs/network/zeromq/Pipeline.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/network/zeromq/message/Message.tpp"
