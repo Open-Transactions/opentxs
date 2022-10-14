@@ -5,13 +5,9 @@
 
 #pragma once
 
-#include "opentxs/crypto/key/Types.hpp"  // IWYU pragma: associated
-
 #include <cstdint>
 
-#include "opentxs/Export.hpp"
-
-namespace opentxs::crypto::key::symmetric
+namespace opentxs::crypto::symmetric
 {
 enum class Source : std::uint8_t {
     Error = 0,
@@ -25,4 +21,4 @@ constexpr auto value(const Source in) noexcept
 {
     return static_cast<std::uint8_t>(in);
 }
-}  // namespace opentxs::crypto::key::symmetric
+}  // namespace opentxs::crypto::symmetric

@@ -12,10 +12,10 @@ namespace opentxs
 {
 namespace crypto
 {
-namespace key
+namespace symmetric
 {
-class Symmetric;
-}  // namespace key
+class Key;
+}  // namespace symmetric
 }  // namespace crypto
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
@@ -26,7 +26,7 @@ class Storage : virtual public session::Storage
 {
 public:
     virtual auto InitBackup() -> void = 0;
-    virtual auto InitEncryptedBackup(opentxs::crypto::key::Symmetric& key)
+    virtual auto InitEncryptedBackup(opentxs::crypto::symmetric::Key& key)
         -> void = 0;
     auto Internal() const noexcept -> const internal::Storage& final
     {

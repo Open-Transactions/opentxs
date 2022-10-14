@@ -19,6 +19,7 @@
 #include "internal/api/crypto/Symmetric.hpp"
 #include "internal/api/session/FactoryAPI.hpp"
 #include "internal/core/Factory.hpp"
+#include "internal/crypto/symmetric/Key.hpp"
 #include "internal/otx/blind/Factory.hpp"
 #include "internal/otx/blind/Purse.hpp"
 #include "internal/otx/blind/Token.hpp"
@@ -38,8 +39,8 @@
 #include "opentxs/core/Secret.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
 #include "opentxs/core/identifier/UnitDefinition.hpp"
-#include "opentxs/crypto/key/Symmetric.hpp"
-#include "opentxs/crypto/key/symmetric/Algorithm.hpp"
+#include "opentxs/crypto/symmetric/Algorithm.hpp"
+#include "opentxs/crypto/symmetric/Key.hpp"
 #include "opentxs/identity/Nym.hpp"
 #include "opentxs/identity/Types.hpp"
 #include "opentxs/otx/blind/Mint.hpp"
@@ -98,7 +99,7 @@ auto Purse(
     secondaryPassword.Randomize(32);
     auto password = api.Factory().PasswordPrompt(reason);
     password.Internal().SetPassword(secondaryPassword);
-    auto pSecondaryKey = std::make_unique<OTSymmetricKey>(
+    auto pSecondaryKey = std::make_unique<crypto::symmetric::Key>(
         api.Crypto().Symmetric().Key(password));
 
     OT_ASSERT(pSecondaryKey);
@@ -215,8 +216,8 @@ auto Purse(
 
 namespace opentxs::otx::blind::purse
 {
-const opentxs::crypto::key::symmetric::Algorithm Purse::mode_{
-    opentxs::crypto::key::symmetric::Algorithm::ChaCha20Poly1305};
+const opentxs::crypto::symmetric::Algorithm Purse::mode_{
+    opentxs::crypto::symmetric::Algorithm::ChaCha20Poly1305};
 
 Purse::Purse(
     const api::Session& api,
@@ -229,9 +230,9 @@ Purse::Purse(
     const Time validFrom,
     const Time validTo,
     const UnallocatedVector<blind::Token>& tokens,
-    const std::shared_ptr<OTSymmetricKey> primary,
+    const std::shared_ptr<crypto::symmetric::Key> primary,
     const UnallocatedVector<proto::Envelope>& primaryPasswords,
-    const std::shared_ptr<const OTSymmetricKey> secondaryKey,
+    const std::shared_ptr<const crypto::symmetric::Key> secondaryKey,
     const std::shared_ptr<const OTEnvelope> secondaryEncrypted,
     std::optional<Secret> secondaryKeyPassword) noexcept
     : api_(api)
@@ -284,7 +285,7 @@ Purse::Purse(
     const blind::CashType type,
     const Mint& mint,
     Secret&& secondaryKeyPassword,
-    std::unique_ptr<const OTSymmetricKey> secondaryKey,
+    std::unique_ptr<const crypto::symmetric::Key> secondaryKey,
     std::unique_ptr<const OTEnvelope> secondaryEncrypted) noexcept
     : Purse(
           api,
@@ -304,7 +305,7 @@ Purse::Purse(
           std::move(secondaryKeyPassword))
 {
     auto primary = generate_key(primary_key_password_);
-    primary_.reset(new OTSymmetricKey(std::move(primary)));
+    primary_.reset(new crypto::symmetric::Key(std::move(primary)));
     unlocked_ = true;
 
     OT_ASSERT(primary_);
@@ -335,7 +336,7 @@ Purse::Purse(
           {})
 {
     auto primary = generate_key(primary_key_password_);
-    primary_.reset(new OTSymmetricKey(std::move(primary)));
+    primary_.reset(new crypto::symmetric::Key(std::move(primary)));
     unlocked_ = true;
 
     OT_ASSERT(primary_);
@@ -361,8 +362,8 @@ Purse::Purse(const api::Session& api, const proto::Purse& in) noexcept
 {
     auto primary = api.Crypto().Symmetric().InternalSymmetric().Key(
         in.primarykey(),
-        opentxs::crypto::key::symmetric::Algorithm::ChaCha20Poly1305);
-    primary_.reset(new OTSymmetricKey(std::move(primary)));
+        opentxs::crypto::symmetric::Algorithm::ChaCha20Poly1305);
+    primary_.reset(new crypto::symmetric::Key(std::move(primary)));
 
     OT_ASSERT(primary_);
 }
@@ -386,7 +387,7 @@ Purse::Purse(const api::Session& api, const Purse& owner) noexcept
           {})
 {
     auto primary = generate_key(primary_key_password_);
-    primary_.reset(new OTSymmetricKey(std::move(primary)));
+    primary_.reset(new crypto::symmetric::Key(std::move(primary)));
     unlocked_ = true;
 
     OT_ASSERT(primary_);
@@ -461,16 +462,15 @@ auto Purse::cend() const noexcept -> const_iterator
 auto Purse::deserialize_secondary_key(
     const api::Session& api,
     const proto::Purse& in) noexcept(false)
-    -> std::unique_ptr<const OTSymmetricKey>
+    -> std::unique_ptr<const crypto::symmetric::Key>
 {
     switch (translate(in.state())) {
         case blind::PurseType::Request:
         case blind::PurseType::Issue: {
-            auto output = std::make_unique<OTSymmetricKey>(
+            auto output = std::make_unique<crypto::symmetric::Key>(
                 api.Crypto().Symmetric().InternalSymmetric().Key(
                     in.secondarykey(),
-                    opentxs::crypto::key::symmetric::Algorithm::
-                        ChaCha20Poly1305));
+                    opentxs::crypto::symmetric::Algorithm::ChaCha20Poly1305));
 
             if (false == bool(output)) {
                 LogError()(OT_PRETTY_STATIC(Imp))(
@@ -537,13 +537,13 @@ auto Purse::end() noexcept -> iterator
     return {parent_, tokens_.size()};
 }
 
-auto Purse::generate_key(Secret& password) const -> OTSymmetricKey
+auto Purse::generate_key(Secret& password) const -> crypto::symmetric::Key
 {
     password.Randomize(32);
     auto keyPassword = api_.Factory().PasswordPrompt("");
     keyPassword.Internal().SetPassword(password);
 
-    return api_.Crypto().Symmetric().Key(keyPassword, mode_);
+    return api_.Crypto().Symmetric().Key(mode_, keyPassword);
 }
 
 // TODO replace this algorithm with one that will ensure all spends up to and
@@ -596,7 +596,7 @@ auto Purse::get_passwords(const proto::Purse& in)
     return output;
 }
 
-auto Purse::PrimaryKey(PasswordPrompt& password) -> crypto::key::Symmetric&
+auto Purse::PrimaryKey(PasswordPrompt& password) -> crypto::symmetric::Key&
 {
     if (false == bool(primary_)) { throw std::out_of_range("No primary key"); }
 
@@ -608,7 +608,7 @@ auto Purse::PrimaryKey(PasswordPrompt& password) -> crypto::key::Symmetric&
 
     password.Internal().SetPassword(primary_key_password_);
 
-    return primary_->get();
+    return *primary_;
 }
 
 auto Purse::Pop() -> Token
@@ -648,7 +648,8 @@ auto Purse::Process(
         state_ = blind::PurseType::Normal;
         const_cast<std::shared_ptr<const OTEnvelope>&>(secondary_password_)
             .reset();
-        const_cast<std::shared_ptr<const OTSymmetricKey>&>(secondary_).reset();
+        const_cast<std::shared_ptr<const crypto::symmetric::Key>&>(secondary_)
+            .reset();
         secondary_key_password_ = api_.Factory().Secret(0);
     } else {
         LogError()(OT_PRETTY_CLASS())("Failed to process token").Flush();
@@ -719,7 +720,7 @@ void Purse::recalculate_times()
 
 auto Purse::SecondaryKey(
     const identity::Nym& owner,
-    PasswordPrompt& passwordOut) -> const crypto::key::Symmetric&
+    PasswordPrompt& passwordOut) -> const crypto::symmetric::Key&
 {
     if (false == bool(secondary_)) {
         throw std::out_of_range("No secondary key");
@@ -729,7 +730,7 @@ auto Purse::SecondaryKey(
         throw std::out_of_range("No secondary key password");
     }
 
-    const auto& secondaryKey = secondary_->get();
+    const auto& secondaryKey = *secondary_;
     const auto& envelope = secondary_password_->get();
     const auto decrypted = envelope.Open(
         owner,
@@ -770,7 +771,8 @@ auto Purse::Serialize(proto::Purse& output) const noexcept -> bool
             throw std::runtime_error("missing primary key");
         }
 
-        if (false == primary_->get().Serialize(*output.mutable_primarykey())) {
+        if (false ==
+            primary_->Internal().Serialize(*output.mutable_primarykey())) {
             throw std::runtime_error("failed to serialize primary key");
         }
 
@@ -785,7 +787,7 @@ auto Purse::Serialize(proto::Purse& output) const noexcept -> bool
                     throw std::runtime_error("missing secondary key");
                 }
 
-                if (!secondary_->get().Serialize(
+                if (!secondary_->Internal().Serialize(
                         *output.mutable_secondarykey())) {
                     throw std::runtime_error(
                         "failed to serialize secondary key");
@@ -856,7 +858,7 @@ auto Purse::Unlock(
                 auto unlocker =
                     api_.Factory().PasswordPrompt(reason.GetDisplayString());
                 unlocker.Internal().SetPassword(password);
-                unlocked_ = primary->Unlock(unlocker);
+                unlocked_ = primary.Unlock(unlocker);
 
                 if (unlocked_) {
                     primary_key_password_ = password;
@@ -1020,4 +1022,6 @@ auto Purse::Verify(const api::session::Notary& server) const -> bool
 
     return true;
 }
+
+Purse::~Purse() = default;
 }  // namespace opentxs::otx::blind::purse

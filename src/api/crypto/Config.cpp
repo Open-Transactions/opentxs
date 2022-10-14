@@ -14,7 +14,7 @@
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/api/Settings.hpp"
 #include "opentxs/api/crypto/Config.hpp"
-#include "opentxs/crypto/key/symmetric/Algorithm.hpp"
+#include "opentxs/crypto/symmetric/Algorithm.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Pimpl.hpp"
 
@@ -52,10 +52,9 @@ auto CryptoConfig(const api::Settings& settings) noexcept
 
 namespace opentxs::api::crypto
 {
-auto HaveSupport(opentxs::crypto::key::symmetric::Algorithm val) noexcept
-    -> bool
+auto HaveSupport(opentxs::crypto::symmetric::Algorithm val) noexcept -> bool
 {
-    using Type = opentxs::crypto::key::symmetric::Algorithm;
+    using Type = opentxs::crypto::symmetric::Algorithm;
     static const auto map = UnallocatedMap<Type, bool>{
         {Type::Error, false},
         {Type::ChaCha20Poly1305, true},

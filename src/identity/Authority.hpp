@@ -50,8 +50,12 @@ namespace key
 {
 class Asymmetric;
 class Parameters;
-class Symmetric;
 }  // namespace key
+
+namespace symmetric
+{
+class Key;
+}  // namespace symmetric
 }  // namespace crypto
 
 namespace identity
@@ -168,7 +172,7 @@ public:
         const crypto::key::Asymmetric& dhKey,
         const std::uint32_t tag,
         const crypto::key::asymmetric::Algorithm type,
-        const crypto::key::Symmetric& key,
+        const crypto::symmetric::Key& key,
         PasswordPrompt& reason) const noexcept -> bool final;
     auto VerificationCredentialVersion() const -> VersionNumber final
     {

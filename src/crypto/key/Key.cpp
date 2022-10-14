@@ -10,8 +10,10 @@
 #include <robin_hood.h>
 
 #include "opentxs/crypto/key/asymmetric/Algorithm.hpp"
-#include "opentxs/crypto/key/symmetric/Algorithm.hpp"
-#include "opentxs/crypto/key/symmetric/Source.hpp"
+#include "opentxs/crypto/key/asymmetric/Mode.hpp"
+#include "opentxs/crypto/key/asymmetric/Role.hpp"
+#include "opentxs/crypto/symmetric/Algorithm.hpp"
+#include "opentxs/crypto/symmetric/Source.hpp"
 #include "util/Container.hpp"
 
 namespace opentxs::crypto::key
@@ -139,7 +141,7 @@ auto translate(const crypto::key::asymmetric::Role in) noexcept
     }
 }
 
-auto translate(const crypto::key::symmetric::Source in) noexcept
+auto translate(const crypto::symmetric::Source in) noexcept
     -> proto::SymmetricKeyType
 {
     try {
@@ -149,7 +151,7 @@ auto translate(const crypto::key::symmetric::Source in) noexcept
     }
 }
 
-auto translate(const crypto::key::symmetric::Algorithm in) noexcept
+auto translate(const crypto::symmetric::Algorithm in) noexcept
     -> proto::SymmetricMode
 {
     try {
@@ -206,25 +208,25 @@ auto translate(const proto::KeyRole in) noexcept
 }
 
 auto translate(const proto::SymmetricKeyType in) noexcept
-    -> crypto::key::symmetric::Source
+    -> crypto::symmetric::Source
 {
     static const auto map = reverse_arbitrary_map<
-        crypto::key::symmetric::Source,
+        crypto::symmetric::Source,
         proto::SymmetricKeyType,
         crypto::key::SourceReverseMap>(crypto::key::source_map());
 
     try {
         return map.at(in);
     } catch (...) {
-        return crypto::key::symmetric::Source::Error;
+        return crypto::symmetric::Source::Error;
     }
 }
 
 auto translate(const proto::SymmetricMode in) noexcept
-    -> crypto::key::symmetric::Algorithm
+    -> crypto::symmetric::Algorithm
 {
     static const auto map = reverse_arbitrary_map<
-        crypto::key::symmetric::Algorithm,
+        crypto::symmetric::Algorithm,
         proto::SymmetricMode,
         crypto::key::SymmetricAlgorithmReverseMap>(
         crypto::key::symmetricalgorithm_map());
@@ -232,7 +234,7 @@ auto translate(const proto::SymmetricMode in) noexcept
     try {
         return map.at(in);
     } catch (...) {
-        return crypto::key::symmetric::Algorithm::Error;
+        return crypto::symmetric::Algorithm::Error;
     }
 }
 }  // namespace opentxs

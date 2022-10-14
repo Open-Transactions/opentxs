@@ -62,10 +62,10 @@ class Crypto;
 
 namespace crypto
 {
-namespace key
+namespace symmetric
 {
-class Symmetric;
-}  // namespace key
+class Key;
+}  // namespace symmetric
 }  // namespace crypto
 
 namespace identifier
@@ -542,7 +542,7 @@ private:
     void Cleanup_Storage();
     void CollectGarbage() const;
     void InitBackup() final;
-    void InitEncryptedBackup(opentxs::crypto::key::Symmetric& key) final;
+    void InitEncryptedBackup(opentxs::crypto::symmetric::Key& key) final;
     void InitPlugins();
     auto mutable_Root() const -> Editor<opentxs::storage::Root>;
     void RunMapPublicNyms(NymLambda lambda) const;

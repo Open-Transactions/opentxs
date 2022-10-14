@@ -8,6 +8,7 @@
 #include "internal/crypto/library/AsymmetricProvider.hpp"
 #include "internal/crypto/library/EcdsaProvider.hpp"
 #include "internal/crypto/library/SymmetricProvider.hpp"
+#include "opentxs/crypto/symmetric/Types.hpp"
 
 namespace opentxs::crypto::blank
 {
@@ -150,7 +151,7 @@ public:
     {
         return {};
     }
-    auto DefaultMode() const -> opentxs::crypto::key::symmetric::Algorithm final
+    auto DefaultMode() const -> opentxs::crypto::symmetric::Algorithm final
     {
         return {};
     }
@@ -162,7 +163,7 @@ public:
         const std::uint64_t,
         const std::uint64_t,
         const std::uint64_t,
-        const crypto::key::symmetric::Source,
+        const crypto::symmetric::Source,
         std::uint8_t*,
         std::size_t) const -> bool final
     {
@@ -177,22 +178,21 @@ public:
     {
         return {};
     }
-    auto IvSize(const opentxs::crypto::key::symmetric::Algorithm) const
+    auto IvSize(const opentxs::crypto::symmetric::Algorithm) const
         -> std::size_t final
     {
         return {};
     }
-    auto KeySize(const opentxs::crypto::key::symmetric::Algorithm) const
+    auto KeySize(const opentxs::crypto::symmetric::Algorithm) const
         -> std::size_t final
     {
         return {};
     }
-    auto SaltSize(const crypto::key::symmetric::Source) const
-        -> std::size_t final
+    auto SaltSize(const crypto::symmetric::Source) const -> std::size_t final
     {
         return {};
     }
-    auto TagSize(const opentxs::crypto::key::symmetric::Algorithm) const
+    auto TagSize(const opentxs::crypto::symmetric::Algorithm) const
         -> std::size_t final
     {
         return {};

@@ -4,7 +4,6 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 add_subdirectory(asymmetric)
-add_subdirectory(symmetric)
 
 target_sources(
   opentxs-common
@@ -12,8 +11,6 @@ target_sources(
     "${opentxs_SOURCE_DIR}/src/internal/crypto/key/Factory.hpp"
     "${opentxs_SOURCE_DIR}/src/internal/crypto/key/Null.hpp"
     "Key.cpp"
-    "Symmetric.cpp"
-    "Symmetric.hpp"
 )
 target_include_directories(
   opentxs-common SYSTEM
@@ -27,7 +24,6 @@ set(cxx-install-headers
     "${opentxs_SOURCE_DIR}/include/opentxs/crypto/key/Keypair.hpp"
     "${opentxs_SOURCE_DIR}/include/opentxs/crypto/key/RSA.hpp"
     "${opentxs_SOURCE_DIR}/include/opentxs/crypto/key/Secp256k1.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/crypto/key/Symmetric.hpp"
     "${opentxs_SOURCE_DIR}/include/opentxs/crypto/key/Types.hpp"
 )
 target_sources(opentxs-common PRIVATE ${cxx-install-headers})

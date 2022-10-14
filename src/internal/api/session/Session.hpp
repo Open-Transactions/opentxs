@@ -28,10 +28,10 @@ class Legacy;
 
 namespace crypto
 {
-namespace key
+namespace symmetric
 {
-class Symmetric;
-}  // namespace key
+class Key;
+}  // namespace symmetric
 }  // namespace crypto
 
 namespace identifier
@@ -72,7 +72,7 @@ public:
     virtual auto Legacy() const noexcept -> const api::Legacy& = 0;
     virtual auto Lock() const -> std::mutex& = 0;
     virtual auto MasterKey(const opentxs::Lock& lock) const
-        -> const opentxs::crypto::key::Symmetric& = 0;
+        -> const opentxs::crypto::symmetric::Key& = 0;
     virtual auto NewNym(const identifier::Nym& id) const noexcept -> void = 0;
     virtual auto ShuttingDown() const noexcept -> bool = 0;
 

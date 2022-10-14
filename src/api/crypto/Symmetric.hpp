@@ -3,6 +3,10 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_include "opentxs/crypto/symmetric/Key.hpp"
+// IWYU pragma: no_include "opentxs/crypto/symmetric/Algorithm.hpp"
+// IWYU pragma: no_include "opentxs/crypto/symmetric/Source.hpp"
+
 #pragma once
 
 #include <cstddef>
@@ -10,11 +14,9 @@
 #include <iosfwd>
 
 #include "internal/api/crypto/Symmetric.hpp"
-#include "internal/serialization/protobuf/Proto.hpp"
 #include "opentxs/api/crypto/Symmetric.hpp"
-#include "opentxs/crypto/key/Symmetric.hpp"
-#include "opentxs/crypto/key/symmetric/Algorithm.hpp"
-#include "opentxs/crypto/key/symmetric/Source.hpp"
+#include "opentxs/crypto/symmetric/Types.hpp"
+#include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Bytes.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -32,7 +34,10 @@ class Session;
 
 namespace crypto
 {
-class SymmetricProvider;
+namespace symmetric
+{
+class Key;
+}  // namespace symmetric
 }  // namespace crypto
 
 namespace proto
@@ -50,39 +55,63 @@ namespace opentxs::api::crypto::imp
 class Symmetric final : public internal::Symmetric
 {
 public:
-    auto IvSize(const opentxs::crypto::key::symmetric::Algorithm mode) const
+    auto IvSize(const opentxs::crypto::symmetric::Algorithm mode) const noexcept
         -> std::size_t final;
     auto Key(
+        opentxs::crypto::symmetric::Algorithm mode,
         const PasswordPrompt& password,
-        const opentxs::crypto::key::symmetric::Algorithm mode =
-            opentxs::crypto::key::symmetric::Algorithm::ChaCha20Poly1305) const
-        -> OTSymmetricKey final;
+        alloc::Default alloc) const noexcept
+        -> opentxs::crypto::symmetric::Key final;
+    auto Key(const PasswordPrompt& password, alloc::Default alloc)
+        const noexcept -> opentxs::crypto::symmetric::Key final;
     auto Key(
-        const proto::SymmetricKey& serialized,
-        const opentxs::crypto::key::symmetric::Algorithm mode) const
-        -> OTSymmetricKey final;
-    auto Key(
-        const ReadView& serializedCiphertext,
-        const opentxs::crypto::key::symmetric::Algorithm mode) const
-        -> OTSymmetricKey final;
+        ReadView serializedCiphertext,
+        opentxs::crypto::symmetric::Algorithm mode,
+        alloc::Default alloc) const noexcept
+        -> opentxs::crypto::symmetric::Key final;
     auto Key(
         const Secret& seed,
-        const std::uint64_t operations = 0,
-        const std::uint64_t difficulty = 0,
-        const opentxs::crypto::key::symmetric::Algorithm mode =
-            opentxs::crypto::key::symmetric::Algorithm::ChaCha20Poly1305,
-        const opentxs::crypto::key::symmetric::Source type =
-            opentxs::crypto::key::symmetric::Source::Argon2i) const
-        -> OTSymmetricKey final;
-    auto Key(
-        const Secret& seed,
-        const ReadView salt,
+        const opentxs::crypto::symmetric::Algorithm mode,
+        const opentxs::crypto::symmetric::Source type,
         const std::uint64_t operations,
         const std::uint64_t difficulty,
-        const std::uint64_t parallel,
-        const std::size_t bytes,
-        const opentxs::crypto::key::symmetric::Source type) const
-        -> OTSymmetricKey final;
+        alloc::Default alloc) const noexcept
+        -> opentxs::crypto::symmetric::Key final;
+    auto Key(
+        const Secret& seed,
+        const opentxs::crypto::symmetric::Source type,
+        const std::uint64_t operations,
+        const std::uint64_t difficulty,
+        alloc::Default alloc) const noexcept
+        -> opentxs::crypto::symmetric::Key final;
+    auto Key(
+        const Secret& seed,
+        const opentxs::crypto::symmetric::Algorithm mode,
+        const std::uint64_t operations,
+        const std::uint64_t difficulty,
+        alloc::Default alloc) const noexcept
+        -> opentxs::crypto::symmetric::Key final;
+    auto Key(
+        const Secret& seed,
+        const std::uint64_t operations,
+        const std::uint64_t difficulty,
+        alloc::Default alloc) const noexcept
+        -> opentxs::crypto::symmetric::Key final;
+    auto Key(
+        const Secret& seed,
+        ReadView salt,
+        std::uint64_t operations,
+        std::uint64_t difficulty,
+        std::uint64_t parallel,
+        std::size_t bytes,
+        opentxs::crypto::symmetric::Source type,
+        alloc::Default alloc) const noexcept
+        -> opentxs::crypto::symmetric::Key final;
+    auto Key(
+        const proto::SymmetricKey& serialized,
+        const opentxs::crypto::symmetric::Algorithm mode,
+        alloc::Default alloc) const noexcept
+        -> opentxs::crypto::symmetric::Key final;
 
     Symmetric(const api::Session& api) noexcept;
     Symmetric() = delete;

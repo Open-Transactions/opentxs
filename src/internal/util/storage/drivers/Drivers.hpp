@@ -13,10 +13,10 @@ namespace opentxs
 {
 namespace crypto
 {
-namespace key
+namespace symmetric
 {
-class Symmetric;
-}  // namespace key
+class Key;
+}  // namespace symmetric
 }  // namespace crypto
 
 namespace storage
@@ -33,7 +33,7 @@ class Multiplex : virtual public Driver
 public:
     virtual auto BestRoot(bool& primaryOutOfSync) -> UnallocatedCString = 0;
     virtual void InitBackup() = 0;
-    virtual void InitEncryptedBackup(opentxs::crypto::key::Symmetric& key) = 0;
+    virtual void InitEncryptedBackup(opentxs::crypto::symmetric::Key& key) = 0;
     virtual auto Primary() -> Driver& = 0;
     virtual void SynchronizePlugins(
         const UnallocatedCString& hash,

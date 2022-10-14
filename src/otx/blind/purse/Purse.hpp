@@ -3,6 +3,8 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_include "opentxs/crypto/symmetric/Key.hpp"
+
 #pragma once
 
 #include <cstddef>
@@ -18,8 +20,6 @@
 #include "opentxs/core/identifier/Notary.hpp"
 #include "opentxs/core/identifier/UnitDefinition.hpp"
 #include "opentxs/crypto/Types.hpp"
-#include "opentxs/crypto/key/Symmetric.hpp"
-#include "opentxs/crypto/key/symmetric/Algorithm.hpp"
 #include "opentxs/otx/blind/CashType.hpp"
 #include "opentxs/otx/blind/Purse.hpp"
 #include "opentxs/otx/blind/PurseType.hpp"
@@ -42,6 +42,14 @@ class Notary;
 
 class Session;
 }  // namespace api
+
+namespace crypto
+{
+namespace symmetric
+{
+class Key;
+}  // namespace symmetric
+}  // namespace crypto
 
 namespace identifier
 {
@@ -126,11 +134,11 @@ public:
     {
         return {};
     }
-    auto PrimaryKey(PasswordPrompt&) -> crypto::key::Symmetric& override;
+    auto PrimaryKey(PasswordPrompt&) -> crypto::symmetric::Key& override;
     virtual auto Pop() -> Token { return {}; }
     virtual auto Push(Token&&, const PasswordPrompt&) -> bool { return {}; }
     auto SecondaryKey(const identity::Nym&, PasswordPrompt&)
-        -> const crypto::key::Symmetric& override;
+        -> const crypto::symmetric::Key& override;
 
     Imp() noexcept
         : parent_(nullptr)
@@ -144,6 +152,6 @@ public:
     auto operator=(const Imp&) -> Imp& = delete;
     auto operator=(Imp&& rhs) -> Imp& = delete;
 
-    ~Imp() override = default;
+    ~Imp() override;
 };
 }  // namespace opentxs::otx::blind

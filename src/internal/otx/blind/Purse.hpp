@@ -12,10 +12,10 @@ namespace opentxs
 {
 namespace crypto
 {
-namespace key
+namespace symmetric
 {
-class Symmetric;
-}  // namespace key
+class Key;
+}  // namespace symmetric
 }  // namespace crypto
 
 namespace identifier
@@ -57,14 +57,14 @@ public:
     virtual auto Serialize(proto::Purse&) const noexcept -> bool = 0;
 
     virtual auto PrimaryKey(PasswordPrompt& password) noexcept(false)
-        -> crypto::key::Symmetric& = 0;
+        -> crypto::symmetric::Key& = 0;
     virtual auto Process(
         const identity::Nym&,
         const blind::Mint&,
         const PasswordPrompt&) -> bool = 0;
     virtual auto SecondaryKey(
         const identity::Nym& owner,
-        PasswordPrompt& password) -> const crypto::key::Symmetric& = 0;
+        PasswordPrompt& password) -> const crypto::symmetric::Key& = 0;
 
     virtual ~Purse() = default;
 };

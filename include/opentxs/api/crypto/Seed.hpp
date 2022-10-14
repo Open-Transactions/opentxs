@@ -14,8 +14,8 @@
 
 #include "opentxs/Export.hpp"
 #include "opentxs/crypto/Types.hpp"
-#include "opentxs/crypto/key/Symmetric.hpp"
 #include "opentxs/crypto/key/Types.hpp"
+#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
 
@@ -40,6 +40,11 @@ namespace key
 class HD;
 class Secp256k1;
 }  // namespace key
+
+namespace symmetric
+{
+class Key;
+}  // namespace symmetric
 
 class Seed;
 }  // namespace crypto
@@ -117,7 +122,8 @@ public:
         -> std::unique_ptr<opentxs::crypto::key::Secp256k1> = 0;
     virtual auto GetStorageKey(
         const UnallocatedCString& seedID,
-        const PasswordPrompt& reason) const -> OTSymmetricKey = 0;
+        const PasswordPrompt& reason) const
+        -> opentxs::crypto::symmetric::Key = 0;
     virtual auto GetSeed(
         const UnallocatedCString& seedID,
         Bip32Index& index,

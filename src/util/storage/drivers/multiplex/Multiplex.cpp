@@ -16,7 +16,6 @@
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/Mutex.hpp"
 #include "internal/util/storage/drivers/Factory.hpp"
-#include "opentxs/crypto/key/Symmetric.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Pimpl.hpp"
@@ -60,7 +59,7 @@ Multiplex::Multiplex(
     , config_(config)
     , primary_plugin_()
     , backup_plugins_()
-    , null_(crypto::key::Symmetric::Factory())
+    , null_()
 {
     Init_Multiplex();
 }
@@ -191,7 +190,7 @@ void Multiplex::InitBackup()
 }
 
 void Multiplex::InitEncryptedBackup(
-    [[maybe_unused]] crypto::key::Symmetric& key)
+    [[maybe_unused]] crypto::symmetric::Key& key)
 {
     if (config_.fs_encrypted_backup_directory_.empty()) { return; }
 

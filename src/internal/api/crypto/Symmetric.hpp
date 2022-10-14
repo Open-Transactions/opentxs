@@ -7,9 +7,20 @@
 
 #include "opentxs/api/crypto/Symmetric.hpp"
 
+#include "opentxs/crypto/symmetric/Types.hpp"
+#include "opentxs/util/Allocator.hpp"
+
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
+namespace crypto
+{
+namespace symmetric
+{
+class Key;
+}  // namespace symmetric
+}  // namespace crypto
+
 namespace proto
 {
 class SymmetricKey;
@@ -30,8 +41,9 @@ public:
     using crypto::Symmetric::Key;
     virtual auto Key(
         const proto::SymmetricKey& serialized,
-        const opentxs::crypto::key::symmetric::Algorithm mode) const
-        -> OTSymmetricKey = 0;
+        const opentxs::crypto::symmetric::Algorithm mode,
+        alloc::Default alloc = {}) const noexcept
+        -> opentxs::crypto::symmetric::Key = 0;
 
     auto InternalSymmetric() noexcept -> Symmetric& final { return *this; }
 

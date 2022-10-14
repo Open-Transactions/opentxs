@@ -4,8 +4,8 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 // IWYU pragma: no_include "opentxs/crypto/key/asymmetric/Algorithm.hpp"
-// IWYU pragma: no_include "opentxs/crypto/key/symmetric/Algorithm.hpp"
-// IWYU pragma: no_include "opentxs/crypto/key/symmetric/Source.hpp"
+// IWYU pragma: no_include "opentxs/crypto/symmetric/Algorithm.hpp"
+// IWYU pragma: no_include "opentxs/crypto/symmetric/Source.hpp"
 
 #pragma once
 
@@ -13,6 +13,7 @@
 
 #include "opentxs/api/crypto/Crypto.hpp"
 #include "opentxs/crypto/key/Types.hpp"
+#include "opentxs/crypto/symmetric/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -52,10 +53,9 @@ public:
         -> const opentxs::crypto::Sodium& = 0;
     virtual auto OpenSSL() const noexcept
         -> const opentxs::crypto::OpenSSL& = 0;
-    virtual auto SymmetricProvider(
-        opentxs::crypto::key::symmetric::Algorithm type) const noexcept
-        -> const opentxs::crypto::SymmetricProvider& = 0;
-    virtual auto SymmetricProvider(opentxs::crypto::key::symmetric::Source type)
+    virtual auto SymmetricProvider(opentxs::crypto::symmetric::Algorithm type)
+        const noexcept -> const opentxs::crypto::SymmetricProvider& = 0;
+    virtual auto SymmetricProvider(opentxs::crypto::symmetric::Source type)
         const noexcept -> const opentxs::crypto::SymmetricProvider& = 0;
     virtual auto hasLibsecp256k1() const noexcept -> bool = 0;
     virtual auto hasOpenSSL() const noexcept -> bool = 0;

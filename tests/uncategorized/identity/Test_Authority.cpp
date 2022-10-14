@@ -19,7 +19,6 @@
 #include <utility>
 
 #include "2_Factory.hpp"
-#include "internal/api/Crypto.hpp"
 #include "internal/api/crypto/Seed.hpp"
 #include "internal/identity/Authority.hpp"
 #include "internal/identity/Nym.hpp"
@@ -515,7 +514,7 @@ TEST_F(Test_Authority, Source_DefaultSetup_ShouldReturnProperData)
 TEST_F(Test_Authority, Unlock_DefaultSetup_ShouldReturnProperData)
 {
     auto testTag = std::uint32_t{};
-    const auto symmetricKey = ot::crypto::key::Symmetric::Factory();
+    const auto symmetricKey = ot::crypto::symmetric::Key{};
     const auto& str = authority_->GetPublicAuthKey(
         ot::crypto::key::asymmetric::Algorithm::Secp256k1);
 
@@ -547,10 +546,8 @@ TEST_F(Test_Authority, Unlock_DefaultSetup_ShouldReturnProperData2)
             .GetPrivateKey();
 
     auto testTag = std::uint32_t{};
-    const auto& provider = client_.Crypto().Internal().SymmetricProvider(
-        opentxs::crypto::key::symmetric::Algorithm::ChaCha20Poly1305);
-
-    const auto key = client_.Factory().SymmetricKey(provider, reason_);
+    const auto key = client_.Crypto().Symmetric().Key(
+        opentxs::crypto::symmetric::Algorithm::ChaCha20Poly1305, reason_);
 
     const auto& str = authority_->GetPublicAuthKey(
         ot::crypto::key::asymmetric::Algorithm::Secp256k1);

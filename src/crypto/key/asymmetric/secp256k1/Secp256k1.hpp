@@ -36,9 +36,12 @@ namespace implementation
 {
 class EllipticCurve;
 }  // namespace implementation
-
-class Symmetric;
 }  // namespace key
+
+namespace symmetric
+{
+class Key;
+}  // namespace symmetric
 
 class EcdsaProvider;
 }  // namespace crypto
@@ -82,7 +85,7 @@ public:
         const Data& publicKey,
         const crypto::key::asymmetric::Role role,
         const VersionNumber version,
-        key::Symmetric& sessionKey,
+        symmetric::Key& sessionKey,
         const PasswordPrompt& reason) noexcept(false);
     Secp256k1(
         const api::Session& api,
@@ -94,7 +97,7 @@ public:
         const Bip32Fingerprint parent,
         const crypto::key::asymmetric::Role role,
         const VersionNumber version,
-        key::Symmetric& sessionKey,
+        symmetric::Key& sessionKey,
         const PasswordPrompt& reason) noexcept(false);
     Secp256k1(
         const api::Session& api,

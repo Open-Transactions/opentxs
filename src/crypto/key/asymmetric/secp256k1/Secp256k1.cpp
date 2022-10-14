@@ -46,7 +46,7 @@ Secp256k1::Secp256k1(
     const Data& publicKey,
     const crypto::key::asymmetric::Role role,
     const VersionNumber version,
-    key::Symmetric& sessionKey,
+    symmetric::Key& sessionKey,
     const opentxs::PasswordPrompt& reason) noexcept(false)
     : ot_super(
           api,
@@ -71,7 +71,7 @@ Secp256k1::Secp256k1(
     const Bip32Fingerprint parent,
     const crypto::key::asymmetric::Role role,
     const VersionNumber version,
-    key::Symmetric& sessionKey,
+    symmetric::Key& sessionKey,
     const opentxs::PasswordPrompt& reason) noexcept(false)
     : ot_super(
           api,

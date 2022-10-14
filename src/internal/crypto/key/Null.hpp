@@ -16,7 +16,6 @@
 #include "opentxs/crypto/key/Keypair.hpp"
 #include "opentxs/crypto/key/RSA.hpp"
 #include "opentxs/crypto/key/Secp256k1.hpp"
-#include "opentxs/crypto/key/Symmetric.hpp"
 #include "opentxs/crypto/key/asymmetric/Algorithm.hpp"
 
 namespace opentxs::crypto::key::blank
@@ -293,71 +292,5 @@ public:
 
 private:
     auto clone() const noexcept -> Secp256k1* final { return new Secp256k1; }
-};
-
-class Symmetric final : virtual public key::Symmetric
-{
-public:
-    auto api() const -> const api::Session& final { throw; }
-
-    auto ChangePassword(const PasswordPrompt&, const Secret&) -> bool final
-    {
-        return false;
-    }
-    auto Decrypt(
-        const proto::Ciphertext&,
-        const PasswordPrompt&,
-        const AllocateOutput) const -> bool final
-    {
-        return false;
-    }
-    auto Decrypt(const ReadView&, const PasswordPrompt&, const AllocateOutput)
-        const -> bool final
-    {
-        return false;
-    }
-    auto Encrypt(
-        const ReadView,
-        const PasswordPrompt&,
-        proto::Ciphertext&,
-        const bool,
-        const opentxs::crypto::key::symmetric::Algorithm,
-        const ReadView) const -> bool final
-    {
-        return false;
-    }
-    auto Encrypt(
-        const ReadView,
-        const PasswordPrompt&,
-        AllocateOutput,
-        const bool,
-        const opentxs::crypto::key::symmetric::Algorithm,
-        const ReadView) const -> bool final
-    {
-        return false;
-    }
-    auto ID(const PasswordPrompt&) const -> identifier::Generic final
-    {
-        return {};
-    }
-    auto RawKey(const PasswordPrompt&, Secret&) const -> bool final
-    {
-        return false;
-    }
-    auto Serialize(proto::SymmetricKey&) const -> bool final { return false; }
-    auto Unlock(const PasswordPrompt&) const -> bool final { return false; }
-
-    operator bool() const final { return false; }
-
-    Symmetric() = default;
-    Symmetric(const Symmetric&) = delete;
-    Symmetric(Symmetric&&) = delete;
-    auto operator=(const Symmetric&) -> Symmetric& = delete;
-    auto operator=(Symmetric&&) -> Symmetric& = delete;
-
-    ~Symmetric() final = default;
-
-private:
-    auto clone() const -> Symmetric* final { return new Symmetric; }
 };
 }  // namespace opentxs::crypto::key::blank

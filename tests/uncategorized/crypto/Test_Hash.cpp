@@ -11,6 +11,8 @@
 #include <type_traits>
 #include <utility>
 
+#include "internal/crypto/symmetric/Key.hpp"
+#include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 
 namespace ot = opentxs;
@@ -703,10 +705,12 @@ TEST_F(Test_Hash, argon2i)
             memory,
             threads,
             bytes,
-            opentxs::crypto::key::symmetric::Source::Argon2i);
+            opentxs::crypto::symmetric::Source::Argon2i);
         const auto hash = [&] {
             auto secret = api.Factory().Secret(bytes);
-            key->RawKey(reason, secret);
+            const auto rc = key.Internal().RawKey(secret, reason);
+
+            OT_ASSERT(rc);
 
             return api.Factory().DataFromBytes(secret.Bytes());
         }();
@@ -731,10 +735,12 @@ TEST_F(Test_Hash, argon2id)
             memory,
             threads,
             bytes,
-            opentxs::crypto::key::symmetric::Source::Argon2id);
+            opentxs::crypto::symmetric::Source::Argon2id);
         const auto hash = [&] {
             auto secret = api.Factory().Secret(bytes);
-            key->RawKey(reason, secret);
+            const auto rc = key.Internal().RawKey(secret, reason);
+
+            OT_ASSERT(rc);
 
             return api.Factory().DataFromBytes(secret.Bytes());
         }();

@@ -4,8 +4,8 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 // IWYU pragma: no_include "opentxs/crypto/key/asymmetric/Algorithm.hpp"
-// IWYU pragma: no_include "opentxs/crypto/key/symmetric/Algorithm.hpp"
-// IWYU pragma: no_include "opentxs/crypto/key/symmetric/Source.hpp"
+// IWYU pragma: no_include "opentxs/crypto/symmetric/Algorithm.hpp"
+// IWYU pragma: no_include "opentxs/crypto/symmetric/Source.hpp"
 
 #pragma once
 
@@ -30,6 +30,7 @@
 #include "opentxs/crypto/Bip32.hpp"
 #include "opentxs/crypto/Bip39.hpp"
 #include "opentxs/crypto/key/Types.hpp"
+#include "opentxs/crypto/symmetric/Types.hpp"
 #include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -56,11 +57,6 @@ namespace blank
 {
 class EcdsaProvider;
 }  // namespace blank
-
-namespace key
-{
-class Symmetric;
-}  // namespace key
 
 class HashingProvider;
 class OpenSSL;
@@ -90,9 +86,9 @@ public:
         -> const opentxs::crypto::Secp256k1& final;
     auto Libsodium() const noexcept -> const opentxs::crypto::Sodium& final;
     auto OpenSSL() const noexcept -> const opentxs::crypto::OpenSSL& final;
-    auto SymmetricProvider(opentxs::crypto::key::symmetric::Algorithm type)
+    auto SymmetricProvider(opentxs::crypto::symmetric::Algorithm type)
         const noexcept -> const opentxs::crypto::SymmetricProvider& final;
-    auto SymmetricProvider(opentxs::crypto::key::symmetric::Source type)
+    auto SymmetricProvider(opentxs::crypto::symmetric::Source type)
         const noexcept -> const opentxs::crypto::SymmetricProvider& final;
     auto Util() const noexcept -> const crypto::Util& final;
     auto hasLibsecp256k1() const noexcept -> bool final;
@@ -113,8 +109,8 @@ public:
 
 private:
     using AType = opentxs::crypto::key::asymmetric::Algorithm;
-    using SaType = opentxs::crypto::key::symmetric::Algorithm;
-    using SsType = opentxs::crypto::key::symmetric::Source;
+    using SaType = opentxs::crypto::symmetric::Algorithm;
+    using SsType = opentxs::crypto::symmetric::Source;
     using AMap = UnallocatedMap<AType, opentxs::crypto::AsymmetricProvider*>;
     using EMap = UnallocatedMap<AType, opentxs::crypto::EcdsaProvider*>;
     using SaMap = UnallocatedMap<SaType, opentxs::crypto::SymmetricProvider*>;

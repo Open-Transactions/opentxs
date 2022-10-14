@@ -30,10 +30,10 @@ class Crypto;
 
 namespace crypto
 {
-namespace key
+namespace symmetric
 {
-class Symmetric;
-}  // namespace key
+class Key;
+}  // namespace symmetric
 }  // namespace crypto
 
 namespace storage
@@ -64,7 +64,7 @@ auto StorageFSArchive(
     const storage::Config& config,
     const Flag& bucket,
     const UnallocatedCString& folder,
-    crypto::key::Symmetric& key) noexcept -> std::unique_ptr<storage::Plugin>;
+    crypto::symmetric::Key& key) noexcept -> std::unique_ptr<storage::Plugin>;
 auto StorageFSGC(
     const api::Crypto& crypto,
     const api::network::Asio& asio,

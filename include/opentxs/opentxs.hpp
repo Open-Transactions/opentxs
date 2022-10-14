@@ -146,13 +146,13 @@
 #include "opentxs/crypto/key/Keypair.hpp"                // IWYU pragma: export
 #include "opentxs/crypto/key/RSA.hpp"                    // IWYU pragma: export
 #include "opentxs/crypto/key/Secp256k1.hpp"              // IWYU pragma: export
-#include "opentxs/crypto/key/Symmetric.hpp"              // IWYU pragma: export
 #include "opentxs/crypto/key/Types.hpp"                  // IWYU pragma: export
 #include "opentxs/crypto/key/asymmetric/Algorithm.hpp"   // IWYU pragma: export
 #include "opentxs/crypto/key/asymmetric/Mode.hpp"        // IWYU pragma: export
 #include "opentxs/crypto/key/asymmetric/Role.hpp"        // IWYU pragma: export
-#include "opentxs/crypto/key/symmetric/Algorithm.hpp"    // IWYU pragma: export
-#include "opentxs/crypto/key/symmetric/Source.hpp"       // IWYU pragma: export
+#include "opentxs/crypto/symmetric/Algorithm.hpp"        // IWYU pragma: export
+#include "opentxs/crypto/symmetric/Key.hpp"              // IWYU pragma: export
+#include "opentxs/crypto/symmetric/Source.hpp"           // IWYU pragma: export
 #include "opentxs/identity/Authority.hpp"                // IWYU pragma: export
 #include "opentxs/identity/CredentialRole.hpp"           // IWYU pragma: export
 #include "opentxs/identity/CredentialType.hpp"           // IWYU pragma: export

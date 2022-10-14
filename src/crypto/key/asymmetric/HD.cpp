@@ -18,6 +18,7 @@
 #include "crypto/key/asymmetric/EllipticCurve.hpp"
 #include "internal/api/crypto/Symmetric.hpp"
 #include "internal/core/String.hpp"
+#include "internal/crypto/symmetric/Key.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/api/crypto/Hash.hpp"
@@ -32,9 +33,9 @@
 #include "opentxs/crypto/Bip32Child.hpp"
 #include "opentxs/crypto/HashType.hpp"
 #include "opentxs/crypto/key/HD.hpp"
-#include "opentxs/crypto/key/Symmetric.hpp"
 #include "opentxs/crypto/key/asymmetric/Algorithm.hpp"
-#include "opentxs/crypto/key/symmetric/Algorithm.hpp"
+#include "opentxs/crypto/symmetric/Algorithm.hpp"
+#include "opentxs/crypto/symmetric/Key.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Pimpl.hpp"
 #include "util/HDIndex.hpp"
@@ -117,7 +118,7 @@ HD::HD(
     const Data& publicKey,
     const crypto::key::asymmetric::Role role,
     const VersionNumber version,
-    key::Symmetric& sessionKey,
+    symmetric::Key& sessionKey,
     const PasswordPrompt& reason) noexcept(false)
     : EllipticCurve(
           api,
@@ -147,7 +148,7 @@ HD::HD(
     const Bip32Fingerprint parent,
     const crypto::key::asymmetric::Role role,
     const VersionNumber version,
-    key::Symmetric& sessionKey,
+    symmetric::Key& sessionKey,
     const PasswordPrompt& reason) noexcept(false)
     : EllipticCurve(
           api,
@@ -274,15 +275,18 @@ auto HD::get_chain_code(const Lock& lock, const PasswordPrompt& reason) const
         // ciphertext
         auto sessionKey = api_.Crypto().Symmetric().InternalSymmetric().Key(
             privateKey.key(),
-            opentxs::crypto::key::symmetric::Algorithm::ChaCha20Poly1305);
+            opentxs::crypto::symmetric::Algorithm::ChaCha20Poly1305);
 
-        if (false == sessionKey.get()) {
+        if (false == sessionKey) {
             throw std::runtime_error{"Failed to extract session key"};
         }
 
-        auto allocator = plaintext_chain_code_.WriteInto(Secret::Mode::Mem);
+        const auto decrypted = sessionKey.Internal().Decrypt(
+            chaincode,
+            plaintext_chain_code_.WriteInto(Secret::Mode::Mem),
+            reason);
 
-        if (false == sessionKey->Decrypt(chaincode, reason, allocator)) {
+        if (false == decrypted) {
             throw std::runtime_error{"Failed to decrypt chain code"};
         }
     }

@@ -14,6 +14,7 @@
 #include "opentxs/Export.hpp"
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/crypto/key/Types.hpp"
+#include "opentxs/crypto/symmetric/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -36,7 +37,7 @@ namespace opentxs::api::crypto
 auto HaveHDKeys() noexcept -> bool;
 auto HaveSupport(opentxs::crypto::ParameterType) noexcept -> bool;
 auto HaveSupport(opentxs::crypto::key::asymmetric::Algorithm) noexcept -> bool;
-auto HaveSupport(opentxs::crypto::key::symmetric::Algorithm) noexcept -> bool;
+auto HaveSupport(opentxs::crypto::symmetric::Algorithm) noexcept -> bool;
 
 /**
  The api::crypto::Config API is used for accessing crypto-specific configuration

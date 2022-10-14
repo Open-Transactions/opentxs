@@ -9,6 +9,7 @@
 #include <Token.pb.h>
 
 #include "internal/core/Factory.hpp"
+#include "internal/crypto/symmetric/Key.hpp"
 #include "internal/otx/blind/Purse.hpp"
 #include "internal/otx/blind/Types.hpp"
 #include "internal/util/LogMacros.hpp"
@@ -18,8 +19,8 @@
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/core/ByteArray.hpp"
-#include "opentxs/crypto/key/Symmetric.hpp"
-#include "opentxs/crypto/key/symmetric/Algorithm.hpp"
+#include "opentxs/crypto/symmetric/Algorithm.hpp"
+#include "opentxs/crypto/symmetric/Key.hpp"
 #include "opentxs/otx/blind/CashType.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
@@ -27,8 +28,8 @@
 
 namespace opentxs::otx::blind::token
 {
-const opentxs::crypto::key::symmetric::Algorithm Token::mode_{
-    opentxs::crypto::key::symmetric::Algorithm::ChaCha20Poly1305};
+const opentxs::crypto::symmetric::Algorithm Token::mode_{
+    opentxs::crypto::symmetric::Algorithm::ChaCha20Poly1305};
 
 Token::Token(
     const api::Session& api,
@@ -116,15 +117,15 @@ Token::Token(
 }
 
 auto Token::reencrypt(
-    const crypto::key::Symmetric& oldKey,
+    const crypto::symmetric::Key& oldKey,
     const PasswordPrompt& oldPassword,
-    const crypto::key::Symmetric& newKey,
+    const crypto::symmetric::Key& newKey,
     const PasswordPrompt& newPassword,
     proto::Ciphertext& ciphertext) -> bool
 {
     auto plaintext = ByteArray{};
-    auto output =
-        oldKey.Decrypt(ciphertext, oldPassword, plaintext.WriteInto());
+    auto output = oldKey.Internal().Decrypt(
+        ciphertext, plaintext.WriteInto(), oldPassword);
 
     if (false == output) {
         LogError()(OT_PRETTY_CLASS())("Failed to decrypt ciphertext.").Flush();
@@ -132,12 +133,12 @@ auto Token::reencrypt(
         return false;
     }
 
-    output = newKey.Encrypt(
+    output = newKey.Internal().Encrypt(
         plaintext.Bytes(),
-        newPassword,
+        opentxs::crypto::symmetric::Algorithm::ChaCha20Poly1305,
         ciphertext,
-        false,
-        opentxs::crypto::key::symmetric::Algorithm::ChaCha20Poly1305);
+        newPassword,
+        false);
 
     if (false == output) {
         LogError()(OT_PRETTY_CLASS())("Failed to encrypt ciphertext.").Flush();

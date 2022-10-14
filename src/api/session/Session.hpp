@@ -36,7 +36,7 @@
 #include "opentxs/api/session/Storage.hpp"
 #include "opentxs/api/session/Wallet.hpp"
 #include "opentxs/core/Secret.hpp"
-#include "opentxs/crypto/key/Symmetric.hpp"
+#include "opentxs/crypto/symmetric/Key.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Time.hpp"
@@ -138,7 +138,7 @@ public:
     auto Legacy() const noexcept -> const api::Legacy& final;
     auto Lock() const -> std::mutex& final { return master_key_lock_; }
     auto MasterKey(const opentxs::Lock& lock) const
-        -> const opentxs::crypto::key::Symmetric& final;
+        -> const opentxs::crypto::symmetric::Key& final;
     auto NewNym(const identifier::Nym& id) const noexcept -> void override {}
     auto Network() const noexcept -> const network::Network& final
     {
@@ -185,7 +185,8 @@ protected:
         proto::Ciphertext& encrypted_secret_,
         std::optional<Secret>& master_secret_,
         const api::crypto::Symmetric& symmetric,
-        const api::session::Storage& storage) -> OTSymmetricKey;
+        const api::session::Storage& storage)
+        -> opentxs::crypto::symmetric::Key;
 
     auto cleanup() noexcept -> void final;
     // NOTE call from final destructor bodies
@@ -206,7 +207,7 @@ protected:
 private:
     mutable std::mutex master_key_lock_;
     mutable std::optional<Secret> master_secret_;
-    mutable OTSymmetricKey master_key_;
+    mutable opentxs::crypto::symmetric::Key master_key_;
     mutable std::chrono::seconds password_duration_;
     mutable Time last_activity_;
     std::promise<void> init_promise_;

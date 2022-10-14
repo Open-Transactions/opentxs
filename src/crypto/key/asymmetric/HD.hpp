@@ -33,10 +33,10 @@ class Session;
 
 namespace crypto
 {
-namespace key
+namespace symmetric
 {
-class Symmetric;
-}  // namespace key
+class Key;
+}  // namespace symmetric
 
 class EcdsaProvider;
 }  // namespace crypto
@@ -98,7 +98,7 @@ protected:
        const Data& publicKey,
        const crypto::key::asymmetric::Role role,
        const VersionNumber version,
-       key::Symmetric& sessionKey,
+       symmetric::Key& sessionKey,
        const PasswordPrompt& reason)
     noexcept(false);
     HD(const api::Session& api,
@@ -111,7 +111,7 @@ protected:
        const Bip32Fingerprint parent,
        const crypto::key::asymmetric::Role role,
        const VersionNumber version,
-       key::Symmetric& sessionKey,
+       symmetric::Key& sessionKey,
        const PasswordPrompt& reason)
     noexcept(false);
     HD(const api::Session& api,

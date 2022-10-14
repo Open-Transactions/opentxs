@@ -49,7 +49,7 @@
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/crypto/key/Asymmetric.hpp"
 #include "opentxs/crypto/key/Keypair.hpp"
-#include "opentxs/crypto/key/Symmetric.hpp"
+#include "opentxs/crypto/symmetric/Key.hpp"
 #include "opentxs/identity/Source.hpp"
 #include "opentxs/identity/credential/Base.hpp"
 #include "opentxs/identity/credential/Key.hpp"
@@ -1147,7 +1147,7 @@ auto Authority::Unlock(
     const crypto::key::Asymmetric& dhKey,
     const std::uint32_t tag,
     const crypto::key::asymmetric::Algorithm type,
-    const crypto::key::Symmetric& key,
+    const crypto::symmetric::Key& key,
     PasswordPrompt& reason) const noexcept -> bool
 {
     for (const auto& [id, pCredential] : key_credentials_) {

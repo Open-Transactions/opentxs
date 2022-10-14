@@ -58,7 +58,7 @@ Storage::Storage(
           zmq))
     , factory_(*factory_p_)
     , crypto_(*crypto_p_)
-    , storage_encryption_key_(opentxs::crypto::key::Symmetric::Factory())
+    , storage_encryption_key_()
 {
     OT_ASSERT(storage_);
 }
@@ -88,9 +88,9 @@ auto Storage::init(
             factory.PasswordPrompt("Initializaing storage encryption");
         storage_encryption_key_ = seeds.GetStorageKey(seed, reason);
 
-        if (storage_encryption_key_.get()) {
+        if (storage_encryption_key_) {
             LogDetail()(OT_PRETTY_CLASS())("Obtained storage key ")(
-                storage_encryption_key_->ID(reason))
+                storage_encryption_key_.ID(reason))
                 .Flush();
         } else {
             LogError()(OT_PRETTY_CLASS())("Failed to load storage key ")(
@@ -110,7 +110,7 @@ auto Storage::start() noexcept -> void
 
     storage.InitBackup();
 
-    if (storage_encryption_key_.get()) {
+    if (storage_encryption_key_) {
         storage.InitEncryptedBackup(storage_encryption_key_);
     }
 

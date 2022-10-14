@@ -8,11 +8,10 @@
 
 #include <utility>
 
-#include "internal/crypto/key/Null.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
 #include "opentxs/core/identifier/UnitDefinition.hpp"
-#include "opentxs/crypto/key/Symmetric.hpp"
+#include "opentxs/crypto/symmetric/Key.hpp"
 #include "opentxs/otx/blind/Purse.hpp"
 #include "opentxs/otx/blind/PurseType.hpp"
 #include "opentxs/otx/blind/Token.hpp"
@@ -40,17 +39,17 @@ auto Purse::Imp::Notary() const -> const identifier::Notary&
     return id;
 }
 
-auto Purse::Imp::PrimaryKey(PasswordPrompt&) -> crypto::key::Symmetric&
+auto Purse::Imp::PrimaryKey(PasswordPrompt&) -> crypto::symmetric::Key&
 {
-    static auto blank = crypto::key::blank::Symmetric{};
+    static auto blank = crypto::symmetric::Key{};
 
     return blank;
 }
 
 auto Purse::Imp::SecondaryKey(const identity::Nym&, PasswordPrompt&)
-    -> const crypto::key::Symmetric&
+    -> const crypto::symmetric::Key&
 {
-    static auto blank = crypto::key::blank::Symmetric{};
+    static auto blank = crypto::symmetric::Key{};
 
     return blank;
 }
@@ -68,6 +67,8 @@ auto Purse::Imp::Value() const -> const Amount&
 
     return blank;
 }
+
+Purse::Imp::~Imp() = default;
 }  // namespace opentxs::otx::blind
 
 namespace opentxs::otx::blind

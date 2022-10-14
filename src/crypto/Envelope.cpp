@@ -24,6 +24,7 @@
 #include "internal/core/Armored.hpp"
 #include "internal/crypto/Envelope.hpp"
 #include "internal/crypto/key/Key.hpp"
+#include "internal/crypto/symmetric/Key.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/serialization/protobuf/Proto.tpp"
 #include "internal/util/LogMacros.hpp"
@@ -40,9 +41,9 @@
 #include "opentxs/core/identifier/Nym.hpp"      // IWYU pragma: keep
 #include "opentxs/crypto/Parameters.hpp"
 #include "opentxs/crypto/key/Asymmetric.hpp"
-#include "opentxs/crypto/key/Symmetric.hpp"
 #include "opentxs/crypto/key/asymmetric/Role.hpp"
-#include "opentxs/crypto/key/symmetric/Algorithm.hpp"
+#include "opentxs/crypto/symmetric/Algorithm.hpp"
+#include "opentxs/crypto/symmetric/Key.hpp"
 #include "opentxs/identity/Authority.hpp"
 #include "opentxs/identity/Nym.hpp"
 #include "opentxs/util/Container.hpp"
@@ -161,7 +162,7 @@ auto Envelope::attach_session_keys(
     const identity::Nym& nym,
     const Solution& solution,
     const PasswordPrompt& previousPassword,
-    const key::Symmetric& masterKey,
+    const symmetric::Key& masterKey,
     const PasswordPrompt& reason) noexcept -> bool
 {
     LogVerbose()(OT_PRETTY_CLASS())("Recipient ")(nym.ID())(" has ")(
@@ -184,10 +185,9 @@ auto Envelope::attach_session_keys(
             return false;
         }
 
-        auto& key = std::get<2>(session_keys_.emplace_back(
-                                    tag, type, OTSymmetricKey(masterKey)))
-                        .get();
-        const auto locked = key.ChangePassword(previousPassword, password);
+        auto& key = std::get<2>(
+            session_keys_.emplace_back(tag, type, symmetric::Key(masterKey)));
+        const auto locked = key.ChangePassword(password, previousPassword);
 
         if (false == locked) {
             LogError()(OT_PRETTY_CLASS())("Failed to lock session key").Flush();
@@ -323,7 +323,7 @@ auto Envelope::get_dh_key(
 
 auto Envelope::Open(
     const identity::Nym& nym,
-    const AllocateOutput plaintext,
+    AllocateOutput&& plaintext,
     const PasswordPrompt& reason) const noexcept -> bool
 {
     if (false == bool(ciphertext_)) {
@@ -339,7 +339,8 @@ auto Envelope::Open(
             api_.Factory().PasswordPrompt(reason.GetDisplayString());
         const auto& key = unlock_session_key(nym, password);
 
-        return key.Decrypt(ciphertext, password, plaintext);
+        return key.Internal().Decrypt(
+            ciphertext, std::move(plaintext), password);
     } catch (...) {
         LogVerbose()(OT_PRETTY_CLASS())("No session keys for this nym").Flush();
 
@@ -373,7 +374,7 @@ auto Envelope::read_sk(
             translate(tagged.type()),
             api.Crypto().Symmetric().InternalSymmetric().Key(
                 tagged.key(),
-                opentxs::crypto::key::symmetric::Algorithm::ChaCha20Poly1305)});
+                opentxs::crypto::symmetric::Algorithm::ChaCha20Poly1305)});
     }
 
     return output;
@@ -503,7 +504,7 @@ auto Envelope::seal(
     OT_ASSERT(ciphertext_);
 
     const auto encrypted =
-        masterKey->Encrypt(plaintext, password, *ciphertext_, false);
+        masterKey.Internal().Encrypt(plaintext, *ciphertext_, password, false);
 
     if (false == encrypted) {
         LogError()(OT_PRETTY_CLASS())("Failed to encrypt plaintext").Flush();
@@ -558,7 +559,9 @@ auto Envelope::Serialize(SerializedType& output) const noexcept -> bool
         tagged.set_version(tagged_key_version_);
         tagged.set_tag(tag);
         tagged.set_type(translate(type));
-        if (false == key->Serialize(*tagged.mutable_key())) { return false; }
+        if (false == key.Internal().Serialize(*tagged.mutable_key())) {
+            return false;
+        }
     }
 
     if (ciphertext_) { *output.mutable_ciphertext() = *ciphertext_; }
@@ -598,7 +601,7 @@ auto Envelope::test_solution(
 
 auto Envelope::unlock_session_key(
     const identity::Nym& nym,
-    PasswordPrompt& reason) const noexcept(false) -> const key::Symmetric&
+    PasswordPrompt& reason) const noexcept(false) -> const symmetric::Key&
 {
     for (const auto& [tag, type, key] : session_keys_) {
         try {
