@@ -43,10 +43,10 @@ class Session;
 
 namespace crypto
 {
-namespace key
+namespace asymmetric
 {
-class Asymmetric;
-}  // namespace key
+class Key;
+}  // namespace asymmetric
 }  // namespace crypto
 
 namespace identity
@@ -73,7 +73,7 @@ public:
     auto GetName(String& strName) const -> void { strName.Set(name_->Get()); }
     auto SaveContractRaw(String& strOutput) const -> bool;
     virtual auto VerifySignature(const identity::Nym& theNym) const -> bool;
-    virtual auto VerifyWithKey(const crypto::key::Asymmetric& theKey) const
+    virtual auto VerifyWithKey(const crypto::asymmetric::Key& theKey) const
         -> bool;
 
     virtual auto LoadContractFromString(const String& theStr) -> bool;
@@ -85,7 +85,7 @@ public:
         const identity::Nym& theNym,
         const PasswordPrompt& reason) -> bool;
     auto SignWithKey(
-        const crypto::key::Asymmetric& theKey,
+        const crypto::asymmetric::Key& theKey,
         const PasswordPrompt& reason) -> bool;
 
     Contract() = delete;
@@ -243,7 +243,7 @@ protected:
         Signature& theSignature,
         const PasswordPrompt& reason) -> bool;
     auto SignContract(
-        const crypto::key::Asymmetric& theKey,
+        const crypto::asymmetric::Key& theKey,
         Signature& theSignature,
         const crypto::HashType hashType,
         const PasswordPrompt& reason) -> bool;
@@ -276,7 +276,7 @@ protected:
         const identity::Nym& theNym,
         const Signature& theSignature) const -> bool;
     auto VerifySignature(
-        const crypto::key::Asymmetric& theKey,
+        const crypto::asymmetric::Key& theKey,
         const Signature& theSignature,
         const crypto::HashType hashType) const -> bool;
     auto GetContractPublicNym() const -> Nym_p;

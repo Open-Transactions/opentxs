@@ -11,8 +11,9 @@
 
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/Mutex.hpp"
+#include "internal/util/Pimpl.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
-#include "opentxs/util/Pimpl.hpp"
+#include "opentxs/util/Writer.hpp"
 
 template class opentxs::Pimpl<opentxs::network::zeromq::ReplyCallback>;
 

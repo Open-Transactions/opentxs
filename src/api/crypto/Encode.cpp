@@ -14,13 +14,17 @@
 #include <sstream>
 #include <stdexcept>
 #include <string_view>
+#include <utility>
 
 #include "base58/base58.h"
 #include "base64/base64.h"
 #include "internal/api/crypto/Factory.hpp"
+#include "internal/core/Core.hpp"
 #include "internal/core/String.hpp"
+#include "internal/util/Bytes.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
+#include "internal/util/Pimpl.hpp"
 #include "opentxs/OT.hpp"
 #include "opentxs/api/Context.hpp"
 #include "opentxs/api/Factory.hpp"
@@ -34,6 +38,8 @@
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
+#include "opentxs/util/WriteBuffer.hpp"
+#include "opentxs/util/Writer.hpp"
 
 namespace opentxs::factory
 {
@@ -53,25 +59,135 @@ Encode::Encode(const api::Crypto& crypto) noexcept
 {
 }
 
-auto Encode::Base64Encode(
-    const std::uint8_t* inputStart,
-    const std::size_t& size) const -> UnallocatedCString
+auto Encode::Base58CheckEncode(ReadView input, Writer&& output) const noexcept
+    -> bool
 {
-    auto output = UnallocatedCString{};
+    try {
+        if (false == valid(input)) {
 
-    if (std::numeric_limits<int>::max() < size) { return {}; }
+            return 0_uz == output.Reserve(0_uz).size();
+        }
 
-    const auto bytes = static_cast<int>(size);
-    output.resize(::Base64encode_len(bytes));
-    ::Base64encode(
-        const_cast<char*>(output.data()),
-        reinterpret_cast<const char*>(inputStart),
-        bytes);
+        static constexpr auto checksumBytes = 4_uz;
+        const auto checksum = [&] {
+            auto out = ByteArray{};
+            const auto rc = crypto_.Hash().Digest(
+                opentxs::crypto::HashType::Sha256DC, input, out.WriteInto());
 
-    return BreakLines(output);
+            if (false == rc) {
+                throw std::runtime_error{"failed to calculate checksum"};
+            }
+
+            return out;
+        }();
+
+        OT_ASSERT(checksumBytes == checksum.size());
+
+        const auto size = input.size();
+        const auto total = checksumBytes + size;
+        const auto preimage = [&] {
+            auto out = factory::Secret(total);
+
+            OT_ASSERT(total == out.size());
+
+            auto* i = static_cast<std::byte*>(out.data());
+            auto rc = copy(input, preallocated(size, i));
+            std::advance(i, size);
+
+            OT_ASSERT(rc);
+
+            rc = copy(checksum.Bytes(), preallocated(checksumBytes, i));
+
+            OT_ASSERT(rc);
+
+            return out;
+        }();
+        // TODO modify bitcoin_base58::EncodeBase58 to accept Writer to avoid
+        // unnecessary copy
+        const auto temp = bitcoin_base58::EncodeBase58(
+            static_cast<const unsigned char*>(preimage.data()),
+            static_cast<const unsigned char*>(preimage.data()) +
+                preimage.size());
+
+        return copy(temp, std::move(output));
+    } catch (const std::exception& e) {
+        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+
+        return false;
+    }
 }
 
-auto Encode::Base64Decode(const UnallocatedCString&& input, RawData& output)
+auto Encode::Base58CheckDecode(std::string_view input, Writer&& output)
+    const noexcept -> bool
+{
+    try {
+        if (false == valid(input)) {
+
+            return 0_uz == output.Reserve(0_uz).size();
+        }
+
+        const auto sanitized{SanatizeBase58(input)};
+        auto vector = UnallocatedVector<unsigned char>{};
+        const auto decoded =
+            bitcoin_base58::DecodeBase58(sanitized.c_str(), vector);
+        constexpr auto checkBytes = 4_uz;
+
+        if (false == decoded) { throw std::runtime_error{"decode failure"}; }
+
+        if (checkBytes > vector.size()) {
+            throw std::runtime_error{"checksum missing"};
+        }
+
+        const auto bytes = reader(vector);
+        const auto payload = bytes.substr(0_uz, vector.size() - checkBytes);
+        const auto checksum = bytes.substr(payload.size());
+        const auto calculated = [&] {
+            auto out = ByteArray{};
+            auto rc = crypto_.Hash().Digest(
+                opentxs::crypto::HashType::Sha256DC, payload, out.WriteInto());
+
+            if (false == rc) {
+                throw std::runtime_error{"failed to calculate checksum"};
+            }
+
+            return out;
+        }();
+
+        if (calculated.Bytes() != checksum) {
+            throw std::runtime_error{"checksum mismatch"};
+        }
+
+        return copy(payload, std::move(output));
+    } catch (const std::exception& e) {
+        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+
+        return false;
+    }
+}
+
+auto Encode::Base64Encode(ReadView input, Writer&& output) const noexcept
+    -> bool
+{
+    const auto temp = base64_encode(
+        reinterpret_cast<const std::uint8_t*>(input.data()), input.size());
+
+    return copy(temp, std::move(output));
+}
+
+auto Encode::Base64Decode(std::string_view input, Writer&& output)
+    const noexcept -> bool
+{
+    RawData decoded;
+
+    if (base64_decode(SanatizeBase64(input), decoded)) {
+
+        return copy(reader(decoded), std::move(output));
+    }
+
+    return false;
+}
+
+auto Encode::base64_decode(const UnallocatedCString&& input, RawData& output)
     const -> bool
 {
     output.resize(::Base64decode_len(input.data()), 0x0);
@@ -86,6 +202,23 @@ auto Encode::Base64Decode(const UnallocatedCString&& input, RawData& output)
     output.resize(decoded);
 
     return true;
+}
+
+auto Encode::base64_encode(const std::uint8_t* inputStart, std::size_t size)
+    const -> UnallocatedCString
+{
+    auto output = UnallocatedCString{};
+
+    if (std::numeric_limits<int>::max() < size) { return {}; }
+
+    const auto bytes = static_cast<int>(size);
+    output.resize(::Base64encode_len(bytes));
+    ::Base64encode(
+        const_cast<char*>(output.data()),
+        reinterpret_cast<const char*>(inputStart),
+        bytes);
+
+    return BreakLines(output);
 }
 
 auto Encode::BreakLines(const UnallocatedCString& input) const
@@ -111,137 +244,7 @@ auto Encode::BreakLines(const UnallocatedCString& input) const
     return output;
 }
 
-auto Encode::DataEncode(const UnallocatedCString& input) const
-    -> UnallocatedCString
-{
-    return Base64Encode(
-        reinterpret_cast<const std::uint8_t*>(input.data()), input.size());
-}
-
-auto Encode::DataEncode(const Data& input) const -> UnallocatedCString
-{
-    return Base64Encode(
-        static_cast<const std::uint8_t*>(input.data()), input.size());
-}
-
-auto Encode::DataDecode(const UnallocatedCString& input) const
-    -> UnallocatedCString
-{
-    RawData decoded;
-
-    if (Base64Decode(SanatizeBase64(input), decoded)) {
-
-        return {reinterpret_cast<const char*>(decoded.data()), decoded.size()};
-    }
-
-    return "";
-}
-
-auto Encode::IdentifierEncode(const ReadView input) const -> UnallocatedCString
-{
-    try {
-        if (false == valid(input)) { throw std::runtime_error{"empty input"}; }
-
-        static constexpr auto checksumBytes = 4_uz;
-        const auto checksum = [&] {
-            auto out = ByteArray{};
-            const auto rc = crypto_.Hash().Digest(
-                opentxs::crypto::HashType::Sha256DC, input, out.WriteInto());
-
-            if (false == rc) {
-                throw std::runtime_error{"failed to calculate checksum"};
-            }
-
-            return out;
-        }();
-
-        OT_ASSERT(checksumBytes == checksum.size());
-
-        const auto size = input.size();
-        const auto preimage = [&] {
-            auto out = ByteArray{};
-            out.SetSize(checksumBytes + size);
-            auto rc = copy(input, preallocated(size, out.data()));
-
-            OT_ASSERT(rc);
-
-            rc = copy(
-                checksum.Bytes(),
-                preallocated(
-                    checksumBytes,
-                    std::next(static_cast<std::byte*>(out.data()), size)));
-
-            OT_ASSERT(rc);
-
-            return out;
-        }();
-
-        return bitcoin_base58::EncodeBase58(
-            static_cast<const unsigned char*>(preimage.data()),
-            static_cast<const unsigned char*>(preimage.data()) +
-                preimage.size());
-    } catch (...) {
-
-        return {};
-    }
-}
-
-auto Encode::IdentifierEncode(const Secret& input) const -> UnallocatedCString
-{
-    const auto bytes = input.Bytes();
-
-    if (0 == bytes.size()) { return {}; }
-
-    auto preimage =
-        ByteArray{bytes.data(), bytes.size()};  // TODO should be secret
-    auto checksum = ByteArray{};
-    auto hash = crypto_.Hash().Digest(
-        opentxs::crypto::HashType::Sha256DC,
-        preimage.Bytes(),
-        checksum.WriteInto());
-
-    OT_ASSERT(4 == checksum.size());
-    OT_ASSERT(hash);
-
-    preimage += checksum;
-
-    return bitcoin_base58::EncodeBase58(
-        static_cast<const unsigned char*>(preimage.data()),
-        static_cast<const unsigned char*>(preimage.data()) + preimage.size());
-}
-
-auto Encode::IdentifierDecode(const ReadView input) const -> UnallocatedCString
-{
-    const auto sanitized{SanatizeBase58(input)};
-    auto vector = UnallocatedVector<unsigned char>{};
-    const auto decoded =
-        bitcoin_base58::DecodeBase58(sanitized.c_str(), vector);
-
-    if (false == decoded) { return {}; }
-
-    if (4 > vector.size()) { return {}; }
-
-    const auto output = UnallocatedCString{
-        reinterpret_cast<const char*>(vector.data()), vector.size() - 4};
-    auto checksum = ByteArray{};
-    const auto incoming =
-        ByteArray{std::next(vector.data(), vector.size() - 4), 4};
-    auto hash = crypto_.Hash().Digest(
-        opentxs::crypto::HashType::Sha256DC, output, checksum.WriteInto());
-
-    OT_ASSERT(4 == checksum.size());
-    OT_ASSERT(hash);
-
-    if (incoming != checksum) {
-        LogTrace()(OT_PRETTY_CLASS())("Checksum failure").Flush();
-
-        return {};
-    }
-
-    return output;
-}
-
-auto Encode::IsBase62(const UnallocatedCString& str) const -> bool
+auto Encode::IsBase64(std::string_view str) const noexcept -> bool
 {
     return str.find_first_not_of("0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHI"
                                  "JKLMNOPQRSTUVWXYZ") ==
@@ -261,7 +264,10 @@ auto Encode::Nonce(const std::uint32_t size, Data& rawOutput) const -> OTString
     rawOutput.SetSize(size);
     auto source = opentxs::Context().Factory().Secret(0);
     source.Randomize(size);
-    auto nonce = String::Factory(IdentifierEncode(source));
+    auto nonce = String::Factory();
+    // TODO error handling
+    [[maybe_unused]] const auto rc =
+        Base58CheckEncode(source.Bytes(), nonce->WriteInto());
     rawOutput.Assign(source.Bytes());
 
     return nonce;
@@ -280,55 +286,20 @@ auto Encode::SanatizeBase58(std::string_view input) const -> UnallocatedCString
         UnallocatedCString{input}, std::regex("[^1-9A-HJ-NP-Za-km-z]"), "");
 }
 
-auto Encode::SanatizeBase64(const UnallocatedCString& input) const
-    -> UnallocatedCString
+auto Encode::SanatizeBase64(std::string_view input) const -> UnallocatedCString
 {
-    return std::regex_replace(input, std::regex("[^0-9A-Za-z+/=]"), "");
+    return std::regex_replace(
+        UnallocatedCString{input}, std::regex("[^0-9A-Za-z+/=]"), "");
 }
 
-auto Encode::Z85Encode(const Data& input) const -> UnallocatedCString
+auto Encode::Z85Encode(ReadView input, Writer&& output) const noexcept -> bool
 {
-    auto output = UnallocatedCString{};
-
-    if (opentxs::network::zeromq::RawToZ85(input.Bytes(), writer(output))) {
-        return output;
-    } else {
-        return {};
-    }
+    return opentxs::network::zeromq::RawToZ85(input, std::move(output));
 }
 
-auto Encode::Z85Encode(const UnallocatedCString& input) const
-    -> UnallocatedCString
+auto Encode::Z85Decode(std::string_view input, Writer&& output) const noexcept
+    -> bool
 {
-    auto output = UnallocatedCString{};
-
-    if (opentxs::network::zeromq::RawToZ85(input, writer(output))) {
-        return output;
-    } else {
-        return {};
-    }
-}
-
-auto Encode::Z85Decode(const Data& input) const -> ByteArray
-{
-    auto output = ByteArray{};
-
-    if (opentxs::network::zeromq::Z85ToRaw(input.Bytes(), output.WriteInto())) {
-        return output;
-    } else {
-        return ByteArray{};
-    }
-}
-
-auto Encode::Z85Decode(const UnallocatedCString& input) const
-    -> UnallocatedCString
-{
-    auto output = UnallocatedCString{};
-
-    if (opentxs::network::zeromq::Z85ToRaw(input, writer(output))) {
-        return output;
-    } else {
-        return {};
-    }
+    return opentxs::network::zeromq::Z85ToRaw(input, std::move(output));
 }
 }  // namespace opentxs::api::crypto::imp

@@ -111,14 +111,12 @@ auto Regtest_fixture_simple::TransactionGenerator(
             Subchain::External, client_1_.Factory().PasswordPrompt(""));
         const auto& element =
             account.BalanceElement(Subchain::External, index.value_or(0));
-        const auto key = element.Key();
+        const auto& key = element.Key();
 
         const auto& [bytes, value, pattern] = meta.emplace_back(
             element.PubkeyHash(), baseAmount, Pattern::PayToPubkeyHash);
         output.emplace_back(
-            value,
-            miner_.Factory().BitcoinScriptP2PKH(test_chain_, *key),
-            keys);
+            value, miner_.Factory().BitcoinScriptP2PKH(test_chain_, key), keys);
     }
 
     auto output_transaction = miner_.Factory().BitcoinGenerationTransaction(

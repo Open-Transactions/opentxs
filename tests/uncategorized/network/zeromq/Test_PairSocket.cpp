@@ -14,6 +14,7 @@
 #include "internal/network/zeromq/ListenCallback.hpp"
 #include "internal/network/zeromq/socket/Pair.hpp"
 #include "internal/network/zeromq/socket/SocketType.hpp"
+#include "internal/util/Pimpl.hpp"
 
 #define TEST_ENDPOINT "inproc://opentxs/pairsocket_endpoint"
 

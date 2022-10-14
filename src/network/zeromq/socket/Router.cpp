@@ -14,6 +14,7 @@
 #include "internal/network/zeromq/socket/Router.hpp"
 #include "internal/network/zeromq/socket/SocketType.hpp"
 #include "internal/util/LogMacros.hpp"
+#include "internal/util/Pimpl.hpp"
 #include "network/zeromq/curve/Client.hpp"
 #include "network/zeromq/curve/Server.hpp"
 #include "network/zeromq/socket/Bidirectional.tpp"
@@ -22,7 +23,6 @@
 #include "network/zeromq/socket/Socket.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/util/Log.hpp"
-#include "opentxs/util/Pimpl.hpp"
 
 template class opentxs::Pimpl<opentxs::network::zeromq::socket::Router>;
 

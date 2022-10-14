@@ -30,6 +30,7 @@
 #include "internal/serialization/protobuf/Proto.tpp"
 #include "internal/serialization/protobuf/verify/PeerObject.hpp"
 #include "internal/util/LogMacros.hpp"
+#include "internal/util/Pimpl.hpp"
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
@@ -38,7 +39,7 @@
 #include "opentxs/identity/Nym.hpp"
 #include "opentxs/otx/blind/Purse.hpp"
 #include "opentxs/util/Log.hpp"
-#include "opentxs/util/Pimpl.hpp"
+#include "opentxs/util/Writer.hpp"
 
 namespace opentxs
 {

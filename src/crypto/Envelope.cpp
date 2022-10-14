@@ -23,6 +23,7 @@
 #include "internal/api/session/FactoryAPI.hpp"
 #include "internal/core/Armored.hpp"
 #include "internal/crypto/Envelope.hpp"
+#include "internal/crypto/asymmetric/Key.hpp"
 #include "internal/crypto/key/Key.hpp"
 #include "internal/crypto/symmetric/Key.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
@@ -40,8 +41,9 @@
 #include "opentxs/core/identifier/Generic.hpp"  // IWYU pragma: keep
 #include "opentxs/core/identifier/Nym.hpp"      // IWYU pragma: keep
 #include "opentxs/crypto/Parameters.hpp"
-#include "opentxs/crypto/key/Asymmetric.hpp"
-#include "opentxs/crypto/key/asymmetric/Role.hpp"
+#include "opentxs/crypto/asymmetric/Algorithm.hpp"
+#include "opentxs/crypto/asymmetric/Key.hpp"
+#include "opentxs/crypto/asymmetric/Role.hpp"
 #include "opentxs/crypto/symmetric/Algorithm.hpp"
 #include "opentxs/crypto/symmetric/Key.hpp"
 #include "opentxs/identity/Authority.hpp"
@@ -50,7 +52,7 @@
 #include "opentxs/util/Iterator.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/PasswordPrompt.hpp"
-#include "opentxs/util/Pimpl.hpp"
+#include "opentxs/util/Writer.hpp"
 
 namespace opentxs
 {
@@ -91,7 +93,7 @@ const VersionNumber Envelope::tagged_key_version_{1};
 // test_solution() will not produce the correct result
 const Envelope::SupportedKeys Envelope::supported_{[] {
     auto out = SupportedKeys{};
-    using Type = crypto::key::asymmetric::Algorithm;
+    using Type = crypto::asymmetric::Algorithm;
 
     if (api::crypto::HaveSupport(Type::Legacy)) {
         out.emplace_back(Type::Legacy);
@@ -110,9 +112,9 @@ const Envelope::SupportedKeys Envelope::supported_{[] {
     return out;
 }()};
 const Envelope::WeightMap Envelope::key_weights_{
-    {crypto::key::asymmetric::Algorithm::ED25519, 1},
-    {crypto::key::asymmetric::Algorithm::Secp256k1, 2},
-    {crypto::key::asymmetric::Algorithm::Legacy, 4},
+    {crypto::asymmetric::Algorithm::ED25519, 1},
+    {crypto::asymmetric::Algorithm::Secp256k1, 2},
+    {crypto::asymmetric::Algorithm::Legacy, 4},
 };
 const Envelope::Solutions Envelope::solutions_{calculate_solutions()};
 
@@ -174,8 +176,8 @@ auto Envelope::attach_session_keys(
         auto tag = Tag{};
         auto password = api_.Factory().Secret(0);
         const auto& dhKey = get_dh_key(type, authority, reason);
-        const auto haveTag =
-            dhKey.CalculateTag(authority, type, reason, tag, password);
+        const auto haveTag = dhKey.Internal().CalculateTag(
+            authority, type, reason, tag, password);
 
         if (false == haveTag) {
             LogError()(OT_PRETTY_CLASS())(
@@ -292,30 +294,30 @@ auto Envelope::find_solution(const Nyms& recipients, Solution& map) noexcept
 }
 
 auto Envelope::get_dh_key(
-    const crypto::key::asymmetric::Algorithm type,
+    const crypto::asymmetric::Algorithm type,
     const identity::Authority& nym,
-    const PasswordPrompt& reason) noexcept -> const key::Asymmetric&
+    const PasswordPrompt& reason) noexcept -> const asymmetric::Key&
 {
-    if (crypto::key::asymmetric::Algorithm::Legacy != type) {
+    if (crypto::asymmetric::Algorithm::Legacy != type) {
         const auto& set = dh_keys_.at(type);
 
         OT_ASSERT(1 == set.size());
 
         return *set.cbegin();
     } else {
-        OT_ASSERT(api::crypto::HaveSupport(
-            crypto::key::asymmetric::Algorithm::Legacy));
+        OT_ASSERT(
+            api::crypto::HaveSupport(crypto::asymmetric::Algorithm::Legacy));
 
         auto params = Parameters{type};
         params.SetDHParams(nym.Params(type));
         auto& set = dh_keys_[type];
         set.emplace_back(api_.Factory().AsymmetricKey(
-            params, reason, crypto::key::asymmetric::Role::Encrypt));
-        const auto& key = set.crbegin()->get();
+            crypto::asymmetric::Role::Encrypt, params, reason));
+        const auto& key = *set.crbegin();
 
-        OT_ASSERT(key.keyType() == type);
-        OT_ASSERT(key.Role() == crypto::key::asymmetric::Role::Encrypt);
-        OT_ASSERT(0 < key.Params().size());
+        OT_ASSERT(key.Type() == type);
+        OT_ASSERT(key.Role() == crypto::asymmetric::Role::Encrypt);
+        OT_ASSERT(0 < key.Internal().Params().size());
 
         return key;
     }
@@ -323,7 +325,7 @@ auto Envelope::get_dh_key(
 
 auto Envelope::Open(
     const identity::Nym& nym,
-    AllocateOutput&& plaintext,
+    Writer&& plaintext,
     const PasswordPrompt& reason) const noexcept -> bool
 {
     if (false == bool(ciphertext_)) {
@@ -476,18 +478,17 @@ auto Envelope::seal(
         try {
             const auto params = Parameters{type};
 
-            if (crypto::key::asymmetric::Algorithm::Legacy != type) {
+            if (crypto::asymmetric::Algorithm::Legacy != type) {
                 auto& set = dh_keys_[type];
                 set.emplace_back(api_.Factory().AsymmetricKey(
+                    opentxs::crypto::asymmetric::Role::Encrypt,
                     params,
-                    reason,
-                    opentxs::crypto::key::asymmetric::Role::Encrypt));
-                const auto& key = set.crbegin()->get();
+                    reason));
+                const auto& key = *set.crbegin();
 
-                OT_ASSERT(key.keyType() == type);
+                OT_ASSERT(key.Type() == type);
                 OT_ASSERT(
-                    key.Role() ==
-                    opentxs::crypto::key::asymmetric::Role::Encrypt);
+                    key.Role() == opentxs::crypto::asymmetric::Role::Encrypt);
             }
         } catch (...) {
             LogError()(OT_PRETTY_CLASS())("Failed to generate DH key").Flush();
@@ -532,12 +533,12 @@ auto Envelope::set_default_password(
         api.Factory().SecretFromText("opentxs"));
 }
 
-auto Envelope::Serialize(AllocateOutput destination) const noexcept -> bool
+auto Envelope::Serialize(Writer&& destination) const noexcept -> bool
 {
     auto serialized = proto::Envelope{};
     if (false == Serialize(serialized)) { return false; }
 
-    return write(serialized, destination);
+    return write(serialized, std::move(destination));
 }
 
 auto Envelope::Serialize(SerializedType& output) const noexcept -> bool
@@ -547,7 +548,7 @@ auto Envelope::Serialize(SerializedType& output) const noexcept -> bool
     for (const auto& [type, set] : dh_keys_) {
         for (const auto& key : set) {
             auto serialized = proto::AsymmetricKey{};
-            if (false == key->asPublic()->Serialize(serialized)) {
+            if (false == key.asPublic().Internal().Serialize(serialized)) {
                 return false;
             }
             *output.add_dhkey() = serialized;
@@ -615,4 +616,6 @@ auto Envelope::unlock_session_key(
 
     throw std::runtime_error("No session key usable by this nym");
 }
+
+Envelope::~Envelope() = default;
 }  // namespace opentxs::crypto::implementation

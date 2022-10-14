@@ -44,6 +44,7 @@
 #include "internal/serialization/protobuf/verify/PaymentWorkflow.hpp"
 #include "internal/serialization/protobuf/verify/RPCPush.hpp"
 #include "internal/util/LogMacros.hpp"
+#include "internal/util/Pimpl.hpp"
 #include "internal/util/Time.hpp"
 #include "opentxs/api/network/Network.hpp"
 #include "opentxs/api/session/Activity.hpp"
@@ -69,8 +70,8 @@
 #include "opentxs/otx/client/PaymentWorkflowType.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Log.hpp"
-#include "opentxs/util/Pimpl.hpp"
 #include "opentxs/util/WorkType.hpp"
+#include "opentxs/util/Writer.hpp"
 
 namespace opentxs
 {

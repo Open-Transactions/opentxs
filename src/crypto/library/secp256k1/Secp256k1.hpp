@@ -19,9 +19,9 @@ extern "C" {
 #include "opentxs/core/Secret.hpp"
 #include "opentxs/crypto/HashType.hpp"
 #include "opentxs/crypto/SecretStyle.hpp"
-#include "opentxs/crypto/key/asymmetric/Role.hpp"
+#include "opentxs/crypto/asymmetric/Types.hpp"
 #include "opentxs/identity/Types.hpp"
-#include "opentxs/util/Bytes.hpp"
+#include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -39,11 +39,10 @@ class Session;
 
 namespace crypto
 {
-namespace key
+namespace asymmetric
 {
-class Asymmetric;
-class Parameters;
-}  // namespace key
+class Key;
+}  // namespace asymmetric
 
 class Parameters;
 }  // namespace crypto
@@ -51,6 +50,7 @@ class Parameters;
 class ByteArray;
 class PasswordPrompt;
 class Secret;
+class Writer;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -61,23 +61,19 @@ class Secp256k1 final : virtual public crypto::Secp256k1,
                         public EcdsaProvider
 {
 public:
-    auto PubkeyAdd(
-        const ReadView pubkey,
-        const ReadView scalar,
-        const AllocateOutput result) const noexcept -> bool final;
+    auto PubkeyAdd(ReadView pubkey, ReadView scalar, Writer&& result)
+        const noexcept -> bool final;
     using AsymmetricProvider::RandomKeypair;
     auto RandomKeypair(
-        const AllocateOutput privateKey,
-        const AllocateOutput publicKey,
-        const opentxs::crypto::key::asymmetric::Role role,
+        Writer&& privateKey,
+        Writer&& publicKey,
+        const opentxs::crypto::asymmetric::Role role,
         const Parameters& options,
-        const AllocateOutput params) const noexcept -> bool final;
-    auto ScalarAdd(
-        const ReadView lhs,
-        const ReadView rhs,
-        const AllocateOutput result) const noexcept -> bool final;
-    auto ScalarMultiplyBase(const ReadView scalar, const AllocateOutput result)
-        const noexcept -> bool final;
+        Writer&& params) const noexcept -> bool final;
+    auto ScalarAdd(ReadView lhs, ReadView rhs, Writer&& result) const noexcept
+        -> bool final;
+    auto ScalarMultiplyBase(ReadView scalar, Writer&& result) const noexcept
+        -> bool final;
     auto SharedSecret(
         const ReadView publicKey,
         const ReadView privateKey,
@@ -87,12 +83,12 @@ public:
         const ReadView plaintext,
         const ReadView key,
         const crypto::HashType hash,
-        const AllocateOutput signature) const -> bool final;
+        Writer&& signature) const -> bool final;
     auto SignDER(
-        const ReadView plaintext,
-        const ReadView key,
-        const crypto::HashType hash,
-        Space& signature) const noexcept -> bool final;
+        ReadView plaintext,
+        ReadView key,
+        crypto::HashType hash,
+        Writer&& signature) const noexcept -> bool final;
     auto Verify(
         const ReadView plaintext,
         const ReadView theKey,

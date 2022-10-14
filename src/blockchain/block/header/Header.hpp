@@ -3,6 +3,8 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_include "opentxs/util/Writer.hpp"
+
 #pragma once
 
 #include <memory>
@@ -16,7 +18,6 @@
 #include "opentxs/blockchain/block/Header.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
-#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
 
@@ -47,6 +48,8 @@ class Position;
 
 class Work;
 }  // namespace blockchain
+
+class Writer;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -79,9 +82,8 @@ public:
     virtual auto Position() const noexcept -> block::Position { return {}; }
     virtual auto Print() const noexcept -> UnallocatedCString { return {}; }
     using internal::Header::Serialize;
-    virtual auto Serialize(
-        const AllocateOutput destination,
-        const bool bitcoinformat) const noexcept -> bool
+    virtual auto Serialize(Writer&& destination, const bool bitcoinformat)
+        const noexcept -> bool
     {
         return {};
     }

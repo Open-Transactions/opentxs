@@ -11,8 +11,14 @@
 #include <stdexcept>
 
 #include "opentxs/Export.hpp"
-#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
+
+// NOLINTBEGIN(modernize-concat-nested-namespaces)
+namespace opentxs
+{
+class Writer;
+}  // namespace opentxs
+// NOLINTEND(modernize-concat-nested-namespaces)
 
 namespace opentxs::network::blockchain::bitcoin
 {
@@ -26,7 +32,7 @@ public:
     static auto CalculateSize(const std::byte first) noexcept -> std::uint64_t;
 
     auto Encode() const noexcept -> Bytes;
-    auto Encode(AllocateOutput destination) const noexcept -> bool;
+    auto Encode(Writer&& destination) const noexcept -> bool;
     // Number of bytes the CompactSize will occupy
     auto Size() const noexcept -> std::size_t;
     // Number of bytes the CompactSize and associated data will occupy

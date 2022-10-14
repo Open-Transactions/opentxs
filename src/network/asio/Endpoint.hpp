@@ -9,7 +9,7 @@
 #include <cstring>
 
 #include "opentxs/network/asio/Endpoint.hpp"
-#include "opentxs/util/Bytes.hpp"
+#include "opentxs/util/Types.hpp"
 
 namespace asio = boost::asio;
 namespace ip = asio::ip;

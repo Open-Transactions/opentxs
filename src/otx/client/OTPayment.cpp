@@ -28,6 +28,7 @@
 #include "internal/otx/common/util/Tag.hpp"
 #include "internal/otx/smartcontract/OTSmartContract.hpp"
 #include "internal/util/LogMacros.hpp"
+#include "internal/util/Pimpl.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/core/Data.hpp"
@@ -36,7 +37,6 @@
 #include "opentxs/core/identifier/UnitDefinition.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
-#include "opentxs/util/Pimpl.hpp"
 
 namespace opentxs
 {

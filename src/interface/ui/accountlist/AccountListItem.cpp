@@ -18,6 +18,7 @@
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/display/Definition.hpp"
 #include "opentxs/util/Bytes.hpp"
+#include "opentxs/util/Writer.hpp"
 
 namespace opentxs::factory
 {

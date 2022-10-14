@@ -16,6 +16,7 @@
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "opentxs/interface/rpc/AccountData.hpp"
 #include "opentxs/interface/rpc/request/GetAccountBalance.hpp"
+#include "opentxs/util/Writer.hpp"
 
 namespace opentxs::rpc::response::implementation
 {

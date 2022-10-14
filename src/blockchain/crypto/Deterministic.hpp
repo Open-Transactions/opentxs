@@ -29,7 +29,8 @@
 #include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/crypto/Types.hpp"
-#include "opentxs/crypto/key/HD.hpp"
+#include "opentxs/crypto/asymmetric/key/EllipticCurve.hpp"
+#include "opentxs/crypto/asymmetric/key/HD.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
 #include "opentxs/util/Time.hpp"
@@ -55,6 +56,17 @@ class Account;
 class Element;
 }  // namespace crypto
 }  // namespace blockchain
+
+namespace crypto
+{
+namespace asymmetric
+{
+namespace key
+{
+class HD;
+}  // namespace key
+}  // namespace asymmetric
+}  // namespace crypto
 
 namespace proto
 {
@@ -83,7 +95,7 @@ public:
         return const_cast<Deterministic&>(*this);
     }
     auto Key(const Subchain type, const Bip32Index index) const noexcept
-        -> ECKey final;
+        -> const opentxs::crypto::asymmetric::key::EllipticCurve& final;
     auto LastGenerated(const Subchain type) const noexcept
         -> std::optional<Bip32Index> final;
     auto Lookahead() const noexcept -> std::size_t final { return window_; }
@@ -117,7 +129,7 @@ public:
         const std::string_view label,
         const Time time) const noexcept -> Batch override;
     auto RootNode(const PasswordPrompt& reason) const noexcept
-        -> blockchain::crypto::HDKey override;
+        -> const opentxs::crypto::asymmetric::key::HD& override;
     auto ScanProgress(Subchain type) const noexcept -> block::Position final;
 
     auto SetScanProgress(
@@ -223,7 +235,9 @@ protected:
 private:
     using Status = internal::Element::Availability;
     using Fallback = UnallocatedMap<Status, UnallocatedSet<Bip32Index>>;
-    using CachedKey = std::pair<std::mutex, blockchain::crypto::HDKey>;
+    // TODO libguarded
+    using CachedKey =
+        std::pair<std::mutex, opentxs::crypto::asymmetric::key::HD>;
 
     static constexpr auto BlockchainDeterministicAccountDataVersion =
         VersionNumber{1};

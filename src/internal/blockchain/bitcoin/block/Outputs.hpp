@@ -17,7 +17,6 @@
 #include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/util/Allocator.hpp"
-#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -51,6 +50,7 @@ class BlockchainTransaction;
 
 class Amount;
 class Log;
+class Writer;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -88,7 +88,7 @@ public:
         const api::crypto::Blockchain& crypto,
         const identifier::Nym& nym,
         const Log& log) const noexcept -> opentxs::Amount = 0;
-    virtual auto Serialize(const AllocateOutput destination) const noexcept
+    virtual auto Serialize(Writer&& destination) const noexcept
         -> std::optional<std::size_t> = 0;
     virtual auto Serialize(
         const api::Session& api,

@@ -18,8 +18,9 @@
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/core/contract/Signable.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
-#include "opentxs/crypto/key/asymmetric/Mode.hpp"
-#include "opentxs/crypto/key/asymmetric/Role.hpp"
+#include "opentxs/crypto/asymmetric/Mode.hpp"
+#include "opentxs/crypto/asymmetric/Role.hpp"
+#include "opentxs/crypto/asymmetric/Types.hpp"
 #include "opentxs/identity/CredentialRole.hpp"
 #include "opentxs/identity/CredentialType.hpp"
 #include "opentxs/identity/Types.hpp"
@@ -91,11 +92,11 @@ public:
         return false;
     }
     auto MasterSignature() const -> Signature final;
-    auto Mode() const -> crypto::key::asymmetric::Mode final { return mode_; }
+    auto Mode() const -> crypto::asymmetric::Mode final { return mode_; }
     auto Role() const -> identity::CredentialRole final { return role_; }
     auto Private() const -> bool final
     {
-        return (crypto::key::asymmetric::Mode::Private == mode_);
+        return (crypto::asymmetric::Mode::Private == mode_);
     }
     auto Save() const -> bool final;
     auto SelfSignature(CredentialModeFlag version = PUBLIC_VERSION) const
@@ -116,8 +117,8 @@ public:
     auto Verify(
         const Data& plaintext,
         const proto::Signature& sig,
-        const opentxs::crypto::key::asymmetric::Role key =
-            opentxs::crypto::key::asymmetric::Role::Sign) const -> bool override
+        const opentxs::crypto::asymmetric::Role key =
+            opentxs::crypto::asymmetric::Role::Sign) const -> bool override
     {
         return false;
     }
@@ -144,7 +145,7 @@ protected:
     const UnallocatedCString master_id_;
     const identity::CredentialType type_;
     const identity::CredentialRole role_;
-    const crypto::key::asymmetric::Mode mode_;
+    const crypto::asymmetric::Mode mode_;
 
     static auto get_master_id(
         const api::Session& api,
@@ -176,7 +177,7 @@ protected:
         const crypto::Parameters& nymParameters,
         const VersionNumber version,
         const identity::CredentialRole role,
-        const crypto::key::asymmetric::Mode mode,
+        const crypto::asymmetric::Mode mode,
         const UnallocatedCString& masterID) noexcept;
     Base(
         const api::Session& api,

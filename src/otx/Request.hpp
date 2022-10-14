@@ -19,7 +19,6 @@
 #include "opentxs/otx/Request.hpp"
 #include "opentxs/otx/ServerRequestType.hpp"
 #include "opentxs/otx/Types.hpp"
-#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
 
@@ -38,6 +37,7 @@ class Signature;
 
 class ByteArray;
 class PasswordPrompt;
+class Writer;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -48,7 +48,7 @@ class Request::Imp final : public opentxs::contract::implementation::Signable
 public:
     auto Initiator() const -> const identifier::Nym& { return initiator_; }
     auto Number() const -> RequestNumber;
-    auto Serialize(AllocateOutput destination) const -> bool;
+    auto Serialize(Writer&& destination) const -> bool;
     auto Serialize(proto::ServerRequest& serialized) const -> bool;
     auto Server() const -> const identifier::Notary& { return server_; }
     auto Type() const -> otx::ServerRequestType { return type_; }

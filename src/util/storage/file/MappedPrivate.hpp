@@ -14,8 +14,9 @@
 #include <utility>
 
 #include "opentxs/util/Allocated.hpp"
-#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
+#include "opentxs/util/Types.hpp"
+#include "opentxs/util/WriteBuffer.hpp"
 #include "util/Allocated.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -42,6 +43,8 @@ class Database;
 class Transaction;
 }  // namespace lmdb
 }  // namespace storage
+
+class WriteBuffer;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -54,7 +57,7 @@ public:
 
     auto Erase(const Index& index, lmdb::Transaction& tx) noexcept -> bool;
     auto Write(lmdb::Transaction& tx, const Vector<std::size_t>& items) noexcept
-        -> Vector<std::pair<Index, WritableView>>;
+        -> Vector<std::pair<Index, WriteBuffer>>;
 
     MappedPrivate(
         const std::filesystem::path& basePath,
@@ -79,7 +82,7 @@ private:
         auto Write(
             lmdb::Transaction& tx,
             const Vector<std::size_t>& items) noexcept
-            -> Vector<std::pair<Index, WritableView>>;
+            -> Vector<std::pair<Index, WriteBuffer>>;
 
         Data(
             const std::filesystem::path& basePath,

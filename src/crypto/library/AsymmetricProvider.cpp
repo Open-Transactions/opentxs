@@ -12,6 +12,7 @@ extern "C" {
 
 #include <cstddef>
 #include <cstring>
+#include <utility>
 
 #include "internal/core/String.hpp"
 #include "internal/otx/common/crypto/Signature.hpp"
@@ -26,27 +27,29 @@ extern "C" {
 #include "opentxs/crypto/HashType.hpp"
 #include "opentxs/crypto/Parameters.hpp"
 #include "opentxs/crypto/Types.hpp"
-#include "opentxs/crypto/key/asymmetric/Algorithm.hpp"
-#include "opentxs/crypto/key/asymmetric/Role.hpp"
+#include "opentxs/crypto/asymmetric/Algorithm.hpp"
+#include "opentxs/crypto/asymmetric/Role.hpp"
+#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
+#include "opentxs/util/Writer.hpp"
 #include "util/Sodium.hpp"
 
 namespace opentxs::crypto
 {
 auto AsymmetricProvider::CurveToKeyType(const EcdsaCurve& curve)
-    -> crypto::key::asymmetric::Algorithm
+    -> crypto::asymmetric::Algorithm
 {
-    auto output = crypto::key::asymmetric::Algorithm::Error;
+    auto output = crypto::asymmetric::Algorithm::Error;
 
     switch (curve) {
         case (EcdsaCurve::secp256k1): {
-            output = key::asymmetric::Algorithm::Secp256k1;
+            output = asymmetric::Algorithm::Secp256k1;
 
             break;
         }
         case (EcdsaCurve::ed25519): {
-            output = key::asymmetric::Algorithm::ED25519;
+            output = asymmetric::Algorithm::ED25519;
 
             break;
         }
@@ -59,10 +62,10 @@ auto AsymmetricProvider::CurveToKeyType(const EcdsaCurve& curve)
 }
 
 auto AsymmetricProvider::KeyTypeToCurve(
-    const crypto::key::asymmetric::Algorithm& type) -> EcdsaCurve
+    const crypto::asymmetric::Algorithm& type) -> EcdsaCurve
 {
     auto output = EcdsaCurve::invalid;
-    using Type = key::asymmetric::Algorithm;
+    using Type = asymmetric::Algorithm;
 
     switch (type) {
         case Type::Secp256k1: {
@@ -90,45 +93,50 @@ AsymmetricProvider::AsymmetricProvider() noexcept
 }
 
 auto AsymmetricProvider::RandomKeypair(
-    const AllocateOutput privateKey,
-    const AllocateOutput publicKey,
-    const AllocateOutput params) const noexcept -> bool
+    Writer&& privateKey,
+    Writer&& publicKey,
+    Writer&& params) const noexcept -> bool
 {
     return RandomKeypair(
-        privateKey,
-        publicKey,
-        opentxs::crypto::key::asymmetric::Role::Sign,
+        std::move(privateKey),
+        std::move(publicKey),
+        opentxs::crypto::asymmetric::Role::Sign,
         Parameters{},
-        params);
+        std::move(params));
 }
 
 auto AsymmetricProvider::RandomKeypair(
-    const AllocateOutput privateKey,
-    const AllocateOutput publicKey,
-    const opentxs::crypto::key::asymmetric::Role role,
-    const AllocateOutput params) const noexcept -> bool
-{
-    return RandomKeypair(privateKey, publicKey, role, Parameters{}, params);
-}
-
-auto AsymmetricProvider::RandomKeypair(
-    const AllocateOutput privateKey,
-    const AllocateOutput publicKey,
-    const Parameters& options,
-    const AllocateOutput params) const noexcept -> bool
+    Writer&& privateKey,
+    Writer&& publicKey,
+    const opentxs::crypto::asymmetric::Role role,
+    Writer&& params) const noexcept -> bool
 {
     return RandomKeypair(
-        privateKey,
-        publicKey,
-        opentxs::crypto::key::asymmetric::Role::Sign,
+        std::move(privateKey),
+        std::move(publicKey),
+        role,
+        Parameters{},
+        std::move(params));
+}
+
+auto AsymmetricProvider::RandomKeypair(
+    Writer&& privateKey,
+    Writer&& publicKey,
+    const Parameters& options,
+    Writer&& params) const noexcept -> bool
+{
+    return RandomKeypair(
+        std::move(privateKey),
+        std::move(publicKey),
+        opentxs::crypto::asymmetric::Role::Sign,
         options,
-        params);
+        std::move(params));
 }
 
 auto AsymmetricProvider::SeedToCurveKey(
     const ReadView seed,
-    const AllocateOutput privateKey,
-    const AllocateOutput publicKey) const noexcept -> bool
+    Writer&& privateKey,
+    Writer&& publicKey) const noexcept -> bool
 {
     auto edPublic = ByteArray{};
     auto edPrivate = Context().Factory().Secret(0);
@@ -142,14 +150,11 @@ auto AsymmetricProvider::SeedToCurveKey(
         return false;
     }
 
-    if (false == bool(privateKey) || false == bool(publicKey)) {
-        LogError()(OT_PRETTY_CLASS())("Invalid output allocator").Flush();
-
-        return false;
-    }
-
     return sodium::ToCurveKeypair(
-        edPrivate.Bytes(), edPublic.Bytes(), privateKey, publicKey);
+        edPrivate.Bytes(),
+        edPublic.Bytes(),
+        std::move(privateKey),
+        std::move(publicKey));
 }
 
 auto AsymmetricProvider::SignContract(

@@ -45,6 +45,7 @@ extern "C" {
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
+#include "opentxs/util/Writer.hpp"
 
 constexpr auto false_byte_ = std::byte{0x0};
 constexpr auto true_byte_ = std::byte{0x1};
@@ -455,17 +456,18 @@ auto Database::LoadFilters(
 auto Database::LoadFilterHash(
     const cfilter::Type type,
     const ReadView blockHash,
-    const AllocateOutput filterHash) const noexcept -> bool
+    Writer&& filterHash) const noexcept -> bool
 {
-    return imp_->filters_.LoadCfilterHash(type, blockHash, filterHash);
+    return imp_->filters_.LoadCfilterHash(
+        type, blockHash, std::move(filterHash));
 }
 
 auto Database::LoadFilterHeader(
     const cfilter::Type type,
     const ReadView blockHash,
-    const AllocateOutput header) const noexcept -> bool
+    Writer&& header) const noexcept -> bool
 {
-    return imp_->filters_.LoadCfheader(type, blockHash, header);
+    return imp_->filters_.LoadCfheader(type, blockHash, std::move(header));
 }
 
 auto Database::LoadTransaction(const ReadView txid) const noexcept

@@ -32,8 +32,8 @@
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/display/Definition.hpp"
 #include "opentxs/util/Allocator.hpp"
-#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
+#include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs

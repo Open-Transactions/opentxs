@@ -9,8 +9,8 @@
 
 #include "opentxs/Export.hpp"
 #include "opentxs/crypto/Types.hpp"
-#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
+#include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -36,6 +36,7 @@ class Frame;
 
 class Data;
 class Secret;
+class Writer;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -50,20 +51,20 @@ public:
     virtual auto Digest(
         const opentxs::crypto::HashType hashType,
         const ReadView data,
-        const AllocateOutput destination) const noexcept -> bool = 0;
+        Writer&& destination) const noexcept -> bool = 0;
     virtual auto Digest(
         const opentxs::crypto::HashType hashType,
         const opentxs::network::zeromq::Frame& data,
-        const AllocateOutput destination) const noexcept -> bool = 0;
+        Writer&& destination) const noexcept -> bool = 0;
     virtual auto Digest(
         const std::uint32_t type,
         const ReadView data,
-        const AllocateOutput encodedDestination) const noexcept -> bool = 0;
+        Writer&& encodedDestination) const noexcept -> bool = 0;
     virtual auto HMAC(
         const opentxs::crypto::HashType hashType,
         const ReadView key,
         const ReadView data,
-        const AllocateOutput digest) const noexcept -> bool = 0;
+        Writer&& digest) const noexcept -> bool = 0;
     OPENTXS_NO_EXPORT virtual auto InternalHash() const noexcept
         -> const internal::Hash& = 0;
     virtual auto MurmurHash3_32(
@@ -98,7 +99,7 @@ public:
         const std::uint32_t r,
         const std::uint32_t p,
         const std::size_t bytes,
-        AllocateOutput writer) const noexcept -> bool = 0;
+        Writer&& writer) const noexcept -> bool = 0;
 
     OPENTXS_NO_EXPORT virtual auto InternalHash() noexcept
         -> internal::Hash& = 0;

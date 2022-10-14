@@ -42,6 +42,7 @@
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/PasswordPrompt.hpp"  // IWYU pragma: keep
+#include "opentxs/util/Writer.hpp"
 
 namespace opentxs::factory
 {

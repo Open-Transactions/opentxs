@@ -4,6 +4,8 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 // IWYU pragma: no_include "opentxs/core/UnitType.hpp"
+// IWYU pragma: no_include "opentxs/crypto/asymmetric/Key.hpp"
+// IWYU pragma: no_include "opentxs/crypto/asymmetric/Role.hpp"
 // IWYU pragma: no_include "opentxs/crypto/symmetric/Algorithm.hpp"
 // IWYU pragma: no_include "opentxs/crypto/symmetric/Key.hpp"
 // IWYU pragma: no_include "opentxs/crypto/symmetric/Source.hpp"
@@ -73,8 +75,7 @@
 #include "opentxs/core/identifier/Types.hpp"
 #include "opentxs/core/identifier/UnitDefinition.hpp"
 #include "opentxs/crypto/Types.hpp"
-#include "opentxs/crypto/key/Asymmetric.hpp"
-#include "opentxs/crypto/key/asymmetric/Role.hpp"
+#include "opentxs/crypto/asymmetric/Types.hpp"
 #include "opentxs/crypto/symmetric/Types.hpp"
 #include "opentxs/identity/Types.hpp"
 #include "opentxs/identity/wot/claim/Types.hpp"
@@ -82,11 +83,11 @@
 #include "opentxs/otx/blind/Mint.hpp"
 #include "opentxs/otx/blind/Purse.hpp"
 #include "opentxs/util/Allocator.hpp"
-#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
 #include "opentxs/util/PasswordPrompt.hpp"
 #include "opentxs/util/Time.hpp"
+#include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace google
@@ -125,11 +126,14 @@ class Header;
 
 namespace crypto
 {
+namespace asymmetric
+{
 namespace key
 {
 class EllipticCurve;
 class Secp256k1;
 }  // namespace key
+}  // namespace asymmetric
 
 namespace symmetric
 {
@@ -243,11 +247,26 @@ public:
     }
     auto AsymmetricKey(
         const opentxs::crypto::Parameters& params,
-        const opentxs::PasswordPrompt& reason,
-        const opentxs::crypto::key::asymmetric::Role role,
-        const VersionNumber version) const -> OTAsymmetricKey final;
+        const opentxs::PasswordPrompt& reason) const
+        -> opentxs::crypto::asymmetric::Key final;
+    auto AsymmetricKey(
+        VersionNumber version,
+        const opentxs::crypto::Parameters& params,
+        const opentxs::PasswordPrompt& reason) const
+        -> opentxs::crypto::asymmetric::Key final;
+    auto AsymmetricKey(
+        opentxs::crypto::asymmetric::Role role,
+        const opentxs::crypto::Parameters& params,
+        const opentxs::PasswordPrompt& reason) const
+        -> opentxs::crypto::asymmetric::Key final;
+    auto AsymmetricKey(
+        VersionNumber version,
+        opentxs::crypto::asymmetric::Role role,
+        const opentxs::crypto::Parameters& params,
+        const opentxs::PasswordPrompt& reason) const
+        -> opentxs::crypto::asymmetric::Key final;
     auto AsymmetricKey(const proto::AsymmetricKey& serialized) const
-        -> OTAsymmetricKey final;
+        -> opentxs::crypto::asymmetric::Key final;
     auto BailmentNotice(
         const Nym_p& nym,
         const identifier::Nym& recipientID,
@@ -334,16 +353,19 @@ public:
         const blockchain::Type chain,
         const std::uint8_t M,
         const std::uint8_t N,
-        const UnallocatedVector<const opentxs::crypto::key::EllipticCurve*>&
-            publicKeys) const noexcept
+        const UnallocatedVector<
+            const opentxs::crypto::asymmetric::key::EllipticCurve*>& publicKeys)
+        const noexcept
         -> std::unique_ptr<const blockchain::bitcoin::block::Script> final;
     auto BitcoinScriptP2PK(
         const blockchain::Type chain,
-        const opentxs::crypto::key::EllipticCurve& publicKey) const noexcept
+        const opentxs::crypto::asymmetric::key::EllipticCurve& publicKey)
+        const noexcept
         -> std::unique_ptr<const blockchain::bitcoin::block::Script> final;
     auto BitcoinScriptP2PKH(
         const blockchain::Type chain,
-        const opentxs::crypto::key::EllipticCurve& publicKey) const noexcept
+        const opentxs::crypto::asymmetric::key::EllipticCurve& publicKey)
+        const noexcept
         -> std::unique_ptr<const blockchain::bitcoin::block::Script> final;
     auto BitcoinScriptP2SH(
         const blockchain::Type chain,
@@ -351,7 +373,8 @@ public:
         -> std::unique_ptr<const blockchain::bitcoin::block::Script> final;
     auto BitcoinScriptP2WPKH(
         const blockchain::Type chain,
-        const opentxs::crypto::key::EllipticCurve& publicKey) const noexcept
+        const opentxs::crypto::asymmetric::key::EllipticCurve& publicKey)
+        const noexcept
         -> std::unique_ptr<const blockchain::bitcoin::block::Script> final;
     auto BitcoinScriptP2WSH(
         const blockchain::Type chain,
@@ -564,7 +587,7 @@ public:
     auto Keypair(
         const opentxs::crypto::Parameters& nymParameters,
         const VersionNumber version,
-        const opentxs::crypto::key::asymmetric::Role role,
+        const opentxs::crypto::asymmetric::Role role,
         const opentxs::PasswordPrompt& reason) const -> OTKeypair final;
     auto Keypair(
         const proto::AsymmetricKey& serializedPubkey,
@@ -577,7 +600,7 @@ public:
         const Bip32Index credset,
         const Bip32Index credindex,
         const opentxs::crypto::EcdsaCurve& curve,
-        const opentxs::crypto::key::asymmetric::Role role,
+        const opentxs::crypto::asymmetric::Role role,
         const opentxs::PasswordPrompt& reason) const -> OTKeypair final;
     auto Ledger(
         const identifier::Generic& theAccountID,
@@ -1088,7 +1111,7 @@ public:
     auto operator=(const Factory&) -> Factory& = delete;
     auto operator=(Factory&&) -> Factory& = delete;
 
-    ~Factory() override = default;
+    ~Factory() override;
 
 protected:
     const api::Session& api_;
@@ -1099,9 +1122,5 @@ protected:
     const api::crypto::Symmetric& symmetric_;
 
     Factory(const api::Session& api);
-
-private:
-    auto instantiate_secp256k1(const ReadView key, const ReadView chaincode)
-        const noexcept -> std::unique_ptr<opentxs::crypto::key::Secp256k1>;
 };
 }  // namespace opentxs::api::session::imp

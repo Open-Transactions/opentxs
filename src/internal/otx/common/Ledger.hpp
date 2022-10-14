@@ -15,10 +15,10 @@
 #include "internal/otx/common/Contract.hpp"
 #include "internal/otx/common/OTTransaction.hpp"
 #include "internal/otx/common/OTTransactionType.hpp"
+#include "internal/util/Pimpl.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
-#include "opentxs/util/Pimpl.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs

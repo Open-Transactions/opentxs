@@ -7,23 +7,27 @@
 
 #include <cstdint>
 #include <memory>
+#include <string_view>
 #include <tuple>
 
 #include "opentxs/Export.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/crypto/Types.hpp"
-#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
+#include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
 namespace crypto
 {
+namespace asymmetric
+{
 namespace key
 {
 class HD;
 }  // namespace key
+}  // namespace asymmetric
 
 namespace internal
 {
@@ -45,6 +49,7 @@ class ByteArray;
 class Data;
 class PasswordPrompt;
 class Secret;
+class Writer;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -68,16 +73,16 @@ public:
         const Path& path) const -> Key;
     /// throws std::runtime_error on invalid inputs
     auto DerivePrivateKey(
-        const key::HD& parent,
+        const asymmetric::key::HD& parent,
         const Path& pathAppend,
         const PasswordPrompt& reason) const noexcept(false) -> Key;
     /// throws std::runtime_error on invalid inputs
     auto DerivePublicKey(
-        const key::HD& parent,
+        const asymmetric::key::HD& parent,
         const Path& pathAppend,
         const PasswordPrompt& reason) const noexcept(false) -> Key;
     auto DeserializePrivate(
-        const UnallocatedCString& serialized,
+        std::string_view serialized,
         Bip32Network& network,
         Bip32Depth& depth,
         Bip32Fingerprint& parent,
@@ -85,28 +90,31 @@ public:
         Data& chainCode,
         Secret& key) const -> bool;
     auto DeserializePublic(
-        const UnallocatedCString& serialized,
+        std::string_view serialized,
         Bip32Network& network,
         Bip32Depth& depth,
         Bip32Fingerprint& parent,
         Bip32Index& index,
         Data& chainCode,
         Data& key) const -> bool;
+    OPENTXS_NO_EXPORT auto Internal() const noexcept -> const internal::Bip32&;
     auto SeedID(const ReadView entropy) const -> identifier::Generic;
     auto SerializePrivate(
-        const Bip32Network network,
-        const Bip32Depth depth,
-        const Bip32Fingerprint parent,
-        const Bip32Index index,
-        const Data& chainCode,
-        const Secret& key) const -> UnallocatedCString;
+        Bip32Network network,
+        Bip32Depth depth,
+        Bip32Fingerprint parent,
+        Bip32Index index,
+        ReadView chainCode,
+        ReadView key,
+        Writer&& out) const noexcept -> bool;
     auto SerializePublic(
-        const Bip32Network network,
-        const Bip32Depth depth,
-        const Bip32Fingerprint parent,
-        const Bip32Index index,
-        const Data& chainCode,
-        const Data& key) const -> UnallocatedCString;
+        Bip32Network network,
+        Bip32Depth depth,
+        Bip32Fingerprint parent,
+        Bip32Index index,
+        ReadView chainCode,
+        ReadView key,
+        Writer&& out) const noexcept -> bool;
 
     OPENTXS_NO_EXPORT auto Internal() noexcept -> internal::Bip32&;
 

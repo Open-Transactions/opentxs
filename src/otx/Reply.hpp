@@ -18,7 +18,6 @@
 #include "opentxs/otx/Reply.hpp"
 #include "opentxs/otx/ServerReplyType.hpp"
 #include "opentxs/otx/Types.hpp"
-#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
 
@@ -38,6 +37,7 @@ class Signature;
 
 class ByteArray;
 class PasswordPrompt;
+class Writer;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -53,7 +53,7 @@ public:
     }
     auto Recipient() const -> const identifier::Nym& { return recipient_; }
     auto Serialize(proto::ServerReply& serialize) const -> bool;
-    auto Serialize(AllocateOutput destination) const -> bool;
+    auto Serialize(Writer&& destination) const -> bool;
     auto Server() const -> const identifier::Notary& { return server_; }
     auto Success() const -> bool { return success_; }
     auto Type() const -> otx::ServerReplyType { return type_; }

@@ -56,7 +56,9 @@
 #include "opentxs/crypto/HashType.hpp"
 #include "opentxs/identity/Nym.hpp"
 #include "opentxs/network/zeromq/ZeroMQ.hpp"
+#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Log.hpp"
+#include "opentxs/util/Writer.hpp"
 #include "util/Container.hpp"
 #include "util/HDIndex.hpp"
 
@@ -844,11 +846,18 @@ auto Blockchain::Imp::decode_legacy(const UnallocatedCString& encoded)
     auto& [data, style, chains, supported] = output;
 
     try {
-        const auto bytes = api_.Factory().DataFromBytes(
-            api_.Crypto().Encode().IdentifierDecode(encoded));
-        auto type = api_.Factory().Data();
+        const auto bytes = [&] {
+            auto out = ByteArray{};
+            const auto rc = api_.Crypto().Encode().Base58CheckDecode(
+                encoded, out.WriteInto());
 
-        if (0 == bytes.size()) { throw std::runtime_error("not base58"); }
+            if (false == rc) {
+                throw std::runtime_error("base58 decode failure");
+            }
+
+            return out;
+        }();
+        auto type = api_.Factory().Data();
 
         try {
             switch (bytes.size()) {
@@ -1324,7 +1333,13 @@ auto Blockchain::Imp::p2pkh(
 
         OT_ASSERT(21 == preimage.size());
 
-        return api_.Crypto().Encode().IdentifierEncode(preimage.Bytes());
+        auto out = UnallocatedCString{};
+        const auto rc = api_.Crypto().Encode().Base58CheckEncode(
+            preimage.Bytes(), writer(out));
+
+        if (false == rc) { throw std::runtime_error{"base58 encode failure"}; }
+
+        return out;
     } catch (...) {
         LogError()(OT_PRETTY_CLASS())("Unsupported chain (")(print(chain))(")")
             .Flush();
@@ -1346,7 +1361,13 @@ auto Blockchain::Imp::p2sh(
 
         OT_ASSERT(21 == preimage.size());
 
-        return api_.Crypto().Encode().IdentifierEncode(preimage.Bytes());
+        auto out = UnallocatedCString{};
+        const auto rc = api_.Crypto().Encode().Base58CheckEncode(
+            preimage.Bytes(), writer(out));
+
+        if (false == rc) { throw std::runtime_error{"base58 encode failure"}; }
+
+        return out;
     } catch (...) {
         LogError()(OT_PRETTY_CLASS())("Unsupported chain (")(print(chain))(")")
             .Flush();

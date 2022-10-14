@@ -7,7 +7,7 @@
 
 #include "internal/network/zeromq/curve/Client.hpp"
 #include "internal/network/zeromq/socket/Sender.hpp"
-#include "opentxs/util/Pimpl.hpp"
+#include "internal/util/Pimpl.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs

@@ -31,6 +31,7 @@ extern "C" {
 #include "internal/otx/blind/Token.hpp"
 #include "internal/otx/blind/Types.hpp"
 #include "internal/util/LogMacros.hpp"
+#include "internal/util/Pimpl.hpp"
 #include "internal/util/Time.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
@@ -43,7 +44,7 @@ extern "C" {
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/PasswordPrompt.hpp"
-#include "opentxs/util/Pimpl.hpp"
+#include "opentxs/util/Writer.hpp"
 #include "otx/blind/lucre/Lucre.hpp"
 
 #define LUCRE_TOKEN_VERSION 1

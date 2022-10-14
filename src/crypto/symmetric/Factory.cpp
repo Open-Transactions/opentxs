@@ -23,7 +23,6 @@
 #include "opentxs/crypto/symmetric/Algorithm.hpp"
 #include "opentxs/crypto/symmetric/Source.hpp"
 #include "opentxs/util/Allocator.hpp"
-#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/PasswordPrompt.hpp"
 

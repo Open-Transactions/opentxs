@@ -48,6 +48,7 @@
 #include "internal/network/zeromq/socket/SocketType.hpp"  // IWYU pragma: keep
 #include "internal/network/zeromq/socket/Types.hpp"
 #include "internal/util/BoostPMR.hpp"
+#include "internal/util/Bytes.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/Thread.hpp"
@@ -81,6 +82,7 @@
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Time.hpp"
 #include "opentxs/util/WorkType.hpp"
+#include "opentxs/util/Writer.hpp"
 #include "util/Container.hpp"
 #include "util/ScopeGuard.hpp"
 #include "util/Work.hpp"

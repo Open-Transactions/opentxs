@@ -18,6 +18,7 @@
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/Size.hpp"
 #include "opentxs/blockchain/bitcoin/block/Opcodes.hpp"
+#include "opentxs/util/Bytes.hpp"
 
 namespace be = boost::endian;
 

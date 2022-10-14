@@ -39,9 +39,11 @@
 #include "opentxs/crypto/symmetric/Key.hpp"
 #include "opentxs/crypto/symmetric/Source.hpp"
 #include "opentxs/util/Allocator.hpp"
+#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/PasswordPrompt.hpp"  // IWYU pragma: keep
+#include "opentxs/util/Writer.hpp"
 #include "util/Allocator.hpp"
 #include "util/ByteLiterals.hpp"
 #include "util/Container.hpp"

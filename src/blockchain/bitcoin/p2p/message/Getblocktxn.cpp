@@ -8,7 +8,6 @@
 
 #include <cstddef>
 #include <cstring>
-#include <functional>
 #include <iterator>
 #include <stdexcept>
 #include <utility>
@@ -21,6 +20,8 @@
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/network/blockchain/bitcoin/CompactSize.hpp"
 #include "opentxs/util/Log.hpp"
+#include "opentxs/util/WriteBuffer.hpp"
+#include "opentxs/util/Writer.hpp"
 
 namespace opentxs::factory
 {
@@ -133,11 +134,9 @@ auto BitcoinP2PGetblocktxn(
 namespace opentxs::blockchain::p2p::bitcoin::message
 {
 
-auto Getblocktxn::payload(AllocateOutput out) const noexcept -> bool
+auto Getblocktxn::payload(Writer&& out) const noexcept -> bool
 {
     try {
-        if (!out) { throw std::runtime_error{"invalid output allocator"}; }
-
         auto bytes = block_hash_.size();
         auto data = UnallocatedVector<ByteArray>{};
         data.reserve(1u + txn_indices_.size());
@@ -157,9 +156,9 @@ auto Getblocktxn::payload(AllocateOutput out) const noexcept -> bool
             bytes += cs.size();
         }
 
-        auto output = out(bytes);
+        auto output = out.Reserve(bytes);
 
-        if (false == output.valid(bytes)) {
+        if (false == output.IsValid(bytes)) {
             throw std::runtime_error{"failed to allocate output space"};
         }
 

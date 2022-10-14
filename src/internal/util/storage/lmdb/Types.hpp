@@ -7,8 +7,8 @@
 
 #include <functional>
 
-#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
+#include "opentxs/util/Types.hpp"
 
 extern "C" {
 using MDB_dbi = unsigned int;

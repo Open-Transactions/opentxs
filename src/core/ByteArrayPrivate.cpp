@@ -14,12 +14,16 @@ extern "C" {
 #include <cstdint>
 #include <cstdlib>
 #include <cstring>
+#include <functional>
 #include <iterator>
+#include <span>
 #include <utility>
 
 #include "internal/core/Core.hpp"
 #include "internal/util/P0330.hpp"
 #include "opentxs/core/Data.hpp"
+#include "opentxs/util/WriteBuffer.hpp"
+#include "opentxs/util/Writer.hpp"
 
 namespace opentxs
 {
@@ -266,15 +270,23 @@ auto ByteArrayPrivate::SetSize(const std::size_t size) -> bool
     return true;
 }
 
-auto ByteArrayPrivate::WriteInto() noexcept -> AllocateOutput
+auto ByteArrayPrivate::WriteInto() noexcept -> Writer
 {
-    return [this](const auto size) {
-        static constexpr auto blank = std::byte{51};
-        data_.clear();
-        data_.assign(size, blank);
+    return {
+        [this](auto size) -> WriteBuffer {
+            static constexpr auto blank = std::byte{51};
+            data_.clear();
+            data_.assign(size, blank);
 
-        return WritableView{data_.data(), data_.size()};
-    };
+            return std::span<std::byte>{
+                static_cast<std::byte*>(data_.data()), data_.size()};
+        },
+        [this](auto size) -> bool {
+            data_.resize(size);
+
+            return true;
+        },
+        get_allocator()};
 }
 
 auto ByteArrayPrivate::zeroMemory() -> void

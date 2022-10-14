@@ -10,12 +10,12 @@
 #include "interface/ui/base/Row.hpp"
 #include "internal/interface/ui/SeedTreeNym.hpp"
 #include "internal/interface/ui/UI.hpp"
+#include "internal/util/Pimpl.hpp"
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/util/Container.hpp"
-#include "opentxs/util/Pimpl.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs

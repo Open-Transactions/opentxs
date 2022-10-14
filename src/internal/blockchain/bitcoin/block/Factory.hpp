@@ -22,9 +22,9 @@
 #include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
-#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Time.hpp"
+#include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -85,10 +85,13 @@ class Outpoint;
 
 namespace crypto
 {
+namespace asymmetric
+{
 namespace key
 {
 class EllipticCurve;
 }  // namespace key
+}  // namespace asymmetric
 }  // namespace crypto
 
 namespace identifier
@@ -190,17 +193,18 @@ auto BitcoinScriptP2MS(
     const blockchain::Type chain,
     const std::uint8_t M,
     const std::uint8_t N,
-    const UnallocatedVector<const opentxs::crypto::key::EllipticCurve*>&
+    const UnallocatedVector<
+        const opentxs::crypto::asymmetric::key::EllipticCurve*>&
         publicKeys) noexcept
     -> std::unique_ptr<blockchain::bitcoin::block::Script>;
 auto BitcoinScriptP2PK(
     const blockchain::Type chain,
-    const opentxs::crypto::key::EllipticCurve& publicKey) noexcept
+    const opentxs::crypto::asymmetric::key::EllipticCurve& publicKey) noexcept
     -> std::unique_ptr<blockchain::bitcoin::block::Script>;
 auto BitcoinScriptP2PKH(
     const api::Crypto& crypto,
     const blockchain::Type chain,
-    const opentxs::crypto::key::EllipticCurve& publicKey) noexcept
+    const opentxs::crypto::asymmetric::key::EllipticCurve& publicKey) noexcept
     -> std::unique_ptr<blockchain::bitcoin::block::Script>;
 auto BitcoinScriptP2SH(
     const api::Crypto& crypto,
@@ -210,7 +214,7 @@ auto BitcoinScriptP2SH(
 auto BitcoinScriptP2WPKH(
     const api::Crypto& crypto,
     const blockchain::Type chain,
-    const opentxs::crypto::key::EllipticCurve& publicKey) noexcept
+    const opentxs::crypto::asymmetric::key::EllipticCurve& publicKey) noexcept
     -> std::unique_ptr<blockchain::bitcoin::block::Script>;
 auto BitcoinScriptP2WSH(
     const api::Crypto& crypto,

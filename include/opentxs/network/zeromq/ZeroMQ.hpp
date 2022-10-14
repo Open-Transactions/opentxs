@@ -9,8 +9,15 @@
 
 #include "opentxs/Export.hpp"
 #include "opentxs/util/Allocator.hpp"
-#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
+#include "opentxs/util/Types.hpp"
+
+// NOLINTBEGIN(modernize-concat-nested-namespaces)
+namespace opentxs
+{
+class Writer;
+}  // namespace opentxs
+// NOLINTEND(modernize-concat-nested-namespaces)
 
 namespace opentxs::network::zeromq
 {
@@ -26,8 +33,6 @@ auto MakeDeterministicInproc(
     const int instance,
     const int version,
     const std::string_view suffix) noexcept -> UnallocatedCString;
-auto RawToZ85(const ReadView input, const AllocateOutput output) noexcept
-    -> bool;
-auto Z85ToRaw(const ReadView input, const AllocateOutput output) noexcept
-    -> bool;
+auto RawToZ85(const ReadView input, Writer&& output) noexcept -> bool;
+auto Z85ToRaw(const ReadView input, Writer&& output) noexcept -> bool;
 }  // namespace opentxs::network::zeromq

@@ -7,6 +7,8 @@
 
 #include <memory>
 
+#include "opentxs/crypto/Bip32.hpp"
+
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
@@ -14,12 +16,34 @@ namespace api
 {
 class Factory;
 }  // namespace api
+
+namespace crypto
+{
+namespace asymmetric
+{
+namespace key
+{
+class HDPrivate;
+}  // namespace key
+}  // namespace asymmetric
+}  // namespace crypto
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
 namespace opentxs::crypto::internal
 {
 struct Bip32 {
+    virtual auto DerivePrivateKey(
+        const asymmetric::key::HDPrivate& parent,
+        const crypto::Bip32::Path& pathAppend,
+        const PasswordPrompt& reason) const noexcept(false)
+        -> crypto::Bip32::Key = 0;
+    virtual auto DerivePublicKey(
+        const asymmetric::key::HDPrivate& parent,
+        const crypto::Bip32::Path& pathAppend,
+        const PasswordPrompt& reason) const noexcept(false)
+        -> crypto::Bip32::Key = 0;
+
     virtual auto Init(
         const std::shared_ptr<const api::Factory>& factory) noexcept
         -> void = 0;

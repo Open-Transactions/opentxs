@@ -12,7 +12,6 @@
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
-#include <functional>
 #include <iosfwd>
 #include <iterator>
 #include <numeric>
@@ -41,9 +40,12 @@
 #include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/core/ByteArray.hpp"  // IWYU pragma: keep
 #include "opentxs/core/Data.hpp"
+#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Iterator.hpp"
 #include "opentxs/util/Log.hpp"
+#include "opentxs/util/WriteBuffer.hpp"
+#include "opentxs/util/Writer.hpp"
 #include "util/Container.hpp"
 
 namespace be = boost::endian;
@@ -312,7 +314,7 @@ auto Block::calculate_merkle_hash(
     const Type chain,
     const HashType& lhs,
     const HashType& rhs,
-    AllocateOutput out) -> bool
+    Writer&& out) -> bool
 {
     auto preimage = std::array<std::byte, 64>{};
     constexpr auto chunk = preimage.size() / 2u;
@@ -333,7 +335,7 @@ auto Block::calculate_merkle_hash(
         crypto,
         chain,
         {reinterpret_cast<const char*>(preimage.data()), preimage.size()},
-        out);
+        std::move(out));
 }
 
 template <typename InputContainer, typename OutputContainer>
@@ -488,18 +490,12 @@ auto Block::Print() const noexcept -> UnallocatedCString
     return out.str();
 }
 
-auto Block::Serialize(AllocateOutput bytes) const noexcept -> bool
+auto Block::Serialize(Writer&& bytes) const noexcept -> bool
 {
-    if (false == bool(bytes)) {
-        LogError()(OT_PRETTY_CLASS())("Invalid output allocator").Flush();
-
-        return false;
-    }
-
     const auto [size, txCount] = get_or_calculate_size();
-    const auto out = bytes(size);
+    auto out = bytes.Reserve(size);
 
-    if (false == out.valid(size)) {
+    if (false == out.IsValid(size)) {
         LogError()(OT_PRETTY_CLASS())("Failed to allocate output").Flush();
 
         return false;
@@ -509,7 +505,7 @@ auto Block::Serialize(AllocateOutput bytes) const noexcept -> bool
         " transactions into ")(size)(" bytes.")
         .Flush();
     auto remaining = std::size_t{size};
-    auto* it = static_cast<std::byte*>(out.data());
+    auto* it = out.as<std::byte>();
 
     if (false == header_.Serialize(preallocated(remaining, it))) {
         LogError()(OT_PRETTY_CLASS())("Failed to serialize header").Flush();

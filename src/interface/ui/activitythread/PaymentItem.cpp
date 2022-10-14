@@ -19,6 +19,7 @@
 #include "internal/otx/common/Cheque.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/Mutex.hpp"
+#include "internal/util/Pimpl.hpp"
 #include "opentxs/api/session/Activity.hpp"
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/Crypto.hpp"
@@ -30,7 +31,6 @@
 #include "opentxs/otx/client/Types.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/PasswordPrompt.hpp"  // IWYU pragma: keep
-#include "opentxs/util/Pimpl.hpp"
 
 namespace opentxs::factory
 {

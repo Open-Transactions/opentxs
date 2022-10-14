@@ -23,12 +23,12 @@
 #include "internal/otx/common/OTTransaction.hpp"
 #include "internal/otx/consensus/Server.hpp"
 #include "internal/util/Lockable.hpp"
+#include "internal/util/Pimpl.hpp"
 #include "internal/util/Types.hpp"
 #include "opentxs/api/session/Wallet.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
-#include "opentxs/util/Pimpl.hpp"
 #include "opentxs/util/Time.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)

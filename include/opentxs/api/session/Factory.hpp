@@ -3,6 +3,7 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_include "opentxs/crypto/asymmetric/Role.hpp"
 // IWYU pragma: no_include "opentxs/otx/blind/CashType.hpp"
 
 #pragma once
@@ -18,15 +19,13 @@
 #include "opentxs/blockchain/p2p/Types.hpp"
 #include "opentxs/core/Types.hpp"
 #include "opentxs/crypto/Types.hpp"
-#include "opentxs/crypto/key/Asymmetric.hpp"
-#include "opentxs/crypto/key/Types.hpp"
-#include "opentxs/crypto/key/asymmetric/Role.hpp"  // TODO remove
+#include "opentxs/crypto/asymmetric/Types.hpp"
 #include "opentxs/crypto/symmetric/Types.hpp"
 #include "opentxs/identity/wot/claim/Types.hpp"
 #include "opentxs/otx/blind/Types.hpp"
-#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
+#include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -71,10 +70,15 @@ class Address;
 
 namespace crypto
 {
+namespace asymmetric
+{
 namespace key
 {
 class EllipticCurve;
 }  // namespace key
+
+class Key;
+}  // namespace asymmetric
 
 class Parameters;
 }  // namespace crypto
@@ -139,12 +143,24 @@ class OPENTXS_EXPORT Factory : virtual public api::Factory
 public:
     virtual auto AsymmetricKey(
         const opentxs::crypto::Parameters& params,
-        const opentxs::PasswordPrompt& reason,
-        const opentxs::crypto::key::asymmetric::Role role =
-            opentxs::crypto::key::asymmetric::Role::Sign,
-        const VersionNumber version =
-            opentxs::crypto::key::Asymmetric::DefaultVersion) const
-        -> OTAsymmetricKey = 0;
+        const opentxs::PasswordPrompt& reason) const
+        -> opentxs::crypto::asymmetric::Key = 0;
+    virtual auto AsymmetricKey(
+        VersionNumber version,
+        const opentxs::crypto::Parameters& params,
+        const opentxs::PasswordPrompt& reason) const
+        -> opentxs::crypto::asymmetric::Key = 0;
+    virtual auto AsymmetricKey(
+        opentxs::crypto::asymmetric::Role role,
+        const opentxs::crypto::Parameters& params,
+        const opentxs::PasswordPrompt& reason) const
+        -> opentxs::crypto::asymmetric::Key = 0;
+    virtual auto AsymmetricKey(
+        VersionNumber version,
+        opentxs::crypto::asymmetric::Role role,
+        const opentxs::crypto::Parameters& params,
+        const opentxs::PasswordPrompt& reason) const
+        -> opentxs::crypto::asymmetric::Key = 0;
     virtual auto BitcoinBlock(
         const blockchain::Type chain,
         const ReadView bytes) const noexcept
@@ -174,16 +190,19 @@ public:
         const blockchain::Type chain,
         const std::uint8_t M,
         const std::uint8_t N,
-        const UnallocatedVector<const opentxs::crypto::key::EllipticCurve*>&
-            publicKeys) const noexcept
+        const UnallocatedVector<
+            const opentxs::crypto::asymmetric::key::EllipticCurve*>& publicKeys)
+        const noexcept
         -> std::unique_ptr<const blockchain::bitcoin::block::Script> = 0;
     virtual auto BitcoinScriptP2PK(
         const blockchain::Type chain,
-        const opentxs::crypto::key::EllipticCurve& publicKey) const noexcept
+        const opentxs::crypto::asymmetric::key::EllipticCurve& publicKey)
+        const noexcept
         -> std::unique_ptr<const blockchain::bitcoin::block::Script> = 0;
     virtual auto BitcoinScriptP2PKH(
         const blockchain::Type chain,
-        const opentxs::crypto::key::EllipticCurve& publicKey) const noexcept
+        const opentxs::crypto::asymmetric::key::EllipticCurve& publicKey)
+        const noexcept
         -> std::unique_ptr<const blockchain::bitcoin::block::Script> = 0;
     virtual auto BitcoinScriptP2SH(
         const blockchain::Type chain,
@@ -191,7 +210,8 @@ public:
         -> std::unique_ptr<const blockchain::bitcoin::block::Script> = 0;
     virtual auto BitcoinScriptP2WPKH(
         const blockchain::Type chain,
-        const opentxs::crypto::key::EllipticCurve& publicKey) const noexcept
+        const opentxs::crypto::asymmetric::key::EllipticCurve& publicKey)
+        const noexcept
         -> std::unique_ptr<const blockchain::bitcoin::block::Script> = 0;
     virtual auto BitcoinScriptP2WSH(
         const blockchain::Type chain,

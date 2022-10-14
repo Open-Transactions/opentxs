@@ -67,22 +67,22 @@ Regtest_fixture_hd::Regtest_fixture_hd()
                         client_1_.Factory().PasswordPrompt(""));
                     const auto& element = account.BalanceElement(
                         Subchain::External, index.value_or(0));
-                    const auto key = element.Key();
+                    const auto& key = element.Key();
 
-                    OT_ASSERT(key);
+                    OT_ASSERT(key.IsValid());
 
                     switch (i) {
                         case 0: {
                             const auto& [bytes, value, pattern] =
                                 meta.emplace_back(
                                     client_1_.Factory().DataFromBytes(
-                                        element.Key()->PublicKey()),
+                                        element.Key().PublicKey()),
                                     baseAmount + i,
                                     Pattern::PayToPubkey);
                             output.emplace_back(
                                 value,
                                 miner_.Factory().BitcoinScriptP2PK(
-                                    test_chain_, *key),
+                                    test_chain_, key),
                                 keys);
                         } break;
                         default: {
@@ -94,7 +94,7 @@ Regtest_fixture_hd::Regtest_fixture_hd()
                             output.emplace_back(
                                 value,
                                 miner_.Factory().BitcoinScriptP2PKH(
-                                    test_chain_, *key),
+                                    test_chain_, key),
                                 keys);
                         }
                     }

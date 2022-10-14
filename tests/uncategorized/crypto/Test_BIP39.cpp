@@ -471,11 +471,10 @@ TEST_F(Test_BIP39, pkt_seed_import)
 
     for (auto i = Index{0}; i < 10u; ++i) {
         const auto& element = account.BalanceElement(subchain, i);
-        const auto pKey = element.PrivateKey(reason_);
+        const auto key = element.PrivateKey(reason_);
 
-        ASSERT_TRUE(pKey);
+        ASSERT_TRUE(key.IsValid());
 
-        const auto& key = *pKey;
         const auto secret = [&] {
             auto out = api_.Factory().DataFromBytes(key.PrivateKey(reason_));
 

@@ -10,7 +10,6 @@
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
-#include <functional>
 #include <iterator>
 #include <limits>
 #include <stdexcept>
@@ -24,6 +23,8 @@
 #include "internal/util/Time.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/util/Log.hpp"
+#include "opentxs/util/WriteBuffer.hpp"
+#include "opentxs/util/Writer.hpp"
 
 namespace opentxs::factory
 {
@@ -353,11 +354,9 @@ Version::BitcoinFormat_209::BitcoinFormat_209(
     OT_ASSERT(std::numeric_limits<std::uint32_t>::max() >= height);
 }
 
-auto Version::payload(AllocateOutput out) const noexcept -> bool
+auto Version::payload(Writer&& out) const noexcept -> bool
 {
     try {
-        if (!out) { throw std::runtime_error{"invalid output allocator"}; }
-
         auto userAgent = ByteArray{};
         const auto bytes = [&] {
             auto output = sizeof(BitcoinFormat_1);
@@ -374,9 +373,9 @@ auto Version::payload(AllocateOutput out) const noexcept -> bool
             return output;
         }();
 
-        auto output = out(bytes);
+        auto output = out.Reserve(bytes);
 
-        if (false == output.valid(bytes)) {
+        if (false == output.IsValid(bytes)) {
             throw std::runtime_error{"failed to allocate output space"};
         }
 

@@ -11,8 +11,8 @@ extern "C" {
 }
 
 #include <array>
-#include <functional>
 #include <string_view>
+#include <utility>
 
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/OT.hpp"
@@ -24,14 +24,16 @@ extern "C" {
 #include "opentxs/crypto/SecretStyle.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
+#include "opentxs/util/WriteBuffer.hpp"
+#include "opentxs/util/Writer.hpp"
 #include "util/Sodium.hpp"
 
 namespace opentxs::crypto::implementation
 {
 auto Sodium::PubkeyAdd(
-    [[maybe_unused]] const ReadView pubkey,
-    [[maybe_unused]] const ReadView scalar,
-    [[maybe_unused]] const AllocateOutput result) const noexcept -> bool
+    [[maybe_unused]] ReadView pubkey,
+    [[maybe_unused]] ReadView scalar,
+    [[maybe_unused]] Writer&& result) const noexcept -> bool
 {
     LogError()(OT_PRETTY_CLASS())("Not implemented").Flush();
 
@@ -39,29 +41,22 @@ auto Sodium::PubkeyAdd(
 }
 
 auto Sodium::RandomKeypair(
-    const AllocateOutput privateKey,
-    const AllocateOutput publicKey,
-    const opentxs::crypto::key::asymmetric::Role,
+    Writer&& privateKey,
+    Writer&& publicKey,
+    const opentxs::crypto::asymmetric::Role,
     const Parameters&,
-    const AllocateOutput) const noexcept -> bool
+    Writer&&) const noexcept -> bool
 {
     auto seed = Context().Factory().Secret(0);
     seed.Randomize(crypto_sign_SEEDBYTES);
 
-    return sodium::ExpandSeed(seed.Bytes(), privateKey, publicKey);
+    return sodium::ExpandSeed(
+        seed.Bytes(), std::move(privateKey), std::move(publicKey));
 }
 
-auto Sodium::ScalarAdd(
-    const ReadView lhs,
-    const ReadView rhs,
-    const AllocateOutput result) const noexcept -> bool
+auto Sodium::ScalarAdd(ReadView lhs, ReadView rhs, Writer&& result)
+    const noexcept -> bool
 {
-    if (false == bool(result)) {
-        LogError()(OT_PRETTY_CLASS())("Invalid output allocator").Flush();
-
-        return false;
-    }
-
     if (crypto_core_ed25519_SCALARBYTES != lhs.size()) {
         LogError()(OT_PRETTY_CLASS())("Invalid lhs scalar").Flush();
 
@@ -74,9 +69,9 @@ auto Sodium::ScalarAdd(
         return false;
     }
 
-    auto key = result(crypto_core_ed25519_SCALARBYTES);
+    auto key = result.Reserve(crypto_core_ed25519_SCALARBYTES);
 
-    if (false == key.valid(crypto_core_ed25519_SCALARBYTES)) {
+    if (false == key.IsValid(crypto_core_ed25519_SCALARBYTES)) {
         LogError()(OT_PRETTY_CLASS())("Failed to allocate space for result")
             .Flush();
 
@@ -91,25 +86,18 @@ auto Sodium::ScalarAdd(
     return true;
 }
 
-auto Sodium::ScalarMultiplyBase(
-    const ReadView scalar,
-    const AllocateOutput result) const noexcept -> bool
+auto Sodium::ScalarMultiplyBase(ReadView scalar, Writer&& result) const noexcept
+    -> bool
 {
-    if (false == bool(result)) {
-        LogError()(OT_PRETTY_CLASS())("Invalid output allocator").Flush();
-
-        return false;
-    }
-
     if (crypto_scalarmult_ed25519_SCALARBYTES != scalar.size()) {
         LogError()(OT_PRETTY_CLASS())("Invalid scalar").Flush();
 
         return false;
     }
 
-    auto pub = result(crypto_scalarmult_ed25519_BYTES);
+    auto pub = result.Reserve(crypto_scalarmult_ed25519_BYTES);
 
-    if (false == pub.valid(crypto_scalarmult_ed25519_BYTES)) {
+    if (false == pub.IsValid(crypto_scalarmult_ed25519_BYTES)) {
         LogError()(OT_PRETTY_CLASS())("Failed to allocate space for public key")
             .Flush();
 
@@ -152,15 +140,15 @@ auto Sodium::SharedSecret(
     }
 
     auto privateEd = Context().Factory().Secret(0);
-    auto privateBytes = privateEd.WriteInto(Secret::Mode::Mem)(
-        crypto_scalarmult_curve25519_BYTES);
-    auto secretBytes =
-        secret.WriteInto(Secret::Mode::Mem)(crypto_scalarmult_curve25519_BYTES);
+    auto privateBytes = privateEd.WriteInto(Secret::Mode::Mem)
+                            .Reserve(crypto_scalarmult_curve25519_BYTES);
+    auto secretBytes = secret.WriteInto(Secret::Mode::Mem)
+                           .Reserve(crypto_scalarmult_curve25519_BYTES);
     auto publicEd =
         std::array<unsigned char, crypto_scalarmult_curve25519_BYTES>{};
 
-    OT_ASSERT(privateBytes.valid(crypto_scalarmult_curve25519_BYTES));
-    OT_ASSERT(secretBytes.valid(crypto_scalarmult_curve25519_BYTES));
+    OT_ASSERT(privateBytes.IsValid(crypto_scalarmult_curve25519_BYTES));
+    OT_ASSERT(secretBytes.IsValid(crypto_scalarmult_curve25519_BYTES));
 
     if (0 != ::crypto_sign_ed25519_pk_to_curve25519(
                  publicEd.data(),
@@ -196,7 +184,7 @@ auto Sodium::Sign(
     const ReadView plaintext,
     const ReadView priv,
     const crypto::HashType hash,
-    const AllocateOutput signature) const -> bool
+    Writer&& signature) const -> bool
 {
     if (crypto::HashType::Blake2b256 != hash) {
         LogVerbose()(OT_PRETTY_CLASS())("Unsupported hash function: ")(
@@ -227,15 +215,9 @@ auto Sodium::Sign(
         return false;
     }
 
-    if (false == bool(signature)) {
-        LogError()(OT_PRETTY_CLASS())("Invalid output allocator").Flush();
+    auto output = signature.Reserve(crypto_sign_BYTES);
 
-        return false;
-    }
-
-    auto output = signature(crypto_sign_BYTES);
-
-    if (false == output.valid(crypto_sign_BYTES)) {
+    if (false == output.IsValid(crypto_sign_BYTES)) {
         LogError()(OT_PRETTY_CLASS())("Failed to allocate space for signature")
             .Flush();
 

@@ -19,6 +19,7 @@
 #include "opentxs/blockchain/p2p/Types.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/util/Log.hpp"
+#include "opentxs/util/Writer.hpp"
 
 namespace opentxs::factory
 {
@@ -85,10 +86,10 @@ Filterload::Filterload(
 {
 }
 
-auto Filterload::payload(AllocateOutput out) const noexcept -> bool
+auto Filterload::payload(Writer&& out) const noexcept -> bool
 {
     try {
-        if (false == payload_->Serialize(out)) {
+        if (false == payload_->Serialize(std::move(out))) {
             throw std::runtime_error{"failed to serialize bloom filter"};
         }
 

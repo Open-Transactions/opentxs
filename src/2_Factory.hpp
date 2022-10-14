@@ -18,10 +18,10 @@
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/identity/Types.hpp"
-#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
 #include "opentxs/util/Time.hpp"
+#include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -114,17 +114,6 @@ class Unit;
 
 namespace crypto
 {
-namespace key
-{
-class Asymmetric;
-class Ed25519;
-class EllipticCurve;
-class HD;
-class Keypair;
-class RSA;
-class Secp256k1;
-}  // namespace key
-
 namespace implementation
 {
 class OpenSSL;

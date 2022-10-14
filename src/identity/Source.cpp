@@ -22,10 +22,12 @@
 #include "internal/core/PaymentCode.hpp"
 #include "internal/core/String.hpp"
 #include "internal/crypto/Parameters.hpp"
+#include "internal/crypto/asymmetric/Key.hpp"
 #include "internal/crypto/key/Keypair.hpp"
 #include "internal/crypto/library/AsymmetricProvider.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/LogMacros.hpp"
+#include "internal/util/Pimpl.hpp"
 #include "opentxs/api/crypto/Config.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
@@ -35,15 +37,14 @@
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/crypto/Parameters.hpp"
 #include "opentxs/crypto/Types.hpp"
-#include "opentxs/crypto/key/Asymmetric.hpp"
-#include "opentxs/crypto/key/asymmetric/Algorithm.hpp"
-#include "opentxs/crypto/key/asymmetric/Role.hpp"
+#include "opentxs/crypto/asymmetric/Algorithm.hpp"
+#include "opentxs/crypto/asymmetric/Key.hpp"
+#include "opentxs/crypto/asymmetric/Role.hpp"
 #include "opentxs/identity/CredentialType.hpp"
 #include "opentxs/identity/SourceType.hpp"
 #include "opentxs/identity/credential/Primary.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
-#include "opentxs/util/Pimpl.hpp"
 #include "util/Container.hpp"
 
 namespace opentxs
@@ -59,7 +60,7 @@ auto Factory::NymIDSource(
         case identity::SourceType::Bip47: {
             if ((false == api::crypto::HaveHDKeys()) ||
                 (false == api::crypto::HaveSupport(
-                              crypto::key::asymmetric::Algorithm::Secp256k1))) {
+                              crypto::asymmetric::Algorithm::Secp256k1))) {
                 throw std::runtime_error("Missing BIP-47 support");
             }
 
@@ -77,8 +78,8 @@ auto Factory::NymIDSource(
                     params.Internal().Keypair() =
                         api.Factory().InternalSession().Keypair(
                             params,
-                            crypto::key::Asymmetric::DefaultVersion,
-                            opentxs::crypto::key::asymmetric::Role::Sign,
+                            crypto::asymmetric::Key::DefaultVersion(),
+                            opentxs::crypto::asymmetric::Role::Sign,
                             reason);
                 } break;
                 case identity::CredentialType::HD: {
@@ -101,7 +102,7 @@ auto Factory::NymIDSource(
                             params.Credset(),
                             params.CredIndex(),
                             curve,
-                            opentxs::crypto::key::asymmetric::Role::Sign,
+                            opentxs::crypto::asymmetric::Role::Sign,
                             reason);
                 } break;
                 case identity::CredentialType::Error:
@@ -166,10 +167,10 @@ Source::Source(
     , type_(nymParameters.SourceType())
     , pubkey_(nymParameters.Internal().Keypair().GetPublicKey())
     , payment_code_(factory_.PaymentCode(UnallocatedCString{}))
-    , version_(key_to_source_version_.at(pubkey_->Version()))
+    , version_(key_to_source_version_.at(pubkey_.Version()))
 
 {
-    if (false == bool(pubkey_.get())) {
+    if (false == pubkey_.IsValid()) {
         throw std::runtime_error("Invalid pubkey");
     }
 }
@@ -179,7 +180,7 @@ Source::Source(
     const PaymentCode& source) noexcept
     : factory_{factory}
     , type_(identity::SourceType::Bip47)
-    , pubkey_(crypto::key::Asymmetric::Factory())
+    , pubkey_()
     , payment_code_{source}
     , version_(key_to_source_version_.at(payment_code_.Version()))
 {
@@ -219,14 +220,14 @@ auto Source::deserialize_paymentcode(
 auto Source::deserialize_pubkey(
     const api::session::Factory& factory,
     const identity::SourceType type,
-    const proto::NymIDSource& serialized) -> OTAsymmetricKey
+    const proto::NymIDSource& serialized) -> crypto::asymmetric::Key
 {
     if (identity::SourceType::PubKey == type) {
 
         return factory.InternalSession().AsymmetricKey(serialized.key());
     } else {
 
-        return crypto::key::Asymmetric::Factory();
+        return {};
     }
 }
 
@@ -281,10 +282,10 @@ auto Source::Serialize(proto::NymIDSource& source) const noexcept -> bool
 
     switch (type_) {
         case identity::SourceType::PubKey: {
-            OT_ASSERT(pubkey_.get());
+            OT_ASSERT(pubkey_.IsValid());
 
             auto key = proto::AsymmetricKey{};
-            if (false == pubkey_->Serialize(key)) { return false; }
+            if (false == pubkey_.Internal().Serialize(key)) { return false; }
             key.set_role(proto::KEYROLE_SIGN);
             *(source.mutable_key()) = key;
 
@@ -351,7 +352,7 @@ auto Source::Verify(
 
     switch (type_) {
         case identity::SourceType::PubKey: {
-            if (!pubkey_.get()) { return false; }
+            if (false == pubkey_.IsValid()) { return false; }
 
             isSelfSigned =
                 (proto::SOURCEPROOFTYPE_SELF_SIGNATURE ==
@@ -373,7 +374,7 @@ auto Source::Verify(
             }
 
             auto sourceKey = proto::AsymmetricKey{};
-            if (false == pubkey_->Serialize(sourceKey)) {
+            if (false == pubkey_.Internal().Serialize(sourceKey)) {
                 LogError()(OT_PRETTY_CLASS())("Failed to serialize key")
                     .Flush();
 
@@ -441,8 +442,8 @@ auto Source::Description() const noexcept -> OTString
 
     switch (type_) {
         case identity::SourceType::PubKey: {
-            if (pubkey_.get()) {
-                pubkey_->CalculateID(keyID);
+            if (pubkey_.IsValid()) {
+                pubkey_.Internal().CalculateID(keyID);
                 description = String::Factory(keyID);
             }
         } break;

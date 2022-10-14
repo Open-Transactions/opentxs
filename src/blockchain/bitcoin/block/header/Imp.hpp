@@ -27,10 +27,10 @@
 #include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/blockchain/block/Header.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
-#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
 #include "opentxs/util/Time.hpp"
+#include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -60,6 +60,7 @@ class Work;
 }  // namespace blockchain
 
 class ByteArray;
+class Writer;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -128,9 +129,8 @@ public:
     auto nBits() const noexcept -> std::uint32_t final { return nbits_; }
     auto Print() const noexcept -> UnallocatedCString final;
     auto Serialize(SerializedType& out) const noexcept -> bool final;
-    auto Serialize(
-        const AllocateOutput destination,
-        const bool bitcoinformat = true) const noexcept -> bool final;
+    auto Serialize(Writer&& destination, const bool bitcoinformat = true)
+        const noexcept -> bool final;
     auto Target() const noexcept -> blockchain::block::NumericHash final;
     auto Timestamp() const noexcept -> Time final { return timestamp_; }
     auto Version() const noexcept -> std::uint32_t final

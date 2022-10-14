@@ -30,10 +30,12 @@
 #include "opentxs/blockchain/crypto/Element.hpp"
 #include "opentxs/blockchain/crypto/Wallet.hpp"
 #include "opentxs/core/Amount.hpp"
-#include "opentxs/crypto/key/HD.hpp"  // IWYU pragma: keep
+#include "opentxs/crypto/asymmetric/key/HD.hpp"  // IWYU pragma: keep
 #include "opentxs/identity/wot/claim/Types.hpp"
+#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
+#include "opentxs/util/Writer.hpp"
 
 namespace opentxs::blockchain::crypto::implementation
 {
@@ -275,6 +277,15 @@ void Subaccount::init() noexcept
     parent_.Internal().ClaimAccountID(id_, this);
 }
 
+auto Subaccount::PrivateKey(
+    const Subchain type,
+    const Bip32Index index,
+    const PasswordPrompt& reason) const noexcept
+    -> opentxs::crypto::asymmetric::key::EllipticCurve
+{
+    return {};
+}
+
 // Due to asynchronous blockchain scanning, spends may be discovered out of
 // order compared to receipts.
 void Subaccount::process_spent(
@@ -427,4 +438,6 @@ auto Subaccount::UpdateElement(
 {
     parent_.Parent().Parent().Internal().UpdateElement(pubkeyHashes);
 }
+
+Subaccount::~Subaccount() = default;
 }  // namespace opentxs::blockchain::crypto::implementation

@@ -10,7 +10,6 @@
 
 #include "opentxs/Export.hpp"
 #include "opentxs/otx/blind/Types.hpp"
-#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Iterator.hpp"
 #include "opentxs/util/Time.hpp"
 
@@ -52,6 +51,7 @@ class Token;
 
 class Amount;
 class PasswordPrompt;
+class Writer;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -80,7 +80,7 @@ public:
     auto IsUnlocked() const -> bool;
     auto LatestValidFrom() const -> Time;
     auto Notary() const -> const identifier::Notary&;
-    auto Serialize(AllocateOutput destination) const noexcept -> bool;
+    auto Serialize(Writer&& destination) const noexcept -> bool;
     auto size() const noexcept -> std::size_t;
     auto State() const -> blind::PurseType;
     auto Type() const -> blind::CashType;

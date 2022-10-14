@@ -26,6 +26,7 @@
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
+#include "internal/util/Pimpl.hpp"
 #include "opentxs/api/crypto/Crypto.hpp"
 #include "opentxs/api/crypto/Encode.hpp"
 #include "opentxs/api/crypto/Hash.hpp"  // IWYU pragma: keep
@@ -39,9 +40,10 @@
 #include "opentxs/core/identifier/Types.hpp"
 #include "opentxs/core/identifier/UnitDefinition.hpp"
 #include "opentxs/crypto/HashType.hpp"
+#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
-#include "opentxs/util/Pimpl.hpp"
+#include "opentxs/util/Writer.hpp"
 
 namespace opentxs::factory
 {
@@ -114,8 +116,17 @@ auto Factory::id_from_base58(
             throw std::runtime_error{error.c_str()};
         }
 
-        const auto bytes = crypto_.Encode().IdentifierDecode(
-            base58.substr(identifier_prefix_.size()));
+        const auto bytes = [&] {
+            auto out = ByteArray{};
+            const auto rc = crypto_.Encode().Base58CheckDecode(
+                base58.substr(identifier_prefix_.size()), out.WriteInto());
+
+            if (false == rc) {
+                throw std::runtime_error{"base58 decode failure"};
+            }
+
+            return out;
+        }();
 
         if (bytes.size() < identifier_header_) {
 
@@ -193,7 +204,7 @@ auto Factory::id_from_base58(
                 return type;
             }
         }();
-        const auto hash = std::string_view{bytes}.substr(identifier_header_);
+        const auto hash = bytes.Bytes().substr(identifier_header_);
         const auto goodHash =
             hash.empty() ||
             (hash.size() == identifier_expected_hash_bytes(algo));

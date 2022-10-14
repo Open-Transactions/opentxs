@@ -58,7 +58,7 @@ auto Mapped::Read(const Vector<Index>& indices) const noexcept
 auto Mapped::Write(
     lmdb::Transaction& tx,
     const Vector<std::size_t>& items) noexcept
-    -> Vector<std::pair<Index, WritableView>>
+    -> Vector<std::pair<Index, WriteBuffer>>
 {
     return mapped_private_->Write(tx, items);
 }

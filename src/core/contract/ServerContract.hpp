@@ -18,7 +18,6 @@
 #include "opentxs/core/Types.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/identity/Types.hpp"
-#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
 
@@ -44,6 +43,7 @@ class Data;
 class Factory;
 class PasswordPrompt;
 class String;
+class Writer;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -61,7 +61,7 @@ public:
     auto EffectiveName() const -> UnallocatedCString final;
     auto Name() const noexcept -> UnallocatedCString final { return name_; }
     auto Serialize() const noexcept -> ByteArray final;
-    auto Serialize(AllocateOutput destination, bool includeNym = false) const
+    auto Serialize(Writer&& destination, bool includeNym = false) const
         -> bool final;
     auto Serialize(proto::ServerContract& output, bool includeNym = false) const
         -> bool final;

@@ -15,6 +15,7 @@
 #include "opentxs/otx/blind/Purse.hpp"
 #include "opentxs/otx/blind/PurseType.hpp"
 #include "opentxs/otx/blind/Token.hpp"
+#include "opentxs/util/Writer.hpp"
 
 namespace opentxs::otx::blind
 {
@@ -173,7 +174,7 @@ auto Purse::Push(Token&& token, const PasswordPrompt& reason) -> bool
     return imp_->Push(std::move(token), reason);
 }
 
-auto Purse::Serialize(AllocateOutput destination) const noexcept -> bool
+auto Purse::Serialize(Writer&& destination) const noexcept -> bool
 {
     return imp_->Serialize(std::move(destination));
 }

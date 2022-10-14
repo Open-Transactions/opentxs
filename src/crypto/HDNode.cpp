@@ -9,17 +9,19 @@
 #include <cstddef>
 #include <functional>
 #include <iterator>
+#include <span>
 #include <stdexcept>
 #include <string_view>
 #include <utility>
 
+#include "internal/crypto/asymmetric/key/HD.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "opentxs/OT.hpp"
 #include "opentxs/api/Context.hpp"
 #include "opentxs/api/Factory.hpp"
 #include "opentxs/api/crypto/Crypto.hpp"
-#include "opentxs/crypto/key/HD.hpp"
+#include "opentxs/util/Writer.hpp"
 #include "util/Sodium.hpp"
 
 namespace opentxs::crypto::implementation
@@ -27,8 +29,8 @@ namespace opentxs::crypto::implementation
 HDNode::HDNode(const api::Crypto& crypto) noexcept
     : data_space_(Context().Factory().Secret(0))
     , hash_space_(Context().Factory().Secret(0))
-    , data_(data_space_.WriteInto()(33 + 4))
-    , hash_(hash_space_.WriteInto()(64))
+    , data_(data_space_.WriteInto().Reserve(33 + 4))
+    , hash_(hash_space_.WriteInto().Reserve(64))
     , crypto_(crypto)
     , switch_(0)
     , a_(Context().Factory().Secret(0))
@@ -38,8 +40,8 @@ HDNode::HDNode(const api::Crypto& crypto) noexcept
 
     {
         static const auto size = 32_uz + 32_uz + 33_uz;
-        a_.WriteInto()(size);
-        b_.WriteInto()(size);
+        a_.SetSize(size);
+        b_.SetSize(size);
 
         OT_ASSERT(size == a_.size());
         OT_ASSERT(size == b_.size());
@@ -74,11 +76,11 @@ auto HDNode::Assign(const EcdsaCurve& curve, Bip32::Key& output) const
 
 auto HDNode::check() const noexcept(false) -> void
 {
-    if (false == data_.valid(33 + 4)) {
+    if (false == data_.IsValid(33 + 4)) {
         throw std::runtime_error("Failed to allocate temporary data space");
     }
 
-    if (false == hash_.valid(64)) {
+    if (false == hash_.IsValid(64)) {
         throw std::runtime_error("Failed to allocate temporary hash space");
     }
 }
@@ -88,55 +90,66 @@ auto HDNode::child() noexcept -> Secret&
     return (1 == (switch_ % 2)) ? a_ : b_;
 }
 
-auto HDNode::ChildCode() noexcept -> WritableView
+auto HDNode::ChildCode() noexcept -> WriteBuffer
 {
     auto* start = static_cast<std::byte*>(child().data());
     std::advance(start, 32);
 
-    return WritableView{start, 32};
+    return std::span<std::byte>{start, 32};
 }
 
-auto HDNode::ChildPrivate() noexcept -> AllocateOutput
+auto HDNode::ChildPrivate() noexcept -> Writer
 {
     auto* start = static_cast<std::byte*>(child().data());
 
-    return [start](const auto) { return WritableView{start, 32}; };
+    return {[start](const auto) -> WriteBuffer {
+        return std::span<std::byte>{start, 32};
+    }};
 }
 
-auto HDNode::ChildPublic() noexcept -> AllocateOutput
+auto HDNode::ChildPublic() noexcept -> Writer
 {
     auto* start = static_cast<std::byte*>(child().data());
     std::advance(start, 32 + 32);
 
-    return [start](const auto) { return WritableView{start, 33}; };
+    return {[start](const auto) -> WriteBuffer {
+        return std::span<std::byte>{start, 33};
+    }};
 }
 
 auto HDNode::Fingerprint() const noexcept -> Bip32Fingerprint
 {
-    return key::HD::CalculateFingerprint(crypto_.Hash(), ParentPublic());
+    return asymmetric::internal::key::HD::CalculateFingerprint(
+        crypto_.Hash(), ParentPublic());
 }
 
-auto HDNode::InitCode() noexcept -> AllocateOutput
+auto HDNode::InitCode() noexcept -> Writer
 {
     auto* start = static_cast<std::byte*>(parent().data());
     std::advance(start, 32);
 
-    return [start](const auto) { return WritableView{start, 32}; };
+    return {[start](const auto) -> WriteBuffer {
+        return std::span<std::byte>{start, 32};
+    }};
 }
 
-auto HDNode::InitPrivate() noexcept -> AllocateOutput
+auto HDNode::InitPrivate() noexcept -> Writer
 {
     auto* start = static_cast<std::byte*>(parent().data());
 
-    return [start](const auto) { return WritableView{start, 32}; };
+    return {[start](const auto) -> WriteBuffer {
+        return std::span<std::byte>{start, 32};
+    }};
 }
 
-auto HDNode::InitPublic() noexcept -> AllocateOutput
+auto HDNode::InitPublic() noexcept -> Writer
 {
     auto* start = static_cast<std::byte*>(parent().data());
     std::advance(start, 32 + 32);
 
-    return [start](const auto) { return WritableView{start, 33}; };
+    return {[start](const auto) -> WriteBuffer {
+        return std::span<std::byte>{start, 33};
+    }};
 }
 
 auto HDNode::Next() noexcept -> void { ++switch_; }

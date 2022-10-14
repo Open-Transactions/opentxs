@@ -5,8 +5,10 @@
 
 #include <gtest/gtest.h>
 #include <opentxs/opentxs.hpp>
+#include <cstddef>
 #include <memory>
 #include <optional>
+#include <span>
 
 #include "internal/api/session/Client.hpp"
 #include "internal/otx/client/obsolete/OTAPI_Exec.hpp"
@@ -109,11 +111,12 @@ TEST_F(Test_Symmetric, key_functionality)
     ot::UnallocatedCString plaintext{};
     auto decrypted = recoveredKey.Decrypt(
         ot::reader(ciphertext_),
-        [&](const auto size) {
+        {[&](const auto size) -> ot::WriteBuffer {
             plaintext.resize(size);
+            auto* out = reinterpret_cast<std::byte*>(plaintext.data());
 
-            return ot::WritableView{plaintext.data(), plaintext.size()};
-        },
+            return std::span<std::byte>{out, plaintext.size()};
+        }},
         password);
 
     ASSERT_TRUE(decrypted);
@@ -130,11 +133,12 @@ TEST_F(Test_Symmetric, key_functionality)
 
     decrypted = recoveredKey.Decrypt(
         ot::reader(ciphertext_),
-        [&](const auto size) {
+        {[&](const auto size) -> ot::WriteBuffer {
             plaintext.resize(size);
+            auto* out = reinterpret_cast<std::byte*>(plaintext.data());
 
-            return ot::WritableView{plaintext.data(), plaintext.size()};
-        },
+            return std::span<std::byte>{out, plaintext.size()};
+        }},
         password);
 
     EXPECT_FALSE(decrypted);

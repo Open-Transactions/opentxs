@@ -10,10 +10,10 @@
 
 #include "internal/core/contract/peer/PeerReply.hpp"
 #include "internal/core/contract/peer/PeerRequest.hpp"
+#include "internal/util/Pimpl.hpp"
 #include "opentxs/core/Types.hpp"
 #include "opentxs/identity/Types.hpp"
 #include "opentxs/util/Container.hpp"
-#include "opentxs/util/Pimpl.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs

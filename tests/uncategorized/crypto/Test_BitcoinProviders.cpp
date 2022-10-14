@@ -6,7 +6,7 @@
 #include <gtest/gtest.h>
 #include <opentxs/opentxs.hpp>
 #include <cstdint>
-#include <memory>
+#include <string_view>
 #include <tuple>
 #include <type_traits>
 #include <utility>
@@ -381,45 +381,62 @@ public:
 
     auto test_base58_encode() -> bool
     {
-        for (const auto& [key, value] : base_58_) {
-            auto input = client_.Factory().Data();
-            input.DecodeHex(key);
-            const auto output =
-                crypto_.Encode().IdentifierEncode(input.Bytes());
+        auto out = true;
 
-            EXPECT_EQ(value, output);
+        for (const auto& [hex, expected] : base_58_) {
+            const auto input = client_.Factory().DataFromHex(hex);
+            auto encoded = ot::UnallocatedCString{};
+            const auto success = crypto_.Encode().Base58CheckEncode(
+                input.Bytes(), ot::writer(encoded));
+
+            EXPECT_TRUE(success);
+            EXPECT_EQ(expected, encoded);
+
+            out &= success;
+            out &= (expected == encoded);
         }
 
-        return true;
+        return out;
     }
 
     auto test_base58_decode() -> bool
     {
-        for (const auto& [key, value] : base_58_) {
-            auto expected = client_.Factory().Data();
-            expected.DecodeHex(key);
-            const auto decoded = crypto_.Encode().IdentifierDecode(value);
-            const auto output = client_.Factory().DataFromBytes(decoded);
+        auto out = true;
 
-            EXPECT_EQ(expected, output);
+        for (const auto& [hex, input] : base_58_) {
+            const auto expected = client_.Factory().DataFromHex(hex);
+            auto decoded = ot::ByteArray{};
+            const auto success =
+                crypto_.Encode().Base58CheckDecode(input, decoded.WriteInto());
+
+            EXPECT_TRUE(success);
+            EXPECT_EQ(expected.asHex(), decoded.asHex());
+
+            out &= success;
+            out &= (expected == decoded);
         }
 
-        return true;
+        return out;
     }
 
     auto test_ripemd160() -> bool
     {
-        for (const auto& [preimage, hash] : ripemd160_) {
-            auto input = client_.Factory().Data();
-            auto output = client_.Factory().Data();
+        auto out = true;
 
-            EXPECT_TRUE(input.DecodeHex(hash));
-            EXPECT_TRUE(crypto_.Hash().Digest(
-                ot::crypto::HashType::Ripemd160, preimage, output.WriteInto()));
-            EXPECT_EQ(output, input);
+        for (const auto& [preimage, hash] : ripemd160_) {
+            const auto input = client_.Factory().DataFromHex(hash);
+            auto output = client_.Factory().Data();
+            const auto hashed = crypto_.Hash().Digest(
+                ot::crypto::HashType::Ripemd160, preimage, output.WriteInto());
+
+            EXPECT_TRUE(hashed);
+            EXPECT_EQ(output.asHex(), input.asHex());
+
+            out &= hashed;
+            out &= (output == input);
         }
 
-        return true;
+        return out;
     }
 
     auto get_seed(const ot::UnallocatedCString& hex) const -> ot::Secret
@@ -444,26 +461,25 @@ public:
                 library.SeedID(seed.Bytes()).asBase58(client_.Crypto());
             const auto serialized =
                 library.DeriveKey(ot::crypto::EcdsaCurve::secp256k1, seed, {});
-            auto pKey = client_.Crypto().Asymmetric().InstantiateKey(
-                ot::crypto::key::asymmetric::Algorithm::Secp256k1,
+            auto key = client_.Crypto().Asymmetric().InstantiateKey(
+                ot::crypto::asymmetric::Algorithm::Secp256k1,
                 seedID,
                 serialized,
-                ot::crypto::key::asymmetric::Role::Sign,
-                ot::crypto::key::EllipticCurve::DefaultVersion,
+                ot::crypto::asymmetric::Role::Sign,
+                ot::crypto::asymmetric::key::EllipticCurve::DefaultVersion(),
                 reason_);
 
-            EXPECT_TRUE(pKey);
+            EXPECT_TRUE(key.IsValid());
 
-            if (false == bool(pKey)) { return false; }
+            if (false == key.IsValid()) { return false; }
 
-            const auto& key = *pKey;
+            auto test = ot::ByteArray{};
 
             EXPECT_TRUE(key.HasPrivate());
             EXPECT_TRUE(key.HasPublic());
-            EXPECT_EQ(
-                ot::crypto::key::asymmetric::Algorithm::Secp256k1,
-                key.keyType());
-            EXPECT_TRUE(compare_private(library, xprv, key.Xprv(reason_)));
+            EXPECT_EQ(ot::crypto::asymmetric::Algorithm::Secp256k1, key.Type());
+            EXPECT_TRUE(key.Xprv(reason_, test.WriteInto()));
+            EXPECT_TRUE(compare_private(library, xprv, test.Bytes()));
         }
 
         return true;
@@ -471,8 +487,8 @@ public:
 
     auto compare_private(
         const ot::crypto::Bip32& library,
-        const ot::UnallocatedCString& lhs,
-        const ot::UnallocatedCString& rhs) const -> bool
+        const std::string_view lhs,
+        const std::string_view rhs) const -> bool
     {
         bool output{true};
         ot::Bip32Network lNetwork{}, rNetwork{};
@@ -513,8 +529,8 @@ public:
 
     auto compare_public(
         const ot::crypto::Bip32& library,
-        const ot::UnallocatedCString& lhs,
-        const ot::UnallocatedCString& rhs) const -> bool
+        const std::string_view lhs,
+        const std::string_view rhs) const -> bool
     {
         bool output{true};
         ot::Bip32Network lNetwork{}, rNetwork{};
@@ -565,29 +581,30 @@ public:
                     library.SeedID(seed.Bytes()).asBase58(client_.Crypto());
                 const auto serialized = library.DeriveKey(
                     ot::crypto::EcdsaCurve::secp256k1, seed, rawPath);
-                auto pKey = client_.Crypto().Asymmetric().InstantiateKey(
-                    ot::crypto::key::asymmetric::Algorithm::Secp256k1,
+                auto key = client_.Crypto().Asymmetric().InstantiateKey(
+                    ot::crypto::asymmetric::Algorithm::Secp256k1,
                     seedID,
                     serialized,
-                    ot::crypto::key::asymmetric::Role::Sign,
-                    ot::crypto::key::EllipticCurve::DefaultVersion,
+                    ot::crypto::asymmetric::Role::Sign,
+                    ot::crypto::asymmetric::key::EllipticCurve::
+                        DefaultVersion(),
                     reason_);
 
-                EXPECT_TRUE(pKey);
+                EXPECT_TRUE(key.IsValid());
 
-                if (false == bool(pKey)) { continue; }
+                if (false == key.IsValid()) { continue; }
 
-                const auto& key = *pKey;
+                auto xpub = ot::ByteArray{};
+                auto xprv = ot::ByteArray{};
 
                 EXPECT_TRUE(key.HasPrivate());
                 EXPECT_TRUE(key.HasPublic());
                 EXPECT_EQ(
-                    ot::crypto::key::asymmetric::Algorithm::Secp256k1,
-                    key.keyType());
-                EXPECT_TRUE(
-                    compare_private(library, expectPrv, key.Xprv(reason_)));
-                EXPECT_TRUE(
-                    compare_public(library, expectPub, key.Xpub(reason_)));
+                    ot::crypto::asymmetric::Algorithm::Secp256k1, key.Type());
+                EXPECT_TRUE(key.Xpub(reason_, xpub.WriteInto()));
+                EXPECT_TRUE(key.Xprv(reason_, xprv.WriteInto()));
+                EXPECT_TRUE(compare_private(library, expectPrv, xprv.Bytes()));
+                EXPECT_TRUE(compare_public(library, expectPub, xpub.Bytes()));
             }
         }
 
@@ -635,8 +652,7 @@ public:
 
 const bool Test_Bitcoin_Providers::have_hd_{
     ot::api::crypto::HaveHDKeys() &&
-    ot::api::crypto::HaveSupport(
-        ot::crypto::key::asymmetric::Algorithm::Secp256k1)
+    ot::api::crypto::HaveSupport(ot::crypto::asymmetric::Algorithm::Secp256k1)
 
 };
 

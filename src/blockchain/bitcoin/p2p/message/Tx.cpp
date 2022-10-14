@@ -18,7 +18,9 @@
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/blockchain/bitcoin/block/Transaction.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/p2p/Types.hpp"
+#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Log.hpp"
+#include "opentxs/util/Writer.hpp"
 
 namespace opentxs::factory
 {
@@ -97,10 +99,10 @@ Tx::Tx(
     verify_checksum();
 }
 
-auto Tx::payload(AllocateOutput out) const noexcept -> bool
+auto Tx::payload(Writer&& out) const noexcept -> bool
 {
     try {
-        if (false == copy(payload_.Bytes(), out)) {
+        if (false == copy(payload_.Bytes(), std::move(out))) {
             throw std::runtime_error{"failed to serialize payload"};
         }
 

@@ -23,6 +23,7 @@
 #include "internal/serialization/protobuf/Proto.tpp"
 #include "internal/serialization/protobuf/verify/VerifyContacts.hpp"
 #include "internal/util/LogMacros.hpp"
+#include "internal/util/Pimpl.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/core/Data.hpp"
@@ -36,8 +37,8 @@
 #include "opentxs/identity/wot/claim/SectionType.hpp"
 #include "opentxs/identity/wot/claim/Types.hpp"
 #include "opentxs/util/Log.hpp"
-#include "opentxs/util/Pimpl.hpp"
 #include "opentxs/util/Time.hpp"
+#include "opentxs/util/Writer.hpp"
 
 namespace opentxs::identity::wot::claim
 {
@@ -1012,8 +1013,7 @@ auto Data::SetScope(const claim::ClaimType type, const UnallocatedCString& name)
     }
 }
 
-auto Data::Serialize(AllocateOutput destination, const bool withID) const
-    -> bool
+auto Data::Serialize(Writer&& destination, const bool withID) const -> bool
 {
     return write(
         [&] {
@@ -1022,7 +1022,7 @@ auto Data::Serialize(AllocateOutput destination, const bool withID) const
 
             return proto;
         }(),
-        destination);
+        std::move(destination));
 }
 
 auto Data::Serialize(proto::ContactData& output, const bool withID) const

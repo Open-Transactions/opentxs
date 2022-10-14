@@ -6,18 +6,20 @@
 #include "0_stdafx.hpp"                       // IWYU pragma: associated
 #include "crypto/key/asymmetric/Keypair.hpp"  // IWYU pragma: associated
 
+#include <memory>
 #include <stdexcept>
 #include <utility>
 
+#include "internal/crypto/asymmetric/Key.hpp"
 #include "internal/crypto/key/Factory.hpp"
 #include "internal/crypto/key/Keypair.hpp"
 #include "internal/crypto/key/Null.hpp"
 #include "internal/otx/common/crypto/OTSignatureMetadata.hpp"
 #include "internal/otx/common/crypto/Signature.hpp"
 #include "internal/util/LogMacros.hpp"
-#include "opentxs/crypto/key/Asymmetric.hpp"
-#include "opentxs/crypto/key/asymmetric/Role.hpp"
-#include "opentxs/util/Pimpl.hpp"
+#include "internal/util/Pimpl.hpp"
+#include "opentxs/crypto/asymmetric/Key.hpp"
+#include "opentxs/crypto/asymmetric/Role.hpp"
 
 template class opentxs::Pimpl<opentxs::crypto::key::Keypair>;
 
@@ -30,20 +32,12 @@ auto Keypair() noexcept -> std::unique_ptr<crypto::key::Keypair>
 
 auto Keypair(
     const api::Session& api,
-    const opentxs::crypto::key::asymmetric::Role role,
-    std::unique_ptr<crypto::key::Asymmetric> publicKey,
-    std::unique_ptr<crypto::key::Asymmetric> privateKey) noexcept(false)
+    const opentxs::crypto::asymmetric::Role role,
+    crypto::asymmetric::Key publicKey,
+    crypto::asymmetric::Key privateKey) noexcept(false)
     -> std::unique_ptr<crypto::key::Keypair>
 {
     using ReturnType = crypto::key::implementation::Keypair;
-
-    if (false == bool(publicKey)) {
-        throw std::runtime_error("Invalid public key");
-    }
-
-    if (false == bool(privateKey)) {
-        throw std::runtime_error("Invalid private key");
-    }
 
     return std::make_unique<ReturnType>(
         api, role, std::move(publicKey), std::move(privateKey));
@@ -54,15 +48,14 @@ namespace opentxs::crypto::key::implementation
 {
 Keypair::Keypair(
     const api::Session& api,
-    const opentxs::crypto::key::asymmetric::Role role,
-    std::unique_ptr<crypto::key::Asymmetric> publicKey,
-    std::unique_ptr<crypto::key::Asymmetric> privateKey) noexcept
+    const crypto::asymmetric::Role role,
+    crypto::asymmetric::Key publicKey,
+    crypto::asymmetric::Key privateKey) noexcept
     : api_(api)
-    , key_private_(privateKey.release())
-    , key_public_(publicKey.release())
+    , key_private_(std::move(privateKey))
+    , key_public_(std::move(publicKey))
     , role_(role)
 {
-    OT_ASSERT(key_public_.get());
 }
 
 Keypair::Keypair(const Keypair& rhs) noexcept
@@ -76,29 +69,22 @@ Keypair::Keypair(const Keypair& rhs) noexcept
 auto Keypair::CheckCapability(
     const identity::NymCapability& capability) const noexcept -> bool
 {
-    bool output{false};
-
-    if (key_private_.get()) {
-        output |= key_private_->hasCapability(capability);
-    } else if (key_public_.get()) {
-        output |= key_public_->hasCapability(capability);
-    }
-
-    return output;
+    return key_private_.HasCapability(capability) ||
+           key_public_.HasCapability(capability);
 }
 
 // Return the private key as an Asymmetric object
-auto Keypair::GetPrivateKey() const -> const key::Asymmetric&
+auto Keypair::GetPrivateKey() const -> const asymmetric::Key&
 {
-    if (key_private_.get()) { return key_private_; }
+    if (key_private_.IsValid()) { return key_private_; }
 
     throw std::runtime_error("private key missing");
 }
 
 // Return the public key as an Asymmetric object
-auto Keypair::GetPublicKey() const -> const key::Asymmetric&
+auto Keypair::GetPublicKey() const -> const asymmetric::Key&
 {
-    if (key_public_.get()) { return key_public_; }
+    if (key_public_.IsValid()) { return key_public_; }
 
     throw std::runtime_error("public key missing");
 }
@@ -109,9 +95,9 @@ auto Keypair::GetPublicKeyBySignature(
     const Signature& theSignature,
     bool bInclusive) const noexcept -> std::int32_t
 {
-    OT_ASSERT(key_public_.get());
+    OT_ASSERT(key_public_.IsValid());
 
-    const auto* metadata = key_public_->GetMetadata();
+    const auto* metadata = key_public_.Internal().GetMetadata();
 
     OT_ASSERT(nullptr != metadata);
 
@@ -140,7 +126,7 @@ auto Keypair::GetPublicKeyBySignature(
          (theSignature.getMetaData() == *(metadata)))) {
         // ...Then add key_public_ as a possible match, to listOutput.
         //
-        listOutput.push_back(&key_public_.get());
+        listOutput.push_back(std::addressof(key_public_));
         return 1;
     }
     return 0;
@@ -149,14 +135,14 @@ auto Keypair::GetPublicKeyBySignature(
 auto Keypair::Serialize(proto::AsymmetricKey& serialized, bool privateKey)
     const noexcept -> bool
 {
-    OT_ASSERT(key_public_.get());
-
     if (privateKey) {
-        OT_ASSERT(key_private_.get());
-
-        if (false == key_private_->Serialize(serialized)) { return false; }
+        if (false == key_private_.Internal().Serialize(serialized)) {
+            return false;
+        }
     } else {
-        if (false == key_public_->Serialize(serialized)) { return false; }
+        if (false == key_public_.Internal().Serialize(serialized)) {
+            return false;
+        }
     }
     return true;
 }
@@ -166,6 +152,6 @@ auto Keypair::GetTransportKey(
     Secret& privateKey,
     const opentxs::PasswordPrompt& reason) const noexcept -> bool
 {
-    return key_private_->TransportKey(publicKey, privateKey, reason);
+    return key_private_.Internal().TransportKey(publicKey, privateKey, reason);
 }
 }  // namespace opentxs::crypto::key::implementation

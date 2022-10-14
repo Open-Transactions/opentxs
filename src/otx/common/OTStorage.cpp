@@ -23,11 +23,11 @@
 #include "internal/core/String.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/P0330.hpp"
+#include "internal/util/Pimpl.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/util/Log.hpp"
-#include "opentxs/util/Pimpl.hpp"
 #include "otx/common/OTStoragePB.hpp"
 
 /*

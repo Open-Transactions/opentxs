@@ -10,7 +10,6 @@
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
-#include <functional>
 #include <iterator>
 #include <stdexcept>
 #include <utility>
@@ -22,6 +21,8 @@
 #include "opentxs/blockchain/p2p/Types.hpp"
 #include "opentxs/network/blockchain/bitcoin/CompactSize.hpp"
 #include "opentxs/util/Log.hpp"
+#include "opentxs/util/WriteBuffer.hpp"
+#include "opentxs/util/Writer.hpp"
 
 namespace be = boost::endian;
 
@@ -214,21 +215,18 @@ Reject::Reject(
     verify_checksum();
 }
 
-auto Reject::payload(AllocateOutput out) const noexcept -> bool
+auto Reject::payload(Writer&& out) const noexcept -> bool
 {
     try {
-        if (!out) { throw std::runtime_error{"invalid output allocator"}; }
-
         const auto message = BitcoinString(message_);
         const auto reason = BitcoinString(reason_);
         const auto code =
             be::little_uint8_buf_t{static_cast<std::uint8_t>(code_)};
         const auto bytes =
             message.size() + reason.size() + sizeof(code) + extra_.size();
+        auto output = out.Reserve(bytes);
 
-        auto output = out(bytes);
-
-        if (false == output.valid(bytes)) {
+        if (false == output.IsValid(bytes)) {
             throw std::runtime_error{"failed to allocate output space"};
         }
 

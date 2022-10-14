@@ -24,16 +24,18 @@ set(cxx-install-headers
     "${opentxs_SOURCE_DIR}/include/opentxs/util/PasswordCallback.hpp"
     "${opentxs_SOURCE_DIR}/include/opentxs/util/PasswordCaller.hpp"
     "${opentxs_SOURCE_DIR}/include/opentxs/util/PasswordPrompt.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/util/Pimpl.hpp"
     "${opentxs_SOURCE_DIR}/include/opentxs/util/Time.hpp"
     "${opentxs_SOURCE_DIR}/include/opentxs/util/Types.hpp"
     "${opentxs_SOURCE_DIR}/include/opentxs/util/WorkType.hpp"
+    "${opentxs_SOURCE_DIR}/include/opentxs/util/WriteBuffer.hpp"
+    "${opentxs_SOURCE_DIR}/include/opentxs/util/Writer.hpp"
 )
 target_sources(
   opentxs-common
   PRIVATE
     "${opentxs_SOURCE_DIR}/src/internal/util/AsyncConst.hpp"
     "${opentxs_SOURCE_DIR}/src/internal/util/BoostPMR.hpp"
+    "${opentxs_SOURCE_DIR}/src/internal/util/Bytes.hpp"
     "${opentxs_SOURCE_DIR}/src/internal/util/Editor.hpp"
     "${opentxs_SOURCE_DIR}/src/internal/util/Exclusive.hpp"
     "${opentxs_SOURCE_DIR}/src/internal/util/Flag.hpp"
@@ -42,6 +44,7 @@ target_sources(
     "${opentxs_SOURCE_DIR}/src/internal/util/Mutex.hpp"
     "${opentxs_SOURCE_DIR}/src/internal/util/P0330.hpp"
     "${opentxs_SOURCE_DIR}/src/internal/util/PasswordPrompt.hpp"
+    "${opentxs_SOURCE_DIR}/src/internal/util/Pimpl.hpp"
     "${opentxs_SOURCE_DIR}/src/internal/util/Shared.hpp"
     "${opentxs_SOURCE_DIR}/src/internal/util/SharedPimpl.hpp"
     "${opentxs_SOURCE_DIR}/src/internal/util/Signals.hpp"
@@ -94,6 +97,10 @@ target_sources(
     "Timer.hpp"
     "Work.cpp"
     "Work.hpp"
+    "WriteBuffer.cpp"
+    "Writer.cpp"
+    "WriterPrivate.cpp"
+    "WriterPrivate.hpp"
 )
 target_include_directories(
   opentxs-common SYSTEM

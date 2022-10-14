@@ -11,6 +11,7 @@
 
 #include "opentxs/blockchain/block/Outpoint.hpp"  // IWYU pragma: keep
 #include "opentxs/core/ByteArray.hpp"             // IWYU pragma: keep
+#include "opentxs/util/Bytes.hpp"
 
 namespace opentxs::blockchain::block
 {

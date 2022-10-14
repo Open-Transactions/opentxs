@@ -3,6 +3,8 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_include "opentxs/crypto/asymmetric/Role.hpp"
+
 #pragma once
 
 #include "opentxs/identity/Authority.hpp"
@@ -10,13 +12,22 @@
 #include "internal/core/String.hpp"
 #include "internal/crypto/key/Keypair.hpp"
 #include "internal/identity/Types.hpp"
-#include "opentxs/crypto/key/asymmetric/Role.hpp"
+#include "opentxs/crypto/Types.hpp"
+#include "opentxs/crypto/asymmetric/Types.hpp"
 #include "opentxs/identity/Nym.hpp"
 #include "opentxs/util/Numbers.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
+namespace crypto
+{
+namespace asymmetric
+{
+class Key;
+}  // namespace asymmetric
+}  // namespace crypto
+
 namespace identity
 {
 namespace credential
@@ -57,43 +68,43 @@ public:
         return *this;
     }
     virtual auto GetPublicAuthKey(
-        crypto::key::asymmetric::Algorithm keytype,
+        crypto::asymmetric::Algorithm keytype,
         const String::List* plistRevokedIDs = nullptr) const
-        -> const crypto::key::Asymmetric& = 0;
+        -> const crypto::asymmetric::Key& = 0;
     virtual auto GetPublicEncrKey(
-        crypto::key::asymmetric::Algorithm keytype,
+        crypto::asymmetric::Algorithm keytype,
         const String::List* plistRevokedIDs = nullptr) const
-        -> const crypto::key::Asymmetric& = 0;
+        -> const crypto::asymmetric::Key& = 0;
     virtual auto GetPublicKeysBySignature(
         crypto::key::Keypair::Keys& listOutput,
         const Signature& theSignature,
         char cKeyType = '0') const -> std::int32_t = 0;
     virtual auto GetPublicSignKey(
-        crypto::key::asymmetric::Algorithm keytype,
+        crypto::asymmetric::Algorithm keytype,
         const String::List* plistRevokedIDs = nullptr) const
-        -> const crypto::key::Asymmetric& = 0;
+        -> const crypto::asymmetric::Key& = 0;
     virtual auto GetPrivateSignKey(
-        crypto::key::asymmetric::Algorithm keytype,
+        crypto::asymmetric::Algorithm keytype,
         const String::List* plistRevokedIDs = nullptr) const
-        -> const crypto::key::Asymmetric& = 0;
+        -> const crypto::asymmetric::Key& = 0;
     virtual auto GetPrivateEncrKey(
-        crypto::key::asymmetric::Algorithm keytype,
+        crypto::asymmetric::Algorithm keytype,
         const String::List* plistRevokedIDs = nullptr) const
-        -> const crypto::key::Asymmetric& = 0;
+        -> const crypto::asymmetric::Key& = 0;
     virtual auto GetPrivateAuthKey(
-        crypto::key::asymmetric::Algorithm keytype,
+        crypto::asymmetric::Algorithm keytype,
         const String::List* plistRevokedIDs = nullptr) const
-        -> const crypto::key::Asymmetric& = 0;
+        -> const crypto::asymmetric::Key& = 0;
     virtual auto GetAuthKeypair(
-        crypto::key::asymmetric::Algorithm keytype,
+        crypto::asymmetric::Algorithm keytype,
         const String::List* plistRevokedIDs = nullptr) const
         -> const crypto::key::Keypair& = 0;
     virtual auto GetEncrKeypair(
-        crypto::key::asymmetric::Algorithm keytype,
+        crypto::asymmetric::Algorithm keytype,
         const String::List* plistRevokedIDs = nullptr) const
         -> const crypto::key::Keypair& = 0;
     virtual auto GetSignKeypair(
-        crypto::key::asymmetric::Algorithm keytype,
+        crypto::asymmetric::Algorithm keytype,
         const String::List* plistRevokedIDs = nullptr) const
         -> const crypto::key::Keypair& = 0;
     virtual auto GetVerificationSet(
@@ -104,18 +115,34 @@ public:
         const CredentialIndexModeFlag mode) const -> bool = 0;
     virtual auto Sign(
         const GetPreimage input,
-        const crypto::SignatureRole role,
-        proto::Signature& signature,
-        const PasswordPrompt& reason,
-        opentxs::crypto::key::asymmetric::Role key =
-            opentxs::crypto::key::asymmetric::Role::Sign,
-        const crypto::HashType hash = crypto::HashType::Error) const
-        -> bool = 0;
+        crypto::SignatureRole role,
+        proto::Signature& output,
+        const PasswordPrompt& reason) const -> bool = 0;
+    virtual auto Sign(
+        const GetPreimage input,
+        crypto::SignatureRole role,
+        crypto::HashType hash,
+        proto::Signature& output,
+        const PasswordPrompt& reason) const -> bool = 0;
+    virtual auto Sign(
+        const GetPreimage input,
+        crypto::SignatureRole role,
+        opentxs::crypto::asymmetric::Role key,
+        proto::Signature& output,
+        const PasswordPrompt& reason) const -> bool = 0;
+    virtual auto Sign(
+        const GetPreimage input,
+        crypto::SignatureRole role,
+        opentxs::crypto::asymmetric::Role key,
+        crypto::HashType hash,
+        proto::Signature& output,
+        const PasswordPrompt& reason) const -> bool = 0;
+    virtual auto Verify(const Data& plaintext, const proto::Signature& sig)
+        const -> bool = 0;
     virtual auto Verify(
         const Data& plaintext,
         const proto::Signature& sig,
-        const opentxs::crypto::key::asymmetric::Role key =
-            opentxs::crypto::key::asymmetric::Role::Sign) const -> bool = 0;
+        const opentxs::crypto::asymmetric::Role key) const -> bool = 0;
     virtual auto Verify(const proto::Verification& item) const -> bool = 0;
     virtual auto VerifyInternally() const -> bool = 0;
     virtual auto WriteCredentials() const -> bool = 0;

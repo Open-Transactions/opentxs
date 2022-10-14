@@ -20,12 +20,14 @@
 
 #include "2_Factory.hpp"
 #include "internal/api/crypto/Seed.hpp"
+#include "internal/crypto/asymmetric/Key.hpp"
 #include "internal/crypto/key/Keypair.hpp"
 #include "internal/identity/Authority.hpp"
 #include "internal/identity/Nym.hpp"
 #include "internal/identity/Types.hpp"
 #include "internal/identity/credential/Credential.hpp"
 #include "internal/otx/common/crypto/Signature.hpp"
+#include "internal/util/Pimpl.hpp"
 #include "ottest/data/crypto/PaymentCodeV3.hpp"
 
 namespace ottest
@@ -110,11 +112,10 @@ public:
 TEST_F(Test_Authority, GetPublicAuthKey_DefaultSetup_ShouldReturnDefaultKey)
 {
     const auto& asymmetricKey = authority_->GetPublicAuthKey(
-        ot::crypto::key::asymmetric::Algorithm::Secp256k1);
+        ot::crypto::asymmetric::Algorithm::Secp256k1);
     EXPECT_EQ(
-        asymmetricKey.keyType(),
-        ot::crypto::key::asymmetric::Algorithm::Secp256k1);
-    EXPECT_EQ(asymmetricKey.Role(), ot::crypto::key::asymmetric::Role::Auth);
+        asymmetricKey.Type(), ot::crypto::asymmetric::Algorithm::Secp256k1);
+    EXPECT_EQ(asymmetricKey.Role(), ot::crypto::asymmetric::Role::Auth);
 }
 
 TEST_F(
@@ -131,21 +132,18 @@ TEST_F(
     authority_->AddChildKeyCredential(parameters, reason_);
 
     const auto& asymmetricKey = authority_->GetPublicAuthKey(
-        ot::crypto::key::asymmetric::Algorithm::ED25519);
-    EXPECT_EQ(
-        asymmetricKey.keyType(),
-        ot::crypto::key::asymmetric::Algorithm::ED25519);
-    EXPECT_EQ(asymmetricKey.Role(), ot::crypto::key::asymmetric::Role::Auth);
+        ot::crypto::asymmetric::Algorithm::ED25519);
+    EXPECT_EQ(asymmetricKey.Type(), ot::crypto::asymmetric::Algorithm::ED25519);
+    EXPECT_EQ(asymmetricKey.Role(), ot::crypto::asymmetric::Role::Auth);
 }
 
 TEST_F(Test_Authority, GetPrivateAuthKey_DefaultSetup_ShouldReturnProperData)
 {
     const auto& asymmetricKey = authority_->GetPrivateAuthKey(
-        ot::crypto::key::asymmetric::Algorithm::Secp256k1);
+        ot::crypto::asymmetric::Algorithm::Secp256k1);
     EXPECT_EQ(
-        asymmetricKey.keyType(),
-        ot::crypto::key::asymmetric::Algorithm::Secp256k1);
-    EXPECT_EQ(asymmetricKey.Role(), ot::crypto::key::asymmetric::Role::Auth);
+        asymmetricKey.Type(), ot::crypto::asymmetric::Algorithm::Secp256k1);
+    EXPECT_EQ(asymmetricKey.Role(), ot::crypto::asymmetric::Role::Auth);
 }
 
 TEST_F(Test_Authority, GetVerificationSet_DefaultSetup_ShouldReturnFalse)
@@ -199,12 +197,11 @@ TEST_F(
 TEST_F(Test_Authority, GetPublicEncrKey_DefaultSetup_ShouldReturnProperData)
 {
     const auto& asymmetricKey = authority_->GetPublicEncrKey(
-        ot::crypto::key::asymmetric::Algorithm::Secp256k1);
+        ot::crypto::asymmetric::Algorithm::Secp256k1);
 
     EXPECT_EQ(
-        asymmetricKey.keyType(),
-        ot::crypto::key::asymmetric::Algorithm::Secp256k1);
-    EXPECT_EQ(asymmetricKey.Role(), ot::crypto::key::asymmetric::Role::Encrypt);
+        asymmetricKey.Type(), ot::crypto::asymmetric::Algorithm::Secp256k1);
+    EXPECT_EQ(asymmetricKey.Role(), ot::crypto::asymmetric::Role::Encrypt);
 }
 
 TEST_F(
@@ -221,45 +218,40 @@ TEST_F(
     authority_->AddChildKeyCredential(parameters, reason_);
 
     const auto& asymmetricKey = authority_->GetPublicEncrKey(
-        ot::crypto::key::asymmetric::Algorithm::ED25519);
+        ot::crypto::asymmetric::Algorithm::ED25519);
 
-    EXPECT_EQ(
-        asymmetricKey.keyType(),
-        ot::crypto::key::asymmetric::Algorithm::ED25519);
-    EXPECT_EQ(asymmetricKey.Role(), ot::crypto::key::asymmetric::Role::Encrypt);
+    EXPECT_EQ(asymmetricKey.Type(), ot::crypto::asymmetric::Algorithm::ED25519);
+    EXPECT_EQ(asymmetricKey.Role(), ot::crypto::asymmetric::Role::Encrypt);
 }
 
 TEST_F(Test_Authority, GetPrivateEncrKey_DefaultSetup_ShouldReturnProperData)
 {
     const auto& asymmetricKey = authority_->GetPrivateEncrKey(
-        ot::crypto::key::asymmetric::Algorithm::Secp256k1);
+        ot::crypto::asymmetric::Algorithm::Secp256k1);
 
     EXPECT_EQ(
-        asymmetricKey.keyType(),
-        ot::crypto::key::asymmetric::Algorithm::Secp256k1);
-    EXPECT_EQ(asymmetricKey.Role(), ot::crypto::key::asymmetric::Role::Encrypt);
+        asymmetricKey.Type(), ot::crypto::asymmetric::Algorithm::Secp256k1);
+    EXPECT_EQ(asymmetricKey.Role(), ot::crypto::asymmetric::Role::Encrypt);
 }
 
 TEST_F(Test_Authority, GetPublicSignKey_DefaultSetup_ShouldReturnProperData)
 {
     const auto& asymmetricKey = authority_->GetPublicSignKey(
-        ot::crypto::key::asymmetric::Algorithm::Secp256k1);
+        ot::crypto::asymmetric::Algorithm::Secp256k1);
 
     EXPECT_EQ(
-        asymmetricKey.keyType(),
-        ot::crypto::key::asymmetric::Algorithm::Secp256k1);
-    EXPECT_EQ(asymmetricKey.Role(), ot::crypto::key::asymmetric::Role::Sign);
+        asymmetricKey.Type(), ot::crypto::asymmetric::Algorithm::Secp256k1);
+    EXPECT_EQ(asymmetricKey.Role(), ot::crypto::asymmetric::Role::Sign);
 }
 
 TEST_F(Test_Authority, GetPrivateSignKey_DefaultSetup_ShouldReturnProperData)
 {
     const auto& asymmetricKey = authority_->GetPrivateSignKey(
-        ot::crypto::key::asymmetric::Algorithm::Secp256k1);
+        ot::crypto::asymmetric::Algorithm::Secp256k1);
 
     EXPECT_EQ(
-        asymmetricKey.keyType(),
-        ot::crypto::key::asymmetric::Algorithm::Secp256k1);
-    EXPECT_EQ(asymmetricKey.Role(), ot::crypto::key::asymmetric::Role::Sign);
+        asymmetricKey.Type(), ot::crypto::asymmetric::Algorithm::Secp256k1);
+    EXPECT_EQ(asymmetricKey.Role(), ot::crypto::asymmetric::Role::Sign);
 }
 
 TEST_F(
@@ -300,16 +292,16 @@ TEST_F(Test_Authority, EncryptionTargets_DefaultSetup_ShouldReturnProperData)
     const auto& keyCredentials = authority_->EncryptionTargets();
     const auto& masterCredID = authority_->GetMasterCredID();
     const auto& tagCredential = authority_->GetTagCredential(
-        ot::crypto::key::asymmetric::Algorithm::Secp256k1);
+        ot::crypto::asymmetric::Algorithm::Secp256k1);
 
     EXPECT_EQ(keyCredentials.first, masterCredID);
     EXPECT_EQ(
         keyCredentials.second.front(),
         tagCredential.Internal()
             .asKey()
-            .GetKeypair(ot::crypto::key::asymmetric::Role::Encrypt)
+            .GetKeypair(ot::crypto::asymmetric::Role::Encrypt)
             .GetPublicKey()
-            .keyType());
+            .Type());
     EXPECT_EQ(keyCredentials.second.size(), 1);
 }
 
@@ -330,16 +322,16 @@ TEST_F(
 
     const auto& keyCredentials2 = authority_->EncryptionTargets();
     const auto& tagCredential2 = authority_->GetTagCredential(
-        ot::crypto::key::asymmetric::Algorithm::ED25519);
+        ot::crypto::asymmetric::Algorithm::ED25519);
 
     EXPECT_EQ(keyCredentials2.first, masterCredID);
     EXPECT_EQ(
         keyCredentials2.second.back(),
         tagCredential2.Internal()
             .asKey()
-            .GetKeypair(ot::crypto::key::asymmetric::Role::Encrypt)
+            .GetKeypair(ot::crypto::asymmetric::Role::Encrypt)
             .GetPublicKey()
-            .keyType());
+            .Type());
     EXPECT_EQ(keyCredentials2.second.size(), 2);
 }
 
@@ -365,8 +357,7 @@ TEST_F(
     EXPECT_EQ(1, keys.size());
 
     EXPECT_EQ(
-        ot::crypto::key::asymmetric::Algorithm::Secp256k1,
-        keys.front()->keyType());
+        ot::crypto::asymmetric::Algorithm::Secp256k1, keys.front()->Type());
 }
 
 TEST_F(
@@ -382,7 +373,7 @@ TEST_F(
 TEST_F(Test_Authority, Params_Secp256k1AsParameter_ShouldReturnProperData)
 {
     const auto& params =
-        authority_->Params(ot::crypto::key::asymmetric::Algorithm::Secp256k1);
+        authority_->Params(ot::crypto::asymmetric::Algorithm::Secp256k1);
 
     EXPECT_EQ(params.size(), 0);
 }
@@ -392,7 +383,7 @@ TEST_F(
     Params_AddChildKeyCredentialCalledFirstLegacyAsParameter_ShouldReturnProperData)
 {
     const auto& params =
-        authority_->Params(ot::crypto::key::asymmetric::Algorithm::Legacy);
+        authority_->Params(ot::crypto::asymmetric::Algorithm::Legacy);
 
     EXPECT_EQ(params.size(), 0);
 
@@ -406,7 +397,7 @@ TEST_F(
     authority_->AddChildKeyCredential(parameters, reason_);
 
     const auto& params2 =
-        authority_->Params(ot::crypto::key::asymmetric::Algorithm::Legacy);
+        authority_->Params(ot::crypto::asymmetric::Algorithm::Legacy);
 
     EXPECT_NE(params2.size(), 0);
 }
@@ -522,24 +513,24 @@ TEST_F(Test_Authority, Unlock_DefaultSetup_ShouldReturnProperData)
     auto testTag = std::uint32_t{};
     const auto symmetricKey = ot::crypto::symmetric::Key{};
     const auto& str = authority_->GetPublicAuthKey(
-        ot::crypto::key::asymmetric::Algorithm::Secp256k1);
+        ot::crypto::asymmetric::Algorithm::Secp256k1);
 
     const auto& tagCredential = authority_->GetTagCredential(
-        ot::crypto::key::asymmetric::Algorithm::Secp256k1);
+        ot::crypto::asymmetric::Algorithm::Secp256k1);
 
     const auto& encryptKey =
         tagCredential.Internal()
             .asKey()
-            .GetKeypair(ot::crypto::key::asymmetric::Role::Encrypt)
+            .GetKeypair(ot::crypto::asymmetric::Role::Encrypt)
             .GetPrivateKey();
 
-    encryptKey.CalculateTag(
+    encryptKey.Internal().CalculateTag(
         str, authority_->GetMasterCredID(), reason_, testTag);
 
     EXPECT_FALSE(authority_->Unlock(
         str,
         testTag,
-        ot::crypto::key::asymmetric::Algorithm::Secp256k1,
+        ot::crypto::asymmetric::Algorithm::Secp256k1,
         symmetricKey,
         non_const_reason_));
 }
@@ -547,12 +538,12 @@ TEST_F(Test_Authority, Unlock_DefaultSetup_ShouldReturnProperData)
 TEST_F(Test_Authority, Unlock_DefaultSetup_ShouldReturnProperData2)
 {
     const auto& tagCredential = authority_->GetTagCredential(
-        ot::crypto::key::asymmetric::Algorithm::Secp256k1);
+        ot::crypto::asymmetric::Algorithm::Secp256k1);
 
     const auto& encryptKey =
         tagCredential.Internal()
             .asKey()
-            .GetKeypair(ot::crypto::key::asymmetric::Role::Encrypt)
+            .GetKeypair(ot::crypto::asymmetric::Role::Encrypt)
             .GetPrivateKey();
 
     auto testTag = std::uint32_t{};
@@ -560,15 +551,15 @@ TEST_F(Test_Authority, Unlock_DefaultSetup_ShouldReturnProperData2)
         opentxs::crypto::symmetric::Algorithm::ChaCha20Poly1305, reason_);
 
     const auto& str = authority_->GetPublicAuthKey(
-        ot::crypto::key::asymmetric::Algorithm::Secp256k1);
+        ot::crypto::asymmetric::Algorithm::Secp256k1);
 
-    encryptKey.CalculateTag(
+    encryptKey.Internal().CalculateTag(
         str, authority_->GetMasterCredID(), reason_, testTag);
 
     EXPECT_TRUE(authority_->Unlock(
         str,
         testTag,
-        ot::crypto::key::asymmetric::Algorithm::Secp256k1,
+        ot::crypto::asymmetric::Algorithm::Secp256k1,
         key,
         non_const_reason_));
 }
@@ -591,7 +582,7 @@ TEST_F(Test_Authority, Verify_DefaultSetup_ShouldReturnProperData)
     auto publicKey2 = ot::ByteArray{};
     ot::proto::Signature signature2;
     EXPECT_FALSE(authority_->Verify(
-        publicKey2, signature2, opentxs::crypto::key::asymmetric::Role::Auth));
+        publicKey2, signature2, opentxs::crypto::asymmetric::Role::Auth));
 }
 
 TEST_F(
@@ -604,7 +595,7 @@ TEST_F(
         authority_->GetMasterCredID().asBase58(client_.Crypto());
 
     EXPECT_FALSE(authority_->Verify(
-        publicKey, signature, opentxs::crypto::key::asymmetric::Role::Auth));
+        publicKey, signature, opentxs::crypto::asymmetric::Role::Auth));
 }
 TEST_F(Test_Authority, Verify_WithChildKeyCredential_ShouldReturnFalse)
 {
@@ -623,7 +614,7 @@ TEST_F(Test_Authority, Verify_WithChildKeyCredential_ShouldReturnFalse)
     *signature.mutable_credentialid() = credential;
 
     EXPECT_FALSE(authority_->Verify(
-        publicKey, signature, opentxs::crypto::key::asymmetric::Role::Auth));
+        publicKey, signature, opentxs::crypto::asymmetric::Role::Auth));
 }
 
 TEST_F(Test_Authority, Verify_DefaultSetup_ShouldReturnFalse)
@@ -667,48 +658,45 @@ TEST_F(Test_Authority, WriteCredentials_DefaultSetup_ShouldReturnProperData)
 TEST_F(Test_Authority, GetPairs_DefaultSetup_ShouldReturnProperData)
 {
     const auto& authKeyPair = authority_->GetAuthKeypair(
-        ot::crypto::key::asymmetric::Algorithm::Secp256k1);
+        ot::crypto::asymmetric::Algorithm::Secp256k1);
 
     EXPECT_EQ(
-        authKeyPair.GetPrivateKey().keyType(),
-        ot::crypto::key::asymmetric::Algorithm::Secp256k1);
+        authKeyPair.GetPrivateKey().Type(),
+        ot::crypto::asymmetric::Algorithm::Secp256k1);
     EXPECT_EQ(
-        authKeyPair.GetPrivateKey().Role(),
-        ot::crypto::key::asymmetric::Role::Auth);
+        authKeyPair.GetPrivateKey().Role(), ot::crypto::asymmetric::Role::Auth);
 
     const auto& encrKeyPair = authority_->GetEncrKeypair(
-        ot::crypto::key::asymmetric::Algorithm::Secp256k1);
+        ot::crypto::asymmetric::Algorithm::Secp256k1);
 
     EXPECT_EQ(
-        encrKeyPair.GetPrivateKey().keyType(),
-        ot::crypto::key::asymmetric::Algorithm::Secp256k1);
+        encrKeyPair.GetPrivateKey().Type(),
+        ot::crypto::asymmetric::Algorithm::Secp256k1);
     EXPECT_EQ(
         encrKeyPair.GetPrivateKey().Role(),
-        ot::crypto::key::asymmetric::Role::Encrypt);
+        ot::crypto::asymmetric::Role::Encrypt);
 
     const auto& signKeyPair = authority_->GetSignKeypair(
-        ot::crypto::key::asymmetric::Algorithm::Secp256k1);
+        ot::crypto::asymmetric::Algorithm::Secp256k1);
 
     EXPECT_EQ(
-        signKeyPair.GetPrivateKey().keyType(),
-        ot::crypto::key::asymmetric::Algorithm::Secp256k1);
+        signKeyPair.GetPrivateKey().Type(),
+        ot::crypto::asymmetric::Algorithm::Secp256k1);
     EXPECT_EQ(
-        signKeyPair.GetPrivateKey().Role(),
-        ot::crypto::key::asymmetric::Role::Sign);
+        signKeyPair.GetPrivateKey().Role(), ot::crypto::asymmetric::Role::Sign);
 }
 
 TEST_F(Test_Authority, GetTagCredential_DefaultSetup_ShouldReturnProperData)
 {
     const auto& tagCredential = authority_->GetTagCredential(
-        ot::crypto::key::asymmetric::Algorithm::Secp256k1);
+        ot::crypto::asymmetric::Algorithm::Secp256k1);
     const auto& keyPair = tagCredential.Internal().asKey().GetKeypair(
-        ot::crypto::key::asymmetric::Role::Sign);
+        ot::crypto::asymmetric::Role::Sign);
 
     EXPECT_EQ(
-        keyPair.GetPrivateKey().keyType(),
-        ot::crypto::key::asymmetric::Algorithm::Secp256k1);
+        keyPair.GetPrivateKey().Type(),
+        ot::crypto::asymmetric::Algorithm::Secp256k1);
     EXPECT_EQ(
-        keyPair.GetPrivateKey().Role(),
-        ot::crypto::key::asymmetric::Role::Sign);
+        keyPair.GetPrivateKey().Role(), ot::crypto::asymmetric::Role::Sign);
 }
 }  // namespace ottest

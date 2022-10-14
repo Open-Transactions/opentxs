@@ -13,8 +13,15 @@
 #include "opentxs/core/Data.hpp"
 #include "opentxs/util/Allocated.hpp"
 #include "opentxs/util/Allocator.hpp"
-#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
+#include "opentxs/util/Types.hpp"
+
+// NOLINTBEGIN(modernize-concat-nested-namespaces)
+namespace opentxs
+{
+class Writer;
+}  // namespace opentxs
+// NOLINTEND(modernize-concat-nested-namespaces)
 
 namespace opentxs
 {
@@ -92,7 +99,7 @@ public:
     auto Randomize(const std::size_t size) -> bool;
     virtual auto resize(const std::size_t size) -> bool;
     virtual auto SetSize(const std::size_t size) -> bool;
-    virtual auto WriteInto() noexcept -> AllocateOutput;
+    virtual auto WriteInto() noexcept -> Writer;
     auto zeroMemory() -> void;
 
     ByteArrayPrivate() = delete;

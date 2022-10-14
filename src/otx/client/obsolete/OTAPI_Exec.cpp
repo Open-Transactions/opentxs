@@ -30,6 +30,7 @@
 #include "internal/otx/smartcontract/OTVariable.hpp"
 #include "internal/serialization/protobuf/Proto.tpp"
 #include "internal/util/LogMacros.hpp"
+#include "internal/util/Pimpl.hpp"
 #include "internal/util/SharedPimpl.hpp"
 #include "internal/util/Time.hpp"
 #include "opentxs/api/crypto/Seed.hpp"
@@ -46,7 +47,6 @@
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/PasswordPrompt.hpp"  // IWYU pragma: keep
-#include "opentxs/util/Pimpl.hpp"
 
 #define OT_ERROR_AMOUNT INT64_MIN
 

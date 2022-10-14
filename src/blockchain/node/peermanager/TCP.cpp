@@ -12,6 +12,7 @@
 
 #include "internal/api/network/Asio.hpp"
 #include "internal/blockchain/p2p/P2P.hpp"
+#include "internal/util/Pimpl.hpp"
 #include "opentxs/api/network/Network.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
@@ -23,7 +24,7 @@
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
-#include "opentxs/util/Pimpl.hpp"
+#include "opentxs/util/Writer.hpp"
 
 namespace opentxs::blockchain::node::peermanager
 {

@@ -14,7 +14,7 @@
 
 namespace opentxs::identity::credential::blank
 {
-struct Base : virtual public contract::blank::Signable,
+struct Base : virtual public contract::blank::Signable2,
               virtual public credential::internal::Base {
     auto asString(const bool) const -> UnallocatedCString final { return {}; }
     auto CredentialID() const -> const identifier::Generic& final
@@ -30,7 +30,7 @@ struct Base : virtual public contract::blank::Signable,
     }
     auto hasCapability(const NymCapability&) const -> bool final { return {}; }
     auto MasterSignature() const -> Signature final { return {}; }
-    auto Mode() const -> crypto::key::asymmetric::Mode final { return {}; }
+    auto Mode() const -> crypto::asymmetric::Mode final { return {}; }
     auto Private() const -> bool final { return {}; }
     auto ReleaseSignatures(const bool) -> void final {}
     auto Role() const -> identity::CredentialRole final { return {}; }
@@ -39,7 +39,7 @@ struct Base : virtual public contract::blank::Signable,
     {
         return {};
     }
-    using contract::blank::Signable::Serialize;
+    using contract::blank::Signable2::Serialize;
     auto Serialize(
         SerializedType&,
         const SerializationModeFlag,
@@ -56,7 +56,7 @@ struct Base : virtual public contract::blank::Signable,
     auto Verify(
         const Data&,
         const proto::Signature&,
-        const opentxs::crypto::key::asymmetric::Role) const -> bool final
+        const opentxs::crypto::asymmetric::Role) const -> bool final
     {
         return {};
     }
@@ -73,15 +73,15 @@ struct Base : virtual public contract::blank::Signable,
 struct Key : virtual public blank::Base,
              virtual public credential::internal::Key {
     auto GetKeypair(
-        const crypto::key::asymmetric::Algorithm,
-        const opentxs::crypto::key::asymmetric::Role) const
+        const crypto::asymmetric::Algorithm,
+        const opentxs::crypto::asymmetric::Role) const
         -> const crypto::key::Keypair& final
     {
         static const auto blank = crypto::key::blank::Keypair{};
 
         return blank;
     }
-    auto GetKeypair(const opentxs::crypto::key::asymmetric::Role) const
+    auto GetKeypair(const opentxs::crypto::asymmetric::Role) const
         -> const crypto::key::Keypair& final
     {
         static const auto blank = crypto::key::blank::Keypair{};
@@ -100,7 +100,7 @@ struct Key : virtual public blank::Base,
         const crypto::SignatureRole,
         proto::Signature&,
         const PasswordPrompt&,
-        opentxs::crypto::key::asymmetric::Role,
+        opentxs::crypto::asymmetric::Role,
         const crypto::HashType hash) const -> bool final
     {
         return {};

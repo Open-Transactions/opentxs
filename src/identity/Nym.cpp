@@ -36,6 +36,7 @@
 #include "internal/serialization/protobuf/verify/Nym.hpp"
 #include "internal/serialization/protobuf/verify/VerifyContacts.hpp"
 #include "internal/util/LogMacros.hpp"
+#include "internal/util/Pimpl.hpp"
 #include "opentxs/api/crypto/Config.hpp"
 #include "opentxs/api/crypto/Seed.hpp"
 #include "opentxs/api/session/Crypto.hpp"
@@ -54,8 +55,8 @@
 #include "opentxs/crypto/Parameters.hpp"
 #include "opentxs/crypto/SignatureRole.hpp"
 #include "opentxs/crypto/Types.hpp"
-#include "opentxs/crypto/key/asymmetric/Algorithm.hpp"
-#include "opentxs/crypto/key/asymmetric/Role.hpp"
+#include "opentxs/crypto/asymmetric/Algorithm.hpp"
+#include "opentxs/crypto/asymmetric/Role.hpp"
 #include "opentxs/identity/Authority.hpp"
 #include "opentxs/identity/CredentialType.hpp"
 #include "opentxs/identity/IdentityType.hpp"
@@ -67,7 +68,7 @@
 #include "opentxs/identity/wot/claim/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
-#include "opentxs/util/Pimpl.hpp"
+#include "opentxs/util/Writer.hpp"
 #include "util/HDIndex.hpp"
 
 namespace opentxs
@@ -168,7 +169,7 @@ namespace opentxs::identity::implementation
 {
 auto session_key_from_iv(
     const api::Session& api,
-    const crypto::key::Asymmetric& signingKey,
+    const crypto::asymmetric::Key& signingKey,
     const Data& iv,
     const crypto::HashType hashType,
     opentxs::PasswordPrompt& reason) -> bool;
@@ -504,12 +505,12 @@ auto Nym::AddSocialMediaProfile(
 
 auto Nym::Alias() const -> UnallocatedCString { return alias_; }
 
-auto Nym::Serialize(AllocateOutput destination) const -> bool
+auto Nym::Serialize(Writer&& destination) const -> bool
 {
     auto serialized = proto::Nym{};
     if (false == Serialize(serialized)) { return false; }
 
-    write(serialized, destination);
+    write(serialized, std::move(destination));
 
     return true;
 }
@@ -707,8 +708,8 @@ void Nym::GetIdentifier(String& theIdentifier) const
 template <typename T>
 auto Nym::get_private_auth_key(
     const T& lock,
-    crypto::key::asymmetric::Algorithm keytype) const
-    -> const crypto::key::Asymmetric&
+    crypto::asymmetric::Algorithm keytype) const
+    -> const crypto::asymmetric::Key&
 {
     OT_ASSERT(!active_.empty());
 
@@ -733,16 +734,26 @@ auto Nym::get_private_auth_key(
         keytype, &list_revoked_ids_);  // success
 }
 
-auto Nym::GetPrivateAuthKey(crypto::key::asymmetric::Algorithm keytype) const
-    -> const crypto::key::Asymmetric&
+auto Nym::GetPrivateAuthKey() const -> const crypto::asymmetric::Key&
+{
+    return GetPrivateAuthKey(crypto::asymmetric::Algorithm::Null);
+}
+
+auto Nym::GetPrivateAuthKey(crypto::asymmetric::Algorithm keytype) const
+    -> const crypto::asymmetric::Key&
 {
     auto lock = sLock{shared_lock_};
 
     return get_private_auth_key(lock, keytype);
 }
 
-auto Nym::GetPrivateEncrKey(crypto::key::asymmetric::Algorithm keytype) const
-    -> const crypto::key::Asymmetric&
+auto Nym::GetPrivateEncrKey() const -> const crypto::asymmetric::Key&
+{
+    return GetPrivateEncrKey(crypto::asymmetric::Algorithm::Null);
+}
+
+auto Nym::GetPrivateEncrKey(crypto::asymmetric::Algorithm keytype) const
+    -> const crypto::asymmetric::Key&
 {
     auto lock = sLock{shared_lock_};
 
@@ -769,8 +780,13 @@ auto Nym::GetPrivateEncrKey(crypto::key::asymmetric::Algorithm keytype) const
         &list_revoked_ids_);  // success
 }
 
-auto Nym::GetPrivateSignKey(crypto::key::asymmetric::Algorithm keytype) const
-    -> const crypto::key::Asymmetric&
+auto Nym::GetPrivateSignKey() const -> const crypto::asymmetric::Key&
+{
+    return GetPrivateSignKey(crypto::asymmetric::Algorithm::Null);
+}
+
+auto Nym::GetPrivateSignKey(crypto::asymmetric::Algorithm keytype) const
+    -> const crypto::asymmetric::Key&
 {
     auto lock = sLock{shared_lock_};
 
@@ -780,8 +796,8 @@ auto Nym::GetPrivateSignKey(crypto::key::asymmetric::Algorithm keytype) const
 template <typename T>
 auto Nym::get_private_sign_key(
     const T& lock,
-    crypto::key::asymmetric::Algorithm keytype) const
-    -> const crypto::key::Asymmetric&
+    crypto::asymmetric::Algorithm keytype) const
+    -> const crypto::asymmetric::Key&
 {
     OT_ASSERT(!active_.empty());
 
@@ -811,8 +827,8 @@ auto Nym::get_private_sign_key(
 template <typename T>
 auto Nym::get_public_sign_key(
     const T& lock,
-    crypto::key::asymmetric::Algorithm keytype) const
-    -> const crypto::key::Asymmetric&
+    crypto::asymmetric::Algorithm keytype) const
+    -> const crypto::asymmetric::Key&
 {
     OT_ASSERT(!active_.empty());
 
@@ -839,8 +855,13 @@ auto Nym::get_public_sign_key(
         &list_revoked_ids_);  // success
 }
 
-auto Nym::GetPublicAuthKey(crypto::key::asymmetric::Algorithm keytype) const
-    -> const crypto::key::Asymmetric&
+auto Nym::GetPublicAuthKey() const -> const crypto::asymmetric::Key&
+{
+    return GetPublicAuthKey(crypto::asymmetric::Algorithm::Null);
+}
+
+auto Nym::GetPublicAuthKey(crypto::asymmetric::Algorithm keytype) const
+    -> const crypto::asymmetric::Key&
 {
     auto lock = sLock{shared_lock_};
 
@@ -867,8 +888,13 @@ auto Nym::GetPublicAuthKey(crypto::key::asymmetric::Algorithm keytype) const
         &list_revoked_ids_);  // success
 }
 
-auto Nym::GetPublicEncrKey(crypto::key::asymmetric::Algorithm keytype) const
-    -> const crypto::key::Asymmetric&
+auto Nym::GetPublicEncrKey() const -> const crypto::asymmetric::Key&
+{
+    return GetPublicEncrKey(crypto::asymmetric::Algorithm::Null);
+}
+
+auto Nym::GetPublicEncrKey(crypto::asymmetric::Algorithm keytype) const
+    -> const crypto::asymmetric::Key&
 {
     auto lock = sLock{shared_lock_};
 
@@ -929,8 +955,13 @@ auto Nym::GetPublicKeysBySignature(
     return nCount;
 }
 
-auto Nym::GetPublicSignKey(crypto::key::asymmetric::Algorithm keytype) const
-    -> const crypto::key::Asymmetric&
+auto Nym::GetPublicSignKey() const -> const crypto::asymmetric::Key&
+{
+    return GetPublicSignKey(crypto::asymmetric::Algorithm::Null);
+}
+
+auto Nym::GetPublicSignKey(crypto::asymmetric::Algorithm keytype) const
+    -> const crypto::asymmetric::Key&
 {
     auto lock = sLock{shared_lock_};
 
@@ -1199,7 +1230,7 @@ auto Nym::PaymentCode() const -> UnallocatedCString
     return paymentCode.asBase58();
 }
 
-auto Nym::PaymentCodePath(AllocateOutput destination) const -> bool
+auto Nym::PaymentCodePath(Writer&& destination) const -> bool
 {
     auto path = proto::HDPath{};
     if (false == PaymentCodePath(path)) {
@@ -1210,7 +1241,7 @@ auto Nym::PaymentCodePath(AllocateOutput destination) const -> bool
         return false;
     }
 
-    write(path, destination);
+    write(path, std::move(destination));
 
     return true;
 }
@@ -1280,13 +1311,13 @@ void Nym::revoke_verification_credentials(const eLock& lock)
     for (auto& it : revokedIDs) { list_revoked_ids_.push_back(it); }
 }
 
-auto Nym::SerializeCredentialIndex(AllocateOutput destination, const Mode mode)
-    const -> bool
+auto Nym::SerializeCredentialIndex(Writer&& destination, const Mode mode) const
+    -> bool
 {
     auto serialized = proto::Nym{};
     if (false == SerializeCredentialIndex(serialized, mode)) { return false; }
 
-    return write(serialized, destination);
+    return write(serialized, std::move(destination));
 }
 
 auto Nym::SerializeCredentialIndex(Serialized& index, const Mode mode) const
@@ -1495,13 +1526,13 @@ auto Nym::Sign(
 
     for (const auto& it : active_) {
         if (nullptr != it.second) {
-            bool success = it.second->Sign(
+            bool success = it.second->Internal().Sign(
                 preimage,
                 role,
+                opentxs::crypto::asymmetric::Role::Sign,
+                hash,
                 signature,
-                reason,
-                opentxs::crypto::key::asymmetric::Role::Sign,
-                hash);
+                reason);
 
             if (success) {
                 haveSig = true;
@@ -1569,9 +1600,9 @@ auto Nym::TransportKey(Data& pubkey, const opentxs::PasswordPrompt& reason)
 }
 
 auto Nym::Unlock(
-    const crypto::key::Asymmetric& dhKey,
+    const crypto::asymmetric::Key& dhKey,
     const std::uint32_t tag,
-    const crypto::key::asymmetric::Algorithm type,
+    const crypto::asymmetric::Algorithm type,
     const crypto::symmetric::Key& key,
     PasswordPrompt& reason) const noexcept -> bool
 {
@@ -1672,4 +1703,6 @@ auto Nym::WriteCredentials() const -> bool
 
     return true;
 }
+
+Nym::~Nym() = default;
 }  // namespace opentxs::identity::implementation

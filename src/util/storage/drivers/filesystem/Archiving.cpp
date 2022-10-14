@@ -21,6 +21,7 @@
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/PasswordPrompt.hpp"  // IWYU pragma: keep
+#include "opentxs/util/Writer.hpp"
 #include "util/storage/Config.hpp"
 
 namespace opentxs::factory

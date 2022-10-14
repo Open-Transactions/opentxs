@@ -109,8 +109,7 @@ public:
 
 const bool Test_PaymentCode::have_hd_{
     ot::api::crypto::HaveHDKeys() &&
-    ot::api::crypto::HaveSupport(
-        ot::crypto::key::asymmetric::Algorithm::Secp256k1)
+    ot::api::crypto::HaveSupport(ot::crypto::asymmetric::Algorithm::Secp256k1)
 
 };
 /* Test: Gets the last paymentcode to be set as primary
@@ -310,7 +309,7 @@ TEST_F(Test_PaymentCode, factory_seed_nym)
         auto privatekey = client_.Crypto().Seed().GetPaymentCode(
             fingerprint, 10, version, reason_);
 
-        ASSERT_TRUE(privatekey);
+        EXPECT_TRUE(privatekey.IsValid());
     } else {
         // TODO
     }

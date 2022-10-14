@@ -64,6 +64,7 @@ if(OT_PCH)
     "$<$<COMPILE_LANGUAGE:CXX>:<regex$<ANGLE-R>>"
     "$<$<COMPILE_LANGUAGE:CXX>:<set$<ANGLE-R>>"
     "$<$<COMPILE_LANGUAGE:CXX>:<shared_mutex$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<span$<ANGLE-R>>"
     "$<$<COMPILE_LANGUAGE:CXX>:<sstream$<ANGLE-R>>"
     "$<$<COMPILE_LANGUAGE:CXX>:<stdexcept$<ANGLE-R>>"
     "$<$<COMPILE_LANGUAGE:CXX>:<string$<ANGLE-R>>"

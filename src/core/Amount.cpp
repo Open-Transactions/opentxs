@@ -14,6 +14,7 @@
 
 #include "core/Amount.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
+#include "opentxs/util/Writer.hpp"
 
 namespace be = boost::endian;
 
@@ -351,9 +352,9 @@ auto Amount::Internal() const noexcept -> const internal::Amount&
     return *imp_;
 }
 
-auto Amount::Serialize(const AllocateOutput dest) const noexcept -> bool
+auto Amount::Serialize(Writer&& dest) const noexcept -> bool
 {
-    return imp_->Serialize(dest);
+    return imp_->Serialize(std::move(dest));
 }
 
 auto Amount::swap(Amount& rhs) noexcept -> void { std::swap(imp_, rhs.imp_); }

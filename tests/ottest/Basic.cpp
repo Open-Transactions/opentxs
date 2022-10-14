@@ -8,7 +8,6 @@
 #include <opentxs/opentxs.hpp>
 #include <cassert>
 #include <filesystem>
-#include <functional>
 
 #include "internal/util/P0330.hpp"
 #include "util/Sodium.hpp"
@@ -52,8 +51,10 @@ auto Home() noexcept -> const fs::path&
     static const auto output = [&]() -> fs::path {
         const auto random = [&] {
             auto buf = ot::Space{};
+            const auto rc = opentxs::crypto::sodium::Randomize(
+                ot::writer(buf).Reserve(16_uz));
 
-            assert(opentxs::crypto::sodium::Randomize(ot::writer(buf)(16_uz)));
+            assert(rc);
 
             return ot::to_hex(buf.data(), buf.size());
         }();

@@ -7,9 +7,6 @@
 #include "blockchain/bitcoin/p2p/message/Cmpctblock.hpp"  // IWYU pragma: associated
 
 #include <cstddef>
-#include <cstring>
-#include <functional>
-#include <iterator>
 #include <stdexcept>
 #include <utility>
 
@@ -19,7 +16,9 @@
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/blockchain/p2p/Types.hpp"
 #include "opentxs/core/ByteArray.hpp"
+#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Log.hpp"
+#include "opentxs/util/Writer.hpp"
 
 namespace opentxs::factory
 {
@@ -92,23 +91,11 @@ Cmpctblock::Cmpctblock(
     verify_checksum();
 }
 
-auto Cmpctblock::payload(AllocateOutput out) const noexcept -> bool
+auto Cmpctblock::payload(Writer&& out) const noexcept -> bool
 {
     try {
-        if (!out) { throw std::runtime_error{"invalid output allocator"}; }
 
-        const auto bytes = raw_cmpctblock_.size();
-        auto output = out(bytes);
-
-        if (false == output.valid(bytes)) {
-            throw std::runtime_error{"failed to allocate output space"};
-        }
-
-        auto* i = output.as<std::byte>();
-        std::memcpy(i, raw_cmpctblock_.data(), bytes);
-        std::advance(i, bytes);
-
-        return true;
+        return copy(raw_cmpctblock_.Bytes(), std::move(out));
     } catch (const std::exception& e) {
         LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
 

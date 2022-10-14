@@ -11,6 +11,7 @@
 #include "opentxs/Export.hpp"
 #include "opentxs/blockchain/block/Block.hpp"
 #include "opentxs/util/Iterator.hpp"
+#include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs

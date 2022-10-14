@@ -10,7 +10,7 @@
 
 #include "opentxs/Export.hpp"
 #include "opentxs/core/contract/Signable.hpp"
-#include "opentxs/crypto/key/asymmetric/Role.hpp"
+#include "opentxs/crypto/asymmetric/Types.hpp"
 #include "opentxs/identity/Types.hpp"
 #include "opentxs/util/Container.hpp"
 
@@ -46,7 +46,7 @@ public:
     OPENTXS_NO_EXPORT virtual auto Internal() const noexcept
         -> const internal::Base& = 0;
     virtual auto MasterSignature() const -> Signature = 0;
-    virtual auto Mode() const -> crypto::key::asymmetric::Mode = 0;
+    virtual auto Mode() const -> crypto::asymmetric::Mode = 0;
     virtual auto Role() const -> identity::CredentialRole = 0;
     virtual auto Private() const -> bool = 0;
     virtual auto Save() const -> bool = 0;

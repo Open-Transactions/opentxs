@@ -8,7 +8,6 @@
 
 #include <cstddef>
 #include <cstring>
-#include <functional>
 #include <iterator>
 #include <stdexcept>
 #include <utility>
@@ -25,6 +24,9 @@
 #include "opentxs/core/FixedByteArray.hpp"
 #include "opentxs/network/blockchain/bitcoin/CompactSize.hpp"
 #include "opentxs/util/Log.hpp"
+#include "opentxs/util/Types.hpp"
+#include "opentxs/util/WriteBuffer.hpp"
+#include "opentxs/util/Writer.hpp"
 
 namespace opentxs::factory
 {
@@ -160,18 +162,16 @@ Cfheaders::Cfheaders(
 {
 }
 
-auto Cfheaders::payload(AllocateOutput out) const noexcept -> bool
+auto Cfheaders::payload(Writer&& out) const noexcept -> bool
 {
     try {
-        if (!out) { throw std::runtime_error{"invalid output allocator"}; }
-
         static constexpr auto fixed = sizeof(BitcoinFormat);
         const auto hashes = payload_.size();
         const auto cs = CompactSize(hashes).Encode();
         const auto bytes = fixed + cs.size() + (hashes * standard_hash_size_);
-        auto output = out(bytes);
+        auto output = out.Reserve(bytes);
 
-        if (false == output.valid(bytes)) {
+        if (false == output.IsValid(bytes)) {
             throw std::runtime_error{"failed to allocate output space"};
         }
 

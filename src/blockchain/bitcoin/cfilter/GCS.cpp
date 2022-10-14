@@ -15,6 +15,7 @@
 #include "opentxs/blockchain/bitcoin/cfilter/Hash.hpp"
 #include "opentxs/blockchain/bitcoin/cfilter/Header.hpp"
 #include "opentxs/util/Container.hpp"
+#include "opentxs/util/Writer.hpp"
 
 namespace opentxs::blockchain
 {
@@ -60,9 +61,9 @@ auto GCS::operator=(GCS&& rhs) noexcept -> GCS&
     return *this;
 }
 
-auto GCS::Compressed(AllocateOutput out) const noexcept -> bool
+auto GCS::Compressed(Writer&& out) const noexcept -> bool
 {
-    return imp_->Compressed(out);
+    return imp_->Compressed(std::move(out));
 }
 
 auto GCS::ElementCount() const noexcept -> std::uint32_t
@@ -70,9 +71,9 @@ auto GCS::ElementCount() const noexcept -> std::uint32_t
     return imp_->ElementCount();
 }
 
-auto GCS::Encode(AllocateOutput out) const noexcept -> bool
+auto GCS::Encode(Writer&& out) const noexcept -> bool
 {
-    return imp_->Encode(out);
+    return imp_->Encode(std::move(out));
 }
 
 auto GCS::get_allocator() const noexcept -> allocator_type
@@ -100,7 +101,7 @@ auto GCS::Match(
     return imp_->Match(in, alloc, monotonic);
 }
 
-auto GCS::Serialize(AllocateOutput out) const noexcept -> bool
+auto GCS::Serialize(Writer&& out) const noexcept -> bool
 {
     return imp_->Serialize(std::move(out));
 }

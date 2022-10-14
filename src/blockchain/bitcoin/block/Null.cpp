@@ -43,8 +43,8 @@ public:
         return blank;
     }
     auto begin() const noexcept -> const_iterator final { return {this}; }
-    auto CalculateHash160(const api::Crypto&, const AllocateOutput)
-        const noexcept -> bool final
+    auto CalculateHash160(const api::Crypto&, Writer&&) const noexcept
+        -> bool final
     {
         return {};
     }
@@ -101,10 +101,7 @@ public:
     {
         return clone();
     }
-    auto Serialize(const AllocateOutput) const noexcept -> bool final
-    {
-        return {};
-    }
+    auto Serialize(Writer&&) const noexcept -> bool final { return {}; }
     auto size() const noexcept -> std::size_t final { return {}; }
     auto Type() const noexcept -> Pattern final { return {}; }
     auto Value(const std::size_t) const noexcept
@@ -177,8 +174,7 @@ public:
     auto Payee() const noexcept -> ContactID final { return {}; }
     auto Payer() const noexcept -> ContactID final { return {}; }
     auto Print() const noexcept -> UnallocatedCString final { return {}; }
-    auto Serialize(const AllocateOutput) const noexcept
-        -> std::optional<std::size_t> final
+    auto Serialize(Writer&&) const noexcept -> std::optional<std::size_t> final
     {
         return {};
     }
@@ -292,8 +288,7 @@ public:
         return blank;
     }
     auto Sequence() const noexcept -> std::uint32_t final { return {}; }
-    auto Serialize(const AllocateOutput) const noexcept
-        -> std::optional<std::size_t> final
+    auto Serialize(Writer&&) const noexcept -> std::optional<std::size_t> final
     {
         return {};
     }
@@ -302,7 +297,7 @@ public:
     {
         return {};
     }
-    auto SerializeNormalized(const AllocateOutput) const noexcept
+    auto SerializeNormalized(Writer&&) const noexcept
         -> std::optional<std::size_t> final
     {
         return {};
@@ -409,8 +404,7 @@ public:
     {
         return {};
     }
-    auto Serialize(const AllocateOutput) const noexcept
-        -> std::optional<std::size_t> final
+    auto Serialize(Writer&&) const noexcept -> std::optional<std::size_t> final
     {
         return {};
     }
@@ -504,8 +498,7 @@ public:
     {
         return {};
     }
-    auto Serialize(const AllocateOutput) const noexcept
-        -> std::optional<std::size_t> final
+    auto Serialize(Writer&&) const noexcept -> std::optional<std::size_t> final
     {
         return {};
     }
@@ -514,7 +507,7 @@ public:
     {
         return {};
     }
-    auto SerializeNormalized(const AllocateOutput) const noexcept
+    auto SerializeNormalized(Writer&&) const noexcept
         -> std::optional<std::size_t> final
     {
         return {};
@@ -689,8 +682,7 @@ public:
         const Log&) noexcept -> void final
     {
     }
-    auto Serialize(const AllocateOutput) const noexcept
-        -> std::optional<std::size_t> final
+    auto Serialize(Writer&&) const noexcept -> std::optional<std::size_t> final
     {
         return {};
     }
@@ -766,7 +758,7 @@ public:
         return blank;
     }
     auto Print() const noexcept -> UnallocatedCString final { return {}; }
-    auto Serialize(AllocateOutput) const noexcept -> bool final { return {}; }
+    auto Serialize(Writer&&) const noexcept -> bool final { return {}; }
     auto size() const noexcept -> std::size_t final { return {}; }
 
     auto asBitcoin() noexcept -> bitcoin::block::Block& final { return *this; }

@@ -10,8 +10,8 @@
 #include <type_traits>
 
 #include "opentxs/Export.hpp"
-#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
+#include "opentxs/util/Types.hpp"
 
 struct zmq_msg_t;
 
@@ -30,6 +30,8 @@ class Frame;
 class Frame;
 }  // namespace zeromq
 }  // namespace network
+
+class Writer;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -84,7 +86,7 @@ public:
     OPENTXS_NO_EXPORT auto Internal() noexcept -> internal::Frame&;
     auto operator+=(const Frame& rhs) noexcept -> Frame&;
     virtual auto swap(Frame& rhs) noexcept -> void;
-    auto WriteInto() noexcept -> AllocateOutput;
+    auto WriteInto() noexcept -> Writer;
 
     OPENTXS_NO_EXPORT Frame(Imp* imp) noexcept;
     Frame() noexcept;

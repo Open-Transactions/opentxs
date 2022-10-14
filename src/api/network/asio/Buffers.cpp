@@ -12,8 +12,8 @@
 #include <mutex>
 
 #include "internal/util/Mutex.hpp"
-#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
+#include "opentxs/util/Types.hpp"
 
 namespace opentxs::api::network::asio
 {

@@ -13,7 +13,7 @@ auto OpenSSL::generate_dh(const Parameters&, ::EVP_PKEY*) const noexcept -> bool
     return false;
 }
 
-auto OpenSSL::get_params(const AllocateOutput, const Parameters&, ::EVP_PKEY*)
+auto OpenSSL::get_params(Writer&&, const Parameters&, ::EVP_PKEY*)
     const noexcept -> bool
 {
     return false;
@@ -24,19 +24,14 @@ auto OpenSSL::import_dh(const ReadView, ::EVP_PKEY*) const noexcept -> bool
     return false;
 }
 
-auto OpenSSL::make_dh_key(
-    const AllocateOutput,
-    const AllocateOutput,
-    const AllocateOutput,
-    const Parameters&) const noexcept -> bool
+auto OpenSSL::make_dh_key(Writer&&, Writer&&, Writer&&, const Parameters&)
+    const noexcept -> bool
 {
     return false;
 }
 
-auto OpenSSL::make_signing_key(
-    const AllocateOutput,
-    const AllocateOutput,
-    const Parameters&) const noexcept -> bool
+auto OpenSSL::make_signing_key(Writer&&, Writer&&, const Parameters&)
+    const noexcept -> bool
 {
     return false;
 }
@@ -44,11 +39,11 @@ auto OpenSSL::make_signing_key(
 auto OpenSSL::primes(const int) -> int { return {}; }
 
 auto OpenSSL::RandomKeypair(
-    const AllocateOutput,
-    const AllocateOutput,
-    const crypto::key::asymmetric::Role,
+    Writer&&,
+    Writer&&,
+    const crypto::asymmetric::Role,
     const Parameters&,
-    const AllocateOutput) const noexcept -> bool
+    Writer&&) const noexcept -> bool
 {
     return false;
 }
@@ -66,7 +61,7 @@ auto OpenSSL::Sign(
     const ReadView,
     const ReadView,
     const crypto::HashType,
-    const AllocateOutput) const -> bool
+    Writer&&) const -> bool
 {
     return false;
 }
@@ -80,15 +75,13 @@ auto OpenSSL::Verify(
     return false;
 }
 
-auto OpenSSL::write_dh(const AllocateOutput, ::EVP_PKEY*) const noexcept -> bool
+auto OpenSSL::write_dh(Writer&&, ::EVP_PKEY*) const noexcept -> bool
 {
     return false;
 }
 
-auto OpenSSL::write_keypair(
-    const AllocateOutput,
-    const AllocateOutput,
-    ::EVP_PKEY*) const noexcept -> bool
+auto OpenSSL::write_keypair(Writer&&, Writer&&, ::EVP_PKEY*) const noexcept
+    -> bool
 {
     return false;
 }

@@ -13,7 +13,14 @@
 
 #include "internal/core/String.hpp"
 #include "opentxs/crypto/Types.hpp"
-#include "opentxs/util/Bytes.hpp"
+#include "opentxs/util/Types.hpp"
+
+// NOLINTBEGIN(modernize-concat-nested-namespaces)
+namespace opentxs
+{
+class Writer;
+}  // namespace opentxs
+// NOLINTEND(modernize-concat-nested-namespaces)
 
 namespace opentxs::crypto
 {
@@ -30,12 +37,12 @@ public:
     virtual auto Digest(
         const crypto::HashType hashType,
         const ReadView data,
-        const AllocateOutput output) const noexcept -> bool = 0;
+        Writer&& output) const noexcept -> bool = 0;
     virtual auto HMAC(
         const crypto::HashType hashType,
         const ReadView key,
         const ReadView data,
-        const AllocateOutput output) const noexcept -> bool = 0;
+        Writer&& output) const noexcept -> bool = 0;
 
     HashingProvider(const HashingProvider&) = delete;
     HashingProvider(HashingProvider&&) = delete;

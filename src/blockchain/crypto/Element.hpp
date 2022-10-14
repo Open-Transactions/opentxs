@@ -35,7 +35,7 @@
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/crypto/Types.hpp"
-#include "opentxs/util/Bytes.hpp"
+#include "opentxs/crypto/asymmetric/key/EllipticCurve.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
 #include "opentxs/util/Time.hpp"
@@ -55,11 +55,14 @@ class Session;
 
 namespace crypto
 {
+namespace asymmetric
+{
 namespace key
 {
 class EllipticCurve;
 class HD;
 }  // namespace key
+}  // namespace asymmetric
 }  // namespace crypto
 
 namespace identifier
@@ -103,7 +106,8 @@ public:
         const identifier::Generic& contact,
         const std::string_view memo) const noexcept -> Availability final;
     auto Index() const noexcept -> Bip32Index final { return index_; }
-    auto Key() const noexcept -> ECKey final;
+    auto Key() const noexcept
+        -> const opentxs::crypto::asymmetric::key::EllipticCurve& final;
     auto KeyID() const noexcept -> crypto::Key final
     {
         return {ID(), subchain_, index_};
@@ -118,7 +122,8 @@ public:
     {
         return parent_;
     }
-    auto PrivateKey(const PasswordPrompt& reason) const noexcept -> ECKey final;
+    auto PrivateKey(const PasswordPrompt& reason) const noexcept
+        -> const opentxs::crypto::asymmetric::key::EllipticCurve& final;
     auto PubkeyHash() const noexcept -> ByteArray final;
     auto Serialize() const noexcept -> SerializedType final;
     auto Subchain() const noexcept -> crypto::Subchain final
@@ -144,7 +149,7 @@ public:
         const opentxs::blockchain::Type chain,
         const crypto::Subchain subchain,
         const Bip32Index index,
-        const opentxs::crypto::key::EllipticCurve& key,
+        const opentxs::crypto::asymmetric::key::EllipticCurve& key,
         identifier::Generic&& contact) noexcept(false);
     Element(
         const api::Session& api,
@@ -181,7 +186,7 @@ private:
     const Bip32Index index_;
     UnallocatedCString label_;
     identifier::Generic contact_;
-    mutable std::shared_ptr<const opentxs::crypto::key::EllipticCurve> pkey_;
+    mutable opentxs::crypto::asymmetric::key::EllipticCurve key_;
     Time timestamp_;
     Transactions unconfirmed_;
     Transactions confirmed_;
@@ -190,7 +195,7 @@ private:
     static auto instantiate(
         const api::Session& api,
         const proto::AsymmetricKey& serialized) noexcept(false)
-        -> std::unique_ptr<opentxs::crypto::key::EllipticCurve>;
+        -> opentxs::crypto::asymmetric::key::EllipticCurve;
 
     auto update_element(rLock& lock) const noexcept -> void;
 
@@ -204,7 +209,7 @@ private:
         const Bip32Index index,
         const UnallocatedCString label,
         identifier::Generic&& contact,
-        const opentxs::crypto::key::EllipticCurve& key,
+        const opentxs::crypto::asymmetric::key::EllipticCurve& key,
         const Time time,
         Transactions&& unconfirmed,
         Transactions&& confirmed) noexcept(false);

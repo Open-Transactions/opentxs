@@ -15,7 +15,6 @@
 
 #include "internal/blockchain/bitcoin/bloom/BloomFilter.hpp"
 #include "internal/blockchain/bitcoin/bloom/Types.hpp"
-#include "opentxs/util/Bytes.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -26,6 +25,7 @@ class Session;
 }  // namespace api
 
 class Data;
+class Writer;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -40,7 +40,7 @@ public:
     using Filter = boost::dynamic_bitset<>;
     using Tweak = std::uint32_t;
 
-    auto Serialize(AllocateOutput) const noexcept -> bool final;
+    auto Serialize(Writer&&) const noexcept -> bool final;
     auto Test(const Data& element) const noexcept -> bool final;
 
     auto AddElement(const Data& element) noexcept -> void final;

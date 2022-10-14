@@ -29,8 +29,8 @@
 #include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/network/otdht/Types.hpp"
 #include "opentxs/util/Allocator.hpp"
-#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
+#include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -94,6 +94,7 @@ class BlockchainTransaction;
 class Contact;
 class Data;
 class Options;
+class Writer;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -160,11 +161,11 @@ public:
     auto LoadFilterHash(
         const cfilter::Type type,
         const ReadView blockHash,
-        const AllocateOutput filterHash) const noexcept -> bool;
+        Writer&& filterHash) const noexcept -> bool;
     auto LoadFilterHeader(
         const cfilter::Type type,
         const ReadView blockHash,
-        const AllocateOutput header) const noexcept -> bool;
+        Writer&& header) const noexcept -> bool;
     auto LoadSync(
         const blockchain::Type chain,
         const block::Height height,

@@ -50,6 +50,7 @@
 #include "internal/otx/consensus/Server.hpp"
 #include "internal/util/Editor.hpp"
 #include "internal/util/LogMacros.hpp"
+#include "internal/util/Pimpl.hpp"
 #include "internal/util/Shared.hpp"
 #include "internal/util/SharedPimpl.hpp"
 #include "otx/server/Server.hpp"

@@ -10,11 +10,14 @@
 #include <memory>
 #include <stdexcept>
 #include <string_view>
+#include <utility>
 
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "opentxs/blockchain/Blockchain.hpp"
+#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
+#include "opentxs/util/Writer.hpp"
 
 namespace opentxs::network::otdht
 {
@@ -144,7 +147,7 @@ auto Block::Serialize(proto::P2PBlockchainSync& dest) const noexcept -> bool
     return true;
 }
 
-auto Block::Serialize(AllocateOutput dest) const noexcept -> bool
+auto Block::Serialize(Writer&& dest) const noexcept -> bool
 {
     const auto proto = [&] {
         auto out = proto::P2PBlockchainSync{};
@@ -153,7 +156,7 @@ auto Block::Serialize(AllocateOutput dest) const noexcept -> bool
         return out;
     }();
 
-    return proto::write(proto, dest);
+    return proto::write(proto, std::move(dest));
 }
 
 Block::~Block() { std::unique_ptr<Imp>(imp_).reset(); }

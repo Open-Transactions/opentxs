@@ -8,7 +8,6 @@
 #include <future>
 
 #include "internal/util/Lockable.hpp"
-#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/storage/Driver.hpp"
 #include "util/storage/Plugin.hpp"

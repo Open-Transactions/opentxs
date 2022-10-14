@@ -13,7 +13,6 @@
 #include "internal/blockchain/block/Types.hpp"
 #include "internal/util/Mutex.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
-#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)

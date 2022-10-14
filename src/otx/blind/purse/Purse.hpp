@@ -4,6 +4,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 // IWYU pragma: no_include "opentxs/crypto/symmetric/Key.hpp"
+// IWYU pragma: no_include "opentxs/util/Writer.hpp"
 
 #pragma once
 
@@ -25,7 +26,6 @@
 #include "opentxs/otx/blind/PurseType.hpp"
 #include "opentxs/otx/blind/Token.hpp"
 #include "opentxs/otx/blind/Types.hpp"
-#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
 #include "opentxs/util/Time.hpp"
@@ -75,6 +75,7 @@ class Purse;
 }  // namespace proto
 
 class PasswordPrompt;
+class Writer;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -103,7 +104,7 @@ public:
         return {};
     }
     auto Serialize(proto::Purse&) const noexcept -> bool override { return {}; }
-    virtual auto Serialize(AllocateOutput) const noexcept -> bool { return {}; }
+    virtual auto Serialize(Writer&&) const noexcept -> bool { return {}; }
     virtual auto size() const noexcept -> std::size_t { return {}; }
     virtual auto State() const -> blind::PurseType { return {}; }
     auto Type() const -> blind::CashType override { return {}; }

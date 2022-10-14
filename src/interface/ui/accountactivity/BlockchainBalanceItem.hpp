@@ -12,13 +12,13 @@
 #include "interface/ui/accountactivity/BalanceItem.hpp"
 #include "internal/interface/ui/UI.hpp"
 #include "internal/util/Mutex.hpp"
+#include "internal/util/Pimpl.hpp"
 #include "opentxs/blockchain/BlockchainType.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/otx/client/Types.hpp"
 #include "opentxs/util/Container.hpp"
-#include "opentxs/util/Pimpl.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs

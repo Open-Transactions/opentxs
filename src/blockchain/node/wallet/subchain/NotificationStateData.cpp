@@ -42,13 +42,13 @@
 #include "opentxs/blockchain/crypto/Subchain.hpp"  // IWYU pragma: keep
 #include "opentxs/core/Contact.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
-#include "opentxs/crypto/key/HD.hpp"
-#include "opentxs/util/Bytes.hpp"
+#include "opentxs/crypto/asymmetric/key/HD.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Iterator.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/NymEditor.hpp"
 #include "opentxs/util/PasswordPrompt.hpp"
+#include "opentxs/util/Types.hpp"
 
 namespace opentxs::blockchain::node::wallet
 {
@@ -216,8 +216,8 @@ auto NotificationStateData::init_keys() const noexcept -> PasswordPrompt
         "Decoding payment code notification transaction");
     auto handle = code_.lock();
 
-    if (auto key{handle->Key()}; key) {
-        if (false == key->HasPrivate()) {
+    if (const auto& key = handle->Key(); key.IsValid()) {
+        if (false == key.HasPrivate()) {
             auto seed{path_.root()};
             const auto upgraded = handle->Internal().AddPrivateKeys(
                 seed, *path_.child().rbegin(), reason);

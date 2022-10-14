@@ -6,6 +6,7 @@
 #include "0_stdafx.hpp"  // IWYU pragma: associated
 #include "internal/otx/common/crypto/OTSignatureMetadata.hpp"  // IWYU pragma: associated
 
+#include "internal/api/crypto/Encode.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/api/crypto/Encode.hpp"
 #include "opentxs/api/session/Crypto.hpp"
@@ -63,17 +64,17 @@ auto OTSignatureMetadata::SetMetadata(
             return false;
     }
 
-    // Todo: really should verify base58 here now, instead of base62.
-    UnallocatedCString str_verify_base62;
+    // Todo: really should verify base58 here now, instead of base64.
+    UnallocatedCString str_verify_base64;
 
-    str_verify_base62 += metaNymID;
-    str_verify_base62 += metaMasterCredID;
-    str_verify_base62 += metaChildCredID;
+    str_verify_base64 += metaNymID;
+    str_verify_base64 += metaMasterCredID;
+    str_verify_base64 += metaChildCredID;
 
-    if (false == api_.Crypto().Encode().IsBase62(str_verify_base62)) {
+    if (!api_.Crypto().Encode().InternalEncode().IsBase64(str_verify_base64)) {
         LogError()(OT_PRETTY_CLASS())(
-            "Metadata for signature failed base62 validation: ")(
-            str_verify_base62)(".")
+            "Metadata for signature failed base64 validation: ")(
+            str_verify_base64)(".")
             .Flush();
         return false;
     }

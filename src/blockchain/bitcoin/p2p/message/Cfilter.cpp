@@ -9,7 +9,6 @@
 #include <algorithm>
 #include <cstddef>
 #include <cstring>
-#include <functional>
 #include <iterator>
 #include <stdexcept>
 #include <type_traits>
@@ -25,8 +24,11 @@
 #include "opentxs/blockchain/bitcoin/cfilter/GCS.hpp"
 #include "opentxs/blockchain/p2p/Types.hpp"
 #include "opentxs/network/blockchain/bitcoin/CompactSize.hpp"
+#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
+#include "opentxs/util/WriteBuffer.hpp"
+#include "opentxs/util/Writer.hpp"
 
 namespace opentxs::factory
 {
@@ -169,7 +171,7 @@ Cfilter::Cfilter(
 {
 }
 
-auto Cfilter::payload(AllocateOutput out) const noexcept -> bool
+auto Cfilter::payload(Writer&& out) const noexcept -> bool
 {
     try {
         const auto payload = [&] {
@@ -187,10 +189,9 @@ auto Cfilter::payload(AllocateOutput out) const noexcept -> bool
         }();
         static constexpr auto fixed = sizeof(BitcoinFormat);
         const auto bytes = fixed + payload.size();
+        auto output = out.Reserve(bytes);
 
-        auto output = out(bytes);
-
-        if (false == output.valid(bytes)) {
+        if (false == output.IsValid(bytes)) {
             throw std::runtime_error{"failed to allocate output space"};
         }
 

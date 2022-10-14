@@ -24,7 +24,8 @@
 #include "opentxs/blockchain/crypto/Subchain.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/crypto/Types.hpp"
-#include "opentxs/crypto/key/HD.hpp"
+#include "opentxs/crypto/asymmetric/key/EllipticCurve.hpp"
+#include "opentxs/crypto/asymmetric/key/HD.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
 
@@ -81,7 +82,8 @@ public:
     auto PrivateKey(
         const Subchain type,
         const Bip32Index index,
-        const PasswordPrompt& reason) const noexcept -> ECKey final;
+        const PasswordPrompt& reason) const noexcept
+        -> opentxs::crypto::asymmetric::key::EllipticCurve final;
     auto Standard() const noexcept -> HDProtocol final { return standard_; }
 
     HD(const api::Session& api,
@@ -111,8 +113,8 @@ private:
 
     const HDProtocol standard_;
     VersionNumber version_;
-    mutable std::unique_ptr<opentxs::crypto::key::HD> cached_internal_;
-    mutable std::unique_ptr<opentxs::crypto::key::HD> cached_external_;
+    mutable opentxs::crypto::asymmetric::key::HD cached_internal_;
+    mutable opentxs::crypto::asymmetric::key::HD cached_external_;
     mutable std::optional<UnallocatedCString> name_;
 
     auto account_already_exists(const rLock& lock) const noexcept -> bool final;

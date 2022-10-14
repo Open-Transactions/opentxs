@@ -33,6 +33,7 @@
 #include "opentxs/core/contract/peer/Types.hpp"
 #include "opentxs/identity/wot/claim/Types.hpp"
 #include "opentxs/util/Allocator.hpp"
+#include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace google
@@ -56,6 +57,11 @@ class Symmetric;
 
 namespace crypto
 {
+namespace asymmetric
+{
+class Key;
+}  // namespace asymmetric
+
 namespace symmetric
 {
 class Key;
@@ -133,7 +139,7 @@ public:
     virtual auto Asymmetric() const -> const api::crypto::Asymmetric& = 0;
     using session::Factory::AsymmetricKey;
     virtual auto AsymmetricKey(const proto::AsymmetricKey& serialized) const
-        -> OTAsymmetricKey = 0;
+        -> opentxs::crypto::asymmetric::Key = 0;
     virtual auto BailmentNotice(
         const Nym_p& nym,
         const identifier::Nym& recipientID,
@@ -302,7 +308,7 @@ public:
     virtual auto Keypair(
         const opentxs::crypto::Parameters& nymParameters,
         const VersionNumber version,
-        const opentxs::crypto::key::asymmetric::Role role,
+        const opentxs::crypto::asymmetric::Role role,
         const opentxs::PasswordPrompt& reason) const -> OTKeypair = 0;
     virtual auto Keypair(
         const UnallocatedCString& fingerprint,
@@ -310,7 +316,7 @@ public:
         const Bip32Index credset,
         const Bip32Index credindex,
         const opentxs::crypto::EcdsaCurve& curve,
-        const opentxs::crypto::key::asymmetric::Role role,
+        const opentxs::crypto::asymmetric::Role role,
         const opentxs::PasswordPrompt& reason) const -> OTKeypair = 0;
     virtual auto Keypair(
         const proto::AsymmetricKey& serializedPubkey,

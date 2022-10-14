@@ -12,10 +12,10 @@
 #include "internal/core/String.hpp"
 #include "internal/otx/common/Contract.hpp"
 #include "internal/util/LogMacros.hpp"
+#include "internal/util/Pimpl.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/core/identifier/UnitDefinition.hpp"
-#include "opentxs/util/Pimpl.hpp"
 #include "otx/blind/mint/Mint.hpp"
 
 namespace opentxs::otx::blind::internal

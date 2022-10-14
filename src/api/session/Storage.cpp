@@ -51,6 +51,7 @@
 #include "opentxs/identity/wot/claim/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
+#include "opentxs/util/Writer.hpp"
 #include "otx/common/OTStorage.hpp"
 #include "util/storage/Config.hpp"
 #include "util/storage/tree/Accounts.hpp"
@@ -573,7 +574,7 @@ auto Storage::Load(
 
 auto Storage::LoadNym(
     const identifier::Nym& id,
-    AllocateOutput destination,
+    Writer&& destination,
     const bool checking) const -> bool
 {
     auto temp = std::make_shared<proto::Nym>();
@@ -587,7 +588,7 @@ auto Storage::LoadNym(
 
     OT_ASSERT(temp);
 
-    return write(*temp, destination);
+    return write(*temp, std::move(destination));
 }
 
 auto Storage::Load(

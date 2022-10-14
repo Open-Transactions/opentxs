@@ -23,7 +23,9 @@
 #include "opentxs/core/identifier/Algorithm.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Type.hpp"
+#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Log.hpp"
+#include "opentxs/util/Writer.hpp"
 
 namespace opentxs::identifier
 {
@@ -87,7 +89,15 @@ auto IdentifierPrivate::asBase58(const api::Crypto& api, alloc::Default alloc)
 
     if (0 < preimage.size()) {
         ss << identifier_prefix_;
-        ss << api.Encode().IdentifierEncode(preimage.Bytes());
+        auto encoded = CString{alloc};
+
+        if (api.Encode().Base58CheckEncode(preimage.Bytes(), writer(encoded))) {
+
+            ss << encoded;
+        } else {
+
+            return CString{alloc};
+        }
     }
 
     return CString{ss.str().c_str(), alloc};

@@ -9,7 +9,7 @@
 #include <type_traits>
 
 #include "opentxs/Export.hpp"
-#include "opentxs/util/Bytes.hpp"
+#include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -31,6 +31,7 @@ class Message;
 }  // namespace network
 
 class Amount;
+class Writer;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -108,7 +109,7 @@ public:
         return AddFrame(&input, sizeof(input));
     }
     auto AddFrame(const void* input, const std::size_t size) noexcept -> Frame&;
-    auto AppendBytes() noexcept -> AllocateOutput;
+    auto AppendBytes() noexcept -> Writer;
     auto at(const std::size_t index) noexcept(false) -> Frame&;
     auto Body() noexcept -> FrameSection;
     auto EnsureDelimiter() noexcept -> void;

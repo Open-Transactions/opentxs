@@ -14,6 +14,8 @@ extern "C" {
 #include <cstdint>
 #include <cstdio>
 #include <cstring>
+#include <functional>
+#include <span>
 #include <sstream>
 #include <utility>
 
@@ -22,12 +24,14 @@ extern "C" {
 #include "internal/otx/common/NymFile.hpp"
 #include "internal/otx/common/crypto/Signature.hpp"
 #include "internal/util/LogMacros.hpp"
+#include "internal/util/Pimpl.hpp"
 #include "opentxs/OT.hpp"
 #include "opentxs/api/Context.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
-#include "opentxs/util/Pimpl.hpp"
+#include "opentxs/util/WriteBuffer.hpp"
+#include "opentxs/util/Writer.hpp"
 
 #define MAX_STRING_LENGTH 0x800000  // this is about 8 megs.
 
@@ -851,17 +855,18 @@ auto String::ToUlong() const -> std::uint64_t
     return StringToUlong(str_number);
 }
 
-auto String::WriteInto() noexcept -> AllocateOutput
+auto String::WriteInto() noexcept -> Writer
 {
-    return [this](const auto size) {
+    return {[this](auto size) -> WriteBuffer {
         Release();
         auto blank = UnallocatedVector<char>{};
         blank.assign(size, 5);
         blank.push_back('\0');
         Set(blank.data());
+        auto* out = reinterpret_cast<std::byte*>(internal_.data());
 
-        return WritableView{internal_.data(), GetLength()};
-    };
+        return std::span<std::byte>{out, GetLength()};
+    }};
 }
 
 void String::WriteToFile(std::ostream& ofs) const

@@ -9,18 +9,20 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        toolchain: [gcc-10.3, gcc-11.3, gcc-12.2, clang-12, clang-13, clang-14, clang-15]
+        # temporarily disable gcc
+        # toolchain: [gcc-10.3, gcc-11.3, gcc-12.2, clang-12, clang-13, clang-14, clang-15]
+        toolchain: [clang-12, clang-13, clang-14, clang-15]
         preset: [test01, test02, test03, test04, test05, test06, test07, test08, nopch, full]
         include:
-          - toolchain: gcc-10.3
-            docker: 33_2
-            compiler: gcc
-          - toolchain: gcc-11.3
-            docker: 35_2
-            compiler: gcc
-          - toolchain: gcc-12.2
-            docker: 37_1
-            compiler: gcc
+          # - toolchain: gcc-10.3
+          #   docker: 33_2
+          #   compiler: gcc
+          # - toolchain: gcc-11.3
+          #   docker: 35_2
+          #   compiler: gcc
+          # - toolchain: gcc-12.2
+          #   docker: 37_1
+          #   compiler: gcc
           - toolchain: clang-12
             docker: 34_2
             compiler: clang

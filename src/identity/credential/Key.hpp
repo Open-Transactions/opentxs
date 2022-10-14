@@ -3,6 +3,9 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_include "opentxs/crypto/asymmetric/Algorithm.hpp"
+// IWYU pragma: no_include "opentxs/crypto/asymmetric/Role.hpp"
+
 #pragma once
 
 #include <Enums.pb.h>
@@ -22,13 +25,12 @@
 #include "opentxs/crypto/HashType.hpp"
 #include "opentxs/crypto/SignatureRole.hpp"
 #include "opentxs/crypto/Types.hpp"
-#include "opentxs/crypto/key/asymmetric/Algorithm.hpp"
-#include "opentxs/crypto/key/asymmetric/Role.hpp"
+#include "opentxs/crypto/asymmetric/Types.hpp"
 #include "opentxs/identity/CredentialRole.hpp"
 #include "opentxs/identity/Types.hpp"
-#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
+#include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -73,14 +75,11 @@ class Key : virtual public credential::internal::Key,
 {
 public:
     auto asKey() const noexcept -> const internal::Key& final { return *this; }
-    auto GetKeypair(const opentxs::crypto::key::asymmetric::Role role) const
-        -> const crypto::key::Keypair& final
-    {
-        return GetKeypair(crypto::key::asymmetric::Algorithm::Null, role);
-    }
+    auto GetKeypair(const opentxs::crypto::asymmetric::Role role) const
+        -> const crypto::key::Keypair& final;
     auto GetKeypair(
-        const crypto::key::asymmetric::Algorithm type,
-        const opentxs::crypto::key::asymmetric::Role role) const
+        const crypto::asymmetric::Algorithm type,
+        const opentxs::crypto::asymmetric::Role role) const
         -> const crypto::key::Keypair& final;
     auto GetPublicKeysBySignature(
         crypto::key::Keypair::Keys& listOutput,
@@ -91,13 +90,13 @@ public:
     auto Verify(
         const Data& plaintext,
         const proto::Signature& sig,
-        const opentxs::crypto::key::asymmetric::Role key) const -> bool final;
+        const opentxs::crypto::asymmetric::Role key) const -> bool final;
     auto Sign(
         const GetPreimage input,
         const crypto::SignatureRole role,
         proto::Signature& signature,
         const PasswordPrompt& reason,
-        opentxs::crypto::key::asymmetric::Role key,
+        opentxs::crypto::asymmetric::Role key,
         const crypto::HashType hash) const -> bool final;
     auto TransportKey(
         Data& publicKey,
@@ -116,7 +115,7 @@ public:
     auto operator=(const Key&) -> Key& = delete;
     auto operator=(Key&&) -> Key& = delete;
 
-    ~Key() override = default;
+    ~Key() override;
 
 protected:
     const VersionNumber subversion_;

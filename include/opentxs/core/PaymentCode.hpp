@@ -12,21 +12,25 @@
 #include "opentxs/Export.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/crypto/Types.hpp"
-#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
+#include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
 namespace crypto
 {
+namespace asymmetric
+{
 namespace key
 {
-class Asymmetric;
 class EllipticCurve;
 class HD;
 }  // namespace key
+
+class Key;
+}  // namespace asymmetric
 }  // namespace crypto
 
 namespace identifier
@@ -42,6 +46,7 @@ class PaymentCode;
 class Data;
 class PaymentCode;
 class PasswordPrompt;
+class Writer;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -63,19 +68,19 @@ public:
 
     static auto DefaultVersion() noexcept -> VersionNumber;
 
-    operator const crypto::key::Asymmetric&() const noexcept;
+    operator const crypto::asymmetric::Key&() const noexcept;
 
     auto asBase58() const noexcept -> UnallocatedCString;
     auto Blind(
         const PaymentCode& recipient,
-        const crypto::key::EllipticCurve& privateKey,
+        const crypto::asymmetric::key::EllipticCurve& privateKey,
         const ReadView outpoint,
-        const AllocateOutput destination,
+        Writer&& destination,
         const PasswordPrompt& reason) const noexcept -> bool;
     auto BlindV3(
         const PaymentCode& recipient,
-        const crypto::key::EllipticCurve& privateKey,
-        const AllocateOutput destination,
+        const crypto::asymmetric::key::EllipticCurve& privateKey,
+        Writer&& destination,
         const PasswordPrompt& reason) const noexcept -> bool;
     auto DecodeNotificationElements(
         const std::uint8_t version,
@@ -83,42 +88,41 @@ public:
         const PasswordPrompt& reason) const noexcept -> opentxs::PaymentCode;
     auto GenerateNotificationElements(
         const PaymentCode& recipient,
-        const crypto::key::EllipticCurve& privateKey,
+        const crypto::asymmetric::key::EllipticCurve& privateKey,
         const PasswordPrompt& reason) const noexcept
         -> UnallocatedVector<Space>;
     auto ID() const noexcept -> const identifier::Nym&;
     OPENTXS_NO_EXPORT auto Internal() const noexcept
         -> const internal::PaymentCode&;
-    auto Key() const noexcept -> std::shared_ptr<crypto::key::HD>;
+    auto Key() const noexcept -> const crypto::asymmetric::key::HD&;
     auto Incoming(
         const PaymentCode& sender,
         const Bip32Index index,
         const blockchain::Type chain,
         const PasswordPrompt& reason,
         const std::uint8_t version = 0) const noexcept
-        -> std::unique_ptr<crypto::key::EllipticCurve>;
-    auto Locator(
-        const AllocateOutput destination,
-        const std::uint8_t version = 0) const noexcept -> bool;
+        -> crypto::asymmetric::key::EllipticCurve;
+    auto Locator(Writer&& destination, const std::uint8_t version = 0)
+        const noexcept -> bool;
     auto Outgoing(
         const PaymentCode& recipient,
         const Bip32Index index,
         const blockchain::Type chain,
         const PasswordPrompt& reason,
         const std::uint8_t version = 0) const noexcept
-        -> std::unique_ptr<crypto::key::EllipticCurve>;
-    auto Serialize(AllocateOutput destination) const noexcept -> bool;
+        -> crypto::asymmetric::key::EllipticCurve;
+    auto Serialize(Writer&& destination) const noexcept -> bool;
     auto Sign(const Data& data, Data& output, const PasswordPrompt& reason)
         const noexcept -> bool;
     auto Unblind(
         const ReadView blinded,
-        const crypto::key::EllipticCurve& publicKey,
+        const crypto::asymmetric::key::EllipticCurve& publicKey,
         const ReadView outpoint,
         const PasswordPrompt& reason) const noexcept -> opentxs::PaymentCode;
     auto UnblindV3(
         const std::uint8_t version,
         const ReadView blinded,
-        const crypto::key::EllipticCurve& publicKey,
+        const crypto::asymmetric::key::EllipticCurve& publicKey,
         const PasswordPrompt& reason) const noexcept -> opentxs::PaymentCode;
     auto Valid() const noexcept -> bool;
     auto Version() const noexcept -> VersionNumber;

@@ -9,7 +9,6 @@
 #include <boost/endian/buffers.hpp>
 #include <cstdint>
 #include <cstring>
-#include <functional>
 #include <iterator>
 #include <stdexcept>
 #include <utility>
@@ -17,7 +16,10 @@
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/Size.hpp"
+#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Log.hpp"
+#include "opentxs/util/WriteBuffer.hpp"
+#include "opentxs/util/Writer.hpp"
 
 namespace opentxs::storage::file
 {
@@ -68,17 +70,11 @@ auto Index::Serialize() const noexcept -> FixedByteArray<index_bytes_>
     return out;
 }
 
-auto Index::Serialize(AllocateOutput destination) const noexcept -> bool
+auto Index::Serialize(Writer&& destination) const noexcept -> bool
 {
-    if (false == destination.operator bool()) {
-        LogError()(OT_PRETTY_CLASS())("invalid output").Flush();
+    auto dest = destination.Reserve(index_bytes_);
 
-        return false;
-    }
-
-    auto dest = destination(index_bytes_);
-
-    if (false == dest.valid(index_bytes_)) {
+    if (false == dest.IsValid(index_bytes_)) {
         LogError()(OT_PRETTY_CLASS())("insufficient space for serialization")
             .Flush();
 

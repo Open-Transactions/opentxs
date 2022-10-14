@@ -14,11 +14,14 @@
 
 #include "internal/blockchain/Params.hpp"
 #include "internal/blockchain/p2p/bitcoin/Factory.hpp"
+#include "internal/util/Bytes.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/blockchain/BlockchainType.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
+#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Log.hpp"
+#include "opentxs/util/Writer.hpp"
 
 namespace opentxs::factory
 {
@@ -133,22 +136,13 @@ auto Header::BitcoinFormat::PayloadSize() const noexcept -> std::size_t
     return length_.value();
 }
 
-auto Header::Serialize(const AllocateOutput out) const noexcept -> bool
+auto Header::Serialize(Writer&& out) const noexcept -> bool
 {
     try {
-        if (!out) { throw std::runtime_error{"invalid output allocator"}; }
-
-        auto bytes = out(header_size_);
-
-        if (false == bytes.valid(header_size_)) {
-            throw std::runtime_error{"failed to allocate write buffer"};
-        }
-
         const auto raw =
             BitcoinFormat(chain_, command_, payload_size_, checksum_);
-        std::memcpy(bytes.data(), static_cast<const void*>(&raw), header_size_);
 
-        return true;
+        return copy(reader(std::addressof(raw), sizeof(raw)), std::move(out));
     } catch (const std::exception& e) {
         LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
 

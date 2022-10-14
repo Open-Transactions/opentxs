@@ -8,7 +8,7 @@
 #include "internal/crypto/library/EcdsaProvider.hpp"
 
 #include "opentxs/crypto/Types.hpp"
-#include "opentxs/util/Bytes.hpp"
+#include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -18,15 +18,7 @@ namespace api
 class Crypto;
 }  // namespace api
 
-namespace crypto
-{
-namespace key
-{
-class Asymmetric;
-}  // namespace key
-}  // namespace crypto
-
-class PasswordPrompt;
+class Writer;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -35,14 +27,8 @@ namespace opentxs::crypto::implementation
 class EcdsaProvider : virtual public crypto::EcdsaProvider
 {
 public:
-    auto SignDER(
-        [[maybe_unused]] const ReadView plaintext,
-        [[maybe_unused]] const ReadView key,
-        [[maybe_unused]] const crypto::HashType hash,
-        [[maybe_unused]] Space& signature) const noexcept -> bool override
-    {
-        return false;
-    }
+    auto SignDER(ReadView plaintext, ReadView key, crypto::HashType, Writer&&)
+        const noexcept -> bool override;
 
     EcdsaProvider() = delete;
     EcdsaProvider(const EcdsaProvider&) = delete;
@@ -50,7 +36,7 @@ public:
     auto operator=(const EcdsaProvider&) -> EcdsaProvider& = delete;
     auto operator=(EcdsaProvider&&) -> EcdsaProvider& = delete;
 
-    ~EcdsaProvider() override = default;
+    ~EcdsaProvider() override;
 
 protected:
     const api::Crypto& crypto_;

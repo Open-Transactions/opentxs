@@ -9,7 +9,6 @@
 #include <array>
 #include <cstddef>
 #include <cstdint>
-#include <functional>
 #include <iterator>
 #include <type_traits>
 #include <utility>
@@ -20,6 +19,8 @@
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/network/blockchain/bitcoin/CompactSize.hpp"
 #include "opentxs/util/Log.hpp"
+#include "opentxs/util/WriteBuffer.hpp"
+#include "opentxs/util/Writer.hpp"
 
 namespace opentxs::factory
 {
@@ -172,20 +173,18 @@ Getblocks::Getblocks(
     verify_checksum();
 }
 
-auto Getblocks::payload(AllocateOutput out) const noexcept -> bool
+auto Getblocks::payload(Writer&& out) const noexcept -> bool
 {
     try {
-        if (!out) { throw std::runtime_error{"invalid output allocator"}; }
-
         static constexpr auto hashBytes = sizeof(BlockHeaderHashField);
         const auto data = Raw{version_, header_hashes_, stop_hash_};
         const auto hashes = data.header_hashes_.size();
         const auto cs = CompactSize(hashes).Encode();
         const auto bytes = sizeof(data.version_) + cs.size() +
                            (hashes * hashBytes) + hashBytes;
-        auto output = out(bytes);
+        auto output = out.Reserve(bytes);
 
-        if (false == output.valid(bytes)) {
+        if (false == output.IsValid(bytes)) {
             throw std::runtime_error{"failed to allocate output space"};
         }
 

@@ -120,8 +120,7 @@ public:
 
 const bool Integration::have_hd_{
     ot::api::crypto::HaveHDKeys() &&
-    ot::api::crypto::HaveSupport(
-        ot::crypto::key::asymmetric::Algorithm::Secp256k1)
+    ot::api::crypto::HaveSupport(ot::crypto::asymmetric::Algorithm::Secp256k1)
 
 };
 int Integration::msg_count_ = 0;

@@ -50,6 +50,7 @@ class Purse;
 
 class NymData;
 class PeerObject;
+class Writer;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -151,7 +152,7 @@ public:
         const identifier::Nym& nym,
         const identifier::Generic& reply,
         const otx::client::StorageBox& box,
-        AllocateOutput destination) const -> bool = 0;
+        Writer&& destination) const -> bool = 0;
     /**   Clean up the recipient's copy of a peer reply
      *
      *    The peer reply is moved from the nym's SentPeerReply
@@ -230,7 +231,7 @@ public:
         const identifier::Generic& request,
         const otx::client::StorageBox& box,
         std::time_t& time,
-        AllocateOutput destination) const -> bool = 0;
+        Writer&& destination) const -> bool = 0;
     /**   Clean up the sender's copy of a peer reply
      *
      *    The peer reply is moved from the nym's IncomingPeerReply

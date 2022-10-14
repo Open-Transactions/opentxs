@@ -40,7 +40,7 @@
 #include "opentxs/core/Amount.hpp"  // IWYU pragma: keep
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
-#include "opentxs/crypto/key/HD.hpp"
+#include "opentxs/crypto/asymmetric/key/HD.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 
@@ -277,15 +277,13 @@ auto PaymentCode::AddNotification(const Txid& tx) const noexcept -> bool
 auto PaymentCode::has_private(const PasswordPrompt& reason) const noexcept
     -> bool
 {
-    auto pKey = local_.get().Key();
+    const auto& key = local_.get().Key();
 
-    if (!pKey) {
+    if (false == key.IsValid()) {
         LogError()(OT_PRETTY_CLASS())("No local HD key").Flush();
 
         return false;
     }
-
-    auto& key = *pKey;
 
     if (key.HasPrivate()) { return true; }
 
@@ -305,7 +303,8 @@ auto PaymentCode::IsNotified() const noexcept -> bool
 auto PaymentCode::PrivateKey(
     const Subchain type,
     const Bip32Index index,
-    const PasswordPrompt& reason) const noexcept -> ECKey
+    const PasswordPrompt& reason) const noexcept
+    -> opentxs::crypto::asymmetric::key::EllipticCurve
 {
     if (false == has_private(reason)) {
         LogError()(OT_PRETTY_CLASS())("Missing private key").Flush();
@@ -352,6 +351,12 @@ auto PaymentCode::Reserve(
 {
     return Deterministic::Reserve(
         type, batch, get_contact(), reason, label, time);
+}
+
+auto PaymentCode::RootNode(const PasswordPrompt& reason) const noexcept
+    -> const opentxs::crypto::asymmetric::key::HD&
+{
+    return local_.get().Key();
 }
 
 auto PaymentCode::save(const rLock& lock) const noexcept -> bool
@@ -415,4 +420,6 @@ auto PaymentCode::save(const rLock& lock) const noexcept -> bool
 
     return saved;
 }
+
+PaymentCode::~PaymentCode() = default;
 }  // namespace opentxs::blockchain::crypto::implementation

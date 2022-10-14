@@ -17,6 +17,7 @@
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/serialization/protobuf/Proto.tpp"
 #include "internal/util/LogMacros.hpp"
+#include "internal/util/Pimpl.hpp"
 #include "internal/util/Time.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
@@ -25,7 +26,7 @@
 #include "opentxs/identity/credential/Contact.hpp"
 #include "opentxs/identity/wot/claim/Attribute.hpp"
 #include "opentxs/util/Log.hpp"
-#include "opentxs/util/Pimpl.hpp"
+#include "opentxs/util/Writer.hpp"
 
 namespace opentxs::identity::wot::claim
 {
@@ -302,8 +303,7 @@ auto Item::Section() const -> const claim::SectionType&
     return imp_->section_;
 }
 
-auto Item::Serialize(AllocateOutput destination, const bool withID) const
-    -> bool
+auto Item::Serialize(Writer&& destination, const bool withID) const -> bool
 {
     return write(
         [&] {
@@ -312,7 +312,7 @@ auto Item::Serialize(AllocateOutput destination, const bool withID) const
 
             return proto;
         }(),
-        destination);
+        std::move(destination));
 }
 
 auto Item::Serialize(proto::ContactItem& output, const bool withID) const

@@ -16,9 +16,8 @@
 #include "internal/network/zeromq/zap/ZAP.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/Mutex.hpp"
-#include "opentxs/util/Bytes.hpp"
+#include "internal/util/Pimpl.hpp"
 #include "opentxs/util/Log.hpp"
-#include "opentxs/util/Pimpl.hpp"
 
 template class opentxs::Pimpl<opentxs::network::zeromq::zap::Callback>;
 

@@ -13,6 +13,7 @@
 #include "core/ByteArrayPrivate.hpp"
 #include "internal/core/Armored.hpp"
 #include "internal/util/LogMacros.hpp"
+#include "opentxs/util/Writer.hpp"
 
 namespace opentxs
 {
@@ -360,10 +361,7 @@ auto ByteArray::swap(ByteArray& rhs) noexcept -> void
     std::swap(imp_->parent_, rhs.imp_->parent_);
 }
 
-auto ByteArray::WriteInto() noexcept -> AllocateOutput
-{
-    return imp_->WriteInto();
-}
+auto ByteArray::WriteInto() noexcept -> Writer { return imp_->WriteInto(); }
 
 auto ByteArray::zeroMemory() -> void { imp_->zeroMemory(); }
 

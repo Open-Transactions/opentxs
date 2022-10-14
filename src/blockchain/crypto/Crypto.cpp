@@ -30,6 +30,8 @@
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/crypto/HashType.hpp"
+#include "opentxs/util/Bytes.hpp"
+#include "opentxs/util/Writer.hpp"
 
 namespace opentxs::blockchain::crypto
 {

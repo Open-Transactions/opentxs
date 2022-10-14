@@ -8,8 +8,8 @@
 #include <functional>
 
 #include "internal/network/zeromq/zap/Reply.hpp"
+#include "internal/util/Pimpl.hpp"
 #include "opentxs/network/zeromq/zap/Types.hpp"
-#include "opentxs/util/Pimpl.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs

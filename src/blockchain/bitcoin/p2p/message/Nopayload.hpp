@@ -14,10 +14,12 @@
 #include "internal/blockchain/block/Block.hpp"
 #include "internal/blockchain/p2p/bitcoin/Bitcoin.hpp"
 #include "internal/util/LogMacros.hpp"
+#include "internal/util/P0330.hpp"
 #include "opentxs/blockchain/BlockchainType.hpp"
 #include "opentxs/blockchain/Types.hpp"
-#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Log.hpp"
+#include "opentxs/util/WriteBuffer.hpp"
+#include "opentxs/util/Writer.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -37,6 +39,8 @@ class Header;
 }  // namespace bitcoin
 }  // namespace p2p
 }  // namespace blockchain
+
+class Writer;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -68,14 +72,12 @@ public:
 
 private:
     using implementation::Message::payload;
-    auto payload(AllocateOutput out) const noexcept -> bool final
+    auto payload(Writer&& out) const noexcept -> bool final
     {
         try {
-            if (!out) { throw std::runtime_error{"invalid output allocator"}; }
+            auto buf = out.Reserve(0_uz);
 
-            out(0);
-
-            return true;
+            return 0_uz == buf.size();
         } catch (const std::exception& e) {
             LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
 

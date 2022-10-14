@@ -7,7 +7,12 @@
 
 #include <google/protobuf/message_lite.h>
 
-#include "opentxs/util/Bytes.hpp"
+// NOLINTBEGIN(modernize-concat-nested-namespaces)
+namespace opentxs
+{
+class Writer;
+}  // namespace opentxs
+// NOLINTEND(modernize-concat-nested-namespaces)
 
 namespace opentxs
 {
@@ -20,8 +25,9 @@ using ProtobufType = ::google::protobuf::MessageLite;
 auto operator==(const ProtobufType& lhs, const ProtobufType& rhs) noexcept
     -> bool;
 
-namespace proto
-{
-auto write(const ProtobufType& in, const AllocateOutput out) noexcept -> bool;
-}  // namespace proto
 }  // namespace opentxs
+
+namespace opentxs::proto
+{
+auto write(const ProtobufType& in, Writer&& out) noexcept -> bool;
+}  // namespace opentxs::proto

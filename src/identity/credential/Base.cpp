@@ -24,6 +24,7 @@
 #include "internal/identity/credential/Credential.hpp"
 #include "internal/serialization/protobuf/Proto.tpp"
 #include "internal/util/LogMacros.hpp"
+#include "internal/util/Pimpl.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/api/session/Wallet.hpp"
@@ -33,11 +34,12 @@
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/crypto/Parameters.hpp"
 #include "opentxs/crypto/SignatureRole.hpp"
+#include "opentxs/crypto/asymmetric/Mode.hpp"
 #include "opentxs/identity/CredentialRole.hpp"
 #include "opentxs/identity/Source.hpp"
 #include "opentxs/identity/credential/Primary.hpp"
 #include "opentxs/util/Container.hpp"
-#include "opentxs/util/Pimpl.hpp"
+#include "opentxs/util/Writer.hpp"
 
 namespace opentxs::identity::credential::internal
 {
@@ -55,7 +57,7 @@ Base::Base(
     const crypto::Parameters& nymParameters,
     const VersionNumber version,
     const identity::CredentialRole role,
-    const crypto::key::asymmetric::Mode mode,
+    const crypto::asymmetric::Mode mode,
     const UnallocatedCString& masterID) noexcept
     : Signable(api, {}, version, {}, {})
     , parent_(parent)
@@ -209,7 +211,7 @@ auto Base::isValid(
 {
     SerializationModeFlag serializationMode = AS_PUBLIC;
 
-    if (crypto::key::asymmetric::Mode::Private == mode_) {
+    if (crypto::asymmetric::Mode::Private == mode_) {
         serializationMode = AS_PRIVATE;
     }
 
@@ -316,7 +318,7 @@ auto Base::serialize(
     }
 
     if (asPrivate) {
-        if (crypto::key::asymmetric::Mode::Private == mode_) {
+        if (crypto::asymmetric::Mode::Private == mode_) {
             serializedCredential->set_mode(translate(mode_));
         } else {
             LogError()(OT_PRETTY_CLASS())(
@@ -326,7 +328,7 @@ auto Base::serialize(
         }
     } else {
         serializedCredential->set_mode(
-            translate(crypto::key::asymmetric::Mode::Public));
+            translate(crypto::asymmetric::Mode::Public));
     }
 
     if (asSigned) {

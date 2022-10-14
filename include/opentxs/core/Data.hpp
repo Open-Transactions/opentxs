@@ -14,9 +14,9 @@
 #include "opentxs/Export.hpp"
 #include "opentxs/core/Types.hpp"
 #include "opentxs/util/Allocator.hpp"
-#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Iterator.hpp"
+#include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -31,6 +31,7 @@ class Frame;
 
 class Armored;
 class Data;
+class Writer;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -100,7 +101,7 @@ public:
     virtual auto Randomize(const std::size_t size) -> bool = 0;
     virtual auto resize(const std::size_t size) -> bool = 0;
     virtual auto SetSize(const std::size_t size) -> bool = 0;
-    virtual auto WriteInto() noexcept -> AllocateOutput = 0;
+    virtual auto WriteInto() noexcept -> Writer = 0;
     virtual auto zeroMemory() -> void = 0;
 
     Data(const Data& rhs) = delete;

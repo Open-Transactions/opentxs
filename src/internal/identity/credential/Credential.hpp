@@ -15,6 +15,7 @@
 #include "opentxs/core/Secret.hpp"  // IWYU pragma: keep
 #include "opentxs/crypto/HashType.hpp"
 #include "opentxs/crypto/Types.hpp"
+#include "opentxs/crypto/asymmetric/Role.hpp"
 #include "opentxs/identity/Types.hpp"
 #include "opentxs/identity/credential/Base.hpp"
 #include "opentxs/identity/credential/Contact.hpp"
@@ -74,8 +75,8 @@ public:
     virtual auto Verify(
         const Data& plaintext,
         const proto::Signature& sig,
-        const opentxs::crypto::key::asymmetric::Role key =
-            opentxs::crypto::key::asymmetric::Role::Sign) const -> bool = 0;
+        const opentxs::crypto::asymmetric::Role key =
+            opentxs::crypto::asymmetric::Role::Sign) const -> bool = 0;
     virtual auto Verify(
         const proto::Credential& credential,
         const identity::CredentialRole& role,
@@ -101,11 +102,11 @@ struct Key : virtual public Base, virtual public identity::credential::Key {
     static auto Blank() noexcept -> Key&;
 
     virtual auto GetKeypair(
-        const crypto::key::asymmetric::Algorithm type,
-        const opentxs::crypto::key::asymmetric::Role role) const
+        const crypto::asymmetric::Algorithm type,
+        const opentxs::crypto::asymmetric::Role role) const
         -> const crypto::key::Keypair& = 0;
-    virtual auto GetKeypair(const opentxs::crypto::key::asymmetric::Role role)
-        const -> const crypto::key::Keypair& = 0;
+    virtual auto GetKeypair(const opentxs::crypto::asymmetric::Role role) const
+        -> const crypto::key::Keypair& = 0;
     virtual auto GetPublicKeysBySignature(
         crypto::key::Keypair::Keys& listOutput,
         const opentxs::Signature& theSignature,
@@ -115,8 +116,8 @@ struct Key : virtual public Base, virtual public identity::credential::Key {
         const crypto::SignatureRole role,
         proto::Signature& signature,
         const PasswordPrompt& reason,
-        opentxs::crypto::key::asymmetric::Role key =
-            opentxs::crypto::key::asymmetric::Role::Sign,
+        opentxs::crypto::asymmetric::Role key =
+            opentxs::crypto::asymmetric::Role::Sign,
         const crypto::HashType hash = crypto::HashType::Error) const
         -> bool = 0;
 

@@ -17,9 +17,9 @@
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/crypto/Types.hpp"
-#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Time.hpp"
+#include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -69,6 +69,7 @@ class Nym;
 class Contact;
 class PasswordPrompt;
 class PaymentCode;
+class Writer;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -97,7 +98,7 @@ public:
     static auto Bip44Path(
         Chain chain,
         const UnallocatedCString& seed,
-        AllocateOutput destination) noexcept(false) -> bool;
+        Writer&& destination) noexcept(false) -> bool;
 
     /// Throws std::runtime_error if chain is invalid
     virtual auto Account(const identifier::Nym& nymID, const Chain chain) const

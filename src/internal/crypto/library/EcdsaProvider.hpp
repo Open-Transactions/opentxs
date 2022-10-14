@@ -6,28 +6,31 @@
 #pragma once
 
 #include "internal/crypto/library/AsymmetricProvider.hpp"
+#include "opentxs/util/Types.hpp"
+
+// NOLINTBEGIN(modernize-concat-nested-namespaces)
+namespace opentxs
+{
+class Writer;
+}  // namespace opentxs
+// NOLINTEND(modernize-concat-nested-namespaces)
 
 namespace opentxs::crypto
 {
 class EcdsaProvider : virtual public AsymmetricProvider
 {
 public:
-    virtual auto PubkeyAdd(
-        const ReadView pubkey,
-        const ReadView scalar,
-        const AllocateOutput result) const noexcept -> bool = 0;
-    virtual auto ScalarAdd(
-        const ReadView lhs,
-        const ReadView rhs,
-        const AllocateOutput result) const noexcept -> bool = 0;
-    virtual auto ScalarMultiplyBase(
-        const ReadView scalar,
-        const AllocateOutput result) const noexcept -> bool = 0;
+    virtual auto PubkeyAdd(ReadView pubkey, ReadView scalar, Writer&& result)
+        const noexcept -> bool = 0;
+    virtual auto ScalarAdd(ReadView lhs, ReadView rhs, Writer&& result)
+        const noexcept -> bool = 0;
+    virtual auto ScalarMultiplyBase(ReadView scalar, Writer&& result)
+        const noexcept -> bool = 0;
     virtual auto SignDER(
-        const ReadView plaintext,
-        const ReadView key,
-        const crypto::HashType hash,
-        Space& signature) const noexcept -> bool = 0;
+        ReadView plaintext,
+        ReadView key,
+        crypto::HashType hash,
+        Writer&& signature) const noexcept -> bool = 0;
 
     EcdsaProvider(const EcdsaProvider&) = delete;
     EcdsaProvider(EcdsaProvider&&) = delete;

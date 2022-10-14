@@ -11,12 +11,12 @@
 #include "internal/api/session/UI.hpp"
 #include "internal/network/zeromq/Context.hpp"
 #include "internal/util/P0330.hpp"
+#include "internal/util/Pimpl.hpp"
 #include "opentxs/api/network/Network.hpp"
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/UI.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/util/Log.hpp"
-#include "opentxs/util/Pimpl.hpp"
 
 namespace opentxs::ui::implementation
 {

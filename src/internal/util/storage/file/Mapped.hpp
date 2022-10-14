@@ -14,8 +14,9 @@
 
 #include "internal/util/storage/file/Index.hpp"
 #include "opentxs/util/Allocated.hpp"
-#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
+#include "opentxs/util/Types.hpp"
+#include "opentxs/util/WriteBuffer.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -34,6 +35,8 @@ class Database;
 class Transaction;
 }  // namespace lmdb
 }  // namespace storage
+
+class WriteBuffer;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -47,7 +50,7 @@ public:
 
     auto Erase(const Index& index, lmdb::Transaction& tx) noexcept -> bool;
     auto Write(lmdb::Transaction& tx, const Vector<std::size_t>& items) noexcept
-        -> Vector<std::pair<Index, WritableView>>;
+        -> Vector<std::pair<Index, WriteBuffer>>;
 
     Mapped(const Mapped&) = delete;
     Mapped(Mapped&&) = delete;

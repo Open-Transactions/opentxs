@@ -11,7 +11,6 @@
 #include <type_traits>
 
 #include "opentxs/Export.hpp"
-#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -23,6 +22,7 @@ class Amount;
 }  // namespace internal
 
 class Amount;
+class Writer;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -123,7 +123,7 @@ public:
     auto operator-=(const Amount& amount) noexcept(false) -> Amount&;
     auto operator-() -> Amount;
 
-    auto Serialize(const AllocateOutput dest) const noexcept -> bool;
+    auto Serialize(Writer&& dest) const noexcept -> bool;
 
     auto swap(Amount& rhs) noexcept -> void;
 

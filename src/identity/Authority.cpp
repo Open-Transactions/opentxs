@@ -26,6 +26,7 @@
 #include "internal/api/session/Wallet.hpp"
 #include "internal/core/String.hpp"
 #include "internal/crypto/Parameters.hpp"
+#include "internal/crypto/asymmetric/Key.hpp"
 #include "internal/crypto/key/Key.hpp"
 #include "internal/crypto/key/Keypair.hpp"
 #include "internal/identity/Authority.hpp"
@@ -44,11 +45,13 @@
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
+#include "opentxs/crypto/HashType.hpp"
 #include "opentxs/crypto/ParameterType.hpp"
 #include "opentxs/crypto/Parameters.hpp"
 #include "opentxs/crypto/SignatureRole.hpp"
 #include "opentxs/crypto/Types.hpp"
-#include "opentxs/crypto/key/Asymmetric.hpp"
+#include "opentxs/crypto/asymmetric/Key.hpp"
+#include "opentxs/crypto/asymmetric/Role.hpp"
 #include "opentxs/crypto/symmetric/Key.hpp"
 #include "opentxs/identity/Source.hpp"
 #include "opentxs/identity/credential/Base.hpp"
@@ -546,7 +549,7 @@ auto Authority::create_master(
 auto Authority::EncryptionTargets() const noexcept -> AuthorityKeys
 {
     auto output = AuthorityKeys{GetMasterCredID(), {}};
-    auto set = UnallocatedSet<crypto::key::asymmetric::Algorithm>{};
+    auto set = UnallocatedSet<crypto::asymmetric::Algorithm>{};
     auto& list = output.second;
 
     for (const auto& [id, pCredential] : key_credentials_) {
@@ -557,8 +560,8 @@ auto Authority::EncryptionTargets() const noexcept -> AuthorityKeys
         }
 
         const auto& keypair =
-            cred.GetKeypair(crypto::key::asymmetric::Role::Encrypt);
-        set.emplace(keypair.GetPublicKey().keyType());
+            cred.GetKeypair(crypto::asymmetric::Role::Encrypt);
+        set.emplace(keypair.GetPublicKey().Type());
     }
 
     std::copy(std::begin(set), std::end(set), std::back_inserter(list));
@@ -599,7 +602,7 @@ void Authority::extract_child(
 }
 
 auto Authority::get_keypair(
-    const crypto::key::asymmetric::Algorithm type,
+    const crypto::asymmetric::Algorithm type,
     const proto::KeyRole role,
     const String::List* plistRevokedIDs) const -> const crypto::key::Keypair&
 {
@@ -655,29 +658,29 @@ auto Authority::GetMasterCredID() const -> identifier::Generic
 }
 
 auto Authority::GetAuthKeypair(
-    crypto::key::asymmetric::Algorithm keytype,
+    crypto::asymmetric::Algorithm keytype,
     const String::List* plistRevokedIDs) const -> const crypto::key::Keypair&
 {
     return get_keypair(keytype, proto::KEYROLE_AUTH, plistRevokedIDs);
 }
 
 auto Authority::GetEncrKeypair(
-    crypto::key::asymmetric::Algorithm keytype,
+    crypto::asymmetric::Algorithm keytype,
     const String::List* plistRevokedIDs) const -> const crypto::key::Keypair&
 {
     return get_keypair(keytype, proto::KEYROLE_ENCRYPT, plistRevokedIDs);
 }
 
 auto Authority::GetPublicAuthKey(
-    crypto::key::asymmetric::Algorithm keytype,
-    const String::List* plistRevokedIDs) const -> const crypto::key::Asymmetric&
+    crypto::asymmetric::Algorithm keytype,
+    const String::List* plistRevokedIDs) const -> const crypto::asymmetric::Key&
 {
     return GetAuthKeypair(keytype, plistRevokedIDs).GetPublicKey();
 }
 
 auto Authority::GetPublicEncrKey(
-    crypto::key::asymmetric::Algorithm keytype,
-    const String::List* plistRevokedIDs) const -> const crypto::key::Asymmetric&
+    crypto::asymmetric::Algorithm keytype,
+    const String::List* plistRevokedIDs) const -> const crypto::asymmetric::Key&
 {
     return GetEncrKeypair(keytype, plistRevokedIDs).GetPublicKey();
 }
@@ -699,41 +702,41 @@ auto Authority::GetPublicKeysBySignature(
 }
 
 auto Authority::GetPublicSignKey(
-    crypto::key::asymmetric::Algorithm keytype,
-    const String::List* plistRevokedIDs) const -> const crypto::key::Asymmetric&
+    crypto::asymmetric::Algorithm keytype,
+    const String::List* plistRevokedIDs) const -> const crypto::asymmetric::Key&
 {
     return GetSignKeypair(keytype, plistRevokedIDs).GetPublicKey();
 }
 
 auto Authority::GetPrivateAuthKey(
-    crypto::key::asymmetric::Algorithm keytype,
-    const String::List* plistRevokedIDs) const -> const crypto::key::Asymmetric&
+    crypto::asymmetric::Algorithm keytype,
+    const String::List* plistRevokedIDs) const -> const crypto::asymmetric::Key&
 {
     return GetAuthKeypair(keytype, plistRevokedIDs).GetPrivateKey();
 }
 
 auto Authority::GetPrivateEncrKey(
-    crypto::key::asymmetric::Algorithm keytype,
-    const String::List* plistRevokedIDs) const -> const crypto::key::Asymmetric&
+    crypto::asymmetric::Algorithm keytype,
+    const String::List* plistRevokedIDs) const -> const crypto::asymmetric::Key&
 {
     return GetEncrKeypair(keytype, plistRevokedIDs).GetPrivateKey();
 }
 
 auto Authority::GetPrivateSignKey(
-    crypto::key::asymmetric::Algorithm keytype,
-    const String::List* plistRevokedIDs) const -> const crypto::key::Asymmetric&
+    crypto::asymmetric::Algorithm keytype,
+    const String::List* plistRevokedIDs) const -> const crypto::asymmetric::Key&
 {
     return GetSignKeypair(keytype, plistRevokedIDs).GetPrivateKey();
 }
 
 auto Authority::GetSignKeypair(
-    crypto::key::asymmetric::Algorithm keytype,
+    crypto::asymmetric::Algorithm keytype,
     const String::List* plistRevokedIDs) const -> const crypto::key::Keypair&
 {
     return get_keypair(keytype, proto::KEYROLE_SIGN, plistRevokedIDs);
 }
 
-auto Authority::GetTagCredential(crypto::key::asymmetric::Algorithm type) const
+auto Authority::GetTagCredential(crypto::asymmetric::Algorithm type) const
     noexcept(false) -> const credential::Key&
 {
     for (const auto& [id, pCredential] : key_credentials_) {
@@ -744,9 +747,9 @@ auto Authority::GetTagCredential(crypto::key::asymmetric::Algorithm type) const
         }
 
         const auto& keypair =
-            cred.GetKeypair(crypto::key::asymmetric::Role::Encrypt);
+            cred.GetKeypair(crypto::asymmetric::Role::Encrypt);
 
-        if (type == keypair.GetPublicKey().keyType()) { return cred; }
+        if (type == keypair.GetPublicKey().Type()) { return cred; }
     }
 
     throw std::out_of_range("No matching credential");
@@ -968,15 +971,16 @@ auto Authority::load_master(
     return output;
 }
 
-auto Authority::Params(
-    const crypto::key::asymmetric::Algorithm type) const noexcept -> ReadView
+auto Authority::Params(const crypto::asymmetric::Algorithm type) const noexcept
+    -> ReadView
 {
     try {
         return GetTagCredential(type)
             .Internal()
             .asKey()
-            .GetKeypair(type, crypto::key::asymmetric::Role::Encrypt)
+            .GetKeypair(type, crypto::asymmetric::Role::Encrypt)
             .GetPublicKey()
+            .Internal()
             .Params();
     } catch (...) {
         LogError()(OT_PRETTY_CLASS())("Invalid credential").Flush();
@@ -1069,16 +1073,52 @@ auto Authority::Serialize(
 
 auto Authority::Sign(
     const GetPreimage input,
-    const crypto::SignatureRole role,
-    proto::Signature& signature,
-    const opentxs::PasswordPrompt& reason,
-    crypto::key::asymmetric::Role key,
-    const crypto::HashType hash) const -> bool
+    crypto::SignatureRole role,
+    proto::Signature& output,
+    const PasswordPrompt& reason) const -> bool
+{
+    return Sign(
+        input,
+        role,
+        crypto::asymmetric::Role::Sign,
+        crypto::HashType::Error,
+        output,
+        reason);
+}
+
+auto Authority::Sign(
+    const GetPreimage input,
+    crypto::SignatureRole role,
+    crypto::HashType hash,
+    proto::Signature& output,
+    const PasswordPrompt& reason) const -> bool
+{
+    return Sign(
+        input, role, crypto::asymmetric::Role::Sign, hash, output, reason);
+}
+
+auto Authority::Sign(
+    const GetPreimage input,
+    crypto::SignatureRole role,
+    opentxs::crypto::asymmetric::Role key,
+    proto::Signature& output,
+    const PasswordPrompt& reason) const -> bool
+{
+    return Sign(input, role, key, crypto::HashType::Error, output, reason);
+}
+
+auto Authority::Sign(
+    const GetPreimage input,
+    crypto::SignatureRole role,
+    opentxs::crypto::asymmetric::Role key,
+    crypto::HashType hash,
+    proto::Signature& output,
+    const PasswordPrompt& reason) const -> bool
 {
     switch (role) {
         case (crypto::SignatureRole::PublicCredential): {
             if (master_->hasCapability(NymCapability::SIGN_CHILDCRED)) {
-                return master_->Sign(input, role, signature, reason, key, hash);
+                return master_->Sign(input, role, output, reason, key, hash);
             }
 
             break;
@@ -1106,8 +1146,7 @@ auto Authority::Sign(
                     continue;
                 }
 
-                if (credential.Sign(
-                        input, role, signature, reason, key, hash)) {
+                if (credential.Sign(input, role, output, reason, key, hash)) {
 
                     return true;
                 }
@@ -1146,9 +1185,9 @@ auto Authority::TransportKey(
 }
 
 auto Authority::Unlock(
-    const crypto::key::Asymmetric& dhKey,
+    const crypto::asymmetric::Key& dhKey,
     const std::uint32_t tag,
-    const crypto::key::asymmetric::Algorithm type,
+    const crypto::asymmetric::Algorithm type,
     const crypto::symmetric::Key& key,
     PasswordPrompt& reason) const noexcept -> bool
 {
@@ -1161,13 +1200,13 @@ auto Authority::Unlock(
 
         try {
             const auto& encryptKey =
-                cred.GetKeypair(crypto::key::asymmetric::Role::Encrypt)
+                cred.GetKeypair(crypto::asymmetric::Role::Encrypt)
                     .GetPrivateKey();
 
-            if (type != encryptKey.keyType()) { continue; }
+            if (type != encryptKey.Type()) { continue; }
 
             auto testTag = std::uint32_t{};
-            auto calculated = encryptKey.CalculateTag(
+            auto calculated = encryptKey.Internal().CalculateTag(
                 dhKey, GetMasterCredID(), reason, testTag);
 
             if (false == calculated) {
@@ -1186,8 +1225,8 @@ auto Authority::Unlock(
             }
 
             auto password = api_.Factory().Secret(0);
-            calculated =
-                encryptKey.CalculateSessionPassword(dhKey, reason, password);
+            calculated = encryptKey.Internal().CalculateSessionPassword(
+                dhKey, reason, password);
 
             if (false == calculated) {
                 LogError()(OT_PRETTY_CLASS())(
@@ -1228,10 +1267,16 @@ auto Authority::validate_credential(const Item& item) const -> bool
     return false;
 }
 
+auto Authority::Verify(const Data& plaintext, const proto::Signature& sig) const
+    -> bool
+{
+    return Verify(plaintext, sig, crypto::asymmetric::Role::Sign);
+}
+
 auto Authority::Verify(
     const Data& plaintext,
     const proto::Signature& sig,
-    const crypto::key::asymmetric::Role key) const -> bool
+    const crypto::asymmetric::Role key) const -> bool
 {
     UnallocatedCString signerID(sig.credentialid());
 
@@ -1268,7 +1313,7 @@ auto Authority::Verify(const proto::Verification& item) const -> bool
     return Verify(
         api_.Factory().InternalSession().Data(serialized),
         signatureCopy,
-        crypto::key::asymmetric::Role::Sign);
+        crypto::asymmetric::Role::Sign);
 }
 
 auto Authority::VerifyInternally() const -> bool
@@ -1323,4 +1368,6 @@ auto Authority::WriteCredentials() const -> bool
 
     return output;
 }
+
+Authority::~Authority() = default;
 }  // namespace opentxs::identity::implementation

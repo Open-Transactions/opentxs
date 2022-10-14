@@ -182,11 +182,11 @@ auto ApiCryptoBlockchain::check_hd_index(
     EXPECT_EQ(element.Address(AddressStyle::P2PKH), target);
     EXPECT_EQ(element.Confirmed().size(), 0);
     EXPECT_EQ(element.Index(), i);
-    EXPECT_TRUE(element.Key());
+    EXPECT_TRUE(element.Key().IsValid());
     EXPECT_EQ(element.KeyID(), locator);
     EXPECT_EQ(element.Label(), label);
     EXPECT_NE(element.LastActivity(), zero_time_);
-    EXPECT_TRUE(element.PrivateKey(reason_));
+    EXPECT_TRUE(element.PrivateKey(reason_).IsValid());
     EXPECT_EQ(element.PubkeyHash(), bytes);
     EXPECT_EQ(element.Subchain(), subchain);
     EXPECT_EQ(element.Unconfirmed().size(), 0);
@@ -194,11 +194,11 @@ auto ApiCryptoBlockchain::check_hd_index(
     output &= (element.Address(AddressStyle::P2PKH) == target);
     output &= (element.Confirmed().size() == 0);
     output &= (element.Index() == i);
-    output &= bool(element.Key());
+    output &= element.Key().IsValid();
     output &= (element.KeyID() == locator);
     output &= (element.Label() == label);
     output &= (element.LastActivity() != zero_time_);
-    output &= bool(element.PrivateKey(reason_));
+    output &= element.PrivateKey(reason_).IsValid();
     output &= (element.PubkeyHash() == bytes);
     output &= (element.Subchain() == subchain);
     output &= (element.Unconfirmed().size() == 0);

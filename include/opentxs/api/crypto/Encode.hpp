@@ -5,12 +5,10 @@
 
 #pragma once
 
-#include <cstdint>
 #include <string_view>
 
 #include "opentxs/Export.hpp"
-#include "opentxs/util/Bytes.hpp"
-#include "opentxs/util/Container.hpp"
+#include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -26,43 +24,37 @@ class Encode;
 }  // namespace crypto
 }  // namespace api
 
-class ByteArray;
-class Data;
+class Writer;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
 namespace opentxs::api::crypto
 {
 /**
- The api::crypto::encode API is used for encoding and decoding data, and related
- functions.
+ The api::crypto::encode API is used for byte sequences to and from encoded
+ strings.
  */
 class Encode
 {
 public:
-    virtual auto DataEncode(const UnallocatedCString& input) const
-        -> UnallocatedCString = 0;
-    virtual auto DataEncode(const Data& input) const -> UnallocatedCString = 0;
-    virtual auto DataDecode(const UnallocatedCString& input) const
-        -> UnallocatedCString = 0;
-    virtual auto IdentifierEncode(const ReadView input) const
-        -> UnallocatedCString = 0;
-    virtual auto IdentifierDecode(const ReadView input) const
-        -> UnallocatedCString = 0;
+    [[nodiscard]] virtual auto Base58CheckEncode(
+        ReadView input,
+        Writer&& output) const noexcept -> bool = 0;
+    [[nodiscard]] virtual auto Base58CheckDecode(
+        std::string_view input,
+        Writer&& output) const -> bool = 0;
+    [[nodiscard]] virtual auto Base64Encode(ReadView input, Writer&& output)
+        const noexcept -> bool = 0;
+    [[nodiscard]] virtual auto Base64Decode(
+        std::string_view input,
+        Writer&& output) const noexcept -> bool = 0;
     OPENTXS_NO_EXPORT virtual auto InternalEncode() const noexcept
         -> const internal::Encode& = 0;
-    virtual auto IsBase62(const UnallocatedCString& str) const -> bool = 0;
-    virtual auto RandomFilename() const -> UnallocatedCString = 0;
-    virtual auto SanatizeBase58(std::string_view input) const
-        -> UnallocatedCString = 0;
-    virtual auto SanatizeBase64(const UnallocatedCString& input) const
-        -> UnallocatedCString = 0;
-    virtual auto Z85Encode(const Data& input) const -> UnallocatedCString = 0;
-    virtual auto Z85Encode(const UnallocatedCString& input) const
-        -> UnallocatedCString = 0;
-    virtual auto Z85Decode(const Data& input) const -> ByteArray = 0;
-    virtual auto Z85Decode(const UnallocatedCString& input) const
-        -> UnallocatedCString = 0;
+    [[nodiscard]] virtual auto Z85Encode(ReadView input, Writer&& output)
+        const noexcept -> bool = 0;
+    [[nodiscard]] virtual auto Z85Decode(
+        std::string_view input,
+        Writer&& output) const noexcept -> bool = 0;
 
     OPENTXS_NO_EXPORT virtual auto InternalEncode() noexcept
         -> internal::Encode& = 0;

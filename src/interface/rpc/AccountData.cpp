@@ -18,6 +18,7 @@
 #include "opentxs/interface/rpc/AccountType.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Numbers.hpp"
+#include "opentxs/util/Writer.hpp"
 
 namespace opentxs::rpc
 {

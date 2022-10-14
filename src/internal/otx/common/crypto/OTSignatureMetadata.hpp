@@ -54,14 +54,14 @@ private:
     // Can be A, E, or S (authentication, encryption, or signing.
     // Also, E would be unusual.)
     char meta_key_type_{0x0};
-    // Can be any letter from base62 alphabet. Represents
+    // Can be any letter from base64 alphabet. Represents
     // first letter of a Nym's ID.
     char meta_nym_id_{0x0};
-    // Can be any letter from base62 alphabet.
+    // Can be any letter from base64 alphabet.
     // Represents first letter of a Master Credential
     // ID (for that Nym.)
     char meta_master_cred_id_{0x0};
-    // Can be any letter from base62 alphabet. Represents
+    // Can be any letter from base64 alphabet. Represents
     // first letter of a Credential ID (signed by that Master.)
     char meta_child_cred_id_{0x0};
 };

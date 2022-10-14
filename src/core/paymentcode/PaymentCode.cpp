@@ -7,15 +7,175 @@
 #include "core/paymentcode/PaymentCode.hpp"  // IWYU pragma: associated
 
 #include <compare>
+#include <memory>
 #include <utility>
 
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/PaymentCode.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
-#include "opentxs/crypto/key/EllipticCurve.hpp"  // IWYU pragma: keep
-#include "opentxs/crypto/key/HD.hpp"             // IWYU pragma: keep
+#include "opentxs/crypto/asymmetric/Key.hpp"
+#include "opentxs/crypto/asymmetric/key/EllipticCurve.hpp"  // IWYU pragma: keep
+#include "opentxs/crypto/asymmetric/key/HD.hpp"             // IWYU pragma: keep
 #include "opentxs/util/Container.hpp"
+#include "opentxs/util/Writer.hpp"
+
+namespace opentxs
+{
+PaymentCode::Imp::Imp() noexcept = default;
+
+auto PaymentCode::Imp::AddPrivateKeys(
+    UnallocatedCString&,
+    const Bip32Index,
+    const opentxs::PasswordPrompt&) noexcept -> bool
+{
+    return {};
+}
+
+PaymentCode::Imp::operator const opentxs::crypto::asymmetric::Key&()
+    const noexcept
+{
+    return crypto::asymmetric::Key::Blank();
+}
+
+auto PaymentCode::Imp::asBase58() const noexcept -> UnallocatedCString
+{
+    return {};
+}
+
+auto PaymentCode::Imp::Blind(
+    const opentxs::PaymentCode&,
+    const crypto::asymmetric::key::EllipticCurve&,
+    const ReadView,
+    Writer&&,
+    const opentxs::PasswordPrompt&) const noexcept -> bool
+{
+    return {};
+}
+
+auto PaymentCode::Imp::BlindV3(
+    const opentxs::PaymentCode&,
+    const crypto::asymmetric::key::EllipticCurve&,
+    Writer&&,
+    const opentxs::PasswordPrompt&) const noexcept -> bool
+{
+    return {};
+}
+
+auto PaymentCode::Imp::clone() const noexcept -> Imp* { return {}; }
+
+auto PaymentCode::Imp::DecodeNotificationElements(
+    const std::uint8_t,
+    const UnallocatedVector<Space>&,
+    const opentxs::PasswordPrompt&) const noexcept -> opentxs::PaymentCode
+{
+    return std::make_unique<Imp>().release();
+}
+
+auto PaymentCode::Imp::GenerateNotificationElements(
+    const opentxs::PaymentCode&,
+    const crypto::asymmetric::key::EllipticCurve&,
+    const opentxs::PasswordPrompt&) const noexcept -> UnallocatedVector<Space>
+{
+    return {};
+}
+
+auto PaymentCode::Imp::ID() const noexcept -> const identifier::Nym&
+{
+    static const auto blank = identifier::Nym{};
+
+    return blank;
+}
+auto PaymentCode::Imp::Incoming(
+    const opentxs::PaymentCode&,
+    const Bip32Index,
+    const blockchain::Type,
+    const opentxs::PasswordPrompt&,
+    const std::uint8_t) const noexcept -> crypto::asymmetric::key::EllipticCurve
+{
+    return {};
+}
+
+auto PaymentCode::Imp::Key() const noexcept
+    -> const crypto::asymmetric::key::HD&
+{
+    return crypto::asymmetric::key::HD::Blank();
+}
+
+auto PaymentCode::Imp::Locator(Writer&&, const std::uint8_t) const noexcept
+    -> bool
+{
+    return {};
+}
+
+auto PaymentCode::Imp::operator==(const proto::PaymentCode&) const noexcept
+    -> bool
+{
+    return {};
+}
+
+auto PaymentCode::Imp::Outgoing(
+    const opentxs::PaymentCode&,
+    const Bip32Index,
+    const blockchain::Type,
+    const opentxs::PasswordPrompt&,
+    const std::uint8_t) const noexcept -> crypto::asymmetric::key::EllipticCurve
+{
+    return {};
+}
+
+auto PaymentCode::Imp::Serialize(Writer&&) const noexcept -> bool { return {}; }
+
+auto PaymentCode::Imp::Serialize(Serialized& serialized) const noexcept -> bool
+{
+    return {};
+}
+
+auto PaymentCode::Imp::Sign(
+    const identity::credential::Base&,
+    proto::Signature&,
+    const opentxs::PasswordPrompt&) const noexcept -> bool
+{
+    return {};
+}
+
+auto PaymentCode::Imp::Sign(const Data&, Data&, const opentxs::PasswordPrompt&)
+    const noexcept -> bool
+{
+    return {};
+}
+
+auto PaymentCode::Imp::Unblind(
+    const ReadView,
+    const crypto::asymmetric::key::EllipticCurve&,
+    const ReadView,
+    const opentxs::PasswordPrompt&) const noexcept -> opentxs::PaymentCode
+{
+    return std::make_unique<Imp>().release();
+}
+
+auto PaymentCode::Imp::UnblindV3(
+    const std::uint8_t,
+    const ReadView,
+    const crypto::asymmetric::key::EllipticCurve&,
+    const opentxs::PasswordPrompt&) const noexcept -> opentxs::PaymentCode
+{
+    return std::make_unique<Imp>().release();
+}
+
+auto PaymentCode::Imp::Valid() const noexcept -> bool { return {}; }
+
+auto PaymentCode::Imp::Verify(
+    const proto::Credential& master,
+    const proto::Signature& sourceSignature) const noexcept -> bool
+{
+    return {};
+}
+
+auto PaymentCode::Imp::Version() const noexcept -> VersionNumber { return {}; }
+
+PaymentCode::Imp::~Imp() = default;
+}  // namespace opentxs
 
 namespace opentxs
 {
@@ -41,7 +201,7 @@ PaymentCode::PaymentCode(Imp* imp) noexcept
 }
 
 PaymentCode::PaymentCode() noexcept
-    : PaymentCode(std::make_unique<blank::PaymentCode>().release())
+    : PaymentCode(std::make_unique<Imp>().release())
 {
 }
 
@@ -74,7 +234,7 @@ auto PaymentCode::operator=(PaymentCode&& rhs) noexcept -> PaymentCode&
     return *this;
 }
 
-PaymentCode::operator const crypto::key::Asymmetric&() const noexcept
+PaymentCode::operator const crypto::asymmetric::Key&() const noexcept
 {
     return *imp_;
 }
@@ -86,21 +246,22 @@ auto PaymentCode::asBase58() const noexcept -> UnallocatedCString
 
 auto PaymentCode::Blind(
     const PaymentCode& recipient,
-    const crypto::key::EllipticCurve& privateKey,
+    const crypto::asymmetric::key::EllipticCurve& privateKey,
     const ReadView outpoint,
-    const AllocateOutput destination,
+    Writer&& destination,
     const opentxs::PasswordPrompt& reason) const noexcept -> bool
 {
-    return imp_->Blind(recipient, privateKey, outpoint, destination, reason);
+    return imp_->Blind(
+        recipient, privateKey, outpoint, std::move(destination), reason);
 }
 
 auto PaymentCode::BlindV3(
     const PaymentCode& recipient,
-    const crypto::key::EllipticCurve& privateKey,
-    const AllocateOutput destination,
+    const crypto::asymmetric::key::EllipticCurve& privateKey,
+    Writer&& destination,
     const opentxs::PasswordPrompt& reason) const noexcept -> bool
 {
-    return imp_->BlindV3(recipient, privateKey, destination, reason);
+    return imp_->BlindV3(recipient, privateKey, std::move(destination), reason);
 }
 
 auto PaymentCode::DecodeNotificationElements(
@@ -116,7 +277,7 @@ auto PaymentCode::DefaultVersion() noexcept -> VersionNumber { return 3; }
 
 auto PaymentCode::GenerateNotificationElements(
     const PaymentCode& recipient,
-    const crypto::key::EllipticCurve& privateKey,
+    const crypto::asymmetric::key::EllipticCurve& privateKey,
     const opentxs::PasswordPrompt& reason) const noexcept
     -> UnallocatedVector<Space>
 {
@@ -138,7 +299,7 @@ auto PaymentCode::Internal() noexcept -> internal::PaymentCode&
     return *imp_;
 }
 
-auto PaymentCode::Key() const noexcept -> std::shared_ptr<crypto::key::HD>
+auto PaymentCode::Key() const noexcept -> const crypto::asymmetric::key::HD&
 {
     return imp_->Key();
 }
@@ -149,16 +310,15 @@ auto PaymentCode::Incoming(
     const blockchain::Type chain,
     const opentxs::PasswordPrompt& reason,
     const std::uint8_t version) const noexcept
-    -> std::unique_ptr<crypto::key::EllipticCurve>
+    -> crypto::asymmetric::key::EllipticCurve
 {
     return imp_->Incoming(sender, index, chain, reason, version);
 }
 
-auto PaymentCode::Locator(
-    const AllocateOutput destination,
-    const std::uint8_t version) const noexcept -> bool
+auto PaymentCode::Locator(Writer&& destination, const std::uint8_t version)
+    const noexcept -> bool
 {
-    return imp_->Locator(destination, version);
+    return imp_->Locator(std::move(destination), version);
 }
 
 auto PaymentCode::Outgoing(
@@ -167,14 +327,14 @@ auto PaymentCode::Outgoing(
     const blockchain::Type chain,
     const opentxs::PasswordPrompt& reason,
     const std::uint8_t version) const noexcept
-    -> std::unique_ptr<crypto::key::EllipticCurve>
+    -> crypto::asymmetric::key::EllipticCurve
 {
     return imp_->Outgoing(recipient, index, chain, reason, version);
 }
 
-auto PaymentCode::Serialize(AllocateOutput destination) const noexcept -> bool
+auto PaymentCode::Serialize(Writer&& destination) const noexcept -> bool
 {
-    return imp_->Serialize(destination);
+    return imp_->Serialize(std::move(destination));
 }
 
 auto PaymentCode::Sign(
@@ -192,7 +352,7 @@ auto PaymentCode::swap(PaymentCode& rhs) noexcept -> void
 
 auto PaymentCode::Unblind(
     const ReadView blinded,
-    const crypto::key::EllipticCurve& publicKey,
+    const crypto::asymmetric::key::EllipticCurve& publicKey,
     const ReadView outpoint,
     const opentxs::PasswordPrompt& reason) const noexcept
     -> opentxs::PaymentCode
@@ -203,7 +363,7 @@ auto PaymentCode::Unblind(
 auto PaymentCode::UnblindV3(
     const std::uint8_t version,
     const ReadView blinded,
-    const crypto::key::EllipticCurve& publicKey,
+    const crypto::asymmetric::key::EllipticCurve& publicKey,
     const opentxs::PasswordPrompt& reason) const noexcept
     -> opentxs::PaymentCode
 {

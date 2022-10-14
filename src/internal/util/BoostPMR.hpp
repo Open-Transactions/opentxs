@@ -12,7 +12,9 @@
 #include <cs_plain_guarded.h>
 #include <utility>
 
+#include "internal/util/LogMacros.hpp"
 #include "opentxs/util/Allocator.hpp"
+#include "opentxs/util/Log.hpp"
 
 namespace opentxs::alloc
 {
@@ -175,6 +177,49 @@ public:
 
 private:
     mutable libguarded::plain_guarded<Resource*> upstream_;
+};
+
+class Logging final : public Resource
+{
+public:
+    auto do_allocate(std::size_t bytes, std::size_t alignment) -> void* final
+    {
+        auto* out = upstream_->allocate(bytes, alignment);
+        LogConsole()(OT_PRETTY_CLASS())("allocated ")(bytes)(" bytes at ")(
+            reinterpret_cast<std::uintptr_t>(out))
+            .Flush();
+
+        return out;
+    }
+
+    auto do_deallocate(void* p, std::size_t size, std::size_t alignment)
+        -> void final
+    {
+        LogConsole()(OT_PRETTY_CLASS())("deallocating ")(size)(" bytes at ")(
+            reinterpret_cast<std::uintptr_t>(p))
+            .Flush();
+
+        return upstream_->deallocate(p, size, alignment);
+    }
+    auto do_is_equal(const Resource& other) const noexcept -> bool final
+    {
+
+        return std::addressof(other) == upstream_;
+    }
+
+    Logging(Resource* upstream = nullptr)
+        : upstream_((nullptr == upstream) ? System() : upstream)
+    {
+    }
+    Logging(const Logging&) = delete;
+    Logging(Logging&&) = delete;
+    auto operator=(const Logging&) -> Logging& = delete;
+    auto operator=(Logging&&) -> Logging& = delete;
+
+    ~Logging() final = default;
+
+private:
+    Resource* upstream_;
 };
 
 using BoostMonotonic = Boost<boost::container::pmr::monotonic_buffer_resource>;

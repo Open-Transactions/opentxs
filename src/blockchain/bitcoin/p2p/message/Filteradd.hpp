@@ -12,7 +12,6 @@
 #include "opentxs/blockchain/BlockchainType.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/core/ByteArray.hpp"
-#include "opentxs/util/Bytes.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -35,6 +34,7 @@ class Header;
 
 class Data;
 class Factory;
+class Writer;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -65,6 +65,6 @@ private:
     const ByteArray element_;
 
     using implementation::Message::payload;
-    auto payload(AllocateOutput out) const noexcept -> bool final;
+    auto payload(Writer&& out) const noexcept -> bool final;
 };
 }  // namespace opentxs::blockchain::p2p::bitcoin::message::implementation

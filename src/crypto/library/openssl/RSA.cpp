@@ -13,13 +13,17 @@ extern "C" {
 
 #include <memory>
 #include <string_view>
+#include <utility>
 
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "opentxs/core/Secret.hpp"
 #include "opentxs/crypto/Parameters.hpp"
 #include "opentxs/crypto/SecretStyle.hpp"
+#include "opentxs/crypto/asymmetric/Role.hpp"
 #include "opentxs/util/Log.hpp"
+#include "opentxs/util/WriteBuffer.hpp"
+#include "opentxs/util/Writer.hpp"
 
 namespace opentxs::crypto::implementation
 {
@@ -60,7 +64,7 @@ auto OpenSSL::generate_dh(const Parameters& options, ::EVP_PKEY* output)
 }
 
 auto OpenSSL::get_params(
-    const AllocateOutput params,
+    Writer&& params,
     const Parameters& options,
     ::EVP_PKEY* output) const noexcept -> bool
 {
@@ -81,7 +85,7 @@ auto OpenSSL::get_params(
         }
     }
 
-    return write_dh(params, output);
+    return write_dh(std::move(params), output);
 }
 
 auto OpenSSL::import_dh(const ReadView existing, ::EVP_PKEY* output)
@@ -136,9 +140,9 @@ auto OpenSSL::import_dh(const ReadView existing, ::EVP_PKEY* output)
 }
 
 auto OpenSSL::make_dh_key(
-    const AllocateOutput privateKey,
-    const AllocateOutput publicKey,
-    const AllocateOutput dhParams,
+    Writer&& privateKey,
+    Writer&& publicKey,
+    Writer&& dhParams,
     const Parameters& options) const noexcept -> bool
 {
     struct Key {
@@ -166,7 +170,7 @@ auto OpenSSL::make_dh_key(
     auto params = Key{};
     auto key = Key{};
 
-    if (false == get_params(dhParams, options, params.key_)) {
+    if (false == get_params(std::move(dhParams), options, params.key_)) {
         LogError()(OT_PRETTY_CLASS())("Failed to set up dh params").Flush();
 
         return false;
@@ -193,12 +197,12 @@ auto OpenSSL::make_dh_key(
         return false;
     }
 
-    return write_keypair(privateKey, publicKey, key.key_);
+    return write_keypair(std::move(privateKey), std::move(publicKey), key.key_);
 }
 
 auto OpenSSL::make_signing_key(
-    const AllocateOutput privateKey,
-    const AllocateOutput publicKey,
+    Writer&& privateKey,
+    Writer&& publicKey,
     const Parameters& options) const noexcept -> bool
 {
     auto evp = OpenSSL_EVP_PKEY{::EVP_PKEY_new(), ::EVP_PKEY_free};
@@ -242,7 +246,8 @@ auto OpenSSL::make_signing_key(
         }
     }
 
-    return write_keypair(privateKey, publicKey, evp.get());
+    return write_keypair(
+        std::move(privateKey), std::move(publicKey), evp.get());
 }
 
 auto OpenSSL::primes(const int bits) -> int
@@ -259,18 +264,23 @@ auto OpenSSL::primes(const int bits) -> int
 }
 
 auto OpenSSL::RandomKeypair(
-    const AllocateOutput privateKey,
-    const AllocateOutput publicKey,
-    const crypto::key::asymmetric::Role role,
+    Writer&& privateKey,
+    Writer&& publicKey,
+    const crypto::asymmetric::Role role,
     const Parameters& options,
-    const AllocateOutput params) const noexcept -> bool
+    Writer&& params) const noexcept -> bool
 {
-    if (crypto::key::asymmetric::Role::Encrypt == role) {
+    if (crypto::asymmetric::Role::Encrypt == role) {
 
-        return make_dh_key(privateKey, publicKey, params, options);
+        return make_dh_key(
+            std::move(privateKey),
+            std::move(publicKey),
+            std::move(params),
+            options);
     } else {
 
-        return make_signing_key(privateKey, publicKey, options);
+        return make_signing_key(
+            std::move(privateKey), std::move(publicKey), options);
     }
 }
 
@@ -303,14 +313,6 @@ auto OpenSSL::SharedSecret(
         return false;
     }
 
-    auto allocate = secret.WriteInto(Secret::Mode::Mem);
-
-    if (false == bool(allocate)) {
-        LogError()(OT_PRETTY_CLASS())("Failed to get output allocator").Flush();
-
-        return false;
-    }
-
     auto size = 0_uz;
 
     if (1 != ::EVP_PKEY_derive(dh, nullptr, &size)) {
@@ -320,9 +322,9 @@ auto OpenSSL::SharedSecret(
         return false;
     }
 
-    auto output = allocate(size);
+    auto output = secret.WriteInto(Secret::Mode::Mem).Reserve(size);
 
-    if (false == output.valid(size)) {
+    if (false == output.IsValid(size)) {
         LogError()(OT_PRETTY_CLASS())(
             "Failed to allocate space for shared secret")
             .Flush();
@@ -343,7 +345,7 @@ auto OpenSSL::Sign(
     const ReadView in,
     const ReadView key,
     const crypto::HashType type,
-    const AllocateOutput signature) const -> bool
+    Writer&& signature) const -> bool
 {
     switch (type) {
         case crypto::HashType::Blake2b160:
@@ -384,15 +386,9 @@ auto OpenSSL::Sign(
         return false;
     }
 
-    if (false == bool(signature)) {
-        LogError()(OT_PRETTY_CLASS())("Invalid output allocator").Flush();
+    auto out = signature.Reserve(bytes);
 
-        return false;
-    }
-
-    auto out = signature(bytes);
-
-    if (false == out.valid(bytes)) {
+    if (false == out.IsValid(bytes)) {
         LogError()(OT_PRETTY_CLASS())("Failed to allocate space for signature")
             .Flush();
 
@@ -458,8 +454,8 @@ auto OpenSSL::Verify(
     return true;
 }
 
-auto OpenSSL::write_dh(const AllocateOutput dhParams, ::EVP_PKEY* input)
-    const noexcept -> bool
+auto OpenSSL::write_dh(Writer&& dhParams, ::EVP_PKEY* input) const noexcept
+    -> bool
 {
     auto dh = OpenSSL_DH{::EVP_PKEY_get1_DH(input), ::DH_free};
 
@@ -478,7 +474,7 @@ auto OpenSSL::write_dh(const AllocateOutput dhParams, ::EVP_PKEY* input)
         return false;
     }
 
-    if (false == params.Export(dhParams)) {
+    if (false == params.Export(std::move(dhParams))) {
         LogError()(OT_PRETTY_CLASS())("Failed write dh params").Flush();
 
         return false;
@@ -488,8 +484,8 @@ auto OpenSSL::write_dh(const AllocateOutput dhParams, ::EVP_PKEY* input)
 }
 
 auto OpenSSL::write_keypair(
-    const AllocateOutput privateKey,
-    const AllocateOutput publicKey,
+    Writer&& privateKey,
+    Writer&& publicKey,
     ::EVP_PKEY* evp) const noexcept -> bool
 {
     OT_ASSERT(nullptr != evp);
@@ -515,13 +511,13 @@ auto OpenSSL::write_keypair(
         return false;
     }
 
-    if (false == pubKey.Export(publicKey)) {
+    if (false == pubKey.Export(std::move(publicKey))) {
         LogError()(OT_PRETTY_CLASS())("Failed write public key").Flush();
 
         return false;
     }
 
-    if (false == privKey.Export(privateKey)) {
+    if (false == privKey.Export(std::move(privateKey))) {
         LogError()(OT_PRETTY_CLASS())("Failed write private key").Flush();
 
         return false;

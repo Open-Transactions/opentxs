@@ -6,6 +6,8 @@
 #include "0_stdafx.hpp"             // IWYU pragma: associated
 #include "util/storage/Config.hpp"  // IWYU pragma: associated
 
+#include "opentxs/util/Writer.hpp"
+
 namespace opentxs::storage
 {
 const UnallocatedCString Config::default_plugin_{

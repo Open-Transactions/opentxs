@@ -99,12 +99,9 @@ TEST_F(Test_PaymentCodeAPI, alice)
         const auto expected =
             alice_.Factory().DataFromHex(vector.receive_keys_.at(i));
         const auto& element = account1.BalanceElement(Subchain::Incoming, i);
-        const auto pKey = element.Key();
+        const auto& key = element.Key();
 
-        ASSERT_TRUE(pKey);
-
-        const auto& key = *pKey;
-
+        ASSERT_TRUE(key.IsValid());
         EXPECT_EQ(expected.Bytes(), key.PublicKey());
 
         const auto& element2 =
@@ -117,12 +114,9 @@ TEST_F(Test_PaymentCodeAPI, alice)
         const auto expected =
             alice_.Factory().DataFromHex(remote.receive_keys_.at(i));
         const auto& element = account2.BalanceElement(Subchain::Outgoing, i);
-        const auto pKey = element.Key();
+        const auto& key = element.Key();
 
-        ASSERT_TRUE(pKey);
-
-        const auto& key = *pKey;
-
+        ASSERT_TRUE(key.IsValid());
         EXPECT_EQ(expected.Bytes(), key.PublicKey());
 
         const auto& element2 =
@@ -203,12 +197,9 @@ TEST_F(Test_PaymentCodeAPI, bob)
         const auto expected =
             bob_.Factory().DataFromHex(vector.receive_keys_.at(i));
         const auto& element = account1.BalanceElement(Subchain::Incoming, i);
-        const auto pKey = element.Key();
+        const auto& key = element.Key();
 
-        ASSERT_TRUE(pKey);
-
-        const auto& key = *pKey;
-
+        ASSERT_TRUE(key.IsValid());
         EXPECT_EQ(expected.Bytes(), key.PublicKey());
 
         const auto& element2 =
@@ -221,12 +212,9 @@ TEST_F(Test_PaymentCodeAPI, bob)
         const auto expected =
             bob_.Factory().DataFromHex(remote.receive_keys_.at(i));
         const auto& element = account2.BalanceElement(Subchain::Outgoing, i);
-        const auto pKey = element.Key();
+        const auto& key = element.Key();
 
-        ASSERT_TRUE(pKey);
-
-        const auto& key = *pKey;
-
+        ASSERT_TRUE(key.IsValid());
         EXPECT_EQ(expected.Bytes(), key.PublicKey());
 
         const auto& element2 =

@@ -28,9 +28,9 @@
 #include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/blockchain/p2p/Types.hpp"
 #include "opentxs/core/ByteArray.hpp"
-#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Iterator.hpp"
+#include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -87,6 +87,7 @@ class Frame;
 }  // namespace network
 
 class Data;
+class Writer;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -100,7 +101,7 @@ struct Message {
     virtual auto Encode() const -> ByteArray = 0;
     virtual auto header() const noexcept -> const Header& = 0;
     virtual auto payload() const noexcept -> ByteArray = 0;
-    virtual auto payload(AllocateOutput) const noexcept -> bool = 0;
+    virtual auto payload(Writer&&) const noexcept -> bool = 0;
     virtual auto Transmit() const noexcept
         -> std::pair<zmq::Frame, zmq::Frame> = 0;
 

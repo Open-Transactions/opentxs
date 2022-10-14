@@ -8,27 +8,26 @@
 
 #include <cstddef>
 #include <cstring>
-#include <functional>
 #include <iterator>
 #include <random>
 
+#include "opentxs/util/WriteBuffer.hpp"
+#include "opentxs/util/Writer.hpp"
+
 namespace opentxs
 {
-auto random_bytes_non_crypto(AllocateOutput dest, std::size_t bytes) noexcept
-    -> bool
+auto random_bytes_non_crypto(Writer&& dest, std::size_t bytes) noexcept -> bool
 {
-    if (false == bool(dest)) { return false; }
+    auto out = dest.Reserve(bytes);
 
-    auto out = dest(bytes);
-
-    if (false == out.valid(bytes)) { return false; }
+    if (false == out.IsValid(bytes)) { return false; }
 
     static auto seed = std::random_device{};
     auto generator = std::mt19937{seed()};
     using RandType = int;
     using OutType = std::byte;
     auto rand = std::uniform_int_distribution<RandType>{};
-    auto* i = static_cast<OutType*>(out.data());
+    auto* i = out.as<OutType>();
 
     static_assert(sizeof(OutType) <= sizeof(RandType));
 

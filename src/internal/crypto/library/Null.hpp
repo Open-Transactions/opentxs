@@ -9,48 +9,49 @@
 #include "internal/crypto/library/EcdsaProvider.hpp"
 #include "internal/crypto/library/SymmetricProvider.hpp"
 #include "opentxs/crypto/symmetric/Types.hpp"
+#include "opentxs/util/Types.hpp"
+
+// NOLINTBEGIN(modernize-concat-nested-namespaces)
+namespace opentxs
+{
+class Writer;
+}  // namespace opentxs
+// NOLINTEND(modernize-concat-nested-namespaces)
 
 namespace opentxs::crypto::blank
 {
 class AsymmetricProvider : virtual public crypto::AsymmetricProvider
 {
 public:
-    auto RandomKeypair(
-        const AllocateOutput,
-        const AllocateOutput,
-        const AllocateOutput) const noexcept -> bool final
+    auto RandomKeypair(Writer&&, Writer&&, Writer&&) const noexcept
+        -> bool final
+    {
+        return false;
+    }
+    auto RandomKeypair(Writer&&, Writer&&, const Parameters&, Writer&&)
+        const noexcept -> bool final
     {
         return false;
     }
     auto RandomKeypair(
-        const AllocateOutput,
-        const AllocateOutput,
+        Writer&&,
+        Writer&&,
+        const opentxs::crypto::asymmetric::Role,
+        Writer&&) const noexcept -> bool final
+    {
+        return false;
+    }
+    auto RandomKeypair(
+        Writer&&,
+        Writer&&,
+        const opentxs::crypto::asymmetric::Role,
         const Parameters&,
-        const AllocateOutput) const noexcept -> bool final
+        Writer&&) const noexcept -> bool final
     {
         return false;
     }
-    auto RandomKeypair(
-        const AllocateOutput,
-        const AllocateOutput,
-        const opentxs::crypto::key::asymmetric::Role,
-        const AllocateOutput) const noexcept -> bool final
-    {
-        return false;
-    }
-    auto RandomKeypair(
-        const AllocateOutput,
-        const AllocateOutput,
-        const opentxs::crypto::key::asymmetric::Role,
-        const Parameters&,
-        const AllocateOutput) const noexcept -> bool final
-    {
-        return false;
-    }
-    auto SeedToCurveKey(
-        const ReadView,
-        const AllocateOutput,
-        const AllocateOutput) const noexcept -> bool final
+    auto SeedToCurveKey(const ReadView, Writer&&, Writer&&) const noexcept
+        -> bool final
     {
         return false;
     }
@@ -62,11 +63,8 @@ public:
     {
         return false;
     }
-    auto Sign(
-        const ReadView,
-        const ReadView,
-        const crypto::HashType,
-        const AllocateOutput) const -> bool final
+    auto Sign(const ReadView, const ReadView, const crypto::HashType, Writer&&)
+        const -> bool final
     {
         return false;
     }
@@ -110,23 +108,20 @@ class EcdsaProvider final : public crypto::EcdsaProvider,
                             public AsymmetricProvider
 {
 public:
-    auto PubkeyAdd(const ReadView, const ReadView, const AllocateOutput)
-        const noexcept -> bool final
+    auto PubkeyAdd(ReadView, ReadView, Writer&&) const noexcept -> bool final
     {
         return false;
     }
-    auto ScalarAdd(const ReadView, const ReadView, const AllocateOutput)
-        const noexcept -> bool final
+    auto ScalarAdd(ReadView, ReadView, Writer&&) const noexcept -> bool final
     {
         return false;
     }
-    auto ScalarMultiplyBase(const ReadView, const AllocateOutput) const noexcept
+    auto ScalarMultiplyBase(ReadView, Writer&&) const noexcept -> bool final
+    {
+        return false;
+    }
+    auto SignDER(ReadView, ReadView, crypto::HashType, Writer&&) const noexcept
         -> bool final
-    {
-        return false;
-    }
-    auto SignDER(const ReadView, const ReadView, const crypto::HashType, Space&)
-        const noexcept -> bool final
     {
         return false;
     }

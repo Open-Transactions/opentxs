@@ -23,14 +23,16 @@
 #include "internal/core/String.hpp"
 #include "internal/crypto/Envelope.hpp"
 #include "internal/util/LogMacros.hpp"
+#include "internal/util/Pimpl.hpp"
 #include "opentxs/OT.hpp"
 #include "opentxs/api/Context.hpp"
 #include "opentxs/api/crypto/Crypto.hpp"
 #include "opentxs/api/crypto/Encode.hpp"
 #include "opentxs/core/Data.hpp"
+#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
-#include "opentxs/util/Pimpl.hpp"
+#include "opentxs/util/Writer.hpp"
 
 template class opentxs::Pimpl<opentxs::Armored>;
 
@@ -277,8 +279,15 @@ auto Armored::GetData(opentxs::Data& theData, bool bLineBreaks) const -> bool
 
     if (GetLength() < 1) { return true; }
 
-    auto decoded = Context().Crypto().Encode().DataDecode(
-        UnallocatedCString(Get(), GetLength()));
+    auto decoded = UnallocatedCString{};
+    const auto rc =
+        Context().Crypto().Encode().Base64Decode(Bytes(), writer(decoded));
+
+    if (false == rc) {
+        LogError()(OT_PRETTY_CLASS())("Base64Decode failed.").Flush();
+
+        return false;
+    }
 
     theData.Assign(decoded.c_str(), decoded.size());
 
@@ -293,11 +302,12 @@ auto Armored::GetString(opentxs::String& strData, bool bLineBreaks) const
 
     if (GetLength() < 1) { return true; }
 
-    UnallocatedCString str_decoded =
-        Context().Crypto().Encode().DataDecode(Get());
+    auto decoded = UnallocatedCString{};
+    const auto rc =
+        Context().Crypto().Encode().Base64Decode(Bytes(), writer(decoded));
 
-    if (str_decoded.empty()) {
-        LogError()(OT_PRETTY_CLASS())("Base58CheckDecode failed.").Flush();
+    if (false == rc) {
+        LogError()(OT_PRETTY_CLASS())("Base64Decode failed.").Flush();
 
         return false;
     }
@@ -305,7 +315,7 @@ auto Armored::GetString(opentxs::String& strData, bool bLineBreaks) const
     auto str_uncompressed = UnallocatedCString{};
 
     try {
-        str_uncompressed = decompress_string(str_decoded);
+        str_uncompressed = decompress_string(decoded);
     } catch (const std::runtime_error&) {
         LogError()(OT_PRETTY_CLASS())("decompress failed.").Flush();
 
@@ -485,9 +495,11 @@ auto Armored::SetData(const opentxs::Data& theData, bool) -> bool
 
     if (theData.size() < 1) { return true; }
 
-    auto string = Context().Crypto().Encode().DataEncode(theData);
+    auto string = UnallocatedCString{};
+    const auto rc = Context().Crypto().Encode().Base64Encode(
+        theData.Bytes(), writer(string));
 
-    if (string.empty()) {
+    if (false == rc) {
         LogError()(OT_PRETTY_CLASS())("Base64Encode failed.").Flush();
 
         return false;
@@ -554,17 +566,19 @@ auto Armored::SetString(
         return false;
     }
 
-    auto pString = Context().Crypto().Encode().DataEncode(str_compressed);
+    auto string = UnallocatedCString{};
+    const auto rc = Context().Crypto().Encode().Base64Encode(
+        str_compressed, writer(string));
 
-    if (pString.empty()) {
+    if (false == rc) {
         LogError()(OT_PRETTY_CLASS())("Base64Encode failed.").Flush();
 
         return false;
     }
 
-    OT_ASSERT(std::numeric_limits<std::uint32_t>::max() >= pString.size());
+    OT_ASSERT(std::numeric_limits<std::uint32_t>::max() >= string.size());
 
-    Set(pString.data(), static_cast<std::uint32_t>(pString.size()));
+    Set(string.data(), static_cast<std::uint32_t>(string.size()));
 
     return true;
 }

@@ -11,8 +11,8 @@
 
 #include "internal/blockchain/node/Mempool.hpp"
 #include "opentxs/blockchain/Types.hpp"
-#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
+#include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs

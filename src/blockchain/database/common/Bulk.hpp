@@ -13,7 +13,6 @@
 
 #include "internal/util/Mutex.hpp"
 #include "internal/util/storage/file/Mapped.hpp"
-#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)

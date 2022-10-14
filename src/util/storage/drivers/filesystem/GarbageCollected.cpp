@@ -9,6 +9,7 @@
 #include <cstdio>
 #include <memory>
 
+#include "internal/api/crypto/Encode.hpp"
 #include "internal/api/network/Asio.hpp"
 #include "internal/util/Flag.hpp"
 #include "internal/util/LogMacros.hpp"
@@ -80,7 +81,7 @@ auto GarbageCollected::EmptyBucket(const bool bucket) const -> bool
 
         return out;
     }();
-    const auto random = crypto_.Encode().RandomFilename();
+    const auto random = crypto_.Encode().InternalEncode().RandomFilename();
     const auto newName = folder_ / random;
 
     if (0 !=

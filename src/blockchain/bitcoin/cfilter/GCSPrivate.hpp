@@ -3,6 +3,8 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_include "opentxs/util/Writer.hpp"
+
 #pragma once
 
 #include <cstdint>
@@ -14,8 +16,8 @@
 #include "opentxs/blockchain/bitcoin/cfilter/Header.hpp"
 #include "opentxs/util/Allocated.hpp"
 #include "opentxs/util/Allocator.hpp"
-#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
+#include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -27,6 +29,7 @@ class GCS;
 
 class ByteArray;
 class Data;
+class Writer;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -45,15 +48,9 @@ public:
     {
         return std::make_unique<GCSPrivate>(alloc);
     }
-    virtual auto Compressed(AllocateOutput out) const noexcept -> bool
-    {
-        return {};
-    }
+    virtual auto Compressed(Writer&& out) const noexcept -> bool { return {}; }
     virtual auto ElementCount() const noexcept -> std::uint32_t { return {}; }
-    virtual auto Encode(AllocateOutput out) const noexcept -> bool
-    {
-        return {};
-    }
+    virtual auto Encode(Writer&& out) const noexcept -> bool { return {}; }
     auto get_allocator() const noexcept -> allocator_type final
     {
         return alloc_;
@@ -77,7 +74,7 @@ public:
     }
     auto Range() const noexcept -> gcs::Range override { return {}; }
     auto Serialize(proto::GCS&) const noexcept -> bool override { return {}; }
-    virtual auto Serialize(AllocateOutput) const noexcept -> bool { return {}; }
+    virtual auto Serialize(Writer&&) const noexcept -> bool { return {}; }
     virtual auto Test(const Data&, allocator_type) const noexcept -> bool
     {
         return {};

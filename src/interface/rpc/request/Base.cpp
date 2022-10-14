@@ -22,6 +22,8 @@
 #include "opentxs/interface/rpc/request/ListAccounts.hpp"
 #include "opentxs/interface/rpc/request/ListNyms.hpp"
 #include "opentxs/interface/rpc/request/SendPayment.hpp"
+#include "opentxs/util/Bytes.hpp"
+#include "opentxs/util/Writer.hpp"
 #include "util/Container.hpp"
 #include "util/Random.hpp"
 
@@ -241,7 +243,7 @@ auto Base::Imp::serialize(proto::RPCCommand& dest) const noexcept -> bool
     return true;
 }
 
-auto Base::Imp::serialize(AllocateOutput dest) const noexcept -> bool
+auto Base::Imp::serialize(Writer&& dest) const noexcept -> bool
 {
     try {
         const auto proto = [&] {
@@ -254,7 +256,7 @@ auto Base::Imp::serialize(AllocateOutput dest) const noexcept -> bool
             return out;
         }();
 
-        return proto::write(proto, dest);
+        return proto::write(proto, std::move(dest));
     } catch (...) {
 
         return false;
@@ -317,9 +319,9 @@ auto Base::Cookie() const noexcept -> const UnallocatedCString&
     return imp_->cookie_;
 }
 
-auto Base::Serialize(AllocateOutput dest) const noexcept -> bool
+auto Base::Serialize(Writer&& dest) const noexcept -> bool
 {
-    return imp_->serialize(dest);
+    return imp_->serialize(std::move(dest));
 }
 
 auto Base::Serialize(proto::RPCCommand& dest) const noexcept -> bool

@@ -17,16 +17,18 @@
 #include <algorithm>
 #include <array>
 #include <cstring>
-#include <functional>
 #include <iterator>
 #include <stdexcept>
 #include <string_view>
+#include <type_traits>
 #include <utility>
 
 #include "core/paymentcode/Preimage.hpp"
 #include "internal/api/session/FactoryAPI.hpp"
 #include "internal/blockchain/Params.hpp"
-#include "internal/crypto/key/Factory.hpp"
+#include "internal/crypto/asymmetric/Factory.hpp"
+#include "internal/crypto/asymmetric/Key.hpp"
+#include "internal/crypto/asymmetric/key/EllipticCurve.hpp"
 #include "internal/crypto/library/AsymmetricProvider.hpp"
 #include "internal/identity/Types.hpp"
 #include "internal/identity/credential/Credential.hpp"
@@ -35,6 +37,7 @@
 #include "internal/serialization/protobuf/Proto.tpp"
 #include "internal/serialization/protobuf/verify/Credential.hpp"
 #include "internal/serialization/protobuf/verify/PaymentCode.hpp"
+#include "internal/util/Bytes.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "opentxs/api/crypto/Asymmetric.hpp"
@@ -53,14 +56,17 @@
 #include "opentxs/crypto/HashType.hpp"
 #include "opentxs/crypto/SecretStyle.hpp"
 #include "opentxs/crypto/SignatureRole.hpp"
-#include "opentxs/crypto/key/Asymmetric.hpp"
-#include "opentxs/crypto/key/EllipticCurve.hpp"  // IWYU pragma: keep
-#include "opentxs/crypto/key/HD.hpp"             // IWYU pragma: keep
-#include "opentxs/crypto/key/Secp256k1.hpp"
-#include "opentxs/crypto/key/asymmetric/Role.hpp"
+#include "opentxs/crypto/asymmetric/Key.hpp"
+#include "opentxs/crypto/asymmetric/Role.hpp"
+#include "opentxs/crypto/asymmetric/key/EllipticCurve.hpp"
+#include "opentxs/crypto/asymmetric/key/HD.hpp"
+#include "opentxs/crypto/asymmetric/key/Secp256k1.hpp"
 #include "opentxs/identity/credential/Base.hpp"
+#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
+#include "opentxs/util/WriteBuffer.hpp"
+#include "opentxs/util/Writer.hpp"
 
 namespace be = boost::endian;
 
@@ -79,7 +85,7 @@ PaymentCode::PaymentCode(
     const ReadView chaincode,
     const std::uint8_t bitmessageVersion,
     const std::uint8_t bitmessageStream,
-    std::unique_ptr<crypto::key::Secp256k1> key) noexcept
+    crypto::asymmetric::key::Secp256k1 key) noexcept
     : api_(api)
     , version_(version)
     , has_bitmessage_(hasBitmessage)
@@ -90,7 +96,6 @@ PaymentCode::PaymentCode(
     , id_(calculate_id(api, pubkey, chaincode))
     , key_(std::move(key))
 {
-    OT_ASSERT(key_);
     OT_ASSERT(id_.Type() == identifier::Type::nym);
 }
 
@@ -108,9 +113,9 @@ PaymentCode::PaymentCode(const PaymentCode& rhs) noexcept
     OT_ASSERT(id_.Type() == identifier::Type::nym);
 }
 
-PaymentCode::operator const crypto::key::Asymmetric&() const noexcept
+PaymentCode::operator const crypto::asymmetric::Key&() const noexcept
 {
-    return *key_;
+    return key_;
 }
 
 auto PaymentCode::operator==(const proto::PaymentCode& rhs) const noexcept
@@ -129,16 +134,14 @@ auto PaymentCode::AddPrivateKeys(
     const Bip32Index index,
     const opentxs::PasswordPrompt& reason) noexcept -> bool
 {
-    auto pCandidate =
+    auto candidate =
         api_.Crypto().Seed().GetPaymentCode(seed, index, version_, reason);
 
-    if (false == bool(pCandidate)) {
+    if (false == candidate.IsValid()) {
         LogError()(OT_PRETTY_CLASS())("Failed to derive private key").Flush();
 
         return false;
     }
-
-    const auto& candidate = *pCandidate;
 
     if (0 != pubkey_.Bytes().compare(candidate.PublicKey())) {
         LogError()(OT_PRETTY_CLASS())(
@@ -156,11 +159,9 @@ auto PaymentCode::AddPrivateKeys(
         return false;
     }
 
-    key_ = std::move(pCandidate);
+    key_ = std::move(candidate);
 
-    OT_ASSERT(key_);
-
-    return true;
+    return key_.IsValid();
 }
 
 auto PaymentCode::apply_mask(const Mask& mask, paymentcode::BinaryPreimage& pre)
@@ -199,17 +200,30 @@ auto PaymentCode::apply_mask(
 
 auto PaymentCode::asBase58() const noexcept -> UnallocatedCString
 {
-    switch (version_) {
-        case 1:
-        case 2: {
-            return api_.Crypto().Encode().IdentifierEncode(
-                api_.Factory().DataFromBytes(base58_preimage()).Bytes());
-        }
-        case 3:
-        default: {
-            return api_.Crypto().Encode().IdentifierEncode(
-                api_.Factory().DataFromBytes(base58_preimage_v3()).Bytes());
-        }
+    try {
+        auto out = UnallocatedCString{};
+        const auto preimage = [&]() -> ByteArray {
+            switch (version_) {
+                case 1:
+                case 2: {
+                    return static_cast<ReadView>(base58_preimage());
+                }
+                case 3:
+                default: {
+                    return static_cast<ReadView>(base58_preimage_v3());
+                }
+            }
+        }();
+        const auto rc = api_.Crypto().Encode().Base58CheckEncode(
+            preimage.Bytes(), writer(out));
+
+        if (false == rc) { throw std::runtime_error{"base58 encode error"}; }
+
+        return out;
+    } catch (const std::exception& e) {
+        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+
+        return {};
     }
 }
 
@@ -245,9 +259,9 @@ auto PaymentCode::binary_preimage_v3() const noexcept
 
 auto PaymentCode::Blind(
     const opentxs::PaymentCode& recipient,
-    const crypto::key::EllipticCurve& privateKey,
+    const crypto::asymmetric::key::EllipticCurve& privateKey,
     const ReadView outpoint,
-    const AllocateOutput dest,
+    Writer&& dest,
     const opentxs::PasswordPrompt& reason) const noexcept -> bool
 {
     try {
@@ -255,50 +269,36 @@ auto PaymentCode::Blind(
             throw std::runtime_error{"Recipient payment code version too high"};
         }
 
-        const auto pHD = recipient.Key();
+        const auto& hd = recipient.Key();
 
-        if (!pHD) {
+        if (false == hd.IsValid()) {
             throw std::runtime_error{"Failed to obtain remote hd key"};
         }
 
-        const auto& hd = *pHD;
-        const auto pRemotePublic = hd.ChildKey(0, reason);
+        const auto remotePublic = hd.ChildKey(0, reason);
 
-        if (!pRemotePublic) {
+        if (false == remotePublic.IsValid()) {
             throw std::runtime_error{
                 "Failed to derive remote notification key"};
         }
 
-        const auto& remotePublic = *pRemotePublic;
         const auto mask =
             calculate_mask_v1(privateKey, remotePublic, outpoint, reason);
         auto pre = binary_preimage();
         apply_mask(mask, pre);
 
-        if (!dest) { throw std::runtime_error{"Invalid output allocator"}; }
-
-        const auto view = pre.operator ReadView();
-        const auto size = view.size();
-        auto out = dest(size);
-
-        if (false == out.valid(size)) {
-            throw std::runtime_error{"Failed to allocate output space"};
-        }
-
-        std::memcpy(out.data(), view.data(), size);
+        return copy(pre, std::move(dest));
     } catch (const std::exception& e) {
         LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
 
         return false;
     }
-
-    return true;
 }
 
 auto PaymentCode::BlindV3(
     const opentxs::PaymentCode& recipient,
-    const crypto::key::EllipticCurve& privateKey,
-    const AllocateOutput dest,
+    const crypto::asymmetric::key::EllipticCurve& privateKey,
+    Writer&& dest,
     const opentxs::PasswordPrompt& reason) const noexcept -> bool
 {
     try {
@@ -306,50 +306,34 @@ auto PaymentCode::BlindV3(
             throw std::runtime_error{"Recipient payment code version too low"};
         }
 
-        const auto pHD = recipient.Key();
+        const auto& hd = recipient.Key();
 
-        if (!pHD) {
+        if (false == hd.IsValid()) {
             throw std::runtime_error{"Failed to obtain remote hd key"};
         }
 
-        const auto& hd = *pHD;
-        const auto pRemotePublic = hd.ChildKey(0, reason);
+        const auto remotePublic = hd.ChildKey(0, reason);
 
-        if (!pRemotePublic) {
+        if (false == remotePublic.IsValid()) {
             throw std::runtime_error{
                 "Failed to derive remote notification key"};
         }
 
-        if (!dest) { throw std::runtime_error{"Invalid output allocator"}; }
-
-        const auto& remotePublic = *pRemotePublic;
         const auto mask = calculate_mask_v3(
             privateKey, remotePublic, privateKey.PublicKey(), reason);
-        const auto copy_preimage = [&](const ReadView view) {
-            const auto size = view.size();
-            auto out = dest(size);
-
-            if (false == out.valid(size)) {
-                throw std::runtime_error{"Failed to allocate output space"};
-            }
-
-            std::memcpy(out.data(), view.data(), size);
-        };
 
         switch (version_) {
             case 1:
             case 2: {
                 auto pre = binary_preimage();
                 apply_mask(mask, pre);
-                copy_preimage(pre);
+                copy(pre, std::move(dest));
             } break;
             case 3:
             default: {
                 auto pre = binary_preimage_v3();
                 apply_mask(mask, pre);
-                copy_preimage(
-                    {reinterpret_cast<const char*>(pre.key_.data()),
-                     pre.key_.size()});
+                copy(reader(pre.key_), std::move(dest));
             }
         }
     } catch (const std::exception& e) {
@@ -370,9 +354,9 @@ auto PaymentCode::calculate_id(
 
     auto preimage = api.Factory().Data();
     const auto target{pubkey_size_ + chain_code_size_};
-    auto raw = preimage.WriteInto()(target);
+    auto raw = preimage.WriteInto().Reserve(target);
 
-    OT_ASSERT(raw.valid(target));
+    OT_ASSERT(raw.IsValid(target));
 
     auto* it = raw.as<std::byte>();
     std::memcpy(
@@ -385,8 +369,8 @@ auto PaymentCode::calculate_id(
 }
 
 auto PaymentCode::calculate_mask_v1(
-    const crypto::key::EllipticCurve& local,
-    const crypto::key::EllipticCurve& remote,
+    const crypto::asymmetric::key::EllipticCurve& local,
+    const crypto::asymmetric::key::EllipticCurve& remote,
     const ReadView outpoint,
     const opentxs::PasswordPrompt& reason) const noexcept(false) -> Mask
 {
@@ -404,8 +388,8 @@ auto PaymentCode::calculate_mask_v1(
 }
 
 auto PaymentCode::calculate_mask_v3(
-    const crypto::key::EllipticCurve& local,
-    const crypto::key::EllipticCurve& remote,
+    const crypto::asymmetric::key::EllipticCurve& local,
+    const crypto::asymmetric::key::EllipticCurve& remote,
     const ReadView pubkey,
     const opentxs::PasswordPrompt& reason) const noexcept(false) -> Mask
 {
@@ -490,14 +474,12 @@ auto PaymentCode::DecodeNotificationElements(
             }
         }();
 
-        const auto pKey = api_.Crypto().Asymmetric().InstantiateSecp256k1Key(
+        const auto key = api_.Crypto().Asymmetric().InstantiateSecp256k1Key(
             reader(A), reason);
 
-        if (!pKey) {
+        if (false == key.IsValid()) {
             throw std::runtime_error{"Failed to instantiate public key"};
         }
-
-        const auto& key = *pKey;
 
         return UnblindV3(version, reader(blind), key, reason);
     } catch (const std::exception& e) {
@@ -512,29 +494,29 @@ auto PaymentCode::derive_keys(
     const Bip32Index local,
     const Bip32Index remote,
     const opentxs::PasswordPrompt& reason) const noexcept(false)
-    -> std::pair<ECKey, ECKey>
+    -> std::pair<
+        crypto::asymmetric::key::EllipticCurve,
+        crypto::asymmetric::key::EllipticCurve>
 {
-    auto output = std::pair<ECKey, ECKey>{};
+    auto output = std::pair<
+        crypto::asymmetric::key::EllipticCurve,
+        crypto::asymmetric::key::EllipticCurve>{};
     auto& [localPrivate, remotePublic] = output;
 
-    if (key_) {
-        localPrivate = key_->ChildKey(local, reason);
+    if (key_.IsValid()) {
+        localPrivate = key_.ChildKey(local, reason);
 
-        if (!localPrivate) {
+        if (false == localPrivate.IsValid()) {
             throw std::runtime_error("Failed to derive local private key");
         }
     } else {
         throw std::runtime_error("Failed to obtain local hd key");
     }
 
-    if (const auto pKey = other.Key(); pKey) {
-        const auto& key = *pKey;
-
-        OT_ASSERT(0 < key.Chaincode(reason).size());
-
+    if (const auto& key = other.Key(); key.IsValid()) {
         remotePublic = key.ChildKey(remote, reason);
 
-        if (!remotePublic) {
+        if (false == remotePublic.IsValid()) {
             throw std::runtime_error("Failed to derive remote public key");
         }
     } else {
@@ -564,7 +546,7 @@ auto PaymentCode::effective_version(
 
 auto PaymentCode::GenerateNotificationElements(
     const opentxs::PaymentCode& recipient,
-    const crypto::key::EllipticCurve& privateKey,
+    const crypto::asymmetric::key::EllipticCurve& privateKey,
     const opentxs::PasswordPrompt& reason) const noexcept
     -> UnallocatedVector<Space>
 {
@@ -677,13 +659,13 @@ auto PaymentCode::Incoming(
     const Bip32Index index,
     const blockchain::Type chain,
     const opentxs::PasswordPrompt& reason,
-    const std::uint8_t version) const noexcept -> ECKey
+    const std::uint8_t version) const noexcept
+    -> crypto::asymmetric::key::EllipticCurve
 {
     try {
         const auto effective = effective_version(version);
-        const auto [pPrivate, pPublic] = derive_keys(sender, index, 0, reason);
-        const auto& localPrivate = *pPrivate;
-        const auto& remotePublic = *pPublic;
+        const auto [localPrivate, remotePublic] =
+            derive_keys(sender, index, 0, reason);
 
         switch (effective) {
             case 1:
@@ -713,9 +695,12 @@ auto PaymentCode::Incoming(
     }
 }
 
-auto PaymentCode::Key() const noexcept -> HDKey { return key_; }
+auto PaymentCode::Key() const noexcept -> const crypto::asymmetric::key::HD&
+{
+    return key_;
+}
 
-auto PaymentCode::Locator(const AllocateOutput dest, const std::uint8_t version)
+auto PaymentCode::Locator(Writer&& dest, const std::uint8_t version)
     const noexcept -> bool
 {
     try {
@@ -743,19 +728,11 @@ auto PaymentCode::Locator(const AllocateOutput dest, const std::uint8_t version)
 
                     return out;
                 }();
-                constexpr auto size = pre.size();
 
-                if (false == bool(dest)) {
-                    throw std::runtime_error("Invalid output allocator");
+                if (false == copy(reader(pre), std::move(dest))) {
+
+                    throw std::runtime_error("Failed to copy locator");
                 }
-
-                auto out = dest(size);
-
-                if (false == out.valid(size)) {
-                    throw std::runtime_error("Failed to allocate output space");
-                }
-
-                std::memcpy(out.data(), pre.data(), pre.size());
             } break;
             case 3:
             default: {
@@ -773,7 +750,7 @@ auto PaymentCode::Locator(const AllocateOutput dest, const std::uint8_t version)
                     throw std::runtime_error("Failed to hash locator");
                 }
 
-                if (false == copy(reader(hash), dest, 32)) {
+                if (false == copy(reader(hash), std::move(dest), 32)) {
                     throw std::runtime_error("Failed to copy locator");
                 }
             }
@@ -815,18 +792,17 @@ auto PaymentCode::Outgoing(
     const Bip32Index index,
     const blockchain::Type chain,
     const opentxs::PasswordPrompt& reason,
-    const std::uint8_t version) const noexcept -> ECKey
+    const std::uint8_t version) const noexcept
+    -> crypto::asymmetric::key::EllipticCurve
 {
     try {
-        if (false == key_->HasPrivate()) {
+        if (false == key_.HasPrivate()) {
             throw std::runtime_error{"Private key missing"};
         }
 
         const auto effective = effective_version(version, recipient.Version());
-        const auto [pPrivate, pPublic] =
+        const auto [localPrivate, remotePublic] =
             derive_keys(recipient, 0, index, reason);
-        const auto& localPrivate = *pPrivate;
-        const auto& remotePublic = *pPublic;
 
         switch (effective) {
             case 1:
@@ -869,12 +845,12 @@ auto PaymentCode::postprocess(const Secret& in) const noexcept(false) -> Secret
     return output;
 }
 
-auto PaymentCode::Serialize(AllocateOutput destination) const noexcept -> bool
+auto PaymentCode::Serialize(Writer&& destination) const noexcept -> bool
 {
     auto serialized = proto::PaymentCode{};
     if (false == Serialize(serialized)) { return false; }
 
-    return write(serialized, destination);
+    return write(serialized, std::move(destination));
 }
 
 auto PaymentCode::Serialize(Serialized& output) const noexcept -> bool
@@ -891,12 +867,12 @@ auto PaymentCode::Serialize(Serialized& output) const noexcept -> bool
 }
 
 auto PaymentCode::shared_secret_mask_v1(
-    const crypto::key::EllipticCurve& local,
-    const crypto::key::EllipticCurve& remote,
+    const crypto::asymmetric::key::EllipticCurve& local,
+    const crypto::asymmetric::key::EllipticCurve& remote,
     const opentxs::PasswordPrompt& reason) const noexcept(false) -> Secret
 {
     auto output = api_.Factory().Secret(0);
-    auto rc = local.engine().SharedSecret(
+    auto rc = local.Internal().Provider().SharedSecret(
         remote.PublicKey(),
         local.PrivateKey(reason),
         crypto::SecretStyle::X_only,
@@ -910,8 +886,8 @@ auto PaymentCode::shared_secret_mask_v1(
 }
 
 auto PaymentCode::shared_secret_payment_v1(
-    const crypto::key::EllipticCurve& local,
-    const crypto::key::EllipticCurve& remote,
+    const crypto::asymmetric::key::EllipticCurve& local,
+    const crypto::asymmetric::key::EllipticCurve& remote,
     const opentxs::PasswordPrompt& reason) const noexcept(false) -> Secret
 {
     auto secret = shared_secret_mask_v1(local, remote, reason);
@@ -920,8 +896,8 @@ auto PaymentCode::shared_secret_payment_v1(
 }
 
 auto PaymentCode::shared_secret_payment_v3(
-    const crypto::key::EllipticCurve& local,
-    const crypto::key::EllipticCurve& remote,
+    const crypto::asymmetric::key::EllipticCurve& local,
+    const crypto::asymmetric::key::EllipticCurve& remote,
     const blockchain::Type chain,
     const opentxs::PasswordPrompt& reason) const noexcept(false) -> Secret
 {
@@ -959,7 +935,7 @@ auto PaymentCode::Sign(
     }
 
     auto& signature = *serialized.add_signature();
-    const bool output = key_->Sign(
+    const bool output = key_.Internal().Sign(
         [&]() -> UnallocatedCString { return proto::ToString(serialized); },
         crypto::SignatureRole::NymIDSource,
         signature,
@@ -975,18 +951,16 @@ auto PaymentCode::Sign(
     opentxs::Data& output,
     const opentxs::PasswordPrompt& reason) const noexcept -> bool
 {
-    const auto& key = *key_;
-
-    return key.engine().Sign(
+    return key_.Internal().Provider().Sign(
         data.Bytes(),
-        key.PrivateKey(reason),
+        key_.PrivateKey(reason),
         crypto::HashType::Sha256,
         output.WriteInto());
 }
 
 auto PaymentCode::Unblind(
     const ReadView in,
-    const crypto::key::EllipticCurve& remote,
+    const crypto::asymmetric::key::EllipticCurve& remote,
     const ReadView outpoint,
     const opentxs::PasswordPrompt& reason) const noexcept
     -> opentxs::PaymentCode
@@ -996,15 +970,16 @@ auto PaymentCode::Unblind(
             throw std::runtime_error{"Payment code version too high"};
         }
 
-        if (!key_) { throw std::runtime_error{"Missing private key"}; }
+        if (false == key_.IsValid()) {
+            throw std::runtime_error{"Missing private key"};
+        }
 
-        const auto pLocal = key_->ChildKey(0, reason);
+        const auto local = key_.ChildKey(0, reason);
 
-        if (!pLocal) {
+        if (false == local.IsValid()) {
             throw std::runtime_error{"Failed to derive notification key"};
         }
 
-        const auto& local = *pLocal;
         const auto mask = calculate_mask_v1(local, remote, outpoint, reason);
         auto pre = [&] {
             auto out = paymentcode::BinaryPreimage{};
@@ -1029,15 +1004,17 @@ auto PaymentCode::Unblind(
                    pre.bm_stream_,
                    factory::Secp256k1Key(
                        api_,
-                       local.ECDSA(),
+                       local.Internal().asEllipticCurve().ECDSA(),
                        api_.Factory().Secret(0),
                        api_.Factory().SecretFromBytes(pre.xpub_.Chaincode()),
                        api_.Factory().DataFromBytes(pre.xpub_.Key()),
                        proto::HDPath{},
                        Bip32Fingerprint{},
-                       crypto::key::asymmetric::Role::Sign,
-                       crypto::key::EllipticCurve::DefaultVersion,
-                       reason))
+                       crypto::asymmetric::Role::Sign,
+                       crypto::asymmetric::key::EllipticCurve::DefaultVersion(),
+                       reason,
+                       {}  // TODO allocator
+                       ))
             .release();
     } catch (const std::exception& e) {
         LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
@@ -1049,7 +1026,7 @@ auto PaymentCode::Unblind(
 auto PaymentCode::UnblindV3(
     const std::uint8_t version,
     const ReadView in,
-    const crypto::key::EllipticCurve& remote,
+    const crypto::asymmetric::key::EllipticCurve& remote,
     const opentxs::PasswordPrompt& reason) const noexcept
     -> opentxs::PaymentCode
 {
@@ -1058,26 +1035,28 @@ auto PaymentCode::UnblindV3(
             throw std::runtime_error{"Local payment code version too low"};
         }
 
-        if (!key_) { throw std::runtime_error{"Missing private key"}; }
+        if (false == key_.IsValid()) {
+            throw std::runtime_error{"Missing private key"};
+        }
 
-        const auto pLocal = key_->ChildKey(0, reason);
+        const auto local = key_.ChildKey(0, reason);
 
-        if (!pLocal) {
+        if (false == local.IsValid()) {
             throw std::runtime_error{"Failed to derive notification key"};
         }
 
-        const auto& local = *pLocal;
         const auto mask =
             calculate_mask_v3(local, remote, remote.PublicKey(), reason);
+        const auto& ecdsa = local.Internal().asEllipticCurve().ECDSA();
 
         switch (version) {
             case 1:
             case 2: {
-                return unblind_v1(in, mask, local.ECDSA(), reason);
+                return unblind_v1(in, mask, ecdsa, reason);
             }
             case 3:
             default: {
-                return unblind_v3(version, in, mask, local.ECDSA(), reason);
+                return unblind_v3(version, in, mask, ecdsa, reason);
             }
         }
     } catch (const std::exception& e) {
@@ -1123,9 +1102,11 @@ auto PaymentCode::unblind_v1(
                    api_.Factory().DataFromBytes(pre.xpub_.Key()),
                    proto::HDPath{},
                    Bip32Fingerprint{},
-                   crypto::key::asymmetric::Role::Sign,
-                   crypto::key::EllipticCurve::DefaultVersion,
-                   reason))
+                   crypto::asymmetric::Role::Sign,
+                   crypto::asymmetric::key::EllipticCurve::DefaultVersion(),
+                   reason,
+                   {}  // TODO allocator
+                   ))
         .release();
 }
 
@@ -1178,9 +1159,11 @@ auto PaymentCode::unblind_v3(
                    api_.Factory().DataFromBytes(pre.Key()),
                    proto::HDPath{},
                    Bip32Fingerprint{},
-                   crypto::key::asymmetric::Role::Sign,
-                   crypto::key::EllipticCurve::DefaultVersion,
-                   reason))
+                   crypto::asymmetric::Role::Sign,
+                   crypto::asymmetric::key::EllipticCurve::DefaultVersion(),
+                   reason,
+                   {}  // TODO allocator
+                   ))
         .release();
 }
 
@@ -1232,7 +1215,9 @@ auto PaymentCode::Verify(
     signature.CopyFrom(sourceSignature);
     signature.clear_signature();
 
-    return key_->Verify(
+    return key_.Internal().Verify(
         api_.Factory().InternalSession().Data(copy), sourceSignature);
 }
+
+PaymentCode::~PaymentCode() = default;
 }  // namespace opentxs::implementation

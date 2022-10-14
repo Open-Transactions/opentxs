@@ -16,6 +16,7 @@
 #include "internal/network/zeromq/socket/Subscribe.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/Mutex.hpp"
+#include "internal/util/Pimpl.hpp"
 
 namespace ottest
 {

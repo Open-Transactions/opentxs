@@ -13,7 +13,6 @@
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/blockchain/crypto/Element.hpp"
-#include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/util/Log.hpp"
 
 namespace opentxs::blockchain::node::wallet
@@ -100,21 +99,20 @@ ScriptForm::ScriptForm(
     , script_([&]() -> Script {
         switch (primary_) {
             case Type::PayToPubkey: {
-                auto out = api.Factory().BitcoinScriptP2PK(chain, *input.Key());
+                auto out = api.Factory().BitcoinScriptP2PK(chain, input.Key());
                 element_.emplace_back(out->Pubkey().value());
 
                 return out;
             }
             case Type::PayToPubkeyHash: {
-                auto out =
-                    api.Factory().BitcoinScriptP2PKH(chain, *input.Key());
+                auto out = api.Factory().BitcoinScriptP2PKH(chain, input.Key());
                 element_.emplace_back(out->PubkeyHash().value());
 
                 return out;
             }
             case Type::PayToWitnessPubkeyHash: {
                 auto out =
-                    api.Factory().BitcoinScriptP2WPKH(chain, *input.Key());
+                    api.Factory().BitcoinScriptP2WPKH(chain, input.Key());
                 element_.emplace_back(out->PubkeyHash().value());
 
                 return out;
@@ -137,11 +135,10 @@ ScriptForm::ScriptForm(
         const auto redeem = [&] {
             switch (secondary_) {
                 case Type::PayToPubkey: {
-                    return api.Factory().BitcoinScriptP2PK(chain, *input.Key());
+                    return api.Factory().BitcoinScriptP2PK(chain, input.Key());
                 }
                 case Type::PayToPubkeyHash: {
-                    return api.Factory().BitcoinScriptP2PKH(
-                        chain, *input.Key());
+                    return api.Factory().BitcoinScriptP2PKH(chain, input.Key());
                 }
                 case Type::Custom:
                 case Type::Coinbase:

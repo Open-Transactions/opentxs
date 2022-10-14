@@ -10,17 +10,21 @@
 #include <boost/endian/conversion.hpp>
 #include <cstdint>
 #include <cstring>
-#include <functional>
 #include <iterator>
 #include <limits>
 #include <stdexcept>
 
+#include "internal/util/Bytes.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/Size.hpp"
 #include "network/blockchain/bitcoin/CompactSize.hpp"
+#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
+#include "opentxs/util/Types.hpp"
+#include "opentxs/util/WriteBuffer.hpp"
+#include "opentxs/util/Writer.hpp"
 
 namespace be = boost::endian;
 
@@ -180,30 +184,15 @@ void CompactSize::Imp::convert_from_raw(
 }
 
 template <typename SizeType>
-auto CompactSize::Imp::convert_to_raw(AllocateOutput output) const noexcept
-    -> bool
+auto CompactSize::Imp::convert_to_raw(Writer&& output) const noexcept -> bool
 {
     OT_ASSERT(std::numeric_limits<SizeType>::max() >= data_);
 
-    if (false == bool(output)) {
-        LogError()(OT_PRETTY_CLASS())("Invalid output allocator").Flush();
-
-        return false;
-    }
-
-    const auto out = output(sizeof(SizeType));
-
-    if (false == out.valid(sizeof(SizeType))) {
-        LogError()(OT_PRETTY_CLASS())("Failed to allocate output").Flush();
-
-        return false;
-    }
-
     auto value{static_cast<SizeType>(data_)};
     be::native_to_little_inplace(value);
-    std::memcpy(out.data(), &value, sizeof(value));
 
-    return true;
+    return copy(
+        reader(std::addressof(value), sizeof(value)), std::move(output));
 }
 
 auto CompactSize::Decode(const UnallocatedVector<std::byte>& bytes) noexcept
@@ -236,24 +225,18 @@ auto CompactSize::Encode() const noexcept -> UnallocatedVector<std::byte>
     return output;
 }
 
-auto CompactSize::Encode(AllocateOutput destination) const noexcept -> bool
+auto CompactSize::Encode(Writer&& destination) const noexcept -> bool
 {
-    if (false == bool(destination)) {
-        LogError()(OT_PRETTY_CLASS())("Invalid output allocator").Flush();
-
-        return false;
-    }
-
     auto size = Size();
-    const auto out = destination(size);
+    auto out = destination.Reserve(size);
 
-    if (false == out.valid(size)) {
+    if (false == out.IsValid(size)) {
         LogError()(OT_PRETTY_CLASS())("Failed to allocate output").Flush();
 
         return false;
     }
 
-    auto* it = static_cast<std::byte*>(out.data());
+    auto* it = out.as<std::byte>();
     const auto& data = imp_->data_;
 
     if (data <= Imp::threshold_.at(0).first) {

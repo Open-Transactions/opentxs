@@ -12,6 +12,7 @@
 #include "interface/ui/base/Row.hpp"
 #include "internal/interface/ui/AccountTreeItem.hpp"
 #include "internal/interface/ui/UI.hpp"
+#include "internal/util/Pimpl.hpp"
 #include "internal/util/SharedPimpl.hpp"
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/Crypto.hpp"
@@ -23,7 +24,6 @@
 #include "opentxs/core/identifier/Notary.hpp"
 #include "opentxs/core/identifier/UnitDefinition.hpp"
 #include "opentxs/util/Container.hpp"
-#include "opentxs/util/Pimpl.hpp"
 
 class QVariant;
 

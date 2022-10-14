@@ -18,8 +18,15 @@
 #include "opentxs/network/zeromq/message/FrameIterator.hpp"
 #include "opentxs/network/zeromq/message/FrameSection.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
-#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
+#include "opentxs/util/Types.hpp"
+
+// NOLINTBEGIN(modernize-concat-nested-namespaces)
+namespace opentxs
+{
+class Writer;
+}  // namespace opentxs
+// NOLINTEND(modernize-concat-nested-namespaces)
 
 namespace opentxs::network::zeromq
 {
@@ -53,7 +60,7 @@ public:
     auto AddFrame(const ProtobufType& input) noexcept -> Frame& final;
     auto AddFrame(const ReadView bytes) noexcept -> Frame&;
     auto AddFrame(const void* input, const std::size_t size) noexcept -> Frame&;
-    auto AppendBytes() noexcept -> AllocateOutput;
+    auto AppendBytes() noexcept -> Writer;
     auto at(const std::size_t index) -> Frame&;
     auto Body() noexcept -> FrameSection;
     auto EnsureDelimiter() noexcept -> void;

@@ -12,13 +12,13 @@
 #include "internal/blockchain/p2p/bitcoin/message/Message.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/core/ByteArray.hpp"
-#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
 class ByteArray;
+class Writer;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -50,7 +50,7 @@ public:
     {
         return DisplayType(type_);
     }
-    auto Serialize(AllocateOutput out) const noexcept -> bool;
+    auto Serialize(Writer&& out) const noexcept -> bool;
 
     Inventory(const Type type, const Hash& hash) noexcept;
     Inventory(const void* payload, const std::size_t size) noexcept(false);

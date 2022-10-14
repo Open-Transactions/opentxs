@@ -36,6 +36,8 @@
 #include "opentxs/otx/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
+#include "opentxs/util/Types.hpp"
+#include "opentxs/util/Writer.hpp"
 
 namespace opentxs::otx
 {
@@ -141,9 +143,9 @@ auto Reply::Serialize() const noexcept -> ByteArray
     return imp_->Serialize();
 }
 
-auto Reply::Serialize(AllocateOutput destination) const -> bool
+auto Reply::Serialize(Writer&& destination) const -> bool
 {
-    return imp_->Serialize(destination);
+    return imp_->Serialize(std::move(destination));
 }
 
 auto Reply::Serialize(proto::ServerReply& serialized) const -> bool
@@ -345,14 +347,14 @@ auto Reply::Imp::Serialize() const noexcept -> ByteArray
     return api_.Factory().InternalSession().Data(full_version(lock));
 }
 
-auto Reply::Imp::Serialize(AllocateOutput destination) const -> bool
+auto Reply::Imp::Serialize(Writer&& destination) const -> bool
 {
     Lock lock(lock_);
 
     auto serialized = proto::ServerReply{};
     if (false == serialize(lock, serialized)) { return false; }
 
-    return write(serialized, destination);
+    return write(serialized, std::move(destination));
 }
 
 auto Reply::Imp::Serialize(proto::ServerReply& output) const -> bool

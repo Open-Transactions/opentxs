@@ -28,12 +28,12 @@ public:
         const BIP44Chain internal,
         const Bip32Index index,
         const PasswordPrompt& reason) const
-        -> std::unique_ptr<opentxs::crypto::key::HD> = 0;
+        -> opentxs::crypto::asymmetric::key::HD = 0;
     virtual auto AccountKey(
         const proto::HDPath& path,
         const BIP44Chain internal,
         const PasswordPrompt& reason) const
-        -> std::unique_ptr<opentxs::crypto::key::HD> = 0;
+        -> opentxs::crypto::asymmetric::key::HD = 0;
     virtual auto GetOrCreateDefaultSeed(
         UnallocatedCString& seedID,
         opentxs::crypto::SeedStyle& type,

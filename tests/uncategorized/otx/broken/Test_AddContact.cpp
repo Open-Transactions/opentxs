@@ -48,8 +48,7 @@ struct Test_AddContact : public IntegrationFixture {
 
 const bool Test_AddContact::have_hd_{
     ot::api::crypto::HaveHDKeys() &&
-    ot::api::crypto::HaveSupport(
-        ot::crypto::key::asymmetric::Algorithm::Secp256k1)
+    ot::api::crypto::HaveSupport(ot::crypto::asymmetric::Algorithm::Secp256k1)
 
 };
 

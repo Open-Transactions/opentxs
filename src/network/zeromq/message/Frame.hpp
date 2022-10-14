@@ -12,8 +12,8 @@
 #include "internal/network/zeromq/message/Frame.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
-#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
+#include "opentxs/util/Types.hpp"
 
 namespace opentxs::network::zeromq
 {

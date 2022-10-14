@@ -51,8 +51,11 @@
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/identity/wot/claim/Types.hpp"
 #include "opentxs/network/blockchain/bitcoin/CompactSize.hpp"
+#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
+#include "opentxs/util/WriteBuffer.hpp"
+#include "opentxs/util/Writer.hpp"
 
 namespace be = boost::endian;
 
@@ -899,19 +902,14 @@ auto Input::ReplaceScript() noexcept -> bool
     }
 }
 
-auto Input::serialize(const AllocateOutput destination, const bool normalized)
+auto Input::serialize(Writer&& destination, const bool normalized)
     const noexcept -> std::optional<std::size_t>
 {
     try {
-        if (!destination) {
-
-            throw std::runtime_error{"invalid output allocator"};
-        }
-
         const auto size = CalculateSize(normalized);
-        auto output = destination(size);
+        auto output = destination.Reserve(size);
 
-        if (false == output.valid(size)) {
+        if (false == output.IsValid(size)) {
 
             throw std::runtime_error{"failed to allocate output bytes"};
         }
@@ -953,10 +951,10 @@ auto Input::serialize(const AllocateOutput destination, const bool normalized)
     }
 }
 
-auto Input::Serialize(const AllocateOutput destination) const noexcept
+auto Input::Serialize(Writer&& destination) const noexcept
     -> std::optional<std::size_t>
 {
-    return serialize(destination, false);
+    return serialize(std::move(destination), false);
 }
 
 auto Input::Serialize(
@@ -1009,10 +1007,10 @@ auto Input::Serialize(
     return true;
 }
 
-auto Input::SerializeNormalized(const AllocateOutput destination) const noexcept
+auto Input::SerializeNormalized(Writer&& destination) const noexcept
     -> std::optional<std::size_t>
 {
-    return serialize(destination, true);
+    return serialize(std::move(destination), true);
 }
 
 auto Input::SignatureVersion() const noexcept

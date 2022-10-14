@@ -11,9 +11,9 @@
 
 #include "opentxs/Export.hpp"
 #include "opentxs/interface/rpc/Types.hpp"
-#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
+#include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -35,6 +35,8 @@ class ListNyms;
 class SendPayment;
 }  // namespace request
 }  // namespace rpc
+
+class Writer;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -61,7 +63,7 @@ public:
 
     auto AssociatedNyms() const noexcept -> const AssociateNyms&;
     auto Cookie() const noexcept -> const UnallocatedCString&;
-    auto Serialize(AllocateOutput dest) const noexcept -> bool;
+    auto Serialize(Writer&& dest) const noexcept -> bool;
     OPENTXS_NO_EXPORT auto Serialize(proto::RPCCommand& dest) const noexcept
         -> bool;
     auto Session() const noexcept -> SessionIndex;

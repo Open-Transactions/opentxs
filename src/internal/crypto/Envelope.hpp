@@ -5,10 +5,10 @@
 
 #pragma once
 
+#include "internal/util/Pimpl.hpp"
 #include "opentxs/identity/Types.hpp"
-#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
-#include "opentxs/util/Pimpl.hpp"
+#include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -25,6 +25,7 @@ class Envelope;
 
 class Armored;
 class PasswordPrompt;
+class Writer;
 
 using OTEnvelope = Pimpl<crypto::Envelope>;
 }  // namespace opentxs
@@ -42,10 +43,9 @@ public:
         -> bool = 0;
     virtual auto Open(
         const identity::Nym& recipient,
-        AllocateOutput&& plaintext,
+        Writer&& plaintext,
         const PasswordPrompt& reason) const noexcept -> bool = 0;
-    virtual auto Serialize(AllocateOutput destination) const noexcept
-        -> bool = 0;
+    virtual auto Serialize(Writer&& destination) const noexcept -> bool = 0;
     virtual auto Serialize(SerializedType& serialized) const noexcept
         -> bool = 0;
 

@@ -24,6 +24,7 @@ extern "C" {
 #include "internal/util/P0330.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Log.hpp"
+#include "opentxs/util/Writer.hpp"
 
 namespace opentxs
 {
@@ -306,7 +307,7 @@ auto FixedByteArray<N>::Randomize(const std::size_t size) -> bool
 }
 
 template <std::size_t N>
-auto FixedByteArray<N>::WriteInto() noexcept -> AllocateOutput
+auto FixedByteArray<N>::WriteInto() noexcept -> Writer
 {
     return preallocated(data_.size(), data_.data());
 }

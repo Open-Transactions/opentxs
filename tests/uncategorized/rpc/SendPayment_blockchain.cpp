@@ -87,13 +87,13 @@ protected:
 
                     const auto& element = account_.BalanceElement(
                         Subchain::External, index.value_or(0));
-                    const auto key = element.Key();
+                    const auto& key = element.Key();
 
-                    OT_ASSERT(key);
+                    OT_ASSERT(key.IsValid());
 
                     output.emplace_back(
                         baseAmount,
-                        miner_.Factory().BitcoinScriptP2PK(test_chain_, *key),
+                        miner_.Factory().BitcoinScriptP2PK(test_chain_, key),
                         keys);
 
                     return output;

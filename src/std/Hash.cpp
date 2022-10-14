@@ -37,6 +37,8 @@
 #include "opentxs/network/zeromq/message/Frame.hpp"
 #include "opentxs/network/zeromq/message/FrameIterator.hpp"
 #include "opentxs/util/Bytes.hpp"
+#include "opentxs/util/Types.hpp"
+#include "opentxs/util/Writer.hpp"
 #include "util/Sodium.hpp"
 
 namespace std

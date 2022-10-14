@@ -15,7 +15,6 @@
 #include "opentxs/blockchain/BlockchainType.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/core/ByteArray.hpp"
-#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -38,6 +37,7 @@ class Header;
 }  // namespace blockchain
 
 class Data;
+class Writer;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -74,6 +74,6 @@ private:
     const UnallocatedVector<std::size_t> txn_indices_;
 
     using implementation::Message::payload;
-    auto payload(AllocateOutput out) const noexcept -> bool final;
+    auto payload(Writer&& out) const noexcept -> bool final;
 };
 }  // namespace opentxs::blockchain::p2p::bitcoin::message

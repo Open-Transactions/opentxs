@@ -13,19 +13,21 @@ extern "C" {
 #include <algorithm>
 #include <cassert>
 #include <cstring>
-#include <functional>
 #include <string_view>
 
 #include "internal/util/P0330.hpp"
 #include "opentxs/core/ByteArray.hpp"
+#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Log.hpp"
+#include "opentxs/util/WriteBuffer.hpp"
+#include "opentxs/util/Writer.hpp"
 
 namespace opentxs::crypto::sodium
 {
 auto ExpandSeed(
     const ReadView seed,
-    const AllocateOutput privateKey,
-    const AllocateOutput publicKey) noexcept -> bool
+    Writer&& privateKey,
+    Writer&& publicKey) noexcept -> bool
 {
     assert(-1 != ::sodium_init());
 
@@ -40,16 +42,9 @@ auto ExpandSeed(
 
     if (crypto_sign_SEEDBYTES != seed.size()) {
         auto allocator = hashed.WriteInto();
+        auto output = allocator.Reserve(crypto_sign_SEEDBYTES);
 
-        if (false == bool(allocator)) {
-            LogError()(__func__)(": Failed to get hash allocator").Flush();
-
-            return false;
-        }
-
-        auto output = allocator(crypto_sign_SEEDBYTES);
-
-        if (false == output.valid(crypto_sign_SEEDBYTES)) {
+        if (false == output.IsValid(crypto_sign_SEEDBYTES)) {
             LogError()(__func__)(": Failed to allocate space for hashed seed")
                 .Flush();
 
@@ -77,23 +72,17 @@ auto ExpandSeed(
         return false;
     }
 
-    if (false == bool(privateKey) || false == bool(publicKey)) {
-        LogError()(__func__)(": Invalid output allocator").Flush();
+    auto prv = privateKey.Reserve(crypto_sign_SECRETKEYBYTES);
+    auto pub = publicKey.Reserve(crypto_sign_PUBLICKEYBYTES);
 
-        return false;
-    }
-
-    auto prv = privateKey(crypto_sign_SECRETKEYBYTES);
-    auto pub = publicKey(crypto_sign_PUBLICKEYBYTES);
-
-    if (false == prv.valid(crypto_sign_SECRETKEYBYTES)) {
+    if (false == prv.IsValid(crypto_sign_SECRETKEYBYTES)) {
         LogError()(__func__)(": Failed to allocate space for private key")
             .Flush();
 
         return false;
     }
 
-    if (false == pub.valid(crypto_sign_PUBLICKEYBYTES)) {
+    if (false == pub.IsValid(crypto_sign_PUBLICKEYBYTES)) {
         LogError()(__func__)(": Failed to allocate space for public key")
             .Flush();
 
@@ -119,13 +108,13 @@ auto MakeSiphashKey(const ReadView data) noexcept -> SiphashKey
     return out;
 }
 
-auto Randomize(WritableView buffer) noexcept -> bool
+auto Randomize(WriteBuffer buffer) noexcept -> bool
 {
     assert(-1 != ::sodium_init());
 
-    if (false == buffer.valid()) { return false; }
-
-    ::randombytes_buf(buffer.data(), buffer.size());
+    if (0_uz < buffer.size()) {
+        ::randombytes_buf(buffer.data(), buffer.size());
+    }
 
     return true;
 }
@@ -149,8 +138,8 @@ auto Siphash(const SiphashKey& key, const ReadView data) noexcept -> std::size_t
 auto ToCurveKeypair(
     const ReadView edPrivate,
     const ReadView edPublic,
-    const AllocateOutput curvePrivate,
-    const AllocateOutput curvePublic) noexcept -> bool
+    Writer&& curvePrivate,
+    Writer&& curvePublic) noexcept -> bool
 {
     assert(-1 != ::sodium_init());
 
@@ -168,23 +157,17 @@ auto ToCurveKeypair(
         return false;
     }
 
-    if (false == bool(curvePrivate) || false == bool(curvePublic)) {
-        LogError()(__func__)(": Invalid output allocator").Flush();
+    auto prv = curvePrivate.Reserve(crypto_scalarmult_curve25519_BYTES);
+    auto pub = curvePublic.Reserve(crypto_scalarmult_curve25519_BYTES);
 
-        return false;
-    }
-
-    auto prv = curvePrivate(crypto_scalarmult_curve25519_BYTES);
-    auto pub = curvePublic(crypto_scalarmult_curve25519_BYTES);
-
-    if (false == prv.valid(crypto_scalarmult_curve25519_BYTES)) {
+    if (false == prv.IsValid(crypto_scalarmult_curve25519_BYTES)) {
         LogError()(__func__)(": Failed to allocate space for private key")
             .Flush();
 
         return false;
     }
 
-    if (false == pub.valid(crypto_scalarmult_curve25519_BYTES)) {
+    if (false == pub.IsValid(crypto_scalarmult_curve25519_BYTES)) {
         LogError()(__func__)(": Failed to allocate space for public key")
             .Flush();
 

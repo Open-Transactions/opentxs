@@ -39,6 +39,7 @@
 #include "opentxs/blockchain/crypto/HDProtocol.hpp"
 #include "opentxs/blockchain/crypto/SubaccountType.hpp"
 #include "opentxs/blockchain/crypto/Subchain.hpp"
+#include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/blockchain/crypto/Wallet.hpp"
 #include "opentxs/core/Amount.hpp"  // IWYU pragma: keep
 #include "opentxs/core/identifier/Generic.hpp"
@@ -231,7 +232,8 @@ auto HD::Name() const noexcept -> UnallocatedCString
 auto HD::PrivateKey(
     const Subchain type,
     const Bip32Index index,
-    const PasswordPrompt& reason) const noexcept -> ECKey
+    const PasswordPrompt& reason) const noexcept
+    -> opentxs::crypto::asymmetric::key::EllipticCurve
 {
     switch (type) {
         case internal_type_:
@@ -247,32 +249,29 @@ auto HD::PrivateKey(
                 print(external_type_))(" are valid for this account.")
                 .Flush();
 
-            return {};
+            return opentxs::crypto::asymmetric::key::EllipticCurve::Blank();
         }
     }
 
-    if (false == api::crypto::HaveHDKeys()) { return {}; }
+    if (false == api::crypto::HaveHDKeys()) {
+        return opentxs::crypto::asymmetric::key::EllipticCurve::Blank();
+    }
 
     const auto change =
         (internal_type_ == type) ? INTERNAL_CHAIN : EXTERNAL_CHAIN;
-    auto& pKey = (internal_type_ == type) ? cached_internal_ : cached_external_;
+    auto& key = (internal_type_ == type) ? cached_internal_ : cached_external_;
     auto lock = rLock{lock_};
 
-    if (!pKey) {
-        pKey =
-            api_.Crypto().Seed().Internal().AccountKey(path_, change, reason);
+    if (false == key.IsValid()) {
+        key = api_.Crypto().Seed().Internal().AccountKey(path_, change, reason);
 
-        if (!pKey) {
+        if (false == key.IsValid()) {
             LogError()(OT_PRETTY_CLASS())("Failed to derive account key")
                 .Flush();
 
-            return {};
+            return opentxs::crypto::asymmetric::key::EllipticCurve::Blank();
         }
     }
-
-    OT_ASSERT(pKey);
-
-    const auto& key = *pKey;
 
     return key.ChildKey(index, reason);
 }

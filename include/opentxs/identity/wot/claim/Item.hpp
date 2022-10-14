@@ -14,10 +14,10 @@
 
 #include "opentxs/Export.hpp"
 #include "opentxs/identity/wot/claim/Types.hpp"
-#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
 #include "opentxs/util/Time.hpp"
+#include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -36,6 +36,8 @@ namespace proto
 {
 class ContactItem;
 }  // namespace proto
+
+class Writer;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -52,7 +54,7 @@ public:
     auto isLocal() const -> bool;
     auto isPrimary() const -> bool;
     auto Section() const -> const claim::SectionType&;
-    auto Serialize(AllocateOutput destination, const bool withID = false) const
+    auto Serialize(Writer&& destination, const bool withID = false) const
         -> bool;
     OPENTXS_NO_EXPORT auto Serialize(
         proto::ContactItem& out,

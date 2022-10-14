@@ -40,6 +40,7 @@
 #include "opentxs/crypto/symmetric/Algorithm.hpp"
 #include "opentxs/crypto/symmetric/Key.hpp"
 #include "opentxs/util/Log.hpp"
+#include "opentxs/util/Writer.hpp"
 #include "util/Container.hpp"
 
 namespace opentxs::factory

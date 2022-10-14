@@ -14,10 +14,10 @@
 #include "internal/core/String.hpp"
 #include "internal/otx/common/cron/OTCron.hpp"
 #include "internal/util/LogMacros.hpp"
+#include "internal/util/Pimpl.hpp"
 #include "opentxs/api/Settings.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
-#include "opentxs/util/Pimpl.hpp"
 #include "otx/server/ServerSettings.hpp"
 
 #define SERVER_WALLET_FILENAME "notaryServer.xml"

@@ -19,6 +19,7 @@
 #include "core/contract/Signable.hpp"
 #include "identity/credential/Key.hpp"
 #include "internal/api/session/FactoryAPI.hpp"
+#include "internal/crypto/asymmetric/Key.hpp"
 #include "internal/crypto/key/Key.hpp"
 #include "internal/crypto/key/Keypair.hpp"
 #include "internal/identity/Source.hpp"
@@ -33,8 +34,8 @@
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/crypto/Parameters.hpp"
-#include "opentxs/crypto/key/Asymmetric.hpp"
-#include "opentxs/crypto/key/asymmetric/Mode.hpp"
+#include "opentxs/crypto/asymmetric/Key.hpp"
+#include "opentxs/crypto/asymmetric/Mode.hpp"
 #include "opentxs/identity/CredentialRole.hpp"
 #include "opentxs/identity/Source.hpp"
 #include "opentxs/identity/SourceProofType.hpp"
@@ -159,7 +160,8 @@ auto Primary::hasCapability(const NymCapability& capability) const -> bool
 auto Primary::Path(proto::HDPath& output) const -> bool
 {
     try {
-        const auto found = signing_key_->GetPrivateKey().Path(output);
+        const auto found =
+            signing_key_->GetPrivateKey().Internal().Path(output);
 
         if (found) { output.mutable_child()->RemoveLast(); }
 
@@ -173,7 +175,7 @@ auto Primary::Path(proto::HDPath& output) const -> bool
 
 auto Primary::Path() const -> UnallocatedCString
 {
-    return signing_key_->GetPrivateKey().Path();
+    return signing_key_->GetPrivateKey().Internal().Path();
 }
 
 auto Primary::serialize(
@@ -275,7 +277,7 @@ auto Primary::Verify(
     if (!proto::Validate<proto::Credential>(
             credential,
             VERBOSE,
-            opentxs::translate(crypto::key::asymmetric::Mode::Public),
+            opentxs::translate(crypto::asymmetric::Mode::Public),
             opentxs::translate(role),
             false)) {
         LogError()(OT_PRETTY_CLASS())("Invalid credential syntax.").Flush();

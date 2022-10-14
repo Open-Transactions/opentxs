@@ -35,6 +35,7 @@
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
+#include "internal/util/Pimpl.hpp"
 #include "opentxs/api/network/Network.hpp"
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/Contacts.hpp"
@@ -58,8 +59,8 @@
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/PasswordPrompt.hpp"
-#include "opentxs/util/Pimpl.hpp"
 #include "opentxs/util/WorkType.hpp"
+#include "opentxs/util/Writer.hpp"
 
 namespace opentxs::factory
 {
@@ -728,7 +729,7 @@ auto Activity::Thread(
 auto Activity::Thread(
     const identifier::Nym& nymID,
     const identifier::Generic& threadID,
-    AllocateOutput output) const noexcept -> bool
+    Writer&& output) const noexcept -> bool
 {
     auto lock = sLock(shared_lock_);
 
@@ -738,7 +739,7 @@ auto Activity::Thread(
         return false;
     }
 
-    return write(serialized, output);
+    return write(serialized, std::move(output));
 }
 
 auto Activity::thread_preload_thread(

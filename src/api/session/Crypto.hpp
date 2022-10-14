@@ -3,9 +3,9 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-// IWYU pragma: no_include "opentxs/crypto/key/asymmetric/Algorithm.hpp"
-// IWYU pragma: no_include "opentxs/crypto/key/symmetric/Algorithm.hpp"
-// IWYU pragma: no_include "opentxs/crypto/key/symmetric/Source.hpp"
+// IWYU pragma: no_include "opentxs/crypto/asymmetric/Algorithm.hpp"
+// IWYU pragma: no_include "opentxs/crypto/symmetric/Algorithm.hpp"
+// IWYU pragma: no_include "opentxs/crypto/symmetric/Source.hpp"
 
 #pragma once
 
@@ -24,7 +24,7 @@
 #include "opentxs/api/crypto/Crypto.hpp"
 #include "opentxs/api/crypto/Seed.hpp"
 #include "opentxs/crypto/Bip32.hpp"
-#include "opentxs/crypto/key/Types.hpp"
+#include "opentxs/crypto/asymmetric/Types.hpp"
 #include "opentxs/crypto/symmetric/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -88,7 +88,7 @@ public:
     {
         return asymmetric_;
     }
-    auto AsymmetricProvider(opentxs::crypto::key::asymmetric::Algorithm type)
+    auto AsymmetricProvider(opentxs::crypto::asymmetric::Algorithm type)
         const noexcept -> const opentxs::crypto::AsymmetricProvider& final
     {
         return parent_.AsymmetricProvider(type);
@@ -106,7 +106,7 @@ public:
     {
         return parent_.Config();
     }
-    auto EllipticProvider(opentxs::crypto::key::asymmetric::Algorithm type)
+    auto EllipticProvider(opentxs::crypto::asymmetric::Algorithm type)
         const noexcept -> const opentxs::crypto::EcdsaProvider& final
     {
         return parent_.EllipticProvider(type);

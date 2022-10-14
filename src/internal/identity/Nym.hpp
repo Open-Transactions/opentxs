@@ -29,6 +29,8 @@ class HDPath;
 class Nym;
 class Signature;
 }  // namespace proto
+
+class Writer;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -62,9 +64,8 @@ public:
     virtual auto PaymentCodePath(proto::HDPath& output) const -> bool = 0;
     using identity::Nym::Serialize;
     virtual auto Serialize(Serialized& serialized) const -> bool = 0;
-    virtual auto SerializeCredentialIndex(
-        AllocateOutput destination,
-        const Mode mode) const -> bool = 0;
+    virtual auto SerializeCredentialIndex(Writer&& destination, const Mode mode)
+        const -> bool = 0;
     virtual auto SerializeCredentialIndex(
         Serialized& serialized,
         const Mode mode) const -> bool = 0;

@@ -23,7 +23,6 @@
 #include "opentxs/otx/blind/Purse.hpp"
 #include "opentxs/otx/blind/PurseType.hpp"
 #include "opentxs/otx/blind/Token.hpp"
-#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
 #include "opentxs/util/Time.hpp"
@@ -75,6 +74,7 @@ class Purse;
 }  // namespace proto
 
 class PasswordPrompt;
+class Writer;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -106,7 +106,7 @@ public:
         const Mint& mint,
         const PasswordPrompt& reason) -> bool final;
     auto Serialize(proto::Purse& out) const noexcept -> bool final;
-    auto Serialize(AllocateOutput destination) const noexcept -> bool final;
+    auto Serialize(Writer&& destination) const noexcept -> bool final;
     auto size() const noexcept -> std::size_t final { return tokens_.size(); }
     auto State() const -> blind::PurseType final { return state_; }
     auto Type() const -> blind::CashType final { return type_; }

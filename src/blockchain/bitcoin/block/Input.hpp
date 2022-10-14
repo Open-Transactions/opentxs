@@ -48,10 +48,10 @@
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/util/Allocator.hpp"
-#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Numbers.hpp"
+#include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -92,6 +92,7 @@ class BlockchainTransactionOutput;
 }  // namespace proto
 
 class Log;
+class Writer;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -155,9 +156,9 @@ public:
         return previous_;
     }
     auto Print() const noexcept -> UnallocatedCString final;
-    auto Serialize(const AllocateOutput destination) const noexcept
+    auto Serialize(Writer&& destination) const noexcept
         -> std::optional<std::size_t> final;
-    auto SerializeNormalized(const AllocateOutput destination) const noexcept
+    auto SerializeNormalized(Writer&& destination) const noexcept
         -> std::optional<std::size_t> final;
     auto Serialize(
         const api::Session& api,
@@ -334,7 +335,7 @@ private:
         alloc::Default monotonic) const noexcept -> void;
     auto is_bip16() const noexcept;
     auto payload_bytes() const noexcept -> std::size_t;
-    auto serialize(const AllocateOutput destination, const bool normalized)
-        const noexcept -> std::optional<std::size_t>;
+    auto serialize(Writer&& destination, const bool normalized) const noexcept
+        -> std::optional<std::size_t>;
 };
 }  // namespace opentxs::blockchain::bitcoin::block::implementation

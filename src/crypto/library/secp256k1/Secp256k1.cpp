@@ -14,14 +14,15 @@ extern "C" {
 #include <array>
 #include <cstdint>
 #include <cstring>
-#include <functional>
 #include <memory>
 #include <stdexcept>
 #include <string_view>
+#include <utility>
 
 #include "crypto/library/EcdsaProvider.hpp"
 #include "internal/crypto/library/Factory.hpp"
 #include "internal/util/LogMacros.hpp"
+#include "internal/util/P0330.hpp"
 #include "opentxs/api/crypto/Crypto.hpp"
 #include "opentxs/api/crypto/Hash.hpp"
 #include "opentxs/api/crypto/Util.hpp"
@@ -29,8 +30,11 @@ extern "C" {
 #include "opentxs/core/Secret.hpp"
 #include "opentxs/crypto/Parameters.hpp"
 #include "opentxs/crypto/SecretStyle.hpp"
+#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
+#include "opentxs/util/WriteBuffer.hpp"
+#include "opentxs/util/Writer.hpp"
 
 extern "C" {
 auto get_x_value(
@@ -84,17 +88,9 @@ auto Secp256k1::blank_private() noexcept -> ReadView
     return reader(blank);
 }
 
-auto Secp256k1::PubkeyAdd(
-    const ReadView pubkey,
-    const ReadView scalar,
-    const AllocateOutput result) const noexcept -> bool
+auto Secp256k1::PubkeyAdd(ReadView pubkey, ReadView scalar, Writer&& result)
+    const noexcept -> bool
 {
-    if (false == bool(result)) {
-        LogError()(OT_PRETTY_CLASS())("Invalid output allocator").Flush();
-
-        return false;
-    }
-
     if ((0 == pubkey.size()) || (nullptr == pubkey.data())) {
         LogError()(OT_PRETTY_CLASS())("Missing pubkey").Flush();
 
@@ -132,9 +128,9 @@ auto Secp256k1::PubkeyAdd(
         return false;
     }
 
-    auto out = result(PublicKeySize);
+    auto out = result.Reserve(PublicKeySize);
 
-    if (false == out.valid(PublicKeySize)) {
+    if (false == out.IsValid(PublicKeySize)) {
         LogError()(OT_PRETTY_CLASS())("Failed to allocate space for result")
             .Flush();
 
@@ -159,23 +155,17 @@ auto Secp256k1::PubkeyAdd(
 }
 
 auto Secp256k1::RandomKeypair(
-    const AllocateOutput privateKey,
-    const AllocateOutput publicKey,
-    const opentxs::crypto::key::asymmetric::Role,
+    Writer&& privateKey,
+    Writer&& publicKey,
+    const opentxs::crypto::asymmetric::Role,
     const Parameters&,
-    const AllocateOutput) const noexcept -> bool
+    Writer&&) const noexcept -> bool
 {
     if (nullptr == context_) { return false; }
 
-    if (false == bool(privateKey)) {
-        LogError()(OT_PRETTY_CLASS())("Invalid output allocator").Flush();
+    auto output = privateKey.Reserve(PrivateKeySize);
 
-        return false;
-    }
-
-    auto output = privateKey(PrivateKeySize);
-
-    if (false == output.valid(PrivateKeySize)) {
+    if (false == output.IsValid(PrivateKeySize)) {
         LogError()(OT_PRETTY_CLASS())(
             "Failed to allocate space for private key")
             .Flush();
@@ -194,20 +184,12 @@ auto Secp256k1::RandomKeypair(
         OT_ASSERT(3 > ++counter);
     }
 
-    return ScalarMultiplyBase(output, publicKey);
+    return ScalarMultiplyBase(output, std::move(publicKey));
 }
 
-auto Secp256k1::ScalarAdd(
-    const ReadView lhs,
-    const ReadView rhs,
-    const AllocateOutput result) const noexcept -> bool
+auto Secp256k1::ScalarAdd(ReadView lhs, ReadView rhs, Writer&& result)
+    const noexcept -> bool
 {
-    if (false == bool(result)) {
-        LogError()(OT_PRETTY_CLASS())("Invalid output allocator").Flush();
-
-        return false;
-    }
-
     if (PrivateKeySize != lhs.size()) {
         LogError()(OT_PRETTY_CLASS())("Invalid lhs scalar").Flush();
 
@@ -220,9 +202,9 @@ auto Secp256k1::ScalarAdd(
         return false;
     }
 
-    auto key = result(PrivateKeySize);
+    auto key = result.Reserve(PrivateKeySize);
 
-    if (false == key.valid(PrivateKeySize)) {
+    if (false == key.IsValid(PrivateKeySize)) {
         LogError()(OT_PRETTY_CLASS())("Failed to allocate space for result")
             .Flush();
 
@@ -237,16 +219,9 @@ auto Secp256k1::ScalarAdd(
                     reinterpret_cast<const unsigned char*>(rhs.data()));
 }
 
-auto Secp256k1::ScalarMultiplyBase(
-    const ReadView scalar,
-    const AllocateOutput result) const noexcept -> bool
+auto Secp256k1::ScalarMultiplyBase(ReadView scalar, Writer&& result)
+    const noexcept -> bool
 {
-    if (false == bool(result)) {
-        LogError()(OT_PRETTY_CLASS())("Invalid output allocator").Flush();
-
-        return false;
-    }
-
     if (PrivateKeySize != scalar.size()) {
         LogError()(OT_PRETTY_CLASS())("Invalid scalar").Flush();
 
@@ -262,9 +237,9 @@ auto Secp256k1::ScalarMultiplyBase(
 
     if (1 != created) { return false; }
 
-    auto pub = result(PublicKeySize);
+    auto pub = result.Reserve(PublicKeySize);
 
-    if (false == pub.valid(PublicKeySize)) {
+    if (false == pub.IsValid(PublicKeySize)) {
         LogError()(OT_PRETTY_CLASS())("Failed to allocate space for public key")
             .Flush();
 
@@ -305,9 +280,9 @@ auto Secp256k1::SharedSecret(
         return false;
     }
 
-    auto writer = secret.WriteInto(Secret::Mode::Mem)(PrivateKeySize);
+    auto out = secret.WriteInto(Secret::Mode::Mem).Reserve(PrivateKeySize);
 
-    OT_ASSERT(writer.valid(PrivateKeySize));
+    OT_ASSERT(out.IsValid(PrivateKeySize));
 
     const auto function = [&] {
         switch (style) {
@@ -325,7 +300,7 @@ auto Secp256k1::SharedSecret(
 
     return 1 == ::secp256k1_ecdh(
                     context_,
-                    static_cast<unsigned char*>(writer.data()),
+                    out.as<unsigned char>(),
                     &key,
                     reinterpret_cast<const unsigned char*>(prv.data()),
                     function,
@@ -336,7 +311,7 @@ auto Secp256k1::Sign(
     const ReadView plaintext,
     const ReadView priv,
     const crypto::HashType type,
-    const AllocateOutput signature) const -> bool
+    Writer&& signature) const -> bool
 {
     try {
         const auto digest = hash(type, plaintext);
@@ -359,16 +334,10 @@ auto Secp256k1::Sign(
             return false;
         }
 
-        if (false == bool(signature)) {
-            LogError()(OT_PRETTY_CLASS())("Invalid output allocator").Flush();
-
-            return false;
-        }
-
         const auto size = sizeof(secp256k1_ecdsa_signature);
-        auto output = signature(size);
+        auto output = signature.Reserve(size);
 
-        if (false == output.valid(size)) {
+        if (false == output.IsValid(size)) {
             LogError()(OT_PRETTY_CLASS())(
                 "Failed to allocate space for signature")
                 .Flush();
@@ -378,7 +347,7 @@ auto Secp256k1::Sign(
 
         const bool signatureCreated = ::secp256k1_ecdsa_sign(
             context_,
-            output.as<::secp256k1_ecdsa_signature>(),
+            static_cast<::secp256k1_ecdsa_signature*>(output.data()),
             reinterpret_cast<const unsigned char*>(digest.data()),
             reinterpret_cast<const unsigned char*>(priv.data()),
             nullptr,
@@ -401,30 +370,27 @@ auto Secp256k1::Sign(
 }
 
 auto Secp256k1::SignDER(
-    const ReadView plaintext,
-    const ReadView priv,
-    const crypto::HashType type,
-    Space& output) const noexcept -> bool
+    ReadView plaintext,
+    ReadView priv,
+    crypto::HashType type,
+    Writer&& result) const noexcept -> bool
 {
     try {
         const auto digest = hash(type, plaintext);
 
-        if (nullptr == priv.data() || 0 == priv.size()) {
-            LogError()(OT_PRETTY_CLASS())("Missing private key").Flush();
+        if (false == valid(priv)) {
 
-            return false;
+            throw std::runtime_error{"missing private key"};
         }
 
         if (PrivateKeySize != priv.size()) {
-            LogError()(OT_PRETTY_CLASS())("Invalid private key").Flush();
 
-            return false;
+            throw std::runtime_error{"invalid private key"};
         }
 
         if (priv == blank_private()) {
-            LogError()(OT_PRETTY_CLASS())("Blank private key").Flush();
 
-            return false;
+            throw std::runtime_error{"blank private key"};
         }
 
         auto sig = secp256k1_ecdsa_signature{};
@@ -438,14 +404,18 @@ auto Secp256k1::SignDER(
             nullptr);
 
         if (false == signatureCreated) {
-            LogError()(OT_PRETTY_CLASS())(
-                "Call to secp256k1_ecdsa_sign() failed.")
-                .Flush();
 
-            return false;
+            throw std::runtime_error{"secp256k1_ecdsa_sign() failed"};
         }
 
-        output.resize(80);
+        constexpr auto maxBytes = 80_uz;
+        auto output = result.Reserve(maxBytes);
+
+        if (false == output.IsValid(maxBytes)) {
+
+            throw std::runtime_error{"failed to allocate space for signature"};
+        }
+
         auto allocated{output.size()};
         const auto wrote = ::secp256k1_ecdsa_signature_serialize_der(
             context_,
@@ -454,15 +424,16 @@ auto Secp256k1::SignDER(
             &sig);
 
         if (1 != wrote) {
-            LogError()(OT_PRETTY_CLASS())(
-                "Call to secp256k1_ecdsa_signature_serialize_der() "
-                "failed.")
-                .Flush();
 
-            return false;
+            throw std::runtime_error{
+                "secp256k1_ecdsa_signature_serialize_der() failed"};
         }
 
-        output.resize(allocated);
+        if (false == result.Truncate(allocated)) {
+
+            throw std::runtime_error{
+                "failed to truncate output buffer to final size"};
+        }
 
         return true;
     } catch (const std::exception& e) {

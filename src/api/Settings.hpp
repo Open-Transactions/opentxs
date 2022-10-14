@@ -14,10 +14,9 @@
 #include "internal/api/Settings.hpp"
 #include "internal/core/String.hpp"
 #include "internal/util/Flag.hpp"
+#include "internal/util/Pimpl.hpp"
 #include "opentxs/api/Settings.hpp"
-#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
-#include "opentxs/util/Pimpl.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -26,6 +25,8 @@ namespace api
 {
 class Legacy;
 }  // namespace api
+
+class Writer;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -120,7 +121,7 @@ public:
     [[nodiscard]] auto ReadString(
         const std::string_view section,
         const std::string_view key,
-        const AllocateOutput out) const noexcept -> bool final;
+        Writer&& out) const noexcept -> bool final;
     [[nodiscard]] auto Save() const noexcept -> bool final;
     auto SetConfigFilePath(const String& strConfigFilePath) const -> void final;
     auto SetOption_bool(

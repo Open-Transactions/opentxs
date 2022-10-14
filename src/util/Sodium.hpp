@@ -8,7 +8,15 @@
 #include <array>
 #include <cstddef>
 
-#include "opentxs/util/Bytes.hpp"
+#include "opentxs/util/Types.hpp"
+
+// NOLINTBEGIN(modernize-concat-nested-namespaces)
+namespace opentxs
+{
+class WriteBuffer;
+class Writer;
+}  // namespace opentxs
+// NOLINTEND(modernize-concat-nested-namespaces)
 
 namespace opentxs::crypto::sodium
 {
@@ -16,15 +24,15 @@ using SiphashKey = std::array<unsigned char, 16>;
 
 auto ExpandSeed(
     const ReadView seed,
-    const AllocateOutput privateKey,
-    const AllocateOutput publicKey) noexcept -> bool;
+    Writer&& privateKey,
+    Writer&& publicKey) noexcept -> bool;
 auto MakeSiphashKey(const ReadView data) noexcept -> SiphashKey;
-auto Randomize(WritableView buffer) noexcept -> bool;
+auto Randomize(WriteBuffer buffer) noexcept -> bool;
 auto Siphash(const SiphashKey& key, const ReadView data) noexcept
     -> std::size_t;
 auto ToCurveKeypair(
     const ReadView edPrivate,
     const ReadView edPublic,
-    const AllocateOutput curvePrivate,
-    const AllocateOutput curvePublic) noexcept -> bool;
+    Writer&& curvePrivate,
+    Writer&& curvePublic) noexcept -> bool;
 }  // namespace opentxs::crypto::sodium

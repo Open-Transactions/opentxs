@@ -8,7 +8,7 @@
 #include <functional>
 
 #include "internal/network/zeromq/ListenCallback.hpp"
-#include "opentxs/util/Pimpl.hpp"
+#include "internal/util/Pimpl.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs

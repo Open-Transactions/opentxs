@@ -8,7 +8,6 @@
 
 #include <cstdint>
 #include <cstring>
-#include <functional>
 #include <iterator>
 #include <stdexcept>
 #include <utility>
@@ -22,6 +21,8 @@
 #include "opentxs/core/Data.hpp"
 #include "opentxs/network/blockchain/bitcoin/CompactSize.hpp"
 #include "opentxs/util/Log.hpp"
+#include "opentxs/util/WriteBuffer.hpp"
+#include "opentxs/util/Writer.hpp"
 
 namespace opentxs::factory
 {
@@ -223,11 +224,9 @@ Merkleblock::Raw::Raw() noexcept
 {
 }
 
-auto Merkleblock::payload(AllocateOutput out) const noexcept -> bool
+auto Merkleblock::payload(Writer&& out) const noexcept -> bool
 {
     try {
-        if (!out) { throw std::runtime_error{"invalid output allocator"}; }
-
         static constexpr auto fixed = sizeof(Raw);
         const auto hashes = hashes_.size();
         const auto flags = flags_.size();
@@ -235,9 +234,9 @@ auto Merkleblock::payload(AllocateOutput out) const noexcept -> bool
         const auto cs2 = CompactSize(flags).Encode();
         const auto bytes = fixed + cs1.size() + (hashes * standard_hash_size_) +
                            cs2.size() + flags;
-        auto output = out(bytes);
+        auto output = out.Reserve(bytes);
 
-        if (false == output.valid(bytes)) {
+        if (false == output.IsValid(bytes)) {
             throw std::runtime_error{"failed to allocate output space"};
         }
 

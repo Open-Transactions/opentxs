@@ -24,6 +24,7 @@
 #include "opentxs/interface/rpc/response/ListAccounts.hpp"
 #include "opentxs/interface/rpc/response/ListNyms.hpp"
 #include "opentxs/interface/rpc/response/SendPayment.hpp"
+#include "opentxs/util/Writer.hpp"
 
 namespace opentxs::rpc::response
 {
@@ -201,7 +202,7 @@ auto Base::Imp::serialize(proto::RPCResponse& dest) const noexcept -> bool
     return true;
 }
 
-auto Base::Imp::serialize(AllocateOutput dest) const noexcept -> bool
+auto Base::Imp::serialize(Writer&& dest) const noexcept -> bool
 {
     try {
         const auto proto = [&] {
@@ -214,7 +215,7 @@ auto Base::Imp::serialize(AllocateOutput dest) const noexcept -> bool
             return out;
         }();
 
-        return proto::write(proto, dest);
+        return proto::write(proto, std::move(dest));
     } catch (...) {
 
         return false;
@@ -286,9 +287,9 @@ auto Base::ResponseCodes() const noexcept -> const Responses&
     return imp_->responses_;
 }
 
-auto Base::Serialize(AllocateOutput dest) const noexcept -> bool
+auto Base::Serialize(Writer&& dest) const noexcept -> bool
 {
-    return imp_->serialize(dest);
+    return imp_->serialize(std::move(dest));
 }
 
 auto Base::Serialize(proto::RPCResponse& dest) const noexcept -> bool

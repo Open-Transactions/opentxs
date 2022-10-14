@@ -6,7 +6,6 @@
 #include <gtest/gtest.h>
 #include <opentxs/opentxs.hpp>
 #include <cstdint>
-#include <memory>
 #include <string_view>
 
 #include "internal/api/Crypto.hpp"
@@ -23,8 +22,8 @@ namespace ottest
 class Test_Signatures : public ::testing::Test
 {
 public:
-    using Role = ot::crypto::key::asymmetric::Role;
-    using Type = ot::crypto::key::asymmetric::Algorithm;
+    using Role = ot::crypto::asymmetric::Role;
+    using Type = ot::crypto::asymmetric::Algorithm;
 
     static const bool have_hd_;
     static const bool have_rsa_;
@@ -47,14 +46,14 @@ public:
     const ot::ByteArray plaintext_2_{
         plaintext_string_2_.data(),
         plaintext_string_2_.size()};
-    ot::OTAsymmetricKey ed_;
-    ot::OTAsymmetricKey ed_hd_;
-    ot::OTAsymmetricKey ed_2_;
-    ot::OTAsymmetricKey secp_;
-    ot::OTAsymmetricKey secp_hd_;
-    ot::OTAsymmetricKey secp_2_;
-    ot::OTAsymmetricKey rsa_sign_1_;
-    ot::OTAsymmetricKey rsa_sign_2_;
+    ot::crypto::asymmetric::Key ed_;
+    ot::crypto::asymmetric::Key ed_hd_;
+    ot::crypto::asymmetric::Key ed_2_;
+    ot::crypto::asymmetric::Key secp_;
+    ot::crypto::asymmetric::Key secp_hd_;
+    ot::crypto::asymmetric::Key secp_2_;
+    ot::crypto::asymmetric::Key rsa_sign_1_;
+    ot::crypto::asymmetric::Key rsa_sign_2_;
 
     [[maybe_unused]] Test_Signatures()
         : api_(dynamic_cast<const ot::api::session::Client&>(
@@ -120,31 +119,25 @@ public:
         const ot::api::session::Client& api,
         const ot::UnallocatedCString& fingerprint,
         const ot::crypto::EcdsaCurve& curve,
-        const std::uint32_t index = 0) -> ot::OTAsymmetricKey
+        const std::uint32_t index = 0) -> ot::crypto::asymmetric::Key
     {
         auto reason = api.Factory().PasswordPrompt(__func__);
         ot::UnallocatedCString id{fingerprint};
 
-        return ot::OTAsymmetricKey{
-            api.Crypto()
-                .Seed()
-                .GetHDKey(
-                    id,
-                    curve,
-                    {ot::HDIndex{
-                         ot::Bip43Purpose::NYM, ot::Bip32Child::HARDENED},
-                     ot::HDIndex{0, ot::Bip32Child::HARDENED},
-                     ot::HDIndex{0, ot::Bip32Child::HARDENED},
-                     ot::HDIndex{index, ot::Bip32Child::HARDENED},
-                     ot::HDIndex{
-                         ot::Bip32Child::SIGN_KEY, ot::Bip32Child::HARDENED}},
-                    reason)
-                .release()};
+        return api.Crypto().Seed().GetHDKey(
+            id,
+            curve,
+            {ot::HDIndex{ot::Bip43Purpose::NYM, ot::Bip32Child::HARDENED},
+             ot::HDIndex{0, ot::Bip32Child::HARDENED},
+             ot::HDIndex{0, ot::Bip32Child::HARDENED},
+             ot::HDIndex{index, ot::Bip32Child::HARDENED},
+             ot::HDIndex{ot::Bip32Child::SIGN_KEY, ot::Bip32Child::HARDENED}},
+            reason);
     }
     [[maybe_unused]] static auto get_key(
         const ot::api::session::Client& api,
         const ot::crypto::EcdsaCurve curve,
-        const Role role) -> ot::OTAsymmetricKey
+        const Role role) -> ot::crypto::asymmetric::Key
     {
         const auto reason = api.Factory().PasswordPrompt(__func__);
         const auto params = [&] {
@@ -162,13 +155,13 @@ public:
             }
         }();
 
-        return api.Factory().AsymmetricKey(params, reason, role);
+        return api.Factory().AsymmetricKey(role, params, reason);
     }
 
     [[maybe_unused]] auto test_dh(
         const ot::crypto::AsymmetricProvider& lib,
-        const ot::crypto::key::Asymmetric& keyOne,
-        const ot::crypto::key::Asymmetric& keyTwo,
+        const ot::crypto::asymmetric::Key& keyOne,
+        const ot::crypto::asymmetric::Key& keyTwo,
         const ot::Data& expected) -> bool
     {
         constexpr auto style = ot::crypto::SecretStyle::Default;
@@ -201,7 +194,7 @@ public:
     [[maybe_unused]] auto test_signature(
         const ot::Data& plaintext,
         const ot::crypto::AsymmetricProvider& lib,
-        const ot::crypto::key::Asymmetric& key,
+        const ot::crypto::asymmetric::Key& key,
         const ot::crypto::HashType hash) -> bool
     {
         auto reason = api_.Factory().PasswordPrompt(__func__);
@@ -226,7 +219,7 @@ public:
 
     [[maybe_unused]] auto bad_signature(
         const ot::crypto::AsymmetricProvider& lib,
-        const ot::crypto::key::Asymmetric& key,
+        const ot::crypto::asymmetric::Key& key,
         const ot::crypto::HashType hash) -> bool
     {
         auto reason = api_.Factory().PasswordPrompt(__func__);
@@ -261,12 +254,12 @@ public:
 };
 
 const bool Test_Signatures::have_hd_{ot::api::crypto::HaveHDKeys()};
-const bool Test_Signatures::have_rsa_{ot::api::crypto::HaveSupport(
-    ot::crypto::key::asymmetric::Algorithm::Legacy)};
-const bool Test_Signatures::have_secp256k1_{ot::api::crypto::HaveSupport(
-    ot::crypto::key::asymmetric::Algorithm::Secp256k1)};
-const bool Test_Signatures::have_ed25519_{ot::api::crypto::HaveSupport(
-    ot::crypto::key::asymmetric::Algorithm::ED25519)};
+const bool Test_Signatures::have_rsa_{
+    ot::api::crypto::HaveSupport(ot::crypto::asymmetric::Algorithm::Legacy)};
+const bool Test_Signatures::have_secp256k1_{
+    ot::api::crypto::HaveSupport(ot::crypto::asymmetric::Algorithm::Secp256k1)};
+const bool Test_Signatures::have_ed25519_{
+    ot::api::crypto::HaveSupport(ot::crypto::asymmetric::Algorithm::ED25519)};
 
 TEST_F(Test_Signatures, RSA_unsupported_hash)
 {

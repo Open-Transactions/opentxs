@@ -8,7 +8,7 @@
 #include <cstdint>
 
 #include "internal/core/String.hpp"
-#include "opentxs/util/Pimpl.hpp"
+#include "internal/util/Pimpl.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace irr

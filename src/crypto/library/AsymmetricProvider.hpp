@@ -3,7 +3,7 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-// IWYU pragma: no_include "opentxs/crypto/key/asymmetric/Role.hpp"
+// IWYU pragma: no_include "opentxs/crypto/asymmetric/Role.hpp"
 // IWYU pragma: no_include "opentxs/crypto/HashType.hpp"
 
 #pragma once
@@ -13,7 +13,7 @@
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "opentxs/crypto/Parameters.hpp"
 #include "opentxs/crypto/Types.hpp"
-#include "opentxs/util/Bytes.hpp"
+#include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -23,17 +23,10 @@ namespace api
 class Session;
 }  // namespace api
 
-namespace crypto
-{
-namespace key
-{
-class Asymmetric;
-}  // namespace key
-}  // namespace crypto
-
 class PasswordPrompt;
 class Signature;
 class String;
+class Writer;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -43,24 +36,22 @@ class AsymmetricProvider : virtual public crypto::AsymmetricProvider
 {
 public:
     using crypto::AsymmetricProvider::RandomKeypair;
+    auto RandomKeypair(Writer&& privateKey, Writer&& publicKey, Writer&& params)
+        const noexcept -> bool final;
     auto RandomKeypair(
-        const AllocateOutput privateKey,
-        const AllocateOutput publicKey,
-        const AllocateOutput params) const noexcept -> bool final;
+        Writer&& privateKey,
+        Writer&& publicKey,
+        const opentxs::crypto::asymmetric::Role role,
+        Writer&& params) const noexcept -> bool final;
     auto RandomKeypair(
-        const AllocateOutput privateKey,
-        const AllocateOutput publicKey,
-        const opentxs::crypto::key::asymmetric::Role role,
-        const AllocateOutput params) const noexcept -> bool final;
-    auto RandomKeypair(
-        const AllocateOutput privateKey,
-        const AllocateOutput publicKey,
+        Writer&& privateKey,
+        Writer&& publicKey,
         const Parameters& options,
-        const AllocateOutput params) const noexcept -> bool final;
+        Writer&& params) const noexcept -> bool final;
     auto SeedToCurveKey(
         const ReadView seed,
-        const AllocateOutput privateKey,
-        const AllocateOutput publicKey) const noexcept -> bool final;
+        Writer&& privateKey,
+        Writer&& publicKey) const noexcept -> bool final;
     auto SignContract(
         const api::Session& api,
         const String& contract,

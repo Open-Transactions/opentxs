@@ -8,7 +8,6 @@
 
 #include <cstddef>
 #include <cstring>
-#include <functional>
 #include <iterator>
 #include <stdexcept>
 #include <utility>
@@ -21,6 +20,8 @@
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
+#include "opentxs/util/WriteBuffer.hpp"
+#include "opentxs/util/Writer.hpp"
 
 namespace opentxs::factory
 {
@@ -81,17 +82,15 @@ Filteradd::Filteradd(
 {
 }
 
-auto Filteradd::payload(AllocateOutput out) const noexcept -> bool
+auto Filteradd::payload(Writer&& out) const noexcept -> bool
 {
     try {
-        if (!out) { throw std::runtime_error{"invalid output allocator"}; }
-
         const auto element = element_.size();
         const auto cs = CompactSize(element).Encode();
         const auto bytes = cs.size() + element;
-        auto output = out(bytes);
+        auto output = out.Reserve(bytes);
 
-        if (false == output.valid(bytes)) {
+        if (false == output.IsValid(bytes)) {
             throw std::runtime_error{"failed to allocate output space"};
         }
 

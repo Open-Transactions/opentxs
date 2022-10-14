@@ -7,7 +7,7 @@
 // IWYU pragma: no_include "opentxs/crypto/ParameterType.hpp"
 // IWYU pragma: no_include "opentxs/crypto/SeedStrength.hpp"
 // IWYU pragma: no_include "opentxs/crypto/SeedStyle.hpp"
-// IWYU pragma: no_include "opentxs/crypto/key/asymmetric/Algorithm.hpp"
+// IWYU pragma: no_include "opentxs/crypto/asymmetric/Algorithm.hpp"
 // IWYU pragma: no_include "opentxs/identity/CredentialType.hpp"
 // IWYU pragma: no_include "opentxs/identity/SourceProofType.hpp"
 // IWYU pragma: no_include "opentxs/identity/SourceType.hpp"
@@ -21,10 +21,10 @@
 
 #include "opentxs/Export.hpp"
 #include "opentxs/crypto/Types.hpp"
-#include "opentxs/crypto/key/Types.hpp"
+#include "opentxs/crypto/asymmetric/Types.hpp"
 #include "opentxs/identity/Types.hpp"
-#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
+#include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -63,7 +63,7 @@ public:
     static auto DefaultSource() noexcept -> identity::SourceType;
     static auto DefaultType() noexcept -> ParameterType;
 
-    auto Algorithm() const noexcept -> key::asymmetric::Algorithm;
+    auto Algorithm() const noexcept -> asymmetric::Algorithm;
     auto ChangeType(const ParameterType type) const noexcept -> Parameters;
     auto credentialType() const noexcept -> identity::CredentialType;
     auto CredIndex() const noexcept -> Bip32Index;
@@ -107,7 +107,7 @@ public:
         const identity::SourceType source = DefaultSource(),
         const std::uint8_t pcVersion = 0) noexcept;
     Parameters(
-        key::asymmetric::Algorithm key,
+        asymmetric::Algorithm key,
         identity::CredentialType credential = DefaultCredential(),
         const identity::SourceType source = DefaultSource(),
         const std::uint8_t pcVersion = 0) noexcept;

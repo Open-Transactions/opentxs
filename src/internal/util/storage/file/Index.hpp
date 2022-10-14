@@ -10,7 +10,14 @@
 
 #include "internal/util/P0330.hpp"
 #include "opentxs/core/FixedByteArray.hpp"
-#include "opentxs/util/Bytes.hpp"
+#include "opentxs/util/Types.hpp"
+
+// NOLINTBEGIN(modernize-concat-nested-namespaces)
+namespace opentxs
+{
+class Writer;
+}  // namespace opentxs
+// NOLINTEND(modernize-concat-nested-namespaces)
 
 namespace opentxs::storage::file
 {
@@ -33,7 +40,7 @@ public:
     auto ItemSize() const noexcept -> std::size_t;
     auto MemoryPosition() const noexcept -> std::size_t;
     auto Serialize() const noexcept -> FixedByteArray<index_bytes_>;
-    auto Serialize(AllocateOutput destination) const noexcept -> bool;
+    auto Serialize(Writer&& destination) const noexcept -> bool;
 
     auto Deserialize(ReadView bytes) noexcept(false) -> void;
     auto SetItemSize(std::size_t size) noexcept -> void;

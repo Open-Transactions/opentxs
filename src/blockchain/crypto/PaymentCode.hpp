@@ -3,6 +3,9 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_include "opentxs/crypto/asymmetric/key/EllipticCurve.hpp"
+// IWYU pragma: no_include "opentxs/crypto/asymmetric/key/HD.hpp"
+
 #pragma once
 
 #include <Bip47Channel.pb.h>
@@ -66,6 +69,18 @@ class PaymentCode;
 }  // namespace crypto
 }  // namespace blockchain
 
+namespace crypto
+{
+namespace asymmetric
+{
+namespace key
+{
+class EllipticCurve;
+class HD;
+}  // namespace key
+}  // namespace asymmetric
+}  // namespace crypto
+
 namespace proto
 {
 class Bip47Channel;
@@ -103,7 +118,8 @@ public:
     auto PrivateKey(
         const Subchain type,
         const Bip32Index index,
-        const PasswordPrompt& reason) const noexcept -> ECKey final;
+        const PasswordPrompt& reason) const noexcept
+        -> opentxs::crypto::asymmetric::key::EllipticCurve final;
     using Deterministic::Reserve;
     auto Reserve(
         const Subchain type,
@@ -113,10 +129,7 @@ public:
         const std::string_view label,
         const Time time) const noexcept -> Batch final;
     auto RootNode(const PasswordPrompt& reason) const noexcept
-        -> blockchain::crypto::HDKey final
-    {
-        return local_.get().Key();
-    }
+        -> const opentxs::crypto::asymmetric::key::HD& final;
 
     PaymentCode(
         const api::Session& api,
@@ -140,7 +153,7 @@ public:
     auto operator=(const PaymentCode&) -> PaymentCode& = delete;
     auto operator=(PaymentCode&&) -> PaymentCode& = delete;
 
-    ~PaymentCode() final = default;
+    ~PaymentCode() final;
 
 private:
     static constexpr auto internal_type_{Subchain::Outgoing};

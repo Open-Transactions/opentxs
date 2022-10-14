@@ -23,6 +23,7 @@
 #include "opentxs/identity/wot/claim/Item.hpp"
 #include "opentxs/identity/wot/claim/SectionType.hpp"
 #include "opentxs/util/Log.hpp"
+#include "opentxs/util/Writer.hpp"
 
 namespace opentxs::identity::wot::claim
 {
@@ -354,8 +355,7 @@ auto Section::HaveClaim(const identifier::Generic& item) const -> bool
     return false;
 }
 
-auto Section::Serialize(AllocateOutput destination, const bool withIDs) const
-    -> bool
+auto Section::Serialize(Writer&& destination, const bool withIDs) const -> bool
 {
     proto::ContactData data;
     if (false == SerializeTo(data, withIDs) || data.section_size() != 1) {
@@ -366,7 +366,7 @@ auto Section::Serialize(AllocateOutput destination, const bool withIDs) const
 
     auto section = data.section(0);
 
-    write(section, destination);
+    write(section, std::move(destination));
 
     return true;
 }

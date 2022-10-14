@@ -9,7 +9,6 @@
 #include <filesystem>
 #include <string_view>
 
-#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/storage/Driver.hpp"
 #include "util/storage/drivers/filesystem/Common.hpp"

@@ -12,10 +12,10 @@
 #include "internal/api/Settings.hpp"
 #include "internal/core/String.hpp"
 #include "internal/util/LogMacros.hpp"
+#include "internal/util/Pimpl.hpp"
 #include "opentxs/api/Settings.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Options.hpp"
-#include "opentxs/util/Pimpl.hpp"
 
 namespace C = std::chrono;
 

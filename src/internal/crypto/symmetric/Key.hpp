@@ -6,7 +6,7 @@
 #pragma once
 
 #include "opentxs/crypto/symmetric/Types.hpp"
-#include "opentxs/util/Bytes.hpp"
+#include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -29,6 +29,7 @@ class SymmetricKey;
 
 class PasswordPrompt;
 class Secret;
+class Writer;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -40,7 +41,7 @@ public:
     virtual auto API() const noexcept -> const api::Session& = 0;
     [[nodiscard]] virtual auto Decrypt(
         const proto::Ciphertext& ciphertext,
-        AllocateOutput&& plaintext,
+        Writer&& plaintext,
         const PasswordPrompt& reason) const noexcept -> bool = 0;
     [[nodiscard]] virtual auto Encrypt(
         ReadView plaintext,

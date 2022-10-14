@@ -16,6 +16,7 @@
 #include "internal/otx/common/NumList.hpp"
 #include "internal/otx/consensus/Client.hpp"
 #include "internal/util/LogMacros.hpp"
+#include "internal/util/Pimpl.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Notary.hpp"
@@ -25,7 +26,6 @@
 #include "opentxs/identity/Nym.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
-#include "opentxs/util/Pimpl.hpp"
 #include "otx/server/Server.hpp"
 #include "otx/server/UserCommandProcessor.hpp"
 
