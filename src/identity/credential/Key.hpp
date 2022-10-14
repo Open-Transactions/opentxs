@@ -11,6 +11,7 @@
 #include <optional>
 
 #include "identity/credential/Base.hpp"
+#include "internal/crypto/key/Keypair.hpp"
 #include "internal/identity/Types.hpp"
 #include "internal/identity/credential/Credential.hpp"
 #include "internal/identity/credential/Types.hpp"
@@ -21,7 +22,6 @@
 #include "opentxs/crypto/HashType.hpp"
 #include "opentxs/crypto/SignatureRole.hpp"
 #include "opentxs/crypto/Types.hpp"
-#include "opentxs/crypto/key/Keypair.hpp"
 #include "opentxs/crypto/key/asymmetric/Algorithm.hpp"
 #include "opentxs/crypto/key/asymmetric/Role.hpp"
 #include "opentxs/identity/CredentialRole.hpp"
@@ -72,6 +72,7 @@ class Key : virtual public credential::internal::Key,
             public credential::implementation::Base
 {
 public:
+    auto asKey() const noexcept -> const internal::Key& final { return *this; }
     auto GetKeypair(const opentxs::crypto::key::asymmetric::Role role) const
         -> const crypto::key::Keypair& final
     {
@@ -103,6 +104,7 @@ public:
         Secret& privateKey,
         const PasswordPrompt& reason) const -> bool final;
 
+    auto asKey() noexcept -> internal::Key& final { return *this; }
     auto SelfSign(
         const PasswordPrompt& reason,
         const std::optional<Secret> exportPassword = {},

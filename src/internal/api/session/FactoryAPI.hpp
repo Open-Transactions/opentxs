@@ -27,10 +27,10 @@
 #include "internal/core/contract/peer/PeerRequest.hpp"
 #include "internal/core/contract/peer/StoreSecret.hpp"
 #include "internal/crypto/Envelope.hpp"
+#include "internal/crypto/key/Keypair.hpp"
 #include "internal/otx/Types.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/core/contract/peer/Types.hpp"
-#include "opentxs/crypto/key/Keypair.hpp"
 #include "opentxs/identity/wot/claim/Types.hpp"
 #include "opentxs/util/Allocator.hpp"
 

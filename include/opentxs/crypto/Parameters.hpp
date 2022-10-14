@@ -21,7 +21,6 @@
 
 #include "opentxs/Export.hpp"
 #include "opentxs/crypto/Types.hpp"
-#include "opentxs/crypto/key/Keypair.hpp"
 #include "opentxs/crypto/key/Types.hpp"
 #include "opentxs/identity/Types.hpp"
 #include "opentxs/util/Bytes.hpp"
@@ -32,11 +31,6 @@ namespace opentxs
 {
 namespace crypto
 {
-namespace key
-{
-class Keypair;
-}  // namespace key
-
 namespace internal
 {
 class Parameters;
@@ -77,7 +71,6 @@ public:
     auto Default() const noexcept -> bool;
     auto DHParams() const noexcept -> ReadView;
     auto Entropy() const noexcept -> const Secret&;
-    auto Keypair() const noexcept -> const key::Keypair&;
     auto keySize() const noexcept -> std::int32_t;
     OPENTXS_NO_EXPORT auto Internal() const noexcept
         -> const internal::Parameters&;
@@ -93,7 +86,6 @@ public:
     auto UseAutoIndex() const noexcept -> bool;
 
     OPENTXS_NO_EXPORT auto Internal() noexcept -> internal::Parameters&;
-    auto Keypair() noexcept -> OTKeypair&;
     auto SetCredIndex(const Bip32Index path) noexcept -> void;
     auto SetCredset(const Bip32Index path) noexcept -> void;
     auto SetDefault(const bool in) noexcept -> void;

@@ -27,6 +27,7 @@
 #include "internal/core/String.hpp"
 #include "internal/crypto/Parameters.hpp"
 #include "internal/crypto/key/Key.hpp"
+#include "internal/crypto/key/Keypair.hpp"
 #include "internal/identity/Authority.hpp"
 #include "internal/serialization/protobuf/Check.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
@@ -48,7 +49,6 @@
 #include "opentxs/crypto/SignatureRole.hpp"
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/crypto/key/Asymmetric.hpp"
-#include "opentxs/crypto/key/Keypair.hpp"
 #include "opentxs/crypto/symmetric/Key.hpp"
 #include "opentxs/identity/Source.hpp"
 #include "opentxs/identity/credential/Base.hpp"
@@ -973,6 +973,8 @@ auto Authority::Params(
 {
     try {
         return GetTagCredential(type)
+            .Internal()
+            .asKey()
             .GetKeypair(type, crypto::key::asymmetric::Role::Encrypt)
             .GetPublicKey()
             .Params();

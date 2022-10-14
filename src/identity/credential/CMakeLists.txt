@@ -6,6 +6,7 @@
 target_sources(
   opentxs-common
   PRIVATE
+    "${opentxs_SOURCE_DIR}/src/internal/identity/credential/Blank.hpp"
     "${opentxs_SOURCE_DIR}/src/internal/identity/credential/Credential.hpp"
     "${opentxs_SOURCE_DIR}/src/internal/identity/credential/Types.hpp"
     "Base.cpp"

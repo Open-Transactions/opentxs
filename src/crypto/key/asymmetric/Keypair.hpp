@@ -8,9 +8,9 @@
 #include <cstdint>
 #include <memory>
 
+#include "internal/crypto/key/Keypair.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "opentxs/crypto/key/Asymmetric.hpp"
-#include "opentxs/crypto/key/Keypair.hpp"
 #include "opentxs/crypto/key/asymmetric/Role.hpp"
 #include "opentxs/identity/Types.hpp"
 

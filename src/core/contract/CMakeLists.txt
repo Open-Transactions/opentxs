@@ -9,6 +9,7 @@ target_sources(
   opentxs-common
   PRIVATE
     "${opentxs_SOURCE_DIR}/src/internal/core/contract/BasketContract.hpp"
+    "${opentxs_SOURCE_DIR}/src/internal/core/contract/Blank.hpp"
     "${opentxs_SOURCE_DIR}/src/internal/core/contract/Contract.hpp"
     "${opentxs_SOURCE_DIR}/src/internal/core/contract/CurrencyContract.hpp"
     "${opentxs_SOURCE_DIR}/src/internal/core/contract/SecurityContract.hpp"

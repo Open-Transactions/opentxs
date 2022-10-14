@@ -84,34 +84,6 @@ public:
         (const ot::UnallocatedCString& alias),
         (noexcept, override));
     MOCK_METHOD(
-        const crypto::key::Keypair&,
-        GetKeypair,
-        (const crypto::key::asymmetric::Algorithm type,
-         const opentxs::crypto::key::asymmetric::Role role),
-        (const, override));
-    MOCK_METHOD(
-        const crypto::key::Keypair&,
-        GetKeypair,
-        (const opentxs::crypto::key::asymmetric::Role role),
-        (const, override));
-    MOCK_METHOD(
-        std::int32_t,
-        GetPublicKeysBySignature,
-        (crypto::key::Keypair::Keys & listOutput,
-         const opentxs::Signature& theSignature,
-         char cKeyType),
-        (const, override));
-    MOCK_METHOD(
-        bool,
-        Sign,
-        (const GetPreimage input,
-         const crypto::SignatureRole role,
-         proto::Signature& signature,
-         const PasswordPrompt& reason,
-         opentxs::crypto::key::asymmetric::Role key,
-         const crypto::HashType hash),
-        (const, override));
-    MOCK_METHOD(
         const internal::Base&,
         Internal,
         (),

@@ -20,6 +20,7 @@
 #include "internal/api/session/Session.hpp"
 #include "internal/core/Armored.hpp"
 #include "internal/core/String.hpp"
+#include "internal/crypto/key/Keypair.hpp"
 #include "internal/crypto/library/AsymmetricProvider.hpp"
 #include "internal/crypto/library/HashingProvider.hpp"
 #include "internal/identity/Nym.hpp"
@@ -36,7 +37,6 @@
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/crypto/key/Asymmetric.hpp"
-#include "opentxs/crypto/key/Keypair.hpp"
 #include "opentxs/identity/Nym.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
@@ -557,7 +557,7 @@ auto Contract::VerifySigAuthent(
 {
     crypto::key::Keypair::Keys listOutput;
 
-    const std::int32_t nCount = nym.GetPublicKeysBySignature(
+    const std::int32_t nCount = nym.Internal().GetPublicKeysBySignature(
         listOutput, theSignature, 'A');  // 'A' for authentication key.
 
     if (nCount > 0)  // Found some (potentially) matching keys...
@@ -599,7 +599,7 @@ auto Contract::VerifySignature(
 {
     crypto::key::Keypair::Keys listOutput;
 
-    const std::int32_t nCount = nym.GetPublicKeysBySignature(
+    const std::int32_t nCount = nym.Internal().GetPublicKeysBySignature(
         listOutput, theSignature, 'S');  // 'S' for signing key.
 
     if (nCount > 0)  // Found some (potentially) matching keys...

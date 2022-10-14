@@ -8,8 +8,8 @@
 #include "opentxs/identity/Authority.hpp"
 
 #include "internal/core/String.hpp"
+#include "internal/crypto/key/Keypair.hpp"
 #include "internal/identity/Types.hpp"
-#include "opentxs/crypto/key/Keypair.hpp"
 #include "opentxs/crypto/key/asymmetric/Role.hpp"
 #include "opentxs/identity/Nym.hpp"
 #include "opentxs/util/Numbers.hpp"
