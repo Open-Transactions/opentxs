@@ -9,6 +9,7 @@ target_sources(
   opentxs-common
   PRIVATE
     "${opentxs_SOURCE_DIR}/src/internal/crypto/key/Factory.hpp"
+    "${opentxs_SOURCE_DIR}/src/internal/crypto/key/Keypair.hpp"
     "${opentxs_SOURCE_DIR}/src/internal/crypto/key/Null.hpp"
     "Key.cpp"
 )
@@ -21,7 +22,6 @@ set(cxx-install-headers
     "${opentxs_SOURCE_DIR}/include/opentxs/crypto/key/EllipticCurve.hpp"
     "${opentxs_SOURCE_DIR}/include/opentxs/crypto/key/Ed25519.hpp"
     "${opentxs_SOURCE_DIR}/include/opentxs/crypto/key/HD.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/crypto/key/Keypair.hpp"
     "${opentxs_SOURCE_DIR}/include/opentxs/crypto/key/RSA.hpp"
     "${opentxs_SOURCE_DIR}/include/opentxs/crypto/key/Secp256k1.hpp"
     "${opentxs_SOURCE_DIR}/include/opentxs/crypto/key/Types.hpp"

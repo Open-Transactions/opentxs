@@ -179,11 +179,6 @@ auto Parameters::Internal() const noexcept -> const internal::Parameters&
 
 auto Parameters::Internal() noexcept -> internal::Parameters& { return *imp_; }
 
-auto Parameters::Keypair() const noexcept -> const crypto::key::Keypair&
-{
-    return imp_->source_keypair_;
-}
-
 auto Parameters::keySize() const noexcept -> std::int32_t
 {
     return imp_->n_bits_;
@@ -231,11 +226,6 @@ auto Parameters::SourceType() const noexcept -> identity::SourceType
 auto Parameters::UseAutoIndex() const noexcept -> bool
 {
     return imp_->use_auto_index_;
-}
-
-auto Parameters::Keypair() noexcept -> OTKeypair&
-{
-    return imp_->source_keypair_;
 }
 
 auto Parameters::SetCredIndex(const Bip32Index path) noexcept -> void

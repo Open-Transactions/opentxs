@@ -19,9 +19,11 @@
 #include "internal/api/crypto/Symmetric.hpp"
 #include "internal/api/session/FactoryAPI.hpp"
 #include "internal/crypto/key/Key.hpp"
+#include "internal/crypto/key/Keypair.hpp"
 #include "internal/crypto/key/Null.hpp"
 #include "internal/crypto/library/AsymmetricProvider.hpp"
 #include "internal/crypto/symmetric/Key.hpp"
+#include "internal/identity/credential/Credential.hpp"
 #include "internal/otx/common/crypto/OTSignatureMetadata.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/api/crypto/Hash.hpp"
@@ -36,7 +38,6 @@
 #include "opentxs/crypto/SecretStyle.hpp"
 #include "opentxs/crypto/SignatureRole.hpp"
 #include "opentxs/crypto/key/Asymmetric.hpp"
-#include "opentxs/crypto/key/Keypair.hpp"
 #include "opentxs/crypto/symmetric/Algorithm.hpp"
 #include "opentxs/crypto/symmetric/Key.hpp"
 #include "opentxs/identity/Authority.hpp"
@@ -299,7 +300,9 @@ auto Asymmetric::CalculateTag(
     try {
         const auto& cred = nym.GetTagCredential(type);
         const auto& key =
-            cred.GetKeypair(
+            cred.Internal()
+                .asKey()
+                .GetKeypair(
                     type, opentxs::crypto::key::asymmetric::Role::Encrypt)
                 .GetPublicKey();
 

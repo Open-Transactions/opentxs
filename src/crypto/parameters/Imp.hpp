@@ -10,6 +10,7 @@
 #include <optional>
 
 #include "internal/crypto/Parameters.hpp"
+#include "internal/crypto/key/Keypair.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Secret.hpp"
 #include "opentxs/crypto/Language.hpp"
@@ -18,7 +19,6 @@
 #include "opentxs/crypto/SeedStrength.hpp"
 #include "opentxs/crypto/SeedStyle.hpp"
 #include "opentxs/crypto/Types.hpp"
-#include "opentxs/crypto/key/Keypair.hpp"
 #include "opentxs/identity/CredentialType.hpp"
 #include "opentxs/identity/SourceProofType.hpp"
 #include "opentxs/identity/SourceType.hpp"
@@ -66,13 +66,18 @@ public:
     auto operator<(const Parameters& rhs) const noexcept -> bool final;
     auto operator==(const Parameters& rhs) const noexcept -> bool final;
 
+    auto clone() const noexcept -> Imp*;
     auto GetContactData(proto::ContactData& serialized) const noexcept
         -> bool final;
     auto GetVerificationSet(proto::VerificationSet& serialized) const noexcept
         -> bool final;
     auto Hash() const noexcept -> ByteArray final;
-    auto clone() const noexcept -> Imp*;
+    auto Keypair() const noexcept -> const key::Keypair& final
+    {
+        return source_keypair_;
+    }
 
+    auto Keypair() noexcept -> OTKeypair& final { return source_keypair_; }
     auto SetContactData(const proto::ContactData& contactData) noexcept
         -> void final;
     auto SetVerificationSet(

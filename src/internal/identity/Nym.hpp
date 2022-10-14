@@ -5,9 +5,11 @@
 
 #pragma once
 
-#include "opentxs/identity/Nym.hpp"
+#include <cstdint>
 
+#include "internal/crypto/key/Keypair.hpp"
 #include "internal/identity/Types.hpp"
+#include "opentxs/identity/Nym.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace google
@@ -42,6 +44,15 @@ public:
         Full = false,
     };
 
+    // OT uses the signature's metadata to narrow down its search for the
+    // correct public key.
+    // 'S' (signing key) or
+    // 'E' (encryption key) OR
+    // 'A' (authentication key)
+    virtual auto GetPublicKeysBySignature(
+        crypto::key::Keypair::Keys& listOutput,
+        const Signature& theSignature,
+        char cKeyType = '0') const -> std::int32_t = 0;
     auto Internal() const noexcept -> const internal::Nym& final
     {
         return *this;

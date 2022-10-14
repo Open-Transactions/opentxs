@@ -21,6 +21,8 @@
 #include "internal/core/Armored.hpp"
 #include "internal/core/PaymentCode.hpp"
 #include "internal/core/String.hpp"
+#include "internal/crypto/Parameters.hpp"
+#include "internal/crypto/key/Keypair.hpp"
 #include "internal/crypto/library/AsymmetricProvider.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/LogMacros.hpp"
@@ -34,7 +36,6 @@
 #include "opentxs/crypto/Parameters.hpp"
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/crypto/key/Asymmetric.hpp"
-#include "opentxs/crypto/key/Keypair.hpp"
 #include "opentxs/crypto/key/asymmetric/Algorithm.hpp"
 #include "opentxs/crypto/key/asymmetric/Role.hpp"
 #include "opentxs/identity/CredentialType.hpp"
@@ -73,11 +74,12 @@ auto Factory::NymIDSource(
         case identity::SourceType::PubKey:
             switch (params.credentialType()) {
                 case identity::CredentialType::Legacy: {
-                    params.Keypair() = api.Factory().InternalSession().Keypair(
-                        params,
-                        crypto::key::Asymmetric::DefaultVersion,
-                        opentxs::crypto::key::asymmetric::Role::Sign,
-                        reason);
+                    params.Internal().Keypair() =
+                        api.Factory().InternalSession().Keypair(
+                            params,
+                            crypto::key::Asymmetric::DefaultVersion,
+                            opentxs::crypto::key::asymmetric::Role::Sign,
+                            reason);
                 } break;
                 case identity::CredentialType::HD: {
                     if (false == api::crypto::HaveHDKeys()) {
@@ -92,14 +94,15 @@ auto Factory::NymIDSource(
                         throw std::runtime_error("Invalid curve type");
                     }
 
-                    params.Keypair() = api.Factory().InternalSession().Keypair(
-                        params.Seed(),
-                        params.Nym(),
-                        params.Credset(),
-                        params.CredIndex(),
-                        curve,
-                        opentxs::crypto::key::asymmetric::Role::Sign,
-                        reason);
+                    params.Internal().Keypair() =
+                        api.Factory().InternalSession().Keypair(
+                            params.Seed(),
+                            params.Nym(),
+                            params.Credset(),
+                            params.CredIndex(),
+                            curve,
+                            opentxs::crypto::key::asymmetric::Role::Sign,
+                            reason);
                 } break;
                 case identity::CredentialType::Error:
                 default: {
@@ -107,7 +110,7 @@ auto Factory::NymIDSource(
                 }
             }
 
-            if (false == bool(params.Keypair().get())) {
+            if (false == bool(params.Internal().Keypair().get())) {
                 LogError()("opentxs::Factory::")(__func__)(
                     ": Failed to generate signing keypair")
                     .Flush();
@@ -161,7 +164,7 @@ Source::Source(
     const crypto::Parameters& nymParameters) noexcept(false)
     : factory_{factory}
     , type_(nymParameters.SourceType())
-    , pubkey_(nymParameters.Keypair().GetPublicKey())
+    , pubkey_(nymParameters.Internal().Keypair().GetPublicKey())
     , payment_code_(factory_.PaymentCode(UnallocatedCString{}))
     , version_(key_to_source_version_.at(pubkey_->Version()))
 

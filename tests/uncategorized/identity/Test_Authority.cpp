@@ -20,9 +20,11 @@
 
 #include "2_Factory.hpp"
 #include "internal/api/crypto/Seed.hpp"
+#include "internal/crypto/key/Keypair.hpp"
 #include "internal/identity/Authority.hpp"
 #include "internal/identity/Nym.hpp"
 #include "internal/identity/Types.hpp"
+#include "internal/identity/credential/Credential.hpp"
 #include "internal/otx/common/crypto/Signature.hpp"
 #include "ottest/data/crypto/PaymentCodeV3.hpp"
 
@@ -303,7 +305,9 @@ TEST_F(Test_Authority, EncryptionTargets_DefaultSetup_ShouldReturnProperData)
     EXPECT_EQ(keyCredentials.first, masterCredID);
     EXPECT_EQ(
         keyCredentials.second.front(),
-        tagCredential.GetKeypair(ot::crypto::key::asymmetric::Role::Encrypt)
+        tagCredential.Internal()
+            .asKey()
+            .GetKeypair(ot::crypto::key::asymmetric::Role::Encrypt)
             .GetPublicKey()
             .keyType());
     EXPECT_EQ(keyCredentials.second.size(), 1);
@@ -331,7 +335,9 @@ TEST_F(
     EXPECT_EQ(keyCredentials2.first, masterCredID);
     EXPECT_EQ(
         keyCredentials2.second.back(),
-        tagCredential2.GetKeypair(ot::crypto::key::asymmetric::Role::Encrypt)
+        tagCredential2.Internal()
+            .asKey()
+            .GetKeypair(ot::crypto::key::asymmetric::Role::Encrypt)
             .GetPublicKey()
             .keyType());
     EXPECT_EQ(keyCredentials2.second.size(), 2);
@@ -522,7 +528,9 @@ TEST_F(Test_Authority, Unlock_DefaultSetup_ShouldReturnProperData)
         ot::crypto::key::asymmetric::Algorithm::Secp256k1);
 
     const auto& encryptKey =
-        tagCredential.GetKeypair(ot::crypto::key::asymmetric::Role::Encrypt)
+        tagCredential.Internal()
+            .asKey()
+            .GetKeypair(ot::crypto::key::asymmetric::Role::Encrypt)
             .GetPrivateKey();
 
     encryptKey.CalculateTag(
@@ -542,7 +550,9 @@ TEST_F(Test_Authority, Unlock_DefaultSetup_ShouldReturnProperData2)
         ot::crypto::key::asymmetric::Algorithm::Secp256k1);
 
     const auto& encryptKey =
-        tagCredential.GetKeypair(ot::crypto::key::asymmetric::Role::Encrypt)
+        tagCredential.Internal()
+            .asKey()
+            .GetKeypair(ot::crypto::key::asymmetric::Role::Encrypt)
             .GetPrivateKey();
 
     auto testTag = std::uint32_t{};
@@ -691,8 +701,8 @@ TEST_F(Test_Authority, GetTagCredential_DefaultSetup_ShouldReturnProperData)
 {
     const auto& tagCredential = authority_->GetTagCredential(
         ot::crypto::key::asymmetric::Algorithm::Secp256k1);
-    const auto& keyPair =
-        tagCredential.GetKeypair(ot::crypto::key::asymmetric::Role::Sign);
+    const auto& keyPair = tagCredential.Internal().asKey().GetKeypair(
+        ot::crypto::key::asymmetric::Role::Sign);
 
     EXPECT_EQ(
         keyPair.GetPrivateKey().keyType(),

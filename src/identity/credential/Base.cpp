@@ -39,6 +39,13 @@
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Pimpl.hpp"
 
+namespace opentxs::identity::credential::internal
+{
+auto Base::asKey() const noexcept -> const Key& { return Key::Blank(); }
+
+auto Base::asKey() noexcept -> Key& { return Key::Blank(); }
+}  // namespace opentxs::identity::credential::internal
+
 namespace opentxs::identity::credential::implementation
 {
 Base::Base(

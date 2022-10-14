@@ -5,9 +5,19 @@
 
 #pragma once
 
+#include "internal/crypto/key/Keypair.hpp"
+
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
+namespace crypto
+{
+namespace key
+{
+class Keypair;
+}  // namespace key
+}  // namespace crypto
+
 namespace proto
 {
 class ContactData;
@@ -31,7 +41,9 @@ public:
     virtual auto GetVerificationSet(
         proto::VerificationSet& serialized) const noexcept -> bool = 0;
     virtual auto Hash() const noexcept -> ByteArray = 0;
+    virtual auto Keypair() const noexcept -> const key::Keypair& = 0;
 
+    virtual auto Keypair() noexcept -> OTKeypair& = 0;
     virtual auto SetContactData(const proto::ContactData& contactData) noexcept
         -> void = 0;
     virtual auto SetVerificationSet(

@@ -6,11 +6,15 @@
 #pragma once
 
 #include <Enums.pb.h>
+#include <memory>
 #include <optional>
 
+#include "internal/crypto/key/Keypair.hpp"
 #include "internal/identity/Types.hpp"
 #include "internal/identity/credential/Types.hpp"
 #include "opentxs/core/Secret.hpp"  // IWYU pragma: keep
+#include "opentxs/crypto/HashType.hpp"
+#include "opentxs/crypto/Types.hpp"
 #include "opentxs/identity/Types.hpp"
 #include "opentxs/identity/credential/Base.hpp"
 #include "opentxs/identity/credential/Contact.hpp"
@@ -22,10 +26,22 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
+namespace identity
+{
+namespace credential
+{
+namespace internal
+{
+struct Key;
+}  // namespace internal
+}  // namespace credential
+}  // namespace identity
+
 namespace proto
 {
-class Credential;
 class ContactData;
+class Credential;
+class Signature;
 class VerificationSet;
 }  // namespace proto
 }  // namespace opentxs
@@ -38,6 +54,7 @@ class Base : virtual public identity::credential::Base
 public:
     using SerializedType = proto::Credential;
 
+    virtual auto asKey() const noexcept -> const Key&;
     virtual auto GetContactData(proto::ContactData& contactData) const
         -> bool = 0;
     virtual auto GetVerificationSet(
@@ -46,7 +63,7 @@ public:
     {
         return *this;
     }
-    virtual void ReleaseSignatures(const bool onlyPrivate) = 0;
+    virtual auto ReleaseSignatures(const bool onlyPrivate) -> void = 0;
     virtual auto SelfSignature(
         CredentialModeFlag version = PUBLIC_VERSION) const -> Signature = 0;
     using Signable::Serialize;
@@ -65,6 +82,7 @@ public:
         const identifier::Generic& masterID,
         const proto::Signature& masterSig) const -> bool = 0;
 
+    virtual auto asKey() noexcept -> Key&;
     auto Internal() noexcept -> internal::Base& final { return *this; }
 
 #ifdef _MSC_VER
@@ -80,6 +98,28 @@ struct Contact : virtual public Base,
     ~Contact() override = default;
 };
 struct Key : virtual public Base, virtual public identity::credential::Key {
+    static auto Blank() noexcept -> Key&;
+
+    virtual auto GetKeypair(
+        const crypto::key::asymmetric::Algorithm type,
+        const opentxs::crypto::key::asymmetric::Role role) const
+        -> const crypto::key::Keypair& = 0;
+    virtual auto GetKeypair(const opentxs::crypto::key::asymmetric::Role role)
+        const -> const crypto::key::Keypair& = 0;
+    virtual auto GetPublicKeysBySignature(
+        crypto::key::Keypair::Keys& listOutput,
+        const opentxs::Signature& theSignature,
+        char cKeyType = '0') const -> std::int32_t = 0;
+    virtual auto Sign(
+        const GetPreimage input,
+        const crypto::SignatureRole role,
+        proto::Signature& signature,
+        const PasswordPrompt& reason,
+        opentxs::crypto::key::asymmetric::Role key =
+            opentxs::crypto::key::asymmetric::Role::Sign,
+        const crypto::HashType hash = crypto::HashType::Error) const
+        -> bool = 0;
+
     virtual auto SelfSign(
         const PasswordPrompt& reason,
         const std::optional<Secret> exportPassword = {},

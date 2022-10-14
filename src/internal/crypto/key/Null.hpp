@@ -8,12 +8,12 @@
 #include <AsymmetricKey.pb.h>
 #include <memory>
 
+#include "internal/crypto/key/Keypair.hpp"
 #include "internal/crypto/library/Null.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/crypto/key/Ed25519.hpp"
 #include "opentxs/crypto/key/HD.hpp"
-#include "opentxs/crypto/key/Keypair.hpp"
 #include "opentxs/crypto/key/RSA.hpp"
 #include "opentxs/crypto/key/Secp256k1.hpp"
 #include "opentxs/crypto/key/asymmetric/Algorithm.hpp"

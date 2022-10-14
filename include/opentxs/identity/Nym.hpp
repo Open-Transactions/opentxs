@@ -12,7 +12,6 @@
 #include "opentxs/Export.hpp"
 #include "opentxs/core/Types.hpp"
 #include "opentxs/crypto/HashType.hpp"
-#include "opentxs/crypto/key/Keypair.hpp"
 #include "opentxs/crypto/key/asymmetric/Algorithm.hpp"
 #include "opentxs/identity/wot/claim/Types.hpp"
 #include "opentxs/util/Bytes.hpp"
@@ -25,6 +24,11 @@ namespace opentxs
 {
 namespace crypto
 {
+namespace key
+{
+class Asymmetric;
+}  // namespace key
+
 namespace symmetric
 {
 class Key;
@@ -67,6 +71,7 @@ class Nym;
 class Signature;
 }  // namespace proto
 
+class Data;
 class PasswordPrompt;
 class PaymentCode;
 class Secret;
@@ -140,15 +145,6 @@ public:
         crypto::key::asymmetric::Algorithm keytype =
             crypto::key::asymmetric::Algorithm::Null) const
         -> const crypto::key::Asymmetric& = 0;
-    // OT uses the signature's metadata to narrow down its search for the
-    // correct public key.
-    // 'S' (signing key) or
-    // 'E' (encryption key) OR
-    // 'A' (authentication key)
-    virtual auto GetPublicKeysBySignature(
-        crypto::key::Keypair::Keys& listOutput,
-        const Signature& theSignature,
-        char cKeyType = '0') const -> std::int32_t = 0;
     virtual auto GetPublicSignKey(
         crypto::key::asymmetric::Algorithm keytype =
             crypto::key::asymmetric::Algorithm::Null) const

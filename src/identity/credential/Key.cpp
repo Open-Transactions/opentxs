@@ -18,8 +18,11 @@
 #include "core/contract/Signable.hpp"
 #include "identity/credential/Base.hpp"
 #include "internal/api/session/FactoryAPI.hpp"
+#include "internal/crypto/Parameters.hpp"
 #include "internal/crypto/key/Key.hpp"
+#include "internal/crypto/key/Keypair.hpp"
 #include "internal/crypto/library/AsymmetricProvider.hpp"
+#include "internal/identity/credential/Blank.hpp"
 #include "internal/otx/common/crypto/OTSignatureMetadata.hpp"
 #include "internal/otx/common/crypto/Signature.hpp"
 #include "internal/serialization/protobuf/Proto.tpp"
@@ -31,11 +34,20 @@
 #include "opentxs/crypto/Parameters.hpp"
 #include "opentxs/crypto/SignatureRole.hpp"
 #include "opentxs/crypto/key/Asymmetric.hpp"
-#include "opentxs/crypto/key/Keypair.hpp"
 #include "opentxs/crypto/key/asymmetric/Algorithm.hpp"
 #include "opentxs/crypto/key/asymmetric/Mode.hpp"
 #include "opentxs/identity/CredentialType.hpp"
 #include "opentxs/util/Log.hpp"
+
+namespace opentxs::identity::credential::internal
+{
+auto Key::Blank() noexcept -> Key&
+{
+    static auto blank = blank::Key{};
+
+    return blank;
+}
+}  // namespace opentxs::identity::credential::internal
 
 namespace opentxs::identity::credential::implementation
 {
@@ -512,9 +524,9 @@ auto Key::signing_key(
     const PasswordPrompt& reason) noexcept(false) -> OTKeypair
 {
     if (useProvided) {
-        if (params.Keypair()) {
+        if (params.Internal().Keypair()) {
 
-            return params.Keypair();
+            return params.Internal().Keypair();
         } else {
             throw std::runtime_error("Invalid provided keypair");
         }

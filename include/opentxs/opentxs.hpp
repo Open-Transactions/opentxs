@@ -143,7 +143,6 @@
 #include "opentxs/crypto/key/Ed25519.hpp"                // IWYU pragma: export
 #include "opentxs/crypto/key/EllipticCurve.hpp"          // IWYU pragma: export
 #include "opentxs/crypto/key/HD.hpp"                     // IWYU pragma: export
-#include "opentxs/crypto/key/Keypair.hpp"                // IWYU pragma: export
 #include "opentxs/crypto/key/RSA.hpp"                    // IWYU pragma: export
 #include "opentxs/crypto/key/Secp256k1.hpp"              // IWYU pragma: export
 #include "opentxs/crypto/key/Types.hpp"                  // IWYU pragma: export
