@@ -49,10 +49,6 @@
 	path = tests/ottest/data/blockchain/ethereum
 	url = https://github.com/ethereum/tests
 	shallow = true
-[submodule "deps/vcpkg_installed"]
-	path = deps/vcpkg_installed
-	url = https://gitlab.com/open-transactions/vcpkg.git/
-	shallow = true
 [submodule "deps/bech32"]
 	shallow = true
 [submodule "deps/frozen"]
