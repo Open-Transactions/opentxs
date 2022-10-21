@@ -9,19 +9,17 @@
 #include <AsymmetricKey.pb.h>
 #include <BlockchainPeerAddress.pb.h>  // IWYU pragma: keep
 #include <Ciphertext.pb.h>
-#include <Enums.pb.h>
 #include <Envelope.pb.h>  // IWYU pragma: keep
-#include <HDPath.pb.h>
 #include <PaymentCode.pb.h>
 #include <PeerReply.pb.h>
 #include <PeerRequest.pb.h>
 #include <UnitDefinition.pb.h>
 #include <array>
 #include <stdexcept>
+#include <type_traits>
 #include <utility>
 
 #include "2_Factory.hpp"
-#include "internal/api/Crypto.hpp"
 #include "internal/api/FactoryAPI.hpp"
 #include "internal/api/crypto/Asymmetric.hpp"
 #include "internal/api/crypto/Factory.hpp"
@@ -48,7 +46,6 @@
 #include "internal/core/contract/peer/StoreSecret.hpp"
 #include "internal/crypto/key/Factory.hpp"
 #include "internal/crypto/key/Key.hpp"
-#include "internal/crypto/key/Null.hpp"
 #include "internal/crypto/symmetric/Factory.hpp"
 #include "internal/network/otdht/Factory.hpp"
 #include "internal/otx/Types.hpp"
@@ -77,10 +74,10 @@
 #include "internal/serialization/protobuf/verify/Envelope.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
+#include "internal/util/Pimpl.hpp"
 #include "opentxs/OT.hpp"  // TODO remove
 #include "opentxs/api/Context.hpp"
 #include "opentxs/api/crypto/Asymmetric.hpp"
-#include "opentxs/api/crypto/Config.hpp"
 #include "opentxs/api/crypto/Seed.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Session.hpp"
@@ -97,11 +94,10 @@
 #include "opentxs/crypto/Bip32Child.hpp"
 #include "opentxs/crypto/Bip43Purpose.hpp"
 #include "opentxs/crypto/Types.hpp"
-#include "opentxs/crypto/key/EllipticCurve.hpp"
-#include "opentxs/crypto/key/HD.hpp"
-#include "opentxs/crypto/key/Secp256k1.hpp"
-#include "opentxs/crypto/key/asymmetric/Algorithm.hpp"
-#include "opentxs/crypto/key/asymmetric/Role.hpp"
+#include "opentxs/crypto/asymmetric/Key.hpp"
+#include "opentxs/crypto/asymmetric/Role.hpp"
+#include "opentxs/crypto/asymmetric/key/EllipticCurve.hpp"
+#include "opentxs/crypto/asymmetric/key/HD.hpp"
 #include "opentxs/crypto/symmetric/Algorithm.hpp"
 #include "opentxs/crypto/symmetric/Key.hpp"
 #include "opentxs/crypto/symmetric/Source.hpp"
@@ -114,7 +110,6 @@
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/PasswordPrompt.hpp"
-#include "opentxs/util/Pimpl.hpp"
 #include "util/HDIndex.hpp"
 #include "util/PasswordPromptPrivate.hpp"
 
@@ -176,28 +171,69 @@ auto Factory::Armored(
 
 auto Factory::AsymmetricKey(
     const opentxs::crypto::Parameters& params,
-    const opentxs::PasswordPrompt& reason,
-    const opentxs::crypto::key::asymmetric::Role role,
-    const VersionNumber version) const -> OTAsymmetricKey
+    const opentxs::PasswordPrompt& reason) const
+    -> opentxs::crypto::asymmetric::Key
 {
-    auto* output = asymmetric_.NewKey(params, role, version, reason).release();
+    return AsymmetricKey(
+        opentxs::crypto::asymmetric::Key::DefaultVersion(),
+        opentxs::crypto::asymmetric::Role::Sign,
+        params,
+        reason);
+}
 
-    if (output) {
-        return OTAsymmetricKey{std::move(output)};
+auto Factory::AsymmetricKey(
+    VersionNumber version,
+    const opentxs::crypto::Parameters& params,
+    const opentxs::PasswordPrompt& reason) const
+    -> opentxs::crypto::asymmetric::Key
+{
+    return AsymmetricKey(
+        version, opentxs::crypto::asymmetric::Role::Sign, params, reason);
+}
+
+auto Factory::AsymmetricKey(
+    opentxs::crypto::asymmetric::Role role,
+    const opentxs::crypto::Parameters& params,
+    const opentxs::PasswordPrompt& reason) const
+    -> opentxs::crypto::asymmetric::Key
+{
+    return AsymmetricKey(
+        opentxs::crypto::asymmetric::Key::DefaultVersion(),
+        role,
+        params,
+        reason);
+}
+
+auto Factory::AsymmetricKey(
+    VersionNumber version,
+    opentxs::crypto::asymmetric::Role role,
+    const opentxs::crypto::Parameters& params,
+    const opentxs::PasswordPrompt& reason) const
+    -> opentxs::crypto::asymmetric::Key
+{
+    auto output = asymmetric_.NewKey(params, role, version, reason);
+
+    if (output.IsValid()) {
+
+        return output;
     } else {
         throw std::runtime_error("Failed to create asymmetric key");
     }
 }
 
 auto Factory::AsymmetricKey(const proto::AsymmetricKey& serialized) const
-    -> OTAsymmetricKey
+    -> opentxs::crypto::asymmetric::Key
 {
-    auto* output = asymmetric_.Internal().InstantiateKey(serialized).release();
+    auto output = asymmetric_.Internal().InstantiateKey(serialized);
 
-    if (output) {
-        return OTAsymmetricKey{std::move(output)};
+    if (output.IsValid()) {
+
+        return opentxs::crypto::asymmetric::Key{std::move(output)};
     } else {
-        throw std::runtime_error("Failed to instantiate asymmetric key");
+        LogError()(OT_PRETTY_CLASS())("Failed to instantiate asymmetric key")
+            .Flush();
+
+        return {};
     }
 }
 
@@ -385,8 +421,9 @@ auto Factory::BitcoinScriptP2MS(
     const opentxs::blockchain::Type chain,
     const std::uint8_t M,
     const std::uint8_t N,
-    const UnallocatedVector<const opentxs::crypto::key::EllipticCurve*>&
-        publicKeys) const noexcept
+    const UnallocatedVector<
+        const opentxs::crypto::asymmetric::key::EllipticCurve*>& publicKeys)
+    const noexcept
     -> std::unique_ptr<const opentxs::blockchain::bitcoin::block::Script>
 {
     return factory::BitcoinScriptP2MS(chain, M, N, publicKeys);
@@ -394,7 +431,7 @@ auto Factory::BitcoinScriptP2MS(
 
 auto Factory::BitcoinScriptP2PK(
     const opentxs::blockchain::Type chain,
-    const opentxs::crypto::key::EllipticCurve& key) const noexcept
+    const opentxs::crypto::asymmetric::key::EllipticCurve& key) const noexcept
     -> std::unique_ptr<const opentxs::blockchain::bitcoin::block::Script>
 {
     return factory::BitcoinScriptP2PK(chain, key);
@@ -402,7 +439,7 @@ auto Factory::BitcoinScriptP2PK(
 
 auto Factory::BitcoinScriptP2PKH(
     const opentxs::blockchain::Type chain,
-    const opentxs::crypto::key::EllipticCurve& key) const noexcept
+    const opentxs::crypto::asymmetric::key::EllipticCurve& key) const noexcept
     -> std::unique_ptr<const opentxs::blockchain::bitcoin::block::Script>
 {
     return factory::BitcoinScriptP2PKH(api_.Crypto(), chain, key);
@@ -418,7 +455,7 @@ auto Factory::BitcoinScriptP2SH(
 
 auto Factory::BitcoinScriptP2WPKH(
     const opentxs::blockchain::Type chain,
-    const opentxs::crypto::key::EllipticCurve& key) const noexcept
+    const opentxs::crypto::asymmetric::key::EllipticCurve& key) const noexcept
     -> std::unique_ptr<const opentxs::blockchain::bitcoin::block::Script>
 {
     return factory::BitcoinScriptP2WPKH(api_.Crypto(), chain, key);
@@ -918,51 +955,6 @@ auto Factory::Identifier(const proto::Identifier& in, allocator_type alloc)
     return primitives_.Internal().Identifier(in, std::move(alloc));
 }
 
-auto Factory::instantiate_secp256k1(
-    const ReadView key,
-    const ReadView chaincode) const noexcept
-    -> std::unique_ptr<opentxs::crypto::key::Secp256k1>
-{
-    using Type = opentxs::crypto::key::asymmetric::Algorithm;
-
-    if (crypto::HaveHDKeys()) {
-        static const auto blank = Secret(0);
-        static const auto path = proto::HDPath{};
-
-        return factory::Secp256k1Key(
-            api_,
-            api_.Crypto().Internal().EllipticProvider(Type::Secp256k1),
-            blank,
-            SecretFromBytes(chaincode),
-            DataFromBytes(key),
-            path,
-            {},
-            opentxs::crypto::key::asymmetric::Role::Sign,
-            opentxs::crypto::key::EllipticCurve::DefaultVersion);
-    } else {
-        using ReturnType = opentxs::crypto::key::Secp256k1;
-
-        auto serialized = ReturnType::Serialized{};
-        serialized.set_version(ReturnType::DefaultVersion);
-        serialized.set_type(proto::AKEYTYPE_SECP256K1);
-        serialized.set_mode(proto::KEYMODE_PUBLIC);
-        serialized.set_role(proto::KEYROLE_SIGN);
-        serialized.set_key(key.data(), key.size());
-        auto output = factory::Secp256k1Key(
-            api_,
-            api_.Crypto().Internal().EllipticProvider(Type::Secp256k1),
-            serialized);
-
-        if (false == bool(output)) {
-            output = std::make_unique<opentxs::crypto::key::blank::Secp256k1>();
-        }
-
-        OT_ASSERT(output);
-
-        return output;
-    }
-}
-
 auto Factory::Item(const UnallocatedCString& serialized) const
     -> std::unique_ptr<opentxs::Item>
 {
@@ -1097,21 +1089,20 @@ auto Factory::Item(
 auto Factory::Keypair(
     const opentxs::crypto::Parameters& params,
     const VersionNumber version,
-    const opentxs::crypto::key::asymmetric::Role role,
+    const opentxs::crypto::asymmetric::Role role,
     const opentxs::PasswordPrompt& reason) const -> OTKeypair
 {
-    auto pPrivateKey = asymmetric_.NewKey(params, role, version, reason);
+    auto privateKey = asymmetric_.NewKey(params, role, version, reason);
 
-    if (false == bool(pPrivateKey)) {
+    if (false == privateKey.IsValid()) {
         LogError()(OT_PRETTY_CLASS())("Failed to derive private key").Flush();
 
         return OTKeypair{factory::Keypair()};
     }
 
-    auto& privateKey = *pPrivateKey;
-    auto pPublicKey = privateKey.asPublic();
+    auto publicKey = privateKey.asPublic();
 
-    if (false == bool(pPublicKey)) {
+    if (false == publicKey.IsValid()) {
         LogError()(OT_PRETTY_CLASS())("Failed to derive public key").Flush();
 
         return OTKeypair{factory::Keypair()};
@@ -1119,7 +1110,7 @@ auto Factory::Keypair(
 
     try {
         return OTKeypair{factory::Keypair(
-            api_, role, std::move(pPublicKey), std::move(pPrivateKey))};
+            api_, role, std::move(publicKey), std::move(privateKey))};
     } catch (...) {
         return OTKeypair{factory::Keypair()};
     }
@@ -1131,7 +1122,7 @@ auto Factory::Keypair(
 {
     auto pPrivateKey = asymmetric_.Internal().InstantiateKey(serializedPrivkey);
 
-    if (false == bool(pPrivateKey)) {
+    if (false == pPrivateKey.IsValid()) {
         LogError()(OT_PRETTY_CLASS())("Failed to instantiate private key")
             .Flush();
 
@@ -1140,7 +1131,7 @@ auto Factory::Keypair(
 
     auto pPublicKey = asymmetric_.Internal().InstantiateKey(serializedPubkey);
 
-    if (false == bool(pPublicKey)) {
+    if (false == pPublicKey.IsValid()) {
         LogError()(OT_PRETTY_CLASS())("Failed to instantiate public key")
             .Flush();
 
@@ -1163,7 +1154,7 @@ auto Factory::Keypair(const proto::AsymmetricKey& serializedPubkey) const
 {
     auto pPublicKey = asymmetric_.Internal().InstantiateKey(serializedPubkey);
 
-    if (false == bool(pPublicKey)) {
+    if (false == pPublicKey.IsValid()) {
         LogError()(OT_PRETTY_CLASS())("Failed to instantiate public key")
             .Flush();
 
@@ -1175,7 +1166,7 @@ auto Factory::Keypair(const proto::AsymmetricKey& serializedPubkey) const
             api_,
             translate(serializedPubkey.role()),
             std::move(pPublicKey),
-            std::make_unique<opentxs::crypto::key::blank::Asymmetric>())};
+            opentxs::crypto::asymmetric::Key{})};
     } catch (...) {
         return OTKeypair{factory::Keypair()};
     }
@@ -1187,23 +1178,23 @@ auto Factory::Keypair(
     const Bip32Index credset,
     const Bip32Index credindex,
     const opentxs::crypto::EcdsaCurve& curve,
-    const opentxs::crypto::key::asymmetric::Role role,
+    const opentxs::crypto::asymmetric::Role role,
     const opentxs::PasswordPrompt& reason) const -> OTKeypair
 {
     auto input(fingerprint);
     auto roleIndex = Bip32Index{0};
 
     switch (role) {
-        case opentxs::crypto::key::asymmetric::Role::Auth: {
+        case opentxs::crypto::asymmetric::Role::Auth: {
             roleIndex = HDIndex{Bip32Child::AUTH_KEY, Bip32Child::HARDENED};
         } break;
-        case opentxs::crypto::key::asymmetric::Role::Encrypt: {
+        case opentxs::crypto::asymmetric::Role::Encrypt: {
             roleIndex = HDIndex{Bip32Child::ENCRYPT_KEY, Bip32Child::HARDENED};
         } break;
-        case opentxs::crypto::key::asymmetric::Role::Sign: {
+        case opentxs::crypto::asymmetric::Role::Sign: {
             roleIndex = HDIndex{Bip32Child::SIGN_KEY, Bip32Child::HARDENED};
         } break;
-        case opentxs::crypto::key::asymmetric::Role::Error:
+        case opentxs::crypto::asymmetric::Role::Error:
         default: {
             LogError()(OT_PRETTY_CLASS())("Invalid key role").Flush();
 
@@ -1217,19 +1208,18 @@ auto Factory::Keypair(
         HDIndex{credset, Bip32Child::HARDENED},
         HDIndex{credindex, Bip32Child::HARDENED},
         roleIndex};
-    auto pPrivateKey =
+    auto privateKey =
         api_.Crypto().Seed().GetHDKey(input, curve, path, role, reason);
 
-    if (false == bool(pPrivateKey)) {
+    if (false == privateKey.IsValid()) {
         LogError()(OT_PRETTY_CLASS())("Failed to derive private key").Flush();
 
         return OTKeypair{factory::Keypair()};
     }
 
-    auto& privateKey = *pPrivateKey;
-    auto pPublicKey = privateKey.asPublic();
+    auto publicKey = privateKey.asPublic();
 
-    if (false == bool(pPublicKey)) {
+    if (false == publicKey.IsValid()) {
         LogError()(OT_PRETTY_CLASS())("Failed to derive public key").Flush();
 
         return OTKeypair{factory::Keypair()};
@@ -1237,7 +1227,7 @@ auto Factory::Keypair(
 
     try {
         return OTKeypair{factory::Keypair(
-            api_, role, std::move(pPublicKey), std::move(pPrivateKey))};
+            api_, role, std::move(publicKey), std::move(privateKey))};
     } catch (...) {
         return OTKeypair{factory::Keypair()};
     }
@@ -2484,4 +2474,6 @@ auto Factory::UnitIDFromPreimage(
     return primitives_.Internal().UnitIDFromPreimage(
         proto, type, std::move(alloc));
 }
+
+Factory::~Factory() = default;
 }  // namespace opentxs::api::session::imp

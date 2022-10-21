@@ -17,6 +17,7 @@
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
+#include "opentxs/util/Writer.hpp"
 #include "serialization/protobuf/verify/Check.hpp"
 
 namespace opentxs::proto

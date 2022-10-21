@@ -3,6 +3,8 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_include "opentxs/util/Writer.hpp"
+
 #pragma once
 
 #include <array>
@@ -14,9 +16,16 @@
 #include "opentxs/Export.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/util/Allocator.hpp"
-#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Platform.hpp"
+#include "opentxs/util/Types.hpp"
+
+// NOLINTBEGIN(modernize-concat-nested-namespaces)
+namespace opentxs
+{
+class Writer;
+}  // namespace opentxs
+// NOLINTEND(modernize-concat-nested-namespaces)
 
 namespace opentxs
 {
@@ -76,7 +85,7 @@ public:
     {
         return false;
     }
-    auto WriteInto() noexcept -> AllocateOutput final;
+    auto WriteInto() noexcept -> Writer final;
     auto zeroMemory() -> void final;
 
     FixedByteArray() noexcept;

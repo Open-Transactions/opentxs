@@ -108,21 +108,20 @@ TEST_F(Test_BIP44, generate_expected_keys)
     const auto DeriveKeys =
         [&](auto subchain, auto index, auto& vector) -> bool {
         auto output{true};
-        const auto pKey = api_.Crypto().Seed().GetHDKey(
+        const auto key = api_.Crypto().Seed().GetHDKey(
             id,
             ot::crypto::EcdsaCurve::secp256k1,
             MakePath(subchain, index),
             reason_);
 
-        EXPECT_TRUE(pKey);
+        EXPECT_TRUE(key.IsValid());
 
-        if (!pKey) { return false; }
+        if (false == key.IsValid()) { return false; }
 
         output &= (seed_id_ == id);
 
         EXPECT_EQ(seed_id_, id);
 
-        const auto& key = *pKey;
         const auto& pubkey = vector.emplace_back(ot::space(key.PublicKey()));
         output &= (false == pubkey.empty());
 
@@ -161,16 +160,14 @@ TEST_F(Test_BIP44, balance_elements)
         EXPECT_EQ(sub, subchain);
         EXPECT_EQ(index, i);
 
-        const auto pPubkey = element.Key();
-        const auto pSeckey = element.PrivateKey(reason_);
+        const auto& pubkey = element.Key();
+        const auto& seckey = element.PrivateKey(reason_);
 
-        EXPECT_TRUE(pPubkey);
-        EXPECT_TRUE(pSeckey);
+        EXPECT_TRUE(pubkey.IsValid());
+        EXPECT_TRUE(seckey.IsValid());
 
-        if ((!pPubkey) || (!pSeckey)) { return false; }
-
-        const auto& pubkey = *pPubkey;
-        const auto& seckey = *pSeckey;
+        output &= pubkey.IsValid();
+        output &= seckey.IsValid();
         const auto& expected = vector.at(i);
         const auto bytes = ot::reader(expected);
         const auto pubBytes = pubkey.PublicKey();

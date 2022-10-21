@@ -37,6 +37,8 @@
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
+#include "opentxs/util/WriteBuffer.hpp"
+#include "opentxs/util/Writer.hpp"
 #include "util/Container.hpp"
 
 namespace opentxs::blockchain::database::common
@@ -231,7 +233,7 @@ auto Wallet::StoreTransaction(
         auto write = bulk_.Write(tx, {bytes});
         auto& [index, view] = write.at(0);
 
-        if ((false == view.valid(bytes)) || (index.empty())) {
+        if ((false == view.IsValid(bytes)) || (index.empty())) {
             throw std::runtime_error{
                 "Failed to get write position for transaction"};
         }

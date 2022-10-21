@@ -14,7 +14,6 @@
 #include "internal/serialization/protobuf/Proto.tpp"
 #include "internal/util/Flag.hpp"
 #include "internal/util/LogMacros.hpp"
-#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/storage/Driver.hpp"

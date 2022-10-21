@@ -31,7 +31,6 @@
 #include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/core/PaymentCode.hpp"
 #include "opentxs/crypto/Types.hpp"
-#include "opentxs/crypto/key/HD.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
 #include "opentxs/util/Time.hpp"
@@ -57,6 +56,17 @@ class Account;
 class Notification;
 }  // namespace crypto
 }  // namespace blockchain
+
+namespace crypto
+{
+namespace asymmetric
+{
+namespace key
+{
+class HD;
+}  // namespace key
+}  // namespace asymmetric
+}  // namespace crypto
 
 namespace identifier
 {

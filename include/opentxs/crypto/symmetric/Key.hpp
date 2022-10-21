@@ -8,7 +8,7 @@
 #include "opentxs/Export.hpp"
 #include "opentxs/crypto/symmetric/Types.hpp"
 #include "opentxs/util/Allocated.hpp"
-#include "opentxs/util/Bytes.hpp"
+#include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -33,6 +33,7 @@ class Generic;
 
 class PasswordPrompt;
 class Secret;
+class Writer;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -45,18 +46,18 @@ public:
 
     [[nodiscard]] auto Decrypt(
         ReadView ciphertext,
-        AllocateOutput&& plaintext,
+        Writer&& plaintext,
         const PasswordPrompt& reason) const noexcept -> bool;
     [[nodiscard]] auto Encrypt(
         ReadView plaintext,
-        AllocateOutput&& ciphertext,
+        Writer&& ciphertext,
         Algorithm mode,
         const PasswordPrompt& reason,
         bool attachKey = true,
         ReadView iv = {}) const noexcept -> bool;
     [[nodiscard]] auto Encrypt(
         ReadView plaintext,
-        AllocateOutput&& ciphertext,
+        Writer&& ciphertext,
         const PasswordPrompt& reason,
         bool attachKey = true,
         ReadView iv = {}) const noexcept -> bool;

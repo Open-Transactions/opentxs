@@ -39,8 +39,7 @@
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/crypto/Types.hpp"
-#include "opentxs/crypto/key/EllipticCurve.hpp"
-#include "opentxs/util/Bytes.hpp"
+#include "opentxs/crypto/asymmetric/key/EllipticCurve.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Iterator.hpp"
 #include "opentxs/util/Log.hpp"
@@ -269,12 +268,10 @@ auto DeterministicStateData::process(
 
         switch (script.Type()) {
             case bitcoin::block::Script::Pattern::PayToPubkey: {
-                const auto pKey = element.Key();
+                const auto& key = element.Key();
 
-                OT_ASSERT(pKey);
+                OT_ASSERT(key.IsValid());
                 OT_ASSERT(script.Pubkey().has_value());
-
-                const auto& key = *pKey;
 
                 if (key.PublicKey() == script.Pubkey().value()) {
                     log_(OT_PRETTY_CLASS())(name_)(" element ")(
@@ -347,11 +344,9 @@ auto DeterministicStateData::process(
                     continue;
                 }
 
-                const auto pKey = element.Key();
+                const auto& key = element.Key();
 
-                OT_ASSERT(pKey);
-
-                const auto& key = *pKey;
+                OT_ASSERT(key.IsValid());
 
                 if (key.PublicKey() == script.MultisigPubkey(0).value()) {
                     log_(OT_PRETTY_CLASS())(name_)(" element ")(index)(": ")(

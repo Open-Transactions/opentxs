@@ -18,14 +18,17 @@
 #include "crypto/HDNode.hpp"
 #include "internal/crypto/library/EcdsaProvider.hpp"
 #include "internal/util/LogMacros.hpp"
+#include "internal/util/P0330.hpp"
 #include "opentxs/api/crypto/Crypto.hpp"
 #include "opentxs/api/crypto/Hash.hpp"
 #include "opentxs/core/Secret.hpp"
 #include "opentxs/crypto/HashType.hpp"
-#include "opentxs/crypto/key/HD.hpp"
-#include "opentxs/crypto/key/asymmetric/Algorithm.hpp"
+#include "opentxs/crypto/asymmetric/Algorithm.hpp"
+#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
+#include "opentxs/util/WriteBuffer.hpp"
+#include "opentxs/util/Writer.hpp"
 
 namespace opentxs::crypto
 {
@@ -71,14 +74,17 @@ auto Bip32::Imp::DeriveKey(
     return output;
 }
 
-auto Bip32::Imp::DerivePrivateKey(
-    const key::HD& key,
+auto Bip32::Imp::derive_private_key(
+    const asymmetric::Algorithm type,
+    const proto::HDPath& path,
+    const ReadView parentPrivate,
+    const ReadView parentChaincode,
+    const ReadView parentPublic,
     const Path& pathAppend,
     const PasswordPrompt& reason) const noexcept(false) -> Key
 {
     const auto curve = [&] {
-        if (opentxs::crypto::key::asymmetric::Algorithm::ED25519 ==
-            key.keyType()) {
+        if (asymmetric::Algorithm::ED25519 == type) {
 
             return EcdsaCurve::ed25519;
         } else {
@@ -89,13 +95,8 @@ auto Bip32::Imp::DerivePrivateKey(
     auto output = [&] {
         auto out{blank_.get()};
         auto& [privateKey, chainCode, publicKey, pathOut, parent] = out;
-        auto path = proto::HDPath{};
 
-        if (key.Path(path)) {
-            for (const auto& child : path.child()) {
-                pathOut.emplace_back(child);
-            }
-        }
+        for (const auto& child : path.child()) { pathOut.emplace_back(child); }
 
         for (const auto child : pathAppend) { pathOut.emplace_back(child); }
 
@@ -106,19 +107,16 @@ auto Bip32::Imp::DerivePrivateKey(
         auto& [privateKey, chainCode, publicKey, pathOut, parent] = output;
         auto node = [&] {
             auto ret = HDNode{crypto_};
-            const auto privateKey = key.PrivateKey(reason);
-            const auto chainCode = key.Chaincode(reason);
-            const auto publicKey = key.PublicKey();
 
-            if (false == copy(privateKey, ret.InitPrivate())) {
+            if (false == copy(parentPrivate, ret.InitPrivate())) {
                 throw std::runtime_error("Failed to initialize public key");
             }
 
-            if (false == copy(chainCode, ret.InitCode())) {
+            if (false == copy(parentChaincode, ret.InitCode())) {
                 throw std::runtime_error("Failed to initialize chain code");
             }
 
-            if (false == copy(publicKey, ret.InitPublic())) {
+            if (false == copy(parentPublic, ret.InitPublic())) {
                 throw std::runtime_error("Failed to initialize public key");
             }
 
@@ -141,13 +139,16 @@ auto Bip32::Imp::DerivePrivateKey(
     return output;
 }
 
-auto Bip32::Imp::DerivePublicKey(
-    const key::HD& key,
+auto Bip32::Imp::derive_public_key(
+    const asymmetric::Algorithm type,
+    const proto::HDPath& path,
+    const ReadView parentChaincode,
+    const ReadView parentPublic,
     const Path& pathAppend,
     const PasswordPrompt& reason) const noexcept(false) -> Key
 {
     const auto curve = [&] {
-        if (crypto::key::asymmetric::Algorithm::ED25519 == key.keyType()) {
+        if (crypto::asymmetric::Algorithm::ED25519 == type) {
 
             return EcdsaCurve::ed25519;
         } else {
@@ -158,13 +159,8 @@ auto Bip32::Imp::DerivePublicKey(
     auto output = [&] {
         auto out{blank_.get()};
         auto& [privateKey, chainCode, publicKey, pathOut, parent] = out;
-        auto path = proto::HDPath{};
 
-        if (key.Path(path)) {
-            for (const auto& child : path.child()) {
-                pathOut.emplace_back(child);
-            }
-        }
+        for (const auto& child : path.child()) { pathOut.emplace_back(child); }
 
         for (const auto child : pathAppend) { pathOut.emplace_back(child); }
 
@@ -175,14 +171,12 @@ auto Bip32::Imp::DerivePublicKey(
         auto& [privateKey, chainCode, publicKey, pathOut, parent] = output;
         auto node = [&] {
             auto ret = HDNode{crypto_};
-            const auto chainCode = key.Chaincode(reason);
-            const auto publicKey = key.PublicKey();
 
-            if (false == copy(chainCode, ret.InitCode())) {
+            if (false == copy(parentChaincode, ret.InitCode())) {
                 throw std::runtime_error("Failed to initialize chain code");
             }
 
-            if (false == copy(publicKey, ret.InitPublic())) {
+            if (false == copy(parentPublic, ret.InitPublic())) {
                 throw std::runtime_error("Failed to initialize public key");
             }
 
@@ -208,9 +202,9 @@ auto Bip32::Imp::DerivePublicKey(
 auto Bip32::Imp::root_node(
     const EcdsaCurve& curve,
     const ReadView entropy,
-    const AllocateOutput key,
-    const AllocateOutput code,
-    const AllocateOutput pub) const noexcept -> bool
+    Writer&& key,
+    Writer&& code,
+    Writer&& pub) const noexcept -> bool
 {
     if ((16 > entropy.size()) || (64 < entropy.size())) {
         LogError()(OT_PRETTY_CLASS())("Invalid entropy size (")(entropy.size())(
@@ -220,16 +214,12 @@ auto Bip32::Imp::root_node(
         return false;
     }
 
-    if (false == bool(key) || false == bool(code)) {
-        LogError()(OT_PRETTY_CLASS())("Invalid output allocator").Flush();
+    constexpr auto keyBytes = 32_uz;
+    auto keyOut = key.Reserve(keyBytes);
+    auto codeOut = code.Reserve(keyBytes);
 
-        return false;
-    }
-
-    auto keyOut = key(32);
-    auto codeOut = code(32);
-
-    if (false == keyOut.valid(32) || false == codeOut.valid(32)) {
+    if (false == keyOut.IsValid(keyBytes) ||
+        false == codeOut.IsValid(keyBytes)) {
         LogError()(OT_PRETTY_CLASS())("failed to allocate output space")
             .Flush();
 
@@ -248,14 +238,14 @@ auto Bip32::Imp::root_node(
         return false;
     }
 
-    OT_ASSERT(64 == node.size());
+    OT_ASSERT(64_uz == node.size());
 
     auto* start{node.data()};
-    std::memcpy(keyOut, start, 32);
-    std::advance(start, 32);
-    std::memcpy(codeOut, start, 32);
+    std::memcpy(keyOut, start, keyBytes);
+    std::advance(start, keyBytes);
+    std::memcpy(codeOut, start, keyBytes);
     const auto havePub = provider(curve).ScalarMultiplyBase(
-        {reinterpret_cast<const char*>(node.data()), 32}, pub);
+        {reinterpret_cast<const char*>(node.data()), keyBytes}, std::move(pub));
 
     try {
         if (false == havePub) {

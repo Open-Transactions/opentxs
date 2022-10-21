@@ -53,6 +53,7 @@
 #include "internal/util/Editor.hpp"
 #include "internal/util/Exclusive.hpp"
 #include "internal/util/LogMacros.hpp"
+#include "internal/util/Pimpl.hpp"
 #include "internal/util/SharedPimpl.hpp"
 #include "opentxs/api/Settings.hpp"
 #include "opentxs/api/session/Crypto.hpp"
@@ -70,7 +71,7 @@
 #include "opentxs/core/identifier/Notary.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/core/identifier/UnitDefinition.hpp"
-#include "opentxs/crypto/key/Asymmetric.hpp"
+#include "opentxs/crypto/asymmetric/Key.hpp"
 #include "opentxs/identity/Nym.hpp"
 #include "opentxs/identity/Types.hpp"
 #include "opentxs/identity/wot/claim/Attribute.hpp"
@@ -80,7 +81,6 @@
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/NymEditor.hpp"
 #include "opentxs/util/PasswordPrompt.hpp"
-#include "opentxs/util/Pimpl.hpp"
 #include "otx/common/OTStorage.hpp"
 #include "otx/server/Macros.hpp"
 #include "otx/server/MainFile.hpp"
@@ -419,7 +419,7 @@ auto UserCommandProcessor::check_ping_notary(const Message& msgIn) const -> bool
     auto nymAuthentKey =
         manager_.Factory().InternalSession().AsymmetricKey(serialized);
 
-    if (false == bool(nymAuthentKey.get())) { return false; }
+    if (false == bool(nymAuthentKey.IsValid())) { return false; }
 
     // Not all contracts are signed with the authentication key, but messages
     // are.

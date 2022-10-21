@@ -21,8 +21,8 @@
 #include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/util/Allocator.hpp"
-#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
+#include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -63,6 +63,7 @@ class BlockchainTransaction;
 }  // namespace proto
 
 class Log;
+class Writer;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -109,7 +110,7 @@ public:
     // WARNING do not call this function if another thread has a non-const
     // reference to this object
     virtual auto MinedPosition() const noexcept -> const block::Position& = 0;
-    virtual auto Serialize(const AllocateOutput destination) const noexcept
+    virtual auto Serialize(Writer&& destination) const noexcept
         -> std::optional<std::size_t> = 0;
     virtual auto Serialize(const api::Session& api) const noexcept
         -> std::optional<SerializeType> = 0;

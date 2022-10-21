@@ -13,6 +13,7 @@
 #include "internal/util/P0330.hpp"
 #include "opentxs/core/Secret.hpp"
 #include "opentxs/util/Allocator.hpp"
+#include "opentxs/util/Writer.hpp"
 
 namespace opentxs::crypto::symmetric
 {
@@ -66,7 +67,7 @@ auto Key::ChangePassword(
 
 auto Key::Decrypt(
     ReadView ciphertext,
-    AllocateOutput&& plaintext,
+    Writer&& plaintext,
     const PasswordPrompt& reason) const noexcept -> bool
 {
     return imp_->Decrypt(ciphertext, std::move(plaintext), reason);
@@ -74,7 +75,7 @@ auto Key::Decrypt(
 
 auto Key::Encrypt(
     ReadView plaintext,
-    AllocateOutput&& ciphertext,
+    Writer&& ciphertext,
     Algorithm mode,
     const PasswordPrompt& reason,
     bool attachKey,
@@ -86,7 +87,7 @@ auto Key::Encrypt(
 
 auto Key::Encrypt(
     ReadView plaintext,
-    AllocateOutput&& ciphertext,
+    Writer&& ciphertext,
     const PasswordPrompt& reason,
     bool attachKey,
     ReadView iv) const noexcept -> bool
@@ -117,10 +118,7 @@ auto Key::operator=(const Key& rhs) noexcept -> Key&
     if (imp_ != rhs.imp_) {
         auto* old{imp_};
         imp_ = rhs.imp_->clone(get_allocator());
-        // TODO c++20
-        auto pmr = alloc::PMR<KeyPrivate>{old->get_allocator()};
-        pmr.destroy(old);
-        pmr.deallocate(old, 1_uz);
+        delete old;
     }
 
     return *this;

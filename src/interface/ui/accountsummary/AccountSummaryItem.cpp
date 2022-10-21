@@ -21,6 +21,7 @@
 #include "opentxs/core/display/Definition.hpp"
 #include "opentxs/core/identifier/UnitDefinition.hpp"  // IWYU pragma: keep
 #include "opentxs/util/Bytes.hpp"
+#include "opentxs/util/Writer.hpp"
 
 namespace opentxs::factory
 {

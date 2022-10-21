@@ -3,7 +3,7 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-// IWYU pragma: no_include "opentxs/crypto/key/asymmetric/Algorithm.hpp"
+// IWYU pragma: no_include "opentxs/crypto/asymmetric/Algorithm.hpp"
 // IWYU pragma: no_include "opentxs/crypto/symmetric/Algorithm.hpp"
 // IWYU pragma: no_include "opentxs/crypto/symmetric/Source.hpp"
 
@@ -12,7 +12,7 @@
 #include <memory>
 
 #include "opentxs/api/crypto/Crypto.hpp"
-#include "opentxs/crypto/key/Types.hpp"
+#include "opentxs/crypto/asymmetric/Types.hpp"
 #include "opentxs/crypto/symmetric/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -40,12 +40,10 @@ namespace opentxs::api::internal
 class Crypto : virtual public api::Crypto
 {
 public:
-    virtual auto AsymmetricProvider(
-        opentxs::crypto::key::asymmetric::Algorithm type) const noexcept
-        -> const opentxs::crypto::AsymmetricProvider& = 0;
-    virtual auto EllipticProvider(
-        opentxs::crypto::key::asymmetric::Algorithm type) const noexcept
-        -> const opentxs::crypto::EcdsaProvider& = 0;
+    virtual auto AsymmetricProvider(opentxs::crypto::asymmetric::Algorithm type)
+        const noexcept -> const opentxs::crypto::AsymmetricProvider& = 0;
+    virtual auto EllipticProvider(opentxs::crypto::asymmetric::Algorithm type)
+        const noexcept -> const opentxs::crypto::EcdsaProvider& = 0;
     auto Internal() const noexcept -> const Crypto& final { return *this; }
     virtual auto Libsecp256k1() const noexcept
         -> const opentxs::crypto::Secp256k1& = 0;

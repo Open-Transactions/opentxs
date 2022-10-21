@@ -15,6 +15,7 @@
 #include "internal/core/String.hpp"
 #include "internal/network/zeromq/ListenCallback.hpp"
 #include "internal/util/LogMacros.hpp"
+#include "internal/util/Pimpl.hpp"
 #include "internal/util/SharedPimpl.hpp"
 #include "ottest/fixtures/common/User.hpp"
 

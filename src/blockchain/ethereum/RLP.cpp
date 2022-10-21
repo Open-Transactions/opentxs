@@ -10,7 +10,6 @@
 #include <boost/multiprecision/cpp_int.hpp>
 #include <cstdint>
 #include <cstring>
-#include <functional>
 #include <iterator>
 #include <numeric>
 #include <sstream>
@@ -26,6 +25,8 @@
 #include "opentxs/core/Data.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
+#include "opentxs/util/WriteBuffer.hpp"
+#include "opentxs/util/Writer.hpp"
 
 namespace opentxs::blockchain::ethereum::rlp
 {
@@ -710,8 +711,7 @@ auto Node::Decode(const api::Session& api, ReadView in) noexcept(false) -> Node
     return decoder();
 }
 
-auto Node::Encode(const api::Session& api, AllocateOutput out) const noexcept
-    -> bool
+auto Node::Encode(const api::Session& api, Writer&& out) const noexcept -> bool
 {
     const auto& log = LogInsane();
     const auto bytes = EncodedSize(api);
@@ -726,17 +726,9 @@ auto Node::Encode(const api::Session& api, AllocateOutput out) const noexcept
         return false;
     }
 
-    if (out.operator bool()) {
-        log(OT_PRETTY_CLASS())("output allocator is valid").Flush();
-    } else {
-        LogError()(OT_PRETTY_CLASS())("invalid output allocator").Flush();
+    auto buffer = out.Reserve(bytes);
 
-        return false;
-    }
-
-    auto buffer = out(bytes);
-
-    if (buffer.valid(bytes)) {
+    if (buffer.IsValid(bytes)) {
         log(OT_PRETTY_CLASS())(bytes)(" bytes allocated in output buffer")
             .Flush();
     } else {

@@ -41,6 +41,8 @@
 #include "opentxs/util/Numbers.hpp"
 #include "opentxs/util/PasswordPrompt.hpp"
 #include "opentxs/util/Types.hpp"
+#include "opentxs/util/WriteBuffer.hpp"
+#include "opentxs/util/Writer.hpp"
 #include "util/ScopeGuard.hpp"
 
 namespace opentxs::crypto::symmetric
@@ -72,23 +74,25 @@ auto KeyPrivate::clone(allocator_type alloc) const noexcept -> KeyPrivate*
 
 auto KeyPrivate::Decrypt(
     const proto::Ciphertext&,
-    AllocateOutput&&,
+    Writer&&,
     const PasswordPrompt&) const noexcept -> bool
 {
     return false;
 }
 
-auto KeyPrivate::Decrypt(ReadView, AllocateOutput&&, const PasswordPrompt&)
+auto KeyPrivate::Decrypt(ReadView, Writer&&, const PasswordPrompt&)
     const noexcept -> bool
 {
     return false;
 }
 
-auto KeyPrivate::get_deleter() const noexcept -> std::function<void(void*)>
+auto KeyPrivate::get_deleter() const noexcept
+    -> std::function<void(KeyPrivate*)>
 {
-    return [alloc = alloc::PMR<KeyPrivate>{get_allocator()}](void* in) mutable {
-        // TODO c++20
-        auto* p = static_cast<KeyPrivate*>(in);
+    return [alloc = alloc::PMR<KeyPrivate>{get_allocator()}](
+               KeyPrivate* p) mutable {
+        OT_ASSERT(nullptr != p);
+
         alloc.destroy(p);
         alloc.deallocate(p, 1_uz);
     };
@@ -117,7 +121,7 @@ auto KeyPrivate::Encrypt(
 
 auto KeyPrivate::Encrypt(
     ReadView,
-    AllocateOutput&&,
+    Writer&&,
     Algorithm,
     bool,
     ReadView,
@@ -128,7 +132,7 @@ auto KeyPrivate::Encrypt(
 
 auto KeyPrivate::Encrypt(
     ReadView,
-    AllocateOutput&&,
+    Writer&&,
     bool,
     ReadView,
     const PasswordPrompt&) const noexcept -> bool
@@ -403,7 +407,7 @@ auto Key::clone(allocator_type alloc) const noexcept -> KeyPrivate*
 
 auto Key::Decrypt(
     const proto::Ciphertext& ciphertext,
-    AllocateOutput&& plaintext,
+    Writer&& plaintext,
     const PasswordPrompt& reason) const noexcept -> bool
 {
     try {
@@ -418,7 +422,7 @@ auto Key::Decrypt(
 
 auto Key::Decrypt(
     ReadView ciphertext,
-    AllocateOutput&& plaintext,
+    Writer&& plaintext,
     const PasswordPrompt& reason) const noexcept -> bool
 {
     try {
@@ -437,19 +441,14 @@ auto Key::Decrypt(
 auto Key::decrypt(
     Data& data,
     const proto::Ciphertext& ciphertext,
-    AllocateOutput&& plaintext,
+    Writer&& plaintext,
     const PasswordPrompt& reason) const noexcept(false) -> bool
 {
-    if (false == plaintext.operator bool()) {
-
-        throw std::runtime_error{"invalid output"};
-    }
-
     const auto& input = ciphertext.data();
     const auto bytes = input.size();
-    auto buffer = plaintext(bytes);
+    auto buffer = plaintext.Reserve(bytes);
 
-    if (false == buffer.valid(bytes)) {
+    if (false == buffer.IsValid(bytes)) {
 
         throw std::runtime_error{"failed to allocate output buffer"};
     }
@@ -494,15 +493,6 @@ auto Key::derive(
     return encrypt_key(data, plain, reason);
 }
 
-auto Key::get_deleter() const noexcept -> std::function<void(void*)>
-{
-    return [alloc = alloc::PMR<Key>{get_allocator()}](void* in) mutable {
-        auto* p = static_cast<Key*>(in);
-        alloc.destroy(p);
-        alloc.deallocate(p, 1_uz);
-    };
-}
-
 auto Key::Encrypt(
     ReadView plaintext,
     proto::Ciphertext& ciphertext,
@@ -543,7 +533,7 @@ auto Key::Encrypt(
 
 auto Key::Encrypt(
     ReadView plaintext,
-    AllocateOutput&& ciphertext,
+    Writer&& ciphertext,
     Algorithm mode,
     bool attachKey,
     ReadView iv,
@@ -553,7 +543,7 @@ auto Key::Encrypt(
         auto proto = proto::Ciphertext{};
         encrypt(*data_.lock(), plaintext, mode, proto, reason, attachKey, iv);
 
-        return proto::write(proto, ciphertext);
+        return proto::write(proto, std::move(ciphertext));
     } catch (const std::exception& e) {
         LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
 
@@ -563,7 +553,7 @@ auto Key::Encrypt(
 
 auto Key::Encrypt(
     ReadView plaintext,
-    AllocateOutput&& ciphertext,
+    Writer&& ciphertext,
     bool attachKey,
     ReadView iv,
     const PasswordPrompt& reason) const noexcept -> bool
@@ -710,6 +700,18 @@ auto Key::encrypted_password(
     OT_ASSERT(secondary.plaintext_key_.has_value());
 
     return *secondary.plaintext_key_;
+}
+
+auto Key::get_deleter() const noexcept -> std::function<void(KeyPrivate*)>
+{
+    return [alloc = alloc::PMR<Key>{get_allocator()}](KeyPrivate* in) mutable {
+        auto* p = dynamic_cast<Key*>(in);
+
+        OT_ASSERT(nullptr != p);
+
+        alloc.destroy(p);
+        alloc.deallocate(p, 1_uz);
+    };
 }
 
 auto Key::get_password(const PasswordPrompt& reason, Secret& out) const

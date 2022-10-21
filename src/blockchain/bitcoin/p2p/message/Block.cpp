@@ -16,7 +16,9 @@
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/blockchain/p2p/Types.hpp"
 #include "opentxs/core/ByteArray.hpp"
+#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Log.hpp"
+#include "opentxs/util/Writer.hpp"
 
 namespace opentxs::factory
 {
@@ -77,10 +79,10 @@ Block::Block(
 {
 }
 
-auto Block::payload(AllocateOutput out) const noexcept -> bool
+auto Block::payload(Writer&& out) const noexcept -> bool
 {
     try {
-        if (false == copy(payload_.Bytes(), out)) {
+        if (false == copy(payload_.Bytes(), std::move(out))) {
             throw std::runtime_error{"failed to serialize payload"};
         }
 

@@ -17,21 +17,3 @@ target_include_directories(
   opentxs-common SYSTEM
   PRIVATE "${opentxs_SOURCE_DIR}/deps/robin-hood/src/include"
 )
-set(cxx-install-headers
-    "${opentxs_SOURCE_DIR}/include/opentxs/crypto/key/Asymmetric.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/crypto/key/EllipticCurve.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/crypto/key/Ed25519.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/crypto/key/HD.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/crypto/key/RSA.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/crypto/key/Secp256k1.hpp"
-    "${opentxs_SOURCE_DIR}/include/opentxs/crypto/key/Types.hpp"
-)
-target_sources(opentxs-common PRIVATE ${cxx-install-headers})
-
-if(OPENTXS_STANDALONE)
-  install(
-    FILES ${cxx-install-headers}
-    DESTINATION include/opentxs/crypto/key
-    COMPONENT dev
-  )
-endif()

@@ -26,6 +26,17 @@ class Subaccount;
 }  // namespace crypto
 }  // namespace blockchain
 
+namespace crypto
+{
+namespace asymmetric
+{
+namespace key
+{
+class EllipticCurve;
+}  // namespace key
+}  // namespace asymmetric
+}  // namespace crypto
+
 namespace identifier
 {
 class Generic;
@@ -49,13 +60,14 @@ public:
     virtual auto Contact() const noexcept -> identifier::Generic = 0;
     virtual auto Index() const noexcept -> Bip32Index = 0;
     virtual auto Internal() const noexcept -> internal::Element& = 0;
-    virtual auto Key() const noexcept -> ECKey = 0;
+    virtual auto Key() const noexcept
+        -> const opentxs::crypto::asymmetric::key::EllipticCurve& = 0;
     virtual auto KeyID() const noexcept -> crypto::Key = 0;
     virtual auto Label() const noexcept -> UnallocatedCString = 0;
     virtual auto LastActivity() const noexcept -> Time = 0;
     virtual auto Parent() const noexcept -> const Subaccount& = 0;
     virtual auto PrivateKey(const PasswordPrompt& reason) const noexcept
-        -> ECKey = 0;
+        -> const opentxs::crypto::asymmetric::key::EllipticCurve& = 0;
     virtual auto PubkeyHash() const noexcept -> ByteArray = 0;
     virtual auto Subchain() const noexcept -> crypto::Subchain = 0;
     virtual auto Unconfirmed() const noexcept -> Txids = 0;

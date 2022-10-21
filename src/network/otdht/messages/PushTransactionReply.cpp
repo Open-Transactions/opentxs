@@ -22,6 +22,8 @@
 #include "opentxs/network/otdht/MessageType.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/util/Bytes.hpp"
+#include "opentxs/util/Types.hpp"
+#include "opentxs/util/Writer.hpp"
 
 namespace opentxs::factory
 {

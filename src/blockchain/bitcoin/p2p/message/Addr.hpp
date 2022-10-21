@@ -18,7 +18,6 @@
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/p2p/Types.hpp"
 #include "opentxs/core/ByteArray.hpp"
-#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -43,6 +42,7 @@ class Address;
 }  // namespace blockchain
 
 class ByteArray;
+class Writer;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -107,6 +107,6 @@ private:
     const AddressVector payload_;
 
     using implementation::Message::payload;
-    auto payload(AllocateOutput out) const noexcept -> bool final;
+    auto payload(Writer&& out) const noexcept -> bool final;
 };
 }  // namespace opentxs::blockchain::p2p::bitcoin::message::implementation

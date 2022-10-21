@@ -24,8 +24,8 @@
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/crypto/symmetric/Types.hpp"
 #include "opentxs/util/Allocated.hpp"
-#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Numbers.hpp"
+#include "opentxs/util/Types.hpp"
 #include "util/Allocated.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -54,6 +54,7 @@ class SymmetricKey;
 
 class PasswordPrompt;
 class Secret;
+class Writer;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -72,11 +73,11 @@ public:
         -> KeyPrivate*;
     [[nodiscard]] auto Decrypt(
         const proto::Ciphertext& ciphertext,
-        AllocateOutput&& plaintext,
+        Writer&& plaintext,
         const PasswordPrompt& reason) const noexcept -> bool override;
     [[nodiscard]] virtual auto Decrypt(
         ReadView ciphertext,
-        AllocateOutput&& plaintext,
+        Writer&& plaintext,
         const PasswordPrompt& reason) const noexcept -> bool;
     [[nodiscard]] auto Encrypt(
         ReadView plaintext,
@@ -93,19 +94,19 @@ public:
         ReadView iv = {}) const noexcept -> bool override;
     [[nodiscard]] virtual auto Encrypt(
         ReadView plaintext,
-        AllocateOutput&& ciphertext,
+        Writer&& ciphertext,
         Algorithm mode,
         bool attachKey,
         ReadView iv,
         const PasswordPrompt& reason) const noexcept -> bool;
     [[nodiscard]] virtual auto Encrypt(
         ReadView plaintext,
-        AllocateOutput&& ciphertext,
+        Writer&& ciphertext,
         bool attachKey,
         ReadView iv,
         const PasswordPrompt& reason) const noexcept -> bool;
     [[nodiscard]] virtual auto get_deleter() const noexcept
-        -> std::function<void(void*)>;
+        -> std::function<void(KeyPrivate*)>;
     virtual auto ID(const PasswordPrompt& reason) const noexcept
         -> const identifier::Generic&;
     [[nodiscard]] virtual auto IsValid() const noexcept -> bool;
@@ -144,11 +145,11 @@ public:
         -> KeyPrivate* final;
     [[nodiscard]] auto Decrypt(
         const proto::Ciphertext& ciphertext,
-        AllocateOutput&& plaintext,
+        Writer&& plaintext,
         const PasswordPrompt& reason) const noexcept -> bool final;
     [[nodiscard]] auto Decrypt(
         ReadView ciphertext,
-        AllocateOutput&& plaintext,
+        Writer&& plaintext,
         const PasswordPrompt& reason) const noexcept -> bool final;
     [[nodiscard]] auto Encrypt(
         ReadView plaintext,
@@ -165,19 +166,19 @@ public:
         ReadView iv = {}) const noexcept -> bool final;
     [[nodiscard]] auto Encrypt(
         ReadView plaintext,
-        AllocateOutput&& ciphertext,
+        Writer&& ciphertext,
         Algorithm mode,
         bool attachKey,
         ReadView iv,
         const PasswordPrompt& reason) const noexcept -> bool final;
     [[nodiscard]] auto Encrypt(
         ReadView plaintext,
-        AllocateOutput&& ciphertext,
+        Writer&& ciphertext,
         bool attachKey,
         ReadView iv,
         const PasswordPrompt& reason) const noexcept -> bool final;
     [[nodiscard]] auto get_deleter() const noexcept
-        -> std::function<void(void*)> final;
+        -> std::function<void(KeyPrivate*)> final;
     auto ID(const PasswordPrompt& reason) const noexcept
         -> const identifier::Generic& final;
     auto IsValid() const noexcept -> bool final { return true; }
@@ -278,7 +279,7 @@ private:
     auto decrypt(
         Data& data,
         const proto::Ciphertext& ciphertext,
-        AllocateOutput&& plaintext,
+        Writer&& plaintext,
         const PasswordPrompt& reason) const noexcept(false) -> bool;
     auto derive(
         Data& data,

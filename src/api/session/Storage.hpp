@@ -35,7 +35,6 @@
 #include "opentxs/otx/client/PaymentWorkflowState.hpp"
 #include "opentxs/otx/client/PaymentWorkflowType.hpp"
 #include "opentxs/otx/client/Types.hpp"
-#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
 #include "opentxs/util/Time.hpp"
@@ -112,6 +111,7 @@ class Root;
 class ByteArray;
 class Data;
 class String;
+class Writer;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -253,7 +253,7 @@ public:
         const bool checking = false) const -> bool final;
     auto LoadNym(
         const identifier::Nym& id,
-        AllocateOutput destination,
+        Writer&& destination,
         const bool checking = false) const -> bool final;
     auto Load(
         const identifier::Nym& nymID,

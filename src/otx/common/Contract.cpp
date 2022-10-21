@@ -20,6 +20,7 @@
 #include "internal/api/session/Session.hpp"
 #include "internal/core/Armored.hpp"
 #include "internal/core/String.hpp"
+#include "internal/crypto/asymmetric/Key.hpp"
 #include "internal/crypto/key/Keypair.hpp"
 #include "internal/crypto/library/AsymmetricProvider.hpp"
 #include "internal/crypto/library/HashingProvider.hpp"
@@ -30,22 +31,21 @@
 #include "internal/otx/common/crypto/Signature.hpp"
 #include "internal/otx/common/util/Tag.hpp"
 #include "internal/util/LogMacros.hpp"
+#include "internal/util/Pimpl.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/api/session/Wallet.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
-#include "opentxs/crypto/key/Asymmetric.hpp"
+#include "opentxs/crypto/asymmetric/Key.hpp"
 #include "opentxs/identity/Nym.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
-#include "opentxs/util/Pimpl.hpp"
 #include "otx/common/OTStorage.hpp"
 
 namespace opentxs
 {
-
 Contract::Contract(const api::Session& api)
     : Contract(
           api,
@@ -336,7 +336,7 @@ auto Contract::SignContract(
     const PasswordPrompt& reason) -> bool
 {
     const auto& key = nym.GetPrivateSignKey();
-    sig_hash_type_ = key.SigHashType();
+    sig_hash_type_ = key.PreferredHash();
 
     return SignContract(key, theSignature, sig_hash_type_, reason);
 }
@@ -348,7 +348,7 @@ auto Contract::SignContractAuthent(
     const PasswordPrompt& reason) -> bool
 {
     const auto& key = nym.GetPrivateAuthKey();
-    sig_hash_type_ = key.SigHashType();
+    sig_hash_type_ = key.PreferredHash();
 
     return SignContract(key, theSignature, sig_hash_type_, reason);
 }
@@ -366,11 +366,11 @@ auto Contract::SignContractAuthent(
 // ready yet to signing anything with.
 //
 auto Contract::SignWithKey(
-    const crypto::key::Asymmetric& key,
+    const crypto::asymmetric::Key& key,
     const PasswordPrompt& reason) -> bool
 {
     auto sig = Signature::Factory(api_);
-    sig_hash_type_ = key.SigHashType();
+    sig_hash_type_ = key.PreferredHash();
     bool bSigned = SignContract(key, sig, sig_hash_type_, reason);
 
     if (bSigned) {
@@ -419,7 +419,7 @@ auto Contract::SignWithKey(
 // the signature.
 // (Simple.) So I will put the Signature Metadata into its own class, so not
 // only a signature
-// can use it, but also the crypto::key::Asymmetric class can use it and also
+// can use it, but also the crypto::asymmetric::Key class can use it and also
 // Credential can use it.
 // Then Contract just uses it if it's there. Also we don't have to pass it in
 // here as separate
@@ -444,14 +444,14 @@ auto Contract::SignWithKey(
 // It is NOT attached to the contract.  This is just a utility function.
 //
 auto Contract::SignContract(
-    const crypto::key::Asymmetric& key,
+    const crypto::asymmetric::Key& key,
     Signature& theSignature,
     const crypto::HashType hashType,
     const PasswordPrompt& reason) -> bool
 {
     // We assume if there's any important metadata, it will already
     // be on the key, so we just copy it over to the signature.
-    const auto* metadata = key.GetMetadata();
+    const auto* metadata = key.Internal().GetMetadata();
 
     if (nullptr != metadata) { theSignature.getMetaData() = *(metadata); }
 
@@ -465,7 +465,7 @@ auto Contract::SignContract(
     //
     UpdateContents(reason);
 
-    const auto& engine = key.engine();
+    const auto& engine = key.Internal().Provider();
 
     if (false == engine.SignContract(
                      api_,
@@ -528,10 +528,10 @@ auto Contract::VerifySignature(const identity::Nym& nym) const -> bool
     return false;
 }
 
-auto Contract::VerifyWithKey(const crypto::key::Asymmetric& key) const -> bool
+auto Contract::VerifyWithKey(const crypto::asymmetric::Key& key) const -> bool
 {
     for (const auto& sig : list_signatures_) {
-        const auto* metadata = key.GetMetadata();
+        const auto* metadata = key.Internal().GetMetadata();
 
         if ((nullptr != metadata) && metadata->HasMetadata() &&
             sig->getMetaData().HasMetadata()) {
@@ -630,11 +630,11 @@ auto Contract::VerifySignature(
 }
 
 auto Contract::VerifySignature(
-    const crypto::key::Asymmetric& key,
+    const crypto::asymmetric::Key& key,
     const Signature& theSignature,
     const crypto::HashType hashType) const -> bool
 {
-    const auto* metadata = key.GetMetadata();
+    const auto* metadata = key.Internal().GetMetadata();
 
     // See if this key could possibly have even signed this signature.
     // (The metadata may eliminate it as a possibility.)
@@ -643,7 +643,7 @@ auto Contract::VerifySignature(
         if (theSignature.getMetaData() != *(metadata)) { return false; }
     }
 
-    const auto& engine = key.engine();
+    const auto& engine = key.Internal().Provider();
 
     if (false == engine.VerifyContractSignature(
                      api_,
@@ -1124,7 +1124,7 @@ auto Contract::ParseRawFile() -> bool
                         // characters std::int64_t.) knms represents the
                         // first characters of the Key type, NymID,
                         // Master Cred ID, and ChildCred ID. Key type is
-                        // (A|E|S) and the others are base62.
+                        // (A|E|S) and the others are base64.
                         {
                             LogConsole()(OT_PRETTY_CLASS())(
                                 "Error in signature for contract ")(

@@ -11,6 +11,7 @@
 #include <utility>
 
 #include "opentxs/interface/rpc/request/ListAccounts.hpp"
+#include "opentxs/util/Writer.hpp"
 
 namespace opentxs::rpc::response::implementation
 {

@@ -24,6 +24,7 @@
 #include "opentxs/network/asio/Socket.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Log.hpp"
+#include "opentxs/util/Types.hpp"
 
 namespace ip = boost::asio::ip;
 

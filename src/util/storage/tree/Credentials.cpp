@@ -20,7 +20,7 @@
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/serialization/protobuf/verify/Credential.hpp"
 #include "internal/serialization/protobuf/verify/StorageCredentials.hpp"
-#include "opentxs/crypto/key/asymmetric/Mode.hpp"
+#include "opentxs/crypto/asymmetric/Mode.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/storage/Driver.hpp"
 #include "util/storage/Plugin.hpp"
@@ -76,8 +76,7 @@ auto Credentials::check_existing(const bool incoming, Metadata& metadata) const
         }
 
         isPrivate =
-            (crypto::key::asymmetric::Mode::Private ==
-             translate(existing->mode()));
+            (crypto::asymmetric::Mode::Private == translate(existing->mode()));
     }
 
     return !isPrivate;
@@ -131,8 +130,7 @@ auto Credentials::Load(
 
     if (!loaded) { return false; }
 
-    isPrivate =
-        (crypto::key::asymmetric::Mode::Private == translate(cred->mode()));
+    isPrivate = (crypto::asymmetric::Mode::Private == translate(cred->mode()));
 
     return true;
 }

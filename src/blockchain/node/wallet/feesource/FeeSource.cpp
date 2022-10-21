@@ -33,6 +33,7 @@
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Options.hpp"
 #include "opentxs/util/WorkType.hpp"
+#include "opentxs/util/Writer.hpp"
 #include "util/Work.hpp"
 
 namespace opentxs::factory

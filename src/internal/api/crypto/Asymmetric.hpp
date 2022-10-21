@@ -7,6 +7,8 @@
 
 #include "opentxs/api/crypto/Asymmetric.hpp"
 
+#include "opentxs/util/Allocator.hpp"
+
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
@@ -17,12 +19,16 @@ class Session;
 
 namespace crypto
 {
+namespace asymmetric
+{
 namespace key
 {
-class Asymmetric;
 class EllipticCurve;
 class HD;
 }  // namespace key
+
+class Key;
+}  // namespace asymmetric
 }  // namespace crypto
 
 namespace proto
@@ -39,13 +45,18 @@ class Asymmetric : virtual public api::crypto::Asymmetric
 public:
     virtual auto API() const noexcept -> const api::Session& = 0;
     virtual auto InstantiateECKey(
-        const proto::AsymmetricKey& serialized) const noexcept
-        -> std::unique_ptr<opentxs::crypto::key::EllipticCurve> = 0;
-    virtual auto InstantiateHDKey(const proto::AsymmetricKey& serialized)
-        const noexcept -> std::unique_ptr<opentxs::crypto::key::HD> = 0;
+        const proto::AsymmetricKey& serialized,
+        alloc::Default alloc = {}) const noexcept
+        -> opentxs::crypto::asymmetric::key::EllipticCurve = 0;
+    virtual auto InstantiateHDKey(
+        const proto::AsymmetricKey& serialized,
+        alloc::Default alloc = {}) const noexcept
+        -> opentxs::crypto::asymmetric::key::HD = 0;
     using crypto::Asymmetric::InstantiateKey;
-    virtual auto InstantiateKey(const proto::AsymmetricKey& serialized)
-        const noexcept -> std::unique_ptr<opentxs::crypto::key::Asymmetric> = 0;
+    virtual auto InstantiateKey(
+        const proto::AsymmetricKey& serialized,
+        alloc::Default alloc = {}) const noexcept
+        -> opentxs::crypto::asymmetric::Key = 0;
     auto Internal() const noexcept -> const Asymmetric& final { return *this; }
 
     auto Internal() noexcept -> Asymmetric& final { return *this; }

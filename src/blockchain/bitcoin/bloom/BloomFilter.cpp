@@ -12,7 +12,6 @@
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
-#include <functional>
 #include <iterator>
 #include <limits>
 #include <stdexcept>
@@ -28,6 +27,8 @@
 #include "opentxs/core/Data.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
+#include "opentxs/util/WriteBuffer.hpp"
+#include "opentxs/util/Writer.hpp"
 
 namespace opentxs::factory
 {
@@ -178,11 +179,9 @@ auto BloomFilter::hash(const Data& input, std::size_t hash_index) const noexcept
     return hash;
 }
 
-auto BloomFilter::Serialize(AllocateOutput out) const noexcept -> bool
+auto BloomFilter::Serialize(Writer&& out) const noexcept -> bool
 {
     try {
-        if (!out) { throw std::runtime_error{"invalid output allocator"}; }
-
         static constexpr auto fixed =
             sizeof(blockchain::internal::SerializedBloomFilter);
         const auto filter = [&] {
@@ -192,9 +191,9 @@ auto BloomFilter::Serialize(AllocateOutput out) const noexcept -> bool
             return out;
         }();
         const auto bytes = fixed + filter.size();
-        auto output = out(bytes);
+        auto output = out.Reserve(bytes);
 
-        if (false == output.valid(bytes)) {
+        if (false == output.IsValid(bytes)) {
             throw std::runtime_error{"failed to allocate output space"};
         }
 

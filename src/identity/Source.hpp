@@ -16,7 +16,7 @@
 #include "internal/util/Types.hpp"
 #include "opentxs/core/PaymentCode.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
-#include "opentxs/crypto/key/Asymmetric.hpp"
+#include "opentxs/crypto/asymmetric/Key.hpp"
 #include "opentxs/identity/Source.hpp"
 #include "opentxs/identity/SourceType.hpp"
 #include "opentxs/util/Numbers.hpp"
@@ -95,14 +95,14 @@ private:
     const api::session::Factory& factory_;
 
     identity::SourceType type_;
-    OTAsymmetricKey pubkey_;
+    crypto::asymmetric::Key pubkey_;
     PaymentCode payment_code_;
     VersionNumber version_;
 
     static auto deserialize_pubkey(
         const api::session::Factory& factory,
         const identity::SourceType type,
-        const proto::NymIDSource& serialized) -> OTAsymmetricKey;
+        const proto::NymIDSource& serialized) -> crypto::asymmetric::Key;
     static auto deserialize_paymentcode(
         const api::session::Factory& factory,
         const identity::SourceType type,

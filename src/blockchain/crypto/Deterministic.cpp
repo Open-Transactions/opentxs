@@ -34,8 +34,8 @@
 #include "opentxs/core/Amount.hpp"  // IWYU pragma: keep
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
-#include "opentxs/crypto/key/EllipticCurve.hpp"
-#include "opentxs/crypto/key/asymmetric/Role.hpp"
+#include "opentxs/crypto/asymmetric/Role.hpp"
+#include "opentxs/crypto/asymmetric/key/EllipticCurve.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/PasswordPrompt.hpp"
 
@@ -472,13 +472,12 @@ auto Deterministic::generate(
 
     if (max_index_ <= index) { throw std::runtime_error("Account is full"); }
 
-    auto pKey = PrivateKey(type, index, reason);
+    const auto& key = PrivateKey(type, index, reason);
 
-    if (false == bool(pKey)) {
+    if (false == key.IsValid()) {
         throw std::runtime_error("Failed to generate key");
     }
 
-    const auto& key = *pKey;
     const auto& blockchain = parent_.Parent().Parent();
     const auto [it, added] = addressMap.emplace(
         std::piecewise_construct,
@@ -572,14 +571,14 @@ auto Deterministic::init(const PasswordPrompt& reason) noexcept(false) -> void
 }
 
 auto Deterministic::Key(const Subchain type, const Bip32Index index)
-    const noexcept -> ECKey
+    const noexcept -> const opentxs::crypto::asymmetric::key::EllipticCurve&
 {
     try {
 
         return data_.Get(type).map_.at(index)->Key();
     } catch (...) {
 
-        return nullptr;
+        return opentxs::crypto::asymmetric::key::EllipticCurve::Blank();
     }
 }
 
@@ -715,12 +714,12 @@ auto Deterministic::Reserve(
 }
 
 auto Deterministic::RootNode(const PasswordPrompt& reason) const noexcept
-    -> blockchain::crypto::HDKey
+    -> const opentxs::crypto::asymmetric::key::HD&
 {
     auto& [mutex, key] = cached_key_;
     auto lock = Lock{mutex};
 
-    if (key) { return key; }
+    if (key.IsValid()) { return key; }
 
     auto fingerprint(path_.root());
     auto path = UnallocatedVector<Bip32Index>{};
@@ -731,8 +730,8 @@ auto Deterministic::RootNode(const PasswordPrompt& reason) const noexcept
         fingerprint,
         opentxs::crypto::EcdsaCurve::secp256k1,
         path,
-        opentxs::crypto::key::asymmetric::Role::Sign,
-        opentxs::crypto::key::EllipticCurve::MaxVersion,
+        opentxs::crypto::asymmetric::Role::Sign,
+        opentxs::crypto::asymmetric::key::EllipticCurve::MaxVersion(),
         reason);
 
     return key;

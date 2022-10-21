@@ -6,15 +6,20 @@
 #include "0_stdafx.hpp"          // IWYU pragma: associated
 #include "crypto/bip32/Imp.hpp"  // IWYU pragma: associated
 
+#include <HDPath.pb.h>
 #include <cstddef>
 #include <cstring>
-#include <functional>
 #include <iterator>
 #include <stdexcept>
+#include <utility>
 
+#include "crypto/asymmetric/key/hd/HDPrivate.hpp"
 #include "internal/api/Crypto.hpp"
+#include "internal/core/Core.hpp"
+#include "internal/crypto/asymmetric/Key.hpp"
 #include "internal/crypto/library/EcdsaProvider.hpp"
 #include "internal/util/LogMacros.hpp"
+#include "internal/util/P0330.hpp"
 #include "opentxs/api/Factory.hpp"
 #include "opentxs/api/crypto/Crypto.hpp"
 #include "opentxs/api/crypto/Encode.hpp"
@@ -25,9 +30,13 @@
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/crypto/Bip32Child.hpp"
 #include "opentxs/crypto/HashType.hpp"
-#include "opentxs/crypto/key/asymmetric/Algorithm.hpp"
+#include "opentxs/crypto/asymmetric/Algorithm.hpp"
+#include "opentxs/crypto/asymmetric/key/HD.hpp"
+#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
+#include "opentxs/util/WriteBuffer.hpp"
+#include "opentxs/util/Writer.hpp"
 #include "util/HDIndex.hpp"
 
 namespace opentxs::crypto
@@ -42,10 +51,10 @@ Bip32::Imp::Imp(const api::Crypto& crypto) noexcept
 auto Bip32::Imp::ckd_hardened(
     const HDNode& node,
     const be::big_uint32_buf_t i,
-    const WritableView& data) const noexcept -> void
+    WriteBuffer& data) const noexcept -> void
 {
     static const auto padding = std::byte{0};
-    auto* out{data.as<std::byte>()};
+    auto* out = data.as<std::byte>();
     std::memcpy(out, &padding, sizeof(padding));
     std::advance(out, 1);
     std::memcpy(out, node.ParentPrivate().data(), 32);
@@ -56,20 +65,65 @@ auto Bip32::Imp::ckd_hardened(
 auto Bip32::Imp::ckd_normal(
     const HDNode& node,
     const be::big_uint32_buf_t i,
-    const WritableView& data) const noexcept -> void
+    WriteBuffer& data) const noexcept -> void
 {
-    auto* out{data.as<std::byte>()};
+    auto* out = data.as<std::byte>();
     std::memcpy(out, node.ParentPublic().data(), 33);
     std::advance(out, 33);
     std::memcpy(out, &i, sizeof(i));
 }
 
-auto Bip32::Imp::decode(const UnallocatedCString& serialized) const noexcept
-    -> ByteArray
+auto Bip32::Imp::decode(std::string_view in) const noexcept -> ByteArray
 {
-    auto input = crypto_.Encode().IdentifierDecode(serialized);
+    auto out = ByteArray{};
 
-    return ByteArray{input.c_str(), input.size()};
+    if (crypto_.Encode().Base58CheckDecode(in, out.WriteInto())) {
+
+        return out;
+    } else {
+
+        return {};
+    }
+}
+
+auto Bip32::Imp::DerivePrivateKey(
+    const asymmetric::key::HD& key,
+    const Path& pathAppend,
+    const PasswordPrompt& reason) const noexcept(false) -> Key
+{
+    return derive_private_key(
+        key.Type(),
+        [&] {
+            auto out = proto::HDPath{};
+            key.Internal().Path(out);
+
+            return out;
+        }(),
+        key.PrivateKey(reason),
+        key.Chaincode(reason),
+        key.PublicKey(),
+        pathAppend,
+        reason);
+}
+
+auto Bip32::Imp::DerivePrivateKey(
+    const asymmetric::key::HDPrivate& key,
+    const Path& pathAppend,
+    const PasswordPrompt& reason) const noexcept(false) -> Key
+{
+    return derive_private_key(
+        key.Type(),
+        [&] {
+            auto out = proto::HDPath{};
+            key.Path(out);
+
+            return out;
+        }(),
+        key.PrivateKey(reason),
+        key.Chaincode(reason),
+        key.PublicKey(),
+        pathAppend,
+        reason);
 }
 
 auto Bip32::Imp::derive_private(
@@ -91,7 +145,7 @@ auto Bip32::Imp::derive_private(
     auto success = crypto_.Hash().HMAC(
         crypto::HashType::Sha512,
         node.ParentCode(),
-        reader(data),
+        data,
         preallocated(hash.size(), hash.data()));
 
     if (false == success) {
@@ -112,7 +166,7 @@ auto Bip32::Imp::derive_private(
         }
 
         success = ecdsa.ScalarMultiplyBase(
-            reader(node.ChildPrivate()(32)), node.ChildPublic());
+            node.ChildPrivate().Reserve(32), node.ChildPublic());
 
         if (false == success) {
             LogError()(OT_PRETTY_CLASS())("Failed to calculate public key")
@@ -132,6 +186,44 @@ auto Bip32::Imp::derive_private(
     node.Next();
 
     return true;
+}
+
+auto Bip32::Imp::DerivePublicKey(
+    const asymmetric::key::HD& key,
+    const Path& pathAppend,
+    const PasswordPrompt& reason) const noexcept(false) -> Key
+{
+    return derive_public_key(
+        key.Type(),
+        [&] {
+            auto out = proto::HDPath{};
+            key.Internal().Path(out);
+
+            return out;
+        }(),
+        key.Chaincode(reason),
+        key.PublicKey(),
+        pathAppend,
+        reason);
+}
+
+auto Bip32::Imp::DerivePublicKey(
+    const asymmetric::key::HDPrivate& key,
+    const Path& pathAppend,
+    const PasswordPrompt& reason) const noexcept(false) -> Key
+{
+    return derive_public_key(
+        key.Type(),
+        [&] {
+            auto out = proto::HDPath{};
+            key.Path(out);
+
+            return out;
+        }(),
+        key.Chaincode(reason),
+        key.PublicKey(),
+        pathAppend,
+        reason);
 }
 
 auto Bip32::Imp::derive_public(
@@ -157,7 +249,7 @@ auto Bip32::Imp::derive_public(
     auto success = crypto_.Hash().HMAC(
         crypto::HashType::Sha512,
         node.ParentCode(),
-        reader(data),
+        data,
         preallocated(hash.size(), hash.data()));
 
     if (false == success) {
@@ -192,7 +284,7 @@ auto Bip32::Imp::derive_public(
 }
 
 auto Bip32::Imp::DeserializePrivate(
-    const UnallocatedCString& serialized,
+    std::string_view serialized,
     Bip32Network& network,
     Bip32Depth& depth,
     Bip32Fingerprint& parent,
@@ -224,7 +316,7 @@ auto Bip32::Imp::DeserializePrivate(
 }
 
 auto Bip32::Imp::DeserializePublic(
-    const UnallocatedCString& serialized,
+    std::string_view serialized,
     Bip32Network& network,
     Bip32Depth& depth,
     Bip32Fingerprint& parent,
@@ -286,7 +378,7 @@ auto Bip32::Imp::IsHard(const Bip32Index index) noexcept -> bool
 auto Bip32::Imp::provider(const EcdsaCurve& curve) const noexcept
     -> const crypto::EcdsaProvider&
 {
-    using Key = key::asymmetric::Algorithm;
+    using Key = asymmetric::Algorithm;
 
     switch (curve) {
         case EcdsaCurve::ed25519: {
@@ -315,44 +407,53 @@ auto Bip32::Imp::SeedID(const ReadView entropy) const -> identifier::Generic
 }
 
 auto Bip32::Imp::SerializePrivate(
-    const Bip32Network network,
-    const Bip32Depth depth,
-    const Bip32Fingerprint parent,
-    const Bip32Index index,
-    const Data& chainCode,
-    const Secret& key) const -> UnallocatedCString
+    Bip32Network network,
+    Bip32Depth depth,
+    Bip32Fingerprint parent,
+    Bip32Index index,
+    ReadView chainCode,
+    ReadView key,
+    Writer&& out) const noexcept -> bool
 {
     const auto size = key.size();
 
-    if (32 != size) {
+    if (32_uz != size) {
         LogError()(OT_PRETTY_CLASS())("Invalid key size (")(size)(")").Flush();
 
         return {};
     }
 
-    auto input = ByteArray{};  // TODO should be secret
+    auto input = factory::Secret(0_uz);
     input.DecodeHex("0x00");
 
-    OT_ASSERT(1 == input.size());
+    OT_ASSERT(1_uz == input.size());
 
-    input.Concatenate(key.Bytes());
+    input.Concatenate(key);
 
-    OT_ASSERT(33 == input.size());
+    OT_ASSERT(33_uz == input.size());
 
-    return SerializePublic(network, depth, parent, index, chainCode, input);
+    return SerializePublic(
+        network,
+        depth,
+        parent,
+        index,
+        chainCode,
+        input.Bytes(),
+        std::move(out));
 }
 
 auto Bip32::Imp::SerializePublic(
-    const Bip32Network network,
-    const Bip32Depth depth,
-    const Bip32Fingerprint parent,
-    const Bip32Index index,
-    const Data& chainCode,
-    const Data& key) const -> UnallocatedCString
+    Bip32Network network,
+    Bip32Depth depth,
+    Bip32Fingerprint parent,
+    Bip32Index index,
+    ReadView chainCode,
+    ReadView key,
+    Writer&& out) const noexcept -> bool
 {
     auto size = key.size();
 
-    if (33 != size) {
+    if (33_uz != size) {
         LogError()(OT_PRETTY_CLASS())("Invalid key size (")(size)(")").Flush();
 
         return {};
@@ -360,7 +461,7 @@ auto Bip32::Imp::SerializePublic(
 
     size = chainCode.size();
 
-    if (32 != size) {
+    if (32_uz != size) {
         LogError()(OT_PRETTY_CLASS())("Invalid chain code size (")(size)(")")
             .Flush();
 
@@ -376,6 +477,8 @@ auto Bip32::Imp::SerializePublic(
 
     OT_ASSERT_MSG(78 == output.size(), std::to_string(output.size()).c_str());
 
-    return crypto_.Encode().IdentifierEncode(output.Bytes());
+    return crypto_.Encode().Base58CheckEncode(output.Bytes(), std::move(out));
 }
+
+Bip32::Imp::~Imp() = default;
 }  // namespace opentxs::crypto

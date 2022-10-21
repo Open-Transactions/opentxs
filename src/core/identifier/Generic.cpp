@@ -18,6 +18,7 @@
 #include "opentxs/core/identifier/Algorithm.hpp"
 #include "opentxs/core/identifier/Type.hpp"
 #include "opentxs/core/identifier/Types.hpp"
+#include "opentxs/util/Writer.hpp"
 
 namespace opentxs::factory
 {
@@ -375,10 +376,7 @@ auto Generic::swap(Generic& rhs) noexcept -> void
 
 auto Generic::Type() const noexcept -> identifier::Type { return imp_->Type(); }
 
-auto Generic::WriteInto() noexcept -> AllocateOutput
-{
-    return imp_->WriteInto();
-}
+auto Generic::WriteInto() noexcept -> Writer { return imp_->WriteInto(); }
 
 auto Generic::zeroMemory() -> void { imp_->zeroMemory(); }
 

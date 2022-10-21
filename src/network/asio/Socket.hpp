@@ -13,7 +13,7 @@
 #include <memory>
 
 #include "opentxs/network/asio/Socket.hpp"
-#include "opentxs/util/Bytes.hpp"
+#include "opentxs/util/Types.hpp"
 #include "opentxs/util/WorkType.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)

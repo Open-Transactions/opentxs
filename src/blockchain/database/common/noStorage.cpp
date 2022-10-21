@@ -7,6 +7,8 @@
 #include "blockchain/database/common/Blocks.hpp"  // IWYU pragma: associated
 #include "blockchain/database/common/Sync.hpp"    // IWYU pragma: associated
 
+#include "opentxs/util/Writer.hpp"
+
 namespace opentxs::blockchain::database::common
 {
 struct Blocks::Imp {

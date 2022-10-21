@@ -40,10 +40,10 @@
 #include "opentxs/otx/OperationType.hpp"
 #include "opentxs/otx/blind/Purse.hpp"
 #include "opentxs/otx/client/Types.hpp"
-#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
 #include "opentxs/util/PasswordPrompt.hpp"
+#include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs

@@ -33,6 +33,9 @@ target_sources(
     "Symmetric.cpp"
     "Symmetric.hpp"
 )
+target_include_directories(
+  opentxs-common SYSTEM PRIVATE "${opentxs_SOURCE_DIR}/deps/frozen/include"
+)
 set(cxx-install-headers
     "${opentxs_SOURCE_DIR}/include/opentxs/api/crypto/Asymmetric.hpp"
     "${opentxs_SOURCE_DIR}/include/opentxs/api/crypto/Config.hpp"

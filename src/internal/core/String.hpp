@@ -10,9 +10,9 @@
 #include <iosfwd>
 #include <utility>
 
-#include "opentxs/util/Bytes.hpp"
+#include "internal/util/Pimpl.hpp"
 #include "opentxs/util/Container.hpp"
-#include "opentxs/util/Pimpl.hpp"
+#include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -27,6 +27,7 @@ class Contract;
 class NymFile;
 class Signature;
 class String;
+class Writer;
 
 using OTString = Pimpl<String>;
 }  // namespace opentxs
@@ -117,7 +118,7 @@ public:
     virtual auto sgetc() -> char = 0;
     virtual auto swap(String& rhs) -> void = 0;
     virtual auto reset() -> void = 0;
-    virtual auto WriteInto() noexcept -> AllocateOutput = 0;
+    virtual auto WriteInto() noexcept -> Writer = 0;
 
     String(String&& rhs) = delete;
     auto operator=(const String& rhs) -> String& = delete;

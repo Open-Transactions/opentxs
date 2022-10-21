@@ -227,14 +227,10 @@ protected:
                     for (const auto index : indices) {
                         const auto& element = alice_account_.BalanceElement(
                             Subchain::External, index);
-                        const auto key = element.Key();
-
-                        OT_ASSERT(key);
-
                         output.emplace_back(
                             amount_,
                             miner_.Factory().BitcoinScriptP2PK(
-                                test_chain_, *key),
+                                test_chain_, element.Key()),
                             keys);
                     }
 

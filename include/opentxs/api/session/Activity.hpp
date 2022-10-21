@@ -14,7 +14,6 @@
 
 #include "opentxs/Export.hpp"
 #include "opentxs/otx/client/Types.hpp"
-#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Time.hpp"
 #include "opentxs/util/Types.hpp"
@@ -65,6 +64,7 @@ class StorageThread;
 
 class PasswordPrompt;
 class PeerObject;
+class Writer;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -184,7 +184,7 @@ public:
     virtual auto Thread(
         const identifier::Nym& nymID,
         const identifier::Generic& threadID,
-        AllocateOutput output) const noexcept -> bool = 0;
+        Writer&& output) const noexcept -> bool = 0;
     /**   Obtain a list of thread ids for the specified nym
      *
      *    \param[in] nym the identifier of the nym

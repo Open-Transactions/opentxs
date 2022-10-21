@@ -11,7 +11,6 @@
 #include "opentxs/core/Types.hpp"
 #include "opentxs/core/contract/Signable.hpp"
 #include "opentxs/core/contract/Types.hpp"
-#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -31,6 +30,7 @@ class Account;
 class AccountVisitor;
 class Amount;
 class PasswordPrompt;
+class Writer;
 
 using OTUnitDefinition = SharedPimpl<contract::Unit>;
 }  // namespace opentxs
@@ -56,8 +56,8 @@ public:
     using Signable::Serialize;
     virtual auto Serialize(SerializedType&, bool includeNym = false) const
         -> bool = 0;
-    virtual auto Serialize(AllocateOutput destination, bool includeNym = false)
-        const -> bool = 0;
+    virtual auto Serialize(Writer&& destination, bool includeNym = false) const
+        -> bool = 0;
     virtual auto Type() const -> contract::UnitType = 0;
     virtual auto UnitOfAccount() const -> opentxs::UnitType = 0;
     virtual auto VisitAccountRecords(

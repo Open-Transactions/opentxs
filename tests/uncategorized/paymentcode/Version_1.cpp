@@ -6,7 +6,6 @@
 #include <gtest/gtest.h>
 #include <opentxs/opentxs.hpp>
 #include <cstdint>
-#include <memory>
 
 #include "ottest/data/crypto/PaymentCodeV1.hpp"
 #include "ottest/fixtures/paymentcode/Helpers.hpp"
@@ -19,10 +18,11 @@ public:
     static constexpr auto version_ = std::uint8_t{1};
     static constexpr auto chain_ = ot::blockchain::Type::Bitcoin;
 
-    const ot::crypto::key::EllipticCurve& alice_blind_secret_;
-    const ot::crypto::key::EllipticCurve& alice_blind_public_;
+    const ot::crypto::asymmetric::key::EllipticCurve& alice_blind_secret_;
+    const ot::crypto::asymmetric::key::EllipticCurve& alice_blind_public_;
 
-    auto KeyToAddress(const ot::crypto::key::EllipticCurve& key) const noexcept
+    auto KeyToAddress(
+        const ot::crypto::asymmetric::key::EllipticCurve& key) const noexcept
     {
         constexpr auto style = ot::blockchain::crypto::AddressStyle::P2PKH;
 
@@ -66,13 +66,10 @@ TEST_F(Test_PaymentCode_v1, generate)
 TEST_F(Test_PaymentCode_v1, outgoing)
 {
     for (auto i = ot::Bip32Index{0}; i < 10u; ++i) {
-        const auto pKey = alice_pc_secret_.Outgoing(
+        const auto key = alice_pc_secret_.Outgoing(
             bob_pc_public_, i, chain_, reason_, version_);
 
-        ASSERT_TRUE(pKey);
-
-        const auto& key = *pKey;
-
+        ASSERT_TRUE(key.IsValid());
         EXPECT_EQ(
             KeyToAddress(key),
             GetPaymentCodeVectors1().bob_.receiving_address_.at(i));
@@ -82,13 +79,10 @@ TEST_F(Test_PaymentCode_v1, outgoing)
 TEST_F(Test_PaymentCode_v1, incoming)
 {
     for (auto i = ot::Bip32Index{0}; i < 10u; ++i) {
-        const auto pKey = bob_pc_secret_.Incoming(
+        const auto key = bob_pc_secret_.Incoming(
             alice_pc_public_, i, chain_, reason_, version_);
 
-        ASSERT_TRUE(pKey);
-
-        const auto& key = *pKey;
-
+        ASSERT_TRUE(key.IsValid());
         EXPECT_EQ(
             KeyToAddress(key),
             GetPaymentCodeVectors1().bob_.receiving_address_.at(i));

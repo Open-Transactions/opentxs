@@ -16,6 +16,7 @@
 #include "internal/util/Shared.hpp"
 #include "opentxs/api/session/Wallet.hpp"
 #include "opentxs/otx/blind/CashType.hpp"
+#include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs

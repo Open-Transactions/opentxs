@@ -67,6 +67,8 @@ class UnitDefinition;
 using NymLambda = std::function<void(const proto::Nym&)>;
 using ServerLambda = std::function<void(const proto::ServerContract&)>;
 using UnitLambda = std::function<void(const proto::UnitDefinition&)>;
+
+class Writer;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -195,7 +197,7 @@ public:
         const bool checking = false) const -> bool = 0;
     virtual auto LoadNym(
         const identifier::Nym& id,
-        AllocateOutput destination,
+        Writer&& destination,
         const bool checking = false) const -> bool = 0;
     virtual auto Load(
         const identifier::Nym& nymID,

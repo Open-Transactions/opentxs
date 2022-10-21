@@ -6,6 +6,8 @@
 #include "0_stdafx.hpp"                      // IWYU pragma: associated
 #include "internal/api/network/Factory.hpp"  // IWYU pragma: associated
 
+#include "opentxs/util/Writer.hpp"
+
 namespace opentxs::factory
 {
 auto BlockchainNetworkAPI(

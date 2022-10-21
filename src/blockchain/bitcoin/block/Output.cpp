@@ -48,6 +48,8 @@
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
+#include "opentxs/util/WriteBuffer.hpp"
+#include "opentxs/util/Writer.hpp"
 
 namespace opentxs::factory
 {
@@ -539,19 +541,14 @@ auto Output::Script() const noexcept -> const block::Script&
     return *script_;
 }
 
-auto Output::Serialize(const AllocateOutput destination) const noexcept
+auto Output::Serialize(Writer&& destination) const noexcept
     -> std::optional<std::size_t>
 {
     try {
-        if (!destination) {
-
-            throw std::runtime_error{"invalid output allocator"};
-        }
-
         const auto size = CalculateSize();
-        auto output = destination(size);
+        auto output = destination.Reserve(size);
 
-        if (false == output.valid(size)) {
+        if (false == output.IsValid(size)) {
 
             throw std::runtime_error{"failed to allocate output bytes"};
         }
@@ -559,10 +556,12 @@ auto Output::Serialize(const AllocateOutput destination) const noexcept
         const auto scriptCS =
             blockchain::bitcoin::CompactSize(script_->CalculateSize());
         const auto csData = scriptCS.Encode();
-        auto* it = static_cast<std::byte*>(output.data());
-        value_.Internal().SerializeBitcoin(destination);
-        std::advance(it, opentxs::internal::Amount::SerializeBitcoinSize());
-        std::memcpy(static_cast<void*>(it), csData.data(), csData.size());
+        auto* it = output.as<std::byte>();
+        static const auto amount =
+            opentxs::internal::Amount::SerializeBitcoinSize();
+        value_.Internal().SerializeBitcoin(preallocated(amount, it));
+        std::advance(it, amount);
+        std::memcpy(it, csData.data(), csData.size());
         std::advance(it, csData.size());
 
         if (false == script_->Serialize(

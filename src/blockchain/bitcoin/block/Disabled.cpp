@@ -76,7 +76,8 @@ auto BitcoinScriptP2MS(
     const blockchain::Type,
     const std::uint8_t,
     const std::uint8_t,
-    const UnallocatedVector<const opentxs::crypto::key::EllipticCurve*>&
+    const UnallocatedVector<
+        const opentxs::crypto::asymmetric::key::EllipticCurve*>&
         publicKeys) noexcept
     -> std::unique_ptr<blockchain::bitcoin::block::Script>
 {
@@ -85,7 +86,7 @@ auto BitcoinScriptP2MS(
 
 auto BitcoinScriptP2PK(
     const blockchain::Type,
-    const opentxs::crypto::key::EllipticCurve&) noexcept
+    const opentxs::crypto::asymmetric::key::EllipticCurve&) noexcept
     -> std::unique_ptr<blockchain::bitcoin::block::Script>
 {
     return BitcoinScript();
@@ -94,7 +95,7 @@ auto BitcoinScriptP2PK(
 auto BitcoinScriptP2PKH(
     const api::Crypto&,
     const blockchain::Type,
-    const opentxs::crypto::key::EllipticCurve&) noexcept
+    const opentxs::crypto::asymmetric::key::EllipticCurve&) noexcept
     -> std::unique_ptr<blockchain::bitcoin::block::Script>
 {
     return BitcoinScript();
@@ -112,7 +113,7 @@ auto BitcoinScriptP2SH(
 auto BitcoinScriptP2WPKH(
     const api::Crypto&,
     const blockchain::Type,
-    const opentxs::crypto::key::EllipticCurve&) noexcept
+    const opentxs::crypto::asymmetric::key::EllipticCurve&) noexcept
     -> std::unique_ptr<blockchain::bitcoin::block::Script>
 {
     return BitcoinScript();

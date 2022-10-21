@@ -234,15 +234,18 @@ TEST_F(ApiCryptoBlockchain, TestBip32_standard_1)
 
     EXPECT_EQ(account.ID(), accountID);
 
-    const auto pRoot = account.RootNode(reason_);
+    const auto& root = account.RootNode(reason_);
 
-    ASSERT_TRUE(pRoot);
+    ASSERT_TRUE(root.IsValid());
 
-    const auto& root = *pRoot;
     const auto& expected = test.children_.at(1);
+    auto xpub = api_.Factory().Secret(0);
+    auto xprv = api_.Factory().Secret(0);
 
-    EXPECT_EQ(expected.xpub_, root.Xpub(reason_));
-    EXPECT_EQ(expected.xprv_, root.Xprv(reason_));
+    EXPECT_TRUE(root.Xpub(reason_, xpub.WriteInto()));
+    EXPECT_TRUE(root.Xprv(reason_, xprv.WriteInto()));
+    EXPECT_EQ(expected.xpub_, xpub.Bytes());
+    EXPECT_EQ(expected.xprv_, xprv.Bytes());
 }
 
 // https://github.com/bitcoin/bips/blob/master/bip-0032.mediawiki#test-vector-3
@@ -273,15 +276,18 @@ TEST_F(ApiCryptoBlockchain, TestBip32_standard_3)
 
     EXPECT_EQ(account.ID(), accountID);
 
-    const auto pRoot = account.RootNode(reason_);
+    const auto& root = account.RootNode(reason_);
 
-    ASSERT_TRUE(pRoot);
+    ASSERT_TRUE(root.IsValid());
 
-    const auto& root = *pRoot;
     const auto& expected = test.children_.at(1);
+    auto xpub = api_.Factory().Secret(0);
+    auto xprv = api_.Factory().Secret(0);
 
-    EXPECT_EQ(expected.xpub_, root.Xpub(reason_));
-    EXPECT_EQ(expected.xprv_, root.Xprv(reason_));
+    EXPECT_TRUE(root.Xpub(reason_, xpub.WriteInto()));
+    EXPECT_TRUE(root.Xprv(reason_, xprv.WriteInto()));
+    EXPECT_EQ(expected.xpub_, xpub.Bytes());
+    EXPECT_EQ(expected.xprv_, xprv.Bytes());
 }
 
 TEST_F(ApiCryptoBlockchain, testBip32_SeedA)

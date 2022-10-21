@@ -20,6 +20,7 @@
 #include "opentxs/interface/rpc/AccountEventType.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Numbers.hpp"
+#include "opentxs/util/Writer.hpp"
 
 namespace opentxs::rpc
 {

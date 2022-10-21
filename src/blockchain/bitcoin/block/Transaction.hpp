@@ -18,6 +18,7 @@
 #include "internal/blockchain/block/Block.hpp"
 #include "internal/blockchain/block/Types.hpp"
 #include "internal/util/Mutex.hpp"
+#include "internal/util/Pimpl.hpp"
 #include "opentxs/blockchain/BlockchainType.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/bitcoin/block/Inputs.hpp"
@@ -34,11 +35,10 @@
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/util/Allocator.hpp"
-#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
-#include "opentxs/util/Pimpl.hpp"
 #include "opentxs/util/Time.hpp"
+#include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -95,6 +95,7 @@ class BlockchainTransactionOutput;
 }  // namespace proto
 
 class Log;
+class Writer;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -179,7 +180,7 @@ public:
         return *outputs_;
     }
     auto SegwitFlag() const noexcept -> std::byte final { return segwit_flag_; }
-    auto Serialize(const AllocateOutput destination) const noexcept
+    auto Serialize(Writer&& destination) const noexcept
         -> std::optional<std::size_t> final;
     auto Serialize(const api::Session& api) const noexcept
         -> std::optional<SerializeType> final;
@@ -322,7 +323,7 @@ private:
     auto base_size() const noexcept -> std::size_t;
     auto calculate_size(const bool normalize) const noexcept -> std::size_t;
     auto calculate_witness_size() const noexcept -> std::size_t;
-    auto serialize(const AllocateOutput destination, const bool normalize)
-        const noexcept -> std::optional<std::size_t>;
+    auto serialize(Writer&& destination, const bool normalize) const noexcept
+        -> std::optional<std::size_t>;
 };
 }  // namespace opentxs::blockchain::bitcoin::block::implementation

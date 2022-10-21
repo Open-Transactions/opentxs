@@ -5,9 +5,8 @@
 
 #pragma once
 
+#include "internal/util/Pimpl.hpp"
 #include "opentxs/Export.hpp"
-#include "opentxs/util/Bytes.hpp"
-#include "opentxs/util/Pimpl.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -18,6 +17,7 @@ class BloomFilter;
 }  // namespace blockchain
 
 class Data;
+class Writer;
 
 using OTBloomFilter = Pimpl<blockchain::BloomFilter>;
 }  // namespace opentxs
@@ -28,7 +28,7 @@ namespace opentxs::blockchain
 class OPENTXS_EXPORT BloomFilter
 {
 public:
-    virtual auto Serialize(AllocateOutput) const noexcept -> bool = 0;
+    virtual auto Serialize(Writer&&) const noexcept -> bool = 0;
     virtual auto Test(const Data& element) const noexcept -> bool = 0;
 
     virtual auto AddElement(const Data& element) noexcept -> void = 0;

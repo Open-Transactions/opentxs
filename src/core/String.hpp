@@ -11,8 +11,8 @@
 #include <string_view>
 
 #include "internal/core/String.hpp"
-#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
+#include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -26,6 +26,7 @@ class Armored;
 class Contract;
 class NymFile;
 class Signature;
+class Writer;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -82,7 +83,7 @@ public:
     auto sgetc() -> char override;
     auto swap(opentxs::String& rhs) -> void override;
     auto reset() -> void override;
-    auto WriteInto() noexcept -> AllocateOutput final;
+    auto WriteInto() noexcept -> Writer final;
 
     ~String() override;
 

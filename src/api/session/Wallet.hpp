@@ -52,7 +52,6 @@
 #include "opentxs/otx/blind/CashType.hpp"
 #include "opentxs/otx/blind/Purse.hpp"
 #include "opentxs/otx/client/Types.hpp"
-#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
 #include "opentxs/util/NymEditor.hpp"
@@ -148,6 +147,7 @@ class NymFile;
 class PasswordPrompt;
 class PeerObject;
 class String;
+class Writer;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -259,7 +259,7 @@ public:
         const identifier::Nym& nym,
         const identifier::Generic& reply,
         const otx::client::StorageBox& box,
-        AllocateOutput destination) const -> bool final;
+        Writer&& destination) const -> bool final;
     auto PeerReplyComplete(
         const identifier::Nym& nym,
         const identifier::Generic& replyOrRequest) const -> bool final;
@@ -291,7 +291,7 @@ public:
         const identifier::Generic& request,
         const otx::client::StorageBox& box,
         std::time_t& time,
-        AllocateOutput destination) const -> bool final;
+        Writer&& destination) const -> bool final;
     auto PeerRequestComplete(
         const identifier::Nym& nym,
         const identifier::Generic& reply) const -> bool final;

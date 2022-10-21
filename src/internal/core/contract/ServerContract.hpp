@@ -30,6 +30,7 @@ class ServerContract;
 }  // namespace proto
 
 class PasswordPrompt;
+class Writer;
 
 using OTServerContract = SharedPimpl<contract::Server>;
 }  // namespace opentxs
@@ -56,8 +57,8 @@ public:
         const AddressType& preferred) const -> bool = 0;
     virtual auto EffectiveName() const -> UnallocatedCString = 0;
     using Signable::Serialize;
-    virtual auto Serialize(AllocateOutput destination, bool includeNym = false)
-        const -> bool = 0;
+    virtual auto Serialize(Writer&& destination, bool includeNym = false) const
+        -> bool = 0;
     virtual auto Serialize(proto::ServerContract&, bool includeNym = false)
         const -> bool = 0;
     virtual auto Statistics(String& strContents) const -> bool = 0;

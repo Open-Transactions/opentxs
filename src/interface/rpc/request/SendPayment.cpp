@@ -16,6 +16,8 @@
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/interface/rpc/CommandType.hpp"
 #include "opentxs/interface/rpc/PaymentType.hpp"
+#include "opentxs/util/Bytes.hpp"
+#include "opentxs/util/Writer.hpp"
 
 namespace opentxs::rpc::request::implementation
 {

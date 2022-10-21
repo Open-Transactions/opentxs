@@ -8,11 +8,15 @@
 #include "internal/core/Core.hpp"  // IWYU pragma: associated
 
 #include <cstring>
+#include <functional>
+#include <span>
 
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Log.hpp"
+#include "opentxs/util/WriteBuffer.hpp"
+#include "opentxs/util/Writer.hpp"
 #include "util/Allocator.hpp"
 
 namespace opentxs::factory
@@ -127,29 +131,40 @@ auto SecretPrivate::size() const noexcept -> std::size_t
     }
 }
 
-auto SecretPrivate::WriteInto() noexcept -> AllocateOutput
+auto SecretPrivate::WriteInto() noexcept -> Writer { return WriteInto(mode_); }
+
+auto SecretPrivate::WriteInto(Secret::Mode mode) noexcept -> Writer
 {
-    return WriteInto(mode_);
-}
+    return {
+        [mode, this](auto size) -> WriteBuffer {
+            mode_ = mode;
 
-auto SecretPrivate::WriteInto(Secret::Mode mode) noexcept -> AllocateOutput
-{
-    return [mode, this](const auto size) -> WritableView {
-        mode_ = mode;
+            if (false == resize(size)) {
+                LogError()(OT_PRETTY_CLASS())("failed to resize to ")(
+                    size)(" bytes")
+                    .Flush();
 
-        if (false == resize(size)) {
-            LogAbort()(OT_PRETTY_CLASS())("failed to resize to ")(
-                size)(" bytes")
-                .Abort();
-        }
+                return std::span<std::byte>{};
+            }
 
-        if (const auto got = this->size(); got != size) {
-            LogAbort()(OT_PRETTY_CLASS())("tried to reserve ")(
-                size)(" bytes but got ")(got)(" bytes")
-                .Abort();
-        }
+            if (const auto got = this->size(); got != size) {
+                LogError()(OT_PRETTY_CLASS())("tried to reserve ")(
+                    size)(" bytes but got ")(got)(" bytes")
+                    .Flush();
 
-        return {data(), size};
-    };
+                return std::span<std::byte>{};
+            }
+
+            return std::span<std::byte>{static_cast<std::byte*>(data()), size};
+        },
+        [this](auto size) -> bool {
+            if (Secret::Mode::Text == mode_) { size += 1_uz; }
+
+            data_.resize(size);
+
+            if (Secret::Mode::Text == mode_) { data_.back() = {}; }
+
+            return true;
+        }};
 }
 }  // namespace opentxs

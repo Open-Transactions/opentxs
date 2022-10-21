@@ -54,7 +54,7 @@ public:
         return blank;
     }
     auto Print() const noexcept -> UnallocatedCString final { return {}; }
-    auto Serialize(AllocateOutput) const noexcept -> bool final { return {}; }
+    auto Serialize(Writer&&) const noexcept -> bool final { return {}; }
 
     auto asBitcoin() noexcept -> bitcoin::block::Block& final
     {

@@ -9,20 +9,20 @@
 #include <memory>
 
 #include "opentxs/Export.hpp"
-#include "opentxs/crypto/key/Types.hpp"
+#include "opentxs/crypto/asymmetric/Types.hpp"
 #include "opentxs/identity/Types.hpp"
-#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Numbers.hpp"
+#include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
 namespace crypto
 {
-namespace key
+namespace asymmetric
 {
-class Asymmetric;
-}  // namespace key
+class Key;
+}  // namespace asymmetric
 
 namespace symmetric
 {
@@ -65,23 +65,23 @@ class OPENTXS_EXPORT Authority
 public:
     virtual auto ContactCredentialVersion() const -> VersionNumber = 0;
     virtual auto GetMasterCredID() const -> identifier::Generic = 0;
-    virtual auto GetTagCredential(crypto::key::asymmetric::Algorithm keytype)
-        const noexcept(false) -> const credential::Key& = 0;
+    virtual auto GetTagCredential(crypto::asymmetric::Algorithm keytype) const
+        noexcept(false) -> const credential::Key& = 0;
     virtual auto hasCapability(const NymCapability& capability) const
         -> bool = 0;
     OPENTXS_NO_EXPORT virtual auto Internal() const noexcept
         -> const internal::Authority& = 0;
-    virtual auto Params(const crypto::key::asymmetric::Algorithm type)
-        const noexcept -> ReadView = 0;
+    virtual auto Params(const crypto::asymmetric::Algorithm type) const noexcept
+        -> ReadView = 0;
     virtual auto Source() const -> const identity::Source& = 0;
     virtual auto TransportKey(
         Data& publicKey,
         Secret& privateKey,
         const PasswordPrompt& reason) const -> bool = 0;
     virtual auto Unlock(
-        const crypto::key::Asymmetric& dhKey,
+        const crypto::asymmetric::Key& dhKey,
         const std::uint32_t tag,
-        const crypto::key::asymmetric::Algorithm type,
+        const crypto::asymmetric::Algorithm type,
         const crypto::symmetric::Key& key,
         PasswordPrompt& reason) const noexcept -> bool = 0;
     virtual auto VerificationCredentialVersion() const -> VersionNumber = 0;

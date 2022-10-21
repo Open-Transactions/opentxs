@@ -73,6 +73,7 @@
 #include "internal/serialization/protobuf/verify/RPCCommand.hpp"
 #include "internal/util/Exclusive.hpp"
 #include "internal/util/Lockable.hpp"
+#include "internal/util/Pimpl.hpp"
 #include "internal/util/Shared.hpp"
 #include "internal/util/SharedPimpl.hpp"
 #include "internal/util/Time.hpp"
@@ -117,12 +118,13 @@
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/otx/client/PaymentWorkflowState.hpp"
 #include "opentxs/otx/client/PaymentWorkflowType.hpp"
+#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/NymEditor.hpp"
 #include "opentxs/util/Options.hpp"
 #include "opentxs/util/PasswordPrompt.hpp"
-#include "opentxs/util/Pimpl.hpp"
+#include "opentxs/util/Writer.hpp"
 
 namespace opentxs
 {

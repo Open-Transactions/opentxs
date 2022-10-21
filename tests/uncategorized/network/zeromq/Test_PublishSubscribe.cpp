@@ -15,6 +15,7 @@
 #include "internal/network/zeromq/socket/Publish.hpp"
 #include "internal/network/zeromq/socket/SocketType.hpp"
 #include "internal/network/zeromq/socket/Subscribe.hpp"
+#include "internal/util/Pimpl.hpp"
 
 namespace ot = opentxs;
 namespace zmq = ot::network::zeromq;

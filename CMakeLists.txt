@@ -3,10 +3,15 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-cmake_minimum_required(VERSION 3.20.0)
+cmake_minimum_required(VERSION 3.21.0)
 cmake_policy(
   SET
   CMP0091
+  NEW
+)
+cmake_policy(
+  SET
+  CMP0126
   NEW
 )
 set(CMAKE_OSX_DEPLOYMENT_TARGET 11)

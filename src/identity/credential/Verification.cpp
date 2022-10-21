@@ -28,7 +28,7 @@
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/crypto/Parameters.hpp"
-#include "opentxs/crypto/key/asymmetric/Mode.hpp"
+#include "opentxs/crypto/asymmetric/Mode.hpp"
 #include "opentxs/identity/CredentialRole.hpp"
 #include "opentxs/identity/credential/Verification.hpp"
 #include "opentxs/util/Container.hpp"
@@ -125,7 +125,7 @@ Verification::Verification(
           params,
           version,
           identity::CredentialRole::Verify,
-          crypto::key::asymmetric::Mode::Null,
+          crypto::asymmetric::Mode::Null,
           get_master_id(api, master))
     , data_(
           [&](const crypto::Parameters& params)
@@ -176,8 +176,7 @@ auto Verification::serialize(
     -> std::shared_ptr<Base::SerializedType>
 {
     auto serializedCredential = Base::serialize(lock, asPrivate, asSigned);
-    serializedCredential->set_mode(
-        translate(crypto::key::asymmetric::Mode::Null));
+    serializedCredential->set_mode(translate(crypto::asymmetric::Mode::Null));
     serializedCredential->clear_signature();  // this fixes a bug, but shouldn't
 
     if (asSigned) {

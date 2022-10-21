@@ -17,6 +17,7 @@ extern "C" {
 
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/storage/lmdb/Transaction.hpp"
+#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Types.hpp"
 #include "util/FileSize.hpp"

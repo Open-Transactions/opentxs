@@ -13,8 +13,8 @@
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "opentxs/api/crypto/Hash.hpp"
 #include "opentxs/crypto/HashType.hpp"
-#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
+#include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -46,6 +46,7 @@ class Frame;
 
 class Data;
 class Secret;
+class Writer;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -57,20 +58,20 @@ public:
     auto Digest(
         const opentxs::crypto::HashType hashType,
         const ReadView data,
-        const AllocateOutput destination) const noexcept -> bool final;
+        Writer&& destination) const noexcept -> bool final;
     auto Digest(
         const opentxs::crypto::HashType hashType,
         const opentxs::network::zeromq::Frame& data,
-        const AllocateOutput destination) const noexcept -> bool final;
+        Writer&& destination) const noexcept -> bool final;
     auto Digest(
         const std::uint32_t type,
         const ReadView data,
-        const AllocateOutput destination) const noexcept -> bool final;
+        Writer&& destination) const noexcept -> bool final;
     auto HMAC(
         const opentxs::crypto::HashType type,
         const ReadView key,
         const ReadView data,
-        const AllocateOutput output) const noexcept -> bool final;
+        Writer&& output) const noexcept -> bool final;
     auto MurmurHash3_32(
         const std::uint32_t& key,
         const Data& data,
@@ -103,7 +104,7 @@ public:
         const std::uint32_t r,
         const std::uint32_t p,
         const std::size_t bytes,
-        AllocateOutput writer) const noexcept -> bool final;
+        Writer&& writer) const noexcept -> bool final;
 
     Hash(
         const api::crypto::Encode& encode,
@@ -127,12 +128,11 @@ private:
     const opentxs::crypto::Ripemd160& ripe_;
     const opentxs::crypto::Scrypt& scrypt_;
 
-    auto bitcoin_hash_160(const ReadView data, const AllocateOutput destination)
+    auto bitcoin_hash_160(const ReadView data, Writer&& destination)
         const noexcept -> bool;
-    auto sha_256_double(const ReadView data, const AllocateOutput destination)
+    auto sha_256_double(const ReadView data, Writer&& destination)
         const noexcept -> bool;
-    auto sha_256_double_checksum(
-        const ReadView data,
-        const AllocateOutput destination) const noexcept -> bool;
+    auto sha_256_double_checksum(const ReadView data, Writer&& destination)
+        const noexcept -> bool;
 };
 }  // namespace opentxs::api::crypto::imp

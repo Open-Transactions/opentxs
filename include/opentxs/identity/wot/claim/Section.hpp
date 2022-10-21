@@ -13,9 +13,9 @@
 
 #include "opentxs/Export.hpp"
 #include "opentxs/identity/wot/claim/Types.hpp"
-#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
+#include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -47,6 +47,8 @@ namespace proto
 class ContactData;
 class ContactSection;
 }  // namespace proto
+
+class Writer;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -67,7 +69,7 @@ public:
     auto end() const -> GroupMap::const_iterator;
     auto Group(const claim::ClaimType& type) const -> std::shared_ptr<Group>;
     auto HaveClaim(const identifier::Generic& item) const -> bool;
-    auto Serialize(AllocateOutput destination, const bool withIDs = false) const
+    auto Serialize(Writer&& destination, const bool withIDs = false) const
         -> bool;
     OPENTXS_NO_EXPORT auto SerializeTo(
         proto::ContactData& data,

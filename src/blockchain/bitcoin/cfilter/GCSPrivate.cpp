@@ -15,7 +15,6 @@
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
-#include <functional>
 #include <iterator>
 #include <limits>
 #include <memory>
@@ -32,6 +31,7 @@
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/serialization/protobuf/Proto.tpp"
 #include "internal/serialization/protobuf/verify/GCS.hpp"
+#include "internal/util/Bytes.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/Size.hpp"
@@ -54,6 +54,8 @@
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Numbers.hpp"
+#include "opentxs/util/WriteBuffer.hpp"
+#include "opentxs/util/Writer.hpp"
 #include "util/Container.hpp"
 
 namespace be = boost::endian;
@@ -82,9 +84,9 @@ public:
     {
         return std::make_unique<GCS>(*this, alloc);
     }
-    auto Compressed(AllocateOutput out) const noexcept -> bool final;
+    auto Compressed(Writer&& out) const noexcept -> bool final;
     auto ElementCount() const noexcept -> std::uint32_t final { return count_; }
-    auto Encode(AllocateOutput out) const noexcept -> bool final;
+    auto Encode(Writer&& out) const noexcept -> bool final;
     auto Hash() const noexcept -> cfilter::Hash final;
     auto Header(const cfilter::Header& previous) const noexcept
         -> cfilter::Header final;
@@ -97,7 +99,7 @@ public:
         const noexcept -> PrehashedMatches final;
     auto Range() const noexcept -> gcs::Range final;
     auto Serialize(proto::GCS& out) const noexcept -> bool final;
-    auto Serialize(AllocateOutput out) const noexcept -> bool final;
+    auto Serialize(Writer&& out) const noexcept -> bool final;
     auto Test(const Data& target, allocator_type monotonic) const noexcept
         -> bool final;
     auto Test(const ReadView target, allocator_type monotonic) const noexcept
@@ -505,8 +507,9 @@ auto Siphash(
     auto output = Hash{};
     auto writer = preallocated(sizeof(output), &output);
 
-    if (false == api.Crypto().Hash().HMAC(
-                     crypto::HashType::SipHash24, key, item, writer)) {
+    if (false ==
+        api.Crypto().Hash().HMAC(
+            crypto::HashType::SipHash24, key, item, std::move(writer))) {
         throw std::runtime_error("siphash failed");
     }
 
@@ -633,9 +636,9 @@ GCS::GCS(const GCS& rhs, allocator_type alloc) noexcept
 {
 }
 
-auto GCS::Compressed(AllocateOutput out) const noexcept -> bool
+auto GCS::Compressed(Writer&& out) const noexcept -> bool
 {
-    return copy(reader(compressed_), out);
+    return copy(reader(compressed_), std::move(out));
 }
 
 auto GCS::decompress() const noexcept -> const gcs::Elements&
@@ -649,14 +652,8 @@ auto GCS::decompress() const noexcept -> const gcs::Elements&
     return elements_.value();
 }
 
-auto GCS::Encode(AllocateOutput cb) const noexcept -> bool
+auto GCS::Encode(Writer&& cb) const noexcept -> bool
 {
-    if (!cb) {
-        LogError()(OT_PRETTY_CLASS())("invalid output").Flush();
-
-        return false;
-    }
-
     using CompactSize = network::blockchain::bitcoin::CompactSize;
     const auto bytes = CompactSize{count_}.Encode();
     const auto max = std::numeric_limits<std::size_t>::max() - bytes.size();
@@ -668,9 +665,9 @@ auto GCS::Encode(AllocateOutput cb) const noexcept -> bool
     }
 
     const auto target = bytes.size() + compressed_.size();
-    auto out = cb(target);
+    auto out = cb.Reserve(target);
 
-    if (false == out.valid()) {
+    if (false == out.IsValid(target)) {
         LogError()(OT_PRETTY_CLASS())("failed to allocate space for output")
             .Flush();
 
@@ -681,7 +678,7 @@ auto GCS::Encode(AllocateOutput cb) const noexcept -> bool
     std::memcpy(i, bytes.data(), bytes.size());
     std::advance(i, bytes.size());
 
-    if (0u < compressed_.size()) {
+    if (0_uz < compressed_.size()) {
         std::memcpy(i, compressed_.data(), compressed_.size());
         std::advance(i, compressed_.size());
     }
@@ -842,13 +839,13 @@ auto GCS::Serialize(proto::GCS& output) const noexcept -> bool
     return true;
 }
 
-auto GCS::Serialize(AllocateOutput out) const noexcept -> bool
+auto GCS::Serialize(Writer&& out) const noexcept -> bool
 {
     auto proto = proto::GCS{};
 
     if (false == Serialize(proto)) { return false; }
 
-    return proto::write(proto, out);
+    return proto::write(proto, std::move(out));
 }
 
 auto GCS::Test(const Data& target, allocator_type monotonic) const noexcept

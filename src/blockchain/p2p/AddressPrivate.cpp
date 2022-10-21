@@ -32,6 +32,8 @@
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Numbers.hpp"
 #include "opentxs/util/Time.hpp"
+#include "opentxs/util/Types.hpp"
+#include "opentxs/util/Writer.hpp"
 
 namespace opentxs::blockchain::p2p::implementation
 {
@@ -81,7 +83,11 @@ public:
                          ".onion";
             } break;
             case Network::eep: {
-                output = api_.Crypto().Encode().DataEncode(bytes_) + ".i2p";
+                // TODO handle errors
+                [[maybe_unused]] const auto rc =
+                    api_.Crypto().Encode().Base64Encode(
+                        bytes_.Bytes(), writer(output));
+                output += ".i2p";
             } break;
             case Network::zmq: {
                 output = bytes_.Bytes();

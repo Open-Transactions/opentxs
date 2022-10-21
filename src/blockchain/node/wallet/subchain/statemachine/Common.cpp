@@ -17,6 +17,8 @@
 #include "opentxs/network/zeromq/message/FrameIterator.hpp"
 #include "opentxs/network/zeromq/message/FrameSection.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
+#include "opentxs/util/WriteBuffer.hpp"
+#include "opentxs/util/Writer.hpp"
 
 namespace opentxs::blockchain::node::wallet
 {
@@ -82,11 +84,12 @@ auto encode(const ScanStatus& in, network::zeromq::Message& out) noexcept
     const auto& [status, position] = in;
     const auto& [height, hash] = position;
     const auto size = fixed + hash.size();  // TODO constexpr
-    auto bytes = out.AppendBytes()(size);
+    auto bytes = out.AppendBytes().Reserve(size);
 
-    OT_ASSERT(bytes.valid(size));
+    OT_ASSERT(bytes.IsValid(size));
 
     auto* i = bytes.as<std::byte>();
+    // TODO use endian buffers
     std::memcpy(i, &status, sizeof(status));
     std::advance(i, sizeof(status));
     std::memcpy(i, &height, sizeof(height));

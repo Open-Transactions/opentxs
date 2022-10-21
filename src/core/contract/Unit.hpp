@@ -23,7 +23,6 @@
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/identity/Types.hpp"
 #include "opentxs/identity/wot/claim/ClaimType.hpp"
-#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
 
@@ -45,6 +44,7 @@ class ByteArray;
 class Factory;
 class PasswordPrompt;
 class String;
+class Writer;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -72,7 +72,7 @@ public:
         return short_name_;
     }
     auto Serialize() const noexcept -> ByteArray override;
-    auto Serialize(AllocateOutput destination, bool includeNym = false) const
+    auto Serialize(Writer&& destination, bool includeNym = false) const
         -> bool override;
     auto Serialize(SerializedType&, bool includeNym = false) const
         -> bool override;

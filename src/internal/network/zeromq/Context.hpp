@@ -24,12 +24,11 @@
 #include "internal/network/zeromq/socket/Socket.hpp"
 #include "internal/network/zeromq/socket/Subscribe.hpp"
 #include "internal/network/zeromq/socket/Types.hpp"
+#include "internal/util/Pimpl.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/util/Allocator.hpp"
-#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Container.hpp"
-#include "opentxs/util/Pimpl.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs

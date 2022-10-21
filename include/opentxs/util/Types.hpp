@@ -5,6 +5,7 @@
 
 #pragma once
 
+#include <cstddef>
 #include <cstdint>
 #include <functional>
 #include <iosfwd>
@@ -38,6 +39,8 @@ enum class ConnectionMode : std::int8_t;      // IWYU pragma: export
 using ObjectList =
     UnallocatedList<std::pair<UnallocatedCString, UnallocatedCString>>;
 using SimpleCallback = std::function<void()>;
+using ReadView = std::string_view;           // TODO std::span<const std::byte>
+using Space = UnallocatedVector<std::byte>;  // TODO ByteArray
 
 auto OPENTXS_EXPORT print(BlockchainProfile) noexcept -> std::string_view;
 auto OPENTXS_EXPORT print(

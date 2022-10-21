@@ -13,9 +13,9 @@
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/bitcoin/block/Types.hpp"
 #include "opentxs/blockchain/bitcoin/cfilter/Types.hpp"
-#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Iterator.hpp"
+#include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -40,6 +40,7 @@ class Script;
 }  // namespace blockchain
 
 class PaymentCode;
+class Writer;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -79,9 +80,8 @@ public:
     virtual auto at(const std::size_t position) const noexcept(false)
         -> const value_type& = 0;
     virtual auto begin() const noexcept -> const_iterator = 0;
-    virtual auto CalculateHash160(
-        const api::Crypto& crypto,
-        const AllocateOutput output) const noexcept -> bool = 0;
+    virtual auto CalculateHash160(const api::Crypto& crypto, Writer&& output)
+        const noexcept -> bool = 0;
     virtual auto CalculateSize() const noexcept -> std::size_t = 0;
     virtual auto cbegin() const noexcept -> const_iterator = 0;
     virtual auto cend() const noexcept -> const_iterator = 0;
@@ -110,8 +110,7 @@ public:
     /// Value only present for PayToScriptHash and PayToWitnessScriptHash
     /// patterns
     virtual auto ScriptHash() const noexcept -> std::optional<ReadView> = 0;
-    virtual auto Serialize(const AllocateOutput destination) const noexcept
-        -> bool = 0;
+    virtual auto Serialize(Writer&& destination) const noexcept -> bool = 0;
     virtual auto size() const noexcept -> std::size_t = 0;
     virtual auto Type() const noexcept -> Pattern = 0;
     /// Value only present for NullData patterns, 0 indexed

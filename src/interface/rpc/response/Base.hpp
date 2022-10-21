@@ -33,6 +33,8 @@ class ListNyms;
 class SendPayment;
 }  // namespace response
 }  // namespace rpc
+
+class Writer;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -58,7 +60,7 @@ struct Base::Imp {
     virtual auto asSendPayment() const noexcept -> const response::SendPayment&;
 
     virtual auto serialize(proto::RPCResponse& dest) const noexcept -> bool;
-    auto serialize(AllocateOutput dest) const noexcept -> bool;
+    auto serialize(Writer&& dest) const noexcept -> bool;
     auto serialize_identifiers(proto::RPCResponse& dest) const noexcept -> void;
     auto serialize_tasks(proto::RPCResponse& dest) const noexcept -> void;
 

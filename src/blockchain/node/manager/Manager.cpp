@@ -87,7 +87,7 @@
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/crypto/Types.hpp"
-#include "opentxs/crypto/key/EllipticCurve.hpp"
+#include "opentxs/crypto/asymmetric/key/EllipticCurve.hpp"
 #include "opentxs/identity/Nym.hpp"
 #include "opentxs/network/otdht/Base.hpp"
 #include "opentxs/network/otdht/Data.hpp"
@@ -105,6 +105,7 @@
 #include "opentxs/util/PasswordPrompt.hpp"  // IWYU pragma: keep
 #include "opentxs/util/Time.hpp"
 #include "opentxs/util/WorkType.hpp"
+#include "opentxs/util/Writer.hpp"
 #include "util/Work.hpp"
 
 namespace opentxs::blockchain::node::implementation
@@ -836,20 +837,21 @@ auto Base::process_send_to_payment_code(network::zeromq::Message&& in) noexcept
             throw std::runtime_error{"Failed to allocate next key"};
         }
 
-        const auto pKey = [&] {
+        const auto& key = [&]() -> const auto&
+        {
             const auto& element =
                 account.BalanceElement(subchain, index.value());
-            auto out = element.Key();
+            const auto& out = element.Key();
 
-            if (!out) {
+            if (false == out.IsValid()) {
                 rc = SendResult::HDDerivationFailure;
 
                 throw std::runtime_error{"Failed to instantiate key"};
             }
 
             return out;
-        }();
-        const auto& key = *pKey;
+        }
+        ();
         const auto proposal = [&] {
             auto out = proto::BlockchainTransactionProposal{};
             out.set_version(proposal_version_);

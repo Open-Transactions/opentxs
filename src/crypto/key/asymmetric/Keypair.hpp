@@ -10,8 +10,8 @@
 
 #include "internal/crypto/key/Keypair.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
-#include "opentxs/crypto/key/Asymmetric.hpp"
-#include "opentxs/crypto/key/asymmetric/Role.hpp"
+#include "opentxs/crypto/asymmetric/Key.hpp"
+#include "opentxs/crypto/asymmetric/Role.hpp"
 #include "opentxs/identity/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -43,8 +43,8 @@ public:
 
     auto CheckCapability(
         const identity::NymCapability& capability) const noexcept -> bool final;
-    auto GetPrivateKey() const noexcept(false) -> const key::Asymmetric& final;
-    auto GetPublicKey() const noexcept(false) -> const key::Asymmetric& final;
+    auto GetPrivateKey() const noexcept(false) -> const asymmetric::Key& final;
+    auto GetPublicKey() const noexcept(false) -> const asymmetric::Key& final;
     auto GetPublicKeyBySignature(
         Keys& listOutput,
         const Signature& theSignature,
@@ -58,9 +58,9 @@ public:
 
     Keypair(
         const api::Session& api,
-        const opentxs::crypto::key::asymmetric::Role role,
-        std::unique_ptr<crypto::key::Asymmetric> publicKey,
-        std::unique_ptr<crypto::key::Asymmetric> privateKey) noexcept;
+        const opentxs::crypto::asymmetric::Role role,
+        crypto::asymmetric::Key publicKey,
+        crypto::asymmetric::Key privateKey) noexcept;
     Keypair() = delete;
     Keypair(const Keypair&) noexcept;
     Keypair(Keypair&&) = delete;
@@ -73,9 +73,9 @@ private:
     friend key::Keypair;
 
     const api::Session& api_;
-    OTAsymmetricKey key_private_;
-    OTAsymmetricKey key_public_;
-    const opentxs::crypto::key::asymmetric::Role role_;
+    asymmetric::Key key_private_;
+    asymmetric::Key key_public_;
+    const opentxs::crypto::asymmetric::Role role_;
 
     auto clone() const -> Keypair* final { return new Keypair(*this); }
 };

@@ -4,8 +4,8 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 // IWYU pragma: no_include "opentxs/crypto/ParameterType.hpp"
-// IWYU pragma: no_include "opentxs/crypto/key/asymmetric/Algorithm.hpp"
-// IWYU pragma: no_include "opentxs/crypto/key/symmetric/Algorithm.hpp"
+// IWYU pragma: no_include "opentxs/crypto/asymmetric/Algorithm.hpp"
+// IWYU pragma: no_include "opentxs/crypto/symmetric/Algorithm.hpp"
 
 #pragma once
 
@@ -13,7 +13,7 @@
 
 #include "opentxs/Export.hpp"
 #include "opentxs/crypto/Types.hpp"
-#include "opentxs/crypto/key/Types.hpp"
+#include "opentxs/crypto/asymmetric/Types.hpp"
 #include "opentxs/crypto/symmetric/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -36,7 +36,7 @@ namespace opentxs::api::crypto
 {
 auto HaveHDKeys() noexcept -> bool;
 auto HaveSupport(opentxs::crypto::ParameterType) noexcept -> bool;
-auto HaveSupport(opentxs::crypto::key::asymmetric::Algorithm) noexcept -> bool;
+auto HaveSupport(opentxs::crypto::asymmetric::Algorithm) noexcept -> bool;
 auto HaveSupport(opentxs::crypto::symmetric::Algorithm) noexcept -> bool;
 
 /**

@@ -23,6 +23,7 @@
 #include "opentxs/crypto/Bip43Purpose.hpp"
 #include "opentxs/crypto/Bip44Type.hpp"
 #include "opentxs/util/Container.hpp"
+#include "opentxs/util/Writer.hpp"
 
 namespace zmq = opentxs::network::zeromq;
 
@@ -61,7 +62,7 @@ auto Blockchain::Bip44(Chain chain) noexcept(false) -> Bip44Type
 auto Blockchain::Bip44Path(
     Chain chain,
     const UnallocatedCString& seed,
-    AllocateOutput destination) noexcept(false) -> bool
+    Writer&& destination) noexcept(false) -> bool
 {
     constexpr auto hard = static_cast<Bip32Index>(Bip32Child::HARDENED);
     const auto coin = Bip44(chain);
@@ -71,7 +72,7 @@ auto Blockchain::Bip44Path(
     output.add_child(static_cast<Bip32Index>(Bip43Purpose::HDWALLET) | hard);
     output.add_child(static_cast<Bip32Index>(coin) | hard);
     output.add_child(Bip32Index{0} | hard);
-    return write(output, destination);
+    return write(output, std::move(destination));
 }
 }  // namespace opentxs::api::crypto
 

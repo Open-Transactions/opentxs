@@ -40,6 +40,7 @@
 #include "internal/core/contract/Unit.hpp"
 #include "internal/core/contract/peer/PeerObject.hpp"
 #include "internal/crypto/Envelope.hpp"
+#include "internal/crypto/asymmetric/Key.hpp"
 #include "internal/network/ServerConnection.hpp"
 #include "internal/network/zeromq/Context.hpp"
 #include "internal/network/zeromq/socket/Publish.hpp"
@@ -77,6 +78,7 @@
 #include "internal/util/Flag.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
+#include "internal/util/Pimpl.hpp"
 #include "internal/util/Shared.hpp"
 #include "internal/util/SharedPimpl.hpp"
 #include "opentxs/api/network/Network.hpp"
@@ -100,7 +102,7 @@
 #include "opentxs/core/identifier/Notary.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/core/identifier/UnitDefinition.hpp"
-#include "opentxs/crypto/key/Asymmetric.hpp"
+#include "opentxs/crypto/asymmetric/Key.hpp"
 #include "opentxs/identity/Nym.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
@@ -118,9 +120,9 @@
 #include "opentxs/util/Iterator.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/PasswordPrompt.hpp"
-#include "opentxs/util/Pimpl.hpp"
 #include "opentxs/util/Time.hpp"
 #include "opentxs/util/WorkType.hpp"
+#include "opentxs/util/Writer.hpp"
 #include "otx/common/OTStorage.hpp"
 #include "otx/consensus/Base.hpp"
 
@@ -2773,14 +2775,16 @@ auto Server::PingNotary(const PasswordPrompt& reason)
     }
 
     auto serializedAuthKey = proto::AsymmetricKey{};
-    if (false == nym_->GetPublicAuthKey().Serialize(serializedAuthKey)) {
+    if (false ==
+        nym_->GetPublicAuthKey().Internal().Serialize(serializedAuthKey)) {
         LogError()(OT_PRETTY_CLASS())("Failed to serialize auth key").Flush();
 
         return {};
     }
 
     auto serializedEncryptKey = proto::AsymmetricKey{};
-    if (false == nym_->GetPublicEncrKey().Serialize(serializedEncryptKey)) {
+    if (false ==
+        nym_->GetPublicEncrKey().Internal().Serialize(serializedEncryptKey)) {
         LogError()(OT_PRETTY_CLASS())("Failed to serialize encrypt key")
             .Flush();
 

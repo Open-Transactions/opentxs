@@ -8,7 +8,8 @@
 #include "opentxs/core/Secret.hpp"
 #include "opentxs/crypto/Bip32.hpp"
 #include "opentxs/crypto/Types.hpp"
-#include "opentxs/util/Bytes.hpp"
+#include "opentxs/util/Types.hpp"
+#include "opentxs/util/WriteBuffer.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -17,6 +18,8 @@ namespace api
 {
 class Crypto;
 }  // namespace api
+
+class Writer;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -28,8 +31,8 @@ class HDNode
     Secret hash_space_;
 
 public:
-    WritableView data_;
-    WritableView hash_;
+    WriteBuffer data_;
+    WriteBuffer hash_;
 
     auto Assign(const EcdsaCurve& curve, Bip32::Key& out) const noexcept(false)
         -> void;
@@ -40,13 +43,13 @@ public:
     auto ParentPrivate() const noexcept -> ReadView;
     auto ParentPublic() const noexcept -> ReadView;
 
-    auto ChildCode() noexcept -> WritableView;
-    auto ChildPrivate() noexcept -> AllocateOutput;
-    auto ChildPublic() noexcept -> AllocateOutput;
+    auto ChildCode() noexcept -> WriteBuffer;
+    auto ChildPrivate() noexcept -> Writer;
+    auto ChildPublic() noexcept -> Writer;
 
-    auto InitCode() noexcept -> AllocateOutput;
-    auto InitPrivate() noexcept -> AllocateOutput;
-    auto InitPublic() noexcept -> AllocateOutput;
+    auto InitCode() noexcept -> Writer;
+    auto InitPrivate() noexcept -> Writer;
+    auto InitPublic() noexcept -> Writer;
 
     auto Next() noexcept -> void;
 

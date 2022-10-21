@@ -12,13 +12,14 @@
 #include "opentxs/core/Data.hpp"
 #include "opentxs/util/Allocated.hpp"
 #include "opentxs/util/Allocator.hpp"
-#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
+#include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
 class SecretPrivate;
+class Writer;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -73,8 +74,8 @@ public:
     auto resize(const std::size_t) -> bool final;
     auto SetSize(const std::size_t) -> bool final;
     auto swap(Secret& rhs) noexcept -> void;
-    auto WriteInto() noexcept -> AllocateOutput final;
-    auto WriteInto(Mode mode) noexcept -> AllocateOutput;
+    auto WriteInto() noexcept -> Writer final;
+    auto WriteInto(Mode mode) noexcept -> Writer;
     auto zeroMemory() -> void final;
 
     OPENTXS_NO_EXPORT Secret(SecretPrivate* imp) noexcept;

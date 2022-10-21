@@ -22,6 +22,7 @@
 #include "internal/core/contract/peer/PeerRequest.hpp"
 #include "internal/otx/client/Client.hpp"
 #include "internal/otx/client/OTPayment.hpp"
+#include "internal/util/Pimpl.hpp"
 #include "internal/util/SharedPimpl.hpp"
 #include "internal/util/UniqueQueue.hpp"
 #include "opentxs/api/session/Client.hpp"
@@ -33,7 +34,6 @@
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/PasswordPrompt.hpp"
-#include "opentxs/util/Pimpl.hpp"
 #include "otx/client/PaymentTasks.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)

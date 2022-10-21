@@ -26,7 +26,6 @@
 #include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/util/Allocator.hpp"
-#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -74,6 +73,7 @@ class BlockchainTransactionOutput;
 }  // namespace proto
 
 class Log;
+class Writer;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -128,12 +128,12 @@ public:
         const api::crypto::Blockchain& crypto,
         const identifier::Nym& nym,
         const Log& log) const noexcept -> opentxs::Amount final;
-    auto Serialize(const AllocateOutput destination) const noexcept
+    auto Serialize(Writer&& destination) const noexcept
         -> std::optional<std::size_t> final;
     auto Serialize(
         const api::Session& api,
         proto::BlockchainTransaction& destination) const noexcept -> bool final;
-    auto SerializeNormalized(const AllocateOutput destination) const noexcept
+    auto SerializeNormalized(Writer&& destination) const noexcept
         -> std::optional<std::size_t> final;
     auto size() const noexcept -> std::size_t final { return inputs_.size(); }
 
@@ -202,7 +202,7 @@ private:
 
     static auto clone(const InputList& rhs) noexcept -> InputList;
 
-    auto serialize(const AllocateOutput destination, const bool normalize)
-        const noexcept -> std::optional<std::size_t>;
+    auto serialize(Writer&& destination, const bool normalize) const noexcept
+        -> std::optional<std::size_t>;
 };
 }  // namespace opentxs::blockchain::bitcoin::block::implementation

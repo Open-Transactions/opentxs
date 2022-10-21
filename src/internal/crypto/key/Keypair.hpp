@@ -8,19 +8,23 @@
 #include <cstdint>
 #include <memory>
 
+#include "internal/util/Pimpl.hpp"
 #include "opentxs/Export.hpp"
 #include "opentxs/identity/Types.hpp"
 #include "opentxs/util/Container.hpp"
-#include "opentxs/util/Pimpl.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
 namespace crypto
 {
+namespace asymmetric
+{
+class Key;
+}  // namespace asymmetric
+
 namespace key
 {
-class Asymmetric;
 class Keypair;
 }  // namespace key
 }  // namespace crypto
@@ -41,19 +45,21 @@ using OTKeypair = Pimpl<crypto::key::Keypair>;
 
 namespace opentxs::crypto::key
 {
-class OPENTXS_EXPORT Keypair
+class Keypair
 {
 public:
-    using Keys = UnallocatedList<const Asymmetric*>;
+    using Keys = UnallocatedList<const crypto::asymmetric::Key*>;
 
     virtual operator bool() const noexcept = 0;
 
     virtual auto CheckCapability(
         const identity::NymCapability& capability) const noexcept -> bool = 0;
     /// throws std::runtime_error if private key is missing
-    virtual auto GetPrivateKey() const noexcept(false) -> const Asymmetric& = 0;
+    virtual auto GetPrivateKey() const noexcept(false)
+        -> const crypto::asymmetric::Key& = 0;
     /// throws std::runtime_error if public key is missing
-    virtual auto GetPublicKey() const noexcept(false) -> const Asymmetric& = 0;
+    virtual auto GetPublicKey() const noexcept(false)
+        -> const crypto::asymmetric::Key& = 0;
     // inclusive means, return keys when theSignature has no metadata.
     virtual auto GetPublicKeyBySignature(
         Keys& listOutput,

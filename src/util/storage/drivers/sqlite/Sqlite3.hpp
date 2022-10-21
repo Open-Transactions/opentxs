@@ -16,7 +16,6 @@ extern "C" {
 #include <utility>
 
 #include "internal/util/Flag.hpp"
-#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/storage/Driver.hpp"
 #include "util/storage/Plugin.hpp"

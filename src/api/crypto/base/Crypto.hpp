@@ -3,7 +3,7 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-// IWYU pragma: no_include "opentxs/crypto/key/asymmetric/Algorithm.hpp"
+// IWYU pragma: no_include "opentxs/crypto/asymmetric/Algorithm.hpp"
 // IWYU pragma: no_include "opentxs/crypto/symmetric/Algorithm.hpp"
 // IWYU pragma: no_include "opentxs/crypto/symmetric/Source.hpp"
 
@@ -29,7 +29,7 @@
 #include "opentxs/api/crypto/Util.hpp"
 #include "opentxs/crypto/Bip32.hpp"
 #include "opentxs/crypto/Bip39.hpp"
-#include "opentxs/crypto/key/Types.hpp"
+#include "opentxs/crypto/asymmetric/Types.hpp"
 #include "opentxs/crypto/symmetric/Types.hpp"
 #include "opentxs/util/Container.hpp"
 
@@ -73,12 +73,12 @@ namespace opentxs::api::imp
 class Crypto final : public internal::Crypto
 {
 public:
-    auto AsymmetricProvider(opentxs::crypto::key::asymmetric::Algorithm type)
+    auto AsymmetricProvider(opentxs::crypto::asymmetric::Algorithm type)
         const noexcept -> const opentxs::crypto::AsymmetricProvider& final;
     auto BIP32() const noexcept -> const opentxs::crypto::Bip32& final;
     auto BIP39() const noexcept -> const opentxs::crypto::Bip39& final;
     auto Config() const noexcept -> const crypto::Config& final;
-    auto EllipticProvider(opentxs::crypto::key::asymmetric::Algorithm type)
+    auto EllipticProvider(opentxs::crypto::asymmetric::Algorithm type)
         const noexcept -> const opentxs::crypto::EcdsaProvider& final;
     auto Encode() const noexcept -> const crypto::Encode& final;
     auto Hash() const noexcept -> const crypto::Hash& final;
@@ -108,7 +108,7 @@ public:
     ~Crypto() final;
 
 private:
-    using AType = opentxs::crypto::key::asymmetric::Algorithm;
+    using AType = opentxs::crypto::asymmetric::Algorithm;
     using SaType = opentxs::crypto::symmetric::Algorithm;
     using SsType = opentxs::crypto::symmetric::Source;
     using AMap = UnallocatedMap<AType, opentxs::crypto::AsymmetricProvider*>;

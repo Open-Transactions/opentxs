@@ -7,7 +7,14 @@
 
 #include <cstdint>
 
-#include "opentxs/util/Bytes.hpp"
+#include "opentxs/util/Types.hpp"
+
+// NOLINTBEGIN(modernize-concat-nested-namespaces)
+namespace opentxs
+{
+class Writer;
+}  // namespace opentxs
+// NOLINTEND(modernize-concat-nested-namespaces)
 
 namespace opentxs::crypto
 {
@@ -21,7 +28,7 @@ public:
         const std::uint32_t r,
         const std::uint32_t p,
         const std::size_t bytes,
-        AllocateOutput writer) const noexcept -> bool = 0;
+        Writer&& writer) const noexcept -> bool = 0;
 
     Scrypt(const Scrypt&) = delete;
     Scrypt(Scrypt&&) = delete;

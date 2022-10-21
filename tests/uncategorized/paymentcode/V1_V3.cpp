@@ -22,10 +22,10 @@ public:
     static constexpr auto alice_version_ = std::uint8_t{1};
     static constexpr auto bob_version_ = std::uint8_t{3};
 
-    const ot::crypto::key::EllipticCurve& alice_blind_secret_;
-    const ot::crypto::key::EllipticCurve& alice_blind_public_;
-    const ot::crypto::key::EllipticCurve& bob_blind_secret_;
-    const ot::crypto::key::EllipticCurve& bob_blind_public_;
+    const ot::crypto::asymmetric::key::EllipticCurve& alice_blind_secret_;
+    const ot::crypto::asymmetric::key::EllipticCurve& alice_blind_public_;
+    const ot::crypto::asymmetric::key::EllipticCurve& bob_blind_secret_;
+    const ot::crypto::asymmetric::key::EllipticCurve& bob_blind_public_;
 
     Test_PaymentCode_v1_v3()
         : PC_Fixture_Base(
@@ -56,15 +56,13 @@ TEST_F(Test_PaymentCode_v1_v3, generate)
     EXPECT_EQ(bob_pc_secret_.Version(), bob_version_);
     EXPECT_EQ(bob_pc_public_.Version(), bob_version_);
 
-    const auto decode1 =
-        api_.Crypto().Encode().IdentifierDecode(alice_pc_secret_.asBase58());
-    const auto decode2 =
-        api_.Crypto().Encode().IdentifierDecode(alice_pc_public_.asBase58());
-    auto data1 = api_.Factory().DataFromBytes(
-        ot::ReadView{decode1.data(), decode1.size()});
-    auto data2 = api_.Factory().DataFromBytes(
-        ot::ReadView{decode2.data(), decode2.size()});
+    auto data1 = ot::ByteArray{};
+    auto data2 = ot::ByteArray{};
 
+    EXPECT_TRUE(api_.Crypto().Encode().Base58CheckDecode(
+        alice_pc_secret_.asBase58(), data1.WriteInto()));
+    EXPECT_TRUE(api_.Crypto().Encode().Base58CheckDecode(
+        alice_pc_public_.asBase58(), data2.WriteInto()));
     EXPECT_EQ(alice_pc_secret_.asBase58(), alice_pc_public_.asBase58());
     EXPECT_EQ(
         alice_pc_secret_.asBase58(),
@@ -112,15 +110,14 @@ TEST_F(Test_PaymentCode_v1_v3, locators)
 TEST_F(Test_PaymentCode_v1_v3, outgoing_btc)
 {
     for (auto i = ot::Bip32Index{0}; i < 10u; ++i) {
-        const auto pKey = bob_pc_secret_.Outgoing(
+        const auto key = bob_pc_secret_.Outgoing(
             alice_pc_public_,
             i,
             GetPaymentCodeVector3().chris_.receive_chain_,
             reason_);
 
-        ASSERT_TRUE(pKey);
+        ASSERT_TRUE(key.IsValid());
 
-        const auto& key = *pKey;
         const auto expect = api_.Factory().DataFromHex(
             GetPaymentCodeVector3().chris_.receive_keys_.at(i));
 
@@ -131,15 +128,14 @@ TEST_F(Test_PaymentCode_v1_v3, outgoing_btc)
 TEST_F(Test_PaymentCode_v1_v3, incoming_btc)
 {
     for (auto i = ot::Bip32Index{0}; i < 10u; ++i) {
-        const auto pKey = alice_pc_secret_.Incoming(
+        const auto key = alice_pc_secret_.Incoming(
             bob_pc_public_,
             i,
             GetPaymentCodeVector3().chris_.receive_chain_,
             reason_);
 
-        ASSERT_TRUE(pKey);
+        ASSERT_TRUE(key.IsValid());
 
-        const auto& key = *pKey;
         const auto expect = api_.Factory().DataFromHex(
             GetPaymentCodeVector3().chris_.receive_keys_.at(i));
 
@@ -150,15 +146,14 @@ TEST_F(Test_PaymentCode_v1_v3, incoming_btc)
 TEST_F(Test_PaymentCode_v1_v3, outgoing_testnet)
 {
     for (auto i = ot::Bip32Index{0}; i < 10u; ++i) {
-        const auto pKey = alice_pc_secret_.Outgoing(
+        const auto key = alice_pc_secret_.Outgoing(
             bob_pc_public_,
             i,
             GetPaymentCodeVector3().daniel_.receive_chain_,
             reason_);
 
-        ASSERT_TRUE(pKey);
+        ASSERT_TRUE(key.IsValid());
 
-        const auto& key = *pKey;
         const auto expect = api_.Factory().DataFromHex(
             GetPaymentCodeVector3().daniel_.receive_keys_.at(i));
 
@@ -169,15 +164,14 @@ TEST_F(Test_PaymentCode_v1_v3, outgoing_testnet)
 TEST_F(Test_PaymentCode_v1_v3, incoming_testnet)
 {
     for (auto i = ot::Bip32Index{0}; i < 10u; ++i) {
-        const auto pKey = bob_pc_secret_.Incoming(
+        const auto key = bob_pc_secret_.Incoming(
             alice_pc_public_,
             i,
             GetPaymentCodeVector3().daniel_.receive_chain_,
             reason_);
 
-        ASSERT_TRUE(pKey);
+        ASSERT_TRUE(key.IsValid());
 
-        const auto& key = *pKey;
         const auto expect = api_.Factory().DataFromHex(
             GetPaymentCodeVector3().daniel_.receive_keys_.at(i));
 
@@ -191,12 +185,11 @@ TEST_F(Test_PaymentCode_v1_v3, incoming_testnet)
 TEST_F(Test_PaymentCode_v1_v3, cross_chain_address_reuse)
 {
     for (auto i = ot::Bip32Index{0}; i < 10u; ++i) {
-        const auto pKey = bob_pc_secret_.Outgoing(
+        const auto key = bob_pc_secret_.Outgoing(
             alice_pc_public_, i, ot::blockchain::Type::Litecoin, reason_);
 
-        ASSERT_TRUE(pKey);
+        ASSERT_TRUE(key.IsValid());
 
-        const auto& key = *pKey;
         const auto expect = api_.Factory().DataFromHex(
             GetPaymentCodeVector3().chris_.receive_keys_.at(i));
 

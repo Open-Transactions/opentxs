@@ -8,8 +8,8 @@
 #include <string_view>
 
 #include "internal/network/zeromq/socket/Sender.hpp"
+#include "internal/util/Pimpl.hpp"
 #include "opentxs/util/Container.hpp"
-#include "opentxs/util/Pimpl.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs

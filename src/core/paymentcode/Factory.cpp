@@ -16,9 +16,7 @@
 
 #include "core/paymentcode/Imp.hpp"
 #include "core/paymentcode/Preimage.hpp"
-#include "internal/crypto/key/Factory.hpp"
-#include "internal/crypto/key/Null.hpp"
-#include "internal/util/LogMacros.hpp"
+#include "internal/crypto/asymmetric/Factory.hpp"
 #include "opentxs/api/crypto/Encode.hpp"
 #include "opentxs/api/crypto/Hash.hpp"
 #include "opentxs/api/crypto/Seed.hpp"
@@ -28,8 +26,9 @@
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/PaymentCode.hpp"
 #include "opentxs/crypto/HashType.hpp"
-#include "opentxs/crypto/key/Secp256k1.hpp"
-#include "opentxs/util/Bytes.hpp"
+#include "opentxs/crypto/asymmetric/key/Secp256k1.hpp"
+#include "opentxs/util/Types.hpp"
+#include "opentxs/util/Writer.hpp"
 
 namespace opentxs::factory
 {
@@ -39,7 +38,15 @@ auto PaymentCode(
 {
     const auto serialized = [&] {
         auto out = opentxs::paymentcode::Base58Preimage{};
-        const auto bytes = api.Crypto().Encode().IdentifierDecode(base58);
+        const auto bytes = [&] {
+            auto out = ByteArray{};
+            // TODO handle errors
+            [[maybe_unused]] const auto rc =
+                api.Crypto().Encode().Base58CheckDecode(
+                    base58, out.WriteInto());
+
+            return out;
+        }();
         const auto* data = reinterpret_cast<const std::byte*>(bytes.data());
 
         switch (bytes.size()) {
@@ -93,6 +100,9 @@ auto PaymentCode(
         return out;
     }();
     const auto& raw = serialized.payload_;
+    auto key = factory::Secp256k1Key(
+        api, raw.xpub_.Key(), raw.xpub_.Chaincode(), {}  // TODO allocator
+    );
 
     return std::make_unique<opentxs::implementation::PaymentCode>(
                api,
@@ -102,8 +112,7 @@ auto PaymentCode(
                raw.xpub_.Chaincode(),
                raw.bm_version_,
                raw.bm_stream_,
-               factory::Secp256k1Key(
-                   api, raw.xpub_.Key(), raw.xpub_.Chaincode()))
+               std::move(key))
         .release();
 }
 
@@ -111,6 +120,10 @@ auto PaymentCode(
     const api::Session& api,
     const proto::PaymentCode& serialized) noexcept -> opentxs::PaymentCode
 {
+    auto key = factory::Secp256k1Key(
+        api, serialized.key(), serialized.chaincode(), {}  // TODO allocator
+    );
+
     return std::make_unique<opentxs::implementation::PaymentCode>(
                api,
                static_cast<std::uint8_t>(serialized.version()),
@@ -119,8 +132,7 @@ auto PaymentCode(
                serialized.chaincode(),
                static_cast<std::uint8_t>(serialized.bitmessageversion()),
                static_cast<std::uint8_t>(serialized.bitmessagestream()),
-               factory::Secp256k1Key(
-                   api, serialized.key(), serialized.chaincode()))
+               std::move(key))
         .release();
 }
 
@@ -135,26 +147,20 @@ auto PaymentCode(
     const opentxs::PasswordPrompt& reason) noexcept -> opentxs::PaymentCode
 {
     auto fingerprint{seed};
-    auto pKey =
+    auto key =
         api.Crypto().Seed().GetPaymentCode(fingerprint, nym, version, reason);
-
-    if (false == bool(pKey)) {
-        pKey = std::make_unique<opentxs::crypto::key::blank::Secp256k1>();
-    }
-
-    OT_ASSERT(pKey);
-
-    const auto& key = *pKey;
+    const auto pub = key.PublicKey();
+    const auto chain = key.Chaincode(reason);
 
     return std::make_unique<opentxs::implementation::PaymentCode>(
                api,
                version,
                bitmessage,
-               key.PublicKey(),
-               key.Chaincode(reason),
+               pub,
+               chain,
                bitmessageVersion,
                bitmessageStream,
-               std::move(pKey))
+               std::move(key))
         .release();
 }
 }  // namespace opentxs::factory

@@ -35,6 +35,7 @@
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Time.hpp"
+#include "opentxs/util/Writer.hpp"
 #include "util/log/LogBuffer.hpp"
 #include "util/log/Logger.hpp"
 

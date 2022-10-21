@@ -31,8 +31,11 @@
 #include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/core/FixedByteArray.hpp"
 #include "opentxs/util/Allocator.hpp"
+#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
+#include "opentxs/util/WriteBuffer.hpp"
+#include "opentxs/util/Writer.hpp"
 #include "util/ByteLiterals.hpp"
 
 namespace opentxs::blockchain::database::common
@@ -181,7 +184,7 @@ auto BlockFilter::LoadCfilters(
 auto BlockFilter::LoadCfilterHash(
     const cfilter::Type type,
     const ReadView blockHash,
-    const AllocateOutput filterHash) const noexcept -> bool
+    Writer&& filterHash) const noexcept -> bool
 {
     auto output{false};
     auto cb = [&output, &filterHash](const auto in) {
@@ -192,9 +195,9 @@ auto BlockFilter::LoadCfilterHash(
         auto proto =
             proto::Factory<proto::BlockchainFilterHeader>(in.data(), in.size());
         const auto& field = proto.hash();
-        auto bytes = filterHash(field.size());
+        auto bytes = filterHash.Reserve(field.size());
 
-        if (bytes.valid(field.size())) {
+        if (bytes.IsValid(field.size())) {
             std::memcpy(bytes, field.data(), bytes);
             output = true;
         }
@@ -212,7 +215,7 @@ auto BlockFilter::LoadCfilterHash(
 auto BlockFilter::LoadCfheader(
     const cfilter::Type type,
     const ReadView blockHash,
-    const AllocateOutput header) const noexcept -> bool
+    Writer&& header) const noexcept -> bool
 {
     auto output{false};
     auto cb = [&output, &header](const auto in) {
@@ -223,12 +226,7 @@ auto BlockFilter::LoadCfheader(
         auto proto =
             proto::Factory<proto::BlockchainFilterHeader>(in.data(), in.size());
         const auto& field = proto.header();
-        auto bytes = header(field.size());
-
-        if (bytes.valid(field.size())) {
-            std::memcpy(bytes, field.data(), bytes);
-            output = true;
-        }
+        output = copy(field, std::move(header));
     };
 
     try {
@@ -323,7 +321,7 @@ auto BlockFilter::store(
             auto& [index, view] = write.at(i);
             const auto sIndex = index.Serialize();
 
-            if ((false == view.valid(bytes)) || (index.empty())) {
+            if ((false == view.IsValid(bytes)) || (index.empty())) {
                 throw std::runtime_error{
                     "Failed to get write position for cfilter"};
             }

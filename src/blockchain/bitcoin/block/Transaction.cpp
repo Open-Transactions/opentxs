@@ -52,9 +52,12 @@
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/identity/wot/claim/Types.hpp"
 #include "opentxs/network/blockchain/bitcoin/CompactSize.hpp"
+#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Iterator.hpp"
 #include "opentxs/util/Log.hpp"
+#include "opentxs/util/WriteBuffer.hpp"
+#include "opentxs/util/Writer.hpp"
 #include "util/Container.hpp"
 
 namespace be = boost::endian;
@@ -799,20 +802,13 @@ auto Transaction::Print() const noexcept -> UnallocatedCString
     return out.str();
 }
 
-auto Transaction::serialize(
-    const AllocateOutput destination,
-    const bool normalize) const noexcept -> std::optional<std::size_t>
+auto Transaction::serialize(Writer&& destination, const bool normalize)
+    const noexcept -> std::optional<std::size_t>
 {
-    if (!destination) {
-        LogError()(OT_PRETTY_CLASS())("Invalid output allocator").Flush();
-
-        return std::nullopt;
-    }
-
     const auto size = calculate_size(normalize);
-    auto output = destination(size);
+    auto output = destination.Reserve(size);
 
-    if (false == output.valid(size)) {
+    if (false == output.IsValid(size)) {
         LogError()(OT_PRETTY_CLASS())("Failed to allocate output bytes")
             .Flush();
 
@@ -822,7 +818,7 @@ auto Transaction::serialize(
     const auto version = be::little_int32_buf_t{version_};
     const auto lockTime = be::little_uint32_buf_t{lock_time_};
     auto remaining{output.size()};
-    auto* it = static_cast<std::byte*>(output.data());
+    auto* it = output.as<std::byte>();
 
     if (remaining < sizeof(version)) {
         LogError()(OT_PRETTY_CLASS())(
@@ -958,10 +954,10 @@ auto Transaction::serialize(
     return size;
 }
 
-auto Transaction::Serialize(const AllocateOutput destination) const noexcept
+auto Transaction::Serialize(Writer&& destination) const noexcept
     -> std::optional<std::size_t>
 {
-    return serialize(destination, false);
+    return serialize(std::move(destination), false);
 }
 
 auto Transaction::Serialize(const api::Session& api) const noexcept

@@ -17,8 +17,8 @@
 #include "opentxs/blockchain/bitcoin/cfilter/FilterType.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/util/Allocator.hpp"
-#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
+#include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace google
@@ -72,6 +72,8 @@ class Database;
 class Transaction;
 }  // namespace lmdb
 }  // namespace storage
+
+class Writer;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -98,11 +100,11 @@ public:
     auto LoadCfilterHash(
         const cfilter::Type type,
         const ReadView blockHash,
-        const AllocateOutput filterHash) const noexcept -> bool;
+        Writer&& filterHash) const noexcept -> bool;
     auto LoadCfheader(
         const cfilter::Type type,
         const ReadView blockHash,
-        const AllocateOutput header) const noexcept -> bool;
+        Writer&& header) const noexcept -> bool;
     auto StoreCfheaders(
         const cfilter::Type type,
         const Vector<CFHeaderParams>& headers) const noexcept -> bool;

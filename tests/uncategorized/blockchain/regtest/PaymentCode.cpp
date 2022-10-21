@@ -477,7 +477,7 @@ TEST_F(Regtest_payment_code, send_to_bob)
             std::piecewise_construct,
             std::forward_as_tuple(txid.Bytes(), 0),
             std::forward_as_tuple(
-                client_1_.Factory().DataFromBytes(element.Key()->PublicKey()),
+                client_1_.Factory().DataFromBytes(element.Key().PublicKey()),
                 amount,
                 Pattern::PayToPubkey));
     }
@@ -488,7 +488,7 @@ TEST_F(Regtest_payment_code, send_to_bob)
             std::piecewise_construct,
             std::forward_as_tuple(txid.Bytes(), 1),
             std::forward_as_tuple(
-                client_1_.Factory().DataFromBytes(element.Key()->PublicKey()),
+                client_1_.Factory().DataFromBytes(element.Key().PublicKey()),
                 amount,
                 Pattern::PayToMultisig));
     }
@@ -1432,7 +1432,7 @@ TEST_F(Regtest_payment_code, send_to_bob_again)
             std::piecewise_construct,
             std::forward_as_tuple(txid.Bytes(), 0),
             std::forward_as_tuple(
-                client_1_.Factory().DataFromBytes(element.Key()->PublicKey()),
+                client_1_.Factory().DataFromBytes(element.Key().PublicKey()),
                 amount,
                 Pattern::PayToPubkey));
     }

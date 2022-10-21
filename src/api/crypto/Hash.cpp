@@ -6,11 +6,12 @@
 #include "0_stdafx.hpp"         // IWYU pragma: associated
 #include "api/crypto/Hash.hpp"  // IWYU pragma: associated
 
-#include <cstring>
+#include <smhasher/src/MurmurHash3.h>
 #include <limits>
 #include <memory>
 #include <stdexcept>
 #include <string_view>
+#include <utility>
 
 #include "internal/api/crypto/Factory.hpp"
 #include "internal/crypto/library/HashingProvider.hpp"
@@ -25,9 +26,10 @@
 #include "opentxs/core/Secret.hpp"
 #include "opentxs/crypto/HashType.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
+#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
-#include "smhasher/src/MurmurHash3.h"
+#include "opentxs/util/Writer.hpp"
 
 namespace opentxs::factory
 {
@@ -66,9 +68,8 @@ Hash::Hash(
 {
 }
 
-auto Hash::bitcoin_hash_160(
-    const ReadView data,
-    const AllocateOutput destination) const noexcept -> bool
+auto Hash::bitcoin_hash_160(const ReadView data, Writer&& destination)
+    const noexcept -> bool
 {
     try {
         auto temp = Space{};
@@ -81,7 +82,9 @@ auto Hash::bitcoin_hash_160(
         }
 
         return Digest(
-            opentxs::crypto::HashType::Ripemd160, reader(temp), destination);
+            opentxs::crypto::HashType::Ripemd160,
+            reader(temp),
+            std::move(destination));
     } catch (const std::exception& e) {
         LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
 
@@ -92,7 +95,7 @@ auto Hash::bitcoin_hash_160(
 auto Hash::Digest(
     const opentxs::crypto::HashType type,
     const ReadView data,
-    const AllocateOutput destination) const noexcept -> bool
+    Writer&& destination) const noexcept -> bool
 {
     using Type = opentxs::crypto::HashType;
 
@@ -101,29 +104,29 @@ auto Hash::Digest(
         case Type::Sha256:
         case Type::Sha512: {
 
-            return sha_.Digest(type, data, destination);
+            return sha_.Digest(type, data, std::move(destination));
         }
         case Type::Blake2b160:
         case Type::Blake2b256:
         case Type::Blake2b512: {
 
-            return blake_.Digest(type, data, destination);
+            return blake_.Digest(type, data, std::move(destination));
         }
         case Type::Ripemd160: {
 
-            return ripe_.RIPEMD160(data, destination);
+            return ripe_.RIPEMD160(data, std::move(destination));
         }
         case Type::Sha256D: {
 
-            return sha_256_double(data, destination);
+            return sha_256_double(data, std::move(destination));
         }
         case Type::Sha256DC: {
 
-            return sha_256_double_checksum(data, destination);
+            return sha_256_double_checksum(data, std::move(destination));
         }
         case Type::Bitcoin: {
 
-            return bitcoin_hash_160(data, destination);
+            return bitcoin_hash_160(data, std::move(destination));
         }
         case Type::Error:
         case Type::None:
@@ -139,15 +142,15 @@ auto Hash::Digest(
 auto Hash::Digest(
     const opentxs::crypto::HashType type,
     const opentxs::network::zeromq::Frame& data,
-    const AllocateOutput destination) const noexcept -> bool
+    Writer&& destination) const noexcept -> bool
 {
-    return Digest(type, data.Bytes(), destination);
+    return Digest(type, data.Bytes(), std::move(destination));
 }
 
 auto Hash::Digest(
     const std::uint32_t hash,
     const ReadView data,
-    const AllocateOutput destination) const noexcept -> bool
+    Writer&& destination) const noexcept -> bool
 {
     const auto type = static_cast<opentxs::crypto::HashType>(hash);
     auto temp = ByteArray{};
@@ -158,16 +161,7 @@ auto Hash::Digest(
             throw std::runtime_error{"failed to calculate hash"};
         }
 
-        const auto encoded = encode_.IdentifierEncode(temp.Bytes());
-        auto output = destination(encoded.size());
-
-        if (false == output.valid(encoded.size())) {
-            throw std::runtime_error{"unable to allocate encoded output space"};
-        }
-
-        std::memcpy(output, encoded.data(), output);
-
-        return true;
+        return encode_.Base58CheckEncode(temp.Bytes(), std::move(destination));
     } catch (const std::exception& e) {
         LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
 
@@ -179,7 +173,7 @@ auto Hash::HMAC(
     const opentxs::crypto::HashType type,
     const ReadView key,
     const ReadView data,
-    const AllocateOutput output) const noexcept -> bool
+    Writer&& output) const noexcept -> bool
 {
     using Type = opentxs::crypto::HashType;
 
@@ -187,14 +181,14 @@ auto Hash::HMAC(
         case Type::Sha256:
         case Type::Sha512: {
 
-            return sha_.HMAC(type, key, data, output);
+            return sha_.HMAC(type, key, data, std::move(output));
         }
         case Type::Blake2b160:
         case Type::Blake2b256:
         case Type::Blake2b512:
         case Type::SipHash24: {
 
-            return blake_.HMAC(type, key, data, output);
+            return blake_.HMAC(type, key, data, std::move(output));
         }
         case Type::Sha1:
         case Type::Ripemd160:
@@ -295,12 +289,12 @@ auto Hash::Scrypt(
     const std::uint32_t r,
     const std::uint32_t p,
     const std::size_t bytes,
-    AllocateOutput writer) const noexcept -> bool
+    Writer&& writer) const noexcept -> bool
 {
-    return scrypt_.Generate(input, salt, N, r, p, bytes, writer);
+    return scrypt_.Generate(input, salt, N, r, p, bytes, std::move(writer));
 }
 
-auto Hash::sha_256_double(const ReadView data, const AllocateOutput destination)
+auto Hash::sha_256_double(const ReadView data, Writer&& destination)
     const noexcept -> bool
 {
     try {
@@ -314,7 +308,9 @@ auto Hash::sha_256_double(const ReadView data, const AllocateOutput destination)
         }
 
         return Digest(
-            opentxs::crypto::HashType::Sha256, reader(temp), destination);
+            opentxs::crypto::HashType::Sha256,
+            reader(temp),
+            std::move(destination));
     } catch (const std::exception& e) {
         LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
 
@@ -322,33 +318,18 @@ auto Hash::sha_256_double(const ReadView data, const AllocateOutput destination)
     }
 }
 
-auto Hash::sha_256_double_checksum(
-    const ReadView data,
-    const AllocateOutput destination) const noexcept -> bool
+auto Hash::sha_256_double_checksum(const ReadView data, Writer&& destination)
+    const noexcept -> bool
 {
     try {
         auto temp = Space{};
-        const auto rc = sha_256_double(data, writer(temp));
 
-        if (false == rc) {
+        if (false == sha_256_double(data, writer(temp))) {
 
-            throw std::runtime_error{"failed to calculate intermediate hash"};
+            throw std::runtime_error{"failed to calculate checksum hash"};
         }
 
-        if (false == destination.operator bool()) {
-            throw std::runtime_error{"invalid output"};
-        }
-
-        static constexpr auto size = 4_uz;
-        auto buf = destination(size);
-
-        if (false == buf.valid(size)) {
-            throw std::runtime_error{"failed to allocate space for output"};
-        }
-
-        std::memcpy(buf.data(), temp.data(), size);
-
-        return true;
+        return copy(reader(temp), std::move(destination), 4_uz);
     } catch (const std::exception& e) {
         LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
 

@@ -16,7 +16,7 @@
 #include "api/network/asio/Acceptors.hpp"
 #include "internal/api/network/Asio.hpp"
 #include "opentxs/api/network/Asio.hpp"
-#include "opentxs/util/Bytes.hpp"
+#include "opentxs/util/Types.hpp"
 #include "opentxs/util/WorkType.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)

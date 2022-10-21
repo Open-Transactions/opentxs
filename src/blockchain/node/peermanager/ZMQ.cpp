@@ -22,6 +22,7 @@
 #include "internal/network/zeromq/socket/Router.hpp"
 #include "internal/network/zeromq/socket/Socket.hpp"
 #include "internal/util/LogMacros.hpp"
+#include "internal/util/Pimpl.hpp"
 #include "opentxs/api/crypto/Encode.hpp"
 #include "opentxs/api/network/Network.hpp"
 #include "opentxs/api/session/Crypto.hpp"
@@ -40,8 +41,8 @@
 #include "opentxs/network/zeromq/message/Message.tpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
-#include "opentxs/util/Pimpl.hpp"
 #include "opentxs/util/WorkType.hpp"
+#include "opentxs/util/Writer.hpp"
 #include "util/Work.hpp"
 
 namespace opentxs::blockchain::node::peermanager

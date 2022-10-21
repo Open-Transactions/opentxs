@@ -3,6 +3,8 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_include "opentxs/util/Writer.hpp"
+
 #pragma once
 
 #include <cstddef>
@@ -10,8 +12,8 @@
 #include <variant>
 
 #include "opentxs/core/ByteArray.hpp"
-#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
+#include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -31,6 +33,8 @@ class Node;
 }  // namespace rlp
 }  // namespace ethereum
 }  // namespace blockchain
+
+class Writer;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -50,8 +54,7 @@ public:
     static auto Decode(const api::Session& api, ReadView serialized) noexcept(
         false) -> Node;
 
-    auto Encode(const api::Session& api, AllocateOutput out) const noexcept
-        -> bool;
+    auto Encode(const api::Session& api, Writer&& out) const noexcept -> bool;
     auto EncodedSize(const api::Session& api) const noexcept -> std::size_t;
     auto operator==(const Node& rhs) const noexcept -> bool;
 

@@ -3,6 +3,8 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_include "opentxs/crypto/asymmetric/key/EllipticCurve.hpp"
+
 #pragma once
 
 #include <BlockchainAccountData.pb.h>
@@ -26,10 +28,10 @@
 #include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/crypto/Types.hpp"
-#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
 #include "opentxs/util/Time.hpp"
+#include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -59,11 +61,14 @@ class Element;
 
 namespace crypto
 {
+namespace asymmetric
+{
 namespace key
 {
 class EllipticCurve;
 class HD;
 }  // namespace key
+}  // namespace asymmetric
 }  // namespace crypto
 
 namespace identifier
@@ -109,10 +114,8 @@ public:
     auto PrivateKey(
         const Subchain type,
         const Bip32Index index,
-        const PasswordPrompt& reason) const noexcept -> ECKey override
-    {
-        return {};
-    }
+        const PasswordPrompt& reason) const noexcept
+        -> opentxs::crypto::asymmetric::key::EllipticCurve override;
     auto ScanProgress(Subchain type) const noexcept -> block::Position override;
 
     auto Confirm(
@@ -149,7 +152,7 @@ public:
     auto operator=(const Subaccount&) -> Subaccount& = delete;
     auto operator=(Subaccount&&) -> Subaccount& = delete;
 
-    ~Subaccount() override = default;
+    ~Subaccount() override;
 
 protected:
     using AddressMap = Map<Bip32Index, std::unique_ptr<Element>>;

@@ -35,6 +35,7 @@
 #include "opentxs/util/PasswordCaller.hpp"
 #include "opentxs/util/PasswordPrompt.hpp"
 #include "opentxs/util/Types.hpp"
+#include "opentxs/util/Writer.hpp"
 #include "util/NullCallback.hpp"
 #include "util/ScopeGuard.hpp"
 

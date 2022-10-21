@@ -43,9 +43,9 @@
 #include "opentxs/core/Secret.hpp"
 #include "opentxs/interface/rpc/request/Base.hpp"
 #include "opentxs/interface/rpc/response/Base.hpp"
-#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Options.hpp"
+#include "opentxs/util/Types.hpp"
 
 class QObject;
 
@@ -105,6 +105,7 @@ class Flag;
 class PasswordCallback;
 class PasswordCaller;
 class Signals;
+class Writer;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -153,8 +154,8 @@ public:
         const -> bool final;
     auto RPC(const rpc::request::Base& command) const noexcept
         -> std::unique_ptr<rpc::response::Base> final;
-    auto RPC(const ReadView command, const AllocateOutput response)
-        const noexcept -> bool final;
+    auto RPC(const ReadView command, Writer&& response) const noexcept
+        -> bool final;
     auto Schedule(
         const std::chrono::seconds& interval,
         const PeriodicTask& task,

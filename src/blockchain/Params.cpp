@@ -49,10 +49,10 @@
 #include "opentxs/core/display/Definition.hpp"
 #include "opentxs/crypto/Bip44Type.hpp"
 #include "opentxs/crypto/HashType.hpp"
-#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Types.hpp"
+#include "opentxs/util/Writer.hpp"
 #include "util/Container.hpp"
 
 namespace opentxs
@@ -97,7 +97,7 @@ auto BlockHash(
     const api::Crypto& crypto,
     const Type chain,
     const ReadView input,
-    const AllocateOutput output) noexcept -> bool
+    Writer&& output) noexcept -> bool
 {
     switch (chain) {
         case Type::Unknown:
@@ -118,7 +118,7 @@ auto BlockHash(
         case Type::UnitTest:
         default: {
             return crypto.Hash().Digest(
-                opentxs::crypto::HashType::Sha256D, input, output);
+                opentxs::crypto::HashType::Sha256D, input, std::move(output));
         }
     }
 }
@@ -140,7 +140,7 @@ auto FilterHash(
     const api::Crypto& crypto,
     const Type chain,
     const ReadView input,
-    const AllocateOutput output) noexcept -> bool
+    Writer&& output) noexcept -> bool
 {
     switch (chain) {
         case Type::Unknown:
@@ -160,7 +160,7 @@ auto FilterHash(
         case Type::eCash_testnet3:
         case Type::UnitTest:
         default: {
-            return BlockHash(crypto, chain, input, output);
+            return BlockHash(crypto, chain, input, std::move(output));
         }
     }
 }
@@ -191,7 +191,7 @@ auto MerkleHash(
     const api::Crypto& crypto,
     const Type chain,
     const ReadView input,
-    const AllocateOutput output) noexcept -> bool
+    Writer&& output) noexcept -> bool
 {
     switch (chain) {
         case Type::Unknown:
@@ -211,7 +211,7 @@ auto MerkleHash(
         case Type::eCash_testnet3:
         case Type::UnitTest:
         default: {
-            return BlockHash(crypto, chain, input, output);
+            return BlockHash(crypto, chain, input, std::move(output));
         }
     }
 }
@@ -220,7 +220,7 @@ auto P2PMessageHash(
     const api::Crypto& crypto,
     const Type chain,
     const ReadView input,
-    const AllocateOutput output) noexcept -> bool
+    Writer&& output) noexcept -> bool
 {
     switch (chain) {
         case Type::Unknown:
@@ -241,7 +241,7 @@ auto P2PMessageHash(
         case Type::UnitTest:
         default: {
             return crypto.Hash().Digest(
-                opentxs::crypto::HashType::Sha256DC, input, output);
+                opentxs::crypto::HashType::Sha256DC, input, std::move(output));
         }
     }
 }
@@ -255,12 +255,13 @@ auto ProofOfWorkHash(
     const api::Crypto& crypto,
     const Type chain,
     const ReadView input,
-    const AllocateOutput output) noexcept -> bool
+    Writer&& output) noexcept -> bool
 {
     switch (chain) {
         case Type::Litecoin:
         case Type::Litecoin_testnet4: {
-            return crypto.Hash().Scrypt(input, input, 1024, 1, 1, 32, output);
+            return crypto.Hash().Scrypt(
+                input, input, 1024, 1, 1, 32, std::move(output));
         }
         case Type::UnitTest:
         case Type::Unknown:
@@ -277,7 +278,7 @@ auto ProofOfWorkHash(
         case Type::eCash:
         case Type::eCash_testnet3:
         default: {
-            return BlockHash(crypto, chain, input, output);
+            return BlockHash(crypto, chain, input, std::move(output));
         }
     }
 }
@@ -286,7 +287,7 @@ auto PubkeyHash(
     const api::Crypto& crypto,
     const Type chain,
     const ReadView input,
-    const AllocateOutput output) noexcept -> bool
+    Writer&& output) noexcept -> bool
 {
     switch (chain) {
         case Type::Unknown:
@@ -307,7 +308,7 @@ auto PubkeyHash(
         case Type::UnitTest:
         default: {
             return crypto.Hash().Digest(
-                opentxs::crypto::HashType::Bitcoin, input, output);
+                opentxs::crypto::HashType::Bitcoin, input, std::move(output));
         }
     }
 }
@@ -316,7 +317,7 @@ auto ScriptHash(
     const api::Crypto& crypto,
     const Type chain,
     const ReadView input,
-    const AllocateOutput output) noexcept -> bool
+    Writer&& output) noexcept -> bool
 {
     switch (chain) {
         case Type::Unknown:
@@ -337,7 +338,7 @@ auto ScriptHash(
         case Type::UnitTest:
         default: {
             return crypto.Hash().Digest(
-                opentxs::crypto::HashType::Bitcoin, input, output);
+                opentxs::crypto::HashType::Bitcoin, input, std::move(output));
         }
     }
 }
@@ -346,7 +347,7 @@ auto ScriptHashSegwit(
     const api::Crypto& crypto,
     const Type chain,
     const ReadView input,
-    const AllocateOutput output) noexcept -> bool
+    Writer&& output) noexcept -> bool
 {
     switch (chain) {
         case Type::Unknown:
@@ -367,7 +368,7 @@ auto ScriptHashSegwit(
         case Type::UnitTest:
         default: {
             return crypto.Hash().Digest(
-                opentxs::crypto::HashType::Sha256, input, output);
+                opentxs::crypto::HashType::Sha256, input, std::move(output));
         }
     }
 }
@@ -397,7 +398,7 @@ auto TransactionHash(
     const api::Crypto& crypto,
     const Type chain,
     const ReadView input,
-    const AllocateOutput output) noexcept -> bool
+    Writer&& output) noexcept -> bool
 {
     switch (chain) {
         case Type::Unknown:
@@ -417,7 +418,7 @@ auto TransactionHash(
         case Type::eCash_testnet3:
         case Type::UnitTest:
         default: {
-            return BlockHash(crypto, chain, input, output);
+            return BlockHash(crypto, chain, input, std::move(output));
         }
     }
 }

@@ -3,7 +3,9 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-// IWYU pragma: no_include "opentxs/crypto/key/asymmetric/Role.hpp"
+// IWYU pragma: no_include "opentxs/crypto/asymmetric/Role.hpp"
+// IWYU pragma: no_include "opentxs/crypto/asymmetric/key/HD.hpp"
+// IWYU pragma: no_include "opentxs/crypto/asymmetric/key/Secp256k1.hpp"
 // IWYU pragma: no_include "opentxs/crypto/symmetric/Key.hpp"
 
 #pragma once
@@ -29,10 +31,10 @@
 #include "opentxs/crypto/SeedStrength.hpp"
 #include "opentxs/crypto/SeedStyle.hpp"
 #include "opentxs/crypto/Types.hpp"
-#include "opentxs/crypto/key/EllipticCurve.hpp"
-#include "opentxs/util/Bytes.hpp"
+#include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
+#include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -58,11 +60,14 @@ class Session;
 
 namespace crypto
 {
+namespace asymmetric
+{
 namespace key
 {
 class HD;
 class Secp256k1;
 }  // namespace key
+}  // namespace asymmetric
 
 namespace symmetric
 {
@@ -107,18 +112,18 @@ public:
         const BIP44Chain internal,
         const Bip32Index index,
         const PasswordPrompt& reason) const
-        -> std::unique_ptr<opentxs::crypto::key::HD> final;
+        -> opentxs::crypto::asymmetric::key::HD final;
     auto AccountChildKey(
         const ReadView& path,
         const BIP44Chain internal,
         const Bip32Index index,
         const PasswordPrompt& reason) const
-        -> std::unique_ptr<opentxs::crypto::key::HD> final;
+        -> opentxs::crypto::asymmetric::key::HD final;
     auto AccountKey(
         const proto::HDPath& path,
         const BIP44Chain internal,
         const PasswordPrompt& reason) const
-        -> std::unique_ptr<opentxs::crypto::key::HD> final;
+        -> opentxs::crypto::asymmetric::key::HD final;
     auto AllowedSeedTypes() const noexcept -> const
         UnallocatedMap<opentxs::crypto::SeedStyle, UnallocatedCString>& final;
     auto AllowedLanguages(const opentxs::crypto::SeedStyle type) const noexcept
@@ -138,29 +143,29 @@ public:
         const opentxs::crypto::EcdsaCurve& curve,
         const UnallocatedVector<Bip32Index>& path,
         const PasswordPrompt& reason) const
-        -> std::unique_ptr<opentxs::crypto::key::HD> final;
+        -> opentxs::crypto::asymmetric::key::HD final;
     auto GetHDKey(
         const UnallocatedCString& seedID,
         const opentxs::crypto::EcdsaCurve& curve,
         const UnallocatedVector<Bip32Index>& path,
-        const opentxs::crypto::key::asymmetric::Role role,
+        const opentxs::crypto::asymmetric::Role role,
         const PasswordPrompt& reason) const
-        -> std::unique_ptr<opentxs::crypto::key::HD> final;
+        -> opentxs::crypto::asymmetric::key::HD final;
     auto GetHDKey(
         const UnallocatedCString& seedID,
         const opentxs::crypto::EcdsaCurve& curve,
         const UnallocatedVector<Bip32Index>& path,
         const VersionNumber version,
         const PasswordPrompt& reason) const
-        -> std::unique_ptr<opentxs::crypto::key::HD> final;
+        -> opentxs::crypto::asymmetric::key::HD final;
     auto GetHDKey(
         const UnallocatedCString& seedID,
         const opentxs::crypto::EcdsaCurve& curve,
         const UnallocatedVector<Bip32Index>& path,
-        const opentxs::crypto::key::asymmetric::Role role,
+        const opentxs::crypto::asymmetric::Role role,
         const VersionNumber version,
         const PasswordPrompt& reason) const
-        -> std::unique_ptr<opentxs::crypto::key::HD> final;
+        -> opentxs::crypto::asymmetric::key::HD final;
     auto GetOrCreateDefaultSeed(
         UnallocatedCString& seedID,
         opentxs::crypto::SeedStyle& type,
@@ -172,8 +177,9 @@ public:
         const UnallocatedCString& seedID,
         const Bip32Index nym,
         const std::uint8_t version,
-        const PasswordPrompt& reason) const
-        -> std::unique_ptr<opentxs::crypto::key::Secp256k1> final;
+        const PasswordPrompt& reason,
+        alloc::Default alloc) const
+        -> opentxs::crypto::asymmetric::key::Secp256k1 final;
     auto GetSeed(
         const UnallocatedCString& seedID,
         Bip32Index& index,
@@ -244,7 +250,7 @@ public:
     auto operator=(const Seed&) -> Seed& = delete;
     auto operator=(Seed&&) -> Seed& = delete;
 
-    ~Seed() final = default;
+    ~Seed() final;
 
 private:
     using SeedMap = UnallocatedMap<UnallocatedCString, opentxs::crypto::Seed>;

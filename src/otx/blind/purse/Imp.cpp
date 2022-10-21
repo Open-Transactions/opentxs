@@ -29,6 +29,7 @@
 #include "internal/serialization/protobuf/Proto.tpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/PasswordPrompt.hpp"
+#include "internal/util/Pimpl.hpp"
 #include "internal/util/Time.hpp"
 #include "opentxs/api/crypto/Symmetric.hpp"
 #include "opentxs/api/session/Crypto.hpp"
@@ -48,10 +49,12 @@
 #include "opentxs/otx/blind/PurseType.hpp"
 #include "opentxs/otx/blind/Token.hpp"
 #include "opentxs/otx/blind/TokenState.hpp"
+#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/PasswordPrompt.hpp"
-#include "opentxs/util/Pimpl.hpp"
+#include "opentxs/util/Types.hpp"
+#include "opentxs/util/Writer.hpp"
 
 #define OT_PURSE_VERSION 1
 
@@ -819,11 +822,11 @@ auto Purse::Serialize(proto::Purse& output) const noexcept -> bool
     return true;
 }
 
-auto Purse::Serialize(AllocateOutput destination) const noexcept -> bool
+auto Purse::Serialize(Writer&& destination) const noexcept -> bool
 {
     auto proto = proto::Purse{};
 
-    if (Serialize(proto)) { return write(proto, destination); }
+    if (Serialize(proto)) { return write(proto, std::move(destination)); }
 
     return false;
 }

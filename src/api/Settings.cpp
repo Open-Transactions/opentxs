@@ -11,14 +11,17 @@
 #include <cstdint>
 #include <cstdlib>  // IWYU pragma: keep
 #include <memory>
+#include <utility>
 
 #include "internal/api/Legacy.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/Mutex.hpp"
 #include "internal/util/P0330.hpp"
+#include "internal/util/Pimpl.hpp"
 #include "internal/util/Size.hpp"
+#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Log.hpp"
-#include "opentxs/util/Pimpl.hpp"
+#include "opentxs/util/Writer.hpp"
 
 namespace opentxs::factory
 {
@@ -895,7 +898,7 @@ auto Settings::ReadNumber(
 auto Settings::ReadString(
     const std::string_view section,
     const std::string_view key,
-    const AllocateOutput out) const noexcept -> bool
+    Writer&& out) const noexcept -> bool
 {
     auto notUsed{false};
     auto value = String::Factory();
@@ -907,7 +910,7 @@ auto Settings::ReadString(
 
     if (rc) {
 
-        return copy(value->Bytes(), out);
+        return copy(value->Bytes(), std::move(out));
     } else {
 
         return false;

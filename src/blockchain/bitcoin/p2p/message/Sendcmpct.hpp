@@ -14,7 +14,6 @@
 #include "internal/blockchain/p2p/bitcoin/Bitcoin.hpp"
 #include "opentxs/blockchain/BlockchainType.hpp"
 #include "opentxs/blockchain/Types.hpp"
-#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -35,6 +34,8 @@ class Header;
 }  // namespace bitcoin
 }  // namespace p2p
 }  // namespace blockchain
+
+class Writer;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -78,6 +79,6 @@ private:
     std::uint64_t version_{};
 
     using implementation::Message::payload;
-    auto payload(AllocateOutput out) const noexcept -> bool final;
+    auto payload(Writer&& out) const noexcept -> bool final;
 };
 }  // namespace opentxs::blockchain::p2p::bitcoin::message

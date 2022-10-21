@@ -8,13 +8,17 @@
 
 #include <algorithm>
 #include <cstring>
+#include <functional>
 #include <iterator>
 #include <limits>
 #include <memory>
+#include <span>
 #include <utility>
 
 #include "internal/network/zeromq/message/Factory.hpp"
 #include "internal/util/LogMacros.hpp"
+#include "opentxs/util/WriteBuffer.hpp"
+#include "opentxs/util/Writer.hpp"
 
 namespace opentxs::factory
 {
@@ -183,14 +187,15 @@ auto Frame::size() const noexcept -> std::size_t { return imp_->size(); }
 
 auto Frame::swap(Frame& rhs) noexcept -> void { std::swap(imp_, rhs.imp_); }
 
-auto Frame::WriteInto() noexcept -> AllocateOutput
+auto Frame::WriteInto() noexcept -> Writer
 {
-    return [this](const auto size) {
+    return {[this](auto size) -> WriteBuffer {
         auto rhs = Frame{std::make_unique<Imp>(size).release()};
         swap(rhs);
+        auto* out = static_cast<std::byte*>(imp_->data());
 
-        return WritableView{imp_->data(), imp_->size()};
-    };
+        return std::span<std::byte>{out, imp_->size()};
+    }};
 }
 
 Frame::~Frame()

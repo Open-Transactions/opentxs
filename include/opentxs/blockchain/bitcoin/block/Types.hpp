@@ -10,8 +10,8 @@
 #include <utility>
 
 #include "opentxs/Export.hpp"
-#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
+#include "opentxs/util/Types.hpp"
 
 namespace opentxs::blockchain::bitcoin::block
 {

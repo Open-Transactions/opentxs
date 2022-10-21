@@ -69,7 +69,7 @@
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/crypto/HashType.hpp"
-#include "opentxs/crypto/key/EllipticCurve.hpp"
+#include "opentxs/crypto/asymmetric/key/EllipticCurve.hpp"
 #include "opentxs/identity/Nym.hpp"
 #include "opentxs/identity/Types.hpp"
 #include "opentxs/network/blockchain/bitcoin/CompactSize.hpp"
@@ -79,6 +79,7 @@
 #include "opentxs/util/PasswordPrompt.hpp"
 #include "opentxs/util/Time.hpp"
 #include "opentxs/util/Types.hpp"
+#include "opentxs/util/Writer.hpp"
 #include "util/ScopeGuard.hpp"
 
 namespace be = boost::endian;
@@ -142,14 +143,13 @@ struct BitcoinTransactionBuilder::Imp {
 
                             return out;
                         }();
-                        const auto pKey = element.PrivateKey(reason);
+                        const auto& key = element.PrivateKey(reason);
 
-                        if (!pKey) {
+                        if (false == key.IsValid()) {
                             throw std::runtime_error{
                                 "Failed to load private change key"};
                         }
 
-                        const auto& key = *pKey;
                         const auto keys = pc.GenerateNotificationElements(
                             recipient, key, reason);
 
@@ -626,11 +626,9 @@ private:
                 OT_FAIL;
             }
 
-            const auto pKey = node.PrivateKey(reason);
+            const auto& key = node.PrivateKey(reason);
 
-            OT_ASSERT(pKey);
-
-            const auto& key = *pKey;
+            OT_ASSERT(key.IsValid());
 
             if (key.PublicKey() != script.MultisigPubkey(0).value()) {
                 LogError()(OT_PRETTY_CLASS())("Pubkey mismatch").Flush();
@@ -641,7 +639,7 @@ private:
             auto& sig = signatures.emplace_back();
             sig.reserve(80);
             const auto haveSig =
-                key.SignDER(preimage, hash_type(), sig, reason);
+                key.SignDER(preimage, hash_type(), writer(sig), reason);
 
             if (false == haveSig) {
                 LogError()(OT_PRETTY_CLASS())("Failed to obtain signature")
@@ -703,21 +701,19 @@ private:
                 OT_FAIL;
             }
 
-            const auto pPublic =
+            const auto& pub =
                 validate(Match::ByValue, node, input.PreviousOutput(), spends);
 
-            if (!pPublic) { continue; }
+            if (false == pub.IsValid()) { continue; }
 
-            const auto& pub = *pPublic;
-            const auto pKey = get_private_key(pub, node, reason);
+            const auto& key = get_private_key(pub, node, reason);
 
-            if (!pKey) { continue; }
+            if (false == key.IsValid()) { continue; }
 
-            const auto& key = *pKey;
             auto& sig = signatures.emplace_back();
             sig.reserve(80);
             const auto haveSig =
-                key.SignDER(preimage, hash_type(), sig, reason);
+                key.SignDER(preimage, hash_type(), writer(sig), reason);
 
             if (false == haveSig) {
                 LogError()(OT_PRETTY_CLASS())("Failed to obtain signature")
@@ -779,24 +775,21 @@ private:
                 OT_FAIL;
             }
 
-            const auto pPublic =
+            const auto& pub =
                 validate(Match::ByHash, node, input.PreviousOutput(), spends);
 
-            if (!pPublic) { continue; }
+            if (false == pub.IsValid()) { continue; }
 
-            const auto& pub = *pPublic;
-            const auto pKey = get_private_key(pub, node, reason);
+            const auto& key = get_private_key(pub, node, reason);
 
-            if (!pKey) { continue; }
-
-            const auto& key = *pKey;
+            if (false == key.IsValid()) { continue; }
 
             const auto& pubkey = keys.emplace_back(
                 api_.Factory().DataFromBytes(key.PublicKey()));
             auto& sig = signatures.emplace_back();
             sig.reserve(80);
             const auto haveSig =
-                key.SignDER(preimage, hash_type(), sig, reason);
+                key.SignDER(preimage, hash_type(), writer(sig), reason);
 
             if (false == haveSig) {
                 LogError()(OT_PRETTY_CLASS())("Failed to obtain signature")
@@ -868,21 +861,20 @@ private:
         return dust;
     }
     auto get_private_key(
-        const opentxs::crypto::key::EllipticCurve& pubkey,
+        const opentxs::crypto::asymmetric::key::EllipticCurve& pubkey,
         const blockchain::crypto::Element& element,
-        const PasswordPrompt& reason) const noexcept -> crypto::ECKey
+        const PasswordPrompt& reason) const noexcept
+        -> const opentxs::crypto::asymmetric::key::EllipticCurve&
     {
-        auto pKey = element.PrivateKey(reason);
+        const auto& key = element.PrivateKey(reason);
 
-        if (!pKey) {
+        if (false == key.IsValid()) {
             LogError()(OT_PRETTY_CLASS())("failed to obtain private key ")(
                 crypto::print(element.KeyID()))
                 .Flush();
 
-            return {};
+            return opentxs::crypto::asymmetric::key::EllipticCurve::Blank();
         }
-
-        const auto& key = *pKey;
 
         OT_ASSERT(key.HasPrivate());
 
@@ -891,20 +883,17 @@ private:
             const auto expected =
                 api_.Factory().DataFromBytes(pubkey.PublicKey());
             const auto [account, subchain, index] = element.KeyID();
-            LogError()(OT_PRETTY_CLASS())(
-                "Derived private key for "
-                "account ")(account)(" subchain"
-                                     " ")(static_cast<std::uint32_t>(subchain))(
-                " index ")(index)(" does not correspond to the "
-                                  "expected public key. Got ")
+            LogAbort()(OT_PRETTY_CLASS())("Derived private key for "
+                                          "account ")(account)(" subchain"
+                                                               " ")(
+                static_cast<std::uint32_t>(subchain))(" index ")(
+                index)(" does not correspond to the expected public key. Got ")
                 .asHex(got)(" expected ")
                 .asHex(expected)
-                .Flush();
-
-            OT_FAIL;
+                .Abort();
         }
 
-        return pKey;
+        return key;
     }
     auto hash_type() const noexcept -> opentxs::crypto::HashType
     {
@@ -1184,7 +1173,7 @@ private:
         const blockchain::crypto::Element& element,
         const block::Outpoint& outpoint,
         const bitcoin::block::internal::Output& output) const noexcept
-        -> crypto::ECKey
+        -> const opentxs::crypto::asymmetric::key::EllipticCurve&
     {
         const auto [account, subchain, index] = element.KeyID();
         LogTrace()(OT_PRETTY_CLASS())("considering spend key ")(
@@ -1193,15 +1182,13 @@ private:
                                      "output ")(outpoint.str())
             .Flush();
 
-        auto pKey = element.Key();
+        const auto& key = element.Key();
 
-        if (!pKey) {
+        if (false == key.IsValid()) {
             LogError()(OT_PRETTY_CLASS())("missing public key").Flush();
 
-            return {};
+            return opentxs::crypto::asymmetric::key::EllipticCurve::Blank();
         }
-
-        const auto& key = *pKey;
 
         if (Match::ByValue == match) {
             const auto expected = output.Script().Pubkey();
@@ -1210,7 +1197,7 @@ private:
                 LogError()(OT_PRETTY_CLASS())("wrong output script type")
                     .Flush();
 
-                return {};
+                return opentxs::crypto::asymmetric::key::EllipticCurve::Blank();
             }
 
             if (key.PublicKey() != expected.value()) {
@@ -1218,7 +1205,7 @@ private:
                     "Provided public key does not match expected value")
                     .Flush();
 
-                return {};
+                return opentxs::crypto::asymmetric::key::EllipticCurve::Blank();
             }
         } else {
             const auto expected = output.Script().PubkeyHash();
@@ -1227,7 +1214,7 @@ private:
                 LogError()(OT_PRETTY_CLASS())("wrong output script type")
                     .Flush();
 
-                return {};
+                return opentxs::crypto::asymmetric::key::EllipticCurve::Blank();
             }
 
             if (element.PubkeyHash().Bytes() != expected.value()) {
@@ -1235,11 +1222,11 @@ private:
                     "Provided public key does not match expected hash")
                     .Flush();
 
-                return {};
+                return opentxs::crypto::asymmetric::key::EllipticCurve::Blank();
             }
         }
 
-        return pKey;
+        return key;
     }
 
     auto bip_69() noexcept -> void

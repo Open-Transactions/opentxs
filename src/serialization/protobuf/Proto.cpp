@@ -11,6 +11,8 @@
 
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "opentxs/util/Bytes.hpp"
+#include "opentxs/util/WriteBuffer.hpp"
+#include "opentxs/util/Writer.hpp"
 
 template class google::protobuf::RepeatedField<unsigned int>;
 template class google::protobuf::RepeatedField<int>;
@@ -44,17 +46,15 @@ auto ToString(const ProtobufType& input) -> UnallocatedCString
     return {};
 }
 
-auto write(const ProtobufType& in, const AllocateOutput out) noexcept -> bool
+auto write(const ProtobufType& in, Writer&& out) noexcept -> bool
 {
-    if (false == bool(out)) { return false; }
-
-    const auto size = static_cast<std::size_t>(in.ByteSize());
+    const auto size = in.ByteSizeLong();
 
     if (std::numeric_limits<int>::max() < size) { return false; }
 
-    auto dest = out(size);
+    auto dest = out.Reserve(size);
 
-    if (false == dest.valid(size)) { return false; }
+    if (false == dest.IsValid(size)) { return false; }
 
     return in.SerializeToArray(dest.data(), static_cast<int>(dest.size()));
 }

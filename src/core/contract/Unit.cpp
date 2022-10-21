@@ -36,6 +36,7 @@
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/serialization/protobuf/verify/UnitDefinition.hpp"
 #include "internal/util/LogMacros.hpp"
+#include "internal/util/Pimpl.hpp"
 #include "internal/util/Shared.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
@@ -54,7 +55,7 @@
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
-#include "opentxs/util/Pimpl.hpp"
+#include "opentxs/util/Writer.hpp"
 #include "otx/common/OTStorage.hpp"
 
 namespace opentxs
@@ -549,7 +550,7 @@ auto Unit::Serialize() const noexcept -> ByteArray
     return api_.Factory().InternalSession().Data(contract(lock));
 }
 
-auto Unit::Serialize(AllocateOutput destination, bool includeNym) const -> bool
+auto Unit::Serialize(Writer&& destination, bool includeNym) const -> bool
 {
     auto serialized = proto::UnitDefinition{};
     if (false == Serialize(serialized, includeNym)) {
@@ -558,7 +559,7 @@ auto Unit::Serialize(AllocateOutput destination, bool includeNym) const -> bool
         return false;
     }
 
-    write(serialized, destination);
+    write(serialized, std::move(destination));
 
     return true;
 }

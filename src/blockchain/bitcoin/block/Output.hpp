@@ -45,9 +45,9 @@
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/util/Allocator.hpp"
-#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
+#include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -92,6 +92,7 @@ class Nym;
 }  // namespace identifier
 
 class Log;
+class Writer;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -146,7 +147,7 @@ public:
     auto Payee() const noexcept -> ContactID final { return cache_.payee(); }
     auto Payer() const noexcept -> ContactID final { return cache_.payer(); }
     auto Print() const noexcept -> UnallocatedCString final;
-    auto Serialize(const AllocateOutput destination) const noexcept
+    auto Serialize(Writer&& destination) const noexcept
         -> std::optional<std::size_t> final;
     auto Serialize(const api::Session& api, SerializeType& destination)
         const noexcept -> bool final;

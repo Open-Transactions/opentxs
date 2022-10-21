@@ -19,22 +19,21 @@
 #include "opentxs/crypto/ParameterType.hpp"
 #include "opentxs/crypto/SeedStrength.hpp"
 #include "opentxs/crypto/SeedStyle.hpp"
-#include "opentxs/crypto/key/asymmetric/Algorithm.hpp"
+#include "opentxs/crypto/asymmetric/Algorithm.hpp"
 #include "opentxs/identity/CredentialType.hpp"
 #include "opentxs/identity/SourceProofType.hpp"
 #include "opentxs/identity/SourceType.hpp"
+#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "util/Container.hpp"
 
 namespace opentxs::crypto
 {
-const UnallocatedMap<crypto::key::asymmetric::Algorithm, ParameterType>
-    key_to_nym_{
-        {crypto::key::asymmetric::Algorithm::Legacy, ParameterType::rsa},
-        {crypto::key::asymmetric::Algorithm::Secp256k1,
-         ParameterType::secp256k1},
-        {crypto::key::asymmetric::Algorithm::ED25519, ParameterType::ed25519},
-    };
+const UnallocatedMap<crypto::asymmetric::Algorithm, ParameterType> key_to_nym_{
+    {crypto::asymmetric::Algorithm::Legacy, ParameterType::rsa},
+    {crypto::asymmetric::Algorithm::Secp256k1, ParameterType::secp256k1},
+    {crypto::asymmetric::Algorithm::ED25519, ParameterType::ed25519},
+};
 const auto nym_to_key_{reverse_map(key_to_nym_)};
 
 auto swap(Parameters& lhs, Parameters& rhs) noexcept -> void { lhs.swap(rhs); }
@@ -60,7 +59,7 @@ Parameters::Parameters(
 }
 
 Parameters::Parameters(
-    crypto::key::asymmetric::Algorithm key,
+    crypto::asymmetric::Algorithm key,
     identity::CredentialType credential,
     const identity::SourceType source,
     const std::uint8_t pcVersion) noexcept
@@ -116,13 +115,12 @@ auto Parameters::operator=(Parameters&& rhs) noexcept -> Parameters&
     return *this;
 }
 
-auto Parameters::Algorithm() const noexcept
-    -> crypto::key::asymmetric::Algorithm
+auto Parameters::Algorithm() const noexcept -> crypto::asymmetric::Algorithm
 {
     try {
         return nym_to_key_.at(imp_->nym_type_);
     } catch (...) {
-        return crypto::key::asymmetric::Algorithm::Error;
+        return crypto::asymmetric::Algorithm::Error;
     }
 }
 

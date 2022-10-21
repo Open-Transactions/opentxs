@@ -18,8 +18,8 @@
 #include "opentxs/core/identifier/Types.hpp"
 #include "opentxs/util/Allocated.hpp"
 #include "opentxs/util/Allocator.hpp"
-#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
+#include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -46,6 +46,7 @@ class IdentifierPrivate;
 }  // namespace identifier
 
 class String;
+class Writer;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -123,7 +124,7 @@ public:
     auto resize(const std::size_t) -> bool final;
     auto SetSize(const std::size_t) -> bool final;
     auto swap(Generic& rhs) noexcept -> void;
-    auto WriteInto() noexcept -> AllocateOutput final;
+    auto WriteInto() noexcept -> Writer final;
     auto zeroMemory() -> void final;
 
     auto Internal() noexcept -> internal::Identifier&;

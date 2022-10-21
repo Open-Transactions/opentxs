@@ -6,10 +6,14 @@
 #include "0_stdafx.hpp"           // IWYU pragma: associated
 #include "api/crypto/Config.hpp"  // IWYU pragma: associated
 
+#include <frozen/bits/algorithms.h>
+#include <frozen/bits/basic_types.h>
+#include <frozen/unordered_map.h>
+#include <utility>
+
 #include "opentxs/api/crypto/Config.hpp"
 #include "opentxs/crypto/ParameterType.hpp"
-#include "opentxs/crypto/key/asymmetric/Algorithm.hpp"
-#include "opentxs/util/Container.hpp"
+#include "opentxs/crypto/asymmetric/Algorithm.hpp"
 
 namespace opentxs::api::crypto
 {
@@ -18,38 +22,37 @@ auto HaveHDKeys() noexcept -> bool { return @OPENTXS_HAVE_HD_KEYS@; }
 auto HaveSupport(opentxs::crypto::ParameterType val) noexcept -> bool
 {
     using Type = opentxs::crypto::ParameterType;
-    static const auto map = UnallocatedMap<Type, bool>{
+    static constexpr auto map = frozen::make_unordered_map<Type, bool>({
         {Type::invalid, false},
         {Type::rsa, @OPENTXS_CRYPTO_HAVE_RSA@},
         {Type::secp256k1, @OPENTXS_CRYPTO_HAVE_SECP256K1@},
         {Type::ed25519, @OPENTXS_CRYPTO_HAVE_ED25519@},
-    };
+    });
 
-    try {
+    if (const auto* i = map.find(val); map.end() != i) {
 
-        return map.at(val);
-    } catch (...) {
+        return i->second;
+    } else {
 
         return false;
     }
 }
 
-auto HaveSupport(opentxs::crypto::key::asymmetric::Algorithm val) noexcept
-    -> bool
+auto HaveSupport(opentxs::crypto::asymmetric::Algorithm val) noexcept -> bool
 {
-    using Type = opentxs::crypto::key::asymmetric::Algorithm;
-    static const auto map = UnallocatedMap<Type, bool>{
+    using Type = opentxs::crypto::asymmetric::Algorithm;
+    static constexpr auto map = frozen::make_unordered_map<Type, bool>({
         {Type::Error, false},
         {Type::Null, true},
         {Type::Legacy, @OPENTXS_CRYPTO_HAVE_RSA@},
         {Type::Secp256k1, @OPENTXS_CRYPTO_HAVE_SECP256K1@},
         {Type::ED25519, @OPENTXS_CRYPTO_HAVE_ED25519@},
-    };
+    });
 
-    try {
+    if (const auto* i = map.find(val); map.end() != i) {
 
-        return map.at(val);
-    } catch (...) {
+        return i->second;
+    } else {
 
         return false;
     }

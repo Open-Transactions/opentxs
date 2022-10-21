@@ -24,7 +24,7 @@
 #include "opentxs/api/crypto/Util.hpp"
 #include "opentxs/crypto/Bip32.hpp"
 #include "opentxs/crypto/Bip39.hpp"
-#include "opentxs/crypto/key/asymmetric/Algorithm.hpp"
+#include "opentxs/crypto/asymmetric/Algorithm.hpp"
 #include "opentxs/crypto/symmetric/Algorithm.hpp"
 #include "opentxs/crypto/symmetric/Key.hpp"  // IWYU pragma: keep
 #include "opentxs/crypto/symmetric/Source.hpp"
@@ -91,9 +91,8 @@ Crypto::Crypto(const api::Settings& settings) noexcept
     Init();
 }
 
-auto Crypto::AsymmetricProvider(
-    opentxs::crypto::key::asymmetric::Algorithm type) const noexcept
-    -> const opentxs::crypto::AsymmetricProvider&
+auto Crypto::AsymmetricProvider(opentxs::crypto::asymmetric::Algorithm type)
+    const noexcept -> const opentxs::crypto::AsymmetricProvider&
 {
     try {
 
@@ -130,7 +129,7 @@ auto Crypto::Config() const noexcept -> const crypto::Config&
     return *config_;
 }
 
-auto Crypto::EllipticProvider(opentxs::crypto::key::asymmetric::Algorithm type)
+auto Crypto::EllipticProvider(opentxs::crypto::asymmetric::Algorithm type)
     const noexcept -> const opentxs::crypto::EcdsaProvider&
 {
     try {

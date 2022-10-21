@@ -128,7 +128,7 @@ public:
     void setupSourceForPubKey(ot::crypto::SeedStyle seedStyle)
     {
         crypto::Parameters parameters{
-            crypto::key::asymmetric::Algorithm::Secp256k1,
+            crypto::asymmetric::Algorithm::Secp256k1,
             identity::CredentialType::HD,
             identity::SourceType::PubKey,
             version_};
@@ -164,7 +164,7 @@ TEST_F(Test_Source, Constructor_WithProtoOfTypePUBKEY_ShouldNotThrow)
 TEST_F(Test_Source, Constructor_WithCredentialTypeError_ShouldThrow)
 {
     crypto::Parameters parameters{
-        crypto::key::asymmetric::Algorithm::Secp256k1,
+        crypto::asymmetric::Algorithm::Secp256k1,
         identity::CredentialType::Error,
         identity::SourceType::PubKey,
         version_};
@@ -186,7 +186,7 @@ TEST_F(
     Constructor_WithParametersCredentialTypeHD_ShouldNotReturnNullptr)
 {
     crypto::Parameters parameters{
-        crypto::key::asymmetric::Algorithm::Secp256k1,
+        crypto::asymmetric::Algorithm::Secp256k1,
         identity::CredentialType::HD,
         identity::SourceType::PubKey,
         version_};
@@ -207,7 +207,7 @@ TEST_F(
     Constructor_WithParametersCredentialTypeLegacy_ShouldNotReturnNullptr)
 {
     crypto::Parameters parameters{
-        crypto::key::asymmetric::Algorithm::Secp256k1,
+        crypto::asymmetric::Algorithm::Secp256k1,
         identity::CredentialType::Legacy,
         identity::SourceType::PubKey,
         version_};
@@ -248,7 +248,8 @@ TEST_F(Test_Source, Serialize_seedBIP39SourcePubKey_ShouldSetProperFields)
     opentxs::proto::NymIDSource nymIdProto;
     EXPECT_TRUE(source_->Internal().Serialize(nymIdProto));
     EXPECT_EQ(
-        nymIdProto.version(), opentxs::crypto::key::Asymmetric::DefaultVersion);
+        nymIdProto.version(),
+        opentxs::crypto::asymmetric::Key::DefaultVersion());
 
     EXPECT_EQ(nymIdProto.key().role(), proto::KEYROLE_SIGN);
     EXPECT_EQ(nymIdProto.type(), proto::SourceType::SOURCETYPE_PUBKEY);
@@ -274,7 +275,7 @@ TEST_F(Test_Source, Verify_seedPubKeySourceBip47_ShouldReturnTrue)
     const auto* masterId = "SOME ID BIGGER THAN 20 CHARS";
     const auto* nymId = "SOME NYM ID BIGGER THAN 20 CHARS";
     crypto::Parameters parameters{
-        crypto::key::asymmetric::Algorithm::Secp256k1,
+        crypto::asymmetric::Algorithm::Secp256k1,
         identity::CredentialType::HD,
         identity::SourceType::PubKey,
         version_};

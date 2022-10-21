@@ -3,6 +3,9 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_include "opentxs/crypto/asymmetric/Algorithm.hpp"
+// IWYU pragma: no_include "opentxs/util/Writer.hpp"
+
 #pragma once
 
 #include <Enums.pb.h>
@@ -27,17 +30,16 @@
 #include "opentxs/crypto/HashType.hpp"
 #include "opentxs/crypto/Parameters.hpp"
 #include "opentxs/crypto/SignatureRole.hpp"
-#include "opentxs/crypto/key/Asymmetric.hpp"
-#include "opentxs/crypto/key/asymmetric/Algorithm.hpp"
+#include "opentxs/crypto/asymmetric/Types.hpp"
 #include "opentxs/identity/Nym.hpp"
 #include "opentxs/identity/Source.hpp"
 #include "opentxs/identity/Types.hpp"
 #include "opentxs/identity/wot/claim/ClaimType.hpp"
 #include "opentxs/identity/wot/claim/Data.hpp"
 #include "opentxs/identity/wot/claim/Types.hpp"
-#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
+#include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -49,6 +51,11 @@ class Session;
 
 namespace crypto
 {
+namespace asymmetric
+{
+class Key;
+}  // namespace asymmetric
+
 namespace symmetric
 {
 class Key;
@@ -75,6 +82,7 @@ class PasswordPrompt;
 class PaymentCode;
 class Signature;
 class Tag;
+class Writer;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -116,32 +124,28 @@ public:
     auto end() const noexcept -> const_iterator final { return cend(); }
     void GetIdentifier(identifier::Nym& theIdentifier) const final;
     void GetIdentifier(String& theIdentifier) const final;
-    auto GetPrivateAuthKey(
-        crypto::key::asymmetric::Algorithm keytype =
-            crypto::key::asymmetric::Algorithm::Null) const
-        -> const crypto::key::Asymmetric& final;
-    auto GetPrivateEncrKey(
-        crypto::key::asymmetric::Algorithm keytype =
-            crypto::key::asymmetric::Algorithm::Null) const
-        -> const crypto::key::Asymmetric& final;
-    auto GetPrivateSignKey(
-        crypto::key::asymmetric::Algorithm keytype =
-            crypto::key::asymmetric::Algorithm::Null) const
-        -> const crypto::key::Asymmetric& final;
-    auto GetPublicAuthKey(
-        crypto::key::asymmetric::Algorithm keytype =
-            crypto::key::asymmetric::Algorithm::Null) const
-        -> const crypto::key::Asymmetric& final;
-    auto GetPublicEncrKey(
-        crypto::key::asymmetric::Algorithm keytype =
-            crypto::key::asymmetric::Algorithm::Null) const
-        -> const crypto::key::Asymmetric& final;
+    auto GetPrivateAuthKey() const -> const crypto::asymmetric::Key& final;
+    auto GetPrivateAuthKey(crypto::asymmetric::Algorithm keytype) const
+        -> const crypto::asymmetric::Key& final;
+    auto GetPrivateEncrKey() const -> const crypto::asymmetric::Key& final;
+    auto GetPrivateEncrKey(crypto::asymmetric::Algorithm keytype) const
+        -> const crypto::asymmetric::Key& final;
+    auto GetPrivateSignKey() const -> const crypto::asymmetric::Key& final;
+    auto GetPrivateSignKey(crypto::asymmetric::Algorithm keytype) const
+        -> const crypto::asymmetric::Key& final;
+    auto GetPublicAuthKey() const -> const crypto::asymmetric::Key& final;
+    auto GetPublicAuthKey(crypto::asymmetric::Algorithm keytype) const
+        -> const crypto::asymmetric::Key& final;
+    auto GetPublicEncrKey() const -> const crypto::asymmetric::Key& final;
+    auto GetPublicEncrKey(crypto::asymmetric::Algorithm keytype) const
+        -> const crypto::asymmetric::Key& final;
+    auto GetPublicSignKey() const -> const crypto::asymmetric::Key& final;
+    auto GetPublicSignKey(crypto::asymmetric::Algorithm keytype) const
+        -> const crypto::asymmetric::Key& final;
     auto GetPublicKeysBySignature(
         crypto::key::Keypair::Keys& listOutput,
         const Signature& theSignature,
         char cKeyType) const -> std::int32_t final;
-    auto GetPublicSignKey(crypto::key::asymmetric::Algorithm keytype) const
-        -> const crypto::key::Asymmetric& final;
     auto HasCapability(const NymCapability& capability) const -> bool final;
     auto HasPath() const -> bool final;
     auto ID() const -> const identifier::Nym& final { return id_; }
@@ -152,12 +156,12 @@ public:
     auto PathChild(int index) const -> std::uint32_t final;
     auto PaymentCode() const -> UnallocatedCString final;
     auto PaymentCodePath(proto::HDPath& output) const -> bool final;
-    auto PaymentCodePath(AllocateOutput destination) const -> bool final;
+    auto PaymentCodePath(Writer&& destination) const -> bool final;
     auto PhoneNumbers(bool active) const -> UnallocatedCString final;
     auto Revision() const -> std::uint64_t final;
-    auto Serialize(AllocateOutput destination) const -> bool final;
+    auto Serialize(Writer&& destination) const -> bool final;
     auto Serialize(Serialized& serialized) const -> bool final;
-    auto SerializeCredentialIndex(AllocateOutput, const Mode mode) const
+    auto SerializeCredentialIndex(Writer&&, const Mode mode) const
         -> bool final;
     auto SerializeCredentialIndex(Serialized& serialized, const Mode mode) const
         -> bool final;
@@ -171,9 +175,9 @@ public:
     auto TransportKey(Data& pubkey, const PasswordPrompt& reason) const
         -> Secret final;
     auto Unlock(
-        const crypto::key::Asymmetric& dhKey,
+        const crypto::asymmetric::Key& dhKey,
         const std::uint32_t tag,
-        const crypto::key::asymmetric::Algorithm type,
+        const crypto::asymmetric::Algorithm type,
         const crypto::symmetric::Key& key,
         PasswordPrompt& reason) const noexcept -> bool final;
     auto VerifyPseudonym() const -> bool final;
@@ -253,7 +257,7 @@ public:
     auto operator=(const Nym&) -> Nym& = delete;
     auto operator=(Nym&&) -> Nym& = delete;
 
-    ~Nym() final = default;
+    ~Nym() final;
 
 private:
     using MasterID = identifier::Generic;
@@ -308,18 +312,18 @@ private:
     template <typename T>
     auto get_private_auth_key(
         const T& lock,
-        crypto::key::asymmetric::Algorithm keytype) const
-        -> const crypto::key::Asymmetric&;
+        crypto::asymmetric::Algorithm keytype) const
+        -> const crypto::asymmetric::Key&;
     template <typename T>
     auto get_private_sign_key(
         const T& lock,
-        crypto::key::asymmetric::Algorithm keytype) const
-        -> const crypto::key::Asymmetric&;
+        crypto::asymmetric::Algorithm keytype) const
+        -> const crypto::asymmetric::Key&;
     template <typename T>
     auto get_public_sign_key(
         const T& lock,
-        crypto::key::asymmetric::Algorithm keytype) const
-        -> const crypto::key::Asymmetric&;
+        crypto::asymmetric::Algorithm keytype) const
+        -> const crypto::asymmetric::Key&;
     auto has_capability(const eLock& lock, const NymCapability& capability)
         const -> bool;
     void init_claims(const eLock& lock) const;

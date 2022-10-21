@@ -7,6 +7,7 @@
 #include "blockchain/node/blockoracle/Shared.hpp"  // IWYU pragma: associated
 
 #include "internal/blockchain/block/Validator.hpp"
+#include "opentxs/util/Writer.hpp"
 
 namespace opentxs::blockchain::node::internal
 {

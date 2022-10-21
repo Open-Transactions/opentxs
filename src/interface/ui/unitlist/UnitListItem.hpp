@@ -15,11 +15,11 @@
 #include "internal/interface/ui/UI.hpp"
 #include "internal/interface/ui/UnitListItem.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
+#include "internal/util/Pimpl.hpp"
 #include "internal/util/SharedPimpl.hpp"
 #include "opentxs/core/Types.hpp"
 #include "opentxs/identity/wot/claim/ClaimType.hpp"
 #include "opentxs/util/Container.hpp"
-#include "opentxs/util/Pimpl.hpp"
 
 class QVariant;
 

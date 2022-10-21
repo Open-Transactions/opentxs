@@ -15,9 +15,10 @@
 
 #include "internal/util/P0330.hpp"
 #include "opentxs/network/zeromq/message/FrameSection.hpp"
-#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
+#include "opentxs/util/WriteBuffer.hpp"
+#include "opentxs/util/Writer.hpp"
 
 namespace opentxs::network::zeromq
 {
@@ -98,8 +99,7 @@ auto MakeDeterministicInproc(
     return out.str();
 }
 
-auto RawToZ85(const ReadView input, const AllocateOutput destination) noexcept
-    -> bool
+auto RawToZ85(const ReadView input, Writer&& destination) noexcept -> bool
 {
     if (0 != input.size() % 4) {
         LogError()("opentxs::network::zeromq::")(__func__)(
@@ -109,18 +109,10 @@ auto RawToZ85(const ReadView input, const AllocateOutput destination) noexcept
         return false;
     }
 
-    if (false == bool(destination)) {
-        LogError()("opentxs::network::zeromq::")(__func__)(
-            ": Invalid output allocator.")
-            .Flush();
-
-        return false;
-    }
-
     const auto target = input.size() + input.size() / 4_uz + 1_uz;
-    auto out = destination(target);
+    auto out = destination.Reserve(target);
 
-    if (false == out.valid(target)) {
+    if (false == out.IsValid(target)) {
         LogError()("opentxs::network::zeromq::")(__func__)(
             ": Failed to allocate output")
             .Flush();
@@ -134,8 +126,7 @@ auto RawToZ85(const ReadView input, const AllocateOutput destination) noexcept
                           input.size());
 }
 
-auto Z85ToRaw(const ReadView input, const AllocateOutput destination) noexcept
-    -> bool
+auto Z85ToRaw(const ReadView input, Writer&& destination) noexcept -> bool
 {
     if (0 != input.size() % 5) {
         LogError()("opentxs::network::zeromq::")(__func__)(
@@ -145,18 +136,10 @@ auto Z85ToRaw(const ReadView input, const AllocateOutput destination) noexcept
         return false;
     }
 
-    if (false == bool(destination)) {
-        LogError()("opentxs::network::zeromq::")(__func__)(
-            ": Invalid output allocator.")
-            .Flush();
-
-        return false;
-    }
-
     const auto target = input.size() * 4_uz / 5_uz;
-    auto out = destination(target);
+    auto out = destination.Reserve(target);
 
-    if (false == out.valid(target)) {
+    if (false == out.IsValid(target)) {
         LogError()("opentxs::network::zeromq::")(__func__)(
             ": Failed to allocate output")
             .Flush();

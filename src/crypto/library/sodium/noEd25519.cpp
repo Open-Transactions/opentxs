@@ -8,30 +8,29 @@
 
 namespace opentxs::crypto::implementation
 {
-auto Sodium::PubkeyAdd(const ReadView, const ReadView, const AllocateOutput)
-    const noexcept -> bool
+auto Sodium::PubkeyAdd(const ReadView, const ReadView, Writer&&) const noexcept
+    -> bool
 {
     return {};
 }
 
 auto Sodium::RandomKeypair(
-    const AllocateOutput,
-    const AllocateOutput,
-    const opentxs::crypto::key::asymmetric::Role,
+    Writer&&,
+    Writer&&,
+    const opentxs::crypto::asymmetric::Role,
     const Parameters&,
-    const AllocateOutput) const noexcept -> bool
+    Writer&&) const noexcept -> bool
 {
     return {};
 }
 
-auto Sodium::ScalarAdd(const ReadView, const ReadView, const AllocateOutput)
-    const noexcept -> bool
+auto Sodium::ScalarAdd(const ReadView, const ReadView, Writer&&) const noexcept
+    -> bool
 {
     return {};
 }
 
-auto Sodium::ScalarMultiplyBase(const ReadView, const AllocateOutput)
-    const noexcept -> bool
+auto Sodium::ScalarMultiplyBase(const ReadView, Writer&&) const noexcept -> bool
 {
     return {};
 }
@@ -49,7 +48,7 @@ auto Sodium::Sign(
     const ReadView,
     const ReadView,
     const crypto::HashType,
-    const AllocateOutput) const -> bool
+    Writer&&) const -> bool
 {
     return {};
 }

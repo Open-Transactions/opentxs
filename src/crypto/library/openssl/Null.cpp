@@ -7,6 +7,7 @@
 #include "internal/crypto/library/Factory.hpp"  // IWYU pragma: associated
 
 #include "internal/crypto/library/OpenSSL.hpp"
+#include "opentxs/util/Writer.hpp"
 
 namespace opentxs::factory
 {

@@ -185,12 +185,12 @@ public:
 };
 
 const bool Test_Nym::have_hd_{ot::api::crypto::HaveHDKeys()};
-const bool Test_Nym::have_rsa_{ot::api::crypto::HaveSupport(
-    ot::crypto::key::asymmetric::Algorithm::Legacy)};
-const bool Test_Nym::have_secp256k1_{ot::api::crypto::HaveSupport(
-    ot::crypto::key::asymmetric::Algorithm::Secp256k1)};
-const bool Test_Nym::have_ed25519_{ot::api::crypto::HaveSupport(
-    ot::crypto::key::asymmetric::Algorithm::ED25519)};
+const bool Test_Nym::have_rsa_{
+    ot::api::crypto::HaveSupport(ot::crypto::asymmetric::Algorithm::Legacy)};
+const bool Test_Nym::have_secp256k1_{
+    ot::api::crypto::HaveSupport(ot::crypto::asymmetric::Algorithm::Secp256k1)};
+const bool Test_Nym::have_ed25519_{
+    ot::api::crypto::HaveSupport(ot::crypto::asymmetric::Algorithm::ED25519)};
 
 TEST_F(Test_Nym, init_ot) {}
 

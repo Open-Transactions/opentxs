@@ -8,8 +8,8 @@
 
 namespace opentxs::api::imp
 {
-auto Context::RPC(const ReadView command, const AllocateOutput response)
-    const noexcept -> bool
+auto Context::RPC(const ReadView command, Writer&& response) const noexcept
+    -> bool
 {
     return false;
 }

@@ -19,12 +19,16 @@ extern "C" {
 #include <limits>
 #include <memory>
 #include <stdexcept>
+#include <utility>
 
 #include "internal/core/String.hpp"
 #include "internal/crypto/library/Factory.hpp"
 #include "internal/crypto/library/HashingProvider.hpp"
 #include "internal/util/LogMacros.hpp"
+#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Log.hpp"
+#include "opentxs/util/WriteBuffer.hpp"
+#include "opentxs/util/Writer.hpp"
 
 namespace opentxs::factory
 {
@@ -79,18 +83,12 @@ OpenSSL::DH::DH() noexcept
 {
 }
 
-auto OpenSSL::BIO::Export(const AllocateOutput allocator) noexcept -> bool
+auto OpenSSL::BIO::Export(Writer&& allocator) noexcept -> bool
 {
-    if (false == bool(allocator)) {
-        LogError()(OT_PRETTY_CLASS())("Invalid output allocator").Flush();
-
-        return false;
-    }
-
     auto bytes = ::BIO_ctrl_pending(bio_.get());
-    auto out = allocator(bytes);
+    auto out = allocator.Reserve(bytes);
 
-    if (false == out.valid(bytes)) {
+    if (false == out.IsValid(bytes)) {
         LogError()(OT_PRETTY_CLASS())("Failed to allocate space for output")
             .Flush();
 
@@ -245,14 +243,10 @@ auto OpenSSL::HashTypeToOpenSSLType(const crypto::HashType hashType) noexcept
 auto OpenSSL::Digest(
     const crypto::HashType type,
     const ReadView data,
-    const AllocateOutput output) const noexcept -> bool
+    Writer&& output) const noexcept -> bool
 
 {
     try {
-        if (false == output.operator bool()) {
-            throw std::runtime_error{"invalid output"};
-        }
-
         if (data.size() > std::numeric_limits<int>::max()) {
             throw std::runtime_error{"input too large"};
         }
@@ -261,9 +255,9 @@ auto OpenSSL::Digest(
 
         OT_ASSERT(size <= std::size_t{EVP_MAX_MD_SIZE});
 
-        auto buf = output(size);
+        auto buf = output.Reserve(size);
 
-        if (false == buf.valid(size)) {
+        if (false == buf.IsValid(size)) {
             throw std::runtime_error{"failed to allocate space for output"};
         }
 
@@ -308,16 +302,12 @@ auto OpenSSL::HMAC(
     const crypto::HashType hashType,
     const ReadView key,
     const ReadView data,
-    const AllocateOutput output) const noexcept -> bool
+    Writer&& output) const noexcept -> bool
 {
     try {
         if (false == valid(data)) { throw std::runtime_error{"invalid input"}; }
 
         if (false == valid(key)) { throw std::runtime_error{"invalid key"}; }
-
-        if (false == output.operator bool()) {
-            throw std::runtime_error{"invalid output"};
-        }
 
         if (data.size() > std::numeric_limits<int>::max()) {
             throw std::runtime_error{"input too large"};
@@ -331,9 +321,9 @@ auto OpenSSL::HMAC(
 
         OT_ASSERT(size <= std::size_t{EVP_MAX_MD_SIZE});
 
-        auto buf = output(size);
+        auto buf = output.Reserve(size);
 
-        if (false == buf.valid(size)) {
+        if (false == buf.IsValid(size)) {
             throw std::runtime_error{"failed to allocate space for output"};
         }
 
@@ -454,10 +444,10 @@ auto OpenSSL::PKCS5_PBKDF2_HMAC(
                     static_cast<unsigned char*>(output));
 }
 
-auto OpenSSL::RIPEMD160(const ReadView data, const AllocateOutput destination)
+auto OpenSSL::RIPEMD160(const ReadView data, Writer&& destination)
     const noexcept -> bool
 {
-    return Digest(crypto::HashType::Ripemd160, data, destination);
+    return Digest(crypto::HashType::Ripemd160, data, std::move(destination));
 }
 
 #if __has_include(<openssl/provider.h>)

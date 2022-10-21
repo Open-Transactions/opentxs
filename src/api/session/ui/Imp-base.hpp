@@ -5,6 +5,7 @@
 
 // IWYU pragma: no_include "opentxs/blockchain/BlockchainType.hpp"
 // IWYU pragma: no_include "opentxs/core/UnitType.hpp"
+// IWYU pragma: no_include "opentxs/util/Writer.hpp"
 
 #pragma once
 
@@ -38,6 +39,7 @@
 #include "opentxs/api/Context.hpp"
 #include "opentxs/api/session/UI.hpp"
 #include "opentxs/blockchain/Types.hpp"
+#include "opentxs/core/Data.hpp"
 #include "opentxs/core/Types.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Nym.hpp"

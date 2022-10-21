@@ -10,8 +10,8 @@
 #include "opentxs/Export.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/util/Allocated.hpp"
-#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
+#include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -34,6 +34,7 @@ class GCSPrivate;
 
 class ByteArray;
 class Data;
+class Writer;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -46,10 +47,10 @@ public:
     using Matches = Vector<Targets::const_iterator>;
 
     /// Serialized filter only, no element count
-    auto Compressed(AllocateOutput out) const noexcept -> bool;
+    auto Compressed(Writer&& out) const noexcept -> bool;
     auto ElementCount() const noexcept -> std::uint32_t;
     /// Element count as CompactSize followed by serialized filter
-    auto Encode(AllocateOutput out) const noexcept -> bool;
+    auto Encode(Writer&& out) const noexcept -> bool;
     auto get_allocator() const noexcept -> allocator_type override;
     auto Hash() const noexcept -> cfilter::Hash;
     auto Header(const cfilter::Header& previous) const noexcept
@@ -60,7 +61,7 @@ public:
         const Targets& targets,
         allocator_type alloc,
         allocator_type monotonic) const noexcept -> Matches;
-    auto Serialize(AllocateOutput out) const noexcept -> bool;
+    auto Serialize(Writer&& out) const noexcept -> bool;
     auto Test(const Data& target, allocator_type monotonic) const noexcept
         -> bool;
     auto Test(const ReadView target, allocator_type monotonic) const noexcept

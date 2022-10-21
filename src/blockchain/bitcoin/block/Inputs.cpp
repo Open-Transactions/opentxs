@@ -26,9 +26,12 @@
 #include "opentxs/core/ByteArray.hpp"  // IWYU pragma: keep
 #include "opentxs/core/Data.hpp"
 #include "opentxs/network/blockchain/bitcoin/CompactSize.hpp"
+#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Iterator.hpp"
 #include "opentxs/util/Log.hpp"
+#include "opentxs/util/WriteBuffer.hpp"
+#include "opentxs/util/Writer.hpp"
 #include "util/Container.hpp"
 
 namespace opentxs::factory
@@ -254,19 +257,13 @@ auto Inputs::ReplaceScript(const std::size_t index) noexcept -> bool
     }
 }
 
-auto Inputs::serialize(const AllocateOutput destination, const bool normalize)
+auto Inputs::serialize(Writer&& destination, const bool normalize)
     const noexcept -> std::optional<std::size_t>
 {
-    if (!destination) {
-        LogError()(OT_PRETTY_CLASS())("Invalid output allocator").Flush();
-
-        return std::nullopt;
-    }
-
     const auto size = CalculateSize(normalize);
-    auto output = destination(size);
+    auto output = destination.Reserve(size);
 
-    if (false == output.valid(size)) {
+    if (false == output.IsValid(size)) {
         LogError()(OT_PRETTY_CLASS())("Failed to allocate output bytes")
             .Flush();
 
@@ -275,8 +272,8 @@ auto Inputs::serialize(const AllocateOutput destination, const bool normalize)
 
     auto remaining{output.size()};
     const auto cs = blockchain::bitcoin::CompactSize(this->size()).Encode();
-    auto* it = static_cast<std::byte*>(output.data());
-    std::memcpy(static_cast<void*>(it), cs.data(), cs.size());
+    auto* it = output.as<std::byte>();
+    std::memcpy(it, cs.data(), cs.size());
     std::advance(it, cs.size());
     remaining -= cs.size();
 
@@ -300,10 +297,10 @@ auto Inputs::serialize(const AllocateOutput destination, const bool normalize)
     return size;
 }
 
-auto Inputs::Serialize(const AllocateOutput destination) const noexcept
+auto Inputs::Serialize(Writer&& destination) const noexcept
     -> std::optional<std::size_t>
 {
-    return serialize(destination, false);
+    return serialize(std::move(destination), false);
 }
 
 auto Inputs::Serialize(
@@ -325,10 +322,10 @@ auto Inputs::Serialize(
     return true;
 }
 
-auto Inputs::SerializeNormalized(const AllocateOutput destination)
-    const noexcept -> std::optional<std::size_t>
+auto Inputs::SerializeNormalized(Writer&& destination) const noexcept
+    -> std::optional<std::size_t>
 {
-    return serialize(destination, true);
+    return serialize(std::move(destination), true);
 }
 
 auto Inputs::SetKeyData(const KeyData& data) noexcept -> void

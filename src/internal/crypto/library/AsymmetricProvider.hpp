@@ -3,7 +3,8 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-// IWYU pragma: no_include "opentxs/crypto/key/asymmetric/Role.hpp"
+// IWYU pragma: no_include "opentxs/crypto/asymmetric/Algorithm.hpp"
+// IWYU pragma: no_include "opentxs/crypto/asymmetric/Role.hpp"
 
 #pragma once
 
@@ -11,8 +12,9 @@
 
 #include "opentxs/core/Secret.hpp"
 #include "opentxs/crypto/Types.hpp"
-#include "opentxs/crypto/key/Types.hpp"
-#include "opentxs/util/Bytes.hpp"
+#include "opentxs/crypto/asymmetric/Types.hpp"
+#include "opentxs/util/Types.hpp"
+#include "opentxs/util/Writer.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -29,6 +31,7 @@ class Parameters;
 
 class Signature;
 class String;
+class Writer;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -38,44 +41,44 @@ class AsymmetricProvider
 {
 public:
     static auto CurveToKeyType(const EcdsaCurve& curve)
-        -> crypto::key::asymmetric::Algorithm;
-    static auto KeyTypeToCurve(const crypto::key::asymmetric::Algorithm& type)
+        -> crypto::asymmetric::Algorithm;
+    static auto KeyTypeToCurve(const crypto::asymmetric::Algorithm& type)
         -> EcdsaCurve;
 
     virtual auto SeedToCurveKey(
         const ReadView seed,
-        const AllocateOutput privateKey,
-        const AllocateOutput publicKey) const noexcept -> bool = 0;
+        Writer&& privateKey,
+        Writer&& publicKey) const noexcept -> bool = 0;
     virtual auto SharedSecret(
         const ReadView publicKey,
         const ReadView privateKey,
         const SecretStyle style,
         Secret& secret) const noexcept -> bool = 0;
     virtual auto RandomKeypair(
-        const AllocateOutput privateKey,
-        const AllocateOutput publicKey,
-        const AllocateOutput params = {}) const noexcept -> bool = 0;
+        Writer&& privateKey,
+        Writer&& publicKey,
+        Writer&& params = {}) const noexcept -> bool = 0;
     virtual auto RandomKeypair(
-        const AllocateOutput privateKey,
-        const AllocateOutput publicKey,
-        const opentxs::crypto::key::asymmetric::Role role,
-        const AllocateOutput params = {}) const noexcept -> bool = 0;
+        Writer&& privateKey,
+        Writer&& publicKey,
+        const opentxs::crypto::asymmetric::Role role,
+        Writer&& params = {}) const noexcept -> bool = 0;
     virtual auto RandomKeypair(
-        const AllocateOutput privateKey,
-        const AllocateOutput publicKey,
+        Writer&& privateKey,
+        Writer&& publicKey,
         const Parameters& options,
-        const AllocateOutput params = {}) const noexcept -> bool = 0;
+        Writer&& params = {}) const noexcept -> bool = 0;
     virtual auto RandomKeypair(
-        const AllocateOutput privateKey,
-        const AllocateOutput publicKey,
-        const opentxs::crypto::key::asymmetric::Role role,
+        Writer&& privateKey,
+        Writer&& publicKey,
+        const opentxs::crypto::asymmetric::Role role,
         const Parameters& options,
-        const AllocateOutput params = {}) const noexcept -> bool = 0;
+        Writer&& params = {}) const noexcept -> bool = 0;
     virtual auto Sign(
         const ReadView plaintext,
         const ReadView key,
         const crypto::HashType hash,
-        const AllocateOutput signature) const -> bool = 0;
+        Writer&& signature) const -> bool = 0;
     virtual auto SignContract(
         const api::Session& api,
         const String& contract,

@@ -9,7 +9,6 @@
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
-#include <functional>
 #include <iterator>
 #include <stdexcept>
 
@@ -24,6 +23,8 @@
 #include "opentxs/network/blockchain/bitcoin/CompactSize.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Time.hpp"
+#include "opentxs/util/WriteBuffer.hpp"
+#include "opentxs/util/Writer.hpp"
 
 namespace opentxs::factory
 {
@@ -227,11 +228,9 @@ auto Addr::ExtractAddress(AddressByteField in) noexcept
     return output;
 }
 
-auto Addr::payload(AllocateOutput out) const noexcept -> bool
+auto Addr::payload(Writer&& out) const noexcept -> bool
 {
     try {
-        if (!out) { throw std::runtime_error{"invalid output allocator"}; }
-
         const auto cs = CompactSize(payload_.size()).Encode();
         const auto bytes = [&] {
             const auto size = [this] {
@@ -246,9 +245,9 @@ auto Addr::payload(AllocateOutput out) const noexcept -> bool
 
             return cs.size() + (payload_.size() * size);
         }();
-        auto output = out(bytes);
+        auto output = out.Reserve(bytes);
 
-        if (false == output.valid(bytes)) {
+        if (false == output.IsValid(bytes)) {
             throw std::runtime_error{"failed to allocate output space"};
         }
 

@@ -5,9 +5,19 @@
 
 #pragma once
 
-#include "opentxs/api/crypto/Encode.hpp"
+#include <cstdint>
+#include <string_view>
 
 #include "internal/core/String.hpp"
+#include "opentxs/api/crypto/Encode.hpp"
+#include "opentxs/util/Container.hpp"
+
+// NOLINTBEGIN(modernize-concat-nested-namespaces)
+namespace opentxs
+{
+class Data;
+}  // namespace opentxs
+// NOLINTEND(modernize-concat-nested-namespaces)
 
 namespace opentxs::api::crypto::internal
 {
@@ -18,9 +28,15 @@ public:
     {
         return *this;
     }
+    virtual auto IsBase64(std::string_view str) const noexcept -> bool = 0;
     virtual auto Nonce(const std::uint32_t size) const -> OTString = 0;
     virtual auto Nonce(const std::uint32_t size, Data& rawOutput) const
         -> OTString = 0;
+    virtual auto RandomFilename() const -> UnallocatedCString = 0;
+    virtual auto SanatizeBase58(std::string_view input) const
+        -> UnallocatedCString = 0;
+    virtual auto SanatizeBase64(std::string_view input) const
+        -> UnallocatedCString = 0;
 
     auto InternalEncode() noexcept -> Encode& final { return *this; }
 

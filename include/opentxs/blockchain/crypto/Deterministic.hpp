@@ -27,6 +27,23 @@ struct Deterministic;
 }  // namespace crypto
 }  // namespace blockchain
 
+namespace crypto
+{
+namespace asymmetric
+{
+namespace key
+{
+class EllipticCurve;
+class HD;
+}  // namespace key
+}  // namespace asymmetric
+}  // namespace crypto
+
+namespace proto
+{
+class HDPath;
+}  // namespace proto
+
 namespace identifier
 {
 class Generic;
@@ -48,7 +65,7 @@ public:
     OPENTXS_NO_EXPORT virtual auto InternalDeterministic() const noexcept
         -> internal::Deterministic& = 0;
     virtual auto Key(const Subchain type, const Bip32Index index) const noexcept
-        -> ECKey = 0;
+        -> const opentxs::crypto::asymmetric::key::EllipticCurve& = 0;
     virtual auto LastGenerated(const Subchain type) const noexcept
         -> std::optional<Bip32Index> = 0;
     virtual auto Lookahead() const noexcept -> std::size_t = 0;
@@ -81,7 +98,7 @@ public:
         const std::string_view label = {},
         const Time time = Clock::now()) const noexcept -> Batch = 0;
     virtual auto RootNode(const PasswordPrompt& reason) const noexcept
-        -> HDKey = 0;
+        -> const opentxs::crypto::asymmetric::key::HD& = 0;
 
     Deterministic(const Deterministic&) = delete;
     Deterministic(Deterministic&&) = delete;

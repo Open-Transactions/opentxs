@@ -23,7 +23,6 @@
 #include "opentxs/api/session/Activity.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/otx/client/Types.hpp"
-#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Time.hpp"
 #include "opentxs/util/Types.hpp"
@@ -72,6 +71,7 @@ class StorageThread;
 class Contact;
 class PasswordPrompt;
 class PeerObject;
+class Writer;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -164,7 +164,7 @@ public:
     auto Thread(
         const identifier::Nym& nymID,
         const identifier::Generic& threadID,
-        AllocateOutput output) const noexcept -> bool final;
+        Writer&& output) const noexcept -> bool final;
     auto Threads(const identifier::Nym& nym, const bool unreadOnly = false)
         const noexcept -> ObjectList final;
     auto UnreadCount(const identifier::Nym& nym) const noexcept

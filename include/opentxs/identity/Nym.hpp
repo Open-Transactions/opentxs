@@ -3,6 +3,8 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_include "opentxs/crypto/asymmetric/Algorithm.hpp"
+
 #pragma once
 
 #include <cstdint>
@@ -12,22 +14,22 @@
 #include "opentxs/Export.hpp"
 #include "opentxs/core/Types.hpp"
 #include "opentxs/crypto/HashType.hpp"
-#include "opentxs/crypto/key/asymmetric/Algorithm.hpp"
+#include "opentxs/crypto/asymmetric/Types.hpp"
 #include "opentxs/identity/wot/claim/Types.hpp"
-#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Iterator.hpp"
 #include "opentxs/util/Numbers.hpp"
+#include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
 namespace crypto
 {
-namespace key
+namespace asymmetric
 {
-class Asymmetric;
-}  // namespace key
+class Key;
+}  // namespace asymmetric
 
 namespace symmetric
 {
@@ -78,6 +80,7 @@ class Secret;
 class Signature;
 class String;
 class Tag;
+class Writer;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -86,10 +89,9 @@ namespace opentxs::identity
 class OPENTXS_EXPORT Nym
 {
 public:
-    using KeyTypes = UnallocatedVector<crypto::key::asymmetric::Algorithm>;
+    using KeyTypes = Vector<crypto::asymmetric::Algorithm>;
     using AuthorityKeys = std::pair<identifier::Generic, KeyTypes>;
-    using NymKeys =
-        std::pair<identifier::Nym, UnallocatedVector<AuthorityKeys>>;
+    using NymKeys = std::pair<identifier::Nym, Vector<AuthorityKeys>>;
     using key_type = identifier::Generic;
     using value_type = Authority;
     using const_iterator =
@@ -124,31 +126,27 @@ public:
     virtual auto GetIdentifier(identifier::Nym& theIdentifier) const
         -> void = 0;
     virtual auto GetIdentifier(String& theIdentifier) const -> void = 0;
-    virtual auto GetPrivateAuthKey(
-        crypto::key::asymmetric::Algorithm keytype =
-            crypto::key::asymmetric::Algorithm::Null) const
-        -> const crypto::key::Asymmetric& = 0;
-    virtual auto GetPrivateEncrKey(
-        crypto::key::asymmetric::Algorithm keytype =
-            crypto::key::asymmetric::Algorithm::Null) const
-        -> const crypto::key::Asymmetric& = 0;
-    virtual auto GetPrivateSignKey(
-        crypto::key::asymmetric::Algorithm keytype =
-            crypto::key::asymmetric::Algorithm::Null) const
-        -> const crypto::key::Asymmetric& = 0;
-
-    virtual auto GetPublicAuthKey(
-        crypto::key::asymmetric::Algorithm keytype =
-            crypto::key::asymmetric::Algorithm::Null) const
-        -> const crypto::key::Asymmetric& = 0;
-    virtual auto GetPublicEncrKey(
-        crypto::key::asymmetric::Algorithm keytype =
-            crypto::key::asymmetric::Algorithm::Null) const
-        -> const crypto::key::Asymmetric& = 0;
-    virtual auto GetPublicSignKey(
-        crypto::key::asymmetric::Algorithm keytype =
-            crypto::key::asymmetric::Algorithm::Null) const
-        -> const crypto::key::Asymmetric& = 0;
+    virtual auto GetPrivateAuthKey() const
+        -> const crypto::asymmetric::Key& = 0;
+    virtual auto GetPrivateAuthKey(crypto::asymmetric::Algorithm keytype) const
+        -> const crypto::asymmetric::Key& = 0;
+    virtual auto GetPrivateEncrKey() const
+        -> const crypto::asymmetric::Key& = 0;
+    virtual auto GetPrivateEncrKey(crypto::asymmetric::Algorithm keytype) const
+        -> const crypto::asymmetric::Key& = 0;
+    virtual auto GetPrivateSignKey() const
+        -> const crypto::asymmetric::Key& = 0;
+    virtual auto GetPrivateSignKey(crypto::asymmetric::Algorithm keytype) const
+        -> const crypto::asymmetric::Key& = 0;
+    virtual auto GetPublicAuthKey() const -> const crypto::asymmetric::Key& = 0;
+    virtual auto GetPublicAuthKey(crypto::asymmetric::Algorithm keytype) const
+        -> const crypto::asymmetric::Key& = 0;
+    virtual auto GetPublicEncrKey() const -> const crypto::asymmetric::Key& = 0;
+    virtual auto GetPublicEncrKey(crypto::asymmetric::Algorithm keytype) const
+        -> const crypto::asymmetric::Key& = 0;
+    virtual auto GetPublicSignKey() const -> const crypto::asymmetric::Key& = 0;
+    virtual auto GetPublicSignKey(crypto::asymmetric::Algorithm keytype) const
+        -> const crypto::asymmetric::Key& = 0;
     virtual auto HasCapability(const NymCapability& capability) const
         -> bool = 0;
     virtual auto HasPath() const -> bool = 0;
@@ -160,11 +158,11 @@ public:
     virtual auto PathChildSize() const -> int = 0;
     virtual auto PathChild(int index) const -> std::uint32_t = 0;
     virtual auto PaymentCode() const -> UnallocatedCString = 0;
-    virtual auto PaymentCodePath(AllocateOutput destination) const -> bool = 0;
+    virtual auto PaymentCodePath(Writer&& destination) const -> bool = 0;
     virtual auto PhoneNumbers(bool active = true) const
         -> UnallocatedCString = 0;
     virtual auto Revision() const -> std::uint64_t = 0;
-    virtual auto Serialize(AllocateOutput destination) const -> bool = 0;
+    virtual auto Serialize(Writer&& destination) const -> bool = 0;
     virtual void SerializeNymIDSource(Tag& parent) const = 0;
     virtual auto size() const noexcept -> std::size_t = 0;
     virtual auto SocialMediaProfiles(
@@ -176,9 +174,9 @@ public:
     virtual auto TransportKey(Data& pubkey, const PasswordPrompt& reason) const
         -> Secret = 0;
     virtual auto Unlock(
-        const crypto::key::Asymmetric& dhKey,
+        const crypto::asymmetric::Key& dhKey,
         const std::uint32_t tag,
-        const crypto::key::asymmetric::Algorithm type,
+        const crypto::asymmetric::Algorithm type,
         const crypto::symmetric::Key& key,
         PasswordPrompt& reason) const noexcept -> bool = 0;
     virtual auto VerifyPseudonym() const -> bool = 0;

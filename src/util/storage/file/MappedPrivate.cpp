@@ -10,7 +10,9 @@
 #include <algorithm>
 #include <cstring>
 #include <filesystem>
+#include <iterator>
 #include <memory>
+#include <span>
 #include <stdexcept>
 #include <utility>
 
@@ -270,10 +272,10 @@ auto MappedPrivate::Data::update_next_position(
 auto MappedPrivate::Data::Write(
     lmdb::Transaction& tx,
     const Vector<std::size_t>& items) noexcept
-    -> Vector<std::pair<Index, WritableView>>
+    -> Vector<std::pair<Index, WriteBuffer>>
 {
     const auto count = items.size();
-    using Output = Vector<std::pair<Index, WritableView>>;
+    using Output = Vector<std::pair<Index, WriteBuffer>>;
     auto out = Output{count, items.get_allocator()};
     auto post = ScopeGuard{[&] { OT_ASSERT(out.size() == items.size()); }};
 
@@ -291,7 +293,8 @@ auto MappedPrivate::Data::Write(
         next += size;
         const auto [file, offset] = get_offset(index.MemoryPosition());
         check_file(file);
-        view = {files_.at(file).data() + offset, size};
+        auto* ptr = reinterpret_cast<std::byte*>(files_.at(file).data());
+        view = std::span<std::byte>{std::next(ptr, offset), size};
     }
 
     if (false == update_next_position(next, tx)) {
@@ -340,7 +343,7 @@ auto MappedPrivate::Read(const Vector<Index>& indices) const noexcept
 auto MappedPrivate::Write(
     lmdb::Transaction& tx,
     const Vector<std::size_t>& items) noexcept
-    -> Vector<std::pair<Index, WritableView>>
+    -> Vector<std::pair<Index, WriteBuffer>>
 {
     return data_.lock()->Write(tx, items);
 }

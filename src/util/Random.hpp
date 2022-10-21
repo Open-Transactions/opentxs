@@ -8,10 +8,14 @@
 #include <cstddef>
 #include <iosfwd>
 
-#include "opentxs/util/Bytes.hpp"
+// NOLINTBEGIN(modernize-concat-nested-namespaces)
+namespace opentxs
+{
+class Writer;
+}  // namespace opentxs
+// NOLINTEND(modernize-concat-nested-namespaces)
 
 namespace opentxs
 {
-auto random_bytes_non_crypto(AllocateOutput dest, std::size_t bytes) noexcept
-    -> bool;
+auto random_bytes_non_crypto(Writer&& dest, std::size_t bytes) noexcept -> bool;
 }  // namespace opentxs

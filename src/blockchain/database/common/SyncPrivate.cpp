@@ -58,6 +58,8 @@ extern "C" {
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Types.hpp"
+#include "opentxs/util/WriteBuffer.hpp"
+#include "opentxs/util/Writer.hpp"
 #include "util/ByteLiterals.hpp"
 #include "util/ScopeGuard.hpp"
 #include "util/Work.hpp"
@@ -464,20 +466,20 @@ auto SyncPrivate::Store(
             }
         }
 
-        const auto data = Write(tx, sizes);
+        auto data = Write(tx, sizes);
 
         for (auto n = 0_uz; n < count; ++n) {
             const auto& dbKey = keys.at(n);
             const auto& raw = bytes.at(n);
             const auto& size = sizes.at(n);
-            const auto& [index, view] = data.at(n);
+            auto& [index, view] = data.at(n);
 
-            if (false == view.valid(size)) {
+            if (false == view.IsValid(size)) {
                 throw std::runtime_error{
                     "Failed to get write position for sync data"};
             }
 
-            std::memcpy(view.data(), raw.data(), size);
+            std::memcpy(view.as<std::byte>(), raw.data(), size);
             auto data = Data{};
             data.index_ = index;
 

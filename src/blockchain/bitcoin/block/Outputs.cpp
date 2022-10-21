@@ -27,9 +27,12 @@
 #include "opentxs/core/ByteArray.hpp"  // IWYU pragma: keep
 #include "opentxs/core/Data.hpp"
 #include "opentxs/network/blockchain/bitcoin/CompactSize.hpp"
+#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Iterator.hpp"
 #include "opentxs/util/Log.hpp"
+#include "opentxs/util/WriteBuffer.hpp"
+#include "opentxs/util/Writer.hpp"
 #include "util/Container.hpp"
 
 namespace opentxs::factory
@@ -222,19 +225,13 @@ auto Outputs::NetBalanceChange(
         });
 }
 
-auto Outputs::Serialize(const AllocateOutput destination) const noexcept
+auto Outputs::Serialize(Writer&& destination) const noexcept
     -> std::optional<std::size_t>
 {
-    if (!destination) {
-        LogError()(OT_PRETTY_CLASS())("Invalid output allocator").Flush();
-
-        return std::nullopt;
-    }
-
     const auto size = CalculateSize();
-    auto output = destination(size);
+    auto output = destination.Reserve(size);
 
-    if (false == output.valid(size)) {
+    if (false == output.IsValid(size)) {
         LogError()(OT_PRETTY_CLASS())("Failed to allocate output bytes")
             .Flush();
 

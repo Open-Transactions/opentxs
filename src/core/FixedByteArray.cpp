@@ -9,6 +9,7 @@
 #include <cstdint>
 
 #include "internal/util/P0330.hpp"
+#include "opentxs/util/Writer.hpp"
 
 namespace opentxs
 {

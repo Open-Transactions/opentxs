@@ -13,11 +13,13 @@
 #include <chrono>
 #include <compare>
 #include <iterator>
+#include <memory>
 #include <stdexcept>
 #include <utility>
 
 #include "internal/api/crypto/Asymmetric.hpp"
 #include "internal/api/crypto/Blockchain.hpp"
+#include "internal/crypto/asymmetric/Key.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/Time.hpp"
@@ -28,11 +30,12 @@
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/blockchain/crypto/Subchain.hpp"
 #include "opentxs/core/ByteArray.hpp"
-#include "opentxs/crypto/key/EllipticCurve.hpp"
-#include "opentxs/crypto/key/HD.hpp"  // IWYU pragma: keep
-#include "opentxs/util/Bytes.hpp"
+#include "opentxs/crypto/asymmetric/Key.hpp"
+#include "opentxs/crypto/asymmetric/key/EllipticCurve.hpp"
+#include "opentxs/crypto/asymmetric/key/HD.hpp"  // IWYU pragma: keep
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
+#include "opentxs/util/Types.hpp"
 
 namespace opentxs::blockchain::crypto::implementation
 {
@@ -46,7 +49,7 @@ Element::Element(
     const Bip32Index index,
     const UnallocatedCString label,
     identifier::Generic&& contact,
-    const opentxs::crypto::key::EllipticCurve& key,
+    const opentxs::crypto::asymmetric::key::EllipticCurve& key,
     const Time time,
     Transactions&& unconfirmed,
     Transactions&& confirmed) noexcept(false)
@@ -60,13 +63,15 @@ Element::Element(
     , index_(index)
     , label_(label)
     , contact_(std::move(contact))
-    , pkey_(key.CloneEC())
+    , key_(key)
     , timestamp_(time)
     , unconfirmed_(std::move(unconfirmed))
     , confirmed_(std::move(confirmed))
     , cached_(std::nullopt)
 {
-    if (false == bool(pkey_)) { throw std::runtime_error("No key provided"); }
+    if (false == key_.IsValid()) {
+        throw std::runtime_error("No key provided");
+    }
 
     if (Subchain::Error == subchain_) {
         throw std::runtime_error("Invalid subchain");
@@ -85,7 +90,7 @@ Element::Element(
     const opentxs::blockchain::Type chain,
     const crypto::Subchain subchain,
     const Bip32Index index,
-    const opentxs::crypto::key::EllipticCurve& key,
+    const opentxs::crypto::asymmetric::key::EllipticCurve& key,
     identifier::Generic&& contact) noexcept(false)
     : Element(
           api,
@@ -122,7 +127,7 @@ Element::Element(
           address.index(),
           address.label(),
           std::move(contact),
-          *instantiate(api, address.key()),
+          instantiate(api, address.key()),
           convert_stime(address.modified()),
           [&] {
               auto out = Transactions{};
@@ -170,7 +175,7 @@ auto Element::Address(const blockchain::crypto::AddressStyle format)
     auto lock = rLock{lock_};
 
     return blockchain_.CalculateAddress(
-        chain_, format, api_.Factory().DataFromBytes(pkey_->PublicKey()));
+        chain_, format, api_.Factory().DataFromBytes(key_.PublicKey()));
 }
 
 auto Element::Confirmed() const noexcept -> Txids
@@ -216,7 +221,7 @@ auto Element::Elements() const noexcept -> UnallocatedSet<ByteArray>
 auto Element::elements(const rLock&) const noexcept -> UnallocatedSet<ByteArray>
 {
     auto output = UnallocatedSet<ByteArray>{};
-    auto pubkey = api_.Factory().DataFromBytes(pkey_->PublicKey());
+    auto pubkey = api_.Factory().DataFromBytes(key_.PublicKey());
 
     try {
         output.emplace(blockchain_.Internal().PubkeyHash(chain_, pubkey));
@@ -236,16 +241,14 @@ auto Element::IncomingTransactions() const noexcept
 auto Element::instantiate(
     const api::Session& api,
     const proto::AsymmetricKey& serialized) noexcept(false)
-    -> std::unique_ptr<opentxs::crypto::key::EllipticCurve>
+    -> opentxs::crypto::asymmetric::key::EllipticCurve
 {
     auto output =
         api.Crypto().Asymmetric().Internal().InstantiateECKey(serialized);
 
-    if (false == bool(output)) {
-        throw std::runtime_error("Failed to construct key");
+    if (false == output.IsValid()) {
+        throw std::runtime_error("Failed to instantiate key");
     }
-
-    if (false == bool(*output)) { throw std::runtime_error("Wrong key type"); }
 
     return output;
 }
@@ -299,11 +302,12 @@ auto Element::IsAvailable(
     }
 }
 
-auto Element::Key() const noexcept -> ECKey
+auto Element::Key() const noexcept
+    -> const opentxs::crypto::asymmetric::key::EllipticCurve&
 {
     auto lock = rLock{lock_};
 
-    return pkey_;
+    return key_;
 }
 
 auto Element::Label() const noexcept -> UnallocatedCString
@@ -320,33 +324,32 @@ auto Element::LastActivity() const noexcept -> Time
     return timestamp_;
 }
 
-auto Element::PrivateKey(const PasswordPrompt& reason) const noexcept -> ECKey
+auto Element::PrivateKey(const PasswordPrompt& reason) const noexcept
+    -> const opentxs::crypto::asymmetric::key::EllipticCurve&
 {
     auto lock = rLock{lock_};
 
-    if (false == pkey_->HasPrivate()) {
+    if (false == key_.HasPrivate()) {
         auto key = parent_.Internal().PrivateKey(subchain_, index_, reason);
 
-        if (!key) {
+        if (false == key.IsValid()) {
             LogError()(OT_PRETTY_CLASS())("error deriving private key").Flush();
 
-            return {};
+            return opentxs::crypto::asymmetric::key::EllipticCurve::Blank();
         }
 
-        pkey_ = std::move(key);
-
-        OT_ASSERT(pkey_);
+        key_ = std::move(key);
     }
 
-    OT_ASSERT(pkey_->HasPrivate());
+    OT_ASSERT(key_.HasPrivate());
 
-    return pkey_;
+    return key_;
 }
 
 auto Element::PubkeyHash() const noexcept -> ByteArray
 {
     auto lock = rLock{lock_};
-    const auto key = api_.Factory().DataFromBytes(pkey_->PublicKey());
+    const auto key = api_.Factory().DataFromBytes(key_.PublicKey());
 
     return blockchain_.Internal().PubkeyHash(chain_, key);
 }
@@ -367,11 +370,13 @@ auto Element::Serialize() const noexcept -> Element::SerializedType
     if (false == cached_.has_value()) {
         const auto key = [&] {
             auto serialized = proto::AsymmetricKey{};
-            if (pkey_->HasPrivate()) {
-                pkey_->asPublicEC()->Serialize(serialized);
+
+            if (key_.HasPrivate()) {
+                key_.asPublic().Internal().Serialize(serialized);
             } else {
-                pkey_->Serialize(serialized);
+                key_.Internal().Serialize(serialized);
             }
+
             return serialized;
         }();
 

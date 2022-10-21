@@ -15,7 +15,6 @@
 #include <string_view>
 
 #include "internal/util/Flag.hpp"
-#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "util/storage/Plugin.hpp"
 

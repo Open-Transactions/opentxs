@@ -12,6 +12,7 @@
 
 #include "internal/core/String.hpp"
 #include "internal/identity/wot/claim/Types.hpp"
+#include "internal/util/Pimpl.hpp"
 
 namespace ot = opentxs;
 namespace claim = ot::identity::wot::claim;

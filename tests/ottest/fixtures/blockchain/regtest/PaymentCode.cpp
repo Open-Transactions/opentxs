@@ -72,18 +72,18 @@ Regtest_payment_code::Regtest_payment_code()
 
                 const auto& element = account.BalanceElement(
                     Subchain::External, index.value_or(0));
-                const auto key = element.Key();
+                const auto& key = element.Key();
 
-                OT_ASSERT(key);
+                OT_ASSERT(key.IsValid());
 
                 const auto& [bytes, value, pattern] = meta.emplace_back(
                     client_1_.Factory().DataFromBytes(
-                        element.Key()->PublicKey()),
+                        element.Key().PublicKey()),
                     baseAmmount,
                     Pattern::PayToPubkey);
                 output.emplace_back(
                     value,
-                    miner_.Factory().BitcoinScriptP2PK(test_chain_, *key),
+                    miner_.Factory().BitcoinScriptP2PK(test_chain_, key),
                     keys);
 
                 return output;

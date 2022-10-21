@@ -3,6 +3,7 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_include "opentxs/crypto/asymmetric/Role.hpp"
 // IWYU pragma: no_include "opentxs/crypto/symmetric/Algorithm.hpp"
 // IWYU pragma: no_include "opentxs/crypto/symmetric/Source.hpp"
 
@@ -21,10 +22,10 @@
 #include "opentxs/crypto/HashType.hpp"
 #include "opentxs/crypto/SecretStyle.hpp"
 #include "opentxs/crypto/Types.hpp"
-#include "opentxs/crypto/key/asymmetric/Role.hpp"
+#include "opentxs/crypto/asymmetric/Types.hpp"
 #include "opentxs/crypto/symmetric/Types.hpp"
 #include "opentxs/identity/Types.hpp"
-#include "opentxs/util/Bytes.hpp"
+#include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -37,11 +38,10 @@ class Session;
 
 namespace crypto
 {
-namespace key
+namespace asymmetric
 {
-class Asymmetric;
-class Parameters;
-}  // namespace key
+class Key;
+}  // namespace asymmetric
 
 class Parameters;
 }  // namespace crypto
@@ -54,6 +54,8 @@ class Ciphertext;
 class Data;
 class PasswordPrompt;
 class Secret;
+class WriteBuffer;
+class Writer;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -68,7 +70,7 @@ public:
     auto Digest(
         const crypto::HashType hashType,
         const ReadView data,
-        const AllocateOutput output) const noexcept -> bool final;
+        Writer&& output) const noexcept -> bool final;
     auto Generate(
         const ReadView input,
         const ReadView salt,
@@ -76,31 +78,27 @@ public:
         const std::uint32_t r,
         const std::uint32_t p,
         const std::size_t bytes,
-        AllocateOutput writer) const noexcept -> bool final;
+        Writer&& writer) const noexcept -> bool final;
     auto HMAC(
         const crypto::HashType hashType,
         const ReadView key,
         const ReadView data,
-        const AllocateOutput output) const noexcept -> bool final;
-    auto PubkeyAdd(
-        const ReadView pubkey,
-        const ReadView scalar,
-        const AllocateOutput result) const noexcept -> bool final;
+        Writer&& output) const noexcept -> bool final;
+    auto PubkeyAdd(ReadView pubkey, ReadView scalar, Writer&& result)
+        const noexcept -> bool final;
     using AsymmetricProvider::RandomKeypair;
     auto RandomKeypair(
-        const AllocateOutput privateKey,
-        const AllocateOutput publicKey,
-        const opentxs::crypto::key::asymmetric::Role role,
+        Writer&& privateKey,
+        Writer&& publicKey,
+        const opentxs::crypto::asymmetric::Role role,
         const Parameters& options,
-        const AllocateOutput params) const noexcept -> bool final;
+        Writer&& params) const noexcept -> bool final;
     auto RandomizeMemory(void* destination, const std::size_t size) const
         -> bool final;
-    auto ScalarAdd(
-        const ReadView lhs,
-        const ReadView rhs,
-        const AllocateOutput result) const noexcept -> bool final;
-    auto ScalarMultiplyBase(const ReadView scalar, const AllocateOutput result)
-        const noexcept -> bool final;
+    auto ScalarAdd(ReadView lhs, ReadView rhs, Writer&& result) const noexcept
+        -> bool final;
+    auto ScalarMultiplyBase(ReadView scalar, Writer&& result) const noexcept
+        -> bool final;
     auto SharedSecret(
         const ReadView publicKey,
         const ReadView privateKey,
@@ -110,7 +108,7 @@ public:
         const ReadView plaintext,
         const ReadView key,
         const crypto::HashType hash,
-        const AllocateOutput signature) const -> bool final;
+        Writer&& signature) const -> bool final;
     auto Verify(
         const ReadView plaintext,
         const ReadView theKey,
@@ -158,7 +156,7 @@ private:
         -> std::size_t final;
     auto SaltSize(const crypto::symmetric::Source type) const
         -> std::size_t final;
-    auto sha1(const ReadView data, WritableView& output) const -> bool;
+    auto sha1(const ReadView data, WriteBuffer& output) const -> bool;
     auto TagSize(const opentxs::crypto::symmetric::Algorithm mode) const
         -> std::size_t final;
 };

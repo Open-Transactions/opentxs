@@ -14,16 +14,23 @@ auto Bip32::Imp::DeriveKey(const EcdsaCurve&, const Secret&, const Path&) const
     return blank_.get();
 }
 
-auto Bip32::Imp::DerivePrivateKey(
-    const key::HD&,
+auto Bip32::Imp::derive_private_key(
+    const asymmetric::Algorithm,
+    const proto::HDPath&,
+    const ReadView,
+    const ReadView,
+    const ReadView,
     const Path&,
     const PasswordPrompt&) const noexcept(false) -> Key
 {
     return blank_.get();
 }
 
-auto Bip32::Imp::DerivePublicKey(
-    const key::HD&,
+auto Bip32::Imp::derive_public_key(
+    const asymmetric::Algorithm,
+    const proto::HDPath&,
+    const ReadView,
+    const ReadView,
     const Path&,
     const PasswordPrompt&) const noexcept(false) -> Key
 {
@@ -33,9 +40,9 @@ auto Bip32::Imp::DerivePublicKey(
 auto Bip32::Imp::root_node(
     const EcdsaCurve&,
     const ReadView,
-    const AllocateOutput,
-    const AllocateOutput,
-    const AllocateOutput) const noexcept -> bool
+    Writer&&,
+    Writer&&,
+    Writer&&) const noexcept -> bool
 {
     return false;
 }

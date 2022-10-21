@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include "opentxs/util/Bytes.hpp"
+#include "internal/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 
 namespace opentxs::crypto

@@ -3,6 +3,10 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_include "opentxs/crypto/asymmetric/Algorithm.hpp"
+// IWYU pragma: no_include "opentxs/crypto/asymmetric/Key.hpp"
+// IWYU pragma: no_include "opentxs/crypto/asymmetric/Role.hpp"
+
 #pragma once
 
 #include <Enums.pb.h>
@@ -19,12 +23,9 @@
 #include "internal/util/Types.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/crypto/HashType.hpp"
-#include "opentxs/crypto/Parameters.hpp"
 #include "opentxs/crypto/SignatureRole.hpp"
 #include "opentxs/crypto/Types.hpp"
-#include "opentxs/crypto/key/Asymmetric.hpp"
-#include "opentxs/crypto/key/asymmetric/Algorithm.hpp"
-#include "opentxs/crypto/key/asymmetric/Role.hpp"
+#include "opentxs/crypto/asymmetric/Types.hpp"
 #include "opentxs/identity/Authority.hpp"
 #include "opentxs/identity/Nym.hpp"
 #include "opentxs/identity/Source.hpp"
@@ -32,9 +33,9 @@
 #include "opentxs/identity/credential/Base.hpp"
 #include "opentxs/identity/credential/Key.hpp"
 #include "opentxs/identity/credential/Primary.hpp"
-#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
+#include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -46,16 +47,17 @@ class Session;
 
 namespace crypto
 {
-namespace key
+namespace asymmetric
 {
-class Asymmetric;
-class Parameters;
-}  // namespace key
+class Key;
+}  // namespace asymmetric
 
 namespace symmetric
 {
 class Key;
 }  // namespace symmetric
+
+class Parameters;
 }  // namespace crypto
 
 namespace identity
@@ -104,62 +106,79 @@ public:
     }
     auto GetMasterCredID() const -> identifier::Generic final;
     auto GetPublicAuthKey(
-        crypto::key::asymmetric::Algorithm keytype,
+        crypto::asymmetric::Algorithm keytype,
         const String::List* plistRevokedIDs = nullptr) const
-        -> const crypto::key::Asymmetric& final;
+        -> const crypto::asymmetric::Key& final;
     auto GetPublicEncrKey(
-        crypto::key::asymmetric::Algorithm keytype,
+        crypto::asymmetric::Algorithm keytype,
         const String::List* plistRevokedIDs = nullptr) const
-        -> const crypto::key::Asymmetric& final;
+        -> const crypto::asymmetric::Key& final;
     auto GetPublicKeysBySignature(
         crypto::key::Keypair::Keys& listOutput,
         const Signature& theSignature,
         char cKeyType = '0') const -> std::int32_t final;
     auto GetPublicSignKey(
-        crypto::key::asymmetric::Algorithm keytype,
+        crypto::asymmetric::Algorithm keytype,
         const String::List* plistRevokedIDs = nullptr) const
-        -> const crypto::key::Asymmetric& final;
+        -> const crypto::asymmetric::Key& final;
     auto GetPrivateSignKey(
-        crypto::key::asymmetric::Algorithm keytype,
+        crypto::asymmetric::Algorithm keytype,
         const String::List* plistRevokedIDs = nullptr) const
-        -> const crypto::key::Asymmetric& final;
+        -> const crypto::asymmetric::Key& final;
     auto GetPrivateEncrKey(
-        crypto::key::asymmetric::Algorithm keytype,
+        crypto::asymmetric::Algorithm keytype,
         const String::List* plistRevokedIDs = nullptr) const
-        -> const crypto::key::Asymmetric& final;
+        -> const crypto::asymmetric::Key& final;
     auto GetPrivateAuthKey(
-        crypto::key::asymmetric::Algorithm keytype,
+        crypto::asymmetric::Algorithm keytype,
         const String::List* plistRevokedIDs = nullptr) const
-        -> const crypto::key::Asymmetric& final;
+        -> const crypto::asymmetric::Key& final;
     auto GetAuthKeypair(
-        crypto::key::asymmetric::Algorithm keytype,
+        crypto::asymmetric::Algorithm keytype,
         const String::List* plistRevokedIDs = nullptr) const
         -> const crypto::key::Keypair& final;
     auto GetEncrKeypair(
-        crypto::key::asymmetric::Algorithm keytype,
+        crypto::asymmetric::Algorithm keytype,
         const String::List* plistRevokedIDs = nullptr) const
         -> const crypto::key::Keypair& final;
     auto GetSignKeypair(
-        crypto::key::asymmetric::Algorithm keytype,
+        crypto::asymmetric::Algorithm keytype,
         const String::List* plistRevokedIDs = nullptr) const
         -> const crypto::key::Keypair& final;
-    auto GetTagCredential(crypto::key::asymmetric::Algorithm keytype) const
+    auto GetTagCredential(crypto::asymmetric::Algorithm keytype) const
         noexcept(false) -> const credential::Key& final;
     auto GetVerificationSet(proto::VerificationSet& verificationSet) const
         -> bool final;
     auto hasCapability(const NymCapability& capability) const -> bool final;
-    auto Params(const crypto::key::asymmetric::Algorithm type) const noexcept
+    auto Params(const crypto::asymmetric::Algorithm type) const noexcept
         -> ReadView final;
     auto Path(proto::HDPath& output) const -> bool final;
     auto Serialize(Serialized& serialized, const CredentialIndexModeFlag mode)
         const -> bool final;
     auto Sign(
         const GetPreimage input,
-        const crypto::SignatureRole role,
-        proto::Signature& signature,
-        const PasswordPrompt& reason,
-        opentxs::crypto::key::asymmetric::Role key,
-        const crypto::HashType hash) const -> bool final;
+        crypto::SignatureRole role,
+        proto::Signature& output,
+        const PasswordPrompt& reason) const -> bool final;
+    auto Sign(
+        const GetPreimage input,
+        crypto::SignatureRole role,
+        crypto::HashType hash,
+        proto::Signature& output,
+        const PasswordPrompt& reason) const -> bool final;
+    auto Sign(
+        const GetPreimage input,
+        crypto::SignatureRole role,
+        opentxs::crypto::asymmetric::Role key,
+        proto::Signature& output,
+        const PasswordPrompt& reason) const -> bool final;
+    auto Sign(
+        const GetPreimage input,
+        crypto::SignatureRole role,
+        opentxs::crypto::asymmetric::Role key,
+        crypto::HashType hash,
+        proto::Signature& output,
+        const PasswordPrompt& reason) const -> bool final;
     auto Source() const -> const identity::Source& final
     {
         return parent_.Source();
@@ -169,19 +188,21 @@ public:
         Secret& privateKey,
         const PasswordPrompt& reason) const -> bool final;
     auto Unlock(
-        const crypto::key::Asymmetric& dhKey,
+        const crypto::asymmetric::Key& dhKey,
         const std::uint32_t tag,
-        const crypto::key::asymmetric::Algorithm type,
+        const crypto::asymmetric::Algorithm type,
         const crypto::symmetric::Key& key,
         PasswordPrompt& reason) const noexcept -> bool final;
     auto VerificationCredentialVersion() const -> VersionNumber final
     {
         return authority_to_verification_.at(version_);
     }
+    auto Verify(const Data& plaintext, const proto::Signature& sig) const
+        -> bool final;
     auto Verify(
         const Data& plaintext,
         const proto::Signature& sig,
-        const opentxs::crypto::key::asymmetric::Role key) const -> bool final;
+        const opentxs::crypto::asymmetric::Role key) const -> bool final;
     auto Verify(const proto::Verification& item) const -> bool final;
     auto VerifyInternally() const -> bool final;
 
@@ -206,7 +227,7 @@ public:
     auto operator=(const Authority&) -> Authority& = delete;
     auto operator=(Authority&&) -> Authority& = delete;
 
-    ~Authority() final = default;
+    ~Authority() final;
 
 private:
     friend opentxs::Factory;
@@ -316,7 +337,7 @@ private:
         -> UnallocatedMap<identifier::Generic, std::unique_ptr<Type>>;
 
     auto get_keypair(
-        const crypto::key::asymmetric::Algorithm type,
+        const crypto::asymmetric::Algorithm type,
         const proto::KeyRole role,
         const String::List* plistRevokedIDs) const
         -> const crypto::key::Keypair&;

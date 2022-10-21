@@ -9,8 +9,8 @@
 #include <iosfwd>
 
 #include "internal/core/String.hpp"
+#include "internal/util/Pimpl.hpp"
 #include "opentxs/util/Container.hpp"
-#include "opentxs/util/Pimpl.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs

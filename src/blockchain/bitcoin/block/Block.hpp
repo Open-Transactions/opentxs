@@ -26,8 +26,8 @@
 #include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/network/blockchain/bitcoin/CompactSize.hpp"
 #include "opentxs/util/Allocator.hpp"
-#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
+#include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -61,6 +61,7 @@ class Hash;
 }  // namespace blockchain
 
 class Log;
+class Writer;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -83,7 +84,7 @@ public:
         const Type chain,
         const HashType& lhs,
         const HashType& rhs,
-        AllocateOutput out) -> bool;
+        Writer&& out) -> bool;
     template <typename InputContainer, typename OutputContainer>
     static auto calculate_merkle_row(
         const api::Crypto& crypto,
@@ -125,7 +126,7 @@ public:
         alloc::Default alloc,
         alloc::Default monotonic) const noexcept -> Matches final;
     auto Print() const noexcept -> UnallocatedCString override;
-    auto Serialize(AllocateOutput bytes) const noexcept -> bool final;
+    auto Serialize(Writer&& bytes) const noexcept -> bool final;
     auto size() const noexcept -> std::size_t final { return index_.size(); }
 
     auto asBitcoin() noexcept -> bitcoin::block::Block& final { return *this; }

@@ -12,6 +12,7 @@
 #include "core/SecretPrivate.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
+#include "opentxs/util/Writer.hpp"
 #include "util/Allocator.hpp"
 
 namespace opentxs
@@ -209,12 +210,9 @@ auto Secret::swap(Secret& rhs) noexcept -> void
     std::swap(imp_->parent_, rhs.imp_->parent_);
 }
 
-auto Secret::WriteInto() noexcept -> AllocateOutput
-{
-    return imp_->WriteInto();
-}
+auto Secret::WriteInto() noexcept -> Writer { return imp_->WriteInto(); }
 
-auto Secret::WriteInto(Mode mode) noexcept -> AllocateOutput
+auto Secret::WriteInto(Mode mode) noexcept -> Writer
 {
     return imp_->WriteInto(mode);
 }

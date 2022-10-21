@@ -10,6 +10,7 @@
 #include "opentxs/Export.hpp"
 #include "opentxs/core/contract/Signable.hpp"
 #include "opentxs/otx/Types.hpp"
+#include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -38,6 +39,7 @@ class ServerReply;
 
 class ByteArray;
 class PasswordPrompt;
+class Writer;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -81,7 +83,7 @@ public:
     auto Push() const -> std::shared_ptr<const proto::OTXPush>;
     auto Recipient() const -> const identifier::Nym&;
     auto Serialize() const noexcept -> ByteArray;
-    auto Serialize(AllocateOutput destination) const -> bool;
+    auto Serialize(Writer&& destination) const -> bool;
     auto Serialize(proto::ServerReply& serialized) const -> bool;
     auto Server() const -> const identifier::Notary&;
     auto Success() const -> bool;

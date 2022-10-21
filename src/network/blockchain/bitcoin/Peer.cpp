@@ -86,6 +86,7 @@
 #include "opentxs/util/Iterator.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Types.hpp"
+#include "opentxs/util/Writer.hpp"
 #include "util/ScopeGuard.hpp"
 #include "util/Work.hpp"
 

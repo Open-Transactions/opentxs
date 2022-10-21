@@ -38,9 +38,9 @@
 #include "opentxs/blockchain/p2p/Types.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/crypto/Types.hpp"
-#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Time.hpp"
+#include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -79,6 +79,17 @@ class Subaccount;
 class Wallet;
 }  // namespace crypto
 }  // namespace blockchain
+
+namespace crypto
+{
+namespace asymmetric
+{
+namespace key
+{
+class EllipticCurve;
+}  // namespace key
+}  // namespace asymmetric
+}  // namespace crypto
 
 namespace identifier
 {
@@ -209,7 +220,8 @@ struct Subaccount : virtual public crypto::Subaccount {
     virtual auto PrivateKey(
         const Subchain type,
         const Bip32Index index,
-        const PasswordPrompt& reason) const noexcept -> ECKey = 0;
+        const PasswordPrompt& reason) const noexcept
+        -> opentxs::crypto::asymmetric::key::EllipticCurve = 0;
 
     virtual auto Confirm(
         const Subchain type,

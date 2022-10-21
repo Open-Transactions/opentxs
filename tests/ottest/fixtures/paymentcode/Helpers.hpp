@@ -27,6 +27,8 @@ class Client;
 
 class Session;
 }  // namespace api
+
+class Writer;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -36,17 +38,18 @@ struct PaymentCodeFixture {
     static constexpr auto account_ = ot::Bip32Index{0};
     static constexpr auto index_ = ot::Bip32Index{0};
 
-    auto blinding_key_public() -> const ot::crypto::key::EllipticCurve&;
+    auto blinding_key_public()
+        -> const ot::crypto::asymmetric::key::EllipticCurve&;
     auto blinding_key_secret(
         const ot::api::session::Client& api,
         const ot::blockchain::Type chain,
         const ot::PasswordPrompt& reason)
-        -> const ot::crypto::key::EllipticCurve&;
+        -> const ot::crypto::asymmetric::key::EllipticCurve&;
     auto blinding_key_secret(
         const ot::api::session::Client& api,
         const ot::UnallocatedCString& privateKey,
         const ot::PasswordPrompt& reason)
-        -> const ot::crypto::key::EllipticCurve&;
+        -> const ot::crypto::asymmetric::key::EllipticCurve&;
     auto payment_code_public(
         const ot::api::Session& api,
         const ot::UnallocatedCString& base58) -> const ot::PaymentCode&;
@@ -67,13 +70,15 @@ private:
     std::optional<ot::UnallocatedCString> seed_{};
     std::optional<ot::PaymentCode> pc_secret_{};
     std::optional<ot::PaymentCode> pc_public_{};
-    std::unique_ptr<const ot::crypto::key::EllipticCurve> blind_key_secret_{};
-    std::unique_ptr<const ot::crypto::key::EllipticCurve> blind_key_public_{};
+    std::optional<ot::crypto::asymmetric::key::EllipticCurve>
+        blind_key_secret_{};
+    std::optional<ot::crypto::asymmetric::key::EllipticCurve>
+        blind_key_public_{};
 
     auto bip44_path(
         const ot::api::session::Client& api,
         const ot::blockchain::Type chain,
-        ot::AllocateOutput destination) const -> bool;
+        ot::Writer&& destination) const -> bool;
 };
 
 class PC_Fixture_Base : virtual public ::testing::Test

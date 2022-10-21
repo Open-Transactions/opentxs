@@ -3,6 +3,8 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_include "opentxs/util/Writer.hpp"
+
 #pragma once
 
 #include <functional>
@@ -15,6 +17,7 @@
 #include "internal/core/contract/peer/PeerReply.hpp"
 #include "internal/core/contract/peer/PeerRequest.hpp"
 #include "internal/otx/consensus/Server.hpp"
+#include "internal/serialization/protobuf/Proto.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/OTX.hpp"
 #include "opentxs/api/session/Session.hpp"
@@ -28,9 +31,9 @@
 #include "opentxs/identity/wot/claim/Types.hpp"
 #include "opentxs/otx/Types.hpp"
 #include "opentxs/otx/client/Types.hpp"
-#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Time.hpp"
+#include "opentxs/util/Types.hpp"
 #include "util/Blank.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)

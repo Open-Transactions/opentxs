@@ -20,12 +20,14 @@
 #include "internal/api/crypto/Factory.hpp"
 #include "internal/crypto/Factory.hpp"
 #include "internal/crypto/Seed.hpp"
-#include "internal/crypto/key/Factory.hpp"
+#include "internal/crypto/asymmetric/Factory.hpp"
+#include "internal/crypto/asymmetric/Key.hpp"
 #include "internal/network/zeromq/Context.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/serialization/protobuf/Proto.tpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
+#include "internal/util/Pimpl.hpp"
 #include "opentxs/OT.hpp"
 #include "opentxs/api/Context.hpp"
 #include "opentxs/api/Factory.hpp"
@@ -52,19 +54,20 @@
 #include "opentxs/crypto/Seed.hpp"
 #include "opentxs/crypto/SeedStrength.hpp"  // IWYU pragma: keep
 #include "opentxs/crypto/SeedStyle.hpp"     // IWYU pragma: keep
-#include "opentxs/crypto/key/EllipticCurve.hpp"
-#include "opentxs/crypto/key/HD.hpp"
-#include "opentxs/crypto/key/Secp256k1.hpp"
-#include "opentxs/crypto/key/asymmetric/Algorithm.hpp"
-#include "opentxs/crypto/key/asymmetric/Role.hpp"
+#include "opentxs/crypto/asymmetric/Algorithm.hpp"
+#include "opentxs/crypto/asymmetric/Role.hpp"
+#include "opentxs/crypto/asymmetric/key/EllipticCurve.hpp"
+#include "opentxs/crypto/asymmetric/key/HD.hpp"
+#include "opentxs/crypto/asymmetric/key/Secp256k1.hpp"
 #include "opentxs/crypto/symmetric/Key.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
+#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
-#include "opentxs/util/Pimpl.hpp"
 #include "opentxs/util/Types.hpp"
 #include "opentxs/util/WorkType.hpp"
+#include "opentxs/util/Writer.hpp"
 #include "util/HDIndex.hpp"  // IWYU pragma: keep
 #include "util/Work.hpp"
 
@@ -133,22 +136,20 @@ auto Seed::AccountChildKey(
     const proto::HDPath& rootPath,
     const BIP44Chain internal,
     const Bip32Index index,
-    const PasswordPrompt& reason) const
-    -> std::unique_ptr<opentxs::crypto::key::HD>
+    const PasswordPrompt& reason) const -> opentxs::crypto::asymmetric::key::HD
 {
     auto parent = AccountKey(rootPath, internal, reason);
 
-    if (!parent) { return {}; }
+    if (false == parent.IsValid()) { return {}; }
 
-    return parent->ChildKey(index, reason);
+    return parent.ChildKey(index, reason);
 }
 
 auto Seed::AccountChildKey(
     const ReadView& view,
     const BIP44Chain internal,
     const Bip32Index index,
-    const PasswordPrompt& reason) const
-    -> std::unique_ptr<opentxs::crypto::key::HD>
+    const PasswordPrompt& reason) const -> opentxs::crypto::asymmetric::key::HD
 {
     return AccountChildKey(
         proto::Factory<proto::HDPath>(view), internal, index, reason);
@@ -157,8 +158,7 @@ auto Seed::AccountChildKey(
 auto Seed::AccountKey(
     const proto::HDPath& rootPath,
     const BIP44Chain internal,
-    const PasswordPrompt& reason) const
-    -> std::unique_ptr<opentxs::crypto::key::HD>
+    const PasswordPrompt& reason) const -> opentxs::crypto::asymmetric::key::HD
 {
     auto fingerprint{rootPath.root()};
     const auto change =
@@ -273,15 +273,14 @@ auto Seed::GetHDKey(
     const UnallocatedCString& fingerprint,
     const opentxs::crypto::EcdsaCurve& curve,
     const UnallocatedVector<Bip32Index>& path,
-    const PasswordPrompt& reason) const
-    -> std::unique_ptr<opentxs::crypto::key::HD>
+    const PasswordPrompt& reason) const -> opentxs::crypto::asymmetric::key::HD
 {
     return GetHDKey(
         fingerprint,
         curve,
         path,
-        opentxs::crypto::key::asymmetric::Role::Sign,
-        opentxs::crypto::key::EllipticCurve::DefaultVersion,
+        opentxs::crypto::asymmetric::Role::Sign,
+        opentxs::crypto::asymmetric::key::EllipticCurve::DefaultVersion(),
         reason);
 }
 
@@ -289,16 +288,15 @@ auto Seed::GetHDKey(
     const UnallocatedCString& fingerprint,
     const opentxs::crypto::EcdsaCurve& curve,
     const UnallocatedVector<Bip32Index>& path,
-    const opentxs::crypto::key::asymmetric::Role role,
-    const PasswordPrompt& reason) const
-    -> std::unique_ptr<opentxs::crypto::key::HD>
+    const opentxs::crypto::asymmetric::Role role,
+    const PasswordPrompt& reason) const -> opentxs::crypto::asymmetric::key::HD
 {
     return GetHDKey(
         fingerprint,
         curve,
         path,
         role,
-        opentxs::crypto::key::EllipticCurve::DefaultVersion,
+        opentxs::crypto::asymmetric::key::EllipticCurve::DefaultVersion(),
         reason);
 }
 
@@ -307,14 +305,13 @@ auto Seed::GetHDKey(
     const opentxs::crypto::EcdsaCurve& curve,
     const UnallocatedVector<Bip32Index>& path,
     const VersionNumber version,
-    const PasswordPrompt& reason) const
-    -> std::unique_ptr<opentxs::crypto::key::HD>
+    const PasswordPrompt& reason) const -> opentxs::crypto::asymmetric::key::HD
 {
     return GetHDKey(
         fingerprint,
         curve,
         path,
-        opentxs::crypto::key::asymmetric::Role::Sign,
+        opentxs::crypto::asymmetric::Role::Sign,
         version,
         reason);
 }
@@ -323,10 +320,9 @@ auto Seed::GetHDKey(
     const UnallocatedCString& fingerprint,
     const opentxs::crypto::EcdsaCurve& curve,
     const UnallocatedVector<Bip32Index>& path,
-    const opentxs::crypto::key::asymmetric::Role role,
+    const opentxs::crypto::asymmetric::Role role,
     const VersionNumber version,
-    const PasswordPrompt& reason) const
-    -> std::unique_ptr<opentxs::crypto::key::HD>
+    const PasswordPrompt& reason) const -> opentxs::crypto::asymmetric::key::HD
 {
     Bip32Index notUsed{0};
     auto seed = GetSeed(fingerprint, notUsed, reason);
@@ -371,15 +367,19 @@ auto Seed::GetPaymentCode(
     const UnallocatedCString& fingerprint,
     const Bip32Index nym,
     const std::uint8_t version,
-    const PasswordPrompt& reason) const
-    -> std::unique_ptr<opentxs::crypto::key::Secp256k1>
+    const PasswordPrompt& reason,
+    alloc::Default alloc) const -> opentxs::crypto::asymmetric::key::Secp256k1
 {
     Bip32Index notUsed{0};
     auto seed = GetSeed(fingerprint, notUsed, reason);
 
-    if (seed.empty()) { return {}; }
+    if (seed.empty()) {
+        LogError()(OT_PRETTY_CLASS())("invalid seed: ")(fingerprint).Flush();
 
-    auto pKey = asymmetric_.NewSecp256k1Key(
+        return {};
+    }
+
+    auto key = asymmetric_.NewSecp256k1Key(
         fingerprint,
         seed,
         {HDIndex{Bip43Purpose::PAYCODE, Bip32Child::HARDENED},
@@ -387,9 +387,11 @@ auto Seed::GetPaymentCode(
          HDIndex{nym, Bip32Child::HARDENED}},
         reason);
 
-    if (!pKey) { return pKey; }
+    if (false == key.IsValid()) {
+        LogError()(OT_PRETTY_CLASS())("key derivation failed").Flush();
 
-    const auto& key = *pKey;
+        return {};
+    }
 
     switch (version) {
         case 3: {
@@ -397,7 +399,8 @@ auto Seed::GetPaymentCode(
         case 1:
         case 2:
         default: {
-            return pKey;
+
+            return key;
         }
     }
 
@@ -413,11 +416,11 @@ auto Seed::GetPaymentCode(
     }();
     const auto path = [&] {
         auto out = proto::HDPath{};
-        key.Path(out);
+        key.Internal().Path(out);
 
         return out;
     }();
-    using Type = opentxs::crypto::key::asymmetric::Algorithm;
+    using Type = opentxs::crypto::asymmetric::Algorithm;
 
     return factory::Secp256k1Key(
         api,
@@ -429,27 +432,26 @@ auto Seed::GetPaymentCode(
         key.Parent(),
         key.Role(),
         key.Version(),
-        reason);
+        reason,
+        alloc);
 }
 
 auto Seed::GetStorageKey(
     const UnallocatedCString& fingerprint,
     const PasswordPrompt& reason) const -> opentxs::crypto::symmetric::Key
 {
-    auto pKey = GetHDKey(
+    auto key = GetHDKey(
         fingerprint,
         opentxs::crypto::EcdsaCurve::secp256k1,
         {HDIndex{Bip43Purpose::FS, Bip32Child::HARDENED},
          HDIndex{Bip32Child::ENCRYPT_KEY, Bip32Child::HARDENED}},
         reason);
 
-    if (false == bool(pKey)) {
+    if (false == key.IsValid()) {
         LogError()(OT_PRETTY_CLASS())("Failed to derive storage key.").Flush();
 
         return {};
     }
-
-    const auto& key = *pKey;
 
     return symmetric_.Key(
         opentxs::Context().Factory().SecretFromBytes(key.PrivateKey(reason)));
@@ -912,4 +914,6 @@ auto Seed::Words(const UnallocatedCString& seedID, const PasswordPrompt& reason)
         return {};
     }
 }
+
+Seed::~Seed() = default;
 }  // namespace opentxs::api::crypto::imp

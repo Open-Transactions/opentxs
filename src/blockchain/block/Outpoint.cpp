@@ -15,7 +15,7 @@
 #include <sstream>
 #include <stdexcept>
 
-#include "opentxs/util/Bytes.hpp"
+#include "internal/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 
 namespace be = boost::endian;

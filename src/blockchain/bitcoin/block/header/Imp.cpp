@@ -27,6 +27,7 @@
 #include "internal/blockchain/Params.hpp"
 #include "internal/blockchain/bitcoin/block/Factory.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
+#include "internal/util/Bytes.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/Time.hpp"  // IWYU pragma: keep
@@ -39,7 +40,9 @@
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/Types.hpp"
+#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Log.hpp"
+#include "opentxs/util/Writer.hpp"
 
 namespace opentxs::factory
 {
@@ -597,9 +600,8 @@ auto Header::Serialize(SerializedType& out) const noexcept -> bool
     return true;
 }
 
-auto Header::Serialize(
-    const AllocateOutput destination,
-    const bool bitcoinformat) const noexcept -> bool
+auto Header::Serialize(Writer&& destination, const bool bitcoinformat)
+    const noexcept -> bool
 {
     if (bitcoinformat) {
         const auto raw = BitcoinFormat{
@@ -610,27 +612,12 @@ auto Header::Serialize(
             nbits_,
             nonce_};
 
-        if (false == bool(destination)) {
-            LogError()(OT_PRETTY_CLASS())("Invalid output allocator").Flush();
-
-            return false;
-        }
-
-        const auto out = destination(sizeof(raw));
-
-        if (false == out.valid(sizeof(raw))) {
-            LogError()(OT_PRETTY_CLASS())("Failed to allocate output").Flush();
-
-            return false;
-        }
-
-        std::memcpy(out.data(), &raw, sizeof(raw));
-
-        return true;
+        return copy(
+            reader(std::addressof(raw), sizeof(raw)), std::move(destination));
     } else {
         auto proto = SerializedType{};
 
-        if (Serialize(proto)) { return write(proto, destination); }
+        if (Serialize(proto)) { return write(proto, std::move(destination)); }
 
         return false;
     }

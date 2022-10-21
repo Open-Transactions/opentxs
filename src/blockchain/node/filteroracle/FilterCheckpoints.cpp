@@ -8,6 +8,7 @@
 
 #include "opentxs/blockchain/BlockchainType.hpp"
 #include "opentxs/blockchain/bitcoin/cfilter/FilterType.hpp"
+#include "opentxs/util/Writer.hpp"
 
 namespace opentxs::blockchain::node::implementation
 {

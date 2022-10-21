@@ -9,9 +9,9 @@
 #include <Enums.pb.h>
 #include <robin_hood.h>
 
-#include "opentxs/crypto/key/asymmetric/Algorithm.hpp"
-#include "opentxs/crypto/key/asymmetric/Mode.hpp"
-#include "opentxs/crypto/key/asymmetric/Role.hpp"
+#include "opentxs/crypto/asymmetric/Algorithm.hpp"
+#include "opentxs/crypto/asymmetric/Mode.hpp"
+#include "opentxs/crypto/asymmetric/Role.hpp"
 #include "opentxs/crypto/symmetric/Algorithm.hpp"
 #include "opentxs/crypto/symmetric/Source.hpp"
 #include "util/Container.hpp"
@@ -76,10 +76,10 @@ auto mode_map() noexcept -> const ModeMap&
 auto role_map() noexcept -> const RoleMap&
 {
     static const auto map = RoleMap{
-        {crypto::key::asymmetric::Role::Error, proto::KEYROLE_ERROR},
-        {crypto::key::asymmetric::Role::Auth, proto::KEYROLE_AUTH},
-        {crypto::key::asymmetric::Role::Encrypt, proto::KEYROLE_ENCRYPT},
-        {crypto::key::asymmetric::Role::Sign, proto::KEYROLE_SIGN},
+        {crypto::asymmetric::Role::Error, proto::KEYROLE_ERROR},
+        {crypto::asymmetric::Role::Auth, proto::KEYROLE_AUTH},
+        {crypto::asymmetric::Role::Encrypt, proto::KEYROLE_ENCRYPT},
+        {crypto::asymmetric::Role::Sign, proto::KEYROLE_SIGN},
     };
 
     return map;
@@ -111,7 +111,7 @@ auto symmetricalgorithm_map() noexcept -> const SymmetricAlgorithmMap&
 
 namespace opentxs
 {
-auto translate(const crypto::key::asymmetric::Algorithm in) noexcept
+auto translate(const crypto::asymmetric::Algorithm in) noexcept
     -> proto::AsymmetricKeyType
 {
     try {
@@ -121,8 +121,7 @@ auto translate(const crypto::key::asymmetric::Algorithm in) noexcept
     }
 }
 
-auto translate(const crypto::key::asymmetric::Mode in) noexcept
-    -> proto::KeyMode
+auto translate(const crypto::asymmetric::Mode in) noexcept -> proto::KeyMode
 {
     try {
         return crypto::key::mode_map().at(in);
@@ -131,8 +130,7 @@ auto translate(const crypto::key::asymmetric::Mode in) noexcept
     }
 }
 
-auto translate(const crypto::key::asymmetric::Role in) noexcept
-    -> proto::KeyRole
+auto translate(const crypto::asymmetric::Role in) noexcept -> proto::KeyRole
 {
     try {
         return crypto::key::role_map().at(in);
@@ -162,10 +160,10 @@ auto translate(const crypto::symmetric::Algorithm in) noexcept
 }
 
 auto translate(const proto::AsymmetricKeyType in) noexcept
-    -> crypto::key::asymmetric::Algorithm
+    -> crypto::asymmetric::Algorithm
 {
     static const auto map = reverse_arbitrary_map<
-        crypto::key::asymmetric::Algorithm,
+        crypto::asymmetric::Algorithm,
         proto::AsymmetricKeyType,
         crypto::key::AsymmetricAlgorithmReverseMap>(
         crypto::key::asymmetricalgorithm_map());
@@ -173,37 +171,35 @@ auto translate(const proto::AsymmetricKeyType in) noexcept
     try {
         return map.at(in);
     } catch (...) {
-        return crypto::key::asymmetric::Algorithm::Error;
+        return crypto::asymmetric::Algorithm::Error;
     }
 }
 
-auto translate(const proto::KeyMode in) noexcept
-    -> crypto::key::asymmetric::Mode
+auto translate(const proto::KeyMode in) noexcept -> crypto::asymmetric::Mode
 {
     static const auto map = reverse_arbitrary_map<
-        crypto::key::asymmetric::Mode,
+        crypto::asymmetric::Mode,
         proto::KeyMode,
         crypto::key::ModeReverseMap>(crypto::key::mode_map());
 
     try {
         return map.at(in);
     } catch (...) {
-        return crypto::key::asymmetric::Mode::Error;
+        return crypto::asymmetric::Mode::Error;
     }
 }
 
-auto translate(const proto::KeyRole in) noexcept
-    -> crypto::key::asymmetric::Role
+auto translate(const proto::KeyRole in) noexcept -> crypto::asymmetric::Role
 {
     static const auto map = reverse_arbitrary_map<
-        crypto::key::asymmetric::Role,
+        crypto::asymmetric::Role,
         proto::KeyRole,
         crypto::key::RoleReverseMap>(crypto::key::role_map());
 
     try {
         return map.at(in);
     } catch (...) {
-        return crypto::key::asymmetric::Role::Error;
+        return crypto::asymmetric::Role::Error;
     }
 }
 

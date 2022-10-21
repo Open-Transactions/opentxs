@@ -12,8 +12,8 @@
 
 #include "opentxs/Export.hpp"
 #include "opentxs/api/Periodic.hpp"
-#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
+#include "opentxs/util/Types.hpp"
 
 class QObject;
 
@@ -67,6 +67,7 @@ class Base;
 }  // namespace rpc
 
 class Options;
+class Writer;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -117,8 +118,8 @@ public:
     /// Used for sending RPC requests. Returns RPC response.
     virtual auto RPC(const rpc::request::Base& command) const noexcept
         -> std::unique_ptr<rpc::response::Base> = 0;
-    virtual auto RPC(const ReadView command, const AllocateOutput response)
-        const noexcept -> bool = 0;
+    virtual auto RPC(const ReadView command, Writer&& response) const noexcept
+        -> bool = 0;
     /** Start up a new client session
      *
      *  If the specified instance exists, it will be returned.

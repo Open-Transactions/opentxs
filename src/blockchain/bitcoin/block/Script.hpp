@@ -21,8 +21,8 @@
 #include "opentxs/blockchain/bitcoin/block/Types.hpp"
 #include "opentxs/blockchain/bitcoin/cfilter/FilterType.hpp"
 #include "opentxs/core/ByteArray.hpp"
-#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
+#include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -35,6 +35,7 @@ class Session;
 
 class ByteArray;
 class PaymentCode;
+class Writer;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -56,9 +57,8 @@ public:
         return elements_.at(position);
     }
     auto begin() const noexcept -> const_iterator final { return cbegin(); }
-    auto CalculateHash160(
-        const api::Crypto& crypto,
-        const AllocateOutput output) const noexcept -> bool final;
+    auto CalculateHash160(const api::Crypto& crypto, Writer&& output)
+        const noexcept -> bool final;
     auto CalculateSize() const noexcept -> std::size_t final;
     auto cbegin() const noexcept -> const_iterator final { return {this, 0}; }
     auto cend() const noexcept -> const_iterator final
@@ -89,8 +89,7 @@ public:
         return std::make_unique<Script>(*this);
     }
     auto ScriptHash() const noexcept -> std::optional<ReadView> final;
-    auto Serialize(const AllocateOutput destination) const noexcept
-        -> bool final;
+    auto Serialize(Writer&& destination) const noexcept -> bool final;
     auto SigningSubscript(const blockchain::Type chain) const noexcept
         -> std::unique_ptr<internal::Script> final;
     auto size() const noexcept -> std::size_t final { return elements_.size(); }

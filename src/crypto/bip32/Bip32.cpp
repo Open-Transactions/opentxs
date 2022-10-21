@@ -17,6 +17,7 @@
 #include "crypto/HDNode.hpp"
 #include "crypto/bip32/Imp.hpp"
 #include "internal/crypto/Factory.hpp"
+#include "opentxs/core/Data.hpp"
 #include "opentxs/core/Secret.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/crypto/Bip32Child.hpp"
@@ -86,7 +87,7 @@ auto Bip32::DeriveKey(
 }
 
 auto Bip32::DerivePrivateKey(
-    const key::HD& parent,
+    const asymmetric::key::HD& parent,
     const Path& pathAppend,
     const PasswordPrompt& reason) const noexcept(false) -> Key
 {
@@ -94,7 +95,7 @@ auto Bip32::DerivePrivateKey(
 }
 
 auto Bip32::DerivePublicKey(
-    const key::HD& parent,
+    const asymmetric::key::HD& parent,
     const Path& pathAppend,
     const PasswordPrompt& reason) const noexcept(false) -> Key
 {
@@ -102,7 +103,7 @@ auto Bip32::DerivePublicKey(
 }
 
 auto Bip32::DeserializePrivate(
-    const UnallocatedCString& serialized,
+    std::string_view serialized,
     Bip32Network& network,
     Bip32Depth& depth,
     Bip32Fingerprint& parent,
@@ -115,7 +116,7 @@ auto Bip32::DeserializePrivate(
 }
 
 auto Bip32::DeserializePublic(
-    const UnallocatedCString& serialized,
+    std::string_view serialized,
     Bip32Network& network,
     Bip32Depth& depth,
     Bip32Fingerprint& parent,
@@ -127,6 +128,11 @@ auto Bip32::DeserializePublic(
         serialized, network, depth, parent, index, chainCode, key);
 }
 
+auto Bip32::Internal() const noexcept -> const internal::Bip32&
+{
+    return *imp_;
+}
+
 auto Bip32::Internal() noexcept -> internal::Bip32& { return *imp_; }
 
 auto Bip32::SeedID(const ReadView entropy) const -> identifier::Generic
@@ -135,26 +141,29 @@ auto Bip32::SeedID(const ReadView entropy) const -> identifier::Generic
 }
 
 auto Bip32::SerializePrivate(
-    const Bip32Network network,
-    const Bip32Depth depth,
-    const Bip32Fingerprint parent,
-    const Bip32Index index,
-    const Data& chainCode,
-    const Secret& key) const -> UnallocatedCString
+    Bip32Network network,
+    Bip32Depth depth,
+    Bip32Fingerprint parent,
+    Bip32Index index,
+    ReadView chainCode,
+    ReadView key,
+    Writer&& out) const noexcept -> bool
 {
     return imp_->SerializePrivate(
-        network, depth, parent, index, chainCode, key);
+        network, depth, parent, index, chainCode, key, std::move(out));
 }
 
 auto Bip32::SerializePublic(
-    const Bip32Network network,
-    const Bip32Depth depth,
-    const Bip32Fingerprint parent,
-    const Bip32Index index,
-    const Data& chainCode,
-    const Data& key) const -> UnallocatedCString
+    Bip32Network network,
+    Bip32Depth depth,
+    Bip32Fingerprint parent,
+    Bip32Index index,
+    ReadView chainCode,
+    ReadView key,
+    Writer&& out) const noexcept -> bool
 {
-    return imp_->SerializePublic(network, depth, parent, index, chainCode, key);
+    return imp_->SerializePublic(
+        network, depth, parent, index, chainCode, key, std::move(out));
 }
 
 Bip32::~Bip32() = default;

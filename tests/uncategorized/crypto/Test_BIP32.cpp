@@ -62,17 +62,20 @@ TEST_F(Test_BIP32, cases)
         auto id{seedID};
 
         for (const auto& child : item.children_) {
-            const auto pKey = api_.Crypto().Seed().GetHDKey(
+            const auto key = api_.Crypto().Seed().GetHDKey(
                 id,
                 ot::crypto::EcdsaCurve::secp256k1,
                 make_path(child.path_),
                 reason_);
-            const auto& key = *pKey;
+            auto xpub = api_.Factory().Secret(0);
+            auto xprv = api_.Factory().Secret(0);
 
-            ASSERT_TRUE(pKey);
+            ASSERT_TRUE(key.IsValid());
             EXPECT_EQ(seedID, id);
-            EXPECT_EQ(child.xpub_, key.Xpub(reason_));
-            EXPECT_EQ(child.xprv_, key.Xprv(reason_));
+            EXPECT_TRUE(key.Xpub(reason_, xpub.WriteInto()));
+            EXPECT_TRUE(key.Xprv(reason_, xprv.WriteInto()));
+            EXPECT_EQ(child.xpub_, xpub.Bytes());
+            EXPECT_EQ(child.xprv_, xprv.Bytes());
         }
     }
 }
@@ -92,17 +95,20 @@ TEST_F(Test_BIP32, stress)
 
     for (auto i{0}; i < 1000; ++i) {
         auto id{seedID};
-        const auto pKey = api_.Crypto().Seed().GetHDKey(
+        const auto key = api_.Crypto().Seed().GetHDKey(
             id,
             ot::crypto::EcdsaCurve::secp256k1,
             make_path(child.path_),
             reason_);
-        const auto& key = *pKey;
+        auto xpub = api_.Factory().Secret(0);
+        auto xprv = api_.Factory().Secret(0);
 
-        ASSERT_TRUE(pKey);
+        ASSERT_TRUE(key.IsValid());
         EXPECT_EQ(seedID, id);
-        EXPECT_EQ(child.xpub_, key.Xpub(reason_));
-        EXPECT_EQ(child.xprv_, key.Xprv(reason_));
+        EXPECT_TRUE(key.Xpub(reason_, xpub.WriteInto()));
+        EXPECT_TRUE(key.Xprv(reason_, xprv.WriteInto()));
+        EXPECT_EQ(child.xpub_, xpub.Bytes());
+        EXPECT_EQ(child.xprv_, xprv.Bytes());
     }
 }
 }  // namespace ottest

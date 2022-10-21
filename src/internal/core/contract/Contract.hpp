@@ -6,6 +6,7 @@
 // IWYU pragma: no_include "opentxs/core/AddressType.hpp"
 // IWYU pragma: no_include "opentxs/core/contract/ProtocolVersion.hpp"
 // IWYU pragma: no_include "opentxs/core/contract/UnitType.hpp"
+// IWYU pragma: no_include "opentxs/util/Writer.hpp"
 
 #pragma once
 
@@ -15,6 +16,7 @@
 #include <ServerContract.pb.h>
 #include <UnitDefinition.pb.h>
 #include <cstdint>
+#include <utility>
 
 #include "internal/core/contract/ServerContract.hpp"
 #include "internal/core/contract/Unit.hpp"
@@ -35,6 +37,7 @@
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/core/ByteArray.hpp"
+#include "opentxs/core/Data.hpp"
 #include "opentxs/core/Secret.hpp"
 #include "opentxs/core/Types.hpp"
 #include "opentxs/core/contract/Signable.hpp"
@@ -46,7 +49,6 @@
 #include "opentxs/core/identifier/UnitDefinition.hpp"
 #include "opentxs/identity/Types.hpp"
 #include "opentxs/identity/wot/claim/Types.hpp"
-#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
 
@@ -87,6 +89,7 @@ class AccountVisitor;
 class Data;
 class PasswordPrompt;
 class String;
+class Writer;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -149,10 +152,10 @@ struct Unit final : virtual public opentxs::contract::Unit, public Signable {
         return {};
     }
     using Signable::Serialize;
-    auto Serialize(AllocateOutput destination, bool includeNym = false) const
+    auto Serialize(Writer&& destination, bool includeNym = false) const
         -> bool final
     {
-        return write(proto::UnitDefinition{}, destination);
+        return write(proto::UnitDefinition{}, std::move(destination));
     }
     auto Serialize(proto::UnitDefinition& output, bool includeNym = false) const
         -> bool final;
@@ -196,10 +199,10 @@ struct Server final : virtual public opentxs::contract::Server,
     }
     auto EffectiveName() const -> UnallocatedCString final { return {}; }
     using Signable::Serialize;
-    auto Serialize(AllocateOutput destination, bool includeNym = false) const
+    auto Serialize(Writer&& destination, bool includeNym = false) const
         -> bool final
     {
-        return write(proto::ServerContract{}, destination);
+        return write(proto::ServerContract{}, std::move(destination));
     }
     auto Serialize(proto::ServerContract& output, bool includeNym = false) const
         -> bool final;

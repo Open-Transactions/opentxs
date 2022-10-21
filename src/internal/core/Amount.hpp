@@ -12,12 +12,12 @@
 #include <limits>
 
 #include "opentxs/core/Amount.hpp"
-#include "opentxs/util/Bytes.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
 class Amount;
+class Writer;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -56,8 +56,7 @@ public:
 
     virtual auto ExtractInt64() const noexcept(false) -> std::int64_t = 0;
     virtual auto ExtractUInt64() const noexcept(false) -> std::uint64_t = 0;
-    virtual auto SerializeBitcoin(const AllocateOutput dest) const noexcept
-        -> bool = 0;
+    virtual auto SerializeBitcoin(Writer&& dest) const noexcept -> bool = 0;
     virtual auto ToFloat() const noexcept -> amount::Float = 0;
 
     Amount() noexcept

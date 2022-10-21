@@ -8,7 +8,6 @@
 #include "opentxs/Export.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
-#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -39,6 +38,8 @@ class Position;
 
 class Work;
 }  // namespace blockchain
+
+class Writer;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -62,9 +63,8 @@ public:
     auto ParentWork() const noexcept -> blockchain::Work;
     auto Position() const noexcept -> block::Position;
     auto Print() const noexcept -> UnallocatedCString;
-    auto Serialize(
-        const AllocateOutput destination,
-        const bool bitcoinformat = true) const noexcept -> bool;
+    auto Serialize(Writer&& destination, const bool bitcoinformat = true)
+        const noexcept -> bool;
     auto Target() const noexcept -> block::NumericHash;
     auto Type() const noexcept -> blockchain::Type;
     auto Valid() const noexcept -> bool;

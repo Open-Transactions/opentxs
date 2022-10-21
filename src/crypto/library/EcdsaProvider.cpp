@@ -6,10 +6,23 @@
 #include "0_stdafx.hpp"                      // IWYU pragma: associated
 #include "crypto/library/EcdsaProvider.hpp"  // IWYU pragma: associated
 
+#include "opentxs/util/Writer.hpp"
+
 namespace opentxs::crypto::implementation
 {
 EcdsaProvider::EcdsaProvider(const api::Crypto& crypto)
     : crypto_(crypto)
 {
 }
+
+auto EcdsaProvider::SignDER(
+    ReadView plaintext,
+    ReadView key,
+    crypto::HashType,
+    Writer&&) const noexcept -> bool
+{
+    return false;
+}
+
+EcdsaProvider::~EcdsaProvider() = default;
 }  // namespace opentxs::crypto::implementation

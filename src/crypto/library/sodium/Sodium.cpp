@@ -16,7 +16,6 @@ extern "C" {
 #include <argon2.h>
 #include <array>
 #include <cstring>
-#include <functional>
 #include <memory>
 #include <stdexcept>
 #include <string_view>
@@ -32,8 +31,11 @@ extern "C" {
 #include "opentxs/crypto/HashType.hpp"
 #include "opentxs/crypto/symmetric/Algorithm.hpp"
 #include "opentxs/crypto/symmetric/Source.hpp"
+#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
+#include "opentxs/util/WriteBuffer.hpp"
+#include "opentxs/util/Writer.hpp"
 
 namespace opentxs::factory
 {
@@ -294,17 +296,13 @@ auto Sodium::Derive(
 auto Sodium::Digest(
     const crypto::HashType hashType,
     const ReadView data,
-    const AllocateOutput output) const noexcept -> bool
+    Writer&& output) const noexcept -> bool
 {
     try {
-        if (false == output.operator bool()) {
-            throw std::runtime_error{"invalid output"};
-        }
-
         const auto size = HashSize(hashType);
-        auto buf = output(size);
+        auto buf = output.Reserve(size);
 
-        if (false == buf.valid(size)) {
+        if (false == buf.IsValid(size)) {
             throw std::runtime_error{"failed to allocate space for output"};
         }
 
@@ -433,14 +431,8 @@ auto Sodium::Generate(
     const std::uint32_t r,
     const std::uint32_t p,
     const std::size_t bytes,
-    AllocateOutput writer) const noexcept -> bool
+    Writer&& writer) const noexcept -> bool
 {
-    if (false == bool(writer)) {
-        LogError()(OT_PRETTY_CLASS())("Invalid writer").Flush();
-
-        return false;
-    }
-
     if (bytes < crypto_pwhash_scryptsalsa208sha256_BYTES_MIN) {
         LogError()(OT_PRETTY_CLASS())("Too few bytes requested: ")(
             bytes)(" vs "
@@ -461,9 +453,9 @@ auto Sodium::Generate(
         return false;
     }
 
-    auto output = writer(bytes);
+    auto output = writer.Reserve(bytes);
 
-    if (false == output.valid(bytes)) {
+    if (false == output.IsValid(bytes)) {
         LogError()(OT_PRETTY_CLASS())("Failed to allocated requested ")(
             bytes)(" bytes")
             .Flush();
@@ -487,21 +479,17 @@ auto Sodium::HMAC(
     const crypto::HashType hashType,
     const ReadView key,
     const ReadView data,
-    const AllocateOutput output) const noexcept -> bool
+    Writer&& output) const noexcept -> bool
 {
     try {
         if (false == valid(data)) { throw std::runtime_error{"invalid input"}; }
 
         if (false == valid(key)) { throw std::runtime_error{"invalid key"}; }
 
-        if (false == output.operator bool()) {
-            throw std::runtime_error{"invalid output"};
-        }
-
         const auto size = HashSize(hashType);
-        auto buf = output(size);
+        auto buf = output.Reserve(size);
 
-        if (false == buf.valid(size)) {
+        if (false == buf.IsValid(size)) {
             throw std::runtime_error{"failed to allocate space for output"};
         }
 
@@ -687,7 +675,7 @@ auto Sodium::SaltSize(const crypto::symmetric::Source type) const -> std::size_t
     return 0;
 }
 
-auto Sodium::sha1(const ReadView data, WritableView& output) const -> bool
+auto Sodium::sha1(const ReadView data, WriteBuffer& output) const -> bool
 {
     try {
         auto hex = std::array<char, SHA1_HEX_SIZE>{};

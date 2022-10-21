@@ -36,10 +36,13 @@
 #include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/PaymentCode.hpp"
-#include "opentxs/crypto/key/EllipticCurve.hpp"
+#include "opentxs/crypto/asymmetric/key/EllipticCurve.hpp"
+#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Iterator.hpp"
 #include "opentxs/util/Log.hpp"
+#include "opentxs/util/WriteBuffer.hpp"
+#include "opentxs/util/Writer.hpp"
 
 namespace be = boost::endian;
 
@@ -69,7 +72,8 @@ auto BitcoinScriptP2MS(
     const blockchain::Type chain,
     const std::uint8_t M,
     const std::uint8_t N,
-    const UnallocatedVector<const opentxs::crypto::key::EllipticCurve*>&
+    const UnallocatedVector<
+        const opentxs::crypto::asymmetric::key::EllipticCurve*>&
         publicKeys) noexcept
     -> std::unique_ptr<blockchain::bitcoin::block::Script>
 {
@@ -111,7 +115,7 @@ auto BitcoinScriptP2MS(
 
 auto BitcoinScriptP2PK(
     const blockchain::Type chain,
-    const opentxs::crypto::key::EllipticCurve& key) noexcept
+    const opentxs::crypto::asymmetric::key::EllipticCurve& key) noexcept
     -> std::unique_ptr<blockchain::bitcoin::block::Script>
 {
     namespace bb = blockchain::bitcoin::block;
@@ -127,7 +131,7 @@ auto BitcoinScriptP2PK(
 auto BitcoinScriptP2PKH(
     const api::Crypto& crypto,
     const blockchain::Type chain,
-    const opentxs::crypto::key::EllipticCurve& key) noexcept
+    const opentxs::crypto::asymmetric::key::EllipticCurve& key) noexcept
     -> std::unique_ptr<blockchain::bitcoin::block::Script>
 {
     namespace b = opentxs::blockchain;
@@ -194,7 +198,7 @@ auto BitcoinScriptP2SH(
 auto BitcoinScriptP2WPKH(
     const api::Crypto& crypto,
     const blockchain::Type chain,
-    const opentxs::crypto::key::EllipticCurve& key) noexcept
+    const opentxs::crypto::asymmetric::key::EllipticCurve& key) noexcept
     -> std::unique_ptr<blockchain::bitcoin::block::Script>
 {
     namespace b = opentxs::blockchain;
@@ -498,9 +502,8 @@ auto Script::bytes(const ScriptElements& script) noexcept -> std::size_t
         });
 }
 
-auto Script::CalculateHash160(
-    const api::Crypto& crypto,
-    const AllocateOutput output) const noexcept -> bool
+auto Script::CalculateHash160(const api::Crypto& crypto, Writer&& output)
+    const noexcept -> bool
 {
     auto preimage = Space{};
 
@@ -510,7 +513,8 @@ auto Script::CalculateHash160(
         return false;
     }
 
-    return blockchain::ScriptHash(crypto, chain_, reader(preimage), output);
+    return blockchain::ScriptHash(
+        crypto, chain_, reader(preimage), std::move(output));
 }
 
 auto Script::CalculateSize() const noexcept -> std::size_t
@@ -1485,28 +1489,22 @@ auto Script::ScriptHash() const noexcept -> std::optional<ReadView>
     }
 }
 
-auto Script::Serialize(const AllocateOutput destination) const noexcept -> bool
+auto Script::Serialize(Writer&& destination) const noexcept -> bool
 {
-    if (!destination) {
-        LogError()(OT_PRETTY_CLASS())("Invalid output allocator").Flush();
-
-        return false;
-    }
-
     const auto size = CalculateSize();
 
-    if (0 == size) { return true; }
+    if (0_uz == size) { return true; }
 
-    auto output = destination(size);
+    auto output = destination.Reserve(size);
 
-    if (false == output.valid(size)) {
+    if (false == output.IsValid(size)) {
         LogError()(OT_PRETTY_CLASS())("Failed to allocate output bytes")
             .Flush();
 
         return false;
     }
 
-    auto* it = static_cast<std::byte*>(output.data());
+    auto* it = output.as<std::byte>();
 
     for (const auto& element : elements_) {
         const auto& [opcode, invalid, bytes, data] = element;

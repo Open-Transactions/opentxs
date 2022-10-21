@@ -3,6 +3,9 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_include "opentxs/crypto/asymmetric/Algorithm.hpp"
+// IWYU pragma: no_include "opentxs/crypto/asymmetric/Key.hpp"
+
 #pragma once
 
 #include <Ciphertext.pb.h>
@@ -14,12 +17,11 @@
 
 #include "internal/crypto/Envelope.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
-#include "opentxs/crypto/key/Asymmetric.hpp"
-#include "opentxs/crypto/key/asymmetric/Algorithm.hpp"
+#include "opentxs/crypto/asymmetric/Types.hpp"
 #include "opentxs/identity/Nym.hpp"
-#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
+#include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -55,6 +57,7 @@ class Ciphertext;
 
 class Armored;
 class PasswordPrompt;
+class Writer;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -66,9 +69,9 @@ public:
     auto Armored(opentxs::Armored& ciphertext) const noexcept -> bool final;
     auto Open(
         const identity::Nym& recipient,
-        AllocateOutput&& plaintext,
+        Writer&& plaintext,
         const PasswordPrompt& reason) const noexcept -> bool final;
-    auto Serialize(AllocateOutput destination) const noexcept -> bool final;
+    auto Serialize(Writer&& destination) const noexcept -> bool final;
     auto Serialize(SerializedType& serialized) const noexcept -> bool final;
 
     auto Seal(
@@ -92,29 +95,26 @@ public:
     auto operator=(const Envelope&) -> Envelope& = delete;
     auto operator=(Envelope&&) -> Envelope& = delete;
 
-    ~Envelope() final = default;
+    ~Envelope() final;
 
 private:
     friend OTEnvelope;
 
     using Ciphertext = std::unique_ptr<proto::Ciphertext>;
     using DHMap = std::map<
-        crypto::key::asymmetric::Algorithm,
-        UnallocatedVector<OTAsymmetricKey>>;
+        crypto::asymmetric::Algorithm,
+        UnallocatedVector<crypto::asymmetric::Key>>;
     using Nyms = UnallocatedVector<const identity::Nym*>;
     using Tag = std::uint32_t;
     using SessionKey =
-        std::tuple<Tag, crypto::key::asymmetric::Algorithm, symmetric::Key>;
+        std::tuple<Tag, crypto::asymmetric::Algorithm, symmetric::Key>;
     using SessionKeys = UnallocatedVector<SessionKey>;
-    using SupportedKeys = UnallocatedVector<crypto::key::asymmetric::Algorithm>;
+    using SupportedKeys = UnallocatedVector<crypto::asymmetric::Algorithm>;
     using Weight = unsigned int;
-    using WeightMap =
-        UnallocatedMap<crypto::key::asymmetric::Algorithm, Weight>;
+    using WeightMap = UnallocatedMap<crypto::asymmetric::Algorithm, Weight>;
     using Solution = UnallocatedMap<
         identifier::Nym,
-        UnallocatedMap<
-            identifier::Generic,
-            crypto::key::asymmetric::Algorithm>>;
+        UnallocatedMap<identifier::Generic, crypto::asymmetric::Algorithm>>;
     using Solutions = UnallocatedMap<Weight, SupportedKeys>;
     using Requirements = UnallocatedVector<identity::Nym::NymKeys>;
 
@@ -168,9 +168,9 @@ private:
         const symmetric::Key& masterKey,
         const PasswordPrompt& reason) noexcept -> bool;
     auto get_dh_key(
-        const crypto::key::asymmetric::Algorithm type,
+        const crypto::asymmetric::Algorithm type,
         const identity::Authority& nym,
-        const PasswordPrompt& reason) noexcept -> const key::Asymmetric&;
+        const PasswordPrompt& reason) noexcept -> const asymmetric::Key&;
     auto seal(
         const Nyms recipients,
         const ReadView plaintext,

@@ -6,7 +6,7 @@
 #pragma once
 
 #include "internal/network/zeromq/zap/ZAP.hpp"
-#include "opentxs/util/Bytes.hpp"
+#include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs

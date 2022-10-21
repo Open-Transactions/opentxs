@@ -9,7 +9,6 @@
 #include <string_view>
 
 #include "opentxs/Export.hpp"
-#include "opentxs/util/Bytes.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -21,6 +20,8 @@ namespace internal
 class Settings;
 }  // namespace internal
 }  // namespace api
+
+class Writer;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -41,7 +42,7 @@ public:
     [[nodiscard]] virtual auto ReadString(
         const std::string_view section,
         const std::string_view key,
-        const AllocateOutput out) const noexcept -> bool = 0;
+        Writer&& out) const noexcept -> bool = 0;
     [[nodiscard]] virtual auto Save() const noexcept -> bool = 0;
     [[nodiscard]] virtual auto WriteBool(
         const std::string_view section,

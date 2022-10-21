@@ -15,6 +15,7 @@
 #include "internal/crypto/Envelope.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
+#include "internal/util/Pimpl.hpp"
 
 namespace ot = opentxs;
 
@@ -161,12 +162,12 @@ public:
     }
 };
 
-const bool Test_Envelope::have_rsa_{ot::api::crypto::HaveSupport(
-    ot::crypto::key::asymmetric::Algorithm::Legacy)};
-const bool Test_Envelope::have_secp256k1_{ot::api::crypto::HaveSupport(
-    ot::crypto::key::asymmetric::Algorithm::Secp256k1)};
-const bool Test_Envelope::have_ed25519_{ot::api::crypto::HaveSupport(
-    ot::crypto::key::asymmetric::Algorithm::ED25519)};
+const bool Test_Envelope::have_rsa_{
+    ot::api::crypto::HaveSupport(ot::crypto::asymmetric::Algorithm::Legacy)};
+const bool Test_Envelope::have_secp256k1_{
+    ot::api::crypto::HaveSupport(ot::crypto::asymmetric::Algorithm::Secp256k1)};
+const bool Test_Envelope::have_ed25519_{
+    ot::api::crypto::HaveSupport(ot::crypto::asymmetric::Algorithm::ED25519)};
 Test_Envelope::Nyms Test_Envelope::nyms_{};
 const Test_Envelope::Expected Test_Envelope::expected_{
     {false, {false, false, false}},

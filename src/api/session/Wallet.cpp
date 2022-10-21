@@ -72,6 +72,7 @@
 #include "internal/serialization/protobuf/verify/UnitDefinition.hpp"
 #include "internal/util/Exclusive.hpp"
 #include "internal/util/LogMacros.hpp"
+#include "internal/util/Pimpl.hpp"
 #include "internal/util/Shared.hpp"
 #include "internal/util/SharedPimpl.hpp"
 #include "opentxs/api/network/Network.hpp"
@@ -111,10 +112,11 @@
 #include "opentxs/network/zeromq/message/Message.tpp"
 #include "opentxs/otx/ConsensusType.hpp"
 #include "opentxs/otx/blind/Purse.hpp"
+#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/NymEditor.hpp"
-#include "opentxs/util/Pimpl.hpp"
 #include "opentxs/util/WorkType.hpp"
+#include "opentxs/util/Writer.hpp"
 #include "util/Exclusive.tpp"
 
 template class opentxs::Exclusive<opentxs::Account>;
@@ -1488,12 +1490,12 @@ auto Wallet::PeerReply(
     const identifier::Nym& nym,
     const identifier::Generic& reply,
     const otx::client::StorageBox& box,
-    AllocateOutput destination) const -> bool
+    Writer&& destination) const -> bool
 {
     auto peerreply = proto::PeerReply{};
     if (false == PeerReply(nym, reply, box, peerreply)) { return false; }
 
-    return write(peerreply, destination);
+    return write(peerreply, std::move(destination));
 }
 
 auto Wallet::PeerReplyComplete(
@@ -1802,14 +1804,14 @@ auto Wallet::PeerRequest(
     const identifier::Generic& request,
     const otx::client::StorageBox& box,
     std::time_t& time,
-    AllocateOutput destination) const -> bool
+    Writer&& destination) const -> bool
 {
     auto peerrequest = proto::PeerRequest{};
     if (false == PeerRequest(nym, request, box, time, peerrequest)) {
         return false;
     }
 
-    return write(peerrequest, destination);
+    return write(peerrequest, std::move(destination));
 }
 
 auto Wallet::PeerRequestComplete(

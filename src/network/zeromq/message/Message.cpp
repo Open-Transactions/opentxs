@@ -7,8 +7,10 @@
 #include "network/zeromq/message/Message.hpp"  // IWYU pragma: associated
 
 #include <algorithm>
+#include <functional>
 #include <memory>
 #include <numeric>
+#include <span>
 #include <utility>
 
 #include "internal/network/zeromq/message/Factory.hpp"
@@ -22,6 +24,8 @@
 #include "opentxs/network/zeromq/message/FrameSection.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/util/Container.hpp"
+#include "opentxs/util/WriteBuffer.hpp"
+#include "opentxs/util/Writer.hpp"
 
 namespace opentxs::network::zeromq
 {
@@ -163,13 +167,14 @@ auto Message::Imp::AddFrame(const ProtobufType& input) noexcept -> Frame&
     return frames_.emplace_back(factory::ZMQFrame(input));
 }
 
-auto Message::Imp::AppendBytes() noexcept -> AllocateOutput
+auto Message::Imp::AppendBytes() noexcept -> Writer
 {
-    return [this](const std::size_t size) -> WritableView {
+    return {[this](const std::size_t size) -> WriteBuffer {
         auto& frame = frames_.emplace_back(factory::ZMQFrame(size));
+        auto* out = static_cast<std::byte*>(const_cast<void*>(frame.data()));
 
-        return {const_cast<void*>(frame.data()), frame.size()};
-    };
+        return std::span<std::byte>{out, frame.size()};
+    }};
 }
 
 auto Message::Imp::at(const std::size_t index) const noexcept(false)
@@ -480,10 +485,7 @@ auto Message::AddFrame(const void* input, const std::size_t size) noexcept
     return imp_->AddFrame(input, size);
 }
 
-auto Message::AppendBytes() noexcept -> AllocateOutput
-{
-    return imp_->AppendBytes();
-}
+auto Message::AppendBytes() noexcept -> Writer { return imp_->AppendBytes(); }
 
 auto Message::at(const std::size_t index) const noexcept(false) -> const Frame&
 {

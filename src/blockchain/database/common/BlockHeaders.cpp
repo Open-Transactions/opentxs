@@ -8,8 +8,8 @@
 
 #include <BlockchainBlockHeader.pb.h>
 #include <cstddef>
+#include <memory>
 #include <stdexcept>
-#include <string_view>
 #include <tuple>
 #include <type_traits>
 #include <utility>
@@ -29,6 +29,8 @@
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
+#include "opentxs/util/WriteBuffer.hpp"
+#include "opentxs/util/Writer.hpp"
 
 namespace opentxs::blockchain::database::common
 {
@@ -144,7 +146,7 @@ auto BlockHeader::Store(const UpdatedHeader& headers) const noexcept -> bool
             auto& [index, view] = writeData;
             const auto sIndex = index.Serialize();
 
-            if (false == view.valid(bytes)) {
+            if (false == view.IsValid(bytes)) {
                 throw std::runtime_error{
                     "Failed to get write position for block header"};
             }

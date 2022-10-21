@@ -10,7 +10,6 @@
 
 #include "internal/util/storage/drivers/Drivers.hpp"
 #include "opentxs/crypto/symmetric/Key.hpp"
-#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/storage/Driver.hpp"
 

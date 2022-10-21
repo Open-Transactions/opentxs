@@ -34,7 +34,10 @@
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/display/Definition.hpp"
 #include "opentxs/network/blockchain/bitcoin/CompactSize.hpp"
+#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
+#include "opentxs/util/WriteBuffer.hpp"
+#include "opentxs/util/Writer.hpp"
 
 constexpr auto BITMASK(std::uint64_t n) noexcept -> std::uint64_t
 {
@@ -61,11 +64,11 @@ BitReader::BitReader(const Vector<std::byte>& data)
     , data_(reinterpret_cast<const std::uint8_t*>(raw_data_.data()))
     , len_(raw_data_.size())
     , accum_(0)
-    , n_(0)
+    , n_(0_uz)
 {
 }
 
-auto BitReader::eof() -> bool { return (len_ == 0u && n_ == 0u); }
+auto BitReader::eof() -> bool { return (len_ == 0_uz && n_ == 0_uz); }
 
 auto BitReader::read(std::size_t nbits) -> std::uint64_t
 {
@@ -74,7 +77,7 @@ auto BitReader::read(std::size_t nbits) -> std::uint64_t
     // native format. Let's say he's trying to read 19 bits.
     OT_ASSERT(nbits < 32u);
 
-    auto ret = std::uint64_t{0u};
+    auto ret = std::uint64_t{0_uz};
 
     // The first loop iteration, nbits is therefore 19.
     while (nbits) {
@@ -104,7 +107,7 @@ auto BitReader::read(std::size_t nbits) -> std::uint64_t
             }
             // If the raw data didn't even contain 4 bytes, then does it at
             // least contain more than 0?
-            else if (len_ > 0u) {
+            else if (len_ > 0_uz) {
                 // Dereference data, grab one byte to accum_, and increment
                 // the data pointer.
                 accum_ = *data_++;
@@ -115,7 +118,7 @@ auto BitReader::read(std::size_t nbits) -> std::uint64_t
                 // accum_.
                 n_ += 8u;
             } else {
-                return 0u;
+                return 0_uz;
             }
         }
 
@@ -158,7 +161,7 @@ BitWriter::BitWriter(Vector<std::byte>& output)
 
 void BitWriter::flush()
 {
-    if (n_ > 0u) {
+    if (n_ > 0_uz) {
         // Assert n is smaller than 8 because if it were larger, it should
         // already have been handled in the write function. Remember, n_ is
         // the number of bits stored in accum_.
@@ -171,8 +174,8 @@ void BitWriter::flush()
 
         // Since we read all the n_ bits out of accum_, we set both back to
         // 0.
-        n_ = 0u;
-        accum_ = 0u;
+        n_ = 0_uz;
+        accum_ = 0;
     }
 }
 
@@ -334,7 +337,7 @@ auto Deserialize(const api::Session& api, const ReadView in) noexcept
 {
     auto output = block::Position{};
 
-    if ((nullptr == in.data()) || (0u == in.size())) { return output; }
+    if ((nullptr == in.data()) || (0_uz == in.size())) { return output; }
 
     if (in.size() < sizeof(output.height_)) { return output; }
 
@@ -342,11 +345,11 @@ auto Deserialize(const api::Session& api, const ReadView in) noexcept
     const auto* it = reinterpret_cast<const std::byte*>(in.data());
     std::memcpy(&output.height_, it, sizeof(output.height_));
 
-    if (0u < size) {
+    if (0_uz < size) {
         std::advance(it, sizeof(output.height_));
-        auto bytes = output.hash_.WriteInto()(size);
+        auto bytes = output.hash_.WriteInto().Reserve(size);
 
-        if (false == bytes.valid(size)) { return output; }
+        if (false == bytes.IsValid(size)) { return output; }
 
         std::memcpy(bytes, it, bytes);
     }
@@ -363,7 +366,7 @@ auto FilterHashToHeader(
     auto preimage = api.Factory().DataFromBytes(hash);
     auto output = cfilter::Header{};
 
-    if (0u == previous.size()) {
+    if (0_uz == previous.size()) {
         preimage.Concatenate(blank.data(), blank.size());
     } else {
         preimage.Concatenate(previous.data(), previous.size());

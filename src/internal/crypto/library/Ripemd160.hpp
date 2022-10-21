@@ -5,16 +5,22 @@
 
 #pragma once
 
-#include "opentxs/util/Bytes.hpp"
+#include "opentxs/util/Types.hpp"
+
+// NOLINTBEGIN(modernize-concat-nested-namespaces)
+namespace opentxs
+{
+class Writer;
+}  // namespace opentxs
+// NOLINTEND(modernize-concat-nested-namespaces)
 
 namespace opentxs::crypto
 {
 class Ripemd160
 {
 public:
-    virtual auto RIPEMD160(
-        const ReadView data,
-        const AllocateOutput destination) const noexcept -> bool = 0;
+    virtual auto RIPEMD160(const ReadView data, Writer&& destination)
+        const noexcept -> bool = 0;
 
     Ripemd160(const Ripemd160&) = delete;
     Ripemd160(Ripemd160&&) = delete;

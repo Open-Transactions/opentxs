@@ -14,7 +14,7 @@
 
 namespace opentxs::contract::blank
 {
-struct Signable : virtual public contract::Signable {
+struct Signable2 : virtual public contract::Signable {
     auto Alias() const noexcept -> UnallocatedCString final { return {}; }
     auto ID() const noexcept -> identifier::Generic final { return {}; }
     auto Name() const noexcept -> UnallocatedCString final { return {}; }

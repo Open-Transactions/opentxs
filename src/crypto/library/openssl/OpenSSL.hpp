@@ -3,6 +3,8 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_include "opentxs/crypto/asymmetric/Role.hpp"
+
 #pragma once
 
 extern "C" {
@@ -36,8 +38,8 @@ extern "C" {
 #include "opentxs/core/Secret.hpp"
 #include "opentxs/crypto/HashType.hpp"
 #include "opentxs/crypto/SecretStyle.hpp"
-#include "opentxs/crypto/key/asymmetric/Role.hpp"
-#include "opentxs/util/Bytes.hpp"
+#include "opentxs/crypto/asymmetric/Types.hpp"
+#include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -50,17 +52,13 @@ class Session;
 
 namespace crypto
 {
-namespace key
-{
-class Asymmetric;
-}  // namespace key
-
 class Parameters;
 }  // namespace crypto
 
 class Data;
 class PasswordPrompt;
 class Secret;
+class Writer;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -90,12 +88,12 @@ public:
     auto Digest(
         const crypto::HashType hashType,
         const ReadView data,
-        const AllocateOutput output) const noexcept -> bool final;
+        Writer&& output) const noexcept -> bool final;
     auto HMAC(
         const crypto::HashType hashType,
         const ReadView key,
         const ReadView data,
-        const AllocateOutput output) const noexcept -> bool final;
+        Writer&& output) const noexcept -> bool final;
     auto PKCS5_PBKDF2_HMAC(
         const void* input,
         const std::size_t inputSize,
@@ -105,16 +103,16 @@ public:
         const crypto::HashType hashType,
         const std::size_t bytes,
         void* output) const noexcept -> bool final;
-    auto RIPEMD160(const ReadView data, const AllocateOutput destination)
-        const noexcept -> bool final;
+    auto RIPEMD160(const ReadView data, Writer&& destination) const noexcept
+        -> bool final;
 
     using AsymmetricProvider::RandomKeypair;
     auto RandomKeypair(
-        const AllocateOutput privateKey,
-        const AllocateOutput publicKey,
-        const crypto::key::asymmetric::Role role,
+        Writer&& privateKey,
+        Writer&& publicKey,
+        const crypto::asymmetric::Role role,
         const Parameters& options,
-        const AllocateOutput params) const noexcept -> bool final;
+        Writer&& params) const noexcept -> bool final;
     auto SharedSecret(
         const ReadView publicKey,
         const ReadView privateKey,
@@ -124,7 +122,7 @@ public:
         const ReadView plaintext,
         const ReadView key,
         const crypto::HashType hash,
-        const AllocateOutput signature) const -> bool final;
+        Writer&& signature) const -> bool final;
     auto Verify(
         const ReadView plaintext,
         const ReadView theKey,
@@ -145,7 +143,7 @@ private:
 
         operator Buffer() noexcept { return bio_.get(); }
 
-        auto Export(const AllocateOutput output) noexcept -> bool;
+        auto Export(Writer&& output) noexcept -> bool;
         auto Import(const ReadView input) noexcept -> bool;
 
 #if OPENSSL_VERSION_NUMBER >= 0x1010000fl
@@ -225,25 +223,22 @@ private:
     auto generate_dh(const Parameters& options, ::EVP_PKEY* output)
         const noexcept -> bool;
     auto get_params(
-        const AllocateOutput params,
+        Writer&& params,
         const Parameters& options,
         ::EVP_PKEY* output) const noexcept -> bool;
     auto import_dh(const ReadView existing, ::EVP_PKEY* output) const noexcept
         -> bool;
     auto make_dh_key(
-        const AllocateOutput privateKey,
-        const AllocateOutput publicKey,
-        const AllocateOutput params,
+        Writer&& privateKey,
+        Writer&& publicKey,
+        Writer&& params,
         const Parameters& options) const noexcept -> bool;
     auto make_signing_key(
-        const AllocateOutput privateKey,
-        const AllocateOutput publicKey,
+        Writer&& privateKey,
+        Writer&& publicKey,
         const Parameters& options) const noexcept -> bool;
-    auto write_dh(const AllocateOutput params, ::EVP_PKEY* dh) const noexcept
-        -> bool;
-    auto write_keypair(
-        const AllocateOutput privateKey,
-        const AllocateOutput publicKey,
-        ::EVP_PKEY* evp) const noexcept -> bool;
+    auto write_dh(Writer&& params, ::EVP_PKEY* dh) const noexcept -> bool;
+    auto write_keypair(Writer&& privateKey, Writer&& publicKey, ::EVP_PKEY* evp)
+        const noexcept -> bool;
 };
 }  // namespace opentxs::crypto::implementation

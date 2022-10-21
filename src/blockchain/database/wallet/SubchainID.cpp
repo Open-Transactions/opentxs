@@ -14,6 +14,7 @@
 #include "internal/util/Mutex.hpp"
 #include "internal/util/P0330.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
+#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 
 namespace opentxs::blockchain::database::wallet::db

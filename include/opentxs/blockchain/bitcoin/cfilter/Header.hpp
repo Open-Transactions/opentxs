@@ -11,8 +11,8 @@
 
 #include "opentxs/Export.hpp"
 #include "opentxs/core/FixedByteArray.hpp"
-#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Platform.hpp"
+#include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs

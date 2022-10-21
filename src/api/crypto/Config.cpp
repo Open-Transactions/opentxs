@@ -12,11 +12,11 @@
 #include "internal/api/crypto/Factory.hpp"
 #include "internal/core/String.hpp"
 #include "internal/util/LogMacros.hpp"
+#include "internal/util/Pimpl.hpp"
 #include "opentxs/api/Settings.hpp"
 #include "opentxs/api/crypto/Config.hpp"
 #include "opentxs/crypto/symmetric/Algorithm.hpp"
 #include "opentxs/util/Container.hpp"
-#include "opentxs/util/Pimpl.hpp"
 
 namespace opentxs
 {

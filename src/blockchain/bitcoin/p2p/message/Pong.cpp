@@ -9,16 +9,18 @@
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
-#include <functional>
 #include <iterator>
 #include <stdexcept>
 #include <utility>
 
 #include "blockchain/bitcoin/p2p/Header.hpp"
 #include "blockchain/bitcoin/p2p/Message.hpp"
+#include "internal/util/Bytes.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/blockchain/p2p/Types.hpp"
+#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Log.hpp"
+#include "opentxs/util/Writer.hpp"
 
 namespace opentxs::factory
 {
@@ -110,24 +112,12 @@ Pong::BitcoinFormat_60001::BitcoinFormat_60001(
     static_assert(8 == sizeof(BitcoinFormat_60001));
 }
 
-auto Pong::payload(AllocateOutput out) const noexcept -> bool
+auto Pong::payload(Writer&& out) const noexcept -> bool
 {
     try {
-        if (!out) { throw std::runtime_error{"invalid output allocator"}; }
-
-        static constexpr auto bytes = sizeof(BitcoinFormat_60001);
-        auto output = out(bytes);
-
-        if (false == output.valid(bytes)) {
-            throw std::runtime_error{"failed to allocate output space"};
-        }
-
         const auto data = BitcoinFormat_60001{nonce_};
-        auto* i = output.as<std::byte>();
-        std::memcpy(i, static_cast<const void*>(&data), bytes);
-        std::advance(i, bytes);
 
-        return true;
+        return copy(reader(std::addressof(data), sizeof(data)), std::move(out));
     } catch (const std::exception& e) {
         LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
 

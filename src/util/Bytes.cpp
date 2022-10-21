@@ -8,37 +8,34 @@
 
 #include <algorithm>
 #include <cstring>
+#include <functional>
+#include <span>
+#include <utility>
 
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "opentxs/util/Log.hpp"
+#include "opentxs/util/WriteBuffer.hpp"
+#include "opentxs/util/Writer.hpp"
 
 namespace opentxs
 {
-auto copy(const ReadView in, const AllocateOutput out) noexcept -> bool
+auto copy(const ReadView in, Writer&& out) noexcept -> bool
 {
-    return copy(in, out, in.size());
+    return copy(in, std::move(out), in.size());
 }
 
-auto copy(
-    const ReadView in,
-    const AllocateOutput out,
-    const std::size_t limit) noexcept -> bool
+auto copy(const ReadView in, Writer&& out, const std::size_t limit) noexcept
+    -> bool
 {
     if ((nullptr == in.data()) || (0_uz == in.size()) || (0_uz == limit)) {
         return true;
     }
 
-    if (false == bool(out)) {
-        LogError()(__func__)(": invalid allocator").Flush();
-
-        return false;
-    }
-
     const auto size = std::min(in.size(), limit);
-    auto write = out(size);
+    auto write = out.Reserve(size);
 
-    if (false == write.valid(size)) {
+    if (false == write.IsValid(size)) {
         LogError()(__func__)(": failed to allocate space").Flush();
 
         return false;
@@ -51,37 +48,37 @@ auto copy(
     return true;
 }
 
-auto preallocated(const std::size_t size, void* out) noexcept -> AllocateOutput
+auto preallocated(const std::size_t size, void* out) noexcept -> Writer
 {
-    return [=](const auto in) -> WritableView {
+    return {[=](const auto in) -> WriteBuffer {
         if (in <= size) {
 
-            return {out, in};
+            return std::span<std::byte>{static_cast<std::byte*>(out), in};
         } else {
             LogError()("preallocated(): Requested ")(in)(" bytes but only ")(
                 size)(" are available")
                 .Flush();
 
-            return {nullptr, 0_uz};
+            return std::span<std::byte>{};
         }
-    };
+    }};
 }
+
 auto reader(const Space& in) noexcept -> ReadView
 {
     return {reinterpret_cast<const char*>(in.data()), in.size()};
 }
+
 auto reader(const Vector<std::byte>& in) noexcept -> ReadView
 {
     return {reinterpret_cast<const char*>(in.data()), in.size()};
 }
-auto reader(const WritableView& in) noexcept -> ReadView
-{
-    return {in.as<const char>(), in.size()};
-}
+
 auto reader(const UnallocatedVector<std::uint8_t>& in) noexcept -> ReadView
 {
     return {reinterpret_cast<const char*>(in.data()), in.size()};
 }
+
 auto space(const std::size_t size) noexcept -> Space
 {
     auto output = Space{};
@@ -89,6 +86,7 @@ auto space(const std::size_t size) noexcept -> Space
 
     return output;
 }
+
 auto space(const std::size_t size, alloc::Default alloc) noexcept
     -> Vector<std::byte>
 {
@@ -97,6 +95,7 @@ auto space(const std::size_t size, alloc::Default alloc) noexcept
 
     return output;
 }
+
 auto space(const ReadView bytes) noexcept -> Space
 {
     if ((nullptr == bytes.data()) || (0_uz == bytes.size())) { return {}; }
@@ -105,6 +104,7 @@ auto space(const ReadView bytes) noexcept -> Space
 
     return {it, it + bytes.size()};
 }
+
 auto space(const ReadView bytes, alloc::Default alloc) noexcept
     -> Vector<std::byte>
 {
@@ -118,38 +118,80 @@ auto space(const ReadView bytes, alloc::Default alloc) noexcept
 
     return Out{it, it + bytes.size(), alloc};
 }
+
 auto valid(const ReadView view) noexcept -> bool
 {
     return (nullptr != view.data()) && (0_uz < view.size());
 }
-auto writer(UnallocatedCString& in) noexcept -> AllocateOutput
-{
-    return [&in](const auto size) -> WritableView {
-        in.resize(size, 51);
 
-        return {in.data(), in.size()};
-    };
+auto writer(CString& in) noexcept -> Writer
+{
+    return {
+        [&in](auto size) -> WriteBuffer {
+            in.resize(size, 51);
+            auto* out = reinterpret_cast<std::byte*>(in.data());
+
+            return std::span<std::byte>{out, in.size()};
+        },
+        [&in](auto size) -> bool {
+            in.resize(size);
+
+            return true;
+        }};
 }
-auto writer(UnallocatedCString* protobuf) noexcept -> AllocateOutput
+
+auto writer(UnallocatedCString& in) noexcept -> Writer
+{
+    return {
+        [&in](auto size) -> WriteBuffer {
+            in.resize(size, 51);
+            auto* out = reinterpret_cast<std::byte*>(in.data());
+
+            return std::span<std::byte>{out, in.size()};
+        },
+        [&in](auto size) -> bool {
+            in.resize(size);
+
+            return true;
+        }};
+}
+
+auto writer(UnallocatedCString* protobuf) noexcept -> Writer
 {
     if (nullptr == protobuf) { return {}; }
 
     return writer(*protobuf);
 }
-auto writer(Space& in) noexcept -> AllocateOutput
-{
-    return [&in](const auto size) -> WritableView {
-        in.resize(size, std::byte{51});
 
-        return {in.data(), in.size()};
-    };
+auto writer(Space& in) noexcept -> Writer
+{
+    return {
+        [&in](auto size) -> WriteBuffer {
+            in.resize(size, std::byte{51});
+            auto* out = reinterpret_cast<std::byte*>(in.data());
+
+            return std::span<std::byte>{out, in.size()};
+        },
+        [&in](auto size) -> bool {
+            in.resize(size);
+
+            return true;
+        }};
 }
-auto writer(Vector<std::byte>& in) noexcept -> AllocateOutput
-{
-    return [&in](const auto size) -> WritableView {
-        in.resize(size, std::byte{51});
 
-        return {in.data(), in.size()};
-    };
+auto writer(Vector<std::byte>& in) noexcept -> Writer
+{
+    return {
+        [&in](auto size) -> WriteBuffer {
+            in.resize(size, std::byte{51});
+            auto* out = reinterpret_cast<std::byte*>(in.data());
+
+            return std::span<std::byte>{out, in.size()};
+        },
+        [&in](auto size) -> bool {
+            in.resize(size);
+
+            return true;
+        }};
 }
 }  // namespace opentxs

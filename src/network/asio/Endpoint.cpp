@@ -14,6 +14,7 @@
 #include <utility>
 
 #include "network/asio/Endpoint.hpp"
+#include "opentxs/util/Bytes.hpp"
 
 namespace opentxs::network::asio
 {

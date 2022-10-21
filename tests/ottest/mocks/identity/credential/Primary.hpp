@@ -55,7 +55,7 @@ public:
         (const, noexcept, override));
     MOCK_METHOD(Signature, MasterSignature, (), (const, noexcept, override));
     MOCK_METHOD(
-        crypto::key::asymmetric::Mode,
+        crypto::asymmetric::Mode,
         Mode,
         (),
         (const, noexcept, override));

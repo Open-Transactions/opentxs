@@ -9,7 +9,6 @@
 #include <boost/endian/buffers.hpp>
 #include <cstddef>
 #include <cstring>
-#include <functional>
 #include <iterator>
 #include <stdexcept>
 #include <utility>
@@ -17,9 +16,12 @@
 #include "blockchain/bitcoin/p2p/Header.hpp"
 #include "internal/blockchain/p2p/bitcoin/Bitcoin.hpp"
 #include "internal/blockchain/p2p/bitcoin/message/Message.hpp"
+#include "internal/util/Bytes.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/blockchain/p2p/Types.hpp"
+#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Log.hpp"
+#include "opentxs/util/Writer.hpp"
 
 using FeeRateField = be::little_uint64_buf_t;
 
@@ -103,24 +105,12 @@ Feefilter::Feefilter(
     verify_checksum();
 }
 
-auto Feefilter::payload(AllocateOutput out) const noexcept -> bool
+auto Feefilter::payload(Writer&& out) const noexcept -> bool
 {
     try {
-        if (!out) { throw std::runtime_error{"invalid output allocator"}; }
-
-        static constexpr auto bytes = sizeof(FeeRateField);
-        auto output = out(bytes);
-
-        if (false == output.valid(bytes)) {
-            throw std::runtime_error{"failed to allocate output space"};
-        }
-
         const auto data = FeeRateField{fee_rate_};
-        auto* i = output.as<std::byte>();
-        std::memcpy(i, &data, bytes);
-        std::advance(i, bytes);
 
-        return true;
+        return copy(reader(std::addressof(data), sizeof(data)), std::move(out));
     } catch (const std::exception& e) {
         LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
 

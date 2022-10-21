@@ -19,7 +19,6 @@
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/core/ByteArray.hpp"
-#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
 
@@ -40,6 +39,7 @@ class Frame;
 }  // namespace network
 
 class Data;
+class Writer;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -77,7 +77,7 @@ public:
     static auto Size() noexcept -> std::size_t { return sizeof(BitcoinFormat); }
 
     auto Command() const noexcept -> bitcoin::Command { return command_; }
-    auto Serialize(const AllocateOutput out) const noexcept -> bool;
+    auto Serialize(Writer&& out) const noexcept -> bool;
     auto Network() const noexcept -> blockchain::Type { return chain_; }
     auto PayloadSize() const noexcept -> std::size_t { return payload_size_; }
     auto Checksum() const noexcept -> const opentxs::Data& { return checksum_; }

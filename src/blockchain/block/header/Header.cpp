@@ -17,6 +17,7 @@
 #include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/blockchain/block/Header.hpp"
 #include "opentxs/blockchain/block/NumericHash.hpp"
+#include "opentxs/util/Writer.hpp"
 
 namespace opentxs::blockchain::block
 {
@@ -140,11 +141,10 @@ auto Header::Print() const noexcept -> UnallocatedCString
     return imp_->Print();
 }
 
-auto Header::Serialize(
-    const AllocateOutput destination,
-    const bool bitcoinformat) const noexcept -> bool
+auto Header::Serialize(Writer&& destination, const bool bitcoinformat)
+    const noexcept -> bool
 {
-    return imp_->Serialize(destination, bitcoinformat);
+    return imp_->Serialize(std::move(destination), bitcoinformat);
 }
 
 auto Header::swap_header(Header& rhs) noexcept -> void

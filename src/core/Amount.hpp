@@ -21,6 +21,15 @@
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
+#include "opentxs/util/Types.hpp"
+#include "opentxs/util/Writer.hpp"
+
+// NOLINTBEGIN(modernize-concat-nested-namespaces)
+namespace opentxs
+{
+class Writer;
+}  // namespace opentxs
+// NOLINTEND(modernize-concat-nested-namespaces)
 
 namespace be = boost::endian;
 
@@ -160,7 +169,7 @@ public:
 
     auto operator-() -> Imp { return -amount_; }
 
-    auto Serialize(const AllocateOutput dest) const noexcept -> bool
+    auto Serialize(Writer&& dest) const noexcept -> bool
     {
         auto amount = UnallocatedCString{};
 
@@ -173,11 +182,10 @@ public:
             return false;
         }
 
-        return copy(amount, dest);
+        return copy(amount, std::move(dest));
     }
 
-    auto SerializeBitcoin(const AllocateOutput dest) const noexcept
-        -> bool final
+    auto SerializeBitcoin(Writer&& dest) const noexcept -> bool final
     {
         const auto backend = shift_right();
         if (backend < 0 || backend > std::numeric_limits<std::int64_t>::max()) {
@@ -198,7 +206,7 @@ public:
         const auto view =
             ReadView(reinterpret_cast<const char*>(&buffer), sizeof(buffer));
 
-        copy(view, dest);
+        copy(view, std::move(dest));
 
         return true;
     }

@@ -24,19 +24,19 @@
 #include "internal/identity/wot/claim/Types.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/LogMacros.hpp"
+#include "internal/util/Pimpl.hpp"
 #include "internal/util/Time.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/crypto/Parameters.hpp"
-#include "opentxs/crypto/key/asymmetric/Mode.hpp"
+#include "opentxs/crypto/asymmetric/Mode.hpp"
 #include "opentxs/identity/CredentialRole.hpp"
 #include "opentxs/identity/credential/Contact.hpp"
 #include "opentxs/identity/wot/claim/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
-#include "opentxs/util/Pimpl.hpp"
 #include "opentxs/util/Time.hpp"
 
 namespace opentxs
@@ -181,7 +181,7 @@ Contact::Contact(
           params,
           version,
           identity::CredentialRole::Contact,
-          crypto::key::asymmetric::Mode::Null,
+          crypto::asymmetric::Mode::Null,
           get_master_id(api, master))
     , data_([&](const crypto::Parameters& params) -> const proto::ContactData {
         auto proto = proto::ContactData{};
@@ -229,8 +229,7 @@ auto Contact::serialize(
     -> std::shared_ptr<Base::SerializedType>
 {
     auto serializedCredential = Base::serialize(lock, asPrivate, asSigned);
-    serializedCredential->set_mode(
-        translate(crypto::key::asymmetric::Mode::Null));
+    serializedCredential->set_mode(translate(crypto::asymmetric::Mode::Null));
     serializedCredential->clear_signature();  // this fixes a bug, but shouldn't
 
     if (asSigned) {

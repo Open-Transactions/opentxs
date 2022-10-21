@@ -9,7 +9,7 @@
 
 #include "internal/network/zeromq/Types.hpp"
 #include "internal/network/zeromq/socket/Types.hpp"
-#include "opentxs/util/Bytes.hpp"
+#include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs

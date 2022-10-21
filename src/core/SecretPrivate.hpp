@@ -10,7 +10,14 @@
 #include "core/ByteArrayPrivate.hpp"
 #include "opentxs/core/Secret.hpp"
 #include "opentxs/util/Allocated.hpp"
-#include "opentxs/util/Bytes.hpp"
+#include "opentxs/util/Types.hpp"
+
+// NOLINTBEGIN(modernize-concat-nested-namespaces)
+namespace opentxs
+{
+class Writer;
+}  // namespace opentxs
+// NOLINTEND(modernize-concat-nested-namespaces)
 
 namespace opentxs
 {
@@ -25,8 +32,8 @@ public:
 
     auto resize(const std::size_t size) noexcept -> bool final;
     auto SetSize(const std::size_t size) noexcept -> bool final;
-    auto WriteInto() noexcept -> AllocateOutput final;
-    auto WriteInto(Secret::Mode mode) noexcept -> AllocateOutput;
+    auto WriteInto() noexcept -> Writer final;
+    auto WriteInto(Secret::Mode mode) noexcept -> Writer;
 
     SecretPrivate() = delete;
     SecretPrivate(

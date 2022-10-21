@@ -21,6 +21,18 @@ struct Imported;
 }  // namespace internal
 }  // namespace crypto
 }  // namespace blockchain
+
+namespace crypto
+{
+namespace asymmetric
+{
+namespace key
+{
+class EllipticCurve;
+}  // namespace key
+}  // namespace asymmetric
+}  // namespace crypto
+
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -31,7 +43,8 @@ class OPENTXS_EXPORT Imported : virtual public Subaccount
 public:
     OPENTXS_NO_EXPORT virtual auto InternalImported() const noexcept
         -> internal::Imported& = 0;
-    virtual auto Key() const -> ECKey = 0;
+    virtual auto Key() const
+        -> const opentxs::crypto::asymmetric::key::EllipticCurve& = 0;
 
     Imported(const Imported&) = delete;
     Imported(Imported&&) = delete;

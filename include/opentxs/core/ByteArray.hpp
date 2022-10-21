@@ -16,8 +16,8 @@
 #include "opentxs/core/Data.hpp"
 #include "opentxs/util/Allocated.hpp"
 #include "opentxs/util/Allocator.hpp"
-#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
+#include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -25,6 +25,7 @@ namespace opentxs
 class Armored;
 class ByteArray;
 class ByteArrayPrivate;
+class Writer;
 struct HexType;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
@@ -100,7 +101,7 @@ public:
     auto resize(const std::size_t) -> bool final;
     auto SetSize(const std::size_t) -> bool final;
     auto swap(ByteArray& rhs) noexcept -> void;
-    auto WriteInto() noexcept -> AllocateOutput final;
+    auto WriteInto() noexcept -> Writer final;
     auto zeroMemory() -> void final;
 
     OPENTXS_NO_EXPORT ByteArray(ByteArrayPrivate* imp) noexcept;

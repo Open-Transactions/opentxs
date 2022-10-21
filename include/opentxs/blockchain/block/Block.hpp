@@ -12,7 +12,6 @@
 #include "opentxs/blockchain/block/Outpoint.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
-#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -39,6 +38,8 @@ class Hash;
 class Header;
 }  // namespace block
 }  // namespace blockchain
+
+class Writer;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -53,7 +54,7 @@ public:
     OPENTXS_NO_EXPORT virtual auto Internal() const noexcept
         -> const internal::Block& = 0;
     virtual auto Print() const noexcept -> UnallocatedCString = 0;
-    virtual auto Serialize(AllocateOutput bytes) const noexcept -> bool = 0;
+    virtual auto Serialize(Writer&& bytes) const noexcept -> bool = 0;
 
     virtual auto asBitcoin() noexcept -> bitcoin::block::Block& = 0;
     OPENTXS_NO_EXPORT virtual auto Internal() noexcept -> internal::Block& = 0;

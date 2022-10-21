@@ -31,6 +31,7 @@
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/serialization/protobuf/verify/ServerContract.hpp"
 #include "internal/util/LogMacros.hpp"
+#include "internal/util/Pimpl.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
@@ -41,7 +42,7 @@
 #include "opentxs/crypto/SignatureRole.hpp"
 #include "opentxs/identity/Nym.hpp"
 #include "opentxs/util/Log.hpp"
-#include "opentxs/util/Pimpl.hpp"
+#include "opentxs/util/Writer.hpp"
 
 namespace opentxs
 {
@@ -356,8 +357,7 @@ auto Server::Serialize() const noexcept -> ByteArray
     return api_.Factory().InternalSession().Data(contract(lock));
 }
 
-auto Server::Serialize(AllocateOutput destination, bool includeNym) const
-    -> bool
+auto Server::Serialize(Writer&& destination, bool includeNym) const -> bool
 {
     auto serialized = proto::ServerContract{};
     if (false == Serialize(serialized, includeNym)) {
@@ -365,7 +365,7 @@ auto Server::Serialize(AllocateOutput destination, bool includeNym) const
         return false;
     }
 
-    write(serialized, destination);
+    write(serialized, std::move(destination));
 
     return true;
 }

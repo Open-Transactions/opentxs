@@ -11,6 +11,13 @@
 #include <tuple>
 #include <utility>
 
+// NOLINTBEGIN(modernize-concat-nested-namespaces)
+namespace opentxs
+{
+class Writer;
+}  // namespace opentxs
+// NOLINTEND(modernize-concat-nested-namespaces)
+
 namespace opentxs::network::blockchain::bitcoin
 {
 struct CompactSize::Imp {
@@ -25,7 +32,7 @@ struct CompactSize::Imp {
     std::uint64_t data_;
 
     template <typename SizeType>
-    auto convert_to_raw(AllocateOutput output) const noexcept -> bool;
+    auto convert_to_raw(Writer&& output) const noexcept -> bool;
     template <typename SizeType>
     auto convert_from_raw(const Bytes& bytes) noexcept -> void;
 
