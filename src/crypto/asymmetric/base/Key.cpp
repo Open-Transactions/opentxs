@@ -6,6 +6,7 @@
 #include "0_stdafx.hpp"                       // IWYU pragma: associated
 #include "opentxs/crypto/asymmetric/Key.hpp"  // IWYU pragma: associated
 
+#include <functional>
 #include <utility>
 
 #include "crypto/asymmetric/base/KeyPrivate.hpp"
@@ -111,7 +112,10 @@ auto Key::operator=(const Key& rhs) noexcept -> Key&
     if (imp_ != rhs.imp_) {
         auto* old{imp_};
         imp_ = rhs.imp_->clone(get_allocator());
-        delete old;
+        // TODO switch to destroying delete after resolution of
+        // https://gcc.gnu.org/bugzilla/show_bug.cgi?id=107352
+        auto deleter = old->get_deleter();
+        std::invoke(deleter, old);
     }
 
     return *this;
@@ -170,7 +174,10 @@ auto Key::Version() const noexcept -> VersionNumber { return imp_->Version(); }
 Key::~Key()
 {
     if (nullptr != imp_) {
-        delete imp_;
+        // TODO switch to destroying delete after resolution of
+        // https://gcc.gnu.org/bugzilla/show_bug.cgi?id=107352
+        auto deleter = imp_->get_deleter();
+        std::invoke(deleter, imp_);
         imp_ = nullptr;
     }
 }
