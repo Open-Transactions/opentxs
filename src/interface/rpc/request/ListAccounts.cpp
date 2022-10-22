@@ -10,7 +10,6 @@
 #include <memory>
 
 #include "opentxs/interface/rpc/CommandType.hpp"
-#include "opentxs/util/Writer.hpp"
 
 namespace opentxs::rpc::request::implementation
 {

@@ -200,11 +200,6 @@ option(
   ${OT_WITH_QT}
 )
 option(
-  OT_OPENSSL_FLAVOR_LIBRESSL
-  "Assume OpenSSL library is LibreSSL"
-  OFF
-)
-option(
   OT_USE_VCPKG_TARGETS
   "Assume dependencies are managed by vcpkg"
   ${OT_USE_VCPKG_TARGETS_DEFAULT}

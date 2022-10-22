@@ -1,18 +1,15 @@
 {
-    "version": 2,
+    "version": 3,
     "cmakeMinimumRequired": {
         "major": 3,
-        "minor": 20,
+        "minor": 21,
         "patch": 0
     },
     "configurePresets": [
         {
             "name": "vcpkg",
             "hidden": true,
-            "cacheVariables": {
-                "CMAKE_TOOLCHAIN_FILE":
-                    "${sourceDir}/deps/vcpkg/scripts/buildsystems/vcpkg.cmake"
-            }
+            "toolchainFile": "deps/vcpkg/scripts/buildsystems/vcpkg.cmake"
         },
         {
             "name": "default",
@@ -298,6 +295,85 @@
                 "OT_CRYPTO_USING_PACKETCRYPT": "OFF",
                 "OT_ENABLE_RPC": "ON"
             }
+        },
+        {
+            "name": "android",
+            "inherits": [
+                "full",
+                "default"
+            ],
+            "hidden": true,
+            "toolchainFile": "/opt/ndk/build/cmake/android.toolchain.cmake",
+            "binaryDir": "/tmp/build",
+            "installDir": "/home/output",
+            "cacheVariables": {
+                "ANDROID_STL": "c++_shared",
+                "CMAKE_SHARED_LINKER_FLAGS": "-Wl,-lGLESv2",
+                "CMAKE_EXE_LINKER_FLAGS": "-Wl,-lGLESv2",
+                "Protobuf_PROTOC_EXECUTABLE": "/usr/bin/protoc",
+                "QT_HOST_PATH": "/usr/host_qt",
+                "HAVE_GLESv2": "ON",
+                "BUILD_SHARED_LIBS": "ON",
+                "CMAKE_BUILD_TYPE": "Release",
+                "OPENTXS_PEDANTIC_BUILD": "ON",
+                "OPENTXS_BUILD_TESTS": "OFF",
+                "OT_VALGRIND": "OFF",
+                "OT_STORAGE_SQLITE": "OFF",
+                "OT_CRYPTO_USING_PACKETCRYPT": "OFF",
+                "OT_ENABLE_RPC": "OFF"
+            }
+        },
+        {
+            "name": "android-arm64",
+            "inherits": [
+                "android",
+                "full",
+                "default"
+            ],
+            "cacheVariables": {
+                "ANDROID_ABI": "arm64-v8a",
+                "CMAKE_FIND_ROOT_PATH":
+                    "/usr/android/arm64;/usr/qt-for-android/arm64"
+            }
+        },
+        {
+            "name": "android-arm",
+            "inherits": [
+                "android",
+                "full",
+                "default"
+            ],
+            "cacheVariables": {
+                "ANDROID_ABI": "armeabi-v7a",
+                "CMAKE_FIND_ROOT_PATH":
+                    "/usr/android/arm;/usr/qt-for-android/arm"
+            }
+        },
+        {
+            "name": "android-x64",
+            "inherits": [
+                "android",
+                "full",
+                "default"
+            ],
+            "cacheVariables": {
+                "ANDROID_ABI": "x86_64",
+                "CMAKE_FIND_ROOT_PATH":
+                    "/usr/android/x64;/usr/qt-for-android/x64"
+            }
+        },
+        {
+            "name": "android-x86",
+            "inherits": [
+                "android",
+                "full",
+                "default"
+            ],
+            "cacheVariables": {
+                "ANDROID_ABI": "x86",
+                "CMAKE_FIND_ROOT_PATH":
+                    "/usr/android/x86;/usr/qt-for-android/x86"
+            }
         }
     ],
     "buildPresets": [
@@ -352,6 +428,22 @@
         {
             "name": "test08",
             "configurePreset": "test08"
+        },
+        {
+            "name": "android-arm64",
+            "configurePreset": "android-arm64"
+        },
+        {
+            "name": "android-arm",
+            "configurePreset": "android-arm"
+        },
+        {
+            "name": "android-x64",
+            "configurePreset": "android-x64"
+        },
+        {
+            "name": "android-x86",
+            "configurePreset": "android-x86"
         }
     ]
 }
