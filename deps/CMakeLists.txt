@@ -18,10 +18,6 @@ if(CASH_LUCRE_EXPORT)
     lucre SYSTEM PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/lucre/include/lucre/"
   )
 
-  if(OT_OPENSSL_FLAVOR_LIBRESSL)
-    target_compile_definitions(lucre PUBLIC OT_BUNDLED_LIBRESSL)
-  endif()
-
   if(NOT MSVC)
     target_compile_options(
       lucre

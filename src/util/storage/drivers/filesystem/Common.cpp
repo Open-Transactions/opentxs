@@ -14,6 +14,7 @@
 #include <system_error>
 
 #include "internal/util/LogMacros.hpp"
+#include "internal/util/Size.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 
@@ -89,27 +90,32 @@ auto Common::prepare_write(const UnallocatedCString& input) const
 auto Common::read_file(const UnallocatedCString& filename) const
     -> UnallocatedCString
 {
-    auto ec = std::error_code{};
+    try {
+        auto ec = std::error_code{};
 
-    if (false == fs::exists(filename, ec)) { return {}; }
+        if (false == fs::exists(filename, ec)) { return {}; }
 
-    std::ifstream file(
-        filename, std::ios::in | std::ios::ate | std::ios::binary);
+        std::ifstream file(
+            filename, std::ios::in | std::ios::ate | std::ios::binary);
 
-    if (file.good()) {
-        std::ifstream::pos_type pos = file.tellg();
+        if (file.good()) {
+            const auto pos = file.tellg();
 
-        if ((0 >= pos) || (0xFFFFFFFF <= pos)) { return {}; }
+            if ((0 >= pos) || (0xFFFFFFFF <= pos)) { return {}; }
 
-        auto size(pos);
-        file.seekg(0, std::ios::beg);
-        UnallocatedVector<char> bytes(size);
-        file.read(&bytes[0], size);
+            const auto size = convert_to_size(pos);
+            file.seekg(0, std::ios::beg);
+            UnallocatedVector<char> bytes(size);
+            file.read(&bytes[0], size);
 
-        return prepare_read(UnallocatedCString(&bytes[0], size));
+            return prepare_read(UnallocatedCString(&bytes[0], size));
+        }
+
+        return {};
+    } catch (...) {
+
+        return {};
     }
-
-    return {};
 }
 
 void Common::store(
