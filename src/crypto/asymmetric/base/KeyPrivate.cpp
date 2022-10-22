@@ -302,14 +302,6 @@ auto KeyPrivate::HasPublic() const noexcept -> bool { return false; }
 
 auto KeyPrivate::IsValid() const noexcept -> bool { return false; }
 
-auto KeyPrivate::operator delete(
-    KeyPrivate* ptr,
-    std::destroying_delete_t) noexcept -> void
-{
-    auto deleter = ptr->get_deleter();
-    std::invoke(deleter, ptr);
-}
-
 auto KeyPrivate::PreferredHash() const noexcept -> crypto::HashType
 {
     return HashType::Error;

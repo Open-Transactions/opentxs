@@ -78,9 +78,6 @@ class KeyPrivate : virtual public internal::Key,
 {
 public:
     static auto Blank(allocator_type alloc) noexcept -> KeyPrivate*;
-    static auto operator delete(
-        KeyPrivate* ptr,
-        std::destroying_delete_t) noexcept -> void;
     static auto Reset(asymmetric::Key& key) noexcept -> void;
 
     [[nodiscard]] virtual auto asEllipticCurvePrivate() const noexcept

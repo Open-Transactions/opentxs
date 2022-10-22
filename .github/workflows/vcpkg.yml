@@ -20,6 +20,10 @@ jobs:
       with:
         fetch-depth: '0'
         submodules: 'recursive'
+    - name: Checkout vcpkg_installed
+      run: |
+        git clone --depth=1 --single-branch --branch=master https://gitlab.com/open-transactions/vcpkg.git/ '${{ github.workspace }}/deps/vcpkg_installed'
+      shell: bash
     - name: Update cmake
       uses: lukka/get-cmake@latest
     - name: Setup vcpkg
