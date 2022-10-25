@@ -6,7 +6,6 @@
 #include "internal/serialization/protobuf/verify/P2PBlockchainChainState.hpp"  // IWYU pragma: associated
 
 #include <P2PBlockchainChainState.pb.h>  // IWYU pragma: keep
-#include <string>
 
 #include "serialization/protobuf/verify/Check.hpp"
 

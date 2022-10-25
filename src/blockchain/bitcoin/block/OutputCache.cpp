@@ -6,7 +6,6 @@
 #include "0_stdafx.hpp"                         // IWYU pragma: associated
 #include "blockchain/bitcoin/block/Output.hpp"  // IWYU pragma: associated
 
-#include <boost/container/vector.hpp>
 #include <algorithm>
 #include <cstddef>
 #include <iterator>
@@ -15,6 +14,7 @@
 
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/blockchain/crypto/Subchain.hpp"
+#include "opentxs/core/Data.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
@@ -23,7 +23,7 @@ namespace opentxs::blockchain::bitcoin::block::implementation
 {
 Output::Cache::Cache(
     std::optional<std::size_t>&& size,
-    boost::container::flat_set<crypto::Key>&& keys,
+    Set<crypto::Key>&& keys,
     block::Position&& minedPosition,
     node::TxoState state,
     UnallocatedSet<node::TxoTag>&& tags) noexcept

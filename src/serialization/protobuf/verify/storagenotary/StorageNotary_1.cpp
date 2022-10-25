@@ -6,7 +6,6 @@
 #include "internal/serialization/protobuf/verify/StorageNotary.hpp"  // IWYU pragma: associated
 
 #include <StorageNotary.pb.h>
-#include <string>
 
 #include "internal/serialization/protobuf/Basic.hpp"
 #include "internal/serialization/protobuf/verify/BlindedSeriesList.hpp"  // IWYU pragma: keep

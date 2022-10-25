@@ -6,7 +6,6 @@
 #include "internal/serialization/protobuf/verify/BlockchainDeterministicAccountData.hpp"  // IWYU pragma: associated
 
 #include <BlockchainDeterministicAccountData.pb.h>
-#include <string>
 
 #include "internal/serialization/protobuf/Basic.hpp"
 #include "internal/serialization/protobuf/verify/BlockchainAccountData.hpp"  // IWYU pragma: keep

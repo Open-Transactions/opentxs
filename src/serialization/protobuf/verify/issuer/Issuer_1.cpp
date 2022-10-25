@@ -6,7 +6,6 @@
 #include "internal/serialization/protobuf/verify/Issuer.hpp"  // IWYU pragma: associated
 
 #include <Issuer.pb.h>
-#include <string>
 
 #include "internal/serialization/protobuf/Basic.hpp"
 #include "internal/serialization/protobuf/verify/PeerRequestHistory.hpp"  // IWYU pragma: keep

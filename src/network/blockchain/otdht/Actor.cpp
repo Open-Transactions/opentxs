@@ -235,8 +235,11 @@ auto OTDHT::Actor::add_peers(Set<PeerID>&& peers) noexcept -> void
 
 auto OTDHT::Actor::calculate_weight(const Samples& samples) noexcept -> Weight
 {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wnull-dereference"
     const auto average =
         std::reduce(samples.begin(), samples.end(), 0_z) / samples.size();
+#pragma GCC diagnostic pop
 
     return std::max<Weight>(min_weight_, average);
 }

@@ -8,6 +8,7 @@
 #include <atomic>
 #include <cstddef>
 #include <memory>
+#include <string_view>
 
 #include "internal/network/zeromq/Context.hpp"
 #include "internal/network/zeromq/ListenCallback.hpp"
@@ -17,6 +18,7 @@
 
 namespace ot = opentxs;
 namespace zmq = ot::network::zeromq;
+using namespace std::literals;
 
 namespace ottest
 {
@@ -45,8 +47,9 @@ TEST(Test_Stress, PubSub_100)
     for (auto i{0}; i < 100; ++i) {
         auto& socket =
             pub.emplace_back(ot.ZMQ().Internal().PublishSocket()).get();
-        auto& endpoint = endpoints.emplace_back(
-            ot::UnallocatedCString{"inproc://PubSub_100/"} + std::to_string(i));
+        auto& endpoint = endpoints.emplace_back();
+        endpoint.append("inproc://PubSub_100/"sv);
+        endpoint.append(std::to_string(i));
 
         EXPECT_TRUE(socket.Start(endpoint));
     }

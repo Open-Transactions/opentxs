@@ -5,7 +5,11 @@
 
 #include "internal/serialization/protobuf/verify/BailmentReply.hpp"  // IWYU pragma: associated
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wnull-dereference"
 #include <BailmentReply.pb.h>
+
+#pragma GCC diagnostic pop
 
 #include "serialization/protobuf/verify/Check.hpp"
 

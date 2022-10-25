@@ -6,7 +6,6 @@
 #include "internal/serialization/protobuf/verify/BlockchainPreviousOutput.hpp"  // IWYU pragma: associated
 
 #include <BlockchainPreviousOutput.pb.h>
-#include <string>
 
 #include "serialization/protobuf/verify/Check.hpp"
 

@@ -9,8 +9,6 @@
 
 #pragma once
 
-#include <boost/container/flat_set.hpp>
-#include <boost/container/vector.hpp>
 #include <cs_plain_guarded.h>
 #include <algorithm>
 #include <cstddef>
@@ -101,7 +99,7 @@ namespace opentxs::blockchain::bitcoin::block::implementation
 class Output final : public internal::Output
 {
 public:
-    using PubkeyHashes = boost::container::flat_set<ElementHash>;
+    using PubkeyHashes = Set<ElementHash>;
 
     auto AssociatedLocalNyms(
         const api::crypto::Blockchain& crypto,
@@ -212,7 +210,7 @@ public:
         const std::uint32_t index,
         const blockchain::Amount& value,
         std::unique_ptr<const block::Script> script,
-        boost::container::flat_set<crypto::Key>&& keys,
+        Set<crypto::Key>&& keys,
         const VersionNumber version = default_version_) noexcept(false);
     Output(
         const blockchain::Type chain,
@@ -221,7 +219,7 @@ public:
         const blockchain::Amount& value,
         std::unique_ptr<const block::Script> script,
         std::optional<std::size_t> size,
-        boost::container::flat_set<crypto::Key>&& keys,
+        Set<crypto::Key>&& keys,
         block::Position minedPosition,
         node::TxoState state,
         UnallocatedSet<node::TxoTag> tags) noexcept(false);
@@ -274,7 +272,7 @@ private:
 
         Cache(
             std::optional<std::size_t>&& size,
-            boost::container::flat_set<crypto::Key>&& keys,
+            Set<crypto::Key>&& keys,
             block::Position&& minedPosition,
             node::TxoState state,
             UnallocatedSet<node::TxoTag>&& tags) noexcept;
@@ -286,7 +284,7 @@ private:
         std::optional<std::size_t> size_{};
         identifier::Generic payee_;
         identifier::Generic payer_;
-        boost::container::flat_set<crypto::Key> keys_;
+        Set<crypto::Key> keys_;
         block::Position mined_position_;
         node::TxoState state_;
         UnallocatedSet<node::TxoTag> tags_;

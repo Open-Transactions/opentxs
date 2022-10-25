@@ -5,10 +5,10 @@
 
 #pragma once
 
-#include <boost/asio.hpp>
 #include <cstdint>
 #include <future>
 
+#include "BoostAsio.hpp"
 #include "core/StateMachine.hpp"
 #include "opentxs/blockchain/p2p/Address.hpp"
 #include "opentxs/blockchain/p2p/Peer.hpp"

@@ -6,6 +6,8 @@
 #include "0_stdafx.hpp"                    // IWYU pragma: associated
 #include "internal/network/asio/HTTP.hpp"  // IWYU pragma: associated
 
+#include <boost/intrusive/list.hpp>
+#include <boost/smart_ptr/make_shared.hpp>
 #include <chrono>
 #include <exception>
 #include <future>

@@ -8,7 +8,6 @@
 #include <Enums.pb.h>
 #include <OTXEnums.pb.h>
 #include <ServerReply.pb.h>
-#include <string>
 
 #include "internal/serialization/protobuf/Basic.hpp"
 #include "internal/serialization/protobuf/verify/OTXPush.hpp"  // IWYU pragma: keep

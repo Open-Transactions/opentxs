@@ -7,11 +7,11 @@
 
 #pragma once
 
-#include <boost/asio.hpp>
 #include <cstddef>
 #include <iosfwd>
 #include <memory>
 
+#include "BoostAsio.hpp"
 #include "opentxs/network/asio/Socket.hpp"
 #include "opentxs/util/Types.hpp"
 #include "opentxs/util/WorkType.hpp"

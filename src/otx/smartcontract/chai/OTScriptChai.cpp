@@ -15,9 +15,8 @@
 #include "otx/smartcontract/chai/OTScriptChai.hpp"  // IWYU pragma: associated
 
 #pragma GCC diagnostic push
-#ifdef __clang__
 #pragma GCC diagnostic ignored "-Wdefaulted-function-deleted"
-#endif
+#pragma GCC diagnostic ignored "-Wnull-dereference"
 #include <chaiscript/chaiscript.hpp>
 #include <chaiscript/chaiscript_stdlib.hpp>  // IWYU pragma: keep
 

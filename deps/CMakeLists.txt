@@ -158,3 +158,5 @@ if(OT_BOOST_JSON_HEADER_ONLY)
 else()
   target_link_libraries(opentxs PUBLIC Boost::json)
 endif()
+
+target_sources(opentxs-common PRIVATE "BoostAsio.hpp")

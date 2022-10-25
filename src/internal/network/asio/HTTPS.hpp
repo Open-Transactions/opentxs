@@ -5,15 +5,12 @@
 
 #pragma once
 
-#include <boost/asio.hpp>
-#include <boost/beast/core.hpp>
-#include <boost/beast/http.hpp>
-#include <boost/beast/ssl.hpp>
 #include <functional>
 #include <memory>
 #include <optional>
 #include <string_view>
 
+#include "BoostAsio.hpp"
 #include "internal/network/asio/WebRequest.hpp"
 #include "opentxs/util/Allocated.hpp"
 #include "opentxs/util/Container.hpp"

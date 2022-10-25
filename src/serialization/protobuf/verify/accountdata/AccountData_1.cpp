@@ -7,7 +7,6 @@
 
 #include <AccountData.pb.h>
 #include <RPCEnums.pb.h>
-#include <string>
 
 #include "serialization/protobuf/verify/Check.hpp"
 

@@ -6,7 +6,6 @@
 #include "0_stdafx.hpp"                   // IWYU pragma: associated
 #include "api/network/asio/Acceptor.hpp"  // IWYU pragma: associated
 
-#include <boost/asio.hpp>
 #include <boost/system/error_code.hpp>
 #include <array>
 #include <cstddef>
@@ -16,6 +15,7 @@
 #include <stdexcept>
 #include <utility>
 
+#include "BoostAsio.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/Mutex.hpp"
 #include "network/asio/Endpoint.hpp"

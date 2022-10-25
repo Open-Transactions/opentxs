@@ -8,8 +8,8 @@
 
 #include <BlockchainBlockHeader.pb.h>
 #include <cstddef>
-#include <memory>
 #include <stdexcept>
+#include <string_view>
 #include <tuple>
 #include <type_traits>
 #include <utility>

@@ -8,7 +8,6 @@
 #include <P2PBlockchainSync.pb.h>  // IWYU pragma: keep
 #include <cstdint>
 #include <limits>
-#include <string>
 
 #include "serialization/protobuf/verify/Check.hpp"
 

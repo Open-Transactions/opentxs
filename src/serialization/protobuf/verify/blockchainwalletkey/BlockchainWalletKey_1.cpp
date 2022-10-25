@@ -7,7 +7,6 @@
 
 #include <BlockchainWalletKey.pb.h>
 #include <ContactEnums.pb.h>
-#include <string>
 
 #include "internal/serialization/protobuf/verify/VerifyContacts.hpp"
 #include "serialization/protobuf/verify/Check.hpp"

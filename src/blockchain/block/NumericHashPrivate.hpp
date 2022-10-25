@@ -5,7 +5,12 @@
 
 #pragma once
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Warray-bounds"
+#pragma GCC diagnostic ignored "-Wstringop-overflow"
 #include <boost/multiprecision/cpp_int.hpp>
+
+#pragma GCC diagnostic pop
 #include <compare>
 #include <cstddef>
 #include <cstdint>

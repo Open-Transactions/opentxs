@@ -6,7 +6,6 @@
 #include "internal/serialization/protobuf/verify/AcceptPendingPayment.hpp"  // IWYU pragma: associated
 
 #include <AcceptPendingPayment.pb.h>
-#include <string>
 
 #include "serialization/protobuf/verify/Check.hpp"
 

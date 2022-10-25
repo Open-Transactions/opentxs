@@ -7,7 +7,6 @@
 #include "blockchain/node/peermanager/PeerManager.hpp"  // IWYU pragma: associated
 
 #include <BlockchainPeerAddress.pb.h>
-#include <boost/asio.hpp>
 #include <atomic>
 #include <chrono>
 #include <iterator>
@@ -17,6 +16,7 @@
 #include <string_view>
 #include <utility>
 
+#include "BoostAsio.hpp"
 #include "core/Worker.hpp"
 #include "internal/api/session/Endpoints.hpp"
 #include "internal/api/session/FactoryAPI.hpp"

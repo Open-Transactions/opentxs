@@ -159,7 +159,7 @@ auto Encode::Base58CheckDecode(std::string_view input, Writer&& output)
 
         return copy(payload, std::move(output));
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogTrace()(OT_PRETTY_CLASS())(e.what()).Flush();
 
         return false;
     }

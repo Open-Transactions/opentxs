@@ -7,8 +7,7 @@
 #include "api/network/asio/Shared.hpp"  // IWYU pragma: associated
 
 #include <boost/algorithm/string.hpp>
-#include <boost/asio.hpp>
-#include <boost/beast/core.hpp>
+#include <boost/intrusive/list.hpp>
 #include <boost/json.hpp>
 #include <boost/smart_ptr/shared_ptr.hpp>
 #include <boost/system/error_code.hpp>
@@ -22,11 +21,13 @@
 #include <functional>
 #include <future>
 #include <memory>
+#include <new>
 #include <stdexcept>
 #include <string_view>
 #include <type_traits>
 #include <utility>
 
+#include "BoostAsio.hpp"
 #include "api/network/asio/Buffers.hpp"
 #include "api/network/asio/Context.hpp"
 #include "api/network/asio/Data.hpp"

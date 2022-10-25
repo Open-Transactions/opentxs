@@ -7,9 +7,6 @@
 
 #pragma once
 
-#include <boost/asio.hpp>
-#include <boost/beast/core.hpp>
-#include <boost/beast/http.hpp>
 #include <boost/smart_ptr/shared_ptr.hpp>
 #include <cs_shared_guarded.h>
 #include <atomic>
@@ -20,6 +17,7 @@
 #include <shared_mutex>
 #include <string_view>
 
+#include "BoostAsio.hpp"
 #include "api/network/asio/Buffers.hpp"
 #include "api/network/asio/Data.hpp"
 #include "internal/api/network/Asio.hpp"

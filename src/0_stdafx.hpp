@@ -5,16 +5,6 @@
 
 #pragma once
 
-// NOTE without this you may get winsock-related problems with boost::asio on
-// Windows:
-//     https://stackoverflow.com/q/9750344
-//     https://stackoverflow.com/a/38201394
-#ifdef _WIN32
-#ifndef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN
-#endif
-#endif
-
 #if defined(BOOST_ALL_NO_LIB)
 // NOTE some versions of clang in some build configurations will emit a "macro
 // is not used" warning regarding BOOST_ALL_NO_LIB if a target is linked against

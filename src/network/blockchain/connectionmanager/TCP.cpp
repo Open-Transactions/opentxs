@@ -6,11 +6,11 @@
 #include "0_stdafx.hpp"  // IWYU pragma: associated
 #include "internal/network/blockchain/ConnectionManager.hpp"  // IWYU pragma: associated
 
-#include <boost/asio.hpp>
 #include <chrono>
 #include <cstddef>
 #include <type_traits>
 
+#include "BoostAsio.hpp"
 #include "internal/api/network/Asio.hpp"
 #include "internal/network/blockchain/Types.hpp"
 #include "internal/util/LogMacros.hpp"

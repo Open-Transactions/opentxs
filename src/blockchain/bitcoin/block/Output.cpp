@@ -8,7 +8,6 @@
 
 #include <BlockchainTransactionOutput.pb.h>
 #include <BlockchainWalletKey.pb.h>
-#include <boost/container/vector.hpp>
 #include <algorithm>
 #include <cstddef>
 #include <cstring>
@@ -64,7 +63,7 @@ auto BitcoinTransactionOutput(
     using ReturnType = blockchain::bitcoin::block::implementation::Output;
 
     try {
-        auto keySet = boost::container::flat_set<blockchain::crypto::Key>{};
+        auto keySet = Set<blockchain::crypto::Key>{};
         std::for_each(std::begin(keys), std::end(keys), [&](const auto& key) {
             keySet.emplace(key);
         });
@@ -111,7 +110,7 @@ auto BitcoinTransactionOutput(
     try {
         auto value = factory::Amount(in.value());
         auto cs = blockchain::bitcoin::CompactSize(in.script().size());
-        auto keys = boost::container::flat_set<blockchain::crypto::Key>{};
+        auto keys = Set<blockchain::crypto::Key>{};
         auto pkh = ReturnType::PubkeyHashes{};
         using Payer = identifier::Generic;
         using Payee = identifier::Generic;
@@ -225,7 +224,7 @@ Output::Output(
     const blockchain::Amount& value,
     std::unique_ptr<const block::Script> script,
     std::optional<std::size_t> size,
-    boost::container::flat_set<crypto::Key>&& keys,
+    Set<crypto::Key>&& keys,
     block::Position minedPosition,
     node::TxoState state,
     UnallocatedSet<node::TxoTag> tags) noexcept(false)
@@ -273,7 +272,7 @@ Output::Output(
     const std::uint32_t index,
     const blockchain::Amount& value,
     std::unique_ptr<const block::Script> script,
-    boost::container::flat_set<crypto::Key>&& keys,
+    Set<crypto::Key>&& keys,
     const VersionNumber version) noexcept(false)
     : Output(
           chain,

@@ -7,7 +7,6 @@
 
 #include <RPCCommand.pb.h>
 #include <RPCEnums.pb.h>
-#include <string>
 
 #include "internal/serialization/protobuf/Basic.hpp"
 #include "internal/serialization/protobuf/verify/APIArgument.hpp"  // IWYU pragma: keep

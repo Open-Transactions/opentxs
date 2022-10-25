@@ -6,7 +6,6 @@
 #include "0_stdafx.hpp"                        // IWYU pragma: associated
 #include "blockchain/bitcoin/block/Input.hpp"  // IWYU pragma: associated
 
-#include <boost/container/vector.hpp>
 #include <algorithm>
 #include <iterator>
 #include <optional>
@@ -19,6 +18,7 @@
 #include "opentxs/api/crypto/Blockchain.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
+#include "opentxs/core/Data.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
@@ -28,7 +28,7 @@ namespace opentxs::blockchain::bitcoin::block::implementation
 Input::Cache::Cache(
     std::unique_ptr<internal::Output>&& output,
     std::optional<std::size_t>&& size,
-    boost::container::flat_set<crypto::Key>&& keys) noexcept
+    Set<crypto::Key>&& keys) noexcept
     : lock_()
     , previous_output_(std::move(output))
     , size_(std::move(size))

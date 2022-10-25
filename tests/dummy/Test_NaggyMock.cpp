@@ -9,6 +9,8 @@
 
 #include "dummy/mocks/DummyInterfaceMock.hpp"
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
 namespace ottest
 {
 TEST(NaggyMock, constructor) { ::ottest::mock::Interface naggyMock; }
@@ -91,3 +93,4 @@ TEST(NaggyMock, naggyMockOnNoExceptConstFunction)
     EXPECT_TRUE(naggyMock.someFunction(2));
 }
 }  // namespace ottest
+#pragma GCC diagnostic pop

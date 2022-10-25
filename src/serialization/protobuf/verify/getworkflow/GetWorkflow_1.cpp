@@ -6,7 +6,6 @@
 #include "internal/serialization/protobuf/verify/GetWorkflow.hpp"  // IWYU pragma: associated
 
 #include <GetWorkflow.pb.h>
-#include <string>
 
 #include "serialization/protobuf/verify/Check.hpp"
 

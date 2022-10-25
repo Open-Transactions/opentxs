@@ -7,7 +7,6 @@
 
 #include <RPCEnums.pb.h>
 #include <TaskComplete.pb.h>
-#include <string>
 
 #include "serialization/protobuf/verify/Check.hpp"
 

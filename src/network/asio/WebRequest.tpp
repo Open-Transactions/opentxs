@@ -7,8 +7,7 @@
 
 #include "internal/network/asio/WebRequest.hpp"  // IWYU pragma: associated
 
-#include <boost/beast/version.hpp>  // IWYU pragma: keep
-
+#include "BoostAsio.hpp"
 #include "api/network/asio/Context.hpp"  // IWYU pragma: keep
 
 namespace opentxs::network::asio

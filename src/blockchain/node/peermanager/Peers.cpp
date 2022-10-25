@@ -6,7 +6,6 @@
 #include "0_stdafx.hpp"                           // IWYU pragma: associated
 #include "blockchain/node/peermanager/Peers.hpp"  // IWYU pragma: associated
 
-#include <boost/asio.hpp>
 #include <boost/system/system_error.hpp>
 #include <algorithm>
 #include <array>
@@ -21,6 +20,7 @@
 #include <string_view>
 #include <utility>
 
+#include "BoostAsio.hpp"
 #include "IncomingConnectionManager.hpp"
 #include "internal/api/session/Endpoints.hpp"
 #include "internal/api/session/Session.hpp"

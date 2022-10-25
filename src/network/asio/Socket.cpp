@@ -6,10 +6,10 @@
 #include "0_stdafx.hpp"                     // IWYU pragma: associated
 #include "opentxs/network/asio/Socket.hpp"  // IWYU pragma: associated
 
-#include <boost/asio.hpp>
 #include <memory>
 #include <utility>
 
+#include "BoostAsio.hpp"
 #include "internal/api/network/Asio.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "network/asio/Socket.hpp"

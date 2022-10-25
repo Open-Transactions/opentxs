@@ -6,7 +6,6 @@
 #include "0_stdafx.hpp"    // IWYU pragma: associated
 #include "util/Timer.hpp"  // IWYU pragma: associated
 
-#include <boost/asio.hpp>
 #include <boost/date_time/posix_time/conversion.hpp>
 #include <boost/date_time/posix_time/posix_time_duration.hpp>
 #include <boost/date_time/time_duration.hpp>
@@ -17,6 +16,7 @@
 #include <type_traits>
 #include <utility>
 
+#include "BoostAsio.hpp"
 #include "api/network/asio/Context.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/util/Log.hpp"

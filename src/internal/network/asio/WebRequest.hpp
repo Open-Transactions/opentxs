@@ -5,15 +5,14 @@
 
 #pragma once
 
-#include <boost/asio.hpp>
-#include <boost/beast/core.hpp>
-#include <boost/beast/http.hpp>
+#include <boost/intrusive/list.hpp>
 #include <functional>
 #include <future>
 #include <memory>
 #include <optional>
 #include <string_view>
 
+#include "BoostAsio.hpp"
 #include "opentxs/util/Allocated.hpp"
 #include "opentxs/util/Container.hpp"
 #include "util/Allocated.hpp"

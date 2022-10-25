@@ -6,6 +6,8 @@
 #include "0_stdafx.hpp"                     // IWYU pragma: associated
 #include "internal/network/asio/HTTPS.hpp"  // IWYU pragma: associated
 
+#include <boost/intrusive/list.hpp>
+#include <boost/smart_ptr/make_shared.hpp>
 #include <boost/system/error_code.hpp>
 #include <openssl/err.h>
 #include <openssl/ssl3.h>
