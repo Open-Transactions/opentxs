@@ -10,6 +10,11 @@
 
 namespace opentxs::blockchain::cfilter
 {
+class OPENTXS_EXPORT Hash;  // IWYU pragma: keep
+}  // namespace opentxs::blockchain::cfilter
+
+namespace opentxs::blockchain::cfilter
+{
 Hash::Hash() noexcept
     : FixedByteArray()
 {

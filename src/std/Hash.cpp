@@ -213,6 +213,22 @@ auto hash<opentxs::ByteArray>::operator()(
     return opentxs::crypto::sodium::Siphash(key, data.Bytes());
 }
 
+auto hash<opentxs::FixedByteArray<16>>::operator()(
+    const opentxs::FixedByteArray<16>& data) const noexcept -> std::size_t
+{
+    static const auto hasher = hash<opentxs::ByteArray>{};
+
+    return hasher(data);
+}
+
+auto hash<opentxs::FixedByteArray<24>>::operator()(
+    const opentxs::FixedByteArray<24>& data) const noexcept -> std::size_t
+{
+    static const auto hasher = hash<opentxs::ByteArray>{};
+
+    return hasher(data);
+}
+
 auto hash<opentxs::FixedByteArray<32>>::operator()(
     const opentxs::FixedByteArray<32>& data) const noexcept -> std::size_t
 {

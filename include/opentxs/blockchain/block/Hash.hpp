@@ -11,7 +11,6 @@
 
 #include "opentxs/Export.hpp"
 #include "opentxs/core/FixedByteArray.hpp"
-#include "opentxs/util/Platform.hpp"
 #include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -41,7 +40,6 @@ struct OPENTXS_EXPORT hash<opentxs::blockchain::block::Hash> {
 
 namespace opentxs::blockchain::block
 {
-// NOTE sorry Windows users, MSVC throws an ICE if we export this symbol
 class OPENTXS_EXPORT_TEMPLATE Hash : virtual public FixedByteArray<32>
 {
 public:

@@ -3,8 +3,6 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-add_library(opentxs-common OBJECT "")
-
 if(OT_QT_EXPORT)
   add_library(opentxs-moc OBJECT "")
 endif()
@@ -164,6 +162,7 @@ if(OT_QT_EXPORT)
       C_CLANG_TIDY ""
       CXX_CLANG_TIDY ""
   )
+  target_compile_definitions(opentxs-moc PRIVATE "${OT_EXPORT_MACRO}")
   target_sources(opentxs PRIVATE $<TARGET_OBJECTS:opentxs-moc>)
 endif()
 
@@ -177,6 +176,7 @@ target_sources(
 )
 
 target_sources(opentxs PRIVATE $<TARGET_OBJECTS:opentxs-common>)
+target_compile_definitions(opentxs-common PRIVATE "${OT_EXPORT_MACRO}")
 set_target_properties(
   opentxs
   PROPERTIES
@@ -263,14 +263,6 @@ if(OT_INSTALL_LIBRARY_DEPENDENCIES)
     set(ZMQ_LIBRARY_PATH "${ZMQ_LIBRARY}")
   endif()
 
-  if(OPENTXS_BUILD_TESTS)
-    install(
-      FILES "${GTEST_LIBRARY}"
-      DESTINATION ${CMAKE_INSTALL_LIBDIR}
-      COMPONENT main
-    )
-  endif(OPENTXS_BUILD_TESTS)
-
   install(
     FILES
       "${Boost_system_LIBRARY}"
@@ -304,6 +296,19 @@ if(OT_INSTALL_LIBRARY_DEPENDENCIES)
     )
     install(
       FILES "${Boost_iostreams_LIBRARY}"
+      DESTINATION ${CMAKE_INSTALL_LIBDIR}
+      COMPONENT main
+    )
+  endif()
+
+  if(Boost_json_FOUND AND NOT OT_BOOST_JSON_HEADER_ONLY)
+    get_target_property(
+      Boost_json_LIBRARY
+      Boost::json
+      IMPORTED_LOCATION_${BUILD_TYPE_SUFFIX}
+    )
+    install(
+      FILES "${Boost_json_LIBRARY}"
       DESTINATION ${CMAKE_INSTALL_LIBDIR}
       COMPONENT main
     )

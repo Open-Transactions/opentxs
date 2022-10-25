@@ -12,6 +12,11 @@
 
 namespace opentxs::blockchain::cfilter
 {
+class OPENTXS_EXPORT Header;  // IWYU pragma: keep
+}  // namespace opentxs::blockchain::cfilter
+
+namespace opentxs::blockchain::cfilter
+{
 Header::Header() noexcept
     : FixedByteArray()
 {

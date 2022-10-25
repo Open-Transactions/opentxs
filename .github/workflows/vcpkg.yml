@@ -9,12 +9,48 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        platform: [macos-11]
-        preset: [full]
+        platform: [macos-11, windows-2022]
+        include:
+          - platform: macos-11
+            vcpkg_installed_root: '/Users/runner/work/opentxs/opentxs/deps/vcpkg_installed'
+            preset: macos
+            static_deps: 'ON'
+          - platform: windows-2022
+            vcpkg_installed_root: 'c:\vcpkg_installed'
+            preset: msvc
+            static_deps: 'OFF'
     env:
       VCPKG_ROOT: '${{ github.workspace }}/deps/vcpkg'
-      VCPKG_INSTALLED_DIR: '${{ github.workspace }}/deps/vcpkg_installed/${{ matrix.platform }}'
+      VCPKG_INSTALLED_DIR: '${{ matrix.vcpkg_installed_root }}/${{ matrix.platform }}'
     steps:
+    - name: Get more disk space
+      run:  |
+        rm -rvf '${GOROOT_1_17_X64}'
+        rm -rvf '${GOROOT_1_18_X64}'
+        rm -rvf '${GOROOT_1_19_X64}'
+        rm -rvf '${JAVA_HOME_11_X64}'
+        rm -rvf '${JAVA_HOME_13_X64}'
+        rm -rvf '${JAVA_HOME_17_X64}'
+        rm -rvf '${JAVA_HOME_8_X64}'
+        rm -rvf '/Users/runner/Library/Android'
+        rm -rvf 'C:\Android'
+        rm -rvf 'C:\Microsoft\AndroidSDK'
+        rm -rvf 'C:\Microsoft\AndroidNDK64'
+        rm -rvf 'C:\Program Files (x86)\Microsoft SDKs\Windows\v10.0A\bin\NETFX 4.7.2 Tools'
+        rm -rvf 'C:\Program Files (x86)\Microsoft SDKs\Windows\v10.0A\bin\NETFX 4.8 Tools'
+        rm -rvf 'C:\Program Files\Google\Chrome'
+        rm -rvf 'C:\Program Files\MongoDB'
+        rm -rvf 'C:\Program Files\Mozilla Firefox'
+        rm -rvf 'C:\Program Files\dotnet'
+        rm -rvf 'C:\ProgramData\docker'
+        rm -rvf 'C:\SeleniumWebDrivers'
+        rm -rvf 'C:\selenium'
+        rm -rvf 'C:\tools\Apache24'
+        rm -rvf 'C:\tools\nginx-1.23.1'
+        rm -rvf 'C:\vcpkg'
+        rm -rvf /usr/bin/link'
+      shell: bash
+      continue-on-error: true
     - name: Checkout opentxs
       uses: actions/checkout@v3
       with:
@@ -22,8 +58,10 @@ jobs:
         submodules: 'recursive'
     - name: Checkout vcpkg_installed
       run: |
-        git clone --depth=1 --single-branch --branch=master https://gitlab.com/open-transactions/vcpkg.git/ '${{ github.workspace }}/deps/vcpkg_installed'
+        git clone --depth=1 --single-branch --branch='${{ matrix.platform }}' https://gitlab.com/open-transactions/vcpkg.git/ '${{ matrix.vcpkg_installed_root }}'
       shell: bash
+    - name: Configure build environment
+      uses: ilammy/msvc-dev-cmd@v1
     - name: Update cmake
       uses: lukka/get-cmake@latest
     - name: Setup vcpkg
@@ -33,5 +71,5 @@ jobs:
     - name: 'Compile'
       run: |
         cd '${{ github.workspace }}'
-        cmake -S '${{ github.workspace }}' --preset '${{ matrix.preset }}' -DCMAKE_TOOLCHAIN_FILE='${{ github.workspace }}/deps/vcpkg/scripts/buildsystems/vcpkg.cmake' -DVCPKG_INSTALLED_DIR='${{ env.VCPKG_INSTALLED_DIR }}'
+        cmake -S '${{ github.workspace }}' --preset '${{ matrix.preset }}' -DVCPKG_INSTALLED_DIR='${{ env.VCPKG_INSTALLED_DIR }}' -DOT_STATIC_DEPENDENCIES='${{ matrix.static_deps }}'
         cmake --build --preset '${{ matrix.preset }}' -- -k 0

@@ -352,6 +352,20 @@ private:
         Vector<ScanStatus>& out,
         allocator_type monotonic) const noexcept
         -> std::optional<block::Position>;
+    auto scan(
+        const Log& log,
+        const Time start,
+        const bool rescan,
+        const block::Position& best,
+        const block::Height stop,
+        const block::Height startHeight,
+        const std::string_view procedure,
+        std::atomic_bool& atLeastOnce,
+        std::optional<block::Position>& highestClean,
+        block::Position& highestTested,
+        wallet::MatchCache::Results& results,
+        Vector<ScanStatus>& out,
+        allocator_type monotonic) const noexcept(false) -> void;
     auto select_all(
         const block::Position& block,
         const Elements& in,

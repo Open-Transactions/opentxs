@@ -7,6 +7,14 @@ add_library(ottest OBJECT "")
 add_library(ottest-basic OBJECT "")
 add_library(ottest-lowlevel OBJECT "")
 add_library(ottest-pch OBJECT "pch.cpp")
+
+if((NOT BUILD_SHARED_LIBS) OR (NOT OPENTXS_HIDDEN_SYMBOLS))
+  target_compile_definitions(ottest PRIVATE OPENTXS_STATIC_DEFINE)
+  target_compile_definitions(ottest-basic PRIVATE OPENTXS_STATIC_DEFINE)
+  target_compile_definitions(ottest-lowlevel PRIVATE OPENTXS_STATIC_DEFINE)
+  target_compile_definitions(ottest-pch PRIVATE OPENTXS_STATIC_DEFINE)
+endif()
+
 target_link_libraries(ottest-pch PRIVATE ottest)
 set_target_properties(
   ottest-pch
@@ -40,6 +48,10 @@ function(
       POSITION_INDEPENDENT_CODE 1
       UNITY_BUILD OFF
   )
+
+  if((NOT BUILD_SHARED_LIBS) OR (NOT OPENTXS_HIDDEN_SYMBOLS))
+    target_compile_definitions(${target_name} PRIVATE OPENTXS_STATIC_DEFINE)
+  endif()
 
   if(WIN32)
     set_target_properties(${target_name} PROPERTIES LINK_OPTIONS /STACK:2097152)

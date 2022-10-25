@@ -9,7 +9,10 @@
         {
             "name": "vcpkg",
             "hidden": true,
-            "toolchainFile": "deps/vcpkg/scripts/buildsystems/vcpkg.cmake"
+            "toolchainFile": "deps/vcpkg/scripts/buildsystems/vcpkg.cmake",
+            "cacheVariables": {
+                "OT_BOOST_JSON_HEADER_ONLY": "OFF"
+            }
         },
         {
             "name": "default",
@@ -75,7 +78,7 @@
         },
         {
             "name": "nopch",
-            "displayName": "Production",
+            "displayName": "no PCH",
             "description":
                 "Debug build with precompiled headers and jumbo build disabled, and all other options enabled. Use this preset for IWYU and other analysis tools.",
             "binaryDir": "${sourceDir}/build/prod",
@@ -374,6 +377,34 @@
                 "CMAKE_FIND_ROOT_PATH":
                     "/usr/android/x86;/usr/qt-for-android/x86"
             }
+        },
+        {
+            "name": "macos",
+            "displayName": "macos",
+            "description": "configure build on macos for ci",
+            "binaryDir": "${sourceDir}/build/macos",
+            "inherits": [
+                "full",
+                "vcpkg"
+            ]
+        },
+        {
+            "name": "msvc",
+            "displayName": "msvc",
+            "description": "configure build on windows for ci",
+            "binaryDir": "${sourceDir}/build/msvc",
+            "inherits": [
+                "full",
+                "vcpkg"
+            ],
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release",
+                "BUILD_SHARED_LIBS": "ON",
+                "OPENTXS_BUILD_TESTS": "OFF",
+                "OPENTXS_PEDANTIC_BUILD": "OFF",
+                "CMAKE_C_COMPILER": "cl.exe",
+                "CMAKE_CXX_COMPILER": "cl.exe"
+            }
         }
     ],
     "buildPresets": [
@@ -444,6 +475,14 @@
         {
             "name": "android-x86",
             "configurePreset": "android-x86"
+        },
+        {
+            "name": "macos",
+            "configurePreset": "macos"
+        },
+        {
+            "name": "msvc",
+            "configurePreset": "msvc"
         }
     ]
 }

@@ -9,7 +9,6 @@ add_subdirectory(platform)
 add_subdirectory(storage)
 
 set(cxx-install-headers
-    "${opentxs_BINARY_DIR}/include/opentxs/util/Platform.hpp"
     "${opentxs_SOURCE_DIR}/include/opentxs/util/Allocated.hpp"
     "${opentxs_SOURCE_DIR}/include/opentxs/util/Allocator.hpp"
     "${opentxs_SOURCE_DIR}/include/opentxs/util/BlockchainProfile.hpp"

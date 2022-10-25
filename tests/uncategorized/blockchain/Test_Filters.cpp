@@ -51,7 +51,7 @@ public:
 
     auto TestGCSBlock(const ot::blockchain::block::Height height) const -> bool
     {
-        const auto& vector = gcs_.at(0);
+        const auto& vector = gcs_.at(height);
         const auto block = api_.Factory().DataFromHex(vector.block_hash_);
         auto elements = ot::Vector<ot::ByteArray>{};
 
@@ -507,11 +507,14 @@ TEST_F(Test_Filters, hash)
 
 TEST_F(Test_Filters, init_array)
 {
-    constexpr auto count{10000000u};
+    constexpr auto count{1000000u};
     stress_test_.reserve(count);
+    stress_test_.clear();
 
     {
-        auto& first = stress_test_.emplace_back(api_.Factory().Data());
+        ASSERT_TRUE(stress_test_.empty());
+
+        auto& first = stress_test_.emplace_back();
         first.SetSize(32);
 
         ASSERT_TRUE(
@@ -520,7 +523,7 @@ TEST_F(Test_Filters, init_array)
 
     while (stress_test_.size() < count) {
         const auto& previous = stress_test_.back();
-        auto& next = stress_test_.emplace_back(api_.Factory().Data());
+        auto& next = stress_test_.emplace_back();
 
         EXPECT_TRUE(api_.Crypto().Hash().Digest(
             ot::crypto::HashType::Sha256, previous.Bytes(), next.WriteInto()));

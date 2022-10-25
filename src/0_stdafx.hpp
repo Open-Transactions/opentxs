@@ -21,3 +21,9 @@
 // Boost::headers but some of the translation units in the target do not
 // actually include any boost headers
 #endif
+
+#ifndef opentxs_EXPORTS
+#ifndef OPENTXS_STATIC_DEFINE
+#error opentxs_EXPORTS or OPENTXS_STATIC_DEFINE must be defined when building the library
+#endif
+#endif

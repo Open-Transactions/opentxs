@@ -1,0 +1,22 @@
+
+#ifdef OPENTXS_STATIC_DEFINE
+#  define OPENTXS_EXPORT_TEMPLATE OPENTXS_EXPORT
+#else
+#  ifndef OPENTXS_EXPORT_TEMPLATE
+#    ifdef opentxs_EXPORTS
+      /* We are building this library */
+#      ifdef WIN32
+#        define OPENTXS_EXPORT_TEMPLATE
+#      else
+#        define OPENTXS_EXPORT_TEMPLATE OPENTXS_EXPORT
+#      endif
+#    else
+      /* We are using this library */
+#      ifdef WIN32
+#        define OPENTXS_EXPORT_TEMPLATE __declspec(dllimport)
+#      else
+#        define OPENTXS_EXPORT_TEMPLATE OPENTXS_EXPORT
+#      endif
+#    endif
+#  endif
+#endif

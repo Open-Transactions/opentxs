@@ -152,3 +152,9 @@ if(OT_BUNDLED_SECP256K1 AND OT_CRYPTO_USING_LIBSECP256K1)
                                                        ""
   )
 endif()
+
+if(OT_BOOST_JSON_HEADER_ONLY)
+  target_sources(opentxs-common PRIVATE "Json.cpp")
+else()
+  target_link_libraries(opentxs PUBLIC Boost::json)
+endif()

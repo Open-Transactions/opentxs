@@ -1031,286 +1031,27 @@ auto SubchainStateData::scan(
         const auto procedure = rescan ? "rescan"sv : "scan"sv;
         const auto& log = log_;
         const auto& name = name_;
-        const auto& node = node_;
-        const auto& type = filter_type_;
-        const auto& headers = node.HeaderOracle();
-        const auto& filters = node.FilterOracle();
         const auto start = Clock::now();
         const auto startHeight = highestTested.height_ + 1;
         auto atLeastOnce = std::atomic_bool{false};
         auto highestClean = std::optional<block::Position>{std::nullopt};
         auto safe = alloc::ThreadSafe{unsafe.resource()};
         auto monotonic = allocator_type{std::addressof(safe)};
-        auto resultMap = [&] {
-            const auto elementsPerFilter = [this] {
-                const auto cached = elements_per_cfilter_.load();
-
-                if (0_uz == cached) {
-                    const auto chainDefault =
-                        params::get(chain_).CfilterBatchEstimate();
-
-                    return std::max<std::size_t>(1_uz, chainDefault);
-                } else {
-
-                    return cached;
-                }
-            }();
-
-            OT_ASSERT(0_uz < elementsPerFilter);
-
-            constexpr auto GetBatchSize = [](std::size_t cfilter,
-                                             std::size_t user) {
-                constexpr auto cfilterWeight = 1_uz;
-                constexpr auto walletWeight = 5_uz;
-                constexpr auto target = 425000_uz;
-                constexpr auto max = 10000_uz;
-
-                return std::min<std::size_t>(
-                    std::max<std::size_t>(
-                        (target * (cfilterWeight * walletWeight)) /
-                            ((cfilterWeight * cfilter) + (walletWeight * user)),
-                        1_uz),
-                    max);
-            };
-            static_assert(GetBatchSize(1, 1) == 10000);
-            static_assert(GetBatchSize(25, 40) == 9444);
-            static_assert(GetBatchSize(1000, 40) == 1770);
-            static_assert(GetBatchSize(25, 400) == 1049);
-            static_assert(GetBatchSize(1000, 400) == 708);
-            static_assert(GetBatchSize(25, 4000) == 106);
-            static_assert(GetBatchSize(25, 40000) == 10);
-            static_assert(GetBatchSize(1000, 40000) == 10);
-            static_assert(GetBatchSize(25, 400000) == 1);
-            static_assert(GetBatchSize(25, 4000000) == 1);
-            static_assert(GetBatchSize(10000, 4000000) == 1);
-            auto handle = element_cache_.lock_shared();
-            const auto& elements = handle->GetElements();
-            const auto elementCount =
-                std::max<std::size_t>(elements.size(), 1_uz);
-            // NOTE attempting to scan too many filters at once causes this
-            // function to take excessive time to execute, which means the Scan
-            // and Rescan Actors will be unable to process new messages for an
-            // extended amount of time which has many negative side effects. The
-            // GetBatchSize function attempts to prevent this from happening by
-            // limiting the batch size to a reasonable value based on the
-            // average cfilter element count (estimated) and match set for this
-            // subchain (known).
-            const auto threads = choose_thread_count(elementCount);
-
-            OT_ASSERT(0_uz < threads);
-
-            const auto scanBatch = std::min(
-                maximum_scan_,
-                GetBatchSize(elementsPerFilter, elementCount) * threads);
-            log(OT_PRETTY_CLASS())(name)(" filter size: ")(
-                elementsPerFilter)(" wallet size: ")(
-                elementCount)(" batch size: ")(scanBatch)
-                .Flush();
-            const auto stopHeight = std::min(
-                std::min<block::Height>(
-                    startHeight + scanBatch - 1, best.height_),
-                stop);
-
-            if (startHeight > stopHeight) {
-                log(OT_PRETTY_CLASS())(name)(" attempted to ")(
-                    procedure)(" filters from ")(startHeight)(" to ")(
-                    stopHeight)(" but this is impossible")
-                    .Flush();
-
-                throw std::runtime_error{""};
-            }
-
-            log(OT_PRETTY_CLASS())(name)(" ")(procedure)("ning filters from ")(
-                startHeight)(" to ")(stopHeight)
-                .Flush();
-            const auto target =
-                static_cast<std::size_t>(stopHeight - startHeight + 1);
-            const auto blocks =
-                headers.BestHashes(startHeight, target, monotonic);
-
-            if (blocks.empty()) { throw std::runtime_error{""}; }
-
-            auto filterPromise = std::promise<Vector<GCS>>{};
-            auto filterFuture = filterPromise.get_future();
-            auto tp = api_.Network().Asio().Internal().Post(
-                ThreadPool::General,
-                [&] {
-                    // NOLINTNEXTLINE(modernize-avoid-c-arrays)
-                    std::byte buf[thread_pool_monotonic_];
-                    auto upstream =
-                        alloc::StandardToBoost(get_allocator().resource());
-                    auto resource = alloc::BoostMonotonic(
-                        buf, sizeof(buf), std::addressof(upstream));
-                    auto temp = allocator_type{std::addressof(resource)};
-                    filterPromise.set_value(
-                        filters.LoadFilters(type, blocks, monotonic, temp));
-                },
-                "SubchainStateData filter");
-
-            if (false == tp) { throw std::runtime_error{""}; }
-
-            auto selected = BlockTargets{monotonic};
-            select_targets(*handle, blocks, elements, startHeight, selected);
-
-            OT_ASSERT(false == selected.empty());
-
-            auto results = wallet::MatchCache::Results{get_allocator()};
-            auto prehash = PrehashData{
-                api_,
-                selected,
-                name_,
-                results,
-                startHeight,
-                std::min(threads, selected.size()),
-                monotonic};
-
-            if (1_uz < prehash.job_count_) {
-                auto count = job_counter_.Allocate();
-
-                for (auto n{0_uz}; n < prehash.job_count_; ++n) {
-                    tp = api_.Network().Asio().Internal().Post(
-                        ThreadPool::General,
-                        [post = std::make_shared<ScopeGuard>(
-                             [&count] { ++count; }, [&] { --count; }),
-                         n,
-                         &prehash] { prehash.Prepare(n); },
-                        "SubchainStateData prehash 1");
-
-                    if (false == tp) { throw std::runtime_error{""}; }
-                }
-            } else {
-                prehash.Prepare(0_uz);
-            }
-
-            const auto havePrehash = Clock::now();
-            log_(OT_PRETTY_CLASS())(name)(" ")(
-                procedure)(" calculated target hashes for ")(blocks.size())(
-                " cfilters in ")(std::chrono::nanoseconds{havePrehash - start})
-                .Flush();
-            const auto cfilters = [&] {
-                auto out = filterFuture.get();
-                out.erase(
-                    std::find_if(
-                        out.begin(),
-                        out.end(),
-                        [](const auto& filter) {
-                            return false == filter.IsValid();
-                        }),
-                    out.end());
-
-                return out;
-            }();
-            const auto haveCfilters = Clock::now();
-            log_(OT_PRETTY_CLASS())(name)(" ")(
-                procedure)(" loaded cfilters in ")(
-                std::chrono::nanoseconds{haveCfilters - havePrehash})
-                .Flush();
-            const auto cfilterCount = cfilters.size();
-
-            OT_ASSERT(cfilterCount <= blocks.size());
-
-            auto data = MatchResults{std::make_tuple(
-                Positions{monotonic},
-                Positions{monotonic},
-                FilterMap{monotonic})};
-
-            OT_ASSERT(0_uz < selected.size());
-
-            if ((1_uz < prehash.job_count_)) {
-                auto count = job_counter_.Allocate();
-
-                for (auto n{0_uz}; n < prehash.job_count_; ++n) {
-                    tp = api_.Network().Asio().Internal().Post(
-                        ThreadPool::General,
-                        [&,
-                         n,
-                         post = std::make_shared<ScopeGuard>(
-                             [&count] { ++count; }, [&] { --count; })] {
-                            // NOLINTNEXTLINE(modernize-avoid-c-arrays)
-                            std::byte buf[thread_pool_monotonic_];
-                            auto upstream = alloc::StandardToBoost(
-                                get_allocator().resource());
-                            auto resource = alloc::BoostMonotonic(
-                                buf, sizeof(buf), std::addressof(upstream));
-                            auto temp =
-                                allocator_type{std::addressof(resource)};
-                            prehash.Match(
-                                procedure,
-                                log,
-                                cfilters,
-                                atLeastOnce,
-                                n,
-                                results,
-                                data,
-                                temp);
-                        },
-                        "SubchainStateData prehash 2");
-
-                    if (false == tp) { throw std::runtime_error{""}; }
-                }
-            } else {
-                prehash.Match(
-                    procedure,
-                    log,
-                    cfilters,
-                    atLeastOnce,
-                    0_uz,
-                    results,
-                    data,
-                    monotonic);
-            }
-
-            {
-                auto handle = data.lock_shared();
-                const auto& [clean, dirty, sizes] = *handle;
-
-                if (auto size = dirty.size(); 0 < size) {
-                    log_(OT_PRETTY_CLASS())(name_)(" requesting ")(
-                        size)(" block hashes from block oracle")
-                        .Flush();
-                    to_block_oracle_.SendDeferred(
-                        [&](const auto& dirty) {
-                            auto work = MakeWork(
-                                node::blockoracle::Job::request_blocks);
-
-                            for (const auto& position : dirty) {
-                                const auto& [height, hash] = position;
-                                work.AddFrame(hash);
-                                out.emplace_back(ScanState::dirty, position);
-                            }
-
-                            return work;
-                        }(dirty),
-                        __FILE__,
-                        __LINE__);
-                }
-
-                highestClean = highest_clean(*handle, highestTested);
-
-                if (false == rescan) {
-                    std::transform(
-                        sizes.begin(),
-                        sizes.end(),
-                        std::back_inserter(filter_sizes_),
-                        [](const auto& in) { return in.second; });
-
-                    // NOTE these statements calculate a 1000 block (or whatever
-                    // cfilter_size_window_ is set to) simple moving average of
-                    // cfilter element sizes
-
-                    while (cfilter_size_window_ < filter_sizes_.size()) {
-                        filter_sizes_.pop_front();
-                    }
-
-                    const auto totalCfilterElements = std::accumulate(
-                        filter_sizes_.begin(), filter_sizes_.end(), 0_uz);
-                    elements_per_cfilter_.store(std::max(
-                        1_uz, totalCfilterElements / filter_sizes_.size()));
-                }
-            }
-
-            return results;
-        }();
+        auto resultMap = wallet::MatchCache::Results{get_allocator()};
+        scan(
+            log,
+            start,
+            rescan,
+            best,
+            stop,
+            startHeight,
+            procedure,
+            atLeastOnce,
+            highestClean,
+            highestTested,
+            resultMap,
+            out,
+            monotonic);
 
         if (atLeastOnce.load()) {
             if (false == resultMap.empty()) {
@@ -1332,6 +1073,276 @@ auto SubchainStateData::scan(
     } catch (...) {
 
         return std::nullopt;
+    }
+}
+
+auto SubchainStateData::scan(
+    const Log& log,
+    const Time start,
+    const bool rescan,
+    const block::Position& best,
+    const block::Height stop,
+    const block::Height startHeight,
+    const std::string_view procedure,
+    std::atomic_bool& atLeastOnce,
+    std::optional<block::Position>& highestClean,
+    block::Position& highestTested,
+    wallet::MatchCache::Results& results,
+    Vector<ScanStatus>& out,
+    allocator_type monotonic) const noexcept(false) -> void
+{
+    const auto elementsPerFilter = [this] {
+        const auto cached = elements_per_cfilter_.load();
+
+        if (0_uz == cached) {
+            const auto chainDefault =
+                params::get(chain_).CfilterBatchEstimate();
+
+            return std::max<std::size_t>(1_uz, chainDefault);
+        } else {
+
+            return cached;
+        }
+    }();
+
+    OT_ASSERT(0_uz < elementsPerFilter);
+
+    constexpr auto GetBatchSize = [](std::size_t cfilter, std::size_t user) {
+        constexpr auto cfilterWeight = 1_uz;
+        constexpr auto walletWeight = 5_uz;
+        constexpr auto target = 425000_uz;
+        constexpr auto max = 10000_uz;
+
+        return std::min<std::size_t>(
+            std::max<std::size_t>(
+                (target * (cfilterWeight * walletWeight)) /
+                    ((cfilterWeight * cfilter) + (walletWeight * user)),
+                1_uz),
+            max);
+    };
+    static_assert(GetBatchSize(1, 1) == 10000);
+    static_assert(GetBatchSize(25, 40) == 9444);
+    static_assert(GetBatchSize(1000, 40) == 1770);
+    static_assert(GetBatchSize(25, 400) == 1049);
+    static_assert(GetBatchSize(1000, 400) == 708);
+    static_assert(GetBatchSize(25, 4000) == 106);
+    static_assert(GetBatchSize(25, 40000) == 10);
+    static_assert(GetBatchSize(1000, 40000) == 10);
+    static_assert(GetBatchSize(25, 400000) == 1);
+    static_assert(GetBatchSize(25, 4000000) == 1);
+    static_assert(GetBatchSize(10000, 4000000) == 1);
+    auto handle = element_cache_.lock_shared();
+    const auto& elements = handle->GetElements();
+    const auto elementCount = std::max<std::size_t>(elements.size(), 1_uz);
+    // NOTE attempting to scan too many filters at once causes this
+    // function to take excessive time to execute, which means the Scan
+    // and Rescan Actors will be unable to process new messages for an
+    // extended amount of time which has many negative side effects. The
+    // GetBatchSize function attempts to prevent this from happening by
+    // limiting the batch size to a reasonable value based on the
+    // average cfilter element count (estimated) and match set for this
+    // subchain (known).
+    const auto threads = choose_thread_count(elementCount);
+
+    OT_ASSERT(0_uz < threads);
+
+    const auto scanBatch = std::min(
+        maximum_scan_, GetBatchSize(elementsPerFilter, elementCount) * threads);
+    log(OT_PRETTY_CLASS())(name_)(" filter size: ")(
+        elementsPerFilter)(" wallet size: ")(elementCount)(" batch size: ")(
+        scanBatch)
+        .Flush();
+    const auto stopHeight = std::min(
+        std::min<block::Height>(startHeight + scanBatch - 1, best.height_),
+        stop);
+
+    if (startHeight > stopHeight) {
+        log(OT_PRETTY_CLASS())(name_)(" attempted to ")(
+            procedure)(" filters from ")(startHeight)(" to ")(
+            stopHeight)(" but this is impossible")
+            .Flush();
+
+        throw std::runtime_error{""};
+    }
+
+    log(OT_PRETTY_CLASS())(name_)(" ")(procedure)("ning filters from ")(
+        startHeight)(" to ")(stopHeight)
+        .Flush();
+    const auto target = static_cast<std::size_t>(stopHeight - startHeight + 1);
+    const auto blocks =
+        node_.HeaderOracle().BestHashes(startHeight, target, monotonic);
+
+    if (blocks.empty()) { throw std::runtime_error{""}; }
+
+    auto filterPromise = std::promise<Vector<GCS>>{};
+    auto filterFuture = filterPromise.get_future();
+    auto tp = api_.Network().Asio().Internal().Post(
+        ThreadPool::General,
+        [&] {
+            // NOLINTNEXTLINE(modernize-avoid-c-arrays)
+            std::byte buf[thread_pool_monotonic_];
+            auto upstream = alloc::StandardToBoost(get_allocator().resource());
+            auto resource = alloc::BoostMonotonic(
+                buf, sizeof(buf), std::addressof(upstream));
+            auto temp = allocator_type{std::addressof(resource)};
+            filterPromise.set_value(node_.FilterOracle().LoadFilters(
+                filter_type_, blocks, monotonic, temp));
+        },
+        "SubchainStateData filter");
+
+    if (false == tp) { throw std::runtime_error{""}; }
+
+    auto selected = BlockTargets{monotonic};
+    select_targets(*handle, blocks, elements, startHeight, selected);
+
+    OT_ASSERT(false == selected.empty());
+
+    auto prehash = PrehashData{
+        api_,
+        selected,
+        name_,
+        results,
+        startHeight,
+        std::min(threads, selected.size()),
+        monotonic};
+
+    if (1_uz < prehash.job_count_) {
+        auto count = job_counter_.Allocate();
+
+        for (auto n{0_uz}; n < prehash.job_count_; ++n) {
+            tp = api_.Network().Asio().Internal().Post(
+                ThreadPool::General,
+                [post = std::make_shared<ScopeGuard>(
+                     [&count] { ++count; }, [&] { --count; }),
+                 n,
+                 &prehash] { prehash.Prepare(n); },
+                "SubchainStateData prehash 1");
+
+            if (false == tp) { throw std::runtime_error{""}; }
+        }
+    } else {
+        prehash.Prepare(0_uz);
+    }
+
+    const auto havePrehash = Clock::now();
+    log_(OT_PRETTY_CLASS())(name_)(" ")(
+        procedure)(" calculated target hashes for ")(blocks.size())(
+        " cfilters in ")(std::chrono::nanoseconds{havePrehash - start})
+        .Flush();
+    const auto cfilters = [&] {
+        auto out = filterFuture.get();
+        out.erase(
+            std::find_if(
+                out.begin(),
+                out.end(),
+                [](const auto& filter) { return false == filter.IsValid(); }),
+            out.end());
+
+        return out;
+    }();
+    const auto haveCfilters = Clock::now();
+    log_(OT_PRETTY_CLASS())(name_)(" ")(procedure)(" loaded cfilters in ")(
+        std::chrono::nanoseconds{haveCfilters - havePrehash})
+        .Flush();
+    const auto cfilterCount = cfilters.size();
+
+    OT_ASSERT(cfilterCount <= blocks.size());
+
+    auto data = MatchResults{std::make_tuple(
+        Positions{monotonic}, Positions{monotonic}, FilterMap{monotonic})};
+
+    OT_ASSERT(0_uz < selected.size());
+
+    if ((1_uz < prehash.job_count_)) {
+        auto count = job_counter_.Allocate();
+
+        for (auto n{0_uz}; n < prehash.job_count_; ++n) {
+            tp = api_.Network().Asio().Internal().Post(
+                ThreadPool::General,
+                [&,
+                 n,
+                 post = std::make_shared<ScopeGuard>(
+                     [&count] { ++count; }, [&] { --count; })] {
+                    // NOLINTNEXTLINE(modernize-avoid-c-arrays)
+                    std::byte buf[thread_pool_monotonic_];
+                    auto upstream =
+                        alloc::StandardToBoost(get_allocator().resource());
+                    auto resource = alloc::BoostMonotonic(
+                        buf, sizeof(buf), std::addressof(upstream));
+                    auto temp = allocator_type{std::addressof(resource)};
+                    prehash.Match(
+                        procedure,
+                        log,
+                        cfilters,
+                        atLeastOnce,
+                        n,
+                        results,
+                        data,
+                        temp);
+                },
+                "SubchainStateData prehash 2");
+
+            if (false == tp) { throw std::runtime_error{""}; }
+        }
+    } else {
+        prehash.Match(
+            procedure,
+            log,
+            cfilters,
+            atLeastOnce,
+            0_uz,
+            results,
+            data,
+            monotonic);
+    }
+
+    {
+        auto handle = data.lock_shared();
+        const auto& [clean, dirty, sizes] = *handle;
+
+        if (auto size = dirty.size(); 0 < size) {
+            log_(OT_PRETTY_CLASS())(name_)(" requesting ")(
+                size)(" block hashes from block oracle")
+                .Flush();
+            to_block_oracle_.SendDeferred(
+                [&](const auto& dirty) {
+                    auto work =
+                        MakeWork(node::blockoracle::Job::request_blocks);
+
+                    for (const auto& position : dirty) {
+                        const auto& [height, hash] = position;
+                        work.AddFrame(hash);
+                        out.emplace_back(ScanState::dirty, position);
+                    }
+
+                    return work;
+                }(dirty),
+                __FILE__,
+                __LINE__);
+        }
+
+        highestClean = highest_clean(*handle, highestTested);
+
+        if (false == rescan) {
+            std::transform(
+                sizes.begin(),
+                sizes.end(),
+                std::back_inserter(filter_sizes_),
+                [](const auto& in) { return in.second; });
+
+            // NOTE these statements calculate a 1000 block (or whatever
+            // cfilter_size_window_ is set to) simple moving average of
+            // cfilter element sizes
+
+            while (cfilter_size_window_ < filter_sizes_.size()) {
+                filter_sizes_.pop_front();
+            }
+
+            const auto totalCfilterElements = std::accumulate(
+                filter_sizes_.begin(), filter_sizes_.end(), 0_uz);
+            elements_per_cfilter_.store(
+                std::max(1_uz, totalCfilterElements / filter_sizes_.size()));
+        }
     }
 }
 

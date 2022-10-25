@@ -10,6 +10,7 @@ extern "C" {
 }
 
 #include <cstddef>
+#include <filesystem>
 #include <future>
 #include <iosfwd>
 #include <mutex>
@@ -82,7 +83,7 @@ public:
 private:
     using ot_super = Plugin;
 
-    UnallocatedCString folder_;
+    const std::filesystem::path folder_;
     mutable std::mutex transaction_lock_;
     mutable OTFlag transaction_bucket_;
     mutable UnallocatedVector<
