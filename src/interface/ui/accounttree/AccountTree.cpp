@@ -27,6 +27,7 @@
 #include "internal/network/zeromq/socket/Types.hpp"
 #include "internal/otx/common/Account.hpp"
 #include "internal/util/LogMacros.hpp"
+#include "internal/util/P0330.hpp"
 #include "internal/util/Shared.hpp"
 #include "opentxs/api/crypto/Blockchain.hpp"
 #include "opentxs/api/session/Client.hpp"
@@ -101,17 +102,23 @@ auto AccountTree::add_children(ChildMap&& map) noexcept -> void
                 [&] {
                     auto out = CustomData{};
                     using Accounts = UnallocatedVector<AccountCurrencyRowData>;
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wnull-dereference"
                     auto& data = [&]() -> auto&
                     {
-                        auto& ptr = out.emplace_back(
-                            std::make_unique<Accounts>().release());
+                        auto p = std::make_unique<Accounts>();
 
-                        OT_ASSERT(1u == out.size());
+                        OT_ASSERT(p);
+
+                        auto& ptr = out.emplace_back(p.release());
+
+                        OT_ASSERT(1_uz == out.size());
                         OT_ASSERT(nullptr != ptr);
 
                         return *reinterpret_cast<Accounts*>(ptr);
                     }
                     ();
+#pragma GCC diagnostic pop
 
                     for (auto& [accountID, accountData] :
                          std::get<3>(it.second)) {

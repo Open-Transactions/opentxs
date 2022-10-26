@@ -5,8 +5,6 @@
 
 #pragma once
 
-#include <boost/asio.hpp>
-#include <boost/asio/ip/address_v6.hpp>
 #include <boost/endian/buffers.hpp>
 #include <boost/endian/conversion.hpp>
 #include <array>
@@ -15,6 +13,7 @@
 #include <memory>
 #include <string_view>
 
+#include "BoostAsio.hpp"
 #include "internal/blockchain/bitcoin/Bitcoin.hpp"
 #include "internal/blockchain/p2p/P2P.hpp"
 #include "opentxs/blockchain/BlockchainType.hpp"

@@ -8,7 +8,6 @@
 #include <Enums.pb.h>
 #include <PeerEnums.pb.h>
 #include <PeerRequest.pb.h>
-#include <string>
 
 #include "internal/serialization/protobuf/Basic.hpp"
 #include "internal/serialization/protobuf/verify/Bailment.hpp"  // IWYU pragma: keep

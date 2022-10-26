@@ -6,7 +6,6 @@
 #include "internal/serialization/protobuf/verify/APIArgument.hpp"  // IWYU pragma: associated
 
 #include <APIArgument.pb.h>
-#include <string>
 
 #include "serialization/protobuf/verify/Check.hpp"
 

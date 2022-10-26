@@ -5,11 +5,12 @@
 
 #pragma once
 
-#include <boost/asio.hpp>
 #include <cstddef>
 #include <cstdint>
 #include <type_traits>
 #include <utility>
+
+#include "BoostAsio.hpp"
 
 namespace opentxs::api::network::asio
 {

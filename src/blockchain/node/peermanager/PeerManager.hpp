@@ -5,8 +5,6 @@
 
 #pragma once
 
-#include <boost/asio.hpp>
-#include <boost/asio/ip/tcp.hpp>
 #include <boost/container/flat_set.hpp>
 #include <boost/container/vector.hpp>
 #include <atomic>
@@ -19,6 +17,7 @@
 #include <string_view>
 #include <utility>
 
+#include "BoostAsio.hpp"
 #include "blockchain/node/peermanager/Peers.hpp"
 #include "core/Worker.hpp"
 #include "internal/blockchain/node/PeerManager.hpp"

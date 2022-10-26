@@ -92,9 +92,12 @@ TEST(OT_suite, ShouldSuccessfullyInitializeContextWithValidPasswordCaller)
     const ot::UnallocatedCString expected = "";
     ot::UnallocatedCString error_message;
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
     StrictMock<ot_mocks::PasswordCallbackMock> mock;
     opentxs::PasswordCaller caller;
     caller.SetCallback(&mock);
+#pragma GCC diagnostic pop
 
     try {
         opentxs::InitContext(&caller);
@@ -132,9 +135,12 @@ TEST(
     const ot::UnallocatedCString expected = "";
     ot::UnallocatedCString error_message;
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
     StrictMock<ot_mocks::PasswordCallbackMock> mock;
     opentxs::PasswordCaller caller;
     caller.SetCallback(&mock);
+#pragma GCC diagnostic pop
 
     try {
         opentxs::InitContext(ottest::Args(true), &caller);
@@ -184,9 +190,12 @@ TEST(
     const ot::UnallocatedCString expected = "Context is already initialized";
     ot::UnallocatedCString error_message;
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
     StrictMock<ot_mocks::PasswordCallbackMock> mock;
     opentxs::PasswordCaller caller;
     caller.SetCallback(&mock);
+#pragma GCC diagnostic pop
 
     try {
         opentxs::InitContext(&caller);
@@ -206,9 +215,12 @@ TEST(
     const ot::UnallocatedCString expected = "Context is already initialized";
     ot::UnallocatedCString error_message;
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
     StrictMock<ot_mocks::PasswordCallbackMock> mock;
     opentxs::PasswordCaller caller;
     caller.SetCallback(&mock);
+#pragma GCC diagnostic pop
 
     try {
         opentxs::InitContext(ottest::Args(true), &caller);

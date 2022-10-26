@@ -6,7 +6,6 @@
 #include "internal/serialization/protobuf/verify/TransactionData.hpp"  // IWYU pragma: associated
 
 #include <TransactionData.pb.h>
-#include <string>
 
 #include "serialization/protobuf/verify/Check.hpp"
 

@@ -10,7 +10,6 @@
 #include <BlockchainPreviousOutput.pb.h>
 #include <BlockchainTransactionInput.pb.h>
 #include <BlockchainWalletKey.pb.h>
-#include <boost/container/vector.hpp>
 #include <boost/endian/buffers.hpp>
 #include <algorithm>
 #include <cstddef>
@@ -48,6 +47,7 @@
 #include "opentxs/blockchain/bitcoin/cfilter/FilterType.hpp"
 #include "opentxs/blockchain/block/Outpoint.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
+#include "opentxs/core/Data.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/identity/wot/claim/Types.hpp"
 #include "opentxs/network/blockchain/bitcoin/CompactSize.hpp"
@@ -131,7 +131,7 @@ auto BitcoinTransactionInput(
         }
     }
 
-    auto keys = boost::container::flat_set<blockchain::crypto::Key>{};
+    auto keys = Set<blockchain::crypto::Key>{};
     std::for_each(
         std::begin(outputKeys), std::end(outputKeys), [&](const auto& key) {
             keys.emplace(key);
@@ -236,7 +236,7 @@ auto BitcoinTransactionInput(
                 in.version(),
                 std::move(spends));
         } else {
-            auto keys = boost::container::flat_set<blockchain::crypto::Key>{};
+            auto keys = Set<blockchain::crypto::Key>{};
             auto pkh = ReturnType::PubkeyHashes{};
 
             for (const auto& key : in.key()) {
@@ -297,7 +297,7 @@ Input::Input(
     Space&& coinbase,
     const VersionNumber version,
     std::optional<std::size_t> size,
-    boost::container::flat_set<crypto::Key>&& keys,
+    Set<crypto::Key>&& keys,
     std::unique_ptr<internal::Output> output) noexcept(false)
     : chain_(chain)
     , serialize_version_(version)
@@ -348,7 +348,7 @@ Input::Input(
     std::unique_ptr<const block::Script> script,
     const VersionNumber version,
     std::unique_ptr<internal::Output> output,
-    boost::container::flat_set<crypto::Key>&& keys) noexcept(false)
+    Set<crypto::Key>&& keys) noexcept(false)
     : Input(
           chain,
           sequence,

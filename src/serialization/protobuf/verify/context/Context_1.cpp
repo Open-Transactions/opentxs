@@ -8,7 +8,6 @@
 #include <ConsensusEnums.pb.h>
 #include <Context.pb.h>
 #include <Enums.pb.h>
-#include <string>
 
 #include "internal/serialization/protobuf/Basic.hpp"
 #include "internal/serialization/protobuf/verify/ClientContext.hpp"  // IWYU pragma: keep

@@ -5,7 +5,6 @@
 
 #pragma once
 
-#include <boost/asio.hpp>
 #include <boost/smart_ptr/shared_ptr.hpp>
 #include <cstddef>
 #include <cstdint>
@@ -13,6 +12,7 @@
 #include <memory>
 #include <string_view>
 
+#include "BoostAsio.hpp"
 #include "api/network/asio/Acceptors.hpp"
 #include "internal/api/network/Asio.hpp"
 #include "opentxs/api/network/Asio.hpp"

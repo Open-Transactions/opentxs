@@ -6,7 +6,6 @@
 #include "internal/serialization/protobuf/verify/BlockchainFilterHeader.hpp"  // IWYU pragma: associated
 
 #include <BlockchainFilterHeader.pb.h>
-#include <string>
 
 #include "serialization/protobuf/verify/Check.hpp"
 

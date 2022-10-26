@@ -5,12 +5,12 @@
 
 #pragma once
 
-#include <boost/asio.hpp>
 #include <cs_plain_guarded.h>
 #include <future>
 #include <memory>
 #include <string_view>
 
+#include "BoostAsio.hpp"
 #include "api/network/asio/Buffers.hpp"
 #include "internal/api/network/Asio.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"

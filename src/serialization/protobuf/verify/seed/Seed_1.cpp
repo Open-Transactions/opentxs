@@ -7,7 +7,6 @@
 
 #include <Enums.pb.h>
 #include <Seed.pb.h>
-#include <string>
 
 #include "internal/serialization/protobuf/Basic.hpp"
 #include "internal/serialization/protobuf/verify/Ciphertext.hpp"  // IWYU pragma: keep

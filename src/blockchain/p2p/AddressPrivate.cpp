@@ -7,12 +7,12 @@
 #include "blockchain/p2p/AddressPrivate.hpp"  // IWYU pragma: associated
 
 #include <BlockchainPeerAddress.pb.h>
-#include <boost/asio.hpp>
 #include <cstdint>
 #include <cstring>
 #include <memory>
 #include <stdexcept>
 
+#include "BoostAsio.hpp"
 #include "internal/api/session/FactoryAPI.hpp"
 #include "internal/blockchain/p2p/P2P.hpp"
 #include "internal/util/LogMacros.hpp"

@@ -5,7 +5,12 @@
 
 #pragma once
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Warray-bounds"
+#pragma GCC diagnostic ignored "-Wstringop-overflow"
 #include <boost/thread/thread.hpp>
+
+#pragma GCC diagnostic pop
 #include <zmq.h>
 #include <atomic>
 #include <future>

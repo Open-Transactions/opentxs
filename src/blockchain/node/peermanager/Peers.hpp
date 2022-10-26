@@ -7,8 +7,6 @@
 
 #pragma once
 
-#include <boost/asio.hpp>
-#include <boost/asio/ip/tcp.hpp>
 #include <boost/container/flat_set.hpp>
 #include <boost/container/vector.hpp>
 #include <atomic>
@@ -18,6 +16,7 @@
 #include <string_view>
 #include <utility>
 
+#include "BoostAsio.hpp"
 #include "internal/blockchain/p2p/P2P.hpp"
 #include "internal/blockchain/p2p/bitcoin/Bitcoin.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"

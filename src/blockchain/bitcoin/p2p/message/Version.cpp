@@ -6,7 +6,6 @@
 #include "0_stdafx.hpp"  // IWYU pragma: associated
 #include "blockchain/bitcoin/p2p/message/Version.hpp"  // IWYU pragma: associated
 
-#include <boost/asio.hpp>
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
@@ -15,6 +14,7 @@
 #include <stdexcept>
 #include <utility>
 
+#include "BoostAsio.hpp"
 #include "blockchain/bitcoin/p2p/Header.hpp"
 #include "blockchain/bitcoin/p2p/Message.hpp"
 #include "internal/util/LogMacros.hpp"

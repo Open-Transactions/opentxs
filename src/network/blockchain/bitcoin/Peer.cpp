@@ -70,7 +70,6 @@
 #include "opentxs/blockchain/node/FilterOracle.hpp"
 #include "opentxs/blockchain/node/HeaderOracle.hpp"
 #include "opentxs/blockchain/node/Manager.hpp"
-#include "opentxs/blockchain/node/Types.hpp"
 #include "opentxs/blockchain/p2p/Address.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Data.hpp"

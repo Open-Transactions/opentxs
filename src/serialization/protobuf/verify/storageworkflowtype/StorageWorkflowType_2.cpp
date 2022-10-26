@@ -8,7 +8,6 @@
 #include <PaymentWorkflowEnums.pb.h>
 #include <StorageWorkflowType.pb.h>
 #include <cstdint>
-#include <string>
 
 #include "serialization/protobuf/verify/Check.hpp"
 

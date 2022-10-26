@@ -10,6 +10,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <sstream>
+#include <string_view>
 
 #include "internal/serialization/protobuf/Check.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
@@ -17,6 +18,8 @@
 
 namespace opentxs::proto
 {
+using namespace std::literals;
+
 static const UnallocatedMap<std::uint32_t, UnallocatedSet<AsymmetricKeyType>>
     AsymmetricKeyAllowedTypes{
         {1, {AKEYTYPE_LEGACY, AKEYTYPE_SECP256K1, AKEYTYPE_ED25519}},
@@ -87,7 +90,8 @@ void WriteLogMessage(const std::stringstream& message) noexcept;
 #define CHECK_STRING_(a, min, max)                                             \
     if (input.has_##a() && (0 < input.a().size())) {                           \
         if ((min > input.a().size()) || (max < input.a().size())) {            \
-            const auto fail = UnallocatedCString("invalid ") + #a + " size";   \
+            const auto fail =                                                  \
+                CString{"invalid "sv}.append(#a).append(" size"sv);            \
             FAIL_2(fail.c_str(), input.a().size());                            \
         }                                                                      \
     }                                                                          \
@@ -103,12 +107,12 @@ void WriteLogMessage(const std::stringstream& message) noexcept;
                 __VA_ARGS__);                                                  \
                                                                                \
             if (false == valid##a) {                                           \
-                const auto fail = UnallocatedCString("invalid ") + #a;         \
+                const auto fail = CString{"invalid "sv}.append(#a);            \
                 FAIL_1(fail.c_str());                                          \
             }                                                                  \
         } catch (const std::out_of_range&) {                                   \
-            const auto fail = UnallocatedCString("allowed ") + #a +            \
-                              " version not defined for version";              \
+            const auto fail = CString{"allowed "sv}.append(#a).append(         \
+                " version not defined for version"sv);                         \
             FAIL_2(fail.c_str(), input.version());                             \
         }                                                                      \
     }                                                                          \
@@ -124,12 +128,12 @@ void WriteLogMessage(const std::stringstream& message) noexcept;
                 __VA_ARGS__);                                                  \
                                                                                \
             if (false == valid##a) {                                           \
-                const auto fail = UnallocatedCString("invalid ") + #a;         \
+                const auto fail = CString{"invalid "sv}.append(#a);            \
                 FAIL_1(fail.c_str());                                          \
             }                                                                  \
         } catch (const std::out_of_range&) {                                   \
-            const auto fail = UnallocatedCString("allowed ") + #a +            \
-                              " version not defined for version";              \
+            const auto fail = CString{"allowed "sv}.append(#a).append(         \
+                " version not defined for version"sv);                         \
             FAIL_2(fail.c_str(), input.version());                             \
         }                                                                      \
     }                                                                          \
@@ -137,19 +141,23 @@ void WriteLogMessage(const std::stringstream& message) noexcept;
 
 #define CHECK_EXCLUDED(a)                                                      \
     if (true == input.has_##a()) {                                             \
-        FAIL_1(UnallocatedCString("unexpected ") + #a + " present");           \
+        const auto fail =                                                      \
+            CString{"unexpected "sv}.append(#a).append(" present"sv);          \
+        FAIL_1(fail.c_str());                                                  \
     }                                                                          \
     static_assert(0 < sizeof(char))  // NOTE silence -Wextra-semi-stmt
 
 #define CHECK_EXISTS(a)                                                        \
     if (false == input.has_##a()) {                                            \
-        FAIL_1(UnallocatedCString("missing ") + #a);                           \
+        const auto fail = CString{"missing "sv}.append(#a);                    \
+        FAIL_1(fail.c_str());                                                  \
     }                                                                          \
     static_assert(0 < sizeof(char))  // NOTE silence -Wextra-semi-stmt
 
 #define CHECK_EXISTS_STRING(a)                                                 \
     if ((false == input.has_##a()) || (0 == input.a().size())) {               \
-        FAIL_1(UnallocatedCString("missing ") + #a);                           \
+        const auto fail = CString{"missing "sv}.append(#a);                    \
+        FAIL_1(fail.c_str());                                                  \
     }                                                                          \
     static_assert(0 < sizeof(char))  // NOTE silence -Wextra-semi-stmt
 
@@ -159,7 +167,8 @@ void WriteLogMessage(const std::stringstream& message) noexcept;
 
 #define CHECK_HAVE(a)                                                          \
     if (0 == input.a().size()) {                                               \
-        FAIL_1(UnallocatedCString("missing ") + #a);                           \
+        const auto fail = CString{"missing "sv}.append(#a);                    \
+        FAIL_1(fail.c_str());                                                  \
     }                                                                          \
     static_assert(0 < sizeof(char))  // NOTE silence -Wextra-semi-stmt
 
@@ -176,12 +185,13 @@ void WriteLogMessage(const std::stringstream& message) noexcept;
         const bool valid##a = 1 == b.at(input.version()).count(input.a());     \
                                                                                \
         if (false == valid##a) {                                               \
-            FAIL_2(UnallocatedCString("invalid ") + #a, input.a());            \
+            const auto fail = CString{"invalid "sv}.append(#a);                \
+            FAIL_2(fail, input.a());                                           \
         }                                                                      \
     } catch (const std::out_of_range&) {                                       \
-        FAIL_2(                                                                \
-            UnallocatedCString("allowed ") + #a + " not defined for version",  \
-            input.version());                                                  \
+        const auto fail = CString{"allowed "sv}.append(#a).append(             \
+            " not defined for version"sv);                                     \
+        FAIL_2(fail.c_str(), input.version());                                 \
     }                                                                          \
     static_assert(0 < sizeof(char))  // NOTE silence -Wextra-semi-stmt
 
@@ -195,15 +205,17 @@ void WriteLogMessage(const std::stringstream& message) noexcept;
 
 #define CHECK_NONE(a)                                                          \
     if (0 < input.a().size()) {                                                \
-        FAIL_1(UnallocatedCString("unexpected ") + #a + " present");           \
+        const auto fail =                                                      \
+            CString{"unexpected "sv}.append(#a).append(" present"sv);          \
+        FAIL_1(fail.c_str());                                                  \
     }                                                                          \
     static_assert(0 < sizeof(char))  // NOTE silence -Wextra-semi-stmt
 
 #define CHECK_SIZE(a, b)                                                       \
     if (b != input.a().size()) {                                               \
-        FAIL_2(                                                                \
-            UnallocatedCString("Wrong number of ") + #a + " present ",         \
-            input.a().size());                                                 \
+        const auto fail =                                                      \
+            CString{"unexpected "sv}.append(#a).append(" present "sv);         \
+        FAIL_2(fail.c_str(), input.a().size());                                \
     }                                                                          \
     static_assert(0 < sizeof(char))  // NOTE silence -Wextra-semi-stmt
 
@@ -233,11 +245,8 @@ void WriteLogMessage(const std::stringstream& message) noexcept;
         const bool valid##a = 1 == (input.a() == b);                           \
                                                                                \
         if (false == valid##a) {                                               \
-            FAIL_4(                                                            \
-                UnallocatedCString("invalid ") + #a,                           \
-                input.a(),                                                     \
-                " expected ",                                                  \
-                b);                                                            \
+            const auto fail = CString{"invalid "sv}.append(#a);                \
+            FAIL_4(fail.c_str(), input.a(), " expected "sv, b);                \
         }                                                                      \
     }                                                                          \
     static_assert(0 < sizeof(char))  // NOTE silence -Wextra-semi-stmt
@@ -251,7 +260,9 @@ void WriteLogMessage(const std::stringstream& message) noexcept;
     for (const auto& it : input.a()) {                                         \
         if ((MIN_PLAUSIBLE_IDENTIFIER > it.size()) ||                          \
             (MAX_PLAUSIBLE_IDENTIFIER < it.size())) {                          \
-            FAIL_2(UnallocatedCString("invalid ") + #a + " size", it.size());  \
+            const auto fail =                                                  \
+                CString{"invalid "sv}.append(#a).append(" size"sv);            \
+            FAIL_2(fail.c_str(), it.size());                                   \
         }                                                                      \
     }                                                                          \
     static_assert(0 < sizeof(char))  // NOTE silence -Wextra-semi-stmt
@@ -264,7 +275,9 @@ void WriteLogMessage(const std::stringstream& message) noexcept;
 #define OPTIONAL_NAMES(a)                                                      \
     for (const auto& it : input.a()) {                                         \
         if ((1 > it.size()) || (MAX_VALID_CONTACT_VALUE < it.size())) {        \
-            FAIL_2(UnallocatedCString("invalid ") + #a + " size", it.size());  \
+            const auto fail =                                                  \
+                CString{"invalid "sv}.append(#a).append(" size"sv);            \
+            FAIL_2(fail.c_str(), it.size());                                   \
         }                                                                      \
     }                                                                          \
     static_assert(0 < sizeof(char))  // NOTE silence -Wextra-semi-stmt

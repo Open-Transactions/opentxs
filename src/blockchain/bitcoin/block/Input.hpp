@@ -10,8 +10,6 @@
 #include <BlockchainTransactionInput.pb.h>
 #include <BlockchainTransactionOutput.pb.h>
 #include <BlockchainWalletKey.pb.h>
-#include <boost/container/flat_set.hpp>
-#include <boost/container/vector.hpp>
 #include <cs_plain_guarded.h>
 #include <algorithm>
 #include <cstddef>
@@ -101,7 +99,7 @@ namespace opentxs::blockchain::bitcoin::block::implementation
 class Input final : public internal::Input
 {
 public:
-    using PubkeyHashes = boost::container::flat_set<ElementHash>;
+    using PubkeyHashes = Set<ElementHash>;
 
     static const VersionNumber default_version_;
 
@@ -213,7 +211,7 @@ public:
         std::unique_ptr<const block::Script> script,
         const VersionNumber version,
         std::unique_ptr<internal::Output> output,
-        boost::container::flat_set<crypto::Key>&& keys) noexcept(false);
+        Set<crypto::Key>&& keys) noexcept(false);
     Input(
         const blockchain::Type chain,
         const std::uint32_t sequence,
@@ -232,7 +230,7 @@ public:
         Space&& coinbase,
         const VersionNumber version,
         std::optional<std::size_t> size,
-        boost::container::flat_set<crypto::Key>&& keys,
+        Set<crypto::Key>&& keys,
         std::unique_ptr<internal::Output> output) noexcept(false);
     Input() = delete;
     Input(const Input&) noexcept;
@@ -286,7 +284,7 @@ private:
         Cache(
             std::unique_ptr<internal::Output>&& output,
             std::optional<std::size_t>&& size,
-            boost::container::flat_set<crypto::Key>&& keys) noexcept;
+            Set<crypto::Key>&& keys) noexcept;
         Cache() = delete;
         Cache(const Cache& rhs) noexcept;
 
@@ -295,7 +293,7 @@ private:
         std::unique_ptr<internal::Output> previous_output_;
         std::optional<std::size_t> size_;
         std::optional<std::size_t> normalized_size_;
-        boost::container::flat_set<crypto::Key> keys_;
+        Set<crypto::Key> keys_;
         identifier::Generic payer_;
     };
 

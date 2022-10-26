@@ -6,7 +6,6 @@
 #include "internal/serialization/protobuf/verify/ServerContext.hpp"  // IWYU pragma: associated
 
 #include <ServerContext.pb.h>
-#include <string>
 
 #include "serialization/protobuf/verify/Check.hpp"
 

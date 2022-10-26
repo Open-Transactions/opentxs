@@ -7,7 +7,6 @@
 #include "api/network/asio/Asio.hpp"         // IWYU pragma: associated
 #include "internal/api/network/Factory.hpp"  // IWYU pragma: associated
 
-#include <boost/asio.hpp>
 #include <boost/json.hpp>  // IWYU pragma: keep
 #include <boost/smart_ptr/make_shared.hpp>
 #include <boost/smart_ptr/shared_ptr.hpp>
@@ -19,6 +18,7 @@
 #include <string_view>
 #include <utility>
 
+#include "BoostAsio.hpp"
 #include "api/network/asio/Acceptors.hpp"
 #include "api/network/asio/Actor.hpp"
 #include "api/network/asio/Context.hpp"

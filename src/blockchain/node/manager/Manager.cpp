@@ -11,7 +11,6 @@
 #include <BlockchainTransactionProposedOutput.pb.h>
 #include <HDPath.pb.h>
 #include <PaymentCode.pb.h>
-#include <boost/asio.hpp>
 #include <boost/system/error_code.hpp>
 #include <algorithm>
 #include <array>
@@ -26,6 +25,7 @@
 #include <type_traits>
 #include <utility>
 
+#include "BoostAsio.hpp"
 #include "internal/api/crypto/Blockchain.hpp"
 #include "internal/api/network/Asio.hpp"
 #include "internal/api/network/Blockchain.hpp"

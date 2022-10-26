@@ -6,7 +6,6 @@
 #include "internal/serialization/protobuf/verify/TaggedKey.hpp"  // IWYU pragma: associated
 
 #include <TaggedKey.pb.h>
-#include <string>
 
 #include "internal/serialization/protobuf/Basic.hpp"
 #include "internal/serialization/protobuf/verify/SymmetricKey.hpp"  // IWYU pragma: keep

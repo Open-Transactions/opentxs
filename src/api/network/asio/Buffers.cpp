@@ -6,11 +6,11 @@
 #include "0_stdafx.hpp"                  // IWYU pragma: associated
 #include "api/network/asio/Buffers.hpp"  // IWYU pragma: associated
 
-#include <boost/asio.hpp>
 #include <cstddef>
 #include <memory>
 #include <mutex>
 
+#include "BoostAsio.hpp"
 #include "internal/util/Mutex.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Types.hpp"

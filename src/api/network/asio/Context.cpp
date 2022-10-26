@@ -6,12 +6,12 @@
 #include "0_stdafx.hpp"                  // IWYU pragma: associated
 #include "api/network/asio/Context.hpp"  // IWYU pragma: associated
 
-#include <boost/asio.hpp>
 #include <boost/thread/thread.hpp>
 #include <memory>
 #include <mutex>
 #include <type_traits>
 
+#include "BoostAsio.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/Mutex.hpp"
 #include "internal/util/Signals.hpp"
