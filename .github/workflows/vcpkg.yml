@@ -4,7 +4,7 @@ on: [push, pull_request]
 
 jobs:
   job:
-    name: ${{ matrix.platform }}-${{ matrix.preset }}-${{ github.workflow }}
+    name: ${{ matrix.platform }}-${{ github.workflow }}
     runs-on: ${{ matrix.platform }}
     strategy:
       fail-fast: false
@@ -12,16 +12,21 @@ jobs:
         platform: [macos-11, windows-2022]
         include:
           - platform: macos-11
+            vcpkg_installed_repo: 'https://gitlab.com/open-transactions/vcpkg.git/'
             vcpkg_installed_root: '/Users/runner/work/opentxs/opentxs/deps/vcpkg_installed'
             preset: macos
             static_deps: 'ON'
+            triplet: 'x64-osx'
           - platform: windows-2022
+            vcpkg_installed_repo: 'https://gitlab.com/open-transactions/vcpkg.git/'
             vcpkg_installed_root: 'c:\vcpkg_installed'
             preset: msvc
             static_deps: 'OFF'
+            triplet: 'x64-windows'
     env:
       VCPKG_ROOT: '${{ github.workspace }}/deps/vcpkg'
       VCPKG_INSTALLED_DIR: '${{ matrix.vcpkg_installed_root }}/${{ matrix.platform }}'
+      VCPKG_OVERLAY_TRIPLETS: '${{ github.workspace }}/deps/vcpkg-triplets'
     steps:
     - name: Get more disk space
       run:  |
@@ -58,7 +63,7 @@ jobs:
         submodules: 'recursive'
     - name: Checkout vcpkg_installed
       run: |
-        git clone --depth=1 --single-branch --branch='${{ matrix.platform }}' https://gitlab.com/open-transactions/vcpkg.git/ '${{ matrix.vcpkg_installed_root }}'
+        git clone --depth=1 --single-branch --branch='${{ matrix.platform }}' '${{ matrix.vcpkg_installed_repo }}' '${{ matrix.vcpkg_installed_root }}'
       shell: bash
     - name: Configure build environment
       uses: ilammy/msvc-dev-cmd@v1
