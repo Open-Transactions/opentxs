@@ -4,7 +4,7 @@ on: [push, pull_request]
 
 jobs:
   job:
-    name: ${{ matrix.platform }}-${{ matrix.preset }}-${{ github.workflow }}
+    name: ${{ matrix.platform }}-${{ github.workflow }}
     runs-on: ${{ matrix.platform }}
     strategy:
       fail-fast: false
@@ -12,16 +12,22 @@ jobs:
         platform: [macos-11, windows-2022]
         include:
           - platform: macos-11
+            vcpkg_installed_repo: 'https://gitlab.com/opentxs-artifacts/vcpkg.git/'
             vcpkg_installed_root: '/Users/runner/work/opentxs/opentxs/deps/vcpkg_installed'
             preset: macos
             static_deps: 'ON'
+            triplet: 'x64-osx-11'
           - platform: windows-2022
+            vcpkg_installed_repo: 'https://gitlab.com/open-transactions/vcpkg.git/'
             vcpkg_installed_root: 'c:\vcpkg_installed'
             preset: msvc
             static_deps: 'OFF'
+            triplet: 'x64-windows'
     env:
       VCPKG_ROOT: '${{ github.workspace }}/deps/vcpkg'
       VCPKG_INSTALLED_DIR: '${{ matrix.vcpkg_installed_root }}/${{ matrix.platform }}'
+      VCPKG_OVERLAY_TRIPLETS: '${{ github.workspace }}/deps/vcpkg-triplets'
+      VCPKG_DEFAULT_TRIPLET: '${{ matrix.triplet }}'
     steps:
     - name: Get more disk space
       run:  |
@@ -58,7 +64,7 @@ jobs:
         submodules: 'recursive'
     - name: Checkout vcpkg_installed
       run: |
-        git clone --depth=1 --single-branch --branch='${{ matrix.platform }}' https://gitlab.com/open-transactions/vcpkg.git/ '${{ matrix.vcpkg_installed_root }}'
+        git clone --depth=1 --single-branch --branch='${{ matrix.platform }}' '${{ matrix.vcpkg_installed_repo }}' '${{ matrix.vcpkg_installed_root }}'
       shell: bash
     - name: Configure build environment
       uses: ilammy/msvc-dev-cmd@v1
@@ -71,5 +77,5 @@ jobs:
     - name: 'Compile'
       run: |
         cd '${{ github.workspace }}'
-        cmake -S '${{ github.workspace }}' --preset '${{ matrix.preset }}' -DVCPKG_INSTALLED_DIR='${{ env.VCPKG_INSTALLED_DIR }}' -DOT_STATIC_DEPENDENCIES='${{ matrix.static_deps }}'
+        cmake -S '${{ github.workspace }}' --preset '${{ matrix.preset }}' -DVCPKG_INSTALLED_DIR='${{ env.VCPKG_INSTALLED_DIR }}' -DVCPKG_TARGET_TRIPLET='${{ matrix.triplet }}' -DOT_STATIC_DEPENDENCIES='${{ matrix.static_deps }}'
         cmake --build --preset '${{ matrix.preset }}' -- -k 0
