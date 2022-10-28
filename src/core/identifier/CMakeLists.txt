@@ -24,7 +24,7 @@ set(cxx-install-headers
     "${opentxs_SOURCE_DIR}/include/opentxs/core/identifier/Types.hpp"
     "${opentxs_SOURCE_DIR}/include/opentxs/core/identifier/UnitDefinition.hpp"
 )
-target_link_libraries(opentxs-common PRIVATE opentxs-core-otprotob)
+opentxs_link_internal(opentxs-core-otprotob)
 target_sources(opentxs-common PRIVATE ${cxx-install-headers})
 
 if(OPENTXS_STANDALONE)

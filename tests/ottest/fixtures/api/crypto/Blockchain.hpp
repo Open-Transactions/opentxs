@@ -26,12 +26,12 @@ namespace ottest
 {
 using namespace std::literals;
 
-struct AddressData {
+struct OPENTXS_EXPORT AddressData {
     ot::UnallocatedVector<ot::Time> times_{};
     ot::UnallocatedVector<ot::identifier::Generic> txids_{};
 };
 
-class ApiCryptoBlockchain : public ::testing::Test
+class OPENTXS_EXPORT ApiCryptoBlockchain : public ::testing::Test
 {
 public:
     using AddressStyle = ot::blockchain::crypto::AddressStyle;

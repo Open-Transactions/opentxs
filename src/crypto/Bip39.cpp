@@ -327,12 +327,12 @@ auto Bip39::words_to_root_bip39(
     auto dataOutput = opentxs::ByteArray{};  // TODO should be secret
     const auto dataSalt = opentxs::ByteArray{salt.data(), salt.size()};
     crypto_.Hash().PKCS5_PBKDF2_HMAC(
-        words,
-        dataSalt,
+        words.Bytes(),
+        dataSalt.Bytes(),
         HmacIterationCount,
         crypto::HashType::Sha512,
         HmacOutputSizeBytes,
-        dataOutput);
+        dataOutput.WriteInto());
     bip32RootNode.Assign(dataOutput.Bytes());
 
     return true;

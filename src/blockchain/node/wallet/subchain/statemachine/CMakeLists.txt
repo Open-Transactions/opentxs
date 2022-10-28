@@ -33,9 +33,3 @@ target_sources(
     "Scan.cpp"
     "Scan.hpp"
 )
-target_link_libraries(opentxs-common PRIVATE Boost::headers)
-target_include_directories(
-  opentxs-common SYSTEM
-  PRIVATE "${opentxs_SOURCE_DIR}/deps/cs_libguarded/src"
-          "${opentxs_SOURCE_DIR}/deps/robin-hood/src/include"
-)

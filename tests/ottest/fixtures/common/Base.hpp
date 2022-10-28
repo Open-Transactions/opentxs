@@ -6,6 +6,7 @@
 #pragma once
 
 #include <gtest/gtest.h>
+#include <opentxs/Export.hpp>
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -21,7 +22,7 @@ namespace ot = opentxs;
 
 namespace ottest
 {
-class Base : virtual public ::testing::Test
+class OPENTXS_EXPORT Base : virtual public ::testing::Test
 {
 protected:
     const ot::api::Context& ot_;

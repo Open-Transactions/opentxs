@@ -60,7 +60,7 @@ namespace bc = b::node;
 
 namespace ottest
 {
-class Test_HeaderOracle_base : public ::testing::Test
+class OPENTXS_EXPORT Test_HeaderOracle_base : public ::testing::Test
 {
 public:
     using Block = std::pair<ot::UnallocatedCString, ot::UnallocatedCString>;
@@ -163,13 +163,13 @@ public:
     ~Test_HeaderOracle_base() override;
 };
 
-struct Test_HeaderOracle_btc : public Test_HeaderOracle_base {
+struct OPENTXS_EXPORT Test_HeaderOracle_btc : public Test_HeaderOracle_base {
     Test_HeaderOracle_btc();
 
     ~Test_HeaderOracle_btc() override;
 };
 
-struct Test_HeaderOracle : public Test_HeaderOracle_base {
+struct OPENTXS_EXPORT Test_HeaderOracle : public Test_HeaderOracle_base {
     Test_HeaderOracle();
 
     ~Test_HeaderOracle() override;

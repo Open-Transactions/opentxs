@@ -11,9 +11,6 @@ target_sources(
   PRIVATE "${opentxs_SOURCE_DIR}/src/internal/crypto/asymmetric/Factory.hpp"
           "Common.cpp"
 )
-target_include_directories(
-  opentxs-common SYSTEM PRIVATE "${opentxs_SOURCE_DIR}/deps/frozen/include"
-)
 set(cxx-install-headers
     "${opentxs_SOURCE_DIR}/include/opentxs/crypto/asymmetric/Algorithm.hpp"
     "${opentxs_SOURCE_DIR}/include/opentxs/crypto/asymmetric/Mode.hpp"

@@ -6,10 +6,11 @@
 #pragma once
 
 #include <gtest/gtest.h>
+#include <opentxs/Export.hpp>
 
 namespace ottest
 {
-class OTTestEnvironment : public testing::Environment
+class OPENTXS_EXPORT OTTestEnvironment : public testing::Environment
 {
 public:
     void SetUp() override;

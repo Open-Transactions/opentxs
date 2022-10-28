@@ -5,8 +5,8 @@
 
 if(SQLITE_EXPORT)
   target_sources(opentxs-common PRIVATE "Sqlite3.cpp" "Sqlite3.hpp")
-  target_link_libraries(opentxs-common PRIVATE SQLite::SQLite3)
-  target_link_libraries(opentxs PUBLIC SQLite::SQLite3)
+  opentxs_link_internal(SQLite::SQLite3)
+  opentxs_link_external(SQLite::SQLite3)
 else()
   target_sources(opentxs-common PRIVATE "null.cpp")
 endif()

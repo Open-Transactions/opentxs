@@ -60,11 +60,6 @@ set(cxx-install-headers
     "${opentxs_SOURCE_DIR}/include/opentxs/api/session/Wallet.hpp"
     "${opentxs_SOURCE_DIR}/include/opentxs/api/session/Workflow.hpp"
 )
-target_include_directories(
-  opentxs-common SYSTEM
-  PRIVATE "${opentxs_SOURCE_DIR}/deps/cs_libguarded/src"
-          "${opentxs_SOURCE_DIR}/deps/robin-hood/src/include"
-)
 target_sources(opentxs-common PRIVATE ${cxx-install-headers})
 
 if(OPENTXS_STANDALONE)

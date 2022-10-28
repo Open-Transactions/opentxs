@@ -10,16 +10,8 @@ target_sources(
     "Sodium.cpp"
     "Sodium.hpp"
 )
-target_include_directories(
-  opentxs-common SYSTEM PRIVATE "${opentxs_SOURCE_DIR}/deps/argon2"
-)
-target_link_libraries(
-  opentxs-common PRIVATE opentxs-argon2 unofficial-sodium::sodium
-)
-target_link_libraries(opentxs PUBLIC unofficial-sodium::sodium)
-target_include_directories(
-  opentxs-common SYSTEM PRIVATE "${opentxs_SOURCE_DIR}/deps/argon2"
-)
+opentxs_link_internal(unofficial-sodium::sodium)
+opentxs_link_external(unofficial-sodium::sodium)
 
 if(ED25519_EXPORT)
   target_sources(opentxs-common PRIVATE "Ed25519.cpp")
@@ -31,4 +23,10 @@ if(WIN32 AND OT_STATIC_DEPENDENCIES)
   target_compile_definitions(
     opentxs-common PRIVATE SODIUM_STATIC=1 SODIUM_EXPORT=
   )
+
+  if(OPENTXS_BUILD_TESTS)
+    target_compile_definitions(
+      opentxs-testlib PRIVATE SODIUM_STATIC=1 SODIUM_EXPORT=
+    )
+  endif()
 endif()

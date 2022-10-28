@@ -178,13 +178,7 @@ protobuf_generate_cpp(
 )
 
 add_library(messages OBJECT ${PROTO_SRC} ${PROTO_HEADER})
-add_library(
-  opentxs::messages
-  ALIAS
-  messages
-)
 target_link_libraries(messages PUBLIC protobuf::libprotobuf-lite)
-target_link_libraries(opentxs INTERFACE $<BUILD_INTERFACE:messages>)
 target_include_directories(messages SYSTEM PUBLIC "${CMAKE_CURRENT_BINARY_DIR}")
 
 if(MSVC)
@@ -221,5 +215,8 @@ set_target_properties(
     CXX_CLANG_TIDY ""
 )
 
-target_sources(opentxs PRIVATE $<TARGET_OBJECTS:messages>)
+opentxs_link_internal(messages)
+opentxs_link_external(protobuf::libprotobuf-lite)
+opentxs_link_external($<BUILD_INTERFACE:messages>)
+opentxs_add_sources($<TARGET_OBJECTS:messages>)
 add_dependencies(generated_code messages)

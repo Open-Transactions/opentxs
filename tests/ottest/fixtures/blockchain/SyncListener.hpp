@@ -14,7 +14,7 @@
 
 namespace ottest
 {
-class SyncListener
+class OPENTXS_EXPORT SyncListener
 {
 public:
     class Imp;

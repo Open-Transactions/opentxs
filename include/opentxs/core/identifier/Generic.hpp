@@ -103,7 +103,8 @@ public:
     auto get_allocator() const noexcept -> allocator_type final;
     auto GetString(const api::Crypto& api, String& theStr) const noexcept
         -> void;
-    auto Internal() const noexcept -> const internal::Identifier&;
+    OPENTXS_NO_EXPORT auto Internal() const noexcept
+        -> const internal::Identifier&;
     auto IsNull() const -> bool final;
     auto size() const -> std::size_t final;
     auto Type() const noexcept -> identifier::Type;
@@ -127,7 +128,7 @@ public:
     auto WriteInto() noexcept -> Writer final;
     auto zeroMemory() -> void final;
 
-    auto Internal() noexcept -> internal::Identifier&;
+    OPENTXS_NO_EXPORT auto Internal() noexcept -> internal::Identifier&;
 
     OPENTXS_NO_EXPORT Generic(IdentifierPrivate* imp) noexcept;
     Generic(allocator_type alloc = {}) noexcept;

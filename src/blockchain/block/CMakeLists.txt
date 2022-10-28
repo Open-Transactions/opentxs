@@ -15,7 +15,6 @@ target_sources(
     "Outpoint.cpp"
     "Position.cpp"
 )
-target_link_libraries(opentxs-common PRIVATE Boost::headers)
 set(cxx-install-headers
     "${opentxs_SOURCE_DIR}/include/opentxs/blockchain/block/Block.hpp"
     "${opentxs_SOURCE_DIR}/include/opentxs/blockchain/block/Hash.hpp"

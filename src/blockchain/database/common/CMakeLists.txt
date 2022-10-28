@@ -39,22 +39,9 @@ if(OPENTXS_BLOCK_STORAGE_ENABLED)
 else()
   target_sources(opentxs-common PRIVATE "noStorage.cpp")
 endif()
-target_include_directories(
-  opentxs-common SYSTEM
-  PRIVATE "${opentxs_SOURCE_DIR}/deps/robin-hood/src/include"
-)
 
-target_link_libraries(
-  opentxs-common
-  PRIVATE
-    Boost::headers
-    unofficial-sodium::sodium
-    lmdb
-)
-target_link_libraries(
-  opentxs
-  PUBLIC
-    unofficial-sodium::sodium
-    Boost::thread
-    lmdb
-)
+opentxs_link_internal(unofficial-sodium::sodium)
+opentxs_link_internal(lmdb)
+opentxs_link_external(unofficial-sodium::sodium)
+opentxs_link_external(Boost::thread)
+opentxs_link_external(lmdb)

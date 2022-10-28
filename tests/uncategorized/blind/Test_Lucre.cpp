@@ -5,151 +5,23 @@
 
 #include <gtest/gtest.h>
 #include <opentxs/opentxs.hpp>
-#include <chrono>
 #include <cstddef>
 #include <memory>
 #include <optional>
 #include <utility>
 
-#include "internal/api/session/Client.hpp"
-#include "internal/api/session/Wallet.hpp"
-#include "internal/otx/blind/Factory.hpp"
-#include "internal/otx/blind/Mint.hpp"
-#include "internal/otx/blind/Purse.hpp"
-#include "internal/otx/blind/Token.hpp"
-#include "internal/otx/client/obsolete/OTAPI_Exec.hpp"
-#include "internal/util/Editor.hpp"
-
-#define MINT_EXPIRE_MONTHS 6
-#define MINT_VALID_MONTHS 12
-#define REQUEST_PURSE_VALUE 20000
-
-namespace ot = opentxs;
+#include "ottest/fixtures/blind/Lucre.hpp"
 
 namespace ottest
 {
-bool init_{false};
+TEST_F(Lucre, generateMint) { EXPECT_TRUE(GenerateMint()); }
 
-class Test_Basic : public ::testing::Test
-{
-public:
-    static ot::identifier::Nym alice_nym_id_;
-    static ot::identifier::Nym bob_nym_id_;
-    static const ot::identifier::Notary server_id_;
-    static const ot::identifier::UnitDefinition unit_id_;
-    static std::optional<ot::otx::blind::Mint> mint_;
-    static std::optional<ot::otx::blind::Purse> request_purse_;
-    static std::optional<ot::otx::blind::Purse> issue_purse_;
-    static ot::Space serialized_bytes_;
-    static ot::Time valid_from_;
-    static ot::Time valid_to_;
-
-    const ot::api::session::Client& api_;
-    ot::PasswordPrompt reason_;
-    ot::Nym_p alice_;
-    ot::Nym_p bob_;
-
-    Test_Basic()
-        : api_(dynamic_cast<const ot::api::session::Client&>(
-              ot::Context().StartClientSession(0)))
-        , reason_(api_.Factory().PasswordPrompt(__func__))
-        , alice_()
-        , bob_()
-    {
-        if (false == init_) { init(); }
-
-        alice_ = api_.Wallet().Nym(alice_nym_id_);
-        bob_ = api_.Wallet().Nym(bob_nym_id_);
-    }
-
-    void init()
-    {
-        const auto seedA = api_.InternalClient().Exec().Wallet_ImportSeed(
-            "spike nominee miss inquiry fee nothing belt list other "
-            "daughter leave valley twelve gossip paper",
-            "");
-        const auto seedB = api_.InternalClient().Exec().Wallet_ImportSeed(
-            "trim thunder unveil reduce crop cradle zone inquiry "
-            "anchor skate property fringe obey butter text tank drama "
-            "palm guilt pudding laundry stay axis prosper",
-            "");
-        alice_nym_id_ = api_.Wallet().Nym({seedA, 0}, reason_, "Alice")->ID();
-        bob_nym_id_ = api_.Wallet().Nym({seedB, 0}, reason_, "Bob")->ID();
-        const_cast<ot::identifier::UnitDefinition&>(unit_id_) =
-            api_.Factory().UnitIDFromRandom();
-        const_cast<ot::identifier::Notary&>(server_id_) =
-            api_.Factory().NotaryIDFromRandom();
-        init_ = true;
-    }
-};
-
-ot::identifier::Nym Test_Basic::alice_nym_id_{};
-ot::identifier::Nym Test_Basic::bob_nym_id_{};
-const ot::identifier::Notary Test_Basic::server_id_{};
-const ot::identifier::UnitDefinition Test_Basic::unit_id_{};
-std::optional<ot::otx::blind::Mint> Test_Basic::mint_{std::nullopt};
-std::optional<ot::otx::blind::Purse> Test_Basic::request_purse_{std::nullopt};
-std::optional<ot::otx::blind::Purse> Test_Basic::issue_purse_{std::nullopt};
-ot::Space Test_Basic::serialized_bytes_{};
-ot::Time Test_Basic::valid_from_;
-ot::Time Test_Basic::valid_to_;
-
-TEST_F(Test_Basic, generateMint)
-{
-    mint_.emplace(api_.Factory().Mint(server_id_, unit_id_));
-
-    ASSERT_TRUE(mint_);
-
-    const auto& nym = *bob_;
-    const auto now = ot::Clock::now();
-    const std::chrono::seconds expireInterval(
-        std::chrono::hours(MINT_EXPIRE_MONTHS * 30 * 24));
-    const std::chrono::seconds validInterval(
-        std::chrono::hours(MINT_VALID_MONTHS * 30 * 24));
-    const auto expires = now + expireInterval;
-    const auto validTo = now + validInterval;
-    valid_from_ = now;
-    valid_to_ = validTo;
-    mint_->Internal().GenerateNewMint(
-        api_.Wallet(),
-        0,
-        now,
-        validTo,
-        expires,
-        unit_id_,
-        server_id_,
-        nym,
-        1,
-        10,
-        100,
-        1000,
-        10000,
-        100000,
-        1000000,
-        10000000,
-        100000000,
-        1000000000,
-        288,
-        reason_);
-}
-
-TEST_F(Test_Basic, requestPurse)
+TEST_F(Lucre, requestPurse)
 {
     ASSERT_TRUE(alice_);
     ASSERT_TRUE(bob_);
     ASSERT_TRUE(mint_);
-
-    request_purse_.emplace(ot::factory::Purse(
-        api_,
-        *alice_,
-        server_id_,
-        *bob_,
-        ot::otx::blind::CashType::Lucre,
-        *mint_,
-        REQUEST_PURSE_VALUE,
-        reason_));
-
-    ASSERT_TRUE(request_purse_.has_value());
+    ASSERT_TRUE(NewPurse());
 
     auto& purse = request_purse_.value();
 
@@ -198,13 +70,13 @@ TEST_F(Test_Basic, requestPurse)
     EXPECT_EQ(token2.Value(), 10000);
 }
 
-TEST_F(Test_Basic, serialize_deserialize)
+TEST_F(Lucre, serialize_deserialize)
 {
     ASSERT_TRUE(request_purse_);
 
     request_purse_->Serialize(opentxs::writer(serialized_bytes_));
 
-    auto restored = ot::factory::Purse(api_, ot::reader(serialized_bytes_));
+    auto restored = DeserializePurse();
 
     ASSERT_TRUE(restored);
 
@@ -241,9 +113,9 @@ TEST_F(Test_Basic, serialize_deserialize)
     }
 }
 
-TEST_F(Test_Basic, sign)
+TEST_F(Lucre, sign)
 {
-    auto requestPurse = ot::factory::Purse(api_, ot::reader(serialized_bytes_));
+    auto requestPurse = DeserializePurse();
 
     ASSERT_TRUE(requestPurse);
 
@@ -251,31 +123,23 @@ TEST_F(Test_Basic, sign)
     ASSERT_TRUE(alice_);
     ASSERT_TRUE(bob_);
 
-    const auto& alice = *alice_;
     const auto& bob = *bob_;
 
     EXPECT_TRUE(requestPurse.Unlock(bob, reason_));
     ASSERT_TRUE(requestPurse.IsUnlocked());
-
-    issue_purse_.emplace(
-        ot::factory::Purse(api_, requestPurse, alice, reason_));
-
-    ASSERT_TRUE(issue_purse_);
+    ASSERT_TRUE(IssuePurse(requestPurse));
 
     auto& issuePurse = *issue_purse_;
 
     EXPECT_TRUE(issuePurse.IsUnlocked());
 
-    auto& mint = *mint_;
     auto token = requestPurse.Pop();
     const auto added = issuePurse.AddNym(bob, reason_);
 
     EXPECT_TRUE(added);
 
     while (token) {
-        const auto signature = mint.Internal().SignToken(bob, token, reason_);
-
-        EXPECT_TRUE(signature);
+        EXPECT_TRUE(Sign(token));
         EXPECT_TRUE(ot::otx::blind::TokenState::Signed == token.State());
 
         const auto push = issuePurse.Push(std::move(token), reason_);
@@ -297,7 +161,7 @@ TEST_F(Test_Basic, sign)
     EXPECT_EQ(requestPurse.Value(), 0);
 }
 
-TEST_F(Test_Basic, process)
+TEST_F(Lucre, process)
 {
     ASSERT_TRUE(issue_purse_);
     ASSERT_TRUE(mint_);
@@ -307,22 +171,21 @@ TEST_F(Test_Basic, process)
 
     auto bytes = ot::Space{};
     issuePurse.Serialize(opentxs::writer(bytes));
-    auto purse = ot::factory::Purse(api_, ot::reader(bytes));
+    auto purse = DeserializePurse(ot::reader(bytes));
 
     ASSERT_TRUE(purse);
 
-    auto& mint = *mint_;
     const auto& alice = *alice_;
 
     EXPECT_TRUE(purse.Unlock(alice, reason_));
     ASSERT_TRUE(purse.IsUnlocked());
-    EXPECT_TRUE(purse.Internal().Process(alice, mint, reason_));
+    EXPECT_TRUE(Process(purse));
     EXPECT_TRUE(ot::otx::blind::PurseType::Normal == purse.State());
 
     issue_purse_.emplace(std::move(purse));
 }
 
-TEST_F(Test_Basic, verify)
+TEST_F(Lucre, verify)
 {
     ASSERT_TRUE(issue_purse_);
     ASSERT_TRUE(mint_);
@@ -336,26 +199,21 @@ TEST_F(Test_Basic, verify)
 
     auto bytes = ot::Space{};
     issuePurse.Serialize(opentxs::writer(bytes));
-    auto purse = ot::factory::Purse(api_, ot::reader(bytes));
+    auto purse = DeserializePurse(ot::reader(bytes));
 
     ASSERT_TRUE(purse);
     EXPECT_TRUE(purse.Unlock(bob, reason_));
     ASSERT_TRUE(purse.IsUnlocked());
 
-    auto& mint = *mint_;
-
     for (const auto& token : purse) {
         EXPECT_FALSE(token.IsSpent(reason_));
-
-        const auto verified = mint.Internal().VerifyToken(bob, token, reason_);
-
-        EXPECT_TRUE(verified);
+        EXPECT_TRUE(Verify(token));
     }
 
     issue_purse_.emplace(std::move(purse));
 }
 
-TEST_F(Test_Basic, wallet)
+TEST_F(Lucre, wallet)
 {
     {
         const auto& purse =
@@ -364,14 +222,7 @@ TEST_F(Test_Basic, wallet)
         EXPECT_FALSE(purse);
     }
 
-    {
-        api_.Wallet().Internal().mutable_Purse(
-            alice_nym_id_,
-            server_id_,
-            unit_id_,
-            reason_,
-            ot::otx::blind::CashType::Lucre);
-    }
+    MakePurse();
 
     {
         const auto& purse =
@@ -381,38 +232,5 @@ TEST_F(Test_Basic, wallet)
     }
 }
 
-TEST_F(Test_Basic, PushPop)
-{
-    auto purseEditor = api_.Wallet().Internal().mutable_Purse(
-        alice_nym_id_,
-        server_id_,
-        unit_id_,
-        reason_,
-        ot::otx::blind::CashType::Lucre);
-    auto& purse = purseEditor.get();
-
-    ASSERT_TRUE(issue_purse_);
-
-    auto& issuePurse = *issue_purse_;
-    const auto& alice = *alice_;
-    const auto unlocked = issuePurse.Unlock(alice, reason_);
-
-    ASSERT_TRUE(unlocked);
-    ASSERT_TRUE(purse.Unlock(alice, reason_));
-    ASSERT_TRUE(purse.IsUnlocked());
-
-    auto token = issuePurse.Pop();
-
-    while (token) {
-        EXPECT_TRUE(token.Internal().MarkSpent(reason_));
-        EXPECT_TRUE(token.IsSpent(reason_));
-        EXPECT_TRUE(purse.Push(std::move(token), reason_));
-
-        token = issuePurse.Pop();
-    }
-
-    EXPECT_EQ(purse.size(), 2);
-    EXPECT_EQ(purse.Value(), 0);
-    EXPECT_EQ(issuePurse.Value(), 0);
-}
+TEST_F(Lucre, PushPop) { EXPECT_TRUE(ReceivePurse()); }
 }  // namespace ottest

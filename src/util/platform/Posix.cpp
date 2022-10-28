@@ -6,6 +6,7 @@
 #include "0_stdafx.hpp"               // IWYU pragma: associated
 #include "api/Legacy.hpp"             // IWYU pragma: associated
 #include "api/context/Context.hpp"    // IWYU pragma: associated
+#include "core/FixedByteArray.tpp"    // IWYU pragma: associated
 #include "core/String.hpp"            // IWYU pragma: associated
 #include "internal/util/Signals.hpp"  // IWYU pragma: associated
 #include "util/storage/drivers/filesystem/Common.hpp"  // IWYU pragma: associated
@@ -31,6 +32,9 @@ extern "C" {
 
 namespace opentxs
 {
+template class FixedByteArray<2_uz * sizeof(std::uint64_t)>;
+template class FixedByteArray<3_uz * sizeof(std::uint64_t)>;
+template class FixedByteArray<4_uz * sizeof(std::uint64_t)>;
 
 auto Signals::Block() -> void
 {

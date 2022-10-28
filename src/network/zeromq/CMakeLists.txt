@@ -33,11 +33,8 @@ target_sources(
 set(cxx-install-headers
     "${opentxs_SOURCE_DIR}/include/opentxs/network/zeromq/ZeroMQ.hpp"
 )
-target_include_directories(
-  opentxs-common SYSTEM PRIVATE "${opentxs_SOURCE_DIR}/deps/cs_libguarded/src"
-)
-target_link_libraries(opentxs-common PRIVATE "${OT_ZMQ_TARGET}")
-target_link_libraries(opentxs PUBLIC "${OT_ZMQ_TARGET}")
+opentxs_link_internal("${OT_ZMQ_TARGET}")
+opentxs_link_external("${OT_ZMQ_TARGET}")
 target_sources(opentxs-common PRIVATE ${cxx-install-headers})
 
 if(OPENTXS_STANDALONE)

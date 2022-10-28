@@ -12,6 +12,7 @@ extern "C" {
 }
 
 #include <boost/endian/buffers.hpp>
+#include <chrono>
 #include <cstdlib>
 #include <cstring>
 #include <iterator>

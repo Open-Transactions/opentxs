@@ -21,7 +21,7 @@ class Options;
 
 namespace ottest
 {
-class ArgumentParser
+class OPENTXS_EXPORT ArgumentParser
 {
 public:
     bool show_help_;

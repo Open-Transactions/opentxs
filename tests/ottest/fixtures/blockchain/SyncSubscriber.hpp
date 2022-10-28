@@ -21,7 +21,7 @@ class MinedBlocks;
 
 namespace ottest
 {
-struct SyncSubscriber {
+struct OPENTXS_EXPORT SyncSubscriber {
     using BlockHash = ot::blockchain::block::Hash;
     using SyncPromise = std::promise<BlockHash>;
     using SyncFuture = std::shared_future<BlockHash>;

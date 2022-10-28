@@ -18,22 +18,22 @@ namespace ot = opentxs;
 
 namespace ottest
 {
-struct NymListRow {
+struct OPENTXS_EXPORT NymListRow {
     ot::UnallocatedCString id_{};
     ot::UnallocatedCString name_{};
 };
 
-struct NymListData {
+struct OPENTXS_EXPORT NymListData {
     ot::UnallocatedVector<NymListRow> rows_{};
 };
 
-auto check_nym_list(
+OPENTXS_EXPORT auto check_nym_list(
     const ot::api::session::Client& api,
     const NymListData& expected) noexcept -> bool;
-auto check_nym_list_qt(
+OPENTXS_EXPORT auto check_nym_list_qt(
     const ot::api::session::Client& api,
     const NymListData& expected) noexcept -> bool;
-auto init_nym_list(
+OPENTXS_EXPORT auto init_nym_list(
     const ot::api::session::Client& api,
     Counter& counter) noexcept -> void;
 }  // namespace ottest

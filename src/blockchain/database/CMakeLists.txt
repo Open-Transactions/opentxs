@@ -31,5 +31,5 @@ target_sources(
     "Wallet.cpp"
     "Wallet.hpp"
 )
-target_link_libraries(opentxs-common PRIVATE lmdb)
-target_link_libraries(opentxs PUBLIC lmdb)
+opentxs_link_internal(lmdb)
+opentxs_link_external(lmdb)

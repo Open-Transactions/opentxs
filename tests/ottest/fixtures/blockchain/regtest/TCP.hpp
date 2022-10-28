@@ -11,7 +11,7 @@
 
 namespace ottest
 {
-class Regtest_fixture_tcp : public Regtest_fixture_base
+class OPENTXS_EXPORT Regtest_fixture_tcp : public Regtest_fixture_base
 {
 protected:
     using Regtest_fixture_base::Connect;

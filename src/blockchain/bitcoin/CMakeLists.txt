@@ -22,5 +22,4 @@ if(OT_BLOCKCHAIN_EXPORT)
       "Inventory.cpp"
       "Inventory.hpp"
   )
-  target_link_libraries(opentxs-common PRIVATE Boost::headers)
 endif()

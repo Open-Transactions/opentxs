@@ -26,7 +26,7 @@ namespace b = ot::blockchain;
 
 namespace ottest
 {
-class Test_StartStop : public ::testing::Test
+class OPENTXS_EXPORT Test_StartStop : public ::testing::Test
 {
 public:
     const ot::api::session::Client& api_;

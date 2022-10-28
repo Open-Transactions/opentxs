@@ -4,4 +4,4 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 add_library(base64 OBJECT "base64.c" "base64.h")
-target_sources(opentxs PRIVATE $<TARGET_OBJECTS:base64>)
+opentxs_add_sources($<TARGET_OBJECTS:base64>)

@@ -54,7 +54,8 @@ public:
     OPENTXS_NO_EXPORT virtual operator SerializedType() const noexcept = 0;
 
     virtual auto External() const noexcept -> const Group& = 0;
-    virtual auto Internal() const noexcept -> const Group& = 0;
+    OPENTXS_NO_EXPORT virtual auto Internal() const noexcept
+        -> const Group& = 0;
     virtual auto Version() const noexcept -> VersionNumber = 0;
 
     virtual auto AddItem(
@@ -73,7 +74,7 @@ public:
     virtual auto DeleteItem(const identifier::Generic& item) noexcept
         -> bool = 0;
     virtual auto External() noexcept -> Group& = 0;
-    virtual auto Internal() noexcept -> Group& = 0;
+    OPENTXS_NO_EXPORT virtual auto Internal() noexcept -> Group& = 0;
 
     Set(const Set&) = delete;
     Set(Set&&) = delete;

@@ -20,7 +20,7 @@ struct Server;
 
 namespace ottest
 {
-class User
+class OPENTXS_EXPORT User
 {
 public:
     const ot::UnallocatedCString words_;

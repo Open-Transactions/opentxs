@@ -6,9 +6,13 @@
 #include "0_stdafx.hpp"               // IWYU pragma: associated
 #include "api/Legacy.hpp"             // IWYU pragma: associated
 #include "api/context/Context.hpp"    // IWYU pragma: associated
+#include "core/FixedByteArray.tpp"    // IWYU pragma: associated
 #include "core/String.hpp"            // IWYU pragma: associated
 #include "internal/util/Signals.hpp"  // IWYU pragma: associated
 #include "internal/util/Thread.hpp"   // IWYU pragma: associated
+#include "opentxs/blockchain/bitcoin/cfilter/Hash.hpp"  // IWYU pragma: associated
+#include "opentxs/blockchain/bitcoin/cfilter/Header.hpp"  // IWYU pragma: associated
+#include "opentxs/blockchain/block/Hash.hpp"  // IWYU pragma: associated
 #include "util/storage/drivers/filesystem/Common.hpp"  // IWYU pragma: associated
 
 #include <Windows.h>  // IWYU pragma: associated
@@ -32,6 +36,10 @@ extern "C" {
 
 namespace opentxs
 {
+template class OPENTXS_EXPORT FixedByteArray<2_uz * sizeof(std::uint64_t)>;
+template class OPENTXS_EXPORT FixedByteArray<3_uz * sizeof(std::uint64_t)>;
+template class OPENTXS_EXPORT FixedByteArray<4_uz * sizeof(std::uint64_t)>;
+
 auto SetThisThreadsPriority(ThreadPriority priority) noexcept -> void
 {
     static const auto map = robin_hood::unordered_flat_map<ThreadPriority, int>{
@@ -173,6 +181,17 @@ auto Legacy::prepend() noexcept -> UnallocatedCString { return {}; }
 
 auto Legacy::use_dot() noexcept -> bool { return false; }
 }  // namespace opentxs::api::imp
+
+namespace opentxs::blockchain::block
+{
+class OPENTXS_EXPORT Hash;
+}  // namespace opentxs::blockchain::block
+
+namespace opentxs::blockchain::cfilter
+{
+class OPENTXS_EXPORT Header;
+class OPENTXS_EXPORT Hash;
+}  // namespace opentxs::blockchain::cfilter
 
 namespace opentxs::storage::driver::filesystem
 {

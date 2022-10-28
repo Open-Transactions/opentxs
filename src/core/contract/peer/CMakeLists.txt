@@ -44,10 +44,6 @@ target_sources(
     "StoreSecret.cpp"
     "StoreSecret.cpp"
 )
-target_include_directories(
-  opentxs-common SYSTEM
-  PRIVATE "${opentxs_SOURCE_DIR}/deps/robin-hood/src/include"
-)
 set(cxx-install-headers
     "${opentxs_SOURCE_DIR}/include/opentxs/core/contract/peer/ConnectionInfoType.hpp"
     "${opentxs_SOURCE_DIR}/include/opentxs/core/contract/peer/PeerObjectType.hpp"

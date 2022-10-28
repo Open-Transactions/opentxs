@@ -14,7 +14,7 @@
 
 namespace ottest
 {
-struct Bip158Vector {
+struct OPENTXS_EXPORT Bip158Vector {
     ot::blockchain::block::Height height_;
     ot::UnallocatedCString block_hash_;
     ot::UnallocatedCString block_;
@@ -35,15 +35,18 @@ struct Bip158Vector {
         -> ot::UnallocatedVector<ot::ByteArray>;
 };
 
-auto GetBchCfilter1307544() noexcept -> std::span<const std::byte>;
-auto GetBchCfilter1307723() noexcept -> std::span<const std::byte>;
-auto GetBip158Elements() noexcept -> const ot::UnallocatedMap<
+auto OPENTXS_EXPORT GetBchCfilter1307544() noexcept
+    -> std::span<const std::byte>;
+auto OPENTXS_EXPORT GetBchCfilter1307723() noexcept
+    -> std::span<const std::byte>;
+auto OPENTXS_EXPORT GetBip158Elements() noexcept -> const ot::UnallocatedMap<
     ot::blockchain::block::Height,
     ot::UnallocatedVector<ot::UnallocatedCString>>&;
-auto GetBip158Vectors() noexcept -> const ot::UnallocatedVector<Bip158Vector>&;
-auto some_moron_wrote_the_bytes_backwards(const ot::UnallocatedCString& in)
-    -> ot::UnallocatedCString;
-auto parse_hex(
+auto OPENTXS_EXPORT GetBip158Vectors() noexcept
+    -> const ot::UnallocatedVector<Bip158Vector>&;
+auto OPENTXS_EXPORT some_moron_wrote_the_bytes_backwards(
+    const ot::UnallocatedCString& in) -> ot::UnallocatedCString;
+auto OPENTXS_EXPORT parse_hex(
     const ot::api::Session& api,
     const ot::UnallocatedCString& hex,
     const bool reverse = false) noexcept -> ot::ByteArray;

@@ -34,7 +34,7 @@ class Writer;
 
 namespace ottest
 {
-struct PaymentCodeFixture {
+struct OPENTXS_EXPORT PaymentCodeFixture {
     static constexpr auto account_ = ot::Bip32Index{0};
     static constexpr auto index_ = ot::Bip32Index{0};
 
@@ -81,7 +81,7 @@ private:
         ot::Writer&& destination) const -> bool;
 };
 
-class PC_Fixture_Base : virtual public ::testing::Test
+class OPENTXS_EXPORT PC_Fixture_Base : virtual public ::testing::Test
 {
 public:
     static PaymentCodeFixture user_1_;

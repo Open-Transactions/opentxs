@@ -11,5 +11,4 @@ target_sources(
     "Actor.hpp"
     "Listener.cpp"
 )
-target_link_libraries(opentxs-common PRIVATE Boost::headers)
-target_link_libraries(opentxs PUBLIC Boost::system)
+opentxs_link_external(Boost::system)

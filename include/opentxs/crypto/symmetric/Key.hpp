@@ -64,7 +64,7 @@ public:
     auto get_allocator() const noexcept -> allocator_type final;
     auto ID(const PasswordPrompt& reason) const noexcept
         -> const identifier::Generic&;
-    auto Internal() const noexcept -> const internal::Key&;
+    OPENTXS_NO_EXPORT auto Internal() const noexcept -> const internal::Key&;
     [[nodiscard]] auto IsValid() const noexcept -> bool;
     [[nodiscard]] auto Unlock(const PasswordPrompt& reason) const noexcept
         -> bool;
@@ -72,7 +72,7 @@ public:
     [[nodiscard]] auto ChangePassword(
         const Secret& newPassword,
         const PasswordPrompt& reason) noexcept -> bool;
-    auto Internal() noexcept -> internal::Key&;
+    OPENTXS_NO_EXPORT auto Internal() noexcept -> internal::Key&;
     auto swap(Key& rhs) noexcept -> void;
 
     OPENTXS_NO_EXPORT Key(KeyPrivate* imp) noexcept;

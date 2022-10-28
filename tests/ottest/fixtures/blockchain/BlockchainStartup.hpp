@@ -13,7 +13,7 @@
 
 namespace ottest
 {
-class BlockchainStartup
+class OPENTXS_EXPORT BlockchainStartup
 {
 public:
     using Future = std::shared_future<void>;

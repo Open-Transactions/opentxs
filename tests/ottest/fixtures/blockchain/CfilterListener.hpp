@@ -14,7 +14,7 @@
 
 namespace ottest
 {
-class CfilterListener
+class OPENTXS_EXPORT CfilterListener
 {
 public:
     class Imp;

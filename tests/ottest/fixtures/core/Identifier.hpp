@@ -13,7 +13,7 @@
 
 namespace ottest
 {
-class Identifier : public LowLevel
+class OPENTXS_EXPORT Identifier : public LowLevel
 {
 protected:
     ot::identifier::Generic generic_;
@@ -21,45 +21,62 @@ protected:
     ot::identifier::Nym nym_;
     ot::identifier::UnitDefinition unit_;
 
+    auto RandomID() const noexcept -> ot::identifier::Generic;
+    auto RandomNotaryID() const noexcept -> ot::identifier::Notary;
+    auto RandomNymID() const noexcept -> ot::identifier::Nym;
+    auto RandomUnitID() const noexcept -> ot::identifier::UnitDefinition;
+
     Identifier() noexcept;
 
     ~Identifier() override = default;
 };
 
-class GenericID : public Identifier
+class OPENTXS_EXPORT GenericID : public Identifier
 {
 protected:
     ot::identifier::Generic id_;
+
+    auto CheckProtobufSerialization(
+        const ot::identifier::Generic& in) const noexcept -> bool;
 
     GenericID() noexcept;
 
     ~GenericID() override = default;
 };
 
-class NotaryID : public Identifier
+class OPENTXS_EXPORT NotaryID : public Identifier
 {
 protected:
     ot::identifier::Notary id_;
+
+    auto CheckProtobufSerialization(
+        const ot::identifier::Notary& in) const noexcept -> bool;
 
     NotaryID() noexcept;
 
     ~NotaryID() override = default;
 };
 
-class NymID : public Identifier
+class OPENTXS_EXPORT NymID : public Identifier
 {
 protected:
     ot::identifier::Nym id_;
+
+    auto CheckProtobufSerialization(
+        const ot::identifier::Nym& in) const noexcept -> bool;
 
     NymID() noexcept;
 
     ~NymID() override = default;
 };
 
-class UnitID : public Identifier
+class OPENTXS_EXPORT UnitID : public Identifier
 {
 protected:
     ot::identifier::UnitDefinition id_;
+
+    auto CheckProtobufSerialization(
+        const ot::identifier::UnitDefinition& in) const noexcept -> bool;
 
     UnitID() noexcept;
 

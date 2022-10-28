@@ -11,7 +11,7 @@
 
 namespace ottest
 {
-class Regtest_fixture_sync_client : public Regtest_fixture_normal
+class OPENTXS_EXPORT Regtest_fixture_sync_client : public Regtest_fixture_normal
 {
 protected:
     Regtest_fixture_sync_client();

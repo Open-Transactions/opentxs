@@ -63,7 +63,7 @@ namespace ottest
 {
 class User;
 
-struct RegtestListener {
+struct OPENTXS_EXPORT RegtestListener {
     RegtestListener(const ot::api::session::Client& client);
 
     std::unique_ptr<BlockListener> block_listener_;
@@ -72,7 +72,7 @@ struct RegtestListener {
     ~RegtestListener();
 };
 
-class Regtest_fixture_simple : public Regtest_fixture_normal
+class OPENTXS_EXPORT Regtest_fixture_simple : public Regtest_fixture_normal
 {
 protected:
     Regtest_fixture_simple();

@@ -4,7 +4,7 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 target_sources(
-  ottest
+  opentxs-testlib
   PRIVATE
     "Bip158.cpp"
     "Bip158.hpp"
@@ -16,15 +16,10 @@ if(OT_BLOCKCHAIN_EXPORT AND NOT MSVC)
   # NOTE the RLP test vectors can not be easily embedded when the compiler is
   # MSVC due to string literal length restrictions
   target_sources(
-    ottest
+    opentxs-testlib
     PRIVATE
       "${opentxs_BINARY_DIR}/tests/ottest/data/blockchain/RLP_raw.cpp"
       "RLP.cpp"
       "RLP.hpp"
-  )
-  target_link_libraries(
-    ottest
-    PRIVATE Boost::headers
-    PUBLIC Boost::system
   )
 endif()

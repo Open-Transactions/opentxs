@@ -22,7 +22,7 @@ namespace ot = opentxs;
 namespace ottest
 {
 // NOLINTBEGIN(clang-analyzer-optin.performance.Padding)
-struct OptionsData {
+struct OPENTXS_EXPORT OptionsData {
     ot::Set<ot::CString> blockchain_bind_ipv4_;
     ot::Set<ot::CString> blockchain_bind_ipv6_;
     ot::Set<opentxs::blockchain::Type> blockchain_disabled_chains_;
@@ -54,7 +54,7 @@ struct OptionsData {
 };
 // NOLINTEND(clang-analyzer-optin.performance.Padding)
 
-auto check_options(
+OPENTXS_EXPORT auto check_options(
     const opentxs::Options& options,
     const OptionsData& expected) noexcept -> bool;
 }  // namespace ottest

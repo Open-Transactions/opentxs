@@ -27,7 +27,7 @@ class Client;
 
 namespace ottest
 {
-class PeerListener
+class OPENTXS_EXPORT PeerListener
 {
     std::promise<void> promise_;
 

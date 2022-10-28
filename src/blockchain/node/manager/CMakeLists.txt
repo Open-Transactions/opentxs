@@ -15,12 +15,8 @@ if(OT_BLOCKCHAIN_EXPORT)
       "Manager.cpp"
       "Manager.hpp"
   )
-  target_include_directories(
-    opentxs-common SYSTEM
-    PRIVATE "${opentxs_SOURCE_DIR}/deps/cs_libguarded/src"
-  )
-  target_link_libraries(opentxs-common PRIVATE "${OT_ZMQ_TARGET}")
-  target_link_libraries(opentxs PUBLIC "${OT_ZMQ_TARGET}")
+  opentxs_link_internal("${OT_ZMQ_TARGET}")
+  opentxs_link_external("${OT_ZMQ_TARGET}")
 endif()
 
 target_sources(opentxs-common PRIVATE ${cxx-install-headers})

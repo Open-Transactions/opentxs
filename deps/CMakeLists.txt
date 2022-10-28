@@ -17,6 +17,9 @@ if(CASH_LUCRE_EXPORT)
   target_include_directories(
     lucre SYSTEM PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/lucre/include/lucre/"
   )
+  target_include_directories(
+    lucre SYSTEM INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/lucre/include/"
+  )
 
   if(NOT MSVC)
     target_compile_options(
@@ -36,7 +39,9 @@ if(CASH_LUCRE_EXPORT)
   set_target_properties(
     lucre PROPERTIES C_INCLUDE_WHAT_YOU_USE "" CXX_INCLUDE_WHAT_YOU_USE ""
   )
-  target_sources(opentxs PRIVATE $<TARGET_OBJECTS:lucre>)
+  opentxs_link_internal(lucre)
+  opentxs_link_external(OpenSSL::Crypto)
+  opentxs_add_sources($<TARGET_OBJECTS:lucre>)
 endif(CASH_LUCRE_EXPORT)
 
 add_library(
@@ -70,7 +75,7 @@ if(${CMAKE_CXX_COMPILER_ID}
   )
 endif()
 
-target_sources(opentxs PRIVATE $<TARGET_OBJECTS:external-hashes>)
+opentxs_add_sources($<TARGET_OBJECTS:external-hashes>)
 
 add_library(
   bech32 OBJECT
@@ -90,7 +95,7 @@ endif()
 set_target_properties(
   bech32 PROPERTIES C_INCLUDE_WHAT_YOU_USE "" CXX_INCLUDE_WHAT_YOU_USE ""
 )
-target_sources(opentxs PRIVATE $<TARGET_OBJECTS:bech32>)
+opentxs_add_sources($<TARGET_OBJECTS:bech32>)
 
 if(OT_BUNDLED_SECP256K1 AND OT_CRYPTO_USING_LIBSECP256K1)
   set(SECP256K1_ENABLE_COVERAGE
@@ -156,7 +161,13 @@ endif()
 if(OT_BOOST_JSON_HEADER_ONLY)
   target_sources(opentxs-common PRIVATE "Json.cpp")
 else()
-  target_link_libraries(opentxs PUBLIC Boost::json)
+  opentxs_link_external(Boost::json)
 endif()
 
 target_sources(opentxs-common PRIVATE "BoostAsio.hpp")
+
+opentxs_include_directories("${opentxs_SOURCE_DIR}/deps/")
+opentxs_include_directories("${opentxs_SOURCE_DIR}/deps/cs_libguarded/src")
+opentxs_include_directories("${opentxs_SOURCE_DIR}/deps/frozen/include")
+opentxs_include_directories("${opentxs_SOURCE_DIR}/deps/robin-hood/src/include")
+opentxs_link_internal(Boost::headers)

@@ -27,8 +27,8 @@ set(cxx-install-headers
     "${opentxs_SOURCE_DIR}/include/opentxs/network/zeromq/message/Message.hpp"
     "${opentxs_SOURCE_DIR}/include/opentxs/network/zeromq/message/Message.tpp"
 )
-target_link_libraries(opentxs-common PRIVATE "${OT_ZMQ_TARGET}")
-target_link_libraries(opentxs PUBLIC "${OT_ZMQ_TARGET}")
+opentxs_link_internal("${OT_ZMQ_TARGET}")
+opentxs_link_external("${OT_ZMQ_TARGET}")
 target_sources(opentxs-common PRIVATE ${cxx-install-headers})
 
 if(OPENTXS_STANDALONE)

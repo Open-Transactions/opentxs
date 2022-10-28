@@ -19,7 +19,7 @@ namespace ot = opentxs;
 
 namespace ottest
 {
-struct ContactListRow {
+struct OPENTXS_EXPORT ContactListRow {
     bool check_contact_id_{};
     ot::UnallocatedCString contact_id_index_{};
     ot::UnallocatedCString name_{};
@@ -27,27 +27,31 @@ struct ContactListRow {
     ot::UnallocatedCString image_{};
 };
 
-struct ContactListData {
+struct OPENTXS_EXPORT ContactListData {
     ot::UnallocatedVector<ContactListRow> rows_{};
 };
 
-auto check_contact_list(
+OPENTXS_EXPORT auto check_contact_list(
     const User& user,
     const ContactListData& expected) noexcept -> bool;
-auto check_contact_list_qt(
+OPENTXS_EXPORT auto check_contact_list_qt(
     const User& user,
     const ContactListData& expected) noexcept -> bool;
-auto check_messagable_list(
+OPENTXS_EXPORT auto check_messagable_list(
     const User& user,
     const ContactListData& expected) noexcept -> bool;
-auto check_messagable_list_qt(
+OPENTXS_EXPORT auto check_messagable_list_qt(
     const User& user,
     const ContactListData& expected) noexcept -> bool;
-auto contact_list_add_contact(
+OPENTXS_EXPORT auto contact_list_add_contact(
     const User& user,
     const ot::UnallocatedCString& label,
     const ot::UnallocatedCString& paymentCode,
     const ot::UnallocatedCString& nymID) noexcept -> ot::UnallocatedCString;
-auto init_contact_list(const User& user, Counter& counter) noexcept -> void;
-auto init_messagable_list(const User& user, Counter& counter) noexcept -> void;
+OPENTXS_EXPORT auto init_contact_list(
+    const User& user,
+    Counter& counter) noexcept -> void;
+OPENTXS_EXPORT auto init_messagable_list(
+    const User& user,
+    Counter& counter) noexcept -> void;
 }  // namespace ottest

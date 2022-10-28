@@ -19,39 +19,39 @@ namespace ot = opentxs;
 
 namespace ottest
 {
-struct BlockchainSubchainData {
+struct OPENTXS_EXPORT BlockchainSubchainData {
     ot::UnallocatedCString name_;
     ot::blockchain::crypto::Subchain type_;
 };
 
-struct BlockchainSubaccountData {
+struct OPENTXS_EXPORT BlockchainSubaccountData {
     ot::UnallocatedCString name_;
     ot::UnallocatedCString id_;
     ot::UnallocatedVector<BlockchainSubchainData> rows_;
 };
 
-struct BlockchainSubaccountSourceData {
+struct OPENTXS_EXPORT BlockchainSubaccountSourceData {
     ot::UnallocatedCString name_;
     ot::UnallocatedCString id_;
     ot::blockchain::crypto::SubaccountType type_;
     ot::UnallocatedVector<BlockchainSubaccountData> rows_;
 };
 
-struct BlockchainAccountStatusData {
+struct OPENTXS_EXPORT BlockchainAccountStatusData {
     ot::UnallocatedCString owner_;
     ot::blockchain::Type chain_;
     ot::UnallocatedVector<BlockchainSubaccountSourceData> rows_;
 };
 
-auto check_blockchain_account_status(
+OPENTXS_EXPORT auto check_blockchain_account_status(
     const User& user,
     const ot::blockchain::Type chain,
     const BlockchainAccountStatusData& expected) noexcept -> bool;
-auto check_blockchain_account_status_qt(
+OPENTXS_EXPORT auto check_blockchain_account_status_qt(
     const User& user,
     const ot::blockchain::Type chain,
     const BlockchainAccountStatusData& expected) noexcept -> bool;
-auto init_blockchain_account_status(
+OPENTXS_EXPORT auto init_blockchain_account_status(
     const User& user,
     const ot::blockchain::Type chain,
     Counter& counter) noexcept -> void;

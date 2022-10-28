@@ -16,7 +16,6 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include <opentxs/opentxs.hpp>
-#include <algorithm>
 #include <cstdint>
 #include <memory>
 #include <stdexcept>

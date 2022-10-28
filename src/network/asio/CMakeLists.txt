@@ -22,7 +22,7 @@ set(cxx-install-headers
     "${opentxs_SOURCE_DIR}/include/opentxs/network/asio/Endpoint.hpp"
     "${opentxs_SOURCE_DIR}/include/opentxs/network/asio/Socket.hpp"
 )
-target_link_libraries(opentxs PUBLIC Boost::system)
+opentxs_link_external(Boost::system)
 target_sources(opentxs-common PRIVATE ${cxx-install-headers})
 
 if(OPENTXS_STANDALONE)

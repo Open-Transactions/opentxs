@@ -11,7 +11,7 @@
 
 namespace ottest
 {
-struct TXOState {
+struct OPENTXS_EXPORT TXOState {
     struct Data {
         ot::blockchain::Balance balance_;
         ot::UnallocatedMap<

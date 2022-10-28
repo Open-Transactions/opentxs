@@ -13,7 +13,3 @@ target_sources(
     "${opentxs_SOURCE_DIR}/src/internal/crypto/key/Null.hpp"
     "Key.cpp"
 )
-target_include_directories(
-  opentxs-common SYSTEM
-  PRIVATE "${opentxs_SOURCE_DIR}/deps/robin-hood/src/include"
-)

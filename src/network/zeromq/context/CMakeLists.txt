@@ -24,12 +24,8 @@ target_sources(
 set(cxx-install-headers
     "${opentxs_SOURCE_DIR}/include/opentxs/network/zeromq/Context.hpp"
 )
-target_include_directories(
-  opentxs-common SYSTEM
-  PRIVATE "${opentxs_SOURCE_DIR}/deps/robin-hood/src/include"
-)
-target_link_libraries(opentxs-common PRIVATE Boost::headers "${OT_ZMQ_TARGET}")
-target_link_libraries(opentxs PUBLIC Boost::system "${OT_ZMQ_TARGET}")
+opentxs_link_internal("${OT_ZMQ_TARGET}")
+opentxs_link_external(Boost::system "${OT_ZMQ_TARGET}")
 target_sources(opentxs-common PRIVATE ${cxx-install-headers})
 
 if(OPENTXS_STANDALONE)

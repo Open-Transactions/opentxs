@@ -3,10 +3,10 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-target_sources(ottest PRIVATE "Helpers.hpp" "Helpers.cpp")
+target_sources(opentxs-testlib PRIVATE "Helpers.hpp" "Helpers.cpp")
 
 if(OT_ENABLE_RPC)
-  target_sources(ottest PRIVATE "Helpers-rpc.cpp")
+  target_sources(opentxs-testlib PRIVATE "Helpers-rpc.cpp")
 else()
-  target_sources(ottest PRIVATE "Null.cpp")
+  target_sources(opentxs-testlib PRIVATE "Null.cpp")
 endif()

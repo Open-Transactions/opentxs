@@ -21,10 +21,6 @@ target_sources(
     "Source.cpp"
     "Source.hpp"
 )
-target_include_directories(
-  opentxs-common SYSTEM
-  PRIVATE "${opentxs_SOURCE_DIR}/deps/robin-hood/src/include"
-)
 set(cxx-install-headers
     "${opentxs_SOURCE_DIR}/include/opentxs/identity/Authority.hpp"
     "${opentxs_SOURCE_DIR}/include/opentxs/identity/CredentialRole.hpp"
@@ -36,8 +32,8 @@ set(cxx-install-headers
     "${opentxs_SOURCE_DIR}/include/opentxs/identity/SourceType.hpp"
     "${opentxs_SOURCE_DIR}/include/opentxs/identity/Types.hpp"
 )
-target_link_libraries(opentxs-common PRIVATE unofficial-sodium::sodium)
-target_link_libraries(opentxs PUBLIC unofficial-sodium::sodium)
+opentxs_link_internal(unofficial-sodium::sodium)
+opentxs_link_external(unofficial-sodium::sodium)
 target_sources(opentxs-common PRIVATE ${cxx-install-headers})
 
 if(OPENTXS_STANDALONE)

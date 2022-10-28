@@ -815,18 +815,18 @@ include_directories(
 )
 
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
-
 add_custom_target(generated_code)
-add_library(opentxs-common OBJECT "")
 
 if(OPENTXS_STANDALONE)
   # library type controlled by BUILD_SHARED_LIBS
   add_library(opentxs "")
 
-  if(BUILD_SHARED_LIBS AND OPENTXS_HIDDEN_SYMBOLS)
+  if(BUILD_SHARED_LIBS)
     set(OT_EXPORT_MACRO "opentxs_EXPORTS")
+    set(OT_IMPORT_MACRO "")
   else()
     set(OT_EXPORT_MACRO "OPENTXS_STATIC_DEFINE")
+    set(OT_IMPORT_MACRO "OPENTXS_STATIC_DEFINE")
   endif()
 else()
   add_library(opentxs STATIC "")
@@ -839,6 +839,8 @@ else()
       $<BUILD_INTERFACE:${opentxs_SOURCE_DIR}/include>
   )
   set(OT_EXPORT_MACRO "OPENTXS_STATIC_DEFINE")
+  set(OT_IMPORT_MACRO "OPENTXS_STATIC_DEFINE")
+  target_compile_definitions(opentxs INTERFACE "${OT_IMPORT_MACRO}")
 
   if(OPENTXS_BUILD_TESTS)
     message(WARNING "tests can only be built in standalone mode")
@@ -850,6 +852,46 @@ add_library(
   ALIAS
   opentxs
 )
+add_library(opentxs-common OBJECT "")
+target_compile_definitions(opentxs-common PRIVATE "${OT_EXPORT_MACRO}")
+
+if(OPENTXS_BUILD_TESTS)
+  add_library(opentxs-testlib "")
+  target_compile_definitions(opentxs-testlib PRIVATE "${OT_EXPORT_MACRO}")
+  target_compile_definitions(opentxs-testlib INTERFACE "${OT_IMPORT_MACRO}")
+endif()
+
+macro(opentxs_include_directories DIR)
+  target_include_directories(opentxs-common SYSTEM PRIVATE "${DIR}")
+
+  if(OPENTXS_BUILD_TESTS)
+    target_include_directories(opentxs-testlib SYSTEM PRIVATE "${DIR}")
+  endif()
+endmacro()
+
+macro(opentxs_link_internal LIB)
+  target_link_libraries(opentxs-common PRIVATE "${LIB}")
+
+  if(OPENTXS_BUILD_TESTS)
+    target_link_libraries(opentxs-testlib PRIVATE "${LIB}")
+  endif()
+endmacro()
+
+macro(opentxs_link_external LIB)
+  target_link_libraries(opentxs PUBLIC "${LIB}")
+
+  if(OPENTXS_BUILD_TESTS)
+    target_link_libraries(opentxs-testlib PUBLIC "${LIB}")
+  endif()
+endmacro()
+
+macro(opentxs_add_sources SOURCES)
+  target_sources(opentxs PRIVATE "${SOURCES}")
+
+  if(OPENTXS_BUILD_TESTS)
+    target_sources(opentxs-testlib PRIVATE "${SOURCES}")
+  endif()
+endmacro()
 
 add_subdirectory(generated)
 add_subdirectory(deps)

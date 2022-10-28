@@ -42,7 +42,6 @@ if(OT_BLOCKCHAIN_EXPORT)
       "Shared.hpp"
       "Wallet.cpp"
   )
-  target_link_libraries(opentxs-common PRIVATE Boost::headers)
 endif()
 
 target_sources(opentxs-common PRIVATE ${cxx-install-headers})

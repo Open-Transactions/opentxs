@@ -57,11 +57,6 @@ if(OT_BLOCKCHAIN_EXPORT)
       "Transaction.hpp"
       "TransactionCache.cpp"
   )
-  target_include_directories(
-    opentxs-common SYSTEM
-    PRIVATE "${opentxs_SOURCE_DIR}/deps/cs_libguarded/src"
-            "${opentxs_SOURCE_DIR}/deps/robin-hood/src/include"
-  )
 else()
   target_sources(opentxs-common PRIVATE "Disabled.cpp")
 endif()

@@ -10,7 +10,6 @@
 #include <limits>
 #include <memory>
 #include <stdexcept>
-#include <string_view>
 #include <utility>
 
 #include "internal/api/crypto/Factory.hpp"
@@ -23,12 +22,11 @@
 #include "opentxs/api/crypto/Encode.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Data.hpp"
-#include "opentxs/core/Secret.hpp"
 #include "opentxs/crypto/HashType.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
 #include "opentxs/util/Bytes.hpp"
-#include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
+#include "opentxs/util/WriteBuffer.hpp"
 #include "opentxs/util/Writer.hpp"
 
 namespace opentxs::factory
@@ -219,67 +217,34 @@ auto Hash::MurmurHash3_32(
 }
 
 auto Hash::PKCS5_PBKDF2_HMAC(
-    const Data& input,
-    const Data& salt,
-    const std::size_t iterations,
-    const opentxs::crypto::HashType type,
-    const std::size_t bytes,
-    Data& output) const noexcept -> bool
+    ReadView input,
+    ReadView salt,
+    std::size_t iterations,
+    opentxs::crypto::HashType hashType,
+    std::size_t bytes,
+    Writer&& output) const noexcept -> bool
 {
-    output.SetSize(bytes);
+    try {
+        auto buf = output.Reserve(bytes);
 
-    return pbkdf2_.PKCS5_PBKDF2_HMAC(
-        input.data(),
-        input.size(),
-        salt.data(),
-        salt.size(),
-        iterations,
-        type,
-        bytes,
-        output.data());
-}
+        if (false == buf.IsValid(bytes)) {
+            throw std::runtime_error{"failed to reserve space for hash"};
+        }
 
-auto Hash::PKCS5_PBKDF2_HMAC(
-    const Secret& input,
-    const Data& salt,
-    const std::size_t iterations,
-    const opentxs::crypto::HashType type,
-    const std::size_t bytes,
-    Data& output) const noexcept -> bool
-{
-    output.SetSize(bytes);
-    const auto data = input.Bytes();
+        return pbkdf2_.PKCS5_PBKDF2_HMAC(
+            input.data(),
+            input.size(),
+            salt.data(),
+            salt.size(),
+            iterations,
+            hashType,
+            bytes,
+            buf.data());
+    } catch (const std::exception& e) {
+        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
 
-    return pbkdf2_.PKCS5_PBKDF2_HMAC(
-        data.data(),
-        data.size(),
-        salt.data(),
-        salt.size(),
-        iterations,
-        type,
-        bytes,
-        output.data());
-}
-
-auto Hash::PKCS5_PBKDF2_HMAC(
-    const UnallocatedCString& input,
-    const Data& salt,
-    const std::size_t iterations,
-    const opentxs::crypto::HashType type,
-    const std::size_t bytes,
-    Data& output) const noexcept -> bool
-{
-    output.SetSize(bytes);
-
-    return pbkdf2_.PKCS5_PBKDF2_HMAC(
-        input.data(),
-        input.size(),
-        salt.data(),
-        salt.size(),
-        iterations,
-        type,
-        bytes,
-        output.data());
+        return false;
+    }
 }
 
 auto Hash::Scrypt(

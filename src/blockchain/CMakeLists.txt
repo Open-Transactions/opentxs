@@ -26,11 +26,6 @@ target_sources(
     "Json.hpp"
     "Params.cpp"
 )
-target_link_libraries(opentxs-common PUBLIC Boost::headers)
-target_include_directories(
-  opentxs-common SYSTEM
-  PRIVATE "${opentxs_SOURCE_DIR}/deps/robin-hood/src/include"
-)
 set(cxx-install-headers
     "${opentxs_SOURCE_DIR}/include/opentxs/blockchain/Blockchain.hpp"
     "${opentxs_SOURCE_DIR}/include/opentxs/blockchain/BlockchainType.hpp"
@@ -43,8 +38,8 @@ if(OT_BLOCKCHAIN_EXPORT)
     PRIVATE "${opentxs_SOURCE_DIR}/src/internal/blockchain/Blockchain.hpp"
             "Blockchain.cpp"
   )
-  target_link_libraries(opentxs-common PRIVATE lmdb)
-  target_link_libraries(opentxs PUBLIC lmdb)
+  opentxs_link_internal(lmdb)
+  opentxs_link_external(lmdb)
 else()
   # TODO move to appropriate subdirectories
   list(

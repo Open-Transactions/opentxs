@@ -77,26 +77,12 @@ public:
         const Data& data,
         std::uint32_t& output) const noexcept -> void final;
     auto PKCS5_PBKDF2_HMAC(
-        const Data& input,
-        const Data& salt,
-        const std::size_t iterations,
-        const opentxs::crypto::HashType hashType,
-        const std::size_t bytes,
-        Data& output) const noexcept -> bool final;
-    auto PKCS5_PBKDF2_HMAC(
-        const Secret& input,
-        const Data& salt,
-        const std::size_t iterations,
-        const opentxs::crypto::HashType hashType,
-        const std::size_t bytes,
-        Data& output) const noexcept -> bool final;
-    auto PKCS5_PBKDF2_HMAC(
-        const UnallocatedCString& input,
-        const Data& salt,
-        const std::size_t iterations,
-        const opentxs::crypto::HashType hashType,
-        const std::size_t bytes,
-        Data& output) const noexcept -> bool final;
+        ReadView input,
+        ReadView salt,
+        std::size_t iterations,
+        opentxs::crypto::HashType hashType,
+        std::size_t bytes,
+        Writer&& output) const noexcept -> bool final;
     auto Scrypt(
         const ReadView input,
         const ReadView salt,

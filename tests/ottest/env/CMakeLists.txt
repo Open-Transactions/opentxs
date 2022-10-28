@@ -6,4 +6,4 @@
 add_subdirectory(basic)
 add_subdirectory(lowlevel)
 
-target_sources(ottest PRIVATE "OTTestEnvironment.hpp" "main.cpp")
+target_sources(opentxs-testlib PRIVATE "OTTestEnvironment.hpp" "main.cpp")

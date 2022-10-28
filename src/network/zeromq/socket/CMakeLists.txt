@@ -54,10 +54,5 @@ target_sources(
     "Subscribe.cpp"
     "Subscribe.hpp"
 )
-target_include_directories(
-  opentxs-common SYSTEM
-  PRIVATE "${opentxs_SOURCE_DIR}/deps/robin-hood/src/include"
-          "${opentxs_SOURCE_DIR}/deps/cs_libguarded/src"
-)
-target_link_libraries(opentxs-common PRIVATE "${OT_ZMQ_TARGET}")
-target_link_libraries(opentxs PRIVATE "${OT_ZMQ_TARGET}")
+opentxs_link_internal("${OT_ZMQ_TARGET}")
+opentxs_link_external("${OT_ZMQ_TARGET}")

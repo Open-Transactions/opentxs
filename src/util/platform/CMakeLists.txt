@@ -18,13 +18,9 @@ if(WIN32)
     target_sources(opentxs-common PRIVATE "Windows_release.cpp")
   endif()
 
-  target_include_directories(
-    opentxs-common SYSTEM
-    PRIVATE "${opentxs_SOURCE_DIR}/deps/robin-hood/src/include"
-  )
-  target_link_libraries(opentxs-common PRIVATE unofficial-sodium::sodium)
-  target_link_libraries(opentxs PUBLIC unofficial-sodium::sodium)
-  target_link_libraries(opentxs PUBLIC PThreads4W::PThreads4W)
+  opentxs_link_internal(unofficial-sodium::sodium)
+  opentxs_link_external(unofficial-sodium::sodium)
+  opentxs_link_external(PThreads4W::PThreads4W)
 elseif(UNIX)
   # Use this file for functions which are the same between all non-Windows
   # platforms
@@ -36,8 +32,8 @@ elseif(UNIX)
     target_sources(opentxs-common PRIVATE "Posix_release.cpp")
   endif()
 
-  target_link_libraries(opentxs-common PRIVATE unofficial-sodium::sodium)
-  target_link_libraries(opentxs PUBLIC unofficial-sodium::sodium)
+  opentxs_link_internal(unofficial-sodium::sodium)
+  opentxs_link_external(unofficial-sodium::sodium)
 
   if(APPLE)
     target_sources(opentxs-common PRIVATE "Apple.cpp")
@@ -60,11 +56,6 @@ elseif(UNIX)
       target_sources(opentxs-common PRIVATE "Unix_debug.cpp")
     endif()
 
-    target_include_directories(
-      opentxs-common SYSTEM
-      PRIVATE "${opentxs_SOURCE_DIR}/deps/robin-hood/src/include"
-    )
-
     if(ANDROID)
       target_sources(opentxs-common PRIVATE "Android.cpp")
     else()
@@ -77,5 +68,5 @@ if(NOT ANDROID)
   target_sources(opentxs-common PRIVATE "non-Android.cpp")
 endif()
 
-target_link_libraries(opentxs-common PRIVATE "${OT_ZMQ_TARGET}")
-target_link_libraries(opentxs PUBLIC "${OT_ZMQ_TARGET}")
+opentxs_link_internal("${OT_ZMQ_TARGET}")
+opentxs_link_external("${OT_ZMQ_TARGET}")

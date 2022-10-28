@@ -30,7 +30,8 @@ namespace opentxs::api
 class OPENTXS_EXPORT Settings
 {
 public:
-    virtual auto Internal() const noexcept -> const internal::Settings& = 0;
+    OPENTXS_NO_EXPORT virtual auto Internal() const noexcept
+        -> const internal::Settings& = 0;
     [[nodiscard]] virtual auto ReadBool(
         const std::string_view section,
         const std::string_view key,
@@ -57,7 +58,8 @@ public:
         const std::string_view key,
         const std::string_view value) const noexcept -> bool = 0;
 
-    virtual auto Internal() noexcept -> internal::Settings& = 0;
+    OPENTXS_NO_EXPORT virtual auto Internal() noexcept
+        -> internal::Settings& = 0;
 
     Settings(const Settings&) = delete;
     Settings(Settings&&) = delete;

@@ -35,4 +35,5 @@ set_target_properties(
     C_STANDARD 90
     UNITY_BUILD OFF
 )
-target_sources(opentxs PRIVATE $<TARGET_OBJECTS:opentxs-argon2>)
+opentxs_link_internal(opentxs-argon2)
+opentxs_add_sources($<TARGET_OBJECTS:opentxs-argon2>)

@@ -4,7 +4,7 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 target_sources(ottest-basic PRIVATE "OTTestEnvironment.cpp")
-target_link_libraries(ottest-basic PRIVATE ottest)
+target_link_libraries(ottest-basic PRIVATE opentxs-testlib)
 set_target_properties(
   ottest-basic PROPERTIES POSITION_INDEPENDENT_CODE 1 UNITY_BUILD OFF
 )

@@ -1,21 +1,28 @@
 
+// NOTE: Windows has different semantics than all other platforms for library
+// symbol visibility especially with regards to templates. Templates on Windows
+// can not be marked dllexport until they can be fully instantiated whereas on
+// all other platforms they must be marked with default visibility at the point
+// of declaration. To properly export extern templates on Windows it must be
+// marked dllimport at the point of declaration (for the benefit of library
+// users), and dllexport at the point where it is instantiated.
 #ifdef OPENTXS_STATIC_DEFINE
-#  define OPENTXS_EXPORT_TEMPLATE OPENTXS_EXPORT
+#  define OPENTXS_IMPORT OPENTXS_EXPORT
 #else
-#  ifndef OPENTXS_EXPORT_TEMPLATE
+#  ifndef OPENTXS_IMPORT
 #    ifdef opentxs_EXPORTS
-      /* We are building this library */
-#      ifdef WIN32
-#        define OPENTXS_EXPORT_TEMPLATE
+       /* We are building this library */
+#      ifdef _WIN32
+#        define OPENTXS_IMPORT
 #      else
-#        define OPENTXS_EXPORT_TEMPLATE OPENTXS_EXPORT
+#        define OPENTXS_IMPORT OPENTXS_EXPORT
 #      endif
 #    else
-      /* We are using this library */
-#      ifdef WIN32
-#        define OPENTXS_EXPORT_TEMPLATE __declspec(dllimport)
+       /* We are using this library */
+#      ifdef _WIN32
+#        define OPENTXS_IMPORT __declspec(dllimport)
 #      else
-#        define OPENTXS_EXPORT_TEMPLATE OPENTXS_EXPORT
+#        define OPENTXS_IMPORT OPENTXS_EXPORT
 #      endif
 #    endif
 #  endif

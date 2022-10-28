@@ -6,12 +6,14 @@
 add_subdirectory(regtest)
 
 target_sources(
-  ottest
+  opentxs-testlib
   PRIVATE
     "Activity.cpp"
     "Activity.hpp"
     "Basic.cpp"
     "Basic.hpp"
+    "BlockHeader.cpp"
+    "BlockHeader.hpp"
     "BlockListener.cpp"
     "BlockListener.hpp"
     "BlockchainStartup.cpp"
@@ -39,7 +41,4 @@ target_sources(
     "TXOState.hpp"
     "TXOs.cpp"
     "TXOs.hpp"
-)
-target_include_directories(
-  ottest SYSTEM PRIVATE "${opentxs_SOURCE_DIR}/deps/cs_libguarded/src"
 )

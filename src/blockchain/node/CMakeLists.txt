@@ -41,12 +41,7 @@ if(OT_BLOCKCHAIN_EXPORT)
       "UpdateTransaction.cpp"
       "UpdateTransaction.hpp"
   )
-  target_link_libraries(opentxs PUBLIC Boost::system)
-  target_include_directories(
-    opentxs-common SYSTEM
-    PRIVATE "${opentxs_SOURCE_DIR}/deps/cs_libguarded/src"
-            "${opentxs_SOURCE_DIR}/deps/robin-hood/src/include"
-  )
+  opentxs_link_external(Boost::system)
 
   if(PACKETCRYPT_EXPORT)
     target_sources(

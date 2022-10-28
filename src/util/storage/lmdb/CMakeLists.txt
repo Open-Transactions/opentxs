@@ -16,8 +16,5 @@ target_sources(
     "TransactionPrivate.cpp"
     "TransactionPrivate.hpp"
 )
-target_link_libraries(opentxs-common PRIVATE lmdb)
-target_link_libraries(opentxs PUBLIC lmdb)
-target_include_directories(
-  opentxs-common SYSTEM PRIVATE "${opentxs_SOURCE_DIR}/deps/cs_libguarded/src"
-)
+opentxs_link_internal(lmdb)
+opentxs_link_external(lmdb)

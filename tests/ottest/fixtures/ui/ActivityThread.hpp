@@ -20,7 +20,7 @@ namespace ot = opentxs;
 
 namespace ottest
 {
-struct ActivityThreadRow {
+struct OPENTXS_EXPORT ActivityThreadRow {
     bool loading_{};
     bool pending_{};
     bool outgoing_{};
@@ -34,7 +34,7 @@ struct ActivityThreadRow {
     std::optional<ot::Time> timestamp_{};
 };
 
-struct ActivityThreadData {
+struct OPENTXS_EXPORT ActivityThreadData {
     bool can_message_{};
     ot::UnallocatedCString thread_id_{};
     ot::UnallocatedCString display_name_{};
@@ -44,22 +44,22 @@ struct ActivityThreadData {
     ot::UnallocatedVector<ActivityThreadRow> rows_{};
 };
 
-auto activity_thread_send_message(
+OPENTXS_EXPORT auto activity_thread_send_message(
     const User& user,
     const User& contact) noexcept -> bool;
-auto activity_thread_send_message(
+OPENTXS_EXPORT auto activity_thread_send_message(
     const User& user,
     const User& contact,
     const ot::UnallocatedCString& messasge) noexcept -> bool;
-auto check_activity_thread(
+OPENTXS_EXPORT auto check_activity_thread(
     const User& user,
     const ot::identifier::Generic& contact,
     const ActivityThreadData& expected) noexcept -> bool;
-auto check_activity_thread_qt(
+OPENTXS_EXPORT auto check_activity_thread_qt(
     const User& user,
     const ot::identifier::Generic& contact,
     const ActivityThreadData& expected) noexcept -> bool;
-auto init_activity_thread(
+OPENTXS_EXPORT auto init_activity_thread(
     const User& user,
     const User& contact,
     Counter& counter) noexcept -> void;

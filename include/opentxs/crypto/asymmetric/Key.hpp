@@ -63,7 +63,7 @@ public:
         -> bool;
     auto HasPrivate() const noexcept -> bool;
     auto HasPublic() const noexcept -> bool;
-    auto Internal() const noexcept -> const internal::Key&;
+    OPENTXS_NO_EXPORT auto Internal() const noexcept -> const internal::Key&;
     [[nodiscard]] auto IsValid() const noexcept -> bool;
     auto PreferredHash() const noexcept -> crypto::HashType;
     auto PrivateKey(const PasswordPrompt& reason) const noexcept -> ReadView;
@@ -81,7 +81,7 @@ public:
     auto asEllipticCurve() noexcept -> key::EllipticCurve&;
     auto asRSA() noexcept -> key::RSA&;
     [[nodiscard]] auto ErasePrivateData() noexcept -> bool;
-    auto Internal() noexcept -> internal::Key&;
+    OPENTXS_NO_EXPORT auto Internal() noexcept -> internal::Key&;
     auto swap(Key& rhs) noexcept -> void;
 
     OPENTXS_NO_EXPORT Key(KeyPrivate* imp) noexcept;

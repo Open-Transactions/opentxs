@@ -14,7 +14,7 @@
 
 namespace ottest
 {
-class MinedBlocks
+class OPENTXS_EXPORT MinedBlocks
 {
 public:
     using BlockHash = ot::blockchain::block::Hash;

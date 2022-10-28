@@ -376,8 +376,3 @@ target_sources(
     "verificationset/VerificationSet_1.cpp"
     "verifyclaim/VerifyClaim_1.cpp"
 )
-target_include_directories(
-  opentxs-common SYSTEM
-  PRIVATE "${opentxs_SOURCE_DIR}/deps/robin-hood/src/include"
-)
-target_link_libraries(opentxs-common PRIVATE Boost::headers messages)

@@ -15,8 +15,4 @@ target_sources(
     "Server.hpp"
     "OTDHT.cpp"
 )
-target_include_directories(
-  opentxs-common SYSTEM PRIVATE "${opentxs_SOURCE_DIR}/deps/cs_libguarded/src"
-)
-target_link_libraries(opentxs-common PRIVATE Boost::headers)
-target_link_libraries(opentxs PUBLIC Boost::system)
+opentxs_link_external(Boost::system)

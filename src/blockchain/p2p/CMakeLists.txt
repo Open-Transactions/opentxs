@@ -18,7 +18,7 @@ if(OT_BLOCKCHAIN_EXPORT)
   target_sources(
     opentxs-common PRIVATE "AddressPrivate.cpp" "AddressPrivate.hpp"
   )
-  target_link_libraries(opentxs PUBLIC Boost::system)
+  opentxs_link_external(Boost::system)
 else()
   target_sources(opentxs-common PRIVATE "Disabled.cpp")
 endif()

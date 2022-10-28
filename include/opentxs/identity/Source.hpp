@@ -33,11 +33,12 @@ namespace opentxs::identity
 class OPENTXS_EXPORT Source
 {
 public:
-    virtual auto Internal() const noexcept -> const internal::Source& = 0;
+    virtual OPENTXS_NO_EXPORT auto Internal() const noexcept
+        -> const internal::Source& = 0;
     virtual auto Type() const noexcept -> identity::SourceType = 0;
     virtual auto NymID() const noexcept -> identifier::Nym = 0;
 
-    virtual auto Internal() noexcept -> internal::Source& = 0;
+    virtual OPENTXS_NO_EXPORT auto Internal() noexcept -> internal::Source& = 0;
 
     Source(const Source&) = delete;
     Source(Source&&) = delete;

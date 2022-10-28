@@ -33,7 +33,7 @@ struct TXOState;
 
 namespace ottest
 {
-class Regtest_fixture_base : virtual public Base
+class OPENTXS_EXPORT Regtest_fixture_base : virtual public Base
 {
 public:
     static auto MaturationInterval() noexcept -> ot::blockchain::block::Height;

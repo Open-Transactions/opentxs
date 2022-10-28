@@ -14,8 +14,7 @@ if(FS_EXPORT)
       "GarbageCollected.cpp"
       "GarbageCollected.hpp"
   )
-  target_link_libraries(opentxs-common PRIVATE Boost::headers)
-  target_link_libraries(opentxs PUBLIC Boost::iostreams)
+  opentxs_link_external(Boost::iostreams)
 else()
   target_sources(opentxs-common PRIVATE "null.cpp")
 endif()

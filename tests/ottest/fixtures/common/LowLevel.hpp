@@ -23,7 +23,7 @@ class Context;
 
 namespace ottest
 {
-class LowLevel : virtual public ::testing::Test
+class OPENTXS_EXPORT LowLevel : virtual public ::testing::Test
 {
 private:
     ot::PasswordCaller caller_;
