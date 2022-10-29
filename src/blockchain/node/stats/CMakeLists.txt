@@ -20,11 +20,7 @@ set(cxx-install-headers
     "${opentxs_SOURCE_DIR}/include/opentxs/blockchain/node/Stats.hpp"
 )
 
-target_include_directories(
-  opentxs-common SYSTEM PRIVATE "${opentxs_SOURCE_DIR}/deps/cs_libguarded/src"
-)
-target_link_libraries(opentxs-common PRIVATE Boost::headers)
-target_link_libraries(opentxs PUBLIC Boost::system)
+opentxs_link_external(Boost::system)
 target_sources(opentxs-common PRIVATE ${cxx-install-headers})
 
 if(OPENTXS_STANDALONE)

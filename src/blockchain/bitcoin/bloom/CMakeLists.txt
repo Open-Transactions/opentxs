@@ -13,5 +13,4 @@ if(OT_BLOCKCHAIN_EXPORT)
       "BloomFilter.cpp"
       "BloomFilter.hpp"
   )
-  target_link_libraries(opentxs-common PRIVATE Boost::headers)
 endif()

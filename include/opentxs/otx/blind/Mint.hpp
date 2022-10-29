@@ -68,9 +68,10 @@ public:
     auto GetValidFrom() const -> Time;
     auto GetValidTo() const -> Time;
     auto InstrumentDefinitionID() const -> const identifier::UnitDefinition&;
-    auto Internal() const noexcept -> const otx::blind::internal::Mint&;
+    OPENTXS_NO_EXPORT auto Internal() const noexcept
+        -> const otx::blind::internal::Mint&;
 
-    auto Internal() noexcept -> otx::blind::internal::Mint&;
+    OPENTXS_NO_EXPORT auto Internal() noexcept -> otx::blind::internal::Mint&;
     OPENTXS_NO_EXPORT auto Release() noexcept -> otx::blind::internal::Mint*;
     auto swap(Mint& rhs) noexcept -> void;
 

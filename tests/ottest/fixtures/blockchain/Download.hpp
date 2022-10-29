@@ -23,7 +23,7 @@ using DownloadType = int;
 using FinishedType = ot::UnallocatedCString;
 using ManagerType = d::Manager<DownloadManager, DownloadType, FinishedType>;
 
-struct DownloadManager : public ManagerType {
+struct OPENTXS_EXPORT DownloadManager : public ManagerType {
     using FinishedMap = ot::UnallocatedMap<Position, Finished>;
 
     static const bb::Position genesis_;

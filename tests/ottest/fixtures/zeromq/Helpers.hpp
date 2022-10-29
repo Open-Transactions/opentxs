@@ -27,7 +27,7 @@ namespace ot = opentxs;
 
 namespace ottest
 {
-struct ZMQQueue {
+struct OPENTXS_EXPORT ZMQQueue {
     using Message = ot::network::zeromq::Message;
 
     auto get(std::size_t index) noexcept(false) -> const Message&;

@@ -37,4 +37,4 @@ if(NOT MSVC)
   )
 endif()
 
-target_sources(opentxs PRIVATE $<TARGET_OBJECTS:irrxml>)
+opentxs_add_sources($<TARGET_OBJECTS:irrxml>)

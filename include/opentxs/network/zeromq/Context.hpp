@@ -30,7 +30,8 @@ class OPENTXS_EXPORT Context
 public:
     virtual operator void*() const noexcept = 0;
 
-    virtual auto Internal() const noexcept -> const internal::Context& = 0;
+    OPENTXS_NO_EXPORT virtual auto Internal() const noexcept
+        -> const internal::Context& = 0;
 
     OPENTXS_NO_EXPORT virtual auto Internal() noexcept
         -> internal::Context& = 0;

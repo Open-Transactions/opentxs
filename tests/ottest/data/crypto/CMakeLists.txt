@@ -4,10 +4,12 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 target_sources(
-  ottest
+  opentxs-testlib
   PRIVATE
     "Bip32.cpp"
     "Bip32.hpp"
+    "Hashes.cpp"
+    "Hashes.hpp"
     "PaymentCodeV1.cpp"
     "PaymentCodeV1.hpp"
     "PaymentCodeV3.cpp"

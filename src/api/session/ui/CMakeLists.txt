@@ -23,8 +23,10 @@ if(OT_QT_EXPORT)
       "Imp-qt.hpp"
       "Qt.cpp"
   )
-  target_link_libraries(opentxs-common PRIVATE Qt::Core Qt::Gui)
-  target_link_libraries(opentxs PUBLIC Qt::Core Qt::Gui)
+  opentxs_link_internal(Qt::Core)
+  opentxs_link_internal(Qt::Gui)
+  opentxs_link_external(Qt::Core)
+  opentxs_link_external(Qt::Gui)
 else()
   target_sources(opentxs-common PRIVATE "No_Qt.cpp")
 endif()

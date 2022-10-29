@@ -19,8 +19,7 @@ if(OT_BLOCKCHAIN_EXPORT)
   )
 endif()
 
-target_link_libraries(opentxs-common PRIVATE Boost::headers)
-target_link_libraries(opentxs PUBLIC Boost::system)
+opentxs_link_external(Boost::system)
 target_sources(opentxs-common PRIVATE ${cxx-install-headers})
 
 if(OPENTXS_STANDALONE)

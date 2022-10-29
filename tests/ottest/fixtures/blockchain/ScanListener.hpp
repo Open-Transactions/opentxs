@@ -14,7 +14,7 @@
 
 namespace ottest
 {
-struct ScanListener {
+struct OPENTXS_EXPORT ScanListener {
     using Callback = ot::network::zeromq::ListenCallback;
     using Subaccount = ot::blockchain::crypto::Subaccount;
     using Subchain = ot::blockchain::crypto::Subchain;

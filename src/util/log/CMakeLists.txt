@@ -17,12 +17,7 @@ target_sources(
     "Logger.cpp"
     "Logger.hpp"
 )
-target_include_directories(
-  opentxs-common SYSTEM PRIVATE "${opentxs_SOURCE_DIR}/deps/cs_libguarded/src"
-)
 set(cxx-install-headers "${opentxs_SOURCE_DIR}/include/opentxs/util/Log.hpp")
-
-target_link_libraries(opentxs-common PRIVATE Boost::headers)
 
 target_sources(opentxs-common PRIVATE ${cxx-install-headers})
 

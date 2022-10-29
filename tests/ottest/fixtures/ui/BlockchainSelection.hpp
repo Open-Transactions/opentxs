@@ -18,22 +18,22 @@ namespace ot = opentxs;
 
 namespace ottest
 {
-struct BlockchainSelectionRow {
+struct OPENTXS_EXPORT BlockchainSelectionRow {
     ot::UnallocatedCString name_{};
     bool enabled_{};
     bool testnet_{};
     ot::blockchain::Type type_{};
 };
 
-struct BlockchainSelectionData {
+struct OPENTXS_EXPORT BlockchainSelectionData {
     ot::UnallocatedVector<BlockchainSelectionRow> rows_{};
 };
 
-auto check_blockchain_selection(
+OPENTXS_EXPORT auto check_blockchain_selection(
     const ot::api::session::Client& api,
     const ot::ui::Blockchains type,
     const BlockchainSelectionData& expected) noexcept -> bool;
-auto check_blockchain_selection_qt(
+OPENTXS_EXPORT auto check_blockchain_selection_qt(
     const ot::api::session::Client& api,
     const ot::ui::Blockchains type,
     const BlockchainSelectionData& expected) noexcept -> bool;

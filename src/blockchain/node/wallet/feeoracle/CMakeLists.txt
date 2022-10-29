@@ -13,7 +13,3 @@ target_sources(
     "Shared.cpp"
     "Shared.hpp"
 )
-target_include_directories(
-  opentxs-common SYSTEM PRIVATE "${opentxs_SOURCE_DIR}/deps/cs_libguarded/src"
-)
-target_link_libraries(opentxs-common PRIVATE Boost::headers)

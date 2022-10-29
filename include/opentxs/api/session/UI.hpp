@@ -141,7 +141,8 @@ public:
     /// Caller does not own this pointer
     virtual auto IdentityManagerQt() const noexcept
         -> opentxs::ui::IdentityManagerQt* = 0;
-    virtual auto Internal() const noexcept -> const internal::UI& = 0;
+    OPENTXS_NO_EXPORT virtual auto Internal() const noexcept
+        -> const internal::UI& = 0;
     /// Caller does not own this pointer
     virtual auto MessagableListQt(
         const identifier::Nym& nymID,

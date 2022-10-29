@@ -55,7 +55,7 @@ public:
     operator bool() const noexcept;
 
     auto ID(const PasswordPrompt& reason) const -> UnallocatedCString;
-    auto Internal() const noexcept -> const internal::Token&;
+    OPENTXS_NO_EXPORT auto Internal() const noexcept -> const internal::Token&;
     auto IsSpent(const PasswordPrompt& reason) const -> bool;
     auto Notary() const -> const identifier::Notary&;
     auto Series() const -> MintSeries;
@@ -66,7 +66,7 @@ public:
     auto ValidTo() const -> Time;
     auto Value() const -> Denomination;
 
-    auto Internal() noexcept -> internal::Token&;
+    OPENTXS_NO_EXPORT auto Internal() noexcept -> internal::Token&;
     auto swap(Token&) noexcept -> void;
 
     OPENTXS_NO_EXPORT Token(Imp* imp) noexcept;

@@ -21,7 +21,7 @@ struct TXOState;
 
 namespace ottest
 {
-struct TXOs {
+struct OPENTXS_EXPORT TXOs {
     auto AddConfirmed(
         const ot::blockchain::bitcoin::block::Transaction& tx,
         const std::size_t index,

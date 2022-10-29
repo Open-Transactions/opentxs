@@ -12,12 +12,14 @@
 
 namespace ottest
 {
-struct Counter {
+struct OPENTXS_EXPORT Counter {
     std::atomic_int expected_{};
     std::atomic_int updated_{};
 };
 
-auto make_cb(Counter& counter, std::string_view name) noexcept
+OPENTXS_EXPORT auto make_cb(Counter& counter, std::string_view name) noexcept
     -> std::function<void()>;
-auto wait_for_counter(Counter& data, const bool hard = true) noexcept -> bool;
+OPENTXS_EXPORT auto wait_for_counter(
+    Counter& data,
+    const bool hard = true) noexcept -> bool;
 }  // namespace ottest

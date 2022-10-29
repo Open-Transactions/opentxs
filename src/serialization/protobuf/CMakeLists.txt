@@ -16,4 +16,4 @@ target_sources(
     "Proto.cpp"
 )
 
-target_link_libraries(opentxs-common PRIVATE messages)
+opentxs_link_internal(messages)

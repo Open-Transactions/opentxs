@@ -253,7 +253,7 @@ public:
         -> ByteArray = 0;
     virtual auto DataFromBytes(const ReadView input) const -> ByteArray = 0;
     virtual auto DataFromHex(const ReadView input) const -> ByteArray = 0;
-    virtual auto InternalSession() const noexcept
+    OPENTXS_NO_EXPORT virtual auto InternalSession() const noexcept
         -> const internal::Factory& = 0;
     virtual auto Mint() const noexcept -> otx::blind::Mint = 0;
     virtual auto Mint(const otx::blind::CashType type) const noexcept

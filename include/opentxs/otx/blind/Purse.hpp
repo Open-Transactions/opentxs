@@ -76,7 +76,7 @@ public:
     auto cend() const noexcept -> const_iterator;
     auto EarliestValidTo() const -> Time;
     auto end() const noexcept -> const_iterator;
-    auto Internal() const noexcept -> const internal::Purse&;
+    OPENTXS_NO_EXPORT auto Internal() const noexcept -> const internal::Purse&;
     auto IsUnlocked() const -> bool;
     auto LatestValidFrom() const -> Time;
     auto Notary() const -> const identifier::Notary&;
@@ -94,7 +94,7 @@ public:
     auto at(const std::size_t position) -> Token&;
     auto begin() noexcept -> iterator;
     auto end() noexcept -> iterator;
-    auto Internal() noexcept -> internal::Purse&;
+    OPENTXS_NO_EXPORT auto Internal() noexcept -> internal::Purse&;
     auto Pop() -> Token;
     auto Push(Token&& token, const PasswordPrompt& reason) -> bool;
     auto swap(Purse& rhs) noexcept -> void;

@@ -80,7 +80,7 @@ using StateMap = std::map<
     ot::UnallocatedCString,
     ot::UnallocatedMap<Widget, ot::UnallocatedMap<int, WidgetCallback>>>;
 
-struct Server {
+struct OPENTXS_EXPORT Server {
     const ot::api::session::Notary* api_{nullptr};
     bool init_{false};
     const ot::identifier::Notary id_{};
@@ -92,7 +92,7 @@ struct Server {
     auto init(const ot::api::session::Notary& api) noexcept -> void;
 };
 
-struct Callbacks {
+struct OPENTXS_EXPORT Callbacks {
     const ot::api::Context& api_;
     mutable std::mutex callback_lock_;
     ot::OTZMQListenCallback callback_;
@@ -125,7 +125,7 @@ private:
     auto callback(ot::network::zeromq::Message&& incoming) noexcept -> void;
 };
 
-struct Issuer {
+struct OPENTXS_EXPORT Issuer {
     static const int expected_bailments_{3};
     static const ot::UnallocatedCString new_notary_name_;
 
@@ -138,7 +138,7 @@ struct Issuer {
     Issuer() noexcept;
 };
 
-class IntegrationFixture : public ::testing::Test
+class OPENTXS_EXPORT IntegrationFixture : public ::testing::Test
 {
 public:
     static const User alex_;
@@ -148,10 +148,10 @@ public:
     static const Server server_1_;
 };
 
-auto set_introduction_server(
+OPENTXS_EXPORT auto set_introduction_server(
     const ot::api::session::Client& api,
     const Server& server) noexcept -> void;
-auto test_future(
+OPENTXS_EXPORT auto test_future(
     std::future<bool>& future,
     const unsigned int seconds = 60) noexcept -> bool;
 }  // namespace ottest

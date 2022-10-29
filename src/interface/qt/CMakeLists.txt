@@ -75,18 +75,16 @@ if(OT_QT_EXPORT)
       "UnitList.cpp"
       ${MOC_SRCS}
   )
-  target_include_directories(
-    opentxs-common SYSTEM
-    PRIVATE "${opentxs_SOURCE_DIR}/deps/cs_libguarded/src"
-  )
 
   if(OT_BLOCKCHAIN_EXPORT)
     target_sources(opentxs-common PRIVATE "Blockchain.cpp")
   endif()
 
   target_link_libraries(opentxs-moc PRIVATE Qt::Core Qt::Gui)
-  target_link_libraries(opentxs-common PRIVATE Qt::Core Qt::Gui)
-  target_link_libraries(opentxs PUBLIC Qt::Core Qt::Gui)
+  opentxs_link_internal(Qt::Core)
+  opentxs_link_internal(Qt::Gui)
+  opentxs_link_external(Qt::Core)
+  opentxs_link_external(Qt::Gui)
 else()
   target_sources(opentxs-common PRIVATE "no-Qt.cpp")
 endif()

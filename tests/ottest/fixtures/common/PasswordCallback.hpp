@@ -15,7 +15,7 @@ namespace ottest
 {
 using namespace std::literals;
 
-class PasswordCallback final : public ot::PasswordCallback
+class OPENTXS_EXPORT PasswordCallback final : public ot::PasswordCallback
 {
 public:
     static constexpr auto password_default_ = "opentxs"sv;

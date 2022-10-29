@@ -27,9 +27,10 @@ class OPENTXS_EXPORT PasswordPrompt
 {
 public:
     auto GetDisplayString() const noexcept -> std::string_view;
-    auto Internal() const noexcept -> const internal::PasswordPrompt&;
+    OPENTXS_NO_EXPORT auto Internal() const noexcept
+        -> const internal::PasswordPrompt&;
 
-    auto Internal() noexcept -> internal::PasswordPrompt&;
+    OPENTXS_NO_EXPORT auto Internal() noexcept -> internal::PasswordPrompt&;
 
     OPENTXS_NO_EXPORT PasswordPrompt(PasswordPromptPrivate* imp) noexcept;
     PasswordPrompt() = delete;

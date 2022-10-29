@@ -57,7 +57,7 @@ public:
     auto Hash() const noexcept -> const block::Hash&;
     auto Height() const noexcept -> block::Height;
     auto IncrementalWork() const noexcept -> blockchain::Work;
-    auto Internal() const noexcept -> const internal::Header&;
+    OPENTXS_NO_EXPORT auto Internal() const noexcept -> const internal::Header&;
     auto NumericHash() const noexcept -> block::NumericHash;
     auto ParentHash() const noexcept -> const block::Hash&;
     auto ParentWork() const noexcept -> blockchain::Work;
@@ -70,7 +70,7 @@ public:
     auto Valid() const noexcept -> bool;
     auto Work() const noexcept -> blockchain::Work;
 
-    auto Internal() noexcept -> internal::Header&;
+    OPENTXS_NO_EXPORT auto Internal() noexcept -> internal::Header&;
 
     Header() noexcept;
     OPENTXS_NO_EXPORT Header(Imp*) noexcept;

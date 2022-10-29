@@ -35,16 +35,16 @@ class Message;
 
 namespace ottest
 {
-struct FilterVector {
+struct OPENTXS_EXPORT FilterVector {
     ot::UnallocatedCString filter_hex_{};
     ot::UnallocatedCString header_hex_{};
 };
-struct ChainVector {
+struct OPENTXS_EXPORT ChainVector {
     ot::UnallocatedCString genesis_block_hex_{};
     boost::container::flat_map<ot::blockchain::cfilter::Type, FilterVector>
         filters_{};
 };
-struct Listener {
+struct OPENTXS_EXPORT Listener {
     using Message = ot::network::zeromq::Message;
 
     auto get(std::size_t index) noexcept(false) -> const Message&;

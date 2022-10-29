@@ -26,14 +26,10 @@ set(cxx-install-headers
     "${opentxs_SOURCE_DIR}/include/opentxs/api/network/ZMQ.hpp"
 )
 target_sources(opentxs-common PRIVATE ${cxx-install-headers})
-target_link_libraries(opentxs-common PRIVATE OpenSSL::SSL)
-target_link_libraries(
-  opentxs
-  PUBLIC
-    Boost::system
-    Boost::thread
-    OpenSSL::SSL
-)
+opentxs_link_internal(OpenSSL::SSL)
+opentxs_link_external(Boost::system)
+opentxs_link_external(Boost::thread)
+opentxs_link_external(OpenSSL::SSL)
 
 if(OPENTXS_STANDALONE)
   install(

@@ -77,7 +77,7 @@ add_library(
   "packetcrypt_rs/packetcrypt-sys/packetcrypt/src/Work.h"
 )
 target_link_libraries(
-  packetcrypt PRIVATE OpenSSL::Crypto unofficial-sodium::sodium
+  packetcrypt PUBLIC OpenSSL::Crypto unofficial-sodium::sodium
 )
 target_include_directories(
   packetcrypt SYSTEM
@@ -93,7 +93,11 @@ set_target_properties(
     C_STANDARD 11
     UNITY_BUILD OFF
 )
+
 if(NOT MSVC)
   target_compile_options(packetcrypt PRIVATE "-fwrapv")
 endif()
-target_sources(opentxs PRIVATE $<TARGET_OBJECTS:packetcrypt>)
+
+opentxs_link_internal(packetcrypt)
+opentxs_link_external(OpenSSL::Crypto unofficial-sodium::sodium)
+opentxs_add_sources($<TARGET_OBJECTS:packetcrypt>)

@@ -7,10 +7,6 @@ if(OT_QT_EXPORT)
   add_library(opentxs-moc OBJECT "")
 endif()
 
-target_link_libraries(opentxs-common PRIVATE Boost::headers opentxs::messages)
-target_include_directories(
-  opentxs-common SYSTEM PRIVATE "${opentxs_SOURCE_DIR}/deps/"
-)
 add_dependencies(opentxs-common generated_code)
 
 if(OT_PCH)
@@ -163,7 +159,7 @@ if(OT_QT_EXPORT)
       CXX_CLANG_TIDY ""
   )
   target_compile_definitions(opentxs-moc PRIVATE "${OT_EXPORT_MACRO}")
-  target_sources(opentxs PRIVATE $<TARGET_OBJECTS:opentxs-moc>)
+  opentxs_add_sources($<TARGET_OBJECTS:opentxs-moc>)
 endif()
 
 target_sources(
@@ -174,9 +170,13 @@ target_sources(
     "2_Factory.hpp"
     "OT.cpp"
 )
+target_sources(opentxs-common PRIVATE ${cxx-install-headers})
+opentxs_add_sources($<TARGET_OBJECTS:opentxs-common>)
 
-target_sources(opentxs PRIVATE $<TARGET_OBJECTS:opentxs-common>)
-target_compile_definitions(opentxs-common PRIVATE "${OT_EXPORT_MACRO}")
+if(OPENTXS_BUILD_TESTS)
+  target_sources(opentxs-testlib PRIVATE $<TARGET_OBJECTS:opentxs-common>)
+endif()
+
 set_target_properties(
   opentxs
   PROPERTIES
@@ -187,26 +187,24 @@ set_target_properties(
 )
 
 if(Threads_FOUND)
-  target_link_libraries(opentxs PUBLIC Threads::Threads)
+  opentxs_link_external(Threads::Threads)
 endif()
 
 if(CMAKE_DL_LIBS)
-  target_link_libraries(opentxs PUBLIC ${CMAKE_DL_LIBS})
+  opentxs_link_external(${CMAKE_DL_LIBS})
 endif()
 
 if(LIB_RT)
-  target_link_libraries(opentxs PUBLIC ${LIB_RT})
+  opentxs_link_external(${LIB_RT})
 endif()
 
 if(LIB_ANDROID_LOG)
-  target_link_libraries(opentxs PUBLIC ${LIB_ANDROID_LOG})
+  opentxs_link_external(${LIB_ANDROID_LOG})
 endif()
 
 if(Boost_stacktrace_basic_FOUND)
-  target_link_libraries(opentxs PUBLIC Boost::stacktrace_basic)
+  opentxs_link_external(Boost::stacktrace_basic)
 endif()
-
-target_sources(opentxs-common PRIVATE ${cxx-install-headers})
 
 if(OPENTXS_STANDALONE)
   install(

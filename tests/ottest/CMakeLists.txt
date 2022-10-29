@@ -9,23 +9,22 @@ add_subdirectory(fixtures)
 add_subdirectory(mocks)
 
 target_sources(
-  ottest
+  opentxs-testlib
   PRIVATE
     "Basic.cpp"
     "Basic.hpp"
     "Cli.hpp"
 )
-target_include_directories(ottest PUBLIC "${opentxs_SOURCE_DIR}/tests/")
 target_include_directories(
-  ottest SYSTEM
-  PUBLIC
-    "${opentxs_SOURCE_DIR}/deps/"
-    "${opentxs_SOURCE_DIR}/include/"
-    "${opentxs_SOURCE_DIR}/deps/robin-hood/src/include"
+  opentxs-testlib PUBLIC "${opentxs_SOURCE_DIR}/tests/"
 )
-target_link_libraries(ottest PUBLIC opentxs::libopentxs)
+target_include_directories(
+  opentxs-testlib SYSTEM
+  PUBLIC "${opentxs_SOURCE_DIR}/deps/"
+         "${opentxs_SOURCE_DIR}/deps/robin-hood/src/include"
+)
 target_compile_definitions(
-  ottest
+  opentxs-testlib
   PUBLIC
     "OT_QT=${OT_QT_EXPORT}"
     "OT_STORAGE_FS=${FS_EXPORT}"
@@ -34,37 +33,37 @@ target_compile_definitions(
 )
 
 if(OT_QT_EXPORT)
-  target_sources(ottest PRIVATE "Qt.cpp")
-  target_link_libraries(ottest PUBLIC Qt::Core)
+  target_sources(opentxs-testlib PRIVATE "Qt.cpp")
 else()
-  target_sources(ottest PRIVATE "no-Qt.cpp")
+  target_sources(opentxs-testlib PRIVATE "no-Qt.cpp")
 endif()
 
 if(OT_USE_VCPKG_TARGETS)
-  target_link_libraries(ottest PUBLIC GTest::gtest GTest::gmock)
+  target_link_libraries(opentxs-testlib PUBLIC GTest::gtest GTest::gmock)
 else()
-  target_link_libraries(ottest PUBLIC GTest::GTest GTest::gmock)
+  target_link_libraries(opentxs-testlib PUBLIC GTest::GTest GTest::gmock)
 endif()
 
-set_target_properties(ottest PROPERTIES POSITION_INDEPENDENT_CODE 1)
+set_target_properties(opentxs-testlib PROPERTIES POSITION_INDEPENDENT_CODE 1)
 
 if(${CMAKE_CXX_COMPILER_ID}
    MATCHES
    Clang
 )
-  target_compile_options(ottest PUBLIC -Wno-suggest-destructor-override)
+  target_compile_options(
+    opentxs-testlib PUBLIC -Wno-suggest-destructor-override
+  )
 endif()
 
 if((NOT MSVC) AND (NOT WIN32))
-  target_compile_options(ottest PUBLIC -fPIC)
+  target_compile_options(opentxs-testlib PUBLIC -fPIC)
 endif()
 
 if(OT_PCH)
   target_precompile_headers(
-    ottest
+    opentxs-testlib
     PRIVATE
     <gmock/gmock.h>
     <gtest/gtest.h>
-    <opentxs/opentxs.hpp>
   )
 endif()

@@ -27,7 +27,7 @@ namespace ot = opentxs;
 
 namespace ottest
 {
-class OneClientSession : virtual public Client_fixture
+class OPENTXS_EXPORT OneClientSession : virtual public Client_fixture
 {
 protected:
     const ot::api::session::Client& client_1_;

@@ -5,6 +5,7 @@
 
 #pragma once
 
+#include <opentxs/Export.hpp>
 #include <chrono>
 #include <filesystem>
 
@@ -22,11 +23,13 @@ namespace fs = std::filesystem;
 
 namespace ottest
 {
-auto Args(bool lowlevel = false, int argc = 0, char** argv = nullptr) noexcept
-    -> const ot::Options&;
-auto GetQT() noexcept -> QObject*;
-auto Home() noexcept -> const fs::path&;
-auto StartQT(bool lowlevel = false) noexcept -> void;
-auto StopQT() noexcept -> void;
-auto WipeHome() noexcept -> void;
+OPENTXS_EXPORT auto Args(
+    bool lowlevel = false,
+    int argc = 0,
+    char** argv = nullptr) noexcept -> const ot::Options&;
+OPENTXS_EXPORT auto GetQT() noexcept -> QObject*;
+OPENTXS_EXPORT auto Home() noexcept -> const fs::path&;
+OPENTXS_EXPORT auto StartQT(bool lowlevel = false) noexcept -> void;
+OPENTXS_EXPORT auto StopQT() noexcept -> void;
+OPENTXS_EXPORT auto WipeHome() noexcept -> void;
 }  // namespace ottest

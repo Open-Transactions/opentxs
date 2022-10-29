@@ -14,11 +14,7 @@ set(cxx-install-headers
     "${opentxs_SOURCE_DIR}/include/opentxs/api/network/OTDHT.hpp"
 )
 target_sources(opentxs-common PRIVATE ${cxx-install-headers})
-target_link_libraries(opentxs-common PUBLIC Boost::headers)
-target_link_libraries(opentxs PUBLIC Boost::system)
-target_include_directories(
-  opentxs-common SYSTEM PRIVATE "${opentxs_SOURCE_DIR}/deps/cs_libguarded/src"
-)
+opentxs_link_external(Boost::system)
 
 if(OPENTXS_STANDALONE)
   install(

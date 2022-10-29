@@ -14,10 +14,6 @@ target_sources(
     "KeyPrivate.cpp"
     "KeyPrivate.hpp"
 )
-target_include_directories(
-  opentxs-common SYSTEM PRIVATE "${opentxs_SOURCE_DIR}/deps/cs_libguarded/src"
-                                "${opentxs_SOURCE_DIR}/deps/frozen/include"
-)
 set(cxx-install-headers
     "${opentxs_SOURCE_DIR}/include/opentxs/crypto/symmetric/Algorithm.hpp"
     "${opentxs_SOURCE_DIR}/include/opentxs/crypto/symmetric/Key.hpp"

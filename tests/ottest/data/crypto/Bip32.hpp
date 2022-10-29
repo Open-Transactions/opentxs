@@ -12,14 +12,14 @@ namespace ot = opentxs;
 
 namespace ottest
 {
-struct PathElement {
+struct OPENTXS_EXPORT PathElement {
     using Index = std::uint32_t;
 
     bool hardened_{};
     Index index_{};
 };
 
-struct Child {
+struct OPENTXS_EXPORT Child {
     using Path = ot::UnallocatedVector<PathElement>;
     using Base58 = ot::UnallocatedCString;
 
@@ -28,7 +28,7 @@ struct Child {
     Base58 xprv_{};
 };
 
-struct Bip32TestCase {
+struct OPENTXS_EXPORT Bip32TestCase {
     using Hex = ot::UnallocatedCString;
     using Children = ot::UnallocatedVector<Child>;
 
@@ -36,5 +36,6 @@ struct Bip32TestCase {
     Children children_{};
 };
 
-auto Bip32TestCases() noexcept -> const ot::UnallocatedVector<Bip32TestCase>&;
+OPENTXS_EXPORT auto Bip32TestCases() noexcept
+    -> const ot::UnallocatedVector<Bip32TestCase>&;
 }  // namespace ottest

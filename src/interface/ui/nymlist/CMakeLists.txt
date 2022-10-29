@@ -13,6 +13,3 @@ target_sources(
     "NymListItem.cpp"
     "NymListItem.hpp"
 )
-target_include_directories(
-  opentxs-common SYSTEM PRIVATE "${opentxs_SOURCE_DIR}/deps/cs_libguarded/src"
-)

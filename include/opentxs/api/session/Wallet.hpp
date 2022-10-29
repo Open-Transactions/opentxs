@@ -75,7 +75,7 @@ public:
         -> bool = 0;
     virtual auto DefaultNym() const noexcept
         -> std::pair<identifier::Nym, std::size_t> = 0;
-    virtual auto Internal() const noexcept
+    OPENTXS_NO_EXPORT virtual auto Internal() const noexcept
         -> const session::internal::Wallet& = 0;
     /**   Returns a list of all issuers associated with a local nym */
     virtual auto IssuerList(const identifier::Nym& nymID) const

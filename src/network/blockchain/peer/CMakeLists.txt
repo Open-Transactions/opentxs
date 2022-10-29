@@ -27,6 +27,5 @@ if(OT_BLOCKCHAIN_EXPORT)
       "UpdateGetHeadersJob.cpp"
       "UpdateGetHeadersJob.hpp"
   )
-  target_link_libraries(opentxs-common PRIVATE Boost::headers)
-  target_link_libraries(opentxs PUBLIC Boost::system)
+  opentxs_link_external(Boost::system)
 endif()

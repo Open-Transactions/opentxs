@@ -57,7 +57,7 @@ class PasswordPrompt;
 
 namespace ottest
 {
-struct Test_BlockchainActivity : public ::testing::Test {
+struct OPENTXS_EXPORT Test_BlockchainActivity : public ::testing::Test {
     using Element = ot::blockchain::crypto::Element;
     using Transaction = ot::blockchain::bitcoin::block::Transaction;
 

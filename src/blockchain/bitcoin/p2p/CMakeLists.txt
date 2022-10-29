@@ -16,7 +16,3 @@ target_sources(
     "Message.cpp"
     "Message.hpp"
 )
-target_include_directories(
-  opentxs-common SYSTEM
-  PRIVATE "${opentxs_SOURCE_DIR}/deps/robin-hood/src/include"
-)

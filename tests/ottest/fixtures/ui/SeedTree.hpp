@@ -19,32 +19,32 @@ namespace ot = opentxs;
 
 namespace ottest
 {
-struct SeedTreeNym {
+struct OPENTXS_EXPORT SeedTreeNym {
     std::size_t index_{};
     ot::UnallocatedCString id_{};
     ot::UnallocatedCString name_{};
 };
 
-struct SeedTreeItem {
+struct OPENTXS_EXPORT SeedTreeItem {
     ot::UnallocatedCString id_{};
     ot::UnallocatedCString name_{};
     ot::crypto::SeedStyle type_{};
     ot::UnallocatedVector<SeedTreeNym> rows_;
 };
 
-struct SeedTreeData {
+struct OPENTXS_EXPORT SeedTreeData {
     ot::UnallocatedVector<SeedTreeItem> rows_;
 };
 
-auto check_seed_tree(
+OPENTXS_EXPORT auto check_seed_tree(
     const ot::api::session::Client& api,
     const SeedTreeData& expected) noexcept -> bool;
-auto check_seed_tree_qt(
+OPENTXS_EXPORT auto check_seed_tree_qt(
     const ot::api::session::Client& api,
     const SeedTreeData& expected) noexcept -> bool;
-auto init_seed_tree(
+OPENTXS_EXPORT auto init_seed_tree(
     const ot::api::session::Client& api,
     Counter& counter) noexcept -> void;
-auto print_seed_tree(const ot::api::session::Client& api) noexcept
-    -> ot::UnallocatedCString;
+OPENTXS_EXPORT auto print_seed_tree(
+    const ot::api::session::Client& api) noexcept -> ot::UnallocatedCString;
 }  // namespace ottest

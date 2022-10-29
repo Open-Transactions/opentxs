@@ -15,10 +15,5 @@ if(OT_BLOCKCHAIN_EXPORT)
       "Shared.cpp"
       "Shared.hpp"
   )
-  target_link_libraries(opentxs-common PRIVATE Boost::headers)
-  target_link_libraries(opentxs PUBLIC Boost::system)
-  target_include_directories(
-    opentxs-common SYSTEM
-    PRIVATE "${opentxs_SOURCE_DIR}/deps/cs_libguarded/src"
-  )
+  opentxs_link_external(Boost::system)
 endif()

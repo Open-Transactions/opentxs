@@ -26,7 +26,7 @@ struct TXOs;
 
 namespace ottest
 {
-class Regtest_payment_code : public Regtest_fixture_normal
+class OPENTXS_EXPORT Regtest_payment_code : public Regtest_fixture_normal
 {
 protected:
     static constexpr auto message_text_{

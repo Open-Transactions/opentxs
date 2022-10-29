@@ -40,7 +40,7 @@ struct OPENTXS_EXPORT hash<opentxs::blockchain::block::Hash> {
 
 namespace opentxs::blockchain::block
 {
-class OPENTXS_EXPORT_TEMPLATE Hash : virtual public FixedByteArray<32>
+class OPENTXS_IMPORT Hash : virtual public FixedByteArray<32>
 {
 public:
     auto asAmount() const noexcept -> Amount;

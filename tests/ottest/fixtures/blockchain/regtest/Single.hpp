@@ -23,7 +23,7 @@ class Options;
 
 namespace ottest
 {
-class Regtest_fixture_single : public Regtest_fixture_normal
+class OPENTXS_EXPORT Regtest_fixture_single : public Regtest_fixture_normal
 {
 protected:
     Regtest_fixture_single();

@@ -37,7 +37,7 @@ struct OPENTXS_EXPORT hash<opentxs::blockchain::cfilter::Hash> {
 
 namespace opentxs::blockchain::cfilter
 {
-class OPENTXS_EXPORT_TEMPLATE Hash : virtual public FixedByteArray<32>
+class OPENTXS_IMPORT Hash : virtual public FixedByteArray<32>
 {
 public:
     Hash() noexcept;

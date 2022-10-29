@@ -24,7 +24,7 @@ struct TXOs;
 
 namespace ottest
 {
-class Regtest_fixture_hd : public Regtest_fixture_normal
+class OPENTXS_EXPORT Regtest_fixture_hd : public Regtest_fixture_normal
 {
 protected:
     static const User alice_;

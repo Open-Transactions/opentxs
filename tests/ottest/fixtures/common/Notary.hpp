@@ -47,7 +47,8 @@ namespace ot = opentxs;
 
 namespace ottest
 {
-class Notary_fixture : virtual public Base, virtual public ::testing::Test
+class OPENTXS_EXPORT Notary_fixture : virtual public Base,
+                                      virtual public ::testing::Test
 {
 protected:
     using LocalNymMap =

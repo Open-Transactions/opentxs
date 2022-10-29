@@ -21,7 +21,7 @@ class MinedBlocks;
 
 namespace ottest
 {
-struct SyncRequestor {
+struct OPENTXS_EXPORT SyncRequestor {
     std::atomic_int checked_;
     std::atomic_int expected_;
 

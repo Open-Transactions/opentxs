@@ -59,7 +59,8 @@ public:
     virtual auto Confirmed() const noexcept -> Txids = 0;
     virtual auto Contact() const noexcept -> identifier::Generic = 0;
     virtual auto Index() const noexcept -> Bip32Index = 0;
-    virtual auto Internal() const noexcept -> internal::Element& = 0;
+    OPENTXS_NO_EXPORT virtual auto Internal() const noexcept
+        -> internal::Element& = 0;
     virtual auto Key() const noexcept
         -> const opentxs::crypto::asymmetric::key::EllipticCurve& = 0;
     virtual auto KeyID() const noexcept -> crypto::Key = 0;

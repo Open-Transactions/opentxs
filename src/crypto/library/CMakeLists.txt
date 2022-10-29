@@ -31,15 +31,5 @@ target_sources(
     "EcdsaProvider.hpp"
     "HashingProvider.cpp"
 )
-target_include_directories(
-  opentxs-common SYSTEM
-  PRIVATE "${opentxs_SOURCE_DIR}/deps/robin-hood/src/include"
-)
-target_link_libraries(
-  opentxs-common
-  PRIVATE
-    Boost::headers
-    opentxs::messages
-    unofficial-sodium::sodium
-)
-target_link_libraries(opentxs PUBLIC unofficial-sodium::sodium)
+opentxs_link_internal(unofficial-sodium::sodium)
+opentxs_link_external(unofficial-sodium::sodium)

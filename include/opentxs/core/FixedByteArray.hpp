@@ -99,9 +99,9 @@ private:
     std::array<std::byte, N> data_;
 };
 
-extern template class OPENTXS_EXPORT_TEMPLATE FixedByteArray<16>;
-extern template class OPENTXS_EXPORT_TEMPLATE FixedByteArray<24>;
-extern template class OPENTXS_EXPORT_TEMPLATE FixedByteArray<32>;
+extern template class OPENTXS_IMPORT FixedByteArray<16>;
+extern template class OPENTXS_IMPORT FixedByteArray<24>;
+extern template class OPENTXS_IMPORT FixedByteArray<32>;
 }  // namespace opentxs
 
 namespace std

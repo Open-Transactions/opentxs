@@ -12,11 +12,6 @@
 
 namespace opentxs::blockchain::block
 {
-class OPENTXS_EXPORT Hash;  // IWYU pragma: keep
-}  // namespace opentxs::blockchain::block
-
-namespace opentxs::blockchain::block
-{
 Hash::Hash() noexcept
     : FixedByteArray()
 {

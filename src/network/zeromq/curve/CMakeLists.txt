@@ -13,5 +13,5 @@ target_sources(
     "Server.cpp"
     "Server.hpp"
 )
-target_link_libraries(opentxs-common PRIVATE "${OT_ZMQ_TARGET}")
-target_link_libraries(opentxs PUBLIC "${OT_ZMQ_TARGET}")
+opentxs_link_internal("${OT_ZMQ_TARGET}")
+opentxs_link_external("${OT_ZMQ_TARGET}")

@@ -23,7 +23,7 @@ class Options;
 
 namespace ottest
 {
-class Regtest_fixture_normal : public Regtest_fixture_base
+class OPENTXS_EXPORT Regtest_fixture_normal : public Regtest_fixture_base
 {
 protected:
     Regtest_fixture_normal(const ot::api::Context& ot, const int clientCount);

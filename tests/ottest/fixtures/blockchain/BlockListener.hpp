@@ -14,7 +14,7 @@
 
 namespace ottest
 {
-class BlockListener
+class OPENTXS_EXPORT BlockListener
 {
 public:
     class Imp;

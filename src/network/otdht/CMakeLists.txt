@@ -13,7 +13,3 @@ target_sources(
   PRIVATE "${opentxs_SOURCE_DIR}/src/internal/network/otdht/Types.hpp"
           "Common.cpp"
 )
-target_include_directories(
-  opentxs-common SYSTEM
-  PRIVATE "${opentxs_SOURCE_DIR}/deps/robin-hood/src/include"
-)

@@ -15,4 +15,4 @@ target_sources(
     "TCP.cpp"
     "ZMQ.cpp"
 )
-target_link_libraries(opentxs PUBLIC Boost::system)
+opentxs_link_external(Boost::system)

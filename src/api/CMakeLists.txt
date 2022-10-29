@@ -34,9 +34,6 @@ set(cxx-install-headers
     "${opentxs_SOURCE_DIR}/include/opentxs/api/Settings.hpp"
 )
 target_sources(opentxs-common PRIVATE ${cxx-install-headers})
-target_include_directories(
-  opentxs-common SYSTEM PRIVATE "${opentxs_SOURCE_DIR}/deps/cs_libguarded/src"
-)
 
 if(OPENTXS_STANDALONE)
   install(

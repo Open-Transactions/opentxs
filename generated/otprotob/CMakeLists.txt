@@ -14,7 +14,6 @@ protobuf_generate_cpp(
 
 add_library(opentxs-core-otprotob OBJECT ${cxx-sources} ${cxx-headers})
 target_link_libraries(opentxs-core-otprotob PUBLIC protobuf::libprotobuf-lite)
-target_link_libraries(opentxs PUBLIC protobuf::libprotobuf-lite)
 target_include_directories(
   opentxs-core-otprotob SYSTEM PUBLIC "${CMAKE_CURRENT_BINARY_DIR}"
 )
@@ -51,5 +50,8 @@ set_target_properties(
     C_CLANG_TIDY ""
     CXX_CLANG_TIDY ""
 )
-target_sources(opentxs PRIVATE $<TARGET_OBJECTS:opentxs-core-otprotob>)
+
+opentxs_link_internal(opentxs-core-otprotob)
+opentxs_link_external(protobuf::libprotobuf-lite)
+opentxs_add_sources($<TARGET_OBJECTS:opentxs-core-otprotob>)
 add_dependencies(generated_code opentxs-core-otprotob)

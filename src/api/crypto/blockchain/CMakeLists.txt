@@ -22,11 +22,7 @@ set(cxx-install-headers
     "${opentxs_SOURCE_DIR}/include/opentxs/api/crypto/Blockchain.hpp"
 )
 target_sources(opentxs-common PRIVATE ${cxx-install-headers})
-target_link_libraries(opentxs-common PRIVATE bech32)
-target_include_directories(
-  opentxs-common SYSTEM PRIVATE "${opentxs_SOURCE_DIR}/deps/bech32/ref/c++"
-                                "${opentxs_SOURCE_DIR}/deps/cs_libguarded/src"
-)
+opentxs_link_internal(bech32)
 
 if(OT_BLOCKCHAIN_EXPORT)
   target_sources(
@@ -38,14 +34,9 @@ if(OT_BLOCKCHAIN_EXPORT)
       "Imp_blockchain.hpp"
       "NonNull.cpp"
   )
-  target_link_libraries(
-    opentxs-common
-    PRIVATE
-      lmdb
-      Boost::headers
-      "${OT_ZMQ_TARGET}"
-  )
-  target_link_libraries(opentxs PUBLIC lmdb "${OT_ZMQ_TARGET}")
+  opentxs_link_internal(lmdb)
+  opentxs_link_internal("${OT_ZMQ_TARGET}")
+  opentxs_link_external(lmdb "${OT_ZMQ_TARGET}")
 else()
   target_sources(opentxs-common PRIVATE "Null.cpp")
 endif()

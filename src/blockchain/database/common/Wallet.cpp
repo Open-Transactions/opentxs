@@ -11,6 +11,7 @@
 #include <iterator>
 #include <optional>
 #include <stdexcept>
+#include <string_view>
 #include <utility>
 
 #include "blockchain/database/common/Bulk.hpp"

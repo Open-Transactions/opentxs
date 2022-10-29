@@ -3,12 +3,9 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#include <Identifier.pb.h>
 #include <gtest/gtest.h>
 #include <opentxs/opentxs.hpp>
 
-#include "internal/api/FactoryAPI.hpp"
-#include "internal/core/identifier/Identifier.hpp"
 #include "internal/util/P0330.hpp"
 #include "ottest/fixtures/core/Identifier.hpp"
 
@@ -26,10 +23,10 @@ TEST_F(Identifier, type)
 
 TEST_F(Identifier, copy_constructor)
 {
-    generic_ = ot_.Factory().Internal().IdentifierFromRandom();
-    notary_ = ot_.Factory().Internal().NotaryIDFromRandom();
-    nym_ = ot_.Factory().Internal().NymIDFromRandom();
-    unit_ = ot_.Factory().Internal().UnitIDFromRandom();
+    generic_ = RandomID();
+    notary_ = RandomNotaryID();
+    nym_ = RandomNymID();
+    unit_ = RandomUnitID();
 
     {
         const auto& id = generic_;
@@ -182,49 +179,21 @@ TEST_F(UnitID, unit_serialize_base58_non_empty)
 
 TEST_F(GenericID, generic_serialize_protobuf_non_empty)
 {
-    auto proto = ot::proto::Identifier{};
-
-    EXPECT_TRUE(id_.Internal().Serialize(proto));
-
-    const auto recovered = ot_.Factory().Internal().Identifier(proto);
-
-    EXPECT_EQ(id_, recovered);
-    EXPECT_EQ(id_.asBase58(ot_.Crypto()), recovered.asBase58(ot_.Crypto()));
+    EXPECT_TRUE(CheckProtobufSerialization(id_));
 }
 
 TEST_F(NotaryID, notary_serialize_protobuf_non_empty)
 {
-    auto proto = ot::proto::Identifier{};
-
-    EXPECT_TRUE(id_.Internal().Serialize(proto));
-
-    const auto recovered = ot_.Factory().Internal().NotaryID(proto);
-
-    EXPECT_EQ(id_, recovered);
-    EXPECT_EQ(id_.asBase58(ot_.Crypto()), recovered.asBase58(ot_.Crypto()));
+    EXPECT_TRUE(CheckProtobufSerialization(id_));
 }
 
 TEST_F(NymID, nym_serialize_protobuf_non_empty)
 {
-    auto proto = ot::proto::Identifier{};
-
-    EXPECT_TRUE(id_.Internal().Serialize(proto));
-
-    const auto recovered = ot_.Factory().Internal().NymID(proto);
-
-    EXPECT_EQ(id_, recovered);
-    EXPECT_EQ(id_.asBase58(ot_.Crypto()), recovered.asBase58(ot_.Crypto()));
+    EXPECT_TRUE(CheckProtobufSerialization(id_));
 }
 
 TEST_F(UnitID, unit_serialize_protobuf_non_empty)
 {
-    auto proto = ot::proto::Identifier{};
-
-    EXPECT_TRUE(id_.Internal().Serialize(proto));
-
-    const auto recovered = ot_.Factory().Internal().UnitID(proto);
-
-    EXPECT_EQ(id_, recovered);
-    EXPECT_EQ(id_.asBase58(ot_.Crypto()), recovered.asBase58(ot_.Crypto()));
+    EXPECT_TRUE(CheckProtobufSerialization(id_));
 }
 }  // namespace ottest

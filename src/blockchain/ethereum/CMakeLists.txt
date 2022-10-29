@@ -9,6 +9,4 @@ if(OT_BLOCKCHAIN_EXPORT)
     PRIVATE "${opentxs_SOURCE_DIR}/src/internal/blockchain/ethereum/RLP.hpp"
             "RLP.cpp"
   )
-  target_link_libraries(opentxs-common PRIVATE Boost::headers)
-  target_link_libraries(opentxs-common PUBLIC Boost::system)
 endif()

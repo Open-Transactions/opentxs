@@ -16,7 +16,6 @@ if(OT_BLOCKCHAIN_EXPORT)
       "WorkPrivate.hpp"
       "Work.cpp"
   )
-  target_link_libraries(opentxs-common PRIVATE Boost::headers)
 else()
   target_sources(opentxs-common PRIVATE "Disabled.cpp")
 endif()

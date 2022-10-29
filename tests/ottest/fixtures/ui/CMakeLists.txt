@@ -4,7 +4,7 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 target_sources(
-  ottest
+  opentxs-testlib
   PRIVATE
     "AccountActivity.cpp"
     "AccountActivity.hpp"
@@ -27,8 +27,7 @@ target_sources(
 )
 
 if(OT_QT_EXPORT)
-  target_sources(ottest PRIVATE "Qt.cpp")
-  target_link_libraries(ottest PRIVATE Qt::Gui)
+  target_sources(opentxs-testlib PRIVATE "Qt.cpp")
 else()
-  target_sources(ottest PRIVATE "no-Qt.cpp")
+  target_sources(opentxs-testlib PRIVATE "no-Qt.cpp")
 endif()

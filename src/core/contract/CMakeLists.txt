@@ -31,10 +31,6 @@ target_sources(
     "Unit.cpp"
     "Unit.hpp"
 )
-target_include_directories(
-  opentxs-common SYSTEM
-  PRIVATE "${opentxs_SOURCE_DIR}/deps/robin-hood/src/include"
-)
 set(cxx-install-headers
     "${opentxs_SOURCE_DIR}/include/opentxs/core/contract/ContractType.hpp"
     "${opentxs_SOURCE_DIR}/include/opentxs/core/contract/ProtocolVersion.hpp"

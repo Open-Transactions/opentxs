@@ -23,7 +23,6 @@ target_sources(
 
 if(OT_BLOCKCHAIN_EXPORT)
   target_sources(opentxs-common PRIVATE "GCSPrivate.cpp" "GCSPrivate.hpp")
-  target_link_libraries(opentxs-common PRIVATE Boost::headers)
 else(OT_BLOCKCHAIN_EXPORT)
   target_sources(opentxs-common PRIVATE "Disabled.cpp")
 endif()

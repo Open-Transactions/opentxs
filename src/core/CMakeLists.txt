@@ -26,7 +26,6 @@ target_sources(
     "Contact.cpp"
     "Core.cpp"
     "Data.cpp"
-    "FixedByteArray.cpp"
     "FixedByteArray.tpp"
     "Secret.cpp"
     "SecretPrivate.cpp"
@@ -38,10 +37,6 @@ target_sources(
     "String.cpp"
     "String.hpp"
     "Worker.hpp"
-)
-target_include_directories(
-  opentxs-common SYSTEM
-  PRIVATE "${opentxs_SOURCE_DIR}/deps/robin-hood/src/include"
 )
 
 set(cxx-install-headers
@@ -56,21 +51,11 @@ set(cxx-install-headers
     "${opentxs_SOURCE_DIR}/include/opentxs/core/Types.hpp"
     "${opentxs_SOURCE_DIR}/include/opentxs/core/UnitType.hpp"
 )
-target_link_libraries(
-  opentxs-common
-  PRIVATE
-    Boost::headers
-    ZLIB::ZLIB
-    opentxs-core-otprotob
-    unofficial-sodium::sodium
-)
-target_link_libraries(
-  opentxs
-  PUBLIC
-    Boost::system
-    ZLIB::ZLIB
-    unofficial-sodium::sodium
-)
+opentxs_link_internal(ZLIB::ZLIB)
+opentxs_link_internal(unofficial-sodium::sodium)
+opentxs_link_external(Boost::system)
+opentxs_link_external(ZLIB::ZLIB)
+opentxs_link_external(unofficial-sodium::sodium)
 target_sources(opentxs-common PRIVATE ${cxx-install-headers})
 
 if(OPENTXS_STANDALONE)

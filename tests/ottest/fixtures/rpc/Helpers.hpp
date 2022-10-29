@@ -68,15 +68,15 @@ namespace zmq = ot::network::zeromq;
 
 namespace ottest
 {
-auto check_account_activity_rpc(
+OPENTXS_EXPORT auto check_account_activity_rpc(
     const User& user,
     const ot::identifier::Generic& account,
     const AccountActivityData& expected) noexcept -> bool;
-auto check_account_list_rpc(
+OPENTXS_EXPORT auto check_account_list_rpc(
     const User& user,
     const AccountListData& expected) noexcept -> bool;
 
-class RPCPushCounter
+class OPENTXS_EXPORT RPCPushCounter
 {
 public:
     auto at(std::size_t index) const -> const zmq::Message&;
@@ -99,7 +99,7 @@ private:
     std::unique_ptr<Imp> imp_;
 };
 
-class RPC_fixture : virtual public Base
+class OPENTXS_EXPORT RPC_fixture : virtual public Base
 {
 protected:
     using AccountMap = ot::UnallocatedMap<

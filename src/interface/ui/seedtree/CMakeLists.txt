@@ -16,6 +16,3 @@ target_sources(
     "SeedTreeItem.cpp"
     "SeedTreeItem.hpp"
 )
-target_include_directories(
-  opentxs-common SYSTEM PRIVATE "${opentxs_SOURCE_DIR}/deps/cs_libguarded/src"
-)

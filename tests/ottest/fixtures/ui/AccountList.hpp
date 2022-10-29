@@ -19,7 +19,7 @@ namespace ot = opentxs;
 
 namespace ottest
 {
-struct AccountListRow {
+struct OPENTXS_EXPORT AccountListRow {
     ot::UnallocatedCString account_id_{};
     ot::UnallocatedCString contract_id_{};
     ot::UnallocatedCString display_unit_{};
@@ -33,15 +33,17 @@ struct AccountListRow {
     ot::UnallocatedCString display_balance_{};
 };
 
-struct AccountListData {
+struct OPENTXS_EXPORT AccountListData {
     ot::UnallocatedVector<AccountListRow> rows_{};
 };
 
-auto check_account_list(
+OPENTXS_EXPORT auto check_account_list(
     const User& user,
     const AccountListData& expected) noexcept -> bool;
-auto check_account_list_qt(
+OPENTXS_EXPORT auto check_account_list_qt(
     const User& user,
     const AccountListData& expected) noexcept -> bool;
-auto init_account_list(const User& user, Counter& counter) noexcept -> void;
+OPENTXS_EXPORT auto init_account_list(
+    const User& user,
+    Counter& counter) noexcept -> void;
 }  // namespace ottest

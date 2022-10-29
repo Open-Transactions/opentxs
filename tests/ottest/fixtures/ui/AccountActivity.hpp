@@ -21,7 +21,7 @@ namespace ot = opentxs;
 
 namespace ottest
 {
-struct AccountActivityRow {
+struct OPENTXS_EXPORT AccountActivityRow {
     ot::otx::client::StorageBox type_{};
     int polarity_{};
     ot::Amount amount_{};
@@ -35,7 +35,7 @@ struct AccountActivityRow {
     int confirmations_{};
 };
 
-struct AccountActivityData {
+struct OPENTXS_EXPORT AccountActivityData {
     ot::AccountType type_;
     ot::UnallocatedCString id_{};
     ot::UnallocatedCString name_{};
@@ -61,15 +61,15 @@ struct AccountActivityData {
     ot::UnallocatedVector<AccountActivityRow> rows_{};
 };
 
-auto check_account_activity(
+OPENTXS_EXPORT auto check_account_activity(
     const User& user,
     const ot::identifier::Generic& account,
     const AccountActivityData& expected) noexcept -> bool;
-auto check_account_activity_qt(
+OPENTXS_EXPORT auto check_account_activity_qt(
     const User& user,
     const ot::identifier::Generic& account,
     const AccountActivityData& expected) noexcept -> bool;
-auto init_account_activity(
+OPENTXS_EXPORT auto init_account_activity(
     const User& user,
     const ot::identifier::Generic& account,
     Counter& counter) noexcept -> void;

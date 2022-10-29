@@ -5,13 +5,13 @@
 
 if(OT_QML_EXPORT)
   target_sources(opentxs-common PRIVATE "Qml.cpp")
-  target_link_libraries(opentxs-common PRIVATE Qt::Qml)
-  target_link_libraries(opentxs PUBLIC Qt::Qml)
+  opentxs_link_internal(Qt::Qml)
+  opentxs_link_external(Qt::Qml)
 else()
   target_sources(opentxs-common PRIVATE "Null.cpp")
 endif()
 
 if(OT_QT_EXPORT)
-  target_link_libraries(opentxs-common PRIVATE Qt::Core)
-  target_link_libraries(opentxs PUBLIC Qt::Core)
+  opentxs_link_internal(Qt::Core)
+  opentxs_link_external(Qt::Core)
 endif()

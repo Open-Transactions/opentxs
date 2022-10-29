@@ -13,10 +13,6 @@ target_sources(
     "Item.cpp"
     "Section.cpp"
 )
-target_include_directories(
-  opentxs-common SYSTEM
-  PRIVATE "${opentxs_SOURCE_DIR}/deps/robin-hood/src/include"
-)
 set(cxx-install-headers
     "${opentxs_SOURCE_DIR}/include/opentxs/identity/wot/claim/Attribute.hpp"
     "${opentxs_SOURCE_DIR}/include/opentxs/identity/wot/claim/ClaimType.hpp"

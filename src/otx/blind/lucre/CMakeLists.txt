@@ -14,11 +14,3 @@ target_sources(
     "Token.cpp"
     "Token.hpp"
 )
-target_include_directories(
-  opentxs-common SYSTEM
-  PRIVATE
-    "${opentxs_SOURCE_DIR}/deps/"
-    "${opentxs_SOURCE_DIR}/deps/robin-hood/src/include"
-    "${opentxs_SOURCE_DIR}/deps/lucre/include"
-    "${OPENSSL_INCLUDE_DIR}"
-)

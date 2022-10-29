@@ -24,10 +24,6 @@ target_sources(
     "Request.cpp"
     "State.cpp"
 )
-target_include_directories(
-  opentxs-common SYSTEM
-  PRIVATE "${opentxs_SOURCE_DIR}/deps/robin-hood/src/include"
-)
 set(cxx-install-headers
     "${opentxs_SOURCE_DIR}/include/opentxs/network/otdht/Acknowledgement.hpp"
     "${opentxs_SOURCE_DIR}/include/opentxs/network/otdht/Base.hpp"
@@ -45,7 +41,6 @@ set(cxx-install-headers
     "${opentxs_SOURCE_DIR}/include/opentxs/network/otdht/State.hpp"
     "${opentxs_SOURCE_DIR}/include/opentxs/network/otdht/Types.hpp"
 )
-target_link_libraries(opentxs-common PUBLIC Boost::headers)
 target_sources(opentxs-common PRIVATE ${cxx-install-headers})
 
 if(OPENTXS_STANDALONE)
