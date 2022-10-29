@@ -4,7 +4,13 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 if(SCRIPT_CHAI_EXPORT)
-  target_sources(opentxs-common PRIVATE "OTScriptChai.cpp" "OTScriptChai.hpp")
+  target_sources(
+    opentxs-common
+    PRIVATE
+      "${opentxs_SOURCE_DIR}/deps/ChaiScript.hpp"
+      "OTScriptChai.cpp"
+      "OTScriptChai.hpp"
+  )
   opentxs_include_directories("${opentxs_SOURCE_DIR}/deps/ChaiScript/include")
 else()
   target_sources(opentxs-common PRIVATE "Null.cpp")

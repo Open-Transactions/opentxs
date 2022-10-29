@@ -7,21 +7,22 @@
 #include <opentxs/opentxs.hpp>
 #include <memory>
 
+#include "ottest/data/blockchain/Headers.hpp"
 #include "ottest/fixtures/blockchain/HeaderOracle.hpp"
 
 namespace ottest
 {
-TEST_F(Test_HeaderOracle, test_block_serialization)
+TEST_F(HeaderOracle, test_block_serialization)
 {
-    const auto empty = ot::blockchain::block::Hash();
+    const auto empty = ot::blockchain::block::Hash{};
 
-    ASSERT_TRUE(make_test_block(BLOCK_1, empty));
+    ASSERT_TRUE(MakeTestBlock(block_1_, empty));
 
-    const auto hash1 = get_block_hash(BLOCK_1);
+    const auto hash1 = GetBlockHash(block_1_);
 
     EXPECT_FALSE(hash1.IsNull());
 
-    auto header = get_test_block(BLOCK_1);
+    auto header = GetTestBlock(block_1_);
 
     ASSERT_TRUE(header);
     EXPECT_EQ(header->Hash(), hash1);
@@ -35,13 +36,13 @@ TEST_F(Test_HeaderOracle, test_block_serialization)
     ASSERT_TRUE(header);
     EXPECT_EQ(header->Hash(), hash1);
     EXPECT_EQ(header->ParentHash(), empty);
-    ASSERT_TRUE(make_test_block(BLOCK_2, hash1));
+    ASSERT_TRUE(MakeTestBlock(block_2_, hash1));
 
-    const auto hash2 = get_block_hash(BLOCK_2);
+    const auto hash2 = GetBlockHash(block_2_);
 
     EXPECT_FALSE(hash2.IsNull());
 
-    header = get_test_block(BLOCK_2);
+    header = GetTestBlock(block_2_);
 
     ASSERT_TRUE(header);
     EXPECT_EQ(header->Hash(), hash2);
@@ -54,6 +55,4 @@ TEST_F(Test_HeaderOracle, test_block_serialization)
     EXPECT_EQ(header->Hash(), hash2);
     EXPECT_EQ(header->ParentHash(), hash1);
 }
-
-TEST_F(Test_HeaderOracle, shutdown) { Shutdown(); }
 }  // namespace ottest

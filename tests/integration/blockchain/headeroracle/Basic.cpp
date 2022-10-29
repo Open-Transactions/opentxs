@@ -6,17 +6,15 @@
 #include <gtest/gtest.h>
 #include <memory>
 
+#include "ottest/data/blockchain/Headers.hpp"
 #include "ottest/fixtures/blockchain/HeaderOracle.hpp"
 
 namespace ottest
 {
-TEST_F(Test_HeaderOracle, receive_headers_out_of_order_batch)
+TEST_F(HeaderOracle, basic_sequence)
 {
-    EXPECT_TRUE(create_blocks(create_5_));
-    EXPECT_TRUE(apply_blocks_batch(sequence_5_));
-    EXPECT_TRUE(verify_post_state(post_state_5_));
-    EXPECT_TRUE(verify_siblings(siblings_5_));
+    EXPECT_TRUE(CreateBlocks(block_sequence_1_));
+    EXPECT_TRUE(ApplyBlockSequence(block_sequence_1_));
+    EXPECT_TRUE(VerifyBestChain(block_sequence_1_, 0));
 }
-
-TEST_F(Test_HeaderOracle, shutdown) { Shutdown(); }
 }  // namespace ottest

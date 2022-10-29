@@ -8,6 +8,8 @@ target_sources(
   PRIVATE
     "Bip158.cpp"
     "Bip158.hpp"
+    "Headers.cpp"
+    "Headers.hpp"
     "bch_filter_1307544.cpp"
     "bch_filter_1307723.cpp"
 )

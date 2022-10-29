@@ -175,7 +175,13 @@ auto HeaderOracle::Shared::add_checkpoint(
 
     update.SetCheckpoint({position, requiredHash});
 
-    return apply_checkpoint(data, position, update);
+    if (apply_checkpoint(data, position, update)) {
+
+        return apply_update(data, update);
+    } else {
+
+        return false;
+    }
 }
 
 auto HeaderOracle::Shared::AddHeader(

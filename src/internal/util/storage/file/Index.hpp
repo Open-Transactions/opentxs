@@ -24,13 +24,6 @@ namespace opentxs::storage::file
 constexpr auto index_bytes_ = 2_uz * sizeof(std::uint64_t);
 }  // namespace opentxs::storage::file
 
-#ifndef _MSC_VER
-namespace opentxs
-{
-extern template class FixedByteArray<storage::file::index_bytes_>;
-}  // namespace opentxs
-#endif
-
 namespace opentxs::storage::file
 {
 class Index

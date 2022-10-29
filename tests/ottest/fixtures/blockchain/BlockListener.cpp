@@ -130,7 +130,7 @@ private:
             }
         } else {
             log_(name_)(" received position ")(
-                position)(" but no future is active for this height")
+                position)(" but waiting for height ")(target_)
                 .Flush();
         }
     }

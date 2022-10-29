@@ -70,13 +70,6 @@ using SyncChecksum = std::uint64_t;
 constexpr auto sync_bytes_ = storage::file::index_bytes_ + sizeof(SyncChecksum);
 }  // namespace opentxs::blockchain::database::common
 
-#ifndef _MSC_VER
-namespace opentxs
-{
-extern template class FixedByteArray<blockchain::database::common::sync_bytes_>;
-}  // namespace opentxs
-#endif
-
 namespace opentxs::blockchain::database::common
 {
 struct SyncPrivate::Data {
